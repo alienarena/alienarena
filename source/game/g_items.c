@@ -1,0 +1,2898 @@
+/*
+Copyright (C) 1997-2001 Id Software, Inc.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+*/
+#include "g_local.h"
+
+
+qboolean	Pickup_Weapon (edict_t *ent, edict_t *other);
+void		Use_Weapon (edict_t *ent, gitem_t *inv);
+void		Drop_Weapon (edict_t *ent, gitem_t *inv);
+
+void Weapon_Blaster (edict_t *ent);
+void Weapon_Smartgun (edict_t *ent);
+void Weapon_Chain (edict_t *ent);
+void Weapon_Flame (edict_t *ent);
+void Weapon_Disruptor (edict_t *ent);
+void Weapon_RocketLauncher (edict_t *ent);
+void Weapon_Beamgun (edict_t *ent);
+void Weapon_Vaporizer (edict_t *ent);
+void Weapon_Bomber (edict_t *ent);
+void Weapon_Strafer (edict_t *ent);
+void Weapon_Deathball (edict_t *ent);
+void Weapon_Hover (edict_t *ent);
+
+gitem_armor_t jacketarmor_info	= { 25,  50, .30, .00, ARMOR_JACKET};
+gitem_armor_t combatarmor_info	= { 50, 100, .60, .30, ARMOR_COMBAT};
+gitem_armor_t bodyarmor_info	= {100, 200, .80, .60, ARMOR_BODY};
+
+static int	jacket_armor_index;
+static int	combat_armor_index;
+static int	body_armor_index;
+static int	power_screen_index;
+static int	power_shield_index;
+
+#define HEALTH_IGNORE_MAX	1
+#define HEALTH_TIMED		2
+
+void Use_Quad (edict_t *ent, gitem_t *item);
+static int	quad_drop_timeout_hack;
+
+//======================================================================
+
+/*
+===============
+GetItemByIndex
+===============
+*/
+gitem_t	*GetItemByIndex (int index)
+{
+	if (index == 0 || index >= game.num_items)
+		return NULL;
+
+	return &itemlist[index];
+}
+
+
+/*
+===============
+FindItemByClassname
+
+===============
+*/
+gitem_t	*FindItemByClassname (char *classname)
+{
+	int		i;
+	gitem_t	*it;
+
+	it = itemlist;
+	for (i=0 ; i<game.num_items ; i++, it++)
+	{
+		if (!it->classname)
+			continue;
+		if (!Q_stricmp(it->classname, classname))
+			return it;
+	}
+
+	return NULL;
+}
+
+/*
+===============
+FindItem
+
+===============
+*/
+gitem_t	*FindItem (char *pickup_name)
+{
+	int		i;
+	gitem_t	*it;
+
+	it = itemlist;
+	for (i=0 ; i<game.num_items ; i++, it++)
+	{
+		if (!it->pickup_name)
+			continue;
+		if (!Q_stricmp(it->pickup_name, pickup_name))
+			return it;
+	}
+
+	return NULL;
+}
+
+//======================================================================
+
+void DoRespawn (edict_t *ent)
+{
+	if (ent->team)
+	{
+		edict_t	*master;
+		int	count;
+		int choice;
+
+		master = ent->teammaster;
+
+		for (count = 0, ent = master; ent; ent = ent->chain, count++)
+			;
+
+		choice = rand() % count;
+
+		for (count = 0, ent = master; count < choice; ent = ent->chain, count++)
+			;
+	}
+
+	ent->svflags &= ~SVF_NOCLIENT;
+	ent->solid = SOLID_TRIGGER;
+	gi.linkentity (ent);
+
+	// send an effect
+	ent->s.event = EV_ITEM_RESPAWN;
+}
+
+void SetRespawn (edict_t *ent, float delay)
+{
+	ent->flags |= FL_RESPAWN;
+	ent->svflags |= SVF_NOCLIENT;
+	ent->solid = SOLID_NOT;
+	ent->nextthink = level.time + delay;
+	ent->think = DoRespawn;
+	gi.linkentity (ent);
+}
+
+
+//======================================================================
+
+qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
+{
+	int		quantity;
+
+	quantity = other->client->pers.inventory[ITEM_INDEX(ent->item)];
+	if ((skill->value == 1 && quantity >= 2) || (skill->value >= 2 && quantity >= 1))
+		return false;
+
+	if ((coop->value) && (ent->item->flags & IT_STAY_COOP) && (quantity > 0))
+		return false;
+
+	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+
+	if (deathmatch->value)
+	{
+		if (!(ent->spawnflags & DROPPED_ITEM) )
+			SetRespawn (ent, ent->item->quantity);
+		if (((int)dmflags->value & DF_INSTANT_ITEMS) || ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM)))
+		{
+			if ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))
+				quad_drop_timeout_hack = (ent->nextthink - level.time) / FRAMETIME;
+			ent->item->use (other, ent->item);
+		}
+	}
+
+	return true;
+}
+//Vehicles
+void Use_Jet ( edict_t *ent)
+{
+    
+    /*jetpack in inventory but no fuel time? must be one of the
+      give all/give jetpack cheats, so put fuel in*/
+    if ( ent->client->Jet_remaining == 0 )
+      ent->client->Jet_remaining = 700;  
+
+    if ( Jet_Active(ent) ) 
+      ent->client->Jet_framenum = 0; 
+    else
+      ent->client->Jet_framenum = level.framenum + ent->client->Jet_remaining;
+    
+    gi.sound( ent, CHAN_ITEM, gi.soundindex("vehicles/got_in.wav"), 0.8, ATTN_NORM, 0 );
+
+    /*this is the sound played when flying. To here this sound 
+      immediately we play it here the first time*/
+    gi.sound ( ent, CHAN_AUTO, gi.soundindex("hover/hovidle1.wav"), 0.8, ATTN_NORM, 0 );
+}
+static void VehicleThink(edict_t *ent)
+{
+	ent->nextthink = level.time + FRAMETIME;
+}
+void VehicleSetup (edict_t *ent)
+{
+	trace_t		tr;
+	vec3_t		dest;
+	float		*v;
+
+	v = tv(-64,-64,-24);
+	VectorCopy (v, ent->mins);
+	v = tv(64,64,64);
+	VectorCopy (v, ent->maxs);
+
+	if (ent->model)
+		gi.setmodel (ent, ent->model);
+	else
+		gi.setmodel (ent, ent->item->world_model);
+
+	if(!strcmp(ent->classname, "item_bomber"))
+		ent->s.modelindex3 = gi.modelindex("vehicles/bomber/helmet.md2");
+
+	if(!strcmp(ent->classname, "item_hover"))
+		ent->s.modelindex3 = gi.modelindex("vehicles/hover/flames.md2");
+
+	ent->solid = SOLID_TRIGGER;
+	ent->movetype = MOVETYPE_TOSS;  
+	ent->touch = Touch_Item;
+
+	v = tv(0,0,-128);
+	VectorAdd (ent->s.origin, v, dest);
+
+	tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, dest, ent, MASK_SOLID);
+	if (tr.startsolid)
+	{
+		gi.dprintf ("VehicleSetup: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
+		G_FreeEdict (ent);
+		return;
+	}
+
+	VectorCopy (tr.endpos, ent->s.origin);
+
+	gi.linkentity (ent);
+
+	ent->nextthink = level.time + FRAMETIME;
+	ent->think = VehicleThink;
+}
+
+void ResetVehicle()//this function returns vehicle to base when player purposely drops it
+{
+	char *c;
+	edict_t *ent;
+
+	c = "item_bomber";
+	
+	ent = NULL;
+	while ((ent = G_Find (ent, FOFS(classname), c)) != NULL) {
+		if (ent->spawnflags & DROPPED_ITEM)
+			G_FreeEdict(ent);
+		else {
+			ent->svflags &= ~SVF_NOCLIENT;
+			ent->solid = SOLID_TRIGGER;
+			gi.linkentity(ent);
+			ent->s.event = EV_ITEM_RESPAWN;
+		}
+	}
+	
+	c = "item_strafer";
+	
+	ent = NULL;
+	while ((ent = G_Find (ent, FOFS(classname), c)) != NULL) {
+		if (ent->spawnflags & DROPPED_ITEM)
+			G_FreeEdict(ent);
+		else {
+			ent->svflags &= ~SVF_NOCLIENT;
+			ent->solid = SOLID_TRIGGER;
+			gi.linkentity(ent);
+			ent->s.event = EV_ITEM_RESPAWN;
+		}
+	}
+
+	c = "item_hover";
+	
+	ent = NULL;
+	while ((ent = G_Find (ent, FOFS(classname), c)) != NULL) {
+		if (ent->spawnflags & DROPPED_ITEM)
+			G_FreeEdict(ent);
+		else {
+			ent->svflags &= ~SVF_NOCLIENT;
+			ent->solid = SOLID_TRIGGER;
+			gi.linkentity(ent);
+			ent->s.event = EV_ITEM_RESPAWN;
+		}
+	}
+	safe_bprintf(PRINT_HIGH, "Vehicle has been returned!\n");
+}
+
+static void VehicleDropTouch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	//owner (who dropped us) can't touch for two secs
+	if (other == ent->owner && 
+		ent->nextthink - level.time > 2)
+		return;
+
+	Touch_Item (ent, other, plane, surf);
+}
+
+static void VehicleDropThink(edict_t *ent)
+{
+	//let it hang around for awhile
+	ent->nextthink = level.time + 20;
+	ent->think = G_FreeEdict;
+}
+
+void VehicleDeadDrop(edict_t *self)
+{
+	edict_t *dropped = NULL;
+	gitem_t *vehicle;
+
+	dropped = NULL;
+	
+	vehicle = FindItemByClassname("item_bomber"); 
+	
+	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+		dropped = Drop_Item(self, vehicle);
+		self->client->pers.inventory[ITEM_INDEX(vehicle)] = 0;
+		safe_bprintf(PRINT_HIGH, "Bomber is abandoned!\n");
+	}
+
+	if (dropped) {
+		dropped->think = VehicleDropThink;
+		dropped->nextthink = level.time + 5;
+		dropped->touch = VehicleDropTouch;
+		dropped->s.frame = 0;
+		return;
+	}
+	//didn't find a bomber, try a strafer
+	vehicle = FindItemByClassname("item_strafer"); 
+	
+	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+		dropped = Drop_Item(self, vehicle);
+		self->client->pers.inventory[ITEM_INDEX(vehicle)] = 0;
+		safe_bprintf(PRINT_HIGH, "Strafer is abandoned!\n");
+	}
+
+	if (dropped) {
+		dropped->think = VehicleDropThink;
+		dropped->nextthink = level.time + 5;
+		dropped->touch = VehicleDropTouch;
+		dropped->s.frame = 0;
+		return;
+	}
+	//didn't find a strafer, try a hovercraft
+	vehicle = FindItemByClassname("item_hover"); 
+	
+	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+		dropped = Drop_Item(self, vehicle);
+		self->client->pers.inventory[ITEM_INDEX(vehicle)] = 0;
+		safe_bprintf(PRINT_HIGH, "Hovercraft is abandoned!\n");
+	}
+
+	if (dropped) {
+		dropped->think = VehicleDropThink;
+		dropped->nextthink = level.time + 5;
+		dropped->touch = VehicleDropTouch;
+		dropped->s.frame = 0;
+		return;
+	}
+
+}
+void Reset_player(edict_t *ent)
+{
+	char		userinfo[MAX_INFO_STRING];
+	int		i, done;
+	char playermodel[MAX_OSPATH] = " ";
+	char playerskin[MAX_INFO_STRING] = " ";
+	char modelpath[MAX_OSPATH] = " ";
+	FILE *file;
+	char *s;
+
+	//set everything back
+	if(instagib->value)
+		ent->client->newweapon = FindItem("Alien Disruptor");
+	else if(rocket_arena->value)
+		ent->client->newweapon = FindItem("Rocket Launcher");
+	else
+		ent->client->newweapon = FindItem("blaster");
+		  		
+	memcpy (userinfo, ent->client->pers.userinfo, sizeof(userinfo));
+	s = Info_ValueForKey (userinfo, "skin");
+			
+	i = 0;
+	done = false;
+	strcpy(playermodel, " ");
+	while(!done)
+	{
+	  	if((s[i] == '/') || (s[i] == '\\'))
+			done = true;
+		playermodel[i] = s[i];
+		if(i > 62)
+			done = true;
+		i++;
+	}
+	playermodel[i-1] = 0;
+		  
+	ent->s.modelindex = 255;
+
+	sprintf(modelpath, "data1/players/%s/helmet.md2", playermodel);
+	Q2_FindFile (modelpath, &file); //does a helmet exist?
+	if(file) {
+	   	sprintf(modelpath, "players/%s/helmet.md2", playermodel);
+		ent->s.modelindex3 = gi.modelindex(modelpath);
+		fclose(file);
+	}
+	else 
+	   	ent->s.modelindex3 = 0;
+			
+	ent->s.modelindex4 = 0;
+	if(!strcmp(playermodel, "war")) //special case
+	{
+	   	ent->s.modelindex4 = gi.modelindex("players/war/weapon.md2");
+		ent->s.modelindex2 = 0;
+	}
+	else if(!strcmp(playermodel, "brainlet"))	
+		ent->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
+	
+}
+qboolean Leave_vehicle(edict_t *ent, gitem_t *item) 
+{
+	Reset_player(ent);
+	
+	ent->client->Jet_framenum = level.framenum;
+		
+	ent->client->pers.inventory[ITEM_INDEX(item)] = 0;
+
+	gi.sound( ent, CHAN_ITEM, gi.soundindex("vehicles/got_in.wav"), 0.8, ATTN_NORM, 0 );
+
+	ResetVehicle();
+
+	return true;
+}
+
+qboolean Get_in_vehicle (edict_t *ent, edict_t *other)
+{
+	
+	gitem_t *vehicle; 
+	gitem_t *bomber;
+	gitem_t *strafer;
+	gitem_t *hover;
+
+	float		*v;
+
+	vehicle = NULL;
+
+    //check for any vehicles, if we have one, don't get in another
+	bomber = FindItemByClassname("item_bomber");
+	strafer = FindItemByClassname("item_strafer");
+	hover = FindItemByClassname("item_hover");
+	if((other->client->pers.inventory[ITEM_INDEX(bomber)] == 1) || (other->client->pers.inventory[ITEM_INDEX(strafer)] == 1)
+		|| (other->client->pers.inventory[ITEM_INDEX(hover)] == 1))
+		return false;
+	
+	vehicle = FindItemByClassname(ent->classname);
+
+	// get in the vehicle
+	if(other->client->pers.inventory[ITEM_INDEX(vehicle)] == 1)
+		return false; //can't get in a vehicle if you're already in one!
+
+	//put him in the vehicle
+	if(!strcmp(ent->classname, "item_bomber")) {
+		other->s.modelindex = gi.modelindex("vehicles/bomber/tris.md2");
+		other->s.modelindex2 = 0;
+		other->s.modelindex3 = gi.modelindex("vehicles/bomber/helmet.md2");
+		other->s.modelindex4 = 0;
+	}
+	else if(!strcmp(ent->classname, "item_hover")) {
+		other->s.modelindex = gi.modelindex("vehicles/hover/tris.md2");
+		other->s.modelindex2 = 0;
+		other->s.modelindex3 = gi.modelindex("vehicles/hover/flames.md2");
+		other->s.modelindex4 = 0;
+	}
+	else {
+		other->s.modelindex = gi.modelindex("vehicles/strafer/tris.md2");
+		other->s.modelindex2 = 0;
+		other->s.modelindex3 = 0;
+		other->s.modelindex4 = 0;
+	}
+	other->in_vehicle = true;
+	other->client->Jet_remaining = 500;
+
+	v = tv(-64,-64,-24);
+	VectorCopy (v,other->mins);
+	v = tv(64,64,64);
+	VectorCopy (v, other->maxs);
+	other->s.origin[2] +=24;
+	
+	other->client->pers.inventory[ITEM_INDEX(vehicle)] = 1;
+	other->client->newweapon = ent->item;
+	
+	if (!(ent->spawnflags & DROPPED_ITEM)) {
+		SetRespawn (ent, 60);
+	}
+	
+	Use_Jet(other);
+
+	return true;
+}
+
+//CTF 
+static void CTFFlagThink(edict_t *ent)
+{
+	if (ent->solid != SOLID_NOT)
+		ent->s.frame = 173 + (((ent->s.frame - 173) + 1) % 16);
+	ent->nextthink = level.time + FRAMETIME;
+}
+void CTFFlagSetup (edict_t *ent)
+{
+	trace_t		tr;
+	vec3_t		dest;
+	float		*v;
+
+	v = tv(-15,-15,-15);
+	VectorCopy (v, ent->mins);
+	v = tv(15,15,15);
+	VectorCopy (v, ent->maxs);
+
+	if (ent->model)
+		gi.setmodel (ent, ent->model);
+	else
+		gi.setmodel (ent, ent->item->world_model);
+	ent->solid = SOLID_TRIGGER;
+	ent->movetype = MOVETYPE_TOSS;  
+	ent->touch = Touch_Item;
+
+	v = tv(0,0,-128);
+	VectorAdd (ent->s.origin, v, dest);
+
+	tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, dest, ent, MASK_SOLID);
+	if (tr.startsolid)
+	{
+		gi.dprintf ("CTFFlagSetup: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
+		G_FreeEdict (ent);
+		return;
+	}
+
+	VectorCopy (tr.endpos, ent->s.origin);
+
+	gi.linkentity (ent);
+
+	ent->nextthink = level.time + FRAMETIME;
+	ent->think = CTFFlagThink;
+}
+void CTFEffects(edict_t *player)
+{
+	gitem_t *flag1_item, *flag2_item;
+
+	flag1_item = FindItemByClassname("item_flag_red");
+	flag2_item = FindItemByClassname("item_flag_blue");
+
+	if (player->client->pers.inventory[ITEM_INDEX(flag1_item)])
+		player->s.modelindex4 = gi.modelindex("models/items/flags/flag1.md2");
+	else if (player->client->pers.inventory[ITEM_INDEX(flag2_item)])
+		player->s.modelindex4 = gi.modelindex("models/items/flags/flag2.md2");
+	else
+		player->s.modelindex4 = 0;
+}
+qboolean CTFDrop_Flag(edict_t *ent, gitem_t *item)
+{
+	if (rand() & 1) 
+		safe_cprintf(ent, PRINT_HIGH, "Only lusers drop flags.\n");
+	else
+		safe_cprintf(ent, PRINT_HIGH, "Winners don't drop flags.\n");
+	return false;
+}
+void CTFResetFlag(int ctf_team)
+{
+	char *c;
+	edict_t *ent;
+
+	switch (ctf_team) {
+	case RED_TEAM:
+		c = "item_flag_red";
+		break;
+	case BLUE_TEAM:
+		c = "item_flag_blue";
+		break;
+	default:
+		return;
+	}
+
+	ent = NULL;
+	while ((ent = G_Find (ent, FOFS(classname), c)) != NULL) {
+		if (ent->spawnflags & DROPPED_ITEM)
+			G_FreeEdict(ent);
+		else {
+			ent->svflags &= ~SVF_NOCLIENT;
+			ent->solid = SOLID_TRIGGER;
+			gi.linkentity(ent);
+			ent->s.event = EV_ITEM_RESPAWN;
+		}
+	}
+}
+
+void CTFResetFlags(void)
+{
+	CTFResetFlag(RED_TEAM);
+	CTFResetFlag(BLUE_TEAM);
+}
+static void CTFDropFlagTouch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	//owner (who dropped us) can't touch for two secs
+	if (other == ent->owner && 
+		ent->nextthink - level.time > 28)
+		return;
+
+	Touch_Item (ent, other, plane, surf);
+}
+static void CTFDropFlagThink(edict_t *ent)
+{
+	// auto return the flag
+	// reset flag will remove ourselves
+	if (strcmp(ent->classname, "item_flag_red") == 0) {
+		CTFResetFlag(RED_TEAM);
+		safe_bprintf(PRINT_HIGH, "The %s flag has returned!\n",
+			"Red");
+	} else if (strcmp(ent->classname, "item_flag_blue") == 0) {
+		CTFResetFlag(BLUE_TEAM);
+		safe_bprintf(PRINT_HIGH, "The %s flag has returned!\n",
+			"Blue");
+	}
+
+}
+void CTFDeadDropFlag(edict_t *self)
+{
+	edict_t *dropped = NULL;
+	gitem_t *flag1_item, *flag2_item;
+
+	dropped = NULL;
+	flag1_item = flag2_item = NULL;
+
+	flag1_item = FindItemByClassname("item_flag_red");
+	flag2_item = FindItemByClassname("item_flag_blue");
+
+	if (self->client->pers.inventory[ITEM_INDEX(flag1_item)]) {
+		dropped = Drop_Item(self, flag1_item);
+		self->client->pers.inventory[ITEM_INDEX(flag1_item)] = 0;
+		safe_bprintf(PRINT_HIGH, "%s lost the %s flag!\n",
+			self->client->pers.netname, "Red");
+	} else if (self->client->pers.inventory[ITEM_INDEX(flag2_item)]) {
+		dropped = Drop_Item(self, flag2_item);
+		self->client->pers.inventory[ITEM_INDEX(flag2_item)] = 0;
+		safe_bprintf(PRINT_HIGH, "%s lost the %s flag!\n",
+			self->client->pers.netname, "Blue");
+	}
+
+	if (dropped) {
+		dropped->think = CTFDropFlagThink;
+		dropped->nextthink = level.time + 30;
+		dropped->touch = CTFDropFlagTouch;
+		dropped->s.frame = 175;
+		dropped->s.effects = EF_ROTATE;
+	}
+}
+qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
+{
+	int ctf_team;
+	char team_name[16] = " ";
+	char enemy_team_name[16] = " ";
+	gitem_t *flag_item, *enemy_flag_item;
+
+	// figure out what team this flag is
+	if (strcmp(ent->classname, "item_flag_red") == 0)
+		ctf_team = RED_TEAM;
+	else if (strcmp(ent->classname, "item_flag_blue") == 0)
+		ctf_team = BLUE_TEAM;
+	else {
+		safe_cprintf(ent, PRINT_HIGH, "Don't know what team the flag is on.\n");
+		return false;
+	}
+
+// same team, if the flag at base, check to he has the enemy flag
+	if (ctf_team == RED_TEAM) {
+		flag_item = FindItemByClassname("item_flag_red");
+		enemy_flag_item = FindItemByClassname("item_flag_blue");
+		strcpy(team_name, "Red");
+		strcpy(enemy_team_name, "Blue");
+	} else {
+		flag_item = FindItemByClassname("item_flag_blue");
+		enemy_flag_item = FindItemByClassname("item_flag_red");
+		strcpy(team_name, "Blue");
+		strcpy(enemy_team_name, "Red");
+	}
+
+	if (ctf_team == other->dmteam) {
+
+		if (!(ent->spawnflags & DROPPED_ITEM)) {
+			// the flag is at home base.  if the player has the enemy
+			// flag, he's just won!
+
+			if (other->client->pers.inventory[ITEM_INDEX(enemy_flag_item)]) {
+				safe_bprintf(PRINT_HIGH, "%s captured the %s flag!\n",
+						other->client->pers.netname, enemy_team_name);
+				other->client->pers.inventory[ITEM_INDEX(enemy_flag_item)] = 0;
+
+				if (ctf_team == RED_TEAM)
+				{
+					red_team_score++;
+					gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_scores.wav"), 1, ATTN_NONE, 0);
+				}
+				else
+				{
+					blue_team_score++;
+					gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_scores.wav"), 1, ATTN_NONE, 0);
+				}
+
+				// other gets another 10 frag bonus
+				other->client->resp.score += 10;//CTF_CAPTURE_BONUS;
+				
+				CTFResetFlags();
+				return false;
+			}
+			return false; // its at home base already
+		}	
+		// hey, its not home.  return it by teleporting it back
+		safe_bprintf(PRINT_HIGH, "%s returned the %s flag!\n", 
+			other->client->pers.netname, team_name);
+		other->client->resp.score += 2;//CTF_RECOVERY_BONUS;
+		if(!strcmp("Red", team_name))
+			gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_returned.wav"), 1, ATTN_NONE, 0);
+		else
+			gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_returned.wav"), 1, ATTN_NONE, 0);
+		
+		//CTFResetFlag will remove this entity!  We must return false
+		CTFResetFlag(ctf_team);
+		return false;
+	}
+
+	// hey, its not our flag, pick it up
+	safe_bprintf(PRINT_HIGH, "%s got the %s flag!\n",
+		other->client->pers.netname, team_name);
+	other->client->resp.score += 10;//CTF_FLAG_BONUS;
+	if(!strcmp("Red", team_name))
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_picked.wav"), 1, ATTN_NONE, 0);
+	else
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_picked.wav"), 1, ATTN_NONE, 0);
+	
+	other->client->pers.inventory[ITEM_INDEX(flag_item)] = 1;
+
+	// pick up the flag
+	// if it's not a dropped flag, we just make is disappear
+	// if it's dropped, it will be removed by the pickup caller
+	if (!(ent->spawnflags & DROPPED_ITEM)) {
+		ent->flags |= FL_RESPAWN;
+		ent->svflags |= SVF_NOCLIENT;
+		ent->solid = SOLID_NOT;
+	}
+	return true;
+}
+
+//Deathball 
+
+static void DeathballThink(edict_t *ent)
+{	
+	ent->nextthink = level.time + FRAMETIME;
+}
+void DeathballSetup (edict_t *ent)
+{
+	trace_t		tr;
+	vec3_t		dest;
+	float		*v;
+
+	v = tv(-32,-32,-32);
+	VectorCopy (v, ent->mins);
+	v = tv(32,32,32);
+	VectorCopy (v, ent->maxs);
+
+	if (ent->model)
+		gi.setmodel (ent, ent->model);
+	else
+		gi.setmodel (ent, ent->item->world_model);
+	ent->solid = SOLID_TRIGGER;
+	ent->movetype = MOVETYPE_TOSS;  
+	ent->touch = Touch_Item;
+
+	v = tv(0,0,-128);
+	VectorAdd (ent->s.origin, v, dest);
+
+	tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, dest, ent, MASK_SOLID);
+	if (tr.startsolid)
+	{
+		gi.dprintf ("DeathballSetup: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
+		G_FreeEdict (ent);
+		return;
+	}
+
+	VectorCopy (tr.endpos, ent->s.origin);
+
+	gi.linkentity (ent);
+	ent->s.frame = 229;
+	ent->nextthink = level.time + FRAMETIME;
+	ent->think = DeathballThink;
+}
+qboolean DeathballDrop(edict_t *ent, gitem_t *item)
+{
+	if (rand() & 1) 
+		safe_cprintf(ent, PRINT_HIGH, "Only lusers drop the ball!\n");
+	else
+		safe_cprintf(ent, PRINT_HIGH, "Winners don't drop their balls!\n");
+	return false;
+}
+void ResetDeathball()
+{
+	char *c;
+	edict_t *ent;
+
+	ent = NULL;
+	c = "item_deathball";
+	while ((ent = G_Find (ent, FOFS(classname), c)) != NULL) {
+		if (ent->spawnflags & DROPPED_ITEM)
+			G_FreeEdict(ent);
+		else {
+			ent->svflags &= ~SVF_NOCLIENT;
+			ent->solid = SOLID_TRIGGER;
+			gi.linkentity(ent);
+			ent->s.frame = 229;
+			ent->s.event = EV_ITEM_RESPAWN;
+		}
+	}
+}
+
+static void DropDeathballTouch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	//owner (who dropped us) can't touch for two secs
+	if (other == ent->owner && 
+		ent->nextthink - level.time > 2)
+		return;
+	other->in_deathball = true;
+	Touch_Item (ent, other, plane, surf);
+}
+static void DropDeathballThink(edict_t *ent)
+{
+	// auto return the ball
+	// reset ball will remove ourselves
+	
+	ResetDeathball();
+	safe_bprintf(PRINT_HIGH, "The ball has returned!\n");
+	
+}
+void DeadDropDeathball(edict_t *self)
+{
+	edict_t *dropped = NULL;
+	gitem_t *deathball_item;
+
+	dropped = NULL;
+	deathball_item = NULL;
+
+	deathball_item = FindItemByClassname("item_deathball");
+
+	if (self->client->pers.inventory[ITEM_INDEX(deathball_item)]) {
+		dropped = Drop_Item(self, deathball_item);
+		self->client->pers.inventory[ITEM_INDEX(deathball_item)] = 0;
+		safe_bprintf(PRINT_HIGH, "%s lost the ball!\n",
+			self->client->pers.netname);
+		self->s.modelindex4 = 0;
+		self->in_deathball = false;
+	}
+
+	if (dropped) {
+		dropped->think = DropDeathballThink;
+		dropped->nextthink = level.time + 30;
+		dropped->touch = DropDeathballTouch;
+		dropped->s.frame = 229;
+	}
+}
+
+qboolean Pickup_deathball (edict_t *ent, edict_t *other)
+{
+	
+	gitem_t *bomber;
+	gitem_t *strafer;
+	gitem_t *hover;
+	gitem_t *deathball;
+	char	cleanname[16];
+	int i, j;
+	edict_t	*cl_ent;
+
+    //check for any vehicles, if we have one, don't get in a deathball!
+	bomber = FindItemByClassname("item_bomber");
+	strafer = FindItemByClassname("item_strafer");
+	hover = FindItemByClassname("item_hover");
+	if((other->client->pers.inventory[ITEM_INDEX(bomber)] == 1) || (other->client->pers.inventory[ITEM_INDEX(strafer)] == 1)
+		|| (other->client->pers.inventory[ITEM_INDEX(hover)] == 1))
+		return false;
+	
+	deathball = FindItemByClassname(ent->classname);
+
+	// get in the ball
+	if(other->client->pers.inventory[ITEM_INDEX(deathball)] == 1)
+		return false; //can't get in a deathball if you're already in one! (would never happen)
+
+	//put him in the ball(weapon model replaced with this)
+	other->s.modelindex4 = gi.modelindex("vehicles/deathball/deathball.md2");
+
+	other->in_deathball = true;
+	
+	other->client->pers.inventory[ITEM_INDEX(deathball)] = 1;
+	other->client->newweapon = ent->item;
+	
+	if (!(ent->spawnflags & DROPPED_ITEM)) {
+		ent->flags |= FL_RESPAWN;
+		ent->svflags |= SVF_NOCLIENT;
+		ent->solid = SOLID_NOT;
+	}
+	//clean up name, get rid of escape chars
+	j = 0;
+	for (i = 0; i < 16; i++)
+		cleanname[i] = 0;
+		for (i = 0; i < strlen(other->client->pers.netname) && i < 16; i++) {
+			if ( other->client->pers.netname[i] == '^' ) {
+				i += 1;
+				continue;
+			}
+		cleanname[j] = other->client->pers.netname[i]+128;
+		j++;
+	}
+	if((int)(dmflags->value) & DF_SKINTEAMS) {
+		for (i=0 ; i<maxclients->value ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (!cl_ent->inuse || cl_ent->is_bot)
+				continue;
+			safe_centerprintf(cl_ent, "%s got the ball!\n", cleanname);
+		}
+		safe_centerprintf(other, "You've got the ball!\nShoot the ball\ninto your enemy's goal!");
+	}
+	else
+	{
+		for (i=0 ; i<maxclients->value ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (!cl_ent->inuse || cl_ent->is_bot)
+				continue;
+			safe_centerprintf(cl_ent, "%s got the ball!\n", cleanname);
+		}
+			safe_centerprintf(other, "You've got the ball!\nShoot the ball\ninto any goal!");
+	}
+	//play a sound here too
+	gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/db_pickup.wav"), 1, ATTN_NONE, 0);
+
+	return true;
+}
+
+void Drop_General (edict_t *ent, gitem_t *item)
+{
+	Drop_Item (ent, item);
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem (ent);
+}
+
+
+//======================================================================
+
+qboolean Pickup_Adrenaline (edict_t *ent, edict_t *other)
+{
+	if (!deathmatch->value)
+		other->max_health += 1;
+
+	if (other->health < other->max_health)
+		other->health = other->max_health;
+
+	if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+		SetRespawn (ent, ent->item->quantity);
+
+	return true;
+}
+
+//======================================================================
+
+void Use_Quad (edict_t *ent, gitem_t *item)
+{
+	int		timeout;
+
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem (ent);
+
+	if (quad_drop_timeout_hack)
+	{
+		timeout = quad_drop_timeout_hack;
+		quad_drop_timeout_hack = 0;
+	}
+	else
+	{
+		timeout = 300;
+	}
+
+	if (ent->client->quad_framenum > level.framenum)
+		ent->client->quad_framenum += timeout;
+	else
+		ent->client->quad_framenum = level.framenum + timeout;
+
+	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/damage.wav"), 1, ATTN_NORM, 0);
+}
+
+//======================================================================
+
+void	Use_Invulnerability (edict_t *ent, gitem_t *item)
+{
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem (ent);
+
+	if (ent->client->invincible_framenum > level.framenum)
+		ent->client->invincible_framenum += 300;
+	else
+		ent->client->invincible_framenum = level.framenum + 300;
+
+	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect.wav"), 1, ATTN_NORM, 0);
+}
+
+void Use_Haste (edict_t *ent, gitem_t *item)
+{
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem (ent);
+
+	if (ent->client->haste_framenum > level.framenum)
+		ent->client->haste_framenum += 300;
+	else
+		ent->client->haste_framenum = level.framenum + 300;
+
+	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
+}
+//======================================================================
+
+void Use_Sproing (edict_t *ent, gitem_t *item)
+{
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem (ent);
+
+	if (ent->client->sproing_framenum > level.framenum)
+		ent->client->sproing_framenum += 300;
+	else
+		ent->client->sproing_framenum = level.framenum + 300;
+
+	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
+}
+//======================================================================
+
+qboolean Pickup_Key (edict_t *ent, edict_t *other)
+{
+	if (coop->value)
+	{
+		if (strcmp(ent->classname, "key_power_cube") == 0)
+		{
+			if (other->client->pers.power_cubes & ((ent->spawnflags & 0x0000ff00)>> 8))
+				return false;
+			other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+			other->client->pers.power_cubes |= ((ent->spawnflags & 0x0000ff00) >> 8);
+		}
+		else
+		{
+			if (other->client->pers.inventory[ITEM_INDEX(ent->item)])
+				return false;
+			other->client->pers.inventory[ITEM_INDEX(ent->item)] = 1;
+		}
+		return true;
+	}
+	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+	return true;
+}
+
+//======================================================================
+
+qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count)
+{
+	int			index;
+	int			max;
+
+	if (!ent->client)
+		return false;
+
+	if (item->tag == AMMO_BULLETS)
+		max = ent->client->pers.max_bullets;
+	else if (item->tag == AMMO_SHELLS)
+		max = ent->client->pers.max_shells;
+	else if (item->tag == AMMO_ROCKETS)
+		max = ent->client->pers.max_rockets;
+	else if (item->tag == AMMO_GRENADES)
+		max = ent->client->pers.max_grenades;
+	else if (item->tag == AMMO_CELLS)
+		max = ent->client->pers.max_cells;
+	else if (item->tag == AMMO_SLUGS)
+		max = ent->client->pers.max_slugs;
+	else
+		return false;
+
+	index = ITEM_INDEX(item);
+
+	if (ent->client->pers.inventory[index] == max)
+		return false;
+
+	ent->client->pers.inventory[index] += count;
+
+	if (ent->client->pers.inventory[index] > max)
+		ent->client->pers.inventory[index] = max;
+
+	return true;
+}
+
+qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
+{
+	int			oldcount;
+	int			count;
+	qboolean	weapon;
+
+	weapon = (ent->item->flags & IT_WEAPON);
+	if ( (weapon) && ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+		count = 1000;
+	else if (ent->count)
+		count = ent->count;
+	else
+		count = ent->item->quantity;
+
+	oldcount = other->client->pers.inventory[ITEM_INDEX(ent->item)];
+
+	if (!Add_Ammo (other, ent->item, count))
+		return false;
+
+	if (weapon && !oldcount)
+	{
+		if (other->client->pers.weapon != ent->item && ( !deathmatch->value || other->client->pers.weapon == FindItem("blaster") ) )
+			other->client->newweapon = ent->item;
+	}
+
+	if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && (deathmatch->value))
+		SetRespawn (ent, 30);
+	return true;
+}
+
+void Drop_Ammo (edict_t *ent, gitem_t *item)
+{
+	edict_t	*dropped;
+	int		index;
+
+	index = ITEM_INDEX(item);
+	dropped = Drop_Item (ent, item);
+	if (ent->client->pers.inventory[index] >= item->quantity)
+		dropped->count = item->quantity;
+	else
+		dropped->count = ent->client->pers.inventory[index];
+
+	if (ent->client->pers.weapon && 
+		ent->client->pers.weapon->tag == AMMO_GRENADES &&
+		item->tag == AMMO_GRENADES &&
+		ent->client->pers.inventory[index] - dropped->count <= 0) {
+		safe_cprintf (ent, PRINT_HIGH, "Can't drop current weapon\n");
+		G_FreeEdict(dropped);
+		return;
+	}
+
+	ent->client->pers.inventory[index] -= dropped->count;
+	ValidateSelectedItem (ent);
+}
+
+
+//======================================================================
+
+void MegaHealth_think (edict_t *self)
+{
+	if (self->owner->health > self->owner->max_health)
+	{
+		self->nextthink = level.time + 1;
+		self->owner->health -= 1;
+		return;
+	}
+
+	if (!(self->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+		SetRespawn (self, 20);
+	else
+		G_FreeEdict (self);
+}
+void Healthbox_think (edict_t *self)
+{
+	
+	self->nextthink = level.time + 7;
+	self->s.effects = EF_ROTATE;
+	self->s.renderfx = RF_GLOW;
+	return;
+}
+qboolean Pickup_Health (edict_t *ent, edict_t *other)
+{
+	if (!(ent->style & HEALTH_IGNORE_MAX))
+		if (other->health >= other->max_health)
+		{
+			//gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/reject.wav"), 1, ATTN_NORM, 0);
+			ent->s.effects |= EF_COLOR_SHELL | EF_ROTATE;
+			ent->s.renderfx |= RF_SHELL_GREEN;
+			ent->think = Healthbox_think;
+			ent->nextthink = level.time + 7;
+			return false;
+		}
+
+	other->health += ent->count;
+
+	if (!(ent->style & HEALTH_IGNORE_MAX))
+	{
+		if (other->health > other->max_health)
+			other->health = other->max_health;
+	}
+
+	if (ent->style & HEALTH_TIMED)
+	{
+		ent->think = MegaHealth_think;
+		ent->nextthink = level.time + 5;
+		ent->owner = other;
+		ent->flags |= FL_RESPAWN;
+		ent->svflags |= SVF_NOCLIENT;
+		ent->solid = SOLID_NOT;
+	}
+	else
+	{
+		if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+			SetRespawn (ent, 30);
+	}
+
+	return true;
+}
+
+//======================================================================
+
+int ArmorIndex (edict_t *ent)
+{
+	if (!ent->client)
+		return 0;
+
+	if (ent->client->pers.inventory[jacket_armor_index] > 0)
+		return jacket_armor_index;
+
+	if (ent->client->pers.inventory[combat_armor_index] > 0)
+		return combat_armor_index;
+
+	if (ent->client->pers.inventory[body_armor_index] > 0)
+		return body_armor_index;
+
+	return 0;
+}
+
+qboolean Pickup_Armor (edict_t *ent, edict_t *other)
+{
+	int				old_armor_index;
+	gitem_armor_t	*oldinfo;
+	gitem_armor_t	*newinfo;
+	int				newcount;
+	float			salvage;
+	int				salvagecount;
+
+	// get info on new armor
+	newinfo = (gitem_armor_t *)ent->item->info;
+
+	old_armor_index = ArmorIndex (other);
+
+	// handle armor shards specially
+	if (ent->item->tag == ARMOR_SHARD)
+	{
+		if (!old_armor_index)
+			other->client->pers.inventory[jacket_armor_index] = 2;
+		else
+			other->client->pers.inventory[old_armor_index] += 2;
+	}
+
+	// if player has no armor, just use it
+	else if (!old_armor_index)
+	{
+		other->client->pers.inventory[ITEM_INDEX(ent->item)] = newinfo->base_count;
+	}
+
+	// use the better armor
+	else
+	{
+		// get info on old armor
+		if (old_armor_index == jacket_armor_index)
+			oldinfo = &jacketarmor_info;
+		else if (old_armor_index == combat_armor_index)
+			oldinfo = &combatarmor_info;
+		else // (old_armor_index == body_armor_index)
+			oldinfo = &bodyarmor_info;
+
+		if (newinfo->normal_protection > oldinfo->normal_protection)
+		{
+			// calc new armor values
+			salvage = oldinfo->normal_protection / newinfo->normal_protection;
+			salvagecount = salvage * other->client->pers.inventory[old_armor_index];
+			newcount = newinfo->base_count + salvagecount;
+			if (newcount > newinfo->max_count)
+				newcount = newinfo->max_count;
+
+			// zero count of old armor so it goes away
+			other->client->pers.inventory[old_armor_index] = 0;
+
+			// change armor to new item with computed value
+			other->client->pers.inventory[ITEM_INDEX(ent->item)] = newcount;
+		}
+		else
+		{
+			// calc new armor values
+			salvage = newinfo->normal_protection / oldinfo->normal_protection;
+			salvagecount = salvage * newinfo->base_count;
+			newcount = other->client->pers.inventory[old_armor_index] + salvagecount;
+			if (newcount > oldinfo->max_count)
+				newcount = oldinfo->max_count;
+
+			// if we're already maxed out then we don't need the new armor
+			if (other->client->pers.inventory[old_armor_index] >= newcount)
+				return false;
+
+			// update current armor value
+			other->client->pers.inventory[old_armor_index] = newcount;
+		}
+	}
+
+	if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
+		SetRespawn (ent, 20);
+
+	return true;
+}
+
+//======================================================================
+
+int PowerArmorType (edict_t *ent)
+{
+	if (!ent->client)
+		return POWER_ARMOR_NONE;
+
+	if (!(ent->flags & FL_POWER_ARMOR))
+		return POWER_ARMOR_NONE;
+
+	if (ent->client->pers.inventory[power_shield_index] > 0)
+		return POWER_ARMOR_SHIELD;
+
+	if (ent->client->pers.inventory[power_screen_index] > 0)
+		return POWER_ARMOR_SCREEN;
+
+	return POWER_ARMOR_NONE;
+}
+
+void Use_PowerArmor (edict_t *ent, gitem_t *item)
+{
+	int		index;
+
+	if (ent->flags & FL_POWER_ARMOR)
+	{
+		ent->flags &= ~FL_POWER_ARMOR;
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
+	}
+	else
+	{
+		index = ITEM_INDEX(FindItem("cells"));
+		if (!ent->client->pers.inventory[index])
+		{
+			safe_cprintf (ent, PRINT_HIGH, "No cells for power armor.\n");
+			return;
+		}
+		ent->flags |= FL_POWER_ARMOR;
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power1.wav"), 1, ATTN_NORM, 0);
+	}
+}
+
+qboolean Pickup_PowerArmor (edict_t *ent, edict_t *other)
+{
+	int		quantity;
+
+	quantity = other->client->pers.inventory[ITEM_INDEX(ent->item)];
+
+	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
+
+	if (deathmatch->value)
+	{
+		if (!(ent->spawnflags & DROPPED_ITEM) )
+			SetRespawn (ent, ent->item->quantity);
+		// auto-use for DM only if we didn't already have one
+		if (!quantity)
+			ent->item->use (other, ent->item);
+	}
+
+	return true;
+}
+
+void Drop_PowerArmor (edict_t *ent, gitem_t *item)
+{
+	if ((ent->flags & FL_POWER_ARMOR) && (ent->client->pers.inventory[ITEM_INDEX(item)] == 1))
+		Use_PowerArmor (ent, item);
+	Drop_General (ent, item);
+}
+
+//======================================================================
+
+/*
+===============
+Touch_Item
+===============
+*/
+void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	qboolean	taken;
+
+	if (!other->client)
+		return;
+	if (other->health < 1)
+		return;		// dead people can't pickup
+	if (!ent->item->pickup)
+		return;		// not a grabbable item?
+
+	taken = ent->item->pickup(ent, other);
+
+	if (taken)
+	{
+		// flash the screen
+		other->client->bonus_alpha = 0.25;	
+
+		// show icon and name on status bar
+		other->client->ps.stats[STAT_PICKUP_ICON] = gi.imageindex(ent->item->icon);
+		other->client->ps.stats[STAT_PICKUP_STRING] = CS_ITEMS+ITEM_INDEX(ent->item);
+		other->client->pickup_msg_time = level.time + 3.0;
+
+		// change selected item
+		if (ent->item->use)
+			other->client->pers.selected_item = other->client->ps.stats[STAT_SELECTED_ITEM] = ITEM_INDEX(ent->item);
+
+		if (ent->item->pickup == Pickup_Health)
+		{
+			if (ent->count == 2)
+				gi.sound(other, CHAN_ITEM, gi.soundindex("items/s_health.wav"), 1, ATTN_NORM, 0);
+			else if (ent->count == 10)
+				gi.sound(other, CHAN_ITEM, gi.soundindex("items/n_health.wav"), 1, ATTN_NORM, 0);
+			else if (ent->count == 25)
+				gi.sound(other, CHAN_ITEM, gi.soundindex("items/l_health.wav"), 1, ATTN_NORM, 0);
+			else // (ent->count == 100)
+				gi.sound(other, CHAN_ITEM, gi.soundindex("items/m_health.wav"), 1, ATTN_NORM, 0);
+		}
+		else if (ent->item->pickup_sound)
+		{
+			gi.sound(other, CHAN_ITEM, gi.soundindex(ent->item->pickup_sound), 1, ATTN_NORM, 0);
+		}
+	}
+
+	if (!(ent->spawnflags & ITEM_TARGETS_USED))
+	{
+		G_UseTargets (ent, other);
+		ent->spawnflags |= ITEM_TARGETS_USED;
+	}
+
+	if (!taken)
+		return;
+
+	if (!((coop->value) &&  (ent->item->flags & IT_STAY_COOP)) || (ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)))
+	{
+		if (ent->flags & FL_RESPAWN)
+			ent->flags &= ~FL_RESPAWN;
+		else
+			G_FreeEdict (ent);
+	}
+}
+
+//======================================================================
+
+static void drop_temp_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (other == ent->owner)
+		return;
+
+	Touch_Item (ent, other, plane, surf);
+}
+
+static void drop_make_touchable (edict_t *ent)
+{
+	ent->touch = Touch_Item;
+	if (deathmatch->value)
+	{
+		ent->nextthink = level.time + 29;
+		ent->think = G_FreeEdict;
+	}
+}
+
+edict_t *Drop_Item (edict_t *ent, gitem_t *item)
+{
+	edict_t	*dropped;
+	vec3_t	forward, right;
+	vec3_t	offset;
+
+	dropped = G_Spawn();
+
+	dropped->classname = item->classname;
+	dropped->item = item;
+	dropped->spawnflags = DROPPED_ITEM;
+	dropped->s.effects = item->world_model_flags;
+	dropped->s.renderfx = RF_GLOW;
+	VectorSet (dropped->mins, -15, -15, -15);
+	VectorSet (dropped->maxs, 15, 15, 15);
+	gi.setmodel (dropped, dropped->item->world_model);
+	if(!strcmp(item->classname, "item_bomber"))
+		dropped->s.modelindex3 = gi.modelindex("vehicles/bomber/helmet.md2");
+	if(!strcmp(item->classname, "item_hover"))
+		dropped->s.modelindex3 = gi.modelindex("vehicles/hover/flames.md2");
+	dropped->solid = SOLID_TRIGGER;
+	dropped->movetype = MOVETYPE_TOSS;  
+	dropped->touch = drop_temp_touch;
+	dropped->owner = ent;
+
+	if (ent->client)
+	{
+		trace_t	trace;
+
+		AngleVectors (ent->client->v_angle, forward, right, NULL);
+		VectorSet(offset, 24, 0, -16);
+		G_ProjectSource (ent->s.origin, offset, forward, right, dropped->s.origin);
+		trace = gi.trace (ent->s.origin, dropped->mins, dropped->maxs,
+			dropped->s.origin, ent, CONTENTS_SOLID);
+		VectorCopy (trace.endpos, dropped->s.origin);
+	}
+	else
+	{
+		AngleVectors (ent->s.angles, forward, right, NULL);
+		VectorCopy (ent->s.origin, dropped->s.origin);
+	}
+
+	VectorScale (forward, 100, dropped->velocity);
+	dropped->velocity[2] = 300;
+
+	dropped->think = drop_make_touchable;
+	dropped->nextthink = level.time + 1;
+
+	gi.linkentity (dropped);
+
+	return dropped;
+}
+
+void Use_Item (edict_t *ent, edict_t *other, edict_t *activator)
+{
+	ent->svflags &= ~SVF_NOCLIENT;
+	ent->use = NULL;
+
+	if (ent->spawnflags & ITEM_NO_TOUCH)
+	{
+		ent->solid = SOLID_BBOX;
+		ent->touch = NULL;
+	}
+	else
+	{
+		ent->solid = SOLID_TRIGGER;
+		ent->touch = Touch_Item;
+	}
+
+	gi.linkentity (ent);
+}
+
+//======================================================================
+
+/*
+================
+droptofloor
+================
+*/
+void droptofloor (edict_t *ent)
+{
+	trace_t		tr;
+	vec3_t		dest;
+	float		*v;
+
+	v = tv(-15,-15,-15);
+	VectorCopy (v, ent->mins);
+	v = tv(15,15,15);
+	VectorCopy (v, ent->maxs);
+
+	if (ent->model)
+		gi.setmodel (ent, ent->model);
+	else
+		gi.setmodel (ent, ent->item->world_model);
+	ent->solid = SOLID_TRIGGER;
+
+	ent->movetype = MOVETYPE_TOSS;  
+	ent->touch = Touch_Item;
+
+	v = tv(0,0,-128);
+	VectorAdd (ent->s.origin, v, dest);
+
+	tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, dest, ent, MASK_SOLID);
+	if (tr.startsolid)
+	{
+		gi.dprintf ("droptofloor: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
+		G_FreeEdict (ent);
+		return;
+	}
+
+	VectorCopy (tr.endpos, ent->s.origin);
+
+	if (ent->team)
+	{
+		ent->flags &= ~FL_TEAMSLAVE;
+		ent->chain = ent->teamchain;
+		ent->teamchain = NULL;
+
+		ent->svflags |= SVF_NOCLIENT;
+		ent->solid = SOLID_NOT;
+		if (ent == ent->teammaster)
+		{
+			ent->nextthink = level.time + FRAMETIME;
+			ent->think = DoRespawn;
+		}
+	}
+
+	if (ent->spawnflags & ITEM_NO_TOUCH)
+	{
+		ent->solid = SOLID_BBOX;
+		ent->touch = NULL;
+		ent->s.effects &= ~EF_ROTATE;
+		ent->s.renderfx &= ~RF_GLOW;
+	}
+
+	if (ent->spawnflags & ITEM_TRIGGER_SPAWN)
+	{
+		ent->svflags |= SVF_NOCLIENT;
+		ent->solid = SOLID_NOT;
+		ent->use = Use_Item;
+	}
+
+	gi.linkentity (ent);
+}
+
+
+/*
+===============
+PrecacheItem
+
+Precaches all data needed for a given item.
+This will be called for each item spawned in a level,
+and for each item in each client's inventory.
+===============
+*/
+void PrecacheItem (gitem_t *it)
+{
+	char	*s, *start;
+	char	data[MAX_QPATH];
+	int		len;
+	gitem_t	*ammo;
+
+	if (!it)
+		return;
+
+	if (it->pickup_sound)
+		gi.soundindex (it->pickup_sound);
+	if (it->world_model)
+		gi.modelindex (it->world_model);
+	if (it->view_model)
+		gi.modelindex (it->view_model);
+	if (it->icon)
+		gi.imageindex (it->icon);
+
+	// parse everything for its ammo
+	if (it->ammo && it->ammo[0])
+	{
+		ammo = FindItem (it->ammo);
+		if (ammo != it)
+			PrecacheItem (ammo);
+	}
+
+	// parse the space seperated precache string for other items
+	s = it->precaches;
+	if (!s || !s[0])
+		return;
+
+	while (*s)
+	{
+		start = s;
+		while (*s && *s != ' ')
+			s++;
+
+		len = s-start;
+		if (len >= MAX_QPATH || len < 5)
+			gi.error ("PrecacheItem: %s has bad precache string", it->classname);
+		memcpy (data, start, len);
+		data[len] = 0;
+		if (*s)
+			s++;
+
+		// determine type based on extension
+		if (!strcmp(data+len-3, "md2"))
+			gi.modelindex (data);
+		else if (!strcmp(data+len-3, "sp2"))
+			gi.modelindex (data);
+		else if (!strcmp(data+len-3, "wav"))
+			gi.soundindex (data);
+		if (!strcmp(data+len-3, "pcx"))
+			gi.imageindex (data);
+	}
+}
+
+/*
+============
+SpawnItem
+
+Sets the clipping size and plants the object on the floor.
+
+Items can't be immediately dropped to floor, because they might
+be on an entity that hasn't spawned yet.
+============
+*/
+void SpawnItem (edict_t *ent, gitem_t *item)
+{
+	PrecacheItem (item);
+
+	if (ent->spawnflags)
+	{
+		if (strcmp(ent->classname, "key_power_cube") != 0)
+		{
+			ent->spawnflags = 0;
+			gi.dprintf("%s at %s has invalid spawnflags set\n", ent->classname, vtos(ent->s.origin));
+		}
+	}
+
+	// some items will be prevented in deathmatch
+	if (deathmatch->value)
+	{
+		if ( (int)dmflags->value & DF_NO_ARMOR )
+		{
+			if (item->pickup == Pickup_Armor || item->pickup == Pickup_PowerArmor)
+			{
+				G_FreeEdict (ent);
+				return;
+			}
+		}
+		if ( (int)dmflags->value & DF_NO_ITEMS )
+		{
+			if (item->pickup == Pickup_Powerup)
+			{
+				G_FreeEdict (ent);
+				return;
+			}
+		}
+		if ( (int)dmflags->value & DF_NO_HEALTH )
+		{
+			if (item->pickup == Pickup_Health || item->pickup == Pickup_Adrenaline)
+			{
+				G_FreeEdict (ent);
+				return;
+			}
+		}
+		if ( (int)dmflags->value & DF_INFINITE_AMMO )
+		{
+			if ( (item->flags == IT_AMMO) || (strcmp(ent->classname, "weapon_bfg") == 0) )
+			{
+				G_FreeEdict (ent);
+				return;
+			}
+		}
+		if(excessive->value || instagib->value || rocket_arena->value)
+		{
+			if (item->flags == IT_AMMO || (strcmp(ent->classname, "weapon_bfg") == 0) ||
+				(strcmp(ent->classname, "weapon_hyperblaster") == 0) || 
+				(strcmp(ent->classname, "weapon_railgun") == 0) ||
+				(strcmp(ent->classname, "weapon_rocketlauncher") == 0) ||
+				(strcmp(ent->classname, "weapon_grenadelauncher") == 0) ||
+				(strcmp(ent->classname, "weapon_chaingun") == 0) ||
+				(strcmp(ent->classname, "weapon_supershotgun") == 0) ||
+				(strcmp(ent->classname, "weapon_shotgun") == 0))
+			{
+				G_FreeEdict (ent);
+				return;
+			}
+		}
+	}
+
+	if (coop->value && (strcmp(ent->classname, "key_power_cube") == 0))
+	{
+		ent->spawnflags |= (1 << (8 + level.power_cubes));
+		level.power_cubes++;
+	}
+
+	// don't let them drop items that stay in a coop game
+	if ((coop->value) && (item->flags & IT_STAY_COOP))
+	{
+		item->drop = NULL;
+	}
+	
+	//CTF
+	//Don't spawn the flags unless enabled
+	if (!ctf->value &&
+		(strcmp(ent->classname, "item_flag_red") == 0 ||
+		strcmp(ent->classname, "item_flag_blue") == 0)) {
+		G_FreeEdict(ent);
+		return;
+	}
+
+	ent->item = item;
+	ent->nextthink = level.time + 2 * FRAMETIME;    // items start after other solids
+	ent->think = droptofloor;
+	if (strcmp(ent->classname, "item_flag_red") && //flags are special and don't get this
+		strcmp(ent->classname, "item_flag_blue")) {
+		ent->s.effects = EF_ROTATE;
+			
+	}
+	ent->s.renderfx = RF_GLOW;
+	if((strcmp(ent->classname, "Health") == 0)) {
+		ent->s.modelindex2 = gi.modelindex("models/items/healing/globe/tris.md2");
+	}
+	else if((strcmp(ent->classname, "item_quad") == 0)) {
+		ent->s.modelindex2 = gi.modelindex("models/items/quaddama/unit.md2");
+	}
+	if(strcmp(ent->classname, "item_armor_shard") == 0) {
+		//ent->s.renderfx = RF_CUSTOMSKIN; //shiny
+	}
+
+	if (ent->model)
+		gi.modelindex (ent->model);
+
+	//flags are server animated and have special handling
+	if (strcmp(ent->classname, "item_flag_red") == 0 ||
+		strcmp(ent->classname, "item_flag_blue") == 0) {
+		ent->think = CTFFlagSetup;
+	}
+
+	//vehicles have special handling
+	if((strcmp(ent->classname, "item_bomber") == 0) || (strcmp(ent->classname, "item_strafer") == 0)
+		|| (strcmp(ent->classname, "item_hover") == 0))
+		ent->think = VehicleSetup;
+
+	//ditto for deathball
+	if(strcmp(ent->classname, "item_deathball") == 0)
+		ent->think = DeathballSetup;	
+}
+
+//======================================================================
+
+gitem_t	itemlist[] = 
+{
+	{
+		NULL
+	},	// leave index 0 alone
+
+	//
+	// ARMOR
+	//
+
+/*QUAKED item_armor_body (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"item_armor_body", 
+		Pickup_Armor,
+		NULL,
+		NULL,
+		NULL,
+		"misc/ar1_pkup.wav",
+		"models/items/armor/body/tris.md2", EF_ROTATE,
+		NULL,
+/* icon */		"i_bodyarmor",
+/* pickup */	"Body Armor",
+/* width */		3,
+		0,
+		NULL,
+		IT_ARMOR,
+		0,
+		&bodyarmor_info,
+		ARMOR_BODY,
+/* precache */ ""
+	},
+
+/*QUAKED item_armor_combat (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"item_armor_combat", 
+		Pickup_Armor,
+		NULL,
+		NULL,
+		NULL,
+		"misc/ar1_pkup.wav",
+		"models/items/armor/combat/tris.md2", EF_ROTATE,
+		NULL,
+/* icon */		"i_combatarmor",
+/* pickup */	"Combat Armor",
+/* width */		3,
+		0,
+		NULL,
+		IT_ARMOR,
+		0,
+		&combatarmor_info,
+		ARMOR_COMBAT,
+/* precache */ ""
+	},
+
+/*QUAKED item_armor_jacket (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"item_armor_jacket", 
+		Pickup_Armor,
+		NULL,
+		NULL,
+		NULL,
+		"misc/ar1_pkup.wav",
+		"models/items/armor/jacket/tris.md2", EF_ROTATE,
+		NULL,
+/* icon */		"i_jacketarmor",
+/* pickup */	"Jacket Armor",
+/* width */		3,
+		0,
+		NULL,
+		IT_ARMOR,
+		0,
+		&jacketarmor_info,
+		ARMOR_JACKET,
+/* precache */ ""
+	},
+
+/*QUAKED item_armor_shard (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"item_armor_shard", 
+		Pickup_Armor,
+		NULL,
+		NULL,
+		NULL,
+		"misc/ar2_pkup.wav",
+		"models/items/armor/shard/tris.md2", EF_ROTATE,
+		NULL,
+/* icon */		"i_jacketarmor",
+/* pickup */	"Armor Shard",
+/* width */		3,
+		0,
+		NULL,
+		IT_ARMOR,
+		0,
+		NULL,
+		ARMOR_SHARD,
+/* precache */ ""
+	},
+
+
+/*QUAKED item_power_screen (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"item_power_screen", 
+		Pickup_PowerArmor,
+		Use_PowerArmor,
+		Drop_PowerArmor,
+		NULL,
+		"misc/ar3_pkup.wav",
+		"models/items/armor/screen/tris.md2", EF_ROTATE,
+		NULL,
+/* icon */		"i_powerscreen",
+/* pickup */	"Power Screen",
+/* width */		0,
+		60,
+		NULL,
+		IT_ARMOR,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+/*QUAKED item_power_shield (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"item_power_shield",
+		Pickup_PowerArmor,
+		Use_PowerArmor,
+		Drop_PowerArmor,
+		NULL,
+		"misc/ar3_pkup.wav",
+		"models/items/armor/shield/tris.md2", EF_ROTATE,
+		NULL,
+/* icon */		"i_powershield",
+/* pickup */	"Power Shield",
+/* width */		0,
+		60,
+		NULL,
+		IT_ARMOR,
+		0,
+		NULL,
+		0,
+/* precache */ "misc/power2.wav misc/power1.wav"
+	},
+//CTF
+/*QUAKED item_flag_team1 (1 0.2 0) (-16 -16 -24) (16 16 32)
+*/
+	{
+		"item_flag_red",
+		CTFPickup_Flag,
+		NULL,
+		CTFDrop_Flag, //Should this be null if we don't want players to drop it manually?
+		NULL,
+		"ctf/flagtk.wav",
+		"models/items/flags/flag1.md2", EF_FLAG1,
+		NULL,
+/* icon */		"i_flag1",
+/* pickup */	"Red Flag",
+/* width */		2,
+		0,
+		NULL,
+		0,
+		0,
+		NULL,
+		0,
+/* precache */ "misc/red_scores.wav"
+	},
+
+/*QUAKED item_flag_team2 (1 0.2 0) (-16 -16 -24) (16 16 32)
+*/
+	{
+		"item_flag_blue",
+		CTFPickup_Flag,
+		NULL,
+		CTFDrop_Flag, //Should this be null if we don't want players to drop it manually?
+		NULL,
+		"ctf/flagtk.wav",
+		"models/items/flags/flag2.md2", EF_FLAG2,
+		NULL,
+/* icon */		"i_flag2",
+/* pickup */	"Blue Flag",
+/* width */		2,
+		0,
+		NULL,
+		0,
+		0,
+		NULL,
+		0,
+/* precache */ "misc/blue_scores.wav"
+	},
+
+/*QUAKED item_bomber (1 0.2 0) (-16 -16 -24) (16 16 32)
+*/
+	{
+		"item_bomber",
+		Get_in_vehicle,
+		NULL,
+		Leave_vehicle, 
+		Weapon_Bomber,
+		"ctf/flagtk.wav",
+		"vehicles/bomber/tris.md2", 0,
+		"vehicles/bomber/v_wep.md2",
+/* icon */		"w_blaster",
+/* pickup */	"Bomber",
+		0,
+		0,
+		NULL,
+		IT_WEAPON,
+		WEAP_BOMBER,
+		NULL,
+		0,
+/* precache */ "weapons/bfg_fly.wav"
+	},
+/*QUAKED item_stafer (1 0.2 0) (-16 -16 -24) (16 16 32)
+*/
+	{
+		"item_strafer",
+		Get_in_vehicle,
+		NULL,
+		Leave_vehicle, 
+		Weapon_Strafer,
+		"ctf/flagtk.wav",
+		"vehicles/strafer/tris.md2", 0,
+		"vehicles/strafer/v_wep.md2", 
+/* icon */		"w_blaster",
+/* pickup */	"Strafer",
+		0,
+		0,
+		NULL,
+		IT_WEAPON,
+		WEAP_STRAFER,
+		NULL,
+		0,
+/* precache */ "weapons/bfg_fly.wav"
+	},
+
+	/*QUAKED item_hover (1 0.2 0) (-16 -16 -24) (16 16 32)
+*/
+	{
+		"item_hover",
+		Get_in_vehicle,
+		NULL,
+		Leave_vehicle, 
+		Weapon_Hover,
+		"ctf/flagtk.wav",
+		"vehicles/hover/tris.md2", 0,
+		"vehicles/hover/v_wep.md2",
+/* icon */		"w_blaster",
+/* pickup */	"Hover",
+		0,
+		0,
+		NULL,
+		IT_WEAPON,
+		WEAP_HOVER,
+		NULL,
+		0,
+/* precache */ "weapons/bfg_fly.wav"
+	},
+
+/*QUAKED item_deathball (1 0.2 0) (-16 -16 -24) (16 16 32)
+*/
+	{
+		"item_deathball",
+		Pickup_deathball,
+		NULL,
+		DeathballDrop, 
+		Weapon_Deathball,
+		"ctf/flagtk.wav",
+		"vehicles/deathball/deathball.md2", 0,
+		"vehicles/deathball/v_wep.md2",
+/* icon */		"w_blaster",
+/* pickup */	"Deathball",
+		0,
+		0,
+		NULL,
+		IT_WEAPON,
+		WEAP_DEATHBALL,
+		NULL,
+		0,
+/* precache */ "weapons/bfg_fly.wav" //we'll get a new sound for this
+	},
+
+	//a fake item for bots to use as a target for throwing a deathball at.
+		{
+		"item_dbtarget",
+		NULL,
+		NULL,
+		NULL, 
+		NULL,
+		NULL,
+		"models/objects/blank/tris.md2", 0,
+		NULL,
+		NULL,
+		NULL,
+		0,
+		0,
+		NULL,
+		IT_POWERUP,
+		WEAP_DEATHBALL,
+		NULL,
+		0,
+		NULL 
+	},
+	{
+		"item_red_dbtarget",
+		NULL,
+		NULL,
+		NULL, 
+		NULL,
+		NULL,
+		"models/objects/blank/tris.md2", 0,
+		NULL,
+		NULL,
+		NULL,
+		0,
+		0,
+		NULL,
+		IT_POWERUP,
+		WEAP_DEATHBALL,
+		NULL,
+		0,
+		NULL 
+	},
+	{
+		"item_blue_dbtarget",
+		NULL,
+		NULL,
+		NULL, 
+		NULL,
+		NULL,
+		"models/objects/blank/tris.md2", 0,
+		NULL,
+		NULL,
+		NULL,
+		0,
+		0,
+		NULL,
+		IT_POWERUP,
+		WEAP_DEATHBALL,
+		NULL,
+		0,
+		NULL 
+	},
+	//
+	// WEAPONS 
+	//
+/* weapon_grapple (.3 .3 1) (-16 -16 -16) (16 16 16)
+always owned, never in the world
+*/
+	{
+		"weapon_grapple", 
+		NULL,
+		Use_Weapon,
+		NULL,
+		CTFWeapon_Grapple,
+		"misc/w_pkup.wav",
+		NULL, 0,
+		"vehicles/deathball/v_wep.md2",
+/* icon */		"w_blaster",
+/* pickup */	"Grapple",
+		0,
+		0,
+		NULL,
+		IT_WEAPON,
+		WEAP_GRAPPLE,
+		NULL,
+		0,
+/* precache */ "weapons/grapple/grfire.wav weapons/grapple/grpull.wav weapons/grapple/grhang.wav weapons/grapple/grreset.wav weapons/grapple/grhit.wav"
+	},
+/* weapon_blaster (.3 .3 1) (-16 -16 -16) (16 16 16)
+always owned, never in the world
+*/
+	{
+		"weapon_blaster", 
+		NULL,
+		Use_Weapon,
+		NULL,
+		Weapon_Blaster,
+		"misc/w_pkup.wav",
+		NULL, 0,
+		"models/weapons/v_blast/tris.md2",
+/* icon */		"w_blaster",
+/* pickup */	"Blaster",
+		0,
+		0,
+		NULL,
+		IT_WEAPON|IT_STAY_COOP,
+		WEAP_BLASTER,
+		NULL,
+		0,
+/* precache */ "weapons/blastf1a.wav misc/lasfly.wav"
+	},
+
+/*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"weapon_shotgun", 
+		Pickup_Weapon,
+		Use_Weapon,
+		Drop_Weapon,
+		Weapon_Smartgun,
+		"misc/w_pkup.wav",
+		"models/weapons/g_shotg/tris.md2", EF_ROTATE,
+		"models/weapons/v_shotg/tris.md2",
+/* icon */		"w_shotgun",
+/* pickup */	"Alien Smartgun",
+		0,
+		1,
+		"Alien Smart Grenade",
+		IT_WEAPON|IT_STAY_COOP,
+		WEAP_SHOTGUN,
+		NULL,
+		0,
+/* precache */ "weapons/clank.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav"
+	},
+
+/*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"weapon_supershotgun", 
+		Pickup_Weapon,
+		Use_Weapon,
+		Drop_Weapon,
+		Weapon_Chain,
+		"misc/w_pkup.wav",
+		"models/weapons/g_shotg2/tris.md2", EF_ROTATE,
+		"models/weapons/v_shotg2/tris.md2",
+/* icon */		"w_sshotgun",
+/* pickup */	"Pulse Rifle",
+		0,
+		2,
+		"Bullets",
+		IT_WEAPON|IT_STAY_COOP,
+		WEAP_SUPERSHOTGUN,
+		NULL,
+		0,
+/* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav machgf5b.wav"
+	},
+
+/*QUAKED weapon_chaingun (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"weapon_chaingun", 
+		Pickup_Weapon,
+		Use_Weapon,
+		Drop_Weapon,
+		Weapon_Flame,
+		"misc/w_pkup.wav",
+		"models/weapons/g_chain/tris.md2", EF_ROTATE,
+		"models/weapons/v_chain/tris.md2",
+/* icon */		"w_chaingun",
+/* pickup */	"Flame Thrower",
+		0,
+		1,
+		"Napalm",
+		IT_WEAPON|IT_STAY_COOP,
+		WEAP_CHAINGUN,
+		NULL,
+		0,
+/* precache */ "weapons/grenlb1b.wav weapons/grenlf1a.wav"
+	},
+
+/*QUAKED weapon_rocketlauncher (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"weapon_rocketlauncher",
+		Pickup_Weapon,
+		Use_Weapon,
+		Drop_Weapon,
+		Weapon_RocketLauncher,
+		"misc/w_pkup.wav",
+		"models/weapons/g_rocket/tris.md2", EF_ROTATE,
+		"models/weapons/v_rocket/tris.md2",
+/* icon */		"w_rlauncher",
+/* pickup */	"Rocket Launcher",
+		0,
+		1,
+		"Rockets",
+		IT_WEAPON|IT_STAY_COOP,
+		WEAP_ROCKETLAUNCHER,
+		NULL,
+		0,
+/* precache */ "models/objects/rocket/tris.md2 weapons/rockfly.wav weapons/rocklf1a.wav models/objects/debris2/tris.md2"
+	},
+
+/*QUAKED weapon_hyperblaster (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"weapon_hyperblaster", 
+		Pickup_Weapon,
+		Use_Weapon,
+		Drop_Weapon,
+		Weapon_Disruptor,
+		"misc/w_pkup.wav",
+		"models/weapons/g_hyperb/tris.md2", EF_ROTATE,
+		"models/weapons/v_hyperb/tris.md2",
+/* icon */		"w_hyperblaster",
+/* pickup */	"Alien Disruptor",
+		0,
+		1,
+		"Cells",
+		IT_WEAPON|IT_STAY_COOP,
+		WEAP_HYPERBLASTER,
+		NULL,
+		0,
+/* precache */ "weapons/railgf1a.wav"
+	},
+
+/*QUAKED weapon_railgun (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"weapon_railgun", 
+		Pickup_Weapon,
+		Use_Weapon,
+		Drop_Weapon,
+		Weapon_Beamgun,
+		"misc/w_pkup.wav",
+		"models/weapons/g_rail/tris.md2", EF_ROTATE,
+		"models/weapons/v_rail/tris.md2",
+/* icon */		"w_railgun",
+/* pickup */	"Disruptor",
+		0,
+		1,
+		"Cells",
+		IT_WEAPON|IT_STAY_COOP,
+		WEAP_RAILGUN,
+		NULL,
+		0,
+/* precache */ "weapons/hyprbf1a.wav"
+	},
+
+/*QUAKED weapon_bfg (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"weapon_bfg",
+		Pickup_Weapon,
+		Use_Weapon,
+		Drop_Weapon,
+		Weapon_Vaporizer,
+		"misc/w_pkup.wav",
+		"models/weapons/g_bfg/tris.md2", EF_ROTATE,
+		"models/weapons/v_bfg/tris.md2",
+/* icon */		"w_bfg",
+/* pickup */	"Alien Vaporizer",
+		0,
+		2,
+		"Slugs",
+		IT_WEAPON|IT_STAY_COOP,
+		WEAP_BFG,
+		NULL,
+		0,
+/* precache */ "weapons/energyfield.wav smallmech/sight.wav"
+	},
+
+	//
+	// AMMO ITEMS
+	//
+/*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"ammo_shells",
+		Pickup_Ammo,
+		NULL,
+		Drop_Ammo,
+		NULL,
+		"misc/am_pkup.wav",
+		"models/items/ammo/shells/medium/tris.md2", 0,
+		NULL,
+/* icon */		"a_shells",
+/* pickup */	"Alien Smart Grenade",
+/* width */		3,
+		10,
+		NULL,
+		IT_AMMO,
+		0,
+		NULL,
+		AMMO_SHELLS,
+/* precache */ ""
+	},
+/*QUAKED ammo_shells (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"ammo_grenades",
+		Pickup_Ammo,
+		NULL,
+		Drop_Ammo,
+		NULL,
+		"misc/am_pkup.wav",
+		"models/items/ammo/grenades/medium/tris.md2", 0,
+		NULL,
+/* icon */		"a_grenades",
+/* pickup */	"Napalm",
+/* width */		3,
+		50,
+		NULL,
+		IT_AMMO,
+		0,
+		NULL,
+		AMMO_GRENADES,
+/* precache */ ""
+	},
+
+/*QUAKED ammo_bullets (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"ammo_bullets",
+		Pickup_Ammo,
+		NULL,
+		Drop_Ammo,
+		NULL,
+		"misc/am_pkup.wav",
+		"models/items/ammo/bullets/medium/tris.md2", 0,
+		NULL,
+/* icon */		"a_bullets",
+/* pickup */	"Bullets",
+/* width */		3,
+		50,
+		NULL,
+		IT_AMMO,
+		0,
+		NULL,
+		AMMO_BULLETS,
+/* precache */ ""
+	},
+
+/*QUAKED ammo_cells (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"ammo_cells",
+		Pickup_Ammo,
+		NULL,
+		Drop_Ammo,
+		NULL,
+		"misc/am_pkup.wav",
+		"models/items/ammo/cells/medium/tris.md2", 0,
+		NULL,
+/* icon */		"a_cells",
+/* pickup */	"Cells",
+/* width */		3,
+		50,
+		NULL,
+		IT_AMMO,
+		0,
+		NULL,
+		AMMO_CELLS,
+/* precache */ ""
+	},
+
+/*QUAKED ammo_rockets (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"ammo_rockets",
+		Pickup_Ammo,
+		NULL,
+		Drop_Ammo,
+		NULL,
+		"misc/am_pkup.wav",
+		"models/items/ammo/rockets/medium/tris.md2", 0,
+		NULL,
+/* icon */		"a_rockets",
+/* pickup */	"Rockets",
+/* width */		3,
+		5,
+		NULL,
+		IT_AMMO,
+		0,
+		NULL,
+		AMMO_ROCKETS,
+/* precache */ ""
+	},
+
+/*QUAKED ammo_slugs (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"ammo_slugs",
+		Pickup_Ammo,
+		NULL,
+		Drop_Ammo,
+		NULL,
+		"misc/am_pkup.wav",
+		"models/items/ammo/slugs/medium/tris.md2", 0,
+		NULL,
+/* icon */		"a_slugs",
+/* pickup */	"Slugs",
+/* width */		3,
+		10,
+		NULL,
+		IT_AMMO,
+		0,
+		NULL,
+		AMMO_SLUGS,
+/* precache */ ""
+	},
+
+
+	//
+	// POWERUP ITEMS
+	//
+/*QUAKED item_quad (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"item_quad", 
+		Pickup_Powerup,
+		Use_Quad,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/quaddama/tris.md2", EF_ROTATE,
+		NULL,
+/* icon */		"p_quad",
+/* pickup */	"Quad Damage",
+/* width */		2,
+		60,
+		NULL,
+		IT_POWERUP,
+		0,
+		NULL,
+		0,
+/* precache */ "items/damage.wav items/damage2.wav items/damage3.wav"
+	},
+
+/*QUAKED item_invulnerability (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+	{
+		"item_invulnerability",
+		Pickup_Powerup,
+		Use_Invulnerability,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/invulner/tris.md2", EF_ROTATE,
+		NULL,
+/* icon */		"p_invulnerability",
+/* pickup */	"Invulnerability",
+/* width */		2,
+		300,
+		NULL,
+		IT_POWERUP,
+		0,
+		NULL,
+		0,
+/* precache */ "items/protect.wav items/protect2.wav items/protect4.wav"
+	},
+
+/*QUAKED item_adrenaline (.3 .3 1) (-16 -16 -16) (16 16 16)
+gives +1 to maximum health
+*/
+	{
+		"item_adrenaline",
+		Pickup_Adrenaline,
+		NULL,
+		NULL,
+		NULL,
+		"items/n_health.wav",
+		"models/items/adrenaline/tris.md2", EF_ROTATE,
+		NULL,
+/* icon */		"p_adrenaline",
+/* pickup */	"Adrenaline",
+/* width */		2,
+		60,
+		NULL,
+		0,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+	//
+	// KEYS
+	//
+/*QUAKED key_data_cd (0 .5 .8) (-16 -16 -16) (16 16 16)
+key for computer centers
+*/
+	{
+		"key_data_cd",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/data_cd/tris.md2", EF_ROTATE,
+		NULL,
+		"k_datacd",
+		"Data CD",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+/*QUAKED key_data_spinner (0 .5 .8) (-16 -16 -16) (16 16 16)
+key for the city computer
+*/
+	{
+		"key_data_spinner",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/spinner/tris.md2", EF_ROTATE,
+		NULL,
+		"k_dataspin",
+		"Data Spinner",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+/*QUAKED key_pass (0 .5 .8) (-16 -16 -16) (16 16 16)
+security pass for the security level
+*/
+	{
+		"key_pass",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/pass/tris.md2", EF_ROTATE,
+		NULL,
+		"k_security",
+		"Security Pass",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+/*QUAKED key_blue_key (0 .5 .8) (-16 -16 -16) (16 16 16)
+normal door key - blue
+*/
+	{
+		"key_blue_key",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/key/tris.md2", EF_ROTATE,
+		NULL,
+		"k_bluekey",
+		"Blue Key",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+/*QUAKED key_red_key (0 .5 .8) (-16 -16 -16) (16 16 16)
+normal door key - red
+*/
+	{
+		"key_red_key",
+		Pickup_Key,
+		NULL,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/keys/red_key/tris.md2", EF_ROTATE,
+		NULL,
+		"k_redkey",
+		"Red Key",
+		2,
+		0,
+		NULL,
+		IT_STAY_COOP|IT_KEY,
+		0,
+		NULL,
+		0,
+/* precache */ ""
+	},
+
+	{
+		NULL,
+		Pickup_Health,
+		NULL,
+		NULL,
+		NULL,
+		"items/pkup.wav",
+		NULL, 0,
+		NULL,
+/* icon */		"i_health",
+/* pickup */	"Health",
+/* width */		3,
+		0,
+		NULL,
+		0,
+		0,
+		NULL,
+		0,
+/* precache */ "items/s_health.wav items/n_health.wav items/l_health.wav items/m_health.wav"
+	},
+
+	{
+		"item_haste",
+		Pickup_Powerup,
+		Use_Haste,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/haste/tris.md2", EF_ROTATE,
+		NULL,
+/* icon */		"p_haste",
+/* pickup */	"Haste",
+/* width */		2,
+		60,
+		NULL,
+		IT_STAY_COOP|IT_POWERUP,
+		0,
+		NULL,
+		0,
+/* precache */ "items/hasteout.wav"
+	},
+	{
+		"item_sproing",
+		Pickup_Powerup,
+		Use_Sproing,
+		Drop_General,
+		NULL,
+		"items/pkup.wav",
+		"models/items/sproing/tris.md2", EF_ROTATE,
+		NULL,
+/* icon */		"p_sproing",
+/* pickup */	"Sproing",
+/* width */		2,
+		60,
+		NULL,
+		IT_STAY_COOP|IT_POWERUP,
+		0,
+		NULL,
+		0,
+/* precache */ "items/sproingout.wav"
+	},
+	// end of list marker
+	{NULL}
+};
+
+
+/*QUAKED item_health (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+void SP_item_health (edict_t *self)
+{
+	if ( deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH) )
+	{
+		G_FreeEdict (self);
+		return;
+	}
+	self->model = "models/items/healing/medium/tris.md2";
+	self->classname = "Health";
+	self->count = 10;
+	SpawnItem (self, FindItem ("Health"));
+	gi.soundindex ("items/n_health.wav");
+}
+
+/*QUAKED item_health_small (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+void SP_item_health_small (edict_t *self)
+{
+	if ( deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH) )
+	{
+		G_FreeEdict (self);
+		return;
+	}
+	
+	self->model = "models/items/healing/small/tris.md2";
+	self->count = 2;
+	self->classname = "Health";
+	SpawnItem (self, FindItem ("Health"));
+	self->style = HEALTH_IGNORE_MAX;
+	gi.soundindex ("items/s_health.wav");
+}
+
+/*QUAKED item_health_large (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+void SP_item_health_large (edict_t *self)
+{
+	if ( deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH) )
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	self->model = "models/items/healing/large/tris.md2";
+	self->classname = "Health";
+	self->count = 25;
+	SpawnItem (self, FindItem ("Health"));
+	gi.soundindex ("items/l_health.wav");
+}
+
+/*QUAKED item_health_mega (.3 .3 1) (-16 -16 -16) (16 16 16)
+*/
+void SP_item_health_mega (edict_t *self)
+{
+	if ( deathmatch->value && ((int)dmflags->value & DF_NO_HEALTH) )
+	{
+		G_FreeEdict (self);
+		return;
+	}
+
+	self->model = "models/items/mega_h/tris.md2";
+	self->count = 100;
+	SpawnItem (self, FindItem ("Health"));
+	gi.soundindex ("items/m_health.wav");
+	self->style = HEALTH_IGNORE_MAX|HEALTH_TIMED;
+}
+
+
+void InitItems (void)
+{
+	game.num_items = sizeof(itemlist)/sizeof(itemlist[0]) - 1;
+}
+
+
+
+/*
+===============
+SetItemNames
+
+Called by worldspawn
+===============
+*/
+void SetItemNames (void)
+{
+	int		i;
+	gitem_t	*it;
+
+	for (i=0 ; i<game.num_items ; i++)
+	{
+		it = &itemlist[i];
+		gi.configstring (CS_ITEMS+i, it->pickup_name);
+	}
+
+	jacket_armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+	combat_armor_index = ITEM_INDEX(FindItem("Combat Armor"));
+	body_armor_index   = ITEM_INDEX(FindItem("Body Armor"));
+	power_screen_index = ITEM_INDEX(FindItem("Power Screen"));
+	power_shield_index = ITEM_INDEX(FindItem("Power Shield"));
+}

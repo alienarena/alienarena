@@ -1,0 +1,542 @@
+glass
+{
+	{
+		map gfx/reflect.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		envmap
+	}
+}
+models/items/ammo/rockets/medium/skin
+{
+	{
+		map models/items/ammo/rockets/medium/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/red.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 50 0.01 0.5
+		nolightmap
+	}
+	{
+		map gfx/rocketfx.tga
+		alphamask
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		alphashift 0 .2  .2
+		nolightmap	
+		envmap
+
+	}
+	{
+		map gfx/flash.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll static 3 static 1
+		alphashift 20 0.05 0.4
+		nolightmap
+	}
+	
+	
+}
+models/items/ammo/cells/medium/cell
+{
+	{
+		map models/items/ammo/cells/medium/cell.tga
+		nolightmap	
+	}
+	{
+		map gfx/green.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 50 0.01 0.5
+		nolightmap
+	}
+	{
+		map gfx/cellfx.tga
+		alphamask
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		alphashift 0 .2  .2
+		nolightmap	
+		envmap
+
+	}
+	{
+		map gfx/flash.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll static 3 static 1
+		alphashift 20 0.05 0.4
+		nolightmap
+	}
+	
+	
+}
+models/items/ammo/shells/medium/skin
+{
+	{
+		map models/items/ammo/shells/medium/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/purple.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 50 0.01 0.5
+		nolightmap
+	}
+	{
+		map gfx/shellsfx.tga
+		alphamask
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		alphashift 0 .2  .2
+		nolightmap	
+		envmap
+
+	}
+	{
+		map gfx/flash.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll static 3 static 1
+		alphashift 20 0.05 0.4
+		nolightmap
+	}
+	
+	
+}
+models/items/ammo/bullets/medium/skin
+{
+	{
+		map models/items/ammo/bullets/medium/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/yellow.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 50 0.01 0.5
+		nolightmap
+	}
+	{
+		map gfx/bulletfx.tga
+		alphamask
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		alphashift 0 .2  .2
+		nolightmap	
+		envmap
+
+	}
+	{
+		map gfx/flash.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll static 3 static 1
+		alphashift 20 0.05 0.4
+		nolightmap
+	}
+	
+	
+}
+models/items/ammo/grenades/medium/skin
+{
+	{
+		map models/items/ammo/grenades/medium/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/orange.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 50 0.01 0.5
+		nolightmap
+	}
+	{
+		map gfx/napalmfx.tga
+		alphamask
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		alphashift 0 .2  .2
+		nolightmap	
+		envmap
+
+	}
+	{
+		map gfx/flash.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll static 3 static 1
+		alphashift 20 0.05 0.4
+		nolightmap
+	}
+	
+	
+}
+models/items/armor/shard/skin
+{
+	{
+		map models/items/armor/shard/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 20 0.5 0.6
+		envmap
+		nolightmap
+	}
+	{
+		map gfx/shardmask.tga
+		nolightmap
+		alphamask
+	}
+}
+models/items/healing/medium/skin
+{
+	{
+		map models/items/healing/medium/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.2 0.2
+		nolightmap
+		envmap
+	}	
+}
+models/items/healing/large/skin
+{
+	{
+		map models/items/healing/large/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.2 0.2
+		nolightmap
+		envmap
+	}	
+}
+models/items/healing/small/skin
+{
+	{
+		map models/items/healing/small/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.2 0.2
+		nolightmap
+		envmap
+	}	
+}
+
+models/weapons/v_shotg/skin
+{
+	{
+		map gfx/smartgunbase.tga
+		nolightmap
+	}
+	{
+		map gfx/bluelightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1 
+		scroll static 2 static 1	
+		alphashift 20 0.05 .3
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		alphashift 20 0.1 0.3
+		nolightmap
+		envmap
+	}
+	{
+		map gfx/smartgunmask.tga
+		alphamask
+	}
+		
+}
+models/weapons/v_blast/skin
+{
+	{
+		map models/weapons/v_blast/skin.tga
+	}
+	{
+		map gfx/blasterfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.01 .8
+		nolightmap
+	}
+}
+models/weapons/v_hyperb/skin
+{
+	{
+		map gfx/disruptorbase.tga
+	}
+	{
+		map gfx/r_lightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5 
+		scroll static 1 static 0	
+		alphashift 10 0.3 .9
+		nolightmap
+	}
+	{
+		map gfx/disruptormask.tga
+		alphamask
+	}
+	
+}
+models/weapons/v_rail/skin
+{
+	{
+		map gfx/beammask.tga
+	}
+	{
+		map gfx/beamfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.01 .8
+		nolightmap
+	}
+}
+models/items/armor/combat/skin
+{
+	{
+		map gfx/armorbase.tga
+	}
+	{
+		map gfx/bluelightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scroll static 0 static 3
+		alphashift 5 0.1 0.7
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		alphashift 0 .2 .2
+		envmap
+	}
+	{
+		map gfx/armormask.tga
+		alphamask
+	}
+	
+}
+models/items/armor/body/skin
+{
+	{
+		map gfx/armorbase.tga
+	}
+	{
+		map gfx/redlightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scroll static 0 static 3
+		alphashift 5 0.1 0.7
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		alphashift 0 .2 .2
+		envmap
+	}
+	{
+		map gfx/armormask.tga
+		alphamask
+	}
+	
+}
+models/items/armor/jacket/skin
+{
+	{
+		map gfx/armorbase.tga
+	}
+	{
+		map gfx/greenlightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scroll static 0 static 3
+		alphashift 5 0.1 0.7
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		alphashift 0 .2 .2
+		envmap
+	}
+	{
+		map gfx/armormask.tga
+		alphamask
+	}
+	
+}
+models/weapons/v_bfg/skin
+{
+	{
+		map gfx/vaporbase.tga
+	}
+	{
+		map gfx/lightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 2 static 1
+		alphashift 10 0.1 0.6
+		nolightmap
+	}
+	{
+		map gfx/vapormask.tga
+		alphamask
+	}
+}
+models/items/haste/skin
+{
+	{
+		map gfx/hastebase.tga
+	}
+	{
+		map gfx/greenlightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 2 static 1
+		alphashift 10 0.1 0.6
+		nolightmap
+	}
+	{
+		map gfx/hastemask.tga
+		alphamask
+	}
+}
+models/items/quaddama/skin
+{
+	{
+		map gfx/quadbase.tga
+	}
+	{
+		map gfx/bluelightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scroll static 1 static 2
+		alphashift 10 0.1 0.6
+		nolightmap
+	}
+	{
+		map gfx/quadmask.tga
+		alphamask
+	}
+}
+models/items/sproing/skin
+{
+	{
+		map models/items/sproing/skin.tga
+	}
+	{
+		map gfx/greenlightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scroll static 0 static 3
+		alphashift 10 0.1 0.3
+		nolightmap
+	}
+}
+models/items/adrenaline/skin
+{
+	{
+		map gfx/adrenalbase.tga
+	}
+	{
+		map gfx/greenlightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll static 1 static 2
+		alphashift 10 0.1 0.6
+		nolightmap
+	}
+	{
+		map gfx/adrenalmask.tga
+		alphamask
+	}
+}
+vehicles/hover/flames
+{
+	{
+		map gfx/hoverfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static -3
+		alphashift 10 0.4 0.9
+		nolightmap
+	}
+}
+vehicles/hover/skin
+{
+	{
+		map vehicles/hover/skin.tga
+	}
+	{
+		map gfx/reflect.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.2 0.2
+		envmap
+	}
+	{
+		map vehicles/hover/skin.tga
+		alphamask
+	}
+}
+vehicles/deathball/deathball
+{
+	{
+		map vehicles/deathball/deathball.tga
+		nolightmap
+	}
+	{
+		map gfx/electrics3a.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 5 static 0
+		alphashift 10 0.4 0.9
+		nolightmap
+	}
+	{
+		map vehicles/deathball/deathmask.tga
+		alphamask
+	}
+}
