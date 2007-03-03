@@ -1,0 +1,2 @@
+rm -r releasei386
+rm -r debugi386

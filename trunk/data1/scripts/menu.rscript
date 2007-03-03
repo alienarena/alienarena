@@ -1,0 +1,66 @@
+pics/m_banner_main
+{
+	{
+		map pics/m_banner_main.tga
+	}
+	{
+		map gfx/m_banner_main_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 15 0.2 0.9
+	}
+}
+pics/m_main_game_sel
+{
+	{
+		map pics/m_main_game_sel.tga
+	}
+	{
+		map gfx/m_sel_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 20 0.1 0.6
+	}
+}
+pics/m_main_multiplayer_sel
+{
+	{
+		map pics/m_main_multiplayer_sel.tga
+	}
+	{
+		map gfx/m_sel_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 20 0.1 0.6
+	}
+}
+pics/m_main_options_sel
+{
+	{
+		map pics/m_main_options_sel.tga
+	}
+	{
+		map gfx/m_sel_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 20 0.1 0.6
+	}
+}
+pics/m_main_video_sel
+{
+	{
+		map pics/m_main_video_sel.tga
+	}
+	{
+		map gfx/m_sel_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 20 0.1 0.6
+	}
+}
+pics/m_main_quit_sel
+{
+	{
+		map pics/m_main_quit_sel.tga
+	}
+	{
+		map gfx/m_sel_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 20 0.1 0.6
+	}
+}

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+acmd=`uname -m`
+
+./crded.$acmd +set game arena +set port 27910

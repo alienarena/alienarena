@@ -1,0 +1,23 @@
+textures/martian/metalrings2
+{
+	{
+		map gfx/bluelightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll static 0 static 2
+		alphashift 5 0.05 0.3
+	}
+	
+}
+textures/arena4/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena5/light1
+{
+	{
+		lensflare
+	}
+}

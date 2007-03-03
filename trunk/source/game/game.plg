@@ -1,0 +1,86 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: game - Win32 Alien Arena--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\JOHNDI~1\LOCALS~1\Temp\RSPE71.tmp" with contents
+[
+/nologo /G5 /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "EXTREME" /D "ARENA" /Fp"game___Win32_Alien_Arena/game.pch" /YX /Fo"game___Win32_Alien_Arena/" /Fd"game___Win32_Alien_Arena/" /FD /c 
+"C:\CodeRed\source\game\g_cmds.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\JOHNDI~1\LOCALS~1\Temp\RSPE71.tmp" 
+Creating temporary file "C:\DOCUME~1\JOHNDI~1\LOCALS~1\Temp\RSPE72.tmp" with contents
+[
+kernel32.lib user32.lib winmm.lib kernel32.lib user32.lib winmm.lib /nologo /base:"0x20000000" /subsystem:windows /dll /incremental:no /pdb:"game___Win32_Alien_Arena/gamex86.pdb" /machine:I386 /def:".\game.def" /out:"c:/codered/arena/gamex86.dll" /implib:"game___Win32_Alien_Arena/gamex86.lib" 
+.\game___Win32_Alien_Arena\acebot_ai.obj
+.\game___Win32_Alien_Arena\acebot_cmds.obj
+.\game___Win32_Alien_Arena\acebot_compress.obj
+.\game___Win32_Alien_Arena\acebot_config.obj
+.\game___Win32_Alien_Arena\acebot_items.obj
+.\game___Win32_Alien_Arena\acebot_movement.obj
+.\game___Win32_Alien_Arena\acebot_nodes.obj
+.\game___Win32_Alien_Arena\acebot_spawn.obj
+.\game___Win32_Alien_Arena\c_cam.obj
+.\game___Win32_Alien_Arena\ctf.obj
+.\game___Win32_Alien_Arena\g_ai.obj
+.\game___Win32_Alien_Arena\g_chase.obj
+.\game___Win32_Alien_Arena\g_cmds.obj
+.\game___Win32_Alien_Arena\g_combat.obj
+.\game___Win32_Alien_Arena\g_func.obj
+.\game___Win32_Alien_Arena\g_items.obj
+.\game___Win32_Alien_Arena\g_main.obj
+.\game___Win32_Alien_Arena\g_misc.obj
+.\game___Win32_Alien_Arena\g_monster.obj
+.\game___Win32_Alien_Arena\g_phys.obj
+.\game___Win32_Alien_Arena\g_save.obj
+.\game___Win32_Alien_Arena\g_spawn.obj
+.\game___Win32_Alien_Arena\g_svcmds.obj
+.\game___Win32_Alien_Arena\g_target.obj
+.\game___Win32_Alien_Arena\g_trigger.obj
+.\game___Win32_Alien_Arena\g_utils.obj
+.\game___Win32_Alien_Arena\g_weapon.obj
+.\game___Win32_Alien_Arena\m_actor.obj
+.\game___Win32_Alien_Arena\M_bigmech.obj
+.\game___Win32_Alien_Arena\M_bigray.obj
+.\game___Win32_Alien_Arena\M_brainlet.obj
+.\game___Win32_Alien_Arena\M_emporer.obj
+.\game___Win32_Alien_Arena\m_flash.obj
+.\game___Win32_Alien_Arena\m_flyer.obj
+.\game___Win32_Alien_Arena\m_insane.obj
+.\game___Win32_Alien_Arena\M_mambass.obj
+.\game___Win32_Alien_Arena\M_martian.obj
+.\game___Win32_Alien_Arena\M_martian_naked.obj
+.\game___Win32_Alien_Arena\m_move.obj
+.\game___Win32_Alien_Arena\M_smallmech.obj
+.\game___Win32_Alien_Arena\M_spider.obj
+.\game___Win32_Alien_Arena\NPC_alien.obj
+.\game___Win32_Alien_Arena\NPC_astronaut.obj
+.\game___Win32_Alien_Arena\NPC_droid.obj
+.\game___Win32_Alien_Arena\NPC_soldier.obj
+.\game___Win32_Alien_Arena\NPC_surgeon.obj
+.\game___Win32_Alien_Arena\p_client.obj
+.\game___Win32_Alien_Arena\p_hud.obj
+.\game___Win32_Alien_Arena\p_light.obj
+.\game___Win32_Alien_Arena\p_trail.obj
+.\game___Win32_Alien_Arena\p_view.obj
+.\game___Win32_Alien_Arena\p_weapon.obj
+.\game___Win32_Alien_Arena\q_shared.obj
+.\game___Win32_Alien_Arena\vehicles.obj
+]
+Creating command line "link.exe @C:\DOCUME~1\JOHNDI~1\LOCALS~1\Temp\RSPE72.tmp"
+<h3>Output Window</h3>
+Compiling...
+g_cmds.c
+Linking...
+   Creating library game___Win32_Alien_Arena/gamex86.lib and object game___Win32_Alien_Arena/gamex86.exp
+
+
+
+<h3>Results</h3>
+gamex86.dll - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

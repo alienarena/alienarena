@@ -1,0 +1,6 @@
+#!/bin/sh
+  
+acmd=`uname -m`
+
+./crx.$acmd +set game arena $*
+exit $?
