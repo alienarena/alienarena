@@ -40,8 +40,6 @@ NULL_DIR=$(MOUNT_DIR)/null
 CTF_DIR=$(MOUNT_DIR)/ctf
 ARENA_DIR=$(GAME_DIR)
 
-EGCS=/usr/local/egcs-1.1.2/bin/gcc
-
 CC=gcc
 
 ifeq ($(ARCH),x86_64)
