@@ -1,5 +1,0 @@
-#!/bin/sh
-
-acmd=`uname -m`
-
-./crded.$acmd +set game arena
