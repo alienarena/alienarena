@@ -194,7 +194,7 @@ CODERED_OBJS = \
 	$(BUILDDIR)/client/sv_world.o \
 	\
 	$(BUILDDIR)/client/cd_linux.o \
-	$(BUILDDIR)/client/q_shlinux.o \
+	$(BUILDDIR)/client/q_shunix.o \
 	$(BUILDDIR)/client/vid_menu.o \
 	$(BUILDDIR)/client/vid_so.o \
 	$(BUILDDIR)/client/sys_linux.o \
@@ -360,7 +360,7 @@ $(BUILDDIR)/client/sv_world.o :   $(SERVER_DIR)/sv_world.c
 $(BUILDDIR)/client/cd_linux.o :   $(LINUX_DIR)/cd_linux.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/q_shlinux.o :  $(LINUX_DIR)/q_shlinux.c
+$(BUILDDIR)/client/q_shunix.o :  $(LINUX_DIR)/q_shunix.c
 	$(DO_O_CC)
 
 $(BUILDDIR)/client/vid_menu.o :   $(LINUX_DIR)/vid_menu.c
@@ -465,7 +465,7 @@ CRDED_OBJS = \
 	$(BUILDDIR)/ded/sv_user.o \
 	$(BUILDDIR)/ded/sv_world.o \
 	\
-	$(BUILDDIR)/ded/q_shlinux.o \
+	$(BUILDDIR)/ded/q_shunix.o \
 	$(BUILDDIR)/ded/sys_linux.o \
 	$(BUILDDIR)/ded/glob.o \
 	$(BUILDDIR)/ded/net_udp.o \
@@ -533,7 +533,7 @@ $(BUILDDIR)/ded/sv_user.o :    $(SERVER_DIR)/sv_user.c
 $(BUILDDIR)/ded/sv_world.o :   $(SERVER_DIR)/sv_world.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/q_shlinux.o :  $(LINUX_DIR)/q_shlinux.c
+$(BUILDDIR)/ded/q_shunix.o :  $(LINUX_DIR)/q_shunix.c
 	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/sys_linux.o :  $(LINUX_DIR)/sys_linux.c
