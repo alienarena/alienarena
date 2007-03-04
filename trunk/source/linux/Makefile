@@ -77,7 +77,7 @@ endif
 
 ARENA_CFLAGS=-DARENA
 
-DEBUG_CFLAGS=$(BASE_CFLAGS) -g
+DEBUG_CFLAGS=$(BASE_CFLAGS) -g -ggdb
 LDFLAGS=-ldl -lm
 SVGALDFLAGS=-lvga -lm
 XLDFLAGS=-L/usr/X11R6/$(_LIB) -lX11 -lXext -lXxf86dga
