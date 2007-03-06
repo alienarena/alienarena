@@ -1142,7 +1142,7 @@ void R_SetupGL (void)
 	// normal operation
 	if (!g_drawing_refl)
 	{
-	    MYgluPerspective (r_newrefdef.fov_y,  screenaspect,  4,  128000);
+		MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4 * 74 / r_newrefdef.fov_y, 15000);
 	}
 	// if this is a reflection, the aspect ratio is different
 	else
