@@ -185,11 +185,6 @@ image_t	*R_RegisterPic (char *name)
 	return gl;
 }
 
-/*
-=============
-R_RegisterPic
-=============
-*/
 image_t	*R_RegisterParticlePic (char *name)
 {
 	image_t *gl;
@@ -198,6 +193,22 @@ image_t	*R_RegisterParticlePic (char *name)
 	if (name[0] != '/' && name[0] != '\\')
 	{
 		Com_sprintf (fullname, sizeof(fullname), "particles/%s.tga", name);
+		gl = GL_FindImage (fullname, it_pic);
+	}
+	else
+		gl = GL_FindImage (name+1, it_pic);
+
+	return gl;
+}
+
+image_t	*R_RegisterGfxPic (char *name)
+{
+	image_t *gl;
+	char	fullname[MAX_QPATH];
+
+	if (name[0] != '/' && name[0] != '\\')
+	{
+		Com_sprintf (fullname, sizeof(fullname), "gfx/%s.tga", name);
 		gl = GL_FindImage (fullname, it_pic);
 	}
 	else
