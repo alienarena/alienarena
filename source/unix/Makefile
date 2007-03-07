@@ -20,7 +20,7 @@ else
 ifneq (,$(findstring x86_64,$(shell uname -m)))
 ARCH=x86_64
 else
-ARCH=i386
+ARCH=i686
 endif
 endif
 endif
