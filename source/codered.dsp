@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib glu32.lib client\mpglib.lib /nologo /subsystem:windows /machine:I386 /out:"c:/codered/crx.exe"
+# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib glu32.lib client\mpglib.lib /nologo /subsystem:windows /machine:I386 /out:"../crx.exe"
 # SUBTRACT LINK32 /incremental:yes /debug /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "codered - Win32 Debug"
@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /G5 /MTd /W3 /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
+# ADD CPP /nologo /G5 /MTd /W3 /GX /ZI /Od /D "INHOUSE" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "EXTREME" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -80,7 +80,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386
-# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib client\mpglib.lib /nologo /subsystem:windows /incremental:no /map /debug /machine:I386 /out:"z:/data1/codered.exe"
+# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib glu32.lib client\mpglib.lib /nologo /subsystem:windows /incremental:no /map /debug /machine:I386 /out:"c:/Alien Arena 2007/crx.exe"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ENDIF 
@@ -190,10 +190,6 @@ SOURCE=.\client\keys.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\game\m_flash.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\qcommon\mdfour.c
 # End Source File
 # Begin Source File
@@ -254,6 +250,10 @@ SOURCE=.\ref_gl\r_mapscript.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ref_gl\r_math.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ref_gl\r_mesh.c
 # End Source File
 # Begin Source File
@@ -275,6 +275,10 @@ SOURCE=.\ref_gl\r_script.c
 # Begin Source File
 
 SOURCE=.\ref_gl\r_surf.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ref_gl\r_vlights.c
 # End Source File
 # Begin Source File
 
@@ -423,6 +427,10 @@ SOURCE=.\ref_gl\qgl.h
 # Begin Source File
 
 SOURCE=.\client\qmenu.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ref_gl\r_image.h
 # End Source File
 # Begin Source File
 
