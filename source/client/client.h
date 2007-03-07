@@ -347,10 +347,8 @@ typedef struct cl_sustain
 void CL_ParticleSteamEffect2(cl_sustain_t *self);
 void CL_ParticleFireEffect2(cl_sustain_t *self);
 void CL_ParticleSmokeEffect2(cl_sustain_t *self);
-void CL_TeleporterParticles (entity_state_t *ent);
 void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count);
 void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
-void CL_ParticleEffect3 (vec3_t org, vec3_t dir, int color, int count);
 void CL_BulletSparks ( vec3_t org, vec3_t dir);
 void CL_SplashEffect ( vec3_t org, vec3_t dir, int color, int count);
 void CL_LaserSparks ( vec3_t org, vec3_t dir, int color, int count);
@@ -380,6 +378,7 @@ typedef struct particle_s
 	float		time;
 
 	vec3_t		org;
+	vec3_t		angle;
 	vec3_t		vel;
 	vec3_t		accel;
 	float		color;
@@ -407,41 +406,20 @@ typedef struct particle_s
 void CL_ClearEffects (void);
 void CL_ClearTEnts (void);
 void CL_BlasterTrail (vec3_t start, vec3_t end);
-void CL_ShockTrail (vec3_t start, vec3_t end);
-void CL_QuadTrail (vec3_t start, vec3_t end);
-void CL_RailTrail (vec3_t start, vec3_t end);
-void CL_LaserTrail (vec3_t start, vec3_t end);
-void CL_BlasterBeamTrail (vec3_t start, vec3_t end);
+void CL_BlasterBall (vec3_t start, vec3_t end);
+void CL_DisruptorBeam (vec3_t start, vec3_t end);
+void CL_LaserBeam (vec3_t start, vec3_t end);
+void CL_BlasterBeam (vec3_t start, vec3_t end);
 void CL_LaserBlast (vec3_t start, vec3_t end);
-void CL_LaserBlast2 (vec3_t start, vec3_t end);
-void CL_HeatBlast (vec3_t start, vec3_t end);
+void CL_RedBlasterBeam (vec3_t start, vec3_t end);
+void CL_VaporizerBeam (vec3_t start, vec3_t end);
 void CL_BubbleTrail (vec3_t start, vec3_t end);
-void CL_FlagTrail (vec3_t start, vec3_t end, float color);
 void CL_NewLightning (vec3_t start, vec3_t end);
 void CL_BlueTeamLight(vec3_t pos);
 void CL_RedTeamLight(vec3_t pos);
-
-// ========
-// PGM
-void CL_BlasterParticles2 (vec3_t org, vec3_t dir, unsigned int color);
-void CL_BlasterTrail2 (vec3_t start, vec3_t end);
 void CL_SmokeTrail (vec3_t start, vec3_t end, int colorStart, int colorRun, int spacing);
-void CL_FlameEffects (centity_t *ent, vec3_t origin);
-void CL_GenericParticleEffect (vec3_t org, vec3_t dir, int color, int count, int numcolors, int dirspread, float alphavel);
-void CL_BubbleTrail2 (vec3_t start, vec3_t end, int dist);
-void CL_Heatbeam (vec3_t start, vec3_t end);
 void CL_ParticleSteamEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude);
-void CL_TrackerTrail (vec3_t start, vec3_t end, int particleColor);
-void CL_Tracker_Explode(vec3_t origin);
-void CL_TagTrail (vec3_t start, vec3_t end, float color);
-void CL_ColorFlash (vec3_t pos, int ent, int intensity, float r, float g, float b);
-void CL_Tracker_Shell(vec3_t origin);
-void CL_MonsterPlasma_Shell(vec3_t origin);
-void CL_ColorExplosionParticles (vec3_t org, int color, int run);
-void CL_ParticleSmokeEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude);
 void CL_SayIcon(vec3_t org);
-// PGM
-// ========
 
 int CL_ParseEntityBits (unsigned *bits);
 void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bits);
@@ -577,7 +555,7 @@ int numitemicons;
 void V_Init (void);
 void V_RenderView( float stereo_separation );
 void V_AddEntity (entity_t *ent);
-void V_AddParticle (vec3_t org, int color, int type, int texnum, int blenddst, int blendsrc, float alpha, float scale);
+void V_AddParticle (vec3_t org, vec3_t angle, int color, int type, int texnum, int blenddst, int blendsrc, float alpha, float scale);
 void V_AddLight (vec3_t org, float intensity, float r, float g, float b);
 void V_AddTeamLight (vec3_t org, float intensity, float r, float g, float b, int team);
 void V_AddLightStyle (int style, float r, float g, float b);
@@ -606,7 +584,6 @@ void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old);
 void CL_ShipExhaust (vec3_t start, vec3_t end, centity_t *old);
 void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old);
 void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags);
-void CL_FlyEffect (centity_t *ent, vec3_t origin);
 void CL_BfgParticles (entity_t *ent);
 void CL_AddParticles (void);
 void CL_EntityEvent (entity_state_t *ent);

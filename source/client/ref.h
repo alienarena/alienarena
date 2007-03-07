@@ -95,6 +95,7 @@ typedef struct
 #define PARTICLE_SPARK				20
 #define PARTICLE_SAY_ICON			21
 #define PARTICLE_FLARE				22
+#define PARTICLE_BEAM				23
 
 #define RDF_BLOOM         4      //BLOOMS
 
@@ -175,6 +176,7 @@ typedef struct
 typedef struct
 {
 	vec3_t	origin;
+	vec3_t	angle;
 	int		color;
 	float	alpha;
 	int		type;

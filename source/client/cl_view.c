@@ -100,7 +100,7 @@ V_AddParticle
 
 =====================
 */
-void V_AddParticle (vec3_t org, int color, int type, int texnum, int blenddst, int blendsrc, float alpha, float scale)
+void V_AddParticle (vec3_t org, vec3_t angle, int color, int type, int texnum, int blenddst, int blendsrc, float alpha, float scale)
 {
 	particle_t	*p;
 
@@ -108,6 +108,7 @@ void V_AddParticle (vec3_t org, int color, int type, int texnum, int blenddst, i
 		return;
 	p = &r_particles[r_numparticles++];
 	VectorCopy (org, p->origin);
+	VectorCopy (angle, p->angle);
 	p->color = color;
 	p->alpha = alpha;
 	p->type = type;
