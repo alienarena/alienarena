@@ -2,5 +2,10 @@
   
 acmd=`uname -m`
 
+#todo, make game lib and ifdefs in code load i686 to avoid this
+if [[ $acmd = "i486" || $acmd = "i586" || $acmd = "i686" ]]; then
+        acmd="i386"
+fi
+
 ./crded.$acmd +set game arena $*
 exit $?
