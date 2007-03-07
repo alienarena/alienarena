@@ -2517,7 +2517,7 @@ void CL_AddParticles (void)
 		time2 = time*time;
 
 		for(i = 0; i < 3; i++) {
-			org[i] = p->org[i] + p->vel[i]*time + p->accel[0]*time2;
+			org[i] = p->org[i] + p->vel[i]*time + p->accel[i]*time2;
 			angle[i] = p->angle[i];
 		}
 
