@@ -61,6 +61,10 @@ image_t		*r_reflecttexture;
 image_t		*r_shottexture;
 image_t		*r_sayicontexture;
 image_t		*r_flaretexture;
+image_t		*r_beamtexture;
+image_t		*r_beam2texture;
+image_t		*r_beam3texture;
+
 cvar_t *rs_detail;
 // MH - detail textures begin
 cvar_t	*gl_detailtextures;
@@ -694,6 +698,7 @@ void R_DrawEntitiesOnList (void)
 ** GL_DrawParticles
 **
 */
+
 void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigned colortable[768])
 {
 	const gparticle_t *p;
@@ -704,6 +709,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 	int			    oldtype;
 	int				texnum, blenddst, blendsrc;
 	float			*corner0 = corner[0];
+	vec3_t move, delta;
 	
 	if ( !num_particles )
 		return;
@@ -763,8 +769,24 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			qglBegin ( GL_QUADS );
 		}
 
-		VectorScale ( right, p->dist, pright );
-		VectorScale ( up, p->dist, pup );
+		if(p->type != PARTICLE_BEAM) {
+			VectorScale ( right, p->dist, pright );
+			VectorScale ( up, p->dist, pup );
+		}
+		else {
+
+			VectorSubtract(p->origin, p->angle, move);
+			VectorNormalize(move);
+
+			VectorCopy(move, pup);
+			VectorSubtract(r_newrefdef.vieworg, p->angle, delta);
+			CrossProduct(pup, delta, pright);
+			VectorNormalize(pright);
+
+			VectorScale(pright, 5*scale, pright);
+			VectorScale(pup, 5*scale, pup);
+		}
+
 		VectorSet (corner[0], 
 			p->origin[0] + (pup[0] + pright[0])*(-0.5),
 			p->origin[1] + (pup[1] + pright[1])*(-0.5),
@@ -803,7 +825,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 R_SortParticles
 ===============
 */
-#define R_CopyParticle(a,b) (a.type=b.type,a.alpha=b.alpha,a.color=b.color,a.dist=b.dist,a.scale=b.scale, a.texnum=b.texnum, a.blenddst=b.blenddst, a.blendsrc=b.blendsrc, VectorCopy(b.origin,a.origin))
+#define R_CopyParticle(a,b) (a.type=b.type,a.alpha=b.alpha,a.color=b.color,a.dist=b.dist,a.scale=b.scale, a.texnum=b.texnum, a.blenddst=b.blenddst, a.blendsrc=b.blendsrc, VectorCopy(b.origin,a.origin), VectorCopy(b.angle, a.angle))
 
 static void R_SortParticles (gparticle_t *particles, int Li, int Ri)
 {
@@ -881,6 +903,7 @@ void R_DrawParticles (void)
 		gp->blenddst = p->blenddst;
 		gp->blendsrc = p->blendsrc;
 		VectorCopy ( p->origin, gp->origin );
+		VectorCopy ( p->angle, gp->angle );
 
 		gp++;
 		num_gparticles++;
@@ -1142,7 +1165,7 @@ void R_SetupGL (void)
 	// normal operation
 	if (!g_drawing_refl)
 	{
-		MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4 * 74 / r_newrefdef.fov_y, 15000);
+	    MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4 * 74 / r_newrefdef.fov_y, 15000); //Phenax
 	}
 	// if this is a reflection, the aspect ratio is different
 	else

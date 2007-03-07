@@ -236,6 +236,9 @@ void R_InitParticleTexture (void)
 	r_shottexture = R_RegisterParticlePic("dflash");
 	r_sayicontexture = R_RegisterParticlePic("sayicon");
 	r_flaretexture = R_RegisterParticlePic("flare");
+	r_beamtexture = R_RegisterGfxPic("greenlightning");
+	r_beam2texture = R_RegisterGfxPic("greenline");
+	r_beam3texture = R_RegisterGfxPic("electrics3d");
 	if (!r_particletexture) {                                 //c14 add this line
 		r_particletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }                                                         //c14 add this line  
