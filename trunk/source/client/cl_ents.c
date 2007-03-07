@@ -491,7 +491,6 @@ void CL_FireEntityEvents (frame_t *frame)
 
 		// EF_TELEPORTER acts like an event, but is not cleared each frame
 		if (s1->effects & EF_TELEPORTER)
-			//CL_TeleporterParticles (s1);
 			CL_BigTeleportParticles(s1->origin);
 	}
 }
@@ -1132,10 +1131,6 @@ void CL_AddPacketEntities (frame_t *frame)
 			{
 				CL_DiminishingTrail (cent->lerp_origin, ent.origin, cent, effects);
 			}
-			else if (effects & EF_FLIES)
-			{
-				CL_FlyEffect (cent, ent.origin);
-			}
 			else if (effects & EF_BFG)
 			{
 				static int bfg_lightramp[6] = {300, 400, 600, 300, 150, 75};
@@ -1190,7 +1185,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		
 			else if (effects & EF_PLASMA)
 			{
-				CL_ShockTrail (cent->lerp_origin, ent.origin);
+				CL_BlasterBall (cent->lerp_origin, ent.origin);
 				V_AddLight (ent.origin, 200, 0, 1, 1);
 			}
 		}

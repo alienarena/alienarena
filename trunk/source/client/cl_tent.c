@@ -760,7 +760,7 @@ void CL_ParseTEnt (void)
 		else {
 			MSG_ReadPos (&net_message, pos);
 			MSG_ReadPos (&net_message, pos2);
-			CL_LaserTrail (pos, pos2);
+			CL_LaserBeam (pos, pos2);
 		}
 		break;
 
@@ -816,7 +816,7 @@ void CL_ParseTEnt (void)
 		else {
 			MSG_ReadPos (&net_message, pos);
 			MSG_ReadPos (&net_message, pos2);
-			CL_RailTrail (pos, pos2);
+			CL_DisruptorBeam (pos, pos2);
 		}
 		S_StartSound (pos, 0, 0, cl_sfx_railg, 1, ATTN_NONE, 0);
 		break;
@@ -886,7 +886,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 
-		CL_HeatBlast (pos, pos2);
+		CL_RedBlasterBeam (pos, pos2);
 
 		break;
 
@@ -905,7 +905,7 @@ void CL_ParseTEnt (void)
 	case TE_HEATBEAM:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
-		CL_Heatbeam (pos, pos2);
+		CL_VaporizerBeam (pos, pos2);
 		break;
 
 	case TE_STEAM:
@@ -931,7 +931,7 @@ void CL_ParseTEnt (void)
 	case TE_LEADERBLASTER:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
-		CL_LaserBlast2 (pos, pos2);
+		CL_RedBlasterBeam (pos, pos2);
 		S_StartSound (pos, 0, 0, S_RegisterSound ("weapons/biglaser.wav"), 1, ATTN_NONE, 0);
 		break;
 
@@ -1002,7 +1002,7 @@ void CL_ParseTEnt (void)
 		else {
 			MSG_ReadPos (&net_message, pos);
 			MSG_ReadPos (&net_message, pos2);
-			CL_BlasterBeamTrail (pos, pos2);
+			CL_BlasterBeam (pos, pos2);
 		}
 		break;
 
