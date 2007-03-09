@@ -2346,32 +2346,9 @@ int		m_num_servers;
 
 #define	NO_SERVER_STRING	"<no server>"
 
-// user readable information
-static char local_server_names[MAX_LOCAL_SERVERS][49];
 static char local_server_info[32][80];
 static char local_server_data[5][26];
-
-// network address
-static netadr_t local_server_netadr[MAX_LOCAL_SERVERS];
-
-void M_AddToServerList (netadr_t adr, char *info)
-{
-	int		i;
-
-	if (m_num_servers == MAX_LOCAL_SERVERS)
-		return;
-	while ( *info == ' ' )
-		info++;
-
-	// ignore if duplicated
-	for (i=0 ; i<m_num_servers ; i++)
-		if (!strcmp(info, local_server_names[i]))
-			return;
-
-	local_server_netadr[m_num_servers] = adr;
-	strncpy (local_server_names[m_num_servers], info, sizeof(local_server_names[0])-1);
-	m_num_servers++;
-}
+unsigned int starttime;
 
 char *GetLine (char **contents, int *len)
 {
@@ -2404,7 +2381,28 @@ char *GetLine (char **contents, int *len)
 	strcpy (ret, line);
 	return ret;
 }
-void M_AddStatusList (char *status_string)
+
+typedef struct _SERVERDATA {
+
+	char szHostName[64];
+	char szMapName[64];
+	char szAdmin[64];
+	char szVersion[32];
+	char szWebsite[64];
+	char maxClients[32];
+	char fraglimit[32];
+	char timelimit[32];
+	char playerInfo[64][80];
+	int players;
+	int ping;
+	netadr_t local_server_netadr;
+	char serverInfo[256];
+
+} SERVERDATA;
+
+SERVERDATA mservers[MAX_LOCAL_SERVERS];
+
+void M_AddToServerList (netadr_t adr, char *status_string)
 {
 	char *rLine;
 	char *token;
@@ -2413,11 +2411,17 @@ void M_AddStatusList (char *status_string)
 	int players = 0;
 	int result;
 	char playername[16];
-	int score, ping;
+	int score, ping, i;
 
 	//if by some chance this gets called without the menu being up, return
 	if(cls.key_dest != key_menu)
 		return;
+
+	if (m_num_servers == MAX_LOCAL_SERVERS)
+		return;
+
+	mservers[m_num_servers].local_server_netadr = adr;
+	mservers[m_num_servers].ping = cls.realtime - starttime;
 
 	//parse it
 
@@ -2426,27 +2430,34 @@ void M_AddStatusList (char *status_string)
 	//server info - we may revisit this 
 	rLine = GetLine (&status_string, &result);
 	
-	//clear the data first
-	Com_sprintf(local_server_data[0], sizeof(local_server_data[0]), "Admin:");
-	Com_sprintf(local_server_data[1], sizeof(local_server_data[1]), "Website:");
-	Com_sprintf(local_server_data[2], sizeof(local_server_data[2]), "Fraglimit:");
-	Com_sprintf(local_server_data[3], sizeof(local_server_data[3]), "Timelimit:");
-	Com_sprintf(local_server_data[4], sizeof(local_server_data[4]), "Version:");
+	//set the displayed default data first
+	Com_sprintf(mservers[m_num_servers].szAdmin, sizeof(mservers[m_num_servers].szAdmin), "Admin:");
+	Com_sprintf(mservers[m_num_servers].szWebsite, sizeof(mservers[m_num_servers].szWebsite), "Website:");
+	Com_sprintf(mservers[m_num_servers].fraglimit, sizeof(mservers[m_num_servers].fraglimit), "Fraglimit:");
+	Com_sprintf(mservers[m_num_servers].timelimit, sizeof(mservers[m_num_servers].timelimit), "Timelimit:");
+	Com_sprintf(mservers[m_num_servers].szVersion, sizeof(mservers[m_num_servers].szVersion), "Version:");
+	
 	/* Establish string and get the first token: */
 	token = strtok( rLine, seps );
 	while( token != NULL ) {
 		/* While there are tokens in "string" */
 		if (!_stricmp (lasttoken, "admin"))
-			Com_sprintf(local_server_data[0], sizeof(local_server_data[0]), "Admin: %s", token);
+			Com_sprintf(mservers[m_num_servers].szAdmin, sizeof(mservers[m_num_servers].szAdmin), "Admin: %s", token);
 		else if (!_stricmp (lasttoken, "website"))
-			Com_sprintf(local_server_data[1], sizeof(local_server_data[1]), "%s", token);
+			Com_sprintf(mservers[m_num_servers].szWebsite, sizeof(mservers[m_num_servers].szWebsite), "%s", token);
 		else if (!_stricmp (lasttoken, "fraglimit"))
-			Com_sprintf(local_server_data[2], sizeof(local_server_data[2]), "Fraglimit: %s", token);
+			Com_sprintf(mservers[m_num_servers].fraglimit, sizeof(mservers[m_num_servers].fraglimit), "Fraglimit: %s", token);
 		else if (!_stricmp (lasttoken, "timelimit"))
-			Com_sprintf(local_server_data[3], sizeof(local_server_data[3]), "Timelimit: %s", token);
+			Com_sprintf(mservers[m_num_servers].timelimit, sizeof(mservers[m_num_servers].timelimit), "Timelimit: %s", token);
 		else if (!_stricmp (lasttoken, "version"))
-			Com_sprintf(local_server_data[4], sizeof(local_server_data[4]), "%s", token);
-
+			Com_sprintf(mservers[m_num_servers].szVersion, sizeof(mservers[m_num_servers].szVersion), "%s", token);
+		else if (!_stricmp (lasttoken, "mapname"))
+			Com_sprintf(mservers[m_num_servers].szMapName, sizeof(mservers[m_num_servers].szMapName), "%s", token);
+		else if (!_stricmp (lasttoken, "hostname"))
+			Com_sprintf(mservers[m_num_servers].szHostName, sizeof(mservers[m_num_servers].szHostName), "%s", token);
+		else if (!_stricmp (lasttoken, "maxclients"))
+			Com_sprintf(mservers[m_num_servers].maxClients, sizeof(mservers[m_num_servers].maxClients), "%s", token);
+		
 		/* Get next token: */
 		strcpy (lasttoken, token);
 		token = strtok( NULL, seps );
@@ -2473,12 +2484,29 @@ void M_AddStatusList (char *status_string)
 		
 		free (rLine);
 	
-		Com_sprintf(local_server_info[players], sizeof(local_server_info[players]), "%s    %4i    %4i\n", playername, score, ping);
+		Com_sprintf(mservers[m_num_servers].playerInfo[players], sizeof(mservers[m_num_servers].playerInfo[players]), "%s    %4i    %4i\n", playername, score, ping);
 	
 		players++;
 	}
-	Con_Clear_f();
+	mservers[m_num_servers].players = players;
 
+	//build the string for the server (hostname - address - mapname - players/maxClients)
+	//pad the strings - gotta do this for both maps and hostname
+	for(i=0; i<20; i++) {
+		if(!mservers[m_num_servers].szHostName[i])
+			mservers[m_num_servers].szHostName[i] = 32;
+	}
+	mservers[m_num_servers].szHostName[20] = 0;
+	for(i=0; i<12; i++) {
+		if(!mservers[m_num_servers].szMapName[i])
+			mservers[m_num_servers].szMapName[i] = 32;
+	}
+	mservers[m_num_servers].szMapName[12] = 0;
+	Com_sprintf(mservers[m_num_servers].serverInfo, sizeof(mservers[m_num_servers].serverInfo), "%s  %12s  %2i/%2s  %4i", mservers[m_num_servers].szHostName, 
+		mservers[m_num_servers].szMapName, players, mservers[m_num_servers].maxClients, mservers[m_num_servers].ping);
+
+	Con_Clear_f(); 
+	m_num_servers++;
 }
 void MoveUp ( void *self)
 {
@@ -2514,7 +2542,7 @@ void JoinServerFunc( void *self )
 
 	index = ( menuaction_s * ) self - s_joinserver_server_actions;
 
-	if ( Q_stricmp( local_server_names[index+svridx], NO_SERVER_STRING ) == 0 )
+	if ( Q_stricmp( mservers[index+svridx].szHostName, NO_SERVER_STRING ) == 0 )
 		return;
 
 	if (index >= m_num_servers)
@@ -2522,20 +2550,26 @@ void JoinServerFunc( void *self )
 
 	if(cursor.buttonclicks[MOUSEBUTTON1] != 2)
 	{
-		//request the server status
 
 		//initialize 
 		for (i=0 ; i<32 ; i++) 		
 			local_server_info[i][0] = '\0';
 		
-		//request a status string
-		Netchan_OutOfBandPrint (NS_CLIENT, local_server_netadr[index+svridx], va("status %i", PROTOCOL_VERSION));
-		Con_Clear_f();
+	    //set strings for output
+		Com_sprintf(local_server_data[0], sizeof(local_server_data[0]), mservers[index+svridx].szAdmin);
+		Com_sprintf(local_server_data[1], sizeof(local_server_data[1]), mservers[index+svridx].szWebsite);
+		Com_sprintf(local_server_data[2], sizeof(local_server_data[2]), mservers[index+svridx].fraglimit);
+		Com_sprintf(local_server_data[3], sizeof(local_server_data[3]), mservers[index+svridx].timelimit);
+		Com_sprintf(local_server_data[4], sizeof(local_server_data[4]), mservers[index+svridx].szVersion);
+	
+		//players
+		for(i=0; i<mservers[index+svridx].players; i++) 
+			Com_sprintf(local_server_info[i], sizeof(local_server_info[i]), mservers[index+svridx].playerInfo[i]);
 
 		return;
 	}
 
-	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (local_server_netadr[index+svridx]));
+	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[index+svridx].local_server_netadr));
 	Cbuf_AddText (buffer);
 	M_ForceMenuOff ();
 }
@@ -2557,7 +2591,7 @@ void SearchLocalGames( void )
 	playeridx = 0;
 	m_num_servers = 0;
 	for (i=0 ; i<MAX_LOCAL_SERVERS ; i++)
-		strcpy (local_server_names[i], NO_SERVER_STRING);
+		strcpy (mservers[i].serverInfo, NO_SERVER_STRING);
 
 	M_DrawTextBox( 8, 120 - 48, 36, 3 );
 	M_Print( 16 + 16, 120 - 48 + 8,  "Contacting master server, this" );
@@ -2566,6 +2600,9 @@ void SearchLocalGames( void )
 
 	// the text box won't show up unless we do a buffer swap
 	R_EndFrame();
+
+	//set the start time for pings
+	starttime = cls.realtime;
 
 	// send out info packets
 	CL_PingServers_f();
@@ -2602,8 +2639,8 @@ void JoinServer_MenuInit( void )
 	s_joinserver_search_action.generic.statusbar = "search for servers";
 
 	s_joinserver_server_title.generic.type = MTYPE_SEPARATOR;
-	s_joinserver_server_title.generic.name = "connect to...";
-	s_joinserver_server_title.generic.x    = 80;
+	s_joinserver_server_title.generic.name = "Server                Map         Players  Ping";
+	s_joinserver_server_title.generic.x    = 350;
 	s_joinserver_server_title.generic.y	   = 105;
 
 	s_joinserver_moveup.generic.type	= MTYPE_ACTION;
@@ -2683,7 +2720,7 @@ void JoinServer_MenuDraw(void)
 	for ( i = 0; i < 16; i++ )
 	{
 		s_joinserver_server_actions[i].generic.type	= MTYPE_ACTION;
-		s_joinserver_server_actions[i].generic.name	= local_server_names[i+svridx];
+		s_joinserver_server_actions[i].generic.name	= mservers[i+svridx].serverInfo;
 		s_joinserver_server_actions[i].generic.flags	= QMF_LEFT_JUSTIFY;
 		s_joinserver_server_actions[i].generic.x		= 6;
 		s_joinserver_server_actions[i].generic.y		= 115 + i*10;

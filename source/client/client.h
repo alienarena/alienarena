@@ -596,8 +596,7 @@ void M_Keydown (int key);
 void M_Draw (void);
 void M_Menu_Main_f (void);
 void M_ForceMenuOff (void);
-void M_AddToServerList (netadr_t adr, char *info);
-void M_AddStatusList (char *statusstring);
+void M_AddToServerList (netadr_t adr, char *status_string);
 //
 // cl_inv.c
 //
