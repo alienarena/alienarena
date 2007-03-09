@@ -42,6 +42,7 @@ static cvar_t *gl_mode;
 static cvar_t *gl_driver;
 static cvar_t *gl_picmip;
 static cvar_t *gl_finish;
+static cvar_t *gl_swapinterval;
 static cvar_t *gl_vlights;
 static cvar_t *gl_texres;
 static cvar_t *r_bloom;
@@ -74,6 +75,7 @@ static menuslider_s		s_screensize_slider;
 static menuslider_s		s_brightness_slider;
 static menulist_s  		s_fs_box;
 static menulist_s  		s_finish_box;
+static menulist_s		s_vsync_box;
 static menuaction_s		s_apply_action;
 static menuaction_s		s_defaults_action;
 static menulist_s		s_texres_box;
@@ -158,6 +160,7 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "gl_picmip", 3 - s_tq_slider.curvalue );
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
 	Cvar_SetValue( "gl_finish", s_finish_box.curvalue );
+	Cvar_SetValue( "gl_swapinterval", s_vsync_box.curvalue);
 	if(s_mode_list.curvalue == 0) {
 		Cvar_SetValue( "gl_mode", -1);
 		//set custom width and height only in this case
@@ -294,6 +297,8 @@ void VID_MenuInit( void )
 		sw_mode = Cvar_Get( "sw_mode", "0", 0 );
 	if ( !gl_finish )
 		gl_finish = Cvar_Get( "gl_finish", "0", CVAR_ARCHIVE );
+	if ( !gl_swapinterval )
+                gl_swapinterval = Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE );
 	if ( !gl_texres )
 		gl_texres = Cvar_Get( "gl_texres", "1", CVAR_ARCHIVE );
 	if ( !gl_reflection)
@@ -468,20 +473,28 @@ void VID_MenuInit( void )
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
 	s_finish_box.generic.x	= 0;
 	s_finish_box.generic.y	= 190;
-	s_finish_box.generic.name	= "sync every frame";
+	s_finish_box.generic.name	= "draw frame completely";
 	s_finish_box.curvalue = gl_finish->value;
 	s_finish_box.itemnames = yesno_names;
+
+        s_vsync_box.generic.type = MTYPE_SPINCONTROL;
+        s_vsync_box.generic.x  = 0;
+        s_vsync_box.generic.y  = 200;
+        s_vsync_box.generic.name       = "vertical sync";
+        s_vsync_box.curvalue = gl_swapinterval->value;
+        s_vsync_box.itemnames = onoff_names;
+
 
 	s_defaults_action.generic.type = MTYPE_ACTION;
 	s_defaults_action.generic.name = "reset to defaults";
 	s_defaults_action.generic.x    = 0;
-	s_defaults_action.generic.y    = 210;
+	s_defaults_action.generic.y    = 220;
 	s_defaults_action.generic.callback = ResetDefaults;
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
 	s_apply_action.generic.x    = 0;
-	s_apply_action.generic.y    = 220;
+	s_apply_action.generic.y    = 230;
 	s_apply_action.generic.callback = ApplyChanges;
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_ref_list);
@@ -501,6 +514,7 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_overbright_slider );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_tq_slider );	
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_finish_box );
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_vsync_box );
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_defaults_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_apply_action);
