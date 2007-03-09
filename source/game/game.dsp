@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib winmm.lib kernel32.lib user32.lib winmm.lib /nologo /base:"0x20000000" /subsystem:windows /dll /machine:I386 /out:"c:/codered/data1/gamex86.dll"
 # SUBTRACT BASE LINK32 /incremental:yes /debug
-# ADD LINK32 kernel32.lib user32.lib winmm.lib kernel32.lib user32.lib winmm.lib /nologo /base:"0x20000000" /subsystem:windows /dll /machine:I386 /out:"c:/Alien Arena 2007/arena/gamex86.dll"
+# ADD LINK32 kernel32.lib user32.lib winmm.lib kernel32.lib user32.lib winmm.lib /nologo /base:"0x20000000" /subsystem:windows /dll /machine:I386 /out:"../../arena/gamex86.dll"
 # SUBTRACT LINK32 /incremental:yes /debug
 
 !ENDIF 
