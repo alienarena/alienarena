@@ -447,7 +447,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		return;
 // ACEBOT_END
 
-	if (ctf->value) {
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) {
 		CTFScoreboardMessage (ent, killer);
 		return;
 	}

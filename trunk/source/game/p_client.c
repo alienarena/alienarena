@@ -1790,7 +1790,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 		//bring up scoreboard if not on a team
 		if(ent->dmteam == NO_TEAM) {
 			ent->client->showscores = true;	
-			if(ctf->value)
+			if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value)
 				CTFScoreboardMessage (ent, NULL);
 			else 
 				DeathmatchScoreboardMessage (ent, NULL);
