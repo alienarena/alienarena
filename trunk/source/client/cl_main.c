@@ -1518,6 +1518,7 @@ void CL_InitLocal (void)
 //
 	cl_stereo_separation = Cvar_Get( "cl_stereo_separation", "0.4", CVAR_ARCHIVE );
 	cl_stereo = Cvar_Get( "cl_stereo", "0", 0 );
+	backround_music = Cvar_Get("backround_music", "0", CVAR_ARCHIVE);
 
 	cl_add_blend = Cvar_Get ("cl_blend", "1", 0);
 	cl_add_lights = Cvar_Get ("cl_lights", "1", 0);
@@ -1529,7 +1530,7 @@ void CL_InitLocal (void)
 	cl_autoskins = Cvar_Get ("cl_autoskins", "0", 0);
 	cl_predict = Cvar_Get ("cl_predict", "1", 0);
 //	cl_minfps = Cvar_Get ("cl_minfps", "5", 0);
-	cl_maxfps = Cvar_Get ("cl_maxfps", "90", 0);
+	cl_maxfps = Cvar_Get ("cl_maxfps", "90", CVAR_ARCHIVE);
 	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE);
 	cl_nobrainlets = Cvar_Get ("cl_nobrainlets", "0", CVAR_ARCHIVE);
 	enginemode = Cvar_Get ("enginemode", "0", CVAR_ARCHIVE);
