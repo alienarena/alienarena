@@ -835,22 +835,6 @@ void CL_Reconnect_f (void)
 =================
 CL_ParseStatusMessage
 
-Handle a reply from a ping
-=================
-*/
-void CL_ParseStatusMessage (void)
-{
-	char	*s;
-
-	s = MSG_ReadString(&net_message);
-
-	Com_Printf ("%s\n", s);
-	M_AddToServerList (net_from, s);
-}
-/*
-=================
-CL_ParseStatusMessage
-
 Handle a reply from a status request
 =================
 */
@@ -861,7 +845,7 @@ void CL_ParseFullStatusMessage (void)
 	s = MSG_ReadString(&net_message);
 
 	Com_Printf ("TESTING!!!!%s\n", s);
-	M_AddStatusList (s);
+	M_AddToServerList (net_from, s);
 }
 
 /*
@@ -947,7 +931,7 @@ void CL_ParseGetServersResponse()
 		if (!adr.port) {
 			adr.port = BigShort(PORT_SERVER);
 		}
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("status %i", PROTOCOL_VERSION));
 
 		if (++numServers == 64)
 			break;
@@ -981,7 +965,7 @@ void CL_PingServers_f (void)
 	{
 		adr.type = NA_BROADCAST;
 		adr.port = BigShort(PORT_SERVER);
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("status %i", PROTOCOL_VERSION));
 
 	}
 	noipx = Cvar_Get ("noipx", "0", CVAR_NOSET);
@@ -989,7 +973,7 @@ void CL_PingServers_f (void)
 	{
 		adr.type = NA_BROADCAST_IPX;
 		adr.port = BigShort(PORT_SERVER);
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("status %i", PROTOCOL_VERSION));
 	}
 
 	// send a packet to each address book entry
@@ -1009,7 +993,7 @@ void CL_PingServers_f (void)
 		if (!adr.port)
 			adr.port = BigShort(PORT_SERVER);
 
-		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("status %i", PROTOCOL_VERSION));
 		
 	}	
 
@@ -1084,13 +1068,6 @@ void CL_ConnectionlessPacket (void)
 		return;
 	}
 
-	// server responding to a status broadcast
-	if (!strcmp(c, "info"))
-	{
-		CL_ParseStatusMessage ();
-		return;
-	}
-
 	// remote command from gui front end
 	if (!strcmp(c, "cmd"))
 	{
@@ -1110,7 +1087,7 @@ void CL_ConnectionlessPacket (void)
 	{
 		s = MSG_ReadString (&net_message);
 		Com_Printf ("%s", s);
-		M_AddStatusList (s); 
+		M_AddToServerList (net_from, s); //add net_from so we have the addy
 		return;
 	}
 
