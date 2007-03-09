@@ -1992,7 +1992,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 			strcpy(playerskin, " ");
 			strcpy(playermodel, " ");
 			j = k = 0;
-			for(i = 0; i <= strlen(s); i++)
+			for(i = 0; i <= strlen(s) && i < MAX_OSPATH; i++)
 			{
 				if(copychar){ 
 					playerskin[k] = s[i];
@@ -2154,7 +2154,7 @@ void ClientChangeSkin (edict_t *ent)
 	strcpy(playerskin, " ");
 	strcpy(playermodel, " ");
 	j = k = 0;
-	for(i = 0; i <= strlen(s); i++)
+	for(i = 0; i <= strlen(s) && i < MAX_OSPATH; i++)
 	{
 		if(copychar){ 
 			playerskin[k] = s[i];
