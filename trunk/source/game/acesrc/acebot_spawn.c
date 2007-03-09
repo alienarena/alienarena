@@ -647,7 +647,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *team)
 		strcpy(playerskin, " ");
 		strcpy(playermodel, " ");
 		j = k = 0;
-		for(i = 0; i <= strlen(skin); i++)
+		for(i = 0; i <= strlen(skin) && i < MAX_INFO_STRING; i++)
 		{
 			if(copychar){ 
 				playerskin[k] = skin[i];
