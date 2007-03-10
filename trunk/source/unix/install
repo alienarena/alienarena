@@ -1,0 +1,4 @@
+mv release*/cr* ../../
+cp release*/game*.so ../../data1
+mv release*/game*.so ../../arena
+rm -rf release*
