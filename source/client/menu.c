@@ -2346,8 +2346,8 @@ int		m_num_servers;
 
 #define	NO_SERVER_STRING	"<no server>"
 
-static char local_server_info[32][80];
-static char local_server_data[5][26];
+static char local_server_info[256][256];
+static char local_server_data[5][64];
 unsigned int starttime;
 
 char *GetLine (char **contents, int *len)
@@ -2387,7 +2387,7 @@ typedef struct _SERVERDATA {
 	char szHostName[64];
 	char szMapName[64];
 	char szAdmin[64];
-	char szVersion[32];
+	char szVersion[64];
 	char szWebsite[64];
 	char maxClients[32];
 	char fraglimit[32];
@@ -2441,7 +2441,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	token = strtok( rLine, seps );
 	while( token != NULL ) {
 		/* While there are tokens in "string" */
-		if (!_stricmp (lasttoken, "admin"))
+		if (!_stricmp (lasttoken, "admin")) 
 			Com_sprintf(mservers[m_num_servers].szAdmin, sizeof(mservers[m_num_servers].szAdmin), "Admin: %s", token);
 		else if (!_stricmp (lasttoken, "website"))
 			Com_sprintf(mservers[m_num_servers].szWebsite, sizeof(mservers[m_num_servers].szWebsite), "%s", token);
@@ -2457,7 +2457,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 			Com_sprintf(mservers[m_num_servers].szHostName, sizeof(mservers[m_num_servers].szHostName), "%s", token);
 		else if (!_stricmp (lasttoken, "maxclients"))
 			Com_sprintf(mservers[m_num_servers].maxClients, sizeof(mservers[m_num_servers].maxClients), "%s", token);
-		
+	
 		/* Get next token: */
 		strcpy (lasttoken, token);
 		token = strtok( NULL, seps );
@@ -2556,6 +2556,9 @@ void JoinServerFunc( void *self )
 			local_server_info[i][0] = '\0';
 		
 	    //set strings for output
+		mservers[index+svridx].szAdmin[24] = 0; //trim some potential box offenders
+		mservers[index+svridx].szWebsite[24] = 0;
+		mservers[index+svridx].szVersion[24] = 0;
 		Com_sprintf(local_server_data[0], sizeof(local_server_data[0]), mservers[index+svridx].szAdmin);
 		Com_sprintf(local_server_data[1], sizeof(local_server_data[1]), mservers[index+svridx].szWebsite);
 		Com_sprintf(local_server_data[2], sizeof(local_server_data[2]), mservers[index+svridx].fraglimit);
