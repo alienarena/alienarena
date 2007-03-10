@@ -885,4 +885,9 @@ clean2:
 	$(ARENA_OBJS) \
 	$(REF_GL_OBJS) \
 	$(REF_GL_GLX_OBJS) 
-
+#TODO: Make install use variables assigned here instead of wildcards
+install:
+	mv release*/cr* ../../
+	cp release*/game*.so ../../data1
+	mv release*/game*.so ../../arena 
+	rm -rf release*
