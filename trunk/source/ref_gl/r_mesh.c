@@ -937,8 +937,11 @@ void R_DrawAliasModel (entity_t *e)
 			qglScalef(-1, 1, 1); 
 			qglCullFace(GL_BACK); 
 		} 
-  
-		MYgluPerspective(min(r_newrefdef.fov_y, 75.0f), (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f); 
+		if(r_newrefdef.fov_y < 75.0f)
+			MYgluPerspective(r_newrefdef.fov_y, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f); 
+		else
+			MYgluPerspective(75.0f, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f); 
+	
 		qglMatrixMode(GL_MODELVIEW); 
     }
 
