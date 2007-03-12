@@ -924,19 +924,23 @@ void R_DrawAliasModel (entity_t *e)
 	if (currententity->flags & RF_DEPTHHACK) // hack the depth range to prevent view model from poking into walls
 		qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
 
-	if ( ( currententity->flags & RF_WEAPONMODEL ) && ( r_lefthand->value == 1.0F ) )
-	{
-		extern void MYgluPerspective( GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar );
-
-		qglMatrixMode( GL_PROJECTION );
-		qglPushMatrix();
-		qglLoadIdentity();
-		qglScalef( -1, 1, 1 );
-	    MYgluPerspective( r_newrefdef.fov_y, ( float ) r_newrefdef.width / r_newrefdef.height,  4,  4096);
-		qglMatrixMode( GL_MODELVIEW );
-
-		qglCullFace( GL_BACK );
-	}
+	if ((currententity->flags & RF_WEAPONMODEL) && r_lefthand->value != 2.0F) 
+    { 
+		extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar); 
+  
+		qglMatrixMode(GL_PROJECTION); 
+		qglPushMatrix(); 
+		qglLoadIdentity(); 
+  
+		if (r_lefthand->value == 1.0F) 
+		{ 
+			qglScalef(-1, 1, 1); 
+			qglCullFace(GL_BACK); 
+		} 
+  
+		MYgluPerspective(min(r_newrefdef.fov_y, 75.0f), (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f); 
+		qglMatrixMode(GL_MODELVIEW); 
+    }
 
     qglPushMatrix ();
 	e->angles[PITCH] = -e->angles[PITCH];	// sigh.
@@ -1028,7 +1032,7 @@ void R_DrawAliasModel (entity_t *e)
 
 	qglPopMatrix ();
 
-	if ( ( currententity->flags & RF_WEAPONMODEL ) && ( r_lefthand->value == 1.0F ) )
+	if ( ( currententity->flags & RF_WEAPONMODEL ) && ( r_lefthand->value != 2.0F ) )
 	{
 		qglMatrixMode( GL_PROJECTION );
 		qglPopMatrix();
