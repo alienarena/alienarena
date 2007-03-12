@@ -74,7 +74,8 @@ image_t	*r_bloomdownsamplingtexture;
 
 static int		r_screendownsamplingtexture_size;
 static int		screen_texture_width, screen_texture_height;
-static int		r_screenbackuptexture_size;
+static int		r_screenbackuptexture_width, r_screenbackuptexture_height;
+
 
 //current refdef size:
 static int	curView_x;
@@ -132,7 +133,8 @@ void R_Bloom_InitBackUpTexture( int width, int height )
 	data = malloc( width * height * 4 );
 	memset( data, 0, width * height * 4 );
 
-	r_screenbackuptexture_size = width;
+	r_screenbackuptexture_width = width;
+	r_screenbackuptexture_height = height;
 
 	r_bloombackuptexture = GL_LoadPic( "***r_bloombackuptexture***", (byte *)data, width, height, it_pic, 3 );
 	
@@ -210,7 +212,7 @@ void R_Bloom_InitTextures( void )
 	free ( data );
 
 	//validate bloom size and init the bloom effect texture
-	R_Bloom_InitEffectTexture ();
+	R_Bloom_InitEffectTexture();
 
 	//if screensize is more than 2x the bloom effect texture, set up for stepped downsampling
 	r_bloomdownsamplingtexture = NULL;
@@ -479,9 +481,9 @@ void R_Bloom_DownsampleView( void )
 	//stepped downsample
 	if( r_screendownsamplingtexture_size )
 	{
-		int		midsample_width = r_screendownsamplingtexture_size * sampleText_tcw;
-		int		midsample_height = r_screendownsamplingtexture_size * sampleText_tch;
-		
+		int      midsample_width = (r_screendownsamplingtexture_size * sampleText_tcw);
+		int      midsample_height = (r_screendownsamplingtexture_size * sampleText_tch);
+
 		//copy the screen and draw resized
 		GL_Bind(r_bloomscreentexture->texnum);
 		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, curView_x, viddef.height - (curView_y + curView_height), curView_width, curView_height);
@@ -550,21 +552,22 @@ void R_BloomBlend ( refdef_t *fd )
 	curView_y = fd->y;
 	curView_width = fd->width;
 	curView_height = fd->height;
-	screenText_tcw = ((float)fd->width / (float)screen_texture_width);
-	screenText_tch = ((float)fd->height / (float)screen_texture_height);
+	screenText_tcw = ((float)curView_width / (float)screen_texture_width);
+	screenText_tch = ((float)curView_height / (float)screen_texture_height);
 	if( fd->height > fd->width ) {
-		sampleText_tcw = ((float)fd->width / (float)fd->height);
+		sampleText_tcw = ((float)curView_width / (float)curView_height);
 		sampleText_tch = 1.0f;
 	} else {
 		sampleText_tcw = 1.0f;
-		sampleText_tch = ((float)fd->height / (float)fd->width);
+		sampleText_tch = ((float)curView_height / (float)curView_width);
 	}
-	sample_width = BLOOM_SIZE * sampleText_tcw;
-	sample_height = BLOOM_SIZE * sampleText_tch;
+	sample_width = (BLOOM_SIZE * sampleText_tcw);
+	sample_height = (BLOOM_SIZE * sampleText_tch);
+
 	
 	//copy the screen space we'll use to work into the backup texture
 	GL_Bind(r_bloombackuptexture->texnum);
-	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, r_screenbackuptexture_size * sampleText_tcw, r_screenbackuptexture_size * sampleText_tch);
+	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, r_screenbackuptexture_width, r_screenbackuptexture_height );
 
 	//create the bloom image
 	R_Bloom_DownsampleView();
@@ -576,11 +579,11 @@ void R_BloomBlend ( refdef_t *fd )
 	GL_Bind(r_bloombackuptexture->texnum);
 	qglColor4f( 1, 1, 1, 1 );
 	R_Bloom_Quad( 0, 
-		viddef.height - (r_screenbackuptexture_size * sampleText_tch),
-		r_screenbackuptexture_size * sampleText_tcw,
-		r_screenbackuptexture_size * sampleText_tch,
-		sampleText_tcw,
-		sampleText_tch );
+		viddef.height - r_screenbackuptexture_height,
+		r_screenbackuptexture_width,
+		r_screenbackuptexture_height,
+		1.0,
+		1.0 );
 
 	R_Bloom_DrawEffect();
 }
