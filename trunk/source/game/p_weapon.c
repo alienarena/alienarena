@@ -668,10 +668,16 @@ void weapon_plasma_fire (edict_t *ent)
 	int			kick;
 	int			buildup;
 
-	damage = 50;
-	kick = 50;
+	if(instagib->value) {
+		damage = 200;
+		kick = 200;
+	}
+	else {
+		damage = 50;
+		kick = 50;
+	}
 	
-	if (is_quad || instagib->value)
+	if (is_quad)
 	{
 		damage *= 4;
 		kick *= 4;

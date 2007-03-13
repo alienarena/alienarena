@@ -2789,6 +2789,7 @@ static menufield_s s_camptime;
 static menulist_s s_speed_list;
 static menulist_s s_joust_list;
 static menulist_s s_lowgrav_list;
+static menulist_s s_classbased_list;
 
 void InstagibFunc(void *self) {
 
@@ -2798,6 +2799,8 @@ void InstagibFunc(void *self) {
 		s_rocketarena_list.curvalue = 0;
 		Cvar_SetValue ("excessive", 0);
 		s_excessive_list.curvalue = 0;
+		Cvar_SetValue("classbased", 0);
+		s_classbased_list.curvalue = 0;
 	}	
 	else
 		Cvar_SetValue ("instagib", 0);
@@ -2810,6 +2813,8 @@ void RocketFunc(void *self) {
 		s_instagib_list.curvalue = 0;
 		Cvar_SetValue ("excessvie", 0);
 		s_excessive_list.curvalue = 0;
+		Cvar_SetValue("classbased", 0);
+		s_classbased_list.curvalue = 0;
 	}
 	else
 		Cvar_SetValue ("rocket_arena", 0);
@@ -2822,9 +2827,25 @@ void ExcessiveFunc(void *self) {
 		s_instagib_list.curvalue = 0;
 		Cvar_SetValue("rocket_arena", 0);
 		s_rocketarena_list.curvalue = 0;
+		Cvar_SetValue("classbased", 0);
+		s_classbased_list.curvalue = 0;
 	}
 	else
 		Cvar_SetValue("excessive", 0);
+}
+void ClassbasedFunc(void *self) {
+
+	if(s_classbased_list.curvalue) {	
+		Cvar_SetValue("classbased", 1);
+		s_excessive_list.curvalue = 0;
+		Cvar_SetValue("excessive", 0);
+		Cvar_SetValue("instagib", 0);
+		s_instagib_list.curvalue = 0;
+		Cvar_SetValue("rocket_arena", 0);
+		s_rocketarena_list.curvalue = 0;	
+	}
+	else
+		Cvar_SetValue("classbased", 0);
 }
 void MutatorsFunc(void *self) {
 
@@ -2857,6 +2878,7 @@ void SetMutatorsFunc( void *self) {
 	strcpy( s_camptime.buffer, Cvar_VariableString("camptime") );
 	s_joust_list.curvalue = Cvar_VariableValue("sv_joustmode");
 	s_speed_list.curvalue = Cvar_VariableValue("playerspeed");
+	s_classbased_list.curvalue = Cvar_VariableValue("classbased");
 }
 void Mutators_MenuInit( void )
 {
@@ -2966,6 +2988,14 @@ void Mutators_MenuInit( void )
 	s_joust_list.itemnames = yn;
 	s_joust_list.curvalue = 0;
 
+	s_classbased_list.generic.type = MTYPE_SPINCONTROL;
+	s_classbased_list.generic.x	= -8;
+	s_classbased_list.generic.y	= 122 + offset;
+	s_classbased_list.generic.name	= "classbased";
+	s_classbased_list.generic.callback = ClassbasedFunc;
+	s_classbased_list.itemnames = yn;
+	s_classbased_list.curvalue = 0;
+
 	Menu_AddItem( &s_mutators_menu, &s_instagib_list );
 	Menu_AddItem( &s_mutators_menu, &s_rocketarena_list );
 	Menu_AddItem( &s_mutators_menu, &s_excessive_list );
@@ -2977,6 +3007,7 @@ void Mutators_MenuInit( void )
 	Menu_AddItem( &s_mutators_menu, &s_speed_list );
 	Menu_AddItem( &s_mutators_menu, &s_lowgrav_list );
 	Menu_AddItem( &s_mutators_menu, &s_joust_list );
+	Menu_AddItem( &s_mutators_menu, &s_classbased_list );
 
 	// call this now to set proper inital state
 	SetMutatorsFunc ( NULL );
