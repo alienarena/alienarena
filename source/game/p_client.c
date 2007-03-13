@@ -1574,6 +1574,7 @@ void PutClientInServer (edict_t *ent)
 	int		index, armor_index;
 	vec3_t	spawn_origin, spawn_angles;
 	gclient_t	*client;
+	gitem_t		*item;
 	int		i, done;
 	client_persistant_t	saved;
 	client_respawn_t	resp;
@@ -1748,8 +1749,15 @@ void PutClientInServer (edict_t *ent)
 	Q2_FindFile (modelpath, &file);
 	if(file) { //alien
 		ent->ctype = 1;
-		if(classbased->value)
-			ent->health = ent->max_health = client->pers.max_health = client->pers.health = 130;
+		if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
+			ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
+			client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
+			client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
+			item = FindItem("Alien Disruptor");
+			client->pers.selected_item = ITEM_INDEX(item);
+			client->pers.inventory[client->pers.selected_item] = 1;
+			client->pers.weapon = item;
+		}
 		fclose(file);
 	}
 	else { //robot
@@ -1757,16 +1765,24 @@ void PutClientInServer (edict_t *ent)
 		Q2_FindFile (modelpath, &file);
 		if(file) {
 			ent->ctype = 2;
-			if(classbased->value) {
+			if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
 				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 85;
-				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-				client->pers.inventory[armor_index] += 75;
+				armor_index = ITEM_INDEX(FindItem("Combat Armor"));
+				client->pers.inventory[armor_index] += 175;
 			}
 			fclose(file);
 		}
 		else { //human
-			armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-			client->pers.inventory[armor_index] += 30;
+			if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
+				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+				client->pers.inventory[armor_index] += 30;
+				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
+				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
+				item = FindItem("Rocket Launcher");
+				client->pers.selected_item = ITEM_INDEX(item);
+				client->pers.inventory[client->pers.selected_item] = 1;
+				client->pers.weapon = item;
+			}
 		}
 	}
 
