@@ -412,10 +412,12 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	{
 		if (client)
 		{
-			if (client) //oh you know we want to differentiate between alien and human one day
-				SpawnDamage (TE_BLOOD, point, normal, take);
-			else
+			if (targ->ctype == 1) //alien, robot, human
 				SpawnDamage (TE_GREENBLOOD, point, normal, take);
+			else if (targ->ctype == 2)
+				SpawnDamage (TE_GUNSHOT, point, normal, take);
+			else
+				SpawnDamage (TE_BLOOD, point, normal, take);
 		}
 		else
 			SpawnDamage (te_sparks, point, normal, take);
