@@ -197,6 +197,7 @@ void InitGame (void)
 	vampire = gi.cvar ("vampire", "0", CVAR_LATCH);
 	excessive = gi.cvar ("excessive", "0", CVAR_LATCH);
 	grapple = gi.cvar ("grapple", "0", CVAR_LATCH);
+	classbased = gi.cvar ("classbased", "0", CVAR_LATCH);
 
 	//quick weapon change
 	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH);

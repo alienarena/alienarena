@@ -326,7 +326,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 {
 	vec3_t	mins = {-16, -16, -24};
 	vec3_t	maxs = {16, 16, 32};
-	int		index;
+	int		index, armor_index;
 	vec3_t	spawn_origin, spawn_angles;
 	gclient_t	*client;
 	int		i, k, done;
@@ -465,6 +465,35 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	}
 	else if(!strcmp(playermodel, "brainlet"))	
 		bot->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
+
+
+	//check for class file
+	bot->ctype = 0;
+	sprintf(modelpath, "data1/players/%s/alien", playermodel);
+	Q2_FindFile (modelpath, &file);
+	if(file) { //alien
+		bot->ctype = 1;
+		if(classbased->value)
+			bot->health = bot->max_health = client->pers.max_health = client->pers.health = 130;
+		fclose(file);
+	}
+	else {
+		sprintf(modelpath, "data1/players/%s/robot", playermodel);
+		Q2_FindFile (modelpath, &file);
+		if(file) { //robot
+			bot->ctype = 2;
+			if(classbased->value) {
+				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 85;
+				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+				client->pers.inventory[armor_index] += 75;
+			}
+			fclose(file);
+		}
+		else { //human
+			armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+			client->pers.inventory[armor_index] += 30;
+		}
+	}
 
 	bot->s.frame = 0;
 	VectorCopy (spawn_origin, bot->s.origin);

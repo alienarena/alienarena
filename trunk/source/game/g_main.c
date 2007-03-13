@@ -45,6 +45,7 @@ cvar_t  *regeneration;
 cvar_t  *vampire;
 cvar_t  *excessive;
 cvar_t  *grapple;
+cvar_t  *classbased;
 
 //quick weapon change
 cvar_t  *quickweap;

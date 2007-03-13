@@ -585,6 +585,7 @@ extern  cvar_t  *regeneration;
 extern  cvar_t  *vampire;
 extern  cvar_t  *excessive;
 extern  cvar_t  *grapple;
+extern  cvar_t  *classbased;
 
 //quick weapon change
 extern  cvar_t  *quickweap;
@@ -1329,6 +1330,9 @@ struct edict_s
 
 	//power nodes
 	qboolean powered;
+
+	//class(human = 0; alien = 1; robot = 2;)
+	int ctype;
 
 };
 

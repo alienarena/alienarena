@@ -807,8 +807,26 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			number_of_gibs = DEATH_GIBS_TO_THROW - 1;
 		}
 		
-		for (n= 0; n < number_of_gibs; n++)
-			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC, EF_GIB);
+		if(self->ctype == 1) {
+
+			for (n= 0; n < number_of_gibs; n++)
+				ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_ORGANIC, EF_GREENGIB);
+		}
+		else if(self->ctype == 2) {
+			for (n= 0; n < number_of_gibs; n++) {
+				ThrowGib (self, "models/objects/debris3/tris.md2", damage, GIB_METALLIC, 0);
+				ThrowGib (self, "models/objects/debris1/tris.md2", damage, GIB_METALLIC, 0);
+			}
+			//blow up too :)
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_ROCKET_EXPLOSION);
+			gi.WritePosition (self->s.origin);
+			gi.multicast (self->s.origin, MULTICAST_PHS);
+		}
+		else {
+			for (n= 0; n < number_of_gibs; n++)
+				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC, EF_GIB);
+		}
 
 	}
 	else
@@ -1335,8 +1353,27 @@ void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	if (self->health < -40)
 	{
 		gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-		for (n= 0; n < 4; n++)
-			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC, EF_GIB);
+		if(self->ctype == 1) {
+
+			for (n= 0; n < 4; n++)
+				ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_ORGANIC, EF_GREENGIB);
+		}
+		else if(self->ctype == 2) {
+			for (n= 0; n < 4; n++)
+				ThrowGib (self, "models/objects/debris3/tris.md2", damage, GIB_METALLIC, 0);
+			for (n= 0; n < 4; n++)
+				ThrowGib (self, "models/objects/debris1/tris.md2", damage, GIB_METALLIC, 0);
+			//blow up too :)
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_ROCKET_EXPLOSION);
+			gi.WritePosition (self->s.origin);
+			gi.multicast (self->s.origin, MULTICAST_PHS);
+	
+		}
+		else {
+			for (n= 0; n < 4; n++)
+				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC, EF_GIB);
+		}	
 		self->s.origin[2] -= 48;
 		ThrowClientHead (self, damage);
 		self->takedamage = DAMAGE_NO;
@@ -1392,6 +1429,7 @@ void CopyToBodyQue (edict_t *ent)
 	body->movetype = ent->movetype;
 	body->die = body_die;
 	body->takedamage = DAMAGE_YES;
+	body->ctype = ent->ctype;
 
 	body->timestamp = level.time;
 	body->nextthink = level.time + 5;
@@ -1533,7 +1571,7 @@ void PutClientInServer (edict_t *ent)
 {
 	vec3_t	mins = {-16, -16, -24};
 	vec3_t	maxs = {16, 16, 32};
-	int		index;
+	int		index, armor_index;
 	vec3_t	spawn_origin, spawn_angles;
 	gclient_t	*client;
 	int		i, done;
@@ -1704,6 +1742,34 @@ void PutClientInServer (edict_t *ent)
 	else if(!strcmp(playermodel, "brainlet"))	
 		ent->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
 	
+	//check for class file
+	ent->ctype = 0;
+	sprintf(modelpath, "data1/players/%s/alien", playermodel);
+	Q2_FindFile (modelpath, &file);
+	if(file) { //alien
+		ent->ctype = 1;
+		if(classbased->value)
+			ent->health = ent->max_health = client->pers.max_health = client->pers.health = 130;
+		fclose(file);
+	}
+	else { //robot
+		sprintf(modelpath, "data1/players/%s/robot", playermodel);
+		Q2_FindFile (modelpath, &file);
+		if(file) {
+			ent->ctype = 2;
+			if(classbased->value) {
+				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 85;
+				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+				client->pers.inventory[armor_index] += 75;
+			}
+			fclose(file);
+		}
+		else { //human
+			armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+			client->pers.inventory[armor_index] += 30;
+		}
+	}
+
 	ent->s.frame = 0;
 	VectorCopy (spawn_origin, ent->s.origin);
 	ent->s.origin[2] += 1;	// make sure off ground
@@ -1808,7 +1874,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	safe_bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
 
-	if ((motd_file = fopen("arena\\motd.txt", "rb")) != NULL)
+	if ((motd_file = fopen("arena/motd.txt", "rb")) != NULL)
 	{
 		// we successfully opened the file "motd.txt"
 		if ( fgets(motd, 500, motd_file) )
@@ -2237,6 +2303,10 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 
 	// check to see if they are on the banned IP list
 	value = Info_ValueForKey (userinfo, "ip");
+	if (SV_FilterPacket(value)) {
+		Info_SetValueForKey(userinfo, "rejmsg", "Banned.");
+		return false;
+	}
 
 	//specator mode
 	// check for a spectator
