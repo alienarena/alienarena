@@ -913,7 +913,11 @@ void SP_worldspawn (edict_t *ent)
 
 	gi.soundindex ("weapons/whoosh.wav");
 
+	//precache any gibs
 	sm_meat_index = gi.modelindex ("models/objects/gibs/sm_meat/tris.md2");
+	gi.modelindex ("models/objects/gibs/mart_gut/tris.md2");
+	gi.modelindex ("models/objects/debris1/tris.md2");
+	gi.modelindex ("models/objects/debris3/tris.md2");
 
 	//precache all base player models.  this eliminates the "stutter" when a player joins the game
 	gi.modelindex ("players/martianenforcer/tris.md2");
@@ -942,6 +946,7 @@ void SP_worldspawn (edict_t *ent)
 	gi.modelindex ("#w_hyperblaster.md2");
 	gi.modelindex ("#w_railgun.md2");
 	gi.modelindex ("#w_bfg.md2");
+
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is doublebright.
 //

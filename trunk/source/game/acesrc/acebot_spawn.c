@@ -470,18 +470,19 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 
 	//check for class file
 	bot->ctype = 0;
-	sprintf(modelpath, "data1/players/%s/alien", playermodel);
+	sprintf(modelpath, "data1/players/%s/human", playermodel);
 	Q2_FindFile (modelpath, &file);
-	if(file) { //alien
+	if(file) { //human
 		bot->ctype = 1;
 		if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
-			bot->health = bot->max_health = client->pers.max_health = client->pers.health = 150;
-			client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
-			client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
-			item = FindItem("Alien Disruptor");
-			client->pers.selected_item = ITEM_INDEX(item);
-			client->pers.inventory[client->pers.selected_item] = 1;
-			client->pers.weapon = item;
+				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+				client->pers.inventory[armor_index] += 30;
+				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
+				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
+				item = FindItem("Rocket Launcher");
+				client->pers.selected_item = ITEM_INDEX(item);
+				client->pers.inventory[client->pers.selected_item] = 1;
+				client->pers.weapon = item;
 		}
 		fclose(file);
 	}
@@ -497,13 +498,12 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 			}
 			fclose(file);
 		}
-		else { //human
+		else { //alien
 			if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
-				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-				client->pers.inventory[armor_index] += 30;
-				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
-				item = FindItem("Rocket Launcher");
+				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 150;
+				client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
+				client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
+				item = FindItem("Alien Disruptor");
 				client->pers.selected_item = ITEM_INDEX(item);
 				client->pers.inventory[client->pers.selected_item] = 1;
 				client->pers.weapon = item;
