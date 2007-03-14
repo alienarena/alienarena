@@ -412,7 +412,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	{
 		if (client)
 		{
-			if (targ->ctype == 1) //alien, robot, human
+			if (targ->ctype == 0) //alien, robot, human
 				SpawnDamage (TE_GREENBLOOD, point, normal, take);
 			else if (targ->ctype == 2)
 				SpawnDamage (TE_GUNSHOT, point, normal, take);

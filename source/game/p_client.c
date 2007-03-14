@@ -807,12 +807,12 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			number_of_gibs = DEATH_GIBS_TO_THROW - 1;
 		}
 		
-		if(self->ctype == 1) {
+		if(self->ctype == 0) { //alien
 
 			for (n= 0; n < number_of_gibs; n++)
 				ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_ORGANIC, EF_GREENGIB);
 		}
-		else if(self->ctype == 2) {
+		else if(self->ctype == 2) { //robot
 			for (n= 0; n < number_of_gibs; n++) {
 				ThrowGib (self, "models/objects/debris3/tris.md2", damage, GIB_METALLIC, 0);
 				ThrowGib (self, "models/objects/debris1/tris.md2", damage, GIB_METALLIC, 0);
@@ -823,7 +823,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			gi.WritePosition (self->s.origin);
 			gi.multicast (self->s.origin, MULTICAST_PHS);
 		}
-		else {
+		else { //human
 			for (n= 0; n < number_of_gibs; n++)
 				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC, EF_GIB);
 		}
@@ -1353,12 +1353,12 @@ void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	if (self->health < -40)
 	{
 		gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-		if(self->ctype == 1) {
+		if(self->ctype == 0) { //alien
 
 			for (n= 0; n < 4; n++)
 				ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_ORGANIC, EF_GREENGIB);
 		}
-		else if(self->ctype == 2) {
+		else if(self->ctype == 2) { //robot
 			for (n= 0; n < 4; n++)
 				ThrowGib (self, "models/objects/debris3/tris.md2", damage, GIB_METALLIC, 0);
 			for (n= 0; n < 4; n++)
@@ -1370,7 +1370,7 @@ void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 			gi.multicast (self->s.origin, MULTICAST_PHS);
 	
 		}
-		else {
+		else { //human
 			for (n= 0; n < 4; n++)
 				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC, EF_GIB);
 		}	
@@ -1744,19 +1744,20 @@ void PutClientInServer (edict_t *ent)
 		ent->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
 	
 	//check for class file
-	ent->ctype = 0;
-	sprintf(modelpath, "data1/players/%s/alien", playermodel);
+	ent->ctype = 0; //alien is default
+	sprintf(modelpath, "data1/players/%s/human", playermodel);
 	Q2_FindFile (modelpath, &file);
-	if(file) { //alien
+	if(file) { //human
 		ent->ctype = 1;
 		if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
-			ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
-			client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
-			client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
-			item = FindItem("Alien Disruptor");
-			client->pers.selected_item = ITEM_INDEX(item);
-			client->pers.inventory[client->pers.selected_item] = 1;
-			client->pers.weapon = item;
+				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+				client->pers.inventory[armor_index] += 30;
+				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
+				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
+				item = FindItem("Rocket Launcher");
+				client->pers.selected_item = ITEM_INDEX(item);
+				client->pers.inventory[client->pers.selected_item] = 1;
+				client->pers.weapon = item;
 		}
 		fclose(file);
 	}
@@ -1772,13 +1773,12 @@ void PutClientInServer (edict_t *ent)
 			}
 			fclose(file);
 		}
-		else { //human
+		else { //alien
 			if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
-				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-				client->pers.inventory[armor_index] += 30;
-				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
-				item = FindItem("Rocket Launcher");
+				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
+				client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
+				client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
+				item = FindItem("Alien Disruptor");
 				client->pers.selected_item = ITEM_INDEX(item);
 				client->pers.inventory[client->pers.selected_item] = 1;
 				client->pers.weapon = item;
