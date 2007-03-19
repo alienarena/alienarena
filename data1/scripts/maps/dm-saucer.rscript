@@ -1,0 +1,50 @@
+textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light12
+{
+	{
+		lensflare
+	}
+}
+textures/martian/light1
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light10
+{
+
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.2 0.2
+		envmap
+	}
+}
+textures/arena6/ice
+{
+
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.2 0.2
+		envmap
+	}
+}
+textures/arena8/grate1
+{
+	{
+		map textures/arena8/grate1.tga
+	}
+	{
+		map gfx/electrics3a.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.2 0.2
+		scroll static 2 static 0
+	}
+}
