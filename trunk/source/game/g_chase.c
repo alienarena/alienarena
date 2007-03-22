@@ -39,7 +39,7 @@ void UpdateChaseCam(edict_t *ent)
 		ChaseNext(ent);
 		if (ent->client->chase_target == old) {
 			ent->client->chase_target = NULL;
-			//ent->client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
+			ent->client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
 			return;
 		}
 	}
@@ -62,7 +62,8 @@ void UpdateChaseCam(edict_t *ent)
 	else 
 		VectorMA(ownerv, -30, forward, o);
 
-	o[2] = targ->s.origin[2] + 20;
+	if (o[2] < targ->s.origin[2] + 20)
+			o[2] = targ->s.origin[2] + 20;
 	
 	trace = gi.trace(ownerv, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
 
@@ -100,7 +101,7 @@ void UpdateChaseCam(edict_t *ent)
 	VectorCopy(targ->client->v_angle, ent->client->v_angle);
 
 	ent->viewheight = 0;
-//	ent->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
+	ent->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
 	gi.linkentity(ent);
 }
 
