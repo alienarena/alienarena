@@ -53,11 +53,15 @@ void UpdateChaseCam(edict_t *ent)
 		angles[PITCH] = 56;
 	AngleVectors (angles, forward, right, NULL);
 	VectorNormalize(forward);
-	VectorMA(ownerv, -30, forward, o);
 
-	if (o[2] < targ->s.origin[2] + 20)
-		o[2] = targ->s.origin[2] + 20;
+	if(ent->client->pers.spectator == 2)
+		VectorMA(ownerv, 10, forward, o);
+	else {
+		VectorMA(ownerv, -30, forward, o);
 
+		if (o[2] < targ->s.origin[2] + 20)
+			o[2] = targ->s.origin[2] + 20;
+	}
 	// jump animation lifts
 	if (!targ->groundentity)
 		o[2] += 16;

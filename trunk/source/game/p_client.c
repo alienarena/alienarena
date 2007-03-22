@@ -1806,7 +1806,7 @@ void PutClientInServer (edict_t *ent)
 	if (client->pers.spectator) {
 
 		client->chase_target = NULL;
-		client->resp.spectator = true;
+		client->resp.spectator = client->pers.spectator;
 		ent->movetype = MOVETYPE_NOCLIP;
 		ent->solid = SOLID_NOT;
 		ent->svflags |= SVF_NOCLIENT;
@@ -2058,7 +2058,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	s = Info_ValueForKey (userinfo, "spectator");
 	// spectators need to be reset in CTF
 	if (deathmatch->value && *s && strcmp(s, "0"))
-		ent->client->pers.spectator = true;
+		ent->client->pers.spectator = atoi(s);
 	else
 		ent->client->pers.spectator = false;
 	//end spectator mode 
