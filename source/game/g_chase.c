@@ -16,6 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+JKD - 032207 - removed some very heinous things like bumping up the view 
+during jumps, and using the old "look at player" angles upon dying.
+
 */
 #include "g_local.h"
 
@@ -55,7 +58,7 @@ void UpdateChaseCam(edict_t *ent)
 	VectorNormalize(forward);
 
 	if(ent->client->pers.spectator == 2)
-		VectorMA(ownerv, 10, forward, o);
+		VectorMA(ownerv, 20, forward, o);
 	else {
 		VectorMA(ownerv, -30, forward, o);
 
@@ -95,14 +98,8 @@ void UpdateChaseCam(edict_t *ent)
 	for (i=0 ; i<3 ; i++)
 		ent->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(targ->client->v_angle[i] - ent->client->resp.cmd_angles[i]);
 
-	if (targ->deadflag) {
-		ent->client->ps.viewangles[ROLL] = 40;
-		ent->client->ps.viewangles[PITCH] = -15;
-		ent->client->ps.viewangles[YAW] = targ->client->killer_yaw;
-	} else {
-		VectorCopy(targ->client->v_angle, ent->client->ps.viewangles);
-		VectorCopy(targ->client->v_angle, ent->client->v_angle);
-	}
+	VectorCopy(targ->client->v_angle, ent->client->ps.viewangles);
+	VectorCopy(targ->client->v_angle, ent->client->v_angle);
 
 	ent->viewheight = 0;
 	ent->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
