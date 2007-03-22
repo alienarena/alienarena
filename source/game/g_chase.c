@@ -59,12 +59,10 @@ void UpdateChaseCam(edict_t *ent)
 
 	if(ent->client->pers.spectator == 2)
 		VectorMA(ownerv, 20, forward, o);
-	else {
+	else 
 		VectorMA(ownerv, -30, forward, o);
 
-		if (o[2] < targ->s.origin[2] + 20)
-			o[2] = targ->s.origin[2] + 20;
-	}
+	o[2] = targ->s.origin[2] + 20;
 	
 	trace = gi.trace(ownerv, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
 
