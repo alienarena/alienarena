@@ -4,7 +4,6 @@
 /* Number of gibs to throw on death with lots of damage (including Client Head, where applicable) */
 #define DEATH_GIBS_TO_THROW 5
 void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom);
-void ClientUserinfoChangedAtSpawn (edict_t *ent, char *userinfo);
 void SP_misc_teleporter_dest (edict_t *ent);
 
 /*QUAKED info_player_start (1 0 0) (-16 -16 -24) (16 16 32)

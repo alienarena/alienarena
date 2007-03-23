@@ -211,7 +211,6 @@ void     TossClientWeapon (edict_t *self);
 void     ClientThink (edict_t *ent, usercmd_t *ucmd);
 void     SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles);
 void     ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom);
-void     ClientUserinfoChangedAtSpawn (edict_t *ent, char *userinfo);
 void     CopyToBodyQue (edict_t *ent);
 
 qboolean ClientConnect (edict_t *ent, char *userinfo);
