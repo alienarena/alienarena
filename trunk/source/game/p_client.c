@@ -2512,153 +2512,162 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	pm_passent = ent;
 
-	// set up for pmove
-	memset (&pm, 0, sizeof(pm));
+	if (ent->client->chase_target) {
 
-	if (ent->movetype == MOVETYPE_NOCLIP)
-		client->ps.pmove.pm_type = PM_SPECTATOR;
-	else if (ent->s.modelindex != 255 && !(ent->in_vehicle) && !(client->chasetoggle)) //for vehicles or deathcam
-		client->ps.pmove.pm_type = PM_GIB;
-	else if (ent->deadflag)
-		client->ps.pmove.pm_type = PM_DEAD;
-	else
-		client->ps.pmove.pm_type = PM_NORMAL;
+		client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
+		client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
+		client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
 
-	if(!client->chasetoggle)
-	{
-		client->ps.pmove.gravity = sv_gravity->value;
-	}
-	else
-	{	/* No gravity to move the deathcam */
-		client->ps.pmove.gravity = 0;
-	}
+	} else {
 
-	//vehicles
-	if ( Jet_Active(ent) )
-		Jet_ApplyJet( ent, ucmd );
 
-	pm.s = client->ps.pmove;
+		// set up for pmove
+		memset (&pm, 0, sizeof(pm));
 
-	for (i=0 ; i<3 ; i++)
-	{
-		pm.s.origin[i] = ent->s.origin[i]*8;
-		pm.s.velocity[i] = ent->velocity[i]*8;
-	}
+		if (ent->movetype == MOVETYPE_NOCLIP)
+			client->ps.pmove.pm_type = PM_SPECTATOR;
+		else if (ent->s.modelindex != 255 && !(ent->in_vehicle) && !(client->chasetoggle)) //for vehicles or deathcam
+			client->ps.pmove.pm_type = PM_GIB;
+		else if (ent->deadflag)
+			client->ps.pmove.pm_type = PM_DEAD;
+		else
+			client->ps.pmove.pm_type = PM_NORMAL;
 
-	if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s)))
-	{
-		pm.snapinitial = true;
-//		gi.dprintf ("pmove changed!\n");
-	}
-
-	ucmd->forwardmove *= 1.3;
-
-	pm.cmd = *ucmd;
-
-	pm.trace = PM_trace;	// adds default parms
-	pm.pointcontents = gi.pointcontents;
-
-	//joust mode
-	if(joustmode->value) {
-		if(ent->groundentity)
-			client->joustattempts = 0;
-		if(pm.cmd.upmove >= 10) {
-			client->joustattempts++;
-			pm.joustattempts = client->joustattempts;
-			if(pm.joustattempts == 10 || pm.joustattempts == 20) {
-				gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, 0);
-				PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
-			}
-		}
-	}
-
-	// perform a pmove
-	gi.Pmove (&pm);
-
-	// save results of pmove
-	client->ps.pmove = pm.s;
-	client->old_pmove = pm.s;
-
-	for (i=0 ; i<3 ; i++)
-	{
-		ent->s.origin[i] = pm.s.origin[i]*0.125;
-		//vehicles
-		if ( !Jet_Active(ent) || (Jet_Active(ent)&&(fabs((float)pm.s.velocity[i]*0.125) < fabs(ent->velocity[i]))) )
-			ent->velocity[i] = pm.s.velocity[i]*0.125;
-	}
-
-	VectorCopy (pm.mins, ent->mins);
-	VectorCopy (pm.maxs, ent->maxs);
-
-	client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
-	client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
-	client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
-
-	//vehicles
-	if ( Jet_Active(ent) )
-		if( pm.groundentity ) 		/*are we on ground*/
-			if ( Jet_AvoidGround(ent) )	/*then lift us if possible*/
-				pm.groundentity = NULL;		/*now we are no longer on ground*/
-
-	if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == 0))
-	{
-		sproing = client->sproing_framenum > level.framenum;
-		haste = client->haste_framenum > level.framenum;
-		if(sproing)
-			gi.sound(ent, CHAN_VOICE, gi.soundindex("items/sproing.wav"), 1, ATTN_NORM, 0);
-		if(haste) {
-			gi.sound(ent, CHAN_VOICE, gi.soundindex("items/haste.wav"), 1, ATTN_NORM, 0);
-			gi.WriteByte (svc_temp_entity);
-			gi.WriteByte (TE_EXPLOSION2);
-			gi.WritePosition (ent->s.origin);
-			gi.multicast (ent->s.origin, MULTICAST_PVS);
+		if(!client->chasetoggle)
+		{
+			client->ps.pmove.gravity = sv_gravity->value;
 		}
 		else
-			gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, 0);
-		PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
+		{	/* No gravity to move the deathcam */
+			client->ps.pmove.gravity = 0;
+		}
+
+		//vehicles
+		if ( Jet_Active(ent) )
+			Jet_ApplyJet( ent, ucmd );
+
+		pm.s = client->ps.pmove;
+
+		for (i=0 ; i<3 ; i++)
+		{
+			pm.s.origin[i] = ent->s.origin[i]*8;
+			pm.s.velocity[i] = ent->velocity[i]*8;
+		}
+
+		if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s)))
+		{
+			pm.snapinitial = true;
+	//		gi.dprintf ("pmove changed!\n");
+		}
+
+		ucmd->forwardmove *= 1.3;
+
+		pm.cmd = *ucmd;
+
+		pm.trace = PM_trace;	// adds default parms
+		pm.pointcontents = gi.pointcontents;
+
+		//joust mode
+		if(joustmode->value) {
+			if(ent->groundentity)
+				client->joustattempts = 0;
+			if(pm.cmd.upmove >= 10) {
+				client->joustattempts++;
+				pm.joustattempts = client->joustattempts;
+				if(pm.joustattempts == 10 || pm.joustattempts == 20) {
+					gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, 0);
+					PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
+				}
+			}
+		}
+
+		// perform a pmove
+		gi.Pmove (&pm);
+
+		// save results of pmove
+		client->ps.pmove = pm.s;
+		client->old_pmove = pm.s;
+
+		for (i=0 ; i<3 ; i++)
+		{
+			ent->s.origin[i] = pm.s.origin[i]*0.125;
+			//vehicles
+			if ( !Jet_Active(ent) || (Jet_Active(ent)&&(fabs((float)pm.s.velocity[i]*0.125) < fabs(ent->velocity[i]))) )
+				ent->velocity[i] = pm.s.velocity[i]*0.125;
+		}
+
+		VectorCopy (pm.mins, ent->mins);
+		VectorCopy (pm.maxs, ent->maxs);
+
+		client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
+		client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
+		client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
+
+		//vehicles
+		if ( Jet_Active(ent) )
+			if( pm.groundentity ) 		/*are we on ground*/
+				if ( Jet_AvoidGround(ent) )	/*then lift us if possible*/
+					pm.groundentity = NULL;		/*now we are no longer on ground*/
+
+		if (ent->groundentity && !pm.groundentity && (pm.cmd.upmove >= 10) && (pm.waterlevel == 0))
+		{
+			sproing = client->sproing_framenum > level.framenum;
+			haste = client->haste_framenum > level.framenum;
+			if(sproing)
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("items/sproing.wav"), 1, ATTN_NORM, 0);
+			if(haste) {
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("items/haste.wav"), 1, ATTN_NORM, 0);
+				gi.WriteByte (svc_temp_entity);
+				gi.WriteByte (TE_EXPLOSION2);
+				gi.WritePosition (ent->s.origin);
+				gi.multicast (ent->s.origin, MULTICAST_PVS);
+			}
+			else
+				gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, 0);
+			PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
+		}
+
+		ent->viewheight = pm.viewheight;
+		ent->waterlevel = pm.waterlevel;
+		ent->watertype = pm.watertype;
+		ent->groundentity = pm.groundentity;
+		if (pm.groundentity)
+			ent->groundentity_linkcount = pm.groundentity->linkcount;
+
+		if (ent->deadflag)
+		{
+			client->ps.viewangles[ROLL] = 40;
+			client->ps.viewangles[PITCH] = -15;
+			client->ps.viewangles[YAW] = client->killer_yaw;
+		}
+		else
+		{
+			VectorCopy (pm.viewangles, client->v_angle);
+			VectorCopy (pm.viewangles, client->ps.viewangles);
+		}
+
+		if (client->ctf_grapple)
+			CTFGrapplePull(client->ctf_grapple);
+
+		gi.linkentity (ent);
+
+		if (ent->movetype != MOVETYPE_NOCLIP)
+			G_TouchTriggers (ent);
+
+		// touch other objects
+		for (i=0 ; i<pm.numtouch ; i++)
+		{
+			other = pm.touchents[i];
+			for (j=0 ; j<i ; j++)
+				if (pm.touchents[j] == other)
+					break;
+			if (j != i)
+				continue;	// duplicated
+			if (!other->touch)
+				continue;
+			other->touch (other, ent, NULL, NULL);
+		}
 	}
-
-	ent->viewheight = pm.viewheight;
-	ent->waterlevel = pm.waterlevel;
-	ent->watertype = pm.watertype;
-	ent->groundentity = pm.groundentity;
-	if (pm.groundentity)
-		ent->groundentity_linkcount = pm.groundentity->linkcount;
-
-	if (ent->deadflag)
-	{
-		client->ps.viewangles[ROLL] = 40;
-		client->ps.viewangles[PITCH] = -15;
-		client->ps.viewangles[YAW] = client->killer_yaw;
-	}
-	else
-	{
-		VectorCopy (pm.viewangles, client->v_angle);
-		VectorCopy (pm.viewangles, client->ps.viewangles);
-	}
-
-	if (client->ctf_grapple)
-		CTFGrapplePull(client->ctf_grapple);
-
-	gi.linkentity (ent);
-
-	if (ent->movetype != MOVETYPE_NOCLIP)
-		G_TouchTriggers (ent);
-
-	// touch other objects
-	for (i=0 ; i<pm.numtouch ; i++)
-	{
-		other = pm.touchents[i];
-		for (j=0 ; j<i ; j++)
-			if (pm.touchents[j] == other)
-				break;
-		if (j != i)
-			continue;	// duplicated
-		if (!other->touch)
-			continue;
-		other->touch (other, ent, NULL, NULL);
-	}
-
 
 	client->oldbuttons = client->buttons;
 	client->buttons = ucmd->buttons;
