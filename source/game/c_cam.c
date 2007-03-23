@@ -49,16 +49,17 @@ void DeathcamStart (edict_t *ent)
 }
 
 void DeathcamRemove (edict_t *ent, char *opt)
-{
-        
-   	ent->client->chasetoggle = 0;
+{    
+    ent->client->chasetoggle = 0;
 
     /* Stop the chasecam from moving */
     VectorClear (ent->client->chasecam->velocity);
-    
-	G_FreeEdict (ent->client->oldplayer);
+
+    if(ent->client->oldplayer->client != NULL)
+        free(ent->client->oldplayer->client);
+
+    G_FreeEdict (ent->client->oldplayer);
     G_FreeEdict (ent->client->chasecam);
-        
 }
 
 /* The "ent" is the chasecam */   
