@@ -1444,8 +1444,12 @@ void respawn (edict_t *self)
 	if (deathmatch->value || coop->value)
 	{
 
+#if 0
+/* Don't think this is needed - deathcam is removed at very end of death,
+   so DeathcamRemove would get called twice */
 		if(!self->is_bot)
 			DeathcamRemove (self, "off");
+#endif
 
 // ACEBOT_ADD special respawning code
 		if (self->is_bot)
@@ -1528,6 +1532,10 @@ void spectator_respawn (edict_t *ent)
 			return;
 		}
 	}
+
+	/* Remove deathcam if changed to spectator after death */
+	if (ent->client->pers.spectator && ent->deadflag) 
+		DeathcamRemove (ent, "off");
 
 	// clear client on respawn
 	ent->client->resp.score = ent->client->pers.score = 0;
@@ -2405,6 +2413,9 @@ void ClientDisconnect (edict_t *ent)
 		CTFDeadDropFlag(ent);
 
 	DeadDropDeathball(ent);	
+
+	if(ent->deadflag)
+		DeathcamRemove(ent, "off");
 
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value)  //adjust teams and scores
 	{
