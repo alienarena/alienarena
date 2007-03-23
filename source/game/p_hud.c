@@ -439,7 +439,6 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 	int		x, y;
 	gclient_t	*cl;
 	edict_t		*cl_ent;
-	char	*tag;
 	char    acc[16];
 	char	weapname[16];
 // ACEBOT_ADD
@@ -493,24 +492,15 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		x = (i>=6) ? 160 : 0;
 		y = 32 + 32 * (i%6);
 
-		// add a dogtag
-		if (cl_ent == ent)
-			tag = "tag1";
-		else if (cl_ent == killer)
-			tag = "tag2";
-		else
-			tag = NULL;
-		if (tag)
-		{
-			Com_sprintf (entry, sizeof(entry),
-				"xv %i yv %i picn %s ",x+32, y, tag);
-			j = strlen(entry);
-			if (stringlength + j > 1024)
-				break;
-			strcpy (string + stringlength, entry);
-			stringlength += j;
-		}
-
+		// add a backround
+		Com_sprintf (entry, sizeof(entry),
+			"xv %i yv %i picn %s ",x+32, y, "tag2");
+		j = strlen(entry);
+		if (stringlength + j > 1024)
+			break;
+		strcpy (string + stringlength, entry);
+		stringlength += j;
+		
 		// send the layout
 		Com_sprintf (entry, sizeof(entry),
 			"client %i %i %i %i %i %i ",
@@ -523,6 +513,26 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 	}
 
 	//weapon accuracy
+
+	//add a backround
+	x = 0;
+	y = (total>=6) ? (32+(32*5)) : (32*total);
+	for (i=0 ; i<3 ; i++)
+	{
+	
+		Com_sprintf (entry, sizeof(entry),
+			"xv %i yv %i picn %s ", x, y+((i+1)*32+24), "tag2");
+		j = strlen(entry);
+		if (stringlength + j > 1024)
+			break;
+		strcpy (string + stringlength, entry);
+		stringlength += j;
+		
+		// send the layout
+		if (stringlength + j > 1024)
+			break;
+	}
+
 	x = 0;
 	y = (total>=6) ? (32+(32*5)) : (32*total);
 	Com_sprintf(entry, sizeof(entry),
@@ -578,7 +588,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 			stringlength +=j;
 		}
 	}
-		
+	
 	gi.WriteByte (svc_layout);
 	gi.WriteString (string);
 }
