@@ -196,6 +196,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
     {
         cl = (gclient_t *) malloc(sizeof(gclient_t));
         winner->client->oldplayer->client = cl;
+/*        printf("+++ Podiumcam = %p\n", winner->client->oldplayer->client); */
     }
 
     if (winner->client->oldplayer)
@@ -417,6 +418,41 @@ void BeginIntermission (edict_t *targ)
 		PlaceWinnerOnVictoryPad(firstrunnerup, 32);
 	if(secondrunnerup && secondrunnerup->client && secondrunnerup->inuse)
 		PlaceWinnerOnVictoryPad(secondrunnerup, -32);
+
+}
+
+
+
+void EndIntermission(void)
+{
+	int		i, n;
+	edict_t	*ent, *client;
+	edict_t *cl_ent;
+
+	for (i=0 ; i<maxclients->value; i++)
+	{
+		ent = g_edicts + 1 + i;
+        if (!ent->inuse || ent->client->resp.spectator)
+            continue;
+
+        if(!ent->is_bot && ent->client->chasetoggle > 0)
+        {
+            ent->client->chasetoggle = 0;
+            printf("Found chase toggle on client %d\n", i);
+            /* Stop the chasecam from moving */
+            VectorClear (ent->client->chasecam->velocity);
+
+            if(ent->client->oldplayer->client != NULL)
+            {
+/*                printf("--- Podiumcam = %p\n", ent->client->oldplayer->client);*/
+                free(ent->client->oldplayer->client);
+            }
+
+            G_FreeEdict (ent->client->oldplayer);
+            G_FreeEdict (ent->client->chasecam);
+        }
+
+    }
 
 }
 
