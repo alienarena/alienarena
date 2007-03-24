@@ -425,9 +425,8 @@ void BeginIntermission (edict_t *targ)
 
 void EndIntermission(void)
 {
-	int		i, n;
-	edict_t	*ent, *client;
-	edict_t *cl_ent;
+	int		i;
+	edict_t	*ent;
 
 	for (i=0 ; i<maxclients->value; i++)
 	{
