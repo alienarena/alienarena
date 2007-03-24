@@ -26,8 +26,7 @@ SDLSOUND?=1
 
 VERSION=		1.40
 
-REALARCH:=		$(shell uname -m)
-ARCH:=			$(shell uname -m | sed -e 's/i.86/i386/')
+ARCH:=			$(shell uname -m)
 OSTYPE:=		$(shell uname -s | tr A-Z a-z)
 
 MOUNT_DIR=		..
@@ -58,19 +57,19 @@ RELEASE_CFLAGS+=-O$(OPTIM_LVL) -ffast-math -funroll-loops -fomit-frame-pointer \
 		-ftree-vectorize -fexpensive-optimizations
 
 ifeq ($(OSTYPE),linux)
-ifeq ($(REALARCH),x86_64)
+ifeq ($(ARCH),x86_64)
 	RELEASE_CFLAGS += -march=k8
 else
-ifeq ($(REALARCH),i686)
+ifeq ($(ARCH),i686)
 	RELEASE_CFLAGS += -march=i686
 else
-ifeq ($(REALARCH),i586)
+ifeq ($(ARCH),i586)
 	RELEASE_CFLAGS += -march=i586
 else
-ifeq ($(REALARCH),i486)
+ifeq ($(ARCH),i486)
 	RELEASE_CFLAGS += -march=i486
 else
-ifeq ($(REALARCH),i386)
+ifeq ($(ARCH),i386)
 	RELEASE_CFLAGS += -march=i386
 endif
 endif
