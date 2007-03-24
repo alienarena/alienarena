@@ -308,6 +308,16 @@ void EndDMLevel (void)
 	int i;
 	FILE *fp;
 
+	/* Search for dead players in order to remove DeathCam and free mem */
+	for (i=0 ; i<maxclients->value ; i++)
+	{
+		ent = g_edicts + i + 1;
+		if (!ent->inuse || ent->client->resp.spectator)
+			continue;
+		if(!ent->is_bot && ent->deadflag)
+			DeathcamRemove (ent, "off");
+	}
+
 	// stay on same level flag
 	if ((int)dmflags->value & DF_SAME_LEVEL)
 	{
@@ -765,6 +775,7 @@ void ExitLevel (void)
 	level.exitintermission = 0;
 	level.intermissiontime = 0;
 	ClientEndServerFrames ();
+	EndIntermission();
 
 	// clear some things before going to next level
 	for (i=0 ; i<maxclients->value ; i++)
