@@ -2,29 +2,30 @@
 # CodeRED Makefile
 #
 
-VERSION=1.40
+VERSION=		1.40
 
-REALARCH:=	$(shell uname -m)
-ARCH:=		$(shell uname -m | sed -e 's/i.86/i386/')
-OSTYPE:=	$(shell uname -s | tr A-Z a-z)
+REALARCH:=		$(shell uname -m)
+ARCH:=			$(shell uname -m | sed -e 's/i.86/i386/')
+OSTYPE:=		$(shell uname -s | tr A-Z a-z)
 
-MOUNT_DIR=..
+MOUNT_DIR=		..
 
-BUILD_DEBUG_DIR=debug$(ARCH)
-BUILD_RELEASE_DIR=release$(ARCH)
-CLIENT_DIR=$(MOUNT_DIR)/client
-SERVER_DIR=$(MOUNT_DIR)/server
-REF_GL_DIR=$(MOUNT_DIR)/ref_gl
-COMMON_DIR=$(MOUNT_DIR)/qcommon
-LINUX_DIR=$(MOUNT_DIR)/unix
-GAME_DIR=$(MOUNT_DIR)/game
-NULL_DIR=$(MOUNT_DIR)/null
-CTF_DIR=$(MOUNT_DIR)/ctf
-ARENA_DIR=$(GAME_DIR)
+BUILD_RELEASE_DIR=	release$(ARCH)
+BUILD_DEBUG_DIR=	debug$(ARCH)
+CLIENT_DIR=		$(MOUNT_DIR)/client
+SERVER_DIR=		$(MOUNT_DIR)/server
+REF_GL_DIR=		$(MOUNT_DIR)/ref_gl
+COMMON_DIR=		$(MOUNT_DIR)/qcommon
+LINUX_DIR=		$(MOUNT_DIR)/unix
+GAME_DIR=		$(MOUNT_DIR)/game
+NULL_DIR=		$(MOUNT_DIR)/null
+CTF_DIR=		$(MOUNT_DIR)/ctf
+ARENA_DIR=		$(GAME_DIR)
 
-SDLSOUND=1
+SDLSOUND=		1
+OPTIM_LVL=		3 #Integer from 0 to 3, controls GCC's -O CFLAG.
 
-CC=gcc
+CC=			gcc
 
 ifeq ($(ARCH),x86_64)
 	_LIB := lib64
@@ -34,23 +35,23 @@ endif
 
 BASE_CFLAGS=-Dstricmp=strcasecmp -D_stricmp=strcasecmp -D__linux__
 
-RELEASE_CFLAGS=$(BASE_CFLAGS) -O3 -ffast-math -funroll-loops \
+RELEASE_CFLAGS=$(BASE_CFLAGS) -O$(OPTIM_LVL) -ffast-math -funroll-loops \
 	-fomit-frame-pointer -ftree-vectorize -fexpensive-optimizations
 
 ifeq ($(REALARCH),x86_64)
-	RELEASE_CFLAGS+=-march=k8
+	RELEASE_CFLAGS += -march=k8
 else
 ifeq ($(REALARCH),i686)
-	RELEASE_CFLAGS+=-march=i686
+	RELEASE_CFLAGS += -march=i686
 else
 ifeq ($(REALARCH),i586)
-	RELEASE_CFLAGS+=-march=i586
+	RELEASE_CFLAGS += -march=i586
 else
 ifeq ($(REALARCH),i486)
-	RELEASE_CFLAGS+=-march=i486
+	RELEASE_CFLAGS += -march=i486
 else
 ifeq ($(REALARCH),i386)
-	RELEASE_CFLAGS+=-march=i386
+	RELEASE_CFLAGS += -march=i386
 endif
 endif
 endif
@@ -63,7 +64,6 @@ DEBUG_CFLAGS=$(BASE_CFLAGS) -g -ggdb
 LDFLAGS=-ldl -lm
 SVGALDFLAGS=-lvga -lm
 XLDFLAGS=-L/usr/X11R6/$(_LIB) -lX11 -lXext -lXxf86dga
-XCFLAGS=
 
 GLXLDFLAGS=-L/usr/X11R6/$(_LIB) -L/usr/local/$(_LIB) -lX11 -lXext -lXxf86dga -lXxf86vm -lm -ljpeg -lGL -lGLU
 
@@ -109,15 +109,6 @@ ifeq ($(strip $(SDLSOUND)),1)
 	TARGETS+=$(BUILDDIR)/crx.sdl.$(ARCH)
 endif
 
-build_debug:
-	@-mkdir $(BUILD_DEBUG_DIR) \
-		$(BUILD_DEBUG_DIR)/client \
-		$(BUILD_DEBUG_DIR)/ded \
-		$(BUILD_DEBUG_DIR)/ref_gl \
-		$(BUILD_DEBUG_DIR)/game \
-		$(BUILD_DEBUG_DIR)/arena
-	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) CFLAGS="$(DEBUG_CFLAGS)"
-
 build_release:
 	@-mkdir $(BUILD_RELEASE_DIR) \
 		$(BUILD_RELEASE_DIR)/client \
@@ -127,7 +118,16 @@ build_release:
 		$(BUILD_RELEASE_DIR)/arena
 	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) CFLAGS="$(RELEASE_CFLAGS)"
 
-all: build_debug build_release
+build_debug:
+	@-mkdir $(BUILD_DEBUG_DIR) \
+		$(BUILD_DEBUG_DIR)/client \
+		$(BUILD_DEBUG_DIR)/ded \
+		$(BUILD_DEBUG_DIR)/ref_gl \
+		$(BUILD_DEBUG_DIR)/game \
+		$(BUILD_DEBUG_DIR)/arena
+	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) CFLAGS="$(DEBUG_CFLAGS)"
+
+all: build_release build_debug
 
 targets: $(TARGETS)
 
@@ -848,7 +848,7 @@ $(BUILDDIR)/arena/q_shared.o :    $(ARENA_DIR)/q_shared.c
 #############################################################################
 # MISC
 #############################################################################
-
+#Needs work.
 clean: clean-debug clean-release
 
 clean-debug:
@@ -866,7 +866,7 @@ clean2:
 	$(ARENA_OBJS) \
 	$(REF_GL_OBJS) \
 	$(REF_GL_GLX_OBJS) 
-#TODO: Make install use variables assigned here instead of wildcards
+
 install:
 	mv $(BUILD_RELEASE_DIR)/cr* ../../
 	cp release*/game*.so ../../data1
