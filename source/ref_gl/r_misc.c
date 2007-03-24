@@ -441,3 +441,4 @@ void GL_UpdateSwapInterval( void )
 		}
 	}
 }
+

@@ -1559,3 +1559,4 @@ void SP_misc_bluespidernode (edict_t *ent)
 	gi.linkentity (ent);
 	M_droptofloor (ent);
 }
+

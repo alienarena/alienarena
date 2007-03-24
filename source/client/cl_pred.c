@@ -385,3 +385,5 @@ trace_t CL_Trace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int skipNu
 
 	return trace;
 }
+
+
