@@ -1324,7 +1324,7 @@ void SCR_ExecuteLayoutString (char *s)
 			if (ping > 999)
 				ping = 999;
 
-			sprintf(block, "%3d %3d %-16.16s", score, ping, ci->name); //changed this from 12 to 16
+			sprintf(block, "%3d %3d %-12.12s", score, ping, ci->name); 
 
 			if (value == cl.playernum)
 				Draw_ColorString (x, y, block);
