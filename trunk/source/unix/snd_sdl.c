@@ -186,3 +186,4 @@ SNDDMA_Submit (void)
 void SNDDMA_BeginPainting(void)
 {    
 }
+
