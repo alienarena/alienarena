@@ -2,29 +2,11 @@
 # CodeRED Makefile
 #
 
-VERSION=1.30
-VERSION_FN=$(VERSION)$(GLIBC)
+VERSION=1.40
 
-ifneq (,$(findstring libc6,$(shell if [ -e /lib/libc.so.6* ];then echo libc6;fi)))
-GLIBC=-glibc
-else
-GLIBC=
-endif
-
-ifneq (,$(findstring alpha,$(shell uname -m)))
-ARCH=axp
-else
-ifneq (,$(findstring ppc,$(shell uname -m)))
-ARCH=ppc
-else
-ifneq (,$(findstring x86_64,$(shell uname -m)))
-ARCH=x86_64
-else
-ARCH=i386
-endif
-endif
-endif
-NOARCH=noarch
+REALARCH:=	$(shell uname -m)
+ARCH:=		$(shell uname -m | sed -e 's/i.86/i386/')
+OSTYPE:=	$(shell uname -s | tr A-Z a-z)
 
 MOUNT_DIR=..
 
@@ -40,39 +22,39 @@ NULL_DIR=$(MOUNT_DIR)/null
 CTF_DIR=$(MOUNT_DIR)/ctf
 ARENA_DIR=$(GAME_DIR)
 
+SDLSOUND=1
+
 CC=gcc
 
 ifeq ($(ARCH),x86_64)
-_LIB := lib64
+	_LIB := lib64
 else
-_LIB := lib
+	_LIB := lib
 endif
 
 BASE_CFLAGS=-Dstricmp=strcasecmp -D_stricmp=strcasecmp -D__linux__
 
-ifeq ($(ARCH),axp)
-RELEASE_CFLAGS=$(BASE_CFLAGS) -ffast-math -funroll-loops \
-	-fomit-frame-pointer -fexpensive-optimizations
-endif
+RELEASE_CFLAGS=$(BASE_CFLAGS) -O3 -ffast-math -funroll-loops \
+	-fomit-frame-pointer -ftree-vectorize -fexpensive-optimizations
 
-ifeq ($(ARCH),ppc)
-RELEASE_CFLAGS=$(BASE_CFLAGS) -O2 -ffast-math -funroll-loops \
-	-fomit-frame-pointer -fexpensive-optimizations
+ifeq ($(REALARCH),x86_64)
+	RELEASE_CFLAGS+=-march=k8
+else
+ifeq ($(REALARCH),i686)
+	RELEASE_CFLAGS+=-march=i686
+else
+ifeq ($(REALARCH),i586)
+	RELEASE_CFLAGS+=-march=i586
+else
+ifeq ($(REALARCH),i486)
+	RELEASE_CFLAGS+=-march=i486
+else
+ifeq ($(REALARCH),i386)
+	RELEASE_CFLAGS+=-march=i386
 endif
-
-ifeq ($(ARCH),sparc)
-RELEASE_CFLAGS=$(BASE_CFLAGS) -ffast-math -funroll-loops \
-	-fomit-frame-pointer -fexpensive-optimizations
 endif
-
-ifeq ($(ARCH),i386)
-RELEASE_CFLAGS=$(BASE_CFLAGS) -O2 -ffast-math -funroll-loops -falign-loops=2 \
-	-fomit-frame-pointer -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -ftree-vectorize
 endif
-
-ifeq ($(ARCH),x86_64)
-RELEASE_CFLAGS=$(BASE_CFLAGS) -O2 -ffast-math -funroll-loops -falign-loops=2 \
-        -fomit-frame-pointer -falign-jumps=2 -falign-functions=2 -fno-strict-aliasing -ftree-vectorize
+endif
 endif
 
 ARENA_CFLAGS=-DARENA
@@ -83,7 +65,6 @@ SVGALDFLAGS=-lvga -lm
 XLDFLAGS=-L/usr/X11R6/$(_LIB) -lX11 -lXext -lXxf86dga
 XCFLAGS=
 
-GLLDFLAGS=-L/usr/X11R6/$(_LIB) -L/usr/local/$(_LIB) -lX11 -lXext -lvga -lm
 GLXLDFLAGS=-L/usr/X11R6/$(_LIB) -L/usr/local/$(_LIB) -lX11 -lXext -lXxf86dga -lXxf86vm -lm -ljpeg -lGL -lGLU
 
 SDLCFLAGS=$(shell sdl-config --cflags)
@@ -887,7 +868,7 @@ clean2:
 	$(REF_GL_GLX_OBJS) 
 #TODO: Make install use variables assigned here instead of wildcards
 install:
-	mv release*/cr* ../../
+	mv $(BUILD_RELEASE_DIR)/cr* ../../
 	cp release*/game*.so ../../data1
 	mv release*/game*.so ../../arena 
 	rm -rf release*
