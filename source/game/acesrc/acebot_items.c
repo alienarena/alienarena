@@ -58,11 +58,7 @@
 //           
 ///////////////////////////////////////////////////////////////////////
 
-#ifdef __linux__
 #include "../g_local.h"
-#else
-#include "..\g_local.h"
-#endif
 #include "acebot.h"
 
 int num_items = 0;

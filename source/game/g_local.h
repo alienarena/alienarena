@@ -1348,7 +1348,7 @@ extern void DeathcamTrack (edict_t *ent);
 #include "acesrc/acebot.h"
 // ACEBOT_END
 
-#ifdef __linux__
+#ifdef __unix__
 void	FS_FreeFile (void *buffer);
 void	Z_Free (void *ptr);
 void	Com_Error (int code, char *fmt, ...);

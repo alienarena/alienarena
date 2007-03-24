@@ -934,7 +934,7 @@ void Mod_LoadFaces (lump_t *l)
 			rscript_t *rs;
 			rs = (rscript_t *)out->texinfo->image->script;
 			if(rs)	{
-#ifdef __linux__
+#ifdef __unix__
 				rs_stage_t	*stage;
 				stage = rs->stage;
 #else

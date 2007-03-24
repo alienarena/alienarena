@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <winsock.h>
 #endif
 
-#ifdef __linux__
+#ifdef __unix__
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/time.h>
@@ -1865,7 +1865,7 @@ void CL_Init (void)
 	// all archived variables will now be loaded
 
 	Con_Init ();	
-#if defined __linux__ || defined __sgi
+#if defined __unix__ || defined __sgi
 	S_Init ();	
 	VID_Init ();
 #else

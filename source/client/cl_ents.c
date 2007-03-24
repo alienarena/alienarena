@@ -1021,7 +1021,7 @@ void CL_AddPacketEntities (frame_t *frame)
 
 			done = false;
 
-#ifdef __linux__
+#ifdef __unix__
 			
 			while(!done) {
 				if(modelpath[len] == 'h')

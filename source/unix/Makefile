@@ -2,6 +2,28 @@
 # CodeRED Makefile
 #
 
+# Start of configurable options.
+
+# Which compiler to use.
+CC?=gcc
+
+# Enable compilation optimizations when "yes".
+OPTIMIZED_CFLAGS?=yes
+
+# Integer from 0 to 3, controls GCC's -O CFLAG.
+OPTIM_LVL?=3
+
+# Path to standard libraries (e.g. jpeg).
+LOCALBASE?=/usr/local
+
+# Path to X libraries (e.g. GL).
+X11BASE?=/usr/X11R6
+
+# Build binary that uses SDL for sound when "1".
+SDLSOUND?=1
+
+# End of configurable options.
+
 VERSION=		1.40
 
 REALARCH:=		$(shell uname -m)
@@ -10,22 +32,16 @@ OSTYPE:=		$(shell uname -s | tr A-Z a-z)
 
 MOUNT_DIR=		..
 
-BUILD_RELEASE_DIR=	release$(ARCH)
-BUILD_DEBUG_DIR=	debug$(ARCH)
+BUILD_RELEASE_DIR=	release
+BUILD_DEBUG_DIR=	debug
 CLIENT_DIR=		$(MOUNT_DIR)/client
 SERVER_DIR=		$(MOUNT_DIR)/server
 REF_GL_DIR=		$(MOUNT_DIR)/ref_gl
 COMMON_DIR=		$(MOUNT_DIR)/qcommon
-LINUX_DIR=		$(MOUNT_DIR)/unix
+UNIX_DIR=		$(MOUNT_DIR)/unix
 GAME_DIR=		$(MOUNT_DIR)/game
 NULL_DIR=		$(MOUNT_DIR)/null
-CTF_DIR=		$(MOUNT_DIR)/ctf
 ARENA_DIR=		$(GAME_DIR)
-
-SDLSOUND=		1
-OPTIM_LVL=		3 #Integer from 0 to 3, controls GCC's -O CFLAG.
-
-CC=			gcc
 
 ifeq ($(ARCH),x86_64)
 	_LIB := lib64
@@ -33,11 +49,15 @@ else
 	_LIB := lib
 endif
 
-BASE_CFLAGS=-Dstricmp=strcasecmp -D_stricmp=strcasecmp -D__linux__
+BASE_CFLAGS=$(CFLAGS) -Dstricmp=strcasecmp -D_stricmp=strcasecmp -I$(X11BASE)/include
 
-RELEASE_CFLAGS=$(BASE_CFLAGS) -O$(OPTIM_LVL) -ffast-math -funroll-loops \
-	-fomit-frame-pointer -ftree-vectorize -fexpensive-optimizations
+RELEASE_CFLAGS=$(BASE_CFLAGS)
 
+ifeq ($(strip $(OPTIMIZED_CFLAGS)),yes)
+RELEASE_CFLAGS+=-O$(OPTIM_LVL) -ffast-math -funroll-loops -fomit-frame-pointer \
+		-ftree-vectorize -fexpensive-optimizations
+
+ifeq ($(OSTYPE),linux)
 ifeq ($(REALARCH),x86_64)
 	RELEASE_CFLAGS += -march=k8
 else
@@ -57,21 +77,25 @@ endif
 endif
 endif
 endif
+endif
+endif
 
 ARENA_CFLAGS=-DARENA
 
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g -ggdb
-LDFLAGS=-ldl -lm
-SVGALDFLAGS=-lvga -lm
-XLDFLAGS=-L/usr/X11R6/$(_LIB) -lX11 -lXext -lXxf86dga
 
-GLXLDFLAGS=-L/usr/X11R6/$(_LIB) -L/usr/local/$(_LIB) -lX11 -lXext -lXxf86dga -lXxf86vm -lm -ljpeg -lGL -lGLU
+LDFLAGS+=-lm
+# In FreeBSD, dlopen() is in libc.
+ifeq ($(OSTYPE),linux)
+LDFLAGS+=-ldl
+endif
+
+GLXLDFLAGS=-L$(X11BASE)/$(_LIB) -L$(LOCALBASE)/$(_LIB) -lX11 -lXext -lXxf86dga -lXxf86vm -lm -ljpeg -lGL -lGLU
 
 SDLCFLAGS=$(shell sdl-config --cflags)
 SDLLDFLAGS=$(shell sdl-config --libs)
 
 SHLIBEXT=so
-
 SHLIBCFLAGS=-fPIC
 SHLIBLDFLAGS=-shared
 
@@ -83,8 +107,8 @@ DO_O_CC=$(CC) $(CFLAGS) -O -o $@ -c $<
 DO_SHLIB_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 DO_SHLIB_O_CC=$(CC) $(CFLAGS) -O $(SHLIBCFLAGS) -o $@ -c $<
 DO_SHLIB_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
-DO_GL_SHLIB_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) $(GLCFLAGS) -o $@ -c $<
-DO_GL_SHLIB_O_CC=$(CC) $(CFLAGS) -O $(SHLIBCFLAGS) $(GLCFLAGS) -o $@ -c $<
+DO_GL_SHLIB_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
+DO_GL_SHLIB_O_CC=$(CC) $(CFLAGS) -O $(SHLIBCFLAGS) -o $@ -c $<
 DO_AS=$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
 DO_SHLIB_AS=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
 
@@ -94,23 +118,17 @@ DO_ARENA_SHLIB_CC=$(CC) $(CFLAGS) $(ARENA_CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 # SETUP AND BUILD
 #############################################################################
 
-ifeq ($(ARCH),axp)
-TARGETS=$(BUILDDIR)/crded.$(ARCH) \
-	$(BUILDDIR)/game$(ARCH).$(SHLIBEXT) \
-	$(BUILDDIR)/arena/game$(ARCH).$(SHLIBEXT)
-else
-TARGETS=$(BUILDDIR)/crded.$(ARCH) \
-	$(BUILDDIR)/crx.$(ARCH) \
-	$(BUILDDIR)/game$(ARCH).$(SHLIBEXT) \
-	$(BUILDDIR)/arena/game$(ARCH).$(SHLIBEXT)
-endif
+TARGETS=$(BUILDDIR)/crded \
+	$(BUILDDIR)/crx \
+	$(BUILDDIR)/game.$(SHLIBEXT) \
+	$(BUILDDIR)/arena/game.$(SHLIBEXT)
 
 ifeq ($(strip $(SDLSOUND)),1)
-	TARGETS+=$(BUILDDIR)/crx.sdl.$(ARCH)
+	TARGETS+=$(BUILDDIR)/crx.sdl
 endif
 
 build_release:
-	@-mkdir $(BUILD_RELEASE_DIR) \
+	@mkdir -p $(BUILD_RELEASE_DIR) \
 		$(BUILD_RELEASE_DIR)/client \
 		$(BUILD_RELEASE_DIR)/ded \
 		$(BUILD_RELEASE_DIR)/ref_gl \
@@ -119,7 +137,7 @@ build_release:
 	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) CFLAGS="$(RELEASE_CFLAGS)"
 
 build_debug:
-	@-mkdir $(BUILD_DEBUG_DIR) \
+	@mkdir -p $(BUILD_DEBUG_DIR) \
 		$(BUILD_DEBUG_DIR)/client \
 		$(BUILD_DEBUG_DIR)/ded \
 		$(BUILD_DEBUG_DIR)/ref_gl \
@@ -213,18 +231,13 @@ SOUND_OSS_OBJS = \
 SOUND_SDL_OBJS = \
 	$(BUILDDIR)/client/snd_sdl.o
 
-ifeq ($(ARCH),axp)
-CODERED_AS_OBJS =  #blank
-else
 CODERED_AS_OBJS = \
 	$(BUILDDIR)/client/snd_mixa.o
-endif
 
-
-$(BUILDDIR)/crx.$(ARCH) : $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
+$(BUILDDIR)/crx : $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
 	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS)
 
-$(BUILDDIR)/crx.sdl.$(ARCH) : $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
+$(BUILDDIR)/crx.sdl : $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
 	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(SDLLDFLAGS)
 
 $(BUILDDIR)/client/cl_cin.o :     $(CLIENT_DIR)/cl_cin.c
@@ -338,34 +351,34 @@ $(BUILDDIR)/client/sv_user.o :    $(SERVER_DIR)/sv_user.c
 $(BUILDDIR)/client/sv_world.o :   $(SERVER_DIR)/sv_world.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/cd_unix.o :   $(LINUX_DIR)/cd_unix.c
+$(BUILDDIR)/client/cd_unix.o :   $(UNIX_DIR)/cd_unix.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/q_shunix.o :  $(LINUX_DIR)/q_shunix.c
+$(BUILDDIR)/client/q_shunix.o :  $(UNIX_DIR)/q_shunix.c
 	$(DO_O_CC)
 
-$(BUILDDIR)/client/vid_menu.o :   $(LINUX_DIR)/vid_menu.c
+$(BUILDDIR)/client/vid_menu.o :   $(UNIX_DIR)/vid_menu.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/vid_so.o :     $(LINUX_DIR)/vid_so.c
+$(BUILDDIR)/client/vid_so.o :     $(UNIX_DIR)/vid_so.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/snd_unix.o :  $(LINUX_DIR)/snd_unix.c
+$(BUILDDIR)/client/snd_unix.o :  $(UNIX_DIR)/snd_unix.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/snd_mixa.o :   $(LINUX_DIR)/snd_mixa.s
+$(BUILDDIR)/client/snd_mixa.o :   $(UNIX_DIR)/snd_mixa.s
 	$(DO_AS)
 
-$(BUILDDIR)/client/sys_unix.o :  $(LINUX_DIR)/sys_unix.c
+$(BUILDDIR)/client/sys_unix.o :  $(UNIX_DIR)/sys_unix.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/rw_unix.o :  $(LINUX_DIR)/rw_unix.c
+$(BUILDDIR)/client/rw_unix.o :  $(UNIX_DIR)/rw_unix.c
 	$(DO_O_CC)
 
-$(BUILDDIR)/client/glob.o :       $(LINUX_DIR)/glob.c
+$(BUILDDIR)/client/glob.o :       $(UNIX_DIR)/glob.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/net_udp.o :    $(LINUX_DIR)/net_udp.c
+$(BUILDDIR)/client/net_udp.o :    $(UNIX_DIR)/net_udp.c
 	$(DO_CC)
 
 $(BUILDDIR)/ref_gl/r_bloom.o :        $(REF_GL_DIR)/r_bloom.c
@@ -410,16 +423,13 @@ $(BUILDDIR)/ref_gl/r_math.o :	    $(REF_GL_DIR)/r_math.c
 $(BUILDDIR)/ref_gl/r_vlights.o:     $(REF_GL_DIR)/r_vlights.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/qgl_unix.o :      $(LINUX_DIR)/qgl_unix.c
+$(BUILDDIR)/ref_gl/qgl_unix.o :      $(UNIX_DIR)/qgl_unix.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/gl_glx.o :      $(LINUX_DIR)/gl_glx.c
+$(BUILDDIR)/ref_gl/gl_glx.o :      $(UNIX_DIR)/gl_glx.c
 	$(DO_GL_SHLIB_CC)
 
-$(BUILDDIR)/ref_gl/rw_in_svgalib.o :  $(LINUX_DIR)/rw_in_svgalib.c
-	$(DO_GL_SHLIB_CC)
-
-$(BUILDDIR)/client/snd_sdl.o :     $(LINUX_DIR)/snd_sdl.c
+$(BUILDDIR)/client/snd_sdl.o :     $(UNIX_DIR)/snd_sdl.c
 	$(DO_CC) $(SDLCFLAGS)
 
 #############################################################################
@@ -457,7 +467,7 @@ CRDED_OBJS = \
 	$(BUILDDIR)/ded/cl_null.o \
 	$(BUILDDIR)/ded/cd_null.o
 
-$(BUILDDIR)/crded.$(ARCH) : $(CRDED_OBJS)
+$(BUILDDIR)/crded : $(CRDED_OBJS)
 	$(CC) $(CFLAGS) -o $@ $(CRDED_OBJS) $(LDFLAGS)
 
 $(BUILDDIR)/ded/cmd.o :        $(COMMON_DIR)/cmd.c
@@ -514,16 +524,16 @@ $(BUILDDIR)/ded/sv_user.o :    $(SERVER_DIR)/sv_user.c
 $(BUILDDIR)/ded/sv_world.o :   $(SERVER_DIR)/sv_world.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/q_shunix.o :  $(LINUX_DIR)/q_shunix.c
+$(BUILDDIR)/ded/q_shunix.o :  $(UNIX_DIR)/q_shunix.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/sys_unix.o :  $(LINUX_DIR)/sys_unix.c
+$(BUILDDIR)/ded/sys_unix.o :  $(UNIX_DIR)/sys_unix.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/glob.o :       $(LINUX_DIR)/glob.c
+$(BUILDDIR)/ded/glob.o :       $(UNIX_DIR)/glob.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/net_udp.o :    $(LINUX_DIR)/net_udp.c
+$(BUILDDIR)/ded/net_udp.o :    $(UNIX_DIR)/net_udp.c
 	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/cd_null.o     : $(NULL_DIR)/cd_null.c    
@@ -576,7 +586,7 @@ GAME_OBJS = \
 
 
 
-$(BUILDDIR)/game$(ARCH).$(SHLIBEXT) : $(GAME_OBJS)
+$(BUILDDIR)/game.$(SHLIBEXT) : $(GAME_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(GAME_OBJS)
 
 
@@ -732,7 +742,7 @@ ARENA_OBJS = \
 	$(BUILDDIR)/arena/p_weapon.o \
 	$(BUILDDIR)/arena/vehicles.o
 
-$(BUILDDIR)/arena/game$(ARCH).$(SHLIBEXT) : $(ARENA_OBJS)
+$(BUILDDIR)/arena/game.$(SHLIBEXT) : $(ARENA_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(ARENA_OBJS)
 
 

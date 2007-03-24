@@ -1021,7 +1021,7 @@ void RS_LoadScript(char *script)
 	free(buf);
 }
 
-#ifdef __linux__
+#ifdef __unix__
 void RS_ScanPathForScripts (void)
 {
 	char	script[MAX_OSPATH];
@@ -1153,7 +1153,7 @@ void RS_ScaleTexcoords (rs_stage_t *stage, float *os, float *ot)
 		}
 	}
 }
-#ifdef __linux__
+#ifdef __unix__
 __inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
 #else
 _inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
@@ -1170,7 +1170,7 @@ _inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
 
 }
 
-#ifdef __linux__
+#ifdef __unix__
 __inline void RS_RotateST2 (float *os, float *ot, float degrees)
 #else
 _inline void RS_RotateST2 (float *os, float *ot, float degrees)
@@ -1385,7 +1385,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	float		*v;
 	int			i, nv;
 	vec3_t		wv, vectors[3];
-#ifdef __linux__
+#ifdef __unix__
 	rs_stage_t	*stage;
 #else
 	rs_stage_t	*stage = rs->stage;

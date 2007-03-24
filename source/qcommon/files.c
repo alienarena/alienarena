@@ -569,7 +569,7 @@ void FS_AddGameDirectory (char *dir)
 	// add the directory to the search path
 	//
 	search = Z_Malloc (sizeof(searchpath_t));
-#ifdef __linux__
+#ifdef __unix__
 	strncpy (search->filename, dir, sizeof(search->filename)-1);
 	search->filename[sizeof(search->filename)-1] = 0;
 #else
@@ -596,7 +596,7 @@ void FS_AddGameDirectory (char *dir)
 
 }
 
-#ifdef __linux__
+#ifdef __unix__
 /*
 ================
 FS_AddHomeAsGameDirectory
@@ -634,7 +634,7 @@ Called to find where to write a file (demos, savegames, etc)
 */
 char *FS_Gamedir (void)
 {
-#ifdef __linux__
+#ifdef __unix__
 	return fs_gamedir;
 #else
 	if (*fs_gamedir)
@@ -651,13 +651,13 @@ FS_ExecAutoexec
 */
 void FS_ExecAutoexec (void)
 {
-#ifdef __linux__
+#ifdef __unix__
 	searchpath_t *s, *end;
 #else
 	char *dir;
 #endif
 	char name [MAX_QPATH];
-#ifdef __linux__
+#ifdef __unix__
 	if (fs_searchpaths == fs_base_searchpaths)
 		end = NULL;
 #else
@@ -666,7 +666,7 @@ void FS_ExecAutoexec (void)
 		Com_sprintf(name, sizeof(name), "%s/%s/autoexec.cfg", fs_basedir->string, dir); 
 #endif
 	else
-#ifdef __linux__
+#ifdef __unix__
 		end = fs_base_searchpaths;
 	
 	// search through all the paths for an autoexec.cfg file	
@@ -747,7 +747,7 @@ void FS_SetGamedir (char *dir)
 		if (fs_cddir->string[0])
 			FS_AddGameDirectory (va("%s/%s", fs_cddir->string, dir) );
 		FS_AddGameDirectory (va("%s/%s", fs_basedir->string, dir) );
-#ifdef __linux__
+#ifdef __unix__
 		FS_AddHomeAsGameDirectory(dir);
 #endif
 	}
@@ -846,7 +846,7 @@ char **FS_ListFiles( char *findname, int *numfiles, unsigned musthave, unsigned 
 	return list;
 }
 
-#ifdef __linux__
+#ifdef __unix__
 void FS_FreeFileList (char **list, int n) // jit
 {
 	int i;
@@ -953,7 +953,7 @@ char *FS_NextPath (char *prevpath)
 	searchpath_t	*s;
 	char			*prev;
 
-#ifdef __linux__
+#ifdef __unix__
 	prev = NULL; /* fs_gamedir is the first directory in the searchpath */
 #else
 	if (!prevpath)
@@ -965,7 +965,7 @@ char *FS_NextPath (char *prevpath)
 	{
 		if (s->pack)
 			continue;
-#ifdef __linux__
+#ifdef __unix__
 		if (prevpath == NULL)
 			return s->filename;
 #endif
@@ -1009,7 +1009,7 @@ void FS_InitFilesystem (void)
 	//
 	FS_AddGameDirectory (va("%s/"BASEDIRNAME, fs_basedir->string) );
 
-#ifdef __linux__
+#ifdef __unix__
 	FS_AddHomeAsGameDirectory(BASEDIRNAME);
 #endif
 	// any set gamedirs will be freed up to here

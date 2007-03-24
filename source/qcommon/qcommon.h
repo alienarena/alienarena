@@ -49,15 +49,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #elif defined __linux__
 
-#define BUILDSTRING "Linux"
+#define buildstring "linux"
+
+#ifdef __i386__
+#define cpustring "i386"
+#elif defined __alpha__
+#define cpustring "axp"
+#else
+#define cpustring "unknown"
+#endif
+
+#elif defined __FreeBSD__
+
+#define BUILDSTRING "FreeBSD"
 
 #ifdef __i386__
 #define CPUSTRING "i386"
-#elif defined __alpha__
-#define CPUSTRING "axp"
+#elif defined __amd64__
+#define CPUSTRING "amd64"
 #else
 #define CPUSTRING "Unknown"
 #endif
+
+#elif defined __sun__
 
 #elif defined __sun__
 
@@ -717,7 +731,7 @@ int		FS_LoadFile (char *path, void **buffer);
 void	FS_Read (void *buffer, int len, FILE *f);
 // properly handles partial reads
 
-#ifdef __linux__
+#ifdef __unix__
 void	FS_FreeFileList (char **list, int n);
 #endif
 void	FS_FreeFile (void *buffer);
