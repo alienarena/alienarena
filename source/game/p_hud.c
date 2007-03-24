@@ -438,7 +438,6 @@ void EndIntermission(void)
         if(!ent->is_bot && ent->client->chasetoggle > 0)
         {
             ent->client->chasetoggle = 0;
-            printf("Found chase toggle on client %d\n", i);
             /* Stop the chasecam from moving */
             VectorClear (ent->client->chasecam->velocity);
 
