@@ -49,14 +49,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #elif defined __linux__
 
-#define buildstring "linux"
+#define BUILDSTRING "Linux"
 
 #ifdef __i386__
-#define cpustring "i386"
+#define CPUSTRING "i386"
 #elif defined __alpha__
-#define cpustring "axp"
+#define CPUSTRING "axp"
 #else
-#define cpustring "unknown"
+#define CPUSTRING "Unknown"
 #endif
 
 #elif defined __FreeBSD__
