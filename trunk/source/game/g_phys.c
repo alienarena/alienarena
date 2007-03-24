@@ -356,7 +356,13 @@ retry:
 		mask = MASK_SOLID;
 
 	trace = gi.trace (start, ent->mins, ent->maxs, end, ent, mask);
-	
+
+	if (trace.startsolid || trace.allsolid)
+	{
+		mask ^= CONTENTS_DEADMONSTER;
+		trace = gi.trace (start, ent->mins, ent->maxs, end, ent, mask);
+	}
+
 	VectorCopy (trace.endpos, ent->s.origin);
 	gi.linkentity (ent);
 

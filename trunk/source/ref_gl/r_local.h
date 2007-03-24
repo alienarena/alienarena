@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 #include "glext.h"
 
-#ifndef __linux__
+#ifndef __unix__
 #ifndef GL_COLOR_INDEX8_EXT
 #define GL_COLOR_INDEX8_EXT GL_COLOR_INDEX
 #endif
@@ -270,7 +270,7 @@ void R_DrawSkyBox (void);
 void R_DrawSkyBoxVooDoo (void);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type);
-#ifdef __linux__
+#ifdef __unix__
 void R_ReadFogScript(char config_file[128]);
 void R_ReadMusicScript(char config_file[128]);
 #endif

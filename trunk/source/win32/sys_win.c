@@ -47,7 +47,7 @@ static HANDLE		hinput, houtput;
 unsigned	sys_msg_time;
 unsigned	sys_frame_time;
 
-#ifndef __linux__
+#ifndef __unix__
 extern void Q_strncpyz( char *dest, const char *src, size_t size );
 #endif
 
@@ -57,7 +57,7 @@ static HANDLE		qwclsemaphore;
 int			argc;
 char		*argv[MAX_NUM_ARGVS];
 
-#ifndef __linux__
+#ifndef __unix__
 
 #define CONSOLE_WINDOW_CLASS_NAME	"CRX Console"
 #define CONSOLE_WINDOW_NAME			"CodeRED Console"
@@ -667,7 +667,7 @@ void Sys_Init (void)
 #endif
 
 	timeBeginPeriod( 1 );
-#ifndef __linux__
+#ifndef __unix__
 	Cvar_Get("sys_hInstance", va("%i", sys_hInstance), CVAR_ROM);
 	Cvar_Get("sys_wndProc", va("%i", MainWndProc), CVAR_ROM);
 #endif
@@ -684,7 +684,7 @@ void Sys_Init (void)
 	else if ( vinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )
 		s_win95 = true;
 
-#ifdef __linux__
+#ifdef __unix__
 	if (dedicated->value)
 	{
 		if (!AllocConsole ())

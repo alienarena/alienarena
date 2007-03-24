@@ -18,10 +18,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-//Do other unix platforms use this?
-/*#ifndef __linux__
-#error You shouldnt be including this file on non-Linux platforms
-#endif*/
+#ifndef __unix__
+#error You shouldnt be including this file on non-Unix platforms
+#endif
 
 /*#ifndef __GLW_LINUX_H__
 #define __GLW_LINUX_H__

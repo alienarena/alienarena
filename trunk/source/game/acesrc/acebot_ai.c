@@ -61,13 +61,8 @@
 //       to provide a "higher" level of AI. 
 ////////////////////////////////////////////////////////////////////////
 
-#ifdef __linux__
 #include "../g_local.h"
 #include "../m_player.h"
-#else
-#include "..\g_local.h"
-#include "..\m_player.h"
-#endif
 
 #include "acebot.h"
 

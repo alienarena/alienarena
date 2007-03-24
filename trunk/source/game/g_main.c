@@ -415,7 +415,7 @@ void EndDMLevel (void)
 
 		strcpy( shortname, COM_Parse( &s ) );
 		l = strlen(shortname);
-#ifndef __linux__
+#ifndef __unix__
 		for (j=0 ; j<l ; j++)
 			shortname[j] = toupper(shortname[j]);
 #endif

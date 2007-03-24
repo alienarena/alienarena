@@ -129,7 +129,7 @@ void Com_Printf (char *fmt, ...)
 	// also echo to debugging console
 	Sys_ConsoleOutput (msg);
 
-#ifndef __linux__
+#ifndef __unix__
 	// Also echo to dedicated console
 	Sys_Print(msg);
 #endif
@@ -783,7 +783,9 @@ char *MSG_ReadString (sizebuf_t *msg_read)
 	l = 0;
 	do
 	{
-		c = MSG_ReadChar (msg_read);
+		// sku - replaced MSG_ReadChar with MSG_ReadByte to avoid
+		// potentional vulnerability
+		c = MSG_ReadByte (msg_read);
 		if (c == -1 || c == 0)
 			break;
 		string[l] = c;
@@ -803,7 +805,9 @@ char *MSG_ReadStringLine (sizebuf_t *msg_read)
 	l = 0;
 	do
 	{
-		c = MSG_ReadChar (msg_read);
+		// sku - replaced MSG_ReadChar with MSG_ReadByte to avoid
+		// potentional vulnerability
+		c = MSG_ReadByte (msg_read);
 		if (c == -1 || c == 0 || c == '\n')
 			break;
 		string[l] = c;
@@ -1517,7 +1521,7 @@ void Qcommon_Frame (int msec)
 {
 
 	int		time_before, time_between, time_after;
-#ifdef __linux__
+#ifdef __unix__
 	char	*s;
 #endif
 
@@ -1567,7 +1571,7 @@ void Qcommon_Frame (int msec)
 		c_brush_traces = 0;
 		c_pointcontents = 0;
 	}
-#ifdef __linux__
+#ifdef __unix__
 	do
 	{
 		s = Sys_ConsoleInput ();

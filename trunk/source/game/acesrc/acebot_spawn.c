@@ -80,11 +80,7 @@ void ACESP_SaveBots()
     FILE *pOut;
 	int i,count = 0;
 
-#ifdef __linux__
 	if((pOut = fopen("botinfo/bots.tmp", "wb" )) == NULL)
-#else
-	if((pOut = fopen("botinfo\\bots.tmp", "wb" )) == NULL)
-#endif
 		return; // bail
 	
 	// Get number of bots
@@ -240,7 +236,7 @@ void ACESP_HoldSpawn(edict_t *self)
 
 }
 
-#ifdef __linux__
+#ifdef __unix__
 void ACECO_ReadConfig(char config_file[128]) //use standard c routines for linux
 {
 	FILE *fp;
@@ -547,12 +543,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 		//if not a respawn, load bot configuration file(specific to each bot)
 		info = Info_ValueForKey (bot->client->pers.userinfo, "name");
  
-#ifdef __linux__
 		sprintf(bot_configfilename, "botinfo/%s.cfg", info);
-		//write something else for linux only
-#else
-		sprintf(bot_configfilename, "botinfo\\%s.cfg", info);
-#endif	
 		ACECO_ReadConfig(bot_configfilename);
 
 		//set config items

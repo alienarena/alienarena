@@ -56,11 +56,7 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-#ifdef __linux__
 #include "../g_local.h"
-#else
-#include "..\g_local.h"
-#endif
 #include "acebot.h"
 
 qboolean debug_mode=false;

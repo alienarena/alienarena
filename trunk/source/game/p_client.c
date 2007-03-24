@@ -333,7 +333,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			//here is where the bot chat features will be added.
 			//default is on.  Setting to 1 turns it off.
 		
-#ifndef __linux__
+#ifndef __unix__
 			if ((!((int)(dmflags->value) & DF_BOTCHAT)) && self->is_bot)
 			{
 				msg = random() * 12;

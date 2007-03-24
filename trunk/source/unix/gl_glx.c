@@ -34,7 +34,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#ifdef __linux__
 #include <sys/vt.h>
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -344,10 +346,8 @@ void HandleEvents(void)
 				} 
 				else 
 				{
-					mx = -((int)event.xmotion.x - mwx);// * 2;
-					my = -((int)event.xmotion.y - mwy);// * 2;
-					mwx = event.xmotion.x;
-					mwy = event.xmotion.y;
+					mx += ((int)event.xmotion.x - mwx);
+					my += ((int)event.xmotion.y - mwy);
 
 					if (mx || my)
 						dowarp = true;

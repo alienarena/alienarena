@@ -279,7 +279,7 @@ R_ReadFogScript
 The linux "c" version of this function
 =================
 */
-#ifdef __linux__
+#ifdef __unix__
 void R_ReadFogScript(char config_file[128])
 {
 	FILE *fp;
@@ -339,7 +339,7 @@ R_ReadMusicScript
 The linux "c" version of this function
 =================
 */
-#ifdef __linux__
+#ifdef __unix__
 void R_ReadMusicScript(char config_file[128])
 {
 	FILE *fp;
@@ -1594,7 +1594,7 @@ void R_Register( void )
 	gl_flashblend = Cvar_Get ("gl_flashblend", "0", 0);
 	gl_playermip = Cvar_Get ("gl_playermip", "0", 0);
 	gl_monolightmap = Cvar_Get( "gl_monolightmap", "0", 0 );
-#ifdef __linux__
+#ifdef __unix__
 	gl_driver = Cvar_Get( "gl_driver", "libGL.so.1", CVAR_ARCHIVE );
 #else
 	gl_driver = Cvar_Get( "gl_driver", "opengl32", CVAR_ARCHIVE );
@@ -1832,7 +1832,7 @@ int R_Init( void *hinstance, void *hWnd )
 		Cvar_Set( "scr_drawall", "0" );
 	}
 
-#ifdef __linux__
+#ifdef __unix__
 	Cvar_SetValue( "gl_finish", 1 );
 #endif
 
@@ -1904,7 +1904,7 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...GL_EXT_point_parameters not found\n" );
 	}
 
-#ifdef __linux__
+#ifdef __unix__
 	if ( strstr( gl_config.extensions_string, "3DFX_set_global_palette" ))
 	{
 		if ( gl_ext_palettedtexture->value )
