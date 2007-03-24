@@ -508,11 +508,8 @@ void SVC_DirectConnect (void)
 		{
 			if (NET_CompareBaseAdr (net_from, svs.challenges[i].adr))
 			{
-				// sku - ignore zero challenges
-				if( svs.challenges[i].challenge && challenge == svs.challenges[i].challenge ) {
-					svs.challenges[i].challenge = 0;
+				if (challenge == svs.challenges[i].challenge)
 					break;		// good
-				}
 				Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nBad challenge.\n");
 				return;
 			}
