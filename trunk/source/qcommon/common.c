@@ -1590,7 +1590,7 @@ void Qcommon_Frame (int msec)
 			Cbuf_AddText("\n");
 		}
 	}
-#endif;
+#endif
 
 	Cbuf_Execute ();
 
