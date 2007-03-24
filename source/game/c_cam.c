@@ -1,5 +1,7 @@
 #include "g_local.h"
 
+/*#define DEBUG_DEATHCAM*/ /* Uncomment this or set as a CFLAG at build time */
+
 void DeathcamTrack (edict_t *ent);
 
 /*  The ent is the owner of the chasecam  */
@@ -22,6 +24,12 @@ void DeathcamStart (edict_t *ent)
     chasecam->owner = ent;
     chasecam->solid = SOLID_NOT;
     chasecam->movetype = MOVETYPE_FLYMISSILE;
+
+	/* Stop movement prediction */
+    ent->client->ps.pmove.pm_flags |= PMF_NO_PREDICTION;
+                                                                                                
+	/* Don't send camera info to other players */
+    ent->svflags |= SVF_NOCLIENT;
 
 	/* Now, make the angles of the player model, (!NOT THE HUMAN VIEW!) be
      * copied to the same angle of the chasecam entity */
@@ -55,8 +63,16 @@ void DeathcamRemove (edict_t *ent, char *opt)
     /* Stop the chasecam from moving */
     VectorClear (ent->client->chasecam->velocity);
 
+	/* Re-enable sending entity info to other clients */
+	ent->svflags &= ~SVF_NOCLIENT;
+
     if(ent->client->oldplayer->client != NULL)
-        free(ent->client->oldplayer->client);
+    {
+		#ifdef DEBUG_DEATHCAM
+		printf("--- Deathcam = %p\n", ent->client->oldplayer->client);
+		#endif
+		free(ent->client->oldplayer->client);
+    }
 
     G_FreeEdict (ent->client->oldplayer);
     G_FreeEdict (ent->client->chasecam);
@@ -103,6 +119,9 @@ void CheckDeathcam_Viewent (edict_t *ent)
     {
         cl = (gclient_t *) malloc(sizeof(gclient_t));
         ent->client->oldplayer->client = cl;
+		#ifdef DEBUG_DEATHCAM
+		printf("+++ Deathcam = %p\n", cl);
+		#endif
     }
 
     if (ent->client->oldplayer)
