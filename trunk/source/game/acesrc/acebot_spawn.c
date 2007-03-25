@@ -165,7 +165,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	{
 		
 		total_players = real_players + i + 1;
-		
+
 		fread(userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn); 
 
 		info = Info_ValueForKey (userinfo, "name");
@@ -781,6 +781,11 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 	bot->yaw_speed = 100; // yaw speed
 	bot->inuse = true;
 	bot->is_bot = true;
+
+	/* TJ: Bots need to know the password for passworded servers
+		otherwise ClientConnect() fails */
+	if (*password->string && strcmp(password->string, "none"))
+		Info_SetValueForKey(userinfo, "password", password->string);
 
 	// To allow bots to respawn
 	if(userinfo == NULL)
