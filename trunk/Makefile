@@ -878,6 +878,10 @@ clean2:
 
 install:
 	mv $(BUILD_RELEASE_DIR)/cr* .
-	cp release*/game*.so data1/
-	mv release*/game*.so arena/
-	rm -rf release*
+	cp $(BUILD_RELEASE_DIR)/game.so data1/
+	mv $(BUILD_RELEASE_DIR)/game.so arena/
+
+install-debug:
+        mv $(BUILD_DEBUG_DIR)/cr* .
+        cp $(BUILD_DEBUG_DIR)/game.so data1/
+        mv $(BUILD_DEBUG_DIR)/game.so arena/
