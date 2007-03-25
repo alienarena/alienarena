@@ -882,6 +882,6 @@ install:
 	mv $(BUILD_RELEASE_DIR)/game.so arena/
 
 install-debug:
-        mv $(BUILD_DEBUG_DIR)/cr* .
-        cp $(BUILD_DEBUG_DIR)/game.so data1/
-        mv $(BUILD_DEBUG_DIR)/game.so arena/
+	mv $(BUILD_DEBUG_DIR)/cr* .
+	cp $(BUILD_DEBUG_DIR)/game.so data1/
+	mv $(BUILD_DEBUG_DIR)/game.so arena/
