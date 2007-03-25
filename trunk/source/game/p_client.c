@@ -2057,7 +2057,8 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	// set name
 	s = Info_ValueForKey (userinfo, "name");
 	//fix player name if corrupted
-	s[16] = 0;
+	if(s != NULL && strlen(s) > 16)
+		s[16] = 0;
 	strncpy (ent->client->pers.netname, s, sizeof(ent->client->pers.netname)-1);
 
 	//spectator mode
