@@ -1473,8 +1473,13 @@ void CL_Shell_f (void) {
 		Com_Printf("Usage: shell command");
 		return;
 	}
-
-	system(Cmd_Args());
+	
+	char line[130];
+	FILE *fp;
+	fp=popen(Cmd_Args(),"r");
+	while (fgets(line, sizeof line, fp))
+		Com_Printf("%s", line);
+	pclose(fp);
 }
 #endif	
 
