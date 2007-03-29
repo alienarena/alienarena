@@ -670,7 +670,7 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 		else if(ACEMV_CanMove(self, MOVE_BACK))
 			ucmd->forwardmove = -400;
 
-		if(!self->groundentity) // if there is ground continue, otherwise wait for next move.
+		if(!M_CheckBottom || !self->groundentity) // if there is ground continue, otherwise wait for next move.
 		{
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
 				ucmd->forwardmove = 400;
