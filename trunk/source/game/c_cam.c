@@ -58,24 +58,27 @@ void DeathcamStart (edict_t *ent)
 
 void DeathcamRemove (edict_t *ent, char *opt)
 {    
-    ent->client->chasetoggle = 0;
+	if(ent->client->chasetoggle == 1) /* Safety check */
+	{
+		ent->client->chasetoggle = 0;
 
-    /* Stop the chasecam from moving */
-    VectorClear (ent->client->chasecam->velocity);
+		/* Stop the chasecam from moving */
+		VectorClear (ent->client->chasecam->velocity);
 
-	/* Re-enable sending entity info to other clients */
-	ent->svflags &= ~SVF_NOCLIENT;
+		/* Re-enable sending entity info to other clients */
+		ent->svflags &= ~SVF_NOCLIENT;
 
-    if(ent->client->oldplayer->client != NULL)
-    {
-		#ifdef DEBUG_DEATHCAM
-		printf("--- Deathcam = %p\n", ent->client->oldplayer->client);
-		#endif
-		free(ent->client->oldplayer->client);
-    }
+		if(ent->client->oldplayer->client != NULL)
+		{
+			#ifdef DEBUG_DEATHCAM
+			printf("--- Deathcam = %p\n", ent->client->oldplayer->client);
+			#endif
+			free(ent->client->oldplayer->client);
+		}
 
-    G_FreeEdict (ent->client->oldplayer);
-    G_FreeEdict (ent->client->chasecam);
+		G_FreeEdict (ent->client->oldplayer);
+		G_FreeEdict (ent->client->chasecam);
+	}
 }
 
 /* The "ent" is the chasecam */   

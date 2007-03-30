@@ -2414,7 +2414,7 @@ void ClientDisconnect (edict_t *ent)
 
 	DeadDropDeathball(ent);	
 
-	if(ent->deadflag)
+	if(ent->deadflag && ent->client->chasetoggle == 1)
 		DeathcamRemove(ent, "off");
 
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value)  //adjust teams and scores
