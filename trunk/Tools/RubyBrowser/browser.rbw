@@ -32,7 +32,7 @@ include Config
 $debug = false   # set to true/false to enable/disable debug output (don't use rubyw to launch!)
 $offline = false # set to true/false to enable/disable offline debug mode (extra data files required)
 $title = 'Alien Arena Server Browser'
-$version = '0.3a'
+$version = '0.4a'
 
 =begin
 	The ServerLink class allows simple access to Alien Arena master/games servers, without
@@ -536,7 +536,14 @@ class Browser
 	
 	# Load the @config hash form file, if exists, else set defaults
 	def LoadConfig
-		parameters = {'gamedir'=>'../../', 'gameexe'=>'crx', 'browser'=>'firefox'}
+		# Set up default parameters
+		parameters = {'gamedir'=>'../../', 'browser'=>'firefox'}
+		if DetectWindows()
+			parameters['gameexe'] = 'crx'
+		else
+			parameters['gameexe'] = 'crx.sdl'
+		end
+		
 		@config.clear # empty hash table
 		file = open('browser.ini', 'r')
 		file.each do
