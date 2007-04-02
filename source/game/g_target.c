@@ -225,7 +225,7 @@ void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
 	if (level.intermissiontime)
 		return;		// already activated
 
-	if (!deathmatch->value && !coop->value)
+	if (!deathmatch->value)
 	{
 		if (g_edicts[1].health <= 0)
 			return;

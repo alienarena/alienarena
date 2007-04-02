@@ -11,8 +11,7 @@ The normal starting point for a level.
 */
 void SP_info_player_start(edict_t *self)
 {
-	if (!coop->value)
-		return;
+	return;
 }
 
 /*QUAKED info_player_deathmatch (1 0 1) (-16 -16 -24) (16 16 32)
@@ -45,20 +44,6 @@ void SP_info_player_blue(edict_t *self)
 	}
 	//SP_misc_teleporter_dest (self);
 }
-/*QUAKED info_player_coop (1 0 1) (-16 -16 -24) (16 16 32)
-potential spawning position for coop games
-*/
-
-void SP_info_player_coop(edict_t *self)
-{
-	if (!coop->value)
-	{
-		G_FreeEdict (self);
-		return;
-	}
-
-}
-
 
 /*QUAKED info_player_intermission (1 0 1) (-16 -16 -24) (16 16 32)
 The deathmatch intermission point will be at one of these
@@ -106,10 +91,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 	int			i, j, pos, total, place;
 	edict_t		*cl_ent;
 
-	if (coop->value && attacker->client)
-		meansOfDeath |= MOD_FRIENDLY_FIRE;
-
-	if (deathmatch->value || coop->value)
+	if (deathmatch->value)
 	{
 		ff = meansOfDeath & MOD_FRIENDLY_FIRE;
 		mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
@@ -729,7 +711,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		self->client->respawn_time = level.time + 3.8;
 
 		//go into 3rd person view
-		if (deathmatch->value || coop->value)
+		if (deathmatch->value)
 			if(!self->is_bot)
 				DeathcamStart(self);
 
@@ -937,7 +919,6 @@ void InitClientResp (gclient_t *client)
 {
 	memset (&client->resp, 0, sizeof(client->resp));
 	client->resp.enterframe = level.framenum;
-	client->resp.coop_respawn = client->pers;
 }
 
 /*
@@ -962,9 +943,6 @@ void SaveClientData (void)
 			continue;
 		game.clients[i].pers.health = ent->health;
 		game.clients[i].pers.max_health = ent->max_health;
-//		game.clients[i].pers.powerArmorActive = (ent->flags & FL_POWER_ARMOR);
-		if (coop->value)
-			game.clients[i].pers.score = ent->client->resp.score;
 	}
 }
 
@@ -974,8 +952,6 @@ void FetchClientEntData (edict_t *ent)
 	ent->max_health = ent->client->pers.max_health;
 //	if (ent->client->pers.powerArmorActive)
 		ent->flags |= FL_POWER_ARMOR;
-	if (coop->value)
-		ent->client->resp.score = ent->client->pers.score;
 }
 
 
@@ -1301,12 +1277,9 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 	// find a single player start spot
 	if (!spot)
 	{
-		if (!game.spawnpoint[0])
-		{	// there wasn't a spawnpoint without a target, so use any
-			spot = G_Find (spot, FOFS(classname), "info_player_start");
-		}
+		spot = G_Find (spot, FOFS(classname), "info_player_start");
 		if (!spot)
-			gi.error ("Couldn't find spawn point %s\n", game.spawnpoint);
+			gi.error ("Couldn't find spawn point!");
 	}
 	
 	VectorCopy (spot->s.origin, origin);
@@ -1426,7 +1399,7 @@ void CopyToBodyQue (edict_t *ent)
 
 void respawn (edict_t *self)
 {
-	if (deathmatch->value || coop->value)
+	if (deathmatch->value)
 	{
 
 #if 0
@@ -1523,7 +1496,7 @@ void spectator_respawn (edict_t *ent)
 		DeathcamRemove (ent, "off");
 
 	// clear client on respawn
-	ent->client->resp.score = ent->client->pers.score = 0;
+	ent->client->resp.score = 0;
 
 	ent->svflags &= ~SVF_NOCLIENT;
 	PutClientInServer (ent);
@@ -1575,6 +1548,7 @@ void PutClientInServer (edict_t *ent)
 	char playermodel[MAX_OSPATH] = " ";
 	char modelpath[MAX_OSPATH] = " ";
 	FILE *file;
+	char userinfo[MAX_INFO_STRING];
 
 	// find a spawn point
 	// do it before setting health back up, so farthest
@@ -1586,38 +1560,12 @@ void PutClientInServer (edict_t *ent)
 	client->is_bot = 0;
 	client->kill_streak = 0;
 
-	// deathmatch wipes most client data every spawn
-	if (deathmatch->value)
-	{
-		char		userinfo[MAX_INFO_STRING];
 
-		resp = client->resp;
-		memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
-		InitClientPersistant (client);
-		ClientUserinfoChanged (ent, userinfo, SPAWN);
-	}
-	else if (coop->value)
-	{
-		int			n;
-		char		userinfo[MAX_INFO_STRING];
 
-		resp = client->resp;
-		memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
-		// this is kind of ugly, but it's how we want to handle keys in coop
-		for (n = 0; n < MAX_ITEMS; n++)
-		{
-			if (itemlist[n].flags & IT_KEY)
-				resp.coop_respawn.inventory[n] = client->pers.inventory[n];
-		}
-		client->pers = resp.coop_respawn;
-		ClientUserinfoChanged (ent, userinfo, SPAWN);
-		if (resp.score > client->pers.score)
-			client->pers.score = resp.score;
-	}
-	else
-	{
-		memset (&resp, 0, sizeof(resp));
-	}
+	resp = client->resp;
+	memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
+	InitClientPersistant (client);
+	ClientUserinfoChanged (ent, userinfo, SPAWN);
 
 	// clear everything but the persistant data
 	saved = client->pers;

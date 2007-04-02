@@ -51,7 +51,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	SPAWNFLAG_NOT_MEDIUM		0x00000200
 #define	SPAWNFLAG_NOT_HARD			0x00000400
 #define	SPAWNFLAG_NOT_DEATHMATCH	0x00000800
-#define	SPAWNFLAG_NOT_COOP			0x00001000
 
 // edict->flags
 #define	FL_FLY					0x00000001
@@ -224,22 +223,18 @@ typedef struct
 #define	IT_WEAPON		1		// use makes active weapon
 #define	IT_AMMO			2
 #define IT_ARMOR		4
-#define IT_STAY_COOP	8
-#define IT_KEY			16
-#define IT_POWERUP		32
+#define IT_KEY			8
+#define IT_POWERUP		16
 
 // gitem_t->weapmodel for weapons indicates model index
 #define WEAP_BLASTER			1 
-#define WEAP_SHOTGUN			2 
-#define WEAP_SUPERSHOTGUN		3 
-#define WEAP_MACHINEGUN			4 
-#define WEAP_CHAINGUN			5 
-#define WEAP_GRENADES			6 
-#define WEAP_GRENADELAUNCHER	7 
+#define WEAP_SMARTGUN			2 
+#define WEAP_CHAINGUN			3 
+#define WEAP_FLAMETHROWER		5 
 #define WEAP_ROCKETLAUNCHER		8 
-#define WEAP_HYPERBLASTER		9 
-#define WEAP_RAILGUN			10
-#define WEAP_BFG				11
+#define WEAP_DISRUPTOR			9 
+#define WEAP_BEAMGUN			10
+#define WEAP_VAPORIZER			11
 #define WEAP_BOMBER				12
 #define WEAP_STRAFER			13
 #define WEAP_DEATHBALL			14
@@ -290,10 +285,6 @@ typedef struct
 								// and increment only if 1, 2, or 3
 
 	gclient_t	*clients;		// [maxclients]
-
-	// can't store spawnpoint in level, because
-	// it would get overwritten by the savegame restore
-	char		spawnpoint[512];	// needed for coop respawns
 
 	// store latched cvars here that we want to get at often
 	int			maxclients;
@@ -352,7 +343,6 @@ typedef struct
 	edict_t		*current_entity;	// entity running from G_RunFrame
 	int			body_que;			// dead bodies
 
-	int			power_cubes;		// ugly necessity for coop
 } level_locals_t;
 
 
@@ -531,7 +521,6 @@ extern	edict_t			*g_edicts;
 extern	cvar_t	*maxentities;
 extern	cvar_t	*deathmatch;
 extern  cvar_t  *ctf;
-extern	cvar_t	*coop;
 extern  cvar_t  *tca;
 extern	cvar_t	*dmflags;
 extern	cvar_t	*skill;
@@ -951,9 +940,6 @@ typedef struct
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;
 
-	int			power_cubes;	// used for tracking the cubes in coop games
-	int			score;			// for calculating total unit score in coop games
-
 	int			game_helpchanged;
 	int			helpchanged;
 
@@ -963,7 +949,6 @@ typedef struct
 // client data that stays across deathmatch respawns
 typedef struct
 {
-	client_persistant_t	coop_respawn;	// what to set client->pers to on a respawn
 	int			enterframe;			// level.framenum the client entered the game
 	int			score;				// frags, etc
 	int			deaths;				// deaths, etc

@@ -830,7 +830,7 @@ char *bindnames[][2] =
 {"cmd help", 		"help computer" }, 
 
 {"use Alien Disruptor",	"alien disruptor" },
-{"use Pulse Rifle",		"chain pistol" },
+{"use Pulse Rifle",		"chaingun" },
 {"use Flame Thrower",	"flame thrower" },
 {"use Rocket Launcher",	"rocket launcher" },
 {"use Alien Smartgun",	"alien smartgun" },
@@ -2205,7 +2205,6 @@ static void StartGame( void )
 	cl.servercount = -1;
 	M_ForceMenuOff ();
 	Cvar_SetValue( "deathmatch", 0 );
-	Cvar_SetValue( "coop", 0 );
 	Cvar_SetValue( "ctf", 0 );
 
 	Cvar_SetValue( "gamerules", 0 );		//PGM
@@ -3514,7 +3513,6 @@ void StartServerActionFunc( void *self )
 	if(s_rules_box.curvalue == 0)
 	{
 		Cvar_SetValue ("deathmatch", !s_rules_box.curvalue );
-		Cvar_SetValue ("coop", 0 );	
 		Cvar_SetValue ("ctf", 0);
 		Cvar_SetValue ("tca", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
@@ -3522,7 +3520,6 @@ void StartServerActionFunc( void *self )
 	else if(s_rules_box.curvalue == 1)
 	{
 		Cvar_SetValue ("deathmatch", 1 );	// deathmatch is always true for ctf, right?
-		Cvar_SetValue ("coop", 0 );			
 		Cvar_SetValue ("ctf", 1 ); //set both dm and ctf
 		Cvar_SetValue ("tca", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
@@ -3530,7 +3527,6 @@ void StartServerActionFunc( void *self )
 	else if(s_rules_box.curvalue == 2) //aoa mode
 	{
 		Cvar_SetValue ("deathmatch", 1 );	// deathmatch is always true for aoa.
-		Cvar_SetValue ("coop", 0 );			
 		Cvar_SetValue ("ctf", 0 ); 
 		Cvar_SetValue ("tca", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
@@ -3538,7 +3534,6 @@ void StartServerActionFunc( void *self )
 	else if(s_rules_box.curvalue == 3) //deathball mode
 	{
 		Cvar_SetValue ("deathmatch", 1 );	// deathmatch is always true for deathball.
-		Cvar_SetValue ("coop", 0 );			
 		Cvar_SetValue ("ctf", 0 ); 
 		Cvar_SetValue ("tca", 0);	
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
@@ -3546,7 +3541,6 @@ void StartServerActionFunc( void *self )
 	else if(s_rules_box.curvalue == 4) //tca mode
 	{
 		Cvar_SetValue ("deathmatch", 1 );	// deathmatch is always true for tca.
-		Cvar_SetValue ("coop", 0 );			
 		Cvar_SetValue ("ctf", 0 ); 
 		Cvar_SetValue ("tca", 1);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );

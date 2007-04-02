@@ -1189,8 +1189,7 @@ void SV_Init (void)
 
 	rcon_password = Cvar_Get ("rcon_password", "", 0);
 	Cvar_Get ("skill", "1", 0);
-	Cvar_Get ("deathmatch", "0", CVAR_LATCH);
-	Cvar_Get ("coop", "0", CVAR_LATCH);
+	Cvar_Get ("deathmatch", "1", CVAR_LATCH); //Alien Arena is *always* deathmatch 
 	Cvar_Get ("ctf", "0", CVAR_LATCH);
 	Cvar_Get ("dmflags", va("%i", DF_INSTANT_ITEMS), CVAR_SERVERINFO);
 	Cvar_Get ("fraglimit", "0", CVAR_SERVERINFO);

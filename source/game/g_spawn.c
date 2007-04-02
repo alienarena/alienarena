@@ -15,7 +15,6 @@ void SP_item_health_mega (edict_t *self);
 
 void SP_info_player_start (edict_t *ent);
 void SP_info_player_deathmatch (edict_t *ent);
-void SP_info_player_coop (edict_t *ent);
 void SP_info_player_intermission (edict_t *ent);
 void SP_info_player_red (edict_t *ent);
 void SP_info_player_blue(edict_t *ent);
@@ -103,7 +102,6 @@ spawn_t	spawns[] = {
 
 	{"info_player_start", SP_info_player_start},
 	{"info_player_deathmatch", SP_info_player_deathmatch},
-	{"info_player_coop", SP_info_player_coop},
 	{"info_player_intermission", SP_info_player_intermission},
 	{"info_player_red", SP_info_player_red},
 	{"info_player_blue", SP_info_player_blue},
@@ -471,7 +469,6 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	memset (g_edicts, 0, game.maxentities * sizeof (g_edicts[0]));
 
 	strncpy (level.mapname, mapname, sizeof(level.mapname)-1);
-	strncpy (game.spawnpoint, spawnpoint, sizeof(game.spawnpoint)-1);
 
 	// set client fields on player ents
 	for (i=0 ; i<game.maxclients ; i++)
@@ -514,7 +511,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 			}
 			else
 			{
-				if ( /* ((coop->value) && (ent->spawnflags & SPAWNFLAG_NOT_COOP)) || */
+				if ( 
 					((skill->value == 0) && (ent->spawnflags & SPAWNFLAG_NOT_EASY)) ||
 					((skill->value == 1) && (ent->spawnflags & SPAWNFLAG_NOT_MEDIUM)) ||
 					(((skill->value == 2) || (skill->value == 3)) && (ent->spawnflags & SPAWNFLAG_NOT_HARD))
@@ -526,7 +523,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 					}
 			}
 
-			ent->spawnflags &= ~(SPAWNFLAG_NOT_EASY|SPAWNFLAG_NOT_MEDIUM|SPAWNFLAG_NOT_HARD|SPAWNFLAG_NOT_COOP|SPAWNFLAG_NOT_DEATHMATCH);
+			ent->spawnflags &= ~(SPAWNFLAG_NOT_EASY|SPAWNFLAG_NOT_MEDIUM|SPAWNFLAG_NOT_HARD|SPAWNFLAG_NOT_DEATHMATCH);
 		}
 
 		ED_CallSpawn (ent);
