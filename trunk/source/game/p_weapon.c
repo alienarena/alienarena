@@ -1431,7 +1431,7 @@ void Machinegun_Fire (edict_t *ent)
 	if(ent->client->ps.gunframe == 6 && ent->client->buttons & BUTTON_ATTACK2) {
 		VectorSet(offset, 1, 1, ent->viewheight-0.5);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-		fire_shotgun (ent, start, forward, damage/2, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT, MOD_SSHOTGUN);
+		fire_shotgun (ent, start, forward, damage/2, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT, MOD_CGALTFIRE);
 		
 		//play a booming sound
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("world/rocket.wav"), 1, ATTN_NORM, 0);

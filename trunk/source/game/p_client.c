@@ -174,7 +174,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				else
 					message = "blew himself up";
 				break;
-			case MOD_BFG_BLAST:
+			case MOD_VAPORIZER:
 				message = "should have used a smaller gun";
 				break;
 			default:
@@ -264,27 +264,17 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			case MOD_BLASTER:
 				message = "was blasted by";
 				break;
-			case MOD_SHOTGUN:
-				message = "was gunned down by";
-				break;
-			case MOD_SSHOTGUN:
+			case MOD_CGALTFIRE:
 				message = "was blown away by";
-				message2 = "'s super shotgun";
-				break;
-			case MOD_MACHINEGUN:
-				message = "was machinegunned by";
+				message2 = "'s chaingun burst";
 				break;
 			case MOD_CHAINGUN:
 				message = "was cut in half by";
 				message2 = "'s chaingun";
 				break;
-			case MOD_GRENADE:
+			case MOD_FLAME:
 				message = "was burned by";
 				message2 = "'s napalm";
-				break;
-			case MOD_G_SPLASH:
-				message = "was shredded by";
-				message2 = "'s shrapnel";
 				break;
 			case MOD_ROCKET:
 				message = "ate";
@@ -294,30 +284,26 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				message = "almost dodged";
 				message2 = "'s rocket";
 				break;
-			case MOD_HYPERBLASTER:
+			case MOD_BEAMGUN:
 				message = "was melted by";
 				message2 = "'s beamgun";
 				break;
-			case MOD_RAILGUN:
+			case MOD_DISRUPTOR:
 				message = "was disrupted by";
 				break;
-			case MOD_BFG_LASER:
+			case MOD_SMARTGUN:
 				message = "saw the pretty lights from";
 				message2 = "'s smartgun";
 				break;
-			case MOD_BFG_BLAST:
+			case MOD_VAPORIZER:
 				message = "was disintegrated by";
 				message2 = "'s vaporizer blast";
 				break;
-			case MOD_BFG_EFFECT:
+			case MOD_VAPORALTFIRE:
 				message = "couldn't hide from";
 				message2 = "'s vaporizer";
 				break;
-			case MOD_HANDGRENADE:
-				message = "caught";
-				message2 = "'s handgrenade";
-				break;
-			case MOD_PLASMA_SPLASH:
+			case MOD_PLASMA_SPLASH: //blaster splash damage
 				message = "was melted";
 				message2 = "'s plasma";
 				break;
