@@ -484,20 +484,16 @@ extern  int print3;
 // means of death
 #define MOD_UNKNOWN			0
 #define MOD_BLASTER			1
-#define MOD_SHOTGUN			2
-#define MOD_SSHOTGUN		3
-#define MOD_MACHINEGUN		4
+#define MOD_CGALTFIRE		3
 #define MOD_CHAINGUN		5
-#define MOD_GRENADE			6
-#define MOD_G_SPLASH		7
+#define MOD_FLAME			6
 #define MOD_ROCKET			8
 #define MOD_R_SPLASH		9
-#define MOD_HYPERBLASTER	10
-#define MOD_RAILGUN			11
-#define MOD_BFG_LASER		12
-#define MOD_BFG_BLAST		13
-#define MOD_BFG_EFFECT		14
-#define MOD_HANDGRENADE		15
+#define MOD_BEAMGUN			10
+#define MOD_DISRUPTOR		11
+#define MOD_SMARTGUN		12
+#define MOD_VAPORIZER		13
+#define MOD_VAPORALTFIRE	14
 #define MOD_PLASMA_SPLASH	16
 #define MOD_WATER			17
 #define MOD_SLIME			18

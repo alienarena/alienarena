@@ -308,7 +308,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	if (other->takedamage)
 	{
 		if (self->spawnflags & 1)
-			mod = MOD_HYPERBLASTER;
+			mod = MOD_BEAMGUN;
 		else
 			mod = MOD_BLASTER;
 		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
@@ -349,7 +349,7 @@ void blasterball_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 	if (other->takedamage)
 	{
 		if (self->spawnflags & 1)
-			mod = MOD_HYPERBLASTER;
+			mod = MOD_BEAMGUN;
 		else
 			mod = MOD_BLASTER;
 		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
@@ -472,7 +472,7 @@ int speed, int effect, qboolean hyper)
 	gi.multicast (self->s.origin, MULTICAST_PHS);   
       
 	if ((tr.ent != self) && (tr.ent->takedamage)) {
-        T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_HYPERBLASTER);
+        T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BEAMGUN);
 		self->client->resp.weapon_hits[6]++;
 		gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 	}
@@ -716,7 +716,7 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 		bomb->think = G_FreeEdict;
 		bomb->classname = "bomb";
 		gi.linkentity (bomb);
-		T_RadiusDamage(bomb, self, 50, NULL, 200, MOD_BFG_EFFECT, 0); 
+		T_RadiusDamage(bomb, self, 50, NULL, 200, MOD_VAPORALTFIRE, 0); 
 		G_FreeEdict (bomb);
 	}
 
@@ -858,7 +858,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 		bomb->think = G_FreeEdict;
 		bomb->classname = "bomb";
 		gi.linkentity (bomb);
-		T_RadiusDamage(bomb, self, 50, NULL, 200, MOD_BFG_EFFECT, -1); 
+		T_RadiusDamage(bomb, self, 50, NULL, 200, MOD_VAPORALTFIRE, -1); 
 	
 		gi.WriteByte (svc_temp_entity);
 		if (bomb->waterlevel)
@@ -974,7 +974,7 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 				ignore = NULL;
 
 			if ((tr.ent != self) && (tr.ent->takedamage)) {
-				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_RAILGUN);
+				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_DISRUPTOR);
 				self->client->resp.weapon_hits[1]++;
 				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 			}
@@ -1038,7 +1038,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 				ignore = NULL;
 
 			if ((tr.ent != self) && (tr.ent->takedamage)) {
-				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BFG_BLAST);
+				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_VAPORIZER);
 				self->client->resp.weapon_hits[7]++;
 				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 			}
@@ -1079,7 +1079,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	bomb->think = G_FreeEdict;
 	bomb->classname = "bomb";
 	gi.linkentity (bomb);
-	T_RadiusDamage(bomb, self, 200, NULL, 200, MOD_BFG_EFFECT, 7); //ridiculously powerful!
+	T_RadiusDamage(bomb, self, 200, NULL, 200, MOD_VAPORALTFIRE, 7); //ridiculously powerful!
 	G_FreeEdict (bomb);
 
 	if (self->client)
@@ -1239,7 +1239,7 @@ void floater_think (edict_t *self)
 
 			// hurt it if we can
 			if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER) && (tr.ent != self->owner)) {
-				T_Damage (tr.ent, self, self->owner, dir, tr.endpos, vec3_origin, dmg, 1, DAMAGE_ENERGY, MOD_BFG_LASER);
+				T_Damage (tr.ent, self, self->owner, dir, tr.endpos, vec3_origin, dmg, 1, DAMAGE_ENERGY, MOD_SMARTGUN);
 				self->owner->client->resp.weapon_hits[2]++;
 				self->owner->client->resp.weapon_shots[2]++;
 				gi.sound (self->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
@@ -1583,7 +1583,7 @@ void Fire_Think (edict_t *self)
 
 	if (self->FlameDelay < level.time)
 	{
-		T_Damage (self->owner, self, self->orb, dir, self->owner->s.origin,vec3_origin, damage, 0, DAMAGE_NO_KNOCKBACK,MOD_GRENADE);
+		T_Damage (self->owner, self, self->orb, dir, self->owner->s.origin,vec3_origin, damage, 0, DAMAGE_NO_KNOCKBACK,MOD_FLAME);
 		self->FlameDelay = level.time + 0.8;
 	}
 	VectorCopy(self->owner->s.origin,self->s.origin);
@@ -1639,7 +1639,7 @@ void flame_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *su
 
 	if (self->owner->client)
 		PlayerNoise(self->owner, self->s.origin, PNOISE_IMPACT);
-	T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, 6, 0, 0,MOD_GRENADE);
+	T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, 6, 0, 0,MOD_FLAME);
 
 	// core explosion - prevents firing it into the wall/floor
 	if (other->health)
