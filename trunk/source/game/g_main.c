@@ -35,7 +35,6 @@ edict_t		*g_edicts;
 
 cvar_t	*deathmatch;
 cvar_t  *ctf;
-cvar_t	*coop;
 cvar_t  *tca;
 //mutators
 cvar_t  *instagib;

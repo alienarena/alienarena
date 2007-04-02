@@ -31,7 +31,7 @@ INTERMISSION
 
 void MoveClientToIntermission (edict_t *ent)
 {
-	if (deathmatch->value || coop->value)
+	if (deathmatch->value)
 		ent->client->showscores = true;
 	VectorCopy (level.intermission_origin, ent->s.origin);
 	ent->client->ps.pmove.origin[0] = level.intermission_origin[0]*8;
@@ -65,7 +65,7 @@ void MoveClientToIntermission (edict_t *ent)
 
 	// add the layout
 
-	if (deathmatch->value || coop->value)
+	if (deathmatch->value)
 	{
 		DeathmatchScoreboardMessage (ent, NULL);
 		gi.unicast (ent, true);
@@ -104,7 +104,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	winner->client->ps.pmove.origin[1] = winner->s.origin[1];
 	winner->client->ps.pmove.origin[2] = winner->s.origin[2];
 
-	if (deathmatch->value || coop->value)
+	if (deathmatch->value)
 		winner->client->showscores = true;
 	
 	winner->client->ps.gunindex = 0;
@@ -130,7 +130,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	
 	// add the layout
 
-	if (deathmatch->value || coop->value)
+	if (deathmatch->value)
 	{
 		DeathmatchScoreboardMessage (winner, NULL);
 		gi.unicast (winner, true);
@@ -227,7 +227,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 
 void BeginIntermission (edict_t *targ)
 {
-	int		i, n;
+	int		i;
 	edict_t	*ent, *client;
 	edict_t *winner = NULL;
 	edict_t *firstrunnerup = NULL;
@@ -261,33 +261,6 @@ void BeginIntermission (edict_t *targ)
 
 	level.intermissiontime = level.time;
 	level.changemap = targ->map;
-
-	if (strstr(level.changemap, "*"))
-	{
-		if (coop->value)
-		{
-			for (i=0 ; i<maxclients->value ; i++)
-			{
-				client = g_edicts + 1 + i;
-				if (!client->inuse)
-					continue;
-				// strip players of all keys between units
-				for (n = 0; n < MAX_ITEMS; n++)
-				{
-					if (itemlist[n].flags & IT_KEY)
-						client->client->pers.inventory[n] = 0;
-				}
-			}
-		}
-	}
-	else
-	{
-		if (!deathmatch->value)
-		{
-			level.exitintermission = 1;		// go immediately to the next level
-			return;
-		}
-	}
 
 	level.exitintermission = 0;
 
@@ -660,7 +633,7 @@ void Cmd_Score_f (edict_t *ent)
 	ent->client->showinventory = false;
 	ent->client->showhelp = false;
 
-	if (!deathmatch->value && !coop->value)
+	if (!deathmatch->value)
 		return;
 
 	if (ent->client->showscores)

@@ -165,9 +165,6 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 	if ((skill->value == 1 && quantity >= 2) || (skill->value >= 2 && quantity >= 1))
 		return false;
 
-	if ((coop->value) && (ent->item->flags & IT_STAY_COOP) && (quantity > 0))
-		return false;
-
 	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
 
 	if (deathmatch->value)
@@ -1053,23 +1050,6 @@ void Use_Sproing (edict_t *ent, gitem_t *item)
 
 qboolean Pickup_Key (edict_t *ent, edict_t *other)
 {
-	if (coop->value)
-	{
-		if (strcmp(ent->classname, "key_power_cube") == 0)
-		{
-			if (other->client->pers.power_cubes & ((ent->spawnflags & 0x0000ff00)>> 8))
-				return false;
-			other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
-			other->client->pers.power_cubes |= ((ent->spawnflags & 0x0000ff00) >> 8);
-		}
-		else
-		{
-			if (other->client->pers.inventory[ITEM_INDEX(ent->item)])
-				return false;
-			other->client->pers.inventory[ITEM_INDEX(ent->item)] = 1;
-		}
-		return true;
-	}
 	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
 	return true;
 }
@@ -1457,7 +1437,7 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 	if (!taken)
 		return;
 
-	if (!((coop->value) &&  (ent->item->flags & IT_STAY_COOP)) || (ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)))
+	if (ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM))
 	{
 		if (ent->flags & FL_RESPAWN)
 			ent->flags &= ~FL_RESPAWN;
@@ -1774,18 +1754,6 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 		}
 	}
 
-	if (coop->value && (strcmp(ent->classname, "key_power_cube") == 0))
-	{
-		ent->spawnflags |= (1 << (8 + level.power_cubes));
-		level.power_cubes++;
-	}
-
-	// don't let them drop items that stay in a coop game
-	if ((coop->value) && (item->flags & IT_STAY_COOP))
-	{
-		item->drop = NULL;
-	}
-	
 	//CTF
 	//Don't spawn the flags unless enabled
 	if (!ctf->value &&
@@ -2225,7 +2193,7 @@ always owned, never in the world
 		0,
 		0,
 		NULL,
-		IT_WEAPON|IT_STAY_COOP,
+		IT_WEAPON,
 		WEAP_BLASTER,
 		NULL,
 		0,
@@ -2248,8 +2216,8 @@ always owned, never in the world
 		0,
 		1,
 		"Alien Smart Grenade",
-		IT_WEAPON|IT_STAY_COOP,
-		WEAP_SHOTGUN,
+		IT_WEAPON,
+		WEAP_SMARTGUN,
 		NULL,
 		0,
 /* precache */ "weapons/clank.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav"
@@ -2271,8 +2239,8 @@ always owned, never in the world
 		0,
 		2,
 		"Bullets",
-		IT_WEAPON|IT_STAY_COOP,
-		WEAP_SUPERSHOTGUN,
+		IT_WEAPON,
+		WEAP_CHAINGUN,
 		NULL,
 		0,
 /* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav machgf5b.wav"
@@ -2294,8 +2262,8 @@ always owned, never in the world
 		0,
 		1,
 		"Napalm",
-		IT_WEAPON|IT_STAY_COOP,
-		WEAP_CHAINGUN,
+		IT_WEAPON,
+		WEAP_FLAMETHROWER,
 		NULL,
 		0,
 /* precache */ "weapons/grenlb1b.wav weapons/grenlf1a.wav"
@@ -2317,7 +2285,7 @@ always owned, never in the world
 		0,
 		1,
 		"Rockets",
-		IT_WEAPON|IT_STAY_COOP,
+		IT_WEAPON,
 		WEAP_ROCKETLAUNCHER,
 		NULL,
 		0,
@@ -2340,8 +2308,8 @@ always owned, never in the world
 		0,
 		1,
 		"Cells",
-		IT_WEAPON|IT_STAY_COOP,
-		WEAP_HYPERBLASTER,
+		IT_WEAPON,
+		WEAP_DISRUPTOR,
 		NULL,
 		0,
 /* precache */ "weapons/railgf1a.wav"
@@ -2363,8 +2331,8 @@ always owned, never in the world
 		0,
 		1,
 		"Cells",
-		IT_WEAPON|IT_STAY_COOP,
-		WEAP_RAILGUN,
+		IT_WEAPON,
+		WEAP_BEAMGUN,
 		NULL,
 		0,
 /* precache */ "weapons/hyprbf1a.wav"
@@ -2386,8 +2354,8 @@ always owned, never in the world
 		0,
 		2,
 		"Slugs",
-		IT_WEAPON|IT_STAY_COOP,
-		WEAP_BFG,
+		IT_WEAPON,
+		WEAP_VAPORIZER,
 		NULL,
 		0,
 /* precache */ "weapons/energyfield.wav smallmech/sight.wav"
@@ -2627,7 +2595,7 @@ key for computer centers
 		2,
 		0,
 		NULL,
-		IT_STAY_COOP|IT_KEY,
+		IT_KEY,
 		0,
 		NULL,
 		0,
@@ -2651,7 +2619,7 @@ key for the city computer
 		2,
 		0,
 		NULL,
-		IT_STAY_COOP|IT_KEY,
+		IT_KEY,
 		0,
 		NULL,
 		0,
@@ -2675,7 +2643,7 @@ security pass for the security level
 		2,
 		0,
 		NULL,
-		IT_STAY_COOP|IT_KEY,
+		IT_KEY,
 		0,
 		NULL,
 		0,
@@ -2699,7 +2667,7 @@ normal door key - blue
 		2,
 		0,
 		NULL,
-		IT_STAY_COOP|IT_KEY,
+		IT_KEY,
 		0,
 		NULL,
 		0,
@@ -2723,7 +2691,7 @@ normal door key - red
 		2,
 		0,
 		NULL,
-		IT_STAY_COOP|IT_KEY,
+		IT_KEY,
 		0,
 		NULL,
 		0,
@@ -2765,7 +2733,7 @@ normal door key - red
 /* width */		2,
 		60,
 		NULL,
-		IT_STAY_COOP|IT_POWERUP,
+		IT_POWERUP,
 		0,
 		NULL,
 		0,
@@ -2785,7 +2753,7 @@ normal door key - red
 /* width */		2,
 		60,
 		NULL,
-		IT_STAY_COOP|IT_POWERUP,
+		IT_POWERUP,
 		0,
 		NULL,
 		0,

@@ -315,21 +315,10 @@ void SV_InitGame (void)
 
 	svs.initialized = true;
 
-	if (Cvar_VariableValue ("coop") && Cvar_VariableValue ("deathmatch"))
-	{
-		Com_Printf("Deathmatch and Coop both set, disabling Coop\n");
-		Cvar_FullSet ("coop", "0",  CVAR_SERVERINFO | CVAR_LATCH);
-	}
-
-	// dedicated servers are can't be single player and are usually DM
-	// so unless they explicity set coop, force it to deathmatch
+	// dedicated servers are always deathmatch
 	if (dedicated->value)
 	{
-		if (!Cvar_VariableValue ("coop"))
-			Cvar_FullSet ("deathmatch", "1",  CVAR_SERVERINFO | CVAR_LATCH);
-		//ctf servers must also be running deathmatch rules 
-		if (Cvar_VariableValue ("ctf"))
-			Cvar_FullSet ("deathmatch", "1", CVAR_SERVERINFO | CVAR_LATCH);
+		Cvar_FullSet ("deathmatch", "1",  CVAR_SERVERINFO | CVAR_LATCH);
 	}
 
 	//set player move speed according to excessive value
@@ -341,36 +330,12 @@ void SV_InitGame (void)
 		pm_maxspeed = 300;
 
 	// init clients
-	if (Cvar_VariableValue ("deathmatch"))
+	if (Cvar_VariableValue ("deathmatch") || Cvar_VariableValue ("ctf"))
 	{
 		if (maxclients->value <= 1)
 			Cvar_FullSet ("maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH);
 		else if (maxclients->value > MAX_CLIENTS)
 			Cvar_FullSet ("maxclients", va("%i", MAX_CLIENTS), CVAR_SERVERINFO | CVAR_LATCH);
-	}
-	else if (Cvar_VariableValue ("coop"))
-	{
-		if (maxclients->value <= 1 || maxclients->value > 4)
-			Cvar_FullSet ("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
-#ifdef COPYPROTECT
-		if (!sv.attractloop && !dedicated->value)
-			Sys_CopyProtect ();
-#endif
-	}
-	else if (Cvar_VariableValue ("ctf"))
-	{
-		if (maxclients->value <= 1)
-			Cvar_FullSet ("maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH);
-		else if (maxclients->value > MAX_CLIENTS)
-			Cvar_FullSet ("maxclients", va("%i", MAX_CLIENTS), CVAR_SERVERINFO | CVAR_LATCH);
-	}
-	else	// non-deathmatch, non-coop is one player
-	{
-		Cvar_FullSet ("maxclients", "1", CVAR_SERVERINFO | CVAR_LATCH);
-#ifdef COPYPROTECT
-		if (!sv.attractloop)
-			Sys_CopyProtect ();
-#endif
 	}
 
 	svs.spawncount = rand();
@@ -445,10 +410,6 @@ void SV_Map (qboolean attractloop, char *levelstring, qboolean loadgame)
 	}
 	else
 		Cvar_Set ("nextserver", "");
-
-	//ZOID special hack for end game screen in coop mode
-	if (Cvar_VariableValue ("coop") && !Q_stricmp(level, "victory.pcx"))
-		Cvar_Set ("nextserver", "gamemap \"*start\"");
 
 	// if there is a $, use the remainder as a spawnpoint
 	ch = strstr(level, "$");

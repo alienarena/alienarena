@@ -522,7 +522,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	else
 	{
 		// don't throw any debris in net games
-		if (!deathmatch->value && !coop->value)
+		if (!deathmatch->value)
 		{
 			if ((surf) && !(surf->flags & (SURF_WARP|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING)))
 			{
@@ -614,7 +614,7 @@ void stinger_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 	else
 	{
 		// don't throw any debris in net games
-		if (!deathmatch->value && !coop->value)
+		if (!deathmatch->value)
 		{
 			if ((surf) && !(surf->flags & (SURF_WARP|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING)))
 			{
