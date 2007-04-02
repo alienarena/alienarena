@@ -782,16 +782,26 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 	bot->inuse = true;
 	bot->is_bot = true;
 
-	/* TJ: Bots need to know the password for passworded servers
+	/* Tony: Bots need to know the password for passworded servers
 		otherwise ClientConnect() fails */
 	if (*password->string && strcmp(password->string, "none"))
 		Info_SetValueForKey(userinfo, "password", password->string);
+
 
 	// To allow bots to respawn
 	if(userinfo == NULL)
 		ACESP_SetName(bot, name, skin, team);
 	else 
-		ClientConnect (bot, userinfo);
+	{
+		if(!ClientConnect (bot, userinfo))
+		{	
+			/* Tony: Sometimes bots are refused entry to servers - give up gracefully */
+			safe_bprintf (PRINT_MEDIUM, "Bot was refused entry to server.\n");
+			bot->inuse = false;
+			bot->is_bot = false;
+			return;
+		}
+	}
 	
 	G_InitEdict (bot);
 
