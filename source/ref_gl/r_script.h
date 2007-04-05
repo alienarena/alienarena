@@ -108,7 +108,8 @@ typedef struct rs_stage_s
 	int						alphafunc;		// software alpha effects
 
 	qboolean				has_alpha;		// for sorting
-	qboolean				lensflare;		//for adding lensflares
+	qboolean				lensflare;		// for adding lensflares
+	qboolean				normalmap;		// for normalmaps
 
 	struct rs_stage_s		*next;			// next stage
 } rs_stage_t;

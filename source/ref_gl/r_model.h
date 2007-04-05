@@ -138,6 +138,7 @@ typedef struct mtexinfo_s
 	int			numframes;
 	struct mtexinfo_s	*next;		// animation chain
 	image_t		*image;
+	image_t		*normalMap;
 	struct		rscript_t	*script;
 	int			value;
 } mtexinfo_t;
@@ -192,6 +193,7 @@ typedef struct msurface_s
 	// we'll keep it consistent with the Q2 way of doing things
 	struct  msurface_s	*detailchain;
 	// MH - detail textures end
+	struct  msurface_s  *normalchain;
 
 	mtexinfo_t	*texinfo;
 	float		c_s, c_t;
@@ -317,6 +319,7 @@ typedef struct model_s
 
 	// for alias models and skins
 	image_t		*skins[MAX_MD2SKINS];
+
 	struct rscript_t	*script[MAX_MD2SKINS];
 
 	int			extradatasize;

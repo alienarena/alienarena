@@ -650,6 +650,38 @@ void Mod_LoadTexinfo (lump_t *l)
 		out->image->script = RS_FindScript(name);
 		if (out->image->script)
 			RS_ReadyScript(out->image->script);
+
+		//get normal map if it exists(courtesy of Ben Lane)
+		if( ( strlen( name ) + 8 ) <= MAX_QPATH )
+		{
+			// Ben Lane 30 March 2005: Now that the texture map has been dealt
+			// with we can load the corresponding normal map. Normal maps have
+			// the same name as their corresponding texture maps, but have an
+			// extra '.nm.tga' tagged onto the end. The 'nm' stands for
+			// 'Normal Map'. Normal maps are always 24-bit TGAs.
+
+			// Ben Lane 20 April 2005: Since we are loading a normal map we
+			// specify the image type as 'it_bump' (for 'bumpmap'). Normal maps
+			// are now treated slightly differently to other image types - see
+			// GL_Upload32() for details.
+			out->normalMap = GL_FindImage( name, it_bump );
+
+			if( out->normalMap == NULL )
+			{
+				//set this to something that we can easily filter out and not be drawn
+				//cannot use -1 or 0, because those cause rather nasty problems, so -2 
+				out->normalMap = r_notexture;
+				out->normalMap->texnum = -2; 
+			}
+
+		}
+		else
+		{
+			//set this to something that we can easily filter out and not be drawn
+			//cannot use -1 or 0, because those cause rather nasty problems, so -2 
+			out->normalMap = r_notexture;
+			out->normalMap->texnum = -2;
+		}
 	}
 
 	// count animation frames
@@ -1609,8 +1641,10 @@ struct model_s *R_RegisterModel (char *name)
 		}
 		else if (mod->type == mod_brush)
 		{
-			for (i=0 ; i<mod->numtexinfo ; i++)
+			for (i=0 ; i<mod->numtexinfo ; i++) {
 				mod->texinfo[i].image->registration_sequence = registration_sequence;
+				mod->texinfo[i].normalMap->registration_sequence = registration_sequence;
+			}
 		}
 	}
 	return mod;

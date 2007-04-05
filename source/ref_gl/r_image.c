@@ -29,13 +29,12 @@ static byte			 intensitytable[256];
 static unsigned char gammatable[256];
 
 cvar_t		*intensity;
-extern cvar_t		*gl_embossfilter;
 
 unsigned	d_8to24table[256];
 
 qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean is_sky );
-qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap);
-qboolean GL_Upload32_hires (unsigned *data, int width, int height,  qboolean mipmap);
+qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, qboolean is_normalmap);
+qboolean GL_Upload32_hires (unsigned *data, int width, int height,  qboolean mipmap, qboolean is_normalmap);
 
 int		gl_solid_format = 3;
 int		gl_alpha_format = 4;
@@ -43,7 +42,7 @@ int		gl_alpha_format = 4;
 int		gl_tex_solid_format = 3;
 int		gl_tex_alpha_format = 4;
 
-int		gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
+int		gl_filter_min = GL_LINEAR_MIPMAP_LINEAR;
 int		gl_filter_max = GL_LINEAR;
 
 GLenum bFunc1 = -1;
@@ -963,201 +962,10 @@ void GL_MipMap (byte *in, int width, int height)
 }
 
 
-#define FILTER_SIZE 5 
-#define BLUR_FILTER 0 
-#define LIGHT_BLUR   1 
-#define EDGE_FILTER 2 
-#define EMBOSS_FILTER 3 
-#define DARKEN_FILTER 4
-
-float FilterMatrix[][FILTER_SIZE][FILTER_SIZE] = 
-{ 
-   // regular blur 
-   { 
-      {0, 0, 0, 0, 0}, 
-      {0, 1, 1, 1, 0}, 
-      {0, 1, 1, 1, 0}, 
-      {0, 1, 1, 1, 0}, 
-      {0, 0, 0, 0, 0}, 
-   }, 
-   // light blur 
-   { 
-      {0, 0, 0, 0, 0}, 
-      {0, 1, 1, 1, 0}, 
-      {0, 1, 4, 1, 0}, 
-      {0, 1, 1, 1, 0}, 
-      {0, 0, 0, 0, 0}, 
-   }, 
-   // find edges 
-   { 
-      {0,  0,  0,  0, 0}, 
-      {0, -1, -1, -1, 0}, 
-      {0, -1,  8, -1, 0}, 
-      {0, -1, -1, -1, 0}, 
-      {0,  0,  0,  0, 0}, 
-   }, 
-   // emboss 
-   { 
-      {-1, -1, -1, -1, 0}, 
-      {-1, -1, -1,  0, 1}, 
-      {-1, -1,  0,  1, 1}, 
-      {-1,  0,  1,  1, 1}, 
-      { 0,  1,  1,  1, 1}, 
-   }, 
-
-   //darken
-   { 
-      {0, 0, 0, 0, 0}, 
-      {0, 0, 0, 0, 0}, 
-      {0, 0, 0, 0, 0}, 
-      {0, 0, 0, 0, 0}, 
-      {0, 0, 0, 0, 0}, 
-   },
-
-   //sharpen
-  {
-	  {1, 2,  0,  -2,   1},
-	  {4, 8,  0,  -8,  -4},
-	  {6, 12, 0, -12,  -6},
-	  {4, 8,  0,  -8,  -4},
-	  {1, 2,  0,  -2,  -1}
-	}
-}; 
-
-
-/* 
-================== 
-R_FilterTexture 
-
-Applies a 5 x 5 filtering matrix to the texture, then runs it through a simulated OpenGL texture environment 
-blend with the original data to derive a new texture.  Freaky, funky, and *f--king* *fantastic*.  You can do 
-reasonable enough "fake bumpmapping" with this baby... 
-
-Filtering algorithm from http://www.student.kuleuven.ac.be/~m0216922/CG/filtering.html 
-All credit due 
-================== 
-*/ 
-void R_FilterTexture (int filterindex, unsigned int *data, int width, int height, float factor, float bias, qboolean greyscale, GLenum GLBlendOperator) 
-{ 
-   int i; 
-   int x; 
-   int y; 
-   int filterX; 
-   int filterY; 
-   unsigned int *temp; 
-
-   // allocate a temp buffer 
-   temp = malloc (width * height * 4); 
-
-   for (x = 0; x < width; x++) 
-   { 
-      for (y = 0; y < height; y++) 
-      { 
-         float rgbFloat[3] = {0, 0, 0}; 
-
-         for (filterX = 0; filterX < FILTER_SIZE; filterX++) 
-         { 
-            for (filterY = 0; filterY < FILTER_SIZE; filterY++) 
-            { 
-               int imageX = (x - (FILTER_SIZE / 2) + filterX + width) % width; 
-               int imageY = (y - (FILTER_SIZE / 2) + filterY + height) % height; 
-
-               // casting's a unary operation anyway, so the othermost set of brackets in the left part 
-               // of the rvalue should not be necessary... but i'm paranoid when it comes to C... 
-               rgbFloat[0] += ((float) ((byte *) &data[imageY * width + imageX])[0]) * FilterMatrix[filterindex][filterX][filterY]; 
-               rgbFloat[1] += ((float) ((byte *) &data[imageY * width + imageX])[1]) * FilterMatrix[filterindex][filterX][filterY]; 
-               rgbFloat[2] += ((float) ((byte *) &data[imageY * width + imageX])[2]) * FilterMatrix[filterindex][filterX][filterY]; 
-            } 
-         } 
-
-         // multiply by factor, add bias, and clamp 
-         for (i = 0; i < 3; i++) 
-         { 
-            rgbFloat[i] *= factor; 
-            rgbFloat[i] += bias; 
-
-            if (rgbFloat[i] < 0) rgbFloat[i] = 0; 
-            if (rgbFloat[i] > 255) rgbFloat[i] = 255; 
-         } 
-
-         if (greyscale) 
-         { 
-            // NTSC greyscale conversion standard 
-            float avg = (rgbFloat[0] * 30 + rgbFloat[1] * 59 + rgbFloat[2] * 11) / 100; 
-
-            // divide by 255 so GL operations work as expected 
-            rgbFloat[0] = avg / 255.0; 
-            rgbFloat[1] = avg / 255.0; 
-            rgbFloat[2] = avg / 255.0; 
-         } 
-
-         // write to temp - first, write data in (to get the alpha channel quickly and 
-         // easily, which will be left well alone by this particular operation...!) 
-         temp[y * width + x] = data[y * width + x]; 
-
-         // now write in each element, applying the blend operator.  blend 
-         // operators are based on standard OpenGL TexEnv modes, and the 
-         // formulae are derived from the OpenGL specs (http://www.opengl.org). 
-         for (i = 0; i < 3; i++) 
-         { 
-            // divide by 255 so GL operations work as expected 
-            float TempTarget; 
-            float SrcData = ((float) ((byte *) &data[y * width + x])[i]) / 255.0; 
-
-            switch (GLBlendOperator) 
-            { 
-            case GL_ADD: 
-               TempTarget = rgbFloat[i] + SrcData; 
-               break; 
-
-            case GL_BLEND: 
-               // default is FUNC_ADD here 
-               // CsS + CdD works out as Src * Dst * 2 
-               TempTarget = rgbFloat[i] * SrcData * 2.0; 
-               break; 
-
-            case GL_DECAL: 
-               // same as GL_REPLACE unless there's alpha, which we ignore for this 
-            case GL_REPLACE: 
-               TempTarget = rgbFloat[i]; 
-               break; 
-
-            case GL_MODULATE: 
-               // same as default 
-            default: 
-               TempTarget = rgbFloat[i] * SrcData; 
-               break; 
-            } 
-
-            // multiply back by 255 to get the proper byte scale 
-            TempTarget *= 255.0; 
-
-            // bound the temp target again now, cos the operation may have thrown it out 
-            if (TempTarget < 0) TempTarget = 0; 
-            if (TempTarget > 255) TempTarget = 255; 
-
-            // and copy it in 
-            ((byte *) &temp[y * width + x])[i] = (byte) TempTarget; 
-         } 
-      } 
-   } 
-
-   // copy temp back to data 
-   for (i = 0; i < (width * height); i++) 
-   { 
-      data[i] = temp[i]; 
-   } 
-
-   // release the temp buffer 
-   free (temp); 
-} 
-
-
-
 int		upload_width, upload_height;
 qboolean uploaded_paletted;
 // Fixed 256x256 texture size limitation - MrG
-qboolean GL_Upload32_hires (unsigned *data, int width, int height,  qboolean mipmap)
+qboolean GL_Upload32_hires (unsigned *data, int width, int height,  qboolean mipmap, qboolean is_normalMap)
 {	int		samples;
 	unsigned 	*scaled;
 	int		scaled_width, scaled_height;
@@ -1165,15 +973,6 @@ qboolean GL_Upload32_hires (unsigned *data, int width, int height,  qboolean mip
 	byte		*scan;
 	int comp;
  
-
-	// At this stage we get to make an "emboss map".  This is *NOT* PROPER BUMPMAPPING.  Proper Bumpmapping 
-	// relies on stuff like normals and light vectors and other doo-dahs.  It *CAN* be done using a similar 
-	// texture to the one I'm about to generate, but you do need light positions for it.  This is an evil, 
-	// quick, and cheap hack which (hopefully) gives a "don't look too close and it's OK" effect.  Like the 
-	// emboss filter on your favourite paint app.  So... let's go for broke... 
-	if(gl_embossfilter->value)
-		if (mipmap) R_FilterTexture (EMBOSS_FILTER, data, width, height, 1, 128, true, GL_MODULATE); 
-
     uploaded_paletted = false;    // scan the texture for any non-255 alpha 
     c = width*height; 
     scan = ((byte *)data) + 3; 
@@ -1233,13 +1032,14 @@ qboolean GL_Upload32_hires (unsigned *data, int width, int height,  qboolean mip
         scaled=data; 
     } 
 
-    if (mipmap) { 
-        GL_LightScaleTexture (scaled, scaled_width, scaled_height, !mipmap); 
+	if( !is_normalMap )
+		GL_LightScaleTexture (scaled, scaled_width, scaled_height, !mipmap);
+    
+	if (mipmap) 
         gluBuild2DMipmaps (GL_TEXTURE_2D, samples, scaled_width, scaled_height, GL_RGBA, GL_UNSIGNED_BYTE, scaled); 
-    } else {  
-        GL_LightScaleTexture (scaled, scaled_width, scaled_height, !mipmap ); 
+    else   
         qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled); 
-    } 
+     
     if (scaled_width != width || scaled_height != height) 
         free(scaled); 
 
@@ -1285,7 +1085,7 @@ void GL_BuildPalettedTexture( unsigned char *paletted_texture, unsigned char *sc
 	}
 }
 
-qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap)
+qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qboolean is_normalMap)
 {
 	int			samples;
 	unsigned	scaled[256*256];
@@ -1294,14 +1094,6 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap)
 	int			i, c;
 	byte		*scan;
 	int comp;
-
-	// At this stage we get to make an "emboss map".  This is *NOT* PROPER BUMPMAPPING.  Proper Bumpmapping 
-	// relies on stuff like normals and light vectors and other doo-dahs.  It *CAN* be done using a similar 
-	// texture to the one I'm about to generate, but you do need light positions for it.  This is an evil, 
-	// quick, and cheap hack which (hopefully) gives a "don't look too close and it's OK" effect.  Like the 
-	// emboss filter on your favourite paint app.  So... let's go for broke... 
-	if(gl_embossfilter->value)
-		if (mipmap) R_FilterTexture (EMBOSS_FILTER, data, width, height, 1, 128, true, GL_MODULATE); 
 
 	uploaded_paletted = false;
 
@@ -1336,7 +1128,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap)
 	upload_height = scaled_height;
 
 	if (scaled_width * scaled_height > sizeof(scaled)/4)
-		Com_Error (ERR_DROP, "GL_Upload32: too big");
+		Sys_Error ("GL_Upload32: too big");
 
 	// scan the texture for any non-255 alpha
 	c = width*height;
@@ -1356,17 +1148,29 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap)
 	else if (samples == gl_alpha_format)
 	    comp = gl_tex_alpha_format;
 	else {
-	    Com_Printf (
-			   "Unknown number of texture components %i\n",
-			   samples);
 	    comp = samples;
 	}
+
+#if 0
+	if (mipmap)
+		gluBuild2DMipmaps (GL_TEXTURE_2D, samples, width, height, GL_RGBA, GL_UNSIGNED_BYTE, trans);
+	else if (scaled_width == width && scaled_height == height)
+		qglTexImage2D (GL_TEXTURE_2D, 0, comp, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, trans);
+	else
+	{
+		gluScaleImage (GL_RGBA, width, height, GL_UNSIGNED_BYTE, trans,
+			scaled_width, scaled_height, GL_UNSIGNED_BYTE, scaled);
+		qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
+	}
+#else
 
 	if (scaled_width == width && scaled_height == height)
 	{
 		if (!mipmap)
 		{
-			if ( qglColorTableEXT && gl_ext_palettedtexture->value && samples == gl_solid_format )
+			// Ben Lane 20 April 2005: Never upload a normal map as an 8 bit
+			// paletted texture.
+			if ( !is_normalMap && qglColorTableEXT && gl_ext_palettedtexture->value && samples == gl_solid_format )
 			{
 				uploaded_paletted = true;
 				GL_BuildPalettedTexture( paletted_texture, ( unsigned char * ) data, scaled_width, scaled_height );
@@ -1391,9 +1195,12 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap)
 	else
 		GL_ResampleTexture (data, width, height, scaled, scaled_width, scaled_height);
 
-	GL_LightScaleTexture (scaled, scaled_width, scaled_height, !mipmap );
+	// Ben Lane 20 April 2005: Never brighten normal maps.
+	if( !is_normalMap ) GL_LightScaleTexture (scaled, scaled_width, scaled_height, !mipmap );
 
-	if ( qglColorTableEXT && gl_ext_palettedtexture->value && ( samples == gl_solid_format ) )
+	// Ben Lane 20 April 2005: Never upload normal maps as 8 bit paletted
+	// textures.
+	if ( !is_normalMap && qglColorTableEXT && gl_ext_palettedtexture->value && ( samples == gl_solid_format ) )
 	{
 		uploaded_paletted = true;
 		GL_BuildPalettedTexture( paletted_texture, ( unsigned char * ) scaled, scaled_width, scaled_height );
@@ -1427,7 +1234,10 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap)
 			if (scaled_height < 1)
 				scaled_height = 1;
 			miplevel++;
-			if ( qglColorTableEXT && gl_ext_palettedtexture->value && samples == gl_solid_format )
+
+			// Ben Lane 20 April 2005: Never upload normal maps as 8 bit
+			// paletted textures.
+			if ( !is_normalMap && qglColorTableEXT && gl_ext_palettedtexture->value && samples == gl_solid_format )
 			{
 				uploaded_paletted = true;
 				GL_BuildPalettedTexture( paletted_texture, ( unsigned char * ) scaled, scaled_width, scaled_height );
@@ -1448,6 +1258,8 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap)
 		}
 	}
 done: ;
+#endif
+
 
 	if (mipmap)
 	{
@@ -1528,9 +1340,9 @@ qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboole
 			}
 		}
 		if(gl_texres->value)
-			return GL_Upload32_hires (trans, width, height, mipmap);
+			return GL_Upload32_hires (trans, width, height, mipmap, false);
 		else
-			return GL_Upload32 (trans, width, height, mipmap);
+			return GL_Upload32 (trans, width, height, mipmap, false);
 	}
 }
 
@@ -1609,9 +1421,9 @@ nonscrap:
 			image->has_alpha = GL_Upload8 (pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_sky );
 		else {
 			if(gl_texres->value || r_bloom->value)
-				image->has_alpha = GL_Upload32_hires ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) );
+				image->has_alpha = GL_Upload32_hires ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_bump );
 			else
-				image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) );
+				image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) ,image->type == it_bump );
 		}
 		image->upload_width = upload_width;		// after power of 2 and scales
 		image->upload_height = upload_height;
@@ -1696,14 +1508,16 @@ image_t	*GL_FindImage (char *name, imagetype_t type)
 	pic = NULL;
 	palette = NULL;
 
-	if(!gl_texres->value) {
-		// try to load alternate .tga first
-		LoadTGA (va("%s_lite.tga", shortname), &pic, &width, &height);
+	//are we a normal map?  
+	if(type == it_bump) {
+		LoadTGA (va("%s.nm.tga", shortname), &pic, &width, &height);
 		if (pic) 
 		{
 			image = GL_LoadPic (name, pic, width, height, type, 32);
 			goto done;
 		}
+		else
+			return NULL;
 	}
 
 	// try to load .tga first
