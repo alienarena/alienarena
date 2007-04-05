@@ -1,10 +1,3 @@
-#This file is just one big Kill class. I didn't want to put it in the
-#Main file because it is big, nasty, and this way if the strings are updated
-#It will be much easier to locate these.
-#
-#Todo: Make strings for op.grep to use for each one of them to even further
-#ease of update
-
 class Kills
 	def initialize
 	end
@@ -92,5 +85,8 @@ class Kills
 			op.grep(/was caught by #{$player}'s grapple/)
 		end
 	end
-end
 
+	def Kills.all()
+		Kills.blaster().length + Kills.chaingunBurst().length + Kills.chaingun().length + Kills.flame().length + Kills.rocket().length + Kills.rocketSplash().length + Kills.beamgun().length + Kills.disruptor().length + Kills.smartgun().length + Kills.vaporizer().length + Kills.vaporizerAlt().length + Kills.plasmaSplash().length + Kills.telefrag().length + Kills.grapple().length
+	end
+end
