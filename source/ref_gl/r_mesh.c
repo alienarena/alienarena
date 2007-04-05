@@ -210,6 +210,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	float	*lerp;
 	vec3_t lightcolor;
 	vec4_t	colorArray[MAX_VERTS];
+	float ramp = 1;
 
 	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames 
 		+ currententity->frame * paliashdr->framesize);
@@ -456,6 +457,8 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 						if(stage->normalmap && gl_normalmaps->value) {
 
+							ramp = 2.0; //for getting brightness of normal maps up a bit
+
 							qglDepthMask (GL_FALSE); 
 							qglEnable (GL_BLEND); 
 
@@ -510,14 +513,14 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 									{
 										if(gl_rtlights->value) {
 											GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
-											red = lightcolor[0];
-											green = lightcolor[1];
-											blue = lightcolor[2];
+											red = lightcolor[0] * ramp;
+											green = lightcolor[1] * ramp;
+											blue = lightcolor[2] * ramp;
 										}
 										else {
-											red = shadelight[0];
-											green = shadelight[1];
-											blue = shadelight[2];
+											red = shadelight[0] * ramp;
+											green = shadelight[1] * ramp;
+											blue = shadelight[2] * ramp;
 										}
 
 									}
@@ -545,6 +548,9 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 							qglEnable (GL_TEXTURE_2D);
 
 						if(stage->normalmap && gl_normalmaps->value) {
+
+							ramp = 1.0;
+
 							// back to replace mode 
 							qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); 
 
