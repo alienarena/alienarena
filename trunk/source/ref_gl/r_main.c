@@ -69,7 +69,7 @@ cvar_t *rs_detail;
 // MH - detail textures begin
 cvar_t	*gl_detailtextures;
 // MH - detail textures begin
-cvar_t  *gl_embossfilter;
+cvar_t  *gl_normalmaps;
 
 entity_t	*currententity;
 model_t		*currentmodel;
@@ -1644,7 +1644,7 @@ void R_Register( void )
 	// cvar.  set to 0 to switch off detail texturing.  
 	gl_detailtextures = Cvar_Get ("gl_detailtextures", "0.0", CVAR_ARCHIVE);
 	// MH - detail textures begin
-	gl_embossfilter = Cvar_Get("gl_embossfilter", "0", CVAR_ARCHIVE);
+	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);

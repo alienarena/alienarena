@@ -33,7 +33,7 @@ extern cvar_t *gl_modulate;
 
 extern cvar_t *r_bloom_intensity;
 extern cvar_t *gl_detailtextures;
-extern cvar_t *gl_embossfilter;
+extern cvar_t *gl_normalmaps;
 
 extern cvar_t *vid_width;
 extern cvar_t *vid_height;

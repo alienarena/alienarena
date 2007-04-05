@@ -326,6 +326,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 			alpha = basealpha;
 			while (1)
 			{
+
 				// get the vertex count and primitive type
 				count = *order++;
 				va=0;
@@ -338,6 +339,9 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				} 
 				else
 					mode=GL_TRIANGLE_STRIP;
+
+				tmp_count=count;
+				tmp_order=order;
 
 				do 
 				{
@@ -353,13 +357,14 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					if(gl_rtlights->value)
 						VA_SetElem4(col_array[va],lightcolor[0], lightcolor[1], lightcolor[2], calcEntAlpha(alpha, s_lerped[index_xyz]));
 					else
-							VA_SetElem4(col_array[va], shadelight[0], shadelight[1], shadelight[2], calcEntAlpha(alpha, s_lerped[index_xyz]));
+						VA_SetElem4(col_array[va], shadelight[0], shadelight[1], shadelight[2], calcEntAlpha(alpha, s_lerped[index_xyz]));
 					va++;
 					order += 3;
 				} while (--count);
 
 				qglDrawArrays(mode,0,va);
 			}
+			
 		}
 		else
 		{
@@ -399,9 +404,6 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 						count=tmp_count;
 						order=tmp_order;
 						va=0;
-
-						if (stage->detail && !rs_detail->value)
-							continue;
 
 						if (stage->colormap.enabled)
 							qglDisable (GL_TEXTURE_2D);
@@ -451,83 +453,113 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 						{
 							GLSTATE_DISABLE_ALPHATEST
 						}
+
+						if(stage->normalmap && gl_normalmaps->value) {
+
+							qglDepthMask (GL_FALSE); 
+							qglEnable (GL_BLEND); 
+
+							// set the correct blending mode for normal maps 
+							qglBlendFunc (GL_ZERO, GL_SRC_COLOR); 
+
+							// and the texenv 
+							qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE); 
+							qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_DOT3_RGB); 
+						}
+										
 						do
 						{
-							float os = ((float *)order)[0];
-							float ot = ((float *)order)[1];
-							vec3_t normal;
-							int k;
+							if (!(stage->normalmap && !gl_normalmaps->value)) { //disable for normal stage if normals are disabled
+					
+								float os = ((float *)order)[0];
+								float ot = ((float *)order)[1];
+								vec3_t normal;
+								int k;
+									
+								index_xyz = order[2];	
 								
-							index_xyz = order[2];	
+								for (k=0;k<3;k++)
+								normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] + 
+								( r_avertexnormals[ov[index_xyz].lightnormalindex][k] - 
+								r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
+								VectorNormalize ( normal );
+													
+								if (stage->envmap)
+								{
+									vec3_t envmapvec;
+
+									VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
+									RS_SetEnvmap (envmapvec, &os, &ot);
+
+									os -= DotProduct (normal , vectors[1] );
+									ot += DotProduct (normal, vectors[2] );
+								}
+
+								RS_SetTexcoords2D(stage, &os, &ot);
 							
-							for (k=0;k<3;k++)
-							normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] + 
-							( r_avertexnormals[ov[index_xyz].lightnormalindex][k] - 
-							r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
-							VectorNormalize ( normal );
-												
-							if (stage->envmap)
-							{
-								vec3_t envmapvec;
+								VA_SetElem2(tex_array[va], os, ot);
+								VA_SetElem3(vert_array[va],s_lerped[index_xyz][0],s_lerped[index_xyz][1],s_lerped[index_xyz][2]);
 
-								VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
-								RS_SetEnvmap (envmapvec, &os, &ot);
-
-								os -= DotProduct (normal , vectors[1] );
-								ot += DotProduct (normal, vectors[2] );
-							}
-
-							RS_SetTexcoords2D(stage, &os, &ot);
-						
-							VA_SetElem2(tex_array[va], os, ot);
-							VA_SetElem3(vert_array[va],s_lerped[index_xyz][0],s_lerped[index_xyz][1],s_lerped[index_xyz][2]);
-
-							{
-								float red = 1, green = 1, blue = 1, nAlpha;
-								
-								nAlpha = RS_AlphaFuncAlias (stage->alphafunc, 
-									calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
-															
-								if (stage->lightmap)
 								{
-									if(gl_rtlights->value) {
-										GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
-										red = lightcolor[0];
-										green = lightcolor[1];
-										blue = lightcolor[2];
-									}
-									else {
-										red = shadelight[0];
-										green = shadelight[1];
-										blue = shadelight[2];
+									float red = 1, green = 1, blue = 1, nAlpha;
+									
+									nAlpha = RS_AlphaFuncAlias (stage->alphafunc, 
+										calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
+																
+									if (stage->lightmap)
+									{
+										if(gl_rtlights->value) {
+											GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+											red = lightcolor[0];
+											green = lightcolor[1];
+											blue = lightcolor[2];
+										}
+										else {
+											red = shadelight[0];
+											green = shadelight[1];
+											blue = shadelight[2];
+										}
+
 									}
 
-								}
+									if (stage->colormap.enabled)
+									{
+										red *= stage->colormap.red/255.0;
+										green *= stage->colormap.green/255.0;
+										blue *= stage->colormap.blue/255.0;
+									}
 
-								if (stage->colormap.enabled)
-								{
-									red *= stage->colormap.red/255.0;
-									green *= stage->colormap.green/255.0;
-									blue *= stage->colormap.blue/255.0;
+									VA_SetElem4(col_array[va], red, green, blue, nAlpha);
 								}
-
-								VA_SetElem4(col_array[va], red, green, blue, nAlpha);
 							}
 							order += 3;
 							va++;
 						} while (--count);
 
-
-						qglDrawArrays(mode,0,va);
-
+						if (!(stage->normalmap && !gl_normalmaps->value)) //disable so that we 
+							//can still have shaders without normalmapped models if so chosen
+							qglDrawArrays(mode,0,va);
+						
 						qglColor4f(1,1,1,1);
 						if (stage->colormap.enabled)
 							qglEnable (GL_TEXTURE_2D);
 
+						if(stage->normalmap && gl_normalmaps->value) {
+							// back to replace mode 
+							qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); 
+
+							// restore the original blend mode 
+							qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+
+							// switch off blending 
+							qglDisable (GL_BLEND); 
+							qglDepthMask (GL_TRUE);
+						}
+
 						laststage = stage;
 						stage=stage->next;
 					}
-
+				
 				}
 
 			}
@@ -984,6 +1016,7 @@ void R_DrawAliasModel (entity_t *e)
 	if (!skin)
 		skin = r_notexture;	// fallback...
 	GL_Bind(skin->texnum);
+
 
 	// draw it
 

@@ -179,7 +179,7 @@ extern cvar_t	*r_overbrightbits;
 extern cvar_t	*gl_ext_mtexcombine;
 
 // Vic - end
-extern cvar_t	*gl_embossfilter;
+extern cvar_t	*gl_normalmaps;
 
 extern	cvar_t	*r_shaders;
 extern  cvar_t  *r_bloom;
@@ -310,7 +310,7 @@ void	GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,
 image_t *R_RegisterSkin (char *name);
 image_t *R_RegisterParticlePic(char *name);
 image_t *R_RegisterGfxPic(char *name);
-
+image_t *R_RegisterNormalMap(char *name);
 
 void	LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
 image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits);
@@ -379,6 +379,9 @@ void	GL_TextureSolidMode( char *string );
 
 #define GLSTATE_DISABLE_TEXGEN		if (gl_state.texgen) { qglDisable(GL_TEXTURE_GEN_S); qglDisable(GL_TEXTURE_GEN_T); qglDisable(GL_TEXTURE_GEN_R); gl_state.texgen=false; }
 #define GLSTATE_ENABLE_TEXGEN		if (!gl_state.texgen) { qglEnable(GL_TEXTURE_GEN_S); qglEnable(GL_TEXTURE_GEN_T); qglEnable(GL_TEXTURE_GEN_R); gl_state.texgen=true; }
+
+#define GL_COMBINE                        0x8570 
+#define GL_DOT3_RGB                       0x86AE 
 
 typedef struct
 {
