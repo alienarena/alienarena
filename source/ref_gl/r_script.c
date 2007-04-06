@@ -227,7 +227,6 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->depthhack = 0;
 	stage->envmap = false;
 	stage->dynamic = false;
-	stage->detail = false;
 	stage->lensflare = false;
 	stage->normalmap = false;
 
@@ -730,11 +729,6 @@ void rs_stage_dynamic (rs_stage_t *stage, char **token)
 	stage->dynamic = true;
 }
 
-void rs_stage_detail (rs_stage_t *stage, char **token)
-{
-	stage->detail = true;
-}
-
 void rs_stage_nolightmap (rs_stage_t *stage, char **token)
 {
 	stage->lightmap = false;
@@ -833,7 +827,6 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"angle",		&rs_stage_angle			},
 	{	"scale",		&rs_stage_scale			},
 	{	"dynamic",		&rs_stage_dynamic		},
-	{	"detail",		&rs_stage_detail		},
 	{	"alphafunc",	&rs_stage_alphafunc		},
 	{	"lensflare",	&rs_stage_lensflare		},
 	{   "normalmap",	&rs_stage_normalmap		},
@@ -1056,7 +1049,7 @@ void RS_ScanPathForScripts (void)
 	FS_FreeFileList(script_list, script_count);
 
 	if(gl_normalmaps->value) { //search for normal map scripts ONLY if we are using normal mapping
-		
+		path = NULL;
 		do {
 			path = FS_NextPath(path);
 			Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/normals/*.rscript", path);
@@ -1480,8 +1473,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 
 	do
 	{
-		if (stage->detail && !rs_detail->value)
-			continue;
 
 		if (stage->lensflare)
 			break;
