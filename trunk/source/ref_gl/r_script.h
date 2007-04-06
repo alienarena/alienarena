@@ -97,8 +97,6 @@ typedef struct rs_stage_s
 	vec3_t					angle;			//angles for models;
 	rs_frames_t				frames;			//frames
 
-	qboolean				detail;			// is a detail dexture (for toggle)
-
 	qboolean				dynamic;		// dynamic texture
 
 	qboolean				envmap;			// fake envmapping - spheremapping
