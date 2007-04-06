@@ -473,6 +473,8 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 						do
 						{
 							if (!(stage->normalmap && !gl_normalmaps->value)) { //disable for normal stage if normals are disabled
+								//note - this is somewhat hacky, but for some weird reason, we have to do the vertex count for the stage
+								//even though the stage is not being rendered in this case.  
 					
 								float os = ((float *)order)[0];
 								float ot = ((float *)order)[1];
@@ -522,6 +524,12 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 											green = shadelight[1] * ramp;
 											blue = shadelight[2] * ramp;
 										}
+										//try to keep normalmapped stages from going completely dark
+										if(stage->normalmap && gl_normalmaps->value) {
+											if(red < .6) red = .6;
+											if(green < .6) green = .6;
+											if(blue < .6) blue = .6;
+										}
 
 									}
 
@@ -550,7 +558,6 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 						if(stage->normalmap && gl_normalmaps->value) {
 
 							ramp = 1.0;
-
 							// back to replace mode 
 							qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); 
 
