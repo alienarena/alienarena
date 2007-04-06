@@ -224,7 +224,6 @@ void RS_ClearStage (rs_stage_t *stage)
 
 	stage->texture = NULL;
 
-
 	stage->depthhack = 0;
 	stage->envmap = false;
 	stage->dynamic = false;
@@ -1055,6 +1054,28 @@ void RS_ScanPathForScripts (void)
 	}
 
 	FS_FreeFileList(script_list, script_count);
+
+	if(gl_normalmaps->value) { //search for normal map scripts ONLY if we are using normal mapping
+		
+		do {
+			path = FS_NextPath(path);
+			Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/normals/*.rscript", path);
+			if ((script_list = FS_ListFiles(dirstring, &script_count, SFF_SUBDIR, 0)) != 0)
+				break;
+		} while (path);
+
+		if (!script_list)
+			return;
+
+		for (i = 0; i < script_count-1; i++)
+		{
+			c = COM_SkipPath(script_list[i]);
+			Com_sprintf(script, MAX_OSPATH, "scripts/normals/%s", c);
+			RS_LoadScript(script);
+		}
+
+		FS_FreeFileList(script_list, script_count);
+	}
 }
 #else
 void RS_ScanPathForScripts (void)
@@ -1105,6 +1126,50 @@ void RS_ScanPathForScripts (void)
 		} while (_findnext( handle, &fileinfo ) != -1);
 
 		_findclose (handle);
+	}
+
+	if(gl_normalmaps->value) { //search for normal map scripts ONLY if we are using normal mapping
+		
+		if (strcmp(dir,basedir))
+		{
+
+			Com_sprintf (dirstring, sizeof(dirstring), "%s/scripts/normals/*.rscript", basedir);
+			handle = _findfirst (dirstring, &fileinfo);
+
+			if (handle != -1) 
+			{
+				do
+				{
+					if (fileinfo.name[0] == '.')
+						continue;
+
+					c = COM_SkipPath(fileinfo.name);
+					Com_sprintf(script, MAX_OSPATH, "scripts/normals/%s", c);
+					RS_LoadScript (script);
+				} while (_findnext( handle, &fileinfo ) != -1);
+
+				_findclose (handle);
+			}
+
+		}
+
+		Com_sprintf (dirstring, sizeof(dirstring), "%s/scripts/normals/*.rscript", dir);
+		handle = _findfirst (dirstring, &fileinfo);
+
+		if (handle != -1) 
+		{
+			do 
+			{
+				if (fileinfo.name[0] == '.')
+					continue;
+
+				c = COM_SkipPath(fileinfo.name);
+				Com_sprintf(script, MAX_OSPATH, "scripts/normals/%s", c);
+				RS_LoadScript (script);
+			} while (_findnext( handle, &fileinfo ) != -1);
+
+			_findclose (handle);
+		}
 	}
 }
 #endif

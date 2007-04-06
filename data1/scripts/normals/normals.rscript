@@ -1,0 +1,120 @@
+players/martianenforcer/red
+{
+	{
+		map players/martianenforcer/red.tga
+	}
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+	}
+}
+players/martianenforcer/default
+{
+	{
+		map players/martianenforcer/default.tga
+	}
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+	}	
+}
+players/martianenforcer/blue
+{
+	{
+		map players/martianenforcer/blue.tga
+	}
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+	}	
+}
+players/enforcer/default
+{
+	{
+		map players/enforcer/default.tga
+	}
+	{
+		map players/enforcer/default_normal.tga
+		normalmap
+	}	
+}
+players/enforcer/red
+{
+	{
+		map players/enforcer/red.tga
+	}
+	{
+		map players/enforcer/default_normal.tga
+		normalmap
+	}	
+}
+players/enforcer/blue
+{
+	{
+		map players/enforcer/blue.tga
+	}
+	{
+		map players/enforcer/default_normal.tga
+		normalmap
+	}	
+}
+players/rustbot/default
+{
+	{
+		map players/rustbot/default.tga
+	}
+	{
+		map players/rustbot/default_normal.tga
+		normalmap
+	}	
+}
+players/rustbot/red
+{
+	{
+		map players/rustbot/red.tga
+	}
+	{
+		map players/rustbot/default_normal.tga
+		normalmap
+	}	
+}
+players/rustbot/blue
+{
+	{
+		map players/rustbot/blue.tga
+	}
+	{
+		map players/rustbot/default_normal.tga
+		normalmap
+	}	
+}
+models/weapons/v_rocket/skin
+{
+	{
+		map models/weapons/v_rocket/skin.tga
+	}
+	{
+		map models/weapons/v_rocket/skin_normal.tga
+		normalmap
+	}
+}
+models/weapons/v_chain/skin
+{
+	{
+		map models/weapons/v_chain/skin.tga
+	}
+	{
+		map models/weapons/v_chain/skin_normal.tga
+		normalmap
+	}
+}
+models/weapons/v_shotg2/skin
+{
+	{
+		map models/weapons/v_shotg2/skin.tga
+	}
+	{
+		map models/weapons/v_shotg2/skin_normal.tga
+		normalmap
+	}
+}

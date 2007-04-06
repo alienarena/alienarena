@@ -267,28 +267,13 @@ models/items/healing/small/skin
 models/weapons/v_shotg/skin
 {
 	{
-		map gfx/smartgunbase.tga
-		nolightmap
-	}
-	{
-		map gfx/bluelightning.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1 
-		scroll static 2 static 1	
-		alphashift 20 0.05 .3
-		nolightmap
-	}
-	{
-		map gfx/chrome.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 2 static 2
-		alphashift 20 0.1 0.3
-		nolightmap
-		envmap
+		map models/weapons/v_shotg/skin.tga
 	}
 	{
 		map gfx/smartgunmask.tga
-		alphamask
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.01 .8
+		nolightmap
 	}
 		
 }
@@ -296,6 +281,10 @@ models/weapons/v_blast/skin
 {
 	{
 		map models/weapons/v_blast/skin.tga
+	}
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
 	}
 	{
 		map gfx/blasterfx.tga
@@ -326,10 +315,30 @@ models/weapons/v_hyperb/skin
 models/weapons/v_rail/skin
 {
 	{
-		map gfx/beammask.tga
+		map models/weapons/v_rail/skin.tga
+	}
+	{
+		map models/weapons/v_rail/skin_normal.tga
+		normalmap
 	}
 	{
 		map gfx/beamfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.01 .8
+		nolightmap
+	}
+}
+models/weapons/v_bfg/skin
+{
+	{
+		map models/weapons/v_bfg/skin.tga
+	}
+	{
+		map models/weapons/v_bfg/skin_normal.tga
+		normalmap
+	}
+	{
+		map gfx/vapormask.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		alphashift 2 0.01 .8
 		nolightmap
@@ -409,24 +418,6 @@ models/items/armor/jacket/skin
 		alphamask
 	}
 	
-}
-models/weapons/v_bfg/skin
-{
-	{
-		map gfx/vaporbase.tga
-	}
-	{
-		map gfx/lightning.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 2 static 2
-		scroll static 2 static 1
-		alphashift 10 0.1 0.6
-		nolightmap
-	}
-	{
-		map gfx/vapormask.tga
-		alphamask
-	}
 }
 models/items/haste/skin
 {
