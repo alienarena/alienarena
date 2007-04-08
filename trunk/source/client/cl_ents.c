@@ -826,6 +826,12 @@ void CL_AddPacketEntities (frame_t *frame)
 		if (s1->number == cl.playernum+1)
 		{
 			ent.flags |= RF_VIEWERMODEL;	// only draw from mirrors
+			// fixed player origin - fixes the "jittery" player shadows too
+			if ((cl_predict->value) && !(cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION))
+			{
+				VectorCopy (cl.predicted_origin, ent.origin);
+				VectorCopy (cl.predicted_origin, ent.oldorigin);
+			}
 	
 		}
 
