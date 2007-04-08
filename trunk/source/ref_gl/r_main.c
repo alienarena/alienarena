@@ -64,6 +64,8 @@ image_t		*r_flaretexture;
 image_t		*r_beamtexture;
 image_t		*r_beam2texture;
 image_t		*r_beam3texture;
+image_t		*r_radarmap; // wall texture for radar texgen
+image_t		*r_around;
 
 cvar_t *rs_detail;
 // MH - detail textures begin
@@ -193,6 +195,11 @@ cvar_t	*gl_reflection_debug;	// MPO	for debugging the reflection
 cvar_t	*gl_reflection_max;		// MPO  max number of water reflections
 
 cvar_t  *con_font;
+
+cvar_t  *r_minimap_size; // GLOOM radar
+cvar_t  *r_minimap_zoom;
+cvar_t  *r_minimap_style;
+cvar_t  *r_minimap;
 
 //fog stuff
 struct r_fog
@@ -1280,7 +1287,9 @@ void R_DrawSpecialSurfaces(void);
 void R_RenderView (refdef_t *fd)
 {
 	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
-	
+		
+	numRadarEnts=0;
+
 	if (r_norefresh->value)
 		return;
 
@@ -1394,6 +1403,8 @@ void R_RenderView (refdef_t *fd)
 	
 	if(map_fog)
 		qglDisable(GL_FOG);
+
+	GL_DrawRadar();
 }
 
 
@@ -1648,6 +1659,11 @@ void R_Register( void )
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
+
+	r_minimap_size = Cvar_Get ("r_minimap_size", "256", CVAR_ARCHIVE );
+	r_minimap_zoom = Cvar_Get ("r_minimap_zoom", "1", CVAR_ARCHIVE );
+	r_minimap_style = Cvar_Get ("r_minimap_style", "1", CVAR_ARCHIVE );  
+    r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE ); 
 
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
 	Cmd_AddCommand( "screenshot", GL_ScreenShot_f );

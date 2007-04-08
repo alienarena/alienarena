@@ -102,3 +102,6 @@ extern	int			numgltextures;
 extern image_t		*r_flare;
 
 extern	image_t		*r_detailtexture;
+
+extern	image_t		*r_radarmap;
+extern	image_t		*r_around;

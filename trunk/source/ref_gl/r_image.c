@@ -1608,6 +1608,13 @@ void GL_FreeUnusedImages (void)
 	r_detailtexture->registration_sequence = registration_sequence;
 	// MH - detail textures end
 
+	//minimap stuff - only if those textures are present, as this was a feature added later on
+	//and if crx has been updated via galaxy, clients may not have these images
+	if(r_radarmap)
+		r_radarmap->registration_sequence = registration_sequence;
+	if(r_around)
+		r_around->registration_sequence = registration_sequence;
+
 	for (i=0, image=gltextures ; i<numgltextures ; i++, image++)
 	{
 		if (image->registration_sequence == registration_sequence)
