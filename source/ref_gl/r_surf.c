@@ -1847,3 +1847,311 @@ void GL_EndBuildingLightmaps (void)
 	GL_EnableMultitexture( false );
 }
 
+/*
+========================
+GLOOM MINI MAP !!!
+draw with vertex array 
+and ower speedup changes
+========================
+*/
+
+
+//sul's minimap thing
+void R_RecursiveRadarNode (mnode_t *node)
+{
+	int			c, side, sidebit;
+	cplane_t	*plane;
+	msurface_t	*surf, **mark;
+	mleaf_t		*pleaf;
+	float		dot,distance;
+	glpoly_t	*p;
+	float		*v;
+	int			i;
+
+	if (node->contents == CONTENTS_SOLID)	return;		// solid
+
+	if(r_minimap_zoom->value>=0.1) {
+		distance = 1024.0/r_minimap_zoom->value;
+	} else {
+		distance = 1024.0;
+	}
+
+	if ( r_origin[0]+distance < node->minmaxs[0] ||
+		 r_origin[0]-distance > node->minmaxs[3] ||
+		 r_origin[1]+distance < node->minmaxs[1] ||
+		 r_origin[1]-distance > node->minmaxs[4] ||
+		 r_origin[2]+256 < node->minmaxs[2] ||
+		 r_origin[2]-256 > node->minmaxs[5]) return;
+  
+	// if a leaf node, draw stuff
+	if (node->contents != -1) {
+		pleaf = (mleaf_t *)node;
+		// check for door connected areas
+		if (r_newrefdef.areabits) {
+			// not visible
+			if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) ) return;
+		}
+		mark = pleaf->firstmarksurface;
+		c = pleaf->nummarksurfaces;
+
+		if (c) {
+			do {
+				(*mark)->visframe = r_framecount;
+				mark++;
+			} while (--c);
+		}
+		return;
+	}
+
+// node is just a decision point, so go down the apropriate sides
+// find which side of the node we are on
+	plane = node->plane;  
+
+	switch (plane->type) {
+	case PLANE_X:
+		dot = modelorg[0] - plane->dist;
+		break;
+	case PLANE_Y:
+		dot = modelorg[1] - plane->dist;
+		break;
+	case PLANE_Z:
+		dot = modelorg[2] - plane->dist;
+		break;
+	default:
+		dot = DotProduct (modelorg, plane->normal) - plane->dist;
+		break;
+	}
+
+	if (dot >= 0) {
+		side = 0;
+		sidebit = 0;
+	} else {
+		side = 1;
+		sidebit = SURF_PLANEBACK;
+	}
+
+// recurse down the children, front side first
+	R_RecursiveRadarNode (node->children[side]);
+
+  if(plane->normal[2]) {      
+		// draw stuff    
+		if(plane->normal[2]>0) for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
+		{
+			if (surf->texinfo->flags & SURF_SKY){
+				continue;
+			}
+		
+
+		}
+	} else {
+			qglDisable(GL_TEXTURE_2D);
+		for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++) {
+			float sColor,C[4];
+			if (surf->texinfo->flags & SURF_SKY) continue;
+			
+			if (surf->texinfo->flags & (SURF_WARP|SURF_FLOWING|SURF_TRANS33|SURF_TRANS66)) {
+				sColor=0.5;
+			} else {
+				sColor=0;
+			}
+		      
+			for ( p = surf->polys; p; p = p->chain ) {
+				v = p->verts[0];      
+				qglBegin(GL_LINE_STRIP);
+				for (i=0 ; i< p->numverts; i++, v+= VERTEXSIZE) {
+					C[3]= (v[2]-r_origin[2])/512.0;        
+					if (C[3]>0) {     
+							
+						C[0]=0.5;
+						C[1]=0.5+sColor;
+						C[2]=0.5;
+						C[3]=1-C[3]; 
+                      
+					}
+					   else 
+					{  
+						C[0]=0.5;
+						C[1]=sColor;
+						C[2]=0;
+						C[3]+=1;
+						
+					}
+
+					if(C[3]<0) {
+						C[3]=0;  
+						
+					}
+					qglColor4fv(C);
+					qglVertex3fv (v);	
+				}
+								
+				qglEnd();
+			}   	      
+		}
+		qglEnable(GL_TEXTURE_2D);
+	
+  }
+	// recurse down the back side
+	R_RecursiveRadarNode (node->children[!side]);
+
+	
+}
+
+
+
+int			numRadarEnts=0;
+RadarEnt_t	RadarEnts[MAX_RADAR_ENTS];
+
+void GL_DrawRadar(void)
+{  
+	int		i;
+	float	fS[4]={0,0,-1.0/512.0,0};  
+    
+	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) return;
+	if(!r_minimap->value) return;
+
+	qglViewport (vid.width-r_minimap_size->value,0, r_minimap_size->value, r_minimap_size->value);  
+	
+	qglDisable(GL_DEPTH_TEST);
+  	qglMatrixMode(GL_PROJECTION);
+	qglPushMatrix();
+	qglLoadIdentity ();	    
+
+	
+	if (r_minimap_style->value) {
+		qglOrtho(-1024,1024,-1024,1024,-256,256);
+	} else {
+		qglOrtho(-1024,1024,-512,1536,-256,256);
+	}
+
+	qglMatrixMode(GL_MODELVIEW);  
+	qglPushMatrix();  
+	qglLoadIdentity ();
+
+    	
+		{
+		qglStencilMask(255);
+		qglClear(GL_STENCIL_BUFFER_BIT);
+		qglEnable(GL_STENCIL_TEST);
+		qglStencilFunc(GL_ALWAYS,4,4);
+		qglStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
+
+	  
+		GLSTATE_ENABLE_ALPHATEST;
+		qglAlphaFunc(GL_LESS,0.1);
+		qglColorMask(0,0,0,0);
+	    
+		qglColor4f(1,1,1,1);
+		if(r_around)
+			GL_Bind(r_around->texnum);
+		qglBegin(GL_TRIANGLE_FAN);
+		if (r_minimap_style->value){
+			qglTexCoord2f(0,1); qglVertex3f(1024,-1024,1);
+			qglTexCoord2f(1,1); qglVertex3f(-1024,-1024,1);
+			qglTexCoord2f(1,0); qglVertex3f(-1024,1024,1);
+			qglTexCoord2f(0,0); qglVertex3f(1024,1024,1);
+		} else {
+			qglTexCoord2f(0,1); qglVertex3f(1024,-512,1);
+			qglTexCoord2f(1,1); qglVertex3f(-1024,-512,1);
+			qglTexCoord2f(1,0); qglVertex3f(-1024,1536,1);
+			qglTexCoord2f(0,0); qglVertex3f(1024,1536,1);
+		}
+		qglEnd();    
+
+		qglColorMask(1,1,1,1);
+		GLSTATE_DISABLE_ALPHATEST;
+		qglAlphaFunc(GL_GREATER, 0.5);
+		qglStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE);
+		qglStencilFunc(GL_NOTEQUAL,4,4);
+
+	}
+
+	if(r_minimap_zoom->value>=0.1) {
+		qglScalef(r_minimap_zoom->value,r_minimap_zoom->value,r_minimap_zoom->value); 
+	}
+
+	if (r_minimap_style->value) {
+		qglPushMatrix();  
+		qglRotatef (90-r_newrefdef.viewangles[1],  0, 0, -1);        
+		
+		qglDisable(GL_TEXTURE_2D);
+		qglBegin(GL_TRIANGLES);  
+		qglColor4f(1,1,1,0.5);
+		qglVertex3f(0,32,0);
+		qglColor4f(1,1,0,0.5);
+		qglVertex3f(24,-32,0);
+		qglVertex3f(-24,-32,0);
+		qglEnd();
+		
+		qglPopMatrix();  
+	} else {
+		qglDisable(GL_TEXTURE_2D);
+		qglBegin(GL_TRIANGLES);  
+		qglColor4f(1,1,1,0.5);
+		qglVertex3f(0,32,0);
+		qglColor4f(1,1,0,0.5);
+		qglVertex3f(24,-32,0);
+		qglVertex3f(-24,-32,0);
+		qglEnd();
+
+		qglRotatef (90-r_newrefdef.viewangles[1],  0, 0, 1);        
+	}
+	qglTranslatef (-r_newrefdef.vieworg[0],  -r_newrefdef.vieworg[1],  -r_newrefdef.vieworg[2]);  
+
+/*	if(!deathmatch->value)
+	{
+	qglBegin(GL_QUADS);
+	for(i=0;i<numRadarEnts;i++){
+	float x=RadarEnts[i].org[0];
+	float y=RadarEnts[i].org[1];
+	float z=RadarEnts[i].org[2];
+	qglColor4fv(RadarEnts[i].color);    
+	
+    qglVertex3f(x+9, y+9, z);
+    qglVertex3f(x+9, y-9, z);
+    qglVertex3f(x-9, y-9, z);
+    qglVertex3f(x-9, y+9, z);
+	}  
+	qglEnd();
+	}*/
+
+	qglEnable(GL_TEXTURE_2D);
+	  
+	if(r_radarmap)
+		GL_Bind(r_radarmap->texnum);
+	qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	GLSTATE_ENABLE_BLEND;
+	qglColor3f(1,1,1);
+	  
+	fS[3]=0.5+ r_newrefdef.vieworg[2]/512.0;
+	qglTexGenf(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
+		
+	GLSTATE_ENABLE_TEXGEN;
+	qglTexGenfv(GL_S,GL_OBJECT_PLANE,fS);
+
+	// draw the stuff
+	R_RecursiveRadarNode (r_worldmodel->nodes);  
+
+
+	qglBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	GLSTATE_DISABLE_TEXGEN;
+
+	qglPopMatrix();
+    
+	
+
+	qglViewport(0,0,vid.width,vid.height);
+	  
+	qglMatrixMode(GL_PROJECTION);
+	qglPopMatrix();
+	qglMatrixMode(GL_MODELVIEW);
+	qglDisable(GL_STENCIL_TEST);
+	qglStencilMask(0);
+	GL_TexEnv( GL_REPLACE );
+	GLSTATE_DISABLE_BLEND;
+	GLSTATE_ENABLE_ALPHATEST
+	qglEnable(GL_DEPTH_TEST);
+    qglColor4f(1,1,1,1);
+
+}
+

@@ -286,4 +286,14 @@ void	R_Shutdown (void);
 
 void	R_AppActivate( qboolean active );
 
+#define MAX_RADAR_ENTS 512
+typedef struct RadarEnt_s{
+  float color[4];
+  vec3_t org;  
+}RadarEnt_t;
+
+
+extern int numRadarEnts;
+extern RadarEnt_t RadarEnts[MAX_RADAR_ENTS];
+
 #endif // __REF_H

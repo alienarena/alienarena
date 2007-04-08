@@ -22,11 +22,6 @@ models/items/ammo/rockets/medium/skin
 		nolightmap
 	}
 	{
-		map gfx/rocketfx.tga
-		alphamask
-		nolightmap
-	}
-	{
 		map gfx/chrome.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
@@ -58,11 +53,6 @@ models/items/ammo/cells/medium/cell
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 50 0.01 0.5
-		nolightmap
-	}
-	{
-		map gfx/cellfx.tga
-		alphamask
 		nolightmap
 	}
 	{
@@ -100,11 +90,6 @@ models/items/ammo/shells/medium/skin
 		nolightmap
 	}
 	{
-		map gfx/shellsfx.tga
-		alphamask
-		nolightmap
-	}
-	{
 		map gfx/chrome.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
@@ -139,11 +124,6 @@ models/items/ammo/bullets/medium/skin
 		nolightmap
 	}
 	{
-		map gfx/bulletfx.tga
-		alphamask
-		nolightmap
-	}
-	{
 		map gfx/chrome.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
@@ -175,11 +155,6 @@ models/items/ammo/grenades/medium/skin
 		scale static 1 static 1
 		scroll static 0 static 0
 		alphashift 50 0.01 0.5
-		nolightmap
-	}
-	{
-		map gfx/napalmfx.tga
-		alphamask
 		nolightmap
 	}
 	{
@@ -357,17 +332,13 @@ models/items/armor/combat/skin
 		nolightmap
 	}
 	{
-		map gfx/chrome.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static .5 static .5
-		alphashift 0 .2 .2
-		envmap
-	}
-	{
 		map gfx/armormask.tga
 		alphamask
 	}
-	
+	{
+		map models/items/armor/combat/skin_normal.tga
+		normalmap
+	}	
 }
 models/items/armor/body/skin
 {
@@ -382,17 +353,13 @@ models/items/armor/body/skin
 		nolightmap
 	}
 	{
-		map gfx/chrome.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static .5 static .5
-		alphashift 0 .2 .2
-		envmap
-	}
-	{
 		map gfx/armormask.tga
 		alphamask
 	}
-	
+	{
+		map models/items/armor/combat/skin_normal.tga
+		normalmap
+	}
 }
 models/items/armor/jacket/skin
 {
@@ -407,17 +374,13 @@ models/items/armor/jacket/skin
 		nolightmap
 	}
 	{
-		map gfx/chrome.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static .5 static .5
-		alphashift 0 .2 .2
-		envmap
-	}
-	{
 		map gfx/armormask.tga
 		alphamask
 	}
-	
+	{
+		map models/items/armor/combat/skin_normal.tga
+		normalmap
+	}
 }
 models/items/haste/skin
 {

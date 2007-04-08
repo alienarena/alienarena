@@ -189,6 +189,11 @@ extern  cvar_t  *arena_mode;
 extern  qboolean map_fog;
 extern  char	map_music[128];
 
+extern  cvar_t		*r_minimap;
+extern  cvar_t		*r_minimap_size;
+extern  cvar_t		*r_minimap_zoom;
+extern  cvar_t		*r_minimap_style;
+
 extern	cvar_t	*gl_reflection;			// MPO
 extern	cvar_t	*gl_reflection_debug;	// MPO	for debugging the reflection
 extern	cvar_t	*gl_reflection_max;		// MPO  max number of water reflections
@@ -257,6 +262,7 @@ void R_RenderDlights (void);
 void R_DrawAlphaSurfaces (void);
 void R_RenderBrushPoly (msurface_t *fa);
 void R_InitParticleTexture (void);
+void GL_DrawRadar(void);
 void Draw_InitLocal (void);
 void GL_SubdivideSurface (msurface_t *fa);
 qboolean R_CullBox (vec3_t mins, vec3_t maxs);
