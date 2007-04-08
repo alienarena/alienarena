@@ -2132,24 +2132,19 @@ void GL_DrawRadar(void)
 	// draw the stuff
 	R_RecursiveRadarNode (r_worldmodel->nodes);  
 
-
 	qglBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	GLSTATE_DISABLE_TEXGEN;
 
 	qglPopMatrix();
     
-	
-
 	qglViewport(0,0,vid.width,vid.height);
 	  
 	qglMatrixMode(GL_PROJECTION);
 	qglPopMatrix();
 	qglMatrixMode(GL_MODELVIEW);
 	qglDisable(GL_STENCIL_TEST);
-	qglStencilMask(0);
 	GL_TexEnv( GL_REPLACE );
 	GLSTATE_DISABLE_BLEND;
-	GLSTATE_ENABLE_ALPHATEST
 	qglEnable(GL_DEPTH_TEST);
     qglColor4f(1,1,1,1);
 

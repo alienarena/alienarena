@@ -1117,6 +1117,7 @@ void R_DrawAliasModel (entity_t *e)
 		shadevector[1] = sin(-an);
 		shadevector[2] = 1;
 		VectorNormalize (shadevector);
+
 		switch ((int)(gl_shadows->value))
 		{
 		case 0:
