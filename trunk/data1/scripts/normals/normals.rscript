@@ -2,6 +2,7 @@ players/martianenforcer/red
 {
 	{
 		map players/martianenforcer/red.tga
+		nolightmap
 	}
 	{
 		map players/martianenforcer/default_normal.tga
@@ -12,16 +13,18 @@ players/martianenforcer/default
 {
 	{
 		map players/martianenforcer/default.tga
+		nolightmap
 	}
 	{
 		map players/martianenforcer/default_normal.tga
 		normalmap
-	}	
+	}
 }
 players/martianenforcer/blue
 {
 	{
 		map players/martianenforcer/blue.tga
+		nolightmap
 	}
 	{
 		map players/martianenforcer/default_normal.tga
@@ -32,6 +35,7 @@ players/enforcer/default
 {
 	{
 		map players/enforcer/default.tga
+		nolightmap
 	}
 	{
 		map players/enforcer/default_normal.tga
@@ -42,6 +46,7 @@ players/enforcer/red
 {
 	{
 		map players/enforcer/red.tga
+		nolightmap
 	}
 	{
 		map players/enforcer/default_normal.tga
@@ -52,6 +57,7 @@ players/enforcer/blue
 {
 	{
 		map players/enforcer/blue.tga
+		nolightmap
 	}
 	{
 		map players/enforcer/default_normal.tga
@@ -62,6 +68,7 @@ players/rustbot/default
 {
 	{
 		map players/rustbot/default.tga
+		nolightmap
 	}
 	{
 		map players/rustbot/default_normal.tga
@@ -72,6 +79,7 @@ players/rustbot/red
 {
 	{
 		map players/rustbot/red.tga
+		nolightmap
 	}
 	{
 		map players/rustbot/default_normal.tga
@@ -82,6 +90,7 @@ players/rustbot/blue
 {
 	{
 		map players/rustbot/blue.tga
+		nolightmap
 	}
 	{
 		map players/rustbot/default_normal.tga
@@ -92,6 +101,7 @@ models/weapons/v_rocket/skin
 {
 	{
 		map models/weapons/v_rocket/skin.tga
+		nolightmap
 	}
 	{
 		map models/weapons/v_rocket/skin_normal.tga
@@ -102,6 +112,7 @@ models/weapons/v_chain/skin
 {
 	{
 		map models/weapons/v_chain/skin.tga
+		nolightmap
 	}
 	{
 		map models/weapons/v_chain/skin_normal.tga
@@ -112,6 +123,7 @@ models/weapons/v_shotg2/skin
 {
 	{
 		map models/weapons/v_shotg2/skin.tga
+		nolightmap
 	}
 	{
 		map models/weapons/v_shotg2/skin_normal.tga
