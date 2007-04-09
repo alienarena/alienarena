@@ -210,7 +210,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	float	*lerp;
 	vec3_t lightcolor;
 	vec4_t	colorArray[MAX_VERTS];
-	float ramp = 1;
+	float ramp = 1.0;
 
 	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames 
 		+ currententity->frame * paliashdr->framesize);
@@ -464,7 +464,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					ramp = 2.0; //for getting brightness of normal maps up a bit
 
 					qglDepthMask (GL_FALSE); 
-					qglEnable (GL_BLEND); 
+			 		qglEnable (GL_BLEND); 
 
 					// set the correct blending mode for normal maps 
 					qglBlendFunc (GL_ZERO, GL_SRC_COLOR); 
@@ -472,6 +472,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					// and the texenv 
 					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT); 
 					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_DOT3_RGB_EXT); 
+
 				}
 										
 				do
@@ -585,8 +586,6 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
-
-	order = startorder;
 	
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
