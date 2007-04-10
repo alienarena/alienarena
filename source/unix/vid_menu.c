@@ -89,6 +89,7 @@ static menuslider_s		s_detailtex_slider;
 static menuslider_s		s_modulate_slider;
 static menufield_s		s_height_field;
 static menufield_s		s_width_field;
+static menulist_s		s_normalmaps_box;
 
 static void DriverCallback( void *unused )
 {
@@ -143,6 +144,7 @@ static void ResetDefaults( void *unused )
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("gl_normalmaps", 0);
 
 	VID_MenuInit();
 }
@@ -185,6 +187,7 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "_windowed_mouse", s_windowed_mouse.curvalue);
 	Cvar_SetValue( "gl_detailtextures", s_detailtex_slider.curvalue);
 	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
+	Cvar_SetValue("gl_normalmaps", s_normalmaps_box.curvalue);
 
 	switch ( s_ref_list.curvalue )
 	{
@@ -301,6 +304,8 @@ void VID_MenuInit( void )
 		vid_width = Cvar_Get( "vid_width", "640", CVAR_ARCHIVE);
 	if ( !vid_height )
 		vid_height = Cvar_Get( "vid_height", "400", CVAR_ARCHIVE);
+	if (!gl_normalmaps)
+		gl_normalmaps = Cvar_Get( "gl_normalmaps", "0", CVAR_ARCHIVE);
 
 	if ( !_windowed_mouse)
         _windowed_mouse = Cvar_Get( "_windowed_mouse", "1", CVAR_ARCHIVE );
@@ -451,23 +456,30 @@ void VID_MenuInit( void )
 	s_tq_slider.maxvalue = 3;
 	s_tq_slider.curvalue = 3-gl_picmip->value;
 
+	s_normalmaps_box.generic.type	= MTYPE_SPINCONTROL;
+	s_normalmaps_box.generic.x		= 0;
+	s_normalmaps_box.generic.y		= 190;
+	s_normalmaps_box.generic.name	= "bumpmapping";
+	s_normalmaps_box.curvalue = gl_normalmaps->value;
+	s_normalmaps_box.itemnames = yesno_names;
+
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
 	s_finish_box.generic.x	= 0;
-	s_finish_box.generic.y	= 190;
+	s_finish_box.generic.y	= 200;
 	s_finish_box.generic.name	= "draw frame completely";
 	s_finish_box.curvalue = gl_finish->value;
 	s_finish_box.itemnames = yesno_names;
 
 	s_vsync_box.generic.type = MTYPE_SPINCONTROL;
-        s_vsync_box.generic.x  = 0;
-        s_vsync_box.generic.y  = 200;
-        s_vsync_box.generic.name       = "vertical sync";
-        s_vsync_box.curvalue = gl_swapinterval->value;
-        s_vsync_box.itemnames = onoff_names;
+    s_vsync_box.generic.x  = 0;
+    s_vsync_box.generic.y  = 210;
+    s_vsync_box.generic.name       = "vertical sync";
+    s_vsync_box.curvalue = gl_swapinterval->value;
+    s_vsync_box.itemnames = onoff_names;
 
 	s_windowed_mouse.generic.type = MTYPE_SPINCONTROL;
 	s_windowed_mouse.generic.x  = 0;
-	s_windowed_mouse.generic.y  = 210;
+	s_windowed_mouse.generic.y  = 220;
 	s_windowed_mouse.generic.name   = "windowed mouse";
 	s_windowed_mouse.curvalue = _windowed_mouse->value;
 	s_windowed_mouse.itemnames = yesno_names;
@@ -475,13 +487,13 @@ void VID_MenuInit( void )
 	s_defaults_action.generic.type = MTYPE_ACTION;
 	s_defaults_action.generic.name = "reset to defaults";
 	s_defaults_action.generic.x    = 0;
-	s_defaults_action.generic.y    = 230;
+	s_defaults_action.generic.y    = 240;
 	s_defaults_action.generic.callback = ResetDefaults;
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
 	s_apply_action.generic.x    = 0;
-	s_apply_action.generic.y    = 240;
+	s_apply_action.generic.y    = 250;
 	s_apply_action.generic.callback = ApplyChanges;
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_ref_list);
@@ -500,6 +512,7 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_texcombine_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_overbright_slider );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_tq_slider );
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_normalmaps_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_finish_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_vsync_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_windowed_mouse );
