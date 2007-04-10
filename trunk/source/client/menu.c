@@ -1387,6 +1387,8 @@ extern cvar_t *cl_nobrainlets;
 extern cvar_t *gl_shadows;
 extern cvar_t *gl_rtlights;
 extern cvar_t *r_shaders;
+extern cvar_t *r_minimap;
+extern cvar_t *r_minimap_style;
 
 static menuframework_s	s_options_menu;
 static menuaction_s		s_player_setup_action;
@@ -1412,6 +1414,7 @@ static menulist_s		s_options_brainlets_box;
 static menulist_s		s_options_shaders_box;
 static menulist_s		s_options_shadows_box;
 static menulist_s		s_options_rtlights_box;
+static menulist_s		s_options_minimap_box;
 
 static void PlayerSetupFunc( void *unused )
 {
@@ -1474,6 +1477,19 @@ static void MouseSpeedFunc( void *unused )
 static void NoAltTabFunc( void *unused )
 {
 	Cvar_SetValue( "win_noalttab", s_options_noalttab_box.curvalue );
+}
+
+static void MinimapFunc( void *unused )
+{
+	if(s_options_minimap_box.curvalue) {
+		Cvar_SetValue("r_minimap", 1);
+		if(s_options_minimap_box.curvalue == 2)
+			Cvar_SetValue("r_minimap_style", 0);
+		else
+			Cvar_SetValue("r_minimap_style", s_options_minimap_box.curvalue);
+	}
+	else
+		Cvar_SetValue("r_minimap", s_options_minimap_box.curvalue);
 }
 
 static float ClampCvar( float min, float max, float value )
@@ -1653,6 +1669,16 @@ static void ControlsSetMenuItemValues( void )
 
 	Cvar_SetValue("gl_rtlights", ClampCvar(0, 1, gl_rtlights->value ) );
 	s_options_rtlights_box.curvalue		= gl_rtlights->value;	
+		
+	Cvar_SetValue("r_minimap_style", ClampCvar(0, 1, r_minimap_style->value));		
+	Cvar_SetValue("r_minimap", ClampCvar(0, 1, r_minimap->value));
+	if(r_minimap_style->value == 0) {
+		s_options_minimap_box.curvalue = 2;
+	}
+	else if(r_minimap->value) 
+		s_options_minimap_box.curvalue = 1;
+	else
+		s_options_minimap_box.curvalue = 0;
 
 }
 
@@ -1800,6 +1826,13 @@ void Options_MenuInit( void )
 		"on",
 		0
 	};
+	static const char *minimap_names[] = 
+	{
+		"off",
+		"static",
+		"rotating",
+		0
+	};
 	win_noalttab = Cvar_Get( "win_noalttab", "0", CVAR_ARCHIVE );
 
 	/*
@@ -1942,22 +1975,29 @@ void Options_MenuInit( void )
 	s_options_crosshair_box.generic.callback = CrosshairFunc;
 	s_options_crosshair_box.itemnames = crosshair_names;
 
+	s_options_minimap_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_minimap_box.generic.x		= 0;
+	s_options_minimap_box.generic.y		= 220;
+	s_options_minimap_box.generic.name  = "minimap";
+	s_options_minimap_box.generic.callback = MinimapFunc;
+	s_options_minimap_box.itemnames = minimap_names;
+
 	s_options_joystick_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_joystick_box.generic.x	= 0;
-	s_options_joystick_box.generic.y	= 220;
+	s_options_joystick_box.generic.y	= 230;
 	s_options_joystick_box.generic.name	= "use joystick";
 	s_options_joystick_box.generic.callback = JoystickFunc;
 	s_options_joystick_box.itemnames = yesno_names;
 
 	s_options_defaults_action.generic.type	= MTYPE_ACTION;
 	s_options_defaults_action.generic.x		= 0;
-	s_options_defaults_action.generic.y		= 240;
+	s_options_defaults_action.generic.y		= 250;
 	s_options_defaults_action.generic.name	= "reset defaults";
 	s_options_defaults_action.generic.callback = ControlsResetDefaultsFunc;
 
 	s_options_console_action.generic.type	= MTYPE_ACTION;
 	s_options_console_action.generic.x		= 0;
-	s_options_console_action.generic.y		= 250;
+	s_options_console_action.generic.y		= 260;
 	s_options_console_action.generic.name	= "go to console";
 	s_options_console_action.generic.callback = ConsoleFunc;
 
@@ -1980,6 +2020,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_invertmouse_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_font_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_crosshair_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_minimap_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_joystick_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_customize_options_action );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_defaults_action );
