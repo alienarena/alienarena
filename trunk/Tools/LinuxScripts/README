@@ -1,0 +1,15 @@
+'kill-runaway-crded' and 'launch-server' are shell scripts designed to emulate
+running crded as a persisant service under linux.   
+
+An example crontab that would check each server is running every ten minutes
+would look like this:
+
+*/10 * * * * /home/aa/cron/kill-runaway-crded
+*/10 * * * * /home/aa/cron/launch-server ctf.cfg     >/dev/null 2>&1
+*/10 * * * * /home/aa/cron/launch-server teamdm.cfg  >/dev/null 2>&1
+
+Don't forget to edit launch-server to set the paths correctly for your
+executable.
+
+'svstat' is a ruby script that will query local servers and produce some nice
+output for server admin.
