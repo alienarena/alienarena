@@ -1427,9 +1427,13 @@ void Machinegun_Fire (edict_t *ent)
 //	ent->client->kick_angles[0] = -3;
 
 	if(ent->client->ps.gunframe == 6 && ent->client->buttons & BUTTON_ATTACK2) {
+		int bullet_count = DEFAULT_SSHOTGUN_COUNT;
+		/* If we're low on ammo, fire less shots */
+		if(ent->client->pers.inventory[ent->client->ammo_index] < DEFAULT_SSHOTGUN_COUNT/2)
+			bullet_count = ent->client->pers.inventory[ent->client->ammo_index] * 2;
 		VectorSet(offset, 1, 1, ent->viewheight-0.5);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-		fire_shotgun (ent, start, forward, damage/2, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT, MOD_CGALTFIRE);
+		fire_shotgun (ent, start, forward, damage/2, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, bullet_count, MOD_CGALTFIRE);
 		
 		//play a booming sound
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("world/rocket.wav"), 1, ATTN_NORM, 0);
