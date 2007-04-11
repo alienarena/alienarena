@@ -10,3 +10,5 @@ def get_players()
 		op.grep(/entered the game/).inject([]) {|mem, line| mem << line.gsub(/ entered the game/, '') }.uniq
 	end
 end
+
+Percent.blaster()
