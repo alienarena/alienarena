@@ -320,6 +320,9 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 				damage = 0;
 			else
 				mod |= MOD_FRIENDLY_FIRE;
+
+			//educate the noobs....
+			safe_centerprintf(attacker, "Stop shooting your teammates!!!");
 		}
 	}
 	meansOfDeath = mod;
