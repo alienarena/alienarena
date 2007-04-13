@@ -63,13 +63,11 @@ MENU INTERACTION
 ====================================================================
 */
 
-static menuframework_s  s_software_menu;
 static menuframework_s	s_opengl_menu;
 static menuframework_s *s_current_menu;
 static int				s_current_menu_index;
 
 static menulist_s		s_mode_list;
-static menulist_s		s_ref_list;
 static menuslider_s		s_tq_slider;
 static menuslider_s		s_screensize_slider;
 static menuslider_s		s_brightness_slider;
@@ -191,57 +189,12 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
 	Cvar_SetValue("gl_normalmaps", s_normalmaps_box.curvalue);
 	
-	switch ( s_ref_list.curvalue )
-	{
-	
-	case REF_OPENGL:
-		Cvar_Set( "vid_ref", "gl" );
-		Cvar_Set( "gl_driver", "opengl32" );
-		break;
-	case REF_3DFX:
-		Cvar_Set( "vid_ref", "gl" );
-		Cvar_Set( "gl_driver", "3dfxgl" );
-		break;
-	case REF_POWERVR:
-		Cvar_Set( "vid_ref", "gl" );
-		Cvar_Set( "gl_driver", "pvrgl" );
-		break;
-	case REF_VERITE:
-		Cvar_Set( "vid_ref", "gl" );
-		Cvar_Set( "gl_driver", "veritegl" );
-		break;
-	}
-
 	/*
 	** update appropriate stuff if we're running OpenGL and gamma
 	** has been modified
 	*/
-	if ( stricmp( vid_ref->string, "gl" ) == 0 )
-	{
-		if ( vid_gamma->modified )
-		{
-			vid_ref->modified = true;
-			if ( stricmp( gl_driver->string, "3dfxgl" ) == 0 )
-			{
-				char envbuffer[1024];
-				float g;
-
-				vid_ref->modified = true;
-
-				g = 2.00 * ( 0.8 - ( vid_gamma->value - 0.5 ) ) + 1.0F;
-				Com_sprintf( envbuffer, sizeof(envbuffer), "SSTV2_GAMMA=%f", g );
-				putenv( envbuffer );
-				Com_sprintf( envbuffer, sizeof(envbuffer), "SST_GAMMA=%f", g );
-				putenv( envbuffer );
-
-				vid_gamma->modified = false;
-			}
-		}
-
-		if ( gl_driver->modified )
-			vid_ref->modified = true;
-	}
-	
+	vid_ref->modified = true;
+		
 	M_ForceMenuOff();
 }
 
@@ -290,8 +243,6 @@ void VID_MenuInit( void )
 		0
 	};
 
-	if ( !gl_driver )
-		gl_driver = Cvar_Get( "gl_driver", "opengl32", 0 );
 	if ( !gl_picmip )
 		gl_picmip = Cvar_Get( "gl_picmip", "0", CVAR_ARCHIVE);
 	if ( !gl_mode )
@@ -337,24 +288,8 @@ void VID_MenuInit( void )
 	s_bloom_slider.curvalue = r_bloom_intensity->value*10;
 	s_detailtex_slider.curvalue = gl_detailtextures->value;
 	
-	if ( strcmp( gl_driver->string, "3dfxgl" ) == 0 )
-		s_ref_list.curvalue = REF_3DFX;
-	else if ( strcmp( gl_driver->string, "pvrgl" ) == 0 )
-		s_ref_list.curvalue = REF_POWERVR;
-	else if ( strcmp( gl_driver->string, "opengl32" ) == 0 )
-		s_ref_list.curvalue = REF_OPENGL;
-	else
-		s_ref_list.curvalue = REF_OPENGL;
-	
 	s_opengl_menu.x = viddef.width * 0.50;
 	s_opengl_menu.nitems = 0;
-
-	s_ref_list.generic.type = MTYPE_SPINCONTROL;
-	s_ref_list.generic.name = "driver";
-	s_ref_list.generic.x = 0;
-	s_ref_list.generic.y = 0;
-	s_ref_list.generic.callback = DriverCallback;
-	s_ref_list.itemnames = refs;
 
 	s_mode_list.generic.type = MTYPE_SPINCONTROL;
 	s_mode_list.generic.name = "video mode";
@@ -508,7 +443,6 @@ void VID_MenuInit( void )
 	s_apply_action.generic.y    = 240;
 	s_apply_action.generic.callback = ApplyChanges;
 
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_ref_list);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_width_field);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_height_field);
