@@ -13,3 +13,5 @@ executable.
 
 'svstat' is a ruby script that will query local servers and produce some nice
 output for server admin.
+
+'rcon' is a ruby script that sends rcon commands to servers
