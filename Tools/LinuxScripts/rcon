@@ -31,7 +31,7 @@ def send_rcon(servers, password, message)
 		return []
 	end
 
-	query = 'ÿÿÿÿrcon ' + password + ' ' + message + ' '
+	query = 'ÿÿÿÿrcon ' + password + ' ' + message + ' ' + "\x00"
 	connections = Hash.new
 	failed = Array.new
 	
