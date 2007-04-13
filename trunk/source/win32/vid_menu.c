@@ -109,6 +109,24 @@ static void BloomCallback( void *s )
 	Cvar_SetValue( "r_bloom_intensity", slider->curvalue/10);
 }
 
+static void BloomSetCallback( void *s)
+{
+	Cvar_SetValue("r_bloom", s_bloom_box.curvalue);
+	if(s_bloom_box.curvalue) { //force mtex combine off, it's just fucking ugly with bloom.
+		Cvar_SetValue("gl_ext_mtexcombine", 0);
+		s_texcombine_box.curvalue = 0;
+	}
+}
+
+static void MtexCallback( void *s)
+{
+	Cvar_SetValue("gl_ext_mtexcombine", s_texcombine_box.curvalue);
+	if(s_texcombine_box.curvalue) { //force mtex combine off, it's just fucking ugly with bloom.
+		Cvar_SetValue("r_bloom", 0);
+		s_bloom_box.curvalue = 0;
+	}
+}
+
 static void DetailtexCallback( void *s )
 {
 	menuslider_s *slider = ( menuslider_s * ) s;
@@ -363,6 +381,7 @@ void VID_MenuInit( void )
 	s_bloom_box.generic.y	= 130;
 	s_bloom_box.generic.name	= "light bloom";
 	s_bloom_box.itemnames = onoff_names;
+	s_bloom_box.generic.callback = BloomSetCallback;
 	s_bloom_box.curvalue = r_bloom->value;
 
 	s_bloom_slider.generic.type	= MTYPE_SLIDER;
@@ -385,6 +404,7 @@ void VID_MenuInit( void )
 	s_texcombine_box.generic.y	= 160;
 	s_texcombine_box.generic.name	= "multitexture combine";
 	s_texcombine_box.itemnames = onoff_names;
+	s_texcombine_box.generic.callback = MtexCallback;
 	s_texcombine_box.curvalue = gl_ext_mtexcombine->value;
 
 	s_overbright_slider.generic.type	= MTYPE_SLIDER;
