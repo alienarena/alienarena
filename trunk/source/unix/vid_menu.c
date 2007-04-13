@@ -36,10 +36,7 @@ extern cvar_t *vid_height;
 static cvar_t *gl_mode;
 static cvar_t *gl_driver;
 static cvar_t *gl_picmip;
-static cvar_t *gl_finish;
-static cvar_t *gl_swapinterval;
-static cvar_t *gl_texres;
-static cvar_t *r_bloom;
+static cvar_t *gl_finish; 
 static cvar_t *gl_reflection;
 static cvar_t *r_overbrightbits;
 static cvar_t *gl_ext_mtexcombine;
@@ -187,6 +184,8 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue("gl_normalmaps", s_normalmaps_box.curvalue);
 
 	vid_ref->modified = true;
+
+	vid_restart = true;
 
 	M_ForceMenuOff();
 }
