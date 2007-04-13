@@ -69,7 +69,6 @@ static menuframework_s *s_current_menu;
 static int				s_current_menu_index;
 
 static menulist_s		s_mode_list;
-static menulist_s		s_ref_list;
 static menuslider_s		s_tq_slider;
 static menuslider_s		s_screensize_slider;
 static menuslider_s		s_brightness_slider;
@@ -189,43 +188,8 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
 	Cvar_SetValue("gl_normalmaps", s_normalmaps_box.curvalue);
 
-	switch ( s_ref_list.curvalue )
-	{
-	case REF_OPENGLX :
-		Cvar_Set( "vid_ref", "glx" );
-		Cvar_Set( "gl_driver", "libGL.so.1" );
-		if (gl_driver->modified)
-			vid_ref->modified = true;
-		break;
-	}
+	vid_ref->modified = true;
 
-#if 0
-	/*
-	** update appropriate stuff if we're running OpenGL and gamma
-	** has been modified
-	*/
-	if ( stricmp( vid_ref->string, "gl" ) == 0 )
-	{
-		if ( vid_gamma->modified )
-		{
-			vid_ref->modified = true;
-			if ( stricmp( gl_driver->string, "3dfxgl" ) == 0 )
-			{
-				char envbuffer[1024];
-				float g;
-
-				vid_ref->modified = true;
-
-				g = 2.00 * ( 0.8 - ( vid_gamma->value - 0.5 ) ) + 1.0F;
-				Com_sprintf( envbuffer, sizeof(envbuffer), "SST_GAMMA=%f", g );
-				putenv( envbuffer );
-
-				vid_gamma->modified = false;
-			}
-		}
-	}
-#endif
-	vid_restart = true; //screw it, most everthing here requires a refresh
 	M_ForceMenuOff();
 }
 
@@ -254,11 +218,7 @@ void VID_MenuInit( void )
 		"[2048 1536]",
 		0
 	};
-	static const char *refs[] =
-	{
-		"[ OpenGL GLX ]",
-		0
-	};
+
 	static const char *yesno_names[] =
 	{
 		"no",
@@ -272,8 +232,6 @@ void VID_MenuInit( void )
 		0
 	};
 
-	if ( !gl_driver )
-		gl_driver = Cvar_Get( "gl_driver", "libGL.so.1", 0 );
 	if ( !gl_picmip )
 		gl_picmip = Cvar_Get( "gl_picmip", "0", CVAR_ARCHIVE );
 	if ( !gl_mode )
@@ -496,7 +454,6 @@ void VID_MenuInit( void )
 	s_apply_action.generic.y    = 250;
 	s_apply_action.generic.callback = ApplyChanges;
 
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_ref_list);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_width_field);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_height_field);
