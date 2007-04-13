@@ -20,9 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "../client/client.h"
 #include "../client/qmenu.h"
 
-#define REF_OPENGLX	0
-
-extern cvar_t *vid_ref;
 extern cvar_t *vid_fullscreen;
 extern cvar_t *vid_gamma;
 extern cvar_t *scr_viewsize;
@@ -280,21 +277,9 @@ void VID_MenuInit( void )
 	s_bloom_slider.curvalue = r_bloom_intensity->value*10;
 	s_detailtex_slider.curvalue = gl_detailtextures->value;
 
-	if ( strcmp( gl_driver->string, "libGL.so.1" ) == 0 )
-		s_ref_list.curvalue = REF_OPENGLX;
-	else
-		s_ref_list.curvalue = REF_OPENGLX;
-
 	s_opengl_menu.x = viddef.width * 0.50;
 	s_opengl_menu.nitems = 0;
-
-	s_ref_list.generic.type = MTYPE_SPINCONTROL;
-	s_ref_list.generic.name = "driver";
-	s_ref_list.generic.x = 0;
-	s_ref_list.generic.y = 0;
-	s_ref_list.generic.callback = DriverCallback;
-	s_ref_list.itemnames = refs;
-
+	
 	s_mode_list.generic.type = MTYPE_SPINCONTROL;
 	s_mode_list.generic.name = "video mode";
 	s_mode_list.generic.x = 0;
