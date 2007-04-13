@@ -223,13 +223,6 @@ void VID_MenuInit( void )
 		"[2048 1536]",
 		0
 	};
-	static const char *refs[] =
-	{
-		"[default OpenGL]",
-		"[3Dfx OpenGL   ]",
-		"[PowerVR OpenGL]",
-		0
-	};
 	static const char *yesno_names[] =
 	{
 		"no",
