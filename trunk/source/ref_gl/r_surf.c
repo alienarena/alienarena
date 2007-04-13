@@ -776,7 +776,7 @@ static void R_DrawNormalMaps (void)
 	   // don't draw if there isn't a normalmap 
 	   if (!surf->texinfo->normalMap->texnum) continue; 
 
-//	   if (surf->flags & SURF_DRAWTURB) continue; 
+	   if (surf->flags & SURF_DRAWTURB) continue; 
 
 	   qglBindTexture (GL_TEXTURE_2D, surf->texinfo->normalMap->texnum); 
 
