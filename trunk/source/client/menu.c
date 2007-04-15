@@ -521,8 +521,8 @@ void M_Main_Draw (void)
 	Draw_Pic( xoffset - 85, (int)(ystart + m_main_cursor * 32.5 + 13), litname );
 
 	//draw web link
-	Menu_DrawString( viddef.width / 2 - 100, viddef.height/2 + 200, "Copyright 2007 COR Entertainment LLC" );
-	Menu_DrawString( viddef.width / 2 - 140, viddef.height/2 + 220, "AA2K7 Website @ http://red.planetarena.org" );
+	Menu_DrawString( viddef.width / 2 - 140, viddef.height/2 + 200, "Copyright 2007 COR Entertainment LLC" );
+	Menu_DrawString( viddef.width / 2 - 160, viddef.height/2 + 220, "AA2K7 Website @ http://red.planetarena.org" );
 		
 }
 
