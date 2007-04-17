@@ -2004,6 +2004,7 @@ void Options_MenuInit( void )
 	ControlsSetMenuItemValues();
 
 	Menu_AddItem( &s_options_menu, ( void * ) &s_player_setup_action );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_customize_options_action );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_enginemode_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_shaders_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_shadows_box );
@@ -2022,7 +2023,6 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_crosshair_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_minimap_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_joystick_box );
-	Menu_AddItem( &s_options_menu, ( void * ) &s_options_customize_options_action );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_defaults_action );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_console_action );
 }
