@@ -659,7 +659,17 @@ void SVC_RemoteCommand (void)
 
 		for (i=2 ; i<Cmd_Argc() ; i++)
 		{
-			strcat (remaining, Cmd_Argv(i) );
+			/* If spaces present in args, quote them in the remaining string */
+			if(strchr(Cmd_Argv(i), ' '))
+			{
+				strcat (remaining, "\"");
+				strcat (remaining, Cmd_Argv(i) );
+				strcat (remaining, "\"");
+			}
+			else
+			{
+				strcat (remaining, Cmd_Argv(i) );
+			}
 			strcat (remaining, " ");
 		}
 
