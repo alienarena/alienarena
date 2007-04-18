@@ -833,6 +833,7 @@ void R_DrawAliasModel (entity_t *e)
 	image_t		*skin;
 	rscript_t	*rs = NULL;
 	char	shortname[MAX_QPATH];
+	extern qboolean g_drawing_refl;
 
 	if ( !( e->flags & RF_WEAPONMODEL ) )
 	{
@@ -841,7 +842,7 @@ void R_DrawAliasModel (entity_t *e)
 	}
 	else
 	{
-		if ( r_lefthand->value == 2 )
+		if ( r_lefthand->value == 2 || g_drawing_refl)
 			return;
 	}
 
