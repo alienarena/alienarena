@@ -392,6 +392,27 @@ extern	void ( APIENTRY * qglSelectTextureSGIS)( GLenum );
 extern	void ( APIENTRY * qglActiveTextureARB)( GLenum );
 extern	void ( APIENTRY * qglClientActiveTextureARB)( GLenum );
 
+extern	void ( APIENTRY * qglMultiTexCoord3fvARB)( GLenum, GLfloat * );
+// jitwater - fragment programs (pixel shaders)
+typedef void (APIENTRY * PFNGLPROGRAMSTRINGARBPROC) (GLenum target, GLenum format, GLsizei len, const GLvoid *string);
+typedef void (APIENTRY * PFNGLBINDPROGRAMARBPROC) (GLenum target, GLuint program);
+typedef void (APIENTRY * PFNGLDELETEPROGRAMSARBPROC) (GLsizei n, const GLuint *programs);
+typedef void (APIENTRY * PFNGLGENPROGRAMSARBPROC) (GLsizei n, GLuint *programs);
+typedef void (APIENTRY * PFNGLPROGRAMENVPARAMETER4DARBPROC) (GLenum target, GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w);
+typedef void (APIENTRY * PFNGLPROGRAMENVPARAMETER4DVARBPROC) (GLenum target, GLuint index, const GLdouble *params);
+typedef void (APIENTRY * PFNGLPROGRAMENVPARAMETER4FARBPROC) (GLenum target, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+typedef void (APIENTRY * PFNGLPROGRAMENVPARAMETER4FVARBPROC) (GLenum target, GLuint index, const GLfloat *params);
+typedef void (APIENTRY * PFNGLPROGRAMLOCALPARAMETER4DARBPROC) (GLenum target, GLuint index, GLdouble x, GLdouble y, GLdouble z, GLdouble w);
+typedef void (APIENTRY * PFNGLPROGRAMLOCALPARAMETER4DVARBPROC) (GLenum target, GLuint index, const GLdouble *params);
+typedef void (APIENTRY * PFNGLPROGRAMLOCALPARAMETER4FARBPROC) (GLenum target, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+typedef void (APIENTRY * PFNGLPROGRAMLOCALPARAMETER4FVARBPROC) (GLenum target, GLuint index, const GLfloat *params);
+typedef void (APIENTRY * PFNGLGETPROGRAMENVPARAMETERDVARBPROC) (GLenum target, GLuint index, GLdouble *params);
+typedef void (APIENTRY * PFNGLGETPROGRAMENVPARAMETERFVARBPROC) (GLenum target, GLuint index, GLfloat *params);
+typedef void (APIENTRY * PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC) (GLenum target, GLuint index, GLdouble *params);
+typedef void (APIENTRY * PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC) (GLenum target, GLuint index, GLfloat *params);
+typedef void (APIENTRY * PFNGLGETPROGRAMIVARBPROC) (GLenum target, GLenum pname, GLint *params);
+typedef void (APIENTRY * PFNGLGETPROGRAMSTRINGARBPROC) (GLenum target, GLenum pname, GLvoid *string);
+
 #ifdef _WIN32
 
 extern  int   ( WINAPI * qwglChoosePixelFormat )(HDC, CONST PIXELFORMATDESCRIPTOR *);
@@ -488,6 +509,9 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
 #ifdef GL_TEXTURE1
 #undef GL_TEXTURE1
 #endif
+#ifdef GL_TEXTURE2
+#undef GL_TEXTURE2
+#endif
 #endif
 
 // MH - detail textures begin
@@ -500,7 +524,10 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
 #define GL_GENERATE_MIPMAP_HINT           0x8192
 // MH - detail textures end
 
-extern int GL_TEXTURE0, GL_TEXTURE1;
+extern int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2;
+
+#define  GL_FRAGMENT_PROGRAM_ARB			0x8804 // jitwater
+#define  GL_PROGRAM_FORMAT_ASCII_ARB		0x8875 // jitwater
 
 // Vic - begin
 #ifndef GL_EXT_texture_env_combine
@@ -547,5 +574,14 @@ extern int GL_TEXTURE0, GL_TEXTURE1;
 #define GL_OPERAND7_ALPHA_EXT             0x859F
 #endif
 // Vic - end
+
+// === jitwater - arb fragmetn program extensions
+extern	PFNGLGENPROGRAMSARBPROC             qglGenProgramsARB;
+extern	PFNGLDELETEPROGRAMSARBPROC          qglDeleteProgramsARB;
+extern	PFNGLBINDPROGRAMARBPROC             qglBindProgramARB;
+extern	PFNGLPROGRAMSTRINGARBPROC           qglProgramStringARB;
+extern	PFNGLPROGRAMENVPARAMETER4FARBPROC   qglProgramEnvParameter4fARB;
+extern	PFNGLPROGRAMLOCALPARAMETER4FARBPROC qglProgramLocalParameter4fARB;
+// jitwater ===
 
 #endif

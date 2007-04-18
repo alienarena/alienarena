@@ -23,11 +23,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_script.h"
 #include "vlights.h"
 
+//****************************************************************************
+// === jitwater -- fragment program extensions
+PFNGLGENPROGRAMSARBPROC             qglGenProgramsARB            = NULL;
+PFNGLDELETEPROGRAMSARBPROC          qglDeleteProgramsARB         = NULL;
+PFNGLBINDPROGRAMARBPROC             qglBindProgramARB            = NULL;
+PFNGLPROGRAMSTRINGARBPROC           qglProgramStringARB          = NULL;
+PFNGLPROGRAMENVPARAMETER4FARBPROC   qglProgramEnvParameter4fARB  = NULL;
+PFNGLPROGRAMLOCALPARAMETER4FARBPROC qglProgramLocalParameter4fARB = NULL;
+// jitwater ===
+//****************************************************************************
+
 void R_Clear (void);
 
 viddef_t	vid;
 
-int GL_TEXTURE0, GL_TEXTURE1;
+int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2;
 
 model_t		*r_worldmodel;
 
@@ -72,6 +83,7 @@ cvar_t *rs_detail;
 cvar_t	*gl_detailtextures;
 // MH - detail textures begin
 cvar_t  *gl_normalmaps;
+cvar_t	*gl_arb_fragment_program; // jit
 
 entity_t	*currententity;
 model_t		*currentmodel;
@@ -1023,48 +1035,40 @@ void R_SetupFrame (void)
 
 	AngleVectors (r_newrefdef.viewangles, vpn, vright, vup);
 
-	// start MPO
-	// we want to look from the mirrored origin's perspective when drawing reflections
+	// === jitwater - MPO's code to draw reflective water
 	if (g_drawing_refl)
 	{
 		vec3_t tmp;
 
-		r_origin[2] = (2*g_refl_Z[g_active_refl]) - r_origin[2];	// flip
-		
+		r_origin[2] = (2 * g_refl_Z[g_active_refl]) - r_origin[2]; // flip
+
 		VectorCopy(r_newrefdef.viewangles, tmp);
-		tmp[0] *= -1.0;
+		tmp[0] *= -1.0f;
 		AngleVectors(tmp, vpn, vright, vup);
 
-		if ( !( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) )
+		if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 		{
-			vec3_t	temp;
+			vec3_t temp;
+			
+			leaf = Mod_PointInLeaf(r_origin, r_worldmodel);
+			temp[0] = g_refl_X[g_active_refl];
+			temp[1] = g_refl_Y[g_active_refl];
 
-//			r_oldviewcluster = r_viewcluster;
-//			r_oldviewcluster2 = r_viewcluster2;
-			leaf = Mod_PointInLeaf (r_origin, r_worldmodel);
-			r_viewcluster = leaf->cluster;
+			//if (r_newrefdef.rdflags & RDF_UNDERWATER) todo
+			if (r_newrefdef.vieworg[2] < g_refl_Z[g_active_refl])
+				temp[2] = g_refl_Z[g_active_refl] - 1;
+			else
+				temp[2] = g_refl_Z[g_active_refl] + 1;
 
-			VectorCopy(r_origin, temp);
-			if( r_newrefdef.rdflags & RDF_UNDERWATER )  {
-				temp[2] = g_refl_Z[g_active_refl] - 1;	// just above water level
-			}
+			leaf = Mod_PointInLeaf(temp, r_worldmodel);
 
-			else {
-				temp[2] = g_refl_Z[g_active_refl] + 1;	// just below water level
-			}
-//				tmp[0] = -45.0;	// HACK
-//				AngleVectors(tmp, vpn, vright, vup);
-
-			leaf = Mod_PointInLeaf (temp, r_worldmodel);
-			if (!(leaf->contents & CONTENTS_SOLID) &&
-				(leaf->cluster != r_viewcluster) )
-			{
+			if (!(leaf->contents & CONTENTS_SOLID) && (leaf->cluster != r_viewcluster))
 				r_viewcluster2 = leaf->cluster;
-			}
 		}
+
 		return;
 	}
-	// stop MPO
+	// jitwater ===
 
 // current viewcluster
 	if ( !( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) )
@@ -1170,16 +1174,16 @@ void R_SetupGL (void)
     qglLoadIdentity ();
     // start MPO
 	// normal operation
-	if (!g_drawing_refl)
+//	if (!g_drawing_refl)
 	{
 	    MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4 * 74 / r_newrefdef.fov_y, 15000); //Phenax
 	}
 	// if this is a reflection, the aspect ratio is different
-	else
-	{
+//	else
+//	{
 //		gluPerspective(r_newrefdef.fov_y, screenaspect, 4, 4096);
-		MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4, 4096);
-	}
+//		MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4, 4096);
+//	}
     // stop MPO
 
 	qglCullFace(GL_FRONT);
@@ -1516,30 +1520,6 @@ void R_RenderFrame (refdef_t *fd)
 	if(gl_reflection->value) {
 		R_UpdateReflTex(fd);
 	}
-	// end MPO
-
-  
-
-	// start MPO
-
-	// step 1 : detect all reflective surfaces
-
-	/*
-	if(gl_reflection->value) {
-		
-		R_clear_refl();			// clear out reflections we found last frame
-		R_RecursiveFindRefl (r_worldmodel->nodes);
-		R_UpdateReflTex(fd);	// render all reflections onto textures (this is slow)
-
-	}//if
-
-	else  {
-		
-		R_clear_refl();	
-
-	}
-	*/
-
 
 	R_RenderView( fd );
 	R_SetLightLevel ();
@@ -1737,6 +1717,8 @@ int R_Init( void *hinstance, void *hWnd )
 	int		j;
 	extern float r_turbsin[256];
 
+	gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "1", CVAR_ARCHIVE); // jit
+
 	for ( j = 0; j < 256; j++ )
 	{
 		r_turbsin[j] *= 0.5;
@@ -1902,13 +1884,15 @@ int R_Init( void *hinstance, void *hWnd )
 	}
 #endif
 
-	if ( strstr( gl_config.extensions_string, "GL_EXT_point_parameters" ) )
+	if (strstr(gl_config.extensions_string, "GL_EXT_point_parameters"))
 	{
-		if ( gl_ext_pointparameters->value )
+		//if(gl_ext_pointparameters->value)
+		if (0) // Workaround for ATI driver bug.
 		{
-			qglPointParameterfEXT = ( void (APIENTRY *)( GLenum, GLfloat ) ) qwglGetProcAddress( "glPointParameterfEXT" );
-			qglPointParameterfvEXT = ( void (APIENTRY *)( GLenum, const GLfloat * ) ) qwglGetProcAddress( "glPointParameterfvEXT" );
-			Com_Printf ("...using GL_EXT_point_parameters\n" );
+			qglPointParameterfEXT = (void(APIENTRY*)(GLenum, GLfloat))qwglGetProcAddress("glPointParameterfEXT");
+			qglPointParameterfvEXT = (void(APIENTRY*)(GLenum, const GLfloat*))qwglGetProcAddress("glPointParameterfvEXT");
+
+	
 		}
 		else
 		{
@@ -1965,10 +1949,12 @@ int R_Init( void *hinstance, void *hWnd )
 		{
 			Com_Printf ("...using GL_ARB_multitexture\n" );
 			qglMTexCoord2fSGIS = ( void * ) qwglGetProcAddress( "glMultiTexCoord2fARB" );
+			qglMultiTexCoord3fvARB = (void*)qwglGetProcAddress("glMultiTexCoord3fvARB");
 			qglActiveTextureARB = ( void * ) qwglGetProcAddress( "glActiveTextureARB" );
 			qglClientActiveTextureARB = ( void * ) qwglGetProcAddress( "glClientActiveTextureARB" );
 			GL_TEXTURE0 = GL_TEXTURE0_ARB;
 			GL_TEXTURE1 = GL_TEXTURE1_ARB;
+			GL_TEXTURE2 = GL_TEXTURE2_ARB;
 		}
 		else
 		{
@@ -2094,6 +2080,39 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		Com_Printf("...GL_NV_texture_shader not found\n");
 		gl_state.texshaders=false;
+	}
+
+		// === jitwater
+	if (!gl_arb_fragment_program->value)
+	{
+		gl_state.fragment_program = false;
+
+	}
+	else if (strstr(gl_config.extensions_string, "GL_ARB_fragment_program"))
+	{
+		gl_state.fragment_program = true;
+
+		qglGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)qwglGetProcAddress("glGenProgramsARB");
+		qglDeleteProgramsARB = (PFNGLDELETEPROGRAMSARBPROC)qwglGetProcAddress("glDeleteProgramsARB");
+		qglBindProgramARB = (PFNGLBINDPROGRAMARBPROC)qwglGetProcAddress("glBindProgramARB");
+		qglProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)qwglGetProcAddress("glProgramStringARB");
+		qglProgramEnvParameter4fARB =
+			(PFNGLPROGRAMENVPARAMETER4FARBPROC)qwglGetProcAddress("glProgramEnvParameter4fARB");
+		qglProgramLocalParameter4fARB =
+			(PFNGLPROGRAMLOCALPARAMETER4FARBPROC)qwglGetProcAddress("glProgramLocalParameter4fARB");
+
+		if (!(qglGenProgramsARB && qglDeleteProgramsARB && qglBindProgramARB &&
+			qglProgramStringARB && qglProgramEnvParameter4fARB && qglProgramLocalParameter4fARB))
+		{
+			gl_state.fragment_program = false;
+			Com_Printf("...GL_ARB_fragment_program not found\n");
+			
+		}
+	}
+	else
+	{
+		gl_state.fragment_program = false;
+		Com_Printf("...GL_ARB_fragment_program not found\n");
 	}
 
 	GL_SetDefaultState();

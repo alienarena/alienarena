@@ -197,6 +197,7 @@ extern  cvar_t		*r_minimap_style;
 extern	cvar_t	*gl_reflection;			// MPO
 extern	cvar_t	*gl_reflection_debug;	// MPO	for debugging the reflection
 extern	cvar_t	*gl_reflection_max;		// MPO  max number of water reflections
+extern	cvar_t	*gl_arb_fragment_program; // jit
 
 extern	int		gl_lightmap_format;
 extern	int		gl_solid_format;
@@ -427,6 +428,7 @@ typedef struct
 	qboolean	blend;
 	qboolean	texgen;
 	qboolean	texshaders;
+	qboolean	fragment_program; // jitwater
 } glstate_t;
 
 extern glconfig_t  gl_config;
