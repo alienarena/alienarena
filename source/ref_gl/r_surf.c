@@ -1301,13 +1301,8 @@ void R_DrawWorld (void)
 
 	VectorCopy (r_newrefdef.vieworg, modelorg);
 
-	// start MPO
-	// if this is a reflection we're drawing, we need to flip vertically across the water
-	if (g_drawing_refl)
-	{
-		modelorg[2] = (2*g_refl_Z[g_active_refl]) - modelorg[2];	// flip
-	}
-	// stop MPO
+	if (g_drawing_refl) // jitwater / MPO
+		modelorg[2] = (2.0f * g_refl_Z[g_active_refl]) - modelorg[2]; // flip
 
 	// auto cycle the world frame for texture animation
 	memset (&ent, 0, sizeof(ent));

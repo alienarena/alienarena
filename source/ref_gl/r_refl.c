@@ -5,7 +5,7 @@
 
 #include "r_local.h"
 #include "r_refl.h"
-#include <GL/glu.h>
+
 
 // width and height of the texture we are gonna use to capture our reflection
 unsigned int REFL_TEXW;
@@ -17,21 +17,27 @@ unsigned int g_reflTexH;
 int		g_num_refl		= 0;	// how many reflections we need to generate
 int		g_active_refl	= 0;	// which reflection is being rendered at the moment
 
+float	*g_refl_X;
+float	*g_refl_Y;
 float	*g_refl_Z;				// the Z (vertical) value of each reflection
 float	*g_waterDistance;		// the rough distance from player to water .. we want to render the closest water surface.
 int		*g_tex_num;				// corresponding texture numbers for each reflection
 int		maxReflections;			// maximum number of reflections
-
+unsigned int g_water_program_id; // jitwater
+image_t *distort_tex = NULL; // jitwater
+image_t *water_normal_tex = NULL; // jitwater
 
 // whether we are actively rendering a reflection of the world
 // (instead of the world itself)
 qboolean g_drawing_refl = false;
 qboolean g_refl_enabled = true;	// whether reflections should be drawn at all
 
-float	g_last_known_fov = 0.0;	// this is no longer necessary
+float	g_last_known_fov = 90.0f;	// jit - default to 90.
 
-extern void MYgluPerspective( GLdouble fovy, GLdouble aspect,
-		     GLdouble zNear, GLdouble zFar );
+void MYgluPerspective (GLdouble fovy, GLdouble aspect,
+		     GLdouble zNear, GLdouble zFar); // jit
+void GL_MipMap (byte *in, int width, int height); // jit
+
 
 /*
 ================
@@ -40,16 +46,23 @@ R_init_refl
 sets everything up 
 ================
 */
-void R_init_refl( int maxNoReflections ) {
 
+void R_init_refl (int maxNoReflections)
+{
 	//===========================
 	int				power;
 	int				maxSize;
 	unsigned char	*buf = NULL;
 	int				i = 0;
+	int len; // jitwater
+	char *fragment_program_text; // jitwater
 	//===========================
 
-	R_setupArrays( maxNoReflections );	// setup number of reflections
+	if (maxNoReflections < 1) // jit
+		maxNoReflections = 1;
+
+	R_setupArrays(maxNoReflections);	// setup number of reflections
+	assert(qglGetError() == GL_NO_ERROR);
 
 	//okay we want to set REFL_TEXH etc to be less than the resolution 
 	//otherwise white boarders are left .. we dont want that.
@@ -57,18 +70,18 @@ void R_init_refl( int maxNoReflections ) {
 	//however if it is turned on in game white marks round the sides will be left again
 	//so maybe its best to leave this alone.
 
-	for(power = 2; power < vid.height; power*=2) {
-		
+	for (power = 2; power < vid.height; power*=2)
+	{	
 		REFL_TEXW = power;	
 		REFL_TEXH = power;  
 	}
 
-	qglGetIntegerv(GL_MAX_TEXTURE_SIZE,&maxSize);		//get max supported texture size
+	qglGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);		//get max supported texture size
 
-	if(REFL_TEXW > maxSize) {
-
-		for(power = 2; power < maxSize; power*=2) {
-		
+	if (REFL_TEXW > maxSize)
+	{
+		for(power = 2; power < maxSize; power*=2)
+		{	
 			REFL_TEXW = power;	
 			REFL_TEXH = power;  
 		}
@@ -77,29 +90,59 @@ void R_init_refl( int maxNoReflections ) {
 	g_reflTexW = REFL_TEXW;
 	g_reflTexH = REFL_TEXH;
 	
-	for (i = 0; i < maxReflections; i++) {
+	for (i = 0; i < maxReflections; i++)
+	{
+		buf = (unsigned char *)malloc(REFL_TEXW * REFL_TEXH * 3);	// create empty buffer for texture
 
-		buf = (unsigned char *) malloc(REFL_TEXW * REFL_TEXH * 3);	// create empty buffer for texture
-
-		if (buf) {
-
+		if (buf)
+		{
 			memset(buf, 255, (REFL_TEXW * REFL_TEXH * 3));	// fill it with white color so we can easily see where our tex border is
 			g_tex_num[i] = txm_genTexObject(buf, REFL_TEXW, REFL_TEXH, GL_RGB,false,true);	// make this texture
 			free(buf);	// once we've made texture memory, we don't need the sys ram anymore
 		}
-
-		else {
-			fprintf(stderr, "Malloc failed?\n");
-			exit(1);	// unsafe exit, but we don't ever expect malloc to fail anyway
+		else
+		{
+			Sys_Error(ERR_FATAL, "Malloc failed?"); // jit
 		}
 	}
 
 	// if screen dimensions are smaller than texture size, we have to use screen dimensions instead (doh!)
-	g_reflTexW = (vid.width < REFL_TEXW) ? vid.width :  REFL_TEXW;	//keeping these in for now ..
-	g_reflTexH = (vid.height< REFL_TEXH) ? vid.height : REFL_TEXH;
+	g_reflTexW = (vid.width < REFL_TEXW) ? vid.width : REFL_TEXW;	//keeping these in for now ..
+	g_reflTexH = (vid.height < REFL_TEXH) ? vid.height : REFL_TEXH;
 
+	// === jitwater - fragment program initializiation
+	if (gl_state.fragment_program)
+	{
+		qglGenProgramsARB(1, &g_water_program_id);
+		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
+		qglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 1.0f, 0.1f, 0.6f, 0.5f); // jitest
+		len = FS_LoadFileZ("scripts/water1.arbf", &fragment_program_text);
+
+		if (len > 0)
+			qglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, len, fragment_program_text);
+		else
+			Com_Printf("Unable to find scripts/water1.arbf\n");
+
+		FS_FreeFile(fragment_program_text);
+		
+		// Make sure the program loaded correctly
+		{
+			int err = 0;
+			assert((err = qglGetError()) == GL_NO_ERROR);
+			err = err; // for debugging only -- todo, remove
+		}
+
+		distort_tex = GL_FindImage("gfx/water/distort1.tga", it_pic);
+		water_normal_tex = GL_FindImage("gfx/water/normal1.tga", it_pic);
+	}
+	// jitwater ===
 }
 
+void R_shutdown_refl (void) // jitodo - call this.
+{
+	if (gl_state.fragment_program)
+		qglDeleteProgramsARB(1, &g_water_program_id);
+}
 
 /*
 ================
@@ -109,25 +152,29 @@ creates the actual arrays
 to hold the reflections in
 ================
 */
-void R_setupArrays(int maxNoReflections) {
-
+void R_setupArrays (int maxNoReflections)
+{
 	R_clear_refl();
 
-	free( g_refl_Z			);
-	free( g_tex_num			);
-	free( g_waterDistance	);
+	free(g_refl_X);
+	free(g_refl_Y);
+	free(g_refl_Z);
+	free(g_tex_num);
+	free(g_waterDistance);
 
+	g_refl_X		= (float *)	malloc ( sizeof(float) * maxNoReflections );
+	g_refl_Y		= (float *)	malloc ( sizeof(float) * maxNoReflections );
 	g_refl_Z		= (float *)	malloc ( sizeof(float) * maxNoReflections );
 	g_waterDistance	= (float *)	malloc ( sizeof(float) * maxNoReflections );
 	g_tex_num		= (int   *) malloc ( sizeof(int)   * maxNoReflections );
 	
-	memset (g_refl_Z		, 0, sizeof(float) );	//initilise to zero
-	memset (g_waterDistance	, 0, sizeof(float) );	//to stop fuck ups
+	memset(g_refl_X			, 0, sizeof(float));
+	memset(g_refl_Y			, 0, sizeof(float));
+	memset(g_refl_Z			, 0, sizeof(float));
+	memset(g_waterDistance	, 0, sizeof(float));
 
-	maxReflections	= maxNoReflections;
+	maxReflections = maxNoReflections;
 }
-
-
 
 
 /*
@@ -137,8 +184,8 @@ R_clear_refl
 clears the relfection array
 ================
 */
-void R_clear_refl() {
-
+void R_clear_refl (void)
+{
 	g_num_refl = 0;
 }
 
@@ -150,54 +197,57 @@ R_add_refl
 creates an array of reflections
 ================
 */
-void R_add_refl(float Z, float distance) {
-
+void R_add_refl (float x, float y, float z)
+{
+	float distance;
 	int i = 0;
+	vec3_t v, v2;
 
-	if(!maxReflections) return;		//safety check.
+	if (!maxReflections)
+		return;		//safety check.
 
-	if(gl_reflection_max->value != maxReflections) {
-		R_init_refl( gl_reflection_max->value );
-	}
+	if (gl_reflection_max->value != maxReflections)
+		R_init_refl(gl_reflection_max->value);
 
 	// make sure this isn't a duplicate entry
 	// (I expect a lot of duplicates, which is why I put this check first)
 	for (; i < g_num_refl; i++)
 	{
 		// if this is a duplicate entry then we don't want to add anything
-
-		if ( fabs(g_refl_Z[i] - Z) < 0.1) {
+		if (fabs(g_refl_Z[i] - z) < 8.0f)
 			return;
-		}
 	}
 
-	// make sure we have room to add
-	if (g_num_refl < maxReflections) {
+	VectorSet(v, x, y, z);
+	VectorSubtract(v, r_newrefdef.vieworg, v2);
+	distance = VectorLength(v2);
 
-		g_refl_Z[g_num_refl]			= Z;
+	// make sure we have room to add
+	if (g_num_refl < maxReflections)
+	{
+		g_refl_X[g_num_refl]			= x;
+		g_refl_Y[g_num_refl]			= y;
+		g_refl_Z[g_num_refl]			= z;
 		g_waterDistance[g_num_refl ]	= distance;
 		g_num_refl++;
 	}
-
-	else {
+	else
+	{
 		// we want to use the closest surface
 		// not just any random surface
 		// good for when 1 reflection enabled.
-		
-		for (i=0; i < g_num_refl; i++) {
-			
-			if ( distance < g_waterDistance[i] ) {
-
-				g_refl_Z [ i ]			= Z;
-				g_waterDistance [ i ]	= distance;
-				
+		for (i = 0; i < g_num_refl; i++)
+		{
+			if (distance < g_waterDistance[i])
+			{
+				g_refl_X[i]			= x;
+				g_refl_Y[i]			= y;
+				g_refl_Z[i]			= z;
+				g_waterDistance[i]	= distance;
 				return;	//lets go
 			}
 		}
-
-	}// else
-
-
+	}
 }
 
 
@@ -212,39 +262,68 @@ static int txm_genTexObject(unsigned char *texData, int w, int h,
 	repeat = false;
 	mipmap = false;
 
-	if (texData) {
-
+	if (texData)
+	{
 		qglBindTexture(GL_TEXTURE_2D, texNum);
-		//qglPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-		/* Set the tiling mode */
-		if (repeat) {
+		// Set the tiling mode
+		if (repeat)
+		{
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		}
-		else {
+		else
+		{
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, 0x812F);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, 0x812F);
 		}
 
-		/* Set the filtering */
-		if (mipmap) {
+		// Set the filtering
+		if (mipmap)
+		{
+			int scaled_width = w, scaled_height = h, miplevel = 0; // jit
+
 			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			qglTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+#if 1 // jit -  q2 compatible code
+			qglTexImage2D(GL_TEXTURE_2D, 0, format, scaled_width, scaled_height,
+				0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+
+			while (scaled_width > 1 || scaled_height > 1)
+			{
+				GL_MipMap((byte*)texData, scaled_width, scaled_height);
+				scaled_width >>= 1;
+				scaled_height >>= 1;
+
+				if (scaled_width < 1)
+					scaled_width = 1;
+
+				if (scaled_height < 1)
+					scaled_height = 1;
+
+				miplevel++;
+				qglTexImage2D(GL_TEXTURE_2D, miplevel, format, scaled_width, scaled_height,
+					0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+			}
+#else
 			gluBuild2DMipmaps(GL_TEXTURE_2D, format, w, h, format, 
 				GL_UNSIGNED_BYTE, texData);
-
+#endif
 		}
-		else {
+		else
+		{
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			qglTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, format, 
 				GL_UNSIGNED_BYTE, texData);
 		}
 	}
+
 	return texNum;
 }
 
+#if 0
 // based off of R_RecursiveWorldNode,
 // this locates all reflective surfaces and their associated height
 // old method - delete this if you want
@@ -264,7 +343,7 @@ void R_RecursiveFindRefl (mnode_t *node)
 
 	// MPO : if this function returns true, it means that the polygon is not visible
 	// in the frustum, therefore drawing it would be a waste of resources
-	if (R_CullBox (node->minmaxs, node->minmaxs+3))
+	if (R_CullBox(node->minmaxs, node->minmaxs+3))
 		return;
 
 	// if a leaf node, draw stuff
@@ -274,10 +353,8 @@ void R_RecursiveFindRefl (mnode_t *node)
 
 		// check for door connected areas
 		if (r_newrefdef.areabits)
-		{
-			if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) )
+			if (!(r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7))))
 				return;		// not visible
-		}
 
 		mark = pleaf->firstmarksurface;
 		c = pleaf->nummarksurfaces;
@@ -341,24 +418,19 @@ void R_RecursiveFindRefl (mnode_t *node)
 		// start MPO
 		
 		// if this is a reflective surface ...
-		//if ((surf->flags & SURF_DRAWTURB & (SURF_TRANS33|SURF_TRANS66) ) &&
-		//	(surf->texinfo->flags & (SURF_TRANS33|SURF_TRANS66)))
 		if (surf->flags & SURF_DRAWTURB)
 		{
 			// and if it is flat on the Z plane ...
 			if (plane->type == PLANE_Z)
-			{
-				//R_add_refl(surf->polys->verts[0][2]);	// add it!
-				R_add_refl(surf->polys->verts[0][2], 0);	//so it dont moan ..
-
-			}
+				R_add_refl(surf->polys->verts[0][0], surf->polys->verts[0][1], surf->polys->verts[0][2]);
 		}
 		// stop MPO
 	}
 
 	// recurse down the back side
-	R_RecursiveFindRefl (node->children[!side]);
+	R_RecursiveFindRefl(node->children[!side]);
 }
+#endif
 
 /*
 ================
@@ -368,8 +440,8 @@ draws debug texture in game
 so you can see whats going on
 ================
 */
-void R_DrawDebugReflTexture() {
-
+void R_DrawDebugReflTexture (void)
+{
 	qglBindTexture(GL_TEXTURE_2D, g_tex_num[0]);	// do the first texture
 	qglBegin(GL_QUADS);
 	qglTexCoord2f(1, 1); qglVertex3f(0, 0, 0);
@@ -388,9 +460,8 @@ into the right texture (slow)
 we have to draw everything a 2nd time
 ================
 */
-void R_UpdateReflTex(refdef_t *fd)
+void R_UpdateReflTex (refdef_t *fd)
 {
-	
 	if(!g_num_refl)	return;	// nothing to do here
 
 	g_drawing_refl = true;	// begin drawing reflection
@@ -398,20 +469,19 @@ void R_UpdateReflTex(refdef_t *fd)
 	g_last_known_fov = fd->fov_y;
 	
 	// go through each reflection and render it
-	for (g_active_refl = 0; g_active_refl < g_num_refl; g_active_refl++){
-
-		qglClearColor(0, 0, 0, 1);								//clear screen
-		qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	for (g_active_refl = 0; g_active_refl < g_num_refl; g_active_refl++)
+	{
+		//qglClearColor(0, 0, 0, 1);								//clear screen
+		qglClear(/*GL_COLOR_BUFFER_BIT |*/ GL_DEPTH_BUFFER_BIT);
 		
-		R_RenderView( fd );	// draw the scene here!
+		R_RenderView(fd);	// draw the scene here!
 
 		qglBindTexture(GL_TEXTURE_2D, g_tex_num[g_active_refl]);
 		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
 			(REFL_TEXW - g_reflTexW) >> 1,
 			(REFL_TEXH - g_reflTexH) >> 1,
-			0, 0, g_reflTexW, g_reflTexH);		
-		
-	} //for
+			0, 0, g_reflTexW, g_reflTexH);
+	}
 
 	g_drawing_refl = false;	// done drawing refl
 	qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	//clear stuff now cause we want to render scene
@@ -422,10 +492,10 @@ void R_UpdateReflTex(refdef_t *fd)
 void R_DoReflTransform()
 {
 	//qglRotatef (180, 1, 0, 0);	// flip upside down (X-axis is forward)
-    qglRotatef (r_newrefdef.viewangles[2],  1, 0, 0);
-    qglRotatef (r_newrefdef.viewangles[0],  0, 1, 0);	// up/down rotation (reversed)
-    qglRotatef (-r_newrefdef.viewangles[1], 0, 0, 1);	// left/right rotation
-    qglTranslatef (-r_newrefdef.vieworg[0],
+    qglRotatef(r_newrefdef.viewangles[2],  1, 0, 0);
+    qglRotatef(r_newrefdef.viewangles[0],  0, 1, 0);	// up/down rotation (reversed)
+    qglRotatef(-r_newrefdef.viewangles[1], 0, 0, 1);	// left/right rotation
+    qglTranslatef(-r_newrefdef.vieworg[0],
     	-r_newrefdef.vieworg[1],
     	-((2*g_refl_Z[g_active_refl]) - r_newrefdef.vieworg[2]));
 }
@@ -446,37 +516,38 @@ void print_matrix(int which_matrix, const char *desc)
 
 
 // alters texture matrix to handle our reflection
-void R_LoadReflMatrix() {
+void R_LoadReflMatrix (void)
+{
 	float aspect = (float)r_newrefdef.width/r_newrefdef.height;
 
-	qglMatrixMode	(GL_TEXTURE);
-	qglLoadIdentity	( );
+	qglMatrixMode(GL_TEXTURE);
+	qglLoadIdentity();
 
-	qglTranslatef	(0.5, 0.5, 0);				/* Center texture */
+	qglTranslatef(0.5f, 0.5f, 0.0f); // Center texture
 
-	qglScalef(0.5f *(float)g_reflTexW / REFL_TEXW,
-			 0.5f * (float)g_reflTexH / REFL_TEXH,
-			 1.0);								/* Scale and bias */
+	qglScalef(0.5f * (float)g_reflTexW / REFL_TEXW,
+			  0.5f * (float)g_reflTexH / REFL_TEXH,
+			  1.0f);								/* Scale and bias */
 
 	MYgluPerspective(g_last_known_fov, aspect, 4, 4096);
 
-	qglRotatef (-90, 1, 0, 0);	    // put Z going up
-	qglRotatef (90,  0, 0, 1);	    // put Z going up
+	qglRotatef(-90.0f, 1.0f, 0.0f, 0.0f);	    // put Z going up
+	qglRotatef(90.0f,  0.0f, 0.0f, 1.0f);	    // put Z going up
 
 	// do transform
-	R_DoReflTransform	( );
-	qglTranslatef		( 0, 0, 0 );
-	qglMatrixMode		( GL_MODELVIEW );
+	R_DoReflTransform();
+	qglTranslatef(0.0f, 0.0f, 0.0f);
+	qglMatrixMode(GL_MODELVIEW);
 }
 
 /*
  * Load identity into texture matrix
  */
-void R_ClearReflMatrix() {
-
-	qglMatrixMode	( GL_TEXTURE	);
-	qglLoadIdentity	(				);
-	qglMatrixMode	( GL_MODELVIEW	);
+void R_ClearReflMatrix()
+{
+	qglMatrixMode(GL_TEXTURE);
+	qglLoadIdentity();
+	qglMatrixMode(GL_MODELVIEW);
 }
 
 // the frustum function from the Mesa3D Library

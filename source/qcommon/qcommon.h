@@ -725,6 +725,7 @@ void	FS_FCloseFile (FILE *f);
 // note: this can't be called from another DLL, due to MS libc issues
 
 int		FS_LoadFile (char *path, void **buffer);
+int		FS_LoadFileZ (const char *path, void **buffer); // jit - null-terminated
 // a null buffer will just return the file length without loading
 // a -1 length is not present
 
