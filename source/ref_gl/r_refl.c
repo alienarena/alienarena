@@ -118,12 +118,14 @@ void R_init_refl (int maxNoReflections)
 		qglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 1.0f, 0.1f, 0.6f, 0.5f); // jitest
 		len = FS_LoadFileZ("scripts/water1.arbf", &fragment_program_text);
 
-		if (len > 0)
+		if (len > 0) {
 			qglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, len, fragment_program_text);
+			FS_FreeFile(fragment_program_text);
+		}
 		else
 			Com_Printf("Unable to find scripts/water1.arbf\n");
 
-		FS_FreeFile(fragment_program_text);
+	
 		
 		// Make sure the program loaded correctly
 		{
