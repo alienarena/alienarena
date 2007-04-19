@@ -375,7 +375,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 			        gl_state.inverse_intensity,
 					gl_state.inverse_intensity,
 					1.0F );
-		if(!gl_reflection->value)
+		if(!gl_reflection->value || (!Q_stricmp(fa->texinfo->image->name, "textures/arena2/lava.wal"))) //lava HACK!
 			EmitWaterPolys_original(fa);
 		else
 			EmitWaterPolys (fa);
@@ -517,8 +517,8 @@ void R_DrawAlphaSurfaces (void)
 			s->entity->angles[2] = -s->entity->angles[2];	// stupid quake bug
 		}
 
-		if (s->flags & SURF_DRAWTURB) {
-			if(!gl_reflection->value)
+		if (s->flags & SURF_DRAWTURB) { 
+			if(!gl_reflection->value || (!Q_stricmp(s->texinfo->image->name, "textures/arena2/lava.wal"))) //lava HACK!
 				EmitWaterPolys_original (s);
 			else
 				EmitWaterPolys (s);
