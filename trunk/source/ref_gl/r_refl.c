@@ -473,8 +473,8 @@ void R_UpdateReflTex (refdef_t *fd)
 	// go through each reflection and render it
 	for (g_active_refl = 0; g_active_refl < g_num_refl; g_active_refl++)
 	{
-		//qglClearColor(0, 0, 0, 1);								//clear screen
-		qglClear(/*GL_COLOR_BUFFER_BIT |*/ GL_DEPTH_BUFFER_BIT);
+		qglClearColor(0, 0, 0, 1);								//clear screen
+		qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		R_RenderView(fd);	// draw the scene here!
 
