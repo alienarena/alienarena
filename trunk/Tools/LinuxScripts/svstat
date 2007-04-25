@@ -363,7 +363,7 @@ responsive_servers.each {
 #	}
 }
 puts '-'*80
-puts 'Player name    Ping   Score IP                    Server name'
+puts 'Player name     Ping   Score IP                    Server name'
 puts '-'*80
 responsive_servers.each {
 	|server|
@@ -374,7 +374,7 @@ responsive_servers.each {
 	bots = 0
 	playerinfo.each { |player|
 		if player['ip'] != '127.0.0.1' then
-			puts "#{player['name'].concat(' '*14).slice(0,14)} #{player['ping'].to_str.concat('ms').concat(' '*6).slice(0,6)} #{player['score'].to_str.concat(' '*5).slice(0,5)} #{player['ip'].concat(' '*21).slice(0,21)} #{serverinfo['hostname'].concat(' '*30).slice(0,30)}"
+			puts "#{player['name'].concat(' '*15).slice(0,15)} #{player['ping'].to_str.concat('ms').concat(' '*6).slice(0,6)} #{player['score'].to_str.concat(' '*5).slice(0,5)} #{player['ip'].concat(' '*21).slice(0,21)} #{serverinfo['hostname'].concat(' '*29).slice(0,29)}"
 			if $*.include?('-r') then
 				playerip = player['ip'].split(':')[0]
 				playerport = player['ip'].split(':')[1]
