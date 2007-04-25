@@ -3156,7 +3156,7 @@ void AddbotFunc(void *self) {
 	for(i = 0; i < strlen(startmap); i++)
 		startmap[i] = tolower(startmap[i]);
 
-	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4)
+	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
 		strcpy(bot_filename, "botinfo/team.tmp");
 	else
 		sprintf(bot_filename, "botinfo/%s.tmp", startmap);
@@ -3283,32 +3283,9 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	extern char **FS_ListFiles( char *, int *, unsigned, unsigned );
 	int		j, l;
 
-	// DM
-	if (s_rules_box.curvalue == 0)
-	{
-		s_maxclients_field.generic.statusbar = NULL;
-		s_startserver_dmoptions_action.generic.statusbar = NULL;
-	}
-	else if(s_rules_box.curvalue == 1) //ctf
-	{
-		s_maxclients_field.generic.statusbar = NULL;
-		s_startserver_dmoptions_action.generic.statusbar = NULL;
-	}
-	else if(s_rules_box.curvalue == 2) //aoa
-	{
-		s_maxclients_field.generic.statusbar = NULL;
-		s_startserver_dmoptions_action.generic.statusbar = NULL;
-	}
-	else if(s_rules_box.curvalue == 3) //deathball
-	{
-		s_maxclients_field.generic.statusbar = NULL;
-		s_startserver_dmoptions_action.generic.statusbar = NULL;
-	}
-	else if(s_rules_box.curvalue == 4) //tca
-	{
-		s_maxclients_field.generic.statusbar = NULL;
-		s_startserver_dmoptions_action.generic.statusbar = NULL;
-	}
+	s_maxclients_field.generic.statusbar = NULL;
+	s_startserver_dmoptions_action.generic.statusbar = NULL;
+	
 	//clear out list first
 	
 	mapnames = 0;
@@ -3403,8 +3380,15 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 				k++;
 			}
 		}
-		else if (s_rules_box.curvalue == 4) {
+		else if (s_rules_box.curvalue == 4) { 
 			if(shortname[0] == 't' && shortname[1] == 'c' && shortname[2] == 'a') {
+				mapnames[k] = malloc( strlen( scratch ) + 1 );
+				strcpy( mapnames[k], scratch );
+				k++;
+			}
+		}
+		else if (s_rules_box.curvalue == 5) {
+			if(shortname[0] == 'c' && shortname[1] == 'p') {
 				mapnames[k] = malloc( strlen( scratch ) + 1 );
 				strcpy( mapnames[k], scratch );
 				k++;
@@ -3503,6 +3487,14 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 						totalmaps++;
 					}
 				}
+				else if (s_rules_box.curvalue == 5) {
+					if(curMap[0] == 'c' && curMap[1] == 'p') {
+						mapnames[k] = malloc( strlen( scratch ) + 1 );
+						strcpy( mapnames[k], scratch );
+						k++;
+						totalmaps++;
+					}
+				}
 
 			}
 			//set back so whole string get deleted.
@@ -3556,6 +3548,7 @@ void StartServerActionFunc( void *self )
 		Cvar_SetValue ("deathmatch", !s_rules_box.curvalue );
 		Cvar_SetValue ("ctf", 0);
 		Cvar_SetValue ("tca", 0);
+		Cvar_SetValue ("cp", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 	else if(s_rules_box.curvalue == 1)
@@ -3563,6 +3556,7 @@ void StartServerActionFunc( void *self )
 		Cvar_SetValue ("deathmatch", 1 );	// deathmatch is always true for ctf, right?
 		Cvar_SetValue ("ctf", 1 ); //set both dm and ctf
 		Cvar_SetValue ("tca", 0);
+		Cvar_SetValue ("cp", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 	else if(s_rules_box.curvalue == 2) //aoa mode
@@ -3570,6 +3564,7 @@ void StartServerActionFunc( void *self )
 		Cvar_SetValue ("deathmatch", 1 );	// deathmatch is always true for aoa.
 		Cvar_SetValue ("ctf", 0 ); 
 		Cvar_SetValue ("tca", 0);
+		Cvar_SetValue ("cp", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 	else if(s_rules_box.curvalue == 3) //deathball mode
@@ -3577,6 +3572,7 @@ void StartServerActionFunc( void *self )
 		Cvar_SetValue ("deathmatch", 1 );	// deathmatch is always true for deathball.
 		Cvar_SetValue ("ctf", 0 ); 
 		Cvar_SetValue ("tca", 0);	
+		Cvar_SetValue ("cp", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 	else if(s_rules_box.curvalue == 4) //tca mode
@@ -3584,35 +3580,49 @@ void StartServerActionFunc( void *self )
 		Cvar_SetValue ("deathmatch", 1 );	// deathmatch is always true for tca.
 		Cvar_SetValue ("ctf", 0 ); 
 		Cvar_SetValue ("tca", 1);
+		Cvar_SetValue ("cp", 0);
+		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
+	}
+	else if(s_rules_box.curvalue == 5) //cattleprod mode
+	{
+		Cvar_SetValue ("deathmatch", 1 );	// deathmatch is always true for cp.
+		Cvar_SetValue ("ctf", 0 ); 
+		Cvar_SetValue ("tca", 0);
+		Cvar_SetValue ("cp", 1);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 
 	spot = NULL;
 	if (s_rules_box.curvalue == 0)		// PGM
 	{
- 		if(Q_stricmp(startmap, "dmintro") == 0)
+ 		if(Q_stricmp(startmap, "dm-dynamo") == 0)
   			spot = "start";
  	
 	}
 	if (s_rules_box.curvalue == 1)		// PGM
 	{
- 		if(Q_stricmp(startmap, "ctf0") == 0)
+ 		if(Q_stricmp(startmap, "ctf-chromium") == 0)
   			spot = "start";
  	
 	}
 	if (s_rules_box.curvalue == 2) 
 	{
-		if(Q_stricmp(startmap, "aoa1") == 0)
+		if(Q_stricmp(startmap, "aoa-morpheus") == 0)
 			spot = "start";
 	}
 	if (s_rules_box.curvalue == 3) 
 	{
-		if(Q_stricmp(startmap, "db-egyptian") == 0)
+		if(Q_stricmp(startmap, "db-chromium") == 0)
 			spot = "start";
 	}
 	if (s_rules_box.curvalue == 4) 
 	{
-		if(Q_stricmp(startmap, "tca-frost") == 0)
+		if(Q_stricmp(startmap, "tca-europa") == 0)
+			spot = "start";
+	}
+	if (s_rules_box.curvalue == 5) 
+	{
+		if(Q_stricmp(startmap, "cp-grindery") == 0)
 			spot = "start";
 	}
 	if (spot)
@@ -3642,6 +3652,7 @@ void StartServer_MenuInit( void )
 		"all out assault",
 		"deathball",
 		"team core assault",
+		"cattle prod",
 		0
 	};
 
@@ -3998,7 +4009,7 @@ void BotAction( void *self )
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 	for(i = 0; i < strlen(startmap); i++)
 		startmap[i] = tolower(startmap[i]);
-	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4)
+	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
 		strcpy(bot_filename, "botinfo/team.tmp");
 	else
 		sprintf(bot_filename, "botinfo/%s.tmp", startmap);
@@ -4185,7 +4196,7 @@ void Read_Bot_Info()
 	char startmap[128];
 
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
-	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4)
+	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
 		strcpy(bot_filename, "botinfo/team.tmp");
 	else
 		sprintf(bot_filename, "botinfo/%s.tmp", startmap);

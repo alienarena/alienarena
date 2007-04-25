@@ -657,5 +657,54 @@ void SP_trigger_bluedeathballtarget (edict_t *self)
 	gi.linkentity (self);
 }
 
+void cowtarget_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
 
+	if (self->timestamp > level.time)
+		return;
 
+	self->timestamp = level.time + FRAMETIME;
+	
+	if(strcmp(other->classname, "cow") == 0) {
+
+	
+		if(strcmp(self->classname, "trigger_bluecowtarget") == 0) 
+			blue_team_score++;
+		if(strcmp(self->classname, "trigger_redcowtarget") == 0) 
+			red_team_score++;
+	
+		//send an effect
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_BFG_BIGEXPLOSION);
+		gi.WritePosition (other->s.origin);
+		gi.multicast (other->s.origin, MULTICAST_PHS);
+		gi.sound (other, CHAN_AUTO, gi.soundindex("misc/db_score.wav"), 1, ATTN_NONE, 0);
+		
+		//get rid of the cow, it's been beamed into the void....(back to pasture)
+		other->health = other->max_health;
+		other->s.event = EV_PLAYER_TELEPORT;
+		VectorCopy(other->s.spawn_pos, other->s.origin);	
+	}
+}
+
+void SP_trigger_redcowtarget (edict_t *self)
+{
+	InitTrigger(self);
+
+	self->solid = SOLID_TRIGGER;
+
+	self->touch = cowtarget_touch;
+
+	gi.linkentity (self);
+}
+
+void SP_trigger_bluecowtarget (edict_t *self)
+{
+	InitTrigger(self);
+
+	self->solid = SOLID_TRIGGER;
+
+	self->touch = cowtarget_touch;
+
+	gi.linkentity (self);
+}

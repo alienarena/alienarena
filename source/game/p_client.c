@@ -1262,7 +1262,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 	edict_t	*spot = NULL;
 
 	if (deathmatch->value) {
-		if (ctf->value || tca->value || ((int)(dmflags->value) & DF_SKINTEAMS)) {
+		if (ctf->value || tca->value || cp->value || ((int)(dmflags->value) & DF_SKINTEAMS)) {
 			spot = SelectCTFSpawnPoint(ent);
 			if(!spot)
 				spot = SelectDeathmatchSpawnPoint ();
@@ -1791,7 +1791,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	InitClientResp (ent->client);
 
-	if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value)
+	if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 		ent->dmteam = NO_TEAM;
 
 	// locate ent at a spawn point
@@ -1800,7 +1800,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 	PutClientInServer (ent);
 
 	//in ctf, initially start in chase mode, and allow them to choose a team
-	if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) {
+	if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
 
 		ent->client->pers.spectator = true;
 		ent->client->chase_target = NULL;
@@ -1813,7 +1813,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 		//bring up scoreboard if not on a team
 		if(ent->dmteam == NO_TEAM) {
 			ent->client->showscores = true;	
-			if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value)
+			if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 				CTFScoreboardMessage (ent, NULL);
 			else 
 				DeathmatchScoreboardMessage (ent, NULL);
@@ -1980,10 +1980,10 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	if(whereFrom != SPAWN && whereFrom != CONNECT)
 		whereFrom = INGAME;
 
-	if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM))
+	if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM))
 		ent->client->pers.spectator = false; //cannot spectate if you've joined a team
 
-	if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
+	if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
 		safe_bprintf (PRINT_MEDIUM, "Illegal to change teams after CTF match has started!\n");
 		return;
 	}
@@ -2010,7 +2010,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 	//do the team skin check, only forcibly set teams for bots
 	if(ent->is_bot) {
-		if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) //only do this for skin teams, red, blue
+		if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //only do this for skin teams, red, blue
 		{
 			copychar = false;
 			strcpy(playerskin, " ");
@@ -2314,7 +2314,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 			InitClientPersistant (ent->client);
 	}
 
-	if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) {
+	if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
 		ent->dmteam = NO_TEAM;
 		ent->teamset = false;
 	}
@@ -2353,7 +2353,7 @@ void ClientDisconnect (edict_t *ent)
 	if(ent->deadflag && ent->client->chasetoggle == 1)
 		DeathcamRemove(ent, "off");
 
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value)  //adjust teams and scores
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
 	{
 		if(ent->dmteam == BLUE_TEAM)
 			blue_team_cnt-=1;
@@ -2620,11 +2620,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 			client->latched_buttons = 0;
 			
-			if((ctf->value || tca->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM)) {
+			if((ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM)) {
 				client->pers.spectator = false; //we have a team, join
 			//	safe_bprintf(PRINT_HIGH, "red: %i blue: %i\n", red_team_cnt, blue_team_cnt);
 			}
-			else if(((int)(dmflags->value) & DF_SKINTEAMS) || (ctf->value || tca->value) && ent->dmteam == NO_TEAM) {
+			else if(((int)(dmflags->value) & DF_SKINTEAMS) || (ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM) {
 				if(red_team_cnt < blue_team_cnt)
 					ent->dmteam = RED_TEAM; //gonna put the autojoin here
 				else
@@ -2647,11 +2647,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	if (client->resp.spectator) {
-		if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value)
+		if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 			if(ent->dmteam == NO_TEAM && (level.time/2 == ceil(level.time/2)))
 				safe_centerprintf(ent, "\n\n\nPress <fire> to autojoin\nor <jump> to join BLUE\nor <crouch> to join RED\n");
 		if (ucmd->upmove >= 10) {
-			if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) && ent->dmteam == NO_TEAM) {
+			if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM) {
 				ent->dmteam = BLUE_TEAM; //join BLUE
 				client->pers.spectator = false;
 				ClientChangeSkin(ent);
@@ -2664,7 +2664,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 					GetChaseTarget(ent);
 			}
 		}
-		else if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) && ent->dmteam == NO_TEAM && 
+		else if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM && 
 			(ucmd->upmove < 0)) {
 		
 			ent->dmteam = RED_TEAM; //join RED

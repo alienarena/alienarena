@@ -49,6 +49,8 @@ void SP_trigger_monsterjump (edict_t *ent);
 void SP_trigger_deathballtarget (edict_t *ent);
 void SP_trigger_reddeathballtarget (edict_t *ent);
 void SP_trigger_bluedeathballtarget (edict_t *ent);
+void SP_trigger_redcowtarget ( edict_t *ent);
+void SP_trigger_bluecowtarget (edict_t *ent);
 
 void SP_target_temp_entity (edict_t *ent);
 void SP_target_speaker (edict_t *ent);
@@ -77,10 +79,8 @@ void SP_point_combat (edict_t *self);
 void SP_misc_teleporter (edict_t *self);
 void SP_misc_teleporter_dest (edict_t *self);
 
-void SP_turret_breach (edict_t *self);
-void SP_turret_base (edict_t *self);
+void SP_npc_cow (edict_t *self);
 
-//CodeRED
 void SP_misc_electrode (edict_t *self);
 void SP_misc_scope (edict_t *self);
 void SP_misc_pod (edict_t *self);
@@ -136,6 +136,8 @@ spawn_t	spawns[] = {
 	{"trigger_deathballtarget", SP_trigger_deathballtarget},
 	{"trigger_reddeathballtarget", SP_trigger_reddeathballtarget},
 	{"trigger_bluedeathballtarget", SP_trigger_bluedeathballtarget},
+	{"trigger_bluecowtarget", SP_trigger_bluecowtarget},
+	{"trigger_redcowtarget", SP_trigger_redcowtarget},
 
 	{"target_temp_entity", SP_target_temp_entity},
 	{"target_speaker", SP_target_speaker},
@@ -165,8 +167,7 @@ spawn_t	spawns[] = {
 	{"misc_teleporter", SP_misc_teleporter},
 	{"misc_teleporter_dest", SP_misc_teleporter_dest},
 
-	{"turret_breach", SP_turret_breach},
-	{"turret_base", SP_turret_base},
+	{"npc_cow", SP_npc_cow},
 
 	{"misc_lamp", SP_misc_lamp},
 	{"misc_lamp2", SP_misc_lamp2},
@@ -822,7 +823,7 @@ void SP_worldspawn (edict_t *ent)
 
 	// status bar program
 	if (deathmatch->value) {
-		if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value)
+		if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 		{
 			gi.configstring (CS_STATUSBAR, team_statusbar);
 			if(ctf->value)

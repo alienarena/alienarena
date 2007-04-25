@@ -125,7 +125,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	edict_t *cl_ent;
 
 //bots and configurations will be loaded level specific
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value)
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 		strcpy(bot_filename, "botinfo/team.tmp");
 	else if(sv_custombots->value)
 		sprintf(bot_filename, "botinfo/custom%i.tmp", sv_custombots->integer);
@@ -195,7 +195,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 
 		if(!found && ((total_players <= sv_botkickthreshold->integer) || !sv_botkickthreshold->integer)) { 
 
-			if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) 
+			if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) 
 				ACESP_SpawnBot(NULL, info, skin, NULL); //we may be changing the info further on
 			else 
 				ACESP_SpawnBot (NULL, NULL, NULL, userinfo);
@@ -677,7 +677,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *team)
 
 	// skin
 	
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) //only do this for skin teams, red, blue
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //only do this for skin teams, red, blue
 	{
 		copychar = false;
 		strcpy(playerskin, " ");
@@ -895,7 +895,7 @@ void ACESP_KickBot(char *name)
 
 				DeadDropDeathball(bot);	
 
-				if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value)  //adjust teams and scores
+				if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
 				{
 					if(bot->dmteam == BLUE_TEAM)
 						blue_team_cnt-=1;

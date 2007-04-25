@@ -869,6 +869,7 @@ typedef struct entity_state_s
 	int		event;			// impulse events -- muzzle flashes, footsteps, etc
 							// events only go out for a single frame, they
 							// are automatically cleared each frame
+	vec3_t	spawn_pos;  //used for remembering the original spawn position of an entity
 } entity_state_t;
 
 //==============================================
