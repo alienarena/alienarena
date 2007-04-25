@@ -852,7 +852,7 @@ void G_SetClientEffects (edict_t *ent)
 	if(ctf->value)
 		CTFEffects(ent);
 
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value)
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 		TeamEffects(ent);
 	
 	if (ent->client->quad_framenum > level.framenum)

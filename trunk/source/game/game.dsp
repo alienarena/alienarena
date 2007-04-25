@@ -131,6 +131,10 @@ SOURCE=.\c_cam.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\cow.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ctf.c
 # End Source File
 # Begin Source File
@@ -192,10 +196,6 @@ SOURCE=.\g_target.c
 # Begin Source File
 
 SOURCE=.\g_trigger.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\g_turret.c
 # End Source File
 # Begin Source File
 

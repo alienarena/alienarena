@@ -36,6 +36,7 @@ edict_t		*g_edicts;
 cvar_t	*deathmatch;
 cvar_t  *ctf;
 cvar_t  *tca;
+cvar_t  *cp;
 //mutators
 cvar_t  *instagib;
 cvar_t  *rocket_arena;
@@ -330,7 +331,7 @@ void EndDMLevel (void)
 		return;
 	}
 
-	if(((int)(ctf->value)) && (!(int)(dedicated->value))) { //ctf will just stay on same level unless specified by dedicated list
+	if((((int)(ctf->value) || (int)(cp->value))) && (!(int)(dedicated->value))) { //ctf will just stay on same level unless specified by dedicated list
 		BeginIntermission (CreateTargetChangeLevel (level.mapname));
 		return;
 	}
@@ -555,7 +556,7 @@ void CheckDMRules (void)
 	gclient_t	*cl;
 	edict_t		*cl_ent;
 
-	if(!tca->value && !ctf->value && !((int)(dmflags->value) & DF_SKINTEAMS)) {
+	if(!tca->value && !ctf->value && !cp->value && !((int)(dmflags->value) & DF_SKINTEAMS)) {
 		if(level.time <= warmuptime->value) { 
 				if((warmuptime->value - level.time ) == 3) {
 					for (i=0 ; i<maxclients->value ; i++)
@@ -622,7 +623,7 @@ void CheckDMRules (void)
 
 	if (timelimit->value)
 	{
-		if (level.time >= timelimit->value*60 && ((tca->value || ctf->value || ((int)(dmflags->value) & DF_SKINTEAMS)) || level.time > warmuptime->value))
+		if (level.time >= timelimit->value*60 && ((tca->value || ctf->value  || cp->value || ((int)(dmflags->value) & DF_SKINTEAMS)) || level.time > warmuptime->value))
 		{
 			safe_bprintf (PRINT_HIGH, "Timelimit hit.\n");
 			EndDMLevel ();
@@ -630,11 +631,11 @@ void CheckDMRules (void)
 		}
 	}
 	
-	if (fraglimit->value && ((tca->value || ctf->value || ((int)(dmflags->value) & DF_SKINTEAMS)) || level.time > warmuptime->value))
+	if (fraglimit->value && ((tca->value || ctf->value || cp->value || ((int)(dmflags->value) & DF_SKINTEAMS)) || level.time > warmuptime->value))
 	{
 		
 		//team scores
-		if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value) //it's all about the team!
+		if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || cp->value) //it's all about the team!
 		{
 			if(blue_team_score >= fraglimit->value)
 			{
@@ -686,7 +687,7 @@ void CheckDMRules (void)
 					return;
 				}
 			}
-			if(!tca->value && !ctf->value) {
+			if(!tca->value && !ctf->value && !cp->value) {
 				i = fraglimit->value - top_score;
 				switch(i) {
 					case 3:

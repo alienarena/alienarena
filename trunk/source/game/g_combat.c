@@ -94,6 +94,15 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 	if (targ->health < -999)
 		targ->health = -999;
 
+	if (targ->monsterinfo.aiflags & AI_NPC) { //cows never really die, they just return to their 
+											  //original spawn points
+		targ->health = targ->max_health;
+		targ->s.event = EV_PLAYER_TELEPORT;
+		targ->enemy = NULL;
+		VectorCopy(targ->s.spawn_pos, targ->s.origin);
+		return;
+	}
+
 	targ->enemy = attacker;
 
 	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
@@ -312,7 +321,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs
-	if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS))) || ctf->value || tca->value))
+	if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS))) || ctf->value || tca->value || cp->value))
 	{
 		if (OnSameTeam (targ, attacker))
 		{

@@ -554,6 +554,7 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/acebot_nodes.o \
 	$(BUILDDIR)/game/acebot_spawn.o \
 	$(BUILDDIR)/game/c_cam.o \
+	$(BUILDDIR)/game/cow.o \
 	$(BUILDDIR)/game/ctf.o \
 	$(BUILDDIR)/game/q_shared.o \
 	$(BUILDDIR)/game/g_ai.o \
@@ -571,7 +572,6 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/g_svcmds.o \
 	$(BUILDDIR)/game/g_target.o \
 	$(BUILDDIR)/game/g_trigger.o \
-	$(BUILDDIR)/game/g_turret.o \
 	$(BUILDDIR)/game/g_utils.o \
 	$(BUILDDIR)/game/g_weapon.o \
 	$(BUILDDIR)/game/m_move.o \
@@ -611,6 +611,9 @@ $(BUILDDIR)/game/acebot_spawn.o :        $(GAME_DIR)/acesrc/acebot_spawn.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/c_cam.o :        $(GAME_DIR)/c_cam.c
+	$(DO_SHLIB_CC)
+
+$(BUILDDIR)/game/cow.o :        $(GAME_DIR)/cow.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/ctf.o :        $(GAME_DIR)/ctf.c
@@ -659,9 +662,6 @@ $(BUILDDIR)/game/g_target.o :    $(GAME_DIR)/g_target.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/g_trigger.o :   $(GAME_DIR)/g_trigger.c
-	$(DO_SHLIB_CC)
-
-$(BUILDDIR)/game/g_turret.o :    $(GAME_DIR)/g_turret.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/g_utils.o :     $(GAME_DIR)/g_utils.c
@@ -713,6 +713,7 @@ ARENA_OBJS = \
 	$(BUILDDIR)/arena/acebot_spawn.o \
 	$(BUILDDIR)/arena/q_shared.o \
 	$(BUILDDIR)/arena/c_cam.o \
+	$(BUILDDIR)/arena/cow.o \
 	$(BUILDDIR)/arena/ctf.o \
 	$(BUILDDIR)/arena/g_ai.o \
 	$(BUILDDIR)/arena/g_chase.o \
@@ -729,7 +730,6 @@ ARENA_OBJS = \
 	$(BUILDDIR)/arena/g_svcmds.o \
 	$(BUILDDIR)/arena/g_target.o \
 	$(BUILDDIR)/arena/g_trigger.o \
-	$(BUILDDIR)/arena/g_turret.o \
 	$(BUILDDIR)/arena/g_utils.o \
 	$(BUILDDIR)/arena/g_weapon.o \
 	$(BUILDDIR)/arena/m_move.o \
@@ -767,6 +767,9 @@ $(BUILDDIR)/arena/acebot_spawn.o :        $(ARENA_DIR)/acesrc/acebot_spawn.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/c_cam.o :        $(ARENA_DIR)/c_cam.c
+	$(DO_ARENA_SHLIB_CC)
+
+$(BUILDDIR)/arena/cow.o :        $(ARENA_DIR)/cow.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/ctf.o :        $(ARENA_DIR)/ctf.c
@@ -815,9 +818,6 @@ $(BUILDDIR)/arena/g_target.o :    $(ARENA_DIR)/g_target.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/g_trigger.o :   $(ARENA_DIR)/g_trigger.c
-	$(DO_ARENA_SHLIB_CC)
-
-$(BUILDDIR)/arena/g_turret.o :    $(ARENA_DIR)/g_turret.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/g_utils.o :     $(ARENA_DIR)/g_utils.c

@@ -522,6 +522,7 @@ extern	cvar_t	*maxentities;
 extern	cvar_t	*deathmatch;
 extern  cvar_t  *ctf;
 extern  cvar_t  *tca;
+extern  cvar_t  *cp;
 extern	cvar_t	*dmflags;
 extern	cvar_t	*skill;
 extern	cvar_t	*fraglimit;

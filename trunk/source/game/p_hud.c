@@ -359,7 +359,7 @@ void BeginIntermission (edict_t *targ)
 	}
 
 	if (!((int)(dmflags->value) & DF_BOT_LEVELAD)) {
-			if ((!((int)(dmflags->value) & DF_SKINTEAMS)) && !(ctf->value || tca->value)) { //don't do this in team play
+			if ((!((int)(dmflags->value) & DF_SKINTEAMS)) && !(ctf->value || tca->value || cp->value)) { //don't do this in team play
 				if(winner->is_bot)
 					gi.sound (ent, CHAN_AUTO, gi.soundindex("world/botwon.wav"), 1, ATTN_NONE, 0);
 				else				
@@ -367,16 +367,16 @@ void BeginIntermission (edict_t *targ)
 			}
 	}
 
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) //team stuff
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //team stuff
 	{
 		if(blue_team_score > red_team_score) {
-			if(ctf->value || tca->value)
+			if(ctf->value || tca->value || cp->value)
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/blue_wins_ctf.wav"), 1, ATTN_NONE, 0);
 			else
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/blue_wins.wav"), 1, ATTN_NONE, 0);
 		}
 		else {
-			if(ctf->value || tca->value)
+			if(ctf->value || tca->value || cp->value)
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/red_wins_ctf.wav"), 1, ATTN_NONE, 0);
 			
 			else
@@ -453,7 +453,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		return;
 // ACEBOT_END
 
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value) {
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
 		CTFScoreboardMessage (ent, killer);
 		return;
 	}
