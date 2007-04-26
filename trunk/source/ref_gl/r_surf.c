@@ -2093,22 +2093,19 @@ void GL_DrawRadar(void)
 	}
 	qglTranslatef (-r_newrefdef.vieworg[0],  -r_newrefdef.vieworg[1],  -r_newrefdef.vieworg[2]);  
 
-/*	if(!deathmatch->value)
-	{
 	qglBegin(GL_QUADS);
 	for(i=0;i<numRadarEnts;i++){
-	float x=RadarEnts[i].org[0];
-	float y=RadarEnts[i].org[1];
-	float z=RadarEnts[i].org[2];
-	qglColor4fv(RadarEnts[i].color);    
-	
-    qglVertex3f(x+9, y+9, z);
-    qglVertex3f(x+9, y-9, z);
-    qglVertex3f(x-9, y-9, z);
-    qglVertex3f(x-9, y+9, z);
+		float x=RadarEnts[i].org[0];
+		float y=RadarEnts[i].org[1];
+		float z=RadarEnts[i].org[2];
+		qglColor4fv(RadarEnts[i].color);    
+		
+		qglVertex3f(x+9, y+9, z);
+		qglVertex3f(x+9, y-9, z);
+		qglVertex3f(x-9, y-9, z);
+		qglVertex3f(x-9, y+9, z);
 	}  
 	qglEnd();
-	}*/
 
 	qglEnable(GL_TEXTURE_2D);
 	  

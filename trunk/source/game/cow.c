@@ -8,7 +8,7 @@ These NPC's are very basic, very dumb creatures that will just walk towards
 whatever client they might see.  The goal is for the players to lure them into
 traps, and without them getting "killed", in which case they would respawn at 
 their original position.  When a cow walks into a trap, the team who owns the 
-trap will get rewarded with points, and that cow will be removed from the map.
+trap will get rewarded with points, and that cow will be respawned.
 
 ==============================================================================
 */
@@ -65,11 +65,21 @@ void cow_step (edict_t *self)
 	gi.sound (self, CHAN_VOICE, sound_step1, 1, ATTN_NORM, 0);
 	//perhaps draw a beam to the player that is leading it?
 	if(self->enemy) {
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLASTERBEAM);
-		gi.WritePosition (self->s.origin);
-		gi.WritePosition (self->enemy->s.origin);
-		gi.multicast (self->s.origin, MULTICAST_PHS);   
+		if(self->enemy->dmteam == BLUE_TEAM) {
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_BLASTERBEAM);
+			gi.WritePosition (self->s.origin);
+			gi.WritePosition (self->enemy->s.origin);
+			gi.multicast (self->s.origin, MULTICAST_PHS);   
+		}
+		else {	
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_REDLASER);
+			gi.WritePosition (self->s.origin);
+			gi.WritePosition (self->enemy->s.origin);
+			gi.multicast (self->s.origin, MULTICAST_PHS);   
+		}
+
 	}
 	
 }
@@ -170,6 +180,7 @@ void SP_npc_cow (edict_t *self)
 	self->monsterinfo.melee = cow_walk;
 	self->monsterinfo.sight = cow_sight;
 	self->monsterinfo.search = cow_search;
+	self->s.renderfx |= RF_MONSTER;
 
 	self->monsterinfo.currentmove = &cow_move_stand;
 	self->monsterinfo.scale = MODEL_SCALE;

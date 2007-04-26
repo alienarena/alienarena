@@ -684,6 +684,10 @@ void cowtarget_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 		other->health = other->max_health;
 		other->s.event = EV_PLAYER_TELEPORT;
 		VectorCopy(other->s.spawn_pos, other->s.origin);	
+
+		//reward the player who was controlling the cow
+		if(other->enemy)
+			other->enemy->client->resp.score += 10;
 	}
 }
 

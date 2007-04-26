@@ -96,6 +96,12 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 
 	if (targ->monsterinfo.aiflags & AI_NPC) { //cows never really die, they just return to their 
 											  //original spawn points
+		//send an effect
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_BFG_BIGEXPLOSION);
+		gi.WritePosition (targ->s.origin);
+		gi.multicast (targ->s.origin, MULTICAST_PHS);
+		
 		targ->health = targ->max_health;
 		targ->s.event = EV_PLAYER_TELEPORT;
 		targ->enemy = NULL;
