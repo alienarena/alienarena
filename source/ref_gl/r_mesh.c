@@ -1186,8 +1186,24 @@ void R_DrawAliasModel (entity_t *e)
 			break;
 		}
 	}
-
 	qglColor4f (1,1,1,1);
+
+	if(r_minimap->value) 
+    {	   
+	   if ( currententity->flags & RF_MONSTER)
+	   { 
+			RadarEnts[numRadarEnts].color[0]= 1.0;
+			RadarEnts[numRadarEnts].color[1]= 0.0;
+			RadarEnts[numRadarEnts].color[2]= 2.0;
+			RadarEnts[numRadarEnts].color[3]= 1.0;
+		}
+	    else
+			return;
+			
+		VectorCopy(currententity->origin,RadarEnts[numRadarEnts].org);
+		numRadarEnts++;
+	}
+
 }
 
 

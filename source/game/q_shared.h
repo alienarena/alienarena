@@ -628,6 +628,8 @@ typedef struct
 #define	RF_SHELL_DOUBLE		0x00010000		// 65536
 #define	RF_SHELL_HALF_DAM	0x00020000
 #define RF_NOSHADOWS		0x00040000 //use this one for turning off shadows, etc.
+#define RF_MONSTER  		0x00080000
+
 // player_state_t->refdef flags
 #define	RDF_UNDERWATER		1		// warp the screen as apropriate
 #define RDF_NOWORLDMODEL	2		// used for player configuration screen
