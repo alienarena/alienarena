@@ -22,6 +22,9 @@ X11BASE?=/usr/X11R6
 # Build binary that uses SDL for sound when "1".
 SDLSOUND?=1
 
+# Selects the component to build; ALL, GAME, or DEDICATED
+BUILD?=ALL
+
 # End of configurable options.
 
 VERSION=		1.40
@@ -117,10 +120,25 @@ DO_ARENA_SHLIB_CC=$(CC) $(CFLAGS) $(ARENA_CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 # SETUP AND BUILD
 #############################################################################
 
-TARGETS=$(BUILDDIR)/crded \
-	$(BUILDDIR)/crx \
-	$(BUILDDIR)/game.$(SHLIBEXT) \
-	$(BUILDDIR)/arena/game.$(SHLIBEXT)
+ifeq ($(strip $(BUILD)),ALL)
+	TARGETS=$(BUILDDIR)/crded \
+		$(BUILDDIR)/crx \
+		$(BUILDDIR)/game.$(SHLIBEXT) \
+		$(BUILDDIR)/arena/game.$(SHLIBEXT)
+endif
+
+ifeq ($(strip $(BUILD)),DEDICATED)
+	SDLSOUND=0
+	TARGETS=$(BUILDDIR)/crded \
+		$(BUILDDIR)/game.$(SHLIBEXT) \
+		$(BUILDDIR)/arena/game.$(SHLIBEXT)
+endif
+
+ifeq ($(strip $(BUILD)),GAME)
+	TARGETS=$(BUILDDIR)/crx \
+		$(BUILDDIR)/game.$(SHLIBEXT) \
+		$(BUILDDIR)/arena/game.$(SHLIBEXT)
+endif
 
 ifeq ($(strip $(SDLSOUND)),1)
 	TARGETS+=$(BUILDDIR)/crx.sdl
