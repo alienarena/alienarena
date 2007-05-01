@@ -120,24 +120,21 @@ DO_ARENA_SHLIB_CC=$(CC) $(CFLAGS) $(ARENA_CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 # SETUP AND BUILD
 #############################################################################
 
+TARGETS=$(BUILDDIR)/game.$(SHLIBEXT) \
+	$(BUILDDIR)/arena/game.$(SHLIBEXT)
+
 ifeq ($(strip $(BUILD)),ALL)
-	TARGETS=$(BUILDDIR)/crded \
-		$(BUILDDIR)/crx \
-		$(BUILDDIR)/game.$(SHLIBEXT) \
-		$(BUILDDIR)/arena/game.$(SHLIBEXT)
+	TARGETS+=$(BUILDDIR)/crded \
+		$(BUILDDIR)/crx
 endif
 
 ifeq ($(strip $(BUILD)),DEDICATED)
 	SDLSOUND=0
-	TARGETS=$(BUILDDIR)/crded \
-		$(BUILDDIR)/game.$(SHLIBEXT) \
-		$(BUILDDIR)/arena/game.$(SHLIBEXT)
+	TARGETS+=$(BUILDDIR)/crded
 endif
 
 ifeq ($(strip $(BUILD)),GAME)
-	TARGETS=$(BUILDDIR)/crx \
-		$(BUILDDIR)/game.$(SHLIBEXT) \
-		$(BUILDDIR)/arena/game.$(SHLIBEXT)
+	TARGETS+=$(BUILDDIR)/crx
 endif
 
 ifeq ($(strip $(SDLSOUND)),1)
