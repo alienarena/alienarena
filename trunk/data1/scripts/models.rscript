@@ -244,10 +244,14 @@ models/weapons/v_shotg/skin
 	{
 		map models/weapons/v_shotg/skin.tga
 	}
+	{	
+		map models/weapons/v_shotg/skin_normal.tga
+		normalmap
+	}
 	{
 		map gfx/smartgunmask.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 2 0.01 .8
+		alphashift 0 0.8 .8
 		nolightmap
 	}
 		
