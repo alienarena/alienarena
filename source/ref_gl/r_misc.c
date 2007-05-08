@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <GL/glu.h>
 image_t *r_detailtexture;
 image_t *r_flare;
+image_t *r_cubemap;
 
 // MH - detail textures begin
 // blatantly plagiarized darkplaces code
@@ -166,7 +167,85 @@ void R_BuildDetailTexture (void)
 } 
 // MH - detail textures end
 
+#define CUBEMAP_MAXSIZE 32
 
+static void getCubeVector (int i, int cubesize, int x, int y, float *vector) 
+{
+	float s, t, sc, tc, mag;
+
+	s = ((float) x + 0.5) / (float) cubesize;
+	t = ((float) y + 0.5) / (float) cubesize;
+	sc = s * 2.0 - 1.0;
+	tc = t * 2.0 - 1.0;
+
+	// cleaned manky braces again here...
+	switch (i) 
+	{
+	case 0: vector[0] = 1.0; vector[1] = - tc; vector[2] = - sc; break;
+	case 1: vector[0] = - 1.0; vector[1] = - tc; vector[2] = sc; break;
+	case 2: vector[0] = sc; vector[1] = 1.0; vector[2] = tc; break;
+	case 3: vector[0] = sc; vector[1] = - 1.0; vector[2] = - tc; break;
+	case 4: vector[0] = sc; vector[1] = - tc; vector[2] = 1.0; break;
+	case 5: vector[0] = - sc; vector[1] = - tc; vector[2] = - 1.0; break;
+	}
+
+	mag = 1.0 / sqrt (vector[0]* vector[0]+ vector[1]* vector[1]+ vector[2]* vector[2]);
+
+	vector[0]*= mag;
+	vector[1]*= mag;
+	vector[2]*= mag;
+}
+
+void R_InitCubemapTextures (void) 
+{
+	// this texture doesn't need to be huge. I've seen examples where it goes up to 128 or higher, but 32
+	// is perfectly adequate. Who am I to argue with Mr. Kilgard?
+	float vector[3];
+	int i, x, y;
+	GLubyte pixels[CUBEMAP_MAXSIZE * CUBEMAP_MAXSIZE * 4];
+
+	// set up a dummy for it to get a valid image_t filled in.  we'll be deleting and recreating the texture data
+	// using glTexImage2D when we actually set up each individual one.  we generate it as a wall texture to ensure that
+	// we get texnums generated for the backup textures as well
+	r_cubemap = GL_LoadPic ("***cubemap***", (byte *) pixels, CUBEMAP_MAXSIZE, CUBEMAP_MAXSIZE, it_pic, 32);
+
+	// switch the texture state
+	qglDisable (GL_TEXTURE_2D);
+	qglEnable (GL_TEXTURE_CUBE_MAP_EXT);
+
+	// bind to the regular texture number
+	qglBindTexture (GL_TEXTURE_CUBE_MAP_EXT, r_cubemap->texnum);
+
+	// set up the texture parameters - did a clamp on R as well...
+	qglTexParameteri (GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	qglTexParameteri (GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	qglTexParameteri (GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	qglTexParameteri (GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	qglTexParameteri (GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	for (i = 0; i < 6; i++) 
+	{
+		for (y = 0; y < CUBEMAP_MAXSIZE; y++) 
+		{
+			for (x = 0; x < CUBEMAP_MAXSIZE; x++) 
+			{
+				getCubeVector (i, CUBEMAP_MAXSIZE, x, y, vector);
+
+				pixels[4 * (y * CUBEMAP_MAXSIZE + x) + 0] = 128 + 127 * vector[0];
+				pixels[4 * (y * CUBEMAP_MAXSIZE + x) + 1] = 128 + 127 * vector[1];
+				pixels[4 * (y * CUBEMAP_MAXSIZE + x) + 2] = 128 + 127 * vector[2];
+			}
+		}
+
+		// cube map me baybeee
+		qglTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT + i, 0, GL_RGBA, CUBEMAP_MAXSIZE, CUBEMAP_MAXSIZE, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	}
+
+	// done - restore the texture state
+	qglDisable (GL_TEXTURE_CUBE_MAP_EXT);
+	qglEnable (GL_TEXTURE_2D);
+}
+#undef CUBEMAP_MAXSIZE
 /*
 ==================
 R_InitParticleTexture
@@ -264,7 +343,7 @@ void R_InitParticleTexture (void)
 	// and for detail textures
 	R_BuildDetailTexture ();
 	// MH - detail textures end
-
+	//R_InitCubemapTextures (); //for future use
 	//lava haze
 //	R_InitSmokes();
 
