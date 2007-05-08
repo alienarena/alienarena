@@ -771,7 +771,7 @@ static void R_DrawNormalMaps (void)
 	qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_DOT3_RGB); 
 
 	for (; surf; surf = surf->normalchain) 
-	{ 
+	{  
 	   
 	   // don't draw if there isn't a normalmap 
 	   if (!surf->texinfo->normalMap->texnum) continue; 
@@ -1056,72 +1056,43 @@ void R_DrawBrushModel (entity_t *e)
 
 	GL_EnableMultitexture( true );
 	GL_SelectTexture( GL_TEXTURE0);
-	// Vic - begin
 
+	// Vic - begin
 	if ( !gl_config.mtexcombine ) {
 
 		GL_TexEnv( GL_REPLACE );
-
 		GL_SelectTexture( GL_TEXTURE1);
 
-
-
 		if ( gl_lightmap->value )
-
 			GL_TexEnv( GL_REPLACE );
-
 		else 
-
 			GL_TexEnv( GL_MODULATE );
 
 	} else {
-
 		GL_TexEnv ( GL_COMBINE_EXT );
-
 		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-
 		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-
 		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
-
 		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-
 		GL_SelectTexture( GL_TEXTURE1 );
-
 		GL_TexEnv ( GL_COMBINE_EXT );
-
-
 
 		if ( gl_lightmap->value ) {
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-
 		} else {
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT );
-
 		}
 
 		if ( r_overbrightbits->value ) {
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
-
 		}
 
 	}
@@ -1326,78 +1297,43 @@ void R_DrawWorld (void)
 		GL_EnableMultitexture( true );
 
 		GL_SelectTexture( GL_TEXTURE0);
+		
 		// Vic - begin
-
 		if ( !gl_config.mtexcombine ) {
-
 			GL_TexEnv( GL_REPLACE );
-
 			GL_SelectTexture( GL_TEXTURE1);
 
-
-
 			if ( gl_lightmap->value )
-
 				GL_TexEnv( GL_REPLACE );
-
 			else 
-
 				GL_TexEnv( GL_MODULATE );
-
 		} else {
-
 			GL_TexEnv ( GL_COMBINE_EXT );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
-
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-
 			GL_SelectTexture( GL_TEXTURE1 );
-
 			GL_TexEnv ( GL_COMBINE_EXT );
-
-
 
 			if ( gl_lightmap->value ) {
-
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
-
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-
 			} else {
-
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
-
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
-
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE );
-
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT );
-
 			}
-
-
 
 			if ( r_overbrightbits->value ) {
-
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
-
 			}
-
 		}
-
 		// Vic - end
 
 		R_RecursiveWorldNode (r_worldmodel->nodes, 15);
