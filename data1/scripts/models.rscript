@@ -319,7 +319,7 @@ models/weapons/v_bfg/skin
 	{
 		map gfx/vapormask.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 2 0.01 .8
+		alphashift 2 0.6 .8
 		nolightmap
 	}
 }
