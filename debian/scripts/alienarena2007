@@ -1,4 +1,32 @@
 #!/bin/sh
 
+EXCUSE="\
+Alien Arena 2007 client wrapper\n\
+This script is Debian specific, it is *NOT* part of the source distribution!\n\
+Usage: alienarena2007 [OPTION]...\n\
+\n\
+ -h, --help\t\tDisplay this help\n\
+ -q, --quiet\t\tDisable console output\n\
+ +<internal command>\tPass commands to the engine\n"
+
+QUIET=0
+
+case "$1" in
+	-h|--help)
+		echo -e ${EXCUSE}
+		exit 0
+		;;
+	-q|--quiet)
+		QUIET=1
+		shift
+		;;
+esac
+
+# Ready to rumble!
 cd /usr/share/games/alienarena2007
-exec /usr/lib/games/alienarena2007/crx.sdl "$@"
+
+if [ ${QUIET} = 1 ]; then
+	exec /usr/lib/games/alienarena2007/crx.sdl "$@" >/dev/null 2>&1
+else
+	exec /usr/lib/games/alienarena2007/crx.sdl "$@"
+fi

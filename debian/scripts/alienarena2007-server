@@ -1,7 +1,7 @@
 #!/bin/sh
 
 EXCUSE="\
-Nexuiz client wrapper\n\
+Alien Arena 2007 server wrapper\n\
 This script is Debian specific, it is *NOT* part of the source distribution!\n\
 Usage: alienarena2007-server [OPTION]...\n\
 \n\
