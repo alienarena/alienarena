@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /usr/share/games/alienarena2007
+exec /usr/lib/games/alienarena2007/crded "$@"

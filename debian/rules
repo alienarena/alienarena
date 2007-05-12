@@ -1,0 +1,57 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpatch/dpatch.make
+
+build: build-stamp
+build-stamp: patch
+	dh_testdir
+	$(MAKE)
+	touch $@
+
+clean: clean-patched unpatch
+clean-patched:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	-$(MAKE) clean
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	install -d debian/tmp
+	install -m 754 release/crx.sdl debian/tmp/crx.sdl
+	install -m 754 release/crded debian/tmp/crded
+	install -m 644 release/game.so debian/tmp/game.so
+	install -m 444 alienarena.xpm debian/tmp/alienarena2007.xpm
+	dh_install
+	rm debian/alienarena2007-data/usr/share/games/alienarena2007/arena/gamex86.dll
+	rm debian/alienarena2007-data/usr/share/games/alienarena2007/data1/gamex86.dll
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs -palienarena2007 docs/changelog.txt
+	dh_installchangelogs -palienarena2007-server docs/changelog.txt
+	dh_installchangelogs -palienarena2007-data docs/changelog.txt
+	dh_installdocs
+	dh_installmenu
+	dh_installman -palienarena2007 debian/alienarena2007.6
+	dh_installman -palienarena2007-server debian/alienarena2007-server.6
+	dh_desktop
+	dh_installdeb
+	dh_shlibdeps
+	dh_compress
+	dh_fixperms
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install
