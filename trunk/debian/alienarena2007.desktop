@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Alien Arena 2007
+Comment=A standalone 3D first person online deathmatch shooter.
+Comment[de]=Possible German translation.
+Comment[es]=Posible traduccion en Español.
+Icon=alienarena2007
+Exec=/usr/games/alienarena2007
+Terminal=false
+Type=Application
+Categories=Game;ArcadeGame;
