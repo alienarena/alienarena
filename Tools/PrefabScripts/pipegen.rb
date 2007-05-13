@@ -267,11 +267,11 @@ class Tube
 				entry.concat(' 0 0');
 				entry.concat(' %.2f' % [texture_rotation])
 				if LIQUID_FLOWING
-					entry.concat(' 0.25 0.25 0 64 ') #'
+					entry.concat(' 0.25 0.25 0 64 0') #'
 				else
-					entry.concat(' 0.25 0.25 0 0 ') #'	
+					entry.concat(' 0.25 0.25 0 0 0') #'	
 				end
-				entry.concat(i.to_s) # value
+#				entry.concat(i.to_s) # value
 				file.puts entry
 			end
 			
