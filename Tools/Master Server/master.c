@@ -36,10 +36,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <netinet/in.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #define SOCKET int
 #define SOCKET_ERROR -1
 #define TIMEVAL struct timeval
-#define WSAGetLastError errno
+#define WSAGetLastError() errno
 #define strnicmp strncasecmp
 #endif
 
@@ -303,13 +306,7 @@ void SendServerListToClient (struct sockaddr_in *from)
 	buflen +=2;
 
 	//dprintf ("[I] query response (%d bytes) sent to %s:%d\n", buflen, inet_ntoa (from->sin_addr), ntohs (from->sin_port));
-	if(!strcmp("68.60.139.170", inet_ntoa(from->sin_addr))) //Vicious
-	{
-		dprintf("Vicious blocked!\n");
-		return;
-	}
-
-
+	
 	if ((sendto (listener, buff, buflen, 0, (struct sockaddr *)from, sizeof(*from))) == SOCKET_ERROR)
 	{
 		dprintf ("[E] socket error on send! code %d.\n", WSAGetLastError());
