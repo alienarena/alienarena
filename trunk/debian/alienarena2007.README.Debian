@@ -76,4 +76,4 @@ These bots are fully configurable using the Botconfigurator program. You can cha
 
 Skill level 0 bots are quite easy to beat. Skill level 1 bots are a little tougher, and do more dodging and are more accurate. Skill level 2 bots do more advanced dodging, rocket jumping, and are even more accurate. Level 3 bots are extremely skilled, and will strafe, and strafe jump around the level. They will also taunt you after killing you. If in Alien Arena, you play the single player tournament against the bots, selecting "easy" will make all bots skill level 0. Selecting "normal" will leave them at whatever level they are configured. Selecting "hard" will make them all move up 1 skill level.
 
- -- Andres Mejia <mcitadel@gmail.com>  Fri, 11 May 2007 12:41:15 -0400
+ -- Andres Mejia <mcitadel@gmail.com>  Sun, 13 May 2007 14:48:46 -0400
