@@ -16,44 +16,50 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-alienarena2007 \- program to do something
+alienarena2007 \- wrapper script to run the Alien Arena 2007 client.
 .SH SYNOPSIS
 .B alienarena2007
-.RI [ options ] " files" ...
+[OPTIONS] [PARAMETERS]...
 .br
-.B bar
-.RI [ options ] " files" ...
+Available options.
+.br
+[\-h|\-\-help] [\-q|\-\-quiet]
 .SH DESCRIPTION
 This manual page documents briefly the
 .B alienarena2007
-and
-.B bar
-commands.
+command.
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
 .\" respectively.
-\fBalienarena2007\fP is a program that...
+\fBalienarena2007\fP is a wrapper script to run the Alien Arena 2007 client. It has
+a single option to disable console output and it allows for parameters to be passed
+to the client binary 'crx.sdl'.
 .SH OPTIONS
 These programs follow the usual GNU command line syntax, with long
 options starting with two dashes (`-').
 A summary of options is included below.
-For a complete description, see the Info files.
 .TP
 .B \-h, \-\-help
 Show summary of options.
 .TP
-.B \-v, \-\-version
-Show version of program.
-.SH SEE ALSO
-.BR bar (1),
-.BR baz (1).
-.br
-The programs are documented fully by
-.IR "The Rise and Fall of a Fooish Bar" ,
-available via the Info system.
+.B \-q, \-\-quiet
+Disable console output.
+.SH PARAMETERS
+<Insert any available parameters for 'crx.sdl' here.>
 .SH AUTHOR
-alienarena2007 was written by <upstream author>.
-.PP
+See the copyright </usr/share/doc/alienarena2007/copyright> for contributers to
+Alien Arena 2007.
+.SH COPYRIGHT
 This manual page was written by Andres Mejia <mcitadel@gmail.com>,
 for the Debian project (but may be used by others).
+
+Copyright (c)  2007  Andres Mejia.
+  Permission is granted to copy, distribute and/or modify this document
+  under the terms of the GNU Free Documentation License, Version 1.2
+  or any later version published by the Free Software Foundation;
+  with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+  Texts.  A copy of the license is included in the section entitled
+  "GNU Free Documentation License". A copy of the license is included
+  in the gfdl(7) man page or online at
+  <http://www.gnu.org/copyleft/fdl.html>.
