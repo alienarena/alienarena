@@ -1,0 +1,101 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## launch-server_tool_debianization.dpatch by Andres Mejia <mcitadel@gmail.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Patch to modify /Tools/LinuxScripts/launch-server script for use in a Debian based distro.
+## DP: Patch also allows for server config files to be placed under $HOME/.alienarena2007 directory.
+## This patch will work provided that the source tree was checked out to a directory named alienarena2007.
+
+@DPATCH@
+diff -urNad alienarena2007~/Tools/LinuxScripts/launch-server alienarena2007/Tools/LinuxScripts/launch-server
++++ alienarena2007/Tools/LinuxScripts/launch-server	2007-05-13 01:23:33.000000000 -0400
+@@ -1,14 +1,20 @@
+ #! /bin/sh
+ #
++
++### This script has been patched from it's original source for
++# distribution to Debian systems. The original script can be viewed and
++# checked out from SVN.
++
+ # AA Server Cron Job (originally TeamSpeak Cron Job)
+ #
+-# Usage: launch-server <configfile>
+-# EG:    launch-server ctf.cfg
++# Usage: alienarena2007-server -s <configfile>
++# EG:    alienarena2007-server -s ctf.cfg
+ #
+ # Author: Chris Childers
+ # E-Mail: Chris@darkstarllc.com
+ # Modified by: Fafa Paku
+ # Modified by: Tony Jackson
++# Debian patch by: Andres Mejia <mcitadel@gmail.com>
+ #
+ # Set the port number in the .cfg if running multiple servers.
+ # Script checks the existance of the cfg file before launching.
+@@ -17,31 +23,42 @@
+ #ulimit -c unlimited
+ 
+ ### Set your default AA Root Directory
+-aadir="/home/aa/alienarena2007"
++aadir="/usr/share/games/alienarena2007"
+ 
+ ### Set your AA Binary Name or command string ($1 is the argument
+ ### passed to the script)
+-aabin="crded +set game arena +exec $1"
++aabin="/usr/lib/games/alienarena2007/crded +set game arena +exec $1"
+ 
+ ########## you probably don't need to change anything below here 
+ ##########
+ 
+-
+ if [ $1 ]
+ then
+-if test -r $aadir/arena/$1
+-then
+-echo "Found server config $aadir/arena/$1..."
+-else
+-echo "Unable to find server config $aadir/arena/$1."
+-exit 0
++	if test -r $HOME/.alienarena2007/$1
++	then
++	echo "Found server config $HOME/.alienarena2007/$1..."
++	elif test -r $aadir/arena/$1
++	then
++	echo "Found server config $aadir/arena/$1..."
++	else
++	echo "Unable to find server config."
++	exit 0
+ fi
+ else
+-echo "Usage: launch-server <configfile>"
++echo "Usage: alienarena2007-server -s <configfile>\n\
++<configfile> must be specified\n\n\
++The <configfile> must be placed either in $HOME/.alienarena2007\n\
++or in /usr/share/games/alienarena2007\n"
+ exit 0
+ fi
+ 
+-aapid="$1.pid"
++if test -d $HOME/.alienarena2007
++then
++aapid="$HOME/.alienarena2007/alienarena2007-server.$1.pid"
++else
++mkdir $HOME/.alienarena2007
++aapid="$HOME/.alienarena2007/alienarena2007-server.$1.pid"
++fi
+ 
+ cd $aadir
+ 
+@@ -59,10 +76,10 @@
+ echo "Stale $aapid file, erasing..."
+ echo "Attempting to Restart Alien Arena"
+ rm -f $aapid
+-./$aabin &
++$aabin &
+ ps aux | grep "$aabin" | grep -v grep | awk '{print $2}' > $aapid
+ else
+ echo "$aapid appears to be missing. Attempting to Restart Alien Arena"
+-./$aabin &
++$aabin &
+ ps aux | grep "$aabin" | grep -v grep | awk '{print $2}' > $aapid
+ fi
