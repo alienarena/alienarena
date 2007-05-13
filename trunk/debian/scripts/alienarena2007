@@ -1,19 +1,19 @@
 #!/bin/sh
 
-EXCUSE="\
+USAGE="\
 Alien Arena 2007 client wrapper\n\
 This script is Debian specific, it is *NOT* part of the source distribution!\n\
-Usage: alienarena2007 [OPTION]...\n\
+Usage: alienarena2007 [OPTION] [PARAMETERS]...\n\
 \n\
  -h, --help\t\tDisplay this help\n\
  -q, --quiet\t\tDisable console output\n\
- +<internal command>\tPass commands to the engine\n"
+ [PARAMETERS]\tPass internal parameters to the client\n"
 
 QUIET=0
 
 case "$1" in
 	-h|--help)
-		echo -e ${EXCUSE}
+		echo -e ${USAGE}
 		exit 0
 		;;
 	-q|--quiet)
