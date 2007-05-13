@@ -1,9 +1,9 @@
 #!/bin/sh
 
-EXCUSE="\
+USAGE="\
 Alien Arena 2007 server wrapper\n\
 This script is Debian specific, it is *NOT* part of the source distribution!\n\
-Usage: alienarena2007-server [OPTION]...\n\
+Usage: alienarena2007-server [OPTION] [PARAMETERS]...\n\
 \n\
  -h, --help\t\tDisplay this help\n\
  -q, --quiet\t\tDisable console output\n\
@@ -11,7 +11,7 @@ Usage: alienarena2007-server [OPTION]...\n\
  -k, --kill\t\tKill a runaway server session\n\
  -Q, --query\t\tQuery local servers\n\
  -r, --rcon\t\tSends rcon commands to servers\n\
- +<internal command>\tPass commands to the engine\n"
+ [PARAMETERS]\tPass internal parameters for specified script\n"
 
 QUIET=0
 LAUNCH_SERVER_AS_SERVICE=0
@@ -21,7 +21,7 @@ RCON=0
 
 case "$1" in
 	-h|--help)
-		echo -e ${EXCUSE}
+		echo -e ${USAGE}
 		exit 0
 		;;
 	-q|--quiet)
@@ -47,8 +47,6 @@ case "$1" in
 esac
 
 # Ready to rumble!
-cd /usr/share/games/alienarena2007
-
 if [ ${LAUNCH_SERVER_AS_SERVICE} = 1 ]; then
 	exec /usr/lib/games/alienarena2007/launch-server "$@"
 elif [ ${KILL_RUNAWAY_CRDED} = 1 ]; then
@@ -58,7 +56,9 @@ elif [ ${SVSTAT} = 1 ]; then
 elif [ ${RCON} = 1 ]; then
 	exec /usr/lib/games/alienarena2007/rcon "$@"
 elif [ ${QUIET} = 1 ]; then
+	cd /usr/share/games/alienarena2007
 	exec /usr/lib/games/alienarena2007/crded "$@" >/dev/null 2>&1
 else
+	cd /usr/share/games/alienarena2007
 	exec /usr/lib/games/alienarena2007/crded "$@"
 fi

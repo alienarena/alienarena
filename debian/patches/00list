@@ -1,2 +1,3 @@
-10_i386_optimize.dpatch
-10_launch-server_tool_debianization.dpatch
+i386_package_optimize.dpatch
+launch-server_tool_debianization.dpatch
+kill-runaway-crded_tool_debianization.dpatch
