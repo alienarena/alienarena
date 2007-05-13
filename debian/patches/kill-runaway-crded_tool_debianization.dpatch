@@ -1,0 +1,24 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## kill-runaway-crded_tool_debianization.dpatch by Andres Mejia <mcitadel@gmail.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Patch to modify Tools/LinuxScripts/kill-runaway-crded script for use in a Debian based distro.
+## This patch will work provided that the source tree was checked out to a directory named alienarena2007.
+
+@DPATCH@
+diff -urNad alienarena2007~/Tools/LinuxScripts/kill-runaway-crded alienarena2007/Tools/LinuxScripts/kill-runaway-crded
++++ alienarena2007/Tools/LinuxScripts/kill-runaway-crded	2007-05-13 01:23:35.000000000 -0400
+@@ -1,9 +1,9 @@
+ #!/bin/sh
+ 
+-for TPPID in `ps -eo pid,pcpu,comm | grep crded | grep -v grep|
+-awk '{print $1":"$2}' |
+-awk 'BEGIN {FS=":"}{ if ($2 > 20.0){print $1} }'`
++### This script has been patched for distribution to Debian systems.
++
++for TPPID in `ps -eo pid,comm | grep crded`
+ do
+ /bin/kill -9 $TPPID
++rm -f `ls $HOME/.alienarena2007/alienarena2007-server.*.pid`
+ done
+-
