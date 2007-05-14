@@ -16,7 +16,7 @@ diff -urNad alienarena2007~/Tools/LinuxScripts/kill-runaway-crded alienarena2007
 -awk 'BEGIN {FS=":"}{ if ($2 > 20.0){print $1} }'`
 +### This script has been patched for distribution to Debian systems.
 +
-+for TPPID in `ps -eo pid,comm | grep crded`
++for TPPID in `ps -eo pid,comm | grep crded | cut -d' ' -f1`
  do
  /bin/kill -9 $TPPID
 +rm -f `ls $HOME/.alienarena2007/alienarena2007-server.*.pid`
