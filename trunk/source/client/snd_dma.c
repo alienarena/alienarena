@@ -758,6 +758,30 @@ void S_StartLocalSound (char *sound)
 
 /*
 ==================
+S_StartMusic
+==================
+*/
+void S_StartMusic (char *sound)
+{
+	sfx_t	*sfx;
+	cvar_t	*fvol;
+
+	if (!sound_started)
+		return;
+
+	fvol = Cvar_Get("backround_music_vol", "1", CVAR_ARCHIVE);
+		
+	sfx = S_RegisterSound (sound);
+	if (!sfx)
+	{
+		Com_Printf ("S_StartMusic: can't cache %s\n", sound);
+		return;
+	}
+	S_StartSound (NULL, cl.playernum+1, 0, sfx, fvol->value, 1, 0);
+}
+
+/*
+==================
 S_ClearBuffer
 ==================
 */

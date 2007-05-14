@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #ifndef DEDICATED_ONLY
 extern void S_StartLocalSound (char *sound);
+extern void S_StartMusic ( char * sound );
 #endif
 
 extern void CL_Disconnect(void);
@@ -1507,7 +1508,7 @@ void Qcommon_Init (int argc, char **argv)
 #ifndef DEDICATED_ONLY
 	//play music
 	if (!dedicated->value)
-		S_StartLocalSound("misc/menumusic.wav");
+		S_StartMusic("misc/menumusic.wav");
 #endif
 	Com_Printf ("======== CRX Initialized ========\n\n");	
 }
