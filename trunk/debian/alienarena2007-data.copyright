@@ -36,27 +36,32 @@ Contact:  http://red.planetarena.org
 
 email: irritant@planetquake.com
 
-Source Code License: GPL
+License: Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported
 
-Source code is Copyright (C) 2007  John Diamond
+Copyright (C) 2007  John Diamond
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+You are free:
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+    * to Share — to copy, distribute and transmit the work
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+Under the following conditions:
 
-A copy of this license can be found in this system under
-</usr/share/common-licenses/GPL> or online at
-<http://www.gnu.org/copyleft/gpl.html>.
+    *
+      Attribution. You must attribute the work in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
+    *
+      Noncommercial. You may not use this work for commercial purposes.
+    *
+      No Derivative Works. You may not alter, transform, or build upon this work.
+    *
+
+    * For any reuse or distribution, you must make clear to others the license terms of this work. The best way to do this is with a link to this web page.
+
+    * Any of the above conditions can be waived if you get permission from the copyright holder.
+
+    * Nothing in this license impairs or restricts the author's moral rights.
+
+The full legal code of this license can be found online at
+<http://creativecommons.org/licenses/by-nc-nd/3.0/legalcode>.
 
 
 The Debian packaging is (C) 2007, Andres Mejia <mcitadel@gmail.com> and
