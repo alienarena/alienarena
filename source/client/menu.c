@@ -185,9 +185,9 @@ void M_ForceMenuOff (void)
 
 	//-JD kill the music when leaving the menu of course
 	S_StopAllSounds();
-	backround_music = Cvar_Get ("backround_music", "0", CVAR_ARCHIVE);	
+	backround_music = Cvar_Get ("backround_music", "1", CVAR_ARCHIVE);	
 	if(backround_music->value)
-		S_StartLocalSound(map_music);
+		S_StartMusic(map_music);
 }
 
 void M_PopMenu (void)
@@ -1404,6 +1404,7 @@ static menulist_s		s_options_invertmouse_box;
 static menulist_s		s_options_font_box;
 static menulist_s		s_options_crosshair_box;
 static menuslider_s		s_options_sfxvolume_slider;
+static menuslider_s		s_options_bgvolume_slider;
 static menulist_s		s_options_joystick_box;
 static menulist_s		s_options_cdvolume_box;
 static menulist_s		s_options_quality_list;
@@ -1635,8 +1636,8 @@ static void ControlsSetMenuItemValues( void )
 {
 
 	s_options_sfxvolume_slider.curvalue		= Cvar_VariableValue( "s_volume" ) * 10;
-	s_options_cdvolume_box.curvalue 		= !Cvar_VariableValue("cd_nocd");
-	s_options_bgmusic_box.curvalue			= !Cvar_VariableValue("backround_music");
+	s_options_bgvolume_slider.curvalue		= Cvar_VariableValue( "backround_music_vol" ) * 10;
+	s_options_bgmusic_box.curvalue			= Cvar_VariableValue("backround_music");
 	s_options_quality_list.curvalue			= !Cvar_VariableValue( "s_loadas8bit" );
 	s_options_sensitivity_slider.curvalue	= ( sensitivity->value ) * 2;
 
@@ -1714,13 +1715,18 @@ static void UpdateVolumeFunc( void *unused )
 	Cvar_SetValue( "s_volume", s_options_sfxvolume_slider.curvalue / 10 );
 }
 
+static void UpdateBGVolumeFunc( void *unused )
+{
+	Cvar_SetValue( "backround_music_vol", s_options_bgvolume_slider.curvalue / 10 );
+}
+
 static void UpdateCDVolumeFunc( void *unused )
 {
 	Cvar_SetValue( "cd_nocd", !s_options_cdvolume_box.curvalue );
 }
 static void UpdateBGMusicFunc( void *unused )
 {
-	Cvar_SetValue( "backround_music", !s_options_bgmusic_box.curvalue );
+	Cvar_SetValue( "backround_music", s_options_bgmusic_box.curvalue );
 }
 static void ConsoleFunc( void *unused )
 {
@@ -1770,16 +1776,10 @@ static void UpdateSoundQualityFunc( void *unused )
 
 void Options_MenuInit( void )
 {
-	static const char *cd_music_items[] =
-	{
-		"disabled",
-		"enabled",
-		0
-	};
 	static const char *backround_music_items[] = 
 	{
-		"enabled",
 		"disabled",
+		"enabled",
 		0
 	};
 	static const char *quality_items[] =
@@ -1915,19 +1915,20 @@ void Options_MenuInit( void )
 	s_options_sfxvolume_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sfxvolume_slider.generic.x	= 0;
 	s_options_sfxvolume_slider.generic.y	= 100;
-	s_options_sfxvolume_slider.generic.name	= "effects volume";
+	s_options_sfxvolume_slider.generic.name	= "global volume";
 	s_options_sfxvolume_slider.generic.callback	= UpdateVolumeFunc;
 	s_options_sfxvolume_slider.minvalue		= 0;
 	s_options_sfxvolume_slider.maxvalue		= 10;
 	s_options_sfxvolume_slider.curvalue		= Cvar_VariableValue( "s_volume" ) * 10;
 
-	s_options_cdvolume_box.generic.type	= MTYPE_SPINCONTROL;
-	s_options_cdvolume_box.generic.x		= 0;
-	s_options_cdvolume_box.generic.y		= 110;
-	s_options_cdvolume_box.generic.name	= "CD music";
-	s_options_cdvolume_box.generic.callback	= UpdateCDVolumeFunc;
-	s_options_cdvolume_box.itemnames		= cd_music_items;
-	s_options_cdvolume_box.curvalue 		= !Cvar_VariableValue("cd_nocd");
+	s_options_bgvolume_slider.generic.type	= MTYPE_SLIDER;
+	s_options_bgvolume_slider.generic.x	= 0;
+	s_options_bgvolume_slider.generic.y	= 110;
+	s_options_bgvolume_slider.generic.name	= "music volume";
+	s_options_bgvolume_slider.generic.callback	= UpdateBGVolumeFunc;
+	s_options_bgvolume_slider.minvalue		= 0;
+	s_options_bgvolume_slider.maxvalue		= 20;
+	s_options_bgvolume_slider.curvalue		= Cvar_VariableValue( "backround_music_vol" ) * 10;
 
 	s_options_bgmusic_box.generic.type	= MTYPE_SPINCONTROL;
 	s_options_bgmusic_box.generic.x		= 0;
@@ -1935,7 +1936,7 @@ void Options_MenuInit( void )
 	s_options_bgmusic_box.generic.name	= "Backround music";
 	s_options_bgmusic_box.generic.callback	= UpdateBGMusicFunc;
 	s_options_bgmusic_box.itemnames		= backround_music_items;
-	s_options_bgmusic_box.curvalue 		= !Cvar_VariableValue("backround_music");
+	s_options_bgmusic_box.curvalue 		= Cvar_VariableValue("backround_music");
 
 	s_options_quality_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_quality_list.generic.x		= 0;
@@ -2029,7 +2030,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_target_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_brainlets_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_sfxvolume_slider );
-	Menu_AddItem( &s_options_menu, ( void * ) &s_options_cdvolume_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_bgvolume_slider );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_bgmusic_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_quality_list );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_compatibility_list );

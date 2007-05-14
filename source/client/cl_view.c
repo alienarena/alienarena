@@ -517,11 +517,10 @@ void CL_PrepRefresh ()
 	cl.refresh_prepped = true;
 	cl.force_refdef = true;	// make sure we have a valid refdef
 
-	// start the cd track
-	CDAudio_Play (atoi(cl.configstrings[CS_CDTRACK]), true);
-	backround_music = Cvar_Get ("backround_music", "0", CVAR_ARCHIVE);
+	// start backround music
+	backround_music = Cvar_Get ("backround_music", "1", CVAR_ARCHIVE);
 	if(backround_music->value)
-		S_StartLocalSound(map_music);
+		S_StartMusic(map_music);
 
 	//loadingMessage = false;
 	rocketlauncher = 0;
