@@ -1375,7 +1375,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 
-	dec = 0.5;
+	dec = 2.5;
 	VectorScale (vec, dec, vec);
 
 	if (old->trailcount > 900)
@@ -1526,7 +1526,7 @@ void CL_ShipExhaust (vec3_t start, vec3_t end, centity_t *old)
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 
-	dec = 1;
+	dec = 3;
 	VectorScale (vec, dec, vec);
 
 	while (len > 0)
@@ -1572,7 +1572,7 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 
-	dec = 3;
+	dec = 8;
 	VectorScale (vec, dec, vec);
 
 	while (len > 0)

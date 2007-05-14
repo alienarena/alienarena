@@ -1385,6 +1385,7 @@ extern cvar_t *enginemode;
 extern cvar_t *cl_showPlayerNames;
 extern cvar_t *cl_nobrainlets;
 extern cvar_t *gl_shadows;
+extern cvar_t *gl_dynamic;
 extern cvar_t *gl_rtlights;
 extern cvar_t *r_shaders;
 extern cvar_t *r_minimap;
@@ -1413,6 +1414,7 @@ static menulist_s		s_options_target_box;
 static menulist_s		s_options_brainlets_box;
 static menulist_s		s_options_shaders_box;
 static menulist_s		s_options_shadows_box;
+static menulist_s		s_options_dynamic_box;
 static menulist_s		s_options_rtlights_box;
 static menulist_s		s_options_minimap_box;
 
@@ -1439,6 +1441,10 @@ static void ShadersFunc( void *unused )
 static void ShadowsFunc( void *unused )
 {
 	Cvar_SetValue( "gl_shadows", s_options_shadows_box.curvalue);
+}
+static void DynamicFunc( void *unused )
+{
+	Cvar_SetValue( "gl_dynamic", s_options_dynamic_box.curvalue);
 }
 static void RTlightsFunc( void *unused )
 {
@@ -1667,6 +1673,9 @@ static void ControlsSetMenuItemValues( void )
 	Cvar_SetValue("gl_shadows", ClampCvar(0, 2, gl_shadows->value ) );
 	s_options_shadows_box.curvalue		= gl_shadows->value;
 
+	Cvar_SetValue("gl_dynamic", ClampCvar(0, 2, gl_dynamic->value ) );
+	s_options_dynamic_box.curvalue		= gl_dynamic->value;
+
 	Cvar_SetValue("gl_rtlights", ClampCvar(0, 1, gl_rtlights->value ) );
 	s_options_rtlights_box.curvalue		= gl_rtlights->value;	
 		
@@ -1875,30 +1884,37 @@ void Options_MenuInit( void )
 	s_options_shadows_box.generic.callback = ShadowsFunc;
 	s_options_shadows_box.itemnames = shadow_names;
 
+	s_options_dynamic_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_dynamic_box.generic.x	= 0;
+	s_options_dynamic_box.generic.y	= 60;
+	s_options_dynamic_box.generic.name	= "dynamic lights";
+	s_options_dynamic_box.generic.callback = DynamicFunc;
+	s_options_dynamic_box.itemnames = onoff_names;
+
 	s_options_rtlights_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_rtlights_box.generic.x	= 0;
-	s_options_rtlights_box.generic.y	= 60;
+	s_options_rtlights_box.generic.y	= 70;
 	s_options_rtlights_box.generic.name	= "real time lighting";
 	s_options_rtlights_box.generic.callback = RTlightsFunc;
 	s_options_rtlights_box.itemnames = rtlights_names;
 
 	s_options_target_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_target_box.generic.x	= 0;
-	s_options_target_box.generic.y	= 70;
+	s_options_target_box.generic.y	= 80;
 	s_options_target_box.generic.name	= "identify target";
 	s_options_target_box.generic.callback = TargetFunc;
 	s_options_target_box.itemnames = yesno_names;
 
 	s_options_brainlets_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_brainlets_box.generic.x	= 0;
-	s_options_brainlets_box.generic.y	= 80;
+	s_options_brainlets_box.generic.y	= 90;
 	s_options_brainlets_box.generic.name	= "no brainlets";
 	s_options_brainlets_box.generic.callback = BrainletsFunc;
 	s_options_brainlets_box.itemnames = onoff_names;
 
 	s_options_sfxvolume_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sfxvolume_slider.generic.x	= 0;
-	s_options_sfxvolume_slider.generic.y	= 90;
+	s_options_sfxvolume_slider.generic.y	= 100;
 	s_options_sfxvolume_slider.generic.name	= "effects volume";
 	s_options_sfxvolume_slider.generic.callback	= UpdateVolumeFunc;
 	s_options_sfxvolume_slider.minvalue		= 0;
@@ -1907,7 +1923,7 @@ void Options_MenuInit( void )
 
 	s_options_cdvolume_box.generic.type	= MTYPE_SPINCONTROL;
 	s_options_cdvolume_box.generic.x		= 0;
-	s_options_cdvolume_box.generic.y		= 100;
+	s_options_cdvolume_box.generic.y		= 110;
 	s_options_cdvolume_box.generic.name	= "CD music";
 	s_options_cdvolume_box.generic.callback	= UpdateCDVolumeFunc;
 	s_options_cdvolume_box.itemnames		= cd_music_items;
@@ -1915,7 +1931,7 @@ void Options_MenuInit( void )
 
 	s_options_bgmusic_box.generic.type	= MTYPE_SPINCONTROL;
 	s_options_bgmusic_box.generic.x		= 0;
-	s_options_bgmusic_box.generic.y		= 110;
+	s_options_bgmusic_box.generic.y		= 120;
 	s_options_bgmusic_box.generic.name	= "Backround music";
 	s_options_bgmusic_box.generic.callback	= UpdateBGMusicFunc;
 	s_options_bgmusic_box.itemnames		= backround_music_items;
@@ -1923,7 +1939,7 @@ void Options_MenuInit( void )
 
 	s_options_quality_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_quality_list.generic.x		= 0;
-	s_options_quality_list.generic.y		= 120;;
+	s_options_quality_list.generic.y		= 130;;
 	s_options_quality_list.generic.name		= "sound quality";
 	s_options_quality_list.generic.callback = UpdateSoundQualityFunc;
 	s_options_quality_list.itemnames		= quality_items;
@@ -1931,7 +1947,7 @@ void Options_MenuInit( void )
 
 	s_options_compatibility_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_compatibility_list.generic.x		= 0;
-	s_options_compatibility_list.generic.y		= 130;
+	s_options_compatibility_list.generic.y		= 140;
 	s_options_compatibility_list.generic.name	= "sound compatibility";
 	s_options_compatibility_list.generic.callback = UpdateSoundQualityFunc;
 	s_options_compatibility_list.itemnames		= compatibility_items;
@@ -1939,7 +1955,7 @@ void Options_MenuInit( void )
 
 	s_options_sensitivity_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sensitivity_slider.generic.x		= 0;
-	s_options_sensitivity_slider.generic.y		= 150;
+	s_options_sensitivity_slider.generic.y		= 160;
 	s_options_sensitivity_slider.generic.name	= "mouse speed";
 	s_options_sensitivity_slider.generic.callback = MouseSpeedFunc;
 	s_options_sensitivity_slider.minvalue		= 2;
@@ -1947,14 +1963,14 @@ void Options_MenuInit( void )
 
 	s_options_alwaysrun_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_alwaysrun_box.generic.x	= 0;
-	s_options_alwaysrun_box.generic.y	= 160;
+	s_options_alwaysrun_box.generic.y	= 170;
 	s_options_alwaysrun_box.generic.name	= "always run";
 	s_options_alwaysrun_box.generic.callback = AlwaysRunFunc;
 	s_options_alwaysrun_box.itemnames = yesno_names;
 
 	s_options_invertmouse_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_invertmouse_box.generic.x	= 0;
-	s_options_invertmouse_box.generic.y	= 170;
+	s_options_invertmouse_box.generic.y	= 180;
 	s_options_invertmouse_box.generic.name	= "invert mouse";
 	s_options_invertmouse_box.generic.callback = InvertMouseFunc;
 	s_options_invertmouse_box.itemnames = yesno_names;
@@ -1962,7 +1978,7 @@ void Options_MenuInit( void )
 	font_names = SetFontNames ();
 	s_options_font_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_font_box.generic.x	= 0;
-	s_options_font_box.generic.y	= 190;
+	s_options_font_box.generic.y	= 200;
 	s_options_font_box.generic.name	= "font";
 	s_options_font_box.generic.callback = FontFunc;
 	s_options_font_box.itemnames = font_names;
@@ -1970,34 +1986,34 @@ void Options_MenuInit( void )
 
 	s_options_crosshair_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_crosshair_box.generic.x	= 0;
-	s_options_crosshair_box.generic.y	= 210;
+	s_options_crosshair_box.generic.y	= 220;
 	s_options_crosshair_box.generic.name	= "crosshair";
 	s_options_crosshair_box.generic.callback = CrosshairFunc;
 	s_options_crosshair_box.itemnames = crosshair_names;
 
 	s_options_minimap_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_minimap_box.generic.x		= 0;
-	s_options_minimap_box.generic.y		= 220;
+	s_options_minimap_box.generic.y		= 230;
 	s_options_minimap_box.generic.name  = "minimap";
 	s_options_minimap_box.generic.callback = MinimapFunc;
 	s_options_minimap_box.itemnames = minimap_names;
 
 	s_options_joystick_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_joystick_box.generic.x	= 0;
-	s_options_joystick_box.generic.y	= 230;
+	s_options_joystick_box.generic.y	= 240;
 	s_options_joystick_box.generic.name	= "use joystick";
 	s_options_joystick_box.generic.callback = JoystickFunc;
 	s_options_joystick_box.itemnames = yesno_names;
 
 	s_options_defaults_action.generic.type	= MTYPE_ACTION;
 	s_options_defaults_action.generic.x		= 0;
-	s_options_defaults_action.generic.y		= 250;
+	s_options_defaults_action.generic.y		= 260;
 	s_options_defaults_action.generic.name	= "reset defaults";
 	s_options_defaults_action.generic.callback = ControlsResetDefaultsFunc;
 
 	s_options_console_action.generic.type	= MTYPE_ACTION;
 	s_options_console_action.generic.x		= 0;
-	s_options_console_action.generic.y		= 260;
+	s_options_console_action.generic.y		= 270;
 	s_options_console_action.generic.name	= "go to console";
 	s_options_console_action.generic.callback = ConsoleFunc;
 
@@ -2008,6 +2024,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_enginemode_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_shaders_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_shadows_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_dynamic_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_rtlights_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_target_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_brainlets_box );
