@@ -889,14 +889,27 @@ clean2:
 	$(GAME_OBJS) \
 	$(ARENA_OBJS) \
 	$(REF_GL_OBJS) \
-	$(REF_GL_GLX_OBJS) 
+	$(REF_GL_GLX_OBJS) \
+	$(SOUND_OSS_OBJS) \
+	$(SOUND_SDL_OBJS)
+
+distclean: clean
+	rm -rf $(BUILD_RELEASE_DIR)
+	rm -rf $(BUILD_DEBUG_DIR)
 
 install:
-	mv $(BUILD_RELEASE_DIR)/cr* .
+	cp $(BUILD_RELEASE_DIR)/cr* .
 	cp $(BUILD_RELEASE_DIR)/game.so data1/
-	mv $(BUILD_RELEASE_DIR)/game.so arena/
+	cp $(BUILD_RELEASE_DIR)/game.so arena/
 
 install-debug:
-	mv $(BUILD_DEBUG_DIR)/cr* .
+	cp $(BUILD_DEBUG_DIR)/cr* .
 	cp $(BUILD_DEBUG_DIR)/game.so data1/
-	mv $(BUILD_DEBUG_DIR)/game.so arena/
+	cp $(BUILD_DEBUG_DIR)/game.so arena/
+
+uninstall:
+	rm -f data1/game.so
+	rm -f arena/game.so
+	rm -f crx
+	rm -f crx.sdl
+	rm -f crded

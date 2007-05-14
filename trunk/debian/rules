@@ -13,7 +13,8 @@ clean-patched:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	-$(MAKE) clean
+	-$(MAKE) uninstall
+	-$(MAKE) distclean
 	dh_clean
 
 install: build
