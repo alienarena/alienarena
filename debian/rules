@@ -26,7 +26,7 @@ install: build
 	install -m 754 release/crded debian/tmp/crded
 	install -m 644 release/game.so debian/tmp/game.so
 	install -m 444 alienarena.xpm debian/tmp/alienarena2007.xpm
-	dh_install
+	dh_install -X.svn/
 	rm debian/alienarena2007-data/usr/share/games/alienarena2007/arena/gamex86.dll
 	rm debian/alienarena2007-data/usr/share/games/alienarena2007/data1/gamex86.dll
 
@@ -48,7 +48,7 @@ binary-arch: build install
 	dh_desktop
 	dh_installdeb
 	dh_shlibdeps
-	dh_compress
+	dh_compress -Xcreative-commons-by-nc-nd-3.0
 	dh_fixperms
 	dh_gencontrol
 	dh_md5sums
