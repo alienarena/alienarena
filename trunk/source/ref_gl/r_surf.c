@@ -175,13 +175,14 @@ void R_DrawTriangleOutlines (void)
 */
 void DrawGLPolyLightmap( glpoly_t *p, float soffset, float toffset )
 {
-	float *v = p->verts[0];
+	float *v;
 	int j;
-	
+
 	qglBegin (GL_POLYGON);
+	v = p->verts[0];
 	for (j=0 ; j<p->numverts ; j++, v+= VERTEXSIZE)
 	{
-		qglTexCoord2f (v[5] - soffset, v[6] - toffset );
+		qglTexCoord2f (v[5], v[6] );
 		qglVertex3fv (v);
 	}
 	qglEnd ();
@@ -303,12 +304,12 @@ void R_BlendLightmaps (void)
 				LM_UploadBlock( true );
 
 				// draw all surfaces that use this lightmap
-				for ( drawsurf = newdrawsurf; drawsurf != surf; drawsurf = drawsurf->lightmapchain )
+				for (drawsurf = newdrawsurf; drawsurf != surf; drawsurf = drawsurf->lightmapchain)
 				{
-					if ( drawsurf->polys )
-						DrawGLPolyLightmap( drawsurf->polys, 
-							              ( drawsurf->light_s - drawsurf->dlight_s ) * ( 1.0 / 128.0 ), 
-										( drawsurf->light_t - drawsurf->dlight_t ) * ( 1.0 / 128.0 ) );
+					if (drawsurf->polys)
+						DrawGLPolyLightmap(drawsurf->polys, 
+							(drawsurf->light_s - drawsurf->dlight_s) * 0.0078125, // ( 1.0 / 128.0 ), 
+							(drawsurf->light_t - drawsurf->dlight_t) * 0.0078125); // ( 1.0 / 128.0 ) );
 				}
 
 				newdrawsurf = drawsurf;
@@ -335,10 +336,11 @@ void R_BlendLightmaps (void)
 		if ( newdrawsurf )
 			LM_UploadBlock( true );
 
-		for ( surf = newdrawsurf; surf != 0; surf = surf->lightmapchain )
+		for (surf = newdrawsurf; surf != 0; surf = surf->lightmapchain)
 		{
-			if ( surf->polys )
-				DrawGLPolyLightmap( surf->polys, ( surf->light_s - surf->dlight_s ) * ( 1.0 / 128.0 ), ( surf->light_t - surf->dlight_t ) * ( 1.0 / 128.0 ) );
+			if (surf->polys)
+				DrawGLPolyLightmap(surf->polys, (surf->light_s - surf->dlight_s) * 0.0078125f /*( 1.0 / 128.0 )*/,
+					(surf->light_t - surf->dlight_t) * 0.0078125f); // ( 1.0 / 128.0 ) );
 		}
 	}
 
@@ -691,8 +693,6 @@ dynamic:
 		}
 	}
 
-	c_brush_polys++;
-
 	if ( is_dynamic )
 	{
 		unsigned	temp[128*128];
@@ -716,7 +716,9 @@ dynamic:
 						  GL_LIGHTMAP_FORMAT, 
 						  GL_UNSIGNED_BYTE, temp );
 	}
-
+	
+	c_brush_polys++;
+	
 	if (SurfaceIsAlphaBlended(surf))
 		qglEnable( GL_ALPHA_TEST );
 

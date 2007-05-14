@@ -1372,15 +1372,9 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawParticles ();
 
-	//lava haze
-//	R_SmokeFrame();
-
-	R_RenderDlights (); 
-
 	R_BloomBlend( fd );//BLOOMS
 
-	if(r_bloom->value)  //this is a hack.  fix - this has to be after R_BloomBlend for some reason
-		R_RenderDlights ();
+	R_RenderDlights ();
 
 // start MPO
 	// if we are doing a reflection, turn off clipping now
@@ -1572,7 +1566,7 @@ void R_Register( void )
 	gl_mode = Cvar_Get( "gl_mode", "3", CVAR_ARCHIVE );
 	gl_lightmap = Cvar_Get ("gl_lightmap", "0", 0);
 	gl_shadows = Cvar_Get ("gl_shadows", "2", CVAR_ARCHIVE );
-	gl_dynamic = Cvar_Get ("gl_dynamic", "1", 0);
+	gl_dynamic = Cvar_Get ("gl_dynamic", "1", CVAR_ARCHIVE);
 	gl_nobind = Cvar_Get ("gl_nobind", "0", 0);
 	gl_round_down = Cvar_Get ("gl_round_down", "1", 0);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", 0);
