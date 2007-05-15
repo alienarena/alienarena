@@ -1,4 +1,4 @@
-#! /bin/sh /usr/share/dpatch/dpatch-run
+#! /bin/sh -e
 ## launch-server_tool_debianization.dpatch by Andres Mejia <mcitadel@gmail.com>
 ##
 ## All lines beginning with `## DP:' are a description of the patch.
@@ -6,10 +6,29 @@
 ## DP: Patch also allows for server config files to be placed under any directory.
 ## This patch will work provided that the source tree was checked out to a directory named alienarena2007.
 
-@DPATCH@
-diff -urNad alienarena2007~/Tools/LinuxScripts/launch-server alienarena2007/Tools/LinuxScripts/launch-server
---- alienarena2007~/Tools/LinuxScripts/launch-server	2007-05-14 23:15:35.000000000 -0400
-+++ alienarena2007/Tools/LinuxScripts/launch-server	2007-05-14 23:15:35.000000000 -0400
+dir=
+if [ $# -eq 3 -a "$2" = '-d' ]; then
+    pdir="-d $3"
+    dir="$3/"
+elif [ $# -ne 1 ]; then
+    echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+    exit 1
+fi
+case "$1" in
+    -patch)
+        patch $pdir -f --no-backup-if-mismatch -p0 < $0
+        ;;
+    -unpatch)
+        patch $pdir -f --no-backup-if-mismatch -R -p0 < $0
+        ;;
+    *)
+        echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+        exit 1
+esac
+exit 0
+
+--- Tools/LinuxScripts/launch-server~	2007-05-14 23:15:35.000000000 -0400
++++ Tools/LinuxScripts/launch-server	2007-05-14 23:15:35.000000000 -0400
 @@ -1,14 +1,20 @@
  #! /bin/sh
  #
