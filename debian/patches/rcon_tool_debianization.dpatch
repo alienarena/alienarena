@@ -2,8 +2,7 @@
 ## rcon_tool_debianization.dpatch by Andres Mejia <mcitadel@gmail.com>
 ##
 ## All lines beginning with `## DP:' are a description of the patch.
-## DP: Patch to modify /Tools/LinuxScripts/rcon script for use in a Debian based distro.
-## This patch will work provided that the source tree was checked out to a directory named alienarena2007.
+## DP: Patch to modify Tools/LinuxScripts/rcon script for use in a Debian based distro.
 
 dir=
 if [ $# -eq 3 -a "$2" = '-d' ]; then

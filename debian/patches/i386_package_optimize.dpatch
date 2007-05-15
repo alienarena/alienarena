@@ -3,7 +3,6 @@
 ##
 ## All lines beginning with `## DP:' are a description of the patch.
 ## DP: Patch to ensure i386 optimatizations only when building i386 Debian packages.
-## This patch will work provided that the source tree was checked out to a directory named alienarena2007.
 
 dir=
 if [ $# -eq 3 -a "$2" = '-d' ]; then
