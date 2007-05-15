@@ -8,6 +8,7 @@
 
 @DPATCH@
 diff -urNad alienarena2007~/Tools/LinuxScripts/launch-server alienarena2007/Tools/LinuxScripts/launch-server
+--- alienarena2007~/Tools/LinuxScripts/launch-server	2007-05-14 23:15:35.000000000 -0400
 +++ alienarena2007/Tools/LinuxScripts/launch-server	2007-05-14 23:15:35.000000000 -0400
 @@ -1,14 +1,20 @@
  #! /bin/sh
