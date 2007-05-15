@@ -52,11 +52,9 @@ Disable console output. Only used when calling the 'crded' binary itself.
 Calls 'luanch-server', which is a shell script designed to emulate running crded as
 a persisant service under linux using a server configuration file <configfile>.
 .br
-\fBNOTE:\fR <configfile> must be a file either in $HOME/.alienarena2007 or in
-/usr/share/games/alienarena2007. 
 .br
-server.cfg is a suitable <configfile> that is
-already installed with alienarena2007-server.
+/usr/share/games/alienarena2007/arena/server.cfg is a suitable <configfile> that is
+already installed with alienarena2007-server. <configfile> can be a file in any directory.
 .TP
 .B \-k, \-\-kill
 Calls 'kill-runaway-crded', which is a shell script to kill all dedicated server processes. Useful when a server session was started with \-s or \-\-service option.
@@ -65,7 +63,7 @@ Calls 'kill-runaway-crded', which is a shell script to kill all dedicated server
 Calls 'svstat' which is a ruby script that will query local servers and produce
 some nice output for server admins.
 .TP
-.B \-r, \-\-rcon
+.B \-r <server:port> password <commandstring>, \-\-rcon <server:port> password <commandstring>
 Calls 'rcon' which is a ruby script that sends rcon commands to servers.
 .SH PARAMETERS
 [PARAMETERS] could be any parameter that can be passed to the script that will be
@@ -74,10 +72,11 @@ called or the binary 'crded'. For example, when using the \-s or \-\-service opt
 option.
 .TP
 .B \-s, \-\-service [PARAMETERS]
-<configfile> \- Any acceptable server configuration file such as server.cfg.
+<configfile> \- Any acceptable server configuration file such as
+/usr/share/games/alienarena2007/arena/server.cfg.
 .TP
 .B \-r, \-\-rcon [PARAMETERS]
-<Insert available parameters for 'rcon' here.>
+<server:port> password <commandstring>
 .SH AUTHOR
 See the copyright </usr/share/doc/alienarena2007-server/copyright> for contributers
 to Alien Arena 2007.
@@ -90,7 +89,6 @@ Copyright (c)  2007  Andres Mejia.
   under the terms of the GNU Free Documentation License, Version 1.2
   or any later version published by the Free Software Foundation;
   with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
-  Texts.  A copy of the license is included in the section entitled
-  "GNU Free Documentation License". A copy of the license is included
-  in the gfdl(7) man page or online at
+  Texts. A copy of the license is included
+  in the gfdl(7) man page and online at
   <http://www.gnu.org/copyleft/fdl.html>.

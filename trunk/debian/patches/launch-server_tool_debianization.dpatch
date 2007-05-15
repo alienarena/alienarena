@@ -3,12 +3,12 @@
 ##
 ## All lines beginning with `## DP:' are a description of the patch.
 ## DP: Patch to modify /Tools/LinuxScripts/launch-server script for use in a Debian based distro.
-## DP: Patch also allows for server config files to be placed under $HOME/.alienarena2007 directory.
+## DP: Patch also allows for server config files to be placed under any directory.
 ## This patch will work provided that the source tree was checked out to a directory named alienarena2007.
 
 @DPATCH@
 diff -urNad alienarena2007~/Tools/LinuxScripts/launch-server alienarena2007/Tools/LinuxScripts/launch-server
-+++ alienarena2007/Tools/LinuxScripts/launch-server	2007-05-13 01:23:33.000000000 -0400
++++ Tools/LinuxScripts/launch-server	2007-05-14 23:15:35.000000000 -0400
 @@ -1,14 +1,20 @@
  #! /bin/sh
  #
@@ -32,7 +32,7 @@ diff -urNad alienarena2007~/Tools/LinuxScripts/launch-server alienarena2007/Tool
  #
  # Set the port number in the .cfg if running multiple servers.
  # Script checks the existance of the cfg file before launching.
-@@ -17,31 +23,42 @@
+@@ -17,31 +23,37 @@
  #ulimit -c unlimited
  
  ### Set your default AA Root Directory
@@ -56,37 +56,32 @@ diff -urNad alienarena2007~/Tools/LinuxScripts/launch-server alienarena2007/Tool
 -else
 -echo "Unable to find server config $aadir/arena/$1."
 -exit 0
-+	if test -r $HOME/.alienarena2007/$1
++	if test -r $1
 +	then
-+	echo "Found server config $HOME/.alienarena2007/$1..."
-+	elif test -r $aadir/arena/$1
-+	then
-+	echo "Found server config $aadir/arena/$1..."
++	echo "Found server config $1..."
 +	else
-+	echo "Unable to find server config."
++	echo "Unable to find server config at $1"
 +	exit 0
  fi
  else
 -echo "Usage: launch-server <configfile>"
 +echo "Usage: alienarena2007-server -s <configfile>\n\
-+<configfile> must be specified\n\n\
-+The <configfile> must be placed either in $HOME/.alienarena2007\n\
-+or in /usr/share/games/alienarena2007\n"
++<configfile> must be specified.\n\n"
  exit 0
  fi
  
 -aapid="$1.pid"
 +if test -d $HOME/.alienarena2007
 +then
-+aapid="$HOME/.alienarena2007/alienarena2007-server.$1.pid"
++aapid="$HOME/.alienarena2007/alienarena2007-server.`basename $1`.pid"
 +else
 +mkdir $HOME/.alienarena2007
-+aapid="$HOME/.alienarena2007/alienarena2007-server.$1.pid"
++aapid="$HOME/.alienarena2007/alienarena2007-server.`basename $1`.pid"
 +fi
  
  cd $aadir
  
-@@ -59,10 +76,10 @@
+@@ -59,10 +71,10 @@
  echo "Stale $aapid file, erasing..."
  echo "Attempting to Restart Alien Arena"
  rm -f $aapid
