@@ -138,7 +138,6 @@ typedef struct mtexinfo_s
 	int			numframes;
 	struct mtexinfo_s	*next;		// animation chain
 	image_t		*image;
-	image_t		*normalMap;
 	struct		rscript_t	*script;
 	int			value;
 } mtexinfo_t;

@@ -130,3 +130,66 @@ models/weapons/v_shotg2/skin
 		normalmap
 	}
 }
+textures/arena7/metal2
+{
+	{
+		map textures/arena7/metal2_nm.tga
+		normalmap
+	}
+}
+textures/arena7/floor1
+{
+	{
+		map textures/arena7/floor1_nm.tga
+		normalmap
+	}
+}
+textures/arena7/floor2
+{
+	{
+		map textures/arena7/floor2_nm.tga
+		normalmap
+	}
+}
+textures/arena8/floor3
+{
+	{
+		map textures/arena8/floor3_nm.tga
+		normalmap
+	}
+}
+textures/arena8/rock1
+{
+	{
+		map textures/arena8/rock1_nm.tga
+		normalmap
+	}
+}
+textures/arena8/metaltrim1
+{
+	{
+		map textures/arena8/metaltrim1_nm.tga
+		normalmap
+	}
+}
+textures/arena8/metaltrim2
+{
+	{
+		map textures/arena8/metaltrim2_nm.tga
+		normalmap
+	}
+}
+textures/arena8/metal1
+{
+	{
+		map textures/arena8/metal1_nm.tga
+		normalmap
+	}
+}
+textures/arena8/brickwall1
+{
+	{
+		map textures/arena8/brickwall1_nm.tga
+		normalmap
+	}
+}

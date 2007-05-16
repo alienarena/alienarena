@@ -70,7 +70,6 @@ extern void R_BuildLightMap (msurface_t *surf, byte *dest, int stride);
 // this should most likely properly belong in a state management struct somewhere
 static msurface_t *r_detailsurfaces;
 // MH - detail textures end
-static msurface_t *r_normalsurfaces;
 
 /*
 =============================================================
@@ -175,14 +174,14 @@ void R_DrawTriangleOutlines (void)
 */
 void DrawGLPolyLightmap( glpoly_t *p, float soffset, float toffset )
 {
-	float *v;
+	float *v = p->verts[0];
 	int j;
 
 	qglBegin (GL_POLYGON);
-	v = p->verts[0];
+
 	for (j=0 ; j<p->numverts ; j++, v+= VERTEXSIZE)
 	{
-		qglTexCoord2f (v[5], v[6] );
+		qglTexCoord2f (v[5] - soffset, v[6] - toffset );
 		qglVertex3fv (v);
 	}
 	qglEnd ();
@@ -398,8 +397,6 @@ void R_RenderBrushPoly (msurface_t *fa)
 	fa->detailchain = r_detailsurfaces;
 	r_detailsurfaces = fa;
 	// MH - detail textures end
-	fa->normalchain = r_normalsurfaces;
-	r_normalsurfaces = fa;
 
 	if (SurfaceIsAlphaBlended(fa))
 		qglEnable( GL_ALPHA_TEST );
@@ -673,8 +670,6 @@ static void GL_RenderLightmappedPoly( msurface_t *surf )
 	surf->detailchain = r_detailsurfaces;
 	r_detailsurfaces = surf;
 	// MH - detail textures end
-	surf->normalchain = r_normalsurfaces;
-	r_normalsurfaces = surf;
 
 	for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
 	{
@@ -745,68 +740,6 @@ dynamic:
 
 	if (SurfaceIsAlphaBlended(surf))
 		qglDisable( GL_ALPHA_TEST);
-}
-
-//normal maps
-static void R_DrawNormalMaps (void)
-{
-	msurface_t *surf = r_normalsurfaces;
-	int		i;
-	float	*v;
-	glpoly_t *p;
-
-	if(!gl_normalmaps->value)
-		return;
-
-	// nothing to draw!
-	if (!surf)
-		return;
-
-	qglDepthMask (GL_FALSE); 
-	qglEnable (GL_BLEND); 
-
-	// set the correct blending mode for normal maps 
-	qglBlendFunc (GL_ZERO, GL_SRC_COLOR); 
-
-	// and the texenv 
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE); 
-	qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_DOT3_RGB); 
-
-	for (; surf; surf = surf->normalchain) 
-	{  
-	   
-	   // don't draw if there isn't a normalmap 
-	   if (!surf->texinfo->normalMap->texnum) continue; 
-
-	   if (surf->flags & SURF_DRAWTURB) continue; 
-
-	   qglBindTexture (GL_TEXTURE_2D, surf->texinfo->normalMap->texnum); 
-
-	   for (p = surf->polys; p; p = p->chain)
-	   {
-		   qglBegin (GL_TRIANGLE_FAN);
-
-		   for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-		   {
-				// take the 128 * 128 version of the s and t co-ords(fix me, obviously)
-				qglTexCoord2f (v[3], v[4]);
-				qglVertex3fv (v);
-		   }
-
-		   qglEnd ();
-	   }
-	} 
-
-	// back to replace mode 
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); 
-
-	// restore the original blend mode 
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-
-	// switch off blending 
-	qglDisable (GL_BLEND); 
-	qglDepthMask (GL_TRUE); 
-
 }
 
 // MH - detail textures begin
@@ -907,7 +840,6 @@ void R_DrawInlineBModel (entity_t *e)
 	// null the detail chain again
 	r_detailsurfaces = NULL;
 	// MH - detail textures end
-	r_normalsurfaces = NULL;
 
 	//
 	// draw texture
@@ -956,7 +888,6 @@ void R_DrawInlineBModel (entity_t *e)
 
 		// don't put them on translucent surfs
 		R_DrawDetailSurfaces ();
-		R_DrawNormalMaps ();
 
 		// bring multitexturing back up
 		GL_EnableMultitexture (true);
@@ -1292,7 +1223,6 @@ void R_DrawWorld (void)
 	// MH - detail textures begin
 	r_detailsurfaces = NULL;
 	// MH - detail textures end
-	r_normalsurfaces = NULL;
 
 	if ( qglMTexCoord2fSGIS )
 	{
@@ -1357,7 +1287,6 @@ void R_DrawWorld (void)
 	// MH - detail textures begin
 	R_DrawDetailSurfaces ();
 	// MH - detail textures end
-	R_DrawNormalMaps ();
 	
 	R_DrawSkyBox ();
 

@@ -37,8 +37,7 @@ typedef enum
 	it_sprite,
 	it_wall,
 	it_pic,
-	it_sky,
-	it_bump
+	it_sky
 } imagetype_t;
 
 typedef struct image_s

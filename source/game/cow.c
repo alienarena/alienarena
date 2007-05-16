@@ -86,16 +86,16 @@ void cow_step (edict_t *self)
 
 mframe_t cow_frames_walk [] =
 {
+	ai_run, 22.0, NULL,
+	ai_run, 12.0, NULL,
 	ai_run, 0.0, NULL,
-	ai_run, 9.3, NULL,
-	ai_run, 17.9, NULL,
-	ai_run, 20.0, NULL,
+	ai_run, 0.0, NULL,
+	ai_run, 0.0, NULL,
 	ai_run, 0.0, cow_step,
 	ai_run, 0.0, NULL,
-	ai_run, 0.0, NULL,
-	ai_run, 9.0, NULL,
-	ai_run, 17.0, NULL,
-	ai_run, 20.0, NULL,
+	ai_run, 7.0, NULL,
+	ai_run, 32.0, NULL,
+	ai_run, 4.0, NULL,
 	ai_run, 0.0, cow_step,
 	ai_run, 0.0, NULL
 };

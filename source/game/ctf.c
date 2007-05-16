@@ -68,10 +68,10 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 	// team one
 	sprintf(string, "xv -8 yv -8 picn i_team1 "
 		"xv 40 yv 28 string \"%4d/%-3d\" "
-		"xv 98 yv 12 num 2 21 "
-		"xv 160 yv -8 picn i_team2 "
-		"xv 200 yv 28 string \"%4d/%-3d\" "
-		"xv 256 yv 12 num 2 22 ",
+		"xv 58 yv 12 num 2 21 "
+		"xv 184 yv -8 picn i_team2 "
+		"xv 230 yv 28 string \"%4d/%-3d\" "
+		"xv 248 yv 12 num 2 22 ",
 		totalscore[0], total[0],
 		totalscore[1], total[1]);
 	len = strlen(string);
@@ -124,14 +124,14 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 
 
 			sprintf(entry+strlen(entry),
-				"ctf 160 %d %d %d %d ",
+				"ctf 190 %d %d %d %d ",
 				42 + i * 8,
 				sorted[1][i],
 				cl->resp.score,
 				cl->ping > 999 ? 999 : cl->ping);
 
 			if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)])
-				sprintf(entry + strlen(entry), "xv 216 yv %d picn sbfctf1 ",
+				sprintf(entry + strlen(entry), "xv 246 yv %d picn sbfctf1 ",
 					42 + i * 8);
 
 			if (maxsize - len > strlen(entry)) {
