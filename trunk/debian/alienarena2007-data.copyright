@@ -18,7 +18,7 @@ Linux Port and installation: Shane Bayer
 Alien Arena IRC Channel:  Astralsin
 FreeBSD port: "Ale"
 Gentoo portage: Paul Bredbury
-Debian packagin: Andres Mejia
+Debian packaging: Andres Mejia
 
 There are other major contributions from the community from QuakeSrc.org, including MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.
 
@@ -26,7 +26,7 @@ Copyright:
 
 ALIEN ARENA 2007 and it's original content are a copyright of COR Entertainment, LLC.
 
-The source code is released under the GPL license and can be used or modified for any purpose, provided it too is released under the GPL license.
+The game data is released under the Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License.
 
 Under no circumstances can ALIEN ARENA 2007 be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2007 may be included in free compilation CD's and similar packages without consent, provided the archives remain unmodified.
 
@@ -54,13 +54,13 @@ Under the following conditions:
       No Derivative Works. You may not alter, transform, or build upon this work.
     *
 
-    * For any reuse or distribution, you must make clear to others the license terms of this work. The best way to do this is with a link to this web page.
+    * For any reuse or distribution, you must make clear to others the license terms of this work. The best way to do this is with posting a link to <http://creativecommons.org/licenses/by-nc-nd/3.0/legalcode>.
 
     * Any of the above conditions can be waived if you get permission from the copyright holder.
 
     * Nothing in this license impairs or restricts the author's moral rights.
 
-The full legal code of this license can be along with this package's documentation
+The full legal code of this license can be found along with this package's documentation
 under </usr/share/doc/alienarena2007-data/creative-commons-by-nc-nd-3.0> and can
 also be found online at
 <http://creativecommons.org/licenses/by-nc-nd/3.0/legalcode>.

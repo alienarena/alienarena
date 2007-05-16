@@ -21,7 +21,7 @@ RCON=0
 
 case "$1" in
 	-h|--help)
-		echo -e ${USAGE}
+		echo ${USAGE}
 		exit 0
 		;;
 	-q|--quiet)

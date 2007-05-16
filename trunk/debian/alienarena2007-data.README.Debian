@@ -1,6 +1,12 @@
 alienarena2007 for Debian
 -------------------------------------
 
-<possible notes regarding this package - if none, delete this file>
+ALIEN ARENA 2007 is a standalone 3D first person online deathmatch shooter crafted from the original source code of Quake II and Quake III, released by id Software under the GPL license. With features including 32 bit graphics, new particle engine and effects, light blooms, reflective water, hi resolution textures and skins, hi poly models, stain maps, ALIEN ARENA pushes the envelope of graphical beauty rivaling today's top games.
+
+The game features 37 levels, which can be played online against other players, or against the built in CodeRED bots.
+
+Alien Arena offers CTF, AOA(All Out Assault) mode, in which players can climb into vehicles to do battle, Deathball, and Team Core Assault. Simply go into the multiplayer menu to start a server, change the game rules, and choose a map to play on. You can also select from five different mutators(instagib, rocket arena, excessive, low grav, regen, and vampire) to further customize your game experience.
+
+The alienarena2007-data package contains just the architecture independent files needed by alienarena2007 and alienarena2007-server.
 
  -- Andres Mejia <mcitadel@gmail.com>  Sun, 13 May 2007 14:48:46 -0400

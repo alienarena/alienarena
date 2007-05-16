@@ -6,10 +6,9 @@ To run the Alien Arena 2007 server, run /usr/games/alienarena2007-server
 To run the server without any output to the terminal, use the parameter -q or --quiet.
 
 To use 'launch-server' for launching the server as a service, use the parameter -s <configfile>  or --service <configfile>.
-NOTE: <configfile> must be a file either in $HOME/.alienarena2007 or in /usr/share/games/alienarena2007.
-server.cfg is a suitable <configfile> that is already installed with alienarena2007-server.
+/usr/share/games/alienarena2007/arena/server.cfg is a suitable <configfile> that is already installed with alienarena2007-data.
 
-To use 'kill-runaway-crded' for stopping any runaway server sessions, use the parameter -k or --kill.
+To use 'kill-runaway-crded' for stopping any runaway server sessions, use the parameter -k or --kill. This option is useful when a server session was started as a service.
 
 To use 'svstat' to query local servers, use the parameter -Q or --query.
 
