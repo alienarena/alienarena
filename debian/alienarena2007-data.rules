@@ -2,25 +2,18 @@
 
 SOURCE_VERSION=$(shell dpkg-parsechangelog | grep Version | cut -d' ' -f2 | cut -d- -f1)
 
-
-tarball:
-	tar -X debian/alienarena2007.exclusions -cvzf \
-	../alienarena2007-data.$(SOURCE_VERSION).orig.tar.gz \
-	docs/ arena/ botinfo/ data1/
-
 build: build-stamp
 build-stamp:
 
 clean:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp configure-stamp
+	rm -f build-stamp
 	dh_clean
 
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k
 	dh_install -palienarena2007-data -X.svn/ -X.exe -X.dll -X.ico -X.bat
 
 # Build architecture-independent files here.

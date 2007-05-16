@@ -1,23 +1,21 @@
 #! /usr/bin/make -f
 # -*- makefile -*-
 # This rules script is used to control which package rules script is run.
-# To build a package, run BUILD_PACKAGE=<packagename> fakeroot dpkg-buildpackage.
+# To build a package, run BUILD_PACKAGE=<packagename> dpkg-buildpackage -rfakeroot.
 # <packagename> can be either alienarena2007, alienarena2007-server, or
-# alienarena2007-data. This script also determine if tarballs will be
-# created. To build a source tarball specific to a package, run
-# BUILD_PACKAGE=<packagename> BUILD_TARBALL=yes fakeroot dpkg-buildpackage.
+# alienarena2007-data.
 
 ifeq ($(BUILD_PACKAGE), alienarena2007-server)
 	BUILD_PACKAGE = alienarena2007
 endif
 
-tarball:
-   ifeq ($(BUILD_TARBALL), yes)
+build:
+   ifeq ($(BUILD_PACKAGE), all)
+	$(MAKE) -f debian/alienarena2007.rules $@
+	$(MAKE) -f debian/alienarena2007-data.rules $@
+   else
 	$(MAKE) -f debian/$(BUILD_PACKAGE).rules $@
    endif
-
-build: tarball
-	$(MAKE) -f debian/$(BUILD_PACKAGE).rules $@
 
 clean:
 	$(MAKE) -f debian/alienarena2007.rules $@
@@ -28,11 +26,19 @@ install: build
 
 # Build architecture-independent files here.
 binary-indep: build install
+   ifeq ($(BUILD_PACKAGE), all)
+	$(MAKE) -f debian/alienarena2007-data.rules $@
+   else
 	$(MAKE) -f debian/$(BUILD_PACKAGE).rules $@
+   endif
 
 # Build architecture-dependent files here.
 binary-arch: build install
+   ifeq ($(BUILD_PACKAGE), all)
+	$(MAKE) -f debian/alienarena2007.rules $@
+   else
 	$(MAKE) -f debian/$(BUILD_PACKAGE).rules $@
+   endif
 
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install
+binary: binary-arch binary-indep
+.PHONY: build clean binary-arch binary-indep binary install

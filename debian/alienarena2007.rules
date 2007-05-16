@@ -4,11 +4,6 @@ include /usr/share/dpatch/dpatch.make
 
 SOURCE_VERSION=$(shell dpkg-parsechangelog | grep Version | cut -d' ' -f2 | cut -d- -f1)
 
-tarball:
-	tar -X debian/alienarena2007.exclusions -cvzf \
-	../alienarena2007.$(SOURCE_VERSION).orig.tar.gz docs/ source/ \
-	Tools/ alienarena.xpm Makefile
-
 build: build-stamp
 build-stamp: patch
 	dh_testdir
@@ -19,7 +14,7 @@ clean: clean-patched unpatch
 clean-patched:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp configure-stamp
+	rm -f build-stamp patch-stamp
 	-$(MAKE) uninstall
 	-$(MAKE) distclean
 	dh_clean
@@ -27,7 +22,6 @@ clean-patched:
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k
 	install -d debian/tmp
 	install -m 644 alienarena.xpm debian/tmp/alienarena2007.xpm
 	dh_install -palienarena2007 -X.svn/ -X.exe -X.dll -X.ico -X.bat
