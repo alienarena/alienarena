@@ -2,7 +2,7 @@ GAMEDIR = 'C:\Games\Alien Arena 2007' # Do not add a trailing slash!
 
 =begin
 
-    WorldCraft 3.3 -> Alien Arena map file convertion script
+    WorldCraft 3.3 -> Alien Arena map file conversion script
     Copyright (C) 2007 Tony Jackson
 
     This library is free software; you can redistribute it and/or
@@ -68,7 +68,7 @@ mapin.each do | line |
 		if index == nil
 			puts 'Warning: unable to find texture: ' + texture
 		else
-			line[15] = File.join(textures[index],paths[index])
+			line[15] = File.join(paths[index], textures[index])
 		end
 	end
 	mapout.puts line.join(' ')
