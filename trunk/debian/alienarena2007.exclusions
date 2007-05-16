@@ -1,0 +1,6 @@
+*/.svn/*
+.svn
+*.ico
+*.dll
+*.exe
+*.bat
