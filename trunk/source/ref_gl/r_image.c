@@ -33,8 +33,8 @@ cvar_t		*intensity;
 unsigned	d_8to24table[256];
 
 qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean is_sky );
-qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, qboolean is_normalmap);
-qboolean GL_Upload32_hires (unsigned *data, int width, int height,  qboolean mipmap, qboolean is_normalmap);
+qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap);
+qboolean GL_Upload32_hires (unsigned *data, int width, int height,  qboolean mipmap);
 
 int		gl_solid_format = 3;
 int		gl_alpha_format = 4;
@@ -965,7 +965,7 @@ void GL_MipMap (byte *in, int width, int height)
 int		upload_width, upload_height;
 qboolean uploaded_paletted;
 // Fixed 256x256 texture size limitation - MrG
-qboolean GL_Upload32_hires (unsigned *data, int width, int height,  qboolean mipmap, qboolean is_normalMap)
+qboolean GL_Upload32_hires (unsigned *data, int width, int height,  qboolean mipmap)
 {	int		samples;
 	unsigned 	*scaled;
 	int		scaled_width, scaled_height;
@@ -1032,8 +1032,7 @@ qboolean GL_Upload32_hires (unsigned *data, int width, int height,  qboolean mip
         scaled=data; 
     } 
 
-	if( !is_normalMap )
-		GL_LightScaleTexture (scaled, scaled_width, scaled_height, !mipmap);
+	GL_LightScaleTexture (scaled, scaled_width, scaled_height, !mipmap);
     
 	if (mipmap) 
         gluBuild2DMipmaps (GL_TEXTURE_2D, samples, scaled_width, scaled_height, GL_RGBA, GL_UNSIGNED_BYTE, scaled); 
@@ -1085,7 +1084,7 @@ void GL_BuildPalettedTexture( unsigned char *paletted_texture, unsigned char *sc
 	}
 }
 
-qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qboolean is_normalMap)
+qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap)
 {
 	int			samples;
 	unsigned	scaled[256*256];
@@ -1168,9 +1167,8 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qb
 	{
 		if (!mipmap)
 		{
-			// Ben Lane 20 April 2005: Never upload a normal map as an 8 bit
 			// paletted texture.
-			if ( !is_normalMap && qglColorTableEXT && gl_ext_palettedtexture->value && samples == gl_solid_format )
+			if ( qglColorTableEXT && gl_ext_palettedtexture->value && samples == gl_solid_format )
 			{
 				uploaded_paletted = true;
 				GL_BuildPalettedTexture( paletted_texture, ( unsigned char * ) data, scaled_width, scaled_height );
@@ -1195,12 +1193,10 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qb
 	else
 		GL_ResampleTexture (data, width, height, scaled, scaled_width, scaled_height);
 
-	// Ben Lane 20 April 2005: Never brighten normal maps.
-	if( !is_normalMap ) GL_LightScaleTexture (scaled, scaled_width, scaled_height, !mipmap );
+	GL_LightScaleTexture (scaled, scaled_width, scaled_height, !mipmap );
 
-	// Ben Lane 20 April 2005: Never upload normal maps as 8 bit paletted
 	// textures.
-	if ( !is_normalMap && qglColorTableEXT && gl_ext_palettedtexture->value && ( samples == gl_solid_format ) )
+	if ( qglColorTableEXT && gl_ext_palettedtexture->value && ( samples == gl_solid_format ) )
 	{
 		uploaded_paletted = true;
 		GL_BuildPalettedTexture( paletted_texture, ( unsigned char * ) scaled, scaled_width, scaled_height );
@@ -1235,9 +1231,8 @@ qboolean GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, qb
 				scaled_height = 1;
 			miplevel++;
 
-			// Ben Lane 20 April 2005: Never upload normal maps as 8 bit
 			// paletted textures.
-			if ( !is_normalMap && qglColorTableEXT && gl_ext_palettedtexture->value && samples == gl_solid_format )
+			if ( qglColorTableEXT && gl_ext_palettedtexture->value && samples == gl_solid_format )
 			{
 				uploaded_paletted = true;
 				GL_BuildPalettedTexture( paletted_texture, ( unsigned char * ) scaled, scaled_width, scaled_height );
@@ -1340,9 +1335,9 @@ qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboole
 			}
 		}
 		if(gl_texres->value)
-			return GL_Upload32_hires (trans, width, height, mipmap, false);
+			return GL_Upload32_hires (trans, width, height, mipmap);
 		else
-			return GL_Upload32 (trans, width, height, mipmap, false);
+			return GL_Upload32 (trans, width, height, mipmap);
 	}
 }
 
@@ -1421,9 +1416,9 @@ nonscrap:
 			image->has_alpha = GL_Upload8 (pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_sky );
 		else {
 			if(gl_texres->value || r_bloom->value)
-				image->has_alpha = GL_Upload32_hires ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_bump );
+				image->has_alpha = GL_Upload32_hires ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) );
 			else
-				image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) ,image->type == it_bump );
+				image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky) );
 		}
 		image->upload_width = upload_width;		// after power of 2 and scales
 		image->upload_height = upload_height;
@@ -1507,18 +1502,6 @@ image_t	*GL_FindImage (char *name, imagetype_t type)
 	image = NULL;
 	pic = NULL;
 	palette = NULL;
-
-	//are we a normal map?  
-	if(type == it_bump) {
-		LoadTGA (va("%s.nm.tga", shortname), &pic, &width, &height);
-		if (pic) 
-		{
-			image = GL_LoadPic (name, pic, width, height, type, 32);
-			goto done;
-		}
-		else
-			return NULL;
-	}
 
 	// try to load .tga first
 	LoadTGA (va("%s.tga", shortname), &pic, &width, &height);
