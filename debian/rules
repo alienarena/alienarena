@@ -1,58 +1,38 @@
-#!/usr/bin/make -f
+#! /usr/bin/make -f
+# -*- makefile -*-
+# This rules script is used to control which package rules script is run.
+# To build a package, run BUILD_PACKAGE=<packagename> fakeroot dpkg-buildpackage.
+# <packagename> can be either alienarena2007, alienarena2007-server, or
+# alienarena2007-data. This script also determine if tarballs will be
+# created. To build a source tarball specific to a package, run
+# BUILD_PACKAGE=<packagename> BUILD_TARBALL=yes fakeroot dpkg-buildpackage.
 
-include /usr/share/dpatch/dpatch.make
+ifeq ($(BUILD_PACKAGE), alienarena2007-server)
+	BUILD_PACKAGE = alienarena2007
+endif
 
-build: build-stamp
-build-stamp: patch
-	dh_testdir
-	$(MAKE)
-	touch $@
+tarball:
+   ifeq ($(BUILD_TARBALL), yes)
+	$(MAKE) -f debian/$(BUILD_PACKAGE).rules $@
+   endif
 
-clean: clean-patched unpatch
-clean-patched:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp configure-stamp
-	-$(MAKE) uninstall
-	-$(MAKE) distclean
+build: tarball
+	$(MAKE) -f debian/$(BUILD_PACKAGE).rules $@
+
+clean:
+	$(MAKE) -f debian/alienarena2007.rules $@
+	$(MAKE) -f debian/alienarena2007-data.rules $@
 	dh_clean
 
 install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	install -d debian/tmp
-	install -m 754 release/crx.sdl debian/tmp/crx.sdl
-	install -m 754 release/crded debian/tmp/crded
-	install -m 644 release/game.so debian/tmp/game.so
-	install -m 444 alienarena.xpm debian/tmp/alienarena2007.xpm
-	dh_install -X.svn/
-	rm debian/alienarena2007-data/usr/share/games/alienarena2007/arena/gamex86.dll
-	rm debian/alienarena2007-data/usr/share/games/alienarena2007/data1/gamex86.dll
 
 # Build architecture-independent files here.
 binary-indep: build install
-# We have nothing to do by default.
+	$(MAKE) -f debian/$(BUILD_PACKAGE).rules $@
 
 # Build architecture-dependent files here.
 binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs -palienarena2007 docs/changelog.txt
-	dh_installchangelogs -palienarena2007-server docs/changelog.txt
-	dh_installchangelogs -palienarena2007-data docs/changelog.txt
-	dh_installdocs
-	dh_installmenu
-	dh_installman -palienarena2007 debian/alienarena2007.6
-	dh_installman -palienarena2007-server debian/alienarena2007-server.6
-	dh_desktop
-	dh_installdeb
-	dh_shlibdeps
-	dh_compress -Xcreative-commons-by-nc-nd-3.0
-	dh_fixperms
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
+	$(MAKE) -f debian/$(BUILD_PACKAGE).rules $@
 
 binary: binary-indep binary-arch
 .PHONY: build clean binary-indep binary-arch binary install

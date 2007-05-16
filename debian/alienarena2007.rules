@@ -1,0 +1,68 @@
+#!/usr/bin/make -f
+
+include /usr/share/dpatch/dpatch.make
+
+SOURCE_VERSION=$(shell dpkg-parsechangelog | grep Version | cut -d' ' -f2 | cut -d- -f1)
+
+tarball:
+	tar -X debian/alienarena2007.exclusions -cvzf \
+	../alienarena2007.$(SOURCE_VERSION).orig.tar.gz docs/ source/ \
+	Tools/ alienarena.xpm Makefile
+
+build: build-stamp
+build-stamp: patch
+	dh_testdir
+	$(MAKE)
+	touch $@
+
+clean: clean-patched unpatch
+clean-patched:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	-$(MAKE) uninstall
+	-$(MAKE) distclean
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	install -d debian/tmp
+	install -m 644 alienarena.xpm debian/tmp/alienarena2007.xpm
+	dh_install -palienarena2007 -X.svn/ -X.exe -X.dll -X.ico -X.bat
+	dh_install -palienarena2007-server -X.svn/ -X.exe -X.dll -X.ico -X.bat
+
+# Build architecture-independent files here.
+binary-indep:
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs -palienarena2007 docs/changelog.txt
+	dh_installchangelogs -palienarena2007-server docs/changelog.txt
+	dh_installdocs -palienarena2007
+	dh_installdocs -palienarena2007-server
+	dh_installmenu -palienarena2007
+	dh_installman -palienarena2007 debian/alienarena2007.6
+	dh_installman -palienarena2007-server debian/alienarena2007-server.6
+	dh_desktop -palienarena2007
+	dh_installdeb -palienarena2007
+	dh_installdeb -palienarena2007-server
+	dh_shlibdeps -palienarena2007
+	dh_shlibdeps -palienarena2007-server
+	dh_compress -palienarena2007
+	dh_compress -palienarena2007-server
+	dh_fixperms -palienarena2007
+	dh_fixperms -palienarena2007-server
+	dh_gencontrol -palienarena2007
+	dh_gencontrol -palienarena2007-server
+	dh_md5sums -palienarena2007
+	dh_md5sums -palienarena2007-server
+	dh_builddeb -palienarena2007
+	dh_builddeb -palienarena2007-server
+
+binary: binary-arch
+.PHONY: build clean binary-indep binary-arch binary install
