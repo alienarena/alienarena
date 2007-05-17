@@ -1,7 +1,4 @@
 TODO's for Debian packaging
 
-* Update alienarena2007.6 man page PARAMETERS section if any parameters exist.
-* Update alienarena2007-server.6 man page PARAMETERS section for all parameters that may exist for each option.
-* See if notes in alienarena2007-server.README.Debian can be written better.
 * Add more translations for alienarena2007.desktop.
-* Certain character's do not appear in alienarena2007.README.Debian. Replace them with comparable UTF-8 characters.
+* Client and server binaries should use $HOME/.alienarena2007 for writing instead of $HOME/.codered. Create a patch for this.
