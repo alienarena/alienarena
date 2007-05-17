@@ -44,11 +44,11 @@ case "$1" in
 esac
 
 if [ ${BASE} = 1 ]; then
-	exec `BUILD_PACKAGE=alienarena2007 dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat -I*/debian/* -Idebian "$@"`
+	exec `BUILD_PACKAGE=alienarena2007 dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat "$@"`
 elif [ ${DATA} = 1 ]; then
-	exec `BUILD_PACKAGE=alienarena2007-data dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat -I*/debian/* -Idebian "$@"`
+	exec `BUILD_PACKAGE=alienarena2007-data dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat "$@"`
 elif [ ${ALL} = 1 ]; then
-	exec `BUILD_PACKAGE=all dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat -I*/debian/* -Idebian "$@"`
+	exec `BUILD_PACKAGE=all dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat "$@"`
 elif [ ${CLEAN} = 1 ]; then
 	exec fakeroot debian/rules clean
 else

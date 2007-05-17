@@ -1,0 +1,6 @@
+#! /bin/sh -e
+mkdir -p $HOME/.alienarena2007
+if [ `dpkg -s alienarena2007 |grep Status |cut -d' ' -f4` != "installed" ]; then
+	ln -s /usr/lib/games/alienarena2007/server.so /usr/share/games/alienarena2007/arena/game.so
+	ln -s /usr/lib/games/alienarena2007/server.so /usr/share/games/alienarena2007/data1/game.so
+fi
