@@ -49,12 +49,12 @@ Show summary of options.
 Disable console output. Only used when calling the 'crded' binary itself.
 .TP
 .B \-s <configfile>, \-\-service <configfile>
-Calls 'luanch-server', which is a shell script designed to emulate running crded as
+Calls 'launch-server', which is a shell script designed to emulate running crded as
 a persisant service under linux using a server configuration file <configfile>.
 .br
 .br
 /usr/share/games/alienarena2007/arena/server.cfg is a suitable <configfile> that is
-already installed with the alienarena2007-data package. <configfile> can be placed inside the .alienarena2007 directory which is a directory inside your home directory <$HOME/.alienarena2007>. This way <configfile> can be specified by its basename. <configfile> can also be specified by its full path.
+already installed with the alienarena2007-data package. <configfile> can be placed inside the .alienarena2007 directory which is a directory inside your home directory <$HOME/.alienarena2007>. This way <configfile> can be specified by its basename alone. <configfile> can also be placed under any directory and be specified by its full path.
 .TP
 .B \-k, \-\-kill
 Calls 'kill-runaway-crded', which is a shell script to kill all dedicated server processes. Useful when a server session was started with \-s or \-\-service option.
@@ -64,7 +64,7 @@ Calls 'svstat' which is a ruby script that will query local servers and produce
 some nice output for server admins.
 .TP
 .B \-r <server:port> password <commandstring>, \-\-rcon <server:port> password <commandstring>
-Calls 'rcon' which is a ruby script that sends rcon commands to servers.
+Calls 'rcon' which is a ruby script that sends rcon commands to servers. <server:port> is the IP address and port number of the server. "password" is the password on the server. <commandstring> is any rcon commands to pass to the server.
 .SH PARAMETERS
 [PARAMETERS] could be any parameter that can be passed to the script that will be
 called or the binary 'crded'. For example, when using the \-s or \-\-service option,
@@ -76,7 +76,9 @@ option.
 /usr/share/games/alienarena2007/arena/server.cfg.
 .TP
 .B \-r, \-\-rcon [PARAMETERS]
-<server:port> password <commandstring>
+<server:port> password <commandstring> \- <server:port> is the IP address and port number of the server. "password" is the password on the server. <commandstring> is any rcon commands to pass to the server.
+.TP
+When calling the 'crded' binary itself, any series of console codes can be passed to it. Alien Arena 2007 uses Quake 2 based console codes. A listing of these codes can be found <http://console.planetquake.gamespy.com/commands/quake_2.html>. Most of the codes described at this webpage will work for Alien Arena 2007.
 .SH AUTHOR
 See the copyright </usr/share/doc/alienarena2007-server/copyright> for contributers
 to Alien Arena 2007.

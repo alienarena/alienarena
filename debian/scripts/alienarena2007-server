@@ -8,10 +8,12 @@ Usage: alienarena2007-server [OPTION] [PARAMETERS]...\n\
  -h, --help\t\tDisplay this help\n\
  -q, --quiet\t\tDisable console output\n\
  -s, --service\t\tLaunch server as a service\n\
- -k, --kill\t\tKill a runaway server session\n\
+ -k, --kill\t\tKill runaway server sessions\n\
  -Q, --query\t\tQuery local servers\n\
  -r, --rcon\t\tSends rcon commands to servers\n\
- [PARAMETERS]\tPass internal parameters for specified script\n"
+ [PARAMETERS]\tPass internal parameters for specified script\n\
+\n\
+More information on using this script can be found in the alienarena2007-server(6) man page.\n"
 
 QUIET=0
 LAUNCH_SERVER_AS_SERVICE=0

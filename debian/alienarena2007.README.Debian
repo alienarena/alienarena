@@ -46,7 +46,7 @@ There are new powerups such as haste and sproing, in addition to the venerable q
 
 The player will also have a flashlight, which is always present, and very useful.  The <F> key activates and de-activates the flashlight, or you can bind whatever key you wish to "flashlight" which will turn it on and off.
 
-It would be advisable for you to change video settings for however you wish to view the game, and what gives you reasonable performance. In Linux, you may have to type "vid_restart" at the console in order for them to take effect, depending on your system and version of X you are running. The game's default settings are at a mid range setting, so try tweaking them or adding/removing effects depending on your framerate. If you wish to see your framerate, you can type "set cl_drawfps 1" at the console(brought down using the ` key).
+It would be advisable for you to change video settings for however you wish to view the game, and what gives you reasonable performance. In Linux, you may have to type "vid_restart" at the console in order for them to take effect, depending on your system and version of X you are running. The game's default settings are at a mid range setting, so try tweaking them or adding/removing effects depending on your framerate. If you wish to see your framerate, you can type "set cl_drawfps 1" at the console(brought down using the ` key). A complete listing of codes that can be used in the console can be found at <http://console.planetquake.gamespy.com/commands/quake_2.html>. Most of the codes described at this webpage will work for Alien Arena 2007.
 
 ALIEN ARENA also allows for colored names just as Quake 3, using the ^ character followed by a number to set the color.
 
@@ -68,7 +68,7 @@ You can either select "join server" from the "multiplayer" menu and select a ser
 
 Bots are a built in feature of ALIEN ARENA 2007. Several bots are already configured for multiplayer games, and in Alien Arena, each level has a specific bot file for what bots are to be played in each level.
 
-To add a bot, type "�sv addbot name model/ski"�, and to remove a bot type"�sv removebot nae"�. You can also add bots in the menu, in the deathmatch/bots flags area.
+To add a bot, type <"sv addbot name model/ski">, and to remove a bot type <"sv removebot nae">. You can also add bots in the menu, in the deathmatch/bots flags area.
 
 In your Deathmatch options, you can configure other options such as chatting, node saving, and aiming.
 
@@ -76,4 +76,4 @@ These bots are fully configurable using the Botconfigurator program. You can cha
 
 Skill level 0 bots are quite easy to beat. Skill level 1 bots are a little tougher, and do more dodging and are more accurate. Skill level 2 bots do more advanced dodging, rocket jumping, and are even more accurate. Level 3 bots are extremely skilled, and will strafe, and strafe jump around the level. They will also taunt you after killing you. If in Alien Arena, you play the single player tournament against the bots, selecting "easy" will make all bots skill level 0. Selecting "normal" will leave them at whatever level they are configured. Selecting "hard" will make them all move up 1 skill level.
 
- -- Andres Mejia <mcitadel@gmail.com>  Sun, 13 May 2007 14:48:46 -0400
+ -- Andres Mejia <mcitadel@gmail.com>  Thu, 17 May 2007 13:47:38 -0400

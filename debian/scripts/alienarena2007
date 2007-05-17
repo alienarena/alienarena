@@ -7,7 +7,9 @@ Usage: alienarena2007 [OPTION] [PARAMETERS]...\n\
 \n\
  -h, --help\t\tDisplay this help\n\
  -q, --quiet\t\tDisable console output\n\
- [PARAMETERS]\tPass internal parameters to the client\n"
+ [PARAMETERS]\tPass internal parameters to the client\n\
+\n\
+More information on using this script can be found in the alienarena2007(6) man page.\n"
 
 QUIET=0
 
