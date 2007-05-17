@@ -24,6 +24,7 @@ install: build
 	dh_testroot
 	install -d debian/tmp
 	install -m 644 alienarena.xpm debian/tmp/alienarena2007.xpm
+	install -m 644 release/game.so debian/tmp/server.so
 	dh_install -palienarena2007 -X.svn/ -X.exe -X.dll -X.ico -X.bat
 	dh_install -palienarena2007-server -X.svn/ -X.exe -X.dll -X.ico -X.bat
 

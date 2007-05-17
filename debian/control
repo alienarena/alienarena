@@ -2,7 +2,7 @@ Source: alienarena2007
 Section: contrib/games
 Priority: extra
 Maintainer: Andres Mejia <mcitadel@gmail.com>
-Build-Depends: debhelper (>= 5), dpatch, libc6-dev (>= 2.3.6.ds1-13 ), libgl1-mesa-dev (>= 6.5.1-0.6 ), libglu1-mesa-dev (>= 6.5.1-0.6 ), libjpeg62-dev (>= 6b-13 ), libsdl1.2-dev (>= 1.2.11-7 ), libx11-dev (>= 2 ), libxext-dev (>= 1:1.0.1-2 ), libxxf86dga-dev (>= 2 ), libxxf86vm-dev (>= 1 ), linux-libc-dev (>= 2.6.20-3 ), mesa-common-dev (>= 6.5.1-0.6 ), x11proto-core-dev (>= 7.0.7-2 ), x11proto-xf86dga-dev (>= 2.0.2-4 ), x11proto-xf86vidmode-dev (>= 2.2.2-4 )
+Build-Depends: debhelper (>= 5), dpatch, libc6-dev (>= 2.3.6 ), libgl1-mesa-dev (>= 6.5.1-0.6 ), libglu1-mesa-dev (>= 6.5.1-0.6 ), libjpeg62-dev (>= 6b-13 ), libsdl1.2-dev (>= 1.2.11-7 ), libx11-dev (>= 2 ), libxext-dev (>= 1:1.0.1-2 ), libxxf86dga-dev (>= 2 ), libxxf86vm-dev (>= 1 ), linux-libc-dev (>= 2.6.20-3 ), mesa-common-dev (>= 6.5.1-0.6 ), x11proto-core-dev (>= 7.0.7-2 ), x11proto-xf86dga-dev (>= 2.0.2-4 ), x11proto-xf86vidmode-dev (>= 2.2.2-4 )
 Standards-Version: 3.7.2
 
 Package: alienarena2007
@@ -21,7 +21,7 @@ Description: standalone 3D first person online deathmatch shooter
 
 Package: alienarena2007-server
 Architecture: any
-Depends: ${shlibs:Depends}, alienarena2007, alienarena2007-data, ruby
+Depends: ${shlibs:Depends}, alienarena2007-data, ruby
 Description: standalone 3D first person online deathmatch shooter
  ALIEN ARENA 2007 is a standalone 3D first person online deathmatch shooter crafted from the original source code of  Quake II and Quake III, released by id Software under the GPL license. With features including 32 bit graphics, new particle engine and effects, light blooms, reflective water, hi resolution textures and skins, hi poly models, stain maps, ALIEN ARENA pushes the envelope of graphical beauty rivaling today's top games.
  .
