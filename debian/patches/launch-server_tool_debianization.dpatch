@@ -26,8 +26,8 @@ case "$1" in
 esac
 exit 0
 
---- Tools/LinuxScripts/launch-server~	2007-05-14 23:15:35.000000000 -0400
-+++ Tools/LinuxScripts/launch-server	2007-05-14 23:15:35.000000000 -0400
+--- Tools/LinuxScripts/launch-server~	2007-05-17 00:38:52.000000000 -0400
++++ Tools/LinuxScripts/launch-server	2007-05-17 01:40:07.000000000 -0400
 @@ -1,14 +1,20 @@
  #! /bin/sh
  #
@@ -51,7 +51,7 @@ exit 0
  #
  # Set the port number in the .cfg if running multiple servers.
  # Script checks the existance of the cfg file before launching.
-@@ -17,31 +23,37 @@
+@@ -17,31 +23,42 @@
  #ulimit -c unlimited
  
  ### Set your default AA Root Directory
@@ -75,17 +75,22 @@ exit 0
 -else
 -echo "Unable to find server config $aadir/arena/$1."
 -exit 0
-+	if test -r $1
++	if test -r $HOME/.alienarena2007/$1
++	then
++	echo "Found server config $HOME/.alienarena2007/$1..."
++	elif test -r $1
 +	then
 +	echo "Found server config $1..."
 +	else
-+	echo "Unable to find server config at $1"
++	echo "Unable to find server config $1."
 +	exit 0
  fi
  else
 -echo "Usage: launch-server <configfile>"
 +echo "Usage: alienarena2007-server -s <configfile>\n\
-+<configfile> must be specified.\n\n"
++<configfile> must be specified.\n\
++<configfile> can be placed inside $HOME/.alienarena2007 and\n\
++specified by its basename, or it can be specified by its full path.\n\n"
  exit 0
  fi
  
@@ -100,7 +105,7 @@ exit 0
  
  cd $aadir
  
-@@ -59,10 +71,10 @@
+@@ -59,10 +76,10 @@
  echo "Stale $aapid file, erasing..."
  echo "Attempting to Restart Alien Arena"
  rm -f $aapid
