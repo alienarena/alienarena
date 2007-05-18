@@ -6,7 +6,7 @@ To run the Alien Arena 2007 server, run <alienarena2007-server>.
 <alienarena2007-server> is a script that is used to call other scripts useful in running a Alien Arena 2007 dedicated server. The four main scripts it can call are 'launch-server', 'kill-runaway-crded', 'svstat', and 'rcon'. It can also be used to call the 'crded' (dedicated server) binary itself.
 
 'launch-server' is a script designed to emulate running crded as a persisant service under linux. To use 'launch-server', use the option -s <configfile>  or --service <configfile>.
-/usr/share/games/alienarena2007/arena/server.cfg is a suitable <configfile> that is already installed with the alienarena2007-data package. <configfile> can also be placed under a directory called .alienarena2007 in your home directory and specified by its basename. <configfile> can also be any file under any directory and can be specified by its full path.
+/usr/share/games/alienarena2007/arena/server.cfg is a suitable <configfile> that is already installed with the alienarena2007-data package. <configfile> can be specified as a path inside the .alienarena2007 directory which is a directory inside your home directory <$HOME/.alienarena2007>. <configfile> can also be specified by its full path in this system.
 
 'kill-runaway-crded' is a script that kills all running sessions of crded (the dedicated server binary) and rm any pid files that may have been created. To use 'kill-runaway-crded', use the option -k or --kill. This option is useful when a server session was started as a service.
 
