@@ -4,3 +4,4 @@ debian/alienarena2007.desktop usr/share/applications
 debian/tmp/alienarena2007.xpm usr/share/pixmaps
 release/game.so usr/lib/games/alienarena2007
 release/game.so usr/lib/games/alienarena2007
+debian/overrides/alienarena2007 usr/share/lintian/overrides

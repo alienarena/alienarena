@@ -2,7 +2,7 @@ Source: alienarena2007
 Section: contrib/games
 Priority: extra
 Maintainer: Andres Mejia <mcitadel@gmail.com>
-Build-Depends: debhelper (>= 5), dpatch, libc6-dev, libgl1-mesa-dev, libglu1-mesa-dev, libjpeg62-dev, libsdl1.2-dev, libx11-dev, libxext-dev, libxxf86dga-dev, libxxf86vm-dev, linux-libc-dev, mesa-common-dev, x11proto-core-dev, x11proto-xf86dga-dev, x11proto-xf86vidmode-dev
+Build-Depends: debhelper (>= 5), dpatch, libc6-dev (>= 2.3.6.ds1-13), libgl1-mesa-dev, libglu1-mesa-dev, libjpeg62-dev, libsdl1.2-dev, libx11-dev, libxext-dev, libxxf86dga-dev, libxxf86vm-dev, linux-libc-dev, mesa-common-dev, x11proto-core-dev, x11proto-xf86dga-dev, x11proto-xf86vidmode-dev
 Standards-Version: 3.7.2
 
 Package: alienarena2007
