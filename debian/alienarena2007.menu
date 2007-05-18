@@ -1,2 +1,2 @@
-?package(alienarena2007):needs="X11" section="Apps/Arcade"\
+?package(alienarena2007):needs="X11" section="Games/Arcade"\
   title="alienarena2007" command="/usr/games/alienarena2007 --quiet"

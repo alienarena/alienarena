@@ -1,0 +1,2 @@
+alienarena2007: unstripped-binary-or-object ./usr/lib/games/alienarena2007/game.so
+alienarena2007: unstripped-binary-or-object ./usr/lib/games/alienarena2007/crx.sdl

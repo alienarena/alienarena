@@ -6,3 +6,4 @@ Tools/LinuxScripts/kill-runaway-crded usr/lib/games/alienarena2007
 Tools/LinuxScripts/rcon usr/lib/games/alienarena2007
 Tools/LinuxScripts/svstat usr/lib/games/alienarena2007
 debian/scripts/alienarena2007-server usr/games
+debian/overrides/alienarena2007-server usr/share/lintian/overrides
