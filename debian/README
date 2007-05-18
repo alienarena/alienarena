@@ -28,3 +28,15 @@ Instructions for building Debian packages.
 
 	To build all packages, run;
 		BUILD_PACKAGE=all dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat
+
+Using 'pbuilder'
+
+	First, of course, you must setup your system to use pbuilder. You will also need the tarball and .dsc file (summary of the contents of the tarball) for the package. To create these files, from the source tree directory, run;
+
+		BUILD_PACKAGE=all dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat -S
+
+	Once you have the .dsc file and the tarball, go into the directory the tarball and .dsc file is located under (back one directory) and run;
+
+		BUILD_PACKAGE=<PACKAGE> sudo pbuilder build alienarena2007_6.05-1.dsc --debuildopts -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat
+
+	<PACKAGE> can be 'all', 'alienarena2007', 'alienarena2007-server', or 'alienarena2007-data'. alienarena2007_6.05-1.dsc is the .dsc file needed by pbuilder. --debuildopts is used to pass all compatible dpkg-buildpackage options for use with pbuilder.
