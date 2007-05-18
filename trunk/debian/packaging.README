@@ -37,6 +37,6 @@ Using 'pbuilder'
 
 	Once you have the .dsc file and the tarball, go into the directory the tarball and .dsc file is located under (back one directory) and run;
 
-		BUILD_PACKAGE=<PACKAGE> sudo pbuilder build alienarena2007_6.05-1.dsc --debuildopts -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat
+		BUILD_PACKAGE=<PACKAGE> sudo pbuilder build <sourcename_version_package-version.dsc> --debuildopts -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat
 
-	<PACKAGE> can be 'all', 'alienarena2007', 'alienarena2007-server', or 'alienarena2007-data'. alienarena2007_6.05-1.dsc is the .dsc file needed by pbuilder. --debuildopts is used to pass all compatible dpkg-buildpackage options for use with pbuilder.
+	<PACKAGE> can be 'all', 'alienarena2007', 'alienarena2007-server', or 'alienarena2007-data'. <sourcename_version_package-version.dsc> is the .dsc file needed by pbuilder. --debuildopts is used to pass all compatible dpkg-buildpackage options for use with pbuilder.
