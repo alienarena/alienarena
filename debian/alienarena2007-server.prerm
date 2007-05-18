@@ -1,6 +1,0 @@
-#! /bin/sh -e
-rm -rf $HOME/.alienarena2007
-if [ `dpkg -s alienarena2007 |grep Status |cut -d' ' -f4` != "installed" ]; then
-	rm -f /usr/share/games/alienarena2007/arena/game.so
-	rm -f /usr/share/games/alienarena2007/data1/game.so
-fi
