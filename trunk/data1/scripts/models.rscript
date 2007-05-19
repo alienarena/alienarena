@@ -275,21 +275,19 @@ models/weapons/v_blast/skin
 models/weapons/v_hyperb/skin
 {
 	{
-		map gfx/disruptorbase.tga
+		map models/weapons/v_hyperb/skin.tga
 	}
-	{
-		map gfx/r_lightning.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static .5 static .5 
-		scroll static 1 static 0	
-		alphashift 10 0.3 .9
-		nolightmap
+	{	
+		map models/weapons/v_hyperb/skin_normal.tga
+		normalmap
 	}
 	{
 		map gfx/disruptormask.tga
-		alphamask
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
 	}
-	
+		
 }
 models/weapons/v_rail/skin
 {
