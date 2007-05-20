@@ -1,44 +1,100 @@
 #! /usr/bin/make -f
 # -*- makefile -*-
-# This rules script is used to control which package rules script is run.
-# To build a package, run BUILD_PACKAGE=<packagename> dpkg-buildpackage -rfakeroot.
-# <packagename> can be either alienarena2007, alienarena2007-server, or
-# alienarena2007-data.
 
-ifeq ($(BUILD_PACKAGE), alienarena2007-server)
-	BUILD_PACKAGE = alienarena2007
-endif
+include /usr/share/dpatch/dpatch.make
 
-build:
-   ifeq ($(BUILD_PACKAGE), all)
-	$(MAKE) -f debian/alienarena2007.rules $@
-	$(MAKE) -f debian/alienarena2007-data.rules $@
-   else
-	$(MAKE) -f debian/$(BUILD_PACKAGE).rules $@
-   endif
+build: build-stamp
+build-stamp: build-base build-data
+build-base: patch
+	dh_testdir
+	$(MAKE) build_debug
+	touch build-stamp
+build-data:
+	touch build-stamp
 
-clean:
-	$(MAKE) -f debian/alienarena2007.rules $@
-	$(MAKE) -f debian/alienarena2007-data.rules $@
+clean: clean-patched unpatch
+clean-patched:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp patch-stamp
+	-$(MAKE) uninstall
+	-$(MAKE) distclean
 	dh_clean
 
-install: build
-
-# Build architecture-independent files here.
-binary-indep: build install
-   ifeq ($(BUILD_PACKAGE), all)
-	$(MAKE) -f debian/alienarena2007-data.rules $@
-   else
-	$(MAKE) -f debian/$(BUILD_PACKAGE).rules $@
-   endif
+install: install-base install-data
+install-base: build-base
+	dh_testdir
+	dh_testroot
+	install -d debian/tmp
+	install -m 644 alienarena.xpm debian/tmp/alienarena2007.xpm
+	install -m 644 debug/game.so debian/tmp/server.so
+	dh_install -palienarena2007 -X.svn/ -X.exe -X.dll -X.ico -X.bat
+	dh_install -palienarena2007-server -X.svn/ -X.exe -X.dll -X.ico -X.bat
+install-data: build-data
+	dh_testdir
+	dh_testroot
+	dh_install -palienarena2007-data -X.svn/ -X.exe -X.dll -X.ico -X.bat
 
 # Build architecture-dependent files here.
-binary-arch: build install
-   ifeq ($(BUILD_PACKAGE), all)
-	$(MAKE) -f debian/alienarena2007.rules $@
-   else
-	$(MAKE) -f debian/$(BUILD_PACKAGE).rules $@
-   endif
+binary-arch: binary-base
+binary-base: build-base install-base
+	dh_testdir
+	dh_testroot
+	dh_installdeb -palienarena2007
+	dh_installdeb -palienarena2007-server
+	dh_strip -palienarena2007 --dbg-package=alienarena2007-dbg
+	dh_strip -palienarena2007-server --dbg-package=alienarena2007-server-dbg
+	dh_installchangelogs -palienarena2007 docs/changelog.txt
+	dh_installchangelogs -palienarena2007-server docs/changelog.txt
+	dh_installchangelogs -palienarena2007-dbg docs/changelog.txt
+	dh_installchangelogs -palienarena2007-server-dbg docs/changelog.txt
+	dh_installdocs -palienarena2007
+	dh_installdocs -palienarena2007-server
+	dh_installdocs -palienarena2007-dbg
+	dh_installdocs -palienarena2007-server-dbg
+	dh_installman -palienarena2007 debian/alienarena2007.6
+	dh_installman -palienarena2007-server debian/alienarena2007-server.6
+	dh_installmenu -palienarena2007
+	dh_desktop -palienarena2007
+	dh_shlibdeps -palienarena2007
+	dh_shlibdeps -palienarena2007-server
+	dh_shlibdeps -palienarena2007-dbg
+	dh_shlibdeps -palienarena2007-server-dbg
+	dh_compress -palienarena2007
+	dh_compress -palienarena2007-server
+	dh_compress -palienarena2007-dbg
+	dh_compress -palienarena2007-server-dbg
+	dh_fixperms -palienarena2007
+	dh_fixperms -palienarena2007-server
+	dh_fixperms -palienarena2007-dbg
+	dh_fixperms -palienarena2007-server-dbg
+	dh_gencontrol -palienarena2007
+	dh_gencontrol -palienarena2007-server
+	dh_gencontrol -palienarena2007-dbg
+	dh_gencontrol -palienarena2007-server-dbg
+	dh_md5sums -palienarena2007
+	dh_md5sums -palienarena2007-server
+	dh_md5sums -palienarena2007-dbg
+	dh_md5sums -palienarena2007-server-dbg
+	dh_builddeb -palienarena2007
+	dh_builddeb -palienarena2007-server
+	dh_builddeb -palienarena2007-dbg
+	dh_builddeb -palienarena2007-server-dbg
+
+# Build architecture-independent files here.
+binary-indep: binary-data
+binary-data: build-data install-data
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs -palienarena2007-data docs/changelog.txt
+	dh_installdocs -palienarena2007-data
+	dh_installdeb -palienarena2007-data
+	dh_shlibdeps -palienarena2007-data
+	dh_compress -palienarena2007-data -Xcreative-commons-by-nc-nd-3.0
+	dh_fixperms -palienarena2007-data
+	dh_gencontrol -palienarena2007-data
+	dh_md5sums -palienarena2007-data
+	dh_builddeb -palienarena2007-data
 
 binary: binary-arch binary-indep
 .PHONY: build clean binary-arch binary-indep binary install
