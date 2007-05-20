@@ -27,7 +27,6 @@ install-base: build-base
 	dh_testroot
 	install -d debian/tmp
 	install -m 644 alienarena.xpm debian/tmp/alienarena2007.xpm
-	install -m 644 debug/game.so debian/tmp/server.so
 	dh_install -palienarena2007 -X.svn/ -X.exe -X.dll -X.ico -X.bat
 	dh_install -palienarena2007-server -X.svn/ -X.exe -X.dll -X.ico -X.bat
 install-data: build-data
@@ -54,6 +53,7 @@ binary-base: build-base install-base
 	dh_installdocs -palienarena2007-server-dbg
 	dh_installman -palienarena2007 debian/alienarena2007.6
 	dh_installman -palienarena2007-server debian/alienarena2007-server.6
+	dh_link -palienarena2007
 	dh_installmenu -palienarena2007
 	dh_desktop -palienarena2007
 	dh_shlibdeps -palienarena2007

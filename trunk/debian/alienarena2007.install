@@ -3,4 +3,3 @@ debian/scripts/alienarena2007 usr/games
 debian/alienarena2007.desktop usr/share/applications
 debian/tmp/alienarena2007.xpm usr/share/pixmaps
 debug/game.so usr/lib/games/alienarena2007
-debug/game.so usr/lib/games/alienarena2007
