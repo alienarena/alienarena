@@ -13,7 +13,7 @@ Usage: debian/build-package.sh [OPTION] [PARAMETERS]...\n\
  --data\t\tBuild the game data package, alienarena2007-data\n\
  --clean\tRun debian/rules clean for cleanup.\n\
  --all\t\tBuild all packages available for Alien Arena 2007.\n\
- [PARAMETERS]\tPass extra parameters to be used by dpkg-buildpackage.\n"
+ [PARAMETERS]\tPass extra parameters to be used by dpkg-source or dpkg-buildpackage.\n"
 
 BASE=0
 DATA=0
@@ -44,11 +44,17 @@ case "$1" in
 esac
 
 if [ ${BASE} = 1 ]; then
-	exec `BUILD_PACKAGE=alienarena2007 dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat "$@"`
+	dpkg-source -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat "$@"
+	fakeroot debian/rules clean
+	fakeroot debian/rules build-base
+	fakeroot debian/rules binary-base
 elif [ ${DATA} = 1 ]; then
-	exec `BUILD_PACKAGE=alienarena2007-data dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat "$@"`
+	dpkg-source -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat "$@"
+	fakeroot debian/rules clean
+	fakeroot debian/rules build-data
+	fakeroot debian/rules binary-data
 elif [ ${ALL} = 1 ]; then
-	exec `BUILD_PACKAGE=all dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat "$@"`
+	exec dpkg-buildpackage -rfakeroot -I*/.svn/* -I.svn -I*.ico -I*.dll -I*.exe -I*.bat "$@"
 elif [ ${CLEAN} = 1 ]; then
 	exec fakeroot debian/rules clean
 else

@@ -1,0 +1,7 @@
+TODO's for Debian packaging
+
+* Add more translations for alienarena2007.desktop.
+* Either create patches or change upstream source so that the server binary uses the server.so shared library instead of game.so.
+* Resolve all issues with copyright files, especially dealing with the License notices.
+* Look into issue with postrm scripts dealing with $HOME.
+* Resolve issue of whether the game data files will be seperated from game client and server when distributed through Debian.
