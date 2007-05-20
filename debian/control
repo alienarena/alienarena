@@ -21,7 +21,7 @@ Description: Standalone 3D first person online deathmatch shooter
 
 Package: alienarena2007-server
 Architecture: any
-Depends: ${shlibs:Depends}, alienarena2007-data, ruby
+Depends: ${shlibs:Depends}, alienarena2007, alienarena2007-data, ruby
 Description: Dedicated server for Alien Arena 2007
  ALIEN ARENA 2007 is a standalone 3D first person online deathmatch shooter crafted from the original source code of  Quake II and Quake III, released by id Software under the GPL license. With features including 32 bit graphics, new particle engine and effects, light blooms, reflective water, hi resolution textures and skins, hi poly models, stain maps, ALIEN ARENA pushes the envelope of graphical beauty rivaling today's top games.
  .
