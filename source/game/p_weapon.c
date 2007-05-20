@@ -280,7 +280,7 @@ void ChangeWeapon (edict_t *ent)
 		sprintf(weaponpath, "data1/%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
 		Q2_FindFile (weaponpath, &file);
 		if(!file) //server does not have this player model
-			sprintf(weaponmodel, "players/martianenforcer/w_hyperblaster.md2");//default player(martian)
+			sprintf(weaponmodel, "players/martianenforcer/weapon.md2");//default player(martian)
 		else { //have the model, but it has no w_weaps
 			sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //custom weapon
 			fclose(file);
