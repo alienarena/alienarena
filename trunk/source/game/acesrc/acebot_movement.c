@@ -549,7 +549,7 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 
 		c = random();
 
-		if(grapple->value && c <= .7) {	//use the grapple once in awhile to pull itself around
+		if(!self->in_deathball && grapple->value && c <= .7) {	//use the grapple once in awhile to pull itself around
 			
 			if(self->client->ctf_grapplestate == CTF_GRAPPLE_STATE_HANG) {
 				CTFPlayerResetGrapple(self);
