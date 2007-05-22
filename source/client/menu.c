@@ -107,8 +107,8 @@ static void M_CrosshairPic( char *name )
 {
 	int w, h;
 
-    w = h = 128;
-	Draw_StretchPic (viddef.width / 2 - w/2 - 120, viddef.height / 2 + 90, 128, 128, name);
+    Draw_GetPicSize (&w, &h, name );
+	Draw_StretchPic (viddef.width / 2 - w/2 - 110, viddef.height / 2 + 125, w, h, name);
 }
 static void M_Backround( char *name)
 {
