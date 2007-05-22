@@ -53,6 +53,7 @@ binary-base: build-base install-base
 	dh_installdocs -palienarena2007-server-dbg
 	dh_installman -palienarena2007 debian/alienarena2007.6
 	dh_installman -palienarena2007-server debian/alienarena2007-server.6
+	dh_installdirs -palienarena2007
 	dh_link -palienarena2007
 	dh_installmenu -palienarena2007
 	dh_desktop -palienarena2007
