@@ -273,6 +273,9 @@ void ChangeWeapon (edict_t *ent)
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_hyperblaster.md2");
 	if(ent->client->pers.weapon->view_model == "models/weapons/v_chain/tris.md2")
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
+	if(ent->client->pers.weapon->view_model == "vehicles/deathball/v_wep.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
+	
 	
 	sprintf(weaponpath, "data1/%s", weaponmodel);
 	Q2_FindFile (weaponpath, &file); //does it really exist?

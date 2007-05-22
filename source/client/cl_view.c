@@ -617,7 +617,7 @@ SCR_DrawCrosshair
 */
 void SCR_DrawCrosshair (void)
 {
-	if (!crosshair->value)
+	if (!strcmp(crosshair->string, "none"))
 		return;
 
 	if (crosshair->modified)

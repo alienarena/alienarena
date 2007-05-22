@@ -100,8 +100,15 @@ static void M_MapPic( char *name )
 {
 	int w, h;
 
-	Draw_GetPicSize (&w, &h, name );
+	w = h = 256;
 	Draw_StretchPic (viddef.width / 2 - w/2 - 4, viddef.height / 2 + 64, 128, 128, name);
+}
+static void M_CrosshairPic( char *name )
+{
+	int w, h;
+
+    w = h = 128;
+	Draw_StretchPic (viddef.width / 2 - w/2 - 120, viddef.height / 2 + 90, 128, 128, name);
 }
 static void M_Backround( char *name)
 {
@@ -1451,10 +1458,6 @@ static void RTlightsFunc( void *unused )
 {
 	Cvar_SetValue( "gl_rtlights", s_options_rtlights_box.curvalue);
 }
-static void CrosshairFunc( void *unused )
-{
-	Cvar_SetValue( "crosshair", s_options_crosshair_box.curvalue );
-}
 
 static void JoystickFunc( void *unused )
 {
@@ -1632,6 +1635,123 @@ char **SetFontNames (void)
 	return list;		
 }
 
+#define MAX_CROSSHAIRS 32
+char **crosshair_names;
+int	numcrosshairs;
+
+static void CrosshairFunc( void *unused )
+{
+	Cvar_Set( "crosshair", crosshair_names[s_options_crosshair_box.curvalue] );
+}
+
+void SetCrosshairCursor (void)
+{
+	int i;
+	s_options_crosshair_box.curvalue = 1;
+
+	if (!con_font)
+		con_font = Cvar_Get ("crosshair", "ch1", CVAR_ARCHIVE);
+
+	if (numcrosshairs>1)
+		for (i=0; crosshair_names[i]; i++)
+		{
+			if (!Q_strcasecmp(crosshair->string, crosshair_names[i]))
+			{
+				s_options_crosshair_box.curvalue = i;
+				return;
+			}
+		}
+}
+
+void insertCrosshair (char ** list, char *insert, int len )
+{
+	int i, j;
+
+	for (i=4;i<len; i++)
+	{
+		if (!list[i])
+			break;
+
+		if (strcmp( list[i], insert ))
+		{
+			for (j=len; j>i ;j--)
+				list[j] = list[j-1];
+
+			list[i] = strdup(insert);
+
+			return;
+		}
+	}
+
+	list[len] = strdup(insert);
+}
+
+char **SetCrosshairNames (void)
+{
+	char *curCrosshair;
+	char **list = 0, *p;
+	char findname[1024];
+	int ncrosshairs = 0, ncrosshairnames;
+	char **crosshairfiles;
+	char *path = NULL;
+	int i;
+	extern char **FS_ListFiles( char *, int *, unsigned, unsigned );
+
+	list = malloc( sizeof( char * ) * MAX_CROSSHAIRS );
+	memset( list, 0, sizeof( char * ) * MAX_CROSSHAIRS );
+
+	ncrosshairnames = 4;
+
+	list[0] = strdup("none"); //the old crosshairs
+	list[1] = strdup("ch1");
+	list[2] = strdup("ch2");
+	list[3] = strdup("ch3");
+
+	path = FS_NextPath( path );
+	while (path) 
+	{
+		Com_sprintf( findname, sizeof(findname), "%s/pics/crosshairs/*.tga", path );
+		crosshairfiles = FS_ListFiles( findname, &ncrosshairs, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+		for (i=0;i<ncrosshairs && ncrosshairnames<MAX_CROSSHAIRS;i++)
+		{
+			int num;
+
+			if (!crosshairfiles || !crosshairfiles[i])
+				continue;
+
+			p = strstr(crosshairfiles[i], "/pics/crosshairs/"); p++;
+			p = strstr(p, "/"); p++;
+
+			if (	!strstr(p, ".tga")
+				&&	!strstr(p, ".pcx")
+				)
+				continue;
+
+			num = strlen(p)-4;
+			p[num] = 0;
+
+			curCrosshair = p;
+
+			if (!fontInList(curCrosshair, ncrosshairnames, list))
+			{
+				insertCrosshair(list, strdup(curCrosshair),ncrosshairnames);
+				ncrosshairnames++;
+			}
+			
+			//set back so whole string get deleted.
+			p[num] = '.';
+		}
+		path = FS_NextPath( path );
+	}
+
+	if (crosshairfiles)
+		free( crosshairfiles );
+
+	numcrosshairs = ncrosshairnames;
+
+	return list;		
+}
 static void ControlsSetMenuItemValues( void )
 {
 
@@ -1642,6 +1762,7 @@ static void ControlsSetMenuItemValues( void )
 	s_options_sensitivity_slider.curvalue	= ( sensitivity->value ) * 2;
 
 	SetFontCursor();
+	SetCrosshairCursor();
 
 	Cvar_SetValue( "cl_run", ClampCvar( 0, 1, cl_run->value ) );
 	s_options_alwaysrun_box.curvalue		= cl_run->value;
@@ -1650,9 +1771,6 @@ static void ControlsSetMenuItemValues( void )
 
 	Cvar_SetValue( "freelook", ClampCvar( 0, 1, freelook->value ) );
 	s_options_freelook_box.curvalue			= freelook->value;
-
-	Cvar_SetValue( "crosshair", ClampCvar( 0, 3, crosshair->value ) );
-	s_options_crosshair_box.curvalue		= crosshair->value;
 
 	Cvar_SetValue( "in_joystick", ClampCvar( 0, 1, in_joystick->value ) );
 	s_options_joystick_box.curvalue		= in_joystick->value;
@@ -1803,15 +1921,6 @@ void Options_MenuInit( void )
 	{
 		"off",
 		"on",
-		0
-	};
-
-	static const char *crosshair_names[] =
-	{
-		"none",
-		"cross",
-		"dot",
-		"angle",
 		0
 	};
 
@@ -1985,12 +2094,14 @@ void Options_MenuInit( void )
 	s_options_font_box.itemnames = font_names;
 	s_options_font_box.generic.statusbar	= "select your font";
 
+	crosshair_names = SetCrosshairNames ();
 	s_options_crosshair_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_crosshair_box.generic.x	= 0;
 	s_options_crosshair_box.generic.y	= 220;
 	s_options_crosshair_box.generic.name	= "crosshair";
 	s_options_crosshair_box.generic.callback = CrosshairFunc;
 	s_options_crosshair_box.itemnames = crosshair_names;
+	s_options_crosshair_box.generic.statusbar	= "select your crosshair";
 
 	s_options_minimap_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_minimap_box.generic.x		= 0;
@@ -2047,8 +2158,14 @@ void Options_MenuInit( void )
 
 void Options_MenuDraw (void)
 {
+	char path[MAX_QPATH];
+
 	M_Backround( "conback"); //draw black backround first
 	M_Banner( "m_banner_main" );
+	if(strcmp(crosshair->string, "none")) {
+		sprintf(path, "/pics/%s", crosshair->string);
+		M_CrosshairPic(path);
+	}
 	Menu_AdjustCursor( &s_options_menu, 1 );
 	Menu_Draw( &s_options_menu );
 }
