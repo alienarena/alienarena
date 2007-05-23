@@ -39,8 +39,6 @@ binary-arch: binary-base
 binary-base: build-base install-base
 	dh_testdir
 	dh_testroot
-	dh_installdeb -palienarena2007
-	dh_installdeb -palienarena2007-server
 	dh_strip -palienarena2007 --dbg-package=alienarena2007-dbg
 	dh_strip -palienarena2007-server --dbg-package=alienarena2007-server-dbg
 	dh_installchangelogs -palienarena2007 docs/changelog.txt
@@ -57,6 +55,8 @@ binary-base: build-base install-base
 	dh_link -palienarena2007
 	dh_installmenu -palienarena2007
 	dh_desktop -palienarena2007
+	dh_installdeb -palienarena2007
+	dh_installdeb -palienarena2007-server
 	dh_shlibdeps -palienarena2007
 	dh_shlibdeps -palienarena2007-server
 	dh_shlibdeps -palienarena2007-dbg
