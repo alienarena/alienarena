@@ -1,0 +1,95 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH ALIENARENA2007-SERVER 6 "May 11, 2007"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+alienarena2007-server \- wrapper script to run an Alien Arena 2007 dedicated server.
+.SH SYNOPSIS
+.B alienarena2007-server [OPTIONS] [PARAMETERS]...
+.br
+Available options.
+.br
+[\-h|\-\-help] [\-q|\-\-quiet] [-s|\-\-service] [\-k|\-\-kill]
+[\-Q|\-\-query] [\-r|\-\-rcon]
+.br
+.SH DESCRIPTION
+This manual page documents briefly the
+.B alienarena2007-server
+command.
+.PP
+.\" TeX users may be more comfortable with the \fB<whatever>\fP and
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
+.\" respectively.
+\fBalienarena2007-server\fP is a wrapper script used for running and maintaining
+Alien Arena 2007 dedicated servers. It calls other scripts ('launch-server', 'kill-runaway-crded', 'svstat',
+and 'rcon') depending on which option is chosen.
+It also calls the 'crded' binary itself if \-q, \-\-quiet, or no option is used.
+.SH OPTIONS
+These programs follow the usual GNU command line syntax, with long
+options starting with two dashes (`-').
+A summary of options is included below.
+.TP
+.B \-h, \-\-help
+Show summary of options.
+.TP
+.B \-q, \-\-quiet
+Disable console output. Only used when calling the 'crded' binary itself.
+.TP
+.B \-s <configfile>, \-\-service <configfile>
+Calls 'launch-server', which is a shell script designed to emulate running crded as
+a persisant service under linux using a server configuration file <configfile>.
+.br
+.br
+/usr/share/games/alienarena2007/arena/server.cfg is a suitable <configfile> that is
+already installed with the alienarena2007-data package. <configfile> can be specified as a path inside the .alienarena2007 directory which is a directory inside your home directory <$HOME/.alienarena2007>. <configfile> can also be specified by its full path in this system.
+.TP
+.B \-k, \-\-kill
+Calls 'kill-runaway-crded', which is a shell script to kill all dedicated server processes. Useful when a server session was started with \-s or \-\-service option.
+.TP
+.B \-Q, \-\-query
+Calls 'svstat' which is a ruby script that will query local servers and produce
+some nice output for server admins.
+.TP
+.B \-r <server:port> password <commandstring>, \-\-rcon <server:port> password <commandstring>
+Calls 'rcon' which is a ruby script that sends rcon commands to servers. <server:port> is the IP address and port number of the server. "password" is the password on the server. <commandstring> is any rcon commands to pass to the server.
+.SH PARAMETERS
+[PARAMETERS] could be any parameter that can be passed to the script that will be
+called or the binary 'crded'. For example, when using the \-s or \-\-service option,
+<configfile> is a parameter. Below is a list of the available parameters for each
+option.
+.TP
+.B \-s, \-\-service [PARAMETERS]
+<configfile> \- Any acceptable server configuration file such as
+/usr/share/games/alienarena2007/arena/server.cfg.
+.TP
+.B \-r, \-\-rcon [PARAMETERS]
+<server:port> password <commandstring> \- <server:port> is the IP address and port number of the server. "password" is the password on the server. <commandstring> is any rcon commands to pass to the server.
+.TP
+When calling the 'crded' binary itself, any series of console codes can be passed to it. Alien Arena 2007 uses Quake 2 based console codes. A listing of these codes can be found <http://console.planetquake.gamespy.com/commands/quake_2.html>. Most of the codes described at this webpage will work for Alien Arena 2007.
+.SH AUTHOR
+See the copyright </usr/share/doc/alienarena2007-server/copyright> for contributers
+to Alien Arena 2007.
+.SH COPYRIGHT
+This manual page was written by Andres Mejia <mcitadel@gmail.com>,
+for the Debian project (but may be used by others).
+
+Copyright (c)  2007  Andres Mejia.
+  Permission is granted to copy, distribute and/or modify this document
+  under the terms of the GNU Free Documentation License, Version 1.2
+  or any later version published by the Free Software Foundation;
+  with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+  Texts. A copy of the license is included in the gfdl(7) man page and
+  online at <http://www.gnu.org/copyleft/fdl.html>.

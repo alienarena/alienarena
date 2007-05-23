@@ -1,0 +1,70 @@
+This package was debianized by Andres Mejia <mcitadel@gmail.com> on
+Thu, 17 May 2007 13:47:38 -0400.
+
+It was downloaded from SVN <svn co svn://svn.icculus.org/alienarena2007/trunk alienarena2007>.
+
+Upstream Authors:
+
+There is a long list of credits - ALIEN ARENA 2007 is greatly indebted to the following for it's creation and completion:
+
+Design:  John Diamond with input from the community at large
+Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter
+Models and skins:  John Diamond, Alex Perez
+Maps:  John Diamond
+Textures:  John Diamond
+Sounds:  John Diamond, Little Music Club, Sound Rangers
+Music:  PuzzleFighter, WhiteLipper, Wooden Productions, and SoundRangers
+Linux Port and installation: Shane Bayer
+Alien Arena IRC Channel:  Astralsin
+FreeBSD port: "Ale"
+Gentoo portage: Paul Bredbury
+Debian packaging: Andres Mejia
+
+There are other major contributions from the community from QuakeSrc.org, including MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.
+
+Copyright:
+
+ALIEN ARENA 2007 and it's original content are a copyright of COR Entertainment, LLC.
+
+The game data is released under the Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+
+Under no circumstances can ALIEN ARENA 2007 be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2007 may be included in free compilation CD's and similar packages without consent, provided the archives remain unmodified.
+
+The original content in ALIEN ARENA 2007 may be used with permission for any free of charge purposes.
+
+Contact:  http://red.planetarena.org
+
+email: irritant@planetquake.com
+
+License: Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported
+
+Copyright (C) 2007  John Diamond
+
+You are free:
+
+    * to Share — to copy, distribute and transmit the work
+
+Under the following conditions:
+
+    *
+      Attribution. You must attribute the work in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work).
+    *
+      Noncommercial. You may not use this work for commercial purposes.
+    *
+      No Derivative Works. You may not alter, transform, or build upon this work.
+    *
+
+    * For any reuse or distribution, you must make clear to others the license terms of this work. The best way to do this is with posting a link to <http://creativecommons.org/licenses/by-nc-nd/3.0/legalcode>.
+
+    * Any of the above conditions can be waived if you get permission from the copyright holder.
+
+    * Nothing in this license impairs or restricts the author's moral rights.
+
+The full legal code of this license can be found along with this package's documentation
+under </usr/share/doc/alienarena2007-data/creative-commons-by-nc-nd-3.0> and can
+also be found online at
+<http://creativecommons.org/licenses/by-nc-nd/3.0/legalcode>.
+
+
+The Debian packaging is (C) 2007, Andres Mejia <mcitadel@gmail.com> and
+is licensed under the GPL, see `/usr/share/common-licenses/GPL'.

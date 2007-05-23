@@ -1,0 +1,1 @@
+This directory here just holds the stuff needed to package alienarena2007 and alienarena2007-data for upload to Debian. Don't include this directory in any releases as it's not of much use in the release.
