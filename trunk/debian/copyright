@@ -1,14 +1,14 @@
 This package was debianized by Andres Mejia <mcitadel@gmail.com> on
 Thu, 17 May 2007 13:47:38 -0400.
 
-It was downloaded from SVN <svn co svn://svn.icculus.org/alienarena2007/trunk alienarena2007>.
+It was downloaded from SVN <svn co svn://svn.icculus.org/alienarena2007/trunk alienarena2007>. Game data files were separated into a different package (alienarena2007-data).
 
 Upstream Authors:
 
 There is a long list of credits - ALIEN ARENA 2007 is greatly indebted to the following for it's creation and completion:
 
-Design:  John Diamond with input from the community at large
-Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter
+Design:  John Diamond <irritant@planetquake.com> with input from the community at large
+Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson <tonyj@cooldark.com>, Kyle Hunter
 Models and skins:  John Diamond, Alex Perez
 Maps:  John Diamond
 Textures:  John Diamond
@@ -36,28 +36,47 @@ Contact:  http://red.planetarena.org
 
 email: irritant@planetquake.com
 
-License: GNU General Public License
+License:
 
-Source code is Copyright (C) 2007  John Diamond
+Source code is Copyright (C) 2007  John Diamond and Licensed under the GNU General Public License
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-A copy of this license can be found in this system under
-</usr/share/common-licenses/GPL> or online at
-<http://www.gnu.org/copyleft/gpl.html>.
+	A copy of this license can be found in this system under
+	</usr/share/common-licenses/GPL> or online at
+	<http://www.gnu.org/copyleft/gpl.html>.
 
+'rcon' and 'svstat' ruby scripts are Copyright (C) 2007 Tony Jackson and Licensed under the GNU Lesser General Public License
+
+	This library is free software; you can redistribute it and/or
+	modify it under the terms of the GNU Lesser General Public
+	License as published by the Free Software Foundation; either
+	version 2.1 of the License, or (at your option) any later version.
+
+	This library is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+	Lesser General Public License for more details.
+
+	You should have received a copy of the GNU Lesser General Public
+	License along with this library; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+	A copy of this license can be found in this system under
+	</usr/share/common-licenses/LGPL> or online at
+	<http://www.gnu.org/copyleft/lgpl.html>.
 
 The Debian packaging is (C) 2007, Andres Mejia <mcitadel@gmail.com> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
