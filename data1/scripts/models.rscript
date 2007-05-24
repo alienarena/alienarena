@@ -321,6 +321,19 @@ models/weapons/v_bfg/skin
 		nolightmap
 	}
 }
+vehicles/deathball/skin
+{
+	{
+		map vehicles/deathball/skin.tga
+	}
+	{
+		map gfx/grapplefx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+		
+}
 models/items/armor/combat/skin
 {
 	{
