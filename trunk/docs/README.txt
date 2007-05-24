@@ -32,15 +32,15 @@ Alien Arena offers CTF,  AOA(All Out Assault) mode, in which players can climb i
 
 (Windows)
 
-Installation has been made very simple.  After downloading, simply click on the alienarena2007.exe file and the installation will begin.  Follow the instructions of the Installshield setup program.  If you are running Windows 2000 or XP, you should have administrative privileges.  If not, you may get some errors when the program tries to write the uninstall information to the registry.  If so, simply click “ignore”, and the installation will continue without problem.  
+Installation has been made very simple.  After downloading, simply click on the alienarena2007.exe file and the installation will begin.  Follow the instructions of the Installshield setup program. If you are running Windows 2000 or XP, you should have administrative privileges.  If not, you may get some errors when the program tries to write the uninstall information to the registry.  If so, simply click “ignore”, and the installation will continue without problem.  
 
 Once finished, you can click on the Alien Arena icon that has been placed on your desktop to start a game or the Alien Arena Server icon to start a dedicated server.
 
 (Linux)
 
-Simply unzip alienarena2007-linux20070121-x86.zip in your usr/local/games folder or wherever you wish to place the game.  
+Simply unzip the archive in your usr/local/games folder or wherever you wish to place the game.  
 
-Type ./AlienArena to run the game, or ./AlienArenaDedicated to start a dedicated server or use the shortcuts installed in the menu.
+Type ./crx to run the game, or ./crded to start a dedicated server or use the shortcuts installed in the menu.
 
 Source files are included, so you may compile the binaries yourself if neccessary.  Please visit the forum if you have any questions regarding this.
 
@@ -52,26 +52,26 @@ The player will have the following weapons:
 
 1.	Blaster
 2.	Alien Disruptor
-3.	Chain Pistol
+3.	Chaingun
 4.	Flame Thrower
 5.	Rocket Launcher
 6.	Alien Smart Gun
 7.	Disruptor
 8.	Alien Vaporizer
 
-Weapons now also have alternate firing modes.  In you controls menu, select your secondary fire key and this will allow you to use these modes.  
+Weapons also have alternate firing modes.  In you controls menu, select your secondary fire key and this will allow you to use these modes.  
 
 There are new powerups such as haste and sproing, in addition to the venerable quad damage and invulerabilty.  
 
 The player will also have a flashlight, which is always present, and very useful.  The “F” key activates and de-activates the flashlight, or you can bind whatever key you wish to "flashlight" which will turn it on and off.
 
-It would be advisable for you to change video settings for however you wish to view the game, and what gives you reasonable performance.  In Linux, you may have to type "vid_restart" at the console in order for them to take effect, depending on your system and version of X you are running.  The game's default settings are at a mid range setting, so try tweaking them or adding/removing effects depending on your framerate.  If you wish to see your framerate, you can type "set cl_drawfps 1" at the console(brought down using the ` key).  
+It would be advisable for you to change video settings for however you wish to view the game, and what gives you reasonable performance. The game's default settings are at a mid range setting, so try tweaking them or adding/removing effects depending on your framerate.  If you wish to see your framerate, you can type "set cl_drawfps 1" at the console(brought down using the ` key).  
 
 ALIEN ARENA also allows for colored names just as Quake 3, using the ^ character followed by a number to set the color.
 
 COMPLETING LEVELS
 
-In Alien Arena you can play a single player tournament where  your goal will to be to reach the fraglimit before a bot does.  If you fail, you will be forced to repeat the level until you do.  These rules can be changed in the menu system.  You can also play people online, where your goal is to reach the fraglimit before your opponents, or by scoring the most frags before the time limit is up.
+In Alien Arena you can play a single player tournament where  your goal will to be to reach the fraglimit before a bot does.  If you fail, you will be forced to repeat the level until you do. These rules can be changed in the menu system.  You can also play people online, where your goal is to reach the fraglimit before your opponents, or by scoring the most frags before the time limit is up.
 
 In CTF mode, you'll be on a team, and trying to capture the enemy's flag and return it to your own flag's location.  The team reaching the capture limit first, wins.
 
@@ -87,43 +87,46 @@ You can either select "join server" from the "multiplayer" menu and select a ser
 
 Bots are a built in feature of ALIEN ARENA 2007.  Several bots are already configured for multiplayer games, and in Alien Arena, each level has a specific bot file for what bots are to be played in each level.
 
-To add a bot, type "“sv addbot name model/ski"”, and to remove a bot type"“sv removebot nae"”.  You can also add bots in the menu, in the deathmatch/bots flags area.
+To add a bot, type "sv addbot name model/skin", and to remove a bot type "sv removebot namee". You can also add bots in the menu, in the deathmatch/bots flags area.
 
 In your Deathmatch options, you can configure other options such as chatting, node saving, and aiming.
 
 These bots are fully configurable using the Botconfigurator program.  You can change their skill levels, accuracy, weapon favoring, awareness, and chat strings.
 
-Skill level 0 bots are quite easy to beat.  Skill level 1 bots are a little tougher, and do more dodging and are more accurate.  Skill level 2 bots do more advanced dodging, rocket jumping, and are even more accurate.  Level 3 bots are extremely skilled, and will strafe, and strafe jump around the level.  They will also taunt you after killing you.  If in Alien Arena, you play the single player tournament against the bots, selecting "easy" will make all bots skill level 0.  Selecting "normal" will leave them at whatever level they are configured.  Selecting "hard" will make them all move up 1 skill level.
+Skill level 0 bots are quite easy to beat.  Skill level 1 bots are a little tougher, and do more dodging and are more accurate.  Skill level 2 bots do more advanced dodging, rocket jumping, and are even more accurate.  Level 3 bots are extremely skilled, and will strafe, and strafe jump around the level.  They will also taunt you after killing you.  If in Alien Arena, you play the single player tournament against the bots, selecting "easy" will make all bots skill level 0.  
+Selecting "normal" will leave them at whatever level they are configured. Selecting "hard" will make them all move up 1 skill level.
 
 5.	CREDITS
 
 There is a long list of credits - ALIEN ARENA 2007 is greatly indebted to the following for it’s creation and completion:
 
-Design:  John Diamond with input from the community at large
-Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson
-Models and skins:  John Diamond, Alex Perez
+Design:  John Diamond with input from the community at large.
+Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter.
+Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
 Maps:  John Diamond
 Textures:  John Diamond
-Sounds:  John Diamond, Little Music Club, Sound Rangers
-Music:  PuzzleFighter, WhiteLipper, Wooden Productions, and SoundRangers
-Linux Port and installation: Shane Bayer
+Sounds:  John Diamond, Sound Rangers
+Music:  John Diamond, WhiteLipper, Wooden Productions, and SoundRangers
+Linux Port: Shane Bayer
+FreeBSD port: "Ale"
+Gentoo portage: Paul Bredbury
+Debian packagin: Andres Mejia
 Alien Arena IRC Channel:  Astralsin
 
-There are other major contributions from the community from QuakeSrc.org, including MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  
+There are other major contributions from the community from QuakeSrc.org, including MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  
 
 5.	COPYRIGHT INFORMATION
 
 ALIEN ARENA 2007 and it's original content are a copyright of COR Entertainment, LLC.  
 
-The source code is released under the GPL license and can be used or modified for any purpose, provided it too is released under the GPL license.  
+The source code of Alien Arena is Free Software. You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
-Under no circumstances can ALIEN ARENA 2007 be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2007 may be included in free compilation CD’s and similar packages without consent, provided the archives remain unmodified.
+It is only permissible to distrubute the game data(models, maps, textures, sound, etc) as a whole, and with the intention of being used with Alien Arena.  It is not permissible to distribute individual portions or items of the game data without express consent from COR Entertainment.
 
-The original content in ALIEN ARENA 2007 may be used with permission for any free of charge purposes.
+Under no circumstances ALIEN ARENA 2007 as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2007 may be included in free compilation CD’s and similar packages without consent, provided it adheres to the above restrictions.
 
 Contact:  http://red.planetarena.org
 
-email: irritant@planetquake.com
 
 
 
