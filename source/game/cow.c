@@ -86,17 +86,17 @@ void cow_step (edict_t *self)
 
 mframe_t cow_frames_walk [] =
 {
+	ai_run, 42.0, NULL,
 	ai_run, 22.0, NULL,
-	ai_run, 12.0, NULL,
-	ai_run, 0.0, NULL,
-	ai_run, 0.0, NULL,
+	ai_run, 5.0, NULL,
+	ai_run, 3.0, NULL,
 	ai_run, 0.0, NULL,
 	ai_run, 0.0, cow_step,
 	ai_run, 0.0, NULL,
-	ai_run, 7.0, NULL,
-	ai_run, 32.0, NULL,
-	ai_run, 4.0, NULL,
-	ai_run, 0.0, cow_step,
+	ai_run, 17.0, NULL,
+	ai_run, 42.0, NULL,
+	ai_run, 14.0, NULL,
+	ai_run, 5.0, cow_step,
 	ai_run, 0.0, NULL
 };
 mmove_t cow_move_walk = {FRAME_walk01, FRAME_walk12, cow_frames_walk, NULL};
@@ -185,6 +185,7 @@ void SP_npc_cow (edict_t *self)
 	self->monsterinfo.currentmove = &cow_move_stand;
 	self->monsterinfo.scale = MODEL_SCALE;
 	self->monsterinfo.aiflags = AI_NPC;
+	self->dmteam = NO_TEAM;
 
 	gi.linkentity (self);
 
