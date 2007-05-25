@@ -1758,7 +1758,17 @@ static void ControlsSetMenuItemValues( void )
 	s_options_sfxvolume_slider.curvalue		= Cvar_VariableValue( "s_volume" ) * 10;
 	s_options_bgvolume_slider.curvalue		= Cvar_VariableValue( "backround_music_vol" ) * 10;
 	s_options_bgmusic_box.curvalue			= Cvar_VariableValue("backround_music");
-	s_options_quality_list.curvalue			= !Cvar_VariableValue( "s_loadas8bit" );
+
+	//Read what was set for s_khz and set the curvalue accordingly
+	if (Cvar_VariableValue("s_khz") == 48)
+		s_options_quality_list.curvalue = 3; //high
+	else if (Cvar_VariableValue("s_khz") == 44)
+		s_options_quality_list.curvalue = 2; //medium
+	else if (Cvar_VariableValue("s_khz") == 22)
+		s_options_quality_list.curvalue = 1; //low
+	else if (Cvar_VariableValue("s_khz") == 11)
+		s_options_quality_list.curvalue = 0; //basic
+
 	s_options_sensitivity_slider.curvalue	= ( sensitivity->value ) * 2;
 
 	SetFontCursor();
@@ -1868,17 +1878,27 @@ static void ConsoleFunc( void *unused )
 
 static void UpdateSoundQualityFunc( void *unused )
 {
-	if ( s_options_quality_list.curvalue )
+	if ( s_options_quality_list.curvalue == 3 ) //high
+	{
+		Cvar_SetValue( "s_khz", 48 );
+		Cvar_SetValue( "s_loadas8bit", false );
+	}
+	else if ( s_options_quality_list.curvalue == 2 ) //medium
+	{
+		Cvar_SetValue( "s_khz", 44 );
+		Cvar_SetValue( "s_loadas8bit", false );
+	}
+	else if ( s_options_quality_list.curvalue == 1 ) //low
 	{
 		Cvar_SetValue( "s_khz", 22 );
 		Cvar_SetValue( "s_loadas8bit", false );
 	}
-	else
+	else if ( s_options_quality_list.curvalue == 0 ) //basic
 	{
 		Cvar_SetValue( "s_khz", 11 );
 		Cvar_SetValue( "s_loadas8bit", true );
 	}
-	
+
 	Cvar_SetValue( "s_primary", s_options_compatibility_list.curvalue );
 
 	M_DrawTextBox( 8, 120 - 48, 36, 3 );
@@ -1900,9 +1920,15 @@ void Options_MenuInit( void )
 		"enabled",
 		0
 	};
+
+	//here we will assume s_options_quality_list.curvalue 0 through 3
 	static const char *quality_items[] =
 	{
-		"low", "high", 0
+		"basic",
+		"low",
+		"medium",
+		"high",
+		0
 	};
 
 	static const char *compatibility_items[] =
@@ -2053,7 +2079,6 @@ void Options_MenuInit( void )
 	s_options_quality_list.generic.name		= "sound quality";
 	s_options_quality_list.generic.callback = UpdateSoundQualityFunc;
 	s_options_quality_list.itemnames		= quality_items;
-	s_options_quality_list.curvalue			= !Cvar_VariableValue( "s_loadas8bit" );
 
 	s_options_compatibility_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_compatibility_list.generic.x		= 0;
