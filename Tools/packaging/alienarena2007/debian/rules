@@ -6,7 +6,7 @@ include /usr/share/dpatch/dpatch.make
 build: build-stamp
 build-stamp: patch
 	dh_testdir
-	$(MAKE) build_debug
+	$(MAKE) build-debug
 	touch build-stamp
 
 clean: clean-patched unpatch
