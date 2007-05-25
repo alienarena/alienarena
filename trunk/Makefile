@@ -901,6 +901,11 @@ install:
 	cp $(BUILD_RELEASE_DIR)/cr* .
 	cp $(BUILD_RELEASE_DIR)/game.so data1/
 	cp $(BUILD_RELEASE_DIR)/game.so arena/
+	strip crded
+	strip crx
+	strip crx.sdl
+	strip arena/game.so
+	strip data1/game.so
 
 install-debug:
 	cp $(BUILD_DEBUG_DIR)/cr* .
