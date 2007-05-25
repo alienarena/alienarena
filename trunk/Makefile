@@ -141,7 +141,7 @@ ifeq ($(strip $(SDLSOUND)),1)
 	TARGETS+=$(BUILDDIR)/crx.sdl
 endif
 
-build_release:
+build-release:
 	@mkdir -p $(BUILD_RELEASE_DIR) \
 		$(BUILD_RELEASE_DIR)/client \
 		$(BUILD_RELEASE_DIR)/ded \
@@ -150,7 +150,7 @@ build_release:
 		$(BUILD_RELEASE_DIR)/arena
 	$(MAKE) targets BUILDDIR=$(BUILD_RELEASE_DIR) CFLAGS="$(RELEASE_CFLAGS)"
 
-build_debug:
+build-debug:
 	@mkdir -p $(BUILD_DEBUG_DIR) \
 		$(BUILD_DEBUG_DIR)/client \
 		$(BUILD_DEBUG_DIR)/ded \
@@ -159,7 +159,7 @@ build_debug:
 		$(BUILD_DEBUG_DIR)/arena
 	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) CFLAGS="$(DEBUG_CFLAGS)"
 
-all: build_release build_debug
+all: build-release build-debug
 
 targets: $(TARGETS)
 
