@@ -7,7 +7,7 @@ build: build-stamp
 build-stamp: build-base build-data
 build-base: patch
 	dh_testdir
-	$(MAKE) build_debug
+	$(MAKE) build-debug
 	touch build-stamp
 build-data:
 	touch build-stamp
