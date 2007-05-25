@@ -454,6 +454,11 @@ qboolean FindTarget (edict_t *self)
 		//
 		FoundTarget (self);
 
+		//tell player that he needs to move his cows to his team's goal!
+		if(self->enemy && !self->enemy->is_bot)
+			safe_centerprintf(self->enemy, "Lead this cow to your team's goal!");
+
+
 		if (!(self->monsterinfo.aiflags & AI_SOUND_TARGET) && (self->monsterinfo.sight))
 			self->monsterinfo.sight (self, self->enemy);	
 		return true;

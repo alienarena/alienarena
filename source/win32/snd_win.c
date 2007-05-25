@@ -357,9 +357,11 @@ sndinitstat SNDDMA_InitDirect (void)
 	dma.channels = 2;
 	dma.samplebits = 16;
 
-	if (s_khz->value == 44)
+	if (s_khz->integer == 48)
+		dma.speed == 48000;
+	else if (s_khz->integer == 44)
 		dma.speed = 44100;
-	if (s_khz->value == 22)
+	else if (s_khz->integer == 22)
 		dma.speed = 22050;
 	else
 		dma.speed = 11025;
@@ -455,9 +457,11 @@ qboolean SNDDMA_InitWav (void)
 	dma.channels = 2;
 	dma.samplebits = 16;
 
-	if (s_khz->value == 44)
+	if (s_khz->integer == 48)
+		dma.speed == 48000;
+	else if (s_khz->integer == 44)
 		dma.speed = 44100;
-	if (s_khz->value == 22)
+	else if (s_khz->integer == 22)
 		dma.speed = 22050;
 	else
 		dma.speed = 11025;

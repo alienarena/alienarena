@@ -1924,10 +1924,10 @@ void Options_MenuInit( void )
 	//here we will assume s_options_quality_list.curvalue 0 through 3
 	static const char *quality_items[] =
 	{
-		"basic",
-		"low",
-		"medium",
-		"high",
+		"11 khz",
+		"22 khz",
+		"44 khz",
+		"48 hkz",
 		0
 	};
 
@@ -2076,7 +2076,7 @@ void Options_MenuInit( void )
 	s_options_quality_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_quality_list.generic.x		= 0;
 	s_options_quality_list.generic.y		= 130;;
-	s_options_quality_list.generic.name		= "sound quality";
+	s_options_quality_list.generic.name		= "sampling rate";
 	s_options_quality_list.generic.callback = UpdateSoundQualityFunc;
 	s_options_quality_list.itemnames		= quality_items;
 
