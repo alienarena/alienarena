@@ -1370,6 +1370,7 @@ void R_RenderView (refdef_t *fd)
 	
 	R_DrawSpecialSurfaces();
 
+	qglLoadMatrixf (r_world_matrix); //moving trans brushes
 	R_DrawParticles ();
 
 	R_BloomBlend( fd );//BLOOMS
