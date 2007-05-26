@@ -1273,6 +1273,7 @@ void CL_RequestNextDownload (void)
 {
 	unsigned	map_checksum;		// for detecting cheater maps
 	char fn[MAX_OSPATH];
+	dmdl_t *pheader;
 
 	if (cls.state != ca_connected)
 		return;
@@ -1288,15 +1289,94 @@ void CL_RequestNextDownload (void)
 				return; // started a download
 	}
 	if (precache_check >= CS_MODELS && precache_check < CS_MODELS+MAX_MODELS) {
-		
+		if (allow_download_models->value) {
+			while (precache_check < CS_MODELS+MAX_MODELS &&
+				cl.configstrings[precache_check][0]) {
+				if (cl.configstrings[precache_check][0] == '*' ||
+					cl.configstrings[precache_check][0] == '#') {
+					precache_check++;
+					continue;
+				}
+				if (precache_model_skin == 0) {
+					if (!CL_CheckOrDownloadFile(cl.configstrings[precache_check])) {
+						precache_model_skin = 1;
+						return; // started a download
+					}
+					precache_model_skin = 1;
+				}
+
+				// checking for skins in the model
+				if (!precache_model) {
+
+					FS_LoadFile (cl.configstrings[precache_check], (void **)&precache_model);
+					if (!precache_model) {
+						precache_model_skin = 0;
+						precache_check++;
+						continue; // couldn't load it
+					}
+					if (LittleLong(*(unsigned *)precache_model) != IDALIASHEADER) {
+						// not an alias model
+						FS_FreeFile(precache_model);
+						precache_model = 0;
+						precache_model_skin = 0;
+						precache_check++;
+						continue;
+					}
+					pheader = (dmdl_t *)precache_model;
+					if (LittleLong (pheader->version) != ALIAS_VERSION) {
+						precache_check++;
+						precache_model_skin = 0;
+						continue; // couldn't load it
+					}
+				}
+
+				pheader = (dmdl_t *)precache_model;
+
+				while (precache_model_skin - 1 < LittleLong(pheader->num_skins)) {
+					if (!CL_CheckOrDownloadFile((char *)precache_model +
+						LittleLong(pheader->ofs_skins) + 
+						(precache_model_skin - 1)*MAX_SKINNAME)) {
+						precache_model_skin++;
+						return; // started a download
+					}
+					precache_model_skin++;
+				}
+				if (precache_model) { 
+					FS_FreeFile(precache_model);
+					precache_model = 0;
+				}
+				precache_model_skin = 0;
+				precache_check++;
+			}
+		}
 		precache_check = CS_SOUNDS;
 	}
 	if (precache_check >= CS_SOUNDS && precache_check < CS_SOUNDS+MAX_SOUNDS) { 
-		
+		if (allow_download_sounds->value) {
+			if (precache_check == CS_SOUNDS)
+				precache_check++; // zero is blank
+			while (precache_check < CS_SOUNDS+MAX_SOUNDS &&
+				cl.configstrings[precache_check][0]) {
+				if (cl.configstrings[precache_check][0] == '*') {
+					precache_check++;
+					continue;
+				}
+				Com_sprintf(fn, sizeof(fn), "sound/%s", cl.configstrings[precache_check++]);
+				if (!CL_CheckOrDownloadFile(fn))
+					return; // started a download
+			}
+		}
 		precache_check = CS_IMAGES;
 	}
 	if (precache_check >= CS_IMAGES && precache_check < CS_IMAGES+MAX_IMAGES) {
-	
+		if (precache_check == CS_IMAGES)
+			precache_check++; // zero is blank
+		while (precache_check < CS_IMAGES+MAX_IMAGES &&
+			cl.configstrings[precache_check][0]) {
+			Com_sprintf(fn, sizeof(fn), "pics/%s.tga", cl.configstrings[precache_check++]);
+			if (!CL_CheckOrDownloadFile(fn))
+				return; // started a download
+		}
 		precache_check = CS_PLAYERSKINS;
 	}
 	// skins are special, since a player has three things to download:

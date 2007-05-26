@@ -752,8 +752,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		self->s.modelindex3 = 0;    //remove helmet, if a martian
 		self->s.modelindex4 = 0;    //war machine rider
 
-		gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
-
 	    gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_DEATHFIELD);
 		gi.WritePosition (self->s.origin);
@@ -1310,7 +1308,6 @@ void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	self->s.modelindex4 = 0;
 	if (self->health < -40)
 	{
-		gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
 		if(self->ctype == 0) { //alien
 
 			for (n= 0; n < 4; n++)

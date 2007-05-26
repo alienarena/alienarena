@@ -87,11 +87,22 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 {
 	FILE *fp;
 	char	name[MAX_OSPATH];
+	char	shortname[MAX_OSPATH];
 
 	if (strstr (filename, ".."))
 	{
 		Com_Printf ("Refusing to download a path with ..\n");
 		return true;
+	}
+
+	//if pcx, strip extension and change to .tga, we never dl .pcx anymore
+    if(filename[strlen(filename)-1] == 'x') {
+
+		//if this is coming from a player model don't bother
+		if(filename[0] != 'm' && filename[0] != 'v')
+			return true;
+		COM_StripExtension ( filename, shortname );
+		sprintf(filename, "%s.tga", shortname);
 	}
 
 	if (FS_LoadFile (filename, NULL) != -1)

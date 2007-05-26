@@ -456,7 +456,6 @@ void SP_trigger_hurt (edict_t *self)
 {
 	InitTrigger (self);
 
-	self->noise_index = gi.soundindex ("world/electro.wav");
 	self->touch = hurt_touch;
 
 	if (!self->dmg)
@@ -607,7 +606,6 @@ void SP_trigger_deathballtarget (edict_t *self)
 {
 	InitTrigger (self);
 
-	self->noise_index = gi.soundindex ("world/electro.wav");
 	self->touch = deathballtarget_touch;
 
 	if (self->spawnflags & 1)
@@ -625,7 +623,6 @@ void SP_trigger_reddeathballtarget (edict_t *self)
 {
 	InitTrigger (self);
 
-	self->noise_index = gi.soundindex ("world/electro.wav");
 	self->touch = deathballtarget_touch;
 
 	if (self->spawnflags & 1)
@@ -643,7 +640,6 @@ void SP_trigger_bluedeathballtarget (edict_t *self)
 {
 	InitTrigger (self);
 
-	self->noise_index = gi.soundindex ("world/electro.wav");
 	self->touch = deathballtarget_touch;
 
 	if (self->spawnflags & 1)
