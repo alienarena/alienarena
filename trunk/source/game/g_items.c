@@ -2018,7 +2018,7 @@ gitem_t	itemlist[] =
 		WEAP_BOMBER,
 		NULL,
 		0,
-/* precache */ "weapons/bfg_fly.wav"
+		NULL
 	},
 /*QUAKED item_stafer (1 0.2 0) (-16 -16 -24) (16 16 32)
 */
@@ -2040,7 +2040,7 @@ gitem_t	itemlist[] =
 		WEAP_STRAFER,
 		NULL,
 		0,
-/* precache */ "weapons/bfg_fly.wav"
+		NULL
 	},
 
 	/*QUAKED item_hover (1 0.2 0) (-16 -16 -24) (16 16 32)
@@ -2063,7 +2063,7 @@ gitem_t	itemlist[] =
 		WEAP_HOVER,
 		NULL,
 		0,
-/* precache */ "weapons/bfg_fly.wav"
+		NULL
 	},
 
 /*QUAKED item_deathball (1 0.2 0) (-16 -16 -24) (16 16 32)
@@ -2086,7 +2086,7 @@ gitem_t	itemlist[] =
 		WEAP_DEATHBALL,
 		NULL,
 		0,
-/* precache */ "weapons/bfg_fly.wav" //we'll get a new sound for this
+		NULL
 	},
 
 	//a fake item for bots to use as a target for throwing a deathball at.
@@ -2174,7 +2174,7 @@ always owned, never in the world
 		WEAP_GRAPPLE,
 		NULL,
 		0,
-/* precache */ "weapons/grapple/grfire.wav weapons/grapple/grpull.wav weapons/grapple/grhang.wav weapons/grapple/grreset.wav weapons/grapple/grhit.wav"
+/* precache */ "weapons/grapple/grfire.wav weapons/grapple/grpull.wav weapons/grapple/grhang.wav weapons/grapple/grhit.wav"
 	},
 /* weapon_blaster (.3 .3 1) (-16 -16 -16) (16 16 16)
 always owned, never in the world
@@ -2243,7 +2243,7 @@ always owned, never in the world
 		WEAP_CHAINGUN,
 		NULL,
 		0,
-/* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav machgf5b.wav"
+/* precache */ "weapons/machgf1b.wav weapons/machgf2b.wav weapons/machgf3b.wav weapons/machgf4b.wav"
 	},
 
 /*QUAKED weapon_chaingun (.3 .3 1) (-16 -16 -16) (16 16 16)
@@ -2513,7 +2513,7 @@ always owned, never in the world
 		Use_Quad,
 		Drop_General,
 		NULL,
-		"items/pkup.wav",
+		"items/powerup.wav",
 		"models/items/quaddama/tris.md2", EF_ROTATE,
 		NULL,
 /* icon */		"p_quad",
@@ -2536,7 +2536,7 @@ always owned, never in the world
 		Use_Invulnerability,
 		Drop_General,
 		NULL,
-		"items/pkup.wav",
+		"items/powerup.wav",
 		"models/items/invulner/tris.md2", EF_ROTATE,
 		NULL,
 /* icon */		"p_invulnerability",
@@ -2575,136 +2575,13 @@ gives +1 to maximum health
 /* precache */ ""
 	},
 
-	//
-	// KEYS
-	//
-/*QUAKED key_data_cd (0 .5 .8) (-16 -16 -16) (16 16 16)
-key for computer centers
-*/
-	{
-		"key_data_cd",
-		Pickup_Key,
-		NULL,
-		Drop_General,
-		NULL,
-		"items/pkup.wav",
-		"models/items/keys/data_cd/tris.md2", EF_ROTATE,
-		NULL,
-		"k_datacd",
-		"Data CD",
-		2,
-		0,
-		NULL,
-		IT_KEY,
-		0,
-		NULL,
-		0,
-/* precache */ ""
-	},
-
-/*QUAKED key_data_spinner (0 .5 .8) (-16 -16 -16) (16 16 16)
-key for the city computer
-*/
-	{
-		"key_data_spinner",
-		Pickup_Key,
-		NULL,
-		Drop_General,
-		NULL,
-		"items/pkup.wav",
-		"models/items/keys/spinner/tris.md2", EF_ROTATE,
-		NULL,
-		"k_dataspin",
-		"Data Spinner",
-		2,
-		0,
-		NULL,
-		IT_KEY,
-		0,
-		NULL,
-		0,
-/* precache */ ""
-	},
-
-/*QUAKED key_pass (0 .5 .8) (-16 -16 -16) (16 16 16)
-security pass for the security level
-*/
-	{
-		"key_pass",
-		Pickup_Key,
-		NULL,
-		Drop_General,
-		NULL,
-		"items/pkup.wav",
-		"models/items/keys/pass/tris.md2", EF_ROTATE,
-		NULL,
-		"k_security",
-		"Security Pass",
-		2,
-		0,
-		NULL,
-		IT_KEY,
-		0,
-		NULL,
-		0,
-/* precache */ ""
-	},
-
-/*QUAKED key_blue_key (0 .5 .8) (-16 -16 -16) (16 16 16)
-normal door key - blue
-*/
-	{
-		"key_blue_key",
-		Pickup_Key,
-		NULL,
-		Drop_General,
-		NULL,
-		"items/pkup.wav",
-		"models/items/keys/key/tris.md2", EF_ROTATE,
-		NULL,
-		"k_bluekey",
-		"Blue Key",
-		2,
-		0,
-		NULL,
-		IT_KEY,
-		0,
-		NULL,
-		0,
-/* precache */ ""
-	},
-
-/*QUAKED key_red_key (0 .5 .8) (-16 -16 -16) (16 16 16)
-normal door key - red
-*/
-	{
-		"key_red_key",
-		Pickup_Key,
-		NULL,
-		Drop_General,
-		NULL,
-		"items/pkup.wav",
-		"models/items/keys/red_key/tris.md2", EF_ROTATE,
-		NULL,
-		"k_redkey",
-		"Red Key",
-		2,
-		0,
-		NULL,
-		IT_KEY,
-		0,
-		NULL,
-		0,
-/* precache */ ""
-	},
-
 	{
 		NULL,
 		Pickup_Health,
 		NULL,
 		NULL,
 		NULL,
-		"items/pkup.wav",
+		"items/l_health.wav",
 		NULL, 0,
 		NULL,
 /* icon */		"i_health",
@@ -2725,7 +2602,7 @@ normal door key - red
 		Use_Haste,
 		Drop_General,
 		NULL,
-		"items/pkup.wav",
+		"items/powerup.wav",
 		"models/items/haste/tris.md2", EF_ROTATE,
 		NULL,
 /* icon */		"p_haste",
@@ -2745,7 +2622,7 @@ normal door key - red
 		Use_Sproing,
 		Drop_General,
 		NULL,
-		"items/pkup.wav",
+		"items/powerup.wav",
 		"models/items/sproing/tris.md2", EF_ROTATE,
 		NULL,
 /* icon */		"p_sproing",

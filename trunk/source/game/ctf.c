@@ -227,7 +227,6 @@ void CTFResetGrapple(edict_t *self)
 		if (self->owner->client->silencer_shots)
 			volume = 0.2;
 
-		gi.sound (self->owner, CHAN_RELIABLE+CHAN_WEAPON, gi.soundindex("weapons/grapple/grreset.wav"), volume, ATTN_NORM, 0);
 		cl = self->owner->client;
 		cl->ctf_grapple = NULL;
 		cl->ctf_grapplereleasetime = level.time;
@@ -353,7 +352,6 @@ void CTFGrapplePull(edict_t *self)
 				volume = 0.2;
 
 			T_Damage (self->enemy, self, self->owner, self->velocity, self->s.origin, vec3_origin, 1, 1, 0, MOD_GRAPPLE);
-			gi.sound (self, CHAN_WEAPON, gi.soundindex("weapons/grapple/grhurt.wav"), volume, ATTN_NORM, 0);
 		}
 		if (self->enemy->deadflag) { // he died
 			CTFResetGrapple(self);

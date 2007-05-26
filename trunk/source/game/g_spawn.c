@@ -839,10 +839,8 @@ void SP_worldspawn (edict_t *ent)
 
 
 	// help icon for statusbar
-	gi.imageindex ("i_help");
 	level.pic_health = gi.imageindex ("i_health");
 	gi.imageindex ("help");
-	gi.imageindex ("field_3");
 
 	if (!st.gravity) {
 		if(low_grav->value)
@@ -862,8 +860,6 @@ void SP_worldspawn (edict_t *ent)
 
 	gi.soundindex ("misc/pc_up.wav");
 	gi.soundindex ("misc/talk1.wav");
-
-	gi.soundindex ("misc/udeath.wav");
 
 	// gibs
 	gi.soundindex ("items/respawn1.wav");
@@ -897,13 +893,6 @@ void SP_worldspawn (edict_t *ent)
 
 	gi.soundindex ("player/watr_un.wav");	// head going underwater
 	
-	gi.soundindex ("player/u_breath1.wav");
-	gi.soundindex ("player/u_breath2.wav");
-
-	gi.soundindex ("items/pkup.wav");		// bonus item pickup
-	gi.soundindex ("world/land.wav");		// landing thud
-	gi.soundindex ("misc/h2ohit1.wav");		// landing splash
-
 	gi.soundindex ("items/damage.wav");
 	gi.soundindex ("items/protect.wav");
 	gi.soundindex ("items/protect4.wav");
