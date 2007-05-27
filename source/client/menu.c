@@ -1635,7 +1635,7 @@ char **SetFontNames (void)
 	return list;		
 }
 
-#define MAX_CROSSHAIRS 32
+#define MAX_CROSSHAIRS 256
 char **crosshair_names;
 int	numcrosshairs;
 
