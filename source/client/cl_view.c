@@ -35,7 +35,7 @@ flare_t r_flares[MAX_FLARES];
 extern cvar_t *cl_showPlayerNames;
 extern cvar_t *name;
 extern char map_music[128];
-extern cvar_t *backround_music;
+extern cvar_t *background_music;
 extern qboolean IsVisible(vec3_t org1,vec3_t org2);
 
 cvar_t		*crosshair;
@@ -517,9 +517,9 @@ void CL_PrepRefresh ()
 	cl.refresh_prepped = true;
 	cl.force_refdef = true;	// make sure we have a valid refdef
 
-	// start backround music
-	backround_music = Cvar_Get ("backround_music", "1", CVAR_ARCHIVE);
-	if(backround_music->value)
+	// start background music
+	background_music = Cvar_Get ("background_music", "1", CVAR_ARCHIVE);
+	if(background_music->value)
 		S_StartMusic(map_music);
 
 	//loadingMessage = false;

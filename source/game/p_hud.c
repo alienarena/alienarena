@@ -499,7 +499,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		x = (i>=6) ? 160 : 0;
 		y = 32 + 32 * (i%6);
 
-		// add a backround
+		// add a background
 		Com_sprintf (entry, sizeof(entry),
 			"xv %i yv %i picn %s ",x+32, y, "tag2");
 		j = strlen(entry);
@@ -521,7 +521,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 
 	//weapon accuracy
 
-	//add a backround
+	//add a background
 	x = 0;
 	y = (total>=6) ? (32+(32*5)) : (32*total);
 	for (i=0 ; i<3 ; i++)

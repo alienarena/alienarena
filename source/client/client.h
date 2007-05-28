@@ -292,7 +292,7 @@ extern	cvar_t	*cl_timedemo;
 
 extern	cvar_t	*cl_vwep;
 
-extern  cvar_t  *backround_music;
+extern  cvar_t  *background_music;
 extern  cvar_t  *cl_nobrainlets;
 extern  cvar_t		*enginemode;
 typedef struct

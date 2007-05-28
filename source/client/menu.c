@@ -30,7 +30,7 @@ extern void RS_LoadScript(char *script);
 extern void RS_LoadSpecialScripts(void);
 extern cvar_t *scriptsloaded;
 extern char map_music[128];
-extern cvar_t *backround_music;
+extern cvar_t *background_music;
 extern cvar_t *dedicated;
 
 #define NUM_CURSOR_FRAMES 15
@@ -42,7 +42,7 @@ extern cvar_t *dedicated;
 static char *menu_in_sound		= "misc/menu1.wav";
 static char *menu_move_sound	= "misc/menu2.wav";
 static char *menu_out_sound		= "misc/menu3.wav";
-static char *menu_backround		= "misc/menuback.wav";
+static char *menu_background		= "misc/menuback.wav";
 int svridx;
 int playeridx;
 int hover_time;
@@ -110,7 +110,7 @@ static void M_CrosshairPic( char *name )
 	w = h = 64;
 	Draw_StretchPic (viddef.width / 2 - w/2 - 110, viddef.height / 2 + 125, w, h, name);
 }
-static void M_Backround( char *name)
+static void M_Background( char *name)
 {
 	Draw_StretchPic(0, 0, viddef.width, viddef.height, name);
 }
@@ -192,8 +192,8 @@ void M_ForceMenuOff (void)
 
 	//-JD kill the music when leaving the menu of course
 	S_StopAllSounds();
-	backround_music = Cvar_Get ("backround_music", "1", CVAR_ARCHIVE);	
-	if(backround_music->value)
+	background_music = Cvar_Get ("background_music", "1", CVAR_ARCHIVE);	
+	if(background_music->value)
 		S_StartMusic(map_music);
 }
 
@@ -510,9 +510,9 @@ void M_Main_Draw (void)
 	ystart = ( viddef.height / 2 - 72 );
 	xoffset = ( viddef.width - widest - 25) / 2;
 
-	//draw the backround pics first - 
+	//draw the background pics first - 
 
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 
 	M_Banner( "m_banner_main" );
 	
@@ -741,7 +741,7 @@ static menuaction_s		s_start_network_server_action;
 
 static void Multiplayer_MenuDraw (void)
 {
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 
 	Menu_AdjustCursor( &s_multiplayer_menu, 1 );
@@ -1322,7 +1322,7 @@ static void Keys_MenuInit( void )
 
 static void Keys_MenuDraw (void)
 {
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 	Menu_AdjustCursor( &s_keys_menu, 1 );
 	Menu_Draw( &s_keys_menu );
@@ -1756,8 +1756,8 @@ static void ControlsSetMenuItemValues( void )
 {
 
 	s_options_sfxvolume_slider.curvalue		= Cvar_VariableValue( "s_volume" ) * 10;
-	s_options_bgvolume_slider.curvalue		= Cvar_VariableValue( "backround_music_vol" ) * 10;
-	s_options_bgmusic_box.curvalue			= Cvar_VariableValue("backround_music");
+	s_options_bgvolume_slider.curvalue		= Cvar_VariableValue( "background_music_vol" ) * 10;
+	s_options_bgmusic_box.curvalue			= Cvar_VariableValue("background_music");
 
 	//Read what was set for s_khz and set the curvalue accordingly
 	if (Cvar_VariableValue("s_khz") == 48)
@@ -1845,7 +1845,7 @@ static void UpdateVolumeFunc( void *unused )
 
 static void UpdateBGVolumeFunc( void *unused )
 {
-	Cvar_SetValue( "backround_music_vol", s_options_bgvolume_slider.curvalue / 10 );
+	Cvar_SetValue( "background_music_vol", s_options_bgvolume_slider.curvalue / 10 );
 }
 
 static void UpdateCDVolumeFunc( void *unused )
@@ -1854,7 +1854,7 @@ static void UpdateCDVolumeFunc( void *unused )
 }
 static void UpdateBGMusicFunc( void *unused )
 {
-	Cvar_SetValue( "backround_music", s_options_bgmusic_box.curvalue );
+	Cvar_SetValue( "background_music", s_options_bgmusic_box.curvalue );
 }
 static void ConsoleFunc( void *unused )
 {
@@ -1914,7 +1914,7 @@ static void UpdateSoundQualityFunc( void *unused )
 
 void Options_MenuInit( void )
 {
-	static const char *backround_music_items[] = 
+	static const char *background_music_items[] = 
 	{
 		"disabled",
 		"enabled",
@@ -2063,15 +2063,15 @@ void Options_MenuInit( void )
 	s_options_bgvolume_slider.generic.callback	= UpdateBGVolumeFunc;
 	s_options_bgvolume_slider.minvalue		= 0;
 	s_options_bgvolume_slider.maxvalue		= 20;
-	s_options_bgvolume_slider.curvalue		= Cvar_VariableValue( "backround_music_vol" ) * 10;
+	s_options_bgvolume_slider.curvalue		= Cvar_VariableValue( "background_music_vol" ) * 10;
 
 	s_options_bgmusic_box.generic.type	= MTYPE_SPINCONTROL;
 	s_options_bgmusic_box.generic.x		= 0;
 	s_options_bgmusic_box.generic.y		= 120;
-	s_options_bgmusic_box.generic.name	= "Backround music";
+	s_options_bgmusic_box.generic.name	= "Background music";
 	s_options_bgmusic_box.generic.callback	= UpdateBGMusicFunc;
-	s_options_bgmusic_box.itemnames		= backround_music_items;
-	s_options_bgmusic_box.curvalue 		= Cvar_VariableValue("backround_music");
+	s_options_bgmusic_box.itemnames		= background_music_items;
+	s_options_bgmusic_box.curvalue 		= Cvar_VariableValue("background_music");
 
 	s_options_quality_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_quality_list.generic.x		= 0;
@@ -2185,7 +2185,7 @@ void Options_MenuDraw (void)
 {
 	char path[MAX_QPATH];
 
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 	if(strcmp(crosshair->string, "none")) {
 		sprintf(path, "/pics/%s", crosshair->string);
@@ -2502,7 +2502,7 @@ void Game_MenuInit( void )
 
 void Game_MenuDraw( void )
 {
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 	Menu_AdjustCursor( &s_game_menu, 1 );
 	Menu_Draw( &s_game_menu );
@@ -2911,7 +2911,7 @@ void JoinServer_MenuInit( void )
 void JoinServer_MenuDraw(void)
 {
 	int i;
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 
 	M_DrawTextBox( 0, 40, 50, 21 );
@@ -3214,7 +3214,7 @@ void Mutators_MenuInit( void )
 }
 void Mutators_MenuDraw(void)
 {
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 
 	Menu_Draw( &s_mutators_menu );
@@ -3368,7 +3368,7 @@ void Addbots_MenuDraw(void)
 {
 	int i;
 	int y;
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 
 	y = viddef.height/2 - 122;
@@ -4006,7 +4006,7 @@ void StartServer_MenuDraw(void)
 	char *token;
 	int offset = 65;
 
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 	sprintf(path, "/levelshots/%s", startmap);
 	M_MapPic(path);
@@ -4606,7 +4606,7 @@ void DMOptions_MenuInit( void )
 
 void DMOptions_MenuDraw(void)
 {
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 	
 	Menu_Draw( &s_dmoptions_menu );
@@ -4741,7 +4741,7 @@ void DownloadOptions_MenuInit( void )
 
 void DownloadOptions_MenuDraw(void)
 {
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 	Menu_Draw( &s_downloadoptions_menu );
 }
@@ -4822,7 +4822,7 @@ const char *AddressBook_MenuKey( int key )
 
 void AddressBook_MenuDraw(void)
 {
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 	Menu_Draw( &s_addressbook_menu );
 }
@@ -5281,7 +5281,7 @@ void PlayerConfig_MenuDraw( void )
 	int helmet = false;
 	int rack = false;
 
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_player" );
 	
 	memset( &refdef, 0, sizeof( refdef ) );
@@ -5493,7 +5493,7 @@ static menuaction_s		s_quit_no_action;
 
 void M_Quit_Draw( void )
 {
-	M_Backround( "conback"); //draw black backround first
+	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 
 	Menu_AdjustCursor( &s_quit_menu, 1 );

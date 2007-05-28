@@ -229,7 +229,7 @@ void InitGame (void)
 	bob_pitch = gi.cvar ("bob_pitch", "0.002", 0);
 	bob_roll = gi.cvar ("bob_roll", "0.002", 0);
 
-	backround_music = gi.cvar ("backround_music", "1", CVAR_ARCHIVE);
+	background_music = gi.cvar ("background_music", "1", CVAR_ARCHIVE);
 
 	// flood control
 	flood_msgs = gi.cvar ("flood_msgs", "4", 0);
