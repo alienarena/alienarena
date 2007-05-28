@@ -1217,8 +1217,6 @@ void CGalaxyDlg::OnJoin(NMHDR* pNMHDR, LRESULT* pResult)
 	PROCESS_INFORMATION p;
 	char cmdLine[512];
 	char myCRXPath[MAX_PATH];
-	char arenaCFGPath[MAX_PATH];
-	char data1CFGPath[MAX_PATH];
 	
 	strcpy (myCRXPath, CRXPath);
 	memset (&s, 0, sizeof(s));
@@ -1227,24 +1225,12 @@ void CGalaxyDlg::OnJoin(NMHDR* pNMHDR, LRESULT* pResult)
 
 	sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
 
-	sprintf(arenaCFGPath, "%s/arena/config.cfg", CRXPath);
-	sprintf(data1CFGPath, "%s/data1/config.cfg", CRXPath);
-	CopyFile(arenaCFGPath, data1CFGPath, false);
-
 	//perhaps put some checks in like the old galaxy, but we should *NEVER* need too
 	//because the path is set in the .ini file during installation of AA
 	
 	sprintf (cmdLine, " +set game arena +set name %s +connect %s", user.nick, Server);
 	CreateProcess (CRXbuff, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myCRXPath, &s, &p);
 	
-	//because this thing gets a little retarded about loading the right config, we will copy the 
-	//config from "arena" into "data1".  
-	AfxMessageBox("Press <enter> to return to Galaxy"); //too pause it
-	//now copy that thing!
-	sprintf(arenaCFGPath, "%s/arena/config.cfg", CRXPath);
-	sprintf(data1CFGPath, "%s/data1/config.cfg", CRXPath);
-	CopyFile(arenaCFGPath, data1CFGPath, false);
-
 	*pResult = 0;
 }
 
@@ -1255,9 +1241,7 @@ void CGalaxyDlg::OnJoin2()  //used from the menu pulldown, doesn't return pointe
 	PROCESS_INFORMATION p;
 	char cmdLine[512];
 	char myCRXPath[MAX_PATH];
-	char arenaCFGPath[MAX_PATH];
-	char data1CFGPath[MAX_PATH];
-	
+
 	strcpy (myCRXPath, CRXPath);
 	memset (&s, 0, sizeof(s));
 	s.cb = sizeof(s);
@@ -1265,24 +1249,11 @@ void CGalaxyDlg::OnJoin2()  //used from the menu pulldown, doesn't return pointe
 
 	sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
 
-	sprintf(arenaCFGPath, "%s/arena/config.cfg", CRXPath);
-	sprintf(data1CFGPath, "%s/data1/config.cfg", CRXPath);
-	CopyFile(arenaCFGPath, data1CFGPath, false);
-
 	//perhaps put some checks in like the old galaxy, but we should *NEVER* need too
 	//because the path is set in the .ini file during installation of AA
 	
 	sprintf (cmdLine, " +set game arena +set name %s +connect %s", user.nick, Server);
 	CreateProcess (CRXbuff, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myCRXPath, &s, &p);
-	
-	//because this thing gets a little retarded about loading the right config, we will copy the 
-	//config from "arena" into "data1".  
-	AfxMessageBox("Press <enter> to return to Galaxy"); //too pause it
-	//now copy that thing!
-	sprintf(arenaCFGPath, "%s/arena/config.cfg", CRXPath);
-	sprintf(data1CFGPath, "%s/data1/config.cfg", CRXPath);
-	CopyFile(arenaCFGPath, data1CFGPath, false);
-
 }
 
 void CGalaxyDlg::OnLaunch() 
@@ -1292,8 +1263,6 @@ void CGalaxyDlg::OnLaunch()
 	PROCESS_INFORMATION p;
 	char cmdLine[512];
 	char myCRXPath[MAX_PATH];
-	char arenaCFGPath[MAX_PATH];
-	char data1CFGPath[MAX_PATH];
 	
 	strcpy (myCRXPath, CRXPath);
 	memset (&s, 0, sizeof(s));
@@ -1302,25 +1271,11 @@ void CGalaxyDlg::OnLaunch()
 
 	sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
 
-	sprintf(arenaCFGPath, "%s/arena/config.cfg", CRXPath);
-	sprintf(data1CFGPath, "%s/data1/config.cfg", CRXPath);
-	CopyFile(arenaCFGPath, data1CFGPath, false);
-
 	//perhaps put some checks in like the old galaxy, but we should *NEVER* need too
 	//because the path is set in the .ini file during installation of AA
 	
 	sprintf (cmdLine, " +set game arena +set name %s", user.nick);
 	CreateProcess (CRXbuff, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myCRXPath, &s, &p);
-	
-	//because this thing gets a little retarded about loading the right config, we will copy the 
-	//config from "arena" into "data1".  
-	AfxMessageBox("Launching Game - press <enter> to return to Galaxy"); //to pause it, so that it copies after
-	//the cfg file gets written on exit of the game
-	//now copy that thing!
-	sprintf(arenaCFGPath, "%s/arena/config.cfg", CRXPath);
-	sprintf(data1CFGPath, "%s/data1/config.cfg", CRXPath);
-	CopyFile(arenaCFGPath, data1CFGPath, false);
-	
 }
 
 void CGalaxyDlg::OnButton6() 
