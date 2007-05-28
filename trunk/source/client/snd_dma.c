@@ -770,7 +770,7 @@ void S_StartMusic (char *sound)
 	if (!sound_started)
 		return;
 
-	fvol = Cvar_Get("backround_music_vol", "1", CVAR_ARCHIVE);
+	fvol = Cvar_Get("background_music_vol", "1", CVAR_ARCHIVE);
 		
 	sfx = S_RegisterSound (sound);
 	if (!sfx)

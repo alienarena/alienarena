@@ -566,7 +566,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 char *single_statusbar = 
 
-//backround
+//background
 "yb -256 "
 "xl	 0 "
 "pic 0 "
@@ -629,7 +629,7 @@ char *single_statusbar =
 ;
 
 char *dm_statusbar =
-//backround
+//background
 "yb -256 "
 "xl	 0 "
 "pic 0 "
@@ -694,7 +694,7 @@ char *dm_statusbar =
 ;
 
 char *team_statusbar =
-//backround
+//background
 "yb -256 "
 "xl	 0 "
 "pic 0 "

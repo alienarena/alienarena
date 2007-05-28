@@ -558,7 +558,7 @@ extern	cvar_t	*flood_waitdelay;
 
 extern	cvar_t	*sv_maplist;
 
-extern  cvar_t  *backround_music;
+extern  cvar_t  *background_music;
 
 extern  cvar_t  *sv_botkickthreshold;
 extern  cvar_t	*sv_custombots;

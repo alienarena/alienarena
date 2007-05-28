@@ -60,7 +60,7 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 	int		chan;
 
 	if(stricmp(level.mapname, "dm-inferno") == 0 || stricmp(level.mapname, "db-inferno") == 0){//hack for dm-inferno's triggered music
-		if(!backround_music->value) {
+		if(!background_music->value) {
 			ent->s.sound = 0;
 			return;
 		}
@@ -87,7 +87,7 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 }
 void Target_Speaker_Think (edict_t *ent)
 {
-	if(!backround_music->value) 
+	if(!background_music->value) 
 		ent->s.sound = 0;
 	else
 		ent->s.sound = ent->noise_index;

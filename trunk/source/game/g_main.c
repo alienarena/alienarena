@@ -98,7 +98,7 @@ cvar_t	*flood_waitdelay;
 
 cvar_t	*sv_maplist;
 
-cvar_t  *backround_music;
+cvar_t  *background_music;
 
 cvar_t  *sv_botkickthreshold;
 cvar_t  *sv_custombots;

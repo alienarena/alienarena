@@ -105,8 +105,8 @@ cvar_t	*gender_auto;
 
 cvar_t	*cl_vwep;
 
-cvar_t  *backround_music;
-cvar_t	*backround_music_vol;
+cvar_t  *background_music;
+cvar_t	*background_music_vol;
 
 cvar_t	*scriptsloaded;
 
@@ -1576,8 +1576,8 @@ void CL_InitLocal (void)
 //
 	cl_stereo_separation = Cvar_Get( "cl_stereo_separation", "0.4", CVAR_ARCHIVE );
 	cl_stereo = Cvar_Get( "cl_stereo", "0", 0 );
-	backround_music = Cvar_Get("backround_music", "1", CVAR_ARCHIVE);
-	backround_music_vol = Cvar_Get("backround_music_vol", "1", CVAR_ARCHIVE);
+	background_music = Cvar_Get("background_music", "1", CVAR_ARCHIVE);
+	background_music_vol = Cvar_Get("background_music_vol", "1", CVAR_ARCHIVE);
 
 	cl_add_blend = Cvar_Get ("cl_blend", "1", 0);
 	cl_add_lights = Cvar_Get ("cl_lights", "1", 0);
