@@ -13,7 +13,7 @@ ALIEN ARENA 2007
 
 1.	INTRODUCTION
 
-ALIEN ARENA 2007 is a standalone 3D first person online deathmatch shooter crafted from the original source code of  Quake II and Quake III,  released by id Software under the GPL license.  With features including 32 bit graphics, new particle engine and effects, light blooms, reflective water, hi resolution textures and skins, hi poly models, stain maps, ALIEN ARENA pushes the envelope of graphical beauty rivaling today’s top games.
+ALIEN ARENA 2007 is a standalone 3D first person online deathmatch shooter crafted from the original source code of  Quake II and Quake III,  released by id Software under the GPL license.  With features including 32 bit graphics, new particle engine and effects, light blooms, reflective water, hi resolution textures and skins, hi poly models, stain maps, ALIEN ARENA pushes the envelope of graphical beauty rivaling today's top games.
 
 The game features 37 levels, which can be played online against other players, or against the built in CodeRED bots.  
 
@@ -32,7 +32,7 @@ Alien Arena offers CTF,  AOA(All Out Assault) mode, in which players can climb i
 
 (Windows)
 
-Installation has been made very simple.  After downloading, simply click on the alienarena2007.exe file and the installation will begin.  Follow the instructions of the Installshield setup program. If you are running Windows 2000 or XP, you should have administrative privileges.  If not, you may get some errors when the program tries to write the uninstall information to the registry.  If so, simply click “ignore”, and the installation will continue without problem.
+Installation has been made very simple.  After downloading, simply click on the alienarena2007.exe file and the installation will begin.  Follow the instructions of the Installshield setup program. If you are running Windows 2000 or XP, you should have administrative privileges.  If not, you may get some errors when the program tries to write the uninstall information to the registry.  If so, simply click "ignore", and the installation will continue without problem.
 
 Once finished, you can click on the Alien Arena icon that has been placed on your desktop to start a game or the Alien Arena Server icon to start a dedicated server.
 
@@ -63,7 +63,7 @@ Weapons also have alternate firing modes.  In you controls menu, select your sec
 
 There are new powerups such as haste and sproing, in addition to the venerable quad damage and invulerabilty.  
 
-The player will also have a flashlight, which is always present, and very useful.  The “F” key activates and de-activates the flashlight, or you can bind whatever key you wish to "flashlight" which will turn it on and off.
+The player will also have a flashlight, which is always present, and very useful.  The "F" key activates and de-activates the flashlight, or you can bind whatever key you wish to "flashlight" which will turn it on and off.
 
 It would be advisable for you to change video settings for however you wish to view the game, and what gives you reasonable performance. The game's default settings are at a mid range setting, so try tweaking them or adding/removing effects depending on your framerate.  If you wish to see your framerate, you can type "set cl_drawfps 1" at the console(brought down using the ` key).  
 
@@ -98,7 +98,7 @@ Selecting "normal" will leave them at whatever level they are configured. Select
 
 5.	CREDITS
 
-There is a long list of credits - ALIEN ARENA 2007 is greatly indebted to the following for it’s creation and completion:
+There is a long list of credits - ALIEN ARENA 2007 is greatly indebted to the following for it's creation and completion:
 
 Design:  John Diamond with input from the community at large.
 Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter.
@@ -123,7 +123,7 @@ The source code of Alien Arena is Free Software. You can redistribute it and/or 
 
 It is only permissible to distrubute the game data(models, maps, textures, sound, etc) as a whole, and with the intention of being used with Alien Arena.  It is not permissible to distribute individual portions or items of the game data without express consent from COR Entertainment.
 
-Under no circumstances ALIEN ARENA 2007 as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2007 may be included in free compilation CD’s and similar packages without consent, provided it adheres to the above restrictions.
+Under no circumstances ALIEN ARENA 2007 as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2007 may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
 
 Contact:  http://red.planetarena.org
 
