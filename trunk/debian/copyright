@@ -7,18 +7,18 @@ Upstream Authors:
 
 There is a long list of credits - ALIEN ARENA 2007 is greatly indebted to the following for it's creation and completion:
 
-Design:  John Diamond <irritant@planetquake.com> with input from the community at large
-Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson <tonyj@cooldark.com>, Kyle Hunter
-Models and skins:  John Diamond, Alex Perez
+Design:  John Diamond with input from the community at large. <irritant@planetquake.com>
+Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson <tonyj@cooldark.com>, Kyle Hunter.
+Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
 Maps:  John Diamond
 Textures:  John Diamond
-Sounds:  John Diamond, Little Music Club, Sound Rangers
-Music:  PuzzleFighter, WhiteLipper, Wooden Productions, and SoundRangers
-Linux Port and installation: Shane Bayer
-Alien Arena IRC Channel:  Astralsin
+Sounds:  John Diamond, Sound Rangers
+Music:  John Diamond, WhiteLipper, Wooden Productions, and SoundRangers
+Linux Port: Shane Bayer
 FreeBSD port: "Ale"
 Gentoo portage: Paul Bredbury
-Debian packagin: Andres Mejia
+Debian packaging: Andres Mejia
+Alien Arena IRC Channel:  Astralsin
 
 There are other major contributions from the community from QuakeSrc.org, including MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.
 
