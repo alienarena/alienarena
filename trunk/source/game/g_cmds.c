@@ -815,7 +815,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 		team = false;
 
 	if (team)
-		Com_sprintf (text, sizeof(text), "(%s): ", ent->client->pers.netname);
+		Com_sprintf (text, sizeof(text), "[TEAM] %s: ", ent->client->pers.netname);
 	else
 		Com_sprintf (text, sizeof(text), "%s: ", ent->client->pers.netname);
 
