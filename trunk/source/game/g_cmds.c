@@ -811,7 +811,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 	gi.WritePosition (ent->s.origin);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
-	if ((!((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS))) || (!ctf->value) || (!tca->value) || (!cp->value))
+	if (!((((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS))) || ctf->value || tca->value || cp->value))
 		team = false;
 
 	if (team)
