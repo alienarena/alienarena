@@ -97,6 +97,281 @@ players/rustbot/blue
 		normalmap
 	}	
 }
+players/robot/blue
+{
+	{
+		map players/robot/blue.tga
+		nolightmap
+	}
+	{
+		map players/robot/default_normal.tga
+		normalmap
+	}	
+}
+players/robot/red
+{
+	{
+		map players/robot/red.tga
+		nolightmap
+	}
+	{
+		map players/robot/default_normal.tga
+		normalmap
+	}	
+}
+players/robot/default
+{
+	{
+		map players/robot/default.tga
+		nolightmap
+	}
+	{
+		map players/robot/default_normal.tga
+		normalmap
+	}	
+}
+players/martiancyborg/blue
+{
+	{
+		map players/martiancyborg/blue.tga
+		nolightmap
+	}
+	{
+		map players/martiancyborg/default_normal.tga
+		normalmap
+	}	
+}
+players/martiancyborg/red
+{
+	{
+		map players/martiancyborg/red.tga
+		nolightmap
+	}
+	{
+		map players/martiancyborg/default_normal.tga
+		normalmap
+	}	
+}
+players/martiancyborg/default
+{
+	{
+		map players/martiancyborg/default.tga
+		nolightmap
+	}
+	{
+		map players/martiancyborg/default_normal.tga
+		normalmap
+	}	
+}
+players/infantry/blue
+{
+	{
+		map players/infantry/blue.tga
+		nolightmap
+	}
+	{
+		map players/infantry/default_normal.tga
+		normalmap
+	}	
+}
+players/infantry/red
+{
+	{
+		map players/infantry/red.tga
+		nolightmap
+	}
+	{
+		map players/infantry/default_normal.tga
+		normalmap
+	}	
+}
+players/infantry/default
+{
+	{
+		map players/infantry/default.tga
+		nolightmap
+	}
+	{
+		map players/infantry/default_normal.tga
+		normalmap
+	}	
+}
+players/lauren/blue
+{
+	{
+		map players/lauren/blue.tga
+		nolightmap
+	}
+	{
+		map players/lauren/default_normal.tga
+		normalmap
+	}	
+}
+players/lauren/red
+{
+	{
+		map players/lauren/red.tga
+		nolightmap
+	}
+	{
+		map players/lauren/default_normal.tga
+		normalmap
+	}	
+}
+players/lauren/default
+{
+	{
+		map players/lauren/default.tga
+		nolightmap
+	}
+	{
+		map players/lauren/default_normal.tga
+		normalmap
+	}	
+}
+players/martian/blue
+{
+	{
+		map players/martian/blue.tga
+		nolightmap
+	}
+	{
+		map players/martian/default_normal.tga
+		normalmap
+	}	
+}
+players/martian/red
+{
+	{
+		map players/martian/red.tga
+		nolightmap
+	}
+	{
+		map players/martian/default_normal.tga
+		normalmap
+	}	
+}
+players/martian/default
+{
+	{
+		map players/martian/default.tga
+		nolightmap
+	}
+	{
+		map players/martian/default_normal.tga
+		normalmap
+	}	
+}
+players/martian/aliengrunt
+{
+	{
+		map players/martian/aliengrunt.tga
+		nolightmap
+	}
+	{
+		map players/martian/default_normal.tga
+		normalmap
+	}	
+}
+players/war/blue
+{
+	{
+		map players/war/blue.tga
+		nolightmap
+	}
+	{
+		map players/war/default_normal.tga
+		normalmap
+	}	
+}
+players/war/red
+{
+	{
+		map players/war/red.tga
+		nolightmap
+	}
+	{
+		map players/war/default_normal.tga
+		normalmap
+	}	
+}
+players/war/default
+{
+	{
+		map players/war/default.tga
+		nolightmap
+	}
+	{
+		map players/war/default_normal.tga
+		normalmap
+	}	
+}
+players/construct/blue
+{
+	{
+		map players/construct/blue.tga
+		nolightmap
+	}
+	{
+		map players/construct/default_normal.tga
+		normalmap
+	}	
+}
+players/construct/red
+{
+	{
+		map players/construct/red.tga
+		nolightmap
+	}
+	{
+		map players/construct/default_normal.tga
+		normalmap
+	}	
+}
+players/construct/default
+{
+	{
+		map players/construct/default.tga
+		nolightmap
+	}
+	{
+		map players/construct/default_normal.tga
+		normalmap
+	}	
+}
+players/brainlet/blue
+{
+	{
+		map players/brainlet/blue.tga
+		nolightmap
+	}
+	{
+		map players/brainlet/default_normal.tga
+		normalmap
+	}	
+}
+players/brainlet/red
+{
+	{
+		map players/brainlet/red.tga
+		nolightmap
+	}
+	{
+		map players/brainlet/default_normal.tga
+		normalmap
+	}	
+}
+players/brainlet/default
+{
+	{
+		map players/brainlet/default.tga
+		nolightmap
+	}
+	{
+		map players/brainlet/default_normal.tga
+		normalmap
+	}	
+}
 models/weapons/v_rocket/skin
 {
 	{
