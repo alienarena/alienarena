@@ -136,10 +136,6 @@ textures/arena7/metal2
 		map textures/arena7/metal2_nm.tga
 		normalmap
 	}
-	{
-		map textures/arena7/metal2_nm.tga
-		normalmap
-	}
 }
 textures/arena7/floor1
 {
