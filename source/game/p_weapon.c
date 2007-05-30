@@ -329,37 +329,42 @@ void NoAmmoWeaponChange (edict_t *ent)
 		ent->client->newweapon = FindItem ("Disruptor");
 		return;
 	}
-	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("alien smart grenade"))]
-		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] )
-	{
-		ent->client->newweapon = FindItem ("Alien Smartgun");
-		return;
-	}
+
 	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("rockets"))]
 		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] )
 	{
 		ent->client->newweapon = FindItem ("Rocket Launcher");
 		return;
 	}
+
 	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("napalm"))]
 		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] )
 	{
 		ent->client->newweapon = FindItem ("Flame Thrower");
 		return;
 	}
-	
+
 	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("bullets"))] > 1
 		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] )
 	{
 		ent->client->newweapon = FindItem ("Pulse Rifle");
 		return;
 	}
+
+	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("alien smart grenade"))]
+		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] )
+	{
+		ent->client->newweapon = FindItem ("Alien Smartgun");
+		return;
+	}
+	
 	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))]
 		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] )
 	{
 		ent->client->newweapon = FindItem ("Alien Disruptor");
 		return;
 	}
+
 	ent->client->newweapon = FindItem ("blaster");
 }
 
@@ -767,8 +772,13 @@ void weapon_energy_field_fire (edict_t *ent)
 
 	if(ent->client->buttons & BUTTON_ATTACK2)
 		ent->altfire = true;
-	else if(ent->client->buttons & BUTTON_ATTACK)
+	else if(ent->client->buttons & BUTTON_ATTACK) {
 		ent->altfire = false;
+		if (ent->client->pers.inventory[ent->client->ammo_index] < 2) {
+			ent->client->ps.gunframe = 19;
+			NoAmmoWeaponChange(ent);
+		}
+	}
 
 	if(ent->client->ps.gunframe == 7)
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("smallmech/sight.wav"), 1, ATTN_NORM, 0);
@@ -802,9 +812,15 @@ void weapon_energy_field_fire (edict_t *ent)
 			forward[1] = forward[1] * 4.6;
 			forward[2] = forward[2] * 4.6;
 			fire_bomb (ent, start, forward, damage, 250, damage_radius, radius_damage, 8);
+			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+				ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-1;
+
 		}
-		else
-			fire_energy_field (ent, start, forward, damage, kick);
+		else {
+				fire_energy_field (ent, start, forward, damage, kick);
+				if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+					ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-2;	
+		}
 
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
@@ -823,8 +839,6 @@ void weapon_energy_field_fire (edict_t *ent)
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/energyfield.wav"), 1, ATTN_NORM, 0);
 		ent->client->weapon_sound = 0;
 
-		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-			ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-2;
 	}
 	ent->client->ps.gunframe++;
 

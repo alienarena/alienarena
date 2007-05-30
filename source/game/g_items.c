@@ -2352,7 +2352,7 @@ always owned, never in the world
 /* icon */		"w_bfg",
 /* pickup */	"Alien Vaporizer",
 		0,
-		2,
+		1,
 		"Slugs",
 		IT_WEAPON,
 		WEAP_VAPORIZER,

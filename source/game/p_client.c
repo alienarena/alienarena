@@ -1399,6 +1399,11 @@ void respawn (edict_t *self)
 	if (deathmatch->value)
 	{
 
+		
+		//stop burning!
+		self->Flames = 0;
+		self->FlameDamage = 0;
+
 #if 0
 /* Don't think this is needed - deathcam is removed at very end of death,
    so DeathcamRemove would get called twice */
@@ -1413,7 +1418,7 @@ void respawn (edict_t *self)
 			return;
 		}
 // ACEBOT_END
-		
+
 		//spectator mode
 		// spectator's don't leave bodies
 		if (self->movetype != MOVETYPE_NOCLIP)
