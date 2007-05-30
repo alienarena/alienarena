@@ -60,7 +60,7 @@ char		*argv[MAX_NUM_ARGVS];
 #ifndef __unix__
 
 #define CONSOLE_WINDOW_CLASS_NAME	"CRX Console"
-#define CONSOLE_WINDOW_NAME			"CodeRED Console"
+#define CONSOLE_WINDOW_NAME			"Alien Arena Console"
 #define CONSOLE_WINDOW_STYLE		(WS_OVERLAPPED|WS_BORDER|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX|WS_CLIPCHILDREN|WS_GROUP)
 
 #define MAX_OUTPUT					32768
@@ -678,9 +678,9 @@ void Sys_Init (void)
 		Sys_Error ("Couldn't get OS info");
 
 	if (vinfo.dwMajorVersion < 4)
-		Sys_Error ("CodeRED requires windows version 4 or greater");
+		Sys_Error ("Alien Arena requires windows version 4 or greater");
 	if (vinfo.dwPlatformId == VER_PLATFORM_WIN32s)
-		Sys_Error ("CodeRED doesn't run on Win32s");
+		Sys_Error ("Alien Arena doesn't run on Win32s");
 	else if ( vinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )
 		s_win95 = true;
 
