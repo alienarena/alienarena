@@ -1410,6 +1410,7 @@ static menulist_s		s_options_alwaysrun_box;
 static menulist_s		s_options_invertmouse_box;
 static menulist_s		s_options_font_box;
 static menulist_s		s_options_crosshair_box;
+static menulist_s		s_options_hud_box;
 static menuslider_s		s_options_sfxvolume_slider;
 static menuslider_s		s_options_bgvolume_slider;
 static menulist_s		s_options_joystick_box;
@@ -1635,27 +1636,38 @@ char **SetFontNames (void)
 	return list;		
 }
 
+extern cvar_t *crosshair;
 #define MAX_CROSSHAIRS 256
 char **crosshair_names;
 int	numcrosshairs;
 
 static void CrosshairFunc( void *unused )
 {
-	Cvar_Set( "crosshair", crosshair_names[s_options_crosshair_box.curvalue] );
+	char cHair[MAX_OSPATH];
+
+	if(s_options_crosshair_box.curvalue > 3)
+		sprintf(cHair, "crosshairs/%s", crosshair_names[s_options_crosshair_box.curvalue]);
+	else
+		strcpy(cHair, crosshair_names[s_options_crosshair_box.curvalue]);
+
+	Cvar_Set( "crosshair", cHair );
 }
 
 void SetCrosshairCursor (void)
 {
 	int i;
+	char cHaircomp[MAX_OSPATH];
+
 	s_options_crosshair_box.curvalue = 1;
 
-	if (!con_font)
-		con_font = Cvar_Get ("crosshair", "ch1", CVAR_ARCHIVE);
+	if (!crosshair)
+		crosshair = Cvar_Get ("crosshair", "ch1", CVAR_ARCHIVE);
 
 	if (numcrosshairs>1)
 		for (i=0; crosshair_names[i]; i++)
 		{
-			if (!Q_strcasecmp(crosshair->string, crosshair_names[i]))
+			sprintf(cHaircomp, "crosshairs/%s", crosshair_names[i]);
+			if (!Q_strcasecmp(crosshair->string, cHaircomp))
 			{
 				s_options_crosshair_box.curvalue = i;
 				return;
@@ -1720,7 +1732,7 @@ char **SetCrosshairNames (void)
 			if (!crosshairfiles || !crosshairfiles[i])
 				continue;
 
-			p = strstr(crosshairfiles[i], "/pics/crosshairs/"); p++;
+			p = strstr(crosshairfiles[i], "/crosshairs/"); p++;
 			p = strstr(p, "/"); p++;
 
 			if (	!strstr(p, ".tga")
@@ -1752,6 +1764,143 @@ char **SetCrosshairNames (void)
 
 	return list;		
 }
+
+extern cvar_t *cl_hudimage1;
+extern cvar_t *cl_hudimage2;
+#define MAX_HUDS 64
+char **hud_names;
+int	numhuds;
+
+static void HudFunc( void *unused )
+{
+	char hud1[MAX_OSPATH] = "pics/i_health.tga";
+	char hud2[MAX_OSPATH] = "pics/i_score.tga";
+
+	if(s_options_hud_box.curvalue > 0) {
+		sprintf(hud1, "pics/huds/%s1", hud_names[s_options_hud_box.curvalue]);
+		sprintf(hud2, "pics/huds/%s2", hud_names[s_options_hud_box.curvalue]);
+	}
+
+	//set the cvars, both of them
+	Cvar_Set( "cl_hudimage1", hud1 );
+	Cvar_Set( "cl_hudimage2", hud2 );
+}
+
+void SetHudCursor (void)
+{
+	int i;
+	char hudset[MAX_OSPATH] = "default";
+	char hudcomp[MAX_OSPATH];
+
+	s_options_hud_box.curvalue = 0;
+
+	if (!cl_hudimage1)
+		cl_hudimage1 = Cvar_Get ("cl_hudimage1", "pics/i_health.tga", CVAR_ARCHIVE);
+	else {
+		strcpy(hudset, cl_hudimage1->string);
+		hudset[strlen(hudset) - 1] = 0;
+	}
+
+	if (numhuds>0)
+		for (i=1; hud_names[i]; i++)
+		{
+			sprintf(hudcomp, "pics/huds/%s", hud_names[i]);
+			if (!Q_strcasecmp(hudset, hudcomp))
+			{
+				s_options_hud_box.curvalue = i;
+				return;
+			}
+		}
+}
+
+void insertHud (char ** list, char *insert, int len )
+{
+	int i, j;
+
+	for (i=1;i<len; i++)
+	{
+		if (!list[i])
+			break;
+
+		if (strcmp( list[i], insert ))
+		{
+			for (j=len; j>i ;j--)
+				list[j] = list[j-1];
+
+			list[i] = strdup(insert);
+
+			return;
+		}
+	}
+
+	list[len] = strdup(insert);
+
+}
+
+char **SetHudNames (void)
+{
+	char *curHud;
+	char **list = 0, *p;
+	char findname[1024];
+	int nhuds = 0, nhudnames;
+	char **hudfiles;
+	char *path = NULL;
+	int i;
+	extern char **FS_ListFiles( char *, int *, unsigned, unsigned );
+
+	list = malloc( sizeof( char * ) * MAX_HUDS );
+	memset( list, 0, sizeof( char * ) * MAX_HUDS );
+
+	nhudnames = 1;
+
+	list[0] = strdup("default"); //the default hud
+	
+	path = FS_NextPath( path );
+	while (path) 
+	{
+		Com_sprintf( findname, sizeof(findname), "%s/pics/huds/*.tga", path );
+		hudfiles = FS_ListFiles( findname, &nhuds, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+		for (i=0;i<nhuds && nhudnames<MAX_HUDS;i++)
+		{
+			int num;
+
+			if (!hudfiles || !hudfiles[i])
+				continue;
+
+			p = strstr(hudfiles[i], "/huds/"); p++;
+			p = strstr(p, "/"); p++;
+
+			if (	!strstr(p, ".tga")
+				&&	!strstr(p, ".pcx")
+				)
+				continue;
+
+			num = strlen(p)-5;
+			p[num] = 0;
+
+			curHud = p;
+
+			if (!fontInList(curHud, nhudnames, list))
+			{
+				insertHud(list, strdup(curHud),nhudnames);
+				nhudnames++;
+			}
+			
+			//set back so whole string get deleted.
+			p[num] = '.';
+		}
+		path = FS_NextPath( path );
+	}
+
+	if (hudfiles)
+		free( hudfiles );
+
+	numhuds = nhudnames;
+
+	return list;		
+}
+
 static void ControlsSetMenuItemValues( void )
 {
 
@@ -1773,6 +1922,7 @@ static void ControlsSetMenuItemValues( void )
 
 	SetFontCursor();
 	SetCrosshairCursor();
+	SetHudCursor();
 
 	Cvar_SetValue( "cl_run", ClampCvar( 0, 1, cl_run->value ) );
 	s_options_alwaysrun_box.curvalue		= cl_run->value;
@@ -2128,29 +2278,38 @@ void Options_MenuInit( void )
 	s_options_crosshair_box.itemnames = crosshair_names;
 	s_options_crosshair_box.generic.statusbar	= "select your crosshair";
 
+	hud_names = SetHudNames ();
+	s_options_hud_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_hud_box.generic.x	= 0;
+	s_options_hud_box.generic.y	= 230;
+	s_options_hud_box.generic.name	= "hud";
+	s_options_hud_box.generic.callback = HudFunc;
+	s_options_hud_box.itemnames = hud_names;
+	s_options_hud_box.generic.statusbar	= "select your hud style";
+
 	s_options_minimap_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_minimap_box.generic.x		= 0;
-	s_options_minimap_box.generic.y		= 230;
+	s_options_minimap_box.generic.y		= 240;
 	s_options_minimap_box.generic.name  = "minimap";
 	s_options_minimap_box.generic.callback = MinimapFunc;
 	s_options_minimap_box.itemnames = minimap_names;
 
 	s_options_joystick_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_joystick_box.generic.x	= 0;
-	s_options_joystick_box.generic.y	= 240;
+	s_options_joystick_box.generic.y	= 250;
 	s_options_joystick_box.generic.name	= "use joystick";
 	s_options_joystick_box.generic.callback = JoystickFunc;
 	s_options_joystick_box.itemnames = yesno_names;
 
 	s_options_defaults_action.generic.type	= MTYPE_ACTION;
 	s_options_defaults_action.generic.x		= 0;
-	s_options_defaults_action.generic.y		= 260;
+	s_options_defaults_action.generic.y		= 270;
 	s_options_defaults_action.generic.name	= "reset defaults";
 	s_options_defaults_action.generic.callback = ControlsResetDefaultsFunc;
 
 	s_options_console_action.generic.type	= MTYPE_ACTION;
 	s_options_console_action.generic.x		= 0;
-	s_options_console_action.generic.y		= 270;
+	s_options_console_action.generic.y		= 280;
 	s_options_console_action.generic.name	= "go to console";
 	s_options_console_action.generic.callback = ConsoleFunc;
 
@@ -2175,6 +2334,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_invertmouse_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_font_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_crosshair_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_hud_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_minimap_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_joystick_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_defaults_action );
@@ -2243,10 +2403,12 @@ static const char *idcredits[] =
 	"Tony Jackson",
 	"Stephan Stahl",
 	"Kyle Hunter",
+	"Andres Mejia",
 	"Quakesrc.org",
 	"",
 	"+ART",
 	"John Diamond",
+	"Shawn Keeth",
 	"",
 	"+LOGO",
 	"Adam -servercleaner- Szalai",
@@ -2254,12 +2416,19 @@ static const char *idcredits[] =
 	"+LEVEL DESIGN",
 	"John Diamond",
 	"",
-	"+BIZ",
-	"Jon Ward",
+	"+CROSSHAIRS AND HUDS",
+	"Astralsin",
+	"Dangeresque",
+	"Phenax",
+	"Roadrage",
+	"Forsaken",
+	"Capt Crazy",
+	"Intimidator",
+	"Stratocaster",
+	"ChexGuy",
 	"",
 	"+SPECIAL THANKS",
-	"Forsaken and Roadrage",
-	"Whitelipper",
+	"The Alien Arena Community",
 	"and everyone else who",
 	"has been loyal to the",
 	"game.",
@@ -2267,9 +2436,19 @@ static const char *idcredits[] =
 	"+LINUX PORT",
 	"Shane Bayer",
 	"",
+	"+FREEBSD PORT",
+	"Ale",
+	"",
+	"+GENTOO PORTAGE",
+	"Paul Bredbury",
+	"",
+	"+DEBIAN PACKAGE",
+	"Andres Mejia",
+	"",
 	"+SOUND EFFECTS AND MUSIC",
-	"Music Composed and Produced by",
-	"Puzzlefighter and Whitelipper",
+	"Music/FX Composed and Produced by",
+	"John Diamond, Whitelipper",
+	"and Soundrangers.com",
 	"",
 	"Alien Arena (C)2007 COR Entertainment, LLC",
 	"All Rights Reserved.",
