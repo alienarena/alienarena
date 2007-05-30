@@ -1,1 +1,0 @@
-crx +set game arena

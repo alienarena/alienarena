@@ -114,6 +114,10 @@ cvar_t	*scriptsloaded;
 cvar_t  *cl_master;
 cvar_t  *cl_master2;
 
+//custom huds
+cvar_t	*cl_hudimage1; 
+cvar_t	*cl_hudimage2;
+
 client_static_t	cls;
 client_state_t	cl;
 
@@ -1643,6 +1647,10 @@ void CL_InitLocal (void)
 
 	cl_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
 	cl_master2 = Cvar_Get ("cl_master2", "master2.corservers.com", CVAR_ARCHIVE);
+
+	//custom huds
+	cl_hudimage1 = Cvar_Get("cl_hudimage1", "pics/i_health.tga", CVAR_ARCHIVE);
+	cl_hudimage2 = Cvar_Get("cl_hudimage2", "pics/i_score.tga", CVAR_ARCHIVE);
 
 	//
 	// register our commands

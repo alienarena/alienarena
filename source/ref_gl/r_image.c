@@ -30,6 +30,9 @@ static unsigned char gammatable[256];
 
 cvar_t		*intensity;
 
+extern cvar_t	*cl_hudimage1; //custom huds
+extern cvar_t	*cl_hudimage2;
+
 unsigned	d_8to24table[256];
 
 qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean is_sky );
@@ -1482,6 +1485,12 @@ image_t	*GL_FindImage (char *name, imagetype_t type)
 	len = strlen(name);
 	if (len<5)
 		return NULL;	//	Com_Error (ERR_DROP, "GL_FindImage: bad name: %s", name);
+
+	//if HUD, then we want to load the one according to what it is set to.
+	if(!strcmp(name, "pics/i_health.pcx")) 
+			strcpy(name, cl_hudimage1->string);
+	if(!strcmp(name, "pics/i_score.pcx")) 
+			strcpy(name, cl_hudimage2->string);
 
 	// look for it
 	for (i=0, image=gltextures ; i<numgltextures ; i++,image++)
