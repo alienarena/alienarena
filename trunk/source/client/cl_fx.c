@@ -1166,38 +1166,36 @@ Wall impact puffs for standard blaster.
 */
 void CL_BlasterParticles (vec3_t org, vec3_t dir)
 {
-	int			i, j, k;
+	int			i, j;
 	cparticle_t	*p;
 	float d;
-	for (i=0 ; i<4 ; i++)
+	for (i=0 ; i<8 ; i++)
 	{
-		for( k=1 ; k<20; k+=(i+1)) {
+		if (!(p = new_particle()))
+			return;
 
-			if (!(p = new_particle()))
-				return;
-
-			p->type = PARTICLE_HIT;
-			p->texnum = r_hittexture->texnum;
-			p->blendsrc = GL_SRC_ALPHA;
-			p->blenddst = GL_ONE;
-			p->color = 0x74;
-			p->scale = (2 * (i+1)) + (rand()&2);
-			p->scalevel = 0;
-			d = rand()&7;
-			for (j=0 ; j<3 ; j++)
-			{
-				p->org[j] = org[j]  +  d*dir[j];
-				p->vel[j] = 0;
-			}
-			p->alpha = 0.3;
-
-			p->alphavel = -2.8 / ((i*2) + frand()*0.3);
-
-			if (p)
-				addParticleLight (p,
-						p->scale*50, 10,
-					0, .5, 1);
+		p->type = PARTICLE_HIT;
+		p->texnum = r_cflashtexture->texnum;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE;
+		p->color = 0x74;
+		p->scale = (1.5 * (i+1)) + (rand()&2);
+		p->scalevel = 12;
+		d = rand()&7;
+		for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = org[j]  +  d*dir[j];
+			p->vel[j] = 0;
+			p->accel[j] = 0;
 		}
+		p->alpha = 0.6;
+
+		p->alphavel = -8.8 / ((i*2) + frand()*0.3);
+
+		if (p && i > 4)
+			addParticleLight (p,
+					p->scale*20, 50,
+				0, .8, 1);
 	}
 }
 
