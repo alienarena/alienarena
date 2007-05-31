@@ -1556,7 +1556,7 @@ void Fire_Think (edict_t *self)
 	float	points;
 	vec3_t	v;
 
-	if (level.time > self->delay)
+	if (level.time > self->delay || self->owner->deadflag == DEAD_DEAD)
 	{
 		self->owner->Flames--;
 		G_FreeEdict (self);
