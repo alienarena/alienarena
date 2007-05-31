@@ -68,10 +68,10 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 	// team one
 	sprintf(string, "xv -8 yv -8 picn i_team1 "
 		"xv 40 yv 28 string \"%4d/%-3d\" "
-		"xv 58 yv 12 num 2 21 "
+		"xv 58 yv 12 num 3 21 "
 		"xv 184 yv -8 picn i_team2 "
 		"xv 230 yv 28 string \"%4d/%-3d\" "
-		"xv 248 yv 12 num 2 22 ",
+		"xv 248 yv 12 num 3 22 ",
 		totalscore[0], total[0],
 		totalscore[1], total[1]);
 	len = strlen(string);

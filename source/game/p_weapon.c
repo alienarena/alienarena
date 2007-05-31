@@ -679,7 +679,7 @@ void weapon_plasma_fire (edict_t *ent)
 		kick = 200;
 	}
 	else {
-		damage = 50;
+		damage = 55;
 		kick = 50;
 	}
 	
