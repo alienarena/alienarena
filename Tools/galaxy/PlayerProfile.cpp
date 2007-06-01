@@ -24,10 +24,10 @@ PlayerProfile::PlayerProfile(CWnd* pParent /*=NULL*/)
 	: CDialog(PlayerProfile::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(PlayerProfile)
-	m_playeremailstr = _T(user.email);
-	m_playernamestr = _T(user.nick);
+	m_playeremailstr = user.email;
+	m_playernamestr = user.nick;
 	m_joinstartup = joinflg;
-	m_gamepathstr = _T(CRXPath);
+	m_gamepathstr = CRXPath;
 	//}}AFX_DATA_INIT
 }
 
@@ -97,9 +97,9 @@ void PlayerProfile::OnOK()
 {
 	// TODO: Add extra validation here
 	//don't leave if player name is not set
-	sprintf(user.nick, _T("%s"), m_playernamestr);
-	sprintf(user.email, _T("%s"), m_playeremailstr);
-	sprintf(CRXPath, _T("%s"), m_gamepathstr);
+	sprintf(user.nick, "%s", m_playernamestr);
+	sprintf(user.email, "%s", m_playeremailstr);
+	sprintf(CRXPath, "%s", m_gamepathstr);
 	if(m_joinstartup) {
 		strcpy(user.joinatstart, "true");
 		joinflg = true;
@@ -109,7 +109,7 @@ void PlayerProfile::OnOK()
 		joinflg = false;
 	}
 
-	if(!_tcscmp(user.nick, "Player") || !user.nick[0]) {
+	if(!strcmp(user.nick, "Player") || !user.nick[0]) {
 		AfxMessageBox("You must choose a real name!");
 		return;
 	}

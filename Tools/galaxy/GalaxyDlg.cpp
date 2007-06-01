@@ -116,7 +116,7 @@ CGalaxyDlg::CGalaxyDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CGalaxyDlg::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CGalaxyDlg)
-	m_sendstring = _T("");
+	m_sendstring = "";
 	//}}AFX_DATA_INIT
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -397,7 +397,7 @@ BOOL CGalaxyDlg::OnInitDialog()
 		joinflg = false;
 
 	//force a player name change the first time program is run, otherwise, continue happily
-	if(!_tcscmp(user.nick, "Player")) {
+	if(!strcmp(user.nick, "Player")) {
 		PlayerProfile ppDlg;
 		ppDlg.DoModal();
 	}
@@ -415,7 +415,7 @@ BOOL CGalaxyDlg::OnInitDialog()
 
 	}
 
-	_tcscpy(user.ident, user.nick);
+	strcpy(user.ident, user.nick);
 
 	if(!strcmp(user.joinatstart, "true")) {
 		WSASetLastError(0);
@@ -867,7 +867,7 @@ void CGalaxyDlg::analizeLine(char Line[1000])
 						msgLine[j] = outputmsg[j+(80*i)];
 					msgLine[80] = 0;
 
-					m_chatthread.InsertItem(messagecount, _T(msgLine));
+					m_chatthread.InsertItem(messagecount, msgLine);
 					messagecount++;
 
 					printed = true;
@@ -893,7 +893,7 @@ void CGalaxyDlg::analizeLine(char Line[1000])
 	   Response = SkipWords(Line,3);
 	   Response.word[0][strlen(Response.word[0])-2]= 0;
 		
-	   m_chatthread.InsertItem(messagecount, _T(Response.word[0]));
+	   m_chatthread.InsertItem(messagecount, Response.word[0]);
 	   messagecount++;
 	   m_chatthread.Scroll(CSize(0, messagecount)); //just just gets it to the bottom for sure
 	   printed = true;
@@ -929,7 +929,7 @@ void CGalaxyDlg::analizeLine(char Line[1000])
 						msgLine[j] = outputmsg[j+(100*i)];
 					msgLine[100] = 0;
 
-					m_chatthread.InsertItem(messagecount, _T(msgLine));
+					m_chatthread.InsertItem(messagecount, msgLine);
 					messagecount++;
 					printed = true;
 				}
@@ -965,7 +965,7 @@ void CGalaxyDlg::analizeLine(char Line[1000])
 						msgLine[j] = outputmsg[j+(100*i)];
 					msgLine[100] = 0;
 
-					m_chatthread.InsertItem(messagecount, _T(msgLine));
+					m_chatthread.InsertItem(messagecount, msgLine);
 					messagecount++;
 
 				}
@@ -1198,7 +1198,7 @@ void CGalaxyDlg::OnButton5()
 				msgLine[j] = mensaje[j+(110*i)];
 			msgLine[110] = 0;
 
-			m_chatthread.InsertItem(messagecount, _T(msgLine));
+			m_chatthread.InsertItem(messagecount, msgLine);
 			messagecount++;
 		}
 		int pos = m_chatthread.GetItemCount();
@@ -1578,16 +1578,12 @@ void CGalaxyDlg::LookUpStats()
 	if(statslog.good()) {
 		while(strlen(name)) {
 			statslog.getline(name, 32); //name
-			name[strlen(name)-1] = 0;
 			statslog.getline(remote_ip, 32); //remote ip
 			statslog.getline(points, 32); //points
-			points[strlen(points)-1] = 0;
 			statslog.getline(frags, 32); //frags
 			statslog.getline(totalfrags, 32); //total frags
-			totalfrags[strlen(totalfrags)-1] = 0;
 			statslog.getline(time, 32); //current time in poll
 			statslog.getline(totaltime, 32);
-			totaltime[strlen(totaltime)-1] =0;
 			real_time = atof(totaltime);
 			real_points = atof(points) * 100/real_time;
 			statslog.getline(ip, 32); //last server.ip
@@ -1599,6 +1595,9 @@ void CGalaxyDlg::LookUpStats()
 			rank++;
 		}
 	}
+	else
+		AfxMessageBox("Unable to parse database...");
+
 	statslog.close();
 	remove("stats.db");
 	if(foundplayer) {
@@ -1664,16 +1663,12 @@ void CGalaxyDlg::LookUpPlayerStats(NMHDR* pNMHDR, LRESULT* pResult)
 	if(statslog.good()) {
 		while(strlen(name)) {
 			statslog.getline(name, 32); //name
-			name[strlen(name)-1] = 0;
 			statslog.getline(remote_ip, 32); //remote ip
 			statslog.getline(points, 32); //points
-			points[strlen(points)-1] = 0;
 			statslog.getline(frags, 32); //frags
 			statslog.getline(totalfrags, 32); //total frags
-			totalfrags[strlen(totalfrags)-1] = 0;
 			statslog.getline(time, 32); //current time in poll
 			statslog.getline(totaltime, 32);
-			totaltime[strlen(totaltime)-1] =0;
 			real_time = atof(totaltime);
 			real_points = atof(points) * 100/real_time;
 			statslog.getline(ip, 32); //last server.ip
@@ -1685,6 +1680,9 @@ void CGalaxyDlg::LookUpPlayerStats(NMHDR* pNMHDR, LRESULT* pResult)
 			rank++;
 		}
 	}
+	else
+		AfxMessageBox("Unable to parse database...");
+
 	statslog.close();
 	remove("stats.db");
 	//change this to bring up a dialog that will allow the addition of this player to your buddy list
