@@ -101,10 +101,10 @@ Selecting "normal" will leave them at whatever level they are configured. Select
 There is a long list of credits - ALIEN ARENA 2007 is greatly indebted to the following for it's creation and completion:
 
 Design:  John Diamond with input from the community at large.
-Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter.
+Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia.
 Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
 Maps:  John Diamond
-Textures:  John Diamond
+Textures and Artwork:  John Diamond, Enki, Adam Saizlai
 Sounds:  John Diamond, Sound Rangers
 Music:  John Diamond, WhiteLipper, Wooden Productions, and SoundRangers
 Linux Port: Shane Bayer
@@ -113,7 +113,7 @@ Gentoo portage: Paul Bredbury
 Debian packaging: Andres Mejia
 Alien Arena IRC Channel:  Astralsin
 
-There are other major contributions from the community from QuakeSrc.org, including MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  
+There are other major contributions from the community from QuakeSrc.org, including MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  A very special thanks goes out to the community members who contributed to the crosshair and hud contest.  A full list of those contributors can be found in the in-game credit list.
 
 5.	COPYRIGHT INFORMATION
 
@@ -122,6 +122,11 @@ ALIEN ARENA 2007 and it's original content are a copyright of COR Entertainment,
 The source code of Alien Arena is Free Software. You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
 It is only permissible to distrubute the game data(models, maps, textures, sound, etc) as a whole, and with the intention of being used with Alien Arena.  It is not permissible to distribute individual portions or items of the game data without express consent from COR Entertainment.
+
+'rcon' and 'svstat' ruby scripts are Copyright (C) 2007 Tony Jackson and Licensed under the GNU Lesser General Public License
+
+The Debian packaging is (C) 2007, Andres Mejia <mcitadel@gmail.com> and
+is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
 
 Under no circumstances ALIEN ARENA 2007 as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2007 may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
 
