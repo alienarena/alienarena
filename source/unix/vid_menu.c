@@ -202,7 +202,9 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "gl_detailtextures", s_detailtex_slider.curvalue);
 	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
 	Cvar_SetValue("gl_normalmaps", s_normalmaps_box.curvalue);
-
+	if(s_normalmaps_box.curvalue)
+		Cvar_SetValue("r_shaders", 1); //because without shaders on this is pointless(normalmaps
+									   //are handled by shaders now
 	vid_ref->modified = true;
 
 	vid_restart = true;
