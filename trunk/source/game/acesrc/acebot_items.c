@@ -460,21 +460,6 @@ int ACEIT_ClassnameToIndex(char *classname)
 	if(strcmp(classname,"item_adrenaline")==0)
 		return ITEMLIST_ADRENALINE;
 
-	if(strcmp(classname,"item_datacd")==0)
-		return ITEMLIST_DATACD;
-
-	if(strcmp(classname,"item_dataspinner")==0)
-		return ITEMLIST_DATASPINNER;
-
-	if(strcmp(classname,"item_securitypass")==0)
-		return ITEMLIST_SECURITYPASS;
-
-	if(strcmp(classname,"item_bluekey")==0)
-		return ITEMLIST_BLUEKEY;
-
-	if(strcmp(classname,"item_redkey")==0)
-		return ITEMLIST_REDKEY;
-
 	if(strcmp(classname,"item_health")==0) // ??
 		return ITEMLIST_HEALTH;
 

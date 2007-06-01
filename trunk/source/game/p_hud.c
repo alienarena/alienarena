@@ -47,8 +47,6 @@ void MoveClientToIntermission (edict_t *ent)
 	// clean up powerup info
 	ent->client->quad_framenum = 0;
 	ent->client->invincible_framenum = 0;
-	ent->client->breather_framenum = 0;
-	ent->client->enviro_framenum = 0;
 	ent->client->haste_framenum = 0;
     ent->client->sproing_framenum = 0;
 	ent->client->grenade_blew_up = false;
@@ -115,8 +113,6 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	// clean up powerup info
 	winner->client->quad_framenum = 0;
 	winner->client->invincible_framenum = 0;
-	winner->client->breather_framenum = 0;
-	winner->client->enviro_framenum = 0;
 	winner->client->haste_framenum = 0;
     winner->client->sproing_framenum = 0;
 	winner->client->grenade_blew_up = false;
@@ -442,7 +438,6 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 	int		sorted[MAX_CLIENTS];
 	int		sortedscores[MAX_CLIENTS];
 	int		score, total;
-	int		picnum;
 	int		x, y;
 	gclient_t	*cl;
 	edict_t		*cl_ent;
@@ -495,7 +490,6 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		cl = &game.clients[sorted[i]];
 		cl_ent = g_edicts + 1 + sorted[i];
 
-		picnum = gi.imageindex ("i_fixme");
 		x = (i>=6) ? 160 : 0;
 		y = 32 + 32 * (i%6);
 
@@ -823,16 +817,6 @@ void G_SetStats (edict_t *ent)
 	{
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_invulnerability");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->invincible_framenum - level.framenum)/10;
-	}
-	else if (ent->client->enviro_framenum > level.framenum)
-	{
-		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_envirosuit");
-		ent->client->ps.stats[STAT_TIMER] = (ent->client->enviro_framenum - level.framenum)/10;
-	}
-	else if (ent->client->breather_framenum > level.framenum)
-	{
-		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_rebreather");
-		ent->client->ps.stats[STAT_TIMER] = (ent->client->breather_framenum - level.framenum)/10;
 	}
 	else if (ent->client->haste_framenum > level.framenum)
 	{

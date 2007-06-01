@@ -1048,8 +1048,6 @@ struct gclient_s
 	// powerup timers
 	float		quad_framenum;
 	float		invincible_framenum;
-	float		breather_framenum;
-	float		enviro_framenum;
 	float		haste_framenum;
 	float		sproing_framenum;
 	float		regen_framenum;

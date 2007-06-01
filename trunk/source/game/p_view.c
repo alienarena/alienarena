@@ -506,22 +506,6 @@ void SV_CalcBlend (edict_t *ent)
 		if (remaining > 30 || (remaining & 4) )
 			SV_AddBlend (1, 1, 0, 0.08, ent->client->ps.blend);
 	}
-	else if (ent->client->enviro_framenum > level.framenum)
-	{
-		remaining = ent->client->enviro_framenum - level.framenum;
-		if (remaining == 30)	// beginning to fade
-			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/airout.wav"), 1, ATTN_NORM, 0);
-		if (remaining > 30 || (remaining & 4) )
-			SV_AddBlend (0, 1, 0, 0.08, ent->client->ps.blend);
-	}
-	else if (ent->client->breather_framenum > level.framenum)
-	{
-		remaining = ent->client->breather_framenum - level.framenum;
-		if (remaining == 30)	// beginning to fade
-			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/airout.wav"), 1, ATTN_NORM, 0);
-		if (remaining > 30 || (remaining & 4) )
-			SV_AddBlend (0.4, 1, 0.4, 0.04, ent->client->ps.blend);
-	}
 	else if (ent->client->haste_framenum > level.framenum)
 	{
 		remaining = ent->client->haste_framenum - level.framenum;
@@ -649,8 +633,6 @@ P_WorldEffects
 */
 void P_WorldEffects (void)
 {
-	qboolean	breather;
-	qboolean	envirosuit;
 	int			waterlevel, old_waterlevel;
 
 	if (current_player->movetype == MOVETYPE_NOCLIP)
@@ -662,9 +644,6 @@ void P_WorldEffects (void)
 	waterlevel = current_player->waterlevel;
 	old_waterlevel = current_client->old_waterlevel;
 	current_client->old_waterlevel = waterlevel;
-
-	breather = current_client->breather_framenum > level.framenum;
-	envirosuit = current_client->enviro_framenum > level.framenum;
 
 	//
 	// if just entered a water volume, play a sound
@@ -723,19 +702,6 @@ void P_WorldEffects (void)
 	//
 	if (waterlevel == 3)
 	{
-		// breather or envirosuit give air
-		if (breather || envirosuit)
-		{
-			current_player->air_finished = level.time + 10;
-
-			if (((int)(current_client->breather_framenum - level.framenum) % 25) == 0)
-			{
-				current_client->breather_sound ^= 1;
-				PlayerNoise(current_player, current_player->s.origin, PNOISE_SELF);
-				//FIXME: release a bubble?
-			}
-		}
-
 		// if out of air, start drowning
 		if (current_player->air_finished < level.time)
 		{	// drown!
@@ -787,18 +753,12 @@ void P_WorldEffects (void)
 				current_player->pain_debounce_time = level.time + 1;
 			}
 
-			if (envirosuit)	// take 1/3 damage with envirosuit
-				T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1*waterlevel, 0, 0, MOD_LAVA);
-			else
-				T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 3*waterlevel, 0, 0, MOD_LAVA);
+			T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 3*waterlevel, 0, 0, MOD_LAVA);
 		}
 
 		if (current_player->watertype & CONTENTS_SLIME)
 		{
-			if (!envirosuit)
-			{	// no damage from slime with envirosuit
-				T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1*waterlevel, 0, 0, MOD_SLIME);
-			}
+			T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1*waterlevel, 0, 0, MOD_SLIME);
 		}
 	}
 }
