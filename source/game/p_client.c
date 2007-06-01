@@ -738,8 +738,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	// remove powerups
 	self->client->quad_framenum = 0;
 	self->client->invincible_framenum = 0;
-	self->client->breather_framenum = 0;
-	self->client->enviro_framenum = 0;
 	self->client->haste_framenum = 0;
 	self->client->sproing_framenum = 0;
 

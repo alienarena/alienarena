@@ -1169,7 +1169,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 	int			i, j;
 	cparticle_t	*p;
 	float d;
-	for (i=0 ; i<8 ; i++)
+	for (i=0 ; i<16 ; i++)
 	{
 		if (!(p = new_particle()))
 			return;
@@ -1179,7 +1179,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
 		p->color = 0x74;
-		p->scale = (1.5 * (i+1)) + (rand()&2);
+		p->scale = (.75 * (i+1)) + (rand()&2);
 		p->scalevel = 12;
 		d = rand()&7;
 		for (j=0 ; j<3 ; j++)
@@ -1188,7 +1188,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 			p->vel[j] = 0;
 			p->accel[j] = 0;
 		}
-		p->alpha = 0.6;
+		p->alpha = 0.3;
 
 		p->alphavel = -8.8 / ((i*2) + frand()*0.3);
 
