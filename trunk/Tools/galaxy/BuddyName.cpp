@@ -20,7 +20,7 @@ BuddyName::BuddyName(CWnd* pParent /*=NULL*/)
 	: CDialog(BuddyName::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(BuddyName)
-	m_buddynamestr = _T(newBuddyName);
+	m_buddynamestr = newBuddyName;
 	//}}AFX_DATA_INIT
 }
 
@@ -58,7 +58,7 @@ void BuddyName::OnChangeBuddyname()
 
 void BuddyName::OnOK() 
 {
-	sprintf(newBuddyName, _T("%s"), m_buddynamestr);
+	sprintf(newBuddyName, "%s", m_buddynamestr);
 
 	CDialog::OnOK();
 }
