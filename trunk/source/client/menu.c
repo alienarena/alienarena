@@ -1446,6 +1446,8 @@ static void BrainletsFunc( void *unused )
 static void ShadersFunc( void *unused )
 {
 	Cvar_SetValue( "r_shaders", s_options_shaders_box.curvalue);
+	if(!s_options_shaders_box.curvalue)
+		Cvar_SetValue("gl_normalmaps", 0); //because normal maps are controlled by shaders
 }
 static void ShadowsFunc( void *unused )
 {
@@ -2409,6 +2411,7 @@ static const char *idcredits[] =
 	"+ART",
 	"John Diamond",
 	"Shawn Keeth",
+	"Enki",
 	"",
 	"+LOGO",
 	"Adam -servercleaner- Szalai",
@@ -2426,6 +2429,7 @@ static const char *idcredits[] =
 	"Intimidator",
 	"Stratocaster",
 	"ChexGuy",
+	"Crayon",
 	"",
 	"+SPECIAL THANKS",
 	"The Alien Arena Community",
