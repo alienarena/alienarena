@@ -28,7 +28,7 @@ binary-indep: build install
 	dh_installdocs -palienarena2007-data
 	dh_installdeb -palienarena2007-data
 	dh_shlibdeps -palienarena2007-data
-	dh_compress -palienarena2007-data -Xcreative-commons-by-nc-nd-3.0
+	dh_compress -palienarena2007-data
 	dh_fixperms -palienarena2007-data
 	dh_gencontrol -palienarena2007-data
 	dh_md5sums -palienarena2007-data
