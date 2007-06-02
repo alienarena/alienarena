@@ -6,9 +6,11 @@ ALIEN ARENA 2007
 * Installation
 * Basic Commands
 * Deathmatch
+* Completing Levels
 * Connecting to a server
-4 The CodeRED ACE Bot
-5. Copyright Information
+4. The CodeRED ACE Bot
+5. Credits
+6. Copyright Information
 
 
 1.	INTRODUCTION
@@ -21,14 +23,14 @@ Alien Arena offers CTF,  AOA(All Out Assault) mode, in which players can climb i
 
 2.	SYSTEM REQUIREMENTS
 
-1 ghz
-256 mb RAM
-500 mb hard disk space
+1 GHz
+256 MB RAM
+500 MB hard disk space
 3D Accelerator
 
 3.	GETTING STARTED
 
-1.	INSTALLATION
+*	INSTALLATION
 
 (Windows)
 
@@ -38,13 +40,13 @@ Once finished, you can click on the Alien Arena icon that has been placed on you
 
 (Linux)
 
-Simply unzip the archive in your usr/local/games folder or wherever you wish to place the game.  
+Simply unzip the archive in your /usr/local/games folder or wherever you wish to place the game.
 
 Type ./crx to run the game, or ./crded to start a dedicated server or use the shortcuts installed in the menu.
 
 Source files are included, so you may compile the binaries yourself if neccessary.  Please visit the forum if you have any questions regarding this.
 
-2. BASIC COMMANDS
+* BASIC COMMANDS
 
 ALIEN ARENA works very much like Quake 2/3, with a few notable exceptions.
 
@@ -61,7 +63,7 @@ The player will have the following weapons:
 
 Weapons also have alternate firing modes.  In you controls menu, select your secondary fire key and this will allow you to use these modes.  
 
-There are new powerups such as haste and sproing, in addition to the venerable quad damage and invulerabilty.  
+There are new powerups such as haste and sproing, in addition to the venerable quad damage and invulnerability.
 
 The player will also have a flashlight, which is always present, and very useful.  The "F" key activates and de-activates the flashlight, or you can bind whatever key you wish to "flashlight" which will turn it on and off.
 
@@ -69,7 +71,7 @@ It would be advisable for you to change video settings for however you wish to v
 
 ALIEN ARENA also allows for colored names just as Quake 3, using the ^ character followed by a number to set the color.
 
-COMPLETING LEVELS
+* COMPLETING LEVELS
 
 In Alien Arena you can play a single player tournament where  your goal will to be to reach the fraglimit before a bot does.  If you fail, you will be forced to repeat the level until you do. These rules can be changed in the menu system.  You can also play people online, where your goal is to reach the fraglimit before your opponents, or by scoring the most frags before the time limit is up.
 
@@ -79,7 +81,7 @@ In Deathball, the goal is to score as many points as possible, either by killing
 
 In Team Core Assault, your goal is to disable your enemy teams power nodes, then destroy the central spider node.  You can only do damage to the spider node when all other power nodes are disabled.
 
-CONNECTING TO A SERVER
+* CONNECTING TO A SERVER
 
 You can either select "join server" from the "multiplayer" menu and select a server in the list, or you can use the CodeRED Galaxy server browser(windows only).  In the in-game browser, servers are listed in order of ping, with lowest ping at the top of the list.  
 
@@ -87,7 +89,7 @@ You can either select "join server" from the "multiplayer" menu and select a ser
 
 Bots are a built in feature of ALIEN ARENA 2007.  Several bots are already configured for multiplayer games, and in Alien Arena, each level has a specific bot file for what bots are to be played in each level.
 
-To add a bot, type "sv addbot name model/skin", and to remove a bot type "sv removebot namee". You can also add bots in the menu, in the deathmatch/bots flags area.
+To add a bot, type "sv addbot name model/skin", and to remove a bot type "sv removebot name". You can also add bots in the menu, in the deathmatch/bots flags area.
 
 In your Deathmatch options, you can configure other options such as chatting, node saving, and aiming.
 
@@ -111,11 +113,11 @@ Linux Port: Shane Bayer
 FreeBSD port: "Ale"
 Gentoo portage: Paul Bredbury
 Debian packaging: Andres Mejia
-Alien Arena IRC Channel:  Astralsin
+Alien Arena IRC Channel: Astralsin
 
-There are other major contributions from the community from QuakeSrc.org, including MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  A very special thanks goes out to the community members who contributed to the crosshair and hud contest.  A full list of those contributors can be found in the in-game credit list.
+There are other major contributions from the community from QuakeSrc.org, including MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  A very special thanks goes out to the community members who contributed to the crosshair and hud contest. A full list of those contributors can be found in the in-game credit list.
 
-5.	COPYRIGHT INFORMATION
+6.	COPYRIGHT INFORMATION
 
 ALIEN ARENA 2007 and it's original content are a copyright of COR Entertainment, LLC.  
 
