@@ -1769,7 +1769,7 @@ char **SetCrosshairNames (void)
 
 extern cvar_t *cl_hudimage1;
 extern cvar_t *cl_hudimage2;
-#define MAX_HUDS 64
+#define MAX_HUDS 256
 char **hud_names;
 int	numhuds;
 
