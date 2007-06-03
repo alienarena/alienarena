@@ -2285,7 +2285,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 			Info_SetValueForKey(userinfo, "rejmsg", "Server spectator limit is full.");
 			return false;
 		}
-	} else {
+	} else if(!ent->is_bot){
 		// check for a password
 		value = Info_ValueForKey (userinfo, "password");
 		if (*password->string && strcmp(password->string, "none") && 

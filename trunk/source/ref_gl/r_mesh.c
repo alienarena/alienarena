@@ -52,6 +52,8 @@ int model_dlights_num;
 extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 extern rscript_t *rs_glass;
 
+extern cvar_t *cl_gun;
+
 // precalculated dot products for quantized angles
 #define SHADEDOT_QUANT 16
 float	r_avertexnormal_dots[SHADEDOT_QUANT][256] =
@@ -361,7 +363,8 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				va++;
 				order += 3;
 			} while (--count);
-			qglDrawArrays(mode,0,va);
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+				qglDrawArrays(mode,0,va);
 		}
 			
 	}
@@ -552,9 +555,13 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					va++;
 				} while (--count);
 
+
 				if (!(stage->normalmap && !gl_normalmaps->value)) //disable so that we 
 					//can still have shaders without normalmapped models if so chosen
-					qglDrawArrays(mode,0,va);
+				{
+					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+						qglDrawArrays(mode,0,va);
+				}
 						
 				qglColor4f(1,1,1,1);
 				if (stage->colormap.enabled)
@@ -845,7 +852,7 @@ void R_DrawAliasModel (entity_t *e)
 		if ( r_lefthand->value == 2 || g_drawing_refl)
 			return;
 	}
-
+	
 	paliashdr = (dmdl_t *)currentmodel->extradata;
 	
 	//
@@ -1028,7 +1035,6 @@ void R_DrawAliasModel (entity_t *e)
 	if (!skin)
 		skin = r_notexture;	// fallback...
 	GL_Bind(skin->texnum);
-
 
 	// draw it
 
