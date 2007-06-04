@@ -1,4 +1,3 @@
-#Hash contains strings to 'grep' out of $file
 $h = Hash.new
 $h['blaster'] = /was blasted by #{$player}/
 $h['chaingunBurst'] = /was blown away by #{$player}'s chaingun burst/
