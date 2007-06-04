@@ -1,25 +1,17 @@
 #!/usr/bin/env ruby
 
-#The file that we parse
 $file = './qconsole.log'
-#The player we are looking for stats is the first command-line argument to the script.
 $player = ARGV[0]
 
-#Actually parses $file for the amount of kills/deaths
 require "kills.rb"
-#A way to sort strings based on ONE integrated number. Used in sortArrays()
 require "compareStrWithNum.rb"
 
-#Parses log file for all player names, this is NOT used yet.
-#It would be nice if no arguments were placed for $player to
-#Use this to show stats for ALL players, hehe.
 def get_players()
 	File.open($file) do |op|
 		op.grep(/entered the game/).inject([]) {|mem, line| mem << line.gsub(/ entered the game/, '') }.uniq
 	end
 end
 
-#Creates & Sorts arrays of weapon kills.. Needs cleanup
 def sortArrays()
 	a0 = Compare.new("Blaster Kills:\t\t #{Kills.blaster().to_s}")
 	a1 = Compare.new("Chaingun Burst Kills:\t #{Kills.chaingunBurst().to_s}")
@@ -38,5 +30,4 @@ def sortArrays()
 	[a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13].sort_by { |a| a }
 end
 
-#By default Compare sorts by least to greatest, lets reverse that to greatest to least.
 puts sortArrays().reverse
