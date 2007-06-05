@@ -1,12 +1,14 @@
 #!/usr/bin/env ruby
 
-$file = './qconsole.log'
-$player = ARGV[0]
-
 require "kills.rb"
 require "compareStrWithNum.rb"
 
-def get_players()
+def parseArguments()
+	$player = ARGV[0]
+	$file = './qconsole.log'
+end
+
+def getPlayers()
 	File.open($file) do |op|
 		op.grep(/entered the game/).inject([]) {|mem, line| mem << line.gsub(/ entered the game/, '') }.uniq
 	end
@@ -30,4 +32,3 @@ def sortArrays()
 	[a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13].sort_by { |a| a }
 end
 
-puts sortArrays().reverse
