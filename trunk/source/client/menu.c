@@ -2226,7 +2226,7 @@ void Options_MenuInit( void )
 
 	s_options_bgvolume_slider.generic.type	= MTYPE_SLIDER;
 	s_options_bgvolume_slider.generic.x	= 0;
-	s_options_bgvolume_slider.generic.y	= 130;
+	s_options_bgvolume_slider.generic.y	= 120;
 	s_options_bgvolume_slider.generic.name	= "music volume";
 	s_options_bgvolume_slider.generic.callback	= UpdateBGVolumeFunc;
 	s_options_bgvolume_slider.minvalue		= 0;
