@@ -174,7 +174,7 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
 	Cvar_SetValue( "gl_finish", s_finish_box.curvalue );
 	Cvar_SetValue( "gl_swapinterval", s_vsync_box.curvalue );
-	if(s_mode_list.curvalue == 0) {
+	if(s_mode_list.curvalue == 8) {
 		Cvar_SetValue( "gl_mode", -1);
 		//set custom width and height only in this case
 		//check for sane values
@@ -191,7 +191,7 @@ static void ApplyChanges( void *unused )
 		Cvar_SetValue("vid_height", atoi( s_height_field.buffer ));
 	}
 	else
-		Cvar_SetValue( "gl_mode", s_mode_list.curvalue + 2 ); //offset added back 
+		Cvar_SetValue( "gl_mode", s_mode_list.curvalue + 3 ); //offset added back 
 	Cvar_SetValue( "gl_texres", s_texres_box.curvalue );
 	Cvar_SetValue( "gl_reflection", s_reflect_box.curvalue);
 	Cvar_SetValue( "r_bloom", s_bloom_box.curvalue);
@@ -226,7 +226,6 @@ void VID_MenuInit( void )
 {
 	static const char *resolutions[] = 
 	{
-		"[custom   ]",
 		"[640 480  ]",
 		"[800 600  ]",
 		"[960 720  ]",
@@ -235,6 +234,7 @@ void VID_MenuInit( void )
 		"[1280 1024]",
 		"[1600 1200]",
 		"[2048 1536]",
+		"[custom   ]",
 		0
 	};
 
@@ -287,7 +287,10 @@ void VID_MenuInit( void )
 	if ( !_windowed_mouse)
         _windowed_mouse = Cvar_Get( "_windowed_mouse", "1", CVAR_ARCHIVE );
 
-	s_mode_list.curvalue = gl_mode->value - 2;
+	if(gl_mode->value == -1)
+		s_mode_list.curvalue = 8;
+	else
+		s_mode_list.curvalue = gl_mode->value - 3; //done because of the removed resolutions hack
 
 	if ( s_mode_list.curvalue < 0 )
 		s_mode_list.curvalue = 0;
