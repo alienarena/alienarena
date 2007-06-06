@@ -108,7 +108,7 @@ static void M_CrosshairPic( char *name )
 	int w, h;
 
 	w = h = 64;
-	Draw_StretchPic (viddef.width / 2 - w/2 - 110, viddef.height / 2 + 135, w, h, name);
+	Draw_StretchPic (viddef.width / 2 - w/2 - 110, viddef.height / 2 + 100, w, h, name);
 }
 static void M_Background( char *name)
 {
@@ -2144,7 +2144,7 @@ void Options_MenuInit( void )
 	** configure controls menu and menu items
 	*/
 	s_options_menu.x = viddef.width / 2;
-	s_options_menu.y = viddef.height / 2 - 58;
+	s_options_menu.y = viddef.height / 2 - 100;
 	s_options_menu.nitems = 0;
 
 	s_player_setup_action.generic.type	= MTYPE_ACTION;
