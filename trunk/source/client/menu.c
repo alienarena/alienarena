@@ -2439,6 +2439,7 @@ static const char *idcredits[] =
 	"+SOUND EFFECTS AND MUSIC",
 	"Music/FX Composed and Produced by",
 	"John Diamond, Whitelipper",
+	"Arteria Games, Wooden Productions",
 	"and Soundrangers.com",
 	"",
 	"+CROSSHAIRS AND HUDS",
