@@ -17532,15 +17532,6 @@
 ( 128 1040 -200 ) ( 104 1040 -200 ) ( 104 1024 -200 ) arena3/floor2 -40 0 90 1 1 0 0 0
 }
 }
-// entity 5
-{
-"origin" "80 -720 -192"
-"volume" "1"
-"attenuation" "1"
-"noise" "world/marsmusic5.wav"
-"spawnflags" "5"
-"classname" "target_speaker"
-}
 // entity 6
 {
 "height" "1400"
