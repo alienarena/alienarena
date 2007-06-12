@@ -45,3 +45,5 @@ Configuring the application
 
     Any questions, please ask tttonyyy on IRC (#alienarena on efnet) or post on
     the forums: http://corent.proboards42.com/index.cgi
+
+Please report any bugs to tonyj@cooldark.com
