@@ -199,7 +199,7 @@ void Com_Printf (char *msg, ...)
 
 //======================================================================
 
-//#ifdef __linux__
+//#ifdef __unix__
 
 #define Z_MAGIC		0x1d1d
 
