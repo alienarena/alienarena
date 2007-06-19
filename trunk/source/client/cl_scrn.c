@@ -199,8 +199,6 @@ for a few moments
 void SCR_CenterPrint (char *str)
 {
 	char	*s;
-	char	line[64];
-	int		i, j, l;
 
 	strncpy (scr_centerstring, str, sizeof(scr_centerstring)-1);
 	scr_centertime_off = scr_centertime->value;
@@ -215,39 +213,6 @@ void SCR_CenterPrint (char *str)
 			scr_center_lines++;
 		s++;
 	}
-
-	// echo it to the console
-	Com_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
-
-	s = str;
-	do	
-	{
-	// scan the width of the line
-		for (l=0 ; l<40 ; l++)
-			if (s[l] == '\n' || !s[l])
-				break;
-		for (i=0 ; i<(40-l)/2 ; i++)
-			line[i] = ' ';
-
-		for (j=0 ; j<l ; j++)
-		{
-			line[i++] = s[j];
-		}
-
-		line[i] = '\n';
-		line[i+1] = 0;
-
-		Com_Printf ("%s", line);
-
-		while (*s && *s != '\n')
-			s++;
-
-		if (!*s)
-			break;
-		s++;		// skip the \n
-	} while (1);
-	Com_Printf("\n\n\35\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\36\37\n\n");
-	Con_ClearNotify ();
 }
 
 

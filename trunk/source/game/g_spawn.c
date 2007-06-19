@@ -900,6 +900,16 @@ void SP_worldspawn (edict_t *ent)
 
 	gi.soundindex ("weapons/whoosh.wav");
 
+	gi.soundindex ("misc/1frags.wav");
+	gi.soundindex ("misc/2frags.wav");
+	gi.soundindex ("misc/3frags.wav");
+	gi.soundindex ("misc/one.wav");
+	gi.soundindex ("misc/two.wav");
+	gi.soundindex ("misc/three.wav");
+	gi.soundindex ("misc/godlike.wav");
+	gi.soundindex ("misc/rampage.wav");
+	gi.soundindex ("misc/fight.wav");
+
 	//precache any gibs
 	sm_meat_index = gi.modelindex ("models/objects/gibs/sm_meat/tris.md2");
 	gi.modelindex ("models/objects/gibs/mart_gut/tris.md2");
