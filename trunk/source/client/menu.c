@@ -5490,12 +5490,11 @@ void PlayerConfig_MenuDraw( void )
 	
 	memset( &refdef, 0, sizeof( refdef ) );
 
-	//refdef.x = viddef.width / 2 - 190;
-	refdef.y = viddef.height / 2 - 250;
-	refdef.x = 220;
-	refdef.width = 600;
-	refdef.height = 600;
-	refdef.fov_x = 85;
+	refdef.width = viddef.width;
+	refdef.height = viddef.height;
+	refdef.x = 0;
+	refdef.y = 0;
+	refdef.fov_x = 80;
 	refdef.fov_y = CalcFov( refdef.fov_x, refdef.width, refdef.height );
 	refdef.time = cls.realtime*0.001;
 
