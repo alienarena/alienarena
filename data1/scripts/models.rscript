@@ -10,172 +10,62 @@ glass
 models/items/ammo/rockets/medium/skin
 {
 	{
+		map gfx/redlightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
 		map models/items/ammo/rockets/medium/skin.tga
-		nolightmap
+		alphamask	
 	}
-	{
-		map gfx/red.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		scroll static 0 static 0
-		alphashift 50 0.01 0.5
-		nolightmap
-	}
-	{
-		map gfx/chrome.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		alphashift 0 .2  .2
-		nolightmap	
-		envmap
-
-	}
-	{
-		map gfx/flash.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static .5 static .5
-		scroll static 3 static 1
-		alphashift 20 0.05 0.4
-		nolightmap
-	}
-	
-	
 }
 models/items/ammo/cells/medium/cell
 {
 	{
+		map gfx/greenlightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
 		map models/items/ammo/cells/medium/cell.tga
-		nolightmap	
-	}
-	{
-		map gfx/green.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		scroll static 0 static 0
-		alphashift 50 0.01 0.5
-		nolightmap
-	}
-	{
-		map gfx/chrome.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		alphashift 0 .2  .2
-		nolightmap	
-		envmap
-
-	}
-	{
-		map gfx/flash.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static .5 static .5
-		scroll static 3 static 1
-		alphashift 20 0.05 0.4
-		nolightmap
-	}
-	
-	
+		alphamask	
+	}		
 }
 models/items/ammo/shells/medium/skin
 {
 	{
+		map gfx/bluelightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
 		map models/items/ammo/shells/medium/skin.tga
-		nolightmap
-	}
-	{
-		map gfx/purple.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		scroll static 0 static 0
-		alphashift 50 0.01 0.5
-		nolightmap
-	}
-	{
-		map gfx/chrome.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		alphashift 0 .2  .2
-		nolightmap	
-		envmap
-
-	}
-	{
-		map gfx/flash.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static .5 static .5
-		scroll static 3 static 1
-		alphashift 20 0.05 0.4
-		nolightmap
-	}
-	
-	
+		alphamask
+	}	
 }
 models/items/ammo/bullets/medium/skin
 {
 	{
+		map gfx/greenlightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
 		map models/items/ammo/bullets/medium/skin.tga
-		nolightmap
+		alphamask
 	}
-	{
-		map gfx/yellow.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		scroll static 0 static 0
-		alphashift 50 0.01 0.5
-		nolightmap
-	}
-	{
-		map gfx/chrome.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		alphashift 0 .2  .2
-		nolightmap	
-		envmap
-
-	}
-	{
-		map gfx/flash.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static .5 static .5
-		scroll static 3 static 1
-		alphashift 20 0.05 0.4
-		nolightmap
-	}
-	
-	
 }
 models/items/ammo/grenades/medium/skin
 {
 	{
+		map gfx/redlightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
 		map models/items/ammo/grenades/medium/skin.tga
-		nolightmap
+		alphamask
 	}
-	{
-		map gfx/orange.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		scroll static 0 static 0
-		alphashift 50 0.01 0.5
-		nolightmap
-	}
-	{
-		map gfx/chrome.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		alphashift 0 .2  .2
-		nolightmap	
-		envmap
-
-	}
-	{
-		map gfx/flash.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static .5 static .5
-		scroll static 3 static 1
-		alphashift 20 0.05 0.4
-		nolightmap
-	}
-	
-	
 }
 models/items/armor/shard/skin
 {
