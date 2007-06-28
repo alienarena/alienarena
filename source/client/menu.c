@@ -5364,7 +5364,7 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_name_field.generic.type = MTYPE_FIELD;
 	s_player_name_field.generic.name = "name";
 	s_player_name_field.generic.callback = 0;
-	s_player_name_field.generic.x		= 0;
+	s_player_name_field.generic.x		= -8;
 	s_player_name_field.generic.y		= 0;
 	s_player_name_field.length	= 20;
 	s_player_name_field.visible_length = 20;
@@ -5373,41 +5373,41 @@ qboolean PlayerConfig_MenuInit( void )
 
 	s_player_model_title.generic.type = MTYPE_SEPARATOR;
 	s_player_model_title.generic.name = "model";
-	s_player_model_title.generic.x    = -8;
+	s_player_model_title.generic.x    = -16;
 	s_player_model_title.generic.y	 = 60;
 
 	s_player_model_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_model_box.generic.x	= -56;
+	s_player_model_box.generic.x	= -64;
 	s_player_model_box.generic.y	= 70;
 	s_player_model_box.generic.callback = ModelCallback;
-	s_player_model_box.generic.cursor_offset = -48;
+	s_player_model_box.generic.cursor_offset = -56;
 	s_player_model_box.curvalue = currentdirectoryindex;
 	s_player_model_box.itemnames = s_pmnames;
 
 	s_player_skin_title.generic.type = MTYPE_SEPARATOR;
 	s_player_skin_title.generic.name = "skin";
-	s_player_skin_title.generic.x    = -16;
+	s_player_skin_title.generic.x    = -24;
 	s_player_skin_title.generic.y	 = 84;
 
 	s_player_skin_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_skin_box.generic.x	= -56;
+	s_player_skin_box.generic.x	= -64;
 	s_player_skin_box.generic.y	= 94;
 	s_player_skin_box.generic.name	= 0;
 	s_player_skin_box.generic.callback = 0;
-	s_player_skin_box.generic.cursor_offset = -48;
+	s_player_skin_box.generic.cursor_offset = -56;
 	s_player_skin_box.curvalue = currentskinindex;
 	s_player_skin_box.itemnames = s_pmi[currentdirectoryindex].skindisplaynames;
 
 	s_player_hand_title.generic.type = MTYPE_SEPARATOR;
 	s_player_hand_title.generic.name = "handedness";
-	s_player_hand_title.generic.x    = 32;
+	s_player_hand_title.generic.x    = 24;
 	s_player_hand_title.generic.y	 = 108;
 
 	s_player_handedness_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_handedness_box.generic.x	= -56;
+	s_player_handedness_box.generic.x	= -64;
 	s_player_handedness_box.generic.y	= 118;
 	s_player_handedness_box.generic.name	= 0;
-	s_player_handedness_box.generic.cursor_offset = -48;
+	s_player_handedness_box.generic.cursor_offset = -56;
 	s_player_handedness_box.generic.callback = HandednessCallback;
 	s_player_handedness_box.curvalue = Cvar_VariableValue( "hand" );
 	s_player_handedness_box.itemnames = handedness;
@@ -5418,14 +5418,14 @@ qboolean PlayerConfig_MenuInit( void )
 
 	s_player_rate_title.generic.type = MTYPE_SEPARATOR;
 	s_player_rate_title.generic.name = "connect speed";
-	s_player_rate_title.generic.x    = 56;
+	s_player_rate_title.generic.x    = 48;
 	s_player_rate_title.generic.y	 = 156;
 
 	s_player_rate_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_rate_box.generic.x	= -56;
+	s_player_rate_box.generic.x	= -64;
 	s_player_rate_box.generic.y	= 166;
 	s_player_rate_box.generic.name	= 0;
-	s_player_rate_box.generic.cursor_offset = -48;
+	s_player_rate_box.generic.cursor_offset = -56;
 	s_player_rate_box.generic.callback = RateCallback;
 	s_player_rate_box.curvalue = i;
 	s_player_rate_box.itemnames = rate_names;
@@ -5434,7 +5434,7 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_download_action.generic.name	= "download options";
 	s_player_download_action.generic.flags= QMF_LEFT_JUSTIFY;
 	s_player_download_action.generic.cursor_offset = -16;
-	s_player_download_action.generic.x	= -24;
+	s_player_download_action.generic.x	= -32;
 	s_player_download_action.generic.y	= 186;
 	s_player_download_action.generic.statusbar = NULL;
 	s_player_download_action.generic.callback = DownloadOptionsFunc;
@@ -5494,7 +5494,7 @@ void PlayerConfig_MenuDraw( void )
 	refdef.height = viddef.height;
 	refdef.x = 0;
 	refdef.y = 0;
-	refdef.fov_x = 80;
+	refdef.fov_x = 90;
 	refdef.fov_y = CalcFov( refdef.fov_x, refdef.width, refdef.height );
 	refdef.time = cls.realtime*0.001;
 
