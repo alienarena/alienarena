@@ -1054,11 +1054,11 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	}
 	else {
 		if(ent->client->buttons & BUTTON_ATTACK2) { //alt fire
-			fire_blaster_beam (ent, start, forward, damage/2, 0, false);
+			fire_blaster_beam (ent, start, forward, damage/1.5, 0, false);
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("vehicles/shootlaser.wav"), 1, ATTN_NORM, 0);
 		}
 		else
-			fire_blasterball (ent, start, forward, damage, 1000, effect, hyper);
+			fire_blasterball (ent, start, forward, damage, 1200, effect, hyper);
 	}
 	// send muzzle flash
 	if(!(ent->client->buttons & BUTTON_ATTACK2)){
@@ -1088,10 +1088,8 @@ void Weapon_Blaster_Fire (edict_t *ent)
 {
 	int		damage;
 
-	if (deathmatch->value)
-		damage = 20; //was 15
-	else
-		damage = 25;
+	damage = 25;
+	
 	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
 	ent->client->ps.gunframe++;
 }

@@ -367,7 +367,7 @@ void blasterball_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 			gi.WriteDir (plane->normal);
 		gi.multicast (self->s.origin, MULTICAST_PVS);		
 	}
-	T_RadiusDamage(self, self->owner, 75, other, 150, MOD_PLASMA_SPLASH, 0);
+	T_RadiusDamage(self, self->owner, 95, other, 150, MOD_PLASMA_SPLASH, 0);
 	G_FreeEdict (self);
 }
 void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, qboolean hyper)

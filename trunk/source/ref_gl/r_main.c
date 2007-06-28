@@ -788,11 +788,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			qglBegin ( GL_QUADS );
 		}
 
-		if(p->type != PARTICLE_BEAM) {
-			VectorScale ( right, p->dist, pright );
-			VectorScale ( up, p->dist, pup );
-		}
-		else {
+		if(p->type == PARTICLE_BEAM || p->type == PARTICLE_SHOT) {
 
 			VectorSubtract(p->origin, p->angle, move);
 			VectorNormalize(move);
@@ -804,6 +800,10 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 
 			VectorScale(pright, 5*scale, pright);
 			VectorScale(pup, 5*scale, pup);
+		}
+		else {
+			VectorScale ( right, p->dist, pright );
+			VectorScale ( up, p->dist, pup );
 		}
 
 		VectorSet (corner[0], 
