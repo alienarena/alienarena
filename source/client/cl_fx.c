@@ -1257,13 +1257,11 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 	float		len;
 	int			j;
 	cparticle_t	*p;
-	int			dec;
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 
-	dec = 5;
 	VectorScale (vec, 5, vec);
 
 	if (!(p = new_particle()))
@@ -1273,12 +1271,38 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 
 	p->alpha = 1;
 	p->alphavel = -50.0;
-	p->type = PARTICLE_SHOT;
+	p->type = PARTICLE_HIT;
 	p->texnum = r_shottexture->texnum;
 	p->scale = 8;
+
 	p->blendsrc = GL_ONE;
 	p->blenddst = GL_ONE;
 	p->color = 0x72;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = move[j];
+		p->vel[j] = 0;
+		p->accel[j] = 0;
+	}
+
+	
+	if (!(p = new_particle())) 
+		return;
+
+	VectorClear (p->accel);
+
+	p->alpha = .5;
+	p->alphavel = -50.0;
+	p->type = PARTICLE_SHOT;
+	p->texnum = r_cflashtexture->texnum;
+	p->scale = 15;
+	p->angle[1] = cl.refdef.viewangles[0];
+	p->angle[0] = sin(len);
+	p->angle[2] = cl.refdef.viewangles[2];
+
+	p->blendsrc = GL_ONE;
+	p->blenddst = GL_ONE;
+	p->color = 0x79;
 	for (j=0 ; j<3 ; j++)
 	{
 		p->org[j] = move[j];
