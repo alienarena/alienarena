@@ -385,7 +385,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	}
 	//diminish plasma splash, as we want this to be minimal, as it's more used for tricks
 	if(mod == MOD_PLASMA_SPLASH)
-		damage = 1;
+		damage /= (1+ (int)(random() * 10.0));
 
 	take = damage;
 	save = 0;
