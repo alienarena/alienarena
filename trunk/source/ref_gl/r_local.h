@@ -298,9 +298,12 @@ void R_RenderFlares (void);
 
 void	Draw_GetPicSize (int *w, int *h, char *name);
 void	Draw_Pic (int x, int y, char *name);
+void	Draw_ScaledPic (int x, int y, float scale, char *pic);
 void	Draw_StretchPic (int x, int y, int w, int h, char *name);
 void	Draw_Char (int x, int y, int c);
 void	Draw_ColorChar (int x, int y, int num, vec4_t color);
+void	Draw_ScaledChar(int x, int y, int num, int scale);
+void	Draw_ScaledColorChar (int x, int y, int num, vec4_t color, int scale);
 void	Draw_TileClear (int x, int y, int w, int h, char *name);
 void	Draw_Fill (int x, int y, int w, int h, int c);
 void	Draw_FadeScreen (void);

@@ -45,10 +45,14 @@ vec4_t	color_table[8] =
 
 void DrawString (int x, int y, char *s)
 {
+	int charscale;
+	charscale = (viddef.height)/100;
+	if(charscale < 8)
+		charscale = 8;
 	while (*s)
 	{
-		Draw_Char (x, y, *s);
-		x+=8;
+		Draw_ScaledChar (x, y, *s, charscale);
+		x+=charscale;
 		s++;
 	}
 }
@@ -61,6 +65,11 @@ void Draw_ColorString ( int x, int y, char *str )
 {
 	int		num;
 	vec4_t	scolor;
+	int		charscale;
+
+	charscale = charscale = (viddef.height)/100;
+	if(charscale < 8)
+		charscale = 8;
 
 	scolor[0] = 0;
 	scolor[1] = 1;
@@ -74,7 +83,7 @@ void Draw_ColorString ( int x, int y, char *str )
 			continue;
 		}
 		
-		Draw_ColorChar (x, y, *str, scolor); //this is only ever used for names.
+		Draw_ScaledColorChar (x, y, *str, scolor, charscale); //this is only ever used for names.
 		
 		num = *str++;
 		num &= 255;
@@ -86,17 +95,23 @@ void Draw_ColorString ( int x, int y, char *str )
 			scolor[3] = 1;
 		}
 
-		x += 8;
+		x += charscale;
 	}
 }
 
 
 void DrawAltString (int x, int y, char *s)
 {
+	int		charscale;
+
+	charscale = (viddef.height)/100;
+	if(charscale < 8)
+		charscale = 8;
+
 	while (*s)
 	{
-		Draw_Char (x, y, *s ^ 0x80);
-		x+=8;
+		Draw_ScaledChar (x, y, *s ^ 0x80, charscale);
+		x+=charscale;
 		s++;
 	}
 }
@@ -544,7 +559,7 @@ void Con_DrawInput (void)
 		text += 1 + key_linepos - con.linewidth;
 		
 // draw it
-	y = con.vislines-16;
+	y = con.vislines-(16);
 
 	i = 0;
 	spacer = 0;
@@ -595,6 +610,11 @@ void Con_DrawNotify (void)
 	int num;
 	int spacer;
 	vec4_t	scolor;
+	int		charscale;
+
+	charscale = (viddef.height)/100;
+	if(charscale < 8)
+		charscale = 8;
 	
 	scolor[0] = 1;
 	scolor[1] = 1;
@@ -624,7 +644,7 @@ void Con_DrawNotify (void)
 				continue;
 			}
 			
-			Draw_ColorChar ((x+1)<<3, v, *text, scolor);
+			Draw_ScaledColorChar ((x+1)*charscale, v, *text, scolor, charscale);
 				
 			num = *text++;
 			num &= 255;	
@@ -640,7 +660,7 @@ void Con_DrawNotify (void)
 			
 		}
 	
-		v += 8;
+		v += charscale;
 	}
 
 
@@ -649,18 +669,18 @@ void Con_DrawNotify (void)
 		
 		if (chat_team)
 		{
-			DrawString (8, v, "say_team:");
+			DrawString (charscale, v, "say_team:");
 			skip = 11;
 		}
 		else
 		{
-			DrawString (8, v, "say:");
+			DrawString (charscale, v, "say:");
 			skip = 5;
 		}
 
 		s = chat_buffer;
-		if (chat_bufferlen > (viddef.width>>3)-(skip+1))
-			s += chat_bufferlen - ((viddef.width>>3)-(skip+1));
+		if (chat_bufferlen > (viddef.width/charscale)-(skip+1))
+			s += chat_bufferlen - ((viddef.width/charscale)-(skip+1));
 		
 		x = 0;
 		while (*s) {
@@ -670,7 +690,7 @@ void Con_DrawNotify (void)
 				continue;
 			}
 			
-			Draw_ColorChar ( (x+skip)<<3, v, *s, scolor);
+			Draw_ScaledColorChar ( (x+skip)*charscale, v, *s, scolor, charscale);
 			
 			num = *s++;
 			num &= 255;	
@@ -685,8 +705,8 @@ void Con_DrawNotify (void)
 			x++;
 			
 		}
-		Draw_Char ( (x+skip)<<3, v, 10+((cls.realtime>>8)&1));
-		v += 8;
+		Draw_ScaledChar ( (x+skip)*charscale, v, 10+((cls.realtime>>charscale)&1), charscale);
+		v += charscale;
 	}
 	
 	if (v)

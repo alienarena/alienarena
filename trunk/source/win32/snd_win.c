@@ -358,7 +358,7 @@ sndinitstat SNDDMA_InitDirect (void)
 	dma.samplebits = 16;
 
 	if (s_khz->integer == 48)
-		dma.speed == 48000;
+		dma.speed = 48000;
 	else if (s_khz->integer == 44)
 		dma.speed = 44100;
 	else if (s_khz->integer == 22)

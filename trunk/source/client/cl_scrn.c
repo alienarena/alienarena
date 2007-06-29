@@ -223,12 +223,17 @@ void SCR_DrawCenterString (void)
 	int		j;
 	int		x, y;
 	int		remaining;
+	int		charscale;
 
 // the finale prints the characters one at a time
 	remaining = 9999;
 
 	scr_erase_center = 0;
 	start = scr_centerstring;
+
+	charscale = (viddef.height)/66; //make these a litter larger 
+	if(charscale < 8)
+		charscale = 8;
 
 	if (scr_center_lines <= 4)
 		y = viddef.height*0.35;
@@ -241,17 +246,17 @@ void SCR_DrawCenterString (void)
 		for (l=0 ; l<40 ; l++)
 			if (start[l] == '\n' || !start[l])
 				break;
-		x = (viddef.width - l*8)/2;
+		x = (viddef.width - l*charscale)/2;
 		SCR_AddDirtyPoint (x, y);
-		for (j=0 ; j<l ; j++, x+=8)
+		for (j=0 ; j<l ; j++, x+=charscale)
 		{
-			Draw_Char (x, y, start[j]);	
+			Draw_ScaledChar (x, y, start[j], charscale);	
 			if (!remaining--)
 				return;
 		}
-		SCR_AddDirtyPoint (x, y+8);
+		SCR_AddDirtyPoint (x, y+charscale);
 			
-		y += 8;
+		y += charscale;
 
 		while (*start && *start != '\n')
 			start++;
@@ -470,15 +475,20 @@ SCR_DrawLoading
 */
 void SCR_DrawLoadingBar (int percent, int scale)
 {
-	
+	int hudscale;
+
+	hudscale = (viddef.height + viddef.width)/1000;
+	if(hudscale < 1)
+		hudscale = 1;
+
 	if (R_RegisterPic("bar_background") && R_RegisterPic("bar_loading"))
 	{
 		Draw_StretchPic (
-			viddef.width/2-scale*15 + 1,viddef.height/2 + scale*5+1, 
-			scale*30-2, scale*10-2, "bar_background");
+			viddef.width/2-scale*15 + 1*hudscale,viddef.height/2 + scale*5+1*hudscale, 
+			scale*30-2*hudscale, scale*10-2*hudscale, "bar_background");
 		Draw_StretchPic (
-			viddef.width/2-scale*15 + 1,viddef.height/2 + scale*5+12, 
-			(scale*30-2)*percent/100, scale*2-2, "bar_loading");
+			viddef.width/2-scale*15 + 1*hudscale,viddef.height/2 + scale*5+8*hudscale, 
+			(scale*30-2*hudscale)*percent/100, scale*2-2*hudscale, "bar_loading");
 	}
 	else
 	{
@@ -499,18 +509,19 @@ void SCR_DrawLoading (void)
 {
 	char	mapfile[32];
 	qboolean isMap = false;
-	float	font_size;
+	int		font_size, hudscale;
 	
 	if (!scr_draw_loading)
 		return;
 	scr_draw_loading = false;
 
-	//menu font scale stuff...
-	menuScale.x = viddef.width;
-	menuScale.y = viddef.height;
-	menuScale.avg = viddef.width/MENU_STATIC_WIDTH;
+	font_size = (viddef.height)/100;
+	if(font_size < 8)
+		font_size = 8;
 
-	font_size = MENU_FONT_SIZE * menuScale.avg;
+	hudscale = (viddef.height)/600;
+	if(hudscale < 1)
+		hudscale = 1;
 
 	//loading a map...
 	if (loadingMessage && cl.configstrings[CS_MODELS+1][0])
@@ -537,115 +548,115 @@ void SCR_DrawLoading (void)
 		char *mapmsg;
 			
 		mapmsg = va("Loading Map [%s]", mapfile);
-		Menu_DrawString(
+		DrawString(
 			viddef.width/2 - font_size/2*stringLen(mapmsg), 
 			viddef.height/2 - font_size*5, 
 			mapmsg);
 
 		mapmsg = va("[%s]", cl.configstrings[CS_NAME]);
-		Menu_DrawString(
+		DrawString(
 			viddef.width/2 - font_size/2*stringLen(mapmsg), 
 			viddef.height/2 - font_size*4, 
 			mapmsg);
 
-		Menu_DrawString(
+		DrawString(
 			viddef.width/2 - font_size*15, 
 			viddef.height/2 - font_size*1, 
 			loadingMessages[0]);
-		Menu_DrawString(
+		DrawString(
 			viddef.width/2 - font_size*15, 
 			viddef.height/2 - font_size*0, 
 			loadingMessages[1]);
-		Menu_DrawString(
+		DrawString(
 			viddef.width/2 - font_size*15, 
 			viddef.height/2 + font_size*1, 
 			loadingMessages[2]);
-		Menu_DrawString(
+		DrawString(
 			viddef.width/2 - font_size*15, 
 			viddef.height/2 + font_size*2, 
 			loadingMessages[3]);
-		Menu_DrawString(
+		DrawString(
 			viddef.width/2 - font_size*15, 
 			viddef.height/2 + font_size*3, 
 			loadingMessages[4]);
 
 		//check for instance of icons we would like to show in loading process, ala q3
 		if(rocketlauncher) {
-			Draw_Pic((int)(viddef.width/3.2), (int)(viddef.height/3.2), "w_rlauncher");
+			Draw_ScaledPic((int)(viddef.width/2.5), (int)(viddef.height/3.2), hudscale, "w_rlauncher");
 			if(!rocketlauncher_drawn){
-				rocketlauncher_drawn = 40;
+				rocketlauncher_drawn = 40*hudscale;
 			}
 		}
 		if(chaingun) {
-			Draw_Pic((int)(viddef.width/3.2) + rocketlauncher_drawn, (int)(viddef.height/3.2), "w_sshotgun");
+			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn, (int)(viddef.height/3.2), hudscale, "w_sshotgun");
 			if(!chaingun_drawn) {
-				chaingun_drawn = 40;
+				chaingun_drawn = 40*hudscale;
 			}
 		}
 		if(smartgun) {
-			Draw_Pic((int)(viddef.width/3.2) + rocketlauncher_drawn+chaingun_drawn, (int)(viddef.height/3.2), "w_shotgun");
+			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn, (int)(viddef.height/3.2), hudscale, "w_shotgun");
 			if(!smartgun_drawn) {
-				smartgun_drawn = 40;
+				smartgun_drawn = 40*hudscale;
 			}
 		}
 		if(beamgun) {
-			Draw_Pic((int)(viddef.width/3.2) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn, (int)(viddef.height/3.2), "w_railgun");
+			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn, (int)(viddef.height/3.2), hudscale, "w_railgun");
 			if(!beamgun_drawn) {
-				beamgun_drawn = 40;
+				beamgun_drawn = 40*hudscale;
 			}
 		}
 		if(flamethrower) {
-			Draw_Pic((int)(viddef.width/3.2) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn
-				, (int)(viddef.height/3.2), "w_chaingun");
+			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn
+				, (int)(viddef.height/3.2), hudscale, "w_chaingun");
 			if(!flamethrower_drawn) {
-				flamethrower_drawn = 40;
+				flamethrower_drawn = 40*hudscale;
 			}
 		}
 		if(disruptor) {
-			Draw_Pic((int)(viddef.width/3.2) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn
-				, (int)(viddef.height/3.2), "w_hyperblaster");
+			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn
+				, (int)(viddef.height/3.2), hudscale, "w_hyperblaster");
 			if(!disruptor_drawn) {
-				disruptor_drawn = 40;
+				disruptor_drawn = 40*hudscale;
 			}
 		}
 		if(vaporizer) {
-			Draw_Pic((int)(viddef.width/3.2) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn
-				, (int)(viddef.height/3.2), "w_bfg");
+			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn
+				, (int)(viddef.height/3.2), hudscale, "w_bfg");
 			if(!vaporizer_drawn) {
-				vaporizer_drawn = 40;
+				vaporizer_drawn = 40*hudscale;
 			}
 		}
 		if(quad) {
-			Draw_Pic((int)(viddef.width/3.2) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn
-				, (int)(viddef.height/3.2), "p_quad");
+			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn
+				, (int)(viddef.height/3.2), hudscale, "p_quad");
 			if(!quad_drawn) {
-				quad_drawn = 40;
+				quad_drawn = 40*hudscale;
 			}
 		}
 		if(haste) {
-			Draw_Pic((int)(viddef.width/3.2) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn
-				, (int)(viddef.height/3.2), "p_haste");
+			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn
+				, (int)(viddef.height/3.2), hudscale, "p_haste");
 			if(!haste_drawn) {
-				haste_drawn = 40;
+				haste_drawn = 40*hudscale;
 			}
 		}
 		if(sproing) {
-			Draw_Pic((int)(viddef.width/3.2) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn
-				, (int)(viddef.height/3.2), "p_sproing");
+			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn
+				, (int)(viddef.height/3.2), hudscale, "p_sproing");
 			if(!sproing_drawn) {
-				sproing_drawn = 40;
+				sproing_drawn = 40*hudscale;
 			}
 		}
 		if(inv) {
-			Draw_Pic((int)(viddef.width/3.2) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn+sproing_drawn
-				, (int)(viddef.height/3.2), "p_invulnerability");
+			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn+sproing_drawn
+				, (int)(viddef.height/3.2), hudscale, "p_invulnerability");
 			if(!inv_drawn) {
-				inv_drawn = 40;
+				inv_drawn = 40*hudscale;
 			}
 		}	
 		if(adren) {
-			Draw_Pic((int)(viddef.width/3.2) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn+sproing_drawn+inv_drawn
-				, (int)(viddef.height/3.2), "p_adrenaline");
+			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn+sproing_drawn+inv_drawn
+				, (int)(viddef.height/3.2), hudscale, "p_adrenaline");
 		}	
 	}
 	else
@@ -653,7 +664,7 @@ void SCR_DrawLoading (void)
 		char *msg = va("Awaiting Connection...");
 
 		//draw centered
-		Menu_DrawString(
+		DrawString(
 				viddef.width/2 - font_size/2*stringLen(msg), 
 				viddef.height/2 - font_size/2, 
 				msg);
@@ -665,14 +676,14 @@ void SCR_DrawLoading (void)
 	{
 		char *download = va("Downloading [%s]", cls.downloadname);
 
-		Menu_DrawString(
+		DrawString(
 			viddef.width/2 - font_size/2*stringLen(download), 
 			viddef.height/2 + font_size*4, 
 			download);
 
 		SCR_DrawLoadingBar(cls.downloadpercent, font_size);
 
-		Menu_DrawString(
+		DrawString(
 			viddef.width/2 - font_size*3, 
 			viddef.height/2 + (int)(font_size*5.5), 
 			va("%3d%%", (int)cls.downloadpercent));
@@ -682,9 +693,9 @@ void SCR_DrawLoading (void)
 
 		SCR_DrawLoadingBar(loadingPercent, font_size);
 		
-		Menu_DrawString(
+		DrawString(
 			viddef.width/2 - font_size*3, 
-			viddef.height/2 + (int)(font_size*6.5), 
+			viddef.height/2 + (int)(font_size*6.3), 
 			va("%3d%%", (int)loadingPercent));
 	}
 }
@@ -1013,6 +1024,11 @@ Allow embedded \n in the string
 void SizeHUDString (char *string, int *w, int *h)
 {
 	int		lines, width, current;
+	int		charscale;
+
+	charscale = viddef.height/100;
+	if(charscale < 8)
+		charscale = 8;
 
 	lines = 1;
 	width = 0;
@@ -1034,8 +1050,8 @@ void SizeHUDString (char *string, int *w, int *h)
 		string++;
 	}
 
-	*w = width * 8;
-	*h = lines * 8;
+	*w = width * charscale;
+	*h = lines * charscale;
 }
 
 void DrawHUDString (char *string, int x, int y, int centerwidth, int xor)
@@ -1044,6 +1060,11 @@ void DrawHUDString (char *string, int x, int y, int centerwidth, int xor)
 	char	line[1024];
 	int		width;
 	int		i;
+	int		charscale;
+
+	charscale = viddef.height/100;
+	if(charscale < 8)
+		charscale = 8;
 
 	margin = x;
 
@@ -1056,19 +1077,19 @@ void DrawHUDString (char *string, int x, int y, int centerwidth, int xor)
 		line[width] = 0;
 
 		if (centerwidth)
-			x = margin + (centerwidth - width*8)/2;
+			x = margin + (centerwidth - width*charscale)/2;
 		else
 			x = margin;
 		for (i=0 ; i<width ; i++)
 		{
 			Draw_Char (x, y, line[i]^xor);
-			x += 8;
+			x += charscale;
 		}
 		if (*string)
 		{
 			string++;	// skip the \n
 			x = margin;
-			y += 8;
+			y += charscale;
 		}
 	}
 }
@@ -1079,7 +1100,7 @@ void DrawHUDString (char *string, int x, int y, int centerwidth, int xor)
 SCR_DrawField
 ==============
 */
-void SCR_DrawField (int x, int y, int color, int width, int value)
+void SCR_DrawField (int x, int y, int color, int width, int value, int scale)
 {
 	char	num[16], *ptr;
 	int		l;
@@ -1099,7 +1120,7 @@ void SCR_DrawField (int x, int y, int color, int width, int value)
 	l = strlen(num);
 	if (l > width)
 		l = width;
-	x += 2 + CHAR_WIDTH*(width - l);
+	x += 2 + CHAR_WIDTH*(width - l)*scale;
 
 	ptr = num;
 	while (*ptr && l)
@@ -1109,8 +1130,8 @@ void SCR_DrawField (int x, int y, int color, int width, int value)
 		else
 			frame = *ptr -'0';
 
-		Draw_Pic (x,y,sb_nums[color][frame]);
-		x += CHAR_WIDTH;
+		Draw_ScaledPic (x,y,scale,sb_nums[color][frame]);
+		x += CHAR_WIDTH*scale;
 		ptr++;
 		l--;
 	}
@@ -1156,6 +1177,8 @@ void SCR_ExecuteLayoutString (char *s)
 	int		width;
 	int		index;
 	clientinfo_t	*ci;
+	int		charscale;
+	float	scale;
 
 	if (cls.state != ca_active || !cl.refresh_prepped)
 		return;
@@ -1166,6 +1189,15 @@ void SCR_ExecuteLayoutString (char *s)
 	x = 0;
 	y = 0;
 	width = 3;
+	scale = (viddef.height)/600;
+
+	if(scale < 1)
+		scale = 1;
+
+	charscale = (viddef.height)/100;
+
+	if(charscale < 8)
+		charscale = 8;
 
 	while (s)
 	{
@@ -1173,38 +1205,38 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "xl"))
 		{
 			token = COM_Parse (&s);
-			x = atoi(token);
+			x = atoi(token)*scale;
 			continue;
 		}
 		if (!strcmp(token, "xr"))
 		{
 			token = COM_Parse (&s);
-			x = viddef.width + atoi(token);
+			x = viddef.width + atoi(token)*scale;
 			continue;
 		}
 		if (!strcmp(token, "xv"))
 		{
 			token = COM_Parse (&s);
-			x = viddef.width/2 - 160 + atoi(token);
+			x = viddef.width/2 - 160*scale + atoi(token)*scale;
 			continue;
 		}
 
 		if (!strcmp(token, "yt"))
 		{
 			token = COM_Parse (&s);
-			y = atoi(token);
+			y = atoi(token)*scale;
 			continue;
 		}
 		if (!strcmp(token, "yb"))
 		{
 			token = COM_Parse (&s);
-			y = viddef.height + atoi(token);
+			y = viddef.height + atoi(token)*scale;
 			continue;
 		}
 		if (!strcmp(token, "yv"))
 		{
 			token = COM_Parse (&s);
-			y = viddef.height/2 - 120 + atoi(token);
+			y = viddef.height/2 - 100*scale + atoi(token)*scale;
 			continue;
 		}
 
@@ -1217,8 +1249,8 @@ void SCR_ExecuteLayoutString (char *s)
 			if (cl.configstrings[CS_IMAGES+value])
 			{
 				SCR_AddDirtyPoint (x, y);
-				SCR_AddDirtyPoint (x+23, y+23);
-				Draw_Pic (x, y, cl.configstrings[CS_IMAGES+value]);
+				SCR_AddDirtyPoint (x+23*scale, y+23*scale);
+				Draw_ScaledPic (x, y, scale, cl.configstrings[CS_IMAGES+value]);
 			}
 			continue;
 		}
@@ -1228,11 +1260,11 @@ void SCR_ExecuteLayoutString (char *s)
 			int		score, ping, time;
 
 			token = COM_Parse (&s);
-			x = viddef.width/2 - 160 + atoi(token);
+			x = viddef.width/2 - 160*scale + atoi(token)*scale;
 			token = COM_Parse (&s);
-			y = viddef.height/2 - 120 + atoi(token);
+			y = viddef.height/2 - 100*scale + atoi(token)*scale;
 			SCR_AddDirtyPoint (x, y);
-			SCR_AddDirtyPoint (x+159, y+31);
+			SCR_AddDirtyPoint (x+159*scale, y+31*scale);
 
 			token = COM_Parse (&s);
 			value = atoi(token);
@@ -1249,15 +1281,15 @@ void SCR_ExecuteLayoutString (char *s)
 			token = COM_Parse (&s);
 			time = atoi(token);
 
-			Draw_ColorString (x+32, y, ci->name);
-			DrawString (x+32, y+8,  "Score: ");
-			DrawAltString (x+32+7*8, y+8,  va("%i", score));
-			DrawString (x+32, y+16, va("Ping:  %i", ping));
-			DrawString (x+32, y+24, va("Time:  %i", time));
+			Draw_ColorString (x+32*scale, y, ci->name);
+			DrawString (x+32*scale, y+8*scale,  "Score: ");
+			DrawAltString (x+32*scale+7*charscale, y+8*scale,  va("%i", score));
+			DrawString (x+32*scale, y+16*scale, va("Ping:  %i", ping));
+			DrawString (x+32*scale, y+24*scale, va("Time:  %i", time));
 
 			if (!ci->icon)
 				ci = &cl.baseclientinfo;
-			Draw_Pic (x, y, ci->iconname);
+			Draw_ScaledPic (x, y, scale, ci->iconname);
 			continue;
 		}
 
@@ -1267,11 +1299,11 @@ void SCR_ExecuteLayoutString (char *s)
 			char	block[80];
 
 			token = COM_Parse (&s);
-			x = viddef.width/2 - 160 + atoi(token);
+			x = viddef.width/2 - 160*scale + atoi(token)*scale;
 			token = COM_Parse (&s);
-			y = viddef.height/2 - 120 + atoi(token);
+			y = viddef.height/2 - 100*scale + atoi(token)*scale;
 			SCR_AddDirtyPoint (x, y);
-			SCR_AddDirtyPoint (x+159, y+31);
+			SCR_AddDirtyPoint (x+159*scale, y+31*scale);
 
 			token = COM_Parse (&s);
 			value = atoi(token);
@@ -1289,10 +1321,8 @@ void SCR_ExecuteLayoutString (char *s)
 
 			sprintf(block, "%3d %3d %-12.12s", score, ping, ci->name); 
 
-			if (value == cl.playernum)
-				Draw_ColorString (x, y, block);
-			else
-				Draw_ColorString (x, y, block);
+			Draw_ColorString (x, y, block);
+			
 			continue;
 		}
 
@@ -1300,8 +1330,8 @@ void SCR_ExecuteLayoutString (char *s)
 		{	// draw a pic from a name
 			token = COM_Parse (&s);
 			SCR_AddDirtyPoint (x, y);
-			SCR_AddDirtyPoint (x+23, y+23);
-			Draw_Pic (x, y, token);
+			SCR_AddDirtyPoint (x+23*scale, y+23*scale);
+			Draw_ScaledPic (x, y, scale, token);
 			continue;
 		}
 
@@ -1311,7 +1341,7 @@ void SCR_ExecuteLayoutString (char *s)
 			width = atoi(token);
 			token = COM_Parse (&s);
 			value = cl.frame.playerstate.stats[atoi(token)];
-			SCR_DrawField (x, y, 0, width, value);
+			SCR_DrawField (x, y, 0, width, value, scale); //probably gotta scale too
 			continue;
 		}
 
@@ -1335,10 +1365,10 @@ void SCR_ExecuteLayoutString (char *s)
 			{
 				sprintf(zoompic, "zoomscope%i", cl.frame.playerstate.stats[STAT_ZOOMED]);
 				Draw_GetPicSize (&w, &h, zoompic);
-				Draw_Pic ((viddef.width-w)/2, (viddef.height-h)/2, zoompic);
+				Draw_ScaledPic ((viddef.width-w)/2, (viddef.height-h)/2, scale, zoompic);
 			}
 
-			SCR_DrawField (x, y, color, width, value);
+			SCR_DrawField (x, y, color, width, value, scale);
 			continue;
 		}
 
@@ -1356,7 +1386,7 @@ void SCR_ExecuteLayoutString (char *s)
 			else
 				continue;	// negative number = don't show
 
-			SCR_DrawField (x, y, color, width, value);
+			SCR_DrawField (x, y, color, width, value, scale);
 			continue;
 		}
 
@@ -1372,7 +1402,7 @@ void SCR_ExecuteLayoutString (char *s)
 
 			color = 0;	// green
 
-			SCR_DrawField (x, y, color, width, value);
+			SCR_DrawField (x, y, color, width, value, scale);
 			continue;
 		}
 
@@ -1478,6 +1508,11 @@ char		temp[32];
 
 void SCR_showFPS(void)
 {
+	float scale;
+
+	scale = (viddef.height)/600;
+	if(scale < 1)
+		scale = 1;
 
 	if ((cl.time + 1000) < fpscounter)
 		fpscounter = cl.time + 100;
@@ -1488,7 +1523,7 @@ void SCR_showFPS(void)
 		fpscounter = cl.time + 100;
 	}
 	//DrawString(viddef.width - 64, 0 , temp);
-	DrawString(viddef.width - 64, viddef.height - 24, temp);
+	DrawString(viddef.width - 64*scale, viddef.height - 24*scale, temp);
 }
 
 //=======================================================
