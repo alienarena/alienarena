@@ -164,6 +164,83 @@ void Draw_ColorChar (int x, int y, int num, vec4_t color)
 	qglColor4f( 1,1,1,1 );
 }
 
+void Draw_ScaledChar (int x, int y, int num, int scale)
+					
+{
+	int				row, col;
+	float			frow, fcol, size;
+
+	num &= 255;
+	
+	if ( (num&127) == 32 )
+		return;		// space
+
+	if (y <= -8)
+		return;			// totally off screen
+	
+	row = num>>4;
+	col = num&15;
+
+	frow = row*0.0625;
+	fcol = col*0.0625;
+	size = 0.0625;
+
+	GL_Bind(draw_chars->texnum);
+
+	qglBegin (GL_QUADS);
+	qglTexCoord2f (fcol, frow);
+	qglVertex2f (x, y);
+	qglTexCoord2f (fcol + size, frow);
+	qglVertex2f (x+scale, y);
+	qglTexCoord2f (fcol + size, frow + size);
+	qglVertex2f (x+scale, y+scale);
+	qglTexCoord2f (fcol, frow + size);
+	qglVertex2f (x, y+scale);
+	qglEnd();
+
+}
+void Draw_ScaledColorChar (int x, int y, int num, vec4_t color, int scale)
+{
+	int				row, col;
+	float			frow, fcol, size;
+	byte			colors[4];
+
+	colors[0] = R_FloatToByte( color[0] );
+	colors[1] = R_FloatToByte( color[1] );
+	colors[2] = R_FloatToByte( color[2] );
+	colors[3] = R_FloatToByte( color[3] );
+
+	num &= 255;
+	
+	if ( (num&127) == 32 )
+		return;		// space
+
+	if (y <= -8)
+		return;			// totally off screen
+
+	row = num>>4;
+	col = num&15;
+
+	frow = row*0.0625;
+	fcol = col*0.0625;
+	size = 0.0625;
+
+	GL_Bind (draw_chars->texnum);
+
+	qglColor4ubv( colors );
+	GL_TexEnv(GL_MODULATE);
+	qglBegin (GL_QUADS);
+	qglTexCoord2f (fcol, frow);
+	qglVertex2f (x, y);
+	qglTexCoord2f (fcol + size, frow);
+	qglVertex2f (x+scale, y);
+	qglTexCoord2f (fcol + size, frow + size);
+	qglVertex2f (x+scale, y+scale);
+	qglTexCoord2f (fcol, frow + size);
+	qglVertex2f (x, y+scale);
+	qglEnd ();
+	qglColor4f( 1,1,1,1 );
+}
 /*
 =============
 R_RegisterPic
@@ -431,6 +508,41 @@ void Draw_Pic (int x, int y, char *pic)
 	Draw_ShaderPic(gl);
 }
 
+/*
+=============
+Draw_ScaledPic
+=============
+*/
+
+void Draw_ScaledPic (int x, int y, float scale, char *pic)
+{
+	image_t *gl;
+	int w, h;
+	float xoff, yoff;
+
+	gl = R_RegisterPic (pic);
+	if (!gl)
+	{
+//		Com_Printf ("Can't find pic: %s\n", pic);
+		return;
+	}
+
+	w = gl->width;
+	h = gl->height;
+
+	xoff = (w*scale-w);
+	yoff = (h*scale-h);
+
+	if (scrap_dirty)
+		Scrap_Upload ();
+
+	VA_SetElem2(vert_array[0],x, y);
+	VA_SetElem2(vert_array[1],x+w+xoff, y);
+	VA_SetElem2(vert_array[2],x+w+xoff, y+h+yoff);
+	VA_SetElem2(vert_array[3],x, y+h+yoff);
+
+	Draw_ShaderPic(gl);
+}
 /*
 =============
 Draw_TileClear
