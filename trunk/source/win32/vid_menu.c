@@ -256,6 +256,11 @@ void VID_MenuInit( void )
 		"on",
 		0
 	};
+	float scale;
+
+	scale = viddef.height/600;
+	if(scale < 1)
+		scale = 1;
 
 	if ( !gl_picmip )
 		gl_picmip = Cvar_Get( "gl_picmip", "0", CVAR_ARCHIVE);
@@ -311,32 +316,32 @@ void VID_MenuInit( void )
 	s_mode_list.generic.type = MTYPE_SPINCONTROL;
 	s_mode_list.generic.name = "video mode";
 	s_mode_list.generic.x = 0;
-	s_mode_list.generic.y = 10;
+	s_mode_list.generic.y = 10*scale;
 	s_mode_list.itemnames = resolutions;
 
 	s_width_field.generic.type = MTYPE_FIELD;
 	s_width_field.generic.name = "custom width";
 	s_width_field.generic.flags = QMF_NUMBERSONLY;
 	s_width_field.generic.x	= 8;
-	s_width_field.generic.y	= 30;
+	s_width_field.generic.y	= 30*scale;
 	s_width_field.generic.statusbar = "set custom width";
-	s_width_field.length = 4;
-	s_width_field.visible_length = 4;
+	s_width_field.length = 4*scale;
+	s_width_field.visible_length = 4*scale;
 	strcpy(s_width_field.buffer, Cvar_VariableString("vid_width"));
 
 	s_height_field.generic.type = MTYPE_FIELD;
 	s_height_field.generic.name = "custom height";
 	s_height_field.generic.flags = QMF_NUMBERSONLY;
 	s_height_field.generic.x	= 8;
-	s_height_field.generic.y	= 50;
+	s_height_field.generic.y	= 50*scale;
 	s_height_field.generic.statusbar = "set custom height";
-	s_height_field.length = 4;
-	s_height_field.visible_length = 4;
+	s_height_field.length = 4*scale;
+	s_height_field.visible_length = 4*scale;
 	strcpy(s_height_field.buffer, Cvar_VariableString("vid_height"));
 
 	s_screensize_slider.generic.type	= MTYPE_SLIDER;
 	s_screensize_slider.generic.x		= 0;
-	s_screensize_slider.generic.y		= 60;
+	s_screensize_slider.generic.y		= 60*scale;
 	s_screensize_slider.generic.name	= "screen size";
 	s_screensize_slider.minvalue = 3;
 	s_screensize_slider.maxvalue = 12;
@@ -344,7 +349,7 @@ void VID_MenuInit( void )
 
 	s_brightness_slider.generic.type	= MTYPE_SLIDER;
 	s_brightness_slider.generic.x	= 0;
-	s_brightness_slider.generic.y	= 70;
+	s_brightness_slider.generic.y	= 70*scale;
 	s_brightness_slider.generic.name	= "texture brightness";
 	s_brightness_slider.generic.callback = BrightnessCallback;
 	s_brightness_slider.minvalue = 5;
@@ -353,7 +358,7 @@ void VID_MenuInit( void )
 
 	s_modulate_slider.generic.type = MTYPE_SLIDER;
 	s_modulate_slider.generic.x	= 0;
-	s_modulate_slider.generic.y	= 80;
+	s_modulate_slider.generic.y	= 80*scale;
 	s_modulate_slider.generic.name = "lightmap brightness";
 	s_modulate_slider.minvalue = 1;
 	s_modulate_slider.maxvalue = 5;
@@ -362,21 +367,21 @@ void VID_MenuInit( void )
 
 	s_fs_box.generic.type = MTYPE_SPINCONTROL;
 	s_fs_box.generic.x	= 0;
-	s_fs_box.generic.y	= 90;
+	s_fs_box.generic.y	= 90*scale;
 	s_fs_box.generic.name	= "fullscreen";
 	s_fs_box.itemnames = yesno_names;
 	s_fs_box.curvalue = vid_fullscreen->value;
 
 	s_texres_box.generic.type = MTYPE_SPINCONTROL;
 	s_texres_box.generic.x	= 0;
-	s_texres_box.generic.y	= 110;
+	s_texres_box.generic.y	= 110*scale;
 	s_texres_box.generic.name	= "hires textures";
 	s_texres_box.itemnames = onoff_names;
 	s_texres_box.curvalue = gl_texres->value;
 
 	s_detailtex_slider.generic.type = MTYPE_SLIDER;
 	s_detailtex_slider.generic.x	= 0;
-	s_detailtex_slider.generic.y	= 120;
+	s_detailtex_slider.generic.y	= 120*scale;
 	s_detailtex_slider.generic.name = "detail texture level";
 	s_detailtex_slider.minvalue = 0;
 	s_detailtex_slider.maxvalue = 9;
@@ -384,7 +389,7 @@ void VID_MenuInit( void )
 
 	s_bloom_box.generic.type = MTYPE_SPINCONTROL;
 	s_bloom_box.generic.x	= 0;
-	s_bloom_box.generic.y	= 130;
+	s_bloom_box.generic.y	= 130*scale;
 	s_bloom_box.generic.name	= "light bloom";
 	s_bloom_box.itemnames = onoff_names;
 	s_bloom_box.generic.callback = BloomSetCallback;
@@ -392,7 +397,7 @@ void VID_MenuInit( void )
 
 	s_bloom_slider.generic.type	= MTYPE_SLIDER;
 	s_bloom_slider.generic.x		= 0;
-	s_bloom_slider.generic.y		= 140;
+	s_bloom_slider.generic.y		= 140*scale;
 	s_bloom_slider.generic.name	= "bloom intensity";
 	s_bloom_slider.minvalue = 0;
 	s_bloom_slider.maxvalue = 20;
@@ -400,14 +405,14 @@ void VID_MenuInit( void )
 	
 	s_reflect_box.generic.type = MTYPE_SPINCONTROL;
 	s_reflect_box.generic.x	= 0;
-	s_reflect_box.generic.y	= 150;
+	s_reflect_box.generic.y	= 150*scale;
 	s_reflect_box.generic.name	= "reflective water";
 	s_reflect_box.itemnames = onoff_names;
 	s_reflect_box.curvalue = gl_reflection->value;
 
 	s_texcombine_box.generic.type = MTYPE_SPINCONTROL;
 	s_texcombine_box.generic.x	= 0;
-	s_texcombine_box.generic.y	= 160;
+	s_texcombine_box.generic.y	= 160*scale;
 	s_texcombine_box.generic.name	= "multitexture combine";
 	s_texcombine_box.itemnames = onoff_names;
 	s_texcombine_box.generic.callback = MtexCallback;
@@ -415,7 +420,7 @@ void VID_MenuInit( void )
 
 	s_overbright_slider.generic.type	= MTYPE_SLIDER;
 	s_overbright_slider.generic.x		= 0;
-	s_overbright_slider.generic.y		= 170;
+	s_overbright_slider.generic.y		= 170*scale;
 	s_overbright_slider.generic.name	= "overbright bits";
 	s_overbright_slider.minvalue = 2;
 	s_overbright_slider.maxvalue = 5;
@@ -423,7 +428,7 @@ void VID_MenuInit( void )
 
 	s_tq_slider.generic.type	= MTYPE_SLIDER;
 	s_tq_slider.generic.x		= 0;
-	s_tq_slider.generic.y		= 180;
+	s_tq_slider.generic.y		= 180*scale;
 	s_tq_slider.generic.name	= "texture quality";
 	s_tq_slider.minvalue = 0;
 	s_tq_slider.maxvalue = 3;
@@ -431,21 +436,21 @@ void VID_MenuInit( void )
 
 	s_normalmaps_box.generic.type	= MTYPE_SPINCONTROL;
 	s_normalmaps_box.generic.x		= 0;
-	s_normalmaps_box.generic.y		= 190;
+	s_normalmaps_box.generic.y		= 190*scale;
 	s_normalmaps_box.generic.name	= "bumpmapping";
 	s_normalmaps_box.curvalue = gl_normalmaps->value;
 	s_normalmaps_box.itemnames = yesno_names;
 
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
 	s_finish_box.generic.x	= 0;
-	s_finish_box.generic.y	= 200;
+	s_finish_box.generic.y	= 200*scale;
 	s_finish_box.generic.name	= "draw frame completely";
 	s_finish_box.curvalue = gl_finish->value;
 	s_finish_box.itemnames = yesno_names;
 
     s_vsync_box.generic.type = MTYPE_SPINCONTROL;
     s_vsync_box.generic.x  = 0;
-    s_vsync_box.generic.y  = 210;
+    s_vsync_box.generic.y  = 210*scale;
     s_vsync_box.generic.name       = "vertical sync";
     s_vsync_box.curvalue = gl_swapinterval->value;
     s_vsync_box.itemnames = onoff_names;
@@ -453,13 +458,13 @@ void VID_MenuInit( void )
 	s_defaults_action.generic.type = MTYPE_ACTION;
 	s_defaults_action.generic.name = "reset to defaults";
 	s_defaults_action.generic.x    = 0;
-	s_defaults_action.generic.y    = 230;
+	s_defaults_action.generic.y    = 230*scale;
 	s_defaults_action.generic.callback = ResetDefaults;
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
 	s_apply_action.generic.x    = 0;
-	s_apply_action.generic.y    = 240;
+	s_apply_action.generic.y    = 240*scale;
 	s_apply_action.generic.callback = ApplyChanges;
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
@@ -496,6 +501,11 @@ VID_MenuDraw
 void VID_MenuDraw (void)
 {
 	int w, h;
+	float scale;
+
+	scale = viddef.height/600;
+	if(scale < 1)
+		scale = 1;
 
 	s_current_menu = &s_opengl_menu;
 
@@ -504,7 +514,9 @@ void VID_MenuDraw (void)
 	*/
 	Draw_StretchPic(0, 0, viddef.width, viddef.height, "conback");
 	Draw_GetPicSize( &w, &h, "m_banner_main" );
-	Draw_Pic( viddef.width / 2 - w / 2, viddef.height /2 - 250, "m_banner_main" );
+	w*=scale;
+	h*=scale;
+	Draw_StretchPic( viddef.width / 2 - w / 2, viddef.height /2 - 250*scale, w, h, "m_banner_main" );
 
 	/*
 	** move cursor to a reasonable starting position
