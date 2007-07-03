@@ -901,7 +901,7 @@ void CL_ExplosionParticles (vec3_t org)
 
 /*
 ===============
-CL_MuzzleParticles
+CL_MuzzleParticles - changed this to a smoke effect in 6.06
 ===============
 */
 void CL_MuzzleParticles (vec3_t org)
@@ -914,23 +914,22 @@ void CL_MuzzleParticles (vec3_t org)
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_BLASTER_MZFLASH;
-		p->texnum = r_bflashtexture->texnum;
-		p->scale = 4 + (rand()&7);
-		p->color = 0xe0;
-		p->blendsrc = GL_SRC_ALPHA;
-		p->blenddst = GL_ONE;
-
 		for (j=0 ; j<3 ; j++)
 		{
-			p->org[j] = org[j] + ((rand()%2)-1);
-			p->vel[j] = 0;
+			p->org[j] = org[j] + crand()*1;
+			p->vel[j] = crand()*5;
 		}
-		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = 0;
-		p->alpha = 0.4;
-
-		p->alphavel = -2.8 / (0.5 + frand()*0.3);
+				
+		p->alphavel = -1.0 / (30+frand()*1.4); //smoke lingers longer
+		p->alpha = .07;
+		p->type = PARTICLE_SMOKE; 
+		p->texnum = r_smoketexture->texnum;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+		p->scale = 1 + (rand()&4);
+		p->scalevel = 12.0;
+		p->color = 15;
+		p->accel[2] = 20;
 	}
 	
 }
