@@ -342,7 +342,7 @@ SOURCE=.\win32\vid_dll.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\vid_menu.c
+SOURCE=.\client\vid_menu.c
 # End Source File
 # Begin Source File
 

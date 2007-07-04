@@ -371,7 +371,7 @@ $(BUILDDIR)/client/cd_unix.o :   $(UNIX_DIR)/cd_unix.c
 $(BUILDDIR)/client/q_shunix.o :  $(UNIX_DIR)/q_shunix.c
 	$(DO_O_CC)
 
-$(BUILDDIR)/client/vid_menu.o :   $(UNIX_DIR)/vid_menu.c
+$(BUILDDIR)/client/vid_menu.o :   $(CLIENT_DIR)/vid_menu.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/vid_so.o :     $(UNIX_DIR)/vid_so.c
