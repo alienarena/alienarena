@@ -520,7 +520,7 @@ void VID_MenuDraw (void)
 	Draw_GetPicSize( &w, &h, "m_banner_main" );
 	w*=scale;
 	h*=scale;
-	Draw_StretchPic( viddef.width / 2 - w / 2, viddef.height /2 - 250, w, h, "m_banner_main" );
+	Draw_StretchPic( viddef.width / 2 - w / 2, viddef.height /2 - 250*scale, w, h, "m_banner_main" );
 
 	/*
 	** move cursor to a reasonable starting position
