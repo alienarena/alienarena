@@ -50,7 +50,9 @@ static cvar_t *_windowed_mouse;
 
 extern void M_ForceMenuOff( void );
 
+#ifdef __unix__
 extern qboolean vid_restart;
+#endif
 
 /*
 ====================================================================
@@ -206,8 +208,9 @@ static void ApplyChanges( void *unused )
 		Cvar_SetValue("r_shaders", 1); //because without shaders on this is pointless(normalmaps
 									   //are handled by shaders now
 	vid_ref->modified = true;
-
+#ifdef __unix__
 	vid_restart = true;
+#endif
 
 	M_ForceMenuOff();
 }
