@@ -56,7 +56,7 @@ BASE_CFLAGS=$(CFLAGS) -Dstricmp=strcasecmp -D_stricmp=strcasecmp -I$(X11BASE)/in
 RELEASE_CFLAGS=$(BASE_CFLAGS)
 
 ifeq ($(strip $(OPTIMIZED_CFLAGS)),yes)
-RELEASE_CFLAGS+=-O$(OPTIM_LVL) -funroll-loops -fomit-frame-pointer \
+RELEASE_CFLAGS+=-O$(OPTIM_LVL) -fomit-frame-pointer \
 		-ftree-vectorize -fexpensive-optimizations
 
 ifeq ($(OSTYPE),linux)
