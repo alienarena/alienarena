@@ -3224,8 +3224,8 @@ void JoinServer_MenuDraw(void)
 	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 
-	M_DrawTextBox( 0, 40*scale, 50, 21 );
-	M_DrawTextBox( 129*scale, 230*scale, 34, 12 );
+	M_DrawTextBox( 0, 40*scale, 50, 22 );
+	M_DrawTextBox( 130*scale, 234*scale, 34, 12 );
 	M_DrawTextBox( -155*scale, 262*scale, 26, 8 );
 
 	for ( i = 0; i < 16; i++ )

@@ -516,7 +516,7 @@ void SCR_DrawLoading (void)
 		return;
 	scr_draw_loading = false;
 
-	font_size = (float)(viddef.height)/100;
+	font_size = (float)(viddef.height)*8/600;
 	if(font_size < 8)
 		font_size = 8;
 
@@ -1101,7 +1101,7 @@ void DrawHUDString (char *string, int x, int y, int centerwidth, int xor)
 SCR_DrawField
 ==============
 */
-void SCR_DrawField (int x, int y, int color, int width, int value, int scale)
+void SCR_DrawField (int x, int y, int color, int width, int value, float scale)
 {
 	char	num[16], *ptr;
 	int		l;
@@ -1342,7 +1342,7 @@ void SCR_ExecuteLayoutString (char *s)
 			width = atoi(token);
 			token = COM_Parse (&s);
 			value = cl.frame.playerstate.stats[atoi(token)];
-			SCR_DrawField (x, y, 0, width, value, scale); //probably gotta scale too
+			SCR_DrawField (x, y, 0, width, value, scale); 
 			continue;
 		}
 
