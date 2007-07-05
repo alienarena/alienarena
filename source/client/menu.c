@@ -92,7 +92,7 @@ static void M_Banner( char *name )
 	int w, h;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600; 
 	if(scale < 1)
 		scale = 1;
 
@@ -102,7 +102,6 @@ static void M_Banner( char *name )
 	h*=scale;
 
 	Draw_StretchPic( viddef.width / 2 - (w / 2), viddef.height / 2 - 250*scale, w, h, name );
-	
 		
 }
 static void M_MapPic( char *name )
@@ -110,7 +109,7 @@ static void M_MapPic( char *name )
 	int w, h;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -122,7 +121,7 @@ static void M_CrosshairPic( char *name )
 	int w, h;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -138,7 +137,7 @@ static void M_ArrowPics()
 	int w, h;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -377,9 +376,15 @@ higher res screens.
 */
 void M_DrawCharacter (int cx, int cy, int num)
 {
-	Draw_Char ( cx + ((viddef.width - 320)>>1), cy + ((viddef.height - 240)>>1), num);
-}
+	int		charscale;
 
+	charscale = (float)(viddef.height)*8/600;  
+	if(charscale < 8)
+		charscale = 8;
+
+	Draw_ScaledChar ( cx + viddef.width/3 - 3*charscale, cy + viddef.height/3 - 3*charscale, num, charscale);
+}
+ 
 void M_Print (int cx, int cy, char *str)
 {
 	while (*str)
@@ -421,7 +426,7 @@ void M_DrawCursor( int x, int y, int f )
 	float scale;
 	int w, h;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -440,6 +445,11 @@ void M_DrawTextBox (int x, int y, int width, int lines)
 {
 	int		cx, cy;
 	int		n;
+	int		charscale;
+
+	charscale = (float)(viddef.height)*8/600;  
+	if(charscale < 8)
+		charscale = 8;
 
 	// draw left side
 	cx = x;
@@ -447,25 +457,25 @@ void M_DrawTextBox (int x, int y, int width, int lines)
 	M_DrawCharacter (cx, cy, 1);
 	for (n = 0; n < lines; n++)
 	{
-		cy += 8;
+		cy += charscale;
 		M_DrawCharacter (cx, cy, 4);
 	}
-	M_DrawCharacter (cx, cy+8, 7);
+	M_DrawCharacter (cx, cy+charscale, 7);
 
 	// draw middle
-	cx += 8;
+	cx += charscale;
 	while (width > 0)
 	{
 		cy = y;
 		M_DrawCharacter (cx, cy, 2);
 		for (n = 0; n < lines; n++)
 		{
-			cy += 8;
+			cy += charscale;
 			M_DrawCharacter (cx, cy, 5);
 		}
-		M_DrawCharacter (cx, cy+8, 8);
+		M_DrawCharacter (cx, cy+charscale, 8);
 		width -= 1;
-		cx += 8;
+		cx += charscale;
 	}
 
 	// draw right side
@@ -473,10 +483,10 @@ void M_DrawTextBox (int x, int y, int width, int lines)
 	M_DrawCharacter (cx, cy, 3);
 	for (n = 0; n < lines; n++)
 	{
-		cy += 8;
+		cy += charscale;
 		M_DrawCharacter (cx, cy, 6);
 	}
-	M_DrawCharacter (cx, cy+8, 9);
+	M_DrawCharacter (cx, cy+charscale, 9);
 }
 
 		
@@ -501,11 +511,10 @@ char *main_names[] =
 
 void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
 {
-	float ratio;
 	int w, h, i;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 	
@@ -538,11 +547,11 @@ void M_Main_Draw (void)
 	float widscale;
 	int w, h;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
-	widscale = viddef.width/800;
+	widscale = (float)(viddef.width)/800;
 	if(widscale<1)
 		widscale = 1;
 
@@ -592,7 +601,7 @@ void addButton (mainmenuobject_t *thisObj, int index, int x, int y)
 	float scale;
 	int w, h;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -661,7 +670,7 @@ void CheckMainMenuMouse (void)
 	mainmenuobject_t buttons[MAIN_ITEMS];
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -816,7 +825,7 @@ void Multiplayer_MenuInit( void )
 {
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -997,7 +1006,7 @@ static void M_FindKeysForCommand (char *command, int *twokeys)
 static void KeyCursorDrawFunc( menuframework_s *menu )
 {
 	float scale;
-	scale = viddef.height/600;
+	scale = (float)(viddef.height)/600; 
 	if(scale < 1)
 		scale = 1;
 
@@ -1058,7 +1067,7 @@ static void Keys_MenuInit( void )
 	int i = 0;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -2213,7 +2222,7 @@ void Options_MenuInit( void )
 
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600; 
 	if(scale < 1)
 		scale = 1;
 
@@ -2730,7 +2739,7 @@ void Game_MenuInit( void )
 		0
 	};
 	float scale;;
-	scale = viddef.height/600;
+	scale = (float)(viddef.height)/600; 
 	if(scale < 1)
 		scale = 1;
 
@@ -3109,7 +3118,7 @@ void JoinServer_MenuInit( void )
 	int i;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600; 
 	if(scale < 1)
 		scale = 1;
 
@@ -3133,10 +3142,12 @@ void JoinServer_MenuInit( void )
 	s_joinserver_search_action.generic.callback = SearchLocalGamesFunc;
 	s_joinserver_search_action.generic.statusbar = "search for servers";
 
-	s_joinserver_server_title.generic.type = MTYPE_SEPARATOR;
+	s_joinserver_server_title.generic.type = MTYPE_ACTION;
+	s_joinserver_server_title.generic.flags = QMF_LEFT_JUSTIFY | QMF_GRAYED;
 	s_joinserver_server_title.generic.name = "Server                Map         Players  Ping";
-	s_joinserver_server_title.generic.x    = 350*scale;
+	s_joinserver_server_title.generic.x    = 6*scale;
 	s_joinserver_server_title.generic.y	   = 105*scale;
+	s_joinserver_server_title.generic.cursor_offset = -16*scale;
 
 	s_joinserver_moveup.generic.type	= MTYPE_ACTION;
 	s_joinserver_moveup.generic.name	= " ";
@@ -3172,16 +3183,14 @@ void JoinServer_MenuInit( void )
 
 	s_joinserver_plist_title.generic.type = MTYPE_SEPARATOR2;
 	s_joinserver_plist_title.generic.name = "Playername   Score    Ping ";
-	s_joinserver_plist_title.generic.x    = 140*scale;
+	s_joinserver_plist_title.generic.x    = 350*scale;
 	s_joinserver_plist_title.generic.y	   = 300*scale;
 
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_address_book_action );
 	
-	if(scale < 1.5)
-		Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_title );
+	Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_title );
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_search_action );
-	if(scale < 1.5)
-		Menu_AddItem( &s_joinserver_menu, &s_joinserver_plist_title );
+	Menu_AddItem( &s_joinserver_menu, &s_joinserver_plist_title );
 
 	for ( i = 0; i < 16; i++ ) 
 		Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_actions[i] );
@@ -3208,20 +3217,16 @@ void JoinServer_MenuDraw(void)
 	int i;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
 	M_Background( "conback"); //draw black background first
 	M_Banner( "m_banner_main" );
 
-	if(scale < 1.5) {
-		M_DrawTextBox( 0*scale, 40*scale, 50*scale, 21*scale );
-
-		M_DrawTextBox( 129*scale, 230*scale, 34*scale, 12*scale );
-
-		M_DrawTextBox( -155*scale, 262*scale, 26*scale, 8*scale );
-	}
+	M_DrawTextBox( 0, 40*scale, 50, 21 );
+	M_DrawTextBox( 129*scale, 230*scale, 34, 12 );
+	M_DrawTextBox( -155*scale, 262*scale, 26, 8 );
 
 	for ( i = 0; i < 16; i++ )
 	{
@@ -3396,7 +3401,7 @@ void Mutators_MenuInit( void )
 	};
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -3650,7 +3655,7 @@ void Addbots_MenuInit( void )
 	int y;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -3683,7 +3688,7 @@ void Addbots_MenuDraw(void)
 	int y;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -4157,7 +4162,7 @@ void StartServer_MenuInit( void )
 	};
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 	
@@ -4331,7 +4336,7 @@ void StartServer_MenuDraw(void)
 	int offset = 65;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -4343,8 +4348,7 @@ void StartServer_MenuDraw(void)
 	M_MapPic(path);
 	M_Banner( "m_banner_main" );
 
-	if(scale < 1.5)
-		M_DrawTextBox( 175*scale, 225*scale, 22*scale, 9*scale );
+	M_DrawTextBox( 175*scale, 225*scale, 22*scale, 9*scale );
 
 	//get a map description if it is there
 	
@@ -4727,7 +4731,7 @@ void DMOptions_MenuInit( void )
 	int y = 70;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -5015,7 +5019,7 @@ void DownloadOptions_MenuInit( void )
 	int y = 0;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -5115,7 +5119,7 @@ void AddressBook_MenuInit( void )
 	int i;
 	float scale;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -5451,7 +5455,7 @@ qboolean PlayerConfig_MenuInit( void )
 
 	static const char *handedness[] = { "right", "left", "center", 0 };
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 
@@ -5632,9 +5636,8 @@ void PlayerConfig_MenuDraw( void )
 	int helmet = false;
 	int rack = false;
 	float scale;
-	int w, h;
 
-	scale = (viddef.height)/600; 
+	scale = (float)(viddef.height)/600;  
 	if(scale < 1)
 		scale = 1;
 

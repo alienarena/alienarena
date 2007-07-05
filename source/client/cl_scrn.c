@@ -231,7 +231,7 @@ void SCR_DrawCenterString (void)
 	scr_erase_center = 0;
 	start = scr_centerstring;
 
-	charscale = (viddef.height)/66; //make these a litter larger 
+	charscale = (float)(viddef.height)*8/400;; //make these a litter larger 
 	if(charscale < 8)
 		charscale = 8;
 
@@ -475,9 +475,9 @@ SCR_DrawLoading
 */
 void SCR_DrawLoadingBar (int percent, int scale)
 {
-	int hudscale;
+	float hudscale;
 
-	hudscale = (viddef.height + viddef.width)/1000;
+	hudscale = (float)(viddef.height)/600;
 	if(hudscale < 1)
 		hudscale = 1;
 
@@ -509,17 +509,18 @@ void SCR_DrawLoading (void)
 {
 	char	mapfile[32];
 	qboolean isMap = false;
-	int		font_size, hudscale;
+	int		font_size;
+	float	hudscale;
 	
 	if (!scr_draw_loading)
 		return;
 	scr_draw_loading = false;
 
-	font_size = (viddef.height)/100;
+	font_size = (float)(viddef.height)/100;
 	if(font_size < 8)
 		font_size = 8;
 
-	hudscale = (viddef.height)/600;
+	hudscale = (float)(viddef.height)/600;
 	if(hudscale < 1)
 		hudscale = 1;
 
@@ -1026,7 +1027,7 @@ void SizeHUDString (char *string, int *w, int *h)
 	int		lines, width, current;
 	int		charscale;
 
-	charscale = viddef.height/100;
+	charscale = (float)(viddef.height)*8/600;
 	if(charscale < 8)
 		charscale = 8;
 
@@ -1062,7 +1063,7 @@ void DrawHUDString (char *string, int x, int y, int centerwidth, int xor)
 	int		i;
 	int		charscale;
 
-	charscale = viddef.height/100;
+	charscale = (float)(viddef.height)*8/600;
 	if(charscale < 8)
 		charscale = 8;
 
@@ -1189,12 +1190,12 @@ void SCR_ExecuteLayoutString (char *s)
 	x = 0;
 	y = 0;
 	width = 3;
-	scale = (viddef.height)/600;
+	scale = (float)(viddef.height)/600;
 
 	if(scale < 1)
 		scale = 1;
 
-	charscale = (viddef.height)/100;
+	charscale = (float)(viddef.height)*8/600;
 
 	if(charscale < 8)
 		charscale = 8;
@@ -1510,7 +1511,7 @@ void SCR_showFPS(void)
 {
 	float scale;
 
-	scale = (viddef.height)/600;
+	scale = (float)(viddef.height)/600;
 	if(scale < 1)
 		scale = 1;
 

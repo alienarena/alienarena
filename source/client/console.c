@@ -46,7 +46,7 @@ vec4_t	color_table[8] =
 void DrawString (int x, int y, char *s)
 {
 	int charscale;
-	charscale = (viddef.height)/100;
+	charscale = (float)(viddef.height)*8/600;
 	if(charscale < 8)
 		charscale = 8;
 	while (*s)
@@ -67,7 +67,7 @@ void Draw_ColorString ( int x, int y, char *str )
 	vec4_t	scolor;
 	int		charscale;
 
-	charscale = charscale = (viddef.height)/100;
+	charscale = (float)(viddef.height)*8/600;
 	if(charscale < 8)
 		charscale = 8;
 
@@ -104,7 +104,7 @@ void DrawAltString (int x, int y, char *s)
 {
 	int		charscale;
 
-	charscale = (viddef.height)/100;
+	charscale = (float)(viddef.height)*8/600;
 	if(charscale < 8)
 		charscale = 8;
 
@@ -612,7 +612,7 @@ void Con_DrawNotify (void)
 	vec4_t	scolor;
 	int		charscale;
 
-	charscale = (viddef.height)/100;
+	charscale = (float)(viddef.height)*8/600;
 	if(charscale < 8)
 		charscale = 8;
 	
