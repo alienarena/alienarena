@@ -1,5 +1,16 @@
 #!/usr/bin/env ruby
 
+# customise these if required (currently checks ports 27900-27999) - note that
+# grep uses '.' as a wildcard that matchs exactly one character
+
+# used when called with the -p option (display pids) - requires admin perms
+
+	$lsof_string = 'lsof -i udp -l | grep crded | grep 279..'
+
+# used when called without the -p option (no pids) - can be run by any user
+
+	$netstat_string = 'netstat -u -l -n | grep 279..'
+
 =begin
 
     ALIEN ARENA SERVER BROWSER (for server admins) V1.1
@@ -294,33 +305,41 @@ end
 
 # Program starts here
 
-#ps = IO.popen('ps aux | grep crded | grep -v grep','r')
-#puts '#######'
-#configs = ps.collect { |psline|
-#	split = psline.split(' ')
-#	split[split.index('+exec')+1]
-#}
-#puts configs
-
 if $*.include?('--help') then
 	puts 'Server Status for Alien Arena servers'
 	puts ''
 	puts '  Optional arguments:'
 	puts '  -r      Resolve player IPs to addresses'
+	puts '  -p      Display PIDs (requires admin perms)'
 	puts '  --help  This message'
+	puts ''
+	puts '  Edit this file (svstat) if you use ports in a range other than 27900-27999'
 	puts ''
 	exit
 end
 
 localports = Array.new
 localpids = Array.new
-lsof = IO.popen('lsof -i udp -l | grep crded | grep 4u','r')
-lsof.each { |line|
-	split = line.split(' ')
-	localports << split.last.split(':').last
-	localpids << split[1]
-}
-lsof.close
+if $*.include?('-p') then
+
+	lsof = IO.popen($lsof_string,'r')
+
+	lsof.each { |line|
+		split = line.split(' ')
+		localports << split.last.split(':').last
+		localpids << split[1]
+	}
+	lsof.close
+else
+	ns = IO.popen($netstat_string,'r')
+
+	ns.each { |line|
+		split = line.split(' ')
+		localports << split[3].split(':').last
+		localpids << '---'
+	}
+	ns.close
+end
 
 # Use this code to get list of hostnames configured in arena/*.cfg files
 #hostnames = Dir['alienarena2007/arena/*'].collect{ |file|
