@@ -84,9 +84,9 @@ void Field_Draw( menufield_s *f )
 {
 	int i;
 	char tempbuffer[128]="";
-	int	charscale;
+	int charscale;
 
-	charscale = (viddef.height)/100; 
+	charscale = (float)(viddef.height)*8/600;
 	if(charscale < 8)
 		charscale = 8;
 
@@ -558,7 +558,7 @@ void Menu_DrawString( int x, int y, const char *string )
 	unsigned i;
 	int	charscale;
 
-	charscale = (viddef.height)/100; 
+	charscale = (float)(viddef.height)*8/600; 
 	if(charscale < 8)
 		charscale = 8;
 
@@ -584,7 +584,7 @@ void Menu_DrawColorString ( int x, int y, const char *str )
 	vec4_t	scolor;
 	int	charscale;
 
-	charscale = (viddef.height)/100; 
+	charscale = (float)(viddef.height)*8/600;
 	if(charscale < 8)
 		charscale = 8;
 
@@ -621,7 +621,7 @@ void Menu_DrawStringDark( int x, int y, const char *string )
 	unsigned i;
 	int	charscale;
 
-	charscale = (viddef.height)/100; 
+	charscale = (float)(viddef.height)*8/600; 
 	if(charscale < 8)
 		charscale = 8;
 
@@ -636,7 +636,7 @@ void Menu_DrawStringR2L( int x, int y, const char *string )
 	unsigned i;
 	int	charscale;
 
-	charscale = (viddef.height)/100; 
+	charscale = (float)(viddef.height)*8/600; 
 	if(charscale < 8)
 		charscale = 8;
 
@@ -651,7 +651,7 @@ void Menu_DrawStringR2LDark( int x, int y, const char *string )
 	unsigned i;
 	int	charscale;
 
-	charscale = (viddef.height)/100; 
+	charscale = (float)(viddef.height)*8/600; 
 	if(charscale < 8)
 		charscale = 8;
 
@@ -798,7 +798,7 @@ void Separator_Draw( menuseparator_s *s )
 void Separator2_Draw( menuseparator_s *s )
 {
 	if ( s->generic.name )
-		Menu_DrawString( s->generic.x + s->generic.parent->x, s->generic.y + s->generic.parent->y, s->generic.name );
+		Menu_DrawStringR2L( s->generic.x + s->generic.parent->x, s->generic.y + s->generic.parent->y, s->generic.name );
 }	
 void Slider_DoSlide( menuslider_s *s, int dir )
 {
