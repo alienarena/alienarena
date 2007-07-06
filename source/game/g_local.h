@@ -296,6 +296,9 @@ typedef struct
 	// items
 	int			num_items;
 
+	//bots
+	int			num_bots;
+
 	qboolean	autosaved;
 } game_locals_t;
 

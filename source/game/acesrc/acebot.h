@@ -186,7 +186,6 @@ struct botvals_s
 	char		chatmsg8[128];
 } botvals;
 
-extern int num_players;
 extern edict_t *players[MAX_CLIENTS];		// pointers to all players in the game
 
 // extern decs
@@ -195,6 +194,7 @@ extern item_table_t item_table[MAX_EDICTS];
 extern qboolean debug_mode;
 extern int numnodes;
 extern int num_items;
+extern int num_bots;
 
 // id Function Protos I need
 void     LookAtKiller (edict_t *self, edict_t *inflictor, edict_t *attacker);

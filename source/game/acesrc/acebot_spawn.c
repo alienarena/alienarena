@@ -185,8 +185,9 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 					}
 				}
 		}
-		else
+		else {
 			ent->client->resp.botnum++;
+		}
         
 		//look for existing bots of same name, so that server doesn't fill up with bots
 		//when clients enter the game
@@ -199,6 +200,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 				ACESP_SpawnBot(NULL, info, skin, NULL); //we may be changing the info further on
 			else 
 				ACESP_SpawnBot (NULL, NULL, NULL, userinfo);
+			game.num_bots++;
 			
 		}
 		else if(found && ((total_players > sv_botkickthreshold->integer) && sv_botkickthreshold->integer)) 
@@ -925,6 +927,7 @@ void ACESP_KickBot(char *name)
 			if(freed) {
 				bot->client->resp.botnum--; //we have one less bot
 				bot->client->ps.botnum = bot->client->resp.botnum;
+				game.num_bots--;
 			}
 
 		}
