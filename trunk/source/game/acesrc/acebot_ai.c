@@ -73,6 +73,9 @@ void ACEAI_Think (edict_t *self)
 {
 	usercmd_t	ucmd;
 
+	if(!game.num_bots)
+		return; //no bots, no need to go here
+
 	// Set up client movement
 	VectorCopy(self->client->ps.viewangles,self->s.angles);
 	VectorSet (self->client->ps.pmove.delta_angles, 0, 0, 0);

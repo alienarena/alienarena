@@ -408,7 +408,6 @@ void SVC_DirectConnect (void)
 	int			challenge;
 	int			previousclients;
 	int			botnum;
-	cvar_t		*sv_botkickthreshold;
 
 	adr = net_from;
 
@@ -558,10 +557,10 @@ void SVC_DirectConnect (void)
 	// find a client slot
 	cl = &svs.clients[0]; //get the bots info from the first client
 	botnum = cl->edict->client->ps.botnum; 
-	sv_botkickthreshold = Cvar_Get("sv_botkickthreshold", "0", 0); //if bots are getting kicked
 	//still need to reserve one slot
 	newcl = NULL;
-	for (i=0,cl=svs.clients ; i<maxclients->value-(botnum+(sv_botkickthreshold->integer>0)) ; i++,cl++)
+
+	for (i=0,cl=svs.clients ; i<maxclients->value-botnum; i++,cl++)
 	{
 		if (cl->state == cs_free)
 		{
