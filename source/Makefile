@@ -11,7 +11,7 @@ CC?=gcc
 OPTIMIZED_CFLAGS?=yes
 
 # Integer from 0 to 3, controls GCC's -O CFLAG.
-OPTIM_LVL?=3
+OPTIM_LVL?=2
 
 # Path to standard libraries (e.g. jpeg).
 LOCALBASE?=/usr/local
@@ -89,7 +89,7 @@ DEBUG_CFLAGS=$(BASE_CFLAGS) -g -ggdb
 LDFLAGS+=-lm
 # In FreeBSD, dlopen() is in libc.
 ifeq ($(OSTYPE),linux)
-LDFLAGS+=-ldl
+	LDFLAGS+=-ldl
 endif
 
 GLXLDFLAGS=-L$(X11BASE)/$(_LIB) -L$(LOCALBASE)/$(_LIB) -lX11 -lXext -lXxf86dga -lXxf86vm -lm -ljpeg -lGL -lGLU
