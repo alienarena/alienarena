@@ -232,18 +232,18 @@ void CL_ParticleFireEffect2 (cl_sustain_t *self)
 	VectorCopy (self->dir, dir);
 	MakeNormalVectors (dir, r, u);
 
-	for (i=0 ; i<self->count ; i++)
+	for (i=0 ; i<1 ; i++)
 	{
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_FIREBALL;//self->color + (rand()&7);
+		p->type = PARTICLE_FIREBALL;
 		p->texnum = r_explosiontexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
 		p->color = 0xe0;
-		p->scale = 4 + (rand()&7);
-		p->scalevel = 0;
+		p->scale = 24 + (rand()&7);
+		p->scalevel = 4;
 		for (j=0 ; j<3 ; j++)
 		{
 			p->org[j] = self->org[j] + self->magnitude*0.1*crand();
@@ -256,11 +256,11 @@ void CL_ParticleFireEffect2 (cl_sustain_t *self)
 		d = crand()*self->magnitude/3;
 		VectorMA (p->vel, d, u, p->vel);
 
-		p->accel[0] = p->accel[1] = -100;
-		p->accel[2] = -PARTICLE_GRAVITY;
-		p->alpha = 0.3;
+		p->accel[0] = p->accel[1] = 0;
+		p->accel[2] = -PARTICLE_GRAVITY/3;
+		p->alpha = 0.03;
 
-		p->alphavel = -1.0 / (0.8 + frand()*0.3);
+		p->alphavel = -.015 / (0.8 + frand()*0.3);
 
 		p->fromsustainedeffect = true;
 	}
@@ -288,7 +288,7 @@ void CL_ParticleSmokeEffect2 (cl_sustain_t *self)
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 		p->scale = 6 + (rand()&7);
 		p->color = 14;
-		p->scalevel = 1.5;
+		p->scalevel = 4.5;
 		for (j=0 ; j<3 ; j++)
 		{
 			p->org[j] = self->org[j] + self->magnitude*0.1*crand();
@@ -301,10 +301,10 @@ void CL_ParticleSmokeEffect2 (cl_sustain_t *self)
 		VectorMA (p->vel, d, u, p->vel);
 
 		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = -PARTICLE_GRAVITY/2;
-		p->alpha = 0.1;
+		p->accel[2] = -PARTICLE_GRAVITY/3;
+		p->alpha = 0.03;
 
-		p->alphavel = -1.0 / (7.8 + frand()*0.3);
+		p->alphavel = -.015 / (7.8 + frand()*0.3);
 
 		p->fromsustainedeffect = true;
 	}
