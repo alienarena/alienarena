@@ -337,7 +337,6 @@ void SP_target_steam (edict_t *self)
 }
 void use_target_fire (edict_t *self, edict_t *other, edict_t *activator)
 {
-	vec3_t start;
 
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_FIRE);
@@ -346,17 +345,6 @@ void use_target_fire (edict_t *self, edict_t *other, edict_t *activator)
 	gi.WriteDir (self->movedir);
 	gi.WriteByte (self->sounds);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
-
-	VectorCopy(self->s.origin, start);
-	start[2] = start[2] + 100;
-
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_SMOKE);
-	gi.WriteByte (self->count);
-	gi.WritePosition (start);
-	gi.WriteDir (self->movedir);
-	gi.WriteByte (self->sounds);
-	gi.multicast (start, MULTICAST_PVS);
 }
 
 void SP_target_fire (edict_t *self)

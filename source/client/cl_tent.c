@@ -653,7 +653,6 @@ void CL_ParseSmoke (void)
 		{
 			s->id = id;
 			s->count = MSG_ReadByte (&net_message);
-			s->count = 40;//just for testing here
 			MSG_ReadPos (&net_message, s->org);
 			MSG_ReadDir (&net_message, s->dir);
 			r = MSG_ReadByte (&net_message);

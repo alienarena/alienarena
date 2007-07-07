@@ -43,8 +43,6 @@ int		keyshift[256];		// key to map to if shift held down in console
 int		key_repeats[256];	// if > 1, it is autorepeating
 qboolean	keydown[256];
 
-extern kbutton_t	in_up, in_down, in_moveright, in_moveleft, in_forward, in_back, in_left, in_right, in_attack;
-
 typedef struct
 {
 	char	*name;
@@ -744,57 +742,7 @@ Called by the system between frames for both key up and key down events
 Should NOT be called during an interrupt!
 ===================
 */
-void Kill_keyUp(char *cmd) 
-{ 
-   //return; 
-   //Com_Printf("kill %s\n",cmd); 
-   if(!strcmp(cmd,"moveup")) 
-   { 
-      in_up.down[0] = in_up.down[1] = 0; 
-      in_up.state = 4;   // impulse up 
-   } 
-   if(!strcmp(cmd,"movedown")) 
-   { 
-      in_down.down[0] = in_down.down[1] = 0; 
-      in_down.state = 4;   // impulse up 
-   } 
-   if(!strcmp(cmd,"left")) 
-   { 
-      in_left.down[0] = in_left.down[1] = 0; 
-      in_left.state = 4;   // impulse up 
-   } 
-   if(!strcmp(cmd,"right")) 
-   { 
-      in_right.down[0] = in_right.down[1] = 0; 
-      in_right.state = 4;   // impulse up 
-   } 
-   if(!strcmp(cmd,"forward")) 
-   { 
-      in_forward.down[0] = in_forward.down[1] = 0; 
-      in_forward.state = 4;   // impulse up 
-   } 
-   if(!strcmp(cmd,"back")) 
-   { 
-      in_back.down[0] = in_back.down[1] = 0; 
-      in_back.state = 4;   // impulse up 
-   } 
-   if(!strcmp(cmd,"moveleft")) 
-   { 
-      in_moveleft.down[0] = in_moveleft.down[1] = 0; 
-      in_moveleft.state = 4;   // impulse up 
-   } 
-   if(!strcmp(cmd,"moveright")) 
-   { 
-      in_moveright.down[0] = in_moveright.down[1] = 0; 
-      in_moveright.state = 4;   // impulse up 
-   } 
-   if(!strcmp(cmd,"attack")) 
-   { 
-      in_attack.down[0] = in_attack.down[1] = 0; 
-      in_attack.state = 4;   // impulse up 
-   } 
 
-}
 void Key_Event (int key, qboolean down, unsigned time)
 {
 	char	*kb;
@@ -903,7 +851,6 @@ void Key_Event (int key, qboolean down, unsigned time)
 		{
 			Com_sprintf (cmd, sizeof(cmd), "-%s %i %i\n", kb+1, key, time);
 			Cbuf_AddText (cmd);
-			Kill_keyUp(kb+1);
 		}
 		if (keyshift[key] != key)
 		{
@@ -912,7 +859,6 @@ void Key_Event (int key, qboolean down, unsigned time)
 			{
 				Com_sprintf (cmd, sizeof(cmd), "-%s %i %i\n", kb+1, key, time);
 				Cbuf_AddText (cmd);
-				Kill_keyUp(kb+1);
 			}
 		}
 		return;
