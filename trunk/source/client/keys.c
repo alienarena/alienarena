@@ -25,7 +25,6 @@ key up events are sent even if in console mode
 
 */
 
-
 #define		MAXCMDLINE	256
 char	key_lines[32][MAXCMDLINE];
 int		key_linepos;
@@ -348,13 +347,13 @@ void Key_Console (int key)
 		return;
 	}
 
-	if (key == K_PGUP || key == K_KP_PGUP || key == K_MWHEELUP )
+	if (key == K_PGUP || key == K_KP_PGUP )
 	{
 		con.display -= 2;
 		return;
 	}
 
-	if (key == K_PGDN || key == K_KP_PGDN || key == K_MWHEELDOWN ) 
+	if (key == K_PGDN || key == K_KP_PGDN ) 
 	{
 		con.display += 2;
 		if (con.display > con.current)
@@ -688,9 +687,6 @@ void Key_Init (void)
 	consolekeys[K_KP_PLUS] = true;
 	consolekeys[K_KP_MINUS] = true;
 	consolekeys[K_KP_5] = true;
-	consolekeys[K_MWHEELUP] = true;
-	consolekeys[K_MWHEELDOWN] = true;
-
 
 	consolekeys['`'] = false;
 	consolekeys['~'] = false;
