@@ -550,10 +550,10 @@ $(BUILDDIR)/ded/glob.o :       $(UNIX_DIR)/glob.c
 $(BUILDDIR)/ded/net_udp.o :    $(UNIX_DIR)/net_udp.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/cd_null.o     : $(NULL_DIR)/cd_null.c    
+$(BUILDDIR)/ded/cd_null.o     : $(NULL_DIR)/cd_null.c
 	$(DO_DED_CC)
 
-$(BUILDDIR)/ded/cl_null.o     : $(NULL_DIR)/cl_null.c    
+$(BUILDDIR)/ded/cl_null.o     : $(NULL_DIR)/cl_null.c
 	$(DO_DED_CC)
 
 #############################################################################
@@ -872,7 +872,6 @@ $(BUILDDIR)/arena/q_shared.o :    $(ARENA_DIR)/q_shared.c
 #############################################################################
 # MISC
 #############################################################################
-#Needs work.
 clean: clean-debug clean-release
 
 clean-debug:
@@ -899,22 +898,22 @@ distclean: clean
 
 install:
 	cp $(BUILD_RELEASE_DIR)/cr* ../
-	cp $(BUILD_RELEASE_DIR)/game.so ../data1/
-	cp $(BUILD_RELEASE_DIR)/game.so ../arena/
+	cp $(BUILD_RELEASE_DIR)/game.$(SHLIBEXT) ../data1/
+	cp $(BUILD_RELEASE_DIR)/game.$(SHLIBEXT) ../arena/
 	strip ../crded
 	strip ../crx
 	strip ../crx.sdl
-	strip ../arena/game.so
-	strip ../data1/game.so
+	strip ../arena/game.$(SHLIBEXT)
+	strip ../data1/game.$(SHLIBEXT)
 
 install-debug:
 	cp $(BUILD_DEBUG_DIR)/cr* ../
-	cp $(BUILD_DEBUG_DIR)/game.so ../data1/
-	cp $(BUILD_DEBUG_DIR)/game.so ../arena/
+	cp $(BUILD_DEBUG_DIR)/game.$(SHLIBEXT) ../data1/
+	cp $(BUILD_DEBUG_DIR)/game.$(SHLIBEXT) ../arena/
 
 uninstall:
-	rm -f ../data1/game.so
-	rm -f ../arena/game.so
+	rm -f ../data1/game.$(SHLIBEXT)
+	rm -f ../arena/game.$(SHLIBEXT)
 	rm -f ../crx
 	rm -f ../crx.sdl
 	rm -f ../crded
