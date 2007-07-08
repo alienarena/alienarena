@@ -353,7 +353,7 @@ void Key_Console (int key)
 		return;
 	}
 
-	if (key == K_PGDN || key == K_KP_PGDN || key = K_MWHEELDOWN ) 
+	if (key == K_PGDN || key == K_KP_PGDN || key == K_MWHEELDOWN ) 
 	{
 		con.display += 2;
 		if (con.display > con.current)
