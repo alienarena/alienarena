@@ -970,7 +970,6 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 {
 
 	int				time, oldtime, newtime;
-	char			*cddir;
 
     /* previous instances do not exist in Win32 */
     if (hPrevInstance)
