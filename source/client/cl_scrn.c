@@ -1365,7 +1365,7 @@ void SCR_ExecuteLayoutString (char *s)
 			{
 				sprintf(zoompic, "zoomscope%i", cl.frame.playerstate.stats[STAT_ZOOMED]);
 				Draw_GetPicSize (&w, &h, zoompic);
-				Draw_ScaledPic ((viddef.width-w)/2, (viddef.height-h)/2, scale, zoompic);
+				Draw_ScaledPic ((viddef.width-w*scale)/2, (viddef.height-h*scale)/2, scale, zoompic);
 			}
 
 			SCR_DrawField (x, y, color, width, value, scale);
