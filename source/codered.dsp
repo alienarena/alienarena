@@ -7,19 +7,19 @@
 CFG=codered - Win32 Release
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
-!MESSAGE 
+!MESSAGE
 !MESSAGE NMAKE /f "codered.mak".
-!MESSAGE 
+!MESSAGE
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
-!MESSAGE 
+!MESSAGE
 !MESSAGE NMAKE /f "codered.mak" CFG="codered - Win32 Release"
-!MESSAGE 
+!MESSAGE
 !MESSAGE Possible choices for configuration are:
-!MESSAGE 
+!MESSAGE
 !MESSAGE "codered - Win32 Release" (based on "Win32 (x86) Application")
 !MESSAGE "codered - Win32 Debug" (based on "Win32 (x86) Application")
-!MESSAGE 
+!MESSAGE
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
@@ -83,7 +83,7 @@ LINK32=link.exe
 # ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib glu32.lib client\mpglib.lib /nologo /subsystem:windows /incremental:no /map /debug /machine:I386 /out:"../crx.exe"
 # SUBTRACT LINK32 /nodefaultlib
 
-!ENDIF 
+!ENDIF
 
 # Begin Target
 
@@ -92,10 +92,6 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90"
-# Begin Source File
-
-SOURCE=.\win32\cd_win.c
-# End Source File
 # Begin Source File
 
 SOURCE=.\client\cl_cin.c
@@ -367,10 +363,6 @@ SOURCE=.\ref_gl\anormtab.h
 # Begin Source File
 
 SOURCE=.\qcommon\bspfile.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\client\cdaudio.h
 # End Source File
 # Begin Source File
 

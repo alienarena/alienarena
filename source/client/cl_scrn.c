@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -166,7 +166,7 @@ void SCR_DrawDebugGraph (void)
 		v = values[i].value;
 		color = values[i].color;
 		v = v*scr_graphscale->value + scr_graphshift->value;
-		
+
 		if (v < 0)
 			v += scr_graphheight->value * (1+(int)(-v/scr_graphheight->value));
 		h = (int)v % (int)scr_graphheight->value;
@@ -231,7 +231,7 @@ void SCR_DrawCenterString (void)
 	scr_erase_center = 0;
 	start = scr_centerstring;
 
-	charscale = (float)(viddef.height)*8/400;; //make these a litter larger 
+	charscale = (float)(viddef.height)*8/400;; //make these a litter larger
 	if(charscale < 8)
 		charscale = 8;
 
@@ -240,7 +240,7 @@ void SCR_DrawCenterString (void)
 	else
 		y = 48;
 
-	do	
+	do
 	{
 	// scan the width of the line
 		for (l=0 ; l<40 ; l++)
@@ -250,12 +250,12 @@ void SCR_DrawCenterString (void)
 		SCR_AddDirtyPoint (x, y);
 		for (j=0 ; j<l ; j++, x+=charscale)
 		{
-			Draw_ScaledChar (x, y, start[j], charscale);	
+			Draw_ScaledChar (x, y, start[j], charscale);
 			if (!remaining--)
 				return;
 		}
 		SCR_AddDirtyPoint (x, y+charscale);
-			
+
 		y += charscale;
 
 		while (*start && *start != '\n')
@@ -270,7 +270,7 @@ void SCR_DrawCenterString (void)
 void SCR_CheckDrawCenterString (void)
 {
 	scr_centertime_off -= cls.frametime;
-	
+
 	if (scr_centertime_off <= 0)
 		return;
 
@@ -416,7 +416,7 @@ SCR_DrawNet
 */
 void SCR_DrawNet (void)
 {
-	if (cls.netchan.outgoing_sequence - cls.netchan.incoming_acknowledged 
+	if (cls.netchan.outgoing_sequence - cls.netchan.incoming_acknowledged
 		< CMD_BACKUP-1)
 		return;
 
@@ -484,19 +484,19 @@ void SCR_DrawLoadingBar (int percent, int scale)
 	if (R_RegisterPic("bar_background") && R_RegisterPic("bar_loading"))
 	{
 		Draw_StretchPic (
-			viddef.width/2-scale*15 + 1*hudscale,viddef.height/2 + scale*5+1*hudscale, 
+			viddef.width/2-scale*15 + 1*hudscale,viddef.height/2 + scale*5+1*hudscale,
 			scale*30-2*hudscale, scale*10-2*hudscale, "bar_background");
 		Draw_StretchPic (
-			viddef.width/2-scale*15 + 1*hudscale,viddef.height/2 + scale*5+8*hudscale, 
+			viddef.width/2-scale*15 + 1*hudscale,viddef.height/2 + scale*5+8*hudscale,
 			(scale*30-2*hudscale)*percent/100, scale*2-2*hudscale, "bar_loading");
 	}
 	else
 	{
 		Draw_Fill (
-			viddef.width/2-scale*15 + 1,viddef.height/2 + scale*5+1, 
+			viddef.width/2-scale*15 + 1,viddef.height/2 + scale*5+1,
 			scale*30-2, scale*2-2, 3);
 		Draw_Fill (
-			viddef.width/2-scale*15 + 1,viddef.height/2 + scale*5+1, 
+			viddef.width/2-scale*15 + 1,viddef.height/2 + scale*5+1,
 			(scale*30-2)*percent/100, scale*2-2, 7);
 	}
 }
@@ -511,7 +511,7 @@ void SCR_DrawLoading (void)
 	qboolean isMap = false;
 	int		font_size;
 	float	hudscale;
-	
+
 	if (!scr_draw_loading)
 		return;
 	scr_draw_loading = false;
@@ -532,7 +532,7 @@ void SCR_DrawLoading (void)
 
 		if(map_pic_loaded)
 			Draw_StretchPic (0, 0, viddef.width, viddef.height, va("/levelshots/%s.pcx", mapfile));
-		else			
+		else
 			Draw_Fill (0, 0, viddef.width, viddef.height, 0);
 
 		isMap = true;
@@ -547,38 +547,38 @@ void SCR_DrawLoading (void)
 	if (isMap)
 	{
 		char *mapmsg;
-			
+
 		mapmsg = va("Loading Map [%s]", mapfile);
 		DrawString(
-			viddef.width/2 - font_size/2*stringLen(mapmsg), 
-			viddef.height/2 - font_size*5, 
+			viddef.width/2 - font_size/2*stringLen(mapmsg),
+			viddef.height/2 - font_size*5,
 			mapmsg);
 
 		mapmsg = va("[%s]", cl.configstrings[CS_NAME]);
 		DrawString(
-			viddef.width/2 - font_size/2*stringLen(mapmsg), 
-			viddef.height/2 - font_size*4, 
+			viddef.width/2 - font_size/2*stringLen(mapmsg),
+			viddef.height/2 - font_size*4,
 			mapmsg);
 
 		DrawString(
-			viddef.width/2 - font_size*15, 
-			viddef.height/2 - font_size*1, 
+			viddef.width/2 - font_size*15,
+			viddef.height/2 - font_size*1,
 			loadingMessages[0]);
 		DrawString(
-			viddef.width/2 - font_size*15, 
-			viddef.height/2 - font_size*0, 
+			viddef.width/2 - font_size*15,
+			viddef.height/2 - font_size*0,
 			loadingMessages[1]);
 		DrawString(
-			viddef.width/2 - font_size*15, 
-			viddef.height/2 + font_size*1, 
+			viddef.width/2 - font_size*15,
+			viddef.height/2 + font_size*1,
 			loadingMessages[2]);
 		DrawString(
-			viddef.width/2 - font_size*15, 
-			viddef.height/2 + font_size*2, 
+			viddef.width/2 - font_size*15,
+			viddef.height/2 + font_size*2,
 			loadingMessages[3]);
 		DrawString(
-			viddef.width/2 - font_size*15, 
-			viddef.height/2 + font_size*3, 
+			viddef.width/2 - font_size*15,
+			viddef.height/2 + font_size*3,
 			loadingMessages[4]);
 
 		//check for instance of icons we would like to show in loading process, ala q3
@@ -654,11 +654,11 @@ void SCR_DrawLoading (void)
 			if(!inv_drawn) {
 				inv_drawn = 40*hudscale;
 			}
-		}	
+		}
 		if(adren) {
 			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn+sproing_drawn+inv_drawn
 				, (int)(viddef.height/3.2), hudscale, "p_adrenaline");
-		}	
+		}
 	}
 	else
 	{
@@ -666,8 +666,8 @@ void SCR_DrawLoading (void)
 
 		//draw centered
 		DrawString(
-				viddef.width/2 - font_size/2*stringLen(msg), 
-				viddef.height/2 - font_size/2, 
+				viddef.width/2 - font_size/2*stringLen(msg),
+				viddef.height/2 - font_size/2,
 				msg);
 
 	}
@@ -678,25 +678,25 @@ void SCR_DrawLoading (void)
 		char *download = va("Downloading [%s]", cls.downloadname);
 
 		DrawString(
-			viddef.width/2 - font_size/2*stringLen(download), 
-			viddef.height/2 + font_size*4, 
+			viddef.width/2 - font_size/2*stringLen(download),
+			viddef.height/2 + font_size*4,
 			download);
 
 		SCR_DrawLoadingBar(cls.downloadpercent, font_size);
 
 		DrawString(
-			viddef.width/2 - font_size*3, 
-			viddef.height/2 + (int)(font_size*5.5), 
+			viddef.width/2 - font_size*3,
+			viddef.height/2 + (int)(font_size*5.5),
 			va("%3d%%", (int)cls.downloadpercent));
 	}
 	else if (isMap) //loading bar...
 	{
 
 		SCR_DrawLoadingBar(loadingPercent, font_size);
-		
+
 		DrawString(
-			viddef.width/2 - font_size*3, 
-			viddef.height/2 + (int)(font_size*6.3), 
+			viddef.width/2 - font_size*3,
+			viddef.height/2 + (int)(font_size*6.3),
 			va("%3d%%", (int)loadingPercent));
 	}
 }
@@ -717,7 +717,7 @@ void SCR_RunConsole (void)
 		scr_conlines = 0.5;		// half screen
 	else
 		scr_conlines = 0;				// none visible
-	
+
 	if (scr_conlines < scr_con_current)
 	{
 		scr_con_current -= scr_conspeed->value*cls.frametime;
@@ -742,7 +742,7 @@ SCR_DrawConsole
 void SCR_DrawConsole (void)
 {
 	Con_CheckResize ();
-	
+
 	if (cls.state == ca_disconnected || cls.state == ca_connecting)
 	{	// forced full screen console
 		Con_DrawConsole (1.0);
@@ -784,7 +784,6 @@ void SCR_BeginLoadingPlaque (void)
 {
 	S_StopAllSounds ();
 	cl.sound_prepped = false;		// don't play ambients
-	CDAudio_Stop ();
 
 	if (developer->value)
 		return;
@@ -1000,7 +999,7 @@ void SCR_TileClear (void)
 
 
 #define STAT_MINUS		10	// num frame for '-' stats digit
-char		*sb_nums[2][11] = 
+char		*sb_nums[2][11] =
 {
 	{"num_0", "num_1", "num_2", "num_3", "num_4", "num_5",
 	"num_6", "num_7", "num_8", "num_9", "num_minus"},
@@ -1166,7 +1165,7 @@ void SCR_TouchPics (void)
 
 /*
 ================
-SCR_ExecuteLayoutString 
+SCR_ExecuteLayoutString
 
 ================
 */
@@ -1320,10 +1319,10 @@ void SCR_ExecuteLayoutString (char *s)
 			if (ping > 999)
 				ping = 999;
 
-			sprintf(block, "%3d %3d %-12.12s", score, ping, ci->name); 
+			sprintf(block, "%3d %3d %-12.12s", score, ping, ci->name);
 
 			Draw_ColorString (x, y, block);
-			
+
 			continue;
 		}
 
@@ -1342,7 +1341,7 @@ void SCR_ExecuteLayoutString (char *s)
 			width = atoi(token);
 			token = COM_Parse (&s);
 			value = cl.frame.playerstate.stats[atoi(token)];
-			SCR_DrawField (x, y, 0, width, value, scale); 
+			SCR_DrawField (x, y, 0, width, value, scale);
 			continue;
 		}
 
@@ -1360,7 +1359,7 @@ void SCR_ExecuteLayoutString (char *s)
 				color = (cl.frame.serverframe>>2) & 1;		// flash
 			else
 				color = 1;
-			
+
 			//draw the zoom scope pic if we are using the zoom alt-fire of disruptor
 			if (cl.frame.playerstate.stats[STAT_ZOOMED])
 			{
@@ -1575,7 +1574,7 @@ void SCR_UpdateScreen (void)
 		numframes = 2;
 		separation[0] = -cl_stereo_separation->value / 2;
 		separation[1] =  cl_stereo_separation->value / 2;
-	}		
+	}
 	else
 	{
 		separation[0] = 0;
@@ -1589,7 +1588,7 @@ void SCR_UpdateScreen (void)
 
 		if (scr_draw_loading == 2)
 		{	//  loading plaque over black screen
-			
+
 			//re.CinematicSetPalette(NULL);
 			SCR_DrawLoading ();
 
@@ -1635,7 +1634,7 @@ void SCR_UpdateScreen (void)
 //				return;
 			}
 		}
-		else 
+		else
 		{
 
 			// make sure the game palette is active
