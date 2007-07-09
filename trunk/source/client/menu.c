@@ -2081,10 +2081,6 @@ static void UpdateBGVolumeFunc( void *unused )
 	Cvar_SetValue( "background_music_vol", s_options_bgvolume_slider.curvalue / 10 );
 }
 
-static void UpdateCDVolumeFunc( void *unused )
-{
-	Cvar_SetValue( "cd_nocd", !s_options_cdvolume_box.curvalue );
-}
 static void UpdateBGMusicFunc( void *unused )
 {
 	Cvar_SetValue( "background_music", s_options_bgmusic_box.curvalue );

@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -161,7 +161,7 @@ void Sys_Print (const char *text){
 	SendMessage(sys_console.hWndOutput, EM_LINESCROLL, 0, 0xFFFF);
 	SendMessage(sys_console.hWndOutput, EM_SCROLLCARET, 0, 0);
 }
- 
+
 void MessageBoxForce (char *name, char *msg)
 {
 	MessageBox(NULL, name, name, 0 );
@@ -283,7 +283,7 @@ static LONG WINAPI Sys_ConsoleProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 	case WM_TIMER:
 		sys_console.flashColor = !sys_console.flashColor;
 		InvalidateRect(sys_console.hWndMsg, NULL, TRUE);
-		
+
 		break;
 	}
 
@@ -378,14 +378,14 @@ static void Sys_InitConsole (void){
 	w = GetDeviceCaps(hDC, HORZRES);
 	h = GetDeviceCaps(hDC, VERTRES);
 	ReleaseDC(0, hDC);
-	
+
 	r.left = (w - 540) / 2;
 	r.top = (h - 455) / 2;
 	r.right = r.left + 540;
 	r.bottom = r.top + 455;
 
 	AdjustWindowRect(&r, CONSOLE_WINDOW_STYLE, FALSE);
-	
+
 	x = r.left;
 	y = r.top;
 	w = r.right - r.left;
@@ -521,7 +521,7 @@ void Sys_PumpMessages (void){
       	DispatchMessage(&msg);
 	}
 
-	// Grab frame time 
+	// Grab frame time
 	sys_frameTime = timeGetTime();	// FIXME: should this be at start?
 }
 #endif
@@ -547,14 +547,14 @@ void WinError (void)
 {
 	LPVOID lpMsgBuf;
 
-	FormatMessage( 
+	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
 		NULL,
 		GetLastError(),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
 		(LPTSTR) &lpMsgBuf,
 		0,
-		NULL 
+		NULL
 	);
 
 	// Display the string.
@@ -563,79 +563,6 @@ void WinError (void)
 	// Free the buffer.
 	LocalFree( lpMsgBuf );
 }
-
-//================================================================
-
-
-/*
-================
-Sys_ScanForCD
-
-================
-*/
-char *Sys_ScanForCD (void)
-{
-	static char	cddir[MAX_OSPATH];
-	static qboolean	done;
-#ifndef DEMO
-	char		drive[4];
-	FILE		*f;
-	char		test[MAX_QPATH];
-
-	if (done)		// don't re-check
-		return cddir;
-
-	// no abort/retry/fail errors
-	SetErrorMode (SEM_FAILCRITICALERRORS);
-
-	drive[0] = 'c';
-	drive[1] = ':';
-	drive[2] = '\\';
-	drive[3] = 0;
-
-	done = true;
-
-	// scan the drives
-	for (drive[0] = 'c' ; drive[0] <= 'z' ; drive[0]++)
-	{
-		// where activision put the stuff...
-		sprintf (cddir, "%sinstall\\data", drive);
-		sprintf (test, "%sinstall\\data\\quake2.exe", drive);
-		f = fopen(test, "r");
-		if (f)
-		{
-			fclose (f);
-			if (GetDriveType (drive) == DRIVE_CDROM)
-				return cddir;
-		}
-	}
-#endif
-
-	cddir[0] = 0;
-	
-	return NULL;
-}
-
-/*
-================
-Sys_CopyProtect
-
-================
-*/
-void	Sys_CopyProtect (void)
-{
-#ifndef DEMO
-	char	*cddir;
-
-	cddir = Sys_ScanForCD();
-	if (!cddir[0])
-		Com_Error (ERR_FATAL, "You must have the Quake2 CD in the drive to play.");
-#endif
-}
-
-
-//================================================================
-
 
 /*
 ================
@@ -691,7 +618,7 @@ void Sys_Init (void)
 			Sys_Error ("Couldn't create dedicated server console");
 		hinput = GetStdHandle (STD_INPUT_HANDLE);
 		houtput = GetStdHandle (STD_OUTPUT_HANDLE);
-	
+
 		// let QHOST hook in
 		InitConProc (argc, argv);
 	}
@@ -740,7 +667,7 @@ char *Sys_ConsoleInput (void)
 				switch (ch)
 				{
 					case '\r':
-						WriteFile(houtput, "\r\n", 2, &dummy, NULL);	
+						WriteFile(houtput, "\r\n", 2, &dummy, NULL);
 
 						if (console_textlen)
 						{
@@ -754,7 +681,7 @@ char *Sys_ConsoleInput (void)
 						if (console_textlen)
 						{
 							console_textlen--;
-							WriteFile(houtput, "\b \b", 3, &dummy, NULL);	
+							WriteFile(houtput, "\b \b", 3, &dummy, NULL);
 						}
 						break;
 
@@ -763,7 +690,7 @@ char *Sys_ConsoleInput (void)
 						{
 							if (console_textlen < sizeof(console_text)-2)
 							{
-								WriteFile(houtput, &ch, 1, &dummy, NULL);	
+								WriteFile(houtput, &ch, 1, &dummy, NULL);
 								console_text[console_textlen] = ch;
 								console_textlen++;
 							}
@@ -831,7 +758,7 @@ void Sys_SendKeyEvents (void)
       	DispatchMessage (&msg);
 	}
 
-	// grab frame time 
+	// grab frame time
 	sys_frame_time = timeGetTime();	// FIXME: should this be at start?
 }
 
@@ -854,7 +781,7 @@ char *Sys_GetClipboardData( void )
 
 		if ( ( hClipboardData = GetClipboardData( CF_TEXT ) ) != 0 )
 		{
-			if ( ( cliptext = GlobalLock( hClipboardData ) ) != 0 ) 
+			if ( ( cliptext = GlobalLock( hClipboardData ) ) != 0 )
 			{
 				data = malloc( GlobalSize( hClipboardData ) + 1 );
 				strcpy( data, cliptext );
@@ -986,7 +913,7 @@ const char *gamename = "gamex86.dll";
 	GetGameAPI = (void *)GetProcAddress (game_library, "GetGameAPI");
 	if (!GetGameAPI)
 	{
-		Sys_UnloadGame ();		
+		Sys_UnloadGame ();
 		return NULL;
 	}
 
@@ -1025,7 +952,7 @@ void ParseCommandLine (LPSTR lpCmdLine)
 				*lpCmdLine = 0;
 				lpCmdLine++;
 			}
-			
+
 		}
 	}
 
@@ -1052,24 +979,6 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	global_hInstance = hInstance;
 
 	ParseCommandLine (lpCmdLine);
-
-	// if we find the CD, add a +set cddir xxx command line
-	cddir = Sys_ScanForCD ();
-	if (cddir && argc < MAX_NUM_ARGVS - 3)
-	{
-		int		i;
-
-		// don't override a cddir on the command line
-		for (i=0 ; i<argc ; i++)
-			if (!strcmp(argv[i], "cddir"))
-				break;
-		if (i == argc)
-		{
-			argv[argc++] = "+set";
-			argv[argc++] = "cddir";
-			argv[argc++] = cddir;
-		}
-	}
 
 	// Initialize the dedicated console
 	Sys_InitConsole();

@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -100,7 +100,7 @@ void Sys_Init(void)
 
 //void Sys_Error (const char *error, ...)
 void Sys_Error (char *error, ...)
-{ 
+{
 	va_list     argptr;
 	char        string[1024];
 
@@ -109,7 +109,7 @@ void Sys_Error (char *error, ...)
 
 	CL_Shutdown ();
 	Qcommon_Shutdown ();
-    
+
 	va_start (argptr,error);
 	vsnprintf (string,1024,error,argptr);
 	va_end (argptr);
@@ -117,18 +117,18 @@ void Sys_Error (char *error, ...)
 
 	_exit (1);
 
-} 
+}
 
 void Sys_Warn (char *warning, ...)
-{ 
+{
 	va_list     argptr;
 	char        string[1024];
-    
+
 	va_start (argptr,warning);
 	vsnprintf (string,1024,warning,argptr);
 	va_end (argptr);
 	fprintf(stderr, "Warning: %s", string);
-} 
+}
 
 /*
 ============
@@ -140,10 +140,10 @@ returns -1 if not present
 int	Sys_FileTime (char *path)
 {
 	struct	stat	buf;
-	
+
 	if (stat (path,&buf) == -1)
 		return -1;
-	
+
 	return buf.st_mtime;
 }
 
@@ -197,7 +197,7 @@ Sys_UnloadGame
 */
 void Sys_UnloadGame (void)
 {
-	if (game_library) 
+	if (game_library)
 		dlclose (game_library);
 	game_library = NULL;
 }
@@ -258,9 +258,9 @@ void *Sys_GetGameAPI (void *parms)
 				str_p = path;
 			else
 				str_p++;
-				
+
 			Com_Printf ("%s\n", str_p);
-			
+
 			return NULL;
 		}
 	}
@@ -268,7 +268,7 @@ void *Sys_GetGameAPI (void *parms)
 	GetGameAPI = (void *)dlsym (game_library, "GetGameAPI");
 	if (!GetGameAPI)
 	{
-		Sys_UnloadGame ();		
+		Sys_UnloadGame ();
 		return NULL;
 	}
 
@@ -289,7 +289,7 @@ void Sys_SendKeyEvents (void)
 		HandleEvents();
 #endif
 
-	// grab frame time 
+	// grab frame time
 	sys_frame_time = Sys_Milliseconds();
 }
 
@@ -331,83 +331,4 @@ int main (int argc, char **argv)
 
 }
 
-#if 0
-void Sys_CopyProtect(void)
-{
-	FILE *mnt;
-	struct mntent *ent;
-	char path[MAX_OSPATH];
-	struct stat st;
-	qboolean found_cd = false;
-
-	static qboolean checked = false;
-
-	if (checked)
-		return;
-
-	if ((mnt = setmntent("/etc/mtab", "r")) == NULL)
-		Com_Error(ERR_FATAL, "Can't read mount table to determine mounted cd location.");
-
-	while ((ent = getmntent(mnt)) != NULL) {
-		if (strcmp(ent->mnt_type, "iso9660") == 0) {
-			// found a cd file system
-			found_cd = true;
-			sprintf(path, "%s/%s", ent->mnt_dir, "install/data/quake2.exe");
-			if (stat(path, &st) == 0) {
-				// found it
-				checked = true;
-				endmntent(mnt);
-				return;
-			}
-			sprintf(path, "%s/%s", ent->mnt_dir, "Install/Data/quake2.exe");
-			if (stat(path, &st) == 0) {
-				// found it
-				checked = true;
-				endmntent(mnt);
-				return;
-			}
-			sprintf(path, "%s/%s", ent->mnt_dir, "quake2.exe");
-			if (stat(path, &st) == 0) {
-				// found it
-				checked = true;
-				endmntent(mnt);
-				return;
-			}
-		}
-	}
-	endmntent(mnt);
-
-	if (found_cd)
-		Com_Error (ERR_FATAL, "Could not find a Quake2 CD in your CD drive.");
-	Com_Error (ERR_FATAL, "Unable to find a mounted iso9660 file system.\n"
-		"You must mount the Quake2 CD in a cdrom drive in order to play.");
-}
-#endif
-
-#if 0
-/*
-================
-Sys_MakeCodeWriteable
-================
-*/
-void Sys_MakeCodeWriteable (unsigned long startaddr, unsigned long length)
-{
-
-	int r;
-	unsigned long addr;
-	int psize = getpagesize();
-
-	addr = (startaddr & ~(psize-1)) - psize;
-
-//	fprintf(stderr, "writable code %lx(%lx)-%lx, length=%lx\n", startaddr,
-//			addr, startaddr+length, length);
-
-	r = mprotect((char*)addr, length + startaddr - addr + psize, 7);
-
-	if (r < 0)
-    		Sys_Error("Protection change failed\n");
-
-}
-
-#endif
 

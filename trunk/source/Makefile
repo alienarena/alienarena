@@ -206,7 +206,6 @@ CODERED_OBJS = \
 	$(BUILDDIR)/client/sv_user.o \
 	$(BUILDDIR)/client/sv_world.o \
 	\
-	$(BUILDDIR)/client/cd_unix.o \
 	$(BUILDDIR)/client/q_shunix.o \
 	$(BUILDDIR)/client/vid_menu.o \
 	$(BUILDDIR)/client/vid_so.o \
@@ -365,9 +364,6 @@ $(BUILDDIR)/client/sv_user.o :    $(SERVER_DIR)/sv_user.c
 $(BUILDDIR)/client/sv_world.o :   $(SERVER_DIR)/sv_world.c
 	$(DO_CC)
 
-$(BUILDDIR)/client/cd_unix.o :   $(UNIX_DIR)/cd_unix.c
-	$(DO_CC)
-
 $(BUILDDIR)/client/q_shunix.o :  $(UNIX_DIR)/q_shunix.c
 	$(DO_O_CC)
 
@@ -478,8 +474,7 @@ CRDED_OBJS = \
 	$(BUILDDIR)/ded/q_shared.o \
 	$(BUILDDIR)/ded/pmove.o \
 	\
-	$(BUILDDIR)/ded/cl_null.o \
-	$(BUILDDIR)/ded/cd_null.o
+	$(BUILDDIR)/ded/cl_null.o
 
 $(BUILDDIR)/crded : $(CRDED_OBJS)
 	$(CC) $(CFLAGS) -o $@ $(CRDED_OBJS) $(LDFLAGS)
@@ -548,9 +543,6 @@ $(BUILDDIR)/ded/glob.o :       $(UNIX_DIR)/glob.c
 	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/net_udp.o :    $(UNIX_DIR)/net_udp.c
-	$(DO_DED_CC)
-
-$(BUILDDIR)/ded/cd_null.o     : $(NULL_DIR)/cd_null.c
 	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/cl_null.o     : $(NULL_DIR)/cl_null.c

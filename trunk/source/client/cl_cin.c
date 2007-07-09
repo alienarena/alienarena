@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -580,9 +580,6 @@ void SCR_PlayCinematic (char *arg)
 	byte	*palette;
 	char	name[MAX_OSPATH], *dot;
 	int		old_khz;
-
-	// make sure CD isn't playing music
-	CDAudio_Stop();
 
 	cl.cinematicframe = 0;
 	dot = strstr (arg, ".");
