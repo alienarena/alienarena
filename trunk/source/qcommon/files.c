@@ -60,7 +60,6 @@ typedef struct pack_s
 
 char	fs_gamedir[MAX_OSPATH];
 cvar_t	*fs_basedir;
-cvar_t	*fs_cddir;
 cvar_t	*fs_gamedirvar;
 
 typedef struct filelink_s
@@ -768,8 +767,6 @@ void FS_SetGamedir (char *dir)
 	else
 	{
 		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO|CVAR_NOSET);
-		if (fs_cddir->string[0])
-			FS_AddGameDirectory (va("%s/%s", fs_cddir->string, dir) );
 		FS_AddGameDirectory (va("%s/%s", fs_basedir->string, dir) );
 #ifdef __unix__
 		FS_AddHomeAsGameDirectory(dir);
@@ -1018,15 +1015,6 @@ void FS_InitFilesystem (void)
 	// allows the game to run from outside the data tree
 	//
 	fs_basedir = Cvar_Get ("basedir", ".", CVAR_NOSET);
-
-	//
-	// cddir <path>
-	// Logically concatenates the cddir after the basedir for
-	// allows the game to run from outside the data tree
-	//
-	fs_cddir = Cvar_Get ("cddir", "", CVAR_NOSET);
-	if (fs_cddir->string[0])
-		FS_AddGameDirectory (va("%s/"BASEDIRNAME, fs_cddir->string) );
 
 	//
 	// start up with baseq2 by default
