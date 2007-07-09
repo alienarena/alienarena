@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -98,7 +98,7 @@ struct sfx_s	*cl_sfx_rockexp;
 struct sfx_s	*cl_sfx_watrexp;
 // RAFAEL
 struct sfx_s	*cl_sfx_footsteps[4];
-struct sfx_s    *cl_sfx_metal_footsteps[4]; 
+struct sfx_s    *cl_sfx_metal_footsteps[4];
 
 struct model_s	*cl_mod_powerscreen;
 
@@ -146,12 +146,12 @@ void CL_RegisterTEntSounds (void)
 		Com_sprintf (name, sizeof(name), "player/step%i.wav", i+1);
 		cl_sfx_footsteps[i] = S_RegisterSound (name);
 	}
-	for (i=0 ; i<4 ; i++) 
-	{ 
-	   Com_sprintf (name, sizeof(name), "player/step_metal%i.wav", i+1); 
-	   cl_sfx_metal_footsteps[i] = S_RegisterSound (name); 
-	} 
-}	
+	for (i=0 ; i<4 ; i++)
+	{
+	   Com_sprintf (name, sizeof(name), "player/step_metal%i.wav", i+1);
+	   cl_sfx_metal_footsteps[i] = S_RegisterSound (name);
+	}
+}
 
 /*
 =================
@@ -184,7 +184,7 @@ void CL_RegisterTEntModels (void)
 	cl_mod_heatbeam = R_RegisterModel ("models/proj/beam/tris.md2");
 	cl_mod_monster_heatbeam = R_RegisterModel ("models/proj/widowbeam/tris.md2");
 //ROGUE
-}	
+}
 
 /*
 =================
@@ -213,7 +213,7 @@ explosion_t *CL_AllocExplosion (void)
 	int		i;
 	int		time;
 	int		index;
-	
+
 	for (i=0 ; i<MAX_EXPLOSIONS ; i++)
 	{
 		if (cl_explosions[i].type == ex_free)
@@ -267,9 +267,9 @@ int CL_ParseBeam (struct model_s *model)
 	vec3_t	start, end;
 	beam_t	*b;
 	int		i;
-	
+
 	ent = MSG_ReadShort (&net_message);
-	
+
 	MSG_ReadPos (&net_message, start);
 	MSG_ReadPos (&net_message, end);
 
@@ -300,7 +300,7 @@ int CL_ParseBeam (struct model_s *model)
 			return ent;
 		}
 	}
-	Com_Printf ("beam list overflow!\n");	
+	Com_Printf ("beam list overflow!\n");
 	return ent;
 }
 
@@ -315,9 +315,9 @@ int CL_ParseBeam2 (struct model_s *model)
 	vec3_t	start, end, offset;
 	beam_t	*b;
 	int		i;
-	
+
 	ent = MSG_ReadShort (&net_message);
-	
+
 	MSG_ReadPos (&net_message, start);
 	MSG_ReadPos (&net_message, end);
 	MSG_ReadPos (&net_message, offset);
@@ -345,14 +345,14 @@ int CL_ParseBeam2 (struct model_s *model)
 		{
 			b->entity = ent;
 			b->model = model;
-			b->endtime = cl.time + 200;	
+			b->endtime = cl.time + 200;
 			VectorCopy (start, b->start);
 			VectorCopy (end, b->end);
 			VectorCopy (offset, b->offset);
 			return ent;
 		}
 	}
-	Com_Printf ("beam list overflow!\n");	
+	Com_Printf ("beam list overflow!\n");
 	return ent;
 }
 
@@ -369,9 +369,9 @@ int CL_ParsePlayerBeam (struct model_s *model)
 	vec3_t	start, end, offset;
 	beam_t	*b;
 	int		i;
-	
+
 	ent = MSG_ReadShort (&net_message);
-	
+
 	MSG_ReadPos (&net_message, start);
 	MSG_ReadPos (&net_message, end);
 	// PMM - network optimization
@@ -417,7 +417,7 @@ int CL_ParsePlayerBeam (struct model_s *model)
 			return ent;
 		}
 	}
-	Com_Printf ("beam list overflow!\n");	
+	Com_Printf ("beam list overflow!\n");
 	return ent;
 }
 //rogue
@@ -433,7 +433,7 @@ int CL_ParseLightning (struct model_s *model)
 	vec3_t	start, end;
 	beam_t	*b;
 	int		i;
-	
+
 	srcEnt = MSG_ReadShort (&net_message);
 	destEnt = MSG_ReadShort (&net_message);
 
@@ -471,7 +471,7 @@ int CL_ParseLightning (struct model_s *model)
 			return srcEnt;
 		}
 	}
-	Com_Printf ("beam list overflow!\n");	
+	Com_Printf ("beam list overflow!\n");
 	return srcEnt;
 }
 
@@ -623,7 +623,7 @@ void CL_ParseFire (void)
 			magnitude = MSG_ReadLong (&net_message); // really interval
 		}
 	}
-	
+
 }
 
 void CL_ParseSmoke (void)
@@ -675,7 +675,7 @@ void CL_ParseSmoke (void)
 			magnitude = MSG_ReadLong (&net_message); // really interval
 		}
 	}
-	
+
 }
 
 //ROGUE
@@ -698,7 +698,7 @@ void CL_ParseTEnt (void)
 	int		color;
 	int		r;
 	float	fcolor[3], intensity, alpha;
-	
+
 	type = MSG_ReadByte (&net_message);
 
 	switch (type)
@@ -740,7 +740,7 @@ void CL_ParseTEnt (void)
 		}
 
 		break;
-		
+
 	case TE_SCREEN_SPARKS:
 	case TE_SHIELD_SPARKS:
 		MSG_ReadPos (&net_message, pos);
@@ -752,15 +752,12 @@ void CL_ParseTEnt (void)
 		//FIXME : replace or remove this sound
 		S_StartSound (pos, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
-		
+
 	case TE_SHOTGUN:				// martian laser effect
-		if(enginemode->value == 1)
-			CL_ParseLaser (0xd0d1d2d3);	
-		else {
-			MSG_ReadPos (&net_message, pos);
-			MSG_ReadPos (&net_message, pos2);
-			CL_LaserBeam (pos, pos2);
-		}
+		MSG_ReadPos (&net_message, pos);
+		MSG_ReadPos (&net_message, pos2);
+		CL_LaserBeam (pos, pos2);
+
 		break;
 
 	case TE_SPLASH:			// bullet hitting water
@@ -799,24 +796,15 @@ void CL_ParseTEnt (void)
 	case TE_BLASTER:			// blaster hitting wall
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
-		if(enginemode->value == 1) {
-			color = 0xb3;
-		    cnt = 50;
-			CL_ParticleEffect2 (pos, dir, color, cnt);
-		}
-		else
-			CL_BlasterParticles (pos, dir);
+		CL_BlasterParticles (pos, dir);
 
 		break;
-		
+
 	case TE_RAILTRAIL:			// railgun effect - let's try the heat missile thingy too!
-		if(enginemode->value == 1)
-			CL_ParseLaser (0xf2f2f2f2);		
-		else {
-			MSG_ReadPos (&net_message, pos);
-			MSG_ReadPos (&net_message, pos2);
-			CL_DisruptorBeam (pos, pos2);
-		}
+		MSG_ReadPos (&net_message, pos);
+		MSG_ReadPos (&net_message, pos2);
+		CL_DisruptorBeam (pos, pos2);
+
 		S_StartSound (pos, 0, 0, cl_sfx_railg, 1, ATTN_NONE, 0);
 		break;
 
@@ -826,11 +814,11 @@ void CL_ParseTEnt (void)
 		ex = CL_AllocExplosion ();
 		VectorCopy (pos, ex->ent.origin);
 		ex->start = cl.frame.servertime - 100;
-		
+
 		ex->ent.angles[1] = rand() % 360;
-	
-		
-		CL_DustParticles (pos);									
+
+
+		CL_DustParticles (pos);
 		break;
 
 	case TE_EXPLOSION1:
@@ -850,8 +838,8 @@ void CL_ParseTEnt (void)
 
 		V_AddStain ( pos, 25, 15, 15, 15, 200 );
 		V_AddStain ( pos, 25*3, 15, 15, 15, 66 );
-	
-		CL_ExplosionParticles (pos);							
+
+		CL_ExplosionParticles (pos);
 		if (type == TE_ROCKET_EXPLOSION_WATER)
 			S_StartSound (pos, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0);
 		else
@@ -992,17 +980,14 @@ void CL_ParseTEnt (void)
 		ex->lightcolor[0] = 1.0;
 		ex->lightcolor[1] = 0.0;
 		ex->lightcolor[2] = 1.0;
-		
+
 		CL_Deathfield (pos);
 		break;
 	case TE_BLASTERBEAM:			// blaster beam effect
-		if(enginemode->value == 1)
-			CL_ParseLaser (0xb0b1b2b3);		
-		else {
-			MSG_ReadPos (&net_message, pos);
-			MSG_ReadPos (&net_message, pos2);
-			CL_BlasterBeam (pos, pos2);
-		}
+		MSG_ReadPos (&net_message, pos);
+		MSG_ReadPos (&net_message, pos2);
+		CL_BlasterBeam (pos, pos2);
+
 		break;
 
 	case TE_STAIN:
