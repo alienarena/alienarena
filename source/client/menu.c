@@ -1494,7 +1494,6 @@ static menulist_s		s_options_hud_box;
 static menuslider_s		s_options_sfxvolume_slider;
 static menuslider_s		s_options_bgvolume_slider;
 static menulist_s		s_options_joystick_box;
-static menulist_s		s_options_cdvolume_box;
 static menulist_s		s_options_quality_list;
 static menulist_s		s_options_compatibility_list;
 static menulist_s		s_options_console_action;
