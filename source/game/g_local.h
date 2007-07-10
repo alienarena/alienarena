@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -87,9 +87,9 @@ typedef enum
 	DAMAGE_AIM			// auto targeting recognizes this
 } damage_t;
 
-typedef enum 
+typedef enum
 {
-	WEAPON_READY, 
+	WEAPON_READY,
 	WEAPON_ACTIVATING,
 	WEAPON_DROPPING,
 	WEAPON_FIRING
@@ -227,12 +227,12 @@ typedef struct
 #define IT_POWERUP		16
 
 // gitem_t->weapmodel for weapons indicates model index
-#define WEAP_BLASTER			1 
-#define WEAP_SMARTGUN			2 
-#define WEAP_CHAINGUN			3 
-#define WEAP_FLAMETHROWER		5 
-#define WEAP_ROCKETLAUNCHER		8 
-#define WEAP_DISRUPTOR			9 
+#define WEAP_BLASTER			1
+#define WEAP_SMARTGUN			2
+#define WEAP_CHAINGUN			3
+#define WEAP_FLAMETHROWER		5
+#define WEAP_ROCKETLAUNCHER		8
+#define WEAP_DISRUPTOR			9
 #define WEAP_BEAMGUN			10
 #define WEAP_VAPORIZER			11
 #define WEAP_BOMBER				12
@@ -576,6 +576,9 @@ extern  cvar_t  *excessive;
 extern  cvar_t  *grapple;
 extern  cvar_t  *classbased;
 
+//weapons
+extern	cvar_t	*wep_selfdmgmulti;
+
 //quick weapon change
 extern  cvar_t  *quickweap;
 
@@ -608,7 +611,7 @@ extern cvar_t   *joustmode;
 #define FFL_NOSPAWN			2
 
 typedef enum {
-	F_INT, 
+	F_INT,
 	F_FLOAT,
 	F_LSTRING,			// string on disk, pointer in memory, TAG_LEVEL
 	F_GSTRING,			// string on disk, pointer in memory, TAG_GAME
@@ -1071,7 +1074,7 @@ struct gclient_s
 	edict_t		*chase_target;		// player we are chasing
 	qboolean	update_chase;		// need to update chase info?
 
-	//team 
+	//team
 	int			dmteam;
 
 	//chasecam
@@ -1083,7 +1086,7 @@ struct gclient_s
 	qboolean in_vehicle;
 	float	Jet_framenum;   /*burn out time when jet is activated*/
     float	Jet_remaining;  /*remaining fuel time*/
-    float	Jet_next_think; 
+    float	Jet_next_think;
 
 	//deathball
 	qboolean in_deathball;
@@ -1092,7 +1095,7 @@ struct gclient_s
 	void		*ctf_grapple;		// entity of grapple
 	int			ctf_grapplestate;		// true if pulling
 	float		ctf_grapplereleasetime;	// time of grapple release
-	
+
 	//kill streaks
 	int kill_streak; //obviously this *will* get cleared at each respawn in most cases
 
@@ -1115,7 +1118,7 @@ struct edict_s
 
 	// FIXME: move these fields to a server private sv_entity_t
 	link_t		area;				// linked to a division node or leaf
-	
+
 	int			num_clusters;		// if -1, use headnode instead
 	int			clusternums[MAX_ENT_CLUSTERS];
 	int			headnode;			// unused if num_clusters != -1
@@ -1140,7 +1143,7 @@ struct edict_s
 
 	char		*model;
 	float		freetime;			// sv.time when the object was freed
-	
+
 	//
 	// only used locally in game, not by server
 	//
@@ -1258,9 +1261,9 @@ struct edict_s
 // ACEBOT_ADD
 	qboolean is_bot;
 	qboolean is_jumping;
-	
+
 	// For movement
-	vec3_t move_vector; 
+	vec3_t move_vector;
 	float next_move_time;
 	float wander_timeout;
 	float suicide_timeout;

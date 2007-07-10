@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -129,7 +129,7 @@ field_t fields[] = {
 field_t		levelfields[] =
 {
 	{"changemap", LLOFS(changemap), F_LSTRING},
-                   
+
 	{"sight_client", LLOFS(sight_client), F_EDICT},
 	{"sight_entity", LLOFS(sight_entity), F_EDICT},
 	{"sound_entity", LLOFS(sound_entity), F_EDICT},
@@ -198,6 +198,9 @@ void InitGame (void)
 	excessive = gi.cvar ("excessive", "0", CVAR_LATCH);
 	grapple = gi.cvar ("grapple", "0", CVAR_LATCH);
 	classbased = gi.cvar ("classbased", "0", CVAR_LATCH);
+
+	//weapons
+	wep_selfdmgmulti = gi.cvar ("wep_selfdmgmulti", "1.0", CVAR_LATCH);
 
 	//quick weapon change
 	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH);
@@ -454,7 +457,7 @@ void WriteClient (FILE *f, gclient_t *client)
 {
 	field_t		*field;
 	gclient_t	temp;
-	
+
 	// all of the ints, floats, and vectors stay as they are
 	temp = *client;
 
