@@ -151,7 +151,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 				if ((int)(dmflags->value) & DF_WEAPONS_STAY)
 					ent->flags |= FL_RESPAWN;
 				else
-					SetRespawn (ent, 20); //was 30
+					SetRespawn (ent, 10); //was 30
 			}
 		}
 	}
