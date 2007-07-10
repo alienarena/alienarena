@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -46,7 +46,7 @@ qboolean CanDamage (edict_t *targ, edict_t *inflictor)
 			return true;
 		return false;
 	}
-	
+
 	trace = gi.trace (inflictor->s.origin, vec3_origin, vec3_origin, targ->s.origin, inflictor, MASK_SOLID);
 	if (trace.fraction == 1.0)
 		return true;
@@ -94,14 +94,14 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 	if (targ->health < -999)
 		targ->health = -999;
 
-	if (targ->monsterinfo.aiflags & AI_NPC) { //cows never really die, they just return to their 
+	if (targ->monsterinfo.aiflags & AI_NPC) { //cows never really die, they just return to their
 											  //original spawn points
 		//send an effect
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_BFG_BIGEXPLOSION);
 		gi.WritePosition (targ->s.origin);
 		gi.multicast (targ->s.origin, MULTICAST_PHS);
-		
+
 		targ->health = targ->max_health;
 		targ->s.event = EV_PLAYER_TELEPORT;
 		targ->enemy = NULL;
@@ -340,6 +340,11 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 			safe_centerprintf(attacker, "Stop shooting your teammates!!!");
 		}
 	}
+
+	if (targ == attacker) {
+		damage *= (wep_selfdmgmulti->value);
+	}
+
 	meansOfDeath = mod;
 
 	// easy mode takes half damage
@@ -439,7 +444,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 			SpawnDamage (te_sparks, point, normal, take);
 
 		targ->health = targ->health - take;
-			
+
 		if (targ->health <= 0)
 		{
 			if (client)
