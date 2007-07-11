@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -141,7 +141,6 @@ cvar_t	*gl_ext_mtexcombine;
 // Vic - end
 
 cvar_t	*gl_nosubimage;
-cvar_t	*gl_allow_software;
 
 cvar_t	*gl_vertex_arrays;
 
@@ -244,7 +243,7 @@ glows_t glow_effects[MAX_GLOWS];
 
 // sin and cos tables from 0 to 1 in 0.0625 increments to speed up glow rendering
 // also from gl_rmisc.c and externed in gl_quake.h - i also use them for alias model glows.
-float glowcos[17] = 
+float glowcos[17] =
 {
 	1.000000,
 	0.923879,
@@ -266,7 +265,7 @@ float glowcos[17] =
 };
 
 
-float glowsin[17] = 
+float glowsin[17] =
 {
 	0.000000,
 	0.382684,
@@ -325,19 +324,19 @@ void R_ReadFogScript(char config_file[128])
 		fread( buffer, length, 1, fp );
 	}
 	s = buffer;
-		
-	strcpy( a_string, COM_Parse( &s ) ); 
-	fog.red = atof(a_string); 
-	strcpy( a_string, COM_Parse( &s ) ); 
-	fog.green = atof(a_string); 
-	strcpy( a_string, COM_Parse( &s ) ); 
-	fog.blue = atof(a_string); 
-	strcpy( a_string, COM_Parse( &s ) ); 
+
+	strcpy( a_string, COM_Parse( &s ) );
+	fog.red = atof(a_string);
+	strcpy( a_string, COM_Parse( &s ) );
+	fog.green = atof(a_string);
+	strcpy( a_string, COM_Parse( &s ) );
+	fog.blue = atof(a_string);
+	strcpy( a_string, COM_Parse( &s ) );
 	fog.start = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) ); 
+	strcpy( a_string, COM_Parse( &s ) );
 	fog.end = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) ); 
-	fog.density = atof(a_string); 
+	strcpy( a_string, COM_Parse( &s ) );
+	fog.density = atof(a_string);
 	if ( fp != 0 )
 	{
 		fp = 0;
@@ -385,8 +384,8 @@ void R_ReadMusicScript(char config_file[128])
 		fread( buffer, length, 1, fp );
 	}
 	s = buffer;
-		
-	strcpy( map_music, COM_Parse( &s ) ); 
+
+	strcpy( map_music, COM_Parse( &s ) );
 	map_music[length] = 0; //clear any possible garbage
 
 	if ( fp != 0 )
@@ -508,7 +507,7 @@ void R_DrawSpriteModel (entity_t *e)
 	right = v_right;
 
 	GL_Bind (currentmodel->skins[e->frame]->texnum);
-	
+
 	alpha = 0.6;
 	qglDepthMask( GL_FALSE );
 	qglEnable( GL_BLEND );
@@ -517,7 +516,7 @@ void R_DrawSpriteModel (entity_t *e)
 	qglBegin (GL_QUADS);
 
 	qglColor4f( 1, 1, 1, alpha );
-	
+
 	qglTexCoord2f (0, 1);
 	VectorMA (e->origin, -frame->origin_y, up, point);
 	VectorMA (point, -frame->origin_x, right, point);
@@ -537,7 +536,7 @@ void R_DrawSpriteModel (entity_t *e)
 	VectorMA (e->origin, -frame->origin_y, up, point);
 	VectorMA (point, frame->width - frame->origin_x, right, point);
 	qglVertex3fv (point);
-	
+
 	qglEnd ();
 
 	qglDisable (GL_ALPHA_TEST);
@@ -619,11 +618,11 @@ void R_DrawEntitiesOnList (void)
 				RS_ReadyScript(rs);
 				currententity->script = rs;
 			}
-			else 
+			else
 				currententity->script = NULL;
 		}
-		
-	
+
+
 		if ( currententity->flags & RF_BEAM )
 		{
 			R_DrawBeam( currententity );
@@ -674,10 +673,10 @@ void R_DrawEntitiesOnList (void)
 				RS_ReadyScript(rs);
 				currententity->script = rs;
 			}
-			else 
+			else
 				currententity->script = NULL;
 		}
-		
+
 
 		if ( currententity->flags & RF_BEAM )
 		{
@@ -729,13 +728,13 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 	int				texnum, blenddst, blendsrc;
 	float			*corner0 = corner[0];
 	vec3_t move, delta;
-	
+
 	if ( !num_particles )
 		return;
 
 	qglDepthMask( GL_FALSE );	 	// no z buffering
 	qglEnable( GL_BLEND);
-	GL_TexEnv( GL_MODULATE ); 
+	GL_TexEnv( GL_MODULATE );
 
 	for ( p = particles, i=0, oldtype=-1 ; i < num_particles ; i++,p++)
 	{
@@ -757,8 +756,8 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 
 		color[3] = p->alpha*255;
 
-		if ( 
-			p->type != oldtype 
+		if (
+			p->type != oldtype
 			|| color[0] != oldcolor[0] || color[1] != oldcolor[1]
 			|| color[2] != oldcolor[2] || color[3] != oldcolor[3] || scale != oldscale)
 		{
@@ -766,7 +765,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			{
 				qglEnd ();
 			}
-			if ( scale != 1 ) 
+			if ( scale != 1 )
 			{
 				VectorScale (vup, scale, up);
 				VectorScale (vright, scale, right);
@@ -806,27 +805,27 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			VectorScale ( up, p->dist, pup );
 		}
 
-		VectorSet (corner[0], 
+		VectorSet (corner[0],
 			p->origin[0] + (pup[0] + pright[0])*(-0.5),
 			p->origin[1] + (pup[1] + pright[1])*(-0.5),
 			p->origin[2] + (pup[2] + pright[2])*(-0.5));
 
-		VectorSet ( corner[1], 
+		VectorSet ( corner[1],
 			corner0[0] + pup[0], corner0[1] + pup[1], corner0[2] + pup[2]);
-		VectorSet ( corner[2], corner0[0] + (pup[0]+pright[0]), 
+		VectorSet ( corner[2], corner0[0] + (pup[0]+pright[0]),
 			corner0[1] + (pup[1]+pright[1]), corner0[2] + (pup[2]+pright[2]));
-		VectorSet ( corner[3], 
+		VectorSet ( corner[3],
 			corner0[0] + pright[0], corner0[1] + pright[1], corner0[2] + pright[2]);
 
 		qglTexCoord2f( 1, 1 );
 		qglVertex3fv( corner[0] );
-		
+
 		qglTexCoord2f( 0, 1 );
 		qglVertex3fv ( corner[1] );
-		
+
 		qglTexCoord2f( 0, 0 );
 		qglVertex3fv ( corner[2] );
-		
+
 		qglTexCoord2f( 1, 0 );
 		qglVertex3fv ( corner[3] );
 	}
@@ -836,7 +835,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 	qglColor4f( 1,1,1,1 );
 	qglDisable(GL_BLEND);
 	qglDepthMask( GL_TRUE );	// back to normal Z buffering
-	GL_TexEnv( GL_REPLACE );    
+	GL_TexEnv( GL_REPLACE );
 }
 
 /*
@@ -902,7 +901,7 @@ void R_DrawParticles (void)
 	for ( p = r_newrefdef.particles, i=0 ; i < r_newrefdef.num_particles ; i++,p++)
 	{
 		// hack a scale up to keep particles from disapearing
-		dist = ( p->origin[0] - r_origin[0] ) * vpn[0] + 
+		dist = ( p->origin[0] - r_origin[0] ) * vpn[0] +
 			    ( p->origin[1] - r_origin[1] ) * vpn[1] +
 			    ( p->origin[2] - r_origin[2] ) * vpn[2];
 
@@ -926,13 +925,13 @@ void R_DrawParticles (void)
 
 		gp++;
 		num_gparticles++;
-	
+
 	}
 	if(map_fog)
 		qglDisable(GL_FOG);
 	R_SortParticles ( gparticles, 0, num_gparticles - 1 );
-	
-	// we are always going to used textured particles!	
+
+	// we are always going to used textured particles!
 	GL_DrawParticles( num_gparticles, gparticles, d_8to24table);
 	if(map_fog)
 		qglEnable(GL_FOG);
@@ -1049,7 +1048,7 @@ void R_SetupFrame (void)
 		if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 		{
 			vec3_t temp;
-			
+
 			leaf = Mod_PointInLeaf(r_origin, r_worldmodel);
 			temp[0] = g_refl_X[g_active_refl];
 			temp[1] = g_refl_Y[g_active_refl];
@@ -1116,16 +1115,16 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 		     GLdouble zNear, GLdouble zFar )
 {
 	GLdouble xmin, xmax, ymin, ymax;
-	
+
 	ymax = zNear * tan( fovy * M_PI / 360.0 );
 	ymin = -ymax;
-	
+
 	xmin = ymin * aspect;
 	xmax = ymax * aspect;
-	
+
 	xmin += -( 2 * gl_state.camera_separation ) / zNear;
 	xmax += -( 2 * gl_state.camera_separation ) / zNear;
-	
+
 	//qglFrustum( xmin, xmax, ymin, ymax, zNear, zFar );
 	mesa_frustum( xmin, xmax, ymin, ymax, zNear, zFar ); //MPO
 }
@@ -1211,9 +1210,9 @@ void R_SetupGL (void)
 	{
 		R_DoReflTransform();
 		qglTranslatef(0, 0, -0);
-	}	
+	}
 	// end MPO
-    
+
 //	if ( gl_state.camera_separation != 0 && gl_state.stereo_enabled )
 //		qglTranslatef ( gl_state.camera_separation, 0, 0 );
 
@@ -1230,14 +1229,14 @@ void R_SetupGL (void)
 	else
 		qglDisable(GL_CULL_FACE);
 
-// CDawg - start 
-	if (r_newrefdef.viewangles[2]) 
-		qglEnable(GL_BLEND); 
-	else 
-		qglDisable(GL_BLEND); 
-// CDawg - end 
+// CDawg - start
+	if (r_newrefdef.viewangles[2])
+		qglEnable(GL_BLEND);
+	else
+		qglDisable(GL_BLEND);
+// CDawg - end
 
-//qglDisable(GL_BLEND); //CDawg <-- comment this line. 
+//qglDisable(GL_BLEND); //CDawg <-- comment this line.
 
 	qglDisable(GL_ALPHA_TEST);
 	qglEnable(GL_DEPTH_TEST);
@@ -1291,7 +1290,7 @@ void R_DrawSpecialSurfaces(void);
 void R_RenderView (refdef_t *fd)
 {
 	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
-		
+
 	numRadarEnts=0;
 
 	if (r_norefresh->value)
@@ -1324,13 +1323,13 @@ void R_RenderView (refdef_t *fd)
 	// start MPO
 	// if we are doing a reflection, we want to do a clip plane now, after
 	// we've set up our projection/modelview matrices
-	
+
 	if (g_drawing_refl)
 	{
 		double clipPlane[] = { 0, 0, 0, 0 };
 
 		if(r_newrefdef.rdflags & RDF_UNDERWATER) {
-			
+
 			clipPlane[2] = -1;
 			clipPlane[3] = g_refl_Z[g_active_refl];
 		}
@@ -1362,12 +1361,12 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawWorld ();
 
-	if(r_lensflare->value)R_RenderFlares ();  
+	if(r_lensflare->value)R_RenderFlares ();
 
 	R_DrawEntitiesOnList ();
-	
+
 	R_DrawAlphaSurfaces ();
-	
+
 	R_DrawSpecialSurfaces();
 
 	qglLoadMatrixf (r_world_matrix); //moving trans brushes
@@ -1388,18 +1387,18 @@ void R_RenderView (refdef_t *fd)
 	else
 	{
 		R_Flash();
-	
+
 		if (r_speeds->value)
 		{
 			Com_Printf (PRINT_ALL, "%4i wpoly %4i epoly %i tex %i lmaps\n",
-				c_brush_polys, 
-				c_alias_polys, 
-				c_visible_textures, 
-				c_visible_lightmaps); 
+				c_brush_polys,
+				c_alias_polys,
+				c_visible_textures,
+				c_visible_lightmaps);
 		}
 	}
 	// stop MPO
-	
+
 	if(map_fog)
 		qglDisable(GL_FOG);
 
@@ -1459,7 +1458,7 @@ static void GL_DrawStereoPattern( void )
 			GL_DrawColoredStereoLinePair( 1, 1, 0, 12);
 			GL_DrawColoredStereoLinePair( 0, 1, 0, 14);
 		qglEnd();
-		
+
 		GLimp_EndFrame();
 	}
 }
@@ -1552,7 +1551,6 @@ void R_Register( void )
 	r_wave = Cvar_Get ("r_wave", "2", CVAR_ARCHIVE); // Water waves
 
 	gl_nosubimage = Cvar_Get( "gl_nosubimage", "0", 0 );
-	gl_allow_software = Cvar_Get( "gl_allow_software", "0", 0 );
 
 	gl_particle_min_size = Cvar_Get( "gl_particle_min_size", ".2", CVAR_ARCHIVE );
 	gl_particle_max_size = Cvar_Get( "gl_particle_max_size", "40", CVAR_ARCHIVE );
@@ -1627,7 +1625,7 @@ void R_Register( void )
 
 	// MH - detail textures begin
 	// the amount of scaling to apply to detail textures depends on the value of this
-	// cvar.  set to 0 to switch off detail texturing.  
+	// cvar.  set to 0 to switch off detail texturing.
 	gl_detailtextures = Cvar_Get ("gl_detailtextures", "0.0", CVAR_ARCHIVE);
 	// MH - detail textures begin
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
@@ -1637,8 +1635,8 @@ void R_Register( void )
 
 	r_minimap_size = Cvar_Get ("r_minimap_size", "256", CVAR_ARCHIVE );
 	r_minimap_zoom = Cvar_Get ("r_minimap_zoom", "1", CVAR_ARCHIVE );
-	r_minimap_style = Cvar_Get ("r_minimap_style", "1", CVAR_ARCHIVE );  
-    r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE ); 
+	r_minimap_style = Cvar_Get ("r_minimap_style", "1", CVAR_ARCHIVE );
+    r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE );
 
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
 	Cmd_AddCommand( "screenshot", GL_ScreenShot_f );
@@ -1705,7 +1703,7 @@ R_Init
 ===============
 */
 int R_Init( void *hinstance, void *hWnd )
-{	
+{
 	char renderer_buffer[1000];
 	char vendor_buffer[1000];
 	int		err;
@@ -1804,7 +1802,7 @@ int R_Init( void *hinstance, void *hWnd )
 			Cvar_Set( "gl_monolightmap", "A" );
 			Com_Printf ("...using gl_monolightmap 'a'\n" );
 		}
-		else if ( gl_config.renderer & GL_RENDERER_POWERVR ) 
+		else if ( gl_config.renderer & GL_RENDERER_POWERVR )
 		{
 			Cvar_Set( "gl_monolightmap", "0" );
 		}
@@ -1816,7 +1814,7 @@ int R_Init( void *hinstance, void *hWnd )
 
 	// power vr can't have anything stay in the framebuffer, so
 	// the screen needs to redraw the tiled background every frame
-	if ( gl_config.renderer & GL_RENDERER_POWERVR ) 
+	if ( gl_config.renderer & GL_RENDERER_POWERVR )
 	{
 		Cvar_Set( "scr_drawall", "1" );
 	}
@@ -1855,7 +1853,7 @@ int R_Init( void *hinstance, void *hWnd )
 	/*
 	** grab extensions
 	*/
-	if ( strstr( gl_config.extensions_string, "GL_EXT_compiled_vertex_array" ) || 
+	if ( strstr( gl_config.extensions_string, "GL_EXT_compiled_vertex_array" ) ||
 		 strstr( gl_config.extensions_string, "GL_SGI_compiled_vertex_array" ) )
 	{
 		Com_Printf ("...enabling GL_EXT_compiled_vertex_array\n" );
@@ -1887,7 +1885,7 @@ int R_Init( void *hinstance, void *hWnd )
 			qglPointParameterfEXT = (void(APIENTRY*)(GLenum, GLfloat))qwglGetProcAddress("glPointParameterfEXT");
 			qglPointParameterfvEXT = (void(APIENTRY*)(GLenum, const GLfloat*))qwglGetProcAddress("glPointParameterfvEXT");
 
-	
+
 		}
 		else
 		{
@@ -1920,7 +1918,7 @@ int R_Init( void *hinstance, void *hWnd )
 #endif
 
 	if ( !qglColorTableEXT &&
-		strstr( gl_config.extensions_string, "GL_EXT_paletted_texture" ) && 
+		strstr( gl_config.extensions_string, "GL_EXT_paletted_texture" ) &&
 		strstr( gl_config.extensions_string, "GL_EXT_shared_texture_palette" ) )
 	{
 		if ( gl_ext_palettedtexture->value )
@@ -2070,8 +2068,8 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		Com_Printf("...using GL_NV_texture_shader\n");
 		gl_state.texshaders=true;
-	} 
-	else 
+	}
+	else
 	{
 		Com_Printf("...GL_NV_texture_shader not found\n");
 		gl_state.texshaders=false;
@@ -2101,7 +2099,7 @@ int R_Init( void *hinstance, void *hWnd )
 		{
 			gl_state.fragment_program = false;
 			Com_Printf("...GL_ARB_fragment_program not found\n");
-			
+
 		}
 	}
 	else
@@ -2432,7 +2430,7 @@ void R_RenderGlowEffects (void)
 		for (i = 16; i >= 0; i--)
 		{
 			for (j = 0; j < 3; j++)
-				v[j] = glow_effects[k].origin[j] + vright[j] * glowcos[i] * 
+				v[j] = glow_effects[k].origin[j] + vright[j] * glowcos[i] *
 					glow_effects[k].radius + vup[j] * glowsin[i] * glow_effects[k].radius;
 
 			qglVertex3fv (v);
