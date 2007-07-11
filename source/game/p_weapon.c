@@ -746,14 +746,10 @@ void weapon_energy_field_fire (edict_t *ent)
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		offset;
-	int			damage, radius_damage, damage_radius;
-	int			kick;
-
-	radius_damage = 100;
-	damage_radius = 150;
-
-	damage = 100;
-	kick = 200;
+	int		damage = 100;
+	int		radius_damage = 100;
+	int		damage_radius = 150;
+	int		kick = 200;
 
 	if (is_quad)
 	{
