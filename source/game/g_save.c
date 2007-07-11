@@ -200,7 +200,12 @@ void InitGame (void)
 	classbased = gi.cvar ("classbased", "0", CVAR_LATCH);
 
 	//weapons
-	wep_selfdmgmulti = gi.cvar ("wep_selfdmgmulti", "1.0", CVAR_LATCH);
+	wep_selfdmgmulti = gi.cvar("wep_selfdmgmulti", "1.0", CVAR_LATCH);
+
+	wep_disruptor_dmg = gi.cvar("wep_disruptor_dmg", "55", CVAR_LATCH);
+	wep_disruptor_kick = gi.cvar("wep_disruptor_kick", "55", CVAR_LATCH);
+	wep_disruptor_insta_dmg = gi.cvar("wep_disruptor_insta_dmg", "200", CVAR_LATCH);
+	wep_disruptor_insta_kick = gi.cvar("wep_disruptor_insta_kick", "200", CVAR_LATCH);
 
 	//quick weapon change
 	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH);

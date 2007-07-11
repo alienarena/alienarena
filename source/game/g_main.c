@@ -50,6 +50,11 @@ cvar_t  *classbased;
 //weapons
 cvar_t	*wep_selfdmgmulti;
 
+cvar_t	*wep_disruptor_dmg;
+cvar_t	*wep_disruptor_kick;
+cvar_t	*wep_disruptor_insta_dmg;
+cvar_t	*wep_disruptor_insta_kick;
+
 //quick weapon change
 cvar_t  *quickweap;
 

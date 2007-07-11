@@ -579,6 +579,11 @@ extern  cvar_t  *classbased;
 //weapons
 extern	cvar_t	*wep_selfdmgmulti;
 
+extern	cvar_t	*wep_disruptor_dmg;
+extern	cvar_t	*wep_disruptor_kick;
+extern	cvar_t	*wep_disruptor_insta_dmg;
+extern	cvar_t	*wep_disruptor_insta_kick;
+
 //quick weapon change
 extern  cvar_t  *quickweap;
 
