@@ -100,23 +100,23 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 	int			index;
 	gitem_t		*ammo;
 	gitem_t *vehicle;
-	
+
 	vehicle = FindItemByClassname("item_bomber");
 
 	if (other->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return false;	
+		return false;
 	}
 
 	vehicle = FindItemByClassname("item_strafer");
 
 	if (other->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return false;	
+		return false;
 	}
 
 	vehicle = FindItemByClassname("item_hover");
 
 	if (other->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return false;	
+		return false;
 	}
 
 
@@ -126,7 +126,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 	if(instagib->value || rocket_arena->value)
 		return false; //why pick them up in these modes?
 
-	if ( ( ((int)(dmflags->value) & DF_WEAPONS_STAY)) 
+	if ( ( ((int)(dmflags->value) & DF_WEAPONS_STAY))
 		&& other->client->pers.inventory[index])
 	{
 		if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM) ) )
@@ -156,7 +156,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		}
 	}
 
-	if (other->client->pers.weapon != ent->item && 
+	if (other->client->pers.weapon != ent->item &&
 		(other->client->pers.inventory[index] == 1) &&
 		( !deathmatch->value || other->client->pers.weapon == FindItem("blaster") ) )
 		other->client->newweapon = ent->item;
@@ -177,7 +177,7 @@ a seperate file.
 
 int Q2_FindFile (char *filename, FILE **file)
 {
-			
+
 	*file = fopen (filename, "rb");
 	if (!*file) {
 		*file = NULL;
@@ -205,7 +205,7 @@ void ChangeWeapon (edict_t *ent)
 	int done;
 	char	weaponpath[MAX_OSPATH] = " ";
 	FILE *file;
-	
+
 	ent->client->pers.lastweapon = ent->client->pers.weapon;
 	ent->client->pers.weapon = ent->client->newweapon;
 	ent->client->newweapon = NULL;
@@ -256,7 +256,7 @@ void ChangeWeapon (edict_t *ent)
 	weaponmodel[0] = 0;
 
 	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
-	
+
 	if(ent->client->pers.weapon->view_model == "models/weapons/v_rocket/tris.md2")
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_rlauncher.md2");
 	if(ent->client->pers.weapon->view_model == "models/weapons/v_blast/tris.md2")
@@ -275,8 +275,8 @@ void ChangeWeapon (edict_t *ent)
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
 	if(ent->client->pers.weapon->view_model == "vehicles/deathball/v_wep.md2")
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
-	
-	
+
+
 	sprintf(weaponpath, "data1/%s", weaponmodel);
 	Q2_FindFile (weaponpath, &file); //does it really exist?
 	if(!file) {
@@ -300,7 +300,7 @@ void ChangeWeapon (edict_t *ent)
 	//play a sound like in Q3, except for blaster, so it doesn't do it on spawn.
 	if(!(ent->client->pers.weapon->view_model == "models/weapons/v_blast/tris.md2"))
 		gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/whoosh.wav"), 1, ATTN_NORM, 0);
-		
+
 	ent->client->anim_priority = ANIM_PAIN;
 	if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 	{
@@ -311,7 +311,7 @@ void ChangeWeapon (edict_t *ent)
 	{
 			ent->s.frame = FRAME_pain301;
 			ent->client->anim_end = FRAME_pain304;
-			
+
 	}
 
 }
@@ -357,7 +357,7 @@ void NoAmmoWeaponChange (edict_t *ent)
 		ent->client->newweapon = FindItem ("Alien Smartgun");
 		return;
 	}
-	
+
 	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))]
 		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] )
 	{
@@ -410,28 +410,28 @@ void Use_Weapon (edict_t *ent, gitem_t *item)
 	gitem_t		*ammo_item;
 
 	gitem_t *vehicle;
-	
+
 	vehicle = FindItemByClassname("item_bomber");
 
 	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return;	
+		return;
 	}
 
 	vehicle = FindItemByClassname("item_strafer");
 
 	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return;	
+		return;
 	}
 
 	vehicle = FindItemByClassname("item_hover");
 
 	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return;	
+		return;
 	}
 
 	vehicle = FindItemByClassname("item_deathball");
 	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return;	
+		return;
 	}
 
 	//mutators
@@ -552,7 +552,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK) )
 		{
 			ent->client->latched_buttons &= ~BUTTON_ATTACK;
-			if ((!ent->client->ammo_index) || 
+			if ((!ent->client->ammo_index) ||
 				( ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity))
 			{
 				ent->client->ps.gunframe = FRAME_FIRE_FIRST;
@@ -587,7 +587,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		else if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK2) )
 		{
 			ent->client->latched_buttons &= ~BUTTON_ATTACK2;
-			if ((!ent->client->ammo_index) || 
+			if ((!ent->client->ammo_index) ||
 				( ent->client->pers.inventory[ent->client->ammo_index] >= ent->client->pers.weapon->quantity))
 			{
 				ent->client->ps.gunframe = FRAME_FIRE_FIRST;
@@ -675,21 +675,21 @@ void weapon_plasma_fire (edict_t *ent)
 	int			buildup;
 
 	if(instagib->value) {
-		damage = 200;
-		kick = 200;
+		damage = (wep_disruptor_insta_dmg->value);
+		kick = (wep_disruptor_insta_kick->value);
 	}
 	else {
-		damage = 55;
-		kick = 50;
+		damage = (wep_disruptor_dmg->value);
+		kick = (wep_disruptor_kick->value);
 	}
-	
+
 	if (is_quad)
 	{
 		damage *= 4;
 		kick *= 4;
 	}
 
-	//alt fire 
+	//alt fire
 	if (ent->client->buttons & BUTTON_ATTACK2) {
 		ent->client->ps.fov = 20;
 		buildup = damage_buildup; //int, for the pic flag
@@ -713,7 +713,7 @@ void weapon_plasma_fire (edict_t *ent)
 
 	//alt fire - reset some things
 	ent->client->ps.fov = atoi(Info_ValueForKey(ent->client->pers.userinfo, "fov")); //alt fire - reset the fov;
-	ent->client->ps.stats[STAT_ZOOMED] = 0;	
+	ent->client->ps.stats[STAT_ZOOMED] = 0;
 	damage_buildup = 1.0;
 
 	// send muzzle flash
@@ -752,16 +752,8 @@ void weapon_energy_field_fire (edict_t *ent)
 	radius_damage = 100;
 	damage_radius = 150;
 
-	if (deathmatch->value)
-	{	// normal damage is too extreme in dm
-		damage = 100;
-		kick = 200;
-	}
-	else
-	{
-		damage = 500;
-		kick = 200;
-	}
+	damage = 100;
+	kick = 200;
 
 	if (is_quad)
 	{
@@ -790,7 +782,7 @@ void weapon_energy_field_fire (edict_t *ent)
 
 	VectorSet(offset, 32, 5,  ent->viewheight-5);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	
+
 	if(ent->client->ps.gunframe == 12) {
 
 		VectorAdd(start, forward, start);
@@ -819,7 +811,7 @@ void weapon_energy_field_fire (edict_t *ent)
 		else {
 				fire_energy_field (ent, start, forward, damage, kick);
 				if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-					ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-2;	
+					ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-2;
 		}
 
 		// send muzzle flash
@@ -835,7 +827,7 @@ void weapon_energy_field_fire (edict_t *ent)
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
 
-	
+
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/energyfield.wav"), 1, ATTN_NORM, 0);
 		ent->client->weapon_sound = 0;
 
@@ -863,11 +855,11 @@ void weapon_flamethrower_fire (edict_t *ent)
 {
 	vec3_t	offset, start;
 	vec3_t	forward, right;
-	int		damage = 25;
+	int	damage = 25;
 	float	damage_radius = 200;
 
 	if((ent->client->buttons & BUTTON_ATTACK2) && ent->client->ps.gunframe == 6) { //shoot a fireball
-		
+
 		AngleVectors (ent->client->v_angle, forward, right, NULL);
 
 		VectorSet(offset, 8, 8, ent->viewheight-8);
@@ -893,7 +885,7 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 		return;
 	}
-		
+
 	if (!(ent->client->buttons & BUTTON_ATTACK))
 	{
 		ent->client->ps.gunframe = 17;
@@ -926,7 +918,7 @@ void weapon_flamethrower_fire (edict_t *ent)
 		if(ent->client->pers.inventory[ent->client->ammo_index] < 0)
 			ent->client->pers.inventory[ent->client->ammo_index] = 0;
 	}
-		
+
 }
 
 void Weapon_Flame (edict_t *ent)
@@ -1009,7 +1001,7 @@ void Weapon_RocketLauncher (edict_t *ent)
 /*
 ======================================================================
 
-BLASTER 
+BLASTER
 
 ======================================================================
 */
@@ -1066,7 +1058,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 		gi.WriteShort (ent-g_edicts);
 		if (hyper)
 			gi.WriteByte (MZ_HYPERBLASTER | is_silenced);
-		else 
+		else
 			gi.WriteByte (MZ_BLASTER | is_silenced);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 		PlayerNoise(ent, start, PNOISE_WEAPON);
@@ -1089,7 +1081,7 @@ void Weapon_Blaster_Fire (edict_t *ent)
 	int		damage;
 
 	damage = 25;
-	
+
 	Blaster_Fire (ent, vec3_origin, damage, false, EF_BLASTER);
 	ent->client->ps.gunframe++;
 }
@@ -1114,7 +1106,7 @@ void Weapon_Bomber_Fire (edict_t *ent)
 	int		damage;
 	float	damage_radius;
 	int		radius_damage;
-    
+
 	damage = 150;
 	radius_damage = 175;
 	damage_radius = 250;
@@ -1133,8 +1125,8 @@ void Weapon_Bomber_Fire (edict_t *ent)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	forward[0] = forward[0] * 2.6;
 	forward[1] = forward[1] * 2.6;
-	fire_bomb (ent, start, forward, damage, 250, damage_radius, radius_damage, 8); 
-	
+	fire_bomb (ent, start, forward, damage, 250, damage_radius, radius_damage, 8);
+
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1184,11 +1176,11 @@ void Weapon_Strafer_Fire (edict_t *ent)
 
 	right[0] = right[0] * 5;
 	right[1] = right[1] * 5;
-	
+
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	fire_blaster_beam (ent, start, forward, damage, 0, true);
-	
+
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1216,7 +1208,7 @@ void Weapon_Strafer_Fire (edict_t *ent)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	fire_blaster_beam (ent, start, forward, damage, 0, true);
-	
+
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1269,7 +1261,7 @@ void Weapon_Hover_Fire (edict_t *ent)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	fire_hover_beam (ent, start, forward, damage, 0, true);
-	
+
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1281,7 +1273,7 @@ void Weapon_Hover_Fire (edict_t *ent)
 	gi.WriteByte (TE_BLASTER_MUZZLEFLASH);
 	gi.WritePosition (start);
 	gi.multicast (start, MULTICAST_PVS);
-	
+
 	ent->client->ps.gunframe++;
 
 	gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/biglaser.wav"), 1, ATTN_NORM, 0);
@@ -1405,7 +1397,7 @@ void Machinegun_Fire (edict_t *ent)
 	}
 	else
 		ent->client->ps.gunframe++;
-	
+
 	shots = 1;
 
 	if (ent->client->pers.inventory[ent->client->ammo_index] < 0)
@@ -1449,10 +1441,10 @@ void Machinegun_Fire (edict_t *ent)
 		VectorSet(offset, 1, 1, ent->viewheight-0.5);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 		fire_shotgun (ent, start, forward, damage/2, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, bullet_count, MOD_CGALTFIRE);
-		
+
 		//play a booming sound
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("world/rocket.wav"), 1, ATTN_NORM, 0);
-	
+
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
@@ -1460,7 +1452,7 @@ void Machinegun_Fire (edict_t *ent)
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		//create visual muzzle flash sprite!
-		
+
 		forward[0] = forward[0] * 24;
 		forward[1] = forward[1] * 24;
 		right[0] = right[0] * 3;
@@ -1473,9 +1465,9 @@ void Machinegun_Fire (edict_t *ent)
 		gi.WriteByte (TE_BLASTER_MUZZLEFLASH);
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
-			
+
 		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-			ent->client->pers.inventory[ent->client->ammo_index] -= 10;	
+			ent->client->pers.inventory[ent->client->ammo_index] -= 10;
 	}
 	else if(!ent->altfire){
 		for (i=0 ; i<shots ; i++)
@@ -1484,7 +1476,7 @@ void Machinegun_Fire (edict_t *ent)
 			P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 			fire_bullet (ent, start, forward, damage, kick, DEFAULT_BULLET_HSPREAD, DEFAULT_BULLET_VSPREAD, MOD_CHAINGUN);
 		}
-	
+
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
@@ -1492,7 +1484,7 @@ void Machinegun_Fire (edict_t *ent)
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		//create visual muzzle flash sprite!
-		
+
 		forward[0] = forward[0] * 24;
 		forward[1] = forward[1] * 24;
 		right[0] = right[0] * 3;
@@ -1527,7 +1519,7 @@ void weapon_floater_fire (edict_t *ent)
 	int		damage;
 	float	damage_radius;
 	int		radius_damage;
-    
+
 	damage = 100 + (int)(random() * 20.0);
 	radius_damage = 120;
 	damage_radius = 120;
@@ -1548,12 +1540,12 @@ void weapon_floater_fire (edict_t *ent)
 	forward[1] = forward[1] * 2.6;
 	if(ent->altfire) {
 		if(excessive->value)
-			fire_floater (ent, start, forward, damage, 500, damage_radius, radius_damage, 8); 
+			fire_floater (ent, start, forward, damage, 500, damage_radius, radius_damage, 8);
 		else
-			fire_prox (ent, start, forward, damage-50, 500, damage_radius, radius_damage-50, 8); 
+			fire_prox (ent, start, forward, damage-50, 500, damage_radius, radius_damage-50, 8);
 	}
 	else
-		fire_floater (ent, start, forward, damage, 500, damage_radius, radius_damage, 8); 
+		fire_floater (ent, start, forward, damage, 500, damage_radius, radius_damage, 8);
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1565,7 +1557,7 @@ void weapon_floater_fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 //create visual muzzle flash sprite!
-	
+
 	forward[0] = forward[0] * 10;
 	forward[1] = forward[1] * 10;
 
@@ -1605,10 +1597,10 @@ void Weapon_Deathball_Fire (edict_t *ent)
 
 	VectorSet(offset, 32, 5,  ent->viewheight-5);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	
+
 
 	if(ent->client->ps.gunframe == 7) {
-		
+
 		fire_deathball (ent, start, forward, 550);
 
 		// send muzzle flash
@@ -1624,17 +1616,17 @@ void Weapon_Deathball_Fire (edict_t *ent)
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
 
-	
+
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/energyfield.wav"), 1, ATTN_NORM, 0);
 		ent->client->weapon_sound = 0;
 
 
-	
+
 	}
 	ent->client->ps.gunframe++;
 
 }
-void Weapon_Deathball (edict_t *ent) 
+void Weapon_Deathball (edict_t *ent)
 {
 	static int	pause_frames[]	= {30, 0};
 	static int	fire_frames[]	= {7,0};
