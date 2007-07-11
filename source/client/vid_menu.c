@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -62,7 +62,6 @@ MENU INTERACTION
 ====================================================================
 */
 
-static menuframework_s  s_software_menu;
 static menuframework_s	s_opengl_menu;
 static menuframework_s *s_current_menu;
 static int				s_current_menu_index;
@@ -193,7 +192,7 @@ static void ApplyChanges( void *unused )
 		Cvar_SetValue("vid_height", atoi( s_height_field.buffer ));
 	}
 	else
-		Cvar_SetValue( "gl_mode", s_mode_list.curvalue + 3 ); //offset added back 
+		Cvar_SetValue( "gl_mode", s_mode_list.curvalue + 3 ); //offset added back
 	Cvar_SetValue( "gl_texres", s_texres_box.curvalue );
 	Cvar_SetValue( "gl_reflection", s_reflect_box.curvalue);
 	Cvar_SetValue( "r_bloom", s_bloom_box.curvalue);
@@ -227,7 +226,7 @@ static void CancelChanges( void *unused )
 */
 void VID_MenuInit( void )
 {
-	static const char *resolutions[] = 
+	static const char *resolutions[] =
 	{
 		"[640 480  ]",
 		"[800 600  ]",
@@ -312,7 +311,7 @@ void VID_MenuInit( void )
 
 	s_opengl_menu.x = viddef.width * 0.50;
 	s_opengl_menu.nitems = 0;
-	
+
 	s_mode_list.generic.type = MTYPE_SPINCONTROL;
 	s_mode_list.generic.name = "video mode";
 	s_mode_list.generic.x = 0;
@@ -394,7 +393,7 @@ void VID_MenuInit( void )
 	s_bloom_box.itemnames = onoff_names;
 	s_bloom_box.generic.callback = BloomSetCallback;
 	s_bloom_box.curvalue = r_bloom->value;
-	
+
 	s_bloom_slider.generic.type	= MTYPE_SLIDER;
 	s_bloom_slider.generic.x		= 0;
 	s_bloom_slider.generic.y		= 140*scale;
