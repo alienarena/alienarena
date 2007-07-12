@@ -2508,7 +2508,7 @@ static const char *idcredits[] =
 	"Roadrage",
 	"Forsaken",
 	"Capt Crazy",
-	"Intimidator",
+	"Torok -Intimidator- Ivan",
 	"Stratocaster",
 	"ChexGuy",
 	"Crayon",

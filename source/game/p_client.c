@@ -900,6 +900,8 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_health = g_maxhealth->value * 2;
 	else if(excessive->value)
 		client->pers.max_health = g_maxhealth->value * 3;
+	else
+		client->pers.max_health = g_maxhealth->value;
 
 	if(grapple->value) {
 		item = FindItem("Grapple");
