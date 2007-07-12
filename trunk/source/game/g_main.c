@@ -55,6 +55,9 @@ cvar_t	*wep_disruptor_kick;
 cvar_t	*wep_disruptor_insta_dmg;
 cvar_t	*wep_disruptor_insta_kick;
 
+//health/max health/max ammo
+cvar_t	*g_spawnhealth;
+
 //quick weapon change
 cvar_t  *quickweap;
 

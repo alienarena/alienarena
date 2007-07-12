@@ -60,7 +60,7 @@ void SP_info_player_intermission(void)
 void player_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
 	// player pain is handled at the end of the frame in P_DamageFeedback
-	if(self->is_bot) 
+	if(self->is_bot)
 		self->oldenemy = other;
 }
 
@@ -81,7 +81,7 @@ qboolean IsFemale (edict_t *ent)
 
 void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 {
-	int			mod, msg;
+	int		mod, msg;
 	char		*message;
 	char		*message2;
 	qboolean	ff;
@@ -217,7 +217,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 
 					if(attacker->client->resp.score+1 >= game.clients[i].resp.score)
 						pos++;
-					
+
 					total++;
 				}
 				place = total - pos;
@@ -238,7 +238,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				}
 				else
 					safe_centerprintf(attacker, "You fragged %s\n", cleanname);
-					
+
 			}
 
 			switch (mod)
@@ -300,7 +300,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			}
 			//here is where the bot chat features will be added.
 			//default is on.  Setting to 1 turns it off.
-		
+
 #ifndef __unix__
 			if ((!((int)(dmflags->value) & DF_BOTCHAT)) && self->is_bot)
 			{
@@ -336,7 +336,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				}
 				safe_bprintf (PRINT_CHAT, chatmsg, self->client->pers.netname, attacker->client->pers.netname);
 				safe_bprintf (PRINT_CHAT, "\n");
-				
+
 				gi.WriteByte (svc_temp_entity);
 				gi.WriteByte (TE_SAYICON);
 				gi.WritePosition (self->s.origin);
@@ -377,7 +377,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				}
 				safe_bprintf (PRINT_CHAT, chatmsg, self->client->pers.netname, attacker->client->pers.netname);
 				safe_bprintf (PRINT_CHAT, "\n");
-				
+
 				gi.WriteByte (svc_temp_entity);
 				gi.WriteByte (TE_SAYICON);
 				gi.WritePosition (self->s.origin);
@@ -433,7 +433,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			if (message)
 			{
 				safe_bprintf (PRINT_MEDIUM,"%s %s %s%s\n", self->client->pers.netname, message, attacker->client->pers.netname, message2);
-			
+
 				if (deathmatch->value)
 				{
 					if (ff) {
@@ -448,7 +448,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					}
 					else {
 						attacker->client->resp.score++;
-										
+
 						//mutators
 						if(vampire->value) {
 							attacker->health+=20;
@@ -466,7 +466,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 								blue_team_score++;
 								safe_bprintf(PRINT_MEDIUM, "Blue Team scores!\n");
 								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/blue_scores.wav"), 1, ATTN_NONE, 0);
-						
+
 							}
 						}
 						//kill streaks
@@ -508,7 +508,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 										continue;
 									safe_centerprintf(cl_ent, "%s is a god!\n", cleanname2);
 								}
-								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/godlike.wav"), 1, ATTN_NONE, 0);	
+								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/godlike.wav"), 1, ATTN_NONE, 0);
 								break;
 							default:
 								break;
@@ -523,13 +523,13 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 							}
 						}
 					}
-					
+
 				}
 				self->client->kill_streak = 0; //reset, you are dead
 				return;
 			}
 		}
-		
+
 	}
 
 	safe_bprintf (PRINT_MEDIUM,"%s died.\n", self->client->pers.netname);
@@ -548,8 +548,8 @@ void TossClientWeapon (edict_t *self)
 	gitem_t		*item;
 	edict_t		*drop;
 	qboolean	quad;
-	qboolean    sproing;
-	qboolean    haste;
+	qboolean	sproing;
+	qboolean	haste;
 	float		spread;
 
 	if ((!deathmatch->value) || instagib->value || rocket_arena->value)
@@ -626,7 +626,7 @@ LookAtKiller
 void LookAtKiller (edict_t *self, edict_t *inflictor, edict_t *attacker)
 {
 	vec3_t		dir;
-	
+
 	if (attacker && attacker != world && attacker != self)
 	{
 		VectorSubtract (attacker->s.origin, self->s.origin, dir);
@@ -651,12 +651,12 @@ player_die
 */
 void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	int		n;
-	char *info;
-	gitem_t *vehicle;
-	int got_vehicle = 0;
-	int     number_of_gibs = 0;
-	
+	int	n;
+	char	*info;
+	gitem_t	*vehicle;
+	int	got_vehicle = 0;
+	int	number_of_gibs = 0;
+
 	vehicle = FindItemByClassname("item_bomber");
 
 	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
@@ -664,7 +664,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		Jet_Explosion(self); //blow that bitch up!
 		got_vehicle = 1; //so we know how to handle dropping it
 	}
-	
+
 	vehicle = FindItemByClassname("item_strafer");
 
 	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
@@ -672,7 +672,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		Jet_Explosion(self); //blow that bitch up!
 		got_vehicle = 1; //so we know how to handle dropping it
 	}
-		
+
 	vehicle = FindItemByClassname("item_hover");
 
 	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
@@ -686,7 +686,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->takedamage = DAMAGE_YES;
 	self->movetype = MOVETYPE_TOSS;
 
-	
+
 	info = Info_ValueForKey (self->client->pers.userinfo, "skin");
 
 	self->s.modelindex2 = 0;	// remove linked weapon model
@@ -732,7 +732,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 		if (deathmatch->value)
 			Cmd_Help_f (self);		// show scores
-	
+
 	}
 
 	// remove powerups
@@ -747,20 +747,20 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	if (self->health < -40)
 	{	// gib
 		self->takedamage	= DAMAGE_NO;
-		self->s.modelindex3 = 0;    //remove helmet, if a martian
-		self->s.modelindex4 = 0;    //war machine rider
+		self->s.modelindex3	= 0;    //remove helmet, if a martian
+		self->s.modelindex4	= 0;    //war machine rider
 
-	    gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_DEATHFIELD);
 		gi.WritePosition (self->s.origin);
 		gi.multicast (self->s.origin, MULTICAST_PVS);
-		
+
 		if(self->client->chasetoggle == 1)
 		{
 			/* If deathcam is active, switch client model to nothing */
 			self->s.modelindex = 0;
 			self->solid = SOLID_NOT;
-		
+
 			number_of_gibs = DEATH_GIBS_TO_THROW;
 		}
 		else
@@ -769,7 +769,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			ThrowClientHead (self, damage);
 			number_of_gibs = DEATH_GIBS_TO_THROW - 1;
 		}
-		
+
 		if(self->ctype == 0) { //alien
 
 			for (n= 0; n < number_of_gibs; n++)
@@ -801,10 +801,10 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			i = (i+1)%3;
 			// start a death animation
 			self->client->anim_priority = ANIM_DEATH;
-			
+
 			switch (i)
 			{
-//all player models are now using the longer set of death frames only
+			//all player models are now using the longer set of death frames only
 			case 0:
 				self->s.frame = FRAME_death501-1;
 				self->client->anim_end = FRAME_death518;
@@ -864,7 +864,10 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.weapon = item;
 
 	if(excessive->value) {
-		client->pers.health = 300;
+		//Allow custom health, even in excessive.
+		if ((g_spawnhealth->value) == 100)
+			gi.cvar_set("g_spawnhealth", "300");
+		client->pers.health		= 100;
 		client->pers.max_bullets	= 500;
 		client->pers.max_shells		= 500;
 		client->pers.max_rockets	= 500;
@@ -886,7 +889,7 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.inventory[ITEM_INDEX(FindItem("napalm"))] = 500;
 	}
 	else {
-		client->pers.health	= 100;
+		//client->pers.health		= (g_spawnhealth->value);
 		client->pers.max_bullets	= 200;
 		client->pers.max_shells		= 100;
 		client->pers.max_rockets	= 50;
@@ -908,6 +911,8 @@ void InitClientPersistant (gclient_t *client)
 	}
 
 	client->pers.connected = true;
+
+	client->pers.health = (g_spawnhealth->value);
 }
 
 
@@ -921,7 +926,7 @@ void InitClientResp (gclient_t *client)
 ==================
 SaveClientData
 
-Some information that should be persistant, like health, 
+Some information that should be persistant, like health,
 is still stored in the edict structure, so it needs to
 be mirrored out to the client structure before all the
 edicts are wiped.
@@ -1188,7 +1193,7 @@ edict_t *SelectCTFSpawnPoint (edict_t *ent)
 	int		selection;
 	float	range, range1, range2;
 	char	*cname;
-	
+
 
 	switch (ent->dmteam) {
 	case RED_TEAM:
@@ -1277,7 +1282,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 		if (!spot)
 			gi.error ("Couldn't find spawn point!");
 	}
-	
+
 	VectorCopy (spot->s.origin, origin);
 	origin[2] += 9;
 	VectorCopy (spot->s.angles, angles);
@@ -1321,12 +1326,12 @@ void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 			gi.WriteByte (TE_ROCKET_EXPLOSION);
 			gi.WritePosition (self->s.origin);
 			gi.multicast (self->s.origin, MULTICAST_PHS);
-	
+
 		}
 		else { //human
 			for (n= 0; n < 4; n++)
 				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC, EF_GIB);
-		}	
+		}
 		self->s.origin[2] -= 48;
 		ThrowClientHead (self, damage);
 		self->takedamage = DAMAGE_NO;
@@ -1349,10 +1354,10 @@ void BodySink( edict_t *ent ) {
 		ent->s.modelindex2 = 0;
 		ent->s.modelindex3 = 0;
 		ent->s.modelindex4 = 0;
-		return;	
+		return;
 	}
 	ent->nextthink = level.time + .1;
-	ent->s.origin[2] -= 1; 
+	ent->s.origin[2] -= 1;
 }
 
 void CopyToBodyQue (edict_t *ent)
@@ -1368,9 +1373,9 @@ void CopyToBodyQue (edict_t *ent)
 	gi.unlinkentity (body);
 	body->s = ent->s;
 	body->s.number = body - g_edicts;
-	
+
 	body->svflags = ent->svflags;
-	
+
 	VectorCopy (ent->mins, body->mins);
 	VectorCopy (ent->maxs, body->maxs);
 	VectorCopy (ent->absmin, body->absmin);
@@ -1416,7 +1421,7 @@ void respawn (edict_t *self)
 		// spectator's don't leave bodies
 		if (self->movetype != MOVETYPE_NOCLIP)
 			CopyToBodyQue (self);
-		//end spectator mode 
+		//end spectator mode
 		self->svflags &= ~SVF_NOCLIENT;
 		PutClientInServer (self);
 
@@ -1446,8 +1451,8 @@ void spectator_respawn (edict_t *ent)
 
 	if (ent->client->pers.spectator) {
 		char *value = Info_ValueForKey (ent->client->pers.userinfo, "spectator");
-		if (*spectator_password->string && 
-			strcmp(spectator_password->string, "none") && 
+		if (*spectator_password->string &&
+			strcmp(spectator_password->string, "none") &&
 			strcmp(spectator_password->string, value)) {
 			gi.cprintf(ent, PRINT_HIGH, "Spectator password incorrect.\n");
 			ent->client->pers.spectator = false;
@@ -1475,7 +1480,7 @@ void spectator_respawn (edict_t *ent)
 		// he was a spectator and wants to join the game
 		// he must have the right password
 		char *value = Info_ValueForKey (ent->client->pers.userinfo, "password");
-		if (*password->string && strcmp(password->string, "none") && 
+		if (*password->string && strcmp(password->string, "none") &&
 			strcmp(password->string, value)) {
 			gi.cprintf(ent, PRINT_HIGH, "Password incorrect.\n");
 			ent->client->pers.spectator = true;
@@ -1487,7 +1492,7 @@ void spectator_respawn (edict_t *ent)
 	}
 
 	/* Remove deathcam if changed to spectator after death */
-	if (ent->client->pers.spectator && ent->deadflag) 
+	if (ent->client->pers.spectator && ent->deadflag)
 		DeathcamRemove (ent, "off");
 
 	// clear client on respawn
@@ -1511,7 +1516,7 @@ void spectator_respawn (edict_t *ent)
 
 	ent->client->respawn_time = level.time;
 
-	if (ent->client->pers.spectator) 
+	if (ent->client->pers.spectator)
 		gi.bprintf (PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->pers.netname);
 	else
 		gi.bprintf (PRINT_HIGH, "%s joined the game\n", ent->client->pers.netname);
@@ -1645,7 +1650,7 @@ void PutClientInServer (edict_t *ent)
 	ent->s.modelindex = 255;		// will use the skin specified model
 	ent->s.modelindex2 = 255;		// custom gun model
 	info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
-	
+
 	i = 0;
 	done = false;
 	strcpy(playermodel, " ");
@@ -1659,7 +1664,7 @@ void PutClientInServer (edict_t *ent)
 		i++;
 	}
 	playermodel[i-1] = 0;
-	
+
 	sprintf(modelpath, "data1/players/%s/helmet.md2", playermodel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
 	if(file) {
@@ -1667,18 +1672,18 @@ void PutClientInServer (edict_t *ent)
 		ent->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
 	}
-	else 
+	else
 		ent->s.modelindex3 = 0;
-	
+
 	ent->s.modelindex4 = 0;
 	if(!strcmp(playermodel, "war")) //special case
 	{
 		ent->s.modelindex4 = gi.modelindex("players/war/weapon.md2");
 		ent->s.modelindex2 = 0;
 	}
-	else if(!strcmp(playermodel, "brainlet"))	
+	else if(!strcmp(playermodel, "brainlet"))
 		ent->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
-	
+
 	//check for class file
 	ent->ctype = 0; //alien is default
 	sprintf(modelpath, "data1/players/%s/human", playermodel);
@@ -1751,7 +1756,7 @@ void PutClientInServer (edict_t *ent)
 		return;
 	} else
 		client->resp.spectator = false;
-	//end spectator mode 
+	//end spectator mode
 
 	if (!KillBox (ent))
 	{	// could't spawn in?
@@ -1768,7 +1773,7 @@ void PutClientInServer (edict_t *ent)
 =====================
 ClientBeginDeathmatch
 
-A client has just connected to the server in 
+A client has just connected to the server in
 deathmatch mode, so clear everything out before starting them.
 =====================
 */
@@ -1807,15 +1812,15 @@ void ClientBeginDeathmatch (edict_t *ent)
 		gi.linkentity (ent);
 		//bring up scoreboard if not on a team
 		if(ent->dmteam == NO_TEAM) {
-			ent->client->showscores = true;	
+			ent->client->showscores = true;
 			if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 				CTFScoreboardMessage (ent, NULL);
-			else 
+			else
 				DeathmatchScoreboardMessage (ent, NULL);
 			gi.unicast (ent, true);
 			ent->teamset = true;
 		}
-		
+
 	}
 
 	// send effect
@@ -1850,13 +1855,13 @@ void ClientBeginDeathmatch (edict_t *ent)
 	else
 		// ACEBOT_ADD
 		safe_centerprintf(ent,"\n======================================\nCodeRED ACE Bot's are running\non this server.\n\n'sv addbot' to add a new bot.\n'sv removebot <name>' to remove bot.\n======================================\n\n");
-		
-	// If the map changes on us, init and reload the nodes.  Need to 
+
+	// If the map changes on us, init and reload the nodes.  Need to
 	//find a way to clear all bots first?
 
 	ACEND_InitNodes();
 	ACEND_LoadNodes();
-	ACESP_LoadBots(ent, 0); 
+	ACESP_LoadBots(ent, 0);
 	strcpy(current_map,level.mapname);
 
 // ACEBOT_END
@@ -1967,8 +1972,8 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		else if(ent->dmteam == BLUE_TEAM)
 			strcpy (userinfo, "\\name\\badinfo\\skin\\martianenforcer/blue");
 		else
-			strcpy (userinfo, "\\name\\badinfo\\skin\\martianenforcer/default");	 
-	
+			strcpy (userinfo, "\\name\\badinfo\\skin\\martianenforcer/default");
+
 		ent->s.modelindex3 = gi.modelindex("players/martianenforcer/helmet.md2");
 	}
 
@@ -1982,7 +1987,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		safe_bprintf (PRINT_MEDIUM, "Illegal to change teams after CTF match has started!\n");
 		return;
 	}
-	
+
 	// set name
 	s = Info_ValueForKey (userinfo, "name");
 	//fix player name if corrupted
@@ -1998,7 +2003,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		ent->client->pers.spectator = atoi(s);
 	else
 		ent->client->pers.spectator = false;
-	//end spectator mode 
+	//end spectator mode
 
 	// set skin
 	s = Info_ValueForKey (userinfo, "skin");
@@ -2013,7 +2018,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 			j = k = 0;
 			for(i = 0; i <= strlen(s) && i < MAX_OSPATH; i++)
 			{
-				if(copychar){ 
+				if(copychar){
 					playerskin[k] = s[i];
 					k++;
 				}
@@ -2023,18 +2028,18 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 				}
 				if(s[i] == '/')
 					copychar = true;
-					
-				
+
+
 			}
 			playermodel[j] = 0;
-			
+
 			if((!strcmp(playerskin, "red"))	|| (!strcmp(playerskin, "blue"))) //was valid teamskin
 			{
 				if(!strcmp(playerskin, "red"))
 				{
 					ent->dmteam = RED_TEAM;
 					if(whereFrom == CONNECT)
-						red_team_cnt++; 
+						red_team_cnt++;
 				}
 				else
 				{
@@ -2054,7 +2059,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 					ent->dmteam = BLUE_TEAM;
 				}
 				else
-				{	
+				{
 					safe_bprintf (PRINT_MEDIUM, "Invalid Team Skin!  Assigning to Red Team...\n");
 					strcpy(playerskin, "red");
 					red_team_cnt++;
@@ -2074,7 +2079,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	gi.configstring (CS_PLAYERSKINS+playernum, va("%s\\%s", ent->client->pers.netname, s) );
 
 	s = Info_ValueForKey (userinfo, "skin");
-			
+
 	i = 0;
 	done = false;
 	strcpy(playermodel, " ");
@@ -2096,18 +2101,18 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		ent->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
 	}
-	else 
+	else
 		ent->s.modelindex3 = 0;
-	
+
 	ent->s.modelindex4 = 0;
 	if(!strcmp(playermodel, "war")) //special case, presents a problem for CTF.  Grr.
 	{
 		ent->s.modelindex4 = gi.modelindex("players/war/weapon.md2");
 		ent->s.modelindex2 = 0;
 	}
-	else if(!strcmp(playermodel, "brainlet"))	
+	else if(!strcmp(playermodel, "brainlet"))
 		ent->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
-	
+
 	// fov
 	if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV))
 	{
@@ -2146,7 +2151,7 @@ void ClientChangeSkin (edict_t *ent)
 
 	//get the userinfo
 	memcpy (userinfo, ent->client->pers.userinfo, sizeof(userinfo));
-	
+
 	// check for malformed or illegal info strings
 	if (!Info_Validate(userinfo))
 	{
@@ -2155,17 +2160,17 @@ void ClientChangeSkin (edict_t *ent)
 		else if(ent->dmteam == BLUE_TEAM)
 			strcpy (userinfo, "\\name\\badinfo\\skin\\martianenforcer/blue");
 		else
-			strcpy (userinfo, "\\name\\badinfo\\skin\\martianenforcer/default");	 
-	
+			strcpy (userinfo, "\\name\\badinfo\\skin\\martianenforcer/default");
+
 		ent->s.modelindex3 = gi.modelindex("players/martianenforcer/helmet.md2");
 	}
-	
+
 	// set name
 	s = Info_ValueForKey (userinfo, "name");
 	//fix player name if corrupted
 	if(s != NULL && strlen(s) > 16)
 		s[16] = 0;
-	
+
 	strncpy (ent->client->pers.netname, s, sizeof(ent->client->pers.netname)-1);
 
 	// set skin
@@ -2177,7 +2182,7 @@ void ClientChangeSkin (edict_t *ent)
 	j = k = 0;
 	for(i = 0; i <= strlen(s) && i < MAX_OSPATH; i++)
 	{
-		if(copychar){ 
+		if(copychar){
 			playerskin[k] = s[i];
 			k++;
 		}
@@ -2187,10 +2192,10 @@ void ClientChangeSkin (edict_t *ent)
 		}
 		if(s[i] == '/')
 			copychar = true;
-			
+
 	}
 	playermodel[j] = 0;
-	
+
 	if(ent->dmteam == BLUE_TEAM)
 	{
 		safe_bprintf (PRINT_MEDIUM, "Joined Blue Team...\n");
@@ -2198,7 +2203,7 @@ void ClientChangeSkin (edict_t *ent)
 		blue_team_cnt++;
 	}
 	else
-	{	
+	{
 		safe_bprintf (PRINT_MEDIUM, "Joined Red Team...\n");
 		strcpy(playerskin, "red");
 		red_team_cnt++;
@@ -2208,7 +2213,7 @@ void ClientChangeSkin (edict_t *ent)
 	strcpy(s, playermodel);
 	strcat(s, playerskin);
 	Info_SetValueForKey (userinfo, "skin", s);
-	
+
 	playernum = ent-g_edicts-1;
 
 	// combine name and skin into a configstring
@@ -2269,8 +2274,8 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 	if (deathmatch->value && *value && strcmp(value, "0")) {
 		int i, numspec;
 
-		if (*spectator_password->string && 
-			strcmp(spectator_password->string, "none") && 
+		if (*spectator_password->string &&
+			strcmp(spectator_password->string, "none") &&
 			strcmp(spectator_password->string, value)) {
 			Info_SetValueForKey(userinfo, "rejmsg", "Spectator password required or incorrect.");
 			return false;
@@ -2288,7 +2293,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 	} else if(!ent->is_bot){
 		// check for a password
 		value = Info_ValueForKey (userinfo, "password");
-		if (*password->string && strcmp(password->string, "none") && 
+		if (*password->string && strcmp(password->string, "none") &&
 			strcmp(password->string, value)) {
 			Info_SetValueForKey(userinfo, "rejmsg", "Password required or incorrect.");
 			return false;
@@ -2343,7 +2348,7 @@ void ClientDisconnect (edict_t *ent)
     if(ctf->value)
 		CTFDeadDropFlag(ent);
 
-	DeadDropDeathball(ent);	
+	DeadDropDeathball(ent);
 
 	if(ent->deadflag && ent->client->chasetoggle == 1)
 		DeathcamRemove(ent, "off");
@@ -2359,7 +2364,7 @@ void ClientDisconnect (edict_t *ent)
 
 	//if using bot thresholds, put the bot back in
 	if(sv_botkickthreshold->integer)
-		ACESP_LoadBots(ent, 1); 
+		ACESP_LoadBots(ent, 1);
 
 	// send effect
 	gi.WriteByte (svc_muzzleflash);
@@ -2432,10 +2437,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	if (level.intermissiontime)
 	{
-		
+
 		client->ps.pmove.pm_type = PM_FREEZE;
 		// can exit intermission after five seconds
-		if (level.time > level.intermissiontime + 5.0 
+		if (level.time > level.intermissiontime + 5.0
 			&& (ucmd->buttons & BUTTON_ANY) )
 			level.exitintermission = true;
 		return;
@@ -2614,7 +2619,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (client->resp.spectator) {
 
 			client->latched_buttons = 0;
-			
+
 			if((ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM)) {
 				client->pers.spectator = false; //we have a team, join
 			//	safe_bprintf(PRINT_HIGH, "red: %i blue: %i\n", red_team_cnt, blue_team_cnt);
@@ -2659,12 +2664,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 					GetChaseTarget(ent);
 			}
 		}
-		else if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM && 
+		else if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM &&
 			(ucmd->upmove < 0)) {
-		
+
 			ent->dmteam = RED_TEAM; //join RED
 			client->pers.spectator = false;
-			ClientChangeSkin(ent);	
+			ClientChangeSkin(ent);
 		}
 		else
 			client->ps.pmove.pm_flags &= ~PMF_JUMP_HELD;
@@ -2714,19 +2719,19 @@ void ClientBeginServerFrame (edict_t *ent)
 		spectator_respawn(ent);
 		return;
 	}
-	//end spectator mode 
+	//end spectator mode
 
-	//anti-camp 
+	//anti-camp
 	if(anticamp->value) {
 		if(excessive->value) {
-			if(VectorLength(ent->velocity) > 450) 
+			if(VectorLength(ent->velocity) > 450)
 				ent->suicide_timeout = level.time + camptime->integer;
 		}
 		else {
-			if(VectorLength(ent->velocity) > 300) 
+			if(VectorLength(ent->velocity) > 300)
 				ent->suicide_timeout = level.time + camptime->integer;
 		}
-		if(ent->suicide_timeout < level.time && ent->takedamage == DAMAGE_AIM  
+		if(ent->suicide_timeout < level.time && ent->takedamage == DAMAGE_AIM
 			&& !client->resp.spectator) {
 			T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, ent->dmg, 0, DAMAGE_NO_ARMOR, MOD_SUICIDE);
 			safe_centerprintf(ent, "Anticamp: move or die!\n");
@@ -2734,7 +2739,7 @@ void ClientBeginServerFrame (edict_t *ent)
 	}
 
 	//spectator mode
-	
+
 	if (!client->weapon_thunk && !client->resp.spectator)
 	//end spectator mode
 
@@ -2742,7 +2747,7 @@ void ClientBeginServerFrame (edict_t *ent)
 	else
 		client->weapon_thunk = false;
 
-	if (ent->deadflag) 
+	if (ent->deadflag)
 	{
 		// wait for any button just going down
 		if ( level.time > client->respawn_time)
