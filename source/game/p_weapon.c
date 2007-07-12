@@ -670,24 +670,27 @@ void weapon_plasma_fire (edict_t *ent)
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		offset;
-	int			damage;
-	int			kick;
-	int			buildup;
+
+	int		damage;
+	int		kick;
+	int		buildup;
 
 	if(instagib->value) {
-		damage = (wep_disruptor_insta_dmg->value);
-		kick = (wep_disruptor_insta_kick->value);
-	}
-	else {
-		damage = (wep_disruptor_dmg->value);
-		kick = (wep_disruptor_kick->value);
-	}
+		//ifs, because custom values should work too..
+		if((wep_disruptor_dmg->value) == 55)
+			gi.cvar_set("wep_disruptor_dmg", "200");
+		if((wep_disruptor_kick->value) == 55)
+			gi.cvar_set("wep_disruptor_kick", "200");
+	}`
 
 	if (is_quad)
 	{
 		damage *= 4;
 		kick *= 4;
 	}
+
+	damage = (wep_disruptor_dmg->value);
+	kick = (wep_disruptor_kick->value);
 
 	//alt fire
 	if (ent->client->buttons & BUTTON_ATTACK2) {
