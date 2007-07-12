@@ -207,6 +207,7 @@ void InitGame (void)
 
 	//health/max health/max ammo
 	g_spawnhealth = gi.cvar("g_spawnhealth", "100", 0);
+	g_maxhealth = gi.cvar("g_maxhealth", "100", 0);
 
 	//quick weapon change
 	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH);

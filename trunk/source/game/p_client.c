@@ -896,12 +896,12 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_slugs		= 50;
 	}
 
-	if(vampire->value)
-		client->pers.max_health = 200;
-	else if(excessive->value)
-		client->pers.max_health = 300;
-	else
-		client->pers.max_health = 100;
+	if(vampire->value) {
+		if(g_maxhealth->value == 100)
+			gi.cvar_set("g_maxhealth", "200");
+	}
+	else if(excessive->value && g_maxhealth->value == 100)
+			gi.cvar_set("g_maxhealth", "300");
 
 	if(grapple->value) {
 		item = FindItem("Grapple");
@@ -910,7 +910,8 @@ void InitClientPersistant (gclient_t *client)
 
 	client->pers.connected = true;
 
-	client->pers.health = (g_spawnhealth->value);
+	client->pers.health = g_spawnhealth->value;
+	client->pers.max_health = g_maxhealth->value;
 }
 
 
