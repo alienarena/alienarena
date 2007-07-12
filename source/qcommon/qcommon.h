@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -130,10 +130,10 @@ void MSG_WriteDir (sizebuf_t *sb, vec3_t vector);
 
 void	MSG_BeginReading (sizebuf_t *sb);
 
-int		MSG_ReadChar (sizebuf_t *sb);
-int		MSG_ReadByte (sizebuf_t *sb);
-int		MSG_ReadShort (sizebuf_t *sb);
-int		MSG_ReadLong (sizebuf_t *sb);
+int	MSG_ReadChar (sizebuf_t *sb);
+int	MSG_ReadByte (sizebuf_t *sb);
+int	MSG_ReadShort (sizebuf_t *sb);
+int	MSG_ReadLong (sizebuf_t *sb);
 float	MSG_ReadFloat (sizebuf_t *sb);
 char	*MSG_ReadString (sizebuf_t *sb);
 char	*MSG_ReadStringLine (sizebuf_t *sb);
@@ -150,19 +150,19 @@ void	MSG_ReadData (sizebuf_t *sb, void *buffer, int size);
 
 //============================================================================
 
-extern	qboolean		bigendien;
+extern	qboolean	bigendien;
 
 extern	short	BigShort (short l);
 extern	short	LittleShort (short l);
-extern	int		BigLong (int l);
-extern	int		LittleLong (int l);
+extern	int	BigLong (int l);
+extern	int	LittleLong (int l);
 extern	float	BigFloat (float l);
 extern	float	LittleFloat (float l);
 
 //============================================================================
 
 
-int	COM_Argc (void);
+int COM_Argc (void);
 char *COM_Argv (int arg);	// range and null checked
 void COM_ClearArgv (int arg);
 int COM_CheckParm (char *parm);
@@ -240,7 +240,7 @@ enum svc_ops_e
 	svc_stufftext,				// [string] stuffed into client's console buffer, should be \n terminated
 	svc_serverdata,				// [long] protocol ...
 	svc_configstring,			// [short] [string]
-	svc_spawnbaseline,		
+	svc_spawnbaseline,
 	svc_centerprint,			// [string] to put in center of the screen
 	svc_download,				// [short] size [size bytes]
 	svc_playerinfo,				// variable
@@ -257,7 +257,7 @@ enum svc_ops_e
 enum clc_ops_e
 {
 	clc_bad,
-	clc_nop, 		
+	clc_nop,
 	clc_move,				// [[usercmd_t]
 	clc_userinfo,			// [[userinfo string]
 	clc_stringcmd			// [string] message
@@ -267,22 +267,22 @@ enum clc_ops_e
 
 // plyer_state_t communication
 
-#define	PS_M_TYPE			(1<<0)
-#define	PS_M_ORIGIN			(1<<1)
+#define	PS_M_TYPE		(1<<0)
+#define	PS_M_ORIGIN		(1<<1)
 #define	PS_M_VELOCITY		(1<<2)
-#define	PS_M_TIME			(1<<3)
-#define	PS_M_FLAGS			(1<<4)
+#define	PS_M_TIME		(1<<3)
+#define	PS_M_FLAGS		(1<<4)
 #define	PS_M_GRAVITY		(1<<5)
 #define	PS_M_DELTA_ANGLES	(1<<6)
 
 #define	PS_VIEWOFFSET		(1<<7)
 #define	PS_VIEWANGLES		(1<<8)
 #define	PS_KICKANGLES		(1<<9)
-#define	PS_BLEND			(1<<10)
-#define	PS_FOV				(1<<11)
+#define	PS_BLEND		(1<<10)
+#define	PS_FOV			(1<<11)
 #define	PS_WEAPONINDEX		(1<<12)
 #define	PS_WEAPONFRAME		(1<<13)
-#define	PS_RDFLAGS			(1<<14)
+#define	PS_RDFLAGS		(1<<14)
 
 //==============================================
 
@@ -302,7 +302,7 @@ enum clc_ops_e
 
 // a sound without an ent or pos will be a local only sound
 #define	SND_VOLUME		(1<<0)		// a byte
-#define	SND_ATTENUATION	(1<<1)		// a byte
+#define	SND_ATTENUATION		(1<<1)		// a byte
 #define	SND_POS			(1<<2)		// three coordinates
 #define	SND_ENT			(1<<3)		// a short 0-2: channel, 3-12: entity
 #define	SND_OFFSET		(1<<4)		// a byte, msec offset from frame start
@@ -336,7 +336,7 @@ enum clc_ops_e
 // third byte
 #define	U_SKIN8		(1<<16)
 #define	U_FRAME16	(1<<17)		// frame is a short
-#define	U_RENDERFX16 (1<<18)	// 8 + 16 = 32
+#define	U_RENDERFX16	(1<<18)		// 8 + 16 = 32
 #define	U_EFFECTS16	(1<<19)		// 8 + 16 = 32
 #define	U_MODEL2	(1<<20)		// weapons, flags, etc
 #define	U_MODEL3	(1<<21)
@@ -372,9 +372,9 @@ The game starts with a Cbuf_AddText ("exec quake.rc\n"); Cbuf_Execute ();
 
 */
 
-#define	EXEC_NOW	0		// don't return until completed
-#define	EXEC_INSERT	1		// insert at current position, but don't run yet
-#define	EXEC_APPEND	2		// add to end of the command buffer
+#define	EXEC_NOW	0	// don't return until completed
+#define	EXEC_INSERT	1	// insert at current position, but don't run yet
+#define	EXEC_APPEND	2	// add to end of the command buffer
 
 void Cbuf_Init (void);
 // allocates an initial text buffer that will grow as needed
@@ -438,7 +438,7 @@ char 	*Cmd_CompleteCommand (char *partial);
 // attempts to match a partial command for automatic command line completion
 // returns NULL if nothing fits
 
-int		Cmd_Argc (void);
+int	Cmd_Argc (void);
 char	*Cmd_Argv (int arg);
 char	*Cmd_Args (void);
 // The functions that execute commands get their parameters with these
