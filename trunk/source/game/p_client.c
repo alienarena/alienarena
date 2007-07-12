@@ -847,12 +847,12 @@ void InitClientPersistant (gclient_t *client)
 	//mutator - will need to have item
 	if(instagib->value) {
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
+		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxcells->value;
 		item = FindItem("Alien Disruptor");
 	}
 	else if(rocket_arena->value) {
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
+		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value;
 		item = FindItem("Rocket Launcher");
 	}
 	else
@@ -865,43 +865,41 @@ void InitClientPersistant (gclient_t *client)
 
 	if(excessive->value) {
 		//Allow custom health, even in excessive.
-		if (g_spawnhealth->value == 100)
-			gi.cvar_set("g_spawnhealth", "300");
-		client->pers.max_bullets	= 500;
-		client->pers.max_shells		= 500;
-		client->pers.max_rockets	= 500;
-		client->pers.max_grenades	= 500;
-		client->pers.max_cells		= 500;
-		client->pers.max_slugs		= 500;
+		client->pers.health 		= g_spawnhealth->value * 3;
+		client->pers.max_bullets 	= g_maxbullets->value * 2.5;
+		client->pers.max_shells		= g_maxshells->value * 5;
+		client->pers.max_rockets	= g_maxrockets->value * 10;
+		client->pers.max_grenades	= g_maxgrenades->value * 10;
+		client->pers.max_cells		= g_maxcells->value * 2.5;
+		client->pers.max_slugs		= g_maxslugs->value * 10;
+
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 500;
+		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value * 10;
 		client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("bullets"))] = 500;
+		client->pers.inventory[ITEM_INDEX(FindItem("bullets"))] = g_maxbullets->value * 2.5;
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 500;
+		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxcells->value * 2.5;
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("alien smart grenade"))] = 500;
+		client->pers.inventory[ITEM_INDEX(FindItem("alien smart grenade"))] = g_maxshells->value * 5;
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Vaporizer"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("slugs"))] = 500;
+		client->pers.inventory[ITEM_INDEX(FindItem("slugs"))] = g_maxslugs->value * 10;
 		client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] = 1;
-		client->pers.inventory[ITEM_INDEX(FindItem("napalm"))] = 500;
-	}
-	else {
-		client->pers.max_bullets	= 200;
-		client->pers.max_shells		= 100;
-		client->pers.max_rockets	= 50;
-		client->pers.max_grenades	= 50;
-		client->pers.max_cells		= 200;
-		client->pers.max_slugs		= 50;
+		client->pers.inventory[ITEM_INDEX(FindItem("napalm"))] = g_maxgrenades->value * 10;
+	} else {
+		client->pers.health 		= g_spawnhealth->value;
+		client->pers.max_bullets 	= g_maxbullets->value;
+		client->pers.max_shells		= g_maxshells->value;
+		client->pers.max_rockets	= g_maxrockets->value;
+		client->pers.max_grenades	= g_maxgrenades->value;
+		client->pers.max_cells		= g_maxcells->value;
+		client->pers.max_slugs		= g_maxslugs->value;
 	}
 
-	if(vampire->value) {
-		if(g_maxhealth->value == 100)
-			gi.cvar_set("g_maxhealth", "200");
-	}
-	else if(excessive->value && g_maxhealth->value == 100)
-			gi.cvar_set("g_maxhealth", "300");
+	if(vampire->value)
+		client->pers.max_health = g_maxhealth->value * 2;
+	else if(excessive->value)
+		client->pers.max_health = g_maxhealth->value * 3;
 
 	if(grapple->value) {
 		item = FindItem("Grapple");
@@ -909,9 +907,6 @@ void InitClientPersistant (gclient_t *client)
 	}
 
 	client->pers.connected = true;
-
-	client->pers.health = g_spawnhealth->value;
-	client->pers.max_health = g_maxhealth->value;
 }
 
 

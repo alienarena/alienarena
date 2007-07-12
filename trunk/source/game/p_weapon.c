@@ -676,15 +676,13 @@ void weapon_plasma_fire (edict_t *ent)
 	int		buildup;
 
 	if(instagib->value) {
-		//ifs, because custom values should work too..
-		if((wep_disruptor_dmg->value) == 55)
-			gi.cvar_set("wep_disruptor_dmg", "200");
-		if((wep_disruptor_kick->value) == 55)
-			gi.cvar_set("wep_disruptor_kick", "200");
+		//aproximate 200 damage
+		damage = wep_disruptor_dmg->value * 3.64;
+		damage = wep_disruptor_kick->value * 3.64;
+	} else {
+		damage = wep_disruptor_dmg->value;
+		kick = wep_disruptor_kick->value;
 	}
-
-	damage = (wep_disruptor_dmg->value);
-	kick = (wep_disruptor_kick->value);
 
 	if (is_quad)
 	{

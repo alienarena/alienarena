@@ -585,6 +585,12 @@ extern	cvar_t	*wep_disruptor_kick;
 //health/max health/max ammo
 extern	cvar_t	*g_spawnhealth;
 extern	cvar_t	*g_maxhealth;
+extern	cvar_t	*g_maxbullets;
+extern	cvar_t	*g_maxshells;
+extern	cvar_t	*g_maxrockets;
+extern	cvar_t	*g_maxgrenades;
+extern	cvar_t	*g_maxcells;
+extern	cvar_t	*g_maxslugs;
 
 //quick weapon change
 extern  cvar_t  *quickweap;
