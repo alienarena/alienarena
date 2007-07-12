@@ -581,8 +581,6 @@ extern	cvar_t	*wep_selfdmgmulti;
 
 extern	cvar_t	*wep_disruptor_dmg;
 extern	cvar_t	*wep_disruptor_kick;
-extern	cvar_t	*wep_disruptor_insta_dmg;
-extern	cvar_t	*wep_disruptor_insta_kick;
 
 //health/max health/max ammo
 extern	cvar_t	*g_spawnhealth;
