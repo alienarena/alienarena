@@ -865,7 +865,7 @@ void InitClientPersistant (gclient_t *client)
 
 	if(excessive->value) {
 		//Allow custom health, even in excessive.
-		if ((g_spawnhealth->value) == 100)
+		if (g_spawnhealth->value == 100)
 			gi.cvar_set("g_spawnhealth", "300");
 		client->pers.health		= 100;
 		client->pers.max_bullets	= 500;
