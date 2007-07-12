@@ -199,9 +199,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 			if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) 
 				ACESP_SpawnBot(NULL, info, skin, NULL); //we may be changing the info further on
 			else 
-				ACESP_SpawnBot (NULL, NULL, NULL, userinfo);
-			game.num_bots++;
-			
+				ACESP_SpawnBot (NULL, NULL, NULL, userinfo);			
 		}
 		else if(found && ((total_players > sv_botkickthreshold->integer) && sv_botkickthreshold->integer)) 
 			ACESP_KickBot(info);
@@ -780,6 +778,8 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 		return;
 	}
 
+	game.num_bots++;
+
 	bot->yaw_speed = 100; // yaw speed
 	bot->inuse = true;
 	bot->is_bot = true;
@@ -845,6 +845,7 @@ void ACESP_RemoveBot(char *name)
 				bot->deadflag = DEAD_DEAD;
 				bot->inuse = false;
 				freed = true;
+				game.num_bots--;
 				safe_bprintf (PRINT_MEDIUM, "%s removed\n", bot->client->pers.netname);
 			}
 
