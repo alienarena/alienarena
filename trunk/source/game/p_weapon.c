@@ -678,7 +678,7 @@ void weapon_plasma_fire (edict_t *ent)
 	if(instagib->value) {
 		//aproximate 200 damage
 		damage = wep_disruptor_dmg->value * 3.64;
-		damage = wep_disruptor_kick->value * 3.64;
+		kick = wep_disruptor_kick->value * 3.64;
 	} else {
 		damage = wep_disruptor_dmg->value;
 		kick = wep_disruptor_kick->value;
