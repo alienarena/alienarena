@@ -867,7 +867,6 @@ void InitClientPersistant (gclient_t *client)
 		//Allow custom health, even in excessive.
 		if (g_spawnhealth->value == 100)
 			gi.cvar_set("g_spawnhealth", "300");
-		client->pers.health		= 100;
 		client->pers.max_bullets	= 500;
 		client->pers.max_shells		= 500;
 		client->pers.max_rockets	= 500;
@@ -889,7 +888,6 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.inventory[ITEM_INDEX(FindItem("napalm"))] = 500;
 	}
 	else {
-		//client->pers.health		= (g_spawnhealth->value);
 		client->pers.max_bullets	= 200;
 		client->pers.max_shells		= 100;
 		client->pers.max_rockets	= 50;
