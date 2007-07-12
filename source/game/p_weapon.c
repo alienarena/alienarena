@@ -681,16 +681,16 @@ void weapon_plasma_fire (edict_t *ent)
 			gi.cvar_set("wep_disruptor_dmg", "200");
 		if((wep_disruptor_kick->value) == 55)
 			gi.cvar_set("wep_disruptor_kick", "200");
-	}`
+	}
+
+	damage = (wep_disruptor_dmg->value);
+	kick = (wep_disruptor_kick->value);
 
 	if (is_quad)
 	{
 		damage *= 4;
 		kick *= 4;
 	}
-
-	damage = (wep_disruptor_dmg->value);
-	kick = (wep_disruptor_kick->value);
 
 	//alt fire
 	if (ent->client->buttons & BUTTON_ATTACK2) {
