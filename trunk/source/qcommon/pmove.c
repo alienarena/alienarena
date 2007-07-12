@@ -684,7 +684,9 @@ void PM_CatagorizePosition (void)
 // see if standing on something solid	
 	point[0] = pml.origin[0];
 	point[1] = pml.origin[1];
-	point[2] = pml.origin[2] - 0.25;
+	point[2] = pml.origin[2] - 0.15; //Irritant - changed from 0.25 - this seems to fix the issue
+									 //in which sometimes while strafejumping it seemed the jump
+									 //was getting "lost"
 	if (pml.velocity[2] > 180) //!!ZOID changed from 100 to 180 (ramp accel)
 	{
 		pm->s.pm_flags &= ~PMF_ON_GROUND;
@@ -1265,18 +1267,18 @@ void Pmove (pmove_t *pmove)
 	memset (&pml, 0, sizeof(pml));
 
 	// convert origin and velocity to float values
-	pml.origin[0] = pm->s.origin[0]*0.125;
-	pml.origin[1] = pm->s.origin[1]*0.125;
-	pml.origin[2] = pm->s.origin[2]*0.125;
+	pml.origin[0] = pm->s.origin[0]*0.125f;
+	pml.origin[1] = pm->s.origin[1]*0.125f;
+	pml.origin[2] = pm->s.origin[2]*0.125f;
 
-	pml.velocity[0] = pm->s.velocity[0]*0.125;
-	pml.velocity[1] = pm->s.velocity[1]*0.125;
-	pml.velocity[2] = pm->s.velocity[2]*0.125;
+	pml.velocity[0] = pm->s.velocity[0]*0.125f;
+	pml.velocity[1] = pm->s.velocity[1]*0.125f;
+	pml.velocity[2] = pm->s.velocity[2]*0.125f;
 
 	// save old org in case we get stuck
 	VectorCopy (pm->s.origin, pml.previous_origin);
 
-	pml.frametime = pm->cmd.msec * 0.001;
+	pml.frametime = pm->cmd.msec * 0.001f;
 
 	PM_ClampAngles ();
 
