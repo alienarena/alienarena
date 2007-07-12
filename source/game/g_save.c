@@ -207,6 +207,9 @@ void InitGame (void)
 	wep_disruptor_insta_dmg = gi.cvar("wep_disruptor_insta_dmg", "200", CVAR_LATCH);
 	wep_disruptor_insta_kick = gi.cvar("wep_disruptor_insta_kick", "200", CVAR_LATCH);
 
+	//health/max health/max ammo
+	g_spawnhealth = gi.cvar("g_spawnhealth", "100", 0);
+
 	//quick weapon change
 	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH);
 
