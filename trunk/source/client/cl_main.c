@@ -1868,13 +1868,9 @@ void CL_Frame (int msec)
 	cls.realtime = curtime;
 
 	extratime = 0;
-#if 0
-	if (cls.frametime > (1.0 / cl_minfps->value))
-		cls.frametime = (1.0 / cl_minfps->value);
-#else
+
 	if (cls.frametime > (1.0 / 5))
 		cls.frametime = (1.0 / 5);
-#endif
 
 	// if in the debugger last frame, don't timeout
 	if (msec > 5000)
