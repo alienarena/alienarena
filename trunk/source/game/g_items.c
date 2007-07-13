@@ -2358,7 +2358,7 @@ always owned, never in the world
 		WEAP_VAPORIZER,
 		NULL,
 		0,
-/* precache */ "weapons/energyfield.wav smallmech/sight.wav"
+/* precache */ "weapons/energyfield.wav smallmech/sight.wav weapons/vaporizer_hum.wav"
 	},
 
 	//

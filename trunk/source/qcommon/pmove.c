@@ -786,10 +786,10 @@ void PM_CheckJump (void)
 	if(sv_joustmode->value)
 		jousting = true;
 
-	if (pm->s.pm_flags & PMF_TIME_LAND)
-	{	// hasn't been long enough since landing to jump again
-		return;
-	}
+//	if (pm->s.pm_flags & PMF_TIME_LAND)
+//	{	// hasn't been long enough since landing to jump again
+//		return;
+//	}
 
 	if (pm->cmd.upmove < 10)
 	{	// not holding jump
