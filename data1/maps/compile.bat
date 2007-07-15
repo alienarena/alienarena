@@ -1,4 +1,4 @@
-qbsp3 dm-frontier2
-qvis3 dm-frontier2
-qrad3 dm-frontier2
+qbsp3 dm-chthon-finalbeta2
+qvis3 dm-chthon-finalbeta2
+qrad3 dm-chthon-finalbeta2
 pause
