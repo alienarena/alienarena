@@ -9,7 +9,7 @@
 ( 768 -160 1152 ) ( 768 560 1152 ) ( 768 560 768 ) arena8/egyptbrick1 0 0 0 0.500000 0.500000 0 4 0
 ( -1440 -1280 1152 ) ( 352 -1280 1152 ) ( 352 -1280 768 ) arena8/egyptbrick1 0 0 0 0.500000 0.500000 0 4 0
 ( -1472 -128 1216 ) ( -1472 592 1216 ) ( 320 592 1216 ) arena8/egyptbrick1 0 0 0 0.500000 0.500000 0 4 0
-( 320 544 1152 ) ( -1472 544 1152 ) ( -1472 -176 1152 ) arena8/egyptbrick1 0 0 0 0.500000 0.500000 0 4 0
+( 320 544 1152 ) ( -1472 544 1152 ) ( -1472 -176 1152 ) arena7/metal2 0 0 0 1 1 0 5 60
 }
 // brush 1
 {
@@ -1857,7 +1857,7 @@
 // brush 197
 {
 ( 2448 852 -128 ) ( 2448 844 -128 ) ( 2472 844 -128 ) arena7/metal2 80 32 -90 1 1 134217728 0 0
-( 2472 844 -122 ) ( 2448 844 -122 ) ( 2448 852 -122 ) arena7/light4 56 -86 -90 0.099854 0.100098 134217728 1 100
+( 2472 844 -122 ) ( 2448 844 -122 ) ( 2448 852 -122 ) arena7/light4 80 -86 -90 0.099854 0.100098 134217728 1 100
 ( 2472 844 -124 ) ( 2472 852 -124 ) ( 2472 852 -128 ) arena7/metal2 80 0 -180 1 -1 134217728 0 0
 ( 2472 852 -124 ) ( 2448 852 -124 ) ( 2448 852 -128 ) arena7/metal2 -32 0 0 1 1 134217728 0 0
 ( 2448 844 -128 ) ( 2448 852 -128 ) ( 2454 852 -122 ) arena7/light3 16 -32 -90 1 1 134217728 1 200
@@ -1875,7 +1875,7 @@
 // brush 199
 {
 ( 2544 844 -128 ) ( 2544 852 -128 ) ( 2520 852 -128 ) arena7/metal2 -15 30 90 1 1 134217728 0 0
-( 2520 852 -122 ) ( 2544 852 -122 ) ( 2544 844 -122 ) arena7/light4 -55 30 90 0.099854 0.099854 134217728 1 100
+( 2520 852 -122 ) ( 2544 852 -122 ) ( 2544 844 -122 ) arena7/light4 80 -86 -90 0.099854 0.100098 134217728 1 100
 ( 2520 852 -124 ) ( 2520 844 -124 ) ( 2520 844 -128 ) arena7/metal2 -15 -127 0 1 1 134217728 0 0
 ( 2520 844 -124 ) ( 2544 844 -124 ) ( 2544 844 -128 ) arena7/metal2 -32 0 -180 1 -1 134217728 0 0
 ( 2544 852 -128 ) ( 2544 844 -128 ) ( 2538 844 -122 ) arena7/light3 -15 30 90 1 1 134217728 1 200
@@ -13652,543 +13652,539 @@
 }
 // entity 1
 {
-"classname" "ammo_rockets"
-"origin" "-64 -1728 48"
+"classname" "light"
+"light" "600"
+"origin" "-304 -312 1096"
 }
 // entity 2
 {
-"origin" "-320 -320 312"
-"classname" "light"
+"classname" "ammo_rockets"
+"origin" "-64 -1728 48"
 }
 // entity 3
-{
-"origin" "-312 -344 1000"
-"light" "600"
-"classname" "light"
-}
-// entity 4
 {
 "classname" "ammo_rockets"
 "origin" "-400 -224 -80"
 }
-// entity 5
+// entity 4
 {
 "classname" "ammo_rockets"
 "origin" "832 768 64"
 }
-// entity 6
+// entity 5
 {
 "classname" "item_haste"
 "origin" "2496 848 -80"
 }
-// entity 7
+// entity 6
 {
 "classname" "info_player_deathmatch"
 "angle" "90"
 "origin" "-320 -1776 24"
 }
-// entity 8
+// entity 7
 {
 "classname" "ammo_bullets"
 "origin" "-832 -576 -96"
 }
-// entity 9
+// entity 8
 {
 "classname" "item_armor_combat"
 "origin" "-1088 -160 48"
 }
-// entity 10
+// entity 9
 {
 "classname" "item_armor_shard"
 "origin" "-704 -192 -96"
 }
-// entity 11
+// entity 10
 {
 "classname" "item_health_large"
 "origin" "-704 -128 -96"
 }
-// entity 12
+// entity 11
 {
 "classname" "item_armor_shard"
 "origin" "-320 -448 -96"
 }
-// entity 13
+// entity 12
 {
 "classname" "item_health"
 "origin" "192 -256 -96"
 }
-// entity 14
+// entity 13
 {
 "classname" "ammo_shells"
 "origin" "192 -192 -96"
 }
-// entity 15
+// entity 14
 {
 "classname" "item_health_small"
 "origin" "336 704 48"
 }
-// entity 16
+// entity 15
 {
 "classname" "item_armor_shard"
 "origin" "-240 704 48"
 }
-// entity 17
+// entity 16
 {
 "classname" "ammo_cells"
 "origin" "-560 688 48"
 }
-// entity 18
+// entity 17
 {
 "classname" "item_health_small"
 "origin" "-880 688 48"
 }
-// entity 19
+// entity 18
 {
 "classname" "ammo_shells"
 "origin" "-1376 720 48"
 }
-// entity 20
+// entity 19
 {
 "classname" "item_armor_shard"
 "origin" "-1536 176 48"
 }
-// entity 21
+// entity 20
 {
 "classname" "ammo_shells"
 "origin" "-1504 -160 48"
 }
-// entity 22
+// entity 21
 {
 "classname" "item_health"
 "origin" "-1568 -512 48"
 }
-// entity 23
+// entity 22
 {
 "classname" "ammo_cells"
 "origin" "16 -1760 48"
 }
-// entity 24
+// entity 23
 {
 "classname" "item_armor_shard"
 "origin" "-1536 -1216 48"
 }
-// entity 25
+// entity 24
 {
 "classname" "item_health_small"
 "origin" "-960 -1760 48"
 }
-// entity 26
+// entity 25
 {
 "classname" "item_armor_shard"
 "origin" "-672 -1936 48"
 }
-// entity 27
+// entity 26
 {
 "classname" "item_health_large"
 "origin" "48 -2272 -96"
 }
-// entity 28
+// entity 27
 {
 "classname" "item_sproing"
 "origin" "-320 -2248 -96"
 }
-// entity 29
+// entity 28
 {
 "classname" "weapon_railgun"
 "origin" "-1568 928 32"
 }
-// entity 30
+// entity 29
 {
 "classname" "weapon_supershotgun"
 "origin" "-1488 -1760 32"
 }
-// entity 31
+// entity 30
 {
 "classname" "weapon_rocketlauncher"
 "origin" "-320 -1992 -96"
 }
-// entity 32
+// entity 31
 {
 "classname" "weapon_shotgun"
 "origin" "320 -352 -96"
 }
-// entity 33
+// entity 32
 {
 "classname" "light"
 "light" "200"
 "origin" "568 768 120"
 }
-// entity 34
+// entity 33
 {
 "classname" "light"
 "light" "100"
 "origin" "-1304 -1752 88"
 }
-// entity 35
+// entity 34
 {
 "angle" "-1"
 "targetname" "fire"
 "origin" "-928 288 920"
 "classname" "target_fire"
 }
-// entity 36
+// entity 35
 {
 "classname" "light"
 "light" "500"
 "origin" "280 280 920"
 }
-// entity 37
+// entity 36
 {
 "origin" "-984 -168 -120"
 "_color" "0 1 1"
 "light" "50"
 "classname" "light"
 }
-// entity 38
+// entity 37
 {
 "origin" "-920 -1000 920"
 "light" "500"
 "classname" "light"
 }
-// entity 39
+// entity 38
 {
 "origin" "-320 -1120 24"
 "angle" "90"
 "classname" "info_player_deathmatch"
 }
-// entity 40
+// entity 39
 {
 "classname" "light"
 "light" "500"
 "origin" "296 -984 920"
 }
-// entity 41
+// entity 40
 {
 "angle" "-1"
 "targetname" "fire"
 "origin" "280 280 920"
 "classname" "target_fire"
 }
-// entity 42
+// entity 41
 {
 "classname" "light"
 "light" "500"
 "origin" "-936 296 920"
 }
-// entity 43
+// entity 42
 {
 "classname" "light"
 "light" "50"
 "_color" "0 1 1"
 "origin" "-480 -256 -144"
 }
-// entity 44
+// entity 43
 {
 "origin" "-480 -448 -144"
 "_color" "0 1 1"
 "light" "50"
 "classname" "light"
 }
-// entity 45
+// entity 44
 {
 "origin" "-160 -256 -144"
 "_color" "0 1 1"
 "light" "50"
 "classname" "light"
 }
-// entity 46
+// entity 45
 {
 "origin" "-160 -448 -144"
 "_color" "0 1 1"
 "light" "50"
 "classname" "light"
 }
-// entity 47
+// entity 46
 {
 "classname" "target_fire"
 "name" "fire"
 "origin" "280 284 920"
 }
-// entity 48
+// entity 47
 {
 "angle" "-1"
 "targetname" "fire"
 "origin" "288 -992 920"
 "classname" "target_fire"
 }
-// entity 49
+// entity 48
 {
 "angle" "-1"
 "targetname" "fire"
 "classname" "target_fire"
 "origin" "-928 -992 920"
 }
-// entity 50
+// entity 49
 {
 "origin" "280 284 920"
 "light" "500"
 "classname" "light"
 }
-// entity 51
+// entity 50
 {
 "classname" "light"
 "light" "200"
 "origin" "-1560 -472 376"
 }
-// entity 52
+// entity 51
 {
 "origin" "-248 728 40"
-"light" "200"
+"light" "150"
 "classname" "light"
+}
+// entity 52
+{
+"classname" "light"
+"light" "150"
+"origin" "-560 736 40"
 }
 // entity 53
 {
 "classname" "light"
-"light" "200"
-"origin" "-560 736 40"
+"light" "150"
+"origin" "-888 736 40"
 }
 // entity 54
 {
+"origin" "-1568 816 40"
+"light" "150"
 "classname" "light"
-"light" "200"
-"origin" "-888 736 40"
 }
 // entity 55
 {
-"origin" "-1568 816 40"
-"light" "200"
 "classname" "light"
+"light" "150"
+"origin" "-1584 480 40"
 }
 // entity 56
 {
+"origin" "-1584 160 40"
+"light" "150"
 "classname" "light"
-"light" "200"
-"origin" "-1584 480 40"
 }
 // entity 57
 {
-"origin" "-1584 160 40"
-"light" "200"
 "classname" "light"
+"light" "150"
+"origin" "-1584 -144 40"
 }
 // entity 58
 {
+"origin" "-1560 -472 40"
+"light" "150"
 "classname" "light"
-"light" "200"
-"origin" "-1584 -144 40"
 }
 // entity 59
-{
-"origin" "-1560 -472 40"
-"light" "50"
-"classname" "light"
-}
-// entity 60
 {
 "classname" "light"
 "light" "300"
 "origin" "-328 -2072 392"
 }
-// entity 61
+// entity 60
 {
 "origin" "-1592 -1672 88"
 "light" "100"
 "classname" "light"
 }
-// entity 62
+// entity 61
 {
 "classname" "light"
 "light" "100"
 "origin" "-1544 -1480 88"
 }
-// entity 63
+// entity 62
 {
 "origin" "-1544 -1288 88"
 "light" "100"
 "classname" "light"
 }
-// entity 64
+// entity 63
 {
 "classname" "light"
 "light" "100"
 "origin" "-1544 -1080 88"
 }
-// entity 65
+// entity 64
 {
 "origin" "-1544 -888 88"
 "light" "100"
 "classname" "light"
 }
-// entity 66
+// entity 65
 {
 "origin" "-672 -1856 48"
 "classname" "item_armor_shard"
 }
-// entity 67
+// entity 66
 {
 "origin" "-1024 -1760 48"
 "classname" "item_health_small"
 }
-// entity 68
+// entity 67
 {
 "origin" "-1536 -1008 48"
 "classname" "item_armor_shard"
 }
-// entity 69
+// entity 68
 {
 "origin" "-176 704 48"
 "classname" "item_armor_shard"
 }
-// entity 70
+// entity 69
 {
 "origin" "272 704 48"
 "classname" "item_health_small"
 }
-// entity 71
+// entity 70
 {
 "classname" "item_health_small"
 "origin" "208 704 48"
 }
-// entity 72
+// entity 71
 {
 "origin" "256 -592 -104"
 "angle" "90"
 "classname" "info_player_deathmatch"
 }
-// entity 73
+// entity 72
 {
 "classname" "info_player_deathmatch"
 "angle" "90"
 "origin" "-912 -576 -104"
 }
-// entity 74
+// entity 73
 {
 "classname" "info_player_deathmatch"
 "angle" "90"
 "origin" "-1568 -640 24"
 }
-// entity 75
+// entity 74
 {
 "origin" "-1216 688 24"
 "angle" "360"
 "classname" "info_player_deathmatch"
 }
-// entity 76
+// entity 75
 {
 "classname" "info_player_deathmatch"
 "angle" "360"
 "origin" "128 688 24"
 }
-// entity 77
+// entity 76
 {
 "origin" "-1536 -1440 24"
 "angle" "270"
 "classname" "info_player_deathmatch"
 }
-// entity 78
+// entity 77
 {
 "origin" "-672 -2400 -104"
 "angle" "90"
 "classname" "info_player_deathmatch"
 }
-// entity 79
+// entity 78
 {
 "origin" "1520 848 48"
 "classname" "item_health_small"
 }
-// entity 80
+// entity 79
 {
 "origin" "1296 776 120"
 "light" "200"
 "classname" "light"
 }
-// entity 81
+// entity 80
 {
 "classname" "light"
 "light" "150"
 "origin" "1032 776 120"
 }
-// entity 82
+// entity 81
 {
 "classname" "item_health_small"
 "origin" "1584 848 48"
 }
-// entity 83
+// entity 82
 {
 "origin" "1648 848 48"
 "classname" "item_health_small"
 }
-// entity 84
+// entity 83
 {
 "origin" "2032 848 24"
 "angle" "360"
 "classname" "info_player_deathmatch"
 }
-// entity 85
+// entity 84
 {
 "origin" "2016 1184 48"
 "classname" "ammo_rockets"
 }
-// entity 86
+// entity 85
 {
 "origin" "2192 496 48"
 "classname" "item_armor_shard"
 }
-// entity 87
+// entity 86
 {
 "origin" "2528 1216 -96"
 "classname" "item_health_large"
 }
-// entity 88
+// entity 87
 {
 "origin" "2240 848 -96"
 "classname" "weapon_bfg"
 }
-// entity 89
+// entity 88
 {
 "origin" "2328 840 392"
 "light" "300"
 "classname" "light"
 }
-// entity 90
+// entity 89
 {
 "classname" "item_armor_shard"
 "origin" "2112 496 48"
 }
-// entity 91
+// entity 90
 {
 "classname" "info_player_deathmatch"
 "angle" "90"
 "origin" "2656 496 -104"
 }
-// entity 92
+// entity 91
 {
 "origin" "-304 -2392 840"
 "light" "300"
 "classname" "light"
 }
-// entity 93
+// entity 92
 {
 "origin" "-1152 -1752 88"
 "light" "100"
 "classname" "light"
 }
-// entity 94
+// entity 93
 {
 "classname" "light"
 "light" "100"
 "origin" "-952 -1768 88"
 }
-// entity 95
+// entity 94
 {
 "classname" "light"
 "light" "300"
 "origin" "2632 848 768"
 }
-// entity 96
+// entity 95
 {
 "target" "fire"
 "classname" "trigger_once"
+"delay" "0"
 // brush 0
 {
 ( -1204 -360 -132 ) ( -1440 -360 -132 ) ( -1440 -464 -132 ) arena8/sand2 484 176 0 1 1 0 0 0
@@ -14199,43 +14195,9 @@
 ( -1432 -360 52 ) ( -1432 -464 52 ) ( -1432 -464 -4 ) arena8/sand2 -176 -4 0 1 1 0 0 0
 }
 }
-// entity 97
+// entity 96
 {
+"origin" "-1200 736 40"
+"light" "150"
 "classname" "light"
-"light" "600"
-"origin" "-320 -344 632"
-}
-// entity 98
-{
-"classname" "light"
-"light" "600"
-"origin" "192 -328 1000"
-}
-// entity 99
-{
-"classname" "light"
-"light" "600"
-"origin" "-808 -328 1000"
-}
-// entity 100
-{
-"origin" "208 -328 608"
-"light" "600"
-"classname" "light"
-}
-// entity 101
-{
-"origin" "-792 -328 608"
-"light" "600"
-"classname" "light"
-}
-// entity 102
-{
-"classname" "light"
-"origin" "160 -344 312"
-}
-// entity 103
-{
-"classname" "light"
-"origin" "-1000 -368 312"
 }
