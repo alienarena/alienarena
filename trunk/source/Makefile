@@ -562,12 +562,13 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/acebot_spawn.o \
 	$(BUILDDIR)/game/c_cam.o \
 	$(BUILDDIR)/game/cow.o \
-	$(BUILDDIR)/game/ctf.o \
 	$(BUILDDIR)/game/q_shared.o \
 	$(BUILDDIR)/game/g_ai.o \
 	$(BUILDDIR)/game/g_chase.o \
 	$(BUILDDIR)/game/g_cmds.o \
 	$(BUILDDIR)/game/g_combat.o \
+	$(BUILDDIR)/game/g_ctf.o \
+	$(BUILDDIR)/game/g_deathball.o \
 	$(BUILDDIR)/game/g_func.o \
 	$(BUILDDIR)/game/g_items.o \
 	$(BUILDDIR)/game/g_main.o \
@@ -581,14 +582,14 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/g_trigger.o \
 	$(BUILDDIR)/game/g_utils.o \
 	$(BUILDDIR)/game/g_weapon.o \
+	$(BUILDDIR)/game/g_vehicles.o \
 	$(BUILDDIR)/game/m_move.o \
 	$(BUILDDIR)/game/p_client.o \
 	$(BUILDDIR)/game/p_hud.o \
 	$(BUILDDIR)/game/p_light.o \
 	$(BUILDDIR)/game/p_trail.o \
 	$(BUILDDIR)/game/p_view.o \
-	$(BUILDDIR)/game/p_weapon.o \
-	$(BUILDDIR)/game/vehicles.o
+	$(BUILDDIR)/game/p_weapon.o 
 
 
 
@@ -623,9 +624,6 @@ $(BUILDDIR)/game/c_cam.o :        $(GAME_DIR)/c_cam.c
 $(BUILDDIR)/game/cow.o :        $(GAME_DIR)/cow.c
 	$(DO_SHLIB_CC)
 
-$(BUILDDIR)/game/ctf.o :        $(GAME_DIR)/ctf.c
-	$(DO_SHLIB_CC)
-
 $(BUILDDIR)/game/g_ai.o :        $(GAME_DIR)/g_ai.c
 	$(DO_SHLIB_CC)
 
@@ -636,6 +634,12 @@ $(BUILDDIR)/game/g_cmds.o :      $(GAME_DIR)/g_cmds.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/g_combat.o :    $(GAME_DIR)/g_combat.c
+	$(DO_SHLIB_CC)
+
+$(BUILDDIR)/game/g_ctf.o :        $(GAME_DIR)/g_ctf.c
+	$(DO_SHLIB_CC)
+
+$(BUILDDIR)/game/g_deathball.o :    $(GAME_DIR)/g_deathball.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/g_func.o :      $(GAME_DIR)/g_func.c
@@ -674,6 +678,9 @@ $(BUILDDIR)/game/g_trigger.o :   $(GAME_DIR)/g_trigger.c
 $(BUILDDIR)/game/g_utils.o :     $(GAME_DIR)/g_utils.c
 	$(DO_SHLIB_CC)
 
+$(BUILDDIR)/game/g_vehicles.o :    $(GAME_DIR)/g_vehicles.c
+	$(DO_SHLIB_CC)
+
 $(BUILDDIR)/game/g_weapon.o :    $(GAME_DIR)/g_weapon.c
 	$(DO_SHLIB_CC)
 
@@ -698,9 +705,6 @@ $(BUILDDIR)/game/p_view.o :      $(GAME_DIR)/p_view.c
 $(BUILDDIR)/game/p_weapon.o :    $(GAME_DIR)/p_weapon.c
 	$(DO_SHLIB_CC)
 
-$(BUILDDIR)/game/vehicles.o :    $(GAME_DIR)/vehicles.c
-	$(DO_SHLIB_CC)
-
 $(BUILDDIR)/game/q_shared.o :    $(GAME_DIR)/q_shared.c
 	$(DO_SHLIB_DEBUG_CC)
 
@@ -721,11 +725,12 @@ ARENA_OBJS = \
 	$(BUILDDIR)/arena/q_shared.o \
 	$(BUILDDIR)/arena/c_cam.o \
 	$(BUILDDIR)/arena/cow.o \
-	$(BUILDDIR)/arena/ctf.o \
 	$(BUILDDIR)/arena/g_ai.o \
 	$(BUILDDIR)/arena/g_chase.o \
 	$(BUILDDIR)/arena/g_cmds.o \
 	$(BUILDDIR)/arena/g_combat.o \
+	$(BUILDDIR)/arena/g_ctf.o \
+	$(BUILDDIR)/arena/g_deathball.o \
 	$(BUILDDIR)/arena/g_func.o \
 	$(BUILDDIR)/arena/g_items.o \
 	$(BUILDDIR)/arena/g_main.o \
@@ -738,6 +743,7 @@ ARENA_OBJS = \
 	$(BUILDDIR)/arena/g_target.o \
 	$(BUILDDIR)/arena/g_trigger.o \
 	$(BUILDDIR)/arena/g_utils.o \
+	$(BUILDDIR)/arena/g_vehicles.o \
 	$(BUILDDIR)/arena/g_weapon.o \
 	$(BUILDDIR)/arena/m_move.o \
 	$(BUILDDIR)/arena/p_client.o \
@@ -745,8 +751,7 @@ ARENA_OBJS = \
 	$(BUILDDIR)/arena/p_light.o \
 	$(BUILDDIR)/arena/p_trail.o \
 	$(BUILDDIR)/arena/p_view.o \
-	$(BUILDDIR)/arena/p_weapon.o \
-	$(BUILDDIR)/arena/vehicles.o
+	$(BUILDDIR)/arena/p_weapon.o 
 
 $(BUILDDIR)/arena/game.$(SHLIBEXT) : $(ARENA_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(ARENA_OBJS)
@@ -779,9 +784,6 @@ $(BUILDDIR)/arena/c_cam.o :        $(ARENA_DIR)/c_cam.c
 $(BUILDDIR)/arena/cow.o :        $(ARENA_DIR)/cow.c
 	$(DO_ARENA_SHLIB_CC)
 
-$(BUILDDIR)/arena/ctf.o :        $(ARENA_DIR)/ctf.c
-	$(DO_ARENA_SHLIB_CC)
-
 $(BUILDDIR)/arena/g_ai.o :        $(ARENA_DIR)/g_ai.c
 	$(DO_ARENA_SHLIB_CC)
 
@@ -792,6 +794,12 @@ $(BUILDDIR)/arena/g_cmds.o :      $(ARENA_DIR)/g_cmds.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/g_combat.o :    $(ARENA_DIR)/g_combat.c
+	$(DO_ARENA_SHLIB_CC)
+
+$(BUILDDIR)/arena/g_ctf.o :        $(ARENA_DIR)/g_ctf.c
+	$(DO_ARENA_SHLIB_CC)
+
+$(BUILDDIR)/arena/g_deathball.o :        $(ARENA_DIR)/g_deathball.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/g_func.o :      $(ARENA_DIR)/g_func.c
@@ -833,6 +841,9 @@ $(BUILDDIR)/arena/g_utils.o :     $(ARENA_DIR)/g_utils.c
 $(BUILDDIR)/arena/g_weapon.o :    $(ARENA_DIR)/g_weapon.c
 	$(DO_ARENA_SHLIB_CC)
 
+$(BUILDDIR)/arena/g_vehicles.o :    $(ARENA_DIR)/g_vehicles.c
+	$(DO_ARENA_SHLIB_CC)
+
 $(BUILDDIR)/arena/m_move.o :      $(ARENA_DIR)/m_move.c
 	$(DO_ARENA_SHLIB_CC)
 
@@ -852,9 +863,6 @@ $(BUILDDIR)/arena/p_view.o :      $(ARENA_DIR)/p_view.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/p_weapon.o :    $(ARENA_DIR)/p_weapon.c
-	$(DO_ARENA_SHLIB_CC)
-
-$(BUILDDIR)/arena/vehicles.o :    $(ARENA_DIR)/vehicles.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/q_shared.o :    $(ARENA_DIR)/q_shared.c
