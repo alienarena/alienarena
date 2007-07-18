@@ -677,11 +677,16 @@ int PowerArmorType (edict_t *ent);
 gitem_t	*GetItemByIndex (int index);
 qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count);
 void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
+
 //CTF
 void CTFDeadDropFlag(edict_t *self);
 void CTFEffects(edict_t *player);
 void CTFScoreboardMessage (edict_t *ent, edict_t *killer);
 void CTFPrecache(void);
+void CTFFlagSetup (edict_t *ent);
+qboolean CTFPickup_Flag (edict_t *ent, edict_t *other);
+qboolean CTFDrop_Flag(edict_t *ent, gitem_t *item);
+
 //Vehicles
 void Reset_player(edict_t *ent);
 void Jet_Explosion(edict_t *ent);
@@ -689,9 +694,17 @@ qboolean Jet_Active(edict_t *ent);
 void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd );
 qboolean Jet_AvoidGround( edict_t *ent );
 void VehicleDeadDrop(edict_t *self);
+void VehicleSetup (edict_t *ent);
+qboolean Get_in_vehicle (edict_t *ent, edict_t *other);
+qboolean Leave_vehicle(edict_t *ent, gitem_t *item);
+
 //deathball
 void ResetDeathball();
 void DeadDropDeathball(edict_t *self);
+void DeathballSetup (edict_t *ent);
+qboolean Pickup_deathball (edict_t *ent, edict_t *other);
+qboolean DeathballDrop(edict_t *ent, gitem_t *item);
+
 //
 // g_utils.c
 //

@@ -1,5 +1,24 @@
+/*
+Copyright (C) 1997-2001 Id Software, Inc.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
+
 #include "g_local.h"
-//#include "m_player.h"
+
 int imageindex_sbfctf1;
 int imageindex_sbfctf2;
 
@@ -505,4 +524,254 @@ void CTFWeapon_Grapple (edict_t *ent)
 			ent->client->ps.gunframe = 5;
 		ent->client->weaponstate = WEAPON_FIRING;
 	}
+}
+
+static void CTFFlagThink(edict_t *ent)
+{
+	if (ent->solid != SOLID_NOT)
+		ent->s.frame = 173 + (((ent->s.frame - 173) + 1) % 16);
+	ent->nextthink = level.time + FRAMETIME;
+}
+void CTFFlagSetup (edict_t *ent)
+{
+	trace_t		tr;
+	vec3_t		dest;
+	float		*v;
+
+	v = tv(-15,-15,-15);
+	VectorCopy (v, ent->mins);
+	v = tv(15,15,15);
+	VectorCopy (v, ent->maxs);
+
+	if (ent->model)
+		gi.setmodel (ent, ent->model);
+	else
+		gi.setmodel (ent, ent->item->world_model);
+	ent->solid = SOLID_TRIGGER;
+	ent->movetype = MOVETYPE_TOSS;  
+	ent->touch = Touch_Item;
+
+	v = tv(0,0,-128);
+	VectorAdd (ent->s.origin, v, dest);
+
+	tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, dest, ent, MASK_SOLID);
+	if (tr.startsolid)
+	{
+		gi.dprintf ("CTFFlagSetup: %s startsolid at %s\n", ent->classname, vtos(ent->s.origin));
+		G_FreeEdict (ent);
+		return;
+	}
+
+	VectorCopy (tr.endpos, ent->s.origin);
+
+	gi.linkentity (ent);
+
+	ent->nextthink = level.time + FRAMETIME;
+	ent->think = CTFFlagThink;
+}
+void CTFEffects(edict_t *player)
+{
+	gitem_t *flag1_item, *flag2_item;
+
+	flag1_item = FindItemByClassname("item_flag_red");
+	flag2_item = FindItemByClassname("item_flag_blue");
+
+	if (player->client->pers.inventory[ITEM_INDEX(flag1_item)])
+		player->s.modelindex4 = gi.modelindex("models/items/flags/flag1.md2");
+	else if (player->client->pers.inventory[ITEM_INDEX(flag2_item)])
+		player->s.modelindex4 = gi.modelindex("models/items/flags/flag2.md2");
+	else
+		player->s.modelindex4 = 0;
+}
+qboolean CTFDrop_Flag(edict_t *ent, gitem_t *item)
+{
+	if (rand() & 1) 
+		safe_cprintf(ent, PRINT_HIGH, "Only lusers drop flags.\n");
+	else
+		safe_cprintf(ent, PRINT_HIGH, "Winners don't drop flags.\n");
+	return false;
+}
+void CTFResetFlag(int ctf_team)
+{
+	char *c;
+	edict_t *ent;
+
+	switch (ctf_team) {
+	case RED_TEAM:
+		c = "item_flag_red";
+		break;
+	case BLUE_TEAM:
+		c = "item_flag_blue";
+		break;
+	default:
+		return;
+	}
+
+	ent = NULL;
+	while ((ent = G_Find (ent, FOFS(classname), c)) != NULL) {
+		if (ent->spawnflags & DROPPED_ITEM)
+			G_FreeEdict(ent);
+		else {
+			ent->svflags &= ~SVF_NOCLIENT;
+			ent->solid = SOLID_TRIGGER;
+			gi.linkentity(ent);
+			ent->s.event = EV_ITEM_RESPAWN;
+		}
+	}
+}
+
+void CTFResetFlags(void)
+{
+	CTFResetFlag(RED_TEAM);
+	CTFResetFlag(BLUE_TEAM);
+}
+static void CTFDropFlagTouch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	//owner (who dropped us) can't touch for two secs
+	if (other == ent->owner && 
+		ent->nextthink - level.time > 28)
+		return;
+
+	Touch_Item (ent, other, plane, surf);
+}
+static void CTFDropFlagThink(edict_t *ent)
+{
+	// auto return the flag
+	// reset flag will remove ourselves
+	if (strcmp(ent->classname, "item_flag_red") == 0) {
+		CTFResetFlag(RED_TEAM);
+		safe_bprintf(PRINT_HIGH, "The %s flag has returned!\n",
+			"Red");
+	} else if (strcmp(ent->classname, "item_flag_blue") == 0) {
+		CTFResetFlag(BLUE_TEAM);
+		safe_bprintf(PRINT_HIGH, "The %s flag has returned!\n",
+			"Blue");
+	}
+
+}
+void CTFDeadDropFlag(edict_t *self)
+{
+	edict_t *dropped = NULL;
+	gitem_t *flag1_item, *flag2_item;
+
+	dropped = NULL;
+	flag1_item = flag2_item = NULL;
+
+	flag1_item = FindItemByClassname("item_flag_red");
+	flag2_item = FindItemByClassname("item_flag_blue");
+
+	if (self->client->pers.inventory[ITEM_INDEX(flag1_item)]) {
+		dropped = Drop_Item(self, flag1_item);
+		self->client->pers.inventory[ITEM_INDEX(flag1_item)] = 0;
+		safe_bprintf(PRINT_HIGH, "%s lost the %s flag!\n",
+			self->client->pers.netname, "Red");
+	} else if (self->client->pers.inventory[ITEM_INDEX(flag2_item)]) {
+		dropped = Drop_Item(self, flag2_item);
+		self->client->pers.inventory[ITEM_INDEX(flag2_item)] = 0;
+		safe_bprintf(PRINT_HIGH, "%s lost the %s flag!\n",
+			self->client->pers.netname, "Blue");
+	}
+
+	if (dropped) {
+		dropped->think = CTFDropFlagThink;
+		dropped->nextthink = level.time + 30;
+		dropped->touch = CTFDropFlagTouch;
+		dropped->s.frame = 175;
+		dropped->s.effects = EF_ROTATE;
+	}
+}
+qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
+{
+	int ctf_team;
+	char team_name[16] = " ";
+	char enemy_team_name[16] = " ";
+	gitem_t *flag_item, *enemy_flag_item;
+
+	// figure out what team this flag is
+	if (strcmp(ent->classname, "item_flag_red") == 0)
+		ctf_team = RED_TEAM;
+	else if (strcmp(ent->classname, "item_flag_blue") == 0)
+		ctf_team = BLUE_TEAM;
+	else {
+		safe_cprintf(ent, PRINT_HIGH, "Don't know what team the flag is on.\n");
+		return false;
+	}
+
+// same team, if the flag at base, check to he has the enemy flag
+	if (ctf_team == RED_TEAM) {
+		flag_item = FindItemByClassname("item_flag_red");
+		enemy_flag_item = FindItemByClassname("item_flag_blue");
+		strcpy(team_name, "Red");
+		strcpy(enemy_team_name, "Blue");
+	} else {
+		flag_item = FindItemByClassname("item_flag_blue");
+		enemy_flag_item = FindItemByClassname("item_flag_red");
+		strcpy(team_name, "Blue");
+		strcpy(enemy_team_name, "Red");
+	}
+
+	if (ctf_team == other->dmteam) {
+
+		if (!(ent->spawnflags & DROPPED_ITEM)) {
+			// the flag is at home base.  if the player has the enemy
+			// flag, he's just won!
+
+			if (other->client->pers.inventory[ITEM_INDEX(enemy_flag_item)]) {
+				safe_bprintf(PRINT_HIGH, "%s captured the %s flag!\n",
+						other->client->pers.netname, enemy_team_name);
+				other->client->pers.inventory[ITEM_INDEX(enemy_flag_item)] = 0;
+
+				if (ctf_team == RED_TEAM)
+				{
+					red_team_score++;
+					gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_scores.wav"), 1, ATTN_NONE, 0);
+				}
+				else
+				{
+					blue_team_score++;
+					gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_scores.wav"), 1, ATTN_NONE, 0);
+				}
+
+				// other gets another 10 frag bonus
+				other->client->resp.score += 10;//CTF_CAPTURE_BONUS;
+				
+				CTFResetFlags();
+				return false;
+			}
+			return false; // its at home base already
+		}	
+		// hey, its not home.  return it by teleporting it back
+		safe_bprintf(PRINT_HIGH, "%s returned the %s flag!\n", 
+			other->client->pers.netname, team_name);
+		other->client->resp.score += 2;//CTF_RECOVERY_BONUS;
+		if(!strcmp("Red", team_name))
+			gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_returned.wav"), 1, ATTN_NONE, 0);
+		else
+			gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_returned.wav"), 1, ATTN_NONE, 0);
+		
+		//CTFResetFlag will remove this entity!  We must return false
+		CTFResetFlag(ctf_team);
+		return false;
+	}
+
+	// hey, its not our flag, pick it up
+	safe_bprintf(PRINT_HIGH, "%s got the %s flag!\n",
+		other->client->pers.netname, team_name);
+	other->client->resp.score += 10;//CTF_FLAG_BONUS;
+	if(!strcmp("Red", team_name))
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_picked.wav"), 1, ATTN_NONE, 0);
+	else
+		gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_picked.wav"), 1, ATTN_NONE, 0);
+	
+	other->client->pers.inventory[ITEM_INDEX(flag_item)] = 1;
+
+	// pick up the flag
+	// if it's not a dropped flag, we just make is disappear
+	// if it's dropped, it will be removed by the pickup caller
+	if (!(ent->spawnflags & DROPPED_ITEM)) {
+		ent->flags |= FL_RESPAWN;
+		ent->svflags |= SVF_NOCLIENT;
+		ent->solid = SOLID_NOT;
+	}
+	return true;
 }
