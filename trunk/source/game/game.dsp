@@ -135,10 +135,6 @@ SOURCE=.\cow.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ctf.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\g_ai.c
 # End Source File
 # Begin Source File
@@ -152,6 +148,14 @@ SOURCE=.\g_cmds.c
 # Begin Source File
 
 SOURCE=.\g_combat.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\g_ctf.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\g_deathball.c
 # End Source File
 # Begin Source File
 
@@ -203,6 +207,10 @@ SOURCE=.\g_utils.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\g_vehicles.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\g_weapon.c
 # End Source File
 # Begin Source File
@@ -236,10 +244,6 @@ SOURCE=.\p_weapon.c
 # Begin Source File
 
 SOURCE=.\q_shared.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\vehicles.c
 # End Source File
 # End Group
 # Begin Group "Header Files"

@@ -54,10 +54,9 @@ void M_Menu_Main_f (void);
 		void M_Menu_PlayerConfig_f (void);
 			void M_Menu_DownloadOptions_f (void);
 		void M_Menu_Credits_f( void );
-	void M_Menu_Multiplayer_f( void );
-		void M_Menu_JoinServer_f (void);
+	void M_Menu_JoinServer_f (void);
 			void M_Menu_AddressBook_f( void );
-		void M_Menu_StartServer_f (void);
+	void M_Menu_StartServer_f (void);
 			void M_Menu_DMOptions_f (void);
 	void M_Menu_Video_f (void);
 	void M_Menu_Options_f (void);
@@ -497,12 +496,13 @@ MAIN MENU
 
 =======================================================================
 */
-#define	MAIN_ITEMS	5
+#define	MAIN_ITEMS	6
 
 char *main_names[] =
 {
 	"m_main_game",
-	"m_main_multiplayer",
+	"m_main_join",
+	"m_main_host",
 	"m_main_options",
 	"m_main_video",
 	"m_main_quit",
@@ -527,11 +527,11 @@ void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
 
 		if ( w*scale > *widest )
 			*widest = w*scale;
-		*totalheight += ( h*scale + 6*scale );
+		*totalheight += ( h*scale + 24*scale);
 	}
 
-	*ystart = ( viddef.height / 2 - 84*scale );
-	*xoffset = ( viddef.width - *widest - 195*scale ) / 2;
+	*ystart = ( viddef.height / 2 - 25*scale );
+	*xoffset = ( viddef.width - *widest + 150*scale) / 2;
 
 }
 
@@ -557,33 +557,42 @@ void M_Main_Draw (void)
 
 	findMenuCoords(&xoffset, &ystart, &totalheight, &widest);
 
-	ystart = ( viddef.height / 2 - 72*scale );
+	ystart = ( viddef.height / 2 - 25*scale );
 	xoffset = ( viddef.width - widest - 25*scale) / 2;
 
 	//draw the background pics first -
 
-	M_Background( "conback"); //draw black background first
-
-	M_Banner( "m_banner_main" );
-
-	M_Banner( "m_main" );
+	M_Background( "m_main"); //draw black background first
 
 	for ( i = 0; main_names[i] != 0; i++ )
 	{
 		if ( i != m_main_cursor ){
 			Draw_GetPicSize( &w, &h, main_names[i] );
-			Draw_StretchPic( xoffset - 85*scale, (int)(ystart + i * 32.5*scale + 13*scale), w*scale, h*scale, main_names[i] );
+			Draw_StretchPic( xoffset + 100*scale + (20*i*scale), (int)(ystart + i * 32.5*scale + 13*scale), w*scale, h*scale, main_names[i] );
 
 		}
 	}
 	strcpy( litname, main_names[m_main_cursor] );
 	strcat( litname, "_sel" );
 	Draw_GetPicSize( &w, &h, litname );
-	Draw_StretchPic( xoffset - 85*scale, (int)(ystart + m_main_cursor * 32.5*scale + 13*scale), w*scale, h*scale, litname );
+	//yuk
+	if(!strcmp(litname, "m_main_game_sel"))
+		i = 0;
+	else if(!strcmp(litname, "m_main_join_sel"))
+		i = 1;
+	else if(!strcmp(litname, "m_main_host_sel"))
+		i = 2;
+	else if(!strcmp(litname, "m_main_options_sel"))
+		i = 3;
+	else if(!strcmp(litname, "m_main_video_sel"))
+		i = 4;
+	else if(!strcmp(litname, "m_main_quit_sel"))
+		i = 5;
+	Draw_StretchPic( xoffset + 100*scale + (20*i*scale), (int)(ystart + m_main_cursor * 32.5*scale + 13*scale), w*scale, h*scale, litname );
 
 	//draw web link
-	Menu_DrawString( viddef.width / 2 - 140*widscale, viddef.height/2 + 200*scale, "Copyright 2007 COR Entertainment LLC" );
-	Menu_DrawString( viddef.width / 2 - 160*widscale, viddef.height/2 + 220*scale, "AA2K7 Website @ http://red.planetarena.org" );
+	Menu_DrawString( viddef.width / 2 - 140*widscale, 0 + 10*scale, "Copyright 2007 COR Entertainment LLC" );
+	Menu_DrawString( viddef.width / 2 - 160*widscale, 0 + 30*scale, "AA2K7 Website @ http://red.planetarena.org" );
 
 }
 
@@ -622,12 +631,14 @@ void addButton (mainmenuobject_t *thisObj, int index, int x, int y)
 	case 0:
 		thisObj->OpenMenu = M_Menu_Game_f;
 	case 1:
-		thisObj->OpenMenu = M_Menu_Multiplayer_f;
+		thisObj->OpenMenu = M_Menu_JoinServer_f;
 	case 2:
-		thisObj->OpenMenu = M_Menu_Options_f;
+		thisObj->OpenMenu = M_Menu_StartServer_f;
 	case 3:
-		thisObj->OpenMenu = M_Menu_Video_f;
+		thisObj->OpenMenu = M_Menu_Options_f;
 	case 4:
+		thisObj->OpenMenu = M_Menu_Video_f;
+	case 5:
 		thisObj->OpenMenu = M_Menu_Quit_f;
 	}
 }
@@ -641,18 +652,22 @@ void openMenuFromMain (void)
 			break;
 
 		case 1:
-			M_Menu_Multiplayer_f();
+			M_Menu_JoinServer_f();
 			break;
 
 		case 2:
-			M_Menu_Options_f ();
+			M_Menu_StartServer_f();
 			break;
 
 		case 3:
-			M_Menu_Video_f ();
+			M_Menu_Options_f ();
 			break;
 
 		case 4:
+			M_Menu_Video_f ();
+			break;
+
+		case 5:
 			M_Menu_Quit_f ();
 			break;
 	}
@@ -679,7 +694,7 @@ void CheckMainMenuMouse (void)
 
 	findMenuCoords(&xoffset, &ystart, &totalheight, &widest);
 	for ( i = 0; main_names[i] != 0; i++ )
-		addButton (&buttons[i], i, xoffset, ystart + (i * 40*scale + 13*scale));
+		addButton (&buttons[i], i, xoffset, ystart + (i * 32*scale + 24*scale));
 
 	//Exit with double click 2nd mouse button
 	if (!cursor.buttonused[MOUSEBUTTON2] && cursor.buttonclicks[MOUSEBUTTON2]==2)
@@ -765,18 +780,22 @@ const char *M_Main_Key (int key)
 			break;
 
 		case 1:
-			M_Menu_Multiplayer_f();
+			M_Menu_JoinServer_f();
 			break;
 
 		case 2:
-			M_Menu_Options_f ();
+			M_Menu_StartServer_f();
 			break;
 
 		case 3:
-			M_Menu_Video_f ();
+			M_Menu_Options_f ();
 			break;
 
 		case 4:
+			M_Menu_Video_f ();
+			break;
+
+		case 5:
 			M_Menu_Quit_f ();
 			break;
 		}
@@ -789,83 +808,6 @@ const char *M_Main_Key (int key)
 void M_Menu_Main_f (void)
 {
 	M_PushMenu (M_Main_Draw, M_Main_Key);
-}
-
-/*
-=======================================================================
-
-MULTIPLAYER MENU
-
-=======================================================================
-*/
-static menuframework_s	s_multiplayer_menu;
-static menuaction_s		s_join_network_server_action;
-static menuaction_s		s_start_network_server_action;
-
-static void Multiplayer_MenuDraw (void)
-{
-	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_main" );
-
-	Menu_AdjustCursor( &s_multiplayer_menu, 1 );
-	Menu_Draw( &s_multiplayer_menu );
-}
-
-static void JoinNetworkServerFunc( void *unused )
-{
-	M_Menu_JoinServer_f();
-}
-
-static void StartNetworkServerFunc( void *unused )
-{
-	M_Menu_StartServer_f ();
-}
-
-void Multiplayer_MenuInit( void )
-{
-	float scale;
-
-	scale = (float)(viddef.height)/600;
-	if(scale < 1)
-		scale = 1;
-
-	s_multiplayer_menu.x = viddef.width * 0.50 - 64*scale;
-	s_multiplayer_menu.nitems = 0;
-
-	s_join_network_server_action.generic.type	= MTYPE_ACTION;
-	s_join_network_server_action.generic.flags  = QMF_LEFT_JUSTIFY;
-	s_join_network_server_action.generic.x		= 0;
-	s_join_network_server_action.generic.y		= 0;
-	s_join_network_server_action.generic.cursor_offset = -8*scale;
-	s_join_network_server_action.generic.name	= " join network server";
-	s_join_network_server_action.generic.callback = JoinNetworkServerFunc;
-
-	s_start_network_server_action.generic.type	= MTYPE_ACTION;
-	s_start_network_server_action.generic.flags  = QMF_LEFT_JUSTIFY;
-	s_start_network_server_action.generic.x		= 0;
-	s_start_network_server_action.generic.y		= 10*scale;
-	s_start_network_server_action.generic.cursor_offset = -8*scale;
-	s_start_network_server_action.generic.name	= " start network server";
-	s_start_network_server_action.generic.callback = StartNetworkServerFunc;
-
-	Menu_AddItem( &s_multiplayer_menu, ( void * ) &s_join_network_server_action );
-	Menu_AddItem( &s_multiplayer_menu, ( void * ) &s_start_network_server_action );
-
-	Menu_SetStatusBar( &s_multiplayer_menu, NULL );
-
-	Menu_Center( &s_multiplayer_menu );
-
-}
-
-const char *Multiplayer_MenuKey( int key )
-{
-	return Default_MenuKey( &s_multiplayer_menu, key );
-}
-
-void M_Menu_Multiplayer_f( void )
-{
-	Multiplayer_MenuInit();
-	M_PushMenu( Multiplayer_MenuDraw, Multiplayer_MenuKey );
 }
 
 /*
@@ -5783,10 +5725,10 @@ void M_Menu_PlayerConfig_f (void)
 {
 	if (!PlayerConfig_MenuInit())
 	{
-		Menu_SetStatusBar( &s_multiplayer_menu, "No valid player models found" );
+		Menu_SetStatusBar( &s_options_menu, "No valid player models found" );
 		return;
 	}
-	Menu_SetStatusBar( &s_multiplayer_menu, NULL );
+	Menu_SetStatusBar( &s_options_menu, NULL );
 	M_PushMenu( PlayerConfig_MenuDraw, PlayerConfig_MenuKey );
 }
 
@@ -5907,7 +5849,6 @@ void M_Init (void)
 		Cmd_AddCommand ("menu_playerconfig", M_Menu_PlayerConfig_f);
 			Cmd_AddCommand ("menu_downloadoptions", M_Menu_DownloadOptions_f);
 		Cmd_AddCommand ("menu_credits", M_Menu_Credits_f );
-	Cmd_AddCommand ("menu_multiplayer", M_Menu_Multiplayer_f );
 	Cmd_AddCommand ("menu_video", M_Menu_Video_f);
 	Cmd_AddCommand ("menu_options", M_Menu_Options_f);
 		Cmd_AddCommand ("menu_keys", M_Menu_Keys_f);
