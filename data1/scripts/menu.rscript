@@ -9,58 +9,19 @@ pics/m_banner_main
 		alphashift 15 0.2 0.9
 	}
 }
-pics/m_main_game_sel
+pics/m_main
 {
 	{
-		map pics/m_main_game_sel.tga
+		map pics/m_main.tga
 	}
 	{
-		map gfx/m_sel_fx.tga
+		map gfx/menubar1.tga
+		blendFunc GL_ONE GL_ONE_MIMUS_SRC_ALPHA
+		scroll static .2 static 0
+	}
+	{
+		map gfx/menubar2.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 20 0.1 0.6
+		scroll static .1 static 0
 	}
-}
-pics/m_main_multiplayer_sel
-{
-	{
-		map pics/m_main_multiplayer_sel.tga
-	}
-	{
-		map gfx/m_sel_fx.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 20 0.1 0.6
-	}
-}
-pics/m_main_options_sel
-{
-	{
-		map pics/m_main_options_sel.tga
-	}
-	{
-		map gfx/m_sel_fx.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 20 0.1 0.6
-	}
-}
-pics/m_main_video_sel
-{
-	{
-		map pics/m_main_video_sel.tga
-	}
-	{
-		map gfx/m_sel_fx.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 20 0.1 0.6
-	}
-}
-pics/m_main_quit_sel
-{
-	{
-		map pics/m_main_quit_sel.tga
-	}
-	{
-		map gfx/m_sel_fx.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 20 0.1 0.6
-	}
-}
+}		

@@ -303,10 +303,9 @@ void ShaderResizePic( image_t *gl, int *w, int *h)
 	rscript_t *rs = NULL;
 	char shortname[MAX_QPATH];
 
-	if (r_shaders->value) {
-		COM_StripExtension ( gl->name, shortname );
-		rs=RS_FindScript(shortname);
-	}
+	COM_StripExtension ( gl->name, shortname );
+	rs=RS_FindScript(shortname);
+	
 	if (!rs)
 		return;
 	if (!rs->picsize.enable)
@@ -335,10 +334,9 @@ void Draw_ShaderPic (image_t *gl)
 	rs_stage_t *stage;
 	char shortname[MAX_QPATH];
 
-	if (r_shaders->value) {
-		COM_StripExtension ( gl->name, shortname );
-		rs=RS_FindScript(shortname);
-	}
+	COM_StripExtension ( gl->name, shortname );
+	rs=RS_FindScript(shortname);
+	
 	if (!rs) 
 	{
 		GLSTATE_DISABLE_ALPHATEST
