@@ -52,7 +52,6 @@ void M_Menu_Main_f (void);
 		void M_Menu_LoadGame_f (void);
 		void M_Menu_SaveGame_f (void);
 		void M_Menu_PlayerConfig_f (void);
-			void M_Menu_DownloadOptions_f (void);
 		void M_Menu_Credits_f( void );
 	void M_Menu_JoinServer_f (void);
 			void M_Menu_AddressBook_f( void );
@@ -113,7 +112,7 @@ static void M_MapPic( char *name )
 		scale = 1;
 
 	w = h = 128*scale;
-	Draw_StretchPic (viddef.width / 2 - w - 4*scale, viddef.height / 2 + 64*scale, w, h, name);
+	Draw_StretchPic (viddef.width / 2 - w - 4*scale, viddef.height / 2 + 112*scale, w, h, name);
 }
 static void M_CrosshairPic( char *name )
 {
@@ -407,37 +406,6 @@ void M_PrintWhite (int cx, int cy, char *str)
 void M_DrawPic (int x, int y, char *pic)
 {
 	Draw_Pic (x + ((viddef.width - 320)>>1), y + ((viddef.height - 240)>>1), pic);
-}
-
-
-/*
-=============
-M_DrawCursor
-
-Draws an animating cursor with the point at
-x,y.  The pic will extend to the left of x,
-and both above and below y.
-=============
-*/
-void M_DrawCursor( int x, int y, int f )
-{
-	static qboolean cached;
-	float scale;
-	int w, h;
-
-	scale = (float)(viddef.height)/600;
-	if(scale < 1)
-		scale = 1;
-
-	Draw_GetPicSize (&w, &h, "m_cursor0" );
-
-	if ( !cached )
-	{
-		R_RegisterPic( "m_cursor0" );
-		cached = true;
-	}
-
-	Draw_StretchPic( x, y, w*scale, h*scale, "m_cursor0" );
 }
 
 void M_DrawTextBox (int x, int y, int width, int lines)
@@ -953,9 +921,9 @@ static void KeyCursorDrawFunc( menuframework_s *menu )
 		scale = 1;
 
 	if ( bind_grab )
-		Draw_Char( menu->x, menu->y + 80*scale + menu->cursor * 9 * scale, '=' );
+		Draw_Char( menu->x, menu->y + 80*scale + menu->cursor * (float)8.6 * scale, '=' );
 	else
-		Draw_Char( menu->x, menu->y + 80*scale + menu->cursor * 9 *scale, 12 + ( ( int ) ( Sys_Milliseconds() / 250 ) & 1 ) );
+		Draw_Char( menu->x, menu->y + 80*scale + menu->cursor * (float)8.6 * scale, 12 + ( ( int ) ( Sys_Milliseconds() / 250 ) & 1 ) );
 }
 
 static void DrawKeyBindingFunc( void *self )
@@ -1345,8 +1313,8 @@ static void Keys_MenuInit( void )
 
 static void Keys_MenuDraw (void)
 {
-	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_main" );
+	M_Background( "m_controls_back"); //draw black background first
+	M_Banner( "m_controls" );
 	Menu_AdjustCursor( &s_keys_menu, 1 );
 	Menu_Draw( &s_keys_menu );
 }
@@ -2365,8 +2333,8 @@ void Options_MenuDraw (void)
 {
 	char path[MAX_QPATH];
 
-	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_main" );
+	M_Background( "m_options_back"); //draw black background first
+	M_Banner( "m_options" );
 	if(strcmp(crosshair->string, "none")) {
 		sprintf(path, "/pics/%s", crosshair->string);
 		M_CrosshairPic(path);
@@ -2661,40 +2629,36 @@ void Game_MenuInit( void )
 
 	s_game_title.generic.type	= MTYPE_SEPARATOR;
 	s_game_title.generic.x		= 52;
-	s_game_title.generic.y		= 0;
+	s_game_title.generic.y		= 40*scale;
 	s_game_title.generic.name	= "Instant Action!";
 
 	s_easy_game_action.generic.type	= MTYPE_ACTION;
-	s_easy_game_action.generic.flags  = QMF_LEFT_JUSTIFY;
-	s_easy_game_action.generic.x		= 0;
-	s_easy_game_action.generic.y		= 20*scale;
-	s_easy_game_action.generic.cursor_offset = -16*scale;
+	s_easy_game_action.generic.x		= 24;
+	s_easy_game_action.generic.y		= 50*scale;
+	s_easy_game_action.generic.cursor_offset = -16;
 	s_easy_game_action.generic.name	= "easy";
 	s_easy_game_action.generic.callback = EasyGameFunc;
 
 	s_medium_game_action.generic.type	= MTYPE_ACTION;
-	s_medium_game_action.generic.flags  = QMF_LEFT_JUSTIFY;
-	s_medium_game_action.generic.x		= 0;
-	s_medium_game_action.generic.y		= 30*scale;
-	s_medium_game_action.generic.cursor_offset = -16*scale;
+	s_medium_game_action.generic.x		= 24;
+	s_medium_game_action.generic.y		= 60*scale;
+	s_medium_game_action.generic.cursor_offset = -16;
 	s_medium_game_action.generic.name	= "medium";
 	s_medium_game_action.generic.callback = MediumGameFunc;
 
 	s_hard_game_action.generic.type	= MTYPE_ACTION;
-	s_hard_game_action.generic.flags  = QMF_LEFT_JUSTIFY;
-	s_hard_game_action.generic.x		= 0;
-	s_hard_game_action.generic.y		= 40*scale;
-	s_hard_game_action.generic.cursor_offset = -16*scale;
+	s_hard_game_action.generic.x		= 24;
+	s_hard_game_action.generic.y		= 70*scale;
+	s_hard_game_action.generic.cursor_offset = -16;
 	s_hard_game_action.generic.name	= "hard";
 	s_hard_game_action.generic.callback = HardGameFunc;
 
 	s_blankline.generic.type = MTYPE_SEPARATOR;
 
 	s_credits_action.generic.type	= MTYPE_ACTION;
-	s_credits_action.generic.flags  = QMF_LEFT_JUSTIFY;
-	s_credits_action.generic.x		= 0;
-	s_credits_action.generic.y		= 60*scale;
-	s_credits_action.generic.cursor_offset = -16*scale;
+	s_credits_action.generic.x		= 24;
+	s_credits_action.generic.y		= 90*scale;
+	s_credits_action.generic.cursor_offset = -16;
 	s_credits_action.generic.name	= "credits";
 	s_credits_action.generic.callback = CreditsFunc;
 
@@ -2711,8 +2675,8 @@ void Game_MenuInit( void )
 
 void Game_MenuDraw( void )
 {
-	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_main" );
+	M_Background( "m_player_back"); //draw black background first
+	M_Banner( "m_single" );
 	Menu_AdjustCursor( &s_game_menu, 1 );
 	Menu_Draw( &s_game_menu );
 }
@@ -3040,40 +3004,31 @@ void JoinServer_MenuInit( void )
 
 	s_joinserver_address_book_action.generic.type	= MTYPE_ACTION;
 	s_joinserver_address_book_action.generic.name	= "address book";
-	s_joinserver_address_book_action.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_joinserver_address_book_action.generic.x		= 0;
-	s_joinserver_address_book_action.generic.y		= 70*scale;
+	s_joinserver_address_book_action.generic.x		= -56*scale;
+	s_joinserver_address_book_action.generic.y		= 105*scale;
 	s_joinserver_address_book_action.generic.cursor_offset = -16*scale;
 	s_joinserver_address_book_action.generic.callback = AddressBookFunc;
 
 	s_joinserver_search_action.generic.type = MTYPE_ACTION;
-	s_joinserver_search_action.generic.name	= "refresh server list";
-	s_joinserver_search_action.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_joinserver_search_action.generic.x	= 0;
-	s_joinserver_search_action.generic.y	= 80*scale;
+	s_joinserver_search_action.generic.name	= "refresh list";
+	s_joinserver_search_action.generic.x	= -56*scale;
+	s_joinserver_search_action.generic.y	= 120*scale;
 	s_joinserver_search_action.generic.cursor_offset = -16*scale;
 	s_joinserver_search_action.generic.callback = SearchLocalGamesFunc;
 	s_joinserver_search_action.generic.statusbar = "search for servers";
 
-	s_joinserver_server_title.generic.type = MTYPE_ACTION;
-	s_joinserver_server_title.generic.flags = QMF_LEFT_JUSTIFY | QMF_GRAYED;
-	s_joinserver_server_title.generic.name = "Server                Map         Players  Ping";
-	s_joinserver_server_title.generic.x    = 6*scale;
-	s_joinserver_server_title.generic.y	   = 105*scale;
-	s_joinserver_server_title.generic.cursor_offset = -16*scale;
-
 	s_joinserver_moveup.generic.type	= MTYPE_ACTION;
-	s_joinserver_moveup.generic.name	= " ";
+	s_joinserver_moveup.generic.name	= "       ";
 	s_joinserver_moveup.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_joinserver_moveup.generic.x		= -35*scale;
+	s_joinserver_moveup.generic.x		= -40*scale;
 	s_joinserver_moveup.generic.y		= 190*scale;
 	s_joinserver_moveup.generic.cursor_offset = -16*scale;
 	s_joinserver_moveup.generic.callback = MoveUp;
 
 	s_joinserver_movedown.generic.type	= MTYPE_ACTION;
-	s_joinserver_movedown.generic.name	= " ";
+	s_joinserver_movedown.generic.name	= "       ";
 	s_joinserver_movedown.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_joinserver_movedown.generic.x		= -35*scale;
+	s_joinserver_movedown.generic.x		= -40*scale;
 	s_joinserver_movedown.generic.y		= 200*scale;
 	s_joinserver_movedown.generic.cursor_offset = -16*scale;
 	s_joinserver_movedown.generic.callback = MoveDown;
@@ -3094,16 +3049,9 @@ void JoinServer_MenuInit( void )
 	s_playerlist_movedown.generic.cursor_offset = -16*scale;
 	s_playerlist_movedown.generic.callback = MoveDown_plist;
 
-	s_joinserver_plist_title.generic.type = MTYPE_SEPARATOR2;
-	s_joinserver_plist_title.generic.name = "Playername   Score    Ping ";
-	s_joinserver_plist_title.generic.x    = 350*scale;
-	s_joinserver_plist_title.generic.y	   = 300*scale;
-
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_address_book_action );
 
-	Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_title );
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_search_action );
-	Menu_AddItem( &s_joinserver_menu, &s_joinserver_plist_title );
 
 	for ( i = 0; i < 16; i++ )
 		Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_actions[i] );
@@ -3134,20 +3082,16 @@ void JoinServer_MenuDraw(void)
 	if(scale < 1)
 		scale = 1;
 
-	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_main" );
+	M_Background( "m_options_back"); //draw black background first
+	M_Banner( "m_joinserver" );
 
-	M_DrawTextBox( 0, 40*scale, 50, 22 );
-	M_DrawTextBox( 130*scale, 234*scale, 34, 12 );
-	M_DrawTextBox( -155*scale, 262*scale, 26, 8 );
 
 	for ( i = 0; i < 16; i++ )
 	{
 		s_joinserver_server_actions[i].generic.type	= MTYPE_ACTION;
 		s_joinserver_server_actions[i].generic.name	= mservers[i+svridx].serverInfo;
-		s_joinserver_server_actions[i].generic.flags	= QMF_LEFT_JUSTIFY;
-		s_joinserver_server_actions[i].generic.x		= 6*scale;
-		s_joinserver_server_actions[i].generic.y		= 115*scale + i*10*scale;
+		s_joinserver_server_actions[i].generic.x		= 372*scale;
+		s_joinserver_server_actions[i].generic.y		= 90*scale + i*10*scale;
 		s_joinserver_server_actions[i].generic.cursor_offset = -16*scale;
 		s_joinserver_server_actions[i].generic.callback = JoinServerFunc;
 		s_joinserver_server_actions[i].generic.statusbar = "press ENTER or DBL CLICK to connect";
@@ -3161,7 +3105,7 @@ void JoinServer_MenuDraw(void)
 		s_joinserver_server_info[i].generic.name	= local_server_info[i+playeridx];
 		s_joinserver_server_info[i].generic.flags	= QMF_LEFT_JUSTIFY;
 		s_joinserver_server_info[i].generic.x		= 350*scale;
-		s_joinserver_server_info[i].generic.y		= 310*scale + i*10*scale;
+		s_joinserver_server_info[i].generic.y		= 305*scale + i*10*scale;
 	}
 
 	for ( i = 0; i < 5; i++)
@@ -3169,7 +3113,7 @@ void JoinServer_MenuDraw(void)
 		s_joinserver_server_data[i].generic.type	= MTYPE_SEPARATOR;
 		s_joinserver_server_data[i].generic.name	= local_server_data[i];
 		s_joinserver_server_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
-		s_joinserver_server_data[i].generic.x		= 10*scale;
+		s_joinserver_server_data[i].generic.x		= 30*scale;
 		s_joinserver_server_data[i].generic.y		= 335*scale + i*10*scale;
 	}
 	M_ArrowPics();
@@ -3440,8 +3384,8 @@ void Mutators_MenuInit( void )
 }
 void Mutators_MenuDraw(void)
 {
-	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_main" );
+	M_Background( "m_options_back"); //draw black background first
+	M_Banner( "m_mutators" );
 
 	Menu_Draw( &s_mutators_menu );
 }
@@ -3583,8 +3527,7 @@ void Addbots_MenuInit( void )
 	for(i = 0; i < totalbots; i++) {
 		s_addbots_bot_action[i].generic.type	= MTYPE_ACTION;
 		s_addbots_bot_action[i].generic.name	= bots[i].name;
-		s_addbots_bot_action[i].generic.flags	= QMF_LEFT_JUSTIFY;
-		s_addbots_bot_action[i].generic.x		= 0;
+		s_addbots_bot_action[i].generic.x		= 64;
 		s_addbots_bot_action[i].generic.y		= y+=20*scale;
 		s_addbots_bot_action[i].generic.cursor_offset = -16*scale;
 		s_addbots_bot_action[i].generic.callback = AddbotFunc;
@@ -3605,14 +3548,14 @@ void Addbots_MenuDraw(void)
 	if(scale < 1)
 		scale = 1;
 
-	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_main" );
+	M_Background( "m_player_back"); //draw black background first
+	M_Banner( "m_bots" );
 
 	y = viddef.height/2 - 122*scale;
 
 	//draw the pics for the bots here
 	for(i = 0; i < totalbots; i++) {
-		Draw_StretchPic (viddef.width / 2 - 120*scale, y, 16*scale, 16*scale, bots[i].model);
+		Draw_StretchPic (viddef.width / 2 + 16*scale, y, 16*scale, 16*scale, bots[i].model);
 		y+=20*scale;
 	}
 	Menu_Draw( &s_addbots_menu );
@@ -4103,9 +4046,8 @@ void StartServer_MenuInit( void )
 	s_rules_box.generic.callback = RulesChangeFunc;
 
 	s_mutators_action.generic.type = MTYPE_ACTION;
-	s_mutators_action.generic.x	= 32;
+	s_mutators_action.generic.x	= 112;
 	s_mutators_action.generic.y	= 36*scale + offset;
-	s_mutators_action.generic.flags= QMF_LEFT_JUSTIFY;
 	s_mutators_action.generic.cursor_offset = -8;
 	s_mutators_action.generic.statusbar = NULL;
 	s_mutators_action.generic.name	= " mutators";
@@ -4190,8 +4132,7 @@ void StartServer_MenuInit( void )
 
 	s_startserver_dmoptions_action.generic.type = MTYPE_ACTION;
 	s_startserver_dmoptions_action.generic.name	= " deathmatch and bot flags";
-	s_startserver_dmoptions_action.generic.flags= QMF_LEFT_JUSTIFY;
-	s_startserver_dmoptions_action.generic.x	= 32;
+	s_startserver_dmoptions_action.generic.x	= 270;
 	s_startserver_dmoptions_action.generic.y	= 182*scale + offset;
 	s_startserver_dmoptions_action.generic.cursor_offset = -8;
 	s_startserver_dmoptions_action.generic.statusbar = NULL;
@@ -4199,8 +4140,7 @@ void StartServer_MenuInit( void )
 
 	s_startserver_start_action.generic.type = MTYPE_ACTION;
 	s_startserver_start_action.generic.name	= " begin";
-	s_startserver_start_action.generic.flags= QMF_LEFT_JUSTIFY;
-	s_startserver_start_action.generic.x	= 32;
+	s_startserver_start_action.generic.x	= 80;
 	s_startserver_start_action.generic.y	= 200*scale + offset;
 	s_startserver_start_action.generic.cursor_offset = -8;
 	s_startserver_start_action.generic.callback = StartServerActionFunc;
@@ -4255,13 +4195,11 @@ void StartServer_MenuDraw(void)
 
 	offset*=scale;
 
-	M_Background( "conback"); //draw black background first
+	M_Background( "m_startserver_back"); //draw black background first
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 	sprintf(path, "/levelshots/%s", startmap);
+	M_Banner( "m_startserver" );
 	M_MapPic(path);
-	M_Banner( "m_banner_main" );
-
-	M_DrawTextBox( 175*scale, 225*scale, 22*scale, 9*scale );
 
 	//get a map description if it is there
 
@@ -4860,8 +4798,8 @@ void DMOptions_MenuInit( void )
 
 void DMOptions_MenuDraw(void)
 {
-	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_main" );
+	M_Background( "m_controls_back"); //draw black background first
+	M_Banner( "m_dmoptions" );
 
 	Menu_Draw( &s_dmoptions_menu );
 }
@@ -4923,98 +4861,6 @@ static void DownloadCallback( void *self )
 	}
 }
 
-void DownloadOptions_MenuInit( void )
-{
-	static const char *yes_no_names[] =
-	{
-		"no", "yes", 0
-	};
-	int y = 0;
-	float scale;
-
-	scale = (float)(viddef.height)/600;
-	if(scale < 1)
-		scale = 1;
-
-	s_downloadoptions_menu.x = viddef.width * 0.50;
-	s_downloadoptions_menu.nitems = 0;
-
-	s_download_title.generic.type = MTYPE_SEPARATOR;
-	s_download_title.generic.name = "Download Options";
-	s_download_title.generic.x    = 48;
-	s_download_title.generic.y	 = y;
-
-	s_allow_download_box.generic.type = MTYPE_SPINCONTROL;
-	s_allow_download_box.generic.x	= 0;
-	s_allow_download_box.generic.y	= y += 20*scale;
-	s_allow_download_box.generic.name	= "allow downloading";
-	s_allow_download_box.generic.callback = DownloadCallback;
-	s_allow_download_box.itemnames = yes_no_names;
-	s_allow_download_box.curvalue = (Cvar_VariableValue("allow_download") != 0);
-
-	s_allow_download_maps_box.generic.type = MTYPE_SPINCONTROL;
-	s_allow_download_maps_box.generic.x	= 0;
-	s_allow_download_maps_box.generic.y	= y += 20*scale;
-	s_allow_download_maps_box.generic.name	= "maps";
-	s_allow_download_maps_box.generic.callback = DownloadCallback;
-	s_allow_download_maps_box.itemnames = yes_no_names;
-	s_allow_download_maps_box.curvalue = (Cvar_VariableValue("allow_download_maps") != 0);
-
-	s_allow_download_players_box.generic.type = MTYPE_SPINCONTROL;
-	s_allow_download_players_box.generic.x	= 0;
-	s_allow_download_players_box.generic.y	= y += 10*scale;
-	s_allow_download_players_box.generic.name	= "player models/skins";
-	s_allow_download_players_box.generic.callback = DownloadCallback;
-	s_allow_download_players_box.itemnames = yes_no_names;
-	s_allow_download_players_box.curvalue = (Cvar_VariableValue("allow_download_players") != 0);
-
-	s_allow_download_models_box.generic.type = MTYPE_SPINCONTROL;
-	s_allow_download_models_box.generic.x	= 0;
-	s_allow_download_models_box.generic.y	= y += 10*scale;
-	s_allow_download_models_box.generic.name	= "models";
-	s_allow_download_models_box.generic.callback = DownloadCallback;
-	s_allow_download_models_box.itemnames = yes_no_names;
-	s_allow_download_models_box.curvalue = (Cvar_VariableValue("allow_download_models") != 0);
-
-	s_allow_download_sounds_box.generic.type = MTYPE_SPINCONTROL;
-	s_allow_download_sounds_box.generic.x	= 0;
-	s_allow_download_sounds_box.generic.y	= y += 10*scale;
-	s_allow_download_sounds_box.generic.name	= "sounds";
-	s_allow_download_sounds_box.generic.callback = DownloadCallback;
-	s_allow_download_sounds_box.itemnames = yes_no_names;
-	s_allow_download_sounds_box.curvalue = (Cvar_VariableValue("allow_download_sounds") != 0);
-
-	Menu_AddItem( &s_downloadoptions_menu, &s_download_title );
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_box );
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_maps_box );
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_players_box );
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_models_box );
-	Menu_AddItem( &s_downloadoptions_menu, &s_allow_download_sounds_box );
-
-	Menu_Center( &s_downloadoptions_menu );
-
-	// skip over title
-	if (s_downloadoptions_menu.cursor == 0)
-		s_downloadoptions_menu.cursor = 1;
-}
-
-void DownloadOptions_MenuDraw(void)
-{
-	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_main" );
-	Menu_Draw( &s_downloadoptions_menu );
-}
-
-const char *DownloadOptions_MenuKey( int key )
-{
-	return Default_MenuKey( &s_downloadoptions_menu, key );
-}
-
-void M_Menu_DownloadOptions_f (void)
-{
-	DownloadOptions_MenuInit();
-	M_PushMenu( DownloadOptions_MenuDraw, DownloadOptions_MenuKey );
-}
 /*
 =============================================================================
 
@@ -5114,7 +4960,6 @@ static menuseparator_s	s_player_skin_title;
 static menuseparator_s	s_player_model_title;
 static menuseparator_s	s_player_hand_title;
 static menuseparator_s	s_player_rate_title;
-static menuaction_s		s_player_download_action;
 
 #define MAX_DISPLAYNAME 16
 #define MAX_PLAYERMODELS 1024
@@ -5134,11 +4979,6 @@ static int s_numplayermodels;
 static int rate_tbl[] = { 2500, 3200, 5000, 10000, 25000, 0 };
 static const char *rate_names[] = { "28.8 Modem", "33.6 Modem", "Single ISDN",
 	"Dual ISDN/Cable", "T1/LAN", "User defined", 0 };
-
-void DownloadOptionsFunc( void *self )
-{
-	M_Menu_DownloadOptions_f();
-}
 
 static void HandednessCallback( void *unused )
 {
@@ -5363,7 +5203,10 @@ qboolean PlayerConfig_MenuInit( void )
 	float scale;
 	int currentdirectoryindex = 0;
 	int currentskinindex = 0;
-
+	static const char *yes_no_names[] =
+	{
+		"no", "yes", 0
+	};
 	cvar_t *hand = Cvar_Get( "hand", "0", CVAR_USERINFO | CVAR_ARCHIVE );
 
 	static const char *handedness[] = { "right", "left", "center", 0 };
@@ -5428,49 +5271,36 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_name_field.generic.type = MTYPE_FIELD;
 	s_player_name_field.generic.name = "name";
 	s_player_name_field.generic.callback = 0;
-	s_player_name_field.generic.x		= -8;
+	s_player_name_field.generic.x		= -32;
 	s_player_name_field.generic.y		= 0;
 	s_player_name_field.length	= 20;
 	s_player_name_field.visible_length = 20;
 	strcpy( s_player_name_field.buffer, name->string );
 	s_player_name_field.cursor = strlen( name->string );
 
-	s_player_model_title.generic.type = MTYPE_SEPARATOR;
-	s_player_model_title.generic.name = "model";
-	s_player_model_title.generic.x    = -16;
-	s_player_model_title.generic.y	 = 60*scale;
 
 	s_player_model_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_model_box.generic.x	= -64;
+	s_player_model_box.generic.name = "model";
+	s_player_model_box.generic.x	= -32;
 	s_player_model_box.generic.y	= 70*scale;
 	s_player_model_box.generic.callback = ModelCallback;
 	s_player_model_box.generic.cursor_offset = -56;
 	s_player_model_box.curvalue = currentdirectoryindex;
 	s_player_model_box.itemnames = s_pmnames;
 
-	s_player_skin_title.generic.type = MTYPE_SEPARATOR;
-	s_player_skin_title.generic.name = "skin";
-	s_player_skin_title.generic.x    = -24;
-	s_player_skin_title.generic.y	 = 84*scale;
-
 	s_player_skin_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_skin_box.generic.x	= -64;
+	s_player_skin_box.generic.name = "skin";
+	s_player_skin_box.generic.x	= -32;
 	s_player_skin_box.generic.y	= 94*scale;
-	s_player_skin_box.generic.name	= 0;
 	s_player_skin_box.generic.callback = 0;
 	s_player_skin_box.generic.cursor_offset = -56;
 	s_player_skin_box.curvalue = currentskinindex;
 	s_player_skin_box.itemnames = s_pmi[currentdirectoryindex].skindisplaynames;
 
-	s_player_hand_title.generic.type = MTYPE_SEPARATOR;
-	s_player_hand_title.generic.name = "handedness";
-	s_player_hand_title.generic.x    = 24;
-	s_player_hand_title.generic.y	 = 108*scale;
-
 	s_player_handedness_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_handedness_box.generic.x	= -64;
+	s_player_handedness_box.generic.name = "handedness";
+	s_player_handedness_box.generic.x	= -32;
 	s_player_handedness_box.generic.y	= 118*scale;
-	s_player_handedness_box.generic.name	= 0;
 	s_player_handedness_box.generic.cursor_offset = -56;
 	s_player_handedness_box.generic.callback = HandednessCallback;
 	s_player_handedness_box.curvalue = Cvar_VariableValue( "hand" );
@@ -5480,42 +5310,68 @@ qboolean PlayerConfig_MenuInit( void )
 		if (Cvar_VariableValue("rate") == rate_tbl[i])
 			break;
 
-	s_player_rate_title.generic.type = MTYPE_SEPARATOR;
-	s_player_rate_title.generic.name = "connect speed";
-	s_player_rate_title.generic.x    = 48;
-	s_player_rate_title.generic.y	 = 156*scale;
-
 	s_player_rate_box.generic.type = MTYPE_SPINCONTROL;
-	s_player_rate_box.generic.x	= -64;
-	s_player_rate_box.generic.y	= 166*scale;
-	s_player_rate_box.generic.name	= 0;
-	s_player_rate_box.generic.cursor_offset = -56;
+	s_player_rate_box.generic.x	= -32;
+	s_player_rate_box.generic.y	= 142*scale;
+	s_player_rate_box.generic.name	= "connect speed";
 	s_player_rate_box.generic.callback = RateCallback;
 	s_player_rate_box.curvalue = i;
 	s_player_rate_box.itemnames = rate_names;
 
-	s_player_download_action.generic.type = MTYPE_ACTION;
-	s_player_download_action.generic.name	= "download options";
-	s_player_download_action.generic.flags= QMF_LEFT_JUSTIFY;
-	s_player_download_action.generic.cursor_offset = -16;
-	s_player_download_action.generic.x	= -32;
-	s_player_download_action.generic.y	= 186*scale;
-	s_player_download_action.generic.statusbar = NULL;
-	s_player_download_action.generic.callback = DownloadOptionsFunc;
+	s_allow_download_box.generic.type = MTYPE_SPINCONTROL;
+	s_allow_download_box.generic.x	= 72;
+	s_allow_download_box.generic.y	= 186*scale;
+	s_allow_download_box.generic.name	= "allow downloading";
+	s_allow_download_box.generic.callback = DownloadCallback;
+	s_allow_download_box.itemnames = yes_no_names;
+	s_allow_download_box.curvalue = (Cvar_VariableValue("allow_download") != 0);
+
+	s_allow_download_maps_box.generic.type = MTYPE_SPINCONTROL;
+	s_allow_download_maps_box.generic.x	= 72;
+	s_allow_download_maps_box.generic.y	= 196*scale;
+	s_allow_download_maps_box.generic.name	= "maps";
+	s_allow_download_maps_box.generic.callback = DownloadCallback;
+	s_allow_download_maps_box.itemnames = yes_no_names;
+	s_allow_download_maps_box.curvalue = (Cvar_VariableValue("allow_download_maps") != 0);
+
+	s_allow_download_players_box.generic.type = MTYPE_SPINCONTROL;
+	s_allow_download_players_box.generic.x	= 72;
+	s_allow_download_players_box.generic.y	= 206*scale;
+	s_allow_download_players_box.generic.name	= "player models/skins";
+	s_allow_download_players_box.generic.callback = DownloadCallback;
+	s_allow_download_players_box.itemnames = yes_no_names;
+	s_allow_download_players_box.curvalue = (Cvar_VariableValue("allow_download_players") != 0);
+
+	s_allow_download_models_box.generic.type = MTYPE_SPINCONTROL;
+	s_allow_download_models_box.generic.x	= 72;
+	s_allow_download_models_box.generic.y	= 216*scale;
+	s_allow_download_models_box.generic.name	= "models";
+	s_allow_download_models_box.generic.callback = DownloadCallback;
+	s_allow_download_models_box.itemnames = yes_no_names;
+	s_allow_download_models_box.curvalue = (Cvar_VariableValue("allow_download_models") != 0);
+
+	s_allow_download_sounds_box.generic.type = MTYPE_SPINCONTROL;
+	s_allow_download_sounds_box.generic.x	= 72;
+	s_allow_download_sounds_box.generic.y	= 226*scale;
+	s_allow_download_sounds_box.generic.name	= "sounds";
+	s_allow_download_sounds_box.generic.callback = DownloadCallback;
+	s_allow_download_sounds_box.itemnames = yes_no_names;
+	s_allow_download_sounds_box.curvalue = (Cvar_VariableValue("allow_download_sounds") != 0);
+
+	Menu_AddItem( &s_player_config_menu, &s_allow_download_box );
+	Menu_AddItem( &s_player_config_menu, &s_allow_download_maps_box );
+	Menu_AddItem( &s_player_config_menu, &s_allow_download_players_box );
+	Menu_AddItem( &s_player_config_menu, &s_allow_download_models_box );
+	Menu_AddItem( &s_player_config_menu, &s_allow_download_sounds_box );
 
 	Menu_AddItem( &s_player_config_menu, &s_player_name_field );
-	Menu_AddItem( &s_player_config_menu, &s_player_model_title );
 	Menu_AddItem( &s_player_config_menu, &s_player_model_box );
 	if ( s_player_skin_box.itemnames )
 	{
-		Menu_AddItem( &s_player_config_menu, &s_player_skin_title );
 		Menu_AddItem( &s_player_config_menu, &s_player_skin_box );
 	}
-	Menu_AddItem( &s_player_config_menu, &s_player_hand_title );
 	Menu_AddItem( &s_player_config_menu, &s_player_handedness_box );
-	Menu_AddItem( &s_player_config_menu, &s_player_rate_title );
 	Menu_AddItem( &s_player_config_menu, &s_player_rate_box );
-	Menu_AddItem( &s_player_config_menu, &s_player_download_action );
 
 	//add in shader support for player models, if the player goes into the menu before entering a
 	//level, that way we see the shaders.  We only want to do this if they are NOT loaded yet.
@@ -5554,8 +5410,8 @@ void PlayerConfig_MenuDraw( void )
 	if(scale < 1)
 		scale = 1;
 
-	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_player" );
+	M_Background( "m_player_back"); //draw black background first
+	M_Banner( "m_player" );
 
 	memset( &refdef, 0, sizeof( refdef ) );
 
@@ -5680,7 +5536,7 @@ void PlayerConfig_MenuDraw( void )
 			s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue] );
 
 		refdef.y = viddef.height / 2 - 70*scale;
-		Draw_StretchPic( s_player_config_menu.x - 40, refdef.y, 32*scale, 32*scale, scratch );
+		Draw_StretchPic( s_player_config_menu.x - 88, refdef.y, 32*scale, 32*scale, scratch );
 	}
 }
 void PConfigAccept (void)
@@ -5766,7 +5622,7 @@ static menuaction_s		s_quit_no_action;
 void M_Quit_Draw( void )
 {
 	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_main" );
+	M_Banner( "m_quit" );
 
 	Menu_AdjustCursor( &s_quit_menu, 1 );
 
@@ -5789,6 +5645,11 @@ void quitActionYes (void *blah)
 
 void Quit_MenuInit (void)
 {
+	float scale;
+
+	scale = (float)(viddef.height)/600;
+	if(scale < 1)
+		scale = 1;
 
 	s_quit_menu.x = viddef.width * 0.50;
 	s_quit_menu.y = viddef.height * 0.50;
@@ -5796,20 +5657,18 @@ void Quit_MenuInit (void)
 
 	s_quit_question.generic.type	= MTYPE_SEPARATOR;
 	s_quit_question.generic.name	= "Are you sure?";
-	s_quit_question.generic.x	= strlen(s_quit_question.generic.name)*MENU_FONT_SIZE*0.5;
-	s_quit_question.generic.y	= MENU_FONT_SIZE*2;
+	s_quit_question.generic.x	= 32;
+	s_quit_question.generic.y	= scale*40;
 
 	s_quit_yes_action.generic.type	= MTYPE_ACTION;
-	s_quit_yes_action.generic.flags  = QMF_LEFT_JUSTIFY;
-	s_quit_yes_action.generic.x		= 0;
-	s_quit_yes_action.generic.y		= MENU_FONT_SIZE*5;
+	s_quit_yes_action.generic.x		= 8;
+	s_quit_yes_action.generic.y		= scale*60;
 	s_quit_yes_action.generic.name	= "  yes";
 	s_quit_yes_action.generic.callback = quitActionYes;
 
 	s_quit_no_action.generic.type	= MTYPE_ACTION;
-	s_quit_no_action.generic.flags  = QMF_LEFT_JUSTIFY;
-	s_quit_no_action.generic.x		= 0;
-	s_quit_no_action.generic.y		= MENU_FONT_SIZE*7;
+	s_quit_no_action.generic.x		= 8;
+	s_quit_no_action.generic.y		= scale*70;
 	s_quit_no_action.generic.name	= "  no";
 	s_quit_no_action.generic.callback = quitActionNo;
 
@@ -5847,7 +5706,6 @@ void M_Init (void)
 		Cmd_AddCommand ("menu_startserver", M_Menu_StartServer_f);
 			Cmd_AddCommand ("menu_dmoptions", M_Menu_DMOptions_f);
 		Cmd_AddCommand ("menu_playerconfig", M_Menu_PlayerConfig_f);
-			Cmd_AddCommand ("menu_downloadoptions", M_Menu_DownloadOptions_f);
 		Cmd_AddCommand ("menu_credits", M_Menu_Credits_f );
 	Cmd_AddCommand ("menu_video", M_Menu_Video_f);
 	Cmd_AddCommand ("menu_options", M_Menu_Options_f);

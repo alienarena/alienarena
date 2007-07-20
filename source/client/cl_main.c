@@ -1709,6 +1709,23 @@ void CL_InitLocal (void)
 	Cvar_SetValue("scriptsloaded", 0);
 
 	strcpy(map_music, "music/none.wav");
+
+	//register all our menu gfx
+	R_RegisterPic("m_main");
+	R_RegisterPic("m_options");
+	R_RegisterPic("m_options_back");
+	R_RegisterPic("m_video");
+	R_RegisterPic("m_controls");
+	R_RegisterPic("m_controls_back");
+	R_RegisterPic("m_player");
+	R_RegisterPic("m_player_back");
+	R_RegisterPic("m_bots");
+	R_RegisterPic("m_startserver");
+	R_RegisterPic("m_startserver_back");
+	R_RegisterPic("m_dmoptions");
+	R_RegisterPic("m_mutators");
+	R_RegisterPic("m_single");
+	R_RegisterPic("m_quit");
 }
 
 

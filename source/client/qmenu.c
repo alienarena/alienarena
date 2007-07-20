@@ -507,15 +507,30 @@ void Menu_Draw( menuframework_s *menu )
 	{
 		menu->cursordraw( menu );
 	}
-	else if ( item && item->type != MTYPE_FIELD )
+	else if ( item && item->type == MTYPE_ACTION ) //change to a "highlite"
 	{
 		if ( item->flags & QMF_LEFT_JUSTIFY )
 		{
-			Draw_Char( menu->x + item->x - 24 + item->cursor_offset, menu->y + item->y, 12 + ( ( int ) ( Sys_Milliseconds()/250 ) & 1 ) );
+			if(item->name)
+				Menu_DrawString(menu->x + item->x - 24, menu->y + item->y, item->name);
 		}
 		else
 		{
-			Draw_Char( menu->x + item->cursor_offset, menu->y + item->y, 12 + ( ( int ) ( Sys_Milliseconds()/250 ) & 1 ) );
+			if(item->name)
+				Menu_DrawStringR2LDark(menu->x + item->x - 24, menu->y + item->y, item->name);
+		}
+	}
+	else if ( item && item->type != MTYPE_FIELD ) //change to a "highlite"
+	{
+		if ( item->flags & QMF_LEFT_JUSTIFY )
+		{
+			if(item->name)
+				Menu_DrawStringDark(menu->x + item->x - 24, menu->y + item->y, item->name);
+		}
+		else
+		{
+			if(item->name)
+				Menu_DrawStringR2L(menu->x + item->x - 24, menu->y + item->y, item->name);
 		}
 	}
 
@@ -537,19 +552,25 @@ void Menu_Draw( menuframework_s *menu )
 
 void Menu_DrawStatusBar( const char *string )
 {
+	int	charscale;
+
+	charscale = (float)(viddef.height)*8/600;
+	if(charscale < 8)
+		charscale = 8;
+
 	if ( string )
 	{
 		int l = strlen( string );
-		int maxrow = VID_HEIGHT / 8;
-		int maxcol = VID_WIDTH / 8;
+		int maxrow = VID_HEIGHT / charscale;
+		int maxcol = VID_WIDTH / charscale;
 		int col = maxcol / 2 - l / 2;
 
-		Draw_Fill( 0, VID_HEIGHT-8, VID_WIDTH, 8, 4 );
-		Menu_DrawString( col*8, VID_HEIGHT - 8, string );
+		Draw_Fill( 0, VID_HEIGHT-charscale, VID_WIDTH, charscale, 4 );
+		Menu_DrawString( col*charscale, VID_HEIGHT - charscale, string );
 	}
 	else
 	{
-		Draw_Fill( 0, VID_HEIGHT-8, VID_WIDTH, 8, 0 );
+		Draw_Fill( 0, VID_HEIGHT-charscale, VID_WIDTH, charscale, 0 );
 	}
 }
 
