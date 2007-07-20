@@ -913,19 +913,6 @@ static void M_FindKeysForCommand (char *command, int *twokeys)
 	}
 }
 
-static void KeyCursorDrawFunc( menuframework_s *menu )
-{
-	float scale;
-	scale = (float)(viddef.height)/600;
-	if(scale < 1)
-		scale = 1;
-
-	if ( bind_grab )
-		Draw_Char( menu->x, menu->y + 80*scale + menu->cursor * (float)8.6 * scale, '=' );
-	else
-		Draw_Char( menu->x, menu->y + 80*scale + menu->cursor * (float)8.6 * scale, 12 + ( ( int ) ( Sys_Milliseconds() / 250 ) & 1 ) );
-}
-
 static void DrawKeyBindingFunc( void *self )
 {
 	int keys[2];
@@ -984,11 +971,8 @@ static void Keys_MenuInit( void )
 	y = 80*scale;
 
 	s_keys_menu.x = viddef.width * 0.50;
-	s_keys_menu.nitems = 0;
-	s_keys_menu.cursordraw = KeyCursorDrawFunc;
 
 	s_keys_attack_action.generic.type	= MTYPE_ACTION;
-	s_keys_attack_action.generic.flags  = QMF_GRAYED;
 	s_keys_attack_action.generic.x		= 0;
 	s_keys_attack_action.generic.y		= y;
 	s_keys_attack_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -996,7 +980,6 @@ static void Keys_MenuInit( void )
 	s_keys_attack_action.generic.name	= bindnames[s_keys_attack_action.generic.localdata[0]][1];
 
 	s_keys_attack2_action.generic.type	= MTYPE_ACTION;
-	s_keys_attack2_action.generic.flags  = QMF_GRAYED;
 	s_keys_attack2_action.generic.x		= 0;
 	s_keys_attack2_action.generic.y		= y += 9*scale;
 	s_keys_attack2_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1004,7 +987,6 @@ static void Keys_MenuInit( void )
 	s_keys_attack2_action.generic.name	= bindnames[s_keys_attack2_action.generic.localdata[0]][1];
 
 	s_keys_change_weapon_action.generic.type	= MTYPE_ACTION;
-	s_keys_change_weapon_action.generic.flags  = QMF_GRAYED;
 	s_keys_change_weapon_action.generic.x		= 0;
 	s_keys_change_weapon_action.generic.y		= y += 9*scale;
 	s_keys_change_weapon_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1012,7 +994,6 @@ static void Keys_MenuInit( void )
 	s_keys_change_weapon_action.generic.name	= bindnames[s_keys_change_weapon_action.generic.localdata[0]][1];
 
 	s_keys_walk_forward_action.generic.type	= MTYPE_ACTION;
-	s_keys_walk_forward_action.generic.flags  = QMF_GRAYED;
 	s_keys_walk_forward_action.generic.x		= 0;
 	s_keys_walk_forward_action.generic.y		= y += 9*scale;
 	s_keys_walk_forward_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1020,7 +1001,6 @@ static void Keys_MenuInit( void )
 	s_keys_walk_forward_action.generic.name	= bindnames[s_keys_walk_forward_action.generic.localdata[0]][1];
 
 	s_keys_backpedal_action.generic.type	= MTYPE_ACTION;
-	s_keys_backpedal_action.generic.flags  = QMF_GRAYED;
 	s_keys_backpedal_action.generic.x		= 0;
 	s_keys_backpedal_action.generic.y		= y += 9*scale;
 	s_keys_backpedal_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1028,7 +1008,6 @@ static void Keys_MenuInit( void )
 	s_keys_backpedal_action.generic.name	= bindnames[s_keys_backpedal_action.generic.localdata[0]][1];
 
 	s_keys_turn_left_action.generic.type	= MTYPE_ACTION;
-	s_keys_turn_left_action.generic.flags  = QMF_GRAYED;
 	s_keys_turn_left_action.generic.x		= 0;
 	s_keys_turn_left_action.generic.y		= y += 9*scale;
 	s_keys_turn_left_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1036,7 +1015,6 @@ static void Keys_MenuInit( void )
 	s_keys_turn_left_action.generic.name	= bindnames[s_keys_turn_left_action.generic.localdata[0]][1];
 
 	s_keys_turn_right_action.generic.type	= MTYPE_ACTION;
-	s_keys_turn_right_action.generic.flags  = QMF_GRAYED;
 	s_keys_turn_right_action.generic.x		= 0;
 	s_keys_turn_right_action.generic.y		= y += 9*scale;
 	s_keys_turn_right_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1044,7 +1022,6 @@ static void Keys_MenuInit( void )
 	s_keys_turn_right_action.generic.name	= bindnames[s_keys_turn_right_action.generic.localdata[0]][1];
 
 	s_keys_run_action.generic.type	= MTYPE_ACTION;
-	s_keys_run_action.generic.flags  = QMF_GRAYED;
 	s_keys_run_action.generic.x		= 0;
 	s_keys_run_action.generic.y		= y += 9*scale;
 	s_keys_run_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1052,7 +1029,6 @@ static void Keys_MenuInit( void )
 	s_keys_run_action.generic.name	= bindnames[s_keys_run_action.generic.localdata[0]][1];
 
 	s_keys_step_left_action.generic.type	= MTYPE_ACTION;
-	s_keys_step_left_action.generic.flags  = QMF_GRAYED;
 	s_keys_step_left_action.generic.x		= 0;
 	s_keys_step_left_action.generic.y		= y += 9*scale;
 	s_keys_step_left_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1060,7 +1036,6 @@ static void Keys_MenuInit( void )
 	s_keys_step_left_action.generic.name	= bindnames[s_keys_step_left_action.generic.localdata[0]][1];
 
 	s_keys_step_right_action.generic.type	= MTYPE_ACTION;
-	s_keys_step_right_action.generic.flags  = QMF_GRAYED;
 	s_keys_step_right_action.generic.x		= 0;
 	s_keys_step_right_action.generic.y		= y += 9*scale;
 	s_keys_step_right_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1068,7 +1043,6 @@ static void Keys_MenuInit( void )
 	s_keys_step_right_action.generic.name	= bindnames[s_keys_step_right_action.generic.localdata[0]][1];
 
 	s_keys_sidestep_action.generic.type	= MTYPE_ACTION;
-	s_keys_sidestep_action.generic.flags  = QMF_GRAYED;
 	s_keys_sidestep_action.generic.x		= 0;
 	s_keys_sidestep_action.generic.y		= y += 9*scale;
 	s_keys_sidestep_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1076,7 +1050,6 @@ static void Keys_MenuInit( void )
 	s_keys_sidestep_action.generic.name	= bindnames[s_keys_sidestep_action.generic.localdata[0]][1];
 
 	s_keys_look_up_action.generic.type	= MTYPE_ACTION;
-	s_keys_look_up_action.generic.flags  = QMF_GRAYED;
 	s_keys_look_up_action.generic.x		= 0;
 	s_keys_look_up_action.generic.y		= y += 9*scale;
 	s_keys_look_up_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1084,7 +1057,6 @@ static void Keys_MenuInit( void )
 	s_keys_look_up_action.generic.name	= bindnames[s_keys_look_up_action.generic.localdata[0]][1];
 
 	s_keys_look_down_action.generic.type	= MTYPE_ACTION;
-	s_keys_look_down_action.generic.flags  = QMF_GRAYED;
 	s_keys_look_down_action.generic.x		= 0;
 	s_keys_look_down_action.generic.y		= y += 9*scale;
 	s_keys_look_down_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1092,7 +1064,6 @@ static void Keys_MenuInit( void )
 	s_keys_look_down_action.generic.name	= bindnames[s_keys_look_down_action.generic.localdata[0]][1];
 
 	s_keys_center_view_action.generic.type	= MTYPE_ACTION;
-	s_keys_center_view_action.generic.flags  = QMF_GRAYED;
 	s_keys_center_view_action.generic.x		= 0;
 	s_keys_center_view_action.generic.y		= y += 9*scale;
 	s_keys_center_view_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1100,7 +1071,6 @@ static void Keys_MenuInit( void )
 	s_keys_center_view_action.generic.name	= bindnames[s_keys_center_view_action.generic.localdata[0]][1];
 
 	s_keys_mouse_look_action.generic.type	= MTYPE_ACTION;
-	s_keys_mouse_look_action.generic.flags  = QMF_GRAYED;
 	s_keys_mouse_look_action.generic.x		= 0;
 	s_keys_mouse_look_action.generic.y		= y += 9*scale;
 	s_keys_mouse_look_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1108,7 +1078,6 @@ static void Keys_MenuInit( void )
 	s_keys_mouse_look_action.generic.name	= bindnames[s_keys_mouse_look_action.generic.localdata[0]][1];
 
 	s_keys_keyboard_look_action.generic.type	= MTYPE_ACTION;
-	s_keys_keyboard_look_action.generic.flags  = QMF_GRAYED;
 	s_keys_keyboard_look_action.generic.x		= 0;
 	s_keys_keyboard_look_action.generic.y		= y += 9*scale;
 	s_keys_keyboard_look_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1116,7 +1085,6 @@ static void Keys_MenuInit( void )
 	s_keys_keyboard_look_action.generic.name	= bindnames[s_keys_keyboard_look_action.generic.localdata[0]][1];
 
 	s_keys_move_up_action.generic.type	= MTYPE_ACTION;
-	s_keys_move_up_action.generic.flags  = QMF_GRAYED;
 	s_keys_move_up_action.generic.x		= 0;
 	s_keys_move_up_action.generic.y		= y += 9*scale;
 	s_keys_move_up_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1124,7 +1092,6 @@ static void Keys_MenuInit( void )
 	s_keys_move_up_action.generic.name	= bindnames[s_keys_move_up_action.generic.localdata[0]][1];
 
 	s_keys_move_down_action.generic.type	= MTYPE_ACTION;
-	s_keys_move_down_action.generic.flags  = QMF_GRAYED;
 	s_keys_move_down_action.generic.x		= 0;
 	s_keys_move_down_action.generic.y		= y += 9*scale;
 	s_keys_move_down_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1132,7 +1099,6 @@ static void Keys_MenuInit( void )
 	s_keys_move_down_action.generic.name	= bindnames[s_keys_move_down_action.generic.localdata[0]][1];
 
 	s_keys_inventory_action.generic.type	= MTYPE_ACTION;
-	s_keys_inventory_action.generic.flags  = QMF_GRAYED;
 	s_keys_inventory_action.generic.x		= 0;
 	s_keys_inventory_action.generic.y		= y += 9*scale;
 	s_keys_inventory_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1140,7 +1106,6 @@ static void Keys_MenuInit( void )
 	s_keys_inventory_action.generic.name	= bindnames[s_keys_inventory_action.generic.localdata[0]][1];
 
 	s_keys_inv_use_action.generic.type	= MTYPE_ACTION;
-	s_keys_inv_use_action.generic.flags  = QMF_GRAYED;
 	s_keys_inv_use_action.generic.x		= 0;
 	s_keys_inv_use_action.generic.y		= y += 9*scale;
 	s_keys_inv_use_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1148,7 +1113,6 @@ static void Keys_MenuInit( void )
 	s_keys_inv_use_action.generic.name	= bindnames[s_keys_inv_use_action.generic.localdata[0]][1];
 
 	s_keys_inv_drop_action.generic.type	= MTYPE_ACTION;
-	s_keys_inv_drop_action.generic.flags  = QMF_GRAYED;
 	s_keys_inv_drop_action.generic.x		= 0;
 	s_keys_inv_drop_action.generic.y		= y += 9*scale;
 	s_keys_inv_drop_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1156,7 +1120,6 @@ static void Keys_MenuInit( void )
 	s_keys_inv_drop_action.generic.name	= bindnames[s_keys_inv_drop_action.generic.localdata[0]][1];
 
 	s_keys_inv_prev_action.generic.type	= MTYPE_ACTION;
-	s_keys_inv_prev_action.generic.flags  = QMF_GRAYED;
 	s_keys_inv_prev_action.generic.x		= 0;
 	s_keys_inv_prev_action.generic.y		= y += 9*scale;
 	s_keys_inv_prev_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1164,7 +1127,6 @@ static void Keys_MenuInit( void )
 	s_keys_inv_prev_action.generic.name	= bindnames[s_keys_inv_prev_action.generic.localdata[0]][1];
 
 	s_keys_inv_next_action.generic.type	= MTYPE_ACTION;
-	s_keys_inv_next_action.generic.flags  = QMF_GRAYED;
 	s_keys_inv_next_action.generic.x		= 0;
 	s_keys_inv_next_action.generic.y		= y += 9*scale;
 	s_keys_inv_next_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1172,7 +1134,6 @@ static void Keys_MenuInit( void )
 	s_keys_inv_next_action.generic.name	= bindnames[s_keys_inv_next_action.generic.localdata[0]][1];
 
 	s_keys_help_computer_action.generic.type	= MTYPE_ACTION;
-	s_keys_help_computer_action.generic.flags  = QMF_GRAYED;
 	s_keys_help_computer_action.generic.x		= 0;
 	s_keys_help_computer_action.generic.y		= y += 9*scale;
 	s_keys_help_computer_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1180,7 +1141,6 @@ static void Keys_MenuInit( void )
 	s_keys_help_computer_action.generic.name	= bindnames[s_keys_help_computer_action.generic.localdata[0]][1];
 
 	s_keys_alien_disruptor_action.generic.type	= MTYPE_ACTION;
-	s_keys_alien_disruptor_action.generic.flags  = QMF_GRAYED;
 	s_keys_alien_disruptor_action.generic.x		= 0;
 	s_keys_alien_disruptor_action.generic.y		= y += 9*scale;
 	s_keys_alien_disruptor_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1188,7 +1148,6 @@ static void Keys_MenuInit( void )
 	s_keys_alien_disruptor_action.generic.name	= bindnames[s_keys_alien_disruptor_action.generic.localdata[0]][1];
 
 	s_keys_chain_pistol_action.generic.type	= MTYPE_ACTION;
-	s_keys_chain_pistol_action.generic.flags  = QMF_GRAYED;
 	s_keys_chain_pistol_action.generic.x		= 0;
 	s_keys_chain_pistol_action.generic.y		= y += 9*scale;
 	s_keys_chain_pistol_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1196,7 +1155,6 @@ static void Keys_MenuInit( void )
 	s_keys_chain_pistol_action.generic.name	= bindnames[s_keys_chain_pistol_action.generic.localdata[0]][1];
 
 	s_keys_flame_thrower_action.generic.type	= MTYPE_ACTION;
-	s_keys_flame_thrower_action.generic.flags  = QMF_GRAYED;
 	s_keys_flame_thrower_action.generic.x		= 0;
 	s_keys_flame_thrower_action.generic.y		= y += 9*scale;
 	s_keys_flame_thrower_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1204,7 +1162,6 @@ static void Keys_MenuInit( void )
 	s_keys_flame_thrower_action.generic.name	= bindnames[s_keys_flame_thrower_action.generic.localdata[0]][1];
 
 	s_keys_rocket_launcher_action.generic.type	= MTYPE_ACTION;
-	s_keys_rocket_launcher_action.generic.flags  = QMF_GRAYED;
 	s_keys_rocket_launcher_action.generic.x		= 0;
 	s_keys_rocket_launcher_action.generic.y		= y += 9*scale;
 	s_keys_rocket_launcher_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1212,7 +1169,6 @@ static void Keys_MenuInit( void )
 	s_keys_rocket_launcher_action.generic.name	= bindnames[s_keys_rocket_launcher_action.generic.localdata[0]][1];
 
 	s_keys_alien_smartgun_action.generic.type	= MTYPE_ACTION;
-	s_keys_alien_smartgun_action.generic.flags  = QMF_GRAYED;
 	s_keys_alien_smartgun_action.generic.x		= 0;
 	s_keys_alien_smartgun_action.generic.y		= y += 9*scale;
 	s_keys_alien_smartgun_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1220,7 +1176,6 @@ static void Keys_MenuInit( void )
 	s_keys_alien_smartgun_action.generic.name	= bindnames[s_keys_alien_smartgun_action.generic.localdata[0]][1];
 
 	s_keys_alien_beamgun_action.generic.type	= MTYPE_ACTION;
-	s_keys_alien_beamgun_action.generic.flags  = QMF_GRAYED;
 	s_keys_alien_beamgun_action.generic.x		= 0;
 	s_keys_alien_beamgun_action.generic.y		= y += 9*scale;
 	s_keys_alien_beamgun_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1228,7 +1183,6 @@ static void Keys_MenuInit( void )
 	s_keys_alien_beamgun_action.generic.name	= bindnames[s_keys_alien_beamgun_action.generic.localdata[0]][1];
 
 	s_keys_alien_vaporizer_action.generic.type	= MTYPE_ACTION;
-	s_keys_alien_vaporizer_action.generic.flags  = QMF_GRAYED;
 	s_keys_alien_vaporizer_action.generic.x		= 0;
 	s_keys_alien_vaporizer_action.generic.y		= y += 9*scale;
 	s_keys_alien_vaporizer_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1236,7 +1190,6 @@ static void Keys_MenuInit( void )
 	s_keys_alien_vaporizer_action.generic.name	= bindnames[s_keys_alien_vaporizer_action.generic.localdata[0]][1];
 
 	s_keys_show_scores_action.generic.type	= MTYPE_ACTION;
-	s_keys_show_scores_action.generic.flags  = QMF_GRAYED;
 	s_keys_show_scores_action.generic.x		= 0;
 	s_keys_show_scores_action.generic.y		= y += 9*scale;
 	s_keys_show_scores_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1244,7 +1197,6 @@ static void Keys_MenuInit( void )
 	s_keys_show_scores_action.generic.name	= bindnames[s_keys_show_scores_action.generic.localdata[0]][1];
 
 	s_keys_flashlight_action.generic.type	= MTYPE_ACTION;
-	s_keys_flashlight_action.generic.flags  = QMF_GRAYED;
 	s_keys_flashlight_action.generic.x		= 0;
 	s_keys_flashlight_action.generic.y		= y += 9*scale;
 	s_keys_flashlight_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1252,7 +1204,6 @@ static void Keys_MenuInit( void )
 	s_keys_flashlight_action.generic.name	= bindnames[s_keys_flashlight_action.generic.localdata[0]][1];
 
 	s_keys_grapple_action.generic.type	= MTYPE_ACTION;
-	s_keys_grapple_action.generic.flags  = QMF_GRAYED;
 	s_keys_grapple_action.generic.x		= 0;
 	s_keys_grapple_action.generic.y		= y += 9*scale;
 	s_keys_grapple_action.generic.ownerdraw = DrawKeyBindingFunc;
@@ -1260,7 +1211,6 @@ static void Keys_MenuInit( void )
 	s_keys_grapple_action.generic.name	= bindnames[s_keys_grapple_action.generic.localdata[0]][1];
 
 	s_keys_filler_action.generic.type	= MTYPE_ACTION;
-	s_keys_filler_action.generic.flags  = QMF_GRAYED;
 	s_keys_filler_action.generic.x		= 0;
 	s_keys_filler_action.generic.y		= y += 9*scale;
 	s_keys_filler_action.generic.ownerdraw = DrawKeyBindingFunc;
