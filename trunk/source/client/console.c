@@ -138,12 +138,6 @@ void Con_ToggleConsole_f (void)
 		return;
 	}
 
-	if (cls.state == ca_disconnected)
-	{	// start the demo loop again
-		Cbuf_AddText ("d1\n");
-		return;
-	}
-
 	Key_ClearTyping ();
 	Con_ClearNotify ();
 
@@ -749,7 +743,7 @@ void Con_DrawConsole (float frac)
 		lines = viddef.height;
 
 // draw the background
-	Draw_StretchPic (0, lines-viddef.height, viddef.width, viddef.height, "conback");
+	Draw_Fill (0, lines-viddef.height, viddef.width, viddef.height, 0);
 	SCR_AddDirtyPoint (0,0);
 	SCR_AddDirtyPoint (viddef.width-1,lines-1);
 

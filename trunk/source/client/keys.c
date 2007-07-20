@@ -783,6 +783,11 @@ void Key_Event (int key, qboolean down, unsigned time)
 	{
 		if (!down)
 			return;
+		if (cls.key_dest == key_console && cls.state == ca_disconnected) {
+			M_Menu_Main_f ();
+			return;
+		}
+			
 		Con_ToggleConsole_f ();
 		return;
 	}
