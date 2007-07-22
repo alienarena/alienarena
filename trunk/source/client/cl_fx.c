@@ -970,6 +970,44 @@ void CL_BlueMuzzleParticles (vec3_t org)
 
 /*
 ===============
+CL_MuzzleFlashParticle
+===============
+*/
+void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles)
+{
+	int			j;
+	cparticle_t	*p;
+	vec3_t		mflashorg, vforward, vright, vup;
+	
+	VectorCopy(org, mflashorg);
+	AngleVectors (angles, vforward, vright, vup);
+			
+	VectorMA(mflashorg, 24, vforward, mflashorg);
+	VectorMA(mflashorg, 2.4, vright, mflashorg);
+	VectorMA(mflashorg, -2.5, vup, mflashorg);
+
+	if (!(p = new_particle()))
+		return;
+
+	p->type = PARTICLE_BLUE_MZFLASH;
+	p->texnum = r_bflashtexture->texnum;
+	p->scale = 7 + (rand()&4);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = mflashorg[j] + ((rand()%2)-1);
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = 0;
+	p->alpha = 0.8;
+	p->color = 0xd9;
+	p->alphavel = -100;
+	
+}
+/*
+===============
 CL_Leaderfield
 ===============
 */

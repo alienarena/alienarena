@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "client.h"
 
-
 extern	struct model_s	*cl_mod_powerscreen;
 
 /*
@@ -1205,10 +1204,17 @@ end:
 CL_AddViewWeapon 
 ==============
 */
+extern struct model_s
+{
+	char		name[MAX_QPATH];
+};
+extern void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles);
+
 void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 {
 	entity_t	gun;		// view model
 	int			i;
+	
 
 	memset (&gun, 0, sizeof(gun));
 
@@ -1216,6 +1222,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.model = gun_model;	// development tool
 	else
 		gun.model = cl.model_draw[ps->gunindex];
+
 	if (!gun.model)
 		return;
 
@@ -1241,13 +1248,19 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		else
 			gun.oldframe = ops->gunframe;
 	}
+	
 
 	gun.flags = RF_MINLIGHT | RF_DEPTHHACK | RF_WEAPONMODEL;
 	gun.backlerp = 1.0 - cl.lerpfrac;
 	VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all
 
-	V_AddEntity (&gun);
+	//add a muzzleflash for chaingun
+	if(!(strcmp("models/weapons/v_shotg2/tris.md2", gun.model->name))) {
+		if(gun.frame > 4 && gun.frame < 14)	
+			CL_MuzzleFlashParticle(gun.origin, gun.angles);
+	}
 
+	V_AddEntity (&gun);
 	//add shells for viewweaps (all of em!)
 	{
 		int oldeffects = gun.flags, pnum;
