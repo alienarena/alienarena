@@ -130,12 +130,8 @@ void CL_RegisterTEntSounds (void)
 	cl_sfx_ric2 = S_RegisterSound ("world/ric2.wav");
 	cl_sfx_ric3 = S_RegisterSound ("world/ric3.wav");
 	cl_sfx_lashit = S_RegisterSound("weapons/lashit.wav");
-	cl_sfx_spark5 = S_RegisterSound ("world/spark5.wav");
-	cl_sfx_spark6 = S_RegisterSound ("world/spark6.wav");
-	cl_sfx_spark7 = S_RegisterSound ("world/spark7.wav");
 	cl_sfx_railg = S_RegisterSound ("weapons/railgf1a.wav");
 	cl_sfx_rockexp = S_RegisterSound ("weapons/rocklx1a.wav");
-	cl_sfx_watrexp = S_RegisterSound ("weapons/xpld_wat.wav");
 
 	S_RegisterSound ("player/land1.wav");
 	S_RegisterSound ("player/fall2.wav");
@@ -160,17 +156,9 @@ CL_RegisterTEntModels
 */
 void CL_RegisterTEntModels (void)
 {
-	cl_mod_powerscreen = R_RegisterModel ("models/items/armor/effect/tris.md2");
-	cl_mod_blaster_muzzleflash = R_RegisterModel ("sprites/s_bfg1.sp2");
-
+	
 	R_RegisterModel ("models/objects/laser/tris.md2");
-	R_RegisterModel ("models/objects/grenade2/tris.md2");
-	R_RegisterModel ("models/weapons/v_machn/tris.md2");
-	R_RegisterModel ("models/weapons/v_handgr/tris.md2");
-	R_RegisterModel ("models/weapons/v_shotg2/tris.md2");
-	R_RegisterModel ("models/objects/gibs/bone/tris.md2");
-	R_RegisterModel ("models/objects/gibs/sm_meat/tris.md2");
-	R_RegisterModel ("models/objects/gibs/bone2/tris.md2");
+
 	// RAFAEL
 	// re.RegisterModel ("models/objects/blaser/tris.md2");
 
@@ -178,12 +166,6 @@ void CL_RegisterTEntModels (void)
 	R_RegisterPic ("a_bullets");
 	R_RegisterPic ("i_health");
 	R_RegisterPic ("a_grenades");
-
-//ROGUE
-	cl_mod_lightning = R_RegisterModel ("models/proj/lightning/tris.md2");
-	cl_mod_heatbeam = R_RegisterModel ("models/proj/beam/tris.md2");
-	cl_mod_monster_heatbeam = R_RegisterModel ("models/proj/widowbeam/tris.md2");
-//ROGUE
 }
 
 /*
