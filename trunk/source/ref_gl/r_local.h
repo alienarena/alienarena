@@ -170,9 +170,6 @@ extern	cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
 
 extern	cvar_t	*intensity;
-// MH - detail textures begin
-extern	cvar_t	*gl_detailtextures;
-// MH - detail textures begin
 // Vic - begin
 
 extern cvar_t	*r_overbrightbits;

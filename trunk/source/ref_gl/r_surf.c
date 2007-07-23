@@ -66,11 +66,6 @@ static qboolean	LM_AllocBlock (int w, int h, int *x, int *y);
 extern void R_SetCacheState( msurface_t *surf );
 extern void R_BuildLightMap (msurface_t *surf, byte *dest, int stride);
 
-// MH - detail textures begin
-// this should most likely properly belong in a state management struct somewhere
-static msurface_t *r_detailsurfaces;
-// MH - detail textures end
-
 /*
 =============================================================
 
@@ -391,13 +386,6 @@ void R_RenderBrushPoly (msurface_t *fa)
 		GL_TexEnv( GL_REPLACE );
 	}
 
-	// MH - detail textures begin
-	// accumulate the detail chain
-	// wait until we get here so that we don't get any detail texturing on DRAWTURB polys
-	fa->detailchain = r_detailsurfaces;
-	r_detailsurfaces = fa;
-	// MH - detail textures end
-
 	if (SurfaceIsAlphaBlended(fa))
 		qglEnable( GL_ALPHA_TEST );
 	
@@ -665,12 +653,6 @@ static void GL_RenderLightmappedPoly( msurface_t *surf )
 	qboolean is_dynamic = false;
 	unsigned lmtex = surf->lightmaptexturenum;
 
-	// MH - detail textures begin
-	// accumulate the detail texture chain
-	surf->detailchain = r_detailsurfaces;
-	r_detailsurfaces = surf;
-	// MH - detail textures end
-
 	for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
 	{
 		if ( r_newrefdef.lightstyles[surf->styles[map]].white != surf->cached_light[map] )
@@ -742,79 +724,6 @@ dynamic:
 		qglDisable( GL_ALPHA_TEST);
 }
 
-// MH - detail textures begin
-// here we draw the detail textures!
-// we could do this as a multitextured render along with the other stuff, but my own tests
-// have indicated that for something like this there's no real benefit to be had from doing
-// so.  the difference is in the order of 1 or 2 FPS - the real hit from detail texturing
-// comes from scrunching large images into small spaces
-static void R_DrawDetailSurfaces (void)
-{
-	msurface_t *surf = r_detailsurfaces;
-	int		i;
-	float	*v;
-	glpoly_t *p;
-
-	// nothing to draw!
-	if (!surf)
-		return;
-
-	// we do this rather than checking for 0 (checking for 0 is always bad with floats)
-	// standard 6 decimal place precision
-	if (gl_detailtextures->value < 0.00001)
-		return;
-
-	// we *could* use the standard glBindTexture here as we don't need to do any bind checking
-	// but again we'll maintain consistency
-	GL_Bind (r_detailtexture->texnum);
-
-	// set the correct blending mode
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-	qglBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
-	qglEnable (GL_BLEND);
-
-	// here we get clever and do our texture scaling in the texture matrix.  this saves
-	// us from more runtime calculations in software
-	qglMatrixMode (GL_TEXTURE);
-	qglLoadIdentity ();
-
-	// we only need to scale the X and Y co-ords, correcponding to texture s and t.
-	// everyone will have their own favourite scaling amount, so i did a cvar
-	qglScalef (gl_detailtextures->value, gl_detailtextures->value, 1.0);
-
-	// we can safely leave the texture matrix as the active mode while we're doing the draw
-	for (; surf; surf = surf->detailchain)
-	{
-		if (SurfaceIsAlphaBlended(surf))
-			continue;
-		for (p = surf->polys; p; p = p->chain)
-		{
-			// using GL_TRIANGLE_FAN is theoretically more efficient than GL_POLYGON as
-			// the GL implementation can know something about what we are going to draw
-			// in advance, and set things up accordingly.  the visual result is identical.
-			qglBegin (GL_TRIANGLE_FAN);
-
-			for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-			{
-				// take the 128 * 128 version of the s and t co-ords
-				qglTexCoord2f (v[7], v[8]);
-				qglVertex3fv (v);
-			}
-
-			qglEnd ();
-		}
-	}
-
-	// restore original texture matrix
-	qglLoadIdentity ();
-	qglMatrixMode (GL_MODELVIEW);
-
-	// restore original blend
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDisable (GL_BLEND);
-}
-// MH - detail textures end
 /*
 =================
 R_DrawInlineBModel
@@ -835,11 +744,6 @@ void R_DrawInlineBModel (entity_t *e)
 		qglColor4f (1,1,1,0.25);
 		GL_TexEnv( GL_MODULATE );
 	}
-
-	// MH - detail textures begin
-	// null the detail chain again
-	r_detailsurfaces = NULL;
-	// MH - detail textures end
 
 	//
 	// draw texture
@@ -880,18 +784,6 @@ void R_DrawInlineBModel (entity_t *e)
 	{
 		if ( !qglMTexCoord2fSGIS )
 			R_BlendLightmaps ();
-
-		// MH - detail textures begin
-		// shut down multitexturing (we can't do this in R_DrawDetailSurfaces cos then it
-		// messes things up for the world)
-		GL_EnableMultitexture (false);
-
-		// don't put them on translucent surfs
-		R_DrawDetailSurfaces ();
-
-		// bring multitexturing back up
-		GL_EnableMultitexture (true);
-		// MH - detail textures end
 	}
 	else
 	{
@@ -1220,10 +1112,6 @@ void R_DrawWorld (void)
 
 	R_ClearSkyBox ();
 
-	// MH - detail textures begin
-	r_detailsurfaces = NULL;
-	// MH - detail textures end
-
 	if ( qglMTexCoord2fSGIS )
 	{
 		GL_EnableMultitexture( true );
@@ -1283,10 +1171,6 @@ void R_DrawWorld (void)
 	*/
 	DrawTextureChains ();
 	R_BlendLightmaps ();
-
-	// MH - detail textures begin
-	R_DrawDetailSurfaces ();
-	// MH - detail textures end
 	
 	R_DrawSkyBox ();
 
@@ -1532,22 +1416,6 @@ void GL_BuildPolygonFromSurface(msurface_t *fa)
 		poly->verts[i][5] = s;
 		poly->verts[i][6] = t;
 
-		// MH - detail textures begin
-		// here we build a set of texture s and t co-ords suitable for a 128 * 128 version
-		// of the texture.  this is necessary because using the original texture s and t
-		// will cause the detail texture (and anything else we may ever consider adding)
-		// to rescale itself to the same aspect ratio as the original texture, which looks
-		// bad.  NOTE - to enable this we *must* increase the define of VERTEXSIZE to 9.
-		s = DotProduct (vec, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3];
-		s /= 128;
-
-		t = DotProduct (vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
-		t /= 128;
-
-		// and load them in
-		poly->verts[i][7] = s;
-		poly->verts[i][8] = t;
-		// MH - detail textures end
 	}
 }
 
