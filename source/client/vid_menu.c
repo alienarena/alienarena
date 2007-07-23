@@ -26,7 +26,6 @@ extern cvar_t *vid_gamma;
 extern cvar_t *scr_viewsize;
 
 extern cvar_t *r_bloom_intensity;
-extern cvar_t *gl_detailtextures;
 extern cvar_t *gl_normalmaps;
 extern cvar_t *gl_modulate;
 
@@ -82,7 +81,6 @@ static menuslider_s		s_bloom_slider;
 static menulist_s		s_reflect_box;
 static menulist_s		s_texcombine_box;
 static menuslider_s		s_overbright_slider;
-static menuslider_s		s_detailtex_slider;
 static menuslider_s		s_modulate_slider;
 static menufield_s		s_height_field;
 static menufield_s		s_width_field;
@@ -132,13 +130,6 @@ static void MtexCallback( void *s)
 	}
 }
 
-static void DetailtexCallback( void *s )
-{
-	menuslider_s *slider = ( menuslider_s * ) s;
-
-	Cvar_SetValue( "gl_detailtextures", slider->curvalue);
-}
-
 static void ModulateCallback( void *s )
 {
 	menuslider_s *slider = ( menuslider_s * ) s;
@@ -155,7 +146,6 @@ static void ResetDefaults( void *unused )
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_detailtextures", 0);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
@@ -200,7 +190,6 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "gl_ext_mtexcombine", s_texcombine_box.curvalue);
 	Cvar_SetValue( "r_overbrightbits", s_overbright_slider.curvalue);
 	Cvar_SetValue( "_windowed_mouse", s_windowed_mouse.curvalue);
-	Cvar_SetValue( "gl_detailtextures", s_detailtex_slider.curvalue);
 	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
 	Cvar_SetValue("gl_normalmaps", s_normalmaps_box.curvalue);
 	if(s_normalmaps_box.curvalue)
@@ -280,8 +269,6 @@ void VID_MenuInit( void )
 		gl_ext_mtexcombine = Cvar_Get( "gl_ext_mtexcombine", "1", CVAR_ARCHIVE);
 	if ( !r_overbrightbits )
 		r_overbrightbits = Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE);
-	if ( !gl_detailtextures )
-		gl_detailtextures = Cvar_Get( "gl_detailtextures", "0", CVAR_ARCHIVE);
 	if ( !gl_modulate )
 		gl_modulate = Cvar_Get( "gl_modulate", "2", CVAR_ARCHIVE);
 	if ( !vid_width )
@@ -307,7 +294,6 @@ void VID_MenuInit( void )
 
 	s_screensize_slider.curvalue = scr_viewsize->value/10;
 	s_bloom_slider.curvalue = r_bloom_intensity->value*10;
-	s_detailtex_slider.curvalue = gl_detailtextures->value;
 
 	s_opengl_menu.x = viddef.width * 0.50;
 	s_opengl_menu.nitems = 0;
@@ -378,17 +364,9 @@ void VID_MenuInit( void )
 	s_texres_box.itemnames = onoff_names;
 	s_texres_box.curvalue = gl_texres->value;
 
-	s_detailtex_slider.generic.type = MTYPE_SLIDER;
-	s_detailtex_slider.generic.x	= 24;
-	s_detailtex_slider.generic.y	= 120*scale;
-	s_detailtex_slider.generic.name = "detail texture level";
-	s_detailtex_slider.minvalue = 0;
-	s_detailtex_slider.maxvalue = 9;
-	s_detailtex_slider.generic.callback = DetailtexCallback;
-
 	s_bloom_box.generic.type = MTYPE_SPINCONTROL;
 	s_bloom_box.generic.x	= 24;
-	s_bloom_box.generic.y	= 130*scale;
+	s_bloom_box.generic.y	= 120*scale;
 	s_bloom_box.generic.name	= "light bloom";
 	s_bloom_box.itemnames = onoff_names;
 	s_bloom_box.generic.callback = BloomSetCallback;
@@ -396,7 +374,7 @@ void VID_MenuInit( void )
 
 	s_bloom_slider.generic.type	= MTYPE_SLIDER;
 	s_bloom_slider.generic.x		= 24;
-	s_bloom_slider.generic.y		= 140*scale;
+	s_bloom_slider.generic.y		= 130*scale;
 	s_bloom_slider.generic.name	= "bloom intensity";
 	s_bloom_slider.minvalue = 0;
 	s_bloom_slider.maxvalue = 20;
@@ -404,14 +382,14 @@ void VID_MenuInit( void )
 
 	s_reflect_box.generic.type = MTYPE_SPINCONTROL;
 	s_reflect_box.generic.x	= 24;
-	s_reflect_box.generic.y	= 150*scale;
+	s_reflect_box.generic.y	= 140*scale;
 	s_reflect_box.generic.name	= "reflective water";
 	s_reflect_box.itemnames = onoff_names;
 	s_reflect_box.curvalue = gl_reflection->value;
 
 	s_texcombine_box.generic.type = MTYPE_SPINCONTROL;
 	s_texcombine_box.generic.x	= 24;
-	s_texcombine_box.generic.y	= 160*scale;
+	s_texcombine_box.generic.y	= 150*scale;
 	s_texcombine_box.generic.name	= "multitexture combine";
 	s_texcombine_box.itemnames = onoff_names;
 	s_texcombine_box.generic.callback = MtexCallback;
@@ -419,7 +397,7 @@ void VID_MenuInit( void )
 
 	s_overbright_slider.generic.type	= MTYPE_SLIDER;
 	s_overbright_slider.generic.x		= 24;
-	s_overbright_slider.generic.y		= 170*scale;
+	s_overbright_slider.generic.y		= 160*scale;
 	s_overbright_slider.generic.name	= "overbright bits";
 	s_overbright_slider.minvalue = 2;
 	s_overbright_slider.maxvalue = 5;
@@ -427,7 +405,7 @@ void VID_MenuInit( void )
 
 	s_tq_slider.generic.type	= MTYPE_SLIDER;
 	s_tq_slider.generic.x		= 24;
-	s_tq_slider.generic.y		= 180*scale;
+	s_tq_slider.generic.y		= 170*scale;
 	s_tq_slider.generic.name	= "texture quality";
 	s_tq_slider.minvalue = 0;
 	s_tq_slider.maxvalue = 3;
@@ -435,28 +413,28 @@ void VID_MenuInit( void )
 
 	s_normalmaps_box.generic.type	= MTYPE_SPINCONTROL;
 	s_normalmaps_box.generic.x		= 24;
-	s_normalmaps_box.generic.y		= 190*scale;
+	s_normalmaps_box.generic.y		= 180*scale;
 	s_normalmaps_box.generic.name	= "bumpmapping";
 	s_normalmaps_box.curvalue = gl_normalmaps->value;
 	s_normalmaps_box.itemnames = yesno_names;
 
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
 	s_finish_box.generic.x	= 24;
-	s_finish_box.generic.y	= 200*scale;
+	s_finish_box.generic.y	= 190*scale;
 	s_finish_box.generic.name	= "draw frame completely";
 	s_finish_box.curvalue = gl_finish->value;
 	s_finish_box.itemnames = yesno_names;
 
 	s_vsync_box.generic.type = MTYPE_SPINCONTROL;
     s_vsync_box.generic.x  = 24;
-    s_vsync_box.generic.y  = 210*scale;
+    s_vsync_box.generic.y  = 200*scale;
     s_vsync_box.generic.name       = "vertical sync";
     s_vsync_box.curvalue = gl_swapinterval->value;
     s_vsync_box.itemnames = onoff_names;
 
 	s_windowed_mouse.generic.type = MTYPE_SPINCONTROL;
 	s_windowed_mouse.generic.x  = 24;
-	s_windowed_mouse.generic.y  = 220*scale;
+	s_windowed_mouse.generic.y  = 210*scale;
 	s_windowed_mouse.generic.name   = "windowed mouse";
 	s_windowed_mouse.curvalue = _windowed_mouse->value;
 	s_windowed_mouse.itemnames = yesno_names;
@@ -464,13 +442,13 @@ void VID_MenuInit( void )
 	s_defaults_action.generic.type = MTYPE_ACTION;
 	s_defaults_action.generic.name = "reset to defaults";
 	s_defaults_action.generic.x    = 24;
-	s_defaults_action.generic.y    = 240*scale;
+	s_defaults_action.generic.y    = 230*scale;
 	s_defaults_action.generic.callback = ResetDefaults;
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
 	s_apply_action.generic.x    = 24;
-	s_apply_action.generic.y    = 250*scale;
+	s_apply_action.generic.y    = 240*scale;
 	s_apply_action.generic.callback = ApplyChanges;
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
@@ -481,7 +459,6 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_modulate_slider);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_fs_box);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_texres_box );
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_detailtex_slider);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_bloom_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_bloom_slider);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_reflect_box );
