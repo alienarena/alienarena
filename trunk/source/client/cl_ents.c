@@ -666,6 +666,11 @@ CL_AddPacketEntities
 
 ===============
 */
+extern struct model_s
+{
+	char		name[MAX_QPATH];
+};
+extern void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles);
 void CL_AddPacketEntities (frame_t *frame)
 {
 	entity_t			ent;
@@ -929,10 +934,12 @@ void CL_AddPacketEntities (frame_t *frame)
 						ent.model = ci->weaponmodel[0];
 					if (!ent.model)
 						ent.model = cl.baseclientinfo.weaponmodel[0];
-				}
+				}				
 			}
-			else
+			else {
+
 				ent.model = cl.model_draw[s1->modelindex2];
+			}
 
 			// PMM - check for the defender sphere shell .. make it translucent
 			// replaces the previous version which used the high bit on modelindex2 to determine transparency
@@ -1026,8 +1033,7 @@ void CL_AddPacketEntities (frame_t *frame)
 
 			done = false;
 
-#ifdef __unix__
-			
+		
 			while(!done) {
 				if(modelpath[len] == 'h')
 					done = true;
@@ -1046,25 +1052,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.alpha = 0.4;
 				ent.flags = RF_TRANSLUCENT;
 			}
-#else
-			while(!done) {
-				if((modelpath[len] == '/') || (modelpath[len] == '\\'))
-					done = true;
-				else {
-					modelname[i] = modelpath[len];
-				
-				}
-				if(len < 1)
-					done = true;
-				len--;
-				i++;
-			}
-			if (!Q_strcasecmp (modelname, "2dm.temleh") || ci->helmet)
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-#endif
+
 			if (s1->number == cl.playernum+1) {
 				ent.flags |= RF_VIEWERMODEL;
 			}	
@@ -1204,11 +1192,6 @@ end:
 CL_AddViewWeapon 
 ==============
 */
-extern struct model_s
-{
-	char		name[MAX_QPATH];
-};
-extern void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles);
 
 void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 {

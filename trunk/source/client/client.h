@@ -456,6 +456,7 @@ void CL_ParseLayout (void);
 //
 // cl_main
 //
+extern qboolean send_packet_now;
 void CL_Init (void);
 
 void CL_FixUpGender(void);
