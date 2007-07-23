@@ -980,6 +980,11 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles)
 	vec3_t		mflashorg, vforward, vright, vup;
 	
 	VectorCopy(org, mflashorg);
+	for (j=0 ; j<3 ; j++)
+	{
+		mflashorg[j] = mflashorg[j] + ((rand()%2)-1);
+
+	}
 	AngleVectors (angles, vforward, vright, vup);
 			
 	VectorMA(mflashorg, 24, vforward, mflashorg);
@@ -996,7 +1001,7 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles)
 	p->blenddst = GL_ONE;
 	for (j=0 ; j<3 ; j++)
 	{
-		p->org[j] = mflashorg[j] + ((rand()%2)-1);
+		p->org[j] = mflashorg[j];
 		p->vel[j] = 0;
 	}
 	p->accel[0] = p->accel[1] = 0;

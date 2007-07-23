@@ -529,7 +529,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 			ent->client->ps.gunframe = FRAME_IDLE_FIRST;
 			return;
 		}
-		else if (ent->client->ps.gunframe == FRAME_ACTIVATE_LAST)
+		else if (ent->client->ps.gunframe == FRAME_ACTIVATE_LAST-2)
 		{
 			ent->client->weaponstate = WEAPON_READY;
 			ent->client->ps.gunframe = FRAME_IDLE_FIRST;
@@ -543,7 +543,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 	if ((ent->client->newweapon) && (ent->client->weaponstate != WEAPON_FIRING))
 	{
 		ent->client->weaponstate = WEAPON_DROPPING;
-		ent->client->ps.gunframe = FRAME_DEACTIVATE_FIRST;
+		ent->client->ps.gunframe = FRAME_DEACTIVATE_FIRST+2;
 		return;
 	}
 
@@ -1465,6 +1465,9 @@ void Machinegun_Fire (edict_t *ent)
 
 		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 			ent->client->pers.inventory[ent->client->ammo_index] -= 10;
+
+		//kick it to the end
+		ent->client->ps.gunframe = 13;
 	}
 	else if(!ent->altfire){
 		for (i=0 ; i<shots ; i++)

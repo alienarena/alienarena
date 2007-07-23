@@ -59,7 +59,7 @@ cvar_t	*cl_autoskins;
 cvar_t	*cl_footsteps;
 cvar_t	*cl_timeout;
 cvar_t	*cl_predict;
-//cvar_t	*cl_minfps;
+cvar_t  *cl_maxpps;
 cvar_t	*cl_maxfps;
 cvar_t	*cl_gun;
 cvar_t  *cl_showPlayerNames;
@@ -1592,6 +1592,7 @@ void CL_InitLocal (void)
 	cl_autoskins = Cvar_Get ("cl_autoskins", "0", 0);
 	cl_predict = Cvar_Get ("cl_predict", "1", 0);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "90", CVAR_ARCHIVE);
+	cl_maxpps = Cvar_Get("cl_maxpps", "10", CVAR_ARCHIVE);
 	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE);
 	cl_nobrainlets = Cvar_Get ("cl_nobrainlets", "0", CVAR_ARCHIVE);
 
@@ -1858,33 +1859,41 @@ CL_Frame
 
 ==================
 */
+qboolean send_packet_now = false;  // instant packets, like firing weapons
+int packet_delta = 0, render_delta = 0;
 void CL_Frame (int msec)
 {
 	static int	extratime;
 	static int  lasttimecalled;
+	qboolean packet_frame = true, render_frame = true;
 
 	if (dedicated->value)
 		return;
 
-	extratime += msec;
+	packet_delta += msec;
+	render_delta += msec;
+
+	if(cl_maxfps->modified || cl_maxpps->modified){  // ensure frame caps are sane
+		if(cl_maxfps->value > 0 && cl_maxfps->value < 10)
+			cl_maxfps->value = 10.0;
+		if(cl_maxpps->value > 0 && cl_maxpps->value < 10)
+			cl_maxpps->value = 10.0;
+		
+		cl_maxfps->modified = cl_maxpps->modified = false;
+	}
 
 	if (!cl_timedemo->value)
 	{
-		if (cls.state == ca_connected && extratime < 100)
-			return;			// don't flood packets out while connecting
-		if (extratime < 1000/cl_maxfps->value)
-			return;			// framerate is too high
+		if (cls.state == ca_connected && cl_maxpps->value > 0 && packet_delta < 1000.0/cl_maxpps->value)
+			packet_frame = false;			// don't flood packets out while connecting
+		if (render_delta < 1000.0/cl_maxfps->value)
+			render_frame = false;			// framerate is too high
 	}
 
-	// let the mouse activate or deactivate
-	IN_Frame ();
-
 	// decide the simulation time
-	cls.frametime = extratime/1000.0;
-	cl.time += extratime;
+	cls.frametime = packet_delta/1000.0;
+	cl.time += packet_delta;
 	cls.realtime = curtime;
-
-	extratime = 0;
 
 	if (cls.frametime > (1.0 / 5))
 		cls.frametime = (1.0 / 5);
@@ -1896,34 +1905,42 @@ void CL_Frame (int msec)
 	// fetch results from server
 	CL_ReadPackets ();
 
-	// send a new command message to the server
-	CL_SendCommand ();
+	if(packet_frame || send_packet_now || userinfo_modified) {
+		// send a new command message to the server
+		CL_SendCommand ();
+		packet_delta = 0;
+		send_packet_now = false;
+	}
+	if(render_frame) {
+		
+		// let the mouse activate or deactivate
+		IN_Frame ();
+		// predict all unacknowledged movements
+		CL_PredictMovement ();
 
-	// predict all unacknowledged movements
-	CL_PredictMovement ();
+		// allow rendering DLL change
+		VID_CheckChanges ();
+		if (!cl.refresh_prepped && cls.state == ca_active)
+			CL_PrepRefresh ();
 
-	// allow rendering DLL change
-	VID_CheckChanges ();
-	if (!cl.refresh_prepped && cls.state == ca_active)
-		CL_PrepRefresh ();
+		// update the screen
+		if (host_speeds->value)
+			time_before_ref = Sys_Milliseconds ();
+		SCR_UpdateScreen ();
+		if (host_speeds->value)
+			time_after_ref = Sys_Milliseconds ();
 
-	// update the screen
-	if (host_speeds->value)
-		time_before_ref = Sys_Milliseconds ();
-	SCR_UpdateScreen ();
-	if (host_speeds->value)
-		time_after_ref = Sys_Milliseconds ();
+		// update audio
+		S_Update (cl.refdef.vieworg, cl.v_forward, cl.v_right, cl.v_up);
 
-	// update audio
-	S_Update (cl.refdef.vieworg, cl.v_forward, cl.v_right, cl.v_up);
+		// advance local effects for next frame
+		CL_RunDLights ();
+		CL_RunLightStyles ();
+		SCR_RunCinematic ();
+		SCR_RunConsole ();
 
-	// advance local effects for next frame
-	CL_RunDLights ();
-	CL_RunLightStyles ();
-	SCR_RunCinematic ();
-	SCR_RunConsole ();
-
-	cls.framecount++;
+		cls.framecount++;
+	}
 
 	if ( log_stats->value )
 	{
