@@ -57,6 +57,8 @@ cvar_t	*sv_reconnect_limit;	// minimum seconds between connect messages
 cvar_t	*sv_ratelimit_status;   //new security measures
 cvar_t	*sv_iplimit;
 
+cvar_t *sv_downloadurl;
+
 void Master_Shutdown (void);
 
 short   ShortSwap (short l);
@@ -500,7 +502,7 @@ void SVC_DirectConnect (void)
 			return;
 		}
 	}
-
+	
 	// see if the challenge is valid
 	if (!NET_IsLocalAddress (adr))
 	{
@@ -605,7 +607,7 @@ gotnewcl:
 	SV_UserinfoChanged (newcl);
 
 	// send the connect packet to the client
-	Netchan_OutOfBandPrint (NS_SERVER, adr, "client_connect");
+	Netchan_OutOfBandPrint(NS_SERVER, adr, "client_connect %s", sv_downloadurl->string);
 
 	Netchan_Setup (NS_SERVER, &newcl->netchan , adr, qport);
 
@@ -1221,6 +1223,7 @@ void SV_Init (void)
 	allow_download_models = Cvar_Get ("allow_download_models", "1", CVAR_ARCHIVE);
 	allow_download_sounds = Cvar_Get ("allow_download_sounds", "1", CVAR_ARCHIVE);
 	allow_download_maps	  = Cvar_Get ("allow_download_maps", "1", CVAR_ARCHIVE);
+	sv_downloadurl = Cvar_Get("sv_downloadurl", "", CVAR_SERVERINFO);
 
 	sv_noreload = Cvar_Get ("sv_noreload", "0", 0);
 
