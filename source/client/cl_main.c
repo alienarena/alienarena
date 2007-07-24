@@ -712,8 +712,11 @@ void CL_Disconnect (void)
 	CL_ClearState ();
 
 	// stop download
-	if (cls.download) {
-		fclose(cls.download);
+	if(cls.download){
+		if(cls.downloadhttp)  // clean up http downloads
+			CL_HttpDownloadCleanup();
+		else  // or just stop legacy ones
+			fclose(cls.download);
 		cls.download = NULL;
 	}
 
@@ -1068,6 +1071,10 @@ void CL_ConnectionlessPacket (void)
 		MSG_WriteChar (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message, "new");
 		cls.state = ca_connected;
+		
+		memset(cls.downloadurl, 0, sizeof(cls.downloadurl));
+		if(Cmd_Argc() == 2)  // http download url
+			strncpy(cls.downloadurl, Cmd_Argv(1), sizeof(cls.downloadurl) - 1);
 		return;
 	}
 
@@ -1563,6 +1570,8 @@ void CL_InitLocal (void)
 
 	CL_InitInput ();
 
+	CL_InitHttpDownload();
+
 	adr0 = Cvar_Get( "adr0", "", CVAR_ARCHIVE );
 	adr1 = Cvar_Get( "adr1", "", CVAR_ARCHIVE );
 	adr2 = Cvar_Get( "adr2", "", CVAR_ARCHIVE );
@@ -1899,6 +1908,9 @@ void CL_Frame (int msec)
 	// fetch results from server
 	CL_ReadPackets ();
 
+	// run http downloads
+	CL_HttpDownloadThink();
+
 	// send a new command message to the server
 	CL_SendCommand ();
 
@@ -2015,6 +2027,7 @@ void CL_Shutdown(void)
 	}
 	isdown = true;
 
+	CL_ShutdownHttpDownload();
 	CL_WriteConfiguration ();
 
 	S_Shutdown();

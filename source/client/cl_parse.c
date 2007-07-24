@@ -120,6 +120,10 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	COM_StripExtension (cls.downloadname, cls.downloadtempname);
 	strcat (cls.downloadtempname, ".tmp");
 
+	// attempt an http download if available
+	if(cls.downloadurl[0] && CL_HttpDownload())
+		return false;
+	
 //ZOID
 	// check to see if we already have a tmp for this file, if so, try to resume
 	// open the file if not opened yet
@@ -765,11 +769,14 @@ void CL_ParseServerMessage (void)
 
 		case svc_reconnect:
 			Com_Printf ("Server disconnected, reconnecting\n");
-			if (cls.download) {
-				//ZOID, close download
-				fclose (cls.download);
-				cls.download = NULL;
-			}
+			// stop download
+				if(cls.download){
+					if(cls.downloadhttp)  // clean up http downloads
+						CL_HttpDownloadCleanup();
+					else  // or just stop legacy ones
+						fclose(cls.download);
+					cls.download = NULL;
+				}
 			cls.state = ca_connecting;
 			cls.connect_time = -99999;	// CL_CheckForResend() will fire immediately
 			break;

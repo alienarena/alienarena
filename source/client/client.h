@@ -231,6 +231,8 @@ typedef struct
 	int			downloadnumber;
 	dltype_t	downloadtype;
 	int			downloadpercent;
+	char		downloadurl[MAX_OSPATH];  // for http downloads		
+	qboolean	downloadhttp;
 
 // demo recording info must be here, so it isn't cleared on level change
 	qboolean	demorecording;
