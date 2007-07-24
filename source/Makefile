@@ -180,6 +180,7 @@ CODERED_OBJS = \
 	$(BUILDDIR)/client/cl_tent.o \
 	$(BUILDDIR)/client/cl_scrn.o \
 	$(BUILDDIR)/client/cl_view.o \
+	$(BUILDDIR)/client/cl_http.o \
 	$(BUILDDIR)/client/console.o \
 	$(BUILDDIR)/client/keys.o \
 	$(BUILDDIR)/client/menu.o \
@@ -248,10 +249,10 @@ CODERED_AS_OBJS = \
 	$(BUILDDIR)/client/snd_mixa.o
 
 $(BUILDDIR)/crx : $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) -lcurl
 
 $(BUILDDIR)/crx.sdl : $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(SDLLDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(SDLLDFLAGS) -lcurl
 
 $(BUILDDIR)/client/cl_cin.o :     $(CLIENT_DIR)/cl_cin.c
 	$(DO_CC)
@@ -390,6 +391,9 @@ $(BUILDDIR)/client/glob.o :       $(UNIX_DIR)/glob.c
 
 $(BUILDDIR)/client/net_udp.o :    $(UNIX_DIR)/net_udp.c
 	$(DO_CC)
+
+$(BUILDDIR)/client/cl_http.o :   $(CLIENT_DIR)/cl_http.c
+	$(DO_CC) -lcurl
 
 $(BUILDDIR)/ref_gl/r_bloom.o :        $(REF_GL_DIR)/r_bloom.c
 	$(DO_GL_SHLIB_CC)
