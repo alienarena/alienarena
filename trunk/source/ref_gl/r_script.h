@@ -173,7 +173,6 @@ void RS_SpecialSurface (msurface_t *surf);
 void RS_LoadSpecialScripts(void);
 float RS_AlphaFuncAlias (int alphafunc, float alpha, vec3_t normal, vec3_t org);
 
-#define RS_DrawPoly(surf)	RS_DrawSurface((surf),true)
 #define RS_DrawPolyNoLightMap(surf)	RS_DrawSurface((surf),false)
 
 extern float rs_realtime;

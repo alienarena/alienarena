@@ -1093,7 +1093,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			if (effects & EF_ROCKET)
 			{
 				CL_RocketTrail (cent->lerp_origin, ent.origin, cent);
-				V_AddLight (ent.origin, 200, 1, 1, 0);
+				V_AddLight (ent.origin, 200, .4, .4, .1);
 			}
 			if (effects & EF_SHIPEXHAUST)
 			{
@@ -1103,14 +1103,6 @@ void CL_AddPacketEntities (frame_t *frame)
 			if (effects & EF_ROCKETEXHAUST)
 			{
 				CL_RocketExhaust (cent->lerp_origin, ent.origin, cent);
-				V_AddLight (ent.origin, 200, 1, 1, 0);
-			}
-			// PGM - Do not reorder EF_BLASTER and EF_HYPERBLASTER. 
-			// EF_BLASTER | EF_TRACKER is a special case for EF_BLASTER2... Cheese!
-			else if (effects & EF_BLASTER)
-			{
-				CL_BlasterTrail (cent->lerp_origin, ent.origin);
-				V_AddLight (ent.origin, 200, 1, 1, 0);
 			}
 			else if (effects & EF_HYPERBLASTER)
 			{
@@ -1123,21 +1115,6 @@ void CL_AddPacketEntities (frame_t *frame)
 			else if (effects & EF_GRENADE)
 			{
 				CL_DiminishingTrail (cent->lerp_origin, ent.origin, cent, effects);
-			}
-			else if (effects & EF_BFG)
-			{
-				static int bfg_lightramp[6] = {300, 400, 600, 300, 150, 75};
-
-				if (effects & EF_ANIM_ALLFAST)
-				{
-					CL_BfgParticles (&ent);
-					i = 200;
-				}
-				else
-				{
-					i = bfg_lightramp[s1->frame];
-				}
-				V_AddLight (ent.origin, i, 0, 1, 0);
 			}
 			else if (effects & EF_FLAG1)
 			{

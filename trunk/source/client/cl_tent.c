@@ -735,7 +735,7 @@ void CL_ParseTEnt (void)
 		S_StartSound (pos, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
-	case TE_SHOTGUN:				// martian laser effect
+	case TE_LASERBEAM:				// martian laser effect
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_LaserBeam (pos, pos2);

@@ -745,7 +745,7 @@ void CL_LaserSparks (vec3_t org, vec3_t dir, int color, int count)
 		p->alpha = .5;
 
 		p->alphavel = -1.0 / (2 + frand()*0.3);
-		if (p)
+		if (p && k < 5)
 			addParticleLight (p,
 						p->scale*10, 10,
 					0, 1, 0);
@@ -827,7 +827,7 @@ void CL_ItemRespawnParticles (vec3_t org)
 
 		p->alphavel = -1.0 / (1.0 + frand()*0.3);
 
-		if (p)
+		if (p && i < 4)
 			addParticleLight (p,
 						p->scale*30, 10,
 					0, 1, 1);
@@ -891,10 +891,10 @@ void CL_ExplosionParticles (vec3_t org)
 					p->texnum = r_explosion1texture->texnum;
 					break;
 			}
-			if (p)
+			if (p && i < 3)
 				addParticleLight (p,
-						p->scale*200, 0,
-					1, 1, 0.1);
+						p->scale*100*i, 0,
+					.4, .4, 0.1);
 		}
 	}
 }
@@ -1192,10 +1192,10 @@ void CL_BigTeleportParticles (vec3_t org)
 
 		p->org[2] = org[2] + 8 + (rand()%40);
 		p->vel[2] = -100 + (rand()&31);
-		p->accel[2] = PARTICLE_GRAVITY*24;
+		p->accel[2] = PARTICLE_GRAVITY*10;
 		p->alpha = 0.5;
 
-		p->alphavel = -0.6 / (0.5 + frand()*0.3);
+		p->alphavel = -2.6 / (0.5 + frand()*0.3);
 	}
 }
 
@@ -2128,7 +2128,7 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 			p->vel[j] = 0;
 			p->accel[j] = 0;
 		}
-		if (p)
+		if (p && len < 4)
 			addParticleLight (p,
 						p->scale*150, 0,
 					.25, 0, .3);
@@ -2353,68 +2353,6 @@ void CL_BubbleTrail (vec3_t start, vec3_t end)
 
 /*
 ===============
-CL_BfgParticles
-===============
-*/
-void CL_BfgParticles (entity_t *ent)
-{
-	int			i;
-	cparticle_t	*p;
-	float		angle;
-	float		sr, sp, sy, cr, cp, cy;
-	vec3_t		forward;
-	float		dist = 64;
-	vec3_t		v;
-	float		ltime;
-	int			beamlength = 16;
-	
-	if (!avelocities[0][0])
-	{
-		for (i=0 ; i<NUMVERTEXNORMALS*3 ; i++)
-			avelocities[0][i] = (rand()&255) * 0.01;
-	}
-
-
-	ltime = (float)cl.time / 1000.0;
-	for (i=0 ; i<NUMVERTEXNORMALS ; i++)
-	{
-		angle = ltime * avelocities[i][0];
-		sy = sin(angle);
-		cy = cos(angle);
-		angle = ltime * avelocities[i][1];
-		sp = sin(angle);
-		cp = cos(angle);
-		angle = ltime * avelocities[i][2];
-		sr = sin(angle);
-		cr = cos(angle);
-	
-		forward[0] = cp*cy;
-		forward[1] = cp*sy;
-		forward[2] = -sp;
-
-		if (!(p = new_particle()))
-			return;
-
-		dist = sin(ltime + i)*64;
-		p->org[0] = ent->origin[0] + bytedirs[i][0]*dist + forward[0]*beamlength;
-		p->org[1] = ent->origin[1] + bytedirs[i][1]*dist + forward[1]*beamlength;
-		p->org[2] = ent->origin[2] + bytedirs[i][2]*dist + forward[2]*beamlength;
-
-		VectorClear (p->vel);
-		VectorClear (p->accel);
-
-		VectorSubtract (p->org, ent->origin, v);
-		dist = VectorLength(v) / 90.0;
-		p->color = floor (0xd0 + dist * 7);
-		p->colorvel = 0;
-
-		p->alpha = 1.0 - dist;
-		p->alphavel = -100;
-	}
-}
-
-/*
-===============
 CL_BFGExplosionParticles
 ===============
 */
@@ -2447,7 +2385,7 @@ void CL_BFGExplosionParticles (vec3_t org)
 		p->alpha = 0.4;
 
 		p->alphavel = -0.8 / (2.5 + frand()*0.3);
-		if (p)
+		if (p && i >124)
 			addParticleLight (p,
 						p->scale*60, 10,
 					0, 1, 1);

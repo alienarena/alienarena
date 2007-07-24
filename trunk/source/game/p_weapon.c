@@ -1466,8 +1466,6 @@ void Machinegun_Fire (edict_t *ent)
 		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 			ent->client->pers.inventory[ent->client->ammo_index] -= 10;
 
-		//kick it to the end
-		ent->client->ps.gunframe = 13;
 	}
 	else if(!ent->altfire){
 		for (i=0 ; i<shots ; i++)
