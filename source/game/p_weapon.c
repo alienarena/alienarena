@@ -1267,7 +1267,7 @@ void Weapon_Hover_Fire (edict_t *ent)
 
 	VectorAdd(start, forward, start);
 	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_BLASTER_MUZZLEFLASH);
+	gi.WriteByte (TE_CHAINGUNSMOKE);
 	gi.WritePosition (start);
 	gi.multicast (start, MULTICAST_PVS);
 
@@ -1372,7 +1372,7 @@ void Machinegun_Fire (edict_t *ent)
 	else
 		damage = 20;
 
-	if ((ent->client->ps.gunframe == 6) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
+	if ((ent->client->ps.gunframe == 5) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
 	{
 		ent->client->ps.gunframe = 14;
 		ent->client->weapon_sound = 0;
@@ -1382,6 +1382,15 @@ void Machinegun_Fire (edict_t *ent)
 		&& ent->client->pers.inventory[ent->client->ammo_index])
 	{
 		ent->client->ps.gunframe = 5;
+	}
+	else if (ent->client->buttons & BUTTON_ATTACK2 && ent->client->ps.gunframe > 6)
+	{
+		if(ent->client->ps.gunframe == 7 || ent->client->ps.gunframe == 12) {
+			ent->client->ps.gunframe = 14;
+			return;
+		}
+		ent->altfire = true;
+		ent->client->ps.gunframe = 14;
 	}
 	else if (ent->client->buttons & BUTTON_ATTACK2)
 	{
@@ -1448,7 +1457,7 @@ void Machinegun_Fire (edict_t *ent)
 		gi.WriteByte ((MZ_CHAINGUN1 + shots - 1) | is_silenced);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
-		//create visual muzzle flash sprite!
+		//create smoke effect
 
 		forward[0] = forward[0] * 24;
 		forward[1] = forward[1] * 24;
@@ -1459,12 +1468,15 @@ void Machinegun_Fire (edict_t *ent)
 		VectorAdd(start, forward, start);
 		VectorAdd(start, right, start);
 		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLASTER_MUZZLEFLASH);
+		gi.WriteByte (TE_CHAINGUNSMOKE);
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
 
 		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 			ent->client->pers.inventory[ent->client->ammo_index] -= 10;
+		
+		//kick it ahead, we don't want spinning
+		ent->client->ps.gunframe = 12;
 
 	}
 	else if(!ent->altfire){
@@ -1492,7 +1504,7 @@ void Machinegun_Fire (edict_t *ent)
 		VectorAdd(start, forward, start);
 		VectorAdd(start, right, start);
 		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLASTER_MUZZLEFLASH);
+		gi.WriteByte (TE_CHAINGUNSMOKE);
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
 		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )

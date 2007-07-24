@@ -904,16 +904,8 @@ void CL_ParseTEnt (void)
 		S_StartSound (pos, 0, 0, S_RegisterSound ("weapons/biglaser.wav"), 1, ATTN_NONE, 0);
 		break;
 
-	case TE_BLASTER_MUZZLEFLASH:
+	case TE_CHAINGUNSMOKE:
 		MSG_ReadPos (&net_message, pos);
-		ex = CL_AllocExplosion ();
-		VectorCopy (pos, ex->ent.origin);
-		ex->ent.flags = RF_FULLBRIGHT;
-		ex->start = cl.frame.servertime - 100;
-		ex->light = 350;
-		ex->lightcolor[0] = 1.0;
-		ex->lightcolor[1] = 0.5;
-		ex->lightcolor[2] = 0.0;
 		CL_MuzzleParticles (pos);
 		break;
 	case TE_BLUE_MUZZLEFLASH:
