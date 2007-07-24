@@ -231,7 +231,7 @@ typedef struct
 	int			downloadnumber;
 	dltype_t	downloadtype;
 	int			downloadpercent;
-	char		downloadurl[MAX_OSPATH];  // for http downloads		
+	char		downloadurl[MAX_OSPATH];  // for http downloads
 	qboolean	downloadhttp;
 
 // demo recording info must be here, so it isn't cleared on level change
@@ -629,3 +629,12 @@ int map_pic_loaded;
 void refreshCursorLink (void);
 void refreshCursorMenu (void);
 void M_Think_MouseCursor (void);
+
+//
+//cl_http.c
+//
+void CL_InitHttpDownload(void);
+void CL_HttpDownloadCleanup(void);
+qboolean CL_HttpDownload(void);
+void CL_HttpDownloadThink(void);
+void CL_ShutdownHttpDownload(void);
