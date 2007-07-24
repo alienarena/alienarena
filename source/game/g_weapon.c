@@ -466,7 +466,7 @@ int speed, int effect, qboolean hyper)
 	VectorCopy (tr.endpos, from);
 
 	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_SHOTGUN);
+	gi.WriteByte (TE_LASERBEAM);
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
 	gi.multicast (self->s.origin, MULTICAST_PHS);   

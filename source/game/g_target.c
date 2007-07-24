@@ -528,7 +528,7 @@ void target_laser_think (edict_t *self)
 		else if (self->spawnflags & 16)
 			gi.WriteByte (TE_HEATBEAM);
 		else
-			gi.WriteByte (TE_SHOTGUN);
+			gi.WriteByte (TE_LASERBEAM);
 		gi.WritePosition (start);
 		gi.WritePosition (end);
 		gi.multicast (start, MULTICAST_PHS); 

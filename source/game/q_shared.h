@@ -668,7 +668,7 @@ typedef struct
 #define	TE_BLOOD					1
 #define	TE_BLASTER					2
 #define	TE_RAILTRAIL				3
-#define	TE_SHOTGUN					4
+#define	TE_LASERBEAM				4
 #define	TE_EXPLOSION1				5
 #define	TE_EXPLOSION2				6
 #define	TE_ROCKET_EXPLOSION			7
