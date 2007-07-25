@@ -60,6 +60,8 @@ cvar_t		*scr_graphscale;
 cvar_t		*scr_graphshift;
 cvar_t		*scr_drawall;
 
+cvar_t		*scr_consize;
+
 cvar_t		*cl_drawfps;
 
 typedef struct
@@ -382,6 +384,7 @@ void SCR_Init (void)
 {
 	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE);
 	scr_conspeed = Cvar_Get ("scr_conspeed", "3", 0);
+	scr_consize = Cvar_Get ("scr_consize", "0.5", 0);
 	scr_showturtle = Cvar_Get ("scr_showturtle", "0", 0);
 	scr_showpause = Cvar_Get ("scr_showpause", "1", 0);
 	scr_centertime = Cvar_Get ("scr_centertime", "2.5", 0);
@@ -714,7 +717,7 @@ void SCR_RunConsole (void)
 {
 // decide on the height of the console
 	if (cls.key_dest == key_console)
-		scr_conlines = 0.5;		// half screen
+		scr_conlines = scr_consize->value;
 	else
 		scr_conlines = 0;				// none visible
 
@@ -745,13 +748,13 @@ void SCR_DrawConsole (void)
 
 	if (cls.state == ca_disconnected || cls.state == ca_connecting)
 	{	// forced full screen console
-		Con_DrawConsole (1.0);
+		Con_DrawConsole (scr_consize->value);
 		return;
 	}
 
 	if (cls.state != ca_active || !cl.refresh_prepped)
 	{	// connected, but can't render
-		Con_DrawConsole (0.5);
+		Con_DrawConsole (scr_consize->value);
 		Draw_Fill (0, viddef.height/2, viddef.width, viddef.height/2, 0);
 		return;
 	}

@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -64,7 +64,7 @@ void Master_Shutdown (void);
 short   ShortSwap (short l);
 
 //============================================================================
- 
+
 
 /*
 =====================
@@ -153,14 +153,14 @@ char	*SV_StatusString (void)
 			}
 			nametxt[k]=0;
 			s = NET_AdrToString ( cl->netchan.remote_address);
-			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"%s\"\n", 
+			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"%s\"\n",
 				cl->edict->client->ps.stats[STAT_FRAGS], cl->ping, nametxt, s);
 			playerLength = strlen(player);
 			if (statusLength + playerLength >= sizeof(status) )
 				break;		// can't hold any more
 			strcpy (status + statusLength, player);
 			statusLength += playerLength;
-						
+
 		}
 	}
 	//bot score info
@@ -184,8 +184,8 @@ char	*SV_StatusString (void)
 					break;
 			}
 			nametxt[k]=0;
-	
-			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"127.0.0.1\"\n", 
+
+			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"127.0.0.1\"\n",
 				cl->edict->client->ps.bots[i].score, 0, nametxt);
 			playerLength = strlen(player);
 			if (statusLength + playerLength >= sizeof(status) )
@@ -255,7 +255,7 @@ static void RateSample (ratelimit_t *limit)
 
 static void SVC_Status (void)
 {
-	
+
 	RateSample (&svs.ratelimit_status);
 
 	if (RateLimited (&svs.ratelimit_status, sv_ratelimit_status->integer))
@@ -301,7 +301,7 @@ void SVC_Info (void)
 	if (version != PROTOCOL_VERSION) {
 		Com_sprintf (string, sizeof(string), "%s: wrong version\n", hostname->string, sizeof(string));
 		//r1: return instead of sending another packet. prevents spoofed udp packet
-		//    causing server <-> server info loops.	
+		//    causing server <-> server info loops.
 		return;
 	}
 	else
@@ -502,7 +502,7 @@ void SVC_DirectConnect (void)
 			return;
 		}
 	}
-	
+
 	// see if the challenge is valid
 	if (!NET_IsLocalAddress (adr))
 	{
@@ -525,7 +525,7 @@ void SVC_DirectConnect (void)
 
 	newcl = &temp;
 	memset (newcl, 0, sizeof(client_t));
-	
+
 	// if there is already a slot for this ip, reuse it
 	for (i=0,cl=svs.clients ; i<maxclients->value ; i++,cl++)
 	{
@@ -558,7 +558,7 @@ void SVC_DirectConnect (void)
 
 	// find a client slot
 	cl = &svs.clients[0]; //get the bots info from the first client
-	botnum = cl->edict->client->ps.botnum; 
+	botnum = cl->edict->client->ps.botnum;
 	//still need to reserve one slot
 	newcl = NULL;
 
@@ -577,7 +577,7 @@ void SVC_DirectConnect (void)
 		return;
 	}
 
-gotnewcl:	
+gotnewcl:
 	// build a new connection
 	// accept the new client
 	// this is the only place a client_t is ever initialized
@@ -589,12 +589,12 @@ gotnewcl:
 	newcl->challenge = challenge; // save challenge for checksumming
 
 	// get the game a chance to reject this connection or modify the userinfo
-	
+
 	if (!(ge->ClientConnect (ent, userinfo)))
 	{
 
-		if (*Info_ValueForKey (userinfo, "rejmsg")) 
-			Netchan_OutOfBandPrint (NS_SERVER, adr, "print\n%s\nConnection refused.\n",  
+		if (*Info_ValueForKey (userinfo, "rejmsg"))
+			Netchan_OutOfBandPrint (NS_SERVER, adr, "print\n%s\nConnection refused.\n",
 				Info_ValueForKey (userinfo, "rejmsg"));
 		else
 			Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nConnection refused.\n" );
@@ -612,7 +612,7 @@ gotnewcl:
 	Netchan_Setup (NS_SERVER, &newcl->netchan , adr, qport);
 
 	newcl->state = cs_connected;
-	
+
 	SZ_Init (&newcl->datagram, newcl->datagram_buf, sizeof(newcl->datagram_buf) );
 	newcl->datagram.allowoverflow = true;
 	newcl->lastmessage = svs.realtime;	// don't timeout
@@ -810,7 +810,7 @@ void SV_GiveMsec (void)
 		cl = &svs.clients[i];
 		if (cl->state == cs_free )
 			continue;
-		
+
 		cl->commandMsec = 1800;		// 1600 + some slop
 	}
 }
@@ -869,7 +869,7 @@ void SV_ReadPackets (void)
 			}
 			break;
 		}
-		
+
 		if (i != maxclients->value)
 			continue;
 	}
@@ -912,11 +912,11 @@ void SV_CheckTimeouts (void)
 			cl->state = cs_free;	// can now be reused
 			continue;
 		}
-		if ( (cl->state == cs_connected || cl->state == cs_spawned) 
+		if ( (cl->state == cs_connected || cl->state == cs_spawned)
 			&& cl->lastmessage < droppoint)
 		{
 			SV_BroadcastPrintf (PRINT_HIGH, "%s timed out\n", cl->name);
-			SV_DropClient (cl); 
+			SV_DropClient (cl);
 			cl->state = cs_free;	// don't bother with zombie state
 		}
 	}
@@ -1157,7 +1157,7 @@ void SV_UserinfoChanged (client_t *cl)
 
 	// call prog code to allow overrides
 	ge->ClientUserinfoChanged (cl->edict, cl->userinfo, 0);
-	
+
 	// name for C code
 	strncpy (cl->name, Info_ValueForKey (cl->userinfo, "name"), sizeof(cl->name)-1);
 	// mask off high bit
@@ -1203,7 +1203,7 @@ void SV_Init (void)
 
 	rcon_password = Cvar_Get ("rcon_password", "", 0);
 	Cvar_Get ("skill", "1", 0);
-	Cvar_Get ("deathmatch", "1", CVAR_LATCH); //Alien Arena is *always* deathmatch 
+	Cvar_Get ("deathmatch", "1", CVAR_LATCH); //Alien Arena is *always* deathmatch
 	Cvar_Get ("ctf", "0", CVAR_LATCH);
 	Cvar_Get ("dmflags", va("%i", DF_INSTANT_ITEMS), CVAR_SERVERINFO);
 	Cvar_Get ("fraglimit", "0", CVAR_SERVERINFO);
@@ -1223,7 +1223,7 @@ void SV_Init (void)
 	allow_download_models = Cvar_Get ("allow_download_models", "1", CVAR_ARCHIVE);
 	allow_download_sounds = Cvar_Get ("allow_download_sounds", "1", CVAR_ARCHIVE);
 	allow_download_maps	  = Cvar_Get ("allow_download_maps", "1", CVAR_ARCHIVE);
-	sv_downloadurl = Cvar_Get("sv_downloadurl", "", CVAR_SERVERINFO);
+	sv_downloadurl = Cvar_Get("sv_downloadurl", "http://icculus.org/alienarena/sv_downloadurl", CVAR_SERVERINFO);
 
 	sv_noreload = Cvar_Get ("sv_noreload", "0", 0);
 
@@ -1256,7 +1256,7 @@ void SV_FinalMessage (char *message, qboolean reconnect)
 {
 	int			i;
 	client_t	*cl;
-	
+
 	SZ_Clear (&net_message);
 	MSG_WriteByte (&net_message, svc_print);
 	MSG_WriteByte (&net_message, PRINT_HIGH);
@@ -1321,10 +1321,10 @@ void SV_Shutdown (char *finalmsg, qboolean reconnect)
 
 qboolean IsVisible(vec3_t org1,vec3_t org2)
 {
-	trace_t	trace; 
+	trace_t	trace;
 
 	trace = SV_Trace2 (org1, NULL, NULL, org2, NULL, MASK_VISIBILILITY);
-	        
+
 	if (trace.fraction != 1)
 		return false;
 	return true;

@@ -18,50 +18,49 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
- 
+
 #include "client.h"
 #define HAVE_CURL
- 
+
 #ifdef __unix__
 #include <unistd.h>
 #endif
- 
+
 #ifdef HAVE_CURL
 #include "curl/curl.h"
 CURLM *curlm;
 CURL *curl;
 #endif
- 
+
 // generic encapsulation for common http response codes
 typedef struct response_s {
         int code;
         char *text;
 } response_t;
- 
+
 response_t responses[] = {
         {400, "Bad request"}, {401, "Unauthorized"}, {403, "Forbidden"},
  {404, "Not found"}, {500, "Internal server error"}, {0, NULL}
 };
- 
+
 char curlerr[MAX_STRING_CHARS];  // curl's error buffer
- 
+
 char url[MAX_OSPATH];  // remote url to fetch from
 char file[MAX_OSPATH];  // local path to save to
- 
+
 long status, length;  // for current transfer
 qboolean success;
- 
+
 /*
 CL_HttpDownloadRecv
 */
 size_t CL_HttpDownloadRecv(void *buffer, size_t size, size_t nmemb, void *p){
         return fwrite(buffer, size, nmemb, cls.download);
 }
- 
- 
+
 /*
 CL_HttpDownload
- 
+
 Queue up an http download.  The url is resolved from cls.downloadurl and
 the current gamedir.  We use cURL's multi interface, even tho we only ever
 perform one download at a time, because it is non-blocking.
@@ -69,54 +68,54 @@ perform one download at a time, because it is non-blocking.
 qboolean CL_HttpDownload(void){
 #ifdef HAVE_CURL
         char game[64];
- 
+
         if(!curlm)
                 return false;
- 
+
         if(!curl)
                 return false;
- 
+
         memset(file, 0, sizeof(file));  // resolve local file name
         Com_sprintf(file, sizeof(file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
- 
+
         FS_CreatePath(file);  // create the directory
 
         if(!(cls.download = fopen(file, "wb"))){
                 Com_Printf("Failed to open %s.\n", file);
                 return false;  // and open the file
         }
-		
+
 		cls.downloadhttp = true;
- 
+
         memset(game, 0, sizeof(game));  // resolve gamedir
         strncpy(game, Cvar_VariableString("game"), sizeof(game) - 1);
- 
+
         if(!strlen(game))  // use default if not set
                 strcpy(game, "default");
- 
+
         memset(url, 0, sizeof(url));  // construct url
         Com_sprintf(url, sizeof(url) - 1, "%s/%s/%s", cls.downloadurl, game, cls.downloadname);
 	    // set handle to default state
         curl_easy_reset(curl);
- 
+
         // set url from which to retrieve the file
         curl_easy_setopt(curl, CURLOPT_URL, url);
- 
+
         // set error buffer so we may print meaningful messages
         memset(curlerr, 0, sizeof(curlerr));
         curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curlerr);
- 
+
         // set the callback for when data is received
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CL_HttpDownloadRecv);
- 
+
         curl_multi_add_handle(curlm, curl);
         return true;
 #else
         return false;
 #endif
 }
- 
- 
+
+
 /*
 CL_HttpResponseCode
 */
@@ -129,57 +128,57 @@ char *CL_HttpResponseCode(long code){
         }
         return "Unknown";
 }
- 
- 
+
+
 /*
 CL_HttpDownloadCleanup
- 
+
 If a download is currently taking place, clean it up.  This is called
 both to finalize completed downloads as well as abort incomplete ones.
 */
 void CL_HttpDownloadCleanup(){
 #ifdef HAVE_CURL
         char *c;
- 
+
         if(!cls.download || !cls.downloadhttp)
                 return;
- 
+
         curl_multi_remove_handle(curlm, curl);  // cleanup curl
- 
+
         fclose(cls.download);  // always close the file
         cls.download = NULL;
- 
+
         if(success){
                 cls.downloadname[0] = 0;
- 
+
                 //if(strstr(file, ".pak"))  // add new paks to search paths
                 //      FS_AddPakfile(file);
         }
         else {  // retry via legacy udp download
- 
+
                 c = strlen(curlerr) ? curlerr : CL_HttpResponseCode(status);
- 
+
                 Com_DPrintf("Failed to download %s via HTTP: %s.\n"
                                 "Trying UDP..", cls.downloadname, c);
- 
+
                 MSG_WriteByte(&cls.netchan.message, clc_stringcmd);
                 MSG_WriteString(&cls.netchan.message, va("download %s", cls.downloadname));
- 
+
                 unlink(file);  // delete partial or empty file
         }
- 
+
         cls.downloadpercent = 0;
         cls.downloadhttp = false;
- 
+
         status = length = 0;
         success = false;
 #endif
 }
- 
- 
+
+
 /*
 CL_HttpDownloadThink
- 
+
 Process the pending download by giving cURL some time to think.
 Poll it for feedback on the transfer to determine what action to take.
 If a transfer fails, stuff a stringcmd to download it via UDP.  Since
@@ -190,19 +189,19 @@ void CL_HttpDownloadThink(void){
 #ifdef HAVE_CURL
         CURLMsg *msg;
         int i;
- 
+
         if(!cls.downloadurl[0] || !cls.download)
                 return;  // nothing to do
-	 
+
         // process the download as long as data is avaialble
         while(curl_multi_perform(curlm, &i) == CURLM_CALL_MULTI_PERFORM){}
- 
+
         // fail fast on any curl error
         if(strlen(curlerr)){
                 CL_HttpDownloadCleanup();
                 return;
         }
- 
+
         // check for http status code
         if(!status){
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
@@ -223,8 +222,8 @@ void CL_HttpDownloadThink(void){
         }
 #endif
 }
- 
- 
+
+
 /*
 CL_InitHttpDownload
 */
@@ -232,23 +231,23 @@ void CL_InitHttpDownload(void){
 #ifdef HAVE_CURL
         if(!(curlm = curl_multi_init()))
                 return;
- 
+
         if(!(curl = curl_easy_init()))
                 return;
 #endif
 }
- 
- 
+
+
 /*
 CL_ShutdownHttpDownload
 */
 void CL_ShutdownHttpDownload(void){
 #ifdef HAVE_CURL
         CL_HttpDownloadCleanup();
- 
+
         curl_easy_cleanup(curl);
         curl = NULL;
- 
+
         curl_multi_cleanup(curlm);
         curlm = NULL;
 #endif
