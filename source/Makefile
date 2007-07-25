@@ -101,6 +101,9 @@ SHLIBEXT=so
 SHLIBCFLAGS=-fPIC
 SHLIBLDFLAGS=-shared
 
+CURLCFLAGS=$(shell curl-config --cflags)
+CURLLDFLAGS=$(shell curl-config --libs)
+
 DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 DO_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) -o $@ -c $<
 DO_DED_CC=$(CC) $(CFLAGS) -DDEDICATED_ONLY -o $@ -c $<
@@ -249,10 +252,10 @@ CODERED_AS_OBJS = \
 	$(BUILDDIR)/client/snd_mixa.o
 
 $(BUILDDIR)/crx : $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) -lcurl
+	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(CURLLDFLAGS)
 
 $(BUILDDIR)/crx.sdl : $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(SDLLDFLAGS) -lcurl
+	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(SDLLDFLAGS) $(CURLLDFLAGS)
 
 $(BUILDDIR)/client/cl_cin.o :     $(CLIENT_DIR)/cl_cin.c
 	$(DO_CC)
@@ -393,7 +396,7 @@ $(BUILDDIR)/client/net_udp.o :    $(UNIX_DIR)/net_udp.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_http.o :   $(CLIENT_DIR)/cl_http.c
-	$(DO_CC) -lcurl
+	$(DO_CC) $(CURLCFLAGS)
 
 $(BUILDDIR)/ref_gl/r_bloom.o :        $(REF_GL_DIR)/r_bloom.c
 	$(DO_GL_SHLIB_CC)
@@ -593,7 +596,7 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/p_light.o \
 	$(BUILDDIR)/game/p_trail.o \
 	$(BUILDDIR)/game/p_view.o \
-	$(BUILDDIR)/game/p_weapon.o 
+	$(BUILDDIR)/game/p_weapon.o
 
 
 
@@ -755,7 +758,7 @@ ARENA_OBJS = \
 	$(BUILDDIR)/arena/p_light.o \
 	$(BUILDDIR)/arena/p_trail.o \
 	$(BUILDDIR)/arena/p_view.o \
-	$(BUILDDIR)/arena/p_weapon.o 
+	$(BUILDDIR)/arena/p_weapon.o
 
 $(BUILDDIR)/arena/game.$(SHLIBEXT) : $(ARENA_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(ARENA_OBJS)
