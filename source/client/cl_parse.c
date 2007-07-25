@@ -118,13 +118,13 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	COM_StripExtension (cls.downloadname, cls.downloadtempname);
 	strcat (cls.downloadtempname, ".tmp");
 
-	// attempt an http download if available 
+	// attempt an http download if available
 	if(cls.downloadurl[0] && CL_HttpDownload()) {
 		return false;
 	}
 	else
 		Com_Printf("didn't find one\n");
-	
+
 //ZOID
 	// check to see if we already have a tmp for this file, if so, try to resume
 	// open the file if not opened yet
