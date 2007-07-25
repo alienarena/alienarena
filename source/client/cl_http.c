@@ -27,11 +27,7 @@
 #endif
 
 #ifdef HAVE_CURL
-#ifdef __unix__
-#include <curl/curl.h>
-#else
 #include "curl/curl.h"
-#endif
 CURLM *curlm;
 CURL *curl;
 #endif
