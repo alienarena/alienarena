@@ -163,6 +163,7 @@ keyname_t keynames[] =
 */
 
 qboolean        Cmd_IsComplete(char *cmd);
+extern void		Q_strncpyz( char *dest, const char *src, size_t size );
 void CompleteCommand (void)
 {
 	char           *cmd, *s;

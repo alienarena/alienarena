@@ -622,7 +622,7 @@ unsigned long *x86_TimerGetHistogram( void );
 // cl_view, cl_scrn
 //
 int map_pic_loaded;
-
+int stringLen (char *string);
 //
 //mouse
 //
