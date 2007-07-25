@@ -973,11 +973,13 @@ void CL_BlueMuzzleParticles (vec3_t org)
 CL_MuzzleFlashParticle
 ===============
 */
+extern cvar_t *r_lefthand;
 void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles)
 {
 	int			j;
 	cparticle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup;
+	float		rightoffset;
 	
 	VectorCopy(org, mflashorg);
 	for (j=0 ; j<3 ; j++)
@@ -986,9 +988,14 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles)
 
 	}
 	AngleVectors (angles, vforward, vright, vup);
-			
+	
+	if (r_lefthand->value == 1.0F)
+		rightoffset = -2.4;
+	else
+		rightoffset = 2.4;
+
 	VectorMA(mflashorg, 24, vforward, mflashorg);
-	VectorMA(mflashorg, 2.4, vright, mflashorg);
+	VectorMA(mflashorg, rightoffset, vright, mflashorg);
 	VectorMA(mflashorg, -2.5, vup, mflashorg);
 
 	if (!(p = new_particle()))

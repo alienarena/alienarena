@@ -524,15 +524,12 @@ void Con_DrawInput (void)
 {
 	int		y;
 	int		i;
-	char	*text;
-	int num;
-	int spacer;
-	vec4_t	scolor;
-	
-	scolor[0] = 1;
-	scolor[1] = 1;
-	scolor[2] = 1;
-	scolor[3] = 1;
+	char	*text, output[2048];
+	int		charscale;
+
+	charscale = (float)(viddef.height)*8/600;
+	if(charscale < 8)
+		charscale = 8;
 
 	if (cls.key_dest == key_menu)
 		return;
@@ -540,46 +537,30 @@ void Con_DrawInput (void)
 		return;		// don't draw anything (always draw if not active)
 
 	text = key_lines[edit_line];
-	
+
 // add the cursor frame
 	text[key_linepos] = 10+((int)(cls.realtime>>8)&1);
-	
+
 // fill out remainder with spaces
 	for (i=key_linepos+1 ; i< con.linewidth ; i++)
 		text[i] = ' ';
-		
+
 //	prestep if horizontally scrolling
 	if (key_linepos >= con.linewidth)
 		text += 1 + key_linepos - con.linewidth;
 		
 // draw it
-	y = con.vislines-(16);
-
-	i = 0;
-	spacer = 0;
-	while (*text && i<con.linewidth-spacer) {
-		if ( Q_IsColorString( text ) ) {
-			VectorCopy ( color_table[ColorIndex(text[1])], scolor );
-			text += 2;
-			spacer +=2;
-			continue;
-		}
+	y = con.vislines-charscale*2;
 	
-		Draw_ColorChar ((i+1)<<3, con.vislines - 22, *text, scolor);
-			
-		num = *text++;
-		num &= 255;	
-
-		if ( (num&127) == 32 ) { //spaces reset colors
-			scolor[0] = 1;
-			scolor[1] = 1;
-			scolor[2] = 1;
-			scolor[3] = 1;
-		}
-
-		i++;
-			
+	Com_sprintf (output, sizeof(output), "");
+	for (i=0 ; i<con.linewidth ; i++)
+	{
+		Com_sprintf (output, sizeof(output), "%s%c", output, text[i]);
 	}
+
+
+
+	Draw_ColorString ( charscale, (int)(con.vislines - 2.75*charscale), output);
 
 // remove cursor
 	key_lines[edit_line][key_linepos] = 0;
@@ -719,17 +700,20 @@ Draws the console with the solid background
 */
 void Con_DrawConsole (float frac)
 {
-	int				i, j, x, y, n;
+	int				i, x, y;
 	int				rows;
-	char			*text;
+	char			*text, dl[MAX_STRING_CHARS], output[1024];
 	int				row;
 	int				lines;
 	char			version[64];
-	char			dlbar[1024];
-	int num;
-	int spacer;
+	int kb;
 	vec4_t	scolor;
-	
+	int		charscale;
+
+	charscale = (float)(viddef.height)*8/600;
+	if(charscale < 8)
+		charscale = 8;
+
 	scolor[0] = 1;
 	scolor[1] = 1;
 	scolor[2] = 1;
@@ -746,37 +730,31 @@ void Con_DrawConsole (float frac)
 	Draw_Fill (0, lines-viddef.height, viddef.width, viddef.height, 0);
 	SCR_AddDirtyPoint (0,0);
 	SCR_AddDirtyPoint (viddef.width-1,lines-1);
-
+ 
 	Com_sprintf (version, sizeof(version), "v%4.2f", VERSION);
-	for (x=0 ; x<5 ; x++)
-		Draw_Char (viddef.width-44+x*8, lines-12, 128 + version[x] );
+	DrawString(viddef.width-charscale*(strlen(version)+1), lines-charscale-1, version);
 
 // draw the text
 	con.vislines = lines;
 	
-#if 0
-	rows = (lines-8)>>3;		// rows of text to draw
+	rows = (lines-22)/charscale;		// rows of text to draw
 
-	y = lines - 24;
-#else
-	rows = (lines-22)>>3;		// rows of text to draw
+	y = lines - 3.75*charscale;
 
-	y = lines - 30;
-#endif
 
 // draw from the bottom up
 	if (con.display != con.current)
 	{
 	// draw arrows to show the buffer is backscrolled
-		for (x=0 ; x<con.linewidth ; x+=4)
-			Draw_Char ( (x+1)<<3, y, '^');
+		for (x=0 ; x<con.linewidth ; x+=charscale*2)
+			Draw_ScaledChar ( (x+1)*charscale, y, '^', charscale);
 	
-		y -= 8;
+		y -= charscale;
 		rows--;
 	}
 	
 	row = con.display;
-	for (i=0 ; i<rows ; i++, y-=8, row--)
+	for (i=0 ; i<rows ; i++, y-=charscale, row--)
 	{
 		if (row < 0)
 			break;
@@ -785,74 +763,22 @@ void Con_DrawConsole (float frac)
 			
 		text = con.text + (row % con.totallines)*con.linewidth;
 	
-		x = 0;
-		spacer = 0;
-		while (*text && x<con.linewidth-spacer) {
-			if ( Q_IsColorString( text ) ) {
-				VectorCopy ( color_table[ColorIndex(text[1])], scolor );	
-				text += 2;
-				spacer +=2;
-				continue;
-			}
-			
-			Draw_ColorChar ( (x+1)<<3, y, *text, scolor);
+		Com_sprintf (output, sizeof(output), "");
+		for (x=0 ; x<con.linewidth ; x++)
+			Com_sprintf (output, sizeof(output), "%s%c", output, text[x]);
 
-			num = *text++;
-			num &= 255;	
-
-			if ( (num&127) == 32 ) { //spaces reset colors
-				scolor[0] = 1;
-				scolor[1] = 1;
-				scolor[2] = 1;
-				scolor[3] = 1;
-			}						
-			x++;
-			
-		}
+		Draw_ColorString ( 4, y, output);
 	}
 
 //ZOID
-	// draw the download bar
-	// figure out width
-	if (cls.download) {
-		if ((text = strrchr(cls.downloadname, '/')) != NULL)
-			text++;
-		else
-			text = cls.downloadname;
 
-		x = con.linewidth - ((con.linewidth * 7) / 40);
-		y = x - strlen(text) - 8;
-		i = con.linewidth/3;
-		if (strlen(text) > i) {
-			y = x - i - 11;
-			strncpy(dlbar, text, i);
-			dlbar[i] = 0;
-			strcat(dlbar, "...");
-		} else
-			strcpy(dlbar, text);
-		strcat(dlbar, ": ");
-		i = strlen(dlbar);
-		dlbar[i++] = '\x80';
-		// where's the dot go?
-		if (cls.downloadpercent == 0)
-			n = 0;
-		else
-			n = y * cls.downloadpercent / 100;
-			
-		for (j = 0; j < y; j++)
-			if (j == n)
-				dlbar[i++] = '\x83';
-			else
-				dlbar[i++] = '\x81';
-		dlbar[i++] = '\x82';
-		dlbar[i] = 0;
-
-		sprintf(dlbar + strlen(dlbar), " %02d%%", cls.downloadpercent);
-
-		// draw it
-		y = con.vislines-12;
-		for (i = 0; i < strlen(dlbar); i++)
-			Draw_Char ( (i+1)<<3, y, dlbar[i]);
+	if(cls.download && (kb = (int)ftell(cls.download) / 1024)){  // draw progress
+		
+		Com_sprintf(dl, sizeof(dl), "%s [%s] %dKB ", cls.downloadname,
+				(cls.downloadhttp ? "HTTP" : "UDP"), kb);
+		
+		for(i = 0; i < strlen(dl); i++)
+			Draw_ScaledChar(i * charscale, con.vislines - charscale, dl[i], charscale);
 	}
 //ZOID
 
