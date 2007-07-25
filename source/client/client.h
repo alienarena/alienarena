@@ -638,3 +638,5 @@ void CL_HttpDownloadCleanup(void);
 qboolean CL_HttpDownload(void);
 void CL_HttpDownloadThink(void);
 void CL_ShutdownHttpDownload(void);
+
+
