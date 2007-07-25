@@ -82,6 +82,10 @@ endif
 endif
 endif
 
+ifeq ($(shell curl -V | grep -c), 3)
+	BASE_CFLAGS += -DHAVE_CURL
+endif
+
 ARENA_CFLAGS=-DARENA
 
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g -ggdb
