@@ -7,19 +7,19 @@
 CFG=codered - Win32 Release
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
-!MESSAGE
+!MESSAGE 
 !MESSAGE NMAKE /f "codered.mak".
-!MESSAGE
+!MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
-!MESSAGE
+!MESSAGE 
 !MESSAGE NMAKE /f "codered.mak" CFG="codered - Win32 Release"
-!MESSAGE
+!MESSAGE 
 !MESSAGE Possible choices for configuration are:
-!MESSAGE
+!MESSAGE 
 !MESSAGE "codered - Win32 Release" (based on "Win32 (x86) Application")
 !MESSAGE "codered - Win32 Debug" (based on "Win32 (x86) Application")
-!MESSAGE
+!MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
@@ -83,7 +83,7 @@ LINK32=link.exe
 # ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib glu32.lib client\mpglib.lib /nologo /subsystem:windows /incremental:no /map /debug /machine:I386 /out:"../crx.exe"
 # SUBTRACT LINK32 /nodefaultlib
 
-!ENDIF
+!ENDIF 
 
 # Begin Target
 
@@ -103,6 +103,10 @@ SOURCE=.\client\cl_ents.c
 # Begin Source File
 
 SOURCE=.\client\cl_fx.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\client\cl_http.c
 # End Source File
 # Begin Source File
 
@@ -485,5 +489,9 @@ SOURCE=.\win32\q2.ico
 SOURCE=.\win32\q2.rc
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\client\curl\libcurl.lib
+# End Source File
 # End Target
 # End Project
