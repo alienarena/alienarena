@@ -20,7 +20,10 @@
 */
 
 #include "client.h"
+
+#ifdef _WIN32 // All CURL libs are distributed in Windows.
 #define HAVE_CURL
+#endif
 
 #ifdef __unix__
 #include <unistd.h>
