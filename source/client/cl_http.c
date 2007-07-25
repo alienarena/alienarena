@@ -77,16 +77,16 @@ qboolean CL_HttpDownload(void){
                 return false;
  
         memset(file, 0, sizeof(file));  // resolve local file name
-        printf(file, sizeof(file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
+        Com_sprintf(file, sizeof(file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
  
         FS_CreatePath(file);  // create the directory
- 
+
         if(!(cls.download = fopen(file, "wb"))){
-                //Com_Warn("Failed to open %s.\n", file);
+                Com_Printf("Failed to open %s.\n", file);
                 return false;  // and open the file
         }
- 
-        cls.downloadhttp = true;
+		
+		cls.downloadhttp = true;
  
         memset(game, 0, sizeof(game));  // resolve gamedir
         strncpy(game, Cvar_VariableString("game"), sizeof(game) - 1);
@@ -95,9 +95,8 @@ qboolean CL_HttpDownload(void){
                 strcpy(game, "default");
  
         memset(url, 0, sizeof(url));  // construct url
-        printf(url, sizeof(url) - 1, "%s/%s/%s", cls.downloadurl, game, cls.downloadname);
- 
-        // set handle to default state
+        Com_sprintf(url, sizeof(url) - 1, "%s/%s/%s", cls.downloadurl, game, cls.downloadname);
+	    // set handle to default state
         curl_easy_reset(curl);
  
         // set url from which to retrieve the file
@@ -194,7 +193,7 @@ void CL_HttpDownloadThink(void){
  
         if(!cls.downloadurl[0] || !cls.download)
                 return;  // nothing to do
- 
+	 
         // process the download as long as data is avaialble
         while(curl_multi_perform(curlm, &i) == CURLM_CALL_MULTI_PERFORM){}
  
@@ -212,7 +211,7 @@ void CL_HttpDownloadThink(void){
                         return;
                 }
         }
- 
+
         // check for completion
         while((msg = curl_multi_info_read(curlm, &i))){
                 if(msg->msg == CURLMSG_DONE){

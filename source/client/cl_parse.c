@@ -110,8 +110,6 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		return true;
 	}
 
-//		return true; //we don't want to download anything in single player mode, period.
-
 	strcpy (cls.downloadname, filename);
 
 	// download to a temp name, and only rename
@@ -120,9 +118,12 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	COM_StripExtension (cls.downloadname, cls.downloadtempname);
 	strcat (cls.downloadtempname, ".tmp");
 
-	// attempt an http download if available
-	if(cls.downloadurl[0] && CL_HttpDownload())
+	// attempt an http download if available 
+	if(cls.downloadurl[0] && CL_HttpDownload()) {
 		return false;
+	}
+	else
+		Com_Printf("didn't find one\n");
 	
 //ZOID
 	// check to see if we already have a tmp for this file, if so, try to resume
@@ -152,7 +153,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	}
 
 	cls.downloadnumber++;
-	
+
 	send_packet_now = true;
 	return false;
 }
@@ -277,15 +278,6 @@ void CL_ParseDownload (void)
 	if (percent != 100)
 	{
 		// request next block
-// change display routines by zoid
-#if 0
-		Com_Printf (".");
-		if (10*(percent/10) != cls.downloadpercent)
-		{
-			cls.downloadpercent = 10*(percent/10);
-			Com_Printf ("%i%%", cls.downloadpercent);
-		}
-#endif
 		cls.downloadpercent = percent;
 
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);

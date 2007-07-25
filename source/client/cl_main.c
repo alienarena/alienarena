@@ -1073,8 +1073,10 @@ void CL_ConnectionlessPacket (void)
 		cls.state = ca_connected;
 		
 		memset(cls.downloadurl, 0, sizeof(cls.downloadurl));
-		if(Cmd_Argc() == 2)  // http download url
+		if(Cmd_Argc() == 2)  // http download url 
+		{
 			strncpy(cls.downloadurl, Cmd_Argv(1), sizeof(cls.downloadurl) - 1);
+		}
 		return;
 	}
 

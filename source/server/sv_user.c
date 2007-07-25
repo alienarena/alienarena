@@ -287,10 +287,9 @@ void SV_NextDownload_f (void)
 		return;
 
 	r = sv_client->downloadsize - sv_client->downloadcount;
-//	if (r > MAX_MSGLEN-20) //was 1024 should speed up 
-//		r = MAX_MSGLEN-20;
-	if (r > 1024) //was 1024 should speed up 
-			r = 1024;
+
+	if (r > 1280) //was 1024 should speed up 
+			r = 1280;
 	MSG_WriteByte (&sv_client->netchan.message, svc_download);
 	MSG_WriteShort (&sv_client->netchan.message, r);
 
