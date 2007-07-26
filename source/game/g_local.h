@@ -576,6 +576,9 @@ extern  cvar_t  *excessive;
 extern  cvar_t  *grapple;
 extern  cvar_t  *classbased;
 
+extern	cvar_t	*g_losehealth;
+extern	cvar_t	*g_losehealth_num;
+
 //weapons
 extern	cvar_t	*wep_selfdmgmulti;
 
@@ -1083,6 +1086,8 @@ struct gclient_s
 	float		haste_framenum;
 	float		sproing_framenum;
 	float		regen_framenum;
+
+	float		losehealth_framenum;
 
 	qboolean	grenade_blew_up;
 	float		grenade_time;

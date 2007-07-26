@@ -47,6 +47,9 @@ cvar_t  *excessive;
 cvar_t  *grapple;
 cvar_t  *classbased;
 
+cvar_t	*g_losehealth;
+cvar_t	*g_losehealth_num;
+
 //weapons
 cvar_t	*wep_selfdmgmulti;
 

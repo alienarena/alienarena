@@ -199,6 +199,9 @@ void InitGame (void)
 	grapple = gi.cvar ("grapple", "0", CVAR_LATCH);
 	classbased = gi.cvar ("classbased", "0", CVAR_LATCH);
 
+	g_losehealth = gi.cvar ("g_losehealth", "1", CVAR_LATCH);
+	g_losehealth_num = gi.cvar ("g_losehealth_num", "100", CVAR_LATCH);
+
 	//weapons
 	wep_selfdmgmulti = gi.cvar("wep_selfdmgmulti", "1.0", 0);
 
@@ -206,7 +209,7 @@ void InitGame (void)
 	wep_disruptor_kick = gi.cvar("wep_disruptor_kick", "55", 0);
 
 	//health/max health/max ammo
-	g_spawnhealth = gi.cvar("g_spawnhealth", "100", 0);
+	g_spawnhealth = gi.cvar("g_spawnhealth", "125", 0);
 	g_maxhealth = gi.cvar("g_maxhealth", "100", 0);
 	g_maxbullets = gi.cvar("g_maxbullets", "200", 0);
 	g_maxshells = gi.cvar("g_maxshells", "100", 0);

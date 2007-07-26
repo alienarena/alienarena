@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -361,7 +361,7 @@ void Drop_Ammo (edict_t *ent, gitem_t *item)
 	else
 		dropped->count = ent->client->pers.inventory[index];
 
-	if (ent->client->pers.weapon && 
+	if (ent->client->pers.weapon &&
 		ent->client->pers.weapon->tag == AMMO_GRENADES &&
 		item->tag == AMMO_GRENADES &&
 		ent->client->pers.inventory[index] - dropped->count <= 0) {
@@ -393,7 +393,7 @@ void MegaHealth_think (edict_t *self)
 }
 void Healthbox_think (edict_t *self)
 {
-	
+
 	self->nextthink = level.time + 7;
 	self->s.effects = EF_ROTATE;
 	self->s.renderfx = RF_GLOW;
@@ -627,7 +627,7 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 	if (taken)
 	{
 		// flash the screen
-		other->client->bonus_alpha = 0.25;	
+		other->client->bonus_alpha = 0.25;
 
 		// show icon and name on status bar
 		other->client->ps.stats[STAT_PICKUP_ICON] = gi.imageindex(ent->item->icon);
@@ -640,7 +640,7 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 
 		if (ent->item->pickup == Pickup_Health)
 		{
-			if (ent->count == 2)
+			if (ent->count == 5)
 				gi.sound(other, CHAN_ITEM, gi.soundindex("items/s_health.wav"), 1, ATTN_NORM, 0);
 			else if (ent->count == 10)
 				gi.sound(other, CHAN_ITEM, gi.soundindex("items/n_health.wav"), 1, ATTN_NORM, 0);
@@ -714,7 +714,7 @@ edict_t *Drop_Item (edict_t *ent, gitem_t *item)
 	if(!strcmp(item->classname, "item_hover"))
 		dropped->s.modelindex3 = gi.modelindex("vehicles/hover/flames.md2");
 	dropped->solid = SOLID_TRIGGER;
-	dropped->movetype = MOVETYPE_TOSS;  
+	dropped->movetype = MOVETYPE_TOSS;
 	dropped->touch = drop_temp_touch;
 	dropped->owner = ent;
 
@@ -789,7 +789,7 @@ void droptofloor (edict_t *ent)
 		gi.setmodel (ent, ent->item->world_model);
 	ent->solid = SOLID_TRIGGER;
 
-	ent->movetype = MOVETYPE_TOSS;  
+	ent->movetype = MOVETYPE_TOSS;
 	ent->touch = Touch_Item;
 
 	v = tv(0,0,-128);
@@ -967,7 +967,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 		if(excessive->value || instagib->value || rocket_arena->value)
 		{
 			if (item->flags == IT_AMMO || (strcmp(ent->classname, "weapon_bfg") == 0) ||
-				(strcmp(ent->classname, "weapon_hyperblaster") == 0) || 
+				(strcmp(ent->classname, "weapon_hyperblaster") == 0) ||
 				(strcmp(ent->classname, "weapon_railgun") == 0) ||
 				(strcmp(ent->classname, "weapon_rocketlauncher") == 0) ||
 				(strcmp(ent->classname, "weapon_grenadelauncher") == 0) ||
@@ -996,7 +996,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	if (strcmp(ent->classname, "item_flag_red") && //flags are special and don't get this
 		strcmp(ent->classname, "item_flag_blue")) {
 		ent->s.effects = EF_ROTATE;
-			
+
 	}
 	ent->s.renderfx = RF_GLOW;
 	if((strcmp(ent->classname, "Health") == 0)) {
@@ -1025,12 +1025,12 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 
 	//ditto for deathball
 	if(strcmp(ent->classname, "item_deathball") == 0)
-		ent->think = DeathballSetup;	
+		ent->think = DeathballSetup;
 }
 
 //======================================================================
 
-gitem_t	itemlist[] = 
+gitem_t	itemlist[] =
 {
 	{
 		NULL
@@ -1043,7 +1043,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_armor_body (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_armor_body", 
+		"item_armor_body",
 		Pickup_Armor,
 		NULL,
 		NULL,
@@ -1066,7 +1066,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_armor_combat (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_armor_combat", 
+		"item_armor_combat",
 		Pickup_Armor,
 		NULL,
 		NULL,
@@ -1089,7 +1089,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_armor_jacket (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_armor_jacket", 
+		"item_armor_jacket",
 		Pickup_Armor,
 		NULL,
 		NULL,
@@ -1112,7 +1112,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_armor_shard (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_armor_shard", 
+		"item_armor_shard",
 		Pickup_Armor,
 		NULL,
 		NULL,
@@ -1136,7 +1136,7 @@ gitem_t	itemlist[] =
 /*QUAKED item_power_screen (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_power_screen", 
+		"item_power_screen",
 		Pickup_PowerArmor,
 		Use_PowerArmor,
 		Drop_PowerArmor,
@@ -1231,7 +1231,7 @@ gitem_t	itemlist[] =
 		"item_bomber",
 		Get_in_vehicle,
 		NULL,
-		Leave_vehicle, 
+		Leave_vehicle,
 		Weapon_Bomber,
 		"ctf/flagtk.wav",
 		"vehicles/bomber/tris.md2", 0,
@@ -1253,11 +1253,11 @@ gitem_t	itemlist[] =
 		"item_strafer",
 		Get_in_vehicle,
 		NULL,
-		Leave_vehicle, 
+		Leave_vehicle,
 		Weapon_Strafer,
 		"ctf/flagtk.wav",
 		"vehicles/strafer/tris.md2", 0,
-		"vehicles/strafer/v_wep.md2", 
+		"vehicles/strafer/v_wep.md2",
 /* icon */		"w_blaster",
 /* pickup */	"Strafer",
 		0,
@@ -1276,7 +1276,7 @@ gitem_t	itemlist[] =
 		"item_hover",
 		Get_in_vehicle,
 		NULL,
-		Leave_vehicle, 
+		Leave_vehicle,
 		Weapon_Hover,
 		"ctf/flagtk.wav",
 		"vehicles/hover/tris.md2", 0,
@@ -1299,7 +1299,7 @@ gitem_t	itemlist[] =
 		"item_deathball",
 		Pickup_deathball,
 		NULL,
-		DeathballDrop, 
+		DeathballDrop,
 		Weapon_Deathball,
 		"ctf/flagtk.wav",
 		"vehicles/deathball/deathball.md2", 0,
@@ -1321,7 +1321,7 @@ gitem_t	itemlist[] =
 		"item_dbtarget",
 		NULL,
 		NULL,
-		NULL, 
+		NULL,
 		NULL,
 		NULL,
 		"models/objects/blank/tris.md2", 0,
@@ -1335,13 +1335,13 @@ gitem_t	itemlist[] =
 		WEAP_DEATHBALL,
 		NULL,
 		0,
-		NULL 
+		NULL
 	},
 	{
 		"item_red_dbtarget",
 		NULL,
 		NULL,
-		NULL, 
+		NULL,
 		NULL,
 		NULL,
 		"models/objects/blank/tris.md2", 0,
@@ -1355,13 +1355,13 @@ gitem_t	itemlist[] =
 		WEAP_DEATHBALL,
 		NULL,
 		0,
-		NULL 
+		NULL
 	},
 	{
 		"item_blue_dbtarget",
 		NULL,
 		NULL,
-		NULL, 
+		NULL,
 		NULL,
 		NULL,
 		"models/objects/blank/tris.md2", 0,
@@ -1375,16 +1375,16 @@ gitem_t	itemlist[] =
 		WEAP_DEATHBALL,
 		NULL,
 		0,
-		NULL 
+		NULL
 	},
 	//
-	// WEAPONS 
+	// WEAPONS
 	//
 /* weapon_grapple (.3 .3 1) (-16 -16 -16) (16 16 16)
 always owned, never in the world
 */
 	{
-		"weapon_grapple", 
+		"weapon_grapple",
 		NULL,
 		Use_Weapon,
 		NULL,
@@ -1407,7 +1407,7 @@ always owned, never in the world
 always owned, never in the world
 */
 	{
-		"weapon_blaster", 
+		"weapon_blaster",
 		NULL,
 		Use_Weapon,
 		NULL,
@@ -1430,7 +1430,7 @@ always owned, never in the world
 /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_shotgun", 
+		"weapon_shotgun",
 		Pickup_Weapon,
 		Use_Weapon,
 		Drop_Weapon,
@@ -1453,7 +1453,7 @@ always owned, never in the world
 /*QUAKED weapon_supershotgun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_supershotgun", 
+		"weapon_supershotgun",
 		Pickup_Weapon,
 		Use_Weapon,
 		Drop_Weapon,
@@ -1476,7 +1476,7 @@ always owned, never in the world
 /*QUAKED weapon_chaingun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_chaingun", 
+		"weapon_chaingun",
 		Pickup_Weapon,
 		Use_Weapon,
 		Drop_Weapon,
@@ -1522,7 +1522,7 @@ always owned, never in the world
 /*QUAKED weapon_hyperblaster (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_hyperblaster", 
+		"weapon_hyperblaster",
 		Pickup_Weapon,
 		Use_Weapon,
 		Drop_Weapon,
@@ -1545,7 +1545,7 @@ always owned, never in the world
 /*QUAKED weapon_railgun (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"weapon_railgun", 
+		"weapon_railgun",
 		Pickup_Weapon,
 		Use_Weapon,
 		Drop_Weapon,
@@ -1736,7 +1736,7 @@ always owned, never in the world
 /*QUAKED item_quad (.3 .3 1) (-16 -16 -16) (16 16 16)
 */
 	{
-		"item_quad", 
+		"item_quad",
 		Pickup_Powerup,
 		Use_Quad,
 		Drop_General,
@@ -1894,9 +1894,9 @@ void SP_item_health_small (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	
+
 	self->model = "models/items/healing/small/tris.md2";
-	self->count = 2;
+	self->count = 5;
 	self->classname = "Health";
 	SpawnItem (self, FindItem ("Health"));
 	self->style = HEALTH_IGNORE_MAX;
