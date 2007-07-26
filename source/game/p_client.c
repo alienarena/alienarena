@@ -1687,14 +1687,15 @@ void PutClientInServer (edict_t *ent)
 	if(file) { //human
 		ent->ctype = 1;
 		if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
-				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
-				client->pers.inventory[armor_index] += 30;
-				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
-				client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
-				item = FindItem("Rocket Launcher");
-				client->pers.selected_item = ITEM_INDEX(item);
-				client->pers.inventory[client->pers.selected_item] = 1;
-				client->pers.weapon = item;
+			ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
+			armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
+			client->pers.inventory[armor_index] += 30;
+			client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
+			client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = 10;
+			item = FindItem("Rocket Launcher");
+			client->pers.selected_item = ITEM_INDEX(item);
+			client->pers.inventory[client->pers.selected_item] = 1;
+			client->pers.weapon = item;
 		}
 		fclose(file);
 	}
