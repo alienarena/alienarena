@@ -49,8 +49,6 @@ int hover_time;
 
 void M_Menu_Main_f (void);
 	void M_Menu_Game_f (void);
-		void M_Menu_LoadGame_f (void);
-		void M_Menu_SaveGame_f (void);
 		void M_Menu_PlayerConfig_f (void);
 		void M_Menu_Credits_f( void );
 	void M_Menu_JoinServer_f (void);
@@ -2528,7 +2526,7 @@ static void StartGame( void )
 	// disable updates and start the cinematic going
 	cl.servercount = -1;
 	M_ForceMenuOff ();
-	Cvar_SetValue( "deathmatch", 0 );
+	Cvar_SetValue( "deathmatch", 1 );
 	Cvar_SetValue( "ctf", 0 );
 
 	Cvar_SetValue( "gamerules", 0 );		//PGM
@@ -3919,7 +3917,7 @@ void StartServerActionFunc( void *self )
 	{
 		if (Com_ServerState())
 			Cbuf_AddText ("disconnect\n");
-		Cbuf_AddText (va("gamemap \"*%s$%s\"\n", startmap, spot));
+		Cbuf_AddText (va("map %s\n", startmap));
 	}
 	else
 	{

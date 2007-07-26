@@ -114,55 +114,6 @@ void SV_CreateBaseline (void)
 	}
 }
 
-
-/*
-=================
-SV_CheckForSavegame
-=================
-*/
-void SV_CheckForSavegame (void)
-{
-	char		name[MAX_OSPATH];
-	FILE		*f;
-	int			i;
-
-	if (sv_noreload->value)
-		return;
-
-	if ((Cvar_VariableValue ("deathmatch")) || (Cvar_VariableValue ("ctf")))
-		return;
-
-	Com_sprintf (name, sizeof(name), "%s/save/current/%s.sav", FS_Gamedir(), sv.name);
-	f = fopen (name, "rb");
-	if (!f)
-		return;		// no savegame
-
-	fclose (f);
-
-	SV_ClearWorld ();
-
-	// get configstrings and areaportals
-	SV_ReadLevelFile ();
-
-	if (!sv.loadgame)
-	{	// coming back to a level after being in a different
-		// level, so run it for ten seconds
-
-		// rlava2 was sending too many lightstyles, and overflowing the
-		// reliable data. temporarily changing the server state to loading
-		// prevents these from being passed down.
-		server_state_t		previousState;		// PGM
-
-		previousState = sv.state;				// PGM
-		sv.state = ss_loading;					// PGM
-		for (i=0 ; i<100 ; i++)
-			ge->RunFrame ();
-
-		sv.state = previousState;				// PGM
-	}
-}
-
-
 /*
 ================
 SV_SpawnServer
@@ -194,7 +145,6 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 	// wipe the entire per-level structure
 	memset (&sv, 0, sizeof(sv));
 	svs.realtime = 0;
-	sv.loadgame = loadgame;
 	sv.attractloop = attractloop;
 
 	// save name for levels that don't set message
@@ -275,9 +225,6 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 	
 	// create a baseline for more efficient communications
 	SV_CreateBaseline ();
-
-	// check for a savegame
-	SV_CheckForSavegame ();
 
 	// set serverinfo variable
 	Cvar_FullSet ("mapname", sv.name, CVAR_SERVERINFO | CVAR_NOSET);
@@ -396,8 +343,7 @@ void SV_Map (qboolean attractloop, char *levelstring, qboolean loadgame)
 	sv.loadgame = loadgame;
 	sv.attractloop = attractloop;
 
-	if (sv.state == ss_dead && !sv.loadgame) 
-		SV_InitGame ();	// the game is just starting
+	SV_InitGame ();	// the game is just starting
 
 	strcpy (level, levelstring);
 
@@ -406,7 +352,7 @@ void SV_Map (qboolean attractloop, char *levelstring, qboolean loadgame)
 	if (ch)
 	{
 		*ch = 0;
-			Cvar_Set ("nextserver", va("gamemap \"%s\"", ch+1));
+			Cvar_Set ("nextserver", va("map \"%s\"", ch+1));
 	}
 	else
 		Cvar_Set ("nextserver", "");
