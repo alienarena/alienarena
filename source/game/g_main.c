@@ -127,10 +127,6 @@ void ClientDisconnect (edict_t *ent);
 void ClientBegin (edict_t *ent);
 void ClientCommand (edict_t *ent);
 void RunEntity (edict_t *ent);
-void WriteGame (char *filename, qboolean autosave);
-void ReadGame (char *filename);
-void WriteLevel (char *filename);
-void ReadLevel (char *filename);
 void InitGame (void);
 void G_RunFrame (void);
 
@@ -163,11 +159,6 @@ game_export_t *GetGameAPI (game_import_t *import)
 	globals.Init = InitGame;
 	globals.Shutdown = ShutdownGame;
 	globals.SpawnEntities = SpawnEntities;
-
-	globals.WriteGame = WriteGame;
-	globals.ReadGame = ReadGame;
-	globals.WriteLevel = WriteLevel;
-	globals.ReadLevel = ReadLevel;
 
 	globals.ClientThink = ClientThink;
 	globals.ClientConnect = ClientConnect;
@@ -785,7 +776,7 @@ void ExitLevel (void)
 	edict_t	*ent;
 	char	command [256];
 
-	Com_sprintf (command, sizeof(command), "gamemap \"%s\"\n", level.changemap);
+	Com_sprintf (command, sizeof(command), "map \"%s\"\n", level.changemap);
 	gi.AddCommandString (command);
 	level.changemap = NULL;
 	level.exitintermission = 0;

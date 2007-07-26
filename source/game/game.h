@@ -197,18 +197,6 @@ typedef struct
 	// each new level entered will cause a call to SpawnEntities
 	void		(*SpawnEntities) (char *mapname, char *entstring, char *spawnpoint);
 
-	// Read/Write Game is for storing persistant cross level information
-	// about the world state and the clients.
-	// WriteGame is called every time a level is exited.
-	// ReadGame is called on a loadgame.
-	void		(*WriteGame) (char *filename, qboolean autosave);
-	void		(*ReadGame) (char *filename);
-
-	// ReadLevel is called after the default map information has been
-	// loaded with SpawnEntities
-	void		(*WriteLevel) (char *filename);
-	void		(*ReadLevel) (char *filename);
-	
 	qboolean	(*ClientConnect)( edict_t *ent, char *userinfo);
 	
 	void		(*ClientBegin) (edict_t *ent);
