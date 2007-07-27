@@ -340,10 +340,10 @@ void SV_Map (qboolean attractloop, char *levelstring, qboolean loadgame)
 	int		l;
 	char	spawnpoint[MAX_QPATH];
 
-	sv.loadgame = loadgame;
 	sv.attractloop = attractloop;
 
-	SV_InitGame ();	// the game is just starting
+	if(loadgame)
+		SV_InitGame ();	// the game is just starting
 
 	strcpy (level, levelstring);
 
