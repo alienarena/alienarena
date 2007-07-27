@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "client.h"
 #include "qmenu.h"
+#include <time.h> //for SCR_showTime
 
 float		scr_con_current;	// aproaches scr_conlines at scr_conspeed
 float		scr_conlines;		// 0.0 to 1.0 lines of console to display
@@ -63,6 +64,8 @@ cvar_t		*scr_drawall;
 cvar_t		*scr_consize;
 
 cvar_t		*cl_drawfps;
+
+cvar_t		*cl_drawtime;
 
 typedef struct
 {
@@ -398,6 +401,8 @@ void SCR_Init (void)
 	scr_drawall = Cvar_Get ("scr_drawall", "0", 0);
 
 	cl_drawfps = Cvar_Get ("cl_drawfps", "0", CVAR_ARCHIVE);
+
+	cl_drawtime = Cvar_Get ("cl_drawtime", "0", CVAR_ARCHIVE);
 
 //
 // register our commands
@@ -1529,7 +1534,32 @@ void SCR_showFPS(void)
 	DrawString(viddef.width - 64*scale, viddef.height - 24*scale, temp);
 }
 
-//=======================================================
+/*
+================
+
+SCR_showTime
+
+================
+*/
+
+time_t	time_now;
+struct	tm *time_ptr;
+char	timestr[9];
+
+void SCR_showTime(void)
+{
+	float scale;
+
+	scale = (float)(viddef.height)/600;
+	if(scale < 1)
+		scale = 1;
+
+	time(&time_now);
+	time_ptr = gmtime(&time_now);
+	strftime(timestr, 9, "%T", time_ptr);
+
+	DrawString(viddef.width - 64*scale, viddef.height - 16*scale, timestr);
+}
 
 /*
 ==================
@@ -1681,6 +1711,11 @@ void SCR_UpdateScreen (void)
 			if(cl_drawfps->value)
 			{
 				SCR_showFPS();
+			}
+
+			if(cl_drawtime->value)
+			{
+				SCR_showTime();
 			}
 
 		}
