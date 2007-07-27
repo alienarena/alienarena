@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -100,7 +100,7 @@ void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bi
 		to->modelindex3 = MSG_ReadByte (&net_message);
 	if (bits & U_MODEL4)
 		to->modelindex4 = MSG_ReadByte (&net_message);
-		
+
 	if (bits & U_FRAME8)
 		to->frame = MSG_ReadByte (&net_message);
 	if (bits & U_FRAME16)
@@ -133,7 +133,7 @@ void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bi
 		to->origin[1] = MSG_ReadCoord (&net_message);
 	if (bits & U_ORIGIN3)
 		to->origin[2] = MSG_ReadCoord (&net_message);
-		
+
 	if (bits & U_ANGLE1)
 		to->angles[0] = MSG_ReadAngle(&net_message);
 	if (bits & U_ANGLE2)
@@ -267,7 +267,7 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 			if (cl_shownet->value == 3)
 				Com_Printf ("   unchanged: %i\n", oldnum);
 			CL_DeltaEntity (newframe, oldnum, oldstate, 0);
-			
+
 			oldindex++;
 
 			if (oldindex >= oldframe->num_entities)
@@ -332,7 +332,7 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 		if (cl_shownet->value == 3)
 			Com_Printf ("   unchanged: %i\n", oldnum);
 		CL_DeltaEntity (newframe, oldnum, oldstate, 0);
-		
+
 		oldindex++;
 
 		if (oldindex >= oldframe->num_entities)
@@ -523,7 +523,7 @@ void CL_ParseFrame (void)
 	// If the frame is delta compressed from data that we
 	// no longer have available, we must suck up the rest of
 	// the frame, but not use it, then ask for a non-compressed
-	// message 
+	// message
 	if (cl.frame.deltaframe <= 0)
 	{
 		cl.frame.valid = true;		// uncompressed frame
@@ -550,7 +550,7 @@ void CL_ParseFrame (void)
 			cl.frame.valid = true;	// valid delta parse
 	}
 
-	// clamp time 
+	// clamp time
 	if (cl.time > cl.frame.servertime)
 		cl.time = cl.frame.servertime;
 	else if (cl.time < cl.frame.servertime - 100)
@@ -593,7 +593,7 @@ void CL_ParseFrame (void)
 				SCR_EndLoadingPlaque ();	// get rid of loading plaque
 		}
 		cl.sound_prepped = true;	// can start mixing ambient sounds
-	
+
 		// fire entity events
 		CL_FireEntityEvents (&cl.frame);
 		CL_CheckPredictionError ();
@@ -651,13 +651,13 @@ struct model_s *S_RegisterSexedModel (entity_state_t *ent, char *base)
 				Com_sprintf (buffer, sizeof(buffer), "players/male/weapon.md2");
 				mdl = R_RegisterModel(buffer);
 			}
-		} 
+		}
 	}
 
 	return mdl;
 }
 
-// PMM - used in shell code 
+// PMM - used in shell code
 extern int Developer_searchpath (int who);
 // pmm
 /*
@@ -737,7 +737,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		ent.backlerp = 1.0 - cl.lerpfrac;
 
 		// create a new entity
-	
+
 		// tweak the color of beams
 		if ( renderfx & RF_BEAM )
 		{	// the four beam colors are encoded in 32 bits of skinnum (hack)
@@ -769,17 +769,17 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.model = cl.model_draw[s1->modelindex];
 			}
 		}
-		
+
 		if (renderfx & (RF_FRAMELERP|RF_BEAM))
 		{	// step origin discretely, because the frames
 			// do the animation properly
 			VectorCopy (cent->current.origin, ent.origin);
 			VectorCopy (cent->current.old_origin, ent.oldorigin);
 		}
-		else if (s1->number == cl.playernum+1) 
+		else if (s1->number == cl.playernum+1)
 		{
 			for (i=0; i<3; i++) {
-				ent.origin[i] = ent.oldorigin[i] = cent->current.origin[i] + cl.lerpfrac * 
+				ent.origin[i] = ent.oldorigin[i] = cent->current.origin[i] + cl.lerpfrac *
 					(cent->current.origin[i] - cent->prev.origin[i]);
 			}
 		}
@@ -787,7 +787,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		{	// interpolate origin
 			for (i=0 ; i<3 ; i++)
 			{
-				ent.origin[i] = ent.oldorigin[i] = cent->prev.origin[i] + cl.lerpfrac * 
+				ent.origin[i] = ent.oldorigin[i] = cent->prev.origin[i] + cl.lerpfrac *
 					(cent->current.origin[i] - cent->prev.origin[i]);
 			}
 		}
@@ -808,11 +808,11 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.angles[0] = 0;
 			ent.angles[1] = autorotate;
 			ent.angles[2] = 0;
-			// bobbing items 
-			bob_scale = (0.005f + s1->number * 0.00001f) * 0.5; 
-			bob = 5 + cos( (cl.time + 1000) * bob_scale ) * 5; 
-			ent.oldorigin[2] += bob; 
-			ent.origin[2] += bob; 
+			// bobbing items
+			bob_scale = (0.005f + s1->number * 0.00001f) * 0.5;
+			bob = 5 + cos( (cl.time + 1000) * bob_scale ) * 5;
+			ent.oldorigin[2] += bob;
+			ent.origin[2] += bob;
 
 		}
 		else
@@ -836,7 +836,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				VectorCopy (cl.predicted_origin, ent.origin);
 				VectorCopy (cl.predicted_origin, ent.oldorigin);
 			}
-	
+
 		}
 
 		// if set to invisible, skip
@@ -917,14 +917,14 @@ void CL_AddPacketEntities (frame_t *frame)
 
 		ci = &cl.clientinfo[s1->skinnum & 0xff];
 
-		//something isn't quite working right - we need to know if this god damn thing is a player 
+		//something isn't quite working right - we need to know if this god damn thing is a player
 		//model - hmmm - actually checking the patch would do it!
 
 		if (s1->modelindex2)
 		{
 			if (s1->modelindex2 == 255 || (ci->helmet && playermodel))
 			{	// custom weapon
-				
+
 				i = (s1->skinnum >> 8); // 0 is default weapon model
 				if (!cl_vwep->value || i > MAX_CLIENTWEAPONMODELS - 1)
 					i = 0;
@@ -934,7 +934,7 @@ void CL_AddPacketEntities (frame_t *frame)
 						ent.model = ci->weaponmodel[0];
 					if (!ent.model)
 						ent.model = cl.baseclientinfo.weaponmodel[0];
-				}				
+				}
 			}
 			else {
 
@@ -949,7 +949,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.flags = RF_TRANSLUCENT;
 			}
 			// pmm
-				
+
 			//here is where we will set the alpha for certain model parts - would like to eventually
 			//do something a little less uh, hardcoded.
 			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/items/quaddama/unit.md2"))
@@ -1002,21 +1002,21 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.alpha = 0.1;
 				ent.flags = RF_TRANSLUCENT;
 			}
-			
+
 			if (s1->number == cl.playernum+1) {
 				ent.flags |= RF_VIEWERMODEL;
-			
+
 			}
-			
+
 			V_AddEntity (&ent);
 
 			//PGM - make sure these get reset.
 			ent.flags = 0;
 			ent.alpha = 0;
 			//PGM
-			
+
 		}
-	
+
 		if (s1->modelindex3 || (ci->helmet && playermodel))
 		{
 			if(ci->helmet && playermodel)
@@ -1027,19 +1027,19 @@ void CL_AddPacketEntities (frame_t *frame)
 			//look for clear player helmets and flag accordingly
 			strcpy(modelpath, cl.configstrings[CS_MODELS+(s1->modelindex3)]);
 			len = strlen (modelpath);
-			
+
 			i = -1;
 			strcpy(modelname, " ");
 
 			done = false;
 
-		
+
 			while(!done) {
 				if(modelpath[len] == 'h')
 					done = true;
 				else {
 					modelname[i] = modelpath[len];
-				
+
 				}
 				if(len < 1)
 					done = true;
@@ -1055,7 +1055,7 @@ void CL_AddPacketEntities (frame_t *frame)
 
 			if (s1->number == cl.playernum+1) {
 				ent.flags |= RF_VIEWERMODEL;
-			}	
+			}
 			V_AddEntity (&ent);
 		}
 
@@ -1072,7 +1072,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				||!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag2.md2"))
 				V_AddEntity (&ent);
 			else if(!ci->helmet) //because we don't want any extraneous models like brainlet
-				//gunracks or war machine riders being drawn if helmt exists, meaning that 
+				//gunracks or war machine riders being drawn if helmt exists, meaning that
 				//the entity had defaulted
 				V_AddEntity (&ent);
 		}
@@ -1126,14 +1126,14 @@ void CL_AddPacketEntities (frame_t *frame)
 				VectorMA (ent.origin, 16, right, start);
 				VectorMA (start, 32, up, start);
 				CL_BlueTeamLight(start);
-				
+
 				VectorMA (ent.origin, -16, right, start);
 				VectorMA (start, 32, up, start);
 				CL_BlueTeamLight(start);
 			}
 			else if (effects & EF_FLAG2)
 			{
-				
+
 				vec3_t right;
 				vec3_t start;
 				vec3_t up;
@@ -1142,7 +1142,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				VectorMA (ent.origin, 16, right, start);
 				VectorMA (start, 32, up, start);
 				CL_RedTeamLight(start);
-			
+
 				VectorMA (ent.origin, -16, right, start);
 				VectorMA (start, 32, up, start);
 				CL_RedTeamLight(start);
@@ -1150,9 +1150,9 @@ void CL_AddPacketEntities (frame_t *frame)
 
 			else if (effects & EF_GREENGIB)
 			{
-				CL_DiminishingTrail (cent->lerp_origin, ent.origin, cent, effects);				
+				CL_DiminishingTrail (cent->lerp_origin, ent.origin, cent, effects);
 			}
-		
+
 			else if (effects & EF_PLASMA)
 			{
 				CL_BlasterBall (cent->lerp_origin, ent.origin);
@@ -1166,7 +1166,7 @@ end:
 
 /*
 ==============
-CL_AddViewWeapon 
+CL_AddViewWeapon
 ==============
 */
 
@@ -1174,7 +1174,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 {
 	entity_t	gun;		// view model
 	int			i;
-	
+
 
 	memset (&gun, 0, sizeof(gun));
 
@@ -1208,7 +1208,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		else
 			gun.oldframe = ops->gunframe;
 	}
-	
+
 
 	gun.flags = RF_MINLIGHT | RF_DEPTHHACK | RF_WEAPONMODEL;
 	gun.backlerp = 1.0 - cl.lerpfrac;
@@ -1216,7 +1216,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 
 	//add a muzzleflash for chaingun
 	if(!(strcmp("models/weapons/v_shotg2/tris.md2", gun.model->name))) {
-		if(gun.frame > 4 && gun.frame < 14)	
+		if(gun.frame > 4 && gun.frame < 14)
 			CL_MuzzleFlashParticle(gun.origin, gun.angles);
 	}
 
@@ -1242,7 +1242,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 
 					gun.flags |= RF_TRANSLUCENT;
 					gun.alpha = 0.30;
-										
+
 					if (s1->effects & EF_COLOR_SHELL && gun.flags & (RF_SHELL_RED|RF_SHELL_BLUE|RF_SHELL_GREEN))
 					{
 						gun.skin = R_RegisterSkin ("gfx/shell.pcx");
@@ -1256,7 +1256,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 
 						V_AddEntity (&gun);
 					}
-					if (s1->effects & EF_QUAD)
+					if (s1->effects & EF_QUAD && cl_gun->value)
 					{
 						gun.skin = R_RegisterSkin ("gfx/shell_quad.pcx");
 						gun.flags = oldeffects | RF_TRANSLUCENT | RF_SHELL_BLUE;
@@ -1312,7 +1312,7 @@ void CL_CalcViewValues (void)
 		backlerp = 1.0 - lerp;
 		for (i=0 ; i<3 ; i++)
 		{
-			cl.refdef.vieworg[i] = cl.predicted_origin[i] + ops->viewoffset[i] 
+			cl.refdef.vieworg[i] = cl.predicted_origin[i] + ops->viewoffset[i]
 				+ cl.lerpfrac * (ps->viewoffset[i] - ops->viewoffset[i])
 				- backlerp * cl.prediction_error[i];
 		}
@@ -1325,8 +1325,8 @@ void CL_CalcViewValues (void)
 	else
 	{	// just use interpolated values
 		for (i=0 ; i<3 ; i++)
-			cl.refdef.vieworg[i] = ops->pmove.origin[i]*0.125 + ops->viewoffset[i] 
-				+ lerp * (ps->pmove.origin[i]*0.125 + ps->viewoffset[i] 
+			cl.refdef.vieworg[i] = ops->pmove.origin[i]*0.125 + ops->viewoffset[i]
+				+ lerp * (ps->pmove.origin[i]*0.125 + ps->viewoffset[i]
 				- (ops->pmove.origin[i]*0.125 + ops->viewoffset[i]) );
 	}
 
