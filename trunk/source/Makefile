@@ -82,7 +82,7 @@ endif
 endif
 endif
 
-ifeq ($(shell curl -V | grep -c), 3)
+ifeq ($(shell curl -V | grep -c .), 3)
 	BASE_CFLAGS += -DHAVE_CURL
 endif
 
