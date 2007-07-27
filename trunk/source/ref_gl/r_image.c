@@ -1594,12 +1594,9 @@ void GL_FreeUnusedImages (void)
 	r_hittexture->registration_sequence = registration_sequence;
 	r_bubbletexture->registration_sequence = registration_sequence;
 	r_shottexture->registration_sequence = registration_sequence;
+	r_bullettexture->registration_sequence = registration_sequence;
 	r_sayicontexture->registration_sequence = registration_sequence;
-	// MH - detail textures begin
-	// never free detail texture
-	r_detailtexture->registration_sequence = registration_sequence;
-	// MH - detail textures end
-
+	
 	//minimap stuff - only if those textures are present, as this was a feature added later on
 	//and if crx has been updated via galaxy, clients may not have these images
 	if(r_radarmap)

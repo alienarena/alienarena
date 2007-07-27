@@ -702,8 +702,10 @@ void CL_ParseTEnt (void)
 		MSG_ReadDir (&net_message, dir);
 
 		// FIXME: change to type
-		if (type == TE_GUNSHOT)
-			CL_ParticleEffect (pos, dir, 425, 10);	// shotgun - do I use this?
+		if (type == TE_GUNSHOT) {
+			CL_ParticleEffect (pos, dir, 425, 10);	
+			CL_BulletMarks(pos, dir);
+		}
 		else
 			CL_ParticleEffect (pos, dir, 425, 2);	// bullets, color is 0xe0
 
@@ -727,8 +729,10 @@ void CL_ParseTEnt (void)
 	case TE_SHIELD_SPARKS:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
-		if (type == TE_SCREEN_SPARKS)
+		if (type == TE_SCREEN_SPARKS) {
 			CL_LaserSparks (pos, dir, 0xd0, 20);
+			CL_BeamgunMark(pos, dir);
+		}
 		else
 			CL_ParticleEffect (pos, dir, 0xb0, 40);
 		//FIXME : replace or remove this sound

@@ -21,151 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 #include <GL/glu.h>
-image_t *r_detailtexture;
 image_t *r_flare;
 image_t *r_cubemap;
-
-// MH - detail textures begin
-// blatantly plagiarized darkplaces code
-// no bound in Q2.
-// this would be better as a #define but it's not runtime so it doesn't matter
-int bound (int smallest, int val, int biggest)
-{
-	if (val < smallest) return smallest;
-	if (val > biggest) return biggest;
-
-	return val;
-}
-
-
-void fractalnoise(byte *noise, int size, int startgrid)
-{
-	int x, y, g, g2, amplitude, min, max, size1 = size - 1, sizepower, gridpower;
-	int *noisebuf;
-#define n(x,y) noisebuf[((y)&size1)*size+((x)&size1)]
-
-	for (sizepower = 0;(1 << sizepower) < size;sizepower++);
-	if (size != (1 << sizepower))
-		Sys_Error("fractalnoise: size must be power of 2\n");
-
-	for (gridpower = 0;(1 << gridpower) < startgrid;gridpower++);
-	if (startgrid != (1 << gridpower))
-		Sys_Error("fractalnoise: grid must be power of 2\n");
-
-	startgrid = bound (0, startgrid, size);
-
-	amplitude = 0xFFFF; // this gets halved before use
-	noisebuf = malloc(size*size*sizeof(int));
-	memset(noisebuf, 0, size*size*sizeof(int));
-
-	for (g2 = startgrid;g2;g2 >>= 1)
-	{
-		// brownian motion (at every smaller level there is random behavior)
-		amplitude >>= 1;
-		for (y = 0;y < size;y += g2)
-			for (x = 0;x < size;x += g2)
-				n(x,y) += (rand()&amplitude);
-
-		g = g2 >> 1;
-		if (g)
-		{
-			// subdivide, diamond-square algorithm (really this has little to do with squares)
-			// diamond
-			for (y = 0;y < size;y += g2)
-				for (x = 0;x < size;x += g2)
-					n(x+g,y+g) = (n(x,y) + n(x+g2,y) + n(x,y+g2) + n(x+g2,y+g2)) >> 2;
-			// square
-			for (y = 0;y < size;y += g2)
-				for (x = 0;x < size;x += g2)
-				{
-					n(x+g,y) = (n(x,y) + n(x+g2,y) + n(x+g,y-g) + n(x+g,y+g)) >> 2;
-					n(x,y+g) = (n(x,y) + n(x,y+g2) + n(x-g,y+g) + n(x+g,y+g)) >> 2;
-				}
-		}
-	}
-	// find range of noise values
-	min = max = 0;
-	for (y = 0;y < size;y++)
-		for (x = 0;x < size;x++)
-		{
-			if (n(x,y) < min) min = n(x,y);
-			if (n(x,y) > max) max = n(x,y);
-		}
-	max -= min;
-	max++;
-	// normalize noise and copy to output
-	for (y = 0;y < size;y++)
-		for (x = 0;x < size;x++)
-			*noise++ = (byte) (((n(x,y) - min) * 256) / max);
-	free(noisebuf);
-#undef n
-}
-
-
-void R_BuildDetailTexture (void) 
-{ 
-   int x, y, light; 
-   float vc[3], vx[3], vy[3], vn[3], lightdir[3]; 
-
-   // increase this if you want 
-   #define DETAILRESOLUTION 256 
-
-   byte data[DETAILRESOLUTION][DETAILRESOLUTION][4], noise[DETAILRESOLUTION][DETAILRESOLUTION]; 
-
-   // this looks odd, but it's necessary cos Q2's uploader will lightscale the texture, which 
-   // will cause all manner of unholy havoc.  So we need to run it through GL_LoadPic before 
-   // we even fill in the data just to fill in the rest of the image_t struct, then we'll 
-   // build the texture for OpenGL manually later on. 
-   r_detailtexture = GL_LoadPic ("***detail***", (byte *) data, DETAILRESOLUTION, DETAILRESOLUTION, it_wall, 32); 
-
-   lightdir[0] = 0.5; 
-   lightdir[1] = 1; 
-   lightdir[2] = -0.25; 
-   VectorNormalize(lightdir); 
-
-   fractalnoise(&noise[0][0], DETAILRESOLUTION, DETAILRESOLUTION >> 4); 
-   for (y = 0;y < DETAILRESOLUTION;y++) 
-   { 
-      for (x = 0;x < DETAILRESOLUTION;x++) 
-      { 
-         vc[0] = x; 
-         vc[1] = y; 
-         vc[2] = noise[y][x] * (1.0f / 32.0f); 
-         vx[0] = x + 1; 
-         vx[1] = y; 
-         vx[2] = noise[y][(x + 1) % DETAILRESOLUTION] * (1.0f / 32.0f); 
-         vy[0] = x; 
-         vy[1] = y + 1; 
-         vy[2] = noise[(y + 1) % DETAILRESOLUTION][x] * (1.0f / 32.0f); 
-         VectorSubtract(vx, vc, vx); 
-         VectorSubtract(vy, vc, vy); 
-         CrossProduct(vx, vy, vn); 
-         VectorNormalize(vn); 
-         light = 128 - DotProduct(vn, lightdir) * 128; 
-         light = bound(0, light, 255); 
-         data[y][x][0] = data[y][x][1] = data[y][x][2] = light; 
-         data[y][x][3] = 255; 
-      } 
-   } 
-
-   // now we build the texture manually.  you can reuse this code for auto mipmap generation 
-   // in other contexts if you wish.  defines are in qgl.h 
-   // first, bind the texture.  probably not necessary, but it seems like good practice 
-   GL_Bind (r_detailtexture->texnum); 
-
-   // upload the correct texture data without any lightscaling interference 
-   gluBuild2DMipmaps (GL_TEXTURE_2D, GL_RGBA, DETAILRESOLUTION, DETAILRESOLUTION, GL_RGBA, GL_UNSIGNED_BYTE, (byte *) data); 
-
-   // set some quick and ugly filtering modes.  detail texturing works by scrunching a 
-   // large image into a small space, so there's no need for sexy filtering (change this, 
-   // turn off the blend in R_DrawDetailSurfaces, and compare if you don't believe me). 
-   // this also helps to take some of the speed hit from detail texturing away. 
-   // fucks up for some reason so using different filtering. 
-   qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min); 
-   qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max); 
-
-} 
-// MH - detail textures end
 
 #define CUBEMAP_MAXSIZE 32
 
@@ -318,6 +175,7 @@ void R_InitParticleTexture (void)
 	r_beamtexture = R_RegisterGfxPic("greenlightning");
 	r_beam2texture = R_RegisterGfxPic("greenline");
 	r_beam3texture = R_RegisterGfxPic("electrics3d");
+	r_bullettexture = R_RegisterParticlePic("bullethole");
 	r_radarmap = GL_FindImage("gfx/radar/radarmap",it_pic);
 	r_around = GL_FindImage("gfx/radar/around",it_pic);
 	if (!r_particletexture) {                                 //c14 add this line
@@ -339,13 +197,7 @@ void R_InitParticleTexture (void)
 	}
 	r_notexture = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 	
-	// MH - detail textures begin
-	// and for detail textures
-	R_BuildDetailTexture ();
-	// MH - detail textures end
 	//R_InitCubemapTextures (); //for future use
-	//lava haze
-//	R_InitSmokes();
 
 	Com_sprintf (flares, sizeof(flares), "gfx/flares/flare0.tga");
 	r_flare = GL_FindImage(flares, it_pic);
