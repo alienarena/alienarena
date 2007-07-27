@@ -2688,11 +2688,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 	}
 
+	//lose one health every second
 	if(g_losehealth->value && !ent->deadflag) {
 		if(regeneration->value || excessive->value || vampire->value)
 			return;
 		if((ent->health > g_losehealth_num->value) && (client->losehealth_framenum < level.framenum)) {
-			client->losehealth_framenum = level.framenum + 5;
+			client->losehealth_framenum = level.framenum + 10;
 			ent->health-=1;
 		}
 	}
