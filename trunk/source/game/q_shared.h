@@ -688,7 +688,7 @@ typedef struct
 #define	TE_BFG_LASER				23
 #define	TE_GREENBLOOD				26
 #define	TE_LIGHTNING				33
-#define	TE_HEATBEAM					38
+#define	TE_VAPORBEAM				38
 #define	TE_STEAM					40
 #define	TE_SAYICON					45
 #define	TE_TELEPORT_EFFECT			48

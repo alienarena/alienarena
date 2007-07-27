@@ -702,7 +702,7 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_BLASTER);
 	gi.WritePosition (tr.endpos);
-	gi.WriteDir (vec3_origin);
+	gi.WriteDir (tr.plane.normal);
 	gi.multicast (tr.endpos, MULTICAST_PVS);
 
 	if(detonate) {
@@ -1059,7 +1059,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	VectorCopy (tr.endpos, from);
 	
 	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_HEATBEAM);
+	gi.WriteByte (TE_VAPORBEAM);
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
 	gi.multicast (self->s.origin, MULTICAST_PHS);   
@@ -1668,8 +1668,8 @@ void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	flame->solid = SOLID_BBOX;
 	flame->s.effects |= EF_SHIPEXHAUST;
 	flame->s.renderfx = RF_TRANSLUCENT;
-	VectorSet (flame->mins,-20,-20,-20);
-	VectorSet (flame->maxs,20,20,20);
+	VectorClear (flame->mins);
+	VectorClear (flame->maxs);
 	flame->s.modelindex = gi.modelindex ("models/objects/fireball/tris.md2");
 	flame->owner = self;
 	flame->touch = flame_touch;

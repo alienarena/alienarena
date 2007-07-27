@@ -526,7 +526,7 @@ void target_laser_think (edict_t *self)
 		if (self->spawnflags & 8)
 			gi.WriteByte (TE_LIGHTNING);
 		else if (self->spawnflags & 16)
-			gi.WriteByte (TE_HEATBEAM);
+			gi.WriteByte (TE_VAPORBEAM);
 		else
 			gi.WriteByte (TE_LASERBEAM);
 		gi.WritePosition (start);

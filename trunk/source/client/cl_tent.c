@@ -680,6 +680,9 @@ void CL_ParseTEnt (void)
 	int		color;
 	int		r;
 	float	fcolor[3], intensity, alpha;
+	trace_t	trace;
+	static vec3_t mins = { -8, -8, -8 }; 
+    static vec3_t maxs = { 8, 8, 8 }; 
 
 	type = MSG_ReadByte (&net_message);
 
@@ -701,9 +704,8 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
 
-		// FIXME: change to type
 		if (type == TE_GUNSHOT) {
-			CL_ParticleEffect (pos, dir, 425, 10);	
+			CL_ParticleEffect (pos, dir, 425, 10);
 			CL_BulletMarks(pos, dir);
 		}
 		else
@@ -731,7 +733,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadDir (&net_message, dir);
 		if (type == TE_SCREEN_SPARKS) {
 			CL_LaserSparks (pos, dir, 0xd0, 20);
-			CL_BeamgunMark(pos, dir);
+			CL_BeamgunMark(pos, dir, 0.8);
 		}
 		else
 			CL_ParticleEffect (pos, dir, 0xb0, 40);
@@ -743,7 +745,6 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_LaserBeam (pos, pos2);
-
 		break;
 
 	case TE_SPLASH:			// bullet hitting water
@@ -790,7 +791,9 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_DisruptorBeam (pos, pos2);
-
+		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_PLAYERSOLID, true, NULL); 
+		if(trace.contents)
+			CL_BeamgunMark(pos2, trace.plane.normal, 0.4);
 		S_StartSound (pos, 0, 0, cl_sfx_railg, 1, ATTN_NONE, 0);
 		break;
 
@@ -811,16 +814,6 @@ void CL_ParseTEnt (void)
 	case TE_ROCKET_EXPLOSION:
 	case TE_ROCKET_EXPLOSION_WATER:
 		MSG_ReadPos (&net_message, pos);
-
-		ex = CL_AllocExplosion ();
-		VectorCopy (pos, ex->ent.origin);
-		ex->ent.flags = RF_FULLBRIGHT;
-		ex->start = cl.frame.servertime - 100;
-		ex->light = 350;
-		ex->lightcolor[0] = 1.0;
-		ex->lightcolor[1] = 0.5;
-		ex->lightcolor[2] = 0.5;
-		ex->ent.angles[1] = rand() % 360;
 
 		V_AddStain ( pos, 25, 15, 15, 15, 200 );
 		V_AddStain ( pos, 25*3, 15, 15, 15, 66 );
@@ -875,10 +868,13 @@ void CL_ParseTEnt (void)
 		CL_NewLightning (pos, pos2);
 		break;
 
-	case TE_HEATBEAM:
+	case TE_VAPORBEAM:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_VaporizerBeam (pos, pos2);
+		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_PLAYERSOLID, true, NULL); 
+		if(trace.contents)
+			CL_VaporizerMarks(pos2, trace.plane.normal);	
 		break;
 
 	case TE_STEAM:
@@ -965,7 +961,9 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_BlasterBeam (pos, pos2);
-
+		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_PLAYERSOLID, true, NULL); 
+		if(trace.contents)
+			CL_BlasterMark(pos2, trace.plane.normal);
 		break;
 
 	case TE_STAIN:
