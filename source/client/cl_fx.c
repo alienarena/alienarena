@@ -651,6 +651,7 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 		p->alphavel = -1.0 / (0.5 + frand()*0.3);
 	}
 }
+
 /*
 ===============
 CL_SplashEffect
@@ -1675,6 +1676,109 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 		VectorAdd (move, vec, move);
 	}
 }
+
+/*
+===============
+Wall Impacts
+
+===============
+*/
+
+void RotateForNormal(vec3_t normal, vec3_t result){
+	float forward, pitch, yaw;
+	
+	forward = sqrt(normal[0] * normal[0] + normal[1] * normal[1]);
+	pitch = (int)(atan2(normal[2], forward) * 180 / M_PI);
+	yaw = (int)(atan2(normal[1], normal[0]) * 180 / M_PI);
+	
+	if(pitch < 0)
+		pitch += 360;
+	
+	result[PITCH] = -pitch;
+	result[YAW] =  yaw;
+}
+void CL_BulletMarks(vec3_t org, vec3_t dir){
+	cparticle_t *p;
+	vec3_t		v;
+	int			j;
+	
+	if(!(p = new_particle()))
+		return;
+	
+	p->texnum = r_bullettexture->texnum;
+	p->color = 0 + (rand() & 1);
+	p->type = PARTICLE_DECAL;
+	p->blendsrc = GL_ZERO;
+	p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+	p->scale = .5;
+	p->scalevel = 0;
+	
+	VectorScale(dir, -1, v);
+	RotateForNormal(v, p->angle);
+	p->angle[ROLL] = rand() % 360;
+	VectorAdd(org, dir, p->org);
+	
+	p->alpha = 0.5;
+	p->alphavel = -0.2 / (2.0 + frand() * 0.3);
+	for (j=0 ; j<3 ; j++)
+	{
+			p->accel[j] = 0;
+			p->vel[j] = 0;
+	}
+}
+void CL_BeamgunMark(vec3_t org, vec3_t dir){
+	cparticle_t *p;
+	vec3_t		v;
+	int			j;
+	
+	if(!(p = new_particle()))
+		return;
+	
+	p->texnum = r_bullettexture->texnum;
+	p->color = 0xd4 + (rand() & 1);
+	p->type = PARTICLE_DECAL;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = .5;
+	p->scalevel = 0;
+	
+	VectorScale(dir, -1, v);
+	RotateForNormal(v, p->angle);
+	p->angle[ROLL] = rand() % 360;
+	VectorAdd(org, dir, p->org);
+	
+	p->alpha = 0.5;
+	p->alphavel = -0.8 / (2.0 + frand() * 0.3);
+	for (j=0 ; j<3 ; j++)
+	{
+			p->accel[j] = 0;
+			p->vel[j] = 0;
+	}
+	if(!(p = new_particle()))
+		return;
+	
+	p->texnum = r_bullettexture->texnum;
+	p->color = 0xd4 + (rand() & 1);
+	p->type = PARTICLE_DECAL;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = 1;
+	p->scalevel = 0;
+	
+	VectorScale(dir, -1, v);
+	RotateForNormal(v, p->angle);
+	p->angle[ROLL] = rand() % 360;
+	VectorAdd(org, dir, p->org);
+	
+	p->alpha = 0.5;
+	p->alphavel = -0.8 / (2.0 + frand() * 0.3);
+	for (j=0 ; j<3 ; j++)
+	{
+			p->accel[j] = 0;
+			p->vel[j] = 0;
+	}
+}
+
 /*
 ===============
 Particle Beams

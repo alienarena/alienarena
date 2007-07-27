@@ -75,6 +75,7 @@ image_t		*r_flaretexture;
 image_t		*r_beamtexture;
 image_t		*r_beam2texture;
 image_t		*r_beam3texture;
+image_t		*r_bullettexture;
 image_t		*r_radarmap; // wall texture for radar texgen
 image_t		*r_around;
 
@@ -721,7 +722,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 {
 	const gparticle_t *p;
 	int				i;
-	vec3_t			corner[4], up, right, pup, pright;
+	vec3_t			corner[4], up, right, pup, pright, dir;
 	float			scale, oldscale;
 	byte			color[4], oldcolor[4];
 	int			    oldtype;
@@ -799,6 +800,15 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 
 			VectorScale(pright, 5*scale, pright);
 			VectorScale(pup, 5*scale, pup);
+		}
+		else if(p->type == PARTICLE_DECAL) { 
+			VectorCopy(p->angle, dir);
+			AngleVectors(dir, NULL, right, up);
+			VectorScale ( right, p->dist, pright );
+			VectorScale ( up, p->dist, pup );
+			VectorScale(pright, 5*scale, pright);
+			VectorScale(pup, 5*scale, pup);
+
 		}
 		else {
 			VectorScale ( right, p->dist, pright );

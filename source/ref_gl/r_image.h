@@ -89,6 +89,7 @@ extern image_t		*r_hittexture;
 extern image_t		*r_bubbletexture;
 extern image_t		*r_reflecttexture;
 extern image_t		*r_shottexture;
+extern image_t		*r_bullettexture;
 extern image_t		*r_sayicontexture;
 extern image_t		*r_flaretexture;
 extern image_t		*r_beamtexture;
@@ -99,8 +100,6 @@ extern	image_t		gltextures[MAX_GLTEXTURES];
 extern	int			numgltextures;
 
 extern image_t		*r_flare;
-
-extern	image_t		*r_detailtexture;
 
 extern  image_t		*r_cubemap;
 
