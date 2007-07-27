@@ -342,7 +342,7 @@ void SV_Map (qboolean attractloop, char *levelstring, qboolean loadgame)
 
 	sv.attractloop = attractloop;
 
-	if(loadgame)
+	if(loadgame || !svs.initialized)
 		SV_InitGame ();	// the game is just starting
 
 	strcpy (level, levelstring);
