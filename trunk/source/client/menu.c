@@ -3917,11 +3917,11 @@ void StartServerActionFunc( void *self )
 	{
 		if (Com_ServerState())
 			Cbuf_AddText ("disconnect\n");
-		Cbuf_AddText (va("map %s\n", startmap));
+		Cbuf_AddText (va("startmap %s\n", startmap));
 	}
 	else
 	{
-		Cbuf_AddText (va("map %s\n", startmap));
+		Cbuf_AddText (va("startmap %s\n", startmap));
 	}
 
 	M_ForceMenuOff ();

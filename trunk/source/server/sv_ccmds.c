@@ -196,7 +196,29 @@ void SV_Map_f (void)
 	// archive server state
 	strncpy (svs.mapcmd, Cmd_Argv(1), sizeof(svs.mapcmd)-1);
 }
+void SV_StartMap_f (void)
+{
+	char	*map;
+	char	expanded[MAX_QPATH];
 
+	// if not a pcx, demo, or cinematic, check to make sure the level exists
+	map = Cmd_Argv(1);
+	if (!strstr (map, "."))
+	{
+		Com_sprintf (expanded, sizeof(expanded), "maps/%s.bsp", map);
+		if (FS_LoadFile (expanded, NULL) == -1)
+		{
+			Com_Printf ("Can't find %s\n", expanded);
+			return;
+		}
+	}
+
+	// start up the next map(and initialize a server)
+	SV_Map (false, Cmd_Argv(1), true );
+
+	// archive server state
+	strncpy (svs.mapcmd, Cmd_Argv(1), sizeof(svs.mapcmd)-1);
+}
 //===============================================================
 
 /*
@@ -533,6 +555,7 @@ void SV_InitOperatorCommands (void)
 	Cmd_AddCommand ("dumpuser", SV_DumpUser_f);
 
 	Cmd_AddCommand ("map", SV_Map_f);
+	Cmd_AddCommand ("startmap", SV_StartMap_f);
 	Cmd_AddCommand ("demomap", SV_DemoMap_f);
 	Cmd_AddCommand ("setmaster", SV_SetMaster_f);
 
