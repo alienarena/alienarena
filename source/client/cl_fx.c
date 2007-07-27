@@ -1726,7 +1726,7 @@ void CL_BulletMarks(vec3_t org, vec3_t dir){
 			p->vel[j] = 0;
 	}
 }
-void CL_BeamgunMark(vec3_t org, vec3_t dir){
+void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur){
 	cparticle_t *p;
 	vec3_t		v;
 	int			j;
@@ -1739,7 +1739,7 @@ void CL_BeamgunMark(vec3_t org, vec3_t dir){
 	p->type = PARTICLE_DECAL;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = .5;
+	p->scale = .75;
 	p->scalevel = 0;
 	
 	VectorScale(dir, -1, v);
@@ -1748,7 +1748,7 @@ void CL_BeamgunMark(vec3_t org, vec3_t dir){
 	VectorAdd(org, dir, p->org);
 	
 	p->alpha = 0.5;
-	p->alphavel = -0.8 / (2.0 + frand() * 0.3);
+	p->alphavel = -dur / (2.0 + frand() * 0.3);
 	for (j=0 ; j<3 ; j++)
 	{
 			p->accel[j] = 0;
@@ -1762,7 +1762,7 @@ void CL_BeamgunMark(vec3_t org, vec3_t dir){
 	p->type = PARTICLE_DECAL;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
-	p->scale = 1;
+	p->scale = 1.5;
 	p->scalevel = 0;
 	
 	VectorScale(dir, -1, v);
@@ -1771,11 +1771,127 @@ void CL_BeamgunMark(vec3_t org, vec3_t dir){
 	VectorAdd(org, dir, p->org);
 	
 	p->alpha = 0.5;
-	p->alphavel = -0.8 / (2.0 + frand() * 0.3);
+	p->alphavel = -dur / (2.0 + frand() * 0.3);
 	for (j=0 ; j<3 ; j++)
 	{
 			p->accel[j] = 0;
 			p->vel[j] = 0;
+	}
+}
+
+void CL_BlasterMark(vec3_t org, vec3_t dir){
+	cparticle_t *p;
+	vec3_t		v;
+	int			j;
+	
+	if(!(p = new_particle()))
+		return;
+	
+	p->texnum = r_bullettexture->texnum;
+	p->color = 0x74 + (rand() & 1);
+	p->type = PARTICLE_DECAL;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = .75;
+	p->scalevel = 0;
+	
+	VectorScale(dir, -1, v);
+	RotateForNormal(v, p->angle);
+	p->angle[ROLL] = rand() % 360;
+	VectorAdd(org, dir, p->org);
+	
+	p->alpha = 0.7;
+	p->alphavel = -0.4 / (2.0 + frand() * 0.3);
+	for (j=0 ; j<3 ; j++)
+	{
+			p->accel[j] = 0;
+			p->vel[j] = 0;
+	}
+	if(!(p = new_particle()))
+		return;
+	
+	p->texnum = r_bullettexture->texnum;
+	p->color = 0x74 + (rand() & 1);
+	p->type = PARTICLE_DECAL;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = 1.5;
+	p->scalevel = 0;
+	
+	VectorScale(dir, -1, v);
+	RotateForNormal(v, p->angle);
+	p->angle[ROLL] = rand() % 360;
+	VectorAdd(org, dir, p->org);
+	
+	p->alpha = 0.5;
+	p->alphavel = -0.4 / (2.0 + frand() * 0.3);
+	for (j=0 ; j<3 ; j++)
+	{
+			p->accel[j] = 0;
+			p->vel[j] = 0;
+	}
+}
+
+void CL_VaporizerMarks(vec3_t org, vec3_t dir){
+	cparticle_t *p;
+	vec3_t		v, forward, right, up;
+	int			i,j;
+	float		scatter;
+
+	for(i = 0; i < 6; i ++) {
+		if(!(p = new_particle()))
+			return;
+		
+		p->texnum = r_bullettexture->texnum;
+		p->color = 0xd4 + (rand()&7);
+		p->type = PARTICLE_DECAL;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE;
+		p->scale = .75;
+		p->scalevel = 0;
+		
+		VectorScale(dir, -1, v);
+		RotateForNormal(v, p->angle);
+		p->angle[ROLL] = rand() % 360;
+		VectorAdd(org, dir, p->org);
+
+		AngleVectors(p->angle, forward, right, up);
+
+		scatter = ((rand()%8)-4);
+		VectorMA(p->org, scatter, up, p->org);
+		
+		p->alpha = 0.7;
+		p->alphavel = -0.4 / (2.0 + frand() * 0.3);
+		for (j=0 ; j<3 ; j++)
+		{
+				p->accel[j] = 0;
+				p->vel[j] = 0;
+		}
+		if(!(p = new_particle()))
+			return;
+		
+		p->texnum = r_bullettexture->texnum;
+		p->color = 0x74 + (rand()&7);
+		p->type = PARTICLE_DECAL;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE;
+		p->scale = 1.5;
+		p->scalevel = 0;
+		
+		VectorScale(dir, -1, v);
+		RotateForNormal(v, p->angle);
+		p->angle[ROLL] = rand() % 360;
+		VectorAdd(org, dir, p->org);
+
+		VectorMA(p->org, scatter, up, p->org);
+		
+		p->alpha = 0.5;
+		p->alphavel = -0.4 / (2.0 + frand() * 0.3);
+		for (j=0 ; j<3 ; j++)
+		{
+				p->accel[j] = 0;
+				p->vel[j] = 0;
+		}
 	}
 }
 
