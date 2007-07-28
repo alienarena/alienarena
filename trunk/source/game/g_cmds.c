@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -205,7 +205,7 @@ void Cmd_Give_f (edict_t *ent)
 				continue;
 			if (!(it->flags & IT_AMMO))
 				continue;
-			Add_Ammo (ent, it, 1000);
+			Add_Ammo (ent, it, 1000, true, true);
 		}
 		if (!give_all)
 			return;
@@ -303,7 +303,7 @@ void Cmd_Give_f (edict_t *ent)
 		if (it_ent->inuse)
 			G_FreeEdict(it_ent);
 	}
-	
+
 }
 
 
@@ -854,7 +854,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
         i = cl->flood_whenhead - flood_msgs->value + 1;
         if (i < 0)
             i = (sizeof(cl->flood_when)/sizeof(cl->flood_when[0])) + i;
-		if (cl->flood_when[i] && 
+		if (cl->flood_when[i] &&
 			level.time - cl->flood_when[i] < flood_persecond->value) {
 			cl->flood_locktill = level.time + flood_waitdelay->value;
 			safe_cprintf(ent, PRINT_CHAT, "Flood protection:  You can't talk for %d seconds.\n",
