@@ -97,9 +97,9 @@ void PlayerNoise(edict_t *who, vec3_t where, int type)
 
 qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 {
-	int			index;
+	int		index;
 	gitem_t		*ammo;
-	gitem_t *vehicle;
+	gitem_t		*vehicle;
 
 	vehicle = FindItemByClassname("item_bomber");
 
@@ -141,6 +141,8 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		ammo = FindItem (ent->item->ammo);
 		if ( (int)dmflags->value & DF_INFINITE_AMMO )
 			Add_Ammo (other, ammo, 1000);
+		else if ((other->client->pers.inventory[index] > 1) && !(ent->spawnflags & DROPPED_PLAYER_ITEM))
+			Add_Ammo (other, ammo, 1); //already has weapon -- not a drop. Give him 1 ammo.
 		else
 			Add_Ammo (other, ammo, ammo->quantity);
 
@@ -151,7 +153,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 				if ((int)(dmflags->value) & DF_WEAPONS_STAY)
 					ent->flags |= FL_RESPAWN;
 				else
-					SetRespawn (ent, 10); //was 30
+					SetRespawn (ent, 5); //was 30
 			}
 		}
 	}
@@ -1474,7 +1476,7 @@ void Machinegun_Fire (edict_t *ent)
 
 		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 			ent->client->pers.inventory[ent->client->ammo_index] -= 10;
-		
+
 		//kick it ahead, we don't want spinning
 		ent->client->ps.gunframe = 12;
 
