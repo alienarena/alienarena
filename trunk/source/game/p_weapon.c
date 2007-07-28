@@ -141,8 +141,8 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		ammo = FindItem (ent->item->ammo);
 		if ( (int)dmflags->value & DF_INFINITE_AMMO )
 			Add_Ammo (other, ammo, 1000);
-		else if ((other->client->pers.inventory[index] > 1) && !(ent->spawnflags & DROPPED_PLAYER_ITEM))
-			Add_Ammo (other, ammo, 1); //already has weapon -- not a drop. Give him 1 ammo.
+		else if (other->client->pers.weapon->quantity && !(ent->spawnflags & DROPPED_PLAYER_ITEM))
+			Add_Ammo (other, ammo, 1); //already has weapon -- not dropped. Give him 1 ammo.
 		else
 			Add_Ammo (other, ammo, ammo->quantity);
 
