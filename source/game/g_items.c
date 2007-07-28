@@ -283,7 +283,7 @@ qboolean Pickup_Key (edict_t *ent, edict_t *other)
 
 //======================================================================
 
-qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count)
+qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboolean dropped)
 {
 	int			index;
 	int			max;
@@ -311,7 +311,7 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count)
 	if (ent->client->pers.inventory[index] == max)
 		return false;
 
-	else if (ent->client->pers.inventory[index] > 0 && !(ent->spawnflags & DROPPED_PLAYER_ITEM))
+	if (weapon && !dropped && (ent->client->pers.inventory[index] > 0))
 		count = 1; //already has weapon -- not dropped. Give him 1 ammo.
 
 	ent->client->pers.inventory[index] += count;
@@ -326,7 +326,7 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 {
 	int			oldcount;
 	int			count;
-	qboolean	weapon;
+	qboolean		weapon;
 
 	weapon = (ent->item->flags & IT_WEAPON);
 	if ( (weapon) && ( (int)dmflags->value & DF_INFINITE_AMMO ) )
@@ -338,7 +338,7 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 
 	oldcount = other->client->pers.inventory[ITEM_INDEX(ent->item)];
 
-	if (!Add_Ammo (other, ent->item, count))
+	if (!Add_Ammo (other, ent->item, count, false, true)) //Not 'dropped' but give full ammo even if ammo > 0
 		return false;
 
 	if (weapon && !oldcount)
