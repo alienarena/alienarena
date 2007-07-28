@@ -311,6 +311,9 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count)
 	if (ent->client->pers.inventory[index] == max)
 		return false;
 
+	else if (ent->client->pers.inventory[index] > 0 && !(ent->spawnflags & DROPPED_PLAYER_ITEM))
+		count = 1; //already has weapon -- not dropped. Give him 1 ammo.
+
 	ent->client->pers.inventory[index] += count;
 
 	if (ent->client->pers.inventory[index] > max)
