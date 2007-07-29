@@ -327,7 +327,7 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboo
 		count = 1; //already has weapon -- not dropped. Give him 1 ammo.
 
 	//if less than base ammo, restock ammo fully
-	if(ent->client->pers.inventory[index]) //less than base ammount
+	if(ent->client->pers.inventory[index] < base) //less than base ammount
 		ent->client->pers.inventory[index] = base;
 	else
 		ent->client->pers.inventory[index] += count;
