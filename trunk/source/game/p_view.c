@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -44,20 +44,20 @@ float SV_CalcRoll (vec3_t angles, vec3_t velocity)
 	float	sign;
 	float	side;
 	float	value;
-	
+
 	side = DotProduct (velocity, right);
 	sign = side < 0 ? -1 : 1;
 	side = fabs(side);
-	
+
 	value = sv_rollangle->value;
 
 	if (side < sv_rollspeed->value)
 		side = side * value / sv_rollspeed->value;
 	else
 		side = value;
-	
+
 	return side*sign;
-	
+
 }
 
 
@@ -181,10 +181,10 @@ void P_DamageFeedback (edict_t *player)
 
 		VectorSubtract (client->damage_from, player->s.origin, v);
 		VectorNormalize (v);
-		
+
 		side = DotProduct (v, right);
 		client->v_dmg_roll = kick*side*0.3;
-		
+
 		side = -DotProduct (v, forward);
 		client->v_dmg_pitch = kick*side*0.3;
 
@@ -213,7 +213,7 @@ Auto pitching on slopes?
   fall from 256: 580 = 336400
   fall from 384: 720 = 518400
   fall from 512: 800 = 640000
-  fall from 640: 960 = 
+  fall from 640: 960 =
 
   damage = deltavelocity*deltavelocity  * 0.0001
 
@@ -271,7 +271,7 @@ void SV_CalcViewOffset (edict_t *ent)
 
 		delta = DotProduct (ent->velocity, forward);
 		angles[PITCH] += delta*run_pitch->value;
-		
+
 		delta = DotProduct (ent->velocity, right);
 		angles[ROLL] += delta*run_roll->value;
 
@@ -334,10 +334,10 @@ void SV_CalcViewOffset (edict_t *ent)
         if (v[2] < -22)
             v[2] = -22;
         else if (v[2] > 30)
-            v[2] = 30; 
+            v[2] = 30;
 	}
 	else
-	{ 
+	{
         VectorSet (v, 0, 0, 0);
         if (ent->client->chasecam != NULL)
         {
@@ -434,7 +434,7 @@ void SV_CalcBlend (edict_t *ent)
 	vec3_t	vieworg;
 	int		remaining;
 
-	ent->client->ps.blend[0] = ent->client->ps.blend[1] = 
+	ent->client->ps.blend[0] = ent->client->ps.blend[1] =
 		ent->client->ps.blend[2] = ent->client->ps.blend[3] = 0;
 
 	// add for contents
@@ -456,11 +456,11 @@ void SV_CalcBlend (edict_t *ent)
 	//vehicles(flying)
 	if ( Jet_Active(ent) )
 	{
-		
+
 		/*update the fuel time*/
 		ent->client->Jet_remaining = ent->client->Jet_framenum - level.framenum;
 
-		/*if no fuel remaining, remove vehicle from inventory*/ 
+		/*if no fuel remaining, remove vehicle from inventory*/
 		if ( ent->client->Jet_remaining == 0 ) {
 		  ent->client->pers.inventory[ITEM_INDEX(FindItem("bomber"))] = 0;
 		  ent->client->pers.inventory[ITEM_INDEX(FindItem("strafer"))] = 0;
@@ -473,7 +473,7 @@ void SV_CalcBlend (edict_t *ent)
 		/*Play jetting sound every 0.6 secs (sound of monster icarus)*/
 		if ( ((int)ent->client->Jet_remaining % 6) == 0 ) {
 		  gi.sound (ent, CHAN_AUTO, gi.soundindex("vehicles/bomberidle.wav"), 0.9, ATTN_NORM, 0);
-		  
+
 		  // send muzzle flash
 		  gi.WriteByte (svc_muzzleflash);
 		  gi.WriteShort (ent-g_edicts);
@@ -573,7 +573,7 @@ void P_FallingDamage (edict_t *ent)
 
 	// never take damage if just release grapple or on grapple
 	if (level.time - ent->client->ctf_grapplereleasetime <= FRAMETIME * 2 ||
-		(ent->client->ctf_grapple && 
+		(ent->client->ctf_grapple &&
 		ent->client->ctf_grapplestate > CTF_GRAPPLE_STATE_FLY))
 		return;
 
@@ -595,8 +595,8 @@ void P_FallingDamage (edict_t *ent)
 	}
 
 	ent->client->fall_value = delta*0.5;
-	if (ent->client->fall_value > 40)
-		ent->client->fall_value = 40;
+	if (ent->client->fall_value > 10)
+		ent->client->fall_value = 10;
 	ent->client->fall_time = level.time + FALL_TIME;
 
 	if (delta > 30)
@@ -705,7 +705,7 @@ void P_WorldEffects (void)
 		// if out of air, start drowning
 		if (current_player->air_finished < level.time)
 		{	// drown!
-			if (current_player->client->next_drown_time < level.time 
+			if (current_player->client->next_drown_time < level.time
 				&& current_player->health > 0)
 			{
 				current_player->client->next_drown_time = level.time + 1;
@@ -810,7 +810,7 @@ void G_SetClientEffects (edict_t *ent)
 
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 		TeamEffects(ent);
-	
+
 	if (ent->client->quad_framenum > level.framenum)
 	{
 		remaining = ent->client->quad_framenum - level.framenum;
@@ -904,26 +904,26 @@ void G_SetClientFrame (edict_t *ent)
 	qboolean	duck, run;
 	//vehicles
 	gitem_t *vehicle;
-	
+
 	vehicle = FindItemByClassname("item_bomber");
 
 	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) { //don't animate the vehicle(yet!)
 		ent->s.frame = 0;
-		return;	
+		return;
 	}
 
 	vehicle = FindItemByClassname("item_strafer");
 
 	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) { //don't animate the vehicle(yet!)
 		ent->s.frame = 0;
-		return;	
+		return;
 	}
-	
+
 	vehicle = FindItemByClassname("item_hover");
 
 	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) { //don't animate the vehicle(yet!)
 		ent->s.frame = 0;
-		return;	
+		return;
 	}
 
 	if (ent->s.modelindex != 255)
@@ -947,7 +947,7 @@ void G_SetClientFrame (edict_t *ent)
 		goto newanim;
 	if (!ent->groundentity && client->anim_priority <= ANIM_WAVE)
 		goto newanim;
-	
+
 	//check for running while shooting
 	if (run && client->anim_priority == ANIM_ATTACK)
 		goto newanim;
@@ -1044,13 +1044,13 @@ void ClientEndServerFrame (edict_t *ent)
 	qboolean haste, sproing;
 	current_player = ent;
 	current_client = ent->client;
-	
+
 
 	//
 	// If the origin or velocity have changed since ClientThink(),
 	// update the pmove values.  This will happen when the client
 	// is pushed by a bmodel or kicked by an explosion.
-	// 
+	//
 	// If it wasn't updated here, the view position would lag a frame
 	// behind the body position when pushed -- "sinking into plats"
 	//
@@ -1094,14 +1094,14 @@ void ClientEndServerFrame (edict_t *ent)
 	// calculate speed and cycle to be used for
 	// all cyclic walking effects
 	//
-	
+
 	haste = current_client->haste_framenum > level.framenum;
 	if(haste) {
 		AngleVectors (ent->s.angles, addspeed, right, up);
 		addspeed[0] *= 100;
 		addspeed[1] *= 100;
  		VectorAdd(ent->velocity, addspeed, ent->velocity);
-		
+
 	}
 	sproing = current_client->sproing_framenum > level.framenum;
 	if(sproing)
@@ -1123,7 +1123,7 @@ void ClientEndServerFrame (edict_t *ent)
 		else
 			bobmove = 0.0625;
 	}
-	
+
 	bobtime = (current_client->bobtime += bobmove);
 
 	if (current_client->ps.pmove.pm_flags & PMF_DUCKED)
