@@ -286,23 +286,35 @@ qboolean Pickup_Key (edict_t *ent, edict_t *other)
 qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboolean dropped)
 {
 	int			index;
-	int			max;
+	int			max, base;
 
 	if (!ent->client)
 		return false;
 
-	if (item->tag == AMMO_BULLETS)
+	if (item->tag == AMMO_BULLETS) {
 		max = ent->client->pers.max_bullets;
-	else if (item->tag == AMMO_SHELLS)
+		base = BASE_BULLETS;
+	}
+	else if (item->tag == AMMO_SHELLS) {
 		max = ent->client->pers.max_shells;
-	else if (item->tag == AMMO_ROCKETS)
+		base = BASE_SHELLS;
+	}
+	else if (item->tag == AMMO_ROCKETS) {
 		max = ent->client->pers.max_rockets;
-	else if (item->tag == AMMO_GRENADES)
+		base = BASE_ROCKETS;
+	}
+	else if (item->tag == AMMO_GRENADES) {
 		max = ent->client->pers.max_grenades;
-	else if (item->tag == AMMO_CELLS)
+		base = BASE_GRENADES;
+	}
+	else if (item->tag == AMMO_CELLS) {
 		max = ent->client->pers.max_cells;
-	else if (item->tag == AMMO_SLUGS)
+		base = BASE_CELLS;
+	}
+	else if (item->tag == AMMO_SLUGS) {
 		max = ent->client->pers.max_slugs;
+		base = BASE_SLUGS;
+	}
 	else
 		return false;
 
@@ -311,10 +323,16 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboo
 	if (ent->client->pers.inventory[index] == max)
 		return false;
 
-	if (weapon && !dropped && (ent->client->pers.inventory[index] > 0))
+	if (weapon && !dropped && (ent->client->pers.inventory[index] > 0)) 
 		count = 1; //already has weapon -- not dropped. Give him 1 ammo.
 
-	ent->client->pers.inventory[index] += count;
+	//if less than base ammo, restock ammo fully - unless it's the vaporizer, which is a special case
+	//this offsets the overall power of the vaporizer slightly, in that it's still tough to keep 
+	//alot of ammo in it.  
+	if(ent->client->pers.inventory[index] < base && item->tag != AMMO_SLUGS) //less than base ammount
+		ent->client->pers.inventory[index] = base;
+	else
+		ent->client->pers.inventory[index] += count;
 
 	if (ent->client->pers.inventory[index] > max)
 		ent->client->pers.inventory[index] = max;

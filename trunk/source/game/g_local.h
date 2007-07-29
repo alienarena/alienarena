@@ -946,6 +946,13 @@ void GetChaseTarget(edict_t *ent);
 #define	ANIM_DEATH		5
 #define	ANIM_REVERSE	6
 
+#define BASE_ROCKETS	10
+#define BASE_SHELLS		10
+#define BASE_CELLS		50
+#define BASE_SLUGS		10
+#define BASE_GRENADES	50
+#define BASE_BULLETS	50
+
 
 // client data that stays across multiple level loads
 typedef struct
