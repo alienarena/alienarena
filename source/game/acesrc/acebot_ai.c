@@ -109,7 +109,7 @@ void ACEAI_Think (edict_t *self)
 		self->state = STATE_WANDER;
 
 	//times up on spawn protection 
-	if(level.time > self->client->spawnprotecttime + 2.0)
+	if(level.time > self->client->spawnprotecttime + g_spawnprotect->integer)
 		self->takedamage = DAMAGE_AIM;
 	
 	// Find any short range goal - but not if in air(ie, jumping a jumppad)

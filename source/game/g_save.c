@@ -229,7 +229,7 @@ void InitGame (void)
 	warmuptime = gi.cvar("warmuptime", "15", CVAR_LATCH);
 
 	//spawn protection
-	g_spawnprotect = gi.cvar("sv_spawnprotect", "1", CVAR_SERVERINFO);
+	g_spawnprotect = gi.cvar("g_spawnprotect", "2", CVAR_SERVERINFO);
 
 	//joust mode
 	joustmode = gi.cvar("sv_joustmode", "0", CVAR_SERVERINFO);
