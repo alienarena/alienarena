@@ -1577,7 +1577,10 @@ void PutClientInServer (edict_t *ent)
 	// clear entity values
 	ent->groundentity = NULL;
 	ent->client = &game.clients[index];
-	ent->takedamage = DAMAGE_AIM;
+	if(g_spawnprotect->value)
+		ent->takedamage = DAMAGE_NO;
+	else
+		ent->takedamage = DAMAGE_AIM;
 	ent->movetype = MOVETYPE_WALK;
 	ent->viewheight = 22;
 	ent->inuse = true;
@@ -1764,6 +1767,8 @@ void PutClientInServer (edict_t *ent)
 	// force the current weapon up
 	client->newweapon = client->pers.weapon;
 	ChangeWeapon (ent);
+
+	client->spawnprotecttime = level.time;
 }
 
 /*
@@ -2436,8 +2441,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	{
 
 		client->ps.pmove.pm_type = PM_FREEZE;
-		// can exit intermission after five seconds
-		if (level.time > level.intermissiontime + 5.0
+		// can exit intermission after ten seconds
+		if (level.time > level.intermissiontime + 10.0
 			&& (ucmd->buttons & BUTTON_ANY) )
 			level.exitintermission = true;
 		return;
@@ -2697,6 +2702,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			ent->health-=1;
 		}
 	}
+
+	//spawn protection has run out
+	if(level.time > ent->client->spawnprotecttime + 2.0)
+		ent->takedamage = DAMAGE_AIM; 
 
 }
 

@@ -368,7 +368,10 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	// clear entity values
 	bot->groundentity = NULL;
 	bot->client = &game.clients[index];
-	bot->takedamage = DAMAGE_AIM;
+	if(g_spawnprotect->value)
+		bot->takedamage = DAMAGE_NO;
+	else
+		bot->takedamage = DAMAGE_AIM;
 	bot->movetype = MOVETYPE_WALK;
 	bot->viewheight = 24;
 	bot->classname = "bot";
@@ -597,6 +600,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 		gi.WriteByte (MZ_LOGIN);
 		gi.multicast (bot->s.origin, MULTICAST_PVS);
 	}
+	client->spawnprotecttime = level.time;
 	
 }
 

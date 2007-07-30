@@ -75,6 +75,8 @@ cvar_t  *camptime;
 
 //warmup
 cvar_t  *warmuptime;
+//spawn protection
+cvar_t  *g_spawnprotect;
 
 //joust mode
 cvar_t  *joustmode;

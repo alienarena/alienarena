@@ -872,6 +872,9 @@ standardmove:
 attack:
 	// Set the attack
 	if(ACEAI_CheckShot(self)) {
+		//bot is taking a shot, lose spawn protection
+		if(self->enemy)
+			self->takedamage = DAMAGE_AIM; 
 		if(self->skill == 3) { //skill 3 bots can use alt-fires!
 			
 			// Base selection on distance.
