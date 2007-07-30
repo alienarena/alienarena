@@ -498,7 +498,7 @@ void SV_CalcBlend (edict_t *ent)
 		if (remaining > 30 || (remaining & 4) )
 			SV_AddBlend (0, 0, 1, 0.08, ent->client->ps.blend);
 	}
-	else if (ent->client->invincible_framenum > level.framenum)
+	else if (ent->client->invincible_framenum > level.framenum || !ent->takedamage)
 	{
 		remaining = ent->client->invincible_framenum - level.framenum;
 		if (remaining == 30)	// beginning to fade

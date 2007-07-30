@@ -2704,7 +2704,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	//spawn protection has run out
-	if(level.time > ent->client->spawnprotecttime + 2.0)
+	if(level.time > ent->client->spawnprotecttime + g_spawnprotect->integer)
 		ent->takedamage = DAMAGE_AIM; 
 
 }
