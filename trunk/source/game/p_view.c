@@ -832,6 +832,9 @@ void G_SetClientEffects (edict_t *ent)
 		ent->s.renderfx |= (RF_SHELL_RED|RF_SHELL_GREEN|RF_SHELL_BLUE);
 	}
 
+	if(!ent->takedamage)
+		ent->s.effects |= EF_PENT;
+
 }
 
 

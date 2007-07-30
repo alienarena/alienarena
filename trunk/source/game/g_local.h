@@ -605,6 +605,8 @@ extern  cvar_t  *camptime;
 //warmup time
 extern cvar_t   *warmuptime;
 
+extern cvar_t   *g_spawnprotect;
+
 //jousting
 extern cvar_t   *joustmode;
 
@@ -1139,6 +1141,8 @@ struct gclient_s
 
 	//joust attempts - for limiting how many times you can joust at a time
 	int joustattempts;
+
+	float spawnprotecttime;
 
 };
 

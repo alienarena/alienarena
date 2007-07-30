@@ -98,7 +98,7 @@ void ACEAI_Think (edict_t *self)
 	if(VectorLength(self->velocity) > 37) 
 		self->suicide_timeout = level.time + 10.0;
 
-	if(self->suicide_timeout < level.time && self->takedamage == DAMAGE_AIM)
+	if(self->suicide_timeout < level.time && self->takedamage == DAMAGE_AIM && !level.intermissiontime)
 	{
 		self->health = 0;
 		player_die (self, self, self, 100000, vec3_origin);
@@ -107,6 +107,10 @@ void ACEAI_Think (edict_t *self)
 	//reset the state from pauses for taunting
 	if(self->suicide_timeout < level.time + 8)
 		self->state = STATE_WANDER;
+
+	//times up on spawn protection 
+	if(level.time > self->client->spawnprotecttime + 2.0)
+		self->takedamage = DAMAGE_AIM;
 	
 	// Find any short range goal - but not if in air(ie, jumping a jumppad)
 	if(self->groundentity)
