@@ -25,12 +25,12 @@ Class13=CTTListBox
 Class14=UpdateDlg
 
 ResourceCount=7
-Resource1=IDD_SETPROFILE
-Resource2=IDD_GALAXY_DIALOG
-Resource3=IDD_ABOUTBOX
-Resource4=IDD_UPDATER
-Resource5=IDD_STARTUP
-Resource6=IDD_BUDDYNAME
+Resource1=IDD_UPDATER
+Resource2=IDD_SETPROFILE
+Resource3=IDD_GALAXY_DIALOG
+Resource4=IDD_STARTUP
+Resource5=IDD_BUDDYNAME
+Resource6=IDD_ABOUTBOX
 Resource7=IDR_MENU1
 
 [CLS:BuddyName]
@@ -69,6 +69,8 @@ Type=0
 BaseClass=CDialog
 HeaderFile=PlayerProfile.h
 ImplementationFile=PlayerProfile.cpp
+Filter=D
+VirtualFilter=dWC
 
 [CLS:CSkinHeaderCtrl]
 Type=0
@@ -174,7 +176,7 @@ Control30=IDC_STATIC,static,1342181902
 [DLG:IDD_SETPROFILE]
 Type=1
 Class=PlayerProfile
-ControlCount=11
+ControlCount=12
 Control1=IDOK,button,1342242817
 Control2=IDC_PLAYERNAME,edit,1350565888
 Control3=IDC_PLAYEREMAIL,edit,1350565888
@@ -186,6 +188,7 @@ Control8=IDC_GAMEPATH,edit,1350566016
 Control9=IDC_STATIC,static,1342308352
 Control10=IDC_STATIC,static,1342308352
 Control11=IDC_IRCSERVER,combobox,1344340099
+Control12=IDC_PRIVACY,static,1342373888
 
 [DLG:IDD_STARTUP]
 Type=1

@@ -9,8 +9,9 @@ ALIEN ARENA 2007
 * Completing Levels
 * Connecting to a server
 4. The CodeRED ACE Bot
-5. Credits
-6. Copyright Information
+5. How to uninstall
+6. Credits
+7. Copyright Information
 
 
 1.	INTRODUCTION
@@ -98,7 +99,13 @@ These bots are fully configurable using the Botconfigurator program.  You can ch
 Skill level 0 bots are quite easy to beat.  Skill level 1 bots are a little tougher, and do more dodging and are more accurate.  Skill level 2 bots do more advanced dodging, rocket jumping, and are even more accurate.  Level 3 bots are extremely skilled, and will strafe, and strafe jump around the level.  They will also taunt you after killing you.  If in Alien Arena, you play the single player tournament against the bots, selecting "easy" will make all bots skill level 0.  
 Selecting "normal" will leave them at whatever level they are configured. Selecting "hard" will make them all move up 1 skill level.
 
-5.	CREDITS
+5.	HOW TO UNINSTALL ALIEN ARENA
+
+To uninstall Alien Arena, simply go to your start programs menu, select your Alien Arena folder, and click on "Uninstall".  You can also go into your control panel, and uninstall Alien Arena in the programs and software section.
+
+For Linux users, you simply just need to delete your Alien Arena folder.
+
+6.	CREDITS
 
 There is a long list of credits - ALIEN ARENA 2007 is greatly indebted to the following for it's creation and completion:
 
@@ -117,7 +124,7 @@ Alien Arena IRC Channel: Astralsin
 
 There are other major contributions from the community from QuakeSrc.org, including MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  A very special thanks goes out to the community members who contributed to the crosshair and hud contest. A full list of those contributors can be found in the in-game credit list.
 
-6.	COPYRIGHT INFORMATION
+7.	COPYRIGHT INFORMATION
 
 ALIEN ARENA 2007 and it's original content are a copyright of COR Entertainment, LLC.  
 
@@ -134,6 +141,7 @@ Under no circumstances ALIEN ARENA 2007 as a whole be sold or used for profit, w
 
 Contact:  http://red.planetarena.org
 
+Privacty Policy: http://home.comcast.net/~alienrace/privacy.html
 
 
 

@@ -5,6 +5,7 @@
 #include "Galaxy.h"
 #include "PlayerProfile.h"
 #include "userinfo.h"
+#include "hyperlink.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -16,12 +17,13 @@ extern cUser user;
 extern bool joinflg;
 extern char CRXPath[MAX_PATH];
 extern char servidor[100];
+
 /////////////////////////////////////////////////////////////////////////////
 // PlayerProfile dialog
 
 
-PlayerProfile::PlayerProfile(CWnd* pParent /*=NULL*/)
-	: CDialog(PlayerProfile::IDD, pParent)
+PlayerProfile::PlayerProfile()
+	: CHyperLinkDlg(PlayerProfile::IDD)
 {
 	//{{AFX_DATA_INIT(PlayerProfile)
 	m_playeremailstr = user.email;
@@ -56,6 +58,7 @@ BEGIN_MESSAGE_MAP(PlayerProfile, CDialog)
 	ON_BN_CLICKED(IDC_JOINATSTARTUP, OnJoinatstartup)
 	ON_EN_CHANGE(IDC_GAMEPATH, OnChangeGamepath)
 	ON_LBN_SELCHANGE(IDC_IRCSERVER, OnSelchangeIrcserver)
+	ON_BN_CLICKED(IDC_PRIVACY, OnPrivacy)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -75,6 +78,8 @@ BOOL PlayerProfile::OnInitDialog()
 	else
 		joinflg = false;
 	m_joinstartup = joinflg;
+
+	setURL(m_PrivacyLink,IDC_PRIVACY);
 
 	return TRUE;
 }
@@ -152,4 +157,10 @@ void PlayerProfile::OnSelchangeIrcserver()
 		WritePrivateProfileString("Galaxy", "server", "irc.blackened.com", "galaxy.ini");
 		strcpy(servidor, "irc.blackened.com");
 	}
+}
+
+void PlayerProfile::OnPrivacy() 
+{
+	// TODO: Add your control notification handler code here
+	
 }
