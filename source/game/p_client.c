@@ -1753,7 +1753,7 @@ void PutClientInServer (edict_t *ent)
 		ent->client->ps.gunindex = 0;
 		gi.linkentity (ent);
 		return;
-	} else
+	} else if(!g_duel->value)
 		client->resp.spectator = false;
 	//end spectator mode
 
@@ -2274,7 +2274,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 	//if duel mode, then check number of existing players.  If more there are already two in the game, force
 	//this player to spectator mode, and assign a queue position(we can use the spectator cvar for this)
 	//duel mode should never be used in team games, so we will nip it in the bud right here and now!
-	if(g_duel->value && !(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)) {
+	if(g_duel->value) {
 		playernum = highpos = 0;
 		for (i = 0; i < maxclients->value; i++) {
 			if(g_edicts[i+1].inuse) { //always be careful here
@@ -2284,8 +2284,11 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 					highpos = g_edicts[i+1].client->pers.spectator;
 			}
 		}
+		safe_bprintf(PRINT_HIGH, "playernum: %i\n", playernum);
 		if(playernum > 1) //already have a pair in battle, send him to the back of the queue
 			ent->client->pers.spectator = highpos+1;
+		else
+			ent->client->pers.spectator = false;
 	}
 	//spectator mode
 	// check for a spectator

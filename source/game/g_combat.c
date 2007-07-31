@@ -325,7 +325,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		return;
 
 	if(mod != MOD_TELEFRAG)
-		if(targ->inuse)
+		if(targ->inuse && targ->client)
 			if(targ->client->spawnprotected)
 				return;
 			
