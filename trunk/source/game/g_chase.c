@@ -57,10 +57,7 @@ void UpdateChaseCam(edict_t *ent)
 	AngleVectors (angles, forward, right, NULL);
 	VectorNormalize(forward);
 
-	if(ent->client->pers.spectator == 2)
-		VectorMA(ownerv, 20, forward, o);
-	else 
-		VectorMA(ownerv, -30, forward, o);
+	VectorMA(ownerv, -30, forward, o);
 
 	if (o[2] < targ->s.origin[2] + 20)
 			o[2] = targ->s.origin[2] + 20;
