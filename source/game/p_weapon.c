@@ -554,7 +554,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 	{
 		if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK) )
 		{
-			ent->takedamage = DAMAGE_AIM;
+			ent->client->spawnprotected = false;
 
 			ent->client->latched_buttons &= ~BUTTON_ATTACK;
 			if ((!ent->client->ammo_index) ||
@@ -591,7 +591,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		//alt fire
 		else if ( ((ent->client->latched_buttons|ent->client->buttons) & BUTTON_ATTACK2) )
 		{
-			ent->takedamage = DAMAGE_AIM;
+			ent->client->spawnprotected = false;
 
 			ent->client->latched_buttons &= ~BUTTON_ATTACK2;
 			if ((!ent->client->ammo_index) ||
