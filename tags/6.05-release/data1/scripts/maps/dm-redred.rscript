@@ -1,0 +1,32 @@
+textures/arena6/wires1
+{
+	{
+		map gfx/lightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll static 0 static 2
+		alphashift 7 0.05 0.3
+	}
+	
+}
+textures/arena6/plate5
+{
+	{
+		map gfx/plate5fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 5 0.05 0.4
+		nolightmap
+	}
+}
+textures/martian/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena5/light2
+{
+	{
+		lensflare
+	}
+}

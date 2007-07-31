@@ -1,0 +1,87 @@
+textures/arena6/plate5
+{
+	{
+		map gfx/plate5fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 5 0.05 0.4
+		nolightmap
+	}
+}
+textures/arena6/rimlight2
+{
+	{
+		map gfx/flash.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 4 static 1
+		scroll static 10 static 0
+		alphashift 20 0.05 0.5
+	}
+	
+}
+textures/arena2/grid2
+{
+	{
+		map gfx/comp1.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static -1
+		alphashift 0 0.4 0.4
+		nolightmap
+	}
+	{
+		map gfx/comp2.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		origin -32 -96 -544
+		rotate 10
+		alphashift 0 0.2 0.2	
+		nolightmap
+	}
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.3 0.3
+		envmap
+	}
+}
+textures/arena6/fodblue
+{
+	{
+		map textures/arena6/fodblue.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.8 0.8
+	}
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+textures/arena2/grid3
+{
+	{
+		map gfx/greenline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 2
+		alphashift 5 0.05 0.7
+	}
+}
+textures/arena4/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena3/light1
+{
+	{
+		lensflare
+	}
+}
+textures/arena3/light2
+{
+	{
+		lensflare
+	}
+}
