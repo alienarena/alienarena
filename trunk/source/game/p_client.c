@@ -2737,6 +2737,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 	}
 
+	//spawn protection has run out
+	if(level.time > ent->client->spawnprotecttime + g_spawnprotect->integer)
+		ent->client->spawnprotected = false;
+
 	//lose one health every second
 	if(g_losehealth->value && !ent->deadflag) {
 		if(regeneration->value || excessive->value || vampire->value)
@@ -2747,9 +2751,6 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 	}
 
-	//spawn protection has run out
-	if(level.time > ent->client->spawnprotecttime + g_spawnprotect->integer)
-		ent->client->spawnprotected = false;
 }
 
 
