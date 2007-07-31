@@ -1,22 +1,118 @@
-#if !defined(AFX_PLAYERPROFILE_H__3E1FD51E_6213_437D_9A2B_96C43A072E75__INCLUDED_)
-#define AFX_PLAYERPROFILE_H__3E1FD51E_6213_437D_9A2B_96C43A072E75__INCLUDED_
+/*
+ * Module ID: mfcpp.h
+ * Title    : MFC++: Extend MFC classes.
+ *
+ * Author   : Olivier Langlois <olivier@olivierlanglois.net>
+ * Date     : December 12, 2005
+ *
+ * For details on CStrechyStatusBar class, go to:
+ * http://www.olivierlanglois.net/clover.html
+ *
+ * For details on CSubclassToolTipCtrl and CHyperLinkDlg classes, go to:
+ * http://www.olivierlanglois.net/hyperlinkdemo.htm
+ *
+ * For details on CMinMaxFrame class, go to:
+ * http://www.olivierlanglois.net/minmaxdemo.html
+ *
+ * Revision :
+ *
+ * 001        03-Feb-2006 - Olivier Langlois
+ *            - Added CMinMaxFrame class
+ */
 
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-// PlayerProfile.h : header file
-//
-#include "hyperlink.h"
-/////////////////////////////////////////////////////////////////////////////
-// PlayerProfile dialog
-class CDemoLink : public CHyperLink
+#ifndef   _MFCPP_H_
+#define   _MFCPP_H_
+
+#include <afxext.h>         // MFC extensions
+#include <afxcmn.h>			// MFC support for Windows Common Controls
+
+/*
+ * Defines
+ */
+#define URLMAXLENGTH 256
+
+/*
+ * Forward declaration
+ */
+class CHyperLink;
+
+/*
+ * class CStrechyStatusBar
+ */
+class CStrechyStatusBar : public CStatusBar
 {
 protected:
-	virtual void OnSelect(void)
-	{ ((CFrameWnd *)AfxGetMainWnd())->SetMessageText(m_strURL); }
-	virtual void OnDeselect(void)
-	{ ((CFrameWnd *)AfxGetMainWnd())->SetMessageText(AFX_IDS_IDLEMESSAGE); }
+/******************************************************************************
+ *
+ * Name      : AddWindowTool
+ *
+ * Purpose   : This function can be called from your derived class OnCreate()
+ *             function once the status bar indicators have been installed.
+ *             For an example, see cloverstatusbar.cpp in
+ *             http://www.olivierlanglois.net/clover.html
+ *
+ * Parameters: None
+ *
+ * Return value : None
+ *
+ ****************************************************************************/
+	void MakeStrechy(void)
+	{
+		UINT nID, nStyle;
+		int  cxWidth;
+		/*
+		 * Set the first strechy indicator width to its minimum to
+		 * make sure that the right side indicators do not disapear when
+		 * the status bar width is reduced.
+		 */
+		GetPaneInfo(0, nID, nStyle, cxWidth);
+		SetPaneInfo(0, nID, nStyle, 1);
+	}
 };
+
+/*
+ * class CSubclassToolTipCtrl
+ */
+class CSubclassToolTipCtrl : public CToolTipCtrl
+{
+// Operations
+public:
+/******************************************************************************
+ *
+ * Name      : AddWindowTool
+ *
+ * Purpose   : Add a window tool by using the Tooltip subclass feature
+ *
+ * Parameters:
+ *     hWin    (HWND)    Tool window
+ *     pszText (LPTSTR)  Tip text (can also be a string resource ID).
+ *
+ * Return value : Returns TRUE if successful, or FALSE otherwise.
+ *
+ ****************************************************************************/
+	BOOL AddWindowTool( HWND hWin, LPTSTR pszText );
+
+/******************************************************************************
+ *
+ * Name      : AddRectTool
+ *
+ * Purpose   : Add a rect tool by using the Tooltip subclass feature
+ *
+ * Parameters:
+ *     hWin    (HWND)    Tool window parent
+ *     pszText (LPTSTR)  Tip text (can also be a string resource ID).
+ *     lpRect  (LPCRECT) Tool rect
+ *     nIDTool (UINT)    User defined Tool ID
+ *
+ * Return value : Returns TRUE if successful, or FALSE otherwise.
+ *
+ ****************************************************************************/
+	BOOL AddRectTool( HWND hWin, LPTSTR pszText, LPCRECT lpRect, UINT nIDTool );
+
+// Implementation
+	void FillInToolInfo(TOOLINFO& ti, HWND hWnd, UINT nIDTool) const;
+};
+
 /*
  * class CHyperLinkDlg
  */
@@ -182,59 +278,4 @@ private:
 	int findDockSide(void);
 };
 
-class PlayerProfile : public CHyperLinkDlg
-{
-// Construction
-public:
-	PlayerProfile();   // standard constructor
-
-// Dialog Data
-	//{{AFX_DATA(PlayerProfile)
-	enum { IDD = IDD_SETPROFILE };
-	CComboBox	m_ircselectserver;
-	CEdit	m_gamepathctrl;
-	CButton	m_joinstartupctrl;
-	CEdit	m_playernamectrl;
-	CEdit	m_playeremailctrl;
-	CString	m_playeremailstr;
-	CString	m_playernamestr;
-	BOOL	m_joinstartup;
-	CString	m_gamepathstr;
-	//}}AFX_DATA
-
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(PlayerProfile)
-	protected:
-	virtual BOOL OnInitDialog();
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
-
-	// Generated message map functions
-	//{{AFX_MSG(PlayerProfile)
-	afx_msg void OnChangePlayername();
-	afx_msg void OnChangePlayeremail();
-	virtual void OnOK();
-	afx_msg void OnJoinatstartup();
-	afx_msg void OnChangeGamepath();
-	afx_msg void OnSelchangeIrcserver();
-	afx_msg void OnPrivacy();
-	//}}AFX_MSG
-private:
-
-CDemoLink	m_PrivacyLink;
-
-	DECLARE_MESSAGE_MAP()
-
-
-
-};
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_PLAYERPROFILE_H__3E1FD51E_6213_437D_9A2B_96C43A072E75__INCLUDED_)
+#endif /* _MFCPP_H_ */

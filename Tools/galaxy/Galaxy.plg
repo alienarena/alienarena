@@ -3,43 +3,82 @@
 <pre>
 <h1>Build Log</h1>
 <h3>
---------------------Configuration: Galaxy - Win32 InHouse--------------------
+--------------------Configuration: Galaxy - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP5B2.tmp" with contents
+Creating command line "rc.exe /l 0x409 /fo"Release/Galaxy.res" /d "NDEBUG" "C:\Alien Arena 2007\Tools\galaxy\Galaxy.rc"" 
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP824F.tmp" with contents
 [
-/nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "INHOUSE" /Fp"Galaxy___Win32_InHouse/Galaxy.pch" /Yu"stdafx.h" /Fo"Galaxy___Win32_InHouse/" /Fd"Galaxy___Win32_InHouse/" /FD /c 
+/nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Fp"Release/Galaxy.pch" /Yu"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Alien Arena 2007\Tools\galaxy\BuddyName.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\Galaxy.cpp"
 "C:\Alien Arena 2007\Tools\galaxy\GalaxyDlg.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\PlayerProfile.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\PollServer.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\SkinHeaderCtrl.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\SkinHorizontalScrollbar.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\SkinListCtrl.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\SkinVerticleScrollbar.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\UpdateDlg.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\UpdateGame.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\hyperlink.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\minmaxlogic.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\mfcpp.cpp"
 ]
-Creating command line "cl.exe @C:\Users\John\AppData\Local\Temp\RSP5B2.tmp" 
-Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP5B3.tmp" with contents
+Creating command line "cl.exe @C:\Users\John\AppData\Local\Temp\RSP824F.tmp" 
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP8250.tmp" with contents
 [
-kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib comctl32.lib Winmm.lib fce32.lib /nologo /subsystem:windows /incremental:no /pdb:"Galaxy___Win32_InHouse/galaxy.pdb" /machine:I386 /out:"c:/Alien Arena Files/galaxy.exe" 
-".\Galaxy___Win32_InHouse\BuddyName.obj"
-".\Galaxy___Win32_InHouse\Galaxy.obj"
-".\Galaxy___Win32_InHouse\GalaxyDlg.obj"
-".\Galaxy___Win32_InHouse\PlayerProfile.obj"
-".\Galaxy___Win32_InHouse\PollServer.obj"
-".\Galaxy___Win32_InHouse\SkinHeaderCtrl.obj"
-".\Galaxy___Win32_InHouse\SkinHorizontalScrollbar.obj"
-".\Galaxy___Win32_InHouse\SkinListCtrl.obj"
-".\Galaxy___Win32_InHouse\SkinVerticleScrollbar.obj"
-".\Galaxy___Win32_InHouse\StdAfx.obj"
-".\Galaxy___Win32_InHouse\UpdateDlg.obj"
-".\Galaxy___Win32_InHouse\UpdateGame.obj"
-".\Galaxy___Win32_InHouse\Galaxy.res"
+/nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Fp"Release/Galaxy.pch" /Yc"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Alien Arena 2007\Tools\galaxy\StdAfx.cpp"
 ]
-Creating command line "link.exe @C:\Users\John\AppData\Local\Temp\RSP5B3.tmp"
+Creating command line "cl.exe @C:\Users\John\AppData\Local\Temp\RSP8250.tmp" 
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP8251.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib comctl32.lib Winmm.lib fce32.lib /nologo /subsystem:windows /incremental:no /pdb:"Release/Galaxy.pdb" /machine:I386 /out:"c:/Alien Arena 2007/Galaxy.exe" 
+".\Release\BuddyName.obj"
+".\Release\Galaxy.obj"
+".\Release\GalaxyDlg.obj"
+".\Release\PlayerProfile.obj"
+".\Release\PollServer.obj"
+".\Release\SkinHeaderCtrl.obj"
+".\Release\SkinHorizontalScrollbar.obj"
+".\Release\SkinListCtrl.obj"
+".\Release\SkinVerticleScrollbar.obj"
+".\Release\StdAfx.obj"
+".\Release\UpdateDlg.obj"
+".\Release\UpdateGame.obj"
+".\Release\Galaxy.res"
+".\Release\hyperlink.obj"
+".\Release\minmaxlogic.obj"
+".\Release\mfcpp.obj"
+]
+Creating command line "link.exe @C:\Users\John\AppData\Local\Temp\RSP8251.tmp"
 <h3>Output Window</h3>
+Compiling resources...
 Compiling...
+StdAfx.cpp
+Compiling...
+BuddyName.cpp
+Galaxy.cpp
 GalaxyDlg.cpp
+PlayerProfile.cpp
+PollServer.cpp
+SkinHeaderCtrl.cpp
+SkinHorizontalScrollbar.cpp
+SkinListCtrl.cpp
+SkinVerticleScrollbar.cpp
+UpdateDlg.cpp
+UpdateGame.cpp
+hyperlink.cpp
+minmaxlogic.cpp
+mfcpp.cpp
+Generating Code...
 Linking...
-LINK : warning LNK4089: all references to "SHELL32.dll" discarded by /OPT:REF
 
 
 
 <h3>Results</h3>
-galaxy.exe - 0 error(s), 1 warning(s)
+Galaxy.exe - 0 error(s), 0 warning(s)
 </pre>
 </body>
 </html>

@@ -138,6 +138,18 @@ SOURCE=.\GalaxyDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\hyperlink.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\mfcpp.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\minmaxlogic.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\PlayerProfile.cpp
 # End Source File
 # Begin Source File
@@ -192,6 +204,10 @@ SOURCE=.\Galaxy.h
 # Begin Source File
 
 SOURCE=.\GalaxyDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\hyperlink.h
 # End Source File
 # Begin Source File
 

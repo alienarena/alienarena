@@ -91,6 +91,7 @@
 #define IDC_IRCSERVER                   1026
 #define IDC_NEWS                        1027
 #define IDC_UPDATEPROGRESS              1028
+#define IDC_PRIVACY                     1032
 #define ID_MENU_CONFIGURE               32771
 #define ID_SERVERTOOLS_REFRESH          32772
 #define ID_SERVERTOOLS_JOIN             32773
@@ -105,7 +106,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        237
 #define _APS_NEXT_COMMAND_VALUE         32780
-#define _APS_NEXT_CONTROL_VALUE         1032
+#define _APS_NEXT_CONTROL_VALUE         1033
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
