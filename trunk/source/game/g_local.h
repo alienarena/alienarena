@@ -576,6 +576,9 @@ extern  cvar_t  *excessive;
 extern  cvar_t  *grapple;
 extern  cvar_t  *classbased;
 
+//duel mode
+extern	cvar_t	*g_duel;
+
 extern	cvar_t	*g_losehealth;
 extern	cvar_t	*g_losehealth_num;
 
@@ -605,6 +608,7 @@ extern  cvar_t  *camptime;
 //warmup time
 extern cvar_t   *warmuptime;
 
+//spawn protection
 extern cvar_t   *g_spawnprotect;
 
 //jousting
@@ -988,7 +992,8 @@ typedef struct
 	int			game_helpchanged;
 	int			helpchanged;
 
-	qboolean	spectator;			// client is a spectator
+	int			spectator;			// client is a spectator
+
 } client_persistant_t;
 
 // client data that stays across deathmatch respawns
@@ -1143,6 +1148,7 @@ struct gclient_s
 	int joustattempts;
 
 	float spawnprotecttime;
+	qboolean spawnprotected;
 
 };
 

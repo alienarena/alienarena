@@ -1578,9 +1578,8 @@ void PutClientInServer (edict_t *ent)
 	ent->groundentity = NULL;
 	ent->client = &game.clients[index];
 	if(g_spawnprotect->value)
-		ent->takedamage = DAMAGE_NO;
-	else
-		ent->takedamage = DAMAGE_AIM;
+		ent->client->spawnprotected = true;
+	ent->takedamage = DAMAGE_AIM;
 	ent->movetype = MOVETYPE_WALK;
 	ent->viewheight = 22;
 	ent->inuse = true;
@@ -2262,6 +2261,8 @@ loadgames will.
 qboolean ClientConnect (edict_t *ent, char *userinfo)
 {
 	char	*value;
+	int		i, numspec, playernum;
+	int		highpos;
 
 	// check to see if they are on the banned IP list
 	value = Info_ValueForKey (userinfo, "ip");
@@ -2270,11 +2271,27 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 		return false;
 	}
 
-	//specator mode
+	//if duel mode, then check number of existing players.  If more there are already two in the game, force
+	//this player to spectator mode, and assign a queue position(we can use the spectator cvar for this)
+	//duel mode should never be used in team games, so we will nip it in the bud right here and now!
+	if(g_duel->value && !(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)) {
+		playernum = highpos = 0;
+		for (i = 0; i < maxclients->value; i++) {
+			if(g_edicts[i+1].inuse) { //always be careful here
+				if(!g_edicts[i+1].client->pers.spectator) //in battle!
+					playernum++;
+				if(g_edicts[i+1].client->pers.spectator > highpos)
+					highpos = g_edicts[i+1].client->pers.spectator;
+			}
+		}
+		if(playernum > 1) //already have a pair in battle, send him to the back of the queue
+			ent->client->pers.spectator = highpos+1;
+	}
+	//spectator mode
 	// check for a spectator
 	value = Info_ValueForKey (userinfo, "spectator");
 	if (deathmatch->value && *value && strcmp(value, "0")) {
-		int i, numspec;
+		
 
 		if (*spectator_password->string &&
 			strcmp(spectator_password->string, "none") &&
@@ -2340,7 +2357,7 @@ Will not be called between levels.
 */
 void ClientDisconnect (edict_t *ent)
 {
-	int		playernum;
+	int		i, playernum, lowpos;
 
 	if (!ent->client)
 		return;
@@ -2368,6 +2385,28 @@ void ClientDisconnect (edict_t *ent)
 	if(sv_botkickthreshold->integer)
 		ACESP_LoadBots(ent, 1);
 
+	//if in duel mode, we need to bump people down the queue if its the player in game leaving
+	if(g_duel->value && !(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)) {
+		lowpos = 10000; //ridiculous high number
+		if(!ent->client->pers.spectator) { //was playing
+			for (i = 0; i < maxclients->value; i++) { //get the lowest position number in queue
+				if(g_edicts[i+1].inuse) { //always be careful here
+					if(g_edicts[i+1].client->pers.spectator) {
+						if(g_edicts[i+1].client->pers.spectator < lowpos)
+							lowpos = g_edicts[i+1].client->pers.spectator;
+					}
+				}
+			}
+			for (i = 0; i < maxclients->value; i++) { //get the next guy in line, and put him in the game
+				if(g_edicts[i+1].inuse) { //always be careful here
+					if(g_edicts[i+1].client->pers.spectator == lowpos) { //got him
+						g_edicts[i+1].client->pers.spectator = 0; //put him in
+					}
+				}
+			}
+		}
+	}
+
 	// send effect
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -2383,6 +2422,7 @@ void ClientDisconnect (edict_t *ent)
 
 	playernum = ent-g_edicts-1;
 	gi.configstring (CS_PLAYERSKINS+playernum, "");
+
 
 }
 
@@ -2626,7 +2666,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				client->pers.spectator = false; //we have a team, join
 			//	safe_bprintf(PRINT_HIGH, "red: %i blue: %i\n", red_team_cnt, blue_team_cnt);
 			}
-			else if(((int)(dmflags->value) & DF_SKINTEAMS) || (ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM) {
+			else if((((int)(dmflags->value) & DF_SKINTEAMS) || (ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM) && client->resp.spectator < 3) {
 				if(red_team_cnt < blue_team_cnt)
 					ent->dmteam = RED_TEAM; //gonna put the autojoin here
 				else
@@ -2649,11 +2689,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	if (client->resp.spectator) {
-		if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
+		if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && client->resp.spectator < 3) {
 			if(ent->dmteam == NO_TEAM && (level.time/2 == ceil(level.time/2)))
 				safe_centerprintf(ent, "\n\n\nPress <fire> to autojoin\nor <jump> to join BLUE\nor <crouch> to join RED\n");
+		}
 		if (ucmd->upmove >= 10) {
-			if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM) {
+			if(((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM) && client->resp.spectator < 3) {
 				ent->dmteam = BLUE_TEAM; //join BLUE
 				client->pers.spectator = false;
 				ClientChangeSkin(ent);
@@ -2666,8 +2707,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 					GetChaseTarget(ent);
 			}
 		}
-		else if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM &&
-			(ucmd->upmove < 0)) {
+		else if(((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM &&
+			(ucmd->upmove < 0))  && client->resp.spectator < 3){
 
 			ent->dmteam = RED_TEAM; //join RED
 			client->pers.spectator = false;
@@ -2705,8 +2746,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	//spawn protection has run out
 	if(level.time > ent->client->spawnprotecttime + g_spawnprotect->integer)
-		ent->takedamage = DAMAGE_AIM; 
-
+		ent->client->spawnprotected = false;
 }
 
 

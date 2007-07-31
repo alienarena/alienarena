@@ -369,9 +369,8 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	bot->groundentity = NULL;
 	bot->client = &game.clients[index];
 	if(g_spawnprotect->value)
-		bot->takedamage = DAMAGE_NO;
-	else
-		bot->takedamage = DAMAGE_AIM;
+		bot->client->spawnprotected = true;
+	bot->takedamage = DAMAGE_AIM;
 	bot->movetype = MOVETYPE_WALK;
 	bot->viewheight = 24;
 	bot->classname = "bot";

@@ -47,6 +47,9 @@ cvar_t  *excessive;
 cvar_t  *grapple;
 cvar_t  *classbased;
 
+//duel mode
+cvar_t	*g_duel;
+
 cvar_t	*g_losehealth;
 cvar_t	*g_losehealth_num;
 
@@ -75,6 +78,7 @@ cvar_t  *camptime;
 
 //warmup
 cvar_t  *warmuptime;
+
 //spawn protection
 cvar_t  *g_spawnprotect;
 

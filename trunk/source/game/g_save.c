@@ -199,6 +199,9 @@ void InitGame (void)
 	grapple = gi.cvar ("grapple", "0", CVAR_LATCH);
 	classbased = gi.cvar ("classbased", "0", CVAR_LATCH);
 
+	//duel mode
+	g_duel = gi.cvar ("g_duel", "0", CVAR_LATCH);
+
 	g_losehealth = gi.cvar ("g_losehealth", "1", CVAR_LATCH);
 	g_losehealth_num = gi.cvar ("g_losehealth_num", "100", CVAR_LATCH);
 

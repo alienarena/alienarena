@@ -498,7 +498,7 @@ void SV_CalcBlend (edict_t *ent)
 		if (remaining > 30 || (remaining & 4) )
 			SV_AddBlend (0, 0, 1, 0.08, ent->client->ps.blend);
 	}
-	else if (ent->client->invincible_framenum > level.framenum || !ent->takedamage)
+	else if (ent->client->invincible_framenum > level.framenum || ent->client->spawnprotected)
 	{
 		remaining = ent->client->invincible_framenum - level.framenum;
 		if (remaining == 30)	// beginning to fade
@@ -832,7 +832,7 @@ void G_SetClientEffects (edict_t *ent)
 		ent->s.renderfx |= (RF_SHELL_RED|RF_SHELL_GREEN|RF_SHELL_BLUE);
 	}
 
-	if(!ent->takedamage)
+	if(ent->client->spawnprotected)
 		ent->s.effects |= EF_PENT;
 
 }
