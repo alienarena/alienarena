@@ -8,8 +8,13 @@ would look like this:
 */10 * * * * /home/aa/cron/launch-server ctf.cfg     >/dev/null 2>&1
 */10 * * * * /home/aa/cron/launch-server teamdm.cfg  >/dev/null 2>&1
 
-Don't forget to edit launch-server to set the paths correctly for your
-executable.
+Additonally, a master server would have the following line in the crontab
+(most people won't want this):
+
+*/10 * * * * /home/aa/cron/check-master >/dev/null 2>&1 
+
+Don't forget to edit the launch-server/check-master scripts to set the paths
+correctly for your executable.
 
 'svstat' is a ruby script that will query local servers and produce some nice
 output for server admin.
