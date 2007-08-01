@@ -390,12 +390,41 @@ void BeginIntermission (edict_t *targ)
 
 }
 
+void CheckDuelWinner(void) {
+	int	i;
+	int highpos, highscore;
 
+	highpos = 0;
+	highscore = 0;
+
+	for (i = 0; i < maxclients->value; i++) {
+		if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
+			if(g_edicts[i+1].client->pers.queue > highpos)
+				highpos = g_edicts[i+1].client->pers.queue;
+			if(g_edicts[i+1].client->resp.score > highscore)
+				highscore = g_edicts[i+1].client->resp.score;
+		}
+	}
+	for (i = 0; i < maxclients->value; i++) {
+		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
+			if((g_edicts[i+1].client->resp.score < highscore) && g_edicts[i+1].client->pers.queue < 3) {
+				g_edicts[i+1].client->pers.queue = highpos; //loser, kicked to the back of the line
+			}
+			else { //move everyone else down a notch(never less than 0)
+				if(g_edicts[i+1].client->pers.queue > 1) 
+					g_edicts[i+1].client->pers.queue--;
+			}
+		}
+	}
+}
 
 void EndIntermission(void)
 {
 	int		i;
 	edict_t	*ent;
+
+	if(g_duel->value)
+		CheckDuelWinner();
 
 	for (i=0 ; i<maxclients->value; i++)
 	{
@@ -457,7 +486,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 	for (i=0 ; i<game.maxclients ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
-		if (!cl_ent->inuse || game.clients[i].resp.spectator)
+		if (!cl_ent->inuse || (!g_duel->value && game.clients[i].resp.spectator))
 			continue;
 
 		score = game.clients[i].resp.score;
@@ -503,9 +532,16 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		stringlength += j;
 		
 		// send the layout
-		Com_sprintf (entry, sizeof(entry),
-			"client %i %i %i %i %i %i ",
-			x, y, sorted[i], cl->resp.score, cl->ping, (level.framenum - cl->resp.enterframe)/600);
+		if(!cl->resp.spectator)
+			Com_sprintf (entry, sizeof(entry),
+				"client %i %i %i %i %i %i ",
+				x, y, sorted[i], cl->resp.score, cl->ping, (level.framenum - cl->resp.enterframe)/600);
+		else //duel mode will have queued spectators
+			Com_sprintf (entry, sizeof(entry),
+				"queued %i %i %i %i %i %i ",
+				x, y, sorted[i], cl->resp.score, cl->ping, cl->pers.queue);
+	
+		
 		j = strlen(entry);
 		if (stringlength + j > 1024)
 			break;

@@ -137,6 +137,9 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 
 	fread(&count,sizeof (int),1,pIn); 
 
+	if(g_duel->value)
+		count = 1; //never more than 1 bot no matter what in duel mode
+
 	if (((int)(dmflags->value) & DF_BOTS)) {
 		fclose(pIn);
 		return; // don't load any preconfigured bots.
@@ -818,6 +821,11 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 	gi.sound (bot, CHAN_AUTO, gi.soundindex(sound), 1, ATTN_NONE, 0);
 
 	ACESP_PutClientInServer (bot,false,0);
+
+	if(g_duel->value) {
+		ClientPlaceInQueue(bot);
+		ClientCheckQueue(bot);
+	}
 
 	// make sure all view stuff is valid
 	ClientEndServerFrame (bot);
