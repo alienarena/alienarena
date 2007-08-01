@@ -1330,7 +1330,7 @@ void SCR_ExecuteLayoutString (char *s)
 			DrawString (x+32*scale, y+8*scale,  "Score: ");
 			DrawAltString (x+32*scale+7*charscale, y+8*scale,  va("%i", score));
 			DrawString (x+32*scale, y+16*scale, va("Ping:  %i", ping));
-			DrawAltString (x+32*scale, y+24*scale, va("Queue:  %i", time));
+			Draw_ColorString (x+32*scale, y+24*scale, va("^1Queue:  ^1%i", time));
 
 			if (!ci->icon)
 				ci = &cl.baseclientinfo;

@@ -539,7 +539,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		else //duel mode will have queued spectators
 			Com_sprintf (entry, sizeof(entry),
 				"queued %i %i %i %i %i %i ",
-				x, y, sorted[i], cl->resp.score, cl->ping, cl->pers.queue);
+				x, y, sorted[i], cl->resp.score, cl->ping, cl->pers.queue-2);
 	
 		
 		j = strlen(entry);
