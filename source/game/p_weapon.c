@@ -993,7 +993,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 void Weapon_RocketLauncher (edict_t *ent)
 {
 	static int	pause_frames[]	= {18, 0};
-	static int	fire_frames[]	= {7, 0};
+	static int	fire_frames[]	= {6, 0};
 	static int	excessive_fire_frames[]	= {5,7,9,11,13, 0};
 
 	if(excessive->value)
