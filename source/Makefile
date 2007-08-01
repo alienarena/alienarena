@@ -51,7 +51,7 @@ else
 	_LIB := lib
 endif
 
-BASE_CFLAGS=$(CFLAGS) -Dstricmp=strcasecmp -D_stricmp=strcasecmp -I$(X11BASE)/include -fno-strict-aliasing
+BASE_CFLAGS=$(CFLAGS) -Dstricmp=strcasecmp -D_stricmp=strcasecmp -I$(X11BASE)/include -fno-strict-aliasing -fmerge-constants
 
 RELEASE_CFLAGS=$(BASE_CFLAGS)
 
