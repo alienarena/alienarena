@@ -1300,7 +1300,43 @@ void SCR_ExecuteLayoutString (char *s)
 			Draw_ScaledPic (x, y, scale, ci->iconname);
 			continue;
 		}
+		if (!strcmp(token, "queued"))
+		{	// draw a deathmatch client block
+			int		score, ping, time;
 
+			token = COM_Parse (&s);
+			x = viddef.width/2 - 160*scale + atoi(token)*scale;
+			token = COM_Parse (&s);
+			y = viddef.height/2 - 100*scale + atoi(token)*scale;
+			SCR_AddDirtyPoint (x, y);
+			SCR_AddDirtyPoint (x+159*scale, y+31*scale);
+
+			token = COM_Parse (&s);
+			value = atoi(token);
+			if (value >= MAX_CLIENTS || value < 0)
+				Com_Error (ERR_DROP, "client >= MAX_CLIENTS");
+			ci = &cl.clientinfo[value];
+
+			token = COM_Parse (&s);
+			score = atoi(token);
+
+			token = COM_Parse (&s);
+			ping = atoi(token);
+
+			token = COM_Parse (&s);
+			time = atoi(token);
+
+			Draw_ColorString (x+32*scale, y, ci->name);
+			DrawString (x+32*scale, y+8*scale,  "Score: ");
+			DrawAltString (x+32*scale+7*charscale, y+8*scale,  va("%i", score));
+			DrawString (x+32*scale, y+16*scale, va("Ping:  %i", ping));
+			DrawAltString (x+32*scale, y+24*scale, va("Queue:  %i", time));
+
+			if (!ci->icon)
+				ci = &cl.baseclientinfo;
+			Draw_ScaledPic (x, y, scale, ci->iconname);
+			continue;
+		}
 		if (!strcmp(token, "ctf"))
 		{	// draw a ctf client block
 			int		score, ping;

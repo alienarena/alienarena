@@ -993,6 +993,7 @@ typedef struct
 	int			helpchanged;
 
 	int			spectator;			// client is a spectator
+	int	queue;				// client queue position for duel mode
 
 } client_persistant_t;
 
@@ -1012,7 +1013,7 @@ typedef struct
 	int weapon_shots[8];
 	int weapon_hits[8];
 
-	qboolean	spectator;			// client is a spectator
+	int			spectator;			// client is a spectator
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),

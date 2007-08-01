@@ -841,8 +841,15 @@ but is called after each death and level change in deathmatch
 void InitClientPersistant (gclient_t *client)
 {
 	gitem_t		*item;
+	int			queue;
+
+	if(g_duel->value) //need to save this off in duel mode.  Potentially dangerous?
+		queue = client->pers.queue;
 
 	memset (&client->pers, 0, sizeof(client->pers));
+
+	if(g_duel->value)
+		client->pers.queue = queue;
 
 	//mutator - will need to have item
 	if(instagib->value) {
@@ -1770,6 +1777,38 @@ void PutClientInServer (edict_t *ent)
 	client->spawnprotecttime = level.time;
 }
 
+void ClientPlaceInQueue(edict_t *ent)
+{
+	int		i;
+	int		highpos;
+	
+	highpos = 0;
+
+	for (i = 0; i < maxclients->value; i++) {
+		if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
+			safe_bprintf(PRINT_HIGH, "Player: %s pos %i\n", g_edicts[i+1].client->pers.netname, g_edicts[i+1].client->pers.queue);
+			if(g_edicts[i+1].client->pers.queue > highpos)
+				highpos = g_edicts[i+1].client->pers.queue;
+		}
+	}
+	if(!ent->client->pers.queue)
+		ent->client->pers.queue = highpos+1;
+}
+void ClientCheckQueue(edict_t *ent)
+{
+	if(ent->client->pers.queue > 2) { //everyone in line remains a spectator
+		ent->client->pers.spectator = ent->client->resp.spectator = true;
+		ent->client->chase_target = NULL;
+		ent->movetype = MOVETYPE_NOCLIP;
+		ent->solid = SOLID_NOT;
+		ent->svflags |= SVF_NOCLIENT;
+		ent->client->ps.gunindex = 0;
+		gi.linkentity (ent);
+	}
+	else 
+		ent->client->pers.spectator = ent->client->resp.spectator =false;
+}
+
 /*
 =====================
 ClientBeginDeathmatch
@@ -1781,13 +1820,11 @@ deathmatch mode, so clear everything out before starting them.
 void ClientBeginDeathmatch (edict_t *ent)
 {
 
-	FILE *motd_file;
-	char line[80];
-	char motd[500];
-
-// ACEBOT_ADD
+	FILE	*motd_file;
+	char	line[80];
+	char	motd[500];
 	static char current_map[55];
-// ACEBOT_END
+
 	G_InitEdict (ent);
 
 	InitClientResp (ent->client);
@@ -1823,7 +1860,14 @@ void ClientBeginDeathmatch (edict_t *ent)
 		}
 
 	}
-
+	
+	//if duel mode, then check number of existing players.  If more there are already two in the game, force
+	//this player to spectator mode, and assign a queue position(we can use the spectator cvar for this)
+	else if(g_duel->value) {
+		ClientPlaceInQueue(ent);
+		ClientCheckQueue(ent);	
+	}
+	
 	// send effect
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -1854,18 +1898,15 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	}
 	else
-		// ACEBOT_ADD
-		safe_centerprintf(ent,"\n======================================\nCodeRED ACE Bot's are running\non this server.\n\n'sv addbot' to add a new bot.\n'sv removebot <name>' to remove bot.\n======================================\n\n");
+	
+	safe_centerprintf(ent,"\n======================================\nCodeRED ACE Bot's are running\non this server.\n\n'sv addbot' to add a new bot.\n'sv removebot <name>' to remove bot.\n======================================\n\n");
 
-	// If the map changes on us, init and reload the nodes.  Need to
-	//find a way to clear all bots first?
-
+	// If the map changes on us, init and reload the nodes.  
 	ACEND_InitNodes();
 	ACEND_LoadNodes();
 	ACESP_LoadBots(ent, 0);
 	strcpy(current_map,level.mapname);
 
-// ACEBOT_END
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
 }
@@ -1891,58 +1932,8 @@ void ClientBegin (edict_t *ent)
 	}
 	ent->client->kill_streak = 0;
 
-	if (deathmatch->value)
-	{
-		ClientBeginDeathmatch (ent);
-		return;
-	}
+	ClientBeginDeathmatch (ent);
 
-	// if there is already a body waiting for us (a loadgame), just
-	// take it, otherwise spawn one from scratch
-	if (ent->inuse == true)
-	{
-		// the client has cleared the client side viewangles upon
-		// connecting to the server, which is different than the
-		// state when the game is saved, so we need to compensate
-		// with deltaangles
-		for (i=0 ; i<3 ; i++)
-			ent->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(ent->client->ps.viewangles[i]);
-	}
-	else
-	{
-		// a spawn point will completely reinitialize the entity
-		// except for the persistant data that was initialized at
-		// ClientConnect() time
-		G_InitEdict (ent);
-		ent->classname = "player";
-
-		if(ent->is_bot)
-			ent->client->is_bot = 1;
-
-		InitClientResp (ent->client);
-		PutClientInServer (ent);
-	}
-
-	if (level.intermissiontime)
-	{
-		MoveClientToIntermission (ent);
-	}
-	else
-	{
-		// send effect if in a multiplayer game
-		if (game.maxclients > 1)
-		{
-			gi.WriteByte (svc_muzzleflash);
-			gi.WriteShort (ent-g_edicts);
-			gi.WriteByte (MZ_LOGIN);
-			gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-			safe_bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
-		}
-	}
-
-	// make sure all view stuff is valid
-	ClientEndServerFrame (ent);
 }
 
 /*
@@ -1998,12 +1989,14 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 	//spectator mode
 	// set spectator
-	s = Info_ValueForKey (userinfo, "spectator");
-	// spectators need to be reset in CTF
-	if (deathmatch->value && *s && strcmp(s, "0"))
-		ent->client->pers.spectator = atoi(s);
-	else
-		ent->client->pers.spectator = false;
+	if(!g_duel->value) { //never fool with spectating in duel mode
+		s = Info_ValueForKey (userinfo, "spectator");
+		// spectators need to be reset in CTF
+		if (deathmatch->value && *s && strcmp(s, "0"))
+			ent->client->pers.spectator = atoi(s);
+		else 
+			ent->client->pers.spectator = false;
+	}
 	//end spectator mode
 
 	// set skin
@@ -2261,8 +2254,7 @@ loadgames will.
 qboolean ClientConnect (edict_t *ent, char *userinfo)
 {
 	char	*value;
-	int		i, numspec, playernum;
-	int		highpos;
+	int		i, numspec;
 
 	// check to see if they are on the banned IP list
 	value = Info_ValueForKey (userinfo, "ip");
@@ -2271,25 +2263,6 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 		return false;
 	}
 
-	//if duel mode, then check number of existing players.  If more there are already two in the game, force
-	//this player to spectator mode, and assign a queue position(we can use the spectator cvar for this)
-	//duel mode should never be used in team games, so we will nip it in the bud right here and now!
-	if(g_duel->value) {
-		playernum = highpos = 0;
-		for (i = 0; i < maxclients->value; i++) {
-			if(g_edicts[i+1].inuse) { //always be careful here
-				if(!g_edicts[i+1].client->pers.spectator) //in battle!
-					playernum++;
-				if(g_edicts[i+1].client->pers.spectator > highpos)
-					highpos = g_edicts[i+1].client->pers.spectator;
-			}
-		}
-		safe_bprintf(PRINT_HIGH, "playernum: %i\n", playernum);
-		if(playernum > 1) //already have a pair in battle, send him to the back of the queue
-			ent->client->pers.spectator = highpos+1;
-		else
-			ent->client->pers.spectator = false;
-	}
 	//spectator mode
 	// check for a spectator
 	value = Info_ValueForKey (userinfo, "spectator");
@@ -2347,6 +2320,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 		gi.dprintf ("%s connected\n", ent->client->pers.netname);
 
 	ent->client->pers.connected = true;
+
 	return true;
 }
 
@@ -2360,7 +2334,7 @@ Will not be called between levels.
 */
 void ClientDisconnect (edict_t *ent)
 {
-	int		i, playernum, lowpos;
+	int		i, playernum;
 
 	if (!ent->client)
 		return;
@@ -2389,24 +2363,20 @@ void ClientDisconnect (edict_t *ent)
 		ACESP_LoadBots(ent, 1);
 
 	//if in duel mode, we need to bump people down the queue if its the player in game leaving
-	if(g_duel->value && !(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)) {
-		lowpos = 10000; //ridiculous high number
-		if(!ent->client->pers.spectator) { //was playing
-			for (i = 0; i < maxclients->value; i++) { //get the lowest position number in queue
-				if(g_edicts[i+1].inuse) { //always be careful here
-					if(g_edicts[i+1].client->pers.spectator) {
-						if(g_edicts[i+1].client->pers.spectator < lowpos)
-							lowpos = g_edicts[i+1].client->pers.spectator;
-					}
+	if(g_duel->value) {
+		for (i = 0; i < maxclients->value; i++) { //move everyone down
+			if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
+				if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue) 
+					g_edicts[i+1].client->pers.queue--;
+
+				if(g_edicts[i+1].client->pers.queue < 3) { //make sure those who should be in game are
+					g_edicts[i+1].client->pers.spectator = g_edicts[i+1].client->resp.spectator = false;
+					g_edicts[i+1].svflags &= ~SVF_NOCLIENT;
+					g_edicts[i+1].movetype = MOVETYPE_WALK;
+					g_edicts[i+1].solid = SOLID_BBOX;
 				}
 			}
-			for (i = 0; i < maxclients->value; i++) { //get the next guy in line, and put him in the game
-				if(g_edicts[i+1].inuse) { //always be careful here
-					if(g_edicts[i+1].client->pers.spectator == lowpos) { //got him
-						g_edicts[i+1].client->pers.spectator = 0; //put him in
-					}
-				}
-			}
+			
 		}
 	}
 
@@ -2750,6 +2720,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			ent->health-=1;
 		}
 	}
+	//safe_bprintf(PRINT_HIGH, "pos: %i\n", ent->client->pers.queue);
 
 }
 
