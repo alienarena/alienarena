@@ -379,8 +379,6 @@ void CL_PrepRefresh ()
 	SCR_TouchPics ();
 	Com_Printf ("                                     \r");
 
-	CL_RegisterTEntModels ();
-
 	num_cl_weaponmodels = 1;
 	strcpy(cl_weaponmodels[0], "weapon.md2");
 

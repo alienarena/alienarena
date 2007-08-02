@@ -30,6 +30,7 @@ int	sm_meat_index;
 int	snd_fry;
 int meansOfDeath;
 int bot_won;
+qboolean stayed;
 
 edict_t		*g_edicts;
 
@@ -515,6 +516,10 @@ void ResetLevel (void) //for resetting players and items after warmup
 	int i;
 	edict_t	*ent;
 	gitem_t *item;
+
+	if(stayed)
+		return;
+
 	for (i=0 ; i<maxclients->value ; i++)
 	{
 		ent = g_edicts + i + 1;
@@ -785,7 +790,13 @@ void ExitLevel (void)
 	edict_t	*ent;
 	char	command [256];
 
-	Com_sprintf (command, sizeof(command), "map \"%s\"\n", level.changemap);
+	if(strcmp(level.mapname, level.changemap) || timelimit->value) {
+		Com_sprintf (command, sizeof(command), "map \"%s\"\n", level.changemap);
+		stayed = false; //failsafe, just to be sure
+	}
+	else
+		stayed = true; //no need to reload map if staying on same level!
+
 	gi.AddCommandString (command);
 	level.changemap = NULL;
 	level.exitintermission = 0;
@@ -801,6 +812,36 @@ void ExitLevel (void)
 			continue;
 		if (ent->health > ent->client->pers.max_health)
 			ent->health = ent->client->pers.max_health;
+		
+		if(stayed) {
+			ent->client->resp.score = 0;
+			if(!ent->is_bot) //players are simple
+				PutClientInServer (ent);
+			else { //reset various bot junk
+				ent->takedamage = DAMAGE_AIM;
+				ent->solid = SOLID_BBOX;
+				ent->deadflag = DEAD_NO;
+				ACESP_PutClientInServer (ent,true,0);
+			}
+			if(g_duel->value) {
+				ClientPlaceInQueue(ent);
+				ClientCheckQueue(ent);	
+			}
+		}
+
+	}
+	if(stayed) {
+		for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) {
+
+			if (!ent->inuse)
+				continue;
+			if(ent->client) {//not players
+				continue;
+			}
+			//remove podiums
+			if(!strcmp(ent->classname, "pad"))
+				G_FreeEdict(ent);
+		}
 	}
 	if(tca->value) {
 		blue_team_score = 4;

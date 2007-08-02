@@ -432,7 +432,7 @@ void CTFFireGrapple (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 	grapple->s.effects |= effect;
 	VectorClear (grapple->mins);
 	VectorClear (grapple->maxs);
-	grapple->s.modelindex = 0;//gi.modelindex ("models/objects/laser/tris.md2");
+	grapple->s.modelindex = 0;
 	grapple->owner = self;
 	grapple->touch = CTFGrappleTouch;
 	grapple->dmg = damage;
