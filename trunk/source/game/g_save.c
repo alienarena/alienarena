@@ -294,5 +294,7 @@ void InitGame (void)
 	blue_team_cnt = 0;
 	red_team_cnt = 0;
 	print1 = print2 = print3 = false;
+
+	stayed = false;
 }
 

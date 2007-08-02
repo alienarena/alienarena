@@ -182,7 +182,6 @@ extern	cvar_t	*r_shaders;
 extern  cvar_t  *r_bloom;
 extern  cvar_t  *r_lensflare;
 extern  cvar_t  *r_lensflare_intens;
-extern  cvar_t  *arena_mode;
 extern  qboolean map_fog;
 extern  char	map_music[128];
 

@@ -199,7 +199,6 @@ cvar_t  *r_bloom;
 cvar_t  *r_lensflare;
 cvar_t  *r_lensflare_intens;
 
-cvar_t  *arena_mode;
 qboolean    map_fog;
 
 cvar_t	*gl_reflection;			// MPO	alpha transparency, 1.0 is full bright
@@ -1630,8 +1629,6 @@ void R_Register( void )
 	vid_fullscreen = Cvar_Get( "vid_fullscreen", "0", CVAR_ARCHIVE );
 	vid_gamma = Cvar_Get( "vid_gamma", "1.0", CVAR_ARCHIVE );
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
-
-	arena_mode = Cvar_Get ("arena_mode", "0", CVAR_ARCHIVE );
 
 	// MH - detail textures begin
 	// the amount of scaling to apply to detail textures depends on the value of this

@@ -1565,7 +1565,7 @@ void R_BeginRegistration (char *model)
 
 	if ( strcmp(mod_known[0].name, fullname) || flushmap->value)
 		Mod_Free (&mod_known[0]);
-	else if (arena_mode)
+	else
 		Mod_Free (&mod_known[0]);	//do it every time to fix shader bugs in AA
 
 	r_worldmodel = Mod_ForName(fullname, true);

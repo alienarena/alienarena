@@ -1786,7 +1786,6 @@ void ClientPlaceInQueue(edict_t *ent)
 
 	for (i = 0; i < maxclients->value; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
-			safe_bprintf(PRINT_HIGH, "Player: %s pos %i\n", g_edicts[i+1].client->pers.netname, g_edicts[i+1].client->pers.queue);
 			if(g_edicts[i+1].client->pers.queue > highpos)
 				highpos = g_edicts[i+1].client->pers.queue;
 		}

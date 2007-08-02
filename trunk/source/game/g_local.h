@@ -473,6 +473,7 @@ extern  int blue_team_score;
 extern	int print1;
 extern  int print2;
 extern  int print3;
+extern  int stayed;
 
 // means of death
 #define MOD_UNKNOWN			0
@@ -864,7 +865,7 @@ edict_t *PlayerTrail_PickNext (edict_t *self);
 edict_t	*PlayerTrail_LastSpot (void);
 
 //
-// g_client.c
+// p_client.c
 //
 void respawn (edict_t *ent);
 void BeginIntermission (edict_t *targ);
@@ -875,6 +876,8 @@ void InitClientResp (gclient_t *client);
 void InitBodyQue (void);
 void ClientBeginServerFrame (edict_t *ent);
 int Q2_FindFile (char *filename, FILE **file);
+void ClientPlaceInQueue(edict_t *ent);
+void ClientCheckQueue(edict_t *ent);
 
 //
 // g_player.c

@@ -150,13 +150,18 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	movedir[2] = -1;
 	VectorCopy(pad->s.origin, origin);
 	origin[2] -= 24;
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_STEAM);
-	gi.WriteByte (100);
-	gi.WritePosition (origin);
-	gi.WriteDir (movedir);
-	gi.WriteByte (0);
-	gi.multicast (origin, MULTICAST_PVS);
+
+	//if map is going to repeat - don't put these here as we have no way to remove them 
+	//if map is not reloaded
+	if(strcmp(level.mapname, level.changemap)) {
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_STEAM);
+		gi.WriteByte (100);
+		gi.WritePosition (origin);
+		gi.WriteDir (movedir);
+		gi.WriteByte (0);
+		gi.multicast (origin, MULTICAST_PVS);
+	}
 
 	//now we want to allow the winners to actually see themselves on the podium, creating a
 	//simple chasecam

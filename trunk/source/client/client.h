@@ -567,7 +567,6 @@ void V_AddStain (vec3_t org, float intensity, float r, float g, float b, float a
 // cl_tent.c
 //
 void CL_RegisterTEntSounds (void);
-void CL_RegisterTEntModels (void);
 
 //
 // cl_pred.c
