@@ -1778,16 +1778,22 @@ void PutClientInServer (edict_t *ent)
 void ClientPlaceInQueue(edict_t *ent)
 {
 	int		i;
-	int		highpos;
+	int		highpos, numplayers;
 	
-	highpos = 0;
+	highpos = numplayers = 0;
 
 	for (i = 0; i < maxclients->value; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
 			if(g_edicts[i+1].client->pers.queue > highpos)
 				highpos = g_edicts[i+1].client->pers.queue;
+			if(g_edicts[i+1].client->pers.queue < 3) 	
+				numplayers++;
 		}
 	}
+
+	if(highpos < 2 && numplayers > 2) 
+		highpos = 2; 
+
 	if(!ent->client->pers.queue)
 		ent->client->pers.queue = highpos+1;
 }
@@ -2366,15 +2372,18 @@ void ClientDisconnect (edict_t *ent)
 				if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue) 
 					g_edicts[i+1].client->pers.queue--;
 
-				if(g_edicts[i+1].client->pers.queue < 3) { //make sure those who should be in game are
+				if(g_edicts[i+1].client->pers.queue == 2) { //make sure those who should be in game are
 					g_edicts[i+1].client->pers.spectator = g_edicts[i+1].client->resp.spectator = false;
 					g_edicts[i+1].svflags &= ~SVF_NOCLIENT;
 					g_edicts[i+1].movetype = MOVETYPE_WALK;
 					g_edicts[i+1].solid = SOLID_BBOX;
+					g_edicts[i+1].client->ps.gunindex = gi.modelindex(g_edicts[i+1].client->pers.weapon->view_model);
 				}
 			}
 			
 		}
+		if(ent->client)
+			ent->client->pers.queue = 0;
 	}
 
 	// send effect
@@ -2389,7 +2398,7 @@ void ClientDisconnect (edict_t *ent)
 	ent->inuse = false;
 	ent->classname = "disconnected";
 	ent->client->pers.connected = false;
-
+	
 	playernum = ent-g_edicts-1;
 	gi.configstring (CS_PLAYERSKINS+playernum, "");
 
