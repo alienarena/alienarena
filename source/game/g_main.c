@@ -517,9 +517,6 @@ void ResetLevel (void) //for resetting players and items after warmup
 	edict_t	*ent;
 	gitem_t *item;
 
-	if(stayed)
-		return;
-
 	for (i=0 ; i<maxclients->value ; i++)
 	{
 		ent = g_edicts + i + 1;
@@ -778,7 +775,6 @@ void CheckDMRules (void)
 	}
 }
 
-
 /*
 =============
 ExitLevel
@@ -786,18 +782,18 @@ ExitLevel
 */
 void ExitLevel (void)
 {
-	int		i;
-	edict_t	*ent;
-	char	command [256];
+	int			i;
+	edict_t		*ent;
+	char		command [256];
+	qboolean	stayed = false;
 
 	if(strcmp(level.mapname, level.changemap) || timelimit->value) {
 		Com_sprintf (command, sizeof(command), "map \"%s\"\n", level.changemap);
-		stayed = false; //failsafe, just to be sure
+		gi.AddCommandString (command);
 	}
-	else
+	else 
 		stayed = true; //no need to reload map if staying on same level!
 
-	gi.AddCommandString (command);
 	level.changemap = NULL;
 	level.exitintermission = 0;
 	level.intermissiontime = 0;
@@ -815,8 +811,12 @@ void ExitLevel (void)
 		
 		if(stayed) {
 			ent->client->resp.score = 0;
-			if(!ent->is_bot) //players are simple
+			if(!ent->is_bot) { //players
+				ent->takedamage = DAMAGE_AIM;
+				ent->solid = SOLID_BBOX;
+				ent->deadflag = DEAD_NO;	
 				PutClientInServer (ent);
+			}
 			else { //reset various bot junk
 				ent->takedamage = DAMAGE_AIM;
 				ent->solid = SOLID_BBOX;
@@ -828,7 +828,6 @@ void ExitLevel (void)
 				ClientCheckQueue(ent);	
 			}
 		}
-
 	}
 	if(stayed) {
 		for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) {

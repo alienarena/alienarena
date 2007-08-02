@@ -473,7 +473,6 @@ extern  int blue_team_score;
 extern	int print1;
 extern  int print2;
 extern  int print3;
-extern  qboolean stayed;
 
 // means of death
 #define MOD_UNKNOWN			0
