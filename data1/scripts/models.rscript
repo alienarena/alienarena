@@ -95,7 +95,7 @@ models/items/healing/medium/skin
 	{
 		map gfx/chrome.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 0.2 0.2
+		alphashift 0 0.5 0.5
 		nolightmap
 		envmap
 	}	
@@ -109,7 +109,7 @@ models/items/healing/large/skin
 	{
 		map gfx/chrome.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 0.2 0.2
+		alphashift 0 0.5 0.5
 		nolightmap
 		envmap
 	}	
@@ -123,7 +123,7 @@ models/items/healing/small/skin
 	{
 		map gfx/chrome.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 0.2 0.2
+		alphashift 0 0.5 0.5
 		nolightmap
 		envmap
 	}	
