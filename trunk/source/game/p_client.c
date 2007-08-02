@@ -1563,8 +1563,6 @@ void PutClientInServer (edict_t *ent)
 	client->is_bot = 0;
 	client->kill_streak = 0;
 
-
-
 	resp = client->resp;
 	memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
 	InitClientPersistant (client);
