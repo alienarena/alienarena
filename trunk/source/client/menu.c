@@ -2751,7 +2751,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		return;
 
 	mservers[m_num_servers].local_server_netadr = adr;
-	mservers[m_num_servers].ping = cls.realtime - starttime;
+	mservers[m_num_servers].ping = Sys_Milliseconds() - starttime;
 
 	//parse it
 
@@ -2934,12 +2934,15 @@ void SearchLocalGames( void )
 	// the text box won't show up unless we do a buffer swap
 	R_EndFrame();
 
-	//set the start time for pings
-	starttime = cls.realtime;
-
 	// send out info packets
 	CL_PingServers_f();
+
+#ifdef __unix__
+	sleep(1000);
+#else
 	Sleep(1000); //time to recieve packets
+#endif
+
 	Con_Clear_f();
 }
 

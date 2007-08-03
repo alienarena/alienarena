@@ -146,9 +146,6 @@ typedef struct _SERVERINFO {
 	char szMapName[256];
 	int curClients;
 	int maxClients;
-#ifdef _WINDOWS
-	DWORD startPing;
-#endif
 	int	ping;
 	PLAYERINFO players[64];
 	int temporary;
@@ -156,6 +153,7 @@ typedef struct _SERVERINFO {
 
 SERVERINFO servers[64];
 int numServers = 0;
+extern unsigned int starttime;
 
 //======================================================================
 
@@ -942,6 +940,9 @@ void CL_ParseGetServersResponse()
 		if (++numServers == 64)
 			break;
 	}
+	//set the start time for pings
+	starttime = Sys_Milliseconds();
+
 }
 
 /*
