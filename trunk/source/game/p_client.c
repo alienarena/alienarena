@@ -2377,7 +2377,11 @@ void ClientDisconnect (edict_t *ent)
 					g_edicts[i+1].svflags &= ~SVF_NOCLIENT;
 					g_edicts[i+1].movetype = MOVETYPE_WALK;
 					g_edicts[i+1].solid = SOLID_BBOX;
-					g_edicts[i+1].client->ps.gunindex = gi.modelindex(g_edicts[i+1].client->pers.weapon->view_model);
+					if(!g_edicts[i+1].is_bot)
+						PutClientInServer(g_edicts+i+1);	
+					else
+						ACESP_PutClientInServer (g_edicts+i+1,true,0);
+					safe_bprintf(PRINT_HIGH, "%s has entered the duel!\n", g_edicts[i+1].client->pers.netname);
 				}
 			}
 			
