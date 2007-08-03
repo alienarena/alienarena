@@ -727,7 +727,7 @@ void Con_DrawConsole (float frac)
 		lines = viddef.height;
 
 // draw the background
-	Draw_Fill (0, lines-viddef.height, viddef.width, viddef.height, 0);
+	Draw_StretchPic (0, lines-viddef.height, viddef.width, viddef.height, "conback");
 	SCR_AddDirtyPoint (0,0);
 	SCR_AddDirtyPoint (viddef.width-1,lines-1);
  
