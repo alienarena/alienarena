@@ -18,9 +18,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 #include <ctype.h>
+#ifdef _WINDOWS
+#include <winsock.h>
+#endif
+
+#ifdef __unix__
+#include <sys/time.h>
+#endif
+
 #ifdef _WIN32
 #include <io.h>
 #endif
+
 #include "client.h"
 #include "../client/qmenu.h"
 
@@ -2930,6 +2939,7 @@ void SearchLocalGames( void )
 
 	// send out info packets
 	CL_PingServers_f();
+	Sleep(1000); //time to recieve packets
 	Con_Clear_f();
 }
 
