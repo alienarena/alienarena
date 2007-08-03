@@ -877,6 +877,7 @@ void ClientBeginServerFrame (edict_t *ent);
 int Q2_FindFile (char *filename, FILE **file);
 void ClientPlaceInQueue(edict_t *ent);
 void ClientCheckQueue(edict_t *ent);
+void MoveClientsDownQueue(edict_t *ent);
 
 //
 // g_player.c
