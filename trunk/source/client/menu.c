@@ -2938,7 +2938,7 @@ void SearchLocalGames( void )
 	CL_PingServers_f();
 
 #ifdef __unix__
-	sleep(1000);
+	sleep(1);
 #else
 	Sleep(1000); //time to recieve packets
 #endif
