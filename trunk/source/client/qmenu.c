@@ -350,6 +350,11 @@ void Menu_Draw( menuframework_s *menu )
 {
 	int i;
 	menucommon_s *item;
+	int charscale;
+
+	charscale = (float)(viddef.height)*8/600;
+	if(charscale < 8)
+		charscale = 8;
 
 	/*
 	** draw contents
@@ -406,7 +411,7 @@ void Menu_Draw( menuframework_s *menu )
 
 			max[0] = min[0] = menu->x + (item->x + RCOLUMN_OFFSET); //+ 2 chars for space + cursor
 			max[1] = min[1] = menu->y + (item->y);
-			max[1] += (MENU_FONT_SIZE);
+			max[1] += (charscale);
 
 			switch ( item->type )
 			{
@@ -417,11 +422,11 @@ void Menu_Draw( menuframework_s *menu )
 						if (item->flags & QMF_LEFT_JUSTIFY)
 						{
 							min[0] += (LCOLUMN_OFFSET*2);
-							max[0] = min[0] + (len*MENU_FONT_SIZE);
+							max[0] = min[0] + (len*charscale);
 						}
 						else
 						{
-							min[0] -= (len*MENU_FONT_SIZE + MENU_FONT_SIZE*3);
+							min[0] -= (len*charscale + charscale*3);
 						}
 
 						type = MENUITEM_ACTION;
@@ -444,11 +449,11 @@ void Menu_Draw( menuframework_s *menu )
 						if (item->name)
 						{
 							len = strlen(item->name);
-							min[0] -= (len*MENU_FONT_SIZE - LCOLUMN_OFFSET*2);
+							min[0] -= (len*charscale - LCOLUMN_OFFSET*2);
 						}
 
 						len = strlen(spin->itemnames[spin->curvalue]);
-						max[0] += (len*MENU_FONT_SIZE);
+						max[0] += (len*charscale);
 
 						type = MENUITEM_ROTATE;
 					}
@@ -459,7 +464,7 @@ void Menu_Draw( menuframework_s *menu )
 
 						len = text->visible_length + 2;
 
-						max[0] += (len*MENU_FONT_SIZE);
+						max[0] += (len*charscale);
 						type = MENUITEM_TEXT;
 					}
 					break;

@@ -4093,7 +4093,7 @@ void StartServer_MenuInit( void )
 
 	s_startserver_dmoptions_action.generic.type = MTYPE_ACTION;
 	s_startserver_dmoptions_action.generic.name	= " deathmatch and bot flags";
-	s_startserver_dmoptions_action.generic.x	= 270;
+	s_startserver_dmoptions_action.generic.x	= 212*scale;
 	s_startserver_dmoptions_action.generic.y	= 182*scale + offset;
 	s_startserver_dmoptions_action.generic.cursor_offset = -8;
 	s_startserver_dmoptions_action.generic.statusbar = NULL;
@@ -4101,7 +4101,7 @@ void StartServer_MenuInit( void )
 
 	s_startserver_start_action.generic.type = MTYPE_ACTION;
 	s_startserver_start_action.generic.name	= " begin";
-	s_startserver_start_action.generic.x	= 80;
+	s_startserver_start_action.generic.x	= 64*scale;
 	s_startserver_start_action.generic.y	= 200*scale + offset;
 	s_startserver_start_action.generic.cursor_offset = -8;
 	s_startserver_start_action.generic.callback = StartServerActionFunc;
