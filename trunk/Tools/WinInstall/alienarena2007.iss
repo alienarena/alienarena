@@ -30,6 +30,8 @@ UsePreviousAppDir=false
 UsePreviousGroup=false
 AppCopyright=© 2007 COR Entertainment LLC
 ShowLanguageDialog=no
+AppComments=Please close application before running uninstall
+UninstallDisplayIcon={app}\Aa1.ico
 
 [Languages]
 Name: english; MessagesFile: compiler:Default.isl
@@ -2261,6 +2263,7 @@ Source: ..\..\..\Alien Arena 2007\docs\license.txt; DestDir: {app}\docs
 Source: ..\..\..\Alien Arena 2007\docs\README.txt; DestDir: {app}\docs
 Source: ..\..\config.cfg; DestDir: {app}\arena
 Source: ..\..\..\Alien Arena 2007\botinfo\bots.tmp; DestDir: {app}\botinfo
+Source: ..\..\..\Alien Arena 2007\closeapp.exe; DestDir: {app}
 
 [Icons]
 Name: {group}\{cm:ProgramOnTheWeb,{#MyAppName}}; Filename: {#MyAppURL}
@@ -2269,6 +2272,7 @@ Name: {group}\Alien Arena 2007; Filename: {app}\Galaxy.exe; WorkingDir: {app}; I
 Name: {group}\Alien Arena Quickplay; Filename: {app}\crx.exe; WorkingDir: {app}; IconFilename: {app}\Aa1.ico; Languages: 
 Name: {userdesktop}\Alien Arena 2007; Filename: {app}\Galaxy.exe; WorkingDir: {app}; IconFilename: {app}\Aa1.ico; IconIndex: 0
 Name: {userdesktop}\Alien Arena Quickplay; Filename: {app}\crx.exe; WorkingDir: {app}; IconFilename: {app}\Aa1.ico; Languages: ; IconIndex: 0
+Name: {group}\Alien Arena README file; Filename: {app}\docs\README.txt
 
 [Dirs]
 Name: {app}\arena
@@ -2401,10 +2405,23 @@ Name: {app}\tools\projects
 Name: {app}\tools\prefabs
 Name: {app}\tools\prefabscripts
 Name: {app}\docs
+
 [INI]
 Filename: galaxy.ini; Section: Galaxy; Key: name; String: Player; Flags: createkeyifdoesntexist uninsdeletesection
 Filename: galaxy.ini; Section: Galaxy; Key: email; String: email@email.com; Flags: createkeyifdoesntexist uninsdeletesection
 Filename: galaxy.ini; Section: Galaxy; Key: chatstart; String: true; Flags: createkeyifdoesntexist uninsdeletesection
 Filename: galaxy.ini; Section: Galaxy; Key: exe; String: {app}\; Flags: createkeyifdoesntexist uninsdeletesection
+
+[UninstallRun]
+Filename: {app}\closeapp.exe
+[UninstallDelete]
+Name: {app}\docs; Type: filesandordirs
+Name: {app}\tools; Type: filesandordirs
+Name: {app}\botinfo; Type: filesandordirs
+Name: {app}\data1; Type: filesandordirs
+Name: {app}\arena; Type: filesandordirs
+Name: {app}\Aa1.ico; Type: files
+Name: {app}\crx.exe; Type: files
+Name: {app}\fce16.dll; Type: files
 
 #include ".\Source\bundlescr.iss"

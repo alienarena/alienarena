@@ -116,7 +116,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 {
     FILE *pIn;
 	char userinfo[MAX_INFO_STRING];
-	int i, j, count;
+	int i, j, count, spawnkicknum;
 	char *info;
 	char *skin;
 	char bot_filename[128];
@@ -137,32 +137,42 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 
 	fread(&count,sizeof (int),1,pIn); 
 
-	if(g_duel->value)
-		count = 1; //never more than 1 bot no matter what in duel mode
-
 	if (((int)(dmflags->value) & DF_BOTS)) {
 		fclose(pIn);
 		return; // don't load any preconfigured bots.
 	}
 
+	if(g_duel->value) {
+		count = 1; //never more than 1 bot no matter what in duel mode
+		spawnkicknum = 2;
+	}
+	else if(sv_botkickthreshold->integer)
+		spawnkicknum = sv_botkickthreshold->integer;
+	else
+		spawnkicknum = 0;
+	
 	ent->client->resp.botnum = 0;
 
 	//probably want to count total REAL players here...
 	real_players = 0;
 
-	if(sv_botkickthreshold->integer) { //test for now
+	if(spawnkicknum) { //test for now
 		for (i=0 ; i<game.maxclients ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;
 			if (cl_ent->inuse && !cl_ent->is_bot){
 				cl_ent->client->resp.botnum = 0;
-				if(!game.clients[i].resp.spectator)
+				if(g_duel->value) 
+					real_players++;
+				else if(!game.clients[i].resp.spectator)
 					real_players++;
 			}
 		}
 	}
 	real_players -= playerleft; //done for when this is called as a player is disconnecting
 	
+	
+
 	total_players = 0;
 	for(i=0;i<count;i++)
 	{
@@ -176,12 +186,12 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 
 		strcpy(ent->client->resp.bots[i].name, info);
 
-		if(sv_botkickthreshold->integer) { 
+		if(spawnkicknum) { 
 				for (j=0 ; j<game.maxclients ; j++)
 				{
 					cl_ent = g_edicts + 1 + j;
 					if (cl_ent->inuse) {
-						if(total_players <= sv_botkickthreshold->integer) //we actually added one
+						if(total_players <= spawnkicknum) //we actually added one
 							cl_ent->client->resp.botnum = i+1;
 						cl_ent->client->ps.botnum = cl_ent->client->resp.botnum;
 						strcpy(cl_ent->client->ps.bots[i].name, info);
@@ -197,14 +207,14 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 		found = false;
 		found = ACESP_FindBot(info);
 
-		if(!found && ((total_players <= sv_botkickthreshold->integer) || !sv_botkickthreshold->integer)) { 
+		if(!found && ((total_players <= spawnkicknum) || !spawnkicknum)) { 
 
 			if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) 
 				ACESP_SpawnBot(NULL, info, skin, NULL); //we may be changing the info further on
 			else 
 				ACESP_SpawnBot (NULL, NULL, NULL, userinfo);			
 		}
-		else if(found && ((total_players > sv_botkickthreshold->integer) && sv_botkickthreshold->integer)) 
+		else if(found && ((total_players > spawnkicknum) && spawnkicknum)) 
 			ACESP_KickBot(info);
 		
 	}
@@ -940,11 +950,15 @@ void ACESP_KickBot(char *name)
 				bot->client->resp.botnum--; //we have one less bot
 				bot->client->ps.botnum = bot->client->resp.botnum;
 				game.num_bots--;
-			}
 
+				//if in duel mode, we need to bump people down the queue if its the player in game leaving
+	
+				if(g_duel->value) if(g_duel->value) 
+					MoveClientsDownQueue(bot);
+			}
 		}
 	}
 
-	if(!freed)	
+	if(!freed)
 		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
 }
