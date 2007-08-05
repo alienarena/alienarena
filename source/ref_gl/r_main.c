@@ -79,10 +79,6 @@ image_t		*r_bullettexture;
 image_t		*r_radarmap; // wall texture for radar texgen
 image_t		*r_around;
 
-cvar_t *rs_detail;
-// MH - detail textures begin
-cvar_t	*gl_detailtextures;
-// MH - detail textures begin
 cvar_t  *gl_normalmaps;
 cvar_t	*gl_arb_fragment_program; // jit
 
@@ -808,6 +804,22 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			VectorScale(pright, 5*scale, pright);
 			VectorScale(pup, 5*scale, pup);
 
+		}
+		else if(p->type == PARTICLE_FLAT) {
+
+			VectorCopy(r_newrefdef.viewangles, dir);
+	
+			dir[0] = -90;  // and splash particles horizontal by setting it
+			AngleVectors(dir, NULL, right, up);
+
+			if(p->origin[2] > r_newrefdef.vieworg[2]){  // it's above us
+				VectorScale(right, 5*scale, pright);
+				VectorScale(up, 5*scale, pup);
+			}
+			else {  // it's below us
+				VectorScale(right, 5*scale, pright);
+				VectorScale(up, -5*scale, pup);
+			}
 		}
 		else {
 			VectorScale ( right, p->dist, pright );
@@ -1630,11 +1642,6 @@ void R_Register( void )
 	vid_gamma = Cvar_Get( "vid_gamma", "1.0", CVAR_ARCHIVE );
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
 
-	// MH - detail textures begin
-	// the amount of scaling to apply to detail textures depends on the value of this
-	// cvar.  set to 0 to switch off detail texturing.
-	gl_detailtextures = Cvar_Get ("gl_detailtextures", "0.0", CVAR_ARCHIVE);
-	// MH - detail textures begin
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );

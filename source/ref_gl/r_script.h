@@ -3,7 +3,6 @@
 
 //CVARS
 extern cvar_t *rs_dynamic_time;
-extern cvar_t *rs_detail;
 
 #define ALPHAFUNC_BASIC		1
 #define ALPHAFUNC_GLOSS		2
