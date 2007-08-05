@@ -806,6 +806,9 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 	if (gi.argc () < 2 && !arg0)
 		return;
 
+	if (strlen(gi.args()) < 3) //no text, don't send
+		return;
+
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_SAYICON);
 	gi.WritePosition (ent->s.origin);
