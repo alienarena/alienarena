@@ -671,12 +671,12 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 		//draw a fatter particle at splash point(we should eventually place a rotated particle)
 		if(!(p = new_particle()))
 			return;
-		p->type = PARTICLE_SPARK;
-		p->texnum = r_particletexture->texnum;
+		p->type = PARTICLE_FLAT;
+		p->texnum = r_hittexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
-		p->scale = 2;
-		p->scalevel = 0;
+		p->scale = 2*i;
+		p->scalevel = 8;
 		p->color = color + (rand()&2);
 		for (j=0 ; j<3 ; j++)
 		{
@@ -684,9 +684,9 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 			p->vel[j] = 0;
 		}
 		p->accel[0] = p->accel[1] = p->accel[2] = 0;
-		p->alpha = .5;
+		p->alpha = .3;
 
-		p->alphavel = -1.0 / (1 + frand()*0.3);
+		p->alphavel = -0.3 / (1 + frand()*0.3);
 		
 		//shoot off small plume of water
 		for (i=0 ; i<12 ; i++)
