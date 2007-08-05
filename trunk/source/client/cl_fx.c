@@ -2653,11 +2653,11 @@ void CL_TeleportParticles (vec3_t start)
 		VectorClear (p->accel);
 			
 												
-		p->alpha = 0.8;
-		p->alphavel = -1.0 / (2+frand()*0.2);
+		p->alpha = 0.9;
+		p->alphavel = -1.5 / (2+frand()*0.2);
 		p->type = PARTICLE_FLAT;
 		p->texnum = r_hittexture->texnum;
-		p->blendsrc = GL_SRC_ALPHA;
+		p->blendsrc = GL_ONE;
 		p->blenddst = GL_ONE;
 		p->color = 0x74 + (rand()&7);
 		p->scale = 24 + (rand()&4) ;
