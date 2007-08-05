@@ -2635,8 +2635,7 @@ void CL_TeleportParticles (vec3_t start)
 	cparticle_t	*p;
 	int			i;
 	vec3_t		dir;
-	float		step = 16.0, rstep;
-	float		rot;
+	float		step = 16.0;
 
 	VectorCopy (start, move);
 	VectorCopy (start, end);
@@ -2645,39 +2644,33 @@ void CL_TeleportParticles (vec3_t start)
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 
-	rstep = 4;
 	for (i=0 ; i<len ; i+=step)
 	{
 
-		for (rot = 0; rot < 360; rot += rstep)
-		{
-			if (!(p = new_particle()))
-				return;
+		if (!(p = new_particle()))
+			return;
+		
+		VectorClear (p->accel);
 			
-			VectorClear (p->accel);
-			
-			dir[0] = cos(rot)*20;
-			dir[1] = sin(rot)*20;
-			dir[2] = 0;
 												
-			p->alpha = 0.3;
-			p->alphavel = -1.0 / (2+frand()*0.2);
-			p->type = PARTICLE_FIREBALL;
-			p->texnum = r_explosiontexture->texnum;
-			p->blendsrc = GL_SRC_ALPHA;
-			p->blenddst = GL_ONE;
-			p->color = 0x74 + (rand()&7);
-			p->scale = 6 + (rand()&4) ;
-			p->scalevel = 0;
-			for(j = 0; j < 3; j++) {
-				p->org[j] = start[j] + dir[j];
-				p->vel[j] = 0;
-			}
-			if (p)
-			addParticleLight (p,
-						p->scale*50, 10,
-					0, 1, 1);
+		p->alpha = 0.8;
+		p->alphavel = -1.0 / (2+frand()*0.2);
+		p->type = PARTICLE_FLAT;
+		p->texnum = r_hittexture->texnum;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE;
+		p->color = 0x74 + (rand()&7);
+		p->scale = 24 + (rand()&4) ;
+		p->scalevel = 0;
+		for(j = 0; j < 3; j++) {
+			p->org[j] = start[j] + dir[j];
+			p->vel[j] = 0;
 		}
+		if (p && i < 1)
+		addParticleLight (p,
+					p->scale, 10,
+				0, 1, 1);
+		
 		start[2] += 16;
 	}
 }

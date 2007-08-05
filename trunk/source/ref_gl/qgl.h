@@ -514,16 +514,6 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
 #endif
 #endif
 
-// MH - detail textures begin
-// defines for automatic hardware mipmap generation.
-// this has been part of the core OpenGL specification since version 1.4, so there's 
-// no real need to check for extension support and other tiresomely silly blather,
-// unless you have a really weird OpenGL implementation.  it does, however, even
-// work on ATI cards, so you should have no trouble with it.
-#define GL_GENERATE_MIPMAP                0x8191
-#define GL_GENERATE_MIPMAP_HINT           0x8192
-// MH - detail textures end
-
 extern int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2;
 
 #define  GL_FRAGMENT_PROGRAM_ARB			0x8804 // jitwater

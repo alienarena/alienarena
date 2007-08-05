@@ -97,6 +97,7 @@ typedef struct
 #define PARTICLE_FLARE				22
 #define PARTICLE_BEAM				23
 #define PARTICLE_DECAL				24
+#define PARTICLE_FLAT				25
 
 #define RDF_BLOOM         4      //BLOOMS
 

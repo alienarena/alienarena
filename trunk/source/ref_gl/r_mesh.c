@@ -481,9 +481,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				do
 				{
 					if (!(stage->normalmap && !gl_normalmaps->value)) { //disable for normal stage if normals are disabled
-						//note - this is somewhat hacky, but for some weird reason, we have to do the vertex count for the stage
-						//even though the stage is not being rendered in this case.  
-					
+						
 						float os = ((float *)order)[0];
 						float ot = ((float *)order)[1];
 						vec3_t normal;

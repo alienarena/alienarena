@@ -142,11 +142,7 @@ typedef struct mtexinfo_s
 	int			value;
 } mtexinfo_t;
 
-// MH - detail textures begin
-// was 7
 #define	VERTEXSIZE	9
-// MH - detail textures end
-
 
 typedef struct glpoly_s
 {
@@ -159,11 +155,6 @@ typedef struct glpoly_s
 	byte		*vertexlightbase;
 	byte		*vertexlight;
 	vec3_t		center;
-
-	//lava haze
-//	vec3_t midpoint; 
-//    float fxofs; 
-
 } glpoly_t;
 
 typedef struct msurface_s
@@ -186,13 +177,6 @@ typedef struct msurface_s
 	struct	msurface_s	*texturechain;
 	struct  msurface_s	*lightmapchain;
 	struct	msurface_s	*specialchain;
-
-	// MH - detail textures begin
-	// Q1 uses polys here where Q2 puts it in surfs.  much of a muchness really, although
-	// we'll keep it consistent with the Q2 way of doing things
-	struct  msurface_s	*detailchain;
-	// MH - detail textures end
-	struct  msurface_s  *normalchain;
 
 	mtexinfo_t	*texinfo;
 	float		c_s, c_t;
