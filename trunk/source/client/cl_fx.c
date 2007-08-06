@@ -668,7 +668,7 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 		for( i=0; i<3; i++)
 			dir[i] *= frand()*2;
 
-		//draw a fatter particle at splash point(we should eventually place a rotated particle)
+		//draw rings that expand outward
 		if(!(p = new_particle()))
 			return;
 		p->type = PARTICLE_FLAT;

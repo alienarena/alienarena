@@ -218,12 +218,13 @@ void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 	float		s, t, os, ot;
 	float		scroll;
 	float		rdt = r_newrefdef.time;
-	vec3_t		nv;   // Water waves
-
+	vec3_t		nv, vectors[3];   // Water waves
+	
 	if (fa->texinfo->flags & SURF_FLOWING)
 		scroll = -64 * ( (r_newrefdef.time*0.5) - (int)(r_newrefdef.time*0.5) );
 	else
 		scroll = 0;
+
 	for (p=fa->polys ; p ; p=p->next)
 	{
 		qglBegin (GL_TRIANGLE_FAN);
@@ -246,7 +247,7 @@ void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 			t = ot + r_turbsin[Q_ftol( ((os*0.125+rdt) * TURBSCALE) ) & 255];
 #endif
 			t *= (1.0/64);
-
+		
 			qglTexCoord2f (s, t);
 //=============== Water waves ============
 
@@ -286,6 +287,63 @@ void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 			qglVertex3fv (v);
 		}
 		qglEnd ();
+	}
+
+	//env map for certain waters(more clear types)
+	if(fa->texinfo->flags &(SURF_TRANS33)){
+		AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
+		GL_Bind(r_reflecttexture->texnum);
+
+		for (p=fa->polys ; p ; p=p->next)
+		{
+			qglBegin (GL_TRIANGLE_FAN);
+			for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
+			{
+				os = v[3];
+				ot = v[4];
+
+				RS_SetEnvmap (v, &os, &ot);
+					//move by normal & position
+				os-=DotProduct (fa->plane->normal, vectors[1] ) + (r_newrefdef.vieworg[0]-r_newrefdef.vieworg[1]+r_newrefdef.vieworg[2])*0.0025;
+				ot+=DotProduct (fa->plane->normal, vectors[2] ) + (-r_newrefdef.vieworg[0]+r_newrefdef.vieworg[1]-r_newrefdef.vieworg[2])*0.0025;
+				
+
+				qglTexCoord2f (.5*os, .5*ot);
+				
+				if (!(fa->texinfo->flags & SURF_FLOWING))
+
+				{
+
+					nv[0] =v[0];
+
+					nv[1] =v[1];
+
+					#if !id386
+
+					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
+
+							+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
+
+					#else
+
+					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+r_newrefdef.time)
+
+							+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
+
+					#endif
+
+
+
+					qglVertex3fv (nv);
+
+				}
+
+				else
+
+				qglVertex3fv (v);
+			}
+			qglEnd ();
+		}
 	}
 }
 
