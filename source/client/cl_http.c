@@ -105,7 +105,7 @@ qboolean CL_HttpDownload(void){
         curl_easy_setopt(curl, CURLOPT_URL, url);
 
 	// time out in 5s
-	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5);
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5);
 
         // set error buffer so we may print meaningful messages
         memset(curlerr, 0, sizeof(curlerr));
