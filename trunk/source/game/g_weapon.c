@@ -208,8 +208,11 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 			if (tr.ent->takedamage)
 			{
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, DAMAGE_BULLET, mod);
-				self->client->resp.weapon_hits[3]++;
-				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				if (tr.ent->health > 0) 
+				{
+					self->client->resp.weapon_hits[3]++;
+					gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				}
 			}
 			else
 			{
@@ -312,8 +315,11 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 		else
 			mod = MOD_BLASTER;
 		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
-		self->owner->client->resp.weapon_hits[0]++;
-		gi.sound (self->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		if (other->health > 0) 
+		{
+			self->owner->client->resp.weapon_hits[0]++;
+			gi.sound (self->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
 	}
 	else
 	{
@@ -353,8 +359,11 @@ void blasterball_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 		else
 			mod = MOD_BLASTER;
 		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
-		self->owner->client->resp.weapon_hits[0]++;
-		gi.sound (self->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		if (other->health > 0)
+		{
+			self->owner->client->resp.weapon_hits[0]++;
+			gi.sound (self->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
 	}
 	else
 	{
@@ -447,11 +456,13 @@ int speed, int effect, qboolean hyper)
 
 			if ((tr.ent != self) && (tr.ent->takedamage)) {
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BLASTER);
-				self->client->resp.weapon_hits[6]++;
-				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				if (tr.ent->health > 0)
+				{
+					self->client->resp.weapon_hits[6]++;
+					gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				}
 			}
 		}
-
 		VectorCopy (tr.endpos, from);
 	}
 
@@ -472,9 +483,12 @@ int speed, int effect, qboolean hyper)
 	gi.multicast (self->s.origin, MULTICAST_PHS);   
       
 	if ((tr.ent != self) && (tr.ent->takedamage)) {
-        T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BEAMGUN);
-		self->client->resp.weapon_hits[6]++;
-		gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+        	T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BEAMGUN);
+		if (tr.ent->health > 0) 
+		{
+			self->client->resp.weapon_hits[6]++;
+			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
 	}
 	else if (!((tr.surface) && (tr.surface->flags & SURF_SKY)))
     {  
@@ -516,8 +530,11 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	if (other->takedamage)
 	{
 		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_ROCKET);
-		ent->owner->client->resp.weapon_hits[5]++;
-		gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		if (other->health > 0)
+		{
+			ent->owner->client->resp.weapon_hits[5]++;
+			gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
 	}
 	else
 	{
@@ -608,8 +625,11 @@ void stinger_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 	if (other->takedamage)
 	{
 		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_ROCKET);
-		ent->owner->client->resp.weapon_hits[5]++;
-		gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		if (other->health > 0)
+		{
+			ent->owner->client->resp.weapon_hits[5]++;
+			gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
 	}
 	else
 	{
@@ -675,8 +695,11 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 			
 			if ((tr.ent != self) && (tr.ent->takedamage)) {
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
-				self->client->resp.weapon_hits[0]++;
-				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				if (tr.ent->health > 0)
+				{
+					self->client->resp.weapon_hits[0]++;
+					gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				}
 			}
 		}
 		
@@ -824,9 +847,11 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 			
 			if ((tr.ent != self) && (tr.ent->takedamage))
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
-				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-		}
-		
+				if (tr.ent->health > 0)
+				{
+					gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				}
+			}
 		VectorCopy (tr.endpos, from);
 	}
 
@@ -975,8 +1000,11 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 
 			if ((tr.ent != self) && (tr.ent->takedamage)) {
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_DISRUPTOR);
-				self->client->resp.weapon_hits[1]++;
-				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				if (tr.ent->health > 0)
+				{
+					self->client->resp.weapon_hits[1]++;
+					gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				}
 			}
 		}
 		VectorCopy (tr.endpos, from);
@@ -1039,8 +1067,11 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 
 			if ((tr.ent != self) && (tr.ent->takedamage)) {
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_VAPORIZER);
-				self->client->resp.weapon_hits[7]++;
-				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				if (tr.ent->health > 0)
+				{
+					self->client->resp.weapon_hits[7]++;
+					gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				}
 			}
 			T_RadiusDamage(tr.ent, self, damage, NULL, 200, MOD_R_SPLASH, -1);
 		}
@@ -1240,10 +1271,12 @@ void floater_think (edict_t *self)
 			// hurt it if we can
 			if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER) && (tr.ent != self->owner)) {
 				T_Damage (tr.ent, self, self->owner, dir, tr.endpos, vec3_origin, dmg, 1, DAMAGE_ENERGY, MOD_SMARTGUN);
-				self->owner->client->resp.weapon_hits[2]++;
 				self->owner->client->resp.weapon_shots[2]++;
-				gi.sound (self->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-	
+				if (tr.ent->health > 0)
+				{
+					self->owner->client->resp.weapon_hits[2]++;
+					gi.sound (self->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				}
 			}
 			// if we hit something that's not a monster or player we're done
 			if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
@@ -1470,9 +1503,11 @@ void bomb_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 	if (other->takedamage)
 	{
 		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_ROCKET);
-		ent->owner->client->resp.weapon_hits[7]++;
-		gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-	
+		if (other->health > 0)
+		{
+			ent->owner->client->resp.weapon_hits[7]++;
+			gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
 	}
 	
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_R_SPLASH, 7);
@@ -1710,8 +1745,11 @@ void fireball_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *
 	if (other->takedamage)
 	{
 		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_ROCKET);
-		ent->owner->client->resp.weapon_hits[4]++;
-		gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		if (other->health > 0)
+		{
+			ent->owner->client->resp.weapon_hits[4]++;
+			gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
 	}
 
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_R_SPLASH, 4);
