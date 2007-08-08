@@ -35,78 +35,6 @@ static void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed)
 	}
 }
 
-
-/*
-=================
-fire_hit
-
-Used for all impact (hit/punch/slash) attacks
-=================
-*/
-qboolean fire_hit (edict_t *self, vec3_t aim, int damage, int kick)
-{
-	trace_t		tr;
-	vec3_t		forward, right, up;
-	vec3_t		v;
-	vec3_t		point;
-	float		range;
-	vec3_t		dir;
-
-	//see if enemy is in range
-	VectorSubtract (self->enemy->s.origin, self->s.origin, dir);
-	range = VectorLength(dir);
-	if (range > aim[0])
-		return false;
-
-	if (aim[1] > self->mins[0] && aim[1] < self->maxs[0])
-	{
-		// the hit is straight on so back the range up to the edge of their bbox
-		range -= self->enemy->maxs[0];
-	}
-	else
-	{
-		// this is a side hit so adjust the "right" value out to the edge of their bbox
-		if (aim[1] < 0)
-			aim[1] = self->enemy->mins[0];
-		else
-			aim[1] = self->enemy->maxs[0];
-	}
-
-	VectorMA (self->s.origin, range, dir, point);
-
-	tr = gi.trace (self->s.origin, NULL, NULL, point, self, MASK_SHOT);
-	if (tr.fraction < 1)
-	{
-		if (!tr.ent->takedamage)
-			return false;
-		// if it will hit any client/monster then hit the one we wanted to hit
-		if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
-			tr.ent = self->enemy;
-	}
-
-	AngleVectors(self->s.angles, forward, right, up);
-	VectorMA (self->s.origin, range, forward, point);
-	VectorMA (point, aim[1], right, point);
-	VectorMA (point, aim[2], up, point);
-	VectorSubtract (point, self->enemy->s.origin, dir);
-
-	// do the damage
-	T_Damage (tr.ent, self, self, dir, point, vec3_origin, damage, kick/2, DAMAGE_NO_KNOCKBACK, MOD_HIT);
-
-	if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
-		return false;
-
-	// do our special form of knockback here
-	VectorMA (self->enemy->absmin, 0.5, self->enemy->size, v);
-	VectorSubtract (v, point, v);
-	VectorNormalize (v);
-	VectorMA (self->enemy->velocity, kick, v, self->enemy->velocity);
-	if (self->enemy->velocity[2] > 0)
-		self->enemy->groundentity = NULL;
-	return true;
-}
-
-
 /*
 =================
 fire_lead
@@ -336,6 +264,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 
 	G_FreeEdict (self);
 }
+
 void blasterball_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	int		mod;
@@ -379,6 +308,7 @@ void blasterball_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 	T_RadiusDamage(self, self->owner, 95, other, 150, MOD_PLASMA_SPLASH, 0);
 	G_FreeEdict (self);
 }
+
 void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, qboolean hyper)
 {
 	edict_t	*bolt;
@@ -456,11 +386,13 @@ int speed, int effect, qboolean hyper)
 
 			if ((tr.ent != self) && (tr.ent->takedamage)) {
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BLASTER);
+	
 				if (tr.ent->health > 0)
 				{
 					self->client->resp.weapon_hits[6]++;
 					gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 				}
+	
 			}
 		}
 		VectorCopy (tr.endpos, from);
@@ -482,25 +414,26 @@ int speed, int effect, qboolean hyper)
 	gi.WritePosition (tr.endpos);
 	gi.multicast (self->s.origin, MULTICAST_PHS);   
       
-	if ((tr.ent != self) && (tr.ent->takedamage)) {
+	if ((tr.ent != self) && (tr.ent->takedamage)) 
+	{
         	T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BEAMGUN);
+	
 		if (tr.ent->health > 0) 
 		{
 			self->client->resp.weapon_hits[6]++;
 			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 		}
+	
 	}
 	else if (!((tr.surface) && (tr.surface->flags & SURF_SKY)))
-    {  
-        gi.WriteByte (svc_temp_entity);
-        gi.WriteByte (TE_SCREEN_SPARKS);
+	{  
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_SCREEN_SPARKS);
 		gi.WritePosition (tr.endpos);
-        gi.WriteDir (tr.plane.normal);
-        gi.multicast (self->s.origin, MULTICAST_PVS);
-
+		gi.WriteDir (tr.plane.normal);
+		gi.multicast (self->s.origin, MULTICAST_PVS);
 	}
-    
-}       
+}
 
 /*
 =================
@@ -534,19 +467,6 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 		{
 			ent->owner->client->resp.weapon_hits[5]++;
 			gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-		}
-	}
-	else
-	{
-		// don't throw any debris in net games
-		if (!deathmatch->value)
-		{
-			if ((surf) && !(surf->flags & (SURF_WARP|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING)))
-			{
-				n = rand() % 5;
-				while(n--)
-					ThrowDebris (ent, "models/objects/debris2/tris.md2", 2, ent->s.origin);
-			}
 		}
 	}
 
