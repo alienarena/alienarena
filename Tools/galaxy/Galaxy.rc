@@ -398,7 +398,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDC_PRIVACY             """http://home.comcast.net/~alienrace/privacy.html"""
+    IDC_PRIVACY             """http://home.comcast.net/~alienrace/privacy2.html"""
 END
 
 #endif    // English (U.S.) resources
