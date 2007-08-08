@@ -244,7 +244,7 @@ void CL_ParseDownload (void)
 	percent = MSG_ReadByte (&net_message);
 	if (size == -1)
 	{
-		Com_Printf ("Server does not have this file.\n");
+		Com_Printf ("Server does not have file %s.\n", cls.downloadname);
 		if (cls.download)
 		{
 			// if here, we tried to resume a file but the server said no
