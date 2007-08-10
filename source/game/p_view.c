@@ -595,8 +595,8 @@ void P_FallingDamage (edict_t *ent)
 	}
 
 	ent->client->fall_value = delta*0.5;
-	if (ent->client->fall_value > 10)
-		ent->client->fall_value = 10;
+	if (ent->client->fall_value > 40)
+		ent->client->fall_value = 40;
 	ent->client->fall_time = level.time + FALL_TIME;
 
 	if (delta > 30)
