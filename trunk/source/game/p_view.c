@@ -612,6 +612,8 @@ void P_FallingDamage (edict_t *ent)
 		damage = (delta-30)/2;
 		if (damage < 1)
 			damage = 1;
+		if (damage > 10)
+			damage = 10;
 		VectorSet (dir, 0, 0, 1);
 
 		if (!deathmatch->value || !((int)dmflags->value & DF_NO_FALLING) )
