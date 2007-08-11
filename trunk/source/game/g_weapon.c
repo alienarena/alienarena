@@ -443,7 +443,6 @@ fire_rocket
 void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	vec3_t		origin;
-	int			n;
 
 	if (other == ent->owner)
 		return;
