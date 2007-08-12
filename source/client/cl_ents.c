@@ -1293,7 +1293,7 @@ void CL_CalcViewValues (void)
 	lerp = cl.lerpfrac;
 
 	// calculate the origin
-	if ((cl_predict->value) && !(cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION))
+	if ( !cl.attractloop && !ps->stats[STAT_CHASE] && cl_predict->value && !(cl.frame.playerstate.pmove.pm_flags & PMF_NO_PREDICTION))  //not for demo/chasecam
 	{	// use predicted values
 		unsigned	delta;
 
