@@ -466,86 +466,6 @@ void R_RotateForEntity (entity_t *e)
 }
 
 /*
-=============================================================
-
-  SPRITE MODELS
-
-=============================================================
-*/
-
-
-/*
-=================
-R_DrawSpriteModel
-
-=================
-*/
-void R_DrawSpriteModel (entity_t *e)
-{
-	float alpha = 1.0F;
-	vec3_t	point;
-	vec3_t		v_forward, v_right, v_up;
-	dsprframe_t	*frame;
-	float		*up, *right;
-	dsprite_t	*psprite;
-
-	// don't even bother culling, because it's just a single
-	// polygon without a surface cache
-
-	psprite = (dsprite_t *)currentmodel->extradata;
-
-	e->frame %= psprite->numframes;
-
-	frame = &psprite->frames[e->frame];
-
-	AngleVectors (currententity->angles, v_forward, v_right, v_up);
-	up = v_forward;
-	right = v_right;
-
-	GL_Bind (currentmodel->skins[e->frame]->texnum);
-
-	alpha = 0.6;
-	qglDepthMask( GL_FALSE );
-	qglEnable( GL_BLEND );
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE);
-    GL_TexEnv( GL_MODULATE );
-	qglBegin (GL_QUADS);
-
-	qglColor4f( 1, 1, 1, alpha );
-
-	qglTexCoord2f (0, 1);
-	VectorMA (e->origin, -frame->origin_y, up, point);
-	VectorMA (point, -frame->origin_x, right, point);
-	qglVertex3fv (point);
-
-	qglTexCoord2f (0, 0);
-	VectorMA (e->origin, frame->height - frame->origin_y, up, point);
-	VectorMA (point, -frame->origin_x, right, point);
-	qglVertex3fv (point);
-
-	qglTexCoord2f (1, 0);
-	VectorMA (e->origin, frame->height - frame->origin_y, up, point);
-	VectorMA (point, frame->width - frame->origin_x, right, point);
-	qglVertex3fv (point);
-
-	qglTexCoord2f (1, 1);
-	VectorMA (e->origin, -frame->origin_y, up, point);
-	VectorMA (point, frame->width - frame->origin_x, right, point);
-	qglVertex3fv (point);
-
-	qglEnd ();
-
-	qglDisable (GL_ALPHA_TEST);
-	GL_TexEnv( GL_REPLACE );
-	qglDisable( GL_BLEND );
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDepthMask( 1 );
-	qglColor4f( 1, 1, 1, 1 );
-}
-
-//==================================================================================
-
-/*
 =============
 R_DrawNullModel
 =============
@@ -639,9 +559,6 @@ void R_DrawEntitiesOnList (void)
 			case mod_brush:
 				R_DrawBrushModel (currententity);
 				break;
-			case mod_sprite:
-				R_DrawSpriteModel (currententity);
-				break;
 			default:
 				Com_Error(ERR_DROP, "Bad modeltype");
 				break;
@@ -694,9 +611,6 @@ void R_DrawEntitiesOnList (void)
 				break;
 			case mod_brush:
 				R_DrawBrushModel (currententity);
-				break;
-			case mod_sprite:
-				R_DrawSpriteModel (currententity);
 				break;
 			default:
 				Com_Error (ERR_DROP, "Bad modeltype");

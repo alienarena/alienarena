@@ -252,7 +252,6 @@ void R_RenderView (refdef_t *fd);
 void GL_ScreenShot_f (void);
 void R_DrawAliasModel (entity_t *e);
 void R_DrawBrushModel (entity_t *e);
-void R_DrawSpriteModel (entity_t *e);
 void R_DrawBeam( entity_t *e );
 void R_DrawWorld (void);
 void R_RenderDlights (void);
