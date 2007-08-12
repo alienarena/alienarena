@@ -160,32 +160,6 @@ typedef struct
 } dmdl_t;
 
 /*
-========================================================================
-
-.SP2 sprite file format
-
-========================================================================
-*/
-
-#define IDSPRITEHEADER	(('2'<<24)+('S'<<16)+('D'<<8)+'I')
-		// little-endian "IDS2"
-#define SPRITE_VERSION	2
-
-typedef struct
-{
-	int		width, height;
-	int		origin_x, origin_y;		// raster coordinates inside pic
-	char	name[MAX_SKINNAME];		// name of pcx file
-} dsprframe_t;
-
-typedef struct {
-	int			ident;
-	int			version;
-	int			numframes;
-	dsprframe_t	frames[1];			// variable sized
-} dsprite_t;
-
-/*
 ==============================================================================
 
   .WAL texture file format
