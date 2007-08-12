@@ -1958,11 +1958,11 @@ static void ConsoleFunc( void *unused )
 	*/
 	extern void Key_ClearTyping( void );
 
-	if ( cl.attractloop )
-	{
-		Cbuf_AddText ("killserver\n");
-		return;
-	}
+// 	if ( cl.attractloop )
+// 	{
+// 		Cbuf_AddText ("killserver\n");
+// 		return;
+// 	}
 
 	Key_ClearTyping ();
 	Con_ClearNotify ();
