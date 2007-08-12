@@ -132,12 +132,6 @@ void Con_ToggleConsole_f (void)
 {
 	SCR_EndLoadingPlaque ();	// get rid of loading plaque
 
-	if (cl.attractloop)
-	{
-		Cbuf_AddText ("killserver\n");
-		return;
-	}
-
 	Key_ClearTyping ();
 	Con_ClearNotify ();
 
