@@ -28,9 +28,9 @@ ResourceCount=7
 Resource1=IDD_GALAXY_DIALOG
 Resource2=IDD_STARTUP
 Resource3=IDD_UPDATER
-Resource4=IDD_ABOUTBOX
+Resource4=IDD_SETPROFILE
 Resource5=IDD_BUDDYNAME
-Resource6=IDD_SETPROFILE
+Resource6=IDD_ABOUTBOX
 Resource7=IDR_MENU1
 
 [CLS:BuddyName]

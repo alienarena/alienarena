@@ -2264,6 +2264,14 @@ Source: ..\..\..\Alien Arena 2007\docs\README.txt; DestDir: {app}\docs
 Source: ..\..\config.cfg; DestDir: {app}\arena
 Source: ..\..\..\Alien Arena 2007\botinfo\bots.tmp; DestDir: {app}\botinfo
 Source: ..\..\..\Alien Arena 2007\closeapp.exe; DestDir: {app}
+Source: ..\..\..\Alien Arena 2007\data1\maps\dm-leviathan.bsp; DestDir: {app}\data1\maps
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-leviathan.mus; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-leviathan.tga; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-leviathan.txt; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-leviathan.rscript; DestDir: {app}\data1\scripts\maps
+Source: ..\..\..\Alien Arena 2007\botinfo\dm-leviathan.tmp; DestDir: {app}\botinfo
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-horus.nod; DestDir: {app}\botinfo\nav
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-leviathan.nod; DestDir: {app}\botinfo\nav
 
 [Icons]
 Name: {group}\{cm:ProgramOnTheWeb,{#MyAppName}}; Filename: {#MyAppURL}
