@@ -1,26 +1,4 @@
 <?php
-
-/*
-    ALIEN ARENA SERVER SCANNER FOR WEB SERVER BROWSER
-    Copyright (C) 2007 Tony Jackson
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
-    Tony Jackson can be contacted at tonyj@cooldark.com
-*/
-
 /*********************************
 This php script contacts the Alien Arena master server, 
 gets a list of games servers, then queries them.
@@ -34,7 +12,7 @@ scanservers.php?debug
 *********************************/
 include 'config.php';  /* Database config */
 
-define("VERSION", "Beta 0.8.4");
+define("VERSION", "0.9.0");
 
 define("MAX_INSTANCES",5); /* Maximum number of instances of this script allowed to run at once */
 define("MAX_SERVERS",256); /* Used to be hardcoded to 64! */
@@ -43,6 +21,7 @@ define("SERVER_QUERY","ÿÿÿÿstatus\n"); /* Query string to send to individual gam
 define("MASTER_ADDRESS",'master.corservers.com');
 define("MASTER_PORT",27900);
 define("SERVER_RETRIES",3); /* Maximum number of times to try querying a games server */
+define("SOCKET_TIMEOUT",6); /* socket_select() timeout, in seconds */
 
 $debug = 0; /* Global for debug configuration */
 
@@ -258,7 +237,7 @@ Function QueryGamesServers(&$serverlist)
 				echo "<br>Waiting for replies...<br>";
 			$buffer = "";
 			$read = $socketlist; /* Take copy of list, as socket_select() writes back to it's params */
-			$result = socket_select($read, $write=NULL, $except=NULL, 3, 0);
+			$result = socket_select($read, $write=NULL, $except=NULL, SOCKET_TIMEOUT, 0);
 			if($result === FALSE)
 				die_message("Failure in socket_select() (".socket_strerror(socket_last_error()).")"); 
 
@@ -332,51 +311,51 @@ Function PopulateServerEntry(&$server, $buffer)
 	if(strlen($buffer) == 0)
 		return;
 
-	$exploded = explode("\\", $buffer);
+	$exploded = explode("\n", $buffer);
 
-//	print_r($exploded);
-//	echo "<br>\n";
+	if(array_key_exists(1, $exploded))
+		$serverstring = explode("\\", $exploded[1]);
+	else
+		$serverstring = '';
 
 	/* Case-sensitive parameters to parse result for */
 	$parameters = array("hostname", "mapname", "version", "website", "Admin");
 	foreach ($parameters as $string)
 	{
-		$key=array_search($string, $exploded);
+		$key=array_search($string, $serverstring);
 		if($key === FALSE)
 			$server[strtolower($string)] = ""; /* Not found (but must add entry otherwise have to check existance later in mysql queries */
 		else
-			$server[strtolower($string)] = substr(addslashes($exploded[$key+1]), 0, 255);  /* 255 chars max */
+			$server[strtolower($string)] = addslashes($serverstring[$key+1]);
 	}
 	
 	$server["mapname"] = strtolower($server["mapname"]);
-	
-	/* game is a special case */
-	$key=array_search("game", $exploded);
-	if(!($key === FALSE))
+	$server['playerinfo'] = array();
+
+	$players = array_slice($exploded, 2, -1);
+
+//	echo "PLAYERS:<br>\n";
+//	print_r($players);
+
+	foreach($players as $player)
 	{
-		$temp = explode("\n", $exploded[$key+1]);
-		/* $server["game"] = $temp[0]; */ /* Always seems to be "arena" */
-		// Get rid of game value off start of array
-		array_shift($temp);
-		// Get rid of spurious CR and LF pair
-		array_pop($temp);
-		$server["playerinfo"] = $temp;
-		foreach ($server["playerinfo"] as &$player)
-		{
-			/* $element here contains a space seperated string, including score, ping, name, and sometimes ip address
-				name and ip address are surrounded by quotes */
-			$space_delimited = explode(" ", $player);
-			$quote_delimited = explode("\"", $player);
-			$player = array();  /* Convert type to array (within array of players) */
-			$player["score"] = $space_delimited[0];
-			$player["ping"]  = $space_delimited[1];			
-			$player["name"]  = addslashes(trim($quote_delimited[1]," \"")); /* Strip off trailing/leading whitespace and quotes, fix any escape charaters */
-			if(array_key_exists(3, $quote_delimited))
-				$player["ip"] = addslashes(trim($quote_delimited[3]," \"")); /* Strip off trailing/leading whitespace and quotes, fix any escape charaters */
-			else
-				$player["ip"] = "";
-		}
+		/* $element here contains a space seperated string, including score, ping, name, and sometimes ip address
+			name and ip address are surrounded by quotes */
+		$space_delimited = explode(" ", $player);
+		$quote_delimited = explode("\"", $player);
+		$player = array();  /* Convert type to array (within array of players) */
+		$player["score"] = $space_delimited[0];
+		$player["ping"]  = $space_delimited[1];			
+		$player["name"]  = addslashes(trim($quote_delimited[1]," \"")); /* Strip off trailing/leading whitespace and quotes, fix any escape charaters */
+		if(array_key_exists(3, $quote_delimited))
+			$player["ip"] = addslashes(trim($quote_delimited[3]," \"")); /* Strip off trailing/leading whitespace and quotes, fix any escape charaters */
+		else
+			$player["ip"] = "";
+		$server['playerinfo'][] = $player;
 	}
+
+//	echo "SERVER DATA:<BR>\n";
+//	print_r($server);
 }
 
 /* Take $serverlist and put entries into mysql database */
