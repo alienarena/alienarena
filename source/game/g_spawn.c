@@ -654,13 +654,6 @@ char *dm_statusbar =
 "	rnum "
 "endif "
 
-// picked up item
-"if 7 "
-"	xl	99 "
-"	yb	-66 "
-"	stat_string 8 "
-"endif "
-
 // timer
 "if 9 "
 "	xv	262 "
@@ -717,13 +710,6 @@ char *team_statusbar =
 "if 4 "
 "	xl	142 "
 "	rnum "
-"endif "
-
-// selected item
-"if 6 "
-"	xv	296 "
-"   yb  -56"
-"	pic 6 "
 "endif "
 
 // timer
