@@ -262,10 +262,10 @@ void SV_CalcViewOffset (edict_t *ent)
 
 		// add pitch based on fall kick
 
-		ratio = (ent->client->fall_time - level.time) / FALL_TIME;
-		if (ratio < 0)
-			ratio = 0;
-		angles[PITCH] += ratio * ent->client->fall_value;
+// 		ratio = (ent->client->fall_time - level.time) / FALL_TIME;
+// 		if (ratio < 0)
+// 			ratio = 0;
+// 		angles[PITCH] += ratio * ent->client->fall_value;
 
 		// add angles based on velocity
 
@@ -304,7 +304,7 @@ void SV_CalcViewOffset (edict_t *ent)
 	ratio = (ent->client->fall_time - level.time) / FALL_TIME;
 	if (ratio < 0)
 		ratio = 0;
-	v[2] -= ratio * ent->client->fall_value * 0.4;
+	v[2] -= ratio * ent->client->fall_value;
 
 	// add bob height
 
@@ -572,18 +572,18 @@ void P_FallingDamage (edict_t *ent)
 	if (ent->waterlevel == 1)
 		delta *= 0.5;
 
-	if (delta < 1)
+	if (delta < 3)
 		return;
 
-	if (delta < 15)
-	{
-		ent->s.event = EV_FOOTSTEP;
-		return;
-	}
+// 	if (delta < 15)
+// 	{
+// 		ent->s.event = EV_FOOTSTEP;
+// 		return;
+// 	}
 
-	ent->client->fall_value = delta*0.5;
-	if (ent->client->fall_value > 40)
-		ent->client->fall_value = 40;
+	ent->client->fall_value = delta;
+	if (ent->client->fall_value > 20)
+		ent->client->fall_value = 20;
 	ent->client->fall_time = level.time + FALL_TIME;
 
 	if (delta > 30)
