@@ -739,7 +739,7 @@ void weapon_plasma_fire (edict_t *ent)
 
 void Weapon_Disruptor (edict_t *ent)
 {
-	static int	pause_frames[]	= {15, 0};
+	static int	pause_frames[]	= {42, 0};
 	static int	fire_frames[]	= {5, 0};
 	static int	excessive_fire_frames[] = {5,7,9,11,0};
 
@@ -841,7 +841,7 @@ void weapon_energy_field_fire (edict_t *ent)
 }
 void Weapon_Vaporizer (edict_t *ent)
 {
-	static int	pause_frames[]	= {25, 0};
+	static int	pause_frames[]	= {48, 0};
 	static int	fire_frames[]	= {6, 7, 12, 13, 0};
 
 	Weapon_Generic (ent, 5, 18, 48, 52, pause_frames, fire_frames, weapon_energy_field_fire);
@@ -927,7 +927,7 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 void Weapon_Flame (edict_t *ent)
 {
-	static int	pause_frames[]	= {20, 0};
+	static int	pause_frames[]	= {36, 0};
 	static int	fire_frames[]	= {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0};
 
 	Weapon_Generic (ent, 5, 16, 36, 40, pause_frames, fire_frames, weapon_flamethrower_fire);
@@ -992,7 +992,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 void Weapon_RocketLauncher (edict_t *ent)
 {
-	static int	pause_frames[]	= {18, 0};
+	static int	pause_frames[]	= {52, 0};
 	static int	fire_frames[]	= {6, 0};
 	static int	excessive_fire_frames[]	= {5,7,9,11,13, 0};
 
@@ -1092,7 +1092,7 @@ void Weapon_Blaster_Fire (edict_t *ent)
 
 void Weapon_Blaster (edict_t *ent)
 {
-	static int	pause_frames[]	= {10, 0};
+	static int	pause_frames[]	= {52, 0};
 	static int	fire_frames[]	= {5,0};
 	static int  excessive_fire_frames[] = {5,6,7,8,0};
 
@@ -1302,7 +1302,7 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 
 	if (!((ent->client->buttons & BUTTON_ATTACK) || (ent->client->buttons & BUTTON_ATTACK2)))
 	{
-		ent->client->ps.gunframe++;
+		ent->client->ps.gunframe = 25;
 	}
 	else
 	{
@@ -1339,15 +1339,15 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 		}
 
 		ent->client->ps.gunframe++;
-		if (ent->client->ps.gunframe == 19 && ent->client->pers.inventory[ent->client->ammo_index])
+		if (ent->client->ps.gunframe == 24 && ent->client->pers.inventory[ent->client->ammo_index])
 			ent->client->ps.gunframe = 6;
 	}
 }
 
 void Weapon_Beamgun (edict_t *ent)
 {
-	static int	pause_frames[]	= {28, 0};
-	static int	fire_frames[]	= {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 0};
+	static int	pause_frames[]	= {53, 0};
+	static int	fire_frames[]	= {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 0};
 
 	Weapon_Generic (ent, 5, 24, 53, 57, pause_frames, fire_frames, Weapon_Beamgun_Fire);
 }
@@ -1522,7 +1522,7 @@ void Machinegun_Fire (edict_t *ent)
 
 void Weapon_Chain (edict_t *ent)
 {
-	static int	pause_frames[]	= {17, 0};
+	static int	pause_frames[]	= {43, 0};
 	static int	fire_frames[]	= {5, 6, 7, 8, 9, 10, 11, 12, 13};
 
 	Weapon_Generic (ent, 4, 14, 43, 46, pause_frames, fire_frames, Machinegun_Fire);
@@ -1590,7 +1590,7 @@ void weapon_floater_fire (edict_t *ent)
 
 void Weapon_Smartgun (edict_t *ent)
 {
-	static int	pause_frames[]	= {14, 0};
+	static int	pause_frames[]	= {31, 0};
 	static int	fire_frames[]	= {6, 0};
 
 	if(ent->client->buttons & BUTTON_ATTACK2)
@@ -1645,7 +1645,7 @@ void Weapon_Deathball_Fire (edict_t *ent)
 }
 void Weapon_Deathball (edict_t *ent)
 {
-	static int	pause_frames[]	= {30, 0};
+	static int	pause_frames[]	= {33, 0};
 	static int	fire_frames[]	= {7,0};
 
 	Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, fire_frames, Weapon_Deathball_Fire);
