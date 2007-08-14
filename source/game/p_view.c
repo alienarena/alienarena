@@ -386,7 +386,7 @@ void SV_CalcGunOffset (edict_t *ent)
 		ent->client->ps.gunoffset[2] -=1.5;
 		ent->client->ps.gunangles[PITCH] -= 1;
 		ent->client->ps.gunangles[ROLL] -= 1;
-	} 
+	}
 }
 
 
@@ -546,6 +546,9 @@ void P_FallingDamage (edict_t *ent)
 
 	if (ent->movetype == MOVETYPE_NOCLIP)
 		return;
+	
+	if(joustmode->value)
+		return;
 
 	if ((ent->client->oldvelocity[2] < 0) && (ent->velocity[2] > ent->client->oldvelocity[2]) && (!ent->groundentity))
 	{
@@ -581,7 +584,7 @@ void P_FallingDamage (edict_t *ent)
 // 		ent->s.event = EV_FOOTSTEP;
 // 		return;
 // 	}
-
+	
 	ent->client->fall_value = delta;
 	if (ent->client->fall_value > 20)
 		ent->client->fall_value = 20;
