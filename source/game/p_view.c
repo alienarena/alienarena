@@ -358,7 +358,6 @@ SV_CalcGunOffset
 void SV_CalcGunOffset (edict_t *ent)
 {
 	int		i;
-	float	delta;
 
 	// gun angles from bobbing
 	ent->client->ps.gunangles[ROLL] = xyspeed * bobfracsin * 0.005;
@@ -371,26 +370,7 @@ void SV_CalcGunOffset (edict_t *ent)
 
 	ent->client->ps.gunangles[PITCH] = xyspeed * bobfracsin * 0.005;
 
-	// gun angles from delta movement
-	for (i=0 ; i<3 ; i++)
-	{
-		delta = ent->client->oldviewangles[i] - ent->client->ps.viewangles[i];
-		if (delta > 180)
-			delta -= 360;
-		if (delta < -180)
-			delta += 360;
-		if (delta > 45)
-			delta = 45;
-		if (delta < -45)
-			delta = -45;
-		if (i == YAW)
-			ent->client->ps.gunangles[ROLL] += 0.1*delta;
-		ent->client->ps.gunangles[i] += 0.2 * delta;
-	}
-
-	// gun height
 	VectorClear (ent->client->ps.gunoffset);
-//	ent->ps->gunorigin[2] += bob;
 
 	// gun_x / gun_y / gun_z are development tools
 	for (i=0 ; i<3 ; i++)
@@ -398,6 +378,13 @@ void SV_CalcGunOffset (edict_t *ent)
 		ent->client->ps.gunoffset[i] += forward[i]*(gun_y->value);
 		ent->client->ps.gunoffset[i] += right[i]*gun_x->value;
 		ent->client->ps.gunoffset[i] += up[i]* (-gun_z->value);
+
+	}
+	
+	//landing on jumps
+	if(ent->velocity[2] == 0 && ent->client->oldvelocity[2] !=0) {
+		ent->client->ps.gunoffset[2] -=.5;
+		ent->client->ps.gunangles[PITCH] += 2;
 	}
 }
 
