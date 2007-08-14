@@ -291,6 +291,11 @@ void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 
 	//env map for certain waters(more clear types)
 	if(fa->texinfo->flags &(SURF_TRANS33)){
+
+		//hack for stock fog textures, ugh
+		if(!Q_stricmp(fa->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_stricmp(fa->texinfo->image->name, "textures/arena5/fod.wal"))
+			return;
+
 		AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 		GL_Bind(r_reflecttexture->texnum);
 
