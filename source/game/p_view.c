@@ -382,10 +382,11 @@ void SV_CalcGunOffset (edict_t *ent)
 	}
 	
 	//landing on jumps
-	if(ent->velocity[2] == 0 && ent->client->oldvelocity[2] !=0) {
-		ent->client->ps.gunoffset[2] -=.5;
-		ent->client->ps.gunangles[PITCH] += 2;
-	}
+	if(ent->s.event == EV_FALLSHORT || ent->s.event == EV_FALL || ent->s.event == EV_FALLFAR) {
+		ent->client->ps.gunoffset[2] -=1.5;
+		ent->client->ps.gunangles[PITCH] -= 1;
+		ent->client->ps.gunangles[ROLL] -= 1;
+	} 
 }
 
 
