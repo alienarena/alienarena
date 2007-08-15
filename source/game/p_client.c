@@ -2363,7 +2363,7 @@ Will not be called between levels.
 */
 void ClientDisconnect (edict_t *ent)
 {
-	int	playernum;
+	int	playernum, i;
 
 	if (!ent->client)
 		return;
@@ -2387,14 +2387,19 @@ void ClientDisconnect (edict_t *ent)
 	//		safe_bprintf(PRINT_HIGH, "disconnected - red: %i blue: %i\n", red_team_cnt, blue_team_cnt);
 	}
 
-	//if using bot thresholds, put the bot back in
-	if(sv_botkickthreshold->integer)
+	//if using bot thresholds, put the bot back in(duel always uses them)
+	if(sv_botkickthreshold->integer || g_duel->value)
 		ACESP_LoadBots(ent, 1);
 
 	//if in duel mode, we need to bump people down the queue if its the player in game leaving
-	if(g_duel->value) 
+	if(g_duel->value) {
 		MoveClientsDownQueue(ent);
-
+		if(ent->client->pers.queue < 3) {
+			for (i = 0; i < maxclients->value; i++)  //clear scores if player was in duel
+				if(g_edicts[i+1].inuse && g_edicts[i+1].client && !g_edicts[i+1].is_bot)
+					g_edicts[i=1].client->resp.score = 0;
+		}
+	}
 	// send effect
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
