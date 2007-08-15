@@ -2408,7 +2408,6 @@ Name: {app}\data1\vehicles\hover
 Name: {app}\data1\vehicles\strafer
 Name: {app}\botinfo
 Name: {app}\botinfo\nav
-Name: {app}\tools
 Name: {app}\tools\projects
 Name: {app}\tools\prefabs
 Name: {app}\tools\prefabscripts
