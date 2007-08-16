@@ -208,9 +208,6 @@ void InitGame (void)
 	//weapons
 	wep_selfdmgmulti = gi.cvar("wep_selfdmgmulti", "1.0", 0);
 
-	wep_disruptor_dmg = gi.cvar("wep_disruptor_dmg", "60", 0);
-	wep_disruptor_kick = gi.cvar("wep_disruptor_kick", "60", 0);
-
 	//health/max health/max ammo
 	g_spawnhealth = gi.cvar("g_spawnhealth", "125", 0);
 	g_maxhealth = gi.cvar("g_maxhealth", "100", 0);

@@ -57,9 +57,6 @@ cvar_t	*g_losehealth_num;
 //weapons
 cvar_t	*wep_selfdmgmulti;
 
-cvar_t	*wep_disruptor_dmg;
-cvar_t	*wep_disruptor_kick;
-
 //health/max health/max ammo
 cvar_t	*g_spawnhealth;
 cvar_t	*g_maxhealth;
