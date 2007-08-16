@@ -526,6 +526,10 @@ Walking monsters that touch this will jump in the direction of the trigger's ang
 
 void trigger_monsterjump_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
+
+	if (self->nextthink)
+		return;		// already been triggered
+
 	if (other->flags & (FL_FLY | FL_SWIM) )
 		return;
 	if (other->svflags & SVF_DEADMONSTER)
@@ -540,7 +544,7 @@ void trigger_monsterjump_touch (edict_t *self, edict_t *other, cplane_t *plane, 
 
 	//play a sound
 	gi.sound (other, CHAN_AUTO, gi.soundindex("world/button2.wav"), 1, ATTN_NORM, 0);
-	
+	self->nextthink = level.time + .1;
 }
 
 void SP_trigger_monsterjump (edict_t *self)
@@ -554,6 +558,7 @@ void SP_trigger_monsterjump (edict_t *self)
 	InitTrigger (self);
 	self->touch = trigger_monsterjump_touch;
 	self->movedir[2] = st.height;
+	self->think = multi_wait;
 }
 
 //trigger_deathballtarget - a "goal" used for scoring in deathball

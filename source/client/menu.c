@@ -3653,7 +3653,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 		strcpy( longname, COM_Parse( &s ) );
 		Com_sprintf( scratch, sizeof( scratch ), "%s\n%s", longname, shortname );
 
-		if (s_rules_box.curvalue == 0) {
+		if (s_rules_box.curvalue == 0 || s_rules_box.curvalue == 6) {
 			if((shortname[0] == 'd' && shortname[1] == 'm') || (shortname[0] == 't' && shortname[1] == 'o')) {
 				mapnames[k] = malloc( strlen( scratch ) + 1 );
 				strcpy( mapnames[k], scratch );
@@ -3846,10 +3846,11 @@ void StartServerActionFunc( void *self )
 //PGM
 	if(s_rules_box.curvalue == 0)
 	{
-		Cvar_SetValue ("deathmatch", !s_rules_box.curvalue );
+		Cvar_SetValue ("deathmatch", 1 );
 		Cvar_SetValue ("ctf", 0);
 		Cvar_SetValue ("tca", 0);
 		Cvar_SetValue ("cp", 0);
+		Cvar_SetValue ("g_duel", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 	else if(s_rules_box.curvalue == 1)
@@ -3858,6 +3859,7 @@ void StartServerActionFunc( void *self )
 		Cvar_SetValue ("ctf", 1 ); //set both dm and ctf
 		Cvar_SetValue ("tca", 0);
 		Cvar_SetValue ("cp", 0);
+		Cvar_SetValue ("g_duel", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 	else if(s_rules_box.curvalue == 2) //aoa mode
@@ -3866,6 +3868,7 @@ void StartServerActionFunc( void *self )
 		Cvar_SetValue ("ctf", 0 );
 		Cvar_SetValue ("tca", 0);
 		Cvar_SetValue ("cp", 0);
+		Cvar_SetValue ("g_duel", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 	else if(s_rules_box.curvalue == 3) //deathball mode
@@ -3874,6 +3877,7 @@ void StartServerActionFunc( void *self )
 		Cvar_SetValue ("ctf", 0 );
 		Cvar_SetValue ("tca", 0);
 		Cvar_SetValue ("cp", 0);
+		Cvar_SetValue ("g_duel", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 	else if(s_rules_box.curvalue == 4) //tca mode
@@ -3882,6 +3886,7 @@ void StartServerActionFunc( void *self )
 		Cvar_SetValue ("ctf", 0 );
 		Cvar_SetValue ("tca", 1);
 		Cvar_SetValue ("cp", 0);
+		Cvar_SetValue ("g_duel", 0);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 	else if(s_rules_box.curvalue == 5) //cattleprod mode
@@ -3890,6 +3895,16 @@ void StartServerActionFunc( void *self )
 		Cvar_SetValue ("ctf", 0 );
 		Cvar_SetValue ("tca", 0);
 		Cvar_SetValue ("cp", 1);
+		Cvar_SetValue ("g_duel", 0);
+		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
+	}
+	else if(s_rules_box.curvalue == 6) //duel mode
+	{
+		Cvar_SetValue ("deathmatch", 1 );	// deathmatch is always true for cp.
+		Cvar_SetValue ("ctf", 0 );
+		Cvar_SetValue ("tca", 0);
+		Cvar_SetValue ("cp", 0);
+		Cvar_SetValue ("g_duel", 1);
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 
@@ -3954,6 +3969,7 @@ void StartServer_MenuInit( void )
 		"deathball",
 		"team core assault",
 		"cattle prod",
+		"duel",
 		0
 	};
 
