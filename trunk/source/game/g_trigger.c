@@ -73,6 +73,8 @@ void Touch_Multi (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *su
 {
 	if(other->client)
 	{
+		if(other->is_bot || other->client->is_bot)
+			return;
 		if (self->spawnflags & 2)
 			return;
 	}
@@ -81,6 +83,7 @@ void Touch_Multi (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *su
 		if (!(self->spawnflags & 1))
 			return;
 	}
+	
 	else
 		return;
 
@@ -532,11 +535,12 @@ void trigger_monsterjump_touch (edict_t *self, edict_t *other, cplane_t *plane, 
 	other->velocity[0] = self->movedir[0] * self->speed;
 	other->velocity[1] = self->movedir[1] * self->speed;
 	
-//	if (!other->groundentity)
-//		return;
-	
 	other->groundentity = NULL;
 	other->velocity[2] = self->movedir[2];
+
+	//play a sound
+	gi.sound (other, CHAN_AUTO, gi.soundindex("world/button2.wav"), 1, ATTN_NORM, 0);
+	
 }
 
 void SP_trigger_monsterjump (edict_t *self)
