@@ -157,7 +157,7 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type, int effects)
 
 	if (type == GIB_ORGANIC)
 	{
-		gib->movetype = MOVETYPE_TOSS;
+		gib->movetype = MOVETYPE_BOUNCE;
 		gib->touch = gib_touch;
 		vscale = 0.5;
 	}
