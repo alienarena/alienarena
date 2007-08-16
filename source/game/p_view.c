@@ -225,10 +225,7 @@ void SV_CalcViewOffset (edict_t *ent)
 	float		bob;
 	float		ratio;
 	float		delta;
-	vec3_t		v;
-
-
-//===================================
+	vec3_t	v;
 
 	// base angles
 	angles = ent->client->ps.kick_angles;
@@ -245,11 +242,9 @@ void SV_CalcViewOffset (edict_t *ent)
 	else
 	{
 		// add angles based on weapon kick
-
 		VectorCopy (ent->client->kick_angles, angles);
 
 		// add angles based on damage kick
-
 		ratio = (ent->client->v_dmg_time - level.time) / DAMAGE_TIME;
 		if (ratio < 0)
 		{
@@ -268,7 +263,6 @@ void SV_CalcViewOffset (edict_t *ent)
 // 		angles[PITCH] += ratio * ent->client->fall_value;
 
 		// add angles based on velocity
-
 		delta = DotProduct (ent->velocity, forward);
 		angles[PITCH] += delta*run_pitch->value;
 
@@ -276,7 +270,6 @@ void SV_CalcViewOffset (edict_t *ent)
 		angles[ROLL] += delta*run_roll->value;
 
 		// add angles based on bob
-
 		delta = bobfracsin * bob_pitch->value * xyspeed;
 		if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 			delta *= 6;		// crouching
@@ -289,57 +282,48 @@ void SV_CalcViewOffset (edict_t *ent)
 		angles[ROLL] += delta;
 	}
 
-//===================================
-
 	// base origin
-
 	VectorClear (v);
 
 	// add view height
-
 	v[2] += ent->viewheight;
 
 	// add fall height
-
 	ratio = (ent->client->fall_time - level.time) / FALL_TIME;
 	if (ratio < 0)
 		ratio = 0;
 	v[2] -= ratio * ent->client->fall_value;
 
 	// add bob height
-
 	bob = bobfracsin * xyspeed * bob_up->value;
 	if (bob > 6)
 		bob = 6;
-	//gi.DebugGraph (bob *2, 255);
 	v[2] += bob;
 
 	// add kick offset
-
 	VectorAdd (v, ent->client->kick_origin, v);
 
 	// absolutely bound offsets
 	// so the view can never be outside the player box
-
 	if (!ent->client->chasetoggle)
-    {
-	    if (v[0] < -14)
-		    v[0] = -14;
-        else if (v[0] > 14)
-            v[0] = 14;
-        if (v[1] < -14)
-            v[1] = -14;
-        else if (v[1] > 14)
-            v[1] = 14;
-        if (v[2] < -22)
-            v[2] = -22;
-        else if (v[2] > 30)
-            v[2] = 30;
+	{
+	if (v[0] < -14)
+		v[0] = -14;
+	else if (v[0] > 14)
+		v[0] = 14;
+	if (v[1] < -14)
+		v[1] = -14;
+	else if (v[1] > 14)
+		v[1] = 14;
+	if (v[2] < -22)
+		v[2] = -22;
+	else if (v[2] > 30)
+		v[2] = 30;
 	}
 	else
 	{
-        VectorSet (v, 0, 0, 0);
-        if (ent->client->chasecam != NULL)
+        	VectorSet (v, 0, 0, 0);
+        	if (ent->client->chasecam != NULL)
         {
             ent->client->ps.pmove.origin[0] = ent->client->chasecam->s.origin[0]*8;
             ent->client->ps.pmove.origin[1] = ent->client->chasecam->s.origin[1]*8;
