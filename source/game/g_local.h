@@ -585,9 +585,6 @@ extern	cvar_t	*g_losehealth_num;
 //weapons
 extern	cvar_t	*wep_selfdmgmulti;
 
-extern	cvar_t	*wep_disruptor_dmg;
-extern	cvar_t	*wep_disruptor_kick;
-
 //health/max health/max ammo
 extern	cvar_t	*g_spawnhealth;
 extern	cvar_t	*g_maxhealth;
