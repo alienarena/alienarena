@@ -114,6 +114,7 @@ typedef struct
 	int curvalue;
 
 	const char **itemnames;
+	char **dyn_itemnames;
 } menulist_s;
 
 typedef struct

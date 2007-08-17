@@ -453,39 +453,6 @@ int FS_LoadFile (char *path, void **buffer)
 	return len;
 }
 
-int FS_LoadFileZ (const char *path, void **buffer) // jit - null-terminated FS_LoadFile
-{
-	FILE	*h;
-	byte	*buf;
-	int		len;
-
-	buf = NULL;
-	len = FS_FOpenFile(path, &h);
-
-	if (!h)
-	{
-		if (buffer)
-			*buffer = NULL;
-
-		return -1;
-	}
-
-	if (!buffer)
-	{
-		fclose(h);
-		return len;
-	}
-
-	buf = Z_Malloc(len + 1);
-	*buffer = buf;
-	FS_Read(buf, len, h);
-	buf[len] = 0;
-	fclose(h);
-
-	return len;
-}
-
-
 /*
 =============
 FS_FreeFile

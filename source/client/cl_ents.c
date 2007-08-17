@@ -664,7 +664,7 @@ CL_AddPacketEntities
 
 ===============
 */
-extern struct model_s
+struct model_s
 {
 	char		name[MAX_QPATH];
 };

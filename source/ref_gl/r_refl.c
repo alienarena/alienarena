@@ -116,7 +116,7 @@ void R_init_refl (int maxNoReflections)
 		qglGenProgramsARB(1, &g_water_program_id);
 		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
 		qglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 1.0f, 0.1f, 0.6f, 0.5f); // jitest
-		len = FS_LoadFileZ("scripts/water1.arbf", &fragment_program_text);
+		len = FS_LoadFile("scripts/water1.arbf", &fragment_program_text);
 
 		if (len > 0) {
 			qglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, len, fragment_program_text);

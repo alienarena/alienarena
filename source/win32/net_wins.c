@@ -561,7 +561,7 @@ void NET_OpenIP (void)
 				port = Cvar_Get("port", va("%i", PORT_SERVER), CVAR_NOSET)->value;
 			}
 		}
-		server_port = port;
+		server_port = (ptrdiff_t)port;
 		ip_sockets[NS_SERVER] = NET_IPSocket (ip->string, port);
 		if (!ip_sockets[NS_SERVER] && dedicated)
 			Com_Error (ERR_FATAL, "Couldn't allocate dedicated server IP port");
