@@ -829,11 +829,6 @@ void SCR_Loading_f (void)
 	SCR_BeginLoadingPlaque ();
 }
 
-/*
-================
-SCR_TimeRefresh_f
-================
-*/
 int entitycmpfnc( const entity_t *a, const entity_t *b )
 {
 	/*
@@ -849,6 +844,12 @@ int entitycmpfnc( const entity_t *a, const entity_t *b )
 	}
 }
 
+
+/*
+================
+SCR_TimeRefresh_f
+================
+*/
 void SCR_TimeRefresh_f (void)
 {
 	int		i;
