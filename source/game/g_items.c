@@ -43,8 +43,6 @@ gitem_armor_t bodyarmor_info	= {100, 200, .80, .60, ARMOR_BODY};
 static int	jacket_armor_index;
 static int	combat_armor_index;
 static int	body_armor_index;
-static int	power_screen_index;
-static int	power_shield_index;
 
 #define HEALTH_IGNORE_MAX	1
 #define HEALTH_TIMED		2
@@ -555,74 +553,6 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 
 //======================================================================
 
-int PowerArmorType (edict_t *ent)
-{
-	if (!ent->client)
-		return POWER_ARMOR_NONE;
-
-	if (!(ent->flags & FL_POWER_ARMOR))
-		return POWER_ARMOR_NONE;
-
-	if (ent->client->pers.inventory[power_shield_index] > 0)
-		return POWER_ARMOR_SHIELD;
-
-	if (ent->client->pers.inventory[power_screen_index] > 0)
-		return POWER_ARMOR_SCREEN;
-
-	return POWER_ARMOR_NONE;
-}
-
-void Use_PowerArmor (edict_t *ent, gitem_t *item)
-{
-	int		index;
-
-	if (ent->flags & FL_POWER_ARMOR)
-	{
-		ent->flags &= ~FL_POWER_ARMOR;
-		gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power2.wav"), 1, ATTN_NORM, 0);
-	}
-	else
-	{
-		index = ITEM_INDEX(FindItem("cells"));
-		if (!ent->client->pers.inventory[index])
-		{
-			safe_cprintf (ent, PRINT_HIGH, "No cells for power armor.\n");
-			return;
-		}
-		ent->flags |= FL_POWER_ARMOR;
-		gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/power1.wav"), 1, ATTN_NORM, 0);
-	}
-}
-
-qboolean Pickup_PowerArmor (edict_t *ent, edict_t *other)
-{
-	int		quantity;
-
-	quantity = other->client->pers.inventory[ITEM_INDEX(ent->item)];
-
-	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
-
-	if (deathmatch->value)
-	{
-		if (!(ent->spawnflags & DROPPED_ITEM) )
-			SetRespawn (ent, ent->item->quantity);
-		// auto-use for DM only if we didn't already have one
-		if (!quantity)
-			ent->item->use (other, ent->item);
-	}
-
-	return true;
-}
-
-void Drop_PowerArmor (edict_t *ent, gitem_t *item)
-{
-	if ((ent->flags & FL_POWER_ARMOR) && (ent->client->pers.inventory[ITEM_INDEX(item)] == 1))
-		Use_PowerArmor (ent, item);
-	Drop_General (ent, item);
-}
-
-//======================================================================
-
 /*
 ===============
 Touch_Item
@@ -951,7 +881,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	{
 		if ( (int)dmflags->value & DF_NO_ARMOR )
 		{
-			if (item->pickup == Pickup_Armor || item->pickup == Pickup_PowerArmor)
+			if (item->pickup == Pickup_Armor)
 			{
 				G_FreeEdict (ent);
 				return;
@@ -1149,52 +1079,6 @@ gitem_t	itemlist[] =
 /* precache */ ""
 	},
 
-
-/*QUAKED item_power_screen (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-	{
-		"item_power_screen",
-		Pickup_PowerArmor,
-		Use_PowerArmor,
-		Drop_PowerArmor,
-		NULL,
-		"misc/ar3_pkup.wav",
-		"models/items/armor/screen/tris.md2", EF_ROTATE,
-		NULL,
-/* icon */		"i_powerscreen",
-/* pickup */	"Power Screen",
-/* width */		0,
-		60,
-		NULL,
-		IT_ARMOR,
-		0,
-		NULL,
-		0,
-/* precache */ ""
-	},
-
-/*QUAKED item_power_shield (.3 .3 1) (-16 -16 -16) (16 16 16)
-*/
-	{
-		"item_power_shield",
-		Pickup_PowerArmor,
-		Use_PowerArmor,
-		Drop_PowerArmor,
-		NULL,
-		"misc/ar3_pkup.wav",
-		"models/items/armor/shield/tris.md2", EF_ROTATE,
-		NULL,
-/* icon */		"i_powershield",
-/* pickup */	"Power Shield",
-/* width */		0,
-		60,
-		NULL,
-		IT_ARMOR,
-		0,
-		NULL,
-		0,
-/* precache */ "misc/power2.wav misc/power1.wav"
-	},
 //CTF
 /*QUAKED item_flag_team1 (1 0.2 0) (-16 -16 -24) (16 16 32)
 */
@@ -1983,6 +1867,4 @@ void SetItemNames (void)
 	jacket_armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 	combat_armor_index = ITEM_INDEX(FindItem("Combat Armor"));
 	body_armor_index   = ITEM_INDEX(FindItem("Body Armor"));
-	power_screen_index = ITEM_INDEX(FindItem("Power Screen"));
-	power_shield_index = ITEM_INDEX(FindItem("Power Shield"));
 }

@@ -954,8 +954,6 @@ void FetchClientEntData (edict_t *ent)
 {
 	ent->health = ent->client->pers.health;
 	ent->max_health = ent->client->pers.max_health;
-//	if (ent->client->pers.powerArmorActive)
-		ent->flags |= FL_POWER_ARMOR;
 }
 
 
