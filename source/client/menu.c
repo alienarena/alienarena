@@ -2227,7 +2227,7 @@ void Options_MenuInit( void )
 	s_options_font_box.generic.y	= 210*scale;
 	s_options_font_box.generic.name	= "font";
 	s_options_font_box.generic.callback = FontFunc;
-	s_options_font_box.dyn_itemnames = font_names;
+	s_options_font_box.itemnames = font_names;
 	s_options_font_box.generic.statusbar	= "select your font";
 
 	crosshair_names = SetCrosshairNames ();
@@ -2236,7 +2236,7 @@ void Options_MenuInit( void )
 	s_options_crosshair_box.generic.y	= 230*scale;
 	s_options_crosshair_box.generic.name	= "crosshair";
 	s_options_crosshair_box.generic.callback = CrosshairFunc;
-	s_options_crosshair_box.dyn_itemnames = crosshair_names;
+	s_options_crosshair_box.itemnames = crosshair_names;
 	s_options_crosshair_box.generic.statusbar	= "select your crosshair";
 
 	hud_names = SetHudNames ();
@@ -2245,7 +2245,7 @@ void Options_MenuInit( void )
 	s_options_hud_box.generic.y	= 240*scale;
 	s_options_hud_box.generic.name	= "hud";
 	s_options_hud_box.generic.callback = HudFunc;
-	s_options_hud_box.dyn_itemnames = hud_names;
+	s_options_hud_box.itemnames = hud_names;
 	s_options_hud_box.generic.statusbar	= "select your hud style";
 
 	s_options_minimap_box.generic.type = MTYPE_SPINCONTROL;
@@ -3830,7 +3830,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	}
 
 	s_startmap_list.generic.name	= "initial map";
-	s_startmap_list.dyn_itemnames = mapnames;
+	s_startmap_list.itemnames = mapnames;
 	s_startmap_list.curvalue = 0;
 }
 
@@ -4029,7 +4029,7 @@ void StartServer_MenuInit( void )
 	s_startmap_list.generic.x	= -8;
 	s_startmap_list.generic.y	= 0 + offset;
 	s_startmap_list.generic.name	= "initial map";
-	s_startmap_list.dyn_itemnames = mapnames;
+	s_startmap_list.itemnames = mapnames;
 
 	s_rules_box.generic.type = MTYPE_SPINCONTROL;
 	s_rules_box.generic.x	= -8;
@@ -4987,7 +4987,7 @@ static void RateCallback( void *unused )
 
 static void ModelCallback( void *unused )
 {
-	s_player_skin_box.dyn_itemnames = s_pmi[s_player_model_box.curvalue].skindisplaynames;
+	s_player_skin_box.itemnames = s_pmi[s_player_model_box.curvalue].skindisplaynames;
 	s_player_skin_box.curvalue = 0;
 }
 
@@ -5280,7 +5280,7 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_model_box.generic.callback = ModelCallback;
 	s_player_model_box.generic.cursor_offset = -56;
 	s_player_model_box.curvalue = currentdirectoryindex;
-	s_player_model_box.dyn_itemnames = s_pmnames;
+	s_player_model_box.itemnames = s_pmnames;
 
 	s_player_skin_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_skin_box.generic.name = "skin";
@@ -5289,7 +5289,7 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_skin_box.generic.callback = 0;
 	s_player_skin_box.generic.cursor_offset = -56;
 	s_player_skin_box.curvalue = currentskinindex;
-	s_player_skin_box.dyn_itemnames = s_pmi[currentdirectoryindex].skindisplaynames;
+	s_player_skin_box.itemnames = s_pmi[currentdirectoryindex].skindisplaynames;
 
 	s_player_handedness_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_handedness_box.generic.name = "handedness";
