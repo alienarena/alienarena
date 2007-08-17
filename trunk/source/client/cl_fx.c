@@ -1468,7 +1468,7 @@ Team Lights
 ===============
 */
 
-void CL_RedTeamLight(vec3_t pos)
+void CL_BlueTeamLight(vec3_t pos)
 {
 	
 	int			i,j;
@@ -1485,7 +1485,7 @@ void CL_RedTeamLight(vec3_t pos)
 		p->texnum = r_flaretexture->texnum;
 		p->blendsrc = GL_ONE;
 		p->blenddst = GL_ONE;
-		p->color = 0x72;
+		p->color = 0x74;
 		p->scale = 10*i;
 		p->alphavel = -50;
 		for (j=0 ; j<3 ; j++)
@@ -1496,7 +1496,7 @@ void CL_RedTeamLight(vec3_t pos)
 		}
 	}
 }
-void CL_BlueTeamLight(vec3_t pos)
+void CL_RedTeamLight(vec3_t pos)
 {
 	
 	int			j,i;

@@ -1107,11 +1107,11 @@ void CL_AddPacketEntities (frame_t *frame)
 				AngleVectors (ent.angles, NULL, right, up);
 				VectorMA (ent.origin, 16, right, start);
 				VectorMA (start, 32, up, start);
-				CL_BlueTeamLight(start);
+				CL_RedTeamLight(start);
 
 				VectorMA (ent.origin, -16, right, start);
 				VectorMA (start, 32, up, start);
-				CL_BlueTeamLight(start);
+				CL_RedTeamLight(start);
 			}
 			else if (effects & EF_FLAG2)
 			{
@@ -1123,11 +1123,11 @@ void CL_AddPacketEntities (frame_t *frame)
 				AngleVectors (ent.angles, NULL, right, up);
 				VectorMA (ent.origin, 16, right, start);
 				VectorMA (start, 32, up, start);
-				CL_RedTeamLight(start);
+				CL_BlueTeamLight(start);
 
 				VectorMA (ent.origin, -16, right, start);
 				VectorMA (start, 32, up, start);
-				CL_RedTeamLight(start);
+				CL_BlueTeamLight(start);
 			}
 
 			else if (effects & EF_GREENGIB)
