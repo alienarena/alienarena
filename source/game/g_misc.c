@@ -1083,7 +1083,7 @@ void SP_misc_teleporter_dest (edict_t *ent)
 {
 	ent->s.modelindex = 0;
 	ent->s.skinnum = 0;
-	ent->solid = SOLID_BBOX;
+	ent->solid = SOLID_NOT;
 	VectorSet (ent->mins, -32, -32, -24);
 	VectorSet (ent->maxs, 32, 32, -16);
 	gi.linkentity (ent);
