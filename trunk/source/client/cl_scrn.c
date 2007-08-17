@@ -836,11 +836,11 @@ int entitycmpfnc( const entity_t *a, const entity_t *b )
 	*/
 	if ( a->model == b->model )
 	{
-		return ( ( int ) a->skin - ( int ) b->skin );
+		return ( ( ptrdiff_t ) a->skin - ( ptrdiff_t ) b->skin );
 	}
 	else
 	{
-		return ( ( int ) a->model - ( int ) b->model );
+		return ( ( ptrdiff_t ) a->model - ( ptrdiff_t ) b->model );
 	}
 }
 
