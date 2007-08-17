@@ -423,9 +423,7 @@ qboolean Pickup_Health (edict_t *ent, edict_t *other)
 	if (!(ent->style & HEALTH_IGNORE_MAX))
 		if (other->health >= other->max_health)
 		{
-			//gi.sound(ent, CHAN_AUTO, gi.soundindex("misc/reject.wav"), 1, ATTN_NORM, 0);
-			ent->s.effects |= EF_COLOR_SHELL | EF_ROTATE;
-			ent->s.renderfx |= RF_SHELL_GREEN;
+			ent->s.effects |= EF_ROTATE;
 			ent->think = Healthbox_think;
 			ent->nextthink = level.time + 7;
 			return false;

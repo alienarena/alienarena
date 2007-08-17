@@ -915,8 +915,15 @@ void CL_AddPacketEntities (frame_t *frame)
 
 		ci = &cl.clientinfo[s1->skinnum & 0xff];
 
-		//something isn't quite working right - we need to know if this god damn thing is a player
-		//model - hmmm - actually checking the patch would do it!
+		//give health an "aura"
+		if(cl_healthaura->value) {
+			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/small/tris.md2"))
+				CL_SmallHealthParticles(ent.origin);
+			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/medium/tris.md2"))
+				CL_MedHealthParticles(ent.origin);
+			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/large/tris.md2"))
+				CL_LargeHealthParticles(ent.origin);
+		}
 
 		if (s1->modelindex2)
 		{
@@ -939,63 +946,50 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.model = cl.model_draw[s1->modelindex2];
 			}
 
-			// PMM - check for the defender sphere shell .. make it translucent
-			// replaces the previous version which used the high bit on modelindex2 to determine transparency
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/items/shell/tris.md2"))
-			{
-				ent.alpha = 0.32;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			// pmm
-
+			
 			//here is where we will set the alpha for certain model parts - would like to eventually
 			//do something a little less uh, hardcoded.
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/items/quaddama/unit.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/objects/blank/tris.md2"))
-			{
-				ent.alpha = 0.1;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/tube/cover.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/receptor/bulb.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/electrode/cover.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/scope/cover.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/console/cover.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
 			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/items/healing/globe/tris.md2"))
 			{
 				ent.alpha = 0.4;
 				ent.flags = RF_TRANSLUCENT;
 			}
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "players/war/helmet.md2"))
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/items/quaddama/unit.md2"))
 			{
 				ent.alpha = 0.4;
 				ent.flags = RF_TRANSLUCENT;
 			}
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/objects/blank/tris.md2"))
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/tube/cover.md2"))
+			{
+				ent.alpha = 0.4;
+				ent.flags = RF_TRANSLUCENT;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/receptor/bulb.md2"))
+			{
+				ent.alpha = 0.4;
+				ent.flags = RF_TRANSLUCENT;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/electrode/cover.md2"))
+			{
+				ent.alpha = 0.4;
+				ent.flags = RF_TRANSLUCENT;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/scope/cover.md2"))
+			{
+				ent.alpha = 0.4;
+				ent.flags = RF_TRANSLUCENT;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/console/cover.md2"))
+			{
+				ent.alpha = 0.4;
+				ent.flags = RF_TRANSLUCENT;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "players/war/helmet.md2"))
+			{
+				ent.alpha = 0.4;
+				ent.flags = RF_TRANSLUCENT;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/objects/blank/tris.md2"))
 			{
 				ent.alpha = 0.1;
 				ent.flags = RF_TRANSLUCENT;

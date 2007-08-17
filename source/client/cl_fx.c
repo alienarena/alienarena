@@ -1206,7 +1206,110 @@ void CL_BigTeleportParticles (vec3_t org)
 		p->alphavel = -2.6 / (0.5 + frand()*0.3);
 	}
 }
+/*
+===============
+CL_HealthParticles
+===============
+*/
+void CL_SmallHealthParticles (vec3_t org)
+{
+	cparticle_t	*p;
+	float		angle, dist;
 
+	if (!(p = new_particle()))
+			return;
+
+	p->type = PARTICLE_BLUE_MZFLASH;
+	p->texnum = r_cflashtexture->texnum;
+	p->scale = 10 + (rand()&7);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->color = 0xd4 + (rand() & 1);
+
+	angle = M_PI*2*(rand()&1023)/1023.0;
+	dist = rand()&5;
+	p->org[0] = org[0] + cos(angle)*dist;
+	p->vel[0] = cos(angle)*(6+(rand()&6));
+	p->accel[0] = -cos(angle)*6;
+
+	p->org[1] = org[1] + sin(angle)*dist;
+	p->vel[1] = sin(angle)*(6+(rand()&6));
+	p->accel[1] = -sin(angle)*100;
+
+	p->org[2] = org[2] + 8 + (rand()%10);
+	p->vel[2] = -10 + (rand()&6);
+	p->accel[2] = PARTICLE_GRAVITY*10;
+	p->alpha = 0.2;
+
+	p->alphavel = -2.6 / (0.5 + frand()*0.3);
+	
+}
+void CL_MedHealthParticles (vec3_t org)
+{
+	cparticle_t	*p;
+	float		angle, dist;
+
+	if (!(p = new_particle()))
+			return;
+
+	p->type = PARTICLE_BLUE_MZFLASH;
+	p->texnum = r_cflashtexture->texnum;
+	p->scale = 10 + (rand()&7);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->color = 0x74 + (rand() & 1);
+
+	angle = M_PI*2*(rand()&1023)/1023.0;
+	dist = rand()&5;
+	p->org[0] = org[0] + cos(angle)*dist;
+	p->vel[0] = cos(angle)*(6+(rand()&6));
+	p->accel[0] = -cos(angle)*6;
+
+	p->org[1] = org[1] + sin(angle)*dist;
+	p->vel[1] = sin(angle)*(6+(rand()&6));
+	p->accel[1] = -sin(angle)*100;
+
+	p->org[2] = org[2] + 8 + (rand()%10);
+	p->vel[2] = -10 + (rand()&6);
+	p->accel[2] = PARTICLE_GRAVITY*10;
+	p->alpha = 0.3;
+
+	p->alphavel = -2.6 / (0.5 + frand()*0.3);
+	
+}
+void CL_LargeHealthParticles (vec3_t org)
+{
+	cparticle_t	*p;
+	float		angle, dist;
+
+	if (!(p = new_particle()))
+			return;
+
+	p->type = PARTICLE_BLUE_MZFLASH;
+	p->texnum = r_cflashtexture->texnum;
+	p->scale = 10 + (rand()&7);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->color = 0xff + (rand() & 1);
+
+	angle = M_PI*2*(rand()&1023)/1023.0;
+	dist = rand()&5;
+	p->org[0] = org[0] + cos(angle)*dist;
+	p->vel[0] = cos(angle)*(6+(rand()&6));
+	p->accel[0] = -cos(angle)*6;
+
+	p->org[1] = org[1] + sin(angle)*dist;
+	p->vel[1] = sin(angle)*(6+(rand()&6));
+	p->accel[1] = -sin(angle)*100;
+
+	p->org[2] = org[2] + 8 + (rand()%10);
+	p->vel[2] = -10 + (rand()&6);
+	p->accel[2] = PARTICLE_GRAVITY*10;
+	p->alpha = 0.3;
+
+	p->alphavel = -2.6 / (0.5 + frand()*0.3);
+	
+}
 /*
 ===============
 CL_BlasterParticles

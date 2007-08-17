@@ -116,6 +116,9 @@ cvar_t  *cl_master2;
 cvar_t	*cl_hudimage1;
 cvar_t	*cl_hudimage2;
 
+//health aura
+cvar_t	*cl_healthaura;
+
 client_static_t	cls;
 client_state_t	cl;
 
@@ -1605,6 +1608,7 @@ void CL_InitLocal (void)
 	cl_maxfps = Cvar_Get ("cl_maxfps", "90", CVAR_ARCHIVE);
 	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE);
 	cl_nobrainlets = Cvar_Get ("cl_nobrainlets", "0", CVAR_ARCHIVE);
+	cl_healthaura = Cvar_Get ("cl_healthaura", "1", CVAR_ARCHIVE);
 
 	cl_upspeed = Cvar_Get ("cl_upspeed", "200", 0);
 	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "200", 0);
