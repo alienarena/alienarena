@@ -4497,16 +4497,10 @@ static void DMFlagCallback( void *self )
 		if ( f->curvalue == 1 )
 		{
 			flags |=  DF_SKINTEAMS;
-			flags &= ~DF_MODELTEAMS;
-		}
-		else if ( f->curvalue == 2 )
-		{
-			flags |=  DF_MODELTEAMS;
-			flags &= ~DF_SKINTEAMS;
 		}
 		else
 		{
-			flags &= ~( DF_MODELTEAMS | DF_SKINTEAMS );
+			flags &= ~( DF_SKINTEAMS );
 		}
 
 		goto setvalue;
@@ -4596,7 +4590,7 @@ void DMOptions_MenuInit( void )
 	};
 	static const char *teamplay_names[] =
 	{
-		"disabled", "by skin", "by model", 0
+		"disabled", "enabled", 0
 	};
 	int dmflags = Cvar_VariableValue( "dmflags" );
 	int y = 70;

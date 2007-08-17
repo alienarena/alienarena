@@ -332,7 +332,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs
-	if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS))) || ctf->value || tca->value || cp->value))
+	if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (DF_SKINTEAMS))) || ctf->value || tca->value || cp->value))
 	{
 		if (OnSameTeam (targ, attacker) && mod != MOD_TELEFRAG) //telefrag kills no matter what
 		{
