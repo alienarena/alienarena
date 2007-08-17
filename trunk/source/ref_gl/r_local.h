@@ -86,7 +86,7 @@ extern	int			r_visframecount;
 extern	int			r_framecount;
 extern	cplane_t	frustum[4];
 extern	int			c_brush_polys, c_alias_polys;
-extern int c_flares;
+extern 	int c_flares;
 
 extern	int			gl_filter_min, gl_filter_max;
 

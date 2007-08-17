@@ -364,7 +364,7 @@ void CL_PrepRefresh ()
 
 	//this was moved here, to prevent having a pic loaded over and over again, which was
 	//totally killing performance after a dozen or so maps.
-	map_pic_loaded = (R_RegisterPic(va("/levelshots/%s.pcx", mapname)));
+	map_pic_loaded = (ptrdiff_t)(R_RegisterPic(va("/levelshots/%s.pcx", mapname)));
 	
 	Com_Printf ("Map: %s\r", mapname); 
 	SCR_UpdateScreen ();

@@ -1156,12 +1156,12 @@ store:
 }
 
 //lens flares
-extern int c_flares=0;
+extern int c_flares;
 void R_RenderFlare (flare_t *light)
 {
 	vec3_t	v, tmp;
 	int j;
-    float	dist;
+	float	dist;
 	unsigned	flaretex;
 	
     flaretex =  r_flare->texnum;

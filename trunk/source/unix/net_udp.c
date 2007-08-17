@@ -378,12 +378,6 @@ void NET_SendPacket (netsrc_t sock, int length, void *data, netadr_t to)
 	}
 }
 
-
-//=============================================================================
-
-
-
-
 /*
 ====================
 NET_OpenIP
@@ -396,7 +390,7 @@ void NET_OpenIP (void)
 	port = Cvar_Get ("port", va("%i", PORT_SERVER), CVAR_NOSET);
 	ip = Cvar_Get ("ip", "localhost", CVAR_NOSET);
 
-	server_port = port;
+	server_port = (ptrdiff_t)port;
 
 	if (!ip_sockets[NS_SERVER])
 		ip_sockets[NS_SERVER] = NET_Socket (ip->string, port->value);
