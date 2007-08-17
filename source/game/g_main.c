@@ -850,6 +850,8 @@ void ExitLevel (void)
 	blue_team_cnt = 0;
 	red_team_cnt = 0; //reset everything now that we are done
 	print1 = print2 = print3 = false;
+	if(!stayed)
+		game.num_bots = 0; //do this *just* incase something got whacked or isn't getting set.
 }
 
 /*
