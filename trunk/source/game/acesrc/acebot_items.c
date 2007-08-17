@@ -339,10 +339,6 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 				return 0.6;  
 			else
 				return 0.0;
-	
-		case ITEMLIST_POWERSCREEN:
-		case ITEMLIST_POWERSHIELD:
-			return 0.5;  
 		//flags
 		case ITEMLIST_FLAG1:
 			wantedFlag = ACEIT_WantedFlag (self); //Returns the flag gitem_t
@@ -396,12 +392,6 @@ int ACEIT_ClassnameToIndex(char *classname)
 	
 	if(strcmp(classname,"item_armor_shard")==0)
 		return ITEMLIST_ARMORSHARD;
-
-	if(strcmp(classname,"item_power_screen")==0)
-		return ITEMLIST_POWERSCREEN;
-
-	if(strcmp(classname,"item_power_shield")==0)
-		return ITEMLIST_POWERSHIELD;
 
 	if(strcmp(classname,"weapon_blaster")==0)
 		return ITEMLIST_BLASTER;

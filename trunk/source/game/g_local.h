@@ -162,11 +162,6 @@ typedef enum
 #define ARMOR_BODY				3
 #define ARMOR_SHARD				4
 
-// power armor types
-#define POWER_ARMOR_NONE		0
-#define POWER_ARMOR_SCREEN		1
-#define POWER_ARMOR_SHIELD		2
-
 // handedness values
 #define RIGHT_HANDED			0
 #define LEFT_HANDED				1
@@ -451,8 +446,6 @@ typedef struct
 	float		idle_time;
 	int			linkcount;
 
-	int			power_armor_type;
-	int			power_armor_power;
 } monsterinfo_t;
 
 
@@ -679,7 +672,6 @@ void SpawnItem (edict_t *ent, gitem_t *item);
 void DoRespawn (edict_t *ent);
 void Think_Weapon (edict_t *ent);
 int ArmorIndex (edict_t *ent);
-int PowerArmorType (edict_t *ent);
 gitem_t	*GetItemByIndex (int index);
 qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboolean dropped);
 void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf);
@@ -1062,7 +1054,6 @@ struct gclient_s
 	// sum up damage over an entire frame, so
 	// shotgun blasts give a single big kick
 	int			damage_armor;		// damage absorbed by armor
-	int			damage_parmor;		// damage absorbed by power armor
 	int			damage_blood;		// damage taken out of health
 	int			damage_knockback;	// impact damage
 	vec3_t		damage_from;		// origin for vector calculation
@@ -1247,8 +1238,6 @@ struct edict_s
 	int			gib_health;
 	int			deadflag;
 	qboolean	show_hostile;
-
-	float		powerarmor_time;
 
 	char		*map;			// target_changelevel
 
