@@ -1184,7 +1184,7 @@ void CL_BigTeleportParticles (vec3_t org)
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
 		if(i>1)
-			p->color = 0xd6;
+			p->color = 0xd4;
 		else
 			p->color = 0x74;
 		p->scalevel = 30;
