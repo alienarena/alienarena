@@ -1147,11 +1147,10 @@ void CL_DustParticles (vec3_t org)
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 		p->scale = 4 + (rand()&2);
+		p->color = 15; 
 		p->scalevel = 1.5;
 		for (j=0 ; j<3 ; j++)
 		{
-		//	p->org[j] = org[j] + ((rand()%32)-16);
-		//	p->vel[j] = (rand()%384)-192;
 			p->org[j] = org[j] + ((rand()%4)-2);
 			p->vel[j] = (rand()%88)-44;
 		}
@@ -1171,39 +1170,35 @@ CL_BigTeleportParticles
 */
 void CL_BigTeleportParticles (vec3_t org)
 {
-	int			i;
+	int			i, j;
 	cparticle_t	*p;
-	float		angle, dist;
-	static int colortable[4] = {2*8,13*8,21*8,18*8};
 
-	for (i=0 ; i<24 ; i++)
+	for (i=1 ; i<3 ; i++)
 	{
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_BLUE_MZFLASH;//colortable[rand()&3];
-		p->texnum = r_cflashtexture->texnum;
-		p->scale = 16 + (rand()&7);
+		p->type = PARTICLE_BLUE_MZFLASH;
+		p->texnum = r_leaderfieldtexture->texnum;
+		p->scale = 16*i + (rand()&7);
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
-		p->color = 0x74;
+		if(i>1)
+			p->color = 0xd6;
+		else
+			p->color = 0x74;
+		p->scalevel = 30;
+		for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = org[j];
+			p->vel[j] = 0;
+		}
 
-		angle = M_PI*2*(rand()&1023)/1023.0;
-		dist = rand()&11;
-		p->org[0] = org[0] + cos(angle)*dist;
-		p->vel[0] = cos(angle)*(20+(rand()&23));
-		p->accel[0] = -cos(angle)*30;
-
-		p->org[1] = org[1] + sin(angle)*dist;
-		p->vel[1] = sin(angle)*(20+(rand()&23));
-		p->accel[1] = -sin(angle)*100;
-
-		p->org[2] = org[2] + 8 + (rand()%40);
-		p->vel[2] = -100 + (rand()&31);
-		p->accel[2] = PARTICLE_GRAVITY*10;
+		p->accel[0] = p->accel[1] = 0;
+		p->accel[2] = 0;
 		p->alpha = 0.5;
 
-		p->alphavel = -2.6 / (0.5 + frand()*0.3);
+		p->alphavel = -0.9 / (0.5 + frand()*0.3);
 	}
 }
 /*
