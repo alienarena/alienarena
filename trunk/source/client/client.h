@@ -259,6 +259,7 @@ extern	cvar_t	*cl_predict;
 extern	cvar_t	*cl_footsteps;
 extern	cvar_t	*cl_noskins;
 extern	cvar_t	*cl_autoskins;
+extern  cvar_t	*cl_healthaura;
 
 extern	cvar_t	*cl_upspeed;
 extern	cvar_t	*cl_forwardspeed;
@@ -353,7 +354,9 @@ void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
 void CL_BulletSparks ( vec3_t org, vec3_t dir);
 void CL_SplashEffect ( vec3_t org, vec3_t dir, int color, int count);
 void CL_LaserSparks ( vec3_t org, vec3_t dir, int color, int count);
-
+void CL_SmallHealthParticles(vec3_t org);
+void CL_MedHealthParticles(vec3_t org);
+void CL_LargeHealthParticles(vec3_t org);
 
 //=================================================
 
