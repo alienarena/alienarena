@@ -2677,9 +2677,9 @@ JOIN SERVER MENU
 #define MAX_LOCAL_SERVERS 128
 
 static menuframework_s	s_joinserver_menu;
-static menuseparator_s	s_joinserver_server_title;
 static menuaction_s		s_joinserver_search_action;
 static menuaction_s		s_joinserver_address_book_action;
+static menulist_s		s_joinserver_filterempty_action;
 static menuaction_s		s_joinserver_server_actions[MAX_LOCAL_SERVERS];
 static menuaction_s		s_joinserver_server_info[32];
 static menuaction_s		s_joinserver_server_data[5];
@@ -2687,9 +2687,9 @@ static menuaction_s		s_joinserver_moveup;
 static menuaction_s		s_joinserver_movedown;
 static menuaction_s		s_playerlist_moveup;
 static menuaction_s		s_playerlist_movedown;
-static menuaction_s     s_joinserver_plist_title;
 
 int		m_num_servers;
+int		m_show_empty;
 
 #define	NO_SERVER_STRING	"<no server>"
 
@@ -2835,6 +2835,11 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 
 		players++;
 	}
+
+	if(!m_show_empty)
+		if(!players)
+			return;
+
 	mservers[m_num_servers].players = players;
 
 	//build the string for the server (hostname - address - mapname - players/maxClients)
@@ -2943,7 +2948,6 @@ void SearchLocalGames( void )
 	for (i=0 ; i<MAX_LOCAL_SERVERS ; i++)
 		strcpy (mservers[i].serverInfo, NO_SERVER_STRING);
 
-	M_DrawTextBox( 8, 120 - 48, 36, 3 );
 	M_Print( 16 + 16, 120 - 48 + 8,  "Contacting master server, this" );
 	M_Print( 16 + 16, 120 - 48 + 16, "could take a few seconds, so" );
 	M_Print( 16 + 16, 120 - 48 + 24, "please be patient." );
@@ -2968,14 +2972,27 @@ void SearchLocalGamesFunc( void *self )
 	SearchLocalGames();
 }
 
+static void FilterEmptyFunc( void *unused )
+{
+	m_show_empty = s_joinserver_filterempty_action.curvalue;
+}
 void JoinServer_MenuInit( void )
 {
 	int i;
 	float scale;
+	
+	static const char *yesno_names[] =
+	{
+		"no",
+		"yes",
+		0
+	};
 
 	scale = (float)(viddef.height)/600;
 	if(scale < 1)
 		scale = 1;
+
+	m_show_empty = true;
 
 	s_joinserver_menu.x = viddef.width * 0.50 - 120*scale;
 	s_joinserver_menu.nitems = 0;
@@ -2990,11 +3007,20 @@ void JoinServer_MenuInit( void )
 	s_joinserver_search_action.generic.type = MTYPE_ACTION;
 	s_joinserver_search_action.generic.name	= "refresh list";
 	s_joinserver_search_action.generic.x	= -56*scale;
-	s_joinserver_search_action.generic.y	= 120*scale;
+	s_joinserver_search_action.generic.y	= 115*scale;
 	s_joinserver_search_action.generic.cursor_offset = -16*scale;
 	s_joinserver_search_action.generic.callback = SearchLocalGamesFunc;
 	s_joinserver_search_action.generic.statusbar = "search for servers";
 
+	s_joinserver_filterempty_action.generic.type = MTYPE_SPINCONTROL;
+	s_joinserver_filterempty_action.generic.name	= "show empty";
+	s_joinserver_filterempty_action.itemnames = yesno_names;
+	s_joinserver_filterempty_action.generic.x	= 80*scale;
+	s_joinserver_filterempty_action.generic.y	= 40*scale;
+	s_joinserver_filterempty_action.generic.cursor_offset = -16*scale;
+	s_joinserver_filterempty_action.curvalue = m_show_empty;
+	s_joinserver_filterempty_action.generic.callback = FilterEmptyFunc;
+	
 	s_joinserver_moveup.generic.type	= MTYPE_ACTION;
 	s_joinserver_moveup.generic.name	= "       ";
 	s_joinserver_moveup.generic.flags	= QMF_LEFT_JUSTIFY;
@@ -3028,8 +3054,8 @@ void JoinServer_MenuInit( void )
 	s_playerlist_movedown.generic.callback = MoveDown_plist;
 
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_address_book_action );
-
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_search_action );
+	Menu_AddItem( &s_joinserver_menu, &s_joinserver_filterempty_action );
 
 	for ( i = 0; i < 16; i++ )
 		Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_actions[i] );
