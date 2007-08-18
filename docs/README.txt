@@ -116,6 +116,7 @@ Maps:  John Diamond
 Textures and Artwork:  John Diamond, Enki, Adam Saizlai
 Sounds:  John Diamond, Sound Rangers
 Music:  John Diamond, WhiteLipper, Wooden Productions, Arteria Games, and SoundRangers
+Fonts: John Diamond, the-interceptor from http://www.quakeworld.nu/
 Linux Port: Shane Bayer
 FreeBSD port: "Ale"
 Gentoo portage: Paul Bredbury
