@@ -64,6 +64,7 @@ cvar_t		*scr_drawall;
 cvar_t		*scr_consize;
 
 cvar_t		*cl_drawfps;
+cvar_t		*cl_drawtimer;
 
 cvar_t		*cl_drawtime;
 
@@ -401,6 +402,7 @@ void SCR_Init (void)
 	scr_drawall = Cvar_Get ("scr_drawall", "0", 0);
 
 	cl_drawfps = Cvar_Get ("cl_drawfps", "0", CVAR_ARCHIVE);
+	cl_drawtimer = Cvar_Get("cl_drawtimer", "0", CVAR_ARCHIVE);
 
 //
 // register our commands
@@ -1541,6 +1543,36 @@ void SCR_DrawLayout (void)
 /*
 ================
 
+SCR_showTimer
+
+================
+*/
+clock_t 	t1;
+char		temptime[32];
+int		timecounter;
+void SCR_showTimer(void)
+{
+	float scale;
+	scale = (float)(viddef.height)/600;
+	if(scale < 1)
+		scale = 1;
+
+	if ((cl.time + 2000) < timecounter)
+		timecounter = cl.time + 1000;
+	
+	if (cl.time >timecounter)
+	{
+		t1 = clock();
+		Com_sprintf(temptime, sizeof(temptime),"%i", (int)t1 / CLOCKS_PER_SEC);
+		timecounter = cl.time + 1000;
+	}
+
+	DrawString(viddef.width - 64*scale, viddef.height - 32*scale, temptime);
+}
+
+/*
+================
+
 SCR_showFPS
 
 ================
@@ -1565,7 +1597,6 @@ void SCR_showFPS(void)
 		Com_sprintf(temp, sizeof(temp),"%3.0ffps", 1/cls.frametime);
 		fpscounter = cl.time + 100;
 	}
-	//DrawString(viddef.width - 64, 0 , temp);
 	DrawString(viddef.width - 64*scale, viddef.height - 24*scale, temp);
 }
 
@@ -1719,6 +1750,11 @@ void SCR_UpdateScreen (void)
 			if(cl_drawfps->value)
 			{
 				SCR_showFPS();
+			}
+
+			if(cl_drawtimer->value)
+			{
+				SCR_showTimer();
 			}
 
 		}
