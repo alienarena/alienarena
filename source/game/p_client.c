@@ -1818,7 +1818,7 @@ void MoveClientsDownQueue(edict_t *ent)
 				if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue) 
 					g_edicts[i+1].client->pers.queue--;
 
-				if(g_edicts[i+1].client->pers.queue == 2) { //make sure those who should be in game are
+				if(g_edicts[i+1].client->pers.queue == 2 && g_edicts[i+1].client->resp.spectator) { //make sure those who should be in game are
 					g_edicts[i+1].client->pers.spectator = g_edicts[i+1].client->resp.spectator = false;
 					g_edicts[i+1].svflags &= ~SVF_NOCLIENT;
 					g_edicts[i+1].movetype = MOVETYPE_WALK;
@@ -2392,7 +2392,7 @@ void ClientDisconnect (edict_t *ent)
 	//if in duel mode, we need to bump people down the queue if its the player in game leaving
 	if(g_duel->value) {
 		MoveClientsDownQueue(ent);
-		if(ent->client->pers.queue < 3) {
+		if(!ent->client->resp.spectator) {
 			for (i = 0; i < maxclients->value; i++)  //clear scores if player was in duel
 				if(g_edicts[i+1].inuse && g_edicts[i+1].client && !g_edicts[i+1].is_bot)
 					g_edicts[i+1].client->resp.score = 0;
