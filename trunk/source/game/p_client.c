@@ -2395,7 +2395,7 @@ void ClientDisconnect (edict_t *ent)
 		if(ent->client->pers.queue < 3) {
 			for (i = 0; i < maxclients->value; i++)  //clear scores if player was in duel
 				if(g_edicts[i+1].inuse && g_edicts[i+1].client && !g_edicts[i+1].is_bot)
-					g_edicts[i=1].client->resp.score = 0;
+					g_edicts[i+1].client->resp.score = 0;
 		}
 	}
 	// send effect
