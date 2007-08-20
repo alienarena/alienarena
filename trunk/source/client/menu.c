@@ -2835,10 +2835,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 
 		free (rLine);
 
-		if(ping == 0)
-			Com_sprintf(mservers[m_num_servers].playerInfo[players], sizeof(mservers[m_num_servers].playerInfo[players]), "[BOT]%s    %4i    %4i\n", playername, score, ping);
-		else
-			Com_sprintf(mservers[m_num_servers].playerInfo[players], sizeof(mservers[m_num_servers].playerInfo[players]), "%s    %4i    %4i\n", playername, score, ping);
+		Com_sprintf(mservers[m_num_servers].playerInfo[players], sizeof(mservers[m_num_servers].playerInfo[players]), "%s    %4i    %4i\n", playername, score, ping);
 
 		players++;
 	}
