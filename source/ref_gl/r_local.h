@@ -195,6 +195,9 @@ extern	cvar_t	*gl_reflection_debug;	// MPO	for debugging the reflection
 extern	cvar_t	*gl_reflection_max;		// MPO  max number of water reflections
 extern	cvar_t	*gl_arb_fragment_program; // jit
 
+extern  cvar_t	*sys_affinity;
+extern	cvar_t	*sys_priority;
+
 extern	int		gl_lightmap_format;
 extern	int		gl_solid_format;
 extern	int		gl_alpha_format;

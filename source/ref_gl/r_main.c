@@ -208,6 +208,9 @@ cvar_t  *r_minimap_zoom;
 cvar_t  *r_minimap_style;
 cvar_t  *r_minimap;
 
+cvar_t	*sys_affinity;
+cvar_t  *sys_priority;
+
 //fog stuff
 struct r_fog
 {
@@ -1567,6 +1570,9 @@ void R_Register( void )
 	r_minimap_zoom = Cvar_Get ("r_minimap_zoom", "1", CVAR_ARCHIVE );
 	r_minimap_style = Cvar_Get ("r_minimap_style", "1", CVAR_ARCHIVE );
     r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE );
+
+	sys_priority = Cvar_Get("sys_priority", "0", CVAR_ARCHIVE);
+	sys_affinity = Cvar_Get("sys_affinity", "0", CVAR_ARCHIVE);
 
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
 	Cmd_AddCommand( "screenshot", GL_ScreenShot_f );

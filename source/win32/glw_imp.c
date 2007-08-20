@@ -342,6 +342,254 @@ void GLimp_Shutdown( void )
 	}
 }
 
+/*
+===================
+CPU Detect from Q2E
+===================
+*/
+extern void	Q_strncpyz( char *dest, const char *src, size_t size );
+extern void Q_strncatz( char *dest, const char *src, size_t size );
+qboolean Sys_DetectCPU (char *cpuString, int maxSize)
+	{
+	char				vendor[16];
+	int					stdBits, features, extFeatures;
+	int					family, model;
+	unsigned __int64	start, end, counter, stop, frequency;
+	unsigned			speed;
+	qboolean			hasMMX, hasMMXExt, has3DNow, has3DNowExt, hasSSE, hasSSE2;
+
+	// Check if CPUID instruction is supported
+	__try {
+		__asm {
+			mov eax, 0
+			cpuid
+		}
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER){
+		return false;
+	}
+
+	// Get CPU info
+	__asm {
+		; // Get vendor identifier
+		mov eax, 0
+		cpuid
+		mov dword ptr[vendor+0], ebx
+		mov dword ptr[vendor+4], edx
+		mov dword ptr[vendor+8], ecx
+		mov dword ptr[vendor+12], 0
+
+		; // Get standard bits and features
+		mov eax, 1
+		cpuid
+		mov stdBits, eax
+		mov features, edx
+
+		; // Check if extended functions are present
+		mov extFeatures, 0
+		mov eax, 80000000h
+		cpuid
+		cmp eax, 80000000h
+		jbe NoExtFunction
+
+		; // Get extended features
+		mov eax, 80000001h
+		cpuid
+		mov extFeatures, edx
+
+NoExtFunction:
+	}
+
+	// Get CPU name
+	family = (stdBits >> 8) & 15;
+	model = (stdBits >> 4) & 15;
+
+	if (!Q_stricmp(vendor, "AuthenticAMD")){
+		Q_strncpyz(cpuString, "AMD", maxSize);
+
+		switch (family){
+		case 5:
+			switch (model){
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+				Q_strncatz(cpuString, " K5", maxSize);
+				break;
+			case 6:
+			case 7:
+				Q_strncatz(cpuString, " K6", maxSize);
+				break;
+			case 8:
+				Q_strncatz(cpuString, " K6-2", maxSize);
+				break;
+			case 9:
+			case 10:
+			case 11:
+			case 12:
+			case 13:
+			case 14:
+			case 15:
+				Q_strncatz(cpuString, " K6-III", maxSize);
+				break;
+			}
+			break;
+		case 6:
+			switch (model){
+			case 1:		// 0.25 core
+			case 2:		// 0.18 core
+				Q_strncatz(cpuString, " Athlon", maxSize);
+				break;
+			case 3:		// Spitfire core
+				Q_strncatz(cpuString, " Duron", maxSize);
+				break;
+			case 4:		// Thunderbird core
+			case 6:		// Palomino core
+				Q_strncatz(cpuString, " Athlon", maxSize);
+				break;
+			case 7:		// Morgan core
+				Q_strncatz(cpuString, " Duron", maxSize);
+				break;
+			case 8:		// Thoroughbred core
+			case 10:	// Barton core
+				Q_strncatz(cpuString, " Athlon", maxSize);
+				break;
+			}
+			break;
+		}
+	}
+	else if (!Q_stricmp(vendor, "GenuineIntel")){
+		Q_strncpyz(cpuString, "Intel", maxSize);
+
+		switch (family){
+		case 5:
+			switch (model){
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 7:
+			case 8:
+				Q_strncatz(cpuString, " Pentium", maxSize);
+				break;
+			}
+			break;
+		case 6:
+			switch (model){
+			case 0:
+			case 1:
+				Q_strncatz(cpuString, " Pentium Pro", maxSize);
+				break;
+			case 3:
+			case 5:		// Actual differentiation depends on cache settings
+				Q_strncatz(cpuString, " Pentium II", maxSize);
+				break;
+			case 6:
+				Q_strncatz(cpuString, " Celeron", maxSize);
+				break;
+			case 7:
+			case 8:
+			case 9:
+			case 10:
+			case 11:	// Actual differentiation depends on cache settings
+				Q_strncatz(cpuString, " Pentium III", maxSize);
+				break;
+			}
+			break;
+		case 15:
+			Q_strncatz(cpuString, " Pentium 4", maxSize);
+			break;
+		}
+	}
+	else
+		return false;
+
+	// Check if RDTSC instruction is supported
+	if ((features >> 4) & 1){
+		// Measure CPU speed
+		QueryPerformanceFrequency((LARGE_INTEGER *)&frequency);
+
+		__asm {
+			rdtsc
+			mov dword ptr[start+0], eax
+			mov dword ptr[start+4], edx
+		}
+
+		QueryPerformanceCounter((LARGE_INTEGER *)&stop);
+		stop += frequency;
+
+		do {
+			QueryPerformanceCounter((LARGE_INTEGER *)&counter);
+		} while (counter < stop);
+
+		__asm {
+			rdtsc
+			mov dword ptr[end+0], eax
+			mov dword ptr[end+4], edx
+		}
+
+		speed = (unsigned)((end - start) / 1000000);
+
+		Q_strncatz(cpuString, va(" %u MHz", speed), maxSize);
+	}
+
+	// Get extended instruction sets supported
+	hasMMX = (features >> 23) & 1;
+	hasMMXExt = (extFeatures >> 22) & 1;
+	has3DNow = (extFeatures >> 31) & 1;
+	has3DNowExt = (extFeatures >> 30) & 1;
+	hasSSE = (features >> 25) & 1;
+	hasSSE2 = (features >> 26) & 1;
+
+	if (hasMMX || has3DNow || hasSSE){
+		Q_strncatz(cpuString, " w/", maxSize);
+
+		if (hasMMX){
+			Q_strncatz(cpuString, " MMX", maxSize);
+			if (hasMMXExt)
+				Q_strncatz(cpuString, "+", maxSize);
+		}
+		if (has3DNow){
+			Q_strncatz(cpuString, " 3DNow!", maxSize);
+			if (has3DNowExt)
+				Q_strncatz(cpuString, "+", maxSize);
+		}
+		if (hasSSE){
+			Q_strncatz(cpuString, " SSE", maxSize);
+			if (hasSSE2)
+				Q_strncatz(cpuString, "2", maxSize);
+		}
+	}
+
+	return true;
+
+
+}
+
+static void Sys_SetCpuCore (void)
+{ 
+	SYSTEM_INFO cpuInfo;
+/*
+	cpumask=1 - use core #0 
+	cpumask=2 - use core #1 
+	cpumask=3 - use cores #0 & #1
+*/
+	if(!sys_affinity->value)
+		return;
+	
+	if(sys_affinity->value >3)
+		Cvar_SetValue("sys_affinity", 3);
+
+	GetSystemInfo(&cpuInfo); 
+	
+	/* if number of cpu core > 1 
+	we can run run game on second core or use both cores*/ 	
+	if (cpuInfo.dwNumberOfProcessors > 1) 
+			SetProcessAffinityMask(GetCurrentProcess(), (DWORD32)sys_affinity->value); 
+	
+	CloseHandle(GetCurrentProcess());
+}
 
 /*
 ** GLimp_Init
@@ -359,6 +607,14 @@ qboolean GLimp_Init( void *hinstance, void *wndproc )
 	vinfo.dwOSVersionInfoSize = sizeof(vinfo);
 
 	glw_state.allowdisplaydepthchange = false;
+
+	//set high process priority for fullscreen mode
+	if(vid_fullscreen->value && sys_priority->value )
+		SetPriorityClass (GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+	else
+		SetPriorityClass (GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
+
+	Sys_SetCpuCore();
 
 	if ( GetVersionEx( &vinfo) )
 	{
