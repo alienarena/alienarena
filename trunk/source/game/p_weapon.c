@@ -180,15 +180,37 @@ a seperate file.
 
 int Q2_FindFile (char *filename, FILE **file)
 {
+	char	name[MAX_OSPATH];
+	cvar_t	*game;
+	qboolean found = false;
 
-	*file = fopen (filename, "rb");
+	game = gi.cvar("game", "", 0);
+
+	if (!*game->string) //if there is a gamedir try here first
+		sprintf (name, "%s/%s", GAMEVERSION, filename);
+	else
+		sprintf (name, "%s/%s", game->string, filename);
+
+	*file = fopen (name, "rb");
 	if (!*file) {
 		*file = NULL;
-		return -1;
+		found = false;
 	}
 	else
 		return 1;
 
+	if(!found) { //try basedir
+		sprintf (name, "%s/%s", GAMEVERSION, filename);
+		*file = fopen (name, "rb");
+		if (!*file) {
+			*file = NULL;
+			return -1;
+		}
+		else
+			return 1;
+	}
+	else
+		return -1;
 }
 
 /*
@@ -280,10 +302,10 @@ void ChangeWeapon (edict_t *ent)
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
 
 
-	sprintf(weaponpath, "data1/%s", weaponmodel);
+	sprintf(weaponpath, "%s", weaponmodel);
 	Q2_FindFile (weaponpath, &file); //does it really exist?
 	if(!file) {
-		sprintf(weaponpath, "data1/%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
+		sprintf(weaponpath, "%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
 		Q2_FindFile (weaponpath, &file);
 		if(!file) //server does not have this player model
 			sprintf(weaponmodel, "players/martianenforcer/weapon.md2");//default player(martian)
