@@ -517,7 +517,7 @@ void SCR_DrawLoading (void)
 {
 	char	mapfile[32];
 	qboolean isMap = false;
-	int		font_size;
+	int		font_size, kb;
 	float	hudscale;
 
 	if (!scr_draw_loading)
@@ -681,7 +681,7 @@ void SCR_DrawLoading (void)
 	}
 
 	// Add Download info stuff...
-	if (cls.download) 
+	if (cls.download && (kb = (int)ftell(cls.download))) 
 	{
 		if ( cls.key_dest != key_console ) //drop the console because of CURL's readout
 		{

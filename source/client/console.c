@@ -767,7 +767,7 @@ void Con_DrawConsole (float frac)
 //ZOID
 
 	if(cls.download && (kb = (int)ftell(cls.download) / 1024)){  // draw progress
-		
+
 		Com_sprintf(dl, sizeof(dl), "%s [%s] %dKB ", cls.downloadname,
 				(cls.downloadhttp ? "HTTP" : "UDP"), kb);
 		
