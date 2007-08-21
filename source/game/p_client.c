@@ -1666,7 +1666,7 @@ void PutClientInServer (edict_t *ent)
 	}
 	playermodel[i-1] = 0;
 
-	sprintf(modelpath, "data1/players/%s/helmet.md2", playermodel);
+	sprintf(modelpath, "players/%s/helmet.md2", playermodel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
 	if(file) {
 		sprintf(modelpath, "players/%s/helmet.md2", playermodel);
@@ -1687,7 +1687,7 @@ void PutClientInServer (edict_t *ent)
 
 	//check for class file
 	ent->ctype = 0; //alien is default
-	sprintf(modelpath, "data1/players/%s/human", playermodel);
+	sprintf(modelpath, "players/%s/human", playermodel);
 	Q2_FindFile (modelpath, &file);
 	if(file) { //human
 		ent->ctype = 1;
@@ -1705,7 +1705,7 @@ void PutClientInServer (edict_t *ent)
 		fclose(file);
 	}
 	else { //robot
-		sprintf(modelpath, "data1/players/%s/robot", playermodel);
+		sprintf(modelpath, "players/%s/robot", playermodel);
 		Q2_FindFile (modelpath, &file);
 		if(file) {
 			ent->ctype = 2;
@@ -2115,7 +2115,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	}
 	playermodel[i-1] = 0;
 
-	sprintf(modelpath, "data1/players/%s/helmet.md2", playermodel);
+	sprintf(modelpath, "players/%s/helmet.md2", playermodel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
 	if(file) {
 		sprintf(modelpath, "players/%s/helmet.md2", playermodel);

@@ -4198,11 +4198,24 @@ void StartServer_MenuInit( void )
 	RulesChangeFunc ( NULL );
 }
 
+int Menu_FindFile (char *filename, FILE **file)
+{
+	*file = fopen (filename, "rb");
+	if (!*file) {
+		*file = NULL;
+		return -1;
+	}
+	else
+		return 1;
+
+}
+
 void StartServer_MenuDraw(void)
 {
 	char startmap[1024];
 	char path[1024];
 	FILE *map_file;
+	FILE *desc_file;
 	char line[500];
 	char *pLine;
 	char *rLine;
@@ -4226,8 +4239,13 @@ void StartServer_MenuDraw(void)
 	M_MapPic(path);
 
 	//get a map description if it is there
+	sprintf(path, "%s/levelshots/%s.txt", FS_Gamedir(), startmap);
+	Menu_FindFile(path, &desc_file);
+	if(desc_file)
+		fclose(desc_file);
+	else
+		sprintf(path, "%s/levelshots/%s.txt", BASEDIRNAME, startmap);
 
-	sprintf(path, "data1/levelshots/%s.txt", startmap);
 	if ((map_file = fopen(path, "rb")) != NULL)
 	{
 		if(fgets(line, 500, map_file))
@@ -5403,17 +5421,7 @@ qboolean PlayerConfig_MenuInit( void )
 
 	return true;
 }
-int Menu_FindFile (char *filename, FILE **file)
-{
-	*file = fopen (filename, "rb");
-	if (!*file) {
-		*file = NULL;
-		return -1;
-	}
-	else
-		return 1;
 
-}
 void PlayerConfig_MenuDraw( void )
 {
 	extern float CalcFov( float fov_x, float w, float h );
@@ -5469,7 +5477,7 @@ void PlayerConfig_MenuDraw( void )
 		entity[1].skin = R_RegisterSkin( scratch );
 
 		//if a helmet or other special device
-		Com_sprintf( scratch, sizeof( scratch ), "data1/players/%s/helmet.md2", s_pmi[s_player_model_box.curvalue].directory );
+		Com_sprintf( scratch, sizeof( scratch ), "%s/players/%s/helmet.md2", FS_Gamedir(), s_pmi[s_player_model_box.curvalue].directory );
 		Menu_FindFile (scratch, &modelfile);
 		if(modelfile) {
 			helmet = true;
@@ -5480,18 +5488,29 @@ void PlayerConfig_MenuDraw( void )
 			fclose(modelfile);
 		}
 		else {
-			Com_sprintf( scratch, sizeof( scratch ), "data1/players/%s/gunrack.md2", s_pmi[s_player_model_box.curvalue].directory );
+			Com_sprintf( scratch, sizeof( scratch ), "%s/players/%s/helmet.md2", BASEDIRNAME, s_pmi[s_player_model_box.curvalue].directory );
 			Menu_FindFile (scratch, &modelfile);
 			if(modelfile) {
-				rack = true;
-				Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.md2", s_pmi[s_player_model_box.curvalue].directory );
+				helmet = true;
+				Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.md2", s_pmi[s_player_model_box.curvalue].directory );
 				entity[2].model = R_RegisterModel( scratch );
-				Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.tga", s_pmi[s_player_model_box.curvalue].directory );
+				Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.tga", s_pmi[s_player_model_box.curvalue].directory );
 				entity[2].skin = R_RegisterSkin( scratch );
 				fclose(modelfile);
 			}
 		}
-
+		//don't bother with gamedirs, this is a special case. Damn brainlets.
+		Com_sprintf( scratch, sizeof( scratch ), "%s/players/%s/gunrack.md2", BASEDIRNAME, s_pmi[s_player_model_box.curvalue].directory );
+		Menu_FindFile (scratch, &modelfile);
+		if(modelfile) {
+			rack = true;
+			Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.md2", s_pmi[s_player_model_box.curvalue].directory );
+			entity[2].model = R_RegisterModel( scratch );
+			Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.tga", s_pmi[s_player_model_box.curvalue].directory );
+			entity[2].skin = R_RegisterSkin( scratch );
+			fclose(modelfile);
+		}
+		
 		entity[0].flags = RF_FULLBRIGHT;
 		entity[0].origin[0] = 80;
 		entity[0].origin[1] = -25;

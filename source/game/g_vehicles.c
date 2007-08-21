@@ -471,7 +471,7 @@ void Reset_player(edict_t *ent)
 		  
 	ent->s.modelindex = 255;
 
-	sprintf(modelpath, "data1/players/%s/helmet.md2", playermodel);
+	sprintf(modelpath, "players/%s/helmet.md2", playermodel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
 	if(file) {
 	   	sprintf(modelpath, "players/%s/helmet.md2", playermodel);

@@ -591,80 +591,80 @@ void SCR_DrawLoading (void)
 
 		//check for instance of icons we would like to show in loading process, ala q3
 		if(rocketlauncher) {
-			Draw_ScaledPic((int)(viddef.width/2.5), (int)(viddef.height/3.2), hudscale, "w_rlauncher");
+			Draw_ScaledPic((int)(viddef.width/3), (int)(viddef.height/3.2), hudscale, "w_rlauncher");
 			if(!rocketlauncher_drawn){
 				rocketlauncher_drawn = 40*hudscale;
 			}
 		}
 		if(chaingun) {
-			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn, (int)(viddef.height/3.2), hudscale, "w_sshotgun");
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn, (int)(viddef.height/3.2), hudscale, "w_sshotgun");
 			if(!chaingun_drawn) {
 				chaingun_drawn = 40*hudscale;
 			}
 		}
 		if(smartgun) {
-			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn, (int)(viddef.height/3.2), hudscale, "w_shotgun");
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn, (int)(viddef.height/3.2), hudscale, "w_shotgun");
 			if(!smartgun_drawn) {
 				smartgun_drawn = 40*hudscale;
 			}
 		}
 		if(beamgun) {
-			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn, (int)(viddef.height/3.2), hudscale, "w_railgun");
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn, (int)(viddef.height/3.2), hudscale, "w_railgun");
 			if(!beamgun_drawn) {
 				beamgun_drawn = 40*hudscale;
 			}
 		}
 		if(flamethrower) {
-			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn
 				, (int)(viddef.height/3.2), hudscale, "w_chaingun");
 			if(!flamethrower_drawn) {
 				flamethrower_drawn = 40*hudscale;
 			}
 		}
 		if(disruptor) {
-			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn
 				, (int)(viddef.height/3.2), hudscale, "w_hyperblaster");
 			if(!disruptor_drawn) {
 				disruptor_drawn = 40*hudscale;
 			}
 		}
 		if(vaporizer) {
-			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn
 				, (int)(viddef.height/3.2), hudscale, "w_bfg");
 			if(!vaporizer_drawn) {
 				vaporizer_drawn = 40*hudscale;
 			}
 		}
 		if(quad) {
-			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn
 				, (int)(viddef.height/3.2), hudscale, "p_quad");
 			if(!quad_drawn) {
 				quad_drawn = 40*hudscale;
 			}
 		}
 		if(haste) {
-			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn
 				, (int)(viddef.height/3.2), hudscale, "p_haste");
 			if(!haste_drawn) {
 				haste_drawn = 40*hudscale;
 			}
 		}
 		if(sproing) {
-			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn
 				, (int)(viddef.height/3.2), hudscale, "p_sproing");
 			if(!sproing_drawn) {
 				sproing_drawn = 40*hudscale;
 			}
 		}
 		if(inv) {
-			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn+sproing_drawn
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn+sproing_drawn
 				, (int)(viddef.height/3.2), hudscale, "p_invulnerability");
 			if(!inv_drawn) {
 				inv_drawn = 40*hudscale;
 			}
 		}
 		if(adren) {
-			Draw_ScaledPic((int)(viddef.width/2.5) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn+sproing_drawn+inv_drawn
+			Draw_ScaledPic((int)(viddef.width/3) + rocketlauncher_drawn+chaingun_drawn+smartgun_drawn+beamgun_drawn+flamethrower_drawn+disruptor_drawn+vaporizer_drawn+quad_drawn+haste_drawn+sproing_drawn+inv_drawn
 				, (int)(viddef.height/3.2), hudscale, "p_adrenaline");
 		}
 	}
@@ -681,21 +681,12 @@ void SCR_DrawLoading (void)
 	}
 
 	// Add Download info stuff...
-	if (cls.download)
+	if (cls.download) 
 	{
-		char *download = va("Downloading [%s]", cls.downloadname);
-
-		DrawString(
-			viddef.width/2 - font_size/2*stringLen(download),
-			viddef.height/2 + font_size*4,
-			download);
-
-		SCR_DrawLoadingBar(cls.downloadpercent, font_size);
-
-		DrawString(
-			viddef.width/2 - font_size*3,
-			viddef.height/2 + (int)(font_size*5.5),
-			va("%3d%%", (int)cls.downloadpercent));
+		if ( cls.key_dest != key_console ) //drop the console because of CURL's readout
+		{
+			Con_ToggleConsole_f();
+		}
 	}
 	else if (isMap) //loading bar...
 	{

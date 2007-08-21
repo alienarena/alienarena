@@ -460,7 +460,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	}
 	playermodel[i-1] = 0;
 
-	sprintf(modelpath, "data1/players/%s/helmet.md2", playermodel);
+	sprintf(modelpath, "players/%s/helmet.md2", playermodel);
 	Q2_FindFile (modelpath, &file); //does a helmet exist?
 	if(file) {
 		sprintf(modelpath, "players/%s/helmet.md2", playermodel);
@@ -481,7 +481,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 
 	//check for class file
 	bot->ctype = 0;
-	sprintf(modelpath, "data1/players/%s/human", playermodel);
+	sprintf(modelpath, "players/%s/human", playermodel);
 	Q2_FindFile (modelpath, &file);
 	if(file) { //human
 		bot->ctype = 1;
@@ -498,7 +498,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 		fclose(file);
 	}
 	else {
-		sprintf(modelpath, "data1/players/%s/robot", playermodel);
+		sprintf(modelpath, "players/%s/robot", playermodel);
 		Q2_FindFile (modelpath, &file);
 		if(file) { //robot
 			bot->ctype = 2;

@@ -834,7 +834,7 @@ char **FS_ListFiles( char *findname, int *numfiles, unsigned musthave, unsigned 
 	return list;
 }
 
-#ifdef __unix__
+//#ifdef __unix__
 void FS_FreeFileList (char **list, int n) // jit
 {
 	int i;
@@ -850,7 +850,7 @@ void FS_FreeFileList (char **list, int n) // jit
 
 	free(list);
 }
-#endif
+//#endif
 
 /*
 ** FS_Dir_f
