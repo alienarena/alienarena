@@ -1258,7 +1258,12 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.alpha = 0.30;
 		V_AddEntity (&gun);
 	}
-
+	if(!(strcmp("vehicles/strafer/v_wep.md2", gun.model->name))) {
+		gun.model = R_RegisterModel("vehicles/bomber/window.md2");
+		gun.flags |= RF_TRANSLUCENT;
+		gun.alpha = 0.30;
+		V_AddEntity (&gun);
+	}
 }
 
 
