@@ -902,7 +902,7 @@ int ACESP_FindBot(char *name)
 
 void ACESP_KickBot(char *name)
 {
-	int i;
+	int i,j;
 	qboolean freed=false;
 	edict_t *bot;
 
@@ -953,8 +953,14 @@ void ACESP_KickBot(char *name)
 
 				//if in duel mode, we need to bump people down the queue if its the player in game leaving
 	
-				if(g_duel->value) if(g_duel->value) 
+				if(g_duel->value) if(g_duel->value) { 
 					MoveClientsDownQueue(bot);
+					if(!bot->client->resp.spectator) {
+						for (j = 0; j < maxclients->value; j++)  //clear scores if player was in duel
+							if(g_edicts[j+1].inuse && g_edicts[j+1].client && !g_edicts[j+1].is_bot)
+								g_edicts[j+1].client->resp.score = 0;
+					}
+				}
 			}
 		}
 	}
