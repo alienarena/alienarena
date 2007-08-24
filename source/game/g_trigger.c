@@ -73,8 +73,6 @@ void Touch_Multi (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *su
 {
 	if(other->client)
 	{
-		if(other->is_bot || other->client->is_bot)
-			return;
 		if (self->spawnflags & 2)
 			return;
 	}

@@ -344,7 +344,7 @@ void use_target_fire (edict_t *self, edict_t *other, edict_t *activator)
 	gi.WritePosition (self->s.origin);
 	gi.WriteDir (self->movedir);
 	gi.WriteByte (self->sounds);
-	gi.multicast (self->s.origin, MULTICAST_PVS);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
 }
 
 void SP_target_fire (edict_t *self)
