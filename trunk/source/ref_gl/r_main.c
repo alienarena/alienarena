@@ -1571,7 +1571,7 @@ void R_Register( void )
 	r_minimap_style = Cvar_Get ("r_minimap_style", "1", CVAR_ARCHIVE );
     r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE );
 
-	sys_priority = Cvar_Get("sys_priority", "1", CVAR_ARCHIVE); 
+	sys_priority = Cvar_Get("sys_priority", "0", CVAR_ARCHIVE); 
 	sys_affinity = Cvar_Get("sys_affinity", "1", CVAR_ARCHIVE); 
 	
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
