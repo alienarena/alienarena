@@ -1796,6 +1796,9 @@ void ClientPlaceInQueue(edict_t *ent)
 }
 void ClientCheckQueue(edict_t *ent)
 {
+	int		i;
+	int		numplayers = 0;
+
 	if(ent->client->pers.queue > 2) { //everyone in line remains a spectator
 		ent->client->pers.spectator = ent->client->resp.spectator = true;
 		ent->client->chase_target = NULL;
@@ -1805,34 +1808,44 @@ void ClientCheckQueue(edict_t *ent)
 		ent->client->ps.gunindex = 0;
 		gi.linkentity (ent);
 	}
-	else 
-		ent->client->pers.spectator = ent->client->resp.spectator =false;
+	else {
+		for (i = 0; i < maxclients->value; i++) {
+			if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
+				if(!g_edicts[i+1].client->pers.spectator)
+					numplayers++;
+			}
+		}
+		if(numplayers < 3) //only put him in if there are less than two 
+			ent->client->pers.spectator = ent->client->resp.spectator = false;
+	}
 }
 void MoveClientsDownQueue(edict_t *ent)
 {
 	int		i;
+	qboolean putonein = false;
 
 	for (i = 0; i < maxclients->value; i++) { //move everyone down
-			if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
-				if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue) 
-					g_edicts[i+1].client->pers.queue--;
+		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
+			if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue) 
+				g_edicts[i+1].client->pers.queue--;
 
-				if(g_edicts[i+1].client->pers.queue == 2 && g_edicts[i+1].client->resp.spectator) { //make sure those who should be in game are
-					g_edicts[i+1].client->pers.spectator = g_edicts[i+1].client->resp.spectator = false;
-					g_edicts[i+1].svflags &= ~SVF_NOCLIENT;
-					g_edicts[i+1].movetype = MOVETYPE_WALK;
-					g_edicts[i+1].solid = SOLID_BBOX;
-					if(!g_edicts[i+1].is_bot)
-						PutClientInServer(g_edicts+i+1);	
-					else
-						ACESP_PutClientInServer (g_edicts+i+1,true,0);
-					safe_bprintf(PRINT_HIGH, "%s has entered the duel!\n", g_edicts[i+1].client->pers.netname);
-				}
+			if(!putonein && g_edicts[i+1].client->pers.queue == 2 && g_edicts[i+1].client->resp.spectator) { //make sure those who should be in game are
+				g_edicts[i+1].client->pers.spectator = g_edicts[i+1].client->resp.spectator = false;
+				g_edicts[i+1].svflags &= ~SVF_NOCLIENT;
+				g_edicts[i+1].movetype = MOVETYPE_WALK;
+				g_edicts[i+1].solid = SOLID_BBOX;
+				if(!g_edicts[i+1].is_bot)
+					PutClientInServer(g_edicts+i+1);	
+				else
+					ACESP_PutClientInServer (g_edicts+i+1,true,0);
+				safe_bprintf(PRINT_HIGH, "%s has entered the duel!\n", g_edicts[i+1].client->pers.netname);
+				putonein = true;
 			}
-			
 		}
-		if(ent->client)
-			ent->client->pers.queue = 0;
+			
+	}
+	if(ent->client)
+		ent->client->pers.queue = 0;
 }
 
 /*
