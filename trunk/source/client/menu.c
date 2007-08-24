@@ -2005,11 +2005,6 @@ static void UpdateSoundQualityFunc( void *unused )
 
 	Cvar_SetValue( "s_primary", s_options_compatibility_list.curvalue );
 
-	M_DrawTextBox( 8, 120 - 48, 36, 3 );
-	M_Print( 16 + 16, 120 - 48 + 8,  "Restarting the sound system. This" );
-	M_Print( 16 + 16, 120 - 48 + 16, "could take up to a minute, so" );
-	M_Print( 16 + 16, 120 - 48 + 24, "please be patient." );
-
 	// the text box won't show up unless we do a buffer swap
 	R_EndFrame();
 
@@ -2951,10 +2946,6 @@ void SearchLocalGames( void )
 	m_num_servers = 0;
 	for (i=0 ; i<MAX_LOCAL_SERVERS ; i++)
 		strcpy (mservers[i].serverInfo, NO_SERVER_STRING);
-
-	M_Print( 16 + 16, 120 - 48 + 8,  "Contacting master server, this" );
-	M_Print( 16 + 16, 120 - 48 + 16, "could take a few seconds, so" );
-	M_Print( 16 + 16, 120 - 48 + 24, "please be patient." );
 
 	// the text box won't show up unless we do a buffer swap
 	R_EndFrame();
