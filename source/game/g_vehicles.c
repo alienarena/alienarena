@@ -258,10 +258,6 @@ void Use_Jet ( edict_t *ent)
       ent->client->Jet_framenum = level.framenum + ent->client->Jet_remaining;
     
     gi.sound( ent, CHAN_ITEM, gi.soundindex("vehicles/got_in.wav"), 0.8, ATTN_NORM, 0 );
-
-    /*this is the sound played when flying. To here this sound 
-      immediately we play it here the first time*/
-    gi.sound ( ent, CHAN_AUTO, gi.soundindex("hover/hovidle1.wav"), 0.8, ATTN_NORM, 0 );
 }
 static void VehicleThink(edict_t *ent)
 {
