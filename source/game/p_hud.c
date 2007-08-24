@@ -397,35 +397,27 @@ void BeginIntermission (edict_t *targ)
 
 void CheckDuelWinner(void) {
 	int	i;
-	int highpos, lowpos, highscore, numplayers;
+	int highscore, numplayers;
 
-	highpos = 0;
-	lowpos = 10000;
 	highscore = 0;
 	numplayers = 0;
 
 	for (i = 0; i < maxclients->value; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
-			if(g_edicts[i+1].client->pers.queue > highpos)
-				highpos = g_edicts[i+1].client->pers.queue;	
-			if(g_edicts[i+1].client->pers.queue < lowpos && 
-				g_edicts[i+1].client->pers.queue > 2)
-				lowpos = g_edicts[i+1].client->pers.queue;
 			if(g_edicts[i+1].client->resp.score > highscore)
 				highscore = g_edicts[i+1].client->resp.score;
 			numplayers++;
 		}
 	}
-	if(highpos < 3 && numplayers > 2)
-		highpos = 3; //never allow loser to stay in if more than 2 players
+
 	for (i = 0; i < maxclients->value; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			if((g_edicts[i+1].client->resp.score < highscore) && g_edicts[i+1].client->pers.queue < 3) {
-				g_edicts[i+1].client->pers.queue = highpos; //loser, kicked to the back of the line
+				g_edicts[i+1].client->pers.queue = numplayers; //loser, kicked to the back of the line
 			}
 			else { //move everyone else down a notch(never less than 0)
 				if(g_edicts[i+1].client->pers.queue > 1) 
-					g_edicts[i+1].client->pers.queue-=(lowpos-2); //make sure empty spaces are accounted for
+					g_edicts[i+1].client->pers.queue-=1; 
 			}
 		}
 	}
