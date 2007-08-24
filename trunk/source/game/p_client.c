@@ -1776,24 +1776,14 @@ void PutClientInServer (edict_t *ent)
 void ClientPlaceInQueue(edict_t *ent)
 {
 	int		i;
-	int		highpos, numplayers;
+	int		numplayers = 0;
 	
-	highpos = numplayers = 0;
+	for (i = 0; i < maxclients->value; i++)
+		if(g_edicts[i+1].inuse && g_edicts[i+1].client) 
+			numplayers++;
 
-	for (i = 0; i < maxclients->value; i++) {
-		if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
-			if(g_edicts[i+1].client->pers.queue > highpos)
-				highpos = g_edicts[i+1].client->pers.queue;
-			if(g_edicts[i+1].client->pers.queue < 3) 	
-				numplayers++;
-		}
-	}
-
-	if(highpos < 2 && numplayers > 2) 
-		highpos = 2; 
-
-	if(!ent->client->pers.queue)
-		ent->client->pers.queue = highpos+1;
+	if(!ent->client->pers.queue) //not in queue, to the back with you
+		ent->client->pers.queue = numplayers;
 }
 void ClientCheckQueue(edict_t *ent)
 {
@@ -1814,9 +1804,9 @@ void MoveClientsDownQueue(edict_t *ent)
 	int		i;
 
 	for (i = 0; i < maxclients->value; i++) { //move everyone down
-			if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
-				if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue) 
-					g_edicts[i+1].client->pers.queue--;
+		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
+			if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue) 
+				g_edicts[i+1].client->pers.queue--;
 
 				if(g_edicts[i+1].client->pers.queue == 2 && g_edicts[i+1].client->resp.spectator) { //make sure those who should be in game are
 					g_edicts[i+1].client->pers.spectator = g_edicts[i+1].client->resp.spectator = false;
@@ -1829,11 +1819,11 @@ void MoveClientsDownQueue(edict_t *ent)
 						ACESP_PutClientInServer (g_edicts+i+1,true,0);
 					safe_bprintf(PRINT_HIGH, "%s has entered the duel!\n", g_edicts[i+1].client->pers.netname);
 				}
-			}
-			
 		}
-		if(ent->client)
-			ent->client->pers.queue = 0;
+			
+	}
+	if(ent->client)
+		ent->client->pers.queue = 0;
 }
 
 /*
