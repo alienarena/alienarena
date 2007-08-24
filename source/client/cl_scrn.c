@@ -744,7 +744,7 @@ void SCR_DrawConsole (void)
 
 	if (cls.state == ca_disconnected || cls.state == ca_connecting)
 	{	// forced full screen console
-		Con_DrawConsole (1.0);
+		Con_DrawConsole (scr_consize->value);
 		return;
 	}
 
