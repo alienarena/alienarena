@@ -406,19 +406,23 @@ void CheckDuelWinner(void) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
 			if(g_edicts[i+1].client->resp.score > highscore)
 				highscore = g_edicts[i+1].client->resp.score;
-			numplayers++;
+			if(g_edicts[i+1].client->pers.queue) //only people who are connected
+				numplayers++;
 		}
 	}
 
 	for (i = 0; i < maxclients->value; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			if((g_edicts[i+1].client->resp.score < highscore) && g_edicts[i+1].client->pers.queue < 3) {
-				g_edicts[i+1].client->pers.queue = numplayers; //loser, kicked to the back of the line
+				g_edicts[i+1].client->pers.queue = numplayers+1; //loser, kicked to the back of the line
 			}
-			else { //move everyone else down a notch(never less than 0)
-				if(g_edicts[i+1].client->pers.queue > 1) 
+		}
+	}
+	for (i = 0; i < maxclients->value; i++) {
+		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
+			//move everyone else down a notch(never less than 0)
+			if(g_edicts[i+1].client->pers.queue > 1) 
 					g_edicts[i+1].client->pers.queue-=1; 
-			}
 		}
 	}
 }
