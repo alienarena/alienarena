@@ -1776,23 +1776,19 @@ void PutClientInServer (edict_t *ent)
 void ClientPlaceInQueue(edict_t *ent)
 {
 	int		i;
-	int		highpos, numplayers;
+	int		numplayers;
 	
-	highpos = numplayers = 0;
+	numplayers = 0;
 
 	for (i = 0; i < maxclients->value; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
-			if(g_edicts[i+1].client->pers.queue > highpos)
-				highpos = g_edicts[i+1].client->pers.queue;
-			numplayers++;
+			if(g_edicts[i+1].client->pers.queue) //only count players that are actually in
+				numplayers++;
 		}
 	}
 
-	if(highpos < 2 && numplayers > 2) 
-		highpos = numplayers - 1; 
-
 	if(!ent->client->pers.queue)
-		ent->client->pers.queue = highpos+1;
+		ent->client->pers.queue = numplayers+1;
 }
 void ClientCheckQueue(edict_t *ent)
 {
@@ -1811,7 +1807,7 @@ void ClientCheckQueue(edict_t *ent)
 	else {
 		for (i = 0; i < maxclients->value; i++) {
 			if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
-				if(!g_edicts[i+1].client->pers.spectator)
+				if(!g_edicts[i+1].client->pers.spectator && g_edicts[i+1].client->pers.queue)
 					numplayers++;
 			}
 		}
