@@ -831,6 +831,7 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 		if (cl_ent->inuse && cl_ent->is_bot)
 			game.num_bots++;
 	}
+	safe_bprintf(PRINT_HIGH, "numbots: %i\n", game.num_bots);
 
 	//play sound announcing arrival of bot
 	info = Info_ValueForKey (bot->client->pers.userinfo, "name");
@@ -873,7 +874,6 @@ void ACESP_RemoveBot(char *name)
 				bot->deadflag = DEAD_DEAD;
 				bot->inuse = false;
 				freed = true;
-				game.num_bots--;
 				safe_bprintf (PRINT_MEDIUM, "%s removed\n", bot->client->pers.netname);
 			}
 
@@ -882,6 +882,8 @@ void ACESP_RemoveBot(char *name)
 
 	if(!freed)	
 		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
+	else
+		game.num_bots--;
 	
 	ACESP_SaveBots(); // Save them again
 }
@@ -956,7 +958,7 @@ void ACESP_KickBot(char *name)
 			if(freed) {
 				bot->client->resp.botnum--; //we have one less bot
 				bot->client->ps.botnum = bot->client->resp.botnum;
-				game.num_bots--;
+			
 
 				//if in duel mode, we need to bump people down the queue if its the player in game leaving
 	
@@ -974,4 +976,6 @@ void ACESP_KickBot(char *name)
 
 	if(!freed)
 		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
+	else
+		game.num_bots--;
 }
