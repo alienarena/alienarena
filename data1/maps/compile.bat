@@ -1,3 +1,4 @@
-qbsp3 dm-leviathan
-qvis3 dm-leviathan
+qbsp3 dm-bloodfactory
+qvis3 dm-bloodfactory
+qrad3 dm-bloodfactory
 pause
