@@ -230,6 +230,7 @@ void ChangeWeapon (edict_t *ent)
 	int done;
 	char	weaponpath[MAX_OSPATH] = " ";
 	FILE *file;
+	gitem_t		*vehicle;
 
 	ent->client->pers.lastweapon = ent->client->pers.weapon;
 	ent->client->pers.weapon = ent->client->newweapon;
@@ -259,6 +260,24 @@ void ChangeWeapon (edict_t *ent)
 	ent->client->weaponstate = WEAPON_ACTIVATING;
 	ent->client->ps.gunframe = 0;
 	ent->client->ps.gunindex = gi.modelindex(ent->client->pers.weapon->view_model);
+
+	vehicle = FindItemByClassname("item_bomber");
+
+	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+		return;
+	}
+
+	vehicle = FindItemByClassname("item_strafer");
+
+	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+		return;
+	}
+
+	vehicle = FindItemByClassname("item_hover");
+
+	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+		return;
+	}
 
 	//set up code to set player world weapon model, as well as some hacks :(
 

@@ -389,7 +389,7 @@ BOOL CGalaxyDlg::OnInitDialog()
 	GetPrivateProfileString("Galaxy", "email", "email@email.com", user.email, 100, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "exe", "C:/Alien Arena 2007/", CRXPath, MAX_PATH, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "chatstart", "true", user.joinatstart, 12, "galaxy.ini");
-	GetPrivateProfileString("Galaxy", "server", "irc.blackened.com", servidor, 100, "galaxy.ini");
+	GetPrivateProfileString("Galaxy", "server", "irc.gamesurge.net", servidor, 100, "galaxy.ini");
 	//set the join flag for the dialog bool
 	if(!_tcscmp(user.joinatstart, "true"))
 		joinflg = true;
@@ -1116,9 +1116,11 @@ void CGalaxyDlg::OnButton4()
 	sprintf(mensaje,"NICK %s\n\r", user.nick);
 	sockete.sendData(mensaje);
 
+
+
 	sprintf(mensaje,"JOIN %s\n\r", "#alienarena");
 	sockete.sendData(mensaje);
-
+	Sleep(1000);
 	if(WSAGetLastError()) { //there was some error in connecting
 			sockete.handle_error();
 			m_status2.SetWindowText("error connecting to #alienarena");
@@ -1130,7 +1132,7 @@ void CGalaxyDlg::OnButton4()
 	//send the buffer to a messagebox
 	if (sockete.len > 1) 
 	{			
-		Response = SkipWords(sockete.File_Buf,6);
+		Response = SkipWords(sockete.File_Buf,0);
 		MessageBoxA(Response.word[0], "Welcome to #alienarena!", NULL);
 	}
 }
