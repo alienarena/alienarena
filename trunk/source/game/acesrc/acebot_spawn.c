@@ -782,9 +782,10 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *team)
 ///////////////////////////////////////////////////////////////////////
 void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 {
-	edict_t *bot;
+	edict_t *bot, *cl_ent;
 	char *info;
 	char sound[64];
+	int	i;
 
 	bot = ACESP_FindFreeClient ();
 
@@ -793,9 +794,7 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 		safe_bprintf (PRINT_MEDIUM, "Server is full, increase Maxclients.\n");
 		return;
 	}
-
-	game.num_bots++;
-
+	
 	bot->yaw_speed = 100; // yaw speed
 	bot->inuse = true;
 	bot->is_bot = true;
@@ -824,6 +823,13 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 	G_InitEdict (bot);
 
 	InitClientResp (bot->client);
+
+	for (i=0; i<game.maxclients ; i++) //this is a more safe way to do this, ensuring we have perfect numbers
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (cl_ent->inuse && cl_ent->is_bot)
+			game.num_bots++;
+	}
 
 	//play sound announcing arrival of bot
 	info = Info_ValueForKey (bot->client->pers.userinfo, "name");
