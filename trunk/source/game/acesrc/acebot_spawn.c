@@ -831,7 +831,6 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 		if (cl_ent->inuse && cl_ent->is_bot)
 			game.num_bots++;
 	}
-	safe_bprintf(PRINT_HIGH, "numbots: %i\n", game.num_bots);
 
 	//play sound announcing arrival of bot
 	info = Info_ValueForKey (bot->client->pers.userinfo, "name");
