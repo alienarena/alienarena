@@ -824,6 +824,7 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 
 	InitClientResp (bot->client);
 
+	game.num_bots = 0;
 	for (i=0; i<game.maxclients ; i++) //this is a more safe way to do this, ensuring we have perfect numbers
 	{
 		cl_ent = g_edicts + 1 + i;
