@@ -774,7 +774,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 		bomb->think = G_FreeEdict;
 		bomb->classname = "bomb";
 		gi.linkentity (bomb);
-		T_RadiusDamage(bomb, self, 50, NULL, 200, MOD_VAPORALTFIRE, -1); 
+		T_RadiusDamage(bomb, self, 100, NULL, 200, MOD_VAPORALTFIRE, -1); 
 	
 		gi.WriteByte (svc_temp_entity);
 		if (bomb->waterlevel)
