@@ -1,4 +1,4 @@
-qbsp3 dm-bloodfactory
-qvis3 dm-bloodfactory
-qrad3 dm-bloodfactory
+qbsp3 dm-atlantis
+qvis3 dm-atlantis
+qrad3 dm-atlantis
 pause
