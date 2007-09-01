@@ -327,7 +327,9 @@ void CL_ParseTEnt (void)
 
 		if (type == TE_GUNSHOT) {
 			CL_ParticleEffect (pos, dir, 425, 10);
-			CL_BulletMarks(pos, dir);
+			trace = CL_Trace ( pos, mins, maxs, pos, -1, MASK_SOLID, true, NULL); 
+			if(trace.contents)
+				CL_BulletMarks(pos, dir);
 		}
 		else
 			CL_ParticleEffect (pos, dir, 425, 2);	// bullets, color is 0xe0
@@ -354,7 +356,9 @@ void CL_ParseTEnt (void)
 		MSG_ReadDir (&net_message, dir);
 		if (type == TE_SCREEN_SPARKS) {
 			CL_LaserSparks (pos, dir, 0xd0, 20);
-			CL_BeamgunMark(pos, dir, 0.8);
+			trace = CL_Trace ( pos, mins, maxs, pos, -1, MASK_SOLID, true, NULL); 
+			if(trace.contents)
+				CL_BeamgunMark(pos, dir, 0.8);
 		}
 		else
 			CL_ParticleEffect (pos, dir, 0xb0, 40);
@@ -412,7 +416,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_DisruptorBeam (pos, pos2);
-		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_PLAYERSOLID, true, NULL); 
+		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL); 
 		if(trace.contents)
 			CL_BeamgunMark(pos2, trace.plane.normal, 0.4);
 		S_StartSound (pos, 0, 0, cl_sfx_railg, 1, ATTN_NONE, 0);
@@ -483,7 +487,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_VaporizerBeam (pos, pos2);
-		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_PLAYERSOLID, true, NULL); 
+		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL); 
 		if(trace.contents)
 			CL_VaporizerMarks(pos2, trace.plane.normal);	
 		break;
@@ -541,7 +545,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_BlasterBeam (pos, pos2);
-		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_PLAYERSOLID, true, NULL); 
+		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL); 
 		if(trace.contents)
 			CL_BlasterMark(pos2, trace.plane.normal);
 		break;
