@@ -94,10 +94,10 @@ void gib_think (edict_t *self)
 	self->s.frame++;
 	self->nextthink = level.time + FRAMETIME;
 
-	if (self->s.frame == 10)
+	if (self->s.frame > 9)
 	{
 		self->think = G_FreeEdict;
-		self->nextthink = level.time + 8 + random()*10;
+		self->nextthink = level.time + 2 + random()*2;
 	}
 }
 
@@ -175,78 +175,9 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type, int effects)
 	gib->avelocity[2] = random()*600;
 
 	gib->think = G_FreeEdict;
-	gib->nextthink = level.time + 10 + random()*10;
+	gib->nextthink = level.time + 2 + random()*2;
 
 	gi.linkentity (gib);
-}
-
-void ThrowBloodStain (edict_t *self, char *gibname)
-{
-	edict_t *blood;
-
-	blood = G_Spawn();
-
-	blood->s.origin[0] = self->s.origin[0];
-	blood->s.origin[1] = self->s.origin[1];
-	blood->s.origin[2] = self->s.origin[2] - 16;
-
-	gi.setmodel (blood, gibname);
-	blood->solid = SOLID_NOT;
-	
-	blood->takedamage = DAMAGE_NO;
-	blood->die = gib_die;
-
-	blood->movetype = MOVETYPE_NONE;
-	
-	blood->think = G_FreeEdict;
-	blood->nextthink = level.time + 10 + random()*10;
-
-	gi.linkentity (blood);
-}
-
-void ThrowHead (edict_t *self, char *gibname, int damage, int type, int effects)
-{
-	vec3_t	vd;
-	float	vscale;
-
-	self->s.skinnum = 0;
-	self->s.frame = 0;
-	VectorClear (self->mins);
-	VectorClear (self->maxs);
-
-	self->s.modelindex2 = 0;
-	gi.setmodel (self, gibname);
-	self->solid = SOLID_NOT;
-	self->s.effects = effects;
-	self->s.effects &= ~EF_FLIES;
-	self->s.sound = 0;
-	self->flags |= FL_NO_KNOCKBACK;
-	self->svflags &= ~SVF_MONSTER;
-	self->takedamage = DAMAGE_YES;
-	self->die = gib_die;
-
-	if (type == GIB_ORGANIC)
-	{
-		self->movetype = MOVETYPE_TOSS;
-		self->touch = gib_touch;
-		vscale = 0.5;
-	}
-	else
-	{
-		self->movetype = MOVETYPE_BOUNCE;
-		vscale = 1.0;
-	}
-
-	VelocityForDamage (damage, vd);
-	VectorMA (self->velocity, vscale, vd, self->velocity);
-	ClipGibVelocity (self);
-
-	self->avelocity[YAW] = crandom()*600;
-
-	self->think = G_FreeEdict;
-	self->nextthink = level.time + 10 + random()*10;
-
-	gi.linkentity (self);
 }
 
 void ThrowClientHead (edict_t *self, int damage)
@@ -277,7 +208,7 @@ void ThrowClientHead (edict_t *self, int damage)
 	self->s.sound = 0;
 	self->flags |= FL_NO_KNOCKBACK;
 
-	self->movetype = MOVETYPE_BOUNCE;
+	self->movetype = MOVETYPE_TOSS;
 	VelocityForDamage (damage, vd);
 	VectorAdd (self->velocity, vd, self->velocity);
 
