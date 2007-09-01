@@ -772,10 +772,8 @@ void M_SetEffects (edict_t *ent);
 //
 // g_misc.c
 //
-void ThrowHead (edict_t *self, char *gibname, int damage, int type, int effects);
 void ThrowClientHead (edict_t *self, int damage);
 void ThrowGib (edict_t *self, char *gibname, int damage, int type, int effects);
-void ThrowBloodStain (edict_t *self, char *gibname);
 void BecomeExplosion1 (edict_t *self);
 
 //
