@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -139,7 +139,7 @@ extern	cvar_t	*gl_log;
 extern	cvar_t	*gl_lightmap;
 extern	cvar_t	*gl_shadows;
 extern	cvar_t	*gl_dynamic;
-extern  cvar_t  *gl_monolightmap;
+extern	cvar_t	*gl_monolightmap;
 extern	cvar_t	*gl_nobind;
 extern	cvar_t	*gl_round_down;
 extern	cvar_t	*gl_picmip;
@@ -157,15 +157,16 @@ extern	cvar_t	*gl_modulate;
 extern	cvar_t	*gl_playermip;
 extern	cvar_t	*gl_drawbuffer;
 extern	cvar_t	*gl_3dlabs_broken;
-extern  cvar_t  *gl_driver;
+extern	cvar_t	*gl_driver;
 extern	cvar_t	*gl_swapinterval;
 extern	cvar_t	*gl_texturemode;
 extern	cvar_t	*gl_texturealphamode;
 extern	cvar_t	*gl_texturesolidmode;
-extern  cvar_t  *gl_saturatelighting;
-extern  cvar_t  *gl_lockpvs;
-extern  cvar_t  *gl_rtlights;
-extern  cvar_t  *gl_texres;
+extern	cvar_t	*gl_saturatelighting;
+extern	cvar_t	*gl_lockpvs;
+extern	cvar_t	*gl_rtlights;
+extern	cvar_t	*gl_texres;
+
 extern	cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
 
@@ -179,11 +180,12 @@ extern cvar_t	*gl_ext_mtexcombine;
 extern cvar_t	*gl_normalmaps;
 
 extern	cvar_t	*r_shaders;
-extern  cvar_t  *r_bloom;
-extern  cvar_t  *r_lensflare;
-extern  cvar_t  *r_lensflare_intens;
-extern  qboolean map_fog;
-extern  char	map_music[128];
+extern	cvar_t	*r_bloom;
+extern	cvar_t	*r_lensflare;
+extern	cvar_t	*r_lensflare_intens;
+
+extern	qboolean	map_fog;
+extern	char		map_music[128];
 
 extern  cvar_t		*r_minimap;
 extern  cvar_t		*r_minimap_size;
@@ -195,8 +197,11 @@ extern	cvar_t	*gl_reflection_debug;	// MPO	for debugging the reflection
 extern	cvar_t	*gl_reflection_max;		// MPO  max number of water reflections
 extern	cvar_t	*gl_arb_fragment_program; // jit
 
-extern  cvar_t	*sys_affinity;
+extern	cvar_t	*sys_affinity;
 extern	cvar_t	*sys_priority;
+
+extern	cvar_t	*gl_screenshot_type;
+extern	cvar_t	*gl_screenshot_jpeg_quality;
 
 extern	int		gl_lightmap_format;
 extern	int		gl_solid_format;
@@ -280,12 +285,12 @@ void R_ReadFogScript(char config_file[128]);
 void R_ReadMusicScript(char config_file[128]);
 #endif
 
-//BLOOMS[start] 
-// 
-// r_bloom.c 
-// 
-void R_BloomBlend( refdef_t *fd ); 
-void R_InitBloomTextures( void ); 
+//BLOOMS[start]
+//
+// r_bloom.c
+//
+void R_BloomBlend( refdef_t *fd );
+void R_InitBloomTextures( void );
 //BLOOMS[end]
 
 void R_RenderFlares (void);
@@ -387,8 +392,8 @@ void	GL_TextureSolidMode( char *string );
 #define GLSTATE_DISABLE_TEXGEN		if (gl_state.texgen) { qglDisable(GL_TEXTURE_GEN_S); qglDisable(GL_TEXTURE_GEN_T); qglDisable(GL_TEXTURE_GEN_R); gl_state.texgen=false; }
 #define GLSTATE_ENABLE_TEXGEN		if (!gl_state.texgen) { qglEnable(GL_TEXTURE_GEN_S); qglEnable(GL_TEXTURE_GEN_T); qglEnable(GL_TEXTURE_GEN_R); gl_state.texgen=true; }
 
-#define GL_COMBINE                        0x8570 
-#define GL_DOT3_RGB                       0x86AE 
+#define GL_COMBINE                        0x8570
+#define GL_DOT3_RGB                       0x86AE
 
 typedef struct
 {

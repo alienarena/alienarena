@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -21,12 +21,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 #include <GL/glu.h>
+
+//For screenshots
+#include "png.h"
+#include <jpeglib.h>
+
 image_t *r_flare;
 image_t *r_cubemap;
 
 #define CUBEMAP_MAXSIZE 32
 
-static void getCubeVector (int i, int cubesize, int x, int y, float *vector) 
+static void getCubeVector (int i, int cubesize, int x, int y, float *vector)
 {
 	float s, t, sc, tc, mag;
 
@@ -36,7 +41,7 @@ static void getCubeVector (int i, int cubesize, int x, int y, float *vector)
 	tc = t * 2.0 - 1.0;
 
 	// cleaned manky braces again here...
-	switch (i) 
+	switch (i)
 	{
 	case 0: vector[0] = 1.0; vector[1] = - tc; vector[2] = - sc; break;
 	case 1: vector[0] = - 1.0; vector[1] = - tc; vector[2] = sc; break;
@@ -53,7 +58,7 @@ static void getCubeVector (int i, int cubesize, int x, int y, float *vector)
 	vector[2]*= mag;
 }
 
-void R_InitCubemapTextures (void) 
+void R_InitCubemapTextures (void)
 {
 	// this texture doesn't need to be huge. I've seen examples where it goes up to 128 or higher, but 32
 	// is perfectly adequate. Who am I to argue with Mr. Kilgard?
@@ -80,11 +85,11 @@ void R_InitCubemapTextures (void)
 	qglTexParameteri (GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	qglTexParameteri (GL_TEXTURE_CUBE_MAP_EXT, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	for (i = 0; i < 6; i++) 
+	for (i = 0; i < 6; i++)
 	{
-		for (y = 0; y < CUBEMAP_MAXSIZE; y++) 
+		for (y = 0; y < CUBEMAP_MAXSIZE; y++)
 		{
-			for (x = 0; x < CUBEMAP_MAXSIZE; x++) 
+			for (x = 0; x < CUBEMAP_MAXSIZE; x++)
 			{
 				getCubeVector (i, CUBEMAP_MAXSIZE, x, y, vector);
 
@@ -126,7 +131,7 @@ byte	dottexture[16][16] =
     {0,0,0,7,24,46,63,72,72,61,43,20,6,0,0,0},
     {0,0,0,0,4,11,20,26,26,20,10,3,0,0,0,0},
     {0,0,0,0,0,0,2,3,3,2,0,0,0,0,0,0},
-};   
+};
 
 void R_InitParticleTexture (void)
 {
@@ -136,7 +141,7 @@ void R_InitParticleTexture (void)
 	//
 	// particle texture
 	//
-	for (x=0 ; x<16 ; x++) 
+	for (x=0 ; x<16 ; x++)
 	{
 		for (y=0 ; y<16 ; y++)
 		{
@@ -149,7 +154,7 @@ void R_InitParticleTexture (void)
 	r_particletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
 
 	r_smoketexture = R_RegisterParticlePic("smoke");//etc etc etc...
-    r_particletexture = R_RegisterParticlePic("particle");   
+    r_particletexture = R_RegisterParticlePic("particle");
 	r_explosiontexture = R_RegisterParticlePic("explosion");
 	r_explosion1texture = R_RegisterParticlePic("r_explod_1");
 	r_explosion2texture = R_RegisterParticlePic("r_explod_2");
@@ -180,8 +185,8 @@ void R_InitParticleTexture (void)
 	r_around = GL_FindImage("gfx/radar/around",it_pic);
 	if (!r_particletexture) {                                 //c14 add this line
 		r_particletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }                                                         //c14 add this line  
-	
+    }                                                         //c14 add this line
+
 	//
 	// also use this for bad textures, but without alpha
 	//
@@ -196,22 +201,22 @@ void R_InitParticleTexture (void)
 		}
 	}
 	r_notexture = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-	
+
 	//R_InitCubemapTextures (); //for future use
 
 	Com_sprintf (flares, sizeof(flares), "gfx/flares/flare0.tga");
 	r_flare = GL_FindImage(flares, it_pic);
-	
+
 }
 
 
-/* 
-============================================================================== 
- 
-						SCREEN SHOTS 
- 
-============================================================================== 
-*/ 
+/*
+==============================================================================
+
+						SCREEN SHOTS
+
+==============================================================================
+*/
 
 typedef struct _TargaHeader {
 	unsigned char 	id_length, colormap_type, image_type;
@@ -221,45 +226,243 @@ typedef struct _TargaHeader {
 	unsigned char	pixel_size, attributes;
 } TargaHeader;
 
-
-/* 
-================== 
-GL_ScreenShot_f
-================== 
-*/  
-void GL_ScreenShot_f (void) 
+/*
+==================
+GL_ScreenShot_PNG
+==================
+*/
+void GL_ScreenShot_PNG(void)
 {
 	byte		*buffer;
-	char		picname[80]; 
+	char		picname[MAX_OSPATH];
 	char		checkname[MAX_OSPATH];
-	int			i, c, temp;
+	int		i, k;
+	FILE		*f;
+
+	png_structp	png_ptr;
+	png_infop		info_ptr;
+	png_bytep		*row_pointers;
+
+	/* Create the scrnshots directory if it doesn't exist */
+	Com_sprintf(checkname, sizeof(checkname), "%s/scrnshot", FS_Gamedir());
+	Sys_Mkdir(checkname);
+
+	strcpy(picname,"AlienArena_00.png");
+
+	for (i=0 ; i<=99 ; i++)
+	{
+		picname[11] = i/10 + '0';
+		picname[12] = i%10 + '0';
+		Com_sprintf (checkname, sizeof(checkname), "%s/scrnshot/%s", FS_Gamedir(), picname);
+		f = fopen (checkname, "rb");
+		if (!f)
+			break;	// file doesn't exist
+		fclose (f);
+	}
+
+	if (i == 100) {
+		Com_Printf(PRINT_ALL, "GL_ScreenShot_PNG: Couldn't create a file\n");
+		return;
+	}
+
+	/* Open the file for Binary Output */
+	f = fopen(checkname, "wb");
+
+	if (!f) {
+		Com_Printf(PRINT_ALL, "GL_ScreenShot_PNG: Couldn't create a file\n");
+		return;
+	}
+
+	/* Allocate room for a copy of the framebuffer */
+	buffer = malloc(vid.width * vid.height * 3);
+
+	if (!buffer) {
+		fclose(f);
+		return;
+	}
+
+	/* Read the framebuffer into our storage */
+	qglReadPixels(0, 0, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+
+	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+	if (!png_ptr) {
+		Com_Printf(0, "LibPNG Error! (%s)\n", picname);
+		return;
+	}
+
+	info_ptr = png_create_info_struct(png_ptr);
+
+	if (!info_ptr) {
+		png_destroy_write_struct(&png_ptr, (png_infopp) NULL);
+		Com_Printf(0, "LibPNG Error! (%s)\n", picname);
+		return;
+	}
+
+	png_init_io(png_ptr, f);
+
+	png_set_IHDR(png_ptr, info_ptr, vid.width, vid.height, 8, PNG_COLOR_TYPE_RGB,
+	PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+
+	png_set_compression_level(png_ptr, Z_DEFAULT_COMPRESSION);
+	png_set_compression_mem_level(png_ptr, 9);
+
+	png_write_info(png_ptr, info_ptr);
+
+	row_pointers = malloc(vid.height * sizeof(png_bytep));
+
+	for (k = 0; k < vid.height; k++)
+		row_pointers[k] = buffer + (vid.height - 1 - k) * 3 * vid.width;
+
+	png_write_image(png_ptr, row_pointers);
+	png_write_end(png_ptr, info_ptr);
+
+	png_destroy_write_struct(&png_ptr, &info_ptr);
+
+	fclose(f);
+	free(buffer);
+
+	/* Done! */
+	Com_Printf ("Wrote %s\n", picname);
+}
+
+
+/*
+==================
+GL_ScreenShot_JPEG
+==================
+*/
+void GL_ScreenShot_JPEG(void)
+{
+	struct		jpeg_compress_struct cinfo;
+	struct		jpeg_error_mgr jerr;
+	byte			*rgbdata;
+	JSAMPROW	s[1];
+	FILE			*f;
+	char			picname[80], checkname[MAX_OSPATH];
+	int			i, offset;
+
+	/* Create the scrnshots directory if it doesn't exist */
+	Com_sprintf(checkname, sizeof(checkname), "%s/scrnshot", FS_Gamedir());
+	Sys_Mkdir(checkname);
+
+	strcpy(picname,"AlienArena_00.jpg");
+
+	for (i=0 ; i<=99 ; i++)
+	{
+		picname[11] = i/10 + '0';
+		picname[12] = i%10 + '0';
+		Com_sprintf (checkname, sizeof(checkname), "%s/scrnshot/%s", FS_Gamedir(), picname);
+		f = fopen (checkname, "rb");
+		if (!f)
+			break;	// file doesn't exist
+		fclose (f);
+	}
+
+	if (i == 100) {
+		Com_Printf(PRINT_ALL, "GL_ScreenShot_JPEG: Couldn't create a file (You probably have taken to many screenshots!)\n");
+		return;
+	}
+
+	/* Open the file for Binary Output */
+	f = fopen(checkname, "wb");
+
+	if (!f) {
+		Com_Printf(PRINT_ALL, "GL_ScreenShot_JPEG: Couldn't create a file\n");
+		return;
+	}
+
+	/* Allocate room for a copy of the framebuffer */
+	rgbdata = malloc(vid.width * vid.height * 3);
+
+	if (!rgbdata) {
+		fclose(f);
+		return;
+	}
+
+	/* Read the framebuffer into our storage */
+	qglReadPixels(0, 0, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, rgbdata);
+
+	/* Initialise the JPEG compression object */
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_compress(&cinfo);
+	jpeg_stdio_dest(&cinfo, f);
+
+	/* Setup JPEG Parameters */
+	cinfo.image_width = vid.width;
+	cinfo.image_height = vid.height;
+	cinfo.in_color_space = JCS_RGB;
+	cinfo.input_components = 3;
+	jpeg_set_defaults(&cinfo);
+
+	if ((gl_screenshot_jpeg_quality->value >= 101) || (gl_screenshot_jpeg_quality->value <= 0))
+		Cvar_Set("gl_screenshot_jpeg_quality", "85");
+
+	jpeg_set_quality(&cinfo, gl_screenshot_jpeg_quality->value, TRUE);
+
+	/* Start Compression */
+	jpeg_start_compress(&cinfo, true);
+
+	/* Feed Scanline data */
+	offset = (cinfo.image_width * cinfo.image_height * 3) - (cinfo.image_width * 3);
+
+	while (cinfo.next_scanline < cinfo.image_height) {
+		s[0] = &rgbdata[offset - (cinfo.next_scanline * (cinfo.image_width * 3))];
+		jpeg_write_scanlines(&cinfo, s, 1);
+	}
+
+	/* Finish Compression */
+	jpeg_finish_compress(&cinfo);
+
+	/* Destroy JPEG object */
+	jpeg_destroy_compress(&cinfo);
+
+	/* Close File */
+	fclose(f);
+
+	/* Free Temp Framebuffer */
+	free(rgbdata);
+
+	/* Done! */
+	Com_Printf ("Wrote %s\n", picname);
+}
+
+/*
+==================
+GL_ScreenShot_TGA
+==================
+*/
+GL_ScreenShot_TGA (void)
+{
+	byte		*buffer;
+	char		picname[80];
+	char		checkname[MAX_OSPATH];
+	int		i, c, temp;
 	FILE		*f;
 
 	// create the scrnshots directory if it doesn't exist
 	Com_sprintf (checkname, sizeof(checkname), "%s/scrnshot", FS_Gamedir());
 	Sys_Mkdir (checkname);
 
-// 
-// find a file name to save it to 
-// 
-	strcpy(picname,"codered00.tga");
+	// find a file name to save it to
+	strcpy(picname,"AlienArena_00.tga");
 
-	for (i=0 ; i<=99 ; i++) 
-	{ 
-		picname[5] = i/10 + '0'; 
-		picname[6] = i%10 + '0'; 
+	for (i=0 ; i<=99 ; i++)
+	{
+		picname[11] = i/10 + '0';
+		picname[12] = i%10 + '0';
 		Com_sprintf (checkname, sizeof(checkname), "%s/scrnshot/%s", FS_Gamedir(), picname);
 		f = fopen (checkname, "rb");
 		if (!f)
 			break;	// file doesn't exist
 		fclose (f);
-	} 
-	if (i==100) 
-	{
-		Com_Printf ("SCR_ScreenShot_f: Couldn't create a file\n"); 
-		return;
- 	}
+	}
 
+	if (i==100)
+	{
+		Com_Printf ("GL_ScreenShot_TGA: Couldn't create file %s (You probably have taken to many screenshots!)\n", picname);
+		return;
+	}
 
 	buffer = malloc(vid.width*vid.height*3 + 18);
 	memset (buffer, 0, 18);
@@ -270,7 +473,7 @@ void GL_ScreenShot_f (void)
 	buffer[15] = vid.height>>8;
 	buffer[16] = 24;	// pixel size
 
-	qglReadPixels (0, 0, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18 ); 
+	qglReadPixels (0, 0, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buffer+18 );
 
 	// swap rgb to bgr
 	c = 18+vid.width*vid.height*3;
@@ -287,7 +490,27 @@ void GL_ScreenShot_f (void)
 
 	free (buffer);
 	Com_Printf ("Wrote %s\n", picname);
-} 
+}
+
+/*
+==================
+GL_ScreenShot_f
+==================
+*/
+void GL_ScreenShot_f (void)
+{
+	if (strcmp(gl_screenshot_type->string, "jpeg") == 0)
+		GL_ScreenShot_JPEG();
+	else if (strcmp(gl_screenshot_type->string, "png") == 0)
+		GL_ScreenShot_PNG();
+	else if (strcmp(gl_screenshot_type->string, "tga") == 0)
+		GL_ScreenShot_TGA();
+	else {
+		Com_Printf("Invalid screenshot type %s; resetting to jpeg.\n", gl_screenshot_type->string);
+		Cvar_Set("gl_screenshot_type", "jpeg");
+		GL_ScreenShot_JPEG();
+	}
+}
 
 /*
 ** GL_Strings_f
@@ -365,7 +588,7 @@ void GL_UpdateSwapInterval( void )
 	{
 		gl_swapinterval->modified = false;
 
-		if ( !gl_state.stereo_enabled ) 
+		if ( !gl_state.stereo_enabled )
 		{
 #ifdef _WIN32
 			if ( qwglSwapIntervalEXT )
