@@ -34,7 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "client.h"
 #include "qmenu.h"
-#include <time.h> //for SCR_showTime
 
 float		scr_con_current;	// aproaches scr_conlines at scr_conspeed
 float		scr_conlines;		// 0.0 to 1.0 lines of console to display
@@ -681,7 +680,7 @@ void SCR_DrawLoading (void)
 	}
 
 	// Add Download info stuff...
-	if (cls.download && (kb = (int)ftell(cls.download))) 
+	if (cls.download && (kb = (int)ftell(cls.download)))
 	{
 		if ( cls.key_dest != key_console ) //drop the console because of CURL's readout
 		{
@@ -1550,7 +1549,7 @@ void SCR_showTimer(void)
 
 	if ((cl.time + 2000) < timecounter)
 		timecounter = cl.time + 1000;
-	
+
 	if (cl.time >timecounter)
 	{
 		t1 = clock();
