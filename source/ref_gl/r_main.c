@@ -42,10 +42,10 @@ int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2;
 
 model_t		*r_worldmodel;
 
-float		gldepthmin, gldepthmax;
+float			gldepthmin, gldepthmax;
 
-glconfig_t	gl_config;
-glstate_t	gl_state;
+glconfig_t		gl_config;
+glstate_t		gl_state;
 
 image_t		*r_notexture;		// use for bad textures
 image_t		*r_particletexture;	// little dot for particles
@@ -65,7 +65,7 @@ image_t		*r_bflashtexture;
 image_t		*r_cflashtexture;
 image_t		*r_leaderfieldtexture;
 image_t		*r_deathfieldtexture;
-image_t     *r_shelltexture;    // c14 added shell texture
+image_t		*r_shelltexture;    // c14 added shell texture
 image_t		*r_hittexture;
 image_t		*r_bubbletexture;
 image_t		*r_reflecttexture;
@@ -79,18 +79,18 @@ image_t		*r_bullettexture;
 image_t		*r_radarmap; // wall texture for radar texgen
 image_t		*r_around;
 
-cvar_t  *gl_normalmaps;
+cvar_t	*gl_normalmaps;
 cvar_t	*gl_arb_fragment_program; // jit
 
 entity_t	*currententity;
-model_t		*currentmodel;
+model_t	*currentmodel;
 
 cplane_t	frustum[4];
 
-int			r_visframecount;	// bumped when going to a new PVS
-int			r_framecount;		// used for dlight push checking
+int		r_visframecount;	// bumped when going to a new PVS
+int		r_framecount;		// used for dlight push checking
 
-int			c_brush_polys, c_alias_polys, c_flares;
+int		c_brush_polys, c_alias_polys, c_flares;
 
 float		v_blend[4];			// final blending color
 
@@ -157,12 +157,12 @@ cvar_t	*gl_ext_compiled_vertex_array;
 cvar_t	*gl_log;
 cvar_t	*gl_bitdepth;
 cvar_t	*gl_drawbuffer;
-cvar_t  *gl_driver;
+cvar_t	*gl_driver;
 cvar_t	*gl_lightmap;
 cvar_t	*gl_shadows;
 cvar_t	*gl_mode;
 cvar_t	*gl_dynamic;
-cvar_t  *gl_monolightmap;
+cvar_t	*gl_monolightmap;
 cvar_t	*gl_modulate;
 cvar_t	*gl_nobind;
 cvar_t	*gl_round_down;
@@ -175,14 +175,14 @@ cvar_t	*gl_cull;
 cvar_t	*gl_polyblend;
 cvar_t	*gl_flashblend;
 cvar_t	*gl_playermip;
-cvar_t  *gl_saturatelighting;
+cvar_t	*gl_saturatelighting;
 cvar_t	*gl_swapinterval;
 cvar_t	*gl_texturemode;
 cvar_t	*gl_texturealphamode;
 cvar_t	*gl_texturesolidmode;
 cvar_t	*gl_lockpvs;
-cvar_t  *gl_rtlights;
-cvar_t  *gl_texres;
+cvar_t	*gl_rtlights;
+cvar_t	*gl_texres;
 
 cvar_t	*gl_3dlabs_broken;
 
@@ -190,26 +190,29 @@ cvar_t	*vid_fullscreen;
 cvar_t	*vid_gamma;
 cvar_t	*vid_ref;
 
-cvar_t  *r_shaders;
-cvar_t  *r_bloom;
-cvar_t  *r_lensflare;
-cvar_t  *r_lensflare_intens;
+cvar_t	*r_shaders;
+cvar_t	*r_bloom;
+cvar_t	*r_lensflare;
+cvar_t	*r_lensflare_intens;
 
-qboolean    map_fog;
+qboolean	map_fog;
 
 cvar_t	*gl_reflection;			// MPO	alpha transparency, 1.0 is full bright
 cvar_t	*gl_reflection_debug;	// MPO	for debugging the reflection
 cvar_t	*gl_reflection_max;		// MPO  max number of water reflections
 
-cvar_t  *con_font;
+cvar_t	*con_font;
 
-cvar_t  *r_minimap_size; // GLOOM radar
-cvar_t  *r_minimap_zoom;
-cvar_t  *r_minimap_style;
-cvar_t  *r_minimap;
+cvar_t	*r_minimap_size; // GLOOM radar
+cvar_t	*r_minimap_zoom;
+cvar_t	*r_minimap_style;
+cvar_t	*r_minimap;
 
 cvar_t	*sys_affinity;
-cvar_t  *sys_priority;
+cvar_t	*sys_priority;
+
+cvar_t	*gl_screenshot_type;
+cvar_t	*gl_screenshot_jpeg_quality;
 
 //fog stuff
 struct r_fog
@@ -713,7 +716,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			VectorScale(pright, 5*scale, pright);
 			VectorScale(pup, 5*scale, pup);
 		}
-		else if(p->type == PARTICLE_DECAL) { 
+		else if(p->type == PARTICLE_DECAL) {
 			VectorCopy(p->angle, dir);
 			AngleVectors(dir, NULL, right, up);
 			VectorScale ( right, p->dist, pright );
@@ -725,7 +728,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 		else if(p->type == PARTICLE_FLAT) {
 
 			VectorCopy(r_newrefdef.viewangles, dir);
-	
+
 			dir[0] = -90;  // and splash particles horizontal by setting it
 			AngleVectors(dir, NULL, right, up);
 
@@ -1569,11 +1572,14 @@ void R_Register( void )
 	r_minimap_size = Cvar_Get ("r_minimap_size", "256", CVAR_ARCHIVE );
 	r_minimap_zoom = Cvar_Get ("r_minimap_zoom", "1", CVAR_ARCHIVE );
 	r_minimap_style = Cvar_Get ("r_minimap_style", "1", CVAR_ARCHIVE );
-    r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE );
+	r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE );
 
-	sys_priority = Cvar_Get("sys_priority", "0", CVAR_ARCHIVE); 
-	sys_affinity = Cvar_Get("sys_affinity", "1", CVAR_ARCHIVE); 
-	
+	sys_priority = Cvar_Get("sys_priority", "0", CVAR_ARCHIVE);
+	sys_affinity = Cvar_Get("sys_affinity", "1", CVAR_ARCHIVE);
+
+	gl_screenshot_type = Cvar_Get("gl_screenshot_type", "jpeg", CVAR_ARCHIVE);
+	gl_screenshot_jpeg_quality = Cvar_Get("gl_screenshot_jpeg_quality", "85", CVAR_ARCHIVE);
+
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
 	Cmd_AddCommand( "screenshot", GL_ScreenShot_f );
 	Cmd_AddCommand( "modellist", Mod_Modellist_f );
