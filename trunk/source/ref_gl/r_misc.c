@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <GL/glu.h>
 
 //For screenshots
-#include <png.h>
-#include <jpeglib.h>
+#include "png/png.h"
+#include "jpeg/jpeglib.h"
 
 image_t *r_flare;
 image_t *r_cubemap;
