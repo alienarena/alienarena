@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <GL/glu.h>
 
 //For screenshots
-#include "png/png.h"
 #include "jpeg/jpeglib.h"
 
 image_t *r_flare;
@@ -228,107 +227,6 @@ typedef struct _TargaHeader {
 
 /*
 ==================
-GL_ScreenShot_PNG
-==================
-*/
-void GL_ScreenShot_PNG(void)
-{
-	byte		*buffer;
-	char		picname[MAX_OSPATH];
-	char		checkname[MAX_OSPATH];
-	int		i, k;
-	FILE		*f;
-
-	png_structp	png_ptr;
-	png_infop		info_ptr;
-	png_bytep		*row_pointers;
-
-	/* Create the scrnshots directory if it doesn't exist */
-	Com_sprintf(checkname, sizeof(checkname), "%s/scrnshot", FS_Gamedir());
-	Sys_Mkdir(checkname);
-
-	strcpy(picname,"AlienArena_00.png");
-
-	for (i=0 ; i<=99 ; i++)
-	{
-		picname[11] = i/10 + '0';
-		picname[12] = i%10 + '0';
-		Com_sprintf (checkname, sizeof(checkname), "%s/scrnshot/%s", FS_Gamedir(), picname);
-		f = fopen (checkname, "rb");
-		if (!f)
-			break;	// file doesn't exist
-		fclose (f);
-	}
-
-	if (i == 100) {
-		Com_Printf(PRINT_ALL, "GL_ScreenShot_PNG: Couldn't create a file\n");
-		return;
-	}
-
-	/* Open the file for Binary Output */
-	f = fopen(checkname, "wb");
-
-	if (!f) {
-		Com_Printf(PRINT_ALL, "GL_ScreenShot_PNG: Couldn't create a file\n");
-		return;
-	}
-
-	/* Allocate room for a copy of the framebuffer */
-	buffer = malloc(vid.width * vid.height * 3);
-
-	if (!buffer) {
-		fclose(f);
-		return;
-	}
-
-	/* Read the framebuffer into our storage */
-	qglReadPixels(0, 0, vid.width, vid.height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
-
-	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-
-	if (!png_ptr) {
-		Com_Printf(0, "LibPNG Error! (%s)\n", picname);
-		return;
-	}
-
-	info_ptr = png_create_info_struct(png_ptr);
-
-	if (!info_ptr) {
-		png_destroy_write_struct(&png_ptr, (png_infopp) NULL);
-		Com_Printf(0, "LibPNG Error! (%s)\n", picname);
-		return;
-	}
-
-	png_init_io(png_ptr, f);
-
-	png_set_IHDR(png_ptr, info_ptr, vid.width, vid.height, 8, PNG_COLOR_TYPE_RGB,
-	PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-
-	png_set_compression_level(png_ptr, Z_DEFAULT_COMPRESSION);
-	png_set_compression_mem_level(png_ptr, 9);
-
-	png_write_info(png_ptr, info_ptr);
-
-	row_pointers = malloc(vid.height * sizeof(png_bytep));
-
-	for (k = 0; k < vid.height; k++)
-		row_pointers[k] = buffer + (vid.height - 1 - k) * 3 * vid.width;
-
-	png_write_image(png_ptr, row_pointers);
-	png_write_end(png_ptr, info_ptr);
-
-	png_destroy_write_struct(&png_ptr, &info_ptr);
-
-	fclose(f);
-	free(buffer);
-
-	/* Done! */
-	Com_Printf ("Wrote %s\n", picname);
-}
-
-
-/*
-==================
 GL_ScreenShot_JPEG
 ==================
 */
@@ -501,8 +399,6 @@ void GL_ScreenShot_f (void)
 {
 	if (strcmp(gl_screenshot_type->string, "jpeg") == 0)
 		GL_ScreenShot_JPEG();
-	else if (strcmp(gl_screenshot_type->string, "png") == 0)
-		GL_ScreenShot_PNG();
 	else if (strcmp(gl_screenshot_type->string, "tga") == 0)
 		GL_ScreenShot_TGA();
 	else {
