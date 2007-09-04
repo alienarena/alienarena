@@ -330,7 +330,7 @@ void GL_ScreenShot_JPEG(void)
 GL_ScreenShot_TGA
 ==================
 */
-GL_ScreenShot_TGA (void)
+void GL_ScreenShot_TGA (void)
 {
 	byte		*buffer;
 	char		picname[80];

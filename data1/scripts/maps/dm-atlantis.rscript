@@ -22,7 +22,7 @@ textures/arena6/ice
 	{
 		map gfx/grchrome.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
-		alphashift 0 0.2 0.2
+		alphashift 0 0.1 0.1
 		envmap
 	}
 }
@@ -32,7 +32,7 @@ textures/arena7/glass
 	{
 		map gfx/grchrome.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
-		alphashift 0 0.2 0.2
+		alphashift 0 0.1 0.1
 		envmap
 	}
 	{
@@ -40,6 +40,13 @@ textures/arena7/glass
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.3 0.3
 		scroll static 0 static 2
+	}
+	{
+		map gfx/bubbles.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.1 0.1
+		scale static -2 static -2
+		scroll static 0 static -1
 	}
 }
 textures/arena7/light9
