@@ -23,7 +23,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <GL/glu.h>
 
 //For screenshots
+#ifdef _WIN32
 #include "jpeg/jpeglib.h"
+#endif
+#ifndef _WIN32
+#include <jpeglib.h>
+#endif
+
 
 image_t *r_flare;
 image_t *r_cubemap;
@@ -251,6 +257,7 @@ void GL_ScreenShot_JPEG(void)
 		picname[11] = i/100     + '0';
 		picname[12] = (i/10)%10 + '0';
 		picname[13] = i%10      + '0';
+
 		Com_sprintf (checkname, sizeof(checkname), "%s/scrnshot/%s", FS_Gamedir(), picname);
 		f = fopen (checkname, "rb");
 		if (!f)
