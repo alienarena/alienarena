@@ -244,12 +244,13 @@ void GL_ScreenShot_JPEG(void)
 	Com_sprintf(checkname, sizeof(checkname), "%s/scrnshot", FS_Gamedir());
 	Sys_Mkdir(checkname);
 
-	strcpy(picname,"AlienArena_00.jpg");
+	strcpy(picname,"AlienArena_000.jpg");
 
-	for (i=0 ; i<=99 ; i++)
+	for (i=0 ; i<=999 ; i++)
 	{
-		picname[11] = i/10 + '0';
-		picname[12] = i%10 + '0';
+		picname[11] = i/100     + '0';
+		picname[12] = (i/10)%10 + '0';
+		picname[13] = i%10      + '0';
 		Com_sprintf (checkname, sizeof(checkname), "%s/scrnshot/%s", FS_Gamedir(), picname);
 		f = fopen (checkname, "rb");
 		if (!f)
@@ -257,7 +258,7 @@ void GL_ScreenShot_JPEG(void)
 		fclose (f);
 	}
 
-	if (i == 100) {
+	if (i == 1000) {
 		Com_Printf(PRINT_ALL, "GL_ScreenShot_JPEG: Couldn't create a file (You probably have taken to many screenshots!)\n");
 		return;
 	}
@@ -343,12 +344,13 @@ void GL_ScreenShot_TGA (void)
 	Sys_Mkdir (checkname);
 
 	// find a file name to save it to
-	strcpy(picname,"AlienArena_00.tga");
+	strcpy(picname,"AlienArena_000.tga");
 
-	for (i=0 ; i<=99 ; i++)
+	for (i=0 ; i<=999 ; i++)
 	{
-		picname[11] = i/10 + '0';
-		picname[12] = i%10 + '0';
+		picname[11] = i/100     + '0';
+		picname[12] = (i/10)%10 + '0';
+		picname[13] = i%10      + '0';
 		Com_sprintf (checkname, sizeof(checkname), "%s/scrnshot/%s", FS_Gamedir(), picname);
 		f = fopen (checkname, "rb");
 		if (!f)
@@ -356,7 +358,7 @@ void GL_ScreenShot_TGA (void)
 		fclose (f);
 	}
 
-	if (i==100)
+	if (i==1000)
 	{
 		Com_Printf ("GL_ScreenShot_TGA: Couldn't create file %s (You probably have taken to many screenshots!)\n", picname);
 		return;
