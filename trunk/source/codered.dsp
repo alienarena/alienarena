@@ -493,5 +493,9 @@ SOURCE=.\win32\q2.rc
 
 SOURCE=.\client\curl\libcurl.lib
 # End Source File
+# Begin Source File
+
+SOURCE=.\win32\lib\libjpeg.lib
+# End Source File
 # End Target
 # End Project
