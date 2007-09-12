@@ -1,4 +1,4 @@
-qbsp3 ctf-atlantis
-qvis3 ctf-atlantis
-qrad3 ctf-atlantis
+qbsp3 tca-zion
+qvis3 tca-zion
+qrad3 tca-zion
 pause
