@@ -199,7 +199,7 @@ int ACEND_FindClosestReachableNode(edict_t *self, int range, int type)
 			if(dist < closest && dist < rng) 
 			{
 				// make sure it is visible
-				tr = gi.trace (self->s.origin, mins, maxs, nodes[i].origin, self, MASK_OPAQUE);
+				tr = gi.trace (self->s.origin, mins, maxs, nodes[i].origin, self, MASK_SOLID);
 				if(tr.fraction == 1.0)
 				{
 					node = i;
@@ -248,10 +248,12 @@ qboolean ACEND_FollowPath(edict_t *self)
 	vec3_t v;
 	
 	//////////////////////////////////////////
-	// Show the path (uncomment for debugging)
-//	show_path_from = self->current_node;
-//	show_path_to = self->goal_node;
-//	ACEND_DrawPath();
+	// Show the path 
+	if(debug_mode) {
+		show_path_from = self->current_node;
+		show_path_to = self->goal_node;
+		ACEND_DrawPath();
+	}
 	//////////////////////////////////////////
 
 	// Try again?
@@ -506,7 +508,7 @@ void ACEND_DrawPath()
 	while(current_node != goal_node && current_node != -1)
 	{
 		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BFG_LASER);
+		gi.WriteByte (TE_REDLASER);
 		gi.WritePosition (nodes[current_node].origin);
 		gi.WritePosition (nodes[next_node].origin);
 		gi.multicast (nodes[current_node].origin, MULTICAST_PVS);
