@@ -837,6 +837,8 @@ void ExitLevel (void)
 			//remove podiums
 			if(!strcmp(ent->classname, "pad"))
 				G_FreeEdict(ent);
+			if(tca->value)
+				ent->powered = true;
 		}
 	}
 	if(tca->value) {
