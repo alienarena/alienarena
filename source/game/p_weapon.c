@@ -1770,7 +1770,8 @@ void Violator_Fire (edict_t *ent)
 		gi.WriteShort (ent-g_edicts);
 		gi.WriteByte (MZ_RAILGUN | is_silenced);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
-
+		
+		VectorScale(forward, 1.4, forward);
 		VectorAdd(start, forward, start);
 		VectorScale(right, -0.5, right);
 		VectorAdd(start, right, start);
@@ -1806,6 +1807,7 @@ void Violator_Fire (edict_t *ent)
 		gi.WriteByte (MZ_RAILGUN | is_silenced);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
+		VectorScale(forward, 1.4, forward);
 		VectorAdd(start, forward, start);
 		VectorScale(right, -0.5, right);
 		VectorAdd(start, right, start);

@@ -917,7 +917,6 @@ void SP_worldspawn (edict_t *ent)
 	//do the w_weps
 	// THIS ORDER MUST MATCH THE DEFINES IN g_local.h
 	// you can add more, max 15
-	gi.modelindex ("#w_violator.md2");
 	gi.modelindex ("#w_blaster.md2");
 	gi.modelindex ("#w_shotgun.md2");
 	gi.modelindex ("#w_sshotgun.md2");
@@ -929,6 +928,7 @@ void SP_worldspawn (edict_t *ent)
 	gi.modelindex ("#w_hyperblaster.md2");
 	gi.modelindex ("#w_railgun.md2");
 	gi.modelindex ("#w_bfg.md2");
+	gi.modelindex ("#w_violator.md2");
 
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is doublebright.

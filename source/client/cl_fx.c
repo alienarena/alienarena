@@ -1072,7 +1072,7 @@ void CL_Voltage (vec3_t org)
 
 		p->type = PARTICLE_LEADER_FIELD;
 		p->texnum = r_voltagetexture->texnum;
-		p->scale = 12 + (rand()&12);
+		p->scale = 14 + (rand()&14);
 		p->color = 0xff;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;

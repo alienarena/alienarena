@@ -230,12 +230,13 @@ typedef struct
 #define WEAP_DISRUPTOR			9
 #define WEAP_BEAMGUN			10
 #define WEAP_VAPORIZER			11
-#define WEAP_BOMBER				12
-#define WEAP_STRAFER			13
-#define WEAP_DEATHBALL			14
-#define WEAP_HOVER				15
+#define WEAP_VIOLATOR			12
+#define WEAP_BOMBER				13
+#define WEAP_STRAFER			14
+#define WEAP_DEATHBALL			15
+#define WEAP_HOVER				16
 #define WEAP_GRAPPLE			16
-#define WEAP_VIOLATOR			17
+
 
 typedef struct gitem_s
 {
