@@ -24,6 +24,7 @@ void		Use_Weapon (edict_t *ent, gitem_t *inv);
 void		Drop_Weapon (edict_t *ent, gitem_t *inv);
 
 void Weapon_Blaster (edict_t *ent);
+void Weapon_Violator (edict_t *ent);
 void Weapon_Smartgun (edict_t *ent);
 void Weapon_Chain (edict_t *ent);
 void Weapon_Flame (edict_t *ent);
@@ -1326,6 +1327,27 @@ always owned, never in the world
 		NULL,
 		0,
 /* precache */ "weapons/blastf1a.wav misc/lasfly.wav"
+	},
+
+	{
+		"weapon_violator",
+		NULL,
+		Use_Weapon,
+		NULL,
+		Weapon_Violator,
+		"misc/w_pkup.wav",
+		NULL, 0,
+		"models/weapons/v_violator/tris.md2",
+/* icon */		"w_blaster",
+/* pickup */	"Violator",
+		0,
+		0,
+		NULL,
+		IT_WEAPON,
+		WEAP_VIOLATOR,
+		NULL,
+		0,
+/* precache */ "weapons/viofire1.wav weapons/viofire2.wav"
 	},
 
 /*QUAKED weapon_shotgun (.3 .3 1) (-16 -16 -16) (16 16 16)

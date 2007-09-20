@@ -708,9 +708,6 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 
 ///////////////////////////////////////////////////////////////////////
 // Attack movement routine
-//
-// NOTE: Very simple for now, just a basic move about avoidance.
-//       Change this routine for more advanced attack movement.
 ///////////////////////////////////////////////////////////////////////
 void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 {
@@ -801,7 +798,15 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 	d = random();
 	c = random();
 
+
+	//violator attack
+
 	//machinegun/blaster/beamgun strafing for level 3 bots
+	if (self->client->pers.weapon == FindItem("Violator")) {
+		if(ACEMV_CanMove(self,MOVE_FORWARD)) 
+			ucmd->forwardmove += 400; //lunge at enemy
+		goto attack;
+	}
 
 	if(!joustmode->value && self->skill == 3  && (self->client->pers.weapon == FindItem("blaster") || self->client->pers.weapon == FindItem("Pulse Rifle") || self->client->pers.weapon == FindItem("Disruptor")) )
 

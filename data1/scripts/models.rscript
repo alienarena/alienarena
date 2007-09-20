@@ -162,6 +162,22 @@ models/weapons/v_blast/skin
 		nolightmap
 	}
 }
+models/weapons/v_violator/skin
+{
+	{
+		map models/weapons/v_violator/skin.tga
+	}
+	{
+		map models/weapons/v_violator/skin_normal.tga
+		normalmap
+	}
+	{
+		map gfx/violatorfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.2 0.8
+		nolightmap
+	}
+}
 models/weapons/v_hyperb/skin
 {
 	{

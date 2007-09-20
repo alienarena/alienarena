@@ -1756,3 +1756,116 @@ void fire_deathball (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	self->client->pers.inventory[ITEM_INDEX(deathball_item)] = 0;
 	self->s.modelindex4 = 0;
 }
+void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int alt)
+{
+
+	vec3_t		from;
+	vec3_t		end;
+	trace_t		tr;
+	edict_t		*ignore;
+	int			mask;
+	qboolean	water;
+	vec3_t		water_start;
+	int			content_mask = MASK_SHOT | MASK_WATER;
+
+	//self->client->resp.weapon_shots[0]++;
+
+	VectorMA (start, 6.4, aimdir, end);
+	VectorCopy (start, from);
+	ignore = self;
+	water = false;
+	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
+	while (ignore)
+	{
+		tr = gi.trace (from, NULL, NULL, end, ignore, mask);
+		
+		if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
+		{
+			mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
+			water = true;
+		}
+		else
+		{
+			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
+				ignore = tr.ent;
+			else
+				ignore = NULL;
+			
+			if ((tr.ent != self) && (tr.ent->takedamage)) {
+				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
+				//self->client->resp.weapon_hits[0]++;
+				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+				gi.WriteByte (svc_temp_entity);
+				gi.WriteByte (TE_LASER_SPARKS);
+				gi.WriteByte (4);
+				gi.WritePosition (tr.endpos);
+				gi.WriteDir (tr.plane.normal);
+				gi.WriteByte (self->s.skinnum);
+				gi.multicast (tr.endpos, MULTICAST_PVS);
+
+			}
+		}
+		
+		VectorCopy (tr.endpos, from);
+	}
+
+	VectorMA (start, 12.8, aimdir, end); //make the effect a little larger then actual hit radius
+	
+	// trace for end point of bolt
+	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);  
+    
+	// send bolt temp entity to clients
+	
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_LIGHTNING);
+	gi.WritePosition (self->s.origin);
+	gi.WritePosition (tr.endpos);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
+	if (gi.pointcontents (start) & MASK_WATER)
+		{
+			water = true;
+			VectorCopy (start, water_start);
+			content_mask &= ~MASK_WATER;
+		}
+
+	tr = gi.trace (start, NULL, NULL, end, self, content_mask);
+
+	// see if we hit water
+	if (tr.contents & MASK_WATER)
+	{
+		int		color;
+		water = true;
+		VectorCopy (tr.endpos, water_start);
+
+		if (!VectorCompare (start, tr.endpos))
+		{
+			if (tr.contents & CONTENTS_WATER)
+			{
+				if (strcmp(tr.surface->name, "*brwater") == 0)
+					color = SPLASH_BROWN_WATER;
+				else
+					color = SPLASH_BLUE_WATER;
+			}
+			else if (tr.contents & CONTENTS_SLIME)
+				color = SPLASH_SLIME;
+			else if (tr.contents & CONTENTS_LAVA)
+				color = SPLASH_LAVA;
+			else
+				color = SPLASH_UNKNOWN;
+
+			if (color != SPLASH_UNKNOWN)
+			{
+				gi.WriteByte (svc_temp_entity);
+				gi.WriteByte (TE_SPLASH);
+				gi.WriteByte (8);
+				gi.WritePosition (tr.endpos);
+				gi.WriteDir (tr.plane.normal);
+				gi.WriteByte (color);
+				gi.multicast (tr.endpos, MULTICAST_PVS);
+			}
+			
+		}
+			
+	}
+}

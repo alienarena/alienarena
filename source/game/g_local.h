@@ -235,6 +235,7 @@ typedef struct
 #define WEAP_DEATHBALL			14
 #define WEAP_HOVER				15
 #define WEAP_GRAPPLE			16
+#define WEAP_VIOLATOR			17
 
 typedef struct gitem_s
 {
@@ -819,6 +820,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, int effect, qboolean hyper);
 void fire_prox (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, float timer);
 void fire_fireball (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float damage_radius, int radius_damage);
+void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int alt);
 
 //deathball
 void fire_deathball (edict_t *self, vec3_t start, vec3_t dir, int speed);
