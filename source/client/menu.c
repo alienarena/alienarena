@@ -820,8 +820,6 @@ char *bindnames[][2] =
 {"invprev",			"prev item"},
 {"invnext",			"next item"},
 
-{"cmd help", 		"help computer" },
-
 {"use Alien Disruptor",	"alien disruptor" },
 {"use Pulse Rifle",		"chaingun" },
 {"use Flame Thrower",	"flame thrower" },
@@ -829,6 +827,7 @@ char *bindnames[][2] =
 {"use Alien Smartgun",	"alien smartgun" },
 {"use Disruptor",		"alien beamgun" },
 {"use Alien Vaporizer", "alien vaporizer" },
+{"use Violator", "the violator" },
 {"score",				"show scores" },
 {"flashlight",			"flashlight" },
 {"use grapple",			"grapple hook"},
@@ -863,7 +862,6 @@ static menuaction_s		s_keys_inv_use_action;
 static menuaction_s		s_keys_inv_drop_action;
 static menuaction_s		s_keys_inv_prev_action;
 static menuaction_s		s_keys_inv_next_action;
-static menuaction_s		s_keys_help_computer_action;
 static menuaction_s		s_keys_alien_disruptor_action;
 static menuaction_s		s_keys_chain_pistol_action;
 static menuaction_s		s_keys_flame_thrower_action;
@@ -874,6 +872,7 @@ static menuaction_s		s_keys_alien_vaporizer_action;
 static menuaction_s		s_keys_show_scores_action;
 static menuaction_s		s_keys_flashlight_action;
 static menuaction_s		s_keys_grapple_action;
+static menuaction_s		s_keys_violator_action;
 static menuaction_s		s_keys_filler_action;
 
 static void M_UnbindCommand (char *command)
@@ -1140,13 +1139,6 @@ static void Keys_MenuInit( void )
 	s_keys_inv_next_action.generic.localdata[0] = ++i;
 	s_keys_inv_next_action.generic.name	= bindnames[s_keys_inv_next_action.generic.localdata[0]][1];
 
-	s_keys_help_computer_action.generic.type	= MTYPE_ACTION;
-	s_keys_help_computer_action.generic.x		= 0;
-	s_keys_help_computer_action.generic.y		= y += 9*scale;
-	s_keys_help_computer_action.generic.ownerdraw = DrawKeyBindingFunc;
-	s_keys_help_computer_action.generic.localdata[0] = ++i;
-	s_keys_help_computer_action.generic.name	= bindnames[s_keys_help_computer_action.generic.localdata[0]][1];
-
 	s_keys_alien_disruptor_action.generic.type	= MTYPE_ACTION;
 	s_keys_alien_disruptor_action.generic.x		= 0;
 	s_keys_alien_disruptor_action.generic.y		= y += 9*scale;
@@ -1195,6 +1187,13 @@ static void Keys_MenuInit( void )
 	s_keys_alien_vaporizer_action.generic.ownerdraw = DrawKeyBindingFunc;
 	s_keys_alien_vaporizer_action.generic.localdata[0] = ++i;
 	s_keys_alien_vaporizer_action.generic.name	= bindnames[s_keys_alien_vaporizer_action.generic.localdata[0]][1];
+
+	s_keys_violator_action.generic.type	= MTYPE_ACTION;
+	s_keys_violator_action.generic.x		= 0;
+	s_keys_violator_action.generic.y		= y += 9*scale;
+	s_keys_violator_action.generic.ownerdraw = DrawKeyBindingFunc;
+	s_keys_violator_action.generic.localdata[0] = ++i;
+	s_keys_violator_action.generic.name	= bindnames[s_keys_violator_action.generic.localdata[0]][1];
 
 	s_keys_show_scores_action.generic.type	= MTYPE_ACTION;
 	s_keys_show_scores_action.generic.x		= 0;
@@ -1249,8 +1248,6 @@ static void Keys_MenuInit( void )
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_inv_prev_action );
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_inv_next_action );
 
-	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_help_computer_action );
-
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_alien_disruptor_action );
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_chain_pistol_action );
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_flame_thrower_action );
@@ -1258,6 +1255,7 @@ static void Keys_MenuInit( void )
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_alien_smartgun_action );
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_alien_beamgun_action );
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_alien_vaporizer_action );
+	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_violator_action );
 
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_show_scores_action );
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_flashlight_action );
@@ -2411,11 +2409,70 @@ static const char *idcredits[] =
 	"+LANGUAGE TRANSLATIONS",
 	"Ken Deguisse",
 	"",
+	"+STORYLINE", 
+	"Sinnocent", 
+	"",
 	"+SPECIAL THANKS",
 	"The Alien Arena Community",
 	"and everyone else who",
 	"has been loyal to the",
 	"game.",
+	"",
+	"",
+	"+ALIEN ARENA - THE STORY",
+	"",
+	"Alien Arena : Many are called, only one will reign supreme",
+	"",
+	"Eternal war ravaged the vastness of infinite space.",
+	"For as far back into the ages as the memories of the",
+	"galaxies oldest races could reach, it had been this way.",
+	"Planet at war with planet, conflicts ending with a",
+	"burned cinder orbiting a dead sun and countless billions",
+	"sent screaming into oblivion. War, endless and ",
+	"eternal, embracing all the peoples of the cosmos.",
+	"Scientific triumphs heralded the creation of ever more",
+	"deadly weapons until the very fabric of the universe itself was threatened.",
+	"",
+	"Then came the call.",
+	"",
+	"Some said it was sent by an elder race, legendary beings",
+	"of terrifying power who had existed since the",
+	"birth of the stars and who now made their home beyond",
+	"the fringes of known creation, others whispered",
+	"fearfully and looked to the skies for the coming of their",
+	"gods. Perhaps it didn't matter who had sent the",
+	"call, for all the people of the stars could at least agree",
+	"that the call was there.",
+	"",
+	"The wars were to end - or they would be ended. In a",
+	"demonstration of power whoever had sent the call",
+	"snuffed out the homeworld of the XXXX, the greatest",
+	"empire of all the stars, in a heartbeat. One moment it",
+	"was there, the next it was dust carried on the solar winds.",
+	"All races had no choice but to heed the call.",
+	"",
+	"For most the call was a distant tug, a whispered warning",
+	"that the wars were over, but for the greatest",
+	"hero of each people it was more, it was a fire raging",
+	"through their blood, a call to a new war, to the battle",
+	"to end all battles. That fire burns in your blood, compelling",
+	"you, the greatest warrior of your people, to fight",
+	"in a distant and unknown arena, your honor and the",
+	"future of your race at stake.",
+	"",
+	"Across the stars you traveled in search of this arena where",
+	"the mightiest of the mighty would do battle,",
+	"where you would stand face to face with your enemies",
+	"in a duel to the death. Strange new weapons",
+	"awaited you, weapons which you would have to master",
+	"if you were to survive and emerge victorious from",
+	"the complex and deadly arenas in which you were summoned to fight.",
+	"",
+	"The call to battle beats through your heart and soul",
+	"like the drums of war. Will you be the one to rise",
+	"through the ranks and conquer all others, the one who",
+	"stands proud as the undefeated champion of the",
+	"Alien Arena?",
 	"",
 	"Alien Arena (C)2007 COR Entertainment, LLC",
 	"All Rights Reserved.",
@@ -2429,7 +2486,7 @@ void M_Credits_MenuDraw( void )
 	/*
 	** draw the credits
 	*/
-	for ( i = 0, y = viddef.height - ( ( cls.realtime - credits_start_time ) / 40.0F ); credits[i] && y < viddef.height; y += 10, i++ )
+	for ( i = 0, y = viddef.height - ( ( cls.realtime - credits_start_time ) / 40.0F ); credits[i]; y += 10, i++ )
 	{
 		int j, stringoffset = 0;
 		int bold = false;
@@ -2484,47 +2541,11 @@ extern int Developer_searchpath (int who);
 
 void M_Menu_Credits_f( void )
 {
-	int		n;
-	int		count;
-	char	*p;
-	int		isdeveloper = 0;
 
 	creditsBuffer = NULL;
-	count = FS_LoadFile ("credits", &creditsBuffer);
-	if (count != -1)
-	{
-		p = creditsBuffer;
-		for (n = 0; n < 255; n++)
-		{
-			creditsIndex[n] = p;
-			while (*p != '\r' && *p != '\n')
-			{
-				p++;
-				if (--count == 0)
-					break;
-			}
-			if (*p == '\r')
-			{
-				*p++ = 0;
-				if (--count == 0)
-					break;
-			}
-			*p++ = 0;
-			if (--count == 0)
-				break;
-		}
-		creditsIndex[++n] = 0;
-		credits = creditsIndex;
-	}
-	else
-	{
-		isdeveloper = Developer_searchpath (1);
-
-		credits = idcredits;
-
-	}
-
+	credits = idcredits;
 	credits_start_time = cls.realtime;
+
 	M_PushMenu( M_Credits_MenuDraw, M_Credits_Key);
 }
 

@@ -621,17 +621,17 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	}
 	if(!strcmp(self->faveweap, "Violator"))
 	{
-		if(range < 100) {
+		if(range < 300) { //because it's a fav weap, we want them to really try and use it
 				if(ACEIT_ChangeWeapon(self,FindItem("Violator")))
 				{
 					self->accuracy = 1.0;
-					return;
+					return; 
 				}
 		}
 	}
 	//now go through normal weapon favoring routine
 	// always favor the Vaporizor, unless close, then use the violator
-	if(range < 100) {
+	if(range < 200) {
 		if(ACEIT_ChangeWeapon(self,FindItem("Violator")))
 		{
 			self->accuracy = 1.0;

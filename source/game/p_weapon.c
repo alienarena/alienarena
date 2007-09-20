@@ -1706,7 +1706,7 @@ void Violator_Fire (edict_t *ent)
 	if(excessive->value)
 		damage = 100;
 	else
-		damage = 30;
+		damage = 40;
 	
 	if ((ent->client->ps.gunframe == 6) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
 	{
