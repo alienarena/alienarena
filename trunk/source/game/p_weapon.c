@@ -301,6 +301,8 @@ void ChangeWeapon (edict_t *ent)
 
 	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
+	if(ent->client->pers.weapon->view_model == "models/weapons/v_violator/tris.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
 	if(ent->client->pers.weapon->view_model == "models/weapons/v_rocket/tris.md2")
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_rlauncher.md2");
 	if(ent->client->pers.weapon->view_model == "models/weapons/v_blast/tris.md2")
@@ -1476,15 +1478,9 @@ void Machinegun_Fire (edict_t *ent)
 		kick *= 4;
 	}
 
-	for (i=0 ; i<3 ; i++)
-	{
-		ent->client->kick_origin[i] = crandom() * 8;
-		ent->client->kick_angles[i] = crandom() * 0.7;
-	}
-
 	AngleVectors (ent->client->v_angle, forward, right, NULL);//was up
-	VectorScale (forward, -16, ent->client->kick_origin);
-//	ent->client->kick_angles[0] = -3;
+	VectorScale (forward, -16 * random(), ent->client->kick_origin);
+	ent->client->kick_angles[0] = -6 * random();
 
 	if(ent->client->ps.gunframe == 6 && ent->client->buttons & BUTTON_ATTACK2) {
 		int bullet_count = DEFAULT_SSHOTGUN_COUNT;
@@ -1691,5 +1687,131 @@ void Weapon_Deathball (edict_t *ent)
 	Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, fire_frames, Weapon_Deathball_Fire);
 }
 
+/*
+======================================================================
 
+VIOALATOR
+
+======================================================================
+*/
+
+void Violator_Fire (edict_t *ent)
+{
+	vec3_t		start;
+	vec3_t		forward, right, left, back;
+	vec3_t		offset;
+	int			damage;
+	int			kick = 4;
+
+	if(excessive->value)
+		damage = 100;
+	else
+		damage = 30;
+	
+	if ((ent->client->ps.gunframe == 6) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
+	{
+		ent->client->ps.gunframe = 14;
+		ent->client->weapon_sound = 0;
+		return;
+	}
+	else if (ent->client->ps.gunframe == 14 && (ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
+	{
+		ent->client->ps.gunframe = 6;
+	}
+	else if (ent->client->buttons & BUTTON_ATTACK2 && ent->client->ps.gunframe > 6)
+	{
+		if(ent->client->ps.gunframe == 7 || ent->client->ps.gunframe == 13) {
+			ent->client->ps.gunframe = 14;
+			return;
+		}
+		ent->altfire = true;
+		ent->client->ps.gunframe = 14;
+	}
+	else if (ent->client->buttons & BUTTON_ATTACK2)
+	{
+		ent->client->ps.gunframe++;
+		ent->altfire = true;
+	}
+	else if (ent->client->buttons & BUTTON_ATTACK){
+		ent->client->ps.gunframe++;
+		ent->altfire = false;
+	}
+	else
+		ent->client->ps.gunframe++;
+
+	if (is_quad) {
+		damage *= 4;
+		kick *=4;
+	}
+
+	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	VectorScale (forward, -6 * random(), ent->client->kick_origin);
+	ent->client->kick_angles[0] = -6 * random();
+	VectorScale(forward, 10, forward);
+	VectorScale(right, 10, right);
+	VectorScale (right, -10, left);
+	VectorScale (forward, -10, back);
+
+	if(ent->client->ps.gunframe == 6 && ent->client->buttons & BUTTON_ATTACK2) {
+	
+		VectorSet(offset, 1, 1, ent->viewheight-0.5);
+		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+		fire_violator(ent, start, forward, damage*2, kick, 1);
+		fire_violator(ent, start, right, damage*2, kick, 1);
+		fire_violator(ent, start, left, damage*2, kick, 1);
+		fire_violator(ent, start, back, damage*2, kick, 1);
+
+		//play a booming sound
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/viofire2.wav"), 1, ATTN_NORM, 0);
+
+		// send muzzle flash
+		gi.WriteByte (svc_muzzleflash);
+		gi.WriteShort (ent-g_edicts);
+		gi.WriteByte (MZ_BFG | is_silenced);
+		gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+		VectorAdd(start, forward, start);
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
+		gi.WritePosition (start);
+		gi.multicast (start, MULTICAST_PVS);
+
+		//kick it ahead, we don't want it continuing to pump
+		ent->client->ps.gunframe = 12;
+
+	}
+	else if(!ent->altfire){
+
+		VectorSet(offset, 1, 1, ent->viewheight-0.5);
+		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+		fire_violator(ent, start, forward, damage, kick, 0);
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/viofire1.wav"), 1, ATTN_NORM, 0);
+		
+		// send muzzle flash
+		gi.WriteByte (svc_muzzleflash);
+		gi.WriteShort (ent-g_edicts);
+		gi.WriteByte (MZ_BFG | is_silenced);
+		gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+		VectorAdd(start, forward, start);
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
+		gi.WritePosition (start);
+		gi.multicast (start, MULTICAST_PVS);
+
+	}
+
+}
+
+void Weapon_Violator (edict_t *ent)
+{
+	static int	pause_frames[]	= {43, 0};
+	static int	fire_frames[]	= {5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+	static int	bot_fire_frames[] = {5, 6, 7, 8, 9, 10, 11, 12, 13};
+	if(ent->is_bot) //done because bots need one frame in which to "escape" from firing 
+		Weapon_Generic (ent, 4, 14, 43, 46, pause_frames, bot_fire_frames, Violator_Fire);
+	else
+		Weapon_Generic (ent, 4, 14, 43, 46, pause_frames, fire_frames, Violator_Fire);
+
+}
 

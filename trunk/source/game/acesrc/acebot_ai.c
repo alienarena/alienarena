@@ -514,7 +514,7 @@ qboolean ACEAI_CheckShot(edict_t *self)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Choose the best weapon for bot (simplified)
+// Choose the best weapon for bot 
 ///////////////////////////////////////////////////////////////////////
 void ACEAI_ChooseWeapon(edict_t *self)
 {	
@@ -619,8 +619,26 @@ void ACEAI_ChooseWeapon(edict_t *self)
 				}
 		}
 	}
+	if(!strcmp(self->faveweap, "Violator"))
+	{
+		if(range < 100) {
+				if(ACEIT_ChangeWeapon(self,FindItem("Violator")))
+				{
+					self->accuracy = 1.0;
+					return;
+				}
+		}
+	}
 	//now go through normal weapon favoring routine
-	// always favor the Vaporizer
+	// always favor the Vaporizor, unless close, then use the violator
+	if(range < 100) {
+		if(ACEIT_ChangeWeapon(self,FindItem("Violator")))
+		{
+			self->accuracy = 1.0;
+			return;
+		}
+	}
+
 	if(ACEIT_ChangeWeapon(self,FindItem("Alien Vaporizer")))
 	{
 		self->accuracy = self->weapacc[9];

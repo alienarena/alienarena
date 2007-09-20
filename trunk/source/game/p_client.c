@@ -560,6 +560,8 @@ void TossClientWeapon (edict_t *self)
 		item = NULL;
 	if (item && (strcmp (item->pickup_name, "Blaster") == 0))
 		item = NULL;
+	if (item && (strcmp (item->pickup_name, "Violator") == 0))
+		item = NULL;
 
 	if (!((int)(dmflags->value) & DF_QUAD_DROP))
 		quad = false;
@@ -850,6 +852,13 @@ void InitClientPersistant (gclient_t *client)
 
 	if(g_duel->value)
 		client->pers.queue = queue;
+
+	if(!(instagib->value || rocket_arena->value)) { //gets a violator (revisit, doesn't look right)
+		item = FindItem("Violator");
+		client->pers.selected_item = ITEM_INDEX(item);
+		client->pers.inventory[client->pers.selected_item] = 1;
+		client->pers.weapon = item;
+	}
 
 	//mutator - will need to have item
 	if(instagib->value) {

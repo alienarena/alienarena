@@ -838,6 +838,7 @@ void SP_worldspawn (edict_t *ent)
 	snd_fry = gi.soundindex ("player/fry.wav");	// standing in lava / slime
 
 	PrecacheItem (FindItem ("Blaster"));
+	PrecacheItem (FindItem ("Violator"));
 
 	gi.soundindex ("player/lava1.wav");
 	gi.soundindex ("player/lava2.wav");
@@ -916,6 +917,7 @@ void SP_worldspawn (edict_t *ent)
 	//do the w_weps
 	// THIS ORDER MUST MATCH THE DEFINES IN g_local.h
 	// you can add more, max 15
+	gi.modelindex ("#w_violator.md2");
 	gi.modelindex ("#w_blaster.md2");
 	gi.modelindex ("#w_shotgun.md2");
 	gi.modelindex ("#w_sshotgun.md2");
