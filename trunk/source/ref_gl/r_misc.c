@@ -186,8 +186,11 @@ void R_InitParticleTexture (void)
 	r_beam2texture = R_RegisterGfxPic("greenline");
 	r_beam3texture = R_RegisterGfxPic("electrics3d");
 	r_bullettexture = R_RegisterParticlePic("bullethole");
+	r_voltagetexture = R_RegisterParticlePic("voltage");
 	r_radarmap = GL_FindImage("gfx/radar/radarmap",it_pic);
 	r_around = GL_FindImage("gfx/radar/around",it_pic);
+
+	//do this for all so as to not have crashes
 	if (!r_particletexture) {                                 //c14 add this line
 		r_particletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }                                                         //c14 add this line

@@ -29,7 +29,8 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir);
 void CL_ExplosionParticles (vec3_t org);
 void CL_MuzzleParticles (vec3_t org);
 void CL_BlueMuzzleParticles (vec3_t org);
-void CL_Leaderfield (vec3_t org);
+void CL_SmartMuzzle (vec3_t org);
+void CL_Voltage(vec3_t org);
 void CL_Deathfield (vec3_t org);
 void CL_BFGExplosionParticles (vec3_t org);
 void CL_DustParticles (vec3_t org);
@@ -529,13 +530,13 @@ void CL_ParseTEnt (void)
 		break;
 	case TE_SMART_MUZZLEFLASH:
 		MSG_ReadPos (&net_message, pos);
-		CL_Leaderfield (pos);
+		CL_SmartMuzzle (pos);
 		break;
 
-	case TE_LEADERFIELD:
+	case TE_VOLTAGE:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
-		CL_Leaderfield (pos);
+		CL_Voltage (pos);
 		break;
 	case TE_DEATHFIELD:
 		MSG_ReadPos (&net_message, pos);

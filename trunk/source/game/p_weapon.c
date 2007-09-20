@@ -1761,16 +1761,26 @@ void Violator_Fire (edict_t *ent)
 		fire_violator(ent, start, left, damage*2, kick, 1);
 		fire_violator(ent, start, back, damage*2, kick, 1);
 
-		//play a booming sound
+		ent->client->resp.weapon_shots[8]++;
+
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/viofire2.wav"), 1, ATTN_NORM, 0);
 
-		// send muzzle flash
+		// send muzzle flash and effects
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_BFG | is_silenced);
+		gi.WriteByte (MZ_RAILGUN | is_silenced);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		VectorAdd(start, forward, start);
+		VectorScale(right, -0.5, right);
+		VectorAdd(start, right, start);
+
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_VOLTAGE);
+		gi.WritePosition (start);
+		gi.WriteDir(forward);
+		gi.multicast (start, MULTICAST_PVS);
+
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
 		gi.WritePosition (start);
@@ -1785,19 +1795,32 @@ void Violator_Fire (edict_t *ent)
 		VectorSet(offset, 1, 1, ent->viewheight-0.5);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 		fire_violator(ent, start, forward, damage, kick, 0);
+
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/viofire1.wav"), 1, ATTN_NORM, 0);
-		
+
+		ent->client->resp.weapon_shots[8]++;
+
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
 		gi.WriteShort (ent-g_edicts);
-		gi.WriteByte (MZ_BFG | is_silenced);
+		gi.WriteByte (MZ_RAILGUN | is_silenced);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 		VectorAdd(start, forward, start);
+		VectorScale(right, -0.5, right);
+		VectorAdd(start, right, start);
+	
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_VOLTAGE);
+		gi.WritePosition (start);
+		gi.WriteDir(forward);
+		gi.multicast (start, MULTICAST_PVS);
+
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
+
 
 	}
 

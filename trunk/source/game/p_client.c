@@ -246,6 +246,9 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			case MOD_BLASTER:
 				message = "was blasted by";
 				break;
+			case MOD_VIOLATOR:
+				message = "was probed by";
+				break;
 			case MOD_CGALTFIRE:
 				message = "was blown away by";
 				message2 = "'s chaingun burst";

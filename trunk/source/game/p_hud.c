@@ -588,7 +588,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 		strcpy(string + stringlength, entry);
 		stringlength +=j;
 	}
-	for(i = 0; i < 8; i++) {
+	for(i = 0; i < 9; i++) {
 
 		//in case of scenarios where a weapon is scoring multiple hits per shot(ie smartgun)
 		if(ent->client->resp.weapon_hits[i] > ent->client->resp.weapon_shots[i])
@@ -625,9 +625,12 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 			case 7:
 				strcpy(weapname, "vaporizer");
 				break;
+			case 8:
+				strcpy(weapname, "violator");
+				break;
 		}
 		Com_sprintf(entry, sizeof(entry),
-			"xv %i yv %i string %s xv %i string %s ", x, y+((i+1)*8)+64, weapname, x+96, acc);
+			"xv %i yv %i string %s xv %i string %s ", x, y+((i+1)*9)+64, weapname, x+96, acc);
 		j = strlen(entry);
 		if(stringlength + j < 1024) {
 			strcpy(string + stringlength, entry);

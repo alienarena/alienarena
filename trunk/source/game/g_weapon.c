@@ -5,38 +5,6 @@ int prox_timer;
 
 /*
 =================
-check_dodge
-
-This is a support routine used when a client is firing
-a non-instant attack weapon.  It checks to see if a
-monster's dodge function should be called.
-=================
-*/
-static void check_dodge (edict_t *self, vec3_t start, vec3_t dir, int speed)
-{
-	vec3_t	end;
-	vec3_t	v;
-	trace_t	tr;
-	float	eta;
-
-	// easy mode only ducks one quarter the time
-	if (skill->value == 0)
-	{
-		if (random() > 0.25)
-			return;
-	}
-	VectorMA (start, 8192, dir, end);
-	tr = gi.trace (start, NULL, NULL, end, self, MASK_SHOT);
-	if ((tr.ent) && (tr.ent->svflags & SVF_MONSTER) && (tr.ent->health > 0) && (tr.ent->monsterinfo.dodge) && infront(tr.ent, self))
-	{
-		VectorSubtract (tr.endpos, start, v);
-		eta = (VectorLength(v) - tr.ent->maxs[0]) / speed;
-		tr.ent->monsterinfo.dodge (tr.ent, self, eta);
-	}
-}
-
-/*
-=================
 fire_lead
 
 This is an internal support routine used for bullet/pellet based weapons.
@@ -332,9 +300,6 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	
 	gi.linkentity (bolt);
 
-	if (self->client)
-		check_dodge (self, bolt->s.origin, dir, speed);
-
 	tr = gi.trace (self->s.origin, NULL, NULL, bolt->s.origin, bolt, MASK_SHOT);
 	if (tr.fraction < 1.0)
 	{
@@ -487,9 +452,6 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	rocket->dmg_radius = damage_radius;
 	rocket->s.sound = gi.soundindex ("weapons/rockfly.wav");
 	rocket->classname = "rocket";
-
-	if (self->client)
-		check_dodge (self, rocket->s.origin, dir, speed);
 
 	gi.linkentity (rocket);
 }
@@ -1090,9 +1052,6 @@ void fire_homingrocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int
 	rocket->s.sound = gi.soundindex ("weapons/rockfly.wav");
 	rocket->classname = "rocket";
 
-	if (self->client)
-		check_dodge (self, rocket->s.origin, dir, speed);
-
 	gi.linkentity (rocket);
 }
 
@@ -1305,9 +1264,7 @@ void fire_floater (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	floater->classname = "grenade";
 	floater_timer = 0;
 
-	if (self->client)
-		check_dodge (self, floater->s.origin, dir, speed);
-    
+   
 	gi.linkentity (floater);
 }
 void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float damage_radius, int radius_damage, float timer)
@@ -1344,9 +1301,6 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	prox->classname = "mine";
 	prox_timer = 0;
 
-	if (self->client)
-		check_dodge (self, prox->s.origin, dir, speed);
-    
 	gi.linkentity (prox);
 }
 
@@ -1451,10 +1405,7 @@ void fire_bomb (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	bomb->dmg_radius = damage_radius;
 	bomb->s.sound = gi.soundindex ("vehicles/flybomb.wav"); //get a new sound
 	bomb->classname = "grenade";
-
-	if (self->client)
-		check_dodge (self, bomb->s.origin, dir, speed);
-    
+ 
 	gi.linkentity (bomb);
 }
 
@@ -1595,10 +1546,6 @@ void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	flame->classname = "flame";
 	flame->s.sound = gi.soundindex ("weapons/grenlf1a.wav");
 
-
-	if (self->client)
-		check_dodge (self, flame->s.origin, dir, speed);
-
 	gi.linkentity (flame);
 }
 void fireball_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
@@ -1680,9 +1627,6 @@ void fire_fireball (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	fireball->s.sound = gi.soundindex ("weapons/grenlf1a.wav");
 	fireball->classname = "flame";
 
-	if (self->client)
-		check_dodge (self, fireball->s.origin, dir, speed);
-    
 	gi.linkentity (fireball);
 }
 //deathball
@@ -1738,9 +1682,6 @@ void fire_deathball (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	ball->touch = DeathballTouch;
 	ball->s.frame = 229;
 
-	if (self->client)
-		check_dodge (self, ball->s.origin, dir, speed);
-    
 	gi.linkentity (ball);
 
 	//remove deathball from players inventory
@@ -1763,109 +1704,33 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 	vec3_t		end;
 	trace_t		tr;
 	edict_t		*ignore;
-	int			mask;
-	qboolean	water;
-	vec3_t		water_start;
-	int			content_mask = MASK_SHOT | MASK_WATER;
-
-	//self->client->resp.weapon_shots[0]++;
 
 	VectorMA (start, 6.4, aimdir, end);
 	VectorCopy (start, from);
 	ignore = self;
-	water = false;
-	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
+
 	while (ignore)
 	{
-		tr = gi.trace (from, NULL, NULL, end, ignore, mask);
+		tr = gi.trace (from, NULL, NULL, end, ignore, MASK_PLAYERSOLID);
 		
-		if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
-		{
-			mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
-			water = true;
-		}
+		if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
+			ignore = tr.ent;
 		else
-		{
-			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
-				ignore = tr.ent;
-			else
-				ignore = NULL;
+			ignore = NULL;
 			
-			if ((tr.ent != self) && (tr.ent->takedamage)) {
-				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
-				//self->client->resp.weapon_hits[0]++;
-				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-				gi.WriteByte (svc_temp_entity);
-				gi.WriteByte (TE_LASER_SPARKS);
-				gi.WriteByte (4);
-				gi.WritePosition (tr.endpos);
-				gi.WriteDir (tr.plane.normal);
-				gi.WriteByte (self->s.skinnum);
-				gi.multicast (tr.endpos, MULTICAST_PVS);
+		if ((tr.ent != self) && (tr.ent->takedamage)) {
+			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_VIOLATOR);
+			self->client->resp.weapon_hits[8]++;
+			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_LASER_SPARKS);
+			gi.WriteByte (4);
+			gi.WritePosition (tr.endpos);
+			gi.WriteDir (tr.plane.normal);
+			gi.WriteByte (self->s.skinnum);
+			gi.multicast (tr.endpos, MULTICAST_PVS);
 
-			}
 		}
-		
 		VectorCopy (tr.endpos, from);
-	}
-
-	VectorMA (start, 12.8, aimdir, end); //make the effect a little larger then actual hit radius
-	
-	// trace for end point of bolt
-	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);  
-    
-	// send bolt temp entity to clients
-	
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_LIGHTNING);
-	gi.WritePosition (self->s.origin);
-	gi.WritePosition (tr.endpos);
-	gi.multicast (self->s.origin, MULTICAST_PHS);
-
-	if (gi.pointcontents (start) & MASK_WATER)
-		{
-			water = true;
-			VectorCopy (start, water_start);
-			content_mask &= ~MASK_WATER;
-		}
-
-	tr = gi.trace (start, NULL, NULL, end, self, content_mask);
-
-	// see if we hit water
-	if (tr.contents & MASK_WATER)
-	{
-		int		color;
-		water = true;
-		VectorCopy (tr.endpos, water_start);
-
-		if (!VectorCompare (start, tr.endpos))
-		{
-			if (tr.contents & CONTENTS_WATER)
-			{
-				if (strcmp(tr.surface->name, "*brwater") == 0)
-					color = SPLASH_BROWN_WATER;
-				else
-					color = SPLASH_BLUE_WATER;
-			}
-			else if (tr.contents & CONTENTS_SLIME)
-				color = SPLASH_SLIME;
-			else if (tr.contents & CONTENTS_LAVA)
-				color = SPLASH_LAVA;
-			else
-				color = SPLASH_UNKNOWN;
-
-			if (color != SPLASH_UNKNOWN)
-			{
-				gi.WriteByte (svc_temp_entity);
-				gi.WriteByte (TE_SPLASH);
-				gi.WriteByte (8);
-				gi.WritePosition (tr.endpos);
-				gi.WriteDir (tr.plane.normal);
-				gi.WriteByte (color);
-				gi.multicast (tr.endpos, MULTICAST_PVS);
-			}
-			
-		}
-			
 	}
 }

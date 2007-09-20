@@ -696,7 +696,7 @@ typedef struct
 #define	TE_CHAINGUNSMOKE			57
 #define	TE_BLUE_MUZZLEFLASH			58
 #define	TE_SMART_MUZZLEFLASH		59
-#define	TE_LEADERFIELD				60
+#define	TE_VOLTAGE					60
 #define	TE_DEATHFIELD				61
 #define	TE_BLASTERBEAM				62
 #define	TE_STAIN					63

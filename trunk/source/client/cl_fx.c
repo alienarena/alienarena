@@ -1021,10 +1021,10 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles)
 }
 /*
 ===============
-CL_Leaderfield
+CL_SmartMuzzle
 ===============
 */
-void CL_Leaderfield (vec3_t org)
+void CL_SmartMuzzle (vec3_t org)
 {
 	int			i, j;
 	cparticle_t	*p;
@@ -1037,6 +1037,42 @@ void CL_Leaderfield (vec3_t org)
 		p->type = PARTICLE_LEADER_FIELD;
 		p->texnum = r_leaderfieldtexture->texnum;
 		p->scale = 24 + (rand()&2);
+		p->color = 0xff;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE;
+
+		for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = org[j] + ((rand()%2)-1);
+			p->vel[j] = 0;
+		}
+		p->accel[0] = p->accel[1] = 0;
+		p->accel[2] = 0;
+		p->alpha = 0.7;
+
+		p->alphavel = -2.8 / (0.5 + frand()*0.3);
+	}
+	
+}
+
+/*
+===============
+CL_SmartMuzzle
+===============
+*/
+void CL_Voltage (vec3_t org)
+{
+	int			i, j;
+	cparticle_t	*p;
+
+	for ( i = 0; i < 3; i++)
+	{
+		if (!(p = new_particle()))
+			return;
+
+		p->type = PARTICLE_LEADER_FIELD;
+		p->texnum = r_voltagetexture->texnum;
+		p->scale = 12 + (rand()&12);
 		p->color = 0xff;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
