@@ -22,6 +22,23 @@ The game features 37 levels, which can be played online against other players, o
 
 Alien Arena offers CTF,  AOA(All Out Assault) mode, in which players can climb into vehicles to do battle, Deathball, and Team Core Assault.  Simply go into the multiplayer menu to start a server, change the game rules , and choose a map to play on.  You can also select from five different mutators(instagib, rocket arena, excessive, low grav, regen, and vampire) to further customize your game experience.
 
+Alien Arena : Many are called, only one will reign supreme
+
+Eternal war ravaged the vastness of infinite space. For as far back into the ages as the memories of the galaxies oldest races could reach, it had been this way. Planet at war with planet, conflicts ending with a burned cinder orbiting a dead sun and countless billions sent screaming into oblivion. War, endless and eternal, embracing all the peoples of the cosmos. Scientific triumphs heralded the creation of ever more deadly weapons until the very fabric of the universe itself was threatened.
+
+Then came the call.
+
+Some said it was sent by an elder race, legendary beings of terrifying power who had existed since the birth of the stars and who now made their home beyond the fringes of known creation, others whispered fearfully and looked to the skies for the coming of their gods. Perhaps it didn't matter who had sent the call, for all the people of the stars could at least agree that the call was there.
+
+The wars were to end - or they would be ended. In a demonstration of power whoever had sent the call snuffed out the homeworld of the XXXX, the greatest empire of all the stars, in a heartbeat. One moment it was there, the next it was dust carried on the solar winds. All races had no choice but to heed the call.
+
+For most the call was a distant tug, a whispered warning that the wars were over, but for the greatest hero of each people it was more, it was a fire raging through their blood, a call to a new war, to the battle to end all battles. That fire burns in your blood, compelling you, the greatest warrior of your people, to fight in a distant and unknown arena, your honor and the future of your race at stake.
+
+Across the stars you traveled in search of this arena where the mightiest of the mighty would do battle, where you would stand face to face with your enemies in a duel to the death. Strange new weapons awaited you, weapons which you would have to master if you were to survive and emerge victorious from the complex and deadly arenas in which you were summoned to fight.
+
+The call to battle beats through your heart and soul like the drums of war. Will you be the one to rise through the ranks and conquer all others, the one who stands proud as the undefeated champion of the Alien Arena? 
+
+
 2.	SYSTEM REQUIREMENTS
 
 1 GHz
