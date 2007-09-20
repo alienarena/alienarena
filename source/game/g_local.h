@@ -471,6 +471,7 @@ extern  int print3;
 // means of death
 #define MOD_UNKNOWN			0
 #define MOD_BLASTER			1
+#define MOD_VIOLATOR		2
 #define MOD_CGALTFIRE		3
 #define MOD_CHAINGUN		5
 #define MOD_FLAME			6
@@ -1001,8 +1002,8 @@ typedef struct
 	bot_t bots[100];
 
 	//weapon accuracy info
-	int weapon_shots[8];
-	int weapon_hits[8];
+	int weapon_shots[9];
+	int weapon_hits[9];
 
 	int			spectator;			// client is a spectator
 } client_respawn_t;

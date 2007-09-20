@@ -76,6 +76,7 @@ image_t		*r_beamtexture;
 image_t		*r_beam2texture;
 image_t		*r_beam3texture;
 image_t		*r_bullettexture;
+image_t		*r_voltagetexture;
 image_t		*r_radarmap; // wall texture for radar texgen
 image_t		*r_around;
 
