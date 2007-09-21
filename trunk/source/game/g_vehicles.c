@@ -308,55 +308,6 @@ void VehicleSetup (edict_t *ent)
 	ent->think = VehicleThink;
 }
 
-void ResetVehicle()//this function returns vehicle to base when player purposely drops it
-{
-	char *c;
-	edict_t *ent;
-
-	c = "item_bomber";
-	
-	ent = NULL;
-	while ((ent = G_Find (ent, FOFS(classname), c)) != NULL) {
-		if (ent->spawnflags & DROPPED_ITEM)
-			G_FreeEdict(ent);
-		else {
-			ent->svflags &= ~SVF_NOCLIENT;
-			ent->solid = SOLID_TRIGGER;
-			gi.linkentity(ent);
-			ent->s.event = EV_ITEM_RESPAWN;
-		}
-	}
-	
-	c = "item_strafer";
-	
-	ent = NULL;
-	while ((ent = G_Find (ent, FOFS(classname), c)) != NULL) {
-		if (ent->spawnflags & DROPPED_ITEM)
-			G_FreeEdict(ent);
-		else {
-			ent->svflags &= ~SVF_NOCLIENT;
-			ent->solid = SOLID_TRIGGER;
-			gi.linkentity(ent);
-			ent->s.event = EV_ITEM_RESPAWN;
-		}
-	}
-
-	c = "item_hover";
-	
-	ent = NULL;
-	while ((ent = G_Find (ent, FOFS(classname), c)) != NULL) {
-		if (ent->spawnflags & DROPPED_ITEM)
-			G_FreeEdict(ent);
-		else {
-			ent->svflags &= ~SVF_NOCLIENT;
-			ent->solid = SOLID_TRIGGER;
-			gi.linkentity(ent);
-			ent->s.event = EV_ITEM_RESPAWN;
-		}
-	}
-	safe_bprintf(PRINT_HIGH, "Vehicle has been returned!\n");
-}
-
 static void VehicleDropTouch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	//owner (who dropped us) can't touch for two secs
@@ -376,7 +327,7 @@ static void VehicleDropThink(edict_t *ent)
 
 void VehicleDeadDrop(edict_t *self)
 {
-	edict_t *dropped = NULL;
+	edict_t *dropped;
 	gitem_t *vehicle;
 
 	dropped = NULL;
@@ -490,6 +441,7 @@ void Reset_player(edict_t *ent)
 }
 qboolean Leave_vehicle(edict_t *ent, gitem_t *item) 
 {
+
 	Reset_player(ent);
 	
 	ent->client->Jet_framenum = level.framenum;
@@ -498,8 +450,9 @@ qboolean Leave_vehicle(edict_t *ent, gitem_t *item)
 
 	gi.sound( ent, CHAN_ITEM, gi.soundindex("vehicles/got_in.wav"), 0.8, ATTN_NORM, 0 );
 
-	ResetVehicle();
+	Drop_Item (ent, item);
 
+	safe_bprintf(PRINT_HIGH, "Vehicle has been dropped!\n");
 	return true;
 }
 
@@ -553,6 +506,8 @@ qboolean Get_in_vehicle (edict_t *ent, edict_t *other)
 	}
 	
 	Use_Jet(other);
+
+	ent->owner = other;
 
 	return true;
 }
