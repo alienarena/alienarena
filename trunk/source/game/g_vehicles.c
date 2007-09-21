@@ -486,6 +486,7 @@ void Reset_player(edict_t *ent)
 	else if(!strcmp(playermodel, "brainlet"))	
 		ent->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
 	
+	ent->in_vehicle = false;
 }
 qboolean Leave_vehicle(edict_t *ent, gitem_t *item) 
 {
@@ -506,27 +507,15 @@ qboolean Get_in_vehicle (edict_t *ent, edict_t *other)
 {
 	
 	gitem_t *vehicle; 
-	gitem_t *bomber;
-	gitem_t *strafer;
-	gitem_t *hover;
 
 	float		*v;
 
 	vehicle = NULL;
 
-    //check for any vehicles, if we have one, don't get in another
-	bomber = FindItemByClassname("item_bomber");
-	strafer = FindItemByClassname("item_strafer");
-	hover = FindItemByClassname("item_hover");
-	if((other->client->pers.inventory[ITEM_INDEX(bomber)] == 1) || (other->client->pers.inventory[ITEM_INDEX(strafer)] == 1)
-		|| (other->client->pers.inventory[ITEM_INDEX(hover)] == 1))
+    if(other->in_vehicle) //already in a vehicle
 		return false;
-	
-	vehicle = FindItemByClassname(ent->classname);
 
-	// get in the vehicle
-	if(other->client->pers.inventory[ITEM_INDEX(vehicle)] == 1)
-		return false; //can't get in a vehicle if you're already in one!
+	vehicle = FindItemByClassname(ent->classname);
 
 	//put him in the vehicle
 	if(!strcmp(ent->classname, "item_bomber")) {

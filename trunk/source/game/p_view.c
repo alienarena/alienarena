@@ -864,25 +864,8 @@ void G_SetClientFrame (edict_t *ent)
 	gclient_t	*client;
 	qboolean	duck, run;
 	//vehicles
-	gitem_t *vehicle;
 
-	vehicle = FindItemByClassname("item_bomber");
-
-	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) { //don't animate the vehicle(yet!)
-		ent->s.frame = 0;
-		return;
-	}
-
-	vehicle = FindItemByClassname("item_strafer");
-
-	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) { //don't animate the vehicle(yet!)
-		ent->s.frame = 0;
-		return;
-	}
-
-	vehicle = FindItemByClassname("item_hover");
-
-	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) { //don't animate the vehicle(yet!)
+	if (ent->in_vehicle) { //don't animate the vehicle(yet!)
 		ent->s.frame = 0;
 		return;
 	}

@@ -720,17 +720,13 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 	float crouch_thresh;
 	float aim;
 	gitem_t *vehicle;
-	qboolean in_ship;
 	float range;
 	vec3_t v;
 	
-	in_ship = false;
-
 	vehicle = FindItemByClassname("item_bomber");
 
 	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
 		//if we are too low, don't shoot, and move up.  Should be fairly simple, right?
-		in_ship = true;
 		if(self->enemy->s.origin[2] >= self->s.origin[2] - 128) { //we want to be well above our target
 			ucmd->upmove += 400;
 			// face the enemy while moving up
@@ -741,23 +737,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 			return;
 		}
 	}
-	vehicle = FindItemByClassname("item_strafer");
 
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		in_ship = true;
-	}
-	vehicle = FindItemByClassname("item_hover");
-
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		in_ship = true;
-	}
-	vehicle = FindItemByClassname("item_deathball");
-
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-
-		in_ship = true;
-
-	}
 	switch(self->skill){ //set up the skill levels;
 	case 0:
 		strafespeed = 300;
@@ -859,7 +839,7 @@ standardmove:
 	c = random(); //really mix this up some
 	if(self->health >= 50 && c < crouch_thresh)  //raise this number to make them crouch alot(lower skills)
 		ucmd->upmove -= 200;
-	else if(self->health >= 50 && c < jump_thresh && !in_ship){  //lets add a rocket jump
+	else if(self->health >= 50 && c < jump_thresh && !self->in_vehicle && !self->in_deathball){  //lets add a rocket jump
 		c = random();
 		if((self->skill >= 2) && (c < 0.6) && (self->health > 70) && (ACEIT_ChangeWeapon(self,FindItem("Rocket Launcher")))) {
 			self->s.angles[PITCH] = 90;
