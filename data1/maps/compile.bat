@@ -1,4 +1,4 @@
-qbsp3 dm-leviathan
-qvis3 dm-leviathan
-qrad3 dm-leviathan
+qbsp3 aoa-atlantis
+qvis3 aoa-atlantis
+qrad3 aoa-atlantis
 pause
