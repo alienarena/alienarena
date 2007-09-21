@@ -658,29 +658,10 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 {
 	int	n;
 	char	*info;
-	gitem_t	*vehicle;
 	int	got_vehicle = 0;
 	int	number_of_gibs = 0;
 
-	vehicle = FindItemByClassname("item_bomber");
-
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		Reset_player(self);	//get the player out of the vehicle
-		Jet_Explosion(self); //blow that bitch up!
-		got_vehicle = 1; //so we know how to handle dropping it
-	}
-
-	vehicle = FindItemByClassname("item_strafer");
-
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		Reset_player(self);	//get the player out of the vehicle
-		Jet_Explosion(self); //blow that bitch up!
-		got_vehicle = 1; //so we know how to handle dropping it
-	}
-
-	vehicle = FindItemByClassname("item_hover");
-
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+	if (self->in_vehicle) {
 		Reset_player(self);	//get the player out of the vehicle
 		Jet_Explosion(self); //blow that bitch up!
 		got_vehicle = 1; //so we know how to handle dropping it

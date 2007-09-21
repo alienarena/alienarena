@@ -520,25 +520,12 @@ void ACEAI_ChooseWeapon(edict_t *self)
 {	
 	float range;
 	vec3_t v;
-	gitem_t *vehicle;
 	
-	vehicle = FindItemByClassname("item_bomber");
-
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return; //always use the bombs when in a bomber
+	if (self->in_vehicle) {
+		return; 
 	}
-	vehicle = FindItemByClassname("item_strafer");
-
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return; //always use the beams when in a strafer
-	}
-	vehicle = FindItemByClassname("item_hover");
-
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return; //always use the beams when in a hovercraft
-	}
-	vehicle = FindItemByClassname("item_deathball");
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+	
+	if (self->in_deathball) {
 		return; //cannot switch or fire weapons when in a deathball.
 	}
 

@@ -99,26 +99,10 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 {
 	int		index;
 	gitem_t		*ammo;
-	gitem_t		*vehicle;
 
-	vehicle = FindItemByClassname("item_bomber");
-
-	if (other->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+	if (other->in_vehicle) {
 		return false;
 	}
-
-	vehicle = FindItemByClassname("item_strafer");
-
-	if (other->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return false;
-	}
-
-	vehicle = FindItemByClassname("item_hover");
-
-	if (other->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return false;
-	}
-
 
 	index = ITEM_INDEX(ent->item);
 
@@ -230,7 +214,6 @@ void ChangeWeapon (edict_t *ent)
 	int done;
 	char	weaponpath[MAX_OSPATH] = " ";
 	FILE *file;
-	gitem_t		*vehicle;
 
 	ent->client->pers.lastweapon = ent->client->pers.weapon;
 	ent->client->pers.weapon = ent->client->newweapon;
@@ -261,21 +244,7 @@ void ChangeWeapon (edict_t *ent)
 	ent->client->ps.gunframe = 0;
 	ent->client->ps.gunindex = gi.modelindex(ent->client->pers.weapon->view_model);
 
-	vehicle = FindItemByClassname("item_bomber");
-
-	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return;
-	}
-
-	vehicle = FindItemByClassname("item_strafer");
-
-	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return;
-	}
-
-	vehicle = FindItemByClassname("item_hover");
-
-	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+	if (ent->in_vehicle) {
 		return;
 	}
 
@@ -455,28 +424,7 @@ void Use_Weapon (edict_t *ent, gitem_t *item)
 	int			ammo_index;
 	gitem_t		*ammo_item;
 
-	gitem_t *vehicle;
-
-	vehicle = FindItemByClassname("item_bomber");
-
-	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return;
-	}
-
-	vehicle = FindItemByClassname("item_strafer");
-
-	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return;
-	}
-
-	vehicle = FindItemByClassname("item_hover");
-
-	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
-		return;
-	}
-
-	vehicle = FindItemByClassname("item_deathball");
-	if (ent->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+	if (ent->in_vehicle || ent->in_deathball) {
 		return;
 	}
 

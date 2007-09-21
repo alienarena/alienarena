@@ -86,8 +86,11 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 
 	if(winner->deadflag == DEAD_DEAD)
 		zoffset = -40;
-	else 
+	else  {
 		zoffset = 0;
+		if(winner->in_vehicle)
+			Reset_player(winner);
+	}
 
 	VectorCopy (level.intermission_angle, winner->s.angles);
 	
