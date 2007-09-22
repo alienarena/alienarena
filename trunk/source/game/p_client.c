@@ -837,7 +837,7 @@ void InitClientPersistant (gclient_t *client)
 	if(g_duel->value)
 		client->pers.queue = queue;
 
-	if(!(instagib->value || rocket_arena->value)) { //gets a violator (revisit, doesn't look right)
+	if(!rocket_arena->value) { //gets a violator, unless RA
 		item = FindItem("Violator");
 		client->pers.selected_item = ITEM_INDEX(item);
 		client->pers.inventory[client->pers.selected_item] = 1;
