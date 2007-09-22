@@ -1651,8 +1651,8 @@ void Violator_Fire (edict_t *ent)
 	int			damage;
 	int			kick = 4;
 
-	if(excessive->value)
-		damage = 100;
+	if(excessive->value || instagib->value)
+		damage = 200;
 	else
 		damage = 40;
 	
