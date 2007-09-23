@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -42,7 +42,7 @@ void R_RenderDlight (dlight_t *light)
 	float	rad;
 
 	rad = light->intensity * 0.35;
-	
+
 	VectorSubtract (light->origin, r_origin, v);
 #if 0
 	// FIXME?
@@ -102,7 +102,7 @@ void R_RenderDlights (void)
 	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDepthMask (1); 
+	qglDepthMask (1);
 }
 
 
@@ -125,13 +125,13 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
 	float		dist;
 	msurface_t	*surf;
 	int			i;
-	
+
 	if (node->contents != -1)
 		return;
 
 	splitplane = node->plane;
 	dist = DotProduct (light->origin, splitplane->normal) - splitplane->dist;
-	
+
 	if (dist > light->intensity-DLIGHT_CUTOFF)
 	{
 		R_MarkLights (light, bit, node->children[0]);
@@ -142,7 +142,7 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
 		R_MarkLights (light, bit, node->children[1]);
 		return;
 	}
-		
+
 // mark the polygons
 	surf = r_worldmodel->surfaces + node->firstsurface;
 	for (i=0 ; i<node->numsurfaces ; i++, surf++)
@@ -191,14 +191,14 @@ void R_PushDlightsForBModel (entity_t *e)
 	dlight_t	*lt;
 
 	lt = r_newrefdef.dlights;
-	
+
 	if (e->angles[0] || e->angles[1] || e->angles[2])
 	{
 		vec3_t	temp;
 		vec3_t	forward, right, up;
-		
+
 		AngleVectors (e->angles, forward, right, up);
-		
+
 		for (k=0 ; k<r_newrefdef.num_dlights ; k++, lt++)
 		{
 			VectorSubtract (lt->origin, e->origin, temp);
@@ -208,7 +208,7 @@ void R_PushDlightsForBModel (entity_t *e)
 			R_MarkLights (lt, 1<<k, e->model->nodes + e->model->firstnode);
 			VectorAdd (temp, e->origin, lt->origin);
 		}
-	} 
+	}
 	else
 	{
 		for (k=0 ; k<r_newrefdef.num_dlights ; k++, lt++)
@@ -249,7 +249,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 
 	if (node->contents != -1)
 		return -1;		// didn't hit anything
-	
+
 // calculate mid point
 
 // FIXME: optimize for axial
@@ -257,23 +257,23 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	front = DotProduct (start, plane->normal) - plane->dist;
 	back = DotProduct (end, plane->normal) - plane->dist;
 	side = front < 0;
-	
+
 	if ( (back < 0) == side)
 		return RecursiveLightPoint (node->children[side], start, end);
-	
+
 	frac = front / (front-back);
 	mid[0] = start[0] + (end[0] - start[0])*frac;
 	mid[1] = start[1] + (end[1] - start[1])*frac;
 	mid[2] = start[2] + (end[2] - start[2])*frac;
-	
-// go down front side	
+
+// go down front side
 	r = RecursiveLightPoint (node->children[side], start, mid);
 	if (r >= 0)
 		return r;		// hit something
-		
+
 	if ( (back < 0) == side )
 		return -1;		// didn't hit anuthing
-		
+
 // check for impact on this node
 	VectorCopy (mid, lightspot);
 	lightplane = plane;
@@ -283,7 +283,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	{
 		tex = surf->texinfo;
 
-		if (tex->flags & (SURF_WARP|SURF_SKY)) 
+		if (tex->flags & (SURF_WARP|SURF_SKY))
 			continue;	// no lightmaps
 
 		s = DotProduct (mid, tex->vecs[0]) + tex->vecs[0][3];
@@ -297,7 +297,7 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 		t = DotProduct (mid, tex->vecs[1]) + tex->vecs[1][3];
 		if (t < surf->texturemins[1])
 			continue;
-		
+
 		dt = t - surf->texturemins[1];
 		if (dt > surf->extents[1])
 			continue;
@@ -312,18 +312,18 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 		VectorClear (pointcolor);
 
 		lightmap += 3*(dt * ((surf->extents[0]>>4)+1) + ds);
-		
+
 		for (maps = 0 ; maps < MAXLIGHTMAPS && surf->styles[maps] != 255 ;	maps++)
 		{
 			for (i=0 ; i<3 ; i++)
 				scale[i] = gl_modulate->value*r_newrefdef.lightstyles[surf->styles[maps]].rgb[i];
-			
+
 			pointcolor[0] += lightmap[0] * scale[0] * (1.0/255);
 			pointcolor[1] += lightmap[1] * scale[1] * (1.0/255);
 			pointcolor[2] += lightmap[2] * scale[2] * (1.0/255);
 			lightmap += 3*((surf->extents[0]>>4)+1) * ((surf->extents[1]>>4)+1);
 		}
-		
+
 		return 1;
 	}
 
@@ -345,19 +345,19 @@ void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic)
 	float		light;
 	vec3_t		dist, dlightcolor;
 	float		add;
-	
+
 	if (!r_worldmodel->lightdata)
 	{
 		color[0] = color[1] = color[2] = 1.0;
 		return;
 	}
-	
+
 	end[0] = p[0];
 	end[1] = p[1];
 	end[2] = p[2] - 2048;
-	
+
 	r = RecursiveLightPoint (r_worldmodel->nodes, p, end);
-	
+
 	if (r == -1)
 	{
 		VectorCopy (vec3_origin, color);
@@ -401,19 +401,19 @@ void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount
 	vec3_t		dist, dlColor;
 	float		add;
 	worldLight_t *wl;
-	
+
 	if (!r_worldmodel->lightdata)
 	{
 		color[0] = color[1] = color[2] = 1.0;
 		return;
 	}
-	
+
 	end[0] = p[0];
 	end[1] = p[1];
 	end[2] = p[2] - 2048;
-	
+
 	r = RecursiveLightPoint (r_worldmodel->nodes, p, end);
-	
+
 	if (r == -1)
 	{
 		VectorCopy (vec3_origin, color);
@@ -431,7 +431,7 @@ void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount
 
 	//add world lights
 	for (lnum=0; lnum<r_numWorldLights; lnum++) {
-				
+
 		wl = &r_worldLights[lnum];
 
 		VectorSubtract (wl->origin, p, dist);
@@ -442,7 +442,7 @@ void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount
 		{
 			float highest = -1;
 
-			
+
 			for (i=0;i<3;i++)
 				dlColor[i] = 1;
 
@@ -503,10 +503,10 @@ void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount
 			}
 		}
 	}
-	
+
 	*amount = m_dl;
 
-	
+
 }
 
 //===================================================================
@@ -526,42 +526,42 @@ void R_AddStainMap (stain_t *st, msurface_t *surf)
 	vec3_t		impact, local;
 	int			s, t, smax, tmax;
 	byte		*pfBL;
-	
+
 	if (!surf->stainsamples)
 		return;
 	tex = surf->texinfo;
 	if ( (tex->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_WARP) ) )
 		return;
-	
+
 	if ( surf->plane->type < 3 ) {
 		dist = st->origin[surf->plane->type] - surf->plane->dist;
 	} else {
 		dist = DotProduct (st->origin, surf->plane->normal) - surf->plane->dist;
 	}
-	
+
 	if (surf->flags & SURF_PLANEBACK)
 		fdist = -dist;
 	else
 		fdist = dist;
-	
+
 	frad = st->intensity - fabs (fdist);
 	if (frad < 0)
 		return;
-	
+
 	smax = (surf->extents[0]>>4)+1;
 	tmax = (surf->extents[1]>>4)+1;
-	
+
 	fminlight = frad;
-	
+
 	for (i = 0 ; i<3 ; i++)
 		impact[i] = st->origin[i] - surf->plane->normal[i] * fdist;
-	
+
 	local[0] = DotProduct (impact, tex->vecs[0]) + tex->vecs[0][3] - surf->texturemins[0];
 	local[1] = DotProduct (impact, tex->vecs[1]) + tex->vecs[1][3] - surf->texturemins[1];
-	
+
 	pfBL = surf->stainsamples;
 	surf->cached_light[0] = 0;
-	
+
 	for (t = 0, ftacc = 0 ; t<tmax ; t++, ftacc += 16)
 	{
 		td = local[1] - ftacc;
@@ -570,37 +570,37 @@ void R_AddStainMap (stain_t *st, msurface_t *surf)
 		for ( s=0, fsacc = 0 ; s<smax ; s++, fsacc += 16, pfBL += 3)
 		{
 			sd = Q_ftol( local[0] - fsacc );
-			
+
 			if ( sd < 0 )
 				sd = -sd;
-			
+
 			if (sd > td)
 				fdist = sd + (td>>1);
 			else
 				fdist = td + (sd>>1);
-			
-			if ( fdist < fminlight ) 
+
+			if ( fdist < fminlight )
 			{
 				float alpha, mult;
 				int test;
-				
+
 				mult = frad / fdist;
-				if (mult > 5.0) 
+				if (mult > 5.0)
 					mult = 5.0;
-				
+
 				alpha = st->alpha * mult;
-				if (alpha > 255) 
+				if (alpha > 255)
 					alpha = 255;
-				if (alpha > st->alpha) 
+				if (alpha > st->alpha)
 					alpha = st->alpha;
-				if (alpha < 0) 
+				if (alpha < 0)
 					alpha = 0;
 				alpha *= (1.0 / 255.0);
-				
-				for (i=0;i<3;i++) 
+
+				for (i=0;i<3;i++)
 				{
 					test = Q_ftol( (1-alpha) * (float)pfBL[i] + alpha * st->color[i] );
-					
+
 					if (test > 255)
 						pfBL[i] = 255;
 					else if (test < 0)
@@ -623,7 +623,7 @@ void R_StainNode (stain_t *st, mnode_t *node)
 	int		c;
 	float	dist;
 	msurface_t *surf;
-	
+
 	if (node->contents != -1)
 		return;
 
@@ -645,7 +645,7 @@ void R_StainNode (stain_t *st, mnode_t *node)
 		return;
 	}
 
-	for (c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++) 
+	for (c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
 	{
 		R_AddStainMap ( st, surf );
 	}
@@ -686,14 +686,14 @@ void R_PushStainsForBModel (entity_t *e)
 
 	st = r_newrefdef.stains;
 	model = e->model;
-	
+
 	if (e->angles[0] || e->angles[1] || e->angles[2])
 	{
 		vec3_t temp;
 		vec3_t forward, right, up;
 
 		AngleVectors ( e->angles, forward, right, up );
-		
+
 		for (i=0 ; i<r_newrefdef.num_stains ; i++, st++) {
 			VectorSubtract (st->origin, e->origin, temp);
 			st->origin[0] = DotProduct (temp, forward);
@@ -1008,149 +1008,54 @@ store:
 	stride -= (smax<<2);
 	bl = s_blocklights;
 
-	monolightmap = gl_monolightmap->string[0];
-
-	if ( monolightmap == '0' )
+	for (i=0 ; i<tmax ; i++, dest += stride)
 	{
-		for (i=0 ; i<tmax ; i++, dest += stride)
+		for (j=0 ; j<smax ; j++)
 		{
-			for (j=0 ; j<smax ; j++)
+			r = Q_ftol( bl[0] );
+			g = Q_ftol( bl[1] );
+			b = Q_ftol( bl[2] );
+
+			// catch negative lights
+			if (r < 0)
+				r = 0;
+			if (g < 0)
+				g = 0;
+			if (b < 0)
+				b = 0;
+			/*
+			** determine the brightest of the three color components
+			*/
+			if (r > g)
+				max = r;
+			else
+				max = g;
+			if (b > max)
+				max = b;
+
+			//255 is best for alpha testing, so textures don't "disapear" in the dark
+			a = 255;
+
+			/*
+			** rescale all the color components if the intensity of the greatest
+			** channel exceeds 1.0
+			*/
+			if (max > 255)
 			{
-				r = Q_ftol( bl[0] );
-				g = Q_ftol( bl[1] );
-				b = Q_ftol( bl[2] );
-
-				// catch negative lights
-				if (r < 0)
-					r = 0;
-				if (g < 0)
-					g = 0;
-				if (b < 0)
-					b = 0;
-
-				/*
-				** determine the brightest of the three color components
-				*/
-				if (r > g)
-					max = r;
-				else
-					max = g;
-				if (b > max)
-					max = b;
-
-				/*
-				** alpha is ONLY used for the mono lightmap case.  For this reason
-				** we set it to the brightest of the color components so that 
-				** things don't get too dim.
-				*/
-				a = max;
-
-				/*
-				** rescale all the color components if the intensity of the greatest
-				** channel exceeds 1.0
-				*/
-				if (max > 255)
-				{
-					float t = 255.0F / max;
-
-					r = r*t;
-					g = g*t;
-					b = b*t;
-					a = a*t;
-				}
-
-				dest[0] = r;
-				dest[1] = g;
-				dest[2] = b;
-				dest[3] = a;
-
-				bl += 3;
-				dest += 4;
+				float t = 255.0F / max;
+				r = r*t;
+				g = g*t;
+				b = b*t;
+				a = a*t;
 			}
-		}
-	}
-	else
-	{
-		for (i=0 ; i<tmax ; i++, dest += stride)
-		{
-			for (j=0 ; j<smax ; j++)
-			{
-				r = Q_ftol( bl[0] );
-				g = Q_ftol( bl[1] );
-				b = Q_ftol( bl[2] );
 
-				// catch negative lights
-				if (r < 0)
-					r = 0;
-				if (g < 0)
-					g = 0;
-				if (b < 0)
-					b = 0;
+			dest[0] = r;
+			dest[1] = g;
+			dest[2] = b;
+			dest[3] = a;
 
-				/*
-				** determine the brightest of the three color components
-				*/
-				if (r > g)
-					max = r;
-				else
-					max = g;
-				if (b > max)
-					max = b;
-
-				/*
-				** alpha is ONLY used for the mono lightmap case.  For this reason
-				** we set it to the brightest of the color components so that 
-				** things don't get too dim.
-				*/
-				a = max;
-
-				/*
-				** rescale all the color components if the intensity of the greatest
-				** channel exceeds 1.0
-				*/
-				if (max > 255)
-				{
-					float t = 255.0F / max;
-
-					r = r*t;
-					g = g*t;
-					b = b*t;
-					a = a*t;
-				}
-
-				/*
-				** So if we are doing alpha lightmaps we need to set the R, G, and B
-				** components to 0 and we need to set alpha to 1-alpha.
-				*/
-				switch ( monolightmap )
-				{
-				case 'L':
-				case 'I':
-					r = a;
-					g = b = 0;
-					break;
-				case 'C':
-					// try faking colored lighting
-					a = 255 - ((r+g+b)/3);
-					r *= a/255.0;
-					g *= a/255.0;
-					b *= a/255.0;
-					break;
-				case 'A':
-				default:
-					r = g = b = 0;
-					a = 255 - a;
-					break;
-				}
-
-				dest[0] = r;
-				dest[1] = g;
-				dest[2] = b;
-				dest[3] = a;
-
-				bl += 3;
-				dest += 4;
-			}
+			bl += 3;
+			dest += 4;
 		}
 	}
 }
@@ -1163,7 +1068,7 @@ void R_RenderFlare (flare_t *light)
 	int j;
 	float	dist;
 	unsigned	flaretex;
-	
+
     flaretex =  r_flare->texnum;
 
 	VectorSubtract (light->origin, r_origin, v);
@@ -1178,7 +1083,7 @@ void R_RenderFlare (flare_t *light)
 	VectorScale(light->color, 0.5, tmp );
 	for (j=0; j<4; j++)
 	   VA_SetElem4(col_array[j], tmp[0],tmp[1],tmp[2], 1);
-		
+
 
 	VectorMA (light->origin, -1-dist, vup, vert_array[0]);
 	VectorMA (vert_array[0], 1+dist, vright, vert_array[0]);
@@ -1191,11 +1096,11 @@ void R_RenderFlare (flare_t *light)
     VectorMA (light->origin, 1+dist, vup, vert_array[2]);
 	VectorMA (vert_array[2], -1-dist, vright, vert_array[2]);
     VA_SetElem2(tex_array[2], 1, 0);
-        
+
 	VectorMA (light->origin, 1+dist, vup, vert_array[3]);
 	VectorMA (vert_array[3], 1+dist, vright, vert_array[3]);
     VA_SetElem2(tex_array[3], 1, 1);
-	 
+
 	qglDrawArrays(GL_QUADS, 0 , 4);
 
 	GL_TexEnv( GL_REPLACE );
@@ -1211,27 +1116,27 @@ void R_RenderFlares (void)
 {
 	flare_t	*l;
     int i;
-	
+
 	if(!r_lensflare->value)
 		return;
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )return;
 	qglDepthMask (0);
 	qglDisable (GL_TEXTURE_2D);
-	qglShadeModel (GL_SMOOTH); 
-	qglEnable (GL_BLEND); 
+	qglShadeModel (GL_SMOOTH);
+	qglEnable (GL_BLEND);
 	qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);
 
      l = r_flares;
     for (i=0; i<r_numflares ; i++, l++)
 	{
-		if (IsVisible(r_origin,l->origin))		
-		{	
+		if (IsVisible(r_origin,l->origin))
+		{
 			R_RenderFlare (l);
 				c_flares++;
 		}
 	}
 	qglColor3f (1,1,1);
-	qglDisable (GL_BLEND); 
+	qglDisable (GL_BLEND);
 	qglEnable (GL_TEXTURE_2D);
     qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDepthMask (1);
@@ -1247,7 +1152,7 @@ void vectoangles (vec3_t value1, vec3_t angles)
 {
 	float	forward;
 	float	yaw, pitch;
-	
+
 	if (value1[1] == 0 && value1[0] == 0)
 	{
 		yaw = 0;
@@ -1317,10 +1222,10 @@ float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type)
 	//
 	// add world light shadow angles
 	//
-	if(gl_shadows->integer == 2 && type) { 
+	if(gl_shadows->integer == 2 && type) {
 
 		for (i=0; i<r_numWorldLights; i++) {
-				
+
 			wl = &r_worldLights[i];
 			VectorSubtract (wl->origin, pos, dist);
 			add = sqrt(wl->intensity - VectorLength(dist)/3);
@@ -1339,7 +1244,7 @@ float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type)
 		if (intens < 0.3)
 			intens = 0.3;
 		if (intens > 0.5)
-			intens = 0.5;	
+			intens = 0.5;
 	}
 
 	// Barnes improved code
@@ -1358,7 +1263,7 @@ float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type)
 		angle[YAW] -= currententity->angles[YAW];
 	}
 	AngleVectors (angle, dist, NULL, NULL);
-	VectorScale (dist, shadowdist, lightAdd); 
+	VectorScale (dist, shadowdist, lightAdd);
 	// end Barnes improved code
 
 	return intens;

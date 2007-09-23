@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-*/ 
+*/
 // r_mesh.c: triangle model functions
 
 #include "r_local.h"
@@ -84,7 +84,7 @@ void GL_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *ver
 
 			lerp[0] = move[0] + ov->v[0]*backv[0] + v->v[0]*frontv[0] + normal[0] * POWERSUIT_SCALE * shellscale;;
 			lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1] + normal[1] * POWERSUIT_SCALE * shellscale;;
-			lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2] + normal[2] * POWERSUIT_SCALE * shellscale;; 
+			lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2] + normal[2] * POWERSUIT_SCALE * shellscale;;
 		}
 	}
 	else
@@ -111,7 +111,7 @@ void GL_LightAliasModel( int nverts, dtrivertx_t *verts, float *colors, float al
 	for ( i = 0; i < nverts; i++, out += 4 )
 	{
 		float l = shadedots[verts[i].lightnormalindex];
-		
+
 		out[0] = l * shadelight[0];
 		out[1] = l * shadelight[1];
 		out[2] = l * shadelight[2];
@@ -139,11 +139,11 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
 							backlerp, lightdir, currententity->angles, false );
 
 	VectorScale(baselight, l, lightOut);
-		
+
 	if (model_dlights_num)
 		for (i=0;i<model_dlights_num;i++)
 		{
-		
+
 			l = 2.0*VLight_LerpLight( verts->lightnormalindex,
 									ov->lightnormalindex,
 									backlerp, model_dlights[i].direction, currententity->angles, true );
@@ -207,18 +207,18 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	qboolean depthmaskrscipt = false, is_trans = false;
 	rscript_t *rs = NULL;
 	rs_stage_t *stage = NULL;
-	int		va = 0; 
+	int		va = 0;
 	float mode;
 	float	*lerp;
 	vec3_t lightcolor;
 	vec4_t	colorArray[MAX_VERTS];
 	float ramp = 1.0;
 
-	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames 
+	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
 		+ currententity->frame * paliashdr->framesize);
 	verts = v = frame->verts;
 
-	oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames 
+	oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
 		+ currententity->oldframe * paliashdr->framesize);
 	ov = oldframe->verts;
 
@@ -235,7 +235,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 	if (currententity->flags & RF_TRANSLUCENT) {
 		basealpha = alpha = currententity->alpha;
-		
+
 		if(r_shaders->value)
 			rs=(rscript_t *)rs_glass;
 		else
@@ -247,7 +247,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	// PMM - added double shell
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) )
 		GL_Bind(r_shelltexture->texnum);  // add this line
-	
+
 	frontlerp = 1.0 - backlerp;
 
 	// move should be the delta back to the previous frame * backlerp
@@ -270,7 +270,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 		frontv[i] = frontlerp*frame->scale[i];
 		backv[i] = backlerp*oldframe->scale[i];
 	}
-	
+
 	lerp = s_lerped[0];
 
 	GL_LerpVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
@@ -279,7 +279,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 		return;
 
 	VectorSubtract(currententity->origin, lightspot, lightdir);
-		VectorNormalize ( lightdir );	
+		VectorNormalize ( lightdir );
 
 	if (!gl_rtlights->value && !(currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM)) )
 	{
@@ -300,15 +300,15 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 			va=0;
 			if (!count)
 				break;		// done
-			if (count < 0) 
+			if (count < 0)
 			{
 				count = -count;
 				mode=GL_TRIANGLE_FAN;
-			} 
+			}
 			else
 				mode=GL_TRIANGLE_STRIP;
 
-			do 
+			do
 			{
 				// texture coordinates come from the draw list
 				index_xyz = order[2];
@@ -334,18 +334,18 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 			va=0;
 			if (!count)
 				break;		// done
-			if (count < 0) 
+			if (count < 0)
 			{
 				count = -count;
 				mode=GL_TRIANGLE_FAN;
-			} 
+			}
 			else
 				mode=GL_TRIANGLE_STRIP;
 
 			tmp_count=count;
 			tmp_order=order;
 
-			do 
+			do
 			{
 				// texture coordinates come from the draw list
 				index_xyz = order[2];
@@ -366,7 +366,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 				qglDrawArrays(mode,0,va);
 		}
-			
+
 	}
 	else
 	{
@@ -400,7 +400,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 			tmp_count=count;
 			tmp_order=order;
 
-			while (stage) 
+			while (stage)
 			{
 				count=tmp_count;
 				order=tmp_order;
@@ -441,7 +441,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					if (!stage->alphashift.speed && stage->alphashift.min > 0)
 					{
 						alpha=basealpha*stage->alphashift.min;
-					} 
+					}
 					else if (stage->alphashift.speed)
 					{
 						alpha=basealpha*sin(rs_realtime * stage->alphashift.speed);
@@ -449,15 +449,15 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 						if (alpha > stage->alphashift.max) alpha=basealpha*stage->alphashift.max;
 						if (alpha < stage->alphashift.min) alpha=basealpha*stage->alphashift.min;
 					}
-				} 
+				}
 				else
 					alpha=basealpha;
 
-				if (stage->alphamask) 
+				if (stage->alphamask)
 				{
 					GLSTATE_ENABLE_ALPHATEST
-				} 
-				else 
+				}
+				else
 				{
 					GLSTATE_DISABLE_ALPHATEST
 				}
@@ -466,35 +466,35 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 					ramp = 2.0; //for getting brightness of normal maps up a bit
 
-					qglDepthMask (GL_FALSE); 
-			 		qglEnable (GL_BLEND); 
+					qglDepthMask (GL_FALSE);
+			 		qglEnable (GL_BLEND);
 
-					// set the correct blending mode for normal maps 
-					qglBlendFunc (GL_ZERO, GL_SRC_COLOR); 
+					// set the correct blending mode for normal maps
+					qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
 
-					// and the texenv 
-					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT); 
-					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_DOT3_RGB_EXT); 
+					// and the texenv
+					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
+					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_DOT3_RGB_EXT);
 
 				}
-										
+
 				do
 				{
 					if (!(stage->normalmap && !gl_normalmaps->value)) { //disable for normal stage if normals are disabled
-						
+
 						float os = ((float *)order)[0];
 						float ot = ((float *)order)[1];
 						vec3_t normal;
 						int k;
-									
-						index_xyz = order[2];	
-								
+
+						index_xyz = order[2];
+
 						for (k=0;k<3;k++)
-						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] + 
-						( r_avertexnormals[ov[index_xyz].lightnormalindex][k] - 
+						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
+						( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
 						r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
 						VectorNormalize ( normal );
-													
+
 						if (stage->envmap)
 						{
 							vec3_t envmapvec;
@@ -507,16 +507,16 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 						}
 
 						RS_SetTexcoords2D(stage, &os, &ot);
-							
+
 						VA_SetElem2(tex_array[va], os, ot);
 						VA_SetElem3(vert_array[va],s_lerped[index_xyz][0],s_lerped[index_xyz][1],s_lerped[index_xyz][2]);
 
 						{
 							float red = 1, green = 1, blue = 1, nAlpha;
-									
-							nAlpha = RS_AlphaFuncAlias (stage->alphafunc, 
+
+							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 							calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
-														
+
 							if (stage->lightmap)
 							{
 								if(gl_rtlights->value) {
@@ -554,13 +554,13 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				} while (--count);
 
 
-				if (!(stage->normalmap && !gl_normalmaps->value)) //disable so that we 
+				if (!(stage->normalmap && !gl_normalmaps->value)) //disable so that we
 					//can still have shaders without normalmapped models if so chosen
 				{
 					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 						qglDrawArrays(mode,0,va);
 				}
-						
+
 				qglColor4f(1,1,1,1);
 				if (stage->colormap.enabled)
 					qglEnable (GL_TEXTURE_2D);
@@ -568,20 +568,20 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				if(stage->normalmap && gl_normalmaps->value) {
 
 					ramp = 1.0;
-					// back to replace mode 
-					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); 
+					// back to replace mode
+					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-					// restore the original blend mode 
-					qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+					// restore the original blend mode
+					qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-					// switch off blending 
-					qglDisable (GL_BLEND); 
+					// switch off blending
+					qglDisable (GL_BLEND);
 					qglDepthMask (GL_TRUE);
 				}
 
 				stage=stage->next;
 			}
-	
+
 		}
 
 		if (depthmaskrscipt)
@@ -591,7 +591,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
-	
+
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
@@ -599,7 +599,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 		qglEnable( GL_TEXTURE_2D );
 }
 
-extern qboolean have_stencil; 
+extern qboolean have_stencil;
 extern	vec3_t			lightspot;
 
 /*
@@ -618,7 +618,7 @@ void R_DrawAliasShadow (dmdl_t *paliashdr, int posenum)
 
 	lheight = currententity->origin[2] - lightspot[2];
 
-	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames 
+	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
 		+ currententity->frame * paliashdr->framesize);
 	verts = frame->verts;
 
@@ -626,7 +626,7 @@ void R_DrawAliasShadow (dmdl_t *paliashdr, int posenum)
 
 	order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
 
-	height = -lheight + 0.1f; 
+	height = -lheight + 0.1f;
 
 	// if above entity's origin, skip
 	if ((currententity->origin[2]+height) > currententity->origin[2])
@@ -640,7 +640,7 @@ void R_DrawAliasShadow (dmdl_t *paliashdr, int posenum)
 		qglEnable(GL_STENCIL_TEST);
 
 		qglStencilFunc(GL_EQUAL,1,2);
-			
+
 		qglStencilOp(GL_KEEP,GL_KEEP,GL_INCR);
 
 	}
@@ -677,7 +677,7 @@ void R_DrawAliasShadow (dmdl_t *paliashdr, int posenum)
 	}
 	qglDepthMask(1);
 	qglColor4f(1,1,1,1);
-	if (have_stencil && gl_shadows->integer) qglDisable(GL_STENCIL_TEST); 
+	if (have_stencil && gl_shadows->integer) qglDisable(GL_STENCIL_TEST);
 }
 
 /*
@@ -697,22 +697,22 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 
 	if ( ( e->frame >= paliashdr->num_frames ) || ( e->frame < 0 ) )
 	{
-		Com_Printf ("R_CullAliasModel %s: no such frame %d\n", 
+		Com_Printf ("R_CullAliasModel %s: no such frame %d\n",
 			currentmodel->name, e->frame);
 		e->frame = 0;
 	}
 	if ( ( e->oldframe >= paliashdr->num_frames ) || ( e->oldframe < 0 ) )
 	{
-		Com_Printf ("R_CullAliasModel %s: no such oldframe %d\n", 
+		Com_Printf ("R_CullAliasModel %s: no such oldframe %d\n",
 			currentmodel->name, e->oldframe);
 		e->oldframe = 0;
 	}
 
-	pframe = ( daliasframe_t * ) ( ( byte * ) paliashdr + 
+	pframe = ( daliasframe_t * ) ( ( byte * ) paliashdr +
 		                              paliashdr->ofs_frames +
 									  e->frame * paliashdr->framesize);
 
-	poldframe = ( daliasframe_t * ) ( ( byte * ) paliashdr + 
+	poldframe = ( daliasframe_t * ) ( ( byte * ) paliashdr +
 		                              paliashdr->ofs_frames +
 									  e->oldframe * paliashdr->framesize);
 
@@ -850,9 +850,9 @@ void R_DrawAliasModel (entity_t *e)
 		if ( r_lefthand->value == 2 || g_drawing_refl)
 			return;
 	}
-	
+
 	paliashdr = (dmdl_t *)currentmodel->extradata;
-	
+
 	//
 	// get lighting information
 	//
@@ -862,7 +862,7 @@ void R_DrawAliasModel (entity_t *e)
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{
 		if(!cl_gun->value && (currententity->flags & RF_WEAPONMODEL))
-			return; 
+			return;
 
 		VectorClear (shadelight);
 		if (currententity->flags & RF_SHELL_HALF_DAM)
@@ -890,7 +890,7 @@ void R_DrawAliasModel (entity_t *e)
 			shadelight[0] = 0.6; //we want this to look like electricity
 		}
 	}
-	else if (currententity->flags & RF_FULLBRIGHT) 
+	else if (currententity->flags & RF_FULLBRIGHT)
 	{
 		for (i=0 ; i<3 ; i++)
 			shadelight[i] = 1.0;
@@ -902,26 +902,12 @@ void R_DrawAliasModel (entity_t *e)
 		if (max<0)max=0;
 		if (max>MAX_MODEL_DLIGHTS)max=MAX_MODEL_DLIGHTS;
 
-		R_LightPointDynamics (currententity->origin, shadelight, model_dlights, 
+		R_LightPointDynamics (currententity->origin, shadelight, model_dlights,
 			&model_dlights_num, max);
 	}
 	else
 	{
 		R_LightPoint (currententity->origin, shadelight, true);
-
-		if ( gl_monolightmap->string[0] != '0' )
-		{
-			float s = shadelight[0];
-
-			if ( s < shadelight[1] )
-				s = shadelight[1];
-			if ( s < shadelight[2] )
-				s = shadelight[2];
-
-			shadelight[0] = s;
-			shadelight[1] = s;
-			shadelight[2] = s;
-		}
 	}
 	if ( currententity->flags & RF_MINLIGHT )
 	{
@@ -940,7 +926,7 @@ void R_DrawAliasModel (entity_t *e)
 	{	// bonus items will pulse with time
 		float	scale;
 		float	min;
-		
+
 		scale = 0.2 * sin(r_newrefdef.time*7);
 		for (i=0 ; i<3 ; i++)
 		{
@@ -959,11 +945,11 @@ void R_DrawAliasModel (entity_t *e)
 		shadelight[1] = 0.0;
 		shadelight[2] = 0.0;
 	}
-// PGM	
+// PGM
 // =================
 
 	shadedots = r_avertexnormal_dots[((int)(currententity->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
-	
+
 	//
 	// locate the proper data
 	//
@@ -976,25 +962,25 @@ void R_DrawAliasModel (entity_t *e)
 	if (currententity->flags & RF_DEPTHHACK) // hack the depth range to prevent view model from poking into walls
 		qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
 
-	if ((currententity->flags & RF_WEAPONMODEL) && r_lefthand->value != 2.0F) 
-    { 
-		extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar); 
-  
-		qglMatrixMode(GL_PROJECTION); 
-		qglPushMatrix(); 
-		qglLoadIdentity(); 
-  
-		if (r_lefthand->value == 1.0F) 
-		{ 
-			qglScalef(-1, 1, 1); 
-			qglCullFace(GL_BACK); 
-		} 
+	if ((currententity->flags & RF_WEAPONMODEL) && r_lefthand->value != 2.0F)
+    {
+		extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
+
+		qglMatrixMode(GL_PROJECTION);
+		qglPushMatrix();
+		qglLoadIdentity();
+
+		if (r_lefthand->value == 1.0F)
+		{
+			qglScalef(-1, 1, 1);
+			qglCullFace(GL_BACK);
+		}
 		if(r_newrefdef.fov_y < 75.0f)
-			MYgluPerspective(r_newrefdef.fov_y, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f); 
+			MYgluPerspective(r_newrefdef.fov_y, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f);
 		else
-			MYgluPerspective(75.0f, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f); 
-	
-		qglMatrixMode(GL_MODELVIEW); 
+			MYgluPerspective(75.0f, (float)r_newrefdef.width / (float)r_newrefdef.height, 4.0f, 4096.0f);
+
+		qglMatrixMode(GL_MODELVIEW);
     }
 
     qglPushMatrix ();
@@ -1011,7 +997,7 @@ void R_DrawAliasModel (entity_t *e)
 		if (r_shaders->value ){
 			COM_StripExtension ( currententity->skin->name, shortname );
 
-			rs = RS_FindScript(shortname);	
+			rs = RS_FindScript(shortname);
 			if (rs)
 			{
 				RS_ReadyScript(rs);
@@ -1045,7 +1031,7 @@ void R_DrawAliasModel (entity_t *e)
 
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE ) )
 		qglEnable (GL_BLEND);
-	else if ( currententity->flags & RF_TRANSLUCENT )	
+	else if ( currententity->flags & RF_TRANSLUCENT )
 	{
 		qglEnable (GL_BLEND);
 		qglBlendFunc (GL_ONE, GL_ONE);
@@ -1054,13 +1040,13 @@ void R_DrawAliasModel (entity_t *e)
 	{
 		qglTexGenf(GL_S, GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
 		qglTexGenf(GL_T, GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
-		qglEnable(GL_TEXTURE_GEN_S); 
-		qglEnable(GL_TEXTURE_GEN_T); 
-		qglBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); 
-	
+		qglEnable(GL_TEXTURE_GEN_S);
+		qglEnable(GL_TEXTURE_GEN_T);
+		qglBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
 	}
 
-	if ( (currententity->frame >= paliashdr->num_frames) 
+	if ( (currententity->frame >= paliashdr->num_frames)
 		|| (currententity->frame < 0) )
 	{
 		Com_Printf ("R_DrawAliasModel %s: no such frame %d\n",
@@ -1105,12 +1091,12 @@ void R_DrawAliasModel (entity_t *e)
 
 	if( currententity->flags & RF_CUSTOMSKIN )
 	{
-		qglDisable(GL_TEXTURE_GEN_S); 
-		qglDisable(GL_TEXTURE_GEN_T); 
-		qglDisable (GL_BLEND); 
-		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-        qglColor4f(1,1,1,1); 
-	    qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); 
+		qglDisable(GL_TEXTURE_GEN_S);
+		qglDisable(GL_TEXTURE_GEN_T);
+		qglDisable (GL_BLEND);
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        qglColor4f(1,1,1,1);
+	    qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	}
 	if (currententity->flags & RF_DEPTHHACK)
@@ -1136,14 +1122,14 @@ void R_DrawAliasModel (entity_t *e)
 			qglRotatef (e->angles[1], 0, 0, 1);
 			qglDisable (GL_TEXTURE_2D);
 			qglEnable (GL_BLEND);
-				
+
 			if (currententity->flags & RF_TRANSLUCENT)
 				qglColor4f (0,0,0,0.4 * currententity->alpha); //Knightmare- variable alpha
 			else
 				qglColor4f (0,0,0,0.4);
-				
+
 			R_DrawAliasShadow (paliashdr, currententity->frame);
-				
+
 			qglEnable (GL_TEXTURE_2D);
 			qglDisable (GL_BLEND);
 			qglPopMatrix ();
@@ -1157,18 +1143,18 @@ void R_DrawAliasModel (entity_t *e)
 			qglRotatef (e->angles[1], 0, 0, 1);
 			qglDisable (GL_TEXTURE_2D);
 			qglEnable (GL_BLEND);
-			
+
 			if (currententity->flags & RF_TRANSLUCENT)
 				qglColor4f (0,0,0,casted * currententity->alpha);
 			else
 				qglColor4f (0,0,0,casted);
-						
+
 			R_DrawAliasShadow (paliashdr, currententity->frame);
-				
+
 			qglEnable (GL_TEXTURE_2D);
 			qglDisable (GL_BLEND);
 			qglPopMatrix ();
-			//dynamic 
+			//dynamic
 			casted = 0;
 			casted = R_ShadowLight (currententity->origin, shadevector, 0);
 			if (casted > 0) { //only draw if there's a dynamic light there
@@ -1177,28 +1163,28 @@ void R_DrawAliasModel (entity_t *e)
 				qglRotatef (e->angles[1], 0, 0, 1);
 				qglDisable (GL_TEXTURE_2D);
 				qglEnable (GL_BLEND);
-				
+
 				if (currententity->flags & RF_TRANSLUCENT)
-					qglColor4f (0,0,0,casted * currententity->alpha); 
+					qglColor4f (0,0,0,casted * currententity->alpha);
 				else
 					qglColor4f (0,0,0,casted);
-				
+
 				R_DrawAliasShadow (paliashdr, currententity->frame);
-				
+
 				qglEnable (GL_TEXTURE_2D);
 				qglDisable (GL_BLEND);
 				qglPopMatrix ();
 			}
-			
+
 			break;
 		}
 	}
 	qglColor4f (1,1,1,1);
 
-	if(r_minimap->value) 
-    {	   
+	if(r_minimap->value)
+    {
 	   if ( currententity->flags & RF_MONSTER)
-	   { 
+	   {
 			RadarEnts[numRadarEnts].color[0]= 1.0;
 			RadarEnts[numRadarEnts].color[1]= 0.0;
 			RadarEnts[numRadarEnts].color[2]= 2.0;
@@ -1206,7 +1192,7 @@ void R_DrawAliasModel (entity_t *e)
 		}
 	    else
 			return;
-			
+
 		VectorCopy(currententity->origin,RadarEnts[numRadarEnts].org);
 		numRadarEnts++;
 	}

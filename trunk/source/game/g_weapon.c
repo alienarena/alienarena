@@ -221,7 +221,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 		else
 			gi.WriteDir (plane->normal);
 		gi.multicast (self->s.origin, MULTICAST_PVS);
-		
+
 	}
 
 	G_FreeEdict (self);
@@ -256,13 +256,13 @@ void blasterball_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 	else
 	{
 		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_BLASTER); 
+		gi.WriteByte (TE_BLASTER);
 		gi.WritePosition (self->s.origin);
 		if (!plane)
 			gi.WriteDir (vec3_origin);
 		else
 			gi.WriteDir (plane->normal);
-		gi.multicast (self->s.origin, MULTICAST_PVS);		
+		gi.multicast (self->s.origin, MULTICAST_PVS);
 	}
 	T_RadiusDamage(self, self->owner, 95, other, 150, MOD_PLASMA_SPLASH, 0);
 	G_FreeEdict (self);
@@ -297,7 +297,7 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	bolt->think = G_FreeEdict;
 	bolt->dmg = damage;
 	bolt->classname = "bolt";
-	
+
 	gi.linkentity (bolt);
 
 	tr = gi.trace (self->s.origin, NULL, NULL, bolt->s.origin, bolt, MASK_SHOT);
@@ -306,17 +306,17 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 		VectorMA (bolt->s.origin, -10, dir, bolt->s.origin);
 		bolt->touch (bolt, tr.ent, NULL, NULL);
 	}
-}	
+}
 void fire_blaster (edict_t *self, vec3_t start, vec3_t aimdir, int damage,
 int speed, int effect, qboolean hyper)
-{   
+{
 	vec3_t		from;
 	vec3_t		end;
 	trace_t		tr;
 	edict_t		*ignore;
 	int			mask;
 	qboolean	water;
-	
+
 	self->client->resp.weapon_shots[6]++;
 
 	VectorMA (start, 8192, aimdir, end);
@@ -352,9 +352,9 @@ int speed, int effect, qboolean hyper)
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
-	// trace for end point of laser beam.      // the laser aim is perfect. 
+	// trace for end point of laser beam.      // the laser aim is perfect.
 	// no random aim like the machinegun
-	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);      
+	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);
 
 	// send laser beam temp entity to clients
 	VectorCopy (tr.endpos, from);
@@ -363,16 +363,16 @@ int speed, int effect, qboolean hyper)
 	gi.WriteByte (TE_LASERBEAM);
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
-	gi.multicast (self->s.origin, MULTICAST_PHS);   
-      
-	if ((tr.ent != self) && (tr.ent->takedamage)) 
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
+	if ((tr.ent != self) && (tr.ent->takedamage))
 	{
         	T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BEAMGUN);
 		self->client->resp.weapon_hits[6]++;
 		gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 	}
 	else if (!((tr.surface) && (tr.surface->flags & SURF_SKY)))
-	{  
+	{
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_SCREEN_SPARKS);
 		gi.WritePosition (tr.endpos);
@@ -536,7 +536,7 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	while (ignore)
 	{
 		tr = gi.trace (from, NULL, NULL, end, ignore, mask);
-		
+
 		if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
 		{
 			mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
@@ -548,24 +548,24 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 				ignore = tr.ent;
 			else
 				ignore = NULL;
-			
+
 			if ((tr.ent != self) && (tr.ent->takedamage)) {
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
 				self->client->resp.weapon_hits[0]++;
 				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 			}
 		}
-		
+
 		VectorCopy (tr.endpos, from);
 	}
 
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
-	// trace for end point of laser beam.      // the laser aim is perfect. 
+	// trace for end point of laser beam.      // the laser aim is perfect.
 	// no random aim like the machinegun
-	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);  
-    
+	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);
+
 	// send laser beam temp entity to clients
 	VectorCopy (tr.endpos, from);
 
@@ -573,8 +573,8 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	gi.WriteByte (TE_BLASTERBEAM);
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
-	gi.multicast (self->s.origin, MULTICAST_PHS);   
-	
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_BLASTER);
 	gi.WritePosition (tr.endpos);
@@ -592,7 +592,7 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 		bomb->think = G_FreeEdict;
 		bomb->classname = "bomb";
 		gi.linkentity (bomb);
-		T_RadiusDamage(bomb, self, 50, NULL, 200, MOD_VAPORALTFIRE, 0); 
+		T_RadiusDamage(bomb, self, 50, NULL, 200, MOD_VAPORALTFIRE, 0);
 		G_FreeEdict (bomb);
 	}
 
@@ -638,9 +638,9 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 				gi.WriteByte (color);
 				gi.multicast (tr.endpos, MULTICAST_PVS);
 			}
-			
+
 		}
-			
+
 	}
 	// if went through water, determine where the end and make a bubble trail
 	if (water)
@@ -685,7 +685,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	while (ignore)
 	{
 		tr = gi.trace (from, NULL, NULL, end, ignore, mask);
-		
+
 		if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
 		{
 			mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
@@ -697,7 +697,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 				ignore = tr.ent;
 			else
 				ignore = NULL;
-			
+
 			if ((tr.ent != self) && (tr.ent->takedamage))
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
 				if (tr.ent->health > 0)
@@ -711,10 +711,10 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
-	// trace for end point of laser beam.      // the laser aim is perfect. 
+	// trace for end point of laser beam.      // the laser aim is perfect.
 	// no random aim like the machinegun
-	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);  
-    
+	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);
+
 	// send laser beam temp entity to clients
 	VectorCopy (tr.endpos, from);
 
@@ -722,8 +722,8 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	gi.WriteByte (TE_REDLASER);
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
-	gi.multicast (self->s.origin, MULTICAST_PHS);   
-	
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
 
 	if(detonate) {
 		//spawn a new ent at end of explosion - and detonate it
@@ -736,8 +736,8 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 		bomb->think = G_FreeEdict;
 		bomb->classname = "bomb";
 		gi.linkentity (bomb);
-		T_RadiusDamage(bomb, self, 100, NULL, 200, MOD_VAPORALTFIRE, -1); 
-	
+		T_RadiusDamage(bomb, self, 100, NULL, 200, MOD_VAPORALTFIRE, -1);
+
 		gi.WriteByte (svc_temp_entity);
 		if (bomb->waterlevel)
 		gi.WriteByte (TE_ROCKET_EXPLOSION_WATER);
@@ -745,7 +745,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 		gi.WriteByte (TE_ROCKET_EXPLOSION);
 		gi.WritePosition (bomb->s.origin);
 		gi.multicast (bomb->s.origin, MULTICAST_PHS);
-		
+
 		G_FreeEdict (bomb);
 	}
 
@@ -791,9 +791,9 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 				gi.WriteByte (color);
 				gi.multicast (tr.endpos, MULTICAST_PVS);
 			}
-			
+
 		}
-			
+
 	}
 	// if went through water, determine where the end and make a bubble trail
 	if (water)
@@ -863,19 +863,19 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
-	// trace for end point of laser beam.      // the laser aim is perfect. 
+	// trace for end point of laser beam.      // the laser aim is perfect.
 	// no random aim like the machinegun
-	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);     
-	
+	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);
+
 	// send laser beam temp entity to clients
 	VectorCopy (tr.endpos, from);
-	
+
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_RAILTRAIL);
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
-	gi.multicast (self->s.origin, MULTICAST_PHS);   
-	
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
 	if (self->client)
 		PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
 }
@@ -925,23 +925,23 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 
 		VectorCopy (tr.endpos, from);
 	}
-	
+
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
-	// trace for end point of laser beam.      // the laser aim is perfect. 
+	// trace for end point of laser beam.      // the laser aim is perfect.
 	// no random aim like the machinegun
-	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);     
-	
+	tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);
+
 	// send laser beam temp entity to clients
 	VectorCopy (tr.endpos, from);
-	
+
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_VAPORBEAM);
 	gi.WritePosition (start);
 	gi.WritePosition (tr.endpos);
-	gi.multicast (self->s.origin, MULTICAST_PHS);   
-	
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_BFG_BIGEXPLOSION);
 	gi.WritePosition (tr.endpos);
@@ -971,7 +971,7 @@ void homing_think (edict_t *ent)
 	edict_t *blip = NULL;
 	vec3_t  targetdir, blipdir;
 	vec_t   speed;
-	
+
 	while ((blip = findradius(blip, ent->s.origin, 1000)) != NULL)
 	{
 		if (!(blip->svflags & SVF_MONSTER) && !blip->client)
@@ -994,7 +994,7 @@ void homing_think (edict_t *ent)
 			VectorCopy(blipdir, targetdir);
 		}
 	}
-	
+
 	if (target != NULL)
 	{
 		// target acquired, nudge our direction toward it
@@ -1007,7 +1007,7 @@ void homing_think (edict_t *ent)
 		speed = VectorLength(ent->velocity);
 		VectorScale(targetdir, speed, ent->velocity);
 	}
-	
+
 	ent->nextthink = level.time + .1;
 }
 
@@ -1031,21 +1031,21 @@ void fire_homingrocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int
 	rocket->s.modelindex = gi.modelindex ("models/objects/rocket/tris.md2");
 	rocket->owner = self;
 	rocket->touch = rocket_touch;
-	
+
 	// CCH: if they have 5 cells, start homing, otherwise normal rocket think
 	if (self->client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] >= 5)
 	{
 		self->client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] -= 5;
 		rocket->nextthink = level.time + .1;
 		rocket->think = homing_think;
-	} 
+	}
 	else
 	{
 		safe_cprintf(self, PRINT_HIGH, "No cells for homing missile.\n");
 		rocket->nextthink = level.time + 8000/speed;
 		rocket->think = G_FreeEdict;
 	}
-    
+
     rocket->dmg = damage;
 	rocket->radius_dmg = radius_damage;
 	rocket->dmg_radius = damage_radius;
@@ -1144,7 +1144,7 @@ void floater_think (edict_t *self)
 
 		target = ent;
 	}
-	
+
 	self->nextthink = level.time + FRAMETIME;
 	floater_timer++;
 
@@ -1178,7 +1178,7 @@ void prox_think (edict_t *self)
 
 		if (!ent->takedamage)
 			continue;
-		
+
 		T_RadiusDamage(self, self->owner, self->radius_dmg, self->enemy, self->dmg_radius, MOD_R_SPLASH, -1);
 		self->owner->client->resp.weapon_hits[2]++;
 
@@ -1193,7 +1193,7 @@ void prox_think (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	
+
 	self->nextthink = level.time + FRAMETIME;
 	prox_timer++;
 
@@ -1264,7 +1264,7 @@ void fire_floater (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	floater->classname = "grenade";
 	floater_timer = 0;
 
-   
+
 	gi.linkentity (floater);
 }
 void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float damage_radius, int radius_damage, float timer)
@@ -1273,7 +1273,7 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
     vec3_t	dir, forward, right, up;
 
 	self->client->resp.weapon_shots[2]++;
-	
+
 	vectoangles(aimdir, dir);
 	AngleVectors(dir, forward, right, up);
 
@@ -1304,7 +1304,7 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	gi.linkentity (prox);
 }
 
-//vehicles 
+//vehicles
 void bomb_think (edict_t *self)
 {
 	self->nextthink = level.time + FRAMETIME;
@@ -1342,7 +1342,7 @@ void bomb_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 		ent->owner->client->resp.weapon_hits[7]++;
 		gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 	}
-	
+
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_R_SPLASH, 7);
 
 	//advance to expoding frame
@@ -1352,7 +1352,7 @@ void bomb_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 	gi.WriteByte (TE_BFG_BIGEXPLOSION);
 	gi.WritePosition (origin);
 	gi.multicast (ent->s.origin, MULTICAST_PHS);
-	
+
 	gi.sound (ent, CHAN_WEAPON, gi.soundindex("vehicles/explodebomb.wav"), 1, ATTN_NORM, 0);
 
 	//shake the ground a bit(it's a big ass bomb, right?)
@@ -1405,7 +1405,7 @@ void fire_bomb (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	bomb->dmg_radius = damage_radius;
 	bomb->s.sound = gi.soundindex ("vehicles/flybomb.wav"); //get a new sound
 	bomb->classname = "grenade";
- 
+
 	gi.linkentity (bomb);
 }
 
@@ -1427,7 +1427,7 @@ void Fire_Think (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	
+
 	if (!self->owner)
 	{
 		G_FreeEdict (self);
@@ -1439,7 +1439,7 @@ void Fire_Think (edict_t *self)
 		G_FreeEdict (self);
 		return;
 	}
-	damage = self->FlameDamage;	
+	damage = self->FlameDamage;
 	VectorAdd (self->orb->mins, self->orb->maxs, v);
 	VectorMA (self->orb->s.origin, 0.5, v, v);
 	VectorSubtract (self->s.origin, v, v);
@@ -1633,7 +1633,7 @@ void fire_fireball (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 static void DeathballTouch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	//owner (who dropped us) can't touch for two secs
-//	if (other == ent->owner && 
+//	if (other == ent->owner &&
 //		ent->nextthink - level.time > 2)
 //		return;
 
@@ -1645,7 +1645,7 @@ static void DeathballThink(edict_t *ent)
 
 	ResetDeathball();
 	safe_bprintf(PRINT_HIGH, "The ball has returned!\n");
-	
+
 }
 void fire_deathball (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 {
@@ -1677,7 +1677,7 @@ void fire_deathball (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 	ball->owner = self; //important for scoring
 
 	ball->classname = "item_deathball";
-	ball->think = DeathballThink; 
+	ball->think = DeathballThink;
 	ball->nextthink = level.time + 30;
 	ball->touch = DeathballTouch;
 	ball->s.frame = 229;
@@ -1686,7 +1686,7 @@ void fire_deathball (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 
 	//remove deathball from players inventory
 	//set everything back
-	
+
 	self->in_deathball = false;
 	if(instagib->value)
 		self->client->newweapon = FindItem("Alien Disruptor");
@@ -1712,12 +1712,12 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 	while (ignore)
 	{
 		tr = gi.trace (from, NULL, NULL, end, ignore, MASK_PLAYERSOLID);
-		
+
 		if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
 			ignore = tr.ent;
 		else
 			ignore = NULL;
-			
+
 		if ((tr.ent != self) && (tr.ent->takedamage)) {
 			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_VIOLATOR);
 			self->client->resp.weapon_hits[8]++;
