@@ -163,7 +163,6 @@ cvar_t	*gl_lightmap;
 cvar_t	*gl_shadows;
 cvar_t	*gl_mode;
 cvar_t	*gl_dynamic;
-cvar_t	*gl_monolightmap;
 cvar_t	*gl_modulate;
 cvar_t	*gl_nobind;
 cvar_t	*gl_round_down;
@@ -176,7 +175,6 @@ cvar_t	*gl_cull;
 cvar_t	*gl_polyblend;
 cvar_t	*gl_flashblend;
 cvar_t	*gl_playermip;
-cvar_t	*gl_saturatelighting;
 cvar_t	*gl_swapinterval;
 cvar_t	*gl_texturemode;
 cvar_t	*gl_texturealphamode;
@@ -1521,7 +1519,6 @@ void R_Register( void )
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", 0);
 	gl_flashblend = Cvar_Get ("gl_flashblend", "0", 0);
 	gl_playermip = Cvar_Get ("gl_playermip", "0", 0);
-	gl_monolightmap = Cvar_Get( "gl_monolightmap", "0", 0 );
 #ifdef __unix__
 	gl_driver = Cvar_Get( "gl_driver", "libGL.so.1", CVAR_ARCHIVE );
 #else
@@ -1544,8 +1541,6 @@ void R_Register( void )
 
 	gl_drawbuffer = Cvar_Get( "gl_drawbuffer", "GL_BACK", 0 );
 	gl_swapinterval = Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE );
-
-	gl_saturatelighting = Cvar_Get( "gl_saturatelighting", "0", 0 );
 
 	gl_3dlabs_broken = Cvar_Get( "gl_3dlabs_broken", "1", CVAR_ARCHIVE );
 
@@ -1672,7 +1667,7 @@ int R_Init( void *hinstance, void *hWnd )
 	if ( !QGL_Init( gl_driver->string ) )
 	{
 		QGL_Shutdown();
-        Com_Printf ("ref_gl::R_Init() - could not load \"%s\"\n", gl_driver->string );
+		Com_Printf ("ref_gl::R_Init() - could not load \"%s\"\n", gl_driver->string );
 		return -1;
 	}
 
@@ -1690,7 +1685,7 @@ int R_Init( void *hinstance, void *hWnd )
 	if ( !R_SetMode () )
 	{
 		QGL_Shutdown();
-        Com_Printf ("ref_gl::R_Init() - could not R_SetMode()\n" );
+		Com_Printf ("ref_gl::R_Init() - could not R_SetMode()\n" );
 		return -1;
 	}
 
@@ -1738,23 +1733,6 @@ int R_Init( void *hinstance, void *hWnd )
 	else
 		gl_config.renderer = GL_RENDERER_OTHER;
 
-	if ( toupper( gl_monolightmap->string[1] ) != 'F' )
-	{
-		if ( gl_config.renderer == GL_RENDERER_PERMEDIA2 )
-		{
-			Cvar_Set( "gl_monolightmap", "A" );
-			Com_Printf ("...using gl_monolightmap 'a'\n" );
-		}
-		else if ( gl_config.renderer & GL_RENDERER_POWERVR )
-		{
-			Cvar_Set( "gl_monolightmap", "0" );
-		}
-		else
-		{
-			Cvar_Set( "gl_monolightmap", "0" );
-		}
-	}
-
 	// power vr can't have anything stay in the framebuffer, so
 	// the screen needs to redraw the tiled background every frame
 	if ( gl_config.renderer & GL_RENDERER_POWERVR )
@@ -1765,10 +1743,6 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		Cvar_Set( "scr_drawall", "0" );
 	}
-
-#ifdef __unix__
-	Cvar_SetValue( "gl_finish", 1 );
-#endif
 
 	// MCD has buffering issues
 	if ( gl_config.renderer == GL_RENDERER_MCD )

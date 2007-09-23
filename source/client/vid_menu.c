@@ -42,9 +42,6 @@ static cvar_t *gl_reflection;
 static cvar_t *r_overbrightbits;
 static cvar_t *gl_ext_mtexcombine;
 
-static cvar_t *sw_mode;
-static cvar_t *sw_stipplealpha;
-
 static cvar_t *_windowed_mouse;
 
 extern void M_ForceMenuOff( void );
@@ -251,8 +248,6 @@ void VID_MenuInit( void )
 		gl_picmip = Cvar_Get( "gl_picmip", "0", CVAR_ARCHIVE );
 	if ( !gl_mode )
 		gl_mode = Cvar_Get( "gl_mode", "3", 0 );
-	if ( !sw_mode )
-		sw_mode = Cvar_Get( "sw_mode", "0", 0 );
 	if ( !gl_finish )
 		gl_finish = Cvar_Get( "gl_finish", "0", CVAR_ARCHIVE );
 	if ( !gl_swapinterval )

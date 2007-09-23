@@ -1075,9 +1075,9 @@ void CL_ConnectionlessPacket (void)
 		MSG_WriteChar (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message, "new");
 		cls.state = ca_connected;
-		
+
 		memset(cls.downloadurl, 0, sizeof(cls.downloadurl));
-		if(Cmd_Argc() == 2)  // http download url 
+		if(Cmd_Argc() == 2)  // http download url
 		{
 			strncpy(cls.downloadurl, Cmd_Argv(1), sizeof(cls.downloadurl) - 1);
 		}
@@ -1799,9 +1799,7 @@ cheatvar_t	cheatvars[] = {
 	{"r_drawflat", "0"},
 	{"paused", "0"},
 	{"fixedtime", "0"},
-	{"sw_draworder", "0"},
 	{"gl_lightmap", "0"},
-	{"gl_saturatelighting", "0"},
 	{NULL, NULL}
 };
 
