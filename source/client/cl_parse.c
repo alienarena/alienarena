@@ -459,13 +459,6 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 			t = model_name;
 		*t = 0;
 
-		if(cl_nobrainlets->value) {  //show them as a martian enforcer instead.
-			if(!strcmp("brainlet", model_name)) {
-				strcpy(model_name, "martianenforcer");
-				ci->helmet = R_RegisterModel("players/martianenforcer/helmet.md2");
-			}
-		}
-
 		// isolate the skin name
 		strcpy (skin_name, s + strlen(model_name) + 1);
 
