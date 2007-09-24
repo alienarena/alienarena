@@ -4240,6 +4240,8 @@ void StartServer_MenuDraw(void)
 		fclose(desc_file);
 	else
 		sprintf(path, "%s/levelshots/%s.txt", BASEDIRNAME, startmap);
+	if(desc_file)
+		fclose(desc_file);
 
 	if ((map_file = fopen(path, "rb")) != NULL)
 	{
