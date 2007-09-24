@@ -62,7 +62,6 @@ cvar_t	*cl_predict;
 cvar_t	*cl_maxfps;
 cvar_t	*cl_gun;
 cvar_t  *cl_showPlayerNames;
-cvar_t	*cl_nobrainlets;
 
 cvar_t	*cl_add_particles;
 cvar_t	*cl_add_lights;
@@ -1607,7 +1606,6 @@ void CL_InitLocal (void)
 	cl_predict = Cvar_Get ("cl_predict", "1", 0);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "90", CVAR_ARCHIVE);
 	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE);
-	cl_nobrainlets = Cvar_Get ("cl_nobrainlets", "0", CVAR_ARCHIVE);
 	cl_healthaura = Cvar_Get ("cl_healthaura", "1", CVAR_ARCHIVE);
 
 	cl_upspeed = Cvar_Get ("cl_upspeed", "200", 0);

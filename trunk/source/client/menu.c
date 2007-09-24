@@ -1335,7 +1335,6 @@ CONTROLS MENU
 static cvar_t *win_noalttab;
 extern cvar_t *in_joystick;
 extern cvar_t *cl_showPlayerNames;
-extern cvar_t *cl_nobrainlets;
 extern cvar_t *cl_healthaura;
 extern cvar_t *cl_noskins;
 extern cvar_t *gl_shadows;
@@ -1365,7 +1364,6 @@ static menulist_s		s_options_compatibility_list;
 static menulist_s		s_options_console_action;
 static menulist_s		s_options_bgmusic_box;
 static menulist_s		s_options_target_box;
-static menulist_s		s_options_brainlets_box;
 static menulist_s		s_options_healthaura_box;
 static menulist_s		s_options_noskins_box;
 static menulist_s		s_options_shaders_box;
@@ -1381,10 +1379,6 @@ static void PlayerSetupFunc( void *unused )
 static void TargetFunc( void *unused )
 {
 	Cvar_SetValue( "cl_showplayernames", s_options_target_box.curvalue);
-}
-static void BrainletsFunc( void *unused )
-{
-	Cvar_SetValue( "cl_nobrainlets", s_options_brainlets_box.curvalue);
 }
 static void HealthauraFunc( void *unused )
 {
@@ -1893,9 +1887,6 @@ static void ControlsSetMenuItemValues( void )
 	Cvar_SetValue("cl_showplayernames", ClampCvar(0, 1, cl_showPlayerNames->value ) );
 	s_options_target_box.curvalue		= cl_showPlayerNames->value;
 
-	Cvar_SetValue("cl_nobrainlets", ClampCvar(0, 1, cl_nobrainlets->value ) );
-	s_options_brainlets_box.curvalue		= cl_nobrainlets->value;
-
 	Cvar_SetValue("cl_noskins", ClampCvar(0, 1, cl_noskins->value ) );
 	s_options_noskins_box.curvalue		= cl_noskins->value;
 
@@ -2130,30 +2121,23 @@ void Options_MenuInit( void )
 	s_options_target_box.generic.callback = TargetFunc;
 	s_options_target_box.itemnames = yesno_names;
 
-	s_options_brainlets_box.generic.type = MTYPE_SPINCONTROL;
-	s_options_brainlets_box.generic.x	= 0;
-	s_options_brainlets_box.generic.y	= 80*scale;
-	s_options_brainlets_box.generic.name	= "no brainlets";
-	s_options_brainlets_box.generic.callback = BrainletsFunc;
-	s_options_brainlets_box.itemnames = onoff_names;
-
 	s_options_healthaura_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_healthaura_box.generic.x	= 0;
-	s_options_healthaura_box.generic.y	= 90*scale;
+	s_options_healthaura_box.generic.y	= 80*scale;
 	s_options_healthaura_box.generic.name	= "health auras";
 	s_options_healthaura_box.generic.callback = HealthauraFunc;
 	s_options_healthaura_box.itemnames = onoff_names;
 
 	s_options_noskins_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_noskins_box.generic.x	= 0;
-	s_options_noskins_box.generic.y	= 100*scale;
+	s_options_noskins_box.generic.y	= 90*scale;
 	s_options_noskins_box.generic.name	= "force martian models";
 	s_options_noskins_box.generic.callback = NoskinsFunc;
 	s_options_noskins_box.itemnames = onoff_names;
 
 	s_options_sfxvolume_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sfxvolume_slider.generic.x	= 0;
-	s_options_sfxvolume_slider.generic.y	= 110*scale;
+	s_options_sfxvolume_slider.generic.y	= 100*scale;
 	s_options_sfxvolume_slider.generic.name	= "global volume";
 	s_options_sfxvolume_slider.generic.callback	= UpdateVolumeFunc;
 	s_options_sfxvolume_slider.minvalue		= 0;
@@ -2162,7 +2146,7 @@ void Options_MenuInit( void )
 
 	s_options_bgvolume_slider.generic.type	= MTYPE_SLIDER;
 	s_options_bgvolume_slider.generic.x	= 0;
-	s_options_bgvolume_slider.generic.y	= 120*scale;
+	s_options_bgvolume_slider.generic.y	= 110*scale;
 	s_options_bgvolume_slider.generic.name	= "music volume";
 	s_options_bgvolume_slider.generic.callback	= UpdateBGVolumeFunc;
 	s_options_bgvolume_slider.minvalue		= 0;
@@ -2171,7 +2155,7 @@ void Options_MenuInit( void )
 
 	s_options_bgmusic_box.generic.type	= MTYPE_SPINCONTROL;
 	s_options_bgmusic_box.generic.x		= 0;
-	s_options_bgmusic_box.generic.y		= 130*scale;
+	s_options_bgmusic_box.generic.y		= 120*scale;
 	s_options_bgmusic_box.generic.name	= "Background music";
 	s_options_bgmusic_box.generic.callback	= UpdateBGMusicFunc;
 	s_options_bgmusic_box.itemnames		= background_music_items;
@@ -2179,14 +2163,14 @@ void Options_MenuInit( void )
 
 	s_options_quality_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_quality_list.generic.x		= 0;
-	s_options_quality_list.generic.y		= 140*scale;
+	s_options_quality_list.generic.y		= 130*scale;
 	s_options_quality_list.generic.name		= "sampling rate";
 	s_options_quality_list.generic.callback = UpdateSoundQualityFunc;
 	s_options_quality_list.itemnames		= quality_items;
 
 	s_options_compatibility_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_compatibility_list.generic.x		= 0;
-	s_options_compatibility_list.generic.y		= 150*scale;
+	s_options_compatibility_list.generic.y		= 140*scale;
 	s_options_compatibility_list.generic.name	= "sound compatibility";
 	s_options_compatibility_list.generic.callback = UpdateSoundQualityFunc;
 	s_options_compatibility_list.itemnames		= compatibility_items;
@@ -2194,7 +2178,7 @@ void Options_MenuInit( void )
 
 	s_options_sensitivity_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sensitivity_slider.generic.x		= 0;
-	s_options_sensitivity_slider.generic.y		= 170*scale;
+	s_options_sensitivity_slider.generic.y		= 160*scale;
 	s_options_sensitivity_slider.generic.name	= "mouse speed";
 	s_options_sensitivity_slider.generic.callback = MouseSpeedFunc;
 	s_options_sensitivity_slider.minvalue		= 2;
@@ -2202,14 +2186,14 @@ void Options_MenuInit( void )
 
 	s_options_alwaysrun_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_alwaysrun_box.generic.x	= 0;
-	s_options_alwaysrun_box.generic.y	= 180*scale;
+	s_options_alwaysrun_box.generic.y	= 170*scale;
 	s_options_alwaysrun_box.generic.name	= "always run";
 	s_options_alwaysrun_box.generic.callback = AlwaysRunFunc;
 	s_options_alwaysrun_box.itemnames = yesno_names;
 
 	s_options_invertmouse_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_invertmouse_box.generic.x	= 0;
-	s_options_invertmouse_box.generic.y	= 190*scale;
+	s_options_invertmouse_box.generic.y	= 180*scale;
 	s_options_invertmouse_box.generic.name	= "invert mouse";
 	s_options_invertmouse_box.generic.callback = InvertMouseFunc;
 	s_options_invertmouse_box.itemnames = yesno_names;
@@ -2217,7 +2201,7 @@ void Options_MenuInit( void )
 	font_names = SetFontNames ();
 	s_options_font_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_font_box.generic.x	= 0;
-	s_options_font_box.generic.y	= 210*scale;
+	s_options_font_box.generic.y	= 200*scale;
 	s_options_font_box.generic.name	= "font";
 	s_options_font_box.generic.callback = FontFunc;
 	s_options_font_box.itemnames = font_names;
@@ -2226,7 +2210,7 @@ void Options_MenuInit( void )
 	crosshair_names = SetCrosshairNames ();
 	s_options_crosshair_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_crosshair_box.generic.x	= 0;
-	s_options_crosshair_box.generic.y	= 230*scale;
+	s_options_crosshair_box.generic.y	= 220*scale;
 	s_options_crosshair_box.generic.name	= "crosshair";
 	s_options_crosshair_box.generic.callback = CrosshairFunc;
 	s_options_crosshair_box.itemnames = crosshair_names;
@@ -2235,7 +2219,7 @@ void Options_MenuInit( void )
 	hud_names = SetHudNames ();
 	s_options_hud_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_hud_box.generic.x	= 0;
-	s_options_hud_box.generic.y	= 240*scale;
+	s_options_hud_box.generic.y	= 230*scale;
 	s_options_hud_box.generic.name	= "hud";
 	s_options_hud_box.generic.callback = HudFunc;
 	s_options_hud_box.itemnames = hud_names;
@@ -2243,27 +2227,27 @@ void Options_MenuInit( void )
 
 	s_options_minimap_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_minimap_box.generic.x		= 0;
-	s_options_minimap_box.generic.y		= 250*scale;
+	s_options_minimap_box.generic.y		= 240*scale;
 	s_options_minimap_box.generic.name  = "minimap";
 	s_options_minimap_box.generic.callback = MinimapFunc;
 	s_options_minimap_box.itemnames = minimap_names;
 
 	s_options_joystick_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_joystick_box.generic.x	= 0;
-	s_options_joystick_box.generic.y	= 260*scale;
+	s_options_joystick_box.generic.y	= 250*scale;
 	s_options_joystick_box.generic.name	= "use joystick";
 	s_options_joystick_box.generic.callback = JoystickFunc;
 	s_options_joystick_box.itemnames = yesno_names;
 
 	s_options_defaults_action.generic.type	= MTYPE_ACTION;
 	s_options_defaults_action.generic.x		= 0;
-	s_options_defaults_action.generic.y		= 280*scale;
+	s_options_defaults_action.generic.y		= 270*scale;
 	s_options_defaults_action.generic.name	= "reset defaults";
 	s_options_defaults_action.generic.callback = ControlsResetDefaultsFunc;
 
 	s_options_console_action.generic.type	= MTYPE_ACTION;
 	s_options_console_action.generic.x		= 0;
-	s_options_console_action.generic.y		= 290*scale;
+	s_options_console_action.generic.y		= 280*scale;
 	s_options_console_action.generic.name	= "go to console";
 	s_options_console_action.generic.callback = ConsoleFunc;
 
@@ -2276,7 +2260,6 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_dynamic_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_rtlights_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_target_box );
-	Menu_AddItem( &s_options_menu, ( void * ) &s_options_brainlets_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_healthaura_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_noskins_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_sfxvolume_slider );

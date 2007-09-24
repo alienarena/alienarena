@@ -295,7 +295,6 @@ extern	cvar_t	*cl_timedemo;
 extern	cvar_t	*cl_vwep;
 
 extern  cvar_t  *background_music;
-extern  cvar_t  *cl_nobrainlets;
 
 typedef struct
 {

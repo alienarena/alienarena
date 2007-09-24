@@ -889,7 +889,6 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 	int			nummaps;
 	float		*bl;
 	lightstyle_t	*style;
-	int monolightmap;
 
 	if ( SurfaceHasNoLightmap( surf ) )
 		Com_Error (ERR_DROP, "R_BuildLightMap called for non-lit surface");

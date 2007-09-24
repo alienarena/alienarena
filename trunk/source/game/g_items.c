@@ -169,15 +169,10 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 	{
 		int randomSpawn;
 		//Phenax - Add random time to quad spawn
-		if(ent->item->use == Use_Quad && !(ent->spawnflags & DROPPED_PLAYER_ITEM)) {
-			randomSpawn = 30 + rand() % (75 - 30); //30 to 75 seconds randomness
-			SetRespawn(ent, ent->item->quantity + randomSpawn);
-			ent->item->use (other, ent->item);
-			return;
-		}
-
+		randomSpawn = 30 + rand() % (75 - 30); //30 to 75 seconds randomness
+		
 		if (!(ent->spawnflags & DROPPED_ITEM) )
-			SetRespawn (ent, ent->item->quantity);
+			SetRespawn (ent, ent->item->quantity + randomSpawn);
 		if (((int)dmflags->value & DF_INSTANT_ITEMS) || ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM)))
 		{
 			if ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM))
