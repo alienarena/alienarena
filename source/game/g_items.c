@@ -167,6 +167,15 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 
 	if (deathmatch->value)
 	{
+		int randomSpawn;
+		//Phenax - Add random time to quad spawn
+		if(ent->item->use == Use_Quad && !(ent->spawnflags & DROPPED_PLAYER_ITEM)) {
+			randomSpawn = 30 + rand() % (75 - 30); //30 to 75 seconds randomness
+			SetRespawn(ent, ent->item->quantity + randomSpawn);
+			ent->item->use (other, ent->item);
+			return;
+		}
+
 		if (!(ent->spawnflags & DROPPED_ITEM) )
 			SetRespawn (ent, ent->item->quantity);
 		if (((int)dmflags->value & DF_INSTANT_ITEMS) || ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM)))
@@ -322,7 +331,7 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboo
 	if (ent->client->pers.inventory[index] == max)
 		return false;
 
-	if (weapon && !dropped && (ent->client->pers.inventory[index] > 0)) 
+	if (weapon && !dropped && (ent->client->pers.inventory[index] > 0))
 		count = 1; //already has weapon -- not dropped. Give him 1 ammo.
 
 	//if less than base ammo, restock ammo fully
