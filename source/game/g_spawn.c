@@ -564,70 +564,6 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 #endif
 
-char *single_statusbar =
-
-//background
-"yb -256 "
-"xl	 0 "
-"pic 0 "
-
-// health
-"yb	-29 "
-"xl	11 "
-"hnum "
-
-// ammo
-"if 2 "
-"	xl	76 "
-"   yb  -29 "
-"	anum "
-"	xl	14 "
-"	yb  -124 "
-"	pic 2 "
-"endif "
-
-// armor
-"if 4 "
-"	xl	142 "
-"   yb  -29 "
-"	rnum "
-"	xl	14 "
-"   yb -156 "
-"	pic 4 "
-"endif "
-
-// selected item
-"if 6 "
-"	xv	296 "
-"   yb  -56"
-"	pic 6 "
-"endif "
-
-// picked up item
-"if 7 "
-"	xl	99 "
-"	yb	-66 "
-"	stat_string 8 "
-"	yb	-36 "
-"endif "
-
-// timer
-"if 9 "
-"	xv	262 "
-"   yb  -36 "
-"	num	2	10 "
-"	xv	296 "
-"   yb  -56 "
-"	pic	9 "
-"endif "
-
-//  help / weapon icon
-"if 11 "
-"	xl	220 "
-"	pic	11 "
-"endif "
-;
-
 char *dm_statusbar =
 //background
 "yb -256 "
@@ -664,10 +600,10 @@ char *dm_statusbar =
 "	pic	9 "
 "endif "
 
-//  help / weapon icon
+// weapon icon
 "if 11 "
-"	xl	220 "
-"   yb  -50 "
+"	xr	-72 "
+"   yt  196 "
 "	pic	11 "
 "endif "
 
@@ -806,18 +742,14 @@ void SP_worldspawn (edict_t *ent)
 	gi.configstring (CS_MAXCLIENTS, va("%i", (int)(maxclients->value) ) );
 
 	// status bar program
-	if (deathmatch->value) {
-		if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
-		{
-			gi.configstring (CS_STATUSBAR, team_statusbar);
-			if(ctf->value)
-				CTFPrecache();
-		}
-		else
-			gi.configstring (CS_STATUSBAR, dm_statusbar);
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
+	{
+		gi.configstring (CS_STATUSBAR, team_statusbar);
+		if(ctf->value)
+			CTFPrecache();
 	}
 	else
-		gi.configstring (CS_STATUSBAR, single_statusbar);
+		gi.configstring (CS_STATUSBAR, dm_statusbar);
 
 	//---------------
 
