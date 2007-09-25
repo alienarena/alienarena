@@ -124,7 +124,7 @@ char	*SV_StatusString (void)
 	int		statusLength;
 	int		playerLength;
 	char *name;
-	char *s;
+	//char *s;
 	char nametxt[MAX_INFO_STRING];
 
 	strcpy (status, Cvar_Serverinfo());
@@ -152,9 +152,9 @@ char	*SV_StatusString (void)
 					break;
 			}
 			nametxt[k]=0;
-			s = NET_AdrToString ( cl->netchan.remote_address);
-			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"%s\"\n",
-				cl->edict->client->ps.stats[STAT_FRAGS], cl->ping, nametxt, s);
+			//s = NET_AdrToString ( cl->netchan.remote_address); //fuck you Luigi
+			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"127.0.0.1\"\n",
+				cl->edict->client->ps.stats[STAT_FRAGS], cl->ping, nametxt);
 			playerLength = strlen(player);
 			if (statusLength + playerLength >= sizeof(status) )
 				break;		// can't hold any more
