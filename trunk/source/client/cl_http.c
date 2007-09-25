@@ -104,8 +104,8 @@ qboolean CL_HttpDownload(void){
         // set url from which to retrieve the file
         curl_easy_setopt(curl, CURLOPT_URL, url);
 
-	// time out in 5s
-	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5);
+		// time out in 5s
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5);
 
         // set error buffer so we may print meaningful messages
         memset(curlerr, 0, sizeof(curlerr));

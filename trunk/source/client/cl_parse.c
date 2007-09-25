@@ -87,22 +87,15 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 {
 	FILE *fp;
 	char	name[MAX_OSPATH];
-	char	shortname[MAX_OSPATH];
 
 	if (strstr (filename, ".."))
 	{
 		Com_Printf ("Refusing to download a path with ..\n");
 		return true;
 	}
-
-	//if pcx, strip extension and change to .tga, we never dl .pcx anymore
+	
     if(filename[strlen(filename)-1] == 'x') {
-
-		//if this is coming from a player model don't bother
-		if(filename[0] != 'm' && filename[0] != 'v')
-			return true;
-		COM_StripExtension ( filename, shortname );
-		sprintf(filename, "%s.tga", shortname);
+		return true; //we just cannot dl at all anymore in this case of models with .pcx in their path
 	}
 
 	if (FS_LoadFile (filename, NULL) != -1)
@@ -119,7 +112,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	strcat (cls.downloadtempname, ".tmp");
 
 	// attempt an http download if available
-	if(cls.downloadurl[0] && CL_HttpDownload()) {
+	if(cls.downloadurl[0] && CL_HttpDownload()) { 
 		return false;
 	}
 	else
