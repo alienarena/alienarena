@@ -242,9 +242,14 @@ void CL_ParseDownload (void)
 	// read the data
 	size = MSG_ReadShort (&net_message);
 	percent = MSG_ReadByte (&net_message);
-	if (size == -1)
+	if (size < 0) //fix issues with bad data being dl'd
 	{
 		Com_Printf ("Server does not have file %s.\n", cls.downloadname);
+		
+		//nuke the temp filename, we don't want that getting left around.
+		cls.downloadtempname[0] = 0;
+		cls.downloadname[0] = 0;
+
 		if (cls.download)
 		{
 			// if here, we tried to resume a file but the server said no
@@ -261,7 +266,7 @@ void CL_ParseDownload (void)
 		CL_DownloadFileName(name, sizeof(name), cls.downloadtempname);
 
 		FS_CreatePath (name);
-
+ 
 		cls.download = fopen (name, "wb");
 		if (!cls.download)
 		{
