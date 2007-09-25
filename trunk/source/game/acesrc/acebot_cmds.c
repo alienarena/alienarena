@@ -211,7 +211,7 @@ void safe_bprintf (int printlevel, char *fmt, ...)
 	va_end (argptr);
 
 	if (dedicated->value)
-		gi.cprintf(NULL, printlevel, bigbuffer);
+		gi.cprintf(NULL, printlevel, "%s", bigbuffer);
 
 	for (i=0 ; i<maxclients->value ; i++)
 	{
@@ -219,7 +219,7 @@ void safe_bprintf (int printlevel, char *fmt, ...)
 		if (!cl_ent->inuse || cl_ent->is_bot)
 			continue;
 
-		gi.cprintf(cl_ent, printlevel, bigbuffer);
+		gi.cprintf(cl_ent, printlevel, "%s", bigbuffer);
 	}
 }
 
