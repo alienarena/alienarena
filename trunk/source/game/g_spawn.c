@@ -658,10 +658,10 @@ char *team_statusbar =
 "	pic	9 "
 "endif "
 
-//  help / weapon icon
+// weapon icon
 "if 11 "
-"	xl	220 "
-"   yb  -50 "
+"	xr	-72 "
+"   yt  196 "
 "	pic	11 "
 "endif "
 

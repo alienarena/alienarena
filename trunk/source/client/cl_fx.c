@@ -493,6 +493,9 @@ void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 	cparticle_t	*p;
 	float		d;
 
+	if((color == 450 || color == 550) && cl_noblood->value)
+		return;
+
 	for (i=0 ; i<count ; i++)
 	{
 		if (!(p = new_particle()))
@@ -1576,6 +1579,9 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 	float		dec;
 	float		orgscale;
 	float		velscale;
+
+	if (((flags & EF_GIB) || (flags & EF_GREENGIB)) && cl_noblood->value)
+		return;
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
