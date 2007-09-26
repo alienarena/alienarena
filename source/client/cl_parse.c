@@ -87,6 +87,8 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 {
 	FILE *fp;
 	char	name[MAX_OSPATH];
+	char	shortname[MAX_OSPATH];
+	qboolean	modelskin = false;
 
 	if (strstr (filename, ".."))
 	{
@@ -94,15 +96,21 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		return true;
 	}
 	
+    //if pcx, strip extension and change to .tga, we never dl .pcx anymore
     if(filename[strlen(filename)-1] == 'x') {
-		return true; //we just cannot dl at all anymore in this case of models with .pcx in their path
+		modelskin = true;
+		//if this is coming from a player model don't bother
+		if(filename[0] != 'm' && filename[0] != 'v')
+			return true;
+		COM_StripExtension ( filename, shortname );
+		sprintf(filename, "%s.tga", shortname);
 	}
+
 
 	if (FS_LoadFile (filename, NULL) != -1)
 	{	// it exists, no need to download
 		return true;
 	}
-
 	strcpy (cls.downloadname, filename);
 
 	// download to a temp name, and only rename
@@ -111,12 +119,11 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	COM_StripExtension (cls.downloadname, cls.downloadtempname);
 	strcat (cls.downloadtempname, ".tmp");
 
-	// attempt an http download if available
-	if(cls.downloadurl[0] && CL_HttpDownload()) { 
-		return false;
+	// attempt an http download if available(never try to dl game model skins here)
+	if(!modelskin) {
+		if(cls.downloadurl[0] && CL_HttpDownload())  
+			return false;
 	}
-	else
-		Com_Printf("didn't find one\n");
 
 //ZOID
 	// check to see if we already have a tmp for this file, if so, try to resume

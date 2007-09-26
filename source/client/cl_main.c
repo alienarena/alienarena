@@ -1302,6 +1302,8 @@ void CL_RequestNextDownload (void)
 			if (!CL_CheckOrDownloadFile(cl.configstrings[CS_MODELS+1]))
 				return; // started a download
 	}
+
+redoSkins:;
 	if (precache_check >= CS_MODELS && precache_check < CS_MODELS+MAX_MODELS) {
 		if (allow_download_models->value) {
 			while (precache_check < CS_MODELS+MAX_MODELS &&
@@ -1362,6 +1364,13 @@ void CL_RequestNextDownload (void)
 				precache_model_skin = 0;
 				precache_check++;
 			}
+		}
+		if (precache_model)
+		{
+			precache_check = CS_MODELS + 2;
+			precache_model_skin = 0;
+
+			goto redoSkins;
 		}
 		precache_check = CS_SOUNDS;
 	}
