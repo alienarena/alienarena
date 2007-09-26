@@ -1448,7 +1448,7 @@ void spectator_respawn (edict_t *ent)
 		if (*spectator_password->string &&
 			strcmp(spectator_password->string, "none") &&
 			strcmp(spectator_password->string, value)) {
-			gi.cprintf(ent, PRINT_HIGH, "Spectator password incorrect.\n");
+			gi.cprintf(ent, PRINT_HIGH, "%s", "Spectator password incorrect.\n");
 			ent->client->pers.spectator = false;
 			gi.WriteByte (svc_stufftext);
 			gi.WriteString ("spectator 0\n");
@@ -1462,7 +1462,7 @@ void spectator_respawn (edict_t *ent)
 				numspec++;
 
 		if (numspec >= maxspectators->value) {
-			gi.cprintf(ent, PRINT_HIGH, "Server spectator limit is full.");
+			gi.cprintf(ent, PRINT_HIGH, "%s", "Server spectator limit is full.");
 			ent->client->pers.spectator = false;
 			// reset his spectator var
 			gi.WriteByte (svc_stufftext);
@@ -1476,7 +1476,7 @@ void spectator_respawn (edict_t *ent)
 		char *value = Info_ValueForKey (ent->client->pers.userinfo, "password");
 		if (*password->string && strcmp(password->string, "none") &&
 			strcmp(password->string, value)) {
-			gi.cprintf(ent, PRINT_HIGH, "Password incorrect.\n");
+			gi.cprintf(ent, PRINT_HIGH, "%s", "Password incorrect.\n");
 			ent->client->pers.spectator = true;
 			gi.WriteByte (svc_stufftext);
 			gi.WriteString ("spectator 1\n");
