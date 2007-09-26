@@ -1310,7 +1310,7 @@ always owned, never in the world
 		WEAP_GRAPPLE,
 		NULL,
 		0,
-/* precache */ "weapons/grapple/grfire.wav weapons/grapple/grpull.wav weapons/grapple/grhang.wav weapons/grapple/grhit.wav"
+/* precache */ "weapons/electroball.wav"
 	},
 /* weapon_blaster (.3 .3 1) (-16 -16 -16) (16 16 16)
 always owned, never in the world
