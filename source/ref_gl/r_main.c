@@ -213,6 +213,9 @@ cvar_t	*sys_priority;
 cvar_t	*gl_screenshot_type;
 cvar_t	*gl_screenshot_jpeg_quality;
 
+//no blood
+extern cvar_t *cl_noblood;
+
 //fog stuff
 struct r_fog
 {
@@ -1249,7 +1252,8 @@ void R_RenderView (refdef_t *fd)
 	}
 
 	R_PushDlights ();
-	R_PushStains ();
+	if(!cl_noblood->value)
+		R_PushStains ();
 
 	if (gl_finish->value)
 		qglFinish ();
