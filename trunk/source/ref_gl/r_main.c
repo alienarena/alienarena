@@ -1528,7 +1528,7 @@ void R_Register( void )
 #else
 	gl_driver = Cvar_Get( "gl_driver", "opengl32", CVAR_ARCHIVE );
 #endif
-	gl_texturemode = Cvar_Get( "gl_texturemode", "GL_LINEAR_MIPMAP_NEAREST", CVAR_ARCHIVE );
+	gl_texturemode = Cvar_Get( "gl_texturemode", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
 	gl_texturealphamode = Cvar_Get( "gl_texturealphamode", "default", CVAR_ARCHIVE );
 	gl_texturesolidmode = Cvar_Get( "gl_texturesolidmode", "default", CVAR_ARCHIVE );
 	gl_lockpvs = Cvar_Get( "gl_lockpvs", "0", 0 );
