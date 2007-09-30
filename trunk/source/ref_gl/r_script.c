@@ -1020,7 +1020,8 @@ void RS_LoadScript(char *script)
 	free(buf);
 }
 
-#ifdef __unix__
+extern char **FS_ListFiles( char *, int *, unsigned, unsigned );
+extern void FS_FreeFileList (char **list, int n);
 void RS_ScanPathForScripts (void)
 {
 	char	script[MAX_OSPATH];
@@ -1029,12 +1030,23 @@ void RS_ScanPathForScripts (void)
 	int	script_count, i;
 	char *path = NULL;
 
-	do {
-		path = FS_NextPath(path);
-		Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/*.rscript", path);
-		if ((script_list = FS_ListFiles(dirstring, &script_count, SFF_SUBDIR, 0)) != 0)
-			break;
-	} while (path);
+
+	Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/*.rscript", FS_Gamedir());
+	script_list = FS_ListFiles(dirstring, &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
+
+	for (i = 0; i < script_count-1; i++)
+	{
+		c = COM_SkipPath(script_list[i]);
+		Com_sprintf(script, MAX_OSPATH, "scripts/%s", c);
+		RS_LoadScript(script);
+	}
+
+	FS_FreeFileList(script_list, script_count);
+
+	script_count = 0;
+
+	Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/*.rscript", BASEDIRNAME);
+	script_list = FS_ListFiles(dirstring, &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
 
 	if (!script_list)
 		return;
@@ -1048,15 +1060,26 @@ void RS_ScanPathForScripts (void)
 
 	FS_FreeFileList(script_list, script_count);
 
+	script_count = 0;
 	if(gl_normalmaps->value) { //search for normal map scripts ONLY if we are using normal mapping
-		path = NULL;
-		do {
-			path = FS_NextPath(path);
-			Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/normals/*.rscript", path);
-			if ((script_list = FS_ListFiles(dirstring, &script_count, SFF_SUBDIR, 0)) != 0)
-				break;
-		} while (path);
+		
+		Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/normals/*.rscript", FS_Gamedir());
+		script_list = FS_ListFiles(dirstring, &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
 
+		for (i = 0; i < script_count-1; i++)
+		{
+			c = COM_SkipPath(script_list[i]);
+			Com_sprintf(script, MAX_OSPATH, "scripts/normals/%s", c);
+			RS_LoadScript(script);
+		}
+
+		FS_FreeFileList(script_list, script_count);
+
+		script_count = 0;
+
+		Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/normals/*.rscript", BASEDIRNAME);
+		script_list = FS_ListFiles(dirstring, &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
+	
 		if (!script_list)
 			return;
 
@@ -1068,104 +1091,9 @@ void RS_ScanPathForScripts (void)
 		}
 
 		FS_FreeFileList(script_list, script_count);
+
 	}
 }
-#else
-void RS_ScanPathForScripts (void)
-{
-	char			script[MAX_OSPATH];
-	char			dirstring[1024], *c;
-	int				handle;
-	struct			_finddata_t fileinfo;
-	char			*dir = FS_Gamedir();
-	char			*basedir = va("./%s", BASEDIRNAME);
-
-	if (strcmp(dir,basedir))
-	{
-
-		Com_sprintf (dirstring, sizeof(dirstring), "%s/scripts/*.rscript", basedir);
-		handle = _findfirst (dirstring, &fileinfo);
-
-		if (handle != -1) 
-		{
-			do
-			{
-				if (fileinfo.name[0] == '.')
-					continue;
-
-				c = COM_SkipPath(fileinfo.name);
-				Com_sprintf(script, MAX_OSPATH, "scripts/%s", c);
-				RS_LoadScript (script);
-			} while (_findnext( handle, &fileinfo ) != -1);
-
-			_findclose (handle);
-		}
-
-	}
-
-	Com_sprintf (dirstring, sizeof(dirstring), "%s/scripts/*.rscript", dir);
-	handle = _findfirst (dirstring, &fileinfo);
-
-	if (handle != -1) 
-	{
-		do 
-		{
-			if (fileinfo.name[0] == '.')
-				continue;
-
-			c = COM_SkipPath(fileinfo.name);
-			Com_sprintf(script, MAX_OSPATH, "scripts/%s", c);
-			RS_LoadScript (script);
-		} while (_findnext( handle, &fileinfo ) != -1);
-
-		_findclose (handle);
-	}
-
-	if(gl_normalmaps->value) { //search for normal map scripts ONLY if we are using normal mapping
-		
-		if (strcmp(dir,basedir))
-		{
-
-			Com_sprintf (dirstring, sizeof(dirstring), "%s/scripts/normals/*.rscript", basedir);
-			handle = _findfirst (dirstring, &fileinfo);
-
-			if (handle != -1) 
-			{
-				do
-				{
-					if (fileinfo.name[0] == '.')
-						continue;
-
-					c = COM_SkipPath(fileinfo.name);
-					Com_sprintf(script, MAX_OSPATH, "scripts/normals/%s", c);
-					RS_LoadScript (script);
-				} while (_findnext( handle, &fileinfo ) != -1);
-
-				_findclose (handle);
-			}
-
-		}
-
-		Com_sprintf (dirstring, sizeof(dirstring), "%s/scripts/normals/*.rscript", dir);
-		handle = _findfirst (dirstring, &fileinfo);
-
-		if (handle != -1) 
-		{
-			do 
-			{
-				if (fileinfo.name[0] == '.')
-					continue;
-
-				c = COM_SkipPath(fileinfo.name);
-				Com_sprintf(script, MAX_OSPATH, "scripts/normals/%s", c);
-				RS_LoadScript (script);
-			} while (_findnext( handle, &fileinfo ) != -1);
-
-			_findclose (handle);
-		}
-	}
-}
-#endif
 
 void RS_SetEnvmap (vec3_t v, float *os, float *ot)
 {
@@ -1712,14 +1640,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 					{
 						
 						float red=255, green=255, blue=255;
-						
-					//	if (stage->lightmap && p->vertexlight)
-					//	{
-					//		red = p->vertexlight[i*3+0]/255.0f;
-					//		green = p->vertexlight[i*3+1]/255.0f;
-					//		blue = p->vertexlight[i*3+2]/255.0f;
-					//	}
-						
+							
 						if (stage->colormap.enabled)
 						{
 							red *= stage->colormap.red/255.0f;
