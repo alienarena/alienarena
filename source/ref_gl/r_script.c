@@ -1034,31 +1034,32 @@ void RS_ScanPathForScripts (void)
 	Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/*.rscript", FS_Gamedir());
 	script_list = FS_ListFiles(dirstring, &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
 
-	for (i = 0; i < script_count-1; i++)
-	{
-		c = COM_SkipPath(script_list[i]);
-		Com_sprintf(script, MAX_OSPATH, "scripts/%s", c);
-		RS_LoadScript(script);
-	}
+	if(script_list) {
+		for (i = 0; i < script_count-1; i++)
+		{
+			c = COM_SkipPath(script_list[i]);
+			Com_sprintf(script, MAX_OSPATH, "scripts/%s", c);
+			RS_LoadScript(script);
+		}
 
-	FS_FreeFileList(script_list, script_count);
+		FS_FreeFileList(script_list, script_count);
+	}
 
 	script_count = 0;
 
 	Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/*.rscript", BASEDIRNAME);
 	script_list = FS_ListFiles(dirstring, &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
 
-	if (!script_list)
-		return;
+	if(script_list) {
+		for (i = 0; i < script_count-1; i++)
+		{
+			c = COM_SkipPath(script_list[i]);
+			Com_sprintf(script, MAX_OSPATH, "scripts/%s", c);
+			RS_LoadScript(script);
+		}
 
-	for (i = 0; i < script_count-1; i++)
-	{
-		c = COM_SkipPath(script_list[i]);
-		Com_sprintf(script, MAX_OSPATH, "scripts/%s", c);
-		RS_LoadScript(script);
+		FS_FreeFileList(script_list, script_count);
 	}
-
-	FS_FreeFileList(script_list, script_count);
 
 	script_count = 0;
 	if(gl_normalmaps->value) { //search for normal map scripts ONLY if we are using normal mapping
@@ -1066,32 +1067,32 @@ void RS_ScanPathForScripts (void)
 		Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/normals/*.rscript", FS_Gamedir());
 		script_list = FS_ListFiles(dirstring, &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
 
-		for (i = 0; i < script_count-1; i++)
-		{
-			c = COM_SkipPath(script_list[i]);
-			Com_sprintf(script, MAX_OSPATH, "scripts/normals/%s", c);
-			RS_LoadScript(script);
-		}
+		if(script_list) {
+			for (i = 0; i < script_count-1; i++)
+			{
+				c = COM_SkipPath(script_list[i]);
+				Com_sprintf(script, MAX_OSPATH, "scripts/normals/%s", c);
+				RS_LoadScript(script);
+			}
 
-		FS_FreeFileList(script_list, script_count);
+			FS_FreeFileList(script_list, script_count);
+		}
 
 		script_count = 0;
 
 		Com_sprintf(dirstring, sizeof(dirstring), "%s/scripts/normals/*.rscript", BASEDIRNAME);
 		script_list = FS_ListFiles(dirstring, &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
 	
-		if (!script_list)
-			return;
+		if(script_list) {
+			for (i = 0; i < script_count-1; i++)
+			{
+				c = COM_SkipPath(script_list[i]);
+				Com_sprintf(script, MAX_OSPATH, "scripts/normals/%s", c);
+				RS_LoadScript(script);
+			}
 
-		for (i = 0; i < script_count-1; i++)
-		{
-			c = COM_SkipPath(script_list[i]);
-			Com_sprintf(script, MAX_OSPATH, "scripts/normals/%s", c);
-			RS_LoadScript(script);
+			FS_FreeFileList(script_list, script_count);
 		}
-
-		FS_FreeFileList(script_list, script_count);
-
 	}
 }
 
