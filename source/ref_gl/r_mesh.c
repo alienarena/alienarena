@@ -236,9 +236,8 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	if (currententity->flags & RF_TRANSLUCENT) {
 		basealpha = alpha = currententity->alpha;
 
-		if(r_shaders->value)
-			rs=(rscript_t *)rs_glass;
-		else
+		rs=(rscript_t *)rs_glass;
+		if(!rs)
 			GL_Bind(r_reflecttexture->texnum);
 	}
 	else
