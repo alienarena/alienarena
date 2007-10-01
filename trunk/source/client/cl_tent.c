@@ -292,6 +292,7 @@ void CL_ParseSmoke (void)
 CL_ParseTEnt
 =================
 */
+extern void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client);
 static byte splash_color[] = {0x00, 0xe0, 0xb0, 0x50, 0xd0, 0xe0, 0xe8};
 
 void CL_ParseTEnt (void)
@@ -523,6 +524,7 @@ void CL_ParseTEnt (void)
 	case TE_CHAINGUNSMOKE:
 		MSG_ReadPos (&net_message, pos);
 		CL_MuzzleParticles (pos);
+		CL_MuzzleFlashParticle(pos, cl.refdef.viewangles, false);
 		break;
 	case TE_BLUE_MUZZLEFLASH:
 		MSG_ReadPos (&net_message, pos);

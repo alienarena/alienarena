@@ -978,12 +978,19 @@ CL_MuzzleFlashParticle
 ===============
 */
 extern cvar_t *r_lefthand;
-void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles)
+void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 {
 	int			j;
 	cparticle_t	*p;
-	vec3_t		mflashorg, vforward, vright, vup;
-	float		rightoffset;
+	vec3_t		mflashorg, vforward, vright, vup, vec;
+	float		rightoffset, len;
+
+	if(!from_client) {
+		VectorSubtract (org, cl.refdef.vieworg, vec);
+		len = VectorNormalize (vec);
+		if(len < 128)
+			return;
+	}
 	
 	VectorCopy(org, mflashorg);
 	for (j=0 ; j<3 ; j++)
@@ -991,16 +998,19 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles)
 		mflashorg[j] = mflashorg[j] + ((rand()%2)-1);
 
 	}
-	AngleVectors (angles, vforward, vright, vup);
-	
-	if (r_lefthand->value == 1.0F)
-		rightoffset = -2.4;
-	else
-		rightoffset = 2.4;
 
-	VectorMA(mflashorg, 24, vforward, mflashorg);
-	VectorMA(mflashorg, rightoffset, vright, mflashorg);
-	VectorMA(mflashorg, -2.5, vup, mflashorg);
+	if(from_client) {
+		AngleVectors (angles, vforward, vright, vup);
+		
+		if (r_lefthand->value == 1.0F)
+			rightoffset = -2.4;
+		else
+			rightoffset = 2.4;
+
+		VectorMA(mflashorg, 24, vforward, mflashorg);
+		VectorMA(mflashorg, rightoffset, vright, mflashorg);
+		VectorMA(mflashorg, -2.5, vup, mflashorg);
+	}
 
 	if (!(p = new_particle()))
 		return;
