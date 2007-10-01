@@ -22,7 +22,7 @@ LicenseFile=C:\Alien Arena 2007\docs\license.txt
 InfoBeforeFile=C:\Alien Arena 2007\docs\README.txt
 InfoAfterFile=
 OutputDir=C:\Alien Arena Files\Bundle\Bundle
-OutputBaseFilename=alienarena2007-20070926
+OutputBaseFilename=alienarena2007-20070930
 SetupIconFile=C:\Alien Arena 2007\Aa1.ico
 Compression=lzma
 SolidCompression=true
@@ -2288,6 +2288,7 @@ Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_violator.md2; De
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_violator.md2; DestDir: {app}\data1\players\martianenforcer
 Source: ..\..\..\Alien Arena 2007\data1\players\robot\w_violator.md2; DestDir: {app}\data1\players\robot
 Source: ..\..\..\Alien Arena 2007\data1\players\rustbot\w_violator.md2; DestDir: {app}\data1\players\rustbot
+Source: ..\..\..\Alien Arena 2007\data1\pics\crosshairs\chexcross.tga; DestDir: {app}\data1\pics\crosshairs
 
 [Icons]
 Name: {group}\{cm:ProgramOnTheWeb,{#MyAppName}}; Filename: {#MyAppURL}
