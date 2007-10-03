@@ -808,6 +808,7 @@ void ExitLevel (void)
 		
 		if(stayed) {
 			ent->client->resp.score = 0;
+			ent->client->resp.deaths = 0;
 			if(!ent->is_bot) { //players
 				ent->takedamage = DAMAGE_AIM;
 				ent->solid = SOLID_BBOX;
