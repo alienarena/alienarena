@@ -169,7 +169,7 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 	{
 		int randomSpawn;
 		//Phenax - Add random time to quad spawn
-		if(ent->item->use == Use_Quad)
+		if(ent->item->use == Use_Quad && g_randomquad->value)
 			randomSpawn = 30 + rand() % (75 - 30); //30 to 75 seconds randomness
 		else
 			randomSpawn = 0;

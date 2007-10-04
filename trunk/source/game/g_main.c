@@ -74,6 +74,9 @@ cvar_t  *quickweap;
 cvar_t  *anticamp;
 cvar_t  *camptime;
 
+//random quad
+cvar_t  *g_randomquad;
+
 //warmup
 cvar_t  *warmuptime;
 
