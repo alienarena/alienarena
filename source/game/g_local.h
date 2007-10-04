@@ -598,6 +598,8 @@ extern  cvar_t  *quickweap;
 extern  cvar_t  *anticamp;
 extern  cvar_t  *camptime;
 
+extern	cvar_t  *g_randomquad;
+
 //warmup time
 extern cvar_t   *warmuptime;
 

@@ -225,6 +225,9 @@ void InitGame (void)
 	anticamp = gi.cvar("anticamp", "0", CVAR_LATCH);
 	camptime = gi.cvar("camptime", "10", CVAR_LATCH);
 
+	//random quad
+	g_randomquad = gi.cvar("g_randomquad", "1", CVAR_LATCH);
+
 	//warmup time
 	warmuptime = gi.cvar("warmuptime", "15", CVAR_LATCH);
 
