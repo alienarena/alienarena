@@ -3622,6 +3622,98 @@ void MutatorFunc( void *self )
 {
 	M_Menu_Mutators_f();
 }
+int Menu_FindFile (char *filename, FILE **file)
+{
+	*file = fopen (filename, "rb");
+	if (!*file) {
+		*file = NULL;
+		return -1;
+	}
+	else
+		return 1;
+
+}
+
+void MapInfoFunc( void *self ) {
+
+	FILE *map_file;
+	FILE *desc_file;
+	char line[500];
+	char *pLine;
+	char *rLine;
+	int result;
+	int i;
+	char seps[]   = "//";
+	char *token;
+	char startmap[128];
+	char path[1024];
+	int offset = 65;
+	float scale;
+
+	scale = (float)(viddef.height)/600;
+	if(scale < 1)
+		scale = 1;
+
+	offset*=scale;
+
+	//get a map description if it is there
+
+	if(mapnames)
+		strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
+	else
+		strcpy( startmap, "missing");
+
+	sprintf(path, "%s/levelshots/%s.txt", FS_Gamedir(), startmap);
+	Menu_FindFile(path, &desc_file);
+	if(desc_file)
+		fclose(desc_file);
+	else 
+		sprintf(path, "%s/levelshots/%s.txt", BASEDIRNAME, startmap);
+
+	if ((map_file = fopen(path, "rb")) != NULL)
+	{
+		if(fgets(line, 500, map_file))
+		{
+			pLine = line;
+
+			result = strlen(line);
+
+			rLine = GetLine (&pLine, &result);
+
+			/* Establish string and get the first token: */
+			token = strtok( rLine, seps );
+			i = 0;
+			while( token != NULL && i < 5) {
+
+				/* Get next token: */
+				token = strtok( NULL, seps );
+				/* While there are tokens in "string" */
+				s_startserver_map_data[i].generic.type	= MTYPE_SEPARATOR;
+				s_startserver_map_data[i].generic.name	= token;
+				s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
+				s_startserver_map_data[i].generic.x		= 180*scale;
+				s_startserver_map_data[i].generic.y		= 241*scale + offset + i*10*scale;
+
+				i++;
+			}
+
+		}
+
+		fclose(map_file);
+
+	}
+	else
+	{
+		for (i = 0; i < 5; i++ )
+		{
+			s_startserver_map_data[i].generic.type	= MTYPE_SEPARATOR;
+			s_startserver_map_data[i].generic.name	= "no data";
+			s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
+			s_startserver_map_data[i].generic.x		= 180*scale;
+			s_startserver_map_data[i].generic.y		= 241*scale + offset + i*10*scale;
+		}
+	}
+}
 
 void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 {
@@ -3874,6 +3966,9 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	s_startmap_list.generic.name	= "initial map";
 	s_startmap_list.itemnames = mapnames;
 	s_startmap_list.curvalue = 0;
+
+	//set map info
+	MapInfoFunc(NULL);
 }
 
 void StartServerActionFunc( void *self )
@@ -4072,6 +4167,7 @@ void StartServer_MenuInit( void )
 	s_startmap_list.generic.y	= 0 + offset;
 	s_startmap_list.generic.name	= "initial map";
 	s_startmap_list.itemnames = mapnames;
+	s_startmap_list.generic.callback = MapInfoFunc;
 
 	s_rules_box.generic.type = MTYPE_SPINCONTROL;
 	s_rules_box.generic.x	= -8;
@@ -4208,33 +4304,13 @@ void StartServer_MenuInit( void )
 
 	// call this now to set proper inital state
 	RulesChangeFunc ( NULL );
-}
-
-int Menu_FindFile (char *filename, FILE **file)
-{
-	*file = fopen (filename, "rb");
-	if (!*file) {
-		*file = NULL;
-		return -1;
-	}
-	else
-		return 1;
-
+	MapInfoFunc(NULL);
 }
 
 void StartServer_MenuDraw(void)
 {
-	char startmap[1024];
+	char startmap[128];
 	char path[1024];
-	FILE *map_file;
-	FILE *desc_file;
-	char line[500];
-	char *pLine;
-	char *rLine;
-	int result;
-	int i;
-	char seps[]   = "//";
-	char *token;
 	int offset = 65;
 	float scale;
 
@@ -4250,58 +4326,6 @@ void StartServer_MenuDraw(void)
 	M_Banner( "m_startserver" );
 	M_MapPic(path);
 
-	//get a map description if it is there
-	sprintf(path, "%s/levelshots/%s.txt", FS_Gamedir(), startmap);
-	Menu_FindFile(path, &desc_file);
-	if(desc_file)
-		fclose(desc_file);
-	else 
-		sprintf(path, "%s/levelshots/%s.txt", BASEDIRNAME, startmap);
-
-	if ((map_file = fopen(path, "rb")) != NULL)
-	{
-		if(fgets(line, 500, map_file))
-		{
-			pLine = line;
-
-			result = strlen(line);
-
-			rLine = GetLine (&pLine, &result);
-
-			/* Establish string and get the first token: */
-			token = strtok( rLine, seps );
-			i = 0;
-			while( token != NULL && i < 5) {
-
-				/* Get next token: */
-				token = strtok( NULL, seps );
-				/* While there are tokens in "string" */
-				s_startserver_map_data[i].generic.type	= MTYPE_SEPARATOR;
-				s_startserver_map_data[i].generic.name	= token;
-				s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
-				s_startserver_map_data[i].generic.x		= 180*scale;
-				s_startserver_map_data[i].generic.y		= 241*scale + offset + i*10*scale;
-
-				i++;
-			}
-
-			free (rLine);
-		}
-
-		fclose(map_file);
-
-	}
-	else
-	{
-		for (i = 0; i < 5; i++ )
-		{
-			s_startserver_map_data[i].generic.type	= MTYPE_SEPARATOR;
-			s_startserver_map_data[i].generic.name	= "no data";
-			s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
-			s_startserver_map_data[i].generic.x		= 180*scale;
-			s_startserver_map_data[i].generic.y		= 241*scale + offset + i*10*scale;
-		}
-	}
 	Menu_Draw( &s_startserver_menu );
 }
 
