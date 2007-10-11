@@ -389,7 +389,7 @@ BOOL CGalaxyDlg::OnInitDialog()
 	GetPrivateProfileString("Galaxy", "email", "email@email.com", user.email, 100, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "exe", "C:/Alien Arena 2007/", CRXPath, MAX_PATH, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "chatstart", "true", user.joinatstart, 12, "galaxy.ini");
-	GetPrivateProfileString("Galaxy", "server", "irc.gamesurge.net", servidor, 100, "galaxy.ini");
+	GetPrivateProfileString("Galaxy", "server", "irc.blackened.com", servidor, 100, "galaxy.ini");
 	//set the join flag for the dialog bool
 	if(!_tcscmp(user.joinatstart, "true"))
 		joinflg = true;

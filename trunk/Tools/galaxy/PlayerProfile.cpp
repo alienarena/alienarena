@@ -67,8 +67,8 @@ BOOL PlayerProfile::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	//initialize drop list
-	m_ircselectserver.AddString("irc.gamesurge.net");
-	m_ircselectserver.AddString("irc.gg-center.net");
+	m_ircselectserver.AddString("irc.blackened.com");
+	m_ircselectserver.AddString("irc.prison.net");
 	m_ircselectserver.AddString("irc.anynet.org");
 
 	GetPrivateProfileString("Galaxy", "chatstart", "true", user.joinatstart, 12, "galaxy.ini");
@@ -142,20 +142,20 @@ void PlayerProfile::OnSelchangeIrcserver()
 
 	switch(index) {
 	case 0:
-		WritePrivateProfileString("Galaxy", "server", "irc.gamesurge.net", "galaxy.ini");
-		strcpy(servidor, "irc.gamesurge.net");
+		WritePrivateProfileString("Galaxy", "server", "irc.blackened.com", "galaxy.ini");
+		strcpy(servidor, "irc.blackened.com");
 		break;
 	case 1:
-		WritePrivateProfileString("Galaxy", "server", "irc.gg-center.net", "galaxy.ini");
-		strcpy(servidor, "irc.gg-center.net");
+		WritePrivateProfileString("Galaxy", "server", "irc.prison.net", "galaxy.ini");
+		strcpy(servidor, "irc.prison.net");
 		break;
 	case 2:
 		WritePrivateProfileString("Galaxy", "server", "irc.anynet.org", "galaxy.ini");
 		strcpy(servidor, "irc.anynet.org");
 		break;
 	default:
-		WritePrivateProfileString("Galaxy", "server", "irc.gamesurge.net", "galaxy.ini");
-		strcpy(servidor, "irc.gamesurge.net");
+		WritePrivateProfileString("Galaxy", "server", "irc.blackened.com", "galaxy.ini");
+		strcpy(servidor, "irc.blackened.com");
 	}
 }
 
