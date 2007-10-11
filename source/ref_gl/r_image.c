@@ -628,12 +628,18 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 	targa_header.attributes = *buf_p++;
 
 	if (targa_header.image_type!=2 
-		&& targa_header.image_type!=10) 
-		Com_Error (ERR_DROP, "LoadTGA: Only type 2 and 10 targa RGB images supported\n");
+		&& targa_header.image_type!=10) {
+		//Com_Error (ERR_DROP, "LoadTGA: Only type 2 and 10 targa RGB images supported\n");
+		FS_FreeFile (buffer);
+		return;
+	}
 
 	if (targa_header.colormap_type !=0 
-		|| (targa_header.pixel_size!=32 && targa_header.pixel_size!=24))
-		Com_Error (ERR_DROP, "LoadTGA: Only 32 or 24 bit images supported (no colormaps)\n");
+		|| (targa_header.pixel_size!=32 && targa_header.pixel_size!=24)) {
+		//Com_Error (ERR_DROP, "LoadTGA: Only 32 or 24 bit images supported (no colormaps)\n");
+		FS_FreeFile (buffer);
+		return;
+	}
 
 	columns = targa_header.width;
 	rows = targa_header.height;
