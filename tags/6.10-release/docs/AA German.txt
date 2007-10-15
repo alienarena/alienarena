@@ -1,0 +1,219 @@
+AUSLÄNDISCHE ARENA 2007
+
+1. Einleitung 2. System Anforderungen 3., die Begonnen
+Erhalten
+* Installation
+* Grundlegende Befehle
+* Deathmatch
+* An einen Bediener 4 die CodeRED AS BOT 5. copyright-Informationen
+anschließen
+
+
+1. EINLEITUNG
+
+AUSLÄNDISCHE ARENA 2007 ist ein alleinstehende Person 3D
+erstes on-line-deathmatch tireur, der vom ursprünglichen
+Quellenprogramm von Beben II und von Beben III in Handarbeit gemacht
+wird, freigegeben durch Kennzeichnung Software unter der GPL Lizenz.
+Mit Eigenschaften einschließlich 32 Bitgraphiken, drückt neue
+Partikelmaschine und Effekte, helle Blüte, reflektierendes Wasser,
+hallo Auflösung Beschaffenheiten und Häute, hallo Polymodelle,
+Fleckdiagramme, AUSLÄNDISCHE ARENA den Umschlag der graphischen
+Schönheit today.s mit oberen Spielen rivalisierend.  
+
+Das Spiel kennzeichnet 37 Niveaus, die online gegen andere Spieler
+gespielt werden können, oder gegen errichtet worden in den CodeRED
+bots.  
+
+Ausländische Arena bietet CTF, AOA(All aus Angriff) Modus an, in dem
+Spieler in Träger klettern können, um Schlacht, Deathball und
+Mannschaft-Kern-Angriff zu tun. Steigen Sie einfach in das
+Multispielermenü ein, einen Bediener anzustellen, ändern Sie die
+Spielrichtlinien, und beschließen Sie ein Diagramm, um an zu spielen.
+Sie können von unterschiedlichem mutators(instagib fünf, Rakete vom
+Arena, übermäßigem, niedrigem grav, vom regen und vom Vampire auch
+vorwählen) zum Ihrer Spielerfahrung weiter besonders anzufertigen.
+
+2. SYSTEM ANFORDERUNGEN
+
+1 Gigahertz 256 mb RAM 500 mb Festplattenspeicher3D Gaspedal
+
+3. ERHALTEN BEGONNEN
+
+1. INSTALLATION
+
+(Windows)
+
+Installation ist sehr einfach gebildet worden. Nach dem
+Downloading klicken Sie einfach an die alienarena2007.exe Akte und die
+Installation fängt an. Befolgen Sie die Anweisungen des Installshield
+Einstellung Programms. Wenn Sie Windows 2000 oder XP laufen lassen,
+sollten Sie administrative Privilegien haben. Wenn nicht, können Sie
+einige Störungen erhalten, wenn das Programm versucht, die uninstall
+Informationen zum Register zu schreiben. Wenn so, einfach fahren
+Klicken ignore. und die Installation ohne Problem fort.  
+
+Sobald beendet, können Sie die ausländische Arenaikone an klicken,
+die auf Ihren Schreibtisch gesetzt worden ist, um ein Spiel oder die
+ausländische Arena-Bedienerikone zu beginnen, um einen engagierten
+Bediener anzustellen.
+
+(Linux)
+
+Unzip einfach alienarena2007-linux20070121-x86.zip in Ihrem
+usr/local/games Heft oder, wohin Sie das Spiel setzen möchten.  
+
+Schreiben Sie /AlienArena, um das Spiel laufen zu lassen oder
+/AlienArenaDedicated, um einen engagierten Bediener anzustellen oder
+die Abkürzungen zu benutzen, die in das Menü angebracht werden.
+
+Quellakten sind- enthalten, also können Sie die binaries kompilieren
+sich, wenn neccessary. Besuchen Sie bitte das Forum, wenn Sie
+irgendwelche Fragen betreffend sind dieses haben.
+
+2. BASIC BEFIEHLT
+
+AUSLÄNDISCHE ARENA arbeitet sehr viel wie Beben 2/3, mit
+einigen bemerkenswerten Ausnahmen.
+
+Der Spieler hat die folgenden Waffen:
+
+1. Ausländer-Der Unterbrecherscheibe-3. Kettender pistole-4. Rakete
+Abschußrampe 6. Des Bläser-2. Flamme-Des Spritzring-5.
+Ausländischer Intelligenter Ausländervaporizer Der Gewehr-7. Der
+Unterbrecherscheibe-8.
+
+Waffen jetzt haben auch wechselnde Zündungmodi. In Ihnen
+wählen Kontrollenmenü, Ihren Sekundärfeuerschlüssel vor und dieses
+erlaubt Ihnen, diese Modi zu verwenden.  
+
+Es gibt neue powerups wie Eile und Sproing, zusätzlich zur venerable
+Viererkabelbeschädigung und invulerabilty.  
+
+Der Spieler hat auch eine Taschenlampe, die immer anwesend ist, und
+sehr nützlich. Der F. Schlüssel aktiviert und entaktiviert die
+Taschenlampe, oder Sie können binden, was Schlüssel Sie
+"Taschenlampe" wünschen, die ihn an und abstellt.
+
+Es würde ratsam für Sie sein, videoeinstellungen für Sie jedoch zu
+ändern Wunsch, um das Spiel anzusehen, und was Ihnen angemessene
+Leistung gibt. In Linux können Sie "vid_restart" an der Konsole
+schreiben müssen, damit sie, um, abhängig von Ihrem System und
+Version von X wirksam zuSEIN Sie laufen. Die Standardannahmen des
+Spiels sind an einer mittleren Strecke Einstellung, also versuchen
+Sie, sie oder adding/removing Effekte abhängig von Ihrem framerate zu
+zwicken. Wenn Sie Ihr framerate sehen möchten, können Sie
+schreiben "einstellen cl_drawfps 1" am console(brought, das unten den
+` Schlüssel verwendet).  
+
+AUSLÄNDISCHE ARENA läßt auch die farbigen Namen zu, die als Beben 3
+mit dem ^ Buchstaben gerecht sind, der von einer Zahl gefolgt wird, um
+die Farbe einzustellen.
+
+DURCHFÜHREN DER NIVEAUS
+
+In der ausländischen Arena können Sie ein einzelnes
+Spielerturnier spielen, in dem man Ihr Zielwille das fraglimit vor
+einem BOT erreichen soll. Wenn Sie ausfallen, werden Sie gezwungen,
+das Niveau zu wiederholen, bis Sie. Diese Richtlinien können im
+Menüsystem geändert werden. Sie können Leute auch online spielen,
+wo Ihr Ziel, das fraglimit vor Ihren Konkurrenten zu erreichen ist
+oder, indem das Zählen der meisten frags vor der Grenzzeit, oben ist.
+
+Im CTF Modus sind Sie auf einer Mannschaft und dem Versuchen, die
+Markierungsfahne des Feindes gefangenzunehmen und sie zur Position
+Ihrer eigenen Markierungsfahne zurückzubringen. Die Mannschaft,
+welche zuerst die Sicherung Begrenzung, Gewinne erreicht.
+
+In Deathball ist das Ziel, da viele Punkte zu zählen, wie möglich,
+entweder, indem es Ihre Konkurrenten tötet oder indem es die Kugel
+findet und sie in die goal(worth 10 frags schießt). Wenn ein Spieler
+innerhalb des deathball ist, ist er defensless.
+
+Im Mannschaft-Kern-Angriff ist Ihr Ziel, Ihre feindlichen
+Mannschaftenergie Nullpunkte zu sperren, zerstören dann den zentralen
+Spinne Nullpunkt. Sie können Beschädigung des Spinne Nullpunktes nur
+tun, wenn alle weiteren Energie Nullpunkte untauglich sind.
+
+ANSCHLIESSEN AN Einen BEDIENER
+
+Sie können entweder auserwählt "Bediener" vom "Multispieler"
+Menü verbinden und einen Bediener in der Liste vorwählen, oder Sie
+können nur die CodeRED Galaxie-Bediener browser(windows benutzen). In
+der Inspiel Datenbanksuchroutine werden Bediener im Auftrag von Ping,
+mit niedrigstem Ping an der Oberseite der Liste verzeichnet.  
+
+4. DAS CODERED AS BOT
+
+Bots sind errichtet in der Eigenschaft AUSLÄNDISCHER ARENA
+2007. Einige bots werden bereits für Multispielerspiele
+zusammengebaut, und in der ausländischen Arena, hat jedes Niveau eine
+spezifische BOT Akte für, welche bots in jedem Niveau gespielt werden
+sollen.
+
+Um ein BOT zu addieren, schreiben Sie "sv addbot Namen model/ski".,
+und ein BOT type".sv removebot nae entfernen".. Sie können bots im
+Menü, im deathmatch/bots Markierungsfahnen Bereich auch hinzufügen.
+
+In Ihren Deathmatch Wahlen können Sie andere Wahlen wie Plaudern,
+Nullpunkteinsparung und Zielen zusammenbauen.
+
+Diese bots sind mit dem Botconfigurator Programm völlig
+konfigurierbar. Sie können ihre Fähigkeit Niveaus, Genauigkeit,
+Waffe bevorzugend, Bewußtsein und Schwätzchenzeichenketten ändern.
+
+Fähigkeit Niveau 0 bots sind ziemlich einfach zu schlagen. Fähigkeit
+Niveau 1 bots sind ein wenig haltbareres, und tun mehr Ausweichen und
+sind genauer. Fähigkeit Niveau 2 bots das vorgerücktere Ausweichen,
+Rakete, die springt, und sind sogar genauer. Niveau 3 bots sind extrem
+erfahren und werden schwer bombardieren und Feuersprung um das Niveau.
+Sie Willeauch taunt Sie nach Tötung Sie. Wenn in der ausländischen
+Arena, spielen Sie das einzelne Spielerturnier gegen die bots, das
+Vorwählen "einfach" bilden alles bots Fähigkeit Niveau 0. Das
+Vorwählen "von von Normal" läßt sie an, was Niveau sie
+zusammengebaut werden. Das Vorwählen "hart" läßt sie alle 1
+Fähigkeit Niveau hochschieben.
+
+5. GUTSCHRIFTEN
+
+Es gibt eine lange Liste von Gutschriften - AUSLÄNDISCHE
+ARENA 2007 ist groß zum folgenden für it.s Kreation und Beendigung
+verschuldet:
+
+Design: John Diamant mit Eingang von der Gemeinschaft an der großen
+Programmierung: John Diamant, Victor Luchits, Shane Bayer, Jan. Rafaj,
+Tony Jackson Modelle und Häute: John Diamant, Alex Perez Diagramme:
+John Diamant-Beschaffenheiten: John Diamant-Töne: John Diamant, Wenig
+Musik-Verein, Stichhaltige Förster-Musik: PuzzleFighter, WhiteLipper,
+hölzerne Produktionen und SoundRangers Linux Tor und Installation:
+Shane Bayer Ausländische Arena IRC Führung: Astralsin
+
+Es gibt andere Hauptbeiträge von der Gemeinschaft von
+QuakeSrc.org, einschließlich MrG, Psychospaz, Jalisko, Heffo, Chayfo,
+Dukey, Jitspoe, Knightmare und Carbon14. Ohne diese wundervolle Gruppe
+Leute und die Freigabe ihrer Vollendungen, würden viele Eigenschaften
+nicht möglich gewesen sein.  
+
+5. COPYRIGHT-INFORMATIONEN
+
+AUSLÄNDISCHE ARENA 2007 und es ist ursprünglicher Inhalt
+sind ein copyright der COR Unterhaltung, LLC.  
+
+Das Quellenprogramm wird unter der GPL Lizenz freigegeben und kann
+für jeden möglichen Zweck verwendet werden oder geändert werden,
+vorausgesetzt es auch unter der GPL Lizenz freigegeben wird.  
+
+Unter keinen Umständen machen Sie AUSLÄNDISCHE ARENA 2007 wird
+verkauft oder verwendet für Profit, ohne ausdrückliche Zustimmung
+von der COR Unterhaltung ein. AUSLÄNDISCHE ARENA 2007 kann in der
+freien Kompilation CD.s und in den ähnlichen Paketen ohne Zustimmung
+eingeschlossen werden, vorausgesetzt die Archive unverändert bleiben.
+
+Der ursprüngliche Inhalt in AUSLÄNDISCHER ARENA 2007 kann mit
+Erlaubnis für alle mögliche Zwecke kostenlos benutzt werden.
+
+Kontakt: http://red.planetarena.org
+
+email: irritant@planetquake.com
+
+

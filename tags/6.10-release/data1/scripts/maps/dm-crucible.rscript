@@ -1,0 +1,23 @@
+textures/arena6/flamejet
+{
+	{
+		map textures/arena6/flamejet.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 150 .2 .9
+		nolightmap
+	}
+
+}
+textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena6/skullite
+{
+	{
+		lensflare
+	}
+}
+
