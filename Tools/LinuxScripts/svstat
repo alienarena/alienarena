@@ -369,11 +369,20 @@ responsive_servers.each {
 	players = 0
 	bots = 0
 	playerinfo.each { |player|
-		if player['ip'] != '127.0.0.1' then
+# can't use IP address to determin bots since 6.10 security fix - they're all 127.0.0.1
+#		if player['ip'] != '127.0.0.1' then
+#			players += 1
+#		else
+#			bots += 1
+#		end
+
+# have to use ping, which is less reliable
+		if player['ping'].to_i > 0 then
 			players += 1
 		else
 			bots += 1
 		end
+
 	}
 
 	puts "#{localpids[localports.index(port)].concat(' '*8).slice(0,8)} #{port.concat(' '*6).slice(0,6)} #{serverinfo['hostname'].concat(' '*38).slice(0,38)} #{serverinfo['mapname'].concat(' '*16).slice(0,16)} #{players.to_s.concat(' '*2).slice(0,2)} #{bots}"
@@ -392,7 +401,7 @@ responsive_servers.each {
 	players = 0
 	bots = 0
 	playerinfo.each { |player|
-		if player['ip'] != '127.0.0.1' then
+		if player['ping'].to_i > 0 then
 			puts "#{player['name'].concat(' '*15).slice(0,15)} #{player['ping'].to_str.concat('ms').concat(' '*6).slice(0,6)} #{player['score'].to_str.concat(' '*5).slice(0,5)} #{player['ip'].concat(' '*21).slice(0,21)} #{serverinfo['hostname'].concat(' '*29).slice(0,29)}"
 			if $*.include?('-r') then
 				playerip = player['ip'].split(':')[0]
