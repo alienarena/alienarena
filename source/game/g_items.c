@@ -170,7 +170,7 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 		int randomSpawn;
 		//Phenax - Add random time to quad spawn
 		if(ent->item->use == Use_Quad && g_randomquad->value)
-			randomSpawn = 30 + rand() % (75 - 30); //30 to 75 seconds randomness
+			randomSpawn = 10 + rand() % (30 - 10); //10 to 30 seconds randomness
 		else
 			randomSpawn = 0;
 		
@@ -1677,7 +1677,7 @@ always owned, never in the world
 /* icon */		"p_quad",
 /* pickup */	"Quad Damage",
 /* width */		2,
-		60,
+		150,
 		NULL,
 		IT_POWERUP,
 		0,
