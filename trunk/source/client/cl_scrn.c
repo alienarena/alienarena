@@ -1241,16 +1241,19 @@ void SCR_ExecuteLayoutString (char *s)
 
 		if (!strcmp(token, "pic"))
 		{	// draw a pic from a stat number
-			token = COM_Parse (&s);
-			value = cl.frame.playerstate.stats[atoi(token)];
-			if (value >= MAX_IMAGES)
-				Com_Error (ERR_DROP, "Pic >= MAX_IMAGES");
-			if (cl.configstrings[CS_IMAGES+value])
-			{
-				SCR_AddDirtyPoint (x, y);
-				SCR_AddDirtyPoint (x+23*scale, y+23*scale);
-				Draw_ScaledPic (x, y, scale, cl.configstrings[CS_IMAGES+value]);
+			if(strcmp(cl_hudimage1->string, "none")) {
+				token = COM_Parse (&s);
+				value = cl.frame.playerstate.stats[atoi(token)];
+				if (value >= MAX_IMAGES)
+					Com_Error (ERR_DROP, "Pic >= MAX_IMAGES");
+				if (cl.configstrings[CS_IMAGES+value])
+				{
+					SCR_AddDirtyPoint (x, y);
+					SCR_AddDirtyPoint (x+23*scale, y+23*scale);
+					Draw_ScaledPic (x, y, scale, cl.configstrings[CS_IMAGES+value]);
+				}
 			}
+
 			continue;
 		}
 
@@ -1372,72 +1375,82 @@ void SCR_ExecuteLayoutString (char *s)
 
 		if (!strcmp(token, "num"))
 		{	// draw a number
-			token = COM_Parse (&s);
-			width = atoi(token);
-			token = COM_Parse (&s);
-			value = cl.frame.playerstate.stats[atoi(token)];
-			SCR_DrawField (x, y, 0, width, value, scale);
+			if(strcmp(cl_hudimage1->string, "none")) {
+				token = COM_Parse (&s);
+				width = atoi(token);
+				token = COM_Parse (&s);
+				value = cl.frame.playerstate.stats[atoi(token)];
+				SCR_DrawField (x, y, 0, width, value, scale);
+			}
+
 			continue;
 		}
 
 		if (!strcmp(token, "hnum"))
 		{	// health number
-			int		color;
-			int		w, h;
-			char zoompic[32];
+			if(strcmp(cl_hudimage1->string, "none")) {
+				int		color;
 
-			width = 3;
-			value = cl.frame.playerstate.stats[STAT_HEALTH];
-			if (value > 25)
-				color = 0;	// green
-			else if (value > 0)
-				color = (cl.frame.serverframe>>2) & 1;		// flash
-			else
-				color = 1;
+				width = 3;
+				value = cl.frame.playerstate.stats[STAT_HEALTH];
+				if (value > 25)
+					color = 0;	// green
+				else if (value > 0)
+					color = (cl.frame.serverframe>>2) & 1;		// flash
+				else
+					color = 1;
 
+				SCR_DrawField (x, y, color, width, value, scale);
+			}
+	
 			//draw the zoom scope pic if we are using the zoom alt-fire of disruptor
 			if (cl.frame.playerstate.stats[STAT_ZOOMED])
 			{
+				int		w, h;
+				char zoompic[32];
 				sprintf(zoompic, "zoomscope%i", cl.frame.playerstate.stats[STAT_ZOOMED]);
 				Draw_GetPicSize (&w, &h, zoompic);
 				Draw_ScaledPic ((viddef.width-w*scale)/2, (viddef.height-h*scale)/2, scale, zoompic);
 			}
 
-			SCR_DrawField (x, y, color, width, value, scale);
 			continue;
 		}
 
 		if (!strcmp(token, "anum"))
 		{	// ammo number
-			int		color;
-			//int		w, h;
+			if(strcmp(cl_hudimage1->string, "none")) {
+				int		color;
 
-			width = 3;
-			value = cl.frame.playerstate.stats[STAT_AMMO];
-			if (value > 5)
-				color = 0;	// green
-			else if (value >= 0)
-				color = (cl.frame.serverframe>>2) & 1;		// flash
-			else
-				continue;	// negative number = don't show
+				width = 3;
+				value = cl.frame.playerstate.stats[STAT_AMMO];
+				if (value > 5)
+					color = 0;	// green
+				else if (value >= 0)
+					color = (cl.frame.serverframe>>2) & 1;		// flash
+				else
+					continue;	// negative number = don't show
 
-			SCR_DrawField (x, y, color, width, value, scale);
+				SCR_DrawField (x, y, color, width, value, scale);
+			}
+
 			continue;
 		}
 
 		if (!strcmp(token, "rnum"))
 		{	// armor number
-			int		color;
-		//	int		w, h;
+			if(strcmp(cl_hudimage1->string, "none")) {
+				int		color;
 
-			width = 3;
-			value = cl.frame.playerstate.stats[STAT_ARMOR];
-			if (value < 1)
-				continue;
+				width = 3;
+				value = cl.frame.playerstate.stats[STAT_ARMOR];
+				if (value < 1)
+					continue;
 
-			color = 0;	// green
+				color = 0;	// green
 
-			SCR_DrawField (x, y, color, width, value, scale);
+				SCR_DrawField (x, y, color, width, value, scale);
+			}
+
 			continue;
 		}
 

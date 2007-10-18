@@ -1726,10 +1726,20 @@ int	numhuds;
 
 static void HudFunc( void *unused )
 {
-	char hud1[MAX_OSPATH] = "pics/i_health.tga";
-	char hud2[MAX_OSPATH] = "pics/i_score.tga";
+	char hud1[MAX_OSPATH];
+	char hud2[MAX_OSPATH];
+	
+	if(s_options_hud_box.curvalue == 0) { //none
+		sprintf(hud1, "none");
+		sprintf(hud2, "none");
+	}
 
-	if(s_options_hud_box.curvalue > 0) {
+	if(s_options_hud_box.curvalue == 1) {
+		sprintf(hud1, "pics/i_health.tga");
+		sprintf(hud2, "pics/i_score.tga");
+	}
+
+	if(s_options_hud_box.curvalue > 1) {
 		sprintf(hud1, "pics/huds/%s1", hud_names[s_options_hud_box.curvalue]);
 		sprintf(hud2, "pics/huds/%s2", hud_names[s_options_hud_box.curvalue]);
 	}
@@ -1745,8 +1755,8 @@ void SetHudCursor (void)
 	char hudset[MAX_OSPATH] = "default";
 	char hudcomp[MAX_OSPATH];
 
-	s_options_hud_box.curvalue = 0;
-
+	s_options_hud_box.curvalue = 1;
+ 
 	if (!cl_hudimage1)
 		cl_hudimage1 = Cvar_Get ("cl_hudimage1", "pics/i_health.tga", CVAR_ARCHIVE);
 	else {
@@ -1770,7 +1780,7 @@ void insertHud (char ** list, char *insert, int len )
 {
 	int i, j;
 
-	for (i=1;i<len; i++)
+	for (i=2;i<len; i++)
 	{
 		if (!list[i])
 			break;
@@ -1804,9 +1814,10 @@ char **SetHudNames (void)
 	list = malloc( sizeof( char * ) * MAX_HUDS );
 	memset( list, 0, sizeof( char * ) * MAX_HUDS );
 
-	nhudnames = 1;
+	nhudnames = 2;
 
-	list[0] = strdup("default"); //the default hud
+	list[0] = strdup("none");
+	list[1] = strdup("default"); //the default hud
 
 	path = FS_NextPath( path );
 	while (path)
