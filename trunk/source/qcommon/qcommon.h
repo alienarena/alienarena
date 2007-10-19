@@ -544,8 +544,8 @@ NET
 
 #define	PORT_ANY	-1
 
-#define	MAX_MSGLEN		2800//1400		// max length of a message
-#define	PACKET_HEADER	20//10			// two ints and a short
+#define	MAX_MSGLEN		1400		// max length of a message
+#define	PACKET_HEADER	10			// two ints and a short
 
 typedef enum {NA_LOOPBACK, NA_BROADCAST, NA_IP, NA_IPX, NA_BROADCAST_IPX} netadrtype_t;
 
