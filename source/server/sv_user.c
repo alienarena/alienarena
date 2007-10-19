@@ -148,7 +148,7 @@ void SV_Configstrings_f (void)
 
 	// write a packet full of data
 
-	while ( sv_client->netchan.message.cursize < MAX_MSGLEN/2 
+	while ( sv_client->netchan.message.cursize < MAX_MSGLEN/4 
 		&& start < MAX_CONFIGSTRINGS)
 	{
 		if (sv.configstrings[start][0])
@@ -219,7 +219,7 @@ void SV_Baselines_f (void)
 
 	// write a packet full of data
 
-	while ( sv_client->netchan.message.cursize <  MAX_MSGLEN/2
+	while ( sv_client->netchan.message.cursize <  MAX_MSGLEN/4
 		&& start < MAX_EDICTS)
 	{
 		base = &sv.baselines[start];

@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 typedef struct
 {
-	byte	data[MAX_MSGLEN];
+	byte	data[MAX_MSGLEN/2];
 	int		datalen;
 } loopmsg_t;
 

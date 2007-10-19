@@ -59,7 +59,7 @@ typedef struct
 	// the multicast buffer is used to send a message to a set of clients
 	// it is only used to marshall data until SV_Multicast is called
 	sizebuf_t	multicast;
-	byte		multicast_buf[MAX_MSGLEN];
+	byte		multicast_buf[MAX_MSGLEN/2];
 
 	// demo server information
 	FILE		*demofile;
@@ -252,7 +252,7 @@ void SV_PrepWorldFrame (void);
 // sv_send.c
 //
 typedef enum {RD_NONE, RD_CLIENT, RD_PACKET} redirect_t;
-#define	SV_OUTPUTBUF_LENGTH	(MAX_MSGLEN - 16)
+#define	SV_OUTPUTBUF_LENGTH	(MAX_MSGLEN/2 - 16)
 
 extern	char	sv_outputbuf[SV_OUTPUTBUF_LENGTH];
 

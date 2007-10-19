@@ -1073,6 +1073,10 @@ void R_RenderFlare (flare_t *light)
 	VectorSubtract (light->origin, r_origin, v);
 	dist = VectorLength(v) * (light->size*0.01);
 
+	//limit their size to reasonable.
+	if(dist > 10*light->size)
+		dist = 10*light->size;
+
 	qglDisable(GL_DEPTH_TEST);
 	qglEnable (GL_TEXTURE_2D);
 	GL_Bind(flaretex);
