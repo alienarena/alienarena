@@ -394,7 +394,7 @@ SV_SendClientDatagram
 */
 qboolean SV_SendClientDatagram (client_t *client)
 {
-	byte		msg_buf[MAX_MSGLEN];
+	byte		msg_buf[MAX_MSGLEN/2];
 	sizebuf_t	msg;
 
 	SV_BuildClientFrame (client);
@@ -492,7 +492,7 @@ void SV_SendClientMessages (void)
 	int			i;
 	client_t	*c;
 	int			msglen;
-	byte		msgbuf[MAX_MSGLEN];
+	byte		msgbuf[MAX_MSGLEN/2];
 	int			r;
 
 	msglen = 0;
@@ -517,7 +517,7 @@ void SV_SendClientMessages (void)
 				SV_DemoCompleted ();
 				return;
 			}
-			if (msglen > MAX_MSGLEN)
+			if (msglen > MAX_MSGLEN/2)
 				Com_Error (ERR_DROP, "SV_SendClientMessages: msglen > MAX_MSGLEN");
 			r = fread (msgbuf, msglen, 1, sv.demofile);
 			if (r != 1)

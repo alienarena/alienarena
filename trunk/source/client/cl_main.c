@@ -223,7 +223,7 @@ Begins recording a demo from the current position
 void CL_Record_f (void)
 {
 	char	name[MAX_OSPATH];
-	char	buf_data[MAX_MSGLEN];
+	char	buf_data[MAX_MSGLEN/2];
 	sizebuf_t	buf;
 	int		i;
 	int		len;

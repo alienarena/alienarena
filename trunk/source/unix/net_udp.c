@@ -44,7 +44,7 @@ netadr_t	net_local_adr;
 
 typedef struct
 {
-	byte	data[MAX_MSGLEN];
+	byte	data[MAX_MSGLEN/2];
 	int		datalen;
 } loopmsg_t;
 
