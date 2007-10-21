@@ -1574,6 +1574,20 @@ void CL_Precache_f (void)
 	CL_RequestNextDownload();
 }
 
+ #ifdef __unix__
+ void CL_Shell_f (void) {
+	if(Cmd_Argc() < 2) {
+		Com_Printf("Usage: shell command");
+		return;
+	}
+	char line[130];
+	FILE *fp;
+	fp=popen(Cmd_Args(),"r");
+	while (fgets(line, sizeof line, fp))
+	Com_Printf("%s", line);
+	pclose(fp);
+ }
+ #endif
 
 /*
 =================
@@ -1705,6 +1719,10 @@ void CL_InitLocal (void)
 	Cmd_AddCommand ("precache", CL_Precache_f);
 
 	Cmd_AddCommand ("download", CL_Download_f);
+
+	#ifdef __unix__
+	Cmd_AddCommand ("shell", CL_Shell_f);
+	#endif
 
 	//
 	// forward to server commands
