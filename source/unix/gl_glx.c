@@ -381,6 +381,8 @@ void HandleEvents(void)
 			else if (event.xbutton.button == 5) Key_Event(K_MWHEELDOWN, event.type == ButtonPress, Sys_Milliseconds());
 			else if (event.xbutton.button == 6) Key_Event(K_MOUSE4, event.type == ButtonPress, Sys_Milliseconds());
 			else if (event.xbutton.button == 7) Key_Event(K_MOUSE5, event.type == ButtonPress, Sys_Milliseconds());
+			else if (event.xbutton.button == 8) Key_Event(K_AUX1, event.type == ButtonPress, Sys_Milliseconds());
+			else if (event.xbutton.button == 9) Key_Event(K_AUX2, event.type == ButtonPress, Sys_Milliseconds());
 			break;
 			
 		case ButtonRelease:
@@ -396,6 +398,8 @@ void HandleEvents(void)
 			else if (event.xbutton.button == 5) Key_Event(K_MWHEELDOWN, event.type == ButtonPress, Sys_Milliseconds());
 			else if (event.xbutton.button == 6) Key_Event(K_MOUSE4, event.type == ButtonPress, Sys_Milliseconds());
 			else if (event.xbutton.button == 7) Key_Event(K_MOUSE5, event.type == ButtonPress, Sys_Milliseconds());
+			else if (event.xbutton.button == 8) Key_Event(K_AUX1, event.type == ButtonPress, Sys_Milliseconds());
+			else if (event.xbutton.button == 9) Key_Event(K_AUX2, event.type == ButtonPress, Sys_Milliseconds());
 			break;
 
 		case CreateNotify :
