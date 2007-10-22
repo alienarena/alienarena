@@ -339,6 +339,8 @@ void Draw_ShaderPic (image_t *gl)
 	
 	if (!rs) 
 	{
+		qglDisable (GL_ALPHA_TEST);
+		qglEnable (GL_BLEND);
 		GLSTATE_DISABLE_ALPHATEST
 		GLSTATE_ENABLE_BLEND
 		GL_TexEnv( GL_MODULATE );
@@ -353,6 +355,8 @@ void Draw_ShaderPic (image_t *gl)
 		VA_SetElem2(tex_array[2],gl->sh, gl->th);
 		VA_SetElem2(tex_array[3],gl->sl, gl->th);
 		qglDrawArrays (GL_QUADS, 0, 4);
+		qglEnable (GL_ALPHA_TEST);
+		qglDisable (GL_BLEND);
 	} 
 	else 
 	{
