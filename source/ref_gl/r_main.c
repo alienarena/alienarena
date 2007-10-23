@@ -227,73 +227,6 @@ struct r_fog
 	float density;
 } fog;
 
-void R_AddGlowEffect (float red, float green, float blue, float radius, vec3_t origin);
-
-
-// glow definitions - originally from gl_rmain.c
-#define MAX_GLOWS 2048
-int num_glows;
-
-typedef struct glows_s
-{
-	float red;
-	float green;
-	float blue;
-	float radius;
-	vec3_t origin;
-} glows_t;
-
-glows_t glow_effects[MAX_GLOWS];
-
-// sin and cos tables from 0 to 1 in 0.0625 increments to speed up glow rendering
-// also from gl_rmisc.c and externed in gl_quake.h - i also use them for alias model glows.
-float glowcos[17] =
-{
-	1.000000,
-	0.923879,
-	0.707106,
-	0.382682,
-	-0.000002,
-	-0.382686,
-	-0.707109,
-	-0.923881,
-	-1.000000,
-	-0.923878,
-	-0.707103,
-	-0.382678,
-	0.000006,
-	0.382689,
-	0.707112,
-	0.923882,
-	1.000000,
-};
-
-
-float glowsin[17] =
-{
-	0.000000,
-	0.382684,
-	0.707107,
-	0.923880,
-	1.000000,
-	0.923879,
-	0.707105,
-	0.382680,
-	-0.000004,
-	-0.382687,
-	-0.707110,
-	-0.923882,
-	-1.000000,
-	-0.923877,
-	-0.707102,
-	-0.382677,
-	0.000008,
-};
-
-
-// this prototype was not required in my original engine
-void R_RenderGlowEffects (void);
-
 /*
 =================
 R_ReadFogScript
@@ -1320,8 +1253,6 @@ void R_RenderView (refdef_t *fd)
 
 	R_BloomBlend( fd );//BLOOMS
 
-	R_RenderDlights ();
-
 // start MPO
 	// if we are doing a reflection, turn off clipping now
 	if (g_drawing_refl)
@@ -1903,86 +1834,45 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		Com_Printf ("...GL_SGIS_multitexture not found\n" );
 	}
+	
 	// Vic - begin
-
 	gl_config.mtexcombine = false;
-
-
-
 	if ( strstr( gl_config.extensions_string, "GL_ARB_texture_env_combine" ) )
-
 	{
-
 		if ( gl_ext_mtexcombine->value )
-
 		{
-
 			Com_Printf( "...using GL_ARB_texture_env_combine\n" );
-
 			gl_config.mtexcombine = true;
-
 		}
-
 		else
-
 		{
-
 			Com_Printf( "...ignoring GL_ARB_texture_env_combine\n" );
-
 		}
-
 	}
-
 	else
-
 	{
-
 		Com_Printf( "...GL_ARB_texture_env_combine not found\n" );
-
 	}
-
-
-
 	if ( !gl_config.mtexcombine )
-
 	{
-
 		if ( strstr( gl_config.extensions_string, "GL_EXT_texture_env_combine" ) )
-
 		{
-
 			if ( gl_ext_mtexcombine->value )
-
 			{
-
 				Com_Printf( "...using GL_EXT_texture_env_combine\n" );
-
 				gl_config.mtexcombine = true;
-
 			}
-
 			else
-
 			{
-
 				Com_Printf( "...ignoring GL_EXT_texture_env_combine\n" );
-
 			}
-
 		}
-
 		else
-
 		{
-
 			Com_Printf( "...GL_EXT_texture_env_combine not found\n" );
-
 		}
-
 	}
-
 	// Vic - end
-
 
 	// Texture Shader support - MrG
 	if ( strstr( gl_config.extensions_string, "GL_NV_texture_shader" ) )
@@ -2320,72 +2210,4 @@ void R_DrawBeam( entity_t *e )
 	qglDisable( GL_BLEND );
 	qglDepthMask( GL_TRUE );
 }
-
-// glow rendering - this was originally in gl_rmain.c
-void R_RenderGlowEffects (void)
-{
-	int i, j, k;
-	vec3_t v;
-
-	// replace this with your own fog stuff if you're using fog
-	if (map_fog)
-		qglDisable (GL_FOG);
-
-	qglDepthMask (0);
-	qglDisable (GL_TEXTURE_2D);
-	qglShadeModel (GL_SMOOTH);
-	qglEnable (GL_BLEND);
-	qglBlendFunc (GL_ONE, GL_ONE);
-
-	for (k = 0; k < num_glows; k++)
-	{
-		qglBegin (GL_TRIANGLE_FAN);
-		qglColor3f (glow_effects[k].red, glow_effects[k].green, glow_effects[k].blue);
-
-		for (i = 0; i < 3; i++)
-			v[i] = glow_effects[k].origin[i] - vpn[i] * glow_effects[k].radius;
-
-		qglVertex3fv (v);
-		qglColor3f (0,0,0);
-
-		for (i = 16; i >= 0; i--)
-		{
-			for (j = 0; j < 3; j++)
-				v[j] = glow_effects[k].origin[j] + vright[j] * glowcos[i] *
-					glow_effects[k].radius + vup[j] * glowsin[i] * glow_effects[k].radius;
-
-			qglVertex3fv (v);
-		}
-
-		qglEnd ();
-	}
-
-	qglColor3f (1,1,1);
-	qglDisable (GL_BLEND);
-	qglEnable (GL_TEXTURE_2D);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDepthMask (1);
-
-	// replace this with your own fog stuff if you're using fog
-	if (map_fog)
-		qglEnable (GL_FOG);
-}
-
-
-void R_AddGlowEffect (float red, float green, float blue, float radius, vec3_t origin)
-{
-	glow_effects[num_glows].red = red;
-	glow_effects[num_glows].green = green;
-	glow_effects[num_glows].blue = blue;
-
-	glow_effects[num_glows].radius = radius;
-
-	glow_effects[num_glows].origin[0] = origin[0];
-	glow_effects[num_glows].origin[1] = origin[1];
-	glow_effects[num_glows].origin[2] = origin[2];
-
-	num_glows++;
-}
-
-
 
