@@ -60,6 +60,7 @@ cvar_t	*cl_footsteps;
 cvar_t	*cl_timeout;
 cvar_t	*cl_predict;
 cvar_t	*cl_maxfps;
+cvar_t  *cl_maxpps;
 cvar_t	*cl_gun;
 cvar_t  *cl_showPlayerNames;
 
@@ -1631,6 +1632,7 @@ void CL_InitLocal (void)
 	cl_autoskins = Cvar_Get ("cl_autoskins", "0", 0);
 	cl_predict = Cvar_Get ("cl_predict", "1", 0);
 	cl_maxfps = Cvar_Get ("cl_maxfps", "90", CVAR_ARCHIVE);
+	cl_maxpps = Cvar_Get("cl_maxpps", "90", CVAR_ARCHIVE);	
 	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE);
 	cl_healthaura = Cvar_Get ("cl_healthaura", "1", CVAR_ARCHIVE);
 	cl_noblood = Cvar_Get ("cl_noblood", "0", CVAR_ARCHIVE);
@@ -1902,35 +1904,31 @@ CL_Frame
 */
 qboolean send_packet_now = false;  // instant packets, like firing weapons
 
+
 void CL_Frame (int msec)
 {
-	static int	extratime;
+	static int packet_delta = 0, render_delta = 0;
 	static int  lasttimecalled;
+	qboolean packet_frame = true, render_frame = true;
 
 	if (dedicated->value)
 		return;
 
-	extratime += msec;
+	packet_delta += msec;
+	render_delta += msec;
 
 	if (!cl_timedemo->value)
 	{
-		if (cls.state == ca_connected && extratime < 100)
-			return;			// don't flood packets out while connecting
-		if (extratime < 1000/cl_maxfps->value && !send_packet_now)
+		if (cls.state == ca_connected && cl_maxpps->value > 0 && packet_delta < 1000.0/cl_maxpps->value)
+			packet_frame = false;			// don't flood packets if framerate is high or during connection
+		if (render_delta < 1000.0/cl_maxfps->value)
 			return;			// framerate is too high
 	}
-	if(send_packet_now)
-		send_packet_now = false;
-
-	// let the mouse activate or deactivate
-	IN_Frame ();
 
 	// decide the simulation time
-	cls.frametime = extratime/1000.0;
-	cl.time += extratime;
+	cls.frametime = packet_delta/1000.0;
+	cl.time += packet_delta;
 	cls.realtime = curtime;
-
-	extratime = 0;
 
 	if (cls.frametime > (1.0 / 5))
 		cls.frametime = (1.0 / 5);
@@ -1938,41 +1936,47 @@ void CL_Frame (int msec)
 	// if in the debugger last frame, don't timeout
 	if (msec > 5000)
 		cls.netchan.last_received = Sys_Milliseconds ();
-
+ 
 	// fetch results from server
 	CL_ReadPackets ();
 
-	// run http downloads
-	CL_HttpDownloadThink();
+	if(packet_frame || send_packet_now || userinfo_modified) {
+		// send a new command message to the server
+		CL_SendCommand ();
+		packet_delta = 0;
+		send_packet_now = false;
+	}
+	if(render_frame) {
+		
+		// let the mouse activate or deactivate
+		IN_Frame ();
+		// predict all unacknowledged movements
+		CL_PredictMovement ();
 
-	// send a new command message to the server
-	CL_SendCommand ();
+		// allow rendering DLL change
+		VID_CheckChanges ();
+		if (!cl.refresh_prepped && cls.state == ca_active)
+			CL_PrepRefresh ();
 
-	// predict all unacknowledged movements
-	CL_PredictMovement ();
+		// update the screen
+		if (host_speeds->value)
+			time_before_ref = Sys_Milliseconds ();
+		SCR_UpdateScreen ();
+		if (host_speeds->value)
+			time_after_ref = Sys_Milliseconds ();
 
-	// allow rendering DLL change
-	VID_CheckChanges ();
-	if (!cl.refresh_prepped && cls.state == ca_active)
-		CL_PrepRefresh ();
+		// update audio
+		S_Update (cl.refdef.vieworg, cl.v_forward, cl.v_right, cl.v_up);
 
-	// update the screen
-	if (host_speeds->value)
-		time_before_ref = Sys_Milliseconds ();
-	SCR_UpdateScreen ();
-	if (host_speeds->value)
-		time_after_ref = Sys_Milliseconds ();
+		// advance local effects for next frame
+		CL_RunDLights ();
+		CL_RunLightStyles ();
+		SCR_RunCinematic ();
+		SCR_RunConsole ();
 
-	// update audio
-	S_Update (cl.refdef.vieworg, cl.v_forward, cl.v_right, cl.v_up);
-
-	// advance local effects for next frame
-	CL_RunDLights ();
-	CL_RunLightStyles ();
-	SCR_RunCinematic ();
-	SCR_RunConsole ();
-
-	cls.framecount++;
+		render_delta = 0;
+		cls.framecount++;
+	}
 
 	if ( log_stats->value )
 	{
@@ -1995,8 +1999,6 @@ void CL_Frame (int msec)
 		}
 	}
 }
-
-
 
 
 //============================================================================
