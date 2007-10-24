@@ -51,7 +51,7 @@ else
 	_LIB := lib
 endif
 
-BASE_CFLAGS=$(CFLAGS) -Dstricmp=strcasecmp -D_stricmp=strcasecmp -I$(X11BASE)/include -fno-strict-aliasing -fmerge-constants
+BASE_CFLAGS=$(CFLAGS) -Dstricmp=strcasecmp -D_stricmp=strcasecmp -I$(X11BASE)/include -fno-strict-aliasing -fmerge-constants -DHAVE_CURL
 
 RELEASE_CFLAGS=$(BASE_CFLAGS)
 
@@ -82,10 +82,6 @@ endif
 endif
 endif
 
-ifeq ($(shell curl -V | grep -c .), 3)
-	BASE_CFLAGS += -DHAVE_CURL
-endif
-
 ARENA_CFLAGS=-DARENA
 
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g -ggdb
@@ -109,7 +105,6 @@ CURLCFLAGS=$(shell curl-config --cflags)
 CURLLDFLAGS=$(shell curl-config --libs)
 
 JPEGLDFLAGS=-ljpeg
-PNGLDFLAGS=-lpng
 
 DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 DO_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) -o $@ -c $<
@@ -259,10 +254,10 @@ CODERED_AS_OBJS = \
 	$(BUILDDIR)/client/snd_mixa.o
 
 $(BUILDDIR)/crx : $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(CURLLDFLAGS) $(PNGLDFLAGS) $(JPEGLDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(CURLLDFLAGS) $(JPEGLDFLAGS)
 
 $(BUILDDIR)/crx.sdl : $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(SDLLDFLAGS) $(CURLLDFLAGS) $(PNGLDFLAGS) $(JPEGLDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(SDLLDFLAGS) $(CURLLDFLAGS) $(JPEGLDFLAGS)
 
 $(BUILDDIR)/client/cl_cin.o :     $(CLIENT_DIR)/cl_cin.c
 	$(DO_CC)
