@@ -1452,7 +1452,7 @@ void R_Register( void )
 	gl_clear = Cvar_Get ("gl_clear", "0", 0);
 	gl_cull = Cvar_Get ("gl_cull", "1", 0);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", 0);
-	gl_flashblend = Cvar_Get ("gl_flashblend", "0", 0);
+	gl_flashblend = Cvar_Get ("gl_flashblend", "0", CVAR_ARCHIVE);
 	gl_playermip = Cvar_Get ("gl_playermip", "0", 0);
 #ifdef __unix__
 	gl_driver = Cvar_Get( "gl_driver", "libGL.so.1", CVAR_ARCHIVE );
