@@ -115,7 +115,7 @@ void Sys_Error (char *error, ...)
 	va_end (argptr);
 	fprintf(stderr, "Error: %s\n", string);
 
-	_exit (1);
+	exit (1);
 
 }
 
