@@ -88,7 +88,7 @@ void Sys_Quit (void)
 	fcntl (0, F_SETFL, fcntl (0, F_GETFL, 0) & ~FNDELAY);
 	CL_Shutdown ();
 	Qcommon_Shutdown ();
-	_exit(0);
+	exit(0);
 }
 
 void Sys_Init(void)
