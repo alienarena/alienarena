@@ -433,7 +433,7 @@ static void signal_handler(int sig)
 {
 	printf("Received signal %d, exiting...\n", sig);
 	GLimp_Shutdown();
-	_exit(0);
+	exit(0);
 }
 
 static void InitSig(void)
