@@ -38,13 +38,13 @@ textures/arena6/ice
 }
 textures/arena8/grate1
 {
+
 	{
-		map textures/arena8/grate1.tga
-	}
-	{
-		map gfx/electrics3a.tga
+		map gfx/lightning.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 0.2 0.2
+		alphashift 5 0.25 0.7
 		scroll static 2 static 0
+		scale static .5 static .5
+		nolightmap
 	}
 }
