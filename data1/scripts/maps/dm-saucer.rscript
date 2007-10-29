@@ -40,11 +40,15 @@ textures/arena8/grate1
 {
 
 	{
-		map gfx/lightning.tga
+		map gfx/electrics3a.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 5 0.25 0.7
+		alphashift 5 0.7 0.9
+		scale static .1 static .1
 		scroll static 2 static 0
-		scale static .5 static .5
 		nolightmap
+	}
+	{	
+		map textures/arena8/grate1.tga
+		alphamask
 	}
 }
