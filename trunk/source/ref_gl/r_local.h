@@ -176,6 +176,8 @@ extern cvar_t	*gl_ext_mtexcombine;
 
 // Vic - end
 extern cvar_t	*gl_normalmaps;
+extern cvar_t	*gl_specularmaps;
+extern cvar_t	*gl_cubemaps;
 
 extern	cvar_t	*r_shaders;
 extern	cvar_t	*r_bloom;

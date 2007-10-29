@@ -27,6 +27,9 @@ static vec3_t	modelorg;		// relative to viewpoint
 
 msurface_t	*r_alpha_surfaces;
 msurface_t	*r_special_surfaces;
+static msurface_t *r_cubemapsurfaces;
+static msurface_t *r_normalsurfaces;
+static msurface_t *r_specularsurfaces;
 
 #define DYNAMIC_LIGHT_WIDTH  128
 #define DYNAMIC_LIGHT_HEIGHT 128
@@ -359,6 +362,13 @@ void R_RenderBrushPoly (msurface_t *fa)
 		GL_TexEnv( GL_REPLACE );
 	}
 
+	fa->cubemapchain = r_cubemapsurfaces;
+	r_cubemapsurfaces = fa;
+	fa->normalchain = r_normalsurfaces;
+	r_normalsurfaces = fa;
+	fa->specularchain = r_specularsurfaces;
+	r_specularsurfaces = fa;
+
 	if (SurfaceIsAlphaBlended(fa))
 		qglEnable( GL_ALPHA_TEST );
 
@@ -625,7 +635,14 @@ static void GL_RenderLightmappedPoly( msurface_t *surf )
 	image_t *image = R_TextureAnimation( surf->texinfo );
 	qboolean is_dynamic = false;
 	unsigned lmtex = surf->lightmaptexturenum;
-
+	
+	surf->cubemapchain = r_cubemapsurfaces;
+	r_cubemapsurfaces = surf;
+	surf->normalchain = r_normalsurfaces;
+	r_normalsurfaces = surf;
+	surf->specularchain = r_specularsurfaces;
+	r_specularsurfaces = surf;
+	
 	for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
 	{
 		if ( r_newrefdef.lightstyles[surf->styles[map]].white != surf->cached_light[map] )
@@ -697,6 +714,208 @@ dynamic:
 		qglDisable( GL_ALPHA_TEST);
 }
 
+static void R_DrawCubemapSurfaces (void)
+{
+	msurface_t *surf = r_cubemapsurfaces;
+	int		i;
+	float	*v;
+	glpoly_t *p;
+	image_t *image = R_TextureAnimation( surf->texinfo );
+
+	// nothing to draw!
+	if (!surf)
+		return;
+
+	if (!gl_normalmaps->value || !gl_cubemaps->value)
+		return;
+ 
+	GL_SelectTexture (GL_TEXTURE0);
+	qglDisable (GL_TEXTURE_2D);
+	qglEnable (GL_TEXTURE_CUBE_MAP_ARB);
+
+	qglBindTexture (GL_TEXTURE_CUBE_MAP_ARB, r_cubemap->texnum);
+	qglMatrixMode (GL_TEXTURE);
+	qglLoadIdentity ();
+
+	// rotate around Y to bring blue/pink to the front
+	qglRotatef (90, 0, 1, 0);
+
+	// now reposition so that the bright spot is center screen
+	qglRotatef (-45, 1, 0, 0);
+
+	// rotate by viewangles
+	qglRotatef (-r_newrefdef.viewangles[2], 1, 0, 0);
+	qglRotatef (-r_newrefdef.viewangles[0], 0, 1, 0);
+	qglRotatef (-r_newrefdef.viewangles[1], 0, 0, 1);
+
+	// the next 2 statements will move the cmstr calculations into hardware so that we don;t
+	// have to evaluate them once per vert...
+
+	// translate after rotation
+	qglTranslatef (r_newrefdef.vieworg[0], r_newrefdef.vieworg[1], r_newrefdef.vieworg[2]);
+
+	// now flip everything by -1 again to mimic the software calculation
+	// we won't bother batching this part up...
+	qglScalef (-1, -1, -1);
+
+	qglMatrixMode (GL_MODELVIEW);
+
+	qglDepthMask (GL_FALSE); 
+	qglEnable (GL_BLEND); 
+
+	// set the correct blending mode for normal maps 
+	qglBlendFunc (GL_ZERO, GL_SRC_COLOR); 
+
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_PREVIOUS_ARB);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_TEXTURE);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_OPERAND1_RGB_ARB, GL_SRC_COLOR);
+
+	for (; surf; surf = surf->cubemapchain)
+	{
+		if (SurfaceIsAlphaBlended(surf))
+			continue;
+		for (p = surf->polys; p; p = p->chain)
+		{
+			qglBegin (GL_POLYGON);
+
+			for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
+			{
+				qglTexCoord3f( v[0], v[1], v[2]);
+				qglVertex3fv (v);
+			}
+
+			qglEnd ();
+		}
+	}
+	
+	qglMatrixMode (GL_TEXTURE);
+	qglLoadIdentity ();
+	qglMatrixMode (GL_MODELVIEW);
+	qglDisable (GL_TEXTURE_CUBE_MAP_ARB);
+	qglEnable (GL_TEXTURE_2D);
+
+	// restore original blend
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDisable (GL_BLEND);
+}
+
+static void R_DrawNormalSurfaces (void)
+{
+	msurface_t *surf = r_normalsurfaces;
+	int		i;
+	float	*v;
+	glpoly_t *p;
+
+	// nothing to draw!
+	if (!surf)
+		return;
+
+	if (!gl_normalmaps->value)
+		return;
+
+	qglDepthMask (GL_FALSE); 
+	qglEnable (GL_BLEND); 
+
+	// set the correct blending mode for normal maps 
+	qglBlendFunc (GL_ZERO, GL_SRC_COLOR); 
+	GL_SelectTexture(GL_TEXTURE0_ARB);
+
+	qglEnable (GL_TEXTURE_2D);
+	qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
+	qglTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB_ARB);
+
+	qglTexEnvf(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
+	qglTexEnvf(GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
+	qglTexEnvf(GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PRIMARY_COLOR_ARB);
+	qglTexEnvf(GL_TEXTURE_ENV, GL_OPERAND1_RGB_ARB, GL_SRC_COLOR);
+
+	for (; surf; surf = surf->normalchain)
+	{
+		if (SurfaceIsAlphaBlended(surf))
+			continue;
+		if(strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name))
+			GL_MBind (GL_TEXTURE0_ARB, surf->texinfo->normalMap->texnum);
+		else
+			continue;
+
+		for (p = surf->polys; p; p = p->chain)
+		{
+			qglBegin (GL_POLYGON);
+
+			for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
+			{
+				qglTexCoord2f( v[3], v[4]);
+				qglVertex3fv (v);
+			}
+
+			qglEnd ();
+		}
+	}
+
+	// restore original blend
+	qglDepthMask (GL_TRUE); 
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDisable (GL_BLEND);
+}
+
+static void R_DrawSpecularSurfaces (void)
+{
+	msurface_t *surf = r_specularsurfaces;
+	int		i;
+	float	*v;
+	glpoly_t *p;
+
+	// nothing to draw!
+	if (!surf)
+		return;
+
+	if (!gl_normalmaps->value || !gl_specularmaps->value)
+		return;
+
+	qglDepthMask (GL_FALSE); 
+	qglEnable (GL_BLEND); 
+	qglBlendFunc (GL_ONE, GL_ONE);
+	
+	GL_SelectTexture(GL_TEXTURE0_ARB);
+
+	qglEnable (GL_TEXTURE_2D);
+
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	for (; surf; surf = surf->specularchain)
+	{
+		if (SurfaceIsAlphaBlended(surf))
+			continue;
+		if(strcmp(surf->texinfo->specularMap->name, surf->texinfo->image->name))
+			GL_MBind (GL_TEXTURE0_ARB, surf->texinfo->specularMap->texnum);
+		else
+			continue;
+
+		for (p = surf->polys; p; p = p->chain)
+		{
+			qglBegin (GL_POLYGON);
+
+			for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
+			{
+				qglTexCoord2f( v[3], v[4]);
+				qglVertex3fv (v);
+			}
+
+			qglEnd ();
+		}
+	}
+
+	// restore original blend
+	qglDepthMask (GL_TRUE); 
+	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDisable (GL_BLEND);
+}
 /*
 =================
 R_DrawInlineBModel
@@ -717,6 +936,10 @@ void R_DrawInlineBModel (entity_t *e)
 		qglColor4f (1,1,1,0.25);
 		GL_TexEnv( GL_MODULATE );
 	}
+
+	r_cubemapsurfaces = NULL;
+	r_normalsurfaces = NULL;
+	r_specularsurfaces = NULL;
 
 	//
 	// draw texture
@@ -755,8 +978,20 @@ void R_DrawInlineBModel (entity_t *e)
 
 	if ( !(currententity->flags & RF_TRANSLUCENT) )
 	{
-		if ( !qglMTexCoord2fSGIS )
+		if ( !qglMTexCoord2fSGIS ) {
 			R_BlendLightmaps ();
+
+			GL_EnableMultitexture (false);
+
+			// don't put them on translucent surfs
+			R_DrawCubemapSurfaces ();
+			R_DrawNormalSurfaces ();
+			R_DrawSpecularSurfaces ();
+
+			// bring multitexturing back up
+			GL_EnableMultitexture (true);
+		}
+
 	}
 	else
 	{
@@ -1083,6 +1318,10 @@ void R_DrawWorld (void)
 	qglColor3f (1,1,1);
 	memset (gl_lms.lightmap_surfaces, 0, sizeof(gl_lms.lightmap_surfaces));
 
+	r_cubemapsurfaces = NULL;
+	r_normalsurfaces = NULL;
+	r_specularsurfaces = NULL;
+
 	R_ClearSkyBox ();
 
 	if ( qglMTexCoord2fSGIS )
@@ -1144,6 +1383,10 @@ void R_DrawWorld (void)
 	*/
 	DrawTextureChains ();
 	R_BlendLightmaps ();
+
+	R_DrawCubemapSurfaces ();
+	R_DrawNormalSurfaces ();
+	R_DrawSpecularSurfaces ();
 
 	R_DrawSkyBox ();
 
@@ -1389,6 +1632,14 @@ void GL_BuildPolygonFromSurface(msurface_t *fa)
 		poly->verts[i][5] = s;
 		poly->verts[i][6] = t;
 
+		s = DotProduct (vec, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3];
+		s /= 128;
+
+		t = DotProduct (vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
+		t /= 128;
+
+		poly->verts[i][7] = s;
+		poly->verts[i][8] = t;
 	}
 }
 

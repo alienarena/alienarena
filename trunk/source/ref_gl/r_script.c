@@ -1406,6 +1406,9 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		if (stage->lensflare)
 			break;
 
+		if (stage->normalmap)
+			continue;
+
 		if (stage->colormap.enabled)
 			qglDisable (GL_TEXTURE_2D);
 		else if (stage->rand_count) {
@@ -1499,29 +1502,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		{
 			GLSTATE_DISABLE_ALPHATEST
 		}
-		if(stage->normalmap)
-		{
-		
-			qglDepthMask (GL_FALSE); 
-			qglEnable (GL_BLEND); 
-
-			// set the correct blending mode for normal maps 
-			qglBlendFunc (GL_ZERO, GL_SRC_COLOR); 
-
-			GL_SelectTexture(GL_TEXTURE0_ARB);
-			GL_MBind (GL_TEXTURE0_ARB, stage->texture->texnum);
-			qglEnable (GL_TEXTURE_2D);
-			qglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-			qglTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB_ARB);
-
-			qglTexEnvf(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
-			qglTexEnvf(GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
-			qglTexEnvf(GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PRIMARY_COLOR_ARB);
-			qglTexEnvf(GL_TEXTURE_ENV, GL_OPERAND1_RGB_ARB, GL_SRC_COLOR);
-
-
-		}
-
+	
 		if (rs->subdivide)
 		{
 			glpoly_t *bp;
@@ -1530,7 +1511,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			for (bp = surf->polys; bp; bp = bp->next)
 			{
 				p = bp;
-
+ 
 				qglBegin(GL_TRIANGLE_FAN);
 				for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
 				{
@@ -1679,20 +1660,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		qglColor4f(1,1,1,1);
 		if (stage->colormap.enabled)
 			qglEnable (GL_TEXTURE_2D); 
-
-		if(stage->normalmap) {
-			// back to replace mode 
-			qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); 
-
-			// restore the original blend mode 
-			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-
-			// switch off blending 
-			qglDisable (GL_BLEND); 
-			qglDepthMask (GL_TRUE); 
-		}
-
-	
+		
 	} while (stage = stage->next);
 
 	if(!r_bloom->value)

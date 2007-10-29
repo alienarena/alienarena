@@ -138,11 +138,13 @@ typedef struct mtexinfo_s
 	int			numframes;
 	struct mtexinfo_s	*next;		// animation chain
 	image_t		*image;
+	image_t		*normalMap;
+	image_t		*specularMap;
 	struct		rscript_t	*script;
 	int			value;
 } mtexinfo_t;
 
-#define	VERTEXSIZE	9
+#define	VERTEXSIZE	10
 
 typedef struct glpoly_s
 {
@@ -177,6 +179,9 @@ typedef struct msurface_s
 	struct	msurface_s	*texturechain;
 	struct  msurface_s	*lightmapchain;
 	struct	msurface_s	*specialchain;
+	struct  msurface_s  *cubemapchain;
+	struct  msurface_s	*normalchain;
+	struct  msurface_s	*specularchain;
 
 	mtexinfo_t	*texinfo;
 	float		c_s, c_t;

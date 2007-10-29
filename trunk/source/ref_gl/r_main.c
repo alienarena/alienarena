@@ -81,6 +81,8 @@ image_t		*r_radarmap; // wall texture for radar texgen
 image_t		*r_around;
 
 cvar_t	*gl_normalmaps;
+cvar_t	*gl_specularmaps;
+cvar_t	*gl_cubemaps;
 cvar_t	*gl_arb_fragment_program; // jit
 
 entity_t	*currententity;
@@ -1496,6 +1498,9 @@ void R_Register( void )
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
 
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
+	//these next two we always have on, but only used when normalmaps are set to on
+	gl_specularmaps = Cvar_Get("gl_specularmaps", "1", CVAR_ARCHIVE);
+	gl_cubemaps = Cvar_Get("gl_cubemaps", "1", CVAR_ARCHIVE);
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);

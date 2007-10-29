@@ -787,7 +787,7 @@ qboolean GLimp_InitGL (void)
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]); //probably remove from here
 	qglVertexPointer (3, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 

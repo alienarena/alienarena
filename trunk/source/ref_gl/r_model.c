@@ -614,6 +614,7 @@ void Mod_LoadTexinfo (lump_t *l)
 	mtexinfo_t *out, *step;
 	int 	i, j, count;
 	char	name[MAX_QPATH];
+	char	sv_name[MAX_QPATH];
 	int		next;
 
 	in = (void *)(mod_base + l->fileofs);
@@ -645,6 +646,29 @@ void Mod_LoadTexinfo (lump_t *l)
 		if (out->image->script)
 			RS_ReadyScript(out->image->script);
 
+		//check for normal and specular maps
+		strcpy(sv_name, name);
+		if( ( strlen( name ) + 8 ) <= MAX_QPATH )
+		{
+			strcat( name, "_nm.tga" );
+			out->normalMap = GL_FindImage( name, it_bump );
+			if( out->normalMap == NULL ) 
+				out->normalMap = out->image; 
+		
+		}
+		else
+			out->normalMap = out->image; 
+
+		if( ( strlen( sv_name ) + 8 ) <= MAX_QPATH )
+		{
+			strcat( sv_name, "_sm.tga" );
+			out->specularMap = GL_FindImage( sv_name, it_bump );
+			if( out->specularMap == NULL ) 
+				out->specularMap = out->image; 
+		
+		}
+		else
+			out->specularMap = out->image; 
 	}
 
 	// count animation frames
@@ -1591,6 +1615,7 @@ struct model_s *R_RegisterModel (char *name)
 		{
 			for (i=0 ; i<mod->numtexinfo ; i++) {
 				mod->texinfo[i].image->registration_sequence = registration_sequence;
+				mod->texinfo[i].normalMap->registration_sequence = registration_sequence;
 			}
 		}
 	}
