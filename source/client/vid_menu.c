@@ -179,7 +179,7 @@ static void SetHigh( void *unused )
 	//umm why wasn't this here before??
 	Cvar_SetValue("gl_texres", 1);
 	Cvar_SetValue("gl_reflection", 0);
-	Cvar_SetValue("r_bloom", 1);
+	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
