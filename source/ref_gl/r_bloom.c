@@ -586,5 +586,11 @@ void R_BloomBlend ( refdef_t *fd )
 		1.0 );
 
 	R_Bloom_DrawEffect();
+
+	qglColor3f (1,1,1);   
+    qglDisable (GL_BLEND);   
+    qglEnable (GL_TEXTURE_2D);   
+    qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);   
+    qglDepthMask (1);    
 }
 
