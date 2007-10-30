@@ -71,7 +71,10 @@ static menulist_s  		s_finish_box;
 static menulist_s		s_vsync_box;
 static menulist_s  		s_windowed_mouse;
 static menuaction_s		s_apply_action;
-static menuaction_s		s_defaults_action;
+static menuaction_s		s_low_action;
+static menuaction_s		s_medium_action;
+static menuaction_s		s_high_action;
+static menuaction_s		s_highest_action;
 static menulist_s		s_texres_box;
 static menulist_s		s_bloom_box;
 static menuslider_s		s_bloom_slider;
@@ -112,19 +115,11 @@ static void BloomCallback( void *s )
 static void BloomSetCallback( void *s)
 {
 	Cvar_SetValue("r_bloom", s_bloom_box.curvalue);
-	if(s_bloom_box.curvalue) { //force mtex combine off, it's just fucking ugly with bloom.
-		Cvar_SetValue("gl_ext_mtexcombine", 0);
-		s_texcombine_box.curvalue = 0;
-	}
 }
 
 static void MtexCallback( void *s)
 {
 	Cvar_SetValue("gl_ext_mtexcombine", s_texcombine_box.curvalue);
-	if(s_texcombine_box.curvalue) { //force mtex combine off, it's just fucking ugly with bloom.
-		Cvar_SetValue("r_bloom", 0);
-		s_bloom_box.curvalue = 0;
-	}
 }
 
 static void ModulateCallback( void *s )
@@ -134,7 +129,7 @@ static void ModulateCallback( void *s )
 	Cvar_SetValue( "gl_modulate", slider->curvalue);
 }
 
-static void ResetDefaults( void *unused )
+static void SetLow( void *unused )
 {
 	//umm why wasn't this here before??
 	Cvar_SetValue("gl_texres", 1);
@@ -147,6 +142,80 @@ static void ResetDefaults( void *unused )
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
+
+	//do other things that aren't in the vid menu per se, but are related "high end" effects
+	Cvar_SetValue("r_shaders", 0);
+	Cvar_SetValue("gl_shadows", 0);
+	Cvar_SetValue("gl_dynamic", 0);
+	Cvar_SetValue("gl_rtlights", 0);
+
+	VID_MenuInit();
+}
+static void SetMedium( void *unused )
+{
+	//umm why wasn't this here before??
+	Cvar_SetValue("gl_texres", 1);
+	Cvar_SetValue("gl_reflection", 0);
+	Cvar_SetValue("r_bloom", 0);
+	Cvar_SetValue("r_bloom_intensity", 0.5);
+	Cvar_SetValue("gl_ext_mtexcombine", 1);
+	Cvar_SetValue("r_overbrightbits", 2);
+	Cvar_SetValue("gl_modulate", 2);
+	Cvar_SetValue("gl_picmip", 0);
+	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("gl_normalmaps", 0);
+
+	//do other things that aren't in the vid menu per se, but are related "high end" effects
+	Cvar_SetValue("r_shaders", 1);
+	Cvar_SetValue("gl_shadows", 2);
+	Cvar_SetValue("gl_dynamic", 1);
+	Cvar_SetValue("gl_rtlights", 0);
+
+	VID_MenuInit();
+}
+
+static void SetHigh( void *unused )
+{
+	//umm why wasn't this here before??
+	Cvar_SetValue("gl_texres", 1);
+	Cvar_SetValue("gl_reflection", 0);
+	Cvar_SetValue("r_bloom", 1);
+	Cvar_SetValue("r_bloom_intensity", 0.5);
+	Cvar_SetValue("gl_ext_mtexcombine", 1);
+	Cvar_SetValue("r_overbrightbits", 2);
+	Cvar_SetValue("gl_modulate", 2);
+	Cvar_SetValue("gl_picmip", 0);
+	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("gl_normalmaps", 1);
+
+	//do other things that aren't in the vid menu per se, but are related "high end" effects
+	Cvar_SetValue("r_shaders", 1);
+	Cvar_SetValue("gl_shadows", 2);
+	Cvar_SetValue("gl_dynamic", 1);
+	Cvar_SetValue("gl_rtlights", 1);
+
+	VID_MenuInit();
+}
+
+static void SetHighest( void *unused )
+{
+	//umm why wasn't this here before??
+	Cvar_SetValue("gl_texres", 1);
+	Cvar_SetValue("gl_reflection", 1);
+	Cvar_SetValue("r_bloom", 1);
+	Cvar_SetValue("r_bloom_intensity", 0.5);
+	Cvar_SetValue("gl_ext_mtexcombine", 1);
+	Cvar_SetValue("r_overbrightbits", 2);
+	Cvar_SetValue("gl_modulate", 2);
+	Cvar_SetValue("gl_picmip", 0);
+	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("gl_normalmaps", 1);
+
+	//do other things that aren't in the vid menu per se, but are related "high end" effects
+	Cvar_SetValue("r_shaders", 1);
+	Cvar_SetValue("gl_shadows", 2);
+	Cvar_SetValue("gl_dynamic", 1);
+	Cvar_SetValue("gl_rtlights", 1);
 
 	VID_MenuInit();
 }
@@ -434,16 +503,34 @@ void VID_MenuInit( void )
 	s_windowed_mouse.curvalue = _windowed_mouse->value;
 	s_windowed_mouse.itemnames = yesno_names;
 
-	s_defaults_action.generic.type = MTYPE_ACTION;
-	s_defaults_action.generic.name = "reset to defaults";
-	s_defaults_action.generic.x    = 24;
-	s_defaults_action.generic.y    = 230*scale;
-	s_defaults_action.generic.callback = ResetDefaults;
+	s_low_action.generic.type = MTYPE_ACTION;
+	s_low_action.generic.name = "low settings";
+	s_low_action.generic.x    = 24;
+	s_low_action.generic.y    = 230*scale;
+	s_low_action.generic.callback = SetLow;
+
+	s_medium_action.generic.type = MTYPE_ACTION;
+	s_medium_action.generic.name = "medium settings";
+	s_medium_action.generic.x    = 24;
+	s_medium_action.generic.y    = 240*scale;
+	s_medium_action.generic.callback = SetMedium;
+
+	s_high_action.generic.type = MTYPE_ACTION;
+	s_high_action.generic.name = "high settings";
+	s_high_action.generic.x    = 24;
+	s_high_action.generic.y    = 250*scale;
+	s_high_action.generic.callback = SetHigh;
+
+	s_highest_action.generic.type = MTYPE_ACTION;
+	s_highest_action.generic.name = "highest settings";
+	s_highest_action.generic.x    = 24;
+	s_highest_action.generic.y    = 260*scale;
+	s_highest_action.generic.callback = SetHighest;
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
 	s_apply_action.generic.x    = 24;
-	s_apply_action.generic.y    = 240*scale;
+	s_apply_action.generic.y    = 280*scale;
 	s_apply_action.generic.callback = ApplyChanges;
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
@@ -465,7 +552,10 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_vsync_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_windowed_mouse );
 
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_defaults_action);
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_low_action);
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_medium_action);
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_high_action);
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_highest_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_apply_action);
 
 	Menu_Center( &s_opengl_menu );
