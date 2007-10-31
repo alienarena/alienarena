@@ -420,12 +420,12 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	switch (LittleLong(*(unsigned *)buf))
 	{
 	case IDALIASHEADER:
-		loadmodel->extradata = Hunk_Begin (0x200000);
+		loadmodel->extradata = Hunk_Begin (0x300000);
 		Mod_LoadAliasModel (mod, buf);
 		break;
 		
 	case IDBSPHEADER:
-		loadmodel->extradata = Hunk_Begin (0x1000000);
+		loadmodel->extradata = Hunk_Begin (0x1500000);
 		Mod_LoadBrushModel (mod, buf);
 		break;
 
