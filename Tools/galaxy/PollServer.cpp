@@ -180,13 +180,13 @@ void PingServers (SERVERINFO *server, CProgressCtrl *m_refreshprogress)
 	m_refreshprogress->SetRange(1, (numServers*2)+1);
 	m_refreshprogress->SetPos(numResponses);
 
+	memset(&addr, 0, sizeof(addr));
+
 	timeBeginPeriod (1);
 
 	/* Open sockets */
 	for(serverindex = 0; serverindex < numServers; serverindex++)
 	{
-		memset(&addr, 0, sizeof(addr));
-		
 		addr.sin_family = AF_INET;
 
 		server[serverindex].socket = socket (AF_INET, SOCK_DGRAM, IPPROTO_UDP);
