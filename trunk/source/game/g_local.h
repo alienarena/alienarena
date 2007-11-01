@@ -1362,6 +1362,13 @@ struct edict_s
 	//class(human = 0; alien = 1; robot = 2;)
 	int ctype;
 
+	//model specific gibs
+	int usegibs;
+	char head[64];
+	char leg[64];
+	char arm[64];
+	char body[64];
+
 };
 
 void FL_think (edict_t *self);

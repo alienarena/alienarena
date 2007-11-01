@@ -159,7 +159,7 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type, int effects)
 	{
 		gib->movetype = MOVETYPE_BOUNCE;
 		gib->touch = gib_touch;
-		vscale = 0.5;
+		vscale = 0.2;
 	}
 	else
 	{
@@ -185,17 +185,9 @@ void ThrowClientHead (edict_t *self, int damage)
 	vec3_t	vd;
 	char	*gibname;
 
-	if (rand()&1)
-	{
-		gibname = "models/objects/gibs/sm_meat/tris.md2";
-		self->s.skinnum = 0;		// second skin is player
-	}
-	else
-	{
-		gibname = "models/objects/gibs/sm_meat/tris.md2";
+	gibname = "models/objects/gibs/sm_meat/tris.md2";
 		self->s.skinnum = 0;
-	}
-
+	
 	self->s.origin[2] += 32;
 	self->s.frame = 0;
 	gi.setmodel (self, gibname);

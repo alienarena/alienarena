@@ -660,6 +660,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	char	*info;
 	int	got_vehicle = 0;
 	int	number_of_gibs = 0;
+	int	gib_effect = EF_GREENGIB;
 
 	if (self->in_vehicle) {
 		Reset_player(self);	//get the player out of the vehicle
@@ -759,9 +760,10 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		if(self->ctype == 0) { //alien
 
 			for (n= 0; n < number_of_gibs; n++)
-				ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_ORGANIC, EF_GREENGIB);
+				ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_METALLIC, EF_GREENGIB);
 		}
 		else if(self->ctype == 2) { //robot
+			gib_effect = 0;
 			for (n= 0; n < number_of_gibs; n++) {
 				ThrowGib (self, "models/objects/debris3/tris.md2", damage, GIB_METALLIC, 0);
 				ThrowGib (self, "models/objects/debris1/tris.md2", damage, GIB_METALLIC, 0);
@@ -773,10 +775,24 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			gi.multicast (self->s.origin, MULTICAST_PHS);
 		}
 		else { //human
+			gib_effect = EF_GIB;
 			for (n= 0; n < number_of_gibs; n++)
-				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC, EF_GIB);
+				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_GIB);
 		}
 
+		//don't use until 6.11 is released, so we don't have lots of people with 
+		//triangles everywhere.  We could precache all this stuff tho and put the models
+		//on icculus perhaps, but we are having problems with the udp downloading of models.
+		//So, better safe than sorry and don't precache.
+		//So in other words, the flag files just won't be uploaded to SVN until release time.
+		if(self->usegibs) {
+			ThrowGib (self, self->head, damage, GIB_ORGANIC, gib_effect);
+			ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);
+			ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);
+			ThrowGib (self, self->body, damage, GIB_ORGANIC, gib_effect);
+			ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
+			ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
+		}
 	}
 	else
 	{	// normal death
@@ -1382,6 +1398,7 @@ void CopyToBodyQue (edict_t *ent)
 	body->die = body_die;
 	body->takedamage = DAMAGE_YES;
 	body->ctype = ent->ctype;
+	body->usegibs = ent->usegibs;
 
 	body->timestamp = level.time;
 	body->nextthink = level.time + 5;
@@ -1720,6 +1737,19 @@ void PutClientInServer (edict_t *ent)
 				client->pers.weapon = item;
 			}
 		}
+	}
+
+	//check for gib file
+	ent->usegibs = 0; //alien is default
+	sprintf(modelpath, "players/%s/usegibs", playermodel);
+	Q2_FindFile (modelpath, &file);
+	if(file) { //use model specific gibs
+		ent->usegibs = 1;
+		sprintf(ent->head, "players/%s/head.md2", playermodel);
+		sprintf(ent->body, "players/%s/body.md2", playermodel);
+		sprintf(ent->leg, "players/%s/leg.md2", playermodel);
+		sprintf(ent->arm, "players/%s/arm.md2", playermodel);
+		fclose(file);
 	}
 
 	ent->s.frame = 0;
