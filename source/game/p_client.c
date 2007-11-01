@@ -1318,7 +1318,6 @@ void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 {
 	int	n;	
 	int gib_effect = EF_GREENGIB;
-	
 	self->s.modelindex3 = 0;    //remove helmet, if a martian
 	self->s.modelindex4 = 0;
 	if (self->health < -40)
@@ -1413,10 +1412,16 @@ void CopyToBodyQue (edict_t *ent)
 	body->takedamage = DAMAGE_YES;
 	body->ctype = ent->ctype;
 	body->usegibs = ent->usegibs;
-
 	body->timestamp = level.time;
 	body->nextthink = level.time + 5;
 	body->think = BodySink;
+
+	if(body->usegibs) {
+		strcpy(body->arm, ent->arm);
+		strcpy(body->leg, ent->leg);
+		strcpy(body->head, ent->head);
+		strcpy(body->body, ent->body);
+	}
 
 	gi.linkentity (body);
 }
@@ -1751,19 +1756,6 @@ void PutClientInServer (edict_t *ent)
 				client->pers.weapon = item;
 			}
 		}
-	}
-
-	//check for gib file
-	ent->usegibs = 0; //alien is default
-	sprintf(modelpath, "players/%s/usegibs", playermodel);
-	Q2_FindFile (modelpath, &file);
-	if(file) { //use model specific gibs
-		ent->usegibs = 1;
-		sprintf(ent->head, "players/%s/head.md2", playermodel);
-		sprintf(ent->body, "players/%s/body.md2", playermodel);
-		sprintf(ent->leg, "players/%s/leg.md2", playermodel);
-		sprintf(ent->arm, "players/%s/arm.md2", playermodel);
-		fclose(file);
 	}
 
 	ent->s.frame = 0;
@@ -2179,6 +2171,20 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	else if(!strcmp(playermodel, "brainlet"))
 		ent->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
 
+	//do gib checking here
+	//check for gib file
+	ent->usegibs = 0; //alien is default
+	sprintf(modelpath, "players/%s/usegibs", playermodel);
+	Q2_FindFile (modelpath, &file);
+	if(file) { //use model specific gibs
+		ent->usegibs = 1;
+		sprintf(ent->head, "players/%s/head.md2", playermodel);
+		sprintf(ent->body, "players/%s/body.md2", playermodel);
+		sprintf(ent->leg, "players/%s/leg.md2", playermodel);
+		sprintf(ent->arm, "players/%s/arm.md2", playermodel);
+		fclose(file);
+	}
+	
 	// fov
 	if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV))
 	{
