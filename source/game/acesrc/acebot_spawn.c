@@ -522,6 +522,19 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 		}
 	}
 
+	//check for gib file
+	bot->usegibs = 0; //alien is default
+	sprintf(modelpath, "players/%s/usegibs", playermodel);
+	Q2_FindFile (modelpath, &file);
+	if(file) { //use model specific gibs
+		bot->usegibs = 1;
+		sprintf(bot->head, "players/%s/head.md2", playermodel);
+		sprintf(bot->body, "players/%s/body.md2", playermodel);
+		sprintf(bot->leg, "players/%s/leg.md2", playermodel);
+		sprintf(bot->arm, "players/%s/arm.md2", playermodel);
+		fclose(file);
+	}
+
 	bot->s.frame = 0;
 	VectorCopy (spawn_origin, bot->s.origin);
 	bot->s.origin[2] += 1;	// make sure off ground
