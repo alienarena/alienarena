@@ -722,6 +722,7 @@ static void R_DrawCubemapSurfaces (void)
 	glpoly_t *p;
 	image_t *image = R_TextureAnimation( surf->texinfo );
 
+	return;
 	// nothing to draw!
 	if (!surf)
 		return;
