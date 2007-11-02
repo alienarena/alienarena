@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 image_t *r_flare;
 image_t *r_cubemap;
 
-#define CUBEMAP_MAXSIZE 32
+#define CUBEMAP_MAXSIZE 128
 void MakeSpecularAttenuationMap (byte *pixels)
 {
 	int x, y;
@@ -259,7 +259,7 @@ void R_InitParticleTexture (void)
 	}
 	r_notexture = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 
-//	R_InitCubemapTextures (); 
+	R_InitCubemapTextures (); 
 
 	Com_sprintf (flares, sizeof(flares), "gfx/flares/flare0.tga");
 	r_flare = GL_FindImage(flares, it_pic);

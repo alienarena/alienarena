@@ -722,7 +722,6 @@ static void R_DrawCubemapSurfaces (void)
 	glpoly_t *p;
 	image_t *image = R_TextureAnimation( surf->texinfo );
 
-	return;
 	// nothing to draw!
 	if (!surf)
 		return;
@@ -739,10 +738,12 @@ static void R_DrawCubemapSurfaces (void)
 	qglLoadIdentity ();
 
 	// rotate around Y to bring blue/pink to the front
-	qglRotatef (90, 0, 1, 0);
+	qglRotatef (110, 0, 1, 0);
 
 	// now reposition so that the bright spot is center screen
 	qglRotatef (-45, 1, 0, 0);
+
+	qglRotatef (-15, 0, 0, 1);
 
 	// rotate by viewangles
 	qglRotatef (-r_newrefdef.viewangles[2], 1, 0, 0);
