@@ -142,7 +142,7 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type, int effects)
 
 	gib = G_Spawn();
 
-	VectorScale (self->size, 0.5, size);
+	VectorScale (self->size, 1, size);
 	VectorAdd (self->absmin, size, origin);
 	gib->s.origin[0] = origin[0] + crandom() * size[0];
 	gib->s.origin[1] = origin[1] + crandom() * size[1];

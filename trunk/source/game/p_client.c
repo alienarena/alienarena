@@ -759,8 +759,10 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 		if(self->ctype == 0) { //alien
 
-			for (n= 0; n < number_of_gibs; n++)
+			for (n= 0; n < number_of_gibs; n++) {
 				ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_METALLIC, EF_GREENGIB);
+				ThrowGib (self, "models/objects/debris2/tris.md2", damage, GIB_METALLIC, 0);
+			}
 		}
 		else if(self->ctype == 2) { //robot
 			gib_effect = 0;
