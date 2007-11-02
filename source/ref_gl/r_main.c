@@ -1736,8 +1736,8 @@ int R_Init( void *hinstance, void *hWnd )
 
 	if (strstr(gl_config.extensions_string, "GL_EXT_point_parameters"))
 	{
-		//if(gl_ext_pointparameters->value)
-		if (0) // Workaround for ATI driver bug.
+		if(gl_ext_pointparameters->value)
+	//	if (0) // Workaround for ATI driver bug.
 		{
 			qglPointParameterfEXT = (void(APIENTRY*)(GLenum, GLfloat))qwglGetProcAddress("glPointParameterfEXT");
 			qglPointParameterfvEXT = (void(APIENTRY*)(GLenum, const GLfloat*))qwglGetProcAddress("glPointParameterfvEXT");
@@ -1938,9 +1938,10 @@ int R_Init( void *hinstance, void *hWnd )
 	R_InitParticleTexture ();
 	Draw_InitLocal ();
 
-	err = qglGetError();
-	if ( err != GL_NO_ERROR )
-		Com_Printf ("glGetError() = 0x%x\n", err);
+//  comment this out for now, it's only needed for dev
+//	err = qglGetError();
+//	if ( err != GL_NO_ERROR )
+//		Com_Printf ("glGetError() = 0x%x\n", err);
 
 	R_init_refl(gl_reflection_max->value);	// MPO : init reflections
 
