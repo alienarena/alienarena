@@ -663,24 +663,18 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 */
 void GLimp_Shutdown( void )
 {
-
+	fprintf(stderr, "GLimp_Shutdown\n");
 	uninstall_grabs();
 	mouse_active = false;
 	dgamouse = false;
 
-	if (dpy) {
-		if (ctx)
-			qglXDestroyContext(dpy, ctx);
-		if (win)
-			XDestroyWindow(dpy, win);
-		if (vidmode_active)
-			XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
-		XCloseDisplay(dpy);
-	}
-	ctx = NULL;
+	if (!dpy)
+		return;
+
+	XSynchronize(dpy, True );
+	XAutoRepeatOn(dpy);
+	XCloseDisplay(dpy);
 	dpy = NULL;
-	win = 0;
-	ctx = NULL;
 }
 
 /*
