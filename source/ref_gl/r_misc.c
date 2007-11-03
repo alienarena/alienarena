@@ -116,12 +116,7 @@ void R_InitCubemapTextures (void)
 	// is perfectly adequate. Who am I to argue with Mr. Kilgard?
 	float vector[3];
 	int i, x, y;
-	GLubyte pixels[CUBEMAP_MAXSIZE * CUBEMAP_MAXSIZE * 4];
-
-	// set up a dummy for it to get a valid image_t filled in.  we'll be deleting and recreating the texture data
-	// using glTexImage2D when we actually set up each individual one.  we generate it as a wall texture to ensure that
-	// we get texnums generated for the backup textures as well
-	r_cubemap = GL_LoadPic ("***cubemap***", (byte *) pixels, CUBEMAP_MAXSIZE, CUBEMAP_MAXSIZE, it_pic, 32);
+	byte pixels[CUBEMAP_MAXSIZE * CUBEMAP_MAXSIZE * 4];
 
 	// switch the texture state
 	qglDisable (GL_TEXTURE_2D);
@@ -161,7 +156,7 @@ void R_InitCubemapTextures (void)
 	qglDisable (GL_TEXTURE_CUBE_MAP_ARB);
 	qglEnable (GL_TEXTURE_2D);
 }
-#undef CUBEMAP_MAXSIZE
+
 /*
 ==================
 R_InitParticleTexture
@@ -191,6 +186,7 @@ void R_InitParticleTexture (void)
 {
 	int		x,y;
 	byte	data[16][16][4];
+	byte pixels[CUBEMAP_MAXSIZE * CUBEMAP_MAXSIZE * 4];
 	char flares[MAX_QPATH];
 	//
 	// particle texture
@@ -259,7 +255,10 @@ void R_InitParticleTexture (void)
 	}
 	r_notexture = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 
-	R_InitCubemapTextures (); 
+	r_cubemap = GL_LoadPic ("***cubemap***", (byte *) pixels, CUBEMAP_MAXSIZE, CUBEMAP_MAXSIZE, it_pic, 32);
+
+	if(gl_cubemaps->value)
+		R_InitCubemapTextures (); 
 
 	Com_sprintf (flares, sizeof(flares), "gfx/flares/flare0.tga");
 	r_flare = GL_FindImage(flares, it_pic);

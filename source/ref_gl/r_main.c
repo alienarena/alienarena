@@ -1498,9 +1498,9 @@ void R_Register( void )
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
 
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
-	//these next two we always have on, but only used when normalmaps are set to on
+	//these next two are only used when normalmaps are set to on
 	gl_specularmaps = Cvar_Get("gl_specularmaps", "1", CVAR_ARCHIVE);
-	gl_cubemaps = Cvar_Get("gl_cubemaps", "1", CVAR_ARCHIVE);
+	gl_cubemaps = Cvar_Get("gl_cubemaps", "0", CVAR_ARCHIVE);
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
@@ -1737,12 +1737,9 @@ int R_Init( void *hinstance, void *hWnd )
 	if (strstr(gl_config.extensions_string, "GL_EXT_point_parameters"))
 	{
 		if(gl_ext_pointparameters->value)
-	//	if (0) // Workaround for ATI driver bug.
 		{
 			qglPointParameterfEXT = (void(APIENTRY*)(GLenum, GLfloat))qwglGetProcAddress("glPointParameterfEXT");
 			qglPointParameterfvEXT = (void(APIENTRY*)(GLenum, const GLfloat*))qwglGetProcAddress("glPointParameterfvEXT");
-
-
 		}
 		else
 		{
@@ -1938,10 +1935,9 @@ int R_Init( void *hinstance, void *hWnd )
 	R_InitParticleTexture ();
 	Draw_InitLocal ();
 
-//  comment this out for now, it's only needed for dev
-//	err = qglGetError();
-//	if ( err != GL_NO_ERROR )
-//		Com_Printf ("glGetError() = 0x%x\n", err);
+	err = qglGetError();
+	if ( err != GL_NO_ERROR )
+		Com_Printf ("glGetError() = 0x%x\n", err);
 
 	R_init_refl(gl_reflection_max->value);	// MPO : init reflections
 
