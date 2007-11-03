@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 image_t *r_flare;
 image_t *r_cubemap;
 
-#define CUBEMAP_MAXSIZE 128
+#define CUBEMAP_MAXSIZE 32
 void MakeSpecularAttenuationMap (byte *pixels)
 {
 	int x, y;
@@ -112,8 +112,6 @@ static void getCubeVector (int i, int cubesize, int x, int y, float *vector)
 
 void R_InitCubemapTextures (void)
 {
-	// this texture doesn't need to be huge. I've seen examples where it goes up to 128 or higher, but 32
-	// is perfectly adequate. Who am I to argue with Mr. Kilgard?
 	float vector[3];
 	int i, x, y;
 	byte pixels[CUBEMAP_MAXSIZE * CUBEMAP_MAXSIZE * 4];
@@ -124,6 +122,7 @@ void R_InitCubemapTextures (void)
 
 	// bind to the regular texture number
 	qglBindTexture (GL_TEXTURE_CUBE_MAP_ARB, r_cubemap->texnum);
+	qglGetError(); //binding this 2d texture initially causes a harmless error
 
 	// set up the texture parameters - did a clamp on R as well...
 	qglTexParameteri (GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
