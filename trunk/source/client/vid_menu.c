@@ -142,6 +142,7 @@ static void SetLow( void *unused )
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_cubemaps", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 0);
@@ -164,6 +165,7 @@ static void SetMedium( void *unused )
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_cubemaps", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
@@ -187,6 +189,7 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_cubemaps", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
@@ -210,6 +213,7 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_cubemaps", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
