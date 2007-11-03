@@ -672,8 +672,9 @@ void GLimp_Shutdown( void )
 			qglXDestroyContext(dpy, ctx);
 		if (win)
 			XDestroyWindow(dpy, win);
-// 		if (vidmode_active)
-// 			XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
+		if (vidmode_active)
+			XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
+		XUngrabKeyboard(dpy, CurrentTime);
 		XCloseDisplay(dpy);
 	}
 	ctx = NULL;
