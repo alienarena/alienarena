@@ -27,9 +27,9 @@ static vec3_t	modelorg;		// relative to viewpoint
 
 msurface_t	*r_alpha_surfaces;
 msurface_t	*r_special_surfaces;
-static msurface_t *r_cubemapsurfaces;
-static msurface_t *r_normalsurfaces;
-static msurface_t *r_specularsurfaces;
+msurface_t *r_cubemapsurfaces;
+msurface_t *r_normalsurfaces;
+msurface_t *r_specularsurfaces;
 
 #define DYNAMIC_LIGHT_WIDTH  128
 #define DYNAMIC_LIGHT_HEIGHT 128
