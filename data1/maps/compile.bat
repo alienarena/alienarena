@@ -1,4 +1,4 @@
-qbsp3 ctf-atlantis
-qvis3 ctf-atlantis
-qrad3 ctf-atlantis
+qbsp3 dm-turbo
+qvis3 -fast dm-turbo
+qrad3 dm-turbo
 pause
