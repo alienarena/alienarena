@@ -70,3 +70,13 @@ textures/arena7/tekwall6
 		alphamask
 	}
 }
+textures/arena7/glass
+{
+
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
