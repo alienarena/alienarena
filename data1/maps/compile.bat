@@ -1,4 +1,4 @@
-qbsp3 dm-outpost
-qvis3 -fast dm-outpost
-qrad3 dm-outpost
+qbsp3 dm-dismal
+qvis3 dm-dismal
+qrad3 dm-dismal
 pause
