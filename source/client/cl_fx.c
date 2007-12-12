@@ -2054,7 +2054,7 @@ Particle Beams
 
 //this is the length of each piece...
 #define RAILTRAILSPACE 20
-#define LASERTRAILSPACE 20
+#define LASERTRAILSPACE 10
 
 void CL_DisruptorBeam (vec3_t start, vec3_t end)
 {
@@ -2072,11 +2072,11 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 
 	MakeNormalVectors (vec, right, up);
 	VectorCopy (vec, vec2);
-	VectorScale (vec, LASERTRAILSPACE, vec);
+	VectorScale (vec, RAILTRAILSPACE, vec);
 	VectorCopy (start, move);
 
 	//muzzleflash	
-	VectorScale (vec2, -LASERTRAILSPACE/2, vec2);
+	VectorScale (vec2, -RAILTRAILSPACE/2, vec2);
 	VectorAdd(start, vec2, start);
 	for(i = 0; i < 3; i++) {
 	
@@ -2101,7 +2101,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 		}
 	}
 	
-	for (; len>0; len -= LASERTRAILSPACE)
+	for (; len>0; len -= RAILTRAILSPACE)
 	{	
 		VectorCopy (move, last);	
 		VectorAdd (move, vec, move);
@@ -2149,11 +2149,11 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 
 	MakeNormalVectors (vec, right, up);
 	VectorCopy (vec, vec2);
-	VectorScale (vec, LASERTRAILSPACE, vec);
+	VectorScale (vec, RAILTRAILSPACE, vec);
 	VectorCopy (start, move);
 
 	//muzzleflash	
-	VectorScale (vec2, -LASERTRAILSPACE/2, vec2);
+	VectorScale (vec2, -RAILTRAILSPACE/2, vec2);
 	VectorAdd(start, vec2, start);
 	for(i = 0; i < 3; i++) {
 	
@@ -2178,7 +2178,7 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 		}
 	}
 	
-	for (; len>0; len -= LASERTRAILSPACE)
+	for (; len>0; len -= RAILTRAILSPACE)
 	{	
 		VectorCopy (move, last);	
 		VectorAdd (move, vec, move);
