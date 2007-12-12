@@ -2,7 +2,7 @@
 # CodeRED Makefile
 #
 
-# Start of configurable options.
+# Start of configurable options (boolean vars can be set to "yes" or "no").
 
 # Which compiler to use.
 CC?=gcc
@@ -19,11 +19,15 @@ LOCALBASE?=/usr/local
 # Path to X libraries (e.g. GL).
 X11BASE?=/usr/X11R6
 
-# Build binary that uses SDL for sound when "1".
-SDLSOUND?=1
+# Selects the component to build: ALL, CLIENT, or DEDICATED
+BUILD?=CLIENT
 
-# Selects the component to build; ALL, GAME, or DEDICATED
-BUILD?=ALL
+# Build binary that uses SDL for sound (when BUILD is "ALL" or "CLIENT").
+SDLSOUND?=yes
+
+# Adds DATADIR/LIBDIR (see below) to the data and library search path.
+WITH_DATADIR?=no
+WITH_LIBDIR?=no
 
 # End of configurable options.
 
@@ -52,6 +56,20 @@ else
 endif
 
 BASE_CFLAGS=$(CFLAGS) -Dstricmp=strcasecmp -D_stricmp=strcasecmp -I$(X11BASE)/include -fno-strict-aliasing -fmerge-constants -DHAVE_CURL
+
+# DATADIR / LIBDIR support.
+
+PREFIX?=/usr/local
+
+ifeq ($(strip $(WITH_DATADIR)),yes)
+DATADIR?=$(PREFIX)/share/alienarena
+BASE_CFLAGS+=-DDATADIR='\"$(DATADIR)\"'
+endif
+
+ifeq ($(strip $(WITH_LIBDIR)),yes)
+LIBDIR?=$(PREFIX)/lib/alienarena
+BASE_CFLAGS+=-DLIBDIR='\"$(LIBDIR)\"'
+endif
 
 RELEASE_CFLAGS=$(BASE_CFLAGS)
 
@@ -88,7 +106,7 @@ DEBUG_CFLAGS=$(BASE_CFLAGS) -g -ggdb
 LDFLAGS+=-lm
 # In FreeBSD, dlopen() is in libc.
 ifeq ($(OSTYPE),linux)
-	LDFLAGS+=-ldl
+LDFLAGS+=-ldl
 endif
 
 GLXLDFLAGS=-L$(X11BASE)/$(_LIB) -L$(LOCALBASE)/$(_LIB) -lX11 -lXext -lXxf86dga -lXxf86vm -lm -ljpeg -lGL -lGLU
@@ -132,16 +150,16 @@ ifeq ($(strip $(BUILD)),ALL)
 		$(BUILDDIR)/crx
 endif
 
-ifeq ($(strip $(BUILD)),DEDICATED)
-	SDLSOUND=0
-	TARGETS+=$(BUILDDIR)/crded
-endif
-
-ifeq ($(strip $(BUILD)),GAME)
+ifeq ($(strip $(BUILD)),CLIENT)
 	TARGETS+=$(BUILDDIR)/crx
 endif
 
-ifeq ($(strip $(SDLSOUND)),1)
+ifeq ($(strip $(BUILD)),DEDICATED)
+	SDLSOUND=no
+	TARGETS+=$(BUILDDIR)/crded
+endif
+
+ifeq ($(strip $(SDLSOUND)),yes)
 	TARGETS+=$(BUILDDIR)/crx.sdl
 endif
 

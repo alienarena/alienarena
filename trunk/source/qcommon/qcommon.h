@@ -732,13 +732,17 @@ int		FS_LoadFileZ (const char *path, void **buffer); // jit - null-terminated
 void	FS_Read (void *buffer, int len, FILE *f);
 // properly handles partial reads
 
-#ifdef __unix__
-void	FS_FreeFileList (char **list, int n);
-#endif
 void	FS_FreeFile (void *buffer);
 
 void	FS_CreatePath (char *path);
 
+qboolean FS_FileExists(char *path);
+
+#define SFF_INPACK	0x20	/* For FS_ListFilesInFS(). */
+
+char	**FS_ListFiles(char *findname, int *numfiles, unsigned musthave, unsigned canthave);
+char	**FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned canthave);
+void	FS_FreeFileList (char **list, int n);
 
 /*
 ==============================================================
