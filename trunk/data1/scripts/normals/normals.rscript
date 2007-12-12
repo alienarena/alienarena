@@ -372,17 +372,6 @@ players/brainlet/default
 		normalmap
 	}	
 }
-models/weapons/v_rocket/skin
-{
-	{
-		map models/weapons/v_rocket/skin.tga
-		nolightmap
-	}
-	{
-		map models/weapons/v_rocket/skin_normal.tga
-		normalmap
-	}
-}
 models/weapons/v_chain/skin
 {
 	{
