@@ -146,6 +146,22 @@ models/weapons/v_shotg/skin
 	}
 		
 }
+models/weapons/v_rocket/skin
+{
+	{
+		map models/weapons/v_rocket/skin.tga
+	}
+	{
+		map models/weapons/v_rocket/skin_normal.tga
+		normalmap
+	}
+	{
+		map gfx/rlauncherfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.2 0.8
+		nolightmap
+	}
+}
 models/weapons/v_blast/skin
 {
 	{
