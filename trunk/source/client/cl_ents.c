@@ -925,6 +925,14 @@ void CL_AddPacketEntities (frame_t *frame)
 				CL_LargeHealthParticles(ent.origin);
 		}
 
+		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_rocket/tris.md2")) {
+			//add clear cover
+			ent.model = R_RegisterModel("models/weapons/g_rocket/cover.md2");
+			ent.flags |= RF_TRANSLUCENT;
+			ent.alpha = 0.30;
+			V_AddEntity (&ent);
+		}			
+
 		if (s1->modelindex2)
 		{
 			if (s1->modelindex2 == 255 || (ci->helmet && playermodel))
@@ -1251,7 +1259,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.flags = oldeffects;
 	}
 
-	//add windows for vehicles
+	//add windows for vehicles, cover for RL
 	if(!(strcmp("vehicles/bomber/v_wep.md2", gun.model->name))) {
 		gun.model = R_RegisterModel("vehicles/bomber/window.md2");
 		gun.flags |= RF_TRANSLUCENT;
@@ -1266,6 +1274,12 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	}
 	if(!(strcmp("vehicles/hover/v_wep.md2", gun.model->name))) {
 		gun.model = R_RegisterModel("vehicles/hover/window.md2");
+		gun.flags |= RF_TRANSLUCENT;
+		gun.alpha = 0.30;
+		V_AddEntity (&gun);
+	}
+	if(!(strcmp("models/weapons/v_rocket/tris.md2", gun.model->name))) {
+		gun.model = R_RegisterModel("models/weapons/v_rocket/cover.md2");
 		gun.flags |= RF_TRANSLUCENT;
 		gun.alpha = 0.30;
 		V_AddEntity (&gun);
