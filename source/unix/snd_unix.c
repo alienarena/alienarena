@@ -171,7 +171,7 @@ qboolean SNDDMA_Init(void)
 	dma.speed = (int)sndspeed->value;
 	if (!dma.speed)
 	{
-		for (i=0 ; i<sizeof(tryrates)/4 ; i++)
+		for (i=0 ; i<sizeof(tryrates)/sizeof(tryrates[0]) ; i++)
 			if (!ioctl(audio_fd, SNDCTL_DSP_SPEED, &tryrates[i]))
 				break;
 		dma.speed = tryrates[i];

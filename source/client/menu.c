@@ -1529,12 +1529,9 @@ char **SetFontNames (void)
 {
 	char *curFont;
 	char **list = 0, *p;
-	char findname[1024];
 	int nfonts = 0, nfontnames;
 	char **fontfiles;
-	char *path = NULL;
 	int i;
-	extern char **FS_ListFiles( char *, int *, unsigned, unsigned );
 
 	list = malloc( sizeof( char * ) * MAX_FONTS );
 	memset( list, 0, sizeof( char * ) * MAX_FONTS );
@@ -1543,46 +1540,36 @@ char **SetFontNames (void)
 
 	nfontnames = 1;
 
-	path = FS_NextPath( path );
-	while (path)
+	fontfiles = FS_ListFilesInFS( "fonts/*.tga", &nfonts, 0,
+	    SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+	for (i=0;i<nfonts && nfontnames<MAX_FONTS;i++)
 	{
-		Com_sprintf( findname, sizeof(findname), "%s/fonts/*.tga", path );
-		fontfiles = FS_ListFiles( findname, &nfonts, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+		int num;
 
-		for (i=0;i<nfonts && nfontnames<MAX_FONTS;i++)
+		p = strstr(fontfiles[i], "fonts/"); p++;
+		p = strstr(p, "/"); p++;
+
+		if (!strstr(p, ".tga") && !strstr(p, ".pcx"))
+			continue;
+
+		num = strlen(p)-4;
+		p[num] = 0;
+
+		curFont = p;
+
+		if (!fontInList(curFont, nfontnames, list))
 		{
-			int num;
-
-			if (!fontfiles || !fontfiles[i])
-				continue;
-
-			p = strstr(fontfiles[i], "/fonts/"); p++;
-			p = strstr(p, "/"); p++;
-
-			if (	!strstr(p, ".tga")
-				&&	!strstr(p, ".pcx")
-				)
-				continue;
-
-			num = strlen(p)-4;
-			p[num] = 0;
-
-			curFont = p;
-
-			if (!fontInList(curFont, nfontnames, list))
-			{
-				insertFont(list, strdup(curFont),nfontnames);
-				nfontnames++;
-			}
-
-			//set back so whole string get deleted.
-			p[num] = '.';
+			insertFont(list, strdup(curFont),nfontnames);
+			nfontnames++;
 		}
-		path = FS_NextPath( path );
+
+		//set back so whole string get deleted.
+		p[num] = '.';
 	}
 
 	if (fontfiles)
-		free( fontfiles );
+		FS_FreeFileList(fontfiles, nfonts);
 
 	numfonts = nfontnames;
 
@@ -1655,12 +1642,9 @@ char **SetCrosshairNames (void)
 {
 	char *curCrosshair;
 	char **list = 0, *p;
-	char findname[1024];
 	int ncrosshairs = 0, ncrosshairnames;
 	char **crosshairfiles;
-	char *path = NULL;
 	int i;
-	extern char **FS_ListFiles( char *, int *, unsigned, unsigned );
 
 	list = malloc( sizeof( char * ) * MAX_CROSSHAIRS );
 	memset( list, 0, sizeof( char * ) * MAX_CROSSHAIRS );
@@ -1672,46 +1656,38 @@ char **SetCrosshairNames (void)
 	list[2] = strdup("ch2");
 	list[3] = strdup("ch3");
 
-	path = FS_NextPath( path );
-	while (path)
+	crosshairfiles = FS_ListFilesInFS( "pics/crosshairs/*.tga",
+	    &ncrosshairs, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+	for (i=0;i<ncrosshairs && ncrosshairnames<MAX_CROSSHAIRS;i++)
 	{
-		Com_sprintf( findname, sizeof(findname), "%s/pics/crosshairs/*.tga", path );
-		crosshairfiles = FS_ListFiles( findname, &ncrosshairs, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+		int num;
 
-		for (i=0;i<ncrosshairs && ncrosshairnames<MAX_CROSSHAIRS;i++)
+		p = strstr(crosshairfiles[i], "/crosshairs/"); p++;
+		p = strstr(p, "/"); p++;
+
+		if (	!strstr(p, ".tga")
+			&&	!strstr(p, ".pcx")
+			)
+			continue;
+
+		num = strlen(p)-4;
+		p[num] = 0;
+
+		curCrosshair = p;
+
+		if (!fontInList(curCrosshair, ncrosshairnames, list))
 		{
-			int num;
-
-			if (!crosshairfiles || !crosshairfiles[i])
-				continue;
-
-			p = strstr(crosshairfiles[i], "/crosshairs/"); p++;
-			p = strstr(p, "/"); p++;
-
-			if (	!strstr(p, ".tga")
-				&&	!strstr(p, ".pcx")
-				)
-				continue;
-
-			num = strlen(p)-4;
-			p[num] = 0;
-
-			curCrosshair = p;
-
-			if (!fontInList(curCrosshair, ncrosshairnames, list))
-			{
-				insertCrosshair(list, strdup(curCrosshair),ncrosshairnames);
-				ncrosshairnames++;
-			}
-
-			//set back so whole string get deleted.
-			p[num] = '.';
+			insertCrosshair(list, strdup(curCrosshair),ncrosshairnames);
+			ncrosshairnames++;
 		}
-		path = FS_NextPath( path );
+
+		//set back so whole string get deleted.
+		p[num] = '.';
 	}
 
 	if (crosshairfiles)
-		free( crosshairfiles );
+		FS_FreeFileList(crosshairfiles, ncrosshairs);
 
 	numcrosshairs = ncrosshairnames;
 
@@ -1804,12 +1780,9 @@ char **SetHudNames (void)
 {
 	char *curHud;
 	char **list = 0, *p;
-	char findname[1024];
 	int nhuds = 0, nhudnames;
 	char **hudfiles;
-	char *path = NULL;
 	int i;
-	extern char **FS_ListFiles( char *, int *, unsigned, unsigned );
 
 	list = malloc( sizeof( char * ) * MAX_HUDS );
 	memset( list, 0, sizeof( char * ) * MAX_HUDS );
@@ -1819,46 +1792,38 @@ char **SetHudNames (void)
 	list[0] = strdup("none");
 	list[1] = strdup("default"); //the default hud
 
-	path = FS_NextPath( path );
-	while (path)
+	hudfiles = FS_ListFilesInFS( "pics/huds/*.tga", &nhuds, 0,
+	    SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+	for (i=0;i<nhuds && nhudnames<MAX_HUDS;i++)
 	{
-		Com_sprintf( findname, sizeof(findname), "%s/pics/huds/*.tga", path );
-		hudfiles = FS_ListFiles( findname, &nhuds, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+		int num;
 
-		for (i=0;i<nhuds && nhudnames<MAX_HUDS;i++)
+		p = strstr(hudfiles[i], "/huds/"); p++;
+		p = strstr(p, "/"); p++;
+
+		if (	!strstr(p, ".tga")
+			&&	!strstr(p, ".pcx")
+			)
+			continue;
+
+		num = strlen(p)-5;
+		p[num] = 0;
+
+		curHud = p;
+
+		if (!fontInList(curHud, nhudnames, list))
 		{
-			int num;
-
-			if (!hudfiles || !hudfiles[i])
-				continue;
-
-			p = strstr(hudfiles[i], "/huds/"); p++;
-			p = strstr(p, "/"); p++;
-
-			if (	!strstr(p, ".tga")
-				&&	!strstr(p, ".pcx")
-				)
-				continue;
-
-			num = strlen(p)-5;
-			p[num] = 0;
-
-			curHud = p;
-
-			if (!fontInList(curHud, nhudnames, list))
-			{
-				insertHud(list, strdup(curHud),nhudnames);
-				nhudnames++;
-			}
-
-			//set back so whole string get deleted.
-			p[num] = '.';
+			insertHud(list, strdup(curHud),nhudnames);
+			nhudnames++;
 		}
-		path = FS_NextPath( path );
+
+		//set back so whole string get deleted.
+		p[num] = '.';
 	}
 
 	if (hudfiles)
-		free( hudfiles );
+		FS_FreeFileList(hudfiles, nhuds);
 
 	numhuds = nhudnames;
 
@@ -3743,7 +3708,6 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	char **mapfiles;
 	char *path = NULL;
 	static char **bspnames;
-	extern char **FS_ListFiles( char *, int *, unsigned, unsigned );
 	int		j, l;
 
 	s_maxclients_field.generic.statusbar = NULL;
@@ -3871,103 +3835,96 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	}
 
 	//now, check the folders and add the maps not in the list yet
-	path = FS_NextPath( path );
-	while (path)
+
+	mapfiles = FS_ListFilesInFS( "maps/*.bsp", &nmaps, 0,
+	    SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+	for (i=0;i<nmaps && totalmaps<MAX_MAPS;i++)
 	{
-		Com_sprintf( mapsname, sizeof(mapsname), "%s/maps/*.bsp", path );
-		mapfiles = FS_ListFiles( mapsname, &nmaps, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+		int num;
 
-		for (i=0;i<nmaps && totalmaps<MAX_MAPS;i++)
-		{
-			int num;
+		s = strstr(mapfiles[i], "maps/"); s++;
+		s = strstr(s, "/"); s++;
 
-			if (!mapfiles || !mapfiles[i])
-				continue;
+		if (!strstr(s, ".bsp"))
+			continue;
 
-			s = strstr(mapfiles[i], "/maps/"); s++;
-			s = strstr(s, "/"); s++;
+		num = strlen(s)-4;
+		s[num] = 0;
 
-			if (!strstr(s, ".bsp"))
-				continue;
+		curMap = s;
 
-			num = strlen(s)-4;
-			s[num] = 0;
+		l = strlen(curMap);
 
-			curMap = s;
+		for (j=0 ; j<l ; j++)
+			curMap[j] = tolower(curMap[j]);
 
-			l = strlen(curMap);
+		Com_sprintf( scratch, sizeof( scratch ), "%s\n%s", "Custom Map", curMap );
 
-			for (j=0 ; j<l ; j++)
-				curMap[j] = tolower(curMap[j]);
-
-			Com_sprintf( scratch, sizeof( scratch ), "%s\n%s", "Custom Map", curMap );
-
-			//check game type, and if not already in maps.lst, add it
-			l = 0;
-			for(j = 0; j < nummaps; j++) {
-				l = Q_strcasecmp(curMap, bspnames[j]);
-				if(!l)
-					break; //already there, don't bother adding
-			}
-			if(l) { //didn't find it in our list
-				if (s_rules_box.curvalue == 0) {
-					if((curMap[0] == 'd' && curMap[1] == 'm') || (curMap[0] == 't' && curMap[1] == 'o')) {
-						mapnames[k] = malloc( strlen( scratch ) + 1 );
-						strcpy( mapnames[k], scratch );
-						k++;
-						totalmaps++;
-					}
-				}
-				else if (s_rules_box.curvalue == 1) {
-					if(curMap[0] == 'c' && curMap[1] == 't' && curMap[2] == 'f') {
-						mapnames[k] = malloc( strlen( scratch ) + 1 );
-						strcpy( mapnames[k], scratch );
-						k++;
-						totalmaps++;
-					}
-				}
-				else if (s_rules_box.curvalue == 2) {
-					if(curMap[0] == 'a' && curMap[1] == 'o' && curMap[2] == 'a') {
-						mapnames[k] = malloc( strlen( scratch ) + 1 );
-						strcpy( mapnames[k], scratch );
-						k++;
-						totalmaps++;
-					}
-				}
-				else if (s_rules_box.curvalue == 3) {
-					if(curMap[0] == 'd' && curMap[1] == 'b') {
-						mapnames[k] = malloc( strlen( scratch ) + 1 );
-						strcpy( mapnames[k], scratch );
-						k++;
-						totalmaps++;
-					}
-				}
-				else if (s_rules_box.curvalue == 4) {
-					if(curMap[0] == 't' && curMap[1] == 'c' && curMap[2] == 'a') {
-						mapnames[k] = malloc( strlen( scratch ) + 1 );
-						strcpy( mapnames[k], scratch );
-						k++;
-						totalmaps++;
-					}
-				}
-				else if (s_rules_box.curvalue == 5) {
-					if(curMap[0] == 'c' && curMap[1] == 'p') {
-						mapnames[k] = malloc( strlen( scratch ) + 1 );
-						strcpy( mapnames[k], scratch );
-						k++;
-						totalmaps++;
-					}
-				}
-
-			}
-			//set back so whole string get deleted.
-			s[num] = '.';
+		//check game type, and if not already in maps.lst, add it
+		l = 0;
+		for(j = 0; j < nummaps; j++) {
+			l = Q_strcasecmp(curMap, bspnames[j]);
+			if(!l)
+				break; //already there, don't bother adding
 		}
-		path = FS_NextPath( path );
+		if(l) { //didn't find it in our list
+			if (s_rules_box.curvalue == 0) {
+				if((curMap[0] == 'd' && curMap[1] == 'm') || (curMap[0] == 't' && curMap[1] == 'o')) {
+					mapnames[k] = malloc( strlen( scratch ) + 1 );
+					strcpy( mapnames[k], scratch );
+					k++;
+					totalmaps++;
+				}
+			}
+			else if (s_rules_box.curvalue == 1) {
+				if(curMap[0] == 'c' && curMap[1] == 't' && curMap[2] == 'f') {
+					mapnames[k] = malloc( strlen( scratch ) + 1 );
+					strcpy( mapnames[k], scratch );
+					k++;
+					totalmaps++;
+				}
+			}
+			else if (s_rules_box.curvalue == 2) {
+				if(curMap[0] == 'a' && curMap[1] == 'o' && curMap[2] == 'a') {
+					mapnames[k] = malloc( strlen( scratch ) + 1 );
+					strcpy( mapnames[k], scratch );
+					k++;
+					totalmaps++;
+				}
+			}
+			else if (s_rules_box.curvalue == 3) {
+				if(curMap[0] == 'd' && curMap[1] == 'b') {
+					mapnames[k] = malloc( strlen( scratch ) + 1 );
+					strcpy( mapnames[k], scratch );
+					k++;
+					totalmaps++;
+				}
+			}
+			else if (s_rules_box.curvalue == 4) {
+				if(curMap[0] == 't' && curMap[1] == 'c' && curMap[2] == 'a') {
+					mapnames[k] = malloc( strlen( scratch ) + 1 );
+					strcpy( mapnames[k], scratch );
+					k++;
+					totalmaps++;
+				}
+			}
+			else if (s_rules_box.curvalue == 5) {
+				if(curMap[0] == 'c' && curMap[1] == 'p') {
+					mapnames[k] = malloc( strlen( scratch ) + 1 );
+					strcpy( mapnames[k], scratch );
+					k++;
+					totalmaps++;
+				}
+			}
+
+		}
+		//set back so whole string get deleted.
+		s[num] = '.';
 	}
 
 	if (mapfiles)
-		free( mapfiles );
+		FS_FreeFileList(mapfiles, nmaps);
 
 	for(i = k; i<=nummaps; i++) {
 		free(mapnames[i]);
@@ -5115,143 +5072,15 @@ static qboolean IconOfSkinExists( char *skin, char **pcxfiles, int npcxfiles )
 
 static void PlayerConfig_ScanDirectories( void )
 {
-	char findname[1024];
 	char scratch[1024];
 	int ndirs = 0, npms = 0;
 	char **dirnames;
 	int i;
 
-	extern char **FS_ListFiles( char *, int *, unsigned, unsigned );
-
 	s_numplayermodels = 0;
 
 	//get dirs from gamedir first.
-
-	Com_sprintf( findname, sizeof(findname), "%s/players/*.*", FS_Gamedir() );
-
-	dirnames = FS_ListFiles( findname, &ndirs, SFF_SUBDIR, 0 );
-	
-	if ( dirnames ) {
-		
-		/*
-		** go through the subdirectories
-		*/
-		npms = ndirs;
-		if ( npms > MAX_PLAYERMODELS )
-			npms = MAX_PLAYERMODELS;
-
-		for ( i = 0; i < npms; i++ )
-		{
-			int k, s;
-			char *a, *b, *c;
-			char **pcxnames;
-			char **skinnames;
-			int npcxfiles;
-			int nskins = 0;
-
-			if ( dirnames[i] == 0 )
-				continue;
-
-			// verify the existence of tris.md2
-			strcpy( scratch, dirnames[i] );
-			strcat( scratch, "/tris.md2" );
-			if ( !Sys_FindFirst( scratch, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM ) )
-			{
-				free( dirnames[i] );
-				dirnames[i] = 0;
-				Sys_FindClose();
-				continue;
-			}
-			Sys_FindClose();
-
-			// verify the existence of at least one skin
-			strcpy( scratch, dirnames[i] );
-			strcat( scratch, "/*.tga" );
-			pcxnames = FS_ListFiles( scratch, &npcxfiles, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
-
-			if ( !pcxnames )
-			{
-				free( dirnames[i] );
-				dirnames[i] = 0;
-				continue;
-			}
-
-			// count valid skins, which consist of a skin with a matching "_i" icon
-			for ( k = 0; k < npcxfiles-1; k++ )
-			{
-				if ( !strstr( pcxnames[k], "_i.tga" ) )
-				{
-					if ( IconOfSkinExists( pcxnames[k], pcxnames, npcxfiles - 1 ) )
-					{
-						nskins++;
-					}
-				}
-			}
-			if ( !nskins )
-				continue;
-
-			skinnames = malloc( sizeof( char * ) * ( nskins + 1 ) );
-			memset( skinnames, 0, sizeof( char * ) * ( nskins + 1 ) );
-
-			// copy the valid skins
-			for ( s = 0, k = 0; k < npcxfiles-1; k++ )
-			{
-				char *a, *b, *c;
-
-				if ( !strstr( pcxnames[k], "_i.tga" ) )
-				{
-					if ( IconOfSkinExists( pcxnames[k], pcxnames, npcxfiles - 1 ) )
-					{
-						a = strrchr( pcxnames[k], '/' );
-						b = strrchr( pcxnames[k], '\\' );
-
-						if ( a > b )
-							c = a;
-						else
-							c = b;
-
-						strcpy( scratch, c + 1 );
-
-						if ( strrchr( scratch, '.' ) )
-							*strrchr( scratch, '.' ) = 0;
-
-						skinnames[s] = strdup( scratch );
-						s++;
-					}
-				}
-			}
-
-			// at this point we have a valid player model
-			s_pmi[s_numplayermodels].nskins = nskins;
-			s_pmi[s_numplayermodels].skindisplaynames = skinnames;
-
-			// make short name for the model
-			a = strrchr( dirnames[i], '/' );
-			b = strrchr( dirnames[i], '\\' );
-
-			if ( a > b )
-				c = a;
-			else
-				c = b;
-
-			strncpy( s_pmi[s_numplayermodels].displayname, c + 1, MAX_DISPLAYNAME-1 );
-			strcpy( s_pmi[s_numplayermodels].directory, c + 1 );
-
-			FreeFileList( pcxnames, npcxfiles );
-
-			s_numplayermodels++;
-		}
-		if ( dirnames )
-			FreeFileList( dirnames, ndirs );
-	}
-
-	/*
-	** get a list of directories from basedir
-	*/
-
-	Com_sprintf( findname, sizeof(findname), "%s/players/*.*", BASEDIRNAME);
-
-	 dirnames = FS_ListFiles( findname, &ndirs, SFF_SUBDIR, 0 );
+	dirnames = FS_ListFilesInFS( "players/*.*", &ndirs, SFF_SUBDIR, 0 );
 
 	if ( !dirnames )
 		return;
@@ -5278,19 +5107,18 @@ static void PlayerConfig_ScanDirectories( void )
 		// verify the existence of tris.md2
 		strcpy( scratch, dirnames[i] );
 		strcat( scratch, "/tris.md2" );
-		if ( !Sys_FindFirst( scratch, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM ) )
+		if (!FS_FileExists(scratch))
 		{
 			free( dirnames[i] );
 			dirnames[i] = 0;
-			Sys_FindClose();
 			continue;
 		}
-		Sys_FindClose();
 
 		// verify the existence of at least one skin
 		strcpy( scratch, dirnames[i] );
 		strcat( scratch, "/*.tga" );
-		pcxnames = FS_ListFiles( scratch, &npcxfiles, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+		pcxnames = FS_ListFilesInFS( scratch, &npcxfiles, 0,
+		    SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
 
 		if ( !pcxnames )
 		{
@@ -5300,11 +5128,11 @@ static void PlayerConfig_ScanDirectories( void )
 		}
 
 		// count valid skins, which consist of a skin with a matching "_i" icon
-		for ( k = 0; k < npcxfiles-1; k++ )
+		for ( k = 0; k < npcxfiles; k++ )
 		{
 			if ( !strstr( pcxnames[k], "_i.tga" ) )
 			{
-				if ( IconOfSkinExists( pcxnames[k], pcxnames, npcxfiles - 1 ) )
+				if ( IconOfSkinExists( pcxnames[k], pcxnames, npcxfiles) )
 				{
 					nskins++;
 				}
@@ -5317,13 +5145,13 @@ static void PlayerConfig_ScanDirectories( void )
 		memset( skinnames, 0, sizeof( char * ) * ( nskins + 1 ) );
 
 		// copy the valid skins
-		for ( s = 0, k = 0; k < npcxfiles-1; k++ )
+		for ( s = 0, k = 0; k < npcxfiles; k++ )
 		{
 			char *a, *b, *c;
 
 			if ( !strstr( pcxnames[k], "_i.tga" ) )
 			{
-				if ( IconOfSkinExists( pcxnames[k], pcxnames, npcxfiles - 1 ) )
+				if ( IconOfSkinExists( pcxnames[k], pcxnames, npcxfiles ) )
 				{
 					a = strrchr( pcxnames[k], '/' );
 					b = strrchr( pcxnames[k], '\\' );
@@ -5365,7 +5193,7 @@ static void PlayerConfig_ScanDirectories( void )
 		s_numplayermodels++;
 	}
 	if ( dirnames )
-		FreeFileList( dirnames, ndirs );
+		free( dirnames );
 }
 
 static int pmicmpfnc( const void *_a, const void *_b )

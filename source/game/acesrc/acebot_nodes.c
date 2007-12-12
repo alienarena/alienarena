@@ -763,11 +763,7 @@ void ACEND_LoadNodes(void)
 	char filename[60];
 	int version;
 
-#ifdef __unix__
-	strcpy(filename,"botinfo/nav/");
-#else
-	strcpy(filename,"botinfo\\nav\\");
-#endif
+	strcpy(filename,BOTDIR"/botinfo/nav/");
 	strcat(filename,level.mapname);
 	strcat(filename,".nod");
 
