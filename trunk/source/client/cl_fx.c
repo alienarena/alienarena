@@ -2054,7 +2054,7 @@ Particle Beams
 
 //this is the length of each piece...
 #define RAILTRAILSPACE 20
-#define LASERTRAILSPACE 10
+#define LASERTRAILSPACE 20
 
 void CL_DisruptorBeam (vec3_t start, vec3_t end)
 {
@@ -2091,7 +2091,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 		for(j=0; j< 3; j++)
 			p->angle[j] = 0;
 		p->type = PARTICLE_BLASTER;
-		p->scalevel = 2;
+		p->scalevel = 4;
 		p->color = 0xd4;
 		for (j=0 ; j<3 ; j++)
 		{
@@ -2113,41 +2113,8 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 		p->alphavel = -.8 / (0.6+frand()*0.2);
 		p->blenddst = GL_ONE;
 		p->blendsrc = GL_SRC_ALPHA;
-		if(len <= 20) { //end blast 
-			p->texnum = r_flaretexture->texnum;
-			p->scale = 24;
-			for(j=0; j< 3; j++)
-				p->angle[j] = 0;
-			p->type = PARTICLE_BLASTER;
-			p->scalevel = 12;
-		}
-		else {
-			p->texnum = r_beamtexture->texnum;
-			p->scale = 2;
-			VectorCopy(move, p->angle);
-			p->type = PARTICLE_BEAM;
-			p->scalevel = 0;
-		}
-		
-		p->color = 0xd4;
-	
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = last[j];
-			p->vel[j] = 0;
-			p->accel[j] = 0;
-		}
-		
-		//do the beam again, to make the effect more prominent and bright, and to the end
-		if (!(p = new_particle()))
-				return;
-
-		p->alpha = 1;
-		p->alphavel = -.8 / (0.6+frand()*0.2);
-		p->blenddst = GL_ONE;
-		p->blendsrc = GL_SRC_ALPHA;
 		p->texnum = r_beamtexture->texnum;
-		p->scale = 2;
+		p->scale = 4;
 		VectorCopy(move, p->angle);
 		p->type = PARTICLE_BEAM;
 		p->scalevel = 0;
@@ -2197,7 +2164,7 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 		p->blenddst = GL_ONE;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->texnum = r_cflashtexture->texnum;
-		p->scale = 8/(i+1);
+		p->scale = 12/(i+1);
 		for(j=0; j< 3; j++)
 			p->angle[j] = 0;
 		p->type = PARTICLE_BLASTER;
@@ -2220,7 +2187,7 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 				return;
 
 		p->alpha = 0.9;
-		p->alphavel = -2.8 / (0.6+frand()*0.2);
+		p->alphavel = -2.8;
 		p->blenddst = GL_ONE;
 		p->blendsrc = GL_SRC_ALPHA;
 		if(len <= 40) { //end blast
@@ -2232,8 +2199,8 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 			p->scalevel = 12;
 		}
 		else {
-			p->texnum = r_beamtexture->texnum;
-			p->scale = 2;
+			p->texnum = r_beam2texture->texnum;
+			p->scale = 4;
 			VectorCopy(move, p->angle);
 			p->type = PARTICLE_BEAM;
 			p->scalevel = 0;
