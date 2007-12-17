@@ -178,6 +178,10 @@ SOURCE=.\qcommon\files.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\unix\glob.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\win32\glw_imp.c
 # End Source File
 # Begin Source File
