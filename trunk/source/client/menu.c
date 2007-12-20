@@ -5066,6 +5066,16 @@ static qboolean IconOfSkinExists( char *skin, char **pcxfiles, int npcxfiles )
 		if ( strcmp( pcxfiles[i], scratch ) == 0 )
 			return true;
 	}
+	
+	strcpy( scratch, skin );
+	*strrchr( scratch, '.' ) = 0;
+	strcat( scratch, "_i.jpg" );
+
+	for ( i = 0; i < npcxfiles; i++ )
+	{
+		if ( strcmp( pcxfiles[i], scratch ) == 0 )
+			return true;
+	}
 
 	return false;
 }
@@ -5114,11 +5124,19 @@ static void PlayerConfig_ScanDirectories( void )
 			continue;
 		}
 
-		// verify the existence of at least one skin
+		// verify the existence of at least one skin(note, do not mix .tga and .jpeg)
 		strcpy( scratch, dirnames[i] );
-		strcat( scratch, "/*.tga" );
+		strcat( scratch, "/*.jpg" );
 		pcxnames = FS_ListFilesInFS( scratch, &npcxfiles, 0,
 		    SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+		if(!pcxnames) {
+			// check for .tga, though this is no longer used for current models
+			strcpy( scratch, dirnames[i] );
+			strcat( scratch, "/*.tga" );
+			pcxnames = FS_ListFilesInFS( scratch, &npcxfiles, 0,
+				SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+		}
 
 		if ( !pcxnames )
 		{
@@ -5130,7 +5148,7 @@ static void PlayerConfig_ScanDirectories( void )
 		// count valid skins, which consist of a skin with a matching "_i" icon
 		for ( k = 0; k < npcxfiles; k++ )
 		{
-			if ( !strstr( pcxnames[k], "_i.tga" ) )
+			if ( !strstr( pcxnames[k], "_i.tga" ) || !strstr( pcxnames[k], "_i.jpg" ))
 			{
 				if ( IconOfSkinExists( pcxnames[k], pcxnames, npcxfiles) )
 				{
@@ -5458,7 +5476,7 @@ void PlayerConfig_MenuDraw( void )
 
 		Com_sprintf( scratch, sizeof( scratch ), "players/%s/tris.md2", s_pmi[s_player_model_box.curvalue].directory );
 		entity[0].model = R_RegisterModel( scratch );
-		Com_sprintf( scratch, sizeof( scratch ), "players/%s/%s.tga", s_pmi[s_player_model_box.curvalue].directory, s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue] );
+		Com_sprintf( scratch, sizeof( scratch ), "players/%s/%s.jpg", s_pmi[s_player_model_box.curvalue].directory, s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue] );
 		entity[0].skin = R_RegisterSkin( scratch );
 
 		Com_sprintf( scratch, sizeof( scratch ), "players/%s/weapon.md2", s_pmi[s_player_model_box.curvalue].directory );
