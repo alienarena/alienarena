@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "r_local.h"
+#include "jpeg/jpeglib.h"
 #include <GL/glu.h>
 
 image_t		gltextures[MAX_GLTEXTURES];
@@ -554,6 +555,153 @@ void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *heigh
 
 	FS_FreeFile (pcx);
 }
+/*
+=================================================================
+
+JPEG LOADING
+
+By Robert 'Heffo' Heffernan
+
+=================================================================
+*/
+
+void jpg_null(j_decompress_ptr cinfo)
+{
+}
+
+unsigned char jpg_fill_input_buffer(j_decompress_ptr cinfo)
+{
+    Com_Printf("Premature end of JPEG data\n");
+    return 1;
+}
+
+void jpg_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
+{
+        
+    cinfo->src->next_input_byte += (size_t) num_bytes;
+    cinfo->src->bytes_in_buffer -= (size_t) num_bytes;
+
+    if (cinfo->src->bytes_in_buffer < 0) 
+		Com_Printf("Premature end of JPEG data\n");
+}
+
+void jpeg_mem_src(j_decompress_ptr cinfo, byte *mem, int len)
+{
+    cinfo->src = (struct jpeg_source_mgr *)(*cinfo->mem->alloc_small)((j_common_ptr) cinfo, JPOOL_PERMANENT, sizeof(struct jpeg_source_mgr));
+    cinfo->src->init_source = jpg_null;
+    cinfo->src->fill_input_buffer = jpg_fill_input_buffer;
+    cinfo->src->skip_input_data = jpg_skip_input_data;
+    cinfo->src->resync_to_restart = jpeg_resync_to_restart;
+    cinfo->src->term_source = jpg_null;
+    cinfo->src->bytes_in_buffer = len;
+    cinfo->src->next_input_byte = mem;
+}
+
+#define DSTATE_START	200	/* after create_decompress */
+#define DSTATE_INHEADER	201	/* reading header markers, no SOS yet */
+
+/*
+==============
+LoadJPG
+==============
+*/
+void LoadJPG (char *filename, byte **pic, int *width, int *height)
+{
+	struct jpeg_decompress_struct	cinfo;
+	struct jpeg_error_mgr			jerr;
+	byte							*rawdata, *rgbadata, *scanline, *p, *q;
+	int								rawsize, i;
+
+	// Load JPEG file into memory
+	rawsize = FS_LoadFile(filename, (void **)&rawdata);
+	if (!rawdata)
+	{
+		return;	
+	}
+
+	// Knightmare- check for bad data
+	if (	rawdata[6] != 'J'
+		||	rawdata[7] != 'F'
+		||	rawdata[8] != 'I'
+		||	rawdata[9] != 'F') {
+		FS_FreeFile(rawdata);
+		return;
+	}
+
+	// Initialise libJpeg Object
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_decompress(&cinfo);
+
+	// Feed JPEG memory into the libJpeg Object
+	jpeg_mem_src(&cinfo, rawdata, rawsize);
+
+	// Process JPEG header
+	jpeg_read_header(&cinfo, true); // bombs out here
+
+	// Start Decompression
+	jpeg_start_decompress(&cinfo);
+
+	// Check Color Components
+	if(cinfo.output_components != 3)
+	{
+		jpeg_destroy_decompress(&cinfo);
+		FS_FreeFile(rawdata);
+		return;
+	}
+
+	// Allocate Memory for decompressed image
+	rgbadata = malloc(cinfo.output_width * cinfo.output_height * 4);
+	if(!rgbadata)
+	{
+		jpeg_destroy_decompress(&cinfo);
+		FS_FreeFile(rawdata);
+		return;
+	}
+
+	// Pass sizes to output
+	*width = cinfo.output_width; *height = cinfo.output_height;
+
+	// Allocate Scanline buffer
+	scanline = malloc(cinfo.output_width * 3);
+	if(!scanline)
+	{
+		free(rgbadata);
+		jpeg_destroy_decompress(&cinfo);
+		FS_FreeFile(rawdata);
+		return;
+	}
+
+	// Read Scanlines, and expand from RGB to RGBA
+	q = rgbadata;
+	while(cinfo.output_scanline < cinfo.output_height)
+	{
+		p = scanline;
+		jpeg_read_scanlines(&cinfo, &scanline, 1);
+
+		for(i=0; i<cinfo.output_width; i++)
+		{
+			q[0] = p[0];
+			q[1] = p[1];
+			q[2] = p[2];
+			q[3] = 255;
+
+			p+=3; q+=4;
+		}
+	}
+
+	// Free the scanline buffer
+	free(scanline);
+
+	// Finish Decompression
+	jpeg_finish_decompress(&cinfo);
+
+	// Destroy JPEG object
+	jpeg_destroy_decompress(&cinfo);
+
+	// Return the 'rgbadata'
+	*pic = rgbadata;
+}
+
 
 /*
 =========================================================
@@ -1527,7 +1675,12 @@ image_t	*GL_FindImage (char *name, imagetype_t type)
 		image = GL_LoadPic (name, pic, width, height, type, 32);
 		goto done;
 	}
-
+	LoadJPG (va("%s.jpg", shortname), &pic, &width, &height);
+	if (pic) 
+	{
+		image = GL_LoadPic (name, pic, width, height, type, 32);
+		goto done;
+	}
 	// then comes .pcx
 	LoadPCX (va("%s.pcx", shortname), &pic, &palette, &width, &height);
 	if (pic) 
@@ -1545,8 +1698,6 @@ done:
 		free(pic);
 	if (palette)
 		free(palette);
-
-	//image->script = RS_FindScript(shortname); god only knows why this crashes everything
 
 	return image; 
 }

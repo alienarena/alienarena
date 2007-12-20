@@ -106,11 +106,20 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		sprintf(filename, "%s.tga", shortname);
 	}
 
-
-	if (FS_LoadFile (filename, NULL) != -1)
-	{	// it exists, no need to download
+	if (FS_LoadFile (filename, NULL) != -1)	{
+		// it exists, no need to download
 		return true;
 	}
+	else if(modelskin){
+		//try for .jpg
+		COM_StripExtension ( filename, shortname );
+		sprintf(filename, "%s.jpg", shortname);	
+		if (FS_LoadFile (filename, NULL) != -1)	{
+			// it exists, no need to download
+			return true;
+		}
+	}
+
 	strcpy (cls.downloadname, filename);
 
 	// download to a temp name, and only rename

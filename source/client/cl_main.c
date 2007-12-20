@@ -1465,7 +1465,7 @@ redoSkins:;
 					/*FALL THROUGH*/
 
 				case 3: // skin
-					Com_sprintf(fn, sizeof(fn), "players/%s/%s.tga", model, skin);
+					Com_sprintf(fn, sizeof(fn), "players/%s/%s.jpg", model, skin);
 					if (!CL_CheckOrDownloadFile(fn)) {
 						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 4;
 						return; // started a download
@@ -1474,7 +1474,7 @@ redoSkins:;
 					/*FALL THROUGH*/
 
 				case 4: // skin_i
-					Com_sprintf(fn, sizeof(fn), "players/%s/%s_i.tga", model, skin);
+					Com_sprintf(fn, sizeof(fn), "players/%s/%s_i.jpg", model, skin);
 					if (!CL_CheckOrDownloadFile(fn)) {
 						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 5;
 						return; // started a download
