@@ -89,6 +89,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	char	name[MAX_OSPATH];
 	char	shortname[MAX_OSPATH];
 	qboolean	modelskin = false;
+	qboolean	jpg = false;
 
 	if (strstr (filename, ".."))
 	{
@@ -106,6 +107,10 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		sprintf(filename, "%s.tga", shortname);
 	}
 
+	//if jpg, be sure to also try tga (player skin situation)
+    if(filename[strlen(filename)-1] == 'g')
+		jpg = true;
+	
 	if (FS_LoadFile (filename, NULL) != -1)	{
 		// it exists, no need to download
 		return true;
@@ -114,6 +119,15 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		//try for .jpg
 		COM_StripExtension ( filename, shortname );
 		sprintf(filename, "%s.jpg", shortname);	
+		if (FS_LoadFile (filename, NULL) != -1)	{
+			// it exists, no need to download
+			return true;
+		}
+	}
+	else if(jpg) { //didn't find .jpg skin, try for .tga skin, convoluted, yes indeed.
+		//try for .tga
+		COM_StripExtension ( filename, shortname );
+		sprintf(filename, "%s.tga", shortname);	
 		if (FS_LoadFile (filename, NULL) != -1)	{
 			// it exists, no need to download
 			return true;
