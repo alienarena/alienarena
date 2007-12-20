@@ -19,7 +19,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "r_local.h"
+#ifdef _WIN32
 #include "jpeg/jpeglib.h"
+#endif
+#ifndef _WIN32
+#include <jpeglib.h>
+#endif
 #include <GL/glu.h>
 
 image_t		gltextures[MAX_GLTEXTURES];
