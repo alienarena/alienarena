@@ -1,4 +1,4 @@
-qbsp3 dm-dismal
-qvis3 dm-dismal
-qrad3 dm-dismal
+qbsp3 dm-turbo
+qvis3 dm-turbo
+qrad3 dm-turbo
 pause
