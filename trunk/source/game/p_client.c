@@ -735,8 +735,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	{	// gib
 		self->takedamage	= DAMAGE_NO;
 		self->s.modelindex3	= 0;    //remove helmet, if a martian
-		self->s.modelindex4	= 0;    //war machine rider
-
+	
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_DEATHFIELD);
 		gi.WritePosition (self->s.origin);
@@ -1708,14 +1707,7 @@ void PutClientInServer (edict_t *ent)
 		ent->s.modelindex3 = 0;
 
 	ent->s.modelindex4 = 0;
-	if(!strcmp(playermodel, "war")) //special case
-	{
-		ent->s.modelindex4 = gi.modelindex("players/war/weapon.md2");
-		ent->s.modelindex2 = 0;
-	}
-	else if(!strcmp(playermodel, "brainlet"))
-		ent->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
-
+	
 	//check for class file
 	ent->ctype = 0; //alien is default
 	sprintf(modelpath, "players/%s/human", playermodel);
@@ -2165,13 +2157,6 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		ent->s.modelindex3 = 0;
 
 	ent->s.modelindex4 = 0;
-	if(!strcmp(playermodel, "war")) //special case, presents a problem for CTF.  Grr.
-	{
-		ent->s.modelindex4 = gi.modelindex("players/war/weapon.md2");
-		ent->s.modelindex2 = 0;
-	}
-	else if(!strcmp(playermodel, "brainlet"))
-		ent->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
 
 	//do gib checking here
 	//check for gib file

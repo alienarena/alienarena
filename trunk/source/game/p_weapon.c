@@ -1030,7 +1030,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 			ent->altfire = !ent->altfire;
 			if(ent->altfire) {
 				gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/blastf1a.wav"), 1, ATTN_NORM, 0);
-				fire_blasterball (ent, start, forward, damage*2, 1000, effect, hyper);
+				fire_blasterball (ent, start, forward, damage*3, 1000, effect, hyper);
 			}
 		}
 		else {
@@ -1285,7 +1285,6 @@ void Weapon_Hover (edict_t *ent) //for now
 }
 void Weapon_Beamgun_Fire (edict_t *ent)
 {
-	//float	rotation; rem out unneed variable
 	vec3_t	offset;
 	int		effect;
 	int		damage;
@@ -1315,14 +1314,12 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 				effect = EF_HYPERBLASTER;
 			else
 				effect = 0;
-			if (deathmatch->value) {
-				if(excessive->value)
-					damage = 45;
-				else
-					damage = 15;
-			}
+		
+			if(excessive->value)
+				damage = 25;
 			else
-				damage = 20;
+				damage = 10; 
+					
 			Blaster_Fire (ent, offset, damage, true, effect);
 			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 				ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -1360,12 +1357,8 @@ void Machinegun_Fire (edict_t *ent)
 	int			damage;
 	int			kick = 2;
 
-	if (deathmatch->value) {
-		if(excessive->value)
-			damage = 60;
-		else
-			damage = 20;
-	}
+	if(excessive->value)
+		damage = 60;
 	else
 		damage = 20;
 

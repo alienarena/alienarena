@@ -429,13 +429,6 @@ void Reset_player(edict_t *ent)
 	   	ent->s.modelindex3 = 0;
 			
 	ent->s.modelindex4 = 0;
-	if(!strcmp(playermodel, "war")) //special case
-	{
-	   	ent->s.modelindex4 = gi.modelindex("players/war/weapon.md2");
-		ent->s.modelindex2 = 0;
-	}
-	else if(!strcmp(playermodel, "brainlet"))	
-		ent->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
 	
 	ent->in_vehicle = false;
 }

@@ -470,15 +470,6 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	else 
 		bot->s.modelindex3 = 0;
 
-	if(!strcmp(playermodel, "war")) //special case
-	{
-		bot->s.modelindex4 = gi.modelindex("players/war/weapon.md2");
-		bot->s.modelindex2 = 0;
-	}
-	else if(!strcmp(playermodel, "brainlet"))	
-		bot->s.modelindex4 = gi.modelindex("players/brainlet/gunrack.md2"); //brainlets have a mount
-
-
 	//check for class file
 	bot->ctype = 0;
 	sprintf(modelpath, "players/%s/human", playermodel);

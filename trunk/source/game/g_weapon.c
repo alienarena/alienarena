@@ -824,7 +824,7 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 	vec3_t		from;
 	vec3_t		end;
 	trace_t		tr;
-	edict_t		*ignore;
+	edict_t		*ignore, *bomb;
 	int			mask;
 	qboolean	water;
 
@@ -876,11 +876,24 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 	gi.WritePosition (tr.endpos);
 	gi.multicast (self->s.origin, MULTICAST_PHS);
 
+	//spawn a new ent at end and detonate - for trick jumping
+	bomb = G_Spawn();
+	VectorCopy (tr.endpos, bomb->s.origin);
+	bomb->movetype = MOVETYPE_NONE;
+	bomb->solid = SOLID_NOT;
+	bomb->s.modelindex = 0;
+	bomb->owner = self;
+	bomb->think = G_FreeEdict;
+	bomb->classname = "bomb";
+	gi.linkentity (bomb);
+	T_RadiusDamage(bomb, self, 95, NULL, 150, MOD_PLASMA_SPLASH, -1);
+	G_FreeEdict (bomb);
+
 	if (self->client)
 		PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
 }
 
-//new weapon code
+//vaporizer code
 void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
 {
 
@@ -920,7 +933,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 				self->client->resp.weapon_hits[7]++;
 				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 			}
-			T_RadiusDamage(tr.ent, self, damage, NULL, 200, MOD_R_SPLASH, -1);
+			T_RadiusDamage(tr.ent, self, damage, NULL, 100, MOD_R_SPLASH, -1);
 		}
 
 		VectorCopy (tr.endpos, from);
@@ -957,7 +970,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	bomb->think = G_FreeEdict;
 	bomb->classname = "bomb";
 	gi.linkentity (bomb);
-	T_RadiusDamage(bomb, self, 200, NULL, 200, MOD_VAPORALTFIRE, 7); //ridiculously powerful!
+	T_RadiusDamage(bomb, self, 200, NULL, 100, MOD_VAPORALTFIRE, 7); //ridiculously powerful!
 	G_FreeEdict (bomb);
 
 	if (self->client)
