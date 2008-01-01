@@ -835,16 +835,16 @@ void SP_worldspawn (edict_t *ent)
 
 	//precache all base player models.  this eliminates the "stutter" when a player joins the game
 	gi.modelindex ("players/martianenforcer/tris.md2");
-	gi.modelindex ("players/martian/tris.md2");
+//	gi.modelindex ("players/martian/tris.md2");
 	gi.modelindex ("players/martiancyborg/tris.md2");
 	gi.modelindex ("players/enforcer/tris.md2");
-	gi.modelindex ("players/infantry/tris.md2");
-	gi.modelindex ("players/war/tris.md2");
-	gi.modelindex ("players/brainlet/tris.md2");
-	gi.modelindex ("players/robot/tris.md2");
-	gi.modelindex ("players/construct/tris.md2");
+//	gi.modelindex ("players/infantry/tris.md2");
+//	gi.modelindex ("players/war/tris.md2");
+//	gi.modelindex ("players/brainlet/tris.md2");
+//	gi.modelindex ("players/robot/tris.md2");
+//	gi.modelindex ("players/construct/tris.md2");
 	gi.modelindex ("players/lauren/tris.md2");
-	gi.modelindex ("players/rustbot/tris.md2");
+//	gi.modelindex ("players/rustbot/tris.md2");
 
 	//do the w_weps
 	// THIS ORDER MUST MATCH THE DEFINES IN g_local.h
