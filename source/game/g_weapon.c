@@ -886,7 +886,7 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 	bomb->think = G_FreeEdict;
 	bomb->classname = "bomb";
 	gi.linkentity (bomb);
-	T_RadiusDamage(bomb, self, 95, NULL, 150, MOD_PLASMA_SPLASH, -1);
+	T_RadiusDamage(bomb, self, 95, NULL, 50, MOD_PLASMA_SPLASH, -1);
 	G_FreeEdict (bomb);
 
 	if (self->client)
