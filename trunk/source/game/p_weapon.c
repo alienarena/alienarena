@@ -683,7 +683,7 @@ void weapon_plasma_fire (edict_t *ent)
 
 	if (is_quad)
 	{
-		damage *= 4;
+		damage *= 4; //leave at four, making it an effective insta weapon with quad
 		kick *= 4;
 	}
 
@@ -751,8 +751,8 @@ void weapon_energy_field_fire (edict_t *ent)
 
 	if (is_quad)
 	{
-		radius_damage *=4;
-		damage *= 4;
+		radius_damage *=2; //definitely nerf vaporizer quad effect
+		damage *= 2;
 		kick *= 4;
 	}
 
@@ -893,8 +893,8 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (is_quad)
-		damage *= 4;
+	if (is_quad) //nerf this, it's already an effective spammer
+		damage *= 2;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
@@ -944,7 +944,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	damage_radius = 120;
 	if (is_quad)
 	{
-		damage *= 4;
+		damage *= 4; //leave rocket launcher alone
 		radius_damage *= 4;
 	}
 
@@ -1007,7 +1007,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	vec3_t	offset;
 
 	if (is_quad)
-		damage *= 4;
+		damage *= 4; 
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
@@ -1034,6 +1034,9 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 			}
 		}
 		else {
+			//nerf it back down to double damage if it is quad
+			if(is_quad)
+				damage /= 2;
 			gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hyprbd1a.wav"), 1, ATTN_NORM, 0);
 			fire_blaster (ent, start, forward, damage, 2800, effect, hyper);
 		}
@@ -1106,7 +1109,7 @@ void Weapon_Bomber_Fire (edict_t *ent)
 	damage_radius = 250;
 	if (is_quad)
 	{
-		damage *= 4;
+		damage *= 4; //bomber stays same
 		radius_damage *= 4;
 	}
 
@@ -1159,7 +1162,7 @@ void Weapon_Strafer_Fire (edict_t *ent)
 		damage = 20;
 
 	if (is_quad)
-		damage *= 4;
+		damage *= 4; //stay at 4
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
@@ -1243,7 +1246,7 @@ void Weapon_Hover_Fire (edict_t *ent)
 		damage = 20;
 
 	if (is_quad)
-		damage *= 4;
+		damage *= 4; //keep at four
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
@@ -1415,7 +1418,7 @@ void Machinegun_Fire (edict_t *ent)
 
 	if (is_quad)
 	{
-		damage *= 4;
+		damage *= 4; //maybe keep this at four
 		kick *= 4;
 	}
 
@@ -1519,7 +1522,7 @@ void weapon_floater_fire (edict_t *ent)
 	damage_radius = 120;
 	if (is_quad || excessive->value)
 	{
-		damage *= 4;
+		damage *= 4; //should stay at four
 		radius_damage *= 4;
 	}
 
@@ -1680,9 +1683,9 @@ void Violator_Fire (edict_t *ent)
 	else
 		ent->client->ps.gunframe++;
 
-	if (is_quad) {
-		damage *= 4;
-		kick *=4;
+	if (is_quad) { //nerf quad
+		damage *= 2;
+		kick *=2;
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -1697,10 +1700,10 @@ void Violator_Fire (edict_t *ent)
 	
 		VectorSet(offset, 1, 1, ent->viewheight-0.5);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-		fire_violator(ent, start, forward, damage*2, kick, 1);
-		fire_violator(ent, start, right, damage*2, kick, 1);
-		fire_violator(ent, start, left, damage*2, kick, 1);
-		fire_violator(ent, start, back, damage*2, kick, 1);
+		fire_violator(ent, start, forward, damage/2, kick*500, 1);
+		fire_violator(ent, start, right, damage/2, kick*500, 1);
+		fire_violator(ent, start, left, damage/2, kick*500, 1);
+		fire_violator(ent, start, back, damage/2, kick*500, 1);
 
 		ent->client->resp.weapon_shots[8]++;
 
