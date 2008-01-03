@@ -1363,7 +1363,7 @@ void Machinegun_Fire (edict_t *ent)
 	if(excessive->value)
 		damage = 60;
 	else
-		damage = 20;
+		damage = 15;
 
 	if ((ent->client->ps.gunframe == 5) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
 	{
@@ -1702,10 +1702,10 @@ void Violator_Fire (edict_t *ent)
 	
 		VectorSet(offset, 1, 1, ent->viewheight-0.5);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-		fire_violator(ent, start, forward, damage/2, kick*500, 1);
-		fire_violator(ent, start, right, damage/2, kick*500, 1);
-		fire_violator(ent, start, left, damage/2, kick*500, 1);
-		fire_violator(ent, start, back, damage/2, kick*500, 1);
+		fire_violator(ent, start, forward, damage/2, kick*100, 1);
+		fire_violator(ent, start, right, damage/2, kick*100, 1);
+		fire_violator(ent, start, left, damage/2, kick*100, 1);
+		fire_violator(ent, start, back, damage/2, kick*100, 1);
 
 		ent->client->resp.weapon_shots[8]++;
 
