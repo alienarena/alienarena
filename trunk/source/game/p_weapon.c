@@ -1423,8 +1423,10 @@ void Machinegun_Fire (edict_t *ent)
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);//was up
-	VectorScale (forward, -16 * random(), ent->client->kick_origin);
-	ent->client->kick_angles[0] = -6 * random();
+	if(ent->client->ps.gunframe == 6 || ent->client->ps.gunframe == 8 || ent->client->ps.gunframe == 10 || ent->client->ps.gunframe == 12)
+		VectorScale (forward, -24, ent->client->kick_origin);
+	
+	ent->client->kick_angles[0] = 0; //no more kicking up, it affects aim poorly
 
 	if(ent->client->ps.gunframe == 6 && ent->client->buttons & BUTTON_ATTACK2) {
 		int bullet_count = DEFAULT_SSHOTGUN_COUNT;
