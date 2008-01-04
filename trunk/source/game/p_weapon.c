@@ -1363,7 +1363,7 @@ void Machinegun_Fire (edict_t *ent)
 	if(excessive->value)
 		damage = 60;
 	else
-		damage = 15;
+		damage = 18;
 
 	if ((ent->client->ps.gunframe == 5) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
 	{
