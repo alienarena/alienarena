@@ -1421,14 +1421,14 @@ void Machinegun_Fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);//was up
 	if(ent->client->ps.gunframe == 6 || ent->client->ps.gunframe == 8 || ent->client->ps.gunframe == 10 || ent->client->ps.gunframe == 12)
-		VectorScale (forward, ent->altfire ? -24 : -12, ent->client->kick_origin);
-	
-	if(ent->altfire)
-		ent->client->kick_angles[0] = -3; /* Kick view up */
-	else
-	{
-		ent->client->kick_angles[2] = (random() - 0.5)*3; /* Twist the view around a bit */
-		ent->client->kick_angles[0] = 0; /* No kick up for normal fire */
+	{	
+		if(ent->altfire)
+			ent->client->kick_angles[0] = -3; /* Kick view up */
+		else
+		{
+			ent->client->kick_angles[2] = (random() - 0.5)*3; /* Twist the view around a bit */
+			ent->client->kick_angles[0] = -1; /* tiny kick for pulsing effect */
+		}
 	}
 
 	if(ent->client->ps.gunframe == 6 && ent->client->buttons & BUTTON_ATTACK2) {
