@@ -1268,7 +1268,7 @@ static void Keys_MenuInit( void )
 
 static void Keys_MenuDraw (void)
 {
-	M_Background( "m_controls_back"); //draw black background first
+	M_Background( "menu_back"); //draw black background first
 	M_Banner( "m_controls" );
 	Menu_AdjustCursor( &s_keys_menu, 1 );
 	Menu_Draw( &s_keys_menu );
@@ -2276,7 +2276,7 @@ void Options_MenuDraw (void)
 {
 	char path[MAX_QPATH];
 
-	M_Background( "m_options_back"); //draw black background first
+	M_Background( "menu_back"); //draw black background first
 	M_Banner( "m_options" );
 	if(strcmp(crosshair->string, "none")) {
 		sprintf(path, "/pics/%s", crosshair->string);
@@ -2645,7 +2645,7 @@ void Game_MenuInit( void )
 
 void Game_MenuDraw( void )
 {
-	M_Background( "m_player_back"); //draw black background first
+	M_Background( "menu_back"); //draw black background first
 	M_Banner( "m_single" );
 	Menu_AdjustCursor( &s_game_menu, 1 );
 	Menu_Draw( &s_game_menu );
@@ -3078,7 +3078,7 @@ void JoinServer_MenuDraw(void)
 	if(scale < 1)
 		scale = 1;
 
-	M_Background( "m_options_back"); //draw black background first
+	M_Background( "menu_back"); //draw black background first
 	M_Banner( "m_joinserver" );
 
 
@@ -3380,7 +3380,7 @@ void Mutators_MenuInit( void )
 }
 void Mutators_MenuDraw(void)
 {
-	M_Background( "m_options_back"); //draw black background first
+	M_Background( "menu_back"); //draw black background first
 	M_Banner( "m_mutators" );
 
 	Menu_Draw( &s_mutators_menu );
@@ -3544,7 +3544,7 @@ void Addbots_MenuDraw(void)
 	if(scale < 1)
 		scale = 1;
 
-	M_Background( "m_player_back"); //draw black background first
+	M_Background( "menu_back"); //draw black background first
 	M_Banner( "m_bots" );
 
 	y = viddef.height/2 - 122*scale;
@@ -4288,7 +4288,7 @@ void StartServer_MenuDraw(void)
 
 	offset*=scale;
 
-	M_Background( "m_startserver_back"); //draw black background first
+	M_Background( "menu_back"); //draw black background first
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 	sprintf(path, "/levelshots/%s", startmap);
 	M_Banner( "m_startserver" );
@@ -4838,7 +4838,7 @@ void DMOptions_MenuInit( void )
 
 void DMOptions_MenuDraw(void)
 {
-	M_Background( "m_controls_back"); //draw black background first
+	M_Background( "menu_back"); //draw black background first
 	M_Banner( "m_dmoptions" );
 
 	Menu_Draw( &s_dmoptions_menu );
@@ -5444,7 +5444,7 @@ void PlayerConfig_MenuDraw( void )
 	if(scale < 1)
 		scale = 1;
 
-	M_Background( "m_player_back"); //draw black background first
+	M_Background( "menu_back"); //draw black background first
 	M_Banner( "m_player" );
 
 	memset( &refdef, 0, sizeof( refdef ) );

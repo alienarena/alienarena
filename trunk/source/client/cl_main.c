@@ -1757,15 +1757,12 @@ void CL_InitLocal (void)
 	//register all our menu gfx
 	R_RegisterPic("m_main");
 	R_RegisterPic("m_options");
-	R_RegisterPic("m_options_back");
+	R_RegisterPic("menu_back");
 	R_RegisterPic("m_video");
 	R_RegisterPic("m_controls");
-	R_RegisterPic("m_controls_back");
 	R_RegisterPic("m_player");
-	R_RegisterPic("m_player_back");
 	R_RegisterPic("m_bots");
 	R_RegisterPic("m_startserver");
-	R_RegisterPic("m_startserver_back");
 	R_RegisterPic("m_dmoptions");
 	R_RegisterPic("m_mutators");
 	R_RegisterPic("m_single");
