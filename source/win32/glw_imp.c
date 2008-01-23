@@ -44,9 +44,9 @@ glwstate_t glw_state;
 
 extern cvar_t *vid_fullscreen;
 extern cvar_t *vid_ref;
+extern cvar_t *vid_displayfrequency;
 
 qboolean have_stencil = false; // Stencil shadows - MrG
-
 
 static qboolean VerifyDriver( void )
 {
@@ -214,6 +214,13 @@ rserr_t GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen 
 			ReleaseDC( 0, hdc );
 		}
 
+		if ( vid_displayfrequency->integer > 0 )
+		{
+			dm.dmFields |= DM_DISPLAYFREQUENCY;
+			dm.dmDisplayFrequency = vid_displayfrequency->integer;
+			Com_Printf ( "...using display frequency %i\n", dm.dmDisplayFrequency );
+		}
+
 		Com_Printf ("...calling CDS: " );
 		if ( ChangeDisplaySettings( &dm, CDS_FULLSCREEN ) == DISP_CHANGE_SUCCESSFUL )
 		{
@@ -246,6 +253,13 @@ rserr_t GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen 
 			{
 				dm.dmBitsPerPel = gl_bitdepth->value;
 				dm.dmFields |= DM_BITSPERPEL;
+			}
+
+			if ( vid_displayfrequency->integer > 0 )
+			{
+				dm.dmFields |= DM_DISPLAYFREQUENCY;
+				dm.dmDisplayFrequency = vid_displayfrequency->integer;
+				Com_Printf ( "...using display frequency %i\n", dm.dmDisplayFrequency );
 			}
 
 			/*
