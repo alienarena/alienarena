@@ -43,6 +43,7 @@ cvar_t		*vid_ypos;			// Y coordinate of window position
 cvar_t		*vid_fullscreen;
 cvar_t		*vid_width;
 cvar_t		*vid_height;
+cvar_t		*vid_displayfrequency;
 
 // Global variables used internally by this module
 viddef_t	viddef;				// global video state; used by other modules
@@ -627,6 +628,7 @@ void VID_Init (void)
 	vid_width = Cvar_Get ( "vid_width", "640", CVAR_ARCHIVE );
 	vid_height = Cvar_Get ( "vid_height", "480", CVAR_ARCHIVE );
 	win_noalttab = Cvar_Get( "win_noalttab", "0", CVAR_ARCHIVE );
+	vid_displayfrequency = Cvar_Get( "vid_displayfrequency", "0", CVAR_ARCHIVE );
 
 	/* Add some console commands that we want to handle */
 	Cmd_AddCommand ("vid_restart", VID_Restart_f);
