@@ -385,6 +385,7 @@ typedef struct particle_s
 	vec3_t		angle;
 	vec3_t		vel;
 	vec3_t		accel;
+	vec3_t		end;
 	float		color;
 	float		colorvel;
 	float		alpha;
@@ -409,7 +410,6 @@ typedef struct particle_s
 
 void CL_ClearEffects (void);
 void CL_ClearTEnts (void);
-void CL_BlasterTrail (vec3_t start, vec3_t end);
 void CL_BlasterBall (vec3_t start, vec3_t end);
 void CL_DisruptorBeam (vec3_t start, vec3_t end);
 void CL_LaserBeam (vec3_t start, vec3_t end);

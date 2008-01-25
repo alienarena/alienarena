@@ -429,14 +429,19 @@ void addParticleLight (cparticle_t *p, float light, float lightvel, float lcol0,
 CL_ClearParticles
 ===============
 */
+/*
+Cl_ClearParticle
+*/
+
 void CL_ClearParticles (void)
 {
 	int		i;
 	
+	
 	free_particles = &particles[0];
 	active_particles = NULL;
 
-	for (i=0 ;i<cl_numparticles ; i++)
+	for (i=0 ;i<cl_numparticles ; i++) 
 		particles[i].next = &particles[i+1];
 	particles[cl_numparticles-1].next = NULL;
 }
@@ -1396,51 +1401,6 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 	}
 }
 
-/*
-===============
-CL_BlasterTrail
-
-===============
-*/
-void CL_BlasterTrail (vec3_t start, vec3_t end)
-{
-	vec3_t		move;
-	vec3_t		vec;
-	float		len;
-	int			j;
-	cparticle_t	*p;
-	int			dec;
-
-	VectorCopy (start, move);
-	VectorSubtract (end, start, vec);
-	len = VectorNormalize (vec);
-
-	dec = 5;
-	VectorScale (vec, 5, vec);
-
-	// FIXME: this is a really silly way to have a loop
-	while (len > 0)
-	{
-		len -= dec;
-
-		if (!(p = new_particle()))
-			return;
-
-		VectorClear (p->accel);
-
-		p->alpha = 0.8;
-		p->alphavel = -1.0 / (0.3+frand()*1.2);
-		p->color = 0xe0;
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = move[j] + crand();
-			p->vel[j] = crand()*5;
-			p->accel[j] = 0;
-		}
-
-		VectorAdd (move, vec, move);
-	}
-}
 /*
 ===============
 CL_BlasterBall
@@ -2792,7 +2752,93 @@ void CL_TeleportParticles (vec3_t start)
 	}
 }
 
+#define WEATHER_PARTICLES 2048
+static int weather_particles;
+extern unsigned r_weather;  
 
+/*
+Cl_WeatherEffects - adopted from Jay Dolan's Q2W
+*/
+void Cl_WeatherEffects(){
+	int i, j, k;
+	vec3_t start, end;
+	trace_t tr;
+	float ceiling;
+	cparticle_t *p;
+	
+	if(!r_weather)
+		return;
+
+	i = weather_particles;  // we count up from current particles
+	p = NULL;  // so that we add the right amount
+		
+	k = 0;
+	while(i++ < WEATHER_PARTICLES && k++ < 25){
+			
+		VectorCopy(cl.refdef.vieworg, start);
+		start[0] = start[0] + (rand() % 2048) - 1024;
+		start[1] = start[1] + (rand() % 2048) - 1024;
+		
+		VectorCopy(start, end);
+		end[2] += 8192;
+		
+		// trace up looking for sky
+		tr = CM_BoxTrace(start, end, vec3_origin, vec3_origin, 0, MASK_SHOT);
+		
+		if(!(tr.surface->flags & SURF_SKY))
+			continue;
+	
+		// drop down somewhere between sky and player
+		ceiling = tr.endpos[2] > start[2] + 1024 ? start[2] + 1024 : tr.endpos[2];
+		tr.endpos[2] = tr.endpos[2] - ((ceiling - start[2]) * frand());
+		
+		if (!(p = new_particle()))
+			return;	
+		
+		VectorCopy(tr.endpos, p->org);
+		p->org[2] -= 1;
+
+		VectorCopy(start, end);
+		end[2] -= 8192;
+		
+		tr = CM_BoxTrace(p->org, end, vec3_origin, vec3_origin, 0, MASK_ALL);
+		
+		if(!tr.surface)  // this shouldn't happen
+			VectorCopy(start, p->end);
+		else
+			VectorCopy(tr.endpos, p->end);
+		
+	
+		// setup the particles
+/*		if(r_weather == 1){
+			p->texnum = r_raintexture;
+			p->vel[2] = -800;
+			p->alpha = 0.6;
+			p->alphavel = frand() * -1;
+			p->color = 8;
+			p->scale = 6;
+		}
+	//	else*/ if(r_weather == 2){
+		
+			p->type = PARTICLE_WEATHER;
+			p->texnum = r_particletexture->texnum; //this is later set in r_main, because of
+			//a bug that seems to be screwing with texnums for some odd reason for this effect only
+			p->vel[2] = -120;
+			p->accel[2] = 0;
+			p->alpha = 0.8;
+			p->alphavel = frand() * -1;
+			p->color = 8;
+			p->scale = 1;
+			p->scalevel = 0;
+		}
+		
+		for(j = 0; j < 2; j++){
+			p->vel[j] = crand() * 2;
+			p->accel[j] = crand() * 2;
+		}
+		weather_particles++;
+	}
+}
 /*
 ===============
 CL_AddParticles
@@ -2803,10 +2849,12 @@ void CL_AddParticles (void)
 	cparticle_t		*p, *next;
 	float			alpha, light;
 	float			time, time2;
-	vec3_t			org, angle;
+	vec3_t			org, curorg, angle;
 	cparticle_t		*active, *tail;
 	float			scale;
 	int				i;
+
+	Cl_WeatherEffects();
 
 	active = NULL;
 	tail = NULL;
@@ -2822,6 +2870,8 @@ void CL_AddParticles (void)
 			alpha = p->alpha + time*p->alphavel;
 			if (alpha <= 0)
 			{	// faded out
+				if(p->type == PARTICLE_WEATHER)
+					weather_particles--;
 				p->next = free_particles;
 				free_particles = p;
 				continue;
@@ -2841,6 +2891,17 @@ void CL_AddParticles (void)
 		if(scale > 64)
 			scale = 64; //don't want them getting too large.
 
+		// free up weather particles that have hit the ground
+		for(i = 0; i < 3; i++) {
+			curorg[i] = p->org[i] + p->vel[i]*time + p->accel[i]*(time*time);
+		}
+		if(p->type == PARTICLE_WEATHER && (curorg[2] <= p->end[2])){
+			p->next = free_particles;
+			free_particles = p;
+			weather_particles--;
+			continue;
+		}
+	
 		p->next = NULL;
 		if (!tail)
 			active = tail = p;

@@ -20,6 +20,7 @@ extern "C" struct r_fog
 	float end;
 	float density;
 } fog;
+extern "C" unsigned r_weather;  // weather effects
 
 extern "C" void R_ReadFogScript(char config_file[128]);
 
@@ -47,6 +48,8 @@ void R_ReadFogScript(char config_file[128])
 		fog.end = atof(a_string); 
 		infile.getline(a_string, 128);
 		fog.density = atof(a_string); 
+		infile.getline(a_string, 128);
+		r_weather = atoi(a_string);
 		infile.close();
 	}
 
