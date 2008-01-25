@@ -1003,7 +1003,7 @@ void R_RenderFlare (flare_t *light)
 	qglEnableClientState( GL_COLOR_ARRAY );
 	GL_TexEnv( GL_MODULATE );
 
-	VectorScale(light->color, 0.5, tmp );
+	VectorScale(light->color, light->alpha, tmp );
 	for (j=0; j<4; j++)
 	   VA_SetElem4(col_array[j], tmp[0],tmp[1],tmp[2], 1);
 
@@ -1032,13 +1032,19 @@ void R_RenderFlare (flare_t *light)
 	qglDisableClientState(GL_COLOR_ARRAY);
 
 }
-extern qboolean IsVisible(vec3_t org1,vec3_t org2);
+
 int r_numflares;
 flare_t r_flares[MAX_FLARES];
 void R_RenderFlares (void)
 {
 	flare_t	*l;
     int i;
+	qboolean visible;
+	vec3_t mins, maxs;
+	trace_t r_trace;
+
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs, 0, 0, 0);
 
 	if(!r_lensflare->value)
 		return;
@@ -1049,10 +1055,27 @@ void R_RenderFlares (void)
 	qglEnable (GL_BLEND);
 	qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);
 
-     l = r_flares;
+    l = r_flares;
     for (i=0; i<r_numflares ; i++, l++)
 	{
-		if (IsVisible(r_origin,l->origin))
+
+		// periodically test visibility to ramp alpha
+		if(rs_realtime - l->time > 0.02){
+			
+			r_trace = CM_BoxTrace(r_origin, l->origin, mins, maxs, r_worldmodel->firstnode, MASK_SHOT);
+			visible = r_trace.fraction == 1.0;
+			
+			l->alpha += (visible ? 0.03 : -0.15);  // ramp
+			
+			if(l->alpha > 0.5)  // clamp
+				l->alpha = 0.5;
+			else if(l->alpha < 0)
+				l->alpha = 0.0;
+			
+			l->time = rs_realtime;
+		}
+
+		if (l->alpha > 0)
 		{
 			R_RenderFlare (l);
 				c_flares++;
