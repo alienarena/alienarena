@@ -41,6 +41,8 @@ typedef struct
 	vec3_t color;
 	int size;
 	int style;
+	float alpha;
+	float time;
 } flare_t;
 
 typedef struct

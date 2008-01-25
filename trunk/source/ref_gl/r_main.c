@@ -342,6 +342,7 @@ void R_ReadMusicScript(char config_file[128])
 	return;
 }
 #endif
+
 /*
 =================
 R_CullBox
