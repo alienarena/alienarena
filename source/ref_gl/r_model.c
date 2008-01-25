@@ -45,6 +45,7 @@ extern void R_ReadMusicScript(char config_file[128]);
 #endif
 
 char map_music[128];
+extern unsigned r_weather;
 
 char		map_entitystring[MAX_MAP_ENTSTRING];
 int			numentitychars;
@@ -1493,6 +1494,8 @@ void R_BeginRegistration (char *model)
 
 	registration_sequence++;
 	r_oldviewcluster = -1;		// force markleafs
+
+	r_weather = 0; //default is 0
 
 	//check for fog file. (gamedir first) 
 	Com_sprintf(fullname, sizeof(fullname), "%s/maps/scripts/%s.fog", FS_Gamedir(), model);

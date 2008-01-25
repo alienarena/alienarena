@@ -228,6 +228,7 @@ struct r_fog
 	float end;
 	float density;
 } fog;
+unsigned r_weather;  
 
 /*
 =================
@@ -276,6 +277,8 @@ void R_ReadFogScript(char config_file[128])
 	fog.end = atof(a_string);
 	strcpy( a_string, COM_Parse( &s ) );
 	fog.density = atof(a_string);
+	strcpy( a_string, COM_Parse( &s ) );
+	r_weather = atoi(a_string);
 	if ( fp != 0 )
 	{
 		fp = 0;
@@ -592,12 +595,15 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 	for ( p = particles, i=0, oldtype=-1 ; i < num_particles ; i++,p++)
 	{
 
-		if(p->type == PARTICLE_NONE){
-				texnum = r_particletexture->texnum;
-				scale = 1;
-				*(int *)color = colortable[p->color];
-				blendsrc = GL_SRC_ALPHA;
-				blenddst = GL_ONE;
+		if(p->type == PARTICLE_NONE || p->type == PARTICLE_WEATHER){
+			if(r_weather == 1)
+				texnum = r_particletexture->texnum; //if we ever do rain
+			else
+				texnum = r_particletexture->texnum; 
+			scale = 1;
+			*(int *)color = colortable[p->color];
+			blendsrc = GL_SRC_ALPHA;
+			blenddst = GL_ONE;
 		}
 		else {
 			texnum = p->texnum;

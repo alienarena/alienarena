@@ -362,8 +362,14 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				va++;
 				order += 3;
 			} while (--count);
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
+				if ( qglLockArraysEXT )
+					qglLockArraysEXT( 0, va );
 				qglDrawArrays(mode,0,va);
+				if ( qglUnlockArraysEXT ) 
+					qglUnlockArraysEXT();
+			}
+	
 		}
 
 	}
@@ -552,12 +558,16 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					va++;
 				} while (--count);
 
-
 				if (!(stage->normalmap && !gl_normalmaps->value)) //disable so that we
 					//can still have shaders without normalmapped models if so chosen
 				{
-					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
+						if ( qglLockArraysEXT )
+						qglLockArraysEXT( 0, va );
 						qglDrawArrays(mode,0,va);
+						if ( qglUnlockArraysEXT ) 
+							qglUnlockArraysEXT();
+					}
 				}
 
 				qglColor4f(1,1,1,1);
@@ -1048,8 +1058,6 @@ void R_DrawAliasModel (entity_t *e)
 	if ( (currententity->frame >= paliashdr->num_frames)
 		|| (currententity->frame < 0) )
 	{
-		Com_Printf ("R_DrawAliasModel %s: no such frame %d\n",
-		currentmodel->name, currententity->frame);
 		currententity->frame = 0;
 		currententity->oldframe = 0;
 	}
@@ -1057,8 +1065,6 @@ void R_DrawAliasModel (entity_t *e)
 	if ( (currententity->oldframe >= paliashdr->num_frames)
 		|| (currententity->oldframe < 0))
 	{
-		Com_Printf ("R_DrawAliasModel %s: no such oldframe %d\n",
-			currentmodel->name, currententity->oldframe);
 		currententity->frame = 0;
 		currententity->oldframe = 0;
 	}
