@@ -2568,6 +2568,22 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 
 		ucmd->forwardmove *= 1.3;
+	
+		//dodging 
+		if(ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && ((level.time - client->lastmovetime) > .15) && ((level.time - client->lastmovetime) < .5))
+		{
+			if((ucmd->sidemove < 0 && client->lastsidemove < 0) || (ucmd->sidemove > 0 && client->lastsidemove > 0)) {
+				if(ucmd->sidemove > 0)
+					client->dodge = 1;
+				else
+					client->dodge = -1;
+				ucmd->sidemove *=2;
+			}
+		}
+		if(ucmd->sidemove != 0) {
+			client->lastmovetime = level.time;
+			client->lastsidemove = ucmd->sidemove;
+		}
 
 		pm.cmd = *ucmd;
 
@@ -2590,7 +2606,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		// perform a pmove
 		gi.Pmove (&pm);
-
+		
 		// save results of pmove
 		client->ps.pmove = pm.s;
 		client->old_pmove = pm.s;

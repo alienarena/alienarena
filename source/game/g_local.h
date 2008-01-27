@@ -1142,6 +1142,11 @@ struct gclient_s
 	//joust attempts - for limiting how many times you can joust at a time
 	int joustattempts;
 
+	//movetime - used for special moves
+	float lastmovetime;
+	int lastsidemove;
+	int dodge;
+
 	float spawnprotecttime;
 	qboolean spawnprotected;
 
