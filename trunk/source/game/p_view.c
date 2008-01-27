@@ -1058,6 +1058,8 @@ void ClientEndServerFrame (edict_t *ent)
 			if(addspeed[i] < -800)
 				addspeed[i] = -800;
 		}
+		ent->s.frame = FRAME_jump1;
+		ent->client->anim_end = FRAME_jump6;
  		VectorAdd(ent->velocity, addspeed, ent->velocity);
 		current_client->dodge = false;
 		current_client->lastmovetime = level.time;
