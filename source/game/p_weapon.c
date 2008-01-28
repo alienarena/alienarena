@@ -1705,10 +1705,10 @@ void Violator_Fire (edict_t *ent)
 	
 		VectorSet(offset, 1, 1, ent->viewheight-0.5);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-		fire_violator(ent, start, forward, damage/2, kick*100, 1);
-		fire_violator(ent, start, right, damage/2, kick*100, 1);
-		fire_violator(ent, start, left, damage/2, kick*100, 1);
-		fire_violator(ent, start, back, damage/2, kick*100, 1);
+		fire_violator(ent, start, forward, damage/2, kick*20, 1);
+		fire_violator(ent, start, right, damage/2, kick*20, 1);
+		fire_violator(ent, start, left, damage/2, kick*20, 1);
+		fire_violator(ent, start, back, damage/2, kick*20, 1);
 
 		ent->client->resp.weapon_shots[8]++;
 
