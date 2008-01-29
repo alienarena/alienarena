@@ -720,11 +720,13 @@ static void R_DrawCubemapSurfaces (void)
 	int		i;
 	float	*v;
 	glpoly_t *p;
-	image_t *image = R_TextureAnimation( surf->texinfo );
+	image_t *image; 
 
 	// nothing to draw!
 	if (!surf)
 		return;
+
+	image = R_TextureAnimation( surf->texinfo );
 
 	if (!gl_normalmaps->value || !gl_cubemaps->value)
 		return;

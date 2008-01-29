@@ -316,6 +316,10 @@ typedef struct model_s
 	signed int	edge_tri[MAX_TRIANGLES][3];
 	qboolean	noshadow;
 
+	//vertex arrays for static meshes
+	int			num_frames;
+	vec3_t r_mesh_verts[MAX_VERTS];
+
 } model_t;
 
 //============================================================================
