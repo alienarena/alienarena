@@ -1326,6 +1326,35 @@ void Mod_AliasCalculateVertexNormals ( int numtris, dtriangle_t *tris, int numxy
 		}
 	}
 }
+/*
+R_LoadMd2VertexArrays
+*/
+extern 
+void R_LoadMd2VertexArrays(model_t *md2model){
+
+	dmdl_t *md2;
+	daliasframe_t *md2frame;
+	dtrivertx_t	*md2v;
+	int i;
+
+	if(md2model->num_frames > 1)
+		return;
+
+	md2 = (dmdl_t *)md2model->extradata;
+	
+	md2frame = (daliasframe_t *)((byte *)md2 + md2->ofs_frames);
+
+	if(md2->num_xyz > MAX_VERTS)
+		return;
+
+	for(i = 0, md2v = md2frame->verts; i < md2->num_xyz; i++, md2v++){  // reconstruct the verts
+		VectorSet(md2model->r_mesh_verts[i],
+					md2v->v[0] * md2frame->scale[0] + md2frame->translate[0],
+					md2v->v[1] * md2frame->scale[1] + md2frame->translate[1],
+					md2v->v[2] * md2frame->scale[2] + md2frame->translate[2]);
+	}
+	
+}
 
 /*
 =================
@@ -1424,6 +1453,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	}
 
 	mod->type = mod_alias;
+	mod->num_frames = pheader->num_frames;
 
 	//
 	// load the glcmds
@@ -1461,6 +1491,8 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	mod->maxs[0] = 32;
 	mod->maxs[1] = 32;
 	mod->maxs[2] = 32;
+
+	R_LoadMd2VertexArrays(mod);
 }
 
 //=============================================================================
@@ -1598,7 +1630,7 @@ struct model_s *R_RegisterModel (char *name)
 	model_t	*mod;
 	int		i;
 	dmdl_t		*pheader;
-
+	
 	mod = Mod_ForName (name, false);
 	if (mod)
 	{

@@ -99,36 +99,6 @@ void GL_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *ver
 
 }
 
-void GL_LightAliasModel( int nverts, dtrivertx_t *verts, float *colors, float alpha )
-{
-	int i;
-	float *out;
-
-	//
-	// pre light everything
-	//
-	out = colors;
-	for ( i = 0; i < nverts; i++, out += 4 )
-	{
-		float l = shadedots[verts[i].lightnormalindex];
-
-		out[0] = l * shadelight[0];
-		out[1] = l * shadelight[1];
-		out[2] = l * shadelight[2];
-		out[3] = alpha;
-	}
-
-	// clamp
-	out = colors;
-	for ( i = 0; i < nverts; i++, out += 4 )
-	{
-		if ( out[0] < 0 ) out[0] = 0; else if ( out[0] > 1.0f ) out[0] = 1.0f;
-		if ( out[1] < 0 ) out[1] = 0; else if ( out[1] > 1.0f ) out[1] = 1.0f;
-		if ( out[2] < 0 ) out[2] = 0; else if ( out[2] > 1.0f ) out[2] = 1.0f;
-		if ( out[3] < 0 ) out[3] = 0; else if ( out[3] > 1.0f ) out[3] = 1.0f;
-	}
-}
-
 void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov, float backlerp, vec3_t lightOut)
 {
 	int i;
@@ -211,7 +181,6 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	float mode;
 	float	*lerp;
 	vec3_t lightcolor;
-	vec4_t	colorArray[MAX_VERTS];
 	float ramp = 1.0;
 
 	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
@@ -280,12 +249,6 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	VectorSubtract(currententity->origin, lightspot, lightdir);
 		VectorNormalize ( lightdir );
 
-	if (!gl_rtlights->value && !(currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM)) )
-	{
-		GL_LightAliasModel( paliashdr->num_xyz, verts, colorArray[0], alpha );
-	}
-
-
 	qglEnableClientState( GL_COLOR_ARRAY );
 
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
@@ -319,7 +282,11 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				order += 3;
 			} while (--count);
 
+			if ( qglLockArraysEXT )
+				qglLockArraysEXT( 0, va );
 			qglDrawArrays(mode,0,va);
+			if ( qglUnlockArraysEXT ) 
+				qglUnlockArraysEXT();
 		}
 	}
 	else if(!rs)
@@ -526,6 +493,385 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 							{
 								if(gl_rtlights->value) {
 									GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+									red = lightcolor[0] * ramp;
+									green = lightcolor[1] * ramp;
+									blue = lightcolor[2] * ramp;
+								}
+								else {
+									red = shadelight[0] * ramp;
+									green = shadelight[1] * ramp;
+									blue = shadelight[2] * ramp;
+								}
+								//try to keep normalmapped stages from going completely dark
+								if(stage->normalmap && gl_normalmaps->value) {
+									if(red < .6) red = .6;
+									if(green < .6) green = .6;
+									if(blue < .6) blue = .6;
+								}
+
+							}
+
+							if (stage->colormap.enabled)
+							{
+								red *= stage->colormap.red/255.0;
+								green *= stage->colormap.green/255.0;
+								blue *= stage->colormap.blue/255.0;
+							}
+
+							VA_SetElem4(col_array[va], red, green, blue, nAlpha);
+						}
+					}
+					order += 3;
+					va++;
+				} while (--count);
+
+				if (!(stage->normalmap && !gl_normalmaps->value)) //disable so that we
+					//can still have shaders without normalmapped models if so chosen
+				{
+					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
+						if ( qglLockArraysEXT )
+						qglLockArraysEXT( 0, va );
+						qglDrawArrays(mode,0,va);
+						if ( qglUnlockArraysEXT ) 
+							qglUnlockArraysEXT();
+					}
+				}
+
+				qglColor4f(1,1,1,1);
+				if (stage->colormap.enabled)
+					qglEnable (GL_TEXTURE_2D);
+
+				if(stage->normalmap && gl_normalmaps->value) {
+
+					ramp = 1.0;
+					// back to replace mode
+					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+					// restore the original blend mode
+					qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+					// switch off blending
+					qglDisable (GL_BLEND);
+					qglDepthMask (GL_TRUE);
+				}
+
+				stage=stage->next;
+			}
+
+		}
+
+		if (depthmaskrscipt)
+			qglDepthMask(true);
+	}
+
+	GLSTATE_DISABLE_ALPHATEST
+	GLSTATE_DISABLE_BLEND
+	GLSTATE_DISABLE_TEXGEN
+
+	qglDisableClientState( GL_COLOR_ARRAY );
+	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+
+	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
+		qglEnable( GL_TEXTURE_2D );
+}
+
+//no lerping, static mesh
+void GL_DrawAliasFrame (dmdl_t *paliashdr)
+{
+	daliasframe_t	*frame;
+	dtrivertx_t	*v, *verts;
+	int		*order, *startorder, *tmp_order;
+	int		count, tmp_count;
+	float	l;
+	float	alpha, basealpha;
+	vec3_t	vectors[3];
+	int		i;
+	int		index_xyz;
+	qboolean depthmaskrscipt = false, is_trans = false;
+	rscript_t *rs = NULL;
+	rs_stage_t *stage = NULL;
+	int		va = 0;
+	float mode;
+	vec3_t lightcolor;
+	float ramp = 1.0;
+
+	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
+	verts = v = frame->verts;
+	
+	startorder = order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
+
+	if (r_shaders->value)
+			rs=(rscript_t *)currententity->script;
+
+	VectorCopy(shadelight, lightcolor);
+	for (i=0;i<model_dlights_num;i++)
+		VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
+	VectorNormalize(lightcolor);
+
+	if (currententity->flags & RF_TRANSLUCENT) {
+		basealpha = alpha = currententity->alpha;
+
+		rs=(rscript_t *)rs_glass;
+		if(!rs)
+			GL_Bind(r_reflecttexture->texnum);
+	}
+	else
+		basealpha = alpha = 1.0;
+
+	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
+
+	// PMM - added double shell
+	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) )
+		GL_Bind(r_shelltexture->texnum);  // add this line
+
+	if(currententity->flags & RF_VIEWERMODEL)
+		return;
+
+	VectorSubtract(currententity->origin, lightspot, lightdir);
+		VectorNormalize ( lightdir );
+
+	qglEnableClientState( GL_COLOR_ARRAY );
+
+	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
+	{
+		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
+
+		while (1)
+		{
+			// get the vertex count and primitive type
+			count = *order++;
+			va=0;
+			if (!count)
+				break;		// done
+			if (count < 0)
+			{
+				count = -count;
+				mode=GL_TRIANGLE_FAN;
+			}
+			else
+				mode=GL_TRIANGLE_STRIP;
+
+			do
+			{
+				// texture coordinates come from the draw list
+				index_xyz = order[2];
+
+				VA_SetElem2(tex_array[va],(currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f), currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f);
+				VA_SetElem3(vert_array[va],currentmodel->r_mesh_verts[index_xyz][0],currentmodel->r_mesh_verts[index_xyz][1],currentmodel->r_mesh_verts[index_xyz][2]);
+				VA_SetElem4(col_array[va], shadelight[0], shadelight[1], shadelight[2], calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]));
+				va++;
+				order += 3;
+			} while (--count);
+
+			if ( qglLockArraysEXT )
+				qglLockArraysEXT( 0, va );
+			qglDrawArrays(mode,0,va);
+			if ( qglUnlockArraysEXT ) 
+				qglUnlockArraysEXT();
+		}
+	}
+	else if(!rs)
+	{
+		alpha = basealpha;
+		while (1)
+		{
+
+			// get the vertex count and primitive type
+			count = *order++;
+			va=0;
+			if (!count)
+				break;		// done
+			if (count < 0)
+			{
+				count = -count;
+				mode=GL_TRIANGLE_FAN;
+			}
+			else
+				mode=GL_TRIANGLE_STRIP;
+
+			tmp_count=count;
+			tmp_order=order;
+
+			do
+			{
+				// texture coordinates come from the draw list
+				index_xyz = order[2];
+				l = shadedots[verts[index_xyz].lightnormalindex];
+
+				if(gl_rtlights->value)
+					GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+
+				VA_SetElem2(tex_array[va],((float *)order)[0], ((float *)order)[1]);
+				VA_SetElem3(vert_array[va],currentmodel->r_mesh_verts[index_xyz][0],currentmodel->r_mesh_verts[index_xyz][1],currentmodel->r_mesh_verts[index_xyz][2]);
+				if(gl_rtlights->value)
+					VA_SetElem4(col_array[va],lightcolor[0], lightcolor[1], lightcolor[2], calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]));
+				else
+					VA_SetElem4(col_array[va], shadelight[0], shadelight[1], shadelight[2], calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]));
+				va++;
+				order += 3;
+			} while (--count);
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
+				if ( qglLockArraysEXT )
+					qglLockArraysEXT( 0, va );
+				qglDrawArrays(mode,0,va);
+				if ( qglUnlockArraysEXT ) 
+					qglUnlockArraysEXT();
+			}
+	
+		}
+
+	}
+	else
+	{
+
+		if (rs->stage && rs->stage->has_alpha)
+		{
+			is_trans = true;
+			depthmaskrscipt = true;
+		}
+
+		if (depthmaskrscipt)
+			qglDepthMask(false);
+
+		while (1)
+		{
+			count = *order++;
+			if (!count)
+				break;		// done
+			// get the vertex count and primitive type
+			if (count < 0)
+			{
+				count = -count;
+				mode=GL_TRIANGLE_FAN;
+			}
+			else
+			{
+				mode=GL_TRIANGLE_STRIP;
+			}
+
+			stage=rs->stage;
+			tmp_count=count;
+			tmp_order=order;
+
+			while (stage)
+			{
+				count=tmp_count;
+				order=tmp_order;
+				va=0;
+
+				if (stage->normalmap && !gl_normalmaps->value) {
+					if(stage->next) {
+						stage = stage->next;
+						continue;
+					}
+				}
+
+				if (stage->colormap.enabled)
+					qglDisable (GL_TEXTURE_2D);
+				else if (stage->anim_count)
+					GL_Bind(RS_Animate(stage));
+				else
+					GL_Bind (stage->texture->texnum);
+
+				if (stage->blendfunc.blend)
+				{
+					GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
+					GLSTATE_ENABLE_BLEND
+				}
+				else if (basealpha==1.0f)
+				{
+					GLSTATE_DISABLE_BLEND
+				}
+				else
+				{
+					GLSTATE_ENABLE_BLEND
+					GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					alpha = basealpha;
+				}
+
+				if (stage->alphashift.min || stage->alphashift.speed)
+				{
+					if (!stage->alphashift.speed && stage->alphashift.min > 0)
+					{
+						alpha=basealpha*stage->alphashift.min;
+					}
+					else if (stage->alphashift.speed)
+					{
+						alpha=basealpha*sin(rs_realtime * stage->alphashift.speed);
+						if (alpha < 0) alpha=-alpha*basealpha;
+						if (alpha > stage->alphashift.max) alpha=basealpha*stage->alphashift.max;
+						if (alpha < stage->alphashift.min) alpha=basealpha*stage->alphashift.min;
+					}
+				}
+				else
+					alpha=basealpha;
+
+				if (stage->alphamask)
+				{
+					GLSTATE_ENABLE_ALPHATEST
+				}
+				else
+				{
+					GLSTATE_DISABLE_ALPHATEST
+				}
+
+				if(stage->normalmap && gl_normalmaps->value) {
+
+					ramp = 2.0; //for getting brightness of normal maps up a bit
+
+					qglDepthMask (GL_FALSE);
+			 		qglEnable (GL_BLEND);
+
+					// set the correct blending mode for normal maps
+					qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+
+					// and the texenv
+					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
+					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_DOT3_RGB_EXT);
+
+				}
+
+				do
+				{
+					if (!(stage->normalmap && !gl_normalmaps->value)) { //disable for normal stage if normals are disabled
+
+						float os = ((float *)order)[0];
+						float ot = ((float *)order)[1];
+						vec3_t normal;
+						int k;
+
+						index_xyz = order[2];
+
+						for (k=0;k<3;k++)
+						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
+						VectorNormalize ( normal );
+
+						if (stage->envmap)
+						{
+							vec3_t envmapvec;
+
+							VectorAdd(currententity->origin, currentmodel->r_mesh_verts[index_xyz], envmapvec);
+							RS_SetEnvmap (envmapvec, &os, &ot);
+
+							os -= DotProduct (normal , vectors[1] );
+							ot += DotProduct (normal, vectors[2] );
+						}
+
+						RS_SetTexcoords2D(stage, &os, &ot);
+
+						VA_SetElem2(tex_array[va], os, ot);
+						VA_SetElem3(vert_array[va],currentmodel->r_mesh_verts[index_xyz][0],currentmodel->r_mesh_verts[index_xyz][1],currentmodel->r_mesh_verts[index_xyz][2]);
+
+						{
+							float red = 1, green = 1, blue = 1, nAlpha;
+
+							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
+							calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
+
+							if (stage->lightmap)
+							{
+								if(gl_rtlights->value) {
+									GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 									red = lightcolor[0] * ramp;
 									green = lightcolor[1] * ramp;
 									blue = lightcolor[2] * ramp;
@@ -1071,7 +1417,11 @@ void R_DrawAliasModel (entity_t *e)
 
 	if ( !r_lerpmodels->value )
 		currententity->backlerp = 0;
-	GL_DrawAliasFrameLerp (paliashdr, currententity->backlerp);
+
+	if(e->frame == 0 && currentmodel->num_frames == 1)
+		GL_DrawAliasFrame(paliashdr);
+	else
+		GL_DrawAliasFrameLerp (paliashdr, currententity->backlerp);
 
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);

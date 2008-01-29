@@ -1719,7 +1719,7 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 	edict_t		*ignore;
 
 	if(alt)
-		VectorMA (start, 16, aimdir, end);
+		VectorMA (start, 6.4, aimdir, end);
 	else
 		VectorMA (start, 6.4, aimdir, end);
 	VectorCopy (start, from);
