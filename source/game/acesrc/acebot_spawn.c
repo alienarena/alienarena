@@ -790,12 +790,6 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 	bot->inuse = true;
 	bot->is_bot = true;
 
-	/* Tony: Bots need to know the password for passworded servers
-		otherwise ClientConnect() fails */
-	if (*password->string && strcmp(password->string, "none"))
-		Info_SetValueForKey(userinfo, "password", password->string);
-
-
 	// To allow bots to respawn
 	if(userinfo == NULL)
 		ACESP_SetName(bot, name, skin, team);

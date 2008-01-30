@@ -2808,21 +2808,20 @@ void Cl_WeatherEffects(){
 		else
 			VectorCopy(tr.endpos, p->end);
 		
-	
+		p->type = PARTICLE_WEATHER;
 		// setup the particles
-/*		if(r_weather == 1){
-			p->texnum = r_raintexture;
+		if(r_weather == 1){
+			p->texnum = r_raintexture->texnum;
 			p->vel[2] = -800;
-			p->alpha = 0.6;
+			p->accel[2] = 0;
+			p->alpha = 0.8;
 			p->alphavel = frand() * -1;
 			p->color = 8;
 			p->scale = 6;
+			p->scalevel = 0;
 		}
-	//	else*/ if(r_weather == 2){
-		
-			p->type = PARTICLE_WEATHER;
-			p->texnum = r_particletexture->texnum; //this is later set in r_main, because of
-			//a bug that seems to be screwing with texnums for some odd reason for this effect only
+		else if(r_weather == 2){
+			p->texnum = r_particletexture->texnum; 
 			p->vel[2] = -120;
 			p->accel[2] = 0;
 			p->alpha = 0.8;

@@ -933,7 +933,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 				self->client->resp.weapon_hits[7]++;
 				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 			}
-			T_RadiusDamage(tr.ent, self, damage, NULL, 100, MOD_R_SPLASH, -1);
+			T_RadiusDamage(tr.ent, self, damage, NULL, 120, MOD_VAPORIZER, -1);
 		}
 
 		VectorCopy (tr.endpos, from);
@@ -970,7 +970,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	bomb->think = G_FreeEdict;
 	bomb->classname = "bomb";
 	gi.linkentity (bomb);
-	T_RadiusDamage(bomb, self, 200, NULL, 100, MOD_VAPORALTFIRE, 7); //ridiculously powerful!
+	T_RadiusDamage(bomb, self, 200, NULL, 120, MOD_VAPORIZER, 7); //ridiculously powerful!
 	G_FreeEdict (bomb);
 
 	if (self->client)

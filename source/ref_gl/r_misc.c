@@ -231,6 +231,7 @@ void R_InitParticleTexture (void)
 	r_beam3texture = R_RegisterGfxPic("electrics3d");
 	r_bullettexture = R_RegisterParticlePic("bullethole");
 	r_voltagetexture = R_RegisterParticlePic("voltage");
+	r_raintexture = R_RegisterParticlePic("beam");
 	r_radarmap = GL_FindImage("gfx/radar/radarmap",it_pic);
 	r_around = GL_FindImage("gfx/radar/around",it_pic);
 

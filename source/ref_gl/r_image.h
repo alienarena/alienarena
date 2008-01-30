@@ -97,6 +97,7 @@ extern image_t		*r_beamtexture;
 extern image_t		*r_beam2texture;
 extern image_t		*r_beam3texture;
 extern image_t		*r_voltagetexture;
+extern image_t		*r_raintexture;
 
 extern	image_t		gltextures[MAX_GLTEXTURES];
 extern	int			numgltextures;
