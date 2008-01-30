@@ -77,6 +77,7 @@ image_t		*r_beam2texture;
 image_t		*r_beam3texture;
 image_t		*r_bullettexture;
 image_t		*r_voltagetexture;
+image_t		*r_raintexture;
 image_t		*r_radarmap; // wall texture for radar texgen
 image_t		*r_around;
 
@@ -584,7 +585,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 	int			    oldtype;
 	int				texnum, blenddst, blendsrc;
 	float			*corner0 = corner[0];
-	vec3_t move, delta;
+	vec3_t move, delta, v;
 
 	if ( !num_particles )
 		return;
@@ -598,9 +599,9 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 
 		if(p->type == PARTICLE_NONE || p->type == PARTICLE_WEATHER){
 			if(r_weather == 1)
-				texnum = r_particletexture->texnum; //if we ever do rain
+				texnum = r_raintexture->texnum; //rain
 			else
-				texnum = r_particletexture->texnum; 
+				texnum = r_particletexture->texnum; //snow
 			scale = 1;
 			*(int *)color = colortable[p->color];
 			blendsrc = GL_SRC_ALPHA;
@@ -684,6 +685,13 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 				VectorScale(right, 5*scale, pright);
 				VectorScale(up, -5*scale, pup);
 			}
+		}
+		else if(p->type == PARTICLE_WEATHER){  // keep it vertical
+			VectorCopy(r_newrefdef.viewangles, v);
+			v[0] = 0;  // keep weather particles vertical by removing pitch
+			AngleVectors(v, NULL, right, up);	
+			VectorScale(right, 3*scale, pright);
+			VectorScale(up, 3*scale, pup);
 		}
 		else {
 			VectorScale ( right, p->dist, pright );

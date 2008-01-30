@@ -747,7 +747,7 @@ static void R_DrawCubemapSurfaces (void)
 
 	qglRotatef (-15, 0, 0, 1);
 
-	// rotate by viewangles
+	// rotate by viewangles 
 	qglRotatef (-r_newrefdef.viewangles[2], 1, 0, 0);
 	qglRotatef (-r_newrefdef.viewangles[0], 0, 1, 0);
 	qglRotatef (-r_newrefdef.viewangles[1], 0, 0, 1);
@@ -781,6 +781,10 @@ static void R_DrawCubemapSurfaces (void)
 	{
 		if (SurfaceIsAlphaBlended(surf))
 			continue;
+
+		if(!strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name))
+			continue;
+
 		for (p = surf->polys; p; p = p->chain)
 		{
 			qglBegin (GL_POLYGON);
