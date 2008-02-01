@@ -1049,8 +1049,8 @@ void ClientEndServerFrame (edict_t *ent)
 	}
 	if(current_client->dodge != 0) {
 		AngleVectors (ent->s.angles, forward, addspeed, up);
-		addspeed[0] *= 1000*current_client->dodge;
-		addspeed[1] *= 1000*current_client->dodge;
+		addspeed[0] *= 300*current_client->dodge;
+		addspeed[1] *= 300*current_client->dodge;
 		//limit to reasonable
 		for(i = 0; i < 2; i++) {
 			if(addspeed[i] > 800)

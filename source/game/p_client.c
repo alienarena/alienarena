@@ -2578,9 +2578,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				else
 					client->dodge = -1;
 				ucmd->sidemove *=2;
+				ucmd->upmove += 100;
 			}
 		}
-		if(ucmd->sidemove != 0) {
+	
+		if(ucmd->sidemove != 0 || ucmd->forwardmove != 0) {
 			client->lastmovetime = level.time;
 			client->lastsidemove = ucmd->sidemove;
 		}
