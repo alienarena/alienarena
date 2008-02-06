@@ -89,7 +89,7 @@ qboolean ACEIT_IsReachable(edict_t *self, vec3_t goal)
 	VectorCopy(self->mins,v);
 	v[2] += 18; // Stepsize
 
-	trace = gi.trace (self->s.origin, v, self->maxs, goal, self, MASK_OPAQUE);
+	trace = gi.trace (self->s.origin, v, self->maxs, goal, self, BOTMASK_OPAQUE);
 	
 	// Yes we can see it
 	if (trace.fraction == 1.0)
@@ -106,7 +106,7 @@ qboolean ACEIT_IsVisible(edict_t *self, vec3_t goal)
 {
 	trace_t trace;
 	
-	trace = gi.trace (self->s.origin, vec3_origin, vec3_origin, goal, self, MASK_OPAQUE);
+	trace = gi.trace (self->s.origin, vec3_origin, vec3_origin, goal, self, BOTMASK_OPAQUE);
 	
 	// Yes we can see it
 	if (trace.fraction == 1.0)

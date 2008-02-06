@@ -149,7 +149,7 @@ int ACEND_FindCloseReachableNode(edict_t *self, int range, int type)
 			{
 				// make sure it is visible
 				//trace = gi.trace (self->s.origin, vec3_origin, vec3_origin, nodes[i].origin, self, MASK_OPAQUE);
-				tr = gi.trace (self->s.origin, self->mins, self->maxs, nodes[i].origin, self, MASK_OPAQUE);
+				tr = gi.trace (self->s.origin, self->mins, self->maxs, nodes[i].origin, self, BOTMASK_OPAQUE);
 
 				if(tr.fraction == 1.0)
 					return i;

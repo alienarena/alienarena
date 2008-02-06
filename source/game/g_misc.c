@@ -978,7 +978,7 @@ void SP_misc_teleporter (edict_t *ent)
 		return;
 	}
 
-	gi.setmodel (ent, "models/objects/dmspot/tris.md2");
+	gi.setmodel (ent, "models/objects/blank/tris.md2");
 	ent->s.skinnum = 1;
 	ent->s.effects = EF_TELEPORTER;
 	ent->solid = SOLID_BBOX;
