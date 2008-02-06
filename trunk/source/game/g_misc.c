@@ -1483,3 +1483,12 @@ void SP_misc_bluespidernode (edict_t *ent)
 	M_droptofloor (ent);
 }
 
+void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
+{
+	gi.setmodel (ent, ent->model);
+
+	ent->solid = SOLID_NOT; //will need clipping brushes around it
+
+	gi.linkentity (ent);
+	
+}

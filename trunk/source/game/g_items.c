@@ -1675,7 +1675,7 @@ always owned, never in the world
 		"models/items/quaddama/tris.md2", EF_ROTATE,
 		NULL,
 /* icon */		"p_quad",
-/* pickup */	"Quad Damage",
+/* pickup */	"Double Damage", //now double damage, rather than quad
 /* width */		2,
 		150,
 		NULL,

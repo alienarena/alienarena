@@ -1459,7 +1459,7 @@ void R_Register( void )
 	gl_mode = Cvar_Get( "gl_mode", "6", CVAR_ARCHIVE );
 	gl_lightmap = Cvar_Get ("gl_lightmap", "0", 0);
 	gl_shadows = Cvar_Get ("gl_shadows", "2", CVAR_ARCHIVE );
-	gl_dynamic = Cvar_Get ("gl_dynamic", "1", CVAR_ARCHIVE);
+	gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
 	gl_nobind = Cvar_Get ("gl_nobind", "0", 0);
 	gl_round_down = Cvar_Get ("gl_round_down", "1", 0);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", 0);

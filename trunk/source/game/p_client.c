@@ -2060,8 +2060,8 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	// set skin
 	s = Info_ValueForKey (userinfo, "skin");
 
-	//do the team skin check, only forcibly set teams for bots
-	if(ent->is_bot) {
+	//do the team skin check
+	if(true) {
 		if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //only do this for skin teams, red, blue
 		{
 			copychar = false;
