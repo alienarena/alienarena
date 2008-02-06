@@ -214,9 +214,9 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	// Ladder code
 	VectorSet(offset,36,0,0); // set as high as possible
 	G_ProjectSource (self->s.origin, offset, forward, right, upend);
-	traceFront = gi.trace(self->s.origin, self->mins, self->maxs, upend, self, MASK_OPAQUE);
+	traceFront = gi.trace(self->s.origin, self->mins, self->maxs, upend, self, BOTMASK_OPAQUE);
 		
-	if(traceFront.contents & 0x8000000) // using detail brush here cuz sometimes it does not pick up ladders...??
+	if ( traceFront.contents & CONTENTS_LADDER ) // 2008-02-06 jjb : should be ok now
 	{
 		ucmd->upmove = 400;
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
@@ -239,8 +239,8 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	//VectorSet(offset, 0, -18, 4);
 	G_ProjectSource (self->s.origin, offset, forward, right, rightstart);
 
-	traceRight = gi.trace(rightstart, NULL, NULL, focalpoint, self, MASK_OPAQUE);
-	traceLeft = gi.trace(leftstart, NULL, NULL, focalpoint, self, MASK_OPAQUE);
+	traceRight = gi.trace(rightstart, NULL, NULL, focalpoint, self, BOTMASK_OPAQUE);
+	traceLeft = gi.trace(leftstart, NULL, NULL, focalpoint, self, BOTMASK_OPAQUE);
 
 	// Wall checking code, this will degenerate progressivly so the least cost 
 	// check will be done first.
@@ -254,11 +254,11 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 
 		VectorSet(offset,0,0,200); // scan for height above head
 		G_ProjectSource (self->s.origin, offset, forward, right, upend);
-		traceUp = gi.trace(upstart, NULL, NULL, upend, self, MASK_OPAQUE);
+		traceUp = gi.trace(upstart, NULL, NULL, upend, self, BOTMASK_OPAQUE);
 			
 		VectorSet(offset,200,0,200*traceUp.fraction-5); // set as high as possible
 		G_ProjectSource (self->s.origin, offset, forward, right, upend);
-		traceUp = gi.trace(upstart, NULL, NULL, upend, self, MASK_OPAQUE);
+		traceUp = gi.trace(upstart, NULL, NULL, upend, self, BOTMASK_OPAQUE);
 
 		// If the upper trace is not open, we need to turn.
 		if(traceUp.fraction != 1)
