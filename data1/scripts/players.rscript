@@ -12,34 +12,6 @@ players/martianenforcer/gamara
 		nolightmap
 	}
 }
-players/enforcer/stryker
-{
-	{
-		map players/enforcer/stryker.tga
-		alphamask
-	}
-	{
-		map gfx/strykerfx.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		alphashift 5 0.2 0.8
-		nolightmap
-	}
-}
-players/martian/destoroyah
-{
-	{
-		map players/martian/destoroyah.tga
-		alphamask
-	}
-	{
-		map gfx/destoroyahfx.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		alphashift 5 0.2 0.8
-		nolightmap
-	}
-}
 players/rustbot/atlas
 {
 	{
