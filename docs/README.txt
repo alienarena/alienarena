@@ -1,4 +1,4 @@
-ALIEN ARENA 2007
+ALIEN ARENA 2008
 
 1. Introduction
 2. System Requirements
@@ -16,7 +16,7 @@ ALIEN ARENA 2007
 
 1.	INTRODUCTION
 
-ALIEN ARENA 2007 is a standalone 3D first person online deathmatch shooter crafted from the original source code of  Quake II and Quake III,  released by id Software under the GPL license.  With features including 32 bit graphics, new particle engine and effects, light blooms, reflective water, hi resolution textures and skins, hi poly models, stain maps, ALIEN ARENA pushes the envelope of graphical beauty rivaling today's top games.
+ALIEN ARENA 2008 is a standalone 3D first person online deathmatch shooter crafted from the original source code of  Quake II and Quake III,  released by id Software under the GPL license.  With features including 32 bit graphics, new particle engine and effects, light blooms, reflective water, hi resolution textures and skins, hi poly models, stain maps, ALIEN ARENA pushes the envelope of graphical beauty rivaling today's top games.
 
 The game features 37 levels, which can be played online against other players, or against the built in CodeRED bots.  
 
@@ -52,7 +52,7 @@ The call to battle beats through your heart and soul like the drums of war. Will
 
 (Windows)
 
-Installation has been made very simple.  After downloading, simply click on the alienarena2007.exe file and the installation will begin.  Follow the instructions of the Installshield setup program. If you are running Windows 2000 or XP, you should have administrative privileges.  If not, you may get some errors when the program tries to write the uninstall information to the registry.  If so, simply click "ignore", and the installation will continue without problem.
+Installation has been made very simple.  After downloading, simply click on the alienarena2008.exe file and the installation will begin.  Follow the instructions of the Installshield setup program. If you are running Windows 2000 or XP, you should have administrative privileges.  If not, you may get some errors when the program tries to write the uninstall information to the registry.  If so, simply click "ignore", and the installation will continue without problem.
 
 Once finished, you can click on the Alien Arena icon that has been placed on your desktop to start a game or the Alien Arena Server icon to start a dedicated server.
 
@@ -66,7 +66,7 @@ Source files are included, so you may compile the binaries yourself if neccessar
 
 * BASIC COMMANDS
 
-ALIEN ARENA works very much like Quake 2/3, with a few notable exceptions.
+ALIEN ARENA works very much like Quake and Unreal Tournament, with a few notable exceptions.
 
 The player will have the following weapons:
 
@@ -78,6 +78,7 @@ The player will have the following weapons:
 6.	Alien Smart Gun
 7.	Disruptor
 8.	Alien Vaporizer
+9.	Violator
 
 Weapons also have alternate firing modes.  In you controls menu, select your secondary fire key and this will allow you to use these modes.  
 
@@ -88,6 +89,8 @@ The player will also have a flashlight, which is always present, and very useful
 It would be advisable for you to change video settings for however you wish to view the game, and what gives you reasonable performance. The game's default settings are at a mid range setting, so try tweaking them or adding/removing effects depending on your framerate.  If you wish to see your framerate, you can type "set cl_drawfps 1" at the console(brought down using the ` key).  
 
 ALIEN ARENA also allows for colored names just as Quake 3, using the ^ character followed by a number to set the color.
+
+Movement is based on Quake 2 physics, allowing strafejumping, doublejumping, and other Quake type movements.  In Alien Arena, you can also dodge, similarly to Unreal Tournament, by pressing a strafe key, releasing it fully, and pressing it again.  
 
 * COMPLETING LEVELS
 
@@ -105,7 +108,7 @@ You can either select "join server" from the "multiplayer" menu and select a ser
 
 4.	THE CODERED ACE BOT
 
-Bots are a built in feature of ALIEN ARENA 2007.  Several bots are already configured for multiplayer games, and in Alien Arena, each level has a specific bot file for what bots are to be played in each level.
+Bots are a built in feature of ALIEN ARENA 2008.  Several bots are already configured for multiplayer games, and in Alien Arena, each level has a specific bot file for what bots are to be played in each level.
 
 To add a bot, type "sv addbot name model/skin", and to remove a bot type "sv removebot name". You can also add bots in the menu, in the deathmatch/bots flags area.
 
@@ -124,12 +127,12 @@ For Linux users, you simply just need to delete your Alien Arena folder.
 
 6.	CREDITS
 
-There is a long list of credits - ALIEN ARENA 2007 is greatly indebted to the following for it's creation and completion:
+There is a long list of credits - ALIEN ARENA 2008 is greatly indebted to the following for it's creation and completion:
 
 Design:  John Diamond with input from the community at large.
-Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia.
+Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Jim Bower, Kyle Hunter, Andres Mejia.
 Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
-Maps:  John Diamond
+Maps:  John Diamond, Dennis "xEMPx" Zedlach
 Textures and Artwork:  John Diamond, Enki, Adam Saizlai
 Sounds:  John Diamond, Sound Rangers
 Music:  John Diamond, WhiteLipper, Wooden Productions, Arteria Games, and SoundRangers
@@ -140,11 +143,11 @@ Gentoo portage: Paul Bredbury
 Debian packaging: Andres Mejia
 Alien Arena IRC Channel: Astralsin
 
-There are other major contributions from the community from QuakeSrc.org, including MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  A very special thanks goes out to the community members who contributed to the crosshair and hud contest. A full list of those contributors can be found in the in-game credit list.
+There are other major contributions from the community from QuakeSrc.org, including MrG, Jay Dolan, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  A very special thanks goes out to the community members who contributed to the crosshair and hud contest. A full list of those contributors can be found in the in-game credit list.
 
 7.	COPYRIGHT INFORMATION
 
-ALIEN ARENA 2007 and it's original content are a copyright of COR Entertainment, LLC.  
+ALIEN ARENA 2008 and it's original content are a copyright of COR Entertainment, LLC.  
 
 The source code of Alien Arena is Free Software. You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
@@ -155,11 +158,11 @@ It is only permissible to distrubute the game data(models, maps, textures, sound
 The Debian packaging is (C) 2007, Andres Mejia <mcitadel@gmail.com> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
 
-Under no circumstances ALIEN ARENA 2007 as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2007 may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
+Under no circumstances ALIEN ARENA 2008 as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2008 may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
 
 Contact:  http://red.planetarena.org
 
-Privacty Policy: http://home.comcast.net/~alienrace/privacy.html
+Privacy Policy: http://home.comcast.net/~alienrace/privacy.html
 
 
 
