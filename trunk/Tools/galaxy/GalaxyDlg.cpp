@@ -389,7 +389,7 @@ BOOL CGalaxyDlg::OnInitDialog()
 	GetPrivateProfileString("Galaxy", "email", "email@email.com", user.email, 100, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "exe", "C:/Alien Arena 2007/", CRXPath, MAX_PATH, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "chatstart", "true", user.joinatstart, 12, "galaxy.ini");
-	GetPrivateProfileString("Galaxy", "server", "irc.blackened.com", servidor, 100, "galaxy.ini");
+	GetPrivateProfileString("Galaxy", "server", "irc.prison.net", servidor, 100, "galaxy.ini");
 	//set the join flag for the dialog bool
 	if(!_tcscmp(user.joinatstart, "true"))
 		joinflg = true;
@@ -1717,7 +1717,7 @@ void CGalaxyDlg::GetNews()
 		m_news.SetWindowText("Unable to connect to news feed at this time...");
 		return;
 	}
-	hFile = InternetOpenUrl( hINet, "http://home.comcast.net/~alienrace/stats/news.db", NULL, 0, 0, 0 );
+	hFile = InternetOpenUrl( hINet, "http://icculus.org/alienarena/news/news.db", NULL, 0, 0, 0 );
 	if(hFile) {
 		DWORD dwRead;
 		newslocal.open("news.db");

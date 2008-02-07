@@ -3,48 +3,45 @@
 <pre>
 <h1>Build Log</h1>
 <h3>
---------------------Configuration: Galaxy - Win32 InHouse--------------------
+--------------------Configuration: Galaxy - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\Users\John\AppData\Local\Temp\RSPF6BD.tmp" with contents
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP3451.tmp" with contents
 [
-/nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "INHOUSE" /Fp"Galaxy___Win32_InHouse/Galaxy.pch" /Yu"stdafx.h" /Fo"Galaxy___Win32_InHouse/" /Fd"Galaxy___Win32_InHouse/" /FD /c 
+/nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Fp"Release/Galaxy.pch" /Yu"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
 "C:\Alien Arena 2007\Tools\galaxy\GalaxyDlg.cpp"
-"C:\Alien Arena 2007\Tools\galaxy\PlayerProfile.cpp"
 ]
-Creating command line "cl.exe @C:\Users\John\AppData\Local\Temp\RSPF6BD.tmp" 
-Creating temporary file "C:\Users\John\AppData\Local\Temp\RSPF6BE.tmp" with contents
+Creating command line "cl.exe @C:\Users\John\AppData\Local\Temp\RSP3451.tmp" 
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP3452.tmp" with contents
 [
-kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib comctl32.lib Winmm.lib fce32.lib /nologo /subsystem:windows /incremental:no /pdb:"Galaxy___Win32_InHouse/galaxy.pdb" /machine:I386 /out:"c:/Alien Arena Files/galaxy.exe" 
-".\Galaxy___Win32_InHouse\BuddyName.obj"
-".\Galaxy___Win32_InHouse\Galaxy.obj"
-".\Galaxy___Win32_InHouse\GalaxyDlg.obj"
-".\Galaxy___Win32_InHouse\hyperlink.obj"
-".\Galaxy___Win32_InHouse\mfcpp.obj"
-".\Galaxy___Win32_InHouse\minmaxlogic.obj"
-".\Galaxy___Win32_InHouse\PlayerProfile.obj"
-".\Galaxy___Win32_InHouse\PollServer.obj"
-".\Galaxy___Win32_InHouse\SkinHeaderCtrl.obj"
-".\Galaxy___Win32_InHouse\SkinHorizontalScrollbar.obj"
-".\Galaxy___Win32_InHouse\SkinListCtrl.obj"
-".\Galaxy___Win32_InHouse\SkinVerticleScrollbar.obj"
-".\Galaxy___Win32_InHouse\StdAfx.obj"
-".\Galaxy___Win32_InHouse\UpdateDlg.obj"
-".\Galaxy___Win32_InHouse\UpdateGame.obj"
-".\Galaxy___Win32_InHouse\Galaxy.res"
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib comctl32.lib Winmm.lib fce32.lib /nologo /subsystem:windows /incremental:no /pdb:"Release/Galaxy.pdb" /machine:I386 /out:"c:/Alien Arena 2007/Galaxy.exe" 
+".\Release\BuddyName.obj"
+".\Release\Galaxy.obj"
+".\Release\GalaxyDlg.obj"
+".\Release\hyperlink.obj"
+".\Release\mfcpp.obj"
+".\Release\minmaxlogic.obj"
+".\Release\PlayerProfile.obj"
+".\Release\PollServer.obj"
+".\Release\SkinHeaderCtrl.obj"
+".\Release\SkinHorizontalScrollbar.obj"
+".\Release\SkinListCtrl.obj"
+".\Release\SkinVerticleScrollbar.obj"
+".\Release\StdAfx.obj"
+".\Release\UpdateDlg.obj"
+".\Release\UpdateGame.obj"
+".\Release\Galaxy.res"
 ]
-Creating command line "link.exe @C:\Users\John\AppData\Local\Temp\RSPF6BE.tmp"
+Creating command line "link.exe @C:\Users\John\AppData\Local\Temp\RSP3452.tmp"
 <h3>Output Window</h3>
 Compiling...
 GalaxyDlg.cpp
-PlayerProfile.cpp
-Generating Code...
 Linking...
 
 
 
 <h3>Results</h3>
-galaxy.exe - 0 error(s), 0 warning(s)
+Galaxy.exe - 0 error(s), 0 warning(s)
 </pre>
 </body>
 </html>
