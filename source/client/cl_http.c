@@ -58,7 +58,7 @@ qboolean success;
 CL_HttpDownloadRecv
 */
 size_t CL_HttpDownloadRecv(void *buffer, size_t size, size_t nmemb, void *p){
-        return fwrite(buffer, size, nmemb, cls.download);
+       return fwrite(buffer, size, nmemb, cls.download);
 }
 
 /*
@@ -81,7 +81,7 @@ qboolean CL_HttpDownload(void){
         memset(file, 0, sizeof(file));  // resolve local file name
         Com_sprintf(file, sizeof(file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
 
-        FS_CreatePath(file);  // create the directory
+        //FS_CreatePath(file);  // create the directory
 
         if(!(cls.download = fopen(file, "wb"))){
                 Com_Printf("Failed to open %s.\n", file);
@@ -115,7 +115,8 @@ qboolean CL_HttpDownload(void){
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CL_HttpDownloadRecv);
 
         curl_multi_add_handle(curlm, curl);
-        return true;
+
+		return true;
 #else
         return false;
 #endif
@@ -156,9 +157,6 @@ void CL_HttpDownloadCleanup(){
 
         if(success){
                 cls.downloadname[0] = 0;
-
-                //if(strstr(file, ".pak"))  // add new paks to search paths
-                //      FS_AddPakfile(file);
         }
         else {  // retry via legacy udp download
 
@@ -180,6 +178,7 @@ void CL_HttpDownloadCleanup(){
         success = false;
 #endif
 }
+
 
 
 /*

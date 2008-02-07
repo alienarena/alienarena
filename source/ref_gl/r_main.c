@@ -1515,7 +1515,7 @@ void R_Register( void )
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
 	//these next two are only used when normalmaps are set to on
 	gl_specularmaps = Cvar_Get("gl_specularmaps", "1", CVAR_ARCHIVE);
-	gl_cubemaps = Cvar_Get("gl_cubemaps", "0", CVAR_ARCHIVE);
+	gl_cubemaps = Cvar_Get("gl_cubemaps", "1", CVAR_ARCHIVE);
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
