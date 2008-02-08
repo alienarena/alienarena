@@ -1811,6 +1811,7 @@ int R_Init( void *hinstance, void *hWnd )
 		{
 			Com_Printf ("...using GL_ARB_multitexture\n" );
 			qglMTexCoord2fSGIS = ( void * ) qwglGetProcAddress( "glMultiTexCoord2fARB" );
+			qglMTexCoord3fSGIS = ( void * ) qwglGetProcAddress( "glMultiTexCoord3fARB" );
 			qglMultiTexCoord3fvARB = (void*)qwglGetProcAddress("glMultiTexCoord3fvARB");
 			qglActiveTextureARB = ( void * ) qwglGetProcAddress( "glActiveTextureARB" );
 			qglClientActiveTextureARB = ( void * ) qwglGetProcAddress( "glClientActiveTextureARB" );
@@ -1838,6 +1839,7 @@ int R_Init( void *hinstance, void *hWnd )
 		{
 			Com_Printf ("...using GL_SGIS_multitexture\n" );
 			qglMTexCoord2fSGIS = ( void * ) qwglGetProcAddress( "glMTexCoord2fSGIS" );
+			qglMTexCoord3fSGIS = ( void * ) qwglGetProcAddress( "glMTexCoord3fSGIS" );
 			qglSelectTextureSGIS = ( void * ) qwglGetProcAddress( "glSelectTextureSGIS" );
 			GL_TEXTURE0 = GL_TEXTURE0_SGIS;
 			GL_TEXTURE1 = GL_TEXTURE1_SGIS;
