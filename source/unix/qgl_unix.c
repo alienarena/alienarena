@@ -400,6 +400,7 @@ void ( APIENTRY * qglColorTableEXT)( int, int, int, int, int, const void * );
 void ( APIENTRY * qgl3DfxSetPaletteEXT)( GLuint * );
 void ( APIENTRY * qglSelectTextureSGIS)( GLenum );
 void ( APIENTRY * qglMTexCoord2fSGIS)( GLenum, GLfloat, GLfloat );
+void ( APIENTRY * qglMTexCoord3fSGIS)( GLenum, GLfloat, GLfloat, GLfloat );
 void ( APIENTRY * qglActiveTextureARB) ( GLenum );
 void ( APIENTRY * qglClientActiveTextureARB) ( GLenum );
 void (APIENTRY * qglMultiTexCoord3fvARB) (GLenum, GLfloat *);
