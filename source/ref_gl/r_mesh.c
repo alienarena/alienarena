@@ -962,7 +962,7 @@ extern	vec3_t			lightspot;
 R_DrawAliasShadow
 =============
 */
-void R_DrawAliasShadow (dmdl_t *paliashdr, int posenum)
+void R_DrawAliasShadowLerped (dmdl_t *paliashdr, int posenum)
 {
 	dtrivertx_t	*verts;
 	int		*order;
@@ -975,6 +975,7 @@ void R_DrawAliasShadow (dmdl_t *paliashdr, int posenum)
 
 	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
 		+ currententity->frame * paliashdr->framesize);
+
 	verts = frame->verts;
 
 	height = 0;
@@ -1018,6 +1019,77 @@ void R_DrawAliasShadow (dmdl_t *paliashdr, int posenum)
 		{
 
 			memcpy( point, s_lerped[order[2]], sizeof( point )  );
+
+			point[0] -= shadevector[0]*(point[2]+lheight);
+			point[1] -= shadevector[1]*(point[2]+lheight);
+			point[2] = height;
+			qglVertex3fv (point);
+
+			order += 3;
+
+		} while (--count);
+
+		qglEnd ();
+	}
+	qglDepthMask(1);
+	qglColor4f(1,1,1,1);
+	if (have_stencil && gl_shadows->integer) qglDisable(GL_STENCIL_TEST);
+}
+void R_DrawAliasShadow(dmdl_t *paliashdr)
+{
+	dtrivertx_t	*verts;
+	int		*order;
+	vec3_t	point;
+	float	height, lheight;
+	int		count;
+	daliasframe_t	*frame;
+
+	lheight = currententity->origin[2] - lightspot[2];
+
+	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
+	verts = frame->verts;
+
+	height = 0;
+
+	order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
+
+	height = -lheight + 0.1f;
+
+	// if above entity's origin, skip
+	if ((currententity->origin[2]+height) > currententity->origin[2])
+		return;
+
+	if (r_newrefdef.vieworg[2] < (currententity->origin[2] + height))
+		return;
+
+	if (have_stencil && gl_shadows->integer) {
+		qglDepthMask(0);
+		qglEnable(GL_STENCIL_TEST);
+
+		qglStencilFunc(GL_EQUAL,1,2);
+
+		qglStencilOp(GL_KEEP,GL_KEEP,GL_INCR);
+
+	}
+
+	while (1)
+	{
+		// get the vertex count and primitive type
+		count = *order++;
+		if (!count)
+			break;		// done
+		if (count < 0)
+		{
+			count = -count;
+			qglBegin (GL_TRIANGLE_FAN);
+		}
+		else
+			qglBegin (GL_TRIANGLE_STRIP);
+
+		do
+		{
+
+			memcpy( point, currentmodel->r_mesh_verts[order[2]], sizeof( point )  );
 
 			point[0] -= shadevector[0]*(point[2]+lheight);
 			point[1] -= shadevector[1]*(point[2]+lheight);
@@ -1482,8 +1554,11 @@ void R_DrawAliasModel (entity_t *e)
 				qglColor4f (0,0,0,0.4 * currententity->alpha); //Knightmare- variable alpha
 			else
 				qglColor4f (0,0,0,0.4);
-
-			R_DrawAliasShadow (paliashdr, currententity->frame);
+			
+			if(e->frame == 0 && currentmodel->num_frames == 1)
+				R_DrawAliasShadow (paliashdr);
+			else
+				R_DrawAliasShadowLerped (paliashdr, currententity->frame);
 
 			qglEnable (GL_TEXTURE_2D);
 			qglDisable (GL_BLEND);
@@ -1504,14 +1579,17 @@ void R_DrawAliasModel (entity_t *e)
 			else
 				qglColor4f (0,0,0,casted);
 
-			R_DrawAliasShadow (paliashdr, currententity->frame);
+			if(e->frame == 0 && currentmodel->num_frames == 1)
+				R_DrawAliasShadow (paliashdr);
+			else
+				R_DrawAliasShadowLerped (paliashdr, currententity->frame);
 
 			qglEnable (GL_TEXTURE_2D);
 			qglDisable (GL_BLEND);
 			qglPopMatrix ();
 			//dynamic
 			casted = 0;
-			casted = R_ShadowLight (currententity->origin, shadevector, 0);
+		 	casted = R_ShadowLight (currententity->origin, shadevector, 0);
 			if (casted > 0) { //only draw if there's a dynamic light there
 				qglPushMatrix ();
 				qglTranslatef	(e->origin[0], e->origin[1], e->origin[2]);
@@ -1524,7 +1602,10 @@ void R_DrawAliasModel (entity_t *e)
 				else
 					qglColor4f (0,0,0,casted);
 
-				R_DrawAliasShadow (paliashdr, currententity->frame);
+				if(e->frame == 0 && currentmodel->num_frames == 1)
+					R_DrawAliasShadow (paliashdr);
+				else
+					R_DrawAliasShadowLerped (paliashdr, currententity->frame);
 
 				qglEnable (GL_TEXTURE_2D);
 				qglDisable (GL_BLEND);
