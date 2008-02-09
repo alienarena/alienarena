@@ -590,7 +590,7 @@ void VID_MenuDraw (void)
 	/*
 	** draw the banner
 	*/
-	Draw_StretchPic(0, 0, viddef.width, viddef.height, "m_controls_back");
+	Draw_StretchPic(0, 0, viddef.width, viddef.height, "menu_back");
 	Draw_GetPicSize( &w, &h, "m_video" );
 	w*=scale;
 	h*=scale;
