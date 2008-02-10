@@ -1,219 +1,225 @@
-AUSLÄNDISCHE ARENA 2007
+Alien Arena 2008
 
-1. Einleitung 2. System Anforderungen 3., die Begonnen
-Erhalten
+1. Einleitung
+2. System Anforderungen
+3. Start
 * Installation
-* Grundlegende Befehle
-* Deathmatch
-* An einen Bediener 4 die CodeRED AS BOT 5. copyright-Informationen
-anschließen
+* grundlegende Befehle
+* Level Beenden
+* Zu einem Server verbinden
+4. Der Codered ACE Bot
+5. Deinstallation
+6. Credits
+7. Copyright Information
 
 
-1. EINLEITUNG
+1.	EINFÜHRUNG
 
-AUSLÄNDISCHE ARENA 2007 ist ein alleinstehende Person 3D
-erstes on-line-deathmatch tireur, der vom ursprünglichen
-Quellenprogramm von Beben II und von Beben III in Handarbeit gemacht
-wird, freigegeben durch Kennzeichnung Software unter der GPL Lizenz.
-Mit Eigenschaften einschließlich 32 Bitgraphiken, drückt neue
-Partikelmaschine und Effekte, helle Blüte, reflektierendes Wasser,
-hallo Auflösung Beschaffenheiten und Häute, hallo Polymodelle,
-Fleckdiagramme, AUSLÄNDISCHE ARENA den Umschlag der graphischen
-Schönheit today.s mit oberen Spielen rivalisierend.  
+ALIEN ARENA 2008 ist ein eigenständiger 3D first person online deathmatch shooter 
+basierend auf den originalen source codes von Quake II und Quake III, welche von ID Software
+unter der GPL Lizenz veröffentlicht wurden. Mit Features wie 32 Bit Grafiken, 
+neuer Partikel Engine und Effekten, Licht Blooms, reflektierendes Wasser, hoch auflösende Texturen und skins,
+hi poly Modellen, stain maps, ALIEN ARENA bringt die Grafik auf die gleiche Ebene, wie die heutigen Top Spiele.
 
-Das Spiel kennzeichnet 37 Niveaus, die online gegen andere Spieler
-gespielt werden können, oder gegen errichtet worden in den CodeRED
-bots.  
+Das Spiel enthält 37 Level, welche online gegen andere Spieler, 
+oder gegen die eingebauten CodeRED Bots gespielt werden können.
 
-Ausländische Arena bietet CTF, AOA(All aus Angriff) Modus an, in dem
-Spieler in Träger klettern können, um Schlacht, Deathball und
-Mannschaft-Kern-Angriff zu tun. Steigen Sie einfach in das
-Multispielermenü ein, einen Bediener anzustellen, ändern Sie die
-Spielrichtlinien, und beschließen Sie ein Diagramm, um an zu spielen.
-Sie können von unterschiedlichem mutators(instagib fünf, Rakete vom
-Arena, übermäßigem, niedrigem grav, vom regen und vom Vampire auch
-vorwählen) zum Ihrer Spielerfahrung weiter besonders anzufertigen.
+Alien Arena bietet CTF, AOA (All Out Assault - Modus, in der Spieler mit Fahrzeugen in die Schlacht ziehen können), 
+Deathball, und Team Core Assault. Gehen Sie einfach in das Multiplayer-Menü und starten einen Server, 
+stellen die gewünschten Spielregeln ein, wählen eine Map aus, auf der sie spielen wollen.
+Sie auch zwischen fünf verschiedenen Mutatoren wählen (instagib, rocket arena, excessive, low grav, regeneration, un vampire), 
+um das Spielerlebnis zu erweitern.
 
-2. SYSTEM ANFORDERUNGEN
+2.	SYSTEM ANFORDERUNGEN
 
-1 Gigahertz 256 mb RAM 500 mb Festplattenspeicher3D Gaspedal
+1 GHz
+256 MB RAM
+500 MB freier Festplattenspeicher
+3D Grafikkarte
 
-3. ERHALTEN BEGONNEN
+3.	START
 
-1. INSTALLATION
+*	INSTALLATION
 
 (Windows)
 
-Installation ist sehr einfach gebildet worden. Nach dem
-Downloading klicken Sie einfach an die alienarena2007.exe Akte und die
-Installation fängt an. Befolgen Sie die Anweisungen des Installshield
-Einstellung Programms. Wenn Sie Windows 2000 oder XP laufen lassen,
-sollten Sie administrative Privilegien haben. Wenn nicht, können Sie
-einige Störungen erhalten, wenn das Programm versucht, die uninstall
-Informationen zum Register zu schreiben. Wenn so, einfach fahren
-Klicken ignore. und die Installation ohne Problem fort.  
-
-Sobald beendet, können Sie die ausländische Arenaikone an klicken,
-die auf Ihren Schreibtisch gesetzt worden ist, um ein Spiel oder die
-ausländische Arena-Bedienerikone zu beginnen, um einen engagierten
-Bediener anzustellen.
+Die Installation is sehr einfach. Nach dem Beende des Downloads, einfach die alienarena2008.exe Datei starten 
+und die Installation beginnt. Folgen Sie den Anweisungen des Installshield Setup Programms.
+Wenn Sie Windows 2000 oder XP benutzen, müssen Sie über Administrator Rechte verfügen. 
+Sollten Sie nicht die erwähnten Rechte besitzen, kann es passieren, dass Sie eine Fehlermeldung erhalten, 
+wenn das Programm versucht die Uninstall Informationen in die Registrierung zu schreiben. 
+Wenn das bei Ihnen der Fall ist, drücken Sie einfach auf "ignore" und die Installation wird ohne probleme fortgesetzt.
+Nachdem die installation abgeschlossen ist, können Sie entweder das Alien Arena Symbol, was sich auf Ihrem Desktop befindet,
+anwählen um das Spiel, oder aber das Alien Arena Server Symbol um einen Dedicated Server zu starten.
 
 (Linux)
 
-Unzip einfach alienarena2007-linux20070121-x86.zip in Ihrem
-usr/local/games Heft oder, wohin Sie das Spiel setzen möchten.  
+Entpacken Sie einfach das Archiv entweder in Ihren /usr/local/games Ordner oder in einen Ordner nach Ihrer Wahl.
+Tippen Sie ./crx um das Spiel, oder ./crded um eien Dedicated Server zu starten. 
+Alternativ können Sie auch die Schnellstart Symbole, die im Menü installiert sind verwenden.
+Die Source dateien sind enthalten, damit Sie die Binär Daten selbst kompilieren, falls benötigt.
+Bitte besuchen Sie unser Forum, wenn Sie irgendwelche Fragen dazu haben.
 
-Schreiben Sie /AlienArena, um das Spiel laufen zu lassen oder
-/AlienArenaDedicated, um einen engagierten Bediener anzustellen oder
-die Abkürzungen zu benutzen, die in das Menü angebracht werden.
+* Grundlegende Befehle
 
-Quellakten sind- enthalten, also können Sie die binaries kompilieren
-sich, wenn neccessary. Besuchen Sie bitte das Forum, wenn Sie
-irgendwelche Fragen betreffend sind dieses haben.
+ALIEN ARENA wird fast genauso wie Quake und Unreal Tournament gespielt, bis auf einige Ausnahmen.
+Der Spieler kann folgende Waffen benutzen:
 
-2. BASIC BEFIEHLT
+1.	Blaster
+2.	Alien Disruptor
+3.	Chaingun
+4.	Flame Thrower
+5.	Rocket Launcher
+6.	Alien Smart Gun
+7.	Alien Beamgun
+8.	Alien Vaporizer
+9.	Violator
 
-AUSLÄNDISCHE ARENA arbeitet sehr viel wie Beben 2/3, mit
-einigen bemerkenswerten Ausnahmen.
+Alle Waffen haben einen alternativen Feuer Modus. In Ihrem Tastenbelegungs Menü, 
+wählen Sie Ihre Taste für den sekundären Feuer Modus aus, damit Sie diesen auch benutzen können.
+Es sind neuer Powerups vohanden, wie Haste (Geschwindigkeit) und Sproing (Sprung), 
+oder auch der ehrwürdige Quad Damage (Vierfach Schaden) und Invulnerability (Unverwundbarkeit).
+Als Spieler verfügen Sie außerdem noch über eine Taschenlampe, welche Sie von Anfang an dabei haben und sehr nützlich ist. 
+Mit der "F" Taste wird sie ein- und ausgeschaltet, oder Sie können dafür eine beliebige Taste einstellen.
+Es ist ebenfalls ratsam, die Grafikeinstellungen Ihren Bedürfnisse und Systemanfoderungen anzupassen, 
+um das beste Ergebnis zu erzielen.
+Das Spiel ist zu Beginn auf einem Mittelwert voreingestellt, Sie sollten also, je nach Ihrer Frame Rate, 
+rumprobieren und gegebenenfalls Effekte hinzufügen und entfernen. 
+Um sich die Frame Rate während des des Spiels anzeigen zulassen, 
+können Sie in der Konsole (wird mit der ^ Taste aufgerufen) "set cl_drawfps 1" eingeben.
+ALIEN ARENA erlaubt es Ihnen auch farbige Namen wie in Quake 3 zu benutzen, dazu müssen Sie 
+(in der Konsole) die Tasten Umschalt und 6(&) drücken, danach eine Nummer, um die Farbe einzustellen.
+Das Movement (Bewegung) basiert auf der Quake 2 Physik, die Ihnen Starfejumping 
+(springen bei gedrückter Seitenschritt Taste), Doublejumping (doppelter Sprung) 
+und andere für Quake typische Bewegungen erlaubt.
+In Alien Arena können Sie auch Dodgen (seitwärts Sprung), ähnlich wie in Unreal Tournament, 
+indem Sie die Strafe (Seitenschritt) Taste drücken, danach komplett loslassen und dieselbe taste nochmals drücken.
 
-Der Spieler hat die folgenden Waffen:
+* LEVEL BEENDEN
 
-1. Ausländer-Der Unterbrecherscheibe-3. Kettender pistole-4. Rakete
-Abschußrampe 6. Des Bläser-2. Flamme-Des Spritzring-5.
-Ausländischer Intelligenter Ausländervaporizer Der Gewehr-7. Der
-Unterbrecherscheibe-8.
+In Alien Arena können Sie ein Einzelspieler Turnier spielen, indem Ihr Ziel ist, 
+das Fraglimit (Obergrenze der Abschüsse) zu erreichen, bevor es ein Bot (Computergegner) schafft. 
+Sollten Sie es nicht shaffen, werden Sie gezwungen den Level zu wiederholen, bis es shaffen. 
+Diese Regeln können Sie im Menü unter System ändern.
+Sie können ebenfals gegen menschliche Gegner online spielen, Ihr Ziel ist es das Fraglimit vor Ihren Gegnern, 
+oder die meisten Frags (Abschüsse) zu erreichen, bevor das Zeitlimit überschritten ist.
 
-Waffen jetzt haben auch wechselnde Zündungmodi. In Ihnen
-wählen Kontrollenmenü, Ihren Sekundärfeuerschlüssel vor und dieses
-erlaubt Ihnen, diese Modi zu verwenden.  
+Im CTF Modus, sind Sie in einem Team, versuchen die gegnerische Flagge zu stehlen und sie zum Standpunkt 
+Ihrer eigenen Flagge zu bringen. Das Team, welches das Punkte Limit erreicht, gewinnt.
 
-Es gibt neue powerups wie Eile und Sproing, zusätzlich zur venerable
-Viererkabelbeschädigung und invulerabilty.  
+Beim Deathball ist das Ziel, so viele Punkte wie möglich zu machen, entweder durch das Töten von Gegnern, 
+oder den Ball in das gegnerische Tor zu schiessen (was Ihnen 10 Punkte einbringt). 
+Wenn sich ein Spieler innerhalb des Deathball befindet, ist er wehrlos.
 
-Der Spieler hat auch eine Taschenlampe, die immer anwesend ist, und
-sehr nützlich. Der F. Schlüssel aktiviert und entaktiviert die
-Taschenlampe, oder Sie können binden, was Schlüssel Sie
-"Taschenlampe" wünschen, die ihn an und abstellt.
+Beim Team Core Assault, ist Ihr Ziel, die gegnerischen Power Nodes zu deaktivieren und danach die Spider Node zu zerstören.
+Sie können der Spider Node nur Schaden zufügen, wenn alle anderen Power Nodes deaktiviert sind.
 
-Es würde ratsam für Sie sein, videoeinstellungen für Sie jedoch zu
-ändern Wunsch, um das Spiel anzusehen, und was Ihnen angemessene
-Leistung gibt. In Linux können Sie "vid_restart" an der Konsole
-schreiben müssen, damit sie, um, abhängig von Ihrem System und
-Version von X wirksam zuSEIN Sie laufen. Die Standardannahmen des
-Spiels sind an einer mittleren Strecke Einstellung, also versuchen
-Sie, sie oder adding/removing Effekte abhängig von Ihrem framerate zu
-zwicken. Wenn Sie Ihr framerate sehen möchten, können Sie
-schreiben "einstellen cl_drawfps 1" am console(brought, das unten den
-` Schlüssel verwendet).  
+* ZU EINEM SERVER VERBINDEN
 
-AUSLÄNDISCHE ARENA läßt auch die farbigen Namen zu, die als Beben 3
-mit dem ^ Buchstaben gerecht sind, der von einer Zahl gefolgt wird, um
-die Farbe einzustellen.
+Sie können entweder "join server" in dem Multiplayer Menü und einen Server in der Liste auswählen, 
+oder Sie können den CodeRED Galaxy Server Browser (nur unter Windows) benutzen. Im In- Game Browser, 
+sind die Server nach dem Ping sortiert, von oben mit dem niedrigsten beginnend.
 
-DURCHFÜHREN DER NIVEAUS
+4.	THE CODERED ACE BOT
 
-In der ausländischen Arena können Sie ein einzelnes
-Spielerturnier spielen, in dem man Ihr Zielwille das fraglimit vor
-einem BOT erreichen soll. Wenn Sie ausfallen, werden Sie gezwungen,
-das Niveau zu wiederholen, bis Sie. Diese Richtlinien können im
-Menüsystem geändert werden. Sie können Leute auch online spielen,
-wo Ihr Ziel, das fraglimit vor Ihren Konkurrenten zu erreichen ist
-oder, indem das Zählen der meisten frags vor der Grenzzeit, oben ist.
+Die Bots sind in ALIEN ARENA eingebaute Computergegner. Mehrere von ihnen sind bereits für Multiplayer vorkonfiguriert.
+Jeder Level in Alien Arena, hat eine bestimmte Bot Datei, das vorgibt welche Bots in welchen Levels spielen.
 
-Im CTF Modus sind Sie auf einer Mannschaft und dem Versuchen, die
-Markierungsfahne des Feindes gefangenzunehmen und sie zur Position
-Ihrer eigenen Markierungsfahne zurückzubringen. Die Mannschaft,
-welche zuerst die Sicherung Begrenzung, Gewinne erreicht.
+Um einen Bot hinzuzufügen, geben Sie (in der Konsole) "sv addbot name model/skin" ein 
+und um ihn wieder zu entfernen "sv removebot name".
+Sie können Bots auch im Menü unter Deathmatch/Bots Flags hinzufügen.
 
-In Deathball ist das Ziel, da viele Punkte zu zählen, wie möglich,
-entweder, indem es Ihre Konkurrenten tötet oder indem es die Kugel
-findet und sie in die goal(worth 10 frags schießt). Wenn ein Spieler
-innerhalb des deathball ist, ist er defensless.
+In den Deathmatch Optionen können Sie auch noch andere Einstellungen wie Chatten, 
+Node Speicherung und Zielgenauigkeit vornehmen.
 
-Im Mannschaft-Kern-Angriff ist Ihr Ziel, Ihre feindlichen
-Mannschaftenergie Nullpunkte zu sperren, zerstören dann den zentralen
-Spinne Nullpunkt. Sie können Beschädigung des Spinne Nullpunktes nur
-tun, wenn alle weiteren Energie Nullpunkte untauglich sind.
+Die Bots können Sie auch komplett selber mit dem Botconfigurator Programm einstellen. 
+Sie können die Geschicklichkeitsstufen (skill levels), Genauigkeit (accuracy), bevorzugte Waffen (weapon favoring), 
+Bewusstsein (awareness) und die Sätze, die dann auf dem Bildschirm erscheinen (chat strings) bestimmen.
 
-ANSCHLIESSEN AN Einen BEDIENER
+Bots mit der Geschicklichkeitsstufe 0 sind einfach zu besiegen. Auf Stufe 1 sind sie ein bißchen schwerer, 
+dodgen mehr und schiessen genauer. Auf Stufe 2 dodgen sie etwas besser, 
+benutzen Rocket Jumps und sind noch genauer beim Schiessen.
 
-Sie können entweder auserwählt "Bediener" vom "Multispieler"
-Menü verbinden und einen Bediener in der Liste vorwählen, oder Sie
-können nur die CodeRED Galaxie-Bediener browser(windows benutzen). In
-der Inspiel Datenbanksuchroutine werden Bediener im Auftrag von Ping,
-mit niedrigstem Ping an der Oberseite der Liste verzeichnet.  
+Bots auf Stufe 3 sind extrem geschickt, Strafen, benutzen Strafe Jumping um durch den Level zu kommen.
 
-4. DAS CODERED AS BOT
+Wenn die Bots Sie töten, werden Sie hinterher von ihnen verspottet (taunt). 
+Wenn Sie Alien Arena im Singleplayer Turnier Modus gegen Bots spielen, 
+wird das Auswählen von "easy" alle Bots auf Stufe 0 stellen.
+Durch das Auswählen von "normal" werden die Bots auf die von Ihnen eingestellte Stufe konfiguriert. 
+Das Auswählen von "hard" stellt alle Bots um eine Stufe höher.
 
-Bots sind errichtet in der Eigenschaft AUSLÄNDISCHER ARENA
-2007. Einige bots werden bereits für Multispielerspiele
-zusammengebaut, und in der ausländischen Arena, hat jedes Niveau eine
-spezifische BOT Akte für, welche bots in jedem Niveau gespielt werden
-sollen.
+5.	DEINSTALLATION
 
-Um ein BOT zu addieren, schreiben Sie "sv addbot Namen model/ski".,
-und ein BOT type".sv removebot nae entfernen".. Sie können bots im
-Menü, im deathmatch/bots Markierungsfahnen Bereich auch hinzufügen.
+Um Alien Arena zu deinstallieren, gehen Sie einfach in Ihr Start Menü, wählen den Alien Arena Ordner 
+aus und klicken auf "Uninstall".
 
-In Ihren Deathmatch Wahlen können Sie andere Wahlen wie Plaudern,
-Nullpunkteinsparung und Zielen zusammenbauen.
+Linux Benutzer müssen einfach Ihren Alien Arena Ordner löschen.
 
-Diese bots sind mit dem Botconfigurator Programm völlig
-konfigurierbar. Sie können ihre Fähigkeit Niveaus, Genauigkeit,
-Waffe bevorzugend, Bewußtsein und Schwätzchenzeichenketten ändern.
+6.	Credits
 
-Fähigkeit Niveau 0 bots sind ziemlich einfach zu schlagen. Fähigkeit
-Niveau 1 bots sind ein wenig haltbareres, und tun mehr Ausweichen und
-sind genauer. Fähigkeit Niveau 2 bots das vorgerücktere Ausweichen,
-Rakete, die springt, und sind sogar genauer. Niveau 3 bots sind extrem
-erfahren und werden schwer bombardieren und Feuersprung um das Niveau.
-Sie Willeauch taunt Sie nach Tötung Sie. Wenn in der ausländischen
-Arena, spielen Sie das einzelne Spielerturnier gegen die bots, das
-Vorwählen "einfach" bilden alles bots Fähigkeit Niveau 0. Das
-Vorwählen "von von Normal" läßt sie an, was Niveau sie
-zusammengebaut werden. Das Vorwählen "hart" läßt sie alle 1
-Fähigkeit Niveau hochschieben.
+Die Liste der Credits ist lang - ALIEN ARENA 2008 profitiert aber vor allem durch die Folgenden Personen, 
+für ihre Kreationen und Fertigstellungen:
 
-5. GUTSCHRIFTEN
+Design:  John Diamond unter großem Mitwirken der Community.
+Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Jim Bower, Kyle Hunter, Andres Mejia.
+Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
+Maps:  John Diamond, Dennis "xEMPx" Zedlach
+Textures and Artwork:  John Diamond, Enki, Adam Saizlai
+Sounds:  John Diamond, Sound Rangers
+Music:  John Diamond, WhiteLipper, Wooden Productions, Arteria Games, and SoundRangers
+Fonts: John Diamond, the-interceptor from http://www.quakeworld.nu/
+Linux Port: Shane Bayer
+FreeBSD port: "Ale"
+Gentoo portage: Paul Bredbury
+Debian packaging: Andres Mejia
+Alien Arena IRC Channel: Astralsin
 
-Es gibt eine lange Liste von Gutschriften - AUSLÄNDISCHE
-ARENA 2007 ist groß zum folgenden für it.s Kreation und Beendigung
-verschuldet:
+Es gibt noch andere Beiträge, im Wesentlichen aus der QuakeSrc.org Community, 
+von MrG, Jay Dolan, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.
+   
+Ohne die großartige Gruppe von Leuten und vor allem durch ihr zur Verfügung stellen ihrer Erfolge, 
+wären viele Features nicht möglich gewesen.
 
-Design: John Diamant mit Eingang von der Gemeinschaft an der großen
-Programmierung: John Diamant, Victor Luchits, Shane Bayer, Jan. Rafaj,
-Tony Jackson Modelle und Häute: John Diamant, Alex Perez Diagramme:
-John Diamant-Beschaffenheiten: John Diamant-Töne: John Diamant, Wenig
-Musik-Verein, Stichhaltige Förster-Musik: PuzzleFighter, WhiteLipper,
-hölzerne Produktionen und SoundRangers Linux Tor und Installation:
-Shane Bayer Ausländische Arena IRC Führung: Astralsin
+7.	COPYRIGHT INFORMATION
 
-Es gibt andere Hauptbeiträge von der Gemeinschaft von
-QuakeSrc.org, einschließlich MrG, Psychospaz, Jalisko, Heffo, Chayfo,
-Dukey, Jitspoe, Knightmare und Carbon14. Ohne diese wundervolle Gruppe
-Leute und die Freigabe ihrer Vollendungen, würden viele Eigenschaften
-nicht möglich gewesen sein.  
+Die Urheberrechte von ALIEN ARENA 2008 und dessen originalen Inhalt, gehören zu COR Entertainment, LLC.
 
-5. COPYRIGHT-INFORMATIONEN
+Der Source Code von Alien Arena ist freie Software. Sie können in umverteilen und/oder verändern, 
 
-AUSLÄNDISCHE ARENA 2007 und es ist ursprünglicher Inhalt
-sind ein copyright der COR Unterhaltung, LLC.  
+solange es unter dem Begriff und der Regeln der GNU General Public License, 
 
-Das Quellenprogramm wird unter der GPL Lizenz freigegeben und kann
-für jeden möglichen Zweck verwendet werden oder geändert werden,
-vorausgesetzt es auch unter der GPL Lizenz freigegeben wird.  
+veröffentlicht durch die Free Software Foundation geschieht;
 
-Unter keinen Umständen machen Sie AUSLÄNDISCHE ARENA 2007 wird
-verkauft oder verwendet für Profit, ohne ausdrückliche Zustimmung
-von der COR Unterhaltung ein. AUSLÄNDISCHE ARENA 2007 kann in der
-freien Kompilation CD.s und in den ähnlichen Paketen ohne Zustimmung
-eingeschlossen werden, vorausgesetzt die Archive unverändert bleiben.
+entweder basierend auf der zweiten Version der Lizenz, oder auf irgendeiner späteren Version.
 
-Der ursprüngliche Inhalt in AUSLÄNDISCHER ARENA 2007 kann mit
-Erlaubnis für alle mögliche Zwecke kostenlos benutzt werden.
+Es ist auschliesslich nur erlaubt den Inhalt und die Daten (wie die Modelle, Karten, Texturen, Ton, usw.) 
+
+als Ganzes im Zusammenhang und mit der Absicht, es mit Alien Arena zu benutzen, zu verteilen.
+
+Es ist nicht erlaubt einzelne Teile oder Daten aus dem Spiel, ohne die ausdrückliche Zustimmung 
+
+Von COR Entertainmaint, zu verteilen.
+
+Die Urheberrechte von den "rcon" und "svstat" Ruby Skripten (C) 2007 gehören Tony Jackson und sind lizensiert 
+
+unter der GNU Lesser General Public License.
+
+Die Debian Packete (C) 2007, von Andres Mejia <mcitadel@gmail.com>, sind lizensiert durch die GPL, 
+
+nachzulesen in "/usr/share/common-licenses/GPL".
+
+Ohne die ausdrückliche Erlaubnis von COR Entertainment, darf ALIEN ARENA 2008, Unter keinen Umständen als ganzes verkauft, 
+
+oder für Gewinn bringende Zwecke benutzt werden.
+
+ALIEN ARENA 2008 kann ohne Erlaubnis für kostenlose CD Kompilationen und ähnlichen Paketen benutzt werden, 
+
+solange die oben genannten Einschränkungen eingehalten werden.
 
 Kontakt: http://red.planetarena.org
 
 email: irritant@planetquake.com
 
+Datenschutz: http://home.comcast.net/~alienrace/privacy.html
 
+Übersetzung aus dem Englischen ins Deutsche: Dennis Zedlach
