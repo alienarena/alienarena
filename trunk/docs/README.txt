@@ -5,7 +5,6 @@ ALIEN ARENA 2008
 3. Getting Started
 * Installation
 * Basic Commands
-* Deathmatch
 * Completing Levels
 * Connecting to a server
 4. The CodeRED ACE Bot
