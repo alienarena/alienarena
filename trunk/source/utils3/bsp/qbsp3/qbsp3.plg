@@ -7,7 +7,7 @@
 </h3>
 <h3>Command Lines</h3>
 Creating command line "rc.exe /l 0x409 /fo".\Release/resource.res" /d "NDEBUG" "C:\Alien Arena 2007\source\utils3\bsp\qbsp3\resource.rc"" 
-Creating temporary file "C:\DOCUME~1\Johnny\LOCALS~1\Temp\RSP886.tmp" with contents
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP276B.tmp" with contents
 [
 /nologo /MT /W3 /GX /Zd /O2 /I "..\..\common" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "QBSP3" /FR".\Release/" /Fp".\Release/qbsp3.pch" /YX /Fo".\Release/" /Fd".\Release/" /FD /c 
 "C:\Alien Arena 2007\source\utils3\bsp\qbsp3\brushbsp.c"
@@ -31,8 +31,8 @@ Creating temporary file "C:\DOCUME~1\Johnny\LOCALS~1\Temp\RSP886.tmp" with conte
 "C:\Alien Arena 2007\source\utils3\bsp\qbsp3\tree.c"
 "C:\Alien Arena 2007\source\utils3\bsp\qbsp3\writebsp.c"
 ]
-Creating command line "cl.exe @C:\DOCUME~1\Johnny\LOCALS~1\Temp\RSP886.tmp" 
-Creating temporary file "C:\DOCUME~1\Johnny\LOCALS~1\Temp\RSP887.tmp" with contents
+Creating command line "cl.exe @C:\Users\John\AppData\Local\Temp\RSP276B.tmp" 
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP276C.tmp" with contents
 [
 libcmt.lib oldnames.lib kernel32.lib /nologo /subsystem:console /incremental:no /pdb:".\Release/qbsp3.pdb" /machine:I386 /nodefaultlib /out:"c:/Alien Arena 2007/data1/maps/qbsp3.exe" 
 ".\Release\brushbsp.obj"
@@ -57,7 +57,7 @@ libcmt.lib oldnames.lib kernel32.lib /nologo /subsystem:console /incremental:no 
 ".\Release\writebsp.obj"
 ".\Release\resource.res"
 ]
-Creating command line "link.exe @C:\DOCUME~1\Johnny\LOCALS~1\Temp\RSP887.tmp"
+Creating command line "link.exe @C:\Users\John\AppData\Local\Temp\RSP276C.tmp"
 <h3>Output Window</h3>
 Compiling resources...
 Compiling...
