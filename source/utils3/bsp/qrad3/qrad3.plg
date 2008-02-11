@@ -6,7 +6,7 @@
 --------------------Configuration: qrad3 - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\DOCUME~1\Johnny\LOCALS~1\Temp\RSP883.tmp" with contents
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP8FAA.tmp" with contents
 [
 /nologo /G5 /MT /W3 /GX /Zd /O2 /I "..\..\common" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "QRAD#" /FR".\Release/" /Fp".\Release/qrad3.pch" /YX /Fo".\Release/" /Fd".\Release/" /FD /c 
 "C:\Alien Arena 2007\source\utils3\common\bspfile.c"
@@ -22,8 +22,8 @@ Creating temporary file "C:\DOCUME~1\Johnny\LOCALS~1\Temp\RSP883.tmp" with conte
 "C:\Alien Arena 2007\source\utils3\common\threads.c"
 "C:\Alien Arena 2007\source\utils3\bsp\qrad3\trace.c"
 ]
-Creating command line "cl.exe @C:\DOCUME~1\Johnny\LOCALS~1\Temp\RSP883.tmp" 
-Creating temporary file "C:\DOCUME~1\Johnny\LOCALS~1\Temp\RSP884.tmp" with contents
+Creating command line "cl.exe @C:\Users\John\AppData\Local\Temp\RSP8FAA.tmp" 
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP8FAB.tmp" with contents
 [
 /nologo /subsystem:console /incremental:no /pdb:".\Release/qrad3.pdb" /debug /machine:I386 /out:"c:/Alien Arena 2007/data1/maps/qrad3.exe" 
 ".\Release\bspfile.obj"
@@ -39,7 +39,7 @@ Creating temporary file "C:\DOCUME~1\Johnny\LOCALS~1\Temp\RSP884.tmp" with conte
 ".\Release\threads.obj"
 ".\Release\trace.obj"
 ]
-Creating command line "link.exe @C:\DOCUME~1\Johnny\LOCALS~1\Temp\RSP884.tmp"
+Creating command line "link.exe @C:\Users\John\AppData\Local\Temp\RSP8FAB.tmp"
 <h3>Output Window</h3>
 Compiling...
 bspfile.c

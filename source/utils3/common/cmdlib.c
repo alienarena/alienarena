@@ -20,7 +20,7 @@ static char THIS_FILE[] = __FILE__;
 #include <libc.h>
 #endif
 
-#define	BASEDIRNAME	"Alien Arena 2007"
+#define	BASEDIRNAME	"Alien Arena 2008"
 #define PATHSEPERATOR   '/'
 
 // set these before calling CheckParm
