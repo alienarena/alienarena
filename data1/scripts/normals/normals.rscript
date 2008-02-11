@@ -64,69 +64,58 @@ players/enforcer/blue
 		normalmap
 	}	
 }
-players/rustbot/default
+players/cybergirl/blue
 {
 	{
-		map players/rustbot/default.tga
+		map players/cybergirl/blue.tga
 		nolightmap
 	}
 	{
-		map players/rustbot/default_normal.tga
+		map players/cybergirl/default_normal.tga
 		normalmap
 	}	
 }
-players/rustbot/red
+players/cybergirl/red
 {
 	{
-		map players/rustbot/red.tga
+		map players/cybergirl/red.tga
 		nolightmap
 	}
 	{
-		map players/rustbot/default_normal.tga
+		map players/cybergirl/default_normal.tga
 		normalmap
 	}	
 }
-players/rustbot/blue
+players/cybergirl/default
 {
 	{
-		map players/rustbot/blue.tga
+		map players/cybergirl/default.tga
 		nolightmap
 	}
 	{
-		map players/rustbot/default_normal.tga
+		map players/cybergirl/default_normal.tga
 		normalmap
 	}	
 }
-players/robot/blue
+players/cybergirl/green
 {
 	{
-		map players/robot/blue.tga
+		map players/cybergirl/green.tga
 		nolightmap
 	}
 	{
-		map players/robot/default_normal.tga
+		map players/cybergirl/default_normal.tga
 		normalmap
 	}	
 }
-players/robot/red
+players/cybergirl/grey
 {
 	{
-		map players/robot/red.tga
+		map players/cybergirl/grey.tga
 		nolightmap
 	}
 	{
-		map players/robot/default_normal.tga
-		normalmap
-	}	
-}
-players/robot/default
-{
-	{
-		map players/robot/default.tga
-		nolightmap
-	}
-	{
-		map players/robot/default_normal.tga
+		map players/cybergirl/default_normal.tga
 		normalmap
 	}	
 }
@@ -163,39 +152,6 @@ players/martiancyborg/default
 		normalmap
 	}	
 }
-players/infantry/blue
-{
-	{
-		map players/infantry/blue.tga
-		nolightmap
-	}
-	{
-		map players/infantry/default_normal.tga
-		normalmap
-	}	
-}
-players/infantry/red
-{
-	{
-		map players/infantry/red.tga
-		nolightmap
-	}
-	{
-		map players/infantry/default_normal.tga
-		normalmap
-	}	
-}
-players/infantry/default
-{
-	{
-		map players/infantry/default.tga
-		nolightmap
-	}
-	{
-		map players/infantry/default_normal.tga
-		normalmap
-	}	
-}
 players/lauren/blue
 {
 	{
@@ -229,149 +185,6 @@ players/lauren/default
 		normalmap
 	}	
 }
-players/martian/blue
-{
-	{
-		map players/martian/blue.tga
-		nolightmap
-	}
-	{
-		map players/martian/default_normal.tga
-		normalmap
-	}	
-}
-players/martian/red
-{
-	{
-		map players/martian/red.tga
-		nolightmap
-	}
-	{
-		map players/martian/default_normal.tga
-		normalmap
-	}	
-}
-players/martian/default
-{
-	{
-		map players/martian/default.tga
-		nolightmap
-	}
-	{
-		map players/martian/default_normal.tga
-		normalmap
-	}	
-}
-players/martian/aliengrunt
-{
-	{
-		map players/martian/aliengrunt.tga
-		nolightmap
-	}
-	{
-		map players/martian/default_normal.tga
-		normalmap
-	}	
-}
-players/war/blue
-{
-	{
-		map players/war/blue.tga
-		nolightmap
-	}
-	{
-		map players/war/default_normal.tga
-		normalmap
-	}	
-}
-players/war/red
-{
-	{
-		map players/war/red.tga
-		nolightmap
-	}
-	{
-		map players/war/default_normal.tga
-		normalmap
-	}	
-}
-players/war/default
-{
-	{
-		map players/war/default.tga
-		nolightmap
-	}
-	{
-		map players/war/default_normal.tga
-		normalmap
-	}	
-}
-players/construct/blue
-{
-	{
-		map players/construct/blue.tga
-		nolightmap
-	}
-	{
-		map players/construct/default_normal.tga
-		normalmap
-	}	
-}
-players/construct/red
-{
-	{
-		map players/construct/red.tga
-		nolightmap
-	}
-	{
-		map players/construct/default_normal.tga
-		normalmap
-	}	
-}
-players/construct/default
-{
-	{
-		map players/construct/default.tga
-		nolightmap
-	}
-	{
-		map players/construct/default_normal.tga
-		normalmap
-	}	
-}
-players/brainlet/blue
-{
-	{
-		map players/brainlet/blue.tga
-		nolightmap
-	}
-	{
-		map players/brainlet/default_normal.tga
-		normalmap
-	}	
-}
-players/brainlet/red
-{
-	{
-		map players/brainlet/red.tga
-		nolightmap
-	}
-	{
-		map players/brainlet/default_normal.tga
-		normalmap
-	}	
-}
-players/brainlet/default
-{
-	{
-		map players/brainlet/default.tga
-		nolightmap
-	}
-	{
-		map players/brainlet/default_normal.tga
-		normalmap
-	}	
-}
 models/weapons/v_chain/skin
 {
 	{
@@ -391,69 +204,6 @@ models/weapons/v_shotg2/skin
 	}
 	{
 		map models/weapons/v_shotg2/skin_normal.tga
-		normalmap
-	}
-}
-textures/arena7/metal2
-{
-	{
-		map textures/arena7/metal2_nm.tga
-		normalmap
-	}
-}
-textures/arena7/floor1
-{
-	{
-		map textures/arena7/floor1_nm.tga
-		normalmap
-	}
-}
-textures/arena7/floor2
-{
-	{
-		map textures/arena7/floor2_nm.tga
-		normalmap
-	}
-}
-textures/arena8/floor3
-{
-	{
-		map textures/arena8/floor3_nm.tga
-		normalmap
-	}
-}
-textures/arena8/rock1
-{
-	{
-		map textures/arena8/rock1_nm.tga
-		normalmap
-	}
-}
-textures/arena8/metaltrim1
-{
-	{
-		map textures/arena8/metaltrim1_nm.tga
-		normalmap
-	}
-}
-textures/arena8/metaltrim2
-{
-	{
-		map textures/arena8/metaltrim2_nm.tga
-		normalmap
-	}
-}
-textures/arena8/metal1
-{
-	{
-		map textures/arena8/metal1_nm.tga
-		normalmap
-	}
-}
-textures/arena8/brickwall1
-{
-	{
-		map textures/arena8/brickwall1_nm.tga
 		normalmap
 	}
 }
