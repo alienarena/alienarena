@@ -2085,7 +2085,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 			}
 			playermodel[j] = 0;
 
-			if((!strcmp(playerskin, "red"))	|| (!strcmp(playerskin, "blue"))) //was valid teamskin
+			if(ent->is_bot && (!strcmp(playerskin, "red"))	|| (!strcmp(playerskin, "blue"))) //was valid teamskin
 			{
 				if(!strcmp(playerskin, "red"))
 				{
