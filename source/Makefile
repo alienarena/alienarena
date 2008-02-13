@@ -20,7 +20,7 @@ LOCALBASE?=/usr/local
 X11BASE?=/usr/X11R6
 
 # Selects the component to build: ALL, CLIENT, or DEDICATED
-BUILD?=CLIENT
+BUILD?=ALL
 
 # Build binary that uses SDL for sound (when BUILD is "ALL" or "CLIENT").
 SDLSOUND?=yes
