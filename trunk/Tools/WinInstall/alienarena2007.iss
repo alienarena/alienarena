@@ -2168,6 +2168,14 @@ Source: ..\..\..\Alien Arena 2007\WipeDirC.exe; DestDir: {app}
 Source: .\Source\{#TbrSetupFile}; DestDir: {tmp}; Flags: deleteafterinstall overwritereadonly ignoreversion dontcopy; Languages: 
 Source: .\Source\{#TbrDotsBmpFile}; DestDir: {tmp}; Flags: deleteafterinstall overwritereadonly ignoreversion dontcopy
 Source: .\Source\{#MyFileImageToolbar}; DestDir: {tmp}; Flags: deleteafterinstall overwritereadonly ignoreversion dontcopy
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\icefloor1_nm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\maps\dm-europa2k8.bsp; DestDir: {app}\data1\maps
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-europa2k8.mus; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-europa2k8.rscript; DestDir: {app}\data1\scripts\maps
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-europa2k8.txt; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-europa2k8.tga; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\botinfo\dm-europa2k8.tmp; DestDir: {app}\botinfo
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-europa2k8.nod; DestDir: {app}\botinfo\nav
 
 
 [Icons]
