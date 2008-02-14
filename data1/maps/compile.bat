@@ -1,4 +1,4 @@
-qbsp3 dm-aquous
-qvis3 dm-aquous
-qrad3 dm-aquous
+qbsp3 dm-dismal
+qvis3 dm-dismal
+qrad3 dm-dismal
 pause
