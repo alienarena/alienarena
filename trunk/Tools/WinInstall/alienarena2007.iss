@@ -2176,6 +2176,7 @@ Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-europa2k8.txt; DestDir: {a
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-europa2k8.tga; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\botinfo\dm-europa2k8.tmp; DestDir: {app}\botinfo
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-europa2k8.nod; DestDir: {app}\botinfo\nav
+Source: ..\..\..\Alien Arena 2007\data1\textures\rage\jpad1a.tga; DestDir: {app}\data1\textures\rage
 
 
 [Icons]

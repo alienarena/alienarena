@@ -1,4 +1,4 @@
-qbsp3 dm-titan2k8
-qvis3 dm-titan2k8
-qrad3 dm-titan2k8
+qbsp3 tca-titan2k8
+qvis3 tca-titan2k8
+qrad3 tca-titan2k8
 pause
