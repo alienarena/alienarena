@@ -69,6 +69,12 @@ textures/arena7/light11
 		lensflare
 	}
 }
+textures/rage/metallight_2
+{
+	{
+		lensflare
+	}
+}
 textures/arena9/trim2
 {
 	{
