@@ -143,10 +143,9 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	strcat (cls.downloadtempname, ".tmp");
 
 	// attempt an http download if available(never try to dl game model skins here)
-	if(!modelskin) {
-		if(cls.downloadurl[0] && CL_HttpDownload())  
+	if(cls.downloadurl[0] && CL_HttpDownload())  
 			return false;
-	}
+	
 
 //ZOID
 	// check to see if we already have a tmp for this file, if so, try to resume
