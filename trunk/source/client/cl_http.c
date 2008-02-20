@@ -155,7 +155,7 @@ void CL_HttpDownloadCleanup(){
         fclose(cls.download);  // always close the file
         cls.download = NULL;
 
-        if(success && FS_LoadFile (file, NULL) != -1){
+        if(success){
                 cls.downloadname[0] = 0;
         }
         else {  // retry via legacy udp download
