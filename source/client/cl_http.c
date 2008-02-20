@@ -81,7 +81,7 @@ qboolean CL_HttpDownload(void){
         memset(file, 0, sizeof(file));  // resolve local file name
         Com_sprintf(file, sizeof(file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
 
-        //FS_CreatePath(file);  // create the directory
+        FS_CreatePath(file);  // create the directory
 
         if(!(cls.download = fopen(file, "wb"))){
                 Com_Printf("Failed to open %s.\n", file);
@@ -94,7 +94,7 @@ qboolean CL_HttpDownload(void){
         strncpy(game, Cvar_VariableString("game"), sizeof(game) - 1);
 
         if(!strlen(game))  // use default if not set
-                strcpy(game, "default");
+                strcpy(game, "arena");
 
         memset(url, 0, sizeof(url));  // construct url
         Com_sprintf(url, sizeof(url) - 1, "%s/%s/%s", cls.downloadurl, game, cls.downloadname);
@@ -154,9 +154,9 @@ void CL_HttpDownloadCleanup(){
 
         fclose(cls.download);  // always close the file
         cls.download = NULL;
-
-        if(success){
-                cls.downloadname[0] = 0;
+    
+		if(success){
+		        cls.downloadname[0] = 0;
         }
         else {  // retry via legacy udp download
 
@@ -170,7 +170,7 @@ void CL_HttpDownloadCleanup(){
 
                 unlink(file);  // delete partial or empty file
         }
-
+	
         cls.downloadpercent = 0;
         cls.downloadhttp = false;
 
@@ -194,6 +194,7 @@ void CL_HttpDownloadThink(void){
 #ifdef HAVE_CURL
         CURLMsg *msg;
         int i;
+		int runt;
 
         if(!cls.downloadurl[0] || !cls.download)
                 return;  // nothing to do
@@ -219,9 +220,17 @@ void CL_HttpDownloadThink(void){
         // check for completion
         while((msg = curl_multi_info_read(curlm, &i))){
                 if(msg->msg == CURLMSG_DONE){
-                        success = true;
-                        CL_HttpDownloadCleanup();
-                        CL_RequestNextDownload();
+						//not so fast, curl gives false positives sometimes
+						runt = FS_LoadFile (cls.downloadname, NULL);
+						if(runt > 2048)  { //the curl bug produces a 2kb chunk of data
+							success = true;
+							CL_HttpDownloadCleanup();
+							CL_RequestNextDownload();
+						}
+						else {
+							success = false;
+							CL_HttpDownloadCleanup();
+						}
                         return;
                 }
         }
