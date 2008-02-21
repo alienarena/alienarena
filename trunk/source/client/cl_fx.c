@@ -1638,14 +1638,14 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 			}
 			else
 			{
-
+				dec = 10; //less smoke
 				for (j=0 ; j<3 ; j++)
 				{
 					p->org[j] = move[j] + crand()*orgscale;
 					p->vel[j] = crand()*velscale;
 				}
 				
-				p->alphavel = -1.0 / (30+frand()*1.4); //smoke lingers longer
+				p->alphavel = -1.0 / (20+frand()*1.4); //smoke lingers longer
 				p->alpha = .07;
 				p->type = PARTICLE_SMOKE; 
 				p->texnum = r_smoketexture->texnum;
