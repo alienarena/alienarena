@@ -1,4 +1,4 @@
-qbsp3 tca-corrosion
-qvis3 tca-corrosion
-qrad3 tca-corrosion
+qbsp3 aoa-corrosion
+qvis3 aoa-corrosion
+qrad3 aoa-corrosion
 pause
