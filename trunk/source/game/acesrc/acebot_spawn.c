@@ -683,6 +683,8 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *team)
 	else
 		strcpy(bot_name,name);
 
+	bot->dmteam = NO_TEAM; //default
+
 	// skin
 	
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //only do this for skin teams, red, blue
