@@ -1092,12 +1092,18 @@ edict_t *SelectRandomCTFSpawnPoint (void)
 	int		count = 0;
 	int		selection;
 	float	range, range1, range2;
+	char	whichteam[16];
 
 	spot = NULL;
 	range1 = range2 = 99999;
 	spot1 = spot2 = NULL;
 
-	while ((spot = G_Find (spot, FOFS(classname), "info_player_red")) != NULL)
+	if(random() < 0.5)
+		strcpy(whichteam, "info_player_red");
+	else
+		strcpy(whichteam, "info_player_blue");
+
+	while ((spot = G_Find (spot, FOFS(classname), whichteam)) != NULL)
 	{
 		count++;
 		range = PlayersRangeFromSpot(spot);
@@ -1135,7 +1141,7 @@ edict_t *SelectRandomCTFSpawnPoint (void)
 	spot = NULL;
 	do
 	{
-		spot = G_Find (spot, FOFS(classname), "info_player_red");
+		spot = G_Find (spot, FOFS(classname), whichteam);
 		if (spot == spot1 || spot == spot2)
 			selection++;
 	} while(selection--);
@@ -1887,8 +1893,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	InitClientResp (ent->client);
 
-	if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
-		ent->dmteam = NO_TEAM;
+	ent->dmteam = NO_TEAM;
 
 	// locate ent at a spawn point
 	if(!ent->client->pers.spectator) //fixes invisible player bugs caused by leftover svf_noclients

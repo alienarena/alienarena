@@ -1,4 +1,4 @@
-qbsp3 ctf-europa2k8
-qvis3 ctf-europa2k8
-qrad3 ctf-europa2k8
+qbsp3 tca-corrosion
+qvis3 tca-corrosion
+qrad3 tca-corrosion
 pause
