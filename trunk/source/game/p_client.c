@@ -2575,7 +2575,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		ucmd->forwardmove *= 1.3;
 	
 		//dodging 
-		if(ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && ((level.time - client->lastmovetime) > .11) && ((level.time - client->lastmovetime) < .3))
+		if(ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && ((level.time - client->lastmovetime) > .15) && ((level.time - client->lastmovetime) < .3))
 		{
 			if((ucmd->sidemove < 0 && client->lastsidemove < 0) || (ucmd->sidemove > 0 && client->lastsidemove > 0)) {
 				if(ucmd->sidemove > 0)
