@@ -1095,7 +1095,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			if (effects & EF_SHIPEXHAUST)
 			{
 				CL_ShipExhaust (cent->lerp_origin, ent.origin, cent);
-				V_AddLight (ent.origin, 200, 1, 1, 0);
+				V_AddLight (ent.origin, 50, 1, 1, 0);
 			}
 			if (effects & EF_ROCKETEXHAUST)
 			{
@@ -1103,7 +1103,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			}
 			else if (effects & EF_HYPERBLASTER)
 			{
-				V_AddLight (ent.origin, 200, 1, 1, 0);
+				V_AddLight (ent.origin, 100, 1, 1, 0);
 			}
 			else if (effects & EF_GIB)
 			{

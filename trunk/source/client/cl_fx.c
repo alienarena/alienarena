@@ -902,7 +902,7 @@ void CL_ExplosionParticles (vec3_t org)
 			}
 			if (p && i < 3)
 				addParticleLight (p,
-						p->scale*100*i, 0,
+						p->scale*50*i, 0,
 					.4, .4, 0.1);
 		}
 	}
