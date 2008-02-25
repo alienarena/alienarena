@@ -219,7 +219,7 @@ void GL_MBind( GLenum target, int texnum );
 void GL_TexEnv( GLenum value );
 void GL_EnableMultitexture( qboolean enable );
 void GL_SelectTexture( GLenum );
-
+void vectoangles (vec3_t value1, vec3_t angles);
 void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic);
 void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount, int max);
 void R_PushDlights (void);

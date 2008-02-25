@@ -713,6 +713,11 @@ dynamic:
 //and "Paul's Projects" tutorials.
 static void R_InitNormalSurfaces (void)
 {
+	dlight_t	*dl;
+	int			lnum;
+	vec3_t		lightAdd, angle;
+	float		add;
+
 	qglActiveTextureARB (GL_TEXTURE0);
 	qglDisable (GL_TEXTURE_2D);
 	qglEnable (GL_TEXTURE_CUBE_MAP_ARB);
@@ -732,6 +737,25 @@ static void R_InitNormalSurfaces (void)
 	qglRotatef (-r_newrefdef.viewangles[2], 1, 0, 0);
 	qglRotatef (-r_newrefdef.viewangles[0], 0, 1, 0);
 	qglRotatef (-r_newrefdef.viewangles[1], 0, 0, 1);
+
+	//now rotate according to dynamic lights
+	VectorClear(lightAdd);
+	dl = r_newrefdef.dlights;
+	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
+	{
+
+		VectorSubtract (r_newrefdef.vieworg, dl->origin, angle);
+		add = sqrt(dl->intensity - VectorLength(angle));
+		VectorNormalize(angle);
+		if (add > 0)
+		{
+			VectorScale(angle, add, angle);
+			VectorAdd (lightAdd, angle, lightAdd);
+		}
+	}
+	qglRotatef (-lightAdd[2], 1, 0, 0);
+	qglRotatef (-lightAdd[0], 0, 1, 0);
+	qglRotatef (-lightAdd[1], 0, 0, 1);
 
 	// the next 2 statements will move the cmstr calculations into hardware so that we don;t
 	// have to evaluate them once per vert...

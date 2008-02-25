@@ -1093,7 +1093,6 @@ void R_RenderFlares (void)
 R_ShadowLight
 ===============
 */
-//bleh, need this
 void vectoangles (vec3_t value1, vec3_t angles)
 {
 	float	forward;
