@@ -22,7 +22,7 @@ LicenseFile=C:\Alien Arena 2007\docs\license.txt
 InfoBeforeFile=C:\Alien Arena 2007\docs\README.txt
 InfoAfterFile=
 OutputDir=C:\Alien Arena Files\Bundle\Bundle
-OutputBaseFilename=alienarena2008-20080210
+OutputBaseFilename=alienarena2008-20080225
 SetupIconFile=C:\Alien Arena 2007\Aa1.ico
 Compression=lzma
 SolidCompression=true
@@ -48,6 +48,9 @@ Name: russian; MessagesFile: compiler:Languages\Russian.isl
 Name: spanish; MessagesFile: compiler:Languages\Spanish.isl
 
 [Files]
+Source: .\Source\{#TbrSetupFile}; DestDir: {tmp}; Flags: deleteafterinstall overwritereadonly ignoreversion dontcopy; Languages: 
+Source: .\Source\{#TbrDotsBmpFile}; DestDir: {tmp}; Flags: deleteafterinstall overwritereadonly ignoreversion dontcopy
+Source: .\Source\{#MyFileImageToolbar}; DestDir: {tmp}; Flags: deleteafterinstall overwritereadonly ignoreversion dontcopy
 Source: ..\..\..\Alien Arena 2007\Aa1.ico; DestDir: {app}
 Source: ..\..\..\Alien Arena 2007\crx.exe; DestDir: {app}
 Source: ..\..\..\Alien Arena 2007\fce16.dll; DestDir: {app}
@@ -2202,9 +2205,6 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\common\weapclip.tga; DestDir: {
 Source: ..\..\..\Alien Arena 2007\data1\textures\common\white.tga; DestDir: {app}\textures\common
 Source: ..\..\..\Alien Arena 2007\data1\textures\forsaken\glass.tga; DestDir: {app}\textures\forsaken
 Source: ..\..\..\Alien Arena 2007\data1\textures\alien\support5.tga; DestDir: {app}\textures\alien
-Source: .\Source\{#TbrSetupFile}; DestDir: {tmp}; Flags: deleteafterinstall overwritereadonly ignoreversion dontcopy; Languages: 
-Source: .\Source\{#TbrDotsBmpFile}; DestDir: {tmp}; Flags: deleteafterinstall overwritereadonly ignoreversion dontcopy
-Source: .\Source\{#MyFileImageToolbar}; DestDir: {tmp}; Flags: deleteafterinstall overwritereadonly ignoreversion dontcopy
 Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a3light1b.tga; DestDir: {app}\data1\textures\xempx
 Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light1b.tga; DestDir: {app}\data1\textures\xempx
 Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light2.tga; DestDir: {app}\data1\textures\xempx
