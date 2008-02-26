@@ -2507,6 +2507,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	int		i, j;
 	pmove_t	pm;
 	qboolean sproing, haste;
+	vec3_t addspeed, forward, up;
 
 	level.current_entity = ent;
 	client = ent->client;
@@ -2569,28 +2570,30 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s)))
 		{
 			pm.snapinitial = true;
-	//		gi.dprintf ("pmove changed!\n");
 		}
 
 		ucmd->forwardmove *= 1.3;
 	
 		//dodging 
-		if(ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && ((level.time - client->lastmovetime) > .125) && ((level.time - client->lastmovetime) < .325))
+		client->dodge = false;
+		if(ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && client->moved == false && ((level.time - client->lastmovetime) < .15))
 		{
 			if((ucmd->sidemove < 0 && client->lastsidemove < 0) || (ucmd->sidemove > 0 && client->lastsidemove > 0)) {
 				if(ucmd->sidemove > 0)
 					client->dodge = 1;
 				else
 					client->dodge = -1;
-				ucmd->sidemove *=2;
 				ucmd->upmove += 100;
 			}
 		}
-	
+
 		if(ucmd->sidemove != 0 || ucmd->forwardmove != 0) {
 			client->lastmovetime = level.time;
 			client->lastsidemove = ucmd->sidemove;
+			client->moved = true;
 		}
+		else //we had a frame with no movement
+			client->moved = false;
 
 		pm.cmd = *ucmd;
 
@@ -2624,6 +2627,23 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			//vehicles
 			if ( !Jet_Active(ent) || (Jet_Active(ent)&&(fabs((float)pm.s.velocity[i]*0.125) < fabs(ent->velocity[i]))) )
 				ent->velocity[i] = pm.s.velocity[i]*0.125;
+		}
+
+		//check for a dodge, and peform if true
+		if(client->dodge != 0) {
+			AngleVectors (ent->s.angles, forward, addspeed, up);
+			addspeed[0] *= 300*client->dodge;
+			addspeed[1] *= 300*client->dodge;
+			//limit to reasonable
+			for(i = 0; i < 2; i++) {
+				if(addspeed[i] > 800)
+					addspeed[i] = 800;
+				if(addspeed[i] < -800)
+					addspeed[i] = -800;
+			}
+			VectorAdd(ent->velocity, addspeed, ent->velocity);
+			client->dodge = false;
+			client->lastmovetime = level.time;
 		}
 
 		VectorCopy (pm.mins, ent->mins);
