@@ -1047,21 +1047,6 @@ void ClientEndServerFrame (edict_t *ent)
  		VectorAdd(ent->velocity, addspeed, ent->velocity);
 
 	}
-	if(current_client->dodge != 0) {
-		AngleVectors (ent->s.angles, forward, addspeed, up);
-		addspeed[0] *= 300*current_client->dodge;
-		addspeed[1] *= 300*current_client->dodge;
-		//limit to reasonable
-		for(i = 0; i < 2; i++) {
-			if(addspeed[i] > 800)
-				addspeed[i] = 800;
-			if(addspeed[i] < -800)
-				addspeed[i] = -800;
-		}
-		VectorAdd(ent->velocity, addspeed, ent->velocity);
-		current_client->dodge = false;
-		current_client->lastmovetime = level.time;
-	}
 	
 	sproing = current_client->sproing_framenum > level.framenum;
 	if(sproing)
