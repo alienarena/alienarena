@@ -1,0 +1,92 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: qbsp3 - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo".\Release/resource.res" /d "NDEBUG" "C:\Alien Arena 2007\source\utils3\bsp\qbsp3\resource.rc"" 
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP276B.tmp" with contents
+[
+/nologo /MT /W3 /GX /Zd /O2 /I "..\..\common" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "QBSP3" /FR".\Release/" /Fp".\Release/qbsp3.pch" /YX /Fo".\Release/" /Fd".\Release/" /FD /c 
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\brushbsp.c"
+"C:\Alien Arena 2007\source\utils3\common\bspfile.c"
+"C:\Alien Arena 2007\source\utils3\common\cmdlib.c"
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\csg.c"
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\faces.c"
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\glfile.c"
+"C:\Alien Arena 2007\source\utils3\common\lbmlib.c"
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\leakfile.c"
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\map.c"
+"C:\Alien Arena 2007\source\utils3\common\mathlib.c"
+"C:\Alien Arena 2007\source\utils3\common\parsecfg.c"
+"C:\Alien Arena 2007\source\utils3\common\polylib.c"
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\portals.c"
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\prtfile.c"
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\qbsp3.c"
+"C:\Alien Arena 2007\source\utils3\common\scriplib.c"
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\textures.c"
+"C:\Alien Arena 2007\source\utils3\common\threads.c"
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\tree.c"
+"C:\Alien Arena 2007\source\utils3\bsp\qbsp3\writebsp.c"
+]
+Creating command line "cl.exe @C:\Users\John\AppData\Local\Temp\RSP276B.tmp" 
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP276C.tmp" with contents
+[
+libcmt.lib oldnames.lib kernel32.lib /nologo /subsystem:console /incremental:no /pdb:".\Release/qbsp3.pdb" /machine:I386 /nodefaultlib /out:"c:/Alien Arena 2007/data1/maps/qbsp3.exe" 
+".\Release\brushbsp.obj"
+".\Release\bspfile.obj"
+".\Release\cmdlib.obj"
+".\Release\csg.obj"
+".\Release\faces.obj"
+".\Release\glfile.obj"
+".\Release\lbmlib.obj"
+".\Release\leakfile.obj"
+".\Release\map.obj"
+".\Release\mathlib.obj"
+".\Release\parsecfg.obj"
+".\Release\polylib.obj"
+".\Release\portals.obj"
+".\Release\prtfile.obj"
+".\Release\qbsp3.obj"
+".\Release\scriplib.obj"
+".\Release\textures.obj"
+".\Release\threads.obj"
+".\Release\tree.obj"
+".\Release\writebsp.obj"
+".\Release\resource.res"
+]
+Creating command line "link.exe @C:\Users\John\AppData\Local\Temp\RSP276C.tmp"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+brushbsp.c
+bspfile.c
+cmdlib.c
+csg.c
+faces.c
+glfile.c
+lbmlib.c
+leakfile.c
+map.c
+mathlib.c
+parsecfg.c
+polylib.c
+portals.c
+prtfile.c
+qbsp3.c
+scriplib.c
+textures.c
+threads.c
+tree.c
+writebsp.c
+Linking...
+
+
+
+<h3>Results</h3>
+qbsp3.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

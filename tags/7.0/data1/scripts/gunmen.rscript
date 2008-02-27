@@ -1,0 +1,12 @@
+players/martianenforcer/gunmen
+{
+	{
+		map gfx/bluelightning.tga
+		scroll static 0 static 2
+		nolightmap
+	}
+	{
+		map players/martianenforcer/gunmen.tga
+		alphamask
+	}
+}

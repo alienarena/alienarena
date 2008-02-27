@@ -1,0 +1,68 @@
+textures/arena7/light1
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena6/ice
+{
+
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.2 0.2
+		envmap
+	}
+}
+textures/arena7/light9
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light5
+{
+	{
+		lensflare
+	}
+}
+textures/arena6/blacktrans
+{
+	{
+		map gfx/purpleline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 2 static 1
+		alphashift 20 0.05 0.8
+		nolightmap
+	}
+}
+textures/arena6/plate5
+{
+	{
+		map gfx/plate5fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 5 0.05 0.4
+		nolightmap
+	}
+}
+textures/arena5/egypt5
+{
+	{
+		map gfx/gold.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		alphashift 1 0.4 0.4
+		envmap
+	}
+	{
+		map gfx/egypt5_mask.tga
+		alphamask
+	}
+}

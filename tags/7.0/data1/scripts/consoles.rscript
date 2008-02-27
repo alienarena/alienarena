@@ -1,0 +1,66 @@
+vehicles/hover/console
+{
+	{
+		map vehicles/hover/console.tga
+	}
+	{
+		map gfx/hconsole.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 5 0.8 0.8
+		nolightmap
+	}
+	{		
+		map gfx/hconsole2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 5 0.2 1
+		nolightmap
+	}
+	{		
+		map gfx/hconsole3.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 9 0.4 2
+		nolightmap
+	}
+}
+vehicles/bomber/console
+{
+	{
+		map vehicles/bomber/console.tga
+	}
+	{
+		map gfx/bconsole.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 5 0.8 1
+		nolightmap
+	}
+	{		
+		map gfx/bconsole2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 10 0.2 1
+		nolightmap
+	}
+}
+vehicles/strafer/console
+{
+	{
+		map vehicles/strafer/console.tga
+	}
+	{
+		map gfx/sconsole.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 5 0.2 0.8
+		nolightmap
+	}
+}
