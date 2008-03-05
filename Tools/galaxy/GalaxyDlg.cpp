@@ -18,7 +18,10 @@
 #include "BuddyName.h"
 #include "Startup.h"
 #include "UpdateDlg.h"
-
+#include <shellAPI.h>
+#include <shlobj.h>
+#include <direct.h>
+#include  <io.h>
 using namespace std;
 
 #ifdef _DEBUG
@@ -48,7 +51,9 @@ char smensaje[1000];
 
 int messagecount;
 
+char CRXbuff[MAX_PATH];
 char CRXPath[MAX_PATH];
+char szStartFolder[MAX_PATH];
 
 void handle_error(void);           // menejador de errores 
 char mensaje[200];				   // variable de todo uso.
@@ -387,7 +392,7 @@ BOOL CGalaxyDlg::OnInitDialog()
 
 	GetPrivateProfileString("Galaxy", "name", defName, user.nick, 16, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "email", "email@email.com", user.email, 100, "galaxy.ini");
-	GetPrivateProfileString("Galaxy", "exe", "C:/Alien Arena 2007/", CRXPath, MAX_PATH, "galaxy.ini");
+	GetPrivateProfileString("Galaxy", "exe", "C:/Alien Arena 2008/", CRXPath, MAX_PATH, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "chatstart", "true", user.joinatstart, 12, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "server", "irc.prison.net", servidor, 100, "galaxy.ini");
 	//set the join flag for the dialog bool
@@ -1212,14 +1217,114 @@ void CGalaxyDlg::OnButton5()
 	
 }
 
+                                     /*--------------------------------*/
+                                     /* BrowseProc                     */
+                                     /*--------------------------------*/
+int WINAPI BrowseProc( HWND hwnd, UINT msg, LPARAM lParam, LPARAM lpData )
+{
+  TCHAR szCur[301];
+  int nIndx;
+
+  switch( msg) 
+  {
+  case BFFM_INITIALIZED:
+    nIndx = _tcslen( CRXPath ) - 1;
+    if ( szStartFolder[nIndx] == _T('\\') ) 
+    {
+      nIndx--;
+    }
+
+    szStartFolder[nIndx+1] = 0;
+    while( nIndx > 3 && _taccess( szStartFolder, 0 )) 
+    {
+      while( nIndx > 0 && szStartFolder[nIndx] != _T('\\') ) 
+      {
+        nIndx--;
+      }
+
+      if ( nIndx != 3 && szStartFolder[nIndx] == _T('\\') ) 
+      {
+        nIndx--;
+      }
+
+      szStartFolder[nIndx+1] = 0;
+    }
+
+    if ( nIndx > 0 ) 
+    {
+      SendMessage( hwnd, BFFM_SETSELECTION, 1, (LPARAM) szStartFolder );
+    }
+    else 
+    {
+      _tgetcwd( szCur, 301 );
+      SendMessage( hwnd, BFFM_SETSELECTION, 1, (LPARAM) szCur );
+    }
+    break;
+  }
+
+  return( FALSE );
+}
+
+                                     /*--------------------------------*/
+                                     /* BrowseForFolder                */
+                                     /*--------------------------------*/
+BOOL BrowseForFolder( TCHAR *szFolder, TCHAR *szTitle )
+{
+  BROWSEINFO pBrowseInfo;
+  LPITEMIDLIST pDesktop;
+  LPITEMIDLIST pBrowseList;
+
+  _tcscpy( szStartFolder, szFolder );
+
+      // Get the ITEMIDLIST for the desktop - this will be used to initialize the folder browser
+  SHGetSpecialFolderLocation( NULL, CSIDL_DRIVES, /**CSIDL_DESKTOP,**/ &pDesktop );
+
+      // Fill the BROWSEINFO data structure
+  pBrowseInfo.hwndOwner = NULL;
+  pBrowseInfo.pidlRoot = pDesktop;
+  pBrowseInfo.pidlRoot = NULL;
+  pBrowseInfo.pszDisplayName = szFolder;
+  pBrowseInfo.lpszTitle = szTitle;
+  pBrowseInfo.ulFlags = BIF_RETURNONLYFSDIRS; //BIF_BROWSEFORPRINTER | BIF_STATUSTEXT ;
+  pBrowseInfo.lpfn = BrowseProc;
+  pBrowseInfo.lParam = 0;
+  pBrowseInfo.iImage = 0;
+
+    // Start Browsing
+  pBrowseList = SHBrowseForFolder( &pBrowseInfo );
+
+    // if returning NULL we skip
+  if ( !pBrowseList ) 
+  {
+    return( FALSE );
+  }
+
+  SHGetPathFromIDList( pBrowseList, szFolder );
+
+  if ( szFolder[_tcslen(szFolder)-1] != _T('\\') ) 
+  {
+    _tcscat( szFolder, _T("\\") );
+  }
+
+  return( TRUE );
+}
+
+TCHAR GLOBAL_drive;
+
+//#define NO_ERROR            0
+#define READ_ERROR          1
+#define WRITE_ERROR         2
+#define FIND_ERROR_WRITE	3
+#define FIND_ERROR_READ		4
+
 void CGalaxyDlg::OnJoin(NMHDR* pNMHDR, LRESULT* pResult) 
 {	
 	STARTUPINFO s; 
-	char CRXbuff[MAX_PATH];
 	PROCESS_INFORMATION p;
 	char cmdLine[512];
 	char myCRXPath[MAX_PATH];
-	
+	FILE *file;
+
 	strcpy (myCRXPath, CRXPath);
 	memset (&s, 0, sizeof(s));
 	s.cb = sizeof(s);
@@ -1227,9 +1332,28 @@ void CGalaxyDlg::OnJoin(NMHDR* pNMHDR, LRESULT* pResult)
 
 	sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
 
-	//perhaps put some checks in like the old galaxy, but we should *NEVER* need too
-	//because the path is set in the .ini file during installation of AA
-	
+	//some checks in case their path got wonkered.
+	file = NULL; //quiet compiler warning
+	file = fopen (CRXbuff, "rb");
+	if (!file) {
+
+		if ( !BrowseForFolder( CRXPath, _T("Folder location of Alien Arena 2008") )) 
+		{
+			AfxMessageBox("Unable to use this folder!");
+		}
+		else {
+			strcpy (myCRXPath, CRXPath);
+			memset (&s, 0, sizeof(s));
+			s.cb = sizeof(s);
+			myCRXPath[strlen(myCRXPath)-1] = '\0';
+			sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
+			file = fopen (CRXbuff, "rb");
+			if (!file) {
+				AfxMessageBox("Unable to locate crx.exe in this folder!");
+			}
+		}
+	}
+
 	sprintf (cmdLine, " +set game arena +set name %s +connect %s", user.nick, Server);
 	CreateProcess (CRXbuff, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myCRXPath, &s, &p);
 	
@@ -1239,10 +1363,10 @@ void CGalaxyDlg::OnJoin(NMHDR* pNMHDR, LRESULT* pResult)
 void CGalaxyDlg::OnJoin2()  //used from the menu pulldown, doesn't return pointer val
 {	
 	STARTUPINFO s; 
-	char CRXbuff[MAX_PATH];
 	PROCESS_INFORMATION p;
 	char cmdLine[512];
 	char myCRXPath[MAX_PATH];
+	FILE *file;
 
 	strcpy (myCRXPath, CRXPath);
 	memset (&s, 0, sizeof(s));
@@ -1251,8 +1375,28 @@ void CGalaxyDlg::OnJoin2()  //used from the menu pulldown, doesn't return pointe
 
 	sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
 
-	//perhaps put some checks in like the old galaxy, but we should *NEVER* need too
-	//because the path is set in the .ini file during installation of AA
+	//some checks in case their path got wonkered.
+	file = NULL; //quiet compiler warning
+	file = fopen (CRXbuff, "rb");
+	if (!file) {
+
+		if ( !BrowseForFolder( CRXPath, _T("Folder location of Alien Arena 2008") )) 
+		{
+			AfxMessageBox("Unable to use this folder!");
+		}
+		else {
+			strcpy (myCRXPath, CRXPath);
+			memset (&s, 0, sizeof(s));
+			s.cb = sizeof(s);
+			myCRXPath[strlen(myCRXPath)-1] = '\0';
+			sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
+			file = fopen (CRXbuff, "rb");
+			if (!file) {
+				AfxMessageBox("Unable to locate crx.exe in this folder!");
+			}
+		}
+	}
+
 	
 	sprintf (cmdLine, " +set game arena +set name %s +connect %s", user.nick, Server);
 	CreateProcess (CRXbuff, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myCRXPath, &s, &p);
@@ -1261,10 +1405,10 @@ void CGalaxyDlg::OnJoin2()  //used from the menu pulldown, doesn't return pointe
 void CGalaxyDlg::OnLaunch() 
 {
 	STARTUPINFO s; 
-	char CRXbuff[MAX_PATH];
 	PROCESS_INFORMATION p;
 	char cmdLine[512];
 	char myCRXPath[MAX_PATH];
+	FILE *file;
 	
 	strcpy (myCRXPath, CRXPath);
 	memset (&s, 0, sizeof(s));
@@ -1273,8 +1417,27 @@ void CGalaxyDlg::OnLaunch()
 
 	sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
 
-	//perhaps put some checks in like the old galaxy, but we should *NEVER* need too
-	//because the path is set in the .ini file during installation of AA
+	//some checks in case their path got wonkered.
+	file = NULL; //quiet compiler warning
+	file = fopen (CRXbuff, "rb");
+	if (!file) {
+
+		if ( !BrowseForFolder( CRXPath, _T("Folder location of Alien Arena 2008") )) 
+		{
+			AfxMessageBox("Unable to use this folder!");
+		}
+		else {
+			strcpy (myCRXPath, CRXPath);
+			memset (&s, 0, sizeof(s));
+			s.cb = sizeof(s);
+			myCRXPath[strlen(myCRXPath)-1] = '\0';
+			sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
+			file = fopen (CRXbuff, "rb");
+			if (!file) {
+				AfxMessageBox("Unable to locate crx.exe in this folder!");
+			}
+		}
+	}
 	
 	sprintf (cmdLine, " +set game arena +set name %s", user.nick);
 	CreateProcess (CRXbuff, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myCRXPath, &s, &p);
