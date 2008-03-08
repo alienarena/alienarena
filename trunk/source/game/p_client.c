@@ -1805,23 +1805,26 @@ void PutClientInServer (edict_t *ent)
 void ClientPlaceInQueue(edict_t *ent)
 {
 	int		i;
-	int		highestpos, induel; //safer this way
-	
-	highestpos = 0;
-	induel = 0;
+	int		highestpos, induel, numplayers; 
 
+	highestpos = induel = numplayers = 0;
+	
 	for (i = 0; i < maxclients->value; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
 			if(g_edicts[i+1].client->pers.queue > highestpos) //only count players that are actually in
 				highestpos = g_edicts[i+1].client->pers.queue;
 			if(g_edicts[i+1].client->pers.queue && g_edicts[i+1].client->pers.queue < 3)
 				induel++;
+			if(g_edicts[i+1].client->pers.queue) //only count players that are actually in
+				numplayers++;
 		}
 	}
 
 	if(induel > 1) //make sure no more than two are in the duel at once
 		if(highestpos < 2)
 			highestpos = 2; //in case two people somehow managed to have pos 1
+	if(highestpos < numplayers)
+		highestpos = numplayers; 
 
 	if(!ent->client->pers.queue)
 		ent->client->pers.queue = highestpos+1;
