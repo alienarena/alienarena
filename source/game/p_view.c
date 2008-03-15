@@ -746,8 +746,6 @@ void TeamEffects(edict_t *player)
 		player->s.effects |= EF_FLAG1;
 	else if(player->dmteam == BLUE_TEAM)
 		player->s.effects |= EF_FLAG2;
-	else if(player->dmteam == NO_TEAM && g_playerbeacon->value)
-		player->s.effects |= EF_FLAG2;
 }
 
 /*
@@ -768,7 +766,7 @@ void G_SetClientEffects (edict_t *ent)
 	if(ctf->value)
 		CTFEffects(ent);
 
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value || g_playerbeacon->value)
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value )
 		TeamEffects(ent);
 
 	if (ent->client->quad_framenum > level.framenum)
