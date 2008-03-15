@@ -997,6 +997,8 @@ void R_RenderFlare (flare_t *light)
 	if(dist > 10*light->size)
 		dist = 10*light->size;
 
+	R_InitMeshVarrays();
+
 	qglDisable(GL_DEPTH_TEST);
 	qglEnable (GL_TEXTURE_2D);
 	GL_Bind(flaretex);

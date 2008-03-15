@@ -798,6 +798,7 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 		ACESP_SetName(bot, name, skin, team);
 	else 
 	{
+		bot->dmteam = NO_TEAM; //default
 		if(!ClientConnect (bot, userinfo))
 		{	
 			/* Tony: Sometimes bots are refused entry to servers - give up gracefully */

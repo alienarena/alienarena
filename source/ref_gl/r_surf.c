@@ -102,7 +102,7 @@ image_t *R_TextureAnimation (mtexinfo_t *tex)
 
 /*
 ================
-DrawGLPoly
+DrawGLPoly - note - move this to vertex arrays
 ================
 */
 void DrawGLPoly (glpoly_t *p, int flags)
@@ -120,12 +120,13 @@ void DrawGLPoly (glpoly_t *p, int flags)
 	}
 
 	qglBegin (GL_POLYGON);
-	for (i=0 ; i<p->numverts ; i++, v+= VERTEXSIZE)
-	{
-		qglTexCoord2f (v[3] + scroll, v[4]);
-		qglVertex3fv (v);
-	}
-	qglEnd ();
+    for (i=0 ; i<p->numverts ; i++, v+= VERTEXSIZE)
+    {
+        qglTexCoord2f (v[3] + scroll, v[4]);
+        qglVertex3fv (v);
+    }
+    qglEnd ();
+
 }
 
 /*
@@ -167,7 +168,7 @@ void R_DrawTriangleOutlines (void)
 }
 
 /*
-** DrawGLPolyLightmap
+** DrawGLPolyLightmap (does this ever really get used?)
 */
 void DrawGLPolyLightmap( glpoly_t *p, float soffset, float toffset )
 {
@@ -331,6 +332,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 	int			maps;
 	image_t		*image;
 	qboolean is_dynamic = false;
+	float		scroll;
 
 	c_brush_polys++;
 
@@ -369,7 +371,16 @@ void R_RenderBrushPoly (msurface_t *fa)
 	if (SurfaceIsAlphaBlended(fa))
 		qglEnable( GL_ALPHA_TEST );
 
-	DrawGLPoly (fa->polys, fa->texinfo->flags);
+	scroll = 0;
+	if (fa->texinfo->flags & SURF_FLOWING)
+	{
+		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
+		if (scroll == 0.0)
+			scroll = -64.0;
+	}
+	R_InitVArrays(VERT_SINGLE_TEXTURED);
+	R_AddTexturedSurfToVArray (fa, scroll);
+	R_KillVArrays();
 
 	if (SurfaceIsAlphaBlended(fa))
 	{
@@ -625,10 +636,9 @@ void DrawTextureChains (void)
 
 static void GL_RenderLightmappedPoly( msurface_t *surf )
 {
-	int		i, nv = surf->polys->numverts;
+	int		nv = surf->polys->numverts;
 	int		map;
 	float	scroll;
-	float	*v;
 	image_t *image = R_TextureAnimation( surf->texinfo );
 	qboolean is_dynamic = false;
 	unsigned lmtex = surf->lightmaptexturenum;
@@ -637,7 +647,7 @@ static void GL_RenderLightmappedPoly( msurface_t *surf )
 	r_normalsurfaces = surf;
 	surf->specularchain = r_specularsurfaces;
 	r_specularsurfaces = surf;
-	
+
 	for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
 	{
 		if ( r_newrefdef.lightstyles[surf->styles[map]].white != surf->cached_light[map] )
@@ -694,16 +704,11 @@ dynamic:
 		if (scroll == 0.0)
 			scroll = -64.0;
 	}
-
-	v = surf->polys->verts[0];
-	qglBegin (GL_POLYGON);
-	for (i=0 ; i< nv; i++, v+= VERTEXSIZE)
-	{
-		qglMTexCoord2fSGIS( GL_TEXTURE0, v[3]+scroll, v[4]);
-		qglMTexCoord2fSGIS( GL_TEXTURE1, v[5], v[6]);
-		qglVertex3fv (v);
-	}
-	qglEnd ();
+	R_InitVArrays (VERT_MULTI_TEXTURED);	
+	
+	R_AddLightMappedSurfToVArray (surf, scroll);
+	
+	R_KillVArrays ();
 
 	if (SurfaceIsAlphaBlended(surf))
 		qglDisable( GL_ALPHA_TEST);
@@ -729,7 +734,7 @@ static void R_InitNormalSurfaces (void)
 	// rotate around Y to bring blue/pink to the front
 	qglRotatef (145, 0, 1, 0);
 
-	// now reposition so that the bright spot is center screen
+	// now reposition so that the bright spot is center screen, and up a little 
 	qglRotatef (-45, 1, 0, 0);
 	qglRotatef (-45, 0, 0, 1);
 
@@ -773,12 +778,25 @@ static void R_InitNormalSurfaces (void)
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
+static void R_KillNormalTMUs(void) {
+	
+	//kill TMU1
+	qglActiveTextureARB (GL_TEXTURE1);
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	qglDisable (GL_TEXTURE_2D);
+
+	//kill TMU0
+	qglActiveTextureARB (GL_TEXTURE0);
+	qglMatrixMode (GL_TEXTURE);
+	qglLoadIdentity ();
+	qglMatrixMode (GL_MODELVIEW);
+	qglDisable (GL_TEXTURE_CUBE_MAP_ARB);
+	qglEnable (GL_TEXTURE_2D);
+}
+
 static void R_DrawNormalSurfaces (void)
 {
 	msurface_t *surf = r_normalsurfaces;
-	int		i;
-	float	*v;
-	glpoly_t *p;
 
 	// nothing to draw!
 	if (!surf)
@@ -787,6 +805,7 @@ static void R_DrawNormalSurfaces (void)
 	if (!gl_normalmaps->value)
 		return;
 
+	R_InitVArrays (VERT_BUMPMAPPED);
 	R_InitNormalSurfaces();
 
 	qglActiveTextureARB (GL_TEXTURE1);
@@ -813,33 +832,11 @@ static void R_DrawNormalSurfaces (void)
 		else
 			continue;
 
-		for (p = surf->polys; p; p = p->chain)
-		{
-			qglBegin (GL_POLYGON);
-
-			for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-			{		
-				qglMTexCoord3fSGIS(GL_TEXTURE0, v[0], v[1], v[2]);
-				qglMTexCoord2fSGIS(GL_TEXTURE1, v[3], v[4]);
-				qglVertex3fv (v);
-			}
-
-			qglEnd ();
-		}
+		R_AddTexturedSurfToVArray (surf, 0);
 	}
 
-	//kill TMU1
-	qglActiveTextureARB (GL_TEXTURE1);
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	qglDisable (GL_TEXTURE_2D);
-
-	//kill TMU0
-	qglActiveTextureARB (GL_TEXTURE0);
-	qglMatrixMode (GL_TEXTURE);
-	qglLoadIdentity ();
-	qglMatrixMode (GL_MODELVIEW);
-	qglDisable (GL_TEXTURE_CUBE_MAP_ARB);
-	qglEnable (GL_TEXTURE_2D);
+	R_KillNormalTMUs();
+	R_KillVArrays ();
 
 	// restore original blend
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -849,10 +846,7 @@ static void R_DrawNormalSurfaces (void)
 static void R_DrawSpecularSurfaces (void)
 {
 	msurface_t *surf = r_specularsurfaces;
-	int		i;
-	float	*v;
-	glpoly_t *p;
-
+ 
 	// nothing to draw!
 	if (!surf)
 		return;
@@ -866,8 +860,8 @@ static void R_DrawSpecularSurfaces (void)
 	qglEnable (GL_TEXTURE_2D);
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	qglDepthMask (GL_FALSE); 
-	qglEnable (GL_BLEND); 
+	qglEnable (GL_BLEND);
+	qglDepthMask (GL_FALSE);  
 	qglBlendFunc (GL_ONE, GL_ONE);
 	
 	for (; surf; surf = surf->specularchain)
@@ -879,33 +873,10 @@ static void R_DrawSpecularSurfaces (void)
 		else
 			continue;
 
-		for (p = surf->polys; p; p = p->chain)
-		{
-			qglBegin (GL_POLYGON);
-
-			for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-			{			
-				qglMTexCoord3fSGIS(GL_TEXTURE0, v[0], v[1], v[2]);
-				qglMTexCoord2fSGIS(GL_TEXTURE1, v[3], v[4]);
-				qglVertex3fv (v);
-			}
-
-			qglEnd ();
-		}
+		R_AddTexturedSurfToVArray (surf, 0);
 	}
 
-		//kill TMU1
-	qglActiveTextureARB (GL_TEXTURE1);
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	qglDisable (GL_TEXTURE_2D);
-
-	//kill TMU0
-	qglActiveTextureARB (GL_TEXTURE0);
-	qglMatrixMode (GL_TEXTURE);
-	qglLoadIdentity ();
-	qglMatrixMode (GL_MODELVIEW);
-	qglDisable (GL_TEXTURE_CUBE_MAP_ARB);
-	qglEnable (GL_TEXTURE_2D);
+	R_KillNormalTMUs();
 
 	// restore original blend
 	qglDepthMask (GL_TRUE);
