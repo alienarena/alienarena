@@ -200,7 +200,7 @@ float	r_turbsin[] =
 {
 	#include "warpsin.h"
 };
-#define TURBSCALE (256.0 / (2 * M_PI))
+
 #define TURBOSCALE (256.0f / ((float)M_PI / 4.0f)) // jitwater / dukey
 
 /*

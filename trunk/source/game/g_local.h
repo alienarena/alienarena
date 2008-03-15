@@ -575,6 +575,8 @@ extern  cvar_t  *classbased;
 //duel mode
 extern	cvar_t	*g_duel;
 
+extern  cvar_t  *g_playerbeacon;
+
 extern	cvar_t	*g_losehealth;
 extern	cvar_t	*g_losehealth_num;
 

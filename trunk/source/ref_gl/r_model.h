@@ -131,6 +131,14 @@ typedef struct
 	unsigned short	v[2];
 } medge_t;
 
+/*
+==============================================================================
+
+VERTEX ARRAYS
+
+==============================================================================
+*/
+
 typedef struct mtexinfo_s
 {
 	float		vecs[2][4];
@@ -196,6 +204,13 @@ typedef struct msurface_s
 	byte		*samples;		// [numstyles*surfsize]
 	byte		*stainsamples;
 	byte		*stains;
+
+	// heat haze support
+	float		warpscale;
+	float		warpfade;
+	vec3_t		mins;
+	vec3_t		maxs;
+	qboolean	hazemask;
 
 	entity_t	*entity;
 

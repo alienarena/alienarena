@@ -282,6 +282,10 @@ SOURCE=.\ref_gl\r_surf.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ref_gl\r_varray.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ref_gl\r_vlights.c
 # End Source File
 # Begin Source File

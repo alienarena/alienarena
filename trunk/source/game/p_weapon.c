@@ -308,10 +308,6 @@ void ChangeWeapon (edict_t *ent)
 		fclose(file);
 	ent->s.modelindex2 = gi.modelindex(weaponmodel);
 
-	//some models don't have visible weapons, ie war machine. hack.
-	if((info[0] == 'w') && (info[1]  == 'a') && (info[2] == 'r'))
-		ent->s.modelindex2 = 0;
-
 	//play a sound like in Q3, except for blaster, so it doesn't do it on spawn.
 	if(!(ent->client->pers.weapon->view_model == "models/weapons/v_blast/tris.md2"))
 		gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/whoosh.wav"), 1, ATTN_NORM, 0);
@@ -427,10 +423,6 @@ void Use_Weapon (edict_t *ent, gitem_t *item)
 	if (ent->in_vehicle || ent->in_deathball) {
 		return;
 	}
-
-	//mutators
-//	if(instagib->value || rocket_arena->value)
-//		return;
 
 	// see if we're already using it
 	if (item == ent->client->pers.weapon)
@@ -1047,18 +1039,18 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 			fire_blasterball (ent, start, forward, damage, 1200, effect, hyper);
 	}
 	// send muzzle flash
-	if(!(ent->client->buttons & BUTTON_ATTACK2)){
-		gi.WriteByte (svc_muzzleflash);
-		gi.WriteShort (ent-g_edicts);
-		if (hyper)
-			gi.WriteByte (MZ_HYPERBLASTER | is_silenced);
-		else
-			gi.WriteByte (MZ_BLASTER | is_silenced);
-		gi.multicast (ent->s.origin, MULTICAST_PVS);
-		PlayerNoise(ent, start, PNOISE_WEAPON);
-	}
+	gi.WriteByte (svc_muzzleflash);
+	gi.WriteShort (ent-g_edicts);
+	if (hyper)
+		gi.WriteByte (MZ_HYPERBLASTER | is_silenced);
+	else if (ent->client->buttons & BUTTON_ATTACK2)
+		gi.WriteByte (MZ_RAILGUN | is_silenced);
+	else
+		gi.WriteByte (MZ_BLASTER | is_silenced);
+	gi.multicast (ent->s.origin, MULTICAST_PVS);
+	PlayerNoise(ent, start, PNOISE_WEAPON);
+	
 	//create visual muzzle flash sprite!
-
 	if(!hyper || (ent->client->buttons & BUTTON_ATTACK2))
 	{
 		VectorAdd(start, forward, start);

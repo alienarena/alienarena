@@ -254,7 +254,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
 	{
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
-
+		R_InitMeshVarrays();
 		while (1)
 		{
 			// get the vertex count and primitive type
@@ -292,6 +292,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	else if(!rs)
 	{
 		alpha = basealpha;
+		R_InitMeshVarrays();
 		while (1)
 		{
 
@@ -352,6 +353,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 		if (depthmaskrscipt)
 			qglDepthMask(false);
 
+		R_InitMeshVarrays();
 		while (1)
 		{
 			count = *order++;
@@ -635,7 +637,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
 	{
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
-
+		R_InitMeshVarrays();
 		while (1)
 		{
 			// get the vertex count and primitive type
@@ -673,6 +675,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 	else if(!rs)
 	{
 		alpha = basealpha;
+		R_InitMeshVarrays();
 		while (1)
 		{
 
@@ -733,6 +736,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 		if (depthmaskrscipt)
 			qglDepthMask(false);
 
+		R_InitMeshVarrays();
 		while (1)
 		{
 			count = *order++;

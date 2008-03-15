@@ -31,8 +31,6 @@ void CIN_FreeCin (int texnum);
 extern float	r_turbsin[];
 extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 
-#define		TURBSCALE (256.0 / (2 * M_PI))
-
 #define		TOK_DELIMINATORS "\r\n\t "
 
 float		rs_realtime = 0;
