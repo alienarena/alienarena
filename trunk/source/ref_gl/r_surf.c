@@ -854,6 +854,7 @@ static void R_DrawSpecularSurfaces (void)
 	if (!gl_normalmaps->value || !gl_specularmaps->value)
 		return;
 
+	R_InitVArrays (VERT_BUMPMAPPED);
 	R_InitNormalSurfaces();
 
 	qglActiveTextureARB (GL_TEXTURE1);
