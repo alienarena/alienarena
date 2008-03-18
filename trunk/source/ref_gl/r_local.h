@@ -163,10 +163,10 @@ extern	cvar_t	*gl_texturealphamode;
 extern	cvar_t	*gl_texturesolidmode;
 extern	cvar_t	*gl_lockpvs;
 extern	cvar_t	*gl_rtlights;
-extern	cvar_t	*gl_texres;
 
 extern	cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
+extern  cvar_t	*vid_contrast;
 
 extern	cvar_t	*intensity;
 // Vic - begin

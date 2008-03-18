@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern cvar_t *vid_ref;
 extern cvar_t *vid_fullscreen;
 extern cvar_t *vid_gamma;
+extern cvar_t *vid_contrast;
 extern cvar_t *scr_viewsize;
 
 extern cvar_t *r_bloom_intensity;
@@ -36,7 +37,6 @@ static cvar_t *gl_mode;
 static cvar_t *gl_picmip;
 static cvar_t *gl_finish;
 static cvar_t *gl_swapinterval;
-static cvar_t *gl_texres;
 static cvar_t *r_bloom;
 static cvar_t *gl_reflection;
 static cvar_t *r_overbrightbits;
@@ -66,6 +66,7 @@ static menulist_s		s_mode_list;
 static menuslider_s		s_tq_slider;
 static menuslider_s		s_screensize_slider;
 static menuslider_s		s_brightness_slider;
+static menuslider_s		s_contrast_slider;
 static menulist_s  		s_fs_box;
 static menulist_s  		s_finish_box;
 static menulist_s		s_vsync_box;
@@ -75,7 +76,6 @@ static menuaction_s		s_low_action;
 static menuaction_s		s_medium_action;
 static menuaction_s		s_high_action;
 static menuaction_s		s_highest_action;
-static menulist_s		s_texres_box;
 static menulist_s		s_bloom_box;
 static menuslider_s		s_bloom_slider;
 static menulist_s		s_reflect_box;
@@ -101,8 +101,15 @@ static void ScreenSizeCallback( void *s )
 static void BrightnessCallback( void *s )
 {
 	menuslider_s *slider = ( menuslider_s * ) s;
-	float gamma = ( 0.8 - ( slider->curvalue/10.0 - 0.5 ) ) + 0.5;
+	float gamma = slider->curvalue/10.0;
 	Cvar_SetValue( "vid_gamma", gamma );
+}
+
+static void ContrastCallback( void *s )
+{
+	menuslider_s *slider = ( menuslider_s * ) s;
+	float contrast = slider->curvalue/10.0;
+	Cvar_SetValue( "vid_contrast", contrast );
 }
 
 static void BloomCallback( void *s )
@@ -131,8 +138,6 @@ static void ModulateCallback( void *s )
 
 static void SetLow( void *unused )
 {
-	//umm why wasn't this here before??
-	Cvar_SetValue("gl_texres", 1);
 	Cvar_SetValue("gl_reflection", 0);
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -141,6 +146,7 @@ static void SetLow( void *unused )
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_specularmaps", 0);
 	Cvar_SetValue("gl_cubemaps", 0);
@@ -155,8 +161,6 @@ static void SetLow( void *unused )
 }
 static void SetMedium( void *unused )
 {
-	//umm why wasn't this here before??
-	Cvar_SetValue("gl_texres", 1);
 	Cvar_SetValue("gl_reflection", 0);
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -165,6 +169,7 @@ static void SetMedium( void *unused )
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_specularmaps", 0);
 	Cvar_SetValue("gl_cubemaps", 0);
@@ -180,8 +185,6 @@ static void SetMedium( void *unused )
 
 static void SetHigh( void *unused )
 {
-	//umm why wasn't this here before??
-	Cvar_SetValue("gl_texres", 1);
 	Cvar_SetValue("gl_reflection", 0);
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -190,6 +193,7 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_specularmaps", 1);
 	Cvar_SetValue("gl_cubemaps", 1);
@@ -205,8 +209,6 @@ static void SetHigh( void *unused )
 
 static void SetHighest( void *unused )
 {
-	//umm why wasn't this here before??
-	Cvar_SetValue("gl_texres", 1);
 	Cvar_SetValue("gl_reflection", 1);
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -215,6 +217,7 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_specularmaps",1);
 	Cvar_SetValue("gl_cubemaps", 1);
@@ -231,10 +234,13 @@ static void SetHighest( void *unused )
 static void ApplyChanges( void *unused )
 {
 	float gamma;
+	float contrast;
 
-	gamma = ( 0.8 - ( s_brightness_slider.curvalue/10.0 - 0.5 ) ) + 0.5;
+	gamma = s_brightness_slider.curvalue/10.0;
+	contrast = s_contrast_slider.curvalue/10.0;
 
 	Cvar_SetValue( "vid_gamma", gamma );
+	Cvar_SetValue( "vid_contrast", contrast );
 	Cvar_SetValue( "gl_picmip", 3 - s_tq_slider.curvalue );
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
 	Cvar_SetValue( "gl_finish", s_finish_box.curvalue );
@@ -256,8 +262,7 @@ static void ApplyChanges( void *unused )
 		Cvar_SetValue("vid_height", atoi( s_height_field.buffer ));
 	}
 	else
-		Cvar_SetValue( "gl_mode", s_mode_list.curvalue + 3 ); //offset added back
-	Cvar_SetValue( "gl_texres", s_texres_box.curvalue );
+	Cvar_SetValue( "gl_mode", s_mode_list.curvalue + 3 ); //offset added back
 	Cvar_SetValue( "gl_reflection", s_reflect_box.curvalue);
 	Cvar_SetValue( "r_bloom", s_bloom_box.curvalue);
 	Cvar_SetValue( "r_bloom_intensity", s_bloom_slider.curvalue/10);
@@ -331,8 +336,6 @@ void VID_MenuInit( void )
 		gl_finish = Cvar_Get( "gl_finish", "0", CVAR_ARCHIVE );
 	if ( !gl_swapinterval )
 		gl_swapinterval = Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE );
-	if ( !gl_texres )
-		gl_texres = Cvar_Get( "gl_texres", "1", CVAR_ARCHIVE );
 	if ( !gl_reflection)
 		gl_reflection = Cvar_Get( "gl_reflection", "0", CVAR_ARCHIVE );
 	if ( !r_bloom )
@@ -411,13 +414,22 @@ void VID_MenuInit( void )
 	s_brightness_slider.generic.y	= 70*scale;
 	s_brightness_slider.generic.name	= "texture brightness";
 	s_brightness_slider.generic.callback = BrightnessCallback;
-	s_brightness_slider.minvalue = 5;
-	s_brightness_slider.maxvalue = 13;
-	s_brightness_slider.curvalue = ( 1.3 - vid_gamma->value + 0.5 ) * 10;
+	s_brightness_slider.minvalue = 1;
+	s_brightness_slider.maxvalue = 20;
+	s_brightness_slider.curvalue = vid_gamma->value * 10;
+
+	s_contrast_slider.generic.type	= MTYPE_SLIDER;
+	s_contrast_slider.generic.x	= 24;
+	s_contrast_slider.generic.y	= 80*scale;
+	s_contrast_slider.generic.name	= "texture contrast";
+	s_contrast_slider.generic.callback = ContrastCallback;
+	s_contrast_slider.minvalue = 1;
+	s_contrast_slider.maxvalue = 20;
+	s_contrast_slider.curvalue = vid_contrast->value * 10;
 
 	s_modulate_slider.generic.type = MTYPE_SLIDER;
 	s_modulate_slider.generic.x	= 24;
-	s_modulate_slider.generic.y	= 80*scale;
+	s_modulate_slider.generic.y	= 90*scale;
 	s_modulate_slider.generic.name = "lightmap brightness";
 	s_modulate_slider.minvalue = 1;
 	s_modulate_slider.maxvalue = 5;
@@ -426,17 +438,10 @@ void VID_MenuInit( void )
 
 	s_fs_box.generic.type = MTYPE_SPINCONTROL;
 	s_fs_box.generic.x	= 24;
-	s_fs_box.generic.y	= 90*scale;
+	s_fs_box.generic.y	= 100*scale;
 	s_fs_box.generic.name	= "fullscreen";
 	s_fs_box.itemnames = yesno_names;
 	s_fs_box.curvalue = vid_fullscreen->value;
-
-	s_texres_box.generic.type = MTYPE_SPINCONTROL;
-	s_texres_box.generic.x	= 24;
-	s_texres_box.generic.y	= 110*scale;
-	s_texres_box.generic.name	= "hires textures";
-	s_texres_box.itemnames = onoff_names;
-	s_texres_box.curvalue = gl_texres->value;
 
 	s_bloom_box.generic.type = MTYPE_SPINCONTROL;
 	s_bloom_box.generic.x	= 24;
@@ -494,21 +499,21 @@ void VID_MenuInit( void )
 
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
 	s_finish_box.generic.x	= 24;
-	s_finish_box.generic.y	= 190*scale;
+	s_finish_box.generic.y	= 200*scale;
 	s_finish_box.generic.name	= "draw frame completely";
 	s_finish_box.curvalue = gl_finish->value;
 	s_finish_box.itemnames = yesno_names;
 
 	s_vsync_box.generic.type = MTYPE_SPINCONTROL;
     s_vsync_box.generic.x  = 24;
-    s_vsync_box.generic.y  = 200*scale;
+    s_vsync_box.generic.y  = 210*scale;
     s_vsync_box.generic.name       = "vertical sync";
     s_vsync_box.curvalue = gl_swapinterval->value;
     s_vsync_box.itemnames = onoff_names;
 
 	s_windowed_mouse.generic.type = MTYPE_SPINCONTROL;
 	s_windowed_mouse.generic.x  = 24;
-	s_windowed_mouse.generic.y  = 210*scale;
+	s_windowed_mouse.generic.y  = 220*scale;
 	s_windowed_mouse.generic.name   = "windowed mouse";
 	s_windowed_mouse.curvalue = _windowed_mouse->value;
 	s_windowed_mouse.itemnames = yesno_names;
@@ -516,31 +521,31 @@ void VID_MenuInit( void )
 	s_low_action.generic.type = MTYPE_ACTION;
 	s_low_action.generic.name = "low settings";
 	s_low_action.generic.x    = 24;
-	s_low_action.generic.y    = 230*scale;
+	s_low_action.generic.y    = 240*scale;
 	s_low_action.generic.callback = SetLow;
 
 	s_medium_action.generic.type = MTYPE_ACTION;
 	s_medium_action.generic.name = "medium settings";
 	s_medium_action.generic.x    = 24;
-	s_medium_action.generic.y    = 240*scale;
+	s_medium_action.generic.y    = 250*scale;
 	s_medium_action.generic.callback = SetMedium;
 
 	s_high_action.generic.type = MTYPE_ACTION;
 	s_high_action.generic.name = "high settings";
 	s_high_action.generic.x    = 24;
-	s_high_action.generic.y    = 250*scale;
+	s_high_action.generic.y    = 260*scale;
 	s_high_action.generic.callback = SetHigh;
 
 	s_highest_action.generic.type = MTYPE_ACTION;
 	s_highest_action.generic.name = "highest settings";
 	s_highest_action.generic.x    = 24;
-	s_highest_action.generic.y    = 260*scale;
+	s_highest_action.generic.y    = 270*scale;
 	s_highest_action.generic.callback = SetHighest;
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
 	s_apply_action.generic.x    = 24;
-	s_apply_action.generic.y    = 280*scale;
+	s_apply_action.generic.y    = 290*scale;
 	s_apply_action.generic.callback = ApplyChanges;
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
@@ -548,9 +553,9 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_height_field);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_screensize_slider);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_brightness_slider);
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_contrast_slider);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_modulate_slider);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_fs_box);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_texres_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_bloom_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_bloom_slider);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_reflect_box );
