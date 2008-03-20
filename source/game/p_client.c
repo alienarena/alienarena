@@ -2334,7 +2334,25 @@ loadgames will.
 qboolean ClientConnect (edict_t *ent, char *userinfo)
 {
 	char	*value;
-	int		i, numspec;
+	int		i, numspec, numplayers;
+	edict_t *cl_ent;
+
+	//check to see if server is using botkick, and if so, allow for at least one free
+	//slot for bots to enter and be kicked if needed
+	if(sv_botkickthreshold->value) { 
+		numplayers = 0;
+		for (i=0 ; i<game.maxclients ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (cl_ent->inuse && !cl_ent->is_bot)
+				numplayers++;
+		}
+		if(numplayers >= game.maxclients - 1) {
+				Info_SetValueForKey(userinfo, "rejmsg", "Server is full.");
+		
+			return false;
+		}
+	}
 
 	// check to see if they are on the banned IP list
 	value = Info_ValueForKey (userinfo, "ip");
