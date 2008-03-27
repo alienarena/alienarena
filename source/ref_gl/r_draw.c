@@ -336,6 +336,8 @@ void Draw_ShaderPic (image_t *gl)
 
 	COM_StripExtension ( gl->name, shortname );
 	rs=RS_FindScript(shortname);
+
+	R_InitMeshVarrays(); //uses same arrays as meshes
 	
 	if (!rs) 
 	{
