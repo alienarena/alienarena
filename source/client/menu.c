@@ -55,6 +55,8 @@ static char *menu_background		= "misc/menuback.wav";
 int svridx;
 int playeridx;
 int hover_time;
+float mappicalpha;
+float banneralpha;
 
 void M_Menu_Main_f (void);
 	void M_Menu_Game_f (void);
@@ -92,7 +94,7 @@ typedef struct
 menulayer_t	m_layers[MAX_MENU_DEPTH];
 int		m_menudepth;
 
-static void M_Banner( char *name )
+static void M_Banner( char *name, float alpha )
 {
 	int w, h;
 	float scale;
@@ -106,10 +108,10 @@ static void M_Banner( char *name )
 	w*=scale;
 	h*=scale;
 
-	Draw_StretchPic( viddef.width / 2 - (w / 2), viddef.height / 2 - 250*scale, w, h, name );
+	Draw_AlphaStretchPic( viddef.width / 2 - (w / 2), viddef.height / 2 - 250*scale, w, h, name, alpha );
 
 }
-static void M_MapPic( char *name )
+static void M_MapPic( char *name, float alpha )
 {
 	int w, h;
 	float scale;
@@ -119,7 +121,7 @@ static void M_MapPic( char *name )
 		scale = 1;
 
 	w = h = 128*scale;
-	Draw_StretchPic (viddef.width / 2 - w - 4*scale, viddef.height / 2 + 112*scale, w, h, name);
+	Draw_AlphaStretchPic (viddef.width / 2 - w - 4*scale, viddef.height / 2 + 112*scale, w, h, name, alpha);
 }
 static void M_CrosshairPic( char *name )
 {
@@ -980,6 +982,8 @@ static void Keys_MenuInit( void )
 
 	y = 80*scale;
 
+	banneralpha = .1;
+
 	s_keys_menu.x = viddef.width * 0.50;
 
 	s_keys_attack_action.generic.type	= MTYPE_ACTION;
@@ -1272,8 +1276,12 @@ static void Keys_MenuInit( void )
 
 static void Keys_MenuDraw (void)
 {
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
 	M_Background( "menu_back"); //draw black background first
-	M_Banner( "m_controls" );
+	M_Banner( "m_controls", banneralpha);
 	Menu_AdjustCursor( &s_keys_menu, 1 );
 	Menu_Draw( &s_keys_menu );
 }
@@ -2054,6 +2062,8 @@ void Options_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha = 0.1;
+
 	win_noalttab = Cvar_Get( "win_noalttab", "0", CVAR_ARCHIVE );
 
 	/*
@@ -2280,8 +2290,12 @@ void Options_MenuDraw (void)
 {
 	char path[MAX_QPATH];
 
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
 	M_Background( "menu_back"); //draw black background first
-	M_Banner( "m_options" );
+	M_Banner( "m_options", banneralpha );
 	if(strcmp(crosshair->string, "none")) {
 		sprintf(path, "/pics/%s", crosshair->string);
 		M_CrosshairPic(path);
@@ -2600,6 +2614,8 @@ void Game_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha = 0.1;
+
 	s_game_menu.x = viddef.width * 0.50;
 	s_game_menu.nitems = 0;
 
@@ -2651,8 +2667,12 @@ void Game_MenuInit( void )
 
 void Game_MenuDraw( void )
 {
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
 	M_Background( "menu_back"); //draw black background first
-	M_Banner( "m_single" );
+	M_Banner( "m_single", banneralpha );
 	Menu_AdjustCursor( &s_game_menu, 1 );
 	Menu_Draw( &s_game_menu );
 }
@@ -2990,6 +3010,8 @@ void JoinServer_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha = 0.1;
+
 	m_show_empty = true;
 
 	s_joinserver_menu.x = viddef.width * 0.50 - 120*scale;
@@ -3084,8 +3106,12 @@ void JoinServer_MenuDraw(void)
 	if(scale < 1)
 		scale = 1;
 
-	M_Background( "menu_back"); //draw black background first
-	M_Banner( "m_joinserver" );
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
+	M_Background( "menu_back" ); //draw black background first
+	M_Banner( "m_joinserver", banneralpha );
 
 
 	for ( i = 0; i < 16; i++ )
@@ -3264,6 +3290,8 @@ void Mutators_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha = 0.1;
+
 	/*
 	** initialize the menu stuff
 	*/
@@ -3386,8 +3414,12 @@ void Mutators_MenuInit( void )
 }
 void Mutators_MenuDraw(void)
 {
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
 	M_Background( "menu_back"); //draw black background first
-	M_Banner( "m_mutators" );
+	M_Banner( "m_mutators", banneralpha );
 
 	Menu_Draw( &s_mutators_menu );
 }
@@ -3518,6 +3550,8 @@ void Addbots_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha = 0.1;
+
 	totalbots = 0;
 
 	LoadBotInfo();
@@ -3550,8 +3584,12 @@ void Addbots_MenuDraw(void)
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
 	M_Background( "menu_back"); //draw black background first
-	M_Banner( "m_bots" );
+	M_Banner( "m_bots", banneralpha );
 
 	y = viddef.height/2 - 122*scale;
 
@@ -3637,6 +3675,8 @@ void MapInfoFunc( void *self ) {
 		scale = 1;
 
 	offset*=scale;
+
+	mappicalpha = 0.1;
 
 	//get a map description if it is there
 
@@ -4135,6 +4175,8 @@ void StartServer_MenuInit( void )
 	s_startserver_menu.x = viddef.width * 0.50;
 	s_startserver_menu.nitems = 0;
 	offset = 65*scale;
+	mappicalpha = 0.1;
+	banneralpha = 0.1;
 
 	s_startmap_list.generic.type = MTYPE_SPINCONTROL;
 	s_startmap_list.generic.x	= -8;
@@ -4292,13 +4334,21 @@ void StartServer_MenuDraw(void)
 	if(scale < 1)
 		scale = 1;
 
+	mappicalpha += 0.01; //fade map pic in
+	if(mappicalpha > 1)
+		mappicalpha = 1;
+
 	offset*=scale;
+
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
 
 	M_Background( "menu_back"); //draw black background first
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 	sprintf(path, "/levelshots/%s", startmap);
-	M_Banner( "m_startserver" );
-	M_MapPic(path);
+	M_Banner( "m_startserver", banneralpha );
+	M_MapPic(path, mappicalpha);
 
 	Menu_Draw( &s_startserver_menu );
 }
@@ -4632,6 +4682,8 @@ void DMOptions_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha = 0.1;
+
 	for(i = 0; i < 8; i++)
 		strcpy(bot[i].name, "...empty slot");
 
@@ -4844,8 +4896,13 @@ void DMOptions_MenuInit( void )
 
 void DMOptions_MenuDraw(void)
 {
+
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
 	M_Background( "menu_back"); //draw black background first
-	M_Banner( "m_dmoptions" );
+	M_Banner( "m_dmoptions", banneralpha );
 
 	Menu_Draw( &s_dmoptions_menu );
 }
@@ -4928,6 +4985,8 @@ void AddressBook_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha = 0.1;
+
 	s_addressbook_menu.x = viddef.width / 2 - 142*scale;
 	s_addressbook_menu.y = viddef.height / 2 - 58*scale;
 	s_addressbook_menu.nitems = 0;
@@ -4978,8 +5037,12 @@ const char *AddressBook_MenuKey( int key )
 
 void AddressBook_MenuDraw(void)
 {
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
 	M_Background( "conback"); //draw black background first
-	M_Banner( "m_banner_main" );
+	M_Banner( "m_banner_main", banneralpha );
 	Menu_Draw( &s_addressbook_menu );
 }
 
@@ -5265,6 +5328,8 @@ qboolean PlayerConfig_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha = 0.1;
+
 	PlayerConfig_ScanDirectories();
 
 	if (s_numplayermodels == 0)
@@ -5450,8 +5515,12 @@ void PlayerConfig_MenuDraw( void )
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
 	M_Background( "menu_back"); //draw black background first
-	M_Banner( "m_player" );
+	M_Banner( "m_player", banneralpha );
 
 	memset( &refdef, 0, sizeof( refdef ) );
 
@@ -5672,8 +5741,12 @@ static menuaction_s		s_quit_no_action;
 
 void M_Quit_Draw( void )
 {
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
 	M_Background( "conback"); //draw black background first
-	M_Banner( "m_quit" );
+	M_Banner( "m_quit", banneralpha );
 
 	Menu_AdjustCursor( &s_quit_menu, 1 );
 
@@ -5701,6 +5774,8 @@ void Quit_MenuInit (void)
 	scale = (float)(viddef.height)/600;
 	if(scale < 1)
 		scale = 1;
+
+	banneralpha = 0.1;
 
 	s_quit_menu.x = viddef.width * 0.50;
 	s_quit_menu.y = viddef.height * 0.50;
