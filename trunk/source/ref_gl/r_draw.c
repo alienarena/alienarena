@@ -96,6 +96,7 @@ void Draw_Char (int x, int y, int num)
 	GL_Bind (draw_chars->texnum);
 
 	qglBegin (GL_QUADS);
+	qglColor4f( 1,1,1,1 );
 	qglTexCoord2f (fcol, frow);
 	qglVertex2f (x, y);
 	qglTexCoord2f (fcol + size, frow);
@@ -186,7 +187,7 @@ void Draw_ScaledChar (int x, int y, int num, int scale)
 	size = 0.0625;
 
 	GL_Bind(draw_chars->texnum);
-
+	qglColor4f( 1,1,1,1 );
 	qglBegin (GL_QUADS);
 	qglTexCoord2f (fcol, frow);
 	qglVertex2f (x, y);
@@ -327,7 +328,7 @@ void Draw_GetPicSize (int *w, int *h, char *pic)
 	ShaderResizePic(gl, w, h);
 }
 #define DIV254BY255 (0.9960784313725490196078431372549f)
-void Draw_ShaderPic (image_t *gl)
+void Draw_ShaderPic (image_t *gl, float alphaval)
 {
 	rscript_t *rs = NULL;
 	float	alpha,s,t;
@@ -346,7 +347,7 @@ void Draw_ShaderPic (image_t *gl)
 		GLSTATE_DISABLE_ALPHATEST
 		GLSTATE_ENABLE_BLEND
 		GL_TexEnv( GL_MODULATE );
-		qglColor4f(1,1,1,DIV254BY255);
+		qglColor4f(1,1,1, alphaval);
 		VA_SetElem4(col_array[0], 1,1,1,1);
 		VA_SetElem4(col_array[1], 1,1,1,1);
 		VA_SetElem4(col_array[2], 1,1,1,1);
@@ -465,7 +466,6 @@ void Draw_StretchPic (int x, int y, int w, int h, char *pic)
 	gl = R_RegisterPic (pic);
 	if (!gl)
 	{
-//		Com_Printf ("Can't find pic: %s\n", pic);
 		return;
 	}
 
@@ -477,9 +477,34 @@ void Draw_StretchPic (int x, int y, int w, int h, char *pic)
 	VA_SetElem2(vert_array[2],x+w, y+h);
 	VA_SetElem2(vert_array[3],x, y+h);
 
-	Draw_ShaderPic(gl);
+	Draw_ShaderPic(gl, DIV254BY255);
 }
 
+/*
+=============
+Draw_AlphaStretchPic
+=============
+*/
+void Draw_AlphaStretchPic (int x, int y, int w, int h, char *pic, float alphaval)
+{
+	image_t *gl;
+
+	gl = R_RegisterPic (pic);
+	if (!gl)
+	{
+		return;
+	}
+
+	if (scrap_dirty)
+		Scrap_Upload ();
+
+	VA_SetElem2(vert_array[0],x, y);
+	VA_SetElem2(vert_array[1],x+w, y);
+	VA_SetElem2(vert_array[2],x+w, y+h);
+	VA_SetElem2(vert_array[3],x, y+h);
+
+	Draw_ShaderPic(gl, alphaval);
+}
 
 /*
 =============
@@ -509,7 +534,7 @@ void Draw_Pic (int x, int y, char *pic)
 	VA_SetElem2(vert_array[2],x+w, y+h);
 	VA_SetElem2(vert_array[3],x, y+h);
 
-	Draw_ShaderPic(gl);
+	Draw_ShaderPic(gl, DIV254BY255);
 }
 
 /*
@@ -545,7 +570,7 @@ void Draw_ScaledPic (int x, int y, float scale, char *pic)
 	VA_SetElem2(vert_array[2],x+w+xoff, y+h+yoff);
 	VA_SetElem2(vert_array[3],x, y+h+yoff);
 
-	Draw_ShaderPic(gl);
+	Draw_ShaderPic(gl, DIV254BY255);
 }
 /*
 =============

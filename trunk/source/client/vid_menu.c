@@ -44,6 +44,8 @@ static cvar_t *gl_ext_mtexcombine;
 
 static cvar_t *_windowed_mouse;
 
+extern float banneralpha;
+
 extern void M_ForceMenuOff( void );
 
 #ifdef __unix__
@@ -328,6 +330,8 @@ void VID_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha = 0.1;
+
 	if ( !gl_picmip )
 		gl_picmip = Cvar_Get( "gl_picmip", "0", CVAR_ARCHIVE );
 	if ( !gl_mode )
@@ -591,6 +595,10 @@ void VID_MenuDraw (void)
 	if(scale < 1)
 		scale = 1;
 
+	banneralpha += 0.01;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
 	s_current_menu = &s_opengl_menu;
 	/*
 	** draw the banner
@@ -599,7 +607,7 @@ void VID_MenuDraw (void)
 	Draw_GetPicSize( &w, &h, "m_video" );
 	w*=scale;
 	h*=scale;
-	Draw_StretchPic( viddef.width / 2 - w / 2, viddef.height /2 - 250*scale, w, h, "m_video" );
+	Draw_AlphaStretchPic( viddef.width / 2 - w / 2, viddef.height /2 - 250*scale, w, h, "m_video", banneralpha );
 
 	/*
 	** move cursor to a reasonable starting position
