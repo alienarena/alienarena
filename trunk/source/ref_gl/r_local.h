@@ -226,7 +226,7 @@ void R_PushDlights (void);
 void R_PushStains (void);
 void R_PushStainsForBModel (entity_t *e);
 void R_PushDlightsForBModel (entity_t *e);
-
+void SetVertexOverbrights (qboolean toggle);
 void RefreshFont (void);
 
 //====================================================================

@@ -104,24 +104,28 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
 	int i;
 	float l;
 
-	l = 2.0 * VLight_LerpLight( verts->lightnormalindex,
-							ov->lightnormalindex,
-							backlerp, lightdir, currententity->angles, false );
+	if (gl_rtlights->value)
+	{
+		l = 2.0 * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
+								backlerp, lightdir, currententity->angles, false);
+		
+		VectorScale(baselight, l, lightOut);
 
-	VectorScale(baselight, l, lightOut);
+		if (model_dlights_num)
+			for (i=0; i<model_dlights_num; i++)
+			{
+				l = 2.0*VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
+					backlerp, model_dlights[i].direction, currententity->angles, true );
+				VectorMA(lightOut, l, model_dlights[i].color, lightOut);
+			}
+	}
+	else
+	{		
+		l = shadedots[verts->lightnormalindex];
+		VectorScale(baselight, l, lightOut);
+	}
 
-	if (model_dlights_num)
-		for (i=0;i<model_dlights_num;i++)
-		{
-
-			l = 2.0*VLight_LerpLight( verts->lightnormalindex,
-									ov->lightnormalindex,
-									backlerp, model_dlights[i].direction, currententity->angles, true );
-
-			VectorMA(lightOut, l, model_dlights[i].color, lightOut);
-		}
-
-	for (i=0;i<3;i++)
+	for (i=0; i<3; i++)
 	{
 		if (lightOut[i]<0) lightOut[i] = 0;
 		if (lightOut[i]>1) lightOut[i] = 1;
@@ -168,7 +172,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	dtrivertx_t	*v, *ov, *verts;
 	int		*order, *startorder, *tmp_order;
 	int		count, tmp_count;
-	float	frontlerp, l;
+	float	frontlerp;
 	float	alpha, basealpha;
 	vec3_t	move, delta, vectors[3];
 	vec3_t	frontv, backv;
@@ -316,10 +320,8 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 			{
 				// texture coordinates come from the draw list
 				index_xyz = order[2];
-				l = shadedots[verts[index_xyz].lightnormalindex];
-
-				if(gl_rtlights->value)
-					GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+				
+				GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 
 				VA_SetElem2(tex_array[va],((float *)order)[0], ((float *)order)[1]);
 				VA_SetElem3(vert_array[va],s_lerped[index_xyz][0],s_lerped[index_xyz][1],s_lerped[index_xyz][2]);
@@ -493,17 +495,11 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 							if (stage->lightmap)
 							{
-								if(gl_rtlights->value) {
-									GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
-									red = lightcolor[0] * ramp;
-									green = lightcolor[1] * ramp;
-									blue = lightcolor[2] * ramp;
-								}
-								else {
-									red = shadelight[0] * ramp;
-									green = shadelight[1] * ramp;
-									blue = shadelight[2] * ramp;
-								}
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+								red = lightcolor[0] * ramp;
+								green = lightcolor[1] * ramp;
+								blue = lightcolor[2] * ramp;
+								
 								//try to keep normalmapped stages from going completely dark
 								if(stage->normalmap && gl_normalmaps->value) {
 									if(red < .6) red = .6;
@@ -584,7 +580,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 	dtrivertx_t	*v, *verts;
 	int		*order, *startorder, *tmp_order;
 	int		count, tmp_count;
-	float	l;
 	float	alpha, basealpha;
 	vec3_t	vectors[3];
 	int		i;
@@ -699,10 +694,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 			{
 				// texture coordinates come from the draw list
 				index_xyz = order[2];
-				l = shadedots[verts[index_xyz].lightnormalindex];
-
-				if(gl_rtlights->value)
-					GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+				
+				GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 
 				VA_SetElem2(tex_array[va],((float *)order)[0], ((float *)order)[1]);
 				VA_SetElem3(vert_array[va],currentmodel->r_mesh_verts[index_xyz][0],currentmodel->r_mesh_verts[index_xyz][1],currentmodel->r_mesh_verts[index_xyz][2]);
@@ -874,17 +867,11 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 
 							if (stage->lightmap)
 							{
-								if(gl_rtlights->value) {
-									GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
-									red = lightcolor[0] * ramp;
-									green = lightcolor[1] * ramp;
-									blue = lightcolor[2] * ramp;
-								}
-								else {
-									red = shadelight[0] * ramp;
-									green = shadelight[1] * ramp;
-									blue = shadelight[2] * ramp;
-								}
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+								red = lightcolor[0] * ramp;
+								green = lightcolor[1] * ramp;
+								blue = lightcolor[2] * ramp;
+								
 								//try to keep normalmapped stages from going completely dark
 								if(stage->normalmap && gl_normalmaps->value) {
 									if(red < .6) red = .6;
