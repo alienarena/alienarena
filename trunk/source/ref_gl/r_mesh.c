@@ -98,15 +98,34 @@ void GL_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *ver
 	}
 
 }
+/*
+=============
+GL_VlightAliasModel
 
+Vertex lighting for Alias models
+
+When rtlights is set we get a smoother, more accurate model shading.  If normalmaps are on
+we scale the light a bit less, as normalmaps tend to add a bit of contrast.
+
+Contrast has been added by finding a threshold point, and scaling values on either side in 
+opposite directions.  This gives the shading a more prounounced, defined look.
+
+=============
+*/
 void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov, float backlerp, vec3_t lightOut)
 {
 	int i;
 	float l;
+	float lscale;
+
+	if(gl_normalmaps->value)
+		lscale = 2.5;
+	else
+		lscale = 3.0;
 
 	if (gl_rtlights->value)
 	{
-		l = 2.0 * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
+		l = lscale * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
 								backlerp, lightdir, currententity->angles, false);
 		
 		VectorScale(baselight, l, lightOut);
@@ -114,7 +133,7 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
 		if (model_dlights_num)
 			for (i=0; i<model_dlights_num; i++)
 			{
-				l = 2.0*VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
+				l = lscale * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
 					backlerp, model_dlights[i].direction, currententity->angles, true );
 				VectorMA(lightOut, l, model_dlights[i].color, lightOut);
 			}
@@ -127,6 +146,9 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
 
 	for (i=0; i<3; i++)
 	{
+		if(!gl_normalmaps->value) //add contrast - lights lighter, darks darker
+			lightOut[i] += (lightOut[i] - 0.25);
+		
 		if (lightOut[i]<0) lightOut[i] = 0;
 		if (lightOut[i]>1) lightOut[i] = 1;
 	}
@@ -136,7 +158,6 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
 GL_DrawAliasFrameLerp
 
 interpolates between two frames and origins
-FIXME: batch lerp all vertexes
 =============
 */
 float calcEntAlpha (float alpha, vec3_t point)
@@ -235,10 +256,6 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	for (i=0 ; i<3 ; i++)
 	{
 		move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
-	}
-
-	for (i=0 ; i<3 ; i++)
-	{
 		frontv[i] = frontlerp*frame->scale[i];
 		backv[i] = backlerp*oldframe->scale[i];
 	}
@@ -325,20 +342,13 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 				VA_SetElem2(tex_array[va],((float *)order)[0], ((float *)order)[1]);
 				VA_SetElem3(vert_array[va],s_lerped[index_xyz][0],s_lerped[index_xyz][1],s_lerped[index_xyz][2]);
-				if(gl_rtlights->value)
-					VA_SetElem4(col_array[va],lightcolor[0], lightcolor[1], lightcolor[2], calcEntAlpha(alpha, s_lerped[index_xyz]));
-				else
-					VA_SetElem4(col_array[va], shadelight[0], shadelight[1], shadelight[2], calcEntAlpha(alpha, s_lerped[index_xyz]));
+				VA_SetElem4(col_array[va],lightcolor[0], lightcolor[1], lightcolor[2], calcEntAlpha(alpha, s_lerped[index_xyz]));
+				
 				va++;
 				order += 3;
 			} while (--count);
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
-				if ( qglLockArraysEXT )
-					qglLockArraysEXT( 0, va );
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
 				qglDrawArrays(mode,0,va);
-				if ( qglUnlockArraysEXT ) 
-					qglUnlockArraysEXT();
-			}
 	
 		}
 
@@ -526,13 +536,8 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				if (!(stage->normalmap && !gl_normalmaps->value)) //disable so that we
 					//can still have shaders without normalmapped models if so chosen
 				{
-					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
-						if ( qglLockArraysEXT )
-						qglLockArraysEXT( 0, va );
+					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 						qglDrawArrays(mode,0,va);
-						if ( qglUnlockArraysEXT ) 
-							qglUnlockArraysEXT();
-					}
 				}
 
 				qglColor4f(1,1,1,1);
@@ -659,12 +664,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 				va++;
 				order += 3;
 			} while (--count);
-
-			if ( qglLockArraysEXT )
-				qglLockArraysEXT( 0, va );
 			qglDrawArrays(mode,0,va);
-			if ( qglUnlockArraysEXT ) 
-				qglUnlockArraysEXT();
 		}
 	}
 	else if(!rs)
@@ -699,21 +699,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 
 				VA_SetElem2(tex_array[va],((float *)order)[0], ((float *)order)[1]);
 				VA_SetElem3(vert_array[va],currentmodel->r_mesh_verts[index_xyz][0],currentmodel->r_mesh_verts[index_xyz][1],currentmodel->r_mesh_verts[index_xyz][2]);
-				if(gl_rtlights->value)
-					VA_SetElem4(col_array[va],lightcolor[0], lightcolor[1], lightcolor[2], calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]));
-				else
-					VA_SetElem4(col_array[va], shadelight[0], shadelight[1], shadelight[2], calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]));
+				VA_SetElem4(col_array[va],lightcolor[0], lightcolor[1], lightcolor[2], calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]));
+				
 				va++;
 				order += 3;
 			} while (--count);
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
-				if ( qglLockArraysEXT )
-					qglLockArraysEXT( 0, va );
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
 				qglDrawArrays(mode,0,va);
-				if ( qglUnlockArraysEXT ) 
-					qglUnlockArraysEXT();
-			}
-	
+					
 		}
 
 	}
@@ -898,13 +891,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 				if (!(stage->normalmap && !gl_normalmaps->value)) //disable so that we
 					//can still have shaders without normalmapped models if so chosen
 				{
-					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
-						if ( qglLockArraysEXT )
-						qglLockArraysEXT( 0, va );
+					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
 						qglDrawArrays(mode,0,va);
-						if ( qglUnlockArraysEXT ) 
-							qglUnlockArraysEXT();
-					}
+						
 				}
 
 				qglColor4f(1,1,1,1);
