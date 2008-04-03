@@ -160,9 +160,7 @@ void RS_FreeScript(rscript_t *rs);
 void RS_FreeUnmarked(void);
 rscript_t *RS_FindScript(char *name);
 void RS_ReadyScript(rscript_t *rs);
-#ifdef _WINDOWS
 void RS_ScanPathForScripts(void);
-#endif
 int RS_Animate(rs_stage_t *stage);
 void RS_UpdateRegistration(void);
 void RS_DrawSurface (msurface_t *surf, qboolean lightmap);

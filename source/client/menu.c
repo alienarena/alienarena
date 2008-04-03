@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #ifdef __unix__
 #include <sys/time.h>
+#include <unistd.h>
 #endif
 
 #ifdef _WIN32

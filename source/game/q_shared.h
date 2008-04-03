@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
 
 #if (defined _M_IX86 || defined __i386__) && !defined C_ONLY && !defined __sun__
 #define id386	1
@@ -251,6 +252,7 @@ int Q_strcasecmp (char *s1, char *s2);
 int Q_strncasecmp (char *s1, char *s2, int n);
 void Q_strcat (char *dst, const char *src, int dstSize);
 int Q_strnicmp (const char *string1, const char *string2, int n);
+char *Q_strlwr(char *s);
 //=============================================
 
 short	BigShort(short l);

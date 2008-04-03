@@ -152,14 +152,6 @@ void Sys_Mkdir (char *path)
     mkdir (path, 0777);
 }
 
-char *strlwr (char *s)
-{
-	while (*s) {
-		*s = tolower(*s);
-		s++;
-	}
-}
-
 //============================================
 
 static	char	findbase[MAX_OSPATH];
