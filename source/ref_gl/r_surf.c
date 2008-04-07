@@ -105,10 +105,8 @@ image_t *R_TextureAnimation (mtexinfo_t *tex)
 DrawGLPoly - note - move this to vertex arrays
 ================
 */
-void DrawGLPoly (glpoly_t *p, int flags)
+void DrawGLPoly (msurface_t *fa, int flags)
 {
-	int		i;
-	float	*v = p->verts[0];
 	float	scroll;
 
 	scroll = 0;
@@ -119,13 +117,9 @@ void DrawGLPoly (glpoly_t *p, int flags)
 			scroll = -64.0;
 	}
 
-	qglBegin (GL_POLYGON);
-    for (i=0 ; i<p->numverts ; i++, v+= VERTEXSIZE)
-    {
-        qglTexCoord2f (v[3] + scroll, v[4]);
-        qglVertex3fv (v);
-    }
-    qglEnd ();
+	R_InitVArrays(VERT_SINGLE_TEXTURED);
+	R_AddTexturedSurfToVArray (fa, scroll);
+	R_KillVArrays();
 
 }
 
@@ -520,10 +514,10 @@ void R_DrawAlphaSurfaces (void)
 					qglDepthMask(true);
 				}
 				else
-					DrawGLPoly (s->polys, s->texinfo->flags);
+					DrawGLPoly (s, s->texinfo->flags);
 			}
 			else
-				DrawGLPoly (s->polys, s->texinfo->flags);
+				DrawGLPoly (s, s->texinfo->flags);
 		}
 
 	}
@@ -667,7 +661,7 @@ dynamic:
 
 	if ( is_dynamic )
 	{
-		unsigned	temp[128*128];
+		unsigned	temp[DYNAMIC_LIGHT_WIDTH*DYNAMIC_LIGHT_HEIGHT];
 		int			smax, tmax;
 
 		smax = (surf->extents[0]>>4)+1;
@@ -704,6 +698,7 @@ dynamic:
 		if (scroll == 0.0)
 			scroll = -64.0;
 	}
+
 	R_InitVArrays (VERT_MULTI_TEXTURED);	
 	
 	R_AddLightMappedSurfToVArray (surf, scroll);
