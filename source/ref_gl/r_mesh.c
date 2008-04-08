@@ -466,80 +466,74 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 				do
 				{
-					if (!(stage->normalmap && !gl_normalmaps->value)) { //disable for normal stage if normals are disabled
+					float os = ((float *)order)[0];
+					float ot = ((float *)order)[1];
+					vec3_t normal;
+					int k;
 
-						float os = ((float *)order)[0];
-						float ot = ((float *)order)[1];
-						vec3_t normal;
-						int k;
+					index_xyz = order[2];
 
-						index_xyz = order[2];
+					for (k=0;k<3;k++)
+					normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
+					( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
+					r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
+					VectorNormalize ( normal );
 
-						for (k=0;k<3;k++)
-						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
-						( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
-						r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
-						VectorNormalize ( normal );
+					if (stage->envmap)
+					{
+						vec3_t envmapvec;
 
-						if (stage->envmap)
-						{
-							vec3_t envmapvec;
+						VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
+						RS_SetEnvmap (envmapvec, &os, &ot);
 
-							VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
-							RS_SetEnvmap (envmapvec, &os, &ot);
-
-							os -= DotProduct (normal , vectors[1] );
-							ot += DotProduct (normal, vectors[2] );
-						}
-
-						RS_SetTexcoords2D(stage, &os, &ot);
-
-						VA_SetElem2(tex_array[va], os, ot);
-						VA_SetElem3(vert_array[va],s_lerped[index_xyz][0],s_lerped[index_xyz][1],s_lerped[index_xyz][2]);
-
-						{
-							float red = 1, green = 1, blue = 1, nAlpha;
-
-							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-							calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
-
-							if (stage->lightmap)
-							{
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
-								red = lightcolor[0] * ramp;
-								green = lightcolor[1] * ramp;
-								blue = lightcolor[2] * ramp;
-								
-								//try to keep normalmapped stages from going completely dark
-								if(stage->normalmap && gl_normalmaps->value) {
-									if(red < .6) red = .6;
-									if(green < .6) green = .6;
-									if(blue < .6) blue = .6;
-								}
-
-							}
-
-							if (stage->colormap.enabled)
-							{
-								red *= stage->colormap.red/255.0;
-								green *= stage->colormap.green/255.0;
-								blue *= stage->colormap.blue/255.0;
-							}
-
-							VA_SetElem4(col_array[va], red, green, blue, nAlpha);
-						}
+						os -= DotProduct (normal , vectors[1] );
+						ot += DotProduct (normal, vectors[2] );
 					}
+
+					RS_SetTexcoords2D(stage, &os, &ot);
+
+					VA_SetElem2(tex_array[va], os, ot);
+					VA_SetElem3(vert_array[va],s_lerped[index_xyz][0],s_lerped[index_xyz][1],s_lerped[index_xyz][2]);
+
+					{
+						float red = 1, green = 1, blue = 1, nAlpha;
+
+						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
+						calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
+
+						if (stage->lightmap)
+						{
+							GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+							red = lightcolor[0] * ramp;
+							green = lightcolor[1] * ramp;
+							blue = lightcolor[2] * ramp;
+								
+							//try to keep normalmapped stages from going completely dark
+							if(stage->normalmap && gl_normalmaps->value) {
+								if(red < .6) red = .6;
+								if(green < .6) green = .6;
+								if(blue < .6) blue = .6;
+							}
+
+						}
+
+						if (stage->colormap.enabled)
+						{
+							red *= stage->colormap.red/255.0;
+							green *= stage->colormap.green/255.0;
+							blue *= stage->colormap.blue/255.0;
+						}
+
+						VA_SetElem4(col_array[va], red, green, blue, nAlpha);
+					}
+				
 					order += 3;
 					va++;
 				} while (--count);
 
-				if (!(stage->normalmap && !gl_normalmaps->value)) //disable so that we
-					//can still have shaders without normalmapped models if so chosen
-				{
-					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 						qglDrawArrays(mode,0,va);
-				}
-
+				
 				qglColor4f(1,1,1,1);
 				if (stage->colormap.enabled)
 					qglEnable (GL_TEXTURE_2D);
@@ -822,80 +816,73 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 				}
 
 				do
-				{
-					if (!(stage->normalmap && !gl_normalmaps->value)) { //disable for normal stage if normals are disabled
+				{					
+					float os = ((float *)order)[0];
+					float ot = ((float *)order)[1];
+					vec3_t normal;
+					int k;
 
-						float os = ((float *)order)[0];
-						float ot = ((float *)order)[1];
-						vec3_t normal;
-						int k;
+					index_xyz = order[2];
 
-						index_xyz = order[2];
+					for (k=0;k<3;k++)
+					normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
+					VectorNormalize ( normal );
 
-						for (k=0;k<3;k++)
-						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
-						VectorNormalize ( normal );
+					if (stage->envmap)
+					{
+						vec3_t envmapvec;
 
-						if (stage->envmap)
-						{
-							vec3_t envmapvec;
+						VectorAdd(currententity->origin, currentmodel->r_mesh_verts[index_xyz], envmapvec);
+						RS_SetEnvmap (envmapvec, &os, &ot);
 
-							VectorAdd(currententity->origin, currentmodel->r_mesh_verts[index_xyz], envmapvec);
-							RS_SetEnvmap (envmapvec, &os, &ot);
-
-							os -= DotProduct (normal , vectors[1] );
-							ot += DotProduct (normal, vectors[2] );
-						}
-
-						RS_SetTexcoords2D(stage, &os, &ot);
-
-						VA_SetElem2(tex_array[va], os, ot);
-						VA_SetElem3(vert_array[va],currentmodel->r_mesh_verts[index_xyz][0],currentmodel->r_mesh_verts[index_xyz][1],currentmodel->r_mesh_verts[index_xyz][2]);
-
-						{
-							float red = 1, green = 1, blue = 1, nAlpha;
-
-							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-							calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
-
-							if (stage->lightmap)
-							{
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
-								red = lightcolor[0] * ramp;
-								green = lightcolor[1] * ramp;
-								blue = lightcolor[2] * ramp;
-								
-								//try to keep normalmapped stages from going completely dark
-								if(stage->normalmap && gl_normalmaps->value) {
-									if(red < .6) red = .6;
-									if(green < .6) green = .6;
-									if(blue < .6) blue = .6;
-								}
-
-							}
-
-							if (stage->colormap.enabled)
-							{
-								red *= stage->colormap.red/255.0;
-								green *= stage->colormap.green/255.0;
-								blue *= stage->colormap.blue/255.0;
-							}
-
-							VA_SetElem4(col_array[va], red, green, blue, nAlpha);
-						}
+						os -= DotProduct (normal , vectors[1] );
+						ot += DotProduct (normal, vectors[2] );
 					}
+
+					RS_SetTexcoords2D(stage, &os, &ot);
+
+					VA_SetElem2(tex_array[va], os, ot);
+					VA_SetElem3(vert_array[va],currentmodel->r_mesh_verts[index_xyz][0],currentmodel->r_mesh_verts[index_xyz][1],currentmodel->r_mesh_verts[index_xyz][2]);
+
+					{
+						float red = 1, green = 1, blue = 1, nAlpha;
+
+						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
+						calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
+
+						if (stage->lightmap)
+						{
+							GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+							red = lightcolor[0] * ramp;
+							green = lightcolor[1] * ramp;
+							blue = lightcolor[2] * ramp;
+								
+							//try to keep normalmapped stages from going completely dark
+							if(stage->normalmap && gl_normalmaps->value) {
+								if(red < .6) red = .6;
+								if(green < .6) green = .6;
+								if(blue < .6) blue = .6;
+							}
+
+						}
+
+						if (stage->colormap.enabled)
+						{
+							red *= stage->colormap.red/255.0;
+							green *= stage->colormap.green/255.0;
+							blue *= stage->colormap.blue/255.0;
+						}
+
+						VA_SetElem4(col_array[va], red, green, blue, nAlpha);
+					}
+				
 					order += 3;
 					va++;
 				} while (--count);
 
-				if (!(stage->normalmap && !gl_normalmaps->value)) //disable so that we
-					//can still have shaders without normalmapped models if so chosen
-				{
-					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-						qglDrawArrays(mode,0,va);
-						
-				}
-
+				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+					qglDrawArrays(mode,0,va);
+				
 				qglColor4f(1,1,1,1);
 				if (stage->colormap.enabled)
 					qglEnable (GL_TEXTURE_2D);

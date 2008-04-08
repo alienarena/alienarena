@@ -81,13 +81,6 @@ void SP_misc_teleporter_dest (edict_t *self);
 
 void SP_npc_cow (edict_t *self);
 
-void SP_misc_electrode (edict_t *self);
-void SP_misc_scope (edict_t *self);
-void SP_misc_pod (edict_t *self);
-void SP_misc_receptor (edict_t *self);
-void SP_misc_etube (edict_t *self);
-void SP_misc_lamp (edict_t *self);
-void SP_misc_lamp2 (edict_t *self);
 void SP_misc_spiderpod (edict_t *self);
 void SP_misc_rednode (edict_t *self);
 void SP_misc_bluenode (edict_t *self);
@@ -170,13 +163,6 @@ spawn_t	spawns[] = {
 
 	{"npc_cow", SP_npc_cow},
 
-	{"misc_lamp", SP_misc_lamp},
-	{"misc_lamp2", SP_misc_lamp2},
-	{"misc_electrode", SP_misc_electrode},
-	{"misc_scope", SP_misc_scope},
-	{"misc_pod", SP_misc_pod},
-	{"misc_receptor", SP_misc_receptor},
-	{"misc_etube", SP_misc_etube},
 	{"misc_spiderpod", SP_misc_spiderpod},
 	{"misc_rednode", SP_misc_rednode},
 	{"misc_bluenode", SP_misc_bluenode},
