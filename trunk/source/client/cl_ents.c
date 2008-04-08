@@ -974,36 +974,6 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.alpha = 0.4;
 				ent.flags = RF_TRANSLUCENT;
 			}
-			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/tube/cover.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/receptor/bulb.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/electrode/cover.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/scope/cover.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/misc/console/cover.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "players/war/helmet.md2"))
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
 			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/objects/blank/tris.md2"))
 			{
 				ent.alpha = 0.1;
@@ -1039,7 +1009,6 @@ void CL_AddPacketEntities (frame_t *frame)
 			strcpy(modelname, " ");
 
 			done = false;
-
 
 			while(!done) {
 				if(modelpath[len] == 'h')
