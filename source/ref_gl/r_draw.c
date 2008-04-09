@@ -338,7 +338,7 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 	COM_StripExtension ( gl->name, shortname );
 	rs=RS_FindScript(shortname);
 
-	R_InitMeshVarrays(); //uses same arrays as meshes
+	R_InitQuadVarrays(); 
 	
 	if (!rs) 
 	{
@@ -451,6 +451,8 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 		GLSTATE_ENABLE_ALPHATEST
 		GLSTATE_DISABLE_BLEND
 		GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		R_KillVArrays();
 	}
 }
 

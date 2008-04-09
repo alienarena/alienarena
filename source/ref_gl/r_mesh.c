@@ -275,12 +275,14 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
 	{
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
-		R_InitMeshVarrays();
+		R_InitVArrays (VERT_COLOURED_TEXTURED);
 		while (1)
 		{
 			// get the vertex count and primitive type
 			count = *order++;
 			va=0;
+			VArray = &VArrayVerts[0];
+
 			if (!count)
 				break;		// done
 			if (count < 0)
@@ -295,31 +297,41 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 			{
 				// texture coordinates come from the draw list
 				index_xyz = order[2];
+	
+				VArray[0] = s_lerped[index_xyz][0];
+				VArray[1] = s_lerped[index_xyz][1];
+				VArray[2] = s_lerped[index_xyz][2];
 
-				VA_SetElem2(tex_array[va],(s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f), s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f);
-				VA_SetElem3(vert_array[va],s_lerped[index_xyz][0],s_lerped[index_xyz][1],s_lerped[index_xyz][2]);
-				VA_SetElem4(col_array[va], shadelight[0], shadelight[1], shadelight[2], calcEntAlpha(alpha, s_lerped[index_xyz]));
+				VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
+				VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
+
+				VArray[5] = shadelight[0];
+				VArray[6] = shadelight[1];
+				VArray[7] = shadelight[2];
+				VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);		
+
+				// increment pointer and counter
+				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 				va++;
 				order += 3;
 			} while (--count);
-
-			if ( qglLockArraysEXT )
-				qglLockArraysEXT( 0, va );
-			qglDrawArrays(mode,0,va);
-			if ( qglUnlockArraysEXT ) 
-				qglUnlockArraysEXT();
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+				qglDrawArrays(mode,0,va);
+			
 		}
 	}
 	else if(!rs)
 	{
 		alpha = basealpha;
-		R_InitMeshVarrays();
+		R_InitVArrays (VERT_COLOURED_TEXTURED);
 		while (1)
 		{
 
 			// get the vertex count and primitive type
 			count = *order++;
 			va=0;
+			VArray = &VArrayVerts[0];
+
 			if (!count)
 				break;		// done
 			if (count < 0)
@@ -332,7 +344,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 			tmp_count=count;
 			tmp_order=order;
-
+					
 			do
 			{
 				// texture coordinates come from the draw list
@@ -340,16 +352,25 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				
 				GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 
-				VA_SetElem2(tex_array[va],((float *)order)[0], ((float *)order)[1]);
-				VA_SetElem3(vert_array[va],s_lerped[index_xyz][0],s_lerped[index_xyz][1],s_lerped[index_xyz][2]);
-				VA_SetElem4(col_array[va],lightcolor[0], lightcolor[1], lightcolor[2], calcEntAlpha(alpha, s_lerped[index_xyz]));
-				
+				VArray[0] = s_lerped[index_xyz][0];
+				VArray[1] = s_lerped[index_xyz][1];
+				VArray[2] = s_lerped[index_xyz][2];
+
+				VArray[3] = ((float *) order)[0];
+				VArray[4] = ((float *) order)[1];
+
+				VArray[5] = lightcolor[0];
+				VArray[6] = lightcolor[1];
+				VArray[7] = lightcolor[2];
+				VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);				
+
+				// increment pointer and counter
+				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 				va++;
 				order += 3;
 			} while (--count);
 			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-				qglDrawArrays(mode,0,va);
-	
+				qglDrawArrays(mode,0,va);	
 		}
 
 	}
@@ -365,7 +386,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 		if (depthmaskrscipt)
 			qglDepthMask(false);
 
-		R_InitMeshVarrays();
+		R_InitVArrays (VERT_COLOURED_TEXTURED);
 		while (1)
 		{
 			count = *order++;
@@ -385,12 +406,14 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 			stage=rs->stage;
 			tmp_count=count;
 			tmp_order=order;
+	
 
 			while (stage)
 			{
 				count=tmp_count;
 				order=tmp_order;
 				va=0;
+				VArray = &VArrayVerts[0];
 
 				if (stage->normalmap && !gl_normalmaps->value) {
 					if(stage->next) {
@@ -491,10 +514,14 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					}
 
 					RS_SetTexcoords2D(stage, &os, &ot);
+		
+					VArray[0] = s_lerped[index_xyz][0];
+					VArray[1] = s_lerped[index_xyz][1];
+					VArray[2] = s_lerped[index_xyz][2];
 
-					VA_SetElem2(tex_array[va], os, ot);
-					VA_SetElem3(vert_array[va],s_lerped[index_xyz][0],s_lerped[index_xyz][1],s_lerped[index_xyz][2]);
-
+					VArray[3] = os;
+					VArray[4] = ot;
+			
 					{
 						float red = 1, green = 1, blue = 1, nAlpha;
 
@@ -523,10 +550,13 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 							green *= stage->colormap.green/255.0;
 							blue *= stage->colormap.blue/255.0;
 						}
-
-						VA_SetElem4(col_array[va], red, green, blue, nAlpha);
+						VArray[5] = red;
+						VArray[6] = green;
+						VArray[7] = blue;
+						VArray[8] = nAlpha;				
 					}
-				
+					// increment pointer and counter
+					VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 					order += 3;
 					va++;
 				} while (--count);
@@ -567,6 +597,8 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+
+	R_KillVArrays ();
 
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
 		qglEnable( GL_TEXTURE_2D );
@@ -631,12 +663,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
 	{
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
-		R_InitMeshVarrays();
+		R_InitVArrays (VERT_COLOURED_TEXTURED);
 		while (1)
 		{
 			// get the vertex count and primitive type
 			count = *order++;
 			va=0;
+			VArray = &VArrayVerts[0];
+
 			if (!count)
 				break;		// done
 			if (count < 0)
@@ -651,26 +685,41 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 			{
 				// texture coordinates come from the draw list
 				index_xyz = order[2];
+				
+				VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
+				VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
+				VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
 
-				VA_SetElem2(tex_array[va],(currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f), currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f);
-				VA_SetElem3(vert_array[va],currentmodel->r_mesh_verts[index_xyz][0],currentmodel->r_mesh_verts[index_xyz][1],currentmodel->r_mesh_verts[index_xyz][2]);
-				VA_SetElem4(col_array[va], shadelight[0], shadelight[1], shadelight[2], calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]));
+				VArray[3] = (currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f);
+				VArray[4] = currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
+
+				VArray[5] = shadelight[0];
+				VArray[6] = shadelight[1];
+				VArray[7] = shadelight[2];
+				VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);		
+
+				// increment pointer and counter
+				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+				
 				va++;
 				order += 3;
 			} while (--count);
-			qglDrawArrays(mode,0,va);
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+				qglDrawArrays(mode,0,va);
 		}
 	}
 	else if(!rs)
 	{
 		alpha = basealpha;
-		R_InitMeshVarrays();
+		R_InitVArrays (VERT_COLOURED_TEXTURED);
 		while (1)
 		{
 
 			// get the vertex count and primitive type
 			count = *order++;
 			va=0;
+			VArray = &VArrayVerts[0];
+
 			if (!count)
 				break;		// done
 			if (count < 0)
@@ -690,11 +739,21 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 				index_xyz = order[2];
 				
 				GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+	
+				VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
+				VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
+				VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
 
-				VA_SetElem2(tex_array[va],((float *)order)[0], ((float *)order)[1]);
-				VA_SetElem3(vert_array[va],currentmodel->r_mesh_verts[index_xyz][0],currentmodel->r_mesh_verts[index_xyz][1],currentmodel->r_mesh_verts[index_xyz][2]);
-				VA_SetElem4(col_array[va],lightcolor[0], lightcolor[1], lightcolor[2], calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]));
-				
+				VArray[3] = ((float *) order)[0];
+				VArray[4] = ((float *) order)[1];
+
+				VArray[5] = lightcolor[0];
+				VArray[6] = lightcolor[1];
+				VArray[7] = lightcolor[2];
+				VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);				
+
+				// increment pointer and counter
+				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 				va++;
 				order += 3;
 			} while (--count);
@@ -716,7 +775,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 		if (depthmaskrscipt)
 			qglDepthMask(false);
 
-		R_InitMeshVarrays();
+		R_InitVArrays (VERT_COLOURED_TEXTURED);
 		while (1)
 		{
 			count = *order++;
@@ -742,6 +801,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 				count=tmp_count;
 				order=tmp_order;
 				va=0;
+				VArray = &VArrayVerts[0];
 
 				if (stage->normalmap && !gl_normalmaps->value) {
 					if(stage->next) {
@@ -841,8 +901,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 
 					RS_SetTexcoords2D(stage, &os, &ot);
 
-					VA_SetElem2(tex_array[va], os, ot);
-					VA_SetElem3(vert_array[va],currentmodel->r_mesh_verts[index_xyz][0],currentmodel->r_mesh_verts[index_xyz][1],currentmodel->r_mesh_verts[index_xyz][2]);
+					VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
+					VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
+					VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+
+					VArray[3] = os;
+					VArray[4] = ot;
 
 					{
 						float red = 1, green = 1, blue = 1, nAlpha;
@@ -873,9 +937,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 							blue *= stage->colormap.blue/255.0;
 						}
 
-						VA_SetElem4(col_array[va], red, green, blue, nAlpha);
+						VArray[5] = red;
+						VArray[6] = green;
+						VArray[7] = blue;
+						VArray[8] = nAlpha;	
 					}
-				
+					// increment pointer and counter
+					VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 					order += 3;
 					va++;
 				} while (--count);
@@ -916,6 +984,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+
+	R_KillVArrays ();
 
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
 		qglEnable( GL_TEXTURE_2D );

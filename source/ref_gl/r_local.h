@@ -452,6 +452,13 @@ extern float	tex_array[MAX_ARRAY][2];
 extern float	vert_array[MAX_ARRAY][3];
 extern float	col_array[MAX_ARRAY][4];
 
+#define MAX_VARRAY_VERTS MAX_VERTS + 2
+#define MAX_VARRAY_VERTEX_SIZE 11
+
+extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
+extern int VertexSizes[];
+extern float *VArray;
+
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu
 #define VERT_BUMPMAPPED					1		// verts and st for 1 tmu, but with 2 texcoord pointers
@@ -466,7 +473,7 @@ extern float	col_array[MAX_ARRAY][4];
 // vertex array subsystem
 void R_InitVArrays (int varraytype);
 void R_KillVArrays (void);
-void R_InitMeshVarrays(void);
+void R_InitQuadVarrays(void);
 void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
 

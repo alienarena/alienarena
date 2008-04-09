@@ -36,13 +36,11 @@ has to take place at least every time the primitive type changes (that's vertex 
 // this must be equal to MAX_VERTS as it's possible for a single MDL to be composed of only one triangle fan or strip.
 // the storage overhead is only in the order of 100K anyway, so it's no big deal.
 // add 2 more verts for surface warping
-#define MAX_VARRAY_VERTS MAX_VERTS + 2
-#define MAX_VARRAY_VERTEX_SIZE 11
 
 float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 
 // pointer for dynamic vert allocation
-static float *VArray = &VArrayVerts[0];
+float *VArray = &VArrayVerts[0];
 
 // number of verts allocated
 static int VertexCounter = 0;
@@ -326,15 +324,12 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 
 /*
 ====================
-R_InitMeshVarrays
+R_InitQuadVarrays
 
-This is used for operations that required more 
-manipulation of texture coordinates than the above 
-code provides.  Perhaps we should write more complex
-functions that can use the other array subsystem.
+Used for 2 dimensional quads
 ====================
 */
-void R_InitMeshVarrays(void) {
+void R_InitQuadVarrays(void) {
 
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
