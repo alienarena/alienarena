@@ -641,14 +641,6 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 
 	RS_ScanPathForScripts();		// load all found scripts
 
-	// Vertex arrays
-	qglEnableClientState (GL_VERTEX_ARRAY);
-	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
-
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	qglVertexPointer (3, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
-	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
-
 	return rserr_ok;
 }
 

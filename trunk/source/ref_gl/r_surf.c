@@ -711,7 +711,7 @@ dynamic:
 
 //This next section deals with bumpmapped surfaces.  Much of this was gathered from Mike Hiney
 //and "Paul's Projects" tutorials.
-void R_InitNormalSurfaces (void)
+static void R_InitNormalSurfaces (void)
 {
 	dlight_t	*dl;
 	int			lnum;
@@ -773,7 +773,7 @@ void R_InitNormalSurfaces (void)
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
-void R_KillNormalTMUs(void) {
+static void R_KillNormalTMUs(void) {
 	
 	//kill TMU1
 	qglActiveTextureARB (GL_TEXTURE1);
