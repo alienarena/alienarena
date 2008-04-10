@@ -471,7 +471,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					GLSTATE_DISABLE_ALPHATEST
 				}
 
-				if(stage->normalmap && gl_normalmaps->value) {
+				if(stage->normalmap) {
 
 					ramp = 2.0; //for getting brightness of normal maps up a bit
 
@@ -536,7 +536,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 							blue = lightcolor[2] * ramp;
 								
 							//try to keep normalmapped stages from going completely dark
-							if(stage->normalmap && gl_normalmaps->value) {
+							if(stage->normalmap ) {
 								if(red < .6) red = .6;
 								if(green < .6) green = .6;
 								if(blue < .6) blue = .6;
@@ -568,7 +568,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				if (stage->colormap.enabled)
 					qglEnable (GL_TEXTURE_2D);
 
-				if(stage->normalmap && gl_normalmaps->value) {
+				if(stage->normalmap) {
 
 					ramp = 1.0;
 					// back to replace mode
@@ -859,7 +859,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 					GLSTATE_DISABLE_ALPHATEST
 				}
 
-				if(stage->normalmap && gl_normalmaps->value) {
+				if(stage->normalmap) {
 
 					ramp = 2.0; //for getting brightness of normal maps up a bit
 
@@ -922,7 +922,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 							blue = lightcolor[2] * ramp;
 								
 							//try to keep normalmapped stages from going completely dark
-							if(stage->normalmap && gl_normalmaps->value) {
+							if(stage->normalmap) {
 								if(red < .6) red = .6;
 								if(green < .6) green = .6;
 								if(blue < .6) blue = .6;
@@ -955,7 +955,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 				if (stage->colormap.enabled)
 					qglEnable (GL_TEXTURE_2D);
 
-				if(stage->normalmap && gl_normalmaps->value) {
+				if(stage->normalmap) {
 
 					ramp = 1.0;
 					// back to replace mode
