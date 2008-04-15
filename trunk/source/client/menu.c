@@ -2368,6 +2368,7 @@ static const char *idcredits[] =
 	"",
 	"+LOGO",
 	"Adam -servercleaner- Szalai",
+	"Paul -GimpAlien-",
 	"",
 	"+LEVEL DESIGN",
 	"John Diamond",

@@ -32,6 +32,8 @@ int meansOfDeath;
 int bot_won;
 qboolean stayed;
 
+char *winningmap;
+
 edict_t		*g_edicts;
 
 cvar_t	*deathmatch;
@@ -85,6 +87,9 @@ cvar_t  *g_spawnprotect;
 
 //joust mode
 cvar_t  *joustmode;
+
+//map voting
+cvar_t	*g_mapvote;
 
 cvar_t	*dmflags;
 cvar_t	*skill;
@@ -333,6 +338,43 @@ void EndDMLevel (void)
 			continue;
 		if(!ent->is_bot && ent->deadflag)
 			DeathcamRemove (ent, "off");
+	}
+
+	//map voting
+	if(g_mapvote->value) {
+		level.changemap = level.mapname;
+		strcpy(votedmap[0].mapname, level.mapname); //first is current
+		votedmap[0].tally = 0;
+		for(i = 1; i < 4; i++) {
+			
+			//initialize 
+			strcpy(votedmap[i].mapname, level.mapname);
+			votedmap[i].tally = 0;
+
+			//get next four maps from the maplist
+			if (*sv_maplist->string) {
+				s = strdup(sv_maplist->string);
+				f = NULL;
+				t = NULL;
+				t = strtok(s, seps);
+				while (t != NULL) {
+					if(!f)
+						f = t; //first map in list	
+					if (Q_stricmp(t, votedmap[i-1].mapname) == 0) {
+						// it's in the list, go to the next one
+						t = strtok(NULL, seps);
+						if(t) {
+							strcpy(votedmap[i].mapname, t);
+							break;
+						}
+						else
+							strcpy(votedmap[i].mapname, f); //first in list
+					}
+					t = strtok(NULL, seps);
+				}
+				free(s);
+			}
+		}
 	}
 
 	// stay on same level flag

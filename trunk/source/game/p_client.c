@@ -1597,6 +1597,8 @@ void PutClientInServer (edict_t *ent)
 	client->is_bot = 0;
 	client->kill_streak = 0;
 
+	client->mapvote = 0;
+
 	resp = client->resp;
 	memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
 	InitClientPersistant (client);
@@ -1927,7 +1929,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 			if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 				CTFScoreboardMessage (ent, NULL);
 			else
-				DeathmatchScoreboardMessage (ent, NULL);
+				DeathmatchScoreboardMessage (ent, NULL, false);
 			gi.unicast (ent, true);
 			ent->teamset = true;
 		}
@@ -2531,8 +2533,9 @@ usually be a couple times for each server frame.
 void ClientThink (edict_t *ent, usercmd_t *ucmd)
 {
 	gclient_t	*client;
+	edict_t *cl_ent;
 	edict_t	*other;
-	int		i, j;
+	int		i, j, mostvotes;
 	pmove_t	pm;
 	qboolean sproing, haste;
 	vec3_t addspeed, forward, up;
@@ -2542,12 +2545,41 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	if (level.intermissiontime)
 	{
-
 		client->ps.pmove.pm_type = PM_FREEZE;
-		// can exit intermission after ten seconds
-		if (level.time > level.intermissiontime + 10.0
-			&& (ucmd->buttons & BUTTON_ANY) )
-			level.exitintermission = true;
+		
+		// can exit intermission after 10 seconds, or 20 if map voting enables
+		if(g_mapvote->value) {
+
+			//print out results, track winning map
+			mostvotes = 0;
+			
+			for (i=0 ; i<maxclients->value ; i++)
+			{
+				cl_ent = g_edicts + 1 + i;
+				if (!cl_ent->inuse || cl_ent->is_bot)
+					continue;
+				for(j = 0; j < 4; j++) {
+					if(votedmap[j].tally >= mostvotes) {
+						mostvotes = votedmap[j].tally;
+						strcpy(level.changemap, votedmap[j].mapname);
+					}
+				}
+			}
+			//if nobody voted, then move to next map in list
+			if(mostvotes == 0)
+				strcpy(level.changemap, votedmap[1].mapname);
+
+			if(!ent->is_bot)
+				safe_centerprintf(ent, "Type \"vote #\" to vote for next map!");
+			if (level.time > level.intermissiontime + 20.0
+				&& (ucmd->buttons & BUTTON_ANY) )
+				level.exitintermission = true;
+		}
+		else {		
+			if (level.time > level.intermissiontime + 10.0
+				&& (ucmd->buttons & BUTTON_ANY) )
+				level.exitintermission = true;
+		}
 		return;
 	}
 
