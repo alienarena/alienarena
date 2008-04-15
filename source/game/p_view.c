@@ -1126,7 +1126,7 @@ void ClientEndServerFrame (edict_t *ent)
 			return;
 // ACEBOT_END
 
-		DeathmatchScoreboardMessage (ent, ent->enemy);
+		DeathmatchScoreboardMessage (ent, ent->enemy, false);
 		gi.unicast (ent, false);
 	}
 	if (ent->client->chasetoggle == 1)

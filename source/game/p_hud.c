@@ -65,7 +65,10 @@ void MoveClientToIntermission (edict_t *ent)
 
 	if (deathmatch->value)
 	{
-		DeathmatchScoreboardMessage (ent, NULL);
+		if(g_mapvote->value)
+			DeathmatchScoreboardMessage (ent, NULL, true);
+		else
+			DeathmatchScoreboardMessage (ent, NULL, false);
 		gi.unicast (ent, true);
 	}
 
@@ -131,7 +134,10 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 
 	if (deathmatch->value)
 	{
-		DeathmatchScoreboardMessage (winner, NULL);
+		if(g_mapvote->value)
+			DeathmatchScoreboardMessage (winner, NULL, true);
+		else
+			DeathmatchScoreboardMessage (winner, NULL, false);
 		gi.unicast (winner, true);
 	}
 
@@ -502,7 +508,7 @@ DeathmatchScoreboardMessage
 
 ==================
 */
-void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
+void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 {
 	char	entry[1024];
 	char	string[1400];
@@ -516,10 +522,9 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 	edict_t		*cl_ent;
 	char    acc[16];
 	char	weapname[16];
-// ACEBOT_ADD
+
 	if (ent->is_bot)
 		return;
-// ACEBOT_END
 
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
 		CTFScoreboardMessage (ent, killer);
@@ -672,7 +677,30 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 			stringlength +=j;
 		}
 	}
-	
+	//map voting
+	if(mapvote) {
+		y = 64;
+		x = 0;
+		Com_sprintf(entry, sizeof(entry), 
+			"xv %i yt %i string Vote.for.next.map: ", x, y);
+		j = strlen(entry);
+		if(stringlength + j < 1024) {
+			strcpy(string + stringlength, entry);
+			stringlength +=j;
+		}
+		for(i=0; i<4; i++) {
+			
+			Com_sprintf(entry, sizeof(entry), 
+			"xv %i yt %i string %i.%s(%i) ", x, y+((i+1)*9)+9, i+1, votedmap[i].mapname, votedmap[i].tally);
+			j = strlen(entry);
+			if(stringlength + j < 1024) {
+				strcpy(string + stringlength, entry);
+				stringlength +=j;
+			}
+		}
+
+	}
+
 	gi.WriteByte (svc_layout);
 	gi.WriteString (string);
 }
@@ -693,7 +721,7 @@ void DeathmatchScoreboard (edict_t *ent)
 		return;
 // ACEBOT_END
 
-	DeathmatchScoreboardMessage (ent, ent->enemy);
+	DeathmatchScoreboardMessage (ent, ent->enemy, false);
 	gi.unicast (ent, true);
 }
 

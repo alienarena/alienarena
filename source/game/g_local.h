@@ -609,6 +609,9 @@ extern cvar_t   *g_spawnprotect;
 //jousting
 extern cvar_t   *joustmode;
 
+//map voting
+extern cvar_t	*g_mapvote;
+
 #define world	(&g_edicts[0])
 
 // item spawnflags
@@ -896,7 +899,7 @@ void G_SetStats (edict_t *ent);
 void G_SetSpectatorStats (edict_t *ent);
 void G_CheckChaseStats (edict_t *ent);
 void ValidateSelectedItem (edict_t *ent);
-void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer);
+void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer, int mapvote);
 
 //
 // p_weapon.c
@@ -1151,6 +1154,9 @@ struct gclient_s
 	float spawnprotecttime;
 	qboolean spawnprotected;
 
+	//map voting
+	int mapvote;
+
 };
 
 
@@ -1376,6 +1382,14 @@ struct edict_s
 	char body[64];
 
 };
+
+struct gmapvote_s
+{
+	char	mapname[32]; //ugg, end the pointer madness
+	int		tally;
+} votedmap[4];
+
+extern char *winningmap;
 
 void FL_think (edict_t *self);
 void FL_make (edict_t *self);

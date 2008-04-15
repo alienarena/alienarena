@@ -904,6 +904,37 @@ void Cmd_PlayerList_f(edict_t *ent)
 
 /*
 =================
+Cmd_Vote_f
+=================
+*/
+void Cmd_Vote_f (edict_t *ent)
+{
+
+	int		i, j;
+	edict_t *cl_ent;
+
+	i = atoi (gi.argv(1));
+
+	ent->client->mapvote = i;
+	safe_bprintf(PRINT_HIGH, "%s voted for map %i\n", ent->client->pers.netname, i);
+
+	//update scoreboard
+	for(i = 0; i < 4; i++)
+		votedmap[i].tally = 0;
+	for (i=0 ; i<maxclients->value ; i++)
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (!cl_ent->inuse || cl_ent->is_bot)
+			continue;
+		for(j = 0; j < 4; j++) {
+			if(cl_ent->client->mapvote-1 == j)
+				votedmap[j].tally++;
+		}
+		DeathmatchScoreboardMessage (cl_ent, NULL, true);
+	}
+}
+/*
+=================
 ClientCommand
 =================
 */
@@ -944,6 +975,11 @@ void ClientCommand (edict_t *ent)
 	if (Q_stricmp (cmd, "help") == 0)
 	{
 		Cmd_Help_f (ent);
+		return;
+	}
+	if (Q_stricmp (cmd, "vote") == 0)
+	{
+		Cmd_Vote_f(ent);
 		return;
 	}
 

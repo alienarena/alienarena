@@ -237,6 +237,9 @@ void InitGame (void)
 	//joust mode
 	joustmode = gi.cvar("sv_joustmode", "0", CVAR_SERVERINFO);
 
+	//map voting
+	g_mapvote = gi.cvar("g_mapvote", "0", CVAR_SERVERINFO);
+
 	// change anytime vars
 	dmflags = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);
 	fraglimit = gi.cvar ("fraglimit", "0", CVAR_SERVERINFO);
