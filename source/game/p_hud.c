@@ -527,7 +527,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		return;
 
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
-		CTFScoreboardMessage (ent, killer);
+		CTFScoreboardMessage (ent, killer, mapvote);
 		return;
 	}
 	// sort the clients by score

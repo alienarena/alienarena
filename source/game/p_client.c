@@ -1927,7 +1927,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 		if(ent->dmteam == NO_TEAM) {
 			ent->client->showscores = true;
 			if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
-				CTFScoreboardMessage (ent, NULL);
+				CTFScoreboardMessage (ent, NULL, false);
 			else
 				DeathmatchScoreboardMessage (ent, NULL, false);
 			gi.unicast (ent, true);

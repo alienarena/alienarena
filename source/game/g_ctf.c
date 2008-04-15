@@ -27,12 +27,12 @@ int imageindex_sbfctf2;
 CTFScoreboardMessage
 ==================
 */
-void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
+void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 {
 	char	entry[1024];
 	char	string[1400];
 	int		len;
-	int		i, j, k, n;
+	int		i, j, k, n, x, y;
 	int		sorted[2][MAX_CLIENTS];
 	int		sortedscores[2][MAX_CLIENTS];
 	int		score, total[2], totalscore[2];
@@ -210,6 +210,27 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer)
 	if (total[1] - last[1] > 1) // couldn't fit everyone
 		sprintf(string + strlen(string), "xv 168 yv %d string \"..and %d more\" ",
 			42 + (last[1]+1)*8, total[1] - last[1] - 1);
+
+	if(mapvote) {
+		y = 64;
+		x = 0;
+		Com_sprintf(entry, sizeof(entry), 
+			"xv %i yt %i string Vote.for.next.map: ", x, y);
+		if(maxsize - len > strlen(entry)) {
+			strcat(string, entry);
+			len = strlen(string);
+		}
+		for(i=0; i<4; i++) {
+			
+			Com_sprintf(entry, sizeof(entry), 
+			"xv %i yt %i string %i.%s(%i) ", x, y+((i+1)*9)+9, i+1, votedmap[i].mapname, votedmap[i].tally);
+			if(maxsize - len > strlen(entry)) {
+				strcat(string, entry);
+				len = strlen(string);
+			}
+		}
+
+	}
 
 	gi.WriteByte (svc_layout);
 	gi.WriteString (string);
