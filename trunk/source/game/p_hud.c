@@ -267,7 +267,7 @@ void BeginIntermission (edict_t *targ)
 			respawn(client);
 			client->deadflag = DEAD_DEAD; //so we can know if he's dead for placement offsetting
 		}
-		if(!client->is_bot)
+		if(!client->is_bot && g_mapvote->value)
 			safe_centerprintf(client, "Type \"vote #\" to vote for next map!");
 	}
 
@@ -600,83 +600,84 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		stringlength += j;
 	}
 
-	//weapon accuracy
-
-	//add a background
-	x = 0;
-	y = (total>=6) ? (32+(32*5)) : (32*total);
-	for (i=0 ; i<3 ; i++)
-	{
-	
-		Com_sprintf (entry, sizeof(entry),
-			"xv %i yv %i picn %s ", x, y+((i+1)*32+24), "tag2");
-		j = strlen(entry);
-		if (stringlength + j > 1024)
-			break;
-		strcpy (string + stringlength, entry);
-		stringlength += j;
+	//weapon accuracy(don't do if map voting)
+	if(!mapvote) {
+		//add a background
+		x = 0;
+		y = (total>=6) ? (32+(32*5)) : (32*total);
+		for (i=0 ; i<3 ; i++)
+		{
 		
-		// send the layout
-		if (stringlength + j > 1024)
-			break;
-	}
-
-	x = 0;
-	y = (total>=6) ? (32+(32*5)) : (32*total);
-	Com_sprintf(entry, sizeof(entry),
-		"xv %i yv %i string Accuracy ", x, y+56);
-	j = strlen(entry);
-	if(stringlength + j < 1024) {
-		strcpy(string + stringlength, entry);
-		stringlength +=j;
-	}
-	for(i = 0; i < 9; i++) {
-
-		//in case of scenarios where a weapon is scoring multiple hits per shot(ie smartgun)
-		if(ent->client->resp.weapon_hits[i] > ent->client->resp.weapon_shots[i])
-			ent->client->resp.weapon_hits[i] = ent->client->resp.weapon_shots[i];
-
-		if(ent->client->resp.weapon_shots[i] == 0)
-			strcpy(acc, "0%");
-		else {
-			sprintf(acc, "%i", (100*ent->client->resp.weapon_hits[i]/ent->client->resp.weapon_shots[i]));
-			strcat(acc, "%");
-		}
-		switch (i) {
-			case 0:
-				strcpy(weapname, "blaster");
+			Com_sprintf (entry, sizeof(entry),
+				"xv %i yv %i picn %s ", x, y+((i+1)*32+24), "tag2");
+			j = strlen(entry);
+			if (stringlength + j > 1024)
 				break;
-			case 1:
-				strcpy(weapname, "disruptor");
-				break;
-			case 2:
-				strcpy(weapname, "smartgun");
-				break;
-			case 3:
-				strcpy(weapname, "chaingun");
-				break;
-			case 4:
-				strcpy(weapname, "flame");
-				break;
-			case 5:
-				strcpy(weapname, "rocket");
-				break;
-			case 6:
-				strcpy(weapname, "beamgun");
-				break;
-			case 7:
-				strcpy(weapname, "vaporizer");
-				break;
-			case 8:
-				strcpy(weapname, "violator");
+			strcpy (string + stringlength, entry);
+			stringlength += j;
+			
+			// send the layout
+			if (stringlength + j > 1024)
 				break;
 		}
+
+		x = 0;
+		y = (total>=6) ? (32+(32*5)) : (32*total);
 		Com_sprintf(entry, sizeof(entry),
-			"xv %i yv %i string %s xv %i string %s ", x, y+((i+1)*9)+64, weapname, x+96, acc);
+			"xv %i yv %i string Accuracy ", x, y+56);
 		j = strlen(entry);
 		if(stringlength + j < 1024) {
 			strcpy(string + stringlength, entry);
 			stringlength +=j;
+		}
+		for(i = 0; i < 9; i++) {
+
+			//in case of scenarios where a weapon is scoring multiple hits per shot(ie smartgun)
+			if(ent->client->resp.weapon_hits[i] > ent->client->resp.weapon_shots[i])
+				ent->client->resp.weapon_hits[i] = ent->client->resp.weapon_shots[i];
+
+			if(ent->client->resp.weapon_shots[i] == 0)
+				strcpy(acc, "0%");
+			else {
+				sprintf(acc, "%i", (100*ent->client->resp.weapon_hits[i]/ent->client->resp.weapon_shots[i]));
+				strcat(acc, "%");
+			}
+			switch (i) {
+				case 0:
+					strcpy(weapname, "blaster");
+					break;
+				case 1:
+					strcpy(weapname, "disruptor");
+					break;
+				case 2:
+					strcpy(weapname, "smartgun");
+					break;
+				case 3:
+					strcpy(weapname, "chaingun");
+					break;
+				case 4:
+					strcpy(weapname, "flame");
+					break;
+				case 5:
+					strcpy(weapname, "rocket");
+					break;
+				case 6:
+					strcpy(weapname, "beamgun");
+					break;
+				case 7:
+					strcpy(weapname, "vaporizer");
+					break;
+				case 8:
+					strcpy(weapname, "violator");
+					break;
+			}
+			Com_sprintf(entry, sizeof(entry),
+				"xv %i yv %i string %s xv %i string %s ", x, y+((i+1)*9)+64, weapname, x+96, acc);
+			j = strlen(entry);
+			if(stringlength + j < 1024) {
+				strcpy(string + stringlength, entry);
+				stringlength +=j;
+			}
 		}
 	}
 	//map voting
