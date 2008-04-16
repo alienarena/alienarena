@@ -267,6 +267,8 @@ void BeginIntermission (edict_t *targ)
 			respawn(client);
 			client->deadflag = DEAD_DEAD; //so we can know if he's dead for placement offsetting
 		}
+		if(!client->is_bot)
+			safe_centerprintf(client, "Type \"vote #\" to vote for next map!");
 	}
 
 	level.intermissiontime = level.time;
@@ -691,7 +693,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		for(i=0; i<4; i++) {
 			
 			Com_sprintf(entry, sizeof(entry), 
-			"xv %i yt %i string %i.%s(%i) ", x, y+((i+1)*9)+9, i+1, votedmap[i].mapname, votedmap[i].tally);
+			"xv %i yt %i string %i.%s ", x, y+((i+1)*9)+9, i+1, votedmap[i].mapname);
 			j = strlen(entry);
 			if(stringlength + j < 1024) {
 				strcpy(string + stringlength, entry);

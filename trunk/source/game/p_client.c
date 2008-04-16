@@ -2568,9 +2568,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			//if nobody voted, then move to next map in list
 			if(mostvotes == 0)
 				strcpy(level.changemap, votedmap[1].mapname);
-
-			if(!ent->is_bot)
-				safe_centerprintf(ent, "Type \"vote #\" to vote for next map!");
+			
 			if (level.time > level.intermissiontime + 20.0
 				&& (ucmd->buttons & BUTTON_ANY) )
 				level.exitintermission = true;
