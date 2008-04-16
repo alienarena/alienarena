@@ -915,6 +915,9 @@ void Cmd_Vote_f (edict_t *ent)
 
 	i = atoi (gi.argv(1));
 
+	if (!level.intermissiontime)
+		return;
+
 	ent->client->mapvote = i;
 	safe_bprintf(PRINT_HIGH, "%s voted for map %i\n", ent->client->pers.netname, i);
 
