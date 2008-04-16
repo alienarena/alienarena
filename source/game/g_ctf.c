@@ -223,7 +223,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		for(i=0; i<4; i++) {
 			
 			Com_sprintf(entry, sizeof(entry), 
-			"xv %i yt %i string %i.%s(%i) ", x, y+((i+1)*9)+9, i+1, votedmap[i].mapname, votedmap[i].tally);
+			"xv %i yt %i string %i.%s ", x, y+((i+1)*9)+9, i+1, votedmap[i].mapname);
 			if(maxsize - len > strlen(entry)) {
 				strcat(string, entry);
 				len = strlen(string);

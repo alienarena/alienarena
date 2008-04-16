@@ -910,7 +910,7 @@ Cmd_Vote_f
 void Cmd_Vote_f (edict_t *ent)
 {
 
-	int		i, j;
+	int		i, j, mostvotes, winner;
 	edict_t *cl_ent;
 
 	i = atoi (gi.argv(1));
@@ -919,6 +919,8 @@ void Cmd_Vote_f (edict_t *ent)
 	safe_bprintf(PRINT_HIGH, "%s voted for map %i\n", ent->client->pers.netname, i);
 
 	//update scoreboard
+	mostvotes = 0;
+	winner = 1; //next map in line
 	for(i = 0; i < 4; i++)
 		votedmap[i].tally = 0;
 	for (i=0 ; i<maxclients->value ; i++)
@@ -929,8 +931,13 @@ void Cmd_Vote_f (edict_t *ent)
 		for(j = 0; j < 4; j++) {
 			if(cl_ent->client->mapvote-1 == j)
 				votedmap[j].tally++;
+			if(votedmap[j].tally >= mostvotes){
+				mostvotes = votedmap[j].tally;
+				winner = j;
+			}
 		}
-		DeathmatchScoreboardMessage (cl_ent, NULL, true);
+		if(!ent->is_bot)
+			safe_centerprintf(ent, "Map %s leads with %i votes!", votedmap[winner].mapname, votedmap[winner].tally);
 	}
 }
 /*
