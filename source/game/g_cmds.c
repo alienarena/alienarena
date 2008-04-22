@@ -934,13 +934,12 @@ void Cmd_Vote_f (edict_t *ent)
 		for(j = 0; j < 4; j++) {
 			if(cl_ent->client->mapvote-1 == j)
 				votedmap[j].tally++;
-			if(votedmap[j].tally >= mostvotes){
+			if(votedmap[j].tally > mostvotes){
 				mostvotes = votedmap[j].tally;
 				winner = j;
 			}
 		}
-		if(!ent->is_bot)
-			safe_centerprintf(ent, "Map %s leads with %i votes!", votedmap[winner].mapname, votedmap[winner].tally);
+		safe_centerprintf(cl_ent, "Map %s leads with %i votes!", votedmap[winner].mapname, votedmap[winner].tally);
 	}
 }
 /*

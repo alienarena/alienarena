@@ -2559,7 +2559,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				if (!cl_ent->inuse || cl_ent->is_bot)
 					continue;
 				for(j = 0; j < 4; j++) {
-					if(votedmap[j].tally >= mostvotes) {
+					if(votedmap[j].tally > mostvotes) {
 						mostvotes = votedmap[j].tally;
 						strcpy(level.changemap, votedmap[j].mapname);
 					}
