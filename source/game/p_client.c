@@ -1899,7 +1899,6 @@ void ClientBeginDeathmatch (edict_t *ent)
 	FILE	*motd_file;
 	char	line[80];
 	char	motd[500];
-	static char current_map[55];
 
 	G_InitEdict (ent);
 
@@ -1980,7 +1979,6 @@ void ClientBeginDeathmatch (edict_t *ent)
 	ACEND_InitNodes();
 	ACEND_LoadNodes();
 	ACESP_LoadBots(ent, 0);
-	strcpy(current_map,level.mapname);
 
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
@@ -2339,8 +2337,13 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 	int		i, numspec, numplayers;
 	edict_t *cl_ent;
 
-	//check to see if server is using botkick, and if so, allow for at least one free
-	//slot for bots to enter and be kicked if needed
+	//check to see if server is using botkick, if so, we need to ensure that bots and 
+	//players are not overwriting one another upon level reloads.
+	//higher threshold means more bots get allowed into server at level load, resulting 
+	//in more chances of bots and true clients being loaded at the same time into the same slot.
+	//This only occurs in full, or near full servers.  Bots search for slots from the rear, and 
+	//real players from the front.  When the two begin overlapping, this is where trouble begins.
+	//The following snippet of code prevents overlapping.
 	if(sv_botkickthreshold->value) { 
 		numplayers = 0;
 		for (i=0 ; i<game.maxclients ; i++)
@@ -2349,7 +2352,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 			if (cl_ent->inuse && !cl_ent->is_bot)
 				numplayers++;
 		}
-		if(numplayers >= game.maxclients - 1) {
+		if(numplayers >= game.maxclients - (sv_botkickthreshold->integer - 1)) {
 				Info_SetValueForKey(userinfo, "rejmsg", "Server is full.");
 		
 			return false;

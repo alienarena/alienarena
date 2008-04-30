@@ -171,9 +171,6 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	}
 	real_players -= playerleft; //done for when this is called as a player is disconnecting
 	
-	if(real_players >= game.maxclients)
-		return; //we have too many slots occupied, so lets not try loading any bots.
-
 	total_players = 0;
 	for(i=0;i<count;i++)
 	{
