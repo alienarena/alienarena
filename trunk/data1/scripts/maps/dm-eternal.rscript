@@ -56,3 +56,20 @@ textures/arena9/greenglass
 		scroll static 0 static -1
 	}
 }
+textures/arena7/light14
+{
+	{
+		map textures/arena7/light14
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.4 0.4
+		nolightmap
+	}
+	{
+		map gfx/purpleline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static .25
+		scroll static 0 static 1
+		alphashift 10 0.02 0.5
+		nolightmap
+	}
+}
