@@ -69,7 +69,7 @@ textures/arena7/light14
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static .25
 		scroll static 0 static 1
-		alphashift 10 0.02 0.5
+		alphashift 10 0.02 0.7
 		nolightmap
 	}
 }
