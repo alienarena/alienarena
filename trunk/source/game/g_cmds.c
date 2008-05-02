@@ -939,6 +939,12 @@ void Cmd_Vote_f (edict_t *ent)
 				winner = j;
 			}
 		}
+	}
+	for (i=0 ; i<maxclients->value ; i++)
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (!cl_ent->inuse || cl_ent->is_bot)
+			continue;
 		safe_centerprintf(cl_ent, "Map %s leads with %i votes!", votedmap[winner].mapname, votedmap[winner].tally);
 	}
 }
