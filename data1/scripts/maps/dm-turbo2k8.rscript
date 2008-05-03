@@ -1,0 +1,82 @@
+textures/arena7/light3
+{
+	{ 
+		lensflare
+	}
+}
+textures/arena7/light10
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light11
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/grate1
+{
+
+	{
+		map gfx/electrics3a.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 5 0.7 0.9
+		scale static .1 static .1
+		scroll static 2 static 0
+		nolightmap
+	}
+	{	
+		map textures/arena8/grate1.tga
+		alphamask
+	}
+}
+textures/arena9/trim2
+{
+	{
+		map gfx/bluelightning2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 5 0.3 0.9
+		scroll static 5 static 0
+		nolightmap
+	}
+	{
+		map gfx/trim2mask.tga
+		alphamask
+	}
+}
+textures/arena7/metal1
+{
+	{
+		map gfx/chrome2.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		alphashift 1 0.2 0.2
+		envmap
+	}
+}
+textures/arena7/tekwall6
+{
+	{
+		map gfx/bluelightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 5 0.3 0.9
+		scroll static 0 static 1
+		nolightmap
+	}
+	{
+		map gfx/tekwallmask.tga
+		alphamask
+	}
+}
+textures/arena7/glass
+{
+
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
