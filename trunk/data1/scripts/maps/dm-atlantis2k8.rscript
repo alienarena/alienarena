@@ -61,17 +61,6 @@ textures/arena7/light5
 		lensflare
 	}
 }
-textures/arena6/blacktrans
-{
-	{
-		map gfx/purpleline.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 1 static 1
-		scroll static 2 static 1
-		alphashift 20 0.05 0.8
-		nolightmap
-	}
-}
 textures/arena6/plate5
 {
 	{
