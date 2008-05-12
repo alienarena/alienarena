@@ -273,7 +273,7 @@ void SendServerListToClient (struct sockaddr_in *from)
 	}
     //we shall add the cor servers to list always - ugly but gotta do it.
 
-	addr = inet_addr("76.21.132.99");
+	addr = inet_addr("76.21.130.55");
 	
 	corservers.sin_port = htons (27910);
 	memcpy (buff + buflen, &addr, 4);
@@ -299,7 +299,7 @@ void SendServerListToClient (struct sockaddr_in *from)
 	memcpy (buff + buflen, &corservers.sin_port, 4);
 	buflen +=2;
 
-	corservers.sin_port = htons (27970);
+	corservers.sin_port = htons (27915);
 	memcpy (buff + buflen, &addr, 4);
 	buflen +=4;
 	memcpy (buff + buflen, &corservers.sin_port, 4);
