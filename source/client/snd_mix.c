@@ -145,7 +145,6 @@ void S_TransferPaintBuffer(int endtime)
 {
 	int 	out_idx;
 	int 	count;
-	int 	out_mask;
 	int 	*p;
 	int 	step;
 	int		val;
@@ -188,9 +187,9 @@ void S_TransferPaintBuffer(int endtime)
 					val = 0x7fff;
 				else if (val < (short)0x8000)
 					val = (short)0x8000;
-				out[out_idx] = val;
-				out_mask = dma.samples - 1;
-				out_idx = (out_idx + 1) & out_mask;
+				out[out_idx++] = val;
+				if ( out_idx >= dma.samples )
+					out_idx = 0;
 			}
 		}
 		else if (dma.samplebits == 8)
@@ -204,9 +203,9 @@ void S_TransferPaintBuffer(int endtime)
 					val = 0x7fff;
 				else if (val < (short)0x8000)
 					val = (short)0x8000;
-				out[out_idx] = (val>>8) + 128;
-				out_mask = dma.samples - 1;
-				out_idx = (out_idx + 1) & out_mask;
+				out[out_idx++] = (val>>8) + 128;
+				if ( out_idx >= dma.samples )
+					out_idx = 0;
 			}
 		}
 	}
