@@ -1277,7 +1277,7 @@ static void Keys_MenuInit( void )
 
 static void Keys_MenuDraw (void)
 {
-	banneralpha += 0.01;
+	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
@@ -2291,7 +2291,7 @@ void Options_MenuDraw (void)
 {
 	char path[MAX_QPATH];
 
-	banneralpha += 0.01;
+	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
@@ -2669,7 +2669,7 @@ void Game_MenuInit( void )
 
 void Game_MenuDraw( void )
 {
-	banneralpha += 0.01;
+	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
@@ -3108,7 +3108,7 @@ void JoinServer_MenuDraw(void)
 	if(scale < 1)
 		scale = 1;
 
-	banneralpha += 0.01;
+	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
@@ -3416,7 +3416,7 @@ void Mutators_MenuInit( void )
 }
 void Mutators_MenuDraw(void)
 {
-	banneralpha += 0.01;
+	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
@@ -3586,7 +3586,7 @@ void Addbots_MenuDraw(void)
 	if(scale < 1)
 		scale = 1;
 
-	banneralpha += 0.01;
+	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
@@ -4336,13 +4336,13 @@ void StartServer_MenuDraw(void)
 	if(scale < 1)
 		scale = 1;
 
-	mappicalpha += 0.01; //fade map pic in
+	mappicalpha += cls.frametime; //fade map pic in
 	if(mappicalpha > 1)
 		mappicalpha = 1;
 
 	offset*=scale;
 
-	banneralpha += 0.01;
+	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
@@ -4899,7 +4899,7 @@ void DMOptions_MenuInit( void )
 void DMOptions_MenuDraw(void)
 {
 
-	banneralpha += 0.01;
+	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
@@ -5039,7 +5039,7 @@ const char *AddressBook_MenuKey( int key )
 
 void AddressBook_MenuDraw(void)
 {
-	banneralpha += 0.01;
+	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
@@ -5517,7 +5517,7 @@ void PlayerConfig_MenuDraw( void )
 	if(scale < 1)
 		scale = 1;
 
-	banneralpha += 0.01;
+	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
@@ -5743,7 +5743,7 @@ static menuaction_s		s_quit_no_action;
 
 void M_Quit_Draw( void )
 {
-	banneralpha += 0.01;
+	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
