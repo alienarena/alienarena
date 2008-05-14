@@ -40,11 +40,7 @@ void GetServerList (void) {
 	char recvBuff[0xFFFF], *p;
 	int tries = 0;
 
-#ifdef INHOUSE
-	hp = gethostbyname ("192.168.0.2");
-#else
 	hp = gethostbyname ("master.corservers.com");
-#endif
 
 	if (!hp) {
 		hp = gethostbyname ("master2.corservers.com"); //second master support
