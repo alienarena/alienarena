@@ -50,13 +50,16 @@ SNDDMA_Init (void)
 	SDL_AudioSpec desired, obtained;
 	int desired_bits, freq;
 	
+    /*
+    ** NOPARACHUTE flag tells SDL not to handle signals -- jjb
+    */
 	if (SDL_WasInit(SDL_INIT_EVERYTHING) == 0) {
-		if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE) < 0) {
 			Com_Printf ("Couldn't init SDL audio: %s\n", SDL_GetError ());
 			return 0;
 		}
 	} else if (SDL_WasInit(SDL_INIT_AUDIO) == 0) {
-		if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
+		if (SDL_InitSubSystem(SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE ) < 0) { 
 			Com_Printf ("Couldn't init SDL audio: %s\n", SDL_GetError ());
 			return 0;
 		}
@@ -134,8 +137,7 @@ SNDDMA_Init (void)
 			memcpy (&obtained, &desired, sizeof (desired));
 			break;
 	}
-	SDL_PauseAudio (0);
-
+	
 	/* Fill the audio DMA information block */
 	shm = &dma;
 	shm->samplebits = (obtained.format & 0xFF);
@@ -145,6 +147,8 @@ SNDDMA_Init (void)
 	shm->samplepos = 0;
 	shm->submission_chunk = 1;
 	shm->buffer = NULL;
+
+	SDL_PauseAudio (0); // start callback after shm struct init -- jjb
 
 	snd_inited = 1;
 	return 1;
@@ -170,20 +174,45 @@ SNDDMA_Shutdown (void)
 		SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
+
 /*
-
-	SNDDMA_Submit
-
-	Send sound to device if buffer isn't really the dma buffer
-
+** -- jjb
+** Use SNDDMA_BeginPainting and SNDMA_Submit for thread-safety/
+** SDL_LockAudio and SDL_UnlockAudio are used to prevent SDL callback,
+**  paint_audio() from running when S_PaintChannels() could be called 
+**  from main thread
+** These functions are called from client/snd_dma.c 
+** A semaphore is used to prevent any nested calls of the lock/unlock functions
 */
+
+static int locksem = 0;
+
 void
 SNDDMA_Submit (void)
 {
+    if ( locksem == 1 )
+    {
+        SDL_UnlockAudio(); // callback may run and call S_PaintChannels()
+        locksem = 0 ;
+    }
+    else
+    {
+        --locksem ;
+        if ( locksem < 0 )
+        {
+            // ERROR
+            locksem = 0 ;
+            // Com_DPrintf("snd_sdl.c:SNDDMA_Submit() semaphore error\n");
+        } 
+    }      
+
 }
 
-
 void SNDDMA_BeginPainting(void)
-{    
+{
+        
+    if ( ++locksem == 1 )
+        SDL_LockAudio();  //prevent callback from executing
+    
 }
 
