@@ -116,7 +116,8 @@ void S_TransferStereo16 (unsigned long *pbuf, int endtime)
 	while (lpaintedtime < endtime)
 	{
 	// handle recirculating buffer issues
-		lpos = lpaintedtime & ((dma.samples>>1)-1);
+	    // dma.samples is not always power of 2 -- jjb
+        lpos = lpaintedtime % (dma.samples >> 1);
 
 		snd_out = (short *) pbuf + (lpos<<1);
 
@@ -172,8 +173,8 @@ void S_TransferPaintBuffer(int endtime)
 	{	// general case
 		p = (int *) paintbuffer;
 		count = (endtime - paintedtime) * dma.channels;
-		out_mask = dma.samples - 1; 
-		out_idx = paintedtime * dma.channels & out_mask;
+	    // dma.samples is not always power of 2 -- jjb
+        out_idx = (paintedtime * dma.channels) % dma.samples;
 		step = 3 - dma.channels;
 
 		if (dma.samplebits == 16)
@@ -188,6 +189,7 @@ void S_TransferPaintBuffer(int endtime)
 				else if (val < (short)0x8000)
 					val = (short)0x8000;
 				out[out_idx] = val;
+				out_mask = dma.samples - 1;
 				out_idx = (out_idx + 1) & out_mask;
 			}
 		}
@@ -203,6 +205,7 @@ void S_TransferPaintBuffer(int endtime)
 				else if (val < (short)0x8000)
 					val = (short)0x8000;
 				out[out_idx] = (val>>8) + 128;
+				out_mask = dma.samples - 1;
 				out_idx = (out_idx + 1) & out_mask;
 			}
 		}

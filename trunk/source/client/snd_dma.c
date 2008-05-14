@@ -1177,10 +1177,21 @@ void S_Update_(void)
 	if (!sound_started)
 		return;
 
+#ifdef __linux__
+/* -- jjb
+** For Linux SDL version: Must not call SNDDMA_BeginPainting() 
+**  without calling SNDDMA_Submit() later. 
+** (Looks like Win version uses NULL dma.buffer as error flag)
+*/
+	if (!dma.buffer)
+		return;
+	SNDDMA_BeginPainting ();
+#else
 	SNDDMA_BeginPainting ();
 
 	if (!dma.buffer)
 		return;
+#endif	
 
 // Updates DMA time
 	GetSoundtime();
