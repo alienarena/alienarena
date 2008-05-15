@@ -2334,7 +2334,7 @@ loadgames will.
 qboolean ClientConnect (edict_t *ent, char *userinfo)
 {
 	char	*value;
-	int		i, numspec, numplayers;
+	int		i, numspec, numplayers, numbots;
 	edict_t *cl_ent;
 
 	//check to see if server is using botkick, if so, we need to ensure that bots and 
@@ -2352,7 +2352,10 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 			if (cl_ent->inuse && !cl_ent->is_bot)
 				numplayers++;
 		}
-		if(numplayers >= game.maxclients - (sv_botkickthreshold->integer)) {
+		numbots = ACESP_FindBotNum(); //number of potential bots	
+		if(sv_botkickthreshold->integer < numbots)
+			numbots = sv_botkickthreshold->integer;
+		if(numplayers >= game.maxclients - (numbots)) {
 			Info_SetValueForKey(userinfo, "rejmsg", "Server is full.");
 			return false;
 		}
