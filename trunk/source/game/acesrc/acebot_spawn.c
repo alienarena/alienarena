@@ -171,12 +171,12 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 		if(count > spawnkicknum) //no need to load more bots than this number
 			count = spawnkicknum;
 	}
+
 	real_players -= playerleft; //done for when this is called as a player is disconnecting
-	
 	total_players = 0;
+
 	for(i=0;i<count;i++)
 	{
-		
 		total_players = real_players + i + 1;
 
 		fread(userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn); 
@@ -206,7 +206,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 		//when clients enter the game
 		found = false;
 		found = ACESP_FindBot(info);
-
+		
 		if(!found && ((total_players <= spawnkicknum) || !spawnkicknum)) { 
 
 			if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) 
