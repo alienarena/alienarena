@@ -2352,9 +2352,8 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 			if (cl_ent->inuse && !cl_ent->is_bot)
 				numplayers++;
 		}
-		if(numplayers >= game.maxclients - (sv_botkickthreshold->integer - 1)) {
-				Info_SetValueForKey(userinfo, "rejmsg", "Server is full.");
-		
+		if(numplayers >= game.maxclients - (sv_botkickthreshold->integer)) {
+			Info_SetValueForKey(userinfo, "rejmsg", "Server is full.");
 			return false;
 		}
 	}
