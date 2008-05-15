@@ -223,6 +223,29 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 
 }
 
+int ACESP_FindBotNum(void)
+{
+    FILE *pIn;
+	int count;
+	char bot_filename[128];
+
+	//bots and configurations are loaded level specific
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
+		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
+	else if(sv_custombots->value)
+		sprintf(bot_filename, BOTDIR"/botinfo/custom%i.tmp", sv_custombots->integer);
+	else
+		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", level.mapname);
+
+	if((pIn = fopen(bot_filename, "rb" )) == NULL)
+		return 0; // bail
+
+	fread(&count,sizeof (int),1,pIn); 
+
+	fclose(pIn);
+	
+	return count; 
+}
 ///////////////////////////////////////////////////////////////////////
 // Called by PutClient in Server to actually release the bot into the game
 // Keep from killin' each other when all spawned at once

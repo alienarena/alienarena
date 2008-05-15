@@ -269,6 +269,7 @@ void     ACEND_LoadNodes();
 // acebot_spawn.c protos
 void	 ACESP_SaveBots();
 void	 ACESP_LoadBots(edict_t *ent, int playerleft); 
+int		 ACESP_FindBotNum(void);
 int		 ACESP_FindBot(char *name);
 void	 ACESP_KickBot(char *name);
 void     ACESP_HoldSpawn(edict_t *self);
