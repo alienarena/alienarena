@@ -427,6 +427,10 @@ SOURCE=.\res\icon12.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\icon13.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\icon2.ico
 # End Source File
 # Begin Source File

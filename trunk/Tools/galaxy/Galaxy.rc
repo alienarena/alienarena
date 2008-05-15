@@ -73,6 +73,7 @@ IDI_ICON4               ICON    DISCARDABLE     "res\\icon2.ico"
 IDI_ICON5               ICON    DISCARDABLE     "res\\icon5.ico"
 IDI_ICON6               ICON    DISCARDABLE     "res\\icon6.ico"
 IDI_ICON7               ICON    DISCARDABLE     "res\\icon7.ico"
+IDI_ICON8               ICON    DISCARDABLE     "res\\icon13.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
