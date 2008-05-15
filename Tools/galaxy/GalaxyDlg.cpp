@@ -361,6 +361,8 @@ BOOL CGalaxyDlg::OnInitDialog()
 	m_ImageList.Add(hIcon);
 	hIcon = AfxGetApp()->LoadIcon(IDI_ICON7);
 	m_ImageList.Add(hIcon);
+	hIcon = AfxGetApp()->LoadIcon(IDI_ICON8);
+	m_ImageList.Add(hIcon);
 
 	// Associate image list to list box
 	m_serverinfo.SetImageList(&m_ImageList, LVSIL_SMALL);
@@ -542,7 +544,10 @@ void CGalaxyDlg::OnSelchangeList1(NMHDR* pNMHDR, LRESULT* pResult)
 		lvi.iItem = i;
 		lvi.iSubItem = 0;
 		lvi.pszText = (LPTSTR)(LPCTSTR)(servers[j].players[i].playername);
-		lvi.iImage = 1;	
+		if(servers[j].players[i].ping > 0)
+			lvi.iImage = 1;
+		else
+			lvi.iImage = 6; //bot
 		m_playerinfo.InsertItem(&lvi);
 
 		sprintf(info, "%i",  servers[j].players[i].score);

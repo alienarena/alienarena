@@ -61,6 +61,7 @@
 #define IDB_VERTICLE_SCROLLBAR_BOTTOM   190
 #define IDB_BITMAP29                    222
 #define IDI_ICON7                       236
+#define IDI_ICON8                       239
 #define IDC_LIST1                       1000
 #define IDC_BUTTON1                     1006
 #define IDC_LIST3                       1007
@@ -99,13 +100,14 @@
 #define ID_CHAT_JOINCHATCHANNEL         32777
 #define ID_CHAT_LEAVECHATCHANNEL        32778
 #define ID_STATS_LOOKUPSTATS            32779
+#define ID_HELP_ALIENARENAWIKKI         32783
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        237
-#define _APS_NEXT_COMMAND_VALUE         32780
+#define _APS_NEXT_RESOURCE_VALUE        240
+#define _APS_NEXT_COMMAND_VALUE         32784
 #define _APS_NEXT_CONTROL_VALUE         1033
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
