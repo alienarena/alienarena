@@ -172,11 +172,6 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 			count = spawnkicknum;
 	}
 	real_players -= playerleft; //done for when this is called as a player is disconnecting
-
-	if(spawnkicknum) {
-		if(real_players > spawnkicknum)
-			return; //no need to even bother beyond this, we have all humans
-	}
 	
 	total_players = 0;
 	for(i=0;i<count;i++)
