@@ -3784,8 +3784,9 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 		length = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
 #endif
-		buffer = malloc( length );
+		buffer = malloc( length + 1 );
 		fread( buffer, length, 1, fp );
+		buffer[length] = 0;
 	}
 
 	s = buffer;

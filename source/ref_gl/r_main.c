@@ -254,14 +254,12 @@ void R_ReadFogScript(char config_file[128])
 	else
 	{
 
-#ifdef _WIN32
-		length = filelength( fileno( fp  ) );
-#else
 		fseek(fp, 0, SEEK_END);
 		length = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
-#endif
-		buffer = malloc( length );
+
+		buffer = malloc( length + 1 );
+		buffer[length] = 0;
 		fread( buffer, length, 1, fp );
 	}
 	s = buffer;
@@ -316,15 +314,13 @@ void R_ReadMusicScript(char config_file[128])
 	else
 	{
 
-#ifdef _WIN32
-		length = filelength( fileno( fp  ) );
-#else
 		fseek(fp, 0, SEEK_END);
 		length = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
-#endif
-		buffer = malloc( length );
+
+		buffer = malloc( length + 1 );
 		fread( buffer, length, 1, fp );
+		buffer[length] = 0;
 	}
 	s = buffer;
 
