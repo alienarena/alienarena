@@ -312,8 +312,9 @@ void ACECO_ReadConfig(char config_file[128]) //use standard c routines for linux
 		length = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
 #endif
-		buffer = malloc( length );
+		buffer = malloc( length + 1);
 		fread( buffer, length, 1, fp );
+		buffer[length] = 0;
 	}
 	s = buffer;
 	
