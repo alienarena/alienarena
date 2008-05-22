@@ -1193,7 +1193,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	int			i;
 	dheader_t	*header;
 	mmodel_t 	*bm;
-	char		rs_name[MAX_OSPATH], tmp[16];		// rscript - MrG
+	char		rs_name[MAX_OSPATH], tmp[MAX_QPATH];		// rscript - MrG
 
 	if(r_lensflare->value)
 		R_ClearFlares();
