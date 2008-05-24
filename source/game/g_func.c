@@ -1581,7 +1581,6 @@ again:
 	VectorCopy (dest, self->moveinfo.end_origin);
 	Move_Calc (self, dest, train_wait);
 	VectorCopy (ent->s.angles, self->s.angles);//will this still work for regular trains?? hmmm
-	self->s.frame = (self->s.frame + 1) % 21;//for leader ship, etc
 	self->spawnflags |= TRAIN_START_ON;
 }
 
@@ -1659,6 +1658,7 @@ void train_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_func_train (edict_t *self)
 {
+
 	self->movetype = MOVETYPE_PUSH;
 
 	VectorClear (self->s.angles);
@@ -1670,8 +1670,15 @@ void SP_func_train (edict_t *self)
 		if (!self->dmg)
 			self->dmg = 100;
 	}
-	self->solid = SOLID_BSP;
+	if(self->spawnflags & 8)
+		self->solid = SOLID_NOT;
+	else
+		self->solid = SOLID_BSP;
 	gi.setmodel (self, self->model);
+	self->s.frame = 0; //in case of mesh
+	if(self->spawnflags & 16)
+		self->s.renderfx = RF_TRANSLUCENT;
+
 
 	self->moveinfo.sound_middle = gi.soundindex ("world/turbine1.wav");
 
