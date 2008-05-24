@@ -1,0 +1,52 @@
+textures/arena7/light1
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light9
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light10
+{
+	{
+		lensflare
+	}
+}
+textures/rage/light10
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/glass
+{
+	{
+		map textures/arena7/light10.tga
+		nolightmap
+	}
+}
+textures/arena9/greenwall1
+{
+	{
+		map textures/arena9/greenwall1.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.1 0.1
+	}
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
+		
