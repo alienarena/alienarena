@@ -1748,43 +1748,86 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 	float		len;
 	int			j;
 	cparticle_t	*p;
-	float		dec;
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 
-	dec = 8;
-	VectorScale (vec, dec, vec);
-
-	while (len > 0)
-	{
-		len -= dec;
-
-		if (!(p = new_particle()))
-				return;
-			
-			VectorClear (p->accel);
-
-			p->alpha = .23;
-			p->alphavel = -4.0 / (3+frand()*0.2);
-			p->scale = 2 + (rand()&2);
-			p->scalevel = -1.5;
-		
-			p->type = PARTICLE_FIREBALL;
-			p->texnum = r_explosiontexture->texnum;
-			p->blendsrc = GL_SRC_ALPHA;
-			p->blenddst = GL_ONE;
-			p->color = 0xc0 + (rand()&2);
-			for (j=0 ; j<3 ; j++)
-			{
-				p->org[j] = move[j] + crand()*2;
-				p->vel[j] = crand()*2;
-			}
-			p->accel[2] = 0;
+	VectorScale (vec, 5, vec);
 	
-		VectorAdd (move, vec, move);
+	if (!(p = new_particle())) 
+		return;
+
+	VectorClear (p->accel);
+
+	p->alpha = .3;
+	p->alphavel = -50.0;
+	p->type = PARTICLE_SHOT;
+	p->texnum = r_bflashtexture->texnum;
+	p->scale = 5;
+	p->angle[0] = cl.refdef.viewangles[0];
+	p->angle[1] = cl.refdef.viewangles[1];
+	p->angle[2] = cl.refdef.viewangles[2];
+
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->color = 0xc0 + (rand()&2);
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = move[j];
+		p->vel[j] = 0;
+		p->accel[j] = 0;
 	}
+
+	if (!(p = new_particle())) 
+		return;
+
+	VectorClear (p->accel);
+
+	p->alpha = .7;
+	p->alphavel = -50.0;
+	p->type = PARTICLE_HIT;
+	p->texnum = r_bflashtexture->texnum;
+	p->scale = 5;
+	p->angle[0] = cl.refdef.viewangles[0];
+	p->angle[1] = cl.refdef.viewangles[1];
+	p->angle[2] = cl.refdef.viewangles[2];
+
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->color = 0xc0 + (rand()&2);
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = move[j];
+		p->vel[j] = 0;
+		p->accel[j] = 0;
+	}
+
+	if (!(p = new_particle())) 
+		return;
+
+	VectorClear (p->accel);
+
+	p->alpha = .7;
+	p->alphavel = -50.0;
+	p->type = PARTICLE_HIT;
+	p->texnum = r_flaretexture->texnum;
+	p->scale = 10;
+	p->angle[0] = cl.refdef.viewangles[0];
+	p->angle[1] = cl.refdef.viewangles[1];
+	p->angle[2] = cl.refdef.viewangles[2];
+
+	p->blendsrc = GL_ONE;
+	p->blenddst = GL_ONE;
+	p->color = 0xc0 + (rand()&2);
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = move[j];
+		p->vel[j] = 0;
+		p->accel[j] = 0;
+	}
+
+	VectorAdd (move, vec, move);
 }
 
 /*
