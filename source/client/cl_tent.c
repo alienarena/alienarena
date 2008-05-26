@@ -383,8 +383,7 @@ void CL_ParseTEnt (void)
 			color = 0x00;
 		else
 			color = splash_color[r];
-		//CL_ParticleEffect (pos, dir, color, cnt); //out with the old.
-
+		
 		CL_SplashEffect (pos, dir, color, cnt);
 
 		if (r == SPLASH_SPARKS)
@@ -414,7 +413,7 @@ void CL_ParseTEnt (void)
 
 		break;
 
-	case TE_RAILTRAIL:			// railgun effect - let's try the heat missile thingy too!
+	case TE_RAILTRAIL:			// beam effect
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_DisruptorBeam (pos, pos2);
