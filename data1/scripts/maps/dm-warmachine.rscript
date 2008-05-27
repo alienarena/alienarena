@@ -28,13 +28,6 @@ textures/rage/light10
 		lensflare
 	}
 }
-textures/arena7/glass
-{
-	{
-		map textures/arena7/light10.tga
-		nolightmap
-	}
-}
 textures/arena9/greenwall1
 {
 	{
