@@ -20,6 +20,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "server.h"
 
+#ifdef __unix__
+#include <sys/socket.h>
+#else
+#include "winsock.h"
+#endif
+
 netadr_t	master_adr[MAX_MASTERS];	// address of group servers
 
 client_t	*sv_client;			// current client
@@ -1076,8 +1082,21 @@ void Master_Heartbeat (void)
 	// send the same string that we would give for a status OOB command
 	string = SV_StatusString();
 
+	sv_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
+
 	// send to group master
 	if(dedicated || dedicated->value) {
+
+		//re resolve main master server ip
+		gethostbyname(sv_master->string);
+		if (!NET_StringToAdr (sv_master->string, &master_adr[0]))
+
+		{
+			Com_Printf ("Bad Master IP");
+		}
+		if (master_adr[0].port == 0)
+			master_adr[0].port = BigShort (PORT_MASTER);
+
 		for (i=0 ; i<MAX_MASTERS ; i++)
 			if (master_adr[i].port)
 			{
@@ -1087,7 +1106,6 @@ void Master_Heartbeat (void)
 	}
 	else {
 
-		sv_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
 		if (!NET_StringToAdr (sv_master->string, &master_adr[0]))
 
 		{
