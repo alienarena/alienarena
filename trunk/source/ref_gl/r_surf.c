@@ -943,13 +943,13 @@ void R_DrawInlineBModel (entity_t *e)
 	{
 		if ( !qglMTexCoord2fSGIS ) {
 			R_BlendLightmaps ();
-
+		}
+		else {
 			GL_EnableMultitexture (true);
 			R_DrawNormalSurfaces ();
 			R_DrawSpecularSurfaces ();
 			GL_EnableMultitexture (false);
 		}
-
 	}
 	else
 	{
@@ -1117,6 +1117,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 	mleaf_t		*pleaf;
 	float		dot;
 	image_t		*image;
+	rscript_t *rs_shader;
 
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid
@@ -1221,8 +1222,13 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 			{
 				GL_RenderLightmappedPoly( surf );
 
-				surf->specialchain = r_special_surfaces;
-				r_special_surfaces = surf;
+				if(r_shaders->value) { //only add to the chain if there is actually a shader
+					rs_shader = (rscript_t *)surf->texinfo->image->script;
+					if(rs_shader) {
+						surf->specialchain = r_special_surfaces;
+						r_special_surfaces = surf;
+					}
+				}
 			}
 			else
 			{
@@ -1233,8 +1239,13 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 				surf->texturechain = image->texturechain;
 				image->texturechain = surf;
 
-				surf->specialchain = r_special_surfaces;
-				r_special_surfaces = surf;
+				if(r_shaders->value) { //only add to the chain if there is actually a shader
+					rs_shader = (rscript_t *)surf->texinfo->image->script;
+					if(rs_shader) {
+						surf->specialchain = r_special_surfaces;
+						r_special_surfaces = surf;
+					}
+				}
 			}
 		}
 	}
