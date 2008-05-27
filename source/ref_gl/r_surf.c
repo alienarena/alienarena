@@ -944,12 +944,6 @@ void R_DrawInlineBModel (entity_t *e)
 		if ( !qglMTexCoord2fSGIS ) {
 			R_BlendLightmaps ();
 		}
-		else {
-			GL_EnableMultitexture (true);
-			R_DrawNormalSurfaces ();
-			R_DrawSpecularSurfaces ();
-			GL_EnableMultitexture (false);
-		}
 	}
 	else
 	{
