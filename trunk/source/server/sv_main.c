@@ -1077,17 +1077,19 @@ void Master_Heartbeat (void)
 	string = SV_StatusString();
 
 	sv_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
+	
+	//re resolve main master server ip
+	if (!NET_StringToAdr (sv_master->string, &master_adr[0]))
+	{
+		Com_Printf ("Bad Master IP");
+	}
+	if (master_adr[0].port == 0)
+		master_adr[0].port = BigShort (PORT_MASTER);
 
 	// send to group master
 	if(dedicated || dedicated->value) {
 
-		//re resolve main master server ip
-		if (!NET_StringToAdr (sv_master->string, &master_adr[0]))
-		{
-			Com_Printf ("Bad Master IP");
-		}
-		if (master_adr[0].port == 0)
-			master_adr[0].port = BigShort (PORT_MASTER);
+		
 
 		for (i=0 ; i<MAX_MASTERS ; i++)
 			if (master_adr[i].port)
@@ -1097,14 +1099,7 @@ void Master_Heartbeat (void)
 			}
 	}
 	else {
-
-		if (!NET_StringToAdr (sv_master->string, &master_adr[0]))
-
-		{
-			Com_Printf ("Bad Master IP");
-		}
-		if (master_adr[0].port == 0)
-			master_adr[0].port = BigShort (PORT_MASTER);
+	
 		Com_Printf ("Sending heartbeat to %s\n", NET_AdrToString (master_adr[0]));
 		Netchan_OutOfBandPrint (NS_SERVER, master_adr[0], "heartbeat\n%s", string);
 	}
