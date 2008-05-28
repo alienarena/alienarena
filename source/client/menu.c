@@ -5355,8 +5355,8 @@ qboolean PlayerConfig_MenuInit( void )
 	}
 	else
 	{
-		strcpy( currentdirectory, "male" );
-		strcpy( currentskin, "grunt" );
+		strcpy( currentdirectory, "martianenforcer" );
+		strcpy( currentskin, "default" );
 	}
 
 	qsort( s_pmi, s_numplayermodels, sizeof( s_pmi[0] ), pmicmpfnc );
@@ -5537,19 +5537,18 @@ void PlayerConfig_MenuDraw( void )
 
 	if ( s_pmi[s_player_model_box.curvalue].skindisplaynames )
 	{
-		static int mframe;
-		static int yaw;
-		int maxframe = 29;
+		static float mframe;
+		static float yaw;
 		entity_t entity[3];
 
 		memset( &entity, 0, sizeof( entity ) );
 
-		mframe += 1;
+		mframe += cls.frametime*150;
 		if ( mframe > 390 )
-			mframe =0;
+			mframe = 0;
 
-		yaw += .5;
-		if (++yaw > 360)
+		yaw += cls.frametime*50;
+		if (yaw > 360)
 			yaw = 0;
 
 		Com_sprintf( scratch, sizeof( scratch ), "players/%s/tris.md2", s_pmi[s_player_model_box.curvalue].directory );
@@ -5623,20 +5622,20 @@ void PlayerConfig_MenuDraw( void )
 
 		VectorCopy( entity[2].origin, entity[2].oldorigin );
 
-		entity[0].frame = mframe/10;
-		entity[0].oldframe = 0;
-		entity[0].backlerp = 0.0;
-		entity[0].angles[1] = yaw;
+		entity[0].frame = (int)(mframe/10);
+		entity[0].oldframe = (int)(mframe/10) - 1;
+		entity[0].backlerp = 1.0;
+		entity[0].angles[1] = (int)yaw;
 
-		entity[1].frame = mframe/10;
-		entity[1].oldframe = 0;
-		entity[1].backlerp = 0.0;
-		entity[1].angles[1] = yaw;
+		entity[1].frame = (int)(mframe/10);
+		entity[1].oldframe = (int)(mframe/10) - 1;
+		entity[1].backlerp = 1.0;
+		entity[1].angles[1] = (int)yaw;
 
-		entity[2].frame = mframe/10;
-		entity[2].oldframe = 0;
-		entity[2].backlerp = 0.0;
-		entity[2].angles[1] = yaw;
+		entity[2].frame = (int)(mframe/10);
+		entity[2].oldframe = (int)(mframe/10) - 1;
+		entity[2].backlerp = 1.0;
+		entity[2].angles[1] = (int)yaw;
 
 		refdef.areabits = 0;
 		if((helmet) || (rack))
