@@ -20,12 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "server.h"
 
-#ifdef __unix__
-#include <sys/socket.h>
-#else
-#include "winsock.h"
-#endif
-
 netadr_t	master_adr[MAX_MASTERS];	// address of group servers
 
 client_t	*sv_client;			// current client
@@ -1088,9 +1082,7 @@ void Master_Heartbeat (void)
 	if(dedicated || dedicated->value) {
 
 		//re resolve main master server ip
-		gethostbyname(sv_master->string);
 		if (!NET_StringToAdr (sv_master->string, &master_adr[0]))
-
 		{
 			Com_Printf ("Bad Master IP");
 		}
