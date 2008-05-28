@@ -5545,7 +5545,9 @@ void PlayerConfig_MenuDraw( void )
 
 		mframe += cls.frametime*150;
 		if ( mframe > 390 )
-			mframe = 0;
+			mframe = 10;
+		if ( mframe < 10)
+			mframe = 10;
 
 		yaw += cls.frametime*50;
 		if (yaw > 360)
