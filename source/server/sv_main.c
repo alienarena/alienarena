@@ -1089,8 +1089,6 @@ void Master_Heartbeat (void)
 	// send to group master
 	if(dedicated || dedicated->value) {
 
-		
-
 		for (i=0 ; i<MAX_MASTERS ; i++)
 			if (master_adr[i].port)
 			{
