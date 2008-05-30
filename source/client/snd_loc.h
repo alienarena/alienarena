@@ -138,6 +138,10 @@ void	SNDDMA_BeginPainting (void);
 
 void	SNDDMA_Submit(void);
 
+// thread-safety for playsound_t lists -- jjb
+void    SNDDMA_PlaySoundLock(void);
+void    SNDDMA_PlaySoundUnlock(void);
+
 //====================================================================
 
 #define	MAX_CHANNELS			32

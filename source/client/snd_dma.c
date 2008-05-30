@@ -507,6 +507,9 @@ playsound_t *S_AllocPlaysound (void)
 {
 	playsound_t	*ps;
 
+#ifdef __unix__
+    SNDDMA_PlaySoundLock() ; // for SDL thread-safety -- jjb
+#endif
 	ps = s_freeplays.next;
 	if (ps == &s_freeplays)
 		return NULL;		// no free playsounds
@@ -514,7 +517,9 @@ playsound_t *S_AllocPlaysound (void)
 	// unlink from freelist
 	ps->prev->next = ps->next;
 	ps->next->prev = ps->prev;
-	
+#ifdef __unix__
+    SNDDMA_PlaySoundUnlock() ;
+#endif
 	return ps;
 }
 
@@ -526,6 +531,9 @@ S_FreePlaysound
 */
 void S_FreePlaysound (playsound_t *ps)
 {
+#ifdef __unix__
+    SNDDMA_PlaySoundLock() ; // for SDL thread-safety -- jjb
+#endif
 	// unlink from channel
 	ps->prev->next = ps->next;
 	ps->next->prev = ps->prev;
@@ -535,6 +543,9 @@ void S_FreePlaysound (playsound_t *ps)
 	s_freeplays.next->prev = ps;
 	ps->prev = &s_freeplays;
 	s_freeplays.next = ps;
+#ifdef __unix__
+    SNDDMA_PlaySoundUnlock() ;
+#endif
 }
 
 
@@ -721,7 +732,9 @@ void S_StartSound(vec3_t origin, int entnum, int entchannel, sfx_t *sfx, float f
 		ps->begin = paintedtime;
 	else
 		ps->begin = start + timeofs * dma.speed;
-
+#ifdef __unix__
+    SNDDMA_PlaySoundLock(); // for SDL thread-safety -- jjb 
+#endif
 	// sort into the pending sound list
 	for (sort = s_pendingplays.next ; 
 		sort != &s_pendingplays && sort->begin < ps->begin ;
@@ -733,6 +746,9 @@ void S_StartSound(vec3_t origin, int entnum, int entchannel, sfx_t *sfx, float f
 
 	ps->next->prev = ps;
 	ps->prev->next = ps;
+#ifdef __unix__
+    SNDDMA_PlaySoundUnlock();
+#endif
 }
 
 
@@ -826,7 +842,9 @@ void S_StopAllSounds(void)
 
 	if (!sound_started)
 		return;
-
+#ifdef __unix__
+    SNDDMA_PlaySoundLock(); // for SDL thread-safety -- jjb 
+#endif
 	// clear all the playsounds
 	memset(s_playsounds, 0, sizeof(s_playsounds));
 	s_freeplays.next = s_freeplays.prev = &s_freeplays;
@@ -839,7 +857,9 @@ void S_StopAllSounds(void)
 		s_playsounds[i].prev->next = &s_playsounds[i];
 		s_playsounds[i].next->prev = &s_playsounds[i];
 	}
-
+#ifdef __unix__
+    SNDDMA_PlaySoundUnlock(); 
+#endif
 	// clear all the channels
 	memset(channels, 0, sizeof(channels));
 
