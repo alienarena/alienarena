@@ -305,3 +305,16 @@ void SNDDMA_BeginPainting (void)
 {
 }
 
+
+/*
+ * dummy routines. (for thread-safety in SDL version)
+ * -- jjb
+ */
+void SNDDMA_PlaySoundLock(void)
+{
+}
+ 
+void SNDDMA_PlaySoundUnlock(void)
+{
+}
+

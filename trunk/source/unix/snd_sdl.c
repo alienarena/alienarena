@@ -2,7 +2,7 @@
 	snd_sdl.c
 
 	Sound code taken from SDLQuake and modified to work with Quake2
-	Robert Bäuml 2001-12-25
+	Robert Bï¿½uml 2001-12-25
 
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
@@ -32,6 +32,8 @@
 
 static int  snd_inited;
 static dma_t *shm;
+SDL_mutex *playsound_pmutex ;  // thread-safety for playsound lists
+
 
 static void
 paint_audio (void *unused, Uint8 * stream, int len)
@@ -148,6 +150,9 @@ SNDDMA_Init (void)
 	shm->submission_chunk = 1;
 	shm->buffer = NULL;
 
+    /* create SDL mutex for to protect playsound_t lists -- jjb */
+    playsound_pmutex = SDL_CreateMutex();  // initially unlocked
+
 	SDL_PauseAudio (0); // start callback after shm struct init -- jjb
 
 	snd_inited = 1;
@@ -172,47 +177,65 @@ SNDDMA_Shutdown (void)
 		SDL_Quit();
 	else
 		SDL_QuitSubSystem(SDL_INIT_AUDIO);
+
+    /* destroy SDL mutex. (it may be recreated above on restart) */
+    SDL_DestroyMutex( playsound_pmutex );
+    playsound_pmutex = NULL; 
+
 }
 
 
 /*
-** -- jjb
-** Use SNDDMA_BeginPainting and SNDMA_Submit for thread-safety/
-** SDL_LockAudio and SDL_UnlockAudio are used to prevent SDL callback,
-**  paint_audio() from running when S_PaintChannels() could be called 
-**  from main thread
-** These functions are called from client/snd_dma.c 
-** A semaphore is used to prevent any nested calls of the lock/unlock functions
-*/
-
-static int locksem = 0;
-
-void
-SNDDMA_Submit (void)
-{
-    if ( locksem == 1 )
-    {
-        SDL_UnlockAudio(); // callback may run and call S_PaintChannels()
-        locksem = 0 ;
-    }
-    else
-    {
-        --locksem ;
-        if ( locksem < 0 )
-        {
-            // ERROR
-            locksem = 0 ;
-            // Com_DPrintf("snd_sdl.c:SNDDMA_Submit() semaphore error\n");
-        } 
-    }      
-
-}
+ * Use SNDDMA_BeginPainting() and SNDMA_Submit() for thread-safety
+ * SDL_LockAudio and SDL_UnlockAudio implement a mutex to block
+ * paint_audio() from running or to block main thread if paint_audio
+ * is already running.
+ *
+ * SNDDMA_PlaySoundLock() and SNDDMA_PlaySoundUnlock() are added to
+ * implement an SDL mutex that protects the playsound_t pending and
+ * free lists from simultaneous access by the threads. Non-SDL versions
+ * must add these as dummy routines.
+ *
+ * Both these must always be called as pairs. And care must be taken
+ * not to nest a mutex's lock/unlock pair.
+ * -- jjb
+ */
 
 void SNDDMA_BeginPainting(void)
 {
         
-    if ( ++locksem == 1 )
-        SDL_LockAudio();  //prevent callback from executing
+    SDL_LockAudio();
     
+}
+
+void
+SNDDMA_Submit (void)
+{
+    SDL_UnlockAudio();
+
+}
+
+void SNDDMA_PlaySoundLock(void)
+{
+    int result;
+
+    if ( playsound_pmutex == NULL )
+        Com_Error( ERR_FATAL, "SNDDMA_PlaySoundLock: NULL pointer\n");    
+    result = SDL_LockMutex( playsound_pmutex );
+    if ( result != 0 )
+        Com_Error( ERR_FATAL, "SNDDMA_PlaySoundLock: SDL_LockMutex error\n");    
+
+}
+ 
+void SNDDMA_PlaySoundUnlock(void)
+{
+    int result;
+    
+    if ( playsound_pmutex == NULL )
+        Com_Error( ERR_FATAL, "SNDDMA_PlaySoundUnLock: NULL pointer\n");    
+    result = SDL_UnlockMutex( playsound_pmutex );
+    if ( result != 0 )
+        Com_Error( ERR_FATAL, "SNDDMA_PlaySoundUnock: SDL_UnlockMutex error\n");    
+
 }
 
