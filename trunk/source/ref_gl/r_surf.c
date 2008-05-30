@@ -711,7 +711,7 @@ dynamic:
 
 //This next section deals with bumpmapped surfaces.  Much of this was gathered from Mike Hiney
 //and "Paul's Projects" tutorials.
-static void R_InitNormalSurfaces (void)
+static void R_InitNormalSurfaces (int is_specular)
 {
 	dlight_t	*dl;
 	int			lnum;
@@ -726,12 +726,22 @@ static void R_InitNormalSurfaces (void)
 	qglMatrixMode (GL_TEXTURE);
 	qglLoadIdentity ();
 
-	// rotate around Y to bring blue/pink to the front
-	qglRotatef (145, 0, 1, 0);
+	if(is_specular) {
+		// rotate around Y to bring blue/pink to the front
+		qglRotatef (90, 0, 1, 0);
 
-	// now reposition so that the bright spot is center screen, and up a little 
-	qglRotatef (-45, 1, 0, 0);
-	qglRotatef (-45, 0, 0, 1);
+		// now reposition so that the bright spot is center screen
+		qglRotatef (-45, 1, 0, 0);
+
+	}
+	else {
+		// rotate around Y to bring blue/pink to the front
+		qglRotatef (145, 0, 1, 0);
+
+		// now reposition so that the bright spot is center screen, and up a little 
+		qglRotatef (-45, 1, 0, 0);
+		qglRotatef (-45, 0, 0, 1);
+	}
 
 	// rotate by viewangles  
 	qglRotatef (-r_newrefdef.viewangles[2], 1, 0, 0);
@@ -801,7 +811,7 @@ static void R_DrawNormalSurfaces (void)
 		return;
 
 	R_InitVArrays (VERT_BUMPMAPPED);
-	R_InitNormalSurfaces();
+	R_InitNormalSurfaces(false);
 
 	qglActiveTextureARB (GL_TEXTURE1);
 	qglEnable (GL_TEXTURE_2D);
@@ -850,12 +860,12 @@ static void R_DrawSpecularSurfaces (void)
 		return;
 
 	R_InitVArrays (VERT_BUMPMAPPED);
-	R_InitNormalSurfaces();
+	R_InitNormalSurfaces(true);
 
 	qglActiveTextureARB (GL_TEXTURE1);
 	qglEnable (GL_TEXTURE_2D);
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
+	
 	qglEnable (GL_BLEND);
 	qglDepthMask (GL_FALSE);  
 	qglBlendFunc (GL_ONE, GL_ONE);
