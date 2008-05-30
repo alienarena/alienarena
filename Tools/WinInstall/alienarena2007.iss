@@ -2388,6 +2388,7 @@ Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\straightconduit.md2; DestDir
 Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\conduit.jpg; DestDir: {app}\data1\maps\meshes
 Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\bentconduit.md2; DestDir: {app}\data1\maps\meshes
 Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\martian.md2; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-eternal.fog; DestDir: {app}\data1\maps\scripts
 
 [Icons]
 Name: {group}\{cm:ProgramOnTheWeb,{#MyAppName}}; Filename: {#MyAppURL}
