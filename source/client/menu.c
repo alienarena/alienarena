@@ -573,8 +573,8 @@ void M_Main_Draw (void)
 	Draw_StretchPic( xoffset + 100*scale + (20*i*scale), (int)(ystart + m_main_cursor * 32.5*scale + 13*scale), w*scale, h*scale, litname );
 
 	//draw web link
-	Menu_DrawString( viddef.width / 2 - 140*widscale, 0 + 10*scale, "Copyright 2007 COR Entertainment LLC" );
-	Menu_DrawString( viddef.width / 2 - 160*widscale, 0 + 30*scale, "AA2K7 Website @ http://red.planetarena.org" );
+	Menu_DrawString( viddef.width / 2 - 140*widscale, 0 + 10*scale, "Copyright 2008 COR Entertainment LLC" );
+	Menu_DrawString( viddef.width / 2 - 185*widscale, 0 + 30*scale, "Alien Arena Website @ http://red.planetarena.org" );
 
 }
 
