@@ -31,7 +31,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 image_t *r_flare;
-image_t *r_cubemap;
+
+//Normalisation cube map
+GLuint normalisationCubeMap;
 
 #define CUBEMAP_MAXSIZE 32
 void MakeSpecularAttenuationMap (byte *pixels)
@@ -116,13 +118,10 @@ void R_InitCubemapTextures (void)
 	int i, x, y;
 	byte pixels[CUBEMAP_MAXSIZE * CUBEMAP_MAXSIZE * 4];
 
-	// switch the texture state
 	qglDisable (GL_TEXTURE_2D);
 	qglEnable (GL_TEXTURE_CUBE_MAP_ARB);
 
-	// bind to the regular texture number
-	qglBindTexture (GL_TEXTURE_CUBE_MAP_ARB, r_cubemap->texnum);
-	qglGetError(); //binding this 2d texture initially causes a harmless error
+	qglBindTexture(GL_TEXTURE_CUBE_MAP_ARB, normalisationCubeMap);
 
 	// set up the texture parameters - did a clamp on R as well...
 	qglTexParameteri (GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -185,7 +184,6 @@ void R_InitParticleTexture (void)
 {
 	int		x,y;
 	byte	data[16][16][4];
-	byte pixels[CUBEMAP_MAXSIZE * CUBEMAP_MAXSIZE * 4];
 	char flares[MAX_QPATH];
 	//
 	// particle texture
@@ -254,8 +252,6 @@ void R_InitParticleTexture (void)
 		}
 	}
 	r_notexture = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-
-	r_cubemap = GL_LoadPic ("***cubemap***", (byte *) pixels, CUBEMAP_MAXSIZE, CUBEMAP_MAXSIZE, it_pic, 32);
 
 	if(gl_cubemaps->value)
 		R_InitCubemapTextures (); 
