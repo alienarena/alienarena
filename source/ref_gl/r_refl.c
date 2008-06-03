@@ -50,8 +50,6 @@ sets everything up
 void R_init_refl (int maxNoReflections)
 {
 	//===========================
-	int				power;
-	int				maxSize;
 	unsigned char	*buf = NULL;
 	int				i = 0;
 	int len; // jitwater
@@ -64,40 +62,20 @@ void R_init_refl (int maxNoReflections)
 	R_setupArrays(maxNoReflections);	// setup number of reflections
 	assert(qglGetError() == GL_NO_ERROR);
 
-	//okay we want to set REFL_TEXH etc to be less than the resolution 
-	//otherwise white boarders are left .. we dont want that.
-	//if waves function is turned off we can set reflection size to resolution.
-	//however if it is turned on in game white marks round the sides will be left again
-	//so maybe its best to leave this alone.
-
-	for (power = 2; power < vid.height; power*=2)
-	{	
-		REFL_TEXW = power;	
-		REFL_TEXH = power;  
-	}
-
-	qglGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);		//get max supported texture size
-
-	if (REFL_TEXW > maxSize)
-	{
-		for(power = 2; power < maxSize; power*=2)
-		{	
-			REFL_TEXW = power;	
-			REFL_TEXH = power;  
-		}
-	}
-
-	g_reflTexW = REFL_TEXW;
-	g_reflTexH = REFL_TEXH;
+	//Fix for ATI driver bugs - limit this to 256x256.  This texture is distorted heavily by 
+	//the fragment shader, there is no reason for it to be any larger than this at all.
+	
+	REFL_TEXW = g_reflTexW = 256;	
+	REFL_TEXH = g_reflTexH = 256;
 	
 	for (i = 0; i < maxReflections; i++)
 	{
-		buf = (unsigned char *)malloc(REFL_TEXW * REFL_TEXH * 3);	// create empty buffer for texture
+		buf = (unsigned char *)malloc(256 * 256 * 3);	// create empty buffer for texture
 
 		if (buf)
 		{
-			memset(buf, 255, (REFL_TEXW * REFL_TEXH * 3));	// fill it with white color so we can easily see where our tex border is
-			g_tex_num[i] = txm_genTexObject(buf, REFL_TEXW, REFL_TEXH, GL_RGB,false,true);	// make this texture
+			memset(buf, 255, (256 * 256 * 3));	// fill it with white color so we can easily see where our tex border is
+			g_tex_num[i] = txm_genTexObject(buf, 256, 256, GL_RGB,false,true);	// make this texture
 			free(buf);	// once we've made texture memory, we don't need the sys ram anymore
 		}
 		else
@@ -107,8 +85,8 @@ void R_init_refl (int maxNoReflections)
 	}
 
 	// if screen dimensions are smaller than texture size, we have to use screen dimensions instead (doh!)
-	g_reflTexW = (vid.width < REFL_TEXW) ? vid.width : REFL_TEXW;	//keeping these in for now ..
-	g_reflTexH = (vid.height < REFL_TEXH) ? vid.height : REFL_TEXH;
+	g_reflTexW = 256;	//keeping these in for now ..
+	g_reflTexH = 256;
 
 	// === jitwater - fragment program initializiation
 	if (gl_state.fragment_program)
@@ -125,7 +103,6 @@ void R_init_refl (int maxNoReflections)
 		else
 			Com_Printf("Unable to find scripts/water1.arbf\n");
 
-	
 		
 		// Make sure the program loaded correctly
 		{
