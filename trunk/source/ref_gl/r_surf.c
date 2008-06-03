@@ -750,6 +750,8 @@ static void R_InitNormalSurfaces ()
 		VectorNormalize(angle);
 		if (add > 0)
 		{
+			if(add > 10) //keep it from being excessively rotated
+				add = 10;
 			VectorScale(angle, add, angle);
 			VectorAdd (lightAdd, angle, lightAdd);
 		}
