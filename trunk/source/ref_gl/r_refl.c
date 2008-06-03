@@ -74,8 +74,8 @@ void R_init_refl (int maxNoReflections)
 
 		if (buf)
 		{
-			memset(buf, 255, (256 * 256 * 3));	// fill it with white color so we can easily see where our tex border is
-			g_tex_num[i] = txm_genTexObject(buf, 256, 256, GL_RGB,false,true);	// make this texture
+			memset(buf, 255, (REFL_TEXW * REFL_TEXH * 3));	// fill it with white color so we can easily see where our tex border is
+			g_tex_num[i] = txm_genTexObject(buf, REFL_TEXW, REFL_TEXH, GL_RGB,false,true);	// make this texture
 			free(buf);	// once we've made texture memory, we don't need the sys ram anymore
 		}
 		else
@@ -83,10 +83,6 @@ void R_init_refl (int maxNoReflections)
 			Sys_Error(ERR_FATAL, "Malloc failed?"); // jit
 		}
 	}
-
-	// if screen dimensions are smaller than texture size, we have to use screen dimensions instead (doh!)
-	g_reflTexW = 256;	//keeping these in for now ..
-	g_reflTexH = 256;
 
 	// === jitwater - fragment program initializiation
 	if (gl_state.fragment_program)
