@@ -1066,7 +1066,7 @@ void R_RenderFlares (void)
 		// periodically test visibility to ramp alpha
 		if(rs_realtime - l->time > 0.02){
 			
-			r_trace = CM_BoxTrace(r_origin, l->origin, mins, maxs, r_worldmodel->firstnode, MASK_SHOT);
+			r_trace = CM_BoxTrace(r_origin, l->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 			visible = r_trace.fraction == 1.0;
 			
 			l->alpha += (visible ? 0.03 : -0.15);  // ramp
