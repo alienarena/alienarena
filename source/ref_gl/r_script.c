@@ -1293,14 +1293,14 @@ rscript_t	*surfaceScript(msurface_t *surf)
 }
 void SetVertexOverbrights (qboolean toggle)
 {
-	if (!r_overbrightbits->value || !gl_ext_mtexcombine->value)
+	if (!r_overbrightbits->value || !gl_ext_mtexcombine->value) 
 		return;
 
 	if (toggle)//turn on
 	{
 		qglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
 		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
-		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 3);
+		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
 		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_MODULATE);
 		
 		GL_TexEnv( GL_COMBINE_EXT );
