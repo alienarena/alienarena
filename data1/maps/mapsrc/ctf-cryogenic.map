@@ -30257,137 +30257,143 @@
 }
 // entity 1
 {
+"origin" "-384 -192 200"
+"angle" "90"
+"classname" "info_player_intermission"
+}
+// entity 2
+{
 "origin" "-384 384 16"
 "angle" "270"
 "classname" "info_player_red"
 }
-// entity 2
+// entity 3
 {
 "origin" "-768 -1376 16"
 "angle" "360"
 "classname" "info_player_blue"
 }
-// entity 3
+// entity 4
 {
 "origin" "-384 -888 -368"
 "angle" "90"
 "classname" "info_player_blue"
 }
-// entity 4
+// entity 5
 {
 "origin" "-320 -1880 -312"
 "angle" "90"
 "classname" "info_player_blue"
 }
-// entity 5
+// entity 6
 {
 "origin" "832 -1920 -264"
 "angle" "180"
 "classname" "info_player_blue"
 }
-// entity 6
+// entity 7
 {
 "origin" "1288 -1920 56"
 "angle" "180"
 "classname" "info_player_blue"
 }
-// entity 7
+// entity 8
 {
 "origin" "160 -1376 16"
 "angle" "180"
 "classname" "info_player_blue"
 }
-// entity 8
+// entity 9
 {
 "origin" "1312 -1248 80"
 "classname" "item_health_small"
 }
-// entity 9
+// entity 10
 {
 "origin" "-440 -992 -352"
 "classname" "ammo_cells"
 }
-// entity 10
+// entity 11
 {
 "origin" "-448 -1344 -352"
 "classname" "item_armor_shard"
 }
-// entity 11
+// entity 12
 {
 "origin" "-448 -1408 -352"
 "classname" "item_health"
 }
-// entity 12
+// entity 13
 {
 "origin" "584 -1856 -248"
 "classname" "item_armor_shard"
 }
-// entity 13
+// entity 14
 {
 "origin" "512 -1856 -248"
 "classname" "ammo_rockets"
 }
-// entity 14
+// entity 15
 {
 "origin" "928 -2176 -248"
 "classname" "item_armor_combat"
 }
-// entity 15
+// entity 16
 {
 "origin" "320 -1280 24"
 "classname" "ammo_bullets"
 }
-// entity 16
+// entity 17
 {
 "origin" "256 -1280 24"
 "classname" "ammo_rockets"
 }
-// entity 17
+// entity 18
 {
 "origin" "-384 -1232 24"
 "classname" "item_health"
 }
-// entity 18
+// entity 19
 {
 "origin" "-320 -192 -344"
 "classname" "weapon_supershotgun"
 }
-// entity 19
+// entity 20
 {
 "origin" "-960 -192 32"
 "classname" "ammo_bullets"
 }
-// entity 20
+// entity 21
 {
 "origin" "192 -192 32"
 "classname" "item_health_large"
 }
-// entity 21
+// entity 22
 {
 "origin" "-384 -192 24"
 "classname" "item_quad"
 }
-// entity 22
+// entity 23
 {
 "origin" "96 -1984 -248"
 "classname" "weapon_hyperblaster"
 }
-// entity 23
+// entity 24
 {
 "origin" "864 -1440 -248"
 "classname" "weapon_railgun"
 }
-// entity 24
+// entity 25
 {
 "origin" "1248 -1760 72"
 "classname" "weapon_rocketlauncher"
 }
-// entity 25
+// entity 26
 {
 "origin" "1152 -2400 32"
 "classname" "item_flag_blue"
 }
-// entity 26
+// entity 27
 {
 "height" "312"
 "speed" "500"
@@ -30654,7 +30660,7 @@
 ( 1024 -2044 32 ) ( 1024 -2044 36 ) ( 1032 -2044 36 ) arena9/metal2 47 32 -180 1 -1 0 0 0
 }
 }
-// entity 27
+// entity 28
 {
 "speed" "500"
 "height" "312"
@@ -30921,7 +30927,7 @@
 ( -416 136 -68 ) ( -416 136 -60 ) ( -416 128 -60 ) arena9/metal4 -16 56 0 1 1 0 0 0
 }
 }
-// entity 28
+// entity 29
 {
 "height" "312"
 "speed" "500"
@@ -31188,559 +31194,559 @@
 ( -268 -488 -72 ) ( -268 -488 -64 ) ( -268 -480 -64 ) arena9/metal2 0 56 0 1 1 0 0 0
 }
 }
-// entity 29
+// entity 30
 {
 "classname" "light"
 "light" "75"
 "origin" "896 -1496 192"
 }
-// entity 30
+// entity 31
 {
 "origin" "-400 -1704 -176"
 "light" "75"
 "classname" "light"
 }
-// entity 31
+// entity 32
 {
 "origin" "-816 -184 136"
 "light" "100"
 "classname" "light"
 }
-// entity 32
+// entity 33
 {
 "origin" "-384 -192 400"
 "light" "500"
 "classname" "light"
 }
-// entity 33
+// entity 34
 {
 "origin" "-932 394 -376"
 "model" "maps/meshes/sconduit1.md2"
 "angle" "90"
 "classname" "misc_mapmodel"
 }
-// entity 34
+// entity 35
 {
 "origin" "-664 -856 104"
 "light" "75"
 "classname" "light"
 }
-// entity 35
+// entity 36
 {
 "origin" "-680 -1128 104"
 "light" "75"
 "classname" "light"
 }
-// entity 36
+// entity 37
 {
 "origin" "-760 -1376 104"
 "light" "75"
 "classname" "light"
 }
-// entity 37
+// entity 38
 {
 "origin" "-288 -1360 104"
 "light" "75"
 "classname" "light"
 }
-// entity 38
+// entity 39
 {
 "origin" "-88 -856 104"
 "light" "75"
 "classname" "light"
 }
-// entity 39
+// entity 40
 {
 "origin" "-104 -1128 104"
 "light" "75"
 "classname" "light"
 }
-// entity 40
+// entity 41
 {
 "origin" "-388 -1280 -248"
 "light" "25"
 "classname" "light"
 }
-// entity 41
+// entity 42
 {
 "origin" "-388 -1152 -248"
 "light" "25"
 "classname" "light"
 }
-// entity 42
+// entity 43
 {
 "origin" "-384 -1488 -152"
 "light" "20"
 "classname" "light"
 }
-// entity 43
+// entity 44
 {
 "origin" "-384 -1368 -152"
 "light" "20"
 "classname" "light"
 }
-// entity 44
+// entity 45
 {
 "origin" "-384 -944 -152"
 "light" "20"
 "classname" "light"
 }
-// entity 45
+// entity 46
 {
 "origin" "-384 -1064 -152"
 "light" "20"
 "classname" "light"
 }
-// entity 46
+// entity 47
 {
 "origin" "-384 -1216 -376"
 "model" "maps/meshes/straightconduit.md2"
 "angle" "270"
 "classname" "misc_mapmodel"
 }
-// entity 47
+// entity 48
 {
 "origin" "-848 -672 -328"
 "model" "maps/meshes/martian.md2"
 "angle" "360"
 "classname" "misc_mapmodel"
 }
-// entity 48
+// entity 49
 {
 "origin" "-872 -672 -280"
 "light" "50"
 "classname" "light"
 }
-// entity 49
+// entity 50
 {
 "origin" "-816 -784 -380"
 "model" "maps/meshes/pipes.md2"
 "angle" "90"
 "classname" "misc_mapmodel"
 }
-// entity 50
+// entity 51
 {
 "origin" "-932 -558 -376"
 "model" "maps/meshes/sconduit1.md2"
 "angle" "90"
 "classname" "misc_mapmodel"
 }
-// entity 51
+// entity 52
 {
 "origin" "-848 280 -328"
 "model" "maps/meshes/martian.md2"
 "angle" "360"
 "classname" "misc_mapmodel"
 }
-// entity 52
+// entity 53
 {
 "origin" "-872 280 -280"
 "light" "50"
 "classname" "light"
 }
-// entity 53
+// entity 54
 {
 "origin" "-944 -244 -264"
 "light" "75"
 "classname" "light"
 }
-// entity 54
+// entity 55
 {
 "origin" "-1008 -192 -352"
 "model" "maps/meshes/unit.md2"
 "angle" "360"
 "classname" "misc_mapmodel"
 }
-// entity 55
+// entity 56
 {
 "origin" "-1000 -192 40"
 "light" "50"
 "_color" "0 .2 .1"
 "classname" "light"
 }
-// entity 56
+// entity 57
 {
 "origin" "164 394 -376"
 "model" "maps/meshes/sconduit1.md2"
 "angle" "270"
 "classname" "misc_mapmodel"
 }
-// entity 57
+// entity 58
 {
 "origin" "80 -672 -328"
 "model" "maps/meshes/martian.md2"
 "angle" "180"
 "classname" "misc_mapmodel"
 }
-// entity 58
+// entity 59
 {
 "origin" "104 -672 -280"
 "light" "50"
 "classname" "light"
 }
-// entity 59
+// entity 60
 {
 "origin" "48 -552 -380"
 "model" "maps/meshes/pipes.md2"
 "angle" "270"
 "classname" "misc_mapmodel"
 }
-// entity 60
+// entity 61
 {
 "origin" "164 -558 -376"
 "model" "maps/meshes/sconduit1.md2"
 "angle" "270"
 "classname" "misc_mapmodel"
 }
-// entity 61
+// entity 62
 {
 "origin" "80 280 -328"
 "model" "maps/meshes/martian.md2"
 "angle" "180"
 "classname" "misc_mapmodel"
 }
-// entity 62
+// entity 63
 {
 "origin" "104 280 -280"
 "light" "50"
 "classname" "light"
 }
-// entity 63
+// entity 64
 {
 "origin" "176 -244 -264"
 "light" "75"
 "classname" "light"
 }
-// entity 64
+// entity 65
 {
 "origin" "240 -192 -352"
 "model" "maps/meshes/unit.md2"
 "angle" "180"
 "classname" "misc_mapmodel"
 }
-// entity 65
+// entity 66
 {
 "origin" "232 -192 40"
 "_color" "0 .2 .1"
 "light" "50"
 "classname" "light"
 }
-// entity 66
+// entity 67
 {
 "origin" "48 400 -380"
 "model" "maps/meshes/pipes.md2"
 "angle" "270"
 "classname" "misc_mapmodel"
 }
-// entity 67
+// entity 68
 {
 "origin" "-816 168 -380"
 "model" "maps/meshes/pipes.md2"
 "angle" "90"
 "classname" "misc_mapmodel"
 }
-// entity 68
+// entity 69
 {
 "origin" "-688 168 136"
 "light" "100"
 "classname" "light"
 }
-// entity 69
+// entity 70
 {
 "origin" "-88 184 136"
 "light" "100"
 "classname" "light"
 }
-// entity 70
+// entity 71
 {
 "origin" "-24 -216 136"
 "light" "100"
 "classname" "light"
 }
-// entity 71
+// entity 72
 {
 "origin" "-120 -512 136"
 "light" "100"
 "classname" "light"
 }
-// entity 72
+// entity 73
 {
 "origin" "-712 -512 136"
 "light" "100"
 "classname" "light"
 }
-// entity 73
+// entity 74
 {
 "origin" "-384 -568 -216"
 "light" "100"
 "classname" "light"
 }
-// entity 74
+// entity 75
 {
 "origin" "-384 160 -216"
 "light" "100"
 "classname" "light"
 }
-// entity 75
+// entity 76
 {
 "origin" "-384 -192 -256"
 "light" "100"
 "classname" "light"
 }
-// entity 76
+// entity 77
 {
 "origin" "256 -1916 -144"
 "light" "25"
 "classname" "light"
 }
-// entity 77
+// entity 78
 {
 "origin" "384 -1916 -144"
 "light" "25"
 "classname" "light"
 }
-// entity 78
+// entity 79
 {
 "origin" "48 -1920 -48"
 "light" "20"
 "classname" "light"
 }
-// entity 79
+// entity 80
 {
 "origin" "168 -1920 -48"
 "light" "20"
 "classname" "light"
 }
-// entity 80
+// entity 81
 {
 "origin" "592 -1920 -48"
 "light" "20"
 "classname" "light"
 }
-// entity 81
+// entity 82
 {
 "origin" "472 -1920 -48"
 "light" "20"
 "classname" "light"
 }
-// entity 82
+// entity 83
 {
 "origin" "320 -1920 -272"
 "model" "maps/meshes/straightconduit.md2"
 "angle" "360"
 "classname" "misc_mapmodel"
 }
-// entity 83
+// entity 84
 {
 "origin" "-128 -192 400"
 "light" "500"
 "classname" "light"
 }
-// entity 84
+// entity 85
 {
 "origin" "-632 -192 400"
 "light" "500"
 "classname" "light"
 }
-// entity 85
+// entity 86
 {
 "classname" "light"
 "light" "75"
 "origin" "-208 -1904 -176"
 }
-// entity 86
+// entity 87
 {
 "classname" "light"
 "light" "75"
 "origin" "352 -1360 104"
 }
-// entity 87
+// entity 88
 {
 "origin" "1224 -1928 192"
 "light" "75"
 "classname" "light"
 }
-// entity 88
+// entity 89
 {
 "classname" "light"
 "light" "75"
 "origin" "1160 -2208 128"
 }
-// entity 89
+// entity 90
 {
 "origin" "1608 -1912 192"
 "light" "75"
 "classname" "light"
 }
-// entity 90
+// entity 91
 {
 "classname" "light"
 "light" "75"
 "origin" "1592 -1544 192"
 }
-// entity 91
+// entity 92
 {
 "origin" "928 -1664 128"
 "light" "75"
 "classname" "light"
 }
-// entity 92
+// entity 93
 {
 "classname" "light"
 "light" "75"
 "origin" "936 -1664 -152"
 }
-// entity 93
+// entity 94
 {
 "_color" "0 1 1"
 "origin" "1152 -2400 96"
 "light" "75"
 "classname" "light"
 }
-// entity 94
+// entity 95
 {
 "classname" "item_armor_shard"
 "origin" "896 -1504 24"
 }
-// entity 95
+// entity 96
 {
 "origin" "936 -1600 24"
 "classname" "item_armor_shard"
 }
-// entity 96
+// entity 97
 {
 "classname" "item_armor_shard"
 "origin" "640 -1856 -248"
 }
-// entity 97
+// entity 98
 {
 "classname" "item_health_small"
 "origin" "1312 -1296 80"
 }
-// entity 98
+// entity 99
 {
 "origin" "1312 -1344 80"
 "classname" "item_health_small"
 }
-// entity 99
+// entity 100
 {
 "classname" "info_player_blue"
 "angle" "90"
 "origin" "-384 -768 16"
 }
-// entity 100
+// entity 101
 {
 "classname" "info_player_blue"
 "angle" "360"
 "origin" "936 -1656 16"
 }
-// entity 101
+// entity 102
 {
 "classname" "info_player_red"
 "angle" "360"
 "origin" "-768 992 16"
 }
-// entity 102
+// entity 103
 {
 "classname" "info_player_red"
 "angle" "270"
 "origin" "-384 504 -368"
 }
-// entity 103
+// entity 104
 {
 "classname" "info_player_red"
 "angle" "270"
 "origin" "-320 1496 -312"
 }
-// entity 104
+// entity 105
 {
 "classname" "info_player_red"
 "angle" "180"
 "origin" "832 1536 -264"
 }
-// entity 105
+// entity 106
 {
 "classname" "info_player_red"
 "angle" "180"
 "origin" "1288 1536 56"
 }
-// entity 106
+// entity 107
 {
 "classname" "info_player_red"
 "angle" "180"
 "origin" "160 992 16"
 }
-// entity 107
+// entity 108
 {
 "classname" "item_health_small"
 "origin" "1312 864 80"
 }
-// entity 108
+// entity 109
 {
 "classname" "ammo_cells"
 "origin" "-440 608 -352"
 }
-// entity 109
+// entity 110
 {
 "classname" "item_armor_shard"
 "origin" "-448 960 -352"
 }
-// entity 110
+// entity 111
 {
 "classname" "item_health"
 "origin" "-448 1024 -352"
 }
-// entity 111
+// entity 112
 {
 "classname" "item_armor_shard"
 "origin" "584 1472 -248"
 }
-// entity 112
+// entity 113
 {
 "classname" "ammo_rockets"
 "origin" "512 1472 -248"
 }
-// entity 113
+// entity 114
 {
 "classname" "item_armor_combat"
 "origin" "928 1792 -248"
 }
-// entity 114
+// entity 115
 {
 "classname" "ammo_bullets"
 "origin" "320 896 24"
 }
-// entity 115
+// entity 116
 {
 "classname" "ammo_rockets"
 "origin" "256 896 24"
 }
-// entity 116
+// entity 117
 {
 "classname" "item_health"
 "origin" "-384 848 24"
 }
-// entity 117
+// entity 118
 {
 "classname" "weapon_hyperblaster"
 "origin" "96 1600 -248"
 }
-// entity 118
+// entity 119
 {
 "classname" "weapon_railgun"
 "origin" "864 1056 -248"
 }
-// entity 119
+// entity 120
 {
 "classname" "weapon_rocketlauncher"
 "origin" "1248 1376 72"
 }
-// entity 120
+// entity 121
 {
 "classname" "item_flag_red"
 "origin" "1152 2016 32"
 }
-// entity 121
+// entity 122
 {
 "classname" "func_plat"
 "speed" "500"
@@ -32007,245 +32013,245 @@
 ( 1032 1660 36 ) ( 1024 1660 36 ) ( 1024 1660 32 ) arena9/metal2 47 31 -180 1 -1 0 0 0
 }
 }
-// entity 122
+// entity 123
 {
 "origin" "896 1112 192"
 "light" "75"
 "classname" "light"
 }
-// entity 123
+// entity 124
 {
 "classname" "light"
 "light" "75"
 "origin" "-400 1320 -176"
 }
-// entity 124
+// entity 125
 {
 "classname" "light"
 "light" "75"
 "origin" "-664 472 104"
 }
-// entity 125
+// entity 126
 {
 "classname" "light"
 "light" "75"
 "origin" "-680 744 104"
 }
-// entity 126
+// entity 127
 {
 "classname" "light"
 "light" "75"
 "origin" "-760 992 104"
 }
-// entity 127
+// entity 128
 {
 "classname" "light"
 "light" "75"
 "origin" "-288 976 104"
 }
-// entity 128
+// entity 129
 {
 "classname" "light"
 "light" "75"
 "origin" "-88 472 104"
 }
-// entity 129
+// entity 130
 {
 "classname" "light"
 "light" "75"
 "origin" "-104 744 104"
 }
-// entity 130
+// entity 131
 {
 "classname" "light"
 "light" "25"
 "origin" "-388 896 -248"
 }
-// entity 131
+// entity 132
 {
 "classname" "light"
 "light" "25"
 "origin" "-388 768 -248"
 }
-// entity 132
+// entity 133
 {
 "classname" "light"
 "light" "20"
 "origin" "-384 1104 -152"
 }
-// entity 133
+// entity 134
 {
 "classname" "light"
 "light" "20"
 "origin" "-384 984 -152"
 }
-// entity 134
+// entity 135
 {
 "classname" "light"
 "light" "20"
 "origin" "-384 560 -152"
 }
-// entity 135
+// entity 136
 {
 "classname" "light"
 "light" "20"
 "origin" "-384 680 -152"
 }
-// entity 136
+// entity 137
 {
 "classname" "misc_mapmodel"
 "angle" "90"
 "model" "maps/meshes/straightconduit.md2"
 "origin" "-384 832 -376"
 }
-// entity 137
+// entity 138
 {
 "classname" "light"
 "light" "25"
 "origin" "256 1532 -144"
 }
-// entity 138
+// entity 139
 {
 "classname" "light"
 "light" "25"
 "origin" "384 1532 -144"
 }
-// entity 139
+// entity 140
 {
 "classname" "light"
 "light" "20"
 "origin" "48 1536 -48"
 }
-// entity 140
+// entity 141
 {
 "classname" "light"
 "light" "20"
 "origin" "168 1536 -48"
 }
-// entity 141
+// entity 142
 {
 "classname" "light"
 "light" "20"
 "origin" "592 1536 -48"
 }
-// entity 142
+// entity 143
 {
 "classname" "light"
 "light" "20"
 "origin" "472 1536 -48"
 }
-// entity 143
+// entity 144
 {
 "classname" "misc_mapmodel"
 "angle" "360"
 "model" "maps/meshes/straightconduit.md2"
 "origin" "320 1536 -272"
 }
-// entity 144
+// entity 145
 {
 "origin" "-208 1520 -176"
 "light" "75"
 "classname" "light"
 }
-// entity 145
+// entity 146
 {
 "origin" "352 976 104"
 "light" "75"
 "classname" "light"
 }
-// entity 146
+// entity 147
 {
 "classname" "light"
 "light" "75"
 "origin" "1224 1544 192"
 }
-// entity 147
+// entity 148
 {
 "origin" "1160 1824 128"
 "light" "75"
 "classname" "light"
 }
-// entity 148
+// entity 149
 {
 "classname" "light"
 "light" "75"
 "origin" "1608 1528 192"
 }
-// entity 149
+// entity 150
 {
 "origin" "1592 1160 192"
 "light" "75"
 "classname" "light"
 }
-// entity 150
+// entity 151
 {
 "classname" "light"
 "light" "75"
 "origin" "928 1280 128"
 }
-// entity 151
+// entity 152
 {
 "origin" "936 1280 -152"
 "light" "75"
 "classname" "light"
 }
-// entity 152
+// entity 153
 {
 "classname" "light"
 "light" "75"
 "origin" "1152 2016 96"
 "_color" "1 0 0"
 }
-// entity 153
+// entity 154
 {
 "origin" "896 1120 24"
 "classname" "item_armor_shard"
 }
-// entity 154
+// entity 155
 {
 "classname" "item_armor_shard"
 "origin" "936 1216 24"
 }
-// entity 155
+// entity 156
 {
 "origin" "640 1472 -248"
 "classname" "item_armor_shard"
 }
-// entity 156
+// entity 157
 {
 "origin" "1312 912 80"
 "classname" "item_health_small"
 }
-// entity 157
+// entity 158
 {
 "classname" "item_health_small"
 "origin" "1312 960 80"
 }
-// entity 158
+// entity 159
 {
 "origin" "936 1272 16"
 "angle" "360"
 "classname" "info_player_red"
 }
-// entity 159
+// entity 160
 {
 "classname" "light"
 "light" "75"
 "origin" "960 1528 -152"
 }
-// entity 160
+// entity 161
 {
 "origin" "928 1728 -152"
 "light" "75"
 "classname" "light"
 }
-// entity 161
+// entity 162
 {
 "origin" "976 -1928 -152"
 "light" "75"
 "classname" "light"
 }
-// entity 162
+// entity 163
 {
 "classname" "light"
 "light" "75"
