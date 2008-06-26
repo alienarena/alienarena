@@ -210,6 +210,9 @@ EmitWaterPolys
 Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
+// === jitwater
+extern image_t *distort_tex;
+extern image_t *water_normal_tex;
 void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 {
 	glpoly_t	*p;
@@ -218,12 +221,37 @@ void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 	float		s, t, os, ot;
 	float		scroll;
 	float		rdt = r_newrefdef.time;
-	vec3_t		nv, vectors[3];   // Water waves
-	
+	vec3_t		nv;  
+	qboolean	fod;
+
 	if (fa->texinfo->flags & SURF_FLOWING)
-		scroll = -64 * ( (r_newrefdef.time*0.5) - (int)(r_newrefdef.time*0.5) );
+		scroll = -64.0f * ((r_newrefdef.time * 0.5f) - (int)(r_newrefdef.time * 0.5f));
 	else
-		scroll = 0;
+		scroll = 0.0f;
+	
+	//special case - note one day we should find a way to check for contents such as mist to do this.
+	if(!Q_stricmp(fa->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_stricmp(fa->texinfo->image->name, "textures/arena5/fod.wal"))
+		fod = true;
+	else
+		fod = false;
+
+	if (gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
+	{
+		qglEnable(GL_FRAGMENT_PROGRAM_ARB);
+		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
+		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0,
+			rs_realtime * (0.2f), 1.0f, 1.0f, 1.0f);
+		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1,
+			rs_realtime * -0.2f, 10.0f, 1.0f, 1.0f);
+		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
+			r_newrefdef.vieworg[0], r_newrefdef.vieworg[1], r_newrefdef.vieworg[2], 1.0f);
+		if(water_normal_tex)
+			GL_MBind(GL_TEXTURE2, water_normal_tex->texnum); // Normal texture
+		if(distort_tex)
+			GL_MBind(GL_TEXTURE1, distort_tex->texnum);      // Distortion texture
+	}
+
+	GL_MBind(GL_TEXTURE0, fa->texinfo->image->texnum);
 
 	for (p=fa->polys ; p ; p=p->next)
 	{
@@ -247,56 +275,49 @@ void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 			t = ot + r_turbsin[Q_ftol( ((os*0.125+rdt) * TURBSCALE) ) & 255];
 #endif
 			t *= (1.0/64);
-		
-			qglTexCoord2f (s, t);
-//=============== Water waves ============
+
+			if (gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
+			{
+				qglMTexCoord2fSGIS(GL_TEXTURE0, s, t);
+				qglMTexCoord2fSGIS(GL_TEXTURE1, 10*s, 10*t);
+				qglMTexCoord2fSGIS(GL_TEXTURE2, 10*s, 10*t);
+			}
+			else
+				qglTexCoord2f (s, t);
 
 			if (!(fa->texinfo->flags & SURF_FLOWING))
 
 			{
 
 				nv[0] =v[0];
-
 				nv[1] =v[1];
 
 				#if !id386
-
 				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
 
 						+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
-
 				#else
-
 				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+r_newrefdef.time)
 
 						+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
-
 				#endif
-
-
-
 				qglVertex3fv (nv);
-
 			}
-
 			else
-
-//============= Water waves end. ==============
-
-
-			qglVertex3fv (v);
+				qglVertex3fv (v);
 		}
 		qglEnd ();
 	}
 
+	if (gl_state.fragment_program) 
+		qglDisable(GL_FRAGMENT_PROGRAM_ARB);
+
+	if(fod)
+		return;
+
 	//env map for certain waters(more clear types)
 	if(fa->texinfo->flags &(SURF_TRANS33)){
 
-		//hack for stock fog textures, ugh
-		if(!Q_stricmp(fa->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_stricmp(fa->texinfo->image->name, "textures/arena5/fod.wal"))
-			return;
-
-		AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 		GL_Bind(r_reflecttexture->texnum);
 
 		for (p=fa->polys ; p ; p=p->next)
@@ -308,43 +329,26 @@ void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 				ot = v[4];
 
 				RS_SetEnvmap (v, &os, &ot);
-					//move by normal & position
-				os-=DotProduct (fa->plane->normal, vectors[1] ) + (r_newrefdef.vieworg[0]-r_newrefdef.vieworg[1]+r_newrefdef.vieworg[2])*0.0025;
-				ot+=DotProduct (fa->plane->normal, vectors[2] ) + (-r_newrefdef.vieworg[0]+r_newrefdef.vieworg[1]-r_newrefdef.vieworg[2])*0.0025;
-				
 
 				qglTexCoord2f (.5*os, .5*ot);
 				
 				if (!(fa->texinfo->flags & SURF_FLOWING))
 
 				{
-
 					nv[0] =v[0];
-
 					nv[1] =v[1];
 
 					#if !id386
-
 					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
-
 							+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
-
 					#else
-
 					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+r_newrefdef.time)
-
 							+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
-
 					#endif
 
-
-
 					qglVertex3fv (nv);
-
 				}
-
 				else
-
 				qglVertex3fv (v);
 			}
 			qglEnd ();
@@ -359,9 +363,6 @@ float CalcWave (float x, float y) // jitwater / MPO
 		(r_turbsin[(int)((y*5+r_newrefdef.time) * TURBOSCALE) & 255] / 2.0f);
 }
 
-// === jitwater
-extern image_t *distort_tex;
-extern image_t *water_normal_tex;
 // MPO : this is my version...
 void EmitWaterPolys (msurface_t *fa)
 {
