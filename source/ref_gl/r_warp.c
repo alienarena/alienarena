@@ -328,8 +328,8 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 			qglBegin (GL_TRIANGLE_FAN);
 			for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
 			{
-				os = v[3] - r_newrefdef.vieworg[0];
-				ot = v[4] + r_newrefdef.vieworg[1];
+				os = v[3] - r_newrefdef.vieworg[0] + 128*scaleX;
+				ot = v[4] + r_newrefdef.vieworg[1] + 128*scaleY;
 
 				if(texnum)
 					qglTexCoord2f(1.0/512*scaleX*os, 1.0/512*scaleY*ot);
