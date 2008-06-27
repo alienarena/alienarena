@@ -80,3 +80,9 @@ textures/arena7/glass
 		envmap
 	}
 }
+textures/arena3/water
+{
+	{
+		map gfx/dmturboreflection.tga
+	}
+}

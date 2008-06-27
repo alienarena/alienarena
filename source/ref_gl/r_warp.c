@@ -213,7 +213,7 @@ Does a water warp on the pre-fragmented glpoly_t chain
 // === jitwater
 extern image_t *distort_tex;
 extern image_t *water_normal_tex;
-void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
+void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag)
 {
 	glpoly_t	*p;
 	float		*v;
@@ -235,7 +235,7 @@ void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 	else
 		fod = false;
 
-	if (gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
+	if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
 	{
 		qglEnable(GL_FRAGMENT_PROGRAM_ARB);
 		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
@@ -244,7 +244,7 @@ void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1,
 			rs_realtime * -0.2f, 10.0f, 1.0f, 1.0f);
 		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
-			r_newrefdef.vieworg[0], r_newrefdef.vieworg[1], r_newrefdef.vieworg[2], 1.0f);
+			(r_newrefdef.vieworg[0]), (r_newrefdef.vieworg[1]), (r_newrefdef.vieworg[2]), 1.0f);
 		if(water_normal_tex)
 			GL_MBind(GL_TEXTURE2, water_normal_tex->texnum); // Normal texture
 		if(distort_tex)
@@ -276,7 +276,7 @@ void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 #endif
 			t *= (1.0/64);
 
-			if (gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
+			if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
 			{
 				qglMTexCoord2fSGIS(GL_TEXTURE0, s, t);
 				qglMTexCoord2fSGIS(GL_TEXTURE1, 10*s, 10*t);
@@ -309,16 +309,17 @@ void EmitWaterPolys_original (msurface_t *fa)	//MPO renamed
 		qglEnd ();
 	}
 
-	if (gl_state.fragment_program) 
+	if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
 		qglDisable(GL_FRAGMENT_PROGRAM_ARB);
 
 	if(fod)
 		return;
 
-	//env map for certain waters(more clear types)
+	//env map for certain waters(more clear types) note - with new shaders, we can do away with alot
+	//of these old hacks
 	if(fa->texinfo->flags &(SURF_TRANS33)){
 
-		GL_Bind(r_reflecttexture->texnum);
+		GL_Bind(r_reflecttexture->texnum); //change this to texture passed if shader is used
 
 		for (p=fa->polys ; p ; p=p->next)
 		{
