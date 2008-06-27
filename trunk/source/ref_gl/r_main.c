@@ -1060,20 +1060,9 @@ void R_SetupGL (void)
     screenaspect = (float)r_newrefdef.width/r_newrefdef.height;
 	qglMatrixMode(GL_PROJECTION);
     qglLoadIdentity ();
-    // start MPO
-	// normal operation
-//	if (!g_drawing_refl)
-	{
-	    MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4 * 74 / r_newrefdef.fov_y, 15000); //Phenax
-	}
-	// if this is a reflection, the aspect ratio is different
-//	else
-//	{
-//		gluPerspective(r_newrefdef.fov_y, screenaspect, 4, 4096);
-//		MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4, 4096);
-//	}
-    // stop MPO
-
+    
+	MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4 * 74 / r_newrefdef.fov_y, 15000); //Phenax
+		
 	qglCullFace(GL_FRONT);
 
 	qglMatrixMode(GL_MODELVIEW);

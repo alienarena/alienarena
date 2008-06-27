@@ -227,6 +227,7 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->dynamic = false;
 	stage->lensflare = false;
 	stage->normalmap = false;
+	stage->distort = false;
 
 	stage->lightmap = true;
 
@@ -547,6 +548,7 @@ scriptname
 		alphamask
 		lensflare
 		normalmap
+		distort
 	}
 }
 */
@@ -805,6 +807,10 @@ void rs_stage_normalmap (rs_stage_t *stage, char **token)
 {
 	stage->normalmap = true;
 }
+void rs_stage_distort (rs_stage_t *stage, char **token)
+{
+	stage->distort = true;
+}
 static rs_stagekey_t rs_stagekeys[] = 
 {
 	{	"colormap",		&rs_stage_colormap		},
@@ -828,6 +834,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"alphafunc",	&rs_stage_alphafunc		},
 	{	"lensflare",	&rs_stage_lensflare		},
 	{   "normalmap",	&rs_stage_normalmap		},
+	{	"distort",		&rs_stage_distort		},
 
 	{	NULL,			NULL					}
 };
