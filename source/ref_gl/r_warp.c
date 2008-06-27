@@ -203,20 +203,6 @@ float	r_turbsin[] =
 
 #define TURBOSCALE (256.0f / ((float)M_PI / 4.0f))
 
-void SetReflEnvmap (vec3_t v, float *os, float *ot)
-{
-	vec3_t vert;
-
-	vert[0] = v[0]*r_world_matrix[0]+v[1]*r_world_matrix[4]+v[2]*r_world_matrix[8] +r_world_matrix[12];
-	vert[1] = v[0]*r_world_matrix[1]+v[1]*r_world_matrix[5]+v[2]*r_world_matrix[9] +r_world_matrix[13];
-	vert[2] = v[0]*r_world_matrix[2]+v[1]*r_world_matrix[6]+v[2]*r_world_matrix[10]+r_world_matrix[14];
-	
-	VectorNormalize (vert);
-
-	*os = vert[0];
-	*ot = vert[1];
-}
-
 /*
 =============
 EmitWaterPolys
@@ -342,15 +328,13 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 			qglBegin (GL_TRIANGLE_FAN);
 			for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
 			{
-				os = v[3];
-				ot = v[4];
-
-				SetReflEnvmap (v, &os, &ot);
+				os = v[3] - r_newrefdef.vieworg[0];
+				ot = v[4] + r_newrefdef.vieworg[1];
 
 				if(texnum)
-					qglTexCoord2f(scaleX*os, scaleY*ot);
+					qglTexCoord2f(1.0/512*scaleX*os, 1.0/512*scaleY*ot);
 				else //default
-					qglTexCoord2f (.5*os, .5*ot);
+					qglTexCoord2f (.5/512*os, .5/512*ot);
 				
 				if (!(fa->texinfo->flags & SURF_FLOWING))
 
