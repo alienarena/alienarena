@@ -201,7 +201,21 @@ float	r_turbsin[] =
 	#include "warpsin.h"
 };
 
-#define TURBOSCALE (256.0f / ((float)M_PI / 4.0f)) // jitwater / dukey
+#define TURBOSCALE (256.0f / ((float)M_PI / 4.0f))
+
+void SetReflEnvmap (vec3_t v, float *os, float *ot)
+{
+	vec3_t vert;
+
+	vert[0] = v[0]*r_world_matrix[0]+v[1]*r_world_matrix[4]+v[2]*r_world_matrix[8] +r_world_matrix[12];
+	vert[1] = v[0]*r_world_matrix[1]+v[1]*r_world_matrix[5]+v[2]*r_world_matrix[9] +r_world_matrix[13];
+	vert[2] = v[0]*r_world_matrix[2]+v[1]*r_world_matrix[6]+v[2]*r_world_matrix[10]+r_world_matrix[14];
+	
+	VectorNormalize (vert);
+
+	*os = vert[0];
+	*ot = vert[1];
+}
 
 /*
 =============
@@ -210,10 +224,9 @@ EmitWaterPolys
 Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
-// === jitwater
 extern image_t *distort_tex;
 extern image_t *water_normal_tex;
-void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag)
+void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, float scaleX, float scaleY)
 {
 	glpoly_t	*p;
 	float		*v;
@@ -319,8 +332,11 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag)
 	//of these old hacks
 	if(fa->texinfo->flags &(SURF_TRANS33)){
 
-		GL_Bind(r_reflecttexture->texnum); //change this to texture passed if shader is used
-
+		if(texnum)
+			GL_Bind(texnum);
+		else //default
+			GL_Bind(r_reflecttexture->texnum); 
+		
 		for (p=fa->polys ; p ; p=p->next)
 		{
 			qglBegin (GL_TRIANGLE_FAN);
@@ -329,9 +345,12 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag)
 				os = v[3];
 				ot = v[4];
 
-				RS_SetEnvmap (v, &os, &ot);
+				SetReflEnvmap (v, &os, &ot);
 
-				qglTexCoord2f (.5*os, .5*ot);
+				if(texnum)
+					qglTexCoord2f(scaleX*os, scaleY*ot);
+				else //default
+					qglTexCoord2f (.5*os, .5*ot);
 				
 				if (!(fa->texinfo->flags & SURF_FLOWING))
 

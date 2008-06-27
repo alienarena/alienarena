@@ -274,7 +274,7 @@ void R_RotateForEntity (entity_t *e);
 void R_MarkLeaves (void);
 void R_AddSkySurface (msurface_t *fa);
 void EmitWaterPolys (msurface_t *fa);
-void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag);
+void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, float scaleX, float scaleY);
 void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
 void R_DrawSkyBoxVooDoo (void);

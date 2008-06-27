@@ -343,7 +343,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 					gl_state.inverse_intensity,
 					1.0F );
 		if(!gl_reflection->value || (!Q_stricmp(fa->texinfo->image->name, "textures/arena2/lava.wal"))) //lava HACK!
-			EmitWaterPolys_original(fa, false);
+			EmitWaterPolys_original(fa, false, 0, 1, 1);
 		else
 			EmitWaterPolys (fa);
 		GL_TexEnv( GL_REPLACE );
@@ -458,7 +458,9 @@ void R_DrawAlphaSurfaces (void)
 	rscript_t	*rs_shader;
 	rs_stage_t	*stage = NULL;
 	qboolean	distFlag = false;
-
+	int			texnum = 0;
+	float		scaleX = 1, scaleY = 1;
+ 
 	// the textures are prescaled up for a better lighting range,
 	// so scale it back down
 	intens = gl_state.inverse_intensity;
@@ -499,12 +501,17 @@ void R_DrawAlphaSurfaces (void)
 					if(rs_shader) {
 						stage = rs_shader->stage;
 						if(stage) { //for now, just map a texture and flag it for distortion
-							//GL_Bind (stage->texture->texnum); //pass this to emitwaterpolys
-							distFlag = true;
+							texnum = stage->texture->texnum; //pass this to emitwaterpolys
 						}
+						if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) {
+							scaleX = stage->scale.scaleX;
+							scaleY = stage->scale.scaleY;
+						}
+						if(stage->distort)
+							distFlag = true;
 					}
 				}
-				EmitWaterPolys_original (s, distFlag);
+				EmitWaterPolys_original (s, distFlag, texnum, scaleX, scaleY);
 			}
 			else
 				EmitWaterPolys (s);

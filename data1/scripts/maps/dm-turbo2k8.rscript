@@ -84,5 +84,6 @@ textures/arena3/water
 {
 	{
 		map gfx/dmturboreflection.tga
+		distort
 	}
 }
