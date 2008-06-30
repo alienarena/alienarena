@@ -1857,26 +1857,25 @@ void CL_BulletMarks(vec3_t org, vec3_t dir){
 	
 	if(!(p = new_particle()))
 		return;
-	
-	p->texnum = r_bullettexture->texnum;
+
+	p->texnum = r_bulletnormal->texnum;
 	p->color = 0 + (rand() & 1);
-	p->type = PARTICLE_DECAL;
-	p->blendsrc = GL_ZERO;
-	p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
-	p->scale = .5;
-	p->scalevel = 0;
+	p->type = PARTICLE_RAISEDDECAL;
+	p->blendsrc = GL_DST_COLOR;
+	p->blenddst = GL_SRC_COLOR;
 	
 	VectorScale(dir, -1, v);
 	RotateForNormal(v, p->angle);
 	p->angle[ROLL] = rand() % 360;
 	VectorAdd(org, dir, p->org);
-	
+
+	p->scale = .5;
 	p->alpha = 0.5;
 	p->alphavel = -0.2 / (2.0 + frand() * 0.3);
 	for (j=0 ; j<3 ; j++)
 	{
-			p->accel[j] = 0;
-			p->vel[j] = 0;
+		p->accel[j] = 0;
+		p->vel[j] = 0;
 	}
 }
 void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur){

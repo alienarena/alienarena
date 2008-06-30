@@ -30,7 +30,41 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <jpeglib.h>
 #endif
 
-image_t *r_flare;
+image_t		*r_notexture;		// use for bad textures
+image_t		*r_particletexture;	// little dot for particles
+image_t		*r_smoketexture;	// for smoke, etc...
+image_t		*r_explosiontexture;
+image_t		*r_explosion1texture;
+image_t		*r_explosion2texture;
+image_t		*r_explosion3texture;
+image_t		*r_explosion4texture;
+image_t		*r_explosion5texture;
+image_t		*r_explosion6texture;
+image_t		*r_explosion7texture;
+image_t		*r_bloodtexture;
+image_t		*r_pufftexture;
+image_t		*r_blastertexture;
+image_t		*r_bflashtexture;
+image_t		*r_cflashtexture;
+image_t		*r_leaderfieldtexture;
+image_t		*r_deathfieldtexture;
+image_t		*r_shelltexture;    // c14 added shell texture
+image_t		*r_hittexture;
+image_t		*r_bubbletexture;
+image_t		*r_reflecttexture;
+image_t		*r_shottexture;
+image_t		*r_sayicontexture;
+image_t		*r_flaretexture;
+image_t		*r_beamtexture;
+image_t		*r_beam2texture;
+image_t		*r_beam3texture;
+image_t		*r_bullettexture;
+image_t		*r_bulletnormal;
+image_t		*r_voltagetexture;
+image_t		*r_raintexture;
+image_t		*r_radarmap; // wall texture for radar texgen
+image_t		*r_around;
+image_t		*r_flare;
 
 //Normalisation cube map
 GLuint normalisationCubeMap;
@@ -228,6 +262,7 @@ void R_InitParticleTexture (void)
 	r_beam2texture = R_RegisterGfxPic("greenline");
 	r_beam3texture = R_RegisterGfxPic("electrics3d");
 	r_bullettexture = R_RegisterParticlePic("bullethole");
+	r_bulletnormal = R_RegisterParticleNormal("bullethole2");
 	r_voltagetexture = R_RegisterParticlePic("voltage");
 	r_raintexture = R_RegisterParticlePic("beam");
 	r_radarmap = GL_FindImage("gfx/radar/radarmap",it_pic);
