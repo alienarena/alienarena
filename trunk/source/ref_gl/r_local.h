@@ -322,6 +322,7 @@ void	GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,
 
 image_t *R_RegisterSkin (char *name);
 image_t *R_RegisterParticlePic(char *name);
+image_t *R_RegisterParticleNormal(char *name);
 image_t *R_RegisterGfxPic(char *name);
 
 void	LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);

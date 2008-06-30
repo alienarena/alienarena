@@ -47,40 +47,6 @@ float			gldepthmin, gldepthmax;
 glconfig_t		gl_config;
 glstate_t		gl_state;
 
-image_t		*r_notexture;		// use for bad textures
-image_t		*r_particletexture;	// little dot for particles
-image_t		*r_smoketexture;	// for smoke, etc...
-image_t		*r_explosiontexture;
-image_t		*r_explosion1texture;
-image_t		*r_explosion2texture;
-image_t		*r_explosion3texture;
-image_t		*r_explosion4texture;
-image_t		*r_explosion5texture;
-image_t		*r_explosion6texture;
-image_t		*r_explosion7texture;
-image_t		*r_bloodtexture;
-image_t		*r_pufftexture;
-image_t		*r_blastertexture;
-image_t		*r_bflashtexture;
-image_t		*r_cflashtexture;
-image_t		*r_leaderfieldtexture;
-image_t		*r_deathfieldtexture;
-image_t		*r_shelltexture;    // c14 added shell texture
-image_t		*r_hittexture;
-image_t		*r_bubbletexture;
-image_t		*r_reflecttexture;
-image_t		*r_shottexture;
-image_t		*r_sayicontexture;
-image_t		*r_flaretexture;
-image_t		*r_beamtexture;
-image_t		*r_beam2texture;
-image_t		*r_beam3texture;
-image_t		*r_bullettexture;
-image_t		*r_voltagetexture;
-image_t		*r_raintexture;
-image_t		*r_radarmap; // wall texture for radar texgen
-image_t		*r_around;
-
 cvar_t	*gl_normalmaps;
 cvar_t	*gl_specularmaps;
 cvar_t	*gl_cubemaps;
@@ -640,7 +606,11 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 
 			GL_Bind ( texnum );
 			qglBlendFunc ( blendsrc, blenddst );
-			qglColor4ubv( color );
+			if(p->type == PARTICLE_RAISEDDECAL) {
+				qglColor4f(1,1,1,1);
+			}
+			else
+				qglColor4ubv( color );
 			qglBegin ( GL_QUADS );
 		}
 
@@ -657,7 +627,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			VectorScale(pright, 5*scale, pright);
 			VectorScale(pup, 5*scale, pup);
 		}
-		else if(p->type == PARTICLE_DECAL) {
+		else if(p->type == PARTICLE_DECAL || p->type == PARTICLE_RAISEDDECAL) {
 			VectorCopy(p->angle, dir);
 			AngleVectors(dir, NULL, right, up);
 			VectorScale ( right, p->dist, pright );
@@ -720,6 +690,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 	}
 
 	qglEnd ();
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglColor4f( 1,1,1,1 );
 	qglDisable(GL_BLEND);

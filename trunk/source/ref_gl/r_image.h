@@ -91,6 +91,7 @@ extern image_t		*r_bubbletexture;
 extern image_t		*r_reflecttexture;
 extern image_t		*r_shottexture;
 extern image_t		*r_bullettexture;
+extern image_t		*r_bulletnormal;
 extern image_t		*r_sayicontexture;
 extern image_t		*r_flaretexture;
 extern image_t		*r_beamtexture;

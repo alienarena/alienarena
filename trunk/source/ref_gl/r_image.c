@@ -1132,7 +1132,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, q
 	byte		*scan;
 	int comp;
 
-	if(mipmap)
+	if(mipmap && !is_normalmap)
 		R_FilterTexture(data, width, height);
  
     uploaded_paletted = false;    // scan the texture for any non-255 alpha 
@@ -1541,6 +1541,7 @@ void GL_FreeUnusedImages (void)
 	r_bubbletexture->registration_sequence = registration_sequence;
 	r_shottexture->registration_sequence = registration_sequence;
 	r_bullettexture->registration_sequence = registration_sequence;
+	r_bulletnormal->registration_sequence = registration_sequence;
 	r_sayicontexture->registration_sequence = registration_sequence;
 	r_voltagetexture->registration_sequence = registration_sequence;
 	r_raintexture->registration_sequence = registration_sequence;
