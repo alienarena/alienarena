@@ -22,9 +22,7 @@
 */
 
 include 'config.php';
-
 include 'support.php';
-
 include 'servers.php';
 include 'maps.php';
 include 'players.php';
@@ -38,13 +36,8 @@ $filename = GetFilename();
 $conn = mysql_connect($CONFIG['dbHost'], $CONFIG['dbUser'], $CONFIG['dbPass']) or die ('Cannot connect to the database because: ' . mysql_error());
 mysql_select_db($CONFIG['dbName']) or die ('Database not found on host');
 
-echo "<a href=\"http://www.cooldark.com/\"><img border=0 width=400 height=90 alt=\"Server Browser\" src=\"img/server_browser_cooldark.jpg\"></a><br>\n";
-//echo "<font class=\"cdtitle\">{$CONFIG['title']} ({$CONFIG['version']})</font>\n";
-//echo "<p class=\"cdsubtitle\">Recovering from mysql server crash - stats valid in 24h</p>\n";
-
-//echo "<p class=\"cdbody\">Please help boost the number of players on Alien Arena 2007 by <a target=_blank href=\"http://digg.com/gaming_news/Alien_Arena_2007_Awesome_Quake_3_Style_FPS_for_FREE\">digging it</a> here.</p>";
-//echo "<p class=\"cdbody\">Please <a target=_blank href=\"http://www.download.com/Alien-Arena-2007/3640-7453_4-10630629.html?tag=tab_ur\">submit a review</a> now that version 6.03 of Alien Arena has been released.</p>";
 echo "<p class=\"cdsubtitle\"> - <a href=\"{$filename}?action=showlive\">Live information</a> - <a href=\"{$filename}?action=serverstats\">Server stats</a> - <a href=\"{$filename}?action=playerstats\">Player stats</a> - <a href=\"{$filename}?action=mapstats\">Map stats</a> - </p>\n";
+
 CheckDBLive();
 
 switch ($control['action'])
@@ -59,6 +52,7 @@ switch ($control['action'])
 		/* Section to build table of servers with most playertime*/
 		echo "<p class=\"cdsubtitle\">Server usage in the last {$control['history']} hours</p>\n";
 		echo "<img alt=\"Server graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=servers&history={$control['history']}\"><br><br>\n";
+		GenerateTotalServers(&$control);
 		GenerateServerTable(&$control);
 		GenerateNumResultsSelector(&$control);
 		GenerateSearchInput("serversearch", "Server search");
@@ -66,6 +60,7 @@ switch ($control['action'])
 	case 'playerstats':
 		echo "<p class=\"cdsubtitle\">Player activity in the last {$control['history']} hours</p>\n";
 		echo "<img alt=\"Player graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=players&history={$control['history']}\"><br><br>\n";
+		GenerateTotalPlayers(&$control);
 		GeneratePlayerTable(&$control);
 		GenerateNumResultsSelector(&$control);
 		GenerateSearchInput("playersearch", "Player search");

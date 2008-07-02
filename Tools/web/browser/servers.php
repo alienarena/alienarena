@@ -21,6 +21,8 @@
     Tony Jackson can be contacted at tonyj@cooldark.com
 */
 
+include("flags.php");
+
 function GenerateLiveServerTable(&$control)
 {
 	$lastupdated = GetLastUpdated();
@@ -53,10 +55,10 @@ function GenerateLiveServerTable(&$control)
 		$svinfo_result = mysql_query($query);
 		$svinfo_row = mysql_fetch_array($svinfo_result, MYSQL_ASSOC);
 
-		if($pl_numrows > 4)
+		if($pl_numrows > 5)
 			$rowspan = $pl_numrows;
 		else
-			$rowspan = 4;
+			$rowspan = 5;
 		
 	    echo "<tr>";
 		//echo "<td>{$svinfo_row['ip']}:{$svinfo_row['port']}</td>";
@@ -71,7 +73,7 @@ function GenerateLiveServerTable(&$control)
 		echo "</td>";
 		
 		$count = 0;
-		while(($pl_row = mysql_fetch_array($pl_result, MYSQL_ASSOC)) or $count < 4)
+		while(($pl_row = mysql_fetch_array($pl_result, MYSQL_ASSOC)) or $count < 5)
 		{
 			
 			if($count > 0)  /* no tr tag for first row, completing row above */
@@ -84,12 +86,18 @@ function GenerateLiveServerTable(&$control)
 						echo "<td>&nbsp;&nbsp;&nbsp;&nbsp;{$svinfo_row['ip']} port {$svinfo_row['port']}</td>";
 					break;
 					case 2:
+						echo "<td>&nbsp;&nbsp;&nbsp;&nbsp;";
+						$cc = GetCountryCode($svinfo_row['ip']);
+						ShowCountryFlag($cc);
+						echo "  ".GetCountryName($cc);
+					break;
+					case 3:
 						echo "<td>";
 						if($svinfo_row['admin'] != '')
 							echo "&nbsp;&nbsp;&nbsp;&nbsp;Admin: ".LimitString($svinfo_row['admin'],25);
 						echo "</td>"; 
 					break;
-					case 3:
+					case 4:
 						echo "<td>";
 						if($svinfo_row['website'] != "")
 						{
@@ -132,6 +140,15 @@ function GenerateLiveServerTable(&$control)
 	mysql_free_result($sv_result);
 
 	echo "</table>\n";
+}
+
+function GenerateTotalServers(&$control)
+{
+	$query = 'select count(distinct serverid) as total_servers from serverlog;';
+	$result = mysql_query($query);
+	$row = mysql_fetch_array($result, MYSQL_ASSOC);
+	
+	echo '<p class="cdsubtitle">'.$row['total_servers'].' unique servers in the last '.$control['history'].' hours</p>';
 }
 
 function GenerateServerTable(&$control)
@@ -339,7 +356,7 @@ function GenerateServerInfo(&$control)
 			echo "<p class=cdbody>Top 50 results shown</p>";
 	
 	echo "<table id=cdtable>\n";
-	echo "<tr><th>Name</th><th>Time</th></tr>\n";
+	echo "<tr><th>Name</th><th>Time</th><th>Average ping</th></tr>\n";
 
 	$count = 0;
 	
@@ -348,6 +365,19 @@ function GenerateServerInfo(&$control)
 		echo "<tr>";
 		echo "<td>".GenerateInfoLink("player", $pllog_row['name'])."</td>";
 		echo "<td>".MinutesToString($pllog_row['playertime'])."</td>";
+		echo "<td>";
+		$query = 'SELECT ROUND(AVG(ping),1) as avping'
+	    	    . ' FROM playerlog '
+				. ' WHERE serverid = \''.$control['id'].'\' '
+				. ' AND time > '.$starttime.' AND time <= '.$endtime
+				. ' AND ping > 0 '
+				. ' AND name = \''.addslashes($pllog_row['name']).'\' ';
+				
+		$ping_result = mysql_query($query);
+		$ping_row = mysql_fetch_array($ping_result, MYSQL_ASSOC);
+		echo $ping_row['avping'].' ms';
+		mysql_free_result($ping_result);
+		echo "</td>";
 		echo "</tr>";
 	}
 	echo "</table>";
