@@ -49,6 +49,15 @@ function GenerateLivePlayerTable(&$control)
 	mysql_free_result($pl_result);	
 }
 
+function GenerateTotalPlayers(&$control)
+{
+	$query = 'select count(distinct name) as total_players from playerlog;';
+	$result = mysql_query($query);
+	$row = mysql_fetch_array($result, MYSQL_ASSOC);
+	
+	echo '<p class="cdsubtitle">'.$row['total_players'].' unique players in the last '.$control['history'].' hours</p>';
+}
+
 function GeneratePlayerTable(&$control)
 {
   $endtime = GetLastUpdated();
@@ -128,7 +137,7 @@ function GeneratePlayerInfo(&$control)
 	mysql_free_result($pllog_result);
 	
 	/* Show which servers this player has been playing on */
-	$query = 'SELECT serverid, mapname, COUNT( serverid ) as playertime'
+	$query = 'SELECT serverid, mapname, COUNT( serverid ) as playertime, ROUND(AVG(ping),1) as avgping'
 //			. ' GROUP_CONCAT(DISTINCT name ORDER BY name DESC SEPARATOR \', \')'
 	        . ' FROM playerlog '
     		. ' WHERE name = \''.$control['id'].'\''
@@ -147,7 +156,7 @@ function GeneratePlayerInfo(&$control)
 			echo "<p class=cdbody>Top 50 results shown</p>";
 		
 		echo "<table id=cdtable>\n";
-		echo "<tr><th>Hostname</th><th>Player time</th></tr>\n";
+		echo "<tr><th>Hostname</th><th>Player time</th><th>Average ping</th></tr>\n";
 
 		$count = 0;
 		
@@ -160,6 +169,7 @@ function GeneratePlayerInfo(&$control)
 			echo "<tr>";
 			echo "<td>".GetServerNameFromID($svlog_row['serverid'])."</td>";
 			echo "<td>".MinutesToString($svlog_row['playertime'])."</td>";
+			echo "<td>".$svlog_row['avgping']." ms</td>";
 			echo "</tr>\n";
 		}
 		echo "</table>\n";

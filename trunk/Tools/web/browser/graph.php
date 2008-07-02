@@ -134,11 +134,12 @@ else
 // Create image and define colors
 $image=imagecreate($width, $height);
 
+// First imagecolorallocate() defines default fill for the image
+$colour['white']=imagecolorallocate($image, 255, 255, 255);
 $colour['green']=imagecolorallocate($image, 0, 255, 0);
 $colour['darkgreen']=imagecolorallocate($image, 0, 200, 0);
 $colour['blue']=imagecolorallocate($image, 0, 0, 255);
 $colour['red']=imagecolorallocate($image, 255, 0, 0);
-$colour['white']=imagecolorallocate($image, 255, 255, 255);
 $colour['darkgrey']=imagecolorallocate($image, 50, 50, 50);
 $colour['lightgrey']=imagecolorallocate($image, 245, 245, 245);
 $colour['grey']=imagecolorallocate($image, 235, 235, 235);
@@ -150,8 +151,11 @@ $gwidth = $width - $xorigin - 10;
 $gheight = $yorigin - 5;
 
 /* Now draw basic structure */
+imagealphablending($image, false);
+/* Filled rectangles must define upper-left then lower-right, otherwise
+    won't work with PHP5-CGI implementation of gd lib */
 imagefilledrectangle($image, 0, 0, $width, $height, $colour['grey']);
-imagefilledrectangle($image, $xorigin, $yorigin, $xorigin+$gwidth, $yorigin-$gheight, $colour['white']);
+imagefilledrectangle($image, $xorigin, $yorigin-$gheight, $xorigin+$gwidth, $yorigin, $colour['white']);
 /* Add x markers */
 for($x = 0; $x <= $control['history']; $x++)
 {

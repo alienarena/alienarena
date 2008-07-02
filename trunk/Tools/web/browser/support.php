@@ -94,7 +94,7 @@ $actionparams = array(
 		),
 	'serversearch' => array(),
 	'playersearch' => array(),
-	'mapsearch' => array()
+	'mapsearch' => array(),
 	);
 
 //	print_r($actioncontrol);
@@ -221,9 +221,10 @@ function GetFilename()
 	$filename = explode('/', $_SERVER["REQUEST_URI"]);
 	$filename = explode('?', $filename[count($filename)-1]);
 	//print_r($filename);
-	if($filename == "")
-		$filename = "stats.php";  /* For when just directory is accessed */
-	return $filename[0];
+	$filename = $filename[0];
+	if($filename == '')
+		$filename = 'index.php';  /* For when just directory is accessed */
+	return $filename;
 }
 
 function GetLastUpdated()
@@ -261,9 +262,16 @@ function MinutesToString ($mins, $long=false)
       $mins = $mins % 60;
     }
     // we're done! now save time periods into our array
-    $t['hours'] = (intval($hours) < 10) ? "0" . $hours : $hours;
-    $t['mins'] = (intval($mins) < 10) ? "0" . $mins : $mins;
-  
+	if(0)
+	{	// With leading zeros
+		$t['hours'] = (intval($hours) < 10) ? "0" . $hours : $hours;
+		$t['mins'] = (intval($mins) < 10) ? "0" . $mins : $mins;
+	}
+	else
+	{	// Without leading zeros
+	    $t['hours'] = $hours;
+		$t['mins'] = $mins;
+	}
   // decide how we should name hours, mins, sec
   $str_hours = ($long) ? "hr" : "hr";
 
