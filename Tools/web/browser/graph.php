@@ -21,7 +21,7 @@
     Tony Jackson can be contacted at tonyj@cooldark.com
 */
 
-include('config.php'); /* Database config, username, password */
+include('../config.php'); /* Database config, username, password */
 include('support.php'); /* For GetLastUpdated() */
 error_reporting (E_ALL);
 
