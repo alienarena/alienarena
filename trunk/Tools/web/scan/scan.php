@@ -12,7 +12,7 @@ scanservers.php?debug
 *********************************/
 include 'config.php';  /* Database config */
 
-define("VERSION", "0.9.0");
+define("VERSION", "0.9.2");
 
 define("MAX_INSTANCES",5); /* Maximum number of instances of this script allowed to run at once */
 define("MAX_SERVERS",256); /* Used to be hardcoded to 64! */
@@ -510,6 +510,28 @@ CheckInstances();
 
 $serverlist = QueryMasterServer();
 /* $serverlist is our master array of servers, into which we will add information about each server */
+
+/* Add local servers */
+/*
+$serverlist[] = array("ip" => "localhost", "port" => 27910);
+$serverlist[] = array("ip" => "localhost", "port" => 27920);
+$serverlist[] = array("ip" => "localhost", "port" => 27930);
+$serverlist[] = array("ip" => "localhost", "port" => 27940);
+$serverlist[] = array("ip" => "localhost", "port" => 27950);
+$serverlist[] = array("ip" => "localhost", "port" => 27960);
+$serverlist[] = array("ip" => "localhost", "port" => 27970);
+$serverlist[] = array("ip" => "localhost", "port" => 27980);
+$serverlist[] = array("ip" => "localhost", "port" => 27990);
+$serverlist[] = array("ip" => "localhost", "port" => 27915);
+$serverlist[] = array("ip" => "localhost", "port" => 27925);
+$serverlist[] = array("ip" => "localhost", "port" => 27935);
+$serverlist[] = array("ip" => "localhost", "port" => 27945);
+$serverlist[] = array("ip" => "localhost", "port" => 27955);
+$serverlist[] = array("ip" => "localhost", "port" => 27965);
+$serverlist[] = array("ip" => "localhost", "port" => 27975);
+$serverlist[] = array("ip" => "localhost", "port" => 27985);
+$serverlist[] = array("ip" => "localhost", "port" => 27995);
+*/
 
 echo "Please wait - querying games servers...<br>\n";
 
