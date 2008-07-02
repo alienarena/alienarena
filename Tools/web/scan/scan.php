@@ -10,9 +10,9 @@ database storage.
 To invoke debug mode, use:
 scanservers.php?debug
 *********************************/
-include 'config.php';  /* Database config */
+include '../config.php';  /* Database config */
 
-define("VERSION", "0.9.2");
+define("VERSION", "0.9.3");
 
 define("MAX_INSTANCES",5); /* Maximum number of instances of this script allowed to run at once */
 define("MAX_SERVERS",256); /* Used to be hardcoded to 64! */
