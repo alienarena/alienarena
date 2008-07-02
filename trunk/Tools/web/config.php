@@ -23,15 +23,15 @@
 
 /* General configuration */
 $CONFIG['title'] = 'Alien Arena :: Server Stats Browser';
-$CONFIG['baseurl'] = 'http://www.chaingun.org/alienarena/tools/'; /* Trailing slash important */
+$CONFIG['baseurl'] = 'http://www.chaingun.org/alienarena/web_svn/'; /* Trailing slash important */
 $CONFIG['stylesheet'] = $CONFIG['baseurl'].'style.css';
 $CONFIG['dbHost'] = 'localhost';
-$CONFIG['dbName'] = 'your_db_name_here';
-$CONFIG['dbUser'] = 'your_db_username_here';
-$CONFIG['dbPass'] = 'your_db_password_here';
+$CONFIG['dbName'] = 'cooldark_stats';
+$CONFIG['dbUser'] = 'cooldark_stats';
+$CONFIG['dbPass'] = 'zn1034e';
 
 /* Contact e-mail shown when master uncontactable or mysql problems */
-$CONFIG['contact'] = 'your@name.here';
+$CONFIG['contact'] = 'tonyj@cooldark.com';
 
 /* Graphs that are shown on browser pages */
 $CONFIG['graphwidth'] = 500;
