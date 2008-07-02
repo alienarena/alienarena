@@ -36,7 +36,7 @@ function Generate_HTML_Headers()
 	echo "<html>\n";
 	echo "<head>\n";
 	echo "    <title>".$CONFIG['title']."</title>\n";
-	echo "    <base href=\"".$CONFIG['baseurl']."\">\n";
+	echo "    <base href=\"".$CONFIG['baseurl']."browser/\">\n";
 	echo "        <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n";
 	echo "        <meta name=\"keywords\" content=\"Code Red CodeRed Alien Arena 2006 2007 GE UE Uranium Edition Server Browser\">\n";
 	echo "        <meta name=\"description\" content=\"Alien Arena server browser - live server, player and map statistics.\">\n";
