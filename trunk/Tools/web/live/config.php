@@ -1,7 +1,6 @@
 <?php
-
 /*
-    ALIEN ARENA LIVE IMAGE GEN
+    ALIEN ARENA LIVE IMAGE GENERATOR CONFIG FILE
     Copyright (C) 2007 Tony Jackson
 
     This library is free software; you can redistribute it and/or
@@ -21,19 +20,19 @@
     Tony Jackson can be contacted at tonyj@cooldark.com
 */
 
-/* mysql server config */
-$CONFIG['dbHost'] = "localhost";
-$CONFIG['dbName'] = "dbname_here";
-$CONFIG['dbUser'] = "dbuser_here";
-$CONFIG['dbPass'] = "dbpass_here";
+$CONFIG['remoteurl'] = "http://www.chaingun.org/alienarena/tools/remote.php";
 
-/* Text overlay config */
-$CONFIG['xoffset'] = 35;
-$CONFIG['yoffset'] = 60;
-$CONFIG['font'] = "Arial_Black.ttf";
-$CONFIG['fontsize'] = 9;
+/* Text overlay config - edit this to match your image */
+//$CONFIG['xoffset'] = 200;
+//$CONFIG['yoffset'] = 145;
+$CONFIG['xoffset'] = 155;
+$CONFIG['yoffset'] = 45;
+$CONFIG['bgimage'] = "aabanner.jpg";
+$CONFIG['font'] = "./font/NEUROPOL.TTF";
+$CONFIG['fontsize'] = 10;
 $CONFIG['jpg_quality'] = 85;
 
+/* You might want to change this to E_ALL if you have problems */
 error_reporting (E_NONE);
 
 ?>
