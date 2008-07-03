@@ -56,12 +56,14 @@ function Generate_HTML_Footers()
 	echo "&copy 2007 Tony Jackson - tonyj[at]cooldark[dot]com</p>\n";
 	echo "</body></html>\n";
 }
-	
+
+/* Build control array and sanitise URL input */
 function BuildControl()
 {
 /* Array of actions, allowed parameters, and defaults/limits/allowed values for these parameters */
 $actionparams = array(	
-	'showlive' => array(),
+	'liveservers' => array(),
+	'liveplayers' => array(),
 	'serverstats' => array(
 		'orderby' => array('default'=>'playertime', 'uptime', 'maxplayers'),
 		'sort' => array('default'=>'desc', 'asc'),
