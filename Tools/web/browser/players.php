@@ -23,30 +23,72 @@
 
 function GenerateLivePlayerTable(&$control)
 {
-
 	$lastupdated = GetLastUpdated();
 	$filename = GetFilename();
-
+	/* Get all servers from last update which responded */
+	
 	/*  Section to display player list */
-	$query  = "SELECT name, serverid, score, ping FROM playerlog WHERE time = '{$lastupdated}' AND ping != '0'";
+	$query  = "SELECT COUNT(name) AS numplayers FROM playerlog WHERE time = '{$lastupdated}' AND ping != '0'";
 	$pl_result = mysql_query($query);
-	$numplayers = mysql_num_rows($pl_result);
+	$numplayers = mysql_fetch_array($pl_result);
+	$numplayers = $numplayers['numplayers'];
+	
+	$query  = " SELECT serverlogid, serverid, mapname, realplayers"
+			. " FROM serverlog"
+			. " WHERE time = '{$lastupdated}' AND realplayers > '0'"
+			. " ORDER BY realplayers DESC";
+	$sv_result = mysql_query($query);
 
-	echo "<p class=\"cdsubtitle\">{$numplayers} players online<p>\n";
+	$numservers = mysql_num_rows($sv_result);
+
+	echo "<p class=\"cdsubtitle\">{$numplayers} players using {$numservers} servers<p>\n";
+
+	/* Section to build table of servers */
 	echo "<p>\n<table id=cdtable>\n";
-	echo "<tr><th>Name</th><th>Host</th><th>Score</th><th>Ping</th></tr>\n";
+	echo "<tr><th>Player</th><th>Score</th><th>Ping</th><th>Server</th><th>Country</th><th>Map</th></tr>\n";
 
-	while($pl_row = mysql_fetch_array($pl_result, MYSQL_ASSOC))
-	{
-		echo "<tr>";
-		echo "<td><b>".GenerateInfoLink("player", $pl_row['name'])."</b></td>";
-		echo "<td>".GetServerNameFromID($pl_row['serverid'])."</td>";
-		echo "<td>{$pl_row['score']}</td>";
-		echo "<td>{$pl_row['ping']} ms</td>";
-		echo "</tr>\n";
-	}
+	while($sv_row = mysql_fetch_array($sv_result, MYSQL_ASSOC))
+	{	
+		$query  = " SELECT name, score, ping FROM playerlog"
+				. " WHERE serverlogid = '{$sv_row['serverlogid']}' AND ping > '0'"
+				. " ORDER BY score DESC";
+		$pl_result = mysql_query($query);
+		$pl_numrows = mysql_num_rows($pl_result);  /* Get number of players (rows) in mysql result */
+		$query  = "SELECT ip, port, hostname, admin, website FROM servers WHERE serverid = '{$sv_row['serverid']}'";
+		$svinfo_result = mysql_query($query);
+		$svinfo_row = mysql_fetch_array($svinfo_result, MYSQL_ASSOC);
+
+		while($pl_row = mysql_fetch_array($pl_result, MYSQL_ASSOC))
+		{
+		    echo "<tr>";
+
+			echo "<td><b>".GenerateInfoLink("player", $pl_row['name'])."</b></td>";
+			echo "<td>{$pl_row['score']}</td>";
+			echo "<td>{$pl_row['ping']} ms</td>";
+							
+			echo "<td><a href=\"{$filename}?action=serverinfo&id={$sv_row['serverid']}\">".LimitString($svinfo_row['hostname'],40)."</a>";
+			echo "</td>";
+		
+			echo '<td>';
+			$cc = GetCountryCode($svinfo_row['ip']);
+			ShowCountryFlag($cc);
+			echo '  '.GetCountryName($cc);
+			echo '</td>';
+
+			echo "<td>";
+				echo "<a href=\"{$filename}?action=mapinfo&id={$sv_row['mapname']}\">";
+				echo $sv_row['mapname'].'</a>';
+			echo "</td>";
+
+			echo "</tr>\n";
+		}
+
+		mysql_free_result($pl_result);
+	} 
+
+	mysql_free_result($sv_result);
+
 	echo "</table>\n";
-	mysql_free_result($pl_result);	
 }
 
 function GenerateTotalPlayers(&$control)

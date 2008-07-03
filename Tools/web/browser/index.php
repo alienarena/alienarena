@@ -36,17 +36,27 @@ $filename = GetFilename();
 $conn = mysql_connect($CONFIG['dbHost'], $CONFIG['dbUser'], $CONFIG['dbPass']) or die ('Cannot connect to the database because: ' . mysql_error());
 mysql_select_db($CONFIG['dbName']) or die ('Database not found on host');
 
-echo "<p class=\"cdsubtitle\"> - <a href=\"{$filename}?action=showlive\">Live information</a> - <a href=\"{$filename}?action=serverstats\">Server stats</a> - <a href=\"{$filename}?action=playerstats\">Player stats</a> - <a href=\"{$filename}?action=mapstats\">Map stats</a> - </p>\n";
+echo '<p class="cdsubtitle">';
+echo ' - ';
+echo "<a href=\"{$filename}?action=liveservers\">Live servers</a> - ";
+echo "<a href=\"{$filename}?action=liveplayers\">Live players</a> - ";
+echo "<a href=\"{$filename}?action=serverstats\">Server stats</a> - ";
+echo "<a href=\"{$filename}?action=playerstats\">Player stats</a> - ";
+echo "<a href=\"{$filename}?action=mapstats\">Map stats</a> - ";
+echo "</p>\n";
 
 CheckDBLive();
 
 switch ($control['action'])
 {
-	case 'showlive':
-		echo "<img alt=\"Player graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=players\"><br><br>\n";
+	case 'liveservers':
 		echo "<img alt=\"Server graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=servers\"><br>\n";
 		//GenerateLivePlayerTable(&$control);
 		GenerateLiveServerTable(&$control);
+	break;
+	case 'liveplayers':
+		echo "<img alt=\"Player graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=players\"><br><br>\n";
+		GenerateLivePlayerTable(&$control);
 	break;
 	case 'serverstats':
 		/* Section to build table of servers with most playertime*/

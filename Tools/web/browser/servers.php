@@ -172,8 +172,8 @@ function GenerateServerTable(&$control)
 	
 	echo "<table id=cdtable>\n";
 	echo "<tr>";
-	echo "<th>IP & port</th>";
-	echo "<th>Hostname</th>";
+	echo "<th>Server</th>";
+	echo "<th>Country</th>";
 	echo "<th>Admin</th>";
 
 	Insert_Table_Sorter(&$control, $display = 'Uptime', $orderby = 'uptime'); 
@@ -193,13 +193,15 @@ function GenerateServerTable(&$control)
       $uptime = 100;
 
     echo "<tr>";
-		echo "<td>{$sv_row['ip']}<br>port {$sv_row['port']}</td>";
 		echo "<td><a href=".$filename."?action=serverinfo&id=".$svlog_row['serverid'].">".$sv_row['hostname']."</a> ";
-		if($sv_row['website'] != "")
-		{
-			echo "<a href={$sv_row['website']}><img border=0 src=img/www.gif></a>";
-		}
 		echo "</td>";
+
+		echo '<td>';
+		$cc = GetCountryCode($sv_row['ip']);
+		ShowCountryFlag($cc);
+		echo '  '.GetCountryName($cc);
+		echo '</td>';
+
 		echo "<td>{$sv_row['admin']}</td>";
 		echo "<td>".$uptime."%</td>";
 		echo "<td>".MinutesToString($svlog_row['playertime'])."</td>";
