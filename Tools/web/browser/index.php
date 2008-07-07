@@ -50,12 +50,13 @@ CheckDBLive();
 switch ($control['action'])
 {
 	case 'liveservers':
+		echo "<img alt=\"Player graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=players\"><br><br>\n";
 		echo "<img alt=\"Server graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=servers\"><br>\n";
-		//GenerateLivePlayerTable(&$control);
 		GenerateLiveServerTable(&$control);
 	break;
 	case 'liveplayers':
 		echo "<img alt=\"Player graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=players\"><br><br>\n";
+		echo "<img alt=\"Server graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=servers\"><br>\n";
 		GenerateLivePlayerTable(&$control);
 	break;
 	case 'serverstats':
