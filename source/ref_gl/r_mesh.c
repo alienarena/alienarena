@@ -1150,12 +1150,13 @@ void R_DrawAliasShadow(dmdl_t *paliashdr)
 static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 {
 	int i;
-	vec3_t		mins, maxs;
+	vec3_t		mins, maxs, min2, max2;
 	dmdl_t	*paliashdr;
 	vec3_t		vectors[3];
 	vec3_t		thismins, oldmins, thismaxs, oldmaxs;
 	daliasframe_t *pframe, *poldframe;
 	vec3_t angles;
+	trace_t r_trace;
 
 	paliashdr = (dmdl_t *)currentmodel->extradata;
 
@@ -1212,6 +1213,19 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 			else
 				maxs[i] = oldmaxs[i];
 		}
+	}
+
+	if (r_worldmodel ) {
+		//occulusion culling - why draw entities we cannot see?
+	
+		VectorSet(min2, maxs[0], maxs[1], 16);
+		VectorSet(max2, mins[0], mins[1], -16);
+
+
+		r_trace = CM_BoxTrace(r_origin, e->origin, min2, max2, r_worldmodel->firstnode, MASK_VISIBILILITY);
+		
+		if(r_trace.fraction != 1.0)
+			return true;
 	}
 
 	/*
@@ -1303,20 +1317,7 @@ void R_DrawAliasModel (entity_t *e)
 	rscript_t	*rs = NULL;
 	char	shortname[MAX_QPATH];
 	extern qboolean g_drawing_refl;
-	vec3_t mins, maxs;
-	trace_t r_trace;
-
-	if (r_worldmodel ) {
-		//occulusion culling - why draw entities we cannot see?
-		VectorSet(mins, 16, 16, 16);
-		VectorSet(maxs, -16, -16, -16);
-
-		r_trace = CM_BoxTrace(r_origin, e->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
-		
-		if(r_trace.fraction != 1.0)
-			return;
-	}
-
+	
 	if ( !( e->flags & RF_WEAPONMODEL ) )
 	{
 		if ( R_CullAliasModel( bbox, e ) )
