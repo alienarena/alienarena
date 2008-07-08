@@ -1282,51 +1282,6 @@ ALIAS MODELS
 */
 
 /*
-=================
-Mod_AliasCalculateVertexNormals
-=================
-*/
-void Mod_AliasCalculateVertexNormals ( int numtris, dtriangle_t *tris, int numxyz, mtrivertx_t *v )
-{
-
-	int i, j;
-	vec3_t dir1, dir2;
-	vec3_t normals[MAX_VERTS], trnormals[MAX_TRIANGLES];
-
-	if(gl_rtlights->value) {
-		for ( i = 0; i < numtris; i++ ) {
-			// calculate two mostly perpendicular edge directions
-			VectorSubtract ( v[tris[i].index_xyz[0]].v, v[tris[i].index_xyz[1]].v, dir1 );
-			VectorSubtract ( v[tris[i].index_xyz[2]].v, v[tris[i].index_xyz[1]].v, dir2 );
-
-			// we have two edge directions, we can calculate a third vector from
-			// them, which is the direction of the surface normal
-			CrossProduct ( dir1, dir2, trnormals[i] );
-			VectorNormalize ( trnormals[i] );
-		}
-
-		// sum all triangle normals
-		for ( i = 0; i < numxyz; i++ ) {
-			VectorClear ( normals[i] );
-
-			for ( j = 0; j < numtris; j++ ) {
-				if ( tris[j].index_xyz[0] == i 
-					|| tris[j].index_xyz[1] == i
-					|| tris[j].index_xyz[2] == i ) {
-					VectorAdd ( normals[i], trnormals[j], normals[i] );
-				}
-			}
-
-			VectorNormalize ( normals[i] );
-		}
-
-		// copy normals back
-		for ( i = 0; i < numxyz; i++ ) {
-			NormalToLatLong ( normals[i], v[i].latlong );
-		}
-	}
-}
-/*
 R_LoadMd2VertexArrays
 */
 extern 
