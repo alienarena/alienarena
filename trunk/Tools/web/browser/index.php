@@ -33,6 +33,8 @@ Generate_HTML_Headers($CONFIG['baseurl'].'browser/', $CONFIG['title']);
 
 $filename = GetFilename();
 
+InsertAds();
+
 $conn = mysql_connect($CONFIG['dbHost'], $CONFIG['dbUser'], $CONFIG['dbPass']) or die ('Cannot connect to the database because: ' . mysql_error());
 mysql_select_db($CONFIG['dbName']) or die ('Database not found on host');
 
@@ -117,5 +119,15 @@ switch ($control['action'])
 
 Generate_HTML_Footers();
 mysql_close($conn);
+
+function InsertAds()
+{
+	ob_start(); // start buffer
+	include ("../adcode.txt");
+	$content = ob_get_contents(); // assign buffer contents to variable
+	ob_end_clean(); // end buffer and remove buffer contents
+	echo $content;
+}
+
 ?>
 
