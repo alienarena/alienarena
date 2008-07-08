@@ -1308,8 +1308,8 @@ void R_DrawAliasModel (entity_t *e)
 
 	if (r_worldmodel ) {
 		//occulusion culling - why draw entities we cannot see?
-		VectorSet(mins, 16, 16, 0);
-		VectorSet(maxs, -16, -16, 0);
+		VectorSet(mins, 16, 16, 16);
+		VectorSet(maxs, -16, -16, -16);
 
 		r_trace = CM_BoxTrace(r_origin, e->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		
