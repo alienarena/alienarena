@@ -132,6 +132,13 @@ void ValidateSelectedItem (edict_t *ent)
 	SelectNextItem (ent, -1);
 }
 
+void DrawChatBubble (edict_t *ent)
+{
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_SAYICON);
+	gi.WritePosition (ent->s.origin);
+	gi.multicast (ent->s.origin, MULTICAST_PVS);
+}
 
 //=================================================================================
 
@@ -1047,6 +1054,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_PlayerList_f(ent);
 	else if (Q_stricmp (cmd, "flashlight") == 0)
 		FL_make (ent);
+	else if (Q_stricmp (cmd, "chatbubble") == 0)
+		DrawChatBubble(ent);
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 

@@ -737,6 +737,7 @@ void SCR_RunConsole (void)
 SCR_DrawConsole
 ==================
 */
+float sendBubbleNow;
 void SCR_DrawConsole (void)
 {
 	Con_CheckResize ();
@@ -760,8 +761,19 @@ void SCR_DrawConsole (void)
 	}
 	else
 	{
-		if (cls.key_dest == key_game || cls.key_dest == key_message)
+		if (cls.key_dest == key_game || cls.key_dest == key_message) 
 			Con_DrawNotify ();	// only draw notify in game
+	}
+
+	//draw chat bubble 
+	if(cls.key_dest == key_message || scr_con_current) { 
+		//only send this every couple of seconds no need to flood
+		sendBubbleNow += cls.frametime;
+		if(sendBubbleNow >= 1) {
+			Cbuf_AddText("chatbubble\n"); 
+			Cbuf_Execute ();
+			sendBubbleNow = 0; 
+		}
 	}
 }
 
