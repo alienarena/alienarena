@@ -1532,11 +1532,12 @@ void weapon_floater_fire (edict_t *ent)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	forward[0] = forward[0] * 2.6;
 	forward[1] = forward[1] * 2.6;
+	forward[2] = forward[2] * 2.6;
 	if(ent->altfire) {
 		if(excessive->value)
-			fire_floater (ent, start, forward, damage, 500, damage_radius, radius_damage, 8);
+			fire_floater (ent, start, forward, damage, 400, damage_radius, radius_damage, 8);
 		else
-			fire_prox (ent, start, forward, damage-50, 500, damage_radius, radius_damage-50, 8);
+			fire_prox (ent, start, forward, damage-50, 200, damage_radius, radius_damage-50, 8);
 	}
 	else
 		fire_floater (ent, start, forward, damage, 500, damage_radius, radius_damage, 8);
