@@ -274,6 +274,8 @@ void Con_MessageMode_f (void)
 {
 	chat_team = false;
 	cls.key_dest = key_message;
+	Cbuf_AddText("chatbubble\n"); 
+	Cbuf_Execute ();
 }
 
 /*
@@ -285,6 +287,8 @@ void Con_MessageMode2_f (void)
 {
 	chat_team = true;
 	cls.key_dest = key_message;
+	Cbuf_AddText("chatbubble\n"); 
+	Cbuf_Execute ();
 }
 
 /*

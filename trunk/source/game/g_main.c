@@ -144,7 +144,7 @@ void ClientCommand (edict_t *ent);
 void RunEntity (edict_t *ent);
 void InitGame (void);
 void G_RunFrame (void);
-
+extern long filelength(int);
 
 //===================================================================
 

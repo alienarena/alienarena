@@ -42,7 +42,7 @@ void ACECO_ReadConfig(char config_file[128])
 	strcpy(botvals.faveweap, "None");
 	for(k = 1; k < 10; k++) 
 		botvals.weapacc[k] = 1.0;
-	botvals.awareness = 0.7;
+	botvals.awareness = (float)0.7;
 
 	strcpy( botvals.chatmsg1, "%s: I am the destroyer %s, not you."); 
 	strcpy( botvals.chatmsg2, "%s: Are you using a bot %s?"); 
