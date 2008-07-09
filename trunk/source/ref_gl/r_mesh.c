@@ -1150,7 +1150,7 @@ void R_DrawAliasShadow(dmdl_t *paliashdr)
 static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 {
 	int i;
-	vec3_t		mins, maxs, min2, max2;
+	vec3_t		mins, maxs;
 	dmdl_t	*paliashdr;
 	vec3_t		vectors[3];
 	vec3_t		thismins, oldmins, thismaxs, oldmaxs;
@@ -1218,11 +1218,7 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 	if (r_worldmodel ) {
 		//occulusion culling - why draw entities we cannot see?
 	
-		VectorSet(min2, maxs[0], maxs[1], 16);
-		VectorSet(max2, mins[0], mins[1], -16);
-
-
-		r_trace = CM_BoxTrace(r_origin, e->origin, min2, max2, r_worldmodel->firstnode, MASK_VISIBILILITY);
+		r_trace = CM_BoxTrace(r_origin, e->origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		
 		if(r_trace.fraction != 1.0)
 			return true;
