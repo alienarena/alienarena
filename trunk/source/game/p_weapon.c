@@ -1109,9 +1109,15 @@ void Weapon_Bomber_Fire (edict_t *ent)
 
 	VectorSet(offset, 8, 8, ent->viewheight-4);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	forward[0] = forward[0] * 2.6;
-	forward[1] = forward[1] * 2.6;
-	fire_bomb (ent, start, forward, damage, 250, damage_radius, radius_damage, 8);
+	
+	if(ent->client->buttons & BUTTON_ATTACK2) 
+		fire_rocket (ent, start, forward, damage, 1400, damage_radius/2, radius_damage/2);
+	else {
+		forward[0] = forward[0] * 2.6;
+		forward[1] = forward[1] * 2.6;
+
+		fire_bomb (ent, start, forward, damage, 250, damage_radius, radius_damage, 8);
+	}
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1144,6 +1150,11 @@ void Weapon_Strafer_Fire (edict_t *ent)
 	vec3_t	start;
 	vec3_t	offset;
 	int damage;
+	float	damage_radius;
+	int		radius_damage;
+
+	radius_damage = 100;
+	damage_radius = 100;
 
 	if(excessive->value)
 		damage = 60;
@@ -1165,7 +1176,10 @@ void Weapon_Strafer_Fire (edict_t *ent)
 
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	fire_blaster_beam (ent, start, forward, damage, 0, true);
+	if(ent->client->buttons & BUTTON_ATTACK2) 
+		fire_rocket (ent, start, forward, damage, 1200, damage_radius, radius_damage);
+	else
+		fire_blaster_beam (ent, start, forward, damage, 0, true);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1193,7 +1207,10 @@ void Weapon_Strafer_Fire (edict_t *ent)
 
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	fire_blaster_beam (ent, start, forward, damage, 0, true);
+	if(ent->client->buttons & BUTTON_ATTACK2) 
+		fire_rocket (ent, start, forward, damage, 1200, damage_radius, radius_damage);
+	else		
+		fire_blaster_beam (ent, start, forward, damage, 0, true);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
