@@ -1247,7 +1247,6 @@ void CL_BigTeleportParticles (vec3_t org)
 			p->org[j] = org[j];
 			p->vel[j] = 0;
 		}
-
 		p->accel[0] = p->accel[1] = 0;
 		p->accel[2] = 0;
 		p->alpha = 0.5;
@@ -2758,8 +2757,8 @@ void CL_TeleportParticles (vec3_t start)
 
 	VectorCopy (start, move);
 	VectorCopy (start, end);
-	end[2] += 48;
-	start[2] -= 32;
+	end[2] += 32;
+	start[2] -= 48;
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 
@@ -2772,8 +2771,8 @@ void CL_TeleportParticles (vec3_t start)
 		VectorClear (p->accel);
 			
 												
-		p->alpha = 0.9;
-		p->alphavel = -1.5 / (2+frand()*0.2);
+		p->alpha = 1.0;
+		p->alphavel = -2.5 / (2+frand()*0.2);
 		p->type = PARTICLE_FLAT;
 		p->texnum = r_hittexture->texnum;
 		p->blendsrc = GL_ONE;
@@ -2785,6 +2784,7 @@ void CL_TeleportParticles (vec3_t start)
 			p->org[j] = start[j] + dir[j];
 			p->vel[j] = 0;
 		}
+		p->vel[2] = PARTICLE_GRAVITY*2;
 		if (p && i < 1)
 		addParticleLight (p,
 					p->scale, 10,
