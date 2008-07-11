@@ -256,18 +256,12 @@ void blasterball_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 	else
 	{
 		gi.WriteByte (svc_temp_entity);
-		if(strcmp(self->classname, "hoverbolt") == 0) {
-			gi.WriteByte (TE_BFG_BIGEXPLOSION);
-			gi.WritePosition (self->s.origin);
-		}
-		else {
-				gi.WriteByte (TE_BLASTER);
-			gi.WritePosition (self->s.origin);
-			if (!plane)
-				gi.WriteDir (vec3_origin);
-			else
-				gi.WriteDir (plane->normal);
-		}
+		gi.WriteByte (TE_BLASTER);
+		gi.WritePosition (self->s.origin);
+		if (!plane)
+			gi.WriteDir (vec3_origin);
+		else
+			gi.WriteDir (plane->normal);
 		gi.multicast (self->s.origin, MULTICAST_PVS);
 	}
 	T_RadiusDamage(self, self->owner, 95, other, 150, MOD_PLASMA_SPLASH, 0);
@@ -295,12 +289,10 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	if(effect == EF_ROCKET) { //ack, kinda assbackwards, but the past mistakes haunt us
 		bolt->s.effects |= EF_BLASTER;
 		bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
-		bolt->classname = "hoverbolt";
 	}
 	else {
 		bolt->s.effects |= EF_PLASMA;
 		bolt->s.modelindex = gi.modelindex ("models/objects/fireball/tris.md2");
-		bolt->classname = "bolt";
 	}
 	VectorClear (bolt->mins);
 	VectorClear (bolt->maxs);
@@ -310,6 +302,8 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	bolt->nextthink = level.time + 2;
 	bolt->think = G_FreeEdict;
 	bolt->dmg = damage;
+	
+	bolt->classname = "bolt";
 	
 	gi.linkentity (bolt);
 
@@ -1394,7 +1388,7 @@ void bomb_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 		e->groundentity = NULL;
 		e->velocity[0] += crandom()* 50;
 		e->velocity[1] += crandom()* 50;
-		e->velocity[2] += crandom()* 100;
+		e->velocity[2] += 175 + crandom()* 50;
 	}
 	ent->think = bomb_blow;
 	ent->nextthink = level.time + .1;

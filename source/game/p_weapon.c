@@ -137,8 +137,13 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 			{
 				if ((int)(dmflags->value) & DF_WEAPONS_STAY)
 					ent->flags |= FL_RESPAWN;
-				else
-					SetRespawn (ent, 5); //was 30
+				else {
+					//weapon = FindItem (ent->item->weapon);
+					if(ent->item->weapmodel == WEAP_VAPORIZER)
+						SetRespawn (ent, 10);
+					else
+						SetRespawn (ent, 5); 
+				}
 			}
 		}
 	}
@@ -1271,9 +1276,15 @@ void Weapon_Hover_Fire (edict_t *ent)
 		fire_blasterball (ent, start, forward, damage*6, 2200, EF_ROCKET, false);
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hypbrl1a.wav"), 1, ATTN_NORM, 0);
 	}
-	else {
+	else if(ent->client->ps.gunframe == 6) {
 		fire_hover_beam (ent, start, forward, damage, 0, true);
 		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/biglaser.wav"), 1, ATTN_NORM, 0);
+		
+		VectorAdd(start, forward, start);
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_CHAINGUNSMOKE);
+		gi.WritePosition (start);
+		gi.multicast (start, MULTICAST_PVS);
 	}
 
 	// send muzzle flash
@@ -1282,18 +1293,12 @@ void Weapon_Hover_Fire (edict_t *ent)
 	gi.WriteByte (MZ_BFG | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
-	VectorAdd(start, forward, start);
-	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_CHAINGUNSMOKE);
-	gi.WritePosition (start);
-	gi.multicast (start, MULTICAST_PVS);
-
 	ent->client->ps.gunframe++;
 }
 void Weapon_Hover (edict_t *ent) //for now
 {
 	static int	pause_frames[]	= {30, 0};
-	static int	fire_frames[]	= {6,0};
+	static int	fire_frames[]	= {6,8,10,0};
 	static int	excessive_fire_frames[]	= {6,8,10,0};
 
 	if(excessive->value)
