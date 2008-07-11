@@ -1124,6 +1124,11 @@ void CL_AddPacketEntities (frame_t *frame)
 				CL_BlasterBall (cent->lerp_origin, ent.origin);
 				V_AddLight (ent.origin, 200, 0, 1, 1);
 			}
+			else if (effects & EF_BLASTER)
+			{
+				CL_BlasterTrail(cent->lerp_origin, ent.origin, cent);
+				V_AddLight (ent.origin, 50, 0, .5, 1);
+			}
 		}
 end:
 		VectorCopy (ent.origin, cent->lerp_origin);

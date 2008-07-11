@@ -585,6 +585,7 @@ trace_t CL_PMSurfaceTrace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, i
 cdlight_t *CL_AllocDlight (int key);
 void CL_BigTeleportParticles (vec3_t org);
 void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old);
+void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old);
 void CL_ShipExhaust (vec3_t start, vec3_t end, centity_t *old);
 void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old);
 void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur);
