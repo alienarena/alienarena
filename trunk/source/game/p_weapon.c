@@ -1110,13 +1110,17 @@ void Weapon_Bomber_Fire (edict_t *ent)
 	VectorSet(offset, 8, 8, ent->viewheight-4);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	
-	if(ent->client->buttons & BUTTON_ATTACK2) 
-		fire_rocket (ent, start, forward, damage, 1400, damage_radius/2, radius_damage/2);
-	else {
+	if(ent->client->buttons & BUTTON_ATTACK2 && ent->client->ps.gunframe != 12) {
+		fire_rocket (ent, start, forward, damage/3, 1400, damage_radius/2, radius_damage/2);
+		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/rocklr1b.wav"), 1, ATTN_NORM, 0);
+		ent->client->ps.gunframe = 12;
+	}
+	else if(ent->client->ps.gunframe != 6){
 		forward[0] = forward[0] * 2.6;
 		forward[1] = forward[1] * 2.6;
 
 		fire_bomb (ent, start, forward, damage, 250, damage_radius, radius_damage, 8);
+		gi.sound (ent, CHAN_WEAPON, gi.soundindex("vehicles/shootbomb.wav"), 1, ATTN_NORM, 0);
 	}
 
 	// send muzzle flash
@@ -1127,8 +1131,6 @@ void Weapon_Bomber_Fire (edict_t *ent)
 
 	ent->client->ps.gunframe++;
 
-	gi.sound (ent, CHAN_WEAPON, gi.soundindex("vehicles/shootbomb.wav"), 1, ATTN_NORM, 0);
-
 	//might want to work with this some
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -1136,7 +1138,7 @@ void Weapon_Bomber_Fire (edict_t *ent)
 void Weapon_Bomber (edict_t *ent)
 {
 	static int	pause_frames[]	= {30, 0};
-	static int	fire_frames[]	= {12,0};
+	static int	fire_frames[]	= {6,12,0};
 	static int	excessive_fire_frames[]	= {6,8,10,12,0};
 
 	if(excessive->value)
@@ -1207,10 +1209,14 @@ void Weapon_Strafer_Fire (edict_t *ent)
 
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	if(ent->client->buttons & BUTTON_ATTACK2) 
+	if(ent->client->buttons & BUTTON_ATTACK2) {
 		fire_rocket (ent, start, forward, damage, 1200, damage_radius, radius_damage);
-	else		
+		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/rocklr1b.wav"), 1, ATTN_NORM, 0);
+	}
+	else {		
 		fire_blaster_beam (ent, start, forward, damage, 0, true);
+		gi.sound (ent, CHAN_WEAPON, gi.soundindex("vehicles/shootlaser.wav"), 1, ATTN_NORM, 0);
+	}
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1225,13 +1231,11 @@ void Weapon_Strafer_Fire (edict_t *ent)
 	gi.multicast (start, MULTICAST_PVS);
 
 	ent->client->ps.gunframe++;
-
-	gi.sound (ent, CHAN_WEAPON, gi.soundindex("vehicles/shootlaser.wav"), 1, ATTN_NORM, 0);
 }
 void Weapon_Strafer (edict_t *ent) //for now
 {
 	static int	pause_frames[]	= {30, 0};
-	static int	fire_frames[]	= {7,0};
+	static int	fire_frames[]	= {6,0};
 	static int	excessive_fire_frames[]	= {6,8,10,0};
 
 	if(excessive->value)
@@ -1263,7 +1267,14 @@ void Weapon_Hover_Fire (edict_t *ent)
 
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	fire_hover_beam (ent, start, forward, damage, 0, true);
+	if(ent->client->buttons & BUTTON_ATTACK2) {
+		fire_blasterball (ent, start, forward, damage*6, 2200, EF_ROCKET, false);
+		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hypbrl1a.wav"), 1, ATTN_NORM, 0);
+	}
+	else {
+		fire_hover_beam (ent, start, forward, damage, 0, true);
+		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/biglaser.wav"), 1, ATTN_NORM, 0);
+	}
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1278,13 +1289,11 @@ void Weapon_Hover_Fire (edict_t *ent)
 	gi.multicast (start, MULTICAST_PVS);
 
 	ent->client->ps.gunframe++;
-
-	gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/biglaser.wav"), 1, ATTN_NORM, 0);
 }
 void Weapon_Hover (edict_t *ent) //for now
 {
 	static int	pause_frames[]	= {30, 0};
-	static int	fire_frames[]	= {7,0};
+	static int	fire_frames[]	= {6,0};
 	static int	excessive_fire_frames[]	= {6,8,10,0};
 
 	if(excessive->value)

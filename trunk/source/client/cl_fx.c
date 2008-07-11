@@ -1694,6 +1694,53 @@ void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old)
 
 }
 
+void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old)
+{
+	vec3_t		move;
+	vec3_t		vec;
+	float		len;
+	int			j;
+	cparticle_t	*p;
+	float		dec;
+
+	VectorCopy (start, move);
+	VectorSubtract (end, start, vec);
+	len = VectorNormalize (vec);
+
+	dec = 20;
+	VectorScale (vec, dec, vec);
+
+	while (len > 0)
+	{
+		len -= dec;
+
+		if ( (rand()&6) == 0)
+		{
+			if (!(p = new_particle()))
+				return;
+			
+			VectorClear (p->accel);
+			p->color = 0xc0 + (rand()&2); 
+			p->scale = 2 + (rand()&7);
+			p->scalevel = 5;
+			p->alpha = .3;
+			p->alphavel = -1.0 / (3+frand()*0.2);
+			p->type = PARTICLE_BLASTER;
+			p->texnum = r_hittexture->texnum;
+			p->blendsrc = GL_SRC_ALPHA;
+			p->blenddst = GL_ONE;
+			for (j=0 ; j<3 ; j++)
+			{
+				p->org[j] = move[j] + crand()*2;
+				p->vel[j] = crand()*2;
+			}
+			p->accel[2] = 0;
+		}
+		VectorAdd (move, vec, move);
+
+	}
+}
+
 void CL_ShipExhaust (vec3_t start, vec3_t end, centity_t *old)
 {
 	vec3_t		move;
@@ -1740,6 +1787,7 @@ void CL_ShipExhaust (vec3_t start, vec3_t end, centity_t *old)
 
 	}
 }
+
 void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 {
 	vec3_t		move;
