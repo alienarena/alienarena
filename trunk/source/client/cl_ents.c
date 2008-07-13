@@ -675,14 +675,12 @@ void CL_AddPacketEntities (frame_t *frame)
 	entity_state_t		*s1;
 	float				autorotate;
 	float				bob, bob_scale;
-	int					i, done, len;
+	int					i;
 	int					pnum;
 	centity_t			*cent;
 	int					autoanim;
 	clientinfo_t		*ci;
 	unsigned int		effects, renderfx;
-	char				modelpath[MAX_OSPATH];
-	char				modelname[MAX_OSPATH];
 	qboolean			playermodel;
 
 	// bonus items rotate at a fixed rate
@@ -994,41 +992,16 @@ void CL_AddPacketEntities (frame_t *frame)
 
 		}
 
-		if (s1->modelindex3 || (ci->helmet && playermodel))
+		if (s1->modelindex3 || (ci->helmet && playermodel)) //index 3 is only used for clear entities now, no need for all that checking
 		{
 			if(ci->helmet && playermodel)
 				ent.model = ci->helmet;
 			else
 				ent.model = cl.model_draw[s1->modelindex3];
 
-			//look for clear player helmets and flag accordingly
-			strcpy(modelpath, cl.configstrings[CS_MODELS+(s1->modelindex3)]);
-			len = strlen (modelpath);
-
-			i = -1;
-			strcpy(modelname, " ");
-
-			done = false;
-
-			while(!done) {
-				if(modelpath[len] == 'h')
-					done = true;
-				else {
-					modelname[i] = modelpath[len];
-
-				}
-				if(len < 1)
-					done = true;
-				len--;
-				i++;
-			}
-			modelname[i-1] = 0;
-			if (!Q_strcasecmp (modelname, "2dm.temle") || ci->helmet)
-			{
-				ent.alpha = 0.4;
-				ent.flags = RF_TRANSLUCENT;
-			}
-
+			ent.alpha = 0.4;
+			ent.flags = RF_TRANSLUCENT;
+			
 			if (s1->number == cl.playernum+1) {
 				ent.flags |= RF_VIEWERMODEL;
 			}
@@ -1041,16 +1014,10 @@ void CL_AddPacketEntities (frame_t *frame)
 		if (s1->modelindex4)
 		{
 			ent.flags = 0;
-			ent.alpha = 1.0;//fix the warmach player bug?
+			ent.alpha = 1.0;
 			ent.model = cl.model_draw[s1->modelindex4];
 
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag1.md2")
-				||!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag2.md2"))
-				V_AddEntity (&ent);
-			else if(!ci->helmet) //because we don't want any extraneous models like brainlet
-				//gunracks or war machine riders being drawn if helmt exists, meaning that
-				//the entity had defaulted
-				V_AddEntity (&ent);
+			V_AddEntity (&ent);
 		}
 
 		// add automatic particle trails
@@ -1244,19 +1211,19 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	if(!(strcmp("vehicles/bomber/v_wep.md2", gun.model->name))) {
 		gun.model = R_RegisterModel("vehicles/bomber/window.md2");
 		gun.flags |= RF_TRANSLUCENT;
-		gun.alpha = 0.30;
+		gun.alpha = 0.20;
 		V_AddEntity (&gun);
 	}
 	if(!(strcmp("vehicles/strafer/v_wep.md2", gun.model->name))) {
 		gun.model = R_RegisterModel("vehicles/bomber/window.md2");
 		gun.flags |= RF_TRANSLUCENT;
-		gun.alpha = 0.30;
+		gun.alpha = 0.20;
 		V_AddEntity (&gun);
 	}
 	if(!(strcmp("vehicles/hover/v_wep.md2", gun.model->name))) {
 		gun.model = R_RegisterModel("vehicles/hover/window.md2");
 		gun.flags |= RF_TRANSLUCENT;
-		gun.alpha = 0.30;
+		gun.alpha = 0.20;
 		V_AddEntity (&gun);
 	}
 	if(!(strcmp("models/weapons/v_rocket/tris.md2", gun.model->name))) {
