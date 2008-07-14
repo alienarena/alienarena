@@ -984,11 +984,8 @@ void ClientEndServerFrame (edict_t *ent)
 {
 	float	bobtime;
 	int		i;
-	vec3_t addspeed;
-	qboolean haste, sproing;
 	current_player = ent;
 	current_client = ent->client;
-
 
 	//
 	// If the origin or velocity have changed since ClientThink(),
@@ -1038,19 +1035,6 @@ void ClientEndServerFrame (edict_t *ent)
 	// calculate speed and cycle to be used for
 	// all cyclic walking effects
 	//
-
-	haste = current_client->haste_framenum > level.framenum;
-	if(haste) {
-		AngleVectors (ent->s.angles, addspeed, right, up);
-		addspeed[0] *= 100;
-		addspeed[1] *= 100;
- 		VectorAdd(ent->velocity, addspeed, ent->velocity);
-
-	}
-	
-	sproing = current_client->sproing_framenum > level.framenum;
-	if(sproing)
-		ent->velocity[2] += 50;
 
 	xyspeed = sqrt(ent->velocity[0]*ent->velocity[0] + ent->velocity[1]*ent->velocity[1]);
 

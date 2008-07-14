@@ -2543,7 +2543,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	int		i, j, mostvotes;
 	pmove_t	pm;
 	qboolean sproing, haste;
-	vec3_t addspeed, forward, up;
+	vec3_t addspeed, forward, up, right;
 
 	level.current_entity = ent;
 	client = ent->client;
@@ -2726,9 +2726,20 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		{
 			sproing = client->sproing_framenum > level.framenum;
 			haste = client->haste_framenum > level.framenum;
-			if(sproing)
+			if(sproing) {
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("items/sproing.wav"), 1, ATTN_NORM, 0);
+				ent->velocity[2] += 400;
+			}
 			if(haste) {
+				AngleVectors (ent->s.angles, addspeed, right, up);
+				addspeed[0] *= 400;
+				addspeed[1] *= 400;
+				for(i = 0; i < 2; i++) {
+				if(addspeed[i] > 200)
+					addspeed[i] = 200;
+				}
+				VectorAdd(ent->velocity, addspeed, ent->velocity);
+
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("items/haste.wav"), 1, ATTN_NORM, 0);
 				gi.WriteByte (svc_temp_entity);
 				gi.WriteByte (TE_EXPLOSION2);
