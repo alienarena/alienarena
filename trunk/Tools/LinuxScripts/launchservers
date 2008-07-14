@@ -1,0 +1,64 @@
+#!/bin/sh
+
+#####################################
+# ENTER CONFIGURATION DETAILS BELOW #
+#####################################
+
+name='Alien Arena'
+execpath=~/alienarena2008
+execname=crded
+cfgpath=~/alienarena2008/arena
+
+# use to generate core dumps after crashs
+ulimit -c unlimited
+
+#####################################
+#   END OF CONFIGURATION DETAILS    #
+#   DO NOT EDIT BELOW THIS LINE!    #
+#####################################
+
+# Written by Tony Jackson 14/07/2008
+
+cd $execpath
+# remove spaces in name
+sname=`echo ${name} | sed 's/\ /_/g'`
+
+# check for existing screen session or start a new one
+present=`screen -ls $sname | wc -l`
+if [ $present != '2' ]; then
+	sname=`screen -ls $sname | awk 'NR==2{printf $1}'`
+	echo "[OK      ] Screen session $sname"
+else
+	# launch screen
+	screen -dmS $sname -t shell
+	echo "[STARTING] New screen session $sname"
+fi
+
+cd $cfgpath
+for i in `ls port?????`; do
+	cd $cfgpath
+	# search config file for hostname and pull out
+	hostname=`cat $i | grep hostname | sed 's/set\ \|hostname\ \|\"//g'`
+	# extract port number from soft link name
+	port=`echo $i | sed 's/port//'`
+	title="Port $port => $hostname"
+
+	cd ${execpath}
+	pidfile="$i.pid"
+
+	# see if PID is still alive, remove pid file if not
+	if [ -e $pidfile ]; then
+		kill -0 $(cat $pidfile) >/dev/null 2>&1 || rm -f $pidfile
+	fi
+
+	# check for pid file (process is running OK)
+	if [ -e $pidfile ]; then
+		echo "[OK      ] $title"
+	else
+		echo "[STARTING] $title"
+		# launch server and attach to existing screen session
+		screen -r $sname -X screen -t "$title" ./$execname +set dedicated 1 +set port $port +exec $i
+		# get pid of process and put in $pidfile
+		ps aux | grep $i | grep -v grep | awk '{printf $2}' > $pidfile
+	fi
+done
