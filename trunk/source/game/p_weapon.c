@@ -1273,7 +1273,7 @@ void Weapon_Hover_Fire (edict_t *ent)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
 	if(ent->client->buttons & BUTTON_ATTACK2) {
-		fire_blasterball (ent, start, forward, damage*6, 2200, EF_ROCKET, false);
+		fire_blasterball (ent, start, forward, damage*3, 1500, EF_ROCKET, false);
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hypbrl1a.wav"), 1, ATTN_NORM, 0);
 	}
 	else if(ent->client->ps.gunframe == 6) {
@@ -1292,6 +1292,17 @@ void Weapon_Hover_Fire (edict_t *ent)
 	gi.WriteShort (ent-g_edicts);
 	gi.WriteByte (MZ_BFG | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+	if(ent->client->buttons & BUTTON_ATTACK2) {
+		forward[0] = forward[0] * 10;
+		forward[1] = forward[1] * 10;
+
+		VectorAdd(start, forward, start);
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_SMART_MUZZLEFLASH);
+		gi.WritePosition (start);
+		gi.multicast (start, MULTICAST_PVS);
+	}
 
 	ent->client->ps.gunframe++;
 }
