@@ -66,7 +66,7 @@ function GenerateLivePlayerTable(&$control)
 			echo "<td>{$pl_row['score']}</td>";
 			echo "<td>{$pl_row['ping']} ms</td>";
 							
-			echo "<td><a href=\"{$filename}?action=serverinfo&id={$sv_row['serverid']}\">".LimitString($svinfo_row['hostname'],40)."</a>";
+			echo "<td><a href=\"{$filename}?action=serverinfo&amp;id={$sv_row['serverid']}\">".LimitString($svinfo_row['hostname'],40)."</a>";
 			echo "</td>";
 		
 			echo '<td>';
@@ -76,7 +76,7 @@ function GenerateLivePlayerTable(&$control)
 			echo '</td>';
 
 			echo "<td>";
-				echo "<a href=\"{$filename}?action=mapinfo&id={$sv_row['mapname']}\">";
+				echo "<a href=\"{$filename}?action=mapinfo&amp;id={$sv_row['mapname']}\">";
 				echo $sv_row['mapname'].'</a>';
 			echo "</td>";
 
@@ -105,8 +105,6 @@ function GeneratePlayerTable(&$control)
   $endtime = GetLastUpdated();
   $starttime = $endtime - $control['history']*60*60;
   
-  	$filename = GetFilename();
-		
 	$query = 'SELECT name, SUM( score ) AS totalscore, COUNT(name) as playertime, SUM( score )/COUNT(name) as fragrate'
 	        . ' FROM playerlog'
 	        . ' WHERE ping >0 AND name != \'Player\''
@@ -152,8 +150,6 @@ function GeneratePlayerInfo(&$control)
 	/* Find time of last database update */
 	$endtime = GetLastUpdated();
 	$starttime = $endtime - $control['history']*60*60;
-
-	$filename = GetFilename();
 
 	$query = 'SELECT COUNT(name) as playertime'
 	        . ' FROM playerlog '
@@ -324,8 +320,6 @@ function GeneratePlayerInfo(&$control)
 
 function DoPlayerSearch(&$control)
 {
-	$filename = GetFilename();
-
 	$searchstring = addslashes($_POST['searchstring']);
 	
 	if($searchstring != "")
@@ -350,7 +344,7 @@ function DoPlayerSearch(&$control)
 		{
 			$control['action'] = 'playerinfo';
 			$control['id'] = $pllog_row['name'];
-			echo "<a href=".$filename."?".http_build_query($control).">".$pllog_row['name']."</a><br>\n";
+			echo "<a href=\"".Generate_URL($control)."\">".$pllog_row['name']."</a><br>\n";
 		} 
 		mysql_free_result($pllog_result);
 		echo "</p>\n";

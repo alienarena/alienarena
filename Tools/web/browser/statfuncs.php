@@ -75,13 +75,12 @@ function GetLastUpdated()
 
 function Insert_Table_Sorter(&$control, $display, $orderby)
 {
-	$filename = GetFilename();
 	echo "<th>".$display."<br>";
 	$control['orderby'] = $orderby;
 	$control['sort'] = 'desc';
-	echo "<a href=".$filename."?".http_build_query($control)."><img border=0 src=img/up.gif></a>";
+	echo "<a href=\"".Generate_URL($control)."\"><img border=0 alt=up src=\"img/up.gif\"></a>";
 	$control['sort'] = 'asc';
-	echo "<a href=".$filename."?".http_build_query($control)."><img border=0 src=img/down.gif></a>";
+	echo "<a href=\"".Generate_URL($control)."\"><img border=0 alt=down src=\"img/down.gif\"></a>";
 	echo "</th>";
 }
 
@@ -101,7 +100,7 @@ function ShowMapImage($mapname, $thumbnail = 0, $addlink = 1)
 	}
 	
 	if($addlink)
-		echo "<a href=\"{$filename}?action=mapinfo&id={$mapname}\">";
+		echo "<a href=\"{$filename}?action=mapinfo&amp;id={$mapname}\">";
 
 	echo "<img border=0 alt={$mapname} width={$width} height={$height} src=\"";
 	
@@ -173,7 +172,7 @@ function GenerateLiveServerTable(&$control)
 		if(strlen($svinfo_row['hostname']) > 40)
 			$svinfo_row['hostname']=substr($svinfo_row['hostname'], 0, 37)."...";
 					
-		echo "<td><a href=\"{$filename}?action=serverinfo&id={$sv_row['serverid']}\">{$svinfo_row['hostname']}</a><br>";
+		echo "<td><a href=\"{$filename}?action=serverinfo&amp;id={$sv_row['serverid']}\">{$svinfo_row['hostname']}</a><br>";
 		echo "</td>";
 //		echo "<td>Admin: {$svinfo_row['admin']}</td>\n";
 
@@ -204,7 +203,7 @@ function GenerateLiveServerTable(&$control)
 						echo "<td>";
 						if($svinfo_row['website'] != "")
 						{
-							echo "&nbsp;&nbsp;&nbsp;&nbsp;<a href={$svinfo_row['website']}><img border=0 src=img/www.gif></a>";		
+							echo "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"{$svinfo_row['website']}\"><img border=0 alt=www src=\"img/www.gif\"></a>";		
 						}
 						echo "</td>";
 					break;
@@ -231,7 +230,7 @@ function GenerateLiveServerTable(&$control)
 		/*
 				if($svinfo_row['website'] != "")
 		{
-			echo "<a href={$svinfo_row['website']}><img border=0 src=img/www.gif></a>";		
+			echo "<a href=\"{$svinfo_row['website']}\"><img border=0 alt=www src=\"img/www.gif\"></a>";		
 		}
 		echo " {$svinfo_row['ip']} port {$svinfo_row['port']}";
 		*/
@@ -268,7 +267,7 @@ function GenerateLiveUserTable(&$control)
 		$svinfo_result = mysql_query($query);
 		$svinfo_row = mysql_fetch_array($svinfo_result, MYSQL_ASSOC);
 
-		echo "<td><a href=\"{$filename}?action=serverinfo&id={$pl_row['serverid']}\">{$svinfo_row['hostname']}</a></td>";
+		echo "<td><a href=\"{$filename}?action=serverinfo&amp;id={$pl_row['serverid']}\">{$svinfo_row['hostname']}</a></td>";
 		echo "<td>{$pl_row['score']}</td>";
 		echo "<td>{$pl_row['ping']} ms</td>";
 		echo "</tr>\n";
@@ -320,10 +319,10 @@ function GenerateServerTable(&$control)
 
 	    echo "<tr>";
 		echo "<td>{$sv_row['ip']}<br>port {$sv_row['port']}</td>";
-		echo "<td><a href=".$filename."?action=serverinfo&id=".$svlog_row['serverid'].">".$sv_row['hostname']."</a> ";
+		echo "<td><a href=\"".$filename."?action=serverinfo&amp;id=".$svlog_row['serverid']."\">".$sv_row['hostname']."</a> ";
 		if($sv_row['website'] != "")
 		{
-			echo "<a href={$sv_row['website']}><img border=0 src=img/www.gif></a>";
+			echo "<a href=\"{$sv_row['website']}\"><img border=0 alt=www src=\"img/www.gif\"></a>";
 		}
 		echo "</td>";
 		echo "<td>{$sv_row['admin']}</td>";
@@ -371,7 +370,7 @@ function GenerateMapTable(&$control)
 	    echo "<tr>";
 		echo "<td>";
 			ShowMapImage($mapname=$svlog_row['mapname'], $thumbnail=1, $addlink=1);
-/*		<a href=\"{$filename}?action=mapinfo&id={$svlog_row['mapname']}\">{$svlog_row['mapname']}</a> */
+/*		<a href=\"{$filename}?action=mapinfo&amp;id={$svlog_row['mapname']}\">{$svlog_row['mapname']}</a> */
 		echo "</td>";
 		echo "<td>".mins_to_string($svlog_row['playertime'])."</td>";
 		echo "<td>".mins_to_string($svlog_row['servedtime'])."</td>";

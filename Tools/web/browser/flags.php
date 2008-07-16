@@ -33,31 +33,15 @@ function ShowCountryFlag($two_letter_country_code)
 	$flagfile="flags/$two_letter_country_code.gif";
 
 	if (file_exists($flagfile))
-    	echo "<img align=absmiddle src=$flagfile alt=\"$country_name\" width=21 height=15>";
+    	echo "<img class=countryflag src=\"$flagfile\" alt=\"$country_name\" width=21 height=15>";
     else
-		echo "<img align=absmiddle src=flags/noflag.gif alt=\"$country_name\" width=21 height=15>";
+		echo "<img class=countryflag src=\"flags/noflag.gif\" alt=\"$country_name\" width=21 height=15>";
 }
 
 function GetCountryName($two_letter_country_code)
 {
 	global $countries;
 	return $countries[$two_letter_country_code][1];
-}
-
-function ShowFlagImage($ip)
-{
-	/* Have to include here as uses global arrays from include file */
-	include("ip_files/countries.php");
-
-	$two_letter_country_code=iptocountry($ip);
-	$country_name=$countries[$two_letter_country_code][1];
-
-	$flagfile="flags/$two_letter_country_code.gif";
-
-	if (file_exists($flagfile))
-    	echo "<img src=$flagfile alt=\"$country_name\" width=21 height=15>";
-    else
-		echo "<img src=flags/noflag.gif alt=\"$country_name\" width=21 height=15>";
 }
 ?>
 

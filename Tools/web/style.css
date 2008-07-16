@@ -57,6 +57,13 @@ a:hover {
 .cdbody { font-size: 8pt; line-height:12pt; color: rgb(50,50,50); }
 .cdfooter { font-size: 8pt; color: rgb(80,80,80); }
 
+.countryflag
+{
+	vertical-align: middle;
+/*	vertical-align: top;
+	margin-top:20px; */
+}
+
 table#cdtable {
     background-color:rgb(235,235,235); /* Colour of borders immediately outside cells -and empty cells */
     border: solid #000 2px; /* Border around outside of table */
@@ -88,12 +95,3 @@ table#cdtable th {
     text-align: center;
     background-color: rgb(0,0,0);
 }
-
-/* Other possaabilities *?
-/*.cdtablemyrow {
-    color: rgb(50,50,50);
-    text-align: left;
-    background-color: rgb(235,235,235);
-}
-*/
-
