@@ -25,8 +25,8 @@ function GenerateSearchInput($searchtype = "serversearch")
 {
 		$filename = GetFilename();
 		echo "<form action=\"".$filename."?action=".$searchtype."\" method=\"post\">";
-		echo "<p class=cdbody>Search: <input name=\"searchstring\" type=\"text\" />"; 
-		echo "<input type=\"submit\" /></p>";
+		echo "<p class=cdbody>Search: <input name=\"searchstring\" type=\"text\">"; 
+		echo "<input type=\"submit\"></p>";
 		echo "</form>";
 }
 
@@ -75,7 +75,7 @@ function GenerateServerInfo(&$control)
 	echo "<td>{$sv_row['hostname']} ";
 	if($sv_row['website'] != "")
 	{
-		echo "<a href={$sv_row['website']}><img border=0 src=www.gif></a>";
+		echo "<a href=\"{$sv_row['website']}\"><img border=0 alt=www src=\"img/www.gif\"></a>";
 	}
 	echo "</td>";
 	echo "<td>{$sv_row['admin']}</td>";
@@ -88,7 +88,7 @@ function GenerateServerInfo(&$control)
 	echo "</table>";
 	mysql_free_result($sv_result);	
 	echo "<br>\n";
-	echo "<img width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} alt=\"Usage graph\" src=\"graph.php?show=server&id={$control['id']}\">\n";
+	echo "<img width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} alt=\"Usage graph\" src=\"graph.php?show=server&amp;id={$control['id']}\">\n";
 	
 }
 
@@ -115,7 +115,7 @@ function DoServerSearch(&$control, $searchstring)
 		{
 			$control['action'] = 'serverinfo';
 			$control['id'] = $sv_row['serverid'];
-			echo "<a href=".$filename."?".http_build_query($control).">";
+			echo "<a href=\"".$filename."?".http_build_query($control)."\">";
 
 			echo $sv_row['hostname']."</a><br>\n";
 		} 

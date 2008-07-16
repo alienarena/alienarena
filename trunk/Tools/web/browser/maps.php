@@ -37,7 +37,7 @@ function ShowMapImage($mapname, $thumbnail = 0, $addlink = 1)
 	}
 	
 	if($addlink)
-		echo "<a href=\"{$filename}?action=mapinfo&id={$mapname}\">";
+		echo "<a href=\"{$filename}?action=mapinfo&amp;id={$mapname}\">";
 
 	echo "<img border=1 alt={$mapname} width={$width} height={$height} src=\"";
 	
@@ -102,7 +102,7 @@ function GenerateMapTable(&$control)
 		echo "<td>";
 			ShowMapImage($mapname=$svlog_row['mapname'], $thumbnail=1, $addlink=1);
 			echo "{$svlog_row['mapname']}";
-/*		<a href=\"{$filename}?action=mapinfo&id={$svlog_row['mapname']}\">{$svlog_row['mapname']}</a> */
+/*		<a href=\"{$filename}?action=mapinfo&amp;id={$svlog_row['mapname']}\">{$svlog_row['mapname']}</a> */
 		echo "</td>";
 		echo "<td>".MinutesToString($svlog_row['playertime'])."</td>";
 		echo "<td>".MinutesToString($svlog_row['servedtime'])."</td>";
@@ -269,7 +269,7 @@ function DoMapSearch(&$control)
 		{
 			$control['action'] = 'mapinfo';
 			$control['id'] = $svlog_row['mapname'];
-			echo "<a href=".$filename."?".http_build_query($control).">".$svlog_row['mapname']."</a><br>\n";
+			echo "<a href=\"".Generate_URL($control)."\">".$svlog_row['mapname']."</a><br>\n";
 		} 
 		mysql_free_result($svlog_result);
 		echo "</p>\n";

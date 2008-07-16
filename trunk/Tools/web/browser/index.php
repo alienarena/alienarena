@@ -64,7 +64,7 @@ switch ($control['action'])
 	case 'serverstats':
 		/* Section to build table of servers with most playertime*/
 		echo "<p class=\"cdsubtitle\">Server usage in the last {$control['history']} hours</p>\n";
-		echo "<img alt=\"Server graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=servers&history={$control['history']}\"><br><br>\n";
+		echo "<img alt=\"Server graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=servers&amp;history={$control['history']}\"><br><br>\n";
 		GenerateTotalServers(&$control);
 		GenerateServerTable(&$control);
 		GenerateNumResultsSelector(&$control);
@@ -72,7 +72,7 @@ switch ($control['action'])
 	break;
 	case 'playerstats':
 		echo "<p class=\"cdsubtitle\">Player activity in the last {$control['history']} hours</p>\n";
-		echo "<img alt=\"Player graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=players&history={$control['history']}\"><br><br>\n";
+		echo "<img alt=\"Player graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=players&amp;history={$control['history']}\"><br><br>\n";
 		GenerateTotalPlayers(&$control);
 		GeneratePlayerTable(&$control);
 		GenerateNumResultsSelector(&$control);

@@ -63,7 +63,7 @@ function GenerateLiveServerTable(&$control)
 	    echo "<tr>";
 		//echo "<td>{$svinfo_row['ip']}:{$svinfo_row['port']}</td>";
 							
-		echo "<td><a href=\"{$filename}?action=serverinfo&id={$sv_row['serverid']}\">".LimitString($svinfo_row['hostname'],40)."</a><br>";
+		echo "<td><a href=\"{$filename}?action=serverinfo&amp;id={$sv_row['serverid']}\">".LimitString($svinfo_row['hostname'],40)."</a><br>";
 		echo "</td>";
 //		echo "<td>Admin: {$svinfo_row['admin']}</td>\n";
 
@@ -89,7 +89,7 @@ function GenerateLiveServerTable(&$control)
 						echo "<td>&nbsp;&nbsp;&nbsp;&nbsp;";
 						$cc = GetCountryCode($svinfo_row['ip']);
 						ShowCountryFlag($cc);
-						echo "  ".GetCountryName($cc);
+						echo ' '.GetCountryName($cc);
 					break;
 					case 3:
 						echo "<td>";
@@ -101,7 +101,7 @@ function GenerateLiveServerTable(&$control)
 						echo "<td>";
 						if($svinfo_row['website'] != "")
 						{
-							echo "&nbsp;&nbsp;&nbsp;&nbsp;<a href={$svinfo_row['website']}><img border=0 src=img/www.gif></a>";		
+							echo "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"{$svinfo_row['website']}\"><img border=0 alt=www src=\"img/www.gif\"></a>";		
 						}
 						echo "</td>";
 					break;
@@ -128,7 +128,7 @@ function GenerateLiveServerTable(&$control)
 		/*
 				if($svinfo_row['website'] != "")
 		{
-			echo "<a href={$svinfo_row['website']}><img border=0 src=img/www.gif></a>";		
+			echo "<a href=\"{$svinfo_row['website']}\"><img border=0 alt=www src=\"img/www.gif\"></a>";		
 		}
 		echo " {$svinfo_row['ip']} port {$svinfo_row['port']}";
 		*/
@@ -193,7 +193,7 @@ function GenerateServerTable(&$control)
       $uptime = 100;
 
     echo "<tr>";
-		echo "<td><a href=".$filename."?action=serverinfo&id=".$svlog_row['serverid'].">".$sv_row['hostname']."</a> ";
+		echo "<td><a href=\"".$filename."?action=serverinfo&amp;id=".$svlog_row['serverid']."\">".$sv_row['hostname']."</a> ";
 		echo "</td>";
 
 		echo '<td>';
@@ -256,7 +256,7 @@ function GenerateServerInfo(&$control)
 
 	echo "<p class=\"cdsubtitle\">Server information covering the last {$control['history']} hours</p>\n";
 
-	echo "<img width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} alt=\"Usage graph\" src=\"graph.php?show=server&id={$control['id']}&history={$control['history']}\">\n";
+	echo "<img width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} alt=\"Usage graph\" src=\"graph.php?show=server&amp;id={$control['id']}&amp;history={$control['history']}\">\n";
 	echo "<br><br>\n";
 
 	echo "<table id=cdtable>";
@@ -440,7 +440,7 @@ function OldGenerateServerInfo(&$control)
 	echo "<td>{$sv_row['hostname']} ";
 	if($sv_row['website'] != "")
 	{
-		echo "<a href={$sv_row['website']}><img border=0 src=img/www.gif></a>";
+		echo "<a href=\"{$sv_row['website']}\"><img border=0 alt=www src=\"img/www.gif\"></a>";
 	}
 	echo "</td>";
 	echo "<td>{$sv_row['admin']}</td>";
@@ -452,7 +452,7 @@ function OldGenerateServerInfo(&$control)
 	echo "</table>";
 	mysql_free_result($sv_result);	
 	echo "<br>\n";
-	echo "<img width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} alt=\"Usage graph\" src=\"graph.php?show=server&id={$control['id']}&history={$control['history']}\">\n";
+	echo "<img width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} alt=\"Usage graph\" src=\"graph.php?show=server&amp;id={$control['id']}&amp;history={$control['history']}\">\n";
 	
 }
 
@@ -484,7 +484,7 @@ function DoServerSearch(&$control)
 		{
 			$control['action'] = 'serverinfo';
 			$control['id'] = $sv_row['serverid'];
-			echo "<a href=".$filename."?".http_build_query($control).">";
+			echo "<a href=\"".Generate_URL($control)."\">";
 
 			echo $sv_row['hostname']."</a><br>\n";
 		} 

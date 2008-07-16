@@ -32,7 +32,8 @@ function Generate_HTML_Headers()
 	/*  Start time for page generation */
 	$_starttime = explode( ' ', microtime() );
 	$_starttime = $_starttime[1] + $_starttime[0];
-	
+
+	echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n";	
 	echo "<html>\n";
 	echo "<head>\n";
 	echo "    <title>".$CONFIG['title']."</title>\n";
@@ -179,14 +180,14 @@ function LimitString($string, $len)
 function GenerateInfoLink($type = "player", $name)
 {
 	$filename = GetFilename();
-	$string  = "<a href=\"{$filename}?action={$type}info&id={$name}\">{$name}</a>";
+	$string  = "<a href=\"{$filename}?action={$type}info&amp;id={$name}\">{$name}</a>";
 	return $string;
 }
 
 function GenerateMapLink($name)
 {
 	$filename = GetFilename();
-	$string  = "<a href=\"{$filename}?action=mapinfo&id={$name}\">{$name}</a>";
+	$string  = "<a href=\"{$filename}?action=mapinfo&amp;id={$name}\">{$name}</a>";
 	return $string;
 }
 
@@ -197,7 +198,7 @@ function GetServerNameFromID($id = 0)
 	$svinfo_result = mysql_query($query);
 	$svinfo_row = mysql_fetch_array($svinfo_result, MYSQL_ASSOC);
 	
-	$string = "<a href=\"{$filename}?action=serverinfo&id={$id}\">";
+	$string = "<a href=\"{$filename}?action=serverinfo&amp;id={$id}\">";
 	if($svinfo_row['hostname'] == "")
 		$string = $string."(unnamed: {$svinfo_row['ip']})</a>";
 	elseif($svinfo_row['hostname'] == "noname")
@@ -213,8 +214,8 @@ function GenerateSearchInput($searchtype="serversearch", $description="Search")
 {
 		$filename = GetFilename();
 		echo "<form action=\"".$filename."?action=".$searchtype."\" method=\"post\">";
-		echo "<p class=cdsubtitle>{$description}<br><input name=\"searchstring\" type=\"text\" />"; 
-		echo "<input type=\"submit\" /></p>";
+		echo "<p class=cdsubtitle>{$description}<br><input name=\"searchstring\" type=\"text\">"; 
+		echo "<input type=\"submit\"></p>";
 		echo "</form>";
 }
 
@@ -241,13 +242,12 @@ function GetLastUpdated()
 
 function Insert_Table_Sorter(&$control, $display, $orderby)
 {
-	$filename = GetFilename();
 	echo "<th>".$display."<br>";
 	$control['orderby'] = $orderby;
 	$control['sort'] = 'desc';
-	echo "<a href=".$filename."?".http_build_query($control)."><img border=0 src=img/up.gif></a>";
+	echo "<a href=\"".Generate_URL($control)."\"><img border=0 alt=up src=\"img/up.gif\"></a>";
 	$control['sort'] = 'asc';
-	echo "<a href=".$filename."?".http_build_query($control)."><img border=0 src=img/down.gif></a>";
+	echo "<a href=\"".Generate_URL($control)."\"><img border=0 alt=down src=\"img/down.gif\"></a>";
 	echo "</th>";
 }
 
@@ -292,7 +292,6 @@ function MinutesToString ($mins, $long=false)
 
 function GenerateNumResultsSelector(&$control)
 {
-	$filename = GetFilename();
 	$current_numresults = $control['results'];
 	echo "<p class=\"cdbody\">Results: ";
 	for ($i=10; $i <=50; $i+=10)
@@ -304,7 +303,7 @@ function GenerateNumResultsSelector(&$control)
 		}
 		else
 		{
-			echo "<a href=".$filename."?".http_build_query($control).">".$i."</a> ";
+			echo "<a href=\"".Generate_URL($control)."\">".$i."</a> ";
 		}
 	}
 	echo "</p>\n";
@@ -324,6 +323,15 @@ function CheckDBLive()
 		echo "<p class=cdsubtitle>Warning: Database more than 15 minutes out-of-date<br>(Temporary network/database problems?)</p>\n";
 	else if(($now - $lastupdated) > 3*60)
 		echo "<p class=cdsubtitle>Notice: Database slightly out-of-date<br>(Network glitch?)</p>\n";
+}
+
+/* W3C complient generation of URL for linking */
+function Generate_URL($control)
+{
+	$url = GetFileName().'?'.http_build_query($control);
+	$url = str_replace('&','&amp;', $url);
+//	echo $url;
+	return $url;
 }
 
 ?>
