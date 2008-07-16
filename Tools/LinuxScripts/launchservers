@@ -48,7 +48,7 @@ for i in `ls port?????`; do
 	# See if this process is already running
 	pid=`ps aux | grep $execname | grep $i | awk '{printf $2}'`
 
-	# check for pid file (process is running OK)
+	# See if pid existed for this config
 	if [ -z $pid ]; then
 		echo "[STARTING] $title"
 		# launch server and attach to existing screen session
