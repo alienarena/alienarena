@@ -606,8 +606,8 @@ typedef struct
 #define	EF_QUAD				0x00008000
 #define	EF_PENT				0x00010000
 #define	EF_TELEPORTER		0x00020000		// particle fountain
-#define EF_FLAG1			0x00040000
-#define EF_FLAG2			0x00080000
+#define EF_TEAM1			0x00040000
+#define EF_TEAM2			0x00080000
 #define EF_GREENGIB			0x00200000
 #define EF_PLASMA			0x01000000
 #define EF_SHIPEXHAUST  	0x02000000
@@ -760,6 +760,13 @@ typedef struct
 #define STAT_BLUESCORE			22
 #define STAT_FLAG_ICON			23
 #define STAT_ZOOMED				24
+#define STAT_WEAPN1				25
+#define STAT_WEAPN2				26
+#define STAT_WEAPN3				27
+#define STAT_WEAPN4				28
+#define STAT_WEAPN5				29
+#define STAT_WEAPN6				30
+#define STAT_WEAPN7				31
 
 #define	MAX_STATS				32
 

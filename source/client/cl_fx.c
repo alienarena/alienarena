@@ -1532,6 +1532,67 @@ void CL_RedTeamLight(vec3_t pos)
 		}
 	}
 }
+void CL_FlagEffects(vec3_t pos, qboolean team)
+{
+	
+	int			i;
+	cparticle_t	*p;
+	float		dist, angle;
+
+	if (!(p = new_particle()))
+		return;
+
+	VectorClear (p->accel);
+
+	p->alpha = 1.0;
+	p->type = PARTICLE_FLARE;
+	p->texnum = r_flagtexture->texnum;
+	p->blendsrc = GL_ONE;
+	p->blenddst = GL_ONE;
+	if(team)
+		p->color = 0x74;
+	else
+		p->color = 0xe8;
+	p->scale = 10;
+	p->alphavel = -50;
+	for (i=0 ; i<3 ; i++)
+	{
+		p->org[i] = pos[i];
+		p->vel[i] = 0;
+		p->accel[i] = 0;
+	}
+	p->org[2] += 64;
+
+	if (!(p = new_particle()))
+			return;
+
+	p->type = PARTICLE_BLUE_MZFLASH;
+	p->texnum = r_cflashtexture->texnum;
+	p->scale = 20 + (rand()&7);
+	p->blendsrc = GL_ONE;
+	p->blenddst = GL_ONE;
+	if(team)
+		p->color = 0x74;
+	else
+		p->color = 0xe8;
+
+	angle = M_PI*2*(rand()&1023)/1023.0;
+	dist = rand()&5;
+	p->org[0] = pos[0] + cos(angle)*dist;
+	p->vel[0] = cos(angle)*(6+(rand()&6));
+	p->accel[0] = -cos(angle)*6;
+
+	p->org[1] = pos[1] + sin(angle)*dist;
+	p->vel[1] = sin(angle)*(6+(rand()&6));
+	p->accel[1] = -sin(angle)*100;
+
+	p->org[2] = pos[2] + 64 + (rand()%10);
+	p->vel[2] = -10 + (rand()&6);
+	p->accel[2] = PARTICLE_GRAVITY*10;
+	p->alpha = 0.2;
+
+	p->alphavel = -50 / (0.5 + frand()*0.3);
+}
 /*
 ===============
 CL_DiminishingTrail
@@ -1971,6 +2032,31 @@ void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur){
 	
 	p->alpha = 0.5;
 	p->alphavel = -dur / (2.0 + frand() * 0.3);
+	for (j=0 ; j<3 ; j++)
+	{
+			p->accel[j] = 0;
+			p->vel[j] = 0;
+	}
+
+	//add small shockwave effect
+	if(!(p = new_particle()))
+		return;
+	
+	p->texnum = r_hittexture->texnum;
+	p->color = 0xd4 + (rand() & 1);
+	p->type = PARTICLE_DECAL;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = .1;
+	p->scalevel = 10;
+	
+	VectorScale(dir, -1, v);
+	RotateForNormal(v, p->angle);
+	p->angle[ROLL] = rand() % 360;
+	VectorAdd(org, dir, p->org);
+	
+	p->alpha = 1.0;
+	p->alphavel = -2.0;
 	for (j=0 ; j<3 ; j++)
 	{
 			p->accel[j] = 0;
@@ -2749,13 +2835,13 @@ void CL_BubbleTrail (vec3_t start, vec3_t end)
 CL_BFGExplosionParticles
 ===============
 */
-//FIXME combined with CL_ExplosionParticles
+
 void CL_BFGExplosionParticles (vec3_t org)
 {
 	int			i, j;
 	cparticle_t	*p;
 
-	for (i=0 ; i<128 ; i++)
+	for (i=0 ; i<32 ; i++)
 	{
 		if (!(p = new_particle()))
 			return;
@@ -2768,7 +2854,7 @@ void CL_BFGExplosionParticles (vec3_t org)
 
 		p->accel[0] = p->accel[1] = 5+(rand()&7);
 		p->accel[2] = 5+(rand()&7);
-		p->scale = (12 + (rand()&2));
+		p->scale = (24 + (rand()&2));
 		p->scalevel = 24;
 		p->type = PARTICLE_FIREBALL;
 		p->texnum = r_explosiontexture->texnum;
@@ -2782,6 +2868,24 @@ void CL_BFGExplosionParticles (vec3_t org)
 			addParticleLight (p,
 						p->scale*60, 10,
 					0, 1, 1);
+	}
+
+	//place a big shock wave effect
+	if (!(p = new_particle()))
+			return;
+	p->alpha = 1.0;
+	p->alphavel = -1.0;
+	p->type = PARTICLE_FLAT;
+	p->texnum = r_hittexture->texnum;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->color = 0x74 + (rand()&7);
+	p->scale = 24 + (rand()&4) ;
+	p->scalevel = 100;
+	for(j = 0; j < 3; j++) {
+		p->org[j] = org[j];
+		p->vel[j] = 0;
+		p->accel[j] = 0;
 	}
 }
 

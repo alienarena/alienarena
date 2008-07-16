@@ -55,6 +55,7 @@ image_t		*r_reflecttexture;
 image_t		*r_shottexture;
 image_t		*r_sayicontexture;
 image_t		*r_flaretexture;
+image_t		*r_flagtexture;
 image_t		*r_beamtexture;
 image_t		*r_beam2texture;
 image_t		*r_beam3texture;
@@ -258,6 +259,7 @@ void R_InitParticleTexture (void)
 	r_shottexture = R_RegisterParticlePic("dflash");
 	r_sayicontexture = R_RegisterParticlePic("sayicon");
 	r_flaretexture = R_RegisterParticlePic("flare");
+	r_flagtexture = R_RegisterParticlePic("flag");
 	r_beamtexture = R_RegisterGfxPic("glightning");
 	r_beam2texture = R_RegisterGfxPic("greenline");
 	r_beam3texture = R_RegisterGfxPic("electrics3d");

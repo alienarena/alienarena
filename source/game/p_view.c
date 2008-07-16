@@ -743,9 +743,9 @@ TeamEffects
 void TeamEffects(edict_t *player)
 {
 	if(player->dmteam == RED_TEAM)
-		player->s.effects |= EF_FLAG1;
+		player->s.effects |= EF_TEAM1;
 	else if(player->dmteam == BLUE_TEAM)
-		player->s.effects |= EF_FLAG2;
+		player->s.effects |= EF_TEAM2;
 }
 
 /*
