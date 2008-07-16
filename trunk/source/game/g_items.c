@@ -960,10 +960,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	else if((strcmp(ent->classname, "item_quad") == 0)) {
 		ent->s.modelindex2 = gi.modelindex("models/items/quaddama/unit.md2");
 	}
-	if(strcmp(ent->classname, "item_armor_shard") == 0) {
-		//ent->s.renderfx = RF_CUSTOMSKIN; //shiny
-	}
-
+	
 	if (ent->model)
 		gi.modelindex (ent->model);
 
@@ -1097,7 +1094,7 @@ gitem_t	itemlist[] =
 		CTFDrop_Flag, //Should this be null if we don't want players to drop it manually?
 		NULL,
 		NULL,
-		"models/items/flags/flag1.md2", EF_FLAG1,
+		"models/items/flags/flag1.md2", EF_TEAM1,
 		NULL,
 /* icon */		"i_flag1",
 /* pickup */	"Red Flag",
@@ -1120,7 +1117,7 @@ gitem_t	itemlist[] =
 		CTFDrop_Flag, //Should this be null if we don't want players to drop it manually?
 		NULL,
 		NULL,
-		"models/items/flags/flag2.md2", EF_FLAG2,
+		"models/items/flags/flag2.md2", EF_TEAM2,
 		NULL,
 /* icon */		"i_flag2",
 /* pickup */	"Blue Flag",

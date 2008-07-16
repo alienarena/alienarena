@@ -608,10 +608,47 @@ char *dm_statusbar =
 //  high scorer
 "yt 80 "
 "num 3 20 "
+
+//  weapon stats
+"if 25 "
+"xr -72 "
+"yt 227 "
+"pic 25 "
+"endif"
+
+"if 26 "
+"yt 258 "
+"pic 26 "
+"endif "
+
+"if 27 "
+"yt 289 "
+"pic 27 "
+"endif "
+
+"if 28 "
+"yt 320 "
+"pic 28 "
+"endif "
+
+"if 29 "
+"yt 351 "
+"pic 29 "
+"endif "
+
+"if 30 "
+"yt 382 "
+"pic 30 "
+"endif "
+
+"if 31 "
+"yt 413 "
+"pic 31 "
+"endif "
 ;
 
 char *team_statusbar =
-//background
+// background
 "yb -256 "
 "xl	 0 "
 "pic 0 "
@@ -674,10 +711,47 @@ char *team_statusbar =
 "yt 166 "
 "num 3 22 "
 
-//flag
+//  flag
 "   xv 128 "
 "   yb -64 "
 "   pic 23 "
+
+//  weapon stats
+"if 25 "
+"xr -72 "
+"yt 227 "
+"pic 25 "
+"endif"
+
+"if 26 "
+"yt 258 "
+"pic 26 "
+"endif "
+
+"if 27 "
+"yt 289 "
+"pic 27 "
+"endif "
+
+"if 28 "
+"yt 320 "
+"pic 28 "
+"endif "
+
+"if 29 "
+"yt 351 "
+"pic 29 "
+"endif "
+
+"if 30 "
+"yt 382 "
+"pic 30 "
+"endif "
+
+"if 31 "
+"yt 413 "
+"pic 31 "
+"endif "
 ;
 /*QUAKED worldspawn (0 0 0) ?
 

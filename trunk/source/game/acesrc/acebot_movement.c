@@ -781,13 +781,14 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 
 	//violator attack
 
-	//machinegun/blaster/beamgun strafing for level 3 bots
+	
 	if (self->client->pers.weapon == FindItem("Violator")) {
 		if(ACEMV_CanMove(self,MOVE_FORWARD)) 
 			ucmd->forwardmove += 400; //lunge at enemy
 		goto attack;
 	}
 
+	//machinegun/blaster/beamgun strafing for level 3 bots
 	if(!joustmode->value && self->skill == 3  && (self->client->pers.weapon == FindItem("blaster") || self->client->pers.weapon == FindItem("Pulse Rifle") || self->client->pers.weapon == FindItem("Disruptor")) )
 
 	{
@@ -915,6 +916,20 @@ attack:
 					ucmd->buttons = BUTTON_ATTACK;
 			}
 		
+			//vehicle alt-fires
+			if (self->client->pers.weapon == FindItem("bomber") 
+				|| self->client->pers.weapon == FindItem("strafer")) {
+				if(range > 500)
+					ucmd->buttons = BUTTON_ATTACK2;
+				else
+					ucmd->buttons = BUTTON_ATTACK;
+			}	
+			if (self->client->pers.weapon == FindItem("hover")) {
+				if(range < 300)
+					ucmd->buttons = BUTTON_ATTACK2;
+				else
+					ucmd->buttons = BUTTON_ATTACK;
+			}
 		}
 		else
 			ucmd->buttons = BUTTON_ATTACK;

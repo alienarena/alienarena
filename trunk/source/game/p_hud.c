@@ -754,56 +754,6 @@ void Cmd_Score_f (edict_t *ent)
 	DeathmatchScoreboard (ent);
 }
 
-
-/*
-==================
-HelpComputer
-
-Draw help computer.
-==================
-*/
-void HelpComputer (edict_t *ent)
-{
-	char	string[1024];
-	char	*sk;
-
-// ACEBOT_ADD
-	if (ent->is_bot)
-		return;
-// ACEBOT_END
-
-	if (skill->value == 0)
-		sk = "easy";
-	else if (skill->value == 1)
-		sk = "medium";
-	else if (skill->value == 2)
-		sk = "hard";
-	else
-		sk = "hard+";
-	//We are going to simplify this layout considerably.
-	// send the layout
-	Com_sprintf (string, sizeof(string),
-		"xv -32 yv 0 picn help "			// background
-//		"xv 202 yv 12 string2 \"%s\" "		// skill
-//		"xv 0 yv 24 cstring2 \"%s\" "		// level name
-		"xv 0 yv 54 cstring2 \"%s\" ",		// help 1
-//		"xv 0 yv 110 cstring2 \"%s\" "		// help 2
-//		"xv 50 yv 164 string2 \" kills     goals    secrets\" "
-//		"xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" ", 
-//		sk,
-//		level.level_name,
-		game.helpmessage1);
-//		game.helpmessage2,
-//		level.killed_monsters, level.total_monsters, 
-//		level.found_goals, level.total_goals,
-//		level.found_secrets, level.total_secrets);
-
-	gi.WriteByte (svc_layout);
-	gi.WriteString (string);
-	gi.unicast (ent, true);
-}
-
-
 /*
 ==================
 Cmd_Help_f
@@ -819,19 +769,6 @@ void Cmd_Help_f (edict_t *ent)
 		Cmd_Score_f (ent);
 		return;
 	}
-
-	ent->client->showinventory = false;
-	ent->client->showscores = false;
-
-	if (ent->client->showhelp && (ent->client->pers.game_helpchanged == game.helpchanged))
-	{
-		ent->client->showhelp = false;
-		return;
-	}
-
-	ent->client->showhelp = true;
-	ent->client->pers.helpchanged = 0;
-	HelpComputer (ent);
 }
 
 
@@ -881,17 +818,18 @@ void G_SetStats (edict_t *ent)
 	//
 
 	index = ArmorIndex (ent);
-	if (index)
+	if (!ent->client->ammo_index /* || !ent->client->pers.inventory[ent->client->ammo_index] */)
 	{
-		item = GetItemByIndex (index);
-		ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex (item->icon);
-		ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.inventory[index];
+		ent->client->ps.stats[STAT_AMMO_ICON] = 0;
+		ent->client->ps.stats[STAT_AMMO] = 0;
 	}
 	else
 	{
-		ent->client->ps.stats[STAT_ARMOR_ICON] = 0;
-		ent->client->ps.stats[STAT_ARMOR] = 0;
+		item = &itemlist[ent->client->ammo_index];
+		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex (item->icon);
+		ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
 	}
+
 
 	//
 	// pickup message
@@ -1016,8 +954,47 @@ void G_SetStats (edict_t *ent)
 	}
 	//end bot score info
 
+	//weapon/ammo inventories
+	for(i = 0; i < 8; i++) 
+		ent->client->ps.stats[STAT_WEAPN1+i] = 0;
+	i = 0;
+	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] &&
+		ent->client->pers.weapon != (FindItem("Alien Disruptor"))) {
+			ent->client->ps.stats[STAT_WEAPN1] = gi.imageindex ("disruptor");
+			i++;
+	}
+	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Smartgun"))] &&
+		ent->client->pers.weapon != (FindItem("Alien Smartgun"))) {
+			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("smartgun");
+			i++;
+	}
+	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Pulse Rifle"))] &&
+		ent->client->pers.weapon != (FindItem("Pulse Rifle"))) {
+			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("chaingun");
+			i++;
+	}
+	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] &&
+		ent->client->pers.weapon != (FindItem("Flame Thrower"))) {
+			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("flamethrower");
+			i++;
+	}
+	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] &&
+		ent->client->pers.weapon != (FindItem("Rocket Launcher"))) {
+			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("rocketlauncher");
+			i++;
+	}
+	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Disruptor"))] &&
+		ent->client->pers.weapon != (FindItem("Disruptor"))) {
+			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("beamgun");
+			i++;
+	}
+	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Vaporizer"))] &&
+		ent->client->pers.weapon != (FindItem("Alien Vaporizer"))) {
+			ent->client->ps.stats[STAT_WEAPN1+i] = gi.imageindex ("vaporizor");
+	}
+
 	//
-	// help icon / current weapon if not shown
+	// current weapon
 	//
 	if (ent->client->pers.weapon)
 		ent->client->ps.stats[STAT_HELPICON] = gi.imageindex (ent->client->pers.weapon->icon);
