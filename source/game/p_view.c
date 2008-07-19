@@ -403,23 +403,6 @@ void ResetWeaponModel (edict_t *ent)
 	if (ent->in_vehicle) {
 		return;
 	}
-	
-	// set visible model
-	if (ent->s.modelindex == 255) {
-		if (ent->client->pers.weapon)
-			i = ((ent->client->pers.weapon->weapmodel & 0xff) << 8);
-		else
-			i = 0;
-		ent->s.skinnum = (ent - g_edicts - 1) | i;
-	}
-
-	if (!ent->client->pers.weapon)
-	{	// dead
-		ent->client->ps.gunindex = 0;
-		return;
-	}
-
-	ent->client->ps.gunindex = gi.modelindex(ent->client->pers.weapon->view_model);
 
 	//set up code to set player world weapon model
 
@@ -895,6 +878,9 @@ void G_SetClientEffects (edict_t *ent)
 
 	if(ent->client->spawnprotected)
 		ent->s.effects |= EF_PENT;
+
+	if(ent->client->kill_streak >= 8)
+		ent->s.effects |= EF_FLIES;
 
 	//invisibility
 	if(ent->client->invis_framenum > level.framenum) {

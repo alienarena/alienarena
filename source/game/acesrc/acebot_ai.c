@@ -543,6 +543,57 @@ void ACEAI_Use_Invisibility (edict_t *ent)
 
 	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
 }
+
+void ACEAI_Use_Haste (edict_t *ent)
+{
+	gitem_t *it;
+
+	it = FindItem("Haste");
+	ent->client->pers.inventory[ITEM_INDEX(it)]--;
+	ValidateSelectedItem (ent);
+
+	it = FindItem("Sproing");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	it = FindItem("Invisibility");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	ent->client->resp.reward_pts = 0;
+	ent->client->resp.powered = false;
+
+	if (ent->client->haste_framenum > level.framenum)
+		ent->client->haste_framenum += 300;
+	else
+		ent->client->haste_framenum = level.framenum + 300;
+
+	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
+}
+
+void ACEAI_Use_Sproing (edict_t *ent)
+{
+	gitem_t *it;
+
+	it = FindItem("Sproing");
+	ent->client->pers.inventory[ITEM_INDEX(it)]--;
+	ValidateSelectedItem (ent);
+
+	it = FindItem("Haste");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	it = FindItem("Invisibility");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	ent->client->resp.reward_pts = 0;
+	ent->client->resp.powered = false;
+
+	if (ent->client->sproing_framenum > level.framenum)
+		ent->client->sproing_framenum += 300;
+	else
+		ent->client->sproing_framenum = level.framenum + 300;
+
+	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Choose the best weapon for bot 
 ///////////////////////////////////////////////////////////////////////
@@ -550,6 +601,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 {	
 	float range;
 	vec3_t v;
+	float c;
 	
 	if (self->in_vehicle) {
 		return; 
@@ -560,7 +612,13 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	}
 
 	if(self->client->resp.powered) { //got enough reward points, use something
-		ACEAI_Use_Invisibility(self);
+		c = random();
+		if( c < 0.5)
+			ACEAI_Use_Invisibility(self);
+		else if (c < 0.7)
+			ACEAI_Use_Haste(self);
+		else
+			ACEAI_Use_Sproing(self);
 	}
 
 	//mutators

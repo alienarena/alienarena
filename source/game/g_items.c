@@ -260,14 +260,16 @@ void Use_Haste (edict_t *ent, gitem_t *item)
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
 
-	it = FindItem("Sproing");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+	if(ent->client->resp.powered) {
+		it = FindItem("Sproing");
+		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
 
-	it = FindItem("Invisibility");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+		it = FindItem("Invisibility");
+		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
 
-	ent->client->resp.reward_pts = 0;
-	ent->client->resp.powered = false;
+		ent->client->resp.reward_pts = 0;
+		ent->client->resp.powered = false;
+	}
 
 	if (ent->client->haste_framenum > level.framenum)
 		ent->client->haste_framenum += 300;
@@ -285,14 +287,17 @@ void Use_Sproing (edict_t *ent, gitem_t *item)
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
 
-	it = FindItem("Invisibility");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+	if(ent->client->resp.powered) {
 
-	it = FindItem("Haste");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+		it = FindItem("Invisibility");
+		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
 
-	ent->client->resp.reward_pts = 0;
-	ent->client->resp.powered = false;
+		it = FindItem("Haste");
+		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+		ent->client->resp.reward_pts = 0;
+		ent->client->resp.powered = false;
+	}
 
 	if (ent->client->sproing_framenum > level.framenum)
 		ent->client->sproing_framenum += 300;
@@ -309,14 +314,16 @@ void Use_Invisibility (edict_t *ent, gitem_t *item)
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
 
-	it = FindItem("Sproing");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+	if(ent->client->resp.powered) {
+		it = FindItem("Sproing");
+		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
 
-	it = FindItem("Haste");
-	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+		it = FindItem("Haste");
+		ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
 
-	ent->client->resp.reward_pts = 0;
-	ent->client->resp.powered = false;
+		ent->client->resp.reward_pts = 0;
+		ent->client->resp.powered = false;
+	}
 
 	if (ent->client->invis_framenum > level.framenum)
 		ent->client->invis_framenum += 300;

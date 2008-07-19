@@ -550,8 +550,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 
 					attacker->client->resp.powered = true;
 
-					//play sound instead, just testing for now
-					safe_centerprintf(attacker, "You have the power!");
+					gi.sound (attacker, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_NONE, 0);
 				}
 				self->client->kill_streak = 0; //reset, you are dead
 				return;
