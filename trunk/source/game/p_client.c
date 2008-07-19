@@ -90,6 +90,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 	char		cleanname[16], cleanname2[16];
 	int			i, j, pos, total, place;
 	edict_t		*cl_ent;
+	gitem_t		*it;
 
 	if (deathmatch->value)
 	{
@@ -451,6 +452,12 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					}
 					else {
 						attacker->client->resp.score++;
+						if(!self->groundentity) {
+							attacker->client->resp.reward_pts+=5;
+							safe_centerprintf(attacker, "Midair shot!\n");
+						}
+						else
+							attacker->client->resp.reward_pts++;
 
 						//mutators
 						if(vampire->value) {
@@ -459,6 +466,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 								attacker->health = attacker->max_health;
 						}
 						self->client->resp.deaths++;
+
 						if (((int)(dmflags->value) & DF_SKINTEAMS)  && !ctf->value) {
 							if(attacker->dmteam == RED_TEAM){
 								red_team_score++;
@@ -493,6 +501,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 									safe_centerprintf(cl_ent, "%s is on a rampage!\n", cleanname2);
 								}
 								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/rampage.wav"), 1, ATTN_NONE, 0);
+								attacker->client->resp.reward_pts+=10;
 								break;
 							case 8:
 								for (i=0 ; i<maxclients->value ; i++)
@@ -512,6 +521,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 									safe_centerprintf(cl_ent, "%s is a god!\n", cleanname2);
 								}
 								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/godlike.wav"), 1, ATTN_NONE, 0);
+								attacker->client->resp.reward_pts+=20;
 								break;
 							default:
 								break;
@@ -527,6 +537,21 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						}
 					}
 
+				}
+				if(attacker->client->resp.reward_pts >= 20 && !attacker->client->resp.powered) { //give them speed and invis powerups
+					it = FindItem("Invisibility");
+					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
+
+					it = FindItem("Sproing");
+					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
+
+					it = FindItem("Haste");
+					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
+
+					attacker->client->resp.powered = true;
+
+					//play sound instead, just testing for now
+					safe_centerprintf(attacker, "You have the power!");
 				}
 				self->client->kill_streak = 0; //reset, you are dead
 				return;
@@ -727,10 +752,11 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->client->invincible_framenum = 0;
 	self->client->haste_framenum = 0;
 	self->client->sproing_framenum = 0;
+	self->client->invis_framenum = 0;
 
 	// clear inventory
 	memset(self->client->pers.inventory, 0, sizeof(self->client->pers.inventory));
-
+	
 	if (self->health < -40)
 	{	// gib
 		self->takedamage	= DAMAGE_NO;
@@ -794,6 +820,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
 			ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
 		}
+
+		attacker->client->resp.reward_pts++;
 	}
 	else
 	{	// normal death
@@ -923,6 +951,18 @@ void InitClientPersistant (gclient_t *client)
 	if(grapple->value) {
 		item = FindItem("Grapple");
 		client->pers.inventory[ITEM_INDEX(item)] = 1;
+	}
+
+	//if powered up, give back powerups
+	if(client->resp.powered) {
+		item = FindItem("Invisibility");
+		client->pers.inventory[ITEM_INDEX(item)] += 1;
+
+		item = FindItem("Sproing");
+		client->pers.inventory[ITEM_INDEX(item)] += 1;
+
+		item = FindItem("Haste");
+		client->pers.inventory[ITEM_INDEX(item)] += 1;
 	}
 
 	client->pers.connected = true;

@@ -211,7 +211,7 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 	for(i=0;i<game.maxclients;i++)
 	{
 		ent = g_edicts + i + 1;
-		if(ent == self || !ent->inuse)
+		if(ent == self || !ent->inuse || (ent->client->invis_framenum > level.framenum))
 			continue;
 
 		node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY,NODE_ALL);
@@ -266,6 +266,11 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 qboolean ACEIT_IsVisibleSolid(edict_t *self, edict_t *other)
 {
 	trace_t tr;
+
+	if(other->client) {
+		if(other->client->invis_framenum > level.framenum)
+			return false;
+	}
 	
 	tr = gi.trace (self->s.origin, vec3_origin, vec3_origin, other->s.origin, self, MASK_SOLID);
 		
@@ -304,7 +309,7 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 		}
 	    if (strcmp(target->classname, "player") == 0) //so players can't sneak RIGHT up on a bot
 		{
-			if(!target->deadflag && !self->in_deathball && !OnSameTeam(self, target))
+			if(!target->deadflag && !self->in_deathball && !OnSameTeam(self, target) && !(target->client->invis_framenum > level.framenum))
 			{
 				self->movetarget = target;
 			}
@@ -513,6 +518,31 @@ qboolean ACEAI_CheckShot(edict_t *self)
 	return true;
 }
 
+
+void ACEAI_Use_Invisibility (edict_t *ent)
+{
+	gitem_t *it;
+
+	it = FindItem("Invisibility");
+	ent->client->pers.inventory[ITEM_INDEX(it)]--;
+	ValidateSelectedItem (ent);
+
+	it = FindItem("Sproing");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	it = FindItem("Haste");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	ent->client->resp.reward_pts = 0;
+	ent->client->resp.powered = false;
+
+	if (ent->client->invis_framenum > level.framenum)
+		ent->client->invis_framenum += 300;
+	else
+		ent->client->invis_framenum = level.framenum + 300;
+
+	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
+}
 ///////////////////////////////////////////////////////////////////////
 // Choose the best weapon for bot 
 ///////////////////////////////////////////////////////////////////////
@@ -527,6 +557,10 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	
 	if (self->in_deathball) {
 		return; //cannot switch or fire weapons when in a deathball.
+	}
+
+	if(self->client->resp.powered) { //got enough reward points, use something
+		ACEAI_Use_Invisibility(self);
 	}
 
 	//mutators

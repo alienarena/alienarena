@@ -390,6 +390,97 @@ void SV_AddBlend (float r, float g, float b, float a, float *v_blend)
 	v_blend[3] = a2;
 }
 
+void ResetWeaponModel (edict_t *ent)
+{
+	char    *info;
+	char	weaponame[64] = " ";
+	char	weaponmodel[MAX_OSPATH] = " ";
+	int i;
+	int done;
+	char	weaponpath[MAX_OSPATH] = " ";
+	FILE *file;
+
+	if (ent->in_vehicle) {
+		return;
+	}
+	
+	// set visible model
+	if (ent->s.modelindex == 255) {
+		if (ent->client->pers.weapon)
+			i = ((ent->client->pers.weapon->weapmodel & 0xff) << 8);
+		else
+			i = 0;
+		ent->s.skinnum = (ent - g_edicts - 1) | i;
+	}
+
+	if (!ent->client->pers.weapon)
+	{	// dead
+		ent->client->ps.gunindex = 0;
+		return;
+	}
+
+	ent->client->ps.gunindex = gi.modelindex(ent->client->pers.weapon->view_model);
+
+	//set up code to set player world weapon model
+
+	info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
+
+	i = 0;
+	done = 0;
+	strcpy(weaponame, " ");
+	weaponame[0] = 0;
+	while(!done)
+	{
+		if((info[i] == '/') || (info[i] == '\\'))
+			done = 1;
+		weaponame[i] = info[i];
+		if(i > 63)
+			done = 1;
+		i++;
+	}
+	strcpy(weaponmodel, " ");
+	weaponmodel[0] = 0;
+
+	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
+
+	if(ent->client->pers.weapon->view_model == "models/weapons/v_violator/tris.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
+	if(ent->client->pers.weapon->view_model == "models/weapons/v_rocket/tris.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_rlauncher.md2");
+	if(ent->client->pers.weapon->view_model == "models/weapons/v_blast/tris.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_blaster.md2");
+	if(ent->client->pers.weapon->view_model == "models/weapons/v_bfg/tris.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_bfg.md2");
+	if(ent->client->pers.weapon->view_model == "models/weapons/v_rail/tris.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_railgun.md2");
+	if(ent->client->pers.weapon->view_model == "models/weapons/v_shotg2/tris.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_sshotgun.md2");
+	if(ent->client->pers.weapon->view_model == "models/weapons/v_shotg/tris.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_shotgun.md2");
+	if(ent->client->pers.weapon->view_model == "models/weapons/v_hyperb/tris.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_hyperblaster.md2");
+	if(ent->client->pers.weapon->view_model == "models/weapons/v_chain/tris.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
+	if(ent->client->pers.weapon->view_model == "vehicles/deathball/v_wep.md2")
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
+
+
+	sprintf(weaponpath, "%s", weaponmodel);
+	Q2_FindFile (weaponpath, &file); //does it really exist?
+	if(!file) {
+		sprintf(weaponpath, "%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
+		Q2_FindFile (weaponpath, &file);
+		if(!file) //server does not have this player model
+			sprintf(weaponmodel, "players/martianenforcer/weapon.md2");//default player(martian)
+		else { //have the model, but it has no w_weaps
+			sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //custom weapon
+			fclose(file);
+		}
+	}
+	else
+		fclose(file);
+	ent->s.modelindex2 = gi.modelindex(weaponmodel);
+}
 
 /*
 =============
@@ -490,6 +581,18 @@ void SV_CalcBlend (edict_t *ent)
 		if (remaining > 30 || (remaining & 4) )
 			SV_AddBlend (0.4, 1, 0.4, 0.04, ent->client->ps.blend);
 	}
+	else if (ent->client->invis_framenum > level.framenum)
+	{
+		remaining = ent->client->invis_framenum - level.framenum;
+		if (remaining == 30)	// beginning to fade
+			gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect2.wav"), 1, ATTN_NORM, 0);
+		if (remaining > 30 || (remaining & 4) )
+			SV_AddBlend (0.4, 1, 0.4, 0.04, ent->client->ps.blend);
+		if (remaining == 1) { //put weapon model back
+			ResetWeaponModel(ent);
+		}
+	}
+
 	// add for damage
 	if (ent->client->damage_alpha > 0)
 		SV_AddBlend (ent->client->damage_blend[0],ent->client->damage_blend[1]
@@ -792,6 +895,12 @@ void G_SetClientEffects (edict_t *ent)
 
 	if(ent->client->spawnprotected)
 		ent->s.effects |= EF_PENT;
+
+	//invisibility
+	if(ent->client->invis_framenum > level.framenum) {
+		ent->s.renderfx |= RF_TRANSLUCENT; 
+		ent->s.modelindex2 = 0;
+	}
 
 }
 

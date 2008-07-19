@@ -49,6 +49,7 @@ void MoveClientToIntermission (edict_t *ent)
 	ent->client->invincible_framenum = 0;
 	ent->client->haste_framenum = 0;
     ent->client->sproing_framenum = 0;
+	ent->client->invis_framenum = 0;
 	ent->client->grenade_blew_up = false;
 	ent->client->grenade_time = 0;
 
@@ -121,6 +122,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	winner->client->invincible_framenum = 0;
 	winner->client->haste_framenum = 0;
     winner->client->sproing_framenum = 0;
+	winner->client->invis_framenum = 0;
 	winner->client->grenade_blew_up = false;
 	winner->client->grenade_time = 0;
 
@@ -818,18 +820,17 @@ void G_SetStats (edict_t *ent)
 	//
 
 	index = ArmorIndex (ent);
-	if (!ent->client->ammo_index /* || !ent->client->pers.inventory[ent->client->ammo_index] */)
-	{
-		ent->client->ps.stats[STAT_AMMO_ICON] = 0;
-		ent->client->ps.stats[STAT_AMMO] = 0;
-	}
-	else
-	{
-		item = &itemlist[ent->client->ammo_index];
-		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex (item->icon);
-		ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
-	}
-
+    if (index)
+    {
+        item = GetItemByIndex (index);
+        ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex (item->icon);
+        ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.inventory[index];
+    }
+    else
+    {
+        ent->client->ps.stats[STAT_ARMOR_ICON] = 0;
+        ent->client->ps.stats[STAT_ARMOR] = 0;
+    }
 
 	//
 	// pickup message
@@ -863,10 +864,15 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_sproing");
 		ent->client->ps.stats[STAT_TIMER] = (ent->client->sproing_framenum - level.framenum)/10;
 	}
+	else if (ent->client->invis_framenum > level.framenum)
+	{
+		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_invis");
+		ent->client->ps.stats[STAT_TIMER] = (ent->client->invis_framenum - level.framenum)/10;
+	}
 	else
 	{
-		ent->client->ps.stats[STAT_TIMER_ICON] = 0;
-		ent->client->ps.stats[STAT_TIMER] = 0;
+		ent->client->ps.stats[STAT_TIMER_ICON] = gi.imageindex ("p_rewardpts");
+		ent->client->ps.stats[STAT_TIMER] = ent->client->resp.reward_pts;
 	}
 
 	//
