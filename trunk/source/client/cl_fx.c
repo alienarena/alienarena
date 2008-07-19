@@ -3032,6 +3032,68 @@ void Cl_WeatherEffects(){
 		weather_particles++;
 	}
 }
+
+/*
+Powered up effects
+*/
+
+#define	BEAMLENGTH			16
+void CL_PoweredEffects (vec3_t origin)
+{
+	int			i;
+	cparticle_t	*p;
+	float		angle;
+	float		sr, sp, sy, cr, cp, cy;
+	vec3_t		forward;
+	float		dist = 64;
+	float		ltime;
+
+	if (!avelocities[0][0])
+	{
+		for (i=0 ; i<NUMVERTEXNORMALS*3 ; i++)
+			avelocities[0][i] = (rand()&255) * 0.01;
+	}
+
+	ltime = (float)cl.time / 1000.0;
+	for (i=0 ; i<32 ; i+=2)
+	{
+		angle = ltime * avelocities[i][0];
+		sy = sin(angle);
+		cy = cos(angle);
+		angle = ltime * avelocities[i][1];
+		sp = sin(angle);
+		cp = cos(angle);
+		angle = ltime * avelocities[i][2];
+		sr = sin(angle);
+		cr = cos(angle);
+	
+		forward[0] = cp*cy;
+		forward[1] = cp*sy;
+		forward[2] = -sp;
+
+		if (!(p = new_particle()))
+			return;	
+
+		dist = sin(ltime + i)*32;
+		p->org[0] = origin[0] + bytedirs[i][0]*dist + forward[0]*BEAMLENGTH;
+		p->org[1] = origin[1] + bytedirs[i][1]*dist + forward[1]*BEAMLENGTH;
+		p->org[2] = origin[2] + bytedirs[i][2]*dist + forward[2]*BEAMLENGTH;
+
+		VectorClear (p->vel);
+		VectorClear (p->accel);
+
+		p->type = PARTICLE_FLARE;
+		p->texnum = r_flagtexture->texnum;
+		p->blendsrc = GL_ONE;
+		p->blenddst = GL_ONE;
+		p->scale = 2;
+		p->scalevel = 2;
+		p->color = 0xd4;
+
+		p->alpha = 1;
+		p->alphavel = -50 / (0.5 + frand()*0.3);
+	}
+}
 /*
 ===============
 CL_AddParticles

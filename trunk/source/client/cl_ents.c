@@ -853,8 +853,9 @@ void CL_AddPacketEntities (frame_t *frame)
 		}
 
 
-		if (renderfx & RF_CUSTOMSKIN) { //wasn't used for anything, so now used for shiny surfaces
-			ent.flags |= RF_CUSTOMSKIN;
+		if (effects & EF_FLIES)
+		{
+			CL_PoweredEffects (ent.origin);
 		}
 
 		//cool new ctf flag effects
