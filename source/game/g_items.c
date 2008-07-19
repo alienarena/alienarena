@@ -255,8 +255,19 @@ void	Use_Invulnerability (edict_t *ent, gitem_t *item)
 
 void Use_Haste (edict_t *ent, gitem_t *item)
 {
+	gitem_t *it;
+
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
+
+	it = FindItem("Sproing");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	it = FindItem("Invisibility");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	ent->client->resp.reward_pts = 0;
+	ent->client->resp.powered = false;
 
 	if (ent->client->haste_framenum > level.framenum)
 		ent->client->haste_framenum += 300;
@@ -269,8 +280,19 @@ void Use_Haste (edict_t *ent, gitem_t *item)
 
 void Use_Sproing (edict_t *ent, gitem_t *item)
 {
+	gitem_t *it;
+
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
+
+	it = FindItem("Invisibility");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	it = FindItem("Haste");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	ent->client->resp.reward_pts = 0;
+	ent->client->resp.powered = false;
 
 	if (ent->client->sproing_framenum > level.framenum)
 		ent->client->sproing_framenum += 300;
@@ -279,6 +301,31 @@ void Use_Sproing (edict_t *ent, gitem_t *item)
 
 	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
 }
+
+void Use_Invisibility (edict_t *ent, gitem_t *item)
+{
+	gitem_t *it;
+
+	ent->client->pers.inventory[ITEM_INDEX(item)]--;
+	ValidateSelectedItem (ent);
+
+	it = FindItem("Sproing");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	it = FindItem("Haste");
+	ent->client->pers.inventory[ITEM_INDEX(it)] = 0;
+
+	ent->client->resp.reward_pts = 0;
+	ent->client->resp.powered = false;
+
+	if (ent->client->invis_framenum > level.framenum)
+		ent->client->invis_framenum += 300;
+	else
+		ent->client->invis_framenum = level.framenum + 300;
+
+	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/powerup.wav"), 1, ATTN_NORM, 0);
+}
+
 //======================================================================
 
 qboolean Pickup_Key (edict_t *ent, edict_t *other)
@@ -1791,6 +1838,30 @@ gives +1 to maximum health
 		0,
 /* precache */ "items/sproingout.wav"
 	},
+
+	//these next two powerups are never placed in maps
+	{
+		"item_invisibility",
+		Pickup_Powerup,
+		Use_Invisibility,
+		NULL,
+		NULL,
+		"items/powerup.wav",
+		NULL, 
+		EF_ROTATE,
+		NULL,
+		NULL,
+		"Invisibility",
+		2,
+		60,
+		NULL,
+		IT_POWERUP,
+		0,
+		NULL,
+		0,
+/* precache */ "items/protect2.wav"
+	},
+	
 	// end of list marker
 	{NULL}
 };

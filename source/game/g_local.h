@@ -1011,6 +1011,10 @@ typedef struct
 	int weapon_shots[9];
 	int weapon_hits[9];
 
+	//reward points
+	int reward_pts;
+	qboolean powered;
+
 	int			spectator;			// client is a spectator
 } client_respawn_t;
 
@@ -1098,6 +1102,7 @@ struct gclient_s
 	float		haste_framenum;
 	float		sproing_framenum;
 	float		regen_framenum;
+	float		invis_framenum;
 
 	float		losehealth_framenum;
 
