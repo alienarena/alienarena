@@ -451,7 +451,9 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						}
 					}
 					else {
+						
 						attacker->client->resp.score++;
+												
 						if(!self->groundentity) {
 							attacker->client->resp.reward_pts+=5;
 							safe_centerprintf(attacker, "Midair shot!\n");
@@ -538,7 +540,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					}
 
 				}
-				if(attacker->client->resp.reward_pts >= 20 && !attacker->client->resp.powered) { //give them speed and invis powerups
+				if(attacker->client->resp.reward_pts >= g_reward->integer && !attacker->client->resp.powered) { //give them speed and invis powerups
 					it = FindItem("Invisibility");
 					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
 
@@ -685,6 +687,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	int	got_vehicle = 0;
 	int	number_of_gibs = 0;
 	int	gib_effect = EF_GREENGIB;
+	gitem_t *it;
 
 	if (self->in_vehicle) {
 		Reset_player(self);	//get the player out of the vehicle
@@ -696,7 +699,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	self->takedamage = DAMAGE_YES;
 	self->movetype = MOVETYPE_TOSS;
-
 
 	info = Info_ValueForKey (self->client->pers.userinfo, "skin");
 
@@ -743,6 +745,24 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 		if (deathmatch->value)
 			Cmd_Help_f (self);		// show scores
+
+		if(self->health < -40) {
+			attacker->client->resp.reward_pts++;
+			if(attacker->client->resp.reward_pts >= g_reward->integer && !attacker->client->resp.powered) { //give them speed and invis powerups
+				it = FindItem("Invisibility");
+				attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
+
+				it = FindItem("Sproing");
+				attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
+
+				it = FindItem("Haste");
+				attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
+
+				attacker->client->resp.powered = true;
+
+				gi.sound (attacker, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_NONE, 0);
+			}
+		}
 
 	}
 
@@ -819,8 +839,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
 			ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
 		}
-
-		attacker->client->resp.reward_pts++;
 	}
 	else
 	{	// normal death
@@ -2010,9 +2028,6 @@ void ClientBeginDeathmatch (edict_t *ent)
 		fclose(motd_file);
 
 	}
-	else
-	
-	safe_centerprintf(ent,"\n======================================\nCodeRED ACE Bot's are running\non this server.\n\n'sv addbot' to add a new bot.\n'sv removebot <name>' to remove bot.\n======================================\n\n");
 
 	// If the map changes on us, init and reload the nodes.  
 	ACEND_InitNodes();

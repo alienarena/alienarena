@@ -124,7 +124,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	int real_players, total_players;
 	edict_t *cl_ent;
 
-//bots and configurations will be loaded level specific
+	//bots and configurations will be loaded level specific
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
 	else if(sv_custombots->value)

@@ -91,6 +91,9 @@ cvar_t  *joustmode;
 //map voting
 cvar_t	*g_mapvote;
 
+//reward point threshold
+cvar_t	*g_reward;
+
 cvar_t	*dmflags;
 cvar_t	*skill;
 cvar_t	*fraglimit;
