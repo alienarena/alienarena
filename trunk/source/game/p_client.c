@@ -746,7 +746,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		if (deathmatch->value)
 			Cmd_Help_f (self);		// show scores
 
-		if(self->health < -40) {
+		if(self->health < -40 && attacker->client) {
 			attacker->client->resp.reward_pts++;
 			if(attacker->client->resp.reward_pts >= g_reward->integer && !attacker->client->resp.powered) { //give them speed and invis powerups
 				it = FindItem("Invisibility");
