@@ -3090,7 +3090,7 @@ void CL_PoweredEffects (vec3_t origin)
 		p->scalevel = 2;
 		p->color = 0xd4;
 
-		p->alpha = 1;
+		p->alpha = .7;
 		p->alphavel = -50 / (0.5 + frand()*0.3);
 	}
 }

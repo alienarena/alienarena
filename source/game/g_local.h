@@ -612,6 +612,9 @@ extern cvar_t   *joustmode;
 //map voting
 extern cvar_t	*g_mapvote;
 
+//reward point threshold
+extern cvar_t	*g_reward;
+
 #define world	(&g_edicts[0])
 
 // item spawnflags

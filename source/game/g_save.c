@@ -240,6 +240,9 @@ void InitGame (void)
 	//map voting
 	g_mapvote = gi.cvar("g_mapvote", "0", CVAR_SERVERINFO);
 
+	//reward points threshold
+	g_reward = gi.cvar("g_reward", "20", CVAR_SERVERINFO);
+
 	// change anytime vars
 	dmflags = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);
 	fraglimit = gi.cvar ("fraglimit", "0", CVAR_SERVERINFO);
