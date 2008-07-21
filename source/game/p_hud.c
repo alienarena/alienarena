@@ -966,7 +966,7 @@ void G_SetStats (edict_t *ent)
 	//end bot score info
 
 	//weapon/ammo inventories
-	for(i = 0; i < 8; i++) 
+	for(i = 0; i < 7; i++) 
 		ent->client->ps.stats[STAT_WEAPN1+i] = 0;
 	i = 0;
 	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] &&
