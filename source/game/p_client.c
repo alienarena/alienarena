@@ -760,7 +760,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 				attacker->client->resp.powered = true;
 
-				gi.sound (attacker, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_NONE, 0);
+				gi.sound (attacker, CHAN_VOICE, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
 			}
 		}
 
