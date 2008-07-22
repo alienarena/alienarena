@@ -624,7 +624,7 @@ void TossClientWeapon (edict_t *self)
 		drop->nextthink = level.time + (self->client->quad_framenum - level.framenum) * FRAMETIME;
 		drop->think = G_FreeEdict;
 	}
-	if (sproing)
+	if (sproing && !self->client->resp.powered)
 	{
 		self->client->v_angle[YAW] += spread;
 		drop = Drop_Item (self, FindItemByClassname ("item_sproing"));
@@ -635,7 +635,7 @@ void TossClientWeapon (edict_t *self)
 		drop->nextthink = level.time + (self->client->sproing_framenum - level.framenum) * FRAMETIME;
 		drop->think = G_FreeEdict;
 	}
-	if (haste)
+	if (haste && !self->client->resp.powered)
 	{
 		self->client->v_angle[YAW] += spread;
 		drop = Drop_Item (self, FindItemByClassname ("item_haste"));
