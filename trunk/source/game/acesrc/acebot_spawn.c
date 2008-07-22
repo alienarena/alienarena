@@ -123,6 +123,10 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	int found;
 	int real_players, total_players;
 	edict_t *cl_ent;
+	
+	if (((int)(dmflags->value) & DF_BOTS)) {
+		return; // don't load any bots.
+	}
 
 	//bots and configurations will be loaded level specific
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
@@ -136,11 +140,6 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 		return; // bail
 
 	fread(&count,sizeof (int),1,pIn); 
-
-	if (((int)(dmflags->value) & DF_BOTS)) {
-		fclose(pIn);
-		return; // don't load any preconfigured bots.
-	}
 
 	if(g_duel->value) {
 		count = 1; //never more than 1 bot no matter what in duel mode

@@ -520,10 +520,12 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	gi.dprintf ("%i entities inhibited\n", inhibit);
 
+	ACEND_InitNodes();
+	ACEND_LoadNodes();
+
 	G_FindTeams ();
 
 	PlayerTrail_Init ();
-
 }
 
 
@@ -581,10 +583,10 @@ char *dm_statusbar =
 // timer
 "if 9 "
 "	xv	262 "
-"   yb  -36 "
+"   yb  -24 "
 "	num	2	10 "
 "	xv	296 "
-"   yb  -56 "
+"   yb  -32 "
 "	pic	9 "
 "endif "
 
@@ -675,11 +677,11 @@ char *team_statusbar =
 
 // timer
 "if 9 "
-"	xv	262 "
-"   yb  -36 "
+"	xv	324 "
+"   yb  -24 "
 "	num	2	10 "
-"	xv	296 "
-"   yb  -56 "
+"	xv	358 "
+"   yb  -32 "
 "	pic	9 "
 "endif "
 
