@@ -770,7 +770,7 @@ void ACEND_LoadNodes(void)
 	if((pIn = fopen(filename, "rb" )) == NULL)
     {
 		// Create item table
-		safe_bprintf(PRINT_MEDIUM, "ACE: No node file found, creating new one...");
+		gi.dprintf("ACE: No node file found, creating new one...");
 		ACEIT_BuildItemNodeTable(false);
 		safe_bprintf(PRINT_MEDIUM, "done.\n");
 		return; 
@@ -781,7 +781,7 @@ void ACEND_LoadNodes(void)
 	
 	if(version == 1) 
 	{
-		safe_bprintf(PRINT_MEDIUM,"ACE: Loading node table...");
+		gi.dprintf("ACE: Loading node table...");
 
 		fread(&numnodes,sizeof(int),1,pIn); // read count
 		fread(&num_items,sizeof(int),1,pIn); // read facts count
@@ -798,13 +798,13 @@ void ACEND_LoadNodes(void)
 	else
 	{
 		// Create item table
-		safe_bprintf(PRINT_MEDIUM, "ACE: No node file found, creating new one...");
+		gi.dprintf("ACE: No node file found, creating new one...");
 		ACEIT_BuildItemNodeTable(false);
 		safe_bprintf(PRINT_MEDIUM, "done.\n");
 		return; // bail
 	}
 	
-	safe_bprintf(PRINT_MEDIUM, "done.\n");
+	gi.dprintf("done.\n");
 	
 	ACEIT_BuildItemNodeTable(true);
 

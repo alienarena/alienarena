@@ -455,7 +455,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						attacker->client->resp.score++;
 												
 						if(!self->groundentity) {
-							attacker->client->resp.reward_pts+=5;
+							attacker->client->resp.reward_pts+=3;
 							safe_centerprintf(attacker, "Midair shot!\n");
 						}
 						else
@@ -826,11 +826,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_GIB);
 		}
 
-		//don't use until 6.11 is released, so we don't have lots of people with 
-		//triangles everywhere.  We could precache all this stuff tho and put the models
-		//on icculus perhaps, but we are having problems with the udp downloading of models.
-		//So, better safe than sorry and don't precache.
-		//So in other words, the flag files just won't be uploaded to SVN until release time.
 		if(self->usegibs) {
 			ThrowGib (self, self->head, damage, GIB_ORGANIC, gib_effect);
 			ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);
@@ -1496,13 +1491,6 @@ void respawn (edict_t *self)
 	if (deathmatch->value)
 	{
 
-#if 0
-/* Don't think this is needed - deathcam is removed at very end of death,
-   so DeathcamRemove would get called twice */
-		if(!self->is_bot)
-			DeathcamRemove (self, "off");
-#endif
-
 // ACEBOT_ADD special respawning code
 		if (self->is_bot)
 		{
@@ -2029,9 +2017,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	}
 
-	// If the map changes on us, init and reload the nodes.  
-	ACEND_InitNodes();
-	ACEND_LoadNodes();
+	//check bots with each player connect
 	ACESP_LoadBots(ent, 0);
 
 	// make sure all view stuff is valid
