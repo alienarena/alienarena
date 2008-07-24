@@ -184,9 +184,6 @@ float calcEntAlpha (float alpha, vec3_t point)
 	return newAlpha;
 }
 
-float	tex_array[MAX_ARRAY][2];
-float	vert_array[MAX_ARRAY][3];
-float	col_array[MAX_ARRAY][4];
 void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 {
 	daliasframe_t	*frame, *oldframe;

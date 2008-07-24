@@ -679,7 +679,7 @@ typedef struct
 #define	TE_SPLASH					10
 #define	TE_BUBBLETRAIL				11
 #define	TE_SCREEN_SPARKS			12
-#define	TE_SHIELD_SPARKS			13
+#define	TE_DEATHFIELD2				13
 #define	TE_BULLET_SPARKS			14
 #define	TE_LASER_SPARKS				15
 #define	TE_PARASITE_ATTACK			16

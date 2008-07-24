@@ -48,6 +48,7 @@ image_t		*r_bflashtexture;
 image_t		*r_cflashtexture;
 image_t		*r_leaderfieldtexture;
 image_t		*r_deathfieldtexture;
+image_t		*r_deathfieldtexture2;
 image_t		*r_shelltexture;    // c14 added shell texture
 image_t		*r_hittexture;
 image_t		*r_bubbletexture;
@@ -252,6 +253,7 @@ void R_InitParticleTexture (void)
 	r_cflashtexture = R_RegisterParticlePic("cflash");
 	r_leaderfieldtexture = R_RegisterParticlePic("leaderfield");
 	r_deathfieldtexture = R_RegisterParticlePic("deathfield");
+	r_deathfieldtexture2 = R_RegisterParticlePic("deathfield2");
 	r_shelltexture = R_RegisterParticlePic("shell");
 	r_hittexture = R_RegisterParticlePic("aflash");
 	r_bubbletexture = R_RegisterParticlePic("bubble");

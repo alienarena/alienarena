@@ -1537,6 +1537,7 @@ void GL_FreeUnusedImages (void)
 	r_cflashtexture->registration_sequence = registration_sequence;
 	r_leaderfieldtexture->registration_sequence = registration_sequence;
 	r_deathfieldtexture->registration_sequence = registration_sequence;
+	r_deathfieldtexture2->registration_sequence = registration_sequence;
 	r_hittexture->registration_sequence = registration_sequence;
 	r_bubbletexture->registration_sequence = registration_sequence;
 	r_shottexture->registration_sequence = registration_sequence;
