@@ -1344,6 +1344,9 @@ void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
 	gi.setmodel (ent, ent->model);
 
 	ent->solid = SOLID_NOT; //will need clipping brushes around it
+
+	if(ent->spawnflags & 1)
+		ent->s.renderfx |= RF_NOSHADOWS;
 	
 	gi.linkentity (ent);	
 }
