@@ -346,17 +346,6 @@ typedef struct cl_sustain
 } cl_sustain_t;
 
 #define MAX_SUSTAINS		32
-void CL_ParticleSteamEffect2(cl_sustain_t *self);
-void CL_ParticleFireEffect2(cl_sustain_t *self);
-void CL_ParticleSmokeEffect2(cl_sustain_t *self);
-void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count);
-void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
-void CL_BulletSparks ( vec3_t org, vec3_t dir);
-void CL_SplashEffect ( vec3_t org, vec3_t dir, int color, int count);
-void CL_LaserSparks ( vec3_t org, vec3_t dir, int color, int count);
-void CL_SmallHealthParticles(vec3_t org);
-void CL_MedHealthParticles(vec3_t org);
-void CL_LargeHealthParticles(vec3_t org);
 
 //=================================================
 
@@ -410,6 +399,7 @@ typedef struct particle_s
 
 void CL_ClearEffects (void);
 void CL_ClearTEnts (void);
+
 void CL_BlasterBall (vec3_t start, vec3_t end);
 void CL_DisruptorBeam (vec3_t start, vec3_t end);
 void CL_LaserBeam (vec3_t start, vec3_t end);
@@ -426,6 +416,28 @@ void CL_PoweredEffects (vec3_t pos);
 void CL_SmokeTrail (vec3_t start, vec3_t end, int colorStart, int colorRun, int spacing);
 void CL_ParticleSteamEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude);
 void CL_SayIcon(vec3_t org);
+void CL_TeleportParticles (vec3_t org);
+void CL_BlasterParticles (vec3_t org, vec3_t dir);
+void CL_ExplosionParticles (vec3_t org);
+void CL_MuzzleParticles (vec3_t org);
+void CL_BlueMuzzleParticles (vec3_t org);
+void CL_SmartMuzzle (vec3_t org);
+void CL_Voltage(vec3_t org);
+void CL_Deathfield (vec3_t org, int type);
+void CL_BFGExplosionParticles (vec3_t org);
+void CL_DustParticles (vec3_t org);
+void CL_BlueBlasterParticles (vec3_t org, vec3_t dir);
+void CL_ParticleSteamEffect2(cl_sustain_t *self);
+void CL_ParticleFireEffect2(cl_sustain_t *self);
+void CL_ParticleSmokeEffect2(cl_sustain_t *self);
+void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count);
+void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count);
+void CL_BulletSparks ( vec3_t org, vec3_t dir);
+void CL_SplashEffect ( vec3_t org, vec3_t dir, int color, int count);
+void CL_LaserSparks ( vec3_t org, vec3_t dir, int color, int count);
+void CL_SmallHealthParticles(vec3_t org);
+void CL_MedHealthParticles(vec3_t org);
+void CL_LargeHealthParticles(vec3_t org);
 
 int CL_ParseEntityBits (unsigned *bits);
 void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bits);

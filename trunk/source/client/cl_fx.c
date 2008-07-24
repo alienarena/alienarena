@@ -1113,36 +1113,35 @@ void CL_Voltage (vec3_t org)
 CL_Deathfield
 ===============
 */
-void CL_Deathfield (vec3_t org)
+void CL_Deathfield (vec3_t org, int type)
 {
-	int			i, j;
+	int			j;
 	cparticle_t	*p;
 
-	for ( i = 0; i < 3; i++)
-	{
-		if (!(p = new_particle()))
-			return;
+	if (!(p = new_particle()))
+		return;
 
-		p->type = PARTICLE_DEATH_FIELD;
+	p->type = PARTICLE_DEATH_FIELD;
+	if(type)
+		p->texnum = r_deathfieldtexture2->texnum;
+	else
 		p->texnum = r_deathfieldtexture->texnum;
-		p->blendsrc = GL_SRC_ALPHA;
-		p->blenddst = GL_ONE;
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = org[j] + ((rand()%2)-1);
-			p->vel[j] = 0;
-		}
-		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = 0;
-		p->alpha = 0.9;
-		p->scale = 18 + (rand()&2);
-		p->scalevel = 12;
-		p->color = 32;
-		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = PARTICLE_GRAVITY;
-		p->alphavel = -1.28 / (2.0 + frand()*0.3);
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = org[j] + ((rand()%2)-1);
+		p->vel[j] = 0;
 	}
-	
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = 0;
+	p->alpha = 1.4;
+	p->scale = 10 + (rand()&2);
+	p->scalevel = 12;
+	p->color = 0x72;
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = PARTICLE_GRAVITY;
+	p->alphavel = -1.28 / (2.0 + frand()*0.3);
 }
 
 /*

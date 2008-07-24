@@ -23,19 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 cl_sustain_t	cl_sustains[MAX_SUSTAINS];
 
-extern void CL_TeleportParticles (vec3_t org);
-
-void CL_BlasterParticles (vec3_t org, vec3_t dir);
-void CL_ExplosionParticles (vec3_t org);
-void CL_MuzzleParticles (vec3_t org);
-void CL_BlueMuzzleParticles (vec3_t org);
-void CL_SmartMuzzle (vec3_t org);
-void CL_Voltage(vec3_t org);
-void CL_Deathfield (vec3_t org);
-void CL_BFGExplosionParticles (vec3_t org);
-void CL_DustParticles (vec3_t org);
-void CL_BlueBlasterParticles (vec3_t org, vec3_t dir);
-
 struct sfx_s	*cl_sfx_ric1;
 struct sfx_s	*cl_sfx_ric2;
 struct sfx_s	*cl_sfx_ric3;
@@ -353,7 +340,6 @@ void CL_ParseTEnt (void)
 		break;
 
 	case TE_SCREEN_SPARKS:
-	case TE_SHIELD_SPARKS:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
 		if (type == TE_SCREEN_SPARKS) {
@@ -541,7 +527,12 @@ void CL_ParseTEnt (void)
 		break;
 	case TE_DEATHFIELD:
 		MSG_ReadPos (&net_message, pos);
-		CL_Deathfield (pos);
+		CL_Deathfield (pos, 0);
+		break;
+	case TE_DEATHFIELD2:
+		MSG_ReadPos (&net_message, pos);
+		MSG_ReadDir (&net_message, dir);
+		CL_Deathfield (pos, 1);
 		break;
 	case TE_BLASTERBEAM:			// blaster beam effect
 		MSG_ReadPos (&net_message, pos);

@@ -781,11 +781,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		self->takedamage	= DAMAGE_NO;
 		self->s.modelindex3	= 0;    //remove helmet, if a martian
 	
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_DEATHFIELD);
-		gi.WritePosition (self->s.origin);
-		gi.multicast (self->s.origin, MULTICAST_PVS);
-
 		if(self->client->chasetoggle == 1)
 		{
 			/* If deathcam is active, switch client model to nothing */
@@ -802,6 +797,11 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		}
 
 		if(self->ctype == 0) { //alien
+
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_DEATHFIELD);
+			gi.WritePosition (self->s.origin);
+			gi.multicast (self->s.origin, MULTICAST_PVS);
 
 			for (n= 0; n < number_of_gibs; n++) {
 				ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_METALLIC, EF_GREENGIB);
@@ -821,6 +821,13 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			gi.multicast (self->s.origin, MULTICAST_PHS);
 		}
 		else { //human
+
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_DEATHFIELD2);
+			gi.WritePosition (self->s.origin);
+			gi.WriteDir (self->s.angles);
+			gi.multicast (self->s.origin, MULTICAST_PVS);
+
 			gib_effect = EF_GIB;
 			for (n= 0; n < number_of_gibs; n++)
 				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_GIB);

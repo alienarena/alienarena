@@ -45,6 +45,10 @@ float *VArray = &VArrayVerts[0];
 // number of verts allocated
 static int VertexCounter = 0;
 
+float	tex_array[MAX_ARRAY][2];
+float	vert_array[MAX_ARRAY][3];
+float	col_array[MAX_ARRAY][4];
+
 // vertex array kill flags
 #define KILL_TMU0_POINTER	1
 #define KILL_TMU1_POINTER	2
