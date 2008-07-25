@@ -1126,7 +1126,7 @@ void CL_Deathfield (vec3_t org, int type)
 		p->texnum = r_deathfieldtexture2->texnum;
 	else
 		p->texnum = r_deathfieldtexture->texnum;
-	p->blendsrc = GL_SRC_ALPHA;
+	p->blendsrc = GL_ONE;
 	p->blenddst = GL_ONE;
 	for (j=0 ; j<3 ; j++)
 	{

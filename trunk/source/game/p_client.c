@@ -552,7 +552,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 
 					attacker->client->resp.powered = true;
 
-					gi.sound (attacker, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_NONE, 0);
+					gi.sound (attacker, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
 				}
 				self->client->kill_streak = 0; //reset, you are dead
 				return;
