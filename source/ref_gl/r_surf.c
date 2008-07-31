@@ -797,7 +797,7 @@ static void R_InitNormalSurfaces ()
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
-static void R_KillNormalTMUs(void) {
+void R_KillNormalTMUs(void) {
 	
 	//kill TMU1
 	qglActiveTextureARB (GL_TEXTURE1);
