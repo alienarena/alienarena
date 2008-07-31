@@ -55,7 +55,7 @@ float	col_array[MAX_ARRAY][4];
 #define KILL_RGBA_POINTER	4
 
 // sizes of our vertexes.  the vertex type can be used as an index into this array
-int VertexSizes[] = {5, 5, 7, 7, 9, 11, 5, 3};
+int VertexSizes[] = {5, 5, 7, 7, 9, 11, 5, 3, 12};
 
 
 int KillFlags;
@@ -130,6 +130,27 @@ void R_InitVArrays (int varraytype)
 		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_BUMPMAPPED], &VArrayVerts[3]);
 
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
+
+		return;
+	}
+
+	if (varraytype == VERT_BUMPMAPPED_COLOURED)
+	{
+		// uses array indices 0, 1, 2
+		qglClientActiveTextureARB (GL_TEXTURE0);
+		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+		qglTexCoordPointer (3, GL_FLOAT, sizeof (float) * VertexSizes[VERT_BUMPMAPPED_COLOURED], &VArrayVerts[0]);
+
+		// uses array indices 3, 4
+		qglClientActiveTextureARB (GL_TEXTURE1);
+		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_BUMPMAPPED_COLOURED], &VArrayVerts[3]);
+
+		// uses array indices 5, 6, 7, 8
+		qglEnableClientState (GL_COLOR_ARRAY);
+		qglColorPointer (4, GL_FLOAT, sizeof (float) * VertexSizes[VERT_BUMPMAPPED_COLOURED], &VArrayVerts[5]);
+		
+		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_RGBA_POINTER);
 
 		return;
 	}

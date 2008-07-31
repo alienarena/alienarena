@@ -62,7 +62,6 @@ float	r_avertexnormal_dots[SHADEDOT_QUANT][256] =
 
 float	*shadedots = r_avertexnormal_dots[0];
 
-
 void GL_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float move[3], float frontv[3], float backv[3] )
 {
 	int i;
@@ -114,45 +113,43 @@ opposite directions.  This gives the shading a more prounounced, defined look.
 */
 void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov, float backlerp, vec3_t lightOut)
 {
-	int i;
-	float l;
-	float lscale;
+    int i;
+    float l;
+    float lscale;
 
-	if(gl_normalmaps->value)
-		lscale = 2.5;
-	else
-		lscale = 3.0;
+    lscale = 3.0;
 
-	if (gl_rtlights->value)
-	{
-		l = lscale * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
-								backlerp, lightdir, currententity->angles, false);
-		
-		VectorScale(baselight, l, lightOut);
+    if (gl_rtlights->value)
+    {
+        l = lscale * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
+                                backlerp, lightdir, currententity->angles, false);
 
-		if (model_dlights_num)
-			for (i=0; i<model_dlights_num; i++)
-			{
-				l = lscale * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
-					backlerp, model_dlights[i].direction, currententity->angles, true );
-				VectorMA(lightOut, l, model_dlights[i].color, lightOut);
-			}
-	}
-	else
-	{		
-		l = shadedots[verts->lightnormalindex];
-		VectorScale(baselight, l, lightOut);
-	}
+        VectorScale(baselight, l, lightOut);
 
-	for (i=0; i<3; i++)
-	{
-		if(!gl_normalmaps->value) //add contrast - lights lighter, darks darker
-			lightOut[i] += (lightOut[i] - 0.25);
-		
-		if (lightOut[i]<0) lightOut[i] = 0;
-		if (lightOut[i]>1) lightOut[i] = 1;
-	}
+        if (model_dlights_num)
+            for (i=0; i<model_dlights_num; i++)
+            {
+                l = lscale * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
+                    backlerp, model_dlights[i].direction, currententity->angles, true );
+                VectorMA(lightOut, l, model_dlights[i].color, lightOut);
+            }
+    }
+    else
+    {
+        l = shadedots[verts->lightnormalindex];
+        VectorScale(baselight, l, lightOut);
+    }
+
+    for (i=0; i<3; i++)
+    {
+        //add contrast - lights lighter, darks darker
+        lightOut[i] += (lightOut[i] - 0.25);
+
+        if (lightOut[i]<0) lightOut[i] = 0;
+        if (lightOut[i]>1) lightOut[i] = 1;
+    }
 }
+
 /*
 =============
 GL_DrawAliasFrameLerp
@@ -184,6 +181,8 @@ float calcEntAlpha (float alpha, vec3_t point)
 	return newAlpha;
 }
 
+extern GLuint normalisationCubeMap;
+
 void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 {
 	daliasframe_t	*frame, *oldframe;
@@ -200,10 +199,11 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	rscript_t *rs = NULL;
 	rs_stage_t *stage = NULL;
 	int		va = 0;
-	float mode;
+	float	mode;
 	float	*lerp;
 	vec3_t lightcolor;
-	float ramp = 1.0;
+
+	float	ramp = 1.0;
 
 	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
 		+ currententity->frame * paliashdr->framesize);
@@ -382,8 +382,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 		if (depthmaskrscipt)
 			qglDepthMask(false);
-
-		R_InitVArrays (VERT_COLOURED_TEXTURED);
+		
 		while (1)
 		{
 			count = *order++;
@@ -402,8 +401,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 			stage=rs->stage;
 			tmp_count=count;
-			tmp_order=order;
-	
+			tmp_order=order;	
 
 			while (stage)
 			{
@@ -423,7 +421,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					qglDisable (GL_TEXTURE_2D);
 				else if (stage->anim_count)
 					GL_Bind(RS_Animate(stage));
-				else
+				else if(!stage->normalmap)
 					GL_Bind (stage->texture->texnum);
 
 				if (stage->blendfunc.blend)
@@ -470,7 +468,10 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 				if(stage->normalmap) {
 
-					ramp = 2.0; //for getting brightness of normal maps up a bit
+					dlight_t	*dl;
+					int			lnum;
+					vec3_t		lightAdd, lightvec;
+					float		add;
 
 					qglDepthMask (GL_FALSE);
 			 		qglEnable (GL_BLEND);
@@ -478,12 +479,50 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					// set the correct blending mode for normal maps
 					qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
 
+					qglActiveTextureARB (GL_TEXTURE0);
+					qglDisable (GL_TEXTURE_2D);
+					qglEnable (GL_TEXTURE_CUBE_MAP_ARB);
+
+					qglBindTexture (GL_TEXTURE_CUBE_MAP_ARB, normalisationCubeMap);
+
+					qglMatrixMode (GL_TEXTURE);
+					qglLoadIdentity ();
+
+					//set up a tangent lightspace vector that is sane to begin with
+					//these values were determined by printing out values and finding
+					//what looked the best for the normalmaps we currently have.
+					lightvec[0] = 547.0;
+					lightvec[1] = -126.0;
+
+					//rotate so that overall light intensity influences the depth of the normals
+					lightvec[2] = 218.0*VectorLength(shadelight);
+
+					//translate to hardware so we don't have to do each vertex
+					//credit to Mike Hiney for pointing this procedure out
+					qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);
+
+					qglScalef (-1, -1, -1);
+
+					qglMatrixMode (GL_MODELVIEW);
+	
+					qglActiveTextureARB (GL_TEXTURE1);
+					qglEnable (GL_TEXTURE_2D);
+
+					qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
+
 					// and the texenv
-					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_DOT3_RGB_EXT);
-
+					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
+				
+					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
 				}
-
+				else {
+					if(stage->next) //increase intensity of lighting to cut through normals a bit
+						if(stage->next->normalmap)
+							ramp = 2.0;
+					R_InitVArrays (VERT_COLOURED_TEXTURED);
+				}
+				
 				do
 				{
 					float os = ((float *)order)[0];
@@ -493,12 +532,12 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 					index_xyz = order[2];
 
-					for (k=0;k<3;k++)
+					for (k=0; k<3; k++)
 					normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
 					( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
 					r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
 					VectorNormalize ( normal );
-
+			
 					if (stage->envmap)
 					{
 						vec3_t envmapvec;
@@ -511,11 +550,11 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					}
 
 					RS_SetTexcoords2D(stage, &os, &ot);
-		
+						
 					VArray[0] = s_lerped[index_xyz][0];
 					VArray[1] = s_lerped[index_xyz][1];
 					VArray[2] = s_lerped[index_xyz][2];
-
+				
 					VArray[3] = os;
 					VArray[4] = ot;
 			
@@ -525,20 +564,12 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 						calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
 
-						if (stage->lightmap)
+						if (stage->lightmap && !stage->normalmap)
 						{
 							GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 							red = lightcolor[0] * ramp;
 							green = lightcolor[1] * ramp;
-							blue = lightcolor[2] * ramp;
-								
-							//try to keep normalmapped stages from going completely dark
-							if(stage->normalmap ) {
-								if(red < .6) red = .6;
-								if(green < .6) green = .6;
-								if(blue < .6) blue = .6;
-							}
-
+							blue = lightcolor[2] * ramp;	
 						}
 
 						if (stage->colormap.enabled)
@@ -547,30 +578,34 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 							green *= stage->colormap.green/255.0;
 							blue *= stage->colormap.blue/255.0;
 						}
+
 						VArray[5] = red;
 						VArray[6] = green;
 						VArray[7] = blue;
 						VArray[8] = nAlpha;				
 					}
 					// increment pointer and counter
-					VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+					if(stage->normalmap)
+						VArray += VertexSizes[VERT_BUMPMAPPED_COLOURED];
+					else
+						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 					order += 3;
 					va++;
 				} while (--count);
 
-				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
-						qglDrawArrays(mode,0,va);
-				
+				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+					qglDrawArrays(mode,0,va);
+							
 				qglColor4f(1,1,1,1);
 				if (stage->colormap.enabled)
 					qglEnable (GL_TEXTURE_2D);
 
 				if(stage->normalmap) {
 
-					ramp = 1.0;
-					// back to replace mode
-					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+					R_KillNormalTMUs();
 
+					ramp = 1.0;
+			
 					// restore the original blend mode
 					qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -772,7 +807,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 		if (depthmaskrscipt)
 			qglDepthMask(false);
 
-		R_InitVArrays (VERT_COLOURED_TEXTURED);
 		while (1)
 		{
 			count = *order++;
@@ -811,7 +845,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 					qglDisable (GL_TEXTURE_2D);
 				else if (stage->anim_count)
 					GL_Bind(RS_Animate(stage));
-				else
+				else if(!stage->normalmap)
 					GL_Bind (stage->texture->texnum);
 
 				if (stage->blendfunc.blend)
@@ -856,9 +890,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 					GLSTATE_DISABLE_ALPHATEST
 				}
 
-				if(stage->normalmap) {
+					if(stage->normalmap) {
 
-					ramp = 2.0; //for getting brightness of normal maps up a bit
+					dlight_t	*dl;
+					int			lnum;
+					vec3_t		lightAdd, lightvec;
+					float		add;
 
 					qglDepthMask (GL_FALSE);
 			 		qglEnable (GL_BLEND);
@@ -866,10 +903,48 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 					// set the correct blending mode for normal maps
 					qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
 
-					// and the texenv
-					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_DOT3_RGB_EXT);
+					qglActiveTextureARB (GL_TEXTURE0);
+					qglDisable (GL_TEXTURE_2D);
+					qglEnable (GL_TEXTURE_CUBE_MAP_ARB);
 
+					qglBindTexture (GL_TEXTURE_CUBE_MAP_ARB, normalisationCubeMap);
+
+					qglMatrixMode (GL_TEXTURE);
+					qglLoadIdentity ();
+
+					//set up a tangent lightspace vector that is sane to begin with
+					//these values were determined by printing out values and finding
+					//what looked the best for the normalmaps we currently have.
+					lightvec[0] = 547.0;
+					lightvec[1] = -126.0;
+
+					//rotate so that overall light intensity influences the depth of the normals
+					lightvec[2] = 218.0*VectorLength(shadelight);
+					
+					//translate to hardware so we don't have to do each vertex
+					//credit to Mike Hiney for pointing this procedure out
+					qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);
+
+					qglScalef (-1, -1, -1);
+
+					qglMatrixMode (GL_MODELVIEW);
+	
+					qglActiveTextureARB (GL_TEXTURE1);
+					qglEnable (GL_TEXTURE_2D);
+
+					qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
+
+					// and the texenv
+					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
+				
+					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
+				}
+				else {
+					if(stage->next) //increase intensity of lighting to cut through normals a bit
+						if(stage->next->normalmap)
+							ramp = 2.0;
+					R_InitVArrays (VERT_COLOURED_TEXTURED);
 				}
 
 				do
@@ -918,13 +993,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 							green = lightcolor[1] * ramp;
 							blue = lightcolor[2] * ramp;
 								
-							//try to keep normalmapped stages from going completely dark
-							if(stage->normalmap) {
-								if(red < .6) red = .6;
-								if(green < .6) green = .6;
-								if(blue < .6) blue = .6;
-							}
-
+						
 						}
 
 						if (stage->colormap.enabled)
@@ -940,7 +1009,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 						VArray[8] = nAlpha;	
 					}
 					// increment pointer and counter
-					VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+					if(stage->normalmap)
+						VArray += VertexSizes[VERT_BUMPMAPPED_COLOURED];
+					else
+						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 					order += 3;
 					va++;
 				} while (--count);
@@ -954,10 +1026,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 
 				if(stage->normalmap) {
 
-					ramp = 1.0;
-					// back to replace mode
-					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+					R_KillNormalTMUs();
 
+					ramp = 1.0;
+			
 					// restore the original blend mode
 					qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

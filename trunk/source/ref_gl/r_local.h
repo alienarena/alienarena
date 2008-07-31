@@ -469,7 +469,7 @@ extern float *VArray;
 #define VERT_COLOURED_MULTI_TEXTURED	5		// verts, st for 2 tmus and colour
 #define VERT_DUAL_TEXTURED				6		// verts, st for 2 tmus both with same st
 #define VERT_NO_TEXTURE					7		// verts only, no textures
-
+#define VERT_BUMPMAPPED_COLOURED		8		// verts and st for 1 tmu, 2 texoord pointers and colour
 
 // vertex array subsystem
 void R_InitVArrays (int varraytype);
@@ -477,6 +477,7 @@ void R_KillVArrays (void);
 void R_InitQuadVarrays(void);
 void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
+void R_KillNormalTMUs(void);
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 
