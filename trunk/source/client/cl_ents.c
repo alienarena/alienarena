@@ -606,55 +606,6 @@ INTERPOLATE BETWEEN FRAMES TO GET RENDERING PARMS
 ==========================================================================
 */
 
-struct model_s *S_RegisterSexedModel (entity_state_t *ent, char *base)
-{
-	int				n;
-	char			*p;
-	struct model_s	*mdl;
-	char			model[MAX_QPATH];
-	char			buffer[MAX_QPATH];
-
-	// determine what model the client is using
-	model[0] = 0;
-	n = CS_PLAYERSKINS + ent->number - 1;
-	if (cl.configstrings[n][0])
-	{
-		p = strchr(cl.configstrings[n], '\\');
-		if (p)
-		{
-			p += 1;
-			strcpy(model, p);
-			p = strchr(model, '/');
-			if (p)
-				*p = 0;
-		}
-	}
-
-	// if we can't figure it out, they're male
-	if (!model[0])
-		strcpy(model, "male");
-
-	Com_sprintf (buffer, sizeof(buffer), "players/%s/%s", model, base+1);
-	mdl = R_RegisterModel(buffer);
-	if (!mdl) {
-		// not found, try default weapon model
-		Com_sprintf (buffer, sizeof(buffer), "players/%s/weapon.md2", model);
-		mdl = R_RegisterModel(buffer);
-		if (!mdl) {
-			// no, revert to the male model
-			Com_sprintf (buffer, sizeof(buffer), "players/%s/%s", "male", base+1);
-			mdl = R_RegisterModel(buffer);
-			if (!mdl) {
-				// last try, default male weapon.md2
-				Com_sprintf (buffer, sizeof(buffer), "players/male/weapon.md2");
-				mdl = R_RegisterModel(buffer);
-			}
-		}
-	}
-
-	return mdl;
-}
-
 // PMM - used in shell code
 extern int Developer_searchpath (int who);
 // pmm
@@ -698,7 +649,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		cent = &cl_entities[s1->number];
 
 		playermodel = false;
-
+		
 		effects = s1->effects;
 		renderfx = s1->renderfx;
 
@@ -740,9 +691,14 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.alpha = 0.30;
 			ent.skinnum = (s1->skinnum >> ((rand() % 4)*8)) & 0xff;
 			ent.model = NULL;
+			ent.lod1 = NULL;
+			ent.lod2 = NULL;
 		}
 		else
 		{
+			ent.lod1 = NULL;
+			ent.lod2 = NULL;
+
 			// set skin
 			if (s1->modelindex == 255)
 			{	// use custom player skin
@@ -750,6 +706,11 @@ void CL_AddPacketEntities (frame_t *frame)
 				ci = &cl.clientinfo[s1->skinnum & 0xff];
 				ent.skin = ci->skin;
 				ent.model = ci->model;
+
+				ent.lod1 = ci->lod1;
+			
+				ent.lod2 = ci->lod2;
+			
 				if (!ent.skin || !ent.model)
 				{
 					ent.skin = cl.baseclientinfo.skin;
@@ -922,6 +883,8 @@ void CL_AddPacketEntities (frame_t *frame)
 		ent.skinnum = 0;
 		ent.flags = 0;
 		ent.alpha = 0;
+		ent.lod1 = NULL;		// only player models get lods
+		ent.lod2 = NULL;
 
 		ci = &cl.clientinfo[s1->skinnum & 0xff];
 
@@ -1135,6 +1098,9 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.model = gun_model;	// development tool
 	else
 		gun.model = cl.model_draw[ps->gunindex];
+
+	gun.lod1 = NULL;
+	gun.lod2 = NULL;
 
 	if (!gun.model)
 		return;

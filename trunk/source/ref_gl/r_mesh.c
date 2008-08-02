@@ -467,11 +467,8 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				}
 
 				if(stage->normalmap) {
-
-					dlight_t	*dl;
-					int			lnum;
-					vec3_t		lightAdd, lightvec;
-					float		add;
+				
+					vec3_t	lightvec;
 
 					qglDepthMask (GL_FALSE);
 			 		qglEnable (GL_BLEND);
@@ -890,12 +887,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 					GLSTATE_DISABLE_ALPHATEST
 				}
 
-					if(stage->normalmap) {
+				if(stage->normalmap) {
 
-					dlight_t	*dl;
-					int			lnum;
-					vec3_t		lightAdd, lightvec;
-					float		add;
+					vec3_t	lightvec;
 
 					qglDepthMask (GL_FALSE);
 			 		qglEnable (GL_BLEND);

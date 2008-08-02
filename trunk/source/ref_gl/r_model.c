@@ -743,7 +743,6 @@ static void R_ClearFlares(void)
 	r_numflares = 0;
 }
 
-//this will get added in the future from a shader or a script 
 void GL_AddFlareSurface (msurface_t *surf )
 {
      int i, width, height, intens;

@@ -441,6 +441,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 	char		model_filename[MAX_QPATH];
 	char		skin_filename[MAX_QPATH];
 	char		weapon_filename[MAX_QPATH];
+	FILE		*file;
 
 	strncpy(ci->cinfo, s, sizeof(ci->cinfo));
 	ci->cinfo[sizeof(ci->cinfo)-1] = 0;
@@ -455,7 +456,18 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		s = t+1;
 	}
 
+	// isolate the model name
+	strcpy (model_name, s);
+	t = strstr(model_name, "/");
+	if (!t)
+		t = strstr(model_name, "\\");
+	if (!t)
+		t = model_name;
+	*t = 0;
+
 	ci->helmet = NULL; //we only worry about this in these cases of missing textures or models
+	ci->lod1 = NULL;
+	ci->lod2 = NULL;
 
 	if (cl_noskins->value || *s == 0)
 	{
@@ -477,15 +489,6 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 	}
 	else
 	{
-		// isolate the model name
-		strcpy (model_name, s);
-		t = strstr(model_name, "/");
-		if (!t)
-			t = strstr(model_name, "\\");
-		if (!t)
-			t = model_name;
-		*t = 0;
-
 		// isolate the skin name
 		strcpy (skin_name, s + strlen(model_name) + 1);
 
@@ -529,6 +532,42 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		ci->icon = R_RegisterPic (ci->iconname);
 	}
 
+	//check for level of detail models
+	Com_sprintf(model_filename, sizeof(model_filename), "players/%s/lod1.md2", model_name);
+	i = 0;
+	do
+		model_filename[i] = tolower(model_filename[i]);
+	while (model_filename[i++]);
+
+	FS_FOpenFile (model_filename, &file); 
+	if(file) {
+		//exists
+		fclose(file);
+		ci->lod1 = R_RegisterModel(model_filename);	
+		Com_Printf("loaded an lod1\n");
+	}
+	else {
+		ci->lod1 = NULL;
+		Com_Printf("no lod1 found\n");
+	}
+
+	Com_sprintf(model_filename, sizeof(model_filename), "players/%s/lod2.md2", model_name);
+	i = 0;
+	do
+		model_filename[i] = tolower(model_filename[i]);
+	while (model_filename[i++]);
+
+	FS_FOpenFile (model_filename, &file); 
+	if(file) {
+		//exists
+		fclose(file);
+		ci->lod2 = R_RegisterModel(model_filename);		
+		Com_Printf("loaded an lod2\n");
+	}
+	else {
+		ci->lod2 = NULL;
+		Com_Printf("no lod2 found\n");
+	}
 	// must have loaded all data types to be valid
 	if (!ci->skin || !ci->icon || !ci->model || !ci->weaponmodel[0])
 	{
