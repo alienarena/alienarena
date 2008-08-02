@@ -108,6 +108,9 @@ typedef struct
 typedef struct entity_s
 {
 	struct model_s		*model;			// opaque type outside refresh
+	struct model_s		*lod1;
+	struct model_s		*lod2;
+
 	float				angles[3];
 
 	/*

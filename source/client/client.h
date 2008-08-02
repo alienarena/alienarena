@@ -76,6 +76,8 @@ typedef struct
 	struct model_s	*model;
 	struct model_s	*weaponmodel[MAX_CLIENTWEAPONMODELS];
 	struct model_s  *helmet;
+	struct model_s  *lod1;
+	struct model_s  *lod2;
 } clientinfo_t;
 
 extern char cl_weaponmodels[MAX_CLIENTWEAPONMODELS][MAX_QPATH];

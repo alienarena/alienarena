@@ -422,6 +422,7 @@ void R_DrawEntitiesOnList (void)
 {
 	int		i;
 	rscript_t	*rs = NULL;
+	vec3_t	dist;
 
 	if (!r_drawentities->value)
 		return;
@@ -456,6 +457,18 @@ void R_DrawEntitiesOnList (void)
 		else
 		{
 			currentmodel = currententity->model;
+
+			//get distance, set lod if available
+			VectorSubtract(r_origin, currententity->origin, dist);
+			if(VectorLength(dist) > 1000) {
+				if(currententity->lod2)
+					currentmodel = currententity->lod2;
+			}
+			else if(VectorLength(dist) > 500) {
+				if(currententity->lod1) 
+					currentmodel = currententity->lod1;
+			}
+			
 			if (!currentmodel)
 			{
 				R_DrawNullModel ();
