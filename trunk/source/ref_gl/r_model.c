@@ -1318,13 +1318,12 @@ Mod_LoadAliasModel
 void Mod_LoadAliasModel (model_t *mod, void *buffer)
 {
 	int					i, j;
-	dmdl_t				*pinmodel, *pheader;
+	dmdl_t				*pinmodel, *pheader, *paliashdr;
 	dstvert_t			*pinst, *poutst;
 	dtriangle_t			*pintri, *pouttri;
-	daliasframe_t		*pinframe, *poutframe;
+	daliasframe_t		*pinframe, *poutframe, *pframe;
 	int					*pincmd, *poutcmd;
 	int					version;
-
 	pinmodel = (dmdl_t *)buffer;
 
 	version = LittleLong (pinmodel->version);
@@ -1439,14 +1438,47 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 			RS_ReadyScript((rscript_t *)mod->script[i]);
 	}
 
-	mod->mins[0] = -32;
-	mod->mins[1] = -32;
-	mod->mins[2] = -32;
-	mod->maxs[0] = 32;
-	mod->maxs[1] = 32;
-	mod->maxs[2] = 32;
-
 	R_LoadMd2VertexArrays(mod);
+
+	paliashdr = (dmdl_t *)mod->extradata;
+
+	//just use frame zero - we never scale frames in Alien Arena
+	pframe = ( daliasframe_t * ) ( ( byte * ) paliashdr +
+		                              paliashdr->ofs_frames);
+
+	/*
+	** compute axially aligned mins and maxs
+	*/
+	for ( i = 0; i < 3; i++ )
+	{
+		mod->mins[i] = pframe->translate[i];
+		mod->maxs[i] = mod->mins[i] + pframe->scale[i]*255;
+	}
+
+	/*
+	** compute a full bounding box
+	*/
+	for ( i = 0; i < 8; i++ )
+	{
+		vec3_t   tmp;
+
+		if ( i & 1 )
+			tmp[0] = mod->mins[0];
+		else
+			tmp[0] = mod->maxs[0];
+
+		if ( i & 2 )
+			tmp[1] = mod->mins[1];
+		else
+			tmp[1] = mod->maxs[1];
+
+		if ( i & 4 )
+			tmp[2] = mod->mins[2];
+		else
+			tmp[2] = mod->maxs[2];
+
+		VectorCopy( tmp, mod->bbox[i] );
+	}
 }
 
 //=============================================================================
