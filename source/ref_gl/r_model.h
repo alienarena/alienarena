@@ -279,6 +279,7 @@ typedef struct model_s
 //		
 	vec3_t		mins, maxs;
 	float		radius;
+	vec3_t		bbox[8];
 
 //
 // brush model

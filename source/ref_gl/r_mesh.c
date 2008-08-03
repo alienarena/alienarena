@@ -1213,103 +1213,18 @@ void R_DrawAliasShadow(dmdl_t *paliashdr)
 static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 {
 	int i;
-	vec3_t		mins, maxs;
-	dmdl_t	*paliashdr;
 	vec3_t		vectors[3];
-	vec3_t		thismins, oldmins, thismaxs, oldmaxs;
-	daliasframe_t *pframe, *poldframe;
 	vec3_t angles;
 	trace_t r_trace;
 
-	paliashdr = (dmdl_t *)currentmodel->extradata;
-
-	if ( ( e->frame >= paliashdr->num_frames ) || ( e->frame < 0 ) )
-	{
-		Com_Printf ("R_CullAliasModel %s: no such frame %d\n",
-			currentmodel->name, e->frame);
-		e->frame = 0;
-	}
-	if ( ( e->oldframe >= paliashdr->num_frames ) || ( e->oldframe < 0 ) )
-	{
-		Com_Printf ("R_CullAliasModel %s: no such oldframe %d\n",
-			currentmodel->name, e->oldframe);
-		e->oldframe = 0;
-	}
-
-	pframe = ( daliasframe_t * ) ( ( byte * ) paliashdr +
-		                              paliashdr->ofs_frames +
-									  e->frame * paliashdr->framesize);
-
-	poldframe = ( daliasframe_t * ) ( ( byte * ) paliashdr +
-		                              paliashdr->ofs_frames +
-									  e->oldframe * paliashdr->framesize);
-
-
-	/*
-	** compute axially aligned mins and maxs
-	*/
-	if ( pframe == poldframe )
-	{
-		for ( i = 0; i < 3; i++ )
-		{
-			mins[i] = pframe->translate[i];
-			maxs[i] = mins[i] + pframe->scale[i]*255;
-		}
-	}
-	else
-	{
-		for ( i = 0; i < 3; i++ )
-		{
-			thismins[i] = pframe->translate[i];
-			thismaxs[i] = thismins[i] + pframe->scale[i]*255;
-
-			oldmins[i]  = poldframe->translate[i];
-			oldmaxs[i]  = oldmins[i] + poldframe->scale[i]*255;
-
-			if ( thismins[i] < oldmins[i] )
-				mins[i] = thismins[i];
-			else
-				mins[i] = oldmins[i];
-
-			if ( thismaxs[i] > oldmaxs[i] )
-				maxs[i] = thismaxs[i];
-			else
-				maxs[i] = oldmaxs[i];
-		}
-	}
 
 	if (r_worldmodel ) {
 		//occulusion culling - why draw entities we cannot see?
 	
-		r_trace = CM_BoxTrace(r_origin, e->origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
+		r_trace = CM_BoxTrace(r_origin, e->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		
 		if(r_trace.fraction != 1.0)
 			return true;
-	}
-
-	/*
-	** compute a full bounding box
-	*/
-	for ( i = 0; i < 8; i++ )
-	{
-		vec3_t   tmp;
-
-		if ( i & 1 )
-			tmp[0] = mins[0];
-		else
-			tmp[0] = maxs[0];
-
-		if ( i & 2 )
-			tmp[1] = mins[1];
-		else
-			tmp[1] = maxs[1];
-
-		if ( i & 4 )
-			tmp[2] = mins[2];
-		else
-			tmp[2] = maxs[2];
-
-		VectorCopy( tmp, bbox[i] );
 	}
 
 	/*
@@ -1323,7 +1238,7 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 	{
 		vec3_t tmp;
 
-		VectorCopy( bbox[i], tmp );
+		VectorCopy( currentmodel->bbox[i], tmp );
 
 		bbox[i][0] = DotProduct( vectors[0], tmp );
 		bbox[i][1] = -DotProduct( vectors[1], tmp );
