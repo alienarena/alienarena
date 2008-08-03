@@ -544,12 +544,9 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		//exists
 		fclose(file);
 		ci->lod1 = R_RegisterModel(model_filename);	
-		Com_Printf("loaded an lod1\n");
 	}
-	else {
+	else 
 		ci->lod1 = NULL;
-		Com_Printf("no lod1 found\n");
-	}
 
 	Com_sprintf(model_filename, sizeof(model_filename), "players/%s/lod2.md2", model_name);
 	i = 0;
@@ -562,12 +559,10 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		//exists
 		fclose(file);
 		ci->lod2 = R_RegisterModel(model_filename);		
-		Com_Printf("loaded an lod2\n");
 	}
-	else {
+	else
 		ci->lod2 = NULL;
-		Com_Printf("no lod2 found\n");
-	}
+	
 	// must have loaded all data types to be valid
 	if (!ci->skin || !ci->icon || !ci->model || !ci->weaponmodel[0])
 	{
