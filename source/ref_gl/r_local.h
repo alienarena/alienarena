@@ -503,6 +503,7 @@ extern GLuint      g_location_binormal;
 extern GLuint      g_location_heightTexture;
 extern GLuint	   g_location_lmTexture;
 extern GLuint      g_heightMapID;
+extern GLuint	   g_location_fog;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 

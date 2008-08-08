@@ -438,7 +438,7 @@ void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll)
 		glUniform4fARB( g_location_tangent, tangent[0], tangent[1], tangent[2], 0.0f );
 		glUniform4fARB( g_location_normal, normal[0], normal[1], normal[2], 0.0f );
 		glUniform4fARB( g_location_binormal, binormal[0], binormal[1], binormal[2], 0.0f );
-		
+		glUniform1iARB( g_location_fog, map_fog);
 		// draw the poly
 		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 	}

@@ -5,6 +5,11 @@ uniform vec4 BiNormal;
 uniform vec4 Eye;
 varying vec3 EyeDir;
 
+uniform int FOG;
+
+
+varying float fog;
+
 void main( void )
 {
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
@@ -42,5 +47,14 @@ void main( void )
     gl_TexCoord[0] = gl_MultiTexCoord0; 
           
     gl_TexCoord[1] = gl_MultiTexCoord1; 
+
+    //fog
+    if(FOG > 0){
+		
+	fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
+		
+    	fog = clamp(fog, 0.0, 1.0);
+	
+    }
 
 }
