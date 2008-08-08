@@ -648,7 +648,7 @@ void DrawTextureChains (void)
 	GL_TexEnv( GL_REPLACE );
 }
 
-
+extern int KillFlags;
 static void GL_RenderLightmappedPoly( msurface_t *surf )
 {
 	int		nv = surf->polys->numverts;
@@ -709,9 +709,6 @@ dynamic:
 	if (SurfaceIsAlphaBlended(surf))
 		qglEnable( GL_ALPHA_TEST );
 
-	GL_MBind( GL_TEXTURE0, image->texnum );
-	GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );
-
 	scroll = 0;
 	if (surf->texinfo->flags & SURF_FLOWING)
 	{
@@ -720,10 +717,51 @@ dynamic:
 			scroll = -64.0;
 	}
 
-	R_InitVArrays (VERT_MULTI_TEXTURED);	
-	
-	R_AddLightMappedSurfToVArray (surf, scroll);
-	
+	if(gl_parallaxmaps->value) {
+		if(strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) {
+		
+			R_InitVArrays (VERT_MULTI_TEXTURED);
+
+			glUseProgramObjectARB( g_programObj );
+    		
+			GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
+			glUniform1iARB( g_location_testTexture, 0); 
+		
+			GL_MBind( GL_TEXTURE1, surf->texinfo->heightMap->texnum);
+			glUniform1iARB( g_location_heightTexture, 1); 
+			
+			//we must eventuall fix what is going on with the builtin bind commands
+			//which are limited to just 2 tmus
+			glUniform1iARB( g_location_lmTexture, 2);
+			qglActiveTextureARB(GL_TEXTURE2);
+			qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
+			KillFlags |= KILL_TMU2_POINTER;
+				
+			R_AddParallaxLightMappedSurfToVArray (surf, scroll);
+
+			glUseProgramObjectARB( NULL ); 
+		}
+
+		else {
+		
+			GL_MBind( GL_TEXTURE0, image->texnum );
+			GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );
+		
+			R_InitVArrays (VERT_MULTI_TEXTURED);	
+			
+			R_AddLightMappedSurfToVArray (surf, scroll);
+		}
+	}
+	else {
+		
+		GL_MBind( GL_TEXTURE0, image->texnum );
+		GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );
+		
+		R_InitVArrays (VERT_MULTI_TEXTURED);	
+			
+		R_AddLightMappedSurfToVArray (surf, scroll);
+	}
+		
 	R_KillVArrays ();
 
 	if (SurfaceIsAlphaBlended(surf))
@@ -904,6 +942,7 @@ static void R_DrawSpecularSurfaces (void)
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDisable (GL_BLEND);
 }
+
 /*
 =================
 R_DrawInlineBModel
@@ -1070,6 +1109,7 @@ void R_DrawBrushModel (entity_t *e)
 	if ( !gl_config.mtexcombine ) {
 
 		GL_TexEnv( GL_REPLACE );
+
 		GL_SelectTexture( GL_TEXTURE1);
 
 		if ( gl_lightmap->value )
@@ -1319,12 +1359,13 @@ void R_DrawWorld (void)
 		// Vic - begin
 		if ( !gl_config.mtexcombine ) {
 			GL_TexEnv( GL_REPLACE );
-			GL_SelectTexture( GL_TEXTURE1);
+				GL_SelectTexture( GL_TEXTURE1);
 
 			if ( gl_lightmap->value )
 				GL_TexEnv( GL_REPLACE );
 			else
 				GL_TexEnv( GL_MODULATE );
+		
 		} else {
 			GL_TexEnv ( GL_COMBINE_EXT );
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );

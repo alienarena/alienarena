@@ -647,7 +647,7 @@ void Mod_LoadTexinfo (lump_t *l)
 		if (out->image->script)
 			RS_ReadyScript(out->image->script);
 
-		//check for normal and specular maps
+		//check for normal, height and specular maps
 		strcpy(sv_name, name);
 		if( ( strlen( name ) + 8 ) <= MAX_QPATH )
 		{
@@ -660,16 +660,29 @@ void Mod_LoadTexinfo (lump_t *l)
 		else
 			out->normalMap = out->image; 
 
-		if( ( strlen( sv_name ) + 8 ) <= MAX_QPATH )
+		strcpy(name, sv_name);
+		if( ( strlen( name ) + 8 ) <= MAX_QPATH )
 		{
-			strcat( sv_name, "_sm.tga" );
-			out->specularMap = GL_FindImage( sv_name, it_bump );
+			strcat( name, "_sm.tga" );
+			out->specularMap = GL_FindImage( name, it_bump );
 			if( out->specularMap == NULL ) 
 				out->specularMap = out->image; 
 		
 		}
 		else
 			out->specularMap = out->image; 
+
+		strcpy(name, sv_name);
+		if( ( strlen( name ) + 8 ) <= MAX_QPATH )
+		{
+			strcat( name, "_hm.tga" );
+			out->heightMap = GL_FindImage( name, it_bump );
+			if( out->heightMap == NULL ) 
+				out->heightMap = out->image; 
+		
+		}
+		else
+			out->heightMap = out->image; 
 	}
 
 	// count animation frames

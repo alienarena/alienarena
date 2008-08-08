@@ -414,6 +414,23 @@ typedef void (APIENTRY * PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC) (GLenum target,
 typedef void (APIENTRY * PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC) (GLenum target, GLuint index, GLfloat *params);
 typedef void (APIENTRY * PFNGLGETPROGRAMIVARBPROC) (GLenum target, GLenum pname, GLint *params);
 typedef void (APIENTRY * PFNGLGETPROGRAMSTRINGARBPROC) (GLenum target, GLenum pname, GLvoid *string);
+
+//GLSL
+typedef unsigned int GLhandleARB;	/* shader object handle */
+typedef char GLcharARB;		/* native character */
+typedef GLhandleARB (APIENTRY * PFNGLCREATEPROGRAMOBJECTARBPROC) (void);
+typedef void (APIENTRY * PFNGLDELETEOBJECTARBPROC) (GLhandleARB obj);
+typedef void (APIENTRY * PFNGLUSEPROGRAMOBJECTARBPROC) (GLhandleARB programObj);
+typedef GLhandleARB (APIENTRY * PFNGLCREATESHADEROBJECTARBPROC) (GLenum shaderType);
+typedef void (APIENTRY * PFNGLSHADERSOURCEARBPROC) (GLhandleARB shaderObj, GLsizei count, const GLcharARB* *string, GLint *length);
+typedef void (APIENTRY * PFNGLCOMPILESHADERARBPROC) (GLhandleARB shaderObj);
+typedef void (APIENTRY * PFNGLGETOBJECTPARAMETERIVARBPROC) (GLhandleARB obj, GLenum pname, GLint *params);
+typedef void (APIENTRY * PFNGLATTACHOBJECTARBPROC) (GLhandleARB containerObj, GLhandleARB obj);
+typedef void (APIENTRY * PFNGLGETINFOLOGARBPROC) (GLhandleARB obj, GLsizei maxLength, GLsizei *length, GLcharARB *infoLog);
+typedef void (APIENTRY * PFNGLLINKPROGRAMARBPROC) (GLhandleARB programObj);
+typedef GLint (APIENTRY * PFNGLGETUNIFORMLOCATIONARBPROC) (GLhandleARB programObj, const GLcharARB *name);
+typedef void (APIENTRY * PFNGLUNIFORM4FARBPROC) (GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+typedef void (APIENTRY * PFNGLUNIFORM1IARBPROC) (GLint location, GLint v0);
 #endif
 
 #ifdef _WIN32
@@ -515,12 +532,27 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
 #ifdef GL_TEXTURE2
 #undef GL_TEXTURE2
 #endif
+#ifdef GL_TEXTURE3
+#undef GL_TEXTURE3
+#endif
 #endif
 
-extern int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2;
+extern int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3;
 
 #define  GL_FRAGMENT_PROGRAM_ARB			0x8804 // jitwater
 #define  GL_PROGRAM_FORMAT_ASCII_ARB		0x8875 // jitwater
+#define GL_VERTEX_SHADER_ARB				0x8B31
+#define GL_FRAGMENT_SHADER_ARB				0x8B30
+
+#define GL_OBJECT_DELETE_STATUS_ARB			0x8B80
+#define GL_OBJECT_COMPILE_STATUS_ARB		0x8B81
+#define GL_OBJECT_LINK_STATUS_ARB			0x8B82
+#define GL_OBJECT_VALIDATE_STATUS_ARB		0x8B83
+#define GL_OBJECT_INFO_LOG_LENGTH_ARB		0x8B84
+#define GL_OBJECT_ATTACHED_OBJECTS_ARB		0x8B85
+#define GL_OBJECT_ACTIVE_UNIFORMS_ARB		0x8B86
+#define GL_OBJECT_ACTIVE_UNIFORM_MAX_LENGTH_ARB 0x8B87
+#define GL_OBJECT_SHADER_SOURCE_LENGTH_ARB	0x8B88
 
 // Vic - begin
 #ifndef GL_EXT_texture_env_combine
@@ -577,4 +609,18 @@ extern	PFNGLPROGRAMENVPARAMETER4FARBPROC   qglProgramEnvParameter4fARB;
 extern	PFNGLPROGRAMLOCALPARAMETER4FARBPROC qglProgramLocalParameter4fARB;
 // jitwater ===
 
+//add glsl program extensions
+extern	PFNGLCREATEPROGRAMOBJECTARBPROC		glCreateProgramObjectARB;	
+extern	PFNGLDELETEOBJECTARBPROC			glDeleteObjectARB;
+extern	PFNGLUSEPROGRAMOBJECTARBPROC		glUseProgramObjectARB;
+extern	PFNGLCREATESHADEROBJECTARBPROC		glCreateShaderObjectARB;
+extern  PFNGLSHADERSOURCEARBPROC			glShaderSourceARB;		
+extern	PFNGLCOMPILESHADERARBPROC			glCompileShaderARB;
+extern	PFNGLGETOBJECTPARAMETERIVARBPROC	glGetObjectParameterivARB;
+extern	PFNGLATTACHOBJECTARBPROC			glAttachObjectARB;
+extern	PFNGLGETINFOLOGARBPROC				glGetInfoLogARB;
+extern	PFNGLLINKPROGRAMARBPROC				glLinkProgramARB;
+extern	PFNGLGETUNIFORMLOCATIONARBPROC		glGetUniformLocationARB;
+extern	PFNGLUNIFORM4FARBPROC				glUniform4fARB;
+extern	PFNGLUNIFORM1IARBPROC				glUniform1iARB;
 #endif

@@ -178,6 +178,7 @@ extern cvar_t	*gl_ext_mtexcombine;
 extern cvar_t	*gl_normalmaps;
 extern cvar_t	*gl_specularmaps;
 extern cvar_t	*gl_cubemaps;
+extern cvar_t	*gl_parallaxmaps;
 
 extern	cvar_t	*r_shaders;
 extern	cvar_t	*r_bloom;
@@ -196,6 +197,8 @@ extern	cvar_t	*gl_reflection;			// MPO
 extern	cvar_t	*gl_reflection_debug;	// MPO	for debugging the reflection
 extern	cvar_t	*gl_reflection_max;		// MPO  max number of water reflections
 extern	cvar_t	*gl_arb_fragment_program; // jit
+extern	cvar_t	*gl_glsl_shaders;
+
 
 extern	cvar_t	*sys_affinity;
 extern	cvar_t	*sys_priority;
@@ -424,7 +427,7 @@ typedef struct
 
 	int			lightmap_textures;
 
-	int			currenttextures[2];
+	int			currenttextures[3];
 	int			currenttmu;
 
 	float		camera_separation;
@@ -435,6 +438,7 @@ typedef struct
 	qboolean	texgen;
 	qboolean	texshaders;
 	qboolean	fragment_program; // jitwater
+	qboolean	glsl_shaders;
 } glstate_t;
 
 extern glconfig_t  gl_config;
@@ -471,13 +475,34 @@ extern float *VArray;
 #define VERT_NO_TEXTURE					7		// verts only, no textures
 #define VERT_BUMPMAPPED_COLOURED		8		// verts and st for 1 tmu, 2 texoord pointers and colour
 
+// vertex array kill flags
+#define KILL_TMU0_POINTER	1
+#define KILL_TMU1_POINTER	2
+#define KILL_TMU2_POINTER	3
+#define KILL_RGBA_POINTER	4
+
 // vertex array subsystem
 void R_InitVArrays (int varraytype);
 void R_KillVArrays (void);
 void R_InitQuadVarrays(void);
 void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
+void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
+
+//glsl
+extern GLhandleARB g_programObj;
+extern GLhandleARB g_vertexShader;
+extern GLhandleARB g_fragmentShader;
+extern GLuint      g_location_testTexture;
+
+extern GLuint      g_location_eyePos;
+extern GLuint      g_location_tangent;
+extern GLuint      g_location_normal;
+extern GLuint      g_location_binormal;
+extern GLuint      g_location_heightTexture;
+extern GLuint	   g_location_lmTexture;
+extern GLuint      g_heightMapID;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 

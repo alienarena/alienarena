@@ -106,10 +106,26 @@ void GL_EnableMultitexture( qboolean enable )
 		GL_SelectTexture( GL_TEXTURE1 );
 		qglEnable( GL_TEXTURE_2D );
 		GL_TexEnv( GL_REPLACE );
+
+		GL_SelectTexture( GL_TEXTURE2 );
+		qglEnable( GL_TEXTURE_2D );
+		GL_TexEnv( GL_REPLACE );
+
+		GL_SelectTexture( GL_TEXTURE3 );
+		qglEnable( GL_TEXTURE_2D );
+		GL_TexEnv( GL_REPLACE );
 	}
 	else
 	{
 		GL_SelectTexture( GL_TEXTURE1 );
+		qglDisable( GL_TEXTURE_2D );
+		GL_TexEnv( GL_REPLACE );
+
+		GL_SelectTexture( GL_TEXTURE2 );
+		qglDisable( GL_TEXTURE_2D );
+		GL_TexEnv( GL_REPLACE );
+
+		GL_SelectTexture( GL_TEXTURE3 );
 		qglDisable( GL_TEXTURE_2D );
 		GL_TexEnv( GL_REPLACE );
 	}

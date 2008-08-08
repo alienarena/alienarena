@@ -244,7 +244,7 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 			rs_realtime * -0.2f, 10.0f, 1.0f, 1.0f);
 		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
 			(r_newrefdef.vieworg[0]), (r_newrefdef.vieworg[1]), (r_newrefdef.vieworg[2]), 1.0f);
-		if(water_normal_tex)
+		if(water_normal_tex) //fix me!
 			GL_MBind(GL_TEXTURE2, water_normal_tex->texnum); // Normal texture
 		if(distort_tex)
 			GL_MBind(GL_TEXTURE1, distort_tex->texnum);      // Distortion texture
