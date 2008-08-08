@@ -5,6 +5,11 @@ varying vec2 v_texCoord;
 
 varying vec3 EyeDir;
 
+uniform int FOG;
+
+
+varying float fog;
+
 void main( void )
 {
      	vec3 EyeT = normalize(EyeDir);
@@ -18,5 +23,9 @@ void main( void )
 	vec4 lightmap = texture2D(lmTexture, gl_TexCoord[1].st);
 
     	gl_FragColor = (diffuse * lightmap * 2.0); 
+
+	if(FOG > 0)
+		
+		gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);
 
 }

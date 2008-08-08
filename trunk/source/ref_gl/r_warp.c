@@ -243,8 +243,8 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1,
 			rs_realtime * -0.2f, 10.0f, 1.0f, 1.0f);
 		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
-			(r_newrefdef.vieworg[0]), (r_newrefdef.vieworg[1]), (r_newrefdef.vieworg[2]), 1.0f);
-		if(water_normal_tex) //fix me!
+			(fa->polys[0].verts[0][3]-r_newrefdef.vieworg[0]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[1]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[2]), 1.0f);
+		if(water_normal_tex) 
 			GL_MBind(GL_TEXTURE2, water_normal_tex->texnum); // Normal texture
 		if(distort_tex)
 			GL_MBind(GL_TEXTURE1, distort_tex->texnum);      // Distortion texture
@@ -499,8 +499,8 @@ void EmitWaterPolys (msurface_t *fa)
 					rs_realtime * (flowing ? -0.3f : 0.2f), 1.0f, 1.0f, 1.0f);
 				qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1,
 					rs_realtime * -0.2f, 10.0f, 1.0f, 1.0f);
-				qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
-					r_newrefdef.vieworg[0], r_newrefdef.vieworg[1], r_newrefdef.vieworg[2], 1.0f);
+					qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
+						(fa->polys[0].verts[0][3]-r_newrefdef.vieworg[0]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[1]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[2]), 1.0f);
 				if(distort_tex)
 					GL_MBind(GL_TEXTURE2, distort_tex->texnum);      // Distortion texture
 				if(water_normal_tex)

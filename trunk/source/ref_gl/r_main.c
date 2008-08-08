@@ -61,6 +61,7 @@ GLuint      g_location_binormal;
 GLuint      g_location_heightTexture;
 GLuint		g_location_lmTexture;
 GLuint		g_heightMapID = 0;
+GLuint		g_location_fog;
 
 void R_Clear (void);
 
@@ -1978,6 +1979,9 @@ int R_Init( void *hinstance, void *hWnd )
 	}
     if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ))
     {
+
+		gl_state.glsl_shaders = true;
+
         glCreateProgramObjectARB  = (PFNGLCREATEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glCreateProgramObjectARB");
         glDeleteObjectARB         = (PFNGLDELETEOBJECTARBPROC)qwglGetProcAddress("glDeleteObjectARB");
         glUseProgramObjectARB     = (PFNGLUSEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glUseProgramObjectARB");
@@ -2007,65 +2011,68 @@ int R_Init( void *hinstance, void *hWnd )
 		gl_state.glsl_shaders = false;
     }
 
-	g_programObj = glCreateProgramObjectARB();
+	if(gl_state.glsl_shaders) {
+		g_programObj = glCreateProgramObjectARB();
 
-	//
-	// Vertex shader
-	//
-	shader_assembly = readShaderFile( "data1/scripts/vertex_shader.glsl" );
+		//
+		// Vertex shader
+		//
+		shader_assembly = readShaderFile( "data1/scripts/vertex_shader.glsl" );
 
-    g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-    shaderStrings[0] = (char*)shader_assembly;
-    glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-    glCompileShaderARB( g_vertexShader);
-    glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)shader_assembly;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 
-    if( nResult )
-        glAttachObjectARB( g_programObj, g_vertexShader );
-	else
-	{
-		Com_Printf("...Vertex Shader Compile Error");
+		if( nResult )
+			glAttachObjectARB( g_programObj, g_vertexShader );
+		else
+		{
+			Com_Printf("...Vertex Shader Compile Error");
+		}
+
+		//
+		// Fragment shader
+		//
+
+		shader_assembly = readShaderFile( "data1/scripts/fragment_shader.glsl" );
+
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)shader_assembly;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_programObj, g_fragmentShader );
+		else
+		{
+			Com_Printf("...Fragment Shader Compile Error");
+		}
+
+		glLinkProgramARB( g_programObj );
+		glGetObjectParameterivARB( g_programObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+		if( !nResult )
+		{
+			glGetInfoLogARB( g_programObj, sizeof(str), NULL, str );
+			Com_Printf("...Linking Error");
+		}
+
+		//
+		// Locate some parameters by name so we can set them later...
+		//
+
+		g_location_testTexture = glGetUniformLocationARB( g_programObj, "testTexture" );
+		g_location_eyePos = glGetUniformLocationARB( g_programObj, "Eye" );
+		g_location_tangent = glGetUniformLocationARB( g_programObj, "Tangent" );
+		g_location_normal = glGetUniformLocationARB( g_programObj, "Normal" );
+		g_location_binormal = glGetUniformLocationARB( g_programObj, "BiNormal" );
+		g_location_heightTexture = glGetUniformLocationARB( g_programObj, "HeightTexture" );
+		g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
+		g_location_fog = glGetUniformLocationARB( g_programObj, "FOG" );
 	}
-
-	//
-	// Fragment shader
-	//
-
-	shader_assembly = readShaderFile( "data1/scripts/fragment_shader.glsl" );
-
-    g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-    shaderStrings[0] = (char*)shader_assembly;
-    glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-    glCompileShaderARB( g_fragmentShader );
-    glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-
-    if( nResult )
-        glAttachObjectARB( g_programObj, g_fragmentShader );
-	else
-	{
-		Com_Printf("...Fragment Shader Compile Error");
-	}
-
-    glLinkProgramARB( g_programObj );
-    glGetObjectParameterivARB( g_programObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
-
-    if( !nResult )
-	{
-		glGetInfoLogARB( g_programObj, sizeof(str), NULL, str );
-		Com_Printf("...Linking Error");
-	}
-
-	//
-	// Locate some parameters by name so we can set them later...
-	//
-
-	g_location_testTexture = glGetUniformLocationARB( g_programObj, "testTexture" );
-	g_location_eyePos = glGetUniformLocationARB( g_programObj, "Eye" );
-	g_location_tangent = glGetUniformLocationARB( g_programObj, "Tangent" );
-	g_location_normal = glGetUniformLocationARB( g_programObj, "Normal" );
-	g_location_binormal = glGetUniformLocationARB( g_programObj, "BiNormal" );
-    g_location_heightTexture = glGetUniformLocationARB( g_programObj, "HeightTexture" );
-	g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
 	
 	GL_SetDefaultState();
 
@@ -2116,9 +2123,11 @@ void R_Shutdown (void)
 	*/
 	QGL_Shutdown();
 
-	glDeleteObjectARB( g_vertexShader );
-    glDeleteObjectARB( g_fragmentShader );
-    glDeleteObjectARB( g_programObj );
+	if(gl_state.glsl_shaders) {
+		glDeleteObjectARB( g_vertexShader );
+		glDeleteObjectARB( g_fragmentShader );
+		glDeleteObjectARB( g_programObj );
+	}
 }
 
 

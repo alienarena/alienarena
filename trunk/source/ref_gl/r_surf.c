@@ -717,7 +717,7 @@ dynamic:
 			scroll = -64.0;
 	}
 
-	if(gl_parallaxmaps->value) {
+	if(gl_parallaxmaps->value && gl_state.glsl_shaders) {
 		if(strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) {
 		
 			R_InitVArrays (VERT_MULTI_TEXTURED);
@@ -739,7 +739,12 @@ dynamic:
 				
 			R_AddParallaxLightMappedSurfToVArray (surf, scroll);
 
-			glUseProgramObjectARB( NULL ); 
+			glUseProgramObjectARB( NULL );
+
+			//dynamic lights need this reset
+			GL_MBind( GL_TEXTURE0, image->texnum );
+			GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );
+
 		}
 
 		else {
