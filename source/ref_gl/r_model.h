@@ -148,6 +148,7 @@ typedef struct mtexinfo_s
 	image_t		*image;
 	image_t		*normalMap;
 	image_t		*specularMap;
+	image_t		*heightMap;
 	struct		rscript_t	*script;
 	int			value;
 } mtexinfo_t;
@@ -165,6 +166,7 @@ typedef struct glpoly_s
 	byte		*vertexlightbase;
 	byte		*vertexlight;
 	vec3_t		center;
+
 } glpoly_t;
 
 typedef struct msurface_s
@@ -190,6 +192,7 @@ typedef struct msurface_s
 	struct  msurface_s  *cubemapchain;
 	struct  msurface_s	*normalchain;
 	struct  msurface_s	*specularchain;
+	struct  msurface_s	*parallaxchain;
 
 	mtexinfo_t	*texinfo;
 	float		c_s, c_t;

@@ -49,14 +49,8 @@ float	tex_array[MAX_ARRAY][2];
 float	vert_array[MAX_ARRAY][3];
 float	col_array[MAX_ARRAY][4];
 
-// vertex array kill flags
-#define KILL_TMU0_POINTER	1
-#define KILL_TMU1_POINTER	2
-#define KILL_RGBA_POINTER	4
-
 // sizes of our vertexes.  the vertex type can be used as an index into this array
 int VertexSizes[] = {5, 5, 7, 7, 9, 11, 5, 3, 12};
-
 
 int KillFlags;
 
@@ -239,6 +233,12 @@ void R_KillVArrays (void)
 	if (KillFlags & KILL_RGBA_POINTER)
 		qglDisableClientState (GL_COLOR_ARRAY);
 
+	if (KillFlags & KILL_TMU2_POINTER)
+	{
+		qglClientActiveTextureARB (GL_TEXTURE2);
+		qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
+	}
+
 	if (KillFlags & KILL_TMU1_POINTER)
 	{
 		qglClientActiveTextureARB (GL_TEXTURE1);
@@ -342,6 +342,103 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 			VertexCounter++;
 		}
 
+		// draw the poly
+		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+	}
+}
+
+//note - would just a simple call to VectorAngles using the surface plane normal work as well?
+void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll)
+{
+	glpoly_t *p = surf->polys;
+	float	*v;	
+	int i;
+	
+
+	for (; p; p = p->chain)
+	{
+		vec3_t v01, v02, temp1, temp2, temp3;
+		vec3_t normal, binormal, tangent;
+		float s;
+		float *vec;
+
+		// reset pointer and counter
+		VArray = &VArrayVerts[0];
+		VertexCounter = 0;
+
+		_VectorSubtract( p->verts[ 1 ], p->verts[0], v01 );
+
+		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
+		{
+
+			float currentLength;
+			vec3_t currentNormal;
+
+			// copy in vertex data
+			VArray[0] = v[0];
+			VArray[1] = v[1];
+			VArray[2] = v[2];
+
+			// world texture coords
+			VArray[3] = v[3] + scroll;
+			VArray[4] = v[4];
+
+			// lightmap texture coords
+			VArray[5] = v[5];
+			VArray[6] = v[6];
+
+			//do calculations for normal, tangent and binormal
+			if( i > 1) {
+				_VectorSubtract( p->verts[ i ], p->verts[0], temp1 );
+
+				CrossProduct( temp1, v01, currentNormal );
+				currentLength = VectorLength( currentNormal );
+
+				if( currentLength > s )
+				{
+					s = currentLength;
+					_VectorCopy( currentNormal, normal );
+
+					vec = p->verts[i];
+					_VectorCopy( temp1, v02 );
+
+				}
+			}
+
+			// nothing else is needed
+			// increment pointer and counter
+			VArray += VertexSizes[VERT_MULTI_TEXTURED];
+			VertexCounter++;
+		}
+
+		VectorNormalize( normal ); //we have the largest normal
+
+		//now get the tangent
+		s = ( p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ] )
+			* ( vec[ 4 ] - p->verts[ 0 ][ 4 ] );
+		s -= ( vec[ 3 ] - p->verts[ 0 ][ 3 ] )
+			 * ( p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ] );
+		s = 1.0f / s;
+
+		VectorScale( v01, vec[ 4 ] - p->verts[ 0 ][ 4 ], temp1 );
+		VectorScale( v02, p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ], temp2 );
+		_VectorSubtract( temp1, temp2, temp3 );
+		VectorScale( temp3, s, tangent );
+		VectorNormalize( tangent ); 
+
+		//now get the binormal
+		VectorScale( v02, p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ], temp1 );
+		VectorScale( v01, vec[ 3 ] - p->verts[ 0 ][ 3 ], temp2 );
+		_VectorSubtract( temp1, temp2, temp3 );
+		VectorScale( temp3, s, binormal );
+		VectorNormalize( binormal ); 
+
+		//send these to the shader program
+		glUniform4fARB( g_location_eyePos, r_newrefdef.vieworg[0]-p->verts[0][0], r_newrefdef.vieworg[1]-p->verts[0][0], r_newrefdef.vieworg[2]-p->verts[0][0], 0.0f );
+		glUniform4fARB( g_location_tangent, tangent[0], tangent[1], tangent[2], 0.0f );
+		glUniform4fARB( g_location_normal, normal[0], normal[1], normal[2], 0.0f );
+		glUniform4fARB( g_location_binormal, binormal[0], binormal[1], binormal[2], 0.0f );
+		
 		// draw the poly
 		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 	}

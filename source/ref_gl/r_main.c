@@ -34,11 +34,39 @@ PFNGLPROGRAMLOCALPARAMETER4FARBPROC qglProgramLocalParameter4fARB = NULL;
 // jitwater ===
 //****************************************************************************
 
+//GLSL
+PFNGLCREATEPROGRAMOBJECTARBPROC		glCreateProgramObjectARB	= NULL;	
+PFNGLDELETEOBJECTARBPROC			glDeleteObjectARB			= NULL;
+PFNGLUSEPROGRAMOBJECTARBPROC		glUseProgramObjectARB		= NULL;
+PFNGLCREATESHADEROBJECTARBPROC		glCreateShaderObjectARB		= NULL;
+PFNGLSHADERSOURCEARBPROC			glShaderSourceARB			= NULL;		
+PFNGLCOMPILESHADERARBPROC			glCompileShaderARB			= NULL;
+PFNGLGETOBJECTPARAMETERIVARBPROC	glGetObjectParameterivARB	= NULL;
+PFNGLATTACHOBJECTARBPROC			glAttachObjectARB			= NULL;
+PFNGLGETINFOLOGARBPROC				glGetInfoLogARB				= NULL;
+PFNGLLINKPROGRAMARBPROC				glLinkProgramARB			= NULL;
+PFNGLGETUNIFORMLOCATIONARBPROC		glGetUniformLocationARB		= NULL;
+PFNGLUNIFORM4FARBPROC				glUniform4fARB				= NULL;
+PFNGLUNIFORM1IARBPROC				glUniform1iARB				= NULL;
+
+GLhandleARB g_programObj;
+GLhandleARB g_vertexShader;
+GLhandleARB g_fragmentShader;
+GLuint      g_location_testTexture;
+
+GLuint      g_location_eyePos;
+GLuint      g_location_tangent;
+GLuint      g_location_normal;
+GLuint      g_location_binormal;
+GLuint      g_location_heightTexture;
+GLuint		g_location_lmTexture;
+GLuint		g_heightMapID = 0;
+
 void R_Clear (void);
 
 viddef_t	vid;
 
-int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2;
+int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3;
 
 model_t		*r_worldmodel;
 
@@ -49,8 +77,10 @@ glstate_t		gl_state;
 
 cvar_t	*gl_normalmaps;
 cvar_t	*gl_specularmaps;
+cvar_t	*gl_parallaxmaps;
 cvar_t	*gl_cubemaps;
 cvar_t	*gl_arb_fragment_program; // jit
+cvar_t	*gl_glsl_shaders;
 
 entity_t	*currententity;
 model_t	*currentmodel;
@@ -1485,6 +1515,7 @@ void R_Register( void )
 	//these next two are only used when normalmaps are set to on
 	gl_specularmaps = Cvar_Get("gl_specularmaps", "1", CVAR_ARCHIVE);
 	gl_cubemaps = Cvar_Get("gl_cubemaps", "1", CVAR_ARCHIVE);
+	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE); 
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
@@ -1559,6 +1590,32 @@ qboolean R_SetMode (void)
 	return true;
 }
 
+unsigned char *readShaderFile( const char *fileName )
+{
+	char *string;
+	GLint success = 0;
+	FILE *shaderFile;
+	size_t stringLength;
+
+	shaderFile = fopen( fileName, "rb" );
+
+	if( shaderFile == NULL )
+	{
+		R_Shutdown();
+		return 0;
+	}
+
+	//Get the length of the file.
+	fseek( shaderFile, 0, SEEK_END );
+	stringLength = ftell( shaderFile );
+	fseek( shaderFile, 0, SEEK_SET );
+
+	string = malloc( stringLength + 1 );
+	fread( string, 1, stringLength, shaderFile );
+	string[ stringLength ] = '\0';
+
+	return string;
+}
 /*
 ===============
 R_Init
@@ -1571,8 +1628,13 @@ int R_Init( void *hinstance, void *hWnd )
 	int		err;
 	int		j;
 	extern float r_turbsin[256];
+	const char *shaderStrings[1];
+	unsigned char *shader_assembly;
+    int nResult;
+    char str[4096];
 
 	gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "1", CVAR_ARCHIVE); // jit
+	gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "1", CVAR_ARCHIVE); 
 
 	for ( j = 0; j < 256; j++ )
 	{
@@ -1787,6 +1849,7 @@ int R_Init( void *hinstance, void *hWnd )
 			GL_TEXTURE0 = GL_TEXTURE0_ARB;
 			GL_TEXTURE1 = GL_TEXTURE1_ARB;
 			GL_TEXTURE2 = GL_TEXTURE2_ARB;
+			GL_TEXTURE3 = GL_TEXTURE3_ARB;
 		}
 		else
 		{
@@ -1907,6 +1970,103 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf("...GL_ARB_fragment_program not found\n");
 	}
 
+	//load glsl 
+	if (!gl_glsl_shaders->value)
+	{
+		gl_state.glsl_shaders = false;
+
+	}
+    if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ))
+    {
+        glCreateProgramObjectARB  = (PFNGLCREATEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glCreateProgramObjectARB");
+        glDeleteObjectARB         = (PFNGLDELETEOBJECTARBPROC)qwglGetProcAddress("glDeleteObjectARB");
+        glUseProgramObjectARB     = (PFNGLUSEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glUseProgramObjectARB");
+        glCreateShaderObjectARB   = (PFNGLCREATESHADEROBJECTARBPROC)qwglGetProcAddress("glCreateShaderObjectARB");
+        glShaderSourceARB         = (PFNGLSHADERSOURCEARBPROC)qwglGetProcAddress("glShaderSourceARB");
+        glCompileShaderARB        = (PFNGLCOMPILESHADERARBPROC)qwglGetProcAddress("glCompileShaderARB");
+        glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)qwglGetProcAddress("glGetObjectParameterivARB");
+        glAttachObjectARB         = (PFNGLATTACHOBJECTARBPROC)qwglGetProcAddress("glAttachObjectARB");
+        glGetInfoLogARB           = (PFNGLGETINFOLOGARBPROC)qwglGetProcAddress("glGetInfoLogARB");
+        glLinkProgramARB          = (PFNGLLINKPROGRAMARBPROC)qwglGetProcAddress("glLinkProgramARB");
+        glGetUniformLocationARB   = (PFNGLGETUNIFORMLOCATIONARBPROC)qwglGetProcAddress("glGetUniformLocationARB");
+        glUniform4fARB            = (PFNGLUNIFORM4FARBPROC)qwglGetProcAddress("glUniform4fARB");
+		glUniform1iARB            = (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
+
+        if( !glCreateProgramObjectARB || !glDeleteObjectARB || !glUseProgramObjectARB ||
+            !glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB || 
+            !glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB || 
+            !glLinkProgramARB || !glGetUniformLocationARB || !glUniform4fARB ||
+			!glUniform1iARB )
+        {
+            Com_Printf("...One or more GL_ARB_shader_objects functions were not found");
+			gl_state.glsl_shaders = false;
+        }
+    }
+	else {            
+		Com_Printf("...One or more GL_ARB_shader_objects functions were not found");
+		gl_state.glsl_shaders = false;
+    }
+
+	g_programObj = glCreateProgramObjectARB();
+
+	//
+	// Vertex shader
+	//
+	shader_assembly = readShaderFile( "data1/scripts/vertex_shader.glsl" );
+
+    g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+    shaderStrings[0] = (char*)shader_assembly;
+    glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+    glCompileShaderARB( g_vertexShader);
+    glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+    if( nResult )
+        glAttachObjectARB( g_programObj, g_vertexShader );
+	else
+	{
+		Com_Printf("...Vertex Shader Compile Error");
+	}
+
+	//
+	// Fragment shader
+	//
+
+	shader_assembly = readShaderFile( "data1/scripts/fragment_shader.glsl" );
+
+    g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+    shaderStrings[0] = (char*)shader_assembly;
+    glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+    glCompileShaderARB( g_fragmentShader );
+    glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+    if( nResult )
+        glAttachObjectARB( g_programObj, g_fragmentShader );
+	else
+	{
+		Com_Printf("...Fragment Shader Compile Error");
+	}
+
+    glLinkProgramARB( g_programObj );
+    glGetObjectParameterivARB( g_programObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+    if( !nResult )
+	{
+		glGetInfoLogARB( g_programObj, sizeof(str), NULL, str );
+		Com_Printf("...Linking Error");
+	}
+
+	//
+	// Locate some parameters by name so we can set them later...
+	//
+
+	g_location_testTexture = glGetUniformLocationARB( g_programObj, "testTexture" );
+	g_location_eyePos = glGetUniformLocationARB( g_programObj, "Eye" );
+	g_location_tangent = glGetUniformLocationARB( g_programObj, "Tangent" );
+	g_location_normal = glGetUniformLocationARB( g_programObj, "Normal" );
+	g_location_binormal = glGetUniformLocationARB( g_programObj, "BiNormal" );
+    g_location_heightTexture = glGetUniformLocationARB( g_programObj, "HeightTexture" );
+	g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
+	
 	GL_SetDefaultState();
 
 	/*
@@ -1955,6 +2115,10 @@ void R_Shutdown (void)
 	** shutdown our QGL subsystem
 	*/
 	QGL_Shutdown();
+
+	glDeleteObjectARB( g_vertexShader );
+    glDeleteObjectARB( g_fragmentShader );
+    glDeleteObjectARB( g_programObj );
 }
 
 
