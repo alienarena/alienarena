@@ -1,13 +1,9 @@
 uniform sampler2D testTexture;
 uniform sampler2D HeightTexture;
 uniform sampler2D lmTexture;
-varying vec2 v_texCoord;
-
-varying vec3 EyeDir;
-
 uniform int FOG;
 
-
+varying vec3 EyeDir;
 varying float fog;
 
 void main( void )
