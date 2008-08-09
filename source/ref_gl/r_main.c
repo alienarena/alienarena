@@ -46,8 +46,9 @@ PFNGLATTACHOBJECTARBPROC			glAttachObjectARB			= NULL;
 PFNGLGETINFOLOGARBPROC				glGetInfoLogARB				= NULL;
 PFNGLLINKPROGRAMARBPROC				glLinkProgramARB			= NULL;
 PFNGLGETUNIFORMLOCATIONARBPROC		glGetUniformLocationARB		= NULL;
-PFNGLUNIFORM4FARBPROC				glUniform4fARB				= NULL;
+PFNGLUNIFORM3FARBPROC				glUniform3fARB				= NULL;
 PFNGLUNIFORM1IARBPROC				glUniform1iARB				= NULL;
+PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB		= NULL;
 
 GLhandleARB g_programObj;
 GLhandleARB g_vertexShader;
@@ -55,9 +56,7 @@ GLhandleARB g_fragmentShader;
 GLuint      g_location_testTexture;
 
 GLuint      g_location_eyePos;
-GLuint      g_location_tangent;
-GLuint      g_location_normal;
-GLuint      g_location_binormal;
+GLuint		g_tangentSpaceTransform;
 GLuint      g_location_heightTexture;
 GLuint		g_location_lmTexture;
 GLuint		g_heightMapID = 0;
@@ -1993,14 +1992,14 @@ int R_Init( void *hinstance, void *hWnd )
         glGetInfoLogARB           = (PFNGLGETINFOLOGARBPROC)qwglGetProcAddress("glGetInfoLogARB");
         glLinkProgramARB          = (PFNGLLINKPROGRAMARBPROC)qwglGetProcAddress("glLinkProgramARB");
         glGetUniformLocationARB   = (PFNGLGETUNIFORMLOCATIONARBPROC)qwglGetProcAddress("glGetUniformLocationARB");
-        glUniform4fARB            = (PFNGLUNIFORM4FARBPROC)qwglGetProcAddress("glUniform4fARB");
+        glUniform3fARB            = (PFNGLUNIFORM3FARBPROC)qwglGetProcAddress("glUniform3fARB");
 		glUniform1iARB            = (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
-
+		glUniformMatrix3fvARB	  = (PFNGLUNIFORMMATRIX3FVARBPROC)qwglGetProcAddress("glUniformMatrix3fvARB");
         if( !glCreateProgramObjectARB || !glDeleteObjectARB || !glUseProgramObjectARB ||
             !glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB || 
             !glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB || 
-            !glLinkProgramARB || !glGetUniformLocationARB || !glUniform4fARB ||
-			!glUniform1iARB )
+            !glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
+			!glUniform1iARB || !glUniformMatrix3fvARB)
         {
             Com_Printf("...One or more GL_ARB_shader_objects functions were not found");
 			gl_state.glsl_shaders = false;
@@ -2066,9 +2065,7 @@ int R_Init( void *hinstance, void *hWnd )
 
 		g_location_testTexture = glGetUniformLocationARB( g_programObj, "testTexture" );
 		g_location_eyePos = glGetUniformLocationARB( g_programObj, "Eye" );
-		g_location_tangent = glGetUniformLocationARB( g_programObj, "Tangent" );
-		g_location_normal = glGetUniformLocationARB( g_programObj, "Normal" );
-		g_location_binormal = glGetUniformLocationARB( g_programObj, "BiNormal" );
+		g_tangentSpaceTransform = glGetUniformLocationARB( g_programObj, "tangentSpaceTransform");
 		g_location_heightTexture = glGetUniformLocationARB( g_programObj, "HeightTexture" );
 		g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
 		g_location_fog = glGetUniformLocationARB( g_programObj, "FOG" );

@@ -357,10 +357,11 @@ void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll)
 
 	for (; p; p = p->chain)
 	{
-		vec3_t v01, v02, temp1, temp2, temp3;
-		vec3_t normal, binormal, tangent;
-		float s;
-		float *vec;
+		vec3_t	v01, v02, temp1, temp2, temp3;
+		vec3_t	normal, binormal, tangent;
+		float	s;
+		float	*vec;
+		float	tangentSpaceTransform[3][3];
 
 		// reset pointer and counter
 		VArray = &VArrayVerts[0];
@@ -413,6 +414,10 @@ void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll)
 
 		VectorNormalize( normal ); //we have the largest normal
 
+		tangentSpaceTransform[ 0 ][ 2 ] = normal[ 0 ];
+		tangentSpaceTransform[ 1 ][ 2 ] = normal[ 1 ];
+		tangentSpaceTransform[ 2 ][ 2 ] = normal[ 2 ];
+
 		//now get the tangent
 		s = ( p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ] )
 			* ( vec[ 4 ] - p->verts[ 0 ][ 4 ] );
@@ -426,6 +431,10 @@ void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll)
 		VectorScale( temp3, s, tangent );
 		VectorNormalize( tangent ); 
 
+		tangentSpaceTransform[ 0 ][ 0 ] = tangent[ 0 ];
+		tangentSpaceTransform[ 1 ][ 0 ] = tangent[ 1 ];
+		tangentSpaceTransform[ 2 ][ 0 ] = tangent[ 2 ];
+
 		//now get the binormal
 		VectorScale( v02, p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ], temp1 );
 		VectorScale( v01, vec[ 3 ] - p->verts[ 0 ][ 3 ], temp2 );
@@ -433,11 +442,16 @@ void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll)
 		VectorScale( temp3, s, binormal );
 		VectorNormalize( binormal ); 
 
+		tangentSpaceTransform[ 0 ][ 1 ] = binormal[ 0 ];
+		tangentSpaceTransform[ 1 ][ 1 ] = binormal[ 1 ];
+		tangentSpaceTransform[ 2 ][ 1 ] = binormal[ 2 ];
+
 		//send these to the shader program
-		glUniform4fARB( g_location_eyePos, r_newrefdef.vieworg[0]-p->verts[0][0], r_newrefdef.vieworg[1]-p->verts[0][0], r_newrefdef.vieworg[2]-p->verts[0][0], 0.0f );
-		glUniform4fARB( g_location_tangent, tangent[0], tangent[1], tangent[2], 0.0f );
-		glUniform4fARB( g_location_normal, normal[0], normal[1], normal[2], 0.0f );
-		glUniform4fARB( g_location_binormal, binormal[0], binormal[1], binormal[2], 0.0f );
+		glUniformMatrix3fvARB( g_tangentSpaceTransform,
+								1,
+								GL_FALSE,
+								tangentSpaceTransform );
+		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
 		glUniform1iARB( g_location_fog, map_fog);
 		// draw the poly
 		qglDrawArrays (GL_POLYGON, 0, VertexCounter);

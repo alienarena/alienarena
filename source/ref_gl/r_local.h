@@ -497,9 +497,7 @@ extern GLhandleARB g_fragmentShader;
 extern GLuint      g_location_testTexture;
 
 extern GLuint      g_location_eyePos;
-extern GLuint      g_location_tangent;
-extern GLuint      g_location_normal;
-extern GLuint      g_location_binormal;
+extern GLuint	   g_tangentSpaceTransform;
 extern GLuint      g_location_heightTexture;
 extern GLuint	   g_location_lmTexture;
 extern GLuint      g_heightMapID;
