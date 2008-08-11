@@ -467,6 +467,10 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				}
 
 				if(stage->normalmap) {
+
+					//this section is subject to a complete rewrite using glsl 
+					//I cannot imagine anyone running this on a card too old 
+					//for using glsl shaders.  
 				
 					vec3_t	lightvec;
 
@@ -980,14 +984,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 						calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
 
-						if (stage->lightmap)
+						if (stage->lightmap && !stage->normalmap)
 						{
 							GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 							red = lightcolor[0] * ramp;
 							green = lightcolor[1] * ramp;
 							blue = lightcolor[2] * ramp;
-								
-						
 						}
 
 						if (stage->colormap.enabled)
@@ -1216,7 +1218,6 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 	vec3_t		vectors[3];
 	vec3_t angles;
 	trace_t r_trace;
-
 
 	if (r_worldmodel ) {
 		//occulusion culling - why draw entities we cannot see?

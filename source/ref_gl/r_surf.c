@@ -28,7 +28,6 @@ static vec3_t	modelorg;		// relative to viewpoint
 msurface_t	*r_alpha_surfaces;
 msurface_t	*r_special_surfaces;
 msurface_t *r_normalsurfaces;
-msurface_t *r_specularsurfaces;
 
 #define DYNAMIC_LIGHT_WIDTH  128
 #define DYNAMIC_LIGHT_HEIGHT 128
@@ -359,8 +358,6 @@ void R_RenderBrushPoly (msurface_t *fa)
 
 	fa->normalchain = r_normalsurfaces;
 	r_normalsurfaces = fa;
-	fa->specularchain = r_specularsurfaces;
-	r_specularsurfaces = fa;
 
 	if (SurfaceIsAlphaBlended(fa))
 		qglEnable( GL_ALPHA_TEST );
@@ -660,8 +657,6 @@ static void GL_RenderLightmappedPoly( msurface_t *surf )
 	
 	surf->normalchain = r_normalsurfaces;
 	r_normalsurfaces = surf;
-	surf->specularchain = r_specularsurfaces;
-	r_specularsurfaces = surf;
 
 	for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
 	{
@@ -908,48 +903,6 @@ static void R_DrawNormalSurfaces (void)
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglDisable (GL_BLEND);
 }
-static void R_DrawSpecularSurfaces (void)
-{
-	msurface_t *surf = r_specularsurfaces;
- 
-	// nothing to draw!
-	if (!surf)
-		return;
-
-	if (!gl_normalmaps->value || !gl_specularmaps->value)
-		return;
-
-	R_InitVArrays (VERT_BUMPMAPPED);
-	R_InitNormalSurfaces();
-
-	qglActiveTextureARB (GL_TEXTURE1);
-	qglEnable (GL_TEXTURE_2D);
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	
-	qglEnable (GL_BLEND);
-	qglDepthMask (GL_FALSE);  
-	qglBlendFunc (GL_ONE, GL_ONE);
-	
-	for (; surf; surf = surf->specularchain)
-	{
-		if (SurfaceIsAlphaBlended(surf))
-			continue;
-		if(strcmp(surf->texinfo->specularMap->name, surf->texinfo->image->name))
-			qglBindTexture (GL_TEXTURE_2D, surf->texinfo->specularMap->texnum);
-		else
-			continue;
-
-		R_AddTexturedSurfToVArray (surf, 0);
-	}
-
-	R_KillNormalTMUs();
-
-	// restore original blend
-	qglDepthMask (GL_TRUE);
-	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDisable (GL_BLEND);
-}
 
 /*
 =================
@@ -973,7 +926,6 @@ void R_DrawInlineBModel (entity_t *e)
 	}
 
 	r_normalsurfaces = NULL;
-	r_specularsurfaces = NULL;
 
 	//
 	// draw texture
@@ -1354,7 +1306,6 @@ void R_DrawWorld (void)
 	memset (gl_lms.lightmap_surfaces, 0, sizeof(gl_lms.lightmap_surfaces));
 
 	r_normalsurfaces = NULL;
-	r_specularsurfaces = NULL;
 
 	R_ClearSkyBox ();
 
@@ -1421,7 +1372,6 @@ void R_DrawWorld (void)
 
 	GL_EnableMultitexture( true );
 	R_DrawNormalSurfaces ();
-	R_DrawSpecularSurfaces ();
 	GL_EnableMultitexture( false );	
 
 	R_DrawSkyBox ();

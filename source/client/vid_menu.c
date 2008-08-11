@@ -150,7 +150,6 @@ static void SetLow( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
-	Cvar_SetValue("gl_specularmaps", 0);
 	Cvar_SetValue("gl_cubemaps", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
@@ -173,7 +172,6 @@ static void SetMedium( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
-	Cvar_SetValue("gl_specularmaps", 0);
 	Cvar_SetValue("gl_cubemaps", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
@@ -197,7 +195,6 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
-	Cvar_SetValue("gl_specularmaps", 1);
 	Cvar_SetValue("gl_cubemaps", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
@@ -221,7 +218,6 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
-	Cvar_SetValue("gl_specularmaps",1);
 	Cvar_SetValue("gl_cubemaps", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
@@ -273,7 +269,6 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "_windowed_mouse", s_windowed_mouse.curvalue);
 	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
 	Cvar_SetValue("gl_normalmaps", s_normalmaps_box.curvalue);
-	Cvar_SetValue("gl_specularmaps", s_normalmaps_box.curvalue);
 	Cvar_SetValue("gl_cubemaps", s_normalmaps_box.curvalue);
 	if(s_normalmaps_box.curvalue)
 		Cvar_SetValue("r_shaders", 1); //because without shaders on this is pointless(normalmaps
