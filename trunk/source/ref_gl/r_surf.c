@@ -736,6 +736,9 @@ dynamic:
 			qglActiveTextureARB(GL_TEXTURE2);
 			qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
 			KillFlags |= KILL_TMU2_POINTER;
+
+			//check if dynamic 
+		    //will need to look at q2w methods
 				
 			R_AddParallaxLightMappedSurfToVArray (surf, scroll);
 

@@ -1552,7 +1552,7 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 		p->color = 0x74;
 	else
 		p->color = 0xe8;
-	p->scale = 10;
+	p->scale = 15;
 	p->alphavel = -50;
 	for (i=0 ; i<3 ; i++)
 	{
@@ -1585,7 +1585,7 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	p->vel[1] = sin(angle)*(6+(rand()&6));
 	p->accel[1] = -sin(angle)*100;
 
-	p->org[2] = pos[2] + 64 + (rand()%10);
+	p->org[2] = pos[2] + 56 + (rand()%10);
 	p->vel[2] = -10 + (rand()&6);
 	p->accel[2] = PARTICLE_GRAVITY*10;
 	p->alpha = 0.2;
@@ -3082,7 +3082,7 @@ void CL_PoweredEffects (vec3_t origin)
 		VectorClear (p->accel);
 
 		p->type = PARTICLE_FLARE;
-		p->texnum = r_flagtexture->texnum;
+		p->texnum = r_logotexture->texnum;
 		p->blendsrc = GL_ONE;
 		p->blenddst = GL_ONE;
 		p->scale = 2;
