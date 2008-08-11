@@ -76,7 +76,6 @@ glconfig_t		gl_config;
 glstate_t		gl_state;
 
 cvar_t	*gl_normalmaps;
-cvar_t	*gl_specularmaps;
 cvar_t	*gl_parallaxmaps;
 cvar_t	*gl_cubemaps;
 cvar_t	*gl_arb_fragment_program; // jit
@@ -1512,8 +1511,6 @@ void R_Register( void )
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
 
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
-	//these next two are only used when normalmaps are set to on
-	gl_specularmaps = Cvar_Get("gl_specularmaps", "1", CVAR_ARCHIVE);
 	gl_cubemaps = Cvar_Get("gl_cubemaps", "1", CVAR_ARCHIVE);
 	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE); 
 

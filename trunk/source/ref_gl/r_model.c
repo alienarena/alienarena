@@ -663,18 +663,6 @@ void Mod_LoadTexinfo (lump_t *l)
 		strcpy(name, sv_name);
 		if( ( strlen( name ) + 8 ) <= MAX_QPATH )
 		{
-			strcat( name, "_sm.tga" );
-			out->specularMap = GL_FindImage( name, it_bump );
-			if( out->specularMap == NULL ) 
-				out->specularMap = out->image; 
-		
-		}
-		else
-			out->specularMap = out->image; 
-
-		strcpy(name, sv_name);
-		if( ( strlen( name ) + 8 ) <= MAX_QPATH )
-		{
 			strcat( name, "_hm.tga" );
 			out->heightMap = GL_FindImage( name, it_bump );
 			if( out->heightMap == NULL ) 
