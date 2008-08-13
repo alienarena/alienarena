@@ -725,7 +725,7 @@ dynamic:
 			GL_MBind( GL_TEXTURE1, surf->texinfo->heightMap->texnum);
 			glUniform1iARB( g_location_heightTexture, 1); 
 			
-			//we must eventuall fix what is going on with the builtin bind commands
+			//we must eventually fix what is going on with the builtin bind commands
 			//which are limited to just 2 tmus
 			glUniform1iARB( g_location_lmTexture, 2);
 			qglActiveTextureARB(GL_TEXTURE2);

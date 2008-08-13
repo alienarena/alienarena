@@ -2,7 +2,10 @@ players/martianenforcer/gamara
 {
 	{
 		map players/martianenforcer/gamara.tga
-		alphamask
+	}
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
 	}
 	{
 		map gfx/gamarafx.tga

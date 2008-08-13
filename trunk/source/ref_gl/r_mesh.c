@@ -519,7 +519,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				}
 				else {
 					if(stage->next) //increase intensity of lighting to cut through normals a bit
-						if(stage->next->normalmap)
+						if(stage->next->normalmap && gl_normalmaps->value)
 							ramp = 2.0;
 					R_InitVArrays (VERT_COLOURED_TEXTURED);
 				}
@@ -940,7 +940,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 				}
 				else {
 					if(stage->next) //increase intensity of lighting to cut through normals a bit
-						if(stage->next->normalmap)
+						if(stage->next->normalmap && gl_normalmaps->value)
 							ramp = 2.0;
 					R_InitVArrays (VERT_COLOURED_TEXTURED);
 				}
