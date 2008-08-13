@@ -369,6 +369,7 @@ void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll)
 
 		_VectorSubtract( p->verts[ 1 ], p->verts[0], v01 );
 		vec = p->verts[0];
+		_VectorCopy(surf->plane->normal, normal); //failsafe?
 
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
