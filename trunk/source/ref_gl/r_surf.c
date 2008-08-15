@@ -732,6 +732,7 @@ dynamic:
 			qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
 			KillFlags |= KILL_TMU2_POINTER;
 
+			glUniform1iARB( g_location_normal, 0);
 			//check if dynamic 
 		    //will need to look at q2w methods
 				

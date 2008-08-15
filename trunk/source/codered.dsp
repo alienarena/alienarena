@@ -362,10 +362,6 @@ SOURCE=.\client\x86.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl;fi;fd"
 # Begin Source File
 
-SOURCE=.\client\anorms.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\ref_gl\anorms.h
 # End Source File
 # Begin Source File
