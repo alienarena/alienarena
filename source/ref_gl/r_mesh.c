@@ -467,10 +467,6 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				}
 
 				if(stage->normalmap) {
-
-					//this section is subject to a complete rewrite using glsl 
-					//I cannot imagine anyone running this on a card too old 
-					//for using glsl shaders.  
 				
 					vec3_t	lightvec;
 
@@ -491,13 +487,16 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 					//set up a tangent lightspace vector that is sane to begin with
 					//these values were determined by printing out values and finding
-					//what looked the best for the normalmaps we currently have.
-					lightvec[0] = 547.0;
-					lightvec[1] = -126.0;
+					//what values looked right. (basically a light straight down)
+					lightvec[0] = 540;
+					lightvec[1] = -120;
 
 					//rotate so that overall light intensity influences the depth of the normals
-					lightvec[2] = 218.0*VectorLength(shadelight);
-
+					//this is rather cheap, but far less expensive than traversing world lights
+					//or a lightgrid, and the effect is subtle, but gives a slightly enhanced
+					//realism to the effect
+					lightvec[2] = 220*min(max(VectorLength(shadelight), .5), 1);
+									
 					//translate to hardware so we don't have to do each vertex
 					//credit to Mike Hiney for pointing this procedure out
 					qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);
@@ -893,7 +892,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 
 				if(stage->normalmap) {
 
-					vec3_t	lightvec;
+						vec3_t	lightvec;
 
 					qglDepthMask (GL_FALSE);
 			 		qglEnable (GL_BLEND);
@@ -912,13 +911,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 
 					//set up a tangent lightspace vector that is sane to begin with
 					//these values were determined by printing out values and finding
-					//what looked the best for the normalmaps we currently have.
-					lightvec[0] = 547.0;
-					lightvec[1] = -126.0;
+					//what values looked right. (basically a light straight down)
+					lightvec[0] = 540;
+					lightvec[1] = -120;
 
 					//rotate so that overall light intensity influences the depth of the normals
-					lightvec[2] = 218.0*VectorLength(shadelight);
-					
+					lightvec[2] = 220*min(max(VectorLength(shadelight), .5), 1);
+								
 					//translate to hardware so we don't have to do each vertex
 					//credit to Mike Hiney for pointing this procedure out
 					qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);

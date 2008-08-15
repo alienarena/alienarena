@@ -359,7 +359,7 @@ void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll)
 	{
 		vec3_t	v01, v02, temp1, temp2, temp3;
 		vec3_t	normal, binormal, tangent;
-		float	s;
+		float	s = 0;
 		float	*vec;
 		float	tangentSpaceTransform[3][3];
 

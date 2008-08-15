@@ -27,3 +27,85 @@ players/rustbot/atlas
 		alphamask
 	}
 }
+players/martianenforcer/weapon
+{
+	{
+		map models/weapons/v_hyperb/skin.tga
+	}
+	{	
+		map models/weapons/v_hyperb/skin_normal.tga
+		normalmap
+	}
+	{
+		map gfx/disruptormask.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+		
+}
+players/martiancyborg/weapon
+{
+	{
+		map models/weapons/v_hyperb/skin.tga
+	}
+	{	
+		map models/weapons/v_hyperb/skin_normal.tga
+		normalmap
+	}
+	{
+		map gfx/disruptormask.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+		
+}
+players/lauren/weapon
+{
+	{
+		map models/weapons/v_blast/skin.tga
+	}
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+	}
+	{
+		map gfx/blasterfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.01 .8
+		nolightmap
+	}
+}
+players/enforcer/weapon
+{
+	{
+		map models/weapons/v_blast/skin.tga
+	}
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+	}
+	{
+		map gfx/blasterfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.01 .8
+		nolightmap
+	}
+}
+players/cybergirl/weapon
+{
+	{
+		map models/weapons/v_blast/skin.tga
+	}
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+	}
+	{
+		map gfx/blasterfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.01 .8
+		nolightmap
+	}
+}
