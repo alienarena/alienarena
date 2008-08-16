@@ -1147,7 +1147,7 @@ void CL_DumpPackets (void)
 {
 	while (NET_GetPacket (NS_CLIENT, &net_from, &net_message))
 	{
-		Com_Printf ("dumnping a packet\n");
+		Com_Printf ("dumping a packet\n");
 	}
 }
 
