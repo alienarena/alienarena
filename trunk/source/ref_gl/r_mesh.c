@@ -469,6 +469,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				if(stage->normalmap) {
 				
 					vec3_t	lightvec;
+					float	shadefactor;
 
 					qglDepthMask (GL_FALSE);
 			 		qglEnable (GL_BLEND);
@@ -495,7 +496,14 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					//this is rather cheap, but far less expensive than traversing world lights
 					//or a lightgrid, and the effect is subtle, but gives a slightly enhanced
 					//realism to the effect
-					lightvec[2] = 220*min(max(VectorLength(shadelight), .5), 1);
+					//caveman code due to linux lack of min/max funcs
+					shadefactor = VectorLength(shadelight);
+					if(shadefactor > 1)
+						shadefactor = 1;
+					if(shadefactor < 0.5)
+						shadefactor = 0.5;
+
+					lightvec[2] = 220*shadefactor;
 									
 					//translate to hardware so we don't have to do each vertex
 					//credit to Mike Hiney for pointing this procedure out
@@ -892,7 +900,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 
 				if(stage->normalmap) {
 
-						vec3_t	lightvec;
+					vec3_t	lightvec;
+					float	shadefactor;
 
 					qglDepthMask (GL_FALSE);
 			 		qglEnable (GL_BLEND);
@@ -916,7 +925,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 					lightvec[1] = -120;
 
 					//rotate so that overall light intensity influences the depth of the normals
-					lightvec[2] = 220*min(max(VectorLength(shadelight), .5), 1);
+					shadefactor = VectorLength(shadelight);
+					if(shadefactor > 1)
+						shadefactor = 1;
+					if(shadefactor < 0.5)
+						shadefactor = 0.5;
+
+					lightvec[2] = 220*shadefactor;
 								
 					//translate to hardware so we don't have to do each vertex
 					//credit to Mike Hiney for pointing this procedure out
