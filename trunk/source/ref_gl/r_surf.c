@@ -514,7 +514,7 @@ void R_DrawAlphaSurfaces (void)
 				EmitWaterPolys (s);
 		}
 		else {
-			if(r_shaders->value) {
+			if(r_shaders->value && !s->texinfo->flags & SURF_FLOWING) {
 				rs_shader = (rscript_t *)s->texinfo->image->script;
 				if(rs_shader) {
 

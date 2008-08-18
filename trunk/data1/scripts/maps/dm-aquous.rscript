@@ -16,3 +16,9 @@ textures/arena7/light10
 		lensflare
 	}
 }
+textures/arena3/water
+{
+	{
+		map gfx/dmaquousreflection.tga
+	}
+}
