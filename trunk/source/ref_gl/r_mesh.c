@@ -469,8 +469,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				if(stage->normalmap) {
 				
 					vec3_t	lightvec;
-					float	shadefactor;
-
+				
 					qglDepthMask (GL_FALSE);
 			 		qglEnable (GL_BLEND);
 
@@ -486,28 +485,19 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					qglMatrixMode (GL_TEXTURE);
 					qglLoadIdentity ();
 
-					//set up a tangent lightspace vector that is sane to begin with
-					//these values were determined by printing out values and finding
-					//what values looked right. (basically a light straight down)
-					lightvec[0] = 540;
-					lightvec[1] = -120;
+					//set up a tangent lightspace vector
+					lightvec[0] = 270;
+					lightvec[1] = -60;
+					lightvec[2] = 60;
 
-					//rotate so that overall light intensity influences the depth of the normals
-					//this is rather cheap, but far less expensive than traversing world lights
-					//or a lightgrid, and the effect is subtle, but gives a slightly enhanced
-					//realism to the effect
-					//caveman code due to linux lack of min/max funcs
-					shadefactor = VectorLength(shadelight);
-					if(shadefactor > 1)
-						shadefactor = 1;
-					if(shadefactor < 0.5)
-						shadefactor = 0.5;
+					qglRotatef ( currententity->angles[1],  0, 0, 1);
+					//qglRotatef ( currententity->angles[0],  0, 1, 0);
+					qglRotatef ( currententity->angles[2],  1, 0, 0);
 
-					lightvec[2] = 220*shadefactor;
-									
-					//translate to hardware so we don't have to do each vertex
-					//credit to Mike Hiney for pointing this procedure out
-					qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);
+					if(currententity->flags & RF_WEAPONMODEL )
+						qglTranslatef(lightdir[0], lightdir[1], lightdir[2]);
+					else
+						qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);
 
 					qglScalef (-1, -1, -1);
 
@@ -898,11 +888,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 					GLSTATE_DISABLE_ALPHATEST
 				}
 
-				if(stage->normalmap) {
-
+					if(stage->normalmap) {
+				
 					vec3_t	lightvec;
-					float	shadefactor;
-
+				
 					qglDepthMask (GL_FALSE);
 			 		qglEnable (GL_BLEND);
 
@@ -918,23 +907,15 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 					qglMatrixMode (GL_TEXTURE);
 					qglLoadIdentity ();
 
-					//set up a tangent lightspace vector that is sane to begin with
-					//these values were determined by printing out values and finding
-					//what values looked right. (basically a light straight down)
-					lightvec[0] = 540;
-					lightvec[1] = -120;
+					//set up a tangent lightspace vector
+					lightvec[0] = 270;
+					lightvec[1] = -60;
+					lightvec[2] = 60;
 
-					//rotate so that overall light intensity influences the depth of the normals
-					shadefactor = VectorLength(shadelight);
-					if(shadefactor > 1)
-						shadefactor = 1;
-					if(shadefactor < 0.5)
-						shadefactor = 0.5;
-
-					lightvec[2] = 220*shadefactor;
-								
-					//translate to hardware so we don't have to do each vertex
-					//credit to Mike Hiney for pointing this procedure out
+					qglRotatef ( currententity->angles[1],  0, 0, 1);
+					//qglRotatef ( currententity->angles[0],  0, 1, 0);
+					qglRotatef ( currententity->angles[2],  1, 0, 0);
+									
 					qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);
 
 					qglScalef (-1, -1, -1);
@@ -1236,7 +1217,7 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 	if (r_worldmodel ) {
 		//occulusion culling - why draw entities we cannot see?
 	
-		r_trace = CM_BoxTrace(r_origin, e->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
+		r_trace = CM_BoxTrace(r_origin, e->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		
 		if(r_trace.fraction != 1.0)
 			return true;
