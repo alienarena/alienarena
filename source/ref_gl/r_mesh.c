@@ -62,41 +62,6 @@ float	r_avertexnormal_dots[SHADEDOT_QUANT][256] =
 
 float	*shadedots = r_avertexnormal_dots[0];
 
-void GL_LerpVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float move[3], float frontv[3], float backv[3] )
-{
-	int i;
-	int shellscale;
-
-	//PMM -- added RF_SHELL_DOUBLE, RF_SHELL_HALF_DAM
-	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) )
-	{
-
-		if(currententity->flags & RF_WEAPONMODEL)
-			//change scale
-			shellscale = .1;
-		else
-			shellscale = 1;
-
-		for (i=0 ; i < nverts; i++, v++, ov++, lerp+=4 )
-		{
-			float *normal = r_avertexnormals[verts[i].lightnormalindex];
-
-			lerp[0] = move[0] + ov->v[0]*backv[0] + v->v[0]*frontv[0] + normal[0] * POWERSUIT_SCALE * shellscale;;
-			lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1] + normal[1] * POWERSUIT_SCALE * shellscale;;
-			lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2] + normal[2] * POWERSUIT_SCALE * shellscale;;
-		}
-	}
-	else
-	{
-		for (i=0 ; i < nverts; i++, v++, ov++, lerp+=4)
-		{
-			lerp[0] = move[0] + ov->v[0]*backv[0] + v->v[0]*frontv[0];
-			lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1];
-			lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2];
-		}
-	}
-
-}
 /*
 =============
 GL_VlightAliasModel
@@ -200,7 +165,6 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	rs_stage_t *stage = NULL;
 	int		va = 0;
 	float	mode;
-	float	*lerp;
 	vec3_t lightcolor;
 
 	float	ramp = 1.0;
@@ -257,10 +221,6 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 		backv[i] = backlerp*oldframe->scale[i];
 	}
 
-	lerp = s_lerped[0];
-
-	GL_LerpVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
-
 	if(currententity->flags & RF_VIEWERMODEL)
 		return;
 
@@ -275,6 +235,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 		R_InitVArrays (VERT_COLOURED_TEXTURED);
 		while (1)
 		{
+			float shellscale;
 			// get the vertex count and primitive type
 			count = *order++;
 			va=0;
@@ -294,10 +255,16 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 			{
 				// texture coordinates come from the draw list
 				index_xyz = order[2];
-	
-				VArray[0] = s_lerped[index_xyz][0];
-				VArray[1] = s_lerped[index_xyz][1];
-				VArray[2] = s_lerped[index_xyz][2];
+ 
+				if(currententity->flags & RF_WEAPONMODEL)
+					//change scale
+					shellscale = .1;
+				else
+					shellscale = 1;
+				
+				VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * POWERSUIT_SCALE * shellscale;;
+				VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * POWERSUIT_SCALE * shellscale;;
+				VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * POWERSUIT_SCALE * shellscale;;
 
 				VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
 				VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
@@ -348,10 +315,10 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				index_xyz = order[2];
 				
 				GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
-
-				VArray[0] = s_lerped[index_xyz][0];
-				VArray[1] = s_lerped[index_xyz][1];
-				VArray[2] = s_lerped[index_xyz][2];
+				
+				VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
+				VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
+				VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
 
 				VArray[3] = ((float *) order)[0];
 				VArray[4] = ((float *) order)[1];
@@ -527,8 +494,12 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					float ot = ((float *)order)[1];
 					vec3_t normal;
 					int k;
-
+					
 					index_xyz = order[2];
+
+					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
+					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
+					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
 
 					for (k=0; k<3; k++)
 					normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
@@ -548,11 +519,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					}
 
 					RS_SetTexcoords2D(stage, &os, &ot);
-						
-					VArray[0] = s_lerped[index_xyz][0];
-					VArray[1] = s_lerped[index_xyz][1];
-					VArray[2] = s_lerped[index_xyz][2];
-				
+							
 					VArray[3] = os;
 					VArray[4] = ot;
 			
