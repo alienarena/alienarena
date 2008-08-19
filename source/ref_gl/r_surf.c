@@ -509,12 +509,12 @@ void R_DrawAlphaSurfaces (void)
 					}
 				}
 				EmitWaterPolys_original (s, distFlag, texnum, scaleX, scaleY);
-			}
+			} 
 			else
 				EmitWaterPolys (s);
 		}
 		else {
-			if(r_shaders->value && !s->texinfo->flags & SURF_FLOWING) {
+			if(r_shaders->value && !(s->texinfo->flags & SURF_FLOWING)) {
 				rs_shader = (rscript_t *)s->texinfo->image->script;
 				if(rs_shader) {
 
