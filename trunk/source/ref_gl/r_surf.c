@@ -778,9 +778,9 @@ extern GLuint normalisationCubeMap;
 static void R_InitNormalSurfaces ()
 {
 	dlight_t	*dl;
-	int			lnum;
-	vec3_t		lightAdd, angle;
-	float		add;
+	int			lnum, sv_lnum = 0;	
+	float		add, brightest = 0;
+	vec3_t		lightVec;
 
 	qglActiveTextureARB (GL_TEXTURE0);
 	qglDisable (GL_TEXTURE_2D);
@@ -796,32 +796,35 @@ static void R_InitNormalSurfaces ()
 	// now reposition so that the bright spot is center screen, and up a little 
 	qglRotatef (-45, 1, 0, 0);
 	qglRotatef (-45, 0, 0, 1);
-	
-	// rotate by viewangles  
+
+	//rotate by view angles(area in front of view brightens up, lower depth)
 	qglRotatef (-r_newrefdef.viewangles[2], 1, 0, 0);
 	qglRotatef (-r_newrefdef.viewangles[0], 0, 1, 0);
 	qglRotatef (-r_newrefdef.viewangles[1], 0, 0, 1);
 
 	//now rotate according to dynamic lights
-	VectorClear(lightAdd);
 	dl = r_newrefdef.dlights;
 	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
 	{
-
-		VectorSubtract (r_newrefdef.vieworg, dl->origin, angle);
-		add = sqrt(dl->intensity - VectorLength(angle));
-		VectorNormalize(angle);
-		if (add > 0)
+		VectorSubtract (r_origin, dl->origin, lightVec);
+		add = dl->intensity - VectorLength(lightVec)/10;
+		if (add > brightest) //only bother with lights close by
 		{
-			if(add > 10) //keep it from being excessively rotated
-				add = 10;
-			VectorScale(angle, add, angle);
-			VectorAdd (lightAdd, angle, lightAdd);
+			brightest = add;
+			sv_lnum = lnum; //remember the position of most influencial light
 		}
 	}
-	qglRotatef (-lightAdd[2], 1, 0, 0);
-	qglRotatef (-lightAdd[0], 0, 1, 0);
-	qglRotatef (-lightAdd[1], 0, 0, 1);
+	if(brightest > 0) { //we have a light
+		dl = r_newrefdef.dlights;
+		dl += sv_lnum; //our most influential light
+		VectorSubtract(dl->origin, r_origin, lightVec);
+		VectorNormalize(lightVec);
+		VectorScale(lightVec, brightest/20, lightVec);
+
+		qglRotatef (lightVec[2], 1, 0, 0);
+		qglRotatef (lightVec[0], 0, 1, 0);
+		qglRotatef (lightVec[1], 0, 0, 1);
+	}
 
 	// the next 2 statements will move the cmstr calculations into hardware so that we don;t
 	// have to evaluate them once per vert...

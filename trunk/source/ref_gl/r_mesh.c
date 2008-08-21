@@ -115,6 +115,17 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
     }
 }
 
+void GL_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float move[3], float frontv[3], float backv[3] )
+{
+    int i;
+    for (i=0 ; i < nverts; i++, v++, ov++, lerp+=4)
+        {
+            lerp[0] = move[0] + ov->v[0]*backv[0] + v->v[0]*frontv[0];
+            lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1];
+            lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2];
+        }
+}
+
 /*
 =============
 GL_DrawAliasFrameLerp
@@ -166,7 +177,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	int		va = 0;
 	float	mode;
 	vec3_t lightcolor;
-
+	float   *lerp;
 	float	ramp = 1.0;
 
 	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
@@ -221,8 +232,11 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 		backv[i] = backlerp*oldframe->scale[i];
 	}
 
-	if(currententity->flags & RF_VIEWERMODEL)
+	if(currententity->flags & RF_VIEWERMODEL) { //lerp the vertices for self shadows, and leave
+		lerp = s_lerped[0];
+		GL_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
 		return;
+	}
 
 	VectorSubtract(currententity->origin, lightspot, lightdir);
 		VectorNormalize ( lightdir );
@@ -648,9 +662,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 	// PMM - added double shell
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) )
 		GL_Bind(r_shelltexture->texnum);  // add this line
-
-	if(currententity->flags & RF_VIEWERMODEL)
-		return;
 
 	VectorSubtract(currententity->origin, lightspot, lightdir);
 		VectorNormalize ( lightdir );
