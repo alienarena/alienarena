@@ -977,7 +977,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	bomb->think = G_FreeEdict;
 	bomb->classname = "bomb";
 	gi.linkentity (bomb);
-	T_RadiusDamage(bomb, self, 100, NULL, 150, MOD_VAPORIZER, 7); //ridiculously powerful!
+	T_RadiusDamage(bomb, self, 150, NULL, 150, MOD_VAPORIZER, 7); //ridiculously powerful!
 	G_FreeEdict (bomb);
 
 	if (self->client)
