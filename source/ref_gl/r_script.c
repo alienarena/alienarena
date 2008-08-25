@@ -1512,13 +1512,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 					{
 						float red=255, green=255, blue=255;
 
-						if (stage->lightmap && p->vertexlight)
-						{
-							red = p->vertexlight[i*3+0]/255.0f;
-							green = p->vertexlight[i*3+1]/255.0f;
-							blue = p->vertexlight[i*3+2]/255.0f;
-						}
-						
 						if (stage->colormap.enabled)
 						{
 							red *= stage->colormap.red/255.0f;

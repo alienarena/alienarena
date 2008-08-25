@@ -634,6 +634,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr)
 	vec3_t lightcolor;
 	float ramp = 1.0;
 
+	if(currententity->flags & RF_VIEWERMODEL) { 
+		return;
+	}
+
 	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
 	verts = v = frame->verts;
 	
