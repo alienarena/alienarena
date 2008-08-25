@@ -161,11 +161,8 @@ typedef struct glpoly_s
 	int		numverts;
 	float	verts[4][VERTEXSIZE];	// variable sized (xyz s1t1 s2t2)
 	int		flags;			// for SURF_UNDERWATER
-	qboolean	vertexlightset;
-	byte		*vertexlightbase;
-	byte		*vertexlight;
-	vec3_t		center;
 
+	vec3_t		center;
 } glpoly_t;
 
 typedef struct msurface_s
