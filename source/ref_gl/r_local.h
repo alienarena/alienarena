@@ -50,6 +50,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // fall over
 #define	ROLL	2
 
+#define	DLIGHT_CUTOFF	64
+
 extern	viddef_t	vid;
 
 #include "r_image.h"
@@ -176,7 +178,6 @@ extern cvar_t	*gl_ext_mtexcombine;
 
 // Vic - end
 extern cvar_t	*gl_normalmaps;
-extern cvar_t	*gl_cubemaps;
 extern cvar_t	*gl_parallaxmaps;
 
 extern	cvar_t	*r_shaders;
@@ -478,7 +479,8 @@ extern float *VArray;
 #define KILL_TMU0_POINTER	1
 #define KILL_TMU1_POINTER	2
 #define KILL_TMU2_POINTER	3
-#define KILL_RGBA_POINTER	4
+#define KILL_TMU3_POINTER	4
+#define KILL_RGBA_POINTER	5
 
 // vertex array subsystem
 void R_InitVArrays (int varraytype);
@@ -486,7 +488,7 @@ void R_KillVArrays (void);
 void R_InitQuadVarrays(void);
 void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
-void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll);
+void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean lightmap);
 void R_KillNormalTMUs(void);
 
 //glsl
@@ -499,11 +501,15 @@ extern GLuint      g_location_eyePos;
 extern GLuint	   g_tangentSpaceTransform;
 extern GLuint      g_location_heightTexture;
 extern GLuint	   g_location_lmTexture;
+extern GLuint	   g_location_normalTexture;
 extern GLuint      g_heightMapID;
 extern GLuint	   g_location_fog;
-extern GLuint	   g_location_normal;
+extern GLuint	   g_location_parallax;
+extern GLuint	   g_location_dynamic;
 extern GLuint	   g_location_surfaceColor;
 extern GLuint	   g_location_lightPosition;
+extern GLuint	   g_location_lightColour;
+extern GLuint	   g_location_lightCutoffSquared;
 extern GLuint	   g_location_tangent;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 

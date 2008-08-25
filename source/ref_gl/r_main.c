@@ -48,6 +48,7 @@ PFNGLLINKPROGRAMARBPROC				glLinkProgramARB			= NULL;
 PFNGLGETUNIFORMLOCATIONARBPROC		glGetUniformLocationARB		= NULL;
 PFNGLUNIFORM3FARBPROC				glUniform3fARB				= NULL;
 PFNGLUNIFORM1IARBPROC				glUniform1iARB				= NULL;
+PFNGLUNIFORM1FARBPROC				glUniform1fARB				= NULL;
 PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB		= NULL;
 
 GLhandleARB g_programObj;
@@ -59,11 +60,15 @@ GLuint      g_location_eyePos;
 GLuint		g_tangentSpaceTransform;
 GLuint      g_location_heightTexture;
 GLuint		g_location_lmTexture;
+GLuint		g_location_normalTexture;
 GLuint		g_heightMapID = 0;
 GLuint		g_location_fog;
-GLuint	    g_location_normal;
+GLuint	    g_location_parallax;
+GLuint		g_location_dynamic;
 GLuint	    g_location_surfaceColor;
 GLuint	    g_location_lightPosition;
+GLuint		g_location_lightColour;
+GLuint	    g_location_lightCutoffSquared;
 GLuint	    g_location_tangent;
 
 void R_Clear (void);
@@ -81,7 +86,6 @@ glstate_t		gl_state;
 
 cvar_t	*gl_normalmaps;
 cvar_t	*gl_parallaxmaps;
-cvar_t	*gl_cubemaps;
 cvar_t	*gl_arb_fragment_program; // jit
 cvar_t	*gl_glsl_shaders;
 
@@ -1515,7 +1519,6 @@ void R_Register( void )
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
 
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
-	gl_cubemaps = Cvar_Get("gl_cubemaps", "1", CVAR_ARCHIVE);
 	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE); 
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
@@ -1635,7 +1638,7 @@ int R_Init( void *hinstance, void *hWnd )
     char str[4096];
 
 	gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "1", CVAR_ARCHIVE); // jit
-	gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "1", CVAR_ARCHIVE); 
+	gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE); 
 
 	for ( j = 0; j < 256; j++ )
 	{
@@ -1995,12 +1998,13 @@ int R_Init( void *hinstance, void *hWnd )
         glGetUniformLocationARB   = (PFNGLGETUNIFORMLOCATIONARBPROC)qwglGetProcAddress("glGetUniformLocationARB");
         glUniform3fARB            = (PFNGLUNIFORM3FARBPROC)qwglGetProcAddress("glUniform3fARB");
 		glUniform1iARB            = (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
+		glUniform1fARB			  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fARB");
 		glUniformMatrix3fvARB	  = (PFNGLUNIFORMMATRIX3FVARBPROC)qwglGetProcAddress("glUniformMatrix3fvARB");
         if( !glCreateProgramObjectARB || !glDeleteObjectARB || !glUseProgramObjectARB ||
             !glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB || 
             !glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB || 
             !glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
-			!glUniform1iARB || !glUniformMatrix3fvARB)
+			!glUniform1iARB || !glUniform1fARB || !glUniformMatrix3fvARB)
         {
             Com_Printf("...One or more GL_ARB_shader_objects functions were not found");
 			gl_state.glsl_shaders = false;
@@ -2069,10 +2073,14 @@ int R_Init( void *hinstance, void *hWnd )
 		g_tangentSpaceTransform = glGetUniformLocationARB( g_programObj, "tangentSpaceTransform");
 		g_location_heightTexture = glGetUniformLocationARB( g_programObj, "HeightTexture" );
 		g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
+		g_location_normalTexture = glGetUniformLocationARB( g_programObj, "NormalTexture" );
 		g_location_fog = glGetUniformLocationARB( g_programObj, "FOG" );
-		g_location_normal = glGetUniformLocationARB( g_programObj, "isNormal" );
+		g_location_parallax = glGetUniformLocationARB( g_programObj, "PARALLAX" );
+		g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
 		g_location_tangent = glGetUniformLocationARB( g_programObj, "sTangent" );
 		g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
+		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
+		g_location_lightCutoffSquared = glGetUniformLocationARB( g_programObj, "lightCutoffSquared" );
 		g_location_surfaceColor = glGetUniformLocationARB( g_programObj, "surfaceColor" );
 	}
 	

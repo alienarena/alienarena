@@ -431,6 +431,7 @@ typedef void (APIENTRY * PFNGLLINKPROGRAMARBPROC) (GLhandleARB programObj);
 typedef GLint (APIENTRY * PFNGLGETUNIFORMLOCATIONARBPROC) (GLhandleARB programObj, const GLcharARB *name);
 typedef void (APIENTRY * PFNGLUNIFORM3FARBPROC) (GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
 typedef void (APIENTRY * PFNGLUNIFORM1IARBPROC) (GLint location, GLint v0);
+typedef void (APIENTRY * PFNGLUNIFORM1FARBPROC) (GLint location, GLfloat v0);
 typedef void (APIENTRY * PFNGLUNIFORMMATRIX3FVARBPROC)(GLint location, GLsizei count, GLboolean transpose, GLfloat [3][3]); 
 #endif
 
@@ -624,5 +625,6 @@ extern	PFNGLLINKPROGRAMARBPROC				glLinkProgramARB;
 extern	PFNGLGETUNIFORMLOCATIONARBPROC		glGetUniformLocationARB;
 extern	PFNGLUNIFORM3FARBPROC				glUniform3fARB;
 extern	PFNGLUNIFORM1IARBPROC				glUniform1iARB;
+extern  PFNGLUNIFORM1FARBPROC				glUniform1fARB;
 extern  PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB;
 #endif

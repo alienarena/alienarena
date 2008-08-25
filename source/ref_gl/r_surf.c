@@ -675,7 +675,7 @@ dynamic:
 		}
 	}
 
-	if ( is_dynamic )
+	if ( is_dynamic && !gl_state.glsl_shaders ) 
 	{
 		unsigned	temp[DYNAMIC_LIGHT_WIDTH*DYNAMIC_LIGHT_HEIGHT];
 		int			smax, tmax;
@@ -712,8 +712,44 @@ dynamic:
 			scroll = -64.0;
 	}
 
-	if(gl_parallaxmaps->value && gl_state.glsl_shaders) {
-		if(strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) {
+	if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
+		dlight_t	*dl;
+		int			lnum, sv_lnum = 0;	
+		float		add, brightest = 0;
+		vec3_t		lightVec;
+		float		lightCutoffSquared;
+
+		if(is_dynamic) {
+
+			dl = r_newrefdef.dlights;
+			for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
+			{
+				VectorSubtract (r_origin, dl->origin, lightVec);
+				add = dl->intensity - VectorLength(lightVec)/10;
+				if (add > brightest) //only bother with lights close by
+				{
+					brightest = add;
+					sv_lnum = lnum; //remember the position of most influencial light
+				}
+			}
+			if(brightest > 0) { //we have a light
+				dl = r_newrefdef.dlights;
+				dl += sv_lnum; //our most influential light
+				VectorSubtract(dl->origin, r_origin, lightVec);
+				VectorNormalize(lightVec);
+				VectorScale(lightVec, brightest/20, lightVec);
+			
+				lightCutoffSquared = ( dl->intensity - DLIGHT_CUTOFF );
+
+				if( lightCutoffSquared <= 0.0f ) 
+					lightCutoffSquared = 0.0f;
+
+				lightCutoffSquared *= 2.0f;
+				lightCutoffSquared *= lightCutoffSquared;
+			}
+		}
+
+		if(gl_parallaxmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) {
 		
 			R_InitVArrays (VERT_MULTI_TEXTURED);
 
@@ -725,27 +761,73 @@ dynamic:
 			GL_MBind( GL_TEXTURE1, surf->texinfo->heightMap->texnum);
 			glUniform1iARB( g_location_heightTexture, 1); 
 			
-			//we must eventually fix what is going on with the builtin bind commands
-			//which are limited to just 2 tmus
 			glUniform1iARB( g_location_lmTexture, 2);
 			qglActiveTextureARB(GL_TEXTURE2);
 			qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
 			KillFlags |= KILL_TMU2_POINTER;
 
-			glUniform1iARB( g_location_normal, 0);
-			//check if dynamic 
-		    //will need to look at q2w methods
-				
-			R_AddParallaxLightMappedSurfToVArray (surf, scroll);
+			if(is_dynamic && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
+						
+				if(brightest > 0) {
+					
+					glUniform1iARB( g_location_normalTexture, 3);
+					qglActiveTextureARB(GL_TEXTURE3);
+					qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
+					KillFlags |= KILL_TMU3_POINTER;
+					
+					glUniform3fARB( g_location_lightPosition, dl->origin[0], dl->origin[1], dl->origin[2]);
+					glUniform3fARB( g_location_lightColour, dl->color[0], dl->color[1], dl->color[2]);
+
+					glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
+					
+					glUniform1iARB( g_location_dynamic, 1);
+				}
+				else
+					glUniform1iARB( g_location_dynamic, 0);
+			}
+			else 
+				glUniform1iARB( g_location_dynamic, 0);
+		
+			glUniform1iARB( g_location_parallax, 1);
+			
+			R_AddGLSLShadedSurfToVArray (surf, scroll, true);
 
 			glUseProgramObjectARB( NULL );
 
-			//dynamic lights need this reset
-			GL_MBind( GL_TEXTURE0, image->texnum );
-			GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );
+		}
+		else if(is_dynamic && brightest > 0 && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
+					
+			R_InitVArrays (VERT_MULTI_TEXTURED);
+
+			glUseProgramObjectARB( g_programObj );
+    		
+			GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
+			glUniform1iARB( g_location_testTexture, 0); 
+
+			GL_MBind( GL_TEXTURE1,  surf->texinfo->heightMap->texnum);
+			glUniform1iARB( g_location_heightTexture, 1);
+
+			glUniform1iARB( g_location_lmTexture, 2);
+			qglActiveTextureARB(GL_TEXTURE2);
+			qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
+			KillFlags |= KILL_TMU2_POINTER;
+
+			glUniform1iARB( g_location_normalTexture, 3);
+			qglActiveTextureARB(GL_TEXTURE3);
+			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
+			KillFlags |= KILL_TMU3_POINTER;
+	
+			glUniform3fARB( g_location_lightPosition, dl->origin[0], dl->origin[1], dl->origin[2]);
+			glUniform3fARB( g_location_lightColour, dl->color[0], dl->color[1], dl->color[2]);
+			glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
+			glUniform1iARB( g_location_dynamic, 1);
+			glUniform1iARB( g_location_parallax, 0);
+			
+			R_AddGLSLShadedSurfToVArray (surf, scroll, true);
+
+			glUseProgramObjectARB( NULL );
 
 		}
-
 		else {
 		
 			GL_MBind( GL_TEXTURE0, image->texnum );
@@ -776,11 +858,7 @@ dynamic:
 //and "Paul's Projects" tutorials.
 extern GLuint normalisationCubeMap;
 static void R_InitNormalSurfaces ()
-{
-	dlight_t	*dl;
-	int			lnum, sv_lnum = 0;	
-	float		add, brightest = 0;
-	vec3_t		lightVec;
+{	
 
 	qglActiveTextureARB (GL_TEXTURE0);
 	qglDisable (GL_TEXTURE_2D);
@@ -801,30 +879,6 @@ static void R_InitNormalSurfaces ()
 	qglRotatef (-r_newrefdef.viewangles[2], 1, 0, 0);
 	qglRotatef (-r_newrefdef.viewangles[0], 0, 1, 0);
 	qglRotatef (-r_newrefdef.viewangles[1], 0, 0, 1);
-
-	//now rotate according to dynamic lights
-	dl = r_newrefdef.dlights;
-	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
-	{
-		VectorSubtract (r_origin, dl->origin, lightVec);
-		add = dl->intensity - VectorLength(lightVec)/10;
-		if (add > brightest) //only bother with lights close by
-		{
-			brightest = add;
-			sv_lnum = lnum; //remember the position of most influencial light
-		}
-	}
-	if(brightest > 0) { //we have a light
-		dl = r_newrefdef.dlights;
-		dl += sv_lnum; //our most influential light
-		VectorSubtract(dl->origin, r_origin, lightVec);
-		VectorNormalize(lightVec);
-		VectorScale(lightVec, brightest/20, lightVec);
-
-		qglRotatef (lightVec[2], 1, 0, 0);
-		qglRotatef (lightVec[0], 0, 1, 0);
-		qglRotatef (lightVec[1], 0, 0, 1);
-	}
 
 	// the next 2 statements will move the cmstr calculations into hardware so that we don;t
 	// have to evaluate them once per vert...
