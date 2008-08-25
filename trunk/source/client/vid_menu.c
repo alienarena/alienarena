@@ -28,6 +28,8 @@ extern cvar_t *scr_viewsize;
 
 extern cvar_t *r_bloom_intensity;
 extern cvar_t *gl_normalmaps;
+extern cvar_t *gl_parallaxmaps;
+extern cvar_t *gl_glsl_shaders;
 extern cvar_t *gl_modulate;
 
 extern cvar_t *vid_width;
@@ -87,6 +89,8 @@ static menuslider_s		s_modulate_slider;
 static menufield_s		s_height_field;
 static menufield_s		s_width_field;
 static menulist_s		s_normalmaps_box;
+static menulist_s		s_parallaxmaps_box;
+static menulist_s		s_glsl_box;
 
 static void DriverCallback( void *unused )
 {
@@ -150,7 +154,8 @@ static void SetLow( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
-	Cvar_SetValue("gl_cubemaps", 0);
+	Cvar_SetValue("gl_parallaxmaps", 0);
+	Cvar_SetValue("gl_glsl_shaders", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 0);
@@ -172,7 +177,8 @@ static void SetMedium( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
-	Cvar_SetValue("gl_cubemaps", 0);
+	Cvar_SetValue("gl_parallaxmaps", 0);
+	Cvar_SetValue("gl_glsl_shaders", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
@@ -195,7 +201,8 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
-	Cvar_SetValue("gl_cubemaps", 1);
+	Cvar_SetValue("gl_parallaxmaps", 0);
+	Cvar_SetValue("gl_glsl_shaders", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
@@ -218,7 +225,8 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
-	Cvar_SetValue("gl_cubemaps", 1);
+	Cvar_SetValue("gl_parallaxmaps", 1);
+	Cvar_SetValue("gl_glsl_shaders", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
@@ -353,6 +361,10 @@ void VID_MenuInit( void )
 		vid_height = Cvar_Get( "vid_height", "400", CVAR_ARCHIVE);
 	if (!gl_normalmaps)
 		gl_normalmaps = Cvar_Get( "gl_normalmaps", "0", CVAR_ARCHIVE);
+	if (!gl_parallaxmaps)
+		gl_parallaxmaps = Cvar_Get( "gl_parallaxmaps", "0", CVAR_ARCHIVE);
+	if (!gl_glsl_shaders)
+		gl_glsl_shaders = Cvar_Get( "gl_glsl_shaders", "0", CVAR_ARCHIVE);
 
 	if ( !_windowed_mouse)
         _windowed_mouse = Cvar_Get( "_windowed_mouse", "1", CVAR_ARCHIVE );
@@ -492,27 +504,41 @@ void VID_MenuInit( void )
 	s_normalmaps_box.generic.type	= MTYPE_SPINCONTROL;
 	s_normalmaps_box.generic.x		= 24;
 	s_normalmaps_box.generic.y		= 180*scale;
-	s_normalmaps_box.generic.name	= "bumpmapping";
+	s_normalmaps_box.generic.name	= "normal maps";
 	s_normalmaps_box.curvalue = gl_normalmaps->value;
 	s_normalmaps_box.itemnames = yesno_names;
 
+	s_parallaxmaps_box.generic.type	= MTYPE_SPINCONTROL;
+	s_parallaxmaps_box.generic.x		= 24;
+	s_parallaxmaps_box.generic.y		= 190*scale;
+	s_parallaxmaps_box.generic.name	= "parallax maps";
+	s_parallaxmaps_box.curvalue = gl_parallaxmaps->value;
+	s_parallaxmaps_box.itemnames = yesno_names;
+
+	s_glsl_box.generic.type	= MTYPE_SPINCONTROL;
+	s_glsl_box.generic.x		= 24;
+	s_glsl_box.generic.y		= 200*scale;
+	s_glsl_box.generic.name	= "use GLSL shaders";
+	s_glsl_box.curvalue = gl_glsl_shaders->value;
+	s_glsl_box.itemnames = yesno_names;
+
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
 	s_finish_box.generic.x	= 24;
-	s_finish_box.generic.y	= 200*scale;
+	s_finish_box.generic.y	= 220*scale;
 	s_finish_box.generic.name	= "draw frame completely";
 	s_finish_box.curvalue = gl_finish->value;
 	s_finish_box.itemnames = yesno_names;
 
 	s_vsync_box.generic.type = MTYPE_SPINCONTROL;
     s_vsync_box.generic.x  = 24;
-    s_vsync_box.generic.y  = 210*scale;
+    s_vsync_box.generic.y  = 230*scale;
     s_vsync_box.generic.name       = "vertical sync";
     s_vsync_box.curvalue = gl_swapinterval->value;
     s_vsync_box.itemnames = onoff_names;
 
 	s_windowed_mouse.generic.type = MTYPE_SPINCONTROL;
 	s_windowed_mouse.generic.x  = 24;
-	s_windowed_mouse.generic.y  = 220*scale;
+	s_windowed_mouse.generic.y  = 240*scale;
 	s_windowed_mouse.generic.name   = "windowed mouse";
 	s_windowed_mouse.curvalue = _windowed_mouse->value;
 	s_windowed_mouse.itemnames = yesno_names;
@@ -520,31 +546,31 @@ void VID_MenuInit( void )
 	s_low_action.generic.type = MTYPE_ACTION;
 	s_low_action.generic.name = "low settings";
 	s_low_action.generic.x    = 24;
-	s_low_action.generic.y    = 240*scale;
+	s_low_action.generic.y    = 260*scale;
 	s_low_action.generic.callback = SetLow;
 
 	s_medium_action.generic.type = MTYPE_ACTION;
 	s_medium_action.generic.name = "medium settings";
 	s_medium_action.generic.x    = 24;
-	s_medium_action.generic.y    = 250*scale;
+	s_medium_action.generic.y    = 270*scale;
 	s_medium_action.generic.callback = SetMedium;
 
 	s_high_action.generic.type = MTYPE_ACTION;
 	s_high_action.generic.name = "high settings";
 	s_high_action.generic.x    = 24;
-	s_high_action.generic.y    = 260*scale;
+	s_high_action.generic.y    = 280*scale;
 	s_high_action.generic.callback = SetHigh;
 
 	s_highest_action.generic.type = MTYPE_ACTION;
 	s_highest_action.generic.name = "highest settings";
 	s_highest_action.generic.x    = 24;
-	s_highest_action.generic.y    = 270*scale;
+	s_highest_action.generic.y    = 290*scale;
 	s_highest_action.generic.callback = SetHighest;
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
 	s_apply_action.generic.x    = 24;
-	s_apply_action.generic.y    = 290*scale;
+	s_apply_action.generic.y    = 310*scale;
 	s_apply_action.generic.callback = ApplyChanges;
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
@@ -562,6 +588,8 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_overbright_slider );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_tq_slider );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_normalmaps_box );
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_parallaxmaps_box );
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_glsl_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_finish_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_vsync_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_windowed_mouse );

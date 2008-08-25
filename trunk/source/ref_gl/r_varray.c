@@ -233,6 +233,12 @@ void R_KillVArrays (void)
 	if (KillFlags & KILL_RGBA_POINTER)
 		qglDisableClientState (GL_COLOR_ARRAY);
 
+	if (KillFlags & KILL_TMU3_POINTER)
+	{
+		qglClientActiveTextureARB (GL_TEXTURE3);
+		qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
+	}
+
 	if (KillFlags & KILL_TMU2_POINTER)
 	{
 		qglClientActiveTextureARB (GL_TEXTURE2);
@@ -347,12 +353,11 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 	}
 }
 
-void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll)
+void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean lightmap)
 {
 	glpoly_t *p = surf->polys;
 	float	*v;	
 	int i;
-	
 
 	for (; p; p = p->chain)
 	{
@@ -385,9 +390,11 @@ void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll)
 			VArray[3] = v[3] + scroll;
 			VArray[4] = v[4];
 
-			// lightmap texture coords
-			VArray[5] = v[5];
-			VArray[6] = v[6];
+			if(lightmap) {
+				// lightmap texture coords
+				VArray[5] = v[5];
+				VArray[6] = v[6];
+			}
 
 			//do calculations for normal, tangent and binormal
 			if( i > 1) {
@@ -409,7 +416,10 @@ void R_AddParallaxLightMappedSurfToVArray (msurface_t *surf, float scroll)
 
 			// nothing else is needed
 			// increment pointer and counter
-			VArray += VertexSizes[VERT_MULTI_TEXTURED];
+			if(lightmap)
+				VArray += VertexSizes[VERT_MULTI_TEXTURED];
+			else
+				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 			VertexCounter++;
 		}
 

@@ -294,8 +294,7 @@ void R_InitParticleTexture (void)
 	}
 	r_notexture = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 
-	if(gl_cubemaps->value)
-		R_InitCubemapTextures (); 
+	R_InitCubemapTextures (); 
 
 	Com_sprintf (flares, sizeof(flares), "gfx/flares/flare0.tga");
 	r_flare = GL_FindImage(flares, it_pic);
