@@ -1231,7 +1231,10 @@ void CL_BigTeleportParticles (vec3_t org)
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_BLUE_MZFLASH;
+		if(i == 1)
+			p->type = PARTICLE_ROTATINGROLL;
+		else
+			p->type = PARTICLE_BLUE_MZFLASH;
 		p->texnum = r_leaderfieldtexture->texnum;
 		p->scale = 16*i + (rand()&7);
 		p->blendsrc = GL_SRC_ALPHA;
@@ -1426,11 +1429,11 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 
 	p->alpha = 1;
 	p->alphavel = -50.0;
-	p->type = PARTICLE_HIT;
+	p->type = PARTICLE_ROTATINGROLL;
 	p->texnum = r_shottexture->texnum;
 	p->scale = 8;
 
-	p->blendsrc = GL_ONE;
+	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
 	p->color = 0x72;
 	for (j=0 ; j<3 ; j++)
@@ -1446,9 +1449,9 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 
 	VectorClear (p->accel);
 
-	p->alpha = .5;
+	p->alpha = .75;
 	p->alphavel = -50.0;
-	p->type = PARTICLE_SHOT;
+	p->type = PARTICLE_ROTATINGROLL;
 	p->texnum = r_cflashtexture->texnum;
 	p->scale = 15;
 	p->angle[1] = cl.refdef.viewangles[0];
@@ -1544,7 +1547,31 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	VectorClear (p->accel);
 
 	p->alpha = 1.0;
-	p->type = PARTICLE_FLARE;
+	p->type = PARTICLE_ROTATINGYAW;
+	p->texnum = r_flagtexture->texnum;
+	p->blendsrc = GL_ONE;
+	p->blenddst = GL_ONE;
+	if(team)
+		p->color = 0x74;
+	else
+		p->color = 0xe8;
+	p->scale = 15;
+	p->alphavel = -50;
+	for (i=0 ; i<3 ; i++)
+	{
+		p->org[i] = pos[i];
+		p->vel[i] = 0;
+		p->accel[i] = 0;
+	}
+	p->org[2] += 64;
+
+		if (!(p = new_particle()))
+		return;
+
+	VectorClear (p->accel);
+
+	p->alpha = 1.0;
+	p->type = PARTICLE_ROTATINGYAWMINUS;
 	p->texnum = r_flagtexture->texnum;
 	p->blendsrc = GL_ONE;
 	p->blenddst = GL_ONE;
@@ -1869,7 +1896,7 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 
 	p->alpha = .3;
 	p->alphavel = -50.0;
-	p->type = PARTICLE_SHOT;
+	p->type = PARTICLE_ROTATINGROLL;
 	p->texnum = r_bflashtexture->texnum;
 	p->scale = 5;
 	p->angle[0] = cl.refdef.viewangles[0];
@@ -2409,7 +2436,7 @@ void CL_BlasterBeam (vec3_t start, vec3_t end)
 					return;
 
 			p->alpha = 0.9;
-			p->alphavel = -1.8 / (0.6+frand()*0.2);
+			p->alphavel = -1.8;
 			p->blenddst = GL_ONE;
 			p->blendsrc = GL_SRC_ALPHA;
 		
@@ -2758,7 +2785,7 @@ void CL_RedBlasterBeam (vec3_t start, vec3_t end)
 					return;
 
 			p->alpha = 0.9;
-			p->alphavel = -1.8 / (0.6+frand()*0.2);
+			p->alphavel = -1.8;
 			p->blenddst = GL_ONE;
 			p->blendsrc = GL_SRC_ALPHA;
 		

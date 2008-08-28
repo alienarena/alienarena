@@ -586,7 +586,7 @@ void R_DrawEntitiesOnList (void)
 ** GL_DrawParticles
 **
 */
-
+static float yawOrRoll;
 void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigned colortable[768])
 {
 	const gparticle_t *p;
@@ -705,6 +705,22 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 		else if(p->type == PARTICLE_WEATHER){  // keep it vertical
 			VectorCopy(r_newrefdef.viewangles, v);
 			v[0] = 0;  // keep weather particles vertical by removing pitch
+			AngleVectors(v, NULL, right, up);	
+			VectorScale(right, 3*scale, pright);
+			VectorScale(up, 3*scale, pup);
+		}
+		else if(p->type == PARTICLE_ROTATINGYAW || p->type == PARTICLE_ROTATINGROLL || p->type == PARTICLE_ROTATINGYAWMINUS){  // keep it vertical, and rotate on axis
+			VectorCopy(r_newrefdef.viewangles, v);
+			v[0] = 0;  // keep weather particles vertical by removing pitch
+			yawOrRoll += .5;
+			if (yawOrRoll > 360)
+				yawOrRoll = 0;
+			if(p->type == PARTICLE_ROTATINGYAW)
+				v[1] = yawOrRoll;
+			else if(p->type == PARTICLE_ROTATINGROLL)
+				v[2] = yawOrRoll;
+			else
+				v[1] = yawOrRoll+180;
 			AngleVectors(v, NULL, right, up);	
 			VectorScale(right, 3*scale, pright);
 			VectorScale(up, 3*scale, pup);
