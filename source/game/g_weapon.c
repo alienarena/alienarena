@@ -22,6 +22,9 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 	qboolean	water = false;
 	int			content_mask = MASK_SHOT | MASK_WATER;
 
+	if ( g_antilag->integer)
+		G_DoTimeShiftFor( self );
+
 	self->client->resp.weapon_shots[3]++;
 
 	tr = gi.trace (self->s.origin, NULL, NULL, start, self, MASK_SHOT);
@@ -146,6 +149,9 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 		gi.WritePosition (tr.endpos);
 		gi.multicast (pos, MULTICAST_PVS);
 	}
+
+	if ( g_antilag->integer)
+		G_UndoTimeShiftFor( self );
 }
 
 
@@ -324,6 +330,9 @@ int speed, int effect, qboolean hyper)
 	int			mask;
 	qboolean	water;
 
+	if ( g_antilag->integer)
+		G_DoTimeShiftFor( self );
+
 	self->client->resp.weapon_shots[6]++;
 
 	VectorMA (start, 8192, aimdir, end);
@@ -386,6 +395,9 @@ int speed, int effect, qboolean hyper)
 		gi.WriteDir (tr.plane.normal);
 		gi.multicast (self->s.origin, MULTICAST_PVS);
 	}
+
+	if ( g_antilag->integer)
+		G_UndoTimeShiftFor( self );
 }
 
 /*
@@ -533,6 +545,9 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	vec3_t		water_start;
 	int			content_mask = MASK_SHOT | MASK_WATER;
 
+	if ( g_antilag->integer)
+		G_DoTimeShiftFor( self );
+
 	self->client->resp.weapon_shots[0]++;
 
 	VectorMA (start, 8192, aimdir, end);
@@ -671,6 +686,10 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 		gi.WritePosition (tr.endpos);
 		gi.multicast (pos, MULTICAST_PVS);
 	}
+
+	if ( g_antilag->integer)
+		G_UndoTimeShiftFor( self );
+
 }
 void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean detonate)
 {
@@ -683,6 +702,9 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	qboolean	water;
 	vec3_t		water_start;
 	int			content_mask = MASK_SHOT | MASK_WATER;
+
+	if ( g_antilag->integer)
+		G_DoTimeShiftFor( self );
 
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
@@ -824,6 +846,10 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 		gi.WritePosition (tr.endpos);
 		gi.multicast (pos, MULTICAST_PVS);
 	}
+
+	if ( g_antilag->integer)
+		G_UndoTimeShiftFor( self );
+
 }
 
 void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick)
@@ -834,6 +860,9 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 	edict_t		*ignore, *bomb;
 	int			mask;
 	qboolean	water;
+
+	if ( g_antilag->integer)
+		G_DoTimeShiftFor( self );
 
 	self->client->resp.weapon_shots[1]++;
 
@@ -898,6 +927,9 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 
 	if (self->client)
 		PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
+
+	if ( g_antilag->integer)
+		G_UndoTimeShiftFor( self );
 }
 
 //vaporizer code
@@ -911,6 +943,9 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	edict_t	*bomb;
 	int			mask;
 	qboolean	water;
+
+	if ( g_antilag->integer)
+		G_DoTimeShiftFor( self );
 
 	self->client->resp.weapon_shots[7]++;
 
@@ -982,6 +1017,9 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 
 	if (self->client)
 		PlayerNoise(self, tr.endpos, PNOISE_IMPACT);
+
+	if ( g_antilag->integer)
+		G_UndoTimeShiftFor( self );
 }
 
 
@@ -1725,6 +1763,9 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 	trace_t		tr;
 	edict_t		*ignore;
 
+	if ( g_antilag->integer)
+		G_DoTimeShiftFor( self );
+
 	if(alt)
 		VectorMA (start, 6.4, aimdir, end);
 	else
@@ -1756,4 +1797,7 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 		}
 		VectorCopy (tr.endpos, from);
 	}
+
+	if ( g_antilag->integer)
+		G_UndoTimeShiftFor( self );
 }

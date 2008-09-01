@@ -137,6 +137,9 @@ cvar_t  *background_music;
 cvar_t  *sv_botkickthreshold;
 cvar_t  *sv_custombots;
 
+//unlagged
+cvar_t	*g_antilag;
+
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
 void ClientThink (edict_t *ent, usercmd_t *cmd);
 qboolean ClientConnect (edict_t *ent, char *userinfo);
@@ -919,6 +922,8 @@ void G_RunFrame (void)
 	int		i;
 	edict_t	*ent;
 
+	level.previousTime = level.time;
+
 	level.framenum++;
 	level.time = level.framenum*FRAMETIME;
 
@@ -937,6 +942,11 @@ void G_RunFrame (void)
 	// treat each object in turn
 	// even the world gets a chance to think
 	//
+
+	//unlagged
+	if ( g_antilag->integer)
+		G_TimeShiftAllClients( level.previousTime, NULL );
+	
 	ent = &g_edicts[0];
 	for (i=0 ; i<globals.num_edicts ; i++, ent++)
 	{
@@ -960,13 +970,14 @@ void G_RunFrame (void)
 		if (i > 0 && i <= maxclients->value)
 		{
 			ClientBeginServerFrame (ent);
-// ACEBOT_ADD
-
-// ACEBOT_END
 		}
 
 		G_RunEntity (ent);
 	}
+
+	//unlagged
+	if ( g_antilag->integer)
+		G_UnTimeShiftAllClients( NULL );
 
 	// see if it is time to end a deathmatch
 	CheckDMRules ();
@@ -976,5 +987,9 @@ void G_RunFrame (void)
 
 	// build the playerstate_t structures for all players
 	ClientEndServerFrames ();
+
+	//unlagged
+	if ( g_antilag->integer)
+		level.frameStartTime = gi.Sys_Milliseconds();
 }
 

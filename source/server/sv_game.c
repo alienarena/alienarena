@@ -385,6 +385,8 @@ void SV_InitGameProgs (void)
 	import.SetAreaPortalState = CM_SetAreaPortalState;
 	import.AreasConnected = CM_AreasConnected;
 
+	import.Sys_Milliseconds = Sys_Milliseconds;
+
 	ge = (game_export_t *)Sys_GetGameAPI (&import);
 
 	if (!ge)

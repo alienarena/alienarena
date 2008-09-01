@@ -610,6 +610,7 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/g_svcmds.o \
 	$(BUILDDIR)/game/g_target.o \
 	$(BUILDDIR)/game/g_trigger.o \
+	$(BUILDDIR)/game/g_unlagged.o \
 	$(BUILDDIR)/game/g_utils.o \
 	$(BUILDDIR)/game/g_weapon.o \
 	$(BUILDDIR)/game/g_vehicles.o \
@@ -704,6 +705,9 @@ $(BUILDDIR)/game/g_target.o :    $(GAME_DIR)/g_target.c
 
 $(BUILDDIR)/game/g_trigger.o :   $(GAME_DIR)/g_trigger.c
 	$(DO_SHLIB_CC)
+	
+$(BUILDDIR)/game/g_unlagged.o :     $(GAME_DIR)/g_unlagged.c
+	$(DO_SHLIB_CC)	
 
 $(BUILDDIR)/game/g_utils.o :     $(GAME_DIR)/g_utils.c
 	$(DO_SHLIB_CC)
@@ -772,6 +776,7 @@ ARENA_OBJS = \
 	$(BUILDDIR)/arena/g_svcmds.o \
 	$(BUILDDIR)/arena/g_target.o \
 	$(BUILDDIR)/arena/g_trigger.o \
+	$(BUILDDIR)/arena/g_unlagged.o \	
 	$(BUILDDIR)/arena/g_utils.o \
 	$(BUILDDIR)/arena/g_vehicles.o \
 	$(BUILDDIR)/arena/g_weapon.o \
@@ -863,6 +868,9 @@ $(BUILDDIR)/arena/g_target.o :    $(ARENA_DIR)/g_target.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/g_trigger.o :   $(ARENA_DIR)/g_trigger.c
+	$(DO_ARENA_SHLIB_CC)
+	
+$(BUILDDIR)/arena/g_unlagged.o :     $(ARENA_DIR)/g_unlagged.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/g_utils.o :     $(ARENA_DIR)/g_utils.c

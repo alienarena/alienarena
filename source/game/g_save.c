@@ -243,6 +243,9 @@ void InitGame (void)
 	//reward points threshold
 	g_reward = gi.cvar("g_reward", "20", CVAR_SERVERINFO);
 
+	//antilag
+	g_antilag = gi.cvar("g_antilag", "0", CVAR_SERVERINFO);
+
 	// change anytime vars
 	dmflags = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);
 	fraglimit = gi.cvar ("fraglimit", "0", CVAR_SERVERINFO);

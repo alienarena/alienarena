@@ -1854,6 +1854,13 @@ void PutClientInServer (edict_t *ent)
 	ChangeWeapon (ent);
 
 	client->spawnprotecttime = level.time;
+
+	//unlagged
+	if ( g_antilag->integer) {
+		G_ResetHistory( ent );
+		// and this is as good a time as any to clear the saved state
+		client->saved.leveltime = 0;
+	}
 }
 
 void ClientPlaceInQueue(edict_t *ent)
@@ -2594,6 +2601,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	level.current_entity = ent;
 	client = ent->client;
+
+	//unlagged
+	if ( g_antilag->integer) {
+		client->frameOffset = gi.Sys_Milliseconds() - level.frameStartTime;
+		client->attackTime = client->ping; //I think this is right, not sure.
+	}
 
 	if (level.intermissiontime)
 	{
