@@ -71,6 +71,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define	FRAMETIME		0.1
 
+//unlagged - true ping
+#define NUM_PING_SAMPLES 64
+//unlagged - true ping
+
 // memory tags to allow dynamic memory to be cleaned up
 #define	TAG_GAME	765		// clear when unloading the dll
 #define	TAG_LEVEL	766		// clear when loading a new level
@@ -308,6 +312,7 @@ typedef struct
 {
 	int			framenum;
 	float		time;
+	float		previousTime;
 
 	char		level_name[MAX_QPATH];	// the descriptive name (Outer Base, etc)
 	char		mapname[MAX_QPATH];		// the server name (base1, etc)
@@ -342,6 +347,11 @@ typedef struct
 
 	edict_t		*current_entity;	// entity running from G_RunFrame
 	int			body_que;			// dead bodies
+
+	//unlagged - backward reconciliation #4
+	// actual time this server frame started
+	int			frameStartTime;
+	//unlagged - backward reconciliation #4
 
 } level_locals_t;
 
@@ -877,6 +887,17 @@ void ClientPlaceInQueue(edict_t *ent);
 void ClientCheckQueue(edict_t *ent);
 void MoveClientsDownQueue(edict_t *ent);
 
+//unlagged - g_unlagged.c
+void G_ResetHistory( edict_t *ent );
+void G_StoreHistory( edict_t *ent );
+void G_TimeShiftAllClients( int time, edict_t *skip );
+void G_UnTimeShiftAllClients( edict_t *skip );
+void G_DoTimeShiftFor( edict_t *ent );
+void G_UndoTimeShiftFor( edict_t *ent );
+void G_UnTimeShiftClient( edict_t *ent );
+void G_PredictPlayerMove( edict_t *ent, float frametime );
+//unlagged - g_unlagged.c
+
 //
 // g_player.c
 //
@@ -996,7 +1017,38 @@ typedef struct
 	int			spectator;			// client is a spectator
 	int	queue;				// client queue position for duel mode
 
+	//unlagged - client options
+	// these correspond with variables in the userinfo string
+	int			delag;
+	int			debugDelag;
+	int			cmdTimeNudge;
+//unlagged - client options
+//unlagged - lag simulation #2
+	int			latentSnaps;
+	int			latentCmds;
+	int			plOut;
+	usercmd_t	cmdqueue[MAX_LATENT_CMDS];
+	int			cmdhead;
+//unlagged - lag simulation #2
+//unlagged - true ping
+	int			realPing;
+	int			pingsamples[NUM_PING_SAMPLES];
+	int			samplehead;
+//unlagged - true ping
+
 } client_persistant_t;
+
+//unlagged - backward reconciliation #1
+// the size of history we'll keep
+#define NUM_CLIENT_HISTORY 17
+
+// everything we need to know to backward reconcile
+typedef struct {
+	vec3_t		mins, maxs;
+	vec3_t		currentOrigin;
+	int			leveltime;
+} clientHistory_t;
+//unlagged - backward reconciliation #1
 
 // client data that stays across deathmatch respawns
 typedef struct
@@ -1164,6 +1216,26 @@ struct gclient_s
 
 	//map voting
 	int mapvote;
+
+	//unlagged - backward reconciliation #1
+	// the serverTime the button was pressed
+	// (stored before pmove_fixed changes serverTime)
+	int			attackTime;
+	// the head of the history queue
+	int			historyHead;
+	// the history queue
+	clientHistory_t	history[NUM_CLIENT_HISTORY];
+	// the client's saved position
+	clientHistory_t	saved;			// used to restore after time shift
+	// an approximation of the actual server time we received this
+	// command (not in 50ms increments)
+	int			frameOffset;
+//unlagged - backward reconciliation #1
+
+//unlagged - smooth clients #1
+	// the last frame number we got an update from this client
+	int			lastUpdateFrame;
+//unlagged - smooth clients #1
 
 };
 
@@ -1405,6 +1477,9 @@ extern void CheckDeathcam_Viewent(edict_t *ent);
 extern void DeathcamRemove (edict_t *ent, char *opt);
 extern void DeathcamStart (edict_t *ent);
 extern void DeathcamTrack (edict_t *ent);
+
+//unlagged
+extern	cvar_t	*g_antilag;
 
 // ACEBOT_ADD
 #include "acesrc/acebot.h"

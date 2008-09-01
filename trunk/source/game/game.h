@@ -179,6 +179,8 @@ typedef struct
 
 	void	(*DebugGraph) (float value, int color);
 
+	int		(*Sys_Milliseconds) (void);
+
 } game_import_t;
 
 //
