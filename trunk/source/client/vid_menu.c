@@ -142,6 +142,22 @@ static void ModulateCallback( void *s )
 	Cvar_SetValue( "gl_modulate", slider->curvalue);
 }
 
+static void ParallaxCallback( void *s )
+{
+	Cvar_SetValue("gl_parallaxmaps", s_parallaxmaps_box.curvalue);
+	if(s_parallaxmaps_box.curvalue) { //must turn this on for parallax 
+		Cvar_SetValue("gl_glsl_shaders", s_parallaxmaps_box.curvalue);
+		s_glsl_box.curvalue = s_parallaxmaps_box.curvalue;
+	}
+}
+static void GlslCallback( void *s )
+{
+	Cvar_SetValue("gl_glsl_shaders", s_glsl_box.curvalue);
+	if(!s_glsl_box.curvalue) { //must turn this on for parallax
+		Cvar_SetValue("gl_parallaxmaps", s_glsl_box.curvalue);
+		s_parallaxmaps_box.curvalue = s_glsl_box.curvalue;
+	}
+}
 static void SetLow( void *unused )
 {
 	Cvar_SetValue("gl_reflection", 0);
@@ -277,7 +293,8 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "_windowed_mouse", s_windowed_mouse.curvalue);
 	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
 	Cvar_SetValue("gl_normalmaps", s_normalmaps_box.curvalue);
-	Cvar_SetValue("gl_cubemaps", s_normalmaps_box.curvalue);
+	Cvar_SetValue("gl_parallaxmaps", s_parallaxmaps_box.curvalue);
+	Cvar_SetValue("gl_glsl_shaders", s_glsl_box.curvalue);
 	if(s_normalmaps_box.curvalue)
 		Cvar_SetValue("r_shaders", 1); //because without shaders on this is pointless(normalmaps
 									   //are handled by shaders now
@@ -514,6 +531,7 @@ void VID_MenuInit( void )
 	s_parallaxmaps_box.generic.name	= "parallax maps";
 	s_parallaxmaps_box.curvalue = gl_parallaxmaps->value;
 	s_parallaxmaps_box.itemnames = yesno_names;
+	s_parallaxmaps_box.generic.callback = ParallaxCallback;
 
 	s_glsl_box.generic.type	= MTYPE_SPINCONTROL;
 	s_glsl_box.generic.x		= 24;
@@ -521,6 +539,7 @@ void VID_MenuInit( void )
 	s_glsl_box.generic.name	= "use GLSL shaders";
 	s_glsl_box.curvalue = gl_glsl_shaders->value;
 	s_glsl_box.itemnames = yesno_names;
+	s_glsl_box.generic.callback = GlslCallback;
 
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
 	s_finish_box.generic.x	= 24;
