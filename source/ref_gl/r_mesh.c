@@ -188,7 +188,6 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 		+ currententity->oldframe * paliashdr->framesize);
 	ov = oldframe->verts;
 
-
 	startorder = order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
 
 	if (r_shaders->value)
@@ -450,7 +449,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				if(stage->normalmap) {
 				
 					vec3_t	lightvec;
-				
+					vec3_t	temp;
 					qglDepthMask (GL_FALSE);
 			 		qglEnable (GL_BLEND);
 
@@ -465,20 +464,27 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 
 					qglMatrixMode (GL_TEXTURE);
 					qglLoadIdentity ();
-
-					//set up a tangent lightspace vector
+	
+					//set up a tangent lightspace vector, approxiamate to light shining down
 					lightvec[0] = 270;
 					lightvec[1] = -60;
 					lightvec[2] = 60;
-
-					qglRotatef ( currententity->angles[1],  0, 0, 1);
-					//qglRotatef ( currententity->angles[0],  0, 1, 0);
-					qglRotatef ( currententity->angles[2],  1, 0, 0);
-
-					if(currententity->flags & RF_WEAPONMODEL )
+				
+					//position it in relation to entity angles
+					VectorCopy(currententity->angles, temp);
+					VectorMA(temp, VectorLength(lightvec), lightvec, temp);
+	
+					//view weapon models get special treatment
+					if(currententity->flags & RF_WEAPONMODEL ) {
+						qglRotatef ( temp[1],  0, 0, 1);
+						qglRotatef ( (temp[0]+180)/-20,  0, 1, 0); //eh a hack of sorts
+						qglRotatef ( temp[2],  1, 0, 0);
 						qglTranslatef(lightdir[0], lightdir[1], lightdir[2]);
-					else
+					}
+					else {
+						qglRotatef (currententity->angles[1], 0, 0, 1);
 						qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);
+					}
 
 					qglScalef (-1, -1, -1);
 
