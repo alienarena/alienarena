@@ -1610,32 +1610,6 @@ qboolean R_SetMode (void)
 	return true;
 }
 
-unsigned char *readShaderFile( const char *fileName )
-{
-	char *string;
-	GLint success = 0;
-	FILE *shaderFile;
-	size_t stringLength;
-
-	shaderFile = fopen( fileName, "rb" );
-
-	if( shaderFile == NULL )
-	{
-		R_Shutdown();
-		return 0;
-	}
-
-	//Get the length of the file.
-	fseek( shaderFile, 0, SEEK_END );
-	stringLength = ftell( shaderFile );
-	fseek( shaderFile, 0, SEEK_SET );
-
-	string = malloc( stringLength + 1 );
-	fread( string, 1, stringLength, shaderFile );
-	string[ stringLength ] = '\0';
-
-	return string;
-}
 /*
 ===============
 R_Init
@@ -1650,8 +1624,8 @@ int R_Init( void *hinstance, void *hWnd )
 	extern float r_turbsin[256];
 	const char *shaderStrings[1];
 	unsigned char *shader_assembly;
-    int nResult;
-    char str[4096];
+    int		nResult;
+    char	str[4096];
 
 	gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "1", CVAR_ARCHIVE); // jit
 	gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE); 
@@ -2032,18 +2006,26 @@ int R_Init( void *hinstance, void *hWnd )
     }
 
 	if(gl_state.glsl_shaders) {
+		int len;
 		g_programObj = glCreateProgramObjectARB();
-
+	
 		//
 		// Vertex shader
 		//
-		shader_assembly = readShaderFile( "data1/scripts/vertex_shader.glsl" );
 
-		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-		shaderStrings[0] = (char*)shader_assembly;
-		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_vertexShader);
-		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		len = FS_LoadFile("scripts/vertex_shader.glsl", &shader_assembly);
+
+		if (len > 0) {
+			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+			shaderStrings[0] = (char*)shader_assembly;
+			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+			glCompileShaderARB( g_vertexShader);
+			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		}
+		else {
+			Com_Printf("...Unable to Locate Vertex Shader");
+			nResult = 0;
+		}
 
 		if( nResult )
 			glAttachObjectARB( g_programObj, g_vertexShader );
@@ -2055,14 +2037,19 @@ int R_Init( void *hinstance, void *hWnd )
 		//
 		// Fragment shader
 		//
-
-		shader_assembly = readShaderFile( "data1/scripts/fragment_shader.glsl" );
-
-		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-		shaderStrings[0] = (char*)shader_assembly;
-		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-		glCompileShaderARB( g_fragmentShader );
-		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		len = FS_LoadFile("scripts/fragment_shader.glsl", &shader_assembly);
+		
+		if(len > 0) {
+			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+			shaderStrings[0] = (char*)shader_assembly;
+			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+			glCompileShaderARB( g_fragmentShader );
+			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		}
+		else {
+			Com_Printf("...Unable to Locate Fragment Shader");
+			nResult = 0;
+		}
 
 		if( nResult )
 			glAttachObjectARB( g_programObj, g_fragmentShader );
