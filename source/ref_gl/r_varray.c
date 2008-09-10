@@ -356,8 +356,10 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean lightmap)
 {
 	glpoly_t *p = surf->polys;
-	float	*v;	
-	int i;
+	float	*v, closest, lfactor;	
+	int		i, sv_light;
+	worldLight_t *wl;
+	vec3_t	dist;
 
 	for (; p; p = p->chain)
 	{
@@ -413,7 +415,7 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean light
 
 				}
 			}
-
+	
 			// nothing else is needed
 			// increment pointer and counter
 			if(lightmap)
@@ -464,6 +466,22 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean light
 								tangentSpaceTransform );
 		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
 		glUniform1iARB( g_location_fog, map_fog);
+
+		closest = 0;
+		sv_light= 0;
+		for (i=0; i<r_numWorldLights; i++) {
+			wl = &r_worldLights[i];
+			VectorSubtract (wl->origin, p->verts[0], dist);
+			lfactor = sqrt(wl->intensity - VectorLength(dist)/10);
+			if(lfactor > closest) {
+				closest = lfactor;
+				sv_light = i;
+			}
+		}
+		wl = &r_worldLights[sv_light];
+
+		glUniform3fARB( g_location_worldlightPosition, wl->origin[0], wl->origin[1], wl->origin[2]);
+		 
 		// draw the poly
 		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 	}
