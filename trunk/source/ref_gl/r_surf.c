@@ -766,27 +766,34 @@ dynamic:
 			qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
 			KillFlags |= KILL_TMU2_POINTER;
 
+			if(strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
+				glUniform1iARB( g_location_normalTexture, 3);
+				qglActiveTextureARB(GL_TEXTURE3);
+				qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
+				KillFlags |= KILL_TMU3_POINTER;
+			}
+
 			if(is_dynamic && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
 						
 				if(brightest > 0) {
-					
-					glUniform1iARB( g_location_normalTexture, 3);
-					qglActiveTextureARB(GL_TEXTURE3);
-					qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
-					KillFlags |= KILL_TMU3_POINTER;
 					
 					glUniform3fARB( g_location_lightPosition, dl->origin[0], dl->origin[1], dl->origin[2]);
 					glUniform3fARB( g_location_lightColour, dl->color[0], dl->color[1], dl->color[2]);
 
 					glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
 					
+					glUniform1iARB( g_location_normal, 1);
 					glUniform1iARB( g_location_dynamic, 1);
 				}
-				else
+				else {
 					glUniform1iARB( g_location_dynamic, 0);
+					glUniform1iARB( g_location_normal, 1); 
+				}
 			}
-			else 
-				glUniform1iARB( g_location_dynamic, 0);
+			else {
+					glUniform1iARB( g_location_dynamic, 0);
+					glUniform1iARB( g_location_normal, 1); 
+			}
 		
 			glUniform1iARB( g_location_parallax, 1);
 			
@@ -822,6 +829,7 @@ dynamic:
 			glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
 			glUniform1iARB( g_location_dynamic, 1);
 			glUniform1iARB( g_location_parallax, 0);
+			glUniform1iARB( g_location_normal, 0); //not yet but probably
 			
 			R_AddGLSLShadedSurfToVArray (surf, scroll, true);
 
