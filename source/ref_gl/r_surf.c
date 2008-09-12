@@ -749,7 +749,9 @@ dynamic:
 			}
 		}
 
-		if(gl_parallaxmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) {
+		//parallax maps
+		if(gl_parallaxmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name) 
+			&& strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
 		
 			R_InitVArrays (VERT_MULTI_TEXTURED);
 
@@ -773,7 +775,7 @@ dynamic:
 				KillFlags |= KILL_TMU3_POINTER;
 			}
 
-			if(is_dynamic && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
+			if(is_dynamic) {
 						
 				if(brightest > 0) {
 					
@@ -782,26 +784,26 @@ dynamic:
 
 					glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
 					
-					glUniform1iARB( g_location_normal, 1);
 					glUniform1iARB( g_location_dynamic, 1);
 				}
-				else {
+				else 
 					glUniform1iARB( g_location_dynamic, 0);
-					glUniform1iARB( g_location_normal, 1); 
-				}
 			}
-			else {
-					glUniform1iARB( g_location_dynamic, 0);
-					glUniform1iARB( g_location_normal, 1); 
-			}
-		
+			else 
+				glUniform1iARB( g_location_dynamic, 0);
+				
 			glUniform1iARB( g_location_parallax, 1);
+			if(gl_specular->value)
+				glUniform1iARB( g_location_specular, 1);
+			else
+				glUniform1iARB( g_location_specular, 0);
 			
 			R_AddGLSLShadedSurfToVArray (surf, scroll, true);
 
 			glUseProgramObjectARB( NULL );
 
 		}
+		//normal mapped surface for dynamic lights
 		else if(is_dynamic && brightest > 0 && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
 					
 			R_InitVArrays (VERT_MULTI_TEXTURED);
@@ -829,13 +831,13 @@ dynamic:
 			glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
 			glUniform1iARB( g_location_dynamic, 1);
 			glUniform1iARB( g_location_parallax, 0);
-			glUniform1iARB( g_location_normal, 0); //not yet but probably
 			
 			R_AddGLSLShadedSurfToVArray (surf, scroll, true);
 
 			glUseProgramObjectARB( NULL );
 
 		}
+		//surface has no normalmap
 		else {
 		
 			GL_MBind( GL_TEXTURE0, image->texnum );
@@ -846,6 +848,7 @@ dynamic:
 			R_AddLightMappedSurfToVArray (surf, scroll);
 		}
 	}
+	//no glsl, standard render
 	else {
 		
 		GL_MBind( GL_TEXTURE0, image->texnum );

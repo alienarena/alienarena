@@ -179,6 +179,7 @@ extern cvar_t	*gl_ext_mtexcombine;
 // Vic - end
 extern cvar_t	*gl_normalmaps;
 extern cvar_t	*gl_parallaxmaps;
+extern cvar_t	*gl_specular;
 
 extern	cvar_t	*r_shaders;
 extern	cvar_t	*r_bloom;
@@ -506,10 +507,9 @@ extern GLuint      g_heightMapID;
 extern GLuint	   g_location_fog;
 extern GLuint	   g_location_parallax;
 extern GLuint	   g_location_dynamic;
-extern GLuint	   g_location_normal;
+extern GLuint	   g_location_specular;
 extern GLuint	   g_location_surfaceColor;
 extern GLuint	   g_location_lightPosition;
-extern GLuint	   g_location_worldlightPosition;
 extern GLuint	   g_location_lightColour;
 extern GLuint	   g_location_lightCutoffSquared;
 extern GLuint	   g_location_tangent;
