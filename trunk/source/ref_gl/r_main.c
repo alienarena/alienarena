@@ -65,10 +65,9 @@ GLuint		g_heightMapID = 0;
 GLuint		g_location_fog;
 GLuint	    g_location_parallax;
 GLuint		g_location_dynamic;
-GLuint	    g_location_normal;
+GLuint		g_location_specular;
 GLuint	    g_location_surfaceColor;
 GLuint	    g_location_lightPosition;
-GLuint		g_location_worldlightPosition;
 GLuint		g_location_lightColour;
 GLuint	    g_location_lightCutoffSquared;
 GLuint	    g_location_tangent;
@@ -88,6 +87,7 @@ glstate_t		gl_state;
 
 cvar_t	*gl_normalmaps;
 cvar_t	*gl_parallaxmaps;
+cvar_t  *gl_specular;
 cvar_t	*gl_arb_fragment_program; // jit
 cvar_t	*gl_glsl_shaders;
 
@@ -1538,6 +1538,7 @@ void R_Register( void )
 
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
 	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE); 
+	gl_specular = Cvar_Get("gl_specular", "0", CVAR_ARCHIVE);
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
@@ -2081,11 +2082,10 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_normalTexture = glGetUniformLocationARB( g_programObj, "NormalTexture" );
 		g_location_fog = glGetUniformLocationARB( g_programObj, "FOG" );
 		g_location_parallax = glGetUniformLocationARB( g_programObj, "PARALLAX" );
-		g_location_normal = glGetUniformLocationARB( g_programObj, "NORMAL" );
 		g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
+		g_location_specular = glGetUniformLocationARB( g_programObj, "SPECULAR" );
 		g_location_tangent = glGetUniformLocationARB( g_programObj, "sTangent" );
 		g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
-		g_location_worldlightPosition = glGetUniformLocationARB( g_programObj, "worldlightPosition" );
 		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
 		g_location_lightCutoffSquared = glGetUniformLocationARB( g_programObj, "lightCutoffSquared" );
 		g_location_surfaceColor = glGetUniformLocationARB( g_programObj, "surfaceColor" );
