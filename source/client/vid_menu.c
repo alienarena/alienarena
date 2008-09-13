@@ -29,6 +29,7 @@ extern cvar_t *scr_viewsize;
 extern cvar_t *r_bloom_intensity;
 extern cvar_t *gl_normalmaps;
 extern cvar_t *gl_parallaxmaps;
+extern cvar_t *gl_specular;
 extern cvar_t *gl_glsl_shaders;
 extern cvar_t *gl_modulate;
 
@@ -80,6 +81,7 @@ static menuaction_s		s_low_action;
 static menuaction_s		s_medium_action;
 static menuaction_s		s_high_action;
 static menuaction_s		s_highest_action;
+static menuaction_s		s_ultra_action;
 static menulist_s		s_bloom_box;
 static menuslider_s		s_bloom_slider;
 static menulist_s		s_reflect_box;
@@ -90,6 +92,7 @@ static menufield_s		s_height_field;
 static menufield_s		s_width_field;
 static menulist_s		s_normalmaps_box;
 static menulist_s		s_parallaxmaps_box;
+static menulist_s		s_specular_box;
 static menulist_s		s_glsl_box;
 
 static void DriverCallback( void *unused )
@@ -150,12 +153,24 @@ static void ParallaxCallback( void *s )
 		s_glsl_box.curvalue = s_parallaxmaps_box.curvalue;
 	}
 }
+static void SpecularCallback( void *s )
+{
+	Cvar_SetValue("gl_specular", s_specular_box.curvalue);
+	if(s_specular_box.curvalue) { //must turn this on for specular 
+		Cvar_SetValue("gl_glsl_shaders", s_parallaxmaps_box.curvalue);
+		s_glsl_box.curvalue = s_parallaxmaps_box.curvalue;
+		Cvar_SetValue("g_parallaxmaps", s_specular_box.curvalue);
+		s_parallaxmaps_box.curvalue = s_specular_box.curvalue;
+	}
+}
 static void GlslCallback( void *s )
 {
 	Cvar_SetValue("gl_glsl_shaders", s_glsl_box.curvalue);
 	if(!s_glsl_box.curvalue) { //must turn this on for parallax
 		Cvar_SetValue("gl_parallaxmaps", s_glsl_box.curvalue);
 		s_parallaxmaps_box.curvalue = s_glsl_box.curvalue;
+		Cvar_SetValue("gl_specular", s_glsl_box.curvalue);
+		s_specular_box.curvalue = s_glsl_box.curvalue;
 	}
 }
 static void SetLow( void *unused )
@@ -171,6 +186,7 @@ static void SetLow( void *unused )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 0);
+	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
@@ -194,6 +210,7 @@ static void SetMedium( void *unused )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 0);
+	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
@@ -218,6 +235,7 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_parallaxmaps", 0);
+	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
@@ -231,6 +249,31 @@ static void SetHigh( void *unused )
 
 static void SetHighest( void *unused )
 {
+	Cvar_SetValue("gl_reflection", 0);
+	Cvar_SetValue("r_bloom", 1);
+	Cvar_SetValue("r_bloom_intensity", 0.5);
+	Cvar_SetValue("gl_ext_mtexcombine", 1);
+	Cvar_SetValue("r_overbrightbits", 2);
+	Cvar_SetValue("gl_modulate", 2);
+	Cvar_SetValue("gl_picmip", 0);
+	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("vid_contrast", 1);
+	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_parallaxmaps", 1);
+	Cvar_SetValue("gl_specular", 0);
+	Cvar_SetValue("gl_glsl_shaders", 1);
+
+	//do other things that aren't in the vid menu per se, but are related "high end" effects
+	Cvar_SetValue("r_shaders", 1);
+	Cvar_SetValue("gl_shadows", 2);
+	Cvar_SetValue("gl_dynamic", 1);
+	Cvar_SetValue("gl_rtlights", 1);
+
+	VID_MenuInit();
+}
+
+static void SetUltra( void *unused )
+{
 	Cvar_SetValue("gl_reflection", 1);
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -242,6 +285,7 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_parallaxmaps", 1);
+	Cvar_SetValue("gl_specular", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
@@ -292,9 +336,10 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "r_overbrightbits", s_overbright_slider.curvalue);
 	Cvar_SetValue( "_windowed_mouse", s_windowed_mouse.curvalue);
 	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
-	Cvar_SetValue("gl_normalmaps", s_normalmaps_box.curvalue);
-	Cvar_SetValue("gl_parallaxmaps", s_parallaxmaps_box.curvalue);
-	Cvar_SetValue("gl_glsl_shaders", s_glsl_box.curvalue);
+	Cvar_SetValue( "gl_normalmaps", s_normalmaps_box.curvalue);
+	Cvar_SetValue( "gl_parallaxmaps", s_parallaxmaps_box.curvalue);
+	Cvar_SetValue( "gl_specular", s_specular_box.curvalue);
+	Cvar_SetValue( "gl_glsl_shaders", s_glsl_box.curvalue);
 	if(s_normalmaps_box.curvalue)
 		Cvar_SetValue("r_shaders", 1); //because without shaders on this is pointless(normalmaps
 									   //are handled by shaders now
@@ -380,6 +425,8 @@ void VID_MenuInit( void )
 		gl_normalmaps = Cvar_Get( "gl_normalmaps", "0", CVAR_ARCHIVE);
 	if (!gl_parallaxmaps)
 		gl_parallaxmaps = Cvar_Get( "gl_parallaxmaps", "0", CVAR_ARCHIVE);
+	if (!gl_specular)
+		gl_specular = Cvar_Get( "gl_specular", "0", CVAR_ARCHIVE);
 	if (!gl_glsl_shaders)
 		gl_glsl_shaders = Cvar_Get( "gl_glsl_shaders", "0", CVAR_ARCHIVE);
 
@@ -533,9 +580,18 @@ void VID_MenuInit( void )
 	s_parallaxmaps_box.itemnames = yesno_names;
 	s_parallaxmaps_box.generic.callback = ParallaxCallback;
 
+	s_specular_box.generic.type	= MTYPE_SPINCONTROL;
+	s_specular_box.generic.x		= 24;
+	s_specular_box.generic.y		= 200*scale;
+	s_specular_box.generic.name	= "specular highlights";
+	s_specular_box.curvalue = gl_specular->value;
+	s_specular_box.itemnames = yesno_names;
+	s_specular_box.generic.callback = SpecularCallback;
+
+
 	s_glsl_box.generic.type	= MTYPE_SPINCONTROL;
 	s_glsl_box.generic.x		= 24;
-	s_glsl_box.generic.y		= 200*scale;
+	s_glsl_box.generic.y		= 210*scale;
 	s_glsl_box.generic.name	= "use GLSL shaders";
 	s_glsl_box.curvalue = gl_glsl_shaders->value;
 	s_glsl_box.itemnames = yesno_names;
@@ -543,21 +599,21 @@ void VID_MenuInit( void )
 
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
 	s_finish_box.generic.x	= 24;
-	s_finish_box.generic.y	= 220*scale;
+	s_finish_box.generic.y	= 230*scale;
 	s_finish_box.generic.name	= "draw frame completely";
 	s_finish_box.curvalue = gl_finish->value;
 	s_finish_box.itemnames = yesno_names;
 
 	s_vsync_box.generic.type = MTYPE_SPINCONTROL;
     s_vsync_box.generic.x  = 24;
-    s_vsync_box.generic.y  = 230*scale;
+    s_vsync_box.generic.y  = 240*scale;
     s_vsync_box.generic.name       = "vertical sync";
     s_vsync_box.curvalue = gl_swapinterval->value;
     s_vsync_box.itemnames = onoff_names;
 
 	s_windowed_mouse.generic.type = MTYPE_SPINCONTROL;
 	s_windowed_mouse.generic.x  = 24;
-	s_windowed_mouse.generic.y  = 240*scale;
+	s_windowed_mouse.generic.y  = 250*scale;
 	s_windowed_mouse.generic.name   = "windowed mouse";
 	s_windowed_mouse.curvalue = _windowed_mouse->value;
 	s_windowed_mouse.itemnames = yesno_names;
@@ -565,31 +621,37 @@ void VID_MenuInit( void )
 	s_low_action.generic.type = MTYPE_ACTION;
 	s_low_action.generic.name = "low settings";
 	s_low_action.generic.x    = 24;
-	s_low_action.generic.y    = 260*scale;
+	s_low_action.generic.y    = 270*scale;
 	s_low_action.generic.callback = SetLow;
 
 	s_medium_action.generic.type = MTYPE_ACTION;
 	s_medium_action.generic.name = "medium settings";
 	s_medium_action.generic.x    = 24;
-	s_medium_action.generic.y    = 270*scale;
+	s_medium_action.generic.y    = 280*scale;
 	s_medium_action.generic.callback = SetMedium;
 
 	s_high_action.generic.type = MTYPE_ACTION;
 	s_high_action.generic.name = "high settings";
 	s_high_action.generic.x    = 24;
-	s_high_action.generic.y    = 280*scale;
+	s_high_action.generic.y    = 290*scale;
 	s_high_action.generic.callback = SetHigh;
 
 	s_highest_action.generic.type = MTYPE_ACTION;
 	s_highest_action.generic.name = "highest settings";
 	s_highest_action.generic.x    = 24;
-	s_highest_action.generic.y    = 290*scale;
+	s_highest_action.generic.y    = 300*scale;
 	s_highest_action.generic.callback = SetHighest;
+
+	s_ultra_action.generic.type = MTYPE_ACTION;
+	s_ultra_action.generic.name = "ultra settings";
+	s_ultra_action.generic.x    = 24;
+	s_ultra_action.generic.y    = 310*scale;
+	s_ultra_action.generic.callback = SetUltra;
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
 	s_apply_action.generic.x    = 24;
-	s_apply_action.generic.y    = 310*scale;
+	s_apply_action.generic.y    = 330*scale;
 	s_apply_action.generic.callback = ApplyChanges;
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
@@ -608,6 +670,7 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_tq_slider );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_normalmaps_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_parallaxmaps_box );
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_specular_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_glsl_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_finish_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_vsync_box );
@@ -617,6 +680,7 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_medium_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_high_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_highest_action);
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_ultra_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_apply_action);
 
 	Menu_Center( &s_opengl_menu );
@@ -649,7 +713,7 @@ void VID_MenuDraw (void)
 	Draw_GetPicSize( &w, &h, "m_video" );
 	w*=scale;
 	h*=scale;
-	Draw_AlphaStretchPic( viddef.width / 2 - w / 2, viddef.height /2 - 250*scale, w, h, "m_video", banneralpha );
+	Draw_AlphaStretchPic( viddef.width / 2 - w / 2, viddef.height /2 - 275*scale, w, h, "m_video", banneralpha );
 
 	/*
 	** move cursor to a reasonable starting position
