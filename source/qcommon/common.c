@@ -49,6 +49,7 @@ cvar_t	*developer;
 cvar_t	*timescale;
 cvar_t	*fixedtime;
 cvar_t	*logfile_active;	// 1 = buffer log, 2 = flush after each print
+cvar_t	*logfile_name;
 cvar_t	*showtrace;
 cvar_t	*dedicated;
 
@@ -135,14 +136,29 @@ void Com_Printf (char *fmt, ...)
 	Sys_Print(msg);
 #endif
 
+	// if logfile_active or logfile_name have been modified, close the current log file
+	if ( (logfile_active && logfile_active->modified || logfile_name && logfile_name->modified) && logfile ) {
+		fclose (logfile);
+		logfile = NULL;
+		if (logfile_active) {
+			logfile_active->modified = false;
+		}
+		if (logfile_name) {
+			logfile_name->modified = false;
+		}
+	}
+
 	// logfile
 	if (logfile_active && logfile_active->value)
 	{
-		char	name[MAX_QPATH];
+		char		name[MAX_QPATH];
+		const char 	*f_name;
 
 		if (!logfile)
 		{
-			Com_sprintf (name, sizeof(name), "%s/qconsole.log", FS_Gamedir ());
+			f_name = logfile_name ? logfile_name->string : "qconsole.log";
+			Com_sprintf (name, sizeof(name), "%s/%s", FS_Gamedir (), f_name);
+
 			if (logfile_active->value > 2)
 				logfile = fopen (name, "a");
 			else
@@ -1461,6 +1477,7 @@ void Qcommon_Init (int argc, char **argv)
 	timescale = Cvar_Get ("timescale", "1", 0);
 	fixedtime = Cvar_Get ("fixedtime", "0", 0);
 	logfile_active = Cvar_Get ("logfile", "3", CVAR_ARCHIVE);
+	logfile_name = Cvar_Get ("logname", "qconsole.log", CVAR_ARCHIVE);
 	showtrace = Cvar_Get ("showtrace", "0", 0);
 #ifdef DEDICATED_ONLY
 	dedicated = Cvar_Get ("dedicated", "1", CVAR_NOSET);

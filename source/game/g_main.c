@@ -106,6 +106,7 @@ cvar_t	*maxspectators;
 cvar_t	*maxentities;
 cvar_t	*g_select_empty;
 cvar_t	*dedicated;
+cvar_t	*motdfile;
 
 cvar_t	*filterban;
 

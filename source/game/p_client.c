@@ -1956,6 +1956,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 {
 
 	FILE	*motd_file;
+	char	motd_file_name[MAX_QPATH];
 	char	line[80];
 	char	motd[500];
 
@@ -2009,7 +2010,13 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	safe_bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
 
-	if ((motd_file = fopen("arena/motd.txt", "rb")) != NULL)
+	// get the name for the MOTD file
+	if ( motdfile && motdfile->string && motdfile->string[0] )
+		Com_sprintf (motd_file_name, sizeof(motd_file_name), "arena/%s", motdfile->string);
+	else
+		strcpy (motd_file_name, "arena/motd.txt");
+
+	if ((motd_file = fopen(motd_file_name, "rb")) != NULL)
 	{
 		// we successfully opened the file "motd.txt"
 		if ( fgets(motd, 500, motd_file) )
