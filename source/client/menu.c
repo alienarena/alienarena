@@ -3630,6 +3630,7 @@ static menufield_s	s_maxclients_field;
 static menufield_s	s_hostname_field;
 static menufield_s  s_mutators_action;
 static menulist_s   s_grapple_box;
+static menulist_s	s_antilag_box;
 static menulist_s   s_public_box;
 static menulist_s	s_dedicated_box;
 static menulist_s   s_skill_box;
@@ -4013,6 +4014,7 @@ void StartServerActionFunc( void *self )
 	}
 	Cvar_SetValue( "skill", s_skill_box.curvalue );
 	Cvar_SetValue( "grapple", s_grapple_box.curvalue);
+	Cvar_SetValue( "g_antilag", s_antilag_box.curvalue);
 
 //PGM
 	if(s_rules_box.curvalue == 0)
@@ -4158,7 +4160,7 @@ void StartServer_MenuInit( void )
 		"hard",
 		0
 	};
-	static const char *grapple[] =
+	static const char *offon[] =
 	{
 		"off",
 		"on",
@@ -4208,14 +4210,21 @@ void StartServer_MenuInit( void )
 	s_grapple_box.generic.x	= -8;
 	s_grapple_box.generic.y	= 52*scale + offset;
 	s_grapple_box.generic.name	= "grapple hook";
-	s_grapple_box.itemnames = grapple;
+	s_grapple_box.itemnames = offon;
 	s_grapple_box.curvalue = 0;
+
+	s_antilag_box.generic.type = MTYPE_SPINCONTROL;
+	s_antilag_box.generic.x	= -8;
+	s_antilag_box.generic.y	= 68*scale + offset;
+	s_antilag_box.generic.name	= "antilag";
+	s_antilag_box.itemnames = offon;
+	s_antilag_box.curvalue = 0;
 
 	s_timelimit_field.generic.type = MTYPE_FIELD;
 	s_timelimit_field.generic.name = "time limit ";
 	s_timelimit_field.generic.flags = QMF_NUMBERSONLY;
 	s_timelimit_field.generic.x	= 0;
-	s_timelimit_field.generic.y	= 68*scale + offset;
+	s_timelimit_field.generic.y	= 84*scale + offset;
 	s_timelimit_field.generic.statusbar = "0 = no limit";
 	s_timelimit_field.length = 3;
 	s_timelimit_field.visible_length = 3;
@@ -4225,7 +4234,7 @@ void StartServer_MenuInit( void )
 	s_fraglimit_field.generic.name = "frag limit ";
 	s_fraglimit_field.generic.flags = QMF_NUMBERSONLY;
 	s_fraglimit_field.generic.x	= 0;
-	s_fraglimit_field.generic.y	= 86*scale + offset;
+	s_fraglimit_field.generic.y	= 102*scale + offset;
 	s_fraglimit_field.generic.statusbar = "0 = no limit";
 	s_fraglimit_field.length = 3;
 	s_fraglimit_field.visible_length = 3;
@@ -4241,7 +4250,7 @@ void StartServer_MenuInit( void )
 	s_maxclients_field.generic.name = "max players ";
 	s_maxclients_field.generic.flags = QMF_NUMBERSONLY;
 	s_maxclients_field.generic.x	= 0;
-	s_maxclients_field.generic.y	= 104*scale + offset;
+	s_maxclients_field.generic.y	= 120*scale + offset;
 	s_maxclients_field.generic.statusbar = NULL;
 	s_maxclients_field.length = 3;
 	s_maxclients_field.visible_length = 3;
@@ -4254,7 +4263,7 @@ void StartServer_MenuInit( void )
 	s_hostname_field.generic.name = "hostname ";
 	s_hostname_field.generic.flags = 0;
 	s_hostname_field.generic.x	= 0;
-	s_hostname_field.generic.y	= 122*scale + offset;
+	s_hostname_field.generic.y	= 138*scale + offset;
 	s_hostname_field.generic.statusbar = NULL;
 	s_hostname_field.length = 12;
 	s_hostname_field.visible_length = 12;
@@ -4262,21 +4271,21 @@ void StartServer_MenuInit( void )
 
 	s_public_box.generic.type = MTYPE_SPINCONTROL;
 	s_public_box.generic.x	= -8;
-	s_public_box.generic.y	= 140*scale + offset;
+	s_public_box.generic.y	= 154*scale + offset;
 	s_public_box.generic.name = "public server";
 	s_public_box.itemnames = public_yn;
 	s_public_box.curvalue = 1;
 
 	s_dedicated_box.generic.type = MTYPE_SPINCONTROL;
 	s_dedicated_box.generic.x	= -8;
-	s_dedicated_box.generic.y	= 150*scale + offset;
+	s_dedicated_box.generic.y	= 164*scale + offset;
 	s_dedicated_box.generic.name = "dedicated server";
 	s_dedicated_box.itemnames = public_yn;
 	s_dedicated_box.curvalue = 0;
 
 	s_skill_box.generic.type = MTYPE_SPINCONTROL;
 	s_skill_box.generic.x	= -8;
-	s_skill_box.generic.y	= 160*scale + offset;
+	s_skill_box.generic.y	= 174*scale + offset;
 	s_skill_box.generic.name	= "skill level";
 	s_skill_box.itemnames = skill;
 	s_skill_box.curvalue = 1;
@@ -4284,7 +4293,7 @@ void StartServer_MenuInit( void )
 	s_startserver_dmoptions_action.generic.type = MTYPE_ACTION;
 	s_startserver_dmoptions_action.generic.name	= " deathmatch and bot flags";
 	s_startserver_dmoptions_action.generic.x	= 212*scale;
-	s_startserver_dmoptions_action.generic.y	= 182*scale + offset;
+	s_startserver_dmoptions_action.generic.y	= 196*scale + offset;
 	s_startserver_dmoptions_action.generic.cursor_offset = -8;
 	s_startserver_dmoptions_action.generic.statusbar = NULL;
 	s_startserver_dmoptions_action.generic.callback = DMOptionsFunc;
@@ -4292,7 +4301,7 @@ void StartServer_MenuInit( void )
 	s_startserver_start_action.generic.type = MTYPE_ACTION;
 	s_startserver_start_action.generic.name	= " begin";
 	s_startserver_start_action.generic.x	= 64*scale;
-	s_startserver_start_action.generic.y	= 200*scale + offset;
+	s_startserver_start_action.generic.y	= 214*scale + offset;
 	s_startserver_start_action.generic.cursor_offset = -8;
 	s_startserver_start_action.generic.callback = StartServerActionFunc;
 
@@ -4308,6 +4317,7 @@ void StartServer_MenuInit( void )
 	Menu_AddItem( &s_startserver_menu, &s_rules_box );
 	Menu_AddItem( &s_startserver_menu, &s_mutators_action );
 	Menu_AddItem( &s_startserver_menu, &s_grapple_box );
+	Menu_AddItem( &s_startserver_menu, &s_antilag_box );
 	Menu_AddItem( &s_startserver_menu, &s_timelimit_field );
 	Menu_AddItem( &s_startserver_menu, &s_fraglimit_field );
 	Menu_AddItem( &s_startserver_menu, &s_maxclients_field );
