@@ -563,7 +563,7 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 							green *= stage->colormap.green/255.0;
 							blue *= stage->colormap.blue/255.0;
 						}
-
+					
 						VArray[5] = red;
 						VArray[6] = green;
 						VArray[7] = blue;
