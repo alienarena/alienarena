@@ -994,8 +994,6 @@ void R_DrawInlineBModel (entity_t *e)
 		GL_TexEnv( GL_MODULATE );
 	}
 
-	r_normalsurfaces = NULL;
-
 	//
 	// draw texture
 	//
@@ -1093,15 +1091,7 @@ void R_DrawBrushModel (entity_t *e)
 	// if this is a reflection we're drawing we need to flip the vertical position across the water
 	if (g_drawing_refl)
 	{
-		/*
-		vec3_t tmp;
-		VectorCopy(r_newrefdef.vieworg, tmp);
-		tmp[2] = (2*g_refl_Z[g_active_refl]) - tmp[2];	// flip
-		VectorSubtract(tmp, e->origin, modelorg);
-		*/
-
-		// equivalent, faster code
-        modelorg[0] = r_newrefdef.vieworg[0] - e->origin[0];
+		modelorg[0] = r_newrefdef.vieworg[0] - e->origin[0];
         modelorg[1] = r_newrefdef.vieworg[1] - e->origin[1];
         modelorg[2] = ((2*g_refl_Z[g_active_refl]) - r_newrefdef.vieworg[2])
         	- e->origin[2];
