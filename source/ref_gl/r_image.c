@@ -1098,43 +1098,53 @@ Applies brightness and contrast to the specified image while optionally computin
 the image's average color.  Also handles image inversion and monochrome.  This is 
 all munged into one function to reduce loops on level load.
 */
-void R_FilterTexture(unsigned *in, int width, int height){
-	int i, j, c;
-	byte *p;
-	float f;
-	
-	p = (byte *)in;
-	c = width * height;
-	
-	for(i = 0; i < c; i++, p+= 4){
-		
-		for(j = 0; j < 3; j++){
-			
-			// first brightness
-			f = p[j] / 255.0;  // as float
-			
-			f *= vid_gamma->value;
-			
-			if(f < 0)
-				f = 0;
-			
-			// then contrast
-			f -= 0.5;  // normalize to -0.5 through 0.5
-			
-			f *= vid_contrast->value;  // scale
-			
-			f += 0.5;
-			f *= 255;  // back to byte
-			
-			if(f > 255)  // clamp
-				f = 255;
-			else if(f < 0)
-				f = 0;
-			
-			p[j] = (byte)f;
-			
+void R_FilterTexture(unsigned *in, int width, int height)
+{
+	byte *pcb;
+	int count;
+	float fcb;
+	int ix;
+	static byte lut[256];
+	static int first_time = 1;
+	static float lut_gamma = 0.0f;
+	static float lut_contrast = 0.0f;
+
+	if ( lut_gamma != vid_gamma->value || lut_contrast != vid_contrast->value || first_time ) {
+		first_time = 0;
+		lut_gamma = vid_gamma->value;
+		lut_contrast = vid_contrast->value;
+		// build lookup table
+		for ( ix = 0; ix < sizeof(lut); ix++ ) {
+			fcb = (float)ix / 255.0f;
+			fcb *= lut_gamma;
+			if (fcb < 0.0f )
+				fcb = 0.0f;
+			fcb -= 0.5f;
+			fcb *= lut_contrast;
+			fcb += 0.5f;
+			fcb *= 255.0f;
+			if ( fcb >= 255.0f )
+				lut[ix] = 255 ;
+			else if (fcb <= 0.0f )
+				lut[ix] = 0;
+			else
+				lut[ix] = (byte)fcb;
 		}
 	}
+
+	// apply to image
+	pcb = (byte*)in;
+	count = width * height;
+	while ( count-- ) {
+		*pcb = lut[*pcb];
+		++pcb;
+		*pcb = lut[*pcb];
+		++pcb;
+		*pcb = lut[*pcb];
+		++pcb;
+		++pcb;
+	}
+
 }
 
 int		upload_width, upload_height;
