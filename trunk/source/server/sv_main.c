@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "server.h"
 
-netadr_t	master_adr[MAX_MASTERS];	// address of group servers
+master_sv_t	master_status[MAX_MASTERS];	// status of master servers
 
 client_t	*sv_client;			// current client
 
@@ -275,7 +275,18 @@ SVC_Ack
 */
 void SVC_Ack (void)
 {
+	int		i;
 	Com_Printf ("Ping acknowledge from %s\n", NET_AdrToString(net_from));
+	for ( i = 0 ; i < MAX_MASTERS ; i ++ ) {
+		if ( master_status[i].name[0] == 0 )
+			break;
+
+		if ( master_status[i].addr.port == 0 )
+			continue;
+
+		if ( NET_CompareAdr (master_status[i].addr, net_from) )
+			master_status[i].last_ping_ack = 2;
+	}
 }
 
 /*
@@ -1056,8 +1067,7 @@ let it know we are alive, and log information
 #define	HEARTBEAT_SECONDS	300
 void Master_Heartbeat (void)
 {
-	char		*string;
-	int			i;
+	char		string[MAX_MSGLEN];
 
 	// pgm post3.19 change, cvar pointer not validated before dereferencing
 
@@ -1074,33 +1084,8 @@ void Master_Heartbeat (void)
 	svs.last_heartbeat = svs.realtime;
 
 	// send the same string that we would give for a status OOB command
-	string = SV_StatusString();
-
-	sv_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
-	
-	//re resolve main master server ip
-	if (!NET_StringToAdr (sv_master->string, &master_adr[0]))
-	{
-		Com_Printf ("Bad Master IP");
-	}
-	if (master_adr[0].port == 0)
-		master_adr[0].port = BigShort (PORT_MASTER);
-
-	// send to group master
-	if(dedicated || dedicated->value) {
-
-		for (i=0 ; i<MAX_MASTERS ; i++)
-			if (master_adr[i].port)
-			{
-				Com_Printf ("Sending heartbeat to %s\n", NET_AdrToString (master_adr[i]));
-				Netchan_OutOfBandPrint (NS_SERVER, master_adr[i], "heartbeat\n%s", string);
-			}
-	}
-	else {
-	
-		Com_Printf ("Sending heartbeat to %s\n", NET_AdrToString (master_adr[0]));
-		Netchan_OutOfBandPrint (NS_SERVER, master_adr[0], "heartbeat\n%s", string);
-	}
+	Com_sprintf (string, MAX_MSGLEN, "heartbeat\n%s", SV_StatusString ());
+	SV_HandleMasters (string, "heartbeat");
 }
 
 /*
@@ -1112,35 +1097,110 @@ Informs all masters that this server is going down
 */
 void Master_Shutdown (void)
 {
-	int			i;
 
 	// pgm post3.19 change, cvar pointer not validated before dereferencing
 	if (!public_server || !public_server->value)
 		return;		// a private dedicated game
 
-	// send to group master
-	if(dedicated || dedicated->value) {
-		for (i=0 ; i<MAX_MASTERS ; i++)
-			if (master_adr[i].port)
-			{
-				if (i > 0)
-					Com_Printf ("Sending heartbeat to %s\n", NET_AdrToString (master_adr[i]));
-				Netchan_OutOfBandPrint (NS_SERVER, master_adr[i], "shutdown");
-			}
-	}
-	else {
+	SV_HandleMasters ("shutdown", "shutdown");
+}
 
-		sv_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
-		if (!NET_StringToAdr (sv_master->string, &master_adr[0]))
+
+/*
+=================
+SV_HandleMasters
+
+Sends a message to all master servers, looking up the
+master servers' addresses if appropriate.
+=================
+*/
+void SV_HandleMasters (const char *message, const char *console_message)
+{
+	int		i;
+	qboolean	updated_master;
+
+	// if the server is not dedicated, we need to check cl_master
+	if ( !( dedicated && dedicated->value ) )
+	{
+		if ( !sv_master )
 		{
-			Com_Printf ("Bad Master IP");
+			sv_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
+			updated_master = true;
 		}
-		if (master_adr[0].port == 0)
-			master_adr[0].port = BigShort (PORT_MASTER);
-		Com_Printf ("Sending heartbeat to %s\n", NET_AdrToString (master_adr[0]));
-		Netchan_OutOfBandPrint (NS_SERVER, master_adr[0], "shutdown");
+		else if ( sv_master->modified )
+		{
+			sv_master->modified = false;
+			updated_master = true;
+		}
+		else
+		{
+			updated_master = false;
+		}
+
+		if ( updated_master )
+		{
+			memset (&master_status[0], 0, sizeof(master_sv_t));
+			strncpy (master_status[0].name, sv_master->string, MAX_MASTER_LEN);
+		}
+	}
+
+	// first we need to loop through the master servers
+	// in order to find the ones that need (re-)resolving
+	for ( i = 0; i < MAX_MASTERS ; i ++ )
+	{
+		if ( master_status[i].name[0] == 0 )
+			break;
+
+		// if we already sent a ping and didn't get
+		// any acknowledgement packet, we need to try
+		// re-resolving
+		if ( master_status[i].resolved && master_status[i].last_ping_sent > master_status[i].last_ping_ack )
+		{
+			Com_Printf ("No acknowledgement from %s - re-resolving\n", master_status[i].name);
+			master_status[i].resolved = false;
+		}
+
+		if ( master_status[i].resolved )
+			continue;
+
+		if (!NET_StringToAdr (master_status[i].name, &master_status[i].addr))
+		{
+			// resolution failed, did we say so already?
+			if ( !master_status[i].failed )
+			{
+				Com_Printf ("Bad master address: %s\n", master_status[i].name);
+				master_status[i].failed = true;
+			}
+			master_status[i].addr.port = 0;
+		}
+		else
+		{
+			master_status[i].failed = false;
+			master_status[i].resolved = true;
+
+			if (master_status[i].addr.port == 0)
+				master_status[i].addr.port = BigShort (PORT_MASTER);
+
+			Com_Printf ("Master server at %s\n", NET_AdrToString (master_status[i].addr));
+		}
+	}
+
+	// send the message we needed to send
+	for ( i = 0 ; i < MAX_MASTERS ; i ++ )
+	{
+		if ( master_status[i].name[0] == 0 )
+			break;
+
+		if ( master_status[i].addr.port == 0 )
+			continue;
+
+		Com_Printf ("Sending %s to %s\n", console_message, NET_AdrToString (master_status[i].addr));
+		Netchan_OutOfBandPrint (NS_SERVER, master_status[i].addr, "%s", message);
+		master_status[i].last_ping_sent = 1;
+		master_status[i].last_ping_ack = 0;
 	}
 }
+
 
 //============================================================================
 

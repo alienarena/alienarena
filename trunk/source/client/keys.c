@@ -25,8 +25,8 @@ key up events are sent even if in console mode
 
 */
 
-#define		MAXCMDLINE	256
 char	key_lines[32][MAXCMDLINE];
+int		key_linelen;
 int		key_linepos;
 int		shift_down=false;
 int	anykeydown;
@@ -178,11 +178,12 @@ void CompleteCommand (void)
         if (cmd) {
                 key_lines[edit_line][1] = '/';
                 Q_strncpyz(key_lines[edit_line] + 2, cmd, sizeof(key_lines[0]));
-                key_linepos = strlen(cmd) + 2;
+                key_linelen = key_linepos = strlen(cmd) + 2;
                 if (Cmd_IsComplete(cmd)) {
                         key_lines[edit_line][key_linepos] = ' ';
                         key_linepos++;
                         key_lines[edit_line][key_linepos] = 0;
+			key_linelen++;
                 } else {
                         key_lines[edit_line][key_linepos] = 0;
                 }
@@ -199,6 +200,7 @@ Interactive line editing and console scrollback
 */
 void Key_Console (int key)
 {
+	char	buffer[MAXCMDLINE];
 
 	switch ( key )
 	{
@@ -255,31 +257,23 @@ void Key_Console (int key)
 		{
 			int i;
 
-			strtok( cbd, "\n\r\b" );
+			// strtok( cbd, "\n\r\b" ); // useless (BlackIce)
 
 			i = strlen( cbd );
-			if ( i + key_linepos >= MAXCMDLINE)
-				i= MAXCMDLINE - key_linepos;
+			if ( i + key_linelen >= MAXCMDLINE)
+				i= MAXCMDLINE - key_linelen;
 
 			if ( i > 0 )
 			{
 				cbd[i]=0;
 				strcat( key_lines[edit_line], cbd );
 				key_linepos += i;
+			       	key_linelen += i;
 			}
 			free( cbd );
 		}
 
 		return;
-	}
-
-	if ( key == 'l' )
-	{
-		if ( keydown[K_CTRL] )
-		{
-			Cbuf_AddText ("clear\n");
-			return;
-		}
 	}
 
 	if ( key == K_ENTER || key == K_KP_ENTER )
@@ -294,7 +288,7 @@ void Key_Console (int key)
 		edit_line = (edit_line + 1) & 31;
 		history_line = edit_line;
 		key_lines[edit_line][0] = ']';
-		key_linepos = 1;
+		key_linelen = key_linepos = 1;
 		if (cls.state == ca_disconnected)
 			SCR_UpdateScreen ();	// force an update, because the command
 									// may take some time
@@ -307,10 +301,40 @@ void Key_Console (int key)
 		return;
 	}
 
-	if ( ( key == K_BACKSPACE ) || ( key == K_LEFTARROW ) || ( key == K_KP_LEFTARROW ) || ( ( key == 'h' ) && ( keydown[K_CTRL] ) ) )
+	if ( ( key == K_BACKSPACE ) || ( ( key == 'h' ) && ( keydown[K_CTRL] ) ) )
 	{
-		if (key_linepos > 1)
+		if (key_linepos > 1) {
+			// remove character at key_linepos
+			if ( key_linelen == key_linepos )
+			{
+				key_lines[edit_line][key_linelen - 1] = 0;
+			}
+			else
+			{
+				memcpy (buffer, key_lines[edit_line], key_linepos - 1);
+				memcpy (buffer + key_linepos - 1, key_lines[edit_line] + key_linepos, key_linelen - key_linepos);
+				buffer[key_linelen - 1] = 0;
+				memcpy (key_lines[edit_line], buffer, MAXCMDLINE);
+			}
 			key_linepos--;
+			key_linelen--;
+		}
+		return;
+	}
+
+	if ( ( key == K_LEFTARROW ) || ( key == K_KP_LEFTARROW ) )
+	{
+		if (key_linepos > 1) {
+			key_linepos--;
+		}
+		return;
+	}
+
+	if ( ( key == K_RIGHTARROW ) || ( key == K_KP_RIGHTARROW ) )
+	{
+		if (key_linepos < key_linelen) {
+			key_linepos++;
+		}
 		return;
 	}
 
@@ -325,7 +349,7 @@ void Key_Console (int key)
 		if (history_line == edit_line)
 			history_line = (edit_line+1)&31;
 		strcpy(key_lines[edit_line], key_lines[history_line]);
-		key_linepos = strlen(key_lines[edit_line]);
+		key_linelen = key_linepos = strlen(key_lines[edit_line]);
 		return;
 	}
 
@@ -342,12 +366,12 @@ void Key_Console (int key)
 		if (history_line == edit_line)
 		{
 			key_lines[edit_line][0] = ']';
-			key_linepos = 1;
+			key_linelen = key_linepos = 1;
 		}
 		else
 		{
 			strcpy(key_lines[edit_line], key_lines[history_line]);
-			key_linepos = strlen(key_lines[edit_line]);
+			key_linelen = key_linepos = strlen(key_lines[edit_line]);
 		}
 		return;
 	}
@@ -368,24 +392,64 @@ void Key_Console (int key)
 
 	if (key == K_HOME || key == K_KP_HOME )
 	{
-		con.display = con.current - con.totallines + 10;
+		if ( keydown[K_CTRL] )
+			con.display = con.current - con.totallines + 10;
+		else
+			key_linepos = 1;
 		return;
 	}
 
 	if (key == K_END || key == K_KP_END )
 	{
-		con.display = con.current;
+		if ( keydown[K_CTRL] )
+			con.display = con.current;
+		else
+			key_linepos = key_linelen;
 		return;
 	}
 
 	if (key < 32 || key > 127)
 		return;	// non printable
 
-	if (key_linepos < MAXCMDLINE-1)
+	if ( keydown[K_CTRL] )
 	{
-		key_lines[edit_line][key_linepos] = key;
+		switch ( key )
+		{
+		case 'a':
+		case 'A':
+			key_linepos = 1;
+			break;
+		case 'e':
+		case 'E':
+			key_linepos = key_linelen;
+			break;
+		case 'l':
+		case 'L':
+			Cbuf_AddText ("clear\n");
+			break;
+		}
+		return;
+	}
+
+	if (key_linelen < MAXCMDLINE-1)
+	{
+		if (key_linepos == key_linelen)
+		{
+			// end of the line, append character
+			key_lines[edit_line][key_linepos] = key;
+			key_lines[edit_line][key_linepos + 1] = 0;
+		}
+		else
+		{
+			// insert character
+			memcpy (buffer, key_lines[edit_line], key_linepos);
+			buffer[key_linepos] = key;
+			memcpy (buffer + key_linepos + 1, key_lines[edit_line] + key_linepos, key_linelen - key_linepos);
+			buffer[key_linelen + 1] = 0;
+			memcpy (key_lines[edit_line], buffer, MAXCMDLINE);
+		}
 		key_linepos++;
-		key_lines[edit_line][key_linepos] = 0;
+		key_linelen++;
 	}
 
 }
@@ -657,7 +721,7 @@ void Key_Init (void)
 		key_lines[i][0] = ']';
 		key_lines[i][1] = 0;
 	}
-	key_linepos = 1;
+	key_linelen = key_linepos = 1;
 
 //
 // init ascii characters in console mode

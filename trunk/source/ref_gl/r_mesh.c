@@ -159,7 +159,7 @@ float calcEntAlpha (float alpha, vec3_t point)
 
 extern GLuint normalisationCubeMap;
 
-void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
+void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 {
 	daliasframe_t	*frame, *oldframe;
 	dtrivertx_t	*v, *ov, *verts;
@@ -180,13 +180,18 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	float   *lerp;
 	float	ramp = 1.0;
 
-	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
-		+ currententity->frame * paliashdr->framesize);
+	if(lerped)
+		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+			+ currententity->frame * paliashdr->framesize);
+	else
+		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
 	verts = v = frame->verts;
 
-	oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
-		+ currententity->oldframe * paliashdr->framesize);
-	ov = oldframe->verts;
+	if(lerped) {
+		oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+			+ currententity->oldframe * paliashdr->framesize);
+		ov = oldframe->verts;
+	}
 
 	startorder = order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
 
@@ -212,29 +217,34 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) )
 		GL_Bind(r_shelltexture->texnum);  // add this line
 
-	frontlerp = 1.0 - backlerp;
+	if(lerped) {
+		frontlerp = 1.0 - backlerp;
 
-	// move should be the delta back to the previous frame * backlerp
-	VectorSubtract (currententity->oldorigin, currententity->origin, delta);
-	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
-
-	move[0] = DotProduct (delta, vectors[0]);	// forward
-	move[1] = -DotProduct (delta, vectors[1]);	// left
-	move[2] = DotProduct (delta, vectors[2]);	// up
-
-	VectorAdd (move, oldframe->translate, move);
-
-	for (i=0 ; i<3 ; i++)
-	{
-		move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
-		frontv[i] = frontlerp*frame->scale[i];
-		backv[i] = backlerp*oldframe->scale[i];
+		// move should be the delta back to the previous frame * backlerp
+		VectorSubtract (currententity->oldorigin, currententity->origin, delta);
 	}
 
-	if(currententity->flags & RF_VIEWERMODEL) { //lerp the vertices for self shadows, and leave
-		lerp = s_lerped[0];
-		GL_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
-		return;
+	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
+
+	if(lerped) {
+		move[0] = DotProduct (delta, vectors[0]);	// forward
+		move[1] = -DotProduct (delta, vectors[1]);	// left
+		move[2] = DotProduct (delta, vectors[2]);	// up
+
+		VectorAdd (move, oldframe->translate, move);
+
+		for (i=0 ; i<3 ; i++)
+		{
+			move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
+			frontv[i] = frontlerp*frame->scale[i];
+			backv[i] = backlerp*oldframe->scale[i];
+		}
+
+		if(currententity->flags & RF_VIEWERMODEL) { //lerp the vertices for self shadows, and leave
+			lerp = s_lerped[0];
+			GL_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
+			return;
+		}
 	}
 
 	VectorSubtract(currententity->origin, lightspot, lightdir);
@@ -275,17 +285,32 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				else
 					shellscale = 1;
 				
-				VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * POWERSUIT_SCALE * shellscale;;
-				VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * POWERSUIT_SCALE * shellscale;;
-				VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * POWERSUIT_SCALE * shellscale;;
+				if(lerped) {
+					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * POWERSUIT_SCALE * shellscale;;
+					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * POWERSUIT_SCALE * shellscale;;
+					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * POWERSUIT_SCALE * shellscale;;
 
-				VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
-				VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
+					VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
+					VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
-				VArray[5] = shadelight[0];
-				VArray[6] = shadelight[1];
-				VArray[7] = shadelight[2];
-				VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);		
+					VArray[5] = shadelight[0];
+					VArray[6] = shadelight[1];
+					VArray[7] = shadelight[2];
+					VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);		
+				}
+				else {
+					VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
+					VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
+					VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+
+					VArray[3] = (currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f);
+					VArray[4] = currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
+
+					VArray[5] = shadelight[0];
+					VArray[6] = shadelight[1];
+					VArray[7] = shadelight[2];
+					VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);		
+				}
 
 				// increment pointer and counter
 				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
@@ -326,20 +351,37 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 			{
 				// texture coordinates come from the draw list
 				index_xyz = order[2];
-				
-				GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
-				
-				VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
-				VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
-				VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
+												
+				if(lerped) {
+					GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 
-				VArray[3] = ((float *) order)[0];
-				VArray[4] = ((float *) order)[1];
+					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
+					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
+					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
 
-				VArray[5] = lightcolor[0];
-				VArray[6] = lightcolor[1];
-				VArray[7] = lightcolor[2];
-				VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);				
+					VArray[3] = ((float *) order)[0];
+					VArray[4] = ((float *) order)[1];
+
+					VArray[5] = lightcolor[0];
+					VArray[6] = lightcolor[1];
+					VArray[7] = lightcolor[2];
+					VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);			
+				}
+				else {
+					GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+
+					VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
+					VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
+					VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+
+					VArray[3] = ((float *) order)[0];
+					VArray[4] = ((float *) order)[1];
+
+					VArray[5] = lightcolor[0];
+					VArray[6] = lightcolor[1];
+					VArray[7] = lightcolor[2];
+					VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);			
+				}
 
 				// increment pointer and counter
 				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
@@ -517,14 +559,25 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					
 					index_xyz = order[2];
 
-					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
-					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
-					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
+					if(lerped) {
 
-					for (k=0; k<3; k++)
-					normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
-					( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
-					r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
+						VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
+						VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
+						VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
+
+						for (k=0; k<3; k++)
+						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
+						( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
+						r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
+					}
+					else {
+						VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
+						VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
+						VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+
+						for (k=0;k<3;k++)
+						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
+					}
 					VectorNormalize ( normal );
 			
 					if (stage->envmap)
@@ -546,12 +599,20 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 					{
 						float red = 1, green = 1, blue = 1, nAlpha;
 
-						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-						calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
+						if(lerped) 
+							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
+								calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
+						else
+							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
+								calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
+
 
 						if (stage->lightmap && !stage->normalmap)
 						{
-							GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+							if(lerped)
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+							else
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 							red = lightcolor[0] * ramp;
 							green = lightcolor[1] * ramp;
 							blue = lightcolor[2] * ramp;	
@@ -581,424 +642,6 @@ void GL_DrawAliasFrameLerp (dmdl_t *paliashdr, float backlerp)
 				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
 					qglDrawArrays(mode,0,va);
 							
-				qglColor4f(1,1,1,1);
-				if (stage->colormap.enabled)
-					qglEnable (GL_TEXTURE_2D);
-
-				if(stage->normalmap) {
-
-					R_KillNormalTMUs();
-
-					ramp = 1.0;
-			
-					// restore the original blend mode
-					qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-					// switch off blending
-					qglDisable (GL_BLEND);
-					qglDepthMask (GL_TRUE);
-				}
-
-				stage=stage->next;
-			}
-
-		}
-
-		if (depthmaskrscipt)
-			qglDepthMask(true);
-	}
-
-	GLSTATE_DISABLE_ALPHATEST
-	GLSTATE_DISABLE_BLEND
-	GLSTATE_DISABLE_TEXGEN
-
-	qglDisableClientState( GL_COLOR_ARRAY );
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
-
-	R_KillVArrays ();
-
-	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
-		qglEnable( GL_TEXTURE_2D );
-}
-
-//no lerping, static mesh
-void GL_DrawAliasFrame (dmdl_t *paliashdr)
-{
-	daliasframe_t	*frame;
-	dtrivertx_t	*v, *verts;
-	int		*order, *startorder, *tmp_order;
-	int		count, tmp_count;
-	float	alpha, basealpha;
-	vec3_t	vectors[3];
-	int		i;
-	int		index_xyz;
-	qboolean depthmaskrscipt = false, is_trans = false;
-	rscript_t *rs = NULL;
-	rs_stage_t *stage = NULL;
-	int		va = 0;
-	float mode;
-	vec3_t lightcolor;
-	float ramp = 1.0;
-
-	if(currententity->flags & RF_VIEWERMODEL) { 
-		return;
-	}
-
-	frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
-	verts = v = frame->verts;
-	
-	startorder = order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
-
-	if (r_shaders->value)
-			rs=(rscript_t *)currententity->script;
-
-	VectorCopy(shadelight, lightcolor);
-	for (i=0;i<model_dlights_num;i++)
-		VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
-	VectorNormalize(lightcolor);
-
-	if (currententity->flags & RF_TRANSLUCENT) {
-		basealpha = alpha = currententity->alpha;
-
-		rs=(rscript_t *)rs_glass;
-		if(!rs)
-			GL_Bind(r_reflecttexture->texnum);
-	}
-	else
-		basealpha = alpha = 1.0;
-
-	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
-
-	// PMM - added double shell
-	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) )
-		GL_Bind(r_shelltexture->texnum);  // add this line
-
-	VectorSubtract(currententity->origin, lightspot, lightdir);
-		VectorNormalize ( lightdir );
-
-	qglEnableClientState( GL_COLOR_ARRAY );
-
-	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
-	{
-		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
-		R_InitVArrays (VERT_COLOURED_TEXTURED);
-		while (1)
-		{
-			// get the vertex count and primitive type
-			count = *order++;
-			va=0;
-			VArray = &VArrayVerts[0];
-
-			if (!count)
-				break;		// done
-			if (count < 0)
-			{
-				count = -count;
-				mode=GL_TRIANGLE_FAN;
-			}
-			else
-				mode=GL_TRIANGLE_STRIP;
-
-			do
-			{
-				// texture coordinates come from the draw list
-				index_xyz = order[2];
-				
-				VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-				VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-				VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
-
-				VArray[3] = (currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f);
-				VArray[4] = currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
-
-				VArray[5] = shadelight[0];
-				VArray[6] = shadelight[1];
-				VArray[7] = shadelight[2];
-				VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);		
-
-				// increment pointer and counter
-				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
-				
-				va++;
-				order += 3;
-			} while (--count);
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-				qglDrawArrays(mode,0,va);
-		}
-	}
-	else if(!rs)
-	{
-		alpha = basealpha;
-		R_InitVArrays (VERT_COLOURED_TEXTURED);
-		while (1)
-		{
-
-			// get the vertex count and primitive type
-			count = *order++;
-			va=0;
-			VArray = &VArrayVerts[0];
-
-			if (!count)
-				break;		// done
-			if (count < 0)
-			{
-				count = -count;
-				mode=GL_TRIANGLE_FAN;
-			}
-			else
-				mode=GL_TRIANGLE_STRIP;
-
-			tmp_count=count;
-			tmp_order=order;
-
-			do
-			{
-				// texture coordinates come from the draw list
-				index_xyz = order[2];
-				
-				GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
-	
-				VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-				VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-				VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
-
-				VArray[3] = ((float *) order)[0];
-				VArray[4] = ((float *) order)[1];
-
-				VArray[5] = lightcolor[0];
-				VArray[6] = lightcolor[1];
-				VArray[7] = lightcolor[2];
-				VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);				
-
-				// increment pointer and counter
-				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
-				va++;
-				order += 3;
-			} while (--count);
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-				qglDrawArrays(mode,0,va);
-					
-		}
-
-	}
-	else
-	{
-
-		if (rs->stage && rs->stage->has_alpha)
-		{
-			is_trans = true;
-			depthmaskrscipt = true;
-		}
-
-		if (depthmaskrscipt)
-			qglDepthMask(false);
-
-		while (1)
-		{
-			count = *order++;
-			if (!count)
-				break;		// done
-			// get the vertex count and primitive type
-			if (count < 0)
-			{
-				count = -count;
-				mode=GL_TRIANGLE_FAN;
-			}
-			else
-			{
-				mode=GL_TRIANGLE_STRIP;
-			}
-
-			stage=rs->stage;
-			tmp_count=count;
-			tmp_order=order;
-
-			while (stage)
-			{
-				count=tmp_count;
-				order=tmp_order;
-				va=0;
-				VArray = &VArrayVerts[0];
-
-				if (stage->normalmap && !gl_normalmaps->value) {
-					if(stage->next) {
-						stage = stage->next;
-						continue;
-					}
-				}
-
-				if (stage->colormap.enabled)
-					qglDisable (GL_TEXTURE_2D);
-				else if (stage->anim_count)
-					GL_Bind(RS_Animate(stage));
-				else if(!stage->normalmap)
-					GL_Bind (stage->texture->texnum);
-
-				if (stage->blendfunc.blend)
-				{
-					GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
-					GLSTATE_ENABLE_BLEND
-				}
-				else if (basealpha==1.0f)
-				{
-					GLSTATE_DISABLE_BLEND
-				}
-				else
-				{
-					GLSTATE_ENABLE_BLEND
-					GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-					alpha = basealpha;
-				}
-
-				if (stage->alphashift.min || stage->alphashift.speed)
-				{
-					if (!stage->alphashift.speed && stage->alphashift.min > 0)
-					{
-						alpha=basealpha*stage->alphashift.min;
-					}
-					else if (stage->alphashift.speed)
-					{
-						alpha=basealpha*sin(rs_realtime * stage->alphashift.speed);
-						if (alpha < 0) alpha=-alpha*basealpha;
-						if (alpha > stage->alphashift.max) alpha=basealpha*stage->alphashift.max;
-						if (alpha < stage->alphashift.min) alpha=basealpha*stage->alphashift.min;
-					}
-				}
-				else
-					alpha=basealpha;
-
-				if (stage->alphamask)
-				{
-					GLSTATE_ENABLE_ALPHATEST
-				}
-				else
-				{
-					GLSTATE_DISABLE_ALPHATEST
-				}
-
-					if(stage->normalmap) {
-				
-					vec3_t	lightvec;
-				
-					qglDepthMask (GL_FALSE);
-			 		qglEnable (GL_BLEND);
-
-					// set the correct blending mode for normal maps
-					qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
-
-					qglActiveTextureARB (GL_TEXTURE0);
-					qglDisable (GL_TEXTURE_2D);
-					qglEnable (GL_TEXTURE_CUBE_MAP_ARB);
-
-					qglBindTexture (GL_TEXTURE_CUBE_MAP_ARB, normalisationCubeMap);
-
-					qglMatrixMode (GL_TEXTURE);
-					qglLoadIdentity ();
-
-					//set up a tangent lightspace vector
-					lightvec[0] = 270;
-					lightvec[1] = -60;
-					lightvec[2] = 60;
-
-					qglRotatef ( currententity->angles[1],  0, 0, 1);
-					//qglRotatef ( currententity->angles[0],  0, 1, 0);
-					qglRotatef ( currententity->angles[2],  1, 0, 0);
-									
-					qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);
-
-					qglScalef (-1, -1, -1);
-
-					qglMatrixMode (GL_MODELVIEW);
-	
-					qglActiveTextureARB (GL_TEXTURE1);
-					qglEnable (GL_TEXTURE_2D);
-
-					qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
-
-					// and the texenv
-					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
-				
-					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
-				}
-				else {
-					if(stage->next) //increase intensity of lighting to cut through normals a bit
-						if(stage->next->normalmap && gl_normalmaps->value)
-							ramp = 2.0;
-					R_InitVArrays (VERT_COLOURED_TEXTURED);
-				}
-
-				do
-				{					
-					float os = ((float *)order)[0];
-					float ot = ((float *)order)[1];
-					vec3_t normal;
-					int k;
-
-					index_xyz = order[2];
-
-					for (k=0;k<3;k++)
-					normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
-					VectorNormalize ( normal );
-
-					if (stage->envmap)
-					{
-						vec3_t envmapvec;
-
-						VectorAdd(currententity->origin, currentmodel->r_mesh_verts[index_xyz], envmapvec);
-						RS_SetEnvmap (envmapvec, &os, &ot);
-
-						os -= DotProduct (normal , vectors[1] );
-						ot += DotProduct (normal, vectors[2] );
-					}
-
-					RS_SetTexcoords2D(stage, &os, &ot);
-
-					VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-					VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-					VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
-
-					VArray[3] = os;
-					VArray[4] = ot;
-
-					{
-						float red = 1, green = 1, blue = 1, nAlpha;
-
-						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-						calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
-
-						if (stage->lightmap && !stage->normalmap)
-						{
-							GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
-							red = lightcolor[0] * ramp;
-							green = lightcolor[1] * ramp;
-							blue = lightcolor[2] * ramp;
-						}
-
-						if (stage->colormap.enabled)
-						{
-							red *= stage->colormap.red/255.0;
-							green *= stage->colormap.green/255.0;
-							blue *= stage->colormap.blue/255.0;
-						}
-
-						VArray[5] = red;
-						VArray[6] = green;
-						VArray[7] = blue;
-						VArray[8] = nAlpha;	
-					}
-					// increment pointer and counter
-					if(stage->normalmap)
-						VArray += VertexSizes[VERT_BUMPMAPPED_COLOURED];
-					else
-						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
-					order += 3;
-					va++;
-				} while (--count);
-
-				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-					qglDrawArrays(mode,0,va);
-				
 				qglColor4f(1,1,1,1);
 				if (stage->colormap.enabled)
 					qglEnable (GL_TEXTURE_2D);
@@ -1435,9 +1078,9 @@ void R_DrawAliasModel (entity_t *e)
 		currententity->backlerp = 0;
 
 	if(e->frame == 0 && currentmodel->num_frames == 1)
-		GL_DrawAliasFrame(paliashdr);
+		GL_DrawAliasFrame(paliashdr, 0, false);
 	else
-		GL_DrawAliasFrameLerp (paliashdr, currententity->backlerp);
+		GL_DrawAliasFrame(paliashdr, currententity->backlerp, true);
 
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);

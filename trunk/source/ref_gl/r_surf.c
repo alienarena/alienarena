@@ -994,6 +994,8 @@ void R_DrawInlineBModel (entity_t *e)
 		GL_TexEnv( GL_MODULATE );
 	}
 
+	r_normalsurfaces = NULL;
+
 	//
 	// draw texture
 	//
@@ -1033,6 +1035,12 @@ void R_DrawInlineBModel (entity_t *e)
 	{
 		if ( !qglMTexCoord2fSGIS ) {
 			R_BlendLightmaps ();
+		}
+		else
+		{
+			GL_EnableMultitexture( false );
+			R_DrawNormalSurfaces();
+			GL_EnableMultitexture( true );
 		}
 	}
 	else

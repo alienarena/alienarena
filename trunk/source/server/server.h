@@ -27,8 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //=============================================================================
 
-#define	MAX_MASTERS	8				// max recipients for heartbeat packets
-
 typedef enum {
 	ss_dead,			// no map loaded
 	ss_loading,			// spawning level edicts
@@ -193,13 +191,29 @@ typedef struct
 
 //=============================================================================
 
+#define	MAX_MASTERS	8				// max recipients for heartbeat packets
+#define MAX_MASTER_LEN	256				// Maximal length for the name of a master server
+
+typedef struct
+{
+	qboolean	resolved;			// True if the server's address has been resolved once
+							// and the server hasn't been unresponsive since then
+	qboolean	failed;				// True if name resolution failed
+	char		name[MAX_MASTER_LEN];		// Name of the server from setmaster or cl_master
+	netadr_t	addr;				// Resolved address of the server
+	int		last_ping_sent;			// Time at which the last ping was sent
+	int		last_ping_ack;			// Time at which the last ping acknowledgement was received
+} master_sv_t;
+
+extern master_sv_t	master_status[MAX_MASTERS];
+
+//=============================================================================
+
 extern	netadr_t	net_from;
 extern	sizebuf_t	net_message;
 
-extern	netadr_t	master_adr[MAX_MASTERS];	// address of the master server
-
 extern	server_static_t	svs;				// persistant server info
-extern	server_t		sv;					// local server
+extern	server_t	sv;				// local server
 
 extern	cvar_t		*sv_paused;
 extern	cvar_t		*maxclients;
@@ -231,6 +245,7 @@ void SV_InitOperatorCommands (void);
 void SV_SendServerinfo (client_t *client);
 void SV_UserinfoChanged (client_t *cl);
 
+void SV_HandleMasters (const char *message, const char * console_message);
 void Master_Heartbeat (void);
 void Master_Packet (void);
 

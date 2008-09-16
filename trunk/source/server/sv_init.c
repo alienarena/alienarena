@@ -243,7 +243,6 @@ void SV_InitGame (void)
 {
 	int		i;
 	edict_t	*ent;
-	char	idmaster[32];
 
 	if (svs.initialized)
 	{
@@ -295,12 +294,6 @@ void SV_InitGame (void)
 
 	// heartbeats will always be sent to the COR master
 	svs.last_heartbeat = -999999;		// send immediately
-
-	sv_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
-
-	Com_sprintf(idmaster, sizeof(idmaster), "%s:%i", sv_master->string, PORT_MASTER);
-
-	NET_StringToAdr (idmaster, &master_adr[0]);
 
 	// init game
 	SV_InitGameProgs ();
