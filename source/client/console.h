@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	NUM_CON_TIMES 4
 
 #define		CON_TEXTSIZE	32768
+#define		MAXCMDLINE	256
 typedef struct
 {
 	qboolean	initialized;
@@ -48,6 +49,10 @@ typedef struct
 } console_t;
 
 extern	console_t	con;
+extern	char		key_lines[32][MAXCMDLINE];
+extern	int		edit_line;
+extern	int		key_linepos;
+extern	int		key_linelen;
 
 void Con_DrawCharacter (int cx, int line, int num);
 

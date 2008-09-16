@@ -27,9 +27,6 @@ cvar_t		*con_notifytime;
 
 
 #define		MAXCMDLINE	256
-extern	char	key_lines[32][MAXCMDLINE];
-extern	int		edit_line;
-extern	int		key_linepos;
 
 vec4_t	color_table[8] =
 {
@@ -120,7 +117,7 @@ void DrawAltString (int x, int y, char *s)
 void Key_ClearTyping (void)
 {
 	key_lines[edit_line][1] = 0;	// clear any typing
-	key_linepos = 1;
+	key_linelen = key_linepos = 1;
 }
 
 /*
@@ -300,10 +297,14 @@ If the line width has changed, reformat the buffer.
 */
 void Con_CheckResize (void)
 {
-	int		i, j, width, oldwidth, oldtotallines, numlines, numchars;
+	int		i, j, width, oldwidth, oldtotallines, numlines, numchars, charscale;
 	char	tbuf[CON_TEXTSIZE];
 
-	width = (viddef.width >> 3) - 2;
+	// find out the character's scale and use it to compute the width
+	charscale = (float)(viddef.height)*8/600;
+	if(charscale < 8)
+		charscale = 8;
+	width = (viddef.width / charscale) - 2;
 
 	if (width == con.linewidth)
 		return;
@@ -520,9 +521,9 @@ The input line scrolls horizontally if typing goes beyond the right edge
 */
 void Con_DrawInput (void)
 {
-	int		y;
 	int		i;
-	char	*text, output[2048];
+	char		text[2048];
+	char		*output;
 	int		charscale;
 
 	charscale = (float)(viddef.height)*8/600;
@@ -534,34 +535,25 @@ void Con_DrawInput (void)
 	if (cls.key_dest != key_console && cls.state == ca_active)
 		return;		// don't draw anything (always draw if not active)
 
-	text = key_lines[edit_line];
-
-// add the cursor frame
+// copy the text into the temporary buffer and add the cursor frame
+	memcpy (text, key_lines[edit_line], key_linepos);
 	text[key_linepos] = 10+((int)(cls.realtime>>8)&1);
+	if ( key_linelen > key_linepos )
+		memcpy (text + key_linepos + 1, key_lines[edit_line] + key_linepos, key_linelen - key_linepos);
 
 // fill out remainder with spaces
-	for (i=key_linepos+1 ; i< con.linewidth ; i++)
+	for (i = key_linelen + 1 ; i < con.linewidth ; i++)
 		text[i] = ' ';
+	text[i] = 0;
 
-//	prestep if horizontally scrolling
+// prestep if horizontally scrolling
+	output = text;
 	if (key_linepos >= con.linewidth)
-		text += 1 + key_linepos - con.linewidth;
-		
+		output += 1 + key_linepos - con.linewidth;
+
+
 // draw it
-	y = con.vislines-charscale*2;
-	
-	Com_sprintf (output, sizeof(output), "");
-	for (i=0 ; i<con.linewidth ; i++)
-	{
-		Com_sprintf (output, sizeof(output), "%s%c", output, text[i]);
-	}
-
-
-
 	Draw_ColorString ( charscale, (int)(con.vislines - 2.75*charscale), output);
-
-// remove cursor
-	key_lines[edit_line][key_linepos] = 0;
 }
 
 

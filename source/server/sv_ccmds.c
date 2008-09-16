@@ -44,55 +44,22 @@ void SV_SetMaster_f (void)
 	// make sure the server is listed public
 	Cvar_Set ("public", "1");
 
-	//do the first slot for all listen servers
-	if (!dedicated->value)
-	{	
+	// Clear the master server status array
+	memset (master_status, 0, sizeof(master_status));
 
-		sv_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
-
-		if (!NET_StringToAdr (sv_master->string, &master_adr[0]))
-		{
-			Com_Printf ("Bad Master IP");
-		}
-		if (master_adr[0].port == 0)
-			master_adr[0].port = BigShort (PORT_MASTER);
-
-		Com_Printf ("Master server at %s\n", NET_AdrToString (master_adr[0]));
-
-		Com_Printf ("Sending a ping.\n");
-
-		Netchan_OutOfBandPrint (NS_SERVER, master_adr[0], "ping");
-		
-		return;
-	}
-
-	for (i=1 ; i<MAX_MASTERS ; i++)
-		memset (&master_adr[i], 0, sizeof(master_adr[i]));
-
-	slot = 1;		// now do the rest
-	for (i=1 ; i<Cmd_Argc() ; i++)
+	if ( dedicated && dedicated->value )
 	{
-		if (slot == MAX_MASTERS)
-			break;
-
-		if (!NET_StringToAdr (Cmd_Argv(i), &master_adr[i]))
+		// Dedicated server, get the names from the command line arguments
+		for ( i = 1; i < Cmd_Argc() && i < MAX_MASTERS + 1 ; i++ )
 		{
-			Com_Printf ("Bad address: %s\n", Cmd_Argv(i));
-			continue;
+			strncpy (master_status[i - 1].name, Cmd_Argv(i), MAX_MASTER_LEN);
 		}
-		if (master_adr[slot].port == 0)
-			master_adr[slot].port = BigShort (PORT_MASTER);
-
-		Com_Printf ("Master server at %s\n", NET_AdrToString (master_adr[slot]));
-
-		Com_Printf ("Sending a ping.\n");
-
-		Netchan_OutOfBandPrint (NS_SERVER, master_adr[slot], "ping");
-
-		slot++;
 	}
 
 	svs.last_heartbeat = -9999999;
+
+	// Resolve the names and send a ping
+	SV_HandleMasters ( "ping" , "ping" );
 }
 
 

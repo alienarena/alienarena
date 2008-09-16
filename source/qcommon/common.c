@@ -164,10 +164,11 @@ void Com_Printf (char *fmt, ...)
 			else
 				logfile = fopen (name, "w");
 		}
-		if (logfile)
+		if (logfile) {
 			fprintf (logfile, "%s", msg);
-		if (logfile_active->value > 1)
-			fflush (logfile);		// force it to save every time
+			if (logfile_active->value > 1)
+				fflush (logfile);		// force it to save every time
+		}
 	}
 }
 
