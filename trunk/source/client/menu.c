@@ -4011,6 +4011,7 @@ void StartServerActionFunc( void *self )
 	if(s_dedicated_box.curvalue) {
 		Cvar_ForceSet("dedicated", "1");
 		Cvar_Set("sv_maplist", startmap);
+		Cbuf_AddText ("setmaster master.corservers.com master2.corservers.com\n");
 	}
 	Cvar_SetValue( "skill", s_skill_box.curvalue );
 	Cvar_SetValue( "grapple", s_grapple_box.curvalue);
