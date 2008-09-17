@@ -231,10 +231,6 @@ SOURCE=.\p_hud.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\p_light.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\p_trail.c
 # End Source File
 # Begin Source File
