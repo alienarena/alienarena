@@ -295,11 +295,6 @@ void Sys_SendKeyEvents (void)
 
 /*****************************************************************************/
 
-char *Sys_GetClipboardData(void)
-{
-	return NULL;
-}
-
 int main (int argc, char **argv)
 {
 	int 	time, oldtime, newtime;

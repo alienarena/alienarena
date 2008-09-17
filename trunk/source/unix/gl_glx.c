@@ -68,13 +68,15 @@ static int scrnum;
 static Window win;
 static GLXContext ctx = NULL;
 static Atom wmDeleteWindow;
+static Atom cor_clipboard;
 
 qboolean have_stencil = false; // Stencil shadows - MrG
 
 #define KEY_MASK (KeyPressMask | KeyReleaseMask)
 #define MOUSE_MASK (ButtonPressMask | ButtonReleaseMask | \
 		    PointerMotionMask | ButtonMotionMask )
-#define X_MASK (KEY_MASK | MOUSE_MASK | VisibilityChangeMask | StructureNotifyMask )
+#define X_MASK (KEY_MASK | MOUSE_MASK | VisibilityChangeMask | \
+	       	StructureNotifyMask | PropertyChangeMask )
 
 /*****************************************************************************/
 /* MOUSE                                                                     */
@@ -614,6 +616,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	wmDeleteWindow = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	XSetWMProtocols(dpy, win, &wmDeleteWindow, 1);
 
+	cor_clipboard = XInternAtom(dpy, "COR_CLIPBOARD", False);
+
 	XMapWindow(dpy, win);
 
 	if (vidmode_active) {
@@ -672,7 +676,6 @@ void GLimp_Shutdown( void )
 	ctx = NULL;
 	dpy = NULL;
 	win = 0;
-	ctx = NULL;
 }
 
 /*
@@ -737,6 +740,64 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
 
 
 /*------------------------------------------------*/
-/* X11 Input Stuff
+/* X11 Input Stuff				  */
 /*------------------------------------------------*/
+
+/*
+** Sys_GetClipboardData()
+**
+** Returns the contents of the X clipboard; needs to
+** be here instead of inside sys_unix.c because it
+** needs to access the X display.
+*/
+char *Sys_GetClipboardData(void)
+{
+	XEvent evt;
+	int sent_at;
+	Bool received;
+	Atom prop_type;
+	int prop_fmt;
+	unsigned long prop_items, prop_size;
+	unsigned char *buffer, *output = NULL;
+
+	// request the contents of the clipboard
+	XConvertSelection( dpy, XA_PRIMARY, XA_STRING,
+		cor_clipboard, win, CurrentTime );
+	sent_at = Sys_Milliseconds();
+
+	// now we need to wait until either:
+	//  1) we get a response
+	//  2) 250ms have gone by and we got nothing
+	do
+       	{
+		received = XCheckTypedEvent( dpy, SelectionNotify, &evt );
+	} while ( !( received || Sys_Milliseconds() - sent_at > 250 ) );
+
+	// no reply received, return NULL
+	if ( !received )
+		return NULL;
+
+	// get information about property
+	XGetWindowProperty( dpy , win, cor_clipboard, 0, 0, False,
+			AnyPropertyType, &prop_type, &prop_fmt,
+			&prop_items, &prop_size, &buffer );
+	XFree(buffer);
+
+	// only get the text if it's actually ASCII
+	if ( prop_fmt == 8 )
+	{
+		XGetWindowProperty( dpy , win, cor_clipboard, 0,
+				prop_size, False, AnyPropertyType,
+				&prop_type, &prop_fmt, &prop_items,
+				&prop_size, &buffer );
+
+		output = malloc( prop_items + 1 );
+		memcpy( output, buffer, prop_items );
+		output[prop_items] = 0;
+	}
+
+	XDeleteProperty(dpy, win, cor_clipboard);
+
+	return output;
+}
 

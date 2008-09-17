@@ -255,21 +255,27 @@ void Key_Console (int key)
 
 		if ( ( cbd = Sys_GetClipboardData() ) != 0 )
 		{
-			int i;
+			int i, l;
 
-			// strtok( cbd, "\n\r\b" ); // useless (BlackIce)
+			// save the end of the line
+			l = 1 + key_linelen - key_linepos;
+			memcpy (buffer, key_lines[edit_line] + key_linepos, l);
 
-			i = strlen( cbd );
-			if ( i + key_linelen >= MAXCMDLINE)
-				i= MAXCMDLINE - key_linelen;
-
-			if ( i > 0 )
+			i = 0;
+			while ( cbd[i] && key_linelen < MAXCMDLINE - 1 )
 			{
-				cbd[i]=0;
-				strcat( key_lines[edit_line], cbd );
-				key_linepos += i;
-			       	key_linelen += i;
+				// only copy printable characters
+				if ( cbd[i] >= 32 )
+				{
+					key_lines[edit_line][key_linepos ++] = cbd[i];
+					key_linelen ++;
+				}
+				i++;
 			}
+
+			// restore the end of the line
+			memcpy (key_lines[edit_line] + key_linepos, buffer, l);
+
 			free( cbd );
 		}
 
@@ -301,6 +307,15 @@ void Key_Console (int key)
 		return;
 	}
 
+	if ( key == K_DEL || key == K_KP_DEL )
+	{
+		// Del key, fakes a backspace from the next character
+		if ( key_linepos == key_linelen )
+			return;
+		key_linepos ++;
+		key = K_BACKSPACE;
+	}
+
 	if ( ( key == K_BACKSPACE ) || ( ( key == 'h' ) && ( keydown[K_CTRL] ) ) )
 	{
 		if (key_linepos > 1) {
@@ -325,7 +340,25 @@ void Key_Console (int key)
 	if ( ( key == K_LEFTARROW ) || ( key == K_KP_LEFTARROW ) )
 	{
 		if (key_linepos > 1) {
-			key_linepos--;
+			if ( keydown[K_CTRL] )
+			{
+				qboolean found_char = false, printable = false;
+				while (key_linepos > 1)
+				{
+					key_linepos --;
+					printable = isalpha(key_lines[edit_line][key_linepos]);
+					found_char = found_char || printable;
+					if ( found_char && !printable )
+					{
+						key_linepos ++;
+						break;
+					}
+				}
+			}
+			else
+			{
+				key_linepos--;
+			}
 		}
 		return;
 	}
@@ -333,7 +366,20 @@ void Key_Console (int key)
 	if ( ( key == K_RIGHTARROW ) || ( key == K_KP_RIGHTARROW ) )
 	{
 		if (key_linepos < key_linelen) {
-			key_linepos++;
+			if ( keydown[K_CTRL] )
+			{
+				qboolean found_char = false, printable;
+				while (key_linepos < key_linelen && (! found_char || printable))
+				{
+					key_linepos ++;
+					printable = isalpha(key_lines[edit_line][key_linepos]);
+					found_char = found_char || printable;
+				}
+			}
+			else
+			{
+				key_linepos++;
+			}
 		}
 		return;
 	}
@@ -426,6 +472,11 @@ void Key_Console (int key)
 		case 'l':
 		case 'L':
 			Cbuf_AddText ("clear\n");
+			break;
+		case 'k':
+		case 'K':
+			key_linelen = key_linepos;
+			key_lines[edit_line][key_linepos + 1] = 0;
 			break;
 		}
 		return;
@@ -750,6 +801,7 @@ void Key_Init (void)
 	consolekeys[K_KP_PGDN] = true;
 	consolekeys[K_SHIFT] = true;
 	consolekeys[K_INS] = true;
+	consolekeys[K_DEL] = true;
 	consolekeys[K_KP_INS] = true;
 	consolekeys[K_KP_DEL] = true;
 	consolekeys[K_KP_SLASH] = true;
