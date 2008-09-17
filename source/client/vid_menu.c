@@ -588,7 +588,6 @@ void VID_MenuInit( void )
 	s_specular_box.itemnames = yesno_names;
 	s_specular_box.generic.callback = SpecularCallback;
 
-
 	s_glsl_box.generic.type	= MTYPE_SPINCONTROL;
 	s_glsl_box.generic.x		= 24;
 	s_glsl_box.generic.y		= 210*scale;
