@@ -836,8 +836,10 @@ char *bindnames[][2] =
 {"use Alien Vaporizer", "alien vaporizer" },
 {"use Violator", "the violator" },
 {"score",				"show scores" },
-{"flashlight",			"flashlight" },
 {"use grapple",			"grapple hook"},
+{"use sproing",			"sproing"},
+{"use haste",			"haste"},
+{"use invisibility",	"invisibility"},
 
 { 0, 0 }
 };
@@ -877,9 +879,11 @@ static menuaction_s		s_keys_alien_smartgun_action;
 static menuaction_s		s_keys_alien_beamgun_action;
 static menuaction_s		s_keys_alien_vaporizer_action;
 static menuaction_s		s_keys_show_scores_action;
-static menuaction_s		s_keys_flashlight_action;
 static menuaction_s		s_keys_grapple_action;
 static menuaction_s		s_keys_violator_action;
+static menuaction_s		s_keys_sproing_action;
+static menuaction_s		s_keys_haste_action;
+static menuaction_s		s_keys_invis_action;
 static menuaction_s		s_keys_filler_action;
 
 static void M_UnbindCommand (char *command)
@@ -981,7 +985,7 @@ static void Keys_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
-	y = 80*scale;
+	y = 180*scale;
 
 	banneralpha = .1;
 
@@ -1211,19 +1215,33 @@ static void Keys_MenuInit( void )
 	s_keys_show_scores_action.generic.localdata[0] = ++i;
 	s_keys_show_scores_action.generic.name	= bindnames[s_keys_show_scores_action.generic.localdata[0]][1];
 
-	s_keys_flashlight_action.generic.type	= MTYPE_ACTION;
-	s_keys_flashlight_action.generic.x		= 0;
-	s_keys_flashlight_action.generic.y		= y += 9*scale;
-	s_keys_flashlight_action.generic.ownerdraw = DrawKeyBindingFunc;
-	s_keys_flashlight_action.generic.localdata[0] = ++i;
-	s_keys_flashlight_action.generic.name	= bindnames[s_keys_flashlight_action.generic.localdata[0]][1];
-
 	s_keys_grapple_action.generic.type	= MTYPE_ACTION;
 	s_keys_grapple_action.generic.x		= 0;
 	s_keys_grapple_action.generic.y		= y += 9*scale;
 	s_keys_grapple_action.generic.ownerdraw = DrawKeyBindingFunc;
 	s_keys_grapple_action.generic.localdata[0] = ++i;
 	s_keys_grapple_action.generic.name	= bindnames[s_keys_grapple_action.generic.localdata[0]][1];
+
+	s_keys_sproing_action.generic.type	= MTYPE_ACTION;
+	s_keys_sproing_action.generic.x		= 0;
+	s_keys_sproing_action.generic.y		= y += 9*scale;
+	s_keys_sproing_action.generic.ownerdraw = DrawKeyBindingFunc;
+	s_keys_sproing_action.generic.localdata[0] = ++i;
+	s_keys_sproing_action.generic.name	= bindnames[s_keys_sproing_action.generic.localdata[0]][1];
+
+	s_keys_haste_action.generic.type	= MTYPE_ACTION;
+	s_keys_haste_action.generic.x		= 0;
+	s_keys_haste_action.generic.y		= y += 9*scale;
+	s_keys_haste_action.generic.ownerdraw = DrawKeyBindingFunc;
+	s_keys_haste_action.generic.localdata[0] = ++i;
+	s_keys_haste_action.generic.name	= bindnames[s_keys_haste_action.generic.localdata[0]][1];
+
+	s_keys_invis_action.generic.type	= MTYPE_ACTION;
+	s_keys_invis_action.generic.x		= 0;
+	s_keys_invis_action.generic.y		= y += 9*scale;
+	s_keys_invis_action.generic.ownerdraw = DrawKeyBindingFunc;
+	s_keys_invis_action.generic.localdata[0] = ++i;
+	s_keys_invis_action.generic.name	= bindnames[s_keys_invis_action.generic.localdata[0]][1];
 
 	s_keys_filler_action.generic.type	= MTYPE_ACTION;
 	s_keys_filler_action.generic.x		= 0;
@@ -1267,12 +1285,13 @@ static void Keys_MenuInit( void )
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_violator_action );
 
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_show_scores_action );
-	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_flashlight_action );
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_grapple_action );
+	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_sproing_action );
+	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_haste_action );
+	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_invis_action );
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_filler_action ); //needed so last item will show
 
 	Menu_SetStatusBar( &s_keys_menu, "enter to change, backspace to clear" );
-	Menu_Center( &s_keys_menu );
 }
 
 static void Keys_MenuDraw (void)
@@ -1341,7 +1360,7 @@ void M_Menu_Keys_f (void)
 /*
 =======================================================================
 
-CONTROLS MENU
+OPTIONS MENU
 
 =======================================================================
 */

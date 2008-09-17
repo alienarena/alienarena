@@ -617,7 +617,6 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/m_move.o \
 	$(BUILDDIR)/game/p_client.o \
 	$(BUILDDIR)/game/p_hud.o \
-	$(BUILDDIR)/game/p_light.o \
 	$(BUILDDIR)/game/p_trail.o \
 	$(BUILDDIR)/game/p_view.o \
 	$(BUILDDIR)/game/p_weapon.o
@@ -727,9 +726,6 @@ $(BUILDDIR)/game/p_client.o :    $(GAME_DIR)/p_client.c
 $(BUILDDIR)/game/p_hud.o :       $(GAME_DIR)/p_hud.c
 	$(DO_SHLIB_CC)
 
-$(BUILDDIR)/game/p_light.o :       $(GAME_DIR)/p_light.c
-	$(DO_SHLIB_CC)
-
 $(BUILDDIR)/game/p_trail.o :     $(GAME_DIR)/p_trail.c
 	$(DO_SHLIB_CC)
 
@@ -783,7 +779,6 @@ ARENA_OBJS = \
 	$(BUILDDIR)/arena/m_move.o \
 	$(BUILDDIR)/arena/p_client.o \
 	$(BUILDDIR)/arena/p_hud.o \
-	$(BUILDDIR)/arena/p_light.o \
 	$(BUILDDIR)/arena/p_trail.o \
 	$(BUILDDIR)/arena/p_view.o \
 	$(BUILDDIR)/arena/p_weapon.o
@@ -889,9 +884,6 @@ $(BUILDDIR)/arena/p_client.o :    $(ARENA_DIR)/p_client.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/p_hud.o :       $(ARENA_DIR)/p_hud.c
-	$(DO_ARENA_SHLIB_CC)
-
-$(BUILDDIR)/arena/p_light.o :       $(ARENA_DIR)/p_light.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/p_trail.o :     $(ARENA_DIR)/p_trail.c

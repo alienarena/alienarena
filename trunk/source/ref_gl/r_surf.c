@@ -377,7 +377,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 	{
 		qglDisable( GL_ALPHA_TEST );
 		return;
-	}//for now until Vic fixes problems with colored lightmaps on these surfaces
+	}
 
 	/*
 	** check for lightmap modification

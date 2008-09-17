@@ -39,7 +39,7 @@ Specify a list of master servers
 */
 void SV_SetMaster_f (void)
 {
-	int		i, slot;
+	int		i;
 
 	// make sure the server is listed public
 	Cvar_Set ("public", "1");

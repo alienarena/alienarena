@@ -1472,8 +1472,6 @@ struct gmapvote_s
 
 extern char *winningmap;
 
-void FL_think (edict_t *self);
-void FL_make (edict_t *self);
 extern void CheckDeathcam_Viewent(edict_t *ent);
 extern void DeathcamRemove (edict_t *ent, char *opt);
 extern void DeathcamStart (edict_t *ent);
