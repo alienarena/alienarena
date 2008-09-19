@@ -925,6 +925,7 @@ clean2:
 distclean: clean
 	rm -rf $(BUILD_RELEASE_DIR)
 	rm -rf $(BUILD_DEBUG_DIR)
+	rm -f .deps
 
 install:
 	cp $(BUILD_RELEASE_DIR)/cr* ../
@@ -947,3 +948,31 @@ uninstall:
 	rm -f ../crx
 	rm -f ../crx.sdl
 	rm -f ../crded
+
+# Dependencies
+-include .deps
+
+.deps:	Makefile
+	@echo "Making dependencies ...";
+	@echo
+	@tmpfile=`mktemp`; \
+	grep '^$$(BUILDDIR)[a-zA-Z/_]\+\.o\s\+' Makefile | while read obj junk source; do \
+		while echo "$$source" | grep -q '$$([A-Z_]\+)'; do \
+			vname=`echo $$source | sed -e 's#$$(\([A-Z_]\+\)).*$$#\1#'`; \
+			vval=`grep '^'$$vname'=' Makefile | sed -e 's#.*=\s\+##'`; \
+			source=`echo $$source | sed -e 's#$$('"$$vname"')#'"$$vval"'#g'`; \
+		done; \
+		if [ -f "$$source" ]; then \
+			echo " Handling $$obj" | sed -e 's#$$(BUILDDIR)/##'; \
+			$(CC) -MM $(BASE_CFLAGS) $(SDLCFLAGS) $$source >$$tmpfile; \
+			outfile=`echo "$$obj" | sed -e 's#$$(BUILDDIR)#$(BUILD_RELEASE_DIR)#'`; \
+			sed -e 's#^.*\.o:#'"$$outfile:"'#' < $$tmpfile >>.deps; \
+			outfile=`echo "$$obj" | sed -e 's#$$(BUILDDIR)#$(BUILD_DEBUG_DIR)#'`; \
+			sed -e 's#^.*\.o:#'"$$outfile:"'#' < $$tmpfile >>.deps; \
+		else \
+			echo " Couldn't find '$$source'"; \
+		fi; \
+	done; \
+	rm -f $$tmpfile
+
+.PHONY: clean clean-debug clean-release clean2 distclean install install-debug uninstall build-release build-debug all targets

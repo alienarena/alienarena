@@ -46,10 +46,12 @@ Cvar_FindVar
 */
 static cvar_t *Cvar_FindVar (char *var_name)
 {
-	cvar_t	*var;
+	cvar_t		*var;
+	unsigned int	i, hash_key;
 	
-	for (var=cvar_vars ; var ; var=var->next)
-		if (!strcmp (var_name, var->name))
+	COMPUTE_HASH_KEY( hash_key, var_name , i );
+	for (var=cvar_vars ; var && var->hash_key <= hash_key ; var=var->next)
+		if (var->hash_key == hash_key && !Q_strcasecmp (var_name, var->name))
 			return var;
 
 	return NULL;
@@ -67,7 +69,7 @@ float Cvar_VariableValue (char *var_name)
 	var = Cvar_FindVar (var_name);
 	if (!var)
 		return 0;
-	return atof (var->string);
+	return var->value;
 }
 
 
@@ -95,21 +97,22 @@ Cvar_CompleteVariable
 char *Cvar_CompleteVariable (char *partial)
 {
 	cvar_t		*cvar;
-	int			len;
+	int		len, i;
+	unsigned int	hash_key;
 	
 	len = strlen(partial);
-	
 	if (!len)
 		return NULL;
-		
+
 	// check exact match
-	for (cvar=cvar_vars ; cvar ; cvar=cvar->next)
-		if (!strcmp (partial,cvar->name))
+	COMPUTE_HASH_KEY( hash_key, partial , i );
+	for (cvar=cvar_vars ; cvar && cvar->hash_key <= hash_key; cvar=cvar->next)
+		if (cvar->hash_key == hash_key && !Q_strcasecmp (partial,cvar->name))
 			return cvar->name;
 
 	// check partial match
 	for (cvar=cvar_vars ; cvar ; cvar=cvar->next)
-		if (!strncmp (partial,cvar->name, len))
+		if (!Q_strncasecmp (partial,cvar->name, len))
 			return cvar->name;
 
 	return NULL;
@@ -126,24 +129,33 @@ The flags will be or'ed in if the variable exists.
 */
 cvar_t *Cvar_Get (char *var_name, char *var_value, int flags)
 {
-	cvar_t	*var;
-	
+	cvar_t		*var, **prev, *nvar;
+	unsigned int	i, hash_key;
+
+	// validate variable name
 	if (flags & (CVAR_USERINFO | CVAR_SERVERINFO))
 	{
-		if (!Cvar_InfoValidate (var_name))
+		if (!Cvar_InfoValidate (var_value))
 		{
-			Com_Printf("invalid info cvar name\n");
+			Com_Printf("invalid info cvar value\n");
 			return NULL;
 		}
 	}
 
-	var = Cvar_FindVar (var_name);
-	if (var)
+	// try finding the variable
+	prev = &cvar_vars;
+	COMPUTE_HASH_KEY( hash_key , var_name , i );
+	for (var = cvar_vars ; var && var->hash_key <= hash_key ; var=var->next)
 	{
-		var->flags |= flags;
-		return var;
+		if (var->hash_key == hash_key && !Q_strcasecmp (var_name, var->name))
+		{
+			var->flags |= flags;
+			return var;
+		}
+		prev = &( var->next );
 	}
 
+	// variable needs to be created, check parameters
 	if (!var_value)
 		return NULL;
 
@@ -156,20 +168,21 @@ cvar_t *Cvar_Get (char *var_name, char *var_value, int flags)
 		}
 	}
 
-	var = Z_Malloc (sizeof(*var));
-	var->name = CopyString (var_name);
-	var->string = CopyString (var_value);
-	var->modified = true;
-	var->value = atof (var->string);
-	var->integer = atoi (var->string);
+	// create the variable
+	nvar = Z_Malloc (sizeof(cvar_t));
+	nvar->name = CopyString (var_name);
+	nvar->string = CopyString (var_value);
+	nvar->modified = true;
+	nvar->value = atof (nvar->string);
+	nvar->integer = atoi (nvar->string);
+	nvar->flags = flags;
+	nvar->hash_key = hash_key;
 
 	// link the variable in
-	var->next = cvar_vars;
-	cvar_vars = var;
+	nvar->next = var;
+	*prev = nvar;
 
-	var->flags = flags;
-
-	return var;
+	return nvar;
 }
 
 /*
@@ -181,6 +194,7 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 {
 	cvar_t	*var;
 
+	// FIXME: this bit is inefficient, it looks up the variable twice (BlackIce)
 	var = Cvar_FindVar (var_name);
 	if (!var)
 	{	// create it
@@ -227,7 +241,7 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 			{
 				var->string = CopyString(value);
 				var->value = atof (var->string);
-				if (!strcmp(var->name, "game"))
+				if (!Q_strcasecmp(var->name, "game"))
 				{
 					FS_SetGamedir (var->string);
 					FS_ExecAutoexec ();
@@ -291,6 +305,7 @@ cvar_t *Cvar_FullSet (char *var_name, char *value, int flags)
 {
 	cvar_t	*var;
 	
+	// FIXME: this bit is inefficient, it looks up the variable twice (BlackIce)
 	var = Cvar_FindVar (var_name);
 	if (!var)
 	{	// create it
@@ -349,7 +364,7 @@ void Cvar_GetLatchedVars (void)
 		var->latched_string = NULL;
 		var->value = atof(var->string);
 		var->integer = atoi(var->string);
-		if (!strcmp(var->name, "game"))
+		if (!Q_strcasecmp(var->name, "game"))
 		{
 			FS_SetGamedir (var->string);
 			FS_ExecAutoexec ();

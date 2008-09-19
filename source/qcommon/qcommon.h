@@ -92,6 +92,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //============================================================================
 
+// Hash key computation macro, because that piece of code gets around a lot
+
+#define COMPUTE_HASH_KEY(key, str, counter) \
+{ \
+	key = 0; \
+	for ( counter = 0; str[counter] ; counter ++ ) \
+		key = 31 * key + tolower(str[counter]); \
+}
+
+//============================================================================
+
 typedef struct sizebuf_s
 {
 	qboolean	allowoverflow;	// if false, do a Com_Error
