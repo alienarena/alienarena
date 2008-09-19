@@ -283,14 +283,12 @@ void Key_Console (int key)
 	}
 
 	if ( key == K_ENTER || key == K_KP_ENTER )
-	{	// backslash text are commands, else chat
-		if (key_lines[edit_line][1] == '\\' || key_lines[edit_line][1] == '/')
-			Cbuf_AddText (key_lines[edit_line]+2);	// skip the >
-		else
-			Cbuf_AddText (key_lines[edit_line]+1);	// valid command
-
+	{
+		Cbuf_AddText (key_lines[edit_line]+1);
 		Cbuf_AddText ("\n");
+
 		Com_Printf ("%s\n",key_lines[edit_line]);
+
 		edit_line = (edit_line + 1) & 31;
 		history_line = edit_line;
 		key_lines[edit_line][0] = ']';

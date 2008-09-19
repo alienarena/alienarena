@@ -7,14 +7,32 @@
 </h3>
 <h3>Command Lines</h3>
 Creating command line "rc.exe /l 0x409 /fo"Release/Galaxy.res" /d "NDEBUG" "C:\Alien Arena 2007\Tools\galaxy\Galaxy.rc"" 
-Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP63E4.tmp" with contents
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP9A90.tmp" with contents
 [
 /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Fp"Release/Galaxy.pch" /Yu"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Alien Arena 2007\Tools\galaxy\BuddyName.cpp"
 "C:\Alien Arena 2007\Tools\galaxy\Galaxy.cpp"
 "C:\Alien Arena 2007\Tools\galaxy\GalaxyDlg.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\hyperlink.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\mfcpp.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\minmaxlogic.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\PlayerProfile.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\PollServer.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\SkinHeaderCtrl.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\SkinHorizontalScrollbar.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\SkinListCtrl.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\SkinVerticleScrollbar.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\UpdateDlg.cpp"
+"C:\Alien Arena 2007\Tools\galaxy\UpdateGame.cpp"
 ]
-Creating command line "cl.exe @C:\Users\John\AppData\Local\Temp\RSP63E4.tmp" 
-Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP63E5.tmp" with contents
+Creating command line "cl.exe @C:\Users\John\AppData\Local\Temp\RSP9A90.tmp" 
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP9A91.tmp" with contents
+[
+/nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /Fp"Release/Galaxy.pch" /Yc"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Alien Arena 2007\Tools\galaxy\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\Users\John\AppData\Local\Temp\RSP9A91.tmp" 
+Creating temporary file "C:\Users\John\AppData\Local\Temp\RSP9A92.tmp" with contents
 [
 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib comctl32.lib Winmm.lib fce32.lib /nologo /subsystem:windows /incremental:no /pdb:"Release/Galaxy.pdb" /machine:I386 /out:"c:/Alien Arena 2007/Galaxy.exe" 
 ".\Release\BuddyName.obj"
@@ -34,12 +52,26 @@ kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32
 ".\Release\UpdateGame.obj"
 ".\Release\Galaxy.res"
 ]
-Creating command line "link.exe @C:\Users\John\AppData\Local\Temp\RSP63E5.tmp"
+Creating command line "link.exe @C:\Users\John\AppData\Local\Temp\RSP9A92.tmp"
 <h3>Output Window</h3>
 Compiling resources...
 Compiling...
+StdAfx.cpp
+Compiling...
+BuddyName.cpp
 Galaxy.cpp
 GalaxyDlg.cpp
+hyperlink.cpp
+mfcpp.cpp
+minmaxlogic.cpp
+PlayerProfile.cpp
+PollServer.cpp
+SkinHeaderCtrl.cpp
+SkinHorizontalScrollbar.cpp
+SkinListCtrl.cpp
+SkinVerticleScrollbar.cpp
+UpdateDlg.cpp
+UpdateGame.cpp
 Generating Code...
 Linking...
 

@@ -21,15 +21,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "qcommon.h"
 
-void Cmd_ForwardToServer (void);
-
 #define	MAX_ALIAS_NAME	32
 
 typedef struct cmdalias_s
 {
 	struct cmdalias_s	*next;
-	char	name[MAX_ALIAS_NAME];
-	char	*value;
+	unsigned int		hash_key;
+	char			name[MAX_ALIAS_NAME];
+	char			*value;
 } cmdalias_t;
 
 cmdalias_t	*cmd_alias;
@@ -428,9 +427,10 @@ Creates a new command that executes a command string (possibly ; seperated)
 */
 void Cmd_Alias_f (void)
 {
-	cmdalias_t	*a;
+	cmdalias_t	*a, *na, **prev;
 	char		cmd[1024];
-	int			i, c;
+	unsigned int	hash_key;
+	int		i, c;
 	char		*s;
 
 	if (Cmd_Argc() == 1)
@@ -448,23 +448,38 @@ void Cmd_Alias_f (void)
 		return;
 	}
 
+	// compute the hash key for this alias
+	hash_key = 0;
+	for ( i = 0; s[i] ; i ++ )
+		hash_key = 31 * hash_key + tolower(s[i]);
+
 	// if the alias already exists, reuse it
-	for (a = cmd_alias ; a ; a=a->next)
+	prev = &cmd_alias;
+	for (a = cmd_alias ; a && a->hash_key <= hash_key ; a=a->next)
 	{
-		if (!strcmp(s, a->name))
+		if (a->hash_key == hash_key && !Q_strcasecmp(s, a->name))
 		{
 			Z_Free (a->value);
 			break;
 		}
+		prev = &( a->next );
 	}
 
 	if (!a)
 	{
 		a = Z_Malloc (sizeof(cmdalias_t));
-		a->next = cmd_alias;
-		cmd_alias = a;
+		a->next = NULL;
+		*prev = a;
+	}
+	else if ( a->hash_key != hash_key )
+	{
+		na = Z_Malloc (sizeof(cmdalias_t));
+		na->next = a;
+		*prev = na;
+		a = na;
 	}
 	strcpy (a->name, s);
+	a->hash_key = hash_key;
 
 // copy the rest of the command line
 	cmd[0] = 0;		// start out with a null string
@@ -481,6 +496,55 @@ void Cmd_Alias_f (void)
 }
 
 /*
+===============
+Cmd_Unalias_f
+
+Removes an existing alias using its name to look it up
+===============
+*/
+void Cmd_Unalias_f (void)
+{
+	cmdalias_t	*a, **prev;
+	unsigned int	hash_key;
+	int		i;
+	char		*s;
+
+	if (Cmd_Argc() != 2)
+	{
+		Com_Printf ("usage: unalias <alias>\n");
+		return;
+	}
+
+	s = Cmd_Argv(1);
+
+	// compute the hash key for this alias
+	hash_key = 0;
+	for ( i = 0; s[i] ; i ++ )
+		hash_key = 31 * hash_key + tolower(s[i]);
+
+	// find the alias
+	prev = &cmd_alias;
+	for (a = cmd_alias ; a && a->hash_key <= hash_key ; a=a->next)
+	{
+		if (a->hash_key == hash_key && !Q_strcasecmp(s, a->name))
+		{
+			break;
+		}
+		prev = &( a->next );
+	}
+
+	if (!a || a->hash_key != hash_key)
+	{
+		Com_Printf ("Alias not found\n");
+		return;
+	}
+
+	*prev = a->next;
+	Z_Free (a->value);
+	Z_Free (a);
+}
+
+/*
 =============================================================================
 
 					COMMAND EXECUTION
@@ -490,13 +554,15 @@ void Cmd_Alias_f (void)
 
 typedef struct cmd_function_s
 {
-	struct cmd_function_s	*next;
-	char					*name;
-	xcommand_t				function;
+	struct cmd_function_s		*next;
+	unsigned int			hash_key;
+	char				*name;
+	xcommand_t			function;
 } cmd_function_t;
 
 
-static	int			cmd_argc;
+static	qboolean	cmd_force_command;
+static	int		cmd_argc;
 static	char		*cmd_argv[MAX_STRING_TOKENS];
 static	char		*cmd_null_string = "";
 static	char		cmd_args[MAX_STRING_CHARS];
@@ -632,6 +698,7 @@ void Cmd_TokenizeString (char *text, qboolean macroExpand)
 
 	cmd_argc = 0;
 	cmd_args[0] = 0;
+	cmd_force_command = false;
 
 	// macro expand the text
 	if (macroExpand)
@@ -677,6 +744,24 @@ void Cmd_TokenizeString (char *text, qboolean macroExpand)
 		if (!text)
 			return;
 
+		// if we're parsing the first arguments, check for "forced"
+		// commands beginning with slashes or backslashes
+		if ( cmd_argc == 0 && ! cmd_force_command )
+		{
+			cmd_force_command = ( com_token[0] == '/' || com_token[0] == '\\' );
+
+			if ( cmd_force_command )
+			{
+				// if there was white space after the slash
+				// or backslash, skip to the next token
+				if ( com_token[1] == 0 )
+					continue;
+
+				// if not, skip the first character
+				com_token ++;
+			}
+		}
+
 		if (cmd_argc < MAX_STRING_TOKENS)
 		{
 			cmd_argv[cmd_argc] = Z_Malloc (strlen(com_token)+1);
@@ -695,7 +780,8 @@ Cmd_AddCommand
 */
 void	Cmd_AddCommand (char *cmd_name, xcommand_t function)
 {
-	cmd_function_t	*cmd;
+	cmd_function_t	*cmd, **prev, *ncmd;
+	unsigned int	hash_key, i;
 
 // fail if the command is a variable name
 	if (Cvar_VariableString(cmd_name)[0])
@@ -704,21 +790,29 @@ void	Cmd_AddCommand (char *cmd_name, xcommand_t function)
 		return;
 	}
 
+// compute the hash key for this command
+	hash_key = 0;
+	for ( i = 0; cmd_name[i] ; i ++ )
+		hash_key = 31 * hash_key + tolower(cmd_name[i]);
+
 // fail if the command already exists
-	for (cmd=cmd_functions ; cmd ; cmd=cmd->next)
+	prev = &cmd_functions;
+	for (cmd=cmd_functions ; cmd && cmd->hash_key <= hash_key ; cmd=cmd->next)
 	{
-		if (!strcmp (cmd_name, cmd->name))
+		if (cmd->hash_key == hash_key && !Q_strcasecmp (cmd_name, cmd->name))
 		{
 			Com_Printf ("Cmd_AddCommand: %s already defined\n", cmd_name);
 			return;
 		}
+		prev = &( cmd->next );
 	}
 
-	cmd = Z_Malloc (sizeof(cmd_function_t));
-	cmd->name = cmd_name;
-	cmd->function = function;
-	cmd->next = cmd_functions;
-	cmd_functions = cmd;
+	ncmd = Z_Malloc (sizeof(cmd_function_t));
+	ncmd->name = cmd_name;
+	ncmd->hash_key = hash_key;
+	ncmd->function = function;
+	ncmd->next = cmd;
+	*prev = ncmd;
 }
 
 /*
@@ -729,17 +823,23 @@ Cmd_RemoveCommand
 void	Cmd_RemoveCommand (char *cmd_name)
 {
 	cmd_function_t	*cmd, **back;
+	unsigned int i, hash_key;
+
+// compute the hash key for the command
+	hash_key = 0;
+	for ( i = 0; cmd_name[i] ; i ++ )
+		hash_key = 31 * hash_key + tolower(cmd_name[i]);
 
 	back = &cmd_functions;
 	while (1)
 	{
 		cmd = *back;
-		if (!cmd)
+		if (!cmd || cmd->hash_key > hash_key)
 		{
 			Com_Printf ("Cmd_RemoveCommand: %s not added\n", cmd_name);
 			return;
 		}
-		if (!strcmp (cmd_name, cmd->name))
+		if (cmd->hash_key == hash_key && !Q_strcasecmp (cmd_name, cmd->name))
 		{
 			*back = cmd->next;
 			Z_Free (cmd);
@@ -757,10 +857,16 @@ Cmd_Exists
 qboolean	Cmd_Exists (char *cmd_name)
 {
 	cmd_function_t	*cmd;
+	unsigned int i, hash_key;
 
-	for (cmd=cmd_functions ; cmd ; cmd=cmd->next)
+// compute the hash key for the command name
+	hash_key = 0;
+	for ( i = 0; cmd_name[i] ; i ++ )
+		hash_key = 31 * hash_key + tolower(cmd_name[i]);
+
+	for (cmd=cmd_functions ; cmd && cmd->hash_key <= hash_key; cmd=cmd->next)
 	{
-		if (!strcmp (cmd_name,cmd->name))
+		if (cmd->hash_key == hash_key && !Q_strcasecmp (cmd_name,cmd->name))
 			return true;
 	}
 
@@ -879,7 +985,8 @@ FIXME: lookupnoadd the token to speed search?
 void	Cmd_ExecuteString (char *text)
 {
 	cmd_function_t	*cmd;
-	cmdalias_t		*a;
+	cmdalias_t	*a;
+	unsigned int	i, hash_key;
 
 	Cmd_TokenizeString (text, true);
 
@@ -887,14 +994,19 @@ void	Cmd_ExecuteString (char *text)
 	if (!Cmd_Argc())
 		return;		// no tokens
 
+	// compute the hash key for the command
+	hash_key = 0;
+	for ( i = 0; cmd_argv[0][i] ; i ++ )
+		hash_key = 31 * hash_key + tolower(cmd_argv[0][i]);
+
 	// check functions
-	for (cmd=cmd_functions ; cmd ; cmd=cmd->next)
+	for (cmd=cmd_functions ; cmd && cmd->hash_key <= hash_key; cmd=cmd->next)
 	{
-		if (!Q_strcasecmp (cmd_argv[0],cmd->name))
+		if (cmd->hash_key == hash_key && !Q_strcasecmp (cmd_argv[0],cmd->name))
 		{
 			if (!cmd->function)
 			{	// forward to server command
-				Cmd_ExecuteString (va("cmd %s", text));
+				Cmd_ExecuteString (va("cmd %s %s", cmd_argv[0], cmd_args));
 			}
 			else
 				cmd->function ();
@@ -903,9 +1015,9 @@ void	Cmd_ExecuteString (char *text)
 	}
 
 	// check alias
-	for (a=cmd_alias ; a ; a=a->next)
+	for (a=cmd_alias ; a && a->hash_key <= hash_key ; a=a->next)
 	{
-		if (!Q_strcasecmp (cmd_argv[0], a->name))
+		if (a->hash_key == hash_key && !Q_strcasecmp (cmd_argv[0], a->name))
 		{
 			if (++alias_count == ALIAS_LOOP_COUNT)
 			{
@@ -922,7 +1034,11 @@ void	Cmd_ExecuteString (char *text)
 		return;
 
 	// send it as a server command if we are connected
-	Cmd_ForwardToServer ();
+	// and if the command wasn't forced
+	if ( ! cmd_force_command )
+		Cmd_ForwardToServer ();
+	else
+		Com_Printf ("Unknown command \"%s\"\n", cmd_argv[0]);
 }
 
 /*
@@ -955,6 +1071,7 @@ void Cmd_Init (void)
 	Cmd_AddCommand ("exec",Cmd_Exec_f);
 	Cmd_AddCommand ("echo",Cmd_Echo_f);
 	Cmd_AddCommand ("alias",Cmd_Alias_f);
+	Cmd_AddCommand ("unalias",Cmd_Unalias_f);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
 }
 
