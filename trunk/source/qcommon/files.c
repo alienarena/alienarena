@@ -614,21 +614,31 @@ Use ~/.codered/dir as fs_gamedir
 void FS_AddHomeAsGameDirectory (char *dir)
 {
 	char gdir[MAX_OSPATH];
-	char *homedir=getenv("HOME");
-	if(homedir)
+	char *homedir = getenv("COR_GAME");
+	int len;
+
+	if (homedir)
 	{
-		int len = snprintf(gdir,sizeof(gdir),"%s/.codered/%s/", homedir, dir);
-		Com_Printf("using %s for writing\n",gdir);
-		FS_CreatePath (gdir);
-
-		if ((len > 0) && (len < sizeof(gdir)) && (gdir[len-1] == '/'))
-			gdir[len-1] = 0;
-
-		strncpy(fs_gamedir,gdir,sizeof(fs_gamedir)-1);
-		fs_gamedir[sizeof(fs_gamedir)-1] = 0;
-
-		FS_AddGameDirectory (gdir);
+		len = snprintf (gdir, sizeof(gdir), "%s/%s/", homedir, dir);
 	}
+	else
+	{
+		homedir = getenv("HOME");
+		if (!homedir)
+			return;
+		len = snprintf(gdir,sizeof(gdir),"%s/.codered/%s/", homedir, dir);
+	}
+
+	Com_Printf("using %s for writing\n",gdir);
+	FS_CreatePath (gdir);
+
+	if ((len > 0) && (len < sizeof(gdir)) && (gdir[len-1] == '/'))
+		gdir[len-1] = 0;
+
+	strncpy(fs_gamedir,gdir,sizeof(fs_gamedir)-1);
+	fs_gamedir[sizeof(fs_gamedir)-1] = 0;
+
+	FS_AddGameDirectory (gdir);
  }
 #endif
 

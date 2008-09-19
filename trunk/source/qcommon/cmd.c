@@ -271,7 +271,7 @@ void Cbuf_AddEarlyCommands (qboolean clear)
 	for (i=0 ; i<COM_Argc() ; i++)
 	{
 		s = COM_Argv(i);
-		if (strcmp (s, "+set"))
+		if (stricmp (s, "+set"))
 			continue;
 		Cbuf_AddText (va("set %s %s\n", COM_Argv(i+1), COM_Argv(i+2)));
 		if (clear)
@@ -449,9 +449,7 @@ void Cmd_Alias_f (void)
 	}
 
 	// compute the hash key for this alias
-	hash_key = 0;
-	for ( i = 0; s[i] ; i ++ )
-		hash_key = 31 * hash_key + tolower(s[i]);
+	COMPUTE_HASH_KEY( hash_key, s , i );
 
 	// if the alias already exists, reuse it
 	prev = &cmd_alias;
@@ -518,9 +516,7 @@ void Cmd_Unalias_f (void)
 	s = Cmd_Argv(1);
 
 	// compute the hash key for this alias
-	hash_key = 0;
-	for ( i = 0; s[i] ; i ++ )
-		hash_key = 31 * hash_key + tolower(s[i]);
+	COMPUTE_HASH_KEY( hash_key, s , i );
 
 	// find the alias
 	prev = &cmd_alias;
@@ -791,9 +787,7 @@ void	Cmd_AddCommand (char *cmd_name, xcommand_t function)
 	}
 
 // compute the hash key for this command
-	hash_key = 0;
-	for ( i = 0; cmd_name[i] ; i ++ )
-		hash_key = 31 * hash_key + tolower(cmd_name[i]);
+	COMPUTE_HASH_KEY( hash_key, cmd_name , i );
 
 // fail if the command already exists
 	prev = &cmd_functions;
@@ -826,9 +820,7 @@ void	Cmd_RemoveCommand (char *cmd_name)
 	unsigned int i, hash_key;
 
 // compute the hash key for the command
-	hash_key = 0;
-	for ( i = 0; cmd_name[i] ; i ++ )
-		hash_key = 31 * hash_key + tolower(cmd_name[i]);
+	COMPUTE_HASH_KEY( hash_key, cmd_name , i );
 
 	back = &cmd_functions;
 	while (1)
@@ -860,9 +852,7 @@ qboolean	Cmd_Exists (char *cmd_name)
 	unsigned int i, hash_key;
 
 // compute the hash key for the command name
-	hash_key = 0;
-	for ( i = 0; cmd_name[i] ; i ++ )
-		hash_key = 31 * hash_key + tolower(cmd_name[i]);
+	COMPUTE_HASH_KEY( hash_key, cmd_name , i );
 
 	for (cmd=cmd_functions ; cmd && cmd->hash_key <= hash_key; cmd=cmd->next)
 	{
@@ -889,40 +879,45 @@ char *Cmd_CompleteCommand (char *partial)
 	cvar_t         *cvar;
 	char           *pmatch[1024];
 	qboolean        diff = false;
+	unsigned int	hash_key;
 
 	len = strlen(partial);
-
 	if (!len)
 		return NULL;
 
         /* check for exact match */
-	for (cmd = cmd_functions; cmd; cmd = cmd->next)
-		if (!strcmp(partial, cmd->name))
+	COMPUTE_HASH_KEY( hash_key , partial , i );
+
+	for (cmd = cmd_functions; cmd && cmd->hash_key <= hash_key; cmd = cmd->next)
+		if (hash_key == cmd->hash_key && !Q_strcasecmp(partial, cmd->name))
 			return cmd->name;
-	for (a = cmd_alias; a; a = a->next)
-		if (!strcmp(partial, a->name))
+
+	for (a = cmd_alias; a && a->hash_key <= hash_key; a = a->next)
+		if (hash_key == a->hash_key && !Q_strcasecmp(partial, a->name))
 			return a->name;
-	for (cvar = cvar_vars; cvar; cvar = cvar->next)
-		if (!strcmp(partial, cvar->name))
+
+	for (cvar = cvar_vars; cvar && cvar->hash_key <= hash_key; cvar = cvar->next)
+		if (hash_key == cvar->hash_key && !Q_strcasecmp(partial, cvar->name))
 			return cvar->name;
 
+	// clear matches
 	for (i = 0; i < 1024; i++)
 		pmatch[i] = NULL;
 	i = 0;
 
 	/* check for partial match */
 	for (cmd = cmd_functions; cmd; cmd = cmd->next)
-		if (!strncmp(partial, cmd->name, len)) {
+		if (!Q_strncasecmp(partial, cmd->name, len)) {
 			pmatch[i] = cmd->name;
 			i++;
 		}
 	for (a = cmd_alias; a; a = a->next)
-		if (!strncmp(partial, a->name, len)) {
+		if (!Q_strncasecmp(partial, a->name, len)) {
 			pmatch[i] = a->name;
 			i++;
 		}
 	for (cvar = cvar_vars; cvar; cvar = cvar->next)
-		if (!strncmp(partial, cvar->name, len)) {
+		if (!Q_strncasecmp(partial, cvar->name, len)) {
 			pmatch[i] = cvar->name;
 			i++;
 		}
@@ -959,16 +954,21 @@ qboolean Cmd_IsComplete(char *command)
 	cmd_function_t *cmd;
 	cmdalias_t     *a;
 	cvar_t         *cvar;
+	unsigned int	hash_key, i;
 
 	/* check for exact match */
-	for (cmd = cmd_functions; cmd; cmd = cmd->next)
-		if (!strcmp(command, cmd->name))
+	COMPUTE_HASH_KEY( hash_key , command , i );
+
+	for (cmd = cmd_functions; cmd && cmd->hash_key <= hash_key; cmd = cmd->next)
+		if (hash_key == cmd->hash_key && !Q_strcasecmp(command, cmd->name))
 			return true;
-	for (a = cmd_alias; a; a = a->next)
-		if (!strcmp(command, a->name))
+
+	for (a = cmd_alias; a && a->hash_key <= hash_key; a = a->next)
+		if (hash_key == a->hash_key && !Q_strcasecmp(command, a->name))
 			return true;
-	for (cvar = cvar_vars; cvar; cvar = cvar->next)
-		if (!strcmp(command, cvar->name))
+
+	for (cvar = cvar_vars; cvar && cvar->hash_key <= hash_key; cvar = cvar->next)
+		if (hash_key == cvar->hash_key && !Q_strcasecmp(command, cvar->name))
 			return true;
 
 	return false;
@@ -995,9 +995,7 @@ void	Cmd_ExecuteString (char *text)
 		return;		// no tokens
 
 	// compute the hash key for the command
-	hash_key = 0;
-	for ( i = 0; cmd_argv[0][i] ; i ++ )
-		hash_key = 31 * hash_key + tolower(cmd_argv[0][i]);
+	COMPUTE_HASH_KEY( hash_key, cmd_argv[0] , i );
 
 	// check functions
 	for (cmd=cmd_functions ; cmd && cmd->hash_key <= hash_key; cmd=cmd->next)

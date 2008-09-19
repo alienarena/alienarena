@@ -352,13 +352,14 @@ CVARS (console variables)
 typedef struct cvar_s
 {
 	char		*name;
+	unsigned int	hash_key;
 	char		*string;
 	char		*latched_string;	// for CVAR_LATCH vars
-	int			flags;
-	qboolean	modified;	// set each time the cvar is changed
+	int		flags;
+	qboolean	modified;		// set each time the cvar is changed
 	float		value;
-	int			integer; //BLOOMS
-	struct cvar_s *next;
+	int		integer;		//BLOOMS
+	struct cvar_s	*next;
 } cvar_t;
 
 #endif		// CVAR
