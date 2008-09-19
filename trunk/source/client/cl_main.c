@@ -1729,7 +1729,8 @@ void CL_InitLocal (void)
 	//
 	// the only thing this does is allow command completion
 	// to work -- all unknown commands are automatically
-	// forwarded to the server
+	// forwarded to the server. It also prevents the commands
+	// from being ignored if they are issued in 'forced' mode.
 	Cmd_AddCommand ("wave", NULL);
 	Cmd_AddCommand ("inven", NULL);
 	Cmd_AddCommand ("kill", NULL);
@@ -1744,12 +1745,23 @@ void CL_InitLocal (void)
 	Cmd_AddCommand ("notarget", NULL);
 	Cmd_AddCommand ("noclip", NULL);
 	Cmd_AddCommand ("invuse", NULL);
+	Cmd_AddCommand ("invprevw", NULL);
+	Cmd_AddCommand ("invnextw", NULL);
+	Cmd_AddCommand ("invprevp", NULL);
+	Cmd_AddCommand ("invnextp", NULL);
 	Cmd_AddCommand ("invprev", NULL);
 	Cmd_AddCommand ("invnext", NULL);
 	Cmd_AddCommand ("invdrop", NULL);
 	Cmd_AddCommand ("weapnext", NULL);
 	Cmd_AddCommand ("weapprev", NULL);
+	Cmd_AddCommand ("weaplast", NULL);
 	Cmd_AddCommand ("chatbubble", NULL);
+	Cmd_AddCommand ("players", NULL);
+	Cmd_AddCommand ("score", NULL);
+	Cmd_AddCommand ("help", NULL);
+	Cmd_AddCommand ("vote", NULL);
+	Cmd_AddCommand ("putaway", NULL);
+	Cmd_AddCommand ("playerlist", NULL);
 
 	Cvar_SetValue("scriptsloaded", 0);
 
