@@ -27,7 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ** GLimp_EndFrame
 ** GLimp_Init
 ** GLimp_Shutdown
-** GLimp_SwitchFullscreen
 **
 */
 
@@ -120,8 +119,6 @@ static Cursor CreateNullCursor(Display *display, Window root)
 
 void install_grabs(void)
 {
-
-	XDefineCursor(dpy, win, CreateNullCursor(dpy, win));
 	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
 
 	if (in_dgamouse->integer)
@@ -129,8 +126,8 @@ void install_grabs(void)
 		int MajorVersion, MinorVersion;
 
 		if (XF86DGAQueryVersion(dpy, &MajorVersion, &MinorVersion)) {
-			XF86DGADirectVideo(dpy, DefaultScreen(dpy), XF86DGADirectMouse);
 			XWarpPointer(dpy, None, win, 0, 0, 0, 0, 0, 0);
+			XF86DGADirectVideo(dpy, DefaultScreen(dpy), XF86DGADirectMouse);
 			dgamouse = true;
 		} else {
 			// unable to query, probalby not supported
@@ -160,8 +157,6 @@ void uninstall_grabs(void)
 
 	XUngrabPointer(dpy, CurrentTime);
 	XUngrabKeyboard(dpy, CurrentTime);
-
-	XUndefineCursor(dpy, win);
 
 	mouse_active = false;
 }
@@ -343,8 +338,8 @@ void HandleEvents(void)
 		case MotionNotify:
 			if (mouse_active) {
 				if (dgamouse) {
-					mx += (event.xmotion.x + win_x) * 2;
-					my += (event.xmotion.y + win_y) * 2;
+					mx += (event.xmotion.x + (vidmode_active ? 0 : win_x)) * 2;
+					my += (event.xmotion.y + (vidmode_active ? 0 : win_y)) * 2;
 				} 
 				else 
 				{
@@ -354,6 +349,12 @@ void HandleEvents(void)
 					if (mx || my)
 						dowarp = true;
 				}
+			}
+			else
+			{
+				// allow mouse movement on menus in windowed mode
+				mx = event.xmotion.x;
+				my = event.xmotion.y;
 			}
 			break;
 
@@ -535,7 +536,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	}
 	else
 		have_stencil = true;
-	
+
+	vidmode_active = false;
 	if (vidmode_ext) {
 		int best_fit, best_dist, dist, x, y;
 		
@@ -640,6 +642,8 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 
 	// let the sound and input subsystems know about the new window
 	VID_NewWindow (width, height);
+
+	XDefineCursor(dpy, win, CreateNullCursor(dpy, win));
 
 	qglXMakeCurrent(dpy, win, ctx);
 

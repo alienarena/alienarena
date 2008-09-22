@@ -15,14 +15,18 @@ unsigned int g_reflTexW;		// dynamic size of reflective texture
 unsigned int g_reflTexH;
 
 int		g_num_refl		= 0;	// how many reflections we need to generate
+int		g_num_mirror_refl = 0;
 int		g_active_refl	= 0;	// which reflection is being rendered at the moment
+int		g_active_mirror_refl = 0;
 
 float	*g_refl_X;
 float	*g_refl_Y;
 float	*g_refl_Z;				// the Z (vertical) value of each reflection
 float	*g_waterDistance;		// the rough distance from player to water .. we want to render the closest water surface.
 int		*g_tex_num;				// corresponding texture numbers for each reflection
-int		maxReflections;			// maximum number of reflections
+int		*g_mirror_tex_num;
+int		maxReflections;		
+int		maxMirrorReflections;	// maximum number of reflections
 unsigned int g_water_program_id; // jitwater
 image_t *distort_tex = NULL; // jitwater
 image_t *water_normal_tex = NULL; // jitwater
@@ -30,7 +34,9 @@ image_t *water_normal_tex = NULL; // jitwater
 // whether we are actively rendering a reflection of the world
 // (instead of the world itself)
 qboolean g_drawing_refl = false;
+qboolean g_drawing_mirror_refl = false;
 qboolean g_refl_enabled = true;	// whether reflections should be drawn at all
+qboolean g_mirror_refl_enabled = true;
 
 float	g_last_known_fov = 90.0f;	// jit - default to 90.
 
@@ -113,7 +119,42 @@ void R_init_refl (int maxNoReflections)
 	// jitwater ===
 }
 
-void R_shutdown_refl (void) // jitodo - call this.
+void R_init_mirror_refl (int maxNoMirrorReflections)
+{
+	//===========================
+	unsigned char	*buf = NULL;
+	int				i = 0;
+
+	if (maxNoMirrorReflections < 1) 
+		maxNoMirrorReflections = 1;
+
+	R_setupMirrorArrays(maxNoMirrorReflections);	// setup number of mirror reflections
+	assert(qglGetError() == GL_NO_ERROR);
+
+	//Fix for ATI driver bugs - limit this to 256x256.  This texture is distorted heavily by 
+	//the fragment shader, there is no reason for it to be any larger than this at all.
+	
+	REFL_TEXW = g_reflTexW = 256;	//maybe even do 128 for mirrors
+	REFL_TEXH = g_reflTexH = 256;
+	
+	for (i = 0; i < maxMirrorReflections; i++)
+	{
+		buf = (unsigned char *)malloc(256 * 256 * 3);	// create empty buffer for texture
+
+		if (buf)
+		{
+			memset(buf, 255, (REFL_TEXW * REFL_TEXH * 3));	// fill it with white color so we can easily see where our tex border is
+			g_tex_num[i] = txm_genTexObject(buf, REFL_TEXW, REFL_TEXH, GL_RGB,false,true);	// make this texture
+			free(buf);	// once we've made texture memory, we don't need the sys ram anymore
+		}
+		else
+		{
+			Sys_Error(ERR_FATAL, "Malloc failed?"); // jit
+		}
+	}
+}
+
+void R_shutdown_refl (void) 
 {
 	if (gl_state.fragment_program)
 		qglDeleteProgramsARB(1, &g_water_program_id);
@@ -149,6 +190,17 @@ void R_setupArrays (int maxNoReflections)
 	memset(g_waterDistance	, 0, sizeof(float));
 
 	maxReflections = maxNoReflections;
+}
+
+void R_setupMirrorArrays (int maxNoMirrorReflections)
+{
+	g_num_mirror_refl = 0;
+	
+	free(g_mirror_tex_num);
+	
+	g_mirror_tex_num = (int   *) malloc ( sizeof(int)   * maxNoMirrorReflections );
+		
+	maxMirrorReflections = maxNoMirrorReflections;
 }
 
 
@@ -225,6 +277,28 @@ void R_add_refl (float x, float y, float z)
 	}
 }
 
+void R_add_mirror_refl (float x, float y, float z)
+{
+	float distance;
+	int i = 0;
+	vec3_t v, v2;
+
+	if (!maxMirrorReflections)
+		return;		//safety check.
+
+	if (gl_reflection_max->value != maxMirrorReflections)
+		R_init_mirror_refl(gl_reflection_max->value);
+
+	VectorSet(v, x, y, z);
+	VectorSubtract(v, r_newrefdef.vieworg, v2);
+	distance = VectorLength(v2);
+
+	// make sure we have room to add
+	if (g_num_mirror_refl < maxMirrorReflections)
+	{		
+		g_num_mirror_refl++;
+	}
+}
 
 
 static int txm_genTexObject(unsigned char *texData, int w, int h,
@@ -298,115 +372,6 @@ static int txm_genTexObject(unsigned char *texData, int w, int h,
 	return texNum;
 }
 
-#if 0
-// based off of R_RecursiveWorldNode,
-// this locates all reflective surfaces and their associated height
-// old method - delete this if you want
-void R_RecursiveFindRefl (mnode_t *node)
-{
-	int			c, side, sidebit;
-	cplane_t	*plane;
-	msurface_t	*surf, **mark;
-	mleaf_t		*pleaf;
-	float		dot;
-
-	if (node->contents == CONTENTS_SOLID)
-		return;		// solid
-
-	if (node->visframe != r_visframecount)
-		return;
-
-	// MPO : if this function returns true, it means that the polygon is not visible
-	// in the frustum, therefore drawing it would be a waste of resources
-	if (R_CullBox(node->minmaxs, node->minmaxs+3))
-		return;
-
-	// if a leaf node, draw stuff
-	if (node->contents != -1)
-	{
-		pleaf = (mleaf_t *)node;
-
-		// check for door connected areas
-		if (r_newrefdef.areabits)
-			if (!(r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7))))
-				return;		// not visible
-
-		mark = pleaf->firstmarksurface;
-		c = pleaf->nummarksurfaces;
-
-		if (c)
-		{
-			do
-			{
-				(*mark)->visframe = r_framecount;
-				mark++;
-			} while (--c);
-		}
-
-		return;
-	}
-
-	// node is just a decision point, so go down the apropriate sides
-
-	// find which side of the node we are on
-	plane = node->plane;
-
-	switch (plane->type)
-	{
-	case PLANE_X:
-		dot = r_newrefdef.vieworg[0] - plane->dist;
-		break;
-	case PLANE_Y:
-		dot = r_newrefdef.vieworg[1] - plane->dist;
-		break;
-	case PLANE_Z:
-		dot = r_newrefdef.vieworg[2] - plane->dist;
-		break;
-	default:
-		dot = DotProduct (r_newrefdef.vieworg, plane->normal) - plane->dist;
-		break;
-	}
-
-	if (dot >= 0)
-	{
-		side = 0;
-		sidebit = 0;
-	}
-	else
-	{
-		side = 1;
-		sidebit = SURF_PLANEBACK;
-	}
-
-	// recurse down the children, front side first
-	R_RecursiveFindRefl (node->children[side]);
-
-	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
-	{
-		if (surf->visframe != r_framecount)
-			continue;
-
-		if ( (surf->flags & SURF_PLANEBACK) != sidebit )
-			continue;		// wrong side
-
-		// MPO : from this point onward, we should be dealing with visible surfaces
-		// start MPO
-		
-		// if this is a reflective surface ...
-		if (surf->flags & SURF_DRAWTURB)
-		{
-			// and if it is flat on the Z plane ...
-			if (plane->type == PLANE_Z)
-				R_add_refl(surf->polys->verts[0][0], surf->polys->verts[0][1], surf->polys->verts[0][2]);
-		}
-		// stop MPO
-	}
-
-	// recurse down the back side
-	R_RecursiveFindRefl(node->children[!side]);
-}
-#endif
-
 /*
 ================
 R_DrawDebugReflTexture
@@ -462,7 +427,34 @@ void R_UpdateReflTex (refdef_t *fd)
 	qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	//clear stuff now cause we want to render scene
 }															
 
+void R_UpdateMirrorReflTex (refdef_t *fd) //for glass on models
+{
+	if(!g_num_mirror_refl)	return;	// nothing to do here
 
+	g_drawing_mirror_refl = true;	// begin drawing reflection
+
+	g_last_known_fov = fd->fov_y;
+		
+	R_RenderView(fd);	// draw the scene here!
+
+	for (g_active_mirror_refl = 0; g_active_mirror_refl < g_num_mirror_refl; g_active_mirror_refl++)
+	{
+		qglClearColor(0, 0, 0, 1);								//clear screen
+		qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		R_RenderView(fd);	// draw the scene here!
+
+		qglBindTexture(GL_TEXTURE_2D, g_mirror_tex_num[g_active_mirror_refl]);
+		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
+			(REFL_TEXW - g_reflTexW) >> 1,
+			(REFL_TEXH - g_reflTexH) >> 1,
+			0, 0, g_reflTexW, g_reflTexH);
+	}
+	
+	g_drawing_mirror_refl = false;	// done drawing refl
+	qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	//clear stuff now cause we want to render scene
+}				
+	
 // sets modelview to reflection instead of normal view
 void R_DoReflTransform()
 {
