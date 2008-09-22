@@ -2116,10 +2116,33 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 	// set name
 	s = Info_ValueForKey (userinfo, "name");
-	//fix player name if corrupted
-	if(s != NULL && strlen(s) > 16)
-		s[16] = 0;
-	strncpy (ent->client->pers.netname, s, sizeof(ent->client->pers.netname)-1);
+	i = j = k = 0;
+	while ( s && *s && i < 47 && j < 15 )
+	{
+		ent->client->pers.netname[i] = s[i];
+		if ( k == 0 )
+		{
+			if ( s[i] == Q_COLOR_ESCAPE )
+				k = 1;
+			else
+				j ++;
+		}
+		else if ( k == 1 )
+		{
+			if ( s[i] == Q_COLOR_ESCAPE )
+			{
+				j += 2;
+				if ( j == 16 )
+				{
+					i --;
+					break;
+				}
+			}
+			k = 0;
+		}
+		i ++;
+	}
+	ent->client->pers.netname[i] = 0;
 
 	//spectator mode
 	// set spectator
