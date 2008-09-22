@@ -88,7 +88,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 	char		*chatmsg;
 	char		*tauntmsg;
 	char		cleanname[16], cleanname2[16];
-	int			i, j, pos, total, place;
+	int		i, j, pos, total, place;
 	edict_t		*cl_ent;
 	gitem_t		*it;
 
@@ -183,30 +183,10 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 		self->enemy = attacker;
 		if (attacker && attacker->client)
 		{
-			//clean up name, get rid of escape chars
-			j = 0;
-			for (i = 0; i < 16; i++)
-				cleanname[i] = 0;
-			for (i = 0; i < strlen(self->client->pers.netname) && i < 16; i++) {
-				if ( self->client->pers.netname[i] == '^' ) {
-					i += 1;
-					continue;
-				}
-				cleanname[j] = self->client->pers.netname[i]+128;
-				j++;
-			}
-			//clean up name, get rid of escape chars
-			j = 0;
-			for (i = 0; i < 16; i++)
-				cleanname2[i] = 0;
-			for (i = 0; i < strlen(attacker->client->pers.netname) && i < 16; i++) {
-					if ( attacker->client->pers.netname[i] == '^' ) {
-						i += 1;
-						continue;
-					}
-				cleanname2[j] = attacker->client->pers.netname[i]+128;
-				j++;
-			}
+			//clean up names, get rid of escape chars
+			G_CleanPlayerName ( self->client->pers.netname , cleanname );
+			G_CleanPlayerName ( attacker->client->pers.netname , cleanname2 );
+
 			if(!attacker->is_bot) {
 				pos = 0;
 				total = 0;

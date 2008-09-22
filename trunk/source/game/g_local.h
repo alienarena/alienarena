@@ -743,7 +743,8 @@ void	G_FreeEdict (edict_t *e);
 void	G_TouchTriggers (edict_t *ent);
 void	G_TouchSolids (edict_t *ent);
 
-char	*G_CopyString (char *in);
+char	*G_CopyString (const char *in);
+void	G_CleanPlayerName ( const char *source, char *dest );
 
 float	*tv (float x, float y, float z);
 char	*vtos (vec3_t v);

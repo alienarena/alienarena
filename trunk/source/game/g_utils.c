@@ -388,7 +388,7 @@ void vectoangles (vec3_t value1, vec3_t angles)
 	angles[ROLL] = 0;
 }
 
-char *G_CopyString (char *in)
+char *G_CopyString (const char *in)
 {
 	char	*out;
 	
@@ -566,3 +566,40 @@ qboolean KillBox (edict_t *ent)
 
 	return true;		// all clear
 }
+
+
+/*
+=============
+G_CleanPlayerName
+
+Removes escape characters from a player's name and prepares it
+to be displayed in green through safe_centerprintf.
+=============
+*/
+void G_CleanPlayerName ( const char *source, char *dest )
+{
+	int i, j, k;
+
+	memset( dest, 0, 16 );
+	for (i = j = k = 0; i < strlen(source) && j < 16; i ++)
+	{
+		if ( !k && source[i] == '^' )
+		{
+			if ( source[i + 1] != '^' )
+			{
+				i += 1;
+				continue;
+			}
+			else
+			{
+				k = 1;
+			}
+		}
+		else if ( k )
+		{
+			k = 0;
+		}
+		dest[j ++] = source[i] + 128;
+	}
+}
+
