@@ -109,6 +109,7 @@ void UpdateChaseCam(edict_t *ent)
 void ChaseNext(edict_t *ent)
 {
 	int i;
+	char clean_name[16];
 	edict_t *e;
 
 	if (!ent->client->chase_target)
@@ -128,12 +129,14 @@ void ChaseNext(edict_t *ent)
 
 	ent->client->chase_target = e;
 	ent->client->update_chase = true;
-	safe_centerprintf(ent, "Following %s", e->client->pers.netname);
+	G_CleanPlayerName( e->client->pers.netname, clean_name );
+	safe_centerprintf(ent, "Following %s", clean_name);
 }
 
 void ChasePrev(edict_t *ent)
 {
 	int i;
+	char clean_name[16];
 	edict_t *e;
 
 	if (!ent->client->chase_target)
@@ -153,12 +156,14 @@ void ChasePrev(edict_t *ent)
 
 	ent->client->chase_target = e;
 	ent->client->update_chase = true;
-	safe_centerprintf(ent, "Following %s", e->client->pers.netname);
+	G_CleanPlayerName( e->client->pers.netname, clean_name );
+	safe_centerprintf(ent, "Following %s", clean_name);
 }
 
 void GetChaseTarget(edict_t *ent)
 {
 	int i;
+	char clean_name[16];
 	edict_t *other;
 
 	for (i = 1; i <= maxclients->value; i++) {
@@ -166,7 +171,8 @@ void GetChaseTarget(edict_t *ent)
 		if (other->inuse && !other->client->resp.spectator) {
 			ent->client->chase_target = other;
 			ent->client->update_chase = true;
-			safe_centerprintf(ent, "Following %s", other->client->pers.netname);
+			G_CleanPlayerName( other->client->pers.netname, clean_name );
+			safe_centerprintf(ent, "Following %s", clean_name);
 			UpdateChaseCam(ent);
 			return;
 		}
