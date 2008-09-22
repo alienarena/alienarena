@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "../client/client.h"
 
 extern int mx, my;
+extern qboolean mouse_active;
 extern cursor_t cursor;
 static qboolean	mouse_avail;
 static int old_mouse_x, old_mouse_y;
@@ -111,18 +112,30 @@ void IN_Move (usercmd_t *cmd)
 		cursor.oldx = cursor.x;
 		cursor.oldy = cursor.y;
 
-		cursor.x += mx * .25;//sensitivity->value/10;
-		cursor.y += my * .25;//sensitivity->value/10;
+		if ( mouse_active )
+		{
+			cursor.x += mx * .25;//sensitivity->value/10;
+			cursor.y += my * .25;//sensitivity->value/10;
+			mx = my = 0;
+		}
+		else
+		{
+			cursor.x = mx;
+			cursor.y = my;
+		}
 
 		if (cursor.x!=cursor.oldx || cursor.y!=cursor.oldy)
 			cursor.mouseaction = true;
 
-		if (cursor.x < 0) cursor.x = 0;
-		if (cursor.x > viddef.width) cursor.x = viddef.width;
-		if (cursor.y < 0) cursor.y = 0;
-		if (cursor.y > viddef.height) cursor.y = viddef.height;
+		if (cursor.x < 0)
+			cursor.x = 0;
+		else if (cursor.x > viddef.width)
+			cursor.x = viddef.width;
+		if (cursor.y < 0)
+			cursor.y = 0;
+		else if (cursor.y > viddef.height)
+		       	cursor.y = viddef.height;
 		M_Think_MouseCursor();
-		mx = my = 0;
 		return;
 	}
 	

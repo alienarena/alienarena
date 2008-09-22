@@ -301,6 +301,7 @@ static void ApplyChanges( void *unused )
 {
 	float gamma;
 	float contrast;
+	int w, h;
 
 	gamma = s_brightness_slider.curvalue/10.0;
 	contrast = s_contrast_slider.curvalue/10.0;
@@ -311,24 +312,42 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "vid_fullscreen", s_fs_box.curvalue );
 	Cvar_SetValue( "gl_finish", s_finish_box.curvalue );
 	Cvar_SetValue( "gl_swapinterval", s_vsync_box.curvalue );
-	if(s_mode_list.curvalue == 8) {
+
+	if (s_mode_list.curvalue == 8) {
 		Cvar_SetValue( "gl_mode", -1);
+
 		//set custom width and height only in this case
 		//check for sane values
-		if(atoi(s_width_field.buffer) > 2048)
+		w = atoi(s_width_field.buffer);
+		if ( w > 2048 )
+	       	{
 			strcpy(s_width_field.buffer, "2048");
-		if(atoi(s_height_field.buffer) > 1536)
-			strcpy(s_height_field.buffer, "1536");
-		if(atoi(s_width_field.buffer) < 512)
+			w = 2048;
+		}
+		else if ( w < 512 )
+		{
 			strcpy(s_width_field.buffer, "512");
-		if(atoi(s_height_field.buffer) < 384)
-			strcpy(s_height_field.buffer, "384");
+			w = 512;
+		}
 
-		Cvar_SetValue("vid_width", atoi( s_width_field.buffer ));
-		Cvar_SetValue("vid_height", atoi( s_height_field.buffer ));
+		h = atoi(s_height_field.buffer);
+		if (h > 1536)
+		{
+			strcpy(s_height_field.buffer, "1536");
+			h = 1536;
+		}
+	       	else if (h < 384)
+		{
+			strcpy(s_height_field.buffer, "384");
+			h = 384;
+		}
+
+		Cvar_SetValue("vid_width", w);
+		Cvar_SetValue("vid_height", h);
 	}
 	else
-	Cvar_SetValue( "gl_mode", s_mode_list.curvalue + 3 ); //offset added back
+		Cvar_SetValue( "gl_mode", s_mode_list.curvalue + 3 ); //offset added back
+
 	Cvar_SetValue( "gl_reflection", s_reflect_box.curvalue);
 	Cvar_SetValue( "r_bloom", s_bloom_box.curvalue);
 	Cvar_SetValue( "r_bloom_intensity", s_bloom_slider.curvalue/10);
@@ -431,7 +450,7 @@ void VID_MenuInit( void )
 		gl_glsl_shaders = Cvar_Get( "gl_glsl_shaders", "0", CVAR_ARCHIVE);
 
 	if ( !_windowed_mouse)
-        _windowed_mouse = Cvar_Get( "_windowed_mouse", "1", CVAR_ARCHIVE );
+		_windowed_mouse = Cvar_Get( "_windowed_mouse", "1", CVAR_ARCHIVE );
 
 	if(gl_mode->value == -1)
 		s_mode_list.curvalue = 8;

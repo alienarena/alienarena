@@ -1973,40 +1973,42 @@ int R_Init( void *hinstance, void *hWnd )
 		gl_state.glsl_shaders = false;
 
 	}
-    if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ) && gl_state.fragment_program)
-    {
+	if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ) && gl_state.fragment_program)
+	{
 
 		gl_state.glsl_shaders = true;
 
-        glCreateProgramObjectARB  = (PFNGLCREATEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glCreateProgramObjectARB");
-        glDeleteObjectARB         = (PFNGLDELETEOBJECTARBPROC)qwglGetProcAddress("glDeleteObjectARB");
-        glUseProgramObjectARB     = (PFNGLUSEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glUseProgramObjectARB");
-        glCreateShaderObjectARB   = (PFNGLCREATESHADEROBJECTARBPROC)qwglGetProcAddress("glCreateShaderObjectARB");
-        glShaderSourceARB         = (PFNGLSHADERSOURCEARBPROC)qwglGetProcAddress("glShaderSourceARB");
-        glCompileShaderARB        = (PFNGLCOMPILESHADERARBPROC)qwglGetProcAddress("glCompileShaderARB");
-        glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)qwglGetProcAddress("glGetObjectParameterivARB");
-        glAttachObjectARB         = (PFNGLATTACHOBJECTARBPROC)qwglGetProcAddress("glAttachObjectARB");
-        glGetInfoLogARB           = (PFNGLGETINFOLOGARBPROC)qwglGetProcAddress("glGetInfoLogARB");
-        glLinkProgramARB          = (PFNGLLINKPROGRAMARBPROC)qwglGetProcAddress("glLinkProgramARB");
-        glGetUniformLocationARB   = (PFNGLGETUNIFORMLOCATIONARBPROC)qwglGetProcAddress("glGetUniformLocationARB");
-        glUniform3fARB            = (PFNGLUNIFORM3FARBPROC)qwglGetProcAddress("glUniform3fARB");
+		glCreateProgramObjectARB  = (PFNGLCREATEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glCreateProgramObjectARB");
+		glDeleteObjectARB         = (PFNGLDELETEOBJECTARBPROC)qwglGetProcAddress("glDeleteObjectARB");
+		glUseProgramObjectARB     = (PFNGLUSEPROGRAMOBJECTARBPROC)qwglGetProcAddress("glUseProgramObjectARB");
+		glCreateShaderObjectARB   = (PFNGLCREATESHADEROBJECTARBPROC)qwglGetProcAddress("glCreateShaderObjectARB");
+		glShaderSourceARB         = (PFNGLSHADERSOURCEARBPROC)qwglGetProcAddress("glShaderSourceARB");
+		glCompileShaderARB        = (PFNGLCOMPILESHADERARBPROC)qwglGetProcAddress("glCompileShaderARB");
+		glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)qwglGetProcAddress("glGetObjectParameterivARB");
+		glAttachObjectARB         = (PFNGLATTACHOBJECTARBPROC)qwglGetProcAddress("glAttachObjectARB");
+		glGetInfoLogARB           = (PFNGLGETINFOLOGARBPROC)qwglGetProcAddress("glGetInfoLogARB");
+		glLinkProgramARB          = (PFNGLLINKPROGRAMARBPROC)qwglGetProcAddress("glLinkProgramARB");
+		glGetUniformLocationARB   = (PFNGLGETUNIFORMLOCATIONARBPROC)qwglGetProcAddress("glGetUniformLocationARB");
+		glUniform3fARB            = (PFNGLUNIFORM3FARBPROC)qwglGetProcAddress("glUniform3fARB");
 		glUniform1iARB            = (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
-		glUniform1fARB			  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fARB");
+		glUniform1fARB		  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fARB");
 		glUniformMatrix3fvARB	  = (PFNGLUNIFORMMATRIX3FVARBPROC)qwglGetProcAddress("glUniformMatrix3fvARB");
-        if( !glCreateProgramObjectARB || !glDeleteObjectARB || !glUseProgramObjectARB ||
-            !glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB || 
-            !glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB || 
-            !glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
-			!glUniform1iARB || !glUniform1fARB || !glUniformMatrix3fvARB)
-        {
-            Com_Printf("...One or more GL_ARB_shader_objects functions were not found");
+
+		if( !glCreateProgramObjectARB || !glDeleteObjectARB || !glUseProgramObjectARB ||
+		    !glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB || 
+		    !glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB || 
+		    !glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
+				!glUniform1iARB || !glUniform1fARB || !glUniformMatrix3fvARB)
+		{
+			Com_Printf("...One or more GL_ARB_shader_objects functions were not found");
 			gl_state.glsl_shaders = false;
-        }
-    }
-	else {            
+		}
+	}
+	else
+	{            
 		Com_Printf("...One or more GL_ARB_shader_objects functions were not found");
 		gl_state.glsl_shaders = false;
-    }
+	}
 
 	if(gl_state.glsl_shaders) {
 		int len;
@@ -2294,9 +2296,14 @@ void R_SetPalette ( const unsigned char *palette)
 	}
 	GL_SetTexturePalette( r_rawpalette );
 
-	qglClearColor (0,0,0,0);
-	qglClear (GL_COLOR_BUFFER_BIT);
-	qglClearColor (1,0, 0.5 , 0.5);
+	if ( qglClear && qglClearColor)
+	{
+		// only run this if we haven't uninitialised
+		// OpenGL already
+		qglClearColor (0,0,0,0);
+		qglClear (GL_COLOR_BUFFER_BIT);
+		qglClearColor (1,0, 0.5 , 0.5);
+	}
 }
 
 /*
