@@ -77,6 +77,7 @@ Cbuf_Init
 void Cbuf_Init (void)
 {
 	SZ_Init (&cmd_text, cmd_text_buf, sizeof(cmd_text_buf));
+	SZ_SetName (&cmd_text, "Command buffer", true);
 }
 
 /*

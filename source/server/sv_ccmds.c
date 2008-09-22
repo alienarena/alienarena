@@ -413,11 +413,13 @@ void SV_ServerRecord_f (void)
 
 	// setup a buffer to catch all multicasts
 	SZ_Init (&svs.demo_multicast, svs.demo_multicast_buf, sizeof(svs.demo_multicast_buf));
+	SZ_SetName (&svs.demo_multicast, "Demo multicast buffer", true);
 
 	//
 	// write a single giant fake message with all the startup info
 	//
 	SZ_Init (&buf, buf_data, sizeof(buf_data));
+	SZ_SetName (&buf, "Giant fake msg buffer", true);
 
 	//
 	// serverdata needs to go over for all types of servers

@@ -916,11 +916,21 @@ void SZ_Init (sizebuf_t *buf, byte *data, int length)
 	buf->maxsize = length;
 }
 
+#ifdef	BUFFER_DEBUG
+void SZ_SetName(sizebuf_t * buf, const char * name, qboolean print_it)
+{
+	strncpy(buf->name, name, sizeof(buf->name));
+	if ( print_it )
+		Com_Printf("SZ_SetName: buffer '%s' (address = 0x%.12x) initialised\n", buf->name, buf);
+}
+#endif	//BUFFER_DEBUG
+
 void SZ_Clear (sizebuf_t *buf)
 {
 	buf->cursize = 0;
 	buf->overflowed = false;
 }
+
 void *SZ_GetSpace (sizebuf_t *buf, int length)
 {
 	void	*data;
@@ -933,7 +943,11 @@ void *SZ_GetSpace (sizebuf_t *buf, int length)
 		if (length > buf->maxsize)
 			Com_Error (ERR_FATAL, "SZ_GetSpace: %i is > full buffer size", length);
 
+#ifdef	BUFFER_DEBUG
+		Com_Printf ("SZ_GetSpace (%s at 0x%.12x): overflow\n", buf->name, buf);
+#else	//BUFFER_DEBUG
 		Com_Printf ("SZ_GetSpace: overflow\n");
+#endif	//BUFFER_DEBUG
 		SZ_Clear (buf);
 		buf->overflowed = true;
 	}

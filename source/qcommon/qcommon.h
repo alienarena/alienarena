@@ -107,10 +107,13 @@ typedef struct sizebuf_s
 {
 	qboolean	allowoverflow;	// if false, do a Com_Error
 	qboolean	overflowed;		// set to true if the buffer size failed
-	byte	*data;
+	byte		*data;
 	int		maxsize;
 	int		cursize;
 	int		readcount;
+#ifdef	BUFFER_DEBUG
+	char		name[32];
+#endif	//BUFFER_DEBUG
 } sizebuf_t;
 
 void SZ_Init (sizebuf_t *buf, byte *data, int length);
@@ -118,6 +121,12 @@ void SZ_Clear (sizebuf_t *buf);
 void *SZ_GetSpace (sizebuf_t *buf, int length);
 void SZ_Write (sizebuf_t *buf, void *data, int length);
 void SZ_Print (sizebuf_t *buf, char *data);	// strcats onto the sizebuf
+
+#ifdef	BUFFER_DEBUG
+void SZ_SetName( sizebuf_t *buf, const char * name, qboolean print_it );
+#else	//BUFFER_DEBUG
+# define SZ_SetName(buf, name, print)
+#endif	// BUFFER_DEBUG
 
 //============================================================================
 
