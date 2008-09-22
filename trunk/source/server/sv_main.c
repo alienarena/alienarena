@@ -625,6 +625,8 @@ gotnewcl:
 	newcl->state = cs_connected;
 
 	SZ_Init (&newcl->datagram, newcl->datagram_buf, sizeof(newcl->datagram_buf) );
+	SZ_SetName (&newcl->datagram, va("Datagram buffer %s", NET_AdrToString(adr)), true);
+
 	newcl->datagram.allowoverflow = true;
 	newcl->lastmessage = svs.realtime;	// don't timeout
 	newcl->lastconnect = svs.realtime;
@@ -1303,6 +1305,7 @@ void SV_Init (void)
 	sv_iplimit = Cvar_Get ("sv_iplimit", "3", 0);
 
 	SZ_Init (&net_message, net_message_buffer, sizeof(net_message_buffer));
+	SZ_SetName (&net_message, "Net message buffer", true);
 }
 
 /*

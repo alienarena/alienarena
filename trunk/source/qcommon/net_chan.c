@@ -114,6 +114,7 @@ void Netchan_OutOfBand (int net_socket, netadr_t adr, int length, byte *data)
 
 // write the packet header
 	SZ_Init (&send, send_buf, sizeof(send_buf));
+	SZ_SetName (&send, "Net OOB buffer", false);
 	
 	MSG_WriteLong (&send, -1);	// -1 sequence means out of band
 	SZ_Write (&send, data, length);
@@ -161,6 +162,7 @@ void Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 	chan->outgoing_sequence = 1;
 
 	SZ_Init (&chan->message, chan->message_buf, sizeof(chan->message_buf));
+	SZ_SetName (&chan->message, va("Net channel %s", NET_AdrToString(adr)), true);
 	chan->message.allowoverflow = true;
 }
 
@@ -239,6 +241,7 @@ void Netchan_Transmit (netchan_t *chan, int length, byte *data)
 
 // write the packet header
 	SZ_Init (&send, send_buf, sizeof(send_buf));
+	SZ_SetName (&send, va("Transmit buffer (%s)", NET_AdrToString(chan->remote_address)), false);
 
 	w1 = ( chan->outgoing_sequence & ~(1<<31) ) | (send_reliable<<31);
 	w2 = ( chan->incoming_sequence & ~(1<<31) ) | (chan->incoming_reliable_sequence<<31);

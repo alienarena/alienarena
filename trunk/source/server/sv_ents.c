@@ -591,6 +591,7 @@ void SV_RecordDemoMessage (void)
 
 	memset (&nostate, 0, sizeof(nostate));
 	SZ_Init (&buf, buf_data, sizeof(buf_data));
+	SZ_SetName (&buf, "Demo message buffer", false);
 
 	// write a frame message that doesn't contain a player_state_t
 	MSG_WriteByte (&buf, svc_frame);

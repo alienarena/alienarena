@@ -400,6 +400,7 @@ qboolean SV_SendClientDatagram (client_t *client)
 	SV_BuildClientFrame (client);
 
 	SZ_Init (&msg, msg_buf, sizeof(msg_buf));
+	SZ_SetName (&msg, va("Client msg out buffer (%s)", NET_AdrToString(client->netchan.remote_address)), false);
 	msg.allowoverflow = true;
 
 	// send over all the relevant entity_state_t
