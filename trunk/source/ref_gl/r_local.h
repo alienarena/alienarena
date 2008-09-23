@@ -197,7 +197,9 @@ extern  cvar_t		*r_minimap_style;
 extern	cvar_t	*gl_reflection;			// MPO
 extern	cvar_t	*gl_reflection_debug;	// MPO	for debugging the reflection
 extern	cvar_t	*gl_reflection_max;		// MPO  max number of water reflections
-extern	cvar_t	*gl_arb_fragment_program; // jit
+extern	cvar_t	*gl_mirror;
+
+extern	cvar_t	*gl_arb_fragment_program; 
 extern	cvar_t	*gl_glsl_shaders;
 
 

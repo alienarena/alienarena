@@ -51,8 +51,11 @@ int model_dlights_num;
 
 extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 extern rscript_t *rs_glass;
+extern image_t *r_mirrortexture;
 
 extern cvar_t *cl_gun;
+
+cvar_t *gl_mirror;
 
 // precalculated dot products for quantized angles
 #define SHADEDOT_QUANT 16
@@ -179,6 +182,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	vec3_t lightcolor;
 	float   *lerp;
 	float	ramp = 1.0;
+	qboolean mirror = false;
 
 	if(lerped)
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
@@ -209,6 +213,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 		rs=(rscript_t *)rs_glass;
 		if(!rs)
 			GL_Bind(r_reflecttexture->texnum);
+		else if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) {
+			if(gl_mirror->value)
+				mirror = true;
+		}
 	}
 	else
 		basealpha = alpha = 1.0;
@@ -439,7 +447,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					}
 				}
 
-				if (stage->colormap.enabled)
+				if(mirror) {			
+					GL_Bind(r_mirrortexture->texnum);
+				}
+				else if (stage->colormap.enabled)
 					qglDisable (GL_TEXTURE_2D);
 				else if (stage->anim_count)
 					GL_Bind(RS_Animate(stage));
@@ -585,12 +596,31 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						vec3_t envmapvec;
 
 						VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
-						RS_SetEnvmap (envmapvec, &os, &ot);
 
-						os -= DotProduct (normal , vectors[1] );
-						ot += DotProduct (normal, vectors[2] );
+						if(mirror) {
+
+							if( !(currententity->flags & RF_WEAPONMODEL)) {
+									RS_SetEnvmap (envmapvec, &os, &ot);
+									stage->scale.scaleX = -2.0; //slight fisheye effect
+									stage->scale.scaleY = 2.0;
+									stage->scale.typeX = stage->scale.typeY = 0;
+							}
+							else {
+
+								stage->scale.scaleX = -1.0;
+								stage->scale.scaleY = 1.0;
+								stage->scale.typeX = stage->scale.typeY = 0;
+							}
+						}
+						else {
+
+							RS_SetEnvmap (envmapvec, &os, &ot);
+
+							os -= DotProduct (normal , vectors[1] );
+							ot += DotProduct (normal, vectors[2] );
+						}
 					}
-
+													
 					RS_SetTexcoords2D(stage, &os, &ot);
 							
 					VArray[3] = os;
@@ -639,8 +669,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					va++;
 				} while (--count);
 
-				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-					qglDrawArrays(mode,0,va);
+				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
+					if(stage->normalmap) {
+						 if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
+							qglDrawArrays(mode,0,va);
+					}
+					else
+						qglDrawArrays(mode,0,va);
+				}
 							
 				qglColor4f(1,1,1,1);
 				if (stage->colormap.enabled)
@@ -1077,8 +1113,10 @@ void R_DrawAliasModel (entity_t *e)
 	if ( !r_lerpmodels->value )
 		currententity->backlerp = 0;
 
-	if(e->frame == 0 && currentmodel->num_frames == 1)
-		GL_DrawAliasFrame(paliashdr, 0, false);
+	if(e->frame == 0 && currentmodel->num_frames == 1) {
+		if(!(currententity->flags & RF_VIEWERMODEL))
+			GL_DrawAliasFrame(paliashdr, 0, false);
+	}
 	else
 		GL_DrawAliasFrame(paliashdr, currententity->backlerp, true);
 

@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <GL/glu.h>
 
 image_t		gltextures[MAX_GLTEXTURES];
+image_t		*r_mirrortexture;
 int			numgltextures;
 int			base_textureid;		// gltextures[i] = base_textureid+i
 
@@ -1633,7 +1634,18 @@ int Draw_GetPalette (void)
 	return 0;
 }
 
+void R_InitMirrorTextures( void )
+{
+	byte	*data;
+	int		size;
 
+	//init the screen texture
+	size = 512 * 512 * 4;
+	data = malloc( size );
+	memset( data, 255, size );
+	r_mirrortexture = GL_LoadPic( "***r_mirrortexture***", (byte *)data, 512, 512, it_pic, 32 );
+	free ( data );
+}
 /*
 ===============
 GL_InitImages
@@ -1656,6 +1668,7 @@ void	GL_InitImages (void)
 	}
 
 	R_InitBloomTextures();//BLOOMS
+	R_InitMirrorTextures();//MIRRORS
 }
 
 /*

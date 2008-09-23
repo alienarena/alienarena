@@ -194,6 +194,7 @@ static void SetLow( void *unused )
 	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_rtlights", 0);
+	Cvar_SetValue("gl_mirror", 0);
 
 	VID_MenuInit();
 }
@@ -218,6 +219,7 @@ static void SetMedium( void *unused )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_rtlights", 0);
+	Cvar_SetValue("gl_mirror", 1);
 
 	VID_MenuInit();
 }
@@ -243,6 +245,7 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_rtlights", 1);
+	Cvar_SetValue("gl_mirror", 1);
 
 	VID_MenuInit();
 }
@@ -268,6 +271,7 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_rtlights", 1);
+	Cvar_SetValue("gl_mirror", 1);
 
 	VID_MenuInit();
 }
@@ -293,6 +297,7 @@ static void SetUltra( void *unused )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_rtlights", 1);
+	Cvar_SetValue("gl_mirror", 1);
 
 	VID_MenuInit();
 }

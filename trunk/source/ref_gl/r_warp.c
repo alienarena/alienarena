@@ -314,10 +314,8 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 	if(fod)
 		return;
 
-	//env map for certain waters(more clear types) note - with new shaders, we can do away with alot
-	//of these old hacks
+	//env map for certain waters
 	if(fa->texinfo->flags &(SURF_TRANS33)){
-
 		if(texnum)
 			GL_Bind(texnum);
 		else //default

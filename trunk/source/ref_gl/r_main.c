@@ -1203,6 +1203,7 @@ R_RenderView
 r_newrefdef must be set before the first call
 ================
 */
+extern image_t *r_mirrortexture;
 void R_DrawSpecialSurfaces(void);
 void R_RenderView (refdef_t *fd)
 {
@@ -1291,6 +1292,13 @@ void R_RenderView (refdef_t *fd)
 	qglLoadMatrixf (r_world_matrix); //moving trans brushes
 
 	R_DrawParticles ();
+
+	if(gl_mirror->value) {
+
+		qglBindTexture(GL_TEXTURE_2D, r_mirrortexture->texnum);
+		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
+					0, 0, 0, 256, 512, 512);
+	}
 
 	R_BloomBlend( fd );//BLOOMS
 
@@ -1424,6 +1432,7 @@ R_RenderFrame
 
 @@@@@@@@@@@@@@@@@@@@@
 */
+
 void R_RenderFrame (refdef_t *fd)
 {
 	//start MPO
@@ -1434,6 +1443,7 @@ void R_RenderFrame (refdef_t *fd)
 	}
 
 	R_RenderView( fd );
+
 	R_SetLightLevel ();
 
 	R_SetGL2D ();
@@ -1530,6 +1540,7 @@ void R_Register( void )
 	gl_reflection		= Cvar_Get("gl_reflection", "0", CVAR_ARCHIVE);			// MPO
 	gl_reflection_debug	= Cvar_Get("gl_reflection_debug", "0", CVAR_ARCHIVE);	// MPO
 	gl_reflection_max	= Cvar_Get("gl_reflection_max", "2", CVAR_ARCHIVE);
+	gl_mirror			= Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE);
 
 	vid_fullscreen = Cvar_Get( "vid_fullscreen", "0", CVAR_ARCHIVE );
 	vid_gamma = Cvar_Get( "vid_gamma", "1.0", CVAR_ARCHIVE );

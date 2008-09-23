@@ -4,19 +4,15 @@
 // max # of reflections we will draw
 // (this can be arbitrarily large, but of course performace will suffer)
 void R_init_refl (int maxNoReflections); 
-void R_init_mirror_refl (int maxNoMirrorReflections);
 void R_setupArrays (int maxNoReflections);
-void R_setupMirrorArrays (int maxNoMirrorRelections);
 void R_clear_refl (void);
 void R_add_refl (float x, float y, float z);
-void R_add_mirror_refl (float x, float y, float z);
 
 static int txm_genTexObject(unsigned char *texData, int w, int h,
 								int format, qboolean repeat, qboolean mipmap);
 void R_RecursiveFindRefl (mnode_t *node); //may try this again
 void R_DrawDebugReflTexture (void);
 void R_UpdateReflTex (refdef_t *fd);
-void R_UpdateMirrorReflTex (refdef_t *fd);
 void R_DoReflTransform (void);
 void R_LoadReflMatrix (void);
 void R_ClearReflMatrix (void);
