@@ -88,7 +88,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 	char		*chatmsg;
 	char		*tauntmsg;
 	char		cleanname[16], cleanname2[16];
-	int		i, j, pos, total, place;
+	int			i, pos, total, place;
 	edict_t		*cl_ent;
 	gitem_t		*it;
 

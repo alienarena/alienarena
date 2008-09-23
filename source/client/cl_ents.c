@@ -1133,7 +1133,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	gun.backlerp = 1.0 - cl.lerpfrac;
 	VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all
 
-	//add a muzzleflash for chaingun
+	//add an attached muzzleflash for chaingun
 	if(!(strcmp("models/weapons/v_shotg2/tris.md2", gun.model->name))) {
 		if(gun.frame > 4 && gun.frame < 14)
 			CL_MuzzleFlashParticle(gun.origin, gun.angles, true);
@@ -1188,25 +1188,8 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.flags = oldeffects;
 	}
 
-	//add windows for vehicles, cover for RL
-	if(!(strcmp("vehicles/bomber/v_wep.md2", gun.model->name))) {
-		gun.model = R_RegisterModel("vehicles/bomber/window.md2");
-		gun.flags |= RF_TRANSLUCENT;
-		gun.alpha = 0.20;
-		V_AddEntity (&gun);
-	}
-	if(!(strcmp("vehicles/strafer/v_wep.md2", gun.model->name))) {
-		gun.model = R_RegisterModel("vehicles/bomber/window.md2");
-		gun.flags |= RF_TRANSLUCENT;
-		gun.alpha = 0.20;
-		V_AddEntity (&gun);
-	}
-	if(!(strcmp("vehicles/hover/v_wep.md2", gun.model->name))) {
-		gun.model = R_RegisterModel("vehicles/hover/window.md2");
-		gun.flags |= RF_TRANSLUCENT;
-		gun.alpha = 0.20;
-		V_AddEntity (&gun);
-	}
+	//add glass pieces
+	
 	if(!(strcmp("models/weapons/v_rocket/tris.md2", gun.model->name))) {
 		gun.model = R_RegisterModel("models/weapons/v_rocket/cover.md2");
 		gun.flags |= RF_TRANSLUCENT;
