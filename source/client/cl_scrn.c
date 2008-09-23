@@ -1345,7 +1345,7 @@ void SCR_ExecuteLayoutString (char *s)
 		}
 		if (!strcmp(token, "ctf"))
 		{	// draw a ctf client block
-			int		score, ping;
+			int	score, ping;
 			char	block[80];
 
 			token = COM_Parse (&s);
@@ -1369,8 +1369,7 @@ void SCR_ExecuteLayoutString (char *s)
 			if (ping > 999)
 				ping = 999;
 
-			sprintf(block, "%3d %3d %-12.12s", score, ping, ci->name);
-
+			sprintf(block, "%3d %3d %s", score, ping, ci->name);
 			Draw_ColorString (x, y, block);
 
 			continue;
