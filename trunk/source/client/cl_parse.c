@@ -533,6 +533,9 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 	}
 
 	//check for level of detail models
+	if (cl_noskins->value || *s == 0)
+		strcpy(model_name, "martianenforcer");
+
 	Com_sprintf(model_filename, sizeof(model_filename), "players/%s/lod1.md2", model_name);
 	i = 0;
 	do
