@@ -90,6 +90,7 @@ extern image_t      *r_shelltexture;     // c14 added shell texture
 extern image_t		*r_hittexture;
 extern image_t		*r_bubbletexture;
 extern image_t		*r_reflecttexture;
+extern image_t		*r_mirrorspec;
 extern image_t		*r_shottexture;
 extern image_t		*r_bullettexture;
 extern image_t		*r_bulletnormal;
