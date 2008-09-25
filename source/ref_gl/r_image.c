@@ -1402,6 +1402,7 @@ nonscrap:
 		image->th = 1;
 	}
 
+	COMPUTE_HASH_KEY( image->hash_key, name, i );
 	return image;
 }
 
@@ -1442,19 +1443,23 @@ GL_FindImage
 Finds or loads the given image
 ===============
 */
+
+static double totalTimeFindImage = 0;
+static unsigned int totalCountFindImage = 0;
 image_t	*GL_FindImage (char *name, imagetype_t type)
 {
-	image_t	*image;
+	image_t		*image = NULL;
 	int		i, len;
-	byte	*pic, *palette;
+	byte		*pic, *palette;
 	int		width, height;
-	char	shortname[MAX_QPATH];
+	char		shortname[MAX_QPATH];
+	unsigned int	hash_key;
 
 	if (!name)
-		return NULL;	//	Com_Error (ERR_DROP, "GL_FindImage: NULL name");
+		goto ret_image;	//	Com_Error (ERR_DROP, "GL_FindImage: NULL name");
 	len = strlen(name);
-	if (len<5)
-		return NULL;	//	Com_Error (ERR_DROP, "GL_FindImage: bad name: %s", name);
+	if (len < 5)
+		goto ret_image;	//	Com_Error (ERR_DROP, "GL_FindImage: bad name: %s", name);
 
 	//if HUD, then we want to load the one according to what it is set to.
 	if(!strcmp(name, "pics/i_health.pcx")) 
@@ -1463,12 +1468,13 @@ image_t	*GL_FindImage (char *name, imagetype_t type)
 			strcpy(name, cl_hudimage2->string);
 
 	// look for it
+	COMPUTE_HASH_KEY( hash_key, name, i );
 	for (i=0, image=gltextures ; i<numgltextures ; i++,image++)
 	{
-		if (!strcmp(name, image->name))
+		if (hash_key == image->hash_key && !strcmp(name, image->name))
 		{
 			image->registration_sequence = registration_sequence;
-			return image;
+			goto ret_image;
 		}
 	}
 
@@ -1513,6 +1519,7 @@ done:
 	if (palette)
 		free(palette);
 
+ret_image:
 	return image; 
 }
 

@@ -43,20 +43,21 @@ typedef enum
 
 typedef struct image_s
 {
-	char	name[MAX_QPATH];			// game path, including extension
-	char	bare_name[MAX_QPATH];		// filename only, as called when searching
-	imagetype_t	type;
-	int		width, height;				// source image
-	int		upload_width, upload_height;	// after power of two and picmip
-	int		registration_sequence;		// 0 = free
-	struct msurface_s	*texturechain;	// for sort-by-texture world drawing
-	int		texnum;						// gl texture binding
-	float	sl, tl, sh, th;				// 0,0 - 1,1 unless part of the scrap
-	qboolean	scrap;
-	qboolean	has_alpha;
-	qboolean paletted;
-	qboolean is_cin;					// Heffo - To identify a cin texture's image_t
-	void *script;
+	char			name[MAX_QPATH];		// game path, including extension
+	char			bare_name[MAX_QPATH];		// filename only, as called when searching
+	unsigned int		hash_key;			// hash key used in GL_FindImage
+	imagetype_t		type;
+	int			width, height;			// source image
+	int			upload_width, upload_height;	// after power of two and picmip
+	int			registration_sequence;		// 0 = free
+	struct msurface_s	*texturechain;			// for sort-by-texture world drawing
+	int			texnum;				// gl texture binding
+	float			sl, tl, sh, th;			// 0,0 - 1,1 unless part of the scrap
+	qboolean		scrap;
+	qboolean		has_alpha;
+	qboolean		paletted;
+	qboolean		is_cin;				// Heffo - To identify a cin texture's image_t
+	void			*script;
 
 } image_t;
 
