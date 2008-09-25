@@ -128,7 +128,8 @@ typedef struct
 // Base script
 typedef struct rscript_s 
 {
-	char					name[MAX_OSPATH];	// name of script
+	char				name[MAX_OSPATH];	// name of script
+	unsigned int			hash_key;		// hash key for the script's name
 	
 	unsigned char			subdivide;	// Heffo - chop the surface up this much for vertex warping
 	float					warpdist;	// Heffo - vertex warping distance;

@@ -237,6 +237,7 @@ void RS_ClearStage (rs_stage_t *stage)
 rscript_t *RS_NewScript (char *name)
 {
 	rscript_t	*rs;
+	unsigned int	i;
 
 	if (!rs_rootscript) 
 	{
@@ -254,6 +255,7 @@ rscript_t *RS_NewScript (char *name)
 		rs = rs->next;
 	}
 
+	COMPUTE_HASH_KEY(rs->hash_key, name, i);
 	strncpy (rs->name, name, sizeof(rs->name));
 
 	rs->stage = NULL;
@@ -369,21 +371,23 @@ void RS_FreeUnmarked (void)
 rscript_t *RS_FindScript(char *name)
 {
 	rscript_t	*rs = rs_rootscript;
+	unsigned int	i, hash_key;
+
+	COMPUTE_HASH_KEY(hash_key, name, i);
 
 	while (rs != NULL) 
 	{
-		if (!_stricmp(rs->name, name))
+		if (rs->hash_key == hash_key && !_stricmp(rs->name, name))
 		{
-			if (rs->stage)
-			   return rs;
-			else
-			   return NULL;
+			if (! rs->stage)
+				rs = NULL;
+			break;
 		}
 
 		rs = rs->next;
 	}
 
-	return NULL;
+	return rs;
 }
 
 void RS_ReadyScript (rscript_t *rs)
@@ -441,6 +445,9 @@ void RS_ReadyScript (rscript_t *rs)
 	rs->ready = true;
 }
 
+
+// This function is never called anywhere, commenting it out (BlackIce)
+#if 0
 void RS_UpdateRegistration (void)
 {
 	rscript_t		*rs = rs_rootscript;
@@ -488,6 +495,7 @@ void RS_UpdateRegistration (void)
 		rs = rs->next;
 	}
 }
+#endif
 
 int RS_BlendID (char *blend)
 {
