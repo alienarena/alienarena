@@ -1547,6 +1547,7 @@ void GL_FreeUnusedImages (void)
 	r_particletexture->registration_sequence = registration_sequence;
     r_shelltexture->registration_sequence = registration_sequence;    // c14 added shell texture
 	r_reflecttexture->registration_sequence = registration_sequence;
+	r_mirrorspec->registration_sequence = registration_sequence;
 	r_flare->registration_sequence = registration_sequence;
 	r_smoketexture->registration_sequence = registration_sequence;
   	r_explosiontexture->registration_sequence = registration_sequence;

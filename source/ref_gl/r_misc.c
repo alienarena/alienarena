@@ -68,6 +68,7 @@ image_t		*r_raintexture;
 image_t		*r_radarmap; // wall texture for radar texgen
 image_t		*r_around;
 image_t		*r_flare;
+image_t		*r_mirrorspec; 
 
 //Normalisation cube map
 GLuint normalisationCubeMap;
@@ -259,6 +260,7 @@ void R_InitParticleTexture (void)
 	r_hittexture = R_RegisterParticlePic("aflash");
 	r_bubbletexture = R_RegisterParticlePic("bubble");
 	r_reflecttexture = R_RegisterParticlePic("reflect");
+	r_mirrorspec = R_RegisterGfxPic("mirrorspec");
 	r_shottexture = R_RegisterParticlePic("dflash");
 	r_sayicontexture = R_RegisterParticlePic("sayicon");
 	r_flaretexture = R_RegisterParticlePic("flare");

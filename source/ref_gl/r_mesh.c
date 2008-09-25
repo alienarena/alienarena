@@ -447,8 +447,23 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					}
 				}
 
-				if(mirror) {			
-					GL_Bind(r_mirrortexture->texnum);
+				if(mirror) {	
+					if( !(currententity->flags & RF_WEAPONMODEL)) {
+						GL_EnableMultitexture( true );
+						GL_SelectTexture( GL_TEXTURE0);
+						GL_TexEnv ( GL_COMBINE_EXT );
+						qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
+						qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+						qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+						GL_SelectTexture( GL_TEXTURE1 );
+						GL_TexEnv ( GL_COMBINE_EXT );
+						qglBindTexture (GL_TEXTURE_2D, r_mirrorspec->texnum);
+						qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
+						qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+						qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
+					}
+					else
+						GL_Bind(r_mirrortexture->texnum);
 				}
 				else if (stage->colormap.enabled)
 					qglDisable (GL_TEXTURE_2D);
@@ -555,16 +570,22 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
 				}
 				else {
-					if(stage->next) //increase intensity of lighting to cut through normals a bit
+					if(stage->next) { //increase intensity of lighting to cut through normals a bit
 						if(stage->next->normalmap && gl_normalmaps->value)
 							ramp = 2.0;
-					R_InitVArrays (VERT_COLOURED_TEXTURED);
+					}
+					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
+						R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
+					else
+						R_InitVArrays (VERT_COLOURED_TEXTURED);
 				}
 				
 				do
 				{
 					float os = ((float *)order)[0];
 					float ot = ((float *)order)[1];
+					float os2 = ((float *)order)[0];
+					float ot2 = ((float *)order)[1];
 					vec3_t normal;
 					int k;
 					
@@ -594,7 +615,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					if (stage->envmap)
 					{
 						vec3_t envmapvec;
-
+						
 						VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
 
 						if(mirror) {
@@ -603,18 +624,20 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 									RS_SetEnvmap (envmapvec, &os, &ot);
 									stage->scale.scaleX = -2.0; //slight fisheye effect
 									stage->scale.scaleY = 2.0;
-									stage->scale.typeX = stage->scale.typeY = 0;
 							}
 							else {
 
 								stage->scale.scaleX = -1.0;
 								stage->scale.scaleY = 1.0;
-								stage->scale.typeX = stage->scale.typeY = 0;
 							}
+							RS_SetEnvmap (envmapvec, &os2, &ot2);
+							RS_SetTexcoords2D(stage, &os2, &ot2);
 						}
 						else {
 
 							RS_SetEnvmap (envmapvec, &os, &ot);
+
+							stage->scale.scaleX = stage->scale.scaleY = 0.5;
 
 							os -= DotProduct (normal , vectors[1] );
 							ot += DotProduct (normal, vectors[2] );
@@ -625,6 +648,11 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 							
 					VArray[3] = os;
 					VArray[4] = ot;
+
+					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) {
+						VArray[5] = os2;
+						VArray[6] = ot2;
+					}
 			
 					{
 						float red = 1, green = 1, blue = 1, nAlpha;
@@ -655,14 +683,24 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 							blue *= stage->colormap.blue/255.0;
 						}
 					
-						VArray[5] = red;
-						VArray[6] = green;
-						VArray[7] = blue;
-						VArray[8] = nAlpha;				
+						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
+							VArray[7] = red;
+							VArray[8] = green;
+							VArray[9] = blue;
+							VArray[10] = nAlpha;
+						}
+						else {
+							VArray[5] = red;
+							VArray[6] = green;
+							VArray[7] = blue;
+							VArray[8] = nAlpha;	
+						}
 					}
 					// increment pointer and counter
 					if(stage->normalmap)
 						VArray += VertexSizes[VERT_BUMPMAPPED_COLOURED];
+					else if(mirror && !(currententity->flags & RF_WEAPONMODEL))
+						VArray += VertexSizes[VERT_COLOURED_MULTI_TEXTURED];
 					else
 						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 					order += 3;
@@ -681,6 +719,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				qglColor4f(1,1,1,1);
 				if (stage->colormap.enabled)
 					qglEnable (GL_TEXTURE_2D);
+
+				if(mirror && !(currententity->flags & RF_WEAPONMODEL))
+					GL_EnableMultitexture( false );
 
 				if(stage->normalmap) {
 
