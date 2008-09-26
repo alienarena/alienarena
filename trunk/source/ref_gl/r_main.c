@@ -2386,3 +2386,124 @@ void R_DrawBeam( entity_t *e )
 	qglDepthMask( GL_TRUE );
 }
 
+/*
+===============
+R_FarClip
+===============
+*/
+float R_FarClip( void )
+{
+	float farclip, farclip_dist;
+	int i;
+	vec_t mins[4];
+	vec_t maxs[4];
+	vec_t dist;
+
+	farclip_dist = DotProduct( r_origin, vpn );
+
+	if(r_farclip_min > 256.0f)
+		farclip = farclip_dist + r_farclip_min;
+	else
+		farclip = farclip_dist + 256.0f;
+
+	if( r_worldmodel && !(r_newrefdef.rdflags & RDF_NOWORLDMODEL) ) {
+
+		for (i = 0; i < 3; i++) {
+			mins[i] = r_worldmodel->nodes[0].minmaxs[i];
+			maxs[i] = r_worldmodel->nodes[0].minmaxs[3+i];
+		}
+		dist = (vpn[0] < 0 ? mins[0] : maxs[0]) * vpn[0] + 
+			(vpn[1] < 0 ? mins[1] : maxs[1]) * vpn[1] +
+			(vpn[2] < 0 ? mins[2] : maxs[2]) * vpn[2];
+		if( dist > farclip )  
+			farclip = dist;
+	}
+
+	if((farclip - farclip_dist + r_farclip_bias) > r_farclip)
+		return ( farclip - farclip_dist + r_farclip_bias);
+	else
+		return r_farclip;
+}
+
+/*
+=============
+R_SetupProjectionMatrix
+=============
+*/
+void R_SetupProjectionMatrix( refdef_t *rd, mat4x4_t m )
+{
+	double xMin, xMax, yMin, yMax, zNear, zFar;
+
+	r_farclip = R_FarClip ();
+
+	zNear = 4;
+	zFar = r_farclip;
+
+	yMax = zNear * tan( rd->fov_y * M_PI / 360.0 );
+	yMin = -yMax;
+
+	xMin = yMin * rd->width / rd->height;
+	xMax = yMax * rd->width / rd->height;
+
+	xMin += -( 2 * gl_state.camera_separation ) / zNear;
+	xMax += -( 2 * gl_state.camera_separation ) / zNear;
+
+	m[0] = (2.0 * zNear) / (xMax - xMin);
+	m[1] = 0.0f;
+	m[2] = 0.0f;
+	m[3] = 0.0f;
+	m[4] = 0.0f;
+	m[5] = (2.0 * zNear) / (yMax - yMin);
+	m[6] = 0.0f;
+	m[7] = 0.0f;
+	m[8] = (xMax + xMin) / (xMax - xMin);
+	m[9] = (yMax + yMin) / (yMax - yMin);
+	m[10] = -(zFar + zNear) / (zFar - zNear);
+	m[11] = -1.0f;
+	m[12] = 0.0f;
+	m[13] = 0.0f;
+	m[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
+	m[15] = 0.0f;
+}
+/*
+=============
+R_SetupModelviewMatrix
+=============
+*/
+void R_SetupModelviewMatrix( refdef_t *rd, mat4x4_t m )
+{
+	Vector4Set( &m[0], 0, 0, -1, 0 );
+	Vector4Set( &m[4], -1, 0, 0, 0 );
+	Vector4Set( &m[8], 0, 1, 0, 0 );
+	Vector4Set( &m[12], 0, 0, 0, 1 );
+
+	Matrix4_Rotate( m, -rd->viewangles[2], 1, 0, 0 );
+	Matrix4_Rotate( m, -rd->viewangles[0], 0, 1, 0 );
+	Matrix4_Rotate( m, -rd->viewangles[1], 0, 0, 1 );
+	Matrix4_Translate( m, -rd->vieworg[0], -rd->vieworg[1], -rd->vieworg[2] );
+}
+
+void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out ) 
+{ 
+   mat4x4_t p, m; 
+   vec4_t temp, temp2; 
+
+   if( !rd || !in || !out ) 
+      return; 
+
+   temp[0] = in[0]; 
+   temp[1] = in[1]; 
+   temp[2] = in[2]; 
+   temp[3] = 1.0f; 
+
+   R_SetupProjectionMatrix( rd, p ); 
+   R_SetupModelviewMatrix( rd, m ); 
+
+   Matrix4_Multiply_Vector( m, temp, temp2 ); 
+   Matrix4_Multiply_Vector( p, temp2, temp ); 
+
+   if( !temp[3] ) 
+      return; 
+   out[0] = rd->x + (temp[0] / temp[3] + 1.0f) * rd->width * 0.5f; 
+   out[1] = rd->y + (temp[1] / temp[3] + 1.0f) * rd->height * 0.5f; 
+}

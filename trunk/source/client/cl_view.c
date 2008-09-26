@@ -647,10 +647,10 @@ qboolean InFront (vec3_t target)
 	return false;
 }
 //============== 
-//SCR_DrawPlayerNames 
-// shows player names at their feets. 
+//SCR_DrawPlayerNamesCenter
+// shows player names at center of screen 
 //============== 
-void SCR_DrawPlayerNames( void ) 
+void SCR_DrawPlayerNamesCenter( void ) 
 { 
    int         i; 
    centity_t   *cent; 
@@ -707,6 +707,65 @@ void SCR_DrawPlayerNames( void )
 	  if(closest)
 		  Draw_ColorString( (int)(cl.refdef.width/2 - strlen(cl.clientinfo[closest].name)*3), (int)(cl.refdef.height/1.8), cl.clientinfo[closest].name);
   		
+}
+
+//============== 
+//SCR_DrawPlayerNames 
+// shows player names at their feets. 
+//============== 
+extern void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out );
+void SCR_DrawPlayerNames( void ) 
+{ 
+   static vec4_t   whiteTransparent = { 1.0f, 1.0f, 1.0f, 0.5f }; 
+   int         i; 
+   centity_t   *cent; 
+   float      dist; 
+   trace_t   trace;
+   vec2_t screen_pos; 
+   vec3_t vecdist; 
+   vec3_t temp; 
+   vec3_t axis[3]; 
+   int y; 
+   static vec3_t mins = { -4, -4, -4 }; 
+   static vec3_t maxs = { 4, 4, 4 }; 
+
+   if( !cl_showPlayerNames->integer ) 
+      return; 
+  
+   for( i = 0; i < MAX_CLIENTS; i++ ) 
+   { 
+      
+	  cent = cl_entities + i + 1; 
+	
+	  if( !cent->current.modelindex ) 
+		 continue; 
+	 
+	  if(!strcmp(cl.clientinfo[i].name, name->string))
+		  continue;
+	
+	  trace = CL_Trace ( cl.refdef.vieworg, mins, maxs, cent->current.origin, -1, MASK_PLAYERSOLID, true, NULL); 
+	  if (trace.fraction != 1.0)	
+		  continue;
+
+	  VectorSubtract(cent->current.origin, cl.refdef.vieworg, vecdist); 
+	  dist = VectorLength(vecdist); 
+
+	  if (dist >= 1000 || !InFront(cent->current.origin)) 
+		  continue; 
+      
+	  VectorSubtract (cent->current.origin, cl.refdef.vieworg, temp); 
+	  VectorNormalize (temp); 
+
+	  AngleVectors(cl.refdef.viewangles, axis[0], axis[1], axis[2]); 
+
+	  if (DotProduct (temp, axis[0]) < 0) 
+	      continue; 
+
+	  R_TransformVectorToScreen(&cl.refdef, cent->current.origin, screen_pos); 
+	  y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6; 
+	  Draw_ColorString ( (int)screen_pos[0], y, cl.clientinfo[i].name ); 
+
+   } 
 }
 
 /*
@@ -828,8 +887,12 @@ void V_RenderView( float stereo_separation )
 
 	SCR_DrawCrosshair ();
 
-	//JD - player names
-	SCR_DrawPlayerNames();
+	if(cl_showPlayerNames->integer) {
+		if(cl_showPlayerNames->integer == 2)
+			SCR_DrawPlayerNames();
+		else
+			SCR_DrawPlayerNamesCenter();
+	}
 }
 
 
