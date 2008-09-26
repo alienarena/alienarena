@@ -1898,7 +1898,7 @@ static void ControlsSetMenuItemValues( void )
 
 	s_options_noalttab_box.curvalue			= win_noalttab->value;
 
-	Cvar_SetValue("cl_showplayernames", ClampCvar(0, 1, cl_showPlayerNames->value ) );
+	Cvar_SetValue("cl_showplayernames", ClampCvar(0, 2, cl_showPlayerNames->value ) );
 	s_options_target_box.curvalue		= cl_showPlayerNames->value;
 
 	Cvar_SetValue("cl_noskins", ClampCvar(0, 1, cl_noskins->value ) );
@@ -2062,17 +2062,18 @@ void Options_MenuInit( void )
 		"dynamic+world",
 		0
 	};
-	static const char *rtlights_names[] =
-	{
-		"off",
-		"on",
-		0
-	};
 	static const char *minimap_names[] =
 	{
 		"off",
 		"static",
 		"rotating",
+		0
+	};
+	static const char *playerid_names[] = 
+	{
+		"off",
+		"centered",
+		"over player",
 		0
 	};
 
@@ -2131,14 +2132,14 @@ void Options_MenuInit( void )
 	s_options_rtlights_box.generic.y	= 60*scale;
 	s_options_rtlights_box.generic.name	= "real time lighting";
 	s_options_rtlights_box.generic.callback = RTlightsFunc;
-	s_options_rtlights_box.itemnames = rtlights_names;
+	s_options_rtlights_box.itemnames = onoff_names;
 
 	s_options_target_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_target_box.generic.x	= 0;
 	s_options_target_box.generic.y	= 70*scale;
 	s_options_target_box.generic.name	= "identify target";
 	s_options_target_box.generic.callback = TargetFunc;
-	s_options_target_box.itemnames = yesno_names;
+	s_options_target_box.itemnames = playerid_names;
 
 	s_options_healthaura_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_healthaura_box.generic.x	= 0;
