@@ -597,34 +597,42 @@ CL_Rcon_f
 */
 void CL_Rcon_f (void)
 {
-	char	message[1024];
+	char		message[1024];
+	sizebuf_t	buffer;
 	int		i;
 	netadr_t	to;
 
-	if (!rcon_client_password->string)
+	if ( !(rcon_client_password->string && rcon_client_password->string[0]) && Cmd_Argc() < 3)
 	{
-		Com_Printf ("You must set 'rcon_password' before\n"
-					"issuing an rcon command.\n");
+		Com_Printf ("You must set 'rcon_password' before issuing an rcon command.\n");
 		return;
 	}
 
-	message[0] = (char)255;
-	message[1] = (char)255;
-	message[2] = (char)255;
-	message[3] = (char)255;
-	message[4] = 0;
-
 	NET_Config (true);		// allow remote
 
-	strcat (message, "rcon ");
+	SZ_Init( &buffer, (byte *) message, 1024 );
+	buffer.allowoverflow = true;
+	SZ_SetName( &buffer, "RCon buffer", false );
 
-	strcat (message, rcon_client_password->string);
-	strcat (message, " ");
+	SZ_Print (&buffer, "\xff\xff\xff\xffrcon ");
+	if ( rcon_client_password->string && rcon_client_password->string[0] )
+	{
+		SZ_Print (&buffer, "\"");
+		SZ_Print (&buffer, rcon_client_password->string);
+		SZ_Print (&buffer, "\" ");
+	}
 
 	for (i=1 ; i<Cmd_Argc() ; i++)
 	{
-		strcat (message, Cmd_Argv(i));
-		strcat (message, " ");
+		SZ_Print (&buffer, "\"");
+		SZ_Print (&buffer, Cmd_Argv(i));
+		SZ_Print (&buffer, "\" ");
+	}
+
+	if ( buffer.overflowed )
+	{
+		Com_Printf ("Rcon command too long\n");
+		return;
 	}
 
 	if (cls.state >= ca_connected)
@@ -633,9 +641,7 @@ void CL_Rcon_f (void)
 	{
 		if (!strlen(rcon_address->string))
 		{
-			Com_Printf ("You must either be connected,\n"
-						"or set the 'rcon_address' cvar\n"
-						"to issue rcon commands\n");
+			Com_Printf ("You must either be connected, or set the 'rcon_address' cvar to issue rcon commands\n");
 
 			return;
 		}
