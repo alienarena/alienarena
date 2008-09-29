@@ -83,7 +83,7 @@ function GenerateLiveServerTable(&$control)
 				{
 					/* These are the rows below servername, admin etc */
 					case 1:
-						echo "<td>&nbsp;&nbsp;&nbsp;&nbsp;{$svinfo_row['ip']} port {$svinfo_row['port']}</td>";
+						echo "<td>&nbsp;&nbsp;&nbsp;&nbsp;{$svinfo_row['ip']}:{$svinfo_row['port']}</td>";
 					break;
 					case 2:
 						echo "<td>&nbsp;&nbsp;&nbsp;&nbsp;";
@@ -130,7 +130,7 @@ function GenerateLiveServerTable(&$control)
 		{
 			echo "<a href=\"{$svinfo_row['website']}\"><img border=0 alt=www src=\"img/www.gif\"></a>";		
 		}
-		echo " {$svinfo_row['ip']} port {$svinfo_row['port']}";
+		echo " {$svinfo_row['ip']}:{$svinfo_row['port']}";
 		*/
 		mysql_free_result($pl_result);
 		echo "<tr><td colspan=3></td></tr>";
@@ -265,7 +265,7 @@ function GenerateServerInfo(&$control)
 	echo "<td>".LimitString($hostname, 40)."</td></tr>";
 
 	echo "<tr><th>IP & port</th>";
-	echo "<td>{$sv_row['ip']} port {$sv_row['port']}</td></tr>";
+	echo "<td>{$sv_row['ip']}:{$sv_row['port']}</td></tr>";
 
 	echo "<tr><th>Website</th>";
 	echo "<td><a href={$sv_row['website']}>{$sv_row['website']}</a></td></tr>";
