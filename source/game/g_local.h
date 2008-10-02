@@ -622,6 +622,9 @@ extern cvar_t   *joustmode;
 
 //map voting
 extern cvar_t	*g_mapvote;
+extern cvar_t	*g_voterand;
+extern cvar_t	*g_votemode;
+extern cvar_t	*g_votesame;
 
 //reward point threshold
 extern cvar_t	*g_reward;

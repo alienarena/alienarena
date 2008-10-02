@@ -2604,7 +2604,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	gclient_t	*client;
 	edict_t *cl_ent;
 	edict_t	*other;
-	int		i, j, mostvotes;
+	int		i, j, mostvotes, n_candidates;
+	int		map_candidates[4];
 	pmove_t	pm;
 	qboolean sproing, haste;
 	vec3_t addspeed, forward, up, right;
@@ -2623,26 +2624,43 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		client->ps.pmove.pm_type = PM_FREEZE;
 		
 		// can exit intermission after 10 seconds, or 20 if map voting enables
-		if(g_mapvote->value) {
+		// (voting will only work if g_mapvote wasn't modified during intermission)
+		if (g_mapvote->value && ! g_mapvote->modified) {
 
 			//print out results, track winning map
 			mostvotes = 0;
 			
-			for (i=0 ; i<maxclients->value ; i++)
+			for (j = 0; j < 4; j++) {
+				if (votedmap[j].tally > mostvotes)
+					mostvotes = votedmap[j].tally;
+			}
+
+			if ( g_voterand && g_voterand->value )
 			{
-				cl_ent = g_edicts + 1 + i;
-				if (!cl_ent->inuse || cl_ent->is_bot)
-					continue;
-				for(j = 0; j < 4; j++) {
-					if(votedmap[j].tally > mostvotes) {
-						mostvotes = votedmap[j].tally;
-						strcpy(level.changemap, votedmap[j].mapname);
-					}
+				// we're using a random value for the next map
+				// if a choice needs to be done
+				n_candidates = 0;
+				for ( j = 0 ; j < 4 ; j ++ ) {
+					if ( votedmap[j].tally < mostvotes )
+						continue;
+					map_candidates[n_candidates ++] = j;
+				}
+
+				j = random() * n_candidates;
+				strcpy(level.changemap, votedmap[map_candidates[j]].mapname);
+			}
+			else
+			{
+				// "old" voting system, take the first map that
+				// has enough votes
+				for ( j = 0 ; j < 4 ; j ++ ) {
+					i = (j + 1) % 4;
+					if ( votedmap[i].tally < mostvotes )
+						continue;
+					strcpy(level.changemap, votedmap[i].mapname);
+					break;
 				}
 			}
-			//if nobody voted, then move to next map in list
-			if(mostvotes == 0)
-				strcpy(level.changemap, votedmap[1].mapname);
 			
 			if (level.time > level.intermissiontime + 20.0
 				&& (ucmd->buttons & BUTTON_ANY) )
@@ -2654,6 +2672,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				level.exitintermission = true;
 		}
 		return;
+	}
+	else if ( g_mapvote && g_mapvote->modified )
+	{
+		g_mapvote->modified = false;
 	}
 
 	pm_passent = ent;

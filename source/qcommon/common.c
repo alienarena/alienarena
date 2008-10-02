@@ -208,7 +208,7 @@ void Com_Error (int code, char *fmt, ...)
 {
 	va_list		argptr;
 	static char		msg[MAXPRINTMSG];
-	static	qboolean	recursive;
+	static	qboolean	recursive = false;
 
 	if (recursive)
 		Sys_Error ("recursive error after: %s", msg);
@@ -919,7 +919,7 @@ void SZ_Init (sizebuf_t *buf, byte *data, int length)
 #ifdef	BUFFER_DEBUG
 void SZ_SetName(sizebuf_t * buf, const char * name, qboolean print_it)
 {
-	strncpy(buf->name, name, sizeof(buf->name));
+	strncpy(buf->name, name, sizeof(buf->name) - 1);
 	if ( print_it )
 		Com_Printf("SZ_SetName: buffer '%s' (address = 0x%.12x) initialised\n", buf->name, buf);
 }

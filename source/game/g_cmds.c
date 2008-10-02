@@ -917,12 +917,16 @@ Cmd_Vote_f
 void Cmd_Vote_f (edict_t *ent)
 {
 
-	int		i, j, mostvotes, winner;
+	int	i, j, mostvotes, winner;
+	int	n_candidates;
+	int	candidates[4];
+	char	buffer[512];
+	char	buffer2[60];
 	edict_t *cl_ent;
 
 	i = atoi (gi.argv(1));
 
-	if (!level.intermissiontime)
+	if (!level.intermissiontime || ! (g_mapvote && g_mapvote->value && !g_mapvote->modified) )
 		return;
 
 	ent->client->mapvote = i;
@@ -943,16 +947,62 @@ void Cmd_Vote_f (edict_t *ent)
 				votedmap[j].tally++;
 			if(votedmap[j].tally > mostvotes){
 				mostvotes = votedmap[j].tally;
-				winner = j;
 			}
 		}
 	}
+
+	if ( g_voterand && g_voterand->value )
+	{
+		// random tie resolution
+		n_candidates = 0;
+		for (j = 0; j < 4; j ++) {
+			if ( votedmap[j].tally < mostvotes )
+				continue;
+			candidates[n_candidates ++] = j;
+		}
+
+		if ( n_candidates == 1 )
+		{
+			winner = candidates[0];
+			sprintf( buffer, "Map %s leads with %i vote%s!", votedmap[winner].mapname, votedmap[winner].tally, (mostvotes > 1) ? "s" : ""  );
+		}
+		else
+		{
+			strcpy( buffer, "It's a tie!\nMaps ");
+			for ( i = 0 ; i < n_candidates ; i ++ ) {
+				j = candidates[i];
+				if ( i > 0 )
+				{
+					if ( i == n_candidates - 1 )
+						strcat( buffer, " and " );
+					else
+						strcat( buffer, ", " );
+				}
+				strcat( buffer, votedmap[j].mapname );
+			}
+			sprintf( buffer2, "\nlead with %i vote%s!" , mostvotes , (mostvotes > 1) ? "s" : "" );
+			strcat( buffer, buffer2 );
+		}
+	}
+	else
+	{
+		// "old" voting system, leading map is the first one with enough votes
+		for (j = 0; j < 4; j ++) {
+			i = (j + 1) % 4;
+			if ( votedmap[i].tally < mostvotes )
+				continue;
+			winner = i;
+			break;
+		}
+		sprintf( buffer, "Map %s leads with %i vote%s!", votedmap[winner].mapname, votedmap[winner].tally, (mostvotes > 1) ? "s" : "" );
+	}
+
 	for (i=0 ; i<maxclients->value ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
 		if (!cl_ent->inuse || cl_ent->is_bot)
 			continue;
-		safe_centerprintf(cl_ent, "Map %s leads with %i votes!", votedmap[winner].mapname, votedmap[winner].tally);
+		safe_centerprintf(cl_ent, "%s", buffer );
 	}
 }
 /*
