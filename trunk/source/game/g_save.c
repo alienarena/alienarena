@@ -239,6 +239,9 @@ void InitGame (void)
 
 	//map voting
 	g_mapvote = gi.cvar("g_mapvote", "0", CVAR_SERVERINFO);
+	g_voterand = gi.cvar("g_voterand", "0", 0);
+	g_votemode = gi.cvar("g_votemode", "0", 0);
+	g_votesame = gi.cvar("g_votesame", "1", 0);
 
 	//reward points threshold
 	g_reward = gi.cvar("g_reward", "20", CVAR_SERVERINFO);

@@ -90,6 +90,9 @@ cvar_t  *joustmode;
 
 //map voting
 cvar_t	*g_mapvote;
+cvar_t	*g_voterand;
+cvar_t	*g_votemode;
+cvar_t	*g_votesame;
 
 //reward point threshold
 cvar_t	*g_reward;
@@ -350,37 +353,78 @@ void EndDMLevel (void)
 	//map voting
 	if(g_mapvote->value) {
 		level.changemap = level.mapname;
-		strcpy(votedmap[0].mapname, level.mapname); //first is current
-		votedmap[0].tally = 0;
-		for(i = 1; i < 4; i++) {
-			
-			//initialize 
+
+		// initialise map list using the current map's name
+		// this is done in all modes just in case
+		for ( i = 0 ; i < 4 ; i ++ )
+		{
 			strcpy(votedmap[i].mapname, level.mapname);
 			votedmap[i].tally = 0;
+		}
 
-			//get next four maps from the maplist
-			if (*sv_maplist->string) {
-				s = strdup(sv_maplist->string);
-				f = NULL;
-				t = NULL;
-				t = strtok(s, seps);
-				while (t != NULL) {
-					if(!f)
-						f = t; //first map in list	
-					if (Q_stricmp(t, votedmap[i-1].mapname) == 0) {
-						// it's in the list, go to the next one
-						t = strtok(NULL, seps);
-						if(t) {
-							strcpy(votedmap[i].mapname, t);
-							break;
-						}
-						else
-							strcpy(votedmap[i].mapname, f); //first in list
-					}
-					t = strtok(NULL, seps);
+		// if there is a map list, time to choose
+		if ( sv_maplist && sv_maplist->string && *(sv_maplist->string) )
+		{
+			char * names[200]; // 200 map names should be fine
+			int n_maps = 0;
+			int same_index = -1;
+			int mode = ( g_votemode ? g_votemode->value : 0 );
+			qboolean same = ( g_votesame ? (g_votesame->value == 1) : 1 );
+
+			memset( names, 0 , sizeof(names) );
+			s = strdup( sv_maplist->string );
+			t = strtok( s, seps );
+			do {
+				// if using the same map is disallowed, skip it
+				if ( !Q_stricmp(t, level.mapname) )
+				{
+					if ( same_index == -1 )
+						same_index = n_maps;
+					if ( !same )
+						continue;
 				}
-				free(s);
+
+				// avoid duplicates
+				for ( i = 0 ; i < n_maps ; i ++ )
+				{
+					if ( ! Q_stricmp( t , names[i] ) )
+						break;
+				}
+				if ( i < n_maps )
+					continue;
+
+				names[n_maps ++] = t;
+			} while ( (t = strtok( NULL, seps)) != NULL );
+
+			if ( n_maps > 0 )
+			{
+				// if the map list has been changed and the
+				// current map is no longer in it, prevent
+				// screw-ups
+				if ( same_index == -1 )
+					same_index = 0;
+
+				if ( mode == 0 )
+				{
+					// standard vote mode, take the next
+					// 4 maps from the list
+					for ( i = 0 ; i < 4 ; i ++ )
+						strcpy( votedmap[i].mapname, names[(same_index + i) % n_maps] );
+				}
+				else
+				{
+					// random selection
+					for ( i = 0 ; i < 4 && n_maps > 0 ; i ++ )
+					{
+						int map = random() * n_maps;
+						strcpy( votedmap[i].mapname, names[map] );
+						names[map] = names[n_maps - 1];
+						n_maps --;
+					}
+				}
 			}
+
+			free(s);
 		}
 	}
 

@@ -112,7 +112,7 @@ typedef struct sizebuf_s
 	int		cursize;
 	int		readcount;
 #ifdef	BUFFER_DEBUG
-	char		name[32];
+	char		name[48];
 #endif	//BUFFER_DEBUG
 } sizebuf_t;
 
