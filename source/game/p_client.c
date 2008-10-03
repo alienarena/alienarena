@@ -2646,7 +2646,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 					map_candidates[n_candidates ++] = j;
 				}
 
-				j = random() * n_candidates;
+				j = random() * (n_candidates - 1);
 				strcpy(level.changemap, votedmap[map_candidates[j]].mapname);
 			}
 			else
