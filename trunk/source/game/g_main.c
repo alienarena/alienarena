@@ -416,7 +416,7 @@ void EndDMLevel (void)
 					// random selection
 					for ( i = 0 ; i < 4 && n_maps > 0 ; i ++ )
 					{
-						int map = random() * n_maps;
+						int map = random() * (n_maps - 1);
 						strcpy( votedmap[i].mapname, names[map] );
 						names[map] = names[n_maps - 1];
 						n_maps --;
