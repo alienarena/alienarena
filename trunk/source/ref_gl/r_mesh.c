@@ -928,7 +928,6 @@ void R_DrawAliasModel (entity_t *e)
 	vec3_t		bbox[8];
 	image_t		*skin;
 	rscript_t	*rs = NULL;
-	char	shortname[MAX_QPATH];
 	extern qboolean g_drawing_refl;
 	
 	if ( !( e->flags & RF_WEAPONMODEL ) )
@@ -1082,22 +1081,6 @@ void R_DrawAliasModel (entity_t *e)
 	// select skin
 	if (currententity->skin) {
 		skin = currententity->skin;	// custom player skin
-
-		//get a script for it, maybe there is a better place for this, but I don't think there is
-		rs = NULL;
-		if (r_shaders->value ){
-			COM_StripExtension ( currententity->skin->name, shortname );
-
-			rs = RS_FindScript(shortname);
-			if (rs)
-			{
-				RS_ReadyScript(rs);
-				currententity->script = rs;
-			}
-			else
-				currententity->script = NULL;
-		}
-
 	}
 	else
 	{
