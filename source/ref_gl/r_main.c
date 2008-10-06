@@ -462,6 +462,7 @@ void R_DrawEntitiesOnList (void)
 	int		i;
 	rscript_t	*rs = NULL;
 	vec3_t	dist;
+	char	shortname[MAX_QPATH];
 
 	if (!r_drawentities->value)
 		return;
@@ -471,19 +472,21 @@ void R_DrawEntitiesOnList (void)
 	{
 		currententity = &r_newrefdef.entities[i];
 		if (currententity->flags & RF_TRANSLUCENT)
-			continue;	// solid
+			continue;	// transluscent
 
 		if (currententity->model && r_shaders->value)
 		{
 			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-			if (currententity->skin)
-				rs = currententity->skin->script;
+
+			if (currententity->skin) { //custom player skin (must be done here)
+				COM_StripExtension ( currententity->skin->name, shortname );
+				rs = RS_FindScript(shortname);	
+				if(rs)
+					RS_ReadyScript(rs);
+			}
 
 			if (rs)
-			{
-				RS_ReadyScript(rs);
 				currententity->script = rs;
-			}
 			else
 				currententity->script = NULL;
 		}
@@ -540,14 +543,16 @@ void R_DrawEntitiesOnList (void)
 		if (currententity->model && r_shaders->value)
 		{
 			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-			if (currententity->skin)
-				rs = currententity->skin->script;
+			
+			if (currententity->skin) { //custom player skin
+				COM_StripExtension ( currententity->skin->name, shortname );
+				rs = RS_FindScript(shortname);	
+				if(rs)
+					RS_ReadyScript(rs);
+			}
 
 			if (rs)
-			{
-				RS_ReadyScript(rs);
 				currententity->script = rs;
-			}
 			else
 				currententity->script = NULL;
 		}
