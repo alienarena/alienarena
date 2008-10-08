@@ -50,9 +50,6 @@ cvar_t		*cl_stats;
 int			r_numdlights;
 dlight_t	r_dlights[MAX_DLIGHTS];
 
-int			r_numstains;
-stain_t		r_stains[MAX_STAINS];
-
 int			r_numentities;
 entity_t	r_entities[MAX_ENTITIES];
 
@@ -74,7 +71,6 @@ Specifies the model that will be used as the world
 void V_ClearScene (void)
 {
 	r_numdlights = 0;
-	r_numstains = 0;
 	r_numentities = 0;
 	r_numparticles = 0;
 }
@@ -157,26 +153,6 @@ void V_AddTeamLight (vec3_t org, float intensity, float r, float g, float b, int
 	dl->color[1] = g;
 	dl->color[2] = b;
 	dl->team = team;
-}
-/*
-=====================
-V_AddStain
-
-=====================
-*/
-void V_AddStain (vec3_t org, float intensity, float r, float g, float b, float a)
-{
-	stain_t		*st;
-
-	if (r_numstains >= MAX_STAINS)
-		return;
-	st = &r_stains[r_numstains++];
-	VectorCopy (org, st->origin);
-	st->intensity = intensity;
-	st->color[0] = r;
-	st->color[1] = g;
-	st->color[2] = b;
-	st->alpha = a;
 }
 
 /*
@@ -858,8 +834,6 @@ void V_RenderView( float stereo_separation )
 		cl.refdef.particles = r_particles;
 		cl.refdef.num_dlights = r_numdlights;
 		cl.refdef.dlights = r_dlights;
-		cl.refdef.num_stains = r_numstains;
-		cl.refdef.stains = r_stains;
 		cl.refdef.lightstyles = r_lightstyles;
 		cl.refdef.num_flares = r_numflares;
         cl.refdef.flares = r_flares;

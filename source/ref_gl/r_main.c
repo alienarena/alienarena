@@ -1232,9 +1232,7 @@ void R_RenderView (refdef_t *fd)
 	}
 
 	R_PushDlights ();
-	if(!cl_noblood->value)
-		R_PushStains ();
-
+	
 	if (gl_finish->value)
 		qglFinish ();
 

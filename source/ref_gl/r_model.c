@@ -865,7 +865,6 @@ void GL_AddFlareSurface (msurface_t *surf )
 
 void GL_BuildPolygonFromSurface(msurface_t *fa);
 void GL_CreateSurfaceLightmap (msurface_t *surf);
-void GL_CreateSurfaceStainmap (msurface_t *surf);
 void GL_EndBuildingLightmaps (void);
 void GL_BeginBuildingLightmaps (model_t *m);
 
@@ -926,7 +925,6 @@ void Mod_LoadFaces (lump_t *l)
 			out->samples = NULL;
 		else
 			out->samples = loadmodel->lightdata + i;
-		out->stainsamples = NULL;
 
 	// set the drawing flags
 		if (out->texinfo->flags & SURF_WARP)
@@ -944,7 +942,6 @@ void Mod_LoadFaces (lump_t *l)
 		if ( !SurfaceHasNoLightmap(out) ) 
 		{
 			GL_CreateSurfaceLightmap (out);
-			GL_CreateSurfaceStainmap (out);
 		}
 
 		if (! (out->texinfo->flags & SURF_WARP) ) 

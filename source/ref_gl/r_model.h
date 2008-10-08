@@ -198,15 +198,6 @@ typedef struct msurface_s
 	byte		styles[MAXLIGHTMAPS];
 	float		cached_light[MAXLIGHTMAPS];	// values currently used in lightmap
 	byte		*samples;		// [numstyles*surfsize]
-	byte		*stainsamples;
-	byte		*stains;
-
-	// heat haze support
-	float		warpscale;
-	float		warpfade;
-	vec3_t		mins;
-	vec3_t		maxs;
-	qboolean	hazemask;
 
 	entity_t	*entity;
 
