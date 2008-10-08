@@ -929,6 +929,9 @@ void R_DrawAliasModel (entity_t *e)
 	image_t		*skin;
 	rscript_t	*rs = NULL;
 	extern qboolean g_drawing_refl;
+
+	if(e->team) //don't draw flag models, handled by sprites
+		return;
 	
 	if ( !( e->flags & RF_WEAPONMODEL ) )
 	{

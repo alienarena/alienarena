@@ -139,6 +139,8 @@ typedef struct entity_s
 	struct image_s	*skin;			// NULL for inline skin
 	int		flags;
 
+	int		team;
+
 	struct rscript_t *script;
 
 } entity_t;

@@ -744,6 +744,33 @@ void SCR_DrawPlayerNames( void )
    } 
 }
 
+void SCR_DrawBases (void)
+{
+	int			i;
+	entity_t	*ent;
+    vec2_t screen_pos; 
+    int y; 
+
+	for (i=0 ; i<cl.refdef.num_entities; i++)
+	{
+		ent = &r_entities[i];
+
+		if(!ent->team)
+			continue;
+
+		if (!InFront(ent->origin)) 
+			continue; 
+    
+		R_TransformVectorToScreen(&cl.refdef, ent->origin, screen_pos); 
+		y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6; 
+		if(ent->team == 2)
+			Draw_ColorString ( (int)screen_pos[0], y, "^4Blue Flag" ); 
+		else if(ent->team == 1)
+			Draw_ColorString ( (int)screen_pos[0], y, "^1Red Flag" );
+
+	}
+}
+
 /*
 ==================
 V_RenderView
@@ -866,6 +893,8 @@ void V_RenderView( float stereo_separation )
 			SCR_DrawPlayerNames();
 		else
 			SCR_DrawPlayerNamesCenter();
+
+		SCR_DrawBases();
 	}
 }
 
