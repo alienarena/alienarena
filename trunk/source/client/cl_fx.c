@@ -1640,7 +1640,7 @@ void RotateForNormal(vec3_t normal, vec3_t result){
 	result[YAW] =  yaw;
 }
 
-void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color )
+void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color, int blend )
 {
 	cparticle_t *p;
 	vec3_t		v;
@@ -1660,7 +1660,10 @@ void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color )
 		p->color = color + (rand() & 1);
 		p->type = PARTICLE_DECAL;
 		p->blendsrc = GL_SRC_ALPHA;
-		p->blenddst = GL_ONE;
+		if(blend) //glowing blood
+			p->blenddst = GL_ONE;
+		else
+			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 		p->scale = 2;
 		p->scalevel = 0;
 		
@@ -1725,9 +1728,9 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 	// add stains if moving
 	if ( len && !cl_noblood->value ) {
 		if ( flags & EF_GIB ) {
-			CL_BloodSplatter(start, end, 0xe8);
+			CL_BloodSplatter(start, end, 0xe8, 0);
 		} else if ( flags & EF_GREENGIB ) {
-			CL_BloodSplatter(start, end, 0xd0);
+			CL_BloodSplatter(start, end, 0xd0, 1);
 		}
 	}
 	
