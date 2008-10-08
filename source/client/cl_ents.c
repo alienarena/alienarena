@@ -698,6 +698,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		{
 			ent.lod1 = NULL;
 			ent.lod2 = NULL;
+			ent.team = 0;
 
 			// set skin
 			if (s1->modelindex == 255)
@@ -822,16 +823,16 @@ void CL_AddPacketEntities (frame_t *frame)
 		//cool new ctf flag effects
 		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/flags/flag1.md2")) {
 			CL_FlagEffects(ent.origin, 0);
-			ent.model = 0;
+			ent.team = 1;
 		}
 		else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/flags/flag2.md2")) {
 			CL_FlagEffects(ent.origin, 1);
-			ent.model = 0;
+			ent.team = 2;
 		}
 
 		// add to refresh list
-		else
-			V_AddEntity (&ent);
+
+		V_AddEntity (&ent);
 
 		// color shells generate a seperate entity for the main model
 		if ((effects & EF_COLOR_SHELL) && !(s1->number == cl.playernum+1))
@@ -885,6 +886,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		ent.alpha = 0;
 		ent.lod1 = NULL;		// only player models get lods
 		ent.lod2 = NULL;
+		ent.team = 0;
 
 		ci = &cl.clientinfo[s1->skinnum & 0xff];
 
@@ -987,10 +989,14 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.alpha = 1.0;
 
 			//cool new ctf flag effects
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag1.md2"))
+			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag1.md2")) {
 				CL_FlagEffects(ent.origin, 0);
-			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag2.md2"))
+				ent.model = 0;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag2.md2")) {
 				CL_FlagEffects(ent.origin, 1);
+				ent.model = 0;
+			}
 			else {
 				ent.model = cl.model_draw[s1->modelindex4];
 
