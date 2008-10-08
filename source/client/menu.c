@@ -1439,6 +1439,7 @@ static void ShadowsFunc( void *unused )
 static void DynamicFunc( void *unused )
 {
 	Cvar_SetValue( "gl_dynamic", s_options_dynamic_box.curvalue);
+	Cvar_SetValue( "gl_glsl_shaders", s_options_dynamic_box.curvalue); //if we have em, use em
 }
 static void RTlightsFunc( void *unused )
 {
