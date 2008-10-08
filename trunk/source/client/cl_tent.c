@@ -289,7 +289,6 @@ void CL_ParseTEnt (void)
 	int		cnt;
 	int		color;
 	int		r;
-	float	fcolor[3], intensity, alpha;
 	trace_t	trace;
 	static vec3_t mins = { -8, -8, -8 }; 
     static vec3_t maxs = { 8, 8, 8 }; 
@@ -420,8 +419,7 @@ void CL_ParseTEnt (void)
 	case TE_ROCKET_EXPLOSION_WATER:
 		MSG_ReadPos (&net_message, pos);
 
-		V_AddStain ( pos, 25, 15, 15, 15, 200 );
-		V_AddStain ( pos, 25*3, 15, 15, 15, 66 );
+		//remember to add explosion stain
 
 		CL_ExplosionParticles (pos);
 		if (type == TE_ROCKET_EXPLOSION_WATER)
@@ -543,15 +541,6 @@ void CL_ParseTEnt (void)
 			CL_BlasterMark(pos2, trace.plane.normal);
 		break;
 
-	case TE_STAIN:
-		MSG_ReadPos (&net_message, pos);
-		intensity = MSG_ReadFloat (&net_message);
-		fcolor[0] = MSG_ReadByte (&net_message);
-		fcolor[1] = MSG_ReadByte (&net_message);
-		fcolor[2] = MSG_ReadByte (&net_message);
-		alpha = MSG_ReadByte (&net_message);
-		V_AddStain ( pos, intensity, fcolor[0], fcolor[1], fcolor[2], alpha );
-		break;
 	default:
 		Com_Error (ERR_DROP, "CL_ParseTEnt: bad type");
 	}

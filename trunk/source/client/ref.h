@@ -28,7 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DIV512 (0.001953125f)
 
 #define	MAX_DLIGHTS			32
-#define MAX_STAINS			32
 #define	MAX_ENTITIES		128
 #define	MAX_PARTICLES		8192
 #define	MAX_LIGHTSTYLES		256
@@ -161,30 +160,6 @@ typedef struct
 	vec3_t	color;
 } m_dlight_t;
 
-typedef enum 
-{
-	stain_add,
-	stain_modulate,
-	stain_subtract
-} staintype_t;
-
-typedef struct
-{
-	vec3_t	origin;
-	vec3_t	color;
-	float	alpha;
-	float	intensity;
-	staintype_t type;
-} dstain_t;
-
-typedef struct
-{
-	vec3_t	origin;
-	vec3_t	color;
-	float	alpha;
-	float	intensity;
-} stain_t;
-
 typedef struct
 {
 	vec3_t	origin;
@@ -220,9 +195,6 @@ typedef struct
 
 	int			num_entities;
 	entity_t	*entities;
-
-	int			num_stains;
-	stain_t		*stains;
 
 	int			num_dlights;
 	dlight_t	*dlights;

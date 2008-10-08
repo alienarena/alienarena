@@ -1619,6 +1619,66 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 
 	p->alphavel = -50 / (0.5 + frand()*0.3);
 }
+
+/*
+===============
+CL_BloodSplatter - simple blood effects
+===============
+*/
+
+void RotateForNormal(vec3_t normal, vec3_t result){
+	float forward, pitch, yaw;
+	
+	forward = sqrt(normal[0] * normal[0] + normal[1] * normal[1]);
+	pitch = (int)(atan2(normal[2], forward) * 180 / M_PI);
+	yaw = (int)(atan2(normal[1], normal[0]) * 180 / M_PI);
+	
+	if(pitch < 0)
+		pitch += 360;
+	
+	result[PITCH] = -pitch;
+	result[YAW] =  yaw;
+}
+
+void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color )
+{
+	cparticle_t *p;
+	vec3_t		v;
+	int			j;
+	trace_t	trace;
+	static vec3_t mins = { -1, -1, -1 }; 
+    static vec3_t maxs = { 1, 1, 1 }; 
+
+	//trace to see if impact occurs with nearby brush
+	trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL); 
+	if(trace.contents) { //hit a brush
+			
+		if(!(p = new_particle()))
+			return;
+		
+		p->texnum = r_bloodtexture->texnum;
+		p->color = color + (rand() & 1);
+		p->type = PARTICLE_DECAL;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE;
+		p->scale = 2;
+		p->scalevel = 0;
+		
+		VectorScale(trace.plane.normal, -1, v);
+		RotateForNormal(v, p->angle);
+		p->angle[ROLL] = rand() % 360;
+		VectorAdd(pos2, trace.plane.normal, p->org);
+		
+		p->alpha = 0.7;
+		p->alphavel = -0.2 / (2.0 + frand() * 0.3);
+		for (j=0 ; j<3 ; j++)
+		{
+				p->accel[j] = 0;
+				p->vel[j] = 0;
+		}
+	}
+}
+
 /*
 ===============
 CL_DiminishingTrail
@@ -1663,11 +1723,11 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 	}
 
 	// add stains if moving
-	if ( len ) {
+	if ( len && !cl_noblood->value ) {
 		if ( flags & EF_GIB ) {
-			V_AddStain ( end, 25, 120, 0, 0, 200 );
+			CL_BloodSplatter(start, end, 0xe8);
 		} else if ( flags & EF_GREENGIB ) {
-			V_AddStain ( end, 25, 0, 100, 0, 200 );
+			CL_BloodSplatter(start, end, 0xd0);
 		}
 	}
 	
@@ -1971,19 +2031,6 @@ Wall Impacts
 ===============
 */
 
-void RotateForNormal(vec3_t normal, vec3_t result){
-	float forward, pitch, yaw;
-	
-	forward = sqrt(normal[0] * normal[0] + normal[1] * normal[1]);
-	pitch = (int)(atan2(normal[2], forward) * 180 / M_PI);
-	yaw = (int)(atan2(normal[1], normal[0]) * 180 / M_PI);
-	
-	if(pitch < 0)
-		pitch += 360;
-	
-	result[PITCH] = -pitch;
-	result[YAW] =  yaw;
-}
 void CL_BulletMarks(vec3_t org, vec3_t dir){
 	cparticle_t *p;
 	vec3_t		v;

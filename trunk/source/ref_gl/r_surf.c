@@ -675,7 +675,7 @@ dynamic:
 		}
 	}
 
-	if ( is_dynamic && !gl_state.glsl_shaders ) 
+	if ( is_dynamic && !(gl_glsl_shaders->value && gl_state.glsl_shaders) ) 
 	{
 		unsigned	temp[DYNAMIC_LIGHT_WIDTH*DYNAMIC_LIGHT_HEIGHT];
 		int			smax, tmax;
@@ -848,8 +848,7 @@ dynamic:
 			R_AddLightMappedSurfToVArray (surf, scroll);
 		}
 	}
-	//no glsl, standard render
-	else {
+	else {	//no glsl, standard render
 		
 		GL_MBind( GL_TEXTURE0, image->texnum );
 		GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );
@@ -1083,8 +1082,6 @@ void R_DrawBrushModel (entity_t *e)
 		VectorAdd (e->origin, currentmodel->mins, mins);
 		VectorAdd (e->origin, currentmodel->maxs, maxs);
 	}
-
-	R_PushStainsForBModel ( e );
 
 	if (R_CullBox (mins, maxs)) {
 		return;
@@ -1732,25 +1729,6 @@ void GL_CreateSurfaceLightmap (msurface_t *surf)
 
 	R_SetCacheState( surf );
 	R_BuildLightMap (surf, base, BLOCK_WIDTH*LIGHTMAP_BYTES);
-}
-
-/*
-========================
-GL_CreateSurfaceStainmap
-========================
-*/
-void GL_CreateSurfaceStainmap (msurface_t *surf)
-{
-	int		smax, tmax;
-
-	if (!surf->samples)
-		return;
-
-	smax = (surf->extents[0]>>4)+1;
-	tmax = (surf->extents[1]>>4)+1;
-
-	surf->stainsamples = Hunk_Alloc (smax*tmax*3);
-	memset (surf->stainsamples, 255, smax*tmax*3);
 }
 
 /*
