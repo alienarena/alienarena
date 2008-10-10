@@ -467,6 +467,8 @@ Function UpdateDatabase($serverlist, $time)
 		$result = mysql_query("DELETE FROM serverlog WHERE time < ".($time - $dbexpire));
 		$result = mysql_query("DELETE FROM playerlog WHERE time < ".($time - $dbexpire));
 		$result = mysql_query("DELETE FROM servers WHERE lastseen < ".($time - $dbexpire));
+		/* Remove all previous bot entries from DB */
+		$result = mysql_query("DELETE FROM playerlog WHERE time <> '".$time."' AND ping = '0'");
 		echo "Deleted ".mysql_num_rows($result)." old entries.<br>\n";
 	}
 
