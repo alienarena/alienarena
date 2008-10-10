@@ -576,6 +576,11 @@ void M_Main_Draw (void)
 	Menu_DrawString( viddef.width / 2 - 140*widscale, 0 + 10*scale, "Copyright 2008 COR Entertainment LLC" );
 	Menu_DrawString( viddef.width / 2 - 185*widscale, 0 + 30*scale, "Alien Arena Website @ http://red.planetarena.org" );
 
+	//draw Diamond Multimedia links - remove this if agreement ends or is voided
+	Menu_DrawString( viddef.width / 2 + 270*widscale, 0 + 80*scale, "MULTIMEDIA" );
+	Menu_DrawString( viddef.width / 2 + 245*widscale, 0 + 90*scale, "www.diamondmm.com" );
+
+
 }
 
 typedef struct
