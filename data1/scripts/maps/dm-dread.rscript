@@ -70,3 +70,9 @@ textures/arena7/light5
 		lensflare
 	}
 }
+textures/arena3/water
+{
+	{
+		map gfx/dmdreadreflection.tga
+	}
+}

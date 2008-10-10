@@ -79,6 +79,7 @@ static menulist_s  		s_windowed_mouse;
 static menuaction_s		s_apply_action;
 static menuaction_s		s_low_action;
 static menuaction_s		s_medium_action;
+static menuaction_s		s_normal_action;
 static menuaction_s		s_high_action;
 static menuaction_s		s_highest_action;
 static menuaction_s		s_ultra_action;
@@ -224,6 +225,32 @@ static void SetMedium( void *unused )
 	VID_MenuInit();
 }
 
+static void SetNormal( void *unused )
+{
+	Cvar_SetValue("gl_reflection", 0);
+	Cvar_SetValue("r_bloom", 0);
+	Cvar_SetValue("r_bloom_intensity", 0.5);
+	Cvar_SetValue("gl_ext_mtexcombine", 1);
+	Cvar_SetValue("r_overbrightbits", 2);
+	Cvar_SetValue("gl_modulate", 2);
+	Cvar_SetValue("gl_picmip", 0);
+	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("vid_contrast", 1);
+	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_parallaxmaps", 0);
+	Cvar_SetValue("gl_specular", 0);
+	Cvar_SetValue("gl_glsl_shaders", 1);
+
+	//do other things that aren't in the vid menu per se, but are related "high end" effects
+	Cvar_SetValue("r_shaders", 1);
+	Cvar_SetValue("gl_shadows", 2);
+	Cvar_SetValue("gl_dynamic", 1);
+	Cvar_SetValue("gl_rtlights", 0);
+	Cvar_SetValue("gl_mirror", 1);
+
+	VID_MenuInit();
+}
+
 static void SetHigh( void *unused )
 {
 	Cvar_SetValue("gl_reflection", 0);
@@ -236,7 +263,7 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
-	Cvar_SetValue("gl_parallaxmaps", 0);
+	Cvar_SetValue("gl_parallaxmaps", 1);
 	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 
@@ -263,7 +290,7 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_parallaxmaps", 1);
-	Cvar_SetValue("gl_specular", 0);
+	Cvar_SetValue("gl_specular", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
@@ -653,28 +680,34 @@ void VID_MenuInit( void )
 	s_medium_action.generic.y    = 280*scale;
 	s_medium_action.generic.callback = SetMedium;
 
+	s_normal_action.generic.type = MTYPE_ACTION;
+	s_normal_action.generic.name = "normal settings";
+	s_normal_action.generic.x    = 24;
+	s_normal_action.generic.y    = 290*scale;
+	s_normal_action.generic.callback = SetNormal;
+
 	s_high_action.generic.type = MTYPE_ACTION;
 	s_high_action.generic.name = "high settings";
 	s_high_action.generic.x    = 24;
-	s_high_action.generic.y    = 290*scale;
+	s_high_action.generic.y    = 300*scale;
 	s_high_action.generic.callback = SetHigh;
 
 	s_highest_action.generic.type = MTYPE_ACTION;
 	s_highest_action.generic.name = "highest settings";
 	s_highest_action.generic.x    = 24;
-	s_highest_action.generic.y    = 300*scale;
+	s_highest_action.generic.y    = 310*scale;
 	s_highest_action.generic.callback = SetHighest;
 
 	s_ultra_action.generic.type = MTYPE_ACTION;
 	s_ultra_action.generic.name = "ultra settings";
 	s_ultra_action.generic.x    = 24;
-	s_ultra_action.generic.y    = 310*scale;
+	s_ultra_action.generic.y    = 320*scale;
 	s_ultra_action.generic.callback = SetUltra;
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
 	s_apply_action.generic.x    = 24;
-	s_apply_action.generic.y    = 330*scale;
+	s_apply_action.generic.y    = 340*scale;
 	s_apply_action.generic.callback = ApplyChanges;
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
@@ -701,6 +734,7 @@ void VID_MenuInit( void )
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_low_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_medium_action);
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_normal_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_high_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_highest_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_ultra_action);

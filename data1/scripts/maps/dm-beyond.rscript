@@ -63,3 +63,9 @@ textures/arena3/light1
 		lensflare
 	}
 }
+textures/arena3/water
+{
+	{
+		map gfx/dmbeyondreflection.tga
+	}
+}
