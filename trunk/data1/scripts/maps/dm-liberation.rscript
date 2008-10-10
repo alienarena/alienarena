@@ -17,13 +17,13 @@ textures/arena6/ice
 		envmap
 	}
 {
-textures/arena7/light3
+textures/arena7/light10
 {
 	{
 		lensflare
 	}
 }
-textures/arena7/light10
+textures/xempx/a7light3
 {
 	{
 		lensflare
