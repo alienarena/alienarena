@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Alien Arena 2008"
-#define MyAppVerName "Alien Arena 2008 7.10"
+#define MyAppVerName "Alien Arena 2008 7.20"
 #define MyAppPublisher "COR Entertainment, LLC"
 #define MyAppURL "http://red.planetarena.org"
 #define MyFileImageToolbar "bundleimg.bmp"
@@ -22,7 +22,7 @@ LicenseFile=C:\Alien Arena 2007\docs\license.txt
 InfoBeforeFile=C:\Alien Arena 2007\docs\README.txt
 InfoAfterFile=
 OutputDir=C:\Alien Arena Files\Bundle\Bundle
-OutputBaseFilename=alienarena2008-20080530
+OutputBaseFilename=alienarena2008-20081012
 SetupIconFile=C:\Alien Arena 2007\Aa1.ico
 Compression=lzma
 SolidCompression=true
@@ -447,7 +447,6 @@ Source: ..\..\..\Alien Arena 2007\data1\models\weapons\g_launch\tris.md2; DestDi
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\g_machn\tris.md2; DestDir: {app}\data1\models\weapons\g_machn
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\g_rail\tris.md2; DestDir: {app}\data1\models\weapons\g_rail
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\g_rocket\cover.md2; DestDir: {app}\data1\models\weapons\g_rocket
-Source: ..\..\..\Alien Arena 2007\data1\models\weapons\g_rocket\skin.tga; DestDir: {app}\data1\models\weapons\g_rocket
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\g_rocket\tris.md2; DestDir: {app}\data1\models\weapons\g_rocket
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\g_shotg\tris.md2; DestDir: {app}\data1\models\weapons\g_shotg
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\g_shotg2\tris.md2; DestDir: {app}\data1\models\weapons\g_shotg2
@@ -462,7 +461,6 @@ Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_chain\skin_normal.tga; 
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_chain\tris.md2; DestDir: {app}\data1\models\weapons\v_chain
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_hyperb\cover.md2; DestDir: {app}\data1\models\weapons\v_hyperb
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_hyperb\skin.jpg; DestDir: {app}\data1\models\weapons\v_hyperb
-Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_hyperb\skin.pcx; DestDir: {app}\data1\models\weapons\v_hyperb
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_hyperb\skin_normal.tga; DestDir: {app}\data1\models\weapons\v_hyperb
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_hyperb\tris.md2; DestDir: {app}\data1\models\weapons\v_hyperb
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_machn\tris.md2; DestDir: {app}\data1\models\weapons\v_machn
@@ -839,7 +837,6 @@ Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\pain100_2.wav; Des
 Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\red.jpg; DestDir: {app}\data1\players\martiancyborg
 Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\red_i.jpg; DestDir: {app}\data1\players\martiancyborg
 Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\robot; DestDir: {app}\data1\players\martiancyborg
-Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\skin.pcx; DestDir: {app}\data1\players\martiancyborg
 Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\tris.md2; DestDir: {app}\data1\players\martiancyborg
 Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_bfg.md2; DestDir: {app}\data1\players\martiancyborg
 Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_blaster.md2; DestDir: {app}\data1\players\martiancyborg
@@ -890,7 +887,6 @@ Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\pain100_2.wav; D
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\red.jpg; DestDir: {app}\data1\players\martianenforcer
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\red_i.jpg; DestDir: {app}\data1\players\martianenforcer
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\tris.md2; DestDir: {app}\data1\players\martianenforcer
-Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\turbine1.wav; DestDir: {app}\data1\players\martianenforcer
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\usegibs; DestDir: {app}\data1\players\martianenforcer
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_bfg.md2; DestDir: {app}\data1\players\martianenforcer
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_blaster.md2; DestDir: {app}\data1\players\martianenforcer
@@ -1494,7 +1490,6 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\metal1.wal; DestDir: {ap
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\metal2.tga; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\metal2.wal; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\metal2_nm.tga; DestDir: {app}\data1\textures\arena7
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\metal2_sm.tga; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\metal3.tga; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\metal3.wal; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\piston1.tga; DestDir: {app}\data1\textures\arena7
@@ -1504,7 +1499,6 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\redgrid.wal; DestDir: {a
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\tekfloor1.tga; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\tekfloor1.wal; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\tekfloor1_nm.tga; DestDir: {app}\data1\textures\arena7
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\tekfloor1_sm.tga; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\tekwall1.tga; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\tekwall1.wal; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\tekwall2.tga; DestDir: {app}\data1\textures\arena7
@@ -1566,19 +1560,15 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\icerock_nm.tga; DestDir:
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate1.tga; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate1.wal; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate1_nm.tga; DestDir: {app}\data1\textures\arena6
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate1_sm.tga; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate2.tga; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate2.wal; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate2_nm.tga; DestDir: {app}\data1\textures\arena6
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate2_sm.tga; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate3.tga; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate3.wal; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate3_nm.tga; DestDir: {app}\data1\textures\arena6
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate3_sm.tga; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate4.tga; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate4.wal; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate4_nm.tga; DestDir: {app}\data1\textures\arena6
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate4_sm.tga; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate5.tga; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate5.wal; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\plate5_nm.tga; DestDir: {app}\data1\textures\arena6
@@ -1613,11 +1603,9 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\brickwall1_nm.tga; DestD
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptbrick1.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptbrick1.wal; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptbrick1_nm.tga; DestDir: {app}\data1\textures\arena8
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptbrick1_sm.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptfloor1.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptfloor1.wal; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptfloor1_nm.tga; DestDir: {app}\data1\textures\arena8
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptfloor1_sm.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptrock1.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptrock1.wal; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptrock1_nm.tga; DestDir: {app}\data1\textures\arena8
@@ -1637,7 +1625,6 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\lavalmetal_nm.tga; DestD
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\metal1.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\metal1.wal; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\metal1_nm.tga; DestDir: {app}\data1\textures\arena8
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\metal1_sm.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\metaltrim1.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\metaltrim1.wal; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\metaltrim1_nm.tga; DestDir: {app}\data1\textures\arena8
@@ -1656,7 +1643,6 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\slime.wal; DestDir: {app
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\wood1.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\wood1.wal; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\wood1_nm.tga; DestDir: {app}\data1\textures\arena8
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\wood1_sm.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\dalek\column1.tga; DestDir: {app}\data1\textures\dalek
 Source: ..\..\..\Alien Arena 2007\data1\textures\dalek\column1.wal; DestDir: {app}\data1\textures\dalek
 Source: ..\..\..\Alien Arena 2007\data1\textures\dalek\console1.tga; DestDir: {app}\data1\textures\dalek
@@ -1992,7 +1978,6 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\icemetal1.wal; DestDir: 
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\iceplate.tga; DestDir: {app}\data1\textures\arena9
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\iceplate.wal; DestDir: {app}\data1\textures\arena9
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\iceplate_nm.tga; DestDir: {app}\data1\textures\arena9
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\iceplate_sm.tga; DestDir: {app}\data1\textures\arena9
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\icetrim1.tga; DestDir: {app}\data1\textures\arena9
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\icetrim1.wal; DestDir: {app}\data1\textures\arena9
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\icetrim2.tga; DestDir: {app}\data1\textures\arena9
@@ -2179,11 +2164,6 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\common\weapclip.tga; DestDir: {
 Source: ..\..\..\Alien Arena 2007\data1\textures\common\white.tga; DestDir: {app}\textures\common
 Source: ..\..\..\Alien Arena 2007\data1\textures\forsaken\glass.tga; DestDir: {app}\textures\forsaken
 Source: ..\..\..\Alien Arena 2007\data1\textures\alien\support5.tga; DestDir: {app}\textures\alien
-Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a3light1b.tga; DestDir: {app}\data1\textures\xempx
-Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light1b.tga; DestDir: {app}\data1\textures\xempx
-Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light2.tga; DestDir: {app}\data1\textures\xempx
-Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light3.tga; DestDir: {app}\data1\textures\xempx
-Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light4.tga; DestDir: {app}\data1\textures\xempx
 Source: ..\..\..\Alien Arena 2007\data1\maps\aoa-corrosion.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\tca-corrosion.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\ctf-corrosion.bsp; DestDir: {app}\data1\maps
@@ -2389,6 +2369,99 @@ Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\conduit.jpg; DestDir: {app}\
 Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\bentconduit.md2; DestDir: {app}\data1\maps\meshes
 Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\martian.md2; DestDir: {app}\data1\maps\meshes
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-eternal.fog; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\gfx\dmdreadreflection.tga; DestDir: {app}\data1\gfx
+Source: ..\..\..\Alien Arena 2007\data1\gfx\dmbeyondreflection.tga; DestDir: {app}\data1\gfx
+Source: ..\..\..\Alien Arena 2007\data1\gfx\mirrorspec.tga; DestDir: {app}\data1\gfx
+Source: ..\..\..\Alien Arena 2007\data1\gfx\dmaquousreflection.tga; DestDir: {app}\data1\gfx
+Source: ..\..\..\Alien Arena 2007\data1\gfx\dmturboreflection.tga; DestDir: {app}\data1\gfx
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-liberation.txt; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-liberation.tga; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\ctf-cryogenic.txt; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\ctf-cryogenic.tga; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\maps\dm-liberation.bsp; DestDir: {app}\data1\maps
+Source: ..\..\..\Alien Arena 2007\data1\maps\ctf-cryogenic.bsp; DestDir: {app}\data1\maps
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-liberation.fog; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\ctf-cryogenic.fog; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\particles\flag.tga; DestDir: {app}\data1\particles
+Source: ..\..\..\Alien Arena 2007\data1\particles\deathfield2.tga; DestDir: {app}\data1\particles
+Source: ..\..\..\Alien Arena 2007\data1\particles\logo.tga; DestDir: {app}\data1\particles
+Source: ..\..\..\Alien Arena 2007\data1\particles\bullethole2.tga; DestDir: {app}\data1\particles
+Source: ..\..\..\Alien Arena 2007\data1\pics\p_invis.tga; DestDir: {app}\data1\pics
+Source: ..\..\..\Alien Arena 2007\data1\pics\p_powered.tga; DestDir: {app}\data1\pics
+Source: ..\..\..\Alien Arena 2007\data1\pics\p_rewardpts.tga; DestDir: {app}\data1\pics
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\lod1.md2; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\lod2.md2; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\weapon.tga; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\lod2.md2; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\lod1.md2; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\lod2.md2; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\lod1.md2; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\scripts\fragment_shader.glsl; DestDir: {app}\data1\scripts
+Source: ..\..\..\Alien Arena 2007\data1\scripts\vertex_shader.glsl; DestDir: {app}\data1\scripts
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\skullite_hm.tga; DestDir: {app}\data1\textures\arena6
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\bricks1_hm.tga; DestDir: {app}\data1\textures\arena6
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\floor2_hm.tga; DestDir: {app}\data1\textures\arena7
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\metaltrim2_hm.tga; DestDir: {app}\data1\textures\arena8
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\metaltrim1_hm.tga; DestDir: {app}\data1\textures\arena8
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptbrick1_hm.tga; DestDir: {app}\data1\textures\arena8
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\egyptrock1_hm.tga; DestDir: {app}\data1\textures\arena8
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\wood1_hm.tga; DestDir: {app}\data1\textures\arena8
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\brickwall1_hm.tga; DestDir: {app}\data1\textures\arena8
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\floor4_hm.tga; DestDir: {app}\data1\textures\arena8
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\floor3_hm.tga; DestDir: {app}\data1\textures\arena8
+Source: ..\..\..\Alien Arena 2007\botinfo\dm-liberation.tmp; DestDir: {app}\botinfo
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-liberation.nod; DestDir: {app}\botinfo\nav
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\ctf-cryogenic.nod; DestDir: {app}\botinfo\nav
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\platefloor1_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\greenwall2_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\wall2_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\icetrim2_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\panel3_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\floor3_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\panel4_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\wetbricks1_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\factorybricks1_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\platefloor2_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\platefloor3_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\platefloor4_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\platefloor7_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\platefloor6_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\platefloor5_hm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\rage\support_column_hm.tga; DestDir: {app}\data1\textures\rage
+Source: ..\..\..\Alien Arena 2007\data1\textures\rage\hexfloor_hm.tga; DestDir: {app}\data1\textures\rage
+Source: ..\..\..\Alien Arena 2007\data1\textures\rage\light8.tga; DestDir: {app}\data1\textures\rage
+Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a3light1b.tga; DestDir: {app}\data1\textures\xempx
+Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light1b.tga; DestDir: {app}\data1\textures\xempx
+Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light3.tga; DestDir: {app}\data1\textures\xempx
+Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light4.tga; DestDir: {app}\data1\textures\xempx
+Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light2.tga; DestDir: {app}\data1\textures\xempx
+Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a9metal5.tga; DestDir: {app}\data1\textures\xempx
+Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light1.tga; DestDir: {app}\data1\textures\xempx
+Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\light1.tga; DestDir: {app}\data1\textures\xempx
+Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light10.tga; DestDir: {app}\data1\textures\xempx
+Source: ..\..\..\Alien Arena 2007\data1\textures\xempx\a7light10.wal; DestDir: {app}\data1\textures\xempx
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\metpipe3.md2; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\mpa2.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\metpipe2.md2; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\metpipe1.md2; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\mpa1.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\textures\billboards\billboard2.tga; DestDir: {app}\data1\textures\billboards
+Source: ..\..\..\Alien Arena 2007\data1\textures\billboards\billboard1.tga; DestDir: {app}\data1\textures\billboards
+Source: ..\..\..\Alien Arena 2007\botconfigurator.exe; DestDir: {app}
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\tca-cryogenic.txt; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\tca-cryogenic.tga; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\maps\tca-cryogenic.bsp; DestDir: {app}\data1\maps
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\tca-cryogenic.fog; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\tca-cryogenic.mus; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\tca-cryogenic.rscript; DestDir: {app}\data1\scripts\maps
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\tca-cryogenic.nod; DestDir: {app}\botinfo\nav
+Source: ..\..\..\Alien Arena 2007\data1\textures\common\hint.tga; DestDir: {app}\textures\common
+Source: ..\..\..\Alien Arena 2007\data1\textures\rage\trimlight_red.tga; DestDir: {app}\data1\textures\rage
+Source: ..\..\..\Alien Arena 2007\data1\textures\null.tga; DestDir: {app}\data1\textures
+Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-liberation.rscript; DestDir: {app}\data1\scripts\maps
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-liberation.mus; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\ctf-cryogenic.mus; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\ctf-cryogenic.rscript; DestDir: {app}\data1\scripts\maps
 
 [Icons]
 Name: {group}\{cm:ProgramOnTheWeb,{#MyAppName}}; Filename: {#MyAppURL}
@@ -2521,6 +2594,7 @@ Name: {app}\FUSE
 Name: {app}\FUSE\config
 Name: {app}\FUSE\offline
 Name: {app}\data1\maps\meshes
+Name: {app}\data1\textures\billboards
 
 [INI]
 Filename: galaxy.ini; Section: Galaxy; Key: name; String: Player; Flags: uninsdeletesection createkeyifdoesntexist
