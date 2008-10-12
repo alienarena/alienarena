@@ -614,7 +614,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 			
 					if (stage->envmap)
 					{
-						vec3_t envmapvec;
+						vec3_t envmapvec, dist;
+						float scaleup;
 						
 						VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
 
@@ -622,8 +623,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 							if( !(currententity->flags & RF_WEAPONMODEL)) {
 									RS_SetEnvmap (envmapvec, &os, &ot);
-									stage->scale.scaleX = -2.0; //slight fisheye effect
-									stage->scale.scaleY = 2.0;
+									VectorSubtract(r_origin, currententity->origin, dist);
+									scaleup = VectorLength(dist)/50;
+									if(scaleup < 1.0)
+										scaleup = 1.0;
+									stage->scale.scaleX = -2.0*scaleup; //slight fisheye effect
+									stage->scale.scaleY = 2.0*scaleup;
 							}
 							else {
 
@@ -637,7 +642,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 							RS_SetEnvmap (envmapvec, &os, &ot);
 
-							stage->scale.scaleX = stage->scale.scaleY = 0.5;
+							if (currententity->flags & RF_TRANSLUCENT) //return to original glass script's scale(mostly for when going into menu)
+								stage->scale.scaleX = stage->scale.scaleY = 0.5;
 
 							os -= DotProduct (normal , vectors[1] );
 							ot += DotProduct (normal, vectors[2] );
