@@ -1105,7 +1105,10 @@ void R_SetupGL (void)
 	qglMatrixMode(GL_PROJECTION);
     qglLoadIdentity ();
     
-	MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4 * 74 / r_newrefdef.fov_y, 15000); //Phenax
+	if(r_newrefdef.fov_y < 90)
+		MYgluPerspective (r_newrefdef.fov_y,  screenaspect,  4,  128000);
+	else
+		MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4 * 74 / r_newrefdef.fov_y, 15000); //Phenax
 		
 	qglCullFace(GL_FRONT);
 
