@@ -129,7 +129,7 @@ For Linux users, you simply just need to delete your Alien Arena folder.
 There is a long list of credits - ALIEN ARENA 2008 is greatly indebted to the following for it's creation and completion:
 
 Design:  John Diamond with input from the community at large.
-Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Jim Bower, Kyle Hunter, Andres Mejia.
+Programming:  John Diamond, BlackIce, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Jim Bower, Kyle Hunter, Andres Mejia.
 Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
 Maps:  John Diamond, Dennis "xEMPx" Zedlach
 Textures and Artwork:  John Diamond, Enki, Adam Saizlai
