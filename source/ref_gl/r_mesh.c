@@ -620,26 +620,23 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
 
 						if(mirror) {
-
 							if( !(currententity->flags & RF_WEAPONMODEL)) {
-									RS_SetEnvmap (envmapvec, &os, &ot);
 									VectorSubtract(r_origin, currententity->origin, dist);
 									scaleup = VectorLength(dist)/50;
 									if(scaleup < 1.0)
 										scaleup = 1.0;
-									stage->scale.scaleX = -2.0*scaleup; //slight fisheye effect
-									stage->scale.scaleY = 2.0*scaleup;
+									stage->scale.scaleX = -0.5; 
+									stage->scale.scaleY = 0.5;
+									os -= DotProduct (normal , vectors[1]);
+									ot += DotProduct (normal, vectors[2]);
 							}
 							else {
-
 								stage->scale.scaleX = -1.0;
 								stage->scale.scaleY = 1.0;
 							}
-							RS_SetEnvmap (envmapvec, &os2, &ot2);
-							RS_SetTexcoords2D(stage, &os2, &ot2);
+	
 						}
 						else {
-
 							RS_SetEnvmap (envmapvec, &os, &ot);
 
 							if (currententity->flags & RF_TRANSLUCENT) //return to original glass script's scale(mostly for when going into menu)
@@ -656,6 +653,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					VArray[4] = ot;
 
 					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) {
+						os2 -= DotProduct (normal , vectors[1] );
+						ot2 += DotProduct (normal, vectors[2] );
+						RS_SetTexcoords2D(stage, &os2, &ot2);
+
 						VArray[5] = os2;
 						VArray[6] = ot2;
 					}
@@ -671,8 +672,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 								calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
 
 
-						if (stage->lightmap && !stage->normalmap)
-						{
+						if (stage->lightmap && !stage->normalmap) {
 							if(lerped)
 								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 							else
@@ -682,8 +682,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 							blue = lightcolor[2] * ramp;	
 						}
 
-						if (stage->colormap.enabled)
-						{
+						if (stage->colormap.enabled) {
 							red *= stage->colormap.red/255.0;
 							green *= stage->colormap.green/255.0;
 							blue *= stage->colormap.blue/255.0;
