@@ -455,7 +455,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
 						qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
 						qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-						GL_SelectTexture( GL_TEXTURE1 );
+						GL_SelectTexture( GL_TEXTURE1);
 						GL_TexEnv ( GL_COMBINE_EXT );
 						qglBindTexture (GL_TEXTURE_2D, r_mirrorspec->texnum);
 						qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
@@ -614,17 +614,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 			
 					if (stage->envmap)
 					{
-						vec3_t envmapvec, dist;
-						float scaleup;
+						vec3_t envmapvec;
 						
 						VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
 
 						if(mirror) {
 							if( !(currententity->flags & RF_WEAPONMODEL)) {
-									VectorSubtract(r_origin, currententity->origin, dist);
-									scaleup = VectorLength(dist)/50;
-									if(scaleup < 1.0)
-										scaleup = 1.0;
 									stage->scale.scaleX = -0.5; 
 									stage->scale.scaleY = 0.5;
 									os -= DotProduct (normal , vectors[1]);
@@ -762,6 +757,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
 		qglEnable( GL_TEXTURE_2D );
+
 }
 
 extern qboolean have_stencil;

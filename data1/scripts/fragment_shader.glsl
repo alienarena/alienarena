@@ -108,7 +108,9 @@ void main( void )
 		vec4 dynamicColour = vec4( attenuation * colour * varyingLightColour, 1.0 );
 		if(PARALLAX > 0) {
 			dynamicColour = max(dynamicColour, diffuse * lightmap * 2.0);
-			dynamicColour = max(dynamicColour, litColour);
+			if(SPECULAR > 0) {
+				dynamicColour = max(dynamicColour, litColour);
+			}
 		}
 		else {
 			dynamicColour = max(dynamicColour, vec4(textureColour, 1.0) * lightmap * 2.0);
