@@ -235,7 +235,7 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 		fod = false;
 
 	//this is broken.  Somehow, other areas seem to be interfering
-	/*
+	
 	if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
 	{
 		qglEnable(GL_FRAGMENT_PROGRAM_ARB);
@@ -246,11 +246,9 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 			rs_realtime * -0.2f, 10.0f, 1.0f, 1.0f);
 		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
 			(fa->polys[0].verts[0][3]-r_newrefdef.vieworg[0]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[1]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[2]), 1.0f);
-		if(water_normal_tex) 
-			GL_MBind(GL_TEXTURE2, water_normal_tex->texnum); // Normal texture
 		if(distort_tex)
 			GL_MBind(GL_TEXTURE1, distort_tex->texnum);      // Distortion texture
-	}*/
+	}
 
 	GL_MBind(GL_TEXTURE0, fa->texinfo->image->texnum);
 
@@ -310,9 +308,9 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 		qglEnd ();
 	}
 
-/*	if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
+	if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
 		qglDisable(GL_FRAGMENT_PROGRAM_ARB);
-*/
+
 	if(fod)
 		return;
 
@@ -502,9 +500,7 @@ void EmitWaterPolys (msurface_t *fa)
 					qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
 						(fa->polys[0].verts[0][3]-r_newrefdef.vieworg[0]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[1]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[2]), 1.0f);
 				if(distort_tex)
-					GL_MBind(GL_TEXTURE2, distort_tex->texnum);      // Distortion texture
-				if(water_normal_tex)
-					GL_MBind(GL_TEXTURE1, water_normal_tex->texnum); // Normal texture
+					GL_MBind(GL_TEXTURE1, distort_tex->texnum);      // Distortion texture
 			}
 
 			GL_MBind(GL_TEXTURE0, g_tex_num[g_active_refl]); // Reflection texture

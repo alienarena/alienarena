@@ -17,8 +17,8 @@ ADD texCoord2, texCoord2, scroll2;
 # Load the distortion textures and add them together.
 TEMP distortColor;
 TEMP distortColor2;
-TXP distortColor, texCoord1, texture[1], 2D;
-TXP distortColor2, texCoord2, texture[1], 2D;
+TXP distortColor, texCoord1, texture[2], 2D;
+TXP distortColor2, texCoord2, texture[2], 2D;
 ADD distortColor, distortColor, distortColor2;
 
 
@@ -63,8 +63,8 @@ MUL texCoord2, fragment.texcoord[2], texScale1;
 ADD texCoord1, texCoord1, scroll1;
 ADD texCoord2, texCoord2, scroll2;
 # Get texel color
-TXP normalColor, texCoord1, texture[2], 2D;
-TXP normalColor2, texCoord2, texture[2], 2D;
+TXP normalColor, texCoord1, texture[1], 2D;
+TXP normalColor2, texCoord2, texture[1], 2D;
 # Combine normal maps
 ADD normalColor, normalColor, normalColor2;
 SUB normalColor, normalColor, 1.0;
