@@ -74,5 +74,6 @@ textures/arena3/water
 {
 	{
 		map gfx/dmdreadreflection.tga
+		distort
 	}
 }

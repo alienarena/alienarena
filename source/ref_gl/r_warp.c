@@ -234,22 +234,21 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 	else
 		fod = false;
 
-	//this is broken.  Somehow, other areas seem to be interfering
-	
-	if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
+
+	if (!gl_glsl_shaders->value && distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
 	{
 		qglEnable(GL_FRAGMENT_PROGRAM_ARB);
 		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
 		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0,
-			rs_realtime * (0.2f), 1.0f, 1.0f, 1.0f);
+			r_newrefdef.time * (0.2f), 1.0f, 1.0f, 1.0f);
 		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1,
-			rs_realtime * -0.2f, 10.0f, 1.0f, 1.0f);
+			r_newrefdef.time * -0.2f, 10.0f, 1.0f, 1.0f);
 		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
 			(fa->polys[0].verts[0][3]-r_newrefdef.vieworg[0]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[1]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[2]), 1.0f);
 		if(distort_tex)
 			GL_MBind(GL_TEXTURE1, distort_tex->texnum);      // Distortion texture
 	}
-
+	
 	GL_MBind(GL_TEXTURE0, fa->texinfo->image->texnum);
 
 	for (p=fa->polys ; p ; p=p->next)
@@ -278,8 +277,8 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 			if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
 			{
 				qglMTexCoord2fSGIS(GL_TEXTURE0, s, t);
-				qglMTexCoord2fSGIS(GL_TEXTURE1, 10*s, 10*t);
-				qglMTexCoord2fSGIS(GL_TEXTURE2, 10*s, 10*t);
+				qglMTexCoord2fSGIS(GL_TEXTURE1, 20*s, 20*t);
+				qglMTexCoord2fSGIS(GL_TEXTURE2, 20*s, 20*t);
 			}
 			else
 				qglTexCoord2f (s, t);
@@ -489,7 +488,7 @@ void EmitWaterPolys (msurface_t *fa)
 		if (fabs(g_refl_Z[g_active_refl] - zValue) < 8.0f)
 		{
 			// === jitwater
-			if (gl_state.fragment_program)
+			if (gl_state.fragment_program && !gl_glsl_shaders->value)
 			{
 				qglEnable(GL_FRAGMENT_PROGRAM_ARB);
 				qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
