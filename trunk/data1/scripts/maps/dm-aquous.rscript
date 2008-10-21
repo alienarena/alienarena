@@ -20,5 +20,6 @@ textures/arena3/water
 {
 	{
 		map gfx/dmaquousreflection.tga
+		distort
 	}
 }
