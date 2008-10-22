@@ -1306,7 +1306,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 				if(r_shaders->value) { //only add to the chain if there is actually a shader
 					rs_shader = (rscript_t *)surf->texinfo->image->script;
-					if(rs_shader) {
+					if(rs_shader || (surf->flags & SURF_UNDERWATER)) {
 						surf->specialchain = r_special_surfaces;
 						r_special_surfaces = surf;
 					}
