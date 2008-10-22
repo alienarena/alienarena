@@ -17,8 +17,8 @@ ADD texCoord2, texCoord2, scroll2;
 # Load the distortion textures and add them together.
 TEMP distortColor;
 TEMP distortColor2;
-TXP distortColor, texCoord1, texture[2], 2D;
-TXP distortColor2, texCoord2, texture[2], 2D;
+TXP distortColor, texCoord1, texture[0], 2D;
+TXP distortColor2, texCoord2, texture[0], 2D;
 ADD distortColor, distortColor, distortColor2;
 
 
