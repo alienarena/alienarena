@@ -334,6 +334,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	{
 		alpha = basealpha;
 		R_InitVArrays (VERT_COLOURED_TEXTURED);
+		GLSTATE_ENABLE_ALPHATEST
 		while (1)
 		{
 
