@@ -1635,10 +1635,16 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	if(!r_bloom->value)
 		SetVertexOverbrights(false);
 
+	// restore the original blend mode
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglEnable (GL_BLEND);
+
+	
 }
 
 rscript_t *rs_caustics;
 rscript_t *rs_glass;
+extern cvar_t *cl_gun;
 
 void RS_LoadSpecialScripts (void) //the special cases of glass and water caustics
 {
@@ -1653,7 +1659,8 @@ void RS_SpecialSurface (msurface_t *surf)
 	rscript_t *rs_shader;
 
 	//Underwater Caustics
-	if (surf->flags & SURF_UNDERWATER)
+	//hack - can't seem to find fix for when there is no gun model
+	if (surf->flags & SURF_UNDERWATER && cl_gun->value && r_lefthand->value != 2.0F) 
 			RS_DrawSurfaceTexture(surf, rs_caustics);
 
 	//this was moved here to handle all textures shaders as well.
