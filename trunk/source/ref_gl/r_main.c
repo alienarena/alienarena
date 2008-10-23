@@ -1291,9 +1291,9 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawEntitiesOnList ();
 
-	R_DrawAlphaSurfaces ();
-
 	R_DrawSpecialSurfaces();
+
+	R_DrawAlphaSurfaces ();
 
 	qglLoadMatrixf (r_world_matrix); //moving trans brushes
 
