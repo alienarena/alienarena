@@ -99,3 +99,20 @@ textures/rage/rimlightpurple
 	}
 	
 }
+textures/metal/fade1
+{
+	{
+		map gfx/rayfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 1	
+		scroll static .5 static 0
+		alphashift 10 0.1 0.2
+	}
+	{
+		map gfx/rayfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 1	
+		scroll static .3 static 0
+		alphashift 15 0.1 0.2
+	}
+}
