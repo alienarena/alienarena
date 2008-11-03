@@ -153,7 +153,7 @@ void G_TimeShiftAllClients( int time, edict_t *skip ) {
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse || !ent->client)
 			continue;
-		if ( ent->client && ent->inuse && ent->client->resp.spectator && ent != skip ) {
+		if ( ent->client && ent->inuse && !ent->client->resp.spectator && ent != skip ) {
 			G_TimeShiftClient( ent, time, false, skip );
 		}
 	}
@@ -182,7 +182,7 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 
 	// if it's enabled server-side and the client wants it or wants it for this weapon
 	// note - I've made this very basic right now.  It's on for any hitscan weapon, all clients
-	// if the server has it enabled.  This will get modified perhaps, but maybe not.  
+	// if the server has it enabled.    
 	if ( g_antilag->integer) { 
 		// do the full lag compensation
 		time = ent->client->attackTime;
@@ -235,7 +235,7 @@ void G_UnTimeShiftAllClients( edict_t *skip ) {
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse || !ent->client)
 			continue;
-		if ( ent->client && ent->inuse && ent->client->resp.spectator && ent != skip ) {
+		if ( ent->client && ent->inuse && !ent->client->resp.spectator && ent != skip ) {
 			G_UnTimeShiftClient( ent );
 		}
 	}

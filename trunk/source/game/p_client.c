@@ -2614,8 +2614,9 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	//unlagged
 	if ( g_antilag->integer) {
+		
 		client->frameOffset = gi.Sys_Milliseconds() - level.frameStartTime;
-		client->attackTime = client->ping; //I think this is right, not sure.
+		client->attackTime = level.time; 
 	}
 
 	if (level.intermissiontime)
