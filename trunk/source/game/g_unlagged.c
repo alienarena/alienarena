@@ -179,11 +179,8 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	if ( !ent->inuse || !ent->client || (ent->is_bot) ) {
 		return;
 	}
-
-	// if it's enabled server-side and the client wants it or wants it for this weapon
-	// note - I've made this very basic right now.  It's on for any hitscan weapon, all clients
-	// if the server has it enabled.    
-	if ( g_antilag->integer) { 
+  
+	if ( g_antilag->integer > 1) { 
 		// do the full lag compensation
 		time = ent->client->attackTime;
 	}
