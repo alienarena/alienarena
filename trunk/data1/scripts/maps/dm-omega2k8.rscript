@@ -1,0 +1,101 @@
+textures/arena7/light1
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light10
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena6/ice
+{
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.2 0.2
+		envmap
+	}
+}
+textures/arena6/blacktrans
+{
+	{
+		map gfx/purpleline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 2
+		alphashift 20 0.05 0.8
+		nolightmap
+	}
+}
+textures/arena6/tech1
+{
+	{
+		map gfx/lightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 2
+		alphashift 5 0.05 0.4
+	}
+	
+}
+textures/arena7/metal1
+{
+	{
+		map gfx/chrome2.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		alphashift 1 0.2 0.2
+		envmap
+	}
+}
+textures/arena9/trim2
+{
+	{
+		map gfx/bluelightning2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 5 0.3 0.9
+		scroll static 5 static 0
+		nolightmap
+	}
+	{
+		map gfx/trim2mask.tga
+		alphamask
+	}
+}
+textures/rage/rimlightpurple
+{
+	{
+		map gfx/flash.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 4 static 1
+		scroll static 10 static 0
+		alphashift 20 0.05 0.5
+	}
+	
+}
+textures/metal/fade1
+{
+	{
+		map gfx/rayfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 1	
+		scroll static .5 static 0
+		alphashift 10 0.1 0.2
+	}
+	{
+		map gfx/rayfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 1	
+		scroll static .3 static 0
+		alphashift 15 0.1 0.2
+	}
+}
