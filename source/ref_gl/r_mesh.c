@@ -174,7 +174,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	vec3_t	frontv, backv;
 	int		i;
 	int		index_xyz;
-	qboolean depthmaskrscipt = false, is_trans = false;
+	qboolean depthmaskrscipt = false;
 	rscript_t *rs = NULL;
 	rs_stage_t *stage = NULL;
 	int		va = 0;
@@ -407,7 +407,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 		if (rs->stage && rs->stage->has_alpha)
 		{
-			is_trans = true;
 			depthmaskrscipt = true;
 		}
 

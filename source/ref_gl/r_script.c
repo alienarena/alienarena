@@ -1355,11 +1355,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	float		*v;
 	int			i, nv;
 	vec3_t		wv, vectors[3];
-#ifdef __unix__
 	rs_stage_t	*stage;
-#else
-	rs_stage_t	*stage = rs->stage;
-#endif
 	float		os, ot, alpha;
 	float		scale, time, txm, tym;
 	

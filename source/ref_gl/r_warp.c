@@ -849,14 +849,14 @@ void R_ClearSkyBox (void)
 }
 
 
-void MakeSkyVec (float s, float t, int axis)
+void MakeSkyVec (float s, float t, int axis, float *tex_s, float *tex_t, float *vec, float size)
 {
 	vec3_t		v, b;
 	int			j, k;
 
-	b[0] = s*3300; //JKD - 9/24/02 this was at 2300 across the board, 3300 fixes 
-	b[1] = t*3300; // problems with skyboxes being too small for the large 
-	b[2] = 3300;   // outdoor, city levels.
+	b[0] = s * size; 
+	b[1] = t * size; 
+	b[2] = size;  
 
 	for (j=0 ; j<3 ; j++)
 	{
@@ -881,8 +881,10 @@ void MakeSkyVec (float s, float t, int axis)
 		t = sky_max;
 
 	t = 1.0 - t;
-	qglTexCoord2f (s, t);
-	qglVertex3fv (v);
+
+	*tex_s = s;
+	*tex_t = t;
+	VectorCopy(v, vec);
 }
 
 /*
@@ -890,10 +892,16 @@ void MakeSkyVec (float s, float t, int axis)
 R_DrawSkyBox
 ==============
 */
+extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 int	skytexorder[6] = {0,2,1,3,4,5};
 void R_DrawSkyBox (void)
 {
 	int		i;
+	float	s ,t;
+	vec3_t	point;
+	float	alpha;
+	rscript_t *rs = NULL;
+	rs_stage_t *stage = NULL;
 
 	if (skyrotate)
 	{	// check for no sky at all
@@ -926,13 +934,132 @@ void R_DrawSkyBox (void)
 		GL_Bind (sky_images[skytexorder[i]]->texnum);
 
 		qglBegin (GL_QUADS);
-		MakeSkyVec (skymins[0][i], skymins[1][i], i);
-		MakeSkyVec (skymins[0][i], skymaxs[1][i], i);
-		MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i);
-		MakeSkyVec (skymaxs[0][i], skymins[1][i], i);
+
+		MakeSkyVec (skymins[0][i], skymins[1][i], i, &s, &t, point, 3300);
+		qglTexCoord2f (s, t);
+		qglVertex3fv (point);
+
+		MakeSkyVec (skymins[0][i], skymaxs[1][i], i, &s, &t, point, 3300);
+		qglTexCoord2f (s, t);
+		qglVertex3fv (point);
+
+		MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i, &s, &t, point, 3300);
+		qglTexCoord2f (s, t);
+		qglVertex3fv (point);
+
+		MakeSkyVec (skymaxs[0][i], skymins[1][i], i, &s, &t, point, 3300);
+		qglTexCoord2f (s, t);
+		qglVertex3fv (point);
+
 		qglEnd ();
+
 	}
 	qglPopMatrix ();
+
+    if(r_shaders->value) { //just cloud layers for now, we can expand this
+
+		qglPushMatrix (); //rotate the clouds
+		qglTranslatef (r_origin[0], r_origin[1], r_origin[2]);
+		qglRotatef (rs_realtime * 20, 0, 1, 0);
+
+		for (i=0 ; i<6 ; i++)
+		{
+			rs=(rscript_t *)sky_images[skytexorder[i]]->script;
+
+			if(rs) {	
+				
+				stage=rs->stage;
+				while (stage) 
+				{
+					qglDepthMask( GL_FALSE );	 	// no z buffering
+					qglEnable( GL_BLEND);
+					GL_TexEnv( GL_MODULATE );
+					GLSTATE_DISABLE_ALPHATEST
+
+					GL_Bind (stage->texture->texnum);
+
+					if (stage->blendfunc.blend) 
+					{
+						GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
+						GLSTATE_ENABLE_BLEND
+					} 
+					else 
+					{
+						GLSTATE_DISABLE_BLEND
+					}
+
+					if (stage->alphashift.min || stage->alphashift.speed) 
+					{
+						alpha=0.0f;
+
+						if (!stage->alphashift.speed && stage->alphashift.min > 0) 
+						{
+							alpha=stage->alphashift.min;
+						} 
+						else if (stage->alphashift.speed) 
+						{
+							alpha=sin(rs_realtime * stage->alphashift.speed);
+							alpha=(alpha+1)*0.5f;
+							if (alpha > stage->alphashift.max) alpha=stage->alphashift.max;
+							if (alpha < stage->alphashift.min) alpha=stage->alphashift.min;
+						}
+					} 
+					else
+						alpha=1.0f;
+
+					qglColor4f(1,1,1,alpha);
+
+					if (stage->alphamask) 
+					{
+						GLSTATE_ENABLE_ALPHATEST
+					} 
+					else 
+					{
+						GLSTATE_DISABLE_ALPHATEST
+					}
+
+					skymins[0][i] = -1;
+					skymins[1][i] = -1;
+					skymaxs[0][i] = 1;
+					skymaxs[1][i] = 1;
+
+					qglBegin (GL_QUADS);
+
+					MakeSkyVec (skymins[0][i], skymins[1][i], i, &s, &t, point, 2300);
+					RS_SetTexcoords2D (stage, &s, &t);
+					qglTexCoord2f (s, t);
+					qglVertex3fv (point);
+
+					MakeSkyVec (skymins[0][i], skymaxs[1][i], i, &s, &t, point, 2300);
+					RS_SetTexcoords2D (stage, &s, &t);
+					qglTexCoord2f (s, t);
+					qglVertex3fv (point);
+
+					MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i, &s, &t, point, 2300);
+					RS_SetTexcoords2D (stage, &s, &t);
+					qglTexCoord2f (s, t);
+					qglVertex3fv (point);
+
+					MakeSkyVec (skymaxs[0][i], skymins[1][i], i, &s, &t, point, 2300);
+					RS_SetTexcoords2D (stage, &s, &t);
+					qglTexCoord2f (s, t);
+					qglVertex3fv (point);
+
+					qglEnd();
+		
+					stage=stage->next;
+				}
+			}		
+		}
+		// restore the original blend mode
+		GLSTATE_DISABLE_ALPHATEST
+		GLSTATE_DISABLE_BLEND
+		qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		qglColor4f( 1,1,1,1 );
+		qglDepthMask( GL_TRUE );	// back to normal Z buffering
+		GL_TexEnv( GL_REPLACE );
+		qglPopMatrix ();
+	}
 }
 
 
@@ -966,7 +1093,15 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 		sky_images[i] = GL_FindImage (pathname, it_sky);
 		if (!sky_images[i])
 			sky_images[i] = r_notexture;
-
+		else { //valid sky, load shader
+			if (r_shaders->value) {
+				strcpy(pathname,sky_images[i]->name);
+				pathname[strlen(pathname)-4]=0;
+				sky_images[i]->script = RS_FindScript(pathname);
+				if(sky_images[i]->script)
+					RS_ReadyScript(sky_images[i]->script);
+			} 
+		}
 		if (gl_skymip->value || skyrotate)
 		{	// take less memory
 			gl_picmip->value--;
