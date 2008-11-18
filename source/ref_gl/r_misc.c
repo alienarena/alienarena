@@ -43,7 +43,6 @@ image_t		*r_explosion6texture;
 image_t		*r_explosion7texture;
 image_t		*r_bloodtexture;
 image_t		*r_pufftexture;
-image_t		*r_blastertexture;
 image_t		*r_bflashtexture;
 image_t		*r_cflashtexture;
 image_t		*r_leaderfieldtexture;
@@ -250,7 +249,6 @@ void R_InitParticleTexture (void)
 	r_explosion7texture = R_RegisterParticlePic("r_explod_7");
 	r_bloodtexture = R_RegisterParticlePic("blood");
 	r_pufftexture = R_RegisterParticlePic("puff");
-	r_blastertexture = R_RegisterParticlePic("blaster");
 	r_bflashtexture = R_RegisterParticlePic("bflash");
 	r_cflashtexture = R_RegisterParticlePic("cflash");
 	r_leaderfieldtexture = R_RegisterParticlePic("leaderfield");

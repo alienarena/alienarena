@@ -1567,7 +1567,6 @@ void GL_FreeUnusedImages (void)
 	r_explosion7texture->registration_sequence = registration_sequence;
 	r_bloodtexture->registration_sequence = registration_sequence;
 	r_pufftexture->registration_sequence = registration_sequence;
-	r_blastertexture->registration_sequence = registration_sequence;
 	r_bflashtexture->registration_sequence = registration_sequence;
 	r_cflashtexture->registration_sequence = registration_sequence;
 	r_leaderfieldtexture->registration_sequence = registration_sequence;
