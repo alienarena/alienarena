@@ -141,43 +141,8 @@ CL_ParticleSteamEffect
 Puffs with velocity along direction, with some randomness thrown in
 ===============
 */
-void CL_ParticleSteamEffect (vec3_t org, vec3_t dir, int color, int count, int magnitude)
-{
-	int			i, j;
-	cparticle_t	*p;
-	float		d;
-	vec3_t		r, u;
 
-	MakeNormalVectors (dir, r, u);
-
-	for (i=0 ; i<count ; i++)
-	{
-		if (!(p = new_particle()))
-			return;
-
-		p->color = color + (rand()&7);
-
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = org[j] + magnitude*0.1*crand();
-		}
-		VectorScale (dir, magnitude, p->vel);
-		d = crand()*magnitude/3;
-		VectorMA (p->vel, d, r, p->vel);
-		d = crand()*magnitude/3;
-		VectorMA (p->vel, d, u, p->vel);
-
-		p->accel[0] = p->accel[1] = 0;
-		p->accel[2] = -PARTICLE_GRAVITY/2;
-		p->alpha = 1.0;
-
-		p->alphavel = -1.0 / (0.5 + frand()*0.3);
-
-		p->fromsustainedeffect = true;
-	}
-}
-
-void CL_ParticleSteamEffect2 (cl_sustain_t *self)
+void CL_ParticleSteamEffect (cl_sustain_t *self)
 {
 	int			i, j;
 	cparticle_t	*p;
@@ -188,18 +153,18 @@ void CL_ParticleSteamEffect2 (cl_sustain_t *self)
 	VectorCopy (self->dir, dir);
 	MakeNormalVectors (dir, r, u);
 
-	for (i=0 ; i<self->count ; i++)
+	for (i=0 ; i<2 ; i++)
 	{
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_GUNSHOT;//self->color + (rand()&7);
+		p->type = PARTICLE_GUNSHOT;
 		p->texnum = r_pufftexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 		p->scale = 4 + (rand()&2);
-		p->scalevel = 0;
-		p->color = 15;
+		p->scalevel = 10;
+		p->color = self->color;
 
 		for (j=0 ; j<3 ; j++)
 		{
@@ -215,7 +180,7 @@ void CL_ParticleSteamEffect2 (cl_sustain_t *self)
 		p->accel[2] = -PARTICLE_GRAVITY/2;
 		p->alpha = 0.1;
 
-		p->alphavel = -1.0 / (4.5 + frand()*0.3);
+		p->alphavel = -1.0 / (6.5 + frand()*0.3);
 
 		p->fromsustainedeffect = true;
 	}

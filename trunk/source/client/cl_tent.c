@@ -104,64 +104,60 @@ void CL_ParseParticles (void)
 void CL_ParseSteam (void)
 {
 	vec3_t	pos, dir;
-	int		id, i;
+	int		i;
 	int		r;
 	int		cnt;
-	int		color;
-	int		magnitude;
 	cl_sustain_t	*s, *free_sustain;
 
-//	id = MSG_ReadShort (&net_message);		// an id of -1 is an instant effect
-	id = 25;
-	if (id != -1) // sustains
+	free_sustain = NULL;
+	for (i=0, s=cl_sustains; i<MAX_SUSTAINS; i++, s++)
 	{
-//			Com_Printf ("Sustain effect id %d\n", id);
-		free_sustain = NULL;
-		for (i=0, s=cl_sustains; i<MAX_SUSTAINS; i++, s++)
+		if (s->id == 0)
 		{
-			if (s->id == 0)
-			{
-				free_sustain = s;
+			free_sustain = s;
+			break;
+		}
+	}
+	if (free_sustain)
+	{
+		s->id = 25; //unused for now
+		s->count = MSG_ReadByte (&net_message);
+
+		MSG_ReadPos (&net_message, s->org);
+		MSG_ReadDir (&net_message, s->dir);
+		r = MSG_ReadByte (&net_message);
+		if(!r)
+			r = 15; //light gray
+		else {
+			switch(r) {
+			case 1:
+				r = 0xd2; //lime green
+				break;
+			case 2:
+				r = 0x74; //blue 
+				break;
+			case 3:
+				r = 0xe8; //red
+				break;
+			default:
+				r = 15;  //light gray
 				break;
 			}
 		}
-		if (free_sustain)
-		{
-			s->id = id;
-			s->count = MSG_ReadByte (&net_message);
-			s->count = 10;//just for testing here
-			MSG_ReadPos (&net_message, s->org);
-			MSG_ReadDir (&net_message, s->dir);
-			r = MSG_ReadByte (&net_message);
-			s->color = r & 0xff;
-			s->magnitude = 50;//MSG_ReadShort (&net_message);
-			s->endtime = cl.time + 10000000;//MSG_ReadLong (&net_message);
-			s->think = CL_ParticleSteamEffect2;
-			s->thinkinterval = 1;
-			s->nextthink = cl.time;
-		}
-		else
-		{
-//				Com_Printf ("No free sustains!\n");
-			// FIXME - read the stuff anyway
-			cnt = MSG_ReadByte (&net_message);
-			MSG_ReadPos (&net_message, pos);
-			MSG_ReadDir (&net_message, dir);
-			r = MSG_ReadByte (&net_message);
-			magnitude = MSG_ReadShort (&net_message);
-			magnitude = MSG_ReadLong (&net_message); // really interval
-		}
+		s->color = r;
+		s->magnitude = 30;
+		s->endtime = cl.time + 10000000;
+		s->think = CL_ParticleSteamEffect;
+		s->thinkinterval = 1;
+		s->nextthink = cl.time;
 	}
-	else // instant
+	else
 	{
+		// read the stuff anyway
 		cnt = MSG_ReadByte (&net_message);
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
 		r = MSG_ReadByte (&net_message);
-		magnitude = MSG_ReadShort (&net_message);
-		color = r & 0xff;
-		CL_ParticleSteamEffect (pos, dir, color, cnt, magnitude);
-//		S_StartSound (pos,  0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 	}
 }
 
@@ -444,7 +440,7 @@ void CL_ParseTEnt (void)
 	case TE_PARASITE_ATTACK:
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
-		CL_LaserBlast (pos, pos2);
+	//unused for now
 		S_StartSound (pos, 0, 0, S_RegisterSound ("weapons/biglaser.wav"), 1, ATTN_NONE, 0);
 		break;
 

@@ -81,7 +81,6 @@ extern image_t		*r_explosion6texture;
 extern image_t		*r_explosion7texture;
 extern image_t		*r_bloodtexture;
 extern image_t		*r_pufftexture;
-extern image_t		*r_blastertexture;
 extern image_t		*r_bflashtexture;
 extern image_t		*r_cflashtexture;
 extern image_t		*r_leaderfieldtexture;
