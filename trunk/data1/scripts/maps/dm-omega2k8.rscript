@@ -16,6 +16,20 @@ textures/arena7/light3
 		lensflare
 	}
 }
+textures/arena7/light9
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light5
+{
+	{
+		map textures/arena8/blackbrick1.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 20 0.0 1.0
+	}
+}
 textures/arena6/ice
 {
 	{
