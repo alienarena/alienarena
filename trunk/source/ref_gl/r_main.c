@@ -671,7 +671,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			qglBegin ( GL_QUADS );
 		}
 
-		if(p->type == PARTICLE_BEAM || p->type == PARTICLE_SHOT) {
+		if(p->type == PARTICLE_BEAM) {
 
 			VectorSubtract(p->origin, p->angle, move);
 			VectorNormalize(move);

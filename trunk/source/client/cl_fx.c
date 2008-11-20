@@ -518,7 +518,7 @@ void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 
 		if (color == 425)		// gunshots: FIXME should be using type
 		{
-			p->type = PARTICLE_GUNSHOT;
+			p->type = PARTICLE_STANDARD;
 			p->texnum = r_pufftexture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
@@ -530,7 +530,7 @@ void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 		}
 		else if (color == 450)
 		{
-			p->type = PARTICLE_BLOOD;
+			p->type = PARTICLE_STANDARD;
 			p->texnum = r_bloodtexture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
@@ -542,7 +542,7 @@ void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 		}
 		else if (color == 550)
 		{
-			p->type = PARTICLE_BLOOD;
+			p->type = PARTICLE_STANDARD;
 			p->texnum = r_bloodtexture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
@@ -639,7 +639,7 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 			return;
 
 		p->color = 0xe0 + (rand()&2);
-		p->type = PARTICLE_SPARK;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_particletexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
@@ -703,7 +703,7 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 				return;
 
 			p->color = color + (rand()&2);
-			p->type = PARTICLE_SPARK;
+			p->type = PARTICLE_STANDARD;
 			p->texnum = r_particletexture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
@@ -819,7 +819,7 @@ void CL_ItemRespawnParticles (vec3_t org)
 		p->color = 0x74 + (rand()&7);
 		p->scale = 12 + (rand()&7) ;
 		p->scalevel = 0;
-		p->type = PARTICLE_FIREBALL;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_explosiontexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
@@ -865,12 +865,12 @@ void CL_ExplosionParticles (vec3_t org)
 				p->org[j] = org[j] + ((rand()%16)-8);
 				p->vel[j] = 0;
 			}
-			p->type = PARTICLE_EXPLOSION1 + i;
+			p->type = PARTICLE_STANDARD;
 			p->accel[0] = p->accel[1] = p->accel[2] = 0;
 			p->alpha = 0.2;
 			p->scale = 6; 
 			p->scalevel = 52;
-			p->color = 0xd9;// + (rand()&7); 
+			p->color = 0xd9 + (rand()&7); 
 			p->alphavel = -1.0 / (1 + i + k/5);
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
@@ -886,12 +886,16 @@ void CL_ExplosionParticles (vec3_t org)
 					break;
 				case 3:
 					p->texnum = r_explosion4texture->texnum;
+					p->blendsrc = GL_SRC_ALPHA;
+					p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 					break;
 				case 4:
 					p->texnum = r_explosion5texture->texnum;
 					break;
 				case 5:
 					p->texnum = r_explosion6texture->texnum;
+					p->blendsrc = GL_SRC_ALPHA;
+					p->blenddst = GL_ONE;
 					break;
 				case 6:
 					p->texnum = r_explosion7texture->texnum;
@@ -931,7 +935,7 @@ void CL_MuzzleParticles (vec3_t org)
 				
 		p->alphavel = -1.0 / (30+frand()*1.4); //smoke lingers longer
 		p->alpha = .07;
-		p->type = PARTICLE_SMOKE; 
+		p->type = PARTICLE_STANDARD; 
 		p->texnum = r_smoketexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
@@ -957,7 +961,7 @@ void CL_BlueMuzzleParticles (vec3_t org)
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_BLUE_MZFLASH;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_cflashtexture->texnum;
 		p->scale = 16 + (rand()&7);
 		p->blendsrc = GL_SRC_ALPHA;
@@ -1020,7 +1024,7 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 	if (!(p = new_particle()))
 		return;
 
-	p->type = PARTICLE_BLUE_MZFLASH;
+	p->type = PARTICLE_STANDARD;
 	p->texnum = r_bflashtexture->texnum;
 	p->scale = 7 + (rand()&4);
 	p->blendsrc = GL_SRC_ALPHA;
@@ -1052,7 +1056,7 @@ void CL_SmartMuzzle (vec3_t org)
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_LEADER_FIELD;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_leaderfieldtexture->texnum;
 		p->scale = 24 + (rand()&2);
 		p->color = 0xff;
@@ -1088,7 +1092,7 @@ void CL_Voltage (vec3_t org)
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_LEADER_FIELD;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_voltagetexture->texnum;
 		p->scale = 14 + (rand()&14);
 		p->color = 0xff;
@@ -1121,7 +1125,7 @@ void CL_Deathfield (vec3_t org, int type)
 	if (!(p = new_particle()))
 		return;
 
-	p->type = PARTICLE_DEATH_FIELD;
+	p->type = PARTICLE_STANDARD;
 	if(type)
 		p->texnum = r_deathfieldtexture2->texnum;
 	else
@@ -1160,7 +1164,7 @@ void CL_SayIcon(vec3_t org)
 	if(!(p = new_particle()))
 		return;
 
-	p->type = PARTICLE_SAY_ICON;
+	p->type = PARTICLE_STANDARD;
 	p->texnum = r_sayicontexture->texnum;
 	p->scale = 5;
 	p->scalevel = 0;
@@ -1195,7 +1199,7 @@ void CL_DustParticles (vec3_t org)
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_GUNSHOT;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_pufftexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
@@ -1234,7 +1238,7 @@ void CL_BigTeleportParticles (vec3_t org)
 		if(i == 1)
 			p->type = PARTICLE_ROTATINGROLL;
 		else
-			p->type = PARTICLE_BLUE_MZFLASH;
+			p->type = PARTICLE_STANDARD;
 		p->texnum = r_leaderfieldtexture->texnum;
 		p->scale = 16*i + (rand()&7);
 		p->blendsrc = GL_SRC_ALPHA;
@@ -1269,7 +1273,7 @@ void CL_SmallHealthParticles (vec3_t org)
 	if (!(p = new_particle()))
 			return;
 
-	p->type = PARTICLE_BLUE_MZFLASH;
+	p->type = PARTICLE_STANDARD;
 	p->texnum = r_cflashtexture->texnum;
 	p->scale = 10 + (rand()&7);
 	p->blendsrc = GL_SRC_ALPHA;
@@ -1302,7 +1306,7 @@ void CL_MedHealthParticles (vec3_t org)
 	if (!(p = new_particle()))
 			return;
 
-	p->type = PARTICLE_BLUE_MZFLASH;
+	p->type = PARTICLE_STANDARD;
 	p->texnum = r_cflashtexture->texnum;
 	p->scale = 10 + (rand()&7);
 	p->blendsrc = GL_SRC_ALPHA;
@@ -1335,7 +1339,7 @@ void CL_LargeHealthParticles (vec3_t org)
 	if (!(p = new_particle()))
 			return;
 
-	p->type = PARTICLE_BLUE_MZFLASH;
+	p->type = PARTICLE_STANDARD;
 	p->texnum = r_cflashtexture->texnum;
 	p->scale = 10 + (rand()&7);
 	p->blendsrc = GL_SRC_ALPHA;
@@ -1377,7 +1381,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_HIT;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_cflashtexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
@@ -1491,7 +1495,7 @@ void CL_BlueTeamLight(vec3_t pos)
 		VectorClear (p->accel);
 
 		p->alpha = .7;
-		p->type = PARTICLE_FLARE;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_flaretexture->texnum;
 		p->blendsrc = GL_ONE;
 		p->blenddst = GL_ONE;
@@ -1519,7 +1523,7 @@ void CL_RedTeamLight(vec3_t pos)
 		VectorClear (p->accel);
 
 		p->alpha = .7;
-		p->type = PARTICLE_FLARE;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_flaretexture->texnum;
 		p->blendsrc = GL_ONE;
 		p->blenddst = GL_ONE;
@@ -1592,7 +1596,7 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	if (!(p = new_particle()))
 			return;
 
-	p->type = PARTICLE_BLUE_MZFLASH;
+	p->type = PARTICLE_STANDARD;
 	p->texnum = r_cflashtexture->texnum;
 	p->scale = 20 + (rand()&7);
 	p->blendsrc = GL_ONE;
@@ -1751,7 +1755,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 			{
 				p->alpha = .6;//1.0;
 				p->alphavel = -1.0 / (1+frand()*0.4);
-				p->type = PARTICLE_BLOOD;
+				p->type = PARTICLE_STANDARD;
 				p->texnum = r_bloodtexture->texnum;
 				p->blendsrc = GL_SRC_ALPHA;
 				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
@@ -1770,7 +1774,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 			{
 				p->alpha = .6;
 				p->alphavel = -1.0 / (1+frand()*0.4);
-				p->type = PARTICLE_BLOOD;
+				p->type = PARTICLE_STANDARD;
 				p->texnum = r_bloodtexture->texnum;
 				p->blendsrc = GL_SRC_ALPHA;
 				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
@@ -1796,7 +1800,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 				
 				p->alphavel = -1.0 / (20+frand()*1.4); //smoke lingers longer
 				p->alpha = .07;
-				p->type = PARTICLE_SMOKE; 
+				p->type = PARTICLE_STANDARD; 
 				p->texnum = r_smoketexture->texnum;
 				p->blendsrc = GL_SRC_ALPHA;
 				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
@@ -1875,7 +1879,7 @@ void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old)
 			p->scalevel = 5;
 			p->alpha = .3;
 			p->alphavel = -1.0 / (3+frand()*0.2);
-			p->type = PARTICLE_BLASTER;
+			p->type = PARTICLE_STANDARD;
 			p->texnum = r_hittexture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
@@ -1922,7 +1926,7 @@ void CL_ShipExhaust (vec3_t start, vec3_t end, centity_t *old)
 			p->scalevel = 5;
 			p->alpha = .3;
 			p->alphavel = -1.0 / (3+frand()*0.2);
-			p->type = PARTICLE_FIREBALL;
+			p->type = PARTICLE_STANDARD;
 			p->texnum = r_explosiontexture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
@@ -1983,7 +1987,7 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 
 	p->alpha = .7;
 	p->alphavel = -50.0;
-	p->type = PARTICLE_HIT;
+	p->type = PARTICLE_STANDARD;
 	p->texnum = r_bflashtexture->texnum;
 	p->scale = 5;
 	p->angle[0] = cl.refdef.viewangles[0];
@@ -2007,7 +2011,7 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 
 	p->alpha = .7;
 	p->alphavel = -50.0;
-	p->type = PARTICLE_HIT;
+	p->type = PARTICLE_STANDARD;
 	p->texnum = r_flaretexture->texnum;
 	p->scale = 10;
 	p->angle[0] = cl.refdef.viewangles[0];
@@ -2301,7 +2305,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 		p->scale = 8/(i+1);
 		for(j=0; j< 3; j++)
 			p->angle[j] = 0;
-		p->type = PARTICLE_BLASTER;
+		p->type = PARTICLE_STANDARD;
 		p->scalevel = 4;
 		p->color = 0xd4;
 		for (j=0 ; j<3 ; j++)
@@ -2378,7 +2382,7 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 		p->scale = 12/(i+1);
 		for(j=0; j< 3; j++)
 			p->angle[j] = 0;
-		p->type = PARTICLE_BLASTER;
+		p->type = PARTICLE_STANDARD;
 		p->scalevel = 8;
 		p->color = 0xd4;
 		for (j=0 ; j<3 ; j++)
@@ -2406,7 +2410,7 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 			p->scale = 24;
 			for(j=0; j< 3; j++)
 				p->angle[j] = 0;
-			p->type = PARTICLE_BLASTER;
+			p->type = PARTICLE_STANDARD;
 			p->scalevel = 12;
 		}
 		else {
@@ -2465,7 +2469,7 @@ void CL_BlasterBeam (vec3_t start, vec3_t end)
 		p->scale = 8/(i+1);
 		for(j=0; j< 3; j++)
 			p->angle[j] = 0;
-		p->type = PARTICLE_BLASTER;
+		p->type = PARTICLE_STANDARD;
 		p->scalevel = 4;
 		p->color = 0x74;
 		for (j=0 ; j<3 ; j++)
@@ -2545,7 +2549,7 @@ void CL_VaporizerBeam (vec3_t start, vec3_t end)
 		p->scale = 24/(i+1);
 		for(j=0; j< 3; j++)
 			p->angle[j] = 0;
-		p->type = PARTICLE_BLASTER;
+		p->type = PARTICLE_STANDARD;
 		p->scalevel = 12;
 		p->color = 0x74 + (rand()&12);;
 		for (j=0 ; j<3 ; j++)
@@ -2671,7 +2675,7 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 
 		p->alpha = 0.8;
 		p->alphavel = -2.0 / (0.6+frand()*0.2);
-		p->type = PARTICLE_SPARK;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_particletexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
@@ -2728,7 +2732,7 @@ void CL_RedBlasterBeam (vec3_t start, vec3_t end)
 		p->scale = 8/(i+1);
 		for(j=0; j< 3; j++)
 			p->angle[j] = 0;
-		p->type = PARTICLE_BLASTER;
+		p->type = PARTICLE_STANDARD;
 		p->scalevel = 4;
 		p->color = 0xe8;
 		for (j=0 ; j<3 ; j++)
@@ -2803,7 +2807,7 @@ void CL_BubbleTrail (vec3_t start, vec3_t end)
 		p->alpha = 1.0;
 		p->alphavel = -1.0 / (1+frand()*0.2);
 		p->color = 4 + (rand()&7);
-		p->type = PARTICLE_BUBBLE;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_bubbletexture->texnum;
 		p->scale = 2 + (rand()&2);
 		p->blendsrc = GL_SRC_ALPHA;
@@ -2846,7 +2850,7 @@ void CL_BFGExplosionParticles (vec3_t org)
 		p->accel[2] = 5+(rand()&7);
 		p->scale = (24 + (rand()&2));
 		p->scalevel = 24;
-		p->type = PARTICLE_FIREBALL;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_explosiontexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
@@ -3072,7 +3076,7 @@ void CL_PoweredEffects (vec3_t origin)
 		VectorClear (p->vel);
 		VectorClear (p->accel);
 
-		p->type = PARTICLE_FLARE;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_logotexture->texnum;
 		p->blendsrc = GL_ONE;
 		p->blenddst = GL_ONE;

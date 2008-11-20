@@ -158,7 +158,7 @@ void CL_ParticleSteamEffect (cl_sustain_t *self)
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_GUNSHOT;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_pufftexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
@@ -202,7 +202,7 @@ void CL_ParticleFireEffect2 (cl_sustain_t *self)
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_FIREBALL;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_explosiontexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
@@ -247,7 +247,7 @@ void CL_ParticleSmokeEffect2 (cl_sustain_t *self)
 		if (!(p = new_particle()))
 			return;
 
-		p->type = PARTICLE_SMOKE;
+		p->type = PARTICLE_STANDARD;
 		p->texnum = r_smoketexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
