@@ -195,6 +195,7 @@ typedef struct
 #define MENUITEM_ROTATE		2
 #define MENUITEM_SLIDER		3
 #define MENUITEM_TEXT		4
+#define MENUITEM_VERTSLIDER 5
 
 typedef struct
 {

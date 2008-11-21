@@ -29,6 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MTYPE_SEPARATOR  	4
 #define MTYPE_FIELD			5
 #define MTYPE_SEPARATOR2	6
+#define MTYPE_VERTSLIDER	7
+#define MTYPE_COLORTXT		8
 
 #define	K_TAB			9
 #define	K_ENTER			13
@@ -105,6 +107,7 @@ typedef struct
 	float curvalue;
 
 	float range;
+	int	  size;
 } menuslider_s;
 
 typedef struct
@@ -125,6 +128,11 @@ typedef struct
 {
 	menucommon_s generic;
 } menuseparator_s;
+
+typedef struct
+{
+	menucommon_s generic;
+} menutxt_s;
 
 typedef struct
 {

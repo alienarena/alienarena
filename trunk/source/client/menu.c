@@ -153,12 +153,12 @@ static void M_ArrowPics()
 	Draw_GetPicSize (&w, &h, "dnarrow" );
 
 	//for the server list
-	Draw_StretchPic (viddef.width / 2 - w/2 - 176*scale, viddef.height / 2 - 16*scale, 32*scale, 32*scale, "uparrow");
-	Draw_StretchPic (viddef.width / 2 - w/2 - 176*scale, viddef.height / 2 + 20*scale, 32*scale, 32*scale, "dnarrow");
+	Draw_StretchPic (viddef.width / 2 - w/2 + 283*scale, viddef.height / 2 - 95*scale, 32*scale, 32*scale, "uparrow");
+	Draw_StretchPic (viddef.width / 2 - w/2 + 283*scale, viddef.height / 2 + 54*scale, 32*scale, 32*scale, "dnarrow");
 
 	//for the player list
-	Draw_StretchPic (viddef.width / 2 - w/2 - 46*scale, viddef.height / 2 + 134*scale, 32*scale, 32*scale, "uparrow");
-	Draw_StretchPic (viddef.width / 2 - w/2 - 46*scale, viddef.height / 2 + 170*scale, 32*scale, 32*scale, "dnarrow");
+	Draw_StretchPic (viddef.width / 2 - w/2 + 283*scale, viddef.height / 2 + 107*scale, 32*scale, 32*scale, "uparrow");
+	Draw_StretchPic (viddef.width / 2 - w/2 + 283*scale, viddef.height / 2 + 224*scale, 32*scale, 32*scale, "dnarrow");
 }
 
 // Knightmare- added Psychospaz's mouse support
@@ -2735,8 +2735,10 @@ static menuaction_s		s_joinserver_server_info[32];
 static menuaction_s		s_joinserver_server_data[5];
 static menuaction_s		s_joinserver_moveup;
 static menuaction_s		s_joinserver_movedown;
+static menuslider_s		s_joinserver_scrollbar;
 static menuaction_s		s_playerlist_moveup;
 static menuaction_s		s_playerlist_movedown;
+static menuslider_s		s_playerlist_scrollbar;
 
 int		m_num_servers;
 int		m_show_empty;
@@ -2807,7 +2809,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	char seps[]   = "\\";
 	int players = 0;
 	int result;
-	char playername[16];
+	char playername[32];
 	int score, ping, i;
 
 	//if by some chance this gets called without the menu being up, return
@@ -2881,7 +2883,9 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 
 		free (rLine);
 
-		Com_sprintf(mservers[m_num_servers].playerInfo[players], sizeof(mservers[m_num_servers].playerInfo[players]), "%s    %4i    %4i\n", playername, score, ping);
+		playername[31] = '\0';
+		Com_sprintf(mservers[m_num_servers].playerInfo[players], sizeof(mservers[m_num_servers].playerInfo[players]),
+			"%32s    %4i    %4i\n", playername, score, ping);
 
 		players++;
 	}
@@ -2915,26 +2919,42 @@ void MoveUp ( void *self)
 	svridx--;
 	if(svridx < 0)
 		svridx = 0;
+	s_joinserver_scrollbar.curvalue--;
 }
 void MoveDown ( void *self)
 {
 	svridx++;
 	if(svridx > 112)
 		svridx = 112;
+	s_joinserver_scrollbar.curvalue++;
 }
+void JoinScrollMove ( void *self)
+{
+	svridx = s_joinserver_scrollbar.curvalue;
+	if(svridx > 112)
+		svridx = 112;
+}
+
 void MoveUp_plist ( void *self)
 {
 	playeridx--;
 	if(playeridx < 0)
 		playeridx = 0;
+	s_playerlist_scrollbar.curvalue--;
 }
 void MoveDown_plist ( void *self)
 {
 	playeridx++;
 	if(playeridx > 24)
 		playeridx = 24;
+	s_playerlist_scrollbar.curvalue++;
 }
-
+void PlayerScrollMove ( void *self)
+{
+	playeridx = s_playerlist_scrollbar.curvalue;
+	if(playeridx > 24)
+		playeridx = 24;
+}
 //join on double click, return info on single click
 void JoinServerFunc( void *self )
 {
@@ -2943,6 +2963,8 @@ void JoinServerFunc( void *self )
 	int     i;
 
 	index = ( menuaction_s * ) self - s_joinserver_server_actions;
+
+	playeridx = s_playerlist_scrollbar.curvalue = 0; 
 
 	if ( Q_stricmp( mservers[index+svridx].szHostName, NO_SERVER_STRING ) == 0 )
 		return;
@@ -3025,7 +3047,7 @@ static void FilterEmptyFunc( void *unused )
 void JoinServer_MenuInit( void )
 {
 	int i;
-	float scale;
+	float scale, offset;
 	
 	static const char *yesno_names[] =
 	{
@@ -3043,19 +3065,21 @@ void JoinServer_MenuInit( void )
 	m_show_empty = true;
 
 	s_joinserver_menu.x = viddef.width * 0.50 - 120*scale;
+	offset = viddef.height/2 - 326*scale;
+
 	s_joinserver_menu.nitems = 0;
 
 	s_joinserver_address_book_action.generic.type	= MTYPE_ACTION;
 	s_joinserver_address_book_action.generic.name	= "address book";
 	s_joinserver_address_book_action.generic.x		= -56*scale;
-	s_joinserver_address_book_action.generic.y		= 105*scale;
+	s_joinserver_address_book_action.generic.y		= 105*scale+offset;
 	s_joinserver_address_book_action.generic.cursor_offset = -16*scale;
 	s_joinserver_address_book_action.generic.callback = AddressBookFunc;
 
 	s_joinserver_search_action.generic.type = MTYPE_ACTION;
 	s_joinserver_search_action.generic.name	= "refresh list";
 	s_joinserver_search_action.generic.x	= -56*scale;
-	s_joinserver_search_action.generic.y	= 115*scale;
+	s_joinserver_search_action.generic.y	= 115*scale+offset;
 	s_joinserver_search_action.generic.cursor_offset = -16*scale;
 	s_joinserver_search_action.generic.callback = SearchLocalGamesFunc;
 	s_joinserver_search_action.generic.statusbar = "search for servers";
@@ -3064,42 +3088,62 @@ void JoinServer_MenuInit( void )
 	s_joinserver_filterempty_action.generic.name	= "show empty";
 	s_joinserver_filterempty_action.itemnames = yesno_names;
 	s_joinserver_filterempty_action.generic.x	= 80*scale;
-	s_joinserver_filterempty_action.generic.y	= 40*scale;
+	s_joinserver_filterempty_action.generic.y	= 40*scale+offset;
 	s_joinserver_filterempty_action.generic.cursor_offset = -16*scale;
 	s_joinserver_filterempty_action.curvalue = m_show_empty;
 	s_joinserver_filterempty_action.generic.callback = FilterEmptyFunc;
 	
 	s_joinserver_moveup.generic.type	= MTYPE_ACTION;
-	s_joinserver_moveup.generic.name	= "       ";
+	s_joinserver_moveup.generic.name	= "     ";
 	s_joinserver_moveup.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_joinserver_moveup.generic.x		= -40*scale;
-	s_joinserver_moveup.generic.y		= 190*scale;
+	s_joinserver_moveup.generic.x		= 405*scale;
+	s_joinserver_moveup.generic.y		= 104*scale+offset;
 	s_joinserver_moveup.generic.cursor_offset = -16*scale;
 	s_joinserver_moveup.generic.callback = MoveUp;
 
 	s_joinserver_movedown.generic.type	= MTYPE_ACTION;
-	s_joinserver_movedown.generic.name	= "       ";
+	s_joinserver_movedown.generic.name	= "     ";
 	s_joinserver_movedown.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_joinserver_movedown.generic.x		= -40*scale;
-	s_joinserver_movedown.generic.y		= 200*scale;
+	s_joinserver_movedown.generic.x		= 405*scale;
+	s_joinserver_movedown.generic.y		= 236*scale+offset;
 	s_joinserver_movedown.generic.cursor_offset = -16*scale;
 	s_joinserver_movedown.generic.callback = MoveDown;
 
+	s_joinserver_scrollbar.generic.type  = MTYPE_VERTSLIDER;
+	s_joinserver_scrollbar.generic.name  = "     ";
+	s_joinserver_scrollbar.generic.x	 = 391*scale;
+	s_joinserver_scrollbar.generic.y	 = 123*scale+offset;
+	s_joinserver_scrollbar.minvalue		 = 0;
+	s_joinserver_scrollbar.maxvalue		 = 16;
+	s_joinserver_scrollbar.size			 = 12;
+	s_joinserver_scrollbar.curvalue		 = 0;
+	s_joinserver_scrollbar.generic.callback = JoinScrollMove;
+
 	s_playerlist_moveup.generic.type	= MTYPE_ACTION;
-	s_playerlist_moveup.generic.name	= " ";
+	s_playerlist_moveup.generic.name	= "      ";
 	s_playerlist_moveup.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_playerlist_moveup.generic.x		= 95*scale;
-	s_playerlist_moveup.generic.y		= 340*scale;
+	s_playerlist_moveup.generic.x		= 405*scale;
+	s_playerlist_moveup.generic.y		= 305*scale+offset;
 	s_playerlist_moveup.generic.cursor_offset = -16*scale;
 	s_playerlist_moveup.generic.callback = MoveUp_plist;
 
 	s_playerlist_movedown.generic.type	= MTYPE_ACTION;
-	s_playerlist_movedown.generic.name	= " ";
+	s_playerlist_movedown.generic.name	= "      ";
 	s_playerlist_movedown.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_playerlist_movedown.generic.x		= 95*scale;
-	s_playerlist_movedown.generic.y		= 350*scale;
+	s_playerlist_movedown.generic.x		= 405*scale;
+	s_playerlist_movedown.generic.y		= 405*scale+offset;
 	s_playerlist_movedown.generic.cursor_offset = -16*scale;
 	s_playerlist_movedown.generic.callback = MoveDown_plist;
+
+	s_playerlist_scrollbar.generic.type  = MTYPE_VERTSLIDER;
+	s_playerlist_scrollbar.generic.name  = " ";
+	s_playerlist_scrollbar.generic.x	 = 391*scale;
+	s_playerlist_scrollbar.generic.y	 = 325*scale+offset;
+	s_playerlist_scrollbar.minvalue		 = 0;
+	s_playerlist_scrollbar.maxvalue		 = 16;
+	s_playerlist_scrollbar.size			 = 8;
+	s_playerlist_scrollbar.curvalue		 = 0;
+	s_playerlist_scrollbar.generic.callback = PlayerScrollMove;
 
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_address_book_action );
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_search_action );
@@ -3117,8 +3161,10 @@ void JoinServer_MenuInit( void )
 	//add items to move the index
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_moveup );
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_movedown );
+	Menu_AddItem( &s_joinserver_menu, &s_joinserver_scrollbar );
 	Menu_AddItem( &s_joinserver_menu, &s_playerlist_moveup );
 	Menu_AddItem( &s_joinserver_menu, &s_playerlist_movedown );
+	Menu_AddItem( &s_joinserver_menu, &s_playerlist_scrollbar );
 
 	Menu_Center( &s_joinserver_menu );
 
@@ -3128,7 +3174,7 @@ void JoinServer_MenuInit( void )
 void JoinServer_MenuDraw(void)
 {
 	int i;
-	float scale;
+	float scale, offset;
 
 	scale = (float)(viddef.height)/600;
 	if(scale < 1)
@@ -3141,13 +3187,13 @@ void JoinServer_MenuDraw(void)
 	M_Background( "menu_back" ); //draw black background first
 	M_Banner( "m_joinserver", banneralpha );
 
-
+	offset = viddef.height/2 - 326*scale;
 	for ( i = 0; i < 16; i++ )
 	{
 		s_joinserver_server_actions[i].generic.type	= MTYPE_ACTION;
 		s_joinserver_server_actions[i].generic.name	= mservers[i+svridx].serverInfo;
 		s_joinserver_server_actions[i].generic.x		= 372*scale;
-		s_joinserver_server_actions[i].generic.y		= 90*scale + i*10*scale;
+		s_joinserver_server_actions[i].generic.y		= 90*scale + i*10*scale+offset;
 		s_joinserver_server_actions[i].generic.cursor_offset = -16*scale;
 		s_joinserver_server_actions[i].generic.callback = JoinServerFunc;
 		s_joinserver_server_actions[i].generic.statusbar = "press ENTER or DBL CLICK to connect";
@@ -3157,11 +3203,11 @@ void JoinServer_MenuDraw(void)
 
 	for ( i = 0; i < 8; i++)
 	{
-		s_joinserver_server_info[i].generic.type	= MTYPE_SEPARATOR;
+		s_joinserver_server_info[i].generic.type	= MTYPE_COLORTXT;
 		s_joinserver_server_info[i].generic.name	= local_server_info[i+playeridx];
 		s_joinserver_server_info[i].generic.flags	= QMF_LEFT_JUSTIFY;
-		s_joinserver_server_info[i].generic.x		= 350*scale;
-		s_joinserver_server_info[i].generic.y		= 305*scale + i*10*scale;
+		s_joinserver_server_info[i].generic.x		= -20*scale;
+		s_joinserver_server_info[i].generic.y		= 305*scale + i*10*scale+offset;
 	}
 
 	for ( i = 0; i < 5; i++)
@@ -3170,8 +3216,9 @@ void JoinServer_MenuDraw(void)
 		s_joinserver_server_data[i].generic.name	= local_server_data[i];
 		s_joinserver_server_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
 		s_joinserver_server_data[i].generic.x		= 30*scale;
-		s_joinserver_server_data[i].generic.y		= 335*scale + i*10*scale;
+		s_joinserver_server_data[i].generic.y		= 335*scale + i*10*scale+offset;
 	}
+	s_joinserver_scrollbar.maxvalue = m_num_servers - 16;	
 	M_ArrowPics();
 	Menu_Draw( &s_joinserver_menu );
 }
@@ -5910,6 +5957,20 @@ int Slider_CursorPositionX ( menuslider_s *s )
 	return ( int )( (MENU_FONT_SIZE) + RCOLUMN_OFFSET + (SLIDER_RANGE)*(MENU_FONT_SIZE) * range );
 }
 
+int Slider_CursorPositionY ( menuslider_s *s )
+{
+	float range;
+
+	range = ( s->curvalue - s->minvalue ) / ( float ) ( s->maxvalue - s->minvalue );
+
+	if ( range < 0)
+		range = 0;
+	if ( range > 1)
+		range = 1;
+
+	return ( int )( (MENU_FONT_SIZE) + (s->size)*(MENU_FONT_SIZE) * range );
+}
+
 int newSliderValueForX (int x, menuslider_s *s)
 {
 	float newValue;
@@ -5917,6 +5978,18 @@ int newSliderValueForX (int x, menuslider_s *s)
 	int pos = x - (MENU_FONT_SIZE + RCOLUMN_OFFSET + s->generic.x) - s->generic.parent->x;
 
 	newValue = ((float)pos)/((SLIDER_RANGE-1)*(MENU_FONT_SIZE));
+	newValueInt = s->minvalue + newValue * (float)( s->maxvalue - s->minvalue );
+
+	return newValueInt;
+}
+
+int newSliderValueForY (int y, menuslider_s *s)
+{
+	float newValue;
+	int newValueInt;
+	int pos = y - (MENU_FONT_SIZE + s->generic.y) - s->generic.parent->y;
+
+	newValue = ((float)pos)/((s->size-1)*(MENU_FONT_SIZE));
 	newValueInt = s->minvalue + newValue * (float)( s->maxvalue - s->minvalue );
 
 	return newValueInt;
@@ -5942,6 +6015,15 @@ void Menu_DragSlideItem (menuframework_s *menu, void *menuitem)
 	Slider_CheckSlide ( slider );
 }
 
+void Menu_DragVertSlideItem (menuframework_s *menu, void *menuitem)
+{
+	menucommon_s *item = ( menucommon_s * ) menuitem;
+	menuslider_s *slider = ( menuslider_s * ) menuitem;
+
+	slider->curvalue = newSliderValueForY(cursor.y, slider);
+	Slider_CheckSlide ( slider );
+}
+
 void Menu_ClickSlideItem (menuframework_s *menu, void *menuitem)
 {
 	int min, max;
@@ -5956,6 +6038,22 @@ void Menu_ClickSlideItem (menuframework_s *menu, void *menuitem)
 	if (cursor.x > max)
 		Menu_SlideItem( menu, 1 );
 }
+
+void Menu_ClickVertSlideItem (menuframework_s *menu, void *menuitem)
+{
+	int min, max;
+	menucommon_s *item = ( menucommon_s * ) menuitem;
+	menuslider_s *slider = ( menuslider_s * ) menuitem;
+
+	min = menu->y + (item->y + Slider_CursorPositionY(slider) - 4);
+	max = menu->y + (item->x + Slider_CursorPositionY(slider) + 4);
+
+	if (cursor.y < min)
+		Menu_SlideItem( menu, -1 );
+	if (cursor.y > max)
+		Menu_SlideItem( menu, 1 );
+}
+
 
 void M_Think_MouseCursor (void)
 {
@@ -5997,6 +6095,10 @@ void M_Think_MouseCursor (void)
 			{
 				Menu_DragSlideItem(m, cursor.menuitem);
 			}
+			else if (cursor.menuitemtype == MENUITEM_VERTSLIDER)
+			{
+				Menu_DragVertSlideItem(m, cursor.menuitem);
+			}
 			else if (!cursor.buttonused[MOUSEBUTTON1] && cursor.buttonclicks[MOUSEBUTTON1])
 			{
 				if (cursor.menuitemtype == MENUITEM_ROTATE)
@@ -6020,6 +6122,12 @@ void M_Think_MouseCursor (void)
 			if (cursor.menuitemtype == MENUITEM_SLIDER && !cursor.buttonused[MOUSEBUTTON2])
 			{
 				Menu_ClickSlideItem(m, cursor.menuitem);
+				sound = menu_move_sound;
+				cursor.buttonused[MOUSEBUTTON2] = true;
+			}
+			else if (cursor.menuitemtype == MENUITEM_VERTSLIDER && !cursor.buttonused[MOUSEBUTTON2])
+			{
+				Menu_ClickVertSlideItem(m, cursor.menuitem);
 				sound = menu_move_sound;
 				cursor.buttonused[MOUSEBUTTON2] = true;
 			}

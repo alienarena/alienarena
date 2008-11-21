@@ -119,7 +119,10 @@ char	*SV_StatusString (void)
 {
 	char	player[1024];
 	static char	status[MAX_MSGLEN - 16];
-	int		i, j, k;
+	int		i;
+#ifdef NOTUSED
+	int j, k;
+#endif
 	client_t	*cl;
 	int		statusLength;
 	int		playerLength;
@@ -136,7 +139,9 @@ char	*SV_StatusString (void)
 		cl = &svs.clients[i];
 		if (cl->state == cs_connected || cl->state == cs_spawned )
 		{
-			name = cl->name; //handle color chars
+			name = cl->name; 
+#ifdef NOTUSED
+			//handle color chars
 			nametxt[0] = 0;
 			k = 0;
 			while(j = *name) {
@@ -152,6 +157,11 @@ char	*SV_StatusString (void)
 					break;
 			}
 			nametxt[k]=0;
+#else		
+			//allow color chars to be sent
+			strcpy(nametxt, name);
+			nametxt[31] = '\0'; //failsafe
+#endif
 			//s = NET_AdrToString ( cl->netchan.remote_address); //fuck you Luigi
 			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"127.0.0.1\"\n",
 				cl->edict->client->ps.stats[STAT_FRAGS], cl->ping, nametxt);
@@ -168,7 +178,9 @@ char	*SV_StatusString (void)
 	if(cl->edict->client->ps.botnum) {
 		for(i = 0; i < cl->edict->client->ps.botnum; i++) {
 
-			name = cl->edict->client->ps.bots[i].name; //handle color chars
+			name = cl->edict->client->ps.bots[i].name; 
+#ifdef NOTUSED
+			//handle color chars
 			nametxt[0] = 0;
 			k = 0;
 			while(j = *name) {
@@ -184,6 +196,11 @@ char	*SV_StatusString (void)
 					break;
 			}
 			nametxt[k]=0;
+#else
+			//allow color chars to be sent
+			strcpy(nametxt, name);
+			nametxt[31] = '\0'; //failsafe
+#endif
 
 			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"127.0.0.1\"\n",
 				cl->edict->client->ps.bots[i].score, 0, nametxt);
