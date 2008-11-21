@@ -30,8 +30,10 @@ static void	 Menulist_DoEnter( menulist_s *l );
 static void	 MenuList_Draw( menulist_s *l );
 static void	 Separator_Draw( menuseparator_s *s );
 static void	 Separator2_Draw( menuseparator_s *s );
+static void  ColorTxt_Draw( menutxt_s *s );
 static void	 Slider_DoSlide( menuslider_s *s, int dir );
 static void	 Slider_Draw( menuslider_s *s );
+static void  VertSlider_Draw( menuslider_s *s );
 static void	 SpinControl_DoEnter( menulist_s *s );
 static void	 SpinControl_Draw( menulist_s *s );
 static void	 SpinControl_DoSlide( menulist_s *s, int dir );
@@ -299,7 +301,7 @@ void Menu_AdjustCursor( menuframework_s *m, int dir )
 	{
 		if ( ( citem = Menu_ItemAtCursor( m ) ) != 0 )
 		{
-			if ( citem->type != MTYPE_SEPARATOR )
+			if ( citem->type != MTYPE_SEPARATOR && citem->type != MTYPE_COLORTXT )
 				return;
 		}
 	}
@@ -314,7 +316,7 @@ void Menu_AdjustCursor( menuframework_s *m, int dir )
 		{
 			citem = Menu_ItemAtCursor( m );
 			if ( citem )
-				if ( citem->type != MTYPE_SEPARATOR )
+				if ( citem->type != MTYPE_SEPARATOR && citem->type != MTYPE_COLORTXT )
 					break;
 			m->cursor += dir;
 			if ( m->cursor >= m->nitems )
@@ -327,7 +329,7 @@ void Menu_AdjustCursor( menuframework_s *m, int dir )
 		{
 			citem = Menu_ItemAtCursor( m );
 			if ( citem )
-				if ( citem->type != MTYPE_SEPARATOR )
+				if ( citem->type != MTYPE_SEPARATOR && citem->type != MTYPE_COLORTXT)
 					break;
 			m->cursor += dir;
 			if ( m->cursor < 0 )
@@ -350,6 +352,7 @@ void Menu_Draw( menuframework_s *menu )
 {
 	int i;
 	menucommon_s *item;
+	menuslider_s *slider;
 	int charscale;
 
 	charscale = (float)(viddef.height)*8/600;
@@ -384,6 +387,12 @@ void Menu_Draw( menuframework_s *menu )
 		case MTYPE_SEPARATOR2:
 			Separator2_Draw( ( menuseparator_s * ) menu->items[i] );
 			break;
+		case MTYPE_VERTSLIDER:
+			VertSlider_Draw( ( menuslider_s * ) menu->items[i] );
+			break;
+		case MTYPE_COLORTXT: 
+			ColorTxt_Draw ( ( menutxt_s * ) menu->items[i] );
+			break;
 		}
 	}
 
@@ -406,7 +415,7 @@ void Menu_Draw( menuframework_s *menu )
 
 			item = ((menucommon_s * )menu->items[i]);
 
-			if (!item || item->type == MTYPE_SEPARATOR)
+			if (!item || item->type == MTYPE_SEPARATOR || item->type == MTYPE_COLORTXT)
 				continue;
 
 			max[0] = min[0] = menu->x + (item->x + RCOLUMN_OFFSET); //+ 2 chars for space + cursor
@@ -437,6 +446,16 @@ void Menu_Draw( menuframework_s *menu )
 						min[0] -= (16);
 						max[0] += ((SLIDER_RANGE + 4)*MENU_FONT_SIZE);
 						type = MENUITEM_SLIDER;
+					}
+					break;
+				case MTYPE_VERTSLIDER:
+					{
+						slider = ((menuslider_s * )menu->items[i]);
+						min[0] -= (charscale);
+						max[0] += (charscale);
+						min[1] -= (charscale);
+						max[1] += ((slider->size)*MENU_FONT_SIZE - charscale);
+						type = MENUITEM_VERTSLIDER;
 					}
 					break;
 				case MTYPE_LIST:
@@ -642,6 +661,54 @@ void Menu_DrawColorString ( int x, int y, const char *str )
 		x += charscale;
 	}
 }
+void Menu_DrawColorStringL2R ( int x, int y, const char *str )
+{
+	int		num, i;
+	vec4_t	scolor;
+	int	charscale;
+
+	charscale = (float)(viddef.height)*8/600;
+	if(charscale < 8)
+		charscale = 8;
+
+	scolor[0] = 0; 
+	scolor[1] = 1;
+	scolor[2] = 0;
+	scolor[3] = 1;
+
+	//need to know just how many color chars there are before hand, so that it will draw in 
+	//correct place
+	for ( i = 0; i < strlen( str ); i++ )
+	{
+		if(str[i] == '^' && i < strlen( str )-1) {
+			if(str[i+1] != '^')
+				x += 2*charscale;
+		}
+	}
+
+	while (*str) {
+		if ( Q_IsColorString( str ) ) {
+			VectorCopy ( Color_Table[ColorIndex(str[1])], scolor );
+			str += 2;
+			color_offset +=2;
+			continue;
+		}
+		
+		Draw_ScaledColorChar (x, y, *str, scolor, charscale); //this is only ever used for names.
+		
+		num = *str++;
+		num &= 255;
+			
+		if ( (num&127) == 32 ) { //spaces reset colors
+			scolor[0] = 0;
+			scolor[1] = 1;
+			scolor[2] = 0;
+			scolor[3] = 1;
+		}
+
+		x += charscale;
+	}
+}
 void Menu_DrawStringDark( int x, int y, const char *string )
 {
 	unsigned i;
@@ -752,6 +819,9 @@ void Menu_SlideItem( menuframework_s *s, int dir )
 		case MTYPE_SLIDER:
 			Slider_DoSlide( ( menuslider_s * ) item, dir );
 			break;
+		case MTYPE_VERTSLIDER:
+			Slider_DoSlide( ( menuslider_s * ) item, dir );
+			break;
 		case MTYPE_SPINCONTROL:
 			SpinControl_DoSlide( ( menulist_s * ) item, dir );
 			break;
@@ -826,6 +896,11 @@ void Separator2_Draw( menuseparator_s *s )
 	if ( s->generic.name )
 		Menu_DrawStringR2L( s->generic.x + s->generic.parent->x, s->generic.y + s->generic.parent->y, s->generic.name );
 }	
+void ColorTxt_Draw( menutxt_s *s )
+{
+	if ( s->generic.name )
+		Menu_DrawColorStringL2R( s->generic.x + s->generic.parent->x, s->generic.y + s->generic.parent->y, s->generic.name );
+}
 void Slider_DoSlide( menuslider_s *s, int dir )
 {
 	s->curvalue += dir;
@@ -844,6 +919,11 @@ void Slider_DoSlide( menuslider_s *s, int dir )
 void Slider_Draw( menuslider_s *s )
 {
 	int	i;
+	int charscale;
+
+	charscale = (float)(viddef.height)*8/600;
+	if(charscale < 8)
+		charscale = 8;	
 
 	Menu_DrawStringR2LDark( s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
 		                s->generic.y + s->generic.parent->y, 
@@ -855,11 +935,54 @@ void Slider_Draw( menuslider_s *s )
 		s->range = 0;
 	if ( s->range > 1)
 		s->range = 1;
-	Draw_Char( s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET, s->generic.y + s->generic.parent->y, 128);
+	Draw_ScaledChar( s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET, 
+		s->generic.y + s->generic.parent->y, 128, charscale);
 	for ( i = 0; i < SLIDER_RANGE; i++ )
-		Draw_Char( RCOLUMN_OFFSET + s->generic.x + i*8 + s->generic.parent->x + 8, s->generic.y + s->generic.parent->y, 129);
-	Draw_Char( RCOLUMN_OFFSET + s->generic.x + i*8 + s->generic.parent->x + 8, s->generic.y + s->generic.parent->y, 130);
-	Draw_Char( ( int ) ( 8 + RCOLUMN_OFFSET + s->generic.parent->x + s->generic.x + (SLIDER_RANGE-1)*8 * s->range ), s->generic.y + s->generic.parent->y, 131);
+		Draw_ScaledChar( RCOLUMN_OFFSET + s->generic.x + i*charscale + s->generic.parent->x + charscale, 
+		s->generic.y + s->generic.parent->y, 129, charscale);
+	Draw_ScaledChar( RCOLUMN_OFFSET + s->generic.x + i*charscale + s->generic.parent->x + charscale, 
+		s->generic.y + s->generic.parent->y, 130, charscale);
+	Draw_ScaledChar( ( int ) ( charscale + RCOLUMN_OFFSET + s->generic.parent->x + s->generic.x + (SLIDER_RANGE-1)*charscale * s->range ), 
+		s->generic.y + s->generic.parent->y, 139, charscale);
+}
+
+void VertSlider_Draw( menuslider_s *s )
+{
+	int	i;
+	int charscale;
+
+	charscale = (float)(viddef.height)*8/600;
+	if(charscale < 8)
+		charscale = 8;
+
+	s->range = ( s->curvalue - s->minvalue ) / ( float ) ( s->maxvalue - s->minvalue );
+
+	if ( s->range < 0)
+		s->range = 0;
+	if ( s->range > 1)
+		s->range = 1;
+	//top
+	Draw_ScaledChar( s->generic.x + s->generic.parent->x + charscale, 
+		s->generic.y + s->generic.parent->y - charscale, 18, charscale);
+	Draw_ScaledChar( s->generic.x + s->generic.parent->x + 2*charscale, 
+		s->generic.y + s->generic.parent->y - charscale, 20, charscale);
+
+	for ( i = 0; i <= s->size; i++ ) {
+		Draw_ScaledChar( s->generic.x + s->generic.parent->x + charscale, 
+			s->generic.y + i*charscale + s->generic.parent->y, 21, charscale);
+		Draw_ScaledChar( s->generic.x + s->generic.parent->x + 2*charscale, 
+			s->generic.y + i*charscale + s->generic.parent->y, 23, charscale);	
+	}
+	//bottom
+	Draw_ScaledChar( s->generic.parent->x + s->generic.x + charscale, 
+		(s->size+1)*charscale + s->generic.y + s->generic.parent->y, 24, charscale);
+	Draw_ScaledChar( s->generic.parent->x + s->generic.x + 2*charscale, 
+		(s->size+1)*charscale + s->generic.y + s->generic.parent->y, 26, charscale);
+
+	//cursor
+	Draw_ScaledChar( (int)( s->generic.parent->x + s->generic.x + 1.5*charscale), 
+		( int ) (s->generic.y + s->generic.parent->y + (s->size)*charscale * s->range), 11, charscale);
+
 }
 
 void SpinControl_DoEnter( menulist_s *s )
