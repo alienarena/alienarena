@@ -71,7 +71,16 @@ void Action_Draw( menuaction_s *a )
 	if ( a->generic.ownerdraw )
 		a->generic.ownerdraw( a );
 }
-
+void ColorAction_Draw( menuaction_s *a )
+{
+	if ( a->generic.flags & QMF_GRAYED )
+		Menu_DrawStringDark( a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET, a->generic.y + a->generic.parent->y, a->generic.name );
+	else
+		Menu_DrawColorString( a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET, a->generic.y + a->generic.parent->y, a->generic.name );
+	
+	if ( a->generic.ownerdraw )
+		a->generic.ownerdraw( a );
+}
 qboolean Field_DoEnter( menufield_s *f )
 {
 	if ( f->generic.callback )
@@ -393,6 +402,9 @@ void Menu_Draw( menuframework_s *menu )
 		case MTYPE_COLORTXT: 
 			ColorTxt_Draw ( ( menutxt_s * ) menu->items[i] );
 			break;
+		case MTYPE_COLORACTION:
+			ColorAction_Draw( ( menuaction_s * ) menu->items[i] );
+			break;
 		}
 	}
 
@@ -425,10 +437,11 @@ void Menu_Draw( menuframework_s *menu )
 			switch ( item->type )
 			{
 				case MTYPE_ACTION:
+				case MTYPE_COLORACTION:
 					{
 						len = strlen(item->name);
 						
-						if (item->flags & QMF_LEFT_JUSTIFY)
+						if (item->flags & QMF_LEFT_JUSTIFY || item->type == MTYPE_COLORACTION)
 						{
 							min[0] += (LCOLUMN_OFFSET*2);
 							max[0] = min[0] + (len*charscale);
@@ -531,11 +544,13 @@ void Menu_Draw( menuframework_s *menu )
 	{
 		menu->cursordraw( menu );
 	}
-	else if ( item && item->type == MTYPE_ACTION ) //change to a "highlite"
+	else if ( item && (item->type == MTYPE_ACTION || item->type == MTYPE_COLORACTION) ) //change to a "highlite"
 	{
-		if ( item->flags & QMF_LEFT_JUSTIFY )
+		if ( item->flags & QMF_LEFT_JUSTIFY || item->type == MTYPE_COLORACTION)
 		{
-			if(item->name)
+			if(item->name && item->type == MTYPE_COLORACTION)
+				Menu_DrawFilteredString(menu->x + item->x - 24, menu->y + item->y, item->name);
+			else if(item->name)
 				Menu_DrawString(menu->x + item->x - 24, menu->y + item->y, item->name);
 		}
 		else
@@ -709,6 +724,40 @@ void Menu_DrawColorStringL2R ( int x, int y, const char *str )
 		x += charscale;
 	}
 }
+
+void Menu_DrawFilteredString ( int x, int y, const char *str )
+{
+	int		num;
+	vec4_t	scolor;
+	int	charscale;
+
+	charscale = (float)(viddef.height)*8/600;
+	if(charscale < 8)
+		charscale = 8;
+
+	while (*str) {
+		if ( Q_IsColorString( str ) ) {
+			str += 2;
+			color_offset +=2;
+			continue;
+		}
+		
+		Draw_ScaledChar (x, y, *str, charscale);
+		
+		num = *str++;
+		num &= 255;
+			
+		if ( (num&127) == 32 ) { //spaces reset colors
+			scolor[0] = 0;
+			scolor[1] = 1;
+			scolor[2] = 0;
+			scolor[3] = 1;
+		}
+
+		x += charscale;
+	}
+}
+
 void Menu_DrawStringDark( int x, int y, const char *string )
 {
 	unsigned i;
@@ -773,6 +822,7 @@ qboolean Menu_SelectItem( menuframework_s *s )
 		case MTYPE_FIELD:
 			return Field_DoEnter( ( menufield_s * ) item ) ;
 		case MTYPE_ACTION:
+		case MTYPE_COLORACTION:
 			Action_DoEnter( ( menuaction_s * ) item );
 			return true;
 		case MTYPE_LIST:
@@ -794,6 +844,7 @@ qboolean Menu_MouseSelectItem( menucommon_s *item )
 		case MTYPE_FIELD:
 			return Field_DoEnter( ( menufield_s * ) item ) ;
 		case MTYPE_ACTION:
+		case MTYPE_COLORACTION:
 			Action_DoEnter( ( menuaction_s * ) item );
 			return true;
 		case MTYPE_LIST:

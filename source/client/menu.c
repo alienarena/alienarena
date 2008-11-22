@@ -2810,7 +2810,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	int players = 0;
 	int result;
 	char playername[32];
-	int score, ping, i;
+	int score, ping, i, x;
 
 	//if by some chance this gets called without the menu being up, return
 	if(cls.key_dest != key_menu)
@@ -2898,11 +2898,16 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 
 	//build the string for the server (hostname - address - mapname - players/maxClients)
 	//pad the strings - gotta do this for both maps and hostname
-	for(i=0; i<20; i++) {
+	x = 0;
+	for(i=0; i<32; i++) {
 		if(!mservers[m_num_servers].szHostName[i])
 			mservers[m_num_servers].szHostName[i] = 32;
+		else if(mservers[m_num_servers].szHostName[i] == '^' && i < strlen( mservers[m_num_servers].szHostName )-1) {
+			if(mservers[m_num_servers].szHostName[i+1] != '^')
+				x += 2;
+		}
 	}
-	mservers[m_num_servers].szHostName[20] = 0;
+	mservers[m_num_servers].szHostName[20+x] = 0;
 	for(i=0; i<12; i++) {
 		if(!mservers[m_num_servers].szMapName[i])
 			mservers[m_num_servers].szMapName[i] = 32;
@@ -3190,9 +3195,9 @@ void JoinServer_MenuDraw(void)
 	offset = viddef.height/2 - 326*scale;
 	for ( i = 0; i < 16; i++ )
 	{
-		s_joinserver_server_actions[i].generic.type	= MTYPE_ACTION;
+		s_joinserver_server_actions[i].generic.type	= MTYPE_COLORACTION;
 		s_joinserver_server_actions[i].generic.name	= mservers[i+svridx].serverInfo;
-		s_joinserver_server_actions[i].generic.x		= 372*scale;
+		s_joinserver_server_actions[i].generic.x		= scale;
 		s_joinserver_server_actions[i].generic.y		= 90*scale + i*10*scale+offset;
 		s_joinserver_server_actions[i].generic.cursor_offset = -16*scale;
 		s_joinserver_server_actions[i].generic.callback = JoinServerFunc;
