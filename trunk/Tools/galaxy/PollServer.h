@@ -1,8 +1,8 @@
 //typedefs that will be used throughout 
 
 typedef struct _PLAYERINFO {
-	char playername[16];
-	char orgname[16];
+	char playername[32];
+	char orgname[32];
 	int ping;
 	int score;
 } PLAYERINFO;

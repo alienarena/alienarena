@@ -11,7 +11,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-extern char newBuddyName[16];
+extern char newBuddyName[32];
 /////////////////////////////////////////////////////////////////////////////
 // BuddyName dialog
 

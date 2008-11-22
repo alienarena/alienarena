@@ -153,6 +153,7 @@ void PingServers (SERVERINFO *server, CProgressCtrl *m_refreshprogress)
 	char *p, *rLine;
 	char lasttoken[256];
 	char recvBuff[4096];
+	char tmptxt[256];
 	fd_set readfds;
 	fd_set masterfds;
 	int result;
@@ -165,7 +166,7 @@ void PingServers (SERVERINFO *server, CProgressCtrl *m_refreshprogress)
 	char *token;
 	int players = 0;
 	DWORD now;
-	unsigned int msecs, i, serverindex;
+	unsigned int msecs, i, j, k, serverindex;
 	unsigned int max_fd = 0;
 	unsigned int socketcount = 0;
 	unsigned int numResponses = 1; /* Used to update progress bar */
@@ -280,6 +281,19 @@ void PingServers (SERVERINFO *server, CProgressCtrl *m_refreshprogress)
 
 					free (rLine);
 
+					//clean up server name of any color escape chars
+					k = 0;
+					for(j=0; j<256; j++) {
+						if(server[i].szHostName[j] == '^' && j < strlen( server[j].szHostName ) - 1) {
+							if(server[i].szHostName[j+1] != '^')
+							j++;
+							continue;
+						}
+						tmptxt[k] = server[i].szHostName[j];
+						k++;
+					}
+					strcpy(server[i].szHostName, tmptxt);
+
 					//playerinfo
 					strcpy (seps, " ");
 					players = 0;
@@ -294,8 +308,21 @@ void PingServers (SERVERINFO *server, CProgressCtrl *m_refreshprogress)
 						token = strtok( NULL, "\"");
 						//token++;
 
-						if (token)
+						if (token) {
 							strncpy (server[i].players[players].playername, token, sizeof(server[i].players[players].playername)-1);
+							//clean up name of any color escape chars
+							k = 0;
+							for(j=0; j<32; j++) {
+								if(server[i].players[players].playername[j] == '^' && j < strlen( server[i].players[players].playername ) - 1) {
+									if(server[i].players[players].playername[j+1] != '^')
+									j++;
+									continue;
+								}
+								tmptxt[k] = server[i].players[players].playername[j];
+								k++;
+							}
+							strcpy(server[i].players[players].playername, tmptxt);
+						}
 						else
 							server[i].players[players].playername[0] = '\0';
 

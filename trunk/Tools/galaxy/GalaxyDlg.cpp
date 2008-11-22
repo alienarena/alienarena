@@ -61,8 +61,8 @@ char servidor[100];
 cUser user;
 bool joinflg;
 
-char currBuddyName[16];
-char newBuddyName[16];
+char currBuddyName[32];
+char newBuddyName[32];
 PLAYERINFO players[64];
 
 cSocket sockete;
@@ -388,11 +388,11 @@ BOOL CGalaxyDlg::OnInitDialog()
 
 	//read in user data from .ini - if not found, ie, first time running, we
 	//want to bring up a dialog to force them to choose an identity.
-	char defName[16];
+	char defName[32];
 
 	sprintf(defName, "Player");
 
-	GetPrivateProfileString("Galaxy", "name", defName, user.nick, 16, "galaxy.ini");
+	GetPrivateProfileString("Galaxy", "name", defName, user.nick, 32, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "email", "email@email.com", user.email, 100, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "exe", "C:/Alien Arena 2008/", CRXPath, MAX_PATH, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "chatstart", "true", user.joinatstart, 12, "galaxy.ini");
@@ -726,7 +726,7 @@ void CGalaxyDlg::Do_Refresh() //refresh server list
 void CGalaxyDlg::Check_Buddies()
 {
 	ifstream buddydb;
-	char buddy[16];
+	char buddy[32];
 	int i, j, x;
 	bool online;
 	LVITEM lvi;
@@ -1499,7 +1499,7 @@ void CGalaxyDlg::OnDelbuddy()
 	ifstream buddylist;
 	ofstream newlist;
 	struct _buddies {
-		char name[16];
+		char name[32];
 		bool remove;
 	} buddies[64];
 	int i, j;
