@@ -464,8 +464,8 @@ void Menu_Draw( menuframework_s *menu )
 				case MTYPE_VERTSLIDER:
 					{
 						slider = ((menuslider_s * )menu->items[i]);
-						min[0] -= (charscale);
-						max[0] += (charscale);
+						min[0] -= (2*charscale);
+						max[0] += (2*charscale);
 						min[1] -= (charscale);
 						max[1] += ((slider->size)*MENU_FONT_SIZE - charscale);
 						type = MENUITEM_VERTSLIDER;
