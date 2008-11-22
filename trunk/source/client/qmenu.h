@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MTYPE_SEPARATOR2	6
 #define MTYPE_VERTSLIDER	7
 #define MTYPE_COLORTXT		8
+#define MTYPE_COLORACTION   9
 
 #define	K_TAB			9
 #define	K_ENTER			13
@@ -163,5 +164,6 @@ void	 Menu_DrawColorString( int, int, const char * );
 void	 Menu_DrawStringDark( int, int, const char * );
 void	 Menu_DrawStringR2L( int, int, const char * );
 void	 Menu_DrawStringR2LDark( int, int, const char * );
+void	 Menu_DrawFilteredString( int, int, const char * );
 
 #endif
