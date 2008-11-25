@@ -230,6 +230,36 @@ void CL_RunDLights (void)
 	}
 }
 
+void RotateForNormal(vec3_t normal, vec3_t result){
+	float forward, pitch, yaw;
+	
+	forward = sqrt(normal[0] * normal[0] + normal[1] * normal[1]);
+	pitch = (int)(atan2(normal[2], forward) * 180 / M_PI);
+	yaw = (int)(atan2(normal[1], normal[0]) * 180 / M_PI);
+	
+	if(pitch < 0)
+		pitch += 360;
+	
+	result[PITCH] = -pitch;
+	result[YAW] =  yaw;
+}
+
+void vectoanglerolled (vec3_t value1, float angleyaw, vec3_t angles)
+{
+	float	forward, yaw, pitch;
+
+	yaw = (int) (atan2(value1[1], value1[0]) * 180 / M_PI);
+	forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
+	pitch = (int) (atan2(value1[2], forward) * 180 / M_PI);
+
+	if (pitch < 0)
+		pitch += 360;
+
+	angles[PITCH] = -pitch;
+	angles[YAW] =  yaw;
+	angles[ROLL] = - angleyaw;
+}
+
 /*
 ==============
 CL_ParseMuzzleFlash
@@ -610,10 +640,10 @@ CL_BulletSparks
 */
 void CL_BulletSparks (vec3_t org, vec3_t dir)
 {
-	int			i, j;
+	int			i, j, k;
+	float		inc;
+	vec3_t		angle;
 	cparticle_t	*p;
-
-	//fire off one spark per hit
 
 	for( i=0; i<3; i++)
 		dir[i] *= frand()*2;
@@ -632,31 +662,47 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 
 	p->alphavel = -1.0 / (1 + frand()*0.3);
 	
-	//shoot off a spark
-	for (i=0 ; i<12 ; i++)
-	{
-		if (!(p = new_particle()))
-			return;
+	//shoot off sparks
 
-		p->color = 0xe0 + (rand()&2);
-		p->type = PARTICLE_STANDARD;
-		p->texnum = r_particletexture->texnum;
-		p->blendsrc = GL_SRC_ALPHA;
-		p->blenddst = GL_ONE;
-		p->scale = 0.4;
-		p->scalevel = 0;
-		
-		for (j=0 ; j<3 ; j++)
+	for( k=0; k<2; k++) {
+
+		vectoanglerolled(dir, rand()%360, angle);
+	
+		RotateForNormal(angle, angle);
+
+		angle[0] *= frand();
+		angle[1] *= frand();
+		angle[2] *= frand();
+	
+		VectorNormalize(angle);
+
+		i = 0;
+		for (inc=1.0 ; inc<2.0 ; inc+=0.1, i++)
 		{
-			p->org[j] = org[j] + i*.5*dir[j];
-			p->vel[j] = 20*dir[j];
+			if (!(p = new_particle()))
+				return;
+
+			p->color = 0xe0 + (rand()&2);
+			p->type = PARTICLE_STANDARD;
+			p->texnum = r_particletexture->texnum;
+			p->blendsrc = GL_SRC_ALPHA;
+			p->blenddst = GL_ONE;
+			p->scale = 1.0/inc;
+			p->scalevel = 0;
+			
+			for (j=0 ; j<3 ; j++)
+			{
+				p->org[j] = org[j] + i*(1.0)*angle[j] - 10*angle[j];
+				p->vel[j] = -60*angle[j];
+			}
+
+			p->accel[0] = 0;
+			p->accel[1] = 0;
+			p->accel[2] = -(PARTICLE_GRAVITY)/(.5*inc);
+			p->alpha = .5;
+
+			p->alphavel = -1.0 / (1.5 + frand()*0.3);
 		}
-
-		p->accel[0] = p->accel[1] = 10;
-		p->accel[2] = 0;
-		p->alpha = .5;
-
-		p->alphavel = -1.0 / (0.5 + frand()*0.3);
 	}
 }
 
@@ -665,39 +711,48 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 CL_SplashEffect
 ===============
 */
+
 void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j, k;
+	float		inc;
 	cparticle_t	*p;
+	vec3_t		angle;
 
+	//draw rings that expand outward
+	if(!(p = new_particle()))
+		return;
+	p->type = PARTICLE_RAISEDDECAL;
+	p->texnum = r_splashtexture->texnum;
+	p->blendsrc = GL_DST_COLOR;
+	p->blenddst = GL_SRC_COLOR;
+	p->scale = 1;
+	p->scalevel = 8;
+	p->color = 0 + (rand() & 1);
+
+	VectorScale(dir, -1, angle);
+	RotateForNormal(angle, p->angle);
+	p->angle[ROLL] = rand() % 360;
+	VectorAdd(org, dir, p->org);
+
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = org[j];
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = p->accel[2] = 0;
+	p->alpha = .1;
+
+	p->alphavel = -0.1 / (1 + frand()*0.3); 
 
 	for( k=0; k<count/4; k++) {
 
-		for( i=0; i<3; i++)
-			dir[i] *= frand()*2;
-
-		//draw rings that expand outward
-		if(!(p = new_particle()))
-			return;
-		p->type = PARTICLE_FLAT;
-		p->texnum = r_hittexture->texnum;
-		p->blendsrc = GL_SRC_ALPHA;
-		p->blenddst = GL_ONE;
-		p->scale = 2*i;
-		p->scalevel = 8;
-		p->color = color + (rand()&2);
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = org[j];
-			p->vel[j] = 0;
-		}
-		p->accel[0] = p->accel[1] = p->accel[2] = 0;
-		p->alpha = .3;
-
-		p->alphavel = -0.3 / (1 + frand()*0.3);
+		vectoanglerolled(dir, rand()%360, angle);
+		VectorNormalize(angle);
 		
 		//shoot off small plume of water
-		for (i=0 ; i<12 ; i++)
+		i = 0;
+		for (inc=1.0 ; inc<2.0 ; inc+=0.1, i++)
 		{
 			if (!(p = new_particle()))
 				return;
@@ -707,20 +762,21 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 			p->texnum = r_particletexture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
-			p->scale = 0.5;
+			p->scale = 1.5/inc;
 			p->scalevel = 0;
 			
 			for (j=0 ; j<3 ; j++)
 			{
-				p->org[j] = org[j] + i*.5*dir[j];
-				p->vel[j] = 20*dir[j];
+				p->org[j] = org[j] + i*(1.5)*angle[j] - 15*angle[j];
+				p->vel[j] = -60*angle[j];
 			}
 
-			p->accel[0] = p->accel[1] = 10;
-			p->accel[2] = 0;
+			p->accel[0] = 0;
+			p->accel[1] = 0;
+			p->accel[2] = -(PARTICLE_GRAVITY)/(.5*inc);
 			p->alpha = .5;
 
-			p->alphavel = -1.0 / (0.5 + frand()*0.3);
+			p->alphavel = -1.0 / (1.5 + frand()*0.3);
 		}
 	}
 }
@@ -1629,20 +1685,6 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 CL_BloodSplatter - simple blood effects
 ===============
 */
-
-void RotateForNormal(vec3_t normal, vec3_t result){
-	float forward, pitch, yaw;
-	
-	forward = sqrt(normal[0] * normal[0] + normal[1] * normal[1]);
-	pitch = (int)(atan2(normal[2], forward) * 180 / M_PI);
-	yaw = (int)(atan2(normal[1], normal[0]) * 180 / M_PI);
-	
-	if(pitch < 0)
-		pitch += 360;
-	
-	result[PITCH] = -pitch;
-	result[YAW] =  yaw;
-}
 
 void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color, int blend )
 {
