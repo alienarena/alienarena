@@ -641,7 +641,7 @@ CL_BulletSparks
 void CL_BulletSparks (vec3_t org, vec3_t dir)
 {
 	int			i, j, k;
-	float		inc;
+	float		inc, scale;
 	vec3_t		angle;
 	cparticle_t	*p;
 
@@ -676,6 +676,8 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 	
 		VectorNormalize(angle);
 
+		scale = frand();
+
 		i = 0;
 		for (inc=1.0 ; inc<2.0 ; inc+=0.1, i++)
 		{
@@ -687,12 +689,12 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 			p->texnum = r_particletexture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
-			p->scale = 1.0/inc;
+			p->scale = 1.25*scale/inc;
 			p->scalevel = 0;
 			
 			for (j=0 ; j<3 ; j++)
 			{
-				p->org[j] = org[j] + i*(1.0)*angle[j] - 10*angle[j];
+				p->org[j] = org[j] + i*(1.25*scale)*angle[j] - 10*angle[j];
 				p->vel[j] = -60*angle[j];
 			}
 
@@ -715,7 +717,7 @@ CL_SplashEffect
 void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j, k;
-	float		inc;
+	float		inc, scale;
 	cparticle_t	*p;
 	vec3_t		angle;
 
@@ -749,6 +751,7 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 
 		vectoanglerolled(dir, rand()%360, angle);
 		VectorNormalize(angle);
+		scale = frand();
 		
 		//shoot off small plume of water
 		i = 0;
@@ -762,12 +765,12 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 			p->texnum = r_particletexture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
-			p->scale = 1.5/inc;
+			p->scale = 1.5*scale/inc;
 			p->scalevel = 0;
 			
 			for (j=0 ; j<3 ; j++)
 			{
-				p->org[j] = org[j] + i*(1.5)*angle[j] - 15*angle[j];
+				p->org[j] = org[j] + i*(1.5*scale)*angle[j] - 15*angle[j];
 				p->vel[j] = -60*angle[j];
 			}
 
