@@ -1580,6 +1580,7 @@ void GL_FreeUnusedImages (void)
 	r_sayicontexture->registration_sequence = registration_sequence;
 	r_voltagetexture->registration_sequence = registration_sequence;
 	r_raintexture->registration_sequence = registration_sequence;
+	r_splashtexture->registration_sequence = registration_sequence;
 	r_flagtexture->registration_sequence = registration_sequence;
 	r_logotexture->registration_sequence = registration_sequence;
 	//minimap stuff - only if those textures are present, as this was a feature added later on

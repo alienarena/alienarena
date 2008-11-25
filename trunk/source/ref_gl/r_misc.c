@@ -64,6 +64,7 @@ image_t		*r_bullettexture;
 image_t		*r_bulletnormal;
 image_t		*r_voltagetexture;
 image_t		*r_raintexture;
+image_t		*r_splashtexture;
 image_t		*r_radarmap; // wall texture for radar texgen
 image_t		*r_around;
 image_t		*r_flare;
@@ -271,6 +272,7 @@ void R_InitParticleTexture (void)
 	r_bulletnormal = R_RegisterParticleNormal("bullethole2");
 	r_voltagetexture = R_RegisterParticlePic("voltage");
 	r_raintexture = R_RegisterParticlePic("beam");
+	r_splashtexture = R_RegisterParticlePic("ripples");
 	r_radarmap = GL_FindImage("gfx/radar/radarmap",it_pic);
 	r_around = GL_FindImage("gfx/radar/around",it_pic);
 
