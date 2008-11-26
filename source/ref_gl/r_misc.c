@@ -236,7 +236,6 @@ void R_InitParticleTexture (void)
 			data[y][x][3] = dottexture[x][y]; // c14 Just this line changes
 		}
 	}
-	r_particletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
 
 	r_smoketexture = R_RegisterParticlePic("smoke");//etc etc etc...
     r_particletexture = R_RegisterParticlePic("particle");
@@ -277,9 +276,9 @@ void R_InitParticleTexture (void)
 	r_around = GL_FindImage("gfx/radar/around",it_pic);
 
 	//do this for all so as to not have crashes
-	if (!r_particletexture) {                                 //c14 add this line
+	if (!r_particletexture) {                                
 		r_particletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }                                                         //c14 add this line
+    }                                                    
 
 	//
 	// also use this for bad textures, but without alpha

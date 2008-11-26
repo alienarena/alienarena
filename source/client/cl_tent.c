@@ -338,10 +338,10 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
 		if (type == TE_SCREEN_SPARKS) {
-			CL_LaserSparks (pos, dir, 0xd0, 20);
 			trace = CL_Trace ( pos, mins, maxs, pos, -1, MASK_SOLID, true, NULL); 
 			if(trace.contents)
-				CL_BeamgunMark(pos, dir, 0.8);
+				CL_BeamgunMark(pos, dir, 0.8, false);
+			CL_LaserSparks (pos, dir, 0xd0, 20);
 		}
 		else
 			CL_ParticleEffect (pos, dir, 0xb0, 40);
@@ -400,7 +400,7 @@ void CL_ParseTEnt (void)
 		CL_DisruptorBeam (pos, pos2);
 		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL); 
 		if(trace.contents)
-			CL_BeamgunMark(pos2, trace.plane.normal, 0.4);
+			CL_BeamgunMark(pos2, trace.plane.normal, 0.4, true);
 		S_StartSound (pos, 0, 0, cl_sfx_railg, 1, ATTN_NONE, 0);
 		break;
 

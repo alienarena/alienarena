@@ -1394,6 +1394,7 @@ static menulist_s		s_options_invertmouse_box;
 static menulist_s		s_options_font_box;
 static menulist_s		s_options_crosshair_box;
 static menulist_s		s_options_hud_box;
+static menulist_s		s_options_discolor_box;
 static menuslider_s		s_options_sfxvolume_slider;
 static menuslider_s		s_options_bgvolume_slider;
 static menulist_s		s_options_joystick_box;
@@ -1469,6 +1470,11 @@ static void AlwaysRunFunc( void *unused )
 static void FreeLookFunc( void *unused )
 {
 	Cvar_SetValue( "freelook", s_options_freelook_box.curvalue );
+}
+
+static void DisColorFunc( void *unused )
+{
+	Cvar_SetValue( "cl_disbeamclr", s_options_discolor_box.curvalue );
 }
 
 static void MouseSpeedFunc( void *unused )
@@ -1874,6 +1880,7 @@ static void ControlsSetMenuItemValues( void )
 	s_options_sfxvolume_slider.curvalue		= Cvar_VariableValue( "s_volume" ) * 10;
 	s_options_bgvolume_slider.curvalue		= Cvar_VariableValue( "background_music_vol" ) * 10;
 	s_options_bgmusic_box.curvalue			= Cvar_VariableValue("background_music");
+	s_options_discolor_box.curvalue			= Cvar_VariableValue("cl_disbeamclr");
 
 	//Read what was set for s_khz and set the curvalue accordingly
 	if (Cvar_VariableValue("s_khz") == 48)
@@ -2083,6 +2090,16 @@ void Options_MenuInit( void )
 		0
 	};
 
+	static const char *color_names[] = 
+	{
+		"green",
+		"blue",
+		"red",
+		"yellow",
+		"purple",
+		0
+	};
+
 	float scale;
 
 	scale = (float)(viddef.height)/600;
@@ -2258,29 +2275,37 @@ void Options_MenuInit( void )
 	s_options_hud_box.itemnames = hud_names;
 	s_options_hud_box.generic.statusbar	= "select your hud style";
 
+	s_options_discolor_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_discolor_box.generic.x = 0;
+	s_options_discolor_box.generic.y = 250*scale;
+	s_options_discolor_box.generic.name = "disruptor color";
+	s_options_discolor_box.generic.callback = DisColorFunc;
+	s_options_discolor_box.itemnames = color_names;
+	s_options_discolor_box.generic.statusbar = "select disruptor beam color";
+
 	s_options_minimap_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_minimap_box.generic.x		= 0;
-	s_options_minimap_box.generic.y		= 250*scale;
+	s_options_minimap_box.generic.y		= 260*scale;
 	s_options_minimap_box.generic.name  = "minimap";
 	s_options_minimap_box.generic.callback = MinimapFunc;
 	s_options_minimap_box.itemnames = minimap_names;
 
 	s_options_joystick_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_joystick_box.generic.x	= 0;
-	s_options_joystick_box.generic.y	= 260*scale;
+	s_options_joystick_box.generic.y	= 270*scale;
 	s_options_joystick_box.generic.name	= "use joystick";
 	s_options_joystick_box.generic.callback = JoystickFunc;
 	s_options_joystick_box.itemnames = yesno_names;
 
 	s_options_defaults_action.generic.type	= MTYPE_ACTION;
 	s_options_defaults_action.generic.x		= 0;
-	s_options_defaults_action.generic.y		= 280*scale;
+	s_options_defaults_action.generic.y		= 290*scale;
 	s_options_defaults_action.generic.name	= "reset defaults";
 	s_options_defaults_action.generic.callback = ControlsResetDefaultsFunc;
 
 	s_options_console_action.generic.type	= MTYPE_ACTION;
 	s_options_console_action.generic.x		= 0;
-	s_options_console_action.generic.y		= 290*scale;
+	s_options_console_action.generic.y		= 300*scale;
 	s_options_console_action.generic.name	= "go to console";
 	s_options_console_action.generic.callback = ConsoleFunc;
 
@@ -2307,6 +2332,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_font_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_crosshair_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_hud_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_discolor_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_minimap_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_joystick_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_defaults_action );
@@ -2327,6 +2353,7 @@ void Options_MenuDraw (void)
 		sprintf(path, "/pics/%s", crosshair->string);
 		M_CrosshairPic(path);
 	}
+	//draw disruptor color icon
 	Menu_AdjustCursor( &s_options_menu, 1 );
 	Menu_Draw( &s_options_menu );
 }
