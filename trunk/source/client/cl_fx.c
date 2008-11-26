@@ -442,6 +442,7 @@ void addParticleLight (cparticle_t *p, float light, float lightvel, float lcol0,
 	for (i=0; i<P_LIGHTS_MAX; i++)
 	{
 		cplight_t *plight = &p->lights[i];
+
 		if (!plight->isactive)
 		{
 			plight->isactive = true;
@@ -790,36 +791,79 @@ CL_LaserSparks
 */
 void CL_LaserSparks (vec3_t org, vec3_t dir, int color, int count)
 {
-	int		j, k;
+	int			i, j, k;
+	float		inc, scale;
+	vec3_t		angle;
 	cparticle_t	*p;
-	float d;
 
+	for( i=0; i<3; i++)
+		dir[i] *= frand()*2;
 
-	for( k=0; k<count; k++) {
+	//draw a fatter glow at the impact point
+	if(!(p = new_particle()))
+		return;
+	p->color = color + (rand()&2);
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = org[j];
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = 0;
+	p->accel[2] = -(PARTICLE_GRAVITY);
+	p->alpha = .5;
 
-		//draw a fatter particle at hit point
-		if(!(p = new_particle()))
-			return;
-		p->scale = 24;
-		p->scalevel = 0;
-		p->color = color + (rand()&2);
-		d = rand()&7;
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = org[j] + frand()*12 + d*dir[j] ;
-			p->vel[j] = 0;
-		}
-		p->accel[0] = p->accel[1] = p->accel[2] = 0;
-		p->alpha = .5;
+	p->alphavel = -1.0 / (1 + frand()*0.3);
 
-		p->alphavel = -1.0 / (2 + frand()*0.3);
-		if (p && k < 5)
-			addParticleLight (p,
+	addParticleLight (p,
 						p->scale*10, 10,
 					0, 1, 0);
-		
+	
+	//shoot off sparks
+
+	for( k=0; k<2; k++) {
+
+		vectoanglerolled(dir, rand()%360, angle);
+	
+		RotateForNormal(angle, angle);
+
+		angle[0] *= frand();
+		angle[1] *= frand();
+		angle[2] *= frand();
+	
+		VectorNormalize(angle);
+
+		scale = frand();
+
+		i = 0;
+		for (inc=1.0 ; inc<2.0 ; inc+=0.1, i++)
+		{
+			if (!(p = new_particle()))
+				return;
+
+			p->color = color + (rand()&2);
+			p->type = PARTICLE_STANDARD;
+			p->texnum = r_particletexture->texnum;
+			p->blendsrc = GL_SRC_ALPHA;
+			p->blenddst = GL_ONE;
+			p->scale = 1.25*scale/inc;
+			p->scalevel = 0;
+			
+			for (j=0 ; j<3 ; j++)
+			{
+				p->org[j] = org[j] + i*(1.25*scale)*angle[j] - 10*angle[j];
+				p->vel[j] = -60*angle[j];
+			}
+
+			p->accel[0] = 0;
+			p->accel[1] = 0;
+			p->accel[2] = -(PARTICLE_GRAVITY)/(.5*inc);
+			p->alpha = .5;
+
+			p->alphavel = -1.0 / (1.5 + frand()*0.3);
+		}
 	}
 }
+	
 /*
 ===============
 CL_LogoutEffect
@@ -963,7 +1007,7 @@ void CL_ExplosionParticles (vec3_t org)
 					p->texnum = r_explosion1texture->texnum;
 					break;
 			}
-			if (p && i < 3)
+			if (p && i < 4)
 				addParticleLight (p,
 						p->scale*50*i, 0,
 					.4, .4, 0.1);
@@ -1317,6 +1361,10 @@ void CL_BigTeleportParticles (vec3_t org)
 		p->alpha = 0.5;
 
 		p->alphavel = -0.9 / (0.5 + frand()*0.3);
+
+		addParticleLight (p,
+						p->scale*(2+(rand()&5)), 0,
+					0, .6, 0.4);
 	}
 }
 /*
@@ -1460,7 +1508,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 
 		if (p && i > 4)
 			addParticleLight (p,
-					p->scale*20, 50,
+					p->scale*25, 50,
 				0, .8, 1);
 	}
 }
@@ -2187,6 +2235,10 @@ void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur){
 			p->accel[j] = 0;
 			p->vel[j] = 0;
 	}
+
+	addParticleLight (p,
+				120, 5,
+				0, 1, 0.2);
 }
 
 void CL_BlasterMark(vec3_t org, vec3_t dir){
@@ -2474,9 +2526,7 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 			p->vel[j] = 0;
 			p->accel[j] = 0;
 		}
-
 	}
-
 }
 void CL_BlasterBeam (vec3_t start, vec3_t end) 
 {
@@ -2903,10 +2953,10 @@ void CL_BFGExplosionParticles (vec3_t org)
 		p->alpha = 0.4;
 
 		p->alphavel = -0.8 / (2.5 + frand()*0.3);
-		if (p && i >124)
+		if (p && i > 28)
 			addParticleLight (p,
-						p->scale*60, 10,
-					0, 1, 1);
+						p->scale*(15+(rand()&5)), 10,
+					0, 0.6, 0.5);
 	}
 
 	//place a big shock wave effect
@@ -3220,7 +3270,7 @@ void CL_AddParticles (void)
 			const cplight_t *plight = &p->lights[i];
 			if (plight->isactive && !p->fromsustainedeffect)
 			{
-				light = plight->light*alpha + plight->lightvel*time;
+				light = plight->light*alpha*2.0 + plight->lightvel*time;
 				V_AddLight (org, light, plight->lightcol[0], plight->lightcol[1], plight->lightcol[2]);
 			}
 		}
