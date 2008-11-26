@@ -257,7 +257,7 @@ void vectoanglerolled (vec3_t value1, float angleyaw, vec3_t angles)
 
 	angles[PITCH] = -pitch;
 	angles[YAW] =  yaw;
-	angles[ROLL] = - angleyaw;
+	angles[ROLL] = -angleyaw;
 }
 
 /*
@@ -516,6 +516,63 @@ static inline cparticle_t *new_particle (void)
 	return (active_particles = p);
 }
 
+float getColor(void)
+{
+	float color;
+
+	switch(cl_disbeamclr->integer) {
+	case 0:
+	default:
+		color = 0xd4; //bright green
+		break;
+	case 1:
+		color = 0x74; //blue 
+		break;
+	case 2:
+		color = 0x40; //red
+		break;
+	case 3:
+		color = 0xe0; //yellow
+		break;
+	case 4:
+		color = 0xff; //purple
+		break;
+	}
+	return color;
+}
+
+void getColorvec(vec3_t colorvec)
+{
+	switch(cl_disbeamclr->integer) {
+	case 0:
+	default:
+		colorvec[0] = 0; //bright green
+		colorvec[1] = 1;
+		colorvec[2] = 0.2;
+		break;
+	case 1:
+		colorvec[0] = 0; //blue 
+		colorvec[1] = 0.5;
+		colorvec[2] = 0.7;
+		break;
+	case 2:
+		colorvec[0] = 0.6; //red
+		colorvec[1] = 0;
+		colorvec[2] = 0;
+		break;
+	case 3:
+		colorvec[0] = 0.7; //yellow
+		colorvec[1] = 0.7;
+		colorvec[2] = 0;
+		break;
+	case 4:
+		colorvec[0] = 0.7; //purple
+		colorvec[1] = 0;
+		colorvec[2] = 0.7;
+		break;
+	}
+}
+
 /*
 ===============
 CL_ParticleEffect
@@ -642,12 +699,16 @@ CL_BulletSparks
 void CL_BulletSparks (vec3_t org, vec3_t dir)
 {
 	int			i, j, k;
-	float		inc, scale;
-	vec3_t		angle;
+	float		inc, scale, nudge;
 	cparticle_t	*p;
 
-	for( i=0; i<3; i++)
-		dir[i] *= frand()*2;
+	for( i=0; i<3; i++) {
+		nudge = frand();
+		if(nudge < 0.5)
+			dir[i] += frand();
+		else
+			dir[i] -= frand();
+	}
 
 	//draw a fatter glow at the impact point
 	if(!(p = new_particle()))
@@ -661,22 +722,14 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 	p->accel[0] = p->accel[1] = p->accel[2] = 0;
 	p->alpha = .5;
 
-	p->alphavel = -1.0 / (1 + frand()*0.3);
-	
+	p->alphavel = -1.0 / (3 + frand()*0.3);
+
 	//shoot off sparks
 
+	VectorNormalize(dir);
+
 	for( k=0; k<2; k++) {
-
-		vectoanglerolled(dir, rand()%360, angle);
 	
-		RotateForNormal(angle, angle);
-
-		angle[0] *= frand();
-		angle[1] *= frand();
-		angle[2] *= frand();
-	
-		VectorNormalize(angle);
-
 		scale = frand();
 
 		i = 0;
@@ -695,8 +748,8 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 			
 			for (j=0 ; j<3 ; j++)
 			{
-				p->org[j] = org[j] + i*(1.25*scale)*angle[j] - 10*angle[j];
-				p->vel[j] = -60*angle[j];
+				p->org[j] = org[j] + i*(-1.25*scale)*dir[j];
+				p->vel[j] = 60*dir[j];
 			}
 
 			p->accel[0] = 0;
@@ -718,7 +771,7 @@ CL_SplashEffect
 void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j, k;
-	float		inc, scale;
+	float		inc, scale, nudge;
 	cparticle_t	*p;
 	vec3_t		angle;
 
@@ -748,10 +801,43 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 
 	p->alphavel = -0.1 / (1 + frand()*0.3); 
 
+	//shoot off small vertical plume of water
+    for (i=0 ; i<12 ; i++)
+    {
+        if (!(p = new_particle()))
+            return;
+
+        p->color = color + (rand()&2);
+        p->type = PARTICLE_STANDARD;
+        p->texnum = r_particletexture->texnum;
+        p->blendsrc = GL_SRC_ALPHA;
+        p->blenddst = GL_ONE;
+        p->scale = 0.5;
+        p->scalevel = 0;
+
+        for (j=0 ; j<3 ; j++)
+        {
+            p->org[j] = org[j] + i*.5*dir[j];
+            p->vel[j] = 20*dir[j];
+        }
+
+		p->accel[0] = p->accel[1] = 10;
+        p->accel[2] = 0;
+        p->alpha = .5;
+		p->alphavel = -1.0 / (0.5 + frand()*0.3);
+    }
+
 	for( k=0; k<count/4; k++) {
 
-		vectoanglerolled(dir, rand()%360, angle);
-		VectorNormalize(angle);
+		for( i=0; i<3; i++) {
+			nudge = frand();
+			if(nudge < 0.5)
+				dir[i] += frand()/2;
+			else
+				dir[i] -= frand()/2;
+		}
+
+		VectorNormalize(dir);
 		scale = frand();
 		
 		//shoot off small plume of water
@@ -769,10 +855,10 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 			p->scale = 1.5*scale/inc;
 			p->scalevel = 0;
 			
-			for (j=0 ; j<3 ; j++)
+			for (j=0; j<3; j++)
 			{
-				p->org[j] = org[j] + i*(1.5*scale)*angle[j] - 15*angle[j];
-				p->vel[j] = -60*angle[j];
+				p->org[j] = org[j] + i*(-1.5*scale)*dir[j] + 10*dir[j];
+				p->vel[j] = 60*dir[j];
 			}
 
 			p->accel[0] = 0;
@@ -792,12 +878,16 @@ CL_LaserSparks
 void CL_LaserSparks (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j, k;
-	float		inc, scale;
-	vec3_t		angle;
+	float		inc, scale, nudge;
 	cparticle_t	*p;
 
-	for( i=0; i<3; i++)
-		dir[i] *= frand()*2;
+	for( i=0; i<3; i++) {
+		nudge = frand();
+		if(nudge < 0.5)
+			dir[i] += frand();
+		else
+			dir[i] -= frand();
+	}
 
 	//draw a fatter glow at the impact point
 	if(!(p = new_particle()))
@@ -821,16 +911,8 @@ void CL_LaserSparks (vec3_t org, vec3_t dir, int color, int count)
 	//shoot off sparks
 
 	for( k=0; k<2; k++) {
-
-		vectoanglerolled(dir, rand()%360, angle);
 	
-		RotateForNormal(angle, angle);
-
-		angle[0] *= frand();
-		angle[1] *= frand();
-		angle[2] *= frand();
-	
-		VectorNormalize(angle);
+		VectorNormalize(dir);
 
 		scale = frand();
 
@@ -845,13 +927,13 @@ void CL_LaserSparks (vec3_t org, vec3_t dir, int color, int count)
 			p->texnum = r_particletexture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
-			p->scale = 1.25*scale/inc;
+			p->scale = 1.5*scale/inc;
 			p->scalevel = 0;
 			
 			for (j=0 ; j<3 ; j++)
 			{
-				p->org[j] = org[j] + i*(1.25*scale)*angle[j] - 10*angle[j];
-				p->vel[j] = -60*angle[j];
+				p->org[j] = org[j] + i*(-1.5*scale)*dir[j];
+				p->vel[j] = 60*dir[j];
 			}
 
 			p->accel[0] = 0;
@@ -2159,16 +2241,23 @@ void CL_BulletMarks(vec3_t org, vec3_t dir){
 		p->vel[j] = 0;
 	}
 }
-void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur){
+void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur, qboolean isDis){
 	cparticle_t *p;
 	vec3_t		v;
 	int			j;
+	float		color;
+	vec3_t		colorvec;
+
+	if(isDis)
+		color = getColor();
+	else
+		color = 0xd4;
 	
 	if(!(p = new_particle()))
 		return;
 	
 	p->texnum = r_bullettexture->texnum;
-	p->color = 0xd4 + (rand() & 1);
+	p->color = color + (rand() & 1);
 	p->type = PARTICLE_DECAL;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
@@ -2191,7 +2280,7 @@ void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur){
 		return;
 	
 	p->texnum = r_bullettexture->texnum;
-	p->color = 0xd4 + (rand() & 1);
+	p->color = color + (rand() & 1);
 	p->type = PARTICLE_DECAL;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
@@ -2216,7 +2305,7 @@ void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur){
 		return;
 	
 	p->texnum = r_hittexture->texnum;
-	p->color = 0xd4 + (rand() & 1);
+	p->color = color + (rand() & 1);
 	p->type = PARTICLE_DECAL;
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
@@ -2236,9 +2325,17 @@ void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur){
 			p->vel[j] = 0;
 	}
 
+	if(isDis)
+		getColorvec(colorvec);
+	else {
+		colorvec[0] = 0; //bright green
+		colorvec[1] = 1;
+		colorvec[2] = 0.2;
+	}
+
 	addParticleLight (p,
-				120, 5,
-				0, 1, 0.2);
+			isDis ? 120:80, 5,
+			colorvec[0], colorvec[1], colorvec[2]);
 }
 
 void CL_BlasterMark(vec3_t org, vec3_t dir){
@@ -2372,10 +2469,12 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 {
 	vec3_t		move;
 	vec3_t		vec, point, last, vec2;
-	float		len;
+	float		len, color;
 	vec3_t		right, up;
 	cparticle_t	*p;
 	int			i,j;
+
+	color = getColor();
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
@@ -2404,7 +2503,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 			p->angle[j] = 0;
 		p->type = PARTICLE_STANDARD;
 		p->scalevel = 4;
-		p->color = 0xd4;
+		p->color = color;
 		for (j=0 ; j<3 ; j++)
 		{
 			p->org[j] = start[j];
@@ -2431,7 +2530,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 		p->type = PARTICLE_BEAM;
 		p->scalevel = 0;
 				
-		p->color = 0xd4;
+		p->color = color;
 	
 		for (j=0 ; j<3 ; j++)
 		{

@@ -263,6 +263,7 @@ extern	cvar_t	*cl_noskins;
 extern	cvar_t	*cl_autoskins;
 extern  cvar_t	*cl_healthaura;
 extern  cvar_t	*cl_noblood;
+extern  cvar_t	*cl_disbeamclr;
 
 extern	cvar_t	*cl_upspeed;
 extern	cvar_t	*cl_forwardspeed;
@@ -602,7 +603,7 @@ void CL_RocketTrail (vec3_t start, vec3_t end, centity_t *old);
 void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old);
 void CL_ShipExhaust (vec3_t start, vec3_t end, centity_t *old);
 void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old);
-void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur);
+void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur, qboolean isDis);
 void CL_BulletMarks(vec3_t org, vec3_t dir);
 void CL_VaporizerMarks(vec3_t org, vec3_t dir);
 void CL_BlasterMark(vec3_t org, vec3_t dir);
