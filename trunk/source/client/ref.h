@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	MAX_LIGHTSTYLES		256
 
 #define MAX_FLARES      512
+#define MAX_GRASSES		2048
 
 typedef struct
 {
@@ -52,6 +53,13 @@ typedef struct
 	int style2;
 } flare2_t;
 
+typedef struct
+{
+	vec3_t origin;
+	vec3_t color;
+	int size;
+	int texnum;
+} grass_t;
 
 #define POWERSUIT_SCALE		4.0F
 
@@ -184,6 +192,9 @@ typedef struct
 
 	int          num_flares;
     flare_t      *flares;
+
+	int			 num_grasses;
+	grass_t		 *grasses;
 
 } refdef_t;
 

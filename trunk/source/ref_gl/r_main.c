@@ -99,7 +99,7 @@ cplane_t	frustum[4];
 int		r_visframecount;	// bumped when going to a new PVS
 int		r_framecount;		// used for dlight push checking
 
-int		c_brush_polys, c_alias_polys, c_flares;
+int		c_brush_polys, c_alias_polys, c_flares, c_grasses;
 
 float		v_blend[4];			// final blending color
 
@@ -1231,7 +1231,8 @@ void R_RenderView (refdef_t *fd)
 	{
 		c_brush_polys = 0;
 		c_alias_polys = 0;
-		c_flares =0;
+		c_flares = 0;
+		c_grasses = 0;
 	}
 
 	R_PushDlights ();
@@ -1288,6 +1289,8 @@ void R_RenderView (refdef_t *fd)
 
 	if(r_lensflare->value)
 		R_RenderFlares ();
+
+	R_DrawVegetationSurface ();
 
 	R_DrawEntitiesOnList ();
 
