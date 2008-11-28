@@ -31,6 +31,9 @@ struct model_s	*gun_model;
 int r_numflares;
 flare_t r_flares[MAX_FLARES];
 
+int r_numgrasses;
+grass_t r_grasses[MAX_GRASSES];
+
 //=============
 extern cvar_t *cl_showPlayerNames;
 extern cvar_t *name;
@@ -864,6 +867,8 @@ void V_RenderView( float stereo_separation )
 		cl.refdef.lightstyles = r_lightstyles;
 		cl.refdef.num_flares = r_numflares;
         cl.refdef.flares = r_flares;
+		cl.refdef.num_grasses = r_numgrasses;
+		cl.refdef.grasses = r_grasses;
 
 		cl.refdef.rdflags = cl.frame.playerstate.rdflags;
 

@@ -863,6 +863,60 @@ void GL_AddFlareSurface (msurface_t *surf )
      free (buffer); 
 }
 
+//vegetation
+int r_numgrasses;
+grass_t r_grasses[MAX_GRASSES];
+
+static void R_ClearGrasses(void)
+{
+	memset(r_grasses, 0, sizeof(r_grasses));
+	r_numgrasses = 0;
+}
+
+void GL_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, int size)
+{
+    int i;
+    glpoly_t *poly;
+    grass_t  *grass; 
+	vec3_t origin = {0,0,0}, binormal, tangent, tmp;
+
+	if (r_numgrasses >= MAX_GRASSES)
+			return;
+ 	  
+	poly = surf->polys;
+         
+	VectorCopy(poly->verts[0], origin);
+   
+	AngleVectors(surf->plane->normal, NULL, tangent, binormal);
+	VectorNormalize(tangent);
+	VectorNormalize(binormal);
+
+	for(i=0; i < 2; i++) { 
+		
+		switch(i) {
+			case 0:				
+				VectorMA(origin, 25, tangent, origin);
+				break;
+			case 1:
+				VectorMA(origin, -12, tangent, origin);
+				break;
+		}				
+		if (surf->flags & SURF_PLANEBACK)
+			VectorNegate(surf->plane->normal, tmp);
+		 else
+			VectorCopy(surf->plane->normal, tmp);
+     
+		VectorMA(origin, 2, tmp, origin);
+		
+		grass = &r_grasses[r_numgrasses++];
+		VectorCopy(origin, grass->origin);
+		grass->texnum = texnum;
+		VectorCopy(color, grass->color);
+		grass->size = size;
+	}
+
+}
+
 void GL_BuildPolygonFromSurface(msurface_t *fa);
 void GL_CreateSurfaceLightmap (msurface_t *surf);
 void GL_EndBuildingLightmaps (void);
@@ -880,6 +934,9 @@ void Mod_LoadFaces (lump_t *l)
 	int			i, count, surfnum;
 	int			planenum, side;
 	int			ti;
+	rscript_t	*rs;
+	vec3_t		color;
+	int			size = 1;
 
 	in = (void *)(mod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
@@ -947,22 +1004,32 @@ void Mod_LoadFaces (lump_t *l)
 		if (! (out->texinfo->flags & SURF_WARP) ) 
 			GL_BuildPolygonFromSurface(out);
 		
-		if(r_lensflare->value) {
-			rscript_t *rs;
-			rs = (rscript_t *)out->texinfo->image->script;
-			if(rs)	{
+		rs = (rscript_t *)out->texinfo->image->script;
+	
+		if(rs)	{
 #ifdef __unix__
-				rs_stage_t	*stage;
-				stage = rs->stage;
+			rs_stage_t	*stage;
+			stage = rs->stage;
 #else
-				rs_stage_t	*stage = rs->stage;
+			rs_stage_t	*stage = rs->stage;
 #endif
-				do {
-					if (stage->lensflare) 
+			do {
+				if (stage->lensflare) {
+					if(r_lensflare->value) 	
 						GL_AddFlareSurface(out);
-				} while (stage = stage->next);
-			}
+				}
+				if (stage->grass && stage->texture) {
+					if(stage->colormap.enabled) {
+						color[0] = stage->colormap.red;
+						color[1] = stage->colormap.green;
+						color[2] = stage->colormap.blue;
+						size = stage->scale.scaleX;
+					}
+					GL_AddVegetationSurface(out, stage->texture->texnum, color, size);
+				}
+			} while (stage = stage->next);
 		}
+
 	
 	}
 	GL_EndBuildingLightmaps ();
@@ -1194,6 +1261,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 	if(r_lensflare->value)
 		R_ClearFlares();
+	R_ClearGrasses();
 	// rscript - MrG
 	RS_FreeUnmarked();
 	strcpy(tmp,loadmodel->name+5);

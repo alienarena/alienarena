@@ -108,6 +108,7 @@ typedef struct rs_stage_s
 	qboolean				lensflare;		// for adding lensflares
 	qboolean				normalmap;		// for normalmaps
 	qboolean				distort;		// for fragment shader
+	qboolean				grass;			// grass and vegetation
 
 	struct rs_stage_s		*next;			// next stage
 } rs_stage_t;
