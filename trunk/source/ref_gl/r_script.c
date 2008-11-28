@@ -1366,10 +1366,18 @@ void R_DrawVegetationSurface ( void )
 	float	*corner0 = corner[0];
 	qboolean visible;
 	trace_t r_trace;
+	int		image_size;
+	image_t *gl;
 
 	grass = r_grasses;
 
-   	scale = 10*grass->size; //make this scale controlled by the shader
+   	scale = 10*grass->size; 
+
+	gl = R_RegisterGfxPic (grass->name);
+	if (gl)
+		image_size = gl->height;
+	else
+		image_size = 64; //sane default
 	 
 	VectorCopy(r_newrefdef.viewangles, angle);
 	angle[0] = 0;  // keep vertical by removing pitch(grass and plants grow upwards)
@@ -1382,7 +1390,7 @@ void R_DrawVegetationSurface ( void )
 
     for (i=0; i<r_numgrasses; i++, grass++) {
 		VectorCopy(grass->origin, origin);
-		origin[2] += 4*(scale/10); //dynamically get image size and adjust? 4 pixels correlated to a 64x64 image
+		origin[2] += (image_size/16)*(scale/10); //dynamically get image size and adjust? 4 pixels correlated to a 64x64 image
 								   //so image size/16 would work.
 
 		r_trace = CM_BoxTrace(r_origin, origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);

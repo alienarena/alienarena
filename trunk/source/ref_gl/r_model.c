@@ -873,7 +873,7 @@ static void R_ClearGrasses(void)
 	r_numgrasses = 0;
 }
 
-void GL_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, int size)
+void GL_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, int size, char name[MAX_QPATH])
 {
     int i;
     glpoly_t *poly;
@@ -913,6 +913,7 @@ void GL_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, int si
 		grass->texnum = texnum;
 		VectorCopy(color, grass->color);
 		grass->size = size;
+		strcpy(grass->name, name);
 	}
 
 }
@@ -937,6 +938,7 @@ void Mod_LoadFaces (lump_t *l)
 	rscript_t	*rs;
 	vec3_t		color;
 	int			size = 1;
+	char		name[MAX_QPATH];
 
 	in = (void *)(mod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
@@ -1024,8 +1026,9 @@ void Mod_LoadFaces (lump_t *l)
 						color[1] = stage->colormap.green;
 						color[2] = stage->colormap.blue;
 						size = stage->scale.scaleX;
+						strcpy(name, stage->texture->bare_name);
 					}
-					GL_AddVegetationSurface(out, stage->texture->texnum, color, size);
+					GL_AddVegetationSurface(out, stage->texture->texnum, color, size, name);
 				}
 			} while (stage = stage->next);
 		}
