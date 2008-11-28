@@ -59,6 +59,7 @@ typedef struct
 	vec3_t color;
 	int size;
 	int texnum;
+	char name[MAX_QPATH];
 } grass_t;
 
 #define POWERSUIT_SCALE		4.0F
