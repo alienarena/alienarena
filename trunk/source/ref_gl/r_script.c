@@ -1400,7 +1400,7 @@ void R_DrawVegetationSurface ( void )
 			//render grass polygon
 			qglDepthMask( GL_FALSE );	 	
 			qglEnable( GL_BLEND);
-			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE );	
+			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );	
 
 			qglColor4f( grass->color[0],grass->color[1],grass->color[2], 1 );
 
