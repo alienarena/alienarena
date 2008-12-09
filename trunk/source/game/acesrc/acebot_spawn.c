@@ -209,9 +209,9 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 		if(!found && ((total_players <= spawnkicknum) || !spawnkicknum)) { 
 
 			if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) 
-				ACESP_SpawnBot(NULL, info, skin, NULL); //we may be changing the info further on
+				ACESP_SpawnBot(info, skin, NULL); //we may be changing the info further on
 			else 
-				ACESP_SpawnBot (NULL, NULL, NULL, userinfo);			
+				ACESP_SpawnBot (NULL, NULL, userinfo);			
 		}
 		else if(found && ((total_players > spawnkicknum) && spawnkicknum)) 
 			ACESP_KickBot(info);
@@ -684,7 +684,7 @@ edict_t *ACESP_FindFreeClient (void)
 ///////////////////////////////////////////////////////////////////////
 // Set the name of the bot and update the userinfo
 ///////////////////////////////////////////////////////////////////////
-void ACESP_SetName(edict_t *bot, char *name, char *skin, char *team)
+void ACESP_SetName(edict_t *bot, char *name, char *skin)
 {
 	float rnd;
 	char userinfo[MAX_INFO_STRING];
@@ -728,34 +728,17 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *team)
 		}
 		playermodel[j] = 0;
 		
-		if((!strcmp(playerskin, "red"))	|| (!strcmp(playerskin, "blue"))) //was valid teamskin
+		if(blue_team_cnt < red_team_cnt)
 		{
-			if(!strcmp(playerskin, "red"))
-			{
-				bot->dmteam = RED_TEAM;
-	//			red_team_cnt++;
-			}
-			else
-			{
-				bot->dmteam = BLUE_TEAM;
-	//			blue_team_cnt++;
-			}
-
+			strcpy(playerskin, "blue");
+			//blue_team_cnt++;
+			bot->dmteam = BLUE_TEAM;
 		}
-		else //assign to team with fewest players
+		else
 		{
-			if(blue_team_cnt < red_team_cnt)
-			{
-				strcpy(playerskin, "blue");
-	//			blue_team_cnt++;
-				bot->dmteam = BLUE_TEAM;
-			}
-			else
-			{
-				strcpy(playerskin, "red");
-	//			red_team_cnt++;
-				bot->dmteam = RED_TEAM;
-			}
+			strcpy(playerskin, "red");
+			//red_team_cnt++;
+			bot->dmteam = RED_TEAM;
 		}
 	
 		strcpy(skin, playermodel);
@@ -792,7 +775,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *team)
 ///////////////////////////////////////////////////////////////////////
 // Spawn the bot
 ///////////////////////////////////////////////////////////////////////
-void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
+void ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 {
 	edict_t *bot, *cl_ent;
 	char *info;
@@ -813,7 +796,7 @@ void ACESP_SpawnBot (char *team, char *name, char *skin, char *userinfo)
 
 	// To allow bots to respawn
 	if(userinfo == NULL)
-		ACESP_SetName(bot, name, skin, team);
+		ACESP_SetName(bot, name, skin);
 	else 
 	{
 		bot->dmteam = NO_TEAM; //default
@@ -876,6 +859,17 @@ void ACESP_RemoveBot(char *name)
 			{
 				bot->health = 0;
 				player_die (bot, bot, bot, 100000, vec3_origin);
+				if(ctf->value)
+					CTFDeadDropFlag(bot);
+
+				DeadDropDeathball(bot);	
+				if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
+				{
+					if(bot->dmteam == BLUE_TEAM)
+						blue_team_cnt-=1;
+					else
+						red_team_cnt-=1;
+				}
 				// don't even bother waiting for death frames
 				bot->deadflag = DEAD_DEAD;
 				bot->inuse = false;
