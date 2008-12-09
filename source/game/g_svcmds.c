@@ -311,7 +311,7 @@ void	ServerCommand (void)
 	else if (Q_stricmp (cmd, "addbot") == 0)
 	{ 
 		
-		ACESP_SpawnBot (NULL, gi.argv(2), gi.argv(3), NULL);
+		ACESP_SpawnBot (gi.argv(2), gi.argv(3), NULL);
 	}	
 
 	// removebot
