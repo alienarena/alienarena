@@ -875,7 +875,6 @@ static void R_ClearGrasses(void)
 
 void GL_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, int size, char name[MAX_QPATH])
 {
-    int i;
     glpoly_t *poly;
     grass_t  *grass; 
 	vec3_t origin = {0,0,0}, binormal, tangent, tmp;
@@ -891,31 +890,22 @@ void GL_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, int si
 	VectorNormalize(tangent);
 	VectorNormalize(binormal);
 
-	for(i=0; i < 2; i++) { 
-		
-		switch(i) {
-			case 0:				
-				VectorMA(origin, 25, tangent, origin);
-				break;
-			case 1:
-				VectorMA(origin, -12, tangent, origin);
-				break;
-		}				
-		if (surf->flags & SURF_PLANEBACK)
-			VectorNegate(surf->plane->normal, tmp);
-		 else
-			VectorCopy(surf->plane->normal, tmp);
-     
-		VectorMA(origin, 2, tmp, origin);
-		
-		grass = &r_grasses[r_numgrasses++];
-		VectorCopy(origin, grass->origin);
-		grass->texnum = texnum;
-		VectorCopy(color, grass->color);
-		grass->size = size;
-		strcpy(grass->name, name);
-	}
+	
+	VectorMA(origin, -32*frand(), tangent, origin);
 
+	if (surf->flags & SURF_PLANEBACK)
+		VectorNegate(surf->plane->normal, tmp);
+	else
+		VectorCopy(surf->plane->normal, tmp);
+     
+	VectorMA(origin, 2, tmp, origin);
+		
+	grass = &r_grasses[r_numgrasses++];
+	VectorCopy(origin, grass->origin);
+	grass->texnum = texnum;
+	VectorCopy(color, grass->color);
+	grass->size = size;
+	strcpy(grass->name, name);
 }
 
 void GL_BuildPolygonFromSurface(msurface_t *fa);
