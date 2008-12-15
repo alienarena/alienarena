@@ -61,6 +61,7 @@ cvar_t	*cl_timeout;
 cvar_t	*cl_predict;
 cvar_t	*cl_maxfps;
 cvar_t	*cl_gun;
+cvar_t  *cl_brass;
 cvar_t  *cl_showPlayerNames;
 
 cvar_t	*cl_add_particles;
@@ -1645,6 +1646,7 @@ void CL_InitLocal (void)
 	cl_healthaura = Cvar_Get ("cl_healthaura", "1", CVAR_ARCHIVE);
 	cl_noblood = Cvar_Get ("cl_noblood", "0", CVAR_ARCHIVE);
 	cl_disbeamclr = Cvar_Get("cl_disbeamclr", "0", CVAR_ARCHIVE);
+	cl_brass = Cvar_Get ("cl_brass", "1", CVAR_ARCHIVE);
 
 	cl_upspeed = Cvar_Get ("cl_upspeed", "200", 0);
 	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "200", 0);

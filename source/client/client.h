@@ -264,6 +264,7 @@ extern	cvar_t	*cl_autoskins;
 extern  cvar_t	*cl_healthaura;
 extern  cvar_t	*cl_noblood;
 extern  cvar_t	*cl_disbeamclr;
+extern  cvar_t	*cl_brass;
 
 extern	cvar_t	*cl_upspeed;
 extern	cvar_t	*cl_forwardspeed;
@@ -400,6 +401,32 @@ typedef struct particle_s
 // PGM
 // ========
 
+// Berserker client entities code
+#define     MAX_CLENTITIES     256
+#define CLM_BOUNCE		1
+#define CLM_FRICTION	2
+#define CLM_ROTATE		4
+#define CLM_NOSHADOW	8
+#define CLM_STOPPED		16
+
+typedef struct clentity_s {
+	struct clentity_s *next;
+	float time;
+	vec3_t org;
+	vec3_t lastOrg;
+	vec3_t vel;
+	vec3_t accel;
+	struct model_s *model;
+	float ang;
+	float avel;
+	float alpha;
+	float alphavel;
+	int flags;
+
+} clentity_t;
+
+void CL_AddClEntities(void);
+void CL_ClearClEntities(void);
 void CL_ClearEffects (void);
 void CL_ClearTEnts (void);
 
@@ -439,6 +466,7 @@ void CL_LaserSparks ( vec3_t org, vec3_t dir, int color, int count);
 void CL_SmallHealthParticles(vec3_t org);
 void CL_MedHealthParticles(vec3_t org);
 void CL_LargeHealthParticles(vec3_t org);
+void CL_BrassShells(vec3_t org, vec3_t dir, int count);
 
 int CL_ParseEntityBits (unsigned *bits);
 void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bits);
@@ -585,6 +613,7 @@ void V_AddStain (vec3_t org, float intensity, float r, float g, float b, float a
 // cl_tent.c
 //
 void CL_RegisterTEntSounds (void);
+void CL_RegisterTEntModels(void);
 
 //
 // cl_pred.c

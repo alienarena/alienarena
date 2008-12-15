@@ -267,7 +267,7 @@ CL_ParseMuzzleFlash
 */
 void CL_ParseMuzzleFlash (void)
 {
-	vec3_t		fv, rv;
+	vec3_t		fv, rv, shell_brass, dir, up;
 	cdlight_t	*dl;
 	int			i, weapon;
 	centity_t	*pl;
@@ -287,7 +287,7 @@ void CL_ParseMuzzleFlash (void)
 
 	dl = CL_AllocDlight (i);
 	VectorCopy (pl->current.origin,  dl->origin);
-	AngleVectors (pl->current.angles, fv, rv, NULL);
+	AngleVectors (pl->current.angles, fv, rv, up);
 	VectorMA (dl->origin, 18, fv, dl->origin);
 	VectorMA (dl->origin, 16, rv, dl->origin);
 	if (silenced)
@@ -301,6 +301,13 @@ void CL_ParseMuzzleFlash (void)
 		volume = 0.2;
 	else
 		volume = 1;
+
+	VectorMA(pl->current.origin, 10, fv, shell_brass);
+	VectorMA(shell_brass, 6, rv, shell_brass);
+	VectorMA(shell_brass, 21, up, shell_brass);
+
+	for (i = 0; i < 3; i++)
+		dir[i] = fv[i] + rv[i] + up[i] * 2;
 
 	switch (weapon)
 	{
@@ -331,6 +338,7 @@ void CL_ParseMuzzleFlash (void)
 		dl->color[0] = 1;dl->color[1] = 0.25;dl->color[2] = 0;
 		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0);
+		CL_BrassShells(shell_brass, dir, 1);
 		break;
 	case MZ_CHAINGUN2:
 		dl->radius = 225 + (rand()&31);
@@ -340,6 +348,7 @@ void CL_ParseMuzzleFlash (void)
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0);
 		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0.05);
+		CL_BrassShells(shell_brass, dir, 1);	
 		break;
 	case MZ_CHAINGUN3:
 		dl->radius = 250 + (rand()&31);
@@ -351,6 +360,7 @@ void CL_ParseMuzzleFlash (void)
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0.033);
 		Com_sprintf(soundname, sizeof(soundname), "weapons/machgf%ib.wav", (rand() % 5) + 1);
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound(soundname), volume, ATTN_NORM, 0.066);
+		CL_BrassShells(shell_brass, dir, 1);
 		break;
 	case MZ_RAILGUN:
 		dl->color[0] = 0.5;dl->color[1] = 0.5;dl->color[2] = 1.0;
@@ -3482,4 +3492,5 @@ void CL_ClearEffects (void)
 	CL_ClearParticles ();
 	CL_ClearDlights ();
 	CL_ClearLightStyles ();
+	CL_ClearClEntities();
 }
