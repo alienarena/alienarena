@@ -269,7 +269,7 @@ void CL_ParseMuzzleFlash (void)
 {
 	vec3_t		fv, rv, shell_brass, dir, up;
 	cdlight_t	*dl;
-	int			i, weapon;
+	int			i, j, weapon;
 	centity_t	*pl;
 	int			silenced;
 	float		volume;
@@ -306,8 +306,8 @@ void CL_ParseMuzzleFlash (void)
 	VectorMA(shell_brass, 6, rv, shell_brass);
 	VectorMA(shell_brass, 21, up, shell_brass);
 
-	for (i = 0; i < 3; i++)
-		dir[i] = fv[i] + rv[i] + up[i] * 2;
+	for (j = 0; j < 3; j++)
+		dir[j] = fv[j] + rv[j] + up[j] * 2;
 
 	switch (weapon)
 	{
