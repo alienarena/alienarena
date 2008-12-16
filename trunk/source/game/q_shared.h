@@ -854,7 +854,8 @@ typedef enum
 	EV_FALL,
 	EV_FALLFAR,
 	EV_PLAYER_TELEPORT,
-	EV_OTHER_TELEPORT
+	EV_OTHER_TELEPORT, 
+	EV_WADE
 } entity_event_t;
 
 

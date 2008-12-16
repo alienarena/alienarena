@@ -905,6 +905,14 @@ void G_SetClientEvent (edict_t *ent)
 	{
 		if ( (int)(current_client->bobtime+bobmove) != bobcycle )
 			ent->s.event = EV_FOOTSTEP;
+		
+		if ( ((ent->waterlevel == 1) || (ent->waterlevel == 2)) && (xyspeed > 100) )
+		{
+			if ( (int)(current_client->bobtime+bobmove) != bobcycle )
+			{				
+				ent->s.event = EV_WADE;	 
+			}
+		}
 	}
 }
 
