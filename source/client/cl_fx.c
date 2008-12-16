@@ -3450,8 +3450,49 @@ void CL_FootSteps (entity_state_t *ent, qboolean loud)
    volume = 1.0; 
    S_StartSound (NULL, ent->number, CHAN_BODY, stepsound, volume, ATTN_NORM, 0); 
 } 
-//end Knightmare 
 
+void CL_WaterWade (entity_state_t *ent)
+{
+	cparticle_t	*p;
+	trace_t   tr; 
+    vec3_t   end, angle; 
+	int		j;
+
+	S_StartSound (NULL, ent->number, CHAN_BODY, S_RegisterSound("player/wade1.wav"), 1, ATTN_NORM, 0); 
+	
+	VectorCopy(ent->origin,end); 
+    end[2] -= 64; 
+    tr = CL_PMSurfaceTrace (ent->origin,NULL,NULL,end,MASK_SOLID | MASK_WATER); 
+    if (!tr.surface) 
+       return; 
+  
+	//draw rings that expand outward
+	if(!(p = new_particle()))
+		return;
+	p->type = PARTICLE_RAISEDDECAL;
+	p->texnum = r_splashtexture->texnum;
+	p->blendsrc = GL_DST_COLOR;
+	p->blenddst = GL_SRC_COLOR;
+	p->scale = 1;
+	p->scalevel = 8;
+	p->color = 0 + (rand() & 1);
+
+	VectorScale(tr.plane.normal, -1, angle);
+	RotateForNormal(angle, p->angle);
+	p->angle[ROLL] = rand() % 360;
+	VectorAdd(tr.endpos, tr.plane.normal, p->org);
+
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = tr.endpos[j];
+		p->vel[j] = 0;
+	}
+	p->accel[0] = p->accel[1] = p->accel[2] = 0;
+	p->alpha = .1;
+
+	p->alphavel = -0.1 / (1 + frand()*0.3); 
+}
+	
 void CL_EntityEvent (entity_state_t *ent)
 {
 	switch (ent->event)
@@ -3467,6 +3508,10 @@ void CL_EntityEvent (entity_state_t *ent)
 	case EV_FOOTSTEP:
 		if (cl_footsteps->value)
 			CL_FootSteps (ent, false); 
+		break;
+	case EV_WADE:
+		if (cl_footsteps->value)
+			CL_WaterWade ( ent );
 		break;
 	case EV_FALLSHORT:
 		S_StartSound (NULL, ent->number, CHAN_AUTO, S_RegisterSound ("player/land1.wav"), 1, ATTN_NORM, 0);
