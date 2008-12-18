@@ -149,7 +149,9 @@ void cow_pain (edict_t *self, edict_t *other, float kick, int damage)
 
 void SP_npc_cow (edict_t *self)
 {
-	
+	if(!cp->value)
+		return; //not in cp mode, no cows needed
+
 	// pre-caches
 	sound_moo  = gi.soundindex ("misc/cow/moo.wav");
 	sound_groan = gi.soundindex ("misc/cow/groan.wav");
@@ -165,7 +167,7 @@ void SP_npc_cow (edict_t *self)
 
 	self->classname = "cow";
 
-	self->max_health = 150;
+	self->max_health = 250;
 	self->health = self->max_health;
 	self->gib_health = -40;
 	self->mass = 250;
@@ -186,6 +188,7 @@ void SP_npc_cow (edict_t *self)
 	self->monsterinfo.scale = MODEL_SCALE;
 	self->monsterinfo.aiflags = AI_NPC;
 	self->dmteam = NO_TEAM;
+	self->enemy = NULL;
 
 	gi.linkentity (self);
 
