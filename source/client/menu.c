@@ -42,6 +42,8 @@ extern cvar_t *scriptsloaded;
 extern char map_music[128];
 extern cvar_t *background_music;
 extern cvar_t *dedicated;
+extern cvar_t *cl_drawfps;
+extern cvar_t *fov;
 
 #define NUM_CURSOR_FRAMES 15
 
@@ -1411,6 +1413,7 @@ static menulist_s		s_options_shadows_box;
 static menulist_s		s_options_dynamic_box;
 static menulist_s		s_options_rtlights_box;
 static menulist_s		s_options_minimap_box;
+static menulist_s		s_options_showfps_box;
 
 static void PlayerSetupFunc( void *unused )
 {
@@ -1498,6 +1501,11 @@ static void MinimapFunc( void *unused )
 	}
 	else
 		Cvar_SetValue("r_minimap", s_options_minimap_box.curvalue);
+}
+
+static void ShowfpsFunc( void *unused )
+{
+	Cvar_SetValue( "cl_drawfps", s_options_showfps_box.curvalue);
 }
 
 static float ClampCvar( float min, float max, float value )
@@ -1917,6 +1925,9 @@ static void ControlsSetMenuItemValues( void )
 	Cvar_SetValue("cl_noskins", ClampCvar(0, 1, cl_noskins->value ) );
 	s_options_noskins_box.curvalue		= cl_noskins->value;
 
+	Cvar_SetValue("cl_drawfps", ClampCvar(0, 1, cl_drawfps->value ) );
+	s_options_showfps_box.curvalue		= cl_drawfps->value;
+
 	Cvar_SetValue("r_shaders", ClampCvar(0, 1, r_shaders->value ) );
 	s_options_shaders_box.curvalue		= r_shaders->value;
 
@@ -2297,15 +2308,23 @@ void Options_MenuInit( void )
 	s_options_joystick_box.generic.callback = JoystickFunc;
 	s_options_joystick_box.itemnames = yesno_names;
 
+	
+	s_options_showfps_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_showfps_box.generic.x	= 0;
+	s_options_showfps_box.generic.y	= 280*scale;
+	s_options_showfps_box.generic.name	= "display fps";
+	s_options_showfps_box.generic.callback = ShowfpsFunc;
+	s_options_showfps_box.itemnames = yesno_names;
+
 	s_options_defaults_action.generic.type	= MTYPE_ACTION;
 	s_options_defaults_action.generic.x		= 0;
-	s_options_defaults_action.generic.y		= 290*scale;
+	s_options_defaults_action.generic.y		= 300*scale;
 	s_options_defaults_action.generic.name	= "reset defaults";
 	s_options_defaults_action.generic.callback = ControlsResetDefaultsFunc;
 
 	s_options_console_action.generic.type	= MTYPE_ACTION;
 	s_options_console_action.generic.x		= 0;
-	s_options_console_action.generic.y		= 300*scale;
+	s_options_console_action.generic.y		= 310*scale;
 	s_options_console_action.generic.name	= "go to console";
 	s_options_console_action.generic.callback = ConsoleFunc;
 
@@ -2334,6 +2353,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_hud_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_discolor_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_minimap_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_showfps_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_joystick_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_defaults_action );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_console_action );
@@ -5188,6 +5208,7 @@ static menuseparator_s	s_player_skin_title;
 static menuseparator_s	s_player_model_title;
 static menuseparator_s	s_player_hand_title;
 static menuseparator_s	s_player_rate_title;
+static menufield_s		s_player_fov_field;
 
 #define MAX_DISPLAYNAME 16
 #define MAX_PLAYERMODELS 1024
@@ -5223,6 +5244,11 @@ static void ModelCallback( void *unused )
 {
 	s_player_skin_box.itemnames = s_pmi[s_player_model_box.curvalue].skindisplaynames;
 	s_player_skin_box.curvalue = 0;
+}
+
+static void FovCallBack( void *unused )
+{
+	Cvar_SetValue( "fov", atoi(s_player_fov_field.buffer));
 }
 
 static void FreeFileList( char **list, int n )
@@ -5540,13 +5566,24 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_handedness_box.curvalue = Cvar_VariableValue( "hand" );
 	s_player_handedness_box.itemnames = handedness;
 
+	s_player_fov_field.generic.type = MTYPE_FIELD;
+	s_player_fov_field.generic.name = "fov";
+	s_player_fov_field.generic.callback = 0;
+	s_player_fov_field.generic.x		= -32;
+	s_player_fov_field.generic.y		= 132*scale;
+	s_player_fov_field.length	= 6;
+	s_player_fov_field.visible_length = 6;
+	s_player_fov_field.generic.callback = FovCallBack;
+	strcpy( s_player_fov_field.buffer, fov->string );
+	s_player_fov_field.cursor = strlen( fov->string );
+
 	for (i = 0; i < sizeof(rate_tbl) / sizeof(*rate_tbl) - 1; i++)
 		if (Cvar_VariableValue("rate") == rate_tbl[i])
 			break;
 
 	s_player_rate_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_rate_box.generic.x	= -32;
-	s_player_rate_box.generic.y	= 142*scale;
+	s_player_rate_box.generic.y	= 146*scale;
 	s_player_rate_box.generic.name	= "connect speed";
 	s_player_rate_box.generic.callback = RateCallback;
 	s_player_rate_box.curvalue = i;
@@ -5605,6 +5642,7 @@ qboolean PlayerConfig_MenuInit( void )
 		Menu_AddItem( &s_player_config_menu, &s_player_skin_box );
 	}
 	Menu_AddItem( &s_player_config_menu, &s_player_handedness_box );
+	Menu_AddItem( &s_player_config_menu, &s_player_fov_field );
 	Menu_AddItem( &s_player_config_menu, &s_player_rate_box );
 
 	//add in shader support for player models, if the player goes into the menu before entering a
