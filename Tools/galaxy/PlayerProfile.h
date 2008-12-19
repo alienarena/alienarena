@@ -7,40 +7,9 @@
 // PlayerProfile.h : header file
 //
 #include "hyperlink.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // PlayerProfile dialog
-class CDemoLink : public CHyperLink
-{
-protected:
-	virtual void OnSelect(void)
-	{ ((CFrameWnd *)AfxGetMainWnd())->SetMessageText(m_strURL); }
-	virtual void OnDeselect(void)
-	{ ((CFrameWnd *)AfxGetMainWnd())->SetMessageText(AFX_IDS_IDLEMESSAGE); }
-};
-/*
- * class CHyperLinkDlg
- */
-class CHyperLinkDlg : public CDialog
-{
-public:
-	CHyperLinkDlg(UINT nIDTemplate) : CDialog(nIDTemplate) {}
-protected:
-/******************************************************************************
- *
- * Name      : setURL
- *
- * Purpose   : Convert the static control id and load URL string from
- *             resource associated with id.
- *
- * Parameters:
- *     ctr     (CHyperLink &) Reference to the hyperlink object to setup.
- *     id      (int)          Static control ID and URL String ID.
- *
- * Return value : None.
- *
- ****************************************************************************/
-	void setURL(CHyperLink &ctr, int id);
-};
 
 /*
  * class CMinMaxFrame
@@ -229,8 +198,6 @@ private:
 CDemoLink	m_PrivacyLink;
 
 	DECLARE_MESSAGE_MAP()
-
-
 
 };
 

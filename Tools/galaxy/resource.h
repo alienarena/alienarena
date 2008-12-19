@@ -62,6 +62,7 @@
 #define IDB_BITMAP29                    222
 #define IDI_ICON7                       236
 #define IDI_ICON8                       239
+#define IDD_HELPBOX                     240
 #define IDC_LIST1                       1000
 #define IDC_BUTTON1                     1006
 #define IDC_LIST3                       1007
@@ -93,6 +94,13 @@
 #define IDC_NEWS                        1027
 #define IDC_UPDATEPROGRESS              1028
 #define IDC_PRIVACY                     1032
+#define IDC_LINK1                       1033
+#define IDC_LINK2                       1034
+#define IDC_LINK3                       1035
+#define IDC_LINK4                       1036
+#define IDC_LINK5                       1037
+#define IDC_LINK6                       1038
+#define IDC_LINK7                       1039
 #define ID_MENU_CONFIGURE               32771
 #define ID_SERVERTOOLS_REFRESH          32772
 #define ID_SERVERTOOLS_JOIN             32773
@@ -100,15 +108,16 @@
 #define ID_CHAT_JOINCHATCHANNEL         32777
 #define ID_CHAT_LEAVECHATCHANNEL        32778
 #define ID_STATS_LOOKUPSTATS            32779
-#define ID_HELP_ALIENARENAWIKKI         32783
+#define ID_MENU_ABOUT                   32784
+#define ID_MENU_HELP                    32785
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        240
-#define _APS_NEXT_COMMAND_VALUE         32784
-#define _APS_NEXT_CONTROL_VALUE         1033
+#define _APS_NEXT_RESOURCE_VALUE        241
+#define _APS_NEXT_COMMAND_VALUE         32786
+#define _APS_NEXT_CONTROL_VALUE         1040
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

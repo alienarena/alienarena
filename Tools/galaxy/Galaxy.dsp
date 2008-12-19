@@ -138,6 +138,10 @@ SOURCE=.\GalaxyDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Help.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\hyperlink.cpp
 # End Source File
 # Begin Source File
@@ -204,6 +208,10 @@ SOURCE=.\Galaxy.h
 # Begin Source File
 
 SOURCE=.\GalaxyDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Help.h
 # End Source File
 # Begin Source File
 

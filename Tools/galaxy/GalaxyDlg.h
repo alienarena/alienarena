@@ -86,6 +86,8 @@ protected:
 	afx_msg void OnQuickAddbuddy();
 	afx_msg void OnShowusers();
 	afx_msg void GetNews();
+	afx_msg void About();
+	afx_msg void HelpLinks();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
