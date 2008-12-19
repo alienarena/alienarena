@@ -2,13 +2,13 @@
 
 [General Info]
 Version=1
-LastClass=CGalaxyDlg
+LastClass=Help
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "galaxy.h"
 LastPage=0
 
-ClassCount=14
+ClassCount=15
 Class1=BuddyName
 Class2=CGalaxyApp
 Class3=CAboutDlg
@@ -24,14 +24,16 @@ Class12=CToolTip2
 Class13=CTTListBox
 Class14=UpdateDlg
 
-ResourceCount=7
-Resource1=IDD_STARTUP
-Resource2=IDD_BUDDYNAME
-Resource3=IDD_SETPROFILE
+ResourceCount=8
+Resource1=IDD_UPDATER
+Resource2=IDD_SETPROFILE
+Resource3=IDD_STARTUP
 Resource4=IDD_GALAXY_DIALOG
-Resource5=IDD_ABOUTBOX
-Resource6=IDD_UPDATER
-Resource7=IDR_MENU1
+Resource5=IDD_BUDDYNAME
+Resource6=IDD_ABOUTBOX
+Resource7=IDD_HELPBOX
+Class15=Help
+Resource8=IDR_MENU1
 
 [CLS:BuddyName]
 Type=0
@@ -56,7 +58,7 @@ Type=0
 BaseClass=CDialog
 HeaderFile=GalaxyDlg.h
 ImplementationFile=GalaxyDlg.cpp
-LastObject=IDC_LIST1
+LastObject=CGalaxyDlg
 
 [CLS:CListBoxST]
 Type=0
@@ -215,5 +217,30 @@ Command4=ID_SERVERTOOLS_LAUNCHALIENARENA
 Command5=ID_CHAT_JOINCHATCHANNEL
 Command6=ID_CHAT_LEAVECHATCHANNEL
 Command7=ID_STATS_LOOKUPSTATS
-CommandCount=7
+Command8=ID_MENU_HELP
+Command9=ID_MENU_ABOUT
+CommandCount=9
+
+[DLG:IDD_HELPBOX]
+Type=1
+Class=Help
+ControlCount=10
+Control1=IDC_STATIC,static,1342308480
+Control2=IDOK,button,1342373889
+Control3=IDC_LINK1,static,1342308352
+Control4=IDC_LINK2,static,1342308352
+Control5=IDC_LINK3,static,1342308352
+Control6=IDC_LINK4,static,1342308352
+Control7=IDC_LINK5,static,1342308352
+Control8=IDC_STATIC,static,1342308352
+Control9=IDC_LINK6,static,1342308352
+Control10=IDC_LINK7,static,1342308352
+
+[CLS:Help]
+Type=0
+HeaderFile=Help.h
+ImplementationFile=Help.cpp
+BaseClass=CDialog
+Filter=D
+LastObject=Help
 

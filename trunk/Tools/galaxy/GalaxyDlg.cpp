@@ -15,6 +15,7 @@
 #include "socket.h"
 #include "functions.h"
 #include "PlayerProfile.h"
+#include "help.h"
 #include "BuddyName.h"
 #include "Startup.h"
 #include "UpdateDlg.h"
@@ -164,6 +165,8 @@ BEGIN_MESSAGE_MAP(CGalaxyDlg, CDialog)
 	ON_NOTIFY(NM_CLICK, IDC_LIST1, OnSelchangeList1)
 	ON_BN_CLICKED(IDC_BUTTON1, OnRefresh)
 	ON_BN_CLICKED(ID_MENU_CONFIGURE, Configure)
+	ON_BN_CLICKED(ID_MENU_HELP, HelpLinks)
+	ON_BN_CLICKED(ID_MENU_ABOUT, About)
 	ON_BN_CLICKED(ID_STATS_LOOKUPSTATS, LookUpStats)
 	ON_EN_CHANGE(IDC_EDIT3, OnChangeEdit3)
 	ON_WM_TIMER()
@@ -1459,6 +1462,18 @@ void CGalaxyDlg::Configure()
 {
 	PlayerProfile ppDlg;
 	ppDlg.DoModal();
+}
+
+void CGalaxyDlg::HelpLinks()
+{
+	Help ppDlg;
+	ppDlg.DoModal();
+}
+
+void CGalaxyDlg::About()
+{
+	CAboutDlg dlgAbout;
+	dlgAbout.DoModal();
 }
 
 void CGalaxyDlg::OnAddbuddy() 
