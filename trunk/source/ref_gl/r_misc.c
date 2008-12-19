@@ -237,48 +237,156 @@ void R_InitParticleTexture (void)
 		}
 	}
 
-	r_smoketexture = R_RegisterParticlePic("smoke");//etc etc etc...
-    r_particletexture = R_RegisterParticlePic("particle");
-	r_explosiontexture = R_RegisterParticlePic("explosion");
-	r_explosion1texture = R_RegisterParticlePic("r_explod_1");
-	r_explosion2texture = R_RegisterParticlePic("r_explod_2");
-	r_explosion3texture = R_RegisterParticlePic("r_explod_3");
-	r_explosion4texture = R_RegisterParticlePic("r_explod_4");
-	r_explosion5texture = R_RegisterParticlePic("r_explod_5");
-	r_explosion6texture = R_RegisterParticlePic("r_explod_6");
-	r_explosion7texture = R_RegisterParticlePic("r_explod_7");
-	r_bloodtexture = R_RegisterParticlePic("blood");
-	r_pufftexture = R_RegisterParticlePic("puff");
-	r_bflashtexture = R_RegisterParticlePic("bflash");
-	r_cflashtexture = R_RegisterParticlePic("cflash");
-	r_leaderfieldtexture = R_RegisterParticlePic("leaderfield");
-	r_deathfieldtexture = R_RegisterParticlePic("deathfield");
-	r_deathfieldtexture2 = R_RegisterParticlePic("deathfield2");
-	r_shelltexture = R_RegisterParticlePic("shell");
-	r_hittexture = R_RegisterParticlePic("aflash");
-	r_bubbletexture = R_RegisterParticlePic("bubble");
-	r_reflecttexture = R_RegisterParticlePic("reflect");
-	r_mirrorspec = R_RegisterGfxPic("mirrorspec");
-	r_shottexture = R_RegisterParticlePic("dflash");
-	r_sayicontexture = R_RegisterParticlePic("sayicon");
-	r_flaretexture = R_RegisterParticlePic("flare");
-	r_flagtexture = R_RegisterParticlePic("flag");
-	r_logotexture = R_RegisterParticlePic("logo");
-	r_beamtexture = R_RegisterGfxPic("glightning");
-	r_beam2texture = R_RegisterGfxPic("greenline");
-	r_beam3texture = R_RegisterGfxPic("electrics3d");
-	r_bullettexture = R_RegisterParticlePic("bullethole");
-	r_bulletnormal = R_RegisterParticleNormal("bullethole2");
-	r_voltagetexture = R_RegisterParticlePic("voltage");
-	r_raintexture = R_RegisterParticlePic("beam");
-	r_splashtexture = R_RegisterParticlePic("ripples");
-	r_radarmap = GL_FindImage("gfx/radar/radarmap",it_pic);
-	r_around = GL_FindImage("gfx/radar/around",it_pic);
-
-	//do this for all so as to not have crashes
+	r_particletexture = R_RegisterParticlePic("particle");
 	if (!r_particletexture) {                                
 		r_particletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }                                                    
+    }     
+
+	r_smoketexture = R_RegisterParticlePic("smoke");
+	if (!r_smoketexture) {                                
+		r_smoketexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_explosiontexture = R_RegisterParticlePic("explosion");
+	if (!r_explosiontexture) {                                
+		r_explosiontexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_explosion1texture = R_RegisterParticlePic("r_explod_1");
+	if (!r_explosion1texture) {                                
+		r_explosion1texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_explosion2texture = R_RegisterParticlePic("r_explod_2");
+	if (!r_explosion2texture) {                                
+		r_explosion2texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_explosion3texture = R_RegisterParticlePic("r_explod_3");
+	if (!r_explosion3texture) {                                
+		r_explosion3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_explosion4texture = R_RegisterParticlePic("r_explod_4");
+	if (!r_explosion4texture) {                                
+		r_explosion4texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_explosion5texture = R_RegisterParticlePic("r_explod_5");
+	if (!r_explosion5texture) {                                
+		r_explosion5texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_explosion6texture = R_RegisterParticlePic("r_explod_6");
+	if (!r_explosion6texture) {                                
+		r_explosion6texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_explosion7texture = R_RegisterParticlePic("r_explod_7");
+	if (!r_explosion7texture) {                                
+		r_explosion7texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_bloodtexture = R_RegisterParticlePic("blood");
+	if (!r_bloodtexture) {                                
+		r_bloodtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_pufftexture = R_RegisterParticlePic("puff");
+	if (!r_pufftexture) {                                
+		r_pufftexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_bflashtexture = R_RegisterParticlePic("bflash");
+	if (!r_bflashtexture) {                                
+		r_bflashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_cflashtexture = R_RegisterParticlePic("cflash");
+	if (!r_cflashtexture) {                                
+		r_cflashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_leaderfieldtexture = R_RegisterParticlePic("leaderfield");
+	if (!r_leaderfieldtexture) {                                
+		r_leaderfieldtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_deathfieldtexture = R_RegisterParticlePic("deathfield");
+	if (!r_deathfieldtexture) {                                
+		r_deathfieldtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_deathfieldtexture2 = R_RegisterParticlePic("deathfield2");
+	if (!r_deathfieldtexture2) {                                
+		r_deathfieldtexture2 = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_shelltexture = R_RegisterParticlePic("shell");
+	if (!r_shelltexture) {                                
+		r_shelltexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_hittexture = R_RegisterParticlePic("aflash");
+	if (!r_hittexture) {                                
+		r_hittexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_bubbletexture = R_RegisterParticlePic("bubble");
+	if (!r_bubbletexture) {                                
+		r_bubbletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_reflecttexture = R_RegisterParticlePic("reflect");
+	if (!r_reflecttexture) {                                
+		r_reflecttexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_mirrorspec = R_RegisterGfxPic("mirrorspec");
+	if (!r_mirrorspec) {                                
+		r_mirrorspec = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_shottexture = R_RegisterParticlePic("dflash");
+	if (!r_shottexture) {                                
+		r_shottexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_sayicontexture = R_RegisterParticlePic("sayicon");
+	if (!r_sayicontexture) {                                
+		r_sayicontexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_flaretexture = R_RegisterParticlePic("flare");
+	if (!r_flaretexture) {                                
+		r_flaretexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_flagtexture = R_RegisterParticlePic("flag");
+	if (!r_flagtexture) {                                
+		r_flagtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_logotexture = R_RegisterParticlePic("logo");
+	if (!r_logotexture) {                                
+		r_logotexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_beamtexture = R_RegisterGfxPic("glightning");
+	if (!r_beamtexture) {                                
+		r_beamtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_beam2texture = R_RegisterGfxPic("greenline");
+	if (!r_beam2texture) {                                
+		r_beam2texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_beam3texture = R_RegisterGfxPic("electrics3d");
+	if (!r_beam3texture) {                                
+		r_beam3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_bullettexture = R_RegisterParticlePic("bullethole");
+	if (!r_bullettexture) {                                
+		r_bullettexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_bulletnormal = R_RegisterParticleNormal("bullethole2");
+	if (!r_bulletnormal) {                                
+		r_bulletnormal = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_voltagetexture = R_RegisterParticlePic("voltage");
+	if (!r_voltagetexture) {                                
+		r_voltagetexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_raintexture = R_RegisterParticlePic("beam");
+	if (!r_raintexture) {                                
+		r_raintexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_splashtexture = R_RegisterParticlePic("ripples");
+	if (!r_splashtexture) {                                
+		r_splashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_radarmap = GL_FindImage("gfx/radar/radarmap",it_pic);
+	if (!r_radarmap) {                                
+		r_radarmap = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+	r_around = GL_FindImage("gfx/radar/around",it_pic);
+	if (!r_around) {                                
+		r_around = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
+                                               
 
 	//
 	// also use this for bad textures, but without alpha
@@ -299,7 +407,9 @@ void R_InitParticleTexture (void)
 
 	Com_sprintf (flares, sizeof(flares), "gfx/flares/flare0.tga");
 	r_flare = GL_FindImage(flares, it_pic);
-
+	if (!r_flare) {                                
+		r_flare = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }     
 }
 
 
