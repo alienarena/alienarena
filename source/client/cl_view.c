@@ -283,6 +283,7 @@ Call before entering a new level, or after changing dlls
 =================
 */
 qboolean needLoadingPlaque (void);
+extern int	seconds, minutes;
 void CL_PrepRefresh ()
 {
 	char		mapname[32];
@@ -319,6 +320,9 @@ void CL_PrepRefresh ()
 	adren_drawn = 0;
 
 	numitemicons = 0;
+
+	//reset clock
+	seconds = minutes = 0;
 
 	if (!cl.configstrings[CS_MODELS+1][0])
 		return;		// no map loaded
