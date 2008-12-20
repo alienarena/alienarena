@@ -3281,6 +3281,24 @@ const char *JoinServer_MenuKey( int key )
 	{
 		cursor.buttonclicks[MOUSEBUTTON1] = 2;//so we can still join without a mouse
 	}
+	if ( key == K_MWHEELDOWN )
+	{
+		svridx++;
+		if(svridx > 112)
+			svridx = 112;
+		s_joinserver_scrollbar.curvalue++;
+		if(s_joinserver_scrollbar.curvalue > 16)
+			s_joinserver_scrollbar.curvalue = 16;
+	}
+	if( key == K_MWHEELUP )
+	{
+			svridx--;
+		if(svridx < 0)
+			svridx = 0;
+		s_joinserver_scrollbar.curvalue--;
+		if(s_joinserver_scrollbar.curvalue < 0)
+			s_joinserver_scrollbar.curvalue = 0;
+	}
 	return Default_MenuKey( &s_joinserver_menu, key );
 }
 
