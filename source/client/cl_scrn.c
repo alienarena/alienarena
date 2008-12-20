@@ -1561,25 +1561,35 @@ SCR_showTimer
 
 ================
 */
-clock_t 	t1;
 char		temptime[32];
 int		timecounter;
+int		seconds, minutes;
 void SCR_showTimer(void)
 {
 	float scale;
+
+	if (cls.key_dest == key_menu || cls.key_dest == key_console)
+		return;
+
 	scale = (float)(viddef.height)/600;
 	if(scale < 1)
 		scale = 1;
 
-	if ((cl.time + 2000) < timecounter)
+	if ((cls.realtime + 2000) < timecounter)
 		timecounter = cl.time + 1000;
 
-	if (cl.time >timecounter)
+	if (cls.realtime > timecounter)
 	{
-		t1 = clock();
-		Com_sprintf(temptime, sizeof(temptime),"%i", (int)t1 / CLOCKS_PER_SEC);
-		timecounter = cl.time + 1000;
+		seconds += 1;
+		if(seconds >= 60) {
+			minutes++;
+			seconds = 0;
+		}
+		Com_sprintf(temptime, sizeof(temptime),"%i:%2i", minutes, seconds);
+		timecounter = cls.realtime + 1000;
 	}
+
+	Draw_StretchPic (viddef.width - 104*scale, viddef.height -42*scale, 32*scale, 32*scale, "timer");
 
 	DrawString(viddef.width - 64*scale, viddef.height - 32*scale, temptime);
 }
@@ -1598,6 +1608,9 @@ char		temp[32];
 void SCR_showFPS(void)
 {
 	float scale;
+
+	if (cls.key_dest == key_menu || cls.key_dest == key_console)
+		return;
 
 	scale = (float)(viddef.height)/600;
 	if(scale < 1)

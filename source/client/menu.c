@@ -43,6 +43,7 @@ extern char map_music[128];
 extern cvar_t *background_music;
 extern cvar_t *dedicated;
 extern cvar_t *cl_drawfps;
+extern cvar_t *cl_drawtimer;
 extern cvar_t *fov;
 
 #define NUM_CURSOR_FRAMES 15
@@ -136,7 +137,7 @@ static void M_CrosshairPic( char *name )
 		scale = 1;
 
 	w = h = 64*scale;
-	Draw_StretchPic (viddef.width / 2 - w/2 - 110*scale, viddef.height / 2 + 100*scale, w, h, name);
+	Draw_StretchPic (viddef.width / 2 - w/2 - 110*scale, viddef.height / 2 + 90*scale, w, h, name);
 }
 static void M_Background( char *name)
 {
@@ -1414,6 +1415,7 @@ static menulist_s		s_options_dynamic_box;
 static menulist_s		s_options_rtlights_box;
 static menulist_s		s_options_minimap_box;
 static menulist_s		s_options_showfps_box;
+static menulist_s		s_options_showtime_box;
 
 static void PlayerSetupFunc( void *unused )
 {
@@ -1506,6 +1508,11 @@ static void MinimapFunc( void *unused )
 static void ShowfpsFunc( void *unused )
 {
 	Cvar_SetValue( "cl_drawfps", s_options_showfps_box.curvalue);
+}
+
+static void ShowtimeFunc( void *unused )
+{
+	Cvar_SetValue( "cl_drawtimer", s_options_showtime_box.curvalue);
 }
 
 static float ClampCvar( float min, float max, float value )
@@ -1928,6 +1935,9 @@ static void ControlsSetMenuItemValues( void )
 	Cvar_SetValue("cl_drawfps", ClampCvar(0, 1, cl_drawfps->value ) );
 	s_options_showfps_box.curvalue		= cl_drawfps->value;
 
+	Cvar_SetValue("cl_drawtimer", ClampCvar(0, 1, cl_drawtimer->value ) );
+	s_options_showtime_box.curvalue		= cl_drawtimer->value;
+
 	Cvar_SetValue("r_shaders", ClampCvar(0, 1, r_shaders->value ) );
 	s_options_shaders_box.curvalue		= r_shaders->value;
 
@@ -2125,7 +2135,7 @@ void Options_MenuInit( void )
 	** configure controls menu and menu items
 	*/
 	s_options_menu.x = viddef.width / 2;
-	s_options_menu.y = viddef.height / 2 - 100*scale;
+	s_options_menu.y = viddef.height / 2 -110*scale;
 	s_options_menu.nitems = 0;
 
 	s_player_setup_action.generic.type	= MTYPE_ACTION;
@@ -2316,15 +2326,22 @@ void Options_MenuInit( void )
 	s_options_showfps_box.generic.callback = ShowfpsFunc;
 	s_options_showfps_box.itemnames = yesno_names;
 
+	s_options_showtime_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_showtime_box.generic.x	= 0;
+	s_options_showtime_box.generic.y	= 290*scale;
+	s_options_showtime_box.generic.name	= "display time";
+	s_options_showtime_box.generic.callback = ShowtimeFunc;
+	s_options_showtime_box.itemnames = yesno_names;
+
 	s_options_defaults_action.generic.type	= MTYPE_ACTION;
 	s_options_defaults_action.generic.x		= 0;
-	s_options_defaults_action.generic.y		= 300*scale;
+	s_options_defaults_action.generic.y		= 310*scale;
 	s_options_defaults_action.generic.name	= "reset defaults";
 	s_options_defaults_action.generic.callback = ControlsResetDefaultsFunc;
 
 	s_options_console_action.generic.type	= MTYPE_ACTION;
 	s_options_console_action.generic.x		= 0;
-	s_options_console_action.generic.y		= 310*scale;
+	s_options_console_action.generic.y		= 320*scale;
 	s_options_console_action.generic.name	= "go to console";
 	s_options_console_action.generic.callback = ConsoleFunc;
 
@@ -2354,6 +2371,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_discolor_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_minimap_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_showfps_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_showtime_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_joystick_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_defaults_action );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_console_action );
