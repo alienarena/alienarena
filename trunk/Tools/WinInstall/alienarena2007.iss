@@ -2227,6 +2227,7 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\tekwall9_nm.tga; DestDir
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\warning.tga; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\lightgid.tga; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\lightgid2.tga; DestDir: {app}\data1\textures\arena7
+Source: ..\..\..\Alien Arena 2007\data1\pics\timer.tga; DestDir: {app}\data1\pics
 
 [Icons]
 Name: {group}\{cm:ProgramOnTheWeb,{#MyAppName}}; Filename: {#MyAppURL}
