@@ -2318,7 +2318,6 @@ void Options_MenuInit( void )
 	s_options_joystick_box.generic.callback = JoystickFunc;
 	s_options_joystick_box.itemnames = yesno_names;
 
-	
 	s_options_showfps_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_showfps_box.generic.x	= 0;
 	s_options_showfps_box.generic.y	= 280*scale;
@@ -2370,9 +2369,9 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_hud_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_discolor_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_minimap_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_joystick_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_showfps_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_showtime_box );
-	Menu_AddItem( &s_options_menu, ( void * ) &s_options_joystick_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_defaults_action );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_console_action );
 }
