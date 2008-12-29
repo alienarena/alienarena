@@ -167,23 +167,17 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	daliasframe_t	*frame, *oldframe;
 	dtrivertx_t	*v, *ov, *verts;
 	int		*order, *startorder, *tmp_order;
-	int		count, tmp_count;
-	float	frontlerp;
-	float	alpha, basealpha;
-	vec3_t	move, delta, vectors[3];
-	vec3_t	frontv, backv;
-	int		i;
-	int		index_xyz;
+	int		count, tmp_count, i, index_xyz;
+	float	frontlerp, red, green, blue, alpha, nAlpha, basealpha, mode;
+	float	*lerp;
+	vec3_t	move, delta, vectors[3], frontv, backv, lightcolor;
 	qboolean depthmaskrscipt = false;
 	rscript_t *rs = NULL;
 	rs_stage_t *stage = NULL;
 	int		va = 0;
-	float	mode;
-	vec3_t lightcolor;
-	float   *lerp;
 	float	ramp = 1.0;
 	qboolean mirror = false;
-
+ 
 	if(lerped)
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
 			+ currententity->frame * paliashdr->framesize);
@@ -434,11 +428,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 			tmp_order=order;	
 
 			while (stage)
-			{
+			{	
+				red = green = blue = 1;
 				count=tmp_count;
 				order=tmp_order;
 				va=0;
 				VArray = &VArrayVerts[0];
+				ramp = 1.0;
 
 				if (stage->normalmap && !gl_normalmaps->value) {
 					if(stage->next) {
@@ -568,11 +564,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
 				
 					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
+
+					ramp = 2.0;
 				}
 				else {
 					if(stage->next) { //increase intensity of lighting to cut through normals a bit
 						if(stage->next->normalmap && gl_normalmaps->value)
-							ramp = 2.0;
+							ramp = 2.0; 
 					}
 					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
 						R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
@@ -656,46 +654,49 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						VArray[6] = ot2;
 					}
 			
-					{
-						float red = 1, green = 1, blue = 1, nAlpha;
+					if(lerped) 
+						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
+							calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
+					else
+						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
+							calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
 
-						if(lerped) 
-							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-								calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
+					if (stage->lightmap) {
+
+						if(lerped)
+							GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 						else
-							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-								calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
-
-
-						if (stage->lightmap && !stage->normalmap) {
-							if(lerped)
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
-							else
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
-							red = lightcolor[0] * ramp;
-							green = lightcolor[1] * ramp;
-							blue = lightcolor[2] * ramp;	
-						}
-
-						if (stage->colormap.enabled) {
-							red *= stage->colormap.red/255.0;
-							green *= stage->colormap.green/255.0;
-							blue *= stage->colormap.blue/255.0;
-						}
-					
-						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
-							VArray[7] = red;
-							VArray[8] = green;
-							VArray[9] = blue;
-							VArray[10] = nAlpha;
-						}
-						else {
-							VArray[5] = red;
-							VArray[6] = green;
-							VArray[7] = blue;
-							VArray[8] = nAlpha;	
+							GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+						
+						red = lightcolor[0] * ramp;
+						green = lightcolor[1] * ramp;
+						blue = lightcolor[2] * ramp;
+						if(stage->normalmap) { 
+							red = max(red, 0.85);
+							green = max(green, 0.85);
+							blue = max(blue, 0.85);
 						}
 					}
+									
+					if (stage->colormap.enabled) {
+						red *= stage->colormap.red/255.0;
+						green *= stage->colormap.green/255.0;
+						blue *= stage->colormap.blue/255.0;
+					}
+				
+					if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
+						VArray[7] = red;
+						VArray[8] = green;
+						VArray[9] = blue;
+						VArray[10] = nAlpha;
+					}
+					else {
+						VArray[5] = red;
+						VArray[6] = green;
+						VArray[7] = blue;
+						VArray[8] = nAlpha;	
+					}
+				
 					// increment pointer and counter
 					if(stage->normalmap)
 						VArray += VertexSizes[VERT_BUMPMAPPED_COLOURED];
@@ -727,8 +728,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 					R_KillNormalTMUs();
 
-					ramp = 1.0;
-			
 					// restore the original blend mode
 					qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
