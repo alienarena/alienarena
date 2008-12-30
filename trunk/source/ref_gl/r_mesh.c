@@ -173,7 +173,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	rscript_t *rs = NULL;
 	rs_stage_t *stage = NULL;
 	int		va = 0;
-	float	ramp = 1.0;
+	qboolean ramp = false;
 	qboolean mirror = false;
  
 	if(lerped)
@@ -432,7 +432,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				order=tmp_order;
 				va=0;
 				VArray = &VArrayVerts[0];
-				ramp = 1.0;
+				ramp = false;
 
 				if (stage->normalmap && !gl_normalmaps->value) {
 					if(stage->next) {
@@ -562,12 +562,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
 				
 					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
-
+					
+					ramp = true;
 				}
 				else {
 					if(stage->next) { //increase intensity of lighting to cut through normals a bit
 						if(stage->next->normalmap && gl_normalmaps->value)
-							ramp = 2.0; 
+							ramp = true; 
 					}
 					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
 						R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
@@ -581,7 +582,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					float ot = ((float *)order)[1];
 					float os2 = ((float *)order)[0];
 					float ot2 = ((float *)order)[1];
-					vec3_t normal;
+					vec3_t normal, addlight;
 					int k;
 					
 					index_xyz = order[2];
@@ -658,16 +659,36 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 							calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
 
-					if (stage->lightmap && !stage->normalmap) {
+					if (stage->lightmap && !ramp) {
 
 						if(lerped)
 							GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 						else
 							GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 						
-						red = lightcolor[0] * ramp;
-						green = lightcolor[1] * ramp;
-						blue = lightcolor[2] * ramp;
+						red = lightcolor[0];
+						green = lightcolor[1];
+						blue = lightcolor[2];
+					}
+					else if(stage->lightmap && ramp) {
+						for(k = 0; k < 3; k++)
+							addlight[k] = shadelight[k]+0.025; //boost the min light, normalmaps tend to darken the surface
+						if(lerped)
+							GL_VlightAliasModel (addlight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+						else
+							GL_VlightAliasModel (addlight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+						
+						red = lightcolor[0] * 2.0f;
+						green = lightcolor[1] * 2.0f;
+						blue = lightcolor[2] * 2.0f;
+						if(stage->normalmap) { //limit the shadowing a bit
+							if(red < 0.85)
+								red = 0.85;
+							if(green < 0.85)
+								green = 0.85;
+							if(blue < 0.85)
+								blue = 0.85;
+						}
 					}
 									
 					if (stage->colormap.enabled) {
@@ -994,6 +1015,7 @@ void R_DrawAliasModel (entity_t *e)
 	{
 		R_LightPoint (currententity->origin, shadelight, true);
 	}
+
 	if ( currententity->flags & RF_MINLIGHT )
 	{
 		for (i=0 ; i<3 ; i++)
