@@ -659,20 +659,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 							calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
 
-					if (stage->lightmap && !ramp) {
-
-						if(lerped)
-							GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
-						else
-							GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
-						
-						red = lightcolor[0];
-						green = lightcolor[1];
-						blue = lightcolor[2];
-					}
-					else if(stage->lightmap && ramp) {
+					if(stage->lightmap && ramp) {
 						for(k = 0; k < 3; k++)
-							addlight[k] = shadelight[k]+0.025; //boost the min light, normalmaps tend to darken the surface
+							addlight[k] = shadelight[k]+0.025f; //boost input light, normalmaps tend to darken the surface
 						if(lerped)
 							GL_VlightAliasModel (addlight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 						else
@@ -682,13 +671,24 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						green = lightcolor[1] * 2.0f;
 						blue = lightcolor[2] * 2.0f;
 						if(stage->normalmap) { //limit the shadowing a bit
-							if(red < 0.85)
-								red = 0.85;
-							if(green < 0.85)
-								green = 0.85;
-							if(blue < 0.85)
-								blue = 0.85;
+							if(red < 0.85f)
+								red = 0.85f;
+							if(green < 0.85f)
+								green = 0.85f;
+							if(blue < 0.85f)
+								blue = 0.85f;
 						}
+					}
+					else if (stage->lightmap) {
+
+						if(lerped)
+							GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+						else
+							GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+						
+						red = lightcolor[0];
+						green = lightcolor[1];
+						blue = lightcolor[2];
 					}
 									
 					if (stage->colormap.enabled) {
