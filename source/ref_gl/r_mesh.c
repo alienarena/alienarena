@@ -112,9 +112,7 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
     {
         //add contrast - lights lighter, darks darker
         lightOut[i] += (lightOut[i] - 0.25);
-
         if (lightOut[i]<0) lightOut[i] = 0;
-        if (lightOut[i]>1) lightOut[i] = 1;
     }
 }
 
@@ -565,7 +563,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				
 					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
 
-					ramp = 2.0;
 				}
 				else {
 					if(stage->next) { //increase intensity of lighting to cut through normals a bit
@@ -661,7 +658,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 							calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
 
-					if (stage->lightmap) {
+					if (stage->lightmap && !stage->normalmap) {
 
 						if(lerped)
 							GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
@@ -671,11 +668,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						red = lightcolor[0] * ramp;
 						green = lightcolor[1] * ramp;
 						blue = lightcolor[2] * ramp;
-						if(stage->normalmap) { 
-							red = max(red, 0.85);
-							green = max(green, 0.85);
-							blue = max(blue, 0.85);
-						}
 					}
 									
 					if (stage->colormap.enabled) {
