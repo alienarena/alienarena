@@ -563,7 +563,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				
 					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
 					
-					ramp = true;
+					if (gl_rtlights->value)
+						ramp = true;
 				}
 				else {
 					if(stage->next) { //increase intensity of lighting to cut through normals a bit
@@ -679,7 +680,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 								blue = 0.85f;
 						}
 					}
-					else if (stage->lightmap) {
+					else if (stage->lightmap && !stage->normalmap) {
 
 						if(lerped)
 							GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
