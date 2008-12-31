@@ -112,7 +112,9 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
     {
         //add contrast - lights lighter, darks darker
         lightOut[i] += (lightOut[i] - 0.25);
+
         if (lightOut[i]<0) lightOut[i] = 0;
+        if (lightOut[i]>1) lightOut[i] = 1;
     }
 }
 
@@ -165,17 +167,23 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	daliasframe_t	*frame, *oldframe;
 	dtrivertx_t	*v, *ov, *verts;
 	int		*order, *startorder, *tmp_order;
-	int		count, tmp_count, i, index_xyz;
-	float	frontlerp, red, green, blue, alpha, nAlpha, basealpha, mode;
-	float	*lerp;
-	vec3_t	move, delta, vectors[3], frontv, backv, lightcolor;
+	int		count, tmp_count;
+	float	frontlerp;
+	float	alpha, basealpha;
+	vec3_t	move, delta, vectors[3];
+	vec3_t	frontv, backv;
+	int		i;
+	int		index_xyz;
 	qboolean depthmaskrscipt = false;
 	rscript_t *rs = NULL;
 	rs_stage_t *stage = NULL;
 	int		va = 0;
-	qboolean ramp = false;
+	float	mode;
+	vec3_t lightcolor;
+	float   *lerp;
+	float	ramp = 1.0;
 	qboolean mirror = false;
- 
+
 	if(lerped)
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
 			+ currententity->frame * paliashdr->framesize);
@@ -426,13 +434,11 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 			tmp_order=order;	
 
 			while (stage)
-			{	
-				red = green = blue = 1;
+			{
 				count=tmp_count;
 				order=tmp_order;
 				va=0;
 				VArray = &VArrayVerts[0];
-				ramp = false;
 
 				if (stage->normalmap && !gl_normalmaps->value) {
 					if(stage->next) {
@@ -562,14 +568,11 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
 				
 					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
-					
-					if (gl_rtlights->value)
-						ramp = true;
 				}
 				else {
 					if(stage->next) { //increase intensity of lighting to cut through normals a bit
 						if(stage->next->normalmap && gl_normalmaps->value)
-							ramp = true; 
+							ramp = 2.0;
 					}
 					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
 						R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
@@ -583,7 +586,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					float ot = ((float *)order)[1];
 					float os2 = ((float *)order)[0];
 					float ot2 = ((float *)order)[1];
-					vec3_t normal, addlight;
+					vec3_t normal;
 					int k;
 					
 					index_xyz = order[2];
@@ -653,64 +656,46 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						VArray[6] = ot2;
 					}
 			
-					if(lerped) 
-						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-							calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
-					else
-						nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-							calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
+					{
+						float red = 1, green = 1, blue = 1, nAlpha;
 
-					if(stage->lightmap && ramp) {
-						for(k = 0; k < 3; k++)
-							addlight[k] = shadelight[k]+0.025f; //boost input light, normalmaps tend to darken the surface
-						if(lerped)
-							GL_VlightAliasModel (addlight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+						if(lerped) 
+							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
+								calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
 						else
-							GL_VlightAliasModel (addlight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
-						
-						red = lightcolor[0] * 2.0f;
-						green = lightcolor[1] * 2.0f;
-						blue = lightcolor[2] * 2.0f;
-						if(stage->normalmap) { //limit the shadowing a bit
-							if(red < 0.85f)
-								red = 0.85f;
-							if(green < 0.85f)
-								green = 0.85f;
-							if(blue < 0.85f)
-								blue = 0.85f;
+							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
+								calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
+
+
+						if (stage->lightmap && !stage->normalmap) {
+							if(lerped)
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+							else
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+							red = lightcolor[0] * ramp;
+							green = lightcolor[1] * ramp;
+							blue = lightcolor[2] * ramp;	
+						}
+
+						if (stage->colormap.enabled) {
+							red *= stage->colormap.red/255.0;
+							green *= stage->colormap.green/255.0;
+							blue *= stage->colormap.blue/255.0;
+						}
+					
+						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
+							VArray[7] = red;
+							VArray[8] = green;
+							VArray[9] = blue;
+							VArray[10] = nAlpha;
+						}
+						else {
+							VArray[5] = red;
+							VArray[6] = green;
+							VArray[7] = blue;
+							VArray[8] = nAlpha;	
 						}
 					}
-					else if (stage->lightmap && !stage->normalmap) {
-
-						if(lerped)
-							GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
-						else
-							GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
-						
-						red = lightcolor[0];
-						green = lightcolor[1];
-						blue = lightcolor[2];
-					}
-									
-					if (stage->colormap.enabled) {
-						red *= stage->colormap.red/255.0;
-						green *= stage->colormap.green/255.0;
-						blue *= stage->colormap.blue/255.0;
-					}
-				
-					if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
-						VArray[7] = red;
-						VArray[8] = green;
-						VArray[9] = blue;
-						VArray[10] = nAlpha;
-					}
-					else {
-						VArray[5] = red;
-						VArray[6] = green;
-						VArray[7] = blue;
-						VArray[8] = nAlpha;	
-					}
-				
 					// increment pointer and counter
 					if(stage->normalmap)
 						VArray += VertexSizes[VERT_BUMPMAPPED_COLOURED];
@@ -742,6 +727,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 					R_KillNormalTMUs();
 
+					ramp = 1.0;
+			
 					// restore the original blend mode
 					qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -1016,7 +1003,6 @@ void R_DrawAliasModel (entity_t *e)
 	{
 		R_LightPoint (currententity->origin, shadelight, true);
 	}
-
 	if ( currententity->flags & RF_MINLIGHT )
 	{
 		for (i=0 ; i<3 ; i++)
