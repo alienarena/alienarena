@@ -1413,6 +1413,8 @@ void R_DrawVegetationSurface ( void )
 				origin[1] + (up[1] + right[1])*(-0.5),
 				origin[2] + (up[2] + right[2])*(-0.5));
 
+			//the next two statements create a slight swaying in the wind
+			//perhaps we should add a parameter to control ammount in shader?
 			VectorSet ( corner[1],
 				corner0[0] + up[0] + 2*sin (rs_realtime*2), 
 				corner0[1] + up[1] + 2*sin (rs_realtime*2), 
