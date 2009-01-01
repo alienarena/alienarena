@@ -1414,11 +1414,19 @@ void R_DrawVegetationSurface ( void )
 				origin[2] + (up[2] + right[2])*(-0.5));
 
 			VectorSet ( corner[1],
-				corner0[0] + up[0], corner0[1] + up[1], corner0[2] + up[2]);
-			VectorSet ( corner[2], corner0[0] + (up[0]+right[0]),
-				corner0[1] + (up[1]+right[1]), corner0[2] + (up[2]+right[2]));
+				corner0[0] + up[0] + 2*sin (rs_realtime*2), 
+				corner0[1] + up[1] + 2*sin (rs_realtime*2), 
+				corner0[2] + up[2]);
+
+			VectorSet ( corner[2], 
+				corner0[0] + (up[0]+right[0] + 2*sin (rs_realtime*2)),
+				corner0[1] + (up[1]+right[1] + 2*sin (rs_realtime*2)), 
+				corner0[2] + (up[2]+right[2]));
+
 			VectorSet ( corner[3],
-				corner0[0] + right[0], corner0[1] + right[1], corner0[2] + right[2]);
+				corner0[0] + right[0], 
+				corner0[1] + right[1], 
+				corner0[2] + right[2]);
 
 			qglTexCoord2f( 1, 1 );
 			qglVertex3fv( corner[0] );
