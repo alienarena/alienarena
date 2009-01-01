@@ -79,7 +79,7 @@ opposite directions.  This gives the shading a more prounounced, defined look.
 
 =============
 */
-void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov, float backlerp, vec3_t lightOut)
+void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov, float backlerp, qboolean perPixel, vec3_t lightOut)
 {
     int i;
     float l;
@@ -109,10 +109,18 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
     }
 
     for (i=0; i<3; i++)
-    {
-        //add contrast - lights lighter, darks darker
-        lightOut[i] += (lightOut[i] - 0.25);
+    {        
+		if(perPixel) {
+			//if normalmapped, try to keep pixel shadows from being pitch black
+			if(lightOut[i]<0.2) 
+				lightOut[i] = 0.2;
+		}
+		else {
+			//add contrast - lights lighter, darks darker
+			lightOut[i] += (lightOut[i] - 0.25);
+		}
 
+		//keep values sane
         if (lightOut[i]<0) lightOut[i] = 0;
         if (lightOut[i]>1) lightOut[i] = 1;
     }
@@ -362,7 +370,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				index_xyz = order[2];
 												
 				if(lerped) {
-					GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+					GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, false, lightcolor);
 
 					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
 					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
@@ -377,7 +385,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);			
 				}
 				else {
-					GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+					GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, false, lightcolor);
 
 					VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
 					VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
@@ -439,6 +447,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				order=tmp_order;
 				va=0;
 				VArray = &VArrayVerts[0];
+				ramp = 1.0;
 
 				if (stage->normalmap && !gl_normalmaps->value) {
 					if(stage->next) {
@@ -568,11 +577,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
 				
 					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
+
+					ramp = 1.75;
 				}
 				else {
 					if(stage->next) { //increase intensity of lighting to cut through normals a bit
 						if(stage->next->normalmap && gl_normalmaps->value)
-							ramp = 2.0;
+							stage->lightmap = false;
 					}
 					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
 						R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
@@ -667,11 +678,11 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 								calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
 
 
-						if (stage->lightmap && !stage->normalmap) {
+						if (stage->lightmap) {
 							if(lerped)
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, stage->normalmap, lightcolor);
 							else
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, stage->normalmap, lightcolor);
 							red = lightcolor[0] * ramp;
 							green = lightcolor[1] * ramp;
 							blue = lightcolor[2] * ramp;	
@@ -690,9 +701,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 							VArray[10] = nAlpha;
 						}
 						else {
-							VArray[5] = red;
-							VArray[6] = green;
-							VArray[7] = blue;
+							VArray[5] = red * ramp;
+							VArray[6] = green * ramp;
+							VArray[7] = blue * ramp;
 							VArray[8] = nAlpha;	
 						}
 					}
