@@ -48,7 +48,7 @@ image_t		*r_cflashtexture;
 image_t		*r_leaderfieldtexture;
 image_t		*r_deathfieldtexture;
 image_t		*r_deathfieldtexture2;
-image_t		*r_shelltexture;    // c14 added shell texture
+image_t		*r_shelltexture;    
 image_t		*r_hittexture;
 image_t		*r_bubbletexture;
 image_t		*r_reflecttexture;
@@ -65,7 +65,8 @@ image_t		*r_bulletnormal;
 image_t		*r_voltagetexture;
 image_t		*r_raintexture;
 image_t		*r_splashtexture;
-image_t		*r_radarmap; // wall texture for radar texgen
+image_t		*r_splash2texture;
+image_t		*r_radarmap; 
 image_t		*r_around;
 image_t		*r_flare;
 image_t		*r_mirrorspec; 
@@ -377,7 +378,11 @@ void R_InitParticleTexture (void)
 	r_splashtexture = R_RegisterParticlePic("ripples");
 	if (!r_splashtexture) {                                
 		r_splashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }   
+	r_splash2texture = R_RegisterParticlePic("watersplash");
+	if (!r_splash2texture) {                                
+		r_splash2texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }  
 	r_radarmap = GL_FindImage("gfx/radar/radarmap",it_pic);
 	if (!r_radarmap) {                                
 		r_radarmap = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);

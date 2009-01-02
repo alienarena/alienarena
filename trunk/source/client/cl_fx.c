@@ -781,7 +781,7 @@ CL_SplashEffect
 void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j, k;
-	float		inc, scale, nudge;
+	float		scale, nudge;
 	cparticle_t	*p;
 	vec3_t		angle;
 
@@ -811,31 +811,6 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 
 	p->alphavel = -0.1 / (1 + frand()*0.3); 
 
-	//shoot off small vertical plume of water
-    for (i=0 ; i<12 ; i++)
-    {
-        if (!(p = new_particle()))
-            return;
-
-        p->color = color + (rand()&2);
-        p->type = PARTICLE_STANDARD;
-        p->texnum = r_particletexture->texnum;
-        p->blendsrc = GL_SRC_ALPHA;
-        p->blenddst = GL_ONE;
-        p->scale = 0.5;
-        p->scalevel = 0;
-
-        for (j=0 ; j<3 ; j++)
-        {
-            p->org[j] = org[j] + i*.5*dir[j];
-            p->vel[j] = 20*dir[j];
-        }
-
-		p->accel[0] = p->accel[1] = 10;
-        p->accel[2] = 0;
-        p->alpha = .5;
-		p->alphavel = -1.0 / (0.5 + frand()*0.3);
-    }
 
 	for( k=0; k<count/4; k++) {
 
@@ -852,28 +827,29 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 		
 		//shoot off small plume of water
 		i = 0;
-		for (inc=1.0 ; inc<2.0 ; inc+=0.1, i++)
+		for (i=0; i<count/2; i++)
 		{
 			if (!(p = new_particle()))
 				return;
 
-			p->color = color + (rand()&2);
-			p->type = PARTICLE_STANDARD;
-			p->texnum = r_particletexture->texnum;
+			p->color = color - (rand()&2);
+			p->type = PARTICLE_VERT;
+			p->texnum = r_splash2texture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
-			p->scale = 1.5*scale/inc;
-			p->scalevel = 0;
+			p->scale = 4*(rand()&8);
+			p->scalevel = 2;
 			
 			for (j=0; j<3; j++)
 			{
-				p->org[j] = org[j] + i*(-1.5*scale)*dir[j] + 10*dir[j];
+				p->org[j] = org[j] + 10*dir[j];
 				p->vel[j] = 60*dir[j];
 			}
+			p->org[2]+=32;
 
 			p->accel[0] = 0;
 			p->accel[1] = 0;
-			p->accel[2] = -(PARTICLE_GRAVITY)/(.5*inc);
+			p->accel[2] = -(PARTICLE_GRAVITY)/0.5;
 			p->alpha = .5;
 
 			p->alphavel = -1.0 / (1.5 + frand()*0.3);
