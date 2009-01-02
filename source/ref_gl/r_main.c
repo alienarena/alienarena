@@ -52,10 +52,12 @@ PFNGLUNIFORM1FARBPROC				glUniform1fARB				= NULL;
 PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB		= NULL;
 
 GLhandleARB g_programObj;
+GLhandleARB g_waterprogramObj;
 GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
-GLuint      g_location_testTexture;
 
+//standard bsp
+GLuint      g_location_testTexture;
 GLuint      g_location_eyePos;
 GLuint		g_tangentSpaceTransform;
 GLuint      g_location_heightTexture;
@@ -70,7 +72,15 @@ GLuint	    g_location_surfaceColor;
 GLuint	    g_location_lightPosition;
 GLuint		g_location_lightColour;
 GLuint	    g_location_lightCutoffSquared;
-GLuint	    g_location_tangent;
+
+//water
+GLuint		g_location_baseTexture;
+GLuint		g_location_normTexture;
+GLuint		g_location_cubeTexture;
+GLuint		g_location_tangent;
+GLuint		g_location_time;
+GLuint		g_location_lightPos;
+GLuint		g_location_fogamount;
 
 void R_Clear (void);
 
@@ -2032,6 +2042,9 @@ int R_Init( void *hinstance, void *hWnd )
 
 	if(gl_state.glsl_shaders) {
 		int len;
+
+		//standard bsp surfaces
+
 		g_programObj = glCreateProgramObjectARB();
 	
 		//
@@ -2106,11 +2119,84 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_parallax = glGetUniformLocationARB( g_programObj, "PARALLAX" );
 		g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
 		g_location_specular = glGetUniformLocationARB( g_programObj, "SPECULAR" );
-		g_location_tangent = glGetUniformLocationARB( g_programObj, "sTangent" );
 		g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
 		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
 		g_location_lightCutoffSquared = glGetUniformLocationARB( g_programObj, "lightCutoffSquared" );
 		g_location_surfaceColor = glGetUniformLocationARB( g_programObj, "surfaceColor" );
+
+		//warp(water) bsp surfaces
+
+		g_waterprogramObj = glCreateProgramObjectARB();
+	
+		//
+		// Vertex shader
+		//
+
+		len = FS_LoadFile("scripts/water_vertex_shader.glsl", &shader_assembly);
+
+		if (len > 0) {
+			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+			shaderStrings[0] = (char*)shader_assembly;
+			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+			glCompileShaderARB( g_vertexShader);
+			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		}
+		else {
+			Com_Printf("...Unable to Locate Water Vertex Shader");
+			nResult = 0;
+		}
+
+		if( nResult )
+			glAttachObjectARB( g_waterprogramObj, g_vertexShader );
+		else
+		{
+			Com_Printf("...Water Vertex Shader Compile Error");
+		}
+
+		//
+		// Fragment shader
+		//
+		len = FS_LoadFile("scripts/water_fragment_shader.glsl", &shader_assembly);
+		
+		if(len > 0) {
+			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+			shaderStrings[0] = (char*)shader_assembly;
+			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+			glCompileShaderARB( g_fragmentShader );
+			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		}
+		else {
+			Com_Printf("...Unable to Locate Water Fragment Shader");
+			nResult = 0;
+		}
+
+		if( nResult )
+			glAttachObjectARB( g_waterprogramObj, g_fragmentShader );
+		else
+		{
+			Com_Printf("...Water Fragment Shader Compile Error");
+		}
+
+		glLinkProgramARB( g_waterprogramObj );
+		glGetObjectParameterivARB( g_waterprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+		if( !nResult )
+		{
+			glGetInfoLogARB( g_waterprogramObj, sizeof(str), NULL, str );
+			Com_Printf("...Linking Error");
+		}
+
+		//
+		// Locate some parameters by name so we can set them later...
+		//
+
+		g_location_baseTexture = glGetUniformLocationARB( g_waterprogramObj, "baseTexture" );
+		g_location_normTexture = glGetUniformLocationARB( g_waterprogramObj, "normalMap" );
+		g_location_cubeTexture = glGetUniformLocationARB( g_waterprogramObj, "cubeMap" );
+		g_location_tangent = glGetUniformLocationARB( g_waterprogramObj, "stangent" );
+		g_location_time = glGetUniformLocationARB( g_waterprogramObj, "time" );
+		g_location_lightPos = glGetUniformLocationARB( g_waterprogramObj, "LightPos" );
+		g_location_fogamount = glGetUniformLocationARB( g_waterprogramObj, "FOG" );
 	}
 	
 	GL_SetDefaultState();

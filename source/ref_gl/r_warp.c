@@ -212,6 +212,8 @@ Does a water warp on the pre-fragmented glpoly_t chain
 */
 extern image_t *distort_tex;
 extern image_t *water_normal_tex;
+extern GLuint normalisationCubeMap;
+extern int KillFlags;
 void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, float scaleX, float scaleY)
 {
 	glpoly_t	*p;
@@ -234,82 +236,127 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 	else
 		fod = false;
 
+	if(distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) 
+		&& !fod && gl_state.glsl_shaders && gl_glsl_shaders->value && gl_parallaxmaps->value && strcmp(fa->texinfo->heightMap->name, fa->texinfo->image->name) 
+			&& strcmp(fa->texinfo->normalMap->name, fa->texinfo->image->name)) {
+		
+		if (SurfaceIsAlphaBlended(fa))
+			qglEnable( GL_ALPHA_TEST );
 
-	if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
-	{
-		qglEnable(GL_FRAGMENT_PROGRAM_ARB);
-		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
-		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0,
-			rs_realtime * (0.2f), 1.0f, 1.0f, 1.0f);
-		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1,
-			rs_realtime * -0.2f, 10.0f, 1.0f, 1.0f);
-		qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
-			(fa->polys[0].verts[0][3]-r_newrefdef.vieworg[0]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[1]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[2]), 1.0f);
-		if(distort_tex)
-			GL_MBind(GL_TEXTURE1, distort_tex->texnum);      // Distortion texture
+		R_InitVArrays (VERT_SINGLE_TEXTURED);
+
+		glUseProgramObjectARB( g_waterprogramObj );
+
+		GL_EnableMultitexture( true );
+    	
+		qglActiveTextureARB(GL_TEXTURE1);
+		qglBindTexture (GL_TEXTURE_CUBE_MAP_ARB, fa->texinfo->image->texnum);
+		glUniform1iARB( g_location_cubeTexture, 1); 
+		KillFlags |= KILL_TMU1_POINTER;
+
+		glUniform1iARB( g_location_normTexture, 2);
+		qglActiveTextureARB(GL_TEXTURE2);
+		qglBindTexture(GL_TEXTURE_2D, fa->texinfo->normalMap->texnum);
+		KillFlags |= KILL_TMU2_POINTER;
+
+		qglActiveTextureARB(GL_TEXTURE3);
+		if(texnum)
+			qglBindTexture(GL_TEXTURE_2D, texnum);
+		else
+			qglBindTexture(GL_TEXTURE_2D,  r_reflecttexture->texnum);
+		glUniform1iARB( g_location_baseTexture, 3); 
+			
+		R_AddGLSLShadedWarpSurfToVArray (fa, scroll);
+
+		glUseProgramObjectARB( NULL );
+
+		R_KillVArrays ();
+
+		GL_EnableMultitexture( false );
+
+		if (SurfaceIsAlphaBlended(fa))
+			qglDisable( GL_ALPHA_TEST);
+
+		GL_MBind(GL_TEXTURE0, fa->texinfo->image->texnum);
 	}
-	
-	GL_MBind(GL_TEXTURE0, fa->texinfo->image->texnum);
+	else {
 
-	for (p=fa->polys ; p ; p=p->next)
-	{
-		qglBegin (GL_TRIANGLE_FAN);
-		for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
+		if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
 		{
-			os = v[3];
-			ot = v[4];
-
-#if !id386
-			s = os + r_turbsin[(int)((ot*0.125+r_newrefdef.time) * TURBSCALE) & 255];
-#else
-			s = os + r_turbsin[Q_ftol( ((ot*0.125+rdt) * TURBSCALE) ) & 255];
-#endif
-			s += scroll;
-			s *= (1.0/64);
-
-#if !id386
-			t = ot + r_turbsin[(int)((os*0.125+rdt) * TURBSCALE) & 255];
-#else
-			t = ot + r_turbsin[Q_ftol( ((os*0.125+rdt) * TURBSCALE) ) & 255];
-#endif
-			t *= (1.0/64);
-
-			if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
-			{
-				qglMTexCoord2fSGIS(GL_TEXTURE0, s, t);
-				qglMTexCoord2fSGIS(GL_TEXTURE1, 20*s, 20*t);
-			}
-			else
-				qglTexCoord2f (s, t);
-
-			if (!(fa->texinfo->flags & SURF_FLOWING))
-
-			{
-
-				nv[0] =v[0];
-				nv[1] =v[1];
-
-				#if !id386
-				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
-
-						+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
-				#else
-				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+r_newrefdef.time)
-
-						+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
-				#endif
-				qglVertex3fv (nv);
-			}
-			else
-				qglVertex3fv (v);
+			qglEnable(GL_FRAGMENT_PROGRAM_ARB);
+			qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
+			qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0,
+				rs_realtime * (0.2f), 1.0f, 1.0f, 1.0f);
+			qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1,
+				rs_realtime * -0.2f, 10.0f, 1.0f, 1.0f);
+			qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
+				(fa->polys[0].verts[0][3]-r_newrefdef.vieworg[0]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[1]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[2]), 1.0f);
+			if(distort_tex)
+				GL_MBind(GL_TEXTURE1, distort_tex->texnum);      // Distortion texture
 		}
-		qglEnd ();
+		
+		GL_MBind(GL_TEXTURE0, fa->texinfo->image->texnum);
+
+		for (p=fa->polys ; p ; p=p->next)
+		{
+			qglBegin (GL_TRIANGLE_FAN);
+			for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
+			{
+				os = v[3];
+				ot = v[4];
+
+	#if !id386
+				s = os + r_turbsin[(int)((ot*0.125+r_newrefdef.time) * TURBSCALE) & 255];
+	#else
+				s = os + r_turbsin[Q_ftol( ((ot*0.125+rdt) * TURBSCALE) ) & 255];
+	#endif
+				s += scroll;
+				s *= (1.0/64);
+
+	#if !id386
+				t = ot + r_turbsin[(int)((os*0.125+rdt) * TURBSCALE) & 255];
+	#else
+				t = ot + r_turbsin[Q_ftol( ((os*0.125+rdt) * TURBSCALE) ) & 255];
+	#endif
+				t *= (1.0/64);
+
+				if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
+				{
+					qglMTexCoord2fSGIS(GL_TEXTURE0, s, t);
+					qglMTexCoord2fSGIS(GL_TEXTURE1, 20*s, 20*t);
+				}
+				else
+					qglTexCoord2f (s, t);
+
+				if (!(fa->texinfo->flags & SURF_FLOWING))
+
+				{
+
+					nv[0] =v[0];
+					nv[1] =v[1];
+
+					#if !id386
+					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
+
+							+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
+					#else
+					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+r_newrefdef.time)
+
+							+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
+					#endif
+					qglVertex3fv (nv);
+				}
+				else
+					qglVertex3fv (v);
+			}
+			qglEnd ();
+		}
+
+		if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
+			qglDisable(GL_FRAGMENT_PROGRAM_ARB);
 	}
 
-	if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
-		qglDisable(GL_FRAGMENT_PROGRAM_ARB);
-
-	if(fod)
+	if(fod || (gl_state.glsl_shaders && gl_glsl_shaders->value))
 		return;
 
 	//env map for certain waters

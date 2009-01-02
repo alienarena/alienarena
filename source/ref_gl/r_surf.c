@@ -768,13 +768,11 @@ dynamic:
 			qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
 			KillFlags |= KILL_TMU2_POINTER;
 
-			if(strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
-				glUniform1iARB( g_location_normalTexture, 3);
-				qglActiveTextureARB(GL_TEXTURE3);
-				qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
-				KillFlags |= KILL_TMU3_POINTER;
-			}
-
+			glUniform1iARB( g_location_normalTexture, 3);
+			qglActiveTextureARB(GL_TEXTURE3);
+			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
+			KillFlags |= KILL_TMU3_POINTER;
+			
 			if(is_dynamic) {
 						
 				if(brightest > 0) {
