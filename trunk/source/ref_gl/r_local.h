@@ -492,29 +492,40 @@ void R_InitQuadVarrays(void);
 void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean lightmap);
+void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
 
 //glsl
-extern GLhandleARB g_programObj;
-extern GLhandleARB g_vertexShader;
-extern GLhandleARB g_fragmentShader;
-extern GLuint      g_location_testTexture;
+extern GLhandleARB	g_programObj;
+extern GLhandleARB	g_waterprogramObj;
+extern GLhandleARB	g_vertexShader;
+extern GLhandleARB	g_fragmentShader;
 
-extern GLuint      g_location_eyePos;
-extern GLuint	   g_tangentSpaceTransform;
-extern GLuint      g_location_heightTexture;
-extern GLuint	   g_location_lmTexture;
-extern GLuint	   g_location_normalTexture;
-extern GLuint      g_heightMapID;
-extern GLuint	   g_location_fog;
-extern GLuint	   g_location_parallax;
-extern GLuint	   g_location_dynamic;
-extern GLuint	   g_location_specular;
-extern GLuint	   g_location_surfaceColor;
-extern GLuint	   g_location_lightPosition;
-extern GLuint	   g_location_lightColour;
-extern GLuint	   g_location_lightCutoffSquared;
-extern GLuint	   g_location_tangent;
+//standard bsp surfaces
+extern GLuint		g_location_testTexture;
+extern GLuint		g_location_eyePos;
+extern GLuint		g_tangentSpaceTransform;
+extern GLuint		g_location_heightTexture;
+extern GLuint		g_location_lmTexture;
+extern GLuint		g_location_normalTexture;
+extern GLuint		g_heightMapID;
+extern GLuint		g_location_fog;
+extern GLuint		g_location_parallax;
+extern GLuint		g_location_dynamic;
+extern GLuint		g_location_specular;
+extern GLuint		g_location_surfaceColor;
+extern GLuint		g_location_lightPosition;
+extern GLuint		g_location_lightColour;
+extern GLuint		g_location_lightCutoffSquared;
+
+//water
+extern GLuint		g_location_baseTexture;
+extern GLuint		g_location_normTexture;
+extern GLuint		g_location_cubeTexture;
+extern GLuint		g_location_tangent;
+extern GLuint		g_location_time;
+extern GLuint		g_location_lightPos;
+extern GLuint		g_location_fogamount;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 

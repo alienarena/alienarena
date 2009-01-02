@@ -470,6 +470,57 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean light
 	}
 }
 
+void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
+{
+	glpoly_t *p = surf->polys;
+	float	*v;	
+	int		i;
+
+	for (; p; p = p->chain)
+	{
+		vec3_t	tangent, lightPos;
+
+		// reset pointer and counter
+		VArray = &VArrayVerts[0];
+		VertexCounter = 0;
+
+		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
+		{
+
+			// copy in vertex data
+			VArray[0] = v[0];
+			VArray[1] = v[1];
+			VArray[2] = v[2];
+
+			// world texture coords
+			VArray[3] = v[3] + scroll;
+			VArray[4] = v[4];
+
+			// nothing else is needed
+			// increment pointer and counter
+			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+			VertexCounter++;
+		}
+
+		AngleVectors(surf->plane->normal, NULL, tangent, NULL);
+
+		//send these to the shader program
+		glUniform3fARB( g_location_tangent, tangent[0], tangent[1], tangent[2]);
+
+		for(i=0; i<3; i++) 
+			lightPos[i] = r_origin[i];
+		lightPos[2] += 512;
+
+		glUniform3fARB( g_location_lightPos, lightPos[0], lightPos[1], lightPos[2]);
+		glUniform1iARB( g_location_fogamount, map_fog);
+		glUniform1fARB( g_location_time, rs_realtime);
+	
+		// draw the poly
+		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+	}
+}
+
+
 /*
 ====================
 R_InitQuadVarrays

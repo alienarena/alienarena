@@ -984,7 +984,8 @@ void Mod_LoadFaces (lump_t *l)
 				out->extents[i] = 16384;
 				out->texturemins[i] = -8192;
 			}
-			GL_SubdivideSurface (out);	// cut up polygon for warps
+			if(!(gl_state.glsl_shaders && gl_glsl_shaders->value))
+				GL_SubdivideSurface (out);	// cut up polygon for warps
 		}
 
 		// create lightmaps and polygons
@@ -993,7 +994,7 @@ void Mod_LoadFaces (lump_t *l)
 			GL_CreateSurfaceLightmap (out);
 		}
 
-		if (! (out->texinfo->flags & SURF_WARP) ) 
+		if ( (! (out->texinfo->flags & SURF_WARP)) || (gl_state.glsl_shaders && gl_glsl_shaders->value)) 
 			GL_BuildPolygonFromSurface(out);
 		
 		rs = (rscript_t *)out->texinfo->image->script;
