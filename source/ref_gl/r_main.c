@@ -709,7 +709,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 				VectorScale(up, -5*scale, pup);
 			}
 		}
-		else if(p->type == PARTICLE_WEATHER){  // keep it vertical
+		else if(p->type == PARTICLE_WEATHER || p->type == PARTICLE_VERT){  // keep it vertical
 			VectorCopy(r_newrefdef.viewangles, v);
 			v[0] = 0;  // keep weather particles vertical by removing pitch
 			AngleVectors(v, NULL, right, up);	

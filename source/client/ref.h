@@ -91,6 +91,7 @@ typedef struct
 #define PARTICLE_ROTATINGYAW		7
 #define PARTICLE_ROTATINGROLL		8
 #define PARTICLE_ROTATINGYAWMINUS   9
+#define PARTICLE_VERT				10
 
 #define RDF_BLOOM         4      //BLOOMS
 
