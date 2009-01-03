@@ -236,7 +236,7 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 		fod = false;
 
 	if(distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) 
-		&& !fod && gl_state.glsl_shaders && gl_glsl_shaders->value && gl_parallaxmaps->value && strcmp(fa->texinfo->heightMap->name, fa->texinfo->image->name) 
+		&& !fod && gl_state.glsl_shaders && gl_glsl_shaders->value && strcmp(fa->texinfo->heightMap->name, fa->texinfo->image->name) 
 			&& strcmp(fa->texinfo->normalMap->name, fa->texinfo->image->name)) {
 		
 		if (SurfaceIsAlphaBlended(fa))
