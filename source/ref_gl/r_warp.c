@@ -212,7 +212,6 @@ Does a water warp on the pre-fragmented glpoly_t chain
 */
 extern image_t *distort_tex;
 extern image_t *water_normal_tex;
-extern GLuint normalisationCubeMap;
 extern int KillFlags;
 void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, float scaleX, float scaleY)
 {
@@ -250,8 +249,8 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 		GL_EnableMultitexture( true );
     	
 		qglActiveTextureARB(GL_TEXTURE1);
-		qglBindTexture (GL_TEXTURE_CUBE_MAP_ARB, fa->texinfo->image->texnum);
-		glUniform1iARB( g_location_cubeTexture, 1); 
+		qglBindTexture (GL_TEXTURE_2D, fa->texinfo->image->texnum);
+		glUniform1iARB( g_location_baseTexture, 1); 
 		KillFlags |= KILL_TMU1_POINTER;
 
 		glUniform1iARB( g_location_normTexture, 2);
@@ -264,7 +263,7 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 			qglBindTexture(GL_TEXTURE_2D, texnum);
 		else
 			qglBindTexture(GL_TEXTURE_2D,  r_reflecttexture->texnum);
-		glUniform1iARB( g_location_baseTexture, 3); 
+		glUniform1iARB( g_location_refTexture, 3); 
 			
 		R_AddGLSLShadedWarpSurfToVArray (fa, scroll);
 

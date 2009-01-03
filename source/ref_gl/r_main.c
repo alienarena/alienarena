@@ -76,7 +76,7 @@ GLuint	    g_location_lightCutoffSquared;
 //water
 GLuint		g_location_baseTexture;
 GLuint		g_location_normTexture;
-GLuint		g_location_cubeTexture;
+GLuint		g_location_refTexture;
 GLuint		g_location_tangent;
 GLuint		g_location_time;
 GLuint		g_location_lightPos;
@@ -2192,7 +2192,7 @@ int R_Init( void *hinstance, void *hWnd )
 
 		g_location_baseTexture = glGetUniformLocationARB( g_waterprogramObj, "baseTexture" );
 		g_location_normTexture = glGetUniformLocationARB( g_waterprogramObj, "normalMap" );
-		g_location_cubeTexture = glGetUniformLocationARB( g_waterprogramObj, "cubeMap" );
+		g_location_refTexture = glGetUniformLocationARB( g_waterprogramObj, "refTexture" );
 		g_location_tangent = glGetUniformLocationARB( g_waterprogramObj, "stangent" );
 		g_location_time = glGetUniformLocationARB( g_waterprogramObj, "time" );
 		g_location_lightPos = glGetUniformLocationARB( g_waterprogramObj, "LightPos" );

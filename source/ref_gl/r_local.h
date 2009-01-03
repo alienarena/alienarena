@@ -521,7 +521,7 @@ extern GLuint		g_location_lightCutoffSquared;
 //water
 extern GLuint		g_location_baseTexture;
 extern GLuint		g_location_normTexture;
-extern GLuint		g_location_cubeTexture;
+extern GLuint		g_location_refTexture;
 extern GLuint		g_location_tangent;
 extern GLuint		g_location_time;
 extern GLuint		g_location_lightPos;
