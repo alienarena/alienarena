@@ -279,7 +279,7 @@ void R_RotateForEntity (entity_t *e);
 void R_MarkLeaves (void);
 void R_AddSkySurface (msurface_t *fa);
 void EmitWaterPolys (msurface_t *fa);
-void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, float scaleX, float scaleY);
+void EmitWaterPolys_original (msurface_t *fa, int texnum, float scaleX, float scaleY);
 void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
 void R_DrawSkyBoxVooDoo (void);
@@ -525,6 +525,8 @@ extern GLuint		g_location_refTexture;
 extern GLuint		g_location_tangent;
 extern GLuint		g_location_time;
 extern GLuint		g_location_lightPos;
+extern GLuint		g_location_reflect;
+extern GLuint		g_location_trans;
 extern GLuint		g_location_fogamount;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 

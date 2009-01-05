@@ -80,6 +80,8 @@ GLuint		g_location_refTexture;
 GLuint		g_location_tangent;
 GLuint		g_location_time;
 GLuint		g_location_lightPos;
+GLuint		g_location_reflect;
+GLuint		g_location_trans;
 GLuint		g_location_fogamount;
 
 void R_Clear (void);
@@ -2196,6 +2198,8 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_tangent = glGetUniformLocationARB( g_waterprogramObj, "stangent" );
 		g_location_time = glGetUniformLocationARB( g_waterprogramObj, "time" );
 		g_location_lightPos = glGetUniformLocationARB( g_waterprogramObj, "LightPos" );
+		g_location_reflect = glGetUniformLocationARB( g_waterprogramObj, "REFLECT" );
+		g_location_trans = glGetUniformLocationARB( g_waterprogramObj, "TRANSPARENT" );
 		g_location_fogamount = glGetUniformLocationARB( g_waterprogramObj, "FOG" );
 	}
 	

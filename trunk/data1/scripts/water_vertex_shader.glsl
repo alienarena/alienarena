@@ -14,7 +14,7 @@ varying float fog;
 uniform vec3 stangent;
 uniform vec3 LightPos;
 uniform float time; 
-
+uniform int	REFLECT;
 uniform int FOG;
 
 void main(void)
@@ -55,8 +55,10 @@ void main(void)
 	eyeDir = normalize(tmp);
 
 	vec4 texco = gl_MultiTexCoord0; 
-	texco.s = texco.s - LightPos.x/256.0;
-	texco.t = texco.t + LightPos.y/256.0; 
+	if(REFLECT > 0) {
+		texco.s = texco.s - LightPos.x/256.0;
+		texco.t = texco.t + LightPos.y/256.0; 
+	}
 
 	gl_TexCoord[0] = texco; 
 
