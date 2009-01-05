@@ -213,7 +213,7 @@ Does a water warp on the pre-fragmented glpoly_t chain
 extern image_t *distort_tex;
 extern image_t *water_normal_tex;
 extern int KillFlags;
-void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, float scaleX, float scaleY)
+void EmitWaterPolys_original (msurface_t *fa, int texnum, float scaleX, float scaleY)
 {
 	glpoly_t	*p;
 	float		*v;
@@ -235,8 +235,7 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 	else
 		fod = false;
 
-	if(distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) 
-		&& !fod && gl_state.glsl_shaders && gl_glsl_shaders->value && strcmp(fa->texinfo->heightMap->name, fa->texinfo->image->name) 
+	if(!fod && gl_state.glsl_shaders && gl_glsl_shaders->value  
 			&& strcmp(fa->texinfo->normalMap->name, fa->texinfo->image->name)) {
 		
 		if (SurfaceIsAlphaBlended(fa))
@@ -258,12 +257,19 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 		qglBindTexture(GL_TEXTURE_2D, fa->texinfo->normalMap->texnum);
 		KillFlags |= KILL_TMU2_POINTER;
 
-		qglActiveTextureARB(GL_TEXTURE3);
-		if(texnum)
-			qglBindTexture(GL_TEXTURE_2D, texnum);
+		if(fa->texinfo->flags &(SURF_TRANS33|SURF_TRANS66))
+			glUniform1iARB( g_location_trans, 1);
 		else
-			qglBindTexture(GL_TEXTURE_2D,  r_reflecttexture->texnum);
-		glUniform1iARB( g_location_refTexture, 3); 
+			glUniform1iARB( g_location_trans, 0);
+
+		if(texnum) {
+			qglActiveTextureARB(GL_TEXTURE3);
+			qglBindTexture(GL_TEXTURE_2D, texnum);
+			glUniform1iARB( g_location_refTexture, 3); 
+			glUniform1iARB( g_location_reflect, 1);
+		}
+		else
+			glUniform1iARB( g_location_reflect, 0);
 			
 		R_AddGLSLShadedWarpSurfToVArray (fa, scroll);
 
@@ -280,7 +286,7 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 	}
 	else {
 
-		if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
+		if (gl_state.fragment_program && !fod)
 		{
 			qglEnable(GL_FRAGMENT_PROGRAM_ARB);
 			qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
@@ -319,7 +325,7 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 	#endif
 				t *= (1.0/64);
 
-				if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
+				if (gl_state.fragment_program && !fod)
 				{
 					qglMTexCoord2fSGIS(GL_TEXTURE0, s, t);
 					qglMTexCoord2fSGIS(GL_TEXTURE1, 20*s, 20*t);
@@ -351,7 +357,7 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 			qglEnd ();
 		}
 
-		if (distFlag && gl_state.fragment_program && (fa->texinfo->flags &(SURF_TRANS33)) && !fod)
+		if (gl_state.fragment_program && !fod)
 			qglDisable(GL_FRAGMENT_PROGRAM_ARB);
 	}
 
@@ -359,46 +365,41 @@ void EmitWaterPolys_original (msurface_t *fa, qboolean distFlag, int texnum, flo
 		return;
 
 	//env map for certain waters
-	if(fa->texinfo->flags &(SURF_TRANS33)){
-		if(texnum)
-			GL_Bind(texnum);
-		else //default
-			GL_Bind(r_reflecttexture->texnum); 
+	if(texnum)
+		GL_Bind(texnum);
+	else 
+		return;
 		
-		for (p=fa->polys ; p ; p=p->next)
+	for (p=fa->polys ; p ; p=p->next)
+	{
+		qglBegin (GL_TRIANGLE_FAN);
+		for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
 		{
-			qglBegin (GL_TRIANGLE_FAN);
-			for (i=0,v=p->verts[0] ; i<p->numverts ; i++, v+=VERTEXSIZE)
-			{
-				os = v[3] - r_newrefdef.vieworg[0] + 128*scaleX;
-				ot = v[4] + r_newrefdef.vieworg[1] + 128*scaleY;
+			os = v[3] - r_newrefdef.vieworg[0] + 128*scaleX;
+			ot = v[4] + r_newrefdef.vieworg[1] + 128*scaleY;
 
-				if(texnum)
-					qglTexCoord2f(1.0/512*scaleX*os, 1.0/512*scaleY*ot);
-				else //default
-					qglTexCoord2f (.5/512*os, .5/512*ot);
+			if(texnum)
+				qglTexCoord2f(1.0/512*scaleX*os, 1.0/512*scaleY*ot);
 				
-				if (!(fa->texinfo->flags & SURF_FLOWING))
+			if (!(fa->texinfo->flags & SURF_FLOWING))
+			{
+				nv[0] =v[0];
+				nv[1] =v[1];
 
-				{
-					nv[0] =v[0];
-					nv[1] =v[1];
+				#if !id386
+				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
+						+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
+				#else
+				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+r_newrefdef.time)
+						+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
+				#endif
 
-					#if !id386
-					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
-							+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
-					#else
-					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+r_newrefdef.time)
-							+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
-					#endif
-
-					qglVertex3fv (nv);
-				}
-				else
-				qglVertex3fv (v);
+				qglVertex3fv (nv);
 			}
-			qglEnd ();
+			else
+				qglVertex3fv (v);
 		}
+		qglEnd ();
 	}
 }
 

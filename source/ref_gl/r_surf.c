@@ -341,8 +341,8 @@ void R_RenderBrushPoly (msurface_t *fa)
 			        gl_state.inverse_intensity,
 					gl_state.inverse_intensity,
 					1.0F );
-		if(!gl_reflection->value || (!Q_stricmp(fa->texinfo->image->name, "textures/arena2/lava.wal"))) //lava HACK!
-			EmitWaterPolys_original(fa, false, 0, 1, 1);
+		if(!gl_reflection->value)
+			EmitWaterPolys_original(fa, 0, 1, 1);
 		else
 			EmitWaterPolys (fa);
 		GL_TexEnv( GL_REPLACE );
@@ -454,7 +454,6 @@ void R_DrawAlphaSurfaces (void)
 	float		intens;
 	rscript_t	*rs_shader;
 	rs_stage_t	*stage = NULL;
-	qboolean	distFlag = false;
 	int			texnum = 0;
 	float		scaleX = 1, scaleY = 1;
  
@@ -491,7 +490,7 @@ void R_DrawAlphaSurfaces (void)
 		}
 
 		if (s->flags & SURF_DRAWTURB) {
-			if(!gl_reflection->value || (!Q_stricmp(s->texinfo->image->name, "textures/arena2/lava.wal"))) { //lava HACK!
+			if(!gl_reflection->value) {
 				//water shaders		
 				if(r_shaders->value) {
 					rs_shader = (rscript_t *)s->texinfo->image->script;
@@ -504,11 +503,9 @@ void R_DrawAlphaSurfaces (void)
 							scaleX = stage->scale.scaleX;
 							scaleY = stage->scale.scaleY;
 						}
-						if(stage->distort)
-							distFlag = true;
 					}
 				}
-				EmitWaterPolys_original (s, distFlag, texnum, scaleX, scaleY);
+				EmitWaterPolys_original (s, texnum, scaleX, scaleY);
 			} 
 			else
 				EmitWaterPolys (s);
