@@ -112,8 +112,8 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
     {        
 		if(perPixel) {
 			//if normalmapped, try to keep pixel shadows from being pitch black
-			if(lightOut[i]<0.2) 
-				lightOut[i] = 0.2;
+			if(lightOut[i]<0.20) 
+				lightOut[i] = 0.20;
 		}
 		else {
 			//add contrast - lights lighter, darks darker
@@ -169,7 +169,6 @@ float calcEntAlpha (float alpha, vec3_t point)
 }
 
 extern GLuint normalisationCubeMap;
-
 void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 {
 	daliasframe_t	*frame, *oldframe;
@@ -474,10 +473,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					else
 						GL_Bind(r_mirrortexture->texnum);
 				}
-				else if (stage->colormap.enabled)
-					qglDisable (GL_TEXTURE_2D);
-				else if (stage->anim_count)
-					GL_Bind(RS_Animate(stage));
 				else if(!stage->normalmap)
 					GL_Bind (stage->texture->texnum);
 
@@ -577,13 +572,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
 				
 					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
-
-					ramp = 1.75;
+					
+					ramp = 1.80; //tweak overall shadowing effect
+		
 				}
 				else {
-					if(stage->next) { //increase intensity of lighting to cut through normals a bit
-						if(stage->next->normalmap && gl_normalmaps->value)
-							stage->lightmap = false;
+					if(stage->next) { 
+						if(stage->next->normalmap && gl_normalmaps->value) 
+							stage->lightmap = false; 
 					}
 					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
 						R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
@@ -677,7 +673,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 								calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
 
-
 						if (stage->lightmap) {
 							if(lerped)
 								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, stage->normalmap, lightcolor);
@@ -685,15 +680,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, stage->normalmap, lightcolor);
 							red = lightcolor[0] * ramp;
 							green = lightcolor[1] * ramp;
-							blue = lightcolor[2] * ramp;	
+							blue = lightcolor[2] * ramp;						
 						}
-
-						if (stage->colormap.enabled) {
-							red *= stage->colormap.red/255.0;
-							green *= stage->colormap.green/255.0;
-							blue *= stage->colormap.blue/255.0;
-						}
-					
+						
 						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
 							VArray[7] = red;
 							VArray[8] = green;
@@ -728,9 +717,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				}
 							
 				qglColor4f(1,1,1,1);
-				if (stage->colormap.enabled)
-					qglEnable (GL_TEXTURE_2D);
-
+			
 				if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 					GL_EnableMultitexture( false );
 
@@ -747,7 +734,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					qglDisable (GL_BLEND);
 					qglDepthMask (GL_TRUE);
 				}
-
+			
 				stage=stage->next;
 			}
 
