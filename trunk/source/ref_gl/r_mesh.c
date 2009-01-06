@@ -573,7 +573,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				
 					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
 					
-					ramp = 1.80; //tweak overall shadowing effect
+					ramp = 1.75; //tweak overall shadowing effect
 		
 				}
 				else {
