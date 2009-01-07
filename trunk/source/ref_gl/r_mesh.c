@@ -927,7 +927,6 @@ void R_DrawAliasModel (entity_t *e)
 	vec3_t		bbox[8];
 	image_t		*skin;
 	rscript_t	*rs = NULL;
-	extern qboolean g_drawing_refl;
 
 	if(e->team) //don't draw flag models, handled by sprites
 		return;
@@ -939,7 +938,7 @@ void R_DrawAliasModel (entity_t *e)
 	}
 	else
 	{
-		if ( r_lefthand->value == 2 || g_drawing_refl)
+		if ( r_lefthand->value == 2 )
 			return;
 	}
 

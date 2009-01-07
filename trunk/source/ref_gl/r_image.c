@@ -1552,7 +1552,7 @@ void GL_FreeUnusedImages (void)
 	// never free r_notexture or particle texture
 	r_notexture->registration_sequence = registration_sequence;
 	r_particletexture->registration_sequence = registration_sequence;
-    r_shelltexture->registration_sequence = registration_sequence;    // c14 added shell texture
+    r_shelltexture->registration_sequence = registration_sequence;    
 	r_reflecttexture->registration_sequence = registration_sequence;
 	r_mirrorspec->registration_sequence = registration_sequence;
 	r_flare->registration_sequence = registration_sequence;
@@ -1569,6 +1569,9 @@ void GL_FreeUnusedImages (void)
 	r_pufftexture->registration_sequence = registration_sequence;
 	r_bflashtexture->registration_sequence = registration_sequence;
 	r_cflashtexture->registration_sequence = registration_sequence;
+	r_beamtexture->registration_sequence = registration_sequence;
+	r_beam2texture->registration_sequence = registration_sequence;
+	r_beam3texture->registration_sequence = registration_sequence;
 	r_leaderfieldtexture->registration_sequence = registration_sequence;
 	r_deathfieldtexture->registration_sequence = registration_sequence;
 	r_deathfieldtexture2->registration_sequence = registration_sequence;
@@ -1584,12 +1587,9 @@ void GL_FreeUnusedImages (void)
 	r_splash2texture->registration_sequence = registration_sequence;
 	r_flagtexture->registration_sequence = registration_sequence;
 	r_logotexture->registration_sequence = registration_sequence;
-	//minimap stuff - only if those textures are present, as this was a feature added later on
-	//and if crx has been updated via galaxy, clients may not have these images
-	if(r_radarmap)
-		r_radarmap->registration_sequence = registration_sequence;
-	if(r_around)
-		r_around->registration_sequence = registration_sequence;
+	r_distort->registration_sequence = registration_sequence;
+	r_radarmap->registration_sequence = registration_sequence;
+	r_around->registration_sequence = registration_sequence;
 
 	for (i=0, image=gltextures ; i<numgltextures ; i++, image++)
 	{

@@ -120,8 +120,6 @@ extern	cvar_t	*r_lerpmodels;
 extern	cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light level
 extern  cvar_t  *r_wave; //water waves
 
-extern cvar_t	*gl_vertex_arrays;
-
 extern cvar_t	*gl_ext_swapinterval;
 extern cvar_t	*gl_ext_palettedtexture;
 extern cvar_t	*gl_ext_multitexture;
@@ -135,7 +133,6 @@ extern cvar_t	*gl_particle_att_a;
 extern cvar_t	*gl_particle_att_b;
 extern cvar_t	*gl_particle_att_c;
 
-extern	cvar_t	*gl_nosubimage;
 extern	cvar_t	*gl_bitdepth;
 extern	cvar_t	*gl_mode;
 extern	cvar_t	*gl_log;
@@ -195,9 +192,6 @@ extern  cvar_t		*r_minimap_size;
 extern  cvar_t		*r_minimap_zoom;
 extern  cvar_t		*r_minimap_style;
 
-extern	cvar_t	*gl_reflection;			// MPO
-extern	cvar_t	*gl_reflection_debug;	// MPO	for debugging the reflection
-extern	cvar_t	*gl_reflection_max;		// MPO  max number of water reflections
 extern	cvar_t	*gl_mirror;
 
 extern	cvar_t	*gl_arb_fragment_program; 
@@ -278,8 +272,7 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 void R_RotateForEntity (entity_t *e);
 void R_MarkLeaves (void);
 void R_AddSkySurface (msurface_t *fa);
-void EmitWaterPolys (msurface_t *fa);
-void EmitWaterPolys_original (msurface_t *fa, int texnum, float scaleX, float scaleY);
+void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY);
 void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
 void R_DrawSkyBoxVooDoo (void);
@@ -409,14 +402,8 @@ typedef struct
 	const char *vendor_string;
 	const char *version_string;
 	const char *extensions_string;
-
 	qboolean	allow_cds;
-
-	// Vic - begin
-
 	qboolean 	mtexcombine;
-
-	// Vic - end
 } glconfig_t;
 
 typedef struct
@@ -440,7 +427,7 @@ typedef struct
 	qboolean	blend;
 	qboolean	texgen;
 	qboolean	texshaders;
-	qboolean	fragment_program; // jitwater
+	qboolean	fragment_program; 
 	qboolean	glsl_shaders;
 } glstate_t;
 

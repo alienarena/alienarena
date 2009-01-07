@@ -70,6 +70,7 @@ image_t		*r_radarmap;
 image_t		*r_around;
 image_t		*r_flare;
 image_t		*r_mirrorspec; 
+image_t		*r_distort;
 
 //Normalisation cube map
 GLuint normalisationCubeMap;
@@ -224,6 +225,7 @@ void R_InitParticleTexture (void)
 	int		x,y;
 	byte	data[16][16][4];
 	char flares[MAX_QPATH];
+
 	//
 	// particle texture
 	//
@@ -234,15 +236,14 @@ void R_InitParticleTexture (void)
 			data[y][x][0] = 255;
 			data[y][x][1] = 255;
 			data[y][x][2] = 255;
-			data[y][x][3] = dottexture[x][y]; // c14 Just this line changes
+			data[y][x][3] = dottexture[x][y]; 
 		}
 	}
 
 	r_particletexture = R_RegisterParticlePic("particle");
 	if (!r_particletexture) {                                
 		r_particletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
-
+    }
 	r_smoketexture = R_RegisterParticlePic("smoke");
 	if (!r_smoketexture) {                                
 		r_smoketexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
@@ -390,9 +391,11 @@ void R_InitParticleTexture (void)
 	r_around = GL_FindImage("gfx/radar/around",it_pic);
 	if (!r_around) {                                
 		r_around = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
-                                               
-
+    }                                          
+	r_distort = GL_FindImage("gfx/water/distort1.tga", it_pic);
+	if (!r_distort) {                                
+		r_distort = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    } 
 	//
 	// also use this for bad textures, but without alpha
 	//
@@ -401,8 +404,8 @@ void R_InitParticleTexture (void)
 		for (y=0 ; y<16 ; y++)
 		{
 			data[y][x][0] = dottexture[x&3][y&3]*255;
-			data[y][x][1] = 0; // dottexture[x&3][y&3]*255;
-			data[y][x][2] = 0; //dottexture[x&3][y&3]*255;
+			data[y][x][1] = 0; 
+			data[y][x][2] = 0; 
 			data[y][x][3] = 255;
 		}
 	}
@@ -410,6 +413,7 @@ void R_InitParticleTexture (void)
 
 	R_InitCubemapTextures (); 
 
+	//will eventually add more flaretypes
 	Com_sprintf (flares, sizeof(flares), "gfx/flares/flare0.tga");
 	r_flare = GL_FindImage(flares, it_pic);
 	if (!r_flare) {                                

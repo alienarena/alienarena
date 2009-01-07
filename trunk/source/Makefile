@@ -248,7 +248,6 @@ CODERED_OBJS = \
 	$(BUILDDIR)/ref_gl/r_mesh.o \
 	$(BUILDDIR)/ref_gl/r_misc.o \
 	$(BUILDDIR)/ref_gl/r_model.o \
-	$(BUILDDIR)/ref_gl/r_refl.o \
 	$(BUILDDIR)/ref_gl/r_math.o \
 	$(BUILDDIR)/ref_gl/r_script.o \
 	$(BUILDDIR)/ref_gl/r_surf.o \
@@ -449,9 +448,6 @@ $(BUILDDIR)/ref_gl/r_mesh.o :        $(REF_GL_DIR)/r_mesh.c
 	$(DO_GL_SHLIB_CC)
 
 $(BUILDDIR)/ref_gl/r_model.o :       $(REF_GL_DIR)/r_model.c
-	$(DO_GL_SHLIB_CC)
-
-$(BUILDDIR)/ref_gl/r_refl.o :       $(REF_GL_DIR)/r_refl.c
 	$(DO_GL_SHLIB_CC)
 
 $(BUILDDIR)/ref_gl/r_math.o :	    $(REF_GL_DIR)/r_math.c

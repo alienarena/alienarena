@@ -19,20 +19,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // r_main.c
 #include "r_local.h"
-#include "r_refl.h"	// MPO
 #include "r_script.h"
 #include "vlights.h"
 
-//****************************************************************************
-// === jitwater -- fragment program extensions
+//fragment program extensions
 PFNGLGENPROGRAMSARBPROC             qglGenProgramsARB            = NULL;
 PFNGLDELETEPROGRAMSARBPROC          qglDeleteProgramsARB         = NULL;
 PFNGLBINDPROGRAMARBPROC             qglBindProgramARB            = NULL;
 PFNGLPROGRAMSTRINGARBPROC           qglProgramStringARB          = NULL;
 PFNGLPROGRAMENVPARAMETER4FARBPROC   qglProgramEnvParameter4fARB  = NULL;
 PFNGLPROGRAMLOCALPARAMETER4FARBPROC qglProgramLocalParameter4fARB = NULL;
-// jitwater ===
-//****************************************************************************
+
+unsigned int g_water_program_id;
+char *fragment_program_text;
 
 //GLSL
 PFNGLCREATEPROGRAMOBJECTARBPROC		glCreateProgramObjectARB	= NULL;	
@@ -215,10 +214,6 @@ cvar_t	*r_lensflare;
 cvar_t	*r_lensflare_intens;
 
 qboolean	map_fog;
-
-cvar_t	*gl_reflection;			// MPO	alpha transparency, 1.0 is full bright
-cvar_t	*gl_reflection_debug;	// MPO	for debugging the reflection
-cvar_t	*gl_reflection_max;		// MPO  max number of water reflections
 
 cvar_t	*con_font;
 
@@ -979,41 +974,6 @@ void R_SetupFrame (void)
 
 	AngleVectors (r_newrefdef.viewangles, vpn, vright, vup);
 
-	// === jitwater - MPO's code to draw reflective water
-	if (g_drawing_refl)
-	{
-		vec3_t tmp;
-
-		r_origin[2] = (2 * g_refl_Z[g_active_refl]) - r_origin[2]; // flip
-
-		VectorCopy(r_newrefdef.viewangles, tmp);
-		tmp[0] *= -1.0f;
-		AngleVectors(tmp, vpn, vright, vup);
-
-		if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
-		{
-			vec3_t temp;
-
-			leaf = Mod_PointInLeaf(r_origin, r_worldmodel);
-			temp[0] = g_refl_X[g_active_refl];
-			temp[1] = g_refl_Y[g_active_refl];
-
-			//if (r_newrefdef.rdflags & RDF_UNDERWATER) todo
-			if (r_newrefdef.vieworg[2] < g_refl_Z[g_active_refl])
-				temp[2] = g_refl_Z[g_active_refl] - 1;
-			else
-				temp[2] = g_refl_Z[g_active_refl] + 1;
-
-			leaf = Mod_PointInLeaf(temp, r_worldmodel);
-
-			if (!(leaf->contents & CONTENTS_SOLID) && (leaf->cluster != r_viewcluster))
-				r_viewcluster2 = leaf->cluster;
-		}
-
-		return;
-	}
-	// jitwater ===
-
 // current viewcluster
 	if ( !( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) )
 	{
@@ -1055,7 +1015,6 @@ void R_SetupFrame (void)
 
 }
 
-
 void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 		     GLdouble zNear, GLdouble zFar )
 {
@@ -1070,8 +1029,7 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 	xmin += -( 2 * gl_state.camera_separation ) / zNear;
 	xmax += -( 2 * gl_state.camera_separation ) / zNear;
 
-	//qglFrustum( xmin, xmax, ymin, ymax, zNear, zFar );
-	mesa_frustum( xmin, xmax, ymin, ymax, zNear, zFar ); //MPO
+	qglFrustum( xmin, xmax, ymin, ymax, zNear, zFar );
 }
 
 
@@ -1096,20 +1054,8 @@ void R_SetupGL (void)
 	w = x2 - x;
 	h = y - y2;
 
-	// start MPO
-	// MPO : we only want to set the viewport if we aren't drawing the reflection
-	if (!g_drawing_refl)
-	{
-		qglViewport (x, y2, w, h);	// MPO : note this happens every frame interestingly enough
-	}
-	else
-	{
-		qglViewport(0, 0, g_reflTexW, g_reflTexH);	// width/height of texture size, not screen size
-	}
-	// stop MPO
-
-
-
+	qglViewport (x, y2, w, h);	// MPO : note this happens every frame interestingly enough
+	
 	//
 	// set up projection matrix
 	//
@@ -1130,50 +1076,21 @@ void R_SetupGL (void)
     qglRotatef (-90, 1, 0, 0);	    // put Z going up
     qglRotatef (90,  0, 0, 1);	    // put Z going up
 
-
-    // start MPO
-	// standard transformation
-	if (!g_drawing_refl)
-	{
-	    qglRotatef (-r_newrefdef.viewangles[2],  1, 0, 0);	// MPO : this handles rolling (ie when we strafe side to side we roll slightly)
-	    qglRotatef (-r_newrefdef.viewangles[0],  0, 1, 0);	// MPO : this handles up/down rotation
-	    qglRotatef (-r_newrefdef.viewangles[1],  0, 0, 1);	// MPO : this handles left/right rotation
-	    qglTranslatef (-r_newrefdef.vieworg[0],  -r_newrefdef.vieworg[1],  -r_newrefdef.vieworg[2]);
-	    // MPO : this translate call puts the player at the proper spot in the map
-	    // MPO : The map is drawn to absolute coordinates
-	}
-	// mirrored transformation for reflection
-	else
-	{
-		R_DoReflTransform();
-		qglTranslatef(0, 0, -0);
-	}
-	// end MPO
-
-//	if ( gl_state.camera_separation != 0 && gl_state.stereo_enabled )
-//		qglTranslatef ( gl_state.camera_separation, 0, 0 );
-
+    qglRotatef (-r_newrefdef.viewangles[2],  1, 0, 0);	
+	qglRotatef (-r_newrefdef.viewangles[0],  0, 1, 0);	
+	qglRotatef (-r_newrefdef.viewangles[1],  0, 0, 1);	
+	qglTranslatef (-r_newrefdef.vieworg[0],  -r_newrefdef.vieworg[1],  -r_newrefdef.vieworg[2]);
+	
 	qglGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
 
 	//
 	// set drawing parms
 	//
 
-	//	if (gl_cull->value)
-	if ((gl_cull->value) && (!g_drawing_refl))	// MPO : we must disable culling when drawing the reflection
-
+	if (gl_cull->value)
 		qglEnable(GL_CULL_FACE);
-	else
-		qglDisable(GL_CULL_FACE);
 
-// CDawg - start
-	if (r_newrefdef.viewangles[2])
-		qglEnable(GL_BLEND);
-	else
-		qglDisable(GL_BLEND);
-// CDawg - end
-
-//qglDisable(GL_BLEND); //CDawg <-- comment this line.
+	qglDisable(GL_BLEND);
 
 	qglDisable(GL_ALPHA_TEST);
 	qglEnable(GL_DEPTH_TEST);
@@ -1258,33 +1175,6 @@ void R_RenderView (refdef_t *fd)
 
 	R_SetupGL ();
 
-	// start MPO
-	// if we are doing a reflection, we want to do a clip plane now, after
-	// we've set up our projection/modelview matrices
-
-	if (g_drawing_refl)
-	{
-		double clipPlane[] = { 0, 0, 0, 0 };
-
-		if(r_newrefdef.rdflags & RDF_UNDERWATER) {
-
-			clipPlane[2] = -1;
-			clipPlane[3] = g_refl_Z[g_active_refl];
-		}
-
-		else {
-
-			clipPlane[2] = 1;
-			clipPlane[3] = -g_refl_Z[g_active_refl];
-		}
-
-
-	    // we need clipping so we don't reflect objects underneath the water
-		qglEnable(GL_CLIP_PLANE0);
-		qglClipPlane(GL_CLIP_PLANE0, clipPlane);
-	}
-	// stop MPO
-
 	R_MarkLeaves ();	// done here so we know if we're in water
 
 	if(map_fog)
@@ -1323,35 +1213,22 @@ void R_RenderView (refdef_t *fd)
 
 	R_BloomBlend( fd );//BLOOMS
 
-// start MPO
-	// if we are doing a reflection, turn off clipping now
-	if (g_drawing_refl)
-	{
-		qglDisable(GL_CLIP_PLANE0);
-	}
-	// if we aren't doing a reflection then we can do the flash and r speeds
-	// (we don't want them showing up in our reflection)
-	else
-	{
-		R_Flash();
+	R_Flash();
 
-		if (r_speeds->value)
-		{
-			Com_Printf (PRINT_ALL, "%4i wpoly %4i epoly %i tex %i lmaps\n",
-				c_brush_polys,
-				c_alias_polys,
-				c_visible_textures,
-				c_visible_lightmaps);
-		}
+	if (r_speeds->value)
+	{
+		Com_Printf (PRINT_ALL, "%4i wpoly %4i epoly %i tex %i lmaps\n",
+			c_brush_polys,
+			c_alias_polys,
+			c_visible_textures,
+			c_visible_lightmaps);
 	}
-	// stop MPO
-
+	
 	if(map_fog)
 		qglDisable(GL_FOG);
 
 	GL_DrawRadar();
 }
-
 
 void	R_SetGL2D (void)
 {
@@ -1456,28 +1333,11 @@ R_RenderFrame
 
 void R_RenderFrame (refdef_t *fd)
 {
-	//start MPO
-	g_refl_enabled = false;		//reset to false
-
-	if(gl_reflection->value) {
-		R_UpdateReflTex(fd);
-	}
-
 	R_RenderView( fd );
 
 	R_SetLightLevel ();
 
 	R_SetGL2D ();
-
-	// start MPO
-	// if debugging is enabled and reflections are enabled.. draw it
-	if ((gl_reflection_debug->value) && (g_refl_enabled)) {
-
-		R_DrawDebugReflTexture();
-	}
-
-	if(!g_refl_enabled) R_clear_refl();
-	// end MPO
 }
 
 
@@ -1551,17 +1411,11 @@ void R_Register( void )
 	gl_3dlabs_broken = Cvar_Get( "gl_3dlabs_broken", "1", CVAR_ARCHIVE );
 
 	r_shaders = Cvar_Get ("r_shaders", "1", CVAR_ARCHIVE);
-	// Vic - begin
-
+	
 	r_overbrightbits = Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE );
 	gl_ext_mtexcombine = Cvar_Get( "gl_ext_mtexcombine", "1", CVAR_ARCHIVE );
 
-	// Vic - end
-
-	gl_reflection		= Cvar_Get("gl_reflection", "0", CVAR_ARCHIVE);			// MPO
-	gl_reflection_debug	= Cvar_Get("gl_reflection_debug", "0", CVAR_ARCHIVE);	// MPO
-	gl_reflection_max	= Cvar_Get("gl_reflection_max", "2", CVAR_ARCHIVE);
-	gl_mirror			= Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE);
+	gl_mirror = Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE);
 
 	vid_fullscreen = Cvar_Get( "vid_fullscreen", "0", CVAR_ARCHIVE );
 	vid_gamma = Cvar_Get( "vid_gamma", "1.0", CVAR_ARCHIVE );
@@ -1661,6 +1515,7 @@ int R_Init( void *hinstance, void *hWnd )
 	unsigned char *shader_assembly;
     int		nResult;
     char	str[4096];
+	int		len;
 
 	gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "1", CVAR_ARCHIVE); // jit
 	gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE); 
@@ -1915,7 +1770,6 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...GL_SGIS_multitexture not found\n" );
 	}
 	
-	// Vic - begin
 	gl_config.mtexcombine = false;
 	if ( strstr( gl_config.extensions_string, "GL_ARB_texture_env_combine" ) )
 	{
@@ -1952,9 +1806,7 @@ int R_Init( void *hinstance, void *hWnd )
 			Com_Printf( "...GL_EXT_texture_env_combine not found\n" );
 		}
 	}
-	// Vic - end
 
-	// Texture Shader support - MrG
 	if ( strstr( gl_config.extensions_string, "GL_NV_texture_shader" ) )
 	{
 		Com_Printf("...using GL_NV_texture_shader\n");
@@ -1966,7 +1818,6 @@ int R_Init( void *hinstance, void *hWnd )
 		gl_state.texshaders=false;
 	}
 
-		// === jitwater
 	if (!gl_arb_fragment_program->value)
 	{
 		gl_state.fragment_program = false;
@@ -1997,6 +1848,29 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		gl_state.fragment_program = false;
 		Com_Printf("...GL_ARB_fragment_program not found\n");
+	}
+
+	if (gl_state.fragment_program)
+	{
+		qglGenProgramsARB(1, &g_water_program_id);
+		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
+		qglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 1.0f, 0.1f, 0.6f, 0.5f); // jitest
+		len = FS_LoadFile("scripts/water1.arbf", &fragment_program_text);
+
+		if (len > 0) {
+			qglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, len, fragment_program_text);
+			FS_FreeFile(fragment_program_text);
+		}
+		else
+			Com_Printf("Unable to find scripts/water1.arbf\n");
+
+		
+		// Make sure the program loaded correctly
+		{
+			int err = 0;
+			assert((err = qglGetError()) == GL_NO_ERROR);
+			err = err; // for debugging only -- todo, remove
+		}
 	}
 
 	//load glsl 
@@ -2043,7 +1917,6 @@ int R_Init( void *hinstance, void *hWnd )
 	}
 
 	if(gl_state.glsl_shaders) {
-		int len;
 
 		//standard bsp surfaces
 
@@ -2220,9 +2093,7 @@ int R_Init( void *hinstance, void *hWnd )
 	err = qglGetError();
 	if ( err != GL_NO_ERROR )
 		Com_Printf ("glGetError() = 0x%x\n", err);
-
-	R_init_refl(gl_reflection_max->value);	// MPO : init reflections
-
+	
 	return 0;
 }
 
