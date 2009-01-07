@@ -86,7 +86,7 @@ extern image_t		*r_cflashtexture;
 extern image_t		*r_leaderfieldtexture;
 extern image_t		*r_deathfieldtexture;
 extern image_t		*r_deathfieldtexture2;
-extern image_t      *r_shelltexture;     // c14 added shell texture
+extern image_t      *r_shelltexture;     
 extern image_t		*r_hittexture;
 extern image_t		*r_bubbletexture;
 extern image_t		*r_reflecttexture;
@@ -105,6 +105,7 @@ extern image_t		*r_splashtexture;
 extern image_t		*r_splash2texture;
 extern image_t		*r_flagtexture;
 extern image_t		*r_logotexture;
+extern image_t		*r_distort;
 
 extern	image_t		gltextures[MAX_GLTEXTURES];
 extern	int			numgltextures;

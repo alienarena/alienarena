@@ -41,7 +41,6 @@ static cvar_t *gl_picmip;
 static cvar_t *gl_finish;
 static cvar_t *gl_swapinterval;
 static cvar_t *r_bloom;
-static cvar_t *gl_reflection;
 static cvar_t *r_overbrightbits;
 static cvar_t *gl_ext_mtexcombine;
 
@@ -77,15 +76,13 @@ static menulist_s  		s_finish_box;
 static menulist_s		s_vsync_box;
 static menulist_s  		s_windowed_mouse;
 static menuaction_s		s_apply_action;
+static menuaction_s		s_lowest_action;
 static menuaction_s		s_low_action;
 static menuaction_s		s_medium_action;
-static menuaction_s		s_normal_action;
 static menuaction_s		s_high_action;
 static menuaction_s		s_highest_action;
-static menuaction_s		s_ultra_action;
 static menulist_s		s_bloom_box;
 static menuslider_s		s_bloom_slider;
-static menulist_s		s_reflect_box;
 static menulist_s		s_texcombine_box;
 static menuslider_s		s_overbright_slider;
 static menuslider_s		s_modulate_slider;
@@ -174,9 +171,8 @@ static void GlslCallback( void *s )
 		s_specular_box.curvalue = s_glsl_box.curvalue;
 	}
 }
-static void SetLow( void *unused )
+static void SetLowest( void *unused )
 {
-	Cvar_SetValue("gl_reflection", 0);
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("gl_ext_mtexcombine", 1);
@@ -199,9 +195,8 @@ static void SetLow( void *unused )
 
 	VID_MenuInit();
 }
-static void SetMedium( void *unused )
+static void SetLow( void *unused )
 {
-	Cvar_SetValue("gl_reflection", 0);
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("gl_ext_mtexcombine", 1);
@@ -225,9 +220,8 @@ static void SetMedium( void *unused )
 	VID_MenuInit();
 }
 
-static void SetNormal( void *unused )
+static void SetMedium( void *unused )
 {
-	Cvar_SetValue("gl_reflection", 0);
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("gl_ext_mtexcombine", 1);
@@ -253,7 +247,6 @@ static void SetNormal( void *unused )
 
 static void SetHigh( void *unused )
 {
-	Cvar_SetValue("gl_reflection", 0);
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("gl_ext_mtexcombine", 1);
@@ -279,33 +272,6 @@ static void SetHigh( void *unused )
 
 static void SetHighest( void *unused )
 {
-	Cvar_SetValue("gl_reflection", 0);
-	Cvar_SetValue("r_bloom", 1);
-	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
-	Cvar_SetValue("r_overbrightbits", 2);
-	Cvar_SetValue("gl_modulate", 2);
-	Cvar_SetValue("gl_picmip", 0);
-	Cvar_SetValue("vid_gamma", 1);
-	Cvar_SetValue("vid_contrast", 1);
-	Cvar_SetValue("gl_normalmaps", 1);
-	Cvar_SetValue("gl_parallaxmaps", 1);
-	Cvar_SetValue("gl_specular", 1);
-	Cvar_SetValue("gl_glsl_shaders", 1);
-
-	//do other things that aren't in the vid menu per se, but are related "high end" effects
-	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_shadows", 2);
-	Cvar_SetValue("gl_dynamic", 1);
-	Cvar_SetValue("gl_rtlights", 1);
-	Cvar_SetValue("gl_mirror", 1);
-
-	VID_MenuInit();
-}
-
-static void SetUltra( void *unused )
-{
-	Cvar_SetValue("gl_reflection", 1);
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
 	Cvar_SetValue("gl_ext_mtexcombine", 1);
@@ -380,7 +346,6 @@ static void ApplyChanges( void *unused )
 	else
 		Cvar_SetValue( "gl_mode", s_mode_list.curvalue + 3 ); //offset added back
 
-	Cvar_SetValue( "gl_reflection", s_reflect_box.curvalue);
 	Cvar_SetValue( "r_bloom", s_bloom_box.curvalue);
 	Cvar_SetValue( "r_bloom_intensity", s_bloom_slider.curvalue/10);
 	Cvar_SetValue( "gl_ext_mtexcombine", s_texcombine_box.curvalue);
@@ -456,8 +421,6 @@ void VID_MenuInit( void )
 		gl_finish = Cvar_Get( "gl_finish", "0", CVAR_ARCHIVE );
 	if ( !gl_swapinterval )
 		gl_swapinterval = Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE );
-	if ( !gl_reflection)
-		gl_reflection = Cvar_Get( "gl_reflection", "0", CVAR_ARCHIVE );
 	if ( !r_bloom )
 		r_bloom = Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );
 	if ( !r_bloom_intensity )
@@ -479,7 +442,7 @@ void VID_MenuInit( void )
 	if (!gl_specular)
 		gl_specular = Cvar_Get( "gl_specular", "0", CVAR_ARCHIVE);
 	if (!gl_glsl_shaders)
-		gl_glsl_shaders = Cvar_Get( "gl_glsl_shaders", "0", CVAR_ARCHIVE);
+		gl_glsl_shaders = Cvar_Get( "gl_glsl_shaders", "1", CVAR_ARCHIVE);
 
 	if ( !_windowed_mouse)
 		_windowed_mouse = Cvar_Get( "_windowed_mouse", "1", CVAR_ARCHIVE );
@@ -585,13 +548,6 @@ void VID_MenuInit( void )
 	s_bloom_slider.maxvalue = 20;
 	s_bloom_slider.generic.callback = BloomCallback;
 
-	s_reflect_box.generic.type = MTYPE_SPINCONTROL;
-	s_reflect_box.generic.x	= 24;
-	s_reflect_box.generic.y	= 140*scale;
-	s_reflect_box.generic.name	= "reflective water";
-	s_reflect_box.itemnames = onoff_names;
-	s_reflect_box.curvalue = gl_reflection->value;
-
 	s_texcombine_box.generic.type = MTYPE_SPINCONTROL;
 	s_texcombine_box.generic.x	= 24;
 	s_texcombine_box.generic.y	= 150*scale;
@@ -668,23 +624,23 @@ void VID_MenuInit( void )
 	s_windowed_mouse.curvalue = _windowed_mouse->value;
 	s_windowed_mouse.itemnames = yesno_names;
 
+	s_lowest_action.generic.type = MTYPE_ACTION;
+	s_lowest_action.generic.name = "lowest settings";
+	s_lowest_action.generic.x    = 24;
+	s_lowest_action.generic.y    = 270*scale;
+	s_lowest_action.generic.callback = SetLowest;
+
 	s_low_action.generic.type = MTYPE_ACTION;
 	s_low_action.generic.name = "low settings";
 	s_low_action.generic.x    = 24;
-	s_low_action.generic.y    = 270*scale;
+	s_low_action.generic.y    = 280*scale;
 	s_low_action.generic.callback = SetLow;
 
 	s_medium_action.generic.type = MTYPE_ACTION;
 	s_medium_action.generic.name = "medium settings";
 	s_medium_action.generic.x    = 24;
-	s_medium_action.generic.y    = 280*scale;
+	s_medium_action.generic.y    = 290*scale;
 	s_medium_action.generic.callback = SetMedium;
-
-	s_normal_action.generic.type = MTYPE_ACTION;
-	s_normal_action.generic.name = "normal settings";
-	s_normal_action.generic.x    = 24;
-	s_normal_action.generic.y    = 290*scale;
-	s_normal_action.generic.callback = SetNormal;
 
 	s_high_action.generic.type = MTYPE_ACTION;
 	s_high_action.generic.name = "high settings";
@@ -697,12 +653,6 @@ void VID_MenuInit( void )
 	s_highest_action.generic.x    = 24;
 	s_highest_action.generic.y    = 310*scale;
 	s_highest_action.generic.callback = SetHighest;
-
-	s_ultra_action.generic.type = MTYPE_ACTION;
-	s_ultra_action.generic.name = "ultra settings";
-	s_ultra_action.generic.x    = 24;
-	s_ultra_action.generic.y    = 320*scale;
-	s_ultra_action.generic.callback = SetUltra;
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
@@ -720,7 +670,6 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_fs_box);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_bloom_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_bloom_slider);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_reflect_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_texcombine_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_overbright_slider );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_tq_slider );
@@ -732,12 +681,11 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_vsync_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_windowed_mouse );
 
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_lowest_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_low_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_medium_action);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_normal_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_high_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_highest_action);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_ultra_action);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_apply_action);
 
 	Menu_Center( &s_opengl_menu );

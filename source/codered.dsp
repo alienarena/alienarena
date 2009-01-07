@@ -270,10 +270,6 @@ SOURCE=.\ref_gl\r_model.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ref_gl\r_refl.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\ref_gl\r_script.c
 # End Source File
 # Begin Source File
@@ -439,10 +435,6 @@ SOURCE=.\ref_gl\r_local.h
 # Begin Source File
 
 SOURCE=.\ref_gl\r_model.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ref_gl\r_refl.h
 # End Source File
 # Begin Source File
 

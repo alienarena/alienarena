@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <assert.h>
 
 #include "r_local.h"
-#include "r_refl.h"	// MPO
 
 static vec3_t	modelorg;		// relative to viewpoint
 
@@ -341,10 +340,8 @@ void R_RenderBrushPoly (msurface_t *fa)
 			        gl_state.inverse_intensity,
 					gl_state.inverse_intensity,
 					1.0F );
-		if(!gl_reflection->value)
-			EmitWaterPolys_original(fa, 0, 1, 1);
-		else
-			EmitWaterPolys (fa);
+		GL_RenderWaterPolys(fa, 0, 1, 1);
+		
 		GL_TexEnv( GL_REPLACE );
 
 		return;
@@ -490,25 +487,21 @@ void R_DrawAlphaSurfaces (void)
 		}
 
 		if (s->flags & SURF_DRAWTURB) {
-			if(!gl_reflection->value) {
-				//water shaders		
-				if(r_shaders->value) {
-					rs_shader = (rscript_t *)s->texinfo->image->script;
-					if(rs_shader) {
-						stage = rs_shader->stage;
-						if(stage) { //for now, just map a texture and flag it for distortion
-							texnum = stage->texture->texnum; //pass this to emitwaterpolys
-						}
-						if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) {
-							scaleX = stage->scale.scaleX;
-							scaleY = stage->scale.scaleY;
-						}
+			//water shaders		
+			if(r_shaders->value) {
+				rs_shader = (rscript_t *)s->texinfo->image->script;
+				if(rs_shader) {
+					stage = rs_shader->stage;
+					if(stage) { //for now, just map a texture and flag it for distortion
+						texnum = stage->texture->texnum; //pass this to emitwaterpolys
+					}
+					if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) {
+						scaleX = stage->scale.scaleX;
+						scaleY = stage->scale.scaleY;
 					}
 				}
-				EmitWaterPolys_original (s, texnum, scaleX, scaleY);
-			} 
-			else
-				EmitWaterPolys (s);
+			}
+			GL_RenderWaterPolys (s, texnum, scaleX, scaleY);
 		}
 		else {
 			if(r_shaders->value && !(s->texinfo->flags & SURF_FLOWING)) {
@@ -1085,22 +1078,7 @@ void R_DrawBrushModel (entity_t *e)
 	qglColor3f (1,1,1);
 	memset (gl_lms.lightmap_surfaces, 0, sizeof(gl_lms.lightmap_surfaces));
 
-	//VectorSubtract (r_newrefdef.vieworg, e->origin, modelorg);
-
-	// start MPO
-	// if this is a reflection we're drawing we need to flip the vertical position across the water
-	if (g_drawing_refl)
-	{
-		modelorg[0] = r_newrefdef.vieworg[0] - e->origin[0];
-        modelorg[1] = r_newrefdef.vieworg[1] - e->origin[1];
-        modelorg[2] = ((2*g_refl_Z[g_active_refl]) - r_newrefdef.vieworg[2])
-        	- e->origin[2];
-	}
-	else
-	{
-		VectorSubtract (r_newrefdef.vieworg, e->origin, modelorg);
-	}
-	// stop MPO
+	VectorSubtract (r_newrefdef.vieworg, e->origin, modelorg);
 
 	if (rotated)
 	{
@@ -1124,7 +1102,6 @@ void R_DrawBrushModel (entity_t *e)
 	GL_EnableMultitexture( true );
 	GL_SelectTexture( GL_TEXTURE0);
 
-	// Vic - begin
 	if ( !gl_config.mtexcombine ) {
 
 		GL_TexEnv( GL_REPLACE );
@@ -1164,8 +1141,6 @@ void R_DrawBrushModel (entity_t *e)
 		}
 
 	}
-
-	// Vic - end
 
 	R_DrawInlineBModel (e);
 	GL_EnableMultitexture( false );
@@ -1351,9 +1326,6 @@ void R_DrawWorld (void)
 
 	VectorCopy (r_newrefdef.vieworg, modelorg);
 
-	if (g_drawing_refl) // jitwater / MPO
-		modelorg[2] = (2.0f * g_refl_Z[g_active_refl]) - modelorg[2]; // flip
-
 	// auto cycle the world frame for texture animation
 	memset (&ent, 0, sizeof(ent));
 	ent.frame = (int)(r_newrefdef.time*2);
@@ -1374,7 +1346,6 @@ void R_DrawWorld (void)
 
 		GL_SelectTexture( GL_TEXTURE0);
 
-		// Vic - begin
 		if ( !gl_config.mtexcombine ) {
 			GL_TexEnv( GL_REPLACE );
 				GL_SelectTexture( GL_TEXTURE1);
@@ -1411,8 +1382,7 @@ void R_DrawWorld (void)
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
 			}
 		}
-		// Vic - end
-
+		
 		R_RecursiveWorldNode (r_worldmodel->nodes, 15);
 
 		GL_EnableMultitexture( false );
