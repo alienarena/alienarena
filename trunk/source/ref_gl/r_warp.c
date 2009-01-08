@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // r_warp.c -- sky and water polygons
 
 #include "r_local.h"
-#include "r_refl.h"	// MPO
 
 extern	model_t	*loadmodel;
 
@@ -32,7 +31,6 @@ image_t	*sky_images[6];
 msurface_t	*warpface;
 
 #define	SUBDIVIDE_SIZE	64
-//#define	SUBDIVIDE_SIZE	1024
 
 void BoundPoly (int numverts, float *verts, vec3_t mins, vec3_t maxs)
 {
