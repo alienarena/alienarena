@@ -482,6 +482,9 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean light
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
 
+//arb fragment
+extern unsigned int g_water_program_id;
+
 //glsl
 extern GLhandleARB	g_programObj;
 extern GLhandleARB	g_waterprogramObj;
