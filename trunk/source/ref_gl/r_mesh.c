@@ -167,7 +167,7 @@ float calcEntAlpha (float alpha, vec3_t point)
 
 	return newAlpha;
 }
-
+extern cvar_t *cl_drawfps;
 extern GLuint normalisationCubeMap;
 void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 {
@@ -190,6 +190,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	float   *lerp;
 	float	ramp = 1.0;
 	qboolean mirror = false;
+	qboolean colored = false;
 
 	if(lerped)
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
@@ -447,6 +448,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				va=0;
 				VArray = &VArrayVerts[0];
 				ramp = 1.0;
+				colored = false;
 
 				if (stage->normalmap && !gl_normalmaps->value) {
 					if(stage->next) {
@@ -578,8 +580,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				}
 				else {
 					if(stage->next) { 
-						if(stage->next->normalmap && gl_normalmaps->value) 
+						if(stage->next->normalmap && gl_normalmaps->value) {
 							stage->lightmap = false; 
+							colored = true;
+						}
 					}
 					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
 						R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
@@ -665,6 +669,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 			
 					{
 						float red = 1, green = 1, blue = 1, nAlpha;
+						float brightest, bFac;
 
 						if(lerped) 
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
@@ -681,6 +686,23 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 							red = lightcolor[0] * ramp;
 							green = lightcolor[1] * ramp;
 							blue = lightcolor[2] * ramp;						
+						}
+
+						if(colored) {
+							red = shadelight[0];
+							green = shadelight[1];
+							blue = shadelight[2];
+							
+							brightest = red;
+							if(green > red && green > blue)
+								brightest = green;
+							else if(blue > green)
+								brightest = blue;
+							bFac = 1.0/brightest;
+
+							red *= bFac;
+							green *= bFac;
+							blue *= bFac;
 						}
 						
 						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
