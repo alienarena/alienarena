@@ -1374,7 +1374,6 @@ void R_Register( void )
 	gl_mode = Cvar_Get( "gl_mode", "6", CVAR_ARCHIVE );
 	gl_lightmap = Cvar_Get ("gl_lightmap", "0", 0);
 	gl_shadows = Cvar_Get ("gl_shadows", "2", CVAR_ARCHIVE );
-	gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
 	gl_nobind = Cvar_Get ("gl_nobind", "0", 0);
 	gl_round_down = Cvar_Get ("gl_round_down", "1", 0);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", 0);
@@ -1516,9 +1515,6 @@ int R_Init( void *hinstance, void *hWnd )
     int		nResult;
     char	str[4096];
 	int		len;
-
-	gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "1", CVAR_ARCHIVE); // jit
-	gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE); 
 
 	for ( j = 0; j < 256; j++ )
 	{
@@ -1818,12 +1814,7 @@ int R_Init( void *hinstance, void *hWnd )
 		gl_state.texshaders=false;
 	}
 
-	if (!gl_arb_fragment_program->value)
-	{
-		gl_state.fragment_program = false;
-
-	}
-	else if (strstr(gl_config.extensions_string, "GL_ARB_fragment_program"))
+	if (strstr(gl_config.extensions_string, "GL_ARB_fragment_program"))
 	{
 		gl_state.fragment_program = true;
 
@@ -1852,6 +1843,8 @@ int R_Init( void *hinstance, void *hWnd )
 
 	if (gl_state.fragment_program)
 	{
+		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "1", CVAR_ARCHIVE); 
+		
 		qglGenProgramsARB(1, &g_water_program_id);
 		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
 		qglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 1.0f, 0.1f, 0.6f, 0.5f); // jitest
@@ -1872,13 +1865,10 @@ int R_Init( void *hinstance, void *hWnd )
 			err = err; // for debugging only -- todo, remove
 		}
 	}
+	else
+		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "0", CVAR_ARCHIVE); 
 
 	//load glsl 
-	if (!gl_glsl_shaders->value)
-	{
-		gl_state.glsl_shaders = false;
-
-	}
 	if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ) && gl_state.fragment_program)
 	{
 
@@ -1917,6 +1907,10 @@ int R_Init( void *hinstance, void *hWnd )
 	}
 
 	if(gl_state.glsl_shaders) {
+
+		//we have them, set defaults accordingly
+		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "1", CVAR_ARCHIVE); 
+		gl_dynamic = Cvar_Get ("gl_dynamic", "1", CVAR_ARCHIVE);
 
 		//standard bsp surfaces
 
@@ -2074,6 +2068,10 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_reflect = glGetUniformLocationARB( g_waterprogramObj, "REFLECT" );
 		g_location_trans = glGetUniformLocationARB( g_waterprogramObj, "TRANSPARENT" );
 		g_location_fogamount = glGetUniformLocationARB( g_waterprogramObj, "FOG" );
+	}
+	else {
+		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE); 
+		gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
 	}
 	
 	GL_SetDefaultState();
