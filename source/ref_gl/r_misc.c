@@ -170,7 +170,7 @@ void R_InitCubemapTextures (void)
 	qglTexParameteri (GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	qglTexParameteri (GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	
-	for (i = 0; i < 6; i++)
+	for (i = 0; i < 5; i++)
 	{
 		for (y = 0; y < CUBEMAP_MAXSIZE; y++)
 		{

@@ -229,7 +229,6 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->dynamic = false;
 	stage->lensflare = false;
 	stage->normalmap = false;
-	stage->distort = false;
 	stage->grass = false;
 
 	stage->lightmap = true;
@@ -559,7 +558,6 @@ scriptname
 		alphamask
 		lensflare
 		normalmap
-		distort
 		grass
 	}
 }
@@ -819,10 +817,6 @@ void rs_stage_normalmap (rs_stage_t *stage, char **token)
 {
 	stage->normalmap = true;
 }
-void rs_stage_distort (rs_stage_t *stage, char **token)
-{
-	stage->distort = true;
-}
 void rs_stage_grass (rs_stage_t *stage, char **token)
 {
 	stage->grass = true;
@@ -850,7 +844,6 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"alphafunc",	&rs_stage_alphafunc		},
 	{	"lensflare",	&rs_stage_lensflare		},
 	{   "normalmap",	&rs_stage_normalmap		},
-	{	"distort",		&rs_stage_distort		},
 	{	"grass",		&rs_stage_grass			},
 
 	{	NULL,			NULL					}
@@ -1485,15 +1478,8 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	do
 	{
 
-		if (stage->lensflare)
+		if (stage->lensflare || stage->grass)
 			break;
-
-		if (stage->grass) {
-			break;
-		}
-
-		if (stage->normalmap)
-			continue;
 
 		if (stage->colormap.enabled)
 			qglDisable (GL_TEXTURE_2D);
