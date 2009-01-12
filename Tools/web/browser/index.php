@@ -40,7 +40,7 @@ mysql_select_db($CONFIG['dbName']) or die ('Database not found on host');
 
 echo '<p class="cdsubtitle">';
 echo ' - ';
-echo "<a href=\"{$filename}?action=liveservers\">Live servers</a> - ";
+echo "<a href=\"{$filename}?action=liveservers\">Live games</a> - ";
 echo "<a href=\"{$filename}?action=liveplayers\">Live players</a> - ";
 echo "<a href=\"{$filename}?action=serverstats\">Server stats</a> - ";
 echo "<a href=\"{$filename}?action=playerstats\">Player stats</a> - ";

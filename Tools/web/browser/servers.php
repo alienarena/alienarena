@@ -44,7 +44,7 @@ function GenerateLiveServerTable(&$control)
 
 	/* Section to build table of servers */
 	echo "<p>\n<table id=cdtable>\n";
-	echo "<tr><th>Server ({$numservers} online)</th><th>Map</th><th colspan=3>Players ({$numplayers} human)</th></tr>\n";
+	echo "<tr><th>Game server ({$numservers} online)</th><th>Map</th><th colspan=3>Players ({$numplayers} human)</th></tr>\n";
 
 	while($sv_row = mysql_fetch_array($sv_result, MYSQL_ASSOC))
 	{	
