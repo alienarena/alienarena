@@ -492,8 +492,8 @@ void R_DrawAlphaSurfaces (void)
 				rs_shader = (rscript_t *)s->texinfo->image->script;
 				if(rs_shader) {
 					stage = rs_shader->stage;
-					if(stage) { //for now, just map a texture and flag it for distortion
-						texnum = stage->texture->texnum; //pass this to emitwaterpolys
+					if(stage) { //for now, just map a reflection texture
+						texnum = stage->texture->texnum; //pass this to renderwaterpolys
 					}
 					if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) {
 						scaleX = stage->scale.scaleX;
