@@ -1519,9 +1519,6 @@ done:
 	if (palette)
 		free(palette);
 
-	if(image) 
-		image->script = RS_FindScript(shortname);
-
 ret_image:
 	return image; 
 }
