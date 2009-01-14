@@ -1,0 +1,188 @@
+{
+"angle" "360"
+"classname" "worldspawn"
+"message" "The Longest Yard"
+// brush 0
+{
+( 720 480 304 ) ( 720 352 304 ) ( 728 352 304 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 716 352 324 ) ( 716 480 324 ) ( 756 480 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 716 352 324 ) ( 756 352 324 ) ( 756 352 276 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 728 480 304 ) ( 728 352 304 ) ( 756 352 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 756 480 324 ) ( 716 480 324 ) ( 716 480 276 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 720 352 304 ) ( 720 480 304 ) ( 716 480 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+}
+// brush 1
+{
+( 756 592 356 ) ( 716 592 356 ) ( 716 464 356 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 740 464 372 ) ( 740 592 372 ) ( 756 592 372 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 716 360 340 ) ( 756 360 340 ) ( 756 360 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 756 464 340 ) ( 756 592 340 ) ( 756 592 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 764 472 340 ) ( 724 472 340 ) ( 724 472 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 740 592 372 ) ( 740 464 372 ) ( 716 464 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+}
+// brush 2
+{
+( 756 480 324 ) ( 716 480 324 ) ( 716 352 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 740 352 372 ) ( 740 480 372 ) ( 756 480 372 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 716 352 340 ) ( 756 352 340 ) ( 756 352 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 756 352 340 ) ( 756 480 340 ) ( 756 480 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 764 360 340 ) ( 724 360 340 ) ( 724 360 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 740 480 372 ) ( 740 352 372 ) ( 716 352 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+}
+// brush 3
+{
+( 756 592 340 ) ( 716 592 340 ) ( 716 464 340 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 740 464 356 ) ( 740 592 356 ) ( 756 592 356 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 716 360 340 ) ( 756 360 340 ) ( 756 360 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 756 464 340 ) ( 756 592 340 ) ( 756 592 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 764 472 340 ) ( 724 472 340 ) ( 724 472 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 740 592 356 ) ( 740 464 356 ) ( 716 464 308 ) arena3/light1 16 16 0 0.300000 0.250000 134217728 1 500
+}
+// brush 4
+{
+( 756 480 324 ) ( 716 480 324 ) ( 716 352 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 716 360 340 ) ( 756 360 340 ) ( 756 360 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 756 352 340 ) ( 756 480 340 ) ( 756 480 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 756 472 340 ) ( 716 472 340 ) ( 716 472 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 740 480 372 ) ( 740 352 372 ) ( 716 352 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 700 496 340 ) ( 756 496 340 ) ( 700 344 340 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+}
+// brush 5
+{
+( 756 600 324 ) ( 716 600 324 ) ( 716 472 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 740 472 372 ) ( 740 600 372 ) ( 756 600 372 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 716 472 340 ) ( 756 472 340 ) ( 756 472 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 756 472 340 ) ( 756 600 340 ) ( 756 600 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 764 480 340 ) ( 724 480 340 ) ( 724 480 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+( 740 600 372 ) ( 740 472 372 ) ( 716 472 324 ) arena3/floor2 0 0 0 1 1 134217728 0 0
+}
+}
+// entity 1
+// entity 2
+// entity 3
+// entity 4
+// entity 5
+// entity 6
+// entity 7
+// entity 8
+// entity 9
+// entity 10
+// entity 11
+// entity 12
+// entity 13
+// entity 14
+// entity 15
+// entity 16
+// entity 17
+// entity 18
+// entity 19
+// entity 20
+// entity 21
+// entity 22
+// entity 23
+// entity 24
+// entity 25
+// entity 26
+// entity 27
+// entity 28
+// entity 29
+// entity 30
+// entity 31
+// entity 32
+// entity 33
+// entity 34
+// entity 35
+// entity 36
+// entity 37
+// entity 38
+// entity 39
+// entity 40
+// entity 41
+// entity 42
+// entity 43
+// entity 44
+// entity 45
+// entity 46
+// entity 47
+// entity 48
+// entity 49
+// entity 50
+// entity 51
+// entity 52
+// entity 53
+// entity 54
+// entity 55
+// entity 56
+// entity 57
+// entity 58
+// entity 59
+// entity 60
+// entity 61
+// entity 62
+// entity 63
+// entity 64
+// entity 65
+// entity 66
+// entity 67
+// entity 68
+// entity 69
+// entity 70
+// entity 71
+// entity 72
+// entity 73
+// entity 74
+// entity 75
+// entity 76
+// entity 77
+// entity 78
+// entity 79
+// entity 80
+// entity 81
+// entity 82
+// entity 83
+// entity 84
+// entity 85
+// entity 86
+// entity 87
+// entity 88
+// entity 89
+// entity 90
+// entity 91
+// entity 92
+// entity 93
+// entity 94
+// entity 95
+// entity 96
+// entity 97
+// entity 98
+// entity 99
+// entity 100
+// entity 101
+// entity 102
+// entity 103
+// entity 104
+// entity 105
+// entity 106
+// entity 107
+// entity 108
+// entity 109
+// entity 110
+// entity 111
+// entity 112
+// entity 113
+// entity 114
+// entity 115
+// entity 116
+// entity 117
+// entity 118
+// entity 119
+// entity 120
+// entity 121
+// entity 122
+// entity 123
+// entity 124
+// entity 125
+// entity 126
+// entity 127
+// entity 128
+// entity 129
