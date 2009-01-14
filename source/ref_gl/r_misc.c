@@ -76,54 +76,6 @@ image_t		*r_distort;
 GLuint normalisationCubeMap;
 
 #define CUBEMAP_MAXSIZE 32
-void MakeSpecularAttenuationMap (byte *pixels)
-{
-	int x, y;
-	int LRADIUS = CUBEMAP_MAXSIZE / 2;
-
-	for (y = 0; y < CUBEMAP_MAXSIZE; y++)
-	{
-		for (x = 0; x < CUBEMAP_MAXSIZE; x++)
-		{
-			// find x and y as a -LRADIUS to LRADIUS scale
-			int TheRX = x - LRADIUS;
-			int TheRY = y - LRADIUS;
-			float TheXResult;
-			float TheYResult;
-			float TheFinalResult;
-			unsigned char OutResult;
-
-			// divide X by LRADIUS and square it
-			TheXResult = ((float) TheRX / (float) LRADIUS);
-			TheXResult *= TheXResult;
-
-			// divide Y by LRADIUS and square it
-			TheYResult = ((float) TheRY / (float) LRADIUS);
-			TheYResult *= TheYResult;
-
-			// add the 2
-			TheFinalResult = TheXResult + TheYResult;
-
-			// multiply by 255 for a byte intensity range
-			TheFinalResult = TheFinalResult * 255;
-
-			// clamp 0 to 255
-			if (TheFinalResult < 0) TheFinalResult = 0;
-			if (TheFinalResult > 255) TheFinalResult = 255;
-
-			// store in an unsigned char now - we want the negative of what is generated above
-			OutResult = 255 - (unsigned char) TheFinalResult;
-
-			// write to output
-			pixels[0] = OutResult;
-			pixels[1] = OutResult;
-			pixels[2] = OutResult;
-			pixels[3] = 255;
-
-			pixels += 4;
-		}
-	}
-}
 
 static void getCubeVector (int i, int cubesize, int x, int y, float *vector)
 {
@@ -170,7 +122,7 @@ void R_InitCubemapTextures (void)
 	qglTexParameteri (GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	qglTexParameteri (GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	
-	for (i = 0; i < 5; i++)
+	for (i = 0; i < 6; i++)
 	{
 		for (y = 0; y < CUBEMAP_MAXSIZE; y++)
 		{
@@ -187,8 +139,6 @@ void R_InitCubemapTextures (void)
 		// cube map me baybeee
 		qglTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + i, 0, GL_RGBA, CUBEMAP_MAXSIZE, CUBEMAP_MAXSIZE, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	}
-	MakeSpecularAttenuationMap (pixels);
-	qglTexImage2D (GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB, 0, GL_RGBA, CUBEMAP_MAXSIZE, CUBEMAP_MAXSIZE, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
 	// done - restore the texture state
 	qglDisable (GL_TEXTURE_CUBE_MAP_ARB);
