@@ -279,7 +279,7 @@ void SV_InitGame (void)
 	// init clients
 	if (Cvar_VariableValue ("deathmatch") || Cvar_VariableValue ("ctf"))
 	{
-		if (maxclients->value <= 1)
+		if (maxclients->value <= 0)
 			Cvar_FullSet ("maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH);
 		else if (maxclients->value > MAX_CLIENTS)
 			Cvar_FullSet ("maxclients", va("%i", MAX_CLIENTS), CVAR_SERVERINFO | CVAR_LATCH);
