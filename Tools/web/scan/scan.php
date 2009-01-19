@@ -12,7 +12,7 @@ scanservers.php?debug
 *********************************/
 include '../config.php';  /* Database config */
 
-define("VERSION", "0.9.3");
+define("VERSION", "1.0.0");
 
 define("MAX_INSTANCES",5); /* Maximum number of instances of this script allowed to run at once */
 define("MAX_SERVERS",256); /* Used to be hardcoded to 64! */
@@ -319,17 +319,20 @@ Function PopulateServerEntry(&$server, $buffer)
 		$serverstring = '';
 
 	/* Case-sensitive parameters to parse result for */
-	$parameters = array("hostname", "mapname", "version", "website", "Admin");
+	$parameters = array('hostname', 'mapname', 'version', 'website', 'Admin');
 	foreach ($parameters as $string)
 	{
 		$key=array_search($string, $serverstring);
 		if($key === FALSE)
-			$server[strtolower($string)] = ""; /* Not found (but must add entry otherwise have to check existance later in mysql queries */
+			$server[strtolower($string)] = ''; /* Not found (but must add entry otherwise have to check existance later in mysql queries */
 		else
 			$server[strtolower($string)] = addslashes($serverstring[$key+1]);
 	}
 	
-	$server["mapname"] = strtolower($server["mapname"]);
+	/* Strip out ^n colour codes from server name */
+	$server['hostname'] = preg_replace('/\^([0-9])/', '', $server['hostname']);
+	/* Make sure map names are always lower case */
+	$server['mapname'] = strtolower($server['mapname']);
 	$server['playerinfo'] = array();
 
 	$players = array_slice($exploded, 2, -1);
@@ -341,16 +344,17 @@ Function PopulateServerEntry(&$server, $buffer)
 	{
 		/* $element here contains a space seperated string, including score, ping, name, and sometimes ip address
 			name and ip address are surrounded by quotes */
-		$space_delimited = explode(" ", $player);
-		$quote_delimited = explode("\"", $player);
+		$space_delimited = explode(' ', $player);
+		$quote_delimited = explode('"', $player);
 		$player = array();  /* Convert type to array (within array of players) */
-		$player["score"] = $space_delimited[0];
-		$player["ping"]  = $space_delimited[1];			
-		$player["name"]  = addslashes(trim($quote_delimited[1]," \"")); /* Strip off trailing/leading whitespace and quotes, fix any escape charaters */
+		$player['score'] = $space_delimited[0];
+		$player['ping']  = $space_delimited[1];			
+		$player['name']  = addslashes(trim($quote_delimited[1],' "')); /* Strip off trailing/leading whitespace and quotes, fix any escape characters */
+    	$player['name'] = preg_replace('/\^([0-9])/', '', $player['name']); /* Strip out ^n colour codes */
 		if(array_key_exists(3, $quote_delimited))
-			$player["ip"] = addslashes(trim($quote_delimited[3]," \"")); /* Strip off trailing/leading whitespace and quotes, fix any escape charaters */
+			$player['ip'] = addslashes(trim($quote_delimited[3],' "')); /* Strip off trailing/leading whitespace and quotes, fix any escape characters */
 		else
-			$player["ip"] = "";
+			$player['ip'] = '';
 		$server['playerinfo'][] = $player;
 	}
 
