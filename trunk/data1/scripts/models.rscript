@@ -404,3 +404,28 @@ vehicles/deathball/deathball
 		alphamask
 	}
 }
+maps/meshes/monitor
+{
+	{
+		map maps/meshes/monitor.jpg
+	}
+	{
+		map gfx/yellowline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 4 static 4
+		scroll static 0 static 2
+		alphashift 10 0.05 0.8
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.2 0.2
+		envmap
+		nolightmap
+	}
+	{
+		map maps/meshes/monitormask.tga
+		alphamask
+	}
+}
