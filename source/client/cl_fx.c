@@ -1081,6 +1081,25 @@ void CL_ExplosionParticles (vec3_t org)
 					.4, .4, 0.1);
 		}
 	}
+
+	//place a big shock wave effect
+	if (!(p = new_particle()))
+			return;
+	p->alpha = 1.0;
+	p->alphavel = -2.0;
+	p->type = PARTICLE_FLAT;
+	p->texnum = r_explosion5texture->texnum;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->color = 0xd9 + (rand()&7); 
+	p->scale = 12 + (rand()&4) ;
+	p->scalevel = 100;
+	for(j = 0; j < 3; j++) {
+		p->org[j] = org[j];
+		p->vel[j] = 0;
+		p->accel[j] = 0;
+	}
+
 }
 
 /*
