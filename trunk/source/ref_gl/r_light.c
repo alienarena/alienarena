@@ -919,6 +919,9 @@ void R_InitSun()
 	else
 		sun_size = 0.2f;
 
+	if (R_CullOrigin(sun_origin))
+		return;
+
 	draw_sun = true;
 
 	gluProject2(sun_origin[0], sun_origin[1], sun_origin[2], r_world_matrix, r_project_matrix, (int *) r_viewport, &sun_x, &sun_y);	// /, 
