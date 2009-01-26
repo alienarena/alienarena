@@ -1235,11 +1235,11 @@ void R_RenderView (refdef_t *fd)
 					0, 0, 0, 256, 512, 512);
 	}
 
-	R_RenderSun();
-
 	R_BloomBlend( fd );//BLOOMS
 
 	R_Flash();
+
+	R_RenderSun();
 
 	if (r_speeds->value)
 	{
