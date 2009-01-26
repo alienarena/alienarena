@@ -1549,7 +1549,7 @@ void GL_FreeUnusedImages (void)
 	int		i;
 	image_t	*image;
 
-	// never free r_notexture or particle texture
+	// never free r_notexture or particle textures
 	r_notexture->registration_sequence = registration_sequence;
 	r_particletexture->registration_sequence = registration_sequence;
     r_shelltexture->registration_sequence = registration_sequence;    
@@ -1590,6 +1590,9 @@ void GL_FreeUnusedImages (void)
 	r_distort->registration_sequence = registration_sequence;
 	r_radarmap->registration_sequence = registration_sequence;
 	r_around->registration_sequence = registration_sequence;
+	sun_object->registration_sequence = registration_sequence;
+	sun1_object->registration_sequence = registration_sequence;
+	sun2_object->registration_sequence = registration_sequence;
 
 	for (i=0, image=gltextures ; i<numgltextures ; i++, image++)
 	{

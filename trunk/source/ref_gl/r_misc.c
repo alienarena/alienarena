@@ -71,6 +71,9 @@ image_t		*r_around;
 image_t		*r_flare;
 image_t		*r_mirrorspec; 
 image_t		*r_distort;
+image_t		*sun_object;
+image_t		*sun1_object;
+image_t		*sun2_object;
 
 //Normalisation cube map
 GLuint normalisationCubeMap;
@@ -346,6 +349,19 @@ void R_InitParticleTexture (void)
 	if (!r_distort) {                                
 		r_distort = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     } 
+	sun_object = R_RegisterGfxPic("sun");
+	if(!sun_object) {
+		sun_object = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+	}
+	sun1_object = R_RegisterGfxPic("sun1");
+	if(!sun1_object) {
+		sun1_object = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+	}
+	sun2_object = R_RegisterGfxPic("sun2");
+	if(!sun2_object) {
+		sun2_object = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+	}
+ 
 	//
 	// also use this for bad textures, but without alpha
 	//
