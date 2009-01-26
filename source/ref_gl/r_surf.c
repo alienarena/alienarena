@@ -1403,7 +1403,11 @@ void R_DrawWorld (void)
 	R_DrawNormalSurfaces ();
 	GL_EnableMultitexture( false );	
 
-	R_DrawSkyBox ();
+	R_InitSun();
+
+	qglDepthMask(0);
+	R_DrawSkyBox();
+	qglDepthMask(1);
 
 	R_DrawTriangleOutlines ();
 }

@@ -183,6 +183,7 @@ extern	cvar_t	*r_shaders;
 extern	cvar_t	*r_bloom;
 extern	cvar_t	*r_lensflare;
 extern	cvar_t	*r_lensflare_intens;
+extern	cvar_t	*r_drawsun;
 
 extern	qboolean	map_fog;
 extern	char		map_music[128];
@@ -214,6 +215,8 @@ extern	int		c_visible_lightmaps;
 extern	int		c_visible_textures;
 
 extern	float	r_world_matrix[16];
+extern float r_project_matrix[16];
+extern int	r_viewport[4];
 extern	float		r_farclip, r_farclip_min, r_farclip_bias;
 void GL_Bind (int texnum);
 void GL_MBind( GLenum target, int texnum );
@@ -269,13 +272,13 @@ void GL_DrawRadar(void);
 void Draw_InitLocal (void);
 void GL_SubdivideSurface (msurface_t *fa);
 qboolean R_CullBox (vec3_t mins, vec3_t maxs);
+qboolean R_CullOrigin(vec3_t origin);
 void R_RotateForEntity (entity_t *e);
 void R_MarkLeaves (void);
 void R_AddSkySurface (msurface_t *fa);
 void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY);
 void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
-void R_DrawSkyBoxVooDoo (void);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type);
 #ifdef __unix__
@@ -291,12 +294,13 @@ void R_BloomBlend( refdef_t *fd );
 void R_InitBloomTextures( void );
 //BLOOMS[end]
 
+//FLARES and SUN
 void R_RenderFlares (void);
 void R_DrawVegetationSurface (void);
-//lava haze [start]
-//void R_InitSmokes (void);
-//void R_SmokeFrame (void);
-//lava haze [end]
+void R_InitSun();
+void R_RenderSun();
+vec3_t sun_origin;
+qboolean spacebox;
 
 void	Draw_GetPicSize (int *w, int *h, char *name);
 void	Draw_Pic (int x, int y, char *name);

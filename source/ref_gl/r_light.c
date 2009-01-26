@@ -841,6 +841,210 @@ void R_RenderFlares (void)
 	qglDepthMask (1);
 }
 
+
+/*
+================
+Berserker@quake2 Sun
+================
+*/
+qboolean draw_sun = false;
+float sun_size = 0.20f;
+vec3_t sun_origin;
+float sun_x, sun_y;
+qboolean spacebox = false;
+
+void transform_point(float out[4], const float m[16], const float in[4])
+{
+#define M(row,col)  m[col*4+row]
+	out[0] =
+		M(0, 0) * in[0] + M(0, 1) * in[1] + M(0, 2) * in[2] + M(0,
+																3) * in[3];
+	out[1] =
+		M(1, 0) * in[0] + M(1, 1) * in[1] + M(1, 2) * in[2] + M(1,
+																3) * in[3];
+	out[2] =
+		M(2, 0) * in[0] + M(2, 1) * in[1] + M(2, 2) * in[2] + M(2,
+																3) * in[3];
+	out[3] =
+		M(3, 0) * in[0] + M(3, 1) * in[1] + M(3, 2) * in[2] + M(3,
+																3) * in[3];
+#undef M
+}
+
+
+qboolean gluProject2(float objx, float objy, float objz, const float model[16], const float proj[16], const int viewport[4], float *winx, float *winy)	// /, 
+																																						// float 
+																																						// *winz)
+{
+	/* matrice de transformation */
+	float in[4], out[4], temp;
+
+	/* initilise la matrice et le vecteur a transformer */
+	in[0] = objx;
+	in[1] = objy;
+	in[2] = objz;
+	in[3] = 1.0;
+	transform_point(out, model, in);
+	transform_point(in, proj, out);
+
+	/* d'ou le resultat normalise entre -1 et 1 */
+	if (in[3] == 0.0)
+		return false;
+
+	temp = 1.0 / in[3];
+	in[0] *= temp;
+	in[1] *= temp;
+	in[2] *= temp;
+
+	/* en coordonnees ecran */
+	*winx = viewport[0] + (1 + in[0]) * (float) viewport[2] * 0.5;
+	*winy = viewport[1] + (1 + in[1]) * (float) viewport[3] * 0.5;
+///   /* entre 0 et 1 suivant z */
+///   *winz = (1 + in[2]) * 0.5;
+	return true;
+}
+
+void R_InitSun()
+{
+	draw_sun = false;
+
+	if (!sun_size)
+		return;
+
+	if (!r_drawsun->value)
+		return;
+
+	if (spacebox)
+		sun_size = 0.1f;
+	else
+		sun_size = 0.2f;
+
+	draw_sun = true;
+
+	gluProject2(sun_origin[0], sun_origin[1], sun_origin[2], r_world_matrix, r_project_matrix, (int *) r_viewport, &sun_x, &sun_y);	// /, 
+																																	// &sun_z);
+	sun_y = r_newrefdef.height - sun_y;
+}
+
+
+void R_RenderSunFlare(image_t * tex, float offset, float size, float r,
+					  float g, float b, float alpha)
+{
+	float minx, miny, maxx, maxy;
+	float new_x, new_y, corr;
+
+	qglColor4f(r, g, b, alpha);
+	GL_Bind(tex->texnum);
+
+	if (offset) {
+		new_x = offset * (r_newrefdef.width / 2 - sun_x) + sun_x;
+		new_y = offset * (r_newrefdef.height / 2 - sun_y) + sun_y;
+	} else {
+		new_x = sun_x;
+		new_y = sun_y;
+	}
+
+	corr = 1;
+
+	minx = new_x - size * corr;
+	miny = new_y - size;
+	maxx = new_x + size * corr;
+	maxy = new_y + size;
+
+	qglBegin(GL_QUADS);
+	qglTexCoord2f(0, 0);
+	qglVertex2f(minx, miny);
+	qglTexCoord2f(1, 0);
+	qglVertex2f(maxx, miny);
+	qglTexCoord2f(1, 1);
+	qglVertex2f(maxx, maxy);
+	qglTexCoord2f(0, 1);
+	qglVertex2f(minx, maxy);
+	qglEnd();
+}
+
+float sun_time = 0;
+float sun_alpha = 0;
+void R_RenderSun()
+{
+	float l, hx, hy;
+	float vec[2];
+	float size;
+
+	if (!draw_sun)
+		return;
+
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		return;
+
+	qglReadPixels(sun_x, r_newrefdef.height - sun_y, 1, 1,
+				  GL_DEPTH_COMPONENT, GL_FLOAT, &l);
+
+	// periodically test visibility to ramp alpha
+	if(rs_realtime - sun_time > 0.02) {
+
+		sun_alpha += (l == 1.0 ? 0.15 : -0.15);  // ramp
+			
+		if(sun_alpha > 1.0)  // clamp
+			sun_alpha = 1.0;
+		else if(sun_alpha < 0)
+			sun_alpha = 0.0;
+
+		sun_time = rs_realtime;
+	}
+
+	if (sun_alpha > 0)
+	{
+
+		hx = r_newrefdef.width / 2;
+		hy = r_newrefdef.height / 2;
+		vec[0] = 1 - fabs(sun_x - hx) / hx;
+		vec[1] = 1 - fabs(sun_y - hy) / hy;
+		l = 3 * vec[0] * vec[1] + 0.25;
+
+		// set 2d
+		qglMatrixMode(GL_PROJECTION);
+		qglPushMatrix();
+		qglLoadIdentity();
+		qglOrtho(0, r_newrefdef.width, r_newrefdef.height, 0, -99999,
+				 99999);
+		qglMatrixMode(GL_MODELVIEW);
+		qglPushMatrix();
+		qglLoadIdentity();
+		qglEnable(GL_BLEND);
+		qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		GL_TexEnv(GL_MODULATE);
+		qglDepthRange(0, 0.3);
+
+		size = r_newrefdef.width * sun_size;
+		R_RenderSunFlare(sun_object, 0, size, .75, .75, .75, sun_alpha);
+		if (r_drawsun->value == 2) {
+	
+			R_RenderSunFlare(sun2_object, -0.9, size * 0.07, 0.1, 0.1, 0, sun_alpha);
+			R_RenderSunFlare(sun2_object, -0.7, size * 0.15, 0, 0, 0.1, sun_alpha);
+			R_RenderSunFlare(sun2_object, -0.5, size * 0.085, 0.1, 0, 0, sun_alpha);
+			R_RenderSunFlare(sun1_object, 0.3, size * 0.25, 0.1, 0.1, 0.1, sun_alpha);
+			R_RenderSunFlare(sun2_object, 0.5, size * 0.05, 0.1, 0, 0, sun_alpha);
+			R_RenderSunFlare(sun2_object, 0.64, size * 0.05, 0, 0.1, 0, sun_alpha);
+			R_RenderSunFlare(sun2_object, 0.7, size * 0.25, 0.1, 0.1, 0, sun_alpha);
+			R_RenderSunFlare(sun1_object, 0.85, size * 0.5, 0.1, 0.1, 0.1, sun_alpha);
+			R_RenderSunFlare(sun2_object, 1.1, size * 0.125, 0.1, 0, 0, sun_alpha);
+			R_RenderSunFlare(sun2_object, 1.25, size * 0.08, 0.1, 0.1, 0, sun_alpha);
+		}
+
+		qglDepthRange(0, 1);
+		qglColor4f(1, 1, 1, 1);
+		qglDisable(GL_BLEND);
+		qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		// set 3d
+		qglPopMatrix();
+		qglMatrixMode(GL_PROJECTION);
+		qglPopMatrix();
+		qglMatrixMode(GL_MODELVIEW);
+	}
+}
+
+
 /*
 ===============
 R_ShadowLight

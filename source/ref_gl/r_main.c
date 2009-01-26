@@ -87,6 +87,8 @@ void R_Clear (void);
 
 viddef_t	vid;
 
+int r_viewport[4];
+
 int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3;
 
 model_t		*r_worldmodel;
@@ -130,6 +132,7 @@ vec3_t	vright;
 vec3_t	r_origin;
 
 float	r_world_matrix[16];
+float	r_project_matrix[16];
 
 //
 // screen size info
@@ -212,6 +215,7 @@ cvar_t	*r_shaders;
 cvar_t	*r_bloom;
 cvar_t	*r_lensflare;
 cvar_t	*r_lensflare_intens;
+cvar_t	*r_drawsun;
 
 qboolean	map_fog;
 
@@ -411,6 +415,23 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 	return false;
 }
 
+/*
+=================
+R_CullOrigin
+
+Returns true if the origin is completely outside the frustom
+=================
+*/
+
+qboolean R_CullOrigin(vec3_t origin)
+{
+	int i;
+
+	for (i = 0; i < 4; i++)
+		if (BOX_ON_PLANE_SIDE(origin, origin, &frustum[i]) == 2)
+			return true;
+	return false;
+}
 
 void R_RotateForEntity (entity_t *e)
 {
@@ -1033,6 +1054,7 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 }
 
 
+
 /*
 =============
 R_SetupGL
@@ -1082,6 +1104,8 @@ void R_SetupGL (void)
 	qglTranslatef (-r_newrefdef.vieworg[0],  -r_newrefdef.vieworg[1],  -r_newrefdef.vieworg[2]);
 	
 	qglGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
+	qglGetFloatv(GL_PROJECTION_MATRIX, r_project_matrix);	
+	qglGetIntegerv(GL_VIEWPORT, (int *) r_viewport);
 
 	//
 	// set drawing parms
@@ -1211,6 +1235,8 @@ void R_RenderView (refdef_t *fd)
 					0, 0, 0, 256, 512, 512);
 	}
 
+	R_RenderSun();
+
 	R_BloomBlend( fd );//BLOOMS
 
 	R_Flash();
@@ -1245,48 +1271,6 @@ void	R_SetGL2D (void)
 	qglEnable (GL_ALPHA_TEST);
 	qglColor4f (1,1,1,1);
 }
-
-static void GL_DrawColoredStereoLinePair( float r, float g, float b, float y )
-{
-	qglColor3f( r, g, b );
-	qglVertex2f( 0, y );
-	qglVertex2f( vid.width, y );
-	qglColor3f( 0, 0, 0 );
-	qglVertex2f( 0, y + 1 );
-	qglVertex2f( vid.width, y + 1 );
-}
-
-static void GL_DrawStereoPattern( void )
-{
-	int i;
-
-	if ( !( gl_config.renderer & GL_RENDERER_INTERGRAPH ) )
-		return;
-
-	if ( !gl_state.stereo_enabled )
-		return;
-
-	R_SetGL2D();
-
-	qglDrawBuffer( GL_BACK_LEFT );
-
-	for ( i = 0; i < 20; i++ )
-	{
-		qglBegin( GL_LINES );
-			GL_DrawColoredStereoLinePair( 1, 0, 0, 0 );
-			GL_DrawColoredStereoLinePair( 1, 0, 0, 2 );
-			GL_DrawColoredStereoLinePair( 1, 0, 0, 4 );
-			GL_DrawColoredStereoLinePair( 1, 0, 0, 6 );
-			GL_DrawColoredStereoLinePair( 0, 1, 0, 8 );
-			GL_DrawColoredStereoLinePair( 1, 1, 0, 10);
-			GL_DrawColoredStereoLinePair( 1, 1, 0, 12);
-			GL_DrawColoredStereoLinePair( 0, 1, 0, 14);
-		qglEnd();
-
-		GLimp_EndFrame();
-	}
-}
-
 
 /*
 ====================
@@ -1427,6 +1411,7 @@ void R_Register( void )
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
+	r_drawsun =	Cvar_Get("r_drawsun", "2", CVAR_ARCHIVE);
 
 	r_minimap_size = Cvar_Get ("r_minimap_size", "256", CVAR_ARCHIVE );
 	r_minimap_zoom = Cvar_Get ("r_minimap_zoom", "1", CVAR_ARCHIVE );
@@ -2075,13 +2060,6 @@ int R_Init( void *hinstance, void *hWnd )
 	}
 	
 	GL_SetDefaultState();
-
-	/*
-	** draw our stereo patterns
-	*/
-#if 0 // commented out until H3D pays us the money they owe us
-	GL_DrawStereoPattern();
-#endif
 
 	GL_InitImages ();
 	Mod_Init ();

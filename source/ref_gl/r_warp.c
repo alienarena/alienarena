@@ -901,6 +901,24 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 					RS_ReadyScript(sky_images[i]->script);
 			} 
 		}
+
+		if (strstr(pathname, "space")) {
+			VectorSet(sun_origin, -5000, -100000, 115000);
+			spacebox = true;
+		}
+		else if (strstr(pathname, "sea")) {
+			VectorSet(sun_origin, 140000, -80000, 125000);
+			spacebox = false;
+		}
+		else if (strstr(pathname, "hell")) {
+			VectorSet(sun_origin, 140000, 160000, 85000);
+			spacebox = false;
+		}
+		else {
+			VectorSet(sun_origin, 140000, -80000, 45000);
+			spacebox = false;
+		}
+
 		if (gl_skymip->value || skyrotate)
 		{	// take less memory
 			gl_picmip->value--;
