@@ -230,6 +230,7 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->lensflare = false;
 	stage->normalmap = false;
 	stage->grass = false;
+	stage->grasstype = 0;
 
 	stage->lightmap = true;
 
@@ -559,6 +560,7 @@ scriptname
 		lensflare
 		normalmap
 		grass
+		grasstype
 	}
 }
 */
@@ -821,6 +823,11 @@ void rs_stage_grass (rs_stage_t *stage, char **token)
 {
 	stage->grass = true;
 }
+void rs_stage_grasstype (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->grasstype = atoi(*token);
+}
 static rs_stagekey_t rs_stagekeys[] = 
 {
 	{	"colormap",		&rs_stage_colormap		},
@@ -845,6 +852,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"lensflare",	&rs_stage_lensflare		},
 	{   "normalmap",	&rs_stage_normalmap		},
 	{	"grass",		&rs_stage_grass			},
+	{	"grasstype",	&rs_stage_grasstype		},
 
 	{	NULL,			NULL					}
 };
@@ -1359,35 +1367,35 @@ void R_DrawVegetationSurface ( void )
 	float	*corner0 = corner[0];
 	qboolean visible;
 	trace_t r_trace;
-	int		image_size;
-	image_t *gl;
 
 	grass = r_grasses;
-
-   	scale = 10*grass->size; 
-
-	gl = R_RegisterGfxPic (grass->name);
-	if (gl)
-		image_size = gl->height;
-	else
-		image_size = 64; //sane default
-	 
-	VectorCopy(r_newrefdef.viewangles, angle);
-	angle[0] = 0;  // keep vertical by removing pitch(grass and plants grow upwards)
-	AngleVectors(angle, NULL, right, up);	
-	VectorScale(right, scale, right);
-	VectorScale(up, scale, up);
 
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);	
 
     for (i=0; i<r_numgrasses; i++, grass++) {
+
+		scale = 10.0*grass->size; 
+		 
+		VectorCopy(r_newrefdef.viewangles, angle);
+
+		if(!grass->type) 
+			angle[0] = 0;  // keep vertical by removing pitch(grass and plants grow upwards)
+
+		AngleVectors(angle, NULL, right, up);	
+		VectorScale(right, scale, right);
+		VectorScale(up, scale, up);
 		VectorCopy(grass->origin, origin);
-		origin[2] += (image_size/16)*(scale/10); //dynamically get image size and adjust? 4 pixels correlated to a 64x64 image
+
+		origin[2] += (grass->texsize/16)*(scale/10); //dynamically get image size and adjust? 4 pixels correlated to a 64x64 image
 								   //so image size/16 would work.
 
-		r_trace = CM_BoxTrace(r_origin, origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
-		visible = r_trace.fraction == 1.0;
+		if(!grass->type) {
+			r_trace = CM_BoxTrace(r_origin, origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
+			visible = r_trace.fraction == 1.0;
+		}
+		else
+			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 
 		if(visible) {
 			//render grass polygon

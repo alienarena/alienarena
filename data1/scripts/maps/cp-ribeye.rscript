@@ -25,5 +25,6 @@ textures/arena8/grass2
 		scale static 4 static 4
 		colormap 0 1 0
 		grass
+		grasstype 0
 	}
 }

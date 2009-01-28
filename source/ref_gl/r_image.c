@@ -1066,33 +1066,6 @@ void GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,
 }
 
 /*
-================
-GL_MipMap
-
-Operates in place, quartering the size of the texture
-================
-*/
-void GL_MipMap (byte *in, int width, int height)
-{
-	int		i, j;
-	byte	*out;
-
-	width <<=2;
-	height >>= 1;
-	out = in;
-	for (i=0 ; i<height ; i++, in+=width)
-	{
-		for (j=0 ; j<width ; j+=8, out+=4, in+=8)
-		{
-			out[0] = (in[0] + in[4] + in[width+0] + in[width+4])>>2;
-			out[1] = (in[1] + in[5] + in[width+1] + in[width+5])>>2;
-			out[2] = (in[2] + in[6] + in[width+2] + in[width+6])>>2;
-			out[3] = (in[3] + in[7] + in[width+3] + in[width+7])>>2;
-		}
-	}
-}
-
-/*
 R_FilterTexture
 
 Applies brightness and contrast to the specified image while optionally computing 
@@ -1161,7 +1134,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, q
 
 	if(mipmap && !is_normalmap)
 		R_FilterTexture(data, width, height);
- 
+
     uploaded_paletted = false;    // scan the texture for any non-255 alpha 
     c = width*height; 
     scan = ((byte *)data) + 3; 
