@@ -112,7 +112,13 @@ cplane_t	frustum[4];
 int		r_visframecount;	// bumped when going to a new PVS
 int		r_framecount;		// used for dlight push checking
 
-int		c_brush_polys, c_alias_polys, c_flares, c_grasses;
+// performance counters for r_speeds reports
+int last_c_brush_polys, c_brush_polys;
+int last_c_alias_polys, c_alias_polys;
+int c_flares;
+int c_grasses;
+extern int c_visible_lightmaps;
+extern int c_visible_textures;
 
 float		v_blend[4];			// final blending color
 
@@ -1169,6 +1175,7 @@ void R_DrawSpecialSurfaces(void);
 void R_RenderView (refdef_t *fd)
 {
 	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
+	static int printf_throttle;
 
 	numRadarEnts=0;
 
@@ -1180,13 +1187,13 @@ void R_RenderView (refdef_t *fd)
 	if (!r_worldmodel && !( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) )
 		Com_Error (ERR_DROP, "R_RenderView: NULL worldmodel");
 
-	if (r_speeds->value)
-	{
-		c_brush_polys = 0;
-		c_alias_polys = 0;
-		c_flares = 0;
-		c_grasses = 0;
-	}
+	// init r_speeds counters
+	last_c_brush_polys = c_brush_polys;
+	last_c_alias_polys = c_alias_polys;
+	c_brush_polys = 0;
+	c_alias_polys = 0;
+	c_flares = 0;
+	c_grasses = 0;
 
 	R_PushDlights ();
 	
@@ -1241,13 +1248,21 @@ void R_RenderView (refdef_t *fd)
 
 	R_RenderSun();
 
-	if (r_speeds->value)
-	{
-		Com_Printf (PRINT_ALL, "%4i wpoly %4i epoly %i tex %i lmaps\n",
-			c_brush_polys,
-			c_alias_polys,
-			c_visible_textures,
-			c_visible_lightmaps);
+	if (r_speeds->value == 1 )
+	{ // display r_speeds 'wpoly' and 'epoly'counters (value==2 puts on HUD)
+		if ( c_brush_polys != last_c_brush_polys
+			|| c_alias_polys != last_c_alias_polys )
+		{
+			Com_Printf( "%5i wpoly %5i epoly\n", c_brush_polys, c_alias_polys );
+		}
+	}
+	else if( r_speeds->value == 3 )
+	{ // display other counters, of unknown utility
+		if ( !(++printf_throttle % 32) )
+		{
+			Com_Printf( "%5i flares %5i grasses %5i vlmaps %5i vtex\n",
+			c_flares, c_grasses, c_visible_lightmaps, c_visible_textures );
+		}
 	}
 	
 	if(map_fog)
