@@ -333,6 +333,7 @@ void plat_Accelerate (moveinfo_t *moveinfo)
 
 void Think_AccelMove (edict_t *ent)
 {
+
 	ent->moveinfo.remaining_distance -= ent->moveinfo.current_speed;
 
 	if (ent->moveinfo.current_speed == 0)		// starting or blocked
@@ -1475,6 +1476,7 @@ void train_blocked (edict_t *self, edict_t *other)
 
 void train_wait (edict_t *self)
 {
+
 	if (self->target_ent->pathtarget)
 	{
 		char	*savetarget;
@@ -1528,6 +1530,7 @@ void train_next (edict_t *self)
 
 	first = true;
 again:
+
 	if (!self->target)
 	{
 //		gi.dprintf ("train_next: no next target\n");
@@ -1574,7 +1577,7 @@ again:
 	VectorCopy (self->s.origin, self->moveinfo.start_origin);
 	VectorCopy (dest, self->moveinfo.end_origin);
 	Move_Calc (self, dest, train_wait);
-	VectorCopy (ent->s.angles, self->s.angles);//will this still work for regular trains?? hmmm
+	VectorCopy (ent->s.angles, self->s.angles);
 	self->spawnflags |= TRAIN_START_ON;
 }
 

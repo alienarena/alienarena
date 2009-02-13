@@ -1,4 +1,4 @@
-qbsp3 dm-aquous
-qvis3 dm-aquous
-qrad3 dm-aquous
+qbsp3 dm-warmachine2k9
+qvis3 -fast dm-warmachine2k9
+qrad3 dm-warmachine2k9
 pause

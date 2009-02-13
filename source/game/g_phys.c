@@ -96,6 +96,13 @@ qboolean SV_RunThink (edict_t *ent)
 {
 	float	thinktime;
 
+	if(!strcmp(ent->classname, "func_train")) {
+		//if animated mesh, animate at this target
+		if (ent->spawnflags & 32) 
+				ent->s.frame = (ent->s.frame + 1)%24;
+	}
+
+
 	thinktime = ent->nextthink;
 	if (thinktime <= 0)
 		return true;
