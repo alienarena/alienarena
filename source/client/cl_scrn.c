@@ -1628,6 +1628,29 @@ void SCR_showFPS(void)
 }
 
 /*
+ * SCR_ShowRSpeeds()
+ *   display the cvar r_speeds activated performance counters
+ */
+void SCR_showRSpeeds( void )
+{
+	char prtstring[32];
+ 	float scale;
+ 	extern int c_brush_polys;
+ 	extern int c_alias_polys;
+ 
+ 	if (cls.key_dest == key_menu || cls.key_dest == key_console)
+ 		return;
+ 
+ 	scale = (float)(viddef.height)/600;
+ 	if(scale < 1)
+ 		scale = 1;
+ 
+ 	Com_sprintf( prtstring, sizeof( prtstring ),
+ 		"%5.5i wpoly %5.5i epoly",  c_brush_polys, c_alias_polys );
+ 	DrawString(	viddef.width/2, viddef.height - 48*scale,	prtstring );
+}
+
+/*
 ==================
 SCR_UpdateScreen
 
@@ -1783,7 +1806,11 @@ void SCR_UpdateScreen (void)
 			{
 				SCR_showTimer();
 			}
-
+			{
+				extern cvar_t* r_speeds;
+				if( r_speeds->value == 2 )
+					SCR_showRSpeeds();
+			}
 		}
 	}
 	R_EndFrame();
