@@ -68,3 +68,9 @@ textures/metal/fade1
 		alphashift 15 0.1 0.2
 	}
 }
+textures/arena3/water
+{
+	{
+		map gfx/dmturboreflection.tga
+	}
+}
