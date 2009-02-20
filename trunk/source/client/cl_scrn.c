@@ -1182,7 +1182,7 @@ SCR_ExecuteLayoutString
 */
 void SCR_ExecuteLayoutString (char *s)
 {
-	int		x, y;
+	int		x, y, ny; //ny is coordinates used for new sb layout client tags only
 	int		value;
 	char	*token;
 	int		width;
@@ -1190,6 +1190,7 @@ void SCR_ExecuteLayoutString (char *s)
 	clientinfo_t	*ci;
 	int		charscale;
 	float	scale;
+	qboolean newSBlayout = false;
 
 	if (cls.state != ca_active || !cl.refresh_prepped)
 		return;
@@ -1248,6 +1249,7 @@ void SCR_ExecuteLayoutString (char *s)
 		{
 			token = COM_Parse (&s);
 			y = viddef.height/2 - 100*scale + atoi(token)*scale;
+			ny = viddef.height/2 - 100*scale + atoi(token)*scale/2;
 			continue;
 		}
 
@@ -1269,6 +1271,21 @@ void SCR_ExecuteLayoutString (char *s)
 			continue;
 		}
 
+		if (!strcmp(token, "newsb"))
+		{		
+			//print header here
+			x = viddef.width/2 - 160*scale;
+			y = viddef.height/2 - 64*scale;
+
+			DrawString (x+36*scale, y, va("Player"));
+			DrawString (x+160*scale, y, va("Score"));
+			DrawString (x+224*scale, y, va("Ping"));
+			DrawString (x+264*scale, y, va("time"));
+
+			newSBlayout = true;
+			continue;
+		}
+
 		if (!strcmp(token, "client"))
 		{	// draw a deathmatch client block
 			int		score, ping, time;
@@ -1276,7 +1293,10 @@ void SCR_ExecuteLayoutString (char *s)
 			token = COM_Parse (&s);
 			x = viddef.width/2 - 160*scale + atoi(token)*scale;
 			token = COM_Parse (&s);
-			y = viddef.height/2 - 100*scale + atoi(token)*scale;
+			if(newSBlayout)
+				y = viddef.height/2 - 100*scale + atoi(token)*scale/2;
+			else
+				y = viddef.height/2 - 100*scale + atoi(token)*scale;
 			SCR_AddDirtyPoint (x, y);
 			SCR_AddDirtyPoint (x+159*scale, y+31*scale);
 
@@ -1291,19 +1311,30 @@ void SCR_ExecuteLayoutString (char *s)
 
 			token = COM_Parse (&s);
 			ping = atoi(token);
-
+ 
 			token = COM_Parse (&s);
 			time = atoi(token);
 
-			Draw_ColorString (x+32*scale, y, ci->name);
-			DrawString (x+32*scale, y+8*scale,  "Score: ");
-			DrawAltString (x+32*scale+7*charscale, y+8*scale,  va("%i", score));
-			DrawString (x+32*scale, y+16*scale, va("Ping:  %i", ping));
-			DrawString (x+32*scale, y+24*scale, va("Time:  %i", time));
+			if(newSBlayout) { //new scoreboard layout
 
-			if (!ci->icon)
-				ci = &cl.baseclientinfo;
-			Draw_ScaledPic (x, y, scale, ci->iconname);
+				Draw_ColorString (x+36*scale, y+34*scale, ci->name, 1.2);
+				DrawAltString (x+192*scale, y+34*scale, va("%i", score));
+				DrawString (x+224*scale, y+34*scale, va("%i", ping));
+				DrawString (x+264*scale, y+34*scale, va("%i", time));
+			}
+			else
+			{
+				Draw_ColorString (x+32*scale, y, ci->name, 1);
+				DrawString (x+32*scale, y+8*scale,  "Score: ");
+				DrawAltString (x+32*scale+7*charscale, y+8*scale,  va("%i", score));
+				DrawString (x+32*scale, y+16*scale, va("Ping:  %i", ping));
+				DrawString (x+32*scale, y+24*scale, va("Time:  %i", time));
+
+				if (!ci->icon)
+					ci = &cl.baseclientinfo;
+				Draw_ScaledPic (x, y, scale, ci->iconname);
+			}
+
 			continue;
 		}
 		if (!strcmp(token, "queued"))
@@ -1332,15 +1363,28 @@ void SCR_ExecuteLayoutString (char *s)
 			token = COM_Parse (&s);
 			time = atoi(token);
 
-			Draw_ColorString (x+32*scale, y, ci->name);
-			DrawString (x+32*scale, y+8*scale,  "Score: ");
-			DrawAltString (x+32*scale+7*charscale, y+8*scale,  va("%i", score));
-			DrawString (x+32*scale, y+16*scale, va("Ping:  %i", ping));
-			Draw_ColorString (x+32*scale, y+24*scale, va("^1Queue:  ^1%i", time));
+			token = COM_Parse (&s);
 
-			if (!ci->icon)
-				ci = &cl.baseclientinfo;
-			Draw_ScaledPic (x, y, scale, ci->iconname);
+			if(newSBlayout) { //new scoreboard layout
+
+				Draw_ColorString (x+36*scale, y+34*scale, ci->name, 1.2);
+				DrawAltString (x+192*scale, y+34*scale, va("%i", score));
+				DrawString (x+224*scale, y+34*scale, va("%i", ping));
+				Draw_ColorString (x+264*scale, y+34*scale, va("^1%i", time), 1.2);
+			}
+			else {
+
+				Draw_ColorString (x+32*scale, y, ci->name, 1);
+				DrawString (x+32*scale, y+8*scale,  "Score: ");
+				DrawAltString (x+32*scale+7*charscale, y+8*scale,  va("%i", score));
+				DrawString (x+32*scale, y+16*scale, va("Ping:  %i", ping));
+				Draw_ColorString (x+32*scale, y+24*scale, va("^1Queue:  ^1%i", time), 1);
+
+				if (!ci->icon)
+					ci = &cl.baseclientinfo;
+				Draw_ScaledPic (x, y, scale, ci->iconname);
+			}
+
 			continue;
 		}
 		if (!strcmp(token, "ctf"))
@@ -1370,7 +1414,7 @@ void SCR_ExecuteLayoutString (char *s)
 				ping = 999;
 
 			sprintf(block, "%3d %3d %s", score, ping, ci->name);
-			Draw_ColorString (x, y, block);
+			Draw_ColorString (x, y, block, 1);
 
 			continue;
 		}
@@ -1378,9 +1422,16 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "picn"))
 		{	// draw a pic from a name
 			token = COM_Parse (&s);
-			SCR_AddDirtyPoint (x, y);
-			SCR_AddDirtyPoint (x+23*scale, y+23*scale);
-			Draw_ScaledPic (x, y, scale, token);
+			if(newSBlayout && !strcmp(token, "playerbox")) { //cannot simply fill y = ny here
+				SCR_AddDirtyPoint (x, ny+32*scale);
+				SCR_AddDirtyPoint (x+23*scale, ny+55*scale);
+				Draw_ScaledPic (x, ny+32*scale, scale, token);
+			}
+			else {
+				SCR_AddDirtyPoint (x, y);
+				SCR_AddDirtyPoint (x+23*scale, y+23*scale);
+				Draw_ScaledPic (x, y, scale, token);
+			}
 			continue;
 		}
 

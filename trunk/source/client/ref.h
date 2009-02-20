@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define MAX_FLARES      512
 #define MAX_GRASSES		2048
+#define MAX_BEAMS		128
 
 typedef struct
 {
@@ -63,6 +64,17 @@ typedef struct
 	int texnum;
 	char name[MAX_QPATH];
 } grass_t;
+
+typedef struct
+{
+	int type;
+	vec3_t origin;
+	vec3_t color;
+	float size;
+	int texsize;
+	int texnum;
+	char name[MAX_QPATH];
+} beam_t;
 
 #define POWERSUIT_SCALE		4.0F
 
@@ -194,11 +206,14 @@ typedef struct
 	int			num_particles;
 	particle_t	*particles;
 
-	int          num_flares;
-    flare_t      *flares;
+	int         num_flares;
+    flare_t     *flares;
 
-	int			 num_grasses;
-	grass_t		 *grasses;
+	int			num_grasses;
+	grass_t		*grasses;
+
+	int			num_beams;
+	beam_t		*beams;
 
 } refdef_t;
 
@@ -242,8 +257,8 @@ void	Draw_StretchPic (int x, int y, int w, int h, char *name);
 void	Draw_AlphaStretchPic (int x, int y, int w, int h, char *name, float alphaval);
 void	Draw_Char (int x, int y, int c);
 void	Draw_ColorChar (int x, int y, int num, vec4_t color);
-void	Draw_ScaledChar (int x, int y, int num, int scale);
-void	Draw_ScaledColorChar (int x, int y, int num, vec4_t color, int scale);
+void	Draw_ScaledChar (float x, float y, int num, float scale);
+void	Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale);
 void	Draw_TileClear (int x, int y, int w, int h, char *name);
 void	Draw_Fill (int x, int y, int w, int h, int c);
 void	Draw_FadeScreen (void);

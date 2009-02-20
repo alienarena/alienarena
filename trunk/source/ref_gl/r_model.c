@@ -920,6 +920,88 @@ void GL_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float 
 	grass->type = type;
 }
 
+int r_numbeams;
+beam_t r_beams[MAX_BEAMS];
+
+static void R_ClearBeams(void)
+{
+	memset(r_beams, 0, sizeof(r_beams));
+	r_numbeams = 0;
+}
+
+void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type)
+{
+    glpoly_t *poly;
+    beam_t  *beam; 
+	image_t *gl;
+	vec3_t poly_center, mins, maxs;
+	float *v;
+	int i;
+	vec3_t origin = {0,0,0}, binormal, tangent, tmp;
+
+	if (r_numbeams >= MAX_BEAMS)
+			return;
+
+	if(size == 0.0)
+		size = 1.0f;
+ 	  
+	poly = surf->polys;
+         
+	 /*
+	===================
+	find poligon centre
+	===================
+	*/
+	VectorSet(mins, 999999, 999999, 999999);
+	VectorSet(maxs, -999999, -999999, -999999);
+
+    for ( poly = surf->polys; poly; poly = poly->chain ) { 
+         for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE) { 
+                
+               if(v[0] > maxs[0])   maxs[0] = v[0]; 
+               if(v[1] > maxs[1])   maxs[1] = v[1]; 
+               if(v[2] > maxs[2])   maxs[2] = v[2]; 
+
+               if(v[0] < mins[0])   mins[0] = v[0]; 
+               if(v[1] < mins[1])   mins[1] = v[1]; 
+               if(v[2] < mins[2])   mins[2] = v[2]; 
+            } 
+      } 
+
+     poly_center[0] = (mins[0] + maxs[0]) /2; 
+     poly_center[1] = (mins[1] + maxs[1]) /2; 
+     poly_center[2] = (mins[2] + maxs[2]) /2;
+	 VectorCopy(poly_center, origin);
+   
+	AngleVectors(surf->plane->normal, NULL, tangent, binormal);
+	VectorNormalize(tangent);
+	VectorNormalize(binormal);
+
+	if (surf->flags & SURF_PLANEBACK)
+		VectorNegate(surf->plane->normal, tmp);
+	else
+		VectorCopy(surf->plane->normal, tmp);
+     
+	VectorMA(origin, 2, tmp, origin);
+		
+	beam = &r_beams[r_numbeams++];
+	VectorCopy(origin, beam->origin);
+	
+	gl = R_RegisterGfxPic (name);
+	if (gl)
+		beam->texsize = gl->height;
+	else
+		beam->texsize = 64; //sane default
+	
+	beam->texnum = texnum;
+	VectorCopy(color, beam->color);
+	beam->size = size;
+	strcpy(beam->name, name);
+	beam->type = type;
+
+}
+
+
 void GL_BuildPolygonFromSurface(msurface_t *fa);
 void GL_CreateSurfaceLightmap (msurface_t *surf);
 void GL_EndBuildingLightmaps (void);
@@ -1035,6 +1117,14 @@ void Mod_LoadFaces (lump_t *l)
 						color[2] = stage->colormap.blue;
 					}
 					GL_AddVegetationSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->grasstype);
+				}
+				if (stage->beam && stage->texture) {
+					if(stage->colormap.enabled) {
+						color[0] = stage->colormap.red;
+						color[1] = stage->colormap.green;
+						color[2] = stage->colormap.blue;
+					}
+					GL_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->beamtype);
 				}
 			} while (stage = stage->next);
 		}
@@ -1271,6 +1361,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	if(r_lensflare->value)
 		R_ClearFlares();
 	R_ClearGrasses();
+	R_ClearBeams();
 	// rscript - MrG
 	RS_FreeUnmarked();
 	strcpy(tmp,loadmodel->name+5);

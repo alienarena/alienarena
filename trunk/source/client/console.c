@@ -58,13 +58,13 @@ void DrawString (int x, int y, char *s)
 Draw_ColorString
 =============
 */
-void Draw_ColorString ( int x, int y, char *str )
+void Draw_ColorString ( int x, int y, char *str, float scale)
 {
 	int		num;
 	vec4_t	scolor;
 	int		charscale;
 
-	charscale = (float)(viddef.height)*8/600;
+	charscale = (float)(viddef.height)*8*scale/600;
 	if(charscale < 8)
 		charscale = 8;
 
@@ -99,7 +99,7 @@ void Draw_ColorString ( int x, int y, char *str )
 
 void DrawAltString (int x, int y, char *s)
 {
-	int		charscale;
+	float	charscale;
 
 	charscale = (float)(viddef.height)*8/600;
 	if(charscale < 8)
@@ -553,7 +553,7 @@ void Con_DrawInput (void)
 
 
 // draw it
-	Draw_ColorString ( charscale, (int)(con.vislines - 2.75*charscale), output);
+	Draw_ColorString ( charscale, (int)(con.vislines - 2.75*charscale), output, 1);
 }
 
 
@@ -757,7 +757,7 @@ void Con_DrawConsole (float frac)
 		for (x=0 ; x<con.linewidth ; x++)
 			Com_sprintf (output, sizeof(output), "%s%c", output, text[x]);
 
-		Draw_ColorString ( 4, y, output);
+		Draw_ColorString ( 4, y, output, 1);
 	}
 
 //ZOID

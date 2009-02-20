@@ -165,7 +165,7 @@ void Draw_ColorChar (int x, int y, int num, vec4_t color)
 	qglColor4f( 1,1,1,1 );
 }
 
-void Draw_ScaledChar (int x, int y, int num, int scale)
+void Draw_ScaledChar (float x, float y, int num, float scale)
 					
 {
 	int				row, col;
@@ -200,7 +200,7 @@ void Draw_ScaledChar (int x, int y, int num, int scale)
 	qglEnd();
 
 }
-void Draw_ScaledColorChar (int x, int y, int num, vec4_t color, int scale)
+void Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale)
 {
 	int				row, col;
 	float			frow, fcol, size;

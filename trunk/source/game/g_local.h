@@ -629,6 +629,9 @@ extern cvar_t	*g_votesame;
 //reward point threshold
 extern cvar_t	*g_reward;
 
+//old scoreboard type
+extern cvar_t	*g_oldscorebd;
+
 #define world	(&g_edicts[0])
 
 // item spawnflags
