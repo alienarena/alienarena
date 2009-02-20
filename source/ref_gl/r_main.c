@@ -117,6 +117,7 @@ int last_c_brush_polys, c_brush_polys;
 int last_c_alias_polys, c_alias_polys;
 int c_flares;
 int c_grasses;
+int c_beams;
 extern int c_visible_lightmaps;
 extern int c_visible_textures;
 
@@ -1194,6 +1195,7 @@ void R_RenderView (refdef_t *fd)
 	c_alias_polys = 0;
 	c_flares = 0;
 	c_grasses = 0;
+	c_beams = 0;
 
 	R_PushDlights ();
 	
@@ -1228,6 +1230,8 @@ void R_RenderView (refdef_t *fd)
 	R_DrawEntitiesOnList ();
 
 	R_DrawSpecialSurfaces();
+
+	R_DrawBeamSurface ();
 
 	R_DrawAlphaSurfaces ();
 

@@ -562,6 +562,14 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	string[0] = 0;
 	
 	stringlength = strlen(string);
+
+	if(!g_oldscorebd->value) { //tell the client we have a new layout
+
+		Com_sprintf (entry, sizeof(entry), "newsb ");
+		j = strlen(entry);
+		strcpy (string + stringlength, entry);
+		stringlength += j;
+	}
 	
 	// add the clients in sorted order
 	if (total > 12)
@@ -572,12 +580,23 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		cl = &game.clients[sorted[i]];
 		cl_ent = g_edicts + 1 + sorted[i];
 
-		x = (i>=6) ? 160 : 0;
-		y = 32 + 32 * (i%6);
-
+		if(g_oldscorebd->value) {
+			x = (i>=6) ? 160 : 0;
+			y = 32 + 32 * (i%6);
+		}
+		else {
+			x = 0;
+			y = 32 + 32 * (i%12);
+		}
+ 
 		// add a background
-		Com_sprintf (entry, sizeof(entry),
-			"xv %i yv %i picn %s ",x+32, y, "tag2");
+		if(g_oldscorebd->value)
+			Com_sprintf (entry, sizeof(entry),
+				"xv %i yv %i picn %s ",x+32, y, "tag2");
+		else
+			Com_sprintf (entry, sizeof(entry),
+				"xv %i yv %i picn %s ",x+32, y, "playerbox");
+
 		j = strlen(entry);
 		if (stringlength + j > 1024)
 			break;
@@ -592,9 +611,8 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		else //duel mode will have queued spectators
 			Com_sprintf (entry, sizeof(entry),
 				"queued %i %i %i %i %i %i ",
-				x, y, sorted[i], cl->resp.score, cl->ping, cl->pers.queue-2);
-	
-		
+				x, y, sorted[i], cl->resp.score, cl->ping, cl->pers.queue-2);	
+					
 		j = strlen(entry);
 		if (stringlength + j > 1024)
 			break;
@@ -605,26 +623,43 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	//weapon accuracy(don't do if map voting)
 	if(!mapvote) {
 		//add a background
-		x = 0;
-		y = (total>=6) ? (32+(32*5)) : (32*total);
-		for (i=0 ; i<3 ; i++)
-		{
-		
-			Com_sprintf (entry, sizeof(entry),
-				"xv %i yv %i picn %s ", x, y+((i+1)*32+24), "tag2");
-			j = strlen(entry);
-			if (stringlength + j > 1024)
-				break;
-			strcpy (string + stringlength, entry);
-			stringlength += j;
-			
-			// send the layout
-			if (stringlength + j > 1024)
-				break;
+		if(g_oldscorebd->value) {
+			x = 0;
+			y = (total>=6) ? (32+(32*5)) : (32*total);
+		}
+		else {
+			x = 36;
+			y = 16*total;
 		}
 
-		x = 0;
 		y = (total>=6) ? (32+(32*5)) : (32*total);
+		
+		if(g_oldscorebd->value) {
+			for (i=0 ; i<3 ; i++)
+			{
+				Com_sprintf (entry, sizeof(entry),
+					"xv %i yv %i picn %s ", x, y+((i+1)*32+24), "tag2");
+				j = strlen(entry);
+				if (stringlength + j > 1024)
+					break;
+				strcpy (string + stringlength, entry);
+				stringlength += j;
+				
+				// send the layout
+				if (stringlength + j > 1024)
+					break;
+			}
+		}
+		else {
+			Com_sprintf (entry, sizeof(entry),
+				"xv %i yv %i picn %s ", x-4, y+48, "statbox");
+			j = strlen(entry);
+			if(stringlength + j < 1024) {
+				strcpy(string + stringlength, entry);
+				stringlength +=j;
+			}
+		}
+
 		Com_sprintf(entry, sizeof(entry),
 			"xv %i yv %i string Accuracy ", x, y+56);
 		j = strlen(entry);

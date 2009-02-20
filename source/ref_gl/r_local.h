@@ -90,6 +90,7 @@ extern	cplane_t	frustum[4];
 extern	int			c_brush_polys, c_alias_polys;
 extern 	int c_flares;
 extern  int c_grasses;
+extern	int c_beams;
 
 extern	int			gl_filter_min, gl_filter_max;
 
@@ -297,6 +298,7 @@ void R_InitBloomTextures( void );
 //FLARES and SUN
 void R_RenderFlares (void);
 void R_DrawVegetationSurface (void);
+void R_DrawBeamSurface ( void );
 void R_InitSun();
 void R_RenderSun();
 vec3_t sun_origin;

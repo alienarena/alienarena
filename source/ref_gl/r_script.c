@@ -37,6 +37,7 @@ float		rs_realtime = 0;
 rscript_t	*rs_rootscript = NULL;
 
 int r_numgrasses;
+int r_numbeams;
 
 int	RS_Random(rs_stage_t *stage, msurface_t *surf)
 {
@@ -231,6 +232,8 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->normalmap = false;
 	stage->grass = false;
 	stage->grasstype = 0;
+	stage->beam = false;
+	stage->beamtype = 0;
 
 	stage->lightmap = true;
 
@@ -561,6 +564,8 @@ scriptname
 		normalmap
 		grass
 		grasstype
+		beam
+		beamtype
 	}
 }
 */
@@ -828,6 +833,15 @@ void rs_stage_grasstype (rs_stage_t *stage, char **token)
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->grasstype = atoi(*token);
 }
+void rs_stage_beam (rs_stage_t *stage, char **token)
+{
+	stage->beam = true;
+}
+void rs_stage_beamtype (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->beamtype = atoi(*token);
+}
 static rs_stagekey_t rs_stagekeys[] = 
 {
 	{	"colormap",		&rs_stage_colormap		},
@@ -853,6 +867,8 @@ static rs_stagekey_t rs_stagekeys[] =
 	{   "normalmap",	&rs_stage_normalmap		},
 	{	"grass",		&rs_stage_grass			},
 	{	"grasstype",	&rs_stage_grasstype		},
+	{	"beam",			&rs_stage_beam			},
+	{	"beamtype",		&rs_stage_beamtype		},
 
 	{	NULL,			NULL					}
 };
@@ -1457,6 +1473,102 @@ void R_DrawVegetationSurface ( void )
 	}
 }
 
+extern int c_beams;
+beam_t r_beams[MAX_BEAMS];
+void R_DrawBeamSurface ( void )
+{
+    int		i;
+	beam_t *beam;
+    float   scale;
+	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
+	float	*corner0 = corner[0];
+	qboolean visible;
+	trace_t r_trace;
+
+	beam = r_beams;
+
+	VectorSet(mins, 0, 0, 64);
+	VectorSet(maxs, 0, 0, -64);	
+
+    for (i=0; i<r_numbeams; i++, beam++) {
+		 
+		scale = 10.0*beam->size; 
+
+		VectorCopy(r_newrefdef.viewangles, angle);
+
+		angle[0] = 0;  // keep vertical by removing pitch
+
+		AngleVectors(angle, NULL, right, up);	
+		VectorScale(right, scale, right);
+		VectorScale(up, scale, up); 
+		VectorCopy(beam->origin, origin);
+
+		if(!beam->type)
+			origin[2] -= up[2]/2; //contingent on direction of beam
+
+		r_trace = CM_BoxTrace(r_origin, origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
+		visible = r_trace.fraction == 1.0;
+		
+		if(visible) {
+
+			//render polygon
+			qglDepthMask( GL_FALSE );	 	
+			qglEnable( GL_BLEND);
+			qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);	
+
+			qglColor4f( beam->color[0],beam->color[1],beam->color[2], 1 );
+
+			GL_Bind(beam->texnum);
+
+			qglBegin ( GL_QUADS );
+
+			VectorSet (corner[0],
+				origin[0] + (up[0] + right[0])*(-0.5),
+				origin[1] + (up[1] + right[1])*(-0.5),
+				origin[2] + (up[2] + right[2])*(-0.5));
+
+			VectorSet ( corner[1],
+				corner0[0] + up[0], 
+				corner0[1] + up[1], 
+				corner0[2] + up[2]);
+
+			VectorSet ( corner[2], 
+				corner0[0] + (up[0]+right[0]),
+				corner0[1] + (up[1]+right[1]), 
+				corner0[2] + (up[2]+right[2]));
+
+			VectorSet ( corner[3],
+				corner0[0] + right[0], 
+				corner0[1] + right[1], 
+				corner0[2] + right[2]);
+
+			qglTexCoord2f( 1, 1 );
+			qglVertex3fv( corner[0] );
+
+			qglTexCoord2f( 0, 1 );
+			qglVertex3fv ( corner[1] );
+
+			qglTexCoord2f( 0, 0 );
+			qglVertex3fv ( corner[2] );
+
+			qglTexCoord2f( 1, 0 );
+			qglVertex3fv ( corner[3] );	
+
+			qglEnd ();
+
+			qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+			qglColor4f( 1,1,1,1 );
+			qglDisable(GL_BLEND);
+			qglDepthMask( GL_TRUE );	
+			GL_TexEnv( GL_REPLACE );
+
+			c_beams++;
+		}
+	}
+}
+
+
 
 //This is the shader drawing routine for bsp surfaces - it will draw on top of the 
 //existing texture.  
@@ -1486,7 +1598,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	do
 	{
 
-		if (stage->lensflare || stage->grass)
+		if (stage->lensflare || stage->grass || stage->beam)
 			break;
 
 		if (stage->colormap.enabled)

@@ -328,7 +328,7 @@ extern	sizebuf_t	net_message;
 
 void DrawString (int x, int y, char *s);
 void DrawAltString (int x, int y, char *s);	// toggle high bit
-void Draw_ColorString ( int x, int y, char *str );
+void Draw_ColorString ( int x, int y, char *str, float scale);
 qboolean	CL_CheckOrDownloadFile (char *filename);
 
 void CL_AddNetgraph (void);

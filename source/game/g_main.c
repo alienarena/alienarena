@@ -97,6 +97,9 @@ cvar_t	*g_votesame;
 //reward point threshold
 cvar_t	*g_reward;
 
+//old scoreboard
+cvar_t	*g_oldscorebd;
+
 cvar_t	*dmflags;
 cvar_t	*skill;
 cvar_t	*fraglimit;

@@ -22,12 +22,6 @@ textures/arena7/light10
 		lensflare
 	}
 }
-textures/rage/light10
-{
-	{
-		lensflare
-	}
-}
 textures/arena9/trim2
 {
 	{
@@ -51,26 +45,29 @@ textures/evil/e6launchengine
 		nolightmap
 	}
 }
-textures/metal/fade1
-{
-	{
-		map gfx/rayfx.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 2 static 1	
-		scroll static .5 static 0
-		alphashift 10 0.1 0.2
-	}
-	{
-		map gfx/rayfx.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 2 static 1	
-		scroll static .3 static 0
-		alphashift 15 0.1 0.2
-	}
-}
 textures/arena3/water
 {
 	{
 		map gfx/dmturboreflection.tga
+	}
+}
+textures/arena9/lightwhite
+{
+	{
+		map gfx/beam1.tga
+		scale static 12 static 12
+		colormap 1 1 1
+		beam
+		lensflare
+	}
+}
+textures/arena9/roundlight
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		lensflare
 	}
 }

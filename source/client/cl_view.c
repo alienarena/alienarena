@@ -34,6 +34,9 @@ flare_t r_flares[MAX_FLARES];
 int r_numgrasses;
 grass_t r_grasses[MAX_GRASSES];
 
+int r_numbeams;
+beam_t	r_beams[MAX_BEAMS];
+
 //=============
 extern cvar_t *cl_showPlayerNames;
 extern cvar_t *name;
@@ -688,7 +691,7 @@ void SCR_DrawPlayerNamesCenter( void )
 
 	  }
 	  if(closest)
-		  Draw_ColorString( (int)(cl.refdef.width/2 - strlen(cl.clientinfo[closest].name)*3), (int)(cl.refdef.height/1.8), cl.clientinfo[closest].name);
+		  Draw_ColorString( (int)(cl.refdef.width/2 - strlen(cl.clientinfo[closest].name)*3), (int)(cl.refdef.height/1.8), cl.clientinfo[closest].name, 1);
   		
 }
 
@@ -746,7 +749,7 @@ void SCR_DrawPlayerNames( void )
 
 	  R_TransformVectorToScreen(&cl.refdef, cent->current.origin, screen_pos); 
 	  y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6; 
-	  Draw_ColorString ( (int)screen_pos[0], y, cl.clientinfo[i].name ); 
+	  Draw_ColorString ( (int)screen_pos[0], y, cl.clientinfo[i].name, 1 ); 
 
    } 
 }
@@ -771,9 +774,9 @@ void SCR_DrawBases (void)
 		R_TransformVectorToScreen(&cl.refdef, ent->origin, screen_pos); 
 		y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6; 
 		if(ent->team == 2)
-			Draw_ColorString ( (int)screen_pos[0], y, "^4Blue Flag" ); 
+			Draw_ColorString ( (int)screen_pos[0], y, "^4Blue Flag", 1 ); 
 		else if(ent->team == 1)
-			Draw_ColorString ( (int)screen_pos[0], y, "^1Red Flag" );
+			Draw_ColorString ( (int)screen_pos[0], y, "^1Red Flag", 1 );
 
 	}
 }
@@ -873,6 +876,8 @@ void V_RenderView( float stereo_separation )
         cl.refdef.flares = r_flares;
 		cl.refdef.num_grasses = r_numgrasses;
 		cl.refdef.grasses = r_grasses;
+		cl.refdef.num_beams = r_numbeams;
+		cl.refdef.beams = r_beams;
 
 		cl.refdef.rdflags = cl.frame.playerstate.rdflags;
 
