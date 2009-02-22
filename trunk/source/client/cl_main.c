@@ -1793,6 +1793,12 @@ void CL_InitLocal (void)
 	R_RegisterPic("m_mutators");
 	R_RegisterPic("m_single");
 	R_RegisterPic("m_quit");
+	R_RegisterPic("m_main_mont0");
+	R_RegisterPic("m_main_mont1");
+	R_RegisterPic("m_main_mont2");
+	R_RegisterPic("m_main_mont3");
+	R_RegisterPic("m_main_mont4");
+	R_RegisterPic("m_main_mont5");
 }
 
 

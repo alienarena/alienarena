@@ -61,6 +61,8 @@ int playeridx;
 int hover_time;
 float mappicalpha;
 float banneralpha;
+float mainalpha;
+int montagepic;
 
 void M_Menu_Main_f (void);
 	void M_Menu_Game_f (void);
@@ -126,6 +128,10 @@ static void M_MapPic( char *name, float alpha )
 
 	w = h = 128*scale;
 	Draw_AlphaStretchPic (viddef.width / 2 - w - 4*scale, viddef.height / 2 + 112*scale, w, h, name, alpha);
+}
+static void M_MontagePic( char *name, float alpha )
+{	
+	Draw_AlphaStretchPic (0, 0, viddef.width, viddef.height, name, alpha);
 }
 static void M_CrosshairPic( char *name )
 {
@@ -531,6 +537,8 @@ void M_Main_Draw (void)
 	float scale;
 	float widscale;
 	int w, h;
+	char montagepicname[16];
+	char backgroundpic[16];
 
 	scale = (float)(viddef.height)/600;
 	if(scale < 1)
@@ -545,9 +553,21 @@ void M_Main_Draw (void)
 	ystart = ( viddef.height / 2 - 25*scale );
 	xoffset = ( viddef.width - widest - 25*scale) / 2;
 
-	//draw the background pics first -
+	M_Background("m_main");
 
-	M_Background( "m_main"); //draw black background first
+	//draw the montage pics
+	mainalpha += cls.frametime; //fade image in
+	if(mainalpha > 4) { //switch pics at this point
+		mainalpha = 0.1;
+		montagepic++;
+		if(montagepic > 5) {
+			montagepic = 1;
+		}
+	}
+	sprintf(backgroundpic, "m_main_mont%i", (montagepic==1)?5:montagepic-1);	
+	sprintf(montagepicname, "m_main_mont%i", montagepic);
+	M_Background(backgroundpic);
+	M_MontagePic(montagepicname, mainalpha);
 
 	for ( i = 0; main_names[i] != 0; i++ )
 	{
