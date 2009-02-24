@@ -323,6 +323,8 @@ typedef struct model_s
 	int			num_frames;
 	vec3_t r_mesh_verts[MAX_VERTS];
 
+	fstvert_t	*st;
+
 } model_t;
 
 //============================================================================
