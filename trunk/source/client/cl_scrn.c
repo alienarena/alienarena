@@ -1286,6 +1286,28 @@ void SCR_ExecuteLayoutString (char *s)
 			continue;
 		}
 
+		if (!strcmp(token, "newctfsb"))
+		{		
+			//print header here
+			x = viddef.width/2 - 160*scale;
+			y = viddef.height/2 - 72*scale;
+
+			//team 1
+			DrawString (x-82*scale, y, va("Player"));
+			DrawString (x+76*scale, y, va("Score"));
+			DrawString (x+124*scale, y, va("Ping"));
+
+			x += 190*scale;
+
+			//team 2
+			DrawString (x-16*scale, y, va("Player"));
+			DrawString (x+142*scale, y, va("Score"));
+			DrawString (x+190*scale, y, va("Ping"));
+
+			newSBlayout = true;
+			continue;
+		}
+
 		if (!strcmp(token, "client"))
 		{	// draw a deathmatch client block
 			int		score, ping, time;
@@ -1413,8 +1435,15 @@ void SCR_ExecuteLayoutString (char *s)
 			if (ping > 999)
 				ping = 999;
 
-			sprintf(block, "%3d %3d %s", score, ping, ci->name);
-			Draw_ColorString (x, y, block, 1);
+			if(newSBlayout) {
+				Draw_ColorString (x+16, y, ci->name, 1.2);
+				DrawAltString (x+172*scale, y+1*scale, va("%i", score));
+				DrawString (x+220*scale, y+1*scale, va("%i", ping));
+			}
+			else {
+				sprintf(block, "%3d %3d %s", score, ping, ci->name);
+				Draw_ColorString (x, y, block, 1);
+			}
 
 			continue;
 		}
