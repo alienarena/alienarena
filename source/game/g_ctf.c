@@ -84,32 +84,43 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	*string = 0;
 	len = 0;
 
-	// team one
-	sprintf(string, "xv -8 yv -8 picn i_team1 "
-		"xv 40 yv 28 string \"%4d/%-3d\" "
-		"xv 58 yv 12 num 3 21 "
-		"xv 184 yv -8 picn i_team2 "
-		"xv 230 yv 28 string \"%4d/%-3d\" "
-		"xv 248 yv 12 num 3 22 ",
-		totalscore[0], total[0],
-		totalscore[1], total[1]);
-	len = strlen(string);
+	if(g_oldscorebd->value) {
+		// team one
+		sprintf(string, "xv -8 yv -8 picn i_team1 "
+			"xv 40 yv 28 string \"%4d/%-3d\" "
+			"xv 58 yv 12 num 3 21 "
+			"xv 184 yv -8 picn i_team2 "
+			"xv 230 yv 28 string \"%4d/%-3d\" "
+			"xv 248 yv 12 num 3 22 ",
+			totalscore[0], total[0],
+			totalscore[1], total[1]);
+		len = strlen(string);
+	}
+	else {
+		if(ctf->value) {
+			//do ctf
+			sprintf(string, "newctfsb xv -16 yv -8 picn ctf1 "
+				"xv +12 yv 4 num 3 21 "
+				"xv 238 yv -8 picn ctf2 "
+				"xv 264 yv 4 num 3 22 ");
+			len = strlen(string);
+		}
+		else {
+			//regular team games
+			sprintf(string, "newctfsb xv -16 yv -8 picn team1 "
+				"xv +12 yv 4 num 3 21 "
+				"xv 238 yv -8 picn team2 "
+				"xv 264 yv 4 num 3 22 ");
+			len = strlen(string);
+		}
+	}
 
 	for (i=0 ; i<16 ; i++)
 	{
 		if (i >= total[0] && i >= total[1])
 			break; // we're done
-
-#if 0 //ndef NEW_SCORE
-		// set up y
-		sprintf(entry, "yv %d ", 42 + i * 8);
-		if (maxsize - len > strlen(entry)) {
-			strcat(string, entry);
-			len = strlen(string);
-		}
-#else
+		
 		*entry = 0;
-#endif
 
 		// left side
 		if (i < total[0]) {
@@ -117,17 +128,34 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			cl_ent = g_edicts + 1 + sorted[0][i];
 
 
-			sprintf(entry+strlen(entry),
-				"ctf 0 %d %d %d %d ",
-				42 + i * 8,
-				sorted[0][i],
-				cl->resp.score,
-				cl->ping > 999 ? 999 : cl->ping);
+			if(g_oldscorebd->value) {
+				sprintf(entry+strlen(entry),
+					"ctf 0 %d %d %d %d ",
+					42 + i * 8,
+					sorted[0][i],
+					cl->resp.score,
+					cl->ping > 999 ? 999 : cl->ping);
 
-			if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
-				sprintf(entry + strlen(entry), "xv 56 yv %d picn sbfctf2 ",
-					42 + i * 8);
+				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
+					sprintf(entry + strlen(entry), "xv 56 yv %d picn sbfctf2 ",
+						42 + i * 8);
+			}
+			else {
 
+				sprintf (entry+strlen(entry),
+				"xv %i yv %i picn %s ",-96, 39 + i * 16, "redplayerbox");
+
+				sprintf(entry+strlen(entry),
+					"ctf -96 %d %d %d %d ",
+					42 + i * 16,
+					sorted[0][i],
+					cl->resp.score,
+					cl->ping > 999 ? 999 : cl->ping);
+
+				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
+					sprintf(entry + strlen(entry), "xv -92 yv %d picn sbfctf2 ",
+						43 + i * 16);
+			}
 
 			if (maxsize - len > strlen(entry)) {
 				strcat(string, entry);
@@ -142,16 +170,34 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			cl_ent = g_edicts + 1 + sorted[1][i];
 
 
-			sprintf(entry+strlen(entry),
-				"ctf 190 %d %d %d %d ",
-				42 + i * 8,
-				sorted[1][i],
-				cl->resp.score,
-				cl->ping > 999 ? 999 : cl->ping);
+			if(g_oldscorebd->value) {
+				sprintf(entry+strlen(entry),
+					"ctf 190 %d %d %d %d ",
+					42 + i * 8,
+					sorted[1][i],
+					cl->resp.score,
+					cl->ping > 999 ? 999 : cl->ping);
 
-			if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)])
-				sprintf(entry + strlen(entry), "xv 246 yv %d picn sbfctf1 ",
-					42 + i * 8);
+				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)])
+					sprintf(entry + strlen(entry), "xv 246 yv %d picn sbfctf1 ",
+						42 + i * 8);
+			}
+			else {
+			
+				sprintf (entry+strlen(entry),
+				"xv %i yv %i picn %s ",160, 39 + i * 16, "blueplayerbox");
+
+				sprintf(entry+strlen(entry),
+					"ctf 160 %d %d %d %d ",
+					42 + i * 16,
+					sorted[1][i],
+					cl->resp.score,
+					cl->ping > 999 ? 999 : cl->ping);
+
+				if (cl_ent->client->pers.inventory[ITEM_INDEX(flag1_item)])
+					sprintf(entry + strlen(entry), "xv 164 yv %d picn sbfctf1 ",
+						43 + i * 16);
+			}
 
 			if (maxsize - len > strlen(entry)) {
 				strcat(string, entry);
