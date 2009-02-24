@@ -98,6 +98,12 @@ typedef struct
 	short	t;
 } dstvert_t;
 
+typedef struct
+{
+	float s;
+	float t;
+} fstvert_t;
+
 typedef struct 
 {
 	short	index_xyz[3];

@@ -173,21 +173,22 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 {
 	daliasframe_t	*frame, *oldframe;
 	dtrivertx_t	*v, *ov, *verts;
-	int		*order, *startorder, *tmp_order;
-	int		count, tmp_count;
+	dtriangle_t		*tris;
 	float	frontlerp;
 	float	alpha, basealpha;
 	vec3_t	move, delta, vectors[3];
 	vec3_t	frontv, backv;
-	int		i;
-	int		index_xyz;
+	int		i, j;
+	int		index_xyz, index_st;
 	qboolean depthmaskrscipt = false;
 	rscript_t *rs = NULL;
 	rs_stage_t *stage = NULL;
 	int		va = 0;
-	float	mode;
+	float shellscale;
 	vec3_t lightcolor;
 	float   *lerp;
+	fstvert_t *st;
+	float os, ot, os2, ot2;
 	float	ramp = 1.0;
 	qboolean mirror = false;
 	qboolean colored = false;
@@ -205,7 +206,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 		ov = oldframe->verts;
 	}
 
-	startorder = order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
+	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
+
+	st = currentmodel->st;
 
 	if (r_shaders->value)
 			rs=(rscript_t *)currententity->script;
@@ -272,35 +275,23 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	{
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
 		R_InitVArrays (VERT_COLOURED_TEXTURED);
-		while (1)
+
+		// get the vertex count and primitive type
+		va=0;
+		VArray = &VArrayVerts[0];
+
+		for (i=0; i<paliashdr->num_tris; i++)
 		{
-			float shellscale;
-			// get the vertex count and primitive type
-			count = *order++;
-			va=0;
-			VArray = &VArrayVerts[0];
-
-			if (!count)
-				break;		// done
-			if (count < 0)
-			{
-				count = -count;
-				mode=GL_TRIANGLE_FAN;
-			}
-			else
-				mode=GL_TRIANGLE_STRIP;
-
-			do
-			{
-				// texture coordinates come from the draw list
-				index_xyz = order[2];
+			for (j=0; j<3; j++)
+			{					
+				index_xyz = tris[i].index_xyz[j];
  
 				if(currententity->flags & RF_WEAPONMODEL)
 					//change scale
 					shellscale = .1;
 				else
 					shellscale = 1;
-				
+					
 				if(lerped) {
 					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * POWERSUIT_SCALE * shellscale;;
 					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * POWERSUIT_SCALE * shellscale;;
@@ -331,43 +322,25 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				// increment pointer and counter
 				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 				va++;
-				order += 3;
-			} while (--count);
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-				qglDrawArrays(mode,0,va);
-			
+			} 				
 		}
+		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+			qglDrawArrays(GL_TRIANGLES,0,va);		
 	}
 	else if(!rs)
 	{
+		va=0;
+		VArray = &VArrayVerts[0];
 		alpha = basealpha;
 		R_InitVArrays (VERT_COLOURED_TEXTURED);
 		GLSTATE_ENABLE_ALPHATEST
-		while (1)
+
+		for (i=0; i<paliashdr->num_tris; i++)
 		{
-
-			// get the vertex count and primitive type
-			count = *order++;
-			va=0;
-			VArray = &VArrayVerts[0];
-
-			if (!count)
-				break;		// done
-			if (count < 0)
-			{
-				count = -count;
-				mode=GL_TRIANGLE_FAN;
-			}
-			else
-				mode=GL_TRIANGLE_STRIP;
-
-			tmp_count=count;
-			tmp_order=order;
-					
-			do
-			{
-				// texture coordinates come from the draw list
-				index_xyz = order[2];
+			for (j=0; j<3; j++)
+			{			
+				index_xyz = tris[i].index_xyz[j];
+				index_st = tris[i].index_st[j];
 												
 				if(lerped) {
 					GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, false, lightcolor);
@@ -376,8 +349,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
 					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
 
-					VArray[3] = ((float *) order)[0];
-					VArray[4] = ((float *) order)[1];
+					VArray[3] = st[index_st].s;
+					VArray[4] = st[index_st].t;
 
 					VArray[5] = lightcolor[0];
 					VArray[6] = lightcolor[1];
@@ -391,8 +364,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
 					VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
 
-					VArray[3] = ((float *) order)[0];
-					VArray[4] = ((float *) order)[1];
+					VArray[3] = st[index_st].s;
+					VArray[4] = st[index_st].t;
 
 					VArray[5] = lightcolor[0];
 					VArray[6] = lightcolor[1];
@@ -402,13 +375,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 				// increment pointer and counter
 				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
-				va++;
-				order += 3;
-			} while (--count);
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-				qglDrawArrays(mode,0,va);	
-		}
+				va++;			
+			} 	
 
+		}
+		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+				qglDrawArrays(GL_TRIANGLES,0,va);	
 	}
 	else
 	{
@@ -420,187 +392,169 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 		if (depthmaskrscipt)
 			qglDepthMask(false);
+
+	
+		stage=rs->stage;
 		
-		while (1)
+		while (stage)
 		{
-			count = *order++;
-			if (!count)
-				break;		// done
-			// get the vertex count and primitive type
-			if (count < 0)
+			va=0;
+			VArray = &VArrayVerts[0];
+			ramp = 1.0;
+			colored = false;
+
+			if (stage->normalmap && !gl_normalmaps->value) {
+				if(stage->next) {
+					stage = stage->next;
+					continue;
+				}
+			}
+
+			if(mirror) {	
+				if( !(currententity->flags & RF_WEAPONMODEL)) {
+					GL_EnableMultitexture( true );
+					GL_SelectTexture( GL_TEXTURE0);
+					GL_TexEnv ( GL_COMBINE_EXT );
+					qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
+					qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+					qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+					GL_SelectTexture( GL_TEXTURE1);
+					GL_TexEnv ( GL_COMBINE_EXT );
+					qglBindTexture (GL_TEXTURE_2D, r_mirrorspec->texnum);
+					qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
+					qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+					qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
+				}
+				else
+					GL_Bind(r_mirrortexture->texnum);
+			}
+			else if(!stage->normalmap)
+				GL_Bind (stage->texture->texnum);
+
+			if (stage->blendfunc.blend)
 			{
-				count = -count;
-				mode=GL_TRIANGLE_FAN;
+				GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
+				GLSTATE_ENABLE_BLEND
+			}
+			else if (basealpha==1.0f)
+			{
+				GLSTATE_DISABLE_BLEND
 			}
 			else
 			{
-				mode=GL_TRIANGLE_STRIP;
+				GLSTATE_ENABLE_BLEND
+				GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				alpha = basealpha;
 			}
 
-			stage=rs->stage;
-			tmp_count=count;
-			tmp_order=order;	
-
-			while (stage)
+			if (stage->alphashift.min || stage->alphashift.speed)
 			{
-				count=tmp_count;
-				order=tmp_order;
-				va=0;
-				VArray = &VArrayVerts[0];
-				ramp = 1.0;
-				colored = false;
-
-				if (stage->normalmap && !gl_normalmaps->value) {
-					if(stage->next) {
-						stage = stage->next;
-						continue;
-					}
-				}
-
-				if(mirror) {	
-					if( !(currententity->flags & RF_WEAPONMODEL)) {
-						GL_EnableMultitexture( true );
-						GL_SelectTexture( GL_TEXTURE0);
-						GL_TexEnv ( GL_COMBINE_EXT );
-						qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
-						qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-						qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-						GL_SelectTexture( GL_TEXTURE1);
-						GL_TexEnv ( GL_COMBINE_EXT );
-						qglBindTexture (GL_TEXTURE_2D, r_mirrorspec->texnum);
-						qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
-						qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-						qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
-					}
-					else
-						GL_Bind(r_mirrortexture->texnum);
-				}
-				else if(!stage->normalmap)
-					GL_Bind (stage->texture->texnum);
-
-				if (stage->blendfunc.blend)
+				if (!stage->alphashift.speed && stage->alphashift.min > 0)
 				{
-					GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
-					GLSTATE_ENABLE_BLEND
+					alpha=basealpha*stage->alphashift.min;
 				}
-				else if (basealpha==1.0f)
+				else if (stage->alphashift.speed)
 				{
-					GLSTATE_DISABLE_BLEND
+					alpha=basealpha*sin(rs_realtime * stage->alphashift.speed);
+					if (alpha < 0) alpha=-alpha*basealpha;
+					if (alpha > stage->alphashift.max) alpha=basealpha*stage->alphashift.max;
+					if (alpha < stage->alphashift.min) alpha=basealpha*stage->alphashift.min;
 				}
-				else
-				{
-					GLSTATE_ENABLE_BLEND
-					GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-					alpha = basealpha;
-				}
+			}
+			else
+				alpha=basealpha;
 
-				if (stage->alphashift.min || stage->alphashift.speed)
-				{
-					if (!stage->alphashift.speed && stage->alphashift.min > 0)
-					{
-						alpha=basealpha*stage->alphashift.min;
-					}
-					else if (stage->alphashift.speed)
-					{
-						alpha=basealpha*sin(rs_realtime * stage->alphashift.speed);
-						if (alpha < 0) alpha=-alpha*basealpha;
-						if (alpha > stage->alphashift.max) alpha=basealpha*stage->alphashift.max;
-						if (alpha < stage->alphashift.min) alpha=basealpha*stage->alphashift.min;
-					}
-				}
-				else
-					alpha=basealpha;
+			if (stage->alphamask)
+			{
+				GLSTATE_ENABLE_ALPHATEST
+			}
+			else
+			{
+				GLSTATE_DISABLE_ALPHATEST
+			}
 
-				if (stage->alphamask)
-				{
-					GLSTATE_ENABLE_ALPHATEST
-				}
-				else
-				{
-					GLSTATE_DISABLE_ALPHATEST
-				}
-
-				if(stage->normalmap) {
+			if(stage->normalmap) {
 				
-					vec3_t	lightvec;
-					vec3_t	temp;
-					qglDepthMask (GL_FALSE);
-			 		qglEnable (GL_BLEND);
+				vec3_t	lightvec;
+				vec3_t	temp;
+				qglDepthMask (GL_FALSE);
+				qglEnable (GL_BLEND);
 
-					// set the correct blending mode for normal maps
-					qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+				// set the correct blending mode for normal maps
+				qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
 
-					qglActiveTextureARB (GL_TEXTURE0);
-					qglDisable (GL_TEXTURE_2D);
-					qglEnable (GL_TEXTURE_CUBE_MAP_ARB);
+				qglActiveTextureARB (GL_TEXTURE0);
+				qglDisable (GL_TEXTURE_2D);
+				qglEnable (GL_TEXTURE_CUBE_MAP_ARB);
 
-					qglBindTexture (GL_TEXTURE_CUBE_MAP_ARB, normalisationCubeMap);
-
-					qglMatrixMode (GL_TEXTURE);
-					qglLoadIdentity ();
+				qglBindTexture (GL_TEXTURE_CUBE_MAP_ARB, normalisationCubeMap);
+				qglMatrixMode (GL_TEXTURE);
+				qglLoadIdentity ();
 	
-					//set up a tangent lightspace vector, approxiamate to light shining down
-					lightvec[0] = 270;
-					lightvec[1] = -60;
-					lightvec[2] = 60;
+				//set up a tangent lightspace vector, approxiamate to light shining down
+				lightvec[0] = 270;
+				lightvec[1] = -60;
+				lightvec[2] = 60;
 				
-					//position it in relation to entity angles
-					VectorCopy(currententity->angles, temp);
-					VectorMA(temp, VectorLength(lightvec), lightvec, temp);
+				//position it in relation to entity angles
+				VectorCopy(currententity->angles, temp);
+				VectorMA(temp, VectorLength(lightvec), lightvec, temp);
 	
-					//view weapon models get special treatment
-					if(currententity->flags & RF_WEAPONMODEL ) {
-						qglRotatef ( temp[1],  0, 0, 1);
-						qglRotatef ( (temp[0]+180)/-20,  0, 1, 0); //eh a hack of sorts
-						qglRotatef ( temp[2],  1, 0, 0);
-						qglTranslatef(lightdir[0], lightdir[1], lightdir[2]);
-					}
-					else {
-						qglRotatef (currententity->angles[1], 0, 0, 1);
-						qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);
-					}
-
-					qglScalef (-1, -1, -1);
-
-					qglMatrixMode (GL_MODELVIEW);
-	
-					qglActiveTextureARB (GL_TEXTURE1);
-					qglEnable (GL_TEXTURE_2D);
-
-					qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
-
-					// and the texenv
-					qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-					qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
-				
-					R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
-					
-					ramp = 1.75; //tweak overall shadowing effect
-		
+				//view weapon models get special treatment
+				if(currententity->flags & RF_WEAPONMODEL ) {
+					qglRotatef ( temp[1],  0, 0, 1);
+					qglRotatef ( (temp[0]+180)/-20,  0, 1, 0); //eh a hack of sorts
+					qglRotatef ( temp[2],  1, 0, 0);
+					qglTranslatef(lightdir[0], lightdir[1], lightdir[2]);
 				}
 				else {
-					if(stage->next) { 
-						if(stage->next->normalmap && gl_normalmaps->value) {
-							stage->lightmap = false; 
-							colored = true;
-						}
-					}
-					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
-						R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
-					else
-						R_InitVArrays (VERT_COLOURED_TEXTURED);
+					qglRotatef (currententity->angles[1], 0, 0, 1);
+					qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);
 				}
+
+				qglScalef (-1, -1, -1);
+
+				qglMatrixMode (GL_MODELVIEW);
+	
+				qglActiveTextureARB (GL_TEXTURE1);
+				qglEnable (GL_TEXTURE_2D);
+
+				qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
+
+				// and the texenv
+				qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+				qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
 				
-				do
-				{
-					float os = ((float *)order)[0];
-					float ot = ((float *)order)[1];
-					float os2 = ((float *)order)[0];
-					float ot2 = ((float *)order)[1];
+				R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
+					
+				ramp = 1.75; //tweak overall shadowing effect
+		
+			}
+			else {
+				if(stage->next) { 
+					if(stage->next->normalmap && gl_normalmaps->value) {
+						stage->lightmap = false; 
+						colored = true;
+					}
+				}
+				if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
+					R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
+				else
+					R_InitVArrays (VERT_COLOURED_TEXTURED);
+			}
+				
+			for (i=0; i<paliashdr->num_tris; i++)
+			{
+				for (j=0; j<3; j++)
+				{	
 					vec3_t normal;
 					int k;
 					
-					index_xyz = order[2];
+					index_xyz = tris[i].index_xyz[j];
+					index_st = tris[i].index_st[j];
+
+					os = os2 = st[index_st].s;
+					ot = ot2 = st[index_st].t;					
 
 					if(lerped) {
 
@@ -619,14 +573,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
 
 						for (k=0;k<3;k++)
-						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
+							normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
 					}
 					VectorNormalize ( normal );
 			
 					if (stage->envmap)
 					{
 						vec3_t envmapvec;
-						
+							
 						VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
 
 						if(mirror) {
@@ -640,7 +594,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 								stage->scale.scaleX = -1.0;
 								stage->scale.scaleY = 1.0;
 							}
-	
+		
 						}
 						else {
 							RS_SetEnvmap (envmapvec, &os, &ot);
@@ -654,7 +608,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					}
 													
 					RS_SetTexcoords2D(stage, &os, &ot);
-							
+								
 					VArray[3] = os;
 					VArray[4] = ot;
 
@@ -692,7 +646,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 							red = shadelight[0];
 							green = shadelight[1];
 							blue = shadelight[2];
-							
+								
 							brightest = red;
 							if(green > red && green > blue)
 								brightest = green;
@@ -704,7 +658,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 							green *= bFac;
 							blue *= bFac;
 						}
-						
+							
 						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
 							VArray[7] = red;
 							VArray[8] = green;
@@ -725,46 +679,46 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						VArray += VertexSizes[VERT_COLOURED_MULTI_TEXTURED];
 					else
 						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
-					order += 3;
 					va++;
-				} while (--count);
-
-				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
-					if(stage->normalmap) {
-						 if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
-							qglDrawArrays(mode,0,va);
-					}
-					else
-						qglDrawArrays(mode,0,va);
-				}
-							
-				qglColor4f(1,1,1,1);
-			
-				if(mirror && !(currententity->flags & RF_WEAPONMODEL))
-					GL_EnableMultitexture( false );
-
+				} 
+			}
+				
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
 				if(stage->normalmap) {
-
-					R_KillNormalTMUs();
-
-					ramp = 1.0;
-			
-					// restore the original blend mode
-					qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-					// switch off blending
-					qglDisable (GL_BLEND);
-					qglDepthMask (GL_TRUE);
+					 if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
+						qglDrawArrays(GL_TRIANGLES,0,va);
 				}
-			
-				stage=stage->next;
+				else
+					qglDrawArrays(GL_TRIANGLES,0,va);	
 			}
 
+			qglColor4f(1,1,1,1);
+			
+			if(mirror && !(currententity->flags & RF_WEAPONMODEL))
+				GL_EnableMultitexture( false );
+
+			if(stage->normalmap) {
+
+				R_KillNormalTMUs();
+
+				ramp = 1.0;
+			
+				// restore the original blend mode
+				qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+				// switch off blending
+				qglDisable (GL_BLEND);
+				qglDepthMask (GL_TRUE);
+			}
+			
+			stage=stage->next;
 		}
 
-		if (depthmaskrscipt)
-			qglDepthMask(true);
 	}
+
+	if (depthmaskrscipt)
+		qglDepthMask(true);
+	
 
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND

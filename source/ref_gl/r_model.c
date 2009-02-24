@@ -1490,6 +1490,10 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	daliasframe_t		*pinframe, *poutframe, *pframe;
 	int					*pincmd, *poutcmd;
 	int					version;
+	int					cx;
+	float				s, t;
+	float				iw, ih;
+	fstvert_t			*st;
 	pinmodel = (dmdl_t *)buffer;
 
 	version = LittleLong (pinmodel->version);
@@ -1603,6 +1607,20 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 		if (mod->script[i])
 			RS_ReadyScript((rscript_t *)mod->script[i]);
 	}
+
+	cx = pheader->num_st * sizeof(fstvert_t);
+     mod->st = st = (fstvert_t*)Hunk_Alloc (cx);
+		
+	// Calculate texcoords for triangles
+    iw = 1.0 / pheader->skinwidth;
+    ih = 1.0 / pheader->skinheight;
+    for (i=0; i<pheader->num_st ; i++)
+    {
+        s = poutst[i].s;
+        t = poutst[i].t;
+        st[i].s = (s + 1.0) * iw; //tweak by one pixel
+        st[i].t = (t + 1.0) * ih;
+    }
 
 	R_LoadMd2VertexArrays(mod);
 
