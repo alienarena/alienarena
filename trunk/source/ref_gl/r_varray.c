@@ -228,10 +228,14 @@ void R_InitVArrays (int varraytype)
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_NORMAL_COLOURED_TEXTURED], &VArrayVerts[3]);
 
+		qglClientActiveTextureARB (GL_TEXTURE1);
+		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_NORMAL_COLOURED_TEXTURED], &VArrayVerts[3]);
+
 		// normal data
 		qglEnableClientState( GL_NORMAL_ARRAY );
 		
-		KillFlags |= (KILL_TMU0_POINTER | KILL_RGBA_POINTER | KILL_NORMAL_POINTER);
+		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
 
 		return;
 	}
@@ -518,11 +522,15 @@ void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 			VArray[3] = v[3] + scroll;
 			VArray[4] = v[4];
 
+			VectorCopy(surf->plane->normal, NormalsArray[VertexCounter]);
+
 			// nothing else is needed
 			// increment pointer and counter
-			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+			VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
 			VertexCounter++;
 		}
+
+		qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 
 		AngleVectors(surf->plane->normal, NULL, tangent, NULL);
 
