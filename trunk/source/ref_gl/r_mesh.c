@@ -430,10 +430,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			GLSTATE_ENABLE_ALPHATEST
 
 			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders)) {
-				stage = stage->next;
-				continue;
+				if(stage->next) {
+					stage = stage->next;
+					continue;
+				}	
+				else
+					goto done;
 			}
-
+/*
 			if(gl_glsl_shaders->value && gl_state.glsl_shaders) { //don't need this pass, remove from scripts
 				if(stage->next) {
 					if(stage->next->normalmap)  {
@@ -441,7 +445,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						continue;
 					}
 				}
-			}			
+			}*/			
 
 			if(!stage->normalmap) {
 				if(mirror) {	
@@ -722,7 +726,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			stage=stage->next;
 		}
 	}
-
+done:
 	if (depthmaskrscipt)
 		qglDepthMask(true);
 	
