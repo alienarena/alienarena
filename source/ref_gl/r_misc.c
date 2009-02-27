@@ -112,7 +112,7 @@ void R_InitCubemapTextures (void)
 	float vector[3];
 	int i, x, y;
 	byte pixels[CUBEMAP_MAXSIZE * CUBEMAP_MAXSIZE * 4];
-return;
+
 	qglDisable (GL_TEXTURE_2D);
 	qglEnable (GL_TEXTURE_CUBE_MAP_ARB);
 
