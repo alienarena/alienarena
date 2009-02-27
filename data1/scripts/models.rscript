@@ -18,6 +18,10 @@ models/items/ammo/rockets/medium/skin
 		map models/items/ammo/rockets/medium/skin.tga
 		alphamask	
 	}
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+	}
 }
 models/items/ammo/cells/medium/cell
 {
@@ -29,7 +33,11 @@ models/items/ammo/cells/medium/cell
 	{
 		map models/items/ammo/cells/medium/cell.tga
 		alphamask	
-	}		
+	}	
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+	}	
 }
 models/items/ammo/shells/medium/skin
 {
@@ -42,6 +50,10 @@ models/items/ammo/shells/medium/skin
 		map models/items/ammo/shells/medium/skin.tga
 		alphamask
 	}	
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+	}
 }
 models/items/ammo/bullets/medium/skin
 {
@@ -54,6 +66,10 @@ models/items/ammo/bullets/medium/skin
 		map models/items/ammo/bullets/medium/skin.tga
 		alphamask
 	}
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+	}
 }
 models/items/ammo/grenades/medium/skin
 {
@@ -65,6 +81,10 @@ models/items/ammo/grenades/medium/skin
 	{
 		map models/items/ammo/grenades/medium/skin.tga
 		alphamask
+	}
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
 	}
 }
 models/items/armor/shard/skin
@@ -84,6 +104,10 @@ models/items/armor/shard/skin
 		map gfx/shardmask.tga
 		nolightmap
 		alphamask
+	}
+	{
+		map models/items/armor/shard/skin_normal.tga
+		normalmap
 	}
 }
 models/items/healing/medium/skin
@@ -267,6 +291,10 @@ models/items/armor/combat/skin
 		map models/items/armor/combat/skin.tga
 		alphamask
 	}	
+	{
+		map models/items/armor/skin_normal.tga
+		normalmap
+	}
 }
 models/items/armor/body/skin
 {
@@ -279,6 +307,10 @@ models/items/armor/body/skin
 		map models/items/armor/body/skin.tga
 		alphamask
 	}	
+	{
+		map models/items/armor/skin_normal.tga
+		normalmap
+	}
 }
 models/items/armor/jacket/skin
 {
@@ -291,6 +323,10 @@ models/items/armor/jacket/skin
 		map models/items/armor/jacket/skin.tga
 		alphamask
 	}	
+	{
+		map models/items/armor/skin_normal.tga
+		normalmap
+	}
 }
 models/items/haste/skin
 {

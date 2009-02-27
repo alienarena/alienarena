@@ -1,18 +1,12 @@
 players/martianenforcer/red
 {
 	{
-		map players/martianenforcer/red.tga
-	}
-	{
 		map players/martianenforcer/default_normal.tga
 		normalmap
 	}
 }
 players/martianenforcer/default
 {
-	{
-		map players/martianenforcer/default.tga
-	}
 	{
 		map players/martianenforcer/default_normal.tga
 		normalmap
@@ -21,18 +15,12 @@ players/martianenforcer/default
 players/martianenforcer/blue
 {
 	{
-		map players/martianenforcer/blue.tga
-	}
-	{
 		map players/martianenforcer/default_normal.tga
 		normalmap
 	}	
 }
 players/enforcer/default
 {
-	{
-		map players/enforcer/default.tga
-	}
 	{
 		map players/enforcer/default_normal.tga
 		normalmap
@@ -41,18 +29,12 @@ players/enforcer/default
 players/enforcer/red
 {
 	{
-		map players/enforcer/red.tga
-	}
-	{
 		map players/enforcer/default_normal.tga
 		normalmap
 	}	
 }
 players/enforcer/blue
 {
-	{
-		map players/enforcer/blue.tga
-	}
 	{
 		map players/enforcer/default_normal.tga
 		normalmap
@@ -61,18 +43,12 @@ players/enforcer/blue
 players/cybergirl/blue
 {
 	{
-		map players/cybergirl/blue.tga
-	}
-	{
 		map players/cybergirl/default_normal.tga
 		normalmap
 	}	
 }
 players/cybergirl/red
 {
-	{
-		map players/cybergirl/red.tga
-	}
 	{
 		map players/cybergirl/default_normal.tga
 		normalmap
@@ -81,18 +57,12 @@ players/cybergirl/red
 players/cybergirl/default
 {
 	{
-		map players/cybergirl/default.tga
-	}
-	{
 		map players/cybergirl/default_normal.tga
 		normalmap
 	}	
 }
 players/cybergirl/green
 {
-	{
-		map players/cybergirl/green.tga
-	}
 	{
 		map players/cybergirl/default_normal.tga
 		normalmap
@@ -101,18 +71,12 @@ players/cybergirl/green
 players/cybergirl/grey
 {
 	{
-		map players/cybergirl/grey.tga
-	}
-	{
 		map players/cybergirl/default_normal.tga
 		normalmap
 	}	
 }
 players/martiancyborg/blue
 {
-	{
-		map players/martiancyborg/blue.tga
-	}
 	{
 		map players/martiancyborg/default_normal.tga
 		normalmap
@@ -121,18 +85,12 @@ players/martiancyborg/blue
 players/martiancyborg/red
 {
 	{
-		map players/martiancyborg/red.tga
-	}
-	{
 		map players/martiancyborg/default_normal.tga
 		normalmap
 	}	
 }
 players/martiancyborg/default
 {
-	{
-		map players/martiancyborg/default.tga
-	}
 	{
 		map players/martiancyborg/default_normal.tga
 		normalmap
@@ -141,18 +99,12 @@ players/martiancyborg/default
 players/lauren/blue
 {
 	{
-		map players/lauren/blue.tga
-	}
-	{
 		map players/lauren/default_normal.tga
 		normalmap
 	}	
 }
 players/lauren/red
 {
-	{
-		map players/lauren/red.tga
-	}
 	{
 		map players/lauren/default_normal.tga
 		normalmap
@@ -161,9 +113,6 @@ players/lauren/red
 players/lauren/default
 {
 	{
-		map players/lauren/default.tga
-	}
-	{
 		map players/lauren/default_normal.tga
 		normalmap
 	}	
@@ -171,18 +120,12 @@ players/lauren/default
 models/weapons/v_chain/skin
 {
 	{
-		map models/weapons/v_chain/skin.tga
-	}
-	{
 		map models/weapons/v_chain/skin_normal.tga
 		normalmap
 	}
 }
 models/weapons/v_shotg2/skin
 {
-	{
-		map models/weapons/v_shotg2/skin.tga
-	}
 	{
 		map models/weapons/v_shotg2/skin_normal.tga
 		normalmap
