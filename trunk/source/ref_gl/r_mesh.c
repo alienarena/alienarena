@@ -437,15 +437,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				else
 					goto done;
 			}
-/*
-			if(gl_glsl_shaders->value && gl_state.glsl_shaders) { //don't need this pass, remove from scripts
-				if(stage->next) {
-					if(stage->next->normalmap)  {
-						stage = stage->next;
-						continue;
-					}
-				}
-			}*/			
 
 			if(!stage->normalmap) {
 				if(mirror) {	
@@ -511,17 +502,31 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 			if(stage->normalmap) {
 
-				vec3_t lightVec, temp;
+				vec3_t lightVec, temp, lightVal;
 
 				GL_GetLightPosition();
 				VectorNormalize(lightPosition);
+
+				//send light level and color to shader, ramp up a bit
+				VectorCopy(shadelight, lightVal);
+				for(i = 0; i < 3; i++) {
+					lightVal[i] *= 5;
+					if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) {
+						if(lightVal[i] > 1.5)
+							lightVal[i] = 1.5;
+					}
+					else {
+						if(lightVal[i] > 1.0)
+							lightVal[i] = 1.0;
+					}
+				}
 
 				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) { //fixed light source
 
 					//light down, slightly forward and to the left
 					lightVec[0] = 2.0; //right - left
 					lightVec[1] = 5.0; //up - down
-					lightVec[2] = 5.0; //forward - back
+					lightVec[2] = 1.0; //forward - back
 				}
 				//the following two sections are only approxiamations, and fairly inaccurate at that
 				if(!(currententity->flags & RF_WEAPONMODEL)) { //position relative to light source
@@ -555,15 +560,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
 				glUniform1iARB( g_location_normTex, 0); 
 
-				//send light level and color to shader, ramp up a bit
-				VectorCopy(shadelight, temp);
-				for(i = 0; i < 3; i++) {
-					temp[i] *= 5;
-					if(temp[i] > 1.0)
-						temp[i] = 1.0;
-				}
-
-				glUniform3fARB( g_location_color, temp[0], temp[1], temp[2]);
+				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
 				glUniform1iARB( g_location_meshFog, map_fog);
 			}
