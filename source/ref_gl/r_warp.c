@@ -238,7 +238,7 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 		if (SurfaceIsAlphaBlended(fa))
 			qglEnable( GL_ALPHA_TEST );
 
-		R_InitVArrays (VERT_SINGLE_TEXTURED);
+		R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 
 		glUseProgramObjectARB( g_waterprogramObj );
 
