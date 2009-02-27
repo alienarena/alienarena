@@ -52,6 +52,8 @@ PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB		= NULL;
 
 GLhandleARB g_programObj;
 GLhandleARB g_waterprogramObj;
+GLhandleARB g_meshprogramObj;
+
 GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
 
@@ -82,6 +84,15 @@ GLuint		g_location_lightPos;
 GLuint		g_location_reflect;
 GLuint		g_location_trans;
 GLuint		g_location_fogamount;
+
+//mesh
+GLuint		g_location_meshlightPosition;
+GLuint		g_location_meshnormal;
+GLuint		g_location_baseTex;
+GLuint		g_location_normTex;
+GLuint		g_location_color;
+GLuint		g_location_meshTangent;
+GLuint		g_location_meshFog;
 
 void R_Clear (void);
 
@@ -2072,11 +2083,85 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_reflect = glGetUniformLocationARB( g_waterprogramObj, "REFLECT" );
 		g_location_trans = glGetUniformLocationARB( g_waterprogramObj, "TRANSPARENT" );
 		g_location_fogamount = glGetUniformLocationARB( g_waterprogramObj, "FOG" );
+
+		//meshes
+
+		g_meshprogramObj = glCreateProgramObjectARB();
+	
+		//
+		// Vertex shader
+		//
+
+		len = FS_LoadFile("scripts/mesh_vertex_shader.glsl", &shader_assembly);
+
+		if (len > 0) {
+			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+			shaderStrings[0] = (char*)shader_assembly;
+			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+			glCompileShaderARB( g_vertexShader);
+			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		}
+		else {
+			Com_Printf("...Unable to Locate Mesh Vertex Shader");
+			nResult = 0;
+		}
+
+		if( nResult )
+			glAttachObjectARB( g_meshprogramObj, g_vertexShader );
+		else
+		{
+			Com_Printf("...Mesh Vertex Shader Compile Error");
+		}
+
+		//
+		// Fragment shader
+		//
+		len = FS_LoadFile("scripts/mesh_fragment_shader.glsl", &shader_assembly);
+		
+		if(len > 0) {
+			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+			shaderStrings[0] = (char*)shader_assembly;
+			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+			glCompileShaderARB( g_fragmentShader );
+			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		}
+		else {
+			Com_Printf("...Unable to Locate Mesh Fragment Shader");
+			nResult = 0;
+		}
+
+		if( nResult )
+			glAttachObjectARB( g_meshprogramObj, g_fragmentShader );
+		else
+		{
+			Com_Printf("...Mesh Fragment Shader Compile Error");
+		}
+
+		glLinkProgramARB( g_meshprogramObj );
+		glGetObjectParameterivARB( g_meshprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+		if( !nResult )
+		{
+			glGetInfoLogARB( g_meshprogramObj, sizeof(str), NULL, str );
+			Com_Printf("...Linking Error");
+		}
+
+		//
+		// Locate some parameters by name so we can set them later...
+		//
+
+		g_location_meshlightPosition = glGetUniformLocationARB( g_meshprogramObj, "lightPos" );
+		g_location_baseTex = glGetUniformLocationARB( g_meshprogramObj, "baseTex" );
+		g_location_normTex = glGetUniformLocationARB( g_meshprogramObj, "normTex" );
+		g_location_color = glGetUniformLocationARB(	g_meshprogramObj, "baseColor" );
+		g_location_meshTangent = glGetUniformLocationARB( g_meshprogramObj, "meshTangent" );
+		g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
 	}
 	else {
 		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE); 
 		gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
 	}
+
 	
 	GL_SetDefaultState();
 
