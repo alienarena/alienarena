@@ -131,3 +131,24 @@ models/weapons/v_shotg2/skin
 		normalmap
 	}
 }
+maps/meshes/railcar
+{
+	{
+		map maps/meshes/railcar_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/generator
+{
+	{
+		map maps/meshes/generator_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/clamps
+{
+	{
+		map maps/meshes/clamps_normal.jpg
+		normalmap
+	}
+}
