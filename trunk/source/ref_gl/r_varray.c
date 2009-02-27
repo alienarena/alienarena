@@ -42,6 +42,9 @@ float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 // pointer for dynamic vert allocation
 float *VArray = &VArrayVerts[0];
 
+// array for dynamic normal allocation
+static vec3_t NormalsArray[4096];
+
 // number of verts allocated
 static int VertexCounter = 0;
 
@@ -50,7 +53,7 @@ float	vert_array[MAX_ARRAY][3];
 float	col_array[MAX_ARRAY][4];
 
 // sizes of our vertexes.  the vertex type can be used as an index into this array
-int VertexSizes[] = {5, 5, 7, 7, 9, 11, 5, 3, 12};
+int VertexSizes[] = {5, 5, 7, 7, 9, 11, 5, 3, 12, 5};
 
 int KillFlags;
 
@@ -217,6 +220,21 @@ void R_InitVArrays (int varraytype)
 
 		return;
 	}
+	// textured, colored, with normals
+	if (varraytype == VERT_NORMAL_COLOURED_TEXTURED)
+	{
+		// uses array indices 3, 4
+		qglClientActiveTextureARB (GL_TEXTURE0);
+		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_NORMAL_COLOURED_TEXTURED], &VArrayVerts[3]);
+
+		// normal data
+		qglEnableClientState( GL_NORMAL_ARRAY );
+		
+		KillFlags |= (KILL_TMU0_POINTER | KILL_RGBA_POINTER | KILL_NORMAL_POINTER);
+
+		return;
+	}
 }
 
 
@@ -230,6 +248,10 @@ hand-holding is done.
 */
 void R_KillVArrays (void)
 {
+
+	if(KillFlags & KILL_NORMAL_POINTER)
+		qglDisableClientState (GL_NORMAL_ARRAY);
+
 	if (KillFlags & KILL_RGBA_POINTER)
 		qglDisableClientState (GL_COLOR_ARRAY);
 

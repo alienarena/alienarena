@@ -459,6 +459,7 @@ extern float	col_array[MAX_ARRAY][4];
 extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
 extern float *VArray;
+static vec3_t NormalsArray[4096];
 
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu
@@ -470,6 +471,7 @@ extern float *VArray;
 #define VERT_DUAL_TEXTURED				6		// verts, st for 2 tmus both with same st
 #define VERT_NO_TEXTURE					7		// verts only, no textures
 #define VERT_BUMPMAPPED_COLOURED		8		// verts and st for 1 tmu, 2 texoord pointers and colour
+#define VERT_NORMAL_COLOURED_TEXTURED	9		// verts and st for 1tmu and color, with normals
 
 // vertex array kill flags
 #define KILL_TMU0_POINTER	1
@@ -477,6 +479,7 @@ extern float *VArray;
 #define KILL_TMU2_POINTER	3
 #define KILL_TMU3_POINTER	4
 #define KILL_RGBA_POINTER	5
+#define KILL_NORMAL_POINTER 6
 
 // vertex array subsystem
 void R_InitVArrays (int varraytype);
@@ -494,6 +497,8 @@ extern unsigned int g_water_program_id;
 //glsl
 extern GLhandleARB	g_programObj;
 extern GLhandleARB	g_waterprogramObj;
+extern GLhandleARB	g_meshprogramObj;
+
 extern GLhandleARB	g_vertexShader;
 extern GLhandleARB	g_fragmentShader;
 
@@ -524,6 +529,15 @@ extern GLuint		g_location_lightPos;
 extern GLuint		g_location_reflect;
 extern GLuint		g_location_trans;
 extern GLuint		g_location_fogamount;
+
+//mesh
+extern GLuint		g_location_meshlightPosition;
+extern GLuint		g_location_meshnormal;
+extern GLuint		g_location_baseTex;
+extern GLuint		g_location_normTex;
+extern GLuint		g_location_color;
+extern GLuint		g_location_meshTangent;
+extern GLuint		g_location_meshFog;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 

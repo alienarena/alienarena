@@ -167,9 +167,38 @@ float calcEntAlpha (float alpha, vec3_t point)
 
 	return newAlpha;
 }
+
+//This routine bascially finds the average light position, by factoring in all lights and 
+//accounting for their distance and intensity
+//this needs to be expanded upon to account for dynamic lights
+vec3_t	lightPosition;
+void GL_GetLightPosition()
+{
+	int i, j;
+	//dlight_t	*dl;
+	worldLight_t *wl;
+	float dist;
+	vec3_t	temp;
+
+	VectorCopy(currententity->origin, lightPosition);
+	
+	for (i=0; i<r_numWorldLights; i++) {
+
+		wl = &r_worldLights[i];
+
+		VectorSubtract(currententity->origin, wl->origin, temp);
+		dist = VectorLength(temp)/100;
+
+		for(j = 0; j < 3; j++) 
+			lightPosition[j] += (currententity->origin[j] - wl->origin[j]/dist)/r_numWorldLights;
+	}
+
+}
+
 extern cvar_t *cl_drawfps;
 extern GLuint normalisationCubeMap;
-void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
+float xxx = 0;
+void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skinnum)
 {
 	daliasframe_t	*frame, *oldframe;
 	dtrivertx_t	*v, *ov, *verts;
@@ -189,9 +218,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	float   *lerp;
 	fstvert_t *st;
 	float os, ot, os2, ot2;
-	float	ramp = 1.0;
 	qboolean mirror = false;
-	qboolean colored = false;
 
 	if(lerped)
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
@@ -267,7 +294,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	}
 
 	VectorSubtract(currententity->origin, lightspot, lightdir);
-		VectorNormalize ( lightdir );
+	VectorNormalize ( lightdir );
 
 	qglEnableClientState( GL_COLOR_ARRAY );
 
@@ -400,143 +427,142 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 		{
 			va=0;
 			VArray = &VArrayVerts[0];
-			ramp = 1.0;
-			colored = false;
+			GLSTATE_ENABLE_ALPHATEST
 
-			if (stage->normalmap && !gl_normalmaps->value) {
-				if(stage->next) {
-					stage = stage->next;
-					continue;
-				}
+			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders)) {
+				stage = stage->next;
+				continue;
 			}
 
-			if(mirror) {	
-				if( !(currententity->flags & RF_WEAPONMODEL)) {
-					GL_EnableMultitexture( true );
-					GL_SelectTexture( GL_TEXTURE0);
-					GL_TexEnv ( GL_COMBINE_EXT );
-					qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
-					qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
-					qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-					GL_SelectTexture( GL_TEXTURE1);
-					GL_TexEnv ( GL_COMBINE_EXT );
-					qglBindTexture (GL_TEXTURE_2D, r_mirrorspec->texnum);
-					qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
-					qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-					qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
+			if(gl_glsl_shaders->value && gl_state.glsl_shaders) { //don't need this pass, remove from scripts
+				if(stage->next) {
+					if(stage->next->normalmap)  {
+						stage = stage->next;
+						continue;
+					}
+				}
+			}			
+
+			if(!stage->normalmap) {
+				if(mirror) {	
+					if( !(currententity->flags & RF_WEAPONMODEL)) {
+						GL_EnableMultitexture( true );
+						GL_SelectTexture( GL_TEXTURE0);
+						GL_TexEnv ( GL_COMBINE_EXT );
+						qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
+						qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+						qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+						GL_SelectTexture( GL_TEXTURE1);
+						GL_TexEnv ( GL_COMBINE_EXT );
+						qglBindTexture (GL_TEXTURE_2D, r_mirrorspec->texnum);
+						qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
+						qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+						qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
+					}
+					else
+						GL_Bind(r_mirrortexture->texnum);
 				}
 				else
-					GL_Bind(r_mirrortexture->texnum);
-			}
-			else if(!stage->normalmap)
-				GL_Bind (stage->texture->texnum);
+					GL_Bind (stage->texture->texnum);
+		
 
-			if (stage->blendfunc.blend)
-			{
-				GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
-				GLSTATE_ENABLE_BLEND
-			}
-			else if (basealpha==1.0f)
-			{
-				GLSTATE_DISABLE_BLEND
-			}
-			else
-			{
-				GLSTATE_ENABLE_BLEND
-				GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				alpha = basealpha;
-			}
-
-			if (stage->alphashift.min || stage->alphashift.speed)
-			{
-				if (!stage->alphashift.speed && stage->alphashift.min > 0)
+				if (stage->blendfunc.blend)
 				{
-					alpha=basealpha*stage->alphashift.min;
+					GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
+					GLSTATE_ENABLE_BLEND
 				}
-				else if (stage->alphashift.speed)
+				else if (basealpha==1.0f)
 				{
-					alpha=basealpha*sin(rs_realtime * stage->alphashift.speed);
-					if (alpha < 0) alpha=-alpha*basealpha;
-					if (alpha > stage->alphashift.max) alpha=basealpha*stage->alphashift.max;
-					if (alpha < stage->alphashift.min) alpha=basealpha*stage->alphashift.min;
+					GLSTATE_DISABLE_BLEND
 				}
-			}
-			else
-				alpha=basealpha;
+				else
+				{
+					GLSTATE_ENABLE_BLEND
+					GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					alpha = basealpha;
+				}
 
-			if (stage->alphamask)
-			{
-				GLSTATE_ENABLE_ALPHATEST
-			}
-			else
-			{
-				GLSTATE_DISABLE_ALPHATEST
+				if (stage->alphashift.min || stage->alphashift.speed)
+				{
+					if (!stage->alphashift.speed && stage->alphashift.min > 0)
+					{
+						alpha=basealpha*stage->alphashift.min;
+					}
+					else if (stage->alphashift.speed)
+					{
+						alpha=basealpha*sin(rs_realtime * stage->alphashift.speed);
+						if (alpha < 0) alpha=-alpha*basealpha;
+						if (alpha > stage->alphashift.max) alpha=basealpha*stage->alphashift.max;
+						if (alpha < stage->alphashift.min) alpha=basealpha*stage->alphashift.min;
+					}
+				}
+				else
+					alpha=basealpha;
+
+				if (!stage->alphamask)
+				{
+					GLSTATE_DISABLE_ALPHATEST
+				}
 			}
 
 			if(stage->normalmap) {
-				
-				vec3_t	lightvec;
-				vec3_t	temp;
-				qglDepthMask (GL_FALSE);
-				qglEnable (GL_BLEND);
 
-				// set the correct blending mode for normal maps
-				qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+				vec3_t lightVec, temp;
 
-				qglActiveTextureARB (GL_TEXTURE0);
-				qglDisable (GL_TEXTURE_2D);
-				qglEnable (GL_TEXTURE_CUBE_MAP_ARB);
+				GL_GetLightPosition();
+				VectorNormalize(lightPosition);
 
-				qglBindTexture (GL_TEXTURE_CUBE_MAP_ARB, normalisationCubeMap);
-				qglMatrixMode (GL_TEXTURE);
-				qglLoadIdentity ();
-	
-				//set up a tangent lightspace vector, approxiamate to light shining down
-				lightvec[0] = 270;
-				lightvec[1] = -60;
-				lightvec[2] = 60;
-				
-				//position it in relation to entity angles
-				VectorCopy(currententity->angles, temp);
-				VectorMA(temp, VectorLength(lightvec), lightvec, temp);
-	
-				//view weapon models get special treatment
-				if(currententity->flags & RF_WEAPONMODEL ) {
-					qglRotatef ( temp[1],  0, 0, 1);
-					qglRotatef ( (temp[0]+180)/-20,  0, 1, 0); //eh a hack of sorts
-					qglRotatef ( temp[2],  1, 0, 0);
-					qglTranslatef(lightdir[0], lightdir[1], lightdir[2]);
+				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) { //fixed light source
+
+					//light down, slightly forward and to the left
+					lightVec[0] = 2.0; //right - left
+					lightVec[1] = 5.0; //up - down
+					lightVec[2] = 5.0; //forward - back
 				}
-				else {
-					qglRotatef (currententity->angles[1], 0, 0, 1);
-					qglTranslatef(lightvec[0], lightvec[1], lightvec[2]);
+				//the following two sections are only approxiamations, and fairly inaccurate at that
+				if(!(currententity->flags & RF_WEAPONMODEL)) { //position relative to light source
+
+					lightVec[0] = 1.0 - lightPosition[0]; //right - left
+					lightVec[1] = (r_origin[2] - (currententity->origin[2]-16))/10; //up - down
+					lightVec[2] = 2.0 - lightPosition[2]; //forward - back
+				}
+				else { //angles relative to lightsource			
+			
+					VectorCopy(currententity->angles, temp);
+
+					lightVec[0] = (abs(temp[1])*2)/122.4 - lightPosition[0]*2;
+					lightVec[1] = (abs(temp[0]+90)*2)/61.2 + lightPosition[2]*2;
+					lightVec[2] = temp[2] - lightPosition[1]*2;
+				}			
+							
+				GL_EnableMultitexture( true );
+			
+				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+				
+				glUseProgramObjectARB( g_meshprogramObj );
+				
+				glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
+
+				GL_MBind(GL_TEXTURE1, skinnum);
+				glUniform1iARB( g_location_baseTex, 1); 
+
+				GL_MBind(GL_TEXTURE0, stage->texture->texnum);
+				glUniform1iARB( g_location_normTex, 0); 
+
+				//send light level and color to shader, ramp up a bit
+				VectorCopy(shadelight, temp);
+				for(i = 0; i < 3; i++) {
+					temp[i] *= 5;
+					if(temp[i] > 1.0)
+						temp[i] = 1.0;
 				}
 
-				qglScalef (-1, -1, -1);
+				glUniform3fARB( g_location_color, temp[0], temp[1], temp[2]);
 
-				qglMatrixMode (GL_MODELVIEW);
-	
-				qglActiveTextureARB (GL_TEXTURE1);
-				qglEnable (GL_TEXTURE_2D);
-
-				qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
-
-				// and the texenv
-				qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-				qglTexEnvi (GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB);
-				
-				R_InitVArrays (VERT_BUMPMAPPED_COLOURED);
-					
-				ramp = 1.75; //tweak overall shadowing effect
-		
+				glUniform1iARB( g_location_meshFog, map_fog);
 			}
 			else {
-				if(stage->next) { 
-					if(stage->next->normalmap && gl_normalmaps->value) {
-						stage->lightmap = false; 
-						colored = true;
-					}
-				}
+				
 				if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
 					R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
 				else
@@ -547,7 +573,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 			{
 				for (j=0; j<3; j++)
 				{	
-					vec3_t normal;
+					vec3_t normal, tangent;
 					int k;
 					
 					index_xyz = tris[i].index_xyz[j];
@@ -575,8 +601,15 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 						for (k=0;k<3;k++)
 							normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
 					}
+
 					VectorNormalize ( normal );
-			
+
+					if(stage->normalmap) { //send tangent to shader
+						AngleVectors(normal, NULL, tangent, NULL);
+						VectorCopy(normal, NormalsArray[va]); //shader needs normal array
+						glUniform3fARB( g_location_meshTangent, tangent[0], tangent[1], tangent[2] );
+					}
+
 					if (stage->envmap)
 					{
 						vec3_t envmapvec;
@@ -623,7 +656,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 			
 					{
 						float red = 1, green = 1, blue = 1, nAlpha;
-						float brightest, bFac;
 
 						if(lerped) 
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
@@ -632,49 +664,35 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 								calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
 
-						if (stage->lightmap) {
+						if (stage->lightmap && !stage->normalmap) { //no need for normalmaps, done in GLSL
 							if(lerped)
 								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, stage->normalmap, lightcolor);
 							else
 								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, stage->normalmap, lightcolor);
-							red = lightcolor[0] * ramp;
-							green = lightcolor[1] * ramp;
-							blue = lightcolor[2] * ramp;						
+							red = lightcolor[0];
+							green = lightcolor[1];
+							blue = lightcolor[2];						
 						}
 
-						if(colored) {
-							red = shadelight[0];
-							green = shadelight[1];
-							blue = shadelight[2];
-								
-							brightest = red;
-							if(green > red && green > blue)
-								brightest = green;
-							else if(blue > green)
-								brightest = blue;
-							bFac = 1.0/brightest;
-
-							red *= bFac;
-							green *= bFac;
-							blue *= bFac;
-						}
+						if(!stage->normalmap) {
 							
-						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
-							VArray[7] = red;
-							VArray[8] = green;
-							VArray[9] = blue;
-							VArray[10] = nAlpha;
-						}
-						else {
-							VArray[5] = red * ramp;
-							VArray[6] = green * ramp;
-							VArray[7] = blue * ramp;
-							VArray[8] = nAlpha;	
+							if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
+								VArray[7] = red;
+								VArray[8] = green;
+								VArray[9] = blue;
+								VArray[10] = nAlpha;
+							}
+							else {
+								VArray[5] = red;
+								VArray[6] = green;
+								VArray[7] = blue;
+								VArray[8] = nAlpha;	
+							}
 						}
 					}
 					// increment pointer and counter
-					if(stage->normalmap)
-						VArray += VertexSizes[VERT_BUMPMAPPED_COLOURED];
+					if(stage->normalmap) 
+						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
 					else if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 						VArray += VertexSizes[VERT_COLOURED_MULTI_TEXTURED];
 					else
@@ -682,16 +700,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 					va++;
 				} 
 			}
-				
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
-				if(stage->normalmap) {
-					 if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
-						qglDrawArrays(GL_TRIANGLES,0,va);
-				}
-				else
-					qglDrawArrays(GL_TRIANGLES,0,va);	
-			}
 
+			if(stage->normalmap) 
+				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+				
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+				qglDrawArrays(GL_TRIANGLES,0,va);	
+			
 			qglColor4f(1,1,1,1);
 			
 			if(mirror && !(currententity->flags & RF_WEAPONMODEL))
@@ -699,27 +714,18 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 			if(stage->normalmap) {
 
-				R_KillNormalTMUs();
+				glUseProgramObjectARB( NULL );
 
-				ramp = 1.0;
-			
-				// restore the original blend mode
-				qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-				// switch off blending
-				qglDisable (GL_BLEND);
-				qglDepthMask (GL_TRUE);
+				GL_EnableMultitexture( false );
 			}
 			
 			stage=stage->next;
 		}
-
 	}
 
 	if (depthmaskrscipt)
 		qglDepthMask(true);
 	
-
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
@@ -1116,10 +1122,10 @@ void R_DrawAliasModel (entity_t *e)
 
 	if(e->frame == 0 && currentmodel->num_frames == 1) {
 		if(!(currententity->flags & RF_VIEWERMODEL))
-			GL_DrawAliasFrame(paliashdr, 0, false);
+			GL_DrawAliasFrame(paliashdr, 0, false, skin->texnum);
 	}
 	else
-		GL_DrawAliasFrame(paliashdr, currententity->backlerp, true);
+		GL_DrawAliasFrame(paliashdr, currententity->backlerp, true, skin->texnum);
 
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);
