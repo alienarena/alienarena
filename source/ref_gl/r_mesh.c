@@ -79,7 +79,7 @@ opposite directions.  This gives the shading a more prounounced, defined look.
 
 =============
 */
-void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov, float backlerp, qboolean perPixel, vec3_t lightOut)
+void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov, float backlerp, vec3_t lightOut)
 {
     int i;
     float l;
@@ -110,16 +110,9 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
 
     for (i=0; i<3; i++)
     {        
-		if(perPixel) {
-			//if normalmapped, try to keep pixel shadows from being pitch black
-			if(lightOut[i]<0.20) 
-				lightOut[i] = 0.20;
-		}
-		else {
-			//add contrast - lights lighter, darks darker
-			lightOut[i] += (lightOut[i] - 0.25);
-		}
-
+		//add contrast - lights lighter, darks darker
+		lightOut[i] += (lightOut[i] - 0.25);
+		
 		//keep values sane
         if (lightOut[i]<0) lightOut[i] = 0;
         if (lightOut[i]>1) lightOut[i] = 1;
@@ -172,7 +165,7 @@ float calcEntAlpha (float alpha, vec3_t point)
 //accounting for their distance and intensity
 //this needs to be expanded upon to account for dynamic lights
 vec3_t	lightPosition;
-void GL_GetLightPosition()
+void GL_GetLightVals()
 {
 	int i, j;
 	//dlight_t	*dl;
@@ -195,9 +188,6 @@ void GL_GetLightPosition()
 
 }
 
-extern cvar_t *cl_drawfps;
-extern GLuint normalisationCubeMap;
-float xxx = 0;
 void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skinnum)
 {
 	daliasframe_t	*frame, *oldframe;
@@ -370,7 +360,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				index_st = tris[i].index_st[j];
 												
 				if(lerped) {
-					GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, false, lightcolor);
+					GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 
 					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
 					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
@@ -385,7 +375,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);			
 				}
 				else {
-					GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, false, lightcolor);
+					GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 
 					VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
 					VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
@@ -504,11 +494,11 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 				vec3_t lightVec, temp, lightVal;
 
-				GL_GetLightPosition();
+				GL_GetLightVals();
 				VectorNormalize(lightPosition);
 
 				//send light level and color to shader, ramp up a bit
-				VectorCopy(shadelight, lightVal);
+				VectorCopy(lightcolor, lightVal);
 				for(i = 0; i < 3; i++) {
 					lightVal[i] *= 5;
 					if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) {
@@ -669,9 +659,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 						if (stage->lightmap && !stage->normalmap) { //no need for normalmaps, done in GLSL
 							if(lerped)
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, stage->normalmap, lightcolor);
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 							else
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, stage->normalmap, lightcolor);
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
 							blue = lightcolor[2];						
