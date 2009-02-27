@@ -547,10 +547,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				
 				glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
 
-				GL_MBind(GL_TEXTURE1, skinnum);
+				GL_SelectTexture( GL_TEXTURE1);
+				qglBindTexture (GL_TEXTURE_2D, skinnum);
 				glUniform1iARB( g_location_baseTex, 1); 
 
-				GL_MBind(GL_TEXTURE0, stage->texture->texnum);
+				GL_SelectTexture( GL_TEXTURE0);
+				qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
 				glUniform1iARB( g_location_normTex, 0); 
 
 				//send light level and color to shader, ramp up a bit
