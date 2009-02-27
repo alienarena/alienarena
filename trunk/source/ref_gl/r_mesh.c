@@ -165,10 +165,11 @@ float calcEntAlpha (float alpha, vec3_t point)
 //accounting for their distance and intensity
 //this needs to be expanded upon to account for dynamic lights
 vec3_t	lightPosition;
+float	dynFactor;
 void GL_GetLightVals()
 {
-	int i, j;
-	//dlight_t	*dl;
+	int i, j, lnum;
+	dlight_t	*dl;
 	worldLight_t *wl;
 	float dist;
 	vec3_t	temp;
@@ -186,6 +187,12 @@ void GL_GetLightVals()
 			lightPosition[j] += (currententity->origin[j] - wl->origin[j]/dist)/r_numWorldLights;
 	}
 
+	dynFactor = 0;
+	dl = r_newrefdef.dlights;
+	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++) {
+		VectorSubtract (dl->origin, currententity->origin, temp);
+		dynFactor += (dl->intensity/20.0)/VectorLength(temp);
+	}
 }
 
 void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skinnum)
@@ -501,13 +508,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				VectorCopy(lightcolor, lightVal);
 				for(i = 0; i < 3; i++) {
 					lightVal[i] *= 5;
+					lightVal[i] += dynFactor;
 					if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) {
 						if(lightVal[i] > 1.5)
 							lightVal[i] = 1.5;
 					}
 					else {
-						if(lightVal[i] > 1.0)
-							lightVal[i] = 1.0;
+						if(lightVal[i] > 1.0+dynFactor)
+							lightVal[i] = 1.0+dynFactor;
 					}
 				}
 
