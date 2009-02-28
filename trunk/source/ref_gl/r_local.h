@@ -535,9 +535,11 @@ extern GLuint		g_location_meshlightPosition;
 extern GLuint		g_location_meshnormal;
 extern GLuint		g_location_baseTex;
 extern GLuint		g_location_normTex;
+extern GLuint		g_location_fxTex;
 extern GLuint		g_location_color;
 extern GLuint		g_location_meshNormal;
 extern GLuint		g_location_meshTangent;
+extern GLuint		g_location_meshTime;
 extern GLuint		g_location_meshFog;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 

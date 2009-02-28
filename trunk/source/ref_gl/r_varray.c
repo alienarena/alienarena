@@ -220,7 +220,7 @@ void R_InitVArrays (int varraytype)
 
 		return;
 	}
-	// textured, colored, with normals
+	// textured with up to 3 TMU's, with normals
 	if (varraytype == VERT_NORMAL_COLOURED_TEXTURED)
 	{
 		// uses array indices 3, 4
@@ -232,10 +232,14 @@ void R_InitVArrays (int varraytype)
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_NORMAL_COLOURED_TEXTURED], &VArrayVerts[3]);
 
+		qglClientActiveTextureARB (GL_TEXTURE2);
+		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+		qglTexCoordPointer (2, GL_FLOAT, sizeof (float) * VertexSizes[VERT_NORMAL_COLOURED_TEXTURED], &VArrayVerts[3]);
+
 		// normal data
 		qglEnableClientState( GL_NORMAL_ARRAY );
 		
-		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_NORMAL_POINTER);
+		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
 
 		return;
 	}

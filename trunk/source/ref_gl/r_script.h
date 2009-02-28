@@ -71,6 +71,8 @@ typedef struct rs_stage_s
 {
 	image_t					*texture;				// texture
 	char					name[MAX_OSPATH];		// tex name
+	image_t					*texture2;				// texture for combining(GLSL)
+	char					name2[MAX_OSPATH];		// texture name
 
 	char					model[MAX_OSPATH];		// name of model
 	

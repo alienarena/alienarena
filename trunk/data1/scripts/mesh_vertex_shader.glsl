@@ -1,5 +1,6 @@
 uniform vec3 lightPos;
 uniform vec3 meshTangent;
+uniform float time;
 uniform int FOG;
 
 varying vec3 LightDir;
@@ -27,6 +28,12 @@ void main()
 	v.y = dot(EyeDir, b);
 	v.z = dot(EyeDir, n);
 	EyeDir = normalize(v);
+	
+	//for scrolling fx
+	vec4 texco = gl_MultiTexCoord0; 
+	texco.s = texco.s + time*1.0;
+	texco.t = texco.t + time*1.0; 
+	gl_TexCoord[1] = texco; 
 	
 	//fog
     if(FOG > 0){
