@@ -152,3 +152,75 @@ maps/meshes/clamps
 		normalmap
 	}
 }
+models/items/ammo/rockets/medium/skin
+{
+
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+		map2 gfx/redlightning.tga
+	}
+}
+models/items/ammo/cells/medium/cell
+{
+
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+		map2 gfx/greenlightning.tga
+	}
+}
+models/items/ammo/shells/medium/skin
+{
+
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+		map2 gfx/bluelightning.tga
+	}
+}
+models/items/ammo/bullets/medium/skin
+{
+
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+		map2 gfx/greenlightning.tga
+	}
+}
+models/items/ammo/grenades/medium/skin
+{
+
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+		map2 gfx/redlightning.tga
+	}
+}
+models/items/armor/combat/skin
+{
+
+	{
+		map models/items/armor/skin_normal.tga
+		normalmap
+		map2 gfx/bluelightning.tga
+	}
+}
+models/items/armor/body/skin
+{
+
+	{
+		map models/items/armor/skin_normal.tga
+		normalmap
+		map2 gfx/redlightning.tga
+	}
+}
+models/items/armor/jacket/skin
+{
+
+	{
+		map models/items/armor/skin_normal.tga
+		normalmap
+		map2 gfx/greenlightning.tga
+	}
+}

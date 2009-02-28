@@ -551,7 +551,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				glUseProgramObjectARB( g_meshprogramObj );
 				
 				glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
-
+				
 				GL_SelectTexture( GL_TEXTURE1);
 				qglBindTexture (GL_TEXTURE_2D, skinnum);
 				glUniform1iARB( g_location_baseTex, 1); 
@@ -560,7 +560,15 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
 				glUniform1iARB( g_location_normTex, 0); 
 
+				GL_SelectTexture( GL_TEXTURE2);
+				qglBindTexture (GL_TEXTURE_2D, stage->texture2->texnum);
+				glUniform1iARB( g_location_fxTex, 2);
+				
+				GL_SelectTexture( GL_TEXTURE0);
+
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
+
+				glUniform1fARB( g_location_meshTime, rs_realtime);
 
 				glUniform1iARB( g_location_meshFog, map_fog);
 			}

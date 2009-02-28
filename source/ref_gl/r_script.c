@@ -224,6 +224,7 @@ void RS_ClearStage (rs_stage_t *stage)
 	VectorClear(stage->angle);
 
 	stage->texture = NULL;
+	stage->texture2 = NULL;
 
 	stage->depthhack = 0;
 	stage->envmap = false;
@@ -300,6 +301,7 @@ rs_stage_t *RS_NewStage (rscript_t *rs)
 	}
 
 	strncpy (stage->name, "***r_notexture***", sizeof(stage->name));
+	strncpy (stage->name2, "***r_notexture***", sizeof(stage->name2));
 
 	stage->rand_stage = NULL;
 	stage->anim_stage = NULL;
@@ -438,6 +440,10 @@ void RS_ReadyScript (rscript_t *rs)
 			stage->texture = GL_FindImage (stage->name, mode);
 		if (!stage->texture)
 			stage->texture = r_notexture;
+		if (stage->name2[0]) 
+			stage->texture2 = GL_FindImage (stage->name2, mode);
+		if (!stage->texture2)
+			stage->texture2 = r_notexture;
 
 		//check alpha
 		if (stage->blendfunc.blend)
@@ -450,58 +456,6 @@ void RS_ReadyScript (rscript_t *rs)
 
 	rs->ready = true;
 }
-
-
-// This function is never called anywhere, commenting it out (BlackIce)
-#if 0
-void RS_UpdateRegistration (void)
-{
-	rscript_t		*rs = rs_rootscript;
-	rs_stage_t		*stage;
-	anim_stage_t	*anim;
-	random_stage_t	*randStage;
-	int				mode;
-
-	while (rs != NULL) 
-	{
-		mode = (rs->dontflush) ? it_pic : it_wall;
-		stage = rs->stage;
-
-		while (stage != NULL) 
-		{
-			anim = stage->anim_stage;
-			while (anim != NULL) 
-			{
-				anim->texture = GL_FindImage(anim->name,mode);
-				if (!anim->texture)
-					anim->texture = r_notexture;
-				anim = anim->next;
-			}
-
-			randStage = (random_stage_t*)stage->rand_stage;
-			while (randStage != NULL) 
-			{
-				randStage->texture = GL_FindImage(randStage->name,mode);
-				if (!randStage->texture)
-					randStage->texture = r_notexture;
-				randStage = randStage->next;
-			}
-
-			if (stage->name[0]) 
-			{
-				stage->texture = GL_FindImage(stage->name, mode);
-			}
-
-			if (!stage->texture)
-				stage->texture = r_notexture;
-
-			stage = stage->next;
-		}
-
-		rs = rs->next;
-	}
-}
-#endif
 
 int RS_BlendID (char *blend)
 {
@@ -553,6 +507,7 @@ scriptname
 	safe
 	{
 		map <texturename>
+		map2 <texturename>
 		scroll <xtype> <xspeed> <ytype> <yspeed>
 		blendfunc <source> <dest>
 		alphashift <speed> <min> <max>
@@ -575,6 +530,13 @@ void rs_stage_map (rs_stage_t *stage, char **token)
 	*token = strtok (NULL, TOK_DELIMINATORS);
 
 	strncpy (stage->name, *token, sizeof(stage->name));
+}
+
+void rs_stage_map2 (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+
+	strncpy (stage->name2, *token, sizeof(stage->name2));
 }
 
 void rs_stage_model (rs_stage_t *stage, char **token)
@@ -846,6 +808,7 @@ static rs_stagekey_t rs_stagekeys[] =
 {
 	{	"colormap",		&rs_stage_colormap		},
 	{	"map",			&rs_stage_map			},
+	{	"map2",			&rs_stage_map2			},
 	{	"model",		&rs_stage_model			},
 	{	"scroll",		&rs_stage_scroll		},
 	{	"frames",		&rs_stage_frames		},
