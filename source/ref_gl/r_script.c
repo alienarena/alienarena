@@ -235,6 +235,7 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->grasstype = 0;
 	stage->beam = false;
 	stage->beamtype = 0;
+	stage->fx = false;
 
 	stage->lightmap = true;
 
@@ -521,6 +522,7 @@ scriptname
 		grasstype
 		beam
 		beamtype
+		fx
 	}
 }
 */
@@ -804,6 +806,10 @@ void rs_stage_beamtype (rs_stage_t *stage, char **token)
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->beamtype = atoi(*token);
 }
+void rs_stage_fx (rs_stage_t *stage, char **token)
+{
+	stage->fx = true;
+}
 static rs_stagekey_t rs_stagekeys[] = 
 {
 	{	"colormap",		&rs_stage_colormap		},
@@ -832,6 +838,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"grasstype",	&rs_stage_grasstype		},
 	{	"beam",			&rs_stage_beam			},
 	{	"beamtype",		&rs_stage_beamtype		},
+	{	"fx",			&rs_stage_fx			},
 
 	{	NULL,			NULL					}
 };
@@ -1043,7 +1050,7 @@ void RS_ScanPathForScripts (void)
 	}
 
 	script_count = 0;
-	if(gl_normalmaps->value) { //search for normal map scripts ONLY if we are using normal mapping
+	if(gl_normalmaps->value) { //search for normal map scripts ONLY if we are using normal mapping, do last to overide anything
 		
 		script_list = FS_ListFilesInFS("scripts/normals/*.rscript", &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
 

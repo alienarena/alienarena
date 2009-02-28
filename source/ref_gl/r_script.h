@@ -109,10 +109,13 @@ typedef struct rs_stage_s
 	qboolean				has_alpha;		// for sorting
 	qboolean				lensflare;		// for adding lensflares
 	qboolean				normalmap;		// for normalmaps
+
 	qboolean				grass;			// grass and vegetation
 	int						grasstype;		// the type of vegetation
 	qboolean				beam;			// for adding light beams
 	qboolean				beamtype;		// the type of beam(up vs down)
+	
+	qboolean				fx;				// for glsl effect layer
 
 	struct rs_stage_s		*next;			// next stage
 } rs_stage_t;

@@ -159,6 +159,7 @@ models/items/ammo/rockets/medium/skin
 		map models/items/ammo/skin_normal.tga
 		normalmap
 		map2 gfx/redlightning.tga
+		fx
 	}
 }
 models/items/ammo/cells/medium/cell
@@ -168,6 +169,7 @@ models/items/ammo/cells/medium/cell
 		map models/items/ammo/skin_normal.tga
 		normalmap
 		map2 gfx/greenlightning.tga
+		fx
 	}
 }
 models/items/ammo/shells/medium/skin
@@ -177,6 +179,7 @@ models/items/ammo/shells/medium/skin
 		map models/items/ammo/skin_normal.tga
 		normalmap
 		map2 gfx/bluelightning.tga
+		fx
 	}
 }
 models/items/ammo/bullets/medium/skin
@@ -186,6 +189,7 @@ models/items/ammo/bullets/medium/skin
 		map models/items/ammo/skin_normal.tga
 		normalmap
 		map2 gfx/greenlightning.tga
+		fx
 	}
 }
 models/items/ammo/grenades/medium/skin
@@ -195,6 +199,7 @@ models/items/ammo/grenades/medium/skin
 		map models/items/ammo/skin_normal.tga
 		normalmap
 		map2 gfx/redlightning.tga
+		fx
 	}
 }
 models/items/armor/combat/skin
@@ -204,6 +209,7 @@ models/items/armor/combat/skin
 		map models/items/armor/skin_normal.tga
 		normalmap
 		map2 gfx/bluelightning.tga
+		fx
 	}
 }
 models/items/armor/body/skin
@@ -213,6 +219,7 @@ models/items/armor/body/skin
 		map models/items/armor/skin_normal.tga
 		normalmap
 		map2 gfx/redlightning.tga
+		fx
 	}
 }
 models/items/armor/jacket/skin
@@ -222,5 +229,20 @@ models/items/armor/jacket/skin
 		map models/items/armor/skin_normal.tga
 		normalmap
 		map2 gfx/greenlightning.tga
+		fx
+	}
+}
+maps/meshes/hanger
+{
+	{
+		map maps/meshes/hanger_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/piston
+{
+	{
+		map maps/meshes/piston_normal.jpg
+		normalmap
 	}
 }
