@@ -507,6 +507,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
 				for(i = 0; i < 3; i++) {
+					if(lightVal[i] < shadelight[i]/2)
+						lightVal[i] = shadelight[i]/2; //never go completely black
 					lightVal[i] *= 5;
 					lightVal[i] += dynFactor;
 					if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) {
