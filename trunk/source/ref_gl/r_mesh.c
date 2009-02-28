@@ -566,6 +566,11 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				
 				GL_SelectTexture( GL_TEXTURE0);
 
+				if(stage->fx)
+					glUniform1iARB( g_location_useFX, 1);
+				else
+					glUniform1iARB( g_location_useFX, 0);
+
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
 				glUniform1fARB( g_location_meshTime, rs_realtime);

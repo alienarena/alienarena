@@ -96,6 +96,7 @@ GLuint		g_location_meshNormal;
 GLuint		g_location_meshTangent;
 GLuint		g_location_meshTime;
 GLuint		g_location_meshFog;
+GLuint		g_location_useFX;
 
 void R_Clear (void);
 
@@ -2162,6 +2163,7 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_meshTangent = glGetUniformLocationARB( g_meshprogramObj, "meshTangent" );
 		g_location_meshTime = glGetUniformLocationARB( g_meshprogramObj, "time" );
 		g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
+		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
 	}
 	else {
 		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE); 
