@@ -575,10 +575,8 @@ char *dm_statusbar =
 "endif "
 
 // armor
-"if 4 "
 "	xl	142 "
 "	rnum "
-"endif "
 
 // timer
 "if 9 "
@@ -670,10 +668,8 @@ char *team_statusbar =
 "endif "
 
 // armor
-"if 4 "
 "	xl	142 "
 "	rnum "
-"endif "
 
 // timer
 "if 9 "

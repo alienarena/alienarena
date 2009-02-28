@@ -858,7 +858,7 @@ void G_SetStats (edict_t *ent)
     if (index)
     {
         item = GetItemByIndex (index);
-        ent->client->ps.stats[STAT_ARMOR_ICON] = gi.imageindex (item->icon);
+        ent->client->ps.stats[STAT_ARMOR_ICON] = 0;
         ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.inventory[index];
     }
     else
