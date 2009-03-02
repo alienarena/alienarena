@@ -209,6 +209,7 @@ void GL_GetLightVals()
 		if(dist < 200 && r_trace.fraction == 1.0) {
 			for(j = 0; j < 3; j++) 
 				lightAdd[j] += dl->origin[j];
+			lightAdd[2] += 192; //adjust for consistent effect
 			numlights++;
 		}
 
@@ -577,8 +578,11 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				}
 				else if(!(currententity->flags & RF_WEAPONMODEL)) { //simple lightvec source - origin
 
-					if(stage->lightmap)
+					if(stage->lightmap) {
 						VectorSubtract(lightPosition, currententity->origin, lightVec);
+						lightVec[1]+=192; //adjust for consistent effect
+						VectorNormalize(lightVec);
+					}
 					else {
 						//light down, slightly forward and to the left
 						lightVec[0] = 1.0;
