@@ -1,4 +1,4 @@
-qbsp3 ctf-frost2k9
-qvis3 -fast ctf-frost2k9
-qrad3 ctf-frost2k9
+qbsp3 test
+qvis3 test
+qrad3 test
 pause
