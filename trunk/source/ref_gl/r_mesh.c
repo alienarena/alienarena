@@ -199,7 +199,7 @@ void GL_GetLightVals()
 
 	dynFactor = 0;
 	dl = r_newrefdef.dlights;
-	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++) {
+	for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) {
 		
 		VectorSubtract(currententity->origin, dl->origin, temp);
 		dist = VectorLength(temp);
@@ -580,14 +580,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 					if(stage->lightmap) {
 						VectorSubtract(lightPosition, currententity->origin, lightVec);
-						lightVec[1]+=192; //adjust for consistent effect
+						lightVec[1]+=192; //adjust for consistent effect for now
 						VectorNormalize(lightVec);
 					}
 					else {
 						//light down, slightly forward and to the left
 						lightVec[0] = 1.0;
 						lightVec[1] = 5.0;
-						lightVec[2] = 2.0;
+						lightVec[2] = 3.0;
 					}
 				}
 				else { //weapon model, use angles relative to lightsource			

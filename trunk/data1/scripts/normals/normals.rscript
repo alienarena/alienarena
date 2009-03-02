@@ -232,6 +232,7 @@ maps/meshes/hanger
 	{
 		map maps/meshes/hanger_normal.jpg
 		normalmap
+		nolightmap
 	}
 }
 maps/meshes/piston
@@ -239,5 +240,13 @@ maps/meshes/piston
 	{
 		map maps/meshes/piston_normal.jpg
 		normalmap
+	}
+}
+maps/meshes/martian
+{
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+		nolightmap
 	}
 }
