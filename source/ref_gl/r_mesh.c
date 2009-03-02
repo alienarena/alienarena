@@ -162,36 +162,84 @@ float calcEntAlpha (float alpha, vec3_t point)
 }
 
 //This routine bascially finds the average light position, by factoring in all lights and 
-//accounting for their distance and intensity
-//this needs to be expanded upon to account for dynamic lights
+//accounting for their distance, visiblity, and intensity.
+
 vec3_t	lightPosition;
 float	dynFactor;
 void GL_GetLightVals()
 {
-	int i, j, lnum;
+	int i, j, lnum, numlights;
 	dlight_t	*dl;
 	worldLight_t *wl;
-	float dist;
-	vec3_t	temp;
+	float dist, xdist, ydist, viewAng;
+	vec3_t	temp, lightAdd;
+	trace_t r_trace;
 
+	//light shining down if there are no lights at all
 	VectorCopy(currententity->origin, lightPosition);
-	
+	lightPosition[2] += 128; 
+
+	numlights = 0;
+	VectorClear(lightAdd);
 	for (i=0; i<r_numWorldLights; i++) {
 
 		wl = &r_worldLights[i];
 
+		r_trace = CM_BoxTrace(currententity->origin, wl->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+		
 		VectorSubtract(currententity->origin, wl->origin, temp);
-		dist = VectorLength(temp)/100;
+		dist = VectorLength(temp);
 
-		for(j = 0; j < 3; j++) 
-			lightPosition[j] += (currententity->origin[j] - wl->origin[j]/dist)/r_numWorldLights;
+		if(dist < 500 && r_trace.fraction == 1.0) {
+			for(j = 0; j < 3; j++) 
+				lightAdd[j] += wl->origin[j];
+			numlights++;
+		}
 	}
 
 	dynFactor = 0;
 	dl = r_newrefdef.dlights;
 	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++) {
+		
+		VectorSubtract(currententity->origin, dl->origin, temp);
+		dist = VectorLength(temp);
+	
+		r_trace = CM_BoxTrace(currententity->origin, dl->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+		
+		if(dist < 200 && r_trace.fraction == 1.0) {
+			for(j = 0; j < 3; j++) 
+				lightAdd[j] += dl->origin[j];
+			numlights++;
+		}
+
 		VectorSubtract (dl->origin, currententity->origin, temp);
 		dynFactor += (dl->intensity/20.0)/VectorLength(temp);
+	}
+
+	if(numlights) {
+		for(i = 0; i < 3; i++) 
+			lightPosition[i] = lightAdd[i]/numlights;
+	}
+
+	//translate for when viewangles are negative - done because otherwise the 
+	//lighting effect is backwards
+	if(r_newrefdef.viewangles[1] < 0) {
+		//translate according viewangles
+		viewAng = r_newrefdef.viewangles[1];
+		if(viewAng < -90)  { //we want move in an arc from 0 to -90 to 0(instead of -180 to 0)
+			viewAng +=180;
+			viewAng /= 45;
+		}
+		else
+			viewAng /= -45; //should give us a peak of +2 now
+
+		viewAng *= (4.0-viewAng)/2; //ramp up quickly, taper off near max. 
+
+		xdist = lightPosition[0] - currententity->origin[0];
+		ydist = lightPosition[1] - currententity->origin[1];
+
+		lightPosition[0] -= 2 * xdist * viewAng;
+		lightPosition[1] -= 2 * ydist * viewAng;
 	}
 }
 
@@ -502,7 +550,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				vec3_t lightVec, temp, lightVal;
 
 				GL_GetLightVals();
-				VectorNormalize(lightPosition);
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
@@ -524,24 +571,28 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) { //fixed light source
 
 					//light down, slightly forward and to the left
-					lightVec[0] = 2.0; //right - left
+					lightVec[0] = 1.0; //right - left
 					lightVec[1] = 5.0; //up - down
-					lightVec[2] = 1.0; //forward - back
+					lightVec[2] = 4.0; //forward - back
 				}
-				//the following two sections are only approxiamations, and fairly inaccurate at that
-				if(!(currententity->flags & RF_WEAPONMODEL)) { //position relative to light source
+				else if(!(currententity->flags & RF_WEAPONMODEL)) { //simple lightvec source - origin
 
-					lightVec[0] = 1.0 - lightPosition[0]; //right - left
-					lightVec[1] = (r_origin[2] - (currententity->origin[2]-16))/10; //up - down
-					lightVec[2] = 2.0 - lightPosition[2]; //forward - back
+					if(stage->lightmap)
+						VectorSubtract(lightPosition, currententity->origin, lightVec);
+					else {
+						//light down, slightly forward and to the left
+						lightVec[0] = 1.0;
+						lightVec[1] = 5.0;
+						lightVec[2] = 2.0;
+					}
 				}
-				else { //angles relative to lightsource			
+				else { //weapon model, use angles relative to lightsource			
 			
 					VectorCopy(currententity->angles, temp);
 
-					lightVec[0] = (abs(temp[1])*2)/122.4 - lightPosition[0]*2;
-					lightVec[1] = (abs(temp[0]+90)*2)/61.2 + lightPosition[2]*2;
-					lightVec[2] = temp[2] - lightPosition[1]*2;
+					lightVec[0] = (abs(temp[1])*2)/122.4;
+					lightVec[1] = (abs(temp[0]+90)*2)/61.2;
+					lightVec[2] = temp[2];
 				}			
 							
 				GL_EnableMultitexture( true );
