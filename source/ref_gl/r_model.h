@@ -316,15 +316,14 @@ typedef struct model_s
 	int			extradatasize;
 	void		*extradata;
 
+	signed int	edge_tri[MAX_TRIANGLES][3];
+	qboolean	noshadow;
+
 	//vertex arrays for static meshes
 	int			num_frames;
 	vec3_t r_mesh_verts[MAX_VERTS];
 
 	fstvert_t	*st;
-
-	byte		*normals;
-	byte		*binormals;
-	byte		*tangents;
 
 } model_t;
 
