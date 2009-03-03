@@ -225,7 +225,8 @@ typedef struct miptex_s
 #define	MAX_MAP_PORTALS		65536
 #define	MAX_MAP_EDGES		128000
 #define	MAX_MAP_SURFEDGES	256000
-#define	MAX_MAP_LIGHTING	0x200000
+// crx can handle >0x200000 for MAX_MAP_LIGHTING
+#define	MAX_MAP_LIGHTING	0x300000
 #define	MAX_MAP_VISIBILITY	0x100000
 
 // key / value pair sizes

@@ -18,8 +18,6 @@ typedef enum
     emit_sky
 } emittype_t;
 
-#define LIGHTDISTBIAS 6800.0
-
 typedef struct directlight_s
 {
 	struct directlight_s *next;

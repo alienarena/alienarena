@@ -12,112 +12,97 @@ vec3_t	texture_reflectivity[MAX_MAP_TEXINFO];
 */
 
 /*
-======================
-CalcTextureReflectivity
-======================
+  CalcTextureReflectivity()
+
+    For each Targa texture, calculate average RGB
+
 */
 void CalcTextureReflectivity (void)
 {
-	int				i;
-	int				j, k, texels;
-    int             mod_fail;
-	int				color[3];
-	int				texel;
-	byte			*palette;
-	char			path[1024];
-    char            pakpath[56];
-	float			r, scale;
-	miptex_t		*mt;
+	int i, j, count;
+	int texels;
+	float color[3];
+	char path[1024];
+	float r;
+	byte* pbuffer;
+	byte* ptexel;
+	int width, height;
 
-	sprintf (path, "%spics/colormap.pcx", gamedir);
+	// for TGA RGBA texture images
 
-	// get the game palette
-	Load256Image (path, NULL, &palette, NULL, NULL);
-
-	// allways set index 0 even if no textures
-	texture_reflectivity[0][0] = 0.5;
-	texture_reflectivity[0][1] = 0.5;
-	texture_reflectivity[0][2] = 0.5;
-
-	for (i=0 ; i<numtexinfo ; i++)
+	for( i = 0; i < numtexinfo; i++ )
 	{
-		// see if an earlier texinfo allready got the value
+		// default
+		texture_reflectivity[i][0] = 0.5f;
+		texture_reflectivity[i][1] = 0.5f;
+		texture_reflectivity[i][2] = 0.5f;
+
+		// see if an earlier texinfo already got the value
 		for (j=0 ; j<i ; j++)
 		{
 			if (!strcmp (texinfo[i].texture, texinfo[j].texture))
 			{
-				VectorCopy (texture_reflectivity[j], texture_reflectivity[i]);
+				VectorCopy(texture_reflectivity[j], texture_reflectivity[i]);
 				break;
 			}
 		}
 		if (j != i)
 			continue;
 
-		// load the wal file
-        sprintf (pakpath, "textures/%s.wal", texinfo[i].texture);
-
-        mod_fail = true;
-
-
-		sprintf (path, "%stextures/%s.wal", gamedir, texinfo[i].texture);
-
-        if(moddir[0] != 0)
-            {
-	        sprintf (path, "%s%s", moddir, pakpath);
-
-            // load the miptex to get the flags and values
-		    if (TryLoadFile (path, (void **)&mt, FALSE) != -1 ||
-                    TryLoadFileFromPak (pakpath, (void **)&mt, moddir) != -1)
-                {
-                mod_fail = false;
-                }
-            }
-
-        if(mod_fail)
-            {
-	        // load the miptex to get the flags and values
-            sprintf (path, "%s%s", gamedir, pakpath);
-
-		    if (TryLoadFile (path, (void **)&mt, FALSE) == -1 &&
-                    TryLoadFileFromPak (pakpath, (void **)&mt, gamedir) == -1)
-                {
-			    printf ("Couldn't load %s\n", path);
-			    texture_reflectivity[i][0] = 0.5;
-			    texture_reflectivity[i][1] = 0.5;
-			    texture_reflectivity[i][2] = 0.5;
-			    continue;
-                }
-            }
-
-		texels = LittleLong(mt->width)*LittleLong(mt->height);
-		color[0] = color[1] = color[2] = 0;
-
-		for (j=0 ; j<texels ; j++)
+		// buffer is RGBA  (A  set to 255 for 24 bit format)
+		// looks in arena/textures and then data1/textures 
+		sprintf( path, "%s/arena/textures/%s.tga", gamedir, texinfo[i].texture );
+		if ( FileExists( path ) ) // LoadTGA expects file to exist
 		{
-			texel = ((byte *)mt)[LittleLong(mt->offsets[0]) + j];
-			for (k=0 ; k<3 ; k++)
-				color[k] += palette[texel*3+k];
+			LoadTGA( path, &pbuffer, &width, &height ); // load rgba data
+			qprintf("load %s\n", path );
+		}
+		else
+		{
+			sprintf( path, "%s/data1/textures/%s.tga", gamedir, texinfo[i].texture );
+			if ( FileExists( path ) )
+			{
+				LoadTGA( path, &pbuffer, &width, &height ); // load rgba data
+				qprintf("load %s\n", path );
+			}
+			else
+			{
+				qprintf("noload %s\n", path);
+				continue;
+			}
 		}
 
-		for (j=0 ; j<3 ; j++)
+		//
+		// Calculate the "average color" for the texture
+		//
+		texels =  width * height;
+		if (texels <= 0)
 		{
-			r = color[j]/texels/255.0;
+			qprintf("tex %i (%s) no rgba data (file broken?)\n", i, path );
+			continue; // empty texture, possible bad file
+		}
+		color[0] = color[1] = color[2] = 0.0f;
+		ptexel = pbuffer;
+		for ( count = texels;  count--; )
+		{
+			color[0] += (float)(*ptexel++); // r
+			color[1] += (float)(*ptexel++); // g
+			color[2] += (float)(*ptexel++); // b
+			ptexel++; // a
+		}
+
+		free( pbuffer );  // malloc'ed in LoadTarga
+
+		for( j = 0; j < 3; j++ )
+		{ // average RGB for the texture to 0.0..1.0 range
+			r = color[j] / (float)texels / 255.0f;
 			texture_reflectivity[i][j] = r;
 		}
-		// scale the reflectivity up, because the textures are
-		// so dim
-		scale = ColorNormalize (texture_reflectivity[i],
-			texture_reflectivity[i]);
-		if (scale < 0.5)
-		{
-			scale *= 2;
-			VectorScale (texture_reflectivity[i], scale, texture_reflectivity[i]);
-		}
-#if 0
-texture_reflectivity[i][0] = 0.5;
-texture_reflectivity[i][1] = 0.5;
-texture_reflectivity[i][2] = 0.5;
-#endif
+
+		qprintf("tex %i (%s) avg rgb [ %f, %f, %f ]\n",
+			i, path, texture_reflectivity[i][0],
+			texture_reflectivity[i][1],texture_reflectivity[i][2]);
+
 	}
 }
 

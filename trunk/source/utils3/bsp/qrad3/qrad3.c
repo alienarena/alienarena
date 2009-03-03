@@ -62,7 +62,7 @@ qboolean	save_trace = false;
 
 char		source[1024];
 
-float	direct_scale =	0.4;
+float	direct_scale =  1.0;
 float	entity_scale =	1.0;
 
 /*
@@ -807,12 +807,7 @@ int main (int argc, char **argv)
     char	game_path[1024] = "";
     char	*param, *param2;
 
-	printf ("----------- qrad3 ----------\n");
-	printf ("original code by id Software\n");
-    printf ("Modified by Geoffrey DeWan\n");
-    printf ("Revision 1.05\n");
-    printf ("Beta revision - Do not distribute\n");
-    printf ("-----------------------------\n");
+	printf ("--- Alien Arena QRAD3 ---\n");
 
 	verbose = false;
     full_help = false;
@@ -881,13 +876,13 @@ int main (int argc, char **argv)
 		else if (!strcmp(param,"-direct"))
 		{
             param2 = WalkConfiguration();
-			direct_scale *= atof (param2);
+			direct_scale = atof (param2);
 			printf ("direct light scaling at %f\n", direct_scale);
 		}
 		else if (!strcmp(param,"-entity"))
 		{
             param2 = WalkConfiguration();
-			entity_scale *= atof(param2);
+			entity_scale = atof(param2);
 			printf ("entity light scaling at %f\n", entity_scale);
 		}
 		else if (!strcmp(param,"-glview"))
@@ -980,11 +975,13 @@ int main (int argc, char **argv)
 	{
         n = strlen(game_path);
 		
+#ifdef WIN32		
         if (n > 1 && n < 1023 && game_path[n-1] != '\\')
 		{
             game_path[n] = '\\';
             game_path[n+1] = 0;
 		}
+#endif		
 
         strcpy(gamedir, game_path);
 	}
