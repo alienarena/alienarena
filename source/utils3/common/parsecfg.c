@@ -93,10 +93,18 @@ void LoadConfigurationFile(char *s, int err)
         AddParam(line);
 	}
 	
-    arg_node_tail->next = node;
+	if ( arg_node_tail != 0 )
+	{ // append original list
+    	arg_node_tail->next = node;
 	
-    if(node2 != 0)
-        arg_node_tail = node2;
+	    if(node2 != 0)
+	        arg_node_tail = node2;
+	}
+	else
+	{ // .cfg was empty, restore original list
+		arg_node_root = node;
+		arg_node_tail = node2;
+	}
 	
     fclose(in);
 }

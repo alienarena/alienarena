@@ -47,7 +47,6 @@ void PlaneFromWinding (winding_t *w, plane_t *plane)
 // calc plane
 	VectorSubtract (w->points[2], w->points[1], v1);
 	VectorSubtract (w->points[0], w->points[1], v2);
-	DotProduct(v1, v2);
 	CrossProduct (v2, v1, plane->normal);
 	VectorNormalize (plane->normal, plane->normal);
 	plane->dist = DotProduct (w->points[0], plane->normal);
@@ -517,11 +516,7 @@ int main (int argc, char **argv)
     char *param, *param2;
 	double		start, end;
 		
-	printf ("----------- qvis3 -----------\n");
-	printf ("original code by id Software\n");
-    printf ("Modified by Geoffrey DeWan\n");
-    printf ("Revision 1.03\n");
-    printf ("-----------------------------\n");
+	printf ("--- Alien Arena QVIS3 ---\n");
 
     LoadConfigurationFile("qvis3", 0);
     LoadConfiguration(argc-1, argv+1);

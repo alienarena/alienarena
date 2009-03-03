@@ -1,8 +1,6 @@
 #ifndef __MATHLIB__
 #define __MATHLIB__
 
-#define MATH_INLINE
-
 // mathlib.h
 
 #include <math.h>

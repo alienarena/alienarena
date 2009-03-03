@@ -1,6 +1,9 @@
 // cmdlib.c
+
+#ifdef WIN32
 #include <windows.h>
 #include <crtdbg.h>
+#endif
 
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
@@ -20,7 +23,16 @@ static char THIS_FILE[] = __FILE__;
 #include <libc.h>
 #endif
 
+#ifdef __unix__
+#include <unistd.h>
+#endif
+
+#ifdef __unix__
+#define BASEDIRNAME "alienarena"
+#else
 #define	BASEDIRNAME	"Alien Arena 2008"
+#endif
+
 #define PATHSEPERATOR   '/'
 
 // set these before calling CheckParm
@@ -295,7 +307,7 @@ void Q_getwd (char *out)
    _getcwd (out, 256);
    strcat (out, "\\");
 #else
-   getwd (out);
+   getcwd (out, 256);
    strcat (out, "/");
 #endif
 }
@@ -720,7 +732,7 @@ int    TryLoadFileFromPak (char *filename, void **bufferptr, char *gd)
                             pak_entry[i].filename[n] = '/';
                         }
 
-                    if(!strnicmp(pak_entry[i].filename, filename, 56))
+                    if(!Q_strncasecmp(pak_entry[i].filename, filename, 56))
                         {
                         if(!fseek(f, pak_entry[i].offset, SEEK_SET))
                             {

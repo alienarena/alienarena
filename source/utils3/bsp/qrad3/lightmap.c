@@ -929,7 +929,7 @@ void CreateDirectLights (void)
 			intensity = 300;
 		
 		_color = ValueForKey (e, "_color");
-		if (_color && _color[1])
+		if (_color && _color[0])
 		{
 			sscanf (_color, "%f %f %f", &dl->color[0],&dl->color[1],&dl->color[2]);
 			ColorNormalize (dl->color, dl->color);
@@ -937,7 +937,7 @@ void CreateDirectLights (void)
 		else
 			dl->color[0] = dl->color[1] = dl->color[2] = 1.0;
 		
-		dl->intensity = intensity * entity_scale * LIGHTDISTBIAS / dl->wait;
+		dl->intensity = intensity * entity_scale; 
 		dl->type = emit_point;
 		
 		target = ValueForKey (e, "target");
@@ -1031,11 +1031,82 @@ void CreateDirectLights (void)
 }
 
 /*
+ * Mar. 2009
+ * Lighting equations for distance attenuation have been changed to
+ * (what appears to be) the form of a standard lighting equation.
+ * Coefficients need to be set empirically based on artistic criteria.
+ * Helps to plot the curve. Real-world-correct inverse square law is to
+ * extreme.
+ */
+
+/*
+ * PointLight()
+ *
+ *  note: point lights are affected by -entity (entity_scale)
+ */
+float PointLight(float dot1, float intensity, float dist)
+{
+	float scale = 0.0f;
+
+	if( dist < 32.0f ) // gets plenty bright at this distance
+		dist = 32.0f;
+	scale = 1.0f / ( 0.8f + ( 0.01f * dist ) + ( 0.0001f * dist * dist ) );
+	scale *= intensity * dot1;
+
+	return scale;
+}
+
+/*
+ * SurfaceLight()
+ *
+ * note: surface lights are affected by -direct (direct_scale)
+ *
+ */
+float SurfaceLight(float dot1, float intensity, float dist, float dot2, float invdist )
+{
+	float scale = 0.0f;
+
+	if( dot2 > 0.001f )
+	{ // point is not behind the surface light
+		scale = 0.001f / ( 0.8f + ( 0.01f * dist ) + ( 0.0001f * dist * dist ) );
+		scale *= intensity * dot1 * dot2;
+	}
+
+	return scale;
+}
+
+/*
+ * SpotLight()
+ *
+ * note: spot lights are affected by -entity (entity_scale)
+ */
+float SpotLight( float dot1, float intensity, float dist, float dot2, float stopdot )
+{
+	float scale = 0.0f;
+
+	if( dot2 >= stopdot )
+	{ // surface point is within the spotlight cone
+		// light to surface distance attenuation
+		scale = 4.0f / ( 0.8f + ( 0.01f * dist ) + ( 0.0001f * dist * dist ) );
+		// surface normal attenuation
+		scale *= dot1;
+		// spot center to surface point attenuation
+		scale *= powf( dot2, 50.0f ); // dot2 range is limited, so exponent is big.
+		// this term is not really necessary, could have spots with sharp cutoff
+		//   and for fuzzy edges use multiple lights with different cones.
+
+		scale *= intensity;
+	}
+
+	return scale;
+}
+
+/*
 =============
 LightContributionToPoint
 =============
 */
-void LightContributionToPoint (directlight_t *l, vec3_t pos, vec3_t normal, vec3_t color)
+void LightContributionToPoint (directlight_t *l, vec3_t pos, vec3_t normal, vec3_t color, float lightscale2 )
 {
 	vec3_t			delta, target;
 	float			dot, dot2;
@@ -1066,110 +1137,88 @@ void LightContributionToPoint (directlight_t *l, vec3_t pos, vec3_t normal, vec3
 	if (!noblock && TestLine_r (0, pos, l->origin))
 		return;		// occluded
 
-	if (l->adjangle == 1.0f)
-		adj = dot;
-	else if (l->adjangle = 0.0f)
-		adj = 1.0f;
-	else
-		adj = pow (dot, l->adjangle);
-
-	set_main = false;
-
-	switch (l->type)
-	{
-	case emit_point:
-		if (dist < 16)
-			dist = 16;
-		scale = l->intensity * adj / (dist * dist);
-		break;
-		
-	case emit_surface:
-		dot2 = -DotProduct (delta, l->normal);
-		if (dot2 <= 0.001)
-			return;		// behind light surface
-		scale = (l->intensity * inv * inv) * dot * dot2;
-		break;
-		
-	case emit_sky:
-		if (sun_main_once)
+	if( l->type == emit_sky )
+	{  // this might be the sun ambient and it might be directional
+		set_main = false;
+		if( sun_main_once ) // don't do -extra multisampling on sun
 			return;
-		
+
 		dot2 = -DotProduct (delta, l->normal);
-		
-		if (dot2 <= 0.001)
-			return;		// behind light surface
-		
-		if (!sun_ambient_once)	// Ambient sky
+		if( dot2 <= 0.001f )
+			return; // behind light surface
+
+		if( !sun_ambient_once ) // Ambient sky, no -extra multisampling
 			scale = sun_ambient;
 		else
 			scale = 0.0f;
-		
+
 		// Main sky
-		dot2 = DotProduct (sun_pos, normal);
-		if (dot2 > 0.001)   // Main sky
+		dot2 = DotProduct (sun_pos, normal); // sun_pos from target entity
+		if( dot2 > 0.001f ) // Main sky
 		{
 			set_main = true;
 			main_val = sun_main * dot2;
+			if ( !noblock )
+			{
+				if( !RayPlaneIntersect(
+					l->plane->normal, l->plane->dist, pos, sun_pos, target )
+					||
+					TestLine_r( 0, pos, target )
+				)
+				{
+					set_main = sun_main_once;
+					main_val = 0.0f;
+				}
+				else
+				{
+					scale += main_val;
+					main_val = 0.0f; // done with it
+				}
+			}
 		}
 		else
 		{
-			if (sun_ambient_once)
+			if( sun_ambient_once )
 				return;
-			
 			set_main = false;
 			main_val = 0.0f;
 		}
-		
-		break;
-		
-	case emit_spotlight:
-		// linear falloff
-		dot2 = -DotProduct (delta, l->normal);
-		if (dot2 <= l->stopdot)
-			return;	// outside light cone
-		scale = (l->intensity - (l->wait * dist)) * adj;
-		break;
-	default:
-		Error ("Bad l->type");
-	}
+		if( sun_alt_color ) // set in .map
+			VectorScale ( sun_color, scale, color );
+		else
+			VectorScale ( l->color, scale, color );
 
-	if (scale <= 0)
-	{
-		if (l->type != emit_sky || set_main <= 0)
-			return;
-	}
-	
-	if (l->type == emit_sky && main_val != 0.0f)
-	{
-		if (!noblock && !RayPlaneIntersect(l->plane->normal, l->plane->dist,
-			pos, sun_pos, target))
-		{
-			set_main = sun_main_once;
-			main_val = 0.0f;
-		}
-		
-		else if (!noblock && TestLine_r (0, pos, target))
-		{
-			set_main = sun_main_once;
-			main_val = 0.0f;
-		}
-		
-		scale += main_val;
-		main_val = 0; // done with it
-	}
-
-	if (l->type != emit_sky)
-		scale *= lightscale;
-
-	if (l->type == emit_sky && sun_alt_color)
-		VectorScale ( sun_color, scale, color );
-	else
-		VectorScale ( l->color, scale, color );
-
-	if (l->type == emit_sky)
-	{
 		sun_ambient_once = true;
 		sun_main_once = set_main;
+	}
+	else
+	{
+		switch ( l->type )
+		{
+		case emit_point:
+			scale = PointLight( dot, l->intensity, dist );
+			break;
+
+		case emit_surface:
+			dot2 = -DotProduct (delta, l->normal);
+			scale = SurfaceLight( dot, l->intensity, dist, dot2, inv );
+			break;
+
+		case emit_spotlight:
+			dot2 = -DotProduct(delta, l->normal);
+			scale = SpotLight( dot, l->intensity, dist, dot2, l->stopdot );
+			break;
+
+		default:
+			Error("Invalid light entity type.\n" );
+			break;
+		} /* switch() */
+
+		if ( scale > 0.0f )
+		{
+			scale *= lightscale2; // adjust for multisamples, -extra cmd line arg
+			VectorScale ( l->color, scale, color );
+		}
 	}
 }
 
@@ -1177,12 +1226,12 @@ void LightContributionToPoint (directlight_t *l, vec3_t pos, vec3_t normal, vec3
 =============
 GatherSampleLight
 
-Lightscale is the normalizer for multisampling
-Testline folded in here to remove function call overhead
+Lightscale2 is the normalizer for multisampling, -extra cmd line arg
 =============
 */
+
 void GatherSampleLight (vec3_t pos, vec3_t normal,
-			float **styletable, int offset, int mapsize, float lightscale)
+			float **styletable, int offset, int mapsize, float lightscale2)
 {
 	int				i;
 	directlight_t	*l;
@@ -1203,7 +1252,7 @@ void GatherSampleLight (vec3_t pos, vec3_t normal,
 
 		for (l=directlights[i] ; l ; l=l->next)
 		{
-			LightContributionToPoint ( l, pos, normal, color );
+			LightContributionToPoint ( l, pos, normal, color, lightscale2 );
 
 			// no contribution
 			if ( VectorCompare ( color, vec3_origin ) )

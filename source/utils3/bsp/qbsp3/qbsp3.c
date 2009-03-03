@@ -331,11 +331,7 @@ int main (int argc, char **argv)
     char *param, *param2;
 
 
-	printf ("----------- qbsp3 -----------\n");
-	printf ("original code by id Software\n");
-    printf ("Modified by Geoffrey DeWan\n");
-    printf ("Revision 1.09\n");
-    printf ("-----------------------------\n");
+	printf ("--- Alien Arena QBSP3 ---\n");
 
     full_help = false;
 
@@ -553,11 +549,13 @@ int main (int argc, char **argv)
         {
         n = strlen(game_path);
 
+#ifdef WIN32
         if(n > 1 && n < 1023 && game_path[n-1] != '\\')
             {
             game_path[n] = '\\';
             game_path[n+1] = 0;
             }
+#endif    
 
         strcpy(gamedir, game_path);
         }
@@ -570,11 +568,13 @@ int main (int argc, char **argv)
         {
         n = strlen(moddir);
 
+#ifdef WIN32
         if(n > 1 && n < 1023 && moddir[n-1] != '\\')
             {
             moddir[n] = '\\';
             moddir[n+1] = 0;
             }
+#endif      
 
         printf("moddir set to %s\n", moddir);
         }
