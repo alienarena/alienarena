@@ -569,7 +569,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					}
 				}
 
-				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) { //fixed light source
+				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL || currententity->flags & RF_NOSHADOWS) { //fixed light source
 
 					//light down, slightly forward and to the left
 					lightVec[0] = 1.0; //right - left

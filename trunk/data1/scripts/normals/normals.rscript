@@ -117,6 +117,27 @@ players/lauren/default
 		normalmap
 	}	
 }
+players/slashbot/red
+{
+	{
+		map players/slashbot/default_normal.jpg
+		normalmap
+	}
+}
+players/slashbot/default
+{
+	{
+		map players/slashbot/default_normal.jpg
+		normalmap
+	}
+}
+players/slashbot/blue
+{
+	{
+		map players/slashbot/default_normal.jpg
+		normalmap
+	}	
+}
 models/weapons/v_chain/skin
 {
 	{
