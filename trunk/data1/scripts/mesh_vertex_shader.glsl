@@ -38,6 +38,6 @@ void main()
 	//fog
     if(FOG > 0){
 		fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);
-		fog = clamp(fog, 0.0, 1.0);
+		fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear
    	}
 }
