@@ -1,7 +1,7 @@
 {
-"sky" "space1"
-"classname" "worldspawn"
 "message" "Deimos Moon Base"
+"classname" "worldspawn"
+"sky" "space1"
 // brush 0
 {
 ( -768 -992 -216 ) ( -1024 -992 -216 ) ( -1024 -1088 -216 ) arena6/blacktrans 0 0 0 1 1 134283264 16 0
@@ -7429,7 +7429,7 @@
 // brush 808
 {
 ( -128 -64 -224 ) ( -256 -64 -224 ) ( -256 -192 -224 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
-( -256 -192 -216 ) ( -256 -64 -216 ) ( -128 -64 -216 ) arena9/boxmetal 0 128 0 0.500000 0.500000 0 0 0
+( -256 -192 -216 ) ( -256 -64 -216 ) ( -128 -64 -216 ) arena9/hexfloor1 0 0 0 0.500000 0.500000 0 0 0
 ( -256 -192 -216 ) ( -128 -192 -216 ) ( -128 -192 -224 ) arena9/metalscale -80 0 90 0.500000 0.500000 0 0 0
 ( -128 -192 -216 ) ( -128 -64 -216 ) ( -128 -64 -224 ) arena9/metalscale -80 0 90 0.500000 0.500000 0 0 0
 ( -128 -64 -216 ) ( -256 -64 -216 ) ( -256 -64 -224 ) arena9/metalscale -80 0 90 0.500000 0.500000 0 0 0
@@ -7438,7 +7438,7 @@
 // brush 809
 {
 ( -128 192 -224 ) ( -256 192 -224 ) ( -256 64 -224 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
-( -256 64 -216 ) ( -256 192 -216 ) ( -128 192 -216 ) arena9/boxmetal 0 128 0 0.500000 0.500000 0 0 0
+( -256 64 -216 ) ( -256 192 -216 ) ( -128 192 -216 ) arena9/hexfloor1 0 0 0 0.500000 0.500000 0 0 0
 ( -256 64 -216 ) ( -128 64 -216 ) ( -128 64 -224 ) arena9/metalscale -80 0 90 0.500000 0.500000 0 0 0
 ( -128 64 -216 ) ( -128 192 -216 ) ( -128 192 -224 ) arena9/metalscale -80 0 90 0.500000 0.500000 0 0 0
 ( -128 192 -216 ) ( -256 192 -216 ) ( -256 192 -224 ) arena9/metalscale -80 0 90 0.500000 0.500000 0 0 0
@@ -8674,7 +8674,7 @@
 // brush 941
 {
 ( -576 -704 -224 ) ( -576 -576 -224 ) ( -704 -576 -224 ) arena9/metalplate1 0 0 0 0.500000 0.500000 0 0 0
-( -704 -576 -216 ) ( -576 -576 -216 ) ( -576 -704 -216 ) arena9/boxmetal 128 128 0 0.500000 0.500000 0 0 0
+( -704 -576 -216 ) ( -576 -576 -216 ) ( -576 -704 -216 ) arena9/hexfloor1 0 0 0 0.500000 0.500000 0 0 0
 ( -704 -576 -216 ) ( -704 -704 -216 ) ( -704 -704 -224 ) arena9/metalscale -80 64 90 0.500000 0.500000 0 0 0
 ( -704 -704 -216 ) ( -576 -704 -216 ) ( -576 -704 -224 ) arena9/metalscale -80 96 90 0.500000 -0.500000 0 0 0
 ( -576 -704 -216 ) ( -576 -576 -216 ) ( -576 -576 -224 ) arena9/metalscale -80 64 90 0.500000 0.500000 0 0 0
@@ -9481,7 +9481,7 @@
 // brush 1030
 {
 ( -832 -704 -224 ) ( -832 -576 -224 ) ( -960 -576 -224 ) arena9/metalplate1 0 0 0 0.500000 0.500000 0 0 0
-( -960 -576 -216 ) ( -832 -576 -216 ) ( -832 -704 -216 ) arena9/boxmetal 128 128 0 0.500000 0.500000 0 0 0
+( -960 -576 -216 ) ( -832 -576 -216 ) ( -832 -704 -216 ) arena9/hexfloor1 0 0 0 0.500000 0.500000 0 0 0
 ( -960 -576 -216 ) ( -960 -704 -216 ) ( -960 -704 -224 ) arena9/metalscale -80 64 90 0.500000 0.500000 0 0 0
 ( -960 -704 -216 ) ( -832 -704 -216 ) ( -832 -704 -224 ) arena9/metalscale -80 -32 90 0.500000 -0.500000 0 0 0
 ( -832 -704 -216 ) ( -832 -576 -216 ) ( -832 -576 -224 ) arena9/metalscale -80 64 90 0.500000 0.500000 0 0 0
@@ -15486,7 +15486,7 @@
 // brush 1676
 {
 ( -1280 -64 -8 ) ( -1408 -64 -8 ) ( -1408 -192 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
-( -1408 -192 0 ) ( -1408 -64 0 ) ( -1280 -64 0 ) arena9/boxmetal 0 128 0 0.500000 0.500000 0 0 0
+( -1408 -192 0 ) ( -1408 -64 0 ) ( -1280 -64 0 ) arena9/hexfloor1 0 0 0 0.500000 0.500000 0 0 0
 ( -1408 -192 0 ) ( -1280 -192 0 ) ( -1280 -192 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
 ( -1280 -192 0 ) ( -1280 -64 0 ) ( -1280 -64 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
 ( -1280 -64 0 ) ( -1408 -64 0 ) ( -1408 -64 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
@@ -15495,7 +15495,7 @@
 // brush 1677
 {
 ( -1280 192 -8 ) ( -1408 192 -8 ) ( -1408 64 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
-( -1408 64 0 ) ( -1408 192 0 ) ( -1280 192 0 ) arena9/boxmetal 0 128 0 0.500000 0.500000 0 0 0
+( -1408 64 0 ) ( -1408 192 0 ) ( -1280 192 0 ) arena9/hexfloor1 0 0 0 0.500000 0.500000 0 0 0
 ( -1408 64 0 ) ( -1280 64 0 ) ( -1280 64 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
 ( -1280 64 0 ) ( -1280 192 0 ) ( -1280 192 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
 ( -1280 192 0 ) ( -1408 192 0 ) ( -1408 192 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
@@ -15855,7 +15855,7 @@
 // brush 1717
 {
 ( -832 -704 -8 ) ( -832 -576 -8 ) ( -960 -576 -8 ) arena9/metalscale -32 64 -180 0.500000 0.500000 0 0 0
-( -960 -576 0 ) ( -832 -576 0 ) ( -832 -704 0 ) arena9/boxmetal 128 128 0 0.500000 0.500000 0 0 0
+( -960 -576 0 ) ( -832 -576 0 ) ( -832 -704 0 ) arena9/hexfloor1 0 0 0 0.500000 0.500000 0 0 0
 ( -960 -576 0 ) ( -960 -704 0 ) ( -960 -704 -8 ) arena9/metalscale 0 64 90 0.500000 0.500000 0 0 0
 ( -960 -704 0 ) ( -832 -704 0 ) ( -832 -704 -8 ) arena9/metalscale 0 -32 90 0.500000 -0.500000 0 0 0
 ( -832 -704 0 ) ( -832 -576 0 ) ( -832 -576 -8 ) arena9/metalscale 0 64 90 0.500000 0.500000 0 0 0
@@ -16662,7 +16662,7 @@
 // brush 1806
 {
 ( -576 -704 -8 ) ( -576 -576 -8 ) ( -704 -576 -8 ) arena9/metalscale 96 64 -180 0.500000 0.500000 0 0 0
-( -704 -576 0 ) ( -576 -576 0 ) ( -576 -704 0 ) arena9/boxmetal 128 128 0 0.500000 0.500000 0 0 0
+( -704 -576 0 ) ( -576 -576 0 ) ( -576 -704 0 ) arena9/hexfloor1 0 0 0 0.500000 0.500000 0 0 0
 ( -704 -576 0 ) ( -704 -704 0 ) ( -704 -704 -8 ) arena9/metalscale 0 64 90 0.500000 0.500000 0 0 0
 ( -704 -704 0 ) ( -576 -704 0 ) ( -576 -704 -8 ) arena9/metalscale 0 96 90 0.500000 -0.500000 0 0 0
 ( -576 -704 0 ) ( -576 -576 0 ) ( -576 -576 -8 ) arena9/metalscale 0 64 90 0.500000 0.500000 0 0 0
@@ -17907,7 +17907,7 @@
 // brush 1939
 {
 ( -128 192 -8 ) ( -256 192 -8 ) ( -256 64 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
-( -256 64 0 ) ( -256 192 0 ) ( -128 192 0 ) arena9/boxmetal 0 128 0 0.500000 0.500000 0 0 0
+( -256 64 0 ) ( -256 192 0 ) ( -128 192 0 ) arena9/hexfloor1 0 0 0 0.500000 0.500000 0 0 0
 ( -256 64 0 ) ( -128 64 0 ) ( -128 64 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
 ( -128 64 0 ) ( -128 192 0 ) ( -128 192 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
 ( -128 192 0 ) ( -256 192 0 ) ( -256 192 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
@@ -17916,7 +17916,7 @@
 // brush 1940
 {
 ( -128 -64 -8 ) ( -256 -64 -8 ) ( -256 -192 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
-( -256 -192 0 ) ( -256 -64 0 ) ( -128 -64 0 ) arena9/boxmetal 0 128 0 0.500000 0.500000 0 0 0
+( -256 -192 0 ) ( -256 -64 0 ) ( -128 -64 0 ) arena9/hexfloor1 0 0 0 0.500000 0.500000 0 0 0
 ( -256 -192 0 ) ( -128 -192 0 ) ( -128 -192 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
 ( -128 -192 0 ) ( -128 -64 0 ) ( -128 -64 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
 ( -128 -64 0 ) ( -256 -64 0 ) ( -256 -64 -8 ) arena9/metalscale 0 0 90 0.500000 0.500000 0 0 0
@@ -18678,125 +18678,125 @@
 }
 // entity 1
 {
-"classname" "info_player_intermission"
-"angle" "270"
 "origin" "-767 129 96"
+"angle" "270"
+"classname" "info_player_intermission"
 }
 // entity 2
 {
-"origin" "-192 416 -168"
 "classname" "weapon_supershotgun"
+"origin" "-192 416 -168"
 }
 // entity 3
 {
-"classname" "ammo_shells"
 "origin" "-928 216 -400"
+"classname" "ammo_shells"
 }
 // entity 4
 {
-"classname" "item_health_small"
 "origin" "-304 -464 32"
+"classname" "item_health_small"
 }
 // entity 5
 {
-"classname" "ammo_rockets"
 "origin" "-1312 -480 32"
+"classname" "ammo_rockets"
 }
 // entity 6
 {
-"classname" "item_armor_shard"
 "origin" "-176 -296 -168"
+"classname" "item_armor_shard"
 }
 // entity 7
 {
-"classname" "item_health_small"
 "origin" "-576 256 -400"
+"classname" "item_health_small"
 }
 // entity 8
 {
-"classname" "item_armor_combat"
 "origin" "-776 -576 -400"
+"classname" "item_armor_combat"
 }
 // entity 9
 {
-"classname" "weapon_railgun"
 "origin" "-768 -120 -400"
+"classname" "weapon_railgun"
 }
 // entity 10
 {
-"classname" "weapon_shotgun"
 "origin" "-896 -640 -176"
+"classname" "weapon_shotgun"
 }
 // entity 11
 {
-"classname" "ammo_cells"
 "origin" "-1144 -640 32"
+"classname" "ammo_cells"
 }
 // entity 12
 {
-"classname" "item_armor_shard"
 "origin" "-880 -632 32"
+"classname" "item_armor_shard"
 }
 // entity 13
 {
-"classname" "item_health"
 "origin" "-648 -640 32"
+"classname" "item_health"
 }
 // entity 14
 {
-"classname" "ammo_rockets"
 "origin" "-648 -648 -168"
+"classname" "ammo_rockets"
 }
 // entity 15
 {
-"classname" "ammo_bullets"
 "origin" "-192 -128 -168"
+"classname" "ammo_bullets"
 }
 // entity 16
 {
-"classname" "misc_teleporter"
-"target" "tele3"
-"angle" "90"
 "origin" "-768 -976 -400"
+"angle" "90"
+"target" "tele3"
+"classname" "misc_teleporter"
 }
 // entity 17
 {
-"light" "50"
-"classname" "light"
 "origin" "-768 -984 -352"
+"classname" "light"
+"light" "50"
 }
 // entity 18
 {
-"classname" "light"
-"light" "70"
 "origin" "-768 -264 -336"
+"light" "70"
+"classname" "light"
 }
 // entity 19
 {
-"classname" "misc_teleporter"
-"angle" "270"
-"target" "tele1"
 "origin" "-768 640 232"
+"target" "tele1"
+"angle" "270"
+"classname" "misc_teleporter"
 }
 // entity 20
 {
-"classname" "weapon_hyperblaster"
 "origin" "-1344 -128 40"
+"classname" "weapon_hyperblaster"
 }
 // entity 21
 {
-"classname" "weapon_rocketlauncher"
 "origin" "-192 -128 32"
+"classname" "weapon_rocketlauncher"
 }
 // entity 22
 {
-"classname" "item_health_large"
 "origin" "-432 -192 24"
+"classname" "item_health_large"
 }
 // entity 23
 {
-"classname" "func_plat"
 "height" "224"
+"classname" "func_plat"
 // brush 0
 {
 ( -692 4 -4 ) ( -692 4 4 ) ( -692 16 4 ) evil/stepside_mtl5 -156 -8 90 0.500000 0.500000 0 0 0
@@ -18863,300 +18863,300 @@
 }
 // entity 24
 {
-"classname" "misc_mapmodel"
-"angle" "50"
-"spawnflags" "1"
-"model" "maps/meshes/metpipe2.md2"
 "origin" "-962 352 48"
+"model" "maps/meshes/metpipe2.md2"
+"spawnflags" "1"
+"angle" "50"
+"classname" "misc_mapmodel"
 }
 // entity 25
 {
-"classname" "light"
 "origin" "-504 64 480"
+"classname" "light"
 }
 // entity 26
 {
-"origin" "-560 152 152"
 "classname" "light"
+"origin" "-560 152 152"
 }
 // entity 27
 {
-"origin" "-192 256 128"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-192 256 128"
 }
 // entity 28
 {
-"angle" "180"
-"classname" "info_player_deathmatch"
 "origin" "-448 128 24"
+"classname" "info_player_deathmatch"
+"angle" "180"
 }
 // entity 29
 {
-"classname" "light"
-"light" "50"
 "origin" "-192 0 128"
+"light" "50"
+"classname" "light"
 }
 // entity 30
 {
-"origin" "-192 -248 128"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-192 -248 128"
 }
 // entity 31
 {
-"classname" "light"
-"light" "25"
 "origin" "-186 -382 80"
+"light" "25"
+"classname" "light"
 }
 // entity 32
 {
-"origin" "-291 -542 80"
-"light" "25"
 "classname" "light"
+"light" "25"
+"origin" "-291 -542 80"
 }
 // entity 33
 {
-"classname" "light"
-"light" "25"
 "origin" "-394 -642 80"
+"light" "25"
+"classname" "light"
 }
 // entity 34
 {
-"origin" "-112 -360 8"
-"angle" "180"
-"model" "maps/meshes/generator.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/generator.md2"
+"angle" "180"
+"origin" "-112 -360 8"
 }
 // entity 35
 {
-"origin" "-412 -704 8"
-"angle" "90"
-"model" "maps/meshes/generator.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/generator.md2"
+"angle" "90"
+"origin" "-412 -704 8"
 }
 // entity 36
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/monitor.md2"
-"angle" "270"
-"origin" "-192 504 184"
 "spawnflags" "1"
+"origin" "-192 504 184"
+"angle" "270"
+"model" "maps/meshes/monitor.md2"
+"classname" "misc_mapmodel"
 }
 // entity 37
 {
-"origin" "-280 -130 184"
-"angle" "360"
-"model" "maps/meshes/monitor.md2"
-"classname" "misc_mapmodel"
 "spawnflags" "1"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/monitor.md2"
+"angle" "360"
+"origin" "-280 -130 184"
 }
 // entity 38
 {
-"origin" "-328 -392 184"
-"angle" "335"
-"model" "maps/meshes/monitor.md2"
-"classname" "misc_mapmodel"
 "spawnflags" "1"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/monitor.md2"
+"angle" "335"
+"origin" "-328 -392 184"
 }
 // entity 39
 {
-"classname" "light"
-"light" "50"
 "origin" "-192 440 128"
+"light" "50"
+"classname" "light"
 }
 // entity 40
 {
-"origin" "-512 -640 128"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-512 -640 128"
 }
 // entity 41
 {
-"classname" "light"
-"light" "50"
 "origin" "-760 -640 128"
+"light" "50"
+"classname" "light"
 }
 // entity 42
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/monitor.md2"
-"angle" "270"
-"origin" "-642 -552 184"
 "spawnflags" "1"
+"origin" "-642 -552 184"
+"angle" "270"
+"model" "maps/meshes/monitor.md2"
+"classname" "misc_mapmodel"
 }
 // entity 43
 {
-"origin" "-1016 -640 128"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-1016 -640 128"
 }
 // entity 44
 {
-"origin" "-898 -552 184"
-"angle" "270"
-"model" "maps/meshes/monitor.md2"
-"classname" "misc_mapmodel"
 "spawnflags" "1"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/monitor.md2"
+"angle" "270"
+"origin" "-898 -552 184"
 }
 // entity 45
 {
-"classname" "light"
-"light" "50"
 "origin" "-1344 256 128"
+"light" "50"
+"classname" "light"
 }
 // entity 46
 {
-"origin" "-1344 0 128"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-1344 0 128"
 }
 // entity 47
 {
-"classname" "light"
-"light" "50"
 "origin" "-1344 -248 128"
+"light" "50"
+"classname" "light"
 }
 // entity 48
 {
-"origin" "-1344 504 184"
-"angle" "270"
-"model" "maps/meshes/monitor.md2"
-"classname" "misc_mapmodel"
 "spawnflags" "1"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/monitor.md2"
+"angle" "270"
+"origin" "-1344 504 184"
 }
 // entity 49
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/monitor.md2"
-"angle" "180"
-"origin" "-1256 -130 184"
 "spawnflags" "1"
+"origin" "-1256 -130 184"
+"angle" "180"
+"model" "maps/meshes/monitor.md2"
+"classname" "misc_mapmodel"
 }
 // entity 50
 {
-"origin" "-1350 -382 80"
-"light" "25"
-"classname" "light"
 "angle" "0"
+"classname" "light"
+"light" "25"
+"origin" "-1350 -382 80"
 }
 // entity 51
 {
-"classname" "light"
-"light" "25"
-"origin" "-1245 -542 80"
 "angle" "0"
+"origin" "-1245 -542 80"
+"light" "25"
+"classname" "light"
 }
 // entity 52
 {
-"origin" "-1142 -642 80"
-"light" "25"
-"classname" "light"
 "angle" "0"
+"classname" "light"
+"light" "25"
+"origin" "-1142 -642 80"
 }
 // entity 53
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/generator.md2"
-"angle" "360"
 "origin" "-1424 -356 8"
+"angle" "360"
+"model" "maps/meshes/generator.md2"
+"classname" "misc_mapmodel"
 }
 // entity 54
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/generator.md2"
-"angle" "90"
 "origin" "-1132 -704 8"
+"angle" "90"
+"model" "maps/meshes/generator.md2"
+"classname" "misc_mapmodel"
 }
 // entity 55
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/monitor.md2"
-"angle" "215"
-"origin" "-1208 -392 184"
 "spawnflags" "1"
+"origin" "-1208 -392 184"
+"angle" "215"
+"model" "maps/meshes/monitor.md2"
+"classname" "misc_mapmodel"
 }
 // entity 56
 {
-"classname" "light"
 "origin" "-944 152 152"
+"classname" "light"
 }
 // entity 57
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/monitor2.md2"
-"angle" "90"
-"origin" "-664 -146 120"
 "spawnflags" "1"
+"origin" "-664 -146 120"
+"angle" "90"
+"model" "maps/meshes/monitor2.md2"
+"classname" "misc_mapmodel"
 }
 // entity 58
 {
-"spawnflags" "1"
-"origin" "-872 -146 120"
-"angle" "90"
-"model" "maps/meshes/monitor2.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/monitor2.md2"
+"angle" "90"
+"origin" "-872 -146 120"
+"spawnflags" "1"
 }
 // entity 59
 {
-"origin" "-1008 88 480"
 "classname" "light"
+"origin" "-1008 88 480"
 }
 // entity 60
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/cables.md2"
-"angle" "90"
-"origin" "-768 -114 120"
 "spawnflags" "1"
+"origin" "-768 -114 120"
+"angle" "90"
+"model" "maps/meshes/cables.md2"
+"classname" "misc_mapmodel"
 }
 // entity 61
 {
-"origin" "-1344 432 128"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-1344 432 128"
 }
 // entity 62
 {
-"classname" "misc_mapmodel"
-"angle" "310"
-"spawnflags" "1"
-"model" "maps/meshes/metpipe2.md2"
 "origin" "-574 352 48"
+"model" "maps/meshes/metpipe2.md2"
+"spawnflags" "1"
+"angle" "310"
+"classname" "misc_mapmodel"
 }
 // entity 63
 {
-"origin" "-1424 -356 184"
-"angle" "360"
-"model" "maps/meshes/cables2.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/cables2.md2"
+"angle" "360"
+"origin" "-1424 -356 184"
 }
 // entity 64
 {
-"origin" "-1124 -704 184"
-"angle" "90"
-"model" "maps/meshes/cables2.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/cables2.md2"
+"angle" "90"
+"origin" "-1124 -704 184"
 }
 // entity 65
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/cables2.md2"
-"angle" "90"
 "origin" "-412 -704 184"
+"angle" "90"
+"model" "maps/meshes/cables2.md2"
+"classname" "misc_mapmodel"
 }
 // entity 66
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/cables2.md2"
-"angle" "180"
 "origin" "-112 -356 184"
+"angle" "180"
+"model" "maps/meshes/cables2.md2"
+"classname" "misc_mapmodel"
 }
 // entity 67
 {
-"classname" "func_rotating"
-"spawnflags" "1"
 "speed" "50"
+"spawnflags" "1"
+"classname" "func_rotating"
 // brush 0
 {
 ( -681 84 534 ) ( -681 84 502 ) ( -681 116 502 ) arena6/icerock 198 -226 -90 1 -1 16777216 0 0
@@ -19203,9 +19203,9 @@
 }
 // entity 68
 {
-"speed" "20"
-"spawnflags" "5"
 "classname" "func_rotating"
+"spawnflags" "5"
+"speed" "20"
 // brush 0
 {
 ( -533 -311 413 ) ( -581 -311 413 ) ( -581 -359 413 ) arena6/icerock 141 -207 0 1 1 16777216 0 0
@@ -19252,9 +19252,9 @@
 }
 // entity 69
 {
-"speed" "50"
-"spawnflags" "9"
 "classname" "func_rotating"
+"spawnflags" "9"
+"speed" "50"
 // brush 0
 {
 ( -1135 150 514 ) ( -1135 182 514 ) ( -1167 182 514 ) arena6/icerock -230 239 90 1 1 16777216 0 0
@@ -19301,9 +19301,9 @@
 }
 // entity 70
 {
-"speed" "100"
-"spawnflags" "5"
 "classname" "func_rotating"
+"spawnflags" "5"
+"speed" "100"
 // brush 0
 {
 ( -320 99 558 ) ( -336 99 558 ) ( -336 83 558 ) arena6/icerock -56 -37 0 1 1 16777216 0 0
@@ -19350,9 +19350,9 @@
 }
 // entity 71
 {
-"classname" "func_rotating"
-"spawnflags" "9"
 "speed" "100"
+"spawnflags" "9"
+"classname" "func_rotating"
 // brush 0
 {
 ( -559 187 429 ) ( -559 203 429 ) ( -575 203 429 ) arena6/icerock -27 175 90 1 1 16777216 0 0
@@ -19399,9 +19399,9 @@
 }
 // entity 72
 {
-"speed" "100"
-"spawnflags" "5"
 "classname" "func_rotating"
+"spawnflags" "5"
+"speed" "100"
 // brush 0
 {
 ( -1094 -217 464 ) ( -1110 -217 464 ) ( -1110 -233 464 ) arena6/icerock 206 -97 0 1 1 16777216 0 0
@@ -19448,170 +19448,170 @@
 }
 // entity 73
 {
-"classname" "light"
 "origin" "-768 168 -120"
+"classname" "light"
 }
 // entity 74
 {
-"classname" "light"
-"light" "50"
 "origin" "-192 256 -88"
+"light" "50"
+"classname" "light"
 }
 // entity 75
 {
-"origin" "-192 0 -88"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-192 0 -88"
 }
 // entity 76
 {
-"classname" "light"
-"light" "50"
 "origin" "-192 -248 -88"
+"light" "50"
+"classname" "light"
 }
 // entity 77
 {
-"origin" "-186 -382 -136"
-"light" "25"
 "classname" "light"
+"light" "25"
+"origin" "-186 -382 -136"
 }
 // entity 78
 {
-"classname" "light"
-"light" "25"
 "origin" "-291 -542 -136"
+"light" "25"
+"classname" "light"
 }
 // entity 79
 {
-"origin" "-394 -642 -136"
-"light" "25"
 "classname" "light"
+"light" "25"
+"origin" "-394 -642 -136"
 }
 // entity 80
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/generator.md2"
-"angle" "180"
 "origin" "-112 -360 -208"
+"angle" "180"
+"model" "maps/meshes/generator.md2"
+"classname" "misc_mapmodel"
 }
 // entity 81
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/generator.md2"
-"angle" "90"
 "origin" "-412 -704 -208"
+"angle" "90"
+"model" "maps/meshes/generator.md2"
+"classname" "misc_mapmodel"
 }
 // entity 82
 {
-"spawnflags" "1"
-"origin" "-192 504 -32"
-"angle" "270"
-"model" "maps/meshes/monitor.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/monitor.md2"
+"angle" "270"
+"origin" "-192 504 -32"
+"spawnflags" "1"
 }
 // entity 83
 {
-"spawnflags" "1"
-"classname" "misc_mapmodel"
-"model" "maps/meshes/monitor.md2"
-"angle" "360"
 "origin" "-280 -130 -32"
+"angle" "360"
+"model" "maps/meshes/monitor.md2"
+"classname" "misc_mapmodel"
+"spawnflags" "1"
 }
 // entity 84
 {
-"spawnflags" "1"
-"classname" "misc_mapmodel"
-"model" "maps/meshes/monitor.md2"
-"angle" "335"
 "origin" "-328 -392 -32"
+"angle" "335"
+"model" "maps/meshes/monitor.md2"
+"classname" "misc_mapmodel"
+"spawnflags" "1"
 }
 // entity 85
 {
-"origin" "-192 440 -88"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-192 440 -88"
 }
 // entity 86
 {
-"classname" "light"
-"light" "50"
 "origin" "-512 -640 -88"
+"light" "50"
+"classname" "light"
 }
 // entity 87
 {
-"origin" "-760 -640 -88"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-760 -640 -88"
 }
 // entity 88
 {
-"spawnflags" "1"
-"origin" "-642 -552 -32"
-"angle" "270"
-"model" "maps/meshes/monitor.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/monitor.md2"
+"angle" "270"
+"origin" "-642 -552 -32"
+"spawnflags" "1"
 }
 // entity 89
 {
-"classname" "light"
-"light" "50"
 "origin" "-1016 -640 -88"
+"light" "50"
+"classname" "light"
 }
 // entity 90
 {
-"spawnflags" "1"
-"classname" "misc_mapmodel"
-"model" "maps/meshes/monitor.md2"
-"angle" "270"
 "origin" "-898 -552 -32"
+"angle" "270"
+"model" "maps/meshes/monitor.md2"
+"classname" "misc_mapmodel"
+"spawnflags" "1"
 }
 // entity 91
 {
-"spawnflags" "1"
-"origin" "-768 -114 -96"
-"angle" "90"
-"model" "maps/meshes/cables.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/cables.md2"
+"angle" "90"
+"origin" "-768 -114 -96"
+"spawnflags" "1"
 }
 // entity 92
 {
-"origin" "-412 -704 -32"
-"angle" "90"
-"model" "maps/meshes/cables2.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/cables2.md2"
+"angle" "90"
+"origin" "-412 -704 -32"
 }
 // entity 93
 {
-"origin" "-112 -356 -32"
-"angle" "180"
-"model" "maps/meshes/cables2.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/cables2.md2"
+"angle" "180"
+"origin" "-112 -356 -32"
 }
 // entity 94
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/cables3.md2"
-"angle" "90"
-"origin" "-768 -114 -16"
 "spawnflags" "1"
+"origin" "-768 -114 -16"
+"angle" "90"
+"model" "maps/meshes/cables3.md2"
+"classname" "misc_mapmodel"
 }
 // entity 95
 {
-"classname" "misc_teleporter_dest"
-"targetname" "tele2"
 "origin" "-1264 128 -168"
+"targetname" "tele2"
+"classname" "misc_teleporter_dest"
 }
 // entity 96
 {
-"origin" "-1264 128 -120"
-"classname" "light"
 "light" "50"
+"classname" "light"
+"origin" "-1264 128 -120"
 }
 // entity 97
 {
-"classname" "func_plat"
-"height" "212"
 "speed" "400"
+"height" "212"
+"classname" "func_plat"
 // brush 0
 {
 ( -864 -848 0 ) ( -772 -848 0 ) ( -772 -840 0 ) arena9/metal1 0 0 0 1 1 0 0 0
@@ -19840,121 +19840,121 @@
 }
 // entity 98
 {
-"classname" "light"
-"light" "50"
 "origin" "-896 -896 72"
+"light" "50"
+"classname" "light"
 }
 // entity 99
 {
-"origin" "-768 472 -400"
-"targetname" "tele1"
-"classname" "misc_teleporter_dest"
 "angle" "270"
+"classname" "misc_teleporter_dest"
+"targetname" "tele1"
+"origin" "-768 472 -400"
 }
 // entity 100
 {
-"light" "50"
-"classname" "light"
 "origin" "-768 472 -352"
+"classname" "light"
+"light" "50"
 }
 // entity 101
 {
-"origin" "-768 -520 -336"
-"light" "70"
 "classname" "light"
+"light" "70"
+"origin" "-768 -520 -336"
 }
 // entity 102
 {
-"classname" "light"
-"light" "70"
 "origin" "-760 -784 -336"
+"light" "70"
+"classname" "light"
 }
 // entity 103
 {
-"origin" "-936 -632 32"
 "classname" "item_armor_shard"
+"origin" "-936 -632 32"
 }
 // entity 104
 {
-"origin" "-208 -360 -168"
 "classname" "item_armor_shard"
+"origin" "-208 -360 -168"
 }
 // entity 105
 {
-"origin" "-352 -512 32"
 "classname" "item_health_small"
+"origin" "-352 -512 32"
 }
 // entity 106
 {
-"origin" "-192 416 40"
-"target" "tele2"
-"angle" "270"
 "classname" "misc_teleporter"
+"angle" "270"
+"target" "tele2"
+"origin" "-192 416 40"
 }
 // entity 107
 {
-"angle" "270"
-"classname" "misc_teleporter_dest"
-"targetname" "tele3"
 "origin" "-1344 416 32"
+"targetname" "tele3"
+"classname" "misc_teleporter_dest"
+"angle" "270"
 }
 // entity 108
 {
-"origin" "-1064 224 24"
-"classname" "info_player_deathmatch"
 "angle" "315"
+"classname" "info_player_deathmatch"
+"origin" "-1064 224 24"
 }
 // entity 109
 {
-"origin" "-200 -528 24"
-"classname" "info_player_deathmatch"
 "angle" "90"
+"classname" "info_player_deathmatch"
+"origin" "-200 -528 24"
 }
 // entity 110
 {
-"angle" "360"
-"classname" "info_player_deathmatch"
 "origin" "-1216 -616 24"
+"classname" "info_player_deathmatch"
+"angle" "360"
 }
 // entity 111
 {
-"origin" "-1088 120 -184"
-"classname" "info_player_deathmatch"
 "angle" "360"
+"classname" "info_player_deathmatch"
+"origin" "-1088 120 -184"
 }
 // entity 112
 {
-"angle" "270"
-"classname" "info_player_deathmatch"
 "origin" "-192 128 -184"
+"classname" "info_player_deathmatch"
+"angle" "270"
 }
 // entity 113
 {
-"origin" "-312 -616 -184"
-"classname" "info_player_deathmatch"
 "angle" "180"
+"classname" "info_player_deathmatch"
+"origin" "-312 -616 -184"
 }
 // entity 114
 {
-"angle" "270"
-"classname" "info_player_deathmatch"
 "origin" "-776 -640 -416"
+"classname" "info_player_deathmatch"
+"angle" "270"
 }
 // entity 115
 {
-"origin" "-960 128 -416"
-"classname" "info_player_deathmatch"
 "angle" "360"
+"classname" "info_player_deathmatch"
+"origin" "-960 128 -416"
 }
 // entity 116
 {
-"angle" "180"
-"classname" "info_player_deathmatch"
 "origin" "-576 128 -416"
+"classname" "info_player_deathmatch"
+"angle" "180"
 }
 // entity 117
 {
-"origin" "-768 552 216"
-"classname" "info_player_deathmatch"
 "angle" "270"
+"classname" "info_player_deathmatch"
+"origin" "-768 552 216"
 }
