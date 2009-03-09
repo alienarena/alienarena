@@ -825,8 +825,12 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 	int		*order;
 	vec3_t	point;
 	float	height, lheight;
-	int		count;
 	daliasframe_t	*frame;
+	fstvert_t	*st;
+	dtriangle_t		*tris;
+	int		i, j;
+	int		index_xyz, index_st;
+	int		va = 0;
 
 	lheight = currententity->origin[2] - lightspot[2];
 
@@ -837,6 +841,10 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
 	
 	verts = frame->verts;
+
+	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
+
+	st = currentmodel->st;
 
 	height = 0;
 
@@ -851,8 +859,10 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 	if (r_newrefdef.vieworg[2] < (currententity->origin[2] + height))
 		return;
 
-	if (have_stencil && gl_shadows->integer) {
+	if (have_stencil) {
+
 		qglDepthMask(0);
+
 		qglEnable(GL_STENCIL_TEST);
 
 		qglStencilFunc(GL_EQUAL,1,2);
@@ -861,42 +871,49 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 
 	}
 
-	while (1)
+	va=0;
+	VArray = &VArrayVerts[0];
+	R_InitVArrays (VERT_SINGLE_TEXTURED);
+
+	for (i=0; i<paliashdr->num_tris; i++)
 	{
-		// get the vertex count and primitive type
-		count = *order++;
-		if (!count)
-			break;		// done
-		if (count < 0)
-		{
-			count = -count;
-			qglBegin (GL_TRIANGLE_FAN);
-		}
-		else
-			qglBegin (GL_TRIANGLE_STRIP);
-
-		do
-		{
-
+		for (j=0; j<3; j++)
+		{			
+			index_xyz = tris[i].index_xyz[j];
+			index_st = tris[i].index_st[j];
+	
 			if(lerped)
-				memcpy( point, s_lerped[order[2]], sizeof( point )  );
+				memcpy( point, s_lerped[index_xyz], sizeof( point )  );
 			else
-				memcpy( point, currentmodel->r_mesh_verts[order[2]], sizeof( point )  );
+				memcpy( point, currentmodel->r_mesh_verts[index_xyz], sizeof( point )  );
 
 			point[0] -= shadevector[0]*(point[2]+lheight);
 			point[1] -= shadevector[1]*(point[2]+lheight);
 			point[2] = height;
-			qglVertex3fv (point);
+				
+			VArray[0] = point[0];
+			VArray[1] = point[1];
+			VArray[2] = point[2];
 
-			order += 3;
+			VArray[3] = st[index_st].s;
+			VArray[4] = st[index_st].t;
 
-		} while (--count);
+			// increment pointer and counter
+			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+			va++;
+		}
 
-		qglEnd ();
 	}
+
+	qglDrawArrays(GL_TRIANGLES,0,va);
+	
+	qglDisableClientState( GL_COLOR_ARRAY );
+	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+
+	R_KillVArrays ();
 	qglDepthMask(1);
 	qglColor4f(1,1,1,1);
-	if (have_stencil && gl_shadows->integer) qglDisable(GL_STENCIL_TEST);
+	if (have_stencil) qglDisable(GL_STENCIL_TEST);
 }
 
 /*
