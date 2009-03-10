@@ -595,7 +595,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 				"xv %i yv %i picn %s ",x+32, y, "tag2");
 		else
 			Com_sprintf (entry, sizeof(entry),
-				"xv %i yv %i picn %s ",x+32, y, "playerbox");
+				"xv %i yv %i picn %s ",x, y, "playerbox");
 
 		j = strlen(entry);
 		if (stringlength + j > 1024)
@@ -628,7 +628,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			y = (total>=6) ? (32+(32*5)) : (32*total);
 		}
 		else {
-			x = 36;
+			x = 96;
 			y = 16*total;
 		}
 

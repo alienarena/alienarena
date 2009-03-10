@@ -1277,10 +1277,10 @@ void SCR_ExecuteLayoutString (char *s)
 			x = viddef.width/2 - 160*scale;
 			y = viddef.height/2 - 64*scale;
 
-			DrawString (x+36*scale, y, va("Player"));
-			DrawString (x+160*scale, y, va("Score"));
-			DrawString (x+224*scale, y, va("Ping"));
-			DrawString (x+264*scale, y, va("time"));
+			DrawString (x+2*scale, y, va("Player"));
+			DrawString (x+176*scale, y, va("Score"));
+			DrawString (x+232*scale, y, va("Ping"));
+			DrawString (x+280*scale, y, va("time"));
 
 			newSBlayout = true;
 			continue;
@@ -1339,10 +1339,10 @@ void SCR_ExecuteLayoutString (char *s)
 
 			if(newSBlayout) { //new scoreboard layout
 
-				Draw_ColorString (x+36*scale, y+34*scale, ci->name, 1.2);
-				DrawAltString (x+192*scale, y+34*scale, va("%i", score));
-				DrawString (x+224*scale, y+34*scale, va("%i", ping));
-				DrawString (x+264*scale, y+34*scale, va("%i", time));
+				Draw_ColorString (x+2*scale, y+34*scale, ci->name, 1.2);
+				DrawAltString (x+176*scale, y+34*scale, va("%i", score));
+				DrawString (x+232*scale, y+34*scale, va("%i", ping));
+				DrawString (x+280*scale, y+34*scale, va("%i", time));
 			}
 			else
 			{
