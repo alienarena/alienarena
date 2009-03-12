@@ -720,14 +720,39 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	//map voting
 	if(mapvote) {
 		y = 64;
-		x = 0;
+		x = 96;
 		Com_sprintf(entry, sizeof(entry), 
-			"xv %i yt %i string Vote.for.next.map: ", x, y);
+			"xv %i yt %i string Vote ", x, y);
 		j = strlen(entry);
 		if(stringlength + j < 1024) {
 			strcpy(string + stringlength, entry);
 			stringlength +=j;
 		}
+		x = 136;
+		Com_sprintf(entry, sizeof(entry), 
+			"xv %i yt %i string for ", x, y);
+		j = strlen(entry);
+		if(stringlength + j < 1024) {
+			strcpy(string + stringlength, entry);
+			stringlength +=j;
+		}
+		x = 168;
+		Com_sprintf(entry, sizeof(entry), 
+			"xv %i yt %i string next ", x, y);
+		j = strlen(entry);
+		if(stringlength + j < 1024) {
+			strcpy(string + stringlength, entry);
+			stringlength +=j;
+		}
+		x = 208;
+		Com_sprintf(entry, sizeof(entry), 
+			"xv %i yt %i string map: ", x, y);
+		j = strlen(entry);
+		if(stringlength + j < 1024) {
+			strcpy(string + stringlength, entry);
+			stringlength +=j;
+		}
+		x = 96;
 		for(i=0; i<4; i++) {
 			
 			Com_sprintf(entry, sizeof(entry), 

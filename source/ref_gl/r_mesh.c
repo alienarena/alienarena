@@ -37,10 +37,9 @@ float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
 };
 
 static	vec4_t	s_lerped[MAX_VERTS];
-
 static	vec3_t	s_normals[MAX_VERTS];
 
-extern	vec3_t			lightspot;
+extern	vec3_t	lightspot;
 vec3_t	shadevector;
 float	shadelight[3];
 vec3_t	lightdir;
@@ -822,7 +821,6 @@ R_DrawAliasShadow
 void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 {
 	dtrivertx_t	*verts;
-	int		*order;
 	vec3_t	point;
 	float	height, lheight;
 	daliasframe_t	*frame;
@@ -847,8 +845,6 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 	st = currentmodel->st;
 
 	height = 0;
-
-	order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
 
 	height = -lheight + 0.1f;
 

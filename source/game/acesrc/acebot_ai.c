@@ -636,13 +636,23 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	//what is the bot's favorite weapon? The bot will always check for it's favorite
 	//weapon first, which is set in the bot's config file. 
 	
-	if(!strcmp(self->faveweap, "Alien Vaporizer"))
-		
-	{
-		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
+	if(self->skill > 1) { //don't allow lower skill bots to use these weapons
+		if(!strcmp(self->faveweap, "Alien Vaporizer"))
+			
 		{
-			self->accuracy = self->weapacc[9];
-			return;
+			if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
+			{
+				self->accuracy = self->weapacc[9];
+				return;
+			}
+		}
+		if(!strcmp(self->faveweap, "Alien Disruptor"))
+		{
+			if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
+			{
+				self->accuracy = self->weapacc[2];
+				return;
+			}
 		}
 	}
 	if(!strcmp(self->faveweap, "Disruptor")) 
@@ -658,14 +668,6 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
 		{
 			self->accuracy = self->weapacc[3];
-			return;
-		}
-	}
-	if(!strcmp(self->faveweap, "Alien Disruptor"))
-	{
-		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
-		{
-			self->accuracy = self->weapacc[2];
 			return;
 		}
 	}
@@ -718,10 +720,12 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		}
 	}
 
-	if(ACEIT_ChangeWeapon(self,FindItem("Alien Vaporizer")))
-	{
-		self->accuracy = self->weapacc[9];
-		return;
+	if(self->skill > 1) {
+		if(ACEIT_ChangeWeapon(self,FindItem("Alien Vaporizer")))
+		{
+			self->accuracy = self->weapacc[9];
+			return;
+		}
 	}
 	
 	if(ACEAI_CheckShot(self) && ACEIT_ChangeWeapon(self, FindItem("Alien Smartgun")))
@@ -762,11 +766,13 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		return;
 	}
 	
-	if(ACEIT_ChangeWeapon(self,FindItem("Alien Disruptor")))
-	{
-		self->accuracy = self->weapacc[2];
-		return;
-	}	
+	if(self->skill > 1) {
+		if(ACEIT_ChangeWeapon(self,FindItem("Alien Disruptor")))
+		{
+			self->accuracy = self->weapacc[2];
+			return;
+		}	
+	}
 
 	if(ACEIT_ChangeWeapon(self,FindItem("Blaster")))
    	{
