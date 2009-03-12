@@ -259,13 +259,35 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 
 	if(mapvote) {
 		y = 64;
-		x = 0;
+		x = 96;
 		Com_sprintf(entry, sizeof(entry), 
-			"xv %i yt %i string Vote.for.next.map: ", x, y);
+			"xv %i yt %i string Vote ", x, y);
 		if(maxsize - len > strlen(entry)) {
 			strcat(string, entry);
 			len = strlen(string);
 		}
+		x = 136;
+		Com_sprintf(entry, sizeof(entry), 
+			"xv %i yt %i string for ", x, y);
+		if(maxsize - len > strlen(entry)) {
+			strcat(string, entry);
+			len = strlen(string);
+		}
+		x = 168;
+		Com_sprintf(entry, sizeof(entry), 
+			"xv %i yt %i string next ", x, y);
+		if(maxsize - len > strlen(entry)) {
+			strcat(string, entry);
+			len = strlen(string);
+		}
+		x = 208;
+		Com_sprintf(entry, sizeof(entry), 
+			"xv %i yt %i string map: ", x, y);
+		if(maxsize - len > strlen(entry)) {
+			strcat(string, entry);
+			len = strlen(string);
+		}
+		x = 96;
 		for(i=0; i<4; i++) {
 			
 			Com_sprintf(entry, sizeof(entry), 
