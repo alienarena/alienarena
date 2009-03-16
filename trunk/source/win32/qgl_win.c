@@ -3033,8 +3033,12 @@ void QGL_Shutdown( void )
 */
 qboolean QGL_Init( const char *dllname )
 {
+	static int firsttime = TRUE;
+
 	// update 3Dfx gamma irrespective of underlying DLL
-	{
+	if ( firsttime )
+	{ // VC++ 2008 Express debugger memory checking failed on second entry.
+		// redoing putenv()'s on video restart probably not a good idea. 
 		char envbuffer[1024];
 		float g;
 
@@ -3043,6 +3047,8 @@ qboolean QGL_Init( const char *dllname )
 		putenv( envbuffer );
 		Com_sprintf( envbuffer, sizeof(envbuffer), "SST_GAMMA=%f", g );
 		putenv( envbuffer );
+
+		firsttime = FALSE;
 	}
 
 	if ( ( glw_state.hinstOpenGL = LoadLibrary( dllname ) ) == 0 )

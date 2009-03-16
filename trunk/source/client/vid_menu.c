@@ -349,7 +349,8 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "r_bloom", s_bloom_box.curvalue);
 	Cvar_SetValue( "r_bloom_intensity", s_bloom_slider.curvalue/10);
 	Cvar_SetValue( "gl_ext_mtexcombine", s_texcombine_box.curvalue);
-	Cvar_SetValue( "r_overbrightbits", s_overbright_slider.curvalue);
+	Cvar_SetValue( "r_overbrightbits",
+			(s_overbright_slider.curvalue == 3.0f ? 4.0f : s_overbright_slider.curvalue) );
 	Cvar_SetValue( "_windowed_mouse", s_windowed_mouse.curvalue);
 	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
 	Cvar_SetValue( "gl_normalmaps", s_normalmaps_box.curvalue);
@@ -560,9 +561,10 @@ void VID_MenuInit( void )
 	s_overbright_slider.generic.x		= 24;
 	s_overbright_slider.generic.y		= 160*scale;
 	s_overbright_slider.generic.name	= "overbright bits";
-	s_overbright_slider.minvalue = 2;
-	s_overbright_slider.maxvalue = 5;
-	s_overbright_slider.curvalue = r_overbrightbits->value;
+	s_overbright_slider.minvalue = 1;
+	s_overbright_slider.maxvalue = 3;
+	s_overbright_slider.curvalue = 
+		(r_overbrightbits->value == 4.0f) ? 3.0f : r_overbrightbits->value;
 
 	s_tq_slider.generic.type	= MTYPE_SLIDER;
 	s_tq_slider.generic.x		= 24;

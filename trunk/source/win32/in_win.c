@@ -346,8 +346,21 @@ void IN_MouseMove (usercmd_t *cmd)
 	old_mouse_x = mx;
 	old_mouse_y = my;
 
-	mouse_x *= sensitivity->value;
-	mouse_y *= sensitivity->value;
+
+	if ( m_smoothing->value )
+	{   // reduce sensitivity when frames per sec is below maximum setting
+		// cvar mouse sensitivity * ( current measured fps / cvar set maximum fps )
+		float adjustment;
+		extern cvar_t* cl_maxfps;
+		adjustment = sensitivity->value / (cls.frametime * cl_maxfps->value);
+		mx *= adjustment;
+		my *= adjustment;
+	}
+	else
+	{
+		mouse_x *= sensitivity->value;
+		mouse_y *= sensitivity->value;
+	}
 
 	//now to set the menu cursor
 	if (cls.key_dest == key_menu)
