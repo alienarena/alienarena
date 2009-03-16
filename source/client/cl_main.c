@@ -80,6 +80,7 @@ cvar_t	*lookspring;
 cvar_t	*lookstrafe;
 cvar_t	*sensitivity;
 
+cvar_t	*m_smoothing;
 cvar_t	*m_pitch;
 cvar_t	*m_yaw;
 cvar_t	*m_forward;
@@ -1661,6 +1662,7 @@ void CL_InitLocal (void)
 	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE);
 	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE);
 
+	m_smoothing = Cvar_Get("m_smoothing", "0", CVAR_ARCHIVE);
 	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE);
 	m_yaw = Cvar_Get ("m_yaw", "0.022", 0);
 	m_forward = Cvar_Get ("m_forward", "1", 0);

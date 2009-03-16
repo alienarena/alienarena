@@ -62,7 +62,7 @@ int hover_time;
 float mappicalpha;
 float banneralpha;
 float mainalpha;
-int montagepic;
+int montagepic = 1;
 
 void M_Menu_Main_f (void);
 	void M_Menu_Game_f (void);
@@ -1410,6 +1410,7 @@ static menuaction_s		s_player_setup_action;
 static menuaction_s		s_options_defaults_action;
 static menuaction_s		s_options_customize_options_action;
 static menuslider_s		s_options_sensitivity_slider;
+static menulist_s		s_options_smoothing_box;
 static menulist_s		s_options_freelook_box;
 static menulist_s		s_options_noalttab_box;
 static menulist_s		s_options_alwaysrun_box;
@@ -1505,6 +1506,11 @@ static void DisColorFunc( void *unused )
 static void MouseSpeedFunc( void *unused )
 {
 	Cvar_SetValue( "sensitivity", s_options_sensitivity_slider.curvalue / 2.0F );
+}
+
+static void MouseSmoothingFunc( void *unused )
+{
+	Cvar_SetValue( "m_smoothing", s_options_smoothing_box.curvalue );
 }
 
 static void NoAltTabFunc( void *unused )
@@ -1929,6 +1935,9 @@ static void ControlsSetMenuItemValues( void )
 
 	s_options_sensitivity_slider.curvalue	= ( sensitivity->value ) * 2;
 
+	Cvar_SetValue("m_smoothing", ClampCvar(0, 1, m_smoothing->value ) );
+	s_options_smoothing_box.curvalue		= m_smoothing->value;
+
 	SetFontCursor();
 	SetCrosshairCursor();
 	SetHudCursor();
@@ -2269,11 +2278,18 @@ void Options_MenuInit( void )
 
 	s_options_sensitivity_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sensitivity_slider.generic.x		= 0;
-	s_options_sensitivity_slider.generic.y		= 170*scale;
+	s_options_sensitivity_slider.generic.y		= 160*scale;
 	s_options_sensitivity_slider.generic.name	= "mouse speed";
 	s_options_sensitivity_slider.generic.callback = MouseSpeedFunc;
 	s_options_sensitivity_slider.minvalue		= 2;
 	s_options_sensitivity_slider.maxvalue		= 22;
+
+	s_options_smoothing_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_smoothing_box.generic.x	= 0;
+	s_options_smoothing_box.generic.y	= 170*scale;
+	s_options_smoothing_box.generic.name	= "mouse smoothing";
+	s_options_smoothing_box.generic.callback = MouseSmoothingFunc;
+	s_options_smoothing_box.itemnames = yesno_names;
 
 	s_options_alwaysrun_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_alwaysrun_box.generic.x	= 0;
@@ -2382,6 +2398,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_quality_list );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_compatibility_list );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_sensitivity_slider );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_smoothing_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_alwaysrun_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_invertmouse_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_font_box );

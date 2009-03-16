@@ -138,23 +138,39 @@ void IN_Move (usercmd_t *cmd)
 		M_Think_MouseCursor();
 		return;
 	}
-	
-	mx *= sensitivity->value;
-	my *= sensitivity->value;
 
-	// add mouse X/Y movement to cmd
-	if ((in_strafe.state & 1) || (lookstrafe->integer && mlooking))
-		cmd->sidemove += m_side->value * mx;
-	else
-		cl.viewangles[YAW] -= m_yaw->value * mx;
+	if (cls.key_dest != key_console)
+	{ // game mouse. don't do mouse movement when in console
 
-	//if ((mlooking || freelook->integer) && !(in_strafe.state & 1))
-	if ( (mlooking || freelook->value) && !(in_strafe.state & 1))
-		cl.viewangles[PITCH] += m_pitch->value * my;
-	else
-		cmd->forwardmove -= m_forward->value * my;
+		if ( m_smoothing->value )
+		{   // reduce sensitivity when frames per sec is below maximum setting
+			// cvar mouse sensitivity * ( current measured fps / cvar set maximum fps )
+			float adjustment;
+			extern cvar_t* cl_maxfps;
+			adjustment = sensitivity->value / (cls.frametime * cl_maxfps->value);
+			mx *= adjustment;
+			my *= adjustment;
+		}
+		else
+		{
+			mx *= sensitivity->value;
+			my *= sensitivity->value;
+		}
 
-	mx = my = 0;
+		// add mouse X/Y movement to cmd
+		if ((in_strafe.state & 1) || (lookstrafe->integer && mlooking))
+			cmd->sidemove += m_side->value * mx;
+		else
+			cl.viewangles[YAW] -= m_yaw->value * mx;
+
+		//if ((mlooking || freelook->integer) && !(in_strafe.state & 1))
+		if ((mlooking || freelook->value) && !(in_strafe.state & 1))
+			cl.viewangles[PITCH] += m_pitch->value * my;
+		else
+			cmd->forwardmove -= m_forward->value * my;
+
+		mx = my = 0;
+	}
 
 }
 
