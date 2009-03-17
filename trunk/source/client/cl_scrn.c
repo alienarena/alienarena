@@ -1413,9 +1413,14 @@ void SCR_ExecuteLayoutString (char *s)
 		{	// draw a ctf client block
 			int	score, ping;
 			char	block[80];
+			int		team;
 
 			token = COM_Parse (&s);
 			x = viddef.width/2 - 160*scale + atoi(token)*scale;
+			if(atoi(token) < 0)
+				team = 0;
+			else
+				team = 1;
 			token = COM_Parse (&s);
 			y = viddef.height/2 - 100*scale + atoi(token)*scale;
 			SCR_AddDirtyPoint (x, y);
@@ -1439,6 +1444,12 @@ void SCR_ExecuteLayoutString (char *s)
 				Draw_ColorString (x+16, y, ci->name, 1.2);
 				DrawAltString (x+172*scale, y+1*scale, va("%i", score));
 				DrawString (x+220*scale, y+1*scale, va("%i", ping));
+
+				if(team) { //draw pic on left side(done client side to save packetsize
+					Draw_ScaledPic (x, y-2*scale, scale, "/pics/blueplayerbox");
+				}
+				else 
+					Draw_ScaledPic(x, y-2*scale, scale, "/pics/redplayerbox");
 			}
 			else {
 				sprintf(block, "%3d %3d %s", score, ping, ci->name);

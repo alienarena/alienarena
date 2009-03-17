@@ -109,3 +109,19 @@ players/cybergirl/weapon
 		nolightmap
 	}
 }
+players/slashbot/weapon
+{
+	{
+		map models/weapons/v_blast/skin.tga
+	}
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+	}
+	{
+		map gfx/blasterfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.01 .8
+		nolightmap
+	}
+}
