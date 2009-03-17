@@ -32,15 +32,14 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	char	entry[1024];
 	char	string[1400];
 	int		len;
-	int		i, j, k, n, x, y;
+	int		i, j, k, x, y;
 	int		sorted[2][MAX_CLIENTS];
 	int		sortedscores[2][MAX_CLIENTS];
 	int		score, total[2], totalscore[2];
-	int		last[2];
 	gclient_t	*cl;
 	edict_t		*cl_ent;
 	int team;
-	int maxsize = 1000;
+	int maxsize = 1024;
 	gitem_t *flag1_item, *flag2_item;
 
 	flag1_item = FindItemByClassname("item_flag_red");
@@ -48,7 +47,6 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 
 	// sort the clients by team and score
 	total[0] = total[1] = 0;
-	last[0] = last[1] = 0;
 	totalscore[0] = totalscore[1] = 0;
 	for (i=0 ; i<game.maxclients ; i++)
 	{
@@ -142,9 +140,6 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			}
 			else {
 
-				sprintf (entry+strlen(entry),
-				"xv %i yv %i picn %s ",-96, 39 + i * 16, "redplayerbox");
-
 				sprintf(entry+strlen(entry),
 					"ctf -96 %d %d %d %d ",
 					42 + i * 16,
@@ -160,7 +155,6 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			if (maxsize - len > strlen(entry)) {
 				strcat(string, entry);
 				len = strlen(string);
-				last[0] = i;
 			}
 		}
 
@@ -184,9 +178,6 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			}
 			else {
 			
-				sprintf (entry+strlen(entry),
-				"xv %i yv %i picn %s ",160, 39 + i * 16, "blueplayerbox");
-
 				sprintf(entry+strlen(entry),
 					"ctf 160 %d %d %d %d ",
 					42 + i * 16,
@@ -202,60 +193,9 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			if (maxsize - len > strlen(entry)) {
 				strcat(string, entry);
 				len = strlen(string);
-				last[1] = i;
 			}
 		}
 	}
-
-	// put in spectators if we have enough room
-	if (last[0] > last[1])
-		j = last[0];
-	else
-		j = last[1];
-	j = (j + 2) * 8 + 42;
-
-	k = n = 0;
-	if (maxsize - len > 50) {
-		for (i = 0; i < maxclients->value; i++) {
-			cl_ent = g_edicts + 1 + i;
-			cl = &game.clients[i];
-			if (!cl_ent->inuse ||
-				cl_ent->solid != SOLID_NOT ||
-				cl_ent->client->dmteam != NO_TEAM)
-				continue;
-
-			if (!k) {
-				k = 1;
-				sprintf(entry, "xv 0 yv %d string2 \"Spectators\" ", j);
-				strcat(string, entry);
-				len = strlen(string);
-				j += 8;
-			}
-
-			sprintf(entry+strlen(entry),
-				"ctf %d %d %d %d %d ",
-				(n & 1) ? 160 : 0, // x
-				j, // y
-				i, // playernum
-				cl->resp.score,
-				cl->ping > 999 ? 999 : cl->ping);
-			if (maxsize - len > strlen(entry)) {
-				strcat(string, entry);
-				len = strlen(string);
-			}
-			
-			if (n & 1)
-				j += 8;
-			n++;
-		}
-	}
-
-	if (total[0] - last[0] > 1) // couldn't fit everyone
-		sprintf(string + strlen(string), "xv 8 yv %d string \"..and %d more\" ",
-			42 + (last[0]+1)*8, total[0] - last[0] - 1);
-	if (total[1] - last[1] > 1) // couldn't fit everyone
-		sprintf(string + strlen(string), "xv 168 yv %d string \"..and %d more\" ",
-			42 + (last[1]+1)*8, total[1] - last[1] - 1);
 
 	if(mapvote) {
 		y = 64;
