@@ -353,8 +353,8 @@ void IN_MouseMove (usercmd_t *cmd)
 		float adjustment;
 		extern cvar_t* cl_maxfps;
 		adjustment = sensitivity->value / (cls.frametime * cl_maxfps->value);
-		mx *= adjustment;
-		my *= adjustment;
+		mouse_x *= adjustment;
+		mouse_y *= adjustment;
 	}
 	else
 	{
