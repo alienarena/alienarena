@@ -116,8 +116,10 @@ glstate_t		gl_state;
 cvar_t	*gl_normalmaps;
 cvar_t	*gl_parallaxmaps;
 cvar_t  *gl_specular;
-cvar_t	*gl_arb_fragment_program; // jit
+cvar_t	*gl_arb_fragment_program; 
 cvar_t	*gl_glsl_shaders;
+
+cvar_t	*r_legacy;
 
 entity_t	*currententity;
 model_t	*currentmodel;
@@ -1457,6 +1459,8 @@ void R_Register( void )
 
 	gl_screenshot_type = Cvar_Get("gl_screenshot_type", "jpeg", CVAR_ARCHIVE);
 	gl_screenshot_jpeg_quality = Cvar_Get("gl_screenshot_jpeg_quality", "85", CVAR_ARCHIVE);
+
+	r_legacy = Cvar_Get("r_legacy", "0", CVAR_ARCHIVE); //to do - move this to automatic detection
 
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
 	Cmd_AddCommand( "screenshot", GL_ScreenShot_f );

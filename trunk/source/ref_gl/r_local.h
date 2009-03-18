@@ -206,6 +206,8 @@ extern	cvar_t	*sys_priority;
 extern	cvar_t	*gl_screenshot_type;
 extern	cvar_t	*gl_screenshot_jpeg_quality;
 
+extern	cvar_t	*r_legacy;
+
 extern	int		gl_lightmap_format;
 extern	int		gl_solid_format;
 extern	int		gl_alpha_format;

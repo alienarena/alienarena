@@ -243,6 +243,514 @@ void GL_GetLightVals()
 	}
 }
 
+//legacy code - this is for ancient hardware that cannot handle GL_TRIANGLE useage
+void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped)
+{
+    daliasframe_t   *frame, *oldframe;
+    dtrivertx_t *v, *ov, *verts;
+    int     *order, *startorder, *tmp_order;
+    int     count, tmp_count;
+    float   frontlerp;
+    float   alpha, basealpha;
+    vec3_t  move, delta, vectors[3];
+    vec3_t  frontv, backv;
+    int     i;
+    int     index_xyz;
+    qboolean depthmaskrscipt = false;
+    rscript_t *rs = NULL;
+    rs_stage_t *stage = NULL;
+    int     va = 0;
+    float   mode;
+    vec3_t lightcolor;
+    float   *lerp;
+
+    if(lerped)
+        frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+            + currententity->frame * paliashdr->framesize);
+    else
+        frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
+    verts = v = frame->verts;
+
+    if(lerped) {
+        oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+            + currententity->oldframe * paliashdr->framesize);
+        ov = oldframe->verts;
+    }
+
+    startorder = order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
+
+    VectorCopy(shadelight, lightcolor);
+    for (i=0;i<model_dlights_num;i++)
+        VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
+    VectorNormalize(lightcolor);
+
+    if (currententity->flags & RF_TRANSLUCENT) {
+        basealpha = alpha = currententity->alpha;
+
+        rs=(rscript_t *)rs_glass;
+        if(!rs)
+            GL_Bind(r_reflecttexture->texnum);
+    }
+    else
+        basealpha = alpha = 1.0;
+
+    // PMM - added double shell
+    if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) )
+        GL_Bind(r_shelltexture->texnum);  // add this line
+
+    if(lerped) {
+        frontlerp = 1.0 - backlerp;
+
+        // move should be the delta back to the previous frame * backlerp
+        VectorSubtract (currententity->oldorigin, currententity->origin, delta);
+    }
+
+    AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
+
+    if(lerped) {
+        move[0] = DotProduct (delta, vectors[0]);   // forward
+        move[1] = -DotProduct (delta, vectors[1]);  // left
+        move[2] = DotProduct (delta, vectors[2]);   // up
+
+        VectorAdd (move, oldframe->translate, move);
+
+        for (i=0 ; i<3 ; i++)
+        {
+            move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
+            frontv[i] = frontlerp*frame->scale[i];
+            backv[i] = backlerp*oldframe->scale[i];
+        }
+
+        if(currententity->flags & RF_VIEWERMODEL) { //lerp the vertices for self shadows, and leave
+            lerp = s_lerped[0];
+            GL_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
+            return;
+        }
+    }
+
+    VectorSubtract(currententity->origin, lightspot, lightdir);
+        VectorNormalize ( lightdir );
+
+    qglEnableClientState( GL_COLOR_ARRAY );
+
+    if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
+    {
+        qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
+        R_InitVArrays (VERT_COLOURED_TEXTURED);
+        while (1)
+        {
+            float shellscale;
+            // get the vertex count and primitive type
+            count = *order++;
+            va=0;
+            VArray = &VArrayVerts[0];
+
+            if (!count)
+                break;      // done
+            if (count < 0)
+            {
+                count = -count;
+                mode=GL_TRIANGLE_FAN;
+            }
+            else
+                mode=GL_TRIANGLE_STRIP;
+
+            do
+            {
+                // texture coordinates come from the draw list
+                index_xyz = order[2];
+
+                if(currententity->flags & RF_WEAPONMODEL)
+                    //change scale
+                    shellscale = .1;
+                else
+                    shellscale = 1;
+
+                if(lerped) {
+                    VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * POWERSUIT_SCALE * shellscale;;
+                    VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * POWERSUIT_SCALE * shellscale;;
+                    VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * POWERSUIT_SCALE * shellscale;;
+
+                    VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
+                    VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
+
+                    VArray[5] = shadelight[0];
+                    VArray[6] = shadelight[1];
+                    VArray[7] = shadelight[2];
+                    VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
+                }
+                else {
+                    VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
+                    VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
+                    VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+
+                    VArray[3] = (currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f);
+                    VArray[4] = currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
+
+                    VArray[5] = shadelight[0];
+                    VArray[6] = shadelight[1];
+                    VArray[7] = shadelight[2];
+                    VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);
+                }
+
+                // increment pointer and counter
+                VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+                va++;
+                order += 3;
+            } while (--count);
+            if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+                qglDrawArrays(mode,0,va);
+
+        }
+    }
+    else if(!rs)
+    {
+        alpha = basealpha;
+        R_InitVArrays (VERT_COLOURED_TEXTURED);
+        GLSTATE_ENABLE_ALPHATEST
+        while (1)
+        {
+
+            // get the vertex count and primitive type
+            count = *order++;
+            va=0;
+            VArray = &VArrayVerts[0];
+
+            if (!count)
+                break;      // done
+            if (count < 0)
+            {
+                count = -count;
+                mode=GL_TRIANGLE_FAN;
+            }
+            else
+                mode=GL_TRIANGLE_STRIP;
+
+            tmp_count=count;
+            tmp_order=order;
+
+            do
+            {
+                // texture coordinates come from the draw list
+                index_xyz = order[2];
+
+                if(lerped) {
+                    GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+
+                    VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
+                    VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
+                    VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
+
+                    VArray[3] = ((float *) order)[0];
+                    VArray[4] = ((float *) order)[1];
+
+                    VArray[5] = lightcolor[0];
+                    VArray[6] = lightcolor[1];
+                    VArray[7] = lightcolor[2];
+                    VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
+                }
+                else {
+                    GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+
+                    VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
+                    VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
+                    VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+
+                    VArray[3] = ((float *) order)[0];
+                    VArray[4] = ((float *) order)[1];
+
+                    VArray[5] = lightcolor[0];
+                    VArray[6] = lightcolor[1];
+                    VArray[7] = lightcolor[2];
+                    VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);
+                }
+
+                // increment pointer and counter
+                VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+                va++;
+                order += 3;
+            } while (--count);
+            if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+                qglDrawArrays(mode,0,va);
+        }
+
+    }
+    else
+    {
+
+        if (rs->stage && rs->stage->has_alpha)
+        {
+            depthmaskrscipt = true;
+        }
+
+        if (depthmaskrscipt)
+            qglDepthMask(false);
+
+        while (1)
+        {
+            count = *order++;
+            if (!count)
+                break;      // done
+            // get the vertex count and primitive type
+            if (count < 0)
+            {
+                count = -count;
+                mode=GL_TRIANGLE_FAN;
+            }
+            else
+            {
+                mode=GL_TRIANGLE_STRIP;
+            }
+
+            stage=rs->stage;
+            tmp_count=count;
+            tmp_order=order;
+
+            while (stage)
+            {
+                count=tmp_count;
+                order=tmp_order;
+                va=0;
+                VArray = &VArrayVerts[0];
+
+                if (stage->normalmap) { //not doing normalmaps for this routine
+                    if(stage->next) {
+                        stage = stage->next;
+                        continue;
+                    }
+                }
+
+                GL_Bind (stage->texture->texnum);
+
+                if (stage->blendfunc.blend)
+                {
+                    GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
+                    GLSTATE_ENABLE_BLEND
+                }
+                else if (basealpha==1.0f)
+                {
+                    GLSTATE_DISABLE_BLEND
+                }
+                else
+                {
+                    GLSTATE_ENABLE_BLEND
+                    GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                    alpha = basealpha;
+                }
+
+                alpha=basealpha;
+
+                if (stage->alphamask)
+                {
+                    GLSTATE_ENABLE_ALPHATEST
+                }
+                else
+                {
+                    GLSTATE_DISABLE_ALPHATEST
+                }
+             
+                R_InitVArrays (VERT_COLOURED_TEXTURED);
+                
+                do
+                {
+                    float os = ((float *)order)[0];
+                    float ot = ((float *)order)[1];
+                    float os2 = ((float *)order)[0];
+                    float ot2 = ((float *)order)[1];
+                    vec3_t normal;
+                    int k;
+
+                    index_xyz = order[2];
+
+                    if(lerped) {
+
+                        VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
+                        VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
+                        VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
+
+                        for (k=0; k<3; k++)
+                        normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
+                        ( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
+                        r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
+                    }
+                    else {
+                        VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
+                        VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
+                        VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+
+                        for (k=0;k<3;k++)
+                        normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
+                    }
+                    VectorNormalize ( normal );
+
+                    if (stage->envmap)
+                    {
+                        vec3_t envmapvec;
+
+                        VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
+
+                        RS_SetEnvmap (envmapvec, &os, &ot);
+
+                        if (currententity->flags & RF_TRANSLUCENT) //return to original glass script's scale(mostly for when going into menu)
+                            stage->scale.scaleX = stage->scale.scaleY = 0.5;
+
+                        os -= DotProduct (normal , vectors[1] );
+                        ot += DotProduct (normal, vectors[2] );
+                    }
+
+                    RS_SetTexcoords2D(stage, &os, &ot);
+
+                    VArray[3] = os;
+                    VArray[4] = ot;
+
+                    {
+                        float red = 1, green = 1, blue = 1, nAlpha;
+  
+                        if(lerped)
+                            nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
+                                calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
+                        else
+                            nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
+                                calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
+
+                        if (stage->lightmap) {
+                            if(lerped)
+                                GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+                            else
+                                GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+                            red = lightcolor[0];
+                            green = lightcolor[1];
+                            blue = lightcolor[2];
+                        }
+                     
+						VArray[5] = red;
+                        VArray[6] = green;
+                        VArray[7] = blue;
+                        VArray[8] = nAlpha;
+                    }
+                    // increment pointer and counter
+                    VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+                    order += 3;
+                    va++;
+                } while (--count);
+
+                if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+                    qglDrawArrays(mode,0,va);
+                
+                qglColor4f(1,1,1,1);
+
+                stage=stage->next;
+            }
+
+        }
+
+        if (depthmaskrscipt)
+            qglDepthMask(true);
+    }
+
+    GLSTATE_DISABLE_ALPHATEST
+    GLSTATE_DISABLE_BLEND
+    GLSTATE_DISABLE_TEXGEN
+
+    qglDisableClientState( GL_COLOR_ARRAY );
+    qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+
+    R_KillVArrays ();
+
+    if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
+        qglEnable( GL_TEXTURE_2D );
+
+}
+
+extern qboolean have_stencil;
+extern  vec3_t          lightspot;
+
+/*
+=============
+R_DrawAliasShadow
+=============
+*/
+void R_DrawAliasShadowLegacy(dmdl_t *paliashdr, qboolean lerped)
+{
+    dtrivertx_t *verts;
+    int     *order;
+    vec3_t  point;
+    float   height, lheight;
+    int     count;
+    daliasframe_t   *frame;
+
+    lheight = currententity->origin[2] - lightspot[2];
+
+    if(lerped)
+        frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+            + currententity->frame * paliashdr->framesize);
+    else
+        frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
+
+    verts = frame->verts;
+
+    height = 0;
+
+    order = (int *)((byte *)paliashdr + paliashdr->ofs_glcmds);
+
+    height = -lheight + 0.1f;
+
+    // if above entity's origin, skip
+    if ((currententity->origin[2]+height) > currententity->origin[2])
+        return;
+
+    if (r_newrefdef.vieworg[2] < (currententity->origin[2] + height))
+        return;
+
+    if (have_stencil && gl_shadows->integer) {
+        qglDepthMask(0);
+        qglEnable(GL_STENCIL_TEST);
+
+        qglStencilFunc(GL_EQUAL,1,2);
+
+        qglStencilOp(GL_KEEP,GL_KEEP,GL_INCR);
+
+    }
+
+    while (1)
+    {
+        // get the vertex count and primitive type
+        count = *order++;
+        if (!count)
+            break;      // done
+        if (count < 0)
+        {
+            count = -count;
+            qglBegin (GL_TRIANGLE_FAN);
+        }
+        else
+            qglBegin (GL_TRIANGLE_STRIP);
+
+        do
+        {
+
+            if(lerped)
+                memcpy( point, s_lerped[order[2]], sizeof( point )  );
+            else
+                memcpy( point, currentmodel->r_mesh_verts[order[2]], sizeof( point )  );
+
+            point[0] -= shadevector[0]*(point[2]+lheight);
+            point[1] -= shadevector[1]*(point[2]+lheight);
+            point[2] = height;
+            qglVertex3fv (point);
+
+            order += 3;
+
+        } while (--count);
+
+        qglEnd ();
+    }
+    qglDepthMask(1);
+    qglColor4f(1,1,1,1);
+    if (have_stencil && gl_shadows->integer) qglDisable(GL_STENCIL_TEST);
+}
+
+
 void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skinnum)
 {
 	daliasframe_t	*frame, *oldframe;
@@ -264,6 +772,11 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 	fstvert_t *st;
 	float os, ot, os2, ot2;
 	qboolean mirror = false;
+
+	if(r_legacy->value) {
+		GL_DrawAliasFrameLegacy (paliashdr, backlerp, lerped);
+			return;
+	}
 
 	if(lerped)
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
@@ -829,6 +1342,11 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 	int		i, j;
 	int		index_xyz, index_st;
 	int		va = 0;
+
+	if(r_legacy->value) {
+		R_DrawAliasShadowLegacy( paliashdr, lerped);
+		return;
+	}
 
 	lheight = currententity->origin[2] - lightspot[2];
 
