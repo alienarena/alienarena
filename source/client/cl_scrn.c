@@ -1141,7 +1141,7 @@ void SCR_DrawField (int x, int y, int color, int width, int value, float scale)
 		else
 			frame = *ptr -'0';
 
-		Draw_ScaledPic (x,y,scale,sb_nums[color][frame]);
+		Draw_ScaledPic (x,y,scale/1.8,sb_nums[color][frame]);
 		x += CHAR_WIDTH*scale;
 		ptr++;
 		l--;
