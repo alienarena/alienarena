@@ -409,6 +409,7 @@ typedef struct particle_s
 #define CLM_ROTATE		4
 #define CLM_NOSHADOW	8
 #define CLM_STOPPED		16
+#define CLM_BRASS		32
 
 typedef struct clentity_s {
 	struct clentity_s *next;
