@@ -1122,7 +1122,7 @@ void CL_BrassShells(vec3_t org, vec3_t dir, int count)
 		le->accel[2] = -6 * PARTICLE_GRAVITY;
 		le->alpha = 1.0;
 		le->alphavel = -0.1;
-		le->flags = CLM_BOUNCE | CLM_FRICTION | CLM_ROTATE | CLM_NOSHADOW;
+		le->flags = CLM_BOUNCE | CLM_FRICTION | CLM_ROTATE | CLM_NOSHADOW | CLM_BRASS;
 		le->model = R_RegisterModel("models/objects/brass/tris.md2");;
 		le->ang = crand() * 360;
 		le->avel = crand() * 500;
@@ -1505,6 +1505,7 @@ void CL_AddClEntities()
 	float alpha, bak;
 	int contents;
 	qboolean onground;
+	char soundname[64];
 	float time, time2, grav = Cvar_VariableValue("sv_gravity");
 	static vec3_t mins = { -2, -2, -2 }; 
     static vec3_t maxs = { 2, 2, 2 }; 
@@ -1633,6 +1634,12 @@ void CL_AddClEntities()
 				// Reset
 				le->time = cl.time;
 				VectorCopy(org, le->org);
+
+				//play a sound if brass
+				if (le->flags & (CLM_BRASS))
+				Com_sprintf(soundname, sizeof(soundname), "weapons/clink0%i.wav", (rand() % 2) + 1);
+				S_StartSound (NULL, 0, CHAN_WEAPON, S_RegisterSound(soundname), 1.0, ATTN_NORM, 0);
+		
 			
 			}
 		}
