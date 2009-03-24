@@ -380,6 +380,34 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 
 		// draw the poly
 		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+
+		/*
+		 * Mapping tool. Outline the light-mapped polygons.
+		 *  gl_showpolys == 1 : perform depth test.
+		 *  gl_showpolys == 2 : disable depth test. everything in "visible set"
+		 */
+		if (gl_showpolys->value) // restricted cvar, maxclients = 1
+		{
+			qglDisable (GL_TEXTURE_2D);
+			if (gl_showpolys->value > 1.9f)
+			{ // lots of lines so make them narrower
+				qglDisable(GL_DEPTH_TEST);
+				qglLineWidth (2.0f);
+			}
+			else
+			{ // less busy, wider line
+				qglLineWidth (3.0f);
+			}
+			qglColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+			qglBegin (GL_LINE_LOOP);
+			for (v = p->verts[0], i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
+				qglVertex3fv(p->verts[i]);
+			}
+			qglEnd();
+			qglEnable (GL_DEPTH_TEST);
+			qglEnable (GL_TEXTURE_2D);
+		}
+
 	}
 }
 
