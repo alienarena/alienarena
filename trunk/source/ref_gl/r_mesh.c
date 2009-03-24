@@ -398,9 +398,16 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 va++;
                 order += 3;
             } while (--count);
-            if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
-                qglDrawArrays(mode,0,va);
+            if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ){
 
+				if(qglLockArraysEXT)						
+					qglLockArraysEXT(0, va);
+
+				qglDrawArrays(GL_TRIANGLES,0,va);
+				
+				if(qglUnlockArraysEXT)						
+					qglUnlockArraysEXT();
+			}
         }
     }
     else if(!rs)
@@ -470,8 +477,16 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 va++;
                 order += 3;
             } while (--count);
-            if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
-                qglDrawArrays(mode,0,va);
+            if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
+
+				if(qglLockArraysEXT)						
+					qglLockArraysEXT(0, va);
+
+				qglDrawArrays(GL_TRIANGLES,0,va);
+				
+				if(qglUnlockArraysEXT)						
+					qglUnlockArraysEXT();
+			}
         }
 
     }
@@ -634,8 +649,16 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                     va++;
                 } while (--count);
 
-                if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-                    qglDrawArrays(mode,0,va);
+                if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
+
+					if(qglLockArraysEXT)						
+						qglLockArraysEXT(0, va);
+
+					qglDrawArrays(GL_TRIANGLES,0,va);
+					
+					if(qglUnlockArraysEXT)						
+						qglUnlockArraysEXT();
+				}
                 
                 qglColor4f(1,1,1,1);
 
@@ -909,8 +932,16 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				va++;
 			} 				
 		}
-		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-			qglDrawArrays(GL_TRIANGLES,0,va);		
+		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
+
+				if(qglLockArraysEXT)						
+					qglLockArraysEXT(0, va);
+
+				qglDrawArrays(GL_TRIANGLES,0,va);
+				
+				if(qglUnlockArraysEXT)						
+					qglUnlockArraysEXT();
+		}
 	}
 	else if(!rs)
 	{
@@ -964,8 +995,17 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			} 	
 
 		}
-		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-				qglDrawArrays(GL_TRIANGLES,0,va);	
+		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
+
+				if(qglLockArraysEXT)						
+					qglLockArraysEXT(0, va);
+
+				qglDrawArrays(GL_TRIANGLES,0,va);
+				
+				if(qglUnlockArraysEXT)						
+					qglUnlockArraysEXT();
+		}
+
 	}
 	else
 	{
@@ -1287,8 +1327,16 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			if(stage->normalmap) 
 				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 				
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
-				qglDrawArrays(GL_TRIANGLES,0,va);	
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
+
+				if(qglLockArraysEXT)						
+					qglLockArraysEXT(0, va);
+
+				qglDrawArrays(GL_TRIANGLES,0,va);
+				
+				if(qglUnlockArraysEXT)						
+					qglUnlockArraysEXT();
+			}
 			
 			qglColor4f(1,1,1,1);
 			

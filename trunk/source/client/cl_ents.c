@@ -1638,9 +1638,7 @@ void CL_AddClEntities()
 				//play a sound if brass
 				if (le->flags & (CLM_BRASS))
 				Com_sprintf(soundname, sizeof(soundname), "weapons/clink0%i.wav", (rand() % 2) + 1);
-				S_StartSound (NULL, 0, CHAN_WEAPON, S_RegisterSound(soundname), 1.0, ATTN_NORM, 0);
-		
-			
+				S_StartSound (le->org, 0, CHAN_WEAPON, S_RegisterSound(soundname), 1.0, ATTN_NORM, 0);
 			}
 		}
 		// Save current origin if needed
