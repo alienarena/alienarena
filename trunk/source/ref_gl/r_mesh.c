@@ -403,7 +403,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
 				if(qglLockArraysEXT)						
 					qglLockArraysEXT(0, va);
 
-				qglDrawArrays(GL_TRIANGLES,0,va);
+				qglDrawArrays(mode,0,va);
 				
 				if(qglUnlockArraysEXT)						
 					qglUnlockArraysEXT();
@@ -482,7 +482,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
 				if(qglLockArraysEXT)						
 					qglLockArraysEXT(0, va);
 
-				qglDrawArrays(GL_TRIANGLES,0,va);
+				qglDrawArrays(mode,0,va);
 				
 				if(qglUnlockArraysEXT)						
 					qglUnlockArraysEXT();
@@ -654,7 +654,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
 					if(qglLockArraysEXT)						
 						qglLockArraysEXT(0, va);
 
-					qglDrawArrays(GL_TRIANGLES,0,va);
+					qglDrawArrays(mode,0,va);
 					
 					if(qglUnlockArraysEXT)						
 						qglUnlockArraysEXT();
