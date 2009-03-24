@@ -1860,6 +1860,7 @@ cheatvar_t	cheatvars[] = {
 	{"paused", "0"},
 	{"fixedtime", "0"},
 	{"gl_lightmap", "0"},
+	{"gl_showpolys", "0"},
 	{NULL, NULL}
 };
 

@@ -215,6 +215,7 @@ cvar_t	*gl_round_down;
 cvar_t	*gl_picmip;
 cvar_t	*gl_skymip;
 cvar_t	*gl_showtris;
+cvar_t	*gl_showpolys;
 cvar_t	*gl_finish;
 cvar_t	*gl_clear;
 cvar_t	*gl_cull;
@@ -1399,6 +1400,7 @@ void R_Register( void )
 	gl_picmip = Cvar_Get ("gl_picmip", "0", 0);
 	gl_skymip = Cvar_Get ("gl_skymip", "0", 0);
 	gl_showtris = Cvar_Get ("gl_showtris", "0", 0);
+	gl_showpolys = Cvar_Get ("gl_showpolys", "0", 0);
 	gl_finish = Cvar_Get ("gl_finish", "0", CVAR_ARCHIVE);
 	gl_clear = Cvar_Get ("gl_clear", "0", 0);
 	gl_cull = Cvar_Get ("gl_cull", "1", 0);
