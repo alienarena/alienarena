@@ -1144,8 +1144,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 					if(stage->lightmap) {
 						VectorSubtract(lightPosition, currententity->origin, lightVec);
-						//lightVec[1]+=192; //adjust for consistent effect for now
-						VectorNormalize(lightVec);
 					}
 					else {
 						//light down, slightly forward and to the left
