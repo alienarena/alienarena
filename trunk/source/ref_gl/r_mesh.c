@@ -170,7 +170,7 @@ void GL_GetLightVals()
 	int i, j, lnum, numlights;
 	dlight_t	*dl;
 	worldLight_t *wl;
-	float dist, xdist, ydist, viewAng;
+	float dist, xdist, ydist;
 	vec3_t	temp, lightAdd;
 	trace_t r_trace;
 	vec3_t mins, maxs;
@@ -189,7 +189,7 @@ void GL_GetLightVals()
 		wl = &r_worldLights[i];
 
 		VectorCopy(currententity->origin, temp);
-		temp[2] += 24; //generates more consistent effect
+		temp[2] += 24; //generates more consistent tracing
 
 		r_trace = CM_BoxTrace(temp, wl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 		
@@ -206,21 +206,35 @@ void GL_GetLightVals()
 
 	dynFactor = 0;
 	dl = r_newrefdef.dlights;
+	//limit to five lights
 	for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) {
 		
 		VectorSubtract(currententity->origin, dl->origin, temp);
 		dist = VectorLength(temp);
 
 		VectorCopy(currententity->origin, temp);
-		temp[2] += 24; //generates more consistent effect
+		temp[2] += 24; //generates more consistent tracing
 	
 		r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 		
 		if(r_trace.fraction == 1.0) {
 			if(dist < 200) {
-				for(j = 0; j < 3; j++) 
-					lightAdd[j] += dl->origin[j];
-				numlights++;
+				VectorCopy(dl->origin, temp);
+				//translate for when viewangles are negative - done because otherwise the 
+				//lighting effect is backwards - stupid quake bug rearing it's head?
+				if(r_newrefdef.viewangles[1] < 0) {
+					//translate according viewangles
+					xdist = temp[0] - currententity->origin[0];
+					ydist = temp[1] - currententity->origin[1];
+					temp[0] -= 2 * xdist;
+					temp[1] -= 2 * ydist;
+				}
+				//make dynamic lights more influential than world
+				for(i = 0; i < 2; i++) {
+					for(j = 0; j < 3; j++) 
+						lightAdd[j] += temp[j];
+					numlights++;
+				}
 			}
 
 			VectorSubtract (dl->origin, currententity->origin, temp);
@@ -231,27 +245,6 @@ void GL_GetLightVals()
 	if(numlights) {
 		for(i = 0; i < 3; i++) 
 			lightPosition[i] = lightAdd[i]/numlights;
-	}
-
-	//translate for when viewangles are negative - done because otherwise the 
-	//lighting effect is backwards - there has to be a more proper way to translate this?
-	if(r_newrefdef.viewangles[1] < 0) {
-		//translate according viewangles
-		viewAng = r_newrefdef.viewangles[1];
-		if(viewAng < -90)  { //we want move in an arc from 0 to -90 to 0(instead of -180 to 0)
-			viewAng +=180;
-			viewAng /= 45;
-		}
-		else
-			viewAng /= -45; //should give us a peak of +2 now
-
-		viewAng *= (4.0-viewAng)/2; //ramp up quickly, taper off near max. 
-
-		xdist = lightPosition[0] - currententity->origin[0];
-		ydist = lightPosition[1] - currententity->origin[1];
-
-		lightPosition[0] -= 2 * xdist * viewAng;
-		lightPosition[1] -= 2 * ydist * viewAng;
 	}
 }
 
