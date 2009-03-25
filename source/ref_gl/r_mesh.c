@@ -173,6 +173,10 @@ void GL_GetLightVals()
 	float dist, xdist, ydist, viewAng;
 	vec3_t	temp, lightAdd;
 	trace_t r_trace;
+	vec3_t mins, maxs;
+	
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs, 0, 0, 0);
 
 	//light shining down if there are no lights at all
 	VectorCopy(currententity->origin, lightPosition);
@@ -184,15 +188,20 @@ void GL_GetLightVals()
 
 		wl = &r_worldLights[i];
 
-		r_trace = CM_BoxTrace(currententity->origin, wl->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
-		
-		VectorSubtract(currententity->origin, wl->origin, temp);
-		dist = VectorLength(temp);
+		VectorCopy(currententity->origin, temp);
+		temp[2] += 24; //generates more consistent effect
 
-		if(dist < 500 && r_trace.fraction == 1.0) {
-			for(j = 0; j < 3; j++) 
-				lightAdd[j] += wl->origin[j];
-			numlights++;
+		r_trace = CM_BoxTrace(temp, wl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+		
+		if(r_trace.fraction == 1) {
+			VectorSubtract(currententity->origin, wl->origin, temp);
+			dist = VectorLength(temp);
+
+			if(dist < 500 && r_trace.fraction == 1.0) {
+				for(j = 0; j < 3; j++) 
+					lightAdd[j] += wl->origin[j];
+				numlights++;
+			}
 		}
 	}
 
@@ -202,18 +211,22 @@ void GL_GetLightVals()
 		
 		VectorSubtract(currententity->origin, dl->origin, temp);
 		dist = VectorLength(temp);
-	
-		r_trace = CM_BoxTrace(currententity->origin, dl->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
-		
-		if(dist < 200 && r_trace.fraction == 1.0) {
-			for(j = 0; j < 3; j++) 
-				lightAdd[j] += dl->origin[j];
-			lightAdd[2] += 192; //adjust for consistent effect
-			numlights++;
-		}
 
-		VectorSubtract (dl->origin, currententity->origin, temp);
-		dynFactor += (dl->intensity/20.0)/VectorLength(temp);
+		VectorCopy(currententity->origin, temp);
+		temp[2] += 24; //generates more consistent effect
+	
+		r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+		
+		if(r_trace.fraction == 1.0) {
+			if(dist < 200 && r_trace.fraction == 1.0) {
+				for(j = 0; j < 3; j++) 
+					lightAdd[j] += dl->origin[j];
+				numlights++;
+			}
+
+			VectorSubtract (dl->origin, currententity->origin, temp);
+			dynFactor += (dl->intensity/20.0)/VectorLength(temp);
+		}
 	}
 
 	if(numlights) {
@@ -222,7 +235,7 @@ void GL_GetLightVals()
 	}
 
 	//translate for when viewangles are negative - done because otherwise the 
-	//lighting effect is backwards
+	//lighting effect is backwards - there has to be a more proper way to translate this?
 	if(r_newrefdef.viewangles[1] < 0) {
 		//translate according viewangles
 		viewAng = r_newrefdef.viewangles[1];
@@ -1132,7 +1145,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 					if(stage->lightmap) {
 						VectorSubtract(lightPosition, currententity->origin, lightVec);
-						lightVec[1]+=192; //adjust for consistent effect for now
+						//lightVec[1]+=192; //adjust for consistent effect for now
 						VectorNormalize(lightVec);
 					}
 					else {
