@@ -196,8 +196,7 @@ void GL_GetLightVals()
 		if(r_trace.fraction == 1) {
 			VectorSubtract(currententity->origin, wl->origin, temp);
 			dist = VectorLength(temp);
-
-			if(dist < 500 && r_trace.fraction == 1.0) {
+			if(dist < 500) {
 				for(j = 0; j < 3; j++) 
 					lightAdd[j] += wl->origin[j];
 				numlights++;
@@ -218,7 +217,7 @@ void GL_GetLightVals()
 		r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 		
 		if(r_trace.fraction == 1.0) {
-			if(dist < 200 && r_trace.fraction == 1.0) {
+			if(dist < 200) {
 				for(j = 0; j < 3; j++) 
 					lightAdd[j] += dl->origin[j];
 				numlights++;
