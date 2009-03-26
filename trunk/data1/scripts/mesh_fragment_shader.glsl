@@ -34,6 +34,9 @@ void main()
 	spec *= SpecularFactor;
 	litColor = min(litColor + spec, vec3(1.0));
 	
+	//keep shadows from making meshes completely black
+	litColor = max(litColor, (textureColour * vec3(0.15)));
+	
 	gl_FragColor = vec4(litColor * baseColor, 1.0);
 	
 	gl_FragColor = mix(fx, gl_FragColor, alphamask.a);
