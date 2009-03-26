@@ -174,6 +174,7 @@ void GL_GetLightVals()
 	vec3_t	temp, lightAdd;
 	trace_t r_trace;
 	vec3_t mins, maxs;
+	int weight;
 	
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
@@ -191,54 +192,60 @@ void GL_GetLightVals()
 		VectorCopy(currententity->origin, temp);
 		temp[2] += 24; //generates more consistent tracing
 
-		r_trace = CM_BoxTrace(temp, wl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+		if(currententity->flags & RF_WEAPONMODEL)
+			r_trace.fraction = 1.0; //don't do traces for weapon models, not smooth enough
+		else
+			r_trace = CM_BoxTrace(temp, wl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 		
-		if(r_trace.fraction == 1) {
+		if(r_trace.fraction == 1.0) {
 			VectorSubtract(currententity->origin, wl->origin, temp);
 			dist = VectorLength(temp);
-			if(dist < 500) {
+			weight = (int)5000/dist;
+			if (weight == 0)
+				weight = 1;
+			if(dist < 1000) { //fairly large distance
 				for(j = 0; j < 3; j++) 
-					lightAdd[j] += wl->origin[j];
-				numlights++;
+					lightAdd[j] += wl->origin[j]*weight;
+				numlights+=weight;				
 			}
 		}
 	}
 
 	dynFactor = 0;
-	dl = r_newrefdef.dlights;
-	//limit to five lights
-	for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) {
-		
-		VectorSubtract(currententity->origin, dl->origin, temp);
-		dist = VectorLength(temp);
+	if(!currententity->flags & RF_NOSHADOWS) {
+		dl = r_newrefdef.dlights;
+		//limit to five lights(maybe less)?
+		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) {
+			
+			VectorSubtract(currententity->origin, dl->origin, temp);
+			dist = VectorLength(temp);
 
-		VectorCopy(currententity->origin, temp);
-		temp[2] += 24; //generates more consistent tracing
-	
-		r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+			VectorCopy(currententity->origin, temp);
+			temp[2] += 24; //generates more consistent tracing
 		
-		if(r_trace.fraction == 1.0) {
-			if(dist < 200) {
-				VectorCopy(dl->origin, temp);
-				//translate for when viewangles are negative - done because otherwise the 
-				//lighting effect is backwards - stupid quake bug rearing it's head?
-				if(r_newrefdef.viewangles[1] < 0) {
-					//translate according viewangles
-					xdist = temp[0] - currententity->origin[0];
-					ydist = temp[1] - currententity->origin[1];
-					temp[0] -= 2 * xdist;
-					temp[1] -= 2 * ydist;
-				}
-				//make dynamic lights more influential than world
-				for(i = 0; i < 2; i++) {
-					for(j = 0; j < 3; j++) 
-						lightAdd[j] += temp[j];
-					numlights++;
+			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+			
+			if(r_trace.fraction == 1.0) { //this section is not perfect, but it works for now
+				if(dist < 100) {
+					VectorCopy(dl->origin, temp);
+					//translate for when viewangles are negative - done because otherwise the
+					//lighting effect is backwards - stupid quake bug rearing it's head?
+					if(r_newrefdef.viewangles[1] < 0) {
+						//translate according viewangles
+						xdist = temp[0] - currententity->origin[0];
+						ydist = temp[1] - currententity->origin[1];
+						temp[0] -= 2 * xdist;
+						temp[1] -= 2 * ydist;
+					}
+					//make dynamic lights more influential than world
+					for(j = 0; j < 3; j++)
+						lightAdd[j] += temp[j]*100;
+					numlights+=100;
+                
+					VectorSubtract (dl->origin, currententity->origin, temp);
+					dynFactor += (dl->intensity/20.0)/VectorLength(temp);
 				}
 			}
-
-			VectorSubtract (dl->origin, currententity->origin, temp);
-			dynFactor += (dl->intensity/20.0)/VectorLength(temp);
 		}
 	}
 
@@ -247,6 +254,15 @@ void GL_GetLightVals()
 			lightPosition[i] = lightAdd[i]/numlights;
 	}
 }
+
+void R_ModelViewTransform(const vec3_t in, vec3_t out){ 
+	const float *v = in; 
+    const float *m = r_world_matrix; 
+ 
+    out[0] = m[0] * v[0] + m[4] * v[1] + m[8]  * v[2] + m[12]; 
+    out[1] = m[1] * v[0] + m[5] * v[1] + m[9]  * v[2] + m[13]; 
+    out[2] = m[2] * v[0] + m[6] * v[1] + m[10] * v[2] + m[14]; 
+} 
 
 //legacy code - this is for ancient hardware that cannot handle GL_TRIANGLE useage
 void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped)
@@ -1126,34 +1142,26 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					}
 				}
 
-				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL || currententity->flags & RF_NOSHADOWS) { //fixed light source
+				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) { //fixed light source
 
-					//light down, slightly forward and to the left
-					lightVec[0] = 1.0; //right - left
-					lightVec[1] = 5.0; //up - down
-					lightVec[2] = 4.0; //forward - back
+					//fixed light source pointing down, slightly forward and to the left
+					lightPosition[0] = -1.0; 
+					lightPosition[1] = 4.0; 
+					lightPosition[2] = 8.0; 
+					R_ModelViewTransform(lightPosition, lightVec);
 				}
-				else if(!(currententity->flags & RF_WEAPONMODEL)) { //simple lightvec source - origin
-
-					if(stage->lightmap) {
-						VectorSubtract(lightPosition, currententity->origin, lightVec);
-					}
-					else {
-						//light down, slightly forward and to the left
-						lightVec[0] = 1.0;
-						lightVec[1] = 5.0;
-						lightVec[2] = 3.0;
-					}
+				else { 
+					//simple directional(relative light position)
+					VectorSubtract(lightPosition, currententity->origin, temp);
+					if(dynFactor == 0.0) //do for world lights only
+						R_ModelViewTransform(lightPosition, lightVec);
+					else
+						VectorCopy(temp, lightVec);
+					//brighten things slightly 
+					for (i = 0; i < 3; i++ )
+						lightVal[i] *= 1.25;
 				}
-				else { //weapon model, use angles relative to lightsource			
-			
-					VectorCopy(currententity->angles, temp);
-
-					lightVec[0] = (abs(temp[1])*2)/122.4;
-					lightVec[1] = (abs(temp[0]+90)*2)/61.2;
-					lightVec[2] = temp[2];
-				}			
-							
+										
 				GL_EnableMultitexture( true );
 			
 				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);

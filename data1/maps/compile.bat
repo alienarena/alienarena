@@ -1,4 +1,4 @@
-qbsp3 test
-qvis3 test
-qrad3 test
+qbsp3 lighttest
+qvis3 lighttest
+qrad3 lighttest
 pause
