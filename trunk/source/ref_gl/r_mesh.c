@@ -192,7 +192,7 @@ void GL_GetLightVals()
 		VectorCopy(currententity->origin, temp);
 		temp[2] += 24; //generates more consistent tracing
 
-		if(currententity->flags & RF_WEAPONMODEL)
+		if((currententity->flags & RF_WEAPONMODEL) && (wl->origin[2] > currententity->origin[2]))
 			r_trace.fraction = 1.0; //don't do traces for weapon models, not smooth enough
 		else
 			r_trace = CM_BoxTrace(temp, wl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
