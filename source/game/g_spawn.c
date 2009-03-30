@@ -899,6 +899,7 @@ void SP_worldspawn (edict_t *ent)
 	gi.modelindex ("players/enforcer/tris.md2");
 	gi.modelindex ("players/lauren/tris.md2");
 	gi.modelindex ("players/slashbot/tris.md2");
+	gi.modelindex ("players/commander/tris.md2");
 
 	//do the w_weps
 	// THIS ORDER MUST MATCH THE DEFINES IN g_local.h

@@ -138,6 +138,27 @@ players/slashbot/blue
 		normalmap
 	}	
 }
+players/commander/blue
+{
+	{
+		map players/commander/default_normal.tga
+		normalmap
+	}	
+}
+players/commander/red
+{
+	{
+		map players/commander/default_normal.tga
+		normalmap
+	}	
+}
+players/commander/default
+{
+	{
+		map players/commander/default_normal.tga
+		normalmap
+	}	
+}
 models/weapons/v_chain/skin
 {
 	{
