@@ -354,7 +354,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					chatmsg = "%s: NOOOOO %s!!!";
 					break;
 				case 7:
-					chatmsg = "%s: It hurts %s...it hurts...%s";
+					chatmsg = "%s: It hurts %s...it hurts...";
 					break;
 				case 8:
 					chatmsg = "%s: You're using a bot %s!";
