@@ -1659,6 +1659,8 @@ void PutClientInServer (edict_t *ent)
 
 	client->mapvote = 0;
 
+	client->lasttaunttime = 0;
+
 	resp = client->resp;
 	memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));
 	InitClientPersistant (client);
