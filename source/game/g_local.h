@@ -626,6 +626,9 @@ extern cvar_t	*g_voterand;
 extern cvar_t	*g_votemode;
 extern cvar_t	*g_votesame;
 
+//forced autobalanced teams
+extern cvar_t	*g_autobalance;
+
 //reward point threshold
 extern cvar_t	*g_reward;
 

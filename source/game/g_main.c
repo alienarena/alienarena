@@ -100,6 +100,9 @@ cvar_t	*g_reward;
 //old scoreboard
 cvar_t	*g_oldscorebd;
 
+//force autobalanced teams
+cvar_t	*g_autobalance;
+
 cvar_t	*dmflags;
 cvar_t	*skill;
 cvar_t	*fraglimit;
