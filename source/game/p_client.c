@@ -97,6 +97,8 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 		ff = meansOfDeath & MOD_FRIENDLY_FIRE;
 		mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
 		message = NULL;
+		chatmsg = NULL;
+		tauntmsg = NULL;
 		message2 = "";
 
 		switch (mod)
@@ -318,13 +320,15 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					chatmsg = "%s: Stop it %s, you punk!";
 					break;
 				}
-				safe_bprintf (PRINT_CHAT, chatmsg, self->client->pers.netname, attacker->client->pers.netname);
-				safe_bprintf (PRINT_CHAT, "\n");
+				if(chatmsg) {
+					safe_bprintf (PRINT_CHAT, chatmsg, self->client->pers.netname, attacker->client->pers.netname);
+					safe_bprintf (PRINT_CHAT, "\n");
 
-				gi.WriteByte (svc_temp_entity);
-				gi.WriteByte (TE_SAYICON);
-				gi.WritePosition (self->s.origin);
-				gi.multicast (self->s.origin, MULTICAST_PVS);
+					gi.WriteByte (svc_temp_entity);
+					gi.WriteByte (TE_SAYICON);
+					gi.WritePosition (self->s.origin);
+					gi.multicast (self->s.origin, MULTICAST_PVS);
+				}
 			}
 #else
 			if ((!((int)(dmflags->value) & DF_BOTCHAT)) && self->is_bot)
@@ -359,13 +363,15 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					chatmsg = "%s: Stop it %s, you punk!";
 					break;
 				}
-				safe_bprintf (PRINT_CHAT, chatmsg, self->client->pers.netname, attacker->client->pers.netname);
-				safe_bprintf (PRINT_CHAT, "\n");
+				if(chatmsg) {
+					safe_bprintf (PRINT_CHAT, chatmsg, self->client->pers.netname, attacker->client->pers.netname);
+					safe_bprintf (PRINT_CHAT, "\n");
 
-				gi.WriteByte (svc_temp_entity);
-				gi.WriteByte (TE_SAYICON);
-				gi.WritePosition (self->s.origin);
-				gi.multicast (self->s.origin, MULTICAST_PVS);
+					gi.WriteByte (svc_temp_entity);
+					gi.WriteByte (TE_SAYICON);
+					gi.WritePosition (self->s.origin);
+					gi.multicast (self->s.origin, MULTICAST_PVS);
+				}
 			}
 #endif
 			//bot taunts
@@ -425,12 +431,14 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						tauntmsg = "%s: You are useless to me, %s\n";
 						break;
 					}
-					safe_bprintf (PRINT_CHAT, tauntmsg, attacker->client->pers.netname, self->client->pers.netname);
-					//send an effect to show that the bot is taunting
-					gi.WriteByte (svc_temp_entity);
-					gi.WriteByte (TE_SAYICON);
-					gi.WritePosition (attacker->s.origin);
-					gi.multicast (attacker->s.origin, MULTICAST_PVS);
+					if(tauntmsg) {
+						safe_bprintf (PRINT_CHAT, tauntmsg, attacker->client->pers.netname, self->client->pers.netname);
+						//send an effect to show that the bot is taunting
+						gi.WriteByte (svc_temp_entity);
+						gi.WriteByte (TE_SAYICON);
+						gi.WritePosition (attacker->s.origin);
+						gi.multicast (attacker->s.origin, MULTICAST_PVS);
+					}
 				}
 			}
 
