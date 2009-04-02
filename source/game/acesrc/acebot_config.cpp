@@ -48,7 +48,7 @@ void ACECO_ReadConfig(char config_file[128])
 	strcpy( botvals.chatmsg2, "%s: Are you using a bot %s?"); 
 	strcpy( botvals.chatmsg3, "%s: %s is a dead man." ); 
 	strcpy( botvals.chatmsg4, "%s: You will pay dearly %s!"); 
-	strcpy( botvals.chatmsg5, "%s: Ackity Ack Ack!"); 
+	strcpy( botvals.chatmsg5, "%s: Ackity %s, Ack Ack!"); 
 	strcpy( botvals.chatmsg6, "%s: Die %s!"); 
 	strcpy( botvals.chatmsg7, "%s: My blood is your blood %s." ); 
 	strcpy( botvals.chatmsg8, "%s: I will own you %s!"); 
