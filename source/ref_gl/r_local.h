@@ -307,6 +307,9 @@ void R_RenderSun();
 vec3_t sun_origin;
 qboolean spacebox;
 
+//Player icons
+extern float	scr_playericonalpha;
+
 void	Draw_GetPicSize (int *w, int *h, char *name);
 void	Draw_Pic (int x, int y, char *name);
 void	Draw_ScaledPic (int x, int y, float scale, char *pic);

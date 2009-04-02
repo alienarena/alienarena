@@ -2184,6 +2184,8 @@ int R_Init( void *hinstance, void *hWnd )
 	R_InitParticleTexture ();
 	Draw_InitLocal ();
 
+	scr_playericonalpha = 0.0;
+
 	err = qglGetError();
 	if ( err != GL_NO_ERROR )
 		Com_Printf ("glGetError() = 0x%x\n", err);

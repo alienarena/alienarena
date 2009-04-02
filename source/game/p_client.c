@@ -288,7 +288,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 #ifndef __unix__
 			if ((!((int)(dmflags->value) & DF_BOTCHAT)) && self->is_bot)
 			{
-				msg = random() * 12;
+				msg = random() * 9;
 				switch(msg){
 				case 1:
 					chatmsg = self->chatmsg1;
@@ -315,7 +315,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					chatmsg = self->chatmsg8;
 					break;
 				default:
-					chatmsg = "";
+					chatmsg = "%s: Stop it %s, you punk!";
 					break;
 				}
 				safe_bprintf (PRINT_CHAT, chatmsg, self->client->pers.netname, attacker->client->pers.netname);
@@ -329,7 +329,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 #else
 			if ((!((int)(dmflags->value) & DF_BOTCHAT)) && self->is_bot)
 			{
-				msg = random() * 12;
+				msg = random() * 9;
 				switch(msg){
 				case 1:
 					chatmsg = "%s: You are a real jerk %s!";
@@ -350,13 +350,13 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					chatmsg = "%s: NOOOOO %s!!!";
 					break;
 				case 7:
-					chatmsg = "%s: It hurts %s...it hurts...";
+					chatmsg = "%s: It hurts %s...it hurts...%s";
 					break;
 				case 8:
 					chatmsg = "%s: You're using a bot %s!";
 					break;
 				default:
-					chatmsg = "";
+					chatmsg = "%s: Stop it %s, you punk!";
 					break;
 				}
 				safe_bprintf (PRINT_CHAT, chatmsg, self->client->pers.netname, attacker->client->pers.netname);
@@ -369,49 +369,69 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			}
 #endif
 			//bot taunts
-			if(attacker->is_bot && (!attacker->client->ps.pmove.pm_flags & PMF_DUCKED) && attacker->skill == 3) {
+			if((!((int)(dmflags->value) & DF_BOTCHAT)) && attacker->is_bot) {
 
-				attacker->state = STATE_STAND;
-				attacker->s.frame = FRAME_taunt01-1;
-				attacker->client->anim_end = FRAME_taunt17;
+				if(!(attacker->client->ps.pmove.pm_flags & PMF_DUCKED)) {
+					attacker->state = STATE_STAND;
+					attacker->s.frame = FRAME_taunt01-1;
+					attacker->client->anim_end = FRAME_taunt17;			
 
-				//print a taunt
-				msg = random() * 9;
-				switch(msg){
-				case 1:
-					tauntmsg = "%s: You should have used a bigger gun %s.\n";
-					break;
-				case 2:
-					tauntmsg = "%s: You fight like your mom %s.\n";
-					break;
-				case 3:
-					tauntmsg = "%s: And stay down %s!\n";
-					break;
-				case 4:
-					tauntmsg = "%s: %s = pwned!\n";
-					break;
-				case 5:
-					tauntmsg = "%s: All too easy, %s, all too easy.\n";
-					break;
-				case 6:
-					tauntmsg = "%s: Ack! %s Ack! Ack!\n";
-					break;
-				case 7:
-					tauntmsg = "%s: What a loser you are %s!\n";
-					break;
-				case 8:
-					tauntmsg = "%s: %s, could you BE any more dead?\n";
-					break;
-				default:
-					tauntmsg = "%s: You are useless to me, %s\n";
-					break;
+					//print a taunt, or send taunt sound
+					msg = random() * 24;
+					switch(msg){
+					case 1:
+						tauntmsg = "%s: You should have used a bigger gun %s.\n";
+						break;
+					case 2:
+						tauntmsg = "%s: You fight like your mom %s.\n";
+						break;
+					case 3:
+						tauntmsg = "%s: And stay down %s!\n";
+						break;
+					case 4:
+						tauntmsg = "%s: %s = pwned!\n";
+						break;
+					case 5:
+						tauntmsg = "%s: All too easy, %s, all too easy.\n";
+						break;
+					case 6:
+						tauntmsg = "%s: Ack! %s Ack! Ack!\n";
+						break;
+					case 7:
+						tauntmsg = "%s: What a loser you are %s!\n";
+						break;
+					case 8:
+						tauntmsg = "%s: %s, could you BE any more dead?\n";
+						break;
+					case 9:
+					case 10:
+					case 11:
+					case 12:
+					case 13:
+					case 14:
+					case 15:
+					case 16:
+					case 17:
+					case 18:
+					case 19:
+					case 20:
+					case 21:
+					case 22:
+					case 23:
+					case 24:
+						Cmd_VoiceTaunt_f(attacker);
+						break;
+					default:
+						tauntmsg = "%s: You are useless to me, %s\n";
+						break;
+					}
+					safe_bprintf (PRINT_CHAT, tauntmsg, attacker->client->pers.netname, self->client->pers.netname);
+					//send an effect to show that the bot is taunting
+					gi.WriteByte (svc_temp_entity);
+					gi.WriteByte (TE_SAYICON);
+					gi.WritePosition (attacker->s.origin);
+					gi.multicast (attacker->s.origin, MULTICAST_PVS);
 				}
-				safe_bprintf (PRINT_CHAT, tauntmsg, attacker->client->pers.netname, self->client->pers.netname);
-				//send an effect to show that the bot is taunting
-				gi.WriteByte (svc_temp_entity);
-				gi.WriteByte (TE_SAYICON);
-				gi.WritePosition (attacker->s.origin);
-				gi.multicast (attacker->s.origin, MULTICAST_PVS);
 			}
 
 			if (message)

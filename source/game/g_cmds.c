@@ -1005,6 +1005,60 @@ void Cmd_Vote_f (edict_t *ent)
 		safe_centerprintf(cl_ent, "%s", buffer );
 	}
 }
+
+void Cmd_VoiceTaunt_f (edict_t *ent)
+{
+	int			index, i;
+	qboolean	done;
+	char		name[32];
+	char		string[256]; //a small string to send
+	char		playermodel[MAX_OSPATH], tauntsound[MAX_OSPATH];
+	char		*info;
+
+	index = atoi (gi.argv(1));
+
+	if(index > 5 || index < 1 || ent->is_bot) {
+		index = (int)(1 + random() * 5);
+		if(index > 5)
+			index = 5;
+	}
+
+	//get info about this client
+	if(ent->inuse && ent->client) {
+
+		strcpy(name, ent->client->pers.netname);
+		info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
+		info[96] = 0; //truncate to prevent bad people from harming the server
+		
+		i = 0;
+		done = false;
+		while(!done)
+		{
+			if((info[i] == '/') || (info[i] == '\\'))
+				done = true;
+			playermodel[i] = info[i];
+			if(i > 62)
+				done = true;
+			i++;
+		}
+		playermodel[i-1] = 0;
+
+		sprintf(tauntsound, "taunts/%s/taunt%i.wav", playermodel, index);
+
+		Com_sprintf(string, sizeof(string), 
+			"%s %s %s ", info, name, tauntsound);
+
+		//send to all clients
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_PLAYERICON);
+		//the next two lines are so that old clients do not crash
+		gi.WritePosition (ent->s.origin);
+		gi.WritePosition (ent->s.origin);
+		gi.WriteString (string);
+		gi.multicast (ent->s.origin, MULTICAST_PVS);
+	}
+}
+
 /*
 =================
 ClientCommand
@@ -1052,6 +1106,11 @@ void ClientCommand (edict_t *ent)
 	if (Q_stricmp (cmd, "vote") == 0)
 	{
 		Cmd_Vote_f(ent);
+		return;
+	}
+	if	(Q_stricmp (cmd, "vtaunt") == 0)
+	{
+		Cmd_VoiceTaunt_f(ent);
 		return;
 	}
 
