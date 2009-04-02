@@ -1354,7 +1354,7 @@ void SCR_ExecuteLayoutString (char *s)
 
 				if (!ci->icon)
 					ci = &cl.baseclientinfo;
-				Draw_ScaledPic (x, y, scale, ci->iconname);
+				Draw_ScaledPic (x, y, scale/2, ci->iconname);
 			}
 
 			continue;
@@ -1404,7 +1404,7 @@ void SCR_ExecuteLayoutString (char *s)
 
 				if (!ci->icon)
 					ci = &cl.baseclientinfo;
-				Draw_ScaledPic (x, y, scale, ci->iconname);
+				Draw_ScaledPic (x, y, scale/2, ci->iconname);
 			}
 
 			continue;
@@ -1643,6 +1643,46 @@ void SCR_DrawLayout (void)
 	if (!cl.frame.playerstate.stats[STAT_LAYOUTS])
 		return;
 	SCR_ExecuteLayoutString (cl.layout);
+}
+
+/*
+=================
+SCR_DrawPlayerIcon
+=================
+*/
+char		scr_playericon[MAX_OSPATH];
+char		scr_playername[32];
+float		scr_playericonalpha;
+void SCR_DrawPlayerIcon(void) {
+	
+	int w, h;
+	float scale, iconPos;
+
+	if (cls.key_dest == key_menu || cls.key_dest == key_console)
+		return;
+
+	if(scr_playericonalpha <= 0.0)
+		return;
+
+	scr_playericonalpha -= cls.frametime; //fade map pic in
+
+	if(scr_playericonalpha < 1.0)
+		iconPos = scr_playericonalpha;
+	else
+		iconPos = 1.0;
+
+	scale = (float)(viddef.height)/600;
+	if(scale < 1)
+		scale = 1;
+
+	w = h = 64; //icon size, will change to be larger
+
+	w*=scale;
+	h*=scale;
+
+	Draw_AlphaStretchPlayerIcon( -w+(w*iconPos), viddef.height/2 + h/2, w, h, scr_playericon, scr_playericonalpha);
+	Menu_DrawColorString(-w+(w*iconPos), viddef.height/2 + h + 32*scale, scr_playername);
+
 }
 
 /*
@@ -1902,6 +1942,7 @@ void SCR_UpdateScreen (void)
 				if( r_speeds->value == 2 )
 					SCR_showRSpeeds();
 			}
+			SCR_DrawPlayerIcon();
 		}
 	}
 	R_EndFrame();

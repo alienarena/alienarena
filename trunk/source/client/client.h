@@ -83,6 +83,10 @@ typedef struct
 extern char cl_weaponmodels[MAX_CLIENTWEAPONMODELS][MAX_QPATH];
 extern int num_cl_weaponmodels;
 
+extern char		scr_playericon[MAX_OSPATH];
+extern char		scr_playername[32];
+extern float	scr_playericonalpha;
+
 #define	CMD_BACKUP		64	// allow a lot of command backups for very fast systems
 
 //

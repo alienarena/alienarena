@@ -310,6 +310,22 @@ image_t	*R_RegisterGfxPic (char *name)
 
 	return gl;
 }
+
+image_t	*R_RegisterPlayerIcon (char *name)
+{
+	image_t *gl;
+	char	fullname[MAX_QPATH];
+
+	if (name[0] != '/' && name[0] != '\\')
+	{
+		Com_sprintf (fullname, sizeof(fullname), "players/%s.tga", name);
+		gl = GL_FindImage (fullname, it_pic);
+	}
+	else
+		gl = GL_FindImage (name+1, it_pic);
+
+	return gl;
+}
 /*
 =============
 Draw_GetPicSize
@@ -376,6 +392,7 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 		qglDrawArrays (GL_QUADS, 0, 4);
 		qglEnable (GL_ALPHA_TEST);
 		qglDisable (GL_BLEND);
+		R_KillVArrays();
 	} 
 	else 
 	{
@@ -589,6 +606,32 @@ void Draw_ScaledPic (int x, int y, float scale, char *pic)
 	VA_SetElem2(vert_array[3],x, y+h+yoff);
 
 	Draw_ShaderPic(gl, DIV254BY255);
+}
+
+/*
+=============
+Draw_AlphaStretchPlayerIcon
+=============
+*/
+void Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, char *pic, float alphaval)
+{
+	image_t *gl;
+
+	gl = R_RegisterPlayerIcon (pic);
+	if (!gl)
+	{
+		return;
+	}
+
+	if (scrap_dirty)
+		Scrap_Upload ();
+
+	VA_SetElem2(vert_array[0],x, y);
+	VA_SetElem2(vert_array[1],x+w, y);
+	VA_SetElem2(vert_array[2],x+w, y+h);
+	VA_SetElem2(vert_array[3],x, y+h);
+
+	Draw_ShaderPic(gl, alphaval);
 }
 /*
 =============

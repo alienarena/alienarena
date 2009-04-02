@@ -255,6 +255,7 @@ void	Draw_Pic (int x, int y, char *name);
 void	Draw_ScaledPic (int x, int y, float scale, char *pic);
 void	Draw_StretchPic (int x, int y, int w, int h, char *name);
 void	Draw_AlphaStretchPic (int x, int y, int w, int h, char *name, float alphaval);
+void	Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, char *pic, float alphaval);
 void	Draw_Char (int x, int y, int c);
 void	Draw_ColorChar (int x, int y, int num, vec4_t color);
 void	Draw_ScaledChar (float x, float y, int num, float scale);
