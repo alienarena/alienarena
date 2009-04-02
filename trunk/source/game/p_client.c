@@ -2933,7 +2933,6 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			if(client->resp.spectator < 2) {
 				if((ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM)) {
 					client->pers.spectator = false; //we have a team, join
-				//	safe_bprintf(PRINT_HIGH, "red: %i blue: %i\n", red_team_cnt, blue_team_cnt);
 				}
 				else if((((int)(dmflags->value) & DF_SKINTEAMS) || (ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM) && client->resp.spectator < 3) {
 					if(red_team_cnt < blue_team_cnt)
@@ -2942,7 +2941,6 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 						ent->dmteam = BLUE_TEAM;
 					client->pers.spectator = false;
 					ClientChangeSkin(ent);
-				//	safe_bprintf(PRINT_HIGH, "autojoin red: %i blue: %i\n", red_team_cnt, blue_team_cnt);
 				}
 			}
 
@@ -2960,14 +2958,20 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	if (client->resp.spectator) {
 		if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && client->resp.spectator < 2) {
-			if(ent->dmteam == NO_TEAM && (level.time/2 == ceil(level.time/2)))
-				safe_centerprintf(ent, "\n\n\nPress <fire> to autojoin\nor <jump> to join BLUE\nor <crouch> to join RED\n");
+			if(ent->dmteam == NO_TEAM && (level.time/2 == ceil(level.time/2))) {
+				if(g_autobalance->value)
+					safe_centerprintf(ent, "\n\n\nPress <fire> to join\nautobalanced team\n");
+				else
+					safe_centerprintf(ent, "\n\n\nPress <fire> to autojoin\nor <jump> to join BLUE\nor <crouch> to join RED\n");
+			}
 		}
 		if (ucmd->upmove >= 10) {
-			if(((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM) && client->resp.spectator < 2) {
-				ent->dmteam = BLUE_TEAM; //join BLUE
-				client->pers.spectator = false;
-				ClientChangeSkin(ent);
+			if(!(g_autobalance->value)) {
+				if(((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM) && client->resp.spectator < 2) {
+					ent->dmteam = BLUE_TEAM; //join BLUE
+					client->pers.spectator = false;
+					ClientChangeSkin(ent);
+				}
 			}
 			if (!(client->ps.pmove.pm_flags & PMF_JUMP_HELD)) {
 				client->ps.pmove.pm_flags |= PMF_JUMP_HELD;
@@ -2978,7 +2982,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			}
 		}
 		else if(((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM &&
-			(ucmd->upmove < 0))  && client->resp.spectator < 2){
+			(ucmd->upmove < 0))  && client->resp.spectator < 2 && !(g_autobalance->value)){
 
 			ent->dmteam = RED_TEAM; //join RED
 			client->pers.spectator = false;
