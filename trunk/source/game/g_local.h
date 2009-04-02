@@ -1226,6 +1226,9 @@ struct gclient_s
 	//map voting
 	int mapvote;
 
+	//taunt message
+	float lasttaunttime;
+
 	//unlagged - backward reconciliation #1
 	// the serverTime the button was pressed
 	// (stored before pmove_fixed changes serverTime)

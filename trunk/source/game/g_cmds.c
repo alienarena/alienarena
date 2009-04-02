@@ -1026,36 +1026,41 @@ void Cmd_VoiceTaunt_f (edict_t *ent)
 	//get info about this client
 	if(ent->inuse && ent->client) {
 
-		strcpy(name, ent->client->pers.netname);
-		info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
-		info[96] = 0; //truncate to prevent bad people from harming the server
-		
-		i = 0;
-		done = false;
-		while(!done)
-		{
-			if((info[i] == '/') || (info[i] == '\\'))
-				done = true;
-			playermodel[i] = info[i];
-			if(i > 62)
-				done = true;
-			i++;
+		if((level.time - ent->client->lasttaunttime) > 2) { //prevent flooding
+
+			ent->client->lasttaunttime = level.time;
+
+			strcpy(name, ent->client->pers.netname);
+			info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
+			info[96] = 0; //truncate to prevent bad people from harming the server
+			
+			i = 0;
+			done = false;
+			while(!done)
+			{
+				if((info[i] == '/') || (info[i] == '\\'))
+					done = true;
+				playermodel[i] = info[i];
+				if(i > 62)
+					done = true;
+				i++;
+			}
+			playermodel[i-1] = 0;
+
+			sprintf(tauntsound, "taunts/%s/taunt%i.wav", playermodel, index);
+
+			Com_sprintf(string, sizeof(string), 
+				"%s %s %s ", info, name, tauntsound);
+
+			//send to all clients
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_PLAYERICON);
+			//the next two lines are so that old clients do not crash
+			gi.WritePosition (ent->s.origin);
+			gi.WritePosition (ent->s.origin);
+			gi.WriteString (string);
+			gi.multicast (ent->s.origin, MULTICAST_PVS);
 		}
-		playermodel[i-1] = 0;
-
-		sprintf(tauntsound, "taunts/%s/taunt%i.wav", playermodel, index);
-
-		Com_sprintf(string, sizeof(string), 
-			"%s %s %s ", info, name, tauntsound);
-
-		//send to all clients
-		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_PLAYERICON);
-		//the next two lines are so that old clients do not crash
-		gi.WritePosition (ent->s.origin);
-		gi.WritePosition (ent->s.origin);
-		gi.WriteString (string);
-		gi.multicast (ent->s.origin, MULTICAST_PVS);
 	}
 }
 
