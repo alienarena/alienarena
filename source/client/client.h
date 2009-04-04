@@ -269,6 +269,7 @@ extern  cvar_t	*cl_healthaura;
 extern  cvar_t	*cl_noblood;
 extern  cvar_t	*cl_disbeamclr;
 extern  cvar_t	*cl_brass;
+extern  cvar_t	*cl_playtaunts;
 
 extern	cvar_t	*cl_upspeed;
 extern	cvar_t	*cl_forwardspeed;
