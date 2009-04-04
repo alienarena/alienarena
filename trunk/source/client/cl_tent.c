@@ -284,9 +284,8 @@ void CL_ParseTEnt (void)
 	vec3_t	pos, pos2, dir;
 	int		cnt;
 	int		color;
-	int		r, l, j;
+	int		r;
 	trace_t	trace;
-	char	*s, tauntsound[MAX_OSPATH];
 	static vec3_t mins = { -8, -8, -8 }; 
     static vec3_t maxs = { 8, 8, 8 }; 
 
@@ -526,34 +525,6 @@ void CL_ParseTEnt (void)
 		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL); 
 		if(trace.contents)
 			CL_BlasterMark(pos2, trace.plane.normal);
-		break;
-	
-	case TE_PLAYERICON:
-
-		//add cvar to turn off
-
-		//legacy crap for old clients
-		MSG_ReadPos (&net_message, pos);
-        MSG_ReadPos (&net_message, pos2);
-
-		s = MSG_ReadString(&net_message);
-
-		//parse
-		strcpy( scr_playericon, COM_Parse( &s ) );
-		l = strlen(scr_playericon);
-
-		for (j=0 ; j<l ; j++)
-			scr_playericon[j] = tolower(scr_playericon[j]);
-
-		Com_sprintf(scr_playericon, sizeof(scr_playericon), "%s_i", scr_playericon);
-		
-		strcpy( scr_playername, COM_Parse( &s ) );
-
-		strcpy( tauntsound, COM_Parse( &s ) );
-
-		S_StartSound (NULL, 0, 0, S_RegisterSound (tauntsound), 1, ATTN_NONE, 0);
-	
-		scr_playericonalpha = 2.0;
 		break;
 
 	default:

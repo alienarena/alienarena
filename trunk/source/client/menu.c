@@ -869,6 +869,13 @@ char *bindnames[][2] =
 {"use haste",			"haste"},
 {"use invisibility",	"invisibility"},
 
+{"vtaunt 1",			"voice taunt #1"},
+{"vtaunt 2",			"voice taunt #2"},
+{"vtaunt 3",			"voice taunt #3"},
+{"vtaunt 4",			"voice taunt #4"},
+{"vtaunt 5",			"voice taunt #5"},
+{"vtaunt 0",			"voice taunt auto"},
+
 { 0, 0 }
 };
 
@@ -912,6 +919,12 @@ static menuaction_s		s_keys_violator_action;
 static menuaction_s		s_keys_sproing_action;
 static menuaction_s		s_keys_haste_action;
 static menuaction_s		s_keys_invis_action;
+static menuaction_s		s_keys_vtaunt1_action;
+static menuaction_s		s_keys_vtaunt2_action;
+static menuaction_s		s_keys_vtaunt3_action;
+static menuaction_s		s_keys_vtaunt4_action;
+static menuaction_s		s_keys_vtaunt5_action;
+static menuaction_s		s_keys_vtauntauto_action;
 static menuaction_s		s_keys_filler_action;
 
 static void M_UnbindCommand (char *command)
@@ -1013,7 +1026,7 @@ static void Keys_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
-	y = 180*scale;
+	y = 170*scale;
 
 	banneralpha = .1;
 
@@ -1271,6 +1284,48 @@ static void Keys_MenuInit( void )
 	s_keys_invis_action.generic.localdata[0] = ++i;
 	s_keys_invis_action.generic.name	= bindnames[s_keys_invis_action.generic.localdata[0]][1];
 
+	s_keys_vtaunt1_action.generic.type	= MTYPE_ACTION;
+	s_keys_vtaunt1_action.generic.x		= 0;
+	s_keys_vtaunt1_action.generic.y		= y += 9*scale;
+	s_keys_vtaunt1_action.generic.ownerdraw = DrawKeyBindingFunc;
+	s_keys_vtaunt1_action.generic.localdata[0] = ++i;
+	s_keys_vtaunt1_action.generic.name	= bindnames[s_keys_vtaunt1_action.generic.localdata[0]][1];
+
+	s_keys_vtaunt2_action.generic.type	= MTYPE_ACTION;
+	s_keys_vtaunt2_action.generic.x		= 0;
+	s_keys_vtaunt2_action.generic.y		= y += 9*scale;
+	s_keys_vtaunt2_action.generic.ownerdraw = DrawKeyBindingFunc;
+	s_keys_vtaunt2_action.generic.localdata[0] = ++i;
+	s_keys_vtaunt2_action.generic.name	= bindnames[s_keys_vtaunt2_action.generic.localdata[0]][1];
+
+	s_keys_vtaunt3_action.generic.type	= MTYPE_ACTION;
+	s_keys_vtaunt3_action.generic.x		= 0;
+	s_keys_vtaunt3_action.generic.y		= y += 9*scale;
+	s_keys_vtaunt3_action.generic.ownerdraw = DrawKeyBindingFunc;
+	s_keys_vtaunt3_action.generic.localdata[0] = ++i;
+	s_keys_vtaunt3_action.generic.name	= bindnames[s_keys_vtaunt3_action.generic.localdata[0]][1];
+	
+	s_keys_vtaunt4_action.generic.type	= MTYPE_ACTION;
+	s_keys_vtaunt4_action.generic.x		= 0;
+	s_keys_vtaunt4_action.generic.y		= y += 9*scale;
+	s_keys_vtaunt4_action.generic.ownerdraw = DrawKeyBindingFunc;
+	s_keys_vtaunt4_action.generic.localdata[0] = ++i;
+	s_keys_vtaunt4_action.generic.name	= bindnames[s_keys_vtaunt4_action.generic.localdata[0]][1];
+
+	s_keys_vtaunt5_action.generic.type	= MTYPE_ACTION;
+	s_keys_vtaunt5_action.generic.x		= 0;
+	s_keys_vtaunt5_action.generic.y		= y += 9*scale;
+	s_keys_vtaunt5_action.generic.ownerdraw = DrawKeyBindingFunc;
+	s_keys_vtaunt5_action.generic.localdata[0] = ++i;
+	s_keys_vtaunt5_action.generic.name	= bindnames[s_keys_vtaunt5_action.generic.localdata[0]][1];
+	
+	s_keys_vtauntauto_action.generic.type	= MTYPE_ACTION;
+	s_keys_vtauntauto_action.generic.x		= 0;
+	s_keys_vtauntauto_action.generic.y		= y += 9*scale;
+	s_keys_vtauntauto_action.generic.ownerdraw = DrawKeyBindingFunc;
+	s_keys_vtauntauto_action.generic.localdata[0] = ++i;
+	s_keys_vtauntauto_action.generic.name	= bindnames[s_keys_vtauntauto_action.generic.localdata[0]][1];
+
 	s_keys_filler_action.generic.type	= MTYPE_ACTION;
 	s_keys_filler_action.generic.x		= 0;
 	s_keys_filler_action.generic.y		= y += 9*scale;
@@ -1317,6 +1372,14 @@ static void Keys_MenuInit( void )
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_sproing_action );
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_haste_action );
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_invis_action );
+
+	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_vtaunt1_action);
+	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_vtaunt2_action);
+	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_vtaunt3_action);
+	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_vtaunt4_action);
+	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_vtaunt5_action);
+	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_vtauntauto_action);
+
 	Menu_AddItem( &s_keys_menu, ( void * ) &s_keys_filler_action ); //needed so last item will show
 
 	Menu_SetStatusBar( &s_keys_menu, "enter to change, backspace to clear" );
@@ -1430,6 +1493,7 @@ static menulist_s		s_options_target_box;
 static menulist_s		s_options_healthaura_box;
 static menulist_s		s_options_noblood_box;
 static menulist_s		s_options_noskins_box;
+static menulist_s		s_options_taunts_box;
 static menulist_s		s_options_shaders_box;
 static menulist_s		s_options_shadows_box;
 static menulist_s		s_options_dynamic_box;
@@ -1457,6 +1521,10 @@ static void NoBloodFunc( void *unused )
 static void NoskinsFunc( void *unused )
 {
 	Cvar_SetValue( "cl_noskins", s_options_noskins_box.curvalue);
+}
+static void TauntsFunc( void *unused )
+{
+	Cvar_SetValue( "cl_playtaunts", s_options_taunts_box.curvalue);
 }
 static void ShadersFunc( void *unused )
 {
@@ -1961,6 +2029,9 @@ static void ControlsSetMenuItemValues( void )
 	Cvar_SetValue("cl_noskins", ClampCvar(0, 1, cl_noskins->value ) );
 	s_options_noskins_box.curvalue		= cl_noskins->value;
 
+	Cvar_SetValue("cl_playtaunts", ClampCvar(0, 1, cl_playtaunts->value ) );
+	s_options_taunts_box.curvalue		= cl_playtaunts->value;
+
 	Cvar_SetValue("cl_drawfps", ClampCvar(0, 1, cl_drawfps->value ) );
 	s_options_showfps_box.curvalue		= cl_drawfps->value;
 
@@ -2235,9 +2306,16 @@ void Options_MenuInit( void )
 	s_options_noskins_box.generic.callback = NoskinsFunc;
 	s_options_noskins_box.itemnames = onoff_names;
 
+	s_options_taunts_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_taunts_box.generic.x	= 0;
+	s_options_taunts_box.generic.y	= 110*scale;
+	s_options_taunts_box.generic.name	= "player taunts";
+	s_options_taunts_box.generic.callback = TauntsFunc;
+	s_options_taunts_box.itemnames = onoff_names;
+
 	s_options_sfxvolume_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sfxvolume_slider.generic.x	= 0;
-	s_options_sfxvolume_slider.generic.y	= 110*scale;
+	s_options_sfxvolume_slider.generic.y	= 120*scale;
 	s_options_sfxvolume_slider.generic.name	= "global volume";
 	s_options_sfxvolume_slider.generic.callback	= UpdateVolumeFunc;
 	s_options_sfxvolume_slider.minvalue		= 0;
@@ -2246,7 +2324,7 @@ void Options_MenuInit( void )
 
 	s_options_bgvolume_slider.generic.type	= MTYPE_SLIDER;
 	s_options_bgvolume_slider.generic.x	= 0;
-	s_options_bgvolume_slider.generic.y	= 120*scale;
+	s_options_bgvolume_slider.generic.y	= 130*scale;
 	s_options_bgvolume_slider.generic.name	= "music volume";
 	s_options_bgvolume_slider.generic.callback	= UpdateBGVolumeFunc;
 	s_options_bgvolume_slider.minvalue		= 0;
@@ -2255,7 +2333,7 @@ void Options_MenuInit( void )
 
 	s_options_bgmusic_box.generic.type	= MTYPE_SPINCONTROL;
 	s_options_bgmusic_box.generic.x		= 0;
-	s_options_bgmusic_box.generic.y		= 130*scale;
+	s_options_bgmusic_box.generic.y		= 140*scale;
 	s_options_bgmusic_box.generic.name	= "Background music";
 	s_options_bgmusic_box.generic.callback	= UpdateBGMusicFunc;
 	s_options_bgmusic_box.itemnames		= background_music_items;
@@ -2263,14 +2341,14 @@ void Options_MenuInit( void )
 
 	s_options_quality_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_quality_list.generic.x		= 0;
-	s_options_quality_list.generic.y		= 140*scale;
+	s_options_quality_list.generic.y		= 150*scale;
 	s_options_quality_list.generic.name		= "sampling rate";
 	s_options_quality_list.generic.callback = UpdateSoundQualityFunc;
 	s_options_quality_list.itemnames		= quality_items;
 
 	s_options_compatibility_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_compatibility_list.generic.x		= 0;
-	s_options_compatibility_list.generic.y		= 150*scale;
+	s_options_compatibility_list.generic.y		= 160*scale;
 	s_options_compatibility_list.generic.name	= "sound compatibility";
 	s_options_compatibility_list.generic.callback = UpdateSoundQualityFunc;
 	s_options_compatibility_list.itemnames		= compatibility_items;
@@ -2278,7 +2356,7 @@ void Options_MenuInit( void )
 
 	s_options_sensitivity_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sensitivity_slider.generic.x		= 0;
-	s_options_sensitivity_slider.generic.y		= 160*scale;
+	s_options_sensitivity_slider.generic.y		= 170*scale;
 	s_options_sensitivity_slider.generic.name	= "mouse speed";
 	s_options_sensitivity_slider.generic.callback = MouseSpeedFunc;
 	s_options_sensitivity_slider.minvalue		= 2;
@@ -2286,21 +2364,21 @@ void Options_MenuInit( void )
 
 	s_options_smoothing_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_smoothing_box.generic.x	= 0;
-	s_options_smoothing_box.generic.y	= 170*scale;
+	s_options_smoothing_box.generic.y	= 180*scale;
 	s_options_smoothing_box.generic.name	= "mouse smoothing";
 	s_options_smoothing_box.generic.callback = MouseSmoothingFunc;
 	s_options_smoothing_box.itemnames = yesno_names;
 
 	s_options_alwaysrun_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_alwaysrun_box.generic.x	= 0;
-	s_options_alwaysrun_box.generic.y	= 180*scale;
+	s_options_alwaysrun_box.generic.y	= 190*scale;
 	s_options_alwaysrun_box.generic.name	= "always run";
 	s_options_alwaysrun_box.generic.callback = AlwaysRunFunc;
 	s_options_alwaysrun_box.itemnames = yesno_names;
 
 	s_options_invertmouse_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_invertmouse_box.generic.x	= 0;
-	s_options_invertmouse_box.generic.y	= 190*scale;
+	s_options_invertmouse_box.generic.y	= 200*scale;
 	s_options_invertmouse_box.generic.name	= "invert mouse";
 	s_options_invertmouse_box.generic.callback = InvertMouseFunc;
 	s_options_invertmouse_box.itemnames = yesno_names;
@@ -2308,7 +2386,7 @@ void Options_MenuInit( void )
 	font_names = SetFontNames ();
 	s_options_font_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_font_box.generic.x	= 0;
-	s_options_font_box.generic.y	= 210*scale;
+	s_options_font_box.generic.y	= 220*scale;
 	s_options_font_box.generic.name	= "font";
 	s_options_font_box.generic.callback = FontFunc;
 	s_options_font_box.itemnames = font_names;
@@ -2392,6 +2470,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_healthaura_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_noblood_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_noskins_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_taunts_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_sfxvolume_slider );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_bgvolume_slider );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_bgmusic_box );

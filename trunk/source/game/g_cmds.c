@@ -1050,16 +1050,10 @@ void Cmd_VoiceTaunt_f (edict_t *ent)
 			sprintf(tauntsound, "taunts/%s/taunt%i.wav", playermodel, index);
 
 			Com_sprintf(string, sizeof(string), 
-				"%s %s %s ", info, name, tauntsound);
+				"%s %s %s ", info, tauntsound, name);
 
-			//send to all clients
-			gi.WriteByte (svc_temp_entity);
-			gi.WriteByte (TE_PLAYERICON);
-			//the next two lines are so that old clients do not crash
-			gi.WritePosition (ent->s.origin);
-			gi.WritePosition (ent->s.origin);
-			gi.WriteString (string);
-			gi.multicast (ent->s.origin, MULTICAST_PVS);
+			//send to all clients as a general config string
+			gi.configstring (CS_GENERAL, string);
 		}
 	}
 }

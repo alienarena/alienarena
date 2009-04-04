@@ -684,12 +684,12 @@ typedef struct
 #define	TE_DEATHFIELD2				13
 #define	TE_BULLET_SPARKS			14
 #define	TE_LASER_SPARKS				15
-#define	TE_PLAYERICON				16
+#define	TE_DONTUSE					16
 #define TE_ROCKET_EXPLOSION_WATER	17
 #define	TE_REDLASER					19
 #define	TE_BFG_BIGEXPLOSION			21
 #define	TE_BOSSTPORT				22			// used as '22' in a map, so DON'T RENUMBER!!!
-#define	TE_BFG_LASER				23
+#define	TE_DONTUSE2					23
 #define	TE_GREENBLOOD				26
 #define	TE_LIGHTNING				33
 #define	TE_VAPORBEAM				38
