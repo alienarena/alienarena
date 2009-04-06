@@ -636,7 +636,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	//what is the bot's favorite weapon? The bot will always check for it's favorite
 	//weapon first, which is set in the bot's config file. 
 	
-	if(!strcmp(self->faveweap, "Alien Vaporizer"))
+	if(!strcmp(self->faveweap, "Alien Vaporizer") && self->skill > 1)
 	{
 		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
 		{
@@ -697,7 +697,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 				}
 		}
 	}
-	if(!strcmp(self->faveweap, "Violator"))
+	if(!strcmp(self->faveweap, "Violator") && self->skill > 0)
 	{
 		if(range < 300) { //because it's a fav weap, we want them to really try and use it
 				if(ACEIT_ChangeWeapon(self,FindItem("Violator")))
@@ -709,7 +709,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	}
 	//now go through normal weapon favoring routine
 	// always favor the Vaporizor, unless close, then use the violator
-	if(range < 200) {
+	if(range < 200 && self->skill > 0) {
 		if(ACEIT_ChangeWeapon(self,FindItem("Violator")))
 		{
 			self->accuracy = 1.0;
