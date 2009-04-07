@@ -40,6 +40,13 @@ players/enforcer/blue
 		normalmap
 	}	
 }
+players/enforcer/stryker
+{
+	{
+		map players/enforcer/default_normal.tga
+		normalmap
+	}	
+}
 players/cybergirl/blue
 {
 	{
@@ -290,5 +297,19 @@ maps/meshes/martian
 		map players/martianenforcer/default_normal.tga
 		normalmap
 		nolightmap
+	}
+}
+models/objects/gibs/mart_gut/skin
+{
+	{
+		map models/objects/gibs/skin_normal.jpg
+		normalmap
+	}
+}
+models/objects/gibs/sm_meat/skin
+{
+	{
+		map models/objects/gibs/skin_normal.jpg
+		normalmap
 	}
 }
