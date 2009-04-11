@@ -659,8 +659,8 @@ void SP_func_rotating (edict_t *ent)
 	else
 		ent->solid = SOLID_BSP;
 
-	if(!ent->spawnflags & 128)
-		ent->s.renderfx = RF_NOSHADOWS; 
+	if(!(ent->spawnflags & 128))
+		ent->s.renderfx = (RF_NOSHADOWS | RF_MINLIGHT); 
 
 	gi.setmodel (ent, ent->model);
 	gi.linkentity (ent);
