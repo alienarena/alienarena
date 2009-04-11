@@ -1,4 +1,4 @@
-qbsp3 lighttest
-qvis3 lighttest
-qrad3 lighttest
+qbsp3 dm-warmachine2k9
+qvis3 dm-warmachine2k9
+qrad3 dm-warmachine2k9
 pause

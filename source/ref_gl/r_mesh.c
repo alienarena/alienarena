@@ -212,7 +212,7 @@ void GL_GetLightVals()
 	}
 
 	dynFactor = 0;
-	if(!(currententity->flags & RF_NOSHADOWS)) {
+	if((!(currententity->flags & RF_NOSHADOWS)) || currententity->flags & RF_MINLIGHT) {
 		dl = r_newrefdef.dlights;
 		//limit to five lights(maybe less)?
 		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) {

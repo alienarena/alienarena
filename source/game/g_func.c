@@ -621,7 +621,7 @@ void rotating_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void SP_func_rotating (edict_t *ent)
 {
-	ent->solid = SOLID_BSP;
+
 	if (ent->spawnflags & 32)
 		ent->movetype = MOVETYPE_STOP;
 	else
@@ -654,10 +654,13 @@ void SP_func_rotating (edict_t *ent)
 	if (ent->spawnflags & 1)
 		ent->use (ent, NULL, NULL);
 
-	if (ent->spawnflags & 64)
-		ent->s.effects |= EF_ANIM_ALL;
-	if (ent->spawnflags & 128)
-		ent->s.effects |= EF_ANIM_ALLFAST;
+	if(ent->spawnflags & 64)
+		ent->solid = SOLID_NOT;
+	else
+		ent->solid = SOLID_BSP;
+
+	if(!ent->spawnflags & 128)
+		ent->s.renderfx = RF_NOSHADOWS; 
 
 	gi.setmodel (ent, ent->model);
 	gi.linkentity (ent);

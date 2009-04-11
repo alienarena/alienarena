@@ -1350,7 +1350,8 @@ void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
 
 	ent->solid = SOLID_NOT; //will need clipping brushes around it
 
-	if(ent->spawnflags & 1)
+	//disable shadows(also disables per-pixel dynamic lighting unless minlight set
+	if(ent->spawnflags & 1) 
 		ent->s.renderfx = RF_NOSHADOWS;
 
 	if(ent->spawnflags & 16)
@@ -1363,6 +1364,10 @@ void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
 	}
 	else //static mesh
 		ent->s.frame = 0;
+ 
+	//allow dynamic per-pixel lighting
+	if(ent->spawnflags & 64)
+		ent->s.renderfx |= RF_MINLIGHT;
 	
 	gi.linkentity (ent);	
 }
