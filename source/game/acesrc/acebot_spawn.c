@@ -778,8 +778,6 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin)
 void ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 {
 	edict_t *bot, *cl_ent;
-	char *info;
-	char sound[64];
 	int	i;
 
 	bot = ACESP_FindFreeClient ();
@@ -821,11 +819,6 @@ void ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 		if (cl_ent->inuse && cl_ent->is_bot)
 			game.num_bots++;
 	}
-
-	//play sound announcing arrival of bot
-	info = Info_ValueForKey (bot->client->pers.userinfo, "name");
-	sprintf(sound, "bots/%s.wav", info);
-	gi.sound (bot, CHAN_AUTO, gi.soundindex(sound), 1, ATTN_NONE, 0);
 
 	ACESP_PutClientInServer (bot,false,0);
 
