@@ -1,4 +1,4 @@
-qbsp3 dm-warmachine2k9
-qvis3 dm-warmachine2k9
-qrad3 dm-warmachine2k9
+qbsp3 dm-deimos2k9
+qvis3 dm-deimos2k9
+qrad3 dm-deimos2k9
 pause
