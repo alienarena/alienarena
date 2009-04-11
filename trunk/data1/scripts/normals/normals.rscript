@@ -313,3 +313,30 @@ models/objects/gibs/sm_meat/skin
 		normalmap
 	}
 }
+maps/meshes/spintube
+{
+	{
+		map maps/meshes/spintube_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/spingear
+{
+	{
+		map maps/meshes/spingear_normal.jpg
+		normalmap
+	}
+	{
+		map maps/meshes/spingear_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
+maps/meshes/weaponpad
+{
+	{
+		map maps/meshes/weaponpad_normal.jpg
+		normalmap
+	}
+}

@@ -433,3 +433,15 @@ maps/meshes/monitor
 		alphamask
 	}
 }
+maps/meshes/spingear
+{
+	{
+		map maps/meshes/spingear.tga
+	}
+	{
+		map maps/meshes/spingear_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
