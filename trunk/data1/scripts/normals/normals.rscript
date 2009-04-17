@@ -340,3 +340,24 @@ maps/meshes/weaponpad
 		normalmap
 	}
 }
+maps/meshes/flagpad
+{
+	{
+		map maps/meshes/flagpad_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/ribtube
+{
+	{
+		map maps/meshes/ribtube_normal.jpg
+		normalmap
+	}
+}
+models/objects/dmspot/skin
+{
+	{
+		map models/objects/dmspot/skin_normal.jpg
+		normalmap
+	}
+}
