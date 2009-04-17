@@ -137,7 +137,7 @@ Design:  John Diamond with input from the community at large.
 Programming:  John Diamond, BlackIce, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Jim Bower, Kyle Hunter, Andres Mejia.
 Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
 Maps:  John Diamond, Dennis "xEMPx" Zedlach
-Textures and Artwork:  John Diamond, Enki, Adam Saizlai
+Textures and Artwork:  John Diamond, Enki, Adam Saizlai, Yves Allaire
 Sounds:  John Diamond, Sound Rangers
 Music:  John Diamond, WhiteLipper, Wooden Productions, Arteria Games, and SoundRangers
 Fonts: John Diamond, the-interceptor from http://www.quakeworld.nu/
