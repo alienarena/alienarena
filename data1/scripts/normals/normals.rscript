@@ -361,3 +361,130 @@ models/objects/dmspot/skin
 		normalmap
 	}
 }
+models/weapons/v_blast/skin
+{
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+		map2 gfx/blasterfx.tga
+		glow
+	}
+}
+models/weapons/v_violator/skin
+{
+	{
+		map models/weapons/v_violator/skin_normal.tga
+		normalmap
+		map2 gfx/violatorfx.tga
+		glow
+	}
+}
+models/weapons/v_hyperb/skin
+{
+	{	
+		map models/weapons/v_hyperb/skin_normal.tga
+		normalmap
+		map2 gfx/disruptormask.tga
+		glow
+	}
+		
+}
+models/weapons/v_rail/skin
+{
+	{
+		map models/weapons/v_rail/skin_normal.tga
+		normalmap
+		map2 gfx/beamfx.tga
+		glow
+	}
+}
+models/weapons/v_bfg/skin
+{	
+	{
+		map models/weapons/v_bfg/skin_normal.tga
+		normalmap
+		map2 gfx/vapormask.tga
+		glow
+	}
+}
+models/weapons/v_shotg/skin
+{
+	{	
+		map models/weapons/v_shotg/skin_normal.tga
+		normalmap
+		map2 gfx/smartgunmask.tga
+		glow
+	}		
+}
+models/weapons/v_rocket/skin
+{
+	{
+		map models/weapons/v_rocket/skin_normal.tga
+		normalmap
+		map2 gfx/rlauncherfx.tga
+		glow
+	}
+}
+players/martianenforcer/gamara
+{
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+		map2 gfx/gamarafx.tga
+		glow
+	}
+}
+players/martianenforcer/weapon
+{
+	{	
+		map models/weapons/v_hyperb/skin_normal.tga
+		normalmap
+		map2 gfx/disruptormask.tga
+		glow
+	}		
+}
+players/martiancyborg/weapon
+{
+	{	
+		map models/weapons/v_hyperb/skin_normal.tga
+		normalmap
+		map2 gfx/disruptormask.tga
+		glow
+	}		
+}
+players/lauren/weapon
+{
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+		map2 gfx/blasterfx.tga
+		glow
+	}
+}
+players/enforcer/weapon
+{
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+		map2 gfx/blasterfx.tga
+		glow
+	}
+}
+players/slashbot/weapon
+{
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+		map2 gfx/blasterfx.tga
+		glow
+	}
+}
+players/commander/weapon
+{
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+		map2 gfx/blasterfx.tga
+		glow
+	}
+}
