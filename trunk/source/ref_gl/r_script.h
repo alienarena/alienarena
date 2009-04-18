@@ -116,6 +116,7 @@ typedef struct rs_stage_s
 	qboolean				beamtype;		// the type of beam(up vs down)
 	
 	qboolean				fx;				// for glsl effect layer
+	qboolean				glow;			// for glsl effect layer
 
 	struct rs_stage_s		*next;			// next stage
 } rs_stage_t;

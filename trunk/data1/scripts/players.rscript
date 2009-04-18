@@ -4,10 +4,6 @@ players/martianenforcer/gamara
 		map players/martianenforcer/gamara.tga
 	}
 	{
-		map players/martianenforcer/default_normal.tga
-		normalmap
-	}
-	{
 		map gfx/gamarafx.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
@@ -32,10 +28,6 @@ players/martianenforcer/weapon
 	{
 		map models/weapons/v_hyperb/skin.tga
 	}
-	{	
-		map models/weapons/v_hyperb/skin_normal.tga
-		normalmap
-	}
 	{
 		map gfx/disruptormask.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
@@ -48,10 +40,6 @@ players/martiancyborg/weapon
 {
 	{
 		map models/weapons/v_hyperb/skin.tga
-	}
-	{	
-		map models/weapons/v_hyperb/skin_normal.tga
-		normalmap
 	}
 	{
 		map gfx/disruptormask.tga
@@ -67,10 +55,6 @@ players/lauren/weapon
 		map models/weapons/v_blast/skin.tga
 	}
 	{
-		map models/weapons/v_blast/skin_normal.tga
-		normalmap
-	}
-	{
 		map gfx/blasterfx.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		alphashift 2 0.01 .8
@@ -81,10 +65,6 @@ players/enforcer/weapon
 {
 	{
 		map models/weapons/v_blast/skin.tga
-	}
-	{
-		map models/weapons/v_blast/skin_normal.tga
-		normalmap
 	}
 	{
 		map gfx/blasterfx.tga
@@ -99,10 +79,6 @@ players/cybergirl/weapon
 		map models/weapons/v_blast/skin.tga
 	}
 	{
-		map models/weapons/v_blast/skin_normal.tga
-		normalmap
-	}
-	{
 		map gfx/blasterfx.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		alphashift 2 0.01 .8
@@ -113,10 +89,6 @@ players/slashbot/weapon
 {
 	{
 		map models/weapons/v_blast/skin.tga
-	}
-	{
-		map models/weapons/v_blast/skin_normal.tga
-		normalmap
 	}
 	{
 		map gfx/blasterfx.tga

@@ -236,6 +236,7 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->beam = false;
 	stage->beamtype = 0;
 	stage->fx = false;
+	stage->glow = false;
 
 	stage->lightmap = true;
 
@@ -523,6 +524,7 @@ scriptname
 		beam
 		beamtype
 		fx
+		glow
 	}
 }
 */
@@ -810,6 +812,10 @@ void rs_stage_fx (rs_stage_t *stage, char **token)
 {
 	stage->fx = true;
 }
+void rs_stage_glow (rs_stage_t *stage, char **token)
+{
+	stage->glow = true;
+}
 static rs_stagekey_t rs_stagekeys[] = 
 {
 	{	"colormap",		&rs_stage_colormap		},
@@ -839,6 +845,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"beam",			&rs_stage_beam			},
 	{	"beamtype",		&rs_stage_beamtype		},
 	{	"fx",			&rs_stage_fx			},
+	{	"glow",			&rs_stage_glow			},
 
 	{	NULL,			NULL					}
 };

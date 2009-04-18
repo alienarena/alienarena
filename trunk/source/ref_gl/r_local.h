@@ -548,6 +548,7 @@ extern GLuint		g_location_meshTangent;
 extern GLuint		g_location_meshTime;
 extern GLuint		g_location_meshFog;
 extern GLuint		g_location_useFX;
+extern GLuint		g_location_useGlow;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 
