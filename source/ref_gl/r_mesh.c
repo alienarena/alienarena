@@ -167,14 +167,14 @@ vec3_t	lightPosition;
 float	dynFactor;
 void GL_GetLightVals()
 {
-	int i, j, lnum, numlights;
+	int i, j, lnum;
 	dlight_t	*dl;
 	worldLight_t *wl;
 	float dist, xdist, ydist;
 	vec3_t	temp, lightAdd;
 	trace_t r_trace;
 	vec3_t mins, maxs;
-	int weight;
+	float numlights, weight;
 	
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
@@ -200,14 +200,13 @@ void GL_GetLightVals()
 		if(r_trace.fraction == 1.0) {
 			VectorSubtract(currententity->origin, wl->origin, temp);
 			dist = VectorLength(temp);
-			weight = (int)5000/dist;
-			if (weight == 0)
-				weight = 1;
-			if(dist < 1000) { //fairly large distance
-				for(j = 0; j < 3; j++) 
-					lightAdd[j] += wl->origin[j]*weight;
-				numlights+=weight;				
-			}
+			if(dist == 0)
+				dist = 1;
+			dist = dist*dist;
+			weight = (int)250000/dist;
+			for(j = 0; j < 3; j++) 
+				lightAdd[j] += wl->origin[j]*weight;
+			numlights+=weight;				
 		}
 	}
 
@@ -249,7 +248,7 @@ void GL_GetLightVals()
 		}
 	}
 
-	if(numlights) {
+	if(numlights > 0.0) {
 		for(i = 0; i < 3; i++) 
 			lightPosition[i] = lightAdd[i]/numlights;
 	}
