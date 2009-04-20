@@ -354,6 +354,13 @@ maps/meshes/ribtube
 		normalmap
 	}
 }
+maps/meshes/bigribpipe
+{
+	{
+		map maps/meshes/bigribpipe_normal.jpg
+		normalmap
+	}
+}
 models/objects/dmspot/skin
 {
 	{

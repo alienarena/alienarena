@@ -26824,16 +26824,16 @@
 {
 "classname" "misc_mapmodel"
 "angle" "270"
-"spawnflags" "1"
-"model" "maps/meshes/metpipe2.md2"
+"spawnflags" "65"
+"model" "maps/meshes/bigribpipe.md2"
 "origin" "272 344 -216"
 }
 // entity 92
 {
 "classname" "misc_mapmodel"
 "angle" "270"
-"spawnflags" "1"
-"model" "maps/meshes/metpipe2.md2"
+"spawnflags" "65"
+"model" "maps/meshes/bigribpipe.md2"
 "origin" "272 232 -216"
 }
 // entity 93
