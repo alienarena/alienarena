@@ -27823,7 +27823,7 @@
 // entity 171
 {
 "origin" "-1683 1042 48"
-"model" "maps/meshes/metpipe2.md2"
+"model" "maps/meshes/bigribpipe.md2"
 "spawnflags" "1"
 "angle" "48"
 "classname" "misc_mapmodel"
@@ -28415,4 +28415,40 @@
 "origin" "-156 1596 204"
 "light" "25"
 "classname" "light"
+}
+// entity 246
+{
+"origin" "-1080 1600 24"
+"angle" "180"
+"classname" "info_player_deathmatch"
+}
+// entity 247
+{
+"classname" "info_player_deathmatch"
+"angle" "180"
+"origin" "-1528 944 24"
+}
+// entity 248
+{
+"origin" "-2312 120 24"
+"angle" "360"
+"classname" "info_player_deathmatch"
+}
+// entity 249
+{
+"classname" "info_player_deathmatch"
+"angle" "90"
+"origin" "-1488 16 24"
+}
+// entity 250
+{
+"origin" "-1384 368 -232"
+"angle" "360"
+"classname" "info_player_deathmatch"
+}
+// entity 251
+{
+"classname" "info_player_deathmatch"
+"angle" "360"
+"origin" "-2320 368 -200"
 }

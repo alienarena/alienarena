@@ -1120,7 +1120,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 			if(stage->normalmap) {
 
-				vec3_t lightVec, temp, lightVal;
+				vec3_t lightVec, lightVal;
 
 				GL_GetLightVals();
 
@@ -1151,11 +1151,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				}
 				else { 
 					//simple directional(relative light position)
-					VectorSubtract(lightPosition, currententity->origin, temp);
+					VectorSubtract(lightPosition, currententity->origin, lightVec);
 					if(dynFactor == 0.0) //do for world lights only
+					{
+						VectorMA(lightPosition, 1.0, lightVec, lightPosition);
 						R_ModelViewTransform(lightPosition, lightVec);
-					else
-						VectorCopy(temp, lightVec);
+					}
+
 					//brighten things slightly 
 					for (i = 0; i < 3; i++ )
 						lightVal[i] *= 1.25;
