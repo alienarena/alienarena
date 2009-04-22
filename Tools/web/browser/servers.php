@@ -133,8 +133,8 @@ function GenerateLiveServerTable(&$control)
 		echo " {$svinfo_row['ip']}:{$svinfo_row['port']}";
 		*/
 		mysql_free_result($pl_result);
-		echo "<tr><td colspan=3></td></tr>";
-		echo "<tr><td colspan=3></td></tr>";
+		echo "<tr><td colspan=5></td></tr>";
+		echo "<tr><td colspan=5></td></tr>";
 	} 
 
 	mysql_free_result($sv_result);
