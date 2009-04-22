@@ -263,6 +263,77 @@ void R_ModelViewTransform(const vec3_t in, vec3_t out){
     out[2] = m[2] * v[0] + m[6] * v[1] + m[10] * v[2] + m[14]; 
 } 
 
+
+/*
+** R_CullAliasModel
+*/
+static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
+{
+	int i;
+	vec3_t	vectors[3];
+	vec3_t  angles;
+	trace_t r_trace;
+	vec3_t	dist;
+
+	if (r_worldmodel ) {
+		//occulusion culling - why draw entities we cannot see?
+	
+		r_trace = CM_BoxTrace(r_origin, e->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+		if(r_trace.fraction != 1.0)
+			return true;
+	}
+
+	VectorSubtract(r_origin, e->origin, dist);
+
+	/*
+	** rotate the bounding box
+	*/
+	VectorCopy( e->angles, angles );
+	angles[YAW] = -angles[YAW];
+	AngleVectors( angles, vectors[0], vectors[1], vectors[2] );
+
+	for ( i = 0; i < 8; i++ )
+	{
+		vec3_t tmp;
+
+		VectorCopy( currentmodel->bbox[i], tmp );
+
+		bbox[i][0] = DotProduct( vectors[0], tmp );
+		bbox[i][1] = -DotProduct( vectors[1], tmp );
+		bbox[i][2] = DotProduct( vectors[2], tmp );
+
+		VectorAdd( e->origin, bbox[i], bbox[i] );
+	}
+
+	{
+		int p, f, aggregatemask = ~0;
+
+		for ( p = 0; p < 8; p++ )
+		{
+			int mask = 0;
+
+			for ( f = 0; f < 4; f++ )
+			{
+				float dp = DotProduct( frustum[f].normal, bbox[p] );
+
+				if ( ( dp - frustum[f].dist ) < 0 )
+				{
+					mask |= ( 1 << f );
+				}
+			}
+
+			aggregatemask &= mask;
+		}
+
+		if ( aggregatemask && (VectorLength(dist) > 150)) //so shadows don't blatantly disappear when out of frustom
+		{
+			return true;
+		}
+
+		return false;
+	}
+}
+
 //legacy code - this is for ancient hardware that cannot handle GL_TRIANGLE useage
 void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 {
@@ -1493,74 +1564,6 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 	qglDepthMask(1);
 	qglColor4f(1,1,1,1);
 	if (have_stencil) qglDisable(GL_STENCIL_TEST);
-}
-
-/*
-** R_CullAliasModel
-*/
-static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
-{
-	int i;
-	vec3_t		vectors[3];
-	vec3_t angles;
-	trace_t r_trace;
-
-	if (r_worldmodel ) {
-		//occulusion culling - why draw entities we cannot see?
-	
-		r_trace = CM_BoxTrace(r_origin, e->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
-		
-		if(r_trace.fraction != 1.0)
-			return true;
-	}
-
-	/*
-	** rotate the bounding box
-	*/
-	VectorCopy( e->angles, angles );
-	angles[YAW] = -angles[YAW];
-	AngleVectors( angles, vectors[0], vectors[1], vectors[2] );
-
-	for ( i = 0; i < 8; i++ )
-	{
-		vec3_t tmp;
-
-		VectorCopy( currentmodel->bbox[i], tmp );
-
-		bbox[i][0] = DotProduct( vectors[0], tmp );
-		bbox[i][1] = -DotProduct( vectors[1], tmp );
-		bbox[i][2] = DotProduct( vectors[2], tmp );
-
-		VectorAdd( e->origin, bbox[i], bbox[i] );
-	}
-
-	{
-		int p, f, aggregatemask = ~0;
-
-		for ( p = 0; p < 8; p++ )
-		{
-			int mask = 0;
-
-			for ( f = 0; f < 4; f++ )
-			{
-				float dp = DotProduct( frustum[f].normal, bbox[p] );
-
-				if ( ( dp - frustum[f].dist ) < 0 )
-				{
-					mask |= ( 1 << f );
-				}
-			}
-
-			aggregatemask &= mask;
-		}
-
-		if ( aggregatemask )
-		{
-			return true;
-		}
-
-		return false;
-	}
 }
 
 /*
