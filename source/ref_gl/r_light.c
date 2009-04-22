@@ -1131,13 +1131,14 @@ float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type)
 
 		for (i=0; i<r_numWorldLights; i++) {
 
-			wl = &r_worldLights[i];
+			wl = &r_worldLights[i];			
+			
 			VectorSubtract (wl->origin, pos, dist);
-			add = sqrt(wl->intensity - VectorLength(dist)/3);
+			add = sqrt(wl->intensity*10 - VectorLength(dist));
 			VectorNormalize(dist);
-			if (add > 0)
+			if (add > 0 && wl->origin[2] > pos[2]) 
 			{
-				VectorScale(dist, add, dist);
+				VectorScale(dist, sqrt(add), dist);
 				VectorAdd (lightAdd, dist, lightAdd);
 				lintens = wl->intensity;
 				if(lintens < 300)
@@ -1145,6 +1146,7 @@ float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type)
 				intens+=(lintens/1000 - VectorLength(dist)/30); //darken shadows where light is stronger
 			}
 		}
+
 		//cap some limits of lightness, darkness, subtley.
 		if (intens < 0.3)
 			intens = 0.3;
