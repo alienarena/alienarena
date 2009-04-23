@@ -1,4 +1,4 @@
-qbsp3 ctf-frost2k9
-qvis3 ctf-frost2k9
-qrad3 ctf-frost2k9
+qbsp3 dm-invasion
+qvis3 dm-invasion
+qrad3 dm-invasion
 pause
