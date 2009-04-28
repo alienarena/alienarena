@@ -1363,8 +1363,8 @@ void R_DrawVegetationSurface ( void )
 
 	grass = r_grasses;
 
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs, 0, 0, 0);	
+	VectorSet(mins, -16, -16, -4);
+	VectorSet(maxs,	16, 16, 28);	
 
     for (i=0; i<r_numgrasses; i++, grass++) {
 
@@ -1384,7 +1384,7 @@ void R_DrawVegetationSurface ( void )
 								   //so image size/16 would work.
 
 		if(!grass->type) {
-			r_trace = CM_BoxTrace(r_origin, origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
+			r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
 			visible = r_trace.fraction == 1.0;
 		}
 		else
