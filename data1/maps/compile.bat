@@ -1,4 +1,4 @@
-qbsp3 dm-invasion
-qvis3 dm-invasion
-qrad3 dm-invasion
+qbsp3 dm-warmachine2k9
+qvis3 dm-warmachine2k9
+qrad3 dm-warmachine2k9
 pause
