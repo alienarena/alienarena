@@ -1679,6 +1679,7 @@ void SP_func_train (edict_t *self)
 	if(self->spawnflags & 16)
 		self->s.renderfx = RF_TRANSLUCENT;
 
+	self->s.renderfx |= RF_NOSHADOWS; //just too unpredictable and odd
 
 	self->moveinfo.sound_middle = gi.soundindex ("world/turbine1.wav");
 

@@ -22,6 +22,12 @@ textures/arena7/light10
 		lensflare
 	}
 }
+textures/arena6/ice
+{
+	{		
+		lensflare
+	}
+}
 textures/arena9/trim2
 {
 	{
@@ -68,6 +74,12 @@ textures/arena9/roundlight
 		scale static 10 static 10
 		colormap 1 1 1
 		beam
+		lensflare
+	}
+}
+textures/rage/light10
+{
+	{
 		lensflare
 	}
 }
