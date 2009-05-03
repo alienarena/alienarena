@@ -2059,3 +2059,5 @@ void SP_func_killbox (edict_t *ent)
 	ent->svflags = SVF_NOCLIENT;
 }
 
+
+
