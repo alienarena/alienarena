@@ -1371,3 +1371,36 @@ void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
 	
 	gi.linkentity (ent);	
 }
+
+void watersplash_think (edict_t *ent)
+{
+	vec3_t up;
+
+	up[0] = 0;
+	up[1] = 0;
+	up[2] = 1;
+
+	//write effect
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_SPLASH);
+	gi.WriteByte (8);
+	gi.WritePosition (ent->s.origin);
+	gi.WriteDir (up);
+	gi.WriteByte (SPLASH_BLUE_WATER); //we should allow spawnflags to change this 
+	gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+	ent->nextthink = level.time + 1.0;
+}
+
+void SP_misc_watersplash (edict_t *ent)
+{
+	gi.setmodel(ent, NULL);
+	ent->solid = SOLID_NOT;
+	ent->movetype = MOVETYPE_NONE;
+	ent->takedamage = DAMAGE_NO;
+
+	ent->think = watersplash_think;
+	ent->nextthink = level.time + 0.5 + random();
+
+	gi.linkentity (ent);
+}
