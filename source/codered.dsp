@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /G5 /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "ARENA" /YX /FD /c
+# ADD CPP /nologo /G5 /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "ARENA" /D "AL_NO_PROTOTYPES" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -222,6 +222,14 @@ SOURCE=.\win32\q_shwin.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\client\qal.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\win32\qal_win.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\win32\qgl_win.c
 # End Source File
 # Begin Source File
@@ -294,19 +302,11 @@ SOURCE=.\ref_gl\r_warp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\client\snd_dma.c
+SOURCE=.\client\snd_openal.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\client\snd_mem.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\client\snd_mix.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\win32\snd_win.c
+SOURCE=.\client\snd_wav.c
 # End Source File
 # Begin Source File
 
