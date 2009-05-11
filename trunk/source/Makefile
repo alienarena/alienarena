@@ -25,6 +25,9 @@ BUILD?=ALL
 # Build binary that uses SDL for sound (when BUILD is "ALL" or "CLIENT").
 SDLSOUND?=yes
 
+# Build binary that uses OpenAL for sound (when BUILD is "ALL" or "CLIENT").
+OPENALSOUND?=yes
+
 # Adds DATADIR/LIBDIR (see below) to the data and library search path.
 WITH_DATADIR?=no
 WITH_LIBDIR?=no
@@ -114,6 +117,9 @@ GLXLDFLAGS=-L$(X11BASE)/$(_LIB) -L$(LOCALBASE)/$(_LIB) -lX11 -lXext -lXxf86dga -
 SDLCFLAGS=$(shell sdl-config --cflags)
 SDLLDFLAGS=$(shell sdl-config --libs)
 
+OPENALCFLAGS=-I/usr/include/AL
+OPENALLDFLAGS=-lopenal -lpthread
+
 SHLIBEXT=so
 SHLIBCFLAGS=-fPIC
 SHLIBLDFLAGS=-shared
@@ -156,12 +162,17 @@ endif
 
 ifeq ($(strip $(BUILD)),DEDICATED)
 	SDLSOUND=no
+	OPENALSOUND=no
 	TARGETS+=$(BUILDDIR)/crded
 endif
 
 ifeq ($(strip $(SDLSOUND)),yes)
 	TARGETS+=$(BUILDDIR)/crx.sdl
 endif
+
+ifeq ($(strip $(OPENALSOUND)),yes)
+ 	TARGETS+=$(BUILDDIR)/crxal
+ endif
 
 build-release:
 	@mkdir -p $(BUILD_RELEASE_DIR) \
@@ -206,9 +217,6 @@ CODERED_OBJS = \
 	$(BUILDDIR)/client/console.o \
 	$(BUILDDIR)/client/keys.o \
 	$(BUILDDIR)/client/menu.o \
-	$(BUILDDIR)/client/snd_dma.o \
-	$(BUILDDIR)/client/snd_mem.o \
-	$(BUILDDIR)/client/snd_mix.o \
 	$(BUILDDIR)/client/qmenu.o \
 	\
 	$(BUILDDIR)/client/cmd.o \
@@ -257,15 +265,26 @@ CODERED_OBJS = \
 	\
 	$(BUILDDIR)/ref_gl/qgl_unix.o
 
-
 REF_GL_GLX_OBJS = \
 	$(BUILDDIR)/ref_gl/gl_glx.o
 
 SOUND_OSS_OBJS = \
-	$(BUILDDIR)/client/snd_unix.o
+ 	$(BUILDDIR)/client/snd_unix.o \
+ 	$(BUILDDIR)/client/snd_dma.o \
+ 	$(BUILDDIR)/client/snd_mem.o \
+ 	$(BUILDDIR)/client/snd_mix.o
 
 SOUND_SDL_OBJS = \
-	$(BUILDDIR)/client/snd_sdl.o
+ 	$(BUILDDIR)/client/snd_sdl.o \
+ 	$(BUILDDIR)/client/snd_dma.o \
+ 	$(BUILDDIR)/client/snd_mem.o \
+ 	$(BUILDDIR)/client/snd_mix.o
+
+SOUND_OPENAL_OBJS = \
+	$(BUILDDIR)/client/qal_unix.o \
+	$(BUILDDIR)/client/qal.o \
+	$(BUILDDIR)/client/snd_openal.o \
+	$(BUILDDIR)/client/snd_wav.o
 
 CODERED_AS_OBJS = \
 	$(BUILDDIR)/client/snd_mixa.o
@@ -275,6 +294,10 @@ $(BUILDDIR)/crx : $(CODERED_OBJS) $(SOUND_OSS_OBJS) $(CODERED_AS_OBJS) $(REF_GL_
 
 $(BUILDDIR)/crx.sdl : $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
 	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(SDLLDFLAGS) $(CURLLDFLAGS) $(JPEGLDFLAGS)
+
+$(BUILDDIR)/crxal : $(CODERED_OBJS) $(SOUND_OPENAL_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
+	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_OPENAL_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(OPENALLDFLAGS) $(CURLLDFLAGS) $(JPEGLDFLAGS)
+
 
 $(BUILDDIR)/client/cl_cin.o :     $(CLIENT_DIR)/cl_cin.c
 	$(DO_CC)
@@ -328,6 +351,15 @@ $(BUILDDIR)/client/snd_mem.o :    $(CLIENT_DIR)/snd_mem.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/snd_mix.o :    $(CLIENT_DIR)/snd_mix.c
+	$(DO_CC)
+
+$(BUILDDIR)/client/qal.o :        $(CLIENT_DIR)/qal.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/snd_openal.o : $(CLIENT_DIR)/snd_openal.c
+	$(DO_CC)
+
+$(BUILDDIR)/client/snd_wav.o :    $(CLIENT_DIR)/snd_wav.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/qmenu.o :      $(CLIENT_DIR)/qmenu.c
@@ -401,6 +433,9 @@ $(BUILDDIR)/client/snd_unix.o :  $(UNIX_DIR)/snd_unix.c
 
 $(BUILDDIR)/client/snd_mixa.o :   $(UNIX_DIR)/snd_mixa.s
 	$(DO_AS)
+
+$(BUILDDIR)/client/qal_unix.o :  $(UNIX_DIR)/qal_unix.c
+	$(DO_CC)
 
 $(BUILDDIR)/client/sys_unix.o :  $(UNIX_DIR)/sys_unix.c
 	$(DO_CC)
@@ -916,7 +951,8 @@ clean2:
 	$(REF_GL_OBJS) \
 	$(REF_GL_GLX_OBJS) \
 	$(SOUND_OSS_OBJS) \
-	$(SOUND_SDL_OBJS)
+	$(SOUND_SDL_OBJS) \
+	$(SOUND_OPENAL_OBJS)
 
 distclean: clean
 	rm -rf $(BUILD_RELEASE_DIR)
@@ -930,6 +966,7 @@ install:
 	strip ../crded
 	strip ../crx
 	strip ../crx.sdl
+	strip ../crxal
 	strip ../arena/game.$(SHLIBEXT)
 	strip ../data1/game.$(SHLIBEXT)
 
@@ -943,6 +980,7 @@ uninstall:
 	rm -f ../arena/game.$(SHLIBEXT)
 	rm -f ../crx
 	rm -f ../crx.sdl
+	rm -f ../crxal
 	rm -f ../crded
 
 # Dependencies
@@ -972,3 +1010,4 @@ uninstall:
 	rm -f $$tmpfile
 
 .PHONY: clean clean-debug clean-release clean2 distclean install install-debug uninstall build-release build-debug all targets
+
