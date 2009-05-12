@@ -176,7 +176,6 @@ cvar_t	*r_nocull;
 cvar_t	*r_lerpmodels;
 cvar_t	*r_lefthand;
 
-cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light level
 cvar_t  *r_wave; // Water waves
 // Vic - begin
 
@@ -1311,42 +1310,6 @@ void	R_SetGL2D (void)
 }
 
 /*
-====================
-R_SetLightLevel
-
-====================
-*/
-void R_SetLightLevel (void)
-{
-	vec3_t		shadelight;
-
-	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-
-	// save off light value for server to look at (BIG HACK!)
-
-	R_LightPoint (r_newrefdef.vieworg, shadelight, true);
-
-	// pick the greatest component, which should be the same
-	// as the mono value returned by software
-	if (shadelight[0] > shadelight[1])
-	{
-		if (shadelight[0] > shadelight[2])
-			r_lightlevel->value = 150*shadelight[0];
-		else
-			r_lightlevel->value = 150*shadelight[2];
-	}
-	else
-	{
-		if (shadelight[1] > shadelight[2])
-			r_lightlevel->value = 150*shadelight[1];
-		else
-			r_lightlevel->value = 150*shadelight[2];
-	}
-
-}
-
-/*
 @@@@@@@@@@@@@@@@@@@@@
 R_RenderFrame
 
@@ -1356,8 +1319,6 @@ R_RenderFrame
 void R_RenderFrame (refdef_t *fd)
 {
 	R_RenderView( fd );
-
-	R_SetLightLevel ();
 
 	R_SetGL2D ();
 }
@@ -1378,7 +1339,6 @@ void R_Register( void )
 	r_lerpmodels = Cvar_Get ("r_lerpmodels", "1", 0);
 	r_speeds = Cvar_Get ("r_speeds", "0", 0);
 
-	r_lightlevel = Cvar_Get ("r_lightlevel", "0", 0);
 	r_wave = Cvar_Get ("r_wave", "2", CVAR_ARCHIVE); // Water waves
 
 	gl_nosubimage = Cvar_Get( "gl_nosubimage", "0", 0 );

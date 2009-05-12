@@ -374,9 +374,6 @@ void CL_FinishMove (usercmd_t *cmd)
 	cmd->impulse = in_impulse;
 	in_impulse = 0;
 
-// send the ambient light level at the player's current position
-	cmd->lightlevel = (byte)cl_lightlevel->value;
-
 	if (((in_attack.state & 2) || (in_use.state & 2)))
 		send_packet_now = true;
 }

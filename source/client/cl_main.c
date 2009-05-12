@@ -87,8 +87,6 @@ cvar_t	*m_yaw;
 cvar_t	*m_forward;
 cvar_t	*m_side;
 
-cvar_t	*cl_lightlevel;
-
 //
 // userinfo
 //
@@ -1679,8 +1677,6 @@ void CL_InitLocal (void)
 
 	rcon_client_password = Cvar_Get ("rcon_password", "", 0);
 	rcon_address = Cvar_Get ("rcon_address", "", 0);
-
-	cl_lightlevel = Cvar_Get ("r_lightlevel", "0", 0);
 
 	//
 	// userinfo

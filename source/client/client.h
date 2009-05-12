@@ -298,8 +298,6 @@ extern	cvar_t	*m_side;
 
 extern	cvar_t	*freelook;
 
-extern	cvar_t	*cl_lightlevel;	// FIXME HACK
-
 extern	cvar_t	*cl_paused;
 extern	cvar_t	*cl_timedemo;
 
