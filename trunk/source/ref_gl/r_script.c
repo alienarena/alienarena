@@ -1359,12 +1359,13 @@ void R_DrawVegetationSurface ( void )
 	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
 	float	*corner0 = corner[0];
 	qboolean visible;
+	float	lightLevel[3];
 	trace_t r_trace;
 
 	grass = r_grasses;
 
-	VectorSet(mins, -16, -16, -4);
-	VectorSet(maxs,	16, 16, 28);	
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs,	0, 0, 0);	
 
     for (i=0; i<r_numgrasses; i++, grass++) {
 
@@ -1391,14 +1392,23 @@ void R_DrawVegetationSurface ( void )
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 
 		if(visible) {
+	
 			//render grass polygon
 			qglDepthMask( GL_FALSE );	 	
 			qglEnable( GL_BLEND);
-			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );	
-
-			qglColor4f( grass->color[0],grass->color[1],grass->color[2], 1 );
-
+			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+					
 			GL_Bind(grass->texnum);
+
+			if(!grass->type) { //if not leaves, modulate by light values
+				if(gl_dynamic->value)
+					R_LightPoint (origin, lightLevel, true);
+				else
+					R_LightPoint (origin, lightLevel, false);
+				VectorScale(lightLevel, 2.0, lightLevel);
+				qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
+				GL_TexEnv( GL_MODULATE );
+			}
 
 			qglBegin ( GL_QUADS );
 

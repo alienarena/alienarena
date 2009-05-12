@@ -295,7 +295,7 @@ void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic)
 	VectorClear ( dlightcolor );
 	for (lnum=0 ; lnum<r_newrefdef.num_dlights ; lnum++, dl++)
 	{
-		VectorSubtract (currententity->origin,
+		VectorSubtract (p,
 						dl->origin,
 						dist);
 		add = dl->intensity - VectorLength(dist);

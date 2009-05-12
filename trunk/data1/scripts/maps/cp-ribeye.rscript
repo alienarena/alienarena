@@ -23,7 +23,7 @@ textures/arena8/grass2
 	{
 		map gfx/grass.tga
 		scale static 4 static 4
-		colormap 0 1 0
+		colormap 2 2 2
 		grass
 		grasstype 0
 	}
