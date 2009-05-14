@@ -401,7 +401,7 @@ void CL_ParseTEnt (void)
 		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL); 
 		if(trace.contents)
 			CL_BeamgunMark(pos2, trace.plane.normal, 0.4, true);
-		S_StartSound (pos, 0, 0, cl_sfx_railg, 1, ATTN_NONE, 0);
+		S_StartSound (pos, 0, 0, cl_sfx_railg, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_EXPLOSION2: //using this for a "dust" explosion, ie big, big footsteps effect
