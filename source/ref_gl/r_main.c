@@ -127,6 +127,7 @@ glstate_t		gl_state;
 cvar_t	*gl_normalmaps;
 cvar_t	*gl_parallaxmaps;
 cvar_t  *gl_specular;
+cvar_t	*gl_glsl_postprocess;
 cvar_t	*gl_arb_fragment_program; 
 cvar_t	*gl_glsl_shaders;
 
@@ -948,7 +949,6 @@ void R_PolyBlend (void)
 	if (!v_blend[3])
 		return;
 
-	//to do:  //we need all flashes for this, but only pain should get distortion
 	if(!r_drawing_fbeffect) {
 		if(v_blend[0] > 2*v_blend[1] && v_blend[0] > 2*v_blend[2]) { 
 			r_drawing_fbeffect = true;
@@ -1431,6 +1431,7 @@ void R_Register( void )
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
 	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE); 
 	gl_specular = Cvar_Get("gl_specular", "0", CVAR_ARCHIVE);
+	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
