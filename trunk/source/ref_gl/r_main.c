@@ -107,6 +107,7 @@ GLuint		g_location_distortTex;
 GLuint		g_location_frametime;
 GLuint		g_location_fxType;
 GLuint		g_location_fxPos;
+GLuint		g_location_fxColor;
 
 void R_Clear (void);
 
@@ -932,6 +933,9 @@ void R_DrawParticles (void)
 		qglEnable(GL_FOG);
 }
 
+extern int r_drawing_fbeffect;
+extern int	r_fbFxType;
+extern float r_fbeffectTime;
 /*
 ============
 R_PolyBlend
@@ -943,6 +947,13 @@ void R_PolyBlend (void)
 		return;
 	if (!v_blend[3])
 		return;
+
+	//to do:  //we need all flashes for this, but only pain should get distortion
+	if(v_blend[0] > 2*v_blend[1] && v_blend[0] > 2*v_blend[2]) { 
+		r_drawing_fbeffect = true;
+		r_fbFxType = 2; //FLASH DISTORTION
+		r_fbeffectTime = rs_realtime;
+	}
 
 	qglDisable (GL_ALPHA_TEST);
 	qglEnable (GL_BLEND);
@@ -2216,6 +2227,7 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_frametime = glGetUniformLocationARB( g_fbprogramObj, "frametime" );
 		g_location_fxType = glGetUniformLocationARB( g_fbprogramObj, "fxType" );
 		g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" ); 
+		g_location_fxColor = glGetUniformLocationARB( g_fbprogramObj, "fxColor" );
 	
 	}
 	else {

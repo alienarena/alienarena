@@ -3,6 +3,7 @@ uniform sampler2D distortiontexture;
 uniform float frametime;
 uniform vec2 fxPos;
 uniform int fxType;
+uniform vec3 fxColor;
 
 void main(void)
 {
@@ -21,5 +22,8 @@ void main(void)
 	noiseVec = (noiseVec * 2.0 - 0.5) * 0.035;
 	
 	gl_FragColor = texture2D(fbtexture, gl_TexCoord[0].st + noiseVec.xy);
+
+	if(fxType == 2)
+		gl_FragColor = mix(gl_FragColor, vec4(fxColor, 1.0), 0.5);
 
 }
