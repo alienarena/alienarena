@@ -289,6 +289,8 @@ float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type);
 void R_ReadFogScript(char config_file[128]);
 void R_ReadMusicScript(char config_file[128]);
 #endif
+void R_GLSLPostProcess(void);
+void R_FB_InitTextures(void);
 
 //BLOOMS[start]
 //
@@ -504,6 +506,7 @@ extern unsigned int g_water_program_id;
 extern GLhandleARB	g_programObj;
 extern GLhandleARB	g_waterprogramObj;
 extern GLhandleARB	g_meshprogramObj;
+extern GLhandleARB	g_fbprogramObj;
 
 extern GLhandleARB	g_vertexShader;
 extern GLhandleARB	g_fragmentShader;
@@ -549,6 +552,13 @@ extern GLuint		g_location_meshTime;
 extern GLuint		g_location_meshFog;
 extern GLuint		g_location_useFX;
 extern GLuint		g_location_useGlow;
+
+//fullscreen
+extern GLuint		g_location_framebuffTex;
+extern GLuint		g_location_distortTex;
+extern GLuint		g_location_frametime;
+extern GLuint		g_location_fxType;
+extern GLuint		g_location_fxPos;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 

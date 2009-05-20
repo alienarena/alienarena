@@ -46,6 +46,7 @@ PFNGLGETINFOLOGARBPROC				glGetInfoLogARB				= NULL;
 PFNGLLINKPROGRAMARBPROC				glLinkProgramARB			= NULL;
 PFNGLGETUNIFORMLOCATIONARBPROC		glGetUniformLocationARB		= NULL;
 PFNGLUNIFORM3FARBPROC				glUniform3fARB				= NULL;
+PFNGLUNIFORM2FARBPROC				glUniform2fARB				= NULL;
 PFNGLUNIFORM1IARBPROC				glUniform1iARB				= NULL;
 PFNGLUNIFORM1FARBPROC				glUniform1fARB				= NULL;
 PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB		= NULL;
@@ -53,6 +54,7 @@ PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB		= NULL;
 GLhandleARB g_programObj;
 GLhandleARB g_waterprogramObj;
 GLhandleARB g_meshprogramObj;
+GLhandleARB g_fbprogramObj;
 
 GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
@@ -98,6 +100,13 @@ GLuint		g_location_meshTime;
 GLuint		g_location_meshFog;
 GLuint		g_location_useFX;
 GLuint		g_location_useGlow;
+
+//fullscreen
+GLuint		g_location_framebuffTex;
+GLuint		g_location_distortTex;
+GLuint		g_location_frametime;
+GLuint		g_location_fxType;
+GLuint		g_location_fxPos;
 
 void R_Clear (void);
 
@@ -1266,9 +1275,11 @@ void R_RenderView (refdef_t *fd)
 
 	R_BloomBlend( fd );//BLOOMS
 
-	R_Flash();
-
 	R_RenderSun();
+
+	R_GLSLPostProcess();
+
+	R_Flash();
 
 	if (r_speeds->value == 1 )
 	{ // display r_speeds 'wpoly' and 'epoly'counters (value==2 puts on HUD)
@@ -1872,6 +1883,7 @@ int R_Init( void *hinstance, void *hWnd )
 		glLinkProgramARB          = (PFNGLLINKPROGRAMARBPROC)qwglGetProcAddress("glLinkProgramARB");
 		glGetUniformLocationARB   = (PFNGLGETUNIFORMLOCATIONARBPROC)qwglGetProcAddress("glGetUniformLocationARB");
 		glUniform3fARB            = (PFNGLUNIFORM3FARBPROC)qwglGetProcAddress("glUniform3fARB");
+		glUniform2fARB            = (PFNGLUNIFORM2FARBPROC)qwglGetProcAddress("glUniform2fARB");
 		glUniform1iARB            = (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
 		glUniform1fARB		  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fARB");
 		glUniformMatrix3fvARB	  = (PFNGLUNIFORMMATRIX3FVARBPROC)qwglGetProcAddress("glUniformMatrix3fvARB");
@@ -2132,6 +2144,79 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
 		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
 		g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow");
+
+		//fullscreen
+
+		g_fbprogramObj = glCreateProgramObjectARB();
+	
+		//
+		// Vertex shader
+		//
+
+		len = FS_LoadFile("scripts/fb_vertex_shader.glsl", &shader_assembly);
+
+		if (len > 0) {
+			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+			shaderStrings[0] = (char*)shader_assembly;
+			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+			glCompileShaderARB( g_vertexShader);
+			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		}
+		else {
+			Com_Printf("...Unable to Locate Framebuffer Vertex Shader");
+			nResult = 0;
+		}
+
+		if( nResult )
+			glAttachObjectARB( g_fbprogramObj, g_vertexShader );
+		else
+		{
+			Com_Printf("...Framebuffer Vertex Shader Compile Error");
+		}
+
+		//
+		// Fragment shader
+		//
+		len = FS_LoadFile("scripts/fb_fragment_shader.glsl", &shader_assembly);
+		
+		if(len > 0) {
+			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+			shaderStrings[0] = (char*)shader_assembly;
+			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+			glCompileShaderARB( g_fragmentShader );
+			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		}
+		else {
+			Com_Printf("...Unable to Locate Framebuffer Fragment Shader");
+			nResult = 0;
+		}
+
+		if( nResult )
+			glAttachObjectARB( g_fbprogramObj, g_fragmentShader );
+		else
+		{
+			Com_Printf("...Framebuffer Fragment Shader Compile Error");
+		}
+
+		glLinkProgramARB( g_fbprogramObj );
+		glGetObjectParameterivARB( g_fbprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+		if( !nResult )
+		{
+			glGetInfoLogARB( g_fbprogramObj, sizeof(str), NULL, str );
+			Com_Printf("...Linking Error");
+		}
+
+		//
+		// Locate some parameters by name so we can set them later...
+		//
+
+		g_location_framebuffTex = glGetUniformLocationARB( g_fbprogramObj, "fbtexture" );
+		g_location_distortTex = glGetUniformLocationARB( g_fbprogramObj, "distorttexture");
+		g_location_frametime = glGetUniformLocationARB( g_fbprogramObj, "frametime" );
+		g_location_fxType = glGetUniformLocationARB( g_fbprogramObj, "fxType" );
+		g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" ); 
+	
 	}
 	else {
 		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE); 
