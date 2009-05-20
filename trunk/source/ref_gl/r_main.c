@@ -949,10 +949,12 @@ void R_PolyBlend (void)
 		return;
 
 	//to do:  //we need all flashes for this, but only pain should get distortion
-	if(v_blend[0] > 2*v_blend[1] && v_blend[0] > 2*v_blend[2]) { 
-		r_drawing_fbeffect = true;
-		r_fbFxType = 2; //FLASH DISTORTION
-		r_fbeffectTime = rs_realtime;
+	if(!r_drawing_fbeffect) {
+		if(v_blend[0] > 2*v_blend[1] && v_blend[0] > 2*v_blend[2]) { 
+			r_drawing_fbeffect = true;
+			r_fbFxType = 2; //FLASH DISTORTION
+			r_fbeffectTime = rs_realtime;
+		}
 	}
 
 	qglDisable (GL_ALPHA_TEST);
