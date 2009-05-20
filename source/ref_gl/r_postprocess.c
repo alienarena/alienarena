@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define FLASHDISTORT 2
 
 extern int KillFlags;
+extern float v_blend[4];
 extern void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out );
 
 image_t *r_framebuffer;
@@ -47,6 +48,8 @@ void R_GLSLPostProcess(void)
 	vec3_t	vec;
 	float	dot;
 	vec3_t	forward;
+
+	//to do:  add cvar to disable effect
 		
 	if(!gl_glsl_shaders->value)
 		return;
@@ -102,7 +105,7 @@ void R_GLSLPostProcess(void)
 	//do some glsl 
 	glUseProgramObjectARB( g_fbprogramObj );
 
-	qglActiveTextureARB(GL_TEXTURE1); //use 1
+	qglActiveTextureARB(GL_TEXTURE1); 
 	qglBindTexture (GL_TEXTURE_2D,r_framebuffer->texnum);
 	glUniform1iARB( g_location_framebuffTex, 1); 
 	KillFlags |= KILL_TMU0_POINTER;
@@ -119,6 +122,7 @@ void R_GLSLPostProcess(void)
 
 	glUniform1iARB( g_location_fxType, r_fbFxType); //2 for flash distortions, 1 for warping
 	glUniform1fARB( g_location_frametime, rs_realtime);
+	glUniform3fARB( g_location_fxColor, v_blend[0], v_blend[1], v_blend[2]);
 
 	VectorClear(fxScreenPos);
 
@@ -127,6 +131,13 @@ void R_GLSLPostProcess(void)
 		R_TransformVectorToScreen(&r_newrefdef, r_explosionOrigin, fxScreenPos);
 		fxScreenPos[0] -= 32; //texture offset
 		fxScreenPos[1] +=32;
+		fxScreenPos[0] += frames*5;
+		fxScreenPos[1] += frames*5;
+		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
+	}
+	else {
+		fxScreenPos[0] -= 32; //texture offset
+		fxScreenPos[1] -=128;
 		fxScreenPos[0] += frames*5;
 		fxScreenPos[1] += frames*5;
 		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
