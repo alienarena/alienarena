@@ -25,9 +25,6 @@
 #include <stdio.h>
 #include <dlfcn.h>
 
-#include <AL/al.h>
-#include <AL/alc.h>
-
 #include "../client/client.h"
 #include "../client/qal.h"
 

@@ -32,14 +32,6 @@
 #include <malloc.h>
 #include <string.h>
 
-#ifdef WIN32
-#include <al.h>
-#include <alc.h>
-#else
-#include <AL/al.h>
-#include <AL/alc.h>
-#endif
-
 #include "client.h"
 #include "qal.h"
 
@@ -52,8 +44,8 @@
 //cvar_t *background_music_vol; // music volume setting
 cvar_t *s_initsound;//     in cfg or on command line, to disable sound
 cvar_t *s_volume; //       global volume setting
-cvar_t *s_khz; //          sample rate selection
-cvar_t *s_primary; //      (Win32 specific)
+//cvar_t *s_khz; //          sample rate selection
+// cvar_t *s_primary; //   (Win32 DirectSound specific)
 // These are obsolete, dont apply, or of limited usefulness
 //cvar_t *s_show; //       show when a playsound_t is issued
 //cvar_t *s_mixahead;  //  timing tweak
@@ -225,14 +217,16 @@ const struct source_default_s
  *  if 8 QuakeMapUnits == 1 foot, 9/8 feet == 1.125 ft
  *  1.125 feet-per-millisec == 1125 feet-per-second
  *  Speed of Sound is 1125 feet-per-second, 343 meters-per-second
+ *
+ *  Doppler defaults to OFF, because lower performance systems
+ *    might have problems
  */
 const ALenum distance_model = AL_EXPONENT_DISTANCE_CLAMPED;
-const ALfloat default_doppler_factor = (ALfloat)1.0f;
+const ALfloat default_doppler_factor = (ALfloat)0.0f;
+const ALfloat maximum_doppler_factor = (ALfloat)5.0f;
 const ALfloat speed_of_sound = (ALfloat)9.0f;
 const ALfloat velocity_max_valid = (ALfloat)( 3.0f * 3.0f );
 ALfloat doppler_factor;
-// TODO: make a menu setting. for cvar: "s_doppler"
-// set doppler factor according to 0.0=OFF, 1.0=LOW, 3.0==MEDIUM 5.0==HIGH.
 
 /*
  * Settings for Distance Culling
@@ -260,6 +254,7 @@ const int stop_timer_msecs = 750; // for src_t stop_timer field
 unsigned short pcmNil[] =
 { 0 };
 
+// Function for loading PCM data from .wav file
 extern qboolean S_LoadSound( const char *filename, // in
         void** readbfr, // out
         void** pcmdata, // out
@@ -1096,17 +1091,29 @@ src_t *calNewSrcAutoLoop( int entity_index, int sound_field )
 
 /*
  ==
- calReadFile()  TODO: merge with calLoadSound
+ calLoadSound()
 
- find and read the sound file for an initialized/registerd SFX
- reads into intermediate buffer, not OpenAL Buffer
+ Load an initialized/registered sound effect into an OpenAL Buffer
  ==
  */
-void calReadFile( sfx_t *sfx )
+void calLoadSound( sfx_t *sfx )
 {
 	char *name;
-	qboolean success;
 	char namebuffer[MAX_OSPATH];
+	qboolean success;
+
+	if( sfx->buffered || sfx->silent )
+	{ // already done for this one
+		return;
+	}
+
+	if( sfx->name[0] == '*' )
+	{ // Model specific sounds are loaded in S_StartSound() when entity is known
+		// use this SFX for the default
+		// set it up as an aliased SFX
+		Com_sprintf(sfx->truename, MAX_QPATH, "player/male/%s",&(sfx->name[1]));
+		sfx->aliased = true;
+	}
 
 	// figure out full filepath
 	name = sfx->aliased ? sfx->truename : sfx->name;
@@ -1120,6 +1127,7 @@ void calReadFile( sfx_t *sfx )
 		Com_sprintf( namebuffer, sizeof( namebuffer ), "sound/%s", name );
 	}
 
+	// read the sound file PCM data into an intermediate buffer
 	success = S_LoadSound( namebuffer, &sfx->filebfr, &sfx->pcmbfr,
 	        &sfx->byte_width, &sfx->channels, &sfx->samplerate,
 	        &sfx->byte_count, &sfx->loop_offset );
@@ -1127,44 +1135,16 @@ void calReadFile( sfx_t *sfx )
 	if( !success )
 	{
 		sfx->silent = true; // prevent repetitive searching for missing/bad file
-		return;
 	}
 
-}
-
-/*
- ==
- calLoadSound()
-
- Load an initialized/registered sound effect into an OpenAL Buffer
- ==
- */
-void calLoadSound( sfx_t *sfx )
-{
-
-	if( sfx->buffered || sfx->silent )
-	{ // already done for this one
-		return;
-	}
-
-	if( sfx->name[0] == '*' )
-	{ // Model specific sounds are loaded in S_StartSound() when entity is known
-		// use this SFX for the default
-		// set it up as an aliased SFX
-		Com_sprintf( sfx->truename, MAX_QPATH, "#sound/player/male/%s",
-		        &( sfx->name[1] ) );
-		sfx->aliased = true;
-	}
-
-	// read the sound effect file
-	calReadFile( sfx );
 	if( sfx->silent )
 	{ // unable to get sound effect data
-		Com_Printf( "Sound File %s could not be read.\n", ( sfx->aliased
+		Com_DPrintf( "Sound File %s could not be read.\n", ( sfx->aliased
 		        ? sfx->truename : sfx->name ) );
 		return;
 	}
 
+	// transfer PCM data to OpenAL Buffer
 	sfx->oalFormat = calALFormat( sfx->byte_width, sfx->channels );
 	if( sfx->oalFormat )
 	{
@@ -1174,7 +1154,7 @@ void calLoadSound( sfx_t *sfx )
 		if( calErrorCheckAL( __LINE__ ) != AL_NO_ERROR )
 		{ // failed to transfer
 			sfx->silent = true;
-			Com_Printf( "Sound File %s failed to load into OpenAL buffer\n",
+			Com_DPrintf( "Sound File %s failed to load into OpenAL buffer\n",
 			        ( sfx->aliased ? sfx->truename : sfx->name ) );
 		}
 		else
@@ -1185,7 +1165,7 @@ void calLoadSound( sfx_t *sfx )
 	else
 	{ // not a supported file format
 		sfx->silent = true;
-		Com_Printf( "Sound File %s's format is not supported.\n",
+		Com_DPrintf( "Sound File %s's format is not supported.\n",
 		        ( sfx->aliased ? sfx->truename : sfx->name ) );
 	}
 
@@ -1217,9 +1197,7 @@ void calStopMusic( void )
  ==
  calContextInfo()
 
- additional info about sound system
- TODO: probably make this accessible by console command, "soundinfo"
-
+ info about sound system configuration
  ==
  */
 void calContextInfo( ALCdevice *pDevice )
@@ -1229,6 +1207,8 @@ void calContextInfo( ALCdevice *pDevice )
 	ALCint alc_frequency;
 	ALCint alc_mono_sources;
 	ALCint alc_stereo_sources;
+	ALCint alc_refresh;
+	ALCint alc_sync;
 
 	calErrorCheckALC( pDevice, __LINE__ );
 
@@ -1262,7 +1242,11 @@ void calContextInfo( ALCdevice *pDevice )
 	Com_Printf( "  Generated Source Count: %i\n", actual_src_count );
 	Com_Printf( "  Generated Buffer Count: %i\n", actual_sfx_count );
 
-	// DEVELOPMENT useful info  TODO:remove later
+	// useful only for developers
+	qalcGetIntegerv( pDevice, ALC_REFRESH, 1, &alc_refresh );
+	Com_DPrintf( "  ALC Refresh: %i\n", alc_refresh);
+	qalcGetIntegerv( pDevice, ALC_SYNC, 1, &alc_sync );
+	Com_DPrintf( "  ALC Sync: %i\n", alc_sync );
 	Com_DPrintf( "Speed of Sound: %f\n", speed_of_sound );
 	Com_DPrintf( "Doppler Factor: %f\n", doppler_factor );
 
@@ -1307,22 +1291,20 @@ void S_Init( void )
 	doppler_factor = s_doppler->value;
 	if( doppler_factor < 0.0f )
 		doppler_factor = 0.0f;
-	else if( doppler_factor > 10.0f )
-		doppler_factor = 10.0f; // arbitrary
+	else if( doppler_factor > maximum_doppler_factor )
+		doppler_factor = maximum_doppler_factor;
 
 	// Link to OpenAL library
 	success = QAL_Init();
 	if( !success )
 	{
-		// TODO: deal with lack of OpenAL library.
-		Com_Printf(
-		        "Sound failed: Please review instructions for installing OpenAL.\n"
+		Com_Printf("Sound failed: Unable to start OpenAL.\n"
 			        "Game will continue without sound.\n" );
 		return;
 	}
 
 	// Use Default Device and Attributes
-	// TODO: implement device selection
+	// TODO: implement device selection, maybe.
 	success = false;
 	pDevice = qalcOpenDevice( NULL ); // 1. open default device
 	result = calErrorCheckALC( pDevice, __LINE__ );
@@ -1341,6 +1323,14 @@ void S_Init( void )
 			qalcCloseDevice( pDevice );
 			pDevice = NULL;
 		}
+		if( !success )
+		{
+			Com_Printf(
+			        "Sound failed: Possible OpenAL or device configuration problem\n"
+				        "Game will continue without sound.\n" );
+			return;
+		}
+
 		result = calErrorCheckALC( pDevice, __LINE__ );
 
 		// Setup 3D Audio State
@@ -1349,19 +1339,13 @@ void S_Init( void )
 		qalSpeedOfSound( speed_of_sound );
 
 		// Initialize Listener
-		qalListenerf( AL_GAIN, (ALfloat)0.0f ); // quiet for now
+		if ( s_volume->value > 0  )
+			qalListenerf( AL_GAIN, (ALfloat)0.1f ); // start quiet, need some for menu clicks
+		else
+			qalListenerf( AL_GAIN, (ALfloat)0.0f ); // sound is off
 		qalListenerfv( AL_POSITION, zero_position );
 		qalListenerfv( AL_VELOCITY, zero_velocity );
 		qalListenerfv( AL_ORIENTATION, default_orientation );
-
-	}
-
-	if( !success )
-	{
-		Com_Printf(
-		        "Sound failed: Possible OpenAL or device configuration problem\n"
-			        "Game will continue without sound.\n" );
-		return;
 	}
 
 	calSourcesInitialize(); // generate OpenAL Sources
@@ -2269,7 +2253,7 @@ void S_Update( vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up )
  S_Play()
 
  target of console command: play <file>[.wav] [<file>[.wav]] ...
- TODO: plays all simultaneously, probably not what user expects
+ plays all simultaneously, possibly by design, in order to test mixing.
  ==
  */
 void S_Play( void )
@@ -2303,8 +2287,16 @@ void S_Play( void )
  */
 void S_SoundInfo_f( void )
 {
-	// TODO: Dump info similar to startup
-	Com_DPrintf( "S_SoundInfo_f() is a stub.\n" );
+	ALCdevice *pDevice;
+	ALCcontext *pContext;
+
+	// get current device in current context
+	pContext = qalcGetCurrentContext();
+	pDevice = qalcGetContextsDevice( pContext );
+
+	// dump some info
+	calContextInfo( pDevice );
+
 }
 
 /*
@@ -2382,17 +2374,16 @@ void sndCmdRemove( void )
 void sndCvarInit( void )
 {
 	s_initsound = Cvar_Get( "s_initsound", "1", 0 );
-	s_volume = Cvar_Get( "s_volume", "0.5", CVAR_ARCHIVE );
-	s_khz = Cvar_Get( "s_khz", "22", CVAR_ARCHIVE );
+	s_volume = Cvar_Get( "s_volume", "0.1", CVAR_ARCHIVE );
+	//s_khz = Cvar_Get( "s_khz", "22", CVAR_ARCHIVE );
 	//s_loadas8bit = Cvar_Get( "s_loadas8bit", "0", CVAR_ARCHIVE );
 	//s_mixahead = Cvar_Get( "s_mixahead", "0.2", CVAR_ARCHIVE );
 	//s_show = Cvar_Get( "s_show", "0", 0 );
 	//s_testsound = Cvar_Get( "s_testsound", "0", 0 );
-	s_primary = Cvar_Get( "s_primary", "0", CVAR_ARCHIVE ); // win32 specific
-	// TODO: see if s_primary still applies in OpenAL
+	//s_primary = Cvar_Get( "s_primary", "0", CVAR_ARCHIVE ); // win32 specific, direct sound
 
 	// OpenAL CVARs
-	s_doppler = Cvar_Get( "s_doppler", "1.0", CVAR_ARCHIVE );
+	s_doppler = Cvar_Get( "s_doppler", "0.0", CVAR_ARCHIVE );
 
 }
 

@@ -20,13 +20,8 @@
 #ifndef QAL_H_
 #define QAL_H_
 
-#ifdef WIN32
 #include <al.h>
 #include <alc.h>
-#else
-#include <AL/al.h>
-#include <AL/alc.h>
-#endif
 
 /*
  * function pointers for library loaders

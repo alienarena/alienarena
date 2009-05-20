@@ -41,6 +41,7 @@ extern void RS_LoadSpecialScripts(void);
 extern cvar_t *scriptsloaded;
 extern char map_music[128];
 extern cvar_t *background_music;
+extern cvar_t *background_music_vol;
 extern cvar_t *dedicated;
 extern cvar_t *cl_drawfps;
 extern cvar_t *cl_drawtimer;
@@ -1485,8 +1486,16 @@ static menulist_s		s_options_discolor_box;
 static menuslider_s		s_options_sfxvolume_slider;
 static menuslider_s		s_options_bgvolume_slider;
 static menulist_s		s_options_joystick_box;
+
+#ifdef SDL_VERSION
 static menulist_s		s_options_quality_list;
 static menulist_s		s_options_compatibility_list;
+#endif
+
+#ifndef SDL_VERSION
+static menulist_s		s_options_doppler_effect_list;
+#endif
+
 static menulist_s		s_options_console_action;
 static menulist_s		s_options_bgmusic_box;
 static menulist_s		s_options_target_box;
@@ -1991,6 +2000,7 @@ static void ControlsSetMenuItemValues( void )
 	s_options_bgmusic_box.curvalue			= Cvar_VariableValue("background_music");
 	s_options_discolor_box.curvalue			= Cvar_VariableValue("cl_disbeamclr");
 
+#ifdef SDL_VERSION
 	//Read what was set for s_khz and set the curvalue accordingly
 	if (Cvar_VariableValue("s_khz") == 48)
 		s_options_quality_list.curvalue = 3; //high
@@ -2000,6 +2010,18 @@ static void ControlsSetMenuItemValues( void )
 		s_options_quality_list.curvalue = 1; //low
 	else if (Cvar_VariableValue("s_khz") == 11)
 		s_options_quality_list.curvalue = 0; //basic
+#endif
+
+#ifndef SDL_VERSION
+	if ( Cvar_VariableValue("s_doppler") == 5.0f ) // TODO: constant declarations would be better
+		s_options_doppler_effect_list.curvalue = 3;
+	else if ( Cvar_VariableValue("s_doppler") == 3.0f )
+		s_options_doppler_effect_list.curvalue = 2;
+	else if ( Cvar_VariableValue("s_doppler") == 1.0f )
+		s_options_doppler_effect_list.curvalue = 1;
+	else /* set to 0 for off  (or curvalue is invalid) */
+		s_options_doppler_effect_list.curvalue = 0;
+#endif
 
 	s_options_sensitivity_slider.curvalue	= ( sensitivity->value ) * 2;
 
@@ -2074,6 +2096,12 @@ static void ControlsResetDefaultsFunc( void *unused )
 	Cbuf_Execute();
 
 	ControlsSetMenuItemValues();
+
+	CL_Snd_Restart_f();
+	if ( background_music->value > 0.99f && background_music_vol->value >= 0.1f )
+	{ // restart menu's background music
+		S_StartMusic( "misc/menumusic.wav" );
+	}
 }
 
 //JD - the next three functions were completely screwed up out of the box by id...so they
@@ -2099,6 +2127,10 @@ static void UpdateBGVolumeFunc( void *unused )
 static void UpdateBGMusicFunc( void *unused )
 {
 	Cvar_SetValue( "background_music", s_options_bgmusic_box.curvalue );
+	if ( background_music->value > 0.99f && background_music_vol->value >= 0.1f )
+	{
+		S_StartMusic( "misc/menumusic.wav" );
+	}
 }
 static void ConsoleFunc( void *unused )
 {
@@ -2120,6 +2152,7 @@ static void ConsoleFunc( void *unused )
 	cls.key_dest = key_console;
 }
 
+#ifdef SDL_VERSION
 static void UpdateSoundQualityFunc( void *unused )
 {
 	if ( s_options_quality_list.curvalue == 3 ) //high
@@ -2143,13 +2176,49 @@ static void UpdateSoundQualityFunc( void *unused )
 		Cvar_SetValue( "s_loadas8bit", true );
 	}
 
-	Cvar_SetValue( "s_primary", s_options_compatibility_list.curvalue );
-
 	// the text box won't show up unless we do a buffer swap
 	R_EndFrame();
 
 	CL_Snd_Restart_f();
+
+	if ( background_music->value > 0.99f && background_music_vol->value >= 0.1f )
+	{ // restart menu's background music
+		S_StartMusic( "misc/menumusic.wav" );
+	}
+
 }
+#endif
+
+#ifndef SDL_VERSION
+static void UpdateDopplerEffectFunc( void *unused )
+{
+	if ( s_options_doppler_effect_list.curvalue == 3 )
+	{
+		Cvar_SetValue( "s_doppler", 5.0f ); // very high
+	}
+	else if ( s_options_doppler_effect_list.curvalue == 2 )
+	{
+		Cvar_SetValue( "s_doppler", 3.0f ); // high
+	}
+	else if ( s_options_doppler_effect_list.curvalue == 1 )
+	{
+		Cvar_SetValue( "s_doppler", 1.0f ); // normal
+	}
+	else if ( s_options_doppler_effect_list.curvalue == 0 )
+	{
+		Cvar_SetValue( "s_doppler", 0.0f ); // off
+	}
+
+	// restart to apply the change in doppler
+	// TODO: would be better to have sound system function to change the doppler
+	R_EndFrame(); // buffer swap needed to show text box TODO: verify this
+	CL_Snd_Restart_f();
+	if ( background_music->value > 0.99f && background_music_vol->value >= 0.1f )
+	{ // restore background music
+		S_StartMusic( "misc/menumusic.wav" );
+	}
+}
+#endif
 
 void Options_MenuInit( void )
 {
@@ -2160,6 +2229,7 @@ void Options_MenuInit( void )
 		0
 	};
 
+#ifdef SDL_VERSION
 	//here we will assume s_options_quality_list.curvalue 0 through 3
 	static const char *quality_items[] =
 	{
@@ -2169,11 +2239,25 @@ void Options_MenuInit( void )
 		"48 hkz",
 		0
 	};
+#endif
 
-	static const char *compatibility_items[] =
+#ifdef SDL_VERSION
+static const char *compatibility_items[] =
 	{
 		"max compatibility", "max performance", 0
 	};
+#endif
+
+#ifndef SDL_VERSION
+	static const char *doppler_effect_items[] =
+	{
+		"off",
+		"normal",
+		"high",
+		"very high",
+		0
+	};
+#endif
 
 	static const char *yesno_names[] =
 	{
@@ -2328,7 +2412,11 @@ void Options_MenuInit( void )
 	s_options_bgvolume_slider.generic.name	= "music volume";
 	s_options_bgvolume_slider.generic.callback	= UpdateBGVolumeFunc;
 	s_options_bgvolume_slider.minvalue		= 0;
+#ifdef SDL_VERSION
 	s_options_bgvolume_slider.maxvalue		= 20;
+#else
+	s_options_bgvolume_slider.maxvalue		= 10;
+#endif
 	s_options_bgvolume_slider.curvalue		= Cvar_VariableValue( "background_music_vol" ) * 10;
 
 	s_options_bgmusic_box.generic.type	= MTYPE_SPINCONTROL;
@@ -2339,13 +2427,16 @@ void Options_MenuInit( void )
 	s_options_bgmusic_box.itemnames		= background_music_items;
 	s_options_bgmusic_box.curvalue 		= Cvar_VariableValue("background_music");
 
+#ifdef SDL_VERSION
 	s_options_quality_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_quality_list.generic.x		= 0;
 	s_options_quality_list.generic.y		= 150*scale;
 	s_options_quality_list.generic.name		= "sampling rate";
 	s_options_quality_list.generic.callback = UpdateSoundQualityFunc;
 	s_options_quality_list.itemnames		= quality_items;
+#endif
 
+#ifdef SDL_VERSION
 	s_options_compatibility_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_compatibility_list.generic.x		= 0;
 	s_options_compatibility_list.generic.y		= 160*scale;
@@ -2353,6 +2444,17 @@ void Options_MenuInit( void )
 	s_options_compatibility_list.generic.callback = UpdateSoundQualityFunc;
 	s_options_compatibility_list.itemnames		= compatibility_items;
 	s_options_compatibility_list.curvalue		= Cvar_VariableValue( "s_primary" );
+#endif
+
+#ifndef SDL_VERSION
+	s_options_doppler_effect_list.generic.type	= MTYPE_SPINCONTROL;
+	s_options_doppler_effect_list.generic.x		= 0;
+	s_options_doppler_effect_list.generic.y		= 150*scale;
+	s_options_doppler_effect_list.generic.name	= "doppler sound effect";
+	s_options_doppler_effect_list.generic.callback = UpdateDopplerEffectFunc;
+	s_options_doppler_effect_list.itemnames		= doppler_effect_items;
+	s_options_doppler_effect_list.curvalue		= Cvar_VariableValue( "s_doppler" );
+#endif
 
 	s_options_sensitivity_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sensitivity_slider.generic.x		= 0;
@@ -2474,8 +2576,15 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_sfxvolume_slider );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_bgvolume_slider );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_bgmusic_box );
+#ifdef SDL_VERSION
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_quality_list );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_compatibility_list );
+#endif
+
+#ifndef SDL_VERSION
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_doppler_effect_list );
+#endif
+
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_sensitivity_slider );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_smoothing_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_alwaysrun_box );
