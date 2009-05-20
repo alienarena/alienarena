@@ -252,8 +252,8 @@ void InitGame (void)
 	//antilag
 	g_antilag = gi.cvar("g_antilag", "0", CVAR_SERVERINFO);
 
-	//old scoreboard - default this to 1 until the change to 2k9
-	g_oldscorebd = gi.cvar("g_oldscorebd", "1", CVAR_SERVERINFO);
+	//old scoreboard
+	g_oldscorebd = gi.cvar("g_oldscorebd", "0", CVAR_SERVERINFO);
 
 	// change anytime vars
 	dmflags = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);

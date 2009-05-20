@@ -180,6 +180,7 @@ extern cvar_t	*gl_ext_mtexcombine;
 extern cvar_t	*gl_normalmaps;
 extern cvar_t	*gl_parallaxmaps;
 extern cvar_t	*gl_specular;
+extern cvar_t	*gl_glsl_postprocess;
 
 extern	cvar_t	*r_shaders;
 extern	cvar_t	*r_bloom;

@@ -49,7 +49,8 @@ void R_GLSLPostProcess(void)
 	float	dot;
 	vec3_t	forward;
 
-	//to do:  add cvar to disable effect
+	if(!gl_glsl_postprocess->value)
+		return;
 		
 	if(!gl_glsl_shaders->value)
 		return;
