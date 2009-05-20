@@ -1031,10 +1031,12 @@ void CL_ExplosionParticles (vec3_t org)
 	cparticle_t	*p;
 
 	//for glsl framebuffer distortion effects
-	r_fbFxType = 1; //EXPLOSION
-	r_drawing_fbeffect = true;
-	VectorCopy(org, r_explosionOrigin);
-	r_fbeffectTime = rs_realtime;
+	if(!r_drawing_fbeffect) {
+		r_fbFxType = 1; //EXPLOSION
+		r_drawing_fbeffect = true;
+		VectorCopy(org, r_explosionOrigin);
+		r_fbeffectTime = rs_realtime;
+	}
 
 	for (i=0 ; i<7; i++)
 	{
