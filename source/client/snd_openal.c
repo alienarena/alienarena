@@ -1151,7 +1151,7 @@ void calLoadSound( sfx_t *sfx )
 	{ // Model specific sounds are loaded in S_StartSound() when entity is known
 		// use this SFX for the default
 		// set it up as an aliased SFX
-		Com_sprintf( sfx->truename, MAX_QPATH, "#players/male/%s",
+		Com_sprintf( sfx->truename, MAX_QPATH, "#sound/player/male/%s",
 		        &( sfx->name[1] ) );
 		sfx->aliased = true;
 	}

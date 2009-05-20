@@ -1020,10 +1020,21 @@ void CL_ItemRespawnParticles (vec3_t org)
 CL_ExplosionParticles - new version - 
 ===============
 */
+extern int r_drawing_fbeffect;
+extern int	r_fbFxType;
+extern float r_fbeffectTime;
+extern vec3_t r_explosionOrigin;
+extern float rs_realtime;
 void CL_ExplosionParticles (vec3_t org)
 {
 	int			i, j, k;
 	cparticle_t	*p;
+
+	//for glsl framebuffer distortion effects
+	r_fbFxType = 1; //EXPLOSION
+	r_drawing_fbeffect = true;
+	VectorCopy(org, r_explosionOrigin);
+	r_fbeffectTime = rs_realtime;
 
 	for (i=0 ; i<7; i++)
 	{

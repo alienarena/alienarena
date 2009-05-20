@@ -1624,13 +1624,14 @@ void R_InitMirrorTextures( void )
 	byte	*data;
 	int		size;
 
-	//init the screen texture
+	//init the partial screen texture
 	size = 512 * 512 * 4;
 	data = malloc( size );
 	memset( data, 255, size );
 	r_mirrortexture = GL_LoadPic( "***r_mirrortexture***", (byte *)data, 512, 512, it_pic, 32 );
 	free ( data );
 }
+
 /*
 ===============
 GL_InitImages
@@ -1654,6 +1655,7 @@ void	GL_InitImages (void)
 
 	R_InitBloomTextures();//BLOOMS
 	R_InitMirrorTextures();//MIRRORS
+	R_FB_InitTextures();//FULLSCREEN EFFECTS
 }
 
 /*
