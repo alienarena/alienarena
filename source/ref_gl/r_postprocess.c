@@ -79,13 +79,11 @@ void R_GLSLPostProcess(void)
 
 	qglViewport(0,0,vid.width, vid.height);	
 
-	//render quad on screen
+	//render quad on screen	
 
 	offsetY = vid.height - FB_texture_height;
 	offsetX = vid.width - FB_texture_width;
 
-	qglColor4f(0.0, 1.0, 1.0, 1.0); //test
-	
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
@@ -129,16 +127,32 @@ void R_GLSLPostProcess(void)
 
 	//get position of focal point of warp if we are doing a warp effect
 	if(r_fbFxType == EXPLOSION) {
+		
 		R_TransformVectorToScreen(&r_newrefdef, r_explosionOrigin, fxScreenPos);
-		fxScreenPos[0] -= 32; //texture offset
-		fxScreenPos[1] +=32;
-		fxScreenPos[0] += frames*5;
+
+		//translate so that center of screen reads 0,0
+		fxScreenPos[0] -= (float)vid.width/2.0;
+		fxScreenPos[1] -= (float)vid.height/2.0;
+
+		//scale
+		fxScreenPos[0] *= 0.25;
+		fxScreenPos[1] *= 0.25;
+
+		//offset according to framebuffer sample size
+		offsetX = (FB_texture_width-1024)/512 * -32; 
+		offsetY = (FB_texture_height-1024)/512 * 48; //to do - need to check highest res
+		fxScreenPos[0] += offsetX;
+		fxScreenPos[1] += offsetY;
+		fxScreenPos[0] -= frames*5;
 		fxScreenPos[1] += frames*5;
 		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
 	}
 	else {
-		fxScreenPos[0] -= 32; //texture offset
-		fxScreenPos[1] -=128;
+		//offset according to framebuffer sample size
+		offsetX = (FB_texture_width-1024)/512 * -48;
+		offsetY = (FB_texture_height-1024)/512 * 48; //to do - need to check highest res
+		fxScreenPos[0] += offsetX;
+		fxScreenPos[1] += offsetY;
 		fxScreenPos[0] += frames*5;
 		fxScreenPos[1] += frames*5;
 		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
@@ -173,13 +187,8 @@ void R_FB_InitTextures( void )
 	for (FB_texture_width = 1;FB_texture_width < viddef.width;FB_texture_width *= 2);
 	for (FB_texture_height = 1;FB_texture_height < viddef.height;FB_texture_height *= 2);
 
-	//limit
-	if(FB_texture_width > 1024)
-		FB_texture_width = 1024;
-
-	if(FB_texture_height > 1024)
-		FB_texture_height = 1024;
-
+	//to do - check hardware limits for texture size(2048x2048 would be the largest possible)
+	
 	//init the framebuffer texture
 	size = FB_texture_width * FB_texture_height * 4;
 	data = malloc( size );
@@ -188,15 +197,28 @@ void R_FB_InitTextures( void )
 	free ( data );
 
 	//init the distortion textures
-	r_perlinnoise = GL_FindImage("gfx/perlin_noise.jpg",it_pic);
-	if (!r_perlinnoise) {                                
-		r_perlinnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-    }  
-	
-	r_distortwave = GL_FindImage("gfx/distortwave.jpg",it_pic);
-	if (!r_distortwave) {                                
-		r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-    }   
+	if(FB_texture_height == FB_texture_width) {		
+		r_perlinnoise = GL_FindImage("gfx/perlin_noise.jpg",it_pic);
+		if (!r_perlinnoise) {                                
+			r_perlinnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
+		}  
+		
+		r_distortwave = GL_FindImage("gfx/distortwave.jpg",it_pic);
+		if (!r_distortwave) {                                
+			r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
+		}  
+	}
+	else { //use wider pic for 2 to 1 framebuffer ratio cases to keep effect similar 
+		r_perlinnoise = GL_FindImage("gfx/w_perlin_noise.jpg",it_pic);
+		if (!r_perlinnoise) {                                
+			r_perlinnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
+		}  
+		
+		r_distortwave = GL_FindImage("gfx/w_distortwave.jpg",it_pic);
+		if (!r_distortwave) {                                
+			r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
+		}  
+	}
 }
 
 
