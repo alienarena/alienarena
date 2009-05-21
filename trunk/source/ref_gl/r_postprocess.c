@@ -28,7 +28,7 @@ extern float v_blend[4];
 extern void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out );
 
 image_t *r_framebuffer;
-image_t *r_perlinnoise;
+image_t *r_flashnoise;
 image_t *r_distortwave;
 
 float	twodvert_array[MAX_ARRAY][3];
@@ -51,8 +51,9 @@ void R_GLSLPostProcess(void)
 
 	if(!gl_glsl_postprocess->value)
 		return;
-		
-	if(!gl_glsl_shaders->value)
+	
+	//don't allow on low resolutions, too much tearing at edges
+	if(!gl_glsl_shaders->value || vid.width < 1024) 
 		return;
 
 	if(r_fbFxType == EXPLOSION) {
@@ -113,7 +114,7 @@ void R_GLSLPostProcess(void)
 	if(r_fbFxType == EXPLOSION)
 		qglBindTexture(GL_TEXTURE_2D, r_distortwave->texnum);
 	else
-		qglBindTexture (GL_TEXTURE_2D, r_perlinnoise->texnum);
+		qglBindTexture (GL_TEXTURE_2D, r_flashnoise->texnum);
 	glUniform1iARB( g_location_distortTex, 0); 
 	KillFlags |= KILL_TMU1_POINTER;
 
@@ -131,6 +132,7 @@ void R_GLSLPostProcess(void)
 		R_TransformVectorToScreen(&r_newrefdef, r_explosionOrigin, fxScreenPos);
 
 		//translate so that center of screen reads 0,0
+		//to do - limit coords to prevent tearing
 		fxScreenPos[0] -= (float)vid.width/2.0;
 		fxScreenPos[1] -= (float)vid.height/2.0;
 
@@ -152,7 +154,7 @@ void R_GLSLPostProcess(void)
 		offsetX = (FB_texture_width-1024)/512 * -48;
 		offsetY = (FB_texture_height-1024)/512 * 48; //to do - need to check highest res
 		fxScreenPos[0] += offsetX;
-		fxScreenPos[1] += offsetY - 128;  //to do - this definitely needs checking at hi res
+		fxScreenPos[1] += offsetY - 96;  //to do - this definitely needs checking at hi res
 		fxScreenPos[0] += frames*1;
 		fxScreenPos[1] -= frames*1;
 		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
@@ -198,9 +200,9 @@ void R_FB_InitTextures( void )
 
 	//init the distortion textures
 	if(FB_texture_height == FB_texture_width) {		
-		r_perlinnoise = GL_FindImage("gfx/perlin_noise.jpg",it_pic);
-		if (!r_perlinnoise) {                                
-			r_perlinnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
+		r_flashnoise = GL_FindImage("gfx/flash_noise.jpg",it_pic);
+		if (!r_flashnoise) {                                
+			r_flashnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 		}  
 		
 		r_distortwave = GL_FindImage("gfx/distortwave.jpg",it_pic);
@@ -209,9 +211,9 @@ void R_FB_InitTextures( void )
 		}  
 	}
 	else { //use wider pic for 2 to 1 framebuffer ratio cases to keep effect similar 
-		r_perlinnoise = GL_FindImage("gfx/w_perlin_noise.jpg",it_pic);
-		if (!r_perlinnoise) {                                
-			r_perlinnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
+		r_flashnoise = GL_FindImage("gfx/w_flash_noise.jpg",it_pic);
+		if (!r_flashnoise) {                                
+			r_flashnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 		}  
 		
 		r_distortwave = GL_FindImage("gfx/w_distortwave.jpg",it_pic);
