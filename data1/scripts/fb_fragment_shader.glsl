@@ -21,11 +21,7 @@ void main(void)
 	noiseVec = normalize(texture2D(distortiontexture, displacement.xy)).xyz;
 	noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
 
-	gl_FragColor = texture2D(fbtexture, gl_TexCoord[0].st);
-	
-	vec4 fxTex = texture2D(fbtexture, gl_TexCoord[0].st + noiseVec.xy);
-
-	gl_FragColor = mix(gl_FragColor, fxTex, 1.0);
+	gl_FragColor = texture2D(fbtexture, gl_TexCoord[0].st + noiseVec.xy);
 
 	if(fxType == 2)
 		gl_FragColor = mix(gl_FragColor, vec4(fxColor, 1.0), 0.5);
