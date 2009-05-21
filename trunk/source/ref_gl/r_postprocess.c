@@ -152,9 +152,9 @@ void R_GLSLPostProcess(void)
 		offsetX = (FB_texture_width-1024)/512 * -48;
 		offsetY = (FB_texture_height-1024)/512 * 48; //to do - need to check highest res
 		fxScreenPos[0] += offsetX;
-		fxScreenPos[1] += offsetY;
-		fxScreenPos[0] += frames*5;
-		fxScreenPos[1] += frames*5;
+		fxScreenPos[1] += offsetY - 128;  //to do - this definitely needs checking at hi res
+		fxScreenPos[0] += frames*1;
+		fxScreenPos[1] -= frames*1;
 		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
 	}
 
