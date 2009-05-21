@@ -4,6 +4,7 @@ uniform float frametime;
 uniform vec2 fxPos;
 uniform int fxType;
 uniform vec3 fxColor;
+uniform float asRatio;
 
 void main(void)
 {
@@ -19,12 +20,12 @@ void main(void)
 	noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
 
 	//clamp edges to prevent artifacts
-	if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < 0.6)
+	if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < asRatio)
 		displacement.x = gl_TexCoord[0].s + noiseVec.x;
 	else
 		displacement.x = gl_TexCoord[0].s;
 		
-	if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < 0.6)
+	if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < 0.6) //to do - height may need tweaking?
 		displacement.y = gl_TexCoord[0].t + noiseVec.y;
 	else
 		displacement.y = gl_TexCoord[0].t;
