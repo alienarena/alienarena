@@ -47,7 +47,8 @@ void R_GLSLPostProcess(void)
 	int offsetX, offsetY;
 	vec3_t	vec;
 	float	dot;
-	vec3_t	forward;
+	vec3_t	forward, mins, maxs;
+	trace_t r_trace;
 
 	if(!gl_glsl_postprocess->value)
 		return;
@@ -57,11 +58,21 @@ void R_GLSLPostProcess(void)
 		return;
 
 	if(r_fbFxType == EXPLOSION) {
+		
+		//is it in our view?
 		AngleVectors (r_newrefdef.viewangles, forward, NULL, NULL);
 		VectorSubtract (r_explosionOrigin, r_newrefdef.vieworg, vec);
 		VectorNormalize (vec);
 		dot = DotProduct (vec, forward);
 		if (dot <= 0.3)
+			r_drawing_fbeffect = false;
+
+		//is anything blocking it from view?
+		VectorSet(mins, 0, 0, 0);
+		VectorSet(maxs,	0, 0, 0);
+
+		r_trace = CM_BoxTrace(r_origin, r_explosionOrigin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
+		if (r_trace.fraction != 1.0)
 			r_drawing_fbeffect = false;
 	}
 
@@ -71,6 +82,19 @@ void R_GLSLPostProcess(void)
 		
 	frames++;
 
+	//set up full screen workspace
+	qglViewport( 0, 0, viddef.width, viddef.height );
+	qglDisable( GL_DEPTH_TEST );
+	qglMatrixMode( GL_PROJECTION );
+    qglLoadIdentity ();
+	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
+	qglMatrixMode( GL_MODELVIEW );
+    qglLoadIdentity ();
+	qglDisable(GL_CULL_FACE);
+
+	qglDisable( GL_BLEND );
+	qglEnable( GL_TEXTURE_2D );
+
 	qglViewport(0,0,FB_texture_width,FB_texture_height);
 
 	//we need to grab the frame buffer
@@ -78,12 +102,12 @@ void R_GLSLPostProcess(void)
 	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0, 0, 0, FB_texture_width, FB_texture_height);
 
-	qglViewport(0,0,vid.width, vid.height);	
+	qglViewport(0,0,viddef.width, viddef.height);	
 
 	//render quad on screen	
 
-	offsetY = vid.height - FB_texture_height;
-	offsetX = vid.width - FB_texture_width;
+	offsetY = viddef.height - FB_texture_height;
+	offsetX = viddef.width - FB_texture_width;
 
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
@@ -92,9 +116,9 @@ void R_GLSLPostProcess(void)
 	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
-	VA_SetElem2(twodvert_array[0],0, vid.height);
-	VA_SetElem2(twodvert_array[1],vid.width-offsetX, vid.height);
-	VA_SetElem2(twodvert_array[2],vid.width-offsetX, offsetY);
+	VA_SetElem2(twodvert_array[0],0, viddef.height);
+	VA_SetElem2(twodvert_array[1],viddef.width-offsetX, viddef.height);
+	VA_SetElem2(twodvert_array[2],viddef.width-offsetX, offsetY);
 	VA_SetElem2(twodvert_array[3],0, offsetY); 
 
 	VA_SetElem2(tex_array[0],r_framebuffer->sl, r_framebuffer->tl);
@@ -133,8 +157,8 @@ void R_GLSLPostProcess(void)
 
 		//translate so that center of screen reads 0,0
 		//to do - limit coords to prevent tearing
-		fxScreenPos[0] -= (float)vid.width/2.0;
-		fxScreenPos[1] -= (float)vid.height/2.0;
+		fxScreenPos[0] -= (float)viddef.width/2.0;
+		fxScreenPos[1] -= (float)viddef.height/2.0;
 
 		//scale
 		fxScreenPos[0] *= 0.25;

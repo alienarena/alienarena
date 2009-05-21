@@ -9,9 +9,6 @@ void main(void)
 {
 	vec3 noiseVec;
 	vec2 displacement;
-	float scaledTimer;
-
-	scaledTimer = frametime*0.1;
 
     	displacement = gl_TexCoord[0].st;
 
@@ -24,6 +21,6 @@ void main(void)
 	gl_FragColor = texture2D(fbtexture, gl_TexCoord[0].st + noiseVec.xy);
 
 	if(fxType == 2)
-		gl_FragColor = mix(gl_FragColor, vec4(fxColor, 1.0), 0.5);
+		gl_FragColor = mix(gl_FragColor, vec4(fxColor, 1.0), 0.3);
 
 }
