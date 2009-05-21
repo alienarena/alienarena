@@ -561,6 +561,7 @@ extern GLuint		g_location_frametime;
 extern GLuint		g_location_fxType;
 extern GLuint		g_location_fxPos;
 extern GLuint		g_location_fxColor;
+extern GLuint		g_location_asRatio;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 

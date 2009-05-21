@@ -38,6 +38,7 @@ int r_drawing_fbeffect;
 int	r_fbFxType;
 float r_fbeffectTime;
 int frames;
+float aspectRatio;
 
 static int		FB_texture_width, FB_texture_height;
 
@@ -147,6 +148,7 @@ void R_GLSLPostProcess(void)
 	glUniform1iARB( g_location_fxType, r_fbFxType); //2 for flash distortions, 1 for warping
 	glUniform1fARB( g_location_frametime, rs_realtime);
 	glUniform3fARB( g_location_fxColor, v_blend[0], v_blend[1], v_blend[2]);
+	glUniform1fARB( g_location_asRatio, aspectRatio);
 
 	VectorClear(fxScreenPos);
 
@@ -233,6 +235,9 @@ void R_FB_InitTextures( void )
 		if (!r_distortwave) {                                
 			r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 		}  
+
+		//we only have two possible ratios, 2 to 1 or 1 to 1
+		aspectRatio = 0.9; //trimmed for shearing shader
 	}
 	else { //use wider pic for 2 to 1 framebuffer ratio cases to keep effect similar 
 		r_flashnoise = GL_FindImage("gfx/w_flash_noise.jpg",it_pic);
@@ -243,7 +248,9 @@ void R_FB_InitTextures( void )
 		r_distortwave = GL_FindImage("gfx/w_distortwave.jpg",it_pic);
 		if (!r_distortwave) {                                
 			r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-		}  
+		}
+		
+		aspectRatio = 0.5;
 	}
 }
 
