@@ -8,7 +8,7 @@
 CC?=gcc
 
 # Enable compilation optimizations when "yes".
-OPTIMIZED_CFLAGS?=no
+OPTIMIZED_CFLAGS?=yes
 
 # Integer from 0 to 3, controls GCC's -O CFLAG.
 OPTIM_LVL?=2
