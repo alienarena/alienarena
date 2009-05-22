@@ -150,7 +150,7 @@ void R_GLSLPostProcess(void)
 	glUniform3fARB( g_location_fxColor, v_blend[0], v_blend[1], v_blend[2]);
 	glUniform1fARB( g_location_asRatio, aspectRatio);
 
-	VectorClear(fxScreenPos);
+	fxScreenPos[0] = fxScreenPos[1] = 0;
 
 	//get position of focal point of warp if we are doing a warp effect
 	if(r_fbFxType == EXPLOSION) {
