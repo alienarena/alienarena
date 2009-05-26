@@ -55,7 +55,7 @@ void R_GLSLPostProcess(void)
 		return;
 	
 	//don't allow on low resolutions, too much tearing at edges
-	if(!gl_glsl_shaders->value || vid.width < 1024) 
+	if(!gl_glsl_shaders->value || vid.width < 1024 || !gl_state.glsl_shaders) 
 		return;
 
 	if(r_fbFxType == EXPLOSION) {
@@ -167,8 +167,8 @@ void R_GLSLPostProcess(void)
 		fxScreenPos[1] *= 0.25;
 
 		//offset according to framebuffer sample size
-		offsetX = (FB_texture_width-1024)/512 * -32; 
-		offsetY = (FB_texture_height-1024)/512 * 48; //to do - need to check highest res
+		offsetX = (1024 - FB_texture_width)/512 * 32; 
+		offsetY = (1024 - FB_texture_height)/512 * 48; 
 		fxScreenPos[0] += offsetX;
 		fxScreenPos[1] += offsetY;
 		fxScreenPos[0] -= frames*5;
@@ -177,10 +177,10 @@ void R_GLSLPostProcess(void)
 	}
 	else {
 		//offset according to framebuffer sample size
-		offsetX = (FB_texture_width-1024)/512 * -48;
-		offsetY = (FB_texture_height-1024)/512 * 48; //to do - need to check highest res
+		offsetX = (1024 - FB_texture_width)/512 * 48;
+		offsetY = (1024 - FB_texture_height)/512 * 48; 
 		fxScreenPos[0] += offsetX;
-		fxScreenPos[1] += offsetY - 96;  //to do - this definitely needs checking at hi res
+		fxScreenPos[1] += offsetY;  
 		fxScreenPos[0] += frames*1;
 		fxScreenPos[1] -= frames*1;
 		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
