@@ -248,6 +248,10 @@ typedef struct mleaf_s
 // Whole model
 //
 
+typedef struct {
+	int n[3];
+} neighbors_t;
+
 typedef enum {mod_bad, mod_brush, mod_sprite, mod_alias } modtype_t;
 
 typedef struct model_s
@@ -324,6 +328,7 @@ typedef struct model_s
 	vec3_t r_mesh_verts[MAX_VERTS];
 
 	fstvert_t	*st;
+	neighbors_t *neighbors;
 
 } model_t;
 

@@ -1361,6 +1361,7 @@ void R_DrawVegetationSurface ( void )
 	qboolean visible;
 	float	lightLevel[3];
 	trace_t r_trace;
+	float	sway;
 
 	grass = r_grasses;
 
@@ -1419,14 +1420,21 @@ void R_DrawVegetationSurface ( void )
 
 			//the next two statements create a slight swaying in the wind
 			//perhaps we should add a parameter to control ammount in shader?
+
+			if(grass->type) {
+				sway = 3;
+			}
+			else
+				sway = 2;
+
 			VectorSet ( corner[1],
-				corner0[0] + up[0] + 2*sin (rs_realtime*2), 
-				corner0[1] + up[1] + 2*sin (rs_realtime*2), 
+				corner0[0] + up[0] + sway*sin (rs_realtime*sway), 
+				corner0[1] + up[1] + sway*sin (rs_realtime*sway), 
 				corner0[2] + up[2]);
 
 			VectorSet ( corner[2], 
-				corner0[0] + (up[0]+right[0] + 2*sin (rs_realtime*2)),
-				corner0[1] + (up[1]+right[1] + 2*sin (rs_realtime*2)), 
+				corner0[0] + (up[0]+right[0] + sway*sin (rs_realtime*sway)),
+				corner0[1] + (up[1]+right[1] + sway*sin (rs_realtime*sway)), 
 				corner0[2] + (up[2]+right[2]));
 
 			VectorSet ( corner[3],
