@@ -224,6 +224,10 @@ void R_FB_InitTextures( void )
 	r_framebuffer = GL_LoadPic( "***r_framebuffer***", (byte *)data, FB_texture_width, FB_texture_height, it_pic, 3 );
 	free ( data );
 
+	//For 2048x2048 situations I think we need different textures and different aspect ratio(.8 worked)
+	//For now I think we just need to deal with the more common resolutions.  There is still something not quite right
+	//with image sizing and position.  I feel that we may need to resample the images based on resolution, but not sure
+
 	//init the distortion textures
 	if(FB_texture_height == FB_texture_width) {		
 		r_flashnoise = GL_FindImage("gfx/flash_noise.jpg",it_pic);
@@ -237,7 +241,10 @@ void R_FB_InitTextures( void )
 		}  
 
 		//we only have two possible ratios, 2 to 1 or 1 to 1
-		aspectRatio = 0.9; //trimmed for shearing shader
+		if(FB_texture_height == 2048)
+			aspectRatio = 0.8; //eh, hacky, really need to figure this out.
+		else
+			aspectRatio = 0.9; //trimmed for shearing shader
 	}
 	else { //use wider pic for 2 to 1 framebuffer ratio cases to keep effect similar 
 		r_flashnoise = GL_FindImage("gfx/w_flash_noise.jpg",it_pic);
@@ -250,7 +257,7 @@ void R_FB_InitTextures( void )
 			r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 		}
 		
-		aspectRatio = 0.5;
+		aspectRatio = 0.5;  
 	}
 }
 
