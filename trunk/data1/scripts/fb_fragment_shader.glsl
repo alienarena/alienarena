@@ -4,14 +4,15 @@ uniform float frametime;
 uniform vec2 fxPos;
 uniform int fxType;
 uniform vec3 fxColor;
-uniform float asRatio;
+uniform int fbSampleSize;
 
 void main(void)
 {
 	vec3 noiseVec;
 	vec2 displacement;
-	float hRatio;
-
+	float wScissor;
+	float hScissor;
+    
     displacement = gl_TexCoord[0].st;
 
 	displacement.x -= fxPos.x*0.002;
@@ -21,17 +22,27 @@ void main(void)
 	noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;
 
 	//clamp edges to prevent artifacts
-	if(asRatio == 0.8) //this is hacky and needs to be addressed
-		hRatio = 0.5;
-	else
-		hRatio = 0.6;
+	
+	//different sample sizes need different clamps
+	if(fbSampleSize == 1) {
+		wScissor = 0.9;
+		hScissor = 0.6;
+	} 
+	else if(fbSampleSize == 2) {
+		wScissor = 0.5;
+		hScissor = 0.6;
+	}
+	else if(fbSampleSize == 3) {
+		wScissor = 0.8;
+		hScissor = 0.5;
+	}
 		
-	if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < asRatio)
+	if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < wScissor)
 		displacement.x = gl_TexCoord[0].s + noiseVec.x;
 	else
 		displacement.x = gl_TexCoord[0].s;
 		
-	if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < hRatio) 
+	if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < hScissor) 
 		displacement.y = gl_TexCoord[0].t + noiseVec.y;
 	else
 		displacement.y = gl_TexCoord[0].t;
