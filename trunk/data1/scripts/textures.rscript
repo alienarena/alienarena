@@ -100,7 +100,7 @@ textures/arena9/weapongrate
 {
 	{
 		map gfx/beam2.tga
-		scale static 10 static 10
+		scale static 4 static 4
 		colormap 1 1 1
 		beam
 		beamtype 1

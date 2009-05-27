@@ -1500,6 +1500,8 @@ void R_DrawBeamSurface ( void )
 
 		if(!beam->type)
 			origin[2] -= up[2]/2; //contingent on direction of beam
+		else
+			origin[2] += up[2]/2;
 
 		r_trace = CM_BoxTrace(r_origin, origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		visible = r_trace.fraction == 1.0;
