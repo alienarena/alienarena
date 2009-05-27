@@ -143,9 +143,6 @@ typedef struct entity_s
 
 	int		team;
 
-	vec3_t	currentLightPos;
-	vec3_t	currentLightColor;
-
 	struct	rscript_t *script;
 
 } entity_t;
