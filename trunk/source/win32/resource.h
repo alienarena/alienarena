@@ -2,6 +2,7 @@
 // Microsoft Developer Studio generated include file.
 // Used by q2.rc
 //
+#define IDS_STRING1                     1
 #define IDI_ICON1                       101
 #define IDD_DIALOG1                     103
 #define IDD_DIALOG2                     104

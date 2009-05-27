@@ -328,7 +328,6 @@ typedef struct model_s
 	vec3_t r_mesh_verts[MAX_VERTS];
 
 	fstvert_t	*st;
-	neighbors_t *neighbors;
 
 } model_t;
 
