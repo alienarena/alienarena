@@ -108,7 +108,7 @@ GLuint		g_location_frametime;
 GLuint		g_location_fxType;
 GLuint		g_location_fxPos;
 GLuint		g_location_fxColor;
-GLuint		g_location_asRatio;
+GLuint		g_location_fbSampleSize;
 
 void R_Clear (void);
 
@@ -2232,7 +2232,7 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_fxType = glGetUniformLocationARB( g_fbprogramObj, "fxType" );
 		g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" ); 
 		g_location_fxColor = glGetUniformLocationARB( g_fbprogramObj, "fxColor" );
-		g_location_asRatio = glGetUniformLocationARB( g_fbprogramObj, "asRatio" );
+		g_location_fbSampleSize = glGetUniformLocationARB( g_fbprogramObj, "fbSampleSize" );
 	
 	}
 	else {

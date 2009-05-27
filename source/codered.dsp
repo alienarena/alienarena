@@ -286,10 +286,6 @@ SOURCE=.\ref_gl\r_script.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ref_gl\r_shadows.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\ref_gl\r_surf.c
 # End Source File
 # Begin Source File

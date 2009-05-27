@@ -38,7 +38,7 @@ int r_drawing_fbeffect;
 int	r_fbFxType;
 float r_fbeffectTime;
 int frames;
-float aspectRatio;
+int fbSampleSize;
 
 static int		FB_texture_width, FB_texture_height;
 
@@ -148,7 +148,7 @@ void R_GLSLPostProcess(void)
 	glUniform1iARB( g_location_fxType, r_fbFxType); //2 for flash distortions, 1 for warping
 	glUniform1fARB( g_location_frametime, rs_realtime);
 	glUniform3fARB( g_location_fxColor, v_blend[0], v_blend[1], v_blend[2]);
-	glUniform1fARB( g_location_asRatio, aspectRatio);
+	glUniform1iARB( g_location_fbSampleSize, fbSampleSize);
 
 	fxScreenPos[0] = fxScreenPos[1] = 0;
 
@@ -215,7 +215,11 @@ void R_FB_InitTextures( void )
 	for (FB_texture_width = 1;FB_texture_width < viddef.width;FB_texture_width *= 2);
 	for (FB_texture_height = 1;FB_texture_height < viddef.height;FB_texture_height *= 2);
 
-	//to do - check hardware limits for texture size(2048x2048 would be the largest possible)
+	//limit to 2048x2048 - anything larger is generally going to cause problems, and AA doesn't support res higher
+	if(FB_texture_width > 2048)
+		FB_texture_width = 2048;
+	if(FB_texture_height > 2048)
+		FB_texture_height = 2048;
 	
 	//init the framebuffer texture
 	size = FB_texture_width * FB_texture_height * 4;
@@ -224,27 +228,36 @@ void R_FB_InitTextures( void )
 	r_framebuffer = GL_LoadPic( "***r_framebuffer***", (byte *)data, FB_texture_width, FB_texture_height, it_pic, 3 );
 	free ( data );
 
-	//For 2048x2048 situations I think we need different textures and different aspect ratio(.8 worked)
-	//For now I think we just need to deal with the more common resolutions.  There is still something not quite right
-	//with image sizing and position.  I feel that we may need to resample the images based on resolution, but not sure
-
 	//init the distortion textures
-	if(FB_texture_height == FB_texture_width) {		
-		r_flashnoise = GL_FindImage("gfx/flash_noise.jpg",it_pic);
-		if (!r_flashnoise) {                                
-			r_flashnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-		}  
+	if(FB_texture_height == FB_texture_width) {	
 		
-		r_distortwave = GL_FindImage("gfx/distortwave.jpg",it_pic);
-		if (!r_distortwave) {                                
-			r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-		}  
+		if(FB_texture_height == 1024) {
+			r_flashnoise = GL_FindImage("gfx/flash_noise.jpg",it_pic);
+			if (!r_flashnoise) {                                
+				r_flashnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
+			}  
+			
+			r_distortwave = GL_FindImage("gfx/distortwave.jpg",it_pic);
+			if (!r_distortwave) {                                
+				r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
+			}  
 
-		//we only have two possible ratios, 2 to 1 or 1 to 1
-		if(FB_texture_height == 2048)
-			aspectRatio = 0.8; //eh, hacky, really need to figure this out.
-		else
-			aspectRatio = 0.9; //trimmed for shearing shader
+			fbSampleSize = 1; //1024x1024
+		}
+		else { 
+			
+			r_flashnoise = GL_FindImage("gfx/wt_flash_noise.jpg",it_pic);
+			if (!r_flashnoise) {                                
+				r_flashnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
+			}  
+			
+			r_distortwave = GL_FindImage("gfx/wt_distortwave.jpg",it_pic);
+			if (!r_distortwave) {                                
+				r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
+			}  
+
+			fbSampleSize = 3; //2048x2048
+		}	
 	}
 	else { //use wider pic for 2 to 1 framebuffer ratio cases to keep effect similar 
 		r_flashnoise = GL_FindImage("gfx/w_flash_noise.jpg",it_pic);
@@ -257,7 +270,7 @@ void R_FB_InitTextures( void )
 			r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 		}
 		
-		aspectRatio = 0.5;  
+		fbSampleSize = 2;  
 	}
 }
 
