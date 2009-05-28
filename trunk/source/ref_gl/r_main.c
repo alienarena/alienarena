@@ -1378,7 +1378,7 @@ void R_Register( void )
 	gl_modulate = Cvar_Get ("gl_modulate", "2", CVAR_ARCHIVE );
 	gl_log = Cvar_Get( "gl_log", "0", 0 );
 	gl_bitdepth = Cvar_Get( "gl_bitdepth", "0", 0 );
-	gl_mode = Cvar_Get( "gl_mode", "6", CVAR_ARCHIVE );
+	gl_mode = Cvar_Get( "gl_mode", "3", CVAR_ARCHIVE );
 	gl_lightmap = Cvar_Get ("gl_lightmap", "0", 0);
 	gl_shadows = Cvar_Get ("gl_shadows", "2", CVAR_ARCHIVE );
 	gl_nobind = Cvar_Get ("gl_nobind", "0", 0);

@@ -345,7 +345,7 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "gl_finish", s_finish_box.curvalue );
 	Cvar_SetValue( "gl_swapinterval", s_vsync_box.curvalue );
 
-	if (s_mode_list.curvalue == 8) {
+	if (s_mode_list.curvalue == 10) {
 		Cvar_SetValue( "gl_mode", -1);
 
 		//set custom width and height only in this case
@@ -356,10 +356,10 @@ static void ApplyChanges( void *unused )
 			strcpy(s_width_field.buffer, "2048");
 			w = 2048;
 		}
-		else if ( w < 512 )
+		else if ( w < 640 )
 		{
-			strcpy(s_width_field.buffer, "512");
-			w = 512;
+			strcpy(s_width_field.buffer, "640");
+			w = 640;
 		}
 
 		h = atoi(s_height_field.buffer);
@@ -368,17 +368,17 @@ static void ApplyChanges( void *unused )
 			strcpy(s_height_field.buffer, "1536");
 			h = 1536;
 		}
-	       	else if (h < 384)
+	       	else if (h < 480)
 		{
-			strcpy(s_height_field.buffer, "384");
-			h = 384;
+			strcpy(s_height_field.buffer, "480");
+			h = 480;
 		}
 
 		Cvar_SetValue("vid_width", w);
 		Cvar_SetValue("vid_height", h);
 	}
 	else
-		Cvar_SetValue( "gl_mode", s_mode_list.curvalue + 3 ); //offset added back
+		Cvar_SetValue( "gl_mode", s_mode_list.curvalue ); 
 
 	Cvar_SetValue( "r_bloom", s_bloom_box.curvalue);
 	Cvar_SetValue( "r_bloom_intensity", s_bloom_slider.curvalue/10);
@@ -423,7 +423,9 @@ void VID_MenuInit( void )
 		"[1024 768 ]",
 		"[1152 864 ]",
 		"[1280 1024]",
+		"[1360 768 ]",
 		"[1600 1200]",
+		"[1680 1050]",
 		"[2048 1536]",
 		"[custom   ]",
 		0
@@ -486,9 +488,9 @@ void VID_MenuInit( void )
 		_windowed_mouse = Cvar_Get( "_windowed_mouse", "1", CVAR_ARCHIVE );
 
 	if(gl_mode->value == -1)
-		s_mode_list.curvalue = 8;
+		s_mode_list.curvalue = 10;
 	else
-		s_mode_list.curvalue = gl_mode->value - 3; //done because of the removed resolutions hack
+		s_mode_list.curvalue = gl_mode->value; 
 
 	if ( s_mode_list.curvalue < 0 )
 		s_mode_list.curvalue = 0;
