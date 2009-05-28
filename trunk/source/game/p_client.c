@@ -3084,7 +3084,7 @@ void ClientBeginServerFrame (edict_t *ent)
 		{
 			// in deathmatch, only wait for attack button
 			if (deathmatch->value)
-				buttonMask = BUTTON_ATTACK;
+				buttonMask = BUTTON_ATTACK | BUTTON_ATTACK2;
 			else
 				buttonMask = -1;
 
