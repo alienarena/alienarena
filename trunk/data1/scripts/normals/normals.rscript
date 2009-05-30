@@ -495,3 +495,92 @@ players/commander/weapon
 		glow
 	}
 }
+vehicles/hover/skin2
+{
+	{
+		map vehicles/hover/skin_normal.tga
+		normalmap
+	}
+}
+vehicles/bomber/skin
+{
+	{
+		map vehicles/bomber/skin_normal.tga
+		normalmap
+	}
+}
+vehicles/strafer/skin
+{
+	{
+		map vehicles/strafer/skin_normal.tga
+		normalmap
+	}
+}
+vehicles/hover/console
+{
+	{
+		map vehicles/hover/console_normal.tga
+		normalmap
+		map2 gfx/hconsole.tga
+		glow
+	}	
+}
+vehicles/bomber/console
+{
+	{
+		map vehicles/bomber/console_normal.tga
+		normalmap
+		map2 gfx/bconsole.tga
+		glow
+	}
+}
+vehicles/strafer/console
+{
+	{
+		map vehicles/strafer/console_normal.tga
+		normalmap
+		map2 gfx/sconsole.tga
+		glow
+	}
+}
+models/items/haste/skin
+{
+	{
+		map models/items/haste/skin_normal.tga
+		normalmap
+		map2 gfx/greenlightning.tga
+		fx
+	}
+}
+models/items/quaddama/skin
+{
+	{
+		map models/items/quaddama/skin_normal.tga
+		normalmap
+		map2 gfx/bluelightning.tga
+		fx
+	}
+}
+models/items/sproing/skin
+{
+	{
+		map models/items/sproing/skin_normal.tga
+		normalmap
+	}
+}
+models/items/adrenaline/skin
+{
+	{
+		map models/items/adrenaline/skin_normal.tga
+		normalmap
+		map2 gfx/greenlightning.tga
+		fx
+	}
+}
+models/items/invulner/skin
+{
+	{
+		map models/items/invulner/skin_normal.tga
+		normalmap
+	}
+}
