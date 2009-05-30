@@ -282,9 +282,6 @@ void VehicleSetup (edict_t *ent)
 	if(!strcmp(ent->classname, "item_bomber"))
 		ent->s.modelindex3 = gi.modelindex("vehicles/bomber/helmet.md2");
 
-	if(!strcmp(ent->classname, "item_hover"))
-		ent->s.modelindex3 = gi.modelindex("vehicles/hover/flames.md2");
-
 	ent->solid = SOLID_TRIGGER;
 	ent->movetype = MOVETYPE_TOSS;  
 	ent->touch = Touch_Item;
@@ -473,7 +470,7 @@ qboolean Get_in_vehicle (edict_t *ent, edict_t *other)
 	else if(!strcmp(ent->classname, "item_hover")) {
 		other->s.modelindex = gi.modelindex("vehicles/hover/tris.md2");
 		other->s.modelindex2 = 0;
-		other->s.modelindex3 = gi.modelindex("vehicles/hover/flames.md2");
+		other->s.modelindex3 = 0;
 		other->s.modelindex4 = 0;
 	}
 	else {

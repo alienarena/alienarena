@@ -303,19 +303,6 @@ models/items/quaddama/skin
 		alphamask
 	}
 }
-models/items/sproing/skin
-{
-	{
-		map models/items/sproing/skin.tga
-	}
-	{
-		map gfx/greenlightning.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scroll static 0 static 3
-		alphashift 10 0.1 0.3
-		nolightmap
-	}
-}
 models/items/adrenaline/skin
 {
 	{
@@ -343,22 +330,6 @@ vehicles/hover/flames
 		scroll static 0 static -3
 		alphashift 10 0.4 0.9
 		nolightmap
-	}
-}
-vehicles/hover/skin
-{
-	{
-		map vehicles/hover/skin.tga
-	}
-	{
-		map gfx/reflect.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 0.2 0.2
-		envmap
-	}
-	{
-		map vehicles/hover/skin.tga
-		alphamask
 	}
 }
 vehicles/deathball/deathball

@@ -720,8 +720,6 @@ edict_t *Drop_Item (edict_t *ent, gitem_t *item)
 	gi.setmodel (dropped, dropped->item->world_model);
 	if(!strcmp(item->classname, "item_bomber"))
 		dropped->s.modelindex3 = gi.modelindex("vehicles/bomber/helmet.md2");
-	if(!strcmp(item->classname, "item_hover"))
-		dropped->s.modelindex3 = gi.modelindex("vehicles/hover/flames.md2");
 	dropped->solid = SOLID_TRIGGER;
 	dropped->movetype = MOVETYPE_TOSS;
 	dropped->touch = drop_temp_touch;
