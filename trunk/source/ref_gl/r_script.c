@@ -415,6 +415,10 @@ void RS_ReadyScript (rscript_t *rs)
 
 	while (stage != NULL)
 	{
+		//if normalmap, set mode
+		if(stage->normalmap)
+			mode = it_bump;
+
 		//set anim
 		anim = stage->anim_stage;
 		while (anim != NULL) 
