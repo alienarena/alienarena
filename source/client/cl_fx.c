@@ -1113,6 +1113,33 @@ void CL_ExplosionParticles (vec3_t org)
 		p->accel[j] = 0;
 	}
 
+	//add smoke
+	for (i=0 ; i<7; i++)
+	{
+		
+		if (!(p = new_particle()))
+			return;
+	
+		for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = org[j] + ((rand()%16)-8);
+			p->vel[j] = 0;
+		}
+		p->type = PARTICLE_STANDARD;
+		p->accel[0] = p->accel[1] = p->accel[2] = 0;
+		p->alpha = 0.2;		
+		p->alphavel = -2.0 / (30+frand()*1.4); //smoke lingers longer
+			
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+		p->scale = 6 + (rand()&4);
+		p->scalevel = 12.0;
+		p->color = 1 + (rand()&10);
+		p->accel[2] = 10;
+				
+		p->texnum = r_smoketexture->texnum;
+		
+	}
 }
 
 /*
