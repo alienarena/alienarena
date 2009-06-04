@@ -1,4 +1,4 @@
-qbsp3 dm-chasmatic2k9
-qvis3 dm-chasmatic2k9
-qrad3 dm-chasmatic2k9
+qbsp3 test
+qvis3 test
+qrad3 test
 pause
