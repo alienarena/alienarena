@@ -1122,7 +1122,7 @@ void CL_ExplosionParticles (vec3_t org)
 	
 		for (j=0 ; j<3 ; j++)
 		{
-			p->org[j] = org[j] + ((rand()%16)-8);
+			p->org[j] = org[j] + ((rand()%32)-16);
 			p->vel[j] = 0;
 		}
 		p->type = PARTICLE_STANDARD;
@@ -1132,7 +1132,7 @@ void CL_ExplosionParticles (vec3_t org)
 			
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
-		p->scale = 6 + (rand()&4);
+		p->scale = 1 + (rand()&4);
 		p->scalevel = 12.0;
 		p->color = 1 + (rand()&10);
 		p->accel[2] = 10;
