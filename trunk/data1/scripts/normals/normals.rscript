@@ -584,3 +584,12 @@ models/items/invulner/skin
 		normalmap
 	}
 }
+models/items/armor/shard/skin
+{
+	{
+		map models/items/armor/shard/skin_normal.jpg
+		normalmap
+		map2 gfx/shard_fx.tga
+		glow
+	}
+}
