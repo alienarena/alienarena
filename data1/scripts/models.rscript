@@ -74,9 +74,9 @@ models/items/armor/shard/skin
 		nolightmap
 	}
 	{
-		map gfx/grchrome.tga
+		map gfx/chrome.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 20 0.5 0.6
+		alphashift 20 0.2 0.4
 		envmap
 		nolightmap
 	}
@@ -84,10 +84,6 @@ models/items/armor/shard/skin
 		map gfx/shardmask.tga
 		nolightmap
 		alphamask
-	}
-	{
-		map models/items/armor/shard/skin_normal.tga
-		normalmap
 	}
 }
 models/items/healing/medium/skin

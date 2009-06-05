@@ -695,7 +695,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	int	got_vehicle = 0;
 	int	number_of_gibs = 0;
 	int	gib_effect = EF_GREENGIB;
-	gitem_t *it;
+	int hasFlag = false;
+	gitem_t *it, *flag1_item, *flag2_item;
 
 	if (self->in_vehicle) {
 		Reset_player(self);	//get the player out of the vehicle
@@ -744,8 +745,27 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			if(!excessive->value)
 				TossClientWeapon (self);
 		}
-		if(ctf->value)
+
+		if(ctf->value) {			
+			//check to see if they had a flag
+			flag1_item = flag2_item = NULL;
+
+			flag1_item = FindItemByClassname("item_flag_red");
+			flag2_item = FindItemByClassname("item_flag_blue");
+
+			if (self->client->pers.inventory[ITEM_INDEX(flag1_item)] || self->client->pers.inventory[ITEM_INDEX(flag1_item)]) 
+				hasFlag = true;
+
 			CTFDeadDropFlag(self);
+			if(anticamp->value && meansOfDeath == MOD_SUICIDE && hasFlag) {
+				
+				//make campers really pay for hiding flags
+				if(self->dmteam == BLUE_TEAM)
+					CTFResetFlag(RED_TEAM);
+				else
+					CTFResetFlag(BLUE_TEAM);
+			}
+		}
 		if(self->in_deathball)
 			DeadDropDeathball(self);
 

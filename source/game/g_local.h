@@ -711,6 +711,7 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 
 //CTF
 void CTFDeadDropFlag(edict_t *self);
+void CTFResetFlag(int team);
 void CTFEffects(edict_t *player);
 void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote);
 void CTFPrecache(void);
