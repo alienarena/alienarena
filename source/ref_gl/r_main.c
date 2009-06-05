@@ -1424,7 +1424,7 @@ void R_Register( void )
 
 	gl_mirror = Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE);
 
-	vid_fullscreen = Cvar_Get( "vid_fullscreen", "0", CVAR_ARCHIVE );
+	vid_fullscreen = Cvar_Get( "vid_fullscreen", "1", CVAR_ARCHIVE );
 	vid_gamma = Cvar_Get( "vid_gamma", "1.0", CVAR_ARCHIVE );
 	vid_contrast = Cvar_Get( "vid_contrast", "1.0", CVAR_ARCHIVE);
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );

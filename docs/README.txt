@@ -1,4 +1,4 @@
-ALIEN ARENA 2008
+ALIEN ARENA 2009
 
 1. Introduction
 2. System Requirements
@@ -16,7 +16,7 @@ ALIEN ARENA 2008
 
 1.	INTRODUCTION
 
-ALIEN ARENA 2008 is a standalone 3D first person online deathmatch shooter crafted from the original source code of Quake II and Quake III, released by id Software under the GPL license.  With features including 32 bit graphics, new particle engine and effects, light blooms, reflective water, hi resolution textures and skins, hi poly models, stain maps, ALIEN ARENA pushes the envelope of graphical beauty rivaling today's top games.
+ALIEN ARENA 2009 is a standalone 3D first person online deathmatch shooter crafted from the original source code of Quake II and Quake III, released by id Software under the GPL license.  With features including 32 bit graphics, new particle engine and effects, light blooms, reflective water, hi resolution textures and skins, hi poly models, stain maps, ALIEN ARENA pushes the envelope of graphical beauty rivaling today's top games.
 
 The game features 37 levels, which can be played online against other players, or against the built in CodeRED bots.  
 
