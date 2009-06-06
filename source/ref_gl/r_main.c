@@ -542,6 +542,8 @@ void R_DrawEntitiesOnList (void)
 		if (currententity->model && r_shaders->value)
 		{
 			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
+			if(!rs)
+				rs=(rscript_t *)currententity->model->script[0]; //try 0
 
 			if (currententity->skin) { //custom player skin (must be done here)
                 COM_StripExtension ( currententity->skin->name, shortname );
@@ -608,6 +610,8 @@ void R_DrawEntitiesOnList (void)
 		if (currententity->model && r_shaders->value)
 		{
 			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
+			if(!rs)
+				rs=(rscript_t *)currententity->model->script[0]; //try 0
 						
 			if (currententity->skin) { //custom player skin
                 COM_StripExtension ( currententity->skin->name, shortname );
