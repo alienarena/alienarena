@@ -1,4 +1,4 @@
-qbsp3 test
-qvis3 test
-qrad3 test
+qbsp3 dm-invasion
+qvis3 dm-invasion
+qrad3 dm-invasion
 pause
