@@ -361,6 +361,27 @@ maps/meshes/bigribpipe
 		normalmap
 	}
 }
+maps/meshes/unit
+{
+	{
+		map maps/meshes/unit_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/conduit
+{
+	{
+		map maps/meshes/conduit_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/pipes1
+{
+	{
+		map maps/meshes/pipes1_normal.jpg
+		normalmap
+	}
+}
 models/objects/dmspot/skin
 {
 	{
@@ -495,7 +516,7 @@ players/commander/weapon
 		glow
 	}
 }
-vehicles/hover/skin2
+vehicles/hover/skin
 {
 	{
 		map vehicles/hover/skin_normal.tga

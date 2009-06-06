@@ -2633,6 +2633,9 @@ Source: ..\..\..\Alien Arena 2007\data1\pics\m_main_mont3.tga; DestDir: {app}\da
 Source: ..\..\..\Alien Arena 2007\data1\pics\statbox.tga; DestDir: {app}\data1\pics
 Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\martian.jpg; DestDir: {app}\data1\maps\meshes
 Source: ..\..\..\Alien Arena 2007\data1\models\items\armor\shard\skin_normal.tga; DestDir: {app}\data1\models\items\armor\shard
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\pipes1_normal.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\unit_normal.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\conduit_normal.jpg; DestDir: {app}\data1\maps\meshes
 
 [Icons]
 Name: {group}\{cm:ProgramOnTheWeb,{#MyAppName}}; Filename: {#MyAppURL}
