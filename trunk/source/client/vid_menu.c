@@ -679,30 +679,35 @@ void VID_MenuInit( void )
 	s_lowest_action.generic.x    = 24;
 	s_lowest_action.generic.y    = 280*scale;
 	s_lowest_action.generic.callback = SetLowest;
+	s_lowest_action.generic.statusbar = "no shaders, no dynamic lighting";
 
 	s_low_action.generic.type = MTYPE_ACTION;
 	s_low_action.generic.name = "low settings";
 	s_low_action.generic.x    = 24;
 	s_low_action.generic.y    = 290*scale;
 	s_low_action.generic.callback = SetLow;
+	s_low_action.generic.statusbar = "shaders, but no dynamic lighting";
 
 	s_medium_action.generic.type = MTYPE_ACTION;
 	s_medium_action.generic.name = "medium settings";
 	s_medium_action.generic.x    = 24;
 	s_medium_action.generic.y    = 300*scale;
 	s_medium_action.generic.callback = SetMedium;
+	s_medium_action.generic.statusbar = "GLSL per-pixel dynamic lighting and postprocess";
 
 	s_high_action.generic.type = MTYPE_ACTION;
 	s_high_action.generic.name = "high settings";
 	s_high_action.generic.x    = 24;
 	s_high_action.generic.y    = 310*scale;
 	s_high_action.generic.callback = SetHigh;
+	s_high_action.generic.statusbar = "GLSL per-pixel effects on most surfaces";
 
 	s_highest_action.generic.type = MTYPE_ACTION;
 	s_highest_action.generic.name = "highest settings";
 	s_highest_action.generic.x    = 24;
 	s_highest_action.generic.y    = 320*scale;
 	s_highest_action.generic.callback = SetHighest;
+	s_highest_action.generic.statusbar = "GLSL per-pixel effects on all surfaces";
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
