@@ -1179,7 +1179,7 @@ edict_t *SelectRandomCTFSpawnPoint (void)
 	int		count = 0;
 	int		selection;
 	float	range, range1, range2;
-	char	whichteam[16];
+	char	whichteam[32];
 
 	spot = NULL;
 	range1 = range2 = 99999;
