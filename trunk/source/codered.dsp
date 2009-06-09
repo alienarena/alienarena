@@ -302,11 +302,11 @@ SOURCE=.\ref_gl\r_warp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\client\snd_openal.c
+SOURCE=.\client\snd_file.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\client\snd_wav.c
+SOURCE=.\client\snd_openal.c
 # End Source File
 # Begin Source File
 
@@ -496,6 +496,22 @@ SOURCE=.\client\curl\libcurl.lib
 # Begin Source File
 
 SOURCE=.\win32\lib\libjpeg.lib
+# End Source File
+# Begin Source File
+
+SOURCE=.\win32\lib\ogg_static.lib
+# End Source File
+# Begin Source File
+
+SOURCE=.\win32\lib\vorbis_static.lib
+# End Source File
+# Begin Source File
+
+SOURCE=.\win32\lib\vorbisfile_static.lib
+# End Source File
+# Begin Source File
+
+SOURCE=.\win32\lib\vorbisenc_static.lib
 # End Source File
 # End Target
 # End Project
