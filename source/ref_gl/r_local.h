@@ -468,7 +468,7 @@ extern float	col_array[MAX_ARRAY][4];
 extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
 extern float *VArray;
-static vec3_t NormalsArray[4096];
+static vec3_t NormalsArray[16384];
 
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu

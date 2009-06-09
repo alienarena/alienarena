@@ -142,6 +142,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
+				FavorSizeOrSpeed="1"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="C:\vorbis\include;C:\ogg\include;&quot;C:\Program Files\OpenAL 1.1 SDK\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;ARENA;AL_NO_PROTOTYPES"
 				StringPooling="true"
@@ -708,10 +710,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\win32\lib\libogg_static.lib"
-				>
 			</File>
 			<File
 				RelativePath="qcommon\mdfour.c"
@@ -1676,6 +1674,10 @@
 		</File>
 		<File
 			RelativePath="win32\lib\libjpeg.lib"
+			>
+		</File>
+		<File
+			RelativePath=".\win32\lib\libogg_static.lib"
 			>
 		</File>
 		<File
