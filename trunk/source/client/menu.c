@@ -2145,12 +2145,10 @@ static void UpdateDopplerEffectFunc( void *unused )
 	{
 		Cvar_SetValue( "s_doppler", 0.0f ); // off
 	}
+	
+	R_EndFrame(); // buffer swap needed to show text box
+	S_UpdateDopplerFactor();
 
-	// restart to apply the change in doppler
-	// TODO: would be better to have sound system function to change the doppler
-	R_EndFrame(); // buffer swap needed to show text box TODO: verify this
-	CL_Snd_Restart_f();
-	S_StartMenuMusic();
 }
 
 void Options_MenuInit( void )
