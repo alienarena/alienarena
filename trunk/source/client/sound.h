@@ -27,6 +27,8 @@ void S_Shutdown (void);
 void S_StartSound (vec3_t origin, int entnum, int entchannel, struct sfx_s *sfx, float fvol,  float attenuation, float timeofs);
 void S_StartLocalSound (char *s);
 void S_StartMusic (char *s);
+void S_StartMenuMusic( void );
+void S_StartMapMusic( void );
 
 void S_RawSamples (int samples, int rate, int width, int channels, byte *data);
 
@@ -40,6 +42,19 @@ struct sfx_s *S_RegisterSound (char *sample);
 void S_EndRegistration (void);
 
 struct sfx_s *S_FindName (char *name, qboolean create);
+
+void S_UpdateDopplerFactor( void );
+
+extern qboolean S_LoadSound( char *filename, // in
+		qboolean ogg_substitute, // in
+        void** readbfr, // out
+        void** pcmdata, // out
+        int *bytewidth, // out
+        int *channels, // out
+        int *samplerate, // out
+        size_t *byte_count // out
+        );
+
 
 // the sound code makes callbacks to the client for entitiy position
 // information, so entities can be dynamically re-spatialized

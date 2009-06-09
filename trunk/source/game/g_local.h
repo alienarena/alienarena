@@ -470,7 +470,6 @@ extern	game_export_t	globals;
 extern	spawn_temp_t	st;
 
 extern	int	sm_meat_index;
-extern	int	snd_fry;
 
 extern	int red_team_cnt;
 extern  int blue_team_cnt;

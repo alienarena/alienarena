@@ -503,8 +503,7 @@ void CL_PrepRefresh ()
 
 	// start background music
 	background_music = Cvar_Get ("background_music", "1", CVAR_ARCHIVE);
-	if(background_music->value)
-		S_StartMusic(map_music);
+	S_StartMapMusic();
 
 	//loadingMessage = false;
 	rocketlauncher = 0;

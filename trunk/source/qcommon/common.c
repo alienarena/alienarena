@@ -1540,7 +1540,7 @@ void Qcommon_Init (int argc, char **argv)
 #ifndef DEDICATED_ONLY
 	//play music
 	if (!dedicated->value)
-		S_StartMusic("misc/menumusic.wav");
+		S_StartMenuMusic();
 #endif
 	Com_Printf ("======== CRX Initialized ========\n\n");
 }
