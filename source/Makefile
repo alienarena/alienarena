@@ -22,9 +22,6 @@ X11BASE?=/usr/X11R6
 # Selects the component to build: ALL, CLIENT, or DEDICATED
 BUILD?=ALL
 
-# Build binary that uses SDL for sound (when BUILD is "ALL" or "CLIENT").
-SDLSOUND?=yes
-
 # Adds DATADIR/LIBDIR (see below) to the data and library search path.
 WITH_DATADIR?=no
 WITH_LIBDIR?=no
@@ -74,7 +71,7 @@ endif
 RELEASE_CFLAGS=$(BASE_CFLAGS)
 
 ifeq ($(strip $(OPTIMIZED_CFLAGS)),yes)
-RELEASE_CFLAGS+=-O$(OPTIM_LVL) -fomit-frame-pointer -fexpensive-optimizations
+RELEASE_CFLAGS+=-O$(OPTIM_LVL) -fomit-frame-pointer -fexpensive-optimizations -ffast-math
 
 ifeq ($(OSTYPE),linux)
 ifeq ($(ARCH),x86_64)
@@ -111,15 +108,15 @@ endif
 
 GLXLDFLAGS=-L$(X11BASE)/$(_LIB) -L$(LOCALBASE)/$(_LIB) -lX11 -lXext -lXxf86dga -lXxf86vm -lm -ljpeg -lGL -lGLU
 
-OPENALCFLAGS=-I/usr/include/AL
-OPENALLDFLAGS=-lopenal -lpthread
-
-SDLCFLAGS=$(shell sdl-config --cflags) 
-SDLLDFLAGS=$(shell sdl-config --libs)
-
 SHLIBEXT=so
 SHLIBCFLAGS=-fPIC
 SHLIBLDFLAGS=-shared
+
+OPPENALCFLAGS+=$(shell pkg-config --cflags openal)
+OPENALLDFLAGS=$(shell pkg-config --libs openal)
+
+VORBISCFLAGS+=$(shell pkg-config --cflags vorbisfile)
+VORBISLDFLAGS=$(shell pkg-config --libs vorbisfile)
 
 CURLCFLAGS=$(shell curl-config --cflags)
 CURLLDFLAGS=$(shell curl-config --libs)
@@ -128,7 +125,7 @@ JPEGLDFLAGS=-ljpeg
 
 DO_CC=$(CC) $(CFLAGS) -o $@ -c $<
 DO_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) -o $@ -c $<
-DO_DED_CC=$(CC) $(CFLAGS) -DDEDICATED_ONLY -DBUFFER_DEBUG -o $@ -c $<
+DO_DED_CC=$(CC) $(CFLAGS) -DDEDICATED_ONLY -o $@ -c $<
 DO_DED_DEBUG_CC=$(CC) $(DEBUG_CFLAGS) -DDEDICATED_ONLY -DBUFFER_DEBUG -o $@ -c $<
 DO_O_CC=$(CC) $(CFLAGS) -O -o $@ -c $<
 DO_SHLIB_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
@@ -138,6 +135,7 @@ DO_GL_SHLIB_CC=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 DO_GL_SHLIB_O_CC=$(CC) $(CFLAGS) -O $(SHLIBCFLAGS) -o $@ -c $<
 DO_AS=$(CC) $(CFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
 DO_SHLIB_AS=$(CC) $(CFLAGS) $(SHLIBCFLAGS) -DELF -x assembler-with-cpp -o $@ -c $<
+
 
 DO_ARENA_SHLIB_CC=$(CC) $(CFLAGS) $(ARENA_CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 
@@ -160,10 +158,6 @@ endif
 ifeq ($(strip $(BUILD)),DEDICATED)
 	SDLSOUND=no
 	TARGETS+=$(BUILDDIR)/crded
-endif
-
-ifeq ($(strip $(SDLSOUND)),yes)
-	TARGETS+=$(BUILDDIR)/crx.sdl
 endif
 
 build-release:
@@ -192,7 +186,11 @@ targets: $(TARGETS)
 # CLIENT/SERVER
 #############################################################################
 
+SOUND_OPENAL_OBJS = \
+	
+
 CODERED_OBJS = \
+	$(BUILDDIR)/client/cl_cin.o \
 	$(BUILDDIR)/client/cl_ents.o \
 	$(BUILDDIR)/client/cl_fx.o \
 	$(BUILDDIR)/client/cl_input.o \
@@ -207,6 +205,10 @@ CODERED_OBJS = \
 	$(BUILDDIR)/client/cl_http.o \
 	$(BUILDDIR)/client/console.o \
 	$(BUILDDIR)/client/keys.o \
+	$(BUILDDIR)/client/menu.o \
+	$(BUILDDIR)/client/snd_openal.o \
+	$(BUILDDIR)/client/snd_file.o \
+	$(BUILDDIR)/client/qal.o \
 	$(BUILDDIR)/client/qmenu.o \
 	\
 	$(BUILDDIR)/client/cmd.o \
@@ -234,6 +236,7 @@ CODERED_OBJS = \
 	$(BUILDDIR)/client/rw_unix.o \
 	$(BUILDDIR)/client/glob.o \
 	$(BUILDDIR)/client/net_udp.o \
+	$(BUILDDIR)/client/qal_unix.o \
 	\
 	$(BUILDDIR)/client/q_shared.o \
 	$(BUILDDIR)/client/pmove.o \
@@ -259,38 +262,12 @@ CODERED_OBJS = \
 REF_GL_GLX_OBJS = \
 	$(BUILDDIR)/ref_gl/gl_glx.o
 
-SOUND_OPENAL_OBJS = \
-	$(BUILDDIR)/client/cl_cin.o \
-	$(BUILDDIR)/client/menu.o \
-	$(BUILDDIR)/client/qal_unix.o \
-	$(BUILDDIR)/client/qal.o \
-	$(BUILDDIR)/client/snd_openal.o \
-	$(BUILDDIR)/client/snd_wav.o
-
-SOUND_SDL_OBJS = \
-	$(BUILDDIR)/client/cl_cin_sdl.o \
-	$(BUILDDIR)/client/menu_sdl.o \
- 	$(BUILDDIR)/client/snd_sdl.o \
- 	$(BUILDDIR)/client/snd_dma.o \
- 	$(BUILDDIR)/client/snd_mem.o \
- 	$(BUILDDIR)/client/snd_mix.o
-
-CODERED_AS_OBJS = \
-	$(BUILDDIR)/client/snd_mixa.o
-
 
 $(BUILDDIR)/crx : $(CODERED_OBJS) $(SOUND_OPENAL_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_OPENAL_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(OPENALLDFLAGS) $(CURLLDFLAGS) $(JPEGLDFLAGS)
-
-$(BUILDDIR)/crx.sdl : $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(SOUND_SDL_OBJS) $(CODERED_AS_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(SDLLDFLAGS) $(CURLLDFLAGS) $(JPEGLDFLAGS)
-
+	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(OPENALLDFLAGS) $(VORBISLDFLAGS) $(CURLLDFLAGS) $(JPEGLDFLAGS)
 
 $(BUILDDIR)/client/cl_cin.o :     $(CLIENT_DIR)/cl_cin.c
 	$(DO_CC)
-
-$(BUILDDIR)/client/cl_cin_sdl.o : $(CLIENT_DIR)/cl_cin.c
-	$(DO_CC) -DSDL_VERSION
 
 $(BUILDDIR)/client/cl_ents.o :    $(CLIENT_DIR)/cl_ents.c
 	$(DO_CC)
@@ -333,27 +310,15 @@ $(BUILDDIR)/client/keys.o :       $(CLIENT_DIR)/keys.c
 
 $(BUILDDIR)/client/menu.o :       $(CLIENT_DIR)/menu.c
 	$(DO_CC) 
-
-$(BUILDDIR)/client/menu_sdl.o :   $(CLIENT_DIR)/menu.c
-	$(DO_CC) -DSDL_VERSION
-
-$(BUILDDIR)/client/snd_dma.o :    $(CLIENT_DIR)/snd_dma.c
-	$(DO_CC)
-
-$(BUILDDIR)/client/snd_mem.o :    $(CLIENT_DIR)/snd_mem.c
-	$(DO_CC)
-
-$(BUILDDIR)/client/snd_mix.o :    $(CLIENT_DIR)/snd_mix.c
-	$(DO_CC)
-
-$(BUILDDIR)/client/qal.o :        $(CLIENT_DIR)/qal.c
-	$(DO_CC) $(OPENALCFLAGS)
 	
 $(BUILDDIR)/client/snd_openal.o : $(CLIENT_DIR)/snd_openal.c
 	$(DO_CC) $(OPENALCFLAGS)
 
-$(BUILDDIR)/client/snd_wav.o :    $(CLIENT_DIR)/snd_wav.c
-	$(DO_CC)
+$(BUILDDIR)/client/snd_file.o :    $(CLIENT_DIR)/snd_file.c
+	$(DO_CC) $(VORBISCFLAGS)
+
+$(BUILDDIR)/client/qal.o :        $(CLIENT_DIR)/qal.c
+	$(DO_CC) $(OPENALCFLAGS)
 
 $(BUILDDIR)/client/qmenu.o :      $(CLIENT_DIR)/qmenu.c
 	$(DO_CC)
@@ -383,7 +348,7 @@ $(BUILDDIR)/client/net_chan.o :   $(COMMON_DIR)/net_chan.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/q_shared.o :   $(GAME_DIR)/q_shared.c
-	$(DO_DEBUG_CC)
+	$(DO_CC)
 
 $(BUILDDIR)/client/pmove.o :      $(COMMON_DIR)/pmove.c
 	$(DO_CC)
@@ -421,15 +386,6 @@ $(BUILDDIR)/client/vid_menu.o :   $(CLIENT_DIR)/vid_menu.c
 $(BUILDDIR)/client/vid_so.o :     $(UNIX_DIR)/vid_so.c
 	$(DO_CC)
 
-#$(BUILDDIR)/client/snd_unix.o :  $(UNIX_DIR)/snd_unix.c
-#	$(DO_CC)
-
-$(BUILDDIR)/client/snd_mixa.o :   $(UNIX_DIR)/snd_mixa.s
-	$(DO_AS)
-
-$(BUILDDIR)/client/qal_unix.o :  $(UNIX_DIR)/qal_unix.c
-	$(DO_CC) $(OPENALCFLAGS)
-
 $(BUILDDIR)/client/sys_unix.o :  $(UNIX_DIR)/sys_unix.c
 	$(DO_CC)
 
@@ -441,6 +397,9 @@ $(BUILDDIR)/client/glob.o :       $(UNIX_DIR)/glob.c
 
 $(BUILDDIR)/client/net_udp.o :    $(UNIX_DIR)/net_udp.c
 	$(DO_CC)
+
+$(BUILDDIR)/client/qal_unix.o :  $(UNIX_DIR)/qal_unix.c
+	$(DO_CC) $(OPENALCFLAGS)
 
 $(BUILDDIR)/client/cl_http.o :   $(CLIENT_DIR)/cl_http.c
 	$(DO_CC) $(CURLCFLAGS)
@@ -495,9 +454,6 @@ $(BUILDDIR)/ref_gl/qgl_unix.o :      $(UNIX_DIR)/qgl_unix.c
 
 $(BUILDDIR)/ref_gl/gl_glx.o :      $(UNIX_DIR)/gl_glx.c
 	$(DO_GL_SHLIB_CC)
-
-$(BUILDDIR)/client/snd_sdl.o :     $(UNIX_DIR)/snd_sdl.c
-	$(DO_CC) $(SDLCFLAGS)
 
 #############################################################################
 # DEDICATED SERVER
@@ -561,7 +517,7 @@ $(BUILDDIR)/ded/net_chan.o :   $(COMMON_DIR)/net_chan.c
 	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/q_shared.o :   $(GAME_DIR)/q_shared.c
-	$(DO_DED_DEBUG_CC)
+	$(DO_DED_CC)
 
 $(BUILDDIR)/ded/pmove.o :      $(COMMON_DIR)/pmove.c
 	$(DO_DED_CC)
@@ -763,7 +719,7 @@ $(BUILDDIR)/game/p_weapon.o :    $(GAME_DIR)/p_weapon.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/q_shared.o :    $(GAME_DIR)/q_shared.c
-	$(DO_SHLIB_DEBUG_CC)
+	$(DO_SHLIB_CC)
 
 
 
@@ -923,7 +879,7 @@ $(BUILDDIR)/arena/p_weapon.o :    $(ARENA_DIR)/p_weapon.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/q_shared.o :    $(ARENA_DIR)/q_shared.c
-	$(DO_SHLIB_DEBUG_CC)
+	$(DO_ARENA_SHLIB_CC)
 
 
 #############################################################################
@@ -941,18 +897,15 @@ clean2:
 	-rm -f \
 	$(CODERED_OBJS) \
 	$(CRDED_OBJS) \
-	$(CODERED_AS_OBJS) \
 	$(GAME_OBJS) \
 	$(ARENA_OBJS) \
 	$(REF_GL_OBJS) \
-	$(REF_GL_GLX_OBJS) \
-	$(SOUND_SDL_OBJS) \
-	$(SOUND_OPENAL_OBJS)
-
+	$(REF_GL_GLX_OBJS)
+	
 distclean: clean
 	rm -rf $(BUILD_RELEASE_DIR)
 	rm -rf $(BUILD_DEBUG_DIR)
-	rm -f .deps
+#	rm -f .deps
 
 install:
 	cp $(BUILD_RELEASE_DIR)/cr* ../
@@ -960,7 +913,6 @@ install:
 	cp $(BUILD_RELEASE_DIR)/game.$(SHLIBEXT) ../arena/
 	strip ../crded
 	strip ../crx
-	strip ../crx.sdl
 	strip ../arena/game.$(SHLIBEXT)
 	strip ../data1/game.$(SHLIBEXT)
 
@@ -973,34 +925,33 @@ uninstall:
 	rm -f ../data1/game.$(SHLIBEXT)
 	rm -f ../arena/game.$(SHLIBEXT)
 	rm -f ../crx
-	rm -f ../crx.sdl
 	rm -f ../crded
 
 # Dependencies
--include .deps
-
-.deps:	Makefile
-	@echo "Making dependencies ...";
-	@echo
-	@tmpfile=`mktemp`; \
-	grep '^$$(BUILDDIR)[a-zA-Z/_]\+\.o\s\+' Makefile | while read obj junk source; do \
-		while echo "$$source" | grep -q '$$([A-Z_]\+)'; do \
-			vname=`echo $$source | sed -e 's#$$(\([A-Z_]\+\)).*$$#\1#'`; \
-			vval=`grep '^'$$vname'=' Makefile | sed -e 's#.*=\s\+##'`; \
-			source=`echo $$source | sed -e 's#$$('"$$vname"')#'"$$vval"'#g'`; \
-		done; \
-		if [ -f "$$source" ]; then \
-			echo " Handling $$obj" | sed -e 's#$$(BUILDDIR)/##'; \
-			$(CC) -MM $(BASE_CFLAGS) $(OPENALCFLAGS) $(SDLCFLAGS) $$source >$$tmpfile; \
-			outfile=`echo "$$obj" | sed -e 's#$$(BUILDDIR)#$(BUILD_RELEASE_DIR)#'`; \
-			sed -e 's#^.*\.o:#'"$$outfile:"'#' < $$tmpfile >>.deps; \
-			outfile=`echo "$$obj" | sed -e 's#$$(BUILDDIR)#$(BUILD_DEBUG_DIR)#'`; \
-			sed -e 's#^.*\.o:#'"$$outfile:"'#' < $$tmpfile >>.deps; \
-		else \
-			echo " Couldn't find '$$source'"; \
-		fi; \
-	done; \
-	rm -f $$tmpfile
+#-include .deps
+#
+#.deps:	Makefile
+#	@echo "Making dependencies ...";
+#	@echo
+#	@tmpfile=`mktemp`; \
+#	grep '^$$(BUILDDIR)[a-zA-Z/_]\+\.o\s\+' Makefile | while read obj junk source; do \
+#		while echo "$$source" | grep -q '$$([A-Z_]\+)'; do \
+#			vname=`echo $$source | sed -e 's#$$(\([A-Z_]\+\)).*$$#\1#'`; \
+#			vval=`grep '^'$$vname'=' Makefile | sed -e 's#.*=\s\+##'`; \
+#			source=`echo $$source | sed -e 's#$$('"$$vname"')#'"$$vval"'#g'`; \
+#		done; \
+#		if [ -f "$$source" ]; then \
+#			echo " Handling $$obj" | sed -e 's#$$(BUILDDIR)/##'; \
+#			$(CC) -MM $(BASE_CFLAGS) $(OPENALCFLAGS) $(VORBISCFLAGS) $(CURLCFLAGS) $$source >$$tmpfile; \
+#			outfile=`echo "$$obj" | sed -e 's#$$(BUILDDIR)#$(BUILD_RELEASE_DIR)#'`; \
+#			sed -e 's#^.*\.o:#'"$$outfile:"'#' < $$tmpfile >>.deps; \
+#			outfile=`echo "$$obj" | sed -e 's#$$(BUILDDIR)#$(BUILD_DEBUG_DIR)#'`; \
+#			sed -e 's#^.*\.o:#'"$$outfile:"'#' < $$tmpfile >>.deps; \
+#		else \
+#			echo " Couldn't find '$$source'"; \
+#		fi; \
+#	done; \
+#	rm -f $$tmpfile
 
 .PHONY: clean clean-debug clean-release clean2 distclean install install-debug uninstall build-release build-debug all targets
 

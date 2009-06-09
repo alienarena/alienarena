@@ -579,9 +579,6 @@ void SCR_PlayCinematic (char *arg)
 	int		width, height;
 	byte	*palette;
 	char	name[MAX_OSPATH], *dot;
-#ifdef SDL_VERSION
-	int		old_khz;
-#endif
 
 	cl.cinematicframe = 0;
 	dot = strstr (arg, ".");
@@ -633,18 +630,6 @@ void SCR_PlayCinematic (char *arg)
 	cin.s_channels = LittleLong(cin.s_channels);
 
 	Huff1TableInit ();
-
-#ifdef SDL_VERSION
-	// switch up to 22 khz sound if necessary
-	old_khz = Cvar_VariableValue ("s_khz");
-	if (old_khz != cin.s_rate/1000)
-	{
-		cin.restart_sound = true;
-		Cvar_SetValue ("s_khz", cin.s_rate/1000);
-		CL_Snd_Restart_f ();
-		Cvar_SetValue ("s_khz", old_khz);
-	}
-#endif
 
 	cl.cinematicframe = 0;
 	cin.pic = SCR_ReadNextFrame ();

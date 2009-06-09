@@ -1690,6 +1690,7 @@ int R_FindFile (char *filename, FILE **file)
 void R_BeginRegistration (char *model)
 {
 	char	fullname[MAX_QPATH];
+ 	char    *path;
 	cvar_t	*flushmap;
 	FILE	*file;
 	int		i;
@@ -1699,77 +1700,53 @@ void R_BeginRegistration (char *model)
 
 	r_weather = 0; //default is 0
 
-	//check for fog file. (gamedir first) 
-	Com_sprintf(fullname, sizeof(fullname), "%s/maps/scripts/%s.fog", FS_Gamedir(), model);
-	i = 0;
-	do
-		fullname[i] = tolower(fullname[i]);
-	while (fullname[i++]);
-
-	R_FindFile (fullname, &file); //does a fogfile exist?
-	if(file) {
-		//read the file, get fog information
-		fclose(file);
-		R_ReadFogScript(fullname);
-		map_fog = true;
-	}
-	else
-		map_fog = false;
-
-	if(!map_fog) {
-		//check for fog file.  
-		Com_sprintf(fullname, sizeof(fullname), "%s/maps/scripts/%s.fog", BASEDIRNAME, model);
+	// check for fog file, using file system search path
+	path = NULL;
+	map_fog = false;
+	for(;;)
+	{
+		path = FS_NextPath( path );
+		if( !path )
+		{
+			break;
+		}
+		Com_sprintf(fullname, sizeof(fullname), "%s/maps/scripts/%s.fog", path, model);
 		i = 0;
 		do
 			fullname[i] = tolower(fullname[i]);
 		while (fullname[i++]);
-
-		R_FindFile (fullname, &file); //does a fogfile exist?
+		R_FindFile( fullname, &file ); //does a fog file exist?
 		if(file) {
 			//read the file, get fog information
 			fclose(file);
 			R_ReadFogScript(fullname);
 			map_fog = true;
+			break;
 		}
-		else
-			map_fog = false;
-	}
-	
-
-	//check for music file.
-	Com_sprintf(fullname, sizeof(fullname), "%s/maps/scripts/%s.mus", FS_Gamedir(), model);
-	i = 0;
-	do
-		fullname[i] = tolower(fullname[i]);
-	while (fullname[i++]);
-
-	R_FindFile (fullname, &file); //does a music file exist?
-	if(file) {
-		//read the file, get music information
-		fclose(file);
-		R_ReadMusicScript(fullname);
-
-	}
-	else {
-		strcpy(map_music, "music/none.wav");
 	}
 
-	if(!strcmp(map_music, "music/none.wav")) {
-		//check for music file.
-		Com_sprintf(fullname, sizeof(fullname), "%s/maps/scripts/%s.mus", BASEDIRNAME, model);
+	// check for background music file, , using file system search path
+	strcpy(map_music, "music/none.wav");
+	path = NULL;
+	for(;;)
+	{
+		path = FS_NextPath( path );
+		if( !path )
+		{
+			break;
+		}
+		Com_sprintf(fullname, sizeof(fullname), "%s/maps/scripts/%s.mus", path, model);
 		i = 0;
 		do
 			fullname[i] = tolower(fullname[i]);
 		while (fullname[i++]);
-
-		R_FindFile (fullname, &file); //does a fogfile exist?
+		R_FindFile( fullname, &file ); //does a music file exist?
 		if(file) {
 			//read the file, get music information
-			fclose(file);
-			R_ReadMusicScript(fullname);
+			fclose( file );
+			R_ReadMusicScript( fullname );
+			break;
 		}
-		else
-			strcpy(map_music, "music/none.wav");
 	}
 
 	Com_sprintf (fullname, sizeof(fullname), "maps/%s.bsp", model);

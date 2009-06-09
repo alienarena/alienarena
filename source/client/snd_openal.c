@@ -44,13 +44,6 @@
 //cvar_t *background_music_vol; // music volume setting
 cvar_t *s_initsound;//     in cfg or on command line, to disable sound
 cvar_t *s_volume; //       global volume setting
-//cvar_t *s_khz; //          sample rate selection
-// cvar_t *s_primary; //   (Win32 DirectSound specific)
-// These are obsolete, dont apply, or of limited usefulness
-//cvar_t *s_show; //       show when a playsound_t is issued
-//cvar_t *s_mixahead;  //  timing tweak
-//cvar_t *s_testsound; //  generate a test tone
-//cvar_t *s_loadas8bit; // force 8-bit samples
 /*--- OpenAL additions ---*/
 cvar_t *s_doppler; //  0=doppler off, non-zero Doppler Factor
 
@@ -68,12 +61,12 @@ typedef struct sfx_s
 {
 	void *backlink; //           link to the sfx_link node
 	qboolean silent; //          for when sound effect file is missing
+	qboolean bg_music; //         this is background music
 	int registration_sequence; // used for culling stale sfx's from pre-cache
 	int byte_width; //           1=8-bit, 2=16-bit
 	int channels; //             1=mono, 2=stereo,
 	int samplerate; //           samples-per-sec, aka Hz
 	size_t byte_count; //        size of the sound data
-	int loop_offset; //          offset to looping part of music file (?) TODO
 	void *filebfr; //            intermediate buffer for file reading
 	void *pcmbfr; //             where PCM data is in filebfr
 	qboolean buffered; //        data has been read into OpenAL buffer
@@ -253,17 +246,6 @@ const int stop_timer_msecs = 750; // for src_t stop_timer field
  */
 unsigned short pcmNil[] =
 { 0 };
-
-// Function for loading PCM data from .wav file
-extern qboolean S_LoadSound( const char *filename, // in
-        void** readbfr, // out
-        void** pcmdata, // out
-        int *bytewidth, // out
-        int *channels, // out
-        int *samplerate, // out
-        size_t *byte_count, // out
-        int *loop_offset // out
-        );
 
 /*
 ==
@@ -511,18 +493,6 @@ void calSourceFree( src_t *src )
 		src_freehead = srclink;
 	}
 
-	// clear data, except for oalSource and backlink
-	// technically, unnecessary.
-	src->start_timer = 0;
-	src->entnum = 0;
-	src->entchannel = 0;
-	src->fixed_origin = false;
-	src->looping = false;
-	src->sfx = NULL;
-	src->loop_mark = lpmk_nonloop;
-	src->entity_index = 0;
-	src->sound_field = 0;
-	src->velocity_state = velst_nodoppler;
 }
 
 /*
@@ -562,7 +532,7 @@ void calSoundFXInitialize( void )
 	// init active SoundFX list to empty
 	sfx_datahead = NULL;
 
-	// init free Sources list
+	// init free SoundFX list
 	sfx_freehead = sfx_link;
 	last = 0;
 	for( ix = 0; ix < buffers_n; ix++ )
@@ -573,6 +543,7 @@ void calSoundFXInitialize( void )
 
 		sfx_data[ix].backlink = (void*) &sfx_link[ix];
 		sfx_data[ix].silent = false;
+		sfx_data[ix].bg_music = false;
 		sfx_data[ix].registration_sequence = 0;
 		sfx_data[ix].byte_width = 0;
 		sfx_data[ix].channels = 0;
@@ -673,19 +644,6 @@ void calSoundFXFree( sfx_t *sfx )
 		sfxlink->prev = NULL;
 		sfx_freehead = sfxlink;
 	}
-
-	// clearing sfx record, probably not necessary here
-	sfx->silent = false;
-	sfx->registration_sequence = 0;
-	sfx->byte_width = 0;
-	sfx->channels = 0;
-	sfx->samplerate = 0;
-	sfx->byte_count = 0;
-	sfx->filebfr = NULL;
-	sfx->pcmbfr = NULL;
-	sfx->buffered = false;
-	sfx->oalFormat = 0;
-	sfx->aliased = false;
 
 	// the oalBuffer is not deleted, but this should free the memory
 	qalBufferData( sfx->oalBuffer, AL_FORMAT_MONO16, pcmNil, sizeof( pcmNil ),
@@ -821,7 +779,6 @@ src_t *calNewSrc( int entnum, int entchannel, sfx_t *sfx, vec3_t origin,
 	        && src->attn_class == ATTN_NORM ) || ( src->start_timer != 0
 	        && src->entchannel == CHAN_AUTO && src->attn_class == ATTN_NORM ) ) )
 	{ // setup for updating velocity for doppler.
-		// TODO: see if above condition comes close. (see cl_fx.c for clues)
 		src->velocity_state = velst_init;
 	}
 
@@ -1026,10 +983,19 @@ src_t *calNewSrcAutoLoop( int entity_index, int sound_field )
 	ALfloat source_position[3];
 
 	sfx = cl.sound_precache[sound_field]; // get SFX from the precache.
+
 	if( sfx == NULL )
 	{ // note: sound_precache sfx pointers are determined by S_RegisterSound()
 		return NULL;
 	}
+
+	if( sfx->bg_music || !Q_strncasecmp( sfx->name, "music", 5 )
+			|| !Q_strncasecmp( sfx->name, "misc/menumusic", 14 ))
+	{ //  background music from speakers is obsolete
+		// TODO: try to detect this earlier
+		return NULL;
+	}
+
 	src = calSourceAlloc(); // get Src from free list
 	if( src == NULL )
 	{
@@ -1128,9 +1094,10 @@ void calLoadSound( sfx_t *sfx )
 	}
 
 	// read the sound file PCM data into an intermediate buffer
-	success = S_LoadSound( namebuffer, &sfx->filebfr, &sfx->pcmbfr,
-	        &sfx->byte_width, &sfx->channels, &sfx->samplerate,
-	        &sfx->byte_count, &sfx->loop_offset );
+	// enable Ogg Vorbis substition for background music files
+	success = S_LoadSound( namebuffer, sfx->bg_music,
+			&sfx->filebfr, &sfx->pcmbfr, &sfx->byte_width,
+			&sfx->channels, &sfx->samplerate, &sfx->byte_count );
 
 	if( !success )
 	{
@@ -1173,24 +1140,6 @@ void calLoadSound( sfx_t *sfx )
 	FS_FreeFile( sfx->filebfr );
 	sfx->filebfr = NULL;
 	sfx->pcmbfr = NULL;
-}
-
-/*
- ==
- calStopMusic()
-
- ==
- */
-void calStopMusic( void )
-{
-	if( music.playing )
-	{
-		qalSourceStop( music.oalSource ); // stop sound
-		qalSourcei( music.oalSource, AL_BUFFER, AL_NONE ); // disconnect Buffer
-		calSoundFXFree( music.sfx ); // free the SFX
-		music.sfx = NULL;
-		music.playing = false;
-	}
 }
 
 /*
@@ -1253,6 +1202,36 @@ void calContextInfo( ALCdevice *pDevice )
 	calErrorCheckALC( pDevice, __LINE__ );
 }
 
+
+/*
+ ==
+ S_UpdateDopplerFactor()
+
+  for update from menu, according to cvar setting,
+ ==
+ */
+void S_UpdateDopplerFactor( void )
+{
+
+	doppler_factor = s_doppler->value;
+	if( doppler_factor < 0.0f )
+	{
+		doppler_factor = 0.0f;
+		Cvar_Set( "s_doppler", "0" );
+	}
+	else if( doppler_factor > maximum_doppler_factor )
+	{
+		doppler_factor = maximum_doppler_factor;
+		Cvar_SetValue( "s_doppler", maximum_doppler_factor );
+	}
+	if ( sound_system_enable )
+	{
+		qalDopplerFactor( doppler_factor );
+	}
+	s_doppler->modified = false;
+
+}
+
 /*
  ==
 
@@ -1283,16 +1262,18 @@ void S_Init( void )
 	 * Setup CVARS
 	 */
 	sndCvarInit(); // setup s_* cvars
-	if( s_initsound->value <= 0 )
-	{ // command line disable of sound system
-		Com_Printf( "!Sound Disabled!\n" );
-		return;
-	}
+
 	doppler_factor = s_doppler->value;
 	if( doppler_factor < 0.0f )
 		doppler_factor = 0.0f;
 	else if( doppler_factor > maximum_doppler_factor )
 		doppler_factor = maximum_doppler_factor;
+
+	if( s_initsound->value <= 0 )
+	{ // command line disable of sound system
+		Com_Printf( "!Sound Disabled!\n" );
+		return;
+	}
 
 	// Link to OpenAL library
 	success = QAL_Init();
@@ -1376,28 +1357,30 @@ void S_StopAllSounds( void )
 {
 	src_t *src;
 	srclink_t *srclink;
-	ALint state;
 
 	if( !QAL_Loaded() || !sound_system_enable )
 		return;
 
-	if( music.playing )
-	{ // special case Source
-		calStopMusic();
-	}
-
 	srclink = src_datahead;
-	while( srclink != NULL )
+	while( srclink != NULL  )
 	{
 		src = srclink->src;
-		srclink = srclink->next; // before modifying list
-		qalGetSourcei( src->oalSource, AL_SOURCE_STATE, &state );
-		if( state == AL_PLAYING )
-		{
-			qalSourceStop( src->oalSource );
-		}
+		srclink=srclink->next;
+		qalSourceStop( src->oalSource ); // ok from any state per spec
 		qalSourcei( src->oalSource, AL_BUFFER, AL_NONE ); // disconnect Buffer
 		calSourceFree( src );
+	}
+	if ( music.oalSource && qalIsSource( music.oalSource ) )
+	{ // special case for music
+		qalSourceStop( music.oalSource );
+		qalSourcei( music.oalSource, AL_BUFFER, AL_NONE ); // disconnect Buffer
+		// special for music, only one Source using this Buffer
+		// NOTE: not freeing sfx means 2 music files are resident which uses
+		//  more memory, but means the Ogg Vorbis decode does not have to
+		//  be done everytime the menu is accessed.
+		// calSoundFXFree( music.sfx );
+		music.sfx = NULL;
+		music.playing = false;
 	}
 }
 
@@ -1423,10 +1406,17 @@ void S_Shutdown( void )
 		return;
 	}
 
-	S_StopAllSounds();
+	S_StopAllSounds(); // quiets all sources, disconnects Sources from Buffers
 
-	// Delete all Sources and Buffers
 	qalGetError();
+
+	// Special case for music. delete the Source only, here.
+	if ( music.oalSource && qalIsSource( music.oalSource ) )
+	{
+		qalDeleteSources( 1, &music.oalSource );
+	}
+
+	// Delete all other Sources and all Buffers
 	count = 0;
 	for( ix = 0; ix < MAX_SRC; ix++ )
 	{
@@ -1446,6 +1436,7 @@ void S_Shutdown( void )
 	}
 	qalDeleteBuffers( count, delbfr );
 	calErrorCheckAL( __LINE__ );
+
 
 	// Empty the src and sfx data, so its all clean if restarting
 	src_datahead = NULL;
@@ -1510,12 +1501,23 @@ sfx_t *S_FindName( char *name, qboolean create )
 	{
 		sfx = calSoundFXAlloc(); // from free list
 		if( sfx != NULL )
-		{
+		{ // set registration seq, file name. clear or default others
+			sfx->silent = false;
+			sfx->bg_music = false;
 			sfx->registration_sequence = s_registration_sequence;
+			sfx->byte_width = 0;
+			sfx->channels = 0;
+			sfx->samplerate = 0;
+			sfx->byte_count = 0;
+			sfx->pcmbfr = NULL;
+			sfx->buffered = false;
+			sfx->oalFormat = 0;
+			sfx->aliased = false;
+			memset( sfx->name, '\0', MAX_QPATH );
 			strncpy( sfx->name, name, MAX_QPATH - 1 );
+			memset( sfx->truename, '\0', MAX_QPATH );
 		}
 	}
-
 	return sfx;
 }
 
@@ -1691,9 +1693,13 @@ void S_StartSound( vec3_t origin, int entnum, int entchannel, sfx_t *arg_sfx,
 	{
 		return;
 	}
-	// background music from speakers is obsolete, so is this code, probably
-	//	if( sfx->name[0] == 'm' && sfx->name[1] == 'u' && attenuation == 0 )
-	//		return;
+
+	if( arg_sfx->bg_music
+			|| !Q_strncasecmp( arg_sfx->name, "music", 5 )
+			|| !Q_strncasecmp( arg_sfx->name, "misc/menumusic", 14 ))
+	{ // background music from speakers is obsolete
+		return;
+	}
 
 	// cull sound by distance
 	if( origin != NULL )
@@ -1757,6 +1763,8 @@ void S_StartSound( vec3_t origin, int entnum, int entchannel, sfx_t *arg_sfx,
  ==
  S_StartMusic()
 
+ Note: background music has it own dedicated src-like struct, but gets
+   its sfx from the general pool. (Memo to self: Remember This.)
  ==
  */
 void S_StartMusic( char *qfilename )
@@ -1770,43 +1778,116 @@ void S_StartMusic( char *qfilename )
 
 	if( music.playing )
 	{
-		calStopMusic();
+		if ( background_music->value
+				&& !Q_strcasecmp( qfilename, music.sfx->name) )
+		{ // music is enabled and this song already playing.
+			return;
+		}
 	}
+
+	if ( music.oalSource && qalIsSource( music.oalSource ) )
+	{ // stop the music
+		qalSourceStop( music.oalSource ); // ok from any state, per spec
+		qalSourcei( music.oalSource, AL_BUFFER, AL_NONE ); // disconnect Buffer
+		// special for music, only one Source using this Buffer
+		// NOTE: not freeing sfx means 2 music files are resident, map music
+		// and menu music. This uses more memory, but means the Ogg Vorbis
+		// decode does not have to  be done everytime the menu is accessed.
+		// calSoundFXFree( music.sfx );
+		music.sfx = NULL;
+	}
+	music.playing = false;
+
 	if( background_music->value == 0 )
 	{ // disabled
 		return;
 	}
-	music.sfx = S_FindName( qfilename, true );
+
+	music.sfx = S_FindName( qfilename, true ); // get a new sfx from pool
 	if( music.sfx != NULL )
 	{
-		calLoadSound( music.sfx );
+		music.sfx->bg_music = true; // special case sfx marker
+		calLoadSound( music.sfx ); // load the music file into a Buffer
 	}
-	if( music.sfx != NULL && !music.sfx->silent )
+	else
 	{
-		if( music.oalSource == 0 )
-		{ // haven't generated the dedicated Source yet.
-			qalGenSources( 1, &( music.oalSource ) );
-		}
-		if( qalIsSource( music.oalSource ) )
-		{
-			gain = (ALfloat)( background_music_vol->value );
-			if( gain > 0.2f )
-			{
-				gain = 0.2f; // start softly, will go up in S_Update()
-			}
-			qalSourcei( music.oalSource, AL_LOOPING, AL_TRUE );
-			qalSourcef( music.oalSource, AL_GAIN, gain );
-			qalSourcei( music.oalSource, AL_SOURCE_RELATIVE, AL_TRUE );
-			qalSourcei( music.oalSource, AL_BUFFER, music.sfx->oalBuffer );
-			qalSourcePlay( music.oalSource );
-			music.playing = true;
-		}
-		else
-		{ // failed to obtain a Source
-			Com_Printf( "Sound Error: Disabling background music.\n" );
-			Cvar_Set( "background_music", "0" );
-		}
+		Com_DPrintf("No SFX for music file %s\n", qfilename );
 	}
+
+	if ( music.sfx->silent )
+	{
+		Com_DPrintf("Music file %s failed load\n", qfilename);
+		return;
+	}
+
+    // music file is loaded, attach to a source and play it
+	if( music.oalSource == 0 )
+	{ // haven't generated the dedicated Source yet, so do that first
+		qalGenSources( 1, &( music.oalSource ) );
+	}
+
+	if( qalIsSource( music.oalSource ) )
+	{ // got a Source
+		// make sure Source is set to defaults
+		qalSourcef( music.oalSource, AL_REFERENCE_DISTANCE,source_default.reference_distance );
+		qalSourcef( music.oalSource, AL_MAX_DISTANCE, source_default.max_distance );
+		qalSourcef( music.oalSource, AL_ROLLOFF_FACTOR, source_default.rolloff_factor );
+		qalSourcef( music.oalSource, AL_PITCH, source_default.pitch );
+		qalSourcef( music.oalSource, AL_MIN_GAIN, source_default.min_gain );
+		qalSourcef( music.oalSource, AL_MAX_GAIN, source_default.max_gain );
+		qalSourcefv( music.oalSource, AL_DIRECTION, zero_direction );
+		qalSourcef( music.oalSource, AL_CONE_OUTER_GAIN, source_default.cone_outer_gain );
+		qalSourcef( music.oalSource, AL_CONE_INNER_ANGLE, source_default.cone_inner_angle );
+		qalSourcef( music.oalSource, AL_CONE_OUTER_ANGLE, source_default.cone_outer_angle );
+
+		// set gain
+		gain = (ALfloat)( background_music_vol->value );
+		if( gain > 0.2f )
+		{
+			gain = 0.2f; // start softly, will go up in S_Update()
+		}
+		qalSourcef( music.oalSource, AL_GAIN, gain );
+
+		// set for looping and "local"
+		qalSourcei( music.oalSource, AL_LOOPING, AL_TRUE );
+		qalSourcei( music.oalSource, AL_SOURCE_RELATIVE, AL_TRUE );
+		qalSourcefv( music.oalSource, AL_POSITION, zero_position );
+		qalSourcefv( music.oalSource, AL_VELOCITY, zero_velocity );
+
+		// attach to buffer
+		qalSourcei( music.oalSource, AL_BUFFER, music.sfx->oalBuffer );
+
+		// and start playing
+		qalSourcePlay( music.oalSource );
+		music.playing = true;
+	}
+	else
+	{ // failed to obtain a Source
+		Com_Printf( "Sound Error: Disabling background music.\n" );
+		Cvar_Set( "background_music", "0" );
+	}
+
+}
+
+/*
+==
+ S_StartMenuMusic()
+ S_StartMapMusic()
+
+ Note: added to get better control of background music. These functions expect
+ S_StartMusic() to do  checks for music enabled, etc.
+ =
+ */
+void S_StartMenuMusic( void )
+{
+	S_StartMusic( "misc/menumusic.wav" ); // note this is not in music/
+}
+
+extern char map_music[128]; // declared and set in r_model.c
+
+void S_StartMapMusic( void )
+{
+	S_StartMusic( map_music );
 }
 
 /*
@@ -1949,6 +2030,7 @@ void calUpdateLoopSounds( int deltaT, ALpoint listener_position )
 
 		if( !src_marked )
 		{ // this must be a new entity w/ .sound field, add a new looping src
+			// but watch out for any obsolete speakers, music/*.wav
 			CL_GetEntitySoundOrigin( new_entity_index, source_position );
 			dist_sq = calDistanceFromListenerSq( listener_position,
 			        source_position );
@@ -2094,7 +2176,7 @@ void S_Update( vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up )
 
 	// update listener gain, aka global volume
 	gain = (ALfloat)s_volume->value;
-	gain = ( gain > 1.0f ? 1.0f : ( gain < 0.0f ? 0.0f : gain ) );
+	gain = ( gain > 1.0f ? 1.0f : ( gain < 0.0f ? 0.0f : gain ) ); // clamp
 	qalGetListenerf( AL_GAIN, &lgain );
 	dgain = gain - lgain;
 	if( dgain < (ALfloat) -0.05 )
@@ -2223,18 +2305,21 @@ void S_Update( vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up )
 
 	if( music.playing )
 	{ // update per background cvars: enable and volume
-		if( background_music->value == 0 )
-		{ // here, turning down probably better than fully shutting down
-			qalSourcef( music.oalSource, AL_GAIN, (ALfloat)0.0f );
+		if( background_music->modified )
+		{ // either on->off or off->on
+			if(	background_music->value == 0 )
+			{ // here, turning down probably better than fully shutting down
+				qalSourcef( music.oalSource, AL_GAIN, (ALfloat)0.0f );
+			}
 		}
-		else
+		if ( background_music->value )
 		{
 			gain = background_music_vol->value;
-			gain = ( gain > 1.0f ? 1.0f : ( gain < 0.0f ? 0.0f : gain ) );
+			gain = gain < 0.0 ? 0.0 : (gain > 1.0 ? 1.0 : gain ); //clamp
 			qalGetSourcef( music.oalSource, AL_GAIN, &lgain );
-			dgain = gain - lgain;
-			if( dgain < (ALfloat) -0.05f )
-			{ // turn gain down
+			dgain = gain - lgain; // difference between setting and current
+			if( dgain < (ALfloat)(-0.05f) )
+			{ // turn gain down to setting
 				qalSourcef( music.oalSource, AL_GAIN, gain );
 			}
 			else if( dgain > (ALfloat)0.05f )
@@ -2242,7 +2327,14 @@ void S_Update( vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up )
 				lgain += (ALfloat)0.005f;
 				qalSourcef( music.oalSource, AL_GAIN, lgain );
 			}
+			background_music->modified = false;
+			background_music_vol->modified = false;
 		}
+	}
+
+	if ( s_doppler->modified )
+	{ // for console Doppler factor changes
+		S_UpdateDopplerFactor();
 	}
 
 	calErrorCheckAL( __LINE__ );
@@ -2308,9 +2400,35 @@ void S_SoundInfo_f( void )
  */
 void S_SoundList( void )
 {
-	// TODO: dump list of registered sound files
-	// see original code for format
-	Com_DPrintf( "S_SoundList() is a stub.\n" );
+	sfxlink_t *sfxlink;
+	sfx_t *sfx = NULL;
+	size_t total = 0;
+
+
+	for( sfxlink = sfx_datahead; sfxlink != NULL; sfxlink = sfxlink->next )
+	{
+		sfx = sfxlink->sfx;
+		if ( !sfx->silent && sfx->registration_sequence )
+		{
+			if ( sfx->buffered )
+			{
+				if ( sfx->name[0] == '#')
+				{
+					Com_Printf("(%2db) %10i : %s\n", sfx->byte_width*8,
+							sfx->byte_count, &sfx->name[1]);
+				}
+				else
+				{
+					Com_Printf("(%2db) %10i : sound/%s\n", sfx->byte_width*8,
+							sfx->byte_count,
+							(sfx->aliased ? sfx->truename : sfx->name ) );
+				}
+				total += sfx->byte_count;
+			}
+		}
+	}
+	Com_Printf ("Total resident: %i\n", total);
+
 }
 
 /*
@@ -2369,19 +2487,16 @@ void sndCmdRemove( void )
  sndCvarInit()
 
  sound related console variables for OpenAL
+
+ The following cvar's are not implemented in this version
+ s_khz, s_loadas8bit, s_mixahead, s_show, s_testsound, s_primary
+
  ==
  */
 void sndCvarInit( void )
 {
 	s_initsound = Cvar_Get( "s_initsound", "1", 0 );
 	s_volume = Cvar_Get( "s_volume", "0.1", CVAR_ARCHIVE );
-	//s_khz = Cvar_Get( "s_khz", "22", CVAR_ARCHIVE );
-	//s_loadas8bit = Cvar_Get( "s_loadas8bit", "0", CVAR_ARCHIVE );
-	//s_mixahead = Cvar_Get( "s_mixahead", "0.2", CVAR_ARCHIVE );
-	//s_show = Cvar_Get( "s_show", "0", 0 );
-	//s_testsound = Cvar_Get( "s_testsound", "0", 0 );
-	//s_primary = Cvar_Get( "s_primary", "0", CVAR_ARCHIVE ); // win32 specific, direct sound
-
 	// OpenAL CVARs
 	s_doppler = Cvar_Get( "s_doppler", "0.0", CVAR_ARCHIVE );
 

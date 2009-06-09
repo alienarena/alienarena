@@ -1021,7 +1021,7 @@ void CL_PingServers_f (void)
 	}
 
 	// -JD restart the menu music that was stopped during this procedure
-	S_StartMusic("misc/menumusic.wav");
+	S_StartMenuMusic();
 }
 
 
@@ -1630,7 +1630,7 @@ void CL_InitLocal (void)
 	cl_stereo_separation = Cvar_Get( "cl_stereo_separation", "0.4", CVAR_ARCHIVE );
 	cl_stereo = Cvar_Get( "cl_stereo", "0", 0 );
 	background_music = Cvar_Get("background_music", "1", CVAR_ARCHIVE);
-	background_music_vol = Cvar_Get("background_music_vol", "1", CVAR_ARCHIVE);
+	background_music_vol = Cvar_Get("background_music_vol", "0.5", CVAR_ARCHIVE);
 
 	cl_add_blend = Cvar_Get ("cl_blend", "1", 0);
 	cl_add_lights = Cvar_Get ("cl_lights", "1", 0);
