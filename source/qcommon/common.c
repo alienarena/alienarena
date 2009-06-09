@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef DEDICATED_ONLY
 extern void S_StartLocalSound (char *sound);
 extern void S_StartMusic ( char * sound );
+extern void S_StartMenuMusic( void );
 #endif
 
 extern void CL_Disconnect(void);
