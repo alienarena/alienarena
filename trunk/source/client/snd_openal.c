@@ -1880,7 +1880,7 @@ void S_StartMusic( char *qfilename )
  */
 void S_StartMenuMusic( void )
 {
-	S_StartMusic( "misc/menumusic.wav" ); // note this is not in music/
+	S_StartMusic( "music/menumusic.wav" ); 
 }
 
 extern char map_music[128]; // declared and set in r_model.c
