@@ -78,29 +78,6 @@ void Jet_ApplyLifting( edict_t *ent )
     VectorCopy( new_origin, ent->s.origin );
 }
 
-
-/*This function applys some sparks to your jetpack, this part is
-  exactly copied from Muce's and SumFuka's JetPack-tutorial and does a
-  very nice effect.*/
-void Jet_ApplySparks ( edict_t *ent )
-{
-  vec3_t  forward, right;
-  vec3_t  pack_pos, jet_vector;
-
-  AngleVectors(ent->client->v_angle, forward, right, NULL);
-  VectorScale (forward, -7, pack_pos);
-  VectorAdd (pack_pos, ent->s.origin, pack_pos);
-  pack_pos[2] += (ent->viewheight);
-  VectorScale (forward, -50, jet_vector);
-
-  gi.WriteByte (svc_temp_entity);
-  gi.WriteByte (TE_SPARKS);
-  gi.WritePosition (pack_pos);
-  gi.WriteDir (jet_vector);
-  gi.multicast (pack_pos, MULTICAST_PVS);
-}
-
-
 /*if the angle of the velocity vector is different to the viewing
   angle (flying curves or stepping left/right) we get a dotproduct
   which is here used for rolling*/
@@ -238,9 +215,6 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
 
   /*add rolling when we fly curves or boost left/right*/
   Jet_ApplyRolling( ent, right );
-
-  /*last but not least add some smoke*/
-  Jet_ApplySparks( ent );
 
 }
 
