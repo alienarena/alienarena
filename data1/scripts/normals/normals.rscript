@@ -614,3 +614,17 @@ models/items/armor/shard/skin
 		glow
 	}
 }
+maps/meshes/injector
+{
+	{
+		map maps/meshes/injector_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/hatch
+{
+	{
+		map maps/meshes/hatch_normal.jpg
+		normalmap
+	}
+}

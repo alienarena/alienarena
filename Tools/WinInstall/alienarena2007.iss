@@ -895,7 +895,6 @@ Source: ..\..\..\Alien Arena 2007\data1\sound\misc\lasfly.wav; DestDir: {app}\da
 Source: ..\..\..\Alien Arena 2007\data1\sound\misc\menu1.wav; DestDir: {app}\data1\sound\misc
 Source: ..\..\..\Alien Arena 2007\data1\sound\misc\menu2.wav; DestDir: {app}\data1\sound\misc
 Source: ..\..\..\Alien Arena 2007\data1\sound\misc\menu3.wav; DestDir: {app}\data1\sound\misc
-Source: ..\..\..\Alien Arena 2007\data1\sound\misc\menumusic.wav; DestDir: {app}\data1\sound\misc
 Source: ..\..\..\Alien Arena 2007\data1\sound\misc\one.wav; DestDir: {app}\data1\sound\misc
 Source: ..\..\..\Alien Arena 2007\data1\sound\misc\pc_up.wav; DestDir: {app}\data1\sound\misc
 Source: ..\..\..\Alien Arena 2007\data1\sound\misc\rampage.wav; DestDir: {app}\data1\sound\misc
@@ -920,14 +919,6 @@ Source: ..\..\..\Alien Arena 2007\data1\sound\misc\w_pkup.wav; DestDir: {app}\da
 Source: ..\..\..\Alien Arena 2007\data1\sound\misc\cow\groan.wav; DestDir: {app}\data1\sound\misc\cow
 Source: ..\..\..\Alien Arena 2007\data1\sound\misc\cow\moo.wav; DestDir: {app}\data1\sound\misc\cow
 Source: ..\..\..\Alien Arena 2007\data1\sound\misc\cow\step1.wav; DestDir: {app}\data1\sound\misc\cow
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-deimos.wav; DestDir: {app}\data1\sound\music
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-dynamo.wav; DestDir: {app}\data1\sound\music
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-frontier.wav; DestDir: {app}\data1\sound\music
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-horus.wav; DestDir: {app}\data1\sound\music
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-inferno.wav; DestDir: {app}\data1\sound\music
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-redred.wav; DestDir: {app}\data1\sound\music
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-saucer.wav; DestDir: {app}\data1\sound\music
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-turbo.wav; DestDir: {app}\data1\sound\music
 Source: ..\..\..\Alien Arena 2007\data1\sound\player\burn1.wav; DestDir: {app}\data1\sound\player
 Source: ..\..\..\Alien Arena 2007\data1\sound\player\burn2.wav; DestDir: {app}\data1\sound\player
 Source: ..\..\..\Alien Arena 2007\data1\sound\player\death1.wav; DestDir: {app}\data1\sound\player
@@ -1757,9 +1748,6 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\rage\ceiling2_nm.tga; DestDir: 
 Source: ..\..\..\Alien Arena 2007\data1\textures\rage\ceiling_nm.tga; DestDir: {app}\data1\textures\rage
 Source: ..\..\..\Alien Arena 2007\data1\textures\rage\support_column_nm.tga; DestDir: {app}\data1\textures\rage
 Source: ..\..\..\Alien Arena 2007\data1\textures\rage\beam_purple_nm.tga; DestDir: {app}\data1\textures\rage
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-warmachine.wav; DestDir: {app}\data1\sound\music
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-dismal.wav; DestDir: {app}\data1\sound\music
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-eternal.wav; DestDir: {app}\data1\sound\music
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\tca-titan2k8.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-furious2k8.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\mhelmet.md2; DestDir: {app}\data1\maps\meshes
@@ -1937,7 +1925,6 @@ Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\cp-ribeye.rscript; DestDir:
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-dynamo2k8.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-crucible2k8.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-omega2k8.rscript; DestDir: {app}\data1\scripts\maps
-Source: ..\..\..\Alien Arena 2007\data1\sound\music\cp-ribeye.wav; DestDir: {app}\data1\sound\music
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\barnwood2.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\barnwood2_nm.TGA; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\fern.tga; DestDir: {app}\data1\textures\arena8
@@ -2636,6 +2623,21 @@ Source: ..\..\..\Alien Arena 2007\data1\models\items\armor\shard\skin_normal.tga
 Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\pipes1_normal.jpg; DestDir: {app}\data1\maps\meshes
 Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\unit_normal.jpg; DestDir: {app}\data1\maps\meshes
 Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\conduit_normal.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\menumusic.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\cp-ribeye.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-deimos.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-dismal.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-dynamo.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-eternal.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-frontier.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-horus.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-inferno.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-redred.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-saucer.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-turbo.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\sound\music\dm-warmachine.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\hatch_normal.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\injector_normal.jpg; DestDir: {app}\data1\maps\meshes
 
 [Icons]
 Name: {group}\{cm:ProgramOnTheWeb,{#MyAppName}}; Filename: {#MyAppURL}
