@@ -942,6 +942,7 @@ void R_DrawParticles (void)
 extern int r_drawing_fbeffect;
 extern int	r_fbFxType;
 extern float r_fbeffectTime;
+extern cvar_t *cl_paindist;
 /*
 ============
 R_PolyBlend
@@ -954,7 +955,7 @@ void R_PolyBlend (void)
 	if (!v_blend[3])
 		return;
 
-	if(!r_drawing_fbeffect) {
+	if(!r_drawing_fbeffect && cl_paindist->value) {
 		if(v_blend[0] > 2*v_blend[1] && v_blend[0] > 2*v_blend[2]) { 
 			r_drawing_fbeffect = true;
 			r_fbFxType = 2; //FLASH DISTORTION
