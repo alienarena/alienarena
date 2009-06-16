@@ -334,32 +334,32 @@ ALCenum calErrorCheckALC( ALCdevice *device, int line_no )
  generate and list manage the collection of OpenAL Sources and related info
  ==
  */
-void calSourcesInitialize( void )
+void calSourcesInitialize( ALint device_sources )
 {
 	int ix;
 	int last;
 	ALuint gensrc[MAX_SRC];
 	ALint sources_n;
 
-	// generate a collection of OpenAL Sources
-	sources_n = MAX_SRC;
-	qalGetError();
-	for( ;; )
-	{
-		qalGenSources( sources_n, gensrc ); // generate the collection of Sources
-		if( qalGetError() == AL_NO_ERROR )
-		{
-			break;
-		}
-		// If failed, OpenAL creates no Sources. Try for a lower number.
-		sources_n -= 2;
-		if( sources_n < 16 )
-		{ // give up
-			return;
-		}
-	}
+	// init Source lists to empty
+	src_datahead = NULL;
+	src_freehead = NULL;
 
-	src_datahead = NULL; // init active Sources list to empty
+	// generate a collection of OpenAL Sources
+	// clamp to what the current Device reports as available Mono Sources
+	// less one, to make sure there is a source available for background music
+	sources_n = ( device_sources <= MAX_SRC ) ? (device_sources-1) : MAX_SRC ;
+	if( sources_n <= 0 )
+	{ // assuming error message is output by caller
+		return;
+	}
+	qalGetError();
+	qalGenSources( sources_n, gensrc ); // generate the collection of Sources
+	if( calErrorCheckAL( __LINE__ ) != AL_NO_ERROR )
+	{
+		Com_Printf("OpenAL Source generation error. Sound effects disabled\n");
+		return;
+	}
 
 	// init free Sources list
 	src_freehead = src_link;
@@ -1253,6 +1253,8 @@ void S_Init( void )
 	ALCcontext *pContext;
 	qboolean success;
 	ALCenum result;
+	ALCint alc_mono_sources;
+
 
 	sound_system_enable = false;
 
@@ -1329,7 +1331,13 @@ void S_Init( void )
 		qalListenerfv( AL_ORIENTATION, default_orientation );
 	}
 
-	calSourcesInitialize(); // generate OpenAL Sources
+	qalcGetIntegerv( pDevice, ALC_MONO_SOURCES, 1, &alc_mono_sources );
+	result = calErrorCheckALC( pDevice, __LINE__ );
+	if( result != ALC_NO_ERROR || alc_mono_sources <= 0 )
+	{
+		Com_Printf("OpenAL Device error: Number of Mono Sources\n");
+	}
+	calSourcesInitialize( alc_mono_sources ); // generate OpenAL Sources
 	calSoundFXInitialize(); // generate OpenAL Buffers
 	sndCmdInit(); // setup snd* console commands
 	calContextInfo( pDevice ); // display OpenAL technical info
