@@ -59,7 +59,7 @@ textures/xempx/a6bt
 {
 	{
 		map textures/arena5/lighta.tga
-		blendfunc GL_ONE GL_ONE
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scale static .4 static .3
 		scroll sin 2 sin 0
 		anim .05
