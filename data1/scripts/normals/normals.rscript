@@ -628,3 +628,19 @@ maps/meshes/hatch
 		normalmap
 	}
 }
+maps/meshes/cmdconsole
+{
+	{
+		map maps/meshes/cmdconsole_normal.jpg
+		normalmap
+		map2 maps/meshes/cmdconsole_fx.tga
+		glow
+	}
+}
+maps/meshes/cannister
+{
+	{
+		map maps/meshes/cannister_normal.jpg
+		normalmap
+	}
+}

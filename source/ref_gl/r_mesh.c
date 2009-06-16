@@ -1638,7 +1638,7 @@ void R_DrawAliasModel (entity_t *e)
 		for (i=0 ; i<3 ; i++)
 			shadelight[i] = 1.0;
 	}
-	else if(gl_rtlights->value)
+	else if(gl_rtlights->value && !gl_normalmaps->value) //no need when normalmaps are used, which should be for all meshes.
 	{
 		int max = 3;
 

@@ -65,6 +65,9 @@ cvar_t  *cl_brass;
 cvar_t  *cl_showPlayerNames;
 cvar_t	*cl_playtaunts;
 
+cvar_t	*cl_paindist;
+cvar_t	*cl_explosiondist;
+
 cvar_t	*cl_add_particles;
 cvar_t	*cl_add_lights;
 cvar_t	*cl_add_entities;
@@ -1648,6 +1651,9 @@ void CL_InitLocal (void)
 	cl_disbeamclr = Cvar_Get("cl_disbeamclr", "0", CVAR_ARCHIVE);
 	cl_brass = Cvar_Get ("cl_brass", "1", CVAR_ARCHIVE);
 	cl_playtaunts = Cvar_Get ("cl_playtaunts", "1", CVAR_ARCHIVE);
+
+	cl_paindist = Cvar_Get ("cl_paindist", "1", CVAR_ARCHIVE);
+	cl_explosiondist = Cvar_Get ("cl_explosiondist", "1", CVAR_ARCHIVE);
 
 	cl_upspeed = Cvar_Get ("cl_upspeed", "200", 0);
 	cl_forwardspeed = Cvar_Get ("cl_forwardspeed", "200", 0);

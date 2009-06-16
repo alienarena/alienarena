@@ -271,6 +271,9 @@ extern  cvar_t	*cl_disbeamclr;
 extern  cvar_t	*cl_brass;
 extern  cvar_t	*cl_playtaunts;
 
+extern	cvar_t	*cl_paindist;
+extern	cvar_t	*cl_explosiondist;
+
 extern	cvar_t	*cl_upspeed;
 extern	cvar_t	*cl_forwardspeed;
 extern	cvar_t	*cl_sidespeed;
