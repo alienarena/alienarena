@@ -640,7 +640,7 @@ void VID_MenuInit( void )
 	s_postprocess_box.generic.type	= MTYPE_SPINCONTROL;
 	s_postprocess_box.generic.x		= 24;
 	s_postprocess_box.generic.y		= 210*scale;
-	s_postprocess_box.generic.name	= "heat/pain distortion";
+	s_postprocess_box.generic.name	= "post process effects";
 	s_postprocess_box.curvalue = gl_glsl_postprocess->value;
 	s_postprocess_box.itemnames = yesno_names;
 	s_postprocess_box.generic.callback = PostProcessCallback;
