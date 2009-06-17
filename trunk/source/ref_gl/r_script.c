@@ -1061,7 +1061,7 @@ void RS_ScanPathForScripts (void)
 	}
 
 	script_count = 0;
-	if(gl_normalmaps->value) { //search for normal map scripts ONLY if we are using normal mapping, do last to overide anything
+	if(gl_normalmaps->value && gl_glsl_shaders->value && gl_state.glsl_shaders) { //search for normal map scripts ONLY if we are using normal mapping, do last to overide anything
 		
 		script_list = FS_ListFilesInFS("scripts/normals/*.rscript", &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
 
