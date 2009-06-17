@@ -52,7 +52,7 @@ The call to battle beats through your heart and soul like the drums of war. Will
 
 (Windows)
 
-Installation has been made very simple.  After downloading, simply click on the alienarena2008.exe file and the installation will begin.  Follow the instructions of the Installshield setup program. If you are running Windows 2000 or XP, you should have administrative privileges.  If not, you may get some errors when the program tries to write the uninstall information to the registry.  If so, simply click "ignore", and the installation will continue without problem.
+Installation has been made very simple.  After downloading, simply click on the .exe file and the installation will begin.  Follow the instructions of the Installshield setup program. If you are running Windows 2000 or XP, you should have administrative privileges.  If not, you may get some errors when the program tries to write the uninstall information to the registry.  If so, simply click "ignore", and the installation will continue without problem.
 
 Once finished, you can click on the Alien Arena icon that has been placed on your desktop to start a game or the Alien Arena Server icon to start a dedicated server.
 
@@ -108,7 +108,7 @@ You can either select "join server" from the "multiplayer" menu and select a ser
 
 4.	THE CODERED ACE BOT
 
-Bots are a built in feature of ALIEN ARENA 2008.  Several bots are already configured for multiplayer games, and in Alien Arena, each level has a specific bot file for what bots are to be played in each level.
+Bots are a built in feature of ALIEN ARENA 2009.  Several bots are already configured for multiplayer games, and in Alien Arena, each level has a specific bot file for what bots are to be played in each level.
 
 To add a bot, type "sv addbot name model/skin", and to remove a bot type "sv removebot name". You can also add bots in the menu, in the deathmatch/bots flags area.
 
@@ -131,38 +131,39 @@ For Linux users, you simply just need to delete your Alien Arena folder.
 
 7.	CREDITS
 
-There is a long list of credits - ALIEN ARENA 2008 is greatly indebted to the following for it's creation and completion:
+There is a long list of credits - ALIEN ARENA 2009 is greatly indebted to the following for it's creation and completion:
 
 Design:  John Diamond with input from the community at large.
 Programming:  John Diamond, BlackIce, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Jim Bower, Kyle Hunter, Andres Mejia.
 Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
 Maps:  John Diamond, Dennis "xEMPx" Zedlach
 Textures and Artwork:  John Diamond, Enki, Adam Saizlai, Yves Allaire
-Sounds:  John Diamond, Sound Rangers
-Music:  John Diamond, WhiteLipper, Wooden Productions, Arteria Games, and SoundRangers
+Sounds:  John Diamond, Sound Rangers, Jon Ward
+Music:  Arteria Games, and SoundRangers
 Fonts: John Diamond, the-interceptor from http://www.quakeworld.nu/
-Linux Port: Shane Bayer
+
+Linux Port: Shane Bayer, John Diamond, Jim Bower
 FreeBSD port: "Ale"
 Gentoo portage: Paul Bredbury
 Debian packaging: Andres Mejia
-Alien Arena IRC Channel: Astralsin
+Alien Arena IRC Channel: Jon "Astralsin" Ward
 
-There are other major contributions from the community from QuakeSrc.org, including MrG, Jay Dolan, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  A very special thanks goes out to the community members who contributed to the crosshair and hud contest. A full list of those contributors can be found in the in-game credit list.
+There are other major contributions from the community from QuakeSrc.org, including MrG, Jay Dolan, Psychospaz, Barnes, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  A very special thanks goes out to the community members who contributed to the crosshair and hud contest. A full list of those contributors can be found in the in-game credit list.
 
 8.	COPYRIGHT INFORMATION
 
-ALIEN ARENA 2008 and it's original content are a copyright of COR Entertainment, LLC.  
+ALIEN ARENA 2009 and it's original content are a copyright of COR Entertainment, LLC.  
 
 The source code of Alien Arena is Free Software. You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
 It is only permissible to distrubute the game data (models, maps, textures, sound, etc) as a whole, and with the intention of being used with Alien Arena.  It is not permissible to distribute individual portions or items of the game data without express consent from COR Entertainment.
 
-'rcon' and 'svstat' ruby scripts are Copyright (C) 2007 Tony Jackson and Licensed under the GNU Lesser General Public License
+'rcon' and 'svstat' ruby scripts are Copyright (C) 2009 Tony Jackson and Licensed under the GNU Lesser General Public License
 
-The Debian packaging is (C) 2007, Andres Mejia <mcitadel@gmail.com> and
+The Debian packaging is (C) 2009, Andres Mejia <mcitadel@gmail.com> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
 
-Under no circumstances ALIEN ARENA 2008 as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2008 may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
+Under no circumstances ALIEN ARENA 2009 as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2009 may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
 
 Contact:  http://red.planetarena.org
 
