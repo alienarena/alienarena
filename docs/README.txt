@@ -60,9 +60,9 @@ Once finished, you can click on the Alien Arena icon that has been placed on you
 
 Simply unzip the archive in your /usr/local/games folder or wherever you wish to place the game.
 
-Type ./crx in the shell to run the game, or ./crded to start a dedicated server or use the shortcuts installed in the menu.  If you have sound or input problems, use ./crx.sdl instead.
+Type ./crx in the shell to run the game, or ./crded to start a dedicated server or use the shortcuts installed in the menu.  OpenGL for graphics and OpenAL 1.1 for sound, are required.
 
-Source files are included, so you may compile the binaries yourself if neccessary.  Please visit the forum if you have any questions regarding this.
+Source files are included, so you may compile the binaries yourself if necessary.  Please visit the forum if you have any questions regarding this.
 
 * BASIC COMMANDS
 
