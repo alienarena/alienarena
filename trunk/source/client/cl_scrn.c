@@ -44,8 +44,6 @@ int			scr_draw_loading;
 
 vrect_t		scr_vrect;		// position of render window on screen
 
-
-cvar_t		*scr_viewsize;
 cvar_t		*scr_conspeed;
 cvar_t		*scr_centertime;
 cvar_t		*scr_showturtle;
@@ -293,50 +291,15 @@ Sets scr_vrect, the coordinates of the rendered window
 */
 static void SCR_CalcVrect (void)
 {
-	int		size;
 
-	// bound viewsize
-	if (scr_viewsize->value < 40)
-		Cvar_Set ("viewsize","40");
-	if (scr_viewsize->value > 100)
-		Cvar_Set ("viewsize","100");
-
-	size = scr_viewsize->value;
-
-	scr_vrect.width = viddef.width*size/100;
+	scr_vrect.width = viddef.width;
 	scr_vrect.width &= ~7;
 
-	scr_vrect.height = viddef.height*size/100;
+	scr_vrect.height = viddef.height;
 	scr_vrect.height &= ~1;
 
 	scr_vrect.x = (viddef.width - scr_vrect.width)/2;
 	scr_vrect.y = (viddef.height - scr_vrect.height)/2;
-}
-
-
-/*
-=================
-SCR_SizeUp_f
-
-Keybinding command
-=================
-*/
-void SCR_SizeUp_f (void)
-{
-	Cvar_SetValue ("viewsize",scr_viewsize->value+10);
-}
-
-
-/*
-=================
-SCR_SizeDown_f
-
-Keybinding command
-=================
-*/
-void SCR_SizeDown_f (void)
-{
-	Cvar_SetValue ("viewsize",scr_viewsize->value-10);
 }
 
 /*
@@ -385,7 +348,6 @@ SCR_Init
 */
 void SCR_Init (void)
 {
-	scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE);
 	scr_conspeed = Cvar_Get ("scr_conspeed", "3", 0);
 	scr_consize = Cvar_Get ("scr_consize", "0.5", 0);
 	scr_showturtle = Cvar_Get ("scr_showturtle", "0", 0);
@@ -408,8 +370,6 @@ void SCR_Init (void)
 //
 	Cmd_AddCommand ("timerefresh",SCR_TimeRefresh_f);
 	Cmd_AddCommand ("loading",SCR_Loading_f);
-	Cmd_AddCommand ("sizeup",SCR_SizeUp_f);
-	Cmd_AddCommand ("sizedown",SCR_SizeDown_f);
 	Cmd_AddCommand ("sky",SCR_Sky_f);
 
 	scr_initialized = true;
@@ -914,97 +874,6 @@ void SCR_DirtyScreen (void)
 	SCR_AddDirtyPoint (0, 0);
 	SCR_AddDirtyPoint (viddef.width-1, viddef.height-1);
 }
-
-/*
-==============
-SCR_TileClear
-
-Clear any parts of the tiled background that were drawn on last frame
-==============
-*/
-void SCR_TileClear (void)
-{
-	int		i;
-	int		top, bottom, left, right;
-	dirty_t	clear;
-
-	if (scr_drawall->value)
-		SCR_DirtyScreen ();	// for power vr or broken page flippers...
-
-	if (scr_con_current == 1.0)
-		return;		// full screen console
-	if (scr_viewsize->value == 100)
-		return;		// full screen rendering
-	if (cl.cinematictime > 0)
-		return;		// full screen cinematic
-
-	// erase rect will be the union of the past three frames
-	// so tripple buffering works properly
-	clear = scr_dirty;
-	for (i=0 ; i<2 ; i++)
-	{
-		if (scr_old_dirty[i].x1 < clear.x1)
-			clear.x1 = scr_old_dirty[i].x1;
-		if (scr_old_dirty[i].x2 > clear.x2)
-			clear.x2 = scr_old_dirty[i].x2;
-		if (scr_old_dirty[i].y1 < clear.y1)
-			clear.y1 = scr_old_dirty[i].y1;
-		if (scr_old_dirty[i].y2 > clear.y2)
-			clear.y2 = scr_old_dirty[i].y2;
-	}
-
-	scr_old_dirty[1] = scr_old_dirty[0];
-	scr_old_dirty[0] = scr_dirty;
-
-	scr_dirty.x1 = 9999;
-	scr_dirty.x2 = -9999;
-	scr_dirty.y1 = 9999;
-	scr_dirty.y2 = -9999;
-
-	// don't bother with anything convered by the console)
-	top = scr_con_current*viddef.height;
-	if (top >= clear.y1)
-		clear.y1 = top;
-
-	if (clear.y2 <= clear.y1)
-		return;		// nothing disturbed
-
-	top = scr_vrect.y;
-	bottom = top + scr_vrect.height-1;
-	left = scr_vrect.x;
-	right = left + scr_vrect.width-1;
-
-	if (clear.y1 < top)
-	{	// clear above view screen
-		i = clear.y2 < top-1 ? clear.y2 : top-1;
-		Draw_TileClear (clear.x1 , clear.y1,
-			clear.x2 - clear.x1 + 1, i - clear.y1+1, "backtile");
-		clear.y1 = top;
-	}
-	if (clear.y2 > bottom)
-	{	// clear below view screen
-		i = clear.y1 > bottom+1 ? clear.y1 : bottom+1;
-		Draw_TileClear (clear.x1, i,
-			clear.x2-clear.x1+1, clear.y2-i+1, "backtile");
-		clear.y2 = bottom;
-	}
-	if (clear.x1 < left)
-	{	// clear left of view screen
-		i = clear.x2 < left-1 ? clear.x2 : left-1;
-		Draw_TileClear (clear.x1, clear.y1,
-			i-clear.x1+1, clear.y2 - clear.y1 + 1, "backtile");
-		clear.x1 = left;
-	}
-	if (clear.x2 > right)
-	{	// clear left of view screen
-		i = clear.x1 > right+1 ? clear.x1 : right+1;
-		Draw_TileClear (i, clear.y1,
-			clear.x2-i+1, clear.y2 - clear.y1 + 1, "backtile");
-		clear.x2 = right;
-	}
-
-}
-
 
 //===============================================================
 
@@ -1899,9 +1768,6 @@ void SCR_UpdateScreen (void)
 
 			// do 3D refresh drawing, and then update the screen
 			SCR_CalcVrect ();
-
-			// clear any dirty part of the background
-			SCR_TileClear ();
 
 			V_RenderView ( separation[i] );
 

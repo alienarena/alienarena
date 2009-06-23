@@ -24,7 +24,6 @@ extern cvar_t *vid_ref;
 extern cvar_t *vid_fullscreen;
 extern cvar_t *vid_gamma;
 extern cvar_t *vid_contrast;
-extern cvar_t *scr_viewsize;
 
 extern cvar_t *r_bloom_intensity;
 extern cvar_t *gl_normalmaps;
@@ -70,7 +69,6 @@ static int				s_current_menu_index;
 
 static menulist_s		s_mode_list;
 static menuslider_s		s_tq_slider;
-static menuslider_s		s_screensize_slider;
 static menuslider_s		s_brightness_slider;
 static menuslider_s		s_contrast_slider;
 static menulist_s  		s_fs_box;
@@ -99,13 +97,6 @@ static menulist_s		s_glsl_box;
 static void DriverCallback( void *unused )
 {
 	s_current_menu = &s_opengl_menu;
-}
-
-static void ScreenSizeCallback( void *s )
-{
-	menuslider_s *slider = ( menuslider_s * ) s;
-
-	Cvar_SetValue( "viewsize", slider->curvalue * 10 );
 }
 
 static void BrightnessCallback( void *s )
@@ -495,10 +486,6 @@ void VID_MenuInit( void )
 	if ( s_mode_list.curvalue < 0 )
 		s_mode_list.curvalue = 0;
 
-	if ( !scr_viewsize )
-		scr_viewsize = Cvar_Get ("viewsize", "100", CVAR_ARCHIVE);
-
-	s_screensize_slider.curvalue = scr_viewsize->value/10;
 	s_bloom_slider.curvalue = r_bloom_intensity->value*10;
 
 	s_opengl_menu.x = viddef.width * 0.50;
@@ -529,14 +516,6 @@ void VID_MenuInit( void )
 	s_height_field.length = 4*scale;
 	s_height_field.visible_length = 4*scale;
 	strcpy(s_height_field.buffer, Cvar_VariableString("vid_height"));
-
-	s_screensize_slider.generic.type	= MTYPE_SLIDER;
-	s_screensize_slider.generic.x		= 24;
-	s_screensize_slider.generic.y		= 60*scale;
-	s_screensize_slider.generic.name	= "screen size";
-	s_screensize_slider.minvalue = 3;
-	s_screensize_slider.maxvalue = 12;
-	s_screensize_slider.generic.callback = ScreenSizeCallback;
 
 	s_brightness_slider.generic.type	= MTYPE_SLIDER;
 	s_brightness_slider.generic.x	= 24;
@@ -718,7 +697,6 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_width_field);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_height_field);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_screensize_slider);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_brightness_slider);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_contrast_slider);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_modulate_slider);
