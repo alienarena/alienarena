@@ -1818,7 +1818,7 @@ void CGalaxyDlg::LookUpPlayerStats(NMHDR* pNMHDR, LRESULT* pResult)
 		AfxMessageBox("Unable to connect to database at this time...");
 		return;
 	}
-	hFile = InternetOpenUrl( hINet, "http://cor.planetquake.gamespy.com/stats/playerrank.db", NULL, 0, 0, 0 );
+	hFile = InternetOpenUrl( hINet, "http://stats.planetarena.org/playerrank.db", NULL, 0, 0, 0 );
 	if(hFile) {
 		DWORD dwRead;
 		newlog.open("stats.db");
@@ -1900,7 +1900,7 @@ void CGalaxyDlg::GetNews()
 		m_news.SetWindowText("Unable to connect to news feed at this time...");
 		return;
 	}
-	hFile = InternetOpenUrl( hINet, "http://icculus.org/alienarena/news/news.db", NULL, 0, 0, 0 );
+	hFile = InternetOpenUrl( hINet, "http://news.planetarena.org/news.db", NULL, 0, 0, 0 );
 	if(hFile) {
 		DWORD dwRead;
 		newslocal.open("news.db");

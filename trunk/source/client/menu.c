@@ -3006,7 +3006,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 {
 	char *rLine;
 	char *token;
-	char lasttoken[256];
+	char *lasttoken = " ";
 	char seps[]   = "\\";
 	int players = 0;
 	int result;
