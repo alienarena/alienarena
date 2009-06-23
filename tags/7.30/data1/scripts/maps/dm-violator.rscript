@@ -1,0 +1,61 @@
+textures/arena7/light1
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light9
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light5
+{
+	{
+		lensflare
+	}
+}
+textures/arena6/blacktrans
+{
+	{
+		map gfx/purpleline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 2 static 1
+		alphashift 20 0.05 0.8
+		nolightmap
+	}
+}
+textures/arena7/bluegrid
+{
+	{
+		map textures/arena7/bluegrid.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.66 0.66
+		nolightmap
+	}
+	{
+		map gfx/greenline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scroll static 0 static 2
+		alphashift 10 0.05 0.66
+		nolightmap
+	}
+}
+textures/arena6/ice
+{
+
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.2 0.2
+		envmap
+	}
+}

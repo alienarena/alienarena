@@ -1,0 +1,142 @@
+textures/arena7/light1
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light10
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light11
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light9
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/glass
+{
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.2 0.2
+		envmap
+	}
+	{
+		map gfx/greencircuit.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 3 static 2
+		scroll static 0 static 1
+		alphashift 3 0.2 0.3
+	}
+	{
+		map gfx/greencircuit2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 3 static 4
+		scroll static 1.5 static 0
+		alphashift 2 0.2 0.3
+	}
+}
+textures/arena7/light5
+{
+	{
+		map textures/arena8/blackbrick1.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 20 0.0 1.0
+	}
+}
+textures/arena9/trim2
+{
+	{
+		map gfx/bluelightning2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 5 0.3 0.9
+		scroll static 5 static 0
+		nolightmap
+	}
+	{
+		map gfx/trim2mask.tga
+		alphamask
+	}
+}
+textures/evil/e6launchengine
+{
+	{
+		map gfx/e6launchengine_glow.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 10 0.1 0.9
+		nolightmap
+	}
+}
+textures/arena9/roundlight
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		lensflare
+	}
+}
+env/space1up
+{
+	{
+		map gfx/cloudsspace.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/space1rt
+{
+	{
+		map gfx/cloudsspace.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/space1lf
+{
+	{
+		map gfx/cloudsspace.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/space1ft
+{
+	{
+		map gfx/cloudsspace.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/space1bk
+{
+	{
+		map gfx/cloudsspace.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/space1dn
+{
+	{
+		map gfx/cloudsspace.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
