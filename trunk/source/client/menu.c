@@ -3006,7 +3006,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 {
 	char *rLine;
 	char *token;
-	char *lasttoken = " ";
+	char lasttoken[256];
 	char seps[]   = "\\";
 	int players = 0;
 	int result;
@@ -3058,8 +3058,8 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		else if (!_stricmp (lasttoken, "maxclients"))
 			Com_sprintf(mservers[m_num_servers].maxClients, sizeof(mservers[m_num_servers].maxClients), "%s", token);
 
-		/* Get next token: */
-		strcpy (lasttoken, token);
+		/* Get next token: */	
+		Com_sprintf(lasttoken, sizeof(lasttoken), "%s", token);
 		token = strtok( NULL, seps );
 	}
 
