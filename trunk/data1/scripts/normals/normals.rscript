@@ -644,3 +644,35 @@ maps/meshes/cannister
 		normalmap
 	}
 }
+maps/meshes/pulsar
+{
+	{
+		map maps/meshes/pulsar_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/lamp2
+{
+	{
+		map maps/meshes/lamp2_normal.jpg
+		normalmap
+		map2 maps/meshes/lamp2_fx.tga
+		glow
+	}
+}
+maps/meshes/arch
+{
+	{
+		map maps/meshes/arch_normal.jpg
+		normalmap
+		map2 maps/meshes/arch_fx.tga
+		glow
+	}
+}
+maps/meshes/scope
+{
+	{
+		map maps/meshes/scope_normal.jpg
+		normalmap
+	}
+}

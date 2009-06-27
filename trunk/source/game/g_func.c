@@ -1681,6 +1681,9 @@ void SP_func_train (edict_t *self)
 
 	self->s.renderfx |= RF_NOSHADOWS; //just too unpredictable and odd
 
+	if(self->spawnflags & 64)
+		self->s.effects |= EF_HYPERBLASTER; //teleporter type effect
+
 	self->moveinfo.sound_middle = gi.soundindex ("world/turbine1.wav");
 
 	if (!self->speed)
