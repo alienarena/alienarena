@@ -1026,7 +1026,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			}
 			else if (effects & EF_HYPERBLASTER)
 			{
-				V_AddLight (ent.origin, 100, 1, 1, 0);
+				V_AddLight (ent.origin, 400*crand(), 1, 0, 1);
 			}
 			else if (effects & EF_GIB)
 			{
