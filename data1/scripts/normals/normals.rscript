@@ -676,3 +676,19 @@ maps/meshes/scope
 		normalmap
 	}
 }
+maps/meshes/brainjar
+{
+	{
+		map maps/meshes/brainjar_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/bignode
+{
+	{
+		map maps/meshes/bignode_normal.jpg
+		normalmap
+		map2 maps/meshes/bignode_fx.tga
+		glow
+	}
+}

@@ -1,0 +1,66 @@
+textures/arena7/light14
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light10
+{
+	{
+		lensflare
+	}
+}
+textures/rage/light7
+{
+	{
+		lensflare
+	}
+}
+textures/martian/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light7
+{
+	{
+		lensflare
+	}
+}
+textures/arena9/lightwhite
+{
+	{
+		map gfx/beam1.tga
+		scale static 16 static 8
+		colormap 1 1 1
+		beam
+		lensflare
+	}
+}
+textures/arena9/roundlight
+{
+	{
+		map gfx/beam1.tga
+		scale static 32 static 16
+		colormap 1 1 1
+		beam
+	}
+}
+textures/xempx/a6bt
+{
+	{
+		map textures/arena5/lighta.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll sin 1 sin 0
+		anim .05
+			textures/arena5/lighta.tga
+			textures/arena5/lightb.tga
+			textures/arena5/lightc.tga
+			textures/arena5/lightd.tga
+			textures/arena5/lighte.tga
+			textures/arena5/lightf.tga
+		end
+	}
+}

@@ -317,17 +317,6 @@ models/items/adrenaline/skin
 		alphamask
 	}
 }
-vehicles/hover/flames
-{
-	{
-		map gfx/hoverfx.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 2 static 2
-		scroll static 0 static -3
-		alphashift 10 0.4 0.9
-		nolightmap
-	}
-}
 vehicles/deathball/deathball
 {
 	{
@@ -379,6 +368,31 @@ maps/meshes/spingear
 	}
 	{
 		map maps/meshes/spingear_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
+maps/meshes/bignode
+{
+	{
+		map maps/meshes/bignode.jpg
+	}
+	{
+		map maps/meshes/bignode_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
+maps/meshes/arch
+{
+	{
+		map maps/meshes/arch.tga
+		alphamask
+	}
+	{
+		map maps/meshes/arch_fx.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 .8
 		nolightmap
