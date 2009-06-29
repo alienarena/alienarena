@@ -1277,7 +1277,7 @@ void S_Init( void )
 		return;
 	}
 
-	// Link to OpenAL library
+	// Link to OpenAL library  (TODO: detect and fail on version 1.0)
 	success = QAL_Init();
 	if( !success )
 	{
@@ -1287,63 +1287,60 @@ void S_Init( void )
 	}
 
 	// Use Default Device and Attributes
-	// TODO: implement device selection, maybe.
-	success = false;
+	// TODO: implement device selection,
+	//   or force "Default Software" if inadequate hardware resources
 	pDevice = qalcOpenDevice( NULL ); // 1. open default device
-	result = calErrorCheckALC( pDevice, __LINE__ );
-	if( pDevice != NULL )
+	if( pDevice == NULL )
 	{
-		pContext = qalcCreateContext( pDevice, NULL ); // 2. create context
-		result = calErrorCheckALC( pDevice, __LINE__ );
-		if( pContext )
-		{
-			qalcMakeContextCurrent( pContext ); // 3. make context current
-			result = calErrorCheckALC( pDevice, __LINE__ );
-			success = true;
-		}
-		else
-		{
-			qalcCloseDevice( pDevice );
-			pDevice = NULL;
-		}
-		if( !success )
-		{
-			Com_Printf(
-			        "Sound failed: Possible OpenAL or device configuration problem\n"
+		Com_Printf("Sound failed: Unable to open default sound device\n"
 				        "Game will continue without sound.\n" );
-			return;
-		}
-
-		result = calErrorCheckALC( pDevice, __LINE__ );
-
-		// Setup 3D Audio State
-		qalDistanceModel( distance_model );
-		qalDopplerFactor( doppler_factor );
-		qalSpeedOfSound( speed_of_sound );
-
-		// Initialize Listener
-		if ( s_volume->value > 0  )
-			qalListenerf( AL_GAIN, (ALfloat)0.1f ); // start quiet, need some for menu clicks
-		else
-			qalListenerf( AL_GAIN, (ALfloat)0.0f ); // sound is off
-		qalListenerfv( AL_POSITION, zero_position );
-		qalListenerfv( AL_VELOCITY, zero_velocity );
-		qalListenerfv( AL_ORIENTATION, default_orientation );
+		return;
 	}
+	pContext = qalcCreateContext( pDevice, NULL ); // 2. create context
+	if ( pContext == NULL )
+	{
+		qalcCloseDevice( pDevice );
+		pDevice = NULL;
+		Com_Printf(
+				"Sound failed: Possible OpenAL or device configuration problem\n"
+					"Game will continue without sound.\n" );
+		return;
+	}
+	qalcMakeContextCurrent( pContext ); // 3. make context current
+	result = calErrorCheckALC( pDevice, __LINE__ );
+
+	// Setup 3D Audio State
+	qalDistanceModel( distance_model );
+	qalDopplerFactor( doppler_factor );
+	qalSpeedOfSound( speed_of_sound );
+
+	// Initialize Listener
+	if ( s_volume->value > 0  )
+		qalListenerf( AL_GAIN, (ALfloat)0.1f ); // start quiet, need some for menu clicks
+	else
+		qalListenerf( AL_GAIN, (ALfloat)0.0f ); // sound is off
+	qalListenerfv( AL_POSITION, zero_position );
+	qalListenerfv( AL_VELOCITY, zero_velocity );
+	qalListenerfv( AL_ORIENTATION, default_orientation );
 
 	qalcGetIntegerv( pDevice, ALC_MONO_SOURCES, 1, &alc_mono_sources );
 	result = calErrorCheckALC( pDevice, __LINE__ );
 	if( result != ALC_NO_ERROR || alc_mono_sources <= 0 )
 	{
 		Com_Printf("OpenAL Device error: Number of Mono Sources\n");
+		alc_mono_sources = 0;
 	}
-	calSourcesInitialize( alc_mono_sources ); // generate OpenAL Sources
+	else
+	{ // generate OpenAL sound effects Sources.
+		//	TODO: check for adequate number of mono Sources
+		calSourcesInitialize( alc_mono_sources );
+	}
 	calSoundFXInitialize(); // generate OpenAL Buffers
 	sndCmdInit(); // setup snd* console commands
 	calContextInfo( pDevice ); // display OpenAL technical info
 
 	// Initialize background music dedicated source record
-	// other intializiation done in S_StartMusic
+	// other intialization done in S_StartMusic
 	music.playing = false;
 	music.sfx = NULL;
 	music.oalSource = 0;
@@ -1462,11 +1459,6 @@ void S_Shutdown( void )
 	pContext = qalcGetCurrentContext();
 	pDevice = qalcGetContextsDevice( pContext );
 	calErrorCheckALC( pDevice, __LINE__ );
-	result = qalcCloseDevice( pDevice );
-	if( !result )
-	{
-		Com_DPrintf( "qalcCloseDevice failed" );
-	}
 	result = qalcMakeContextCurrent( NULL );
 	if( result )
 	{
@@ -1475,6 +1467,12 @@ void S_Shutdown( void )
 	else
 	{
 		Com_DPrintf( "qalcMakeContextCurrent(NULL) failed\n" );
+	}
+	// Close OpenAL Device
+	result = qalcCloseDevice( pDevice );
+	if( !result )
+	{
+		Com_DPrintf( "qalcCloseDevice failed\n" );
 	}
 
 	QAL_Shutdown(); // Unlink OpenAL dynamic/shared library
