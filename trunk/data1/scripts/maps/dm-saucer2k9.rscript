@@ -47,6 +47,22 @@ textures/arena9/roundlight
 		beam
 	}
 }
+textures/martian/metalrings1
+{
+	{
+		map textures/martian/metalrings1.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.6 0.6
+	}
+	{
+		map gfx/greenline.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 0.5 static 0.5
+		scroll static 0 static -10
+		alphashift 5 0.0 0.3
+		nolightmap
+	}
+}
 textures/xempx/a6bt
 {
 	{
