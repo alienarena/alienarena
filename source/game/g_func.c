@@ -1572,7 +1572,10 @@ again:
 	{
 		if (self->moveinfo.sound_start)
 			gi.sound (self, CHAN_NO_PHS_ADD+CHAN_VOICE, self->moveinfo.sound_start, 1, ATTN_STATIC, 0);
-		self->s.sound = gi.soundindex ("world/turbine1.wav");
+		if(self->spawnflags & 64)
+			self->s.sound = gi.soundindex("world/electricity.wav");
+		else
+			self->s.sound = gi.soundindex ("world/turbine1.wav");
 	}
 
 	VectorSubtract (ent->s.origin, self->mins, dest);

@@ -692,3 +692,12 @@ maps/meshes/bignode
 		glow
 	}
 }
+maps/meshes/controls
+{
+	{
+		map maps/meshes/controls_normal.jpg
+		normalmap
+		map2 maps/meshes/controls_fx.jpg
+		glow
+	}
+}

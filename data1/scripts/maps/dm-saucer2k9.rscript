@@ -28,7 +28,27 @@ textures/arena7/light7
 		lensflare
 	}
 }
+textures/arena6/ice
+{
+
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.2 0.2
+		envmap
+	}
+}
 textures/arena9/lightwhite
+{
+	{
+		map gfx/beam1.tga
+		scale static 16 static 8
+		colormap 1 1 1
+		beam
+		lensflare
+	}
+}
+textures/rage/metallight_2
 {
 	{
 		map gfx/beam1.tga
@@ -78,5 +98,14 @@ textures/xempx/a6bt
 			textures/arena5/lighte.tga
 			textures/arena5/lightf.tga
 		end
+	}
+}
+textures/evil/e6launchengine
+{
+	{
+		map gfx/e6launchengine_glow.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 10 0.1 0.9
+		nolightmap
 	}
 }
