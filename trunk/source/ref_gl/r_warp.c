@@ -270,7 +270,7 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 			
 		R_AddGLSLShadedWarpSurfToVArray (fa, scroll);
 
-		glUseProgramObjectARB( NULL );
+		glUseProgramObjectARB( 0 );
 
 		R_KillVArrays ();
 

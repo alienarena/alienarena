@@ -553,7 +553,11 @@ void R_DrawEntitiesOnList (void)
             }
 
 			if (rs)
+#ifdef _WINDOWS
+				(struct rscript_s *)currententity->script = rs;
+#else
 				currententity->script = rs;
+#endif
 			else
 				currententity->script = NULL;
 		}
@@ -621,7 +625,11 @@ void R_DrawEntitiesOnList (void)
             }
 
 			if (rs)
+#ifdef _WINDOWS
+				(struct rscript_s *)currententity->script = rs;
+#else
 				currententity->script = rs;
+#endif
 			else
 				currententity->script = NULL;
 		}

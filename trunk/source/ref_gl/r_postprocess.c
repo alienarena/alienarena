@@ -188,7 +188,7 @@ void R_GLSLPostProcess(void)
 
 	qglDrawArrays (GL_QUADS, 0, 4);
 
-	glUseProgramObjectARB( NULL );
+	glUseProgramObjectARB( 0 );
 
 	R_KillVArrays();
 
