@@ -788,7 +788,7 @@ dynamic:
 			
 			R_AddGLSLShadedSurfToVArray (surf, scroll, true);
 
-			glUseProgramObjectARB( NULL );
+			glUseProgramObjectARB( 0 );
 
 		}
 		//normal mapped surface for dynamic lights
@@ -822,7 +822,7 @@ dynamic:
 			
 			R_AddGLSLShadedSurfToVArray (surf, scroll, true);
 
-			glUseProgramObjectARB( NULL );
+			glUseProgramObjectARB( 0 );
 
 		}
 		//surface has no normalmap

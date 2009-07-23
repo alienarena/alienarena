@@ -1433,7 +1433,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 			if(stage->normalmap) {
 
-				glUseProgramObjectARB( NULL );
+				glUseProgramObjectARB( 0 );
 
 				GL_EnableMultitexture( false );
 			}

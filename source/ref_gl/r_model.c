@@ -368,8 +368,11 @@ model_t *Mod_ForName (char *name, qboolean crash)
 					strcpy(rs,mod->skins[i]->name);
 					rs[strlen(rs)-4]=0;
 
-					//(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
+#ifdef _WINDOWS
+					(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
+#else
 					mod->script[i] = RS_FindScript(rs); //make it gcc 4.1.1 compatible
+#endif
 					if (mod->script[i])
 						RS_ReadyScript((rscript_t *)mod->script[i]);
 					i++;
@@ -1600,9 +1603,12 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 		strcpy(rs,(char *)pinmodel + LittleLong(pinmodel->ofs_skins) + i*MAX_SKINNAME);
 
 		rs[strlen(rs)-4]=0;
-	
-		//(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
+
+#ifdef _WINDOWS
+		(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
+#else
 		mod->script[i] = RS_FindScript(rs); //make it gcc 4.1.1 compatible
+#endif
 		
 		if (mod->script[i])
 			RS_ReadyScript((rscript_t *)mod->script[i]);
