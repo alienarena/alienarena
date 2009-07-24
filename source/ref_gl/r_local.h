@@ -465,10 +465,15 @@ extern float	col_array[MAX_ARRAY][4];
 #define MAX_VARRAY_VERTS MAX_VERTS + 2
 #define MAX_VARRAY_VERTEX_SIZE 11
 
+#define MAX_VERTICES		16384
+#define MAX_INDICES		MAX_VERTICES * 4
+#define MAX_SHADOW_VERTS	16384
+
 extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
 extern float *VArray;
 static vec3_t NormalsArray[MAX_TRIANGLES*3];
+extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
 #define VERT_SINGLE_TEXTURED			0		// verts and st for 1 tmu

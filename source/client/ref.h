@@ -145,6 +145,8 @@ typedef struct entity_s
 
 	struct	rscript_t *script;
 
+	vec3_t	currentLightPos;
+
 } entity_t;
 
 #define ENTITY_FLAGS  68

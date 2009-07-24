@@ -1181,6 +1181,59 @@ void R_SetupGL (void)
 	qglEnable(GL_DEPTH_TEST);
 }
 
+extern void R_DrawShadowVolume(entity_t * e);
+extern void R_DrawShadowWorld(void);
+void R_CastShadow(void)
+{
+	int i;
+	
+	if (gl_shadows->value < 3)
+		return;
+		
+	qglEnableClientState(GL_VERTEX_ARRAY);
+	qglVertexPointer(3, GL_FLOAT, sizeof(vec3_t), ShadowArray);
+	qglEnable(GL_STENCIL_TEST);
+	qglClear(GL_STENCIL_BUFFER_BIT);
+	qglEnable(GL_CULL_FACE);
+	qglDepthMask(0);
+	qglDepthFunc(GL_LESS);
+	
+	qglColorMask(0, 0, 0, 0);
+	
+	qglStencilMask(255);
+	
+	qglStencilFunc(GL_ALWAYS, 128, 255);
+	
+	for (i = 0; i < r_newrefdef.num_entities; i++) 
+	{
+		currententity = &r_newrefdef.entities[i];
+		currentmodel = currententity->model; //to do - we probably want to remove this entire function to r_mesh.c with other shadow code
+		//this willnegate needing to do LOD checks
+		if (!currentmodel)
+			continue;
+		
+		if (currentmodel->type != mod_alias)
+			continue;
+
+		if (currententity->
+		flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED |
+				 RF_SHELL_BLUE | RF_SHELL_DOUBLE |
+				 RF_BEAM | RF_WEAPONMODEL | RF_NOSHADOWS))
+				 continue;
+		
+		R_DrawShadowVolume(currententity);
+	}
+	
+	qglDisableClientState(GL_VERTEX_ARRAY);
+	qglDisable(GL_STENCIL_TEST);
+	qglStencilMask(0);
+	qglDepthMask(true);
+	qglDepthFunc(GL_LEQUAL);
+	qglColor4f(1,1,1,1);
+	qglColorMask(1, 1, 1, 1);
+	
+}
+
 /*
 =============
 R_Clear
@@ -1204,13 +1257,14 @@ void R_Clear (void)
 
 	if (have_stencil && gl_shadows->integer) {
 
-	qglClearStencil(1);
+		if(gl_shadows->integer > 2)
+			qglClearStencil(0);
+		else
+			qglClearStencil(1);
 
-	qglClear(GL_STENCIL_BUFFER_BIT);
+		qglClear(GL_STENCIL_BUFFER_BIT);
 
-}
-
-
+	}
 }
 
 void R_Flash( void )
@@ -1281,7 +1335,10 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawVegetationSurface ();
 
+	R_CastShadow();
 	R_DrawEntitiesOnList ();
+	
+	//R_DrawShadowWorld(); //done after?  Maybe we want this to cast onto entites, ala id tech 4
 
 	R_DrawSpecialSurfaces();
 

@@ -1831,7 +1831,8 @@ void R_DrawAliasModel (entity_t *e)
 	if (currententity->flags & RF_DEPTHHACK)
 		qglDepthRange (gldepthmin, gldepthmax);
 
-	if (gl_shadows->value && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
+	//old legacy shadows
+	if (gl_shadows->value && gl_shadows->value < 3 && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
 	{
 		float casted;
 		float an = currententity->angles[1]/180*M_PI;
