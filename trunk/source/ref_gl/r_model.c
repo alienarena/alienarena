@@ -1450,6 +1450,84 @@ ALIAS MODELS
 */
 
 /*
+========================
+Mod_FindTriangleWithEdge
+Shadow volumes stuff
+========================
+*/
+static int Mod_FindTriangleWithEdge(neighbors_t * neighbors, dtriangle_t * tris, int numtris, int triIndex, int edgeIndex){
+
+
+	int i, j, found = -1, foundj = 0;
+	dtriangle_t *current = &tris[triIndex];
+	qboolean dup = false;
+
+	for (i = 0; i < numtris; i++) {
+		if (i == triIndex)
+			continue;
+
+		for (j = 0; j < 3; j++) {
+			if (((current->index_xyz[edgeIndex] == tris[i].index_xyz[j]) &&
+				 (current->index_xyz[(edgeIndex + 1) % 3] ==
+				  tris[i].index_xyz[(j + 1) % 3]))
+				||
+				((current->index_xyz[edgeIndex] ==
+				  tris[i].index_xyz[(j + 1) % 3])
+				 && (current->index_xyz[(edgeIndex + 1) % 3] ==
+					 tris[i].index_xyz[j]))) {
+				// no edge for this model found yet?
+				if (found == -1) {
+					found = i;
+					foundj = j;
+				} else
+					dup = true;	// the three edges story
+			}
+		}
+	}
+
+	// normal edge, setup neighbour pointers
+	if (!dup && found != -1) {	// / FIXED by BERSERKER: в Tenebrae не
+								// провер€етс€ случай, когда found == -1
+								// -> ошибка защиты пам€ти!
+		neighbors[found].n[foundj] = triIndex;
+		return found;
+	}
+	// naughty egde let no-one have the neighbour
+	return -1;
+}
+
+/*
+===============
+Mod_BuildTriangleNeighbors
+
+===============
+*/
+static void Mod_BuildTriangleNeighbors(neighbors_t * neighbors,
+									   dtriangle_t * tris, int numtris)
+{
+	int i, j;
+
+	// set neighbours to -1
+	for (i = 0; i < numtris; i++) {
+		for (j = 0; j < 3; j++)
+			neighbors[i].n[j] = -1;
+	}
+
+	// generate edges information (for shadow volumes)
+	// NOTE: We do this with the original vertices not the reordered onces 
+	// since reordering them
+	// duplicates vertices and we only compare indices
+	for (i = 0; i < numtris; i++) {
+		for (j = 0; j < 3; j++) {
+			if (neighbors[i].n[j] == -1)
+				neighbors[i].n[j] =
+					Mod_FindTriangleWithEdge(neighbors, tris, numtris, i,
+											 j);
+		}
+	}
+}
+
+/*
 R_LoadMd2VertexArrays
 */
 extern 
@@ -1555,6 +1633,12 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 			pouttri[i].index_st[j] = LittleShort (pintri[i].index_st[j]);
 		}
 	}
+
+//
+// find neighbours
+//
+	mod->neighbors = malloc(pheader->num_tris * sizeof(neighbors_t));
+	Mod_BuildTriangleNeighbors(mod->neighbors, pouttri, pheader->num_tris);
 
 //
 // load the frames
