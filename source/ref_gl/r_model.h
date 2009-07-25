@@ -330,6 +330,8 @@ typedef struct model_s
 	fstvert_t	*st;
 	neighbors_t *neighbors;
 
+	vec4_t	s_lerped[MAX_VERTS];
+
 } model_t;
 
 //============================================================================
