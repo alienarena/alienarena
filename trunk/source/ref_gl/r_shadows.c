@@ -25,7 +25,8 @@ vec4_t shadow_lerped[MAX_VERTS];
 
 /*
 ===============
-SHADOW VOLUMES
+SHADOW VOLUMES - to do - instead of calling this in a separate loop from r_main.c, eventually this would be better off from r_mesh
+//after each entity.  First we have to resolve the self shadowing issue.
 ===============
 */
 
@@ -308,12 +309,8 @@ void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist)
 
 void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm)
 {
-	int *order;
 	vec3_t light, light2, temp;
 	int i, o;
-	dtriangle_t *t, *tris;
-	daliasframe_t *frame, *oldframe;
-	dtrivertx_t *ov, *verts;
 	dlight_t *dl;
 	worldLight_t *wl;
 	float cost, sint;
@@ -330,16 +327,6 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm)
 	
 	VectorClear(light);
 	
-	t = tris = (dtriangle_t *) ((unsigned char *) paliashdr + paliashdr->ofs_tris);
-
-	frame = (daliasframe_t *) ((byte *) paliashdr + paliashdr->ofs_frames + currententity->frame * paliashdr->framesize);
-	verts = frame->verts;
-
-	oldframe = (daliasframe_t *) ((byte *) paliashdr + paliashdr->ofs_frames + currententity->oldframe * paliashdr->framesize);
-	ov = oldframe->verts;
-
-	order = (int *) ((byte *) paliashdr + paliashdr->ofs_glcmds);
-
 	cost =  cos(-currententity->angles[1] / 180 * M_PI), 
     sint =  sin(-currententity->angles[1] / 180 * M_PI);
 
@@ -377,7 +364,6 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm)
 		light[2] += 8;
 		VectorSubtract(currententity->origin, dl->origin, light2);
 		VectorCopy(light2, currententity->currentLightPos);
-		GL_RenderVolumes(paliashdr, light, 15);
 		worldlight++;
 		dlight++;
 	}
@@ -469,7 +455,7 @@ void R_DrawShadowVolume(entity_t * e)
 	float	*lerp;
 	float frontlerp;
 	vec3_t move, delta, vectors[3];
-	vec3_t frontv, backv, tmp, water;
+	vec3_t frontv, backv, tmp;//, water;
 	int i;
 	float rad, alpha;
 	trace_t r_trace;
@@ -477,9 +463,9 @@ void R_DrawShadowVolume(entity_t * e)
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 	
-	VectorAdd(e->origin, currententity->model->maxs, water); 
-	if(CL_PMpointcontents(water) & MASK_WATER)
-		return;
+//	VectorAdd(e->origin, currententity->model->maxs, water); 
+//	if(CL_PMpointcontents(water) & MASK_WATER)
+//		return;
 	
 	VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
 	VectorScale (tmp, 1.666, tmp); 

@@ -1186,34 +1186,35 @@ extern void R_DrawShadowWorld(void);
 void R_CastShadow(void)
 {
 	int i;
+	vec3_t dist;
 	
 	if (gl_shadows->value < 3)
 		return;
 		
 	qglEnableClientState(GL_VERTEX_ARRAY);
 	qglVertexPointer(3, GL_FLOAT, sizeof(vec3_t), ShadowArray);
-	qglEnable(GL_STENCIL_TEST);
-	qglClear(GL_STENCIL_BUFFER_BIT);
-	qglEnable(GL_CULL_FACE);
-	qglDepthMask(0);
-	qglDepthFunc(GL_LESS);
-	
-	qglColorMask(0, 0, 0, 0);
-	
-	qglStencilMask(255);
-	
-	qglStencilFunc(GL_ALWAYS, 128, 255);
 	
 	for (i = 0; i < r_newrefdef.num_entities; i++) 
 	{
 		currententity = &r_newrefdef.entities[i];
-		currentmodel = currententity->model; //to do - we probably want to remove this entire function to r_mesh.c with other shadow code
-		//this willnegate needing to do LOD checks
+		currentmodel = currententity->model; 
+
 		if (!currentmodel)
 			continue;
 		
 		if (currentmodel->type != mod_alias)
 			continue;
+
+		//get distance, set lod if available
+		VectorSubtract(r_origin, currententity->origin, dist);
+		if(VectorLength(dist) > 1000) {
+			if(currententity->lod2)
+				currentmodel = currententity->lod2;
+		}
+		else if(VectorLength(dist) > 500) {
+			if(currententity->lod1) 
+				currentmodel = currententity->lod1;
+		}
 
 		if (currententity->
 		flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED |
@@ -1226,12 +1227,7 @@ void R_CastShadow(void)
 	
 	qglDisableClientState(GL_VERTEX_ARRAY);
 	qglDisable(GL_STENCIL_TEST);
-	qglStencilMask(0);
-	qglDepthMask(true);
-	qglDepthFunc(GL_LEQUAL);
-	qglColor4f(1,1,1,1);
-	qglColorMask(1, 1, 1, 1);
-	
+
 }
 
 /*
