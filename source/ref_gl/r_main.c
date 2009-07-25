@@ -1183,6 +1183,7 @@ void R_SetupGL (void)
 
 extern void R_DrawShadowVolume(entity_t * e);
 extern void R_DrawShadowWorld(void);
+void R_ShadowBlend(float alpha);
 void R_CastShadow(void)
 {
 	int i;
@@ -1193,6 +1194,10 @@ void R_CastShadow(void)
 		
 	qglEnableClientState(GL_VERTEX_ARRAY);
 	qglVertexPointer(3, GL_FLOAT, sizeof(vec3_t), ShadowArray);
+
+
+	qglClear(GL_STENCIL_BUFFER_BIT);
+
 	
 	for (i = 0; i < r_newrefdef.num_entities; i++) 
 	{
@@ -1224,9 +1229,14 @@ void R_CastShadow(void)
 		
 		R_DrawShadowVolume(currententity);
 	}
+
+	R_ShadowBlend(0.4);
 	
 	qglDisableClientState(GL_VERTEX_ARRAY);
-	qglDisable(GL_STENCIL_TEST);
+	qglColorMask(1,1,1,1);
+	
+	qglDepthMask(1);
+	qglDepthFunc(GL_LEQUAL);
 
 }
 
