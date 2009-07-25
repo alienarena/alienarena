@@ -1198,10 +1198,13 @@ void R_CastShadow(void)
 
 	qglClear(GL_STENCIL_BUFFER_BIT);
 
-	
 	for (i = 0; i < r_newrefdef.num_entities; i++) 
 	{
 		currententity = &r_newrefdef.entities[i];
+
+		if (currententity->flags & RF_TRANSLUCENT)
+			continue;	// transluscent
+
 		currentmodel = currententity->model; 
 
 		if (!currentmodel)
