@@ -59,6 +59,9 @@ dlight_t	r_dlights[MAX_DLIGHTS];
 int			r_numentities;
 entity_t	r_entities[MAX_ENTITIES];
 
+int			r_numviewentities;
+entity_t	r_viewentities[MAX_ENTITIES];
+
 int			r_numparticles;
 particle_t	r_particles[MAX_PARTICLES];
 
@@ -78,6 +81,7 @@ void V_ClearScene (void)
 {
 	r_numdlights = 0;
 	r_numentities = 0;
+	r_numviewentities = 0;
 	r_numparticles = 0;
 }
 
@@ -93,6 +97,19 @@ void V_AddEntity (entity_t *ent)
 	if (r_numentities >= MAX_ENTITIES)
 		return;
 	r_entities[r_numentities++] = *ent;
+}
+
+/*
+=====================
+V_AddViewEntity
+
+=====================
+*/
+void V_AddViewEntity (entity_t *ent)
+{
+	if (r_numviewentities >= MAX_ENTITIES)
+		return;
+	r_viewentities[r_numviewentities++] = *ent;
 }
 
 
@@ -853,8 +870,10 @@ void V_RenderView( float stereo_separation )
 
 		cl.refdef.areabits = cl.frame.areabits;
 
-		if (!cl_add_entities->value)
+		if (!cl_add_entities->value) {
 			r_numentities = 0;
+			r_numviewentities = 0;
+		}
 		if (!cl_add_particles->value)
 			r_numparticles = 0;
 		if (!cl_add_lights->value)
@@ -866,6 +885,8 @@ void V_RenderView( float stereo_separation )
 
 		cl.refdef.num_entities = r_numentities;
 		cl.refdef.entities = r_entities;
+		cl.refdef.num_viewentities = r_numviewentities;
+		cl.refdef.viewentities = r_viewentities;
 		cl.refdef.num_particles = r_numparticles;
 		cl.refdef.particles = r_particles;
 		cl.refdef.num_dlights = r_numdlights;

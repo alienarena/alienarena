@@ -832,14 +832,14 @@ void CL_AddPacketEntities (frame_t *frame)
 			CL_FlagEffects(ent.origin, 1);
 			ent.team = 2;
 		}
-
+		
 		// add to refresh list
-
 		V_AddEntity (&ent);
 
 		// color shells generate a seperate entity for the main model
 		if ((effects & EF_COLOR_SHELL) && !(s1->number == cl.playernum+1))
 		{
+			
 			// PMM - at this point, all of the shells have been handled
 			// if we're in the rogue pack, set up the custom mixing, otherwise just
 			// keep going
@@ -880,7 +880,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			// pmm
 			ent.flags = renderfx | RF_TRANSLUCENT;
 			ent.alpha = 0.30;
-			V_AddEntity (&ent);
+			V_AddViewEntity (&ent);			
 		}
 
 		ent.skin = NULL;		// never use a custom skin on others
@@ -1193,7 +1193,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 			CL_MuzzleFlashParticle(gun.origin, gun.angles, true);
 	}
 
-	V_AddEntity (&gun);
+	V_AddViewEntity (&gun);
 	//add shells for viewweaps (all of em!)
 	{
 		int oldeffects = gun.flags, pnum;
@@ -1220,21 +1220,21 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 					{
 						gun.skin = R_RegisterSkin ("gfx/shell.pcx");
 
-						V_AddEntity (&gun);
+						V_AddViewEntity (&gun);
 					}
 					if (s1->effects & EF_PENT)
 					{
 						gun.skin = R_RegisterSkin ("gfx/shell_pent.pcx");
 						gun.flags = oldeffects | RF_TRANSLUCENT | RF_SHELL_RED;
 
-						V_AddEntity (&gun);
+						V_AddViewEntity (&gun);
 					}
 					if (s1->effects & EF_QUAD && cl_gun->value)
 					{
 						gun.skin = R_RegisterSkin ("gfx/shell_quad.pcx");
 						gun.flags = oldeffects | RF_TRANSLUCENT | RF_SHELL_BLUE;
 
-						V_AddEntity (&gun);
+						V_AddViewEntity (&gun);
 					}
 				}
 			}
@@ -1248,13 +1248,13 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.model = R_RegisterModel("models/weapons/v_rocket/cover.md2");
 		gun.flags |= RF_TRANSLUCENT;
 		gun.alpha = 0.30;
-		V_AddEntity (&gun);
+		V_AddViewEntity (&gun);
 	}
 	if(!(strcmp("models/weapons/v_hyperb/tris.md2", gun.model->name))) {
 		gun.model = R_RegisterModel("models/weapons/v_hyperb/cover.md2");
 		gun.flags |= RF_TRANSLUCENT;
 		gun.alpha = 0.30;
-		V_AddEntity (&gun);
+		V_AddViewEntity (&gun);
 	}
 }
 

@@ -519,7 +519,7 @@ void R_DrawNullModel (void)
 
 /*
 =============
-R_DrawEntitiesOnList
+R_DrawEntitiesOnList - to do - place view weapon ents on their own list
 =============
 */
 void R_DrawEntitiesOnList (void)
@@ -664,6 +664,116 @@ void R_DrawEntitiesOnList (void)
 	}
 	qglDepthMask (1);		// back to writing
 
+}
+
+void R_DrawViewEntitiesOnList (void)
+{
+	int		i;
+	rscript_t	*rs = NULL;
+	char    shortname[MAX_QPATH];
+
+	if (!r_drawentities->value)
+		return;
+
+	// draw non-transparent first
+	for (i=0 ; i<r_newrefdef.num_viewentities ; i++)
+	{
+		currententity = &r_newrefdef.viewentities[i];
+		if (currententity->flags & RF_TRANSLUCENT)
+			continue;	// transluscent
+
+		if (currententity->model && r_shaders->value)
+		{
+			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
+			if(!rs)
+				rs=(rscript_t *)currententity->model->script[0]; //try 0
+
+			if (currententity->skin) { //custom player skin (must be done here)
+                COM_StripExtension ( currententity->skin->name, shortname );
+                rs = RS_FindScript(shortname);
+                if(rs)
+                    RS_ReadyScript(rs);
+            }
+
+			if (rs)
+#ifdef _WINDOWS
+				(struct rscript_s *)currententity->script = rs;
+#else
+				currententity->script = rs;
+#endif
+			else
+				currententity->script = NULL;
+		}
+
+
+		currentmodel = currententity->model;
+			
+		if (!currentmodel)
+		{
+			R_DrawNullModel ();
+			continue;
+		}
+		switch (currentmodel->type)
+		{
+		case mod_alias:
+			R_DrawAliasModel (currententity);
+			break;
+		default:
+			Com_Error(ERR_DROP, "Bad modeltype");
+			break;
+		}
+	}
+
+	// draw transparent entities
+	// we could sort these if it ever becomes a problem...
+	qglDepthMask (0);		// no z writes
+	for (i=0 ; i<r_newrefdef.num_viewentities ; i++)
+	{
+		currententity = &r_newrefdef.viewentities[i];
+		if (!(currententity->flags & RF_TRANSLUCENT))
+			continue;	// solid
+
+		if (currententity->model && r_shaders->value)
+		{
+			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
+			if(!rs)
+				rs=(rscript_t *)currententity->model->script[0]; //try 0
+						
+			if (currententity->skin) { //custom player skin
+                COM_StripExtension ( currententity->skin->name, shortname );
+                rs = RS_FindScript(shortname);
+                if(rs)
+                    RS_ReadyScript(rs);
+            }
+
+			if (rs)
+#ifdef _WINDOWS
+				(struct rscript_s *)currententity->script = rs;
+#else
+				currententity->script = rs;
+#endif
+			else
+				currententity->script = NULL;
+		}
+
+		currentmodel = currententity->model;
+
+		if (!currentmodel)
+		{
+			R_DrawNullModel ();
+			continue;
+		}
+		switch (currentmodel->type)
+		{
+		case mod_alias:
+			R_DrawAliasModel (currententity);
+			break;
+		default:
+			Com_Error (ERR_DROP, "Bad modeltype");
+			break;
+		}
+	}
+	qglDepthMask (1);		// back to writing
 }
 
 /*
@@ -1348,6 +1458,7 @@ void R_RenderView (refdef_t *fd)
 	R_DrawEntitiesOnList ();
 	R_CastShadow();
 	//Draw v_weaps last after shadows
+	R_DrawViewEntitiesOnList ();
 	//R_DrawShadowWorld(); //done after?  Maybe we want this to cast onto entites, ala id tech 4
 
 	R_DrawSpecialSurfaces();
