@@ -611,6 +611,7 @@ int numitemicons;
 void V_Init (void);
 void V_RenderView( float stereo_separation );
 void V_AddEntity (entity_t *ent);
+void V_AddViewEntity (entity_t *ent);
 void V_AddParticle (vec3_t org, vec3_t angle, int color, int type, int texnum, int blenddst, int blendsrc, float alpha, float scale);
 void V_AddLight (vec3_t org, float intensity, float r, float g, float b);
 void V_AddTeamLight (vec3_t org, float intensity, float r, float g, float b, int team);

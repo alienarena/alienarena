@@ -202,6 +202,9 @@ typedef struct
 	int			num_entities;
 	entity_t	*entities;
 
+	int			num_viewentities;
+	entity_t	*viewentities;
+
 	int			num_dlights;
 	dlight_t	*dlights;
 
