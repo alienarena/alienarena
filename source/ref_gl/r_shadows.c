@@ -32,18 +32,6 @@ SHADOW VOLUMES
 vec3_t ShadowArray[MAX_SHADOW_VERTS];
 static qboolean	triangleFacingLight	[MAX_INDICES / 3];
 
-//to do - remove lerping
-void GL_LerpVerts(int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float move[3], float frontv[3], float backv[3])
-{
-	int i;
-
-	for (i = 0; i < nverts; i++, v++, ov++, lerp += 4) {
-		lerp[0] = move[0] + ov->v[0]*backv[0] + v->v[0]*frontv[0];
-		lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1];
-		lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2];
-	}	
-}
-
 /*
 ==============
 R_ShadowBlend
@@ -499,14 +487,8 @@ int CL_PMpointcontents(vec3_t point);
 void R_DrawShadowVolume(entity_t * e)
 {
 	dmdl_t *paliashdr;
-	daliasframe_t *frame, *oldframe;
-	dtrivertx_t *v, *ov, *verts;
-	int *order;
-	float	*lerp;
-	float frontlerp;
-	vec3_t move, delta, vectors[3];
-	vec3_t frontv, backv, tmp;//, water;
-	int i;
+	daliasframe_t *frame;
+	vec3_t tmp;//, water;
 	float rad, alpha;
 	trace_t r_trace;
 	
@@ -537,8 +519,6 @@ void R_DrawShadowVolume(entity_t * e)
 	frame = (daliasframe_t *) ((byte *) paliashdr   + paliashdr->ofs_frames
 						        + currententity->frame *
 							  paliashdr->framesize);
-
-
 
 	qglPushMatrix();
 	qglDisable(GL_TEXTURE_2D);
