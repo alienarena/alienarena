@@ -1331,9 +1331,10 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawVegetationSurface ();
 
-	R_CastShadow();
-	R_DrawEntitiesOnList ();
 	
+	R_DrawEntitiesOnList ();
+	R_CastShadow();
+	//Draw v_weaps last after shadows
 	//R_DrawShadowWorld(); //done after?  Maybe we want this to cast onto entites, ala id tech 4
 
 	R_DrawSpecialSurfaces();

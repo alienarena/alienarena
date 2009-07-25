@@ -21,12 +21,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_local.h"
 
 typedef float vec4_t[4];
-vec4_t shadow_lerped[MAX_VERTS];
+
 
 /*
 ===============
-SHADOW VOLUMES - to do - instead of calling this in a separate loop from r_main.c, eventually this would be better off from r_mesh
-//after each entity.  First we have to resolve the self shadowing issue.
+SHADOW VOLUMES
 ===============
 */
 
@@ -76,7 +75,7 @@ void R_ShadowBlend(float alpha)
 
 	qglEnable(GL_STENCIL_TEST);
 	qglStencilFunc( GL_NOTEQUAL, 0, 0xFF);
-	qglStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	qglStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
 	qglBegin(GL_TRIANGLES);
 	qglVertex2f(-5, -5);
@@ -99,7 +98,7 @@ void R_ShadowBlend(float alpha)
 
 }
 
-void R_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightOrg){
+void R_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightOrg, qboolean lerp){
 	
 	vec3_t	r_triangleNormals[MAX_INDICES / 3];
 	vec3_t	temp, dir0, dir1;
@@ -110,9 +109,17 @@ void R_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightOrg
 		
 	for (i = 0; i < paliashdr->num_tris; i++, tris++) {
 		
-			v0 = (float*)shadow_lerped[tris->index_xyz[0]];
-			v1 = (float*)shadow_lerped[tris->index_xyz[1]];
-			v2 = (float*)shadow_lerped[tris->index_xyz[2]];
+		if(lerp) {
+
+			v0 = (float*)currentmodel->s_lerped[tris->index_xyz[0]];
+			v1 = (float*)currentmodel->s_lerped[tris->index_xyz[1]];
+			v2 = (float*)currentmodel->s_lerped[tris->index_xyz[2]];
+		}
+		else {
+			v0 = (float*)currentmodel->r_mesh_verts[tris->index_xyz[0]];
+			v1 = (float*)currentmodel->r_mesh_verts[tris->index_xyz[1]];
+			v2 = (float*)currentmodel->r_mesh_verts[tris->index_xyz[2]];
+		}
 		
 		//Calculate shadow volume triangle normals
 		VectorSubtract( v0, v1, dir0 );
@@ -130,7 +137,7 @@ void R_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightOrg
 
 }
 
-void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance)
+void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboolean lerp)
 {
 	dtriangle_t *ot, *tris;
 	neighbors_t *neighbors;
@@ -148,7 +155,7 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance)
 
 	ot = tris = (dtriangle_t *) ((unsigned char *) hdr + hdr->ofs_tris);
 	
-	R_MarkShadowTriangles(hdr, tris, light);
+	R_MarkShadowTriangles(hdr, tris, light, lerp);
 	
 	VectorCopy(light, currentShadowLight);
 
@@ -159,8 +166,15 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance)
 		
 		if (neighbors->n[0] < 0 || !triangleFacingLight[neighbors->n[0]]) {
 			for (j = 0; j < 3; j++) {
-				v0[j] = shadow_lerped[tris->index_xyz[1]][j];
-				v1[j] = shadow_lerped[tris->index_xyz[0]][j];
+
+				if(lerp) {
+					v0[j] = currentmodel->s_lerped[tris->index_xyz[1]][j];
+					v1[j] = currentmodel->s_lerped[tris->index_xyz[0]][j];
+				}
+				else {
+					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
+					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
+				}
 
 				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
 				v3[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
@@ -184,8 +198,17 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance)
 
 		if (neighbors->n[1] < 0 || !triangleFacingLight[neighbors->n[1]]) {
 			for (j = 0; j < 3; j++) {
-				v0[j] = shadow_lerped[tris->index_xyz[2]][j];
-				v1[j] = shadow_lerped[tris->index_xyz[1]][j];
+
+				if(lerp) {
+
+					v0[j] = currentmodel->s_lerped[tris->index_xyz[2]][j];
+					v1[j] = currentmodel->s_lerped[tris->index_xyz[1]][j];
+				}
+				else {
+					
+					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
+					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
+				}
 
 				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
 				v3[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
@@ -208,8 +231,17 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance)
 
 		if (neighbors->n[2] < 0 || !triangleFacingLight[neighbors->n[2]]) {
 			for (j = 0; j < 3; j++) {
-				v0[j] = shadow_lerped[tris->index_xyz[0]][j];
-				v1[j] = shadow_lerped[tris->index_xyz[2]][j];
+
+				if(lerp) {
+
+					v0[j] = currentmodel->s_lerped[tris->index_xyz[0]][j];
+					v1[j] = currentmodel->s_lerped[tris->index_xyz[2]][j];
+				}
+				else {
+
+					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
+					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
+				}
 
 				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
 				v3[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
@@ -241,9 +273,18 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance)
 			continue;
 	
 			for (j = 0; j < 3; j++) {
-				v0[j] = shadow_lerped[tris->index_xyz[0]][j];
-				v1[j] = shadow_lerped[tris->index_xyz[1]][j];
-				v2[j] = shadow_lerped[tris->index_xyz[2]][j];
+
+				if(lerp) {
+					v0[j] = currentmodel->s_lerped[tris->index_xyz[0]][j];
+					v1[j] = currentmodel->s_lerped[tris->index_xyz[1]][j];
+					v2[j] = currentmodel->s_lerped[tris->index_xyz[2]][j];
+				}
+				else {
+
+					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
+					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
+					v2[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
+				}
 			}
 
 		VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
@@ -258,9 +299,19 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance)
 			// rear cap (with flipped winding order)
 
 			for (j = 0; j < 3; j++) {
-				v0[j] = shadow_lerped[tris->index_xyz[0]][j];
-				v1[j] = shadow_lerped[tris->index_xyz[1]][j];
-				v2[j] = shadow_lerped[tris->index_xyz[2]][j];
+
+				if(lerp) {
+
+					v0[j] = currentmodel->s_lerped[tris->index_xyz[0]][j];
+					v1[j] = currentmodel->s_lerped[tris->index_xyz[1]][j];
+					v2[j] = currentmodel->s_lerped[tris->index_xyz[2]][j];
+				}
+				else {
+
+					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
+					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
+					v2[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
+				}
 
 
 				v0[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
@@ -288,7 +339,7 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance)
 
 }
 
-void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist)
+void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolean lerp)
 {
 	int incr = GL_INCR;
 	int decr = GL_DECR;
@@ -300,14 +351,14 @@ void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist)
 
 	qglCullFace(GL_BACK);
 	qglStencilOp(GL_KEEP, incr, GL_KEEP);
-	BuildShadowVolume(paliashdr, lightdir, projdist);
+	BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
 
 	qglCullFace(GL_FRONT);
 	qglStencilOp(GL_KEEP, decr, GL_KEEP);
-	BuildShadowVolume(paliashdr, lightdir, projdist);
+	BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
 }
 
-void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm)
+void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
 {
 	vec3_t light, light2, temp;
 	int i, o;
@@ -335,8 +386,10 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm)
 	qglEnable(GL_STENCIL_TEST);
 	
 	qglDepthMask(0);
-	qglDepthFunc( GL_LESS );
-	qglStencilFunc( GL_ALWAYS, 0, 0xFF);
+	qglStencilFunc( GL_ALWAYS, 0x0, 0xFF);
+
+	qglEnable(GL_POLYGON_OFFSET_FILL);
+	qglPolygonOffset(0.0f, 100.0f);
 
 	VectorClear(currententity->currentLightPos);
 
@@ -369,7 +422,7 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm)
 	}
 
 	if(dlight)
-		GL_RenderVolumes(paliashdr, light, 15);
+		GL_RenderVolumes(paliashdr, light, 15, lerp);
 
 	for (i=0; i<r_numWorldLights; i++) {
 
@@ -406,7 +459,7 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm)
 		VectorCopy(light, currententity->currentLightPos);
 	}
 	
-	GL_RenderVolumes(paliashdr, light, 15);
+	GL_RenderVolumes(paliashdr, light, 15, lerp);
 
 	qglDisable(GL_STENCIL_TEST);
 	qglColorMask(1,1,1,1);
@@ -415,9 +468,6 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm)
 	qglDepthFunc(GL_LEQUAL);
 
 }
-
-
-
 
 /*==============
 Vis's CullSphere
@@ -487,53 +537,21 @@ void R_DrawShadowVolume(entity_t * e)
 	frame = (daliasframe_t *) ((byte *) paliashdr   + paliashdr->ofs_frames
 						        + currententity->frame *
 							  paliashdr->framesize);
-	verts = v = frame->verts;
 
-	oldframe =
-		(daliasframe_t *) ((byte *) paliashdr + paliashdr->ofs_frames +
-						   currententity->oldframe * paliashdr->framesize);
-	ov = oldframe->verts;
 
-	order = (int *) ((byte *) paliashdr + paliashdr->ofs_glcmds);
 
-	frontlerp = 1.0 - currententity->backlerp;
+	qglPushMatrix();
+	qglDisable(GL_TEXTURE_2D);
+	qglTranslatef(e->origin[0], e->origin[1], e->origin[2]);
+	qglRotatef(e->angles[1], 0, 0, 1);
 
-	// move should be the delta back to the previous frame * backlerp
-	VectorSubtract(currententity->oldorigin, currententity->origin, delta);
-	AngleVectors(currententity->angles, vectors[0], vectors[1],
-				 vectors[2]);
-
-	move[0] = DotProduct(delta, vectors[0]);	// forward
-	move[1] = -DotProduct(delta, vectors[1]);	// left
-	move[2] = DotProduct(delta, vectors[2]);	// up
-
-	VectorAdd(move, oldframe->translate, move);
-
-	for (i = 0; i < 3; i++) {
-		move[i] =
-			currententity->backlerp * move[i] +
-			frontlerp * frame->translate[i];
-		frontv[i] = frontlerp * frame->scale[i];
-		backv[i] = currententity->backlerp * oldframe->scale[i];
-	}
-
-	lerp = shadow_lerped[0];
-
-	GL_LerpVerts(paliashdr->num_xyz, v, ov, verts, lerp, move,
-				 frontv, backv);
-
-	if (gl_shadows->value) {
-		qglPushMatrix();
-		qglDisable(GL_TEXTURE_2D);
-		qglTranslatef(e->origin[0], e->origin[1], e->origin[2]);
-		qglRotatef(e->angles[1], 0, 0, 1);
-
-		GL_DrawAliasShadowVolume(paliashdr, currententity->frame);
+	if(e->frame == 0 && currentmodel->num_frames == 1) 
+		GL_DrawAliasShadowVolume(paliashdr, currententity->frame, false);
+	else
+		GL_DrawAliasShadowVolume(paliashdr, currententity->frame, true);
 		
-		qglEnable(GL_TEXTURE_2D);
-		qglPopMatrix();
-
-	}
+	qglEnable(GL_TEXTURE_2D);
+	qglPopMatrix();
 
 	//this should probably be moved so that we can deal with dynamic vs world and have variable alpha for light amounts
 	if (currententity->flags & RF_TRANSLUCENT)
