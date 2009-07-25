@@ -370,7 +370,6 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
     sint =  sin(-currententity->angles[1] / 180 * M_PI);
 
 	qglColorMask(0,0,0,0);
-	qglClear(GL_STENCIL_BUFFER_BIT);
 	qglEnable(GL_STENCIL_TEST);
 	
 	qglDepthMask(0);
@@ -489,7 +488,7 @@ void R_DrawShadowVolume(entity_t * e)
 	dmdl_t *paliashdr;
 	daliasframe_t *frame;
 	vec3_t tmp;//, water;
-	float rad, alpha;
+	float rad;
 	trace_t r_trace;
 	
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
@@ -532,14 +531,6 @@ void R_DrawShadowVolume(entity_t * e)
 		
 	qglEnable(GL_TEXTURE_2D);
 	qglPopMatrix();
-
-	//this should probably be moved so that we can deal with dynamic vs world and have variable alpha for light amounts
-	if (currententity->flags & RF_TRANSLUCENT)
-		alpha = 0.4 * currententity->alpha; 
-	else
-		alpha = 0.4;
-
-	R_ShadowBlend(alpha); 
 }
 
 
@@ -577,12 +568,6 @@ void GL_DrawShadowTriangles(msurface_t * surf)
         
 }
 
-
-
-
-
-
-
 void R_DrawBModelShadow(void)
 {
 	int i;
@@ -616,7 +601,6 @@ void R_DrawBModelShadow(void)
 	}
 	
 }
-
 
 void R_DrawBrushModelShadow(entity_t * e)
 {
@@ -675,8 +659,6 @@ void R_DrawBrushModelShadow(entity_t * e)
 	qglPopMatrix();
 	
 }
-
-
 
 void R_RecursiveShadowWorldNode(mnode_t * node)
 {
