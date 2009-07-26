@@ -163,6 +163,7 @@ typedef struct glpoly_s
 	int		flags;			// for SURF_UNDERWATER
 
 	vec3_t		center;
+
 } glpoly_t;
 
 typedef struct msurface_s
@@ -200,6 +201,8 @@ typedef struct msurface_s
 	byte		*samples;		// [numstyles*surfsize]
 
 	entity_t	*entity;
+	
+	float	tangentSpaceTransform[3][3];
 
 } msurface_t;
 

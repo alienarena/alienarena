@@ -419,26 +419,14 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean light
 
 	for (; p; p = p->chain)
 	{
-		vec3_t	v01, v02, temp1, temp2, temp3;
-		vec3_t	normal, binormal, tangent;
-		float	s = 0;
-		float	*vec;
-		float	tangentSpaceTransform[3][3];
-
 		// reset pointer and counter
 		VArray = &VArrayVerts[0];
 		VertexCounter = 0;
 
-		_VectorSubtract( p->verts[ 1 ], p->verts[0], v01 );
-		vec = p->verts[0];
-		_VectorCopy(surf->plane->normal, normal); 
+	
 
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
-
-			float currentLength;
-			vec3_t currentNormal;
-
 			// copy in vertex data
 			VArray[0] = v[0];
 			VArray[1] = v[1];
@@ -453,24 +441,6 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean light
 				VArray[5] = v[5];
 				VArray[6] = v[6];
 			}
-
-			//do calculations for normal, tangent and binormal
-			if( i > 1) {
-				_VectorSubtract( p->verts[ i ], p->verts[0], temp1 );
-
-				CrossProduct( temp1, v01, currentNormal );
-				currentLength = VectorLength( currentNormal );
-
-				if( currentLength > s )
-				{
-					s = currentLength;
-					_VectorCopy( currentNormal, normal );
-
-					vec = p->verts[i];
-					_VectorCopy( temp1, v02 );
-
-				}
-			}
 	
 			// nothing else is needed
 			// increment pointer and counter
@@ -481,45 +451,11 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean light
 			VertexCounter++;
 		}
 
-		VectorNormalize( normal ); //we have the largest normal
-
-		tangentSpaceTransform[ 0 ][ 2 ] = normal[ 0 ];
-		tangentSpaceTransform[ 1 ][ 2 ] = normal[ 1 ];
-		tangentSpaceTransform[ 2 ][ 2 ] = normal[ 2 ];
-
-		//now get the tangent
-		s = ( p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ] )
-			* ( vec[ 4 ] - p->verts[ 0 ][ 4 ] );
-		s -= ( vec[ 3 ] - p->verts[ 0 ][ 3 ] )
-			 * ( p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ] );
-		s = 1.0f / s;
-
-		VectorScale( v01, vec[ 4 ] - p->verts[ 0 ][ 4 ], temp1 );
-		VectorScale( v02, p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ], temp2 );
-		_VectorSubtract( temp1, temp2, temp3 );
-		VectorScale( temp3, s, tangent );
-		VectorNormalize( tangent ); 
-
-		tangentSpaceTransform[ 0 ][ 0 ] = tangent[ 0 ];
-		tangentSpaceTransform[ 1 ][ 0 ] = tangent[ 1 ];
-		tangentSpaceTransform[ 2 ][ 0 ] = tangent[ 2 ];
-
-		//now get the binormal
-		VectorScale( v02, p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ], temp1 );
-		VectorScale( v01, vec[ 3 ] - p->verts[ 0 ][ 3 ], temp2 );
-		_VectorSubtract( temp1, temp2, temp3 );
-		VectorScale( temp3, s, binormal );
-		VectorNormalize( binormal ); 
-
-		tangentSpaceTransform[ 0 ][ 1 ] = binormal[ 0 ];
-		tangentSpaceTransform[ 1 ][ 1 ] = binormal[ 1 ];
-		tangentSpaceTransform[ 2 ][ 1 ] = binormal[ 2 ];
-
 		//send these to the shader program
 		glUniformMatrix3fvARB( g_tangentSpaceTransform,
 								1,
 								GL_FALSE,
-								tangentSpaceTransform );
+								surf->tangentSpaceTransform );
 		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
 		glUniform1iARB( g_location_fog, map_fog);
 	
