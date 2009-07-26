@@ -1004,6 +1004,87 @@ void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, 
 
 }
 
+GL_CalcSurfaceNormals(msurface_t *surf) {
+
+	glpoly_t *p = surf->polys;
+	float	*v;	
+	int		i;
+
+	for (; p; p = p->chain)
+	{
+		vec3_t	v01, v02, temp1, temp2, temp3;
+		vec3_t	normal, binormal, tangent;
+		float	s = 0;
+		float	*vec;
+
+		_VectorSubtract( p->verts[ 1 ], p->verts[0], v01 );
+		vec = p->verts[0];
+		_VectorCopy(surf->plane->normal, normal); 
+
+		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
+		{
+
+			float currentLength;
+			vec3_t currentNormal;
+
+			//do calculations for normal, tangent and binormal
+			if( i > 1) {
+				_VectorSubtract( p->verts[ i ], p->verts[0], temp1 );
+
+				CrossProduct( temp1, v01, currentNormal );
+				currentLength = VectorLength( currentNormal );
+
+				if( currentLength > s )
+				{
+					s = currentLength;
+					_VectorCopy( currentNormal, normal );
+
+					vec = p->verts[i];
+					_VectorCopy( temp1, v02 );
+
+				}
+			}
+		}
+
+		VectorNormalize( normal ); //we have the largest normal
+
+		surf->tangentSpaceTransform[ 0 ][ 2 ] = normal[ 0 ];
+		surf->tangentSpaceTransform[ 1 ][ 2 ] = normal[ 1 ];
+		surf->tangentSpaceTransform[ 2 ][ 2 ] = normal[ 2 ];
+
+		//now get the tangent
+		s = ( p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ] )
+			* ( vec[ 4 ] - p->verts[ 0 ][ 4 ] );
+		s -= ( vec[ 3 ] - p->verts[ 0 ][ 3 ] )
+			 * ( p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ] );
+		s = 1.0f / s;
+
+		VectorScale( v01, vec[ 4 ] - p->verts[ 0 ][ 4 ], temp1 );
+		VectorScale( v02, p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ], temp2 );
+		_VectorSubtract( temp1, temp2, temp3 );
+		VectorScale( temp3, s, tangent );
+		VectorNormalize( tangent ); 
+
+		surf->tangentSpaceTransform[ 0 ][ 0 ] = tangent[ 0 ];
+		surf->tangentSpaceTransform[ 1 ][ 0 ] = tangent[ 1 ];
+		surf->tangentSpaceTransform[ 2 ][ 0 ] = tangent[ 2 ];
+
+		//now get the binormal
+		VectorScale( v02, p->verts[ 1 ][ 3 ] - p->verts[ 0 ][ 3 ], temp1 );
+		VectorScale( v01, vec[ 3 ] - p->verts[ 0 ][ 3 ], temp2 );
+		_VectorSubtract( temp1, temp2, temp3 );
+		VectorScale( temp3, s, binormal );
+		VectorNormalize( binormal ); 
+
+		surf->tangentSpaceTransform[ 0 ][ 1 ] = binormal[ 0 ];
+		surf->tangentSpaceTransform[ 1 ][ 1 ] = binormal[ 1 ];
+		surf->tangentSpaceTransform[ 2 ][ 1 ] = binormal[ 2 ];
+	}
+}
+
+
+
+
 
 void GL_BuildPolygonFromSurface(msurface_t *fa);
 void GL_CreateSurfaceLightmap (msurface_t *surf);
@@ -1131,8 +1212,7 @@ void Mod_LoadFaces (lump_t *l)
 				}
 			} while (stage = stage->next);
 		}
-
-	
+		GL_CalcSurfaceNormals(out);	
 	}
 	GL_EndBuildingLightmaps ();
 }
