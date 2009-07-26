@@ -147,6 +147,8 @@ typedef struct entity_s
 
 	vec3_t	currentLightPos;
 
+	vec4_t  s_lerped[MAX_VERTS];
+
 } entity_t;
 
 #define ENTITY_FLAGS  68
