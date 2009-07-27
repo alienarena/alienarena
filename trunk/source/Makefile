@@ -442,6 +442,9 @@ $(BUILDDIR)/ref_gl/r_math.o :	    $(REF_GL_DIR)/r_math.c
 	
 $(BUILDDIR)/ref_gl/r_postprocess.o :	    $(REF_GL_DIR)/r_postprocess.c
 	$(DO_GL_SHLIB_CC)
+	
+$(BUILDDIR)/ref_gl/r_shadows.o:     $(REF_GL_DIR)/r_shadows.c
+	$(DO_GL_SHLIB_CC)
 
 $(BUILDDIR)/ref_gl/r_vlights.o:     $(REF_GL_DIR)/r_vlights.c
 	$(DO_GL_SHLIB_CC)

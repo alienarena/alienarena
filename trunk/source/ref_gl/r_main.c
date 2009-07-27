@@ -22,6 +22,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_script.h"
 #include "vlights.h"
 
+// stencil volumes
+glStencilFuncSeparatePROC			qglStencilFuncSeparate		= NULL;
+glStencilOpSeparatePROC				qglStencilOpSeparate		= NULL;
+glStencilMaskSeparatePROC			qglStencilMaskSeparate		= NULL;
+
 //fragment program extensions
 PFNGLGENPROGRAMSARBPROC             qglGenProgramsARB            = NULL;
 PFNGLDELETEPROGRAMSARBPROC          qglDeleteProgramsARB         = NULL;
@@ -2016,6 +2021,28 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf("...GL_NV_texture_shader not found\n");
 		gl_state.texshaders=false;
 	}
+
+	// openGL 2.0 Unified Separate Stencil
+	gl_state.stencil_wrap = false;
+	if (strstr(gl_config.extensions_string, "GL_EXT_stencil_wrap")) {
+		Com_Printf("...using GL_EXT_stencil_wrap\n");
+		gl_state.stencil_wrap = true;
+	} else {
+		Com_Printf("...GL_EXT_stencil_wrap not found\n");
+		gl_state.stencil_wrap = false;
+	}
+
+	qglStencilFuncSeparate		= (void *)qwglGetProcAddress("glStencilFuncSeparate");
+	qglStencilOpSeparate		= (void *)qwglGetProcAddress("glStencilOpSeparate");
+	qglStencilMaskSeparate		= (void *)qwglGetProcAddress("glStencilMaskSeparate");
+	
+	gl_state.separateStencil = false;
+	if(qglStencilFuncSeparate && qglStencilOpSeparate && qglStencilMaskSeparate){
+			Com_Printf("...using GL_EXT_stencil_two_side\n");
+			gl_state.separateStencil = true;
+	
+	}else
+		Com_Printf("...GL_EXT_stencil_two_side not found\n");
 
 	if (strstr(gl_config.extensions_string, "GL_ARB_fragment_program"))
 	{
