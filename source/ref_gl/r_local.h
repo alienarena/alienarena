@@ -444,6 +444,9 @@ typedef struct
 	qboolean	texshaders;
 	qboolean	fragment_program; 
 	qboolean	glsl_shaders;
+	qboolean	separateStencil;
+	qboolean	stencil_wrap;
+
 } glstate_t;
 
 extern glconfig_t  gl_config;
@@ -504,6 +507,11 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean lightmap);
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
+
+// stencil volumes
+extern glStencilFuncSeparatePROC			qglStencilFuncSeparate;
+extern glStencilOpSeparatePROC				qglStencilOpSeparate;
+extern glStencilMaskSeparatePROC			qglStencilMaskSeparate;
 
 //arb fragment
 extern unsigned int g_water_program_id;

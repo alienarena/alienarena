@@ -326,21 +326,35 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 
 void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolean lerp)
 {
-	int incr = GL_INCR;
-	int decr = GL_DECR;
+	int incr = gl_state.stencil_wrap ? GL_INCR_WRAP_EXT : GL_INCR;
+	int decr = gl_state.stencil_wrap ? GL_DECR_WRAP_EXT : GL_DECR;
 	
 	if(VectorCompare(lightdir, vec3_origin))
 		return;
+
+	if(gl_state.separateStencil) {
 	
-	qglEnable(GL_CULL_FACE);
+		qglDisable(GL_CULL_FACE);
 
-	qglCullFace(GL_BACK);
-	qglStencilOp(GL_KEEP, incr, GL_KEEP);
-	BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
+		qglStencilOpSeparate(GL_BACK, GL_KEEP,  incr, GL_KEEP);
+		qglStencilOpSeparate(GL_FRONT, GL_KEEP, decr, GL_KEEP);
+			
+		BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
+			
+		qglEnable(GL_CULL_FACE);
+	}
+	else {
 
-	qglCullFace(GL_FRONT);
-	qglStencilOp(GL_KEEP, decr, GL_KEEP);
-	BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
+		qglEnable(GL_CULL_FACE);
+
+		qglCullFace(GL_BACK);
+		qglStencilOp(GL_KEEP, incr, GL_KEEP);
+		BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
+
+		qglCullFace(GL_FRONT);
+		qglStencilOp(GL_KEEP, decr, GL_KEEP);
+		BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
+	}
 }
 
 void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
@@ -370,7 +384,11 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
 	qglEnable(GL_STENCIL_TEST);
 	
 	qglDepthMask(0);
-	qglStencilFunc( GL_ALWAYS, 0x0, 0xFF);
+
+	if(gl_state.separateStencil)
+		qglStencilFuncSeparate(GL_FRONT_AND_BACK, GL_ALWAYS, 0x0, 0xFF);
+	else
+		qglStencilFunc( GL_ALWAYS, 0x0, 0xFF);
 
 	qglEnable(GL_POLYGON_OFFSET_FILL);
 	qglPolygonOffset(0.0f, 100.0f);
