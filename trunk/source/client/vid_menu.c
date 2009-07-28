@@ -311,7 +311,7 @@ static void SetHighest( void *unused )
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_shadows", 2);
+	Cvar_SetValue("gl_shadows", 3);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_rtlights", 1);
 	Cvar_SetValue("gl_mirror", 1);

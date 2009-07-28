@@ -2051,7 +2051,7 @@ static void ControlsSetMenuItemValues( void )
 	Cvar_SetValue("r_shaders", ClampCvar(0, 1, r_shaders->value ) );
 	s_options_shaders_box.curvalue		= r_shaders->value;
 
-	Cvar_SetValue("gl_shadows", ClampCvar(0, 2, gl_shadows->value ) );
+	Cvar_SetValue("gl_shadows", ClampCvar(0, 3, gl_shadows->value ) );
 	s_options_shadows_box.curvalue		= gl_shadows->value;
 
 	Cvar_SetValue("gl_dynamic", ClampCvar(0, 2, gl_dynamic->value ) );
@@ -2205,6 +2205,7 @@ void Options_MenuInit( void )
 		"off",
 		"dynamic",
 		"dynamic+world",
+		"shadow volumes",
 		0
 	};
 	static const char *minimap_names[] =

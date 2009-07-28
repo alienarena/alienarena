@@ -430,6 +430,9 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
 
 		wl = &r_worldLights[i];
 
+		if(wl->origin[2] < currententity->origin[2])
+			continue; //don't bother with world lights below the ent, creates undesirable shadows
+
 		VectorSubtract(wl->origin, currententity->origin, temp);
 
 		dist = VectorNormalize(temp);
@@ -550,11 +553,18 @@ void R_DrawShadowVolume(entity_t * e)
 }
 
 
+
+/*theory:
+
+  We just go through the nodes as usual, and calc a sane light source average 
+  like with do with normalmapped meshes.  This would probably be the way to go, and yes, fast.
+
+*/
+
 /*=====================
 World Shadows Triangles - this section is not used yet
 =====================*/
 
-vec3_t sVertexArray[1024];
 static vec3_t modelorg;			// relative to viewpoint
 
 void GL_DrawShadowTriangles(msurface_t * surf)
@@ -564,13 +574,19 @@ void GL_DrawShadowTriangles(msurface_t * surf)
     int i, cv;
        
     cv = surf->polys->numverts;
-   	c_brush_polys++;		
+   	c_brush_polys++;
+
+
+	//get light for this surface, or should be do it by node, if possible?
+	
+	//this is all wrong.  Either look at the Q2GM stuff(probably best idea) or use same algorithms above.
+	//this should be using carmack's reverse or similar
    
 	for (p = surf->polys; p; p = p->chain) {
             v = p->verts[0];
         
             for (i = 0; i < cv; i++, v += VERTEXSIZE)
-                  VectorCopy(v, sVertexArray[i]);
+                  VectorCopy(v, ShadowArray[i]);
         }
         
         if ( qglLockArraysEXT != 0 )
@@ -758,7 +774,7 @@ void R_RecursiveShadowWorldNode(mnode_t * node)
 			continue;			// wrong side
 
 			
-			GL_DrawShadowTriangles(surf);
+			GL_DrawShadowTriangles(surf); //maybe here we get a light val, and yeah, render carmack's reverse tech
 		
 	}
 
@@ -780,7 +796,7 @@ void R_DrawShadowWorld(void)
 		return;
 	
 	qglEnableClientState(GL_VERTEX_ARRAY);
-	qglVertexPointer(3, GL_FLOAT, 0, sVertexArray);
+	qglVertexPointer(3, GL_FLOAT, 0, ShadowArray);
 	
 	qglEnable(GL_STENCIL_TEST);
     qglStencilFunc(GL_NOTEQUAL, 128, 255);
@@ -795,7 +811,7 @@ void R_DrawShadowWorld(void)
 
 	R_RecursiveShadowWorldNode(r_worldmodel->nodes);
 	
-	for (i = 0; i < r_newrefdef.num_entities; i++) {
+/*	for (i = 0; i < r_newrefdef.num_entities; i++) {
 		currententity = &r_newrefdef.entities[i];
 		currentmodel = currententity->model;
 		
@@ -806,7 +822,7 @@ void R_DrawShadowWorld(void)
 			continue;
 
 		R_DrawBrushModelShadow(currententity);
-	}
+	}*/
 	qglDisable(GL_STENCIL_TEST);
 	qglDisableClientState(GL_VERTEX_ARRAY);
 	qglDepthMask(1);
