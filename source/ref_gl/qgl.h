@@ -395,6 +395,11 @@ extern	void ( APIENTRY * qglClientActiveTextureARB)( GLenum );
 
 extern	void ( APIENTRY * qglMultiTexCoord3fvARB)( GLenum, GLfloat * );
 
+//SEPARATE STENCIL
+typedef void (APIENTRY * glStencilFuncSeparatePROC)(GLenum frontfunc, GLenum backfunc, GLint ref, GLuint mask);
+typedef void (APIENTRY * glStencilOpSeparatePROC)(GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass);
+typedef void (APIENTRY * glStencilMaskSeparatePROC)(GLenum face, GLuint mask);
+
 #ifndef __unix__ // FIXME: already have in GL/glx.h (all Unix or FreeBSD?)
 // jitwater - fragment programs (pixel shaders)
 typedef void (APIENTRY * PFNGLPROGRAMSTRINGARBPROC) (GLenum target, GLenum format, GLsizei len, const GLvoid *string);
@@ -435,11 +440,6 @@ typedef void (APIENTRY * PFNGLUNIFORM2FARBPROC) (GLint location, GLfloat v0, GLf
 typedef void (APIENTRY * PFNGLUNIFORM1IARBPROC) (GLint location, GLint v0);
 typedef void (APIENTRY * PFNGLUNIFORM1FARBPROC) (GLint location, GLfloat v0);
 typedef void (APIENTRY * PFNGLUNIFORMMATRIX3FVARBPROC)(GLint location, GLsizei count, GLboolean transpose, GLfloat [3][3]); 
-
-//SEPARATE STENCIL
-typedef void (APIENTRY * glStencilFuncSeparatePROC)(GLenum frontfunc, GLenum backfunc, GLint ref, GLuint mask);
-typedef void (APIENTRY * glStencilOpSeparatePROC)(GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass);
-typedef void (APIENTRY * glStencilMaskSeparatePROC)(GLenum face, GLuint mask);
 
 #endif
 
