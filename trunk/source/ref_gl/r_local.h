@@ -509,9 +509,9 @@ void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
 
 // stencil volumes
-extern glStencilFuncSeparatePROC			qglStencilFuncSeparate;
-extern glStencilOpSeparatePROC				qglStencilOpSeparate;
-extern glStencilMaskSeparatePROC			qglStencilMaskSeparate;
+extern glStencilFuncSeparatePROC	qglStencilFuncSeparate;
+extern glStencilOpSeparatePROC		qglStencilOpSeparate;
+extern glStencilMaskSeparatePROC	qglStencilMaskSeparate;
 
 //arb fragment
 extern unsigned int g_water_program_id;
