@@ -252,6 +252,7 @@ CODERED_OBJS = \
 	$(BUILDDIR)/ref_gl/r_math.o \
 	$(BUILDDIR)/ref_gl/r_postprocess.o \
 	$(BUILDDIR)/ref_gl/r_script.o \
+	$(BUILDDIR)/ref_gl/r_shadows.o \
 	$(BUILDDIR)/ref_gl/r_surf.o \
 	$(BUILDDIR)/ref_gl/r_vlights.o \
 	$(BUILDDIR)/ref_gl/r_varray.o \
