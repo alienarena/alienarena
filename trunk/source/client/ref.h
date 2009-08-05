@@ -145,8 +145,6 @@ typedef struct entity_s
 
 	struct	rscript_t *script;
 
-	vec3_t	currentLightPos;
-
 	vec4_t  s_lerped[MAX_VERTS];
 
 } entity_t;
