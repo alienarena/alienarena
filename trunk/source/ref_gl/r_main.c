@@ -1310,7 +1310,6 @@ void R_CastShadow(void)
 	qglEnableClientState(GL_VERTEX_ARRAY);
 	qglVertexPointer(3, GL_FLOAT, sizeof(vec3_t), ShadowArray);
 
-
 	qglClear(GL_STENCIL_BUFFER_BIT);
 
 	for (i = 0; i < r_newrefdef.num_entities; i++) 
@@ -1458,13 +1457,15 @@ void R_RenderView (refdef_t *fd)
 		R_RenderFlares ();
 
 	R_DrawVegetationSurface ();
-
 	
 	R_DrawEntitiesOnList ();
+
 	R_CastShadow();
+	
+//	R_DrawShadowWorld(); 
+	
 	//Draw v_weaps last after shadows
 	R_DrawViewEntitiesOnList ();
-	//R_DrawShadowWorld(); //done after?  Maybe we want this to cast onto entites, ala id tech 4
 
 	R_DrawSpecialSurfaces();
 

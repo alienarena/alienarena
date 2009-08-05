@@ -452,7 +452,6 @@ typedef struct
 extern glconfig_t  gl_config;
 extern glstate_t   gl_state;
 
-
 // vertex arrays
 
 #define MAX_ARRAY MAX_PARTICLES*4
