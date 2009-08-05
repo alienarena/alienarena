@@ -360,7 +360,7 @@ void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolea
 
 void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
 {
-	vec3_t light, light2, temp;
+	vec3_t light, temp;
 	int i, o;
 	dlight_t *dl;
 	worldLight_t *wl;
@@ -399,8 +399,6 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
 	qglEnable(GL_POLYGON_OFFSET_FILL);
 	qglPolygonOffset(0.0f, 100.0f);
 
-	VectorClear(currententity->currentLightPos);
-
 	for (i = 0; i < (r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); i++, dl++) {
 
 
@@ -420,15 +418,16 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
 		if (dist > dl->intensity*2.0)
 			continue;		// big distance! - but check this so we dont' have sharp shadow loss
 
+		VectorCopy(dl->origin, temp);
+
 		for (o = 0; o < 3; o++)
-			light[o] = -currententity->origin[o] + dl->origin[o];	
+			light[o] = -currententity->origin[o] + temp[o];	
 
 		is = light[0], it = light[1];
 		light[0] = (cost * (is - 0) + sint * (0 - it) + 0);
 		light[1] = (cost * (it - 0) + sint * (is - 0) + 0);
-		light[2] += 8;
-		VectorSubtract(currententity->origin, dl->origin, light2);
-		VectorCopy(light2, currententity->currentLightPos);
+		light[2] += currententity->model->maxs[2]+32;
+	
 		worldlight++;
 		dlight++;
 	}
@@ -462,7 +461,6 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
 		light[0] = (cost * (is - 0) + sint * (0 - it) + 0);
 		light[1] = (cost * (it - 0) + sint * (is - 0) + 0);
 		light[2] += currententity->model->maxs[2] + 56;
-		VectorCopy(light, currententity->currentLightPos);
 
 		worldlight++;
 			
@@ -476,7 +474,6 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
 		light[0] = (cost * (is - 0) + sint * (0 - it) + 0);
 		light[1] = (cost * (it - 0) + sint * (is - 0) + 0);
 		light[2] += 8;
-		VectorCopy(light, currententity->currentLightPos);
 	}
 	
 	GL_RenderVolumes(paliashdr, light, 15, lerp);
