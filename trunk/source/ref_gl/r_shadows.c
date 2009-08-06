@@ -386,21 +386,7 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
 	cost =  cos(-currententity->angles[1] / 180 * M_PI), 
     sint =  sin(-currententity->angles[1] / 180 * M_PI);
 
-	qglColorMask(0,0,0,0);
-	qglEnable(GL_STENCIL_TEST);
-	
-	qglDepthMask(0);
-
-	if(gl_state.separateStencil)
-		qglStencilFuncSeparate(GL_FRONT_AND_BACK, GL_ALWAYS, 0x0, 0xFF);
-	else
-		qglStencilFunc( GL_ALWAYS, 0x0, 0xFF);
-
-	qglEnable(GL_POLYGON_OFFSET_FILL);
-	qglPolygonOffset(0.0f, 100.0f);
-
 	for (i = 0; i < (r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); i++, dl++) {
-
 
 		if ((dl->origin[0] == currententity->origin[0]) &&
 			(dl->origin[1] == currententity->origin[1]) &&
@@ -477,13 +463,6 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
 	}
 	
 	GL_RenderVolumes(paliashdr, light, 15, lerp);
-
-	qglDisable(GL_STENCIL_TEST);
-	qglColorMask(1,1,1,1);
-	
-	qglDepthMask(1);
-	qglDepthFunc(GL_LEQUAL);
-
 }
 
 /*==============
@@ -582,8 +561,9 @@ void GL_DrawShadowTriangles(msurface_t * surf)
 		vec3_t tempVec;
 		float dist;
 
-		VectorSubtract( g_lightOrigin, p->verts[0], tempVec );
-		dist = DotProduct( tempVec, surf->plane->normal ); //this may not be right
+		VectorSubtract( g_lightOrigin, p->center, tempVec );
+		
+		dist = DotProduct( tempVec, surf->plane->normal );
 
 		if( fabs( dist ) < 2.0f ) 
 			return;
@@ -600,31 +580,9 @@ void GL_DrawShadowTriangles(msurface_t * surf)
 			ShadowVerts[i][0] = (v[0] - g_lightOrigin[0]);
 			ShadowVerts[i][1] = (v[1] - g_lightOrigin[1]);
 			ShadowVerts[i][2] = (v[2] - g_lightOrigin[2]);
-
-			VectorNormalize(ShadowVerts[i]);
-			ShadowVerts[i][0] *= 50.0f;
-			ShadowVerts[i][1] *= 50.0f;
-			ShadowVerts[i][2] *= 50.0f;
-			ShadowVerts[i][0] += g_lightOrigin[0];
-			ShadowVerts[i][1] += g_lightOrigin[1];
-			ShadowVerts[i][2] += g_lightOrigin[2];
-		
 		}
 
-		//back cap 
-		v = p->verts[nv];
-		qglBegin(GL_TRIANGLES);
-		for (i = nv-1; i < -1; i--, v -= VERTEXSIZE) 			
-			qglVertex3fv(ShadowVerts[i]);
-		qglEnd();
-			
-		//front cap
-		v = p->verts[0];
-		qglBegin(GL_TRIANGLES);
-		for (i = 0; i < nv; i++, v+=VERTEXSIZE)
-			qglVertex3fv(v);
-		qglEnd();
-
+		//sides
 		v = p->verts[0];
 		qglBegin(GL_TRIANGLE_STRIP);
 		qglVertex3fv(v);
@@ -633,8 +591,21 @@ void GL_DrawShadowTriangles(msurface_t * surf)
 			qglVertex3fv(v);
 			qglVertex3fv(ShadowVerts[i]);
 		}
+		qglEnd();	
+			
+		//front cap
+		v = p->verts[0];
+		qglBegin(GL_POLYGON);
+		for (i = 0; i < nv; i++, v+=VERTEXSIZE)
+			qglVertex3fv(v);
 		qglEnd();
 
+		//back cap 
+		v = p->verts[nv];
+		qglBegin(GL_TRIANGLE_FAN);
+		for (i = nv-1; i < -1; i--, v -= VERTEXSIZE) 			
+			qglVertex3fv(ShadowVerts[i]);
+		qglEnd();
 	}		
         
 }
@@ -720,7 +691,7 @@ void R_RecursiveShadowWorldNode(mnode_t * node)
         if ((surf->flags & SURF_PLANEBACK) != sidebit)
             continue;           // wrong side
 
-            GL_DrawShadowTriangles(surf);
+        GL_DrawShadowTriangles(surf);
     }
 
     // recurse down the back side
@@ -797,6 +768,8 @@ void R_DrawShadowWorld(void)
 	
 	qglDepthMask(1);
 	qglDepthFunc(GL_LEQUAL);
+
+	R_ShadowBlend(0.4);
 
 }
 

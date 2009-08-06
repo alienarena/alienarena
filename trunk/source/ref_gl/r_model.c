@@ -896,7 +896,6 @@ void GL_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float 
 	AngleVectors(surf->plane->normal, NULL, tangent, binormal);
 	VectorNormalize(tangent);
 	VectorNormalize(binormal);
-
 	
 	VectorMA(origin, -32*frand(), tangent, origin);
 
