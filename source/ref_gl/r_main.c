@@ -1312,6 +1312,20 @@ void R_CastShadow(void)
 
 	qglClear(GL_STENCIL_BUFFER_BIT);
 
+	qglColorMask(0,0,0,0);
+	qglEnable(GL_STENCIL_TEST);
+	
+	qglDepthFunc (GL_LESS);
+	qglDepthMask(0);
+
+	qglEnable(GL_POLYGON_OFFSET_FILL);
+	qglPolygonOffset(0.0f, 100.0f);
+
+	if(gl_state.separateStencil)
+		qglStencilFuncSeparate(GL_FRONT_AND_BACK, GL_ALWAYS, 0x0, 0xFF);
+	else
+		qglStencilFunc( GL_ALWAYS, 0x0, 0xFF);
+
 	for (i = 0; i < r_newrefdef.num_entities; i++) 
 	{
 		currententity = &r_newrefdef.entities[i];
@@ -1347,13 +1361,13 @@ void R_CastShadow(void)
 		R_DrawShadowVolume(currententity);
 	}
 
-	R_ShadowBlend(0.4);
-	
 	qglDisableClientState(GL_VERTEX_ARRAY);
 	qglColorMask(1,1,1,1);
 	
 	qglDepthMask(1);
 	qglDepthFunc(GL_LEQUAL);
+	
+	R_ShadowBlend(0.4);
 
 }
 
