@@ -1235,7 +1235,10 @@ void SCR_ExecuteLayoutString (char *s)
 			token = COM_Parse (&s);
 			x = viddef.width/2 - 160*scale + atoi(token)*scale;
 			token = COM_Parse (&s);
-			y = viddef.height/2 - 100*scale + atoi(token)*scale;
+			if(newSBlayout)
+				y = viddef.height/2 - 100*scale + atoi(token)*scale/2;
+			else
+				y = viddef.height/2 - 100*scale + atoi(token)*scale;
 			SCR_AddDirtyPoint (x, y);
 			SCR_AddDirtyPoint (x+159*scale, y+31*scale);
 
@@ -1258,10 +1261,11 @@ void SCR_ExecuteLayoutString (char *s)
 
 			if(newSBlayout) { //new scoreboard layout
 
-				Draw_ColorString (x+36*scale, y+34*scale, ci->name, 1.2);
-				DrawAltString (x+192*scale, y+34*scale, va("%i", score));
-				DrawString (x+224*scale, y+34*scale, va("%i", ping));
-				Draw_ColorString (x+264*scale, y+34*scale, va("^1%i", time), 1.2);
+				Draw_ColorString (x+2*scale, y+34*scale, ci->name, 1.2);
+				DrawAltString (x+176*scale, y+34*scale, va("%i", score));
+				DrawString (x+232*scale, y+34*scale, va("%i", ping));
+				Draw_ColorString (x+280*scale, y+34*scale, va("^1%i", time), 1.2);
+
 			}
 			else {
 
