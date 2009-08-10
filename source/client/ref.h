@@ -109,6 +109,56 @@ typedef struct
 
 #define RDF_BLOOM         4      //BLOOMS
 
+
+#define	MAX_VERTEX_CACHES	4096
+#define MAX_VBO_XYZs		65536
+
+typedef enum {
+	VBO_STATIC,
+	VBO_DYNAMIC
+} vertCacheMode_t;
+
+typedef enum {
+	VBO_STORE_ANY,
+	VBO_STORE_XYZ,
+	VBO_STORE_NORMAL,
+	VBO_STORE_BINORMAL,
+	VBO_STORE_TANGENT
+} vertStoreMode_t;
+
+typedef struct vertCache_s
+{
+	struct vertCache_s	*prev;
+	struct vertCache_s	*next;
+
+	vertCacheMode_t		mode;
+
+	int					size;
+
+	void				*pointer;
+
+	vertStoreMode_t		store;
+	struct model_s		*mod;
+	int					frame;
+	float				backlerp;
+	float				angles[3];
+	float				origin[3];
+	int					mesh;		// 0 for md2
+
+	unsigned			id;
+} vertCache_t;
+
+typedef struct {
+	vertCache_t		*freeVertCache;
+	vertCache_t		activeVertCache;
+	vertCache_t		vertCacheList[MAX_VERTEX_CACHES];
+} vertCacheManager_t;
+
+static vertCacheManager_t	vcm;
+
+vec3_t	vbo_shadow[MAX_VBO_XYZs];
+
+
 typedef struct entity_s
 {
 	struct model_s		*model;			// opaque type outside refresh
@@ -146,6 +196,14 @@ typedef struct entity_s
 	struct	rscript_t *script;
 
 	vec4_t  s_lerped[MAX_VERTS];
+
+	vertCache_t		*vbo_xyz[32];
+	vertCache_t		*vbo_lightp[32];
+	vertCache_t		*vbo_tsh[32];
+	vertCache_t		*vbo_fx[32];
+	vertCache_t		*vbo_normals[32];
+	vertCache_t		*vbo_tangents[32];
+	vertCache_t		*vbo_binormals[32];
 
 } entity_t;
 

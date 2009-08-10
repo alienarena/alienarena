@@ -1937,6 +1937,7 @@ CL_Frame
 ==================
 */
 qboolean send_packet_now = false;  // instant packets, like firing weapons
+extern float	r_frametime;
 
 void CL_Frame (int msec)
 {
@@ -1965,6 +1966,8 @@ void CL_Frame (int msec)
 	cls.frametime = extratime/1000.0;
 	cl.time += extratime;
 	cls.realtime = curtime;
+
+	r_frametime = cls.frametime;
 
 	extratime = 0;
 

@@ -126,6 +126,7 @@ int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3;
 model_t		*r_worldmodel;
 
 float			gldepthmin, gldepthmax;
+float			r_frametime;
 
 glconfig_t		gl_config;
 glstate_t		gl_state;
@@ -789,7 +790,7 @@ static float yawOrRoll;
 void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigned colortable[768])
 {
 	const gparticle_t *p;
-	int				i;
+	int				i, k;
 	vec3_t			corner[4], up, right, pup, pright, dir;
 	float			scale, oldscale;
 	byte			color[4], oldcolor[4];
@@ -804,6 +805,8 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 	qglDepthMask( GL_FALSE );	 	// no z buffering
 	qglEnable( GL_BLEND);
 	GL_TexEnv( GL_MODULATE );
+
+	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
 	for ( p = particles, i=0, oldtype=-1 ; i < num_particles ; i++,p++)
 	{
@@ -833,10 +836,6 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			|| color[0] != oldcolor[0] || color[1] != oldcolor[1]
 			|| color[2] != oldcolor[2] || color[3] != oldcolor[3] || scale != oldscale)
 		{
-			if ( oldtype != -1 )
-			{
-				qglEnd ();
-			}
 			if ( scale != 1 )
 			{
 				VectorScale (vup, scale, up);
@@ -860,7 +859,6 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			}
 			else
 				qglColor4ubv( color );
-			qglBegin ( GL_QUADS );
 		}
 
 		if(p->type == PARTICLE_BEAM) {
@@ -911,7 +909,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 		else if(p->type == PARTICLE_ROTATINGYAW || p->type == PARTICLE_ROTATINGROLL || p->type == PARTICLE_ROTATINGYAWMINUS){  // keep it vertical, and rotate on axis
 			VectorCopy(r_newrefdef.viewangles, v);
 			v[0] = 0;  // keep weather particles vertical by removing pitch
-			yawOrRoll += .5;
+			yawOrRoll += r_frametime*50;
 			if (yawOrRoll > 360)
 				yawOrRoll = 0;
 			if(p->type == PARTICLE_ROTATINGYAW)
@@ -940,21 +938,50 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			corner0[1] + (pup[1]+pright[1]), corner0[2] + (pup[2]+pright[2]));
 		VectorSet ( corner[3],
 			corner0[0] + pright[0], corner0[1] + pright[1], corner0[2] + pright[2]);
+	
 
-		qglTexCoord2f( 1, 1 );
-		qglVertex3fv( corner[0] );
+		//to do - VBO first attempt here, since this is the simplest example of VA in the game
+		VArray = &VArrayVerts[0];
 
-		qglTexCoord2f( 0, 1 );
-		qglVertex3fv ( corner[1] );
+		for(k = 0; k < 4; k++) {
 
-		qglTexCoord2f( 0, 0 );
-		qglVertex3fv ( corner[2] );
+			 VArray[0] = corner[k][0];
+             VArray[1] = corner[k][1];
+             VArray[2] = corner[k][2];
 
-		qglTexCoord2f( 1, 0 );
-		qglVertex3fv ( corner[3] );
+			 switch(k) {
+				case 0:
+					VArray[3] = 1;
+					VArray[4] = 1;
+					break;
+				case 1:
+					VArray[3] = 0;
+					VArray[4] = 1;
+					break;
+				case 2:
+					VArray[3] = 0;
+					VArray[4] = 0;
+					break;
+				case 3:
+					VArray[3] = 1;
+					VArray[4] = 0;
+					break;
+			 }
+
+			 VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+		}
+
+		if(qglLockArraysEXT)						
+			qglLockArraysEXT(0, 4);
+
+		qglDrawArrays(GL_QUADS,0,4);
+				
+		if(qglUnlockArraysEXT)						
+			qglUnlockArraysEXT();
+		
 	}
 
-	qglEnd ();
+	R_KillVArrays ();
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglColor4f( 1,1,1,1 );
@@ -2058,6 +2085,27 @@ int R_Init( void *hinstance, void *hWnd )
 	
 	}else
 		Com_Printf("...GL_EXT_stencil_two_side not found\n");
+
+	gl_state.vbo = false;
+
+	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object")) {
+			
+		qglBindBufferARB = (void *)qwglGetProcAddress("glBindBufferARB");
+		qglDeleteBuffersARB = (void *)qwglGetProcAddress("glDeleteBuffersARB");
+		qglGenBuffersARB = (void *)qwglGetProcAddress("glGenBuffersARB");
+		qglBufferDataARB = (void *)qwglGetProcAddress("glBufferDataARB");
+		qglBufferSubDataARB = (void *)qwglGetProcAddress("glBufferSubDataARB");
+			
+		if (qglGenBuffersARB && qglBindBufferARB && qglBufferDataARB && qglDeleteBuffersARB){
+				
+			Com_Printf("...using GL_ARB_vertex_buffer_object\n");
+			gl_state.vbo = true;
+			R_VCInit();
+		}
+	} else {
+		Com_Printf(S_COLOR_RED "...GL_ARB_vertex_buffer_object not found\n");
+		gl_state.vbo = false;
+	}
 
 	if (strstr(gl_config.extensions_string, "GL_ARB_fragment_program"))
 	{

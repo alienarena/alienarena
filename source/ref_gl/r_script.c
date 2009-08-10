@@ -1357,7 +1357,7 @@ extern int c_grasses;
 grass_t r_grasses[MAX_GRASSES];
 void R_DrawVegetationSurface ( void )
 {
-    int		i;
+    int		i, k;
 	grass_t *grass;
     float   scale;
 	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
@@ -1371,6 +1371,8 @@ void R_DrawVegetationSurface ( void )
 
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs,	0, 0, 0);	
+
+	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
     for (i=0; i<r_numgrasses; i++, grass++) {
 
@@ -1415,8 +1417,6 @@ void R_DrawVegetationSurface ( void )
 				GL_TexEnv( GL_MODULATE );
 			}
 
-			qglBegin ( GL_QUADS );
-
 			VectorSet (corner[0],
 				origin[0] + (up[0] + right[0])*(-0.5),
 				origin[1] + (up[1] + right[1])*(-0.5),
@@ -1446,37 +1446,63 @@ void R_DrawVegetationSurface ( void )
 				corner0[1] + right[1], 
 				corner0[2] + right[2]);
 
-			qglTexCoord2f( 1, 1 );
-			qglVertex3fv( corner[0] );
+			VArray = &VArrayVerts[0];
 
-			qglTexCoord2f( 0, 1 );
-			qglVertex3fv ( corner[1] );
+			for(k = 0; k < 4; k++) {
 
-			qglTexCoord2f( 0, 0 );
-			qglVertex3fv ( corner[2] );
+				VArray[0] = corner[k][0];
+				VArray[1] = corner[k][1];
+				VArray[2] = corner[k][2];
 
-			qglTexCoord2f( 1, 0 );
-			qglVertex3fv ( corner[3] );	
+				switch(k) {
+					case 0:
+						VArray[3] = 1;
+						VArray[4] = 1;
+						break;
+					case 1:
+						VArray[3] = 0;
+						VArray[4] = 1;
+						break;
+					case 2:
+						VArray[3] = 0;
+						VArray[4] = 0;
+						break;
+					case 3:
+						VArray[3] = 1;
+						VArray[4] = 0;
+						break;
+				}
 
-			qglEnd ();
+				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+			}
 
-			qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-			qglColor4f( 1,1,1,1 );
-			qglDisable(GL_BLEND);
-			qglDepthMask( GL_TRUE );	
-			GL_TexEnv( GL_REPLACE );
+			if(qglLockArraysEXT)						
+				qglLockArraysEXT(0, 4);
+
+			qglDrawArrays(GL_QUADS,0,4);
+					
+			if(qglUnlockArraysEXT)						
+				qglUnlockArraysEXT();
 
 			c_grasses++;
 		}
 	}
+
+	R_KillVArrays ();
+
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	qglColor4f( 1,1,1,1 );
+	qglDisable(GL_BLEND);
+	qglDepthMask( GL_TRUE );	
+	GL_TexEnv( GL_REPLACE );
 }
 
 extern int c_beams;
 beam_t r_beams[MAX_BEAMS];
 void R_DrawBeamSurface ( void )
 {
-    int		i;
+    int		i, k;
 	beam_t *beam;
     float   scale;
 	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
@@ -1488,6 +1514,8 @@ void R_DrawBeamSurface ( void )
 
 	VectorSet(mins, 0, 0, 64);
 	VectorSet(maxs, 0, 0, -64);	
+
+	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
     for (i=0; i<r_numbeams; i++, beam++) {
 		 
@@ -1521,8 +1549,6 @@ void R_DrawBeamSurface ( void )
 
 			GL_Bind(beam->texnum);
 
-			qglBegin ( GL_QUADS );
-
 			VectorSet (corner[0],
 				origin[0] + (up[0] + right[0])*(-0.5),
 				origin[1] + (up[1] + right[1])*(-0.5),
@@ -1543,33 +1569,60 @@ void R_DrawBeamSurface ( void )
 				corner0[1] + right[1], 
 				corner0[2] + right[2]);
 
-			qglTexCoord2f( 1, 1 );
-			qglVertex3fv( corner[0] );
+				VArray = &VArrayVerts[0];
 
-			qglTexCoord2f( 0, 1 );
-			qglVertex3fv ( corner[1] );
+			for(k = 0; k < 4; k++) {
 
-			qglTexCoord2f( 0, 0 );
-			qglVertex3fv ( corner[2] );
+				VArray[0] = corner[k][0];
+				VArray[1] = corner[k][1];
+				VArray[2] = corner[k][2];
 
-			qglTexCoord2f( 1, 0 );
-			qglVertex3fv ( corner[3] );	
+				switch(k) {
+					case 0:
+						VArray[3] = 1;
+						VArray[4] = 1;
+						break;
+					case 1:
+						VArray[3] = 0;
+						VArray[4] = 1;
+						break;
+					case 2:
+						VArray[3] = 0;
+						VArray[4] = 0;
+						break;
+					case 3:
+						VArray[3] = 1;
+						VArray[4] = 0;
+						break;
+				}
 
-			qglEnd ();
+				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+			}
 
-			qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-			qglColor4f( 1,1,1,1 );
-			qglDisable(GL_BLEND);
-			qglDepthMask( GL_TRUE );	
-			GL_TexEnv( GL_REPLACE );
+			if(qglLockArraysEXT)						
+				qglLockArraysEXT(0, 4);
+
+			qglDrawArrays(GL_QUADS,0,4);
+					
+			if(qglUnlockArraysEXT)						
+				qglUnlockArraysEXT();
 
 			c_beams++;
 		}
 	}
+
+	R_KillVArrays ();
+
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	qglColor4f( 1,1,1,1 );
+	qglDisable(GL_BLEND);
+	qglDepthMask( GL_TRUE );	
+	GL_TexEnv( GL_REPLACE );
 }
 
 
+//to do - rewrite using vertex arrays
 
 //This is the shader drawing routine for bsp surfaces - it will draw on top of the 
 //existing texture.  

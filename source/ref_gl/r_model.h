@@ -333,6 +333,8 @@ typedef struct model_s
 	fstvert_t	*st;
 	neighbors_t *neighbors;
 
+	vertCache_t	*vbo_st;
+
 } model_t;
 
 //============================================================================

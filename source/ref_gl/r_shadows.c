@@ -561,6 +561,7 @@ void GL_DrawShadowTriangles(msurface_t * surf)
 		vec3_t tempVec;
 		float dist;
 
+		//I think this facing light section is wrong
 		VectorSubtract( g_lightOrigin, p->center, tempVec );
 		
 		dist = DotProduct( tempVec, surf->plane->normal );
