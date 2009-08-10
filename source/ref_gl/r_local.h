@@ -295,6 +295,8 @@ void R_FB_InitTextures(void);
 
 //VBO
 void R_VCInit(void);
+vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent, int mesh);
+void R_VCShutdown(void);
 
 //BLOOMS[start]
 //

@@ -613,6 +613,8 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
             tmp_count=count;
             tmp_order=order;
 
+			R_InitVArrays (VERT_COLOURED_TEXTURED);
+
             while (stage)
             {
                 count=tmp_count;
@@ -655,8 +657,6 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 {
                     GLSTATE_DISABLE_ALPHATEST
                 }
-             
-                R_InitVArrays (VERT_COLOURED_TEXTURED);
                 
                 do
                 {
@@ -688,6 +688,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                         for (k=0;k<3;k++)
                         normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
                     }
+
                     VectorNormalize ( normal );
 
                     if (stage->envmap)
@@ -735,6 +736,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                         VArray[7] = blue;
                         VArray[8] = nAlpha;
                     }
+
                     // increment pointer and counter
                     VArray += VertexSizes[VERT_COLOURED_TEXTURED];
                     order += 3;
@@ -1234,8 +1236,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 										
 				GL_EnableMultitexture( true );
 			
-				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-				
 				glUseProgramObjectARB( g_meshprogramObj );
 				
 				glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
@@ -1270,14 +1270,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 				glUniform1iARB( g_location_meshFog, map_fog);
 			}
-			else {
-				
-				if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
-					R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
-				else
-					R_InitVArrays (VERT_COLOURED_TEXTURED);
-			}
-				
+						
 			//note - here is where we'd bypass if using vbo(we need verts, normal and texcoords).  Do this only for normalmapped meshes
 			for (i=0; i<paliashdr->num_tris; i++)
 			{
@@ -1398,6 +1391,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 							VArray[8] = nAlpha;	
 						}
 					}
+
+		/*			if(gl_state.vbo) {
+
+						vert_array[va][0] = VArray[0];
+						vert_array[va][1] = VArray[1];
+						vert_array[va][2] = VArray[2];
+					}*/
 					
 					// increment pointer and counter
 					if(stage->normalmap) 
@@ -1408,6 +1408,23 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 					va++;
 				} 
+			}
+
+/*			if(gl_state.vbo) {
+
+				currententity->vbo_xyz[0] = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &vert_array, VBO_STORE_XYZ, currententity, 0);
+			}				  
+skipLoad:*/
+			if(stage->normalmap) {
+			
+				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+			}
+			else {
+				
+				if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
+					R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
+				else
+					R_InitVArrays (VERT_COLOURED_TEXTURED);
 			}
 
 			if(stage->normalmap) 

@@ -579,6 +579,8 @@ void CL_Download_f (void);
 extern	int			gun_frame;
 extern	struct model_s	*gun_model;
 
+extern qboolean need_free_vbo;
+
 qboolean loadingMessage;
 char loadingMessages[5][96];
 float loadingPercent;
