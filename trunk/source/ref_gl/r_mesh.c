@@ -86,6 +86,9 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
 
     lscale = 3.0;
 
+	VectorSubtract(currententity->origin, lightspot, lightdir);
+	VectorNormalize ( lightdir );
+
     if (gl_rtlights->value)
     {
         l = lscale * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
@@ -224,6 +227,7 @@ void GL_GetLightVals()
 		
 			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 			
+			//to do - fix me, we have better code for this now
 			if(r_trace.fraction == 1.0) { //this section is not perfect, but it works for now
 				if(dist < 100) {
 					VectorCopy(dl->origin, temp);
@@ -418,9 +422,6 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
             return;
         }
     }
-
-    VectorSubtract(currententity->origin, lightspot, lightdir);
-        VectorNormalize ( lightdir );
 
     qglEnableClientState( GL_COLOR_ARRAY );
 
@@ -965,9 +966,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 		}
 	}
 
-	VectorSubtract(currententity->origin, lightspot, lightdir);
-	VectorNormalize ( lightdir );
-
 	qglEnableClientState( GL_COLOR_ARRAY );
 
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
@@ -1280,6 +1278,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					R_InitVArrays (VERT_COLOURED_TEXTURED);
 			}
 				
+			//note - here is where we'd bypass if using vbo(we need verts, normal and texcoords).  Do this only for normalmapped meshes
 			for (i=0; i<paliashdr->num_tris; i++)
 			{
 				for (j=0; j<3; j++)
@@ -1365,7 +1364,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						VArray[6] = ot2;
 					}
 			
-					{
+					if(!stage->normalmap) {
+
 						float red = 1, green = 1, blue = 1, nAlpha;
 
 						if(lerped) 
@@ -1375,7 +1375,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 								calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
 
-						if (stage->lightmap && !stage->normalmap) { //no need for normalmaps, done in GLSL
+						if (stage->lightmap) { //no need for normalmaps, done in GLSL
 							if(lerped)
 								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 							else
@@ -1385,22 +1385,20 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 							blue = lightcolor[2];						
 						}
 
-						if(!stage->normalmap) {
-							
-							if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
-								VArray[7] = red;
-								VArray[8] = green;
-								VArray[9] = blue;
-								VArray[10] = nAlpha;
-							}
-							else {
-								VArray[5] = red;
-								VArray[6] = green;
-								VArray[7] = blue;
-								VArray[8] = nAlpha;	
-							}
+						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
+							VArray[7] = red;
+							VArray[8] = green;
+							VArray[9] = blue;
+							VArray[10] = nAlpha;
+						}
+						else {
+							VArray[5] = red;
+							VArray[6] = green;
+							VArray[7] = blue;
+							VArray[8] = nAlpha;	
 						}
 					}
+					
 					// increment pointer and counter
 					if(stage->normalmap) 
 						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
