@@ -37,12 +37,15 @@ grass_t r_grasses[MAX_GRASSES];
 int r_numbeams;
 beam_t	r_beams[MAX_BEAMS];
 
+qboolean need_free_vbo;
+
 //=============
 extern cvar_t *cl_showPlayerNames;
 extern cvar_t *name;
 extern char map_music[128];
 extern cvar_t *background_music;
 extern qboolean IsVisible(vec3_t org1,vec3_t org2);
+extern void R_VCFreeFrame(void);
 
 cvar_t		*crosshair;
 cvar_t		*cl_testparticles;
@@ -908,6 +911,9 @@ void V_RenderView( float stereo_separation )
 	}
 
 	cl.refdef.rdflags |= RDF_BLOOM;   //BLOOMS
+
+	R_VCFreeFrame();
+	need_free_vbo = false;
 
 	R_RenderFrame (&cl.refdef);
 	if (cl_stats->value)

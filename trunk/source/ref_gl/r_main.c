@@ -2550,6 +2550,8 @@ void R_Shutdown (void)
 	Cmd_RemoveCommand ("imagelist");
 	Cmd_RemoveCommand ("gl_strings");
 
+	R_VCShutdown();
+
 	Mod_FreeAll ();
 
 	GL_ShutdownImages ();
