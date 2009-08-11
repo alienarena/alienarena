@@ -143,8 +143,6 @@ typedef struct vertCache_s
 	float				backlerp;
 	float				angles[3];
 	float				origin[3];
-	int					mesh;		// 0 for md2
-
 	unsigned			id;
 } vertCache_t;
 
@@ -197,13 +195,9 @@ typedef struct entity_s
 
 	vec4_t  s_lerped[MAX_VERTS];
 
-	vertCache_t		*vbo_xyz[32];
-	vertCache_t		*vbo_lightp[32];
-	vertCache_t		*vbo_tsh[32];
-	vertCache_t		*vbo_fx[32];
-	vertCache_t		*vbo_normals[32];
-	vertCache_t		*vbo_tangents[32];
-	vertCache_t		*vbo_binormals[32];
+	vertCache_t		*vbo_xyz;
+	vertCache_t		*vbo_lightp;
+	vertCache_t		*vbo_normals;
 
 } entity_t;
 

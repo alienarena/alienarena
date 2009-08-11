@@ -1857,7 +1857,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 		if (l>3*MAX_VBO_XYZs)
 			Com_Error(ERR_FATAL, "Temporary buffer overflow\n");
 
-		mod->vbo_st = R_VCLoadData(VBO_STATIC, l*sizeof(float), &vbo_shadow, VBO_STORE_ANY, 0, 0);
+		mod->vbo_st = R_VCLoadData(VBO_STATIC, l*sizeof(float), &vbo_shadow, VBO_STORE_ANY, NULL);
 		GL_BindVBO(NULL);
 	}
 
