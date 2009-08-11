@@ -1441,7 +1441,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				currententity->vbo_xyz = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &vert_array, VBO_STORE_XYZ, currententity);
 			//	if(!stage->normalmap)
 			//		currententity->vbo_lightp = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec4_t), &col_array, VBO_STORE_ANY, currententity);
-				currententity->vbo_normals = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &norm_array, VBO_STORE_ANY, currententity);
+				currententity->vbo_normals = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &norm_array, VBO_STORE_NORMAL, currententity);
 			}				
 skipLoad:			
 			
@@ -1514,6 +1514,7 @@ done:
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
 
+	qglDisableClientState( GL_NORMAL_ARRAY);
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
