@@ -1275,15 +1275,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			}
 				
 			//some other todo's here - first, non-bumpmapped meshes are not lit correctly.
-			
-			if (gl_state.vbo && use_vbo)
-			{
-				currententity->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
-				if (currententity->vbo_xyz) {
-					//Com_Printf("Skipping");
-					goto skipLoad;
-				}
-			}
+		
+//			if (gl_state.vbo && use_vbo) //this may not be needed really
+//			{
+//				currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
+//				if (currentmodel->vbo_xyz) {
+//					goto skipLoad;
+//				}
+//			}
 
 			for (i=0; i<paliashdr->num_tris; i++)
 			{
@@ -1383,7 +1382,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 								calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
 
-						if (stage->lightmap) { //no need for normalmaps, done in GLSL
+						if (stage->lightmap) { 
 							if(lerped)
 								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 							else
@@ -1438,17 +1437,17 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 			if(gl_state.vbo && use_vbo) { 
 
-				currententity->vbo_xyz = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &vert_array, VBO_STORE_XYZ, currententity);
+				currentmodel->vbo_xyz = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &vert_array, VBO_STORE_XYZ, currententity);
 			//	if(!stage->normalmap)
 			//		currententity->vbo_lightp = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec4_t), &col_array, VBO_STORE_ANY, currententity);
-				currententity->vbo_normals = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &norm_array, VBO_STORE_NORMAL, currententity);
+				currentmodel->vbo_normals = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &norm_array, VBO_STORE_NORMAL, currententity);
 			}				
-skipLoad:			
+//skipLoad:			
 			
 			if(gl_state.vbo && use_vbo) {
 
 				qglEnableClientState( GL_VERTEX_ARRAY );
-				GL_BindVBO(currententity->vbo_xyz);
+				GL_BindVBO(currentmodel->vbo_xyz);
 				qglVertexPointer(3, GL_FLOAT, 0, 0);
 
 				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -1462,7 +1461,7 @@ skipLoad:
 			//	}
 
 				qglEnableClientState( GL_NORMAL_ARRAY );
-				GL_BindVBO(currententity->vbo_normals);
+				GL_BindVBO(currentmodel->vbo_normals);
 				qglNormalPointer(GL_FLOAT, 0, 0);
 			}
 			else {

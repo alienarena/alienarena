@@ -3075,7 +3075,7 @@ void CL_BFGExplosionParticles (vec3_t org)
 	cparticle_t	*p;
 
 	//for glsl framebuffer distortion effects
-	if(!r_drawing_fbeffect) {
+	if(!r_drawing_fbeffect && cl_explosiondist->value) {
 		r_fbFxType = 1; //EXPLOSION
 		r_drawing_fbeffect = true;
 		VectorCopy(org, r_explosionOrigin);

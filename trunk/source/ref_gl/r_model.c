@@ -1832,7 +1832,6 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 		VectorCopy( tmp, mod->bbox[i] );
 	}
-
 	
 	if (gl_state.vbo)
 	{
