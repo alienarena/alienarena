@@ -1407,16 +1407,14 @@ void R_DrawVegetationSurface ( void )
 					
 			GL_Bind(grass->texnum);
 
-			if(!grass->type) { //if not leaves, modulate by light values
-				if(gl_dynamic->value)
-					R_LightPoint (origin, lightLevel, true);
-				else
-					R_LightPoint (origin, lightLevel, false);
-				VectorScale(lightLevel, 2.0, lightLevel);
-				qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
-				GL_TexEnv( GL_MODULATE );
-			}
-
+			if(gl_dynamic->value)
+				R_LightPoint (origin, lightLevel, true);
+			else
+				R_LightPoint (origin, lightLevel, false);
+			VectorScale(lightLevel, 2.0, lightLevel);
+			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
+			GL_TexEnv( GL_MODULATE );
+			
 			VectorSet (corner[0],
 				origin[0] + (up[0] + right[0])*(-0.5),
 				origin[1] + (up[1] + right[1])*(-0.5),

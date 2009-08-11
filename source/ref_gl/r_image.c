@@ -1219,6 +1219,9 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, q
         qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max); 
         qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max); 
     }     
+
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_anisotropic->value);
+
     return (samples == gl_alpha_format); 
 } 
 

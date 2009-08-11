@@ -171,6 +171,10 @@ extern	cvar_t	*vid_gamma;
 extern  cvar_t	*vid_contrast;
 
 extern	cvar_t	*intensity;
+
+extern cvar_t *r_anisotropic;
+extern cvar_t *r_ext_max_anisotropy;
+
 // Vic - begin
 
 extern cvar_t	*r_overbrightbits;
@@ -448,7 +452,6 @@ typedef struct
 	qboolean	alpha_test;
 	qboolean	blend;
 	qboolean	texgen;
-	qboolean	texshaders;
 	qboolean	fragment_program; 
 	qboolean	glsl_shaders;
 	qboolean	separateStencil;
