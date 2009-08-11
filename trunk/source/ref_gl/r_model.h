@@ -333,10 +333,11 @@ typedef struct model_s
 	fstvert_t	*st;
 	neighbors_t *neighbors;
 
-	vertCache_t		*vbo_st;
-	vertCache_t		*vbo_xyz;
-	vertCache_t		*vbo_lightp;
-	vertCache_t		*vbo_normals;
+	//vbo
+	vertCache_t	*vbo_st;
+	vertCache_t	*vbo_xyz;
+	vertCache_t	*vbo_color;
+	vertCache_t	*vbo_normals;
 
 } model_t;
 

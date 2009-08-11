@@ -150,7 +150,7 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 }
 
 
-vertCache_t *R_VCCreate(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent, int mesh)
+vertCache_t *R_VCCreate(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent)
 {
 	vertCache_t	*cache;
 

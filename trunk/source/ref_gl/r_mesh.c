@@ -1274,15 +1274,16 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				glUniform1iARB( g_location_meshFog, map_fog);
 			}
 				
-			//some other todo's here - first, non-bumpmapped meshes are not lit correctly.
+			//some other todo's here - non-bumpmapped meshes are not lit correctly.
 		
-//			if (gl_state.vbo && use_vbo) //this may not be needed really
-//			{
-//				currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
-//				if (currentmodel->vbo_xyz) {
-//					goto skipLoad;
-//				}
-//			}
+	/*		if (gl_state.vbo && use_vbo) 
+			{
+				currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
+				if (currentmodel->vbo_xyz) {
+					//Com_Printf("skipped\n");
+					goto skipLoad;
+				}
+			}*/
 
 			for (i=0; i<paliashdr->num_tris; i++)
 			{
