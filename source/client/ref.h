@@ -156,7 +156,6 @@ static vertCacheManager_t	vcm;
 
 vec3_t	vbo_shadow[MAX_VBO_XYZs];
 
-
 typedef struct entity_s
 {
 	struct model_s		*model;			// opaque type outside refresh
@@ -194,10 +193,6 @@ typedef struct entity_s
 	struct	rscript_t *script;
 
 	vec4_t  s_lerped[MAX_VERTS];
-
-	vertCache_t		*vbo_xyz;
-	vertCache_t		*vbo_lightp;
-	vertCache_t		*vbo_normals;
 
 } entity_t;
 
