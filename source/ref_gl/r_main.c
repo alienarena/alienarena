@@ -2062,12 +2062,10 @@ int R_Init( void *hinstance, void *hWnd )
 
 		qglGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
 	
-		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_NOSET );
+		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE );
 		Cvar_SetValue("r_ext_max_anisotropy", max_aniso);
 
-		Com_Printf("Max: %i\n", r_ext_max_anisotropy->integer);
-		
-		r_anisotropic = Cvar_Get("r_anisotropic", "4", CVAR_ARCHIVE);
+		r_anisotropic = Cvar_Get("r_anisotropic", "16", CVAR_ARCHIVE);
 		if (r_anisotropic->value >= r_ext_max_anisotropy->value)
 			Cvar_SetValue("r_anisotropic", r_ext_max_anisotropy->value);
 
