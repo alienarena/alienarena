@@ -254,6 +254,9 @@ cvar_t	*vid_gamma;
 cvar_t  *vid_contrast;
 cvar_t	*vid_ref;
 
+cvar_t *r_anisotropic;
+cvar_t *r_ext_max_anisotropy;
+
 cvar_t	*r_shaders;
 cvar_t	*r_bloom;
 cvar_t	*r_lensflare;
@@ -1765,6 +1768,7 @@ int R_Init( void *hinstance, void *hWnd )
     int		nResult;
     char	str[4096];
 	int		len;
+	int		aniso_level, max_aniso;
 
 	for ( j = 0; j < 256; j++ )
 	{
@@ -2053,15 +2057,35 @@ int R_Init( void *hinstance, void *hWnd )
 		}
 	}
 
-	if ( strstr( gl_config.extensions_string, "GL_NV_texture_shader" ) )
-	{
-		Com_Printf("...using GL_NV_texture_shader\n");
-		gl_state.texshaders=true;
-	}
-	else
-	{
-		Com_Printf("...GL_NV_texture_shader not found\n");
-		gl_state.texshaders=false;
+
+	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic")) {
+
+		qglGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
+	
+		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_NOSET );
+		Cvar_SetValue("r_ext_max_anisotropy", max_aniso);
+
+		Com_Printf("Max: %i\n", r_ext_max_anisotropy->integer);
+		
+		r_anisotropic = Cvar_Get("r_anisotropic", "4", CVAR_ARCHIVE);
+		if (r_anisotropic->value >= r_ext_max_anisotropy->value)
+			Cvar_SetValue("r_anisotropic", r_ext_max_anisotropy->value);
+
+		aniso_level = r_anisotropic->value;
+
+		if (r_anisotropic->value == 1) {
+			Com_Printf(S_COLOR_YELLOW"...ignoring GL_EXT_texture_filter_anisotropic\n");
+
+		} else {
+
+			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n   ["S_COLOR_GREEN"%i"S_COLOR_WHITE" max] ["S_COLOR_GREEN"%i" S_COLOR_WHITE" selected]\n",
+					   max_aniso, aniso_level);
+
+		}
+	} else {
+		Com_Printf(S_COLOR_RED "...GL_EXT_texture_filter_anisotropic not found\n");
+		r_anisotropic = Cvar_Get("r_anisotropic", "0", CVAR_ARCHIVE);
+		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE);
 	}
 
 	// openGL 2.0 Unified Separate Stencil
