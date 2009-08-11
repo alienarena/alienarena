@@ -1839,6 +1839,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 		float	*map;
 
 		mod->vbo_st = NULL;
+		mod->vbo_xyz = NULL;
 
 		tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
 		map = (float*) vbo_shadow;	
@@ -1856,7 +1857,9 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 		if (l>3*MAX_VBO_XYZs)
 			Com_Error(ERR_FATAL, "Temporary buffer overflow\n");
 
+
 		mod->vbo_st = R_VCLoadData(VBO_STATIC, l*sizeof(float), &vbo_shadow, VBO_STORE_ANY, NULL);
+		//mod->vbo_xyz = R_VCLoadData(VBO_STATIC, paliashdr->num_xyz*sizeof(vec3_t), &mod->r_mesh_verts, VBO_STORE_ANY, NULL);
 		GL_BindVBO(NULL);
 	}
 
