@@ -62,7 +62,7 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent, int mesh)
 		{
 			next = cache->next;
 			if (backlerp)
-			{	// анимированным моделям ОПАСНО шарить один и тот же VBO-кэш, т.к. они могут иметь и разные oldangles, oldorigin и oldframe. Отсюда следует, что геометрия будет немного отличаться. Поэтому данное кэширование будет действовать в пределах одного entity в пределах одного кадра. Выигрыш заметнее в местах с многими источниками света.
+			{	//  oldorigin и oldframe.
 				if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->mesh == mesh && cache->backlerp == backlerp && cache->angles[0] == angles[0] && cache->angles[1] == angles[1] && cache->angles[2] == angles[2] && cache->origin[0] == orgs[0] && cache->origin[1] == orgs[1] && cache->origin[2] == orgs[2])
 				{	// already cached!
 					GL_BindVBO(cache);
@@ -70,7 +70,7 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent, int mesh)
 				}
 			}
 			else
-			{	// для статичных моделей всё проще...
+			{	
 				if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->mesh == mesh && cache->angles[0] == angles[0] && cache->angles[1] == angles[1] && cache->angles[2] == angles[2])
 				{	// already cached!
 					GL_BindVBO(cache);
@@ -196,7 +196,6 @@ void R_VCInit()
 	for (i=0; i<MAX_VERTEX_CACHES-1; i++)
 		vcm.vertCacheList[i].next = &vcm.vertCacheList[i+1];
 
-	// Создадим хэндлы для всех VBO
 	for (i=0; i<MAX_VERTEX_CACHES; i++)
 		qglGenBuffersARB(1, &vcm.vertCacheList[i].id);
 }
@@ -205,7 +204,6 @@ void R_VCInit()
 ===============
 R_VCFreeFrame
 
-Вызывается ПЕРЕД рисование кадра со всеми зеркалами и ПОСЛЕ определения всех entity.
 Deletes all non-STATIC buffers from the previous frame.
 PS: VBO_STATIC using for ST texture/skin coordinates and static shadow volumes
 ===============
@@ -239,7 +237,6 @@ void R_VCShutdown()
 		R_VCFree(cache);
 	}
 
-	// Освободим хэндлы всех VBO
 	for (i=0; i<MAX_VERTEX_CACHES; i++)
 		qglDeleteBuffersARB(1, &vcm.vertCacheList[i].id);
 }
