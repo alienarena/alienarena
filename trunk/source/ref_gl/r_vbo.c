@@ -36,7 +36,7 @@ void GL_BindVBO(vertCache_t *cache)
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }
 
-vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent, int mesh)
+vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent)
 {
 	model_t		*mod;
 	int			frame;
@@ -63,7 +63,7 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent, int mesh)
 			next = cache->next;
 			if (backlerp)
 			{	//  oldorigin è oldframe.
-				if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->mesh == mesh && cache->backlerp == backlerp && cache->angles[0] == angles[0] && cache->angles[1] == angles[1] && cache->angles[2] == angles[2] && cache->origin[0] == orgs[0] && cache->origin[1] == orgs[1] && cache->origin[2] == orgs[2])
+				if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->backlerp == backlerp && cache->angles[0] == angles[0] && cache->angles[1] == angles[1] && cache->angles[2] == angles[2] && cache->origin[0] == orgs[0] && cache->origin[1] == orgs[1] && cache->origin[2] == orgs[2])
 				{	// already cached!
 					GL_BindVBO(cache);
 					return cache;
@@ -71,7 +71,7 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent, int mesh)
 			}
 			else
 			{	
-				if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->mesh == mesh && cache->angles[0] == angles[0] && cache->angles[1] == angles[1] && cache->angles[2] == angles[2])
+				if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->angles[0] == angles[0] && cache->angles[1] == angles[1] && cache->angles[2] == angles[2])
 				{	// already cached!
 					GL_BindVBO(cache);
 					return cache;
@@ -90,7 +90,7 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent, int mesh)
 		for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
 		{
 			next = cache->next;
-			if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->mesh == mesh && cache->backlerp == backlerp)
+			if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->backlerp == backlerp)
 			{	// already cached!
 				GL_BindVBO(cache);
 				return cache;
@@ -102,7 +102,7 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent, int mesh)
 }
 
 
-vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent, int mesh)
+vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent)
 {
 	vertCache_t *cache;
 
@@ -117,7 +117,6 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 	if (store != VBO_STORE_ANY)
 	{
 		cache->mod = ent->model;
-		cache->mesh = mesh;
 		cache->frame = ent->frame;
 		cache->backlerp = ent->backlerp;
 		cache->angles[0] = ent->angles[0];
@@ -155,11 +154,11 @@ vertCache_t *R_VCCreate(vertCacheMode_t mode, int size, void *buffer, vertStoreM
 {
 	vertCache_t	*cache;
 
-	cache = R_VCFindCache(store, ent, mesh);
+	cache = R_VCFindCache(store, ent);
 	if (cache)
 		return cache;
 
-	return R_VCLoadData(mode, size, buffer, store, ent, mesh);
+	return R_VCLoadData(mode, size, buffer, store, ent);
 }
 
 

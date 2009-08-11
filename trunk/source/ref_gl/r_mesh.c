@@ -1278,10 +1278,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			
 			if (gl_state.vbo && use_vbo)
 			{
-				currententity->vbo_xyz[0] = R_VCFindCache(VBO_STORE_XYZ, currententity, 0);
-				if (currententity->vbo_xyz[0]) {
+				currententity->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
+				if (currententity->vbo_xyz) {
 					//Com_Printf("Skipping");
-					//to do - shouldn't this be skipping in the case of static meshes??  double check
 					goto skipLoad;
 				}
 			}
@@ -1414,10 +1413,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						vert_array[va][1] = VArray[1];
 						vert_array[va][2] = VArray[2];
 
-						col_array[va][0] = VArray[5];
-						col_array[va][1] = VArray[6];
-						col_array[va][2] = VArray[7];
-						col_array[va][3] = VArray[8];
+						//if(!stage->normalmap) {
+						//	col_array[va][0] = VArray[5];
+						//	col_array[va][1] = VArray[6];
+						//	col_array[va][2] = VArray[7];
+						//	col_array[va][3] = VArray[8];
+						//}
 
 						norm_array[va][0] = normal[0];
 						norm_array[va][1] = normal[1];
@@ -1435,30 +1436,33 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				} 
 			}
 
-			if(gl_state.vbo && use_vbo) {
+			if(gl_state.vbo && use_vbo) { 
 
-				currententity->vbo_xyz[0] = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &vert_array, VBO_STORE_XYZ, currententity, 0);
-				currententity->vbo_lightp[0] = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec4_t), &col_array, VBO_STORE_ANY, currententity, 0);
-				currententity->vbo_normals[0] = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &norm_array, VBO_STORE_ANY, currententity, 0);
+				currententity->vbo_xyz = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &vert_array, VBO_STORE_XYZ, currententity);
+			//	if(!stage->normalmap)
+			//		currententity->vbo_lightp = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec4_t), &col_array, VBO_STORE_ANY, currententity);
+				currententity->vbo_normals = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &norm_array, VBO_STORE_ANY, currententity);
 			}				
 skipLoad:			
 			
 			if(gl_state.vbo && use_vbo) {
 
 				qglEnableClientState( GL_VERTEX_ARRAY );
-				GL_BindVBO(currententity->vbo_xyz[0]);
+				GL_BindVBO(currententity->vbo_xyz);
 				qglVertexPointer(3, GL_FLOAT, 0, 0);
 
 				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 				GL_BindVBO(currentmodel->vbo_st);
 				qglTexCoordPointer(2, GL_FLOAT, 0, 0);	
 				
-				qglEnableClientState( GL_COLOR_ARRAY );
-				GL_BindVBO(currententity->vbo_lightp[0]);
-				qglColorPointer (4, GL_FLOAT, 0, 0);
+			//	if(!stage->normalmap) {
+			//		qglEnableClientState( GL_COLOR_ARRAY );
+			//		GL_BindVBO(currententity->vbo_lightp);
+			//		qglColorPointer (4, GL_FLOAT, 0, 0);
+			//	}
 
 				qglEnableClientState( GL_NORMAL_ARRAY );
-				GL_BindVBO(currententity->vbo_normals[0]);
+				GL_BindVBO(currententity->vbo_normals);
 				qglNormalPointer(GL_FLOAT, 0, 0);
 			}
 			else {
@@ -1516,7 +1520,7 @@ done:
 	R_KillVArrays ();
 
 	if (gl_state.vbo)
-		GL_BindVBO(0);
+		GL_BindVBO(NULL);
 
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
 		qglEnable( GL_TEXTURE_2D );
