@@ -1758,8 +1758,6 @@ R_Init
 */
 int R_Init( void *hinstance, void *hWnd )
 {
-	char renderer_buffer[1000];
-	char vendor_buffer[1000];
 	int		err;
 	int		j;
 	extern float r_turbsin[256];
@@ -1823,69 +1821,10 @@ int R_Init( void *hinstance, void *hWnd )
 	gl_config.extensions_string = qglGetString (GL_EXTENSIONS);
 	Com_Printf ("GL_EXTENSIONS: %s\n", gl_config.extensions_string );
 
-	strcpy( renderer_buffer, gl_config.renderer_string );
-	Q_strlwr( renderer_buffer );
+	Cvar_Set( "scr_drawall", "0" );
 
-	strcpy( vendor_buffer, gl_config.vendor_string );
-	Q_strlwr( vendor_buffer );
-
-	if ( strstr( renderer_buffer, "voodoo" ) )
-	{
-		if ( !strstr( renderer_buffer, "rush" ) )
-			gl_config.renderer = GL_RENDERER_VOODOO;
-		else
-			gl_config.renderer = GL_RENDERER_VOODOO_RUSH;
-	}
-	else if ( strstr( vendor_buffer, "sgi" ) )
-		gl_config.renderer = GL_RENDERER_SGI;
-	else if ( strstr( renderer_buffer, "permedia" ) )
-		gl_config.renderer = GL_RENDERER_PERMEDIA2;
-	else if ( strstr( renderer_buffer, "glint" ) )
-		gl_config.renderer = GL_RENDERER_GLINT_MX;
-	else if ( strstr( renderer_buffer, "glzicd" ) )
-		gl_config.renderer = GL_RENDERER_REALIZM;
-	else if ( strstr( renderer_buffer, "gdi" ) )
-		gl_config.renderer = GL_RENDERER_MCD;
-	else if ( strstr( renderer_buffer, "pcx2" ) )
-		gl_config.renderer = GL_RENDERER_PCX2;
-	else if ( strstr( renderer_buffer, "verite" ) )
-		gl_config.renderer = GL_RENDERER_RENDITION;
-	else
-		gl_config.renderer = GL_RENDERER_OTHER;
-
-	// power vr can't have anything stay in the framebuffer, so
-	// the screen needs to redraw the tiled background every frame
-	if ( gl_config.renderer & GL_RENDERER_POWERVR )
-	{
-		Cvar_Set( "scr_drawall", "1" );
-	}
-	else
-	{
-		Cvar_Set( "scr_drawall", "0" );
-	}
-
-	// MCD has buffering issues
-	if ( gl_config.renderer == GL_RENDERER_MCD )
-	{
-		Cvar_SetValue( "gl_finish", 1 );
-	}
-
-	if ( gl_config.renderer & GL_RENDERER_3DLABS )
-	{
-		if ( gl_3dlabs_broken->value )
-			gl_config.allow_cds = false;
-		else
-			gl_config.allow_cds = true;
-	}
-	else
-	{
-		gl_config.allow_cds = true;
-	}
-
-	if ( gl_config.allow_cds )
-		Com_Printf ("...allowing CDS\n" );
-	else
-		Com_Printf ( "...disabling CDS\n" );
+	gl_config.allow_cds = true;
+	Com_Printf ("...allowing CDS\n" );
 
 	/*
 	** grab extensions
