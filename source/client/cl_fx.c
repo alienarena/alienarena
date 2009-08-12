@@ -2521,7 +2521,6 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 
 	color = getColor();
 
-	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 	VectorCopy (vec, point);
@@ -2598,7 +2597,6 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 	cparticle_t	*p;
 	int			i,j;
 
-	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 	VectorCopy (vec, point);
@@ -2682,7 +2680,6 @@ void CL_BlasterBeam (vec3_t start, vec3_t end)
 	cparticle_t	*p;
 	int			i,j;
 
-	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 	VectorCopy (vec, point);
@@ -2763,7 +2760,6 @@ void CL_VaporizerBeam (vec3_t start, vec3_t end)
 	cparticle_t	*p;
 	int			i,j;
 
-	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
 	len = VectorNormalize (vec);
 	VectorCopy (vec, point);
