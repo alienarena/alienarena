@@ -2072,16 +2072,15 @@ int R_Init( void *hinstance, void *hWnd )
 		aniso_level = r_anisotropic->value;
 
 		if (r_anisotropic->value == 1) {
-			Com_Printf(S_COLOR_YELLOW"...ignoring GL_EXT_texture_filter_anisotropic\n");
+			Com_Printf("...ignoring GL_EXT_texture_filter_anisotropic\n");
 
 		} else {
 
-			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n   ["S_COLOR_GREEN"%i"S_COLOR_WHITE" max] ["S_COLOR_GREEN"%i" S_COLOR_WHITE" selected]\n",
-					   max_aniso, aniso_level);
+			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n");
 
 		}
 	} else {
-		Com_Printf(S_COLOR_RED "...GL_EXT_texture_filter_anisotropic not found\n");
+		Com_Printf("...GL_EXT_texture_filter_anisotropic not found\n");
 		r_anisotropic = Cvar_Get("r_anisotropic", "0", CVAR_ARCHIVE);
 		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE);
 	}

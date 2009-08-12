@@ -182,7 +182,7 @@ void R_VCInit()
 	if (!gl_state.vbo)
 		return;
 
-	Com_Printf(S_COLOR_GREEN"...Initializing VBO cache\n");
+	Com_Printf("...Initializing VBO cache\n");
 
 	memset(&vcm, 0, sizeof(vcm));
 
