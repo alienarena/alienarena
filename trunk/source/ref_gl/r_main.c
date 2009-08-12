@@ -528,7 +528,7 @@ void R_DrawNullModel (void)
 
 /*
 =============
-R_DrawEntitiesOnList - to do - place view weapon ents on their own list
+R_DrawEntitiesOnList
 =============
 */
 void R_DrawEntitiesOnList (void)
@@ -1820,8 +1820,6 @@ int R_Init( void *hinstance, void *hWnd )
 	Com_Printf ("GL_VERSION: %s\n", gl_config.version_string );
 	gl_config.extensions_string = qglGetString (GL_EXTENSIONS);
 	Com_Printf ("GL_EXTENSIONS: %s\n", gl_config.extensions_string );
-
-	Cvar_Set( "scr_drawall", "0" );
 
 	gl_config.allow_cds = true;
 	Com_Printf ("...allowing CDS\n" );
