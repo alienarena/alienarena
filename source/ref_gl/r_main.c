@@ -281,6 +281,9 @@ cvar_t	*gl_screenshot_jpeg_quality;
 //no blood
 extern cvar_t *cl_noblood;
 
+//first time running game
+cvar_t	*r_firstrun;
+
 //fog stuff
 struct r_fog
 {
@@ -1692,6 +1695,8 @@ void R_Register( void )
 
 	r_legacy = Cvar_Get("r_legacy", "0", CVAR_ARCHIVE); //to do - move this to automatic detection
 
+	r_firstrun = Cvar_Get("r_firstrun", "0", CVAR_ARCHIVE); //first time running the game
+
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
 	Cmd_AddCommand( "screenshot", GL_ScreenShot_f );
 	Cmd_AddCommand( "modellist", Mod_Modellist_f );
@@ -1749,6 +1754,161 @@ qboolean R_SetMode (void)
 		}
 	}
 	return true;
+}
+
+/*
+===============
+R_SetLowest
+===============
+*/
+
+void R_SetLowest(void) 
+{
+	Cvar_SetValue("r_bloom", 0);
+	Cvar_SetValue("r_bloom_intensity", 0.5);
+	Cvar_SetValue("gl_ext_mtexcombine", 1);
+	Cvar_SetValue("r_overbrightbits", 2);
+	Cvar_SetValue("gl_modulate", 2);
+	Cvar_SetValue("gl_picmip", 0);
+	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("vid_contrast", 1);
+	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_parallaxmaps", 0);
+	Cvar_SetValue("gl_specular", 0);
+	Cvar_SetValue("gl_glsl_postprocess", 0);
+	Cvar_SetValue("gl_glsl_shaders", 0);
+	Cvar_SetValue("r_shaders", 0);
+	Cvar_SetValue("gl_shadows", 0);
+	Cvar_SetValue("gl_dynamic", 0);
+	Cvar_SetValue("gl_rtlights", 0);
+	Cvar_SetValue("gl_mirror", 0);
+	Cvar_SetValue("r_legacy", 1);
+
+	Com_Printf("...autodetected LOWEST game setting\n");
+}
+
+/*
+===============
+R_SetLow
+===============
+*/
+
+void R_SetLow( void )
+{
+	Cvar_SetValue("r_bloom", 0);
+	Cvar_SetValue("r_bloom_intensity", 0.5);
+	Cvar_SetValue("gl_ext_mtexcombine", 1);
+	Cvar_SetValue("r_overbrightbits", 2);
+	Cvar_SetValue("gl_modulate", 2);
+	Cvar_SetValue("gl_picmip", 0);
+	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("vid_contrast", 1);
+	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_parallaxmaps", 0);
+	Cvar_SetValue("gl_specular", 0);
+	Cvar_SetValue("gl_glsl_postprocess", 0);
+	Cvar_SetValue("gl_glsl_shaders", 0);
+	Cvar_SetValue("r_shaders", 1);
+	Cvar_SetValue("gl_shadows", 2);
+	Cvar_SetValue("gl_dynamic", 0);
+	Cvar_SetValue("gl_rtlights", 0);
+	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("r_legacy", 0);
+
+	Com_Printf("...autodetected LOW game setting\n");
+}
+
+/*
+===============
+R_SetMedium
+===============
+*/
+
+void R_SetMedium( void )
+{
+	Cvar_SetValue("r_bloom", 0);
+	Cvar_SetValue("r_bloom_intensity", 0.5);
+	Cvar_SetValue("gl_ext_mtexcombine", 1);
+	Cvar_SetValue("r_overbrightbits", 2);
+	Cvar_SetValue("gl_modulate", 2);
+	Cvar_SetValue("gl_picmip", 0);
+	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("vid_contrast", 1);
+	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_parallaxmaps", 0);
+	Cvar_SetValue("gl_specular", 0);
+	Cvar_SetValue("gl_glsl_postprocess", 1);
+	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("r_shaders", 1);
+	Cvar_SetValue("gl_shadows", 2);
+	Cvar_SetValue("gl_dynamic", 1);
+	Cvar_SetValue("gl_rtlights", 0);
+	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("r_legacy", 0);
+
+	Com_Printf("...autodetected MEDIUM game setting\n");
+}
+
+/*
+===============
+R_SetHigh
+===============
+*/
+
+void R_SetHigh( void )
+{
+	Cvar_SetValue("r_bloom", 1);
+	Cvar_SetValue("r_bloom_intensity", 0.5);
+	Cvar_SetValue("gl_ext_mtexcombine", 1);
+	Cvar_SetValue("r_overbrightbits", 2);
+	Cvar_SetValue("gl_modulate", 2);
+	Cvar_SetValue("gl_picmip", 0);
+	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("vid_contrast", 1);
+	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_parallaxmaps", 1);
+	Cvar_SetValue("gl_specular", 1);
+	Cvar_SetValue("gl_glsl_postprocess", 1);
+	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("r_shaders", 1);
+	Cvar_SetValue("gl_shadows", 2);
+	Cvar_SetValue("gl_dynamic", 1);
+	Cvar_SetValue("gl_rtlights", 1);
+	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("r_legacy", 0);
+
+	Com_Printf("...autodetected HIGH game setting\n");
+}
+
+/*
+===============
+R_SetHighest
+===============
+*/
+
+void R_SetHighest( void )
+{
+	Cvar_SetValue("r_bloom", 1);
+	Cvar_SetValue("r_bloom_intensity", 0.5);
+	Cvar_SetValue("gl_ext_mtexcombine", 1);
+	Cvar_SetValue("r_overbrightbits", 2);
+	Cvar_SetValue("gl_modulate", 2);
+	Cvar_SetValue("gl_picmip", 0);
+	Cvar_SetValue("vid_gamma", 1);
+	Cvar_SetValue("vid_contrast", 1);
+	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_parallaxmaps", 1);
+	Cvar_SetValue("gl_specular", 1);
+	Cvar_SetValue("gl_glsl_postprocess", 1);
+	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("r_shaders", 1);
+	Cvar_SetValue("gl_shadows", 3);
+	Cvar_SetValue("gl_dynamic", 1);
+	Cvar_SetValue("gl_rtlights", 1);
+	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("r_legacy", 0);
+
+	Com_Printf("...autodetected HIGHEST game setting\n");
 }
 
 /*
@@ -2479,6 +2639,26 @@ int R_Init( void *hinstance, void *hWnd )
 		gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
 	}
 
+	//if running for the very first time, automatically set video settings
+	if(r_firstrun->integer == 0) {
+		
+		int OGLVer = atoi(&gl_config.version_string[0]);
+		int OGLSubVer = atoi(&gl_config.version_string[2]);
+
+		if(OGLVer < 2) {
+			if(OGLSubVer > 4)
+				R_SetMedium();
+			else
+				R_SetLow();
+		}
+		else if(OGLVer == 3)
+			R_SetHighest();
+		else
+			R_SetHigh();
+
+		//never run again
+		Cvar_SetValue("r_firstrun", 1);
+	}
 	
 	GL_SetDefaultState();
 
