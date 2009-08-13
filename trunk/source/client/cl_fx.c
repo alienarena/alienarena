@@ -1663,17 +1663,18 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 	if (!(p = new_particle()))
 		return;
 
-	VectorClear (p->accel);
-
 	p->alpha = 1;
 	p->alphavel = -50.0;
 	p->type = PARTICLE_ROTATINGROLL;
 	p->texnum = r_shottexture->texnum;
 	p->scale = 8;
-
+	p->angle[1] = cl.refdef.viewangles[0];
+	p->angle[0] = sin(len);
+	p->angle[2] = cl.refdef.viewangles[2];
 	p->blendsrc = GL_SRC_ALPHA;
 	p->blenddst = GL_ONE;
 	p->color = 0x72;
+	
 	for (j=0 ; j<3 ; j++)
 	{
 		p->org[j] = move[j];
@@ -1681,32 +1682,46 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 		p->accel[j] = 0;
 	}
 
+	if (!(p = new_particle()))
+		return;
+
+	p->alpha = 1;
+	p->alphavel = -50.0;
+	p->type = PARTICLE_ROTATINGROLL;
+	p->texnum = r_shottexture->texnum;
+	p->scale = 2;
+	p->angle[1] = cl.refdef.viewangles[0];
+	p->angle[0] = sin(len);
+	p->angle[2] = cl.refdef.viewangles[2];
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->color = 0x72;
+	
+	for (j=0 ; j<3 ; j++)
+	{
+		p->org[j] = move[j];
+		p->vel[j] = 0;
+		p->accel[j] = 0;
+	}
 	
 	if (!(p = new_particle())) 
 		return;
 
-	VectorClear (p->accel);
-
-	p->alpha = .75;
+	p->alpha = .95;
 	p->alphavel = -50.0;
-	p->type = PARTICLE_ROTATINGROLL;
+	p->type = PARTICLE_STANDARD;
 	p->texnum = r_cflashtexture->texnum;
-	p->scale = 15;
-	p->angle[1] = cl.refdef.viewangles[0];
-	p->angle[0] = sin(len);
-	p->angle[2] = cl.refdef.viewangles[2];
-
+	p->scale = 15+5*frand();
 	p->blendsrc = GL_ONE;
 	p->blenddst = GL_ONE;
 	p->color = 0x79;
+
 	for (j=0 ; j<3 ; j++)
 	{
 		p->org[j] = move[j];
 		p->vel[j] = 0;
 		p->accel[j] = 0;
 	}
-
-	VectorAdd (move, vec, move);
 }
 
 /*
@@ -3341,7 +3356,7 @@ void CL_AddParticles (void)
 	cparticle_t		*p, *next;
 	float			alpha, light;
 	float			time, time2;
-	vec3_t			org, curorg, angle;
+	vec3_t			org, curorg;
 	cparticle_t		*active, *tail;
 	float			scale;
 	int				i;
@@ -3410,7 +3425,6 @@ void CL_AddParticles (void)
 
 		for(i = 0; i < 3; i++) {
 			org[i] = p->org[i] + p->vel[i]*time + p->accel[i]*time2;
-			angle[i] = p->angle[i];
 		}
 
 		for (i=0;i<P_LIGHTS_MAX;i++)
@@ -3423,7 +3437,7 @@ void CL_AddParticles (void)
 			}
 		}
 
-		V_AddParticle (org, angle, p->color, p->type, p->texnum, p->blenddst, p->blendsrc, alpha, scale);
+		V_AddParticle (org, p->angle, p->color, p->type, p->texnum, p->blenddst, p->blendsrc, alpha, scale);
 		// PMM
 		if (p->alphavel == INSTANT_PARTICLE)
 		{
