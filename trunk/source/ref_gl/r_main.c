@@ -2643,13 +2643,10 @@ int R_Init( void *hinstance, void *hWnd )
 	if(r_firstrun->integer == 0) {
 		
 		int OGLVer = atoi(&gl_config.version_string[0]);
-		int OGLSubVer = atoi(&gl_config.version_string[2]);
+		//int OGLSubVer = atoi(&gl_config.version_string[2]);
 
 		if(OGLVer < 2) {
-			if(OGLSubVer > 4)
-				R_SetMedium();
-			else
-				R_SetLow();
+			R_SetLow();
 		}
 		else if(OGLVer == 3)
 			R_SetHighest();
