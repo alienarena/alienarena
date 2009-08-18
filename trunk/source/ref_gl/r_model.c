@@ -1889,7 +1889,7 @@ int R_FindFile (char *filename, FILE **file)
 
 void R_BeginRegistration (char *model)
 {
-	char	fullname[MAX_QPATH];
+	char	fullname[MAX_OSPATH];
  	char    *path;
 	cvar_t	*flushmap;
 	FILE	*file;

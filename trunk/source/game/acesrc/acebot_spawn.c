@@ -119,7 +119,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	int i, j, count, spawnkicknum;
 	char *info;
 	char *skin;
-	char bot_filename[128];
+	char bot_filename[MAX_OSPATH];
 	int found;
 	int real_players, total_players;
 	edict_t *cl_ent;
@@ -226,7 +226,7 @@ int ACESP_FindBotNum(void)
 {
     FILE *pIn;
 	int count;
-	char bot_filename[128];
+	char bot_filename[MAX_OSPATH];
 
 	//bots and configurations are loaded level specific
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
@@ -693,13 +693,21 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin)
 	char playerskin[MAX_INFO_STRING];
 	char playermodel[MAX_INFO_STRING];
 	int i, j, k, copychar;
+	char *skin2;
 
 	// Set the name for the bot.
 	// name
 	if(strlen(name) == 0)
+	{
 		sprintf(bot_name,"ACEBot_%d",bot->count);
+		sprintf(bot_skin,"martianenforcer/default");
+		skin2 = bot_skin;
+	}
 	else
+	{
 		strcpy(bot_name,name);
+		skin2 = skin;
+	}
 
 	bot->dmteam = NO_TEAM; //default
 
@@ -711,17 +719,17 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin)
 		strcpy(playerskin, " ");
 		strcpy(playermodel, " ");
 		j = k = 0;
-		for(i = 0; i <= strlen(skin) && i < MAX_INFO_STRING; i++)
+		for(i = 0; i <= strlen(skin2) && i < MAX_INFO_STRING; i++)
 		{
 			if(copychar){ 
-				playerskin[k] = skin[i];
+				playerskin[k] = skin2[i];
 				k++;
 			}
 			else {
-				playermodel[j] = skin[i];
+				playermodel[j] = skin2[i];
 				j++;
 			}
-			if(skin[i] == '/')
+			if(skin2[i] == '/')
 				copychar = true;
 				
 			
@@ -741,12 +749,12 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin)
 			bot->dmteam = RED_TEAM;
 		}
 	
-		strcpy(skin, playermodel);
-		strcat(skin, playerskin);
+		strcpy(skin2, playermodel);
+		strcat(skin2, playerskin);
 
 	}
 		
-	if(strlen(skin) == 0)
+	if(strlen(skin2) == 0)
 	{
 		// randomly choose skin 
 		rnd = random();
@@ -757,7 +765,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin)
 			sprintf(bot_skin,"martianenforcer/blue");
 	}
 	else 
-		strcpy(bot_skin,skin);
+		strcpy(bot_skin,skin2);
 
 	// initialise userinfo
 	memset (userinfo, 0, sizeof(userinfo));

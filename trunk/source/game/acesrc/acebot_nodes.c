@@ -719,7 +719,7 @@ void ACEND_ResolveAllPaths()
 void ACEND_SaveNodes()
 {
 	FILE *pOut;
-	char filename[60];
+	char filename[MAX_OSPATH];
 	int i,j;
 	int version = 1;
 	
@@ -760,7 +760,7 @@ void ACEND_LoadNodes(void)
 {
 	FILE *pIn;
 	int i,j;
-	char filename[60];
+	char filename[MAX_OSPATH];
 	int version;
 
 	strcpy(filename,BOTDIR"/botinfo/nav/");

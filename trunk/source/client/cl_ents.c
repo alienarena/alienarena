@@ -1595,7 +1595,7 @@ void CL_AddClEntities()
 		{
 			trace_t trace = CL_PMTraceWorld (le->lastOrg, mins, maxs, org, MASK_SOLID);
 
-			if (trace.fraction > 0.0001 && trace.fraction < 1)
+			if (trace.fraction > 0.0001f && trace.fraction < 0.9999f )
 			{
 				vec3_t	vel;
 				// Reflect velocity
@@ -1636,7 +1636,7 @@ void CL_AddClEntities()
 				VectorCopy(org, le->org);
 
 				//play a sound if brass
-				if (le->flags & (CLM_BRASS)) {
+				if ( (le->flags & (CLM_BRASS))  &&  (le->flags & (CLM_BOUNCE)) ) {
 					Com_sprintf(soundname, sizeof(soundname), "weapons/clink0%i.wav", (rand() % 2) + 1);
 					S_StartSound (le->org, 0, CHAN_WEAPON, S_RegisterSound(soundname), 1.0, ATTN_NORM, 0);
 				}
