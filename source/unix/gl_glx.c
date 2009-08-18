@@ -711,8 +711,7 @@ void GLimp_BeginFrame( float camera_seperation )
 */
 void GLimp_EndFrame (void)
 {
-	qglFlush();
-	qglXSwapBuffers(dpy, win);
+	qglXSwapBuffers(dpy, win); // does glFlush()
 
 	// rscript - MrG
 	rs_realtime=Sys_Milliseconds() * 0.0005f;
