@@ -208,6 +208,15 @@ MOVETYPE_BOUNCE
 } movetype_t;
 
 
+typedef struct
+{
+	char	command[128]; //limit to prevent malicious buffer overflows
+	int		yay;
+	int		nay;
+	float	starttime;
+	float	time;
+	qboolean called;
+} g_vote_t;
 
 typedef struct
 {
@@ -468,6 +477,7 @@ extern	level_locals_t	level;
 extern	game_import_t	gi;
 extern	game_export_t	globals;
 extern	spawn_temp_t	st;
+extern	g_vote_t		playervote;
 
 extern	int	sm_meat_index;
 
@@ -625,6 +635,9 @@ extern cvar_t	*g_mapvote;
 extern cvar_t	*g_voterand;
 extern cvar_t	*g_votemode;
 extern cvar_t	*g_votesame;
+
+//call voting
+extern cvar_t	*g_callvote;
 
 //forced autobalanced teams
 extern cvar_t	*g_autobalance;
@@ -1082,6 +1095,9 @@ typedef struct
 	//reward points
 	int reward_pts;
 	qboolean powered;
+
+	//voting
+	qboolean voted;
 
 	int			spectator;			// client is a spectator
 } client_respawn_t;

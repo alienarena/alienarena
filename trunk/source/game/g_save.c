@@ -243,6 +243,9 @@ void InitGame (void)
 	g_votemode = gi.cvar("g_votemode", "0", 0);
 	g_votesame = gi.cvar("g_votesame", "1", 0);
 
+	//call voting
+	g_callvote = gi.cvar("g_callvote", "1", CVAR_SERVERINFO); //change after testing
+
 	//forced autobalanced teams
 	g_autobalance = gi.cvar("g_autobalance", "0", 0);
 

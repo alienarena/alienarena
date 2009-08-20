@@ -961,5 +961,13 @@ void SP_worldspawn (edict_t *ent)
 
 	// 63 testing
 	gi.configstring(CS_LIGHTS+63, "a");
+
+	//call voting(we've started a new level, clear it)
+	if(g_callvote->value) {
+		playervote.called = false;
+		playervote.yay = 0;
+		playervote.nay = 0;
+		playervote.command[0] = 0;
+	}
 }
 
