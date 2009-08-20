@@ -25,6 +25,7 @@ level_locals_t	level;
 game_import_t	gi;
 game_export_t	globals;
 spawn_temp_t	st;
+g_vote_t		playervote;
 
 int	sm_meat_index;
 int meansOfDeath;
@@ -92,6 +93,9 @@ cvar_t	*g_mapvote;
 cvar_t	*g_voterand;
 cvar_t	*g_votemode;
 cvar_t	*g_votesame;
+
+//call voting
+cvar_t	*g_callvote;
 
 //reward point threshold
 cvar_t	*g_reward;
@@ -353,6 +357,14 @@ void EndDMLevel (void)
 			continue;
 		if(!ent->is_bot && ent->deadflag)
 			DeathcamRemove (ent, "off");
+	}
+
+	//call voting
+	if(g_callvote->value) {
+		playervote.called = false;
+		playervote.yay = 0;
+		playervote.nay = 0;
+		playervote.command[0] = 0;
 	}
 
 	//map voting
@@ -658,6 +670,12 @@ void ResetLevel (void) //for resetting players and items after warmup
 		}
 
 	}
+
+	if(g_callvote->value)
+		safe_bprintf(PRINT_HIGH, "Call voting is ^2ENABLED\n");
+	else
+		safe_bprintf(PRINT_HIGH, "Call voting is ^1DISABLED\n");
+
 	return;
 }
 
@@ -962,6 +980,65 @@ void ExitLevel (void)
 
 /*
 ================
+G_ParseVoteCommand
+
+Parse and execute command
+================
+*/
+void G_ParseVoteCommand (void)
+{
+	int i, j;
+	char command[128];
+	char args[128];
+	edict_t *ent;
+	qboolean donearg = false;
+
+	//separate command from args
+	i = j = 0;
+	while(i < 128) {
+
+		if(playervote.command[i] == ' ')
+			donearg = true;
+
+		if(!donearg) 
+			command[i] = playervote.command[i];
+		else
+			command[i] = 0;
+
+		if(donearg && i < 127) { //skip the space between command and arg
+			args[j] = playervote.command[i+1];
+			j++;
+		}
+		i++;
+	}
+
+	if(!strcmp(command, "kick")) { //kick player
+
+		//get the correct client
+		for (i=0 ; i<maxclients->value ; i++)
+		{
+			ent = g_edicts + 1 + i;
+			if (!ent->inuse)
+				continue;
+
+			if(ent->client) {
+				if(!strcmp(ent->client->pers.netname, args)) {
+					if(ent->is_bot)
+						ACESP_KickBot(args);
+					else {
+						safe_bprintf(PRINT_HIGH, "%s was kicked\n", args);
+						ClientDisconnect (ent);
+					}
+				}
+				
+			}
+		}
+	}
+}
+
+
+/*
+================
 G_RunFrame
 
 Advances the world by 0.1 seconds
@@ -1041,5 +1118,37 @@ void G_RunFrame (void)
 	//unlagged
 	if ( g_antilag->integer)
 		level.frameStartTime = gi.Sys_Milliseconds();
+
+	//call voting
+	if(g_callvote->value && playervote.called) {
+
+		playervote.time = level.time;
+		if(playervote.time-playervote.starttime > 15 ){ //15 seconds
+			//execute command if votes are sufficient
+			if(playervote.yay > 1 && playervote.yay > playervote.nay) {
+				safe_bprintf(PRINT_HIGH, "Vote ^2Passed\n");
+				
+				//parse command(we will allow kick, map, fraglimit, timelimit).
+				G_ParseVoteCommand();
+				
+			}
+			else
+				safe_bprintf(PRINT_HIGH, "Vote ^1Failed\n");
+		
+			//clear
+			playervote.called = false;
+			playervote.yay = playervote.nay = 0;
+			playervote.command[0] = 0;
+
+			//do each ent
+			for (i=0 ; i<maxclients->value ; i++)
+			{
+				ent = g_edicts + 1 + i;
+				if (!ent->inuse || ent->is_bot)
+					continue;
+				ent->client->resp.voted = false;
+			}
+		}
+	}
 }
 

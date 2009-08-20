@@ -911,6 +911,29 @@ void Cmd_PlayerList_f(edict_t *ent)
 
 /*
 =================
+Cmd_CallVote_f
+=================
+*/
+void Cmd_CallVote_f (edict_t *ent)
+{
+
+	if(level.time <= warmuptime->value) {
+		safe_bprintf(PRINT_HIGH, "Cannot call a vote during warmup!\n");
+		return;
+	}
+
+	//start a vote
+	playervote.called = true; 
+	playervote.nay = playervote.nay = 0;
+	playervote.starttime = level.time;
+	if(strlen(gi.args()) < 128) {
+		strcpy(playervote.command, gi.args()); 
+		safe_bprintf(PRINT_HIGH, "%s called a vote: %s\n", ent->client->pers.netname, playervote.command);
+	}
+}
+
+/*
+=================
 Cmd_Vote_f
 =================
 */
@@ -925,6 +948,26 @@ void Cmd_Vote_f (edict_t *ent)
 	edict_t *cl_ent;
 
 	i = atoi (gi.argv(1));
+
+	if(g_callvote->value && playervote.called) {
+
+		switch(i) { //to do - move "voted" to persistant data
+			case 1:
+				if(!ent->client->resp.voted) {
+					ent->client->resp.voted = true;
+					playervote.yay++;
+					safe_bprintf(PRINT_HIGH, "%s voted ^2YES\n", ent->client->pers.netname);
+				}
+				break;
+			case 2:
+				if(!ent->client->resp.voted) {
+					ent->client->resp.voted = true;
+					playervote.nay++;
+					safe_bprintf(PRINT_HIGH, "%s voted ^1NO\n", ent->client->pers.netname);
+				}
+				break;
+		}
+	}
 
 	if (!level.intermissiontime || ! (g_mapvote && g_mapvote->value && !g_mapvote->modified) )
 		return;
@@ -1100,6 +1143,11 @@ void ClientCommand (edict_t *ent)
 	if (Q_stricmp (cmd, "help") == 0)
 	{
 		Cmd_Help_f (ent);
+		return;
+	}
+	if (Q_stricmp (cmd, "callvote") == 0)
+	{
+		Cmd_CallVote_f(ent);
 		return;
 	}
 	if (Q_stricmp (cmd, "vote") == 0)

@@ -227,8 +227,7 @@ void GL_GetLightVals()
 		
 			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 			
-			//to do - fix me, we have better code for this now
-			if(r_trace.fraction == 1.0) { //this section is not perfect, but it works for now
+			if(r_trace.fraction == 1.0) {
 				if(dist < 100) {
 					VectorCopy(dl->origin, temp);
 					//translate for when viewangles are negative - done because otherwise the
