@@ -174,6 +174,8 @@ void VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
 
 #define DEG2RAD( a ) ( a * M_PI ) / 180.0F
 #define RAD2DEG( a ) ( a * 180.0F ) / M_PI
+#define HALFDEG2RAD(angle) ((angle) * 0.00872664626f)
+#define DOUBLERAD2DEG(angle) ((angle) * 114.591559f)
 
 // just in case you do't want to use the macros
 vec_t _DotProduct (vec3_t v1, vec3_t v2);
