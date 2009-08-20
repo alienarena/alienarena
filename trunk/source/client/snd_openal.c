@@ -134,7 +134,11 @@ srclink_t *src_datahead;
 srclink_t *src_freehead;
 srclink_t src_link[MAX_SRC];
 src_t src_data[MAX_SRC];
-int actual_src_count;
+int actual_src_count; //      number of sources generated
+int source_counter; //        current number of sources in use
+int max_sources_used; //      for tracking max number of sources used
+int source_failed_counter; // for counting source alloc failures
+int max_sources_failed;
 
 // single dedicated background sound, stereo enabled
 // "Your only Source for Alien Arena Music"
@@ -345,6 +349,11 @@ void calSourcesInitialize( ALint device_sources )
 	src_datahead = NULL;
 	src_freehead = NULL;
 
+	source_counter = 0; // gather statistics about Source use
+	max_sources_used = 0;
+	source_failed_counter = 0;
+	max_sources_failed = 0;
+
 	// generate a collection of OpenAL Sources
 	// clamp to what the current Device reports as available Mono Sources
 	// less one, to make sure there is a source available for background music
@@ -443,7 +452,21 @@ src_t *calSourceAlloc( void )
 		}
 		// get the return src, backlink to link record
 		src = srclink->src;
+
+		if( ++source_counter > max_sources_used )
+		{ // update maximum used statistic
+			max_sources_used = source_counter;
+		}
+		source_failed_counter = 0;
 	}
+	else
+	{
+		if( ++source_failed_counter > max_sources_failed )
+		{
+			max_sources_failed = source_failed_counter;
+		}
+	}
+
 	return src;
 }
 
@@ -452,6 +475,8 @@ void calSourceFree( src_t *src )
 	srclink_t *srclink;
 	srclink_t *srclink_prev;
 	srclink_t *srclink_next;
+
+	--source_counter; // statistics update
 
 	// unlink from active list
 	srclink = src->backlink;
@@ -1191,6 +1216,17 @@ void calContextInfo( ALCdevice *pDevice )
 	Com_Printf( "  Generated Source Count: %i\n", actual_src_count );
 	Com_Printf( "  Generated Buffer Count: %i\n", actual_sfx_count );
 
+	// Source statistics
+	if( max_sources_used > 0 )
+	{
+		Com_Printf( "  Maximum Sources Used: %i\n", max_sources_used );
+		if( max_sources_failed > 0 )
+		{
+			Com_Printf( "  Maximum Sources Requested: %i\n",
+					max_sources_used + max_sources_failed );
+		}
+	}
+
 	// useful only for developers
 	qalcGetIntegerv( pDevice, ALC_REFRESH, 1, &alc_refresh );
 	Com_DPrintf( "  ALC Refresh: %i\n", alc_refresh);
@@ -1254,7 +1290,8 @@ void S_Init( void )
 	qboolean success;
 	ALCenum result;
 	ALCint alc_mono_sources;
-
+	ALCint major_version;
+	ALCint minor_version;
 
 	sound_system_enable = false;
 
@@ -1277,7 +1314,7 @@ void S_Init( void )
 		return;
 	}
 
-	// Link to OpenAL library  (TODO: detect and fail on version 1.0)
+	// Link to OpenAL library
 	success = QAL_Init();
 	if( !success )
 	{
@@ -1295,6 +1332,17 @@ void S_Init( void )
 		Com_Printf("Sound failed: Unable to open default sound device\n"
 				        "Game will continue without sound.\n" );
 		return;
+	}
+	// verify OpenAL 1.1
+	qalcGetIntegerv( pDevice, ALC_MAJOR_VERSION, sizeof(ALCint), &major_version );
+	qalcGetIntegerv( pDevice, ALC_MINOR_VERSION, sizeof(ALCint), &minor_version );
+	Com_Printf("Active OpenAL Device is \"%s\" using OpenAL Version %i.%i\n",
+					qalcGetString( pDevice, ALC_DEVICE_SPECIFIER),
+					major_version, minor_version );
+	if( major_version < 1 || (major_version == 1 && minor_version < 1) )
+	{
+		Com_Printf("Sound failed: OpenAL %i.%i in use; 1.1 or greater required\n"
+				"Game will continue without sound.\n", major_version, minor_version);
 	}
 	pContext = qalcCreateContext( pDevice, NULL ); // 2. create context
 	if ( pContext == NULL )
@@ -1701,8 +1749,7 @@ void S_StartSound( vec3_t origin, int entnum, int entchannel, sfx_t *arg_sfx,
 	}
 
 	if( arg_sfx->bg_music
-			|| !Q_strncasecmp( arg_sfx->name, "music", 5 )
-			|| !Q_strncasecmp( arg_sfx->name, "misc/menumusic", 14 ))
+			|| !Q_strncasecmp( arg_sfx->name, "music", 5 ) )
 	{ // background music from speakers is obsolete
 		return;
 	}
@@ -1886,7 +1933,7 @@ void S_StartMusic( char *qfilename )
  */
 void S_StartMenuMusic( void )
 {
-	S_StartMusic( "music/menumusic.wav" ); 
+	S_StartMusic( "music/menumusic.wav" );
 }
 
 extern char map_music[128]; // declared and set in r_model.c
