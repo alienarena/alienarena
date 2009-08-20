@@ -922,6 +922,11 @@ void Cmd_CallVote_f (edict_t *ent)
 		return;
 	}
 
+	if(playervote.called) {
+		safe_bprintf(PRINT_HIGH, "Vote already in progress, please wait.\n");
+		return;
+	}
+
 	//start a vote
 	playervote.called = true; 
 	playervote.nay = playervote.nay = 0;
