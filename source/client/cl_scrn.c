@@ -348,8 +348,8 @@ SCR_Init
 */
 void SCR_Init (void)
 {
-	scr_conspeed = Cvar_Get ("scr_conspeed", "3", 0);
-	scr_consize = Cvar_Get ("scr_consize", "0.5", 0);
+	scr_conspeed = Cvar_Get ("scr_conspeed", "3", CVAR_ARCHIVE);
+	scr_consize = Cvar_Get ("scr_consize", "0.5", CVAR_ARCHIVE);
 	scr_showturtle = Cvar_Get ("scr_showturtle", "0", 0);
 	scr_showpause = Cvar_Get ("scr_showpause", "1", 0);
 	scr_centertime = Cvar_Get ("scr_centertime", "2.5", 0);
