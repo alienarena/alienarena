@@ -2113,11 +2113,15 @@ The game can override any of the settings in place
 void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 {
 	char	*s;
+	edict_t *cl_ent;
 	int		playernum;
-	int		i, j, k, copychar, done;
+	int		i, j, k;
+	qboolean duplicate, done, copychar;
 	char playermodel[MAX_OSPATH] = " ";
 	char playerskin[MAX_INFO_STRING] = " ";
 	char modelpath[MAX_OSPATH] = " ";
+	char slot[2];
+	char colorName[32];
 	FILE *file;
 
 	// check for malformed or illegal info strings
@@ -2146,6 +2150,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 	// set name
 	s = Info_ValueForKey (userinfo, "name");
+	strcpy(colorName, s);
 	i = j = k = 0;
 	while ( s && *s && i < 47 && j < 15 )
 	{
@@ -2255,6 +2260,42 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		}
 	}
 	playernum = ent-g_edicts-1;
+
+	//check for duplicates(but not on respawns)
+	duplicate = false;
+	if(whereFrom != SPAWN) { 
+
+		for (j=0; j<maxclients->value ; j++) {
+
+			cl_ent = g_edicts + 1 + j;
+			if (!cl_ent->inuse)
+				continue;
+
+			if(!strcmp(ent->client->pers.netname, cl_ent->client->pers.netname)) {
+
+				if(playernum != j)
+					duplicate = true;
+			}
+		}
+		
+		if(duplicate && playernum < 100) { //just paranoia, should never be more than 64
+
+			sprintf(slot, "%i", playernum);
+
+			if(strlen(ent->client->pers.netname) < 31) { //small enough, just add to end
+
+				strcat(ent->client->pers.netname, slot);
+			}
+			else { //need to lop off end first
+
+				ent->client->pers.netname[30] = 0;
+				strcat(ent->client->pers.netname, slot);
+			}
+
+			Info_SetValueForKey (userinfo, "name", ent->client->pers.netname);
+			safe_bprintf(PRINT_HIGH, "Was a duplicate, changing name to %s\n", ent->client->pers.netname);
+		}
+	}
 
 	// combine name and skin into a configstring
 	gi.configstring (CS_PLAYERSKINS+playernum, va("%s\\%s", ent->client->pers.netname, s) );
