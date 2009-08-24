@@ -549,62 +549,40 @@ vec3_t g_lightOrigin;
 void GL_DrawShadowTriangles(msurface_t * surf)
 {
     glpoly_t *p;
-    float *v;
     int i, nv;	
 	vec3_t ShadowVerts[MAX_SHADOW_VERTS];
 
-	nv = surf->polys->numverts;
-
 	for( p = surf->polys; p; p = p->chain )
 	{
-		int facingLight;
-		vec3_t tempVec;
-		float dist;
 
-		//I think this facing light section is wrong
-		VectorSubtract( g_lightOrigin, p->center, tempVec );
-		
-		dist = DotProduct( tempVec, surf->plane->normal );
+		nv = p->numverts;
+       
+        for (i = 0; i < nv; i++) {
 
-		if( fabs( dist ) < 2.0f ) 
-			return;
-		else 
-			facingLight = dist > 0.0f;
-
-		if(!facingLight)
-			continue;
-
-		v = p->verts[0];
-        
-        for (i = 0; i < nv; i++, v += VERTEXSIZE) {
-
-			ShadowVerts[i][0] = (v[0] - g_lightOrigin[0]);
-			ShadowVerts[i][1] = (v[1] - g_lightOrigin[1]);
-			ShadowVerts[i][2] = (v[2] - g_lightOrigin[2]);
+			ShadowVerts[i][0] = (p->verts[i][0] - g_lightOrigin[0]);
+			ShadowVerts[i][1] = (p->verts[i][1] - g_lightOrigin[1]);
+			ShadowVerts[i][2] = (p->verts[i][2] - g_lightOrigin[2]);
 		}
 
 		//sides
-		v = p->verts[0];
 		qglBegin(GL_TRIANGLE_STRIP);
-		qglVertex3fv(v);
+		qglVertex3fv(p->verts[0]);
 		qglVertex3fv(ShadowVerts[0]);
-		for (i = 0; i < nv; i++, v+=VERTEXSIZE) {
-			qglVertex3fv(v);
+		for (i = 0; i < nv; i++) {
+			qglVertex3fv(p->verts[i]);
 			qglVertex3fv(ShadowVerts[i]);
 		}
 		qglEnd();	
 			
 		//front cap
-		v = p->verts[0];
 		qglBegin(GL_POLYGON);
-		for (i = 0; i < nv; i++, v+=VERTEXSIZE)
-			qglVertex3fv(v);
+		for (i = 0; i < nv; i++)
+			qglVertex3fv(p->verts[i]);
 		qglEnd();
 
 		//back cap 
-		v = p->verts[nv];
 		qglBegin(GL_TRIANGLE_FAN);
-		for (i = nv-1; i < -1; i--, v -= VERTEXSIZE) 			
+		for (i = nv-1; i < -1; i--) 			
 			qglVertex3fv(ShadowVerts[i]);
 		qglEnd();
 	}		
