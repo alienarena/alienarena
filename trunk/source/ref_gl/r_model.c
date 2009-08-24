@@ -166,34 +166,6 @@ static void R_ParseLightEntities (void)
 	}
 }
 
-//only add one light per light surface
-void GL_AddSurfaceWorldLight (msurface_t *surf)
-{
-	int i, intensity;
-	glpoly_t *poly;
-	vec3_t origin = {0,0,0}, color = {0,0,0};
-
-	if (!(surf->texinfo->flags & SURF_LIGHT))
-		return;
-	if (r_numWorldLights == MAX_LIGHTS)
-		return;
-
-	for (poly=surf->polys, i=0 ; poly ; poly=poly->next, i++)
-		VectorAdd(origin, poly->center, origin);
-
-	VectorScale(origin, 1.0/(float)i, origin);
-	VectorCopy(origin, r_worldLights[r_numWorldLights].origin);
-
-	intensity = surf->texinfo->value/2;
-	if (intensity>200) intensity = 200;
-	r_worldLights[r_numWorldLights].intensity = intensity;
-	
-	r_worldLights[r_numWorldLights].surf = surf;
-
-	r_numWorldLights++;
-}
-
-
 /*
 ===============
 Mod_PointInLeaf

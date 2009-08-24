@@ -2140,6 +2140,9 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	if(whereFrom != SPAWN && whereFrom != CONNECT)
 		whereFrom = INGAME;
 
+	if(playervote.called && whereFrom == INGAME) 
+		return; //do not allow people to change info during votes
+
 	if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM))
 		ent->client->pers.spectator = false; //cannot spectate if you've joined a team
 
