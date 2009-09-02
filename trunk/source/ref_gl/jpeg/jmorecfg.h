@@ -150,7 +150,7 @@ typedef unsigned int UINT16;
 #endif /* HAVE_UNSIGNED_SHORT */
 
 /* INT16 must hold at least the values -32768..32767. */
-
+#ifdef __unix__
 #ifndef XMD_H			/* X11/xmd.h correctly defines INT16 */
 typedef short INT16;
 #endif
@@ -159,6 +159,7 @@ typedef short INT16;
 
 #ifndef XMD_H			/* X11/xmd.h correctly defines INT32 */
 typedef long INT32;
+#endif
 #endif
 
 /* Datatype used for image dimensions.  The JPEG standard only supports
@@ -209,12 +210,13 @@ typedef unsigned int JDIMENSION;
  * explicit coding is needed; see uses of the NEED_FAR_POINTERS symbol.
  */
 
+#ifdef __unix__
 #ifdef NEED_FAR_POINTERS
 #define FAR  far
 #else
 #define FAR
 #endif
-
+#endif
 
 /*
  * On a few systems, type boolean and/or its values FALSE, TRUE may appear

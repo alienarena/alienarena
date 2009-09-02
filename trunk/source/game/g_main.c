@@ -1034,6 +1034,21 @@ void G_ParseVoteCommand (void)
 			}
 		}
 	}
+	else if(!strcmp(command, "fraglimit")) { //change fraglimit
+		gi.cvar_set("fraglimit", args);
+		safe_bprintf(PRINT_HIGH, "Fraglimit changed to %s\n", args);
+	}
+	else if(!strcmp(command, "timelimit")) { //change timelimit
+		gi.cvar_set("timelimit", args);
+		safe_bprintf(PRINT_HIGH, "Timelimit changed to %s\n", args);
+	}
+	else if(!strcmp(command, "map")) { //change map
+		Com_sprintf (command, sizeof(command), "map \"%s\"\n", args);
+		gi.AddCommandString (command);
+	}
+	else
+		safe_bprintf(PRINT_HIGH, "Invalid command!");
+
 }
 
 
@@ -1125,7 +1140,7 @@ void G_RunFrame (void)
 		playervote.time = level.time;
 		if(playervote.time-playervote.starttime > 15 ){ //15 seconds
 			//execute command if votes are sufficient
-			if(playervote.yay > 1 && playervote.yay > playervote.nay) {
+			if(playervote.yay > 2 && playervote.yay > playervote.nay+1) {
 				safe_bprintf(PRINT_HIGH, "Vote ^2Passed\n");
 				
 				//parse command(we will allow kick, map, fraglimit, timelimit).

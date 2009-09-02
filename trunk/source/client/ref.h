@@ -152,7 +152,7 @@ typedef struct {
 	vertCache_t		vertCacheList[MAX_VERTEX_CACHES];
 } vertCacheManager_t;
 
-static vertCacheManager_t	vcm;
+vertCacheManager_t	vcm;
 
 vec3_t	vbo_shadow[MAX_VBO_XYZs];
 
