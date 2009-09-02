@@ -486,7 +486,7 @@ extern float	norm_array[MAX_ARRAY][3];
 extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
 extern float *VArray;
-static vec3_t NormalsArray[MAX_TRIANGLES*3];
+extern vec3_t NormalsArray[MAX_TRIANGLES*3];
 extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
@@ -548,7 +548,6 @@ extern GLuint		g_location_fog;
 extern GLuint		g_location_parallax;
 extern GLuint		g_location_dynamic;
 extern GLuint		g_location_specular;
-extern GLuint		g_location_surfaceColor;
 extern GLuint		g_location_lightPosition;
 extern GLuint		g_location_lightColour;
 extern GLuint		g_location_lightCutoffSquared;

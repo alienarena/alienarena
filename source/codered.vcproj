@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="3"
 				InlineFunctionExpansion="1"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="false"
@@ -149,6 +149,8 @@
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
+				EnableEnhancedInstructionSet="2"
+				FloatingPointModel="2"
 				PrecompiledHeaderFile=".\release/codered.pch"
 				AssemblerListingLocation=".\release/"
 				ObjectFile=".\release/"
@@ -1172,6 +1174,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ref_gl\r_shadows.c"
+				>
+			</File>
+			<File
 				RelativePath="ref_gl\r_surf.c"
 				>
 				<FileConfiguration
@@ -1210,6 +1216,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\ref_gl\r_vbo.c"
+				>
 			</File>
 			<File
 				RelativePath="ref_gl\r_vlights.c"

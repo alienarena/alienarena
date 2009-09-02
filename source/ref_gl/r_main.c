@@ -76,7 +76,6 @@ GLuint		g_location_fog;
 GLuint	    g_location_parallax;
 GLuint		g_location_dynamic;
 GLuint		g_location_specular;
-GLuint	    g_location_surfaceColor;
 GLuint	    g_location_lightPosition;
 GLuint		g_location_lightColour;
 GLuint	    g_location_lightCutoffSquared;
@@ -2403,7 +2402,6 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
 		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
 		g_location_lightCutoffSquared = glGetUniformLocationARB( g_programObj, "lightCutoffSquared" );
-		g_location_surfaceColor = glGetUniformLocationARB( g_programObj, "surfaceColor" );
 
 		//warp(water) bsp surfaces
 

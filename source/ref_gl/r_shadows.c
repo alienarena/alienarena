@@ -549,44 +549,61 @@ vec3_t g_lightOrigin;
 void GL_DrawShadowTriangles(msurface_t * surf)
 {
     glpoly_t *p;
-    int i, nv;	
-	vec3_t ShadowVerts[MAX_SHADOW_VERTS];
+    int i, nv = surf->polys->numverts;	
+	vec4_t ShadowVerts[MAX_SHADOW_VERTS];
+	float	*v;
 
 	for( p = surf->polys; p; p = p->chain )
 	{
+		int facingLight;
+		vec3_t tempVec;
+		float dist;
 
-		nv = p->numverts;
-       
-        for (i = 0; i < nv; i++) {
+		VectorSubtract( g_lightOrigin, p->verts[0], tempVec );
 
-			ShadowVerts[i][0] = (p->verts[i][0] - g_lightOrigin[0]);
-			ShadowVerts[i][1] = (p->verts[i][1] - g_lightOrigin[1]);
-			ShadowVerts[i][2] = (p->verts[i][2] - g_lightOrigin[2]);
+		dist = _DotProduct( tempVec, surf->plane->normal );
+
+		if( fabs( dist ) < 2.0f ) 
+			return;
+		else 
+			facingLight = dist > 0.0f;
+
+		if( facingLight )
+			continue;
+
+		for( i = 0, v = p->verts[0]; i < nv; i++, v += VERTEXSIZE )
+		{
+			VectorSubtract( v, g_lightOrigin, ShadowVerts[i]);
+			ShadowVerts[i][3] = 0.0f;
 		}
 
 		//sides
-		qglBegin(GL_TRIANGLE_STRIP);
-		qglVertex3fv(p->verts[0]);
-		qglVertex3fv(ShadowVerts[0]);
-		for (i = 0; i < nv; i++) {
-			qglVertex3fv(p->verts[i]);
-			qglVertex3fv(ShadowVerts[i]);
+		qglBegin( GL_TRIANGLE_STRIP );
+		for( i = 0, v = p->verts[0]; i < nv; i++, v += VERTEXSIZE )
+		{
+			qglVertex3fv( v );
+			qglVertex4fv( ShadowVerts[i] );
 		}
+		qglVertex3fv( p->verts[0] );
+		qglVertex4fv( ShadowVerts[0] );
 		qglEnd();	
 			
 		//front cap
-		qglBegin(GL_POLYGON);
-		for (i = 0; i < nv; i++)
-			qglVertex3fv(p->verts[i]);
+		qglBegin( GL_POLYGON );
+		for( i = 0, v = p->verts[0]; i < nv; i++, v += VERTEXSIZE )
+		{
+			qglVertex3fv( v );
+		}
 		qglEnd();
 
 		//back cap 
-		qglBegin(GL_TRIANGLE_FAN);
-		for (i = nv-1; i < -1; i--) 			
-			qglVertex3fv(ShadowVerts[i]);
+		qglBegin( GL_TRIANGLE_FAN );
+		for( i = nv - 1; i >= 0; i-- )
+		{
+			qglVertex4fv( ShadowVerts[i]);
+		}
 		qglEnd();
-	}		
-        
+	}		        
 }
 
 void R_RecursiveShadowWorldNode(mnode_t * node)
@@ -690,9 +707,9 @@ void R_DrawShadowWorld(void)
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 	
-	if(!gl_shadows->value)
+	if(gl_shadows->value != 3)
 		return;
-	
+
 	//qglEnableClientState(GL_VERTEX_ARRAY);
 	//qglVertexPointer(3, GL_FLOAT, 0, ShadowArray);
 
