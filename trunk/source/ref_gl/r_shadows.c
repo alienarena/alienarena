@@ -564,7 +564,7 @@ void GL_DrawWorldShadowTriangles(msurface_t * surf)
 		dist = _DotProduct( tempVec, surf->plane->normal );
 
 		if( fabs( dist ) < 2.0f )
-			return;
+			continue;
 		else 
 			facingLight = dist > 0.0f;
 
@@ -767,6 +767,7 @@ void R_DrawShadowWorld(void)
 	R_ShadowBlend(0.4); 
 	
 	//to do - we have to figure out how to fade shadows by distance.  Darplaces, and Doom III do this, I really don't know how yet.
+	//I suspect it is because of the z-fail z-pass methods which I am not fully using.
 
 }
 

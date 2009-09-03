@@ -43,7 +43,7 @@ float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 float *VArray = &VArrayVerts[0];
 
 // array for dynamic normal allocation
-vec3_t NormalsArray[MAX_TRIANGLES*3];
+static vec3_t NormalsArray[MAX_TRIANGLES*3];
 
 // number of verts allocated
 static int VertexCounter = 0;
