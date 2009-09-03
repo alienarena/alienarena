@@ -1248,6 +1248,8 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 		     GLdouble zNear, GLdouble zFar )
 {
 	GLdouble xmin, xmax, ymin, ymax;
+	const float correction = 0.1;
+	float projectionMatrix[16];
 
 	ymax = zNear * tan( fovy * M_PI / 360.0 );
 	ymin = -ymax;
@@ -1259,6 +1261,12 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 	xmax += -( 2 * gl_state.camera_separation ) / zNear;
 
 	qglFrustum( xmin, xmax, ymin, ymax, zNear, zFar );
+	
+	//for world shadows
+	qglGetFloatv( GL_PROJECTION_MATRIX, projectionMatrix );
+	projectionMatrix[ 10 ] = correction - 1;
+	projectionMatrix[ 14 ] = zNear * ( correction - 2 );
+	qglLoadMatrixf( projectionMatrix );
 }
 
 
@@ -1508,7 +1516,7 @@ void R_RenderView (refdef_t *fd)
 
 	R_CastShadow();
 	
-//	R_DrawShadowWorld(); 
+	R_DrawShadowWorld(); 
 	
 	//Draw v_weaps last after shadows
 	R_DrawViewEntitiesOnList ();

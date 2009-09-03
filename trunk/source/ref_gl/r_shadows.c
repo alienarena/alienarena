@@ -546,7 +546,7 @@ World Shadows Triangles
 static vec3_t modelorg;			// relative to viewpoint
 vec3_t g_lightOrigin;
 
-void GL_DrawShadowTriangles(msurface_t * surf)
+void GL_DrawWorldShadowTriangles(msurface_t * surf)
 {
     glpoly_t *p;
     int i, nv = surf->polys->numverts;	
@@ -563,7 +563,7 @@ void GL_DrawShadowTriangles(msurface_t * surf)
 
 		dist = _DotProduct( tempVec, surf->plane->normal );
 
-		if( fabs( dist ) < 2.0f ) 
+		if( fabs( dist ) < 2.0f )
 			return;
 		else 
 			facingLight = dist > 0.0f;
@@ -576,6 +576,8 @@ void GL_DrawShadowTriangles(msurface_t * surf)
 			VectorSubtract( v, g_lightOrigin, ShadowVerts[i]);
 			ShadowVerts[i][3] = 0.0f;
 		}
+
+		//to do - convert to vertex arrays
 
 		//sides
 		qglBegin( GL_TRIANGLE_STRIP );
@@ -687,7 +689,7 @@ void R_RecursiveShadowWorldNode(mnode_t * node)
         if ((surf->flags & SURF_PLANEBACK) != sidebit)
             continue;           // wrong side
 
-        GL_DrawShadowTriangles(surf);
+        GL_DrawWorldShadowTriangles(surf);
     }
 
     // recurse down the back side
@@ -701,17 +703,14 @@ void R_DrawShadowWorld(void)
 	int incr = gl_state.stencil_wrap ? GL_INCR_WRAP_EXT : GL_INCR;
 	int decr = gl_state.stencil_wrap ? GL_DECR_WRAP_EXT : GL_DECR;
 
+	if(gl_shadows->value != 4)
+		return;
+
 	if (!r_drawworld->value)
 		return;
 
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
-	
-	if(gl_shadows->value != 3)
-		return;
-
-	//qglEnableClientState(GL_VERTEX_ARRAY);
-	//qglVertexPointer(3, GL_FLOAT, 0, ShadowArray);
 
 	qglClear(GL_STENCIL_BUFFER_BIT);
 
@@ -765,7 +764,9 @@ void R_DrawShadowWorld(void)
 	qglDepthMask(1);
 	qglDepthFunc(GL_LEQUAL);
 
-	R_ShadowBlend(0.4);
+	R_ShadowBlend(0.4); 
+	
+	//to do - we have to figure out how to fade shadows by distance.  Darplaces, and Doom III do this, I really don't know how yet.
 
 }
 
