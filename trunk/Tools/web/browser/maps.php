@@ -90,10 +90,10 @@ function GenerateMapTable(&$control)
 	
 	echo "<table id=cdtable>\n";
 	echo "<tr>";
-	Insert_Table_Sorter(&$control, $display = 'Map name', $orderby = 'mapname'); 
-	Insert_Table_Sorter(&$control, $display = 'Total player time', $orderby = 'playertime'); 
-	Insert_Table_Sorter(&$control, $display = 'Time served', $orderby = 'servedtime'); 
-	Insert_Table_Sorter(&$control, $display = 'Most players at once', $orderby = 'maxplayers'); 
+	Insert_Table_Sorter($control, $display = 'Map name', $orderby = 'mapname'); 
+	Insert_Table_Sorter($control, $display = 'Total player time', $orderby = 'playertime'); 
+	Insert_Table_Sorter($control, $display = 'Time served', $orderby = 'servedtime'); 
+	Insert_Table_Sorter($control, $display = 'Most players at once', $orderby = 'maxplayers'); 
 	echo "</tr>\n";
 
 	while($svlog_row = mysql_fetch_array($svlog_result, MYSQL_ASSOC))

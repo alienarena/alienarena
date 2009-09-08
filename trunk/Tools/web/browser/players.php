@@ -124,10 +124,10 @@ function GeneratePlayerTable(&$control)
 		
 	echo "<table id=cdtable>\n";
 	echo "<tr>";
-	Insert_Table_Sorter(&$control, $display = 'Name', $orderby = 'name'); 
-//	Insert_Table_Sorter(&$control, $display = 'Total score', $orderby = 'totalscore'); 
-	Insert_Table_Sorter(&$control, $display = 'Time played', $orderby = 'playertime'); 
-//	Insert_Table_Sorter(&$control, $display = 'Fragrate', $orderby = 'fragrate'); 
+	Insert_Table_Sorter($control, $display = 'Name', $orderby = 'name'); 
+//	Insert_Table_Sorter($control, $display = 'Total score', $orderby = 'totalscore'); 
+	Insert_Table_Sorter($control, $display = 'Time played', $orderby = 'playertime'); 
+//	Insert_Table_Sorter($control, $display = 'Fragrate', $orderby = 'fragrate'); 
 	echo "</tr>\n";
 
 	while($pllog_row = mysql_fetch_array($pllog_result, MYSQL_ASSOC))

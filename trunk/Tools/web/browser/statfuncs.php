@@ -73,17 +73,6 @@ function GetLastUpdated()
 	return $lastupdated;
 }
 
-function Insert_Table_Sorter(&$control, $display, $orderby)
-{
-	echo "<th>".$display."<br>";
-	$control['orderby'] = $orderby;
-	$control['sort'] = 'desc';
-	echo "<a href=\"".Generate_URL($control)."\"><img border=0 alt=up src=\"img/up.gif\"></a>";
-	$control['sort'] = 'asc';
-	echo "<a href=\"".Generate_URL($control)."\"><img border=0 alt=down src=\"img/down.gif\"></a>";
-	echo "</th>";
-}
-
 function ShowMapImage($mapname, $thumbnail = 0, $addlink = 1)
 {
 	$filename = GetFilename();
@@ -304,10 +293,10 @@ function GenerateServerTable(&$control)
 	echo "<th>Hostname</th>";
 	echo "<th>Admin</th>";
 
-	Insert_Table_Sorter(&$control, $display = 'Uptime', $orderby = 'uptime'); 
-	Insert_Table_Sorter(&$control, $display = 'Total player time', $orderby = 'playertime'); 
-	Insert_Table_Sorter(&$control, $display = 'Most players at once', $orderby = 'maxplayers'); 
-	Insert_Table_Sorter(&$control, $display = 'Popularity', $orderby = 'popularity'); 
+	Insert_Table_Sorter($control, $display = 'Uptime', $orderby = 'uptime'); 
+	Insert_Table_Sorter($control, $display = 'Total player time', $orderby = 'playertime'); 
+	Insert_Table_Sorter($control, $display = 'Most players at once', $orderby = 'maxplayers'); 
+	Insert_Table_Sorter($control, $display = 'Popularity', $orderby = 'popularity'); 
 	
 	echo "</tr>\n";
 
@@ -359,10 +348,10 @@ function GenerateMapTable(&$control)
 
 	echo "<table id=cdtable>\n";
 	echo "<tr>";
-	Insert_Table_Sorter(&$control, $display = 'Map name', $orderby = 'mapname'); 
-	Insert_Table_Sorter(&$control, $display = 'Total player time', $orderby = 'playertime'); 
-	Insert_Table_Sorter(&$control, $display = 'Time served', $orderby = 'servedtime'); 
-	Insert_Table_Sorter(&$control, $display = 'Most players at once', $orderby = 'maxplayers'); 
+	Insert_Table_Sorter($control, $display = 'Map name', $orderby = 'mapname'); 
+	Insert_Table_Sorter($control, $display = 'Total player time', $orderby = 'playertime'); 
+	Insert_Table_Sorter($control, $display = 'Time served', $orderby = 'servedtime'); 
+	Insert_Table_Sorter($control, $display = 'Most players at once', $orderby = 'maxplayers'); 
 	echo "</tr>\n";
 
 	while($svlog_row = mysql_fetch_array($svlog_result, MYSQL_ASSOC))
@@ -405,10 +394,10 @@ function GeneratePlayerTable(&$control)
 
 	echo "<table id=cdtable>\n";
 	echo "<tr>";
-	Insert_Table_Sorter(&$control, $display = 'Name', $orderby = 'name'); 
-	Insert_Table_Sorter(&$control, $display = 'Total score', $orderby = 'totalscore'); 
-	Insert_Table_Sorter(&$control, $display = 'Time played', $orderby = 'playertime'); 
-	Insert_Table_Sorter(&$control, $display = 'Fragrate', $orderby = 'fragrate'); 
+	Insert_Table_Sorter($control, $display = 'Name', $orderby = 'name'); 
+	Insert_Table_Sorter($control, $display = 'Total score', $orderby = 'totalscore'); 
+	Insert_Table_Sorter($control, $display = 'Time played', $orderby = 'playertime'); 
+	Insert_Table_Sorter($control, $display = 'Fragrate', $orderby = 'fragrate'); 
 	echo "</tr>\n";
 
 	while($pllog_row = mysql_fetch_array($pllog_result, MYSQL_ASSOC))

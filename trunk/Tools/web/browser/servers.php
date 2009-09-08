@@ -176,9 +176,9 @@ function GenerateServerTable(&$control)
 	echo "<th>Country</th>";
 	echo "<th>Admin</th>";
 
-	Insert_Table_Sorter(&$control, $display = 'Uptime', $orderby = 'uptime'); 
-	Insert_Table_Sorter(&$control, $display = 'Total player time', $orderby = 'playertime'); 
-	Insert_Table_Sorter(&$control, $display = 'Most players at once', $orderby = 'maxplayers'); 
+	Insert_Table_Sorter($control, $display = 'Uptime', $orderby = 'uptime'); 
+	Insert_Table_Sorter($control, $display = 'Total player time', $orderby = 'playertime'); 
+	Insert_Table_Sorter($control, $display = 'Most players at once', $orderby = 'maxplayers'); 
 	
 	echo "</tr>\n";
 
