@@ -240,7 +240,9 @@ function GetLastUpdated()
 	return $lastupdated;
 }
 
-function Insert_Table_Sorter(&$control, $display, $orderby)
+// $display is the string to show in the header, $orderby is the sort order
+// uses a copy of $control in order not modify original array
+function Insert_Table_Sorter($control, $display, $orderby)
 {
 	echo "<th>".$display."<br>";
 	$control['orderby'] = $orderby;
@@ -290,7 +292,7 @@ function MinutesToString ($mins, $long=false)
   return empty($time_string) ? 0 : $time_string;
 } 
 
-function GenerateNumResultsSelector(&$control)
+function GenerateNumResultsSelector($control)
 {
 	$current_numresults = $control['results'];
 	echo "<p class=\"cdbody\">Results: ";

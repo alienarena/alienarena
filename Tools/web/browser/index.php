@@ -67,7 +67,7 @@ switch ($control['action'])
 		echo "<img alt=\"Server graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=servers&amp;history={$control['history']}\"><br><br>\n";
 		GenerateTotalServers(&$control);
 		GenerateServerTable(&$control);
-		GenerateNumResultsSelector(&$control);
+		GenerateNumResultsSelector($control);
 		GenerateSearchInput("serversearch", "Server search");
 	break;
 	case 'playerstats':
@@ -75,14 +75,14 @@ switch ($control['action'])
 		echo "<img alt=\"Player graph\" width={$CONFIG['graphwidth']} height={$CONFIG['graphheight']} src=\"graph.php?show=players&amp;history={$control['history']}\"><br><br>\n";
 		GenerateTotalPlayers(&$control);
 		GeneratePlayerTable(&$control);
-		GenerateNumResultsSelector(&$control);
+		GenerateNumResultsSelector($control);
 		GenerateSearchInput("playersearch", "Player search");
 	break;
 	case 'mapstats':
 		/* Get list of most played maps */
 		echo "<p class=\"cdsubtitle\">Map usage in the last {$control['history']} hours</p>\n";
 		GenerateMapTable(&$control);
-		GenerateNumResultsSelector(&$control);
+		GenerateNumResultsSelector($control);
 		GenerateSearchInput("mapsearch", "Map search");
 	break;
 	
