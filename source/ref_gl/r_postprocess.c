@@ -55,7 +55,7 @@ void R_GLSLPostProcess(void)
 		return;
 	
 	//don't allow on low resolutions, too much tearing at edges
-	if(!gl_glsl_shaders->value || vid.width < 1024 || vid.width > 1680 || !gl_state.glsl_shaders) 
+	if(!gl_glsl_shaders->value || vid.width < 1024 || vid.width > 2048 || !gl_state.glsl_shaders) 
 		return;
 
 	if(r_fbFxType == EXPLOSION) {
