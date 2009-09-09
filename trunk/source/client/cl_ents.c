@@ -609,9 +609,6 @@ INTERPOLATE BETWEEN FRAMES TO GET RENDERING PARMS
 ==========================================================================
 */
 
-// PMM - used in shell code
-extern int Developer_searchpath (int who);
-// pmm
 /*
 ===============
 CL_AddPacketEntities
@@ -688,50 +685,38 @@ void CL_AddPacketEntities (frame_t *frame)
 
 		// create a new entity
 
-		// tweak the color of beams
-		if ( renderfx & RF_BEAM )
-		{	// the four beam colors are encoded in 32 bits of skinnum (hack)
-			ent.alpha = 0.30;
-			ent.skinnum = (s1->skinnum >> ((rand() % 4)*8)) & 0xff;
-			ent.model = NULL;
-			ent.lod1 = NULL;
-			ent.lod2 = NULL;
+		ent.lod1 = NULL;
+		ent.lod2 = NULL;
+		ent.team = 0;
+
+		// set skin
+		if (s1->modelindex == 255)
+		{	// use custom player skin
+			ent.skinnum = 0;
+			ci = &cl.clientinfo[s1->skinnum & 0xff];
+			ent.skin = ci->skin;
+			ent.model = ci->model;
+
+			ent.lod1 = ci->lod1;
+			
+			ent.lod2 = ci->lod2;
+			
+			if (!ent.skin || !ent.model)
+			{
+				ent.skin = cl.baseclientinfo.skin;
+				ent.model = cl.baseclientinfo.model;
+			}
+			playermodel = true;
+
 		}
 		else
 		{
-			ent.lod1 = NULL;
-			ent.lod2 = NULL;
-			ent.team = 0;
-
-			// set skin
-			if (s1->modelindex == 255)
-			{	// use custom player skin
-				ent.skinnum = 0;
-				ci = &cl.clientinfo[s1->skinnum & 0xff];
-				ent.skin = ci->skin;
-				ent.model = ci->model;
-
-				ent.lod1 = ci->lod1;
-			
-				ent.lod2 = ci->lod2;
-			
-				if (!ent.skin || !ent.model)
-				{
-					ent.skin = cl.baseclientinfo.skin;
-					ent.model = cl.baseclientinfo.model;
-				}
-				playermodel = true;
-
-			}
-			else
-			{
-				ent.skinnum = s1->skinnum;
-				ent.skin = NULL;
-				ent.model = cl.model_draw[s1->modelindex];
-			}
+			ent.skinnum = s1->skinnum;
+			ent.skin = NULL;
+			ent.model = cl.model_draw[s1->modelindex];
 		}
-
-		if (renderfx & (RF_FRAMELERP|RF_BEAM))
+		
+		if (renderfx & (RF_FRAMELERP))
 		{	// step origin discretely, because the frames
 			// do the animation properly
 			VectorCopy (cent->current.origin, ent.origin);
@@ -752,10 +737,6 @@ void CL_AddPacketEntities (frame_t *frame)
 					(cent->current.origin[i] - cent->prev.origin[i]);
 			}
 		}
-
-		// only used for black hole model right now, FIXME: do better
-		if (renderfx == RF_TRANSLUCENT)
-			ent.alpha = 0.70;
 
 		// render effects (fullbright, translucent, etc)
 		if ((effects & EF_COLOR_SHELL))
@@ -804,19 +785,11 @@ void CL_AddPacketEntities (frame_t *frame)
 		if (!s1->modelindex)
 			continue;
 
-		if (effects & EF_BFG)
-		{
-			ent.flags |= RF_TRANSLUCENT;
-			ent.alpha = 0.30;
-		}
-
-		// RAFAEL
 		if (effects & EF_PLASMA)
 		{
 			ent.flags |= RF_TRANSLUCENT;
 			ent.alpha = 0.6;
 		}
-
 
 		if (effects & EF_FLIES)
 		{
@@ -839,45 +812,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		// color shells generate a seperate entity for the main model
 		if ((effects & EF_COLOR_SHELL) && !(s1->number == cl.playernum+1))
 		{
-			
-			// PMM - at this point, all of the shells have been handled
-			// if we're in the rogue pack, set up the custom mixing, otherwise just
-			// keep going
-//			if(Developer_searchpath(2) == 2)
-//			{
-				// all of the solo colors are fine.  we need to catch any of the combinations that look bad
-				// (double & half) and turn them into the appropriate color, and make double/quad something special
-				if (renderfx & RF_SHELL_HALF_DAM)
-				{
-					if(Developer_searchpath(2) == 2)
-					{
-						// ditch the half damage shell if any of red, blue, or double are on
-						if (renderfx & (RF_SHELL_RED|RF_SHELL_BLUE|RF_SHELL_DOUBLE))
-							renderfx &= ~RF_SHELL_HALF_DAM;
-					}
-				}
-
-				if (renderfx & RF_SHELL_DOUBLE)
-				{
-					if(Developer_searchpath(2) == 2)
-					{
-						// lose the yellow shell if we have a red, blue, or green shell
-						if (renderfx & (RF_SHELL_RED|RF_SHELL_BLUE|RF_SHELL_GREEN))
-							renderfx &= ~RF_SHELL_DOUBLE;
-						// if we have a red shell, turn it to purple by adding blue
-						if (renderfx & RF_SHELL_RED)
-							renderfx |= RF_SHELL_BLUE;
-						// if we have a blue shell (and not a red shell), turn it to cyan by adding green
-						else if (renderfx & RF_SHELL_BLUE)
-							// go to green if it's on already, otherwise do cyan (flash green)
-							if (renderfx & RF_SHELL_GREEN)
-								renderfx &= ~RF_SHELL_BLUE;
-							else
-								renderfx |= RF_SHELL_GREEN;
-					}
-				}
-//			}
-			// pmm
+		
 			ent.flags = renderfx | RF_TRANSLUCENT;
 			ent.alpha = 0.30;
 			V_AddViewEntity (&ent);			
@@ -1148,10 +1083,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 
 	memset (&gun, 0, sizeof(gun));
 
-	if (gun_model)
-		gun.model = gun_model;	// development tool
-	else
-		gun.model = cl.model_draw[ps->gunindex];
+	gun.model = cl.model_draw[ps->gunindex];
 
 	gun.lod1 = NULL;
 	gun.lod2 = NULL;
@@ -1168,21 +1100,12 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 			ps->gunangles[i], cl.lerpfrac);
 	}
 
-	if (gun_frame)
-	{
-		gun.frame = gun_frame;	// development tool
-		gun.oldframe = gun_frame;	// development tool
-	}
+	gun.frame = ps->gunframe;
+	if (gun.frame == 0)
+		gun.oldframe = 0;	// just changed weapons, don't lerp from old
 	else
-	{
-		gun.frame = ps->gunframe;
-		if (gun.frame == 0)
-			gun.oldframe = 0;	// just changed weapons, don't lerp from old
-		else
-			gun.oldframe = ops->gunframe;
-	}
-
-
+		gun.oldframe = ops->gunframe;
+	
 	gun.flags = RF_MINLIGHT | RF_DEPTHHACK | RF_WEAPONMODEL;
 	gun.backlerp = 1.0 - cl.lerpfrac;
 	VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all

@@ -623,7 +623,7 @@ typedef struct
 #define	RF_DEPTHHACK		16		// for view weapon Z crunching
 #define	RF_TRANSLUCENT		32
 #define	RF_FRAMELERP		64
-#define RF_BEAM				128
+#define RF_BEAM				128		// unused
 #define	RF_CUSTOMSKIN		256		// skin is an index in image_precache
 #define	RF_GLOW				512		// pulse lighting for bonus items
 #define RF_SHELL_RED		1024

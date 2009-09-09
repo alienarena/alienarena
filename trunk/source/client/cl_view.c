@@ -578,39 +578,6 @@ float CalcFov (float fov_x, float width, float height)
 	return a;
 }
 
-//============================================================================
-
-// gun frame debugging functions
-void V_Gun_Next_f (void)
-{
-	gun_frame++;
-	Com_Printf ("frame %i\n", gun_frame);
-}
-
-void V_Gun_Prev_f (void)
-{
-	gun_frame--;
-	if (gun_frame < 0)
-		gun_frame = 0;
-	Com_Printf ("frame %i\n", gun_frame);
-}
-
-void V_Gun_Model_f (void)
-{
-	char	name[MAX_QPATH];
-
-	if (Cmd_Argc() != 2)
-	{
-		gun_model = NULL;
-		return;
-	}
-	Com_sprintf (name, sizeof(name), "models/%s/tris.md2", Cmd_Argv(1));
-	gun_model = R_RegisterModel (name);
-}
-
-//============================================================================
-
-
 /*
 =================
 SCR_DrawCrosshair
@@ -956,10 +923,6 @@ V_Init
 */
 void V_Init (void)
 {
-	Cmd_AddCommand ("gun_next", V_Gun_Next_f);
-	Cmd_AddCommand ("gun_prev", V_Gun_Prev_f);
-	Cmd_AddCommand ("gun_model", V_Gun_Model_f);
-
 	Cmd_AddCommand ("viewpos", V_Viewpos_f);
 
 	crosshair = Cvar_Get ("crosshair", "0", CVAR_ARCHIVE);

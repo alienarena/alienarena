@@ -70,6 +70,8 @@ typedef enum
 
 #include "r_model.h"
 
+extern float	r_frametime;
+
 void GL_BeginRendering (int *x, int *y, int *width, int *height);
 void GL_EndRendering (void);
 
@@ -194,6 +196,7 @@ extern	cvar_t	*r_drawsun;
 
 extern	qboolean	map_fog;
 extern	char		map_music[128];
+extern  unsigned	r_weather;
 
 extern  cvar_t		*r_minimap;
 extern  cvar_t		*r_minimap_size;
@@ -276,7 +279,9 @@ void R_DrawWorld (void);
 void R_RenderDlights (void);
 void R_DrawAlphaSurfaces (void);
 void R_RenderBrushPoly (msurface_t *fa);
+void R_DrawSpecialSurfaces(void);
 void R_InitParticleTexture (void);
+void R_DrawParticles (void);
 void GL_DrawRadar(void);
 void Draw_InitLocal (void);
 void GL_SubdivideSurface (msurface_t *fa);
@@ -290,6 +295,9 @@ void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type);
+void R_DrawShadowVolume(entity_t * e);
+void R_DrawShadowWorld(void);
+void R_ShadowBlend(float alpha);
 #ifdef __unix__
 void R_ReadFogScript(char config_file[128]);
 void R_ReadMusicScript(char config_file[128]);

@@ -501,53 +501,43 @@ void SV_BuildClientFrame (client_t *client)
 					continue;		// blocked by a door
 			}
 
-			// beams just check one point for PHS
-			if (ent->s.renderfx & RF_BEAM)
+			// FIXME: if an ent has a model and a sound, but isn't
+			// in the PVS, only the PHS, clear the model
+			if (ent->s.sound)
 			{
-				l = ent->clusternums[0];
-				if ( !(clientphs[l >> 3] & (1 << (l&7) )) )
-					continue;
+				bitvector = fatpvs;	//clientphs;
 			}
 			else
-			{
-				// FIXME: if an ent has a model and a sound, but isn't
-				// in the PVS, only the PHS, clear the model
-				if (ent->s.sound)
-				{
-					bitvector = fatpvs;	//clientphs;
-				}
-				else
-					bitvector = fatpvs;
+				bitvector = fatpvs;
 
-				if (ent->num_clusters == -1)
-				{	// too many leafs for individual check, go by headnode
-					if (!CM_HeadnodeVisible (ent->headnode, bitvector))
-						continue;
-					c_fullsend++;
-				}
-				else
-				{	// check individual leafs
-					for (i=0 ; i < ent->num_clusters ; i++)
-					{
-						l = ent->clusternums[i];
-						if (bitvector[l >> 3] & (1 << (l&7) ))
-							break;
-					}
-					if (i == ent->num_clusters)
-						continue;		// not visible
-				}
-
-				if (!ent->s.modelindex)
-				{	// don't send sounds if they will be attenuated away
-					vec3_t	delta;
-					float	len;
-
-					VectorSubtract (org, ent->s.origin, delta);
-					len = VectorLength (delta);
-					if (len > 400)
-						continue;
-				}
+			if (ent->num_clusters == -1)
+			{	// too many leafs for individual check, go by headnode
+				if (!CM_HeadnodeVisible (ent->headnode, bitvector))
+					continue;
+				c_fullsend++;
 			}
+			else
+			{	// check individual leafs
+				for (i=0 ; i < ent->num_clusters ; i++)
+				{
+					l = ent->clusternums[i];
+					if (bitvector[l >> 3] & (1 << (l&7) ))
+						break;
+				}
+				if (i == ent->num_clusters)
+					continue;		// not visible
+			}
+
+			if (!ent->s.modelindex)
+			{	// don't send sounds if they will be attenuated away
+				vec3_t	delta;
+				float	len;
+
+				VectorSubtract (org, ent->s.origin, delta);
+				len = VectorLength (delta);
+				if (len > 400)
+					continue;
+			}			
 		}
 
 		// add it to the circular client_entities array

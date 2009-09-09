@@ -190,13 +190,11 @@ SOUND_OPENAL_OBJS = \
 	
 
 CODERED_OBJS = \
-	$(BUILDDIR)/client/cl_cin.o \
 	$(BUILDDIR)/client/cl_ents.o \
 	$(BUILDDIR)/client/cl_fx.o \
 	$(BUILDDIR)/client/cl_input.o \
 	$(BUILDDIR)/client/cl_inv.o \
 	$(BUILDDIR)/client/cl_main.o \
-	$(BUILDDIR)/client/cl_newfx.o \
 	$(BUILDDIR)/client/cl_parse.o \
 	$(BUILDDIR)/client/cl_pred.o \
 	$(BUILDDIR)/client/cl_tent.o \
@@ -250,6 +248,7 @@ CODERED_OBJS = \
 	$(BUILDDIR)/ref_gl/r_misc.o \
 	$(BUILDDIR)/ref_gl/r_model.o \
 	$(BUILDDIR)/ref_gl/r_math.o \
+	$(BUILDDIR)/ref_gl/r_particle.o \
 	$(BUILDDIR)/ref_gl/r_postprocess.o \
 	$(BUILDDIR)/ref_gl/r_script.o \
 	$(BUILDDIR)/ref_gl/r_shadows.o \
@@ -268,9 +267,6 @@ REF_GL_GLX_OBJS = \
 $(BUILDDIR)/crx : $(CODERED_OBJS) $(SOUND_OPENAL_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
 	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(OPENALLDFLAGS) $(VORBISLDFLAGS) $(CURLLDFLAGS) $(JPEGLDFLAGS)
 
-$(BUILDDIR)/client/cl_cin.o :     $(CLIENT_DIR)/cl_cin.c
-	$(DO_CC)
-
 $(BUILDDIR)/client/cl_ents.o :    $(CLIENT_DIR)/cl_ents.c
 	$(DO_CC)
 
@@ -284,9 +280,6 @@ $(BUILDDIR)/client/cl_inv.o :     $(CLIENT_DIR)/cl_inv.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_main.o :    $(CLIENT_DIR)/cl_main.c
-	$(DO_CC)
-
-$(BUILDDIR)/client/cl_newfx.o :    $(CLIENT_DIR)/cl_newfx.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_parse.o :   $(CLIENT_DIR)/cl_parse.c
@@ -440,6 +433,9 @@ $(BUILDDIR)/ref_gl/r_model.o :       $(REF_GL_DIR)/r_model.c
 	$(DO_GL_SHLIB_CC)
 
 $(BUILDDIR)/ref_gl/r_math.o :	    $(REF_GL_DIR)/r_math.c
+	$(DO_GL_SHLIB_CC)
+	
+$(BUILDDIR)/ref_gl/r_particle.o :	    $(REF_GL_DIR)/r_particle.c
 	$(DO_GL_SHLIB_CC)
 	
 $(BUILDDIR)/ref_gl/r_postprocess.o :	    $(REF_GL_DIR)/r_postprocess.c

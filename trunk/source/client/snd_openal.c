@@ -2486,20 +2486,6 @@ void S_SoundList( void )
 
 /*
  ==
- S_RawSamples()
-
- Play raw format PCM data.
- Used by cinematic (cl_cin.c).
- ==
- */
-void S_RawSamples( int samples, int rate, int width, int channels, byte *data )
-{
-	/* STUB. Until there is some significant use for this  */
-	Com_DPrintf( "S_RawSamples() is a stub.\n" );
-}
-
-/*
- ==
  S_Activate()
 
  Windows only. gain window focus/lose window focus
