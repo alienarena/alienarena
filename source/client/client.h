@@ -144,15 +144,6 @@ typedef struct
 	int			inventory[MAX_ITEMS];
 
 	//
-	// non-gameserver infornamtion
-	// FIXME: move this cinematic stuff into the cin_t structure
-	FILE		*cinematic_file;
-	int			cinematictime;		// cls.realtime for first cinematic frame
-	int			cinematicframe;
-	char		cinematicpalette[768];
-	qboolean	cinematicpalette_active;
-
-	//
 	// server state information
 	//
 	qboolean	attractloop;		// running the attract loop, any key will menu
@@ -576,8 +567,6 @@ void CL_Download_f (void);
 //
 // cl_view.c
 //
-extern	int			gun_frame;
-extern	struct model_s	*gun_model;
 
 extern qboolean need_free_vbo;
 

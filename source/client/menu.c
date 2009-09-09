@@ -2763,8 +2763,6 @@ const char *M_Credits_Key( int key )
 
 }
 
-extern int Developer_searchpath (int who);
-
 void M_Menu_Credits_f( void )
 {
 
@@ -2795,7 +2793,7 @@ static menuseparator_s	s_blankline;
 
 static void StartGame( void )
 {
-	// disable updates and start the cinematic going
+	// disable updates
 	cl.servercount = -1;
 	M_ForceMenuOff ();
 	Cvar_SetValue( "deathmatch", 1 );
@@ -6443,10 +6441,7 @@ void M_Draw (void)
 	SCR_DirtyScreen ();
 
 	// dim everything behind it down
-	if (cl.cinematictime > 0)
-		Draw_Fill (0,0,viddef.width, viddef.height, 0);
-	else
-		Draw_FadeScreen ();
+	Draw_FadeScreen ();
 
 	// Knigthmare- added Psychospaz's mouse support
 	refreshCursorMenu();

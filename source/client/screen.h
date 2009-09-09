@@ -52,12 +52,4 @@ extern	int			crosshair_width, crosshair_height;
 void SCR_AddDirtyPoint (int x, int y);
 void SCR_DirtyScreen (void);
 
-//
-// scr_cin.c
-//
-void SCR_PlayCinematic (char *name);
-qboolean SCR_DrawCinematic (void);
-void SCR_RunCinematic (void);
-void SCR_StopCinematic (void);
-void SCR_FinishCinematic (void);
 

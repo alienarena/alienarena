@@ -714,8 +714,6 @@ void CL_Disconnect (void)
 
 	cls.connect_time = 0;
 
-	SCR_StopCinematic ();
-
 	if (cls.demorecording)
 		CL_Stop_f ();
 
@@ -2008,7 +2006,6 @@ void CL_Frame (int msec)
 	// advance local effects for next frame
 	CL_RunDLights ();
 	CL_RunLightStyles ();
-	SCR_RunCinematic ();
 	SCR_RunConsole ();
 
 	cls.framecount++;

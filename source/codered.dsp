@@ -59,10 +59,6 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90"
 # Begin Source File
 
-SOURCE=.\client\cl_cin.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\client\cl_ents.c
 # End Source File
 # Begin Source File
@@ -84,10 +80,6 @@ SOURCE=.\client\cl_inv.c
 # Begin Source File
 
 SOURCE=.\client\cl_main.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\client\cl_newfx.c
 # End Source File
 # Begin Source File
 
@@ -240,6 +232,10 @@ SOURCE=.\ref_gl\r_misc.c
 # Begin Source File
 
 SOURCE=.\ref_gl\r_model.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ref_gl\r_particle.c
 # End Source File
 # Begin Source File
 

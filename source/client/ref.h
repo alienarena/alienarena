@@ -167,20 +167,20 @@ typedef struct entity_s
 	/*
 	** most recent data
 	*/
-	float				origin[3];		// also used as RF_BEAM's "from"
-	int					frame;			// also used as RF_BEAM's diameter
+	float				origin[3];	
+	int					frame;		
 
 	/*
 	** previous data for lerping
 	*/
-	float				oldorigin[3];	// also used as RF_BEAM's "to"
+	float				oldorigin[3];	
 	int					oldframe;
 
 	/*
 	** misc
 	*/
 	float	backlerp;				// 0.0 = current, 1.0 = old
-	int		skinnum;				// also used as RF_BEAM's palette index
+	int		skinnum;				
 
 	int		lightstyle;				// for flashing entities
 	float	alpha;					// ignore if RF_TRANSLUCENT isn't set

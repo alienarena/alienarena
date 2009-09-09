@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
   put up loading plaque
   blanked background with loading plaque
   blanked background with menu
-  cinematics
   full screen image for quit and victory
 
   end of unit intermissions
@@ -757,10 +756,7 @@ void SCR_BeginLoadingPlaque (void)
 	if (developer->value)
 		return;
 
-	if (cl.cinematictime > 0)
-		scr_draw_loading = 2;	// clear to balack first
-	else
-		scr_draw_loading = 1;
+	scr_draw_loading = 1;
 
 	SCR_UpdateScreen ();
 	cls.disable_screen = Sys_Milliseconds ();
@@ -1714,61 +1710,16 @@ void SCR_UpdateScreen (void)
 		if (scr_draw_loading == 2)
 		{	//  loading plaque over black screen
 
-			//re.CinematicSetPalette(NULL);
 			SCR_DrawLoading ();
 
 			if (cls.disable_screen)
 				scr_draw_loading = 2;
-
-			//if (cls.consoleActive)
-			//	Con_DrawConsole (0.5, false);
-
+	
 			//NO CONSOLE!!!
 			continue;
-		}
-		// if a cinematic is supposed to be running, handle menus
-		// and console specially
-		else if (cl.cinematictime > 0)
-		{
-			if (cls.key_dest == key_menu)
-			{
-				if (cl.cinematicpalette_active)
-				{
-					R_SetPalette(NULL);
-					cl.cinematicpalette_active = false;
-				}
-				M_Draw ();
-//				R_EndFrame();
-//				return;
-			}
-			else if (cls.key_dest == key_console)
-			{
-				if (cl.cinematicpalette_active)
-				{
-					R_SetPalette(NULL);
-					cl.cinematicpalette_active = false;
-				}
-				SCR_DrawConsole ();
-//				R_EndFrame();
-//				return;
-			}
-			else
-			{
-				SCR_DrawCinematic();
-//				R_EndFrame();
-//				return;
-			}
-		}
+		}		
 		else
 		{
-
-			// make sure the game palette is active
-			if (cl.cinematicpalette_active)
-			{
-				R_SetPalette(NULL);
-				cl.cinematicpalette_active = false;
-			}
-
 			// do 3D refresh drawing, and then update the screen
 			SCR_CalcVrect ();
 
