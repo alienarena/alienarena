@@ -275,6 +275,28 @@ void ChangeWeapon (edict_t *ent)
 
 	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
+#ifdef __unix__
+	if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_violator/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
+	else if( !Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_rocket/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_rlauncher.md2");
+	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_blaster.md2");
+	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_bfg/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_bfg.md2");
+	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_rail/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_railgun.md2");
+	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_shotg2/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_sshotgun.md2");
+	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_shotg/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_shotgun.md2");
+	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_hyperb/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_hyperblaster.md2");
+	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_chain/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
+	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"vehicles/deathball/v_wep.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
+#else
 	if(ent->client->pers.weapon->view_model == "models/weapons/v_violator/tris.md2")
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
 	if(ent->client->pers.weapon->view_model == "models/weapons/v_rocket/tris.md2")
@@ -295,12 +317,16 @@ void ChangeWeapon (edict_t *ent)
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
 	if(ent->client->pers.weapon->view_model == "vehicles/deathball/v_wep.md2")
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
-
+#endif
 
 	sprintf(weaponpath, "%s", weaponmodel);
 	Q2_FindFile (weaponpath, &file); //does it really exist?
 	if(!file) {
+#ifdef __unix__
+		sprintf(weaponpath, "%s%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
+#else
 		sprintf(weaponpath, "%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
+#endif
 		Q2_FindFile (weaponpath, &file);
 		if(!file) //server does not have this player model
 			sprintf(weaponmodel, "players/martianenforcer/weapon.md2");//default player(martian)
@@ -314,9 +340,13 @@ void ChangeWeapon (edict_t *ent)
 	ent->s.modelindex2 = gi.modelindex(weaponmodel);
 
 	//play a sound like in Q3, except for blaster, so it doesn't do it on spawn.
+#ifdef __unix__
+	if( Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.md2") )
+		gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/whoosh.wav"), 1, ATTN_NORM, 0);
+#else
 	if(!(ent->client->pers.weapon->view_model == "models/weapons/v_blast/tris.md2"))
 		gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/whoosh.wav"), 1, ATTN_NORM, 0);
-
+#endif
 	ent->client->anim_priority = ANIM_PAIN;
 	if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 	{
