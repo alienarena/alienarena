@@ -396,6 +396,8 @@ void calSourcesInitialize( ALint device_sources )
 		last = ix;
 
 		// Set Source properties to distance settings and defaults
+		qalSourcef( src_data[ix].oalSource, AL_GAIN, (ALfloat)0.0f );
+		qalSourcei( src_data[ix].oalSource, AL_LOOPING, AL_FALSE );
 		qalSourcef( src_data[ix].oalSource, AL_REFERENCE_DISTANCE,
 		        source_default.reference_distance );
 		qalSourcef( src_data[ix].oalSource, AL_MAX_DISTANCE,
@@ -407,6 +409,7 @@ void calSourcesInitialize( ALint device_sources )
 		        source_default.min_gain );
 		qalSourcef( src_data[ix].oalSource, AL_MAX_GAIN,
 		        source_default.max_gain );
+		qalSourcefv( src_data[ix].oalSource, AL_VELOCITY, zero_velocity );
 		qalSourcefv( src_data[ix].oalSource, AL_DIRECTION, zero_direction );
 		qalSourcef( src_data[ix].oalSource, AL_CONE_OUTER_GAIN,
 		        source_default.cone_outer_gain );
@@ -933,7 +936,7 @@ src_t *calNewSrc( int entnum, int entchannel, sfx_t *sfx, vec3_t origin,
 	qalSourcef( src->oalSource, AL_MAX_DISTANCE, max_distance );
 	qalSourcef( src->oalSource, AL_ROLLOFF_FACTOR, rolloff_factor );
 	qalSourcef( src->oalSource, AL_REFERENCE_DISTANCE, reference_distance );
-
+	qalSourcefv( src->oalSource, AL_VELOCITY, zero_velocity );
 	qalSourcef( src->oalSource, AL_MIN_GAIN, source_default.min_gain );
 	qalSourcef( src->oalSource, AL_MAX_GAIN, source_default.max_gain );
 	qalSourcefv( src->oalSource, AL_DIRECTION, zero_direction );
