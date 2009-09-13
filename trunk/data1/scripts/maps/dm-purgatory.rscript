@@ -1,0 +1,43 @@
+textures/arena10/rockdirt1
+{
+	{
+		map gfx/grass.tga
+		scale static 4 static 4
+		colormap 1 1 1
+		grass
+		grasstype 0
+	}
+}
+textures/arena9/roundlight
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		lensflare
+	}
+}
+textures/arena7/light10
+{
+	{
+		lensflare
+	}
+}
+textures/metal/fade2
+{
+	{
+		map gfx/beam3.tga
+		scale static 80 static 80
+		colormap 1 1 1
+		beam
+	}
+}
+textures/water/bluewater
+{
+	{
+		map gfx/dmturboreflection.tga
+		distort
+	}
+}
+		

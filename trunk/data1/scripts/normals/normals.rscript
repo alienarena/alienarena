@@ -701,3 +701,10 @@ maps/meshes/controls
 		glow
 	}
 }
+maps/meshes/gothic/freedom_statue_green
+{
+	{
+		map maps/meshes/gothic/fd_statue_normal.jpg
+		normalmap
+	}
+}
