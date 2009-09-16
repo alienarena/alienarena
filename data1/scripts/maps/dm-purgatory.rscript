@@ -2,7 +2,7 @@ textures/arena10/rockdirt1
 {
 	{
 		map gfx/grass.tga
-		scale static 4 static 4
+		scale static 8 static 8
 		colormap 1 1 1
 		grass
 		grasstype 0
