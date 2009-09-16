@@ -708,3 +708,10 @@ maps/meshes/gothic/freedom_statue_green
 		normalmap
 	}
 }
+maps/meshes/cables
+{
+	{
+		map maps/meshes/cables_normal.jpg
+		normalmap
+	}
+}

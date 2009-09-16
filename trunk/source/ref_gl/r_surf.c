@@ -1256,7 +1256,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 		if (surf->visframe != r_framecount)
 			continue;
 
-		if ( (surf->flags & SURF_PLANEBACK) != sidebit || (surf->flags & SURF_NODRAW) )
+		if ( (surf->flags & SURF_PLANEBACK) != sidebit )
 			continue;		// wrong side
 
 		if (surf->texinfo->flags & SURF_SKY)
