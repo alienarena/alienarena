@@ -715,3 +715,12 @@ maps/meshes/cables
 		normalmap
 	}
 }
+maps/meshes/gothic/lamp
+{
+	{
+		map maps/meshes/gothic/lamp_normal.tga
+		normalmap
+		map2 maps/meshes/gothic/lamp_fx.tga
+		glow
+	}
+}
