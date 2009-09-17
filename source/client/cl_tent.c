@@ -26,7 +26,7 @@ cl_sustain_t	cl_sustains[MAX_SUSTAINS];
 struct sfx_s	*cl_sfx_ric1;
 struct sfx_s	*cl_sfx_ric2;
 struct sfx_s	*cl_sfx_ric3;
-struct sfx_s	*cl_sfx_lashit;
+// [no file] struct sfx_s	*cl_sfx_lashit;
 struct sfx_s	*cl_sfx_spark5;
 struct sfx_s	*cl_sfx_spark6;
 struct sfx_s	*cl_sfx_spark7;
@@ -49,7 +49,7 @@ void CL_RegisterTEntSounds (void)
 	cl_sfx_ric1 = S_RegisterSound ("world/ric1.wav");
 	cl_sfx_ric2 = S_RegisterSound ("world/ric2.wav");
 	cl_sfx_ric3 = S_RegisterSound ("world/ric3.wav");
-	cl_sfx_lashit = S_RegisterSound("weapons/lashit.wav");
+	// [no file] cl_sfx_lashit = S_RegisterSound("weapons/lashit.wav");
 	cl_sfx_railg = S_RegisterSound ("weapons/railgf1a.wav");
 	cl_sfx_rockexp = S_RegisterSound ("weapons/rocklx1a.wav");
 
@@ -345,8 +345,7 @@ void CL_ParseTEnt (void)
 		}
 		else
 			CL_ParticleEffect (pos, dir, 0xb0, 40);
-		//FIXME : replace or remove this sound
-		S_StartSound (pos, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
+		// [no file] S_StartSound (pos, 0, 0, cl_sfx_lashit, 1, ATTN_NORM, 0);
 		break;
 
 	case TE_LASERBEAM:				// martian laser effect

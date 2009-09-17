@@ -23,6 +23,7 @@
  * Reference:
  *   OpenAL 1.1 Specification and Reference (June 2005)
  *   OpenAL Programmer's Guide : OpenAL Version 1.1 (June 2007)
+ *   OpenAL Deployment Guide (PC Windows) Version 0.16 (June 2007)
  *	 http://www.openal.org (at creativelabs.com)
  *	 http://kcat.strangesoft.net/openal.html  (OpenAL Soft)
  *
@@ -38,14 +39,21 @@
 /*
  * Sound CVARS
  */
+#define MAX_SRC 128
+#define MIN_SRC_DEFAULT 96
 /*--- previous system ---*/
 // These 2 are defined in cl_main.c
 //cvar_t *background_music; //     enable/disable music
 //cvar_t *background_music_vol; // music volume setting
-cvar_t *s_initsound;//     in cfg or on command line, to disable sound
-cvar_t *s_volume; //       global volume setting
+cvar_t *s_initsound; //   in cfg or on command line, to disable sound
+cvar_t *s_volume; //      global volume setting
 /*--- OpenAL additions ---*/
-cvar_t *s_doppler; //  0=doppler off, non-zero Doppler Factor
+cvar_t *s_doppler; //     0=doppler off, non-zero Doppler Factor
+cvar_t *s_maxsources; //  upper limit on generated Sources
+cvar_t *s_minsources; //  lower limit on generated Sources
+cvar_t *s_device; //      name of device to use
+/*--- debug ---*/
+cvar_t *snd_developer; // for debug printf's
 
 /*
  * Sound System State Control
@@ -61,7 +69,7 @@ typedef struct sfx_s
 {
 	void *backlink; //           link to the sfx_link node
 	qboolean silent; //          for when sound effect file is missing
-	qboolean bg_music; //         this is background music
+	qboolean bg_music; //        this is background music
 	int registration_sequence; // used for culling stale sfx's from pre-cache
 	int byte_width; //           1=8-bit, 2=16-bit
 	int channels; //             1=mono, 2=stereo,
@@ -129,7 +137,6 @@ typedef struct srclink_s // node for the src_t lists
 	src_t *src;
 } srclink_t;
 
-#define MAX_SRC 128
 srclink_t *src_datahead;
 srclink_t *src_freehead;
 srclink_t src_link[MAX_SRC];
@@ -164,39 +171,6 @@ const ALfloat default_orientation[6] =
 const ALfloat zero_direction[3] =
 { 0.0f, 0.0f, 0.0f };
 
-const struct source_default_s
-{
-	// Source properties
-	ALfloat pitch;
-	ALfloat gain;
-	ALfloat max_distance;
-	ALfloat rolloff_factor;
-	ALfloat reference_distance;
-	ALfloat static_max_distance;
-	ALfloat static_rolloff_factor;
-	ALfloat static_reference_distance;
-	ALfloat min_gain;
-	ALfloat max_gain;
-	ALfloat cone_outer_gain;
-	ALfloat cone_inner_angle;
-	ALfloat cone_outer_angle;
-	int stop_timer_delay;
-} source_default =
-{ (ALfloat)1.0f, //          AL_PITCH
-        (ALfloat)1.0f, //    AL_GAIN
-        (ALfloat)1200.0f, //  AL_MAX_DISTANCE
-        (ALfloat)1.0f, //    AL_ROLLOFF_FACTOR
-        (ALfloat)200.0f, //  AL_REFERENCE_DISTANCE
-        (ALfloat)600.0f, //  AL_MAX_DISTANCE (ATTN_STATIC)
-        (ALfloat)1.4f, //    AL_ROLLOFF_FACTOR (ATTN_STATIC)
-        (ALfloat)50.0f, //   AL_REFERENCE_DISTANCE (ATTN_STATIC)
-        (ALfloat)0.0f, //    AL_MIN_GAIN
-        (ALfloat)1.0f, //    AL_MAX_GAIN
-        (ALfloat)0.0f, //    AL_CONE_OUTER_GAIN
-        (ALfloat)360.0f, //  AL_CONE_INNER_ANGLE
-        (ALfloat)360.0 //   AL_CONE_OUTER_ANGLE
-        };
-
 /*
  * Settings for OpenAL context
  *
@@ -225,20 +199,82 @@ const ALfloat speed_of_sound = (ALfloat)9.0f;
 const ALfloat velocity_max_valid = (ALfloat)( 3.0f * 3.0f );
 ALfloat doppler_factor;
 
+const struct source_default_s
+{
+	// Source properties
+	ALfloat pitch;
+	ALfloat gain;
+	ALfloat looping_gain;
+	ALfloat max_distance;
+	ALfloat rolloff_factor;
+	ALfloat reference_distance;
+	ALfloat idle_max_distance;
+	ALfloat idle_rolloff_factor;
+	ALfloat idle_reference_distance;
+	ALfloat static_max_distance;
+	ALfloat static_rolloff_factor;
+	ALfloat static_reference_distance;
+	ALfloat looping_max_distance;
+	ALfloat looping_rolloff_factor;
+	ALfloat looping_reference_distance;
+	ALfloat min_gain;
+	ALfloat max_gain;
+	ALfloat cone_outer_gain;
+	ALfloat cone_inner_angle;
+	ALfloat cone_outer_angle;
+	int stop_timer_delay;
+} source_default =
+{
+		(ALfloat)1.0f, //    AL_PITCH
+        (ALfloat)1.0f, //    AL_GAIN
+        (ALfloat)0.7f, //    AL_GAIN for auto loop sounds
+        // ATTN_NORM:
+        (ALfloat)3200.0f, // AL_MAX_DISTANCE (ATTN_NORM)
+        (ALfloat)1.5f, //    AL_ROLLOFF_FACTOR (ATTN_NORM)
+        (ALfloat)320.0f, //  AL_REFERENCE_DISTANCE (ATTN_NORM)
+        // ATTN_IDLE:
+        (ALfloat)2800.0f, // AL_MAX_DISTANCE (ATTN_IDLE)
+        (ALfloat)2.0f, //    AL_ROLLOFF_FACTOR (ATTN_IDLE)
+        (ALfloat)280.0f, //  AL_REFERENCE_DISTANCE (ATTN_IDLE)
+        // ATTN_STATIC:
+        (ALfloat)2400.0f, // AL_MAX_DISTANCE (ATTN_STATIC)
+        (ALfloat)2.0f, //    AL_ROLLOFF_FACTOR (ATTN_STATIC)
+        (ALfloat)240.0f, //  AL_REFERENCE_DISTANCE (ATTN_STATIC)
+        // "Auto Looping"
+        (ALfloat)1600.0f, // AL_MAX_DISTANCE (Looping)
+        (ALfloat)1.8f, //    AL_ROLLOFF_FACTOR (Looping)
+        (ALfloat)160.0f, //  AL_REFERENCE_DISTANCE (Looping)
+        //
+        (ALfloat)0.0f, //    AL_MIN_GAIN
+        (ALfloat)1.0f, //    AL_MAX_GAIN
+        (ALfloat)0.0f, //    AL_CONE_OUTER_GAIN
+        (ALfloat)360.0f, //  AL_CONE_INNER_ANGLE
+        (ALfloat)360.0f //   AL_CONE_OUTER_ANGLE
+ };
+
 /*
  * Settings for Distance Culling
  *
  * - OpenAL does not cull by distance, just scales gain. Its up to
- * the application to cull.
- * - Cull distance should be greater than AL_MAX_DISTANCE.
- * - Its a compromise between, say, hearing visible explosions and
- * not hearing distant non-visible explosions
- * - The static value is for attenuation == ATTN_STATIC which are steeply
- * attenuated. So we only hear nearby environmental sounds, probably a good
- * idea. There is a static AL_MAX_DISTANCE, also, for such Sources.
+ *   the application to cull.
+ * - Today's theory is that the cull distance should take into account
+ *   longest line-of-sight paths in maps, so visible events are heard.
+ *   And, then, depend mostly on the distance attenuation model to
+ *   keep things reasonable.
  */
-const ALfloat sq_cull_distance = (ALfloat)( 1600.0f * 1600.0f );
-const ALfloat static_sq_cull_distance = (ALfloat)( 720.0f * 720.0f );
+const ALfloat norm_sq_cull_distance = (ALfloat)( 3296.0f * 3296.0f );
+const ALfloat idle_sq_cull_distance = (ALfloat)( 2864.0f * 2864.0f );
+const ALfloat static_sq_cull_distance = (ALfloat)( 2464.0f * 2464.0f );
+const ALfloat looping_sq_cull_distance = (ALfloat)( 1664.0f * 1664.0f );
+const ALfloat looping_cull_hysteresis = (ALfloat)( 64.0f * 64.0f );
+
+/*
+ * OpenAL Device
+ */
+#define MAX_OAL_DEVICES 16
+const ALCchar* oalDeviceList; // pointer to OpenAL's nul-separated device list
+int oalDeviceCount; // number of valid devices
+ALCchar* pDeviceNames[MAX_OAL_DEVICES]; // pointers to valid devices in list
 
 /*
  * Other settings
@@ -250,6 +286,33 @@ const int stop_timer_msecs = 750; // for src_t stop_timer field
  */
 unsigned short pcmNil[] =
 { 0 };
+
+/*
+==
+ Snd_DPrintf()
+
+  debug printf when "snd_developer" cvar is set
+  does not print messages where level > snd_developer cvar value
+  use 1 for "normal" developer error/status messages,
+   >1 for higher rate event monitoring, for example.
+
+  Note: the usual Com_DPrintf() sometimes floods the console output
+==
+*/
+void Snd_DPrintf( int level, char *fmt, ... )
+{
+	va_list		argptr;
+	char		msg[256];
+
+	if( !snd_developer || !snd_developer->value || level > snd_developer->value )
+		return;
+
+	va_start( argptr, fmt );
+	vsnprintf(msg, sizeof(msg), fmt, argptr );
+	va_end (argptr);
+
+	Com_Printf ("%s", msg);
+}
 
 /*
 ==
@@ -267,22 +330,22 @@ ALenum calErrorCheckAL( int line_no )
 	case AL_NO_ERROR:
 		break;
 	case AL_INVALID_NAME:
-		Com_DPrintf( "OpenAL Error: AL_INVALID_NAME (%i)\n", line_no );
+		Snd_DPrintf( 1,"OpenAL Error: AL_INVALID_NAME (%i)\n", line_no );
 		break;
 	case AL_INVALID_ENUM:
-		Com_DPrintf( "OpenAL Error: AL_INVALID_ENUM (%i)\n", line_no );
+		Snd_DPrintf( 1, "OpenAL Error: AL_INVALID_ENUM (%i)\n", line_no );
 		break;
 	case AL_INVALID_VALUE:
-		Com_DPrintf( "OpenAL Error: AL_INVALID_VALUE (%i)\n", line_no );
+		Snd_DPrintf( 1, "OpenAL Error: AL_INVALID_VALUE (%i)\n", line_no );
 		break;
 	case AL_INVALID_OPERATION:
-		Com_DPrintf( "OpenAL Error: AL_INVALID_OPERATION (%i)\n", line_no );
+		Snd_DPrintf( 1, "OpenAL Error: AL_INVALID_OPERATION (%i)\n", line_no );
 		break;
 	case AL_OUT_OF_MEMORY:
-		Com_DPrintf( "OpenAL Error: AL_OUT_OF_MEMORY (%i)\n", line_no );
+		Snd_DPrintf( 1, "OpenAL Error: AL_OUT_OF_MEMORY (%i)\n", line_no );
 		break;
 	default:
-		Com_DPrintf( "OpenAL Error: AL Code = %i (%#X) (%i)\n", error_code,
+		Snd_DPrintf( 1, "OpenAL Error: AL Code = %i (%#X) (%i)\n", error_code,
 		        error_code, line_no );
 		break;
 	}
@@ -306,22 +369,22 @@ ALCenum calErrorCheckALC( ALCdevice *device, int line_no )
 	case ALC_NO_ERROR:
 		break;
 	case ALC_INVALID_DEVICE:
-		Com_DPrintf( "OpenALC Error: ALC_INVALID_DEVICE (%i)\n", line_no );
+		Snd_DPrintf( 1, "OpenALC Error: ALC_INVALID_DEVICE (%i)\n", line_no );
 		break;
 	case ALC_INVALID_CONTEXT:
-		Com_DPrintf( "OpenALC Error: ALC_INVALID_CONTEXT (%i)\n", line_no );
+		Snd_DPrintf( 1, "OpenALC Error: ALC_INVALID_CONTEXT (%i)\n", line_no );
 		break;
 	case ALC_INVALID_ENUM:
-		Com_DPrintf( "OpenALC Error: ALC_INVALID_ENUM (%i)\n", line_no );
+		Snd_DPrintf( 1, "OpenALC Error: ALC_INVALID_ENUM (%i)\n", line_no );
 		break;
 	case ALC_INVALID_VALUE:
-		Com_DPrintf( "OpenALC Error: ALC_INVALID_VALUE (%i)\n", line_no );
+		Snd_DPrintf( 1, "OpenALC Error: ALC_INVALID_VALUE (%i)\n", line_no );
 		break;
 	case ALC_OUT_OF_MEMORY:
-		Com_DPrintf( "OpenALC Error: ALC_OUT_OF_MEMORY (%i)\n", line_no );
+		Snd_DPrintf( 1, "OpenALC Error: ALC_OUT_OF_MEMORY (%i)\n", line_no );
 		break;
 	default:
-		Com_DPrintf( "OpenALC Error: ALC Code = %i (%#X) (%i)\n", error_code,
+		Snd_DPrintf( 1, "OpenALC Error: ALC Code = %i (%#X) (%i)\n", error_code,
 		        error_code, line_no );
 		break;
 	}
@@ -344,6 +407,7 @@ void calSourcesInitialize( ALint device_sources )
 	int last;
 	ALuint gensrc[MAX_SRC];
 	ALint sources_n;
+	char cvarset[16];
 
 	// init Source lists to empty
 	src_datahead = NULL;
@@ -355,18 +419,27 @@ void calSourcesInitialize( ALint device_sources )
 	max_sources_failed = 0;
 
 	// generate a collection of OpenAL Sources
-	// clamp to what the current Device reports as available Mono Sources
-	// less one, to make sure there is a source available for background music
-	sources_n = ( device_sources <= MAX_SRC ) ? (device_sources-1) : MAX_SRC ;
-	if( sources_n <= 0 )
-	{ // assuming error message is output by caller
-		return;
+	// may be limited by what the current Device supports
+	// otherwise use the s_maxsources cvar
+	if( s_maxsources->integer > MAX_SRC || s_maxsources->integer <= 0 )
+	{ // set to default
+		Com_sprintf(cvarset, sizeof(cvarset),"%i", MAX_SRC );
+		Cvar_ForceSet( "s_maxsources", cvarset );
 	}
+	sources_n = s_maxsources->integer; // cvar sets limit on sources
+	if( device_sources > 0 && sources_n > device_sources )
+	{ // less one seems to work better
+		sources_n = device_sources;
+		if( sources_n > 1 )
+			--sources_n;
+	}
+
 	qalGetError();
 	qalGenSources( sources_n, gensrc ); // generate the collection of Sources
 	if( calErrorCheckAL( __LINE__ ) != AL_NO_ERROR )
 	{
-		Com_Printf("OpenAL Source generation error. Sound effects disabled\n");
+		Com_Printf("Failed to generate %i OpenAL Sources. "
+				" Sound effects disabled\n", sources_n );
 		return;
 	}
 
@@ -468,6 +541,7 @@ src_t *calSourceAlloc( void )
 		{
 			max_sources_failed = source_failed_counter;
 		}
+		//Snd_DPrintf( 3, "[Source Allocation Failed]\n" );
 	}
 
 	return src;
@@ -779,10 +853,18 @@ src_t *calNewSrc( int entnum, int entchannel, sfx_t *sfx, vec3_t origin,
 	ALfloat position[3];
 	vec_t distance_squared;
 	vec3_t delta;
-	ALfloat max_distance;
-	ALfloat rolloff_factor;
-	ALfloat reference_distance;
+	ALfloat max_distance = 0.0f;
+	ALfloat rolloff_factor = 0.0f;
+	ALfloat reference_distance = 0.0f;
 	ALint state;
+	ALint attn_class;
+
+	attn_class = (int)( attenuation + 0.5f );
+	if( attn_class < ATTN_NONE || attn_class > ATTN_STATIC )
+	{
+		Snd_DPrintf( 1, "Program Error: Invalid Attenuation (%i)\n", __LINE__);
+		return NULL;
+	}
 
 	src = calSourceAlloc();
 	if( src == NULL )
@@ -796,7 +878,7 @@ src_t *calNewSrc( int entnum, int entchannel, sfx_t *sfx, vec3_t origin,
 	src->entnum = entnum;
 	src->entchannel = entchannel;
 	src->fixed_origin = ( origin != NULL );
-	src->attn_class = (int)( attenuation + 0.5f );
+	src->attn_class = attn_class;
 	src->looping = false;
 	src->loop_mark = lpmk_nonloop;
 	src->entity_index = entnum; // might be 0. fixed_origin overrides.
@@ -805,7 +887,7 @@ src_t *calNewSrc( int entnum, int entchannel, sfx_t *sfx, vec3_t origin,
 
 	if( !src->fixed_origin && ( ( src->entchannel == CHAN_WEAPON
 	        && src->attn_class == ATTN_NORM ) || ( src->start_timer != 0
-	        && src->entchannel == CHAN_AUTO && src->attn_class == ATTN_NORM ) ) )
+	        && src->entchannel == CHAN_AUTO && src->attn_class == ATTN_NORM )))
 	{ // setup for updating velocity for doppler.
 		src->velocity_state = velst_init;
 	}
@@ -813,6 +895,8 @@ src_t *calNewSrc( int entnum, int entchannel, sfx_t *sfx, vec3_t origin,
 	if( src->entnum != 0 && src->entchannel != 0 )
 	{ // Theory: Stop anything playing with the same entity and non-zero channel
 		/*
+		 * it seems unnecessary to stop same channel sounds in most cases
+		 *
 		 * Some special hacks here.
 		 * - moving things (plats, doors) require the "closing/landing" sound
 		 *  to stop the "traveling" sound.
@@ -914,18 +998,31 @@ src_t *calNewSrc( int entnum, int entchannel, sfx_t *sfx, vec3_t origin,
 	switch( src->attn_class )
 	{ // distance attenuation variants.
 	case ATTN_NONE: // "full volume the entire level"
-	case ATTN_NORM:
-	case ATTN_IDLE: // TODO: consider separate setting for IDLE
+		reference_distance =  0.0f;
+		max_distance = 0.0f;
+		rolloff_factor = 0.0f;
+		break;
+
+	case ATTN_NORM:  // normal distance attenuation
 		reference_distance = source_default.reference_distance;
 		max_distance = source_default.max_distance;
 		rolloff_factor = source_default.rolloff_factor;
 		break;
 
+	case ATTN_IDLE: // "idle" (meaning?) distance attenuation
+		reference_distance = source_default.idle_reference_distance;
+		max_distance = source_default.idle_max_distance;
+		rolloff_factor = source_default.idle_rolloff_factor;
+		break;
+
 	case ATTN_STATIC: // "diminish very rapidly with distance"
-	default:
 		reference_distance = source_default.static_reference_distance;
 		max_distance = source_default.static_max_distance;
 		rolloff_factor = source_default.static_rolloff_factor;
+		break;
+
+	default: // should be impossible, checked above
+		Sys_Error("In snd_openal.c:calNewSrc()");
 		break;
 	}
 
@@ -1014,13 +1111,13 @@ src_t *calNewSrcAutoLoop( int entity_index, int sound_field )
 
 	if( sfx == NULL )
 	{ // note: sound_precache sfx pointers are determined by S_RegisterSound()
+		//Snd_DPrintf( 3, "[looping sound not registered (%i)", __LINE__ );
 		return NULL;
 	}
 
-	if( sfx->bg_music || !Q_strncasecmp( sfx->name, "music", 5 )
-			|| !Q_strncasecmp( sfx->name, "misc/menumusic", 14 ))
+	if( sfx->bg_music || !Q_strncasecmp( sfx->name, "music", 5 ))
 	{ //  background music from speakers is obsolete
-		// TODO: try to detect this earlier
+		//Snd_DPrintf( 3, "[background music looping sound (%i)", __LINE__ );
 		return NULL;
 	}
 
@@ -1035,7 +1132,7 @@ src_t *calNewSrcAutoLoop( int entity_index, int sound_field )
 	src->entnum = entity_index;
 	src->entchannel = CHAN_AUTO;
 	src->fixed_origin = false;
-	src->attn_class = ATTN_NORM;
+	src->attn_class = ATTN_NONE; // Does not apply
 	src->looping = true;
 	src->loop_mark = lpmk_start;
 	src->entity_index = entity_index;
@@ -1049,7 +1146,6 @@ src_t *calNewSrcAutoLoop( int entity_index, int sound_field )
 		src->velocity_state = velst_nodoppler; // of course
 		qalSourcei( src->oalSource, AL_SOURCE_RELATIVE, AL_TRUE );
 		qalSourcefv( src->oalSource, AL_POSITION, zero_position );
-
 	}
 	else
 	{ //  set position from entity information
@@ -1058,13 +1154,13 @@ src_t *calNewSrcAutoLoop( int entity_index, int sound_field )
 		qalSourcefv( src->oalSource, AL_POSITION, source_position );
 	}
 
-	qalSourcef( src->oalSource, AL_GAIN, source_default.gain );
+	qalSourcef( src->oalSource, AL_GAIN, source_default.looping_gain );
 	qalSourcef( src->oalSource, AL_REFERENCE_DISTANCE,
-	        source_default.static_reference_distance );
+	        source_default.looping_reference_distance );
 	qalSourcef( src->oalSource, AL_MAX_DISTANCE,
-	        source_default.static_max_distance );
+	        source_default.looping_max_distance );
 	qalSourcef( src->oalSource, AL_ROLLOFF_FACTOR,
-	        source_default.static_rolloff_factor );
+	        source_default.looping_rolloff_factor );
 	qalSourcefv( src->oalSource, AL_VELOCITY, zero_velocity );
 
 	// Make sure Source properties are at defaults
@@ -1134,7 +1230,7 @@ void calLoadSound( sfx_t *sfx )
 
 	if( sfx->silent )
 	{ // unable to get sound effect data
-		Com_DPrintf( "Sound File %s could not be read.\n", ( sfx->aliased
+		Snd_DPrintf( 1, "Sound File %s could not be read.\n", ( sfx->aliased
 		        ? sfx->truename : sfx->name ) );
 		return;
 	}
@@ -1149,7 +1245,7 @@ void calLoadSound( sfx_t *sfx )
 		if( calErrorCheckAL( __LINE__ ) != AL_NO_ERROR )
 		{ // failed to transfer
 			sfx->silent = true;
-			Com_DPrintf( "Sound File %s failed to load into OpenAL buffer\n",
+			Snd_DPrintf( 1, "Sound File %s failed to load into OpenAL buffer\n",
 			        ( sfx->aliased ? sfx->truename : sfx->name ) );
 		}
 		else
@@ -1160,7 +1256,7 @@ void calLoadSound( sfx_t *sfx )
 	else
 	{ // not a supported file format
 		sfx->silent = true;
-		Com_DPrintf( "Sound File %s's format is not supported.\n",
+		Snd_DPrintf( 1, "Sound File %s's format is not supported.\n",
 		        ( sfx->aliased ? sfx->truename : sfx->name ) );
 	}
 
@@ -1179,47 +1275,29 @@ void calLoadSound( sfx_t *sfx )
  */
 void calContextInfo( ALCdevice *pDevice )
 {
-	const ALCchar* defaultdevice;
-	const ALCchar* devicelist;
 	ALCint alc_frequency;
 	ALCint alc_mono_sources;
 	ALCint alc_stereo_sources;
 	ALCint alc_refresh;
 	ALCint alc_sync;
+	int ix;
 
 	calErrorCheckALC( pDevice, __LINE__ );
 
-	Com_Printf( "OpenAL info:\n" );
+	Com_Printf( "OpenAL Information:\n" );
+	Com_Printf( "Active Device: %s\n", qalcGetString( pDevice, ALC_DEVICE_SPECIFIER ));
 	Com_Printf( "  Vendor:     %s\n", qalGetString( AL_VENDOR ) );
 	Com_Printf( "  Version:    %s\n", qalGetString( AL_VERSION ) );
 	Com_Printf( "  Renderer:   %s\n", qalGetString( AL_RENDERER ) );
-	Com_Printf( "  AL Extensions: %s\n", qalGetString( AL_EXTENSIONS ) );
-	Com_Printf( "  ALC Extensions: %s\n", qalcGetString( pDevice,
-	        ALC_EXTENSIONS ) );
-	if( qalcIsExtensionPresent( NULL, "ALC_ENUMERATION_EXT" ) )
-	{
-
-		defaultdevice = qalcGetString( NULL, ALC_DEFAULT_DEVICE_SPECIFIER );
-		Com_Printf( "  Default Device: %s\n", defaultdevice );
-
-		devicelist = qalcGetString( NULL, ALC_DEVICE_SPECIFIER );
-		Com_Printf( "  Available Devices:\n" );
-		while( strlen( devicelist ) > 0 )
-		{
-			Com_Printf( "    %s\n", devicelist );
-			devicelist = &( devicelist[strlen( devicelist ) + 1] );
-		}
-	}
 	qalcGetIntegerv( pDevice, ALC_FREQUENCY, 1, &alc_frequency );
 	Com_Printf( "  ALC Frequency: %i\n", alc_frequency );
+	Com_Printf( "  Generated Buffer Count: %i\n", actual_sfx_count );
+	// Source statistics
 	qalcGetIntegerv( pDevice, ALC_MONO_SOURCES, 1, &alc_mono_sources );
 	Com_Printf( "  ALC Mono Sources: %i\n", alc_mono_sources );
 	qalcGetIntegerv( pDevice, ALC_STEREO_SOURCES, 1, &alc_stereo_sources );
 	Com_Printf( "  ALC Stereo Sources: %i\n", alc_stereo_sources );
 	Com_Printf( "  Generated Source Count: %i\n", actual_src_count );
-	Com_Printf( "  Generated Buffer Count: %i\n", actual_sfx_count );
-
-	// Source statistics
 	if( max_sources_used > 0 )
 	{
 		Com_Printf( "  Maximum Sources Used: %i\n", max_sources_used );
@@ -1229,14 +1307,19 @@ void calContextInfo( ALCdevice *pDevice )
 					max_sources_used + max_sources_failed );
 		}
 	}
-
-	// useful only for developers
+	Snd_DPrintf( 1, "  AL Extensions: %s\n", qalGetString( AL_EXTENSIONS ) );
+	Snd_DPrintf( 1, "  ALC Extensions: %s\n", qalcGetString( pDevice,ALC_EXTENSIONS ) );
 	qalcGetIntegerv( pDevice, ALC_REFRESH, 1, &alc_refresh );
-	Com_DPrintf( "  ALC Refresh: %i\n", alc_refresh);
+	Snd_DPrintf( 1, "  ALC Refresh: %i\n", alc_refresh);
 	qalcGetIntegerv( pDevice, ALC_SYNC, 1, &alc_sync );
-	Com_DPrintf( "  ALC Sync: %i\n", alc_sync );
-	Com_DPrintf( "Speed of Sound: %f\n", speed_of_sound );
-	Com_DPrintf( "Doppler Factor: %f\n", doppler_factor );
+	Snd_DPrintf( 1, "  ALC Sync: %i\n", alc_sync );
+	Com_Printf( "Available Devices:\n" );
+	for( ix = 0; ix < oalDeviceCount; ++ix )
+	{
+		Com_Printf("  %s\n", pDeviceNames[ix] );
+	}
+	Snd_DPrintf( 1, "Speed of Sound: %f\n", speed_of_sound );
+	Snd_DPrintf( 1, "Doppler Factor: %f\n", doppler_factor );
 
 	calErrorCheckALC( pDevice, __LINE__ );
 }
@@ -1274,6 +1357,167 @@ void S_UpdateDopplerFactor( void )
 /*
  ==
 
+ calEnumerateDevices()
+
+  Builds a list of devices supporting OpenAL 1.1 or greater
+  An empty list probably indicates OpenAL 1.0 devices only
+
+  Notes:
+   The OpenAL device list is a null-separated, double-null terminated
+    list of device name strings
+   snd_restart command should rebuild list because devices can change
+
+ ==
+ */
+void calEnumerateDevices( void )
+{
+	ALCchar* pDeviceName;
+	ALCdevice *pDevice;
+	ALCint major_version;
+	ALCint minor_version;
+	int ix;
+	int len;
+	int pos;
+	qboolean success;
+
+	ix = 0;
+	pos = 0;
+	if( qalcIsExtensionPresent( NULL, "ALC_ENUMERATION_EXT" ) )
+	{
+		oalDeviceList = qalcGetString( NULL, ALC_DEVICE_SPECIFIER );
+		pDeviceName = (ALCchar*)oalDeviceList;
+		while( (len = strlen( pDeviceName )) )
+		{
+			pDevice = qalcOpenDevice( pDeviceName );
+			calErrorCheckALC( pDevice, __LINE__ );  // clear any device error
+			if( pDevice )
+			{ // the device can be opened
+				qalcGetIntegerv( pDevice, ALC_MAJOR_VERSION, 1, &major_version );
+				qalcGetIntegerv( pDevice, ALC_MINOR_VERSION, 1, &minor_version );
+				if( (major_version == 1 && minor_version >= 1)
+						|| major_version > 1 )
+				{ // device supports OpenAL 1.1 or greater
+					if( ix >= MAX_OAL_DEVICES )
+					{
+						Snd_DPrintf(1, "Program Error: Valid devices  > %i\n",
+								MAX_OAL_DEVICES );
+					}
+					else
+					{
+						pDeviceNames[ix++] = pDeviceName;
+						Snd_DPrintf( 1, "Adding Valid Device %s\n", pDeviceName );
+					}
+				}
+				calErrorCheckALC( pDevice, __LINE__ ); // clear any device error
+				success = qalcCloseDevice( pDevice );
+				if( !success )
+				{
+					Snd_DPrintf( 1, "Close failed on %s\n", pDeviceName );
+				}
+			}
+			else
+			{
+				Snd_DPrintf(1, "Open failed on %s\n", pDeviceName );
+			}
+			pos += len + 1;
+			pDeviceName = (ALCchar*)&oalDeviceList[ pos ];  // next device string
+		}
+	}
+	oalDeviceCount = ix; // store count of available devices in list
+}
+
+/*
+ ==
+
+ calSelectDevice()
+
+ Theory is:
+   Always accept the device specified by the user set cvar (provided it opens)
+   Otherwise, use the default device.
+   For the special Windows XP case, override the generic hardware default if it
+     has less than the minimum specified in the s_minsources cvar.
+==
+ */
+ALCdevice *calSelectDevice( void )
+{
+	ALCdevice *pDevice = NULL;
+	ALCdevice *pDevice2 = NULL;
+	ALCchar *pDeviceName;
+	ALCint alc_mono_sources;
+	ALenum result;
+	int len;
+	int pos;
+
+	// selected device (note: case insensitive compare)
+	if( oalDeviceCount > 0 && s_device
+			&& Q_strcasecmp(s_device->string, "Default" ) )
+	{ // cvar set and it is not 'Default'
+		// alcOpenDevice needs case sensitive name from device list
+		pDeviceName = (ALCchar*)oalDeviceList;
+		pos = 0;
+		while( (len = strlen( pDeviceName )) > 0 )
+		{
+			if( !Q_strcasecmp( s_device->string, pDeviceName ) )
+			{ // found cvar device selection in list
+				pDevice = qalcOpenDevice( pDeviceName );
+				if( pDevice != NULL )
+				{
+					if( calErrorCheckALC( pDevice, __LINE__ ) != ALC_NO_ERROR )
+					{
+						qalcCloseDevice( pDevice );
+						Com_Printf("Error opening sound device: %s\n",
+								pDeviceName );
+						pDevice = NULL;
+					}
+				}
+				else
+				{
+					Com_Printf( "Failed to open sound device: %s\n",
+							pDeviceName );
+				}
+				break;  // exit loop
+			}
+			pos += len + 1;
+			pDeviceName = (ALCchar*)&oalDeviceList[ pos ]; // next device name
+		}
+		if( len == 0 )
+		{ // no match to cvar found in list
+			Com_Printf( "Device %s not in available device list\n"
+					"  (check that cvar: s_device is correct.)\n",
+					s_device->string );
+		}
+	}
+
+	// default device
+	if (pDevice == NULL)
+	{ // open the Default device
+		pDevice = qalcOpenDevice(NULL);
+		if( pDevice != NULL )
+		{ // handle Windows XP "Generic Hardware" case
+			result = calErrorCheckALC( pDevice,  __LINE__ );
+			pDeviceName = (ALCchar*)qalcGetString( pDevice, ALC_DEVICE_SPECIFIER );
+			if( !Q_strcasecmp( (char*)pDeviceName, "Generic Hardware") )
+			{
+				qalcGetIntegerv(pDevice, ALC_MONO_SOURCES, 1, &alc_mono_sources);
+				if ( alc_mono_sources < s_minsources->integer )
+				{ // supported sources are below limit
+					pDevice2 = qalcOpenDevice( "Generic Software" );
+					if( pDevice2 != NULL )
+					{ // use Generic Software device instead
+						qalcCloseDevice( pDevice );
+						pDevice = pDevice2;
+					}
+				}
+			}
+		}
+	}
+
+	return pDevice;
+}
+
+/*
+ ==
+
  S_Init()
 
  - cold-start initialization
@@ -1289,16 +1533,18 @@ void sndCmdRemove( void );
 void S_Init( void )
 {
 	ALCdevice *pDevice;
+	ALCchar *pDeviceName;
 	ALCcontext *pContext;
 	qboolean success;
 	ALCenum result;
 	ALCint alc_mono_sources;
-	ALCint major_version;
-	ALCint minor_version;
 
 	sound_system_enable = false;
 
 	Com_Printf( "\n------- sound initialization -------\n" );
+
+	// init global device state
+	oalDeviceCount = 0;
 
 	/*
 	 * Setup CVARS
@@ -1326,27 +1572,24 @@ void S_Init( void )
 		return;
 	}
 
-	// Use Default Device and Attributes
-	// TODO: implement device selection,
-	//   or force "Default Software" if inadequate hardware resources
-	pDevice = qalcOpenDevice( NULL ); // 1. open default device
-	if( pDevice == NULL )
+	// Enumerate Devices
+	calEnumerateDevices();
+	if( oalDeviceCount == 0 )
 	{
-		Com_Printf("Sound failed: Unable to open default sound device\n"
-				        "Game will continue without sound.\n" );
+		Com_Printf("Sound failed: OpenAL 1.1 or greater required\n"
+				"Game will continue without sound.\n");
 		return;
 	}
-	// verify OpenAL 1.1
-	qalcGetIntegerv( pDevice, ALC_MAJOR_VERSION, sizeof(ALCint), &major_version );
-	qalcGetIntegerv( pDevice, ALC_MINOR_VERSION, sizeof(ALCint), &minor_version );
-	Com_Printf("Active OpenAL Device is \"%s\" using OpenAL Version %i.%i\n",
-					qalcGetString( pDevice, ALC_DEVICE_SPECIFIER),
-					major_version, minor_version );
-	if( major_version < 1 || (major_version == 1 && minor_version < 1) )
+
+	// Select Device
+	pDevice = calSelectDevice();
+	if( pDevice == NULL )
 	{
-		Com_Printf("Sound failed: OpenAL %i.%i in use; 1.1 or greater required\n"
-				"Game will continue without sound.\n", major_version, minor_version);
+		Com_Printf("Sound failed: Unable to open sound device\n"
+			        "Game will continue without sound.\n" );
+		return;
 	}
+
 	pContext = qalcCreateContext( pDevice, NULL ); // 2. create context
 	if ( pContext == NULL )
 	{
@@ -1359,6 +1602,17 @@ void S_Init( void )
 	}
 	qalcMakeContextCurrent( pContext ); // 3. make context current
 	result = calErrorCheckALC( pDevice, __LINE__ );
+
+	// warn about number of Sources
+	qalcGetIntegerv( pDevice, ALC_MONO_SOURCES, 1, &alc_mono_sources );
+	if ( alc_mono_sources < s_minsources->integer )
+	{
+		pDeviceName = (ALCchar*)qalcGetString( pDevice, ALC_DEVICE_SPECIFIER );
+		Com_Printf( "Warning: \"%s\" supports %i OpenAL Sources.\n"
+			"  Minimum Sources (cvar: s_minsources) set to %i.\n"
+			"  Some sound effects may not be heard\n",
+			pDeviceName, alc_mono_sources, s_minsources->integer );
+	}
 
 	// Setup 3D Audio State
 	qalDistanceModel( distance_model );
@@ -1383,7 +1637,6 @@ void S_Init( void )
 	}
 	else
 	{ // generate OpenAL sound effects Sources.
-		//	TODO: check for adequate number of mono Sources
 		calSourcesInitialize( alc_mono_sources );
 	}
 	calSoundFXInitialize(); // generate OpenAL Buffers
@@ -1517,13 +1770,13 @@ void S_Shutdown( void )
 	}
 	else
 	{
-		Com_DPrintf( "qalcMakeContextCurrent(NULL) failed\n" );
+		Snd_DPrintf( 1, "qalcMakeContextCurrent(NULL) failed\n" );
 	}
 	// Close OpenAL Device
 	result = qalcCloseDevice( pDevice );
 	if( !result )
 	{
-		Com_DPrintf( "qalcCloseDevice failed\n" );
+		Snd_DPrintf( 1, "qalcCloseDevice failed\n" );
 	}
 
 	QAL_Shutdown(); // Unlink OpenAL dynamic/shared library
@@ -1654,7 +1907,7 @@ sfx_t *S_RegisterSound( char *name )
 		}
 		else
 		{
-			Com_DPrintf( "S_RegisterSound(): Failed to register %s\n", name );
+			Snd_DPrintf( 1, "S_RegisterSound(): Failed to register %s\n", name );
 		}
 	}
 
@@ -1744,10 +1997,18 @@ void S_StartSound( vec3_t origin, int entnum, int entchannel, sfx_t *arg_sfx,
 	char qfilename[MAX_QPATH];
 	ALfloat listener_position[3];
 	ALfloat source_position[3];
-	ALfloat dist_sq;
+	ALfloat dist_sq = 0.0f;
+	ALfloat sq_cull_distance;
+	int attn_class;
 
 	if( !sound_system_enable || arg_sfx == NULL )
 	{
+/*
+		if( arg_sfx == NULL )
+		{
+			Snd_DPrintf( 3, "[StartSound: SFX is NULL]\n" );
+		}
+*/
 		return;
 	}
 
@@ -1758,24 +2019,44 @@ void S_StartSound( vec3_t origin, int entnum, int entchannel, sfx_t *arg_sfx,
 	}
 
 	// cull sound by distance
-	if( origin != NULL )
+	attn_class = (int)(attenuation + 0.5f);
+	if( attn_class != ATTN_NONE )
 	{
-		qalGetListenerfv( AL_POSITION, listener_position );
-		dist_sq = calDistanceFromListenerSq( listener_position, origin );
-		if( dist_sq > sq_cull_distance )
+		switch( attn_class )
 		{
-			return;
+		case ATTN_NORM:
+			sq_cull_distance = norm_sq_cull_distance;
+			break;
+		case ATTN_IDLE:
+			sq_cull_distance = idle_sq_cull_distance;
+			break;
+		case ATTN_STATIC:
+			sq_cull_distance = static_sq_cull_distance;
+			break;
+		default:
+			Snd_DPrintf( 1, "Program Error: ATTN_ value (%i)\n", __LINE__);
+			sq_cull_distance = 0.0f;
+			break;
 		}
-	}
-	else if( entnum != 0 )
-	{
-		CL_GetEntitySoundOrigin( entnum, source_position );
 		qalGetListenerfv( AL_POSITION, listener_position );
-		dist_sq
-		        = calDistanceFromListenerSq( listener_position, source_position );
-		if( dist_sq > sq_cull_distance )
+		if( origin != NULL )
 		{
-			return;
+			dist_sq = calDistanceFromListenerSq( listener_position, origin );
+			if( dist_sq > sq_cull_distance)
+			{
+				//Snd_DPrintf( 3, "[Culled-1: %s]\n", arg_sfx->name);
+				return;
+			}
+		}
+		else if( entnum != 0 )
+		{
+			CL_GetEntitySoundOrigin( entnum, source_position );
+			dist_sq = calDistanceFromListenerSq( listener_position, source_position );
+			if( dist_sq > sq_cull_distance)
+			{
+				//Snd_DPrintf( 3, "[Culled-2: %s]\n", arg_sfx->name);
+				return;
+			}
 		}
 	}
 
@@ -1813,6 +2094,22 @@ void S_StartSound( vec3_t origin, int entnum, int entchannel, sfx_t *arg_sfx,
 		src->start_timer = 0;
 		qalSourcePlay( src->oalSource ); // !make some noise!
 	}
+
+/*
+	if( origin != NULL )
+	{
+		Snd_DPrintf( 3,
+			"[StartSound: CHAN=%i, ATTN=%i, timer=%i, origin=(%f,%f,%f) %s]\n",
+			src->entchannel, src->attn_class, src->start_timer,
+			origin[0], origin[1], origin[2], src->sfx->name );
+	}
+	else
+	{
+		Snd_DPrintf( 3, "[StartSound: CHAN=%i, ATTN=%i, timer=%i, %s]\n",
+		src->entchannel, src->attn_class, src->start_timer,
+		src->sfx->name );
+	}
+*/
 }
 
 /*
@@ -1867,12 +2164,12 @@ void S_StartMusic( char *qfilename )
 	}
 	else
 	{
-		Com_DPrintf("No SFX for music file %s\n", qfilename );
+		Snd_DPrintf( 1, "No SFX for music file %s\n", qfilename );
 	}
 
 	if ( music.sfx->silent )
 	{
-		Com_DPrintf("Music file %s failed load\n", qfilename);
+		Snd_DPrintf( 1, "Music file %s failed load\n", qfilename);
 		return;
 	}
 
@@ -2090,8 +2387,8 @@ void calUpdateLoopSounds( int deltaT, ALpoint listener_position )
 			CL_GetEntitySoundOrigin( new_entity_index, source_position );
 			dist_sq = calDistanceFromListenerSq( listener_position,
 			        source_position );
-			if( dist_sq < static_sq_cull_distance )
-			{ // within cull distance, using ATTN_STATIC cull distance
+			if( dist_sq < looping_sq_cull_distance )
+			{ // within cull distance
 				src = calNewSrcAutoLoop( new_entity_index, new_sound_field );
 			}
 		}
@@ -2110,6 +2407,7 @@ void calUpdateLoopSounds( int deltaT, ALpoint listener_position )
 
 		case lpmk_start:
 			qalSourcePlay( src->oalSource );
+			//Snd_DPrintf( 7, "[lpmk_start %s]\n", src->sfx->name );
 			break;
 
 		case lpmk_continue:
@@ -2122,10 +2420,10 @@ void calUpdateLoopSounds( int deltaT, ALpoint listener_position )
 
 				dist_sq = calDistanceFromListenerSq( listener_position,
 				        new_position );
-				if( dist_sq > (static_sq_cull_distance + ( 100.0f * 100.0f )) )
+				if( dist_sq > (looping_sq_cull_distance + looping_cull_hysteresis ))
 				{ // beyond cull distance w/ some hysteresis
 					// might re-start if it comes inside of cull distance
-					// Note: using smaller ATTN_STATIC cull distance.
+					//Snd_DPrintf( 7, "[lpmk_continue culled %s]\n", src->sfx->name);
 					qalSourceStop( src->oalSource );
 					qalSourcei( src->oalSource, AL_BUFFER, AL_NONE );
 					calSourceFree( src );
@@ -2161,9 +2459,11 @@ void calUpdateLoopSounds( int deltaT, ALpoint listener_position )
 					break;
 				}
 			}
+			//Snd_DPrintf( 7, "[lpmk_continue %s]\n", src->sfx->name );
 			break;
 
 		case lpmk_stop:
+			//Snd_DPrintf( 7, "[lpmk_stop %s]\n", src->sfx->name );
 			qalSourceStop( src->oalSource );
 			qalSourcei( src->oalSource, AL_BUFFER, AL_NONE );
 			calSourceFree( src );
@@ -2182,7 +2482,6 @@ void calUpdateLoopSounds( int deltaT, ALpoint listener_position )
  Called every frame to update sound system state.
  ==
  */
-
 void S_Update( vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up )
 {
 	src_t *src;
@@ -2276,6 +2575,7 @@ void S_Update( vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up )
 					}
 				}
 				qalSourcePlay( src->oalSource );
+				//Snd_DPrintf( 3, "[Delayed start %s]\n", src->sfx->name);
 			}
 			continue;
 		}
@@ -2290,6 +2590,7 @@ void S_Update( vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up )
 				src->stop_timer -= difftime;
 				if( src->stop_timer < 5 )
 				{
+					//Snd_DPrintf( 3, "[Timed stop %s]\n", src->sfx->name);
 					src->stop_timer = 0;
 					qalSourceStop( src->oalSource );
 					qalSourcei( src->oalSource, AL_BUFFER, AL_NONE );
@@ -2348,6 +2649,7 @@ void S_Update( vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up )
 			break;
 
 		case AL_STOPPED: // has finished playing, free the src
+			//Snd_DPrintf( 3, "[Done playing %s]\n", src->sfx->name);
 			qalSourcei( src->oalSource, AL_BUFFER, AL_NONE );
 			calSourceFree( src );
 			break;
@@ -2400,8 +2702,10 @@ void S_Update( vec3_t origin, vec3_t v_forward, vec3_t v_right, vec3_t v_up )
  ==
  S_Play()
 
- target of console command: play <file>[.wav] [<file>[.wav]] ...
+ target of console command: playsounds <file>[.wav] [<file>[.wav]] ...
  plays all simultaneously, possibly by design, in order to test mixing.
+
+ changed command from 'play' to 'playsound' to prevent confusion
  ==
  */
 void S_Play( void )
@@ -2409,7 +2713,7 @@ void S_Play( void )
 	int ix;
 	char filename[MAX_QPATH];
 
-	Com_Printf( "Starting..." );
+	Com_Printf( "playsound starting..." );
 	for( ix = 1; ix < Cmd_Argc(); ix++ )
 	{
 		if( !strrchr( Cmd_Argv( ix ), '.' ) )
@@ -2423,7 +2727,7 @@ void S_Play( void )
 		}
 		S_StartLocalSound( filename );
 	}
-	Com_Printf( "use stopsound command to stop.\n" );
+	Com_Printf( " use stopsound command to stop.\n" );
 }
 
 /*
@@ -2497,7 +2801,7 @@ void S_SoundList( void )
 void S_Activate( qboolean active )
 {
 	/* TODO: may not be anything to do here. */
-	Com_DPrintf( "S_Activate() is a stub.\n" );
+	Snd_DPrintf( 1, "S_Activate() is a stub.\n" );
 }
 
 /**
@@ -2510,7 +2814,7 @@ void S_Activate( qboolean active )
  **/
 void sndCmdInit( void )
 {
-	Cmd_AddCommand( "play", S_Play );
+	Cmd_AddCommand( "playsound", S_Play );
 	Cmd_AddCommand( "stopsound", S_StopAllSounds );
 	Cmd_AddCommand( "soundlist", S_SoundList );
 	Cmd_AddCommand( "soundinfo", S_SoundInfo_f );
@@ -2518,7 +2822,7 @@ void sndCmdInit( void )
 
 void sndCmdRemove( void )
 {
-	Cmd_RemoveCommand( "play" );
+	Cmd_RemoveCommand( "playsound" );
 	Cmd_RemoveCommand( "stopsound" );
 	Cmd_RemoveCommand( "soundlist" );
 	Cmd_RemoveCommand( "soundinfo" );
@@ -2537,10 +2841,19 @@ void sndCmdRemove( void )
  */
 void sndCvarInit( void )
 {
+	char cvarset[16];
+
 	s_initsound = Cvar_Get( "s_initsound", "1", 0 );
 	s_volume = Cvar_Get( "s_volume", "0.1", CVAR_ARCHIVE );
 	// OpenAL CVARs
 	s_doppler = Cvar_Get( "s_doppler", "0.0", CVAR_ARCHIVE );
+	Com_sprintf(cvarset, sizeof(cvarset),"%i", MAX_SRC );
+	s_maxsources = Cvar_Get( "s_maxsources", cvarset , CVAR_ARCHIVE );
+	Com_sprintf(cvarset, sizeof(cvarset),"%i", MIN_SRC_DEFAULT );
+	s_minsources = Cvar_Get( "s_minsources", cvarset, CVAR_ARCHIVE );
+	s_device = Cvar_Get( "s_device", "Default", CVAR_ARCHIVE );
+	// for debug
+	snd_developer = Cvar_Get( "snd_developer", "0", 0);
 
 }
 
