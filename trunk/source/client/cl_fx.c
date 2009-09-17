@@ -315,6 +315,9 @@ void CL_ParseMuzzleFlash (void)
 	for (j = 0; j < 3; j++)
 		dir[j] = fv[j] + rv[j] + up[j] * 2;
 
+	// NOTE: sounds started here are subject to PVS rather than PHS
+	//  which results in these sounds not being heard when others
+	//  in same location can be heard
 	switch (weapon)
 	{
 	case MZ_BLASTER:
@@ -333,7 +336,7 @@ void CL_ParseMuzzleFlash (void)
 	case MZ_SHOTGUN:
 		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
 		S_StartSound (NULL, i, CHAN_WEAPON, S_RegisterSound("weapons/shotgf1b.wav"), volume, ATTN_NORM, 0);
-		S_StartSound (NULL, i, CHAN_AUTO,   S_RegisterSound("weapons/shotgr1b.wav"), volume, ATTN_NORM, 0.1);
+		//[no file] S_StartSound (NULL, i, CHAN_AUTO,   S_RegisterSound("weapons/shotgr1b.wav"), volume, ATTN_NORM, 0.1);
 		break;
 	case MZ_SSHOTGUN:
 		dl->color[0] = 1;dl->color[1] = 1;dl->color[2] = 0;
