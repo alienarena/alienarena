@@ -398,3 +398,16 @@ maps/meshes/arch
 		nolightmap
 	}
 }
+maps/meshes/gothic/lamp
+{
+	{
+		map maps/meshes/gothic/lamp.tga
+		alphamask
+	}
+	{
+		map maps/meshes/gothic/lamp_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
