@@ -1648,6 +1648,9 @@ void R_DrawAliasModel (entity_t *e)
 	image_t		*skin;
 	rscript_t	*rs = NULL;
 
+	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(e->flags & RF_MENUMODEL))
+		return;
+
 	if(e->team) //don't draw flag models, handled by sprites
 		return;
 	
@@ -1900,7 +1903,7 @@ void R_DrawAliasModel (entity_t *e)
 		qglDepthRange (gldepthmin, gldepthmax);
 
 	//old legacy shadows
-	if (gl_shadows->value && gl_shadows->value < 3 && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
+	if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL) && gl_shadows->value && gl_shadows->value < 3 && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
 	{
 		float casted;
 		float an = currententity->angles[1]/180*M_PI;

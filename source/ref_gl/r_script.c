@@ -1375,6 +1375,9 @@ void R_DrawVegetationSurface ( void )
 	trace_t r_trace;
 	float	sway;
 
+	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		return;
+
 	grass = r_grasses;
 
 	VectorSet(mins, 0, 0, 0);
@@ -1515,6 +1518,9 @@ void R_DrawBeamSurface ( void )
 	float	*corner0 = corner[0];
 	qboolean visible;
 	trace_t r_trace;
+
+	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		return;
 
 	beam = r_beams;
 

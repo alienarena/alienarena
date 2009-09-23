@@ -634,6 +634,7 @@ typedef struct
 #define	RF_SHELL_HALF_DAM	0x00020000
 #define RF_NOSHADOWS		0x00040000 //use this one for turning off shadows, etc.
 #define RF_MONSTER  		0x00080000
+#define RF_MENUMODEL		0x01280000 //for player menu
 
 // player_state_t->refdef flags
 #define	RDF_UNDERWATER		1		// warp the screen as apropriate
