@@ -5913,20 +5913,20 @@ void PlayerConfig_MenuDraw( void )
 			fclose(modelfile);
 		}
 		
-		entity[0].flags = RF_FULLBRIGHT;
+		entity[0].flags = RF_FULLBRIGHT | RF_MENUMODEL;
 		entity[0].origin[0] = 80;
 		entity[0].origin[1] = -25;
 		entity[0].origin[2] = 0;
 
-		entity[1].flags = RF_FULLBRIGHT;
+		entity[1].flags = RF_FULLBRIGHT | RF_MENUMODEL;
 		entity[1].origin[0] = 80;
 		entity[1].origin[1] = -25;
 		entity[1].origin[2] = 0;
 
 		if(helmet)
-			entity[2].flags = RF_FULLBRIGHT | RF_TRANSLUCENT;
+			entity[2].flags = RF_FULLBRIGHT | RF_TRANSLUCENT | RF_MENUMODEL;
 		else
-			entity[2].flags = RF_FULLBRIGHT;
+			entity[2].flags = RF_FULLBRIGHT | RF_MENUMODEL;
 		entity[2].origin[0] = 80;
 		entity[2].origin[1] = -25;
 		entity[2].origin[2] = 0;

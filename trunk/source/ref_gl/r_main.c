@@ -669,6 +669,9 @@ void R_DrawViewEntitiesOnList (void)
 	if (!r_drawentities->value)
 		return;
 
+	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		return;
+
 	// draw non-transparent first
 	for (i=0 ; i<r_newrefdef.num_viewentities ; i++)
 	{
