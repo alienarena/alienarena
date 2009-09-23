@@ -14525,7 +14525,7 @@
 }
 // entity 10
 {
-"classname" "item_armor_body"
+"classname" "ammo_cells"
 "origin" "-1664 -656 -32"
 }
 // entity 11
@@ -14541,7 +14541,7 @@
 // entity 13
 {
 "origin" "-832 808 160"
-"classname" "item_armor_jacket"
+"classname" "item_armor_combat"
 }
 // entity 14
 {
