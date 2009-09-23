@@ -230,6 +230,7 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->envmap = false;
 	stage->dynamic = false;
 	stage->lensflare = false;
+	stage->flaretype = 0;
 	stage->normalmap = false;
 	stage->grass = false;
 	stage->grasstype = 0;
@@ -522,6 +523,7 @@ scriptname
 		nolightmap
 		alphamask
 		lensflare
+		flaretype
 		normalmap
 		grass
 		grasstype
@@ -790,6 +792,11 @@ void rs_stage_lensflare (rs_stage_t *stage, char **token)
 {
 	stage->lensflare = true;
 }
+void rs_stage_flaretype (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->flaretype = atoi(*token);
+}
 void rs_stage_normalmap (rs_stage_t *stage, char **token)
 {
 	stage->normalmap = true;
@@ -843,6 +850,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"dynamic",		&rs_stage_dynamic		},
 	{	"alphafunc",	&rs_stage_alphafunc		},
 	{	"lensflare",	&rs_stage_lensflare		},
+	{	"flaretype",	&rs_stage_flaretype		},
 	{   "normalmap",	&rs_stage_normalmap		},
 	{	"grass",		&rs_stage_grass			},
 	{	"grasstype",	&rs_stage_grasstype		},

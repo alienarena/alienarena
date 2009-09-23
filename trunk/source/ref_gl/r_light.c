@@ -737,7 +737,10 @@ void R_RenderFlare (flare_t *light)
 	float	dist;
 	unsigned	flaretex;
 
-    flaretex =  r_flare->texnum;
+	if(light->style == 0)
+		flaretex =  r_flare->texnum;
+	else
+		flaretex = r_flare1->texnum;
 
 	VectorSubtract (light->origin, r_origin, v);
 	dist = VectorLength(v) * (light->size*0.01);

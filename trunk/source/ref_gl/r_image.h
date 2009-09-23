@@ -112,6 +112,7 @@ extern	image_t		gltextures[MAX_GLTEXTURES];
 extern	int			numgltextures;
 
 extern image_t		*r_flare;
+extern image_t		*r_flare1;
 extern image_t		*sun_object;
 extern image_t		*sun1_object;
 extern image_t		*sun2_object;
