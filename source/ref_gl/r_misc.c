@@ -69,6 +69,7 @@ image_t		*r_splash2texture;
 image_t		*r_radarmap; 
 image_t		*r_around;
 image_t		*r_flare;
+image_t		*r_flare1;
 image_t		*r_mirrorspec; 
 image_t		*r_distort;
 image_t		*sun_object;
@@ -385,6 +386,12 @@ void R_InitParticleTexture (void)
 	if (!r_flare) {                                
 		r_flare = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }     
+
+	Com_sprintf (flares, sizeof(flares), "gfx/flares/flare1.tga");
+	r_flare1 = GL_FindImage(flares, it_pic);
+	if (!r_flare1) {                                
+		r_flare1 = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }   
 }
 
 

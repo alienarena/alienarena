@@ -24,6 +24,13 @@ textures/arena7/light10
 		lensflare
 	}
 }
+textures/arena7/light11
+{
+	{
+		lensflare
+		flaretype 1
+	}
+}
 textures/metal/fade2
 {
 	{
@@ -38,6 +45,26 @@ textures/water/bluewater
 	{
 		map gfx/dmturboreflection.tga
 		distort
+	}
+}
+textures/arena6/icerock
+{
+	{
+		map gfx/leaves1.tga
+		scale static 12 static 12
+		colormap 1 1 1
+		grass
+		grasstype 1
+	}
+}
+textures/evil/e6launchengine
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		lensflare
 	}
 }
 		

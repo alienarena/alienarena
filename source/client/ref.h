@@ -48,14 +48,6 @@ typedef struct
 
 typedef struct
 {
-	vec3_t origin2;
-	vec3_t color2;
-	int size2;
-	int style2;
-} flare2_t;
-
-typedef struct
-{
 	int type;
 	vec3_t origin;
 	vec3_t color;

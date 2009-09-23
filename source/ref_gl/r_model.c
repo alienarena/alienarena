@@ -719,7 +719,7 @@ static void R_ClearFlares(void)
 	r_numflares = 0;
 }
 
-void GL_AddFlareSurface (msurface_t *surf )
+void GL_AddFlareSurface (msurface_t *surf, int type )
 {
      int i, width, height, intens;
      glpoly_t *poly;
@@ -833,7 +833,7 @@ void GL_AddFlareSurface (msurface_t *surf )
      VectorMA(origin, 2, tmp, origin);
      VectorCopy(origin, light->origin);
     
-     light->style = 1;
+     light->style = type;
 
      free (buffer); 
 }
@@ -1163,7 +1163,7 @@ void Mod_LoadFaces (lump_t *l)
 			do {
 				if (stage->lensflare) {
 					if(r_lensflare->value) 	
-						GL_AddFlareSurface(out);
+						GL_AddFlareSurface(out, stage->flaretype);
 				}
 				if (stage->grass && stage->texture) {
 					if(stage->colormap.enabled) {
