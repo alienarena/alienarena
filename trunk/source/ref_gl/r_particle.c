@@ -53,15 +53,13 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 	for ( p = particles, i=0, oldtype=-1 ; i < num_particles ; i++,p++)
 	{
 
-		if(p->type == PARTICLE_NONE || p->type == PARTICLE_WEATHER){
-			if(r_weather == 1)
-				texnum = r_raintexture->texnum; //rain
-			else
-				texnum = r_particletexture->texnum; //snow
-			scale = 1;
-			*(int *)color = colortable[p->color];
+		if(p->type == PARTICLE_NONE) {
+
 			blendsrc = GL_SRC_ALPHA;
 			blenddst = GL_ONE;
+			
+			*(int *)color = colortable[p->color];
+			scale = 1;
 		}
 		else {
 			texnum = p->texnum;

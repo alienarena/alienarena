@@ -1892,7 +1892,6 @@ void R_BeginRegistration (char *model)
 			//read the file, get fog information
 			fclose(file);
 			R_ReadFogScript(fullname);
-			map_fog = true;
 			break;
 		}
 	}

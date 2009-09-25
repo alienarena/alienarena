@@ -215,10 +215,6 @@ SOURCE=.\ref_gl\r_main.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ref_gl\r_mapscript.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\ref_gl\r_math.c
 # End Source File
 # Begin Source File
