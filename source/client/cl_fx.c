@@ -3228,69 +3228,132 @@ void Cl_WeatherEffects(){
 	p = NULL;  // so that we add the right amount
 		
 	k = 0;
-	while(i++ < WEATHER_PARTICLES && k++ < 25){
-			
-		VectorCopy(cl.refdef.vieworg, start);
-		start[0] = start[0] + (rand() % 2048) - 1024;
-		start[1] = start[1] + (rand() % 2048) - 1024;
-		
-		VectorCopy(start, end);
-		end[2] += 8192;
-		
-		// trace up looking for sky
-		tr = CM_BoxTrace(start, end, vec3_origin, vec3_origin, 0, MASK_SHOT);
-		
-		if(!(tr.surface->flags & SURF_SKY))
-			continue;
 	
-		// drop down somewhere between sky and player
-		ceiling = tr.endpos[2] > start[2] + 1024 ? start[2] + 1024 : tr.endpos[2];
-		tr.endpos[2] = tr.endpos[2] - ((ceiling - start[2]) * frand());
-		
-		if (!(p = new_particle()))
-			return;	
-		
-		VectorCopy(tr.endpos, p->org);
-		p->org[2] -= 1;
+	if(r_weather == 3) {
 
-		VectorCopy(start, end);
-		end[2] -= 8192;
+		while(i++ < WEATHER_PARTICLES && k++ < 2){
+			
+			VectorCopy(cl.refdef.vieworg, start);
+			start[0] = start[0] + (rand() % 2048) - 1024;
+			start[1] = start[1] + (rand() % 2048) - 1024;
+			
+			VectorCopy(start, end);
+			end[2] += 8192;
+			
+			// trace up looking for sky
+			tr = CM_BoxTrace(start, end, vec3_origin, vec3_origin, 0, MASK_SHOT);
+			
+			if(!(tr.surface->flags & SURF_SKY))
+				continue;
 		
-		tr = CM_BoxTrace(p->org, end, vec3_origin, vec3_origin, 0, MASK_ALL);
-		
-		if(!tr.surface)  // this shouldn't happen
-			VectorCopy(start, p->end);
-		else
-			VectorCopy(tr.endpos, p->end);
-		
-		p->type = PARTICLE_WEATHER;
-		// setup the particles
-		if(r_weather == 1){
-			p->texnum = r_raintexture->texnum;
-			p->vel[2] = -800;
+			// drop down somewhere between sky and player
+			ceiling = tr.endpos[2] > start[2] + 1024 ? start[2] + 1024 : tr.endpos[2];
+			tr.endpos[2] = tr.endpos[2] - ((ceiling - start[2]) * frand());
+			
+			if (!(p = new_particle()))
+				return;	
+			
+			VectorCopy(tr.endpos, p->org);
+			p->org[2] -= 1;
+
+			VectorCopy(start, end);
+			end[2] -= 8192;
+			
+			tr = CM_BoxTrace(p->org, end, vec3_origin, vec3_origin, 0, MASK_ALL);
+			
+			if(!tr.surface)  // this shouldn't happen
+				VectorCopy(start, p->end);
+			else
+				VectorCopy(tr.endpos, p->end);
+			
+			p->type = PARTICLE_WEATHER;
+			// setup the particles
+			p->texnum = r_leaftexture->texnum; 
+			p->vel[2] = -80;
 			p->accel[2] = 0;
-			p->alpha = 0.8;
-			p->alphavel = frand() * -1;
+			p->alpha = 0.9;
+			p->alphavel = 0;
 			p->color = 8;
-			p->scale = 6;
+			p->scale = 2;
 			p->scalevel = 0;
+			p->blendsrc = GL_SRC_ALPHA;
+			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+						
+			for(j = 0; j < 2; j++){
+				p->vel[j] = crand() * 25;
+				p->accel[j] = crand() * 50;
+			}
+			weather_particles++;
 		}
-		else if(r_weather == 2){
-			p->texnum = r_particletexture->texnum; 
-			p->vel[2] = -120;
-			p->accel[2] = 0;
-			p->alpha = 0.8;
-			p->alphavel = frand() * -1;
-			p->color = 8;
-			p->scale = 1;
-			p->scalevel = 0;
-		}
+	}
+	else {
+
+		while(i++ < WEATHER_PARTICLES && k++ < 25){
+				
+			VectorCopy(cl.refdef.vieworg, start);
+			start[0] = start[0] + (rand() % 2048) - 1024;
+			start[1] = start[1] + (rand() % 2048) - 1024;
+			
+			VectorCopy(start, end);
+			end[2] += 8192;
+			
+			// trace up looking for sky
+			tr = CM_BoxTrace(start, end, vec3_origin, vec3_origin, 0, MASK_SHOT);
+			
+			if(!(tr.surface->flags & SURF_SKY))
+				continue;
 		
-		for(j = 0; j < 2; j++){
-			p->vel[j] = crand() * 2;
-			p->accel[j] = crand() * 2;
+			// drop down somewhere between sky and player
+			ceiling = tr.endpos[2] > start[2] + 1024 ? start[2] + 1024 : tr.endpos[2];
+			tr.endpos[2] = tr.endpos[2] - ((ceiling - start[2]) * frand());
+			
+			if (!(p = new_particle()))
+				return;	
+			
+			VectorCopy(tr.endpos, p->org);
+			p->org[2] -= 1;
+
+			VectorCopy(start, end);
+			end[2] -= 8192;
+			
+			tr = CM_BoxTrace(p->org, end, vec3_origin, vec3_origin, 0, MASK_ALL);
+			
+			if(!tr.surface)  // this shouldn't happen
+				VectorCopy(start, p->end);
+			else
+				VectorCopy(tr.endpos, p->end);
+			
+			p->type = PARTICLE_WEATHER;
+			// setup the particles
+			if(r_weather == 1){
+				p->texnum = r_raintexture->texnum;
+				p->vel[2] = -800;
+				p->accel[2] = 0;
+				p->alpha = 0.3;
+				p->alphavel = frand() * -1;
+				p->color = 8;
+				p->scale = 6;
+				p->scalevel = 0;
+			}
+			else if(r_weather == 2){
+				p->texnum = r_particletexture->texnum; 
+				p->vel[2] = -120;
+				p->accel[2] = 0;
+				p->alpha = 0.8;
+				p->alphavel = frand() * -1;
+				p->color = 8;
+				p->scale = 1;
+				p->scalevel = 0;
+			}
+			p->blendsrc = GL_SRC_ALPHA;
+			p->blenddst = GL_ONE;
+			
+			for(j = 0; j < 2; j++){
+				p->vel[j] = crand() * 2;
+				p->accel[j] = crand() * 2;
+			}
+			weather_particles++;
 		}
-		weather_particles++;
 	}
 }
 

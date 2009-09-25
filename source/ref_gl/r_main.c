@@ -299,11 +299,11 @@ R_ReadFogScript
 The linux "c" version of this function
 =================
 */
-#ifdef __unix__
+
 void R_ReadFogScript(char config_file[128])
 {
 	FILE *fp;
-	int k, length, rslt;
+	int length;
 	char a_string[128];
 	char *buffer;
 	char *s;
@@ -339,6 +339,10 @@ void R_ReadFogScript(char config_file[128])
 	fog.density = atof(a_string);
 	strcpy( a_string, COM_Parse( &s ) );
 	r_weather = atoi(a_string);
+
+	if(fog.density > 0)
+		map_fog = true;
+
 	if ( fp != 0 )
 	{
 		fp = 0;
@@ -350,7 +354,6 @@ void R_ReadFogScript(char config_file[128])
 	}
 	return;
 }
-#endif
 
 /*
 =================
@@ -359,12 +362,11 @@ R_ReadMusicScript
 The linux "c" version of this function
 =================
 */
-#ifdef __unix__
+
 void R_ReadMusicScript(char config_file[128])
 {
 	FILE *fp;
-	int k, length, rslt;
-	char a_string[128];
+	int length;
 	char *buffer;
 	char *s;
 
@@ -399,7 +401,6 @@ void R_ReadMusicScript(char config_file[128])
 	}
 	return;
 }
-#endif
 
 /*
 =================
