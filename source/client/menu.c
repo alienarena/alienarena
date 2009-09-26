@@ -2276,9 +2276,10 @@ void Options_MenuInit( void )
 	s_options_rtlights_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_rtlights_box.generic.x	= 0;
 	s_options_rtlights_box.generic.y	= 60*scale;
-	s_options_rtlights_box.generic.name	= "real time lighting";
+	s_options_rtlights_box.generic.name	= "smooth gouraud shading";
 	s_options_rtlights_box.generic.callback = RTlightsFunc;
 	s_options_rtlights_box.itemnames = onoff_names;
+	s_options_paindist_box.generic.statusbar = "Unused if GLSL enabled";
 
 	s_options_paindist_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_paindist_box.generic.x	= 0;
