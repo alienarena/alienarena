@@ -239,7 +239,7 @@ const struct source_default_s
         // ATTN_STATIC:
         (ALfloat)2400.0f, // AL_MAX_DISTANCE (ATTN_STATIC)
         (ALfloat)2.0f, //    AL_ROLLOFF_FACTOR (ATTN_STATIC)
-        (ALfloat)240.0f, //  AL_REFERENCE_DISTANCE (ATTN_STATIC)
+        (ALfloat)20.0f, //  AL_REFERENCE_DISTANCE (ATTN_STATIC)
         // "Auto Looping"
         (ALfloat)1600.0f, // AL_MAX_DISTANCE (Looping)
         (ALfloat)1.8f, //    AL_ROLLOFF_FACTOR (Looping)
