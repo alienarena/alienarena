@@ -227,7 +227,7 @@ const struct source_default_s
 {
 		(ALfloat)1.0f, //    AL_PITCH
         (ALfloat)1.0f, //    AL_GAIN
-        (ALfloat)0.7f, //    AL_GAIN for auto loop sounds
+        (ALfloat)0.8f, //    AL_GAIN for auto loop sounds
         // ATTN_NORM:
         (ALfloat)3200.0f, // AL_MAX_DISTANCE (ATTN_NORM)
         (ALfloat)1.5f, //    AL_ROLLOFF_FACTOR (ATTN_NORM)
@@ -237,13 +237,13 @@ const struct source_default_s
         (ALfloat)2.0f, //    AL_ROLLOFF_FACTOR (ATTN_IDLE)
         (ALfloat)280.0f, //  AL_REFERENCE_DISTANCE (ATTN_IDLE)
         // ATTN_STATIC:
-        (ALfloat)2400.0f, // AL_MAX_DISTANCE (ATTN_STATIC)
-        (ALfloat)2.0f, //    AL_ROLLOFF_FACTOR (ATTN_STATIC)
-        (ALfloat)20.0f, //  AL_REFERENCE_DISTANCE (ATTN_STATIC)
+        (ALfloat)288.0f, //  AL_MAX_DISTANCE (ATTN_STATIC)
+        (ALfloat)2.4f, //    AL_ROLLOFF_FACTOR (ATTN_STATIC)
+        (ALfloat)56.0f, //   AL_REFERENCE_DISTANCE (ATTN_STATIC)
         // "Auto Looping"
-        (ALfloat)1600.0f, // AL_MAX_DISTANCE (Looping)
-        (ALfloat)1.8f, //    AL_ROLLOFF_FACTOR (Looping)
-        (ALfloat)160.0f, //  AL_REFERENCE_DISTANCE (Looping)
+        (ALfloat)560.0f, //  AL_MAX_DISTANCE (Looping)
+        (ALfloat)2.0f, //    AL_ROLLOFF_FACTOR (Looping)
+        (ALfloat)64.0f, //   AL_REFERENCE_DISTANCE (Looping)
         //
         (ALfloat)0.0f, //    AL_MIN_GAIN
         (ALfloat)1.0f, //    AL_MAX_GAIN
@@ -264,8 +264,8 @@ const struct source_default_s
  */
 const ALfloat norm_sq_cull_distance = (ALfloat)( 3296.0f * 3296.0f );
 const ALfloat idle_sq_cull_distance = (ALfloat)( 2864.0f * 2864.0f );
-const ALfloat static_sq_cull_distance = (ALfloat)( 2464.0f * 2464.0f );
-const ALfloat looping_sq_cull_distance = (ALfloat)( 1664.0f * 1664.0f );
+const ALfloat static_sq_cull_distance = (ALfloat)( 320.0f * 320.0f );
+const ALfloat looping_sq_cull_distance = (ALfloat)( 600.0f * 600.0f );
 const ALfloat looping_cull_hysteresis = (ALfloat)( 64.0f * 64.0f );
 
 /*
