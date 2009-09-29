@@ -358,7 +358,12 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 				SpawnDamage (TE_BLOOD, point, normal, take);
 		}
 		else {
-			SpawnDamage (te_sparks, point, normal, take);
+			if (targ->ctype == 0) //alien, robot, human
+				SpawnDamage (TE_GREENBLOOD, point, normal, take);
+			else if (targ->ctype == 2)
+				SpawnDamage (TE_GUNSHOT, point, normal, take);
+			else
+				SpawnDamage (TE_BLOOD, point, normal, take);
 			if(tca->value) {
 				if(!(strcmp(targ->classname, "misc_redspidernode")) || !(strcmp(targ->classname, "misc_bluespidernode")))
 					safe_centerprintf(attacker, "Spider health at %i percent", 100*targ->health/600);
