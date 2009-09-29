@@ -1,4 +1,4 @@
-ALIEN ARENA 2009 and it's original content are a copyright of COR Entertainment, LLC.  
+ALIEN ARENA and it's original content are a copyright of COR Entertainment, LLC.  
 
 The source code of Alien Arena is Free Software. You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
@@ -9,7 +9,7 @@ It is only permissible to distrubute the game data(models, maps, textures, sound
 The Debian packaging is (C) 2009, Andres Mejia <mcitadel@gmail.com> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
 
-Under no circumstances ALIEN ARENA 2009 as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2009 may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
+Under no circumstances ALIEN ARENA as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
 
 You, the end user, by installing this software agree to these terms.
 
