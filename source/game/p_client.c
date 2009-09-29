@@ -901,8 +901,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		}
 	}
 
-	gi.sound (self, CHAN_VOICE, gi.soundindex("misc/death.wav"), 1, ATTN_STATIC, 0);
-
 	self->deadflag = DEAD_DEAD;
 
 	gi.linkentity (self);
