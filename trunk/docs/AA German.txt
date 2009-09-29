@@ -1,4 +1,4 @@
-Alien Arena 2008
+Alien Arena 
 
 1. Einleitung
 2. System Anforderungen
@@ -15,7 +15,7 @@ Alien Arena 2008
 
 1.	EINFÜHRUNG
 
-ALIEN ARENA 2008 ist ein eigenständiger 3D first person online deathmatch shooter 
+ALIEN ARENA ist ein eigenständiger 3D first person online deathmatch shooter 
 basierend auf den originalen source codes von Quake II und Quake III, welche von ID Software
 unter der GPL Lizenz veröffentlicht wurden. Mit Features wie 32 Bit Grafiken, 
 neuer Partikel Engine und Effekten, Licht Blooms, reflektierendes Wasser, hoch auflösende Texturen und skins,
@@ -157,18 +157,18 @@ Linux Benutzer müssen einfach Ihren Alien Arena Ordner löschen.
 
 6.	Credits
 
-Die Liste der Credits ist lang - ALIEN ARENA 2008 profitiert aber vor allem durch die Folgenden Personen, 
+Die Liste der Credits ist lang - ALIEN ARENA profitiert aber vor allem durch die Folgenden Personen, 
 für ihre Kreationen und Fertigstellungen:
 
 Design:  John Diamond unter großem Mitwirken der Community.
-Programming:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Jim Bower, Kyle Hunter, Andres Mejia.
+Programming:  John Diamond, Jim Bower, "Blackice", Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia.
 Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
 Maps:  John Diamond, Dennis "xEMPx" Zedlach
 Textures and Artwork:  John Diamond, Enki, Adam Saizlai
 Sounds:  John Diamond, Sound Rangers
 Music:  John Diamond, WhiteLipper, Wooden Productions, Arteria Games, and SoundRangers
 Fonts: John Diamond, the-interceptor from http://www.quakeworld.nu/
-Linux Port: Shane Bayer
+Linux Port: Shane Bayer, John Diamond, Jim Bower
 FreeBSD port: "Ale"
 Gentoo portage: Paul Bredbury
 Debian packaging: Andres Mejia
@@ -182,7 +182,7 @@ wären viele Features nicht möglich gewesen.
 
 7.	COPYRIGHT INFORMATION
 
-Die Urheberrechte von ALIEN ARENA 2008 und dessen originalen Inhalt, gehören zu COR Entertainment, LLC.
+Die Urheberrechte von ALIEN ARENA und dessen originalen Inhalt, gehören zu COR Entertainment, LLC.
 
 Der Source Code von Alien Arena ist freie Software. Sie können in umverteilen und/oder verändern, 
 
@@ -200,7 +200,7 @@ Es ist nicht erlaubt einzelne Teile oder Daten aus dem Spiel, ohne die ausdrückl
 
 Von COR Entertainmaint, zu verteilen.
 
-Die Urheberrechte von den "rcon" und "svstat" Ruby Skripten (C) 2007 gehören Tony Jackson und sind lizensiert 
+Die Urheberrechte von den "rcon" und "svstat" Ruby Skripten (C) 2009 gehören Tony Jackson und sind lizensiert 
 
 unter der GNU Lesser General Public License.
 
@@ -208,11 +208,11 @@ Die Debian Packete (C) 2007, von Andres Mejia <mcitadel@gmail.com>, sind lizensi
 
 nachzulesen in "/usr/share/common-licenses/GPL".
 
-Ohne die ausdrückliche Erlaubnis von COR Entertainment, darf ALIEN ARENA 2008, Unter keinen Umständen als ganzes verkauft, 
+Ohne die ausdrückliche Erlaubnis von COR Entertainment, darf ALIEN ARENA, Unter keinen Umständen als ganzes verkauft, 
 
 oder für Gewinn bringende Zwecke benutzt werden.
 
-ALIEN ARENA 2008 kann ohne Erlaubnis für kostenlose CD Kompilationen und ähnlichen Paketen benutzt werden, 
+ALIEN ARENA kann ohne Erlaubnis für kostenlose CD Kompilationen und ähnlichen Paketen benutzt werden, 
 
 solange die oben genannten Einschränkungen eingehalten werden.
 

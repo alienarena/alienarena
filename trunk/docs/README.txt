@@ -1,4 +1,4 @@
-ALIEN ARENA 2009
+ALIEN ARENA
 
 1. Introduction
 2. System Requirements
@@ -16,7 +16,7 @@ ALIEN ARENA 2009
 
 1.	INTRODUCTION
 
-ALIEN ARENA 2009 is a standalone 3D first person online deathmatch shooter crafted from the original source code of Quake II and Quake III, released by id Software under the GPL license.  With features including 32 bit graphics, new particle engine and effects, light blooms, reflective water, hi resolution textures and skins, hi poly models, stain maps, ALIEN ARENA pushes the envelope of graphical beauty rivaling today's top games.
+ALIEN ARENA is a standalone 3D first person online deathmatch shooter crafted from the original source code of Quake II and Quake III, released by id Software under the GPL license.  With features including 32 bit graphics, new particle engine and effects, light blooms, reflective water, hi resolution textures and skins, hi poly models, stain maps, ALIEN ARENA pushes the envelope of graphical beauty rivaling today's top games.
 
 The game features 37 levels, which can be played online against other players, or against the built in CodeRED bots.  
 
@@ -131,14 +131,14 @@ For Linux users, you simply just need to delete your Alien Arena folder.
 
 7.	CREDITS
 
-There is a long list of credits - ALIEN ARENA 2009 is greatly indebted to the following for it's creation and completion:
+There is a long list of credits - ALIEN ARENA is greatly indebted to the following for it's creation and completion:
 
 Design:  John Diamond with input from the community at large.
-Programming:  John Diamond, BlackIce, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Jim Bower, Kyle Hunter, Andres Mejia.
+Programming:  John Diamond, Jim Bower, "BlackIce", Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia.
 Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
 Maps:  John Diamond, Dennis "xEMPx" Zedlach
 Textures and Artwork:  John Diamond, Enki, Adam Saizlai, Yves Allaire
-Sounds:  John Diamond, Sound Rangers, Jon Ward
+Sounds:  John Diamond, Sound Rangers, Jon Ward, Jim Bower
 Music:  Arteria Games, and SoundRangers
 Fonts: John Diamond, the-interceptor from http://www.quakeworld.nu/
 
@@ -152,7 +152,7 @@ There are other major contributions from the community from QuakeSrc.org, includ
 
 8.	COPYRIGHT INFORMATION
 
-ALIEN ARENA 2009 and it's original content are a copyright of COR Entertainment, LLC.  
+ALIEN ARENA and it's original content are a copyright of COR Entertainment, LLC.  
 
 The source code of Alien Arena is Free Software. You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
@@ -163,7 +163,7 @@ It is only permissible to distrubute the game data (models, maps, textures, soun
 The Debian packaging is (C) 2009, Andres Mejia <mcitadel@gmail.com> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
 
-Under no circumstances ALIEN ARENA 2009 as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA 2009 may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
+Under no circumstances ALIEN ARENA as a whole be sold or used for profit, without express consent from COR Entertainment.  ALIEN ARENA may be included in free compilation CD's and similar packages without consent, provided it adheres to the above restrictions.
 
 Contact:  http://red.planetarena.org
 
