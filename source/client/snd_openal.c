@@ -237,9 +237,9 @@ const struct source_default_s
         (ALfloat)2.0f, //    AL_ROLLOFF_FACTOR (ATTN_IDLE)
         (ALfloat)280.0f, //  AL_REFERENCE_DISTANCE (ATTN_IDLE)
         // ATTN_STATIC:
-        (ALfloat)2400.0f, // AL_MAX_DISTANCE (ATTN_STATIC)
-        (ALfloat)2.0f, //    AL_ROLLOFF_FACTOR (ATTN_STATIC)
-        (ALfloat)240.0f, //  AL_REFERENCE_DISTANCE (ATTN_STATIC)
+        (ALfloat)1600.0f, // AL_MAX_DISTANCE (ATTN_STATIC)
+        (ALfloat)2.2f, //    AL_ROLLOFF_FACTOR (ATTN_STATIC)
+        (ALfloat)160.0f, //  AL_REFERENCE_DISTANCE (ATTN_STATIC)
         // "Auto Looping"
         (ALfloat)1600.0f, // AL_MAX_DISTANCE (Looping)
         (ALfloat)1.8f, //    AL_ROLLOFF_FACTOR (Looping)
@@ -264,7 +264,7 @@ const struct source_default_s
  */
 const ALfloat norm_sq_cull_distance = (ALfloat)( 3296.0f * 3296.0f );
 const ALfloat idle_sq_cull_distance = (ALfloat)( 2864.0f * 2864.0f );
-const ALfloat static_sq_cull_distance = (ALfloat)( 2464.0f * 2464.0f );
+const ALfloat static_sq_cull_distance = (ALfloat)( 1664.0f * 1664.0f );
 const ALfloat looping_sq_cull_distance = (ALfloat)( 1664.0f * 1664.0f );
 const ALfloat looping_cull_hysteresis = (ALfloat)( 64.0f * 64.0f );
 
