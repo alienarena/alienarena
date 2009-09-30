@@ -732,6 +732,14 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 	//draw a fatter glow at the impact point
 	if(!(p = new_particle()))
 		return;
+
+	p->type = PARTICLE_STANDARD;
+	p->texnum = r_particletexture->texnum;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = 1;
+	p->scalevel = 0;
+
 	p->color = 0xe0 + (rand()&2);
 	for (j=0 ; j<3 ; j++)
 	{
