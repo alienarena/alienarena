@@ -693,6 +693,13 @@ void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count)
 		if (!(p = new_particle()))
 			return;
 
+		p->type = PARTICLE_STANDARD;
+		p->texnum = r_particletexture->texnum;
+		p->blendsrc = GL_SRC_ALPHA;
+		p->blenddst = GL_ONE;
+		p->scale = 1;
+		p->scalevel = 0;
+
 		p->color = color;
 
 		d = rand()&7;
