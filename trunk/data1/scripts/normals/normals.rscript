@@ -724,3 +724,10 @@ maps/meshes/gothic/lamp
 		glow
 	}
 }
+maps/meshes/tech/railing
+{
+	{
+		map maps/meshes/tech/railing_normal.jpg
+		normalmap
+	}
+}
