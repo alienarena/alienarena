@@ -67,3 +67,29 @@ textures/arena9/roundlight
 		lensflare
 	}
 }
+textures/metal/fade2
+{
+	{
+		map gfx/beam3.tga
+		scale static 45 static 80
+		colormap 1 1 1
+		beam
+	}
+}
+textures/rage/light7
+{
+	{
+		map textures/arena5/lighta.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll sin 1 sin 0
+		anim .05
+			textures/arena5/lighta.tga
+			textures/arena5/lightb.tga
+			textures/arena5/lightc.tga
+			textures/arena5/lightd.tga
+			textures/arena5/lighte.tga
+			textures/arena5/lightf.tga
+		end
+	}
+}
