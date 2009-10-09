@@ -1,3 +1,12 @@
+textures/arena6/ice
+{
+	{
+		map gfx/grchrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.1 0.1
+		envmap
+	}
+}
 textures/arena7/light1
 {
 	{
