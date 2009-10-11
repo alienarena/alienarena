@@ -3180,9 +3180,62 @@ void CL_TeleportParticles (vec3_t start)
 	int			j;
 	cparticle_t	*p;
 	int			i;
-	vec3_t		dir;
+	vec3_t		dir, pos1, pos2, v;
 	float		step = 16.0;
+	static vec3_t mins = { -1, -1, -1 }; 
+    static vec3_t maxs = { 1, 1, 1 }; 
 
+	VectorCopy(start, pos1);
+	pos2[2] = 1;
+	pos2[0] = pos2[1] = 0;
+	pos1[2] -= 32;
+
+	if(!(p = new_particle()))
+		return;
+		
+	p->texnum = r_logotexture->texnum;
+	p->color = 0x74 + (rand()&7);
+	p->type = PARTICLE_DECAL;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->scale = 4;
+	p->scalevel = 0;
+		
+	VectorScale(pos2, -1, v);
+	RotateForNormal(v, p->angle);
+	p->angle[ROLL] = rand() % 360;
+	VectorCopy( pos1, p->org);
+		
+	p->alpha = 0.7;
+	p->alphavel = -0.15;
+	for (j=0 ; j<3 ; j++)
+	{
+		p->accel[j] = 0;
+		p->vel[j] = 0;
+	}
+
+	//place a big shock wave effect
+	if (!(p = new_particle()))
+			return;
+
+	p->alpha = 1.0;
+	p->alphavel = -.250;
+	p->type = PARTICLE_DECAL;
+	p->texnum = r_explosion5texture->texnum;
+	p->blendsrc = GL_SRC_ALPHA;
+	p->blenddst = GL_ONE;
+	p->color = 0x74 + (rand()&7);
+	p->scale = 1 + (rand()&4) ;
+	p->scalevel = 4;
+	VectorScale(pos2, -1, v);
+	RotateForNormal(v, p->angle);
+	p->angle[ROLL] = rand() % 360;
+	VectorCopy( pos1, p->org);
+	for(j = 0; j < 3; j++) {
+		p->vel[j] = 0;
+		p->accel[j] = 0;
+	}
+	
 	VectorCopy (start, move);
 	VectorCopy (start, end);
 	end[2] += 32;
@@ -3219,7 +3272,7 @@ void CL_TeleportParticles (vec3_t start)
 				0, 1, 1);
 		
 		start[2] += 16;
-	}
+	}	
 }
 
 #define WEATHER_PARTICLES 2048
