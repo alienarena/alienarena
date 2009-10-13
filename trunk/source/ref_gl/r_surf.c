@@ -100,7 +100,7 @@ image_t *R_TextureAnimation (mtexinfo_t *tex)
 
 /*
 ================
-DrawGLPoly - note - move this to vertex arrays
+DrawGLPoly
 ================
 */
 void DrawGLPoly (msurface_t *fa, int flags)
@@ -636,6 +636,7 @@ void DrawTextureChains (void)
 }
 
 extern int KillFlags;
+extern GLuint depthTextureId;
 static void GL_RenderLightmappedPoly( msurface_t *surf )
 {
 	int		nv = surf->polys->numverts;
@@ -762,6 +763,10 @@ dynamic:
 			qglActiveTextureARB(GL_TEXTURE3);
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
 			KillFlags |= KILL_TMU3_POINTER;
+
+			glUniform1iARB( g_location_bspShadowmapTexture, 7);
+			qglActiveTextureARB(GL_TEXTURE7);
+			qglBindTexture(GL_TEXTURE_2D, depthTextureId);
 			
 			if(is_dynamic) {
 						
@@ -813,6 +818,10 @@ dynamic:
 			qglActiveTextureARB(GL_TEXTURE3);
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
 			KillFlags |= KILL_TMU3_POINTER;
+
+			glUniform1iARB( g_location_bspShadowmapTexture, 7);
+			qglActiveTextureARB(GL_TEXTURE7);
+			qglBindTexture(GL_TEXTURE_2D, depthTextureId);
 	
 			glUniform3fARB( g_location_lightPosition, dl->origin[0], dl->origin[1], dl->origin[2]);
 			glUniform3fARB( g_location_lightColour, dl->color[0], dl->color[1], dl->color[2]);

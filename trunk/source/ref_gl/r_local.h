@@ -551,6 +551,7 @@ extern GLuint		g_tangentSpaceTransform;
 extern GLuint		g_location_heightTexture;
 extern GLuint		g_location_lmTexture;
 extern GLuint		g_location_normalTexture;
+extern GLuint		g_location_bspShadowmapTexture;
 extern GLuint		g_heightMapID;
 extern GLuint		g_location_fog;
 extern GLuint		g_location_parallax;

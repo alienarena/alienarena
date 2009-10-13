@@ -251,6 +251,7 @@ CODERED_OBJS = \
 	$(BUILDDIR)/ref_gl/r_particle.o \
 	$(BUILDDIR)/ref_gl/r_postprocess.o \
 	$(BUILDDIR)/ref_gl/r_script.o \
+	$(BUILDDIR)/ref_gl/r_shadowmaps.o \
 	$(BUILDDIR)/ref_gl/r_shadows.o \
 	$(BUILDDIR)/ref_gl/r_surf.o \
 	$(BUILDDIR)/ref_gl/r_vlights.o \
@@ -439,6 +440,9 @@ $(BUILDDIR)/ref_gl/r_particle.o :	    $(REF_GL_DIR)/r_particle.c
 	$(DO_GL_SHLIB_CC)
 	
 $(BUILDDIR)/ref_gl/r_postprocess.o :	    $(REF_GL_DIR)/r_postprocess.c
+	$(DO_GL_SHLIB_CC)
+	
+$(BUILDDIR)/ref_gl/r_shadowmaps.o:     $(REF_GL_DIR)/r_shadowmaps.c
 	$(DO_GL_SHLIB_CC)
 	
 $(BUILDDIR)/ref_gl/r_shadows.o:     $(REF_GL_DIR)/r_shadows.c
