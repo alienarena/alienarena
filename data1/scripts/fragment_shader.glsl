@@ -2,11 +2,13 @@ uniform sampler2D testTexture;
 uniform sampler2D HeightTexture;
 uniform sampler2D NormalTexture;
 uniform sampler2D lmTexture;
+uniform sampler2D ShadowMap;
 uniform int FOG;
 uniform int PARALLAX;
 uniform int DYNAMIC;
 uniform int SPECULAR;
 
+varying vec4 ShadowCoord;
 varying vec3 EyeDir;
 varying vec3 LightDir;
 varying vec3 varyingLightColour;
@@ -30,6 +32,17 @@ void main( void )
 	vec3 relativeEyeDirection = normalize( EyeDir );
 	vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
 	vec3 textureColour = texture2D( testTexture, gl_TexCoord[0].xy ).rgb;
+	
+	//to do - need a flag here?
+	vec4 shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
+	// Used to lower moiré pattern and self-shadowing
+	shadowCoordinateWdivide.z += 0.0005;	
+	
+	float distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
+		
+ 	float shadow = 1.0;
+ 	if (ShadowCoord.w > 0.0)
+ 		shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
 	
 	if(PARALLAX > 0) {
 		//do the parallax mapping
@@ -75,6 +88,7 @@ void main( void )
 	else {
 		diffuse = texture2D(testTexture, gl_TexCoord[0].xy);
 		lightmap = texture2D(lmTexture, gl_TexCoord[1].st);		
+		gl_FragColor = (diffuse * lightmap * 2.0);
 	}		
 	
 	if(DYNAMIC > 0) {
@@ -105,7 +119,7 @@ void main( void )
 
 		colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 3.0;
 		
-		vec4 dynamicColour = vec4( attenuation * colour * varyingLightColour, 1.0 );
+		vec4 dynamicColour = vec4( attenuation * colour * varyingLightColour * shadow, 1.0 );
 		if(PARALLAX > 0) {
 			dynamicColour = max(dynamicColour, diffuse * lightmap * 2.0);
 			if(SPECULAR > 0) {
@@ -115,7 +129,7 @@ void main( void )
 		else {
 			dynamicColour = max(dynamicColour, vec4(textureColour, 1.0) * lightmap * 2.0);
 		}
-    	gl_FragColor = dynamicColour;
+    	gl_FragColor = dynamicColour; 
 	}
 	if(FOG > 0)
 		gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);

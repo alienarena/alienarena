@@ -218,7 +218,7 @@ void Sys_Error (char *error, ...)
 	char		text[1024];
 
 	va_start (argptr, error);
-	vsprintf (text, error, argptr);
+	_vsnprintf(text, sizeof(text), error, argptr);
 	va_end (argptr);
 
 	gi.error (ERR_FATAL, "%s", text);
@@ -230,7 +230,7 @@ void Com_Printf (char *msg, ...)
 	char		text[1024];
 
 	va_start (argptr, msg);
-	vsprintf (text, msg, argptr);
+	_vsnprintf(text, sizeof(text), msg, argptr);
 	va_end (argptr);
 
 	gi.dprintf ("%s", text);

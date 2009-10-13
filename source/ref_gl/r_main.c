@@ -71,6 +71,7 @@ GLuint		g_tangentSpaceTransform;
 GLuint      g_location_heightTexture;
 GLuint		g_location_lmTexture;
 GLuint		g_location_normalTexture;
+GLuint		g_location_bspShadowmapTexture;
 GLuint		g_heightMapID = 0;
 GLuint		g_location_fog;
 GLuint	    g_location_parallax;
@@ -120,7 +121,7 @@ viddef_t	vid;
 
 int r_viewport[4];
 
-int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3;
+int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3, GL_TEXTURE7;
 
 model_t		*r_worldmodel;
 
@@ -1090,6 +1091,69 @@ void R_CastShadow(void)
 
 }
 
+extern void setupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z);
+extern void setTextureMatrix();
+extern GLuint fboId;
+extern GLuint depthTextureId;
+extern void R_DrawShadowMapWorld (void);
+
+void R_DrawCaster(void)
+{
+	int			sv_lnum, lnum;
+	vec3_t		lightVec;
+	dlight_t	*dl;
+	float		add, brightest = 0;
+
+	//get avg of dynamic lights that are nearby enough to matter.
+	dl = r_newrefdef.dlights;
+	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
+	{
+		VectorSubtract (r_origin, dl->origin, lightVec);
+		add = dl->intensity - VectorLength(lightVec)/10;
+		if (add > brightest) //only bother with lights close by
+		{
+			brightest = add;
+			sv_lnum = lnum; //remember the position of most influencial light
+		}
+	}
+	if(brightest > 0) { //we have a light
+		dl = r_newrefdef.dlights;
+		dl += sv_lnum; //our most influential light
+	}
+	else
+		return; 
+
+	qglBindTexture(GL_TEXTURE_2D, depthTextureId);
+
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId); 
+	
+	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
+	qglViewport(0,0,(int)(vid.width * 1),(int)(vid.height * 1));
+
+	// Clear previous frame values
+	qglClear( GL_DEPTH_BUFFER_BIT);
+		
+	//Disable color rendering, we only want to write to the Z-Buffer
+	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); 
+		
+	// Culling switching, rendering only frontfaces
+	qglCullFace(GL_BACK);
+
+	// attach the texture to FBO depth attachment point
+	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, depthTextureId, 0);
+			
+	//set camera
+	setupMatrices(dl->origin[0],dl->origin[1],dl->origin[2],r_origin[0],r_origin[1],r_origin[2]-100);
+
+	//render world - very basic
+	R_DrawShadowMapWorld();
+	
+	setTextureMatrix();
+	
+	qglDepthMask (1);		// back to writing
+
+}
+
 /*
 =============
 R_Clear
@@ -1133,6 +1197,8 @@ r_newrefdef must be set before the first call
 ================
 */
 
+extern void generateShadowFBO();
+
 void R_RenderView (refdef_t *fd)
 {
 	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
@@ -1144,7 +1210,29 @@ void R_RenderView (refdef_t *fd)
 		return;
 
 	r_newrefdef = *fd;
+/*
+	//to do - if shadow map
 
+	qglEnable(GL_DEPTH_TEST);
+	qglClearColor(0,0,0,1.0f);
+	
+	qglEnable(GL_CULL_FACE);
+	
+	qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+
+	//Render from the light POV to a FBO, store depth values only
+
+	generateShadowFBO();
+
+	R_DrawCaster(); 
+
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+	
+	//Enabling color write (previously disabled for light POV z-buffer rendering)
+	qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); 
+		
+	//end shadow maps
+*/
 	if (!r_worldmodel && !( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) )
 		Com_Error (ERR_DROP, "R_RenderView: NULL worldmodel");
 
@@ -1763,6 +1851,7 @@ int R_Init( void *hinstance, void *hWnd )
 			GL_TEXTURE1 = GL_TEXTURE1_ARB;
 			GL_TEXTURE2 = GL_TEXTURE2_ARB;
 			GL_TEXTURE3 = GL_TEXTURE3_ARB;
+			GL_TEXTURE7 = GL_TEXTURE7_ARB;
 		}
 		else
 		{
@@ -2078,6 +2167,7 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_heightTexture = glGetUniformLocationARB( g_programObj, "HeightTexture" );
 		g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
 		g_location_normalTexture = glGetUniformLocationARB( g_programObj, "NormalTexture" );
+		g_location_bspShadowmapTexture = glGetUniformLocationARB( g_programObj, "ShadowMap" );
 		g_location_fog = glGetUniformLocationARB( g_programObj, "FOG" );
 		g_location_parallax = glGetUniformLocationARB( g_programObj, "PARALLAX" );
 		g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );

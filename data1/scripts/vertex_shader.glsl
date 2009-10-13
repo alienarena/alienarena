@@ -10,11 +10,16 @@ varying vec3 EyeDir;
 varying vec3 LightDir;
 varying vec3 varyingLightColour;
 varying float varyingLightCutoffSquared;
+varying vec4 ShadowCoord;
 varying float fog;
 
 void main( void )
 { 
+	ShadowCoord = gl_TextureMatrix[7] * gl_Vertex;
+
     gl_Position = ftransform(); 
+    
+    gl_FrontColor = gl_Color;
           
 	EyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );
 	LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);

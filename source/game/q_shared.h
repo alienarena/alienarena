@@ -226,6 +226,11 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 
 //=============================================
 
+/* FIXME: Beware - _vsnprintf does not end with \0 - vsnprintf (*nix) does */
+#ifdef _WIN32
+#define vsnprintf	_vsnprintf
+#endif
+
 char *COM_SkipPath (char *pathname);
 void COM_StripExtension (char *in, char *out);
 void COM_FileBase (char *in, char *out);
