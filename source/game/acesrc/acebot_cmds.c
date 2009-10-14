@@ -138,7 +138,7 @@ void debug_printf(char *fmt, ...)
 	edict_t	*cl_ent;
 	
 	va_start (argptr,fmt);
-	len = _vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
+	len = vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
 	va_end (argptr);
 
 	if (dedicated->value)
@@ -168,7 +168,7 @@ void safe_cprintf (edict_t *ent, int printlevel, char *fmt, ...)
 		return;
 
 	va_start (argptr,fmt);
-	len = _vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
+	len = vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
 	va_end (argptr);
 
 	gi.cprintf(ent, printlevel, "%s", bigbuffer);
@@ -188,7 +188,7 @@ void safe_centerprintf (edict_t *ent, char *fmt, ...)
 		return;
 	
 	va_start (argptr,fmt);
-	len = _vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
+	len = vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
 	va_end (argptr);
 	
 	gi.centerprintf(ent, bigbuffer);
@@ -207,7 +207,7 @@ void safe_bprintf (int printlevel, char *fmt, ...)
 	edict_t	*cl_ent;
 
 	va_start (argptr,fmt);
-	len = _vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
+	len = vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
 	va_end (argptr);
 
 	if (dedicated->value)

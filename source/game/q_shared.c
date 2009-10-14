@@ -1088,7 +1088,7 @@ char	*va(char *format, ...)
 	static char		string[1024];
 	
 	va_start (argptr, format);
-	_vsnprintf(string, sizeof(string), format, argptr);
+	vsnprintf(string, sizeof(string), format, argptr);
 	va_end (argptr);
 
 	return string;	
@@ -1465,7 +1465,7 @@ void Com_sprintf (char *dest, int size, char *fmt, ...)
 	char	bigbuffer[0x10000];
 
 	va_start (argptr,fmt);
-	len = _vsnprintf (bigbuffer,sizeof(bigbuffer), fmt,argptr);
+	len = vsnprintf (bigbuffer,sizeof(bigbuffer), fmt,argptr);
 	va_end (argptr);
 	if (len >= size) 
 		Com_Printf ("Com_sprintf: overflow of %i in %i\n", len, size);
