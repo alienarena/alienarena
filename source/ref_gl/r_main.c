@@ -1662,7 +1662,7 @@ void R_SetHighest( void )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
-	Cvar_SetValue("gl_shadowmaps", 0);
+	Cvar_SetValue("gl_shadowmaps", 1);
 	Cvar_SetValue("gl_parallaxmaps", 1);
 	Cvar_SetValue("gl_specular", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
