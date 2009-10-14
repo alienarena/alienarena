@@ -1640,15 +1640,27 @@ void R_InitMirrorTextures( void )
 void R_InitDepthTextures( void )
 {
 	byte	*data;
-	int		size;
+	int		size, texture_height, texture_width;
 
-	//init the full screen texture
-	size = vid.height * vid.width * 4;
+	//find closer power of 2 to screen size 
+	for (texture_width = 1;texture_width < viddef.width;texture_width *= 2);
+	for (texture_height = 1;texture_height < viddef.height;texture_height *= 2);
+
+	//limit to 2048x2048 - anything larger is generally going to cause problems, and AA doesn't support res higher
+	if(texture_width > 2048)
+		texture_width = 2048;
+	if(texture_height > 2048)
+		texture_height = 2048;
+	
+	//init the framebuffer texture
+	size = texture_width * texture_height * 4;
 	data = malloc( size );
 	memset( data, 255, size );
-	r_depthtexture = GL_LoadPic( "***r_depthtexture***", (byte *)data, vid.width, vid.height, it_pic, 32 );
-	free ( data );
+	r_depthtexture = GL_LoadPic( "***r_depthtexture***", (byte *)data, texture_width, texture_height, it_pic, 3 );
+	free ( data );	
 }
+
+
 /*
 ===============
 GL_InitImages
