@@ -184,6 +184,7 @@ extern cvar_t	*gl_ext_mtexcombine;
 
 // Vic - end
 extern cvar_t	*gl_normalmaps;
+extern cvar_t	*gl_shadowmaps;
 extern cvar_t	*gl_parallaxmaps;
 extern cvar_t	*gl_specular;
 extern cvar_t	*gl_glsl_postprocess;
@@ -296,7 +297,6 @@ void R_DrawSkyBox (void);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type);
 void R_DrawShadowVolume(entity_t * e);
-void R_DrawShadowWorld(void);
 void R_ShadowBlend(float alpha);
 #ifdef __unix__
 void R_ReadFogScript(char config_file[128]);
@@ -532,6 +532,13 @@ extern glStencilFuncSeparatePROC	qglStencilFuncSeparate;
 extern glStencilOpSeparatePROC		qglStencilOpSeparate;
 extern glStencilMaskSeparatePROC	qglStencilMaskSeparate;
 
+//shadow maps
+GLuint fboId;
+void setupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z);
+void setTextureMatrix();
+void R_DrawShadowMapWorld (void);
+extern image_t *r_depthtexture;
+
 //arb fragment
 extern unsigned int g_water_program_id;
 
@@ -557,6 +564,7 @@ extern GLuint		g_location_fog;
 extern GLuint		g_location_parallax;
 extern GLuint		g_location_dynamic;
 extern GLuint		g_location_specular;
+extern GLuint		g_location_shadowmap;
 extern GLuint		g_location_lightPosition;
 extern GLuint		g_location_lightColour;
 extern GLuint		g_location_lightCutoffSquared;

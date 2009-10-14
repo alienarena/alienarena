@@ -893,6 +893,9 @@ void SP_worldspawn (edict_t *ent)
 	gi.modelindex ("models/objects/debris1/tris.md2");
 	gi.modelindex ("models/objects/debris3/tris.md2");
 
+//	gi.modelindex ("models/objects/laser/tris.md2");
+//	gi.modelindex ("models/objects/fireball/tris.md2");
+
 	//precache all base player models.  this eliminates "stutter" when a player joins the game
 	gi.modelindex ("players/martianenforcer/tris.md2");
 	gi.modelindex ("players/martiancyborg/tris.md2");

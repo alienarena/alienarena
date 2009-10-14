@@ -77,6 +77,7 @@ GLuint		g_location_fog;
 GLuint	    g_location_parallax;
 GLuint		g_location_dynamic;
 GLuint		g_location_specular;
+GLuint		g_location_shadowmap;
 GLuint	    g_location_lightPosition;
 GLuint		g_location_lightColour;
 GLuint	    g_location_lightCutoffSquared;
@@ -132,6 +133,7 @@ glconfig_t		gl_config;
 glstate_t		gl_state;
 
 cvar_t	*gl_normalmaps;
+cvar_t  *gl_shadowmaps;
 cvar_t	*gl_parallaxmaps;
 cvar_t  *gl_specular;
 cvar_t	*gl_glsl_postprocess;
@@ -930,7 +932,6 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 {
 	GLdouble xmin, xmax, ymin, ymax;
 	const float correction = 0.1;
-	float projectionMatrix[16];
 
 	ymax = zNear * tan( fovy * M_PI / 360.0 );
 	ymin = -ymax;
@@ -943,13 +944,6 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 
 	qglFrustum( xmin, xmax, ymin, ymax, zNear, zFar );
 	
-	//for world shadows
-	if(gl_shadows->value > 3) {
-		qglGetFloatv( GL_PROJECTION_MATRIX, projectionMatrix );
-		projectionMatrix[ 10 ] = correction - 1;
-		projectionMatrix[ 14 ] = zNear * ( correction - 2 );
-		qglLoadMatrixf( projectionMatrix );
-	}
 }
 
 
@@ -1091,13 +1085,7 @@ void R_CastShadow(void)
 
 }
 
-extern void setupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z);
-extern void setTextureMatrix();
-extern GLuint fboId;
-extern GLuint depthTextureId;
-extern void R_DrawShadowMapWorld (void);
-
-void R_DrawCaster(void)
+void R_DrawWorldCaster(void)
 {
 	int			sv_lnum, lnum;
 	vec3_t		lightVec;
@@ -1123,7 +1111,7 @@ void R_DrawCaster(void)
 	else
 		return; 
 
-	qglBindTexture(GL_TEXTURE_2D, depthTextureId);
+	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId); 
 	
@@ -1140,10 +1128,10 @@ void R_DrawCaster(void)
 	qglCullFace(GL_BACK);
 
 	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, depthTextureId, 0);
+	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
 			
-	//set camera
-	setupMatrices(dl->origin[0],dl->origin[1],dl->origin[2],r_origin[0],r_origin[1],r_origin[2]-100);
+	//set camera to look back from light to player, keeping z at light level
+	setupMatrices(dl->origin[0],dl->origin[1],dl->origin[2],r_origin[0],r_origin[1],dl->origin[2]);
 
 	//render world - very basic
 	R_DrawShadowMapWorld();
@@ -1210,29 +1198,33 @@ void R_RenderView (refdef_t *fd)
 		return;
 
 	r_newrefdef = *fd;
-/*
-	//to do - if shadow map
 
-	qglEnable(GL_DEPTH_TEST);
-	qglClearColor(0,0,0,1.0f);
-	
-	qglEnable(GL_CULL_FACE);
-	
-	qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+	//shadowmaps
 
-	//Render from the light POV to a FBO, store depth values only
+	if(gl_shadowmaps->value) {
 
-	generateShadowFBO();
-
-	R_DrawCaster(); 
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
-	
-	//Enabling color write (previously disabled for light POV z-buffer rendering)
-	qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); 
+		qglEnable(GL_DEPTH_TEST);
+		qglClearColor(0,0,0,1.0f);
 		
-	//end shadow maps
-*/
+		qglEnable(GL_CULL_FACE);
+		
+		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+
+		//Render from the light POV to a FBO, store depth values only
+		//to do - this should be moved to a better place instead of this hack
+		//if(r_framecount == 1)
+		//	generateShadowFBO();
+
+		R_DrawWorldCaster(); 
+
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
+		
+		//Enabling color write (previously disabled for light POV z-buffer rendering)
+		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); 
+			
+		//end shadow maps
+	}
+
 	if (!r_worldmodel && !( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) )
 		Com_Error (ERR_DROP, "R_RenderView: NULL worldmodel");
 
@@ -1278,8 +1270,6 @@ void R_RenderView (refdef_t *fd)
 	R_DrawEntitiesOnList ();
 
 	R_CastShadow();
-	
-	R_DrawShadowWorld(); 
 	
 	//Draw v_weaps last after shadows
 	R_DrawViewEntitiesOnList ();
@@ -1444,6 +1434,7 @@ void R_Register( void )
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
 
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
+	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
 	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE); 
 	gl_specular = Cvar_Get("gl_specular", "0", CVAR_ARCHIVE);
 	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
@@ -1545,6 +1536,7 @@ void R_SetLowest(void)
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_specular", 0);
+	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
 	Cvar_SetValue("r_shaders", 0);
@@ -1574,6 +1566,7 @@ void R_SetLow( void )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
@@ -1605,6 +1598,7 @@ void R_SetMedium( void )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
@@ -1636,6 +1630,7 @@ void R_SetHigh( void )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 1);
 	Cvar_SetValue("gl_specular", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
@@ -1667,6 +1662,7 @@ void R_SetHighest( void )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 1);
 	Cvar_SetValue("gl_specular", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
@@ -2172,6 +2168,7 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_parallax = glGetUniformLocationARB( g_programObj, "PARALLAX" );
 		g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
 		g_location_specular = glGetUniformLocationARB( g_programObj, "SPECULAR" );
+		g_location_shadowmap = glGetUniformLocationARB( g_programObj, "SHADOWMAP" );
 		g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
 		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
 		g_location_lightCutoffSquared = glGetUniformLocationARB( g_programObj, "lightCutoffSquared" );
@@ -2434,6 +2431,9 @@ int R_Init( void *hinstance, void *hWnd )
 	Mod_Init ();
 	R_InitParticleTexture ();
 	Draw_InitLocal ();
+
+	if(gl_shadowmaps->value)
+		generateShadowFBO(); //to do - probably should only do if gl_shadows = 4, which would require a vid restart
 
 	scr_playericonalpha = 0.0;
 

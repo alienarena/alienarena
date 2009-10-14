@@ -27,6 +27,7 @@ extern cvar_t *vid_contrast;
 
 extern cvar_t *r_bloom_intensity;
 extern cvar_t *gl_normalmaps;
+extern cvar_t *gl_shadowmaps;
 extern cvar_t *gl_parallaxmaps;
 extern cvar_t *gl_specular;
 extern cvar_t *gl_glsl_postprocess;
@@ -89,6 +90,7 @@ static menuslider_s		s_modulate_slider;
 static menufield_s		s_height_field;
 static menufield_s		s_width_field;
 static menulist_s		s_normalmaps_box;
+static menulist_s		s_shadowmaps_box;
 static menulist_s		s_parallaxmaps_box;
 static menulist_s		s_specular_box;
 static menulist_s		s_postprocess_box;
@@ -146,6 +148,15 @@ static void NormalMapsCallback( void *s )
 	}
 }
 
+static void ShadowMapsCallback( void *s )
+{
+	Cvar_SetValue("gl_shadowmaps", s_shadowmaps_box.curvalue);
+	if(s_shadowmaps_box.curvalue) { //must turn this on for shadowmaps 
+		Cvar_SetValue("gl_glsl_shaders", s_shadowmaps_box.curvalue);
+		s_glsl_box.curvalue = s_shadowmaps_box.curvalue;
+	}
+}
+
 static void ParallaxCallback( void *s )
 {
 	Cvar_SetValue("gl_parallaxmaps", s_parallaxmaps_box.curvalue);
@@ -175,13 +186,15 @@ static void PostProcessCallback( void *s )
 static void GlslCallback( void *s )
 {
 	Cvar_SetValue("gl_glsl_shaders", s_glsl_box.curvalue);
-	if(!s_glsl_box.curvalue) { //must turn this on for parallax
+	if(!s_glsl_box.curvalue) { 
 		Cvar_SetValue("gl_parallaxmaps", s_glsl_box.curvalue);
 		s_parallaxmaps_box.curvalue = s_glsl_box.curvalue;
 		Cvar_SetValue("gl_specular", s_glsl_box.curvalue);
 		s_specular_box.curvalue = s_glsl_box.curvalue;
 		Cvar_SetValue("gl_normalmaps", s_glsl_box.curvalue);
 		s_normalmaps_box.curvalue = s_glsl_box.curvalue;
+		Cvar_SetValue("gl_shadowmaps", s_glsl_box.curvalue);
+		s_shadowmaps_box.curvalue = s_glsl_box.curvalue;
 		Cvar_SetValue("gl_glsl_postprocess", s_glsl_box.curvalue);
 		s_postprocess_box.curvalue = s_glsl_box.curvalue;
 	}
@@ -197,6 +210,7 @@ static void SetLowest( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
@@ -223,6 +237,7 @@ static void SetLow( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
@@ -250,6 +265,7 @@ static void SetMedium( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
+	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
@@ -277,6 +293,7 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 1);
 	Cvar_SetValue("gl_specular", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
@@ -304,6 +321,7 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
+	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 1);
 	Cvar_SetValue("gl_specular", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
@@ -379,6 +397,7 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "_windowed_mouse", s_windowed_mouse.curvalue);
 	Cvar_SetValue( "gl_modulate", s_modulate_slider.curvalue);
 	Cvar_SetValue( "gl_normalmaps", s_normalmaps_box.curvalue);
+	Cvar_SetValue( "gl_shadowmaps", s_shadowmaps_box.curvalue);
 	Cvar_SetValue( "gl_parallaxmaps", s_parallaxmaps_box.curvalue);
 	Cvar_SetValue( "gl_specular", s_specular_box.curvalue);
 	Cvar_SetValue( "gl_glsl_postprocess", s_postprocess_box.curvalue);
@@ -466,6 +485,8 @@ void VID_MenuInit( void )
 		vid_height = Cvar_Get( "vid_height", "400", CVAR_ARCHIVE);
 	if (!gl_normalmaps)
 		gl_normalmaps = Cvar_Get( "gl_normalmaps", "0", CVAR_ARCHIVE);
+	if (!gl_shadowmaps)
+		gl_shadowmaps = Cvar_Get( "gl_shadowmaps", "0", CVAR_ARCHIVE);
 	if (!gl_parallaxmaps)
 		gl_parallaxmaps = Cvar_Get( "gl_parallaxmaps", "0", CVAR_ARCHIVE);
 	if (!gl_specular)
@@ -600,9 +621,18 @@ void VID_MenuInit( void )
 	s_normalmaps_box.itemnames = yesno_names;
 	s_normalmaps_box.generic.callback = NormalMapsCallback;
 
+	s_shadowmaps_box.generic.type	= MTYPE_SPINCONTROL;
+	s_shadowmaps_box.generic.x		= 24;
+	s_shadowmaps_box.generic.y		= 190*scale;
+	s_shadowmaps_box.generic.name	= "shadow maps";
+	s_shadowmaps_box.curvalue = gl_shadowmaps->value;
+	s_shadowmaps_box.itemnames = yesno_names;
+	s_shadowmaps_box.generic.callback = ShadowMapsCallback;
+	s_shadowmaps_box.generic.statusbar = "for testing only, incomplete code";
+
 	s_parallaxmaps_box.generic.type	= MTYPE_SPINCONTROL;
 	s_parallaxmaps_box.generic.x		= 24;
-	s_parallaxmaps_box.generic.y		= 190*scale;
+	s_parallaxmaps_box.generic.y		= 200*scale;
 	s_parallaxmaps_box.generic.name	= "parallax maps";
 	s_parallaxmaps_box.curvalue = gl_parallaxmaps->value;
 	s_parallaxmaps_box.itemnames = yesno_names;
@@ -610,7 +640,7 @@ void VID_MenuInit( void )
 
 	s_specular_box.generic.type	= MTYPE_SPINCONTROL;
 	s_specular_box.generic.x		= 24;
-	s_specular_box.generic.y		= 200*scale;
+	s_specular_box.generic.y		= 210*scale;
 	s_specular_box.generic.name	= "specular highlights";
 	s_specular_box.curvalue = gl_specular->value;
 	s_specular_box.itemnames = yesno_names;
@@ -618,7 +648,7 @@ void VID_MenuInit( void )
 
 	s_postprocess_box.generic.type	= MTYPE_SPINCONTROL;
 	s_postprocess_box.generic.x		= 24;
-	s_postprocess_box.generic.y		= 210*scale;
+	s_postprocess_box.generic.y		= 220*scale;
 	s_postprocess_box.generic.name	= "post process effects";
 	s_postprocess_box.curvalue = gl_glsl_postprocess->value;
 	s_postprocess_box.itemnames = yesno_names;
@@ -626,7 +656,7 @@ void VID_MenuInit( void )
 
 	s_glsl_box.generic.type	= MTYPE_SPINCONTROL;
 	s_glsl_box.generic.x		= 24;
-	s_glsl_box.generic.y		= 220*scale;
+	s_glsl_box.generic.y		= 230*scale;
 	s_glsl_box.generic.name	= "use GLSL shaders";
 	s_glsl_box.curvalue = gl_glsl_shaders->value;
 	s_glsl_box.itemnames = yesno_names;
@@ -634,21 +664,21 @@ void VID_MenuInit( void )
 
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
 	s_finish_box.generic.x	= 24;
-	s_finish_box.generic.y	= 240*scale;
+	s_finish_box.generic.y	= 250*scale;
 	s_finish_box.generic.name	= "draw frame completely";
 	s_finish_box.curvalue = gl_finish->value;
 	s_finish_box.itemnames = yesno_names;
 
 	s_vsync_box.generic.type = MTYPE_SPINCONTROL;
     s_vsync_box.generic.x  = 24;
-    s_vsync_box.generic.y  = 250*scale;
+    s_vsync_box.generic.y  = 260*scale;
     s_vsync_box.generic.name       = "vertical sync";
     s_vsync_box.curvalue = gl_swapinterval->value;
     s_vsync_box.itemnames = onoff_names;
 
 	s_windowed_mouse.generic.type = MTYPE_SPINCONTROL;
 	s_windowed_mouse.generic.x  = 24;
-	s_windowed_mouse.generic.y  = 260*scale;
+	s_windowed_mouse.generic.y  = 270*scale;
 	s_windowed_mouse.generic.name   = "windowed mouse";
 	s_windowed_mouse.curvalue = _windowed_mouse->value;
 	s_windowed_mouse.itemnames = yesno_names;
@@ -656,42 +686,42 @@ void VID_MenuInit( void )
 	s_lowest_action.generic.type = MTYPE_ACTION;
 	s_lowest_action.generic.name = "lowest settings";
 	s_lowest_action.generic.x    = 24;
-	s_lowest_action.generic.y    = 280*scale;
+	s_lowest_action.generic.y    = 290*scale;
 	s_lowest_action.generic.callback = SetLowest;
 	s_lowest_action.generic.statusbar = "no shaders, no dynamic lighting";
 
 	s_low_action.generic.type = MTYPE_ACTION;
 	s_low_action.generic.name = "low settings";
 	s_low_action.generic.x    = 24;
-	s_low_action.generic.y    = 290*scale;
+	s_low_action.generic.y    = 300*scale;
 	s_low_action.generic.callback = SetLow;
 	s_low_action.generic.statusbar = "shaders, but no dynamic lighting";
 
 	s_medium_action.generic.type = MTYPE_ACTION;
 	s_medium_action.generic.name = "medium settings";
 	s_medium_action.generic.x    = 24;
-	s_medium_action.generic.y    = 300*scale;
+	s_medium_action.generic.y    = 310*scale;
 	s_medium_action.generic.callback = SetMedium;
 	s_medium_action.generic.statusbar = "GLSL per-pixel dynamic lighting and postprocess";
 
 	s_high_action.generic.type = MTYPE_ACTION;
 	s_high_action.generic.name = "high settings";
 	s_high_action.generic.x    = 24;
-	s_high_action.generic.y    = 310*scale;
+	s_high_action.generic.y    = 320*scale;
 	s_high_action.generic.callback = SetHigh;
 	s_high_action.generic.statusbar = "GLSL per-pixel effects on most surfaces";
 
 	s_highest_action.generic.type = MTYPE_ACTION;
 	s_highest_action.generic.name = "highest settings";
 	s_highest_action.generic.x    = 24;
-	s_highest_action.generic.y    = 320*scale;
+	s_highest_action.generic.y    = 330*scale;
 	s_highest_action.generic.callback = SetHighest;
 	s_highest_action.generic.statusbar = "GLSL per-pixel effects on all surfaces";
 
 	s_apply_action.generic.type = MTYPE_ACTION;
 	s_apply_action.generic.name = "apply changes";
 	s_apply_action.generic.x    = 24;
-	s_apply_action.generic.y    = 350*scale;
+	s_apply_action.generic.y    = 345*scale;
 	s_apply_action.generic.callback = ApplyChanges;
 
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_mode_list);
@@ -707,6 +737,7 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_overbright_slider );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_tq_slider );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_normalmaps_box );
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_shadowmaps_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_parallaxmaps_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_specular_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_postprocess_box );
