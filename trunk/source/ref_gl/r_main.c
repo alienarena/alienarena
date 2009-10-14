@@ -2432,8 +2432,7 @@ int R_Init( void *hinstance, void *hWnd )
 	R_InitParticleTexture ();
 	Draw_InitLocal ();
 
-	if(gl_shadowmaps->value)
-		generateShadowFBO(); //to do - probably should only do if gl_shadows = 4, which would require a vid restart
+	generateShadowFBO(); 
 
 	scr_playericonalpha = 0.0;
 

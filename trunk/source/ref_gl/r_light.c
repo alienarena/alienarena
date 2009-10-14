@@ -38,42 +38,49 @@ R_MarkLights
 */
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
 {
-	cplane_t	*splitplane;
-	float		dist;
-	msurface_t	*surf;
-	int			i;
-
-	if (node->contents != -1)
-		return;
-
-	splitplane = node->plane;
-	dist = DotProduct (light->origin, splitplane->normal) - splitplane->dist;
-
-	if (dist > light->intensity-DLIGHT_CUTOFF)
-	{
-		R_MarkLights (light, bit, node->children[0]);
-		return;
-	}
-	if (dist < -light->intensity+DLIGHT_CUTOFF)
-	{
-		R_MarkLights (light, bit, node->children[1]);
-		return;
-	}
-
+          cplane_t  *splitplane;
+          float              dist;
+          msurface_t         *surf;
+          int                i, sidebit;
+          
+          if (node->contents != -1)
+                   return;
+ 
+          splitplane = node->plane;
+          dist = DotProduct (light->origin, splitplane->normal) - splitplane->dist;
+ 
+          if (dist > light->intensity-DLIGHT_CUTOFF) {
+                   R_MarkLights (light, bit, node->children[0]);
+                   return;
+          }
+          if (dist < -light->intensity+DLIGHT_CUTOFF) {
+                   R_MarkLights (light, bit, node->children[1]);
+                   return;
+          }
+ 
 // mark the polygons
-	surf = r_worldmodel->surfaces + node->firstsurface;
-	for (i=0 ; i<node->numsurfaces ; i++, surf++)
-	{
-		if (surf->dlightframe != r_dlightframecount)
-		{
-			surf->dlightbits = 0;
-			surf->dlightframe = r_dlightframecount;
-		}
-		surf->dlightbits |= bit;
-	}
-
-	R_MarkLights (light, bit, node->children[0]);
-	R_MarkLights (light, bit, node->children[1]);
+          surf = r_worldmodel->surfaces + node->firstsurface;
+          for (i=0 ; i<node->numsurfaces ; i++, surf++)
+          {
+                   dist = DotProduct (light->origin, surf->plane->normal) - surf->plane->dist;         //Discoloda
+                   if (dist >= 0)                                                                              //Discoloda
+                             sidebit = 0;                                                                      //Discoloda
+                   else                                                                                        //Discoloda
+                             sidebit = SURF_PLANEBACK;                                                //Discoloda
+ 
+                   if ( (surf->flags & SURF_PLANEBACK) != sidebit )                                   //Discoloda
+                             continue;                                                                //Discoloda
+ 
+                   if (surf->dlightframe != r_dlightframecount)
+                   {
+                             surf->dlightbits = bit;
+                             surf->dlightframe = r_dlightframecount;
+                   } else
+                             surf->dlightbits |= bit;
+          }
+ 
+          R_MarkLights (light, bit, node->children[0]);
+          R_MarkLights (light, bit, node->children[1]);
 }
 
 
