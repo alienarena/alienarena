@@ -636,7 +636,6 @@ void DrawTextureChains (void)
 }
 
 extern int KillFlags;
-extern GLuint depthTextureId;
 static void GL_RenderLightmappedPoly( msurface_t *surf )
 {
 	int		nv = surf->polys->numverts;
@@ -763,10 +762,6 @@ dynamic:
 			qglActiveTextureARB(GL_TEXTURE3);
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
 			KillFlags |= KILL_TMU3_POINTER;
-
-			glUniform1iARB( g_location_bspShadowmapTexture, 7);
-			qglActiveTextureARB(GL_TEXTURE7);
-			qglBindTexture(GL_TEXTURE_2D, depthTextureId);
 			
 			if(is_dynamic) {
 						
@@ -778,9 +773,17 @@ dynamic:
 					glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
 					
 					glUniform1iARB( g_location_dynamic, 1);
+					if(gl_shadowmaps->value) { //dynamic world shadows
+						glUniform1iARB( g_location_bspShadowmapTexture, 7);
+						qglActiveTextureARB(GL_TEXTURE7);
+						qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
+						glUniform1iARB( g_location_shadowmap, 1);
+					}
 				}
-				else 
+				else {
 					glUniform1iARB( g_location_dynamic, 0);
+					glUniform1iARB( g_location_shadowmap, 0);
+				}
 			}
 			else 
 				glUniform1iARB( g_location_dynamic, 0);
@@ -819,9 +822,12 @@ dynamic:
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
 			KillFlags |= KILL_TMU3_POINTER;
 
-			glUniform1iARB( g_location_bspShadowmapTexture, 7);
-			qglActiveTextureARB(GL_TEXTURE7);
-			qglBindTexture(GL_TEXTURE_2D, depthTextureId);
+			if(gl_shadowmaps->value) { //dynamic world shadows
+				glUniform1iARB( g_location_bspShadowmapTexture, 7);
+				qglActiveTextureARB(GL_TEXTURE7);
+				qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
+				glUniform1iARB( g_location_shadowmap, 1);
+			}
 	
 			glUniform3fARB( g_location_lightPosition, dl->origin[0], dl->origin[1], dl->origin[2]);
 			glUniform3fARB( g_location_lightColour, dl->color[0], dl->color[1], dl->color[2]);

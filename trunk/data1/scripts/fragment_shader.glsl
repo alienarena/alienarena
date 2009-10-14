@@ -7,6 +7,7 @@ uniform int FOG;
 uniform int PARALLAX;
 uniform int DYNAMIC;
 uniform int SPECULAR;
+uniform int SHADOWMAP;
 
 varying vec4 ShadowCoord;
 varying vec3 EyeDir;
@@ -33,16 +34,18 @@ void main( void )
 	vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
 	vec3 textureColour = texture2D( testTexture, gl_TexCoord[0].xy ).rgb;
 	
-	//to do - need a flag here?
-	vec4 shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
-	// Used to lower moiré pattern and self-shadowing
-	shadowCoordinateWdivide.z += 0.0005;	
-	
-	float distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
+	//shadows
+	float shadow = 1.0;
+	if(SHADOWMAP > 0) {
+		vec4 shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
+		// Used to lower moiré pattern and self-shadowing
+		shadowCoordinateWdivide.z += 0.0005;	
 		
- 	float shadow = 1.0;
- 	if (ShadowCoord.w > 0.0)
- 		shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
+		float distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
+			 		
+ 		if (ShadowCoord.w > 0.0)
+ 			shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
+ 	}
 	
 	if(PARALLAX > 0) {
 		//do the parallax mapping

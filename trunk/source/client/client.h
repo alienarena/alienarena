@@ -492,6 +492,7 @@ void CL_AddLightStyles (void);
 
 void CL_PrepRefresh (void);
 void CL_RegisterSounds (void);
+void CL_RegisterModels (void);
 
 void CL_Quit_f (void);
 

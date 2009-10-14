@@ -1058,7 +1058,7 @@ void CL_BrassShells(vec3_t org, vec3_t dir, int count)
 		le->alpha = 1.0;
 		le->alphavel = -0.1;
 		le->flags = CLM_BOUNCE | CLM_FRICTION | CLM_ROTATE | CLM_NOSHADOW | CLM_BRASS;
-		le->model = R_RegisterModel("models/objects/brass/tris.md2");;
+		le->model = R_RegisterModel("models/objects/brass/tris.md2");
 		le->ang = crand() * 360;
 		le->avel = crand() * 500;
 

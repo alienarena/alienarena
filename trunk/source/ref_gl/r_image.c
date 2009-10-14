@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 image_t		gltextures[MAX_GLTEXTURES];
 image_t		*r_mirrortexture;
+image_t		*r_depthtexture;
 int			numgltextures;
 int			base_textureid;		// gltextures[i] = base_textureid+i
 
@@ -1636,6 +1637,18 @@ void R_InitMirrorTextures( void )
 	free ( data );
 }
 
+void R_InitDepthTextures( void )
+{
+	byte	*data;
+	int		size;
+
+	//init the full screen texture
+	size = vid.height * vid.width * 4;
+	data = malloc( size );
+	memset( data, 255, size );
+	r_depthtexture = GL_LoadPic( "***r_depthtexture***", (byte *)data, vid.width, vid.height, it_pic, 32 );
+	free ( data );
+}
 /*
 ===============
 GL_InitImages
@@ -1659,6 +1672,7 @@ void	GL_InitImages (void)
 
 	R_InitBloomTextures();//BLOOMS
 	R_InitMirrorTextures();//MIRRORS
+	R_InitDepthTextures();//DEPTH(SHADOWMAPS)
 	R_FB_InitTextures();//FULLSCREEN EFFECTS
 }
 
