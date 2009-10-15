@@ -2433,7 +2433,8 @@ int R_Init( void *hinstance, void *hWnd )
 	R_InitParticleTexture ();
 	Draw_InitLocal ();
 
-	generateShadowFBO(); 
+	if(gl_shadowmaps->value)
+		generateShadowFBO(); 
 
 	scr_playericonalpha = 0.0;
 
