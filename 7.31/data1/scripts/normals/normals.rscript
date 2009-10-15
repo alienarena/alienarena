@@ -1,0 +1,726 @@
+players/martianenforcer/red
+{
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+	}
+}
+players/martianenforcer/default
+{
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+	}
+}
+players/martianenforcer/blue
+{
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+	}	
+}
+players/enforcer/default
+{
+	{
+		map players/enforcer/default_normal.tga
+		normalmap
+	}	
+}
+players/enforcer/red
+{
+	{
+		map players/enforcer/default_normal.tga
+		normalmap
+	}	
+}
+players/enforcer/blue
+{
+	{
+		map players/enforcer/default_normal.tga
+		normalmap
+	}	
+}
+players/enforcer/stryker
+{
+	{
+		map players/enforcer/default_normal.tga
+		normalmap
+	}	
+}
+players/cybergirl/blue
+{
+	{
+		map players/cybergirl/default_normal.tga
+		normalmap
+	}	
+}
+players/cybergirl/red
+{
+	{
+		map players/cybergirl/default_normal.tga
+		normalmap
+	}	
+}
+players/cybergirl/default
+{
+	{
+		map players/cybergirl/default_normal.tga
+		normalmap
+	}	
+}
+players/cybergirl/green
+{
+	{
+		map players/cybergirl/default_normal.tga
+		normalmap
+	}	
+}
+players/cybergirl/grey
+{
+	{
+		map players/cybergirl/default_normal.tga
+		normalmap
+	}	
+}
+players/martiancyborg/blue
+{
+	{
+		map players/martiancyborg/default_normal.tga
+		normalmap
+	}	
+}
+players/martiancyborg/red
+{
+	{
+		map players/martiancyborg/default_normal.tga
+		normalmap
+	}	
+}
+players/martiancyborg/default
+{
+	{
+		map players/martiancyborg/default_normal.tga
+		normalmap
+	}	
+}
+players/lauren/blue
+{
+	{
+		map players/lauren/default_normal.tga
+		normalmap
+	}	
+}
+players/lauren/red
+{
+	{
+		map players/lauren/default_normal.tga
+		normalmap
+	}	
+}
+players/lauren/default
+{
+	{
+		map players/lauren/default_normal.tga
+		normalmap
+	}	
+}
+players/slashbot/red
+{
+	{
+		map players/slashbot/default_normal.jpg
+		normalmap
+	}
+}
+players/slashbot/default
+{
+	{
+		map players/slashbot/default_normal.jpg
+		normalmap
+	}
+}
+players/slashbot/blue
+{
+	{
+		map players/slashbot/default_normal.jpg
+		normalmap
+	}	
+}
+players/commander/blue
+{
+	{
+		map players/commander/default_normal.tga
+		normalmap
+	}	
+}
+players/commander/red
+{
+	{
+		map players/commander/default_normal.tga
+		normalmap
+	}	
+}
+players/commander/default
+{
+	{
+		map players/commander/default_normal.tga
+		normalmap
+	}	
+}
+models/weapons/v_chain/skin
+{
+	{
+		map models/weapons/v_chain/skin_normal.tga
+		normalmap
+	}
+}
+models/weapons/v_shotg2/skin
+{
+	{
+		map models/weapons/v_shotg2/skin_normal.tga
+		normalmap
+	}
+}
+maps/meshes/generator
+{
+	{
+		map maps/meshes/generator_normal.jpg
+		normalmap
+		nolightmap
+	}
+}
+maps/meshes/clamps
+{
+	{
+		map maps/meshes/clamps_normal.jpg
+		normalmap
+		nolightmap
+	}
+}
+models/items/ammo/rockets/medium/skin
+{
+
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+		map2 gfx/redlightning.tga
+		fx
+	}
+}
+models/items/ammo/cells/medium/cell
+{
+
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+		map2 gfx/greenlightning.tga
+		fx
+	}
+}
+models/items/ammo/shells/medium/skin
+{
+
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+		map2 gfx/bluelightning.tga
+		fx
+	}
+}
+models/items/ammo/bullets/medium/skin
+{
+
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+		map2 gfx/greenlightning.tga
+		fx
+	}
+}
+models/items/ammo/grenades/medium/skin
+{
+
+	{
+		map models/items/ammo/skin_normal.tga
+		normalmap
+		map2 gfx/redlightning.tga
+		fx
+	}
+}
+models/items/armor/combat/skin
+{
+
+	{
+		map models/items/armor/skin_normal.tga
+		normalmap
+		map2 gfx/bluelightning.tga
+		fx
+	}
+}
+models/items/armor/body/skin
+{
+
+	{
+		map models/items/armor/skin_normal.tga
+		normalmap
+		map2 gfx/redlightning.tga
+		fx
+	}
+}
+models/items/armor/jacket/skin
+{
+
+	{
+		map models/items/armor/skin_normal.tga
+		normalmap
+		map2 gfx/greenlightning.tga
+		fx
+	}
+}
+maps/meshes/hanger
+{
+	{
+		map maps/meshes/hanger_normal.jpg
+		normalmap
+		nolightmap
+	}
+}
+maps/meshes/piston
+{
+	{
+		map maps/meshes/piston_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/martian
+{
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+		nolightmap
+	}
+}
+models/objects/gibs/mart_gut/skin
+{
+	{
+		map models/objects/gibs/skin_normal.jpg
+		normalmap
+	}
+}
+models/objects/gibs/sm_meat/skin
+{
+	{
+		map models/objects/gibs/skin_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/spintube
+{
+	{
+		map maps/meshes/spintube_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/spingear
+{
+	{
+		map maps/meshes/spingear_normal.jpg
+		normalmap
+	}
+	{
+		map maps/meshes/spingear_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
+maps/meshes/weaponpad
+{
+	{
+		map maps/meshes/weaponpad_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/flagpad
+{
+	{
+		map maps/meshes/flagpad_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/ribtube
+{
+	{
+		map maps/meshes/ribtube_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/bigribpipe
+{
+	{
+		map maps/meshes/bigribpipe_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/unit
+{
+	{
+		map maps/meshes/unit_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/conduit
+{
+	{
+		map maps/meshes/conduit_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/pipes1
+{
+	{
+		map maps/meshes/pipes1_normal.jpg
+		normalmap
+	}
+}
+models/objects/dmspot/skin
+{
+	{
+		map models/objects/dmspot/skin_normal.jpg
+		normalmap
+	}
+}
+models/weapons/v_blast/skin
+{
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+		map2 gfx/blasterfx.tga
+		glow
+	}
+}
+models/weapons/v_violator/skin
+{
+	{
+		map models/weapons/v_violator/skin_normal.tga
+		normalmap
+		map2 gfx/violatorfx.tga
+		glow
+	}
+}
+models/weapons/v_hyperb/skin
+{
+	{	
+		map models/weapons/v_hyperb/skin_normal.tga
+		normalmap
+		map2 gfx/disruptormask.tga
+		glow
+	}
+		
+}
+models/weapons/v_rail/skin
+{
+	{
+		map models/weapons/v_rail/skin_normal.tga
+		normalmap
+		map2 gfx/beamfx.tga
+		glow
+	}
+}
+models/weapons/v_bfg/skin
+{	
+	{
+		map models/weapons/v_bfg/skin_normal.tga
+		normalmap
+		map2 gfx/vapormask.tga
+		glow
+	}
+}
+models/weapons/v_shotg/skin
+{
+	{	
+		map models/weapons/v_shotg/skin_normal.tga
+		normalmap
+		map2 gfx/smartgunmask.tga
+		glow
+	}		
+}
+models/weapons/v_rocket/skin
+{
+	{
+		map models/weapons/v_rocket/skin_normal.tga
+		normalmap
+		map2 gfx/rlauncherfx.tga
+		glow
+	}
+}
+players/martianenforcer/gamara
+{
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+		map2 gfx/gamarafx.tga
+		glow
+	}
+}
+players/martianenforcer/weapon
+{
+	{	
+		map models/weapons/v_hyperb/skin_normal.tga
+		normalmap
+		map2 gfx/disruptormask.tga
+		glow
+	}		
+}
+players/martiancyborg/weapon
+{
+	{	
+		map models/weapons/v_hyperb/skin_normal.tga
+		normalmap
+		map2 gfx/disruptormask.tga
+		glow
+	}		
+}
+players/lauren/weapon
+{
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+		map2 gfx/blasterfx.tga
+		glow
+	}
+}
+players/enforcer/weapon
+{
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+		map2 gfx/blasterfx.tga
+		glow
+	}
+}
+players/slashbot/weapon
+{
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+		map2 gfx/blasterfx.tga
+		glow
+	}
+}
+players/commander/weapon
+{
+	{
+		map models/weapons/v_blast/skin_normal.tga
+		normalmap
+		map2 gfx/blasterfx.tga
+		glow
+	}
+}
+vehicles/hover/skin
+{
+	{
+		map vehicles/hover/skin_normal.tga
+		normalmap
+	}
+}
+vehicles/bomber/skin
+{
+	{
+		map vehicles/bomber/skin_normal.tga
+		normalmap
+	}
+}
+vehicles/strafer/skin
+{
+	{
+		map vehicles/strafer/skin_normal.tga
+		normalmap
+	}
+}
+vehicles/hover/console
+{
+	{
+		map vehicles/hover/console_normal.tga
+		normalmap
+		map2 gfx/hconsole.tga
+		glow
+	}	
+}
+vehicles/bomber/console
+{
+	{
+		map vehicles/bomber/console_normal.tga
+		normalmap
+		map2 gfx/bconsole.tga
+		glow
+	}
+}
+vehicles/strafer/console
+{
+	{
+		map vehicles/strafer/console_normal.tga
+		normalmap
+		map2 gfx/sconsole.tga
+		glow
+	}
+}
+models/items/haste/skin
+{
+	{
+		map models/items/haste/skin_normal.tga
+		normalmap
+		map2 gfx/greenlightning.tga
+		fx
+	}
+}
+models/items/quaddama/skin
+{
+	{
+		map models/items/quaddama/skin_normal.tga
+		normalmap
+		map2 gfx/bluelightning.tga
+		fx
+	}
+}
+models/items/sproing/skin
+{
+	{
+		map models/items/sproing/skin_normal.tga
+		normalmap
+	}
+}
+models/items/adrenaline/skin
+{
+	{
+		map models/items/adrenaline/skin_normal.tga
+		normalmap
+		map2 gfx/greenlightning.tga
+		fx
+	}
+}
+models/items/invulner/skin
+{
+	{
+		map models/items/invulner/skin_normal.tga
+		normalmap
+	}
+}
+models/items/armor/shard/skin
+{
+	{
+		map models/items/armor/shard/skin_normal.jpg
+		normalmap
+		map2 gfx/shard_fx.tga
+		glow
+	}
+}
+maps/meshes/injector
+{
+	{
+		map maps/meshes/injector_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/hatch
+{
+	{
+		map maps/meshes/hatch_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/cmdconsole
+{
+	{
+		map maps/meshes/cmdconsole_normal.jpg
+		normalmap
+		map2 maps/meshes/cmdconsole_fx.tga
+		glow
+	}
+}
+maps/meshes/cannister
+{
+	{
+		map maps/meshes/cannister_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/pulsar
+{
+	{
+		map maps/meshes/pulsar_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/lamp2
+{
+	{
+		map maps/meshes/lamp2_normal.jpg
+		normalmap
+		map2 maps/meshes/lamp2_fx.tga
+		glow
+	}
+}
+maps/meshes/arch
+{
+	{
+		map maps/meshes/arch_normal.jpg
+		normalmap
+		map2 maps/meshes/arch_fx.tga
+		glow
+	}
+}
+maps/meshes/scope
+{
+	{
+		map maps/meshes/scope_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/brainjar
+{
+	{
+		map maps/meshes/brainjar_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/bignode
+{
+	{
+		map maps/meshes/bignode_normal.jpg
+		normalmap
+		map2 maps/meshes/bignode_fx.tga
+		glow
+	}
+}
+maps/meshes/controls
+{
+	{
+		map maps/meshes/controls_normal.jpg
+		normalmap
+		map2 maps/meshes/controls_fx.jpg
+		glow
+	}
+}
+maps/meshes/gothic/freedom_statue_green
+{
+	{
+		map maps/meshes/gothic/fd_statue_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/cables
+{
+	{
+		map maps/meshes/cables_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/gothic/lamp
+{
+	{
+		map maps/meshes/gothic/lamp_normal.tga
+		normalmap
+		map2 maps/meshes/gothic/lamp_fx.tga
+		glow
+	}
+}

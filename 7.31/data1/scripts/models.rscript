@@ -1,0 +1,413 @@
+glass
+{
+	{
+		map gfx/reflect.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		envmap
+	}
+}
+models/items/ammo/rockets/medium/skin
+{
+	{
+		map gfx/redlightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
+		map models/items/ammo/rockets/medium/skin.tga
+		alphamask	
+	}
+}
+models/items/ammo/cells/medium/cell
+{
+	{
+		map gfx/greenlightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
+		map models/items/ammo/cells/medium/cell.tga
+		alphamask	
+	}	
+}
+models/items/ammo/shells/medium/skin
+{
+	{
+		map gfx/bluelightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
+		map models/items/ammo/shells/medium/skin.tga
+		alphamask
+	}	
+}
+models/items/ammo/bullets/medium/skin
+{
+	{
+		map gfx/greenlightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
+		map models/items/ammo/bullets/medium/skin.tga
+		alphamask
+	}
+}
+models/items/ammo/grenades/medium/skin
+{
+	{
+		map gfx/redlightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
+		map models/items/ammo/grenades/medium/skin.tga
+		alphamask
+	}
+}
+models/items/armor/shard/skin
+{
+	{
+		map models/items/armor/shard/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 20 0.2 0.4
+		envmap
+		nolightmap
+	}
+	{
+		map gfx/shardmask.tga
+		nolightmap
+		alphamask
+	}
+}
+models/items/healing/medium/skin
+{
+	{
+		map models/items/healing/medium/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.5 0.5
+		nolightmap
+		envmap
+	}	
+}
+models/items/healing/large/skin
+{
+	{
+		map models/items/healing/large/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.5 0.5
+		nolightmap
+		envmap
+	}	
+}
+models/items/healing/small/skin
+{
+	{
+		map models/items/healing/small/skin.tga
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.5 0.5
+		nolightmap
+		envmap
+	}	
+}
+
+models/weapons/v_shotg/skin
+{
+	{
+		map models/weapons/v_shotg/skin.tga
+	}
+	{
+		map gfx/smartgunmask.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+		
+}
+models/weapons/v_rocket/skin
+{
+	{
+		map models/weapons/v_rocket/skin.tga
+	}
+	{
+		map gfx/rlauncherfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.2 0.8
+		nolightmap
+	}
+}
+models/weapons/v_blast/skin
+{
+	{
+		map models/weapons/v_blast/skin.tga
+	}
+	{
+		map gfx/blasterfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.01 .8
+		nolightmap
+	}
+}
+models/weapons/v_violator/skin
+{
+	{
+		map models/weapons/v_violator/skin.tga
+	}
+	{
+		map gfx/violatorfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.2 0.8
+		nolightmap
+	}
+}
+models/weapons/v_hyperb/skin
+{
+	{
+		map models/weapons/v_hyperb/skin.tga
+	}
+	{
+		map gfx/disruptormask.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+		
+}
+models/weapons/v_rail/skin
+{
+	{
+		map models/weapons/v_rail/skin.tga
+	}
+	{
+		map gfx/beamfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
+models/weapons/v_bfg/skin
+{
+	{
+		map models/weapons/v_bfg/skin.tga
+	}
+	{
+		map gfx/vapormask.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2 0.6 .8
+		nolightmap
+	}
+}
+vehicles/deathball/skin
+{
+	{
+		map vehicles/deathball/skin.tga
+	}
+	{
+		map gfx/grapplefx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+		
+}
+models/items/armor/combat/skin
+{
+	{
+		map gfx/bluelightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
+		map models/items/armor/combat/skin.tga
+		alphamask
+	}	
+}
+models/items/armor/body/skin
+{
+	{
+		map gfx/redlightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
+		map models/items/armor/body/skin.tga
+		alphamask
+	}	
+}
+models/items/armor/jacket/skin
+{
+	{
+		map gfx/greenlightning.tga
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
+		map models/items/armor/jacket/skin.tga
+		alphamask
+	}	
+}
+models/items/haste/skin
+{
+	{
+		map gfx/hastebase.tga
+	}
+	{
+		map gfx/greenlightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 2 static 1
+		alphashift 10 0.1 0.6
+		nolightmap
+	}
+	{
+		map gfx/hastemask.tga
+		alphamask
+	}
+}
+models/items/quaddama/skin
+{
+	{
+		map gfx/quadbase.tga
+	}
+	{
+		map gfx/bluelightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scroll static 1 static 2
+		alphashift 10 0.1 0.6
+		nolightmap
+	}
+	{
+		map gfx/quadmask.tga
+		alphamask
+	}
+}
+models/items/adrenaline/skin
+{
+	{
+		map gfx/adrenalbase.tga
+	}
+	{
+		map gfx/greenlightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll static 1 static 2
+		alphashift 10 0.1 0.6
+		nolightmap
+	}
+	{
+		map gfx/adrenalmask.tga
+		alphamask
+	}
+}
+vehicles/deathball/deathball
+{
+	{
+		map vehicles/deathball/deathball.tga
+		nolightmap
+	}
+	{
+		map gfx/electrics3a.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 5 static 0
+		alphashift 10 0.4 0.9
+		nolightmap
+	}
+	{
+		map vehicles/deathball/deathmask.tga
+		alphamask
+	}
+}
+maps/meshes/monitor
+{
+	{
+		map maps/meshes/monitor.jpg
+	}
+	{
+		map gfx/yellowline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 4 static 4
+		scroll static 0 static 2
+		alphashift 10 0.05 0.8
+		nolightmap
+	}
+	{
+		map gfx/chrome.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.2 0.2
+		envmap
+		nolightmap
+	}
+	{
+		map maps/meshes/monitormask.tga
+		alphamask
+	}
+}
+maps/meshes/spingear
+{
+	{
+		map maps/meshes/spingear.tga
+	}
+	{
+		map maps/meshes/spingear_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
+maps/meshes/bignode
+{
+	{
+		map maps/meshes/bignode.jpg
+	}
+	{
+		map maps/meshes/bignode_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
+maps/meshes/arch
+{
+	{
+		map maps/meshes/arch.tga
+		alphamask
+	}
+	{
+		map maps/meshes/arch_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
+maps/meshes/gothic/lamp
+{
+	{
+		map maps/meshes/gothic/lamp.tga
+		alphamask
+	}
+	{
+		map maps/meshes/gothic/lamp_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}

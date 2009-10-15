@@ -1,0 +1,210 @@
+VREEMDE ARENA 2007
+
+1. Inleiding 2. die Vereisten 3. van het Systeem Begonnen wordt
+* Installatie
+* Basisbevelen
+* Deathmatch
+* Verbindend met een server 4 de CodeRED ACE Bot 5. Informatie van het
+Auteursrecht
+
+
+1. INLEIDING
+
+De VREEMDE ARENA 2007 is standalone 3D eerste shooter van persoons
+online deathmatch die van de originele broncode van Schok II en Schok
+III wordt bewerkt, die door identiteitskaartsoftware onder de Gpl-
+vergunning wordt vrijgegeven. Met eigenschappen met inbegrip van 32
+beetjegrafiek, nieuwe deeltjesmotor en gevolgen, lichte bloei,
+weerspiegelend water, hallo duwen de resolutietexturen en de huiden,
+hallo polymodellen, vlekkaarten, VREEMDE ARENA de envelop van
+grafische schoonheid die hoogste spelen today.s wedijvert.  
+
+Het spel kenmerkt 37 niveaus, die online tegen andere spelers, of
+tegen gebouwd in CodeRED kunnen worden gespeeld bots.  
+
+De vreemde Arena biedt uit de wijze van de Aanval aan CTF, AOA(All),
+waarop de spelers in voertuigen kunnen beklimmen om slag, Deathball,
+en de Aanval van de Kern van het Team te doen. Ga eenvoudig in het
+multiplayermenu een server beginnen, de spelregels veranderen, en een
+kaart verkiezen om te spelen. U kunt ook uit verschillende
+mutators(instagib vijf, raketarena, bovenmatige, lage grav, regen, en
+vampire) selecteren om uw spelervaring verder aan te passen.
+
+2. DE VEREISTEN VAN HET SYSTEEM
+
+1 ghz 256 mb van de RAM 500 mb Versneller van de harde schijfruimte
+van 3D
+
+3. WORDEND BEGONNEN
+
+1. INSTALLATIE
+
+(Vensters)
+
+De installatie is gemaakt zeer eenvoudig. Na het downloaden, klik
+eenvoudig op het alienarena2007.exe- dossier en de installatie zal
+beginnen. Volg de instructies van het Installshield
+opstellingsprogramma. Als u Vensters 2000 of XP in werking stelt, zou
+u administratieve voorrechten moeten hebben. Als niet, kunt u sommige
+fouten krijgen wanneer het programma probeert om de
+desinstallatieinformatie aan de registratie te schrijven. Als zo, klik
+eenvoudig ignore., en de installatie zal zonder probleem verdergaan.  
+
+Zodra beëindigd, kunt u op het Vreemde pictogram van de Arena klikken
+dat op uw Desktop is geplaatst om een spel of het Vreemde pictogram
+van de Server van de Arena te beginnen om een specifieke server te
+beginnen.
+
+(Linux)
+
+Rits eenvoudig alienarena2007-linux20070121-x86.zip in uw omslag
+usr/local/games open of waar u wenst om het spel te plaatsen.  
+
+Type./AlienArena om het spel, of./AlienArenaDedicated in werking te
+stellen om een specifieke server te beginnen of de kortere weg te
+gebruiken die in het menu wordt geïnstalleerd.
+
+De bron dossiers zijn inbegrepen, zodat kunt u de binaire getallen
+compileren zelf als neccessary. Gelieve te bezoeken het forum als u om
+het even welke vragen betreffende dit hebt.
+
+2. BASISBEVELEN
+
+De VREEMDE werken van de ARENA zeer zoals Schok 2/3, met een paar
+opmerkelijke uitzonderingen.
+
+De speler zal de volgende wapens hebben:
+
+1. Zandstraler 2. Vreemde Verbreker 3. Pistool 4. Pottenbakker 5.
+Lanceerinrichting van de Raket 6. Vreemd Slim Kanon 7. Verbreker 8.
+van de Ketting van de Vlam Vreemde Verstuiver
+
+De wapens nu hebben ook afwisselende vurenwijzen. In u controleert
+menu, selecteren uw secundaire brandsleutel en dit zal u toestaan om
+deze wijzen te gebruiken.  
+
+Er zijn nieuwe powerups zoals haast en het sproing, naast de venerable
+quad schade en invulerabilty.  
+
+De speler zal ook een flitslicht hebben, dat aanwezig, en altijd zeer
+nuttig is. De sleutel van F. activeert en desactiveert het flitslicht,
+of u kunt binden de sleutel u aan "flitslicht" wenst dat het aan en
+uit zal draaien.
+
+Het zou voor u raadzaam zijn om videomontages voor te ruilen nochtans
+wenst u om het spel te bekijken, en wat u redelijke prestaties geeft.
+In Linux, kunt u "vid_restart" bij de console opdat hen effect nemen,
+afhankelijk van uw systeem en versie van X moeten typen u in werking
+stelt. De van het standaard spel montages zijn bij het medio waaier
+plaatsen, probeer zo tweaking hen of toevoegend/verwijderend gevolgen
+afhankelijk van uw framerate. Als u wenst om uw framerate te zien,
+kunt u typen "plaatst cl_drawfps 1" bij console(brought beneden
+gebruikend de sleutel `).  
+
+De VREEMDE ARENA staat ook voor gekleurde namen toe enkel als Schok 3,
+gebruiken ^ karakter dat door een aantal wordt gevolgd de kleur te
+plaatsen.
+
+DE VOLTOOIING VAN NIVEAUS
+
+In Vreemde Arena kunt u een enige spelertoernooien spelen waar uw doel
+fraglimit vóór bot te bereiken zal zijn. Als u ontbreekt, zal u
+worden gedwongen om het niveau te herhalen tot u. Deze regels kunnen
+in het menusysteem worden veranderd. U kunt mensen ook spelen online,
+waar uw doel fraglimit vóór uw tegenstanders te bereiken is, of door
+te noteren het meest frags alvorens de tijdslimiet omhoog is.
+
+Op wijze CTF, zult u op een team, en het proberen om de vlag van de
+vijand te vangen en het terug te komen op de plaats van uw eigen vlag
+zijn. Het team dat de vangst bereikt beperkt eerst, wint.
+
+In Deathball, het doel is zoveel mogelijk punten te noteren, of door
+uw tegenstanders te doden, of door de bal te vinden en het te
+ontspruiten in goal(worth 10 frags). Wanneer een speler binnen van
+deathball is, is hij defensless.
+
+In de Aanval van de Kern van het Team, uw doel is uw vijandelijke
+knopen van de teamsmacht onbruikbaar te maken, dan de centrale
+spinknoop te vernietigen. U kunt schade aan de spinknoop slechts
+berokkenen wanneer alle andere machtsknopen onbruikbaar worden
+gemaakt.
+
+Het VERBINDEN MET een SERVER
+
+U kunt of selecteren "aansluit zich bij server" van het "multiplayer"
+menu en selecteert een server in de lijst, of u kunt de server van de
+Melkweg slechts gebruiken CodeRED browser(windows). In in-spelbrowser,
+zijn de servers vermeld in volgorde van ping, met laagste ping bij de
+bovenkant van de lijst.  
+
+4. CODERED ACE BOT
+
+Bots is gebouwd in eigenschap van VREEMDE ARENA 2007. Verscheidene
+bots worden reeds gevormd voor multiplayerspelen, en in Vreemde Arena,
+heeft elk niveau een specifiek bot dossier voor wat bots in elk niveau
+worden gespeeld zijn.
+
+Om bot, het model/de ski van de type "sv addbot naam toe te voegen".,
+en om bot type".sv removebot nae" te verwijderen.. U kunt ook bots in
+het menu, in deathmatch/bots het vlaggengebied toevoegen.
+
+In uw opties Deathmatch, kunt u andere opties vormen zoals het
+babbelen, knoopbesparing, en het streven.
+
+Deze bots zijn volledig configureerbaar gebruikend het programma
+Botconfigurator. U kunt hun vaardigheidsniveaus, nauwkeurigheid, wapen
+goedkeurend, voorlichting, en praatjekoorden veranderen.
+
+Niveau van de vaardigheid 0 bots is vrij gemakkelijk te slaan. Niveau
+van de vaardigheid 1 bots is een weinig taaier, en doet meer het
+ontwijken en is nauwkeuriger. Niveau van de vaardigheid 2 bots doet
+het geavanceerdere ontwijken, raket springend, en is nauwkeuriger.
+Niveau 3 bots is uiterst bekwaam, en zal strafe, en strafe sprong rond
+het niveau. Zij zullen ook taunt u na het doden van u. Als in Vreemde
+Arena, u de enige spelertoernooien tegen bots speelt, "gemakkelijk"
+zal selecteren al niveau van de botsvaardigheid 0 maken. "Normaal"
+selecteren zal hen verlaten op het niveau zij worden gevormd. Het
+selecteren zal tot hen "hard" al beweging omhoog 1 vaardigheidsniveau
+maken.
+
+5. KREDIETEN
+
+Er is een lange lijst van kredieten - de VREEMDE ARENA 2007 is zeer
+schuldig aan het volgende voor it.s verwezenlijking en voltooiing:
+
+Ontwerp: John Diamond met input van de gemeenschap bij grote
+Programmering: John Diamond, Victor Luchits, Shane Bayer, Januari
+Rafaj, de Modellen van Tony Jackson en huiden: John Diamond, Alex
+Perez Maps: John Diamond Textures: John Diamond Sounds: John Diamond,
+Weinig Club van de Muziek, Correcte Muziek Rangers: PuzzleFighter,
+WhiteLipper, Houten Productie, en Haven SoundRangers Linux en
+installatie: Kanaal van de Arena IRC van Bayer van Shane het Vreemde:
+Astralsin
+
+Er zijn andere belangrijke bijdragen van de gemeenschap van
+QuakeSrc.org, met inbegrip van MrG, Psychospaz, Jalisko, Heffo,
+Chayfo, Dukey, Jitspoe, Knightmare, en Carbon14. Zonder deze prachtige
+groep mensen, en versie van hun verwezenlijkingen, zouden vele
+eigenschappen niet mogelijk geweest zijn.  
+
+5. DE INFORMATIE VAN HET AUTEURSRECHT
+
+De VREEMDE ARENA 2007 en het is originele inhoud is een auteursrecht
+van COR Vermaak, LLC.  
+
+De broncode wordt vrijgegeven onder de Gpl- vergunning en kan voor om
+het even welk doel worden gebruikt of worden gewijzigd, op voorwaarde
+dat het ook onder de Gpl- vergunning wordt vrijgegeven.  
+
+In geen omstandigheden kan VREEMDE ARENA 2007 voor winst, zonder
+uitdrukkelijke toestemming van COR Vermaak worden verkocht of worden
+gebruikt. De VREEMDE ARENA 2007 kan in vrije compilatie CD.s en
+gelijkaardige pakketten zonder toestemming worden omvat, op voorwaarde
+dat de archieven ongewijzigd blijven.
+
+De originele inhoud in VREEMDE ARENA 2007 kan met toestemming voor om
+het even welke vrij van lastendoeleinden worden gebruikt.
+
+Contact: http://red.planetarena.org
+
+e-mail: irritant@planetquake.com
