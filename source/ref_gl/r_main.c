@@ -2408,7 +2408,8 @@ int R_Init( void *hinstance, void *hWnd )
 	}
 
 	//if running for the very first time, automatically set video settings
-	if(r_firstrun->integer == 0) {
+	//disabled for now
+	if(0) {
 		
 		int OGLVer = atoi(&gl_config.version_string[0]);
 		//int OGLSubVer = atoi(&gl_config.version_string[2]);
