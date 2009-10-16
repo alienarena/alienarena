@@ -148,7 +148,7 @@ void G_TimeShiftClient( edict_t *ent, float time, qboolean debug, edict_t *debug
 				ent->maxs );
 
 			//debug
-			if(1)
+			if(0)
 				safe_bprintf(PRINT_HIGH, "backward reconciliation\n");
 
 			// this will recalculate absmin and absmax
