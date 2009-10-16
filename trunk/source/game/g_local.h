@@ -360,7 +360,7 @@ typedef struct
 
 	//unlagged - backward reconciliation #4
 	// actual time this server frame started
-	int			frameStartTime;
+	float		frameStartTime;
 	//unlagged - backward reconciliation #4
 
 } level_locals_t;
@@ -1072,7 +1072,7 @@ typedef struct
 typedef struct {
 	vec3_t		mins, maxs;
 	vec3_t		currentOrigin;
-	int			leveltime;
+	float		leveltime;
 } clientHistory_t;
 //unlagged - backward reconciliation #1
 

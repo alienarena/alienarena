@@ -1083,11 +1083,7 @@ void G_RunFrame (void)
 	//
 	// treat each object in turn
 	// even the world gets a chance to think
-	//
-
-	//unlagged
-	if ( g_antilag->integer)
-		G_TimeShiftAllClients( level.previousTime, NULL );
+	//	
 	
 	ent = &g_edicts[0];
 	for (i=0 ; i<globals.num_edicts ; i++, ent++)
@@ -1118,8 +1114,14 @@ void G_RunFrame (void)
 	}
 
 	//unlagged
-	if ( g_antilag->integer)
-		G_UnTimeShiftAllClients( NULL );
+//	if ( g_antilag->integer)
+//		G_TimeShiftAllClients( level.previousTime, NULL );
+
+	//to do - move missile code here, means separating those entities from others.  Huge task
+
+	//unlagged
+//	if ( g_antilag->integer)
+//		G_UnTimeShiftAllClients( NULL );
 
 	// see if it is time to end a deathmatch
 	CheckDMRules ();
@@ -1132,7 +1134,7 @@ void G_RunFrame (void)
 
 	//unlagged
 	if ( g_antilag->integer)
-		level.frameStartTime = gi.Sys_Milliseconds();
+		level.frameStartTime = level.time;
 
 	//call voting
 	if(g_callvote->value && playervote.called) {

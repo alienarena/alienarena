@@ -8,11 +8,12 @@ Clear out the given client's history (should be called when the teleport bit is 
 ============
 */
 void G_ResetHistory( edict_t *ent ) {
-	int		i, time;
+	int		i;
+	float	time;
 
 	// fill up the history with data (assume the current position)
 	ent->client->historyHead = NUM_CLIENT_HISTORY - 1;
-	for ( i = ent->client->historyHead, time = level.time; i >= 0; i--, time -= 50 ) {
+	for ( i = ent->client->historyHead, time = level.time; i >= 0; i--, time -= .05 ) {
 		VectorCopy( ent->mins, ent->client->history[i].mins );
 		VectorCopy( ent->maxs, ent->client->history[i].maxs );
 		VectorCopy( ent->s.origin, ent->client->history[i].currentOrigin );
@@ -29,9 +30,7 @@ Keep track of where the client's been
 ============
 */
 void G_StoreHistory( edict_t *ent ) {
-	int		head, frametime;
-
-	frametime = level.time - level.previousTime;
+	int		head;
 
 	ent->client->historyHead++;
 	if ( ent->client->historyHead >= NUM_CLIENT_HISTORY ) {
@@ -44,7 +43,7 @@ void G_StoreHistory( edict_t *ent ) {
 	VectorCopy( ent->mins, ent->client->history[head].mins );
 	VectorCopy( ent->maxs, ent->client->history[head].maxs );
 	VectorCopy( ent->s.origin, ent->client->history[head].currentOrigin );
-	SnapVector( ent->client->history[head].currentOrigin );
+	SnapVector( ent->client->history[head].currentOrigin ); 
 	ent->client->history[head].leveltime = level.time;
 }
 
@@ -72,13 +71,40 @@ G_TimeShiftClient
 Move a client back to where he was at the specified "time"
 =================
 */
-void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugger ) {
+void G_TimeShiftClient( edict_t *ent, float time, qboolean debug, edict_t *debugger ) {
 	int		j, k;
+
+	char	str[MAX_STRING_CHARS];
+
+	if(0) { //debug
+		Com_sprintf(str, sizeof(str), "print \"head: %i, %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f time: %8.4f\n\"",
+			ent->client->historyHead,
+			ent->client->history[0].leveltime,
+			ent->client->history[1].leveltime,
+			ent->client->history[2].leveltime,
+			ent->client->history[3].leveltime,
+			ent->client->history[4].leveltime,
+			ent->client->history[5].leveltime,
+			ent->client->history[6].leveltime,
+			ent->client->history[7].leveltime,
+			ent->client->history[8].leveltime,
+			ent->client->history[9].leveltime,
+			ent->client->history[10].leveltime,
+			ent->client->history[11].leveltime,
+			ent->client->history[12].leveltime,
+			ent->client->history[13].leveltime,
+			ent->client->history[14].leveltime,
+			ent->client->history[15].leveltime,
+			ent->client->history[16].leveltime,
+			time );
+		safe_bprintf(PRINT_HIGH, "%s\n", str);
+	}
 	
 	// find two entries in the history whose times sandwich "time"
 	// assumes no two adjacent records have the same timestamp
 	j = k = ent->client->historyHead;
 	do {
+		
 		if ( ent->client->history[j].leveltime <= time )
 			break;
 
@@ -100,7 +126,7 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 			VectorCopy( ent->s.origin, ent->client->saved.currentOrigin );
 			ent->client->saved.leveltime = level.time;
 		}
-
+	
 		// if we haven't wrapped back to the head, we've sandwiched, so
 		// we shift the client's position back to where he was at "time"
 		if ( j != ent->client->historyHead ) {
@@ -121,13 +147,22 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 				ent->client->history[j].maxs, ent->client->history[k].maxs,
 				ent->maxs );
 
+			//debug
+			if(1)
+				safe_bprintf(PRINT_HIGH, "backward reconciliation\n");
+
 			// this will recalculate absmin and absmax
 			gi.linkentity( ent );
+
+		
 		} else {
 			// we wrapped, so grab the earliest
 			VectorCopy( ent->client->history[k].currentOrigin, ent->s.origin );
 			VectorCopy( ent->client->history[k].mins, ent->mins );
 			VectorCopy( ent->client->history[k].maxs, ent->maxs );
+
+			if(0)
+				safe_bprintf(PRINT_HIGH, "no backward reconciliation\n");
 
 			// this will recalculate absmin and absmax
 			gi.linkentity( ent );
@@ -152,7 +187,8 @@ void G_TimeShiftAllClients( int time, edict_t *skip ) {
 	{
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse || !ent->client)
-			continue;
+			continue;	
+
 		if ( ent->client && ent->inuse && !ent->client->resp.spectator && ent != skip ) {
 			G_TimeShiftClient( ent, time, false, skip );
 		}
@@ -173,20 +209,21 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 //	int wpflags[10] = { 0, 0, 2, 4, 0, 0, 8, 16, 0, 0 };
 	
 //	int wpflag = wpflags[ent->client->ps.weapon];
-	int time;
+	float time;
 
 	// don't time shift for mistakes or bots
-	if ( !ent->inuse || !ent->client || (ent->is_bot) ) {
+	if ( !ent->inuse || !ent->client || ent->is_bot ) {
 		return;
 	}
-  
+ 
 	if ( g_antilag->integer > 1) { 
 		// do the full lag compensation
 		time = ent->client->attackTime;
 	}
 	else {
 		// do just 50ms
-		time = level.previousTime + ent->client->frameOffset;
+		time = level.previousTime + ent->client->frameOffset; 
+
 	}
 
 	G_TimeShiftAllClients( time, ent );
