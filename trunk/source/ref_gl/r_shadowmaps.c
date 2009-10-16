@@ -75,6 +75,11 @@ void generateShadowFBO()
 
 	getOpenGLFunctionPointers();
 
+	if(!qglGenFramebuffersEXT || !qglBindFramebufferEXT || !qglFramebufferTexture2DEXT || !qglCheckFramebufferStatusEXT) {
+		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
+		return;
+	}
+
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
 	// GL_LINEAR does not make sense for depth texture. However, next tutorial shows usage of GL_LINEAR and PCF
