@@ -1232,10 +1232,8 @@ void ClientEndServerFrame (edict_t *ent)
 	// if the scoreboard is up, update it
 	if (ent->client->showscores && !(level.framenum & 31) )
 	{
-// ACEBOT_ADD
 		if (ent->is_bot)
 			return;
-// ACEBOT_END
 
 		DeathmatchScoreboardMessage (ent, ent->enemy, false);
 		gi.unicast (ent, false);
