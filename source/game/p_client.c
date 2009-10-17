@@ -2709,11 +2709,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	client = ent->client;
 
 	//unlagged
-	if ( g_antilag->integer) {
-		
-		client->frameOffset = level.time - level.frameStartTime;
+	if ( g_antilag->integer)		
 		client->attackTime = level.time; 
-	}
 
 	if (level.intermissiontime)
 	{
