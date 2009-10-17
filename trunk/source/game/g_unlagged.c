@@ -9,11 +9,13 @@ Clear out the given client's history (should be called when the teleport bit is 
 */
 void G_ResetHistory( edict_t *ent ) {
 	int		i;
-	float	time;
+	int	time;
+
+	time = gi.Sys_Milliseconds();
 
 	// fill up the history with data (assume the current position)
 	ent->client->historyHead = NUM_CLIENT_HISTORY - 1;
-	for ( i = ent->client->historyHead, time = level.time; i >= 0; i--, time -= .05 ) {
+	for ( i = ent->client->historyHead; i >= 0; i--, time -= 50 ) {
 		VectorCopy( ent->mins, ent->client->history[i].mins );
 		VectorCopy( ent->maxs, ent->client->history[i].maxs );
 		VectorCopy( ent->s.origin, ent->client->history[i].currentOrigin );
@@ -44,7 +46,7 @@ void G_StoreHistory( edict_t *ent ) {
 	VectorCopy( ent->maxs, ent->client->history[head].maxs );
 	VectorCopy( ent->s.origin, ent->client->history[head].currentOrigin );
 	SnapVector( ent->client->history[head].currentOrigin ); 
-	ent->client->history[head].leveltime = level.time;
+	ent->client->history[head].leveltime = gi.Sys_Milliseconds();
 }
 
 
@@ -68,16 +70,16 @@ static void TimeShiftLerp( float frac, vec3_t start, vec3_t end, vec3_t result )
 =================
 G_TimeShiftClient
 
-Move a client back to where he was at the specified "time"
+Move a client back to where he was at the specified time
 =================
 */
-void G_TimeShiftClient( edict_t *ent, float time, qboolean debug, edict_t *debugger ) {
+void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugger ) {
 	int		j, k;
 
 	char	str[MAX_STRING_CHARS];
 
 	if(g_antilagdebug->integer > 1) { //debug
-		Com_sprintf(str, sizeof(str), "print \"head: %i, %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f time: %8.4f\n\"",
+		Com_sprintf(str, sizeof(str), "print \"head: %i, %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i time: %i\n\"",
 			ent->client->historyHead,
 			ent->client->history[0].leveltime,
 			ent->client->history[1].leveltime,
@@ -116,15 +118,18 @@ void G_TimeShiftClient( edict_t *ent, float time, qboolean debug, edict_t *debug
 	}
 	while ( j != ent->client->historyHead );
 
+	if(g_antilagdebug->value) 
+		safe_bprintf(PRINT_HIGH, "reconciled time at: %i\n", k);
+
 	// if we got past the first iteration above, we've sandwiched (or wrapped)
 	if ( j != k ) {
 		// make sure it doesn't get re-saved
-		if ( ent->client->saved.leveltime != level.time ) {
+		if ( ent->client->saved.leveltime != gi.Sys_Milliseconds() ) {
 			// save the current origin and bounding box
 			VectorCopy( ent->mins, ent->client->saved.mins );
 			VectorCopy( ent->maxs, ent->client->saved.maxs );
 			VectorCopy( ent->s.origin, ent->client->saved.currentOrigin );
-			ent->client->saved.leveltime = level.time;
+			ent->client->saved.leveltime = gi.Sys_Milliseconds();
 		}
 	
 		// if we haven't wrapped back to the head, we've sandwiched, so
@@ -150,18 +155,12 @@ void G_TimeShiftClient( edict_t *ent, float time, qboolean debug, edict_t *debug
 			// this will recalculate absmin and absmax
 			gi.linkentity( ent );
 
-				//debug
-			if(g_antilagdebug->value) 
-				safe_bprintf(PRINT_HIGH, "backward reconciliation: %8.4f\n", frac);
-							
+						
 		} else {
 			// we wrapped, so grab the earliest
 			VectorCopy( ent->client->history[k].currentOrigin, ent->s.origin );
 			VectorCopy( ent->client->history[k].mins, ent->mins );
 			VectorCopy( ent->client->history[k].maxs, ent->maxs );
-
-			if(g_antilagdebug->value)
-				safe_bprintf(PRINT_HIGH, "no backward reconciliation\n");
 
 			// this will recalculate absmin and absmax
 			gi.linkentity( ent );
@@ -208,7 +207,7 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 //	int wpflags[10] = { 0, 0, 2, 4, 0, 0, 8, 16, 0, 0 };
 	
 //	int wpflag = wpflags[ent->client->ps.weapon];
-	float time;
+	int time;
 
 	// don't time shift for mistakes or bots
 	if ( !ent->inuse || !ent->client || ent->is_bot ) {
@@ -231,7 +230,7 @@ Move a client back to where he was before the time shift
 */
 void G_UnTimeShiftClient( edict_t *ent ) {
 	// if it was saved
-	if ( ent->client->saved.leveltime == level.time ) {
+	if ( ent->client->saved.leveltime == gi.Sys_Milliseconds() ) {
 		// move it back
 		VectorCopy( ent->client->saved.mins, ent->mins );
 		VectorCopy( ent->client->saved.maxs, ent->maxs );

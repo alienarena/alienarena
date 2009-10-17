@@ -1072,7 +1072,7 @@ typedef struct
 typedef struct {
 	vec3_t		mins, maxs;
 	vec3_t		currentOrigin;
-	float		leveltime;
+	int			leveltime;
 } clientHistory_t;
 //unlagged - backward reconciliation #1
 
