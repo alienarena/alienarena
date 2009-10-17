@@ -2710,7 +2710,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	//unlagged
 	if ( g_antilag->integer)		
-		client->attackTime = level.time; 
+		client->attackTime = gi.Sys_Milliseconds(); 
 
 	if (level.intermissiontime)
 	{
