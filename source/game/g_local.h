@@ -1510,6 +1510,7 @@ extern void DeathcamTrack (edict_t *ent);
 
 //unlagged
 extern	cvar_t	*g_antilag;
+extern  cvar_t	*g_antilagdebug;
 
 // ACEBOT_ADD
 #include "acesrc/acebot.h"

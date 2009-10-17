@@ -254,6 +254,7 @@ void InitGame (void)
 
 	//antilag
 	g_antilag = gi.cvar("g_antilag", "0", CVAR_SERVERINFO);
+	g_antilagdebug = gi.cvar("g_antilagdebug", "0", CVAR_SERVERINFO);
 
 	//old scoreboard
 	g_oldscorebd = gi.cvar("g_oldscorebd", "0", CVAR_SERVERINFO);

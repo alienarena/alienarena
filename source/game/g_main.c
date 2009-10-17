@@ -152,6 +152,7 @@ cvar_t  *sv_custombots;
 
 //unlagged
 cvar_t	*g_antilag;
+cvar_t	*g_antilagdebug;
 
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
 void ClientThink (edict_t *ent, usercmd_t *cmd);

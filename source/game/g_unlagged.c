@@ -76,7 +76,7 @@ void G_TimeShiftClient( edict_t *ent, float time, qboolean debug, edict_t *debug
 
 	char	str[MAX_STRING_CHARS];
 
-	if(0) { //debug
+	if(g_antilagdebug->integer > 1) { //debug
 		Com_sprintf(str, sizeof(str), "print \"head: %i, %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f time: %8.4f\n\"",
 			ent->client->historyHead,
 			ent->client->history[0].leveltime,
@@ -145,23 +145,22 @@ void G_TimeShiftClient( edict_t *ent, float time, qboolean debug, edict_t *debug
 
 			TimeShiftLerp( frac,
 				ent->client->history[j].maxs, ent->client->history[k].maxs,
-				ent->maxs );
-
-			//debug
-			if(0)
-				safe_bprintf(PRINT_HIGH, "backward reconciliation: %8.4f\n", frac);
+				ent->maxs );		
 
 			// this will recalculate absmin and absmax
 			gi.linkentity( ent );
 
-		
+				//debug
+			if(g_antilagdebug->value) 
+				safe_bprintf(PRINT_HIGH, "backward reconciliation: %8.4f\n", frac);
+							
 		} else {
 			// we wrapped, so grab the earliest
 			VectorCopy( ent->client->history[k].currentOrigin, ent->s.origin );
 			VectorCopy( ent->client->history[k].mins, ent->mins );
 			VectorCopy( ent->client->history[k].maxs, ent->maxs );
 
-			if(0)
+			if(g_antilagdebug->value)
 				safe_bprintf(PRINT_HIGH, "no backward reconciliation\n");
 
 			// this will recalculate absmin and absmax
