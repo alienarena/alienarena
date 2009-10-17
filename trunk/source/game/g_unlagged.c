@@ -149,7 +149,7 @@ void G_TimeShiftClient( edict_t *ent, float time, qboolean debug, edict_t *debug
 
 			//debug
 			if(0)
-				safe_bprintf(PRINT_HIGH, "backward reconciliation\n");
+				safe_bprintf(PRINT_HIGH, "backward reconciliation: %8.4f\n", frac);
 
 			// this will recalculate absmin and absmax
 			gi.linkentity( ent );
@@ -216,16 +216,9 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 		return;
 	}
  
-	if ( g_antilag->integer > 1) { 
-		// do the full lag compensation
-		time = ent->client->attackTime;
-	}
-	else {
-		// do just 50ms
-		time = level.previousTime + ent->client->frameOffset; 
-
-	}
-
+	// do the full lag compensation
+	time = ent->client->attackTime;
+	
 	G_TimeShiftAllClients( time, ent );
 }
 
