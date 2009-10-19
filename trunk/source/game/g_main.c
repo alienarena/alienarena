@@ -677,6 +677,11 @@ void ResetLevel (void) //for resetting players and items after warmup
 	else
 		safe_bprintf(PRINT_HIGH, "Call voting is ^1DISABLED\n");
 
+	if(g_antilag->value)
+		safe_bprintf(PRINT_HIGH, "Antilag is ^2ENABLED\n");
+	else
+		safe_bprintf(PRINT_HIGH, "Antilag is ^1DISABLED\n");
+
 	return;
 }
 
