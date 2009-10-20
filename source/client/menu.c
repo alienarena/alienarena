@@ -4460,8 +4460,6 @@ void StartServer_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
-	//moved the map stuff to where rules are set, so we can filter the list
-
 	/*
 	** initialize the menu stuff
 	*/
@@ -4491,7 +4489,7 @@ void StartServer_MenuInit( void )
 	s_mutators_action.generic.y	= 36*scale + offset;
 	s_mutators_action.generic.cursor_offset = -8;
 	s_mutators_action.generic.statusbar = NULL;
-	s_mutators_action.generic.name	= " mutators";
+	s_mutators_action.generic.name	= "mutators";
 	s_mutators_action.generic.callback = MutatorFunc;
 
 	s_grapple_box.generic.type = MTYPE_SPINCONTROL;
@@ -4506,7 +4504,7 @@ void StartServer_MenuInit( void )
 	s_antilag_box.generic.y	= 68*scale + offset;
 	s_antilag_box.generic.name	= "antilag";
 	s_antilag_box.itemnames = offon;
-	s_antilag_box.curvalue = 0;
+	s_antilag_box.curvalue = 1;
 
 	s_timelimit_field.generic.type = MTYPE_FIELD;
 	s_timelimit_field.generic.name = "time limit ";
@@ -4543,7 +4541,7 @@ void StartServer_MenuInit( void )
 	s_maxclients_field.length = 3;
 	s_maxclients_field.visible_length = 3;
 	if ( Cvar_VariableValue( "maxclients" ) == 1 )
-		strcpy( s_maxclients_field.buffer, "8" );
+		strcpy( s_maxclients_field.buffer, "2" );
 	else
 		strcpy( s_maxclients_field.buffer, Cvar_VariableString("maxclients") );
 
