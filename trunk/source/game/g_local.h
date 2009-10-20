@@ -322,7 +322,7 @@ typedef struct
 {
 	int			framenum;
 	float		time;
-	float		previousTime;
+	int			previousTime; //in milleseconds
 
 	char		level_name[MAX_QPATH];	// the descriptive name (Outer Base, etc)
 	char		mapname[MAX_QPATH];		// the server name (base1, etc)

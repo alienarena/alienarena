@@ -644,7 +644,6 @@ void ResetLevel (void) //for resetting players and items after warmup
 			PutClientInServer (ent);
 			ACESP_LoadBots(ent, 0);
 		}
-
 	}
 	blue_team_score = 0;
 	red_team_score = 0;
@@ -677,11 +676,11 @@ void ResetLevel (void) //for resetting players and items after warmup
 	else
 		safe_bprintf(PRINT_HIGH, "Call voting is ^1DISABLED\n");
 
-	if(g_antilag->value)
+	if(g_antilag->value) 
 		safe_bprintf(PRINT_HIGH, "Antilag is ^2ENABLED\n");
-	else
+	else 
 		safe_bprintf(PRINT_HIGH, "Antilag is ^1DISABLED\n");
-
+	
 	return;
 }
 
@@ -1070,7 +1069,7 @@ void G_RunFrame (void)
 	int		i;
 	edict_t	*ent;
 
-	level.previousTime = level.time;
+	level.previousTime = gi.Sys_Milliseconds() - 100; //100 milleseconds(1/10 of a second)
 
 	level.framenum++;
 	level.time = level.framenum*FRAMETIME;
@@ -1116,18 +1115,21 @@ void G_RunFrame (void)
 			ClientBeginServerFrame (ent);
 		}
 
-		G_RunEntity (ent);
+		//this next block of code may not be practical for a server running at 10fps
+/*		if(ent->movetype & MOVETYPE_FLYMISSILE) {
+			//unlagged
+			if ( g_antilag->integer)
+				G_TimeShiftAllClients( level.previousTime, NULL );	
+
+			G_RunEntity (ent);
+
+			//unlagged
+			if ( g_antilag->integer)
+				G_UnTimeShiftAllClients( NULL );
+		}
+		else*/
+			G_RunEntity (ent);
 	}
-
-	//unlagged
-//	if ( g_antilag->integer)
-//		G_TimeShiftAllClients( level.previousTime, NULL );
-
-	//to do - move missile code here, means separating those entities from others.  Huge task
-
-	//unlagged
-//	if ( g_antilag->integer)
-//		G_UnTimeShiftAllClients( NULL );
 
 	// see if it is time to end a deathmatch
 	CheckDMRules ();
