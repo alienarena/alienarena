@@ -4541,7 +4541,7 @@ void StartServer_MenuInit( void )
 	s_maxclients_field.length = 3;
 	s_maxclients_field.visible_length = 3;
 	if ( Cvar_VariableValue( "maxclients" ) == 1 )
-		strcpy( s_maxclients_field.buffer, "2" );
+		strcpy( s_maxclients_field.buffer, "8" );
 	else
 		strcpy( s_maxclients_field.buffer, Cvar_VariableString("maxclients") );
 

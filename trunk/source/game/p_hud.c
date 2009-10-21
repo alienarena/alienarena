@@ -563,14 +563,11 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	
 	stringlength = strlen(string);
 
-	if(!g_oldscorebd->value) { //tell the client we have a new layout
-
-		Com_sprintf (entry, sizeof(entry), "newsb ");
-		j = strlen(entry);
-		strcpy (string + stringlength, entry);
-		stringlength += j;
-	}
-	
+	Com_sprintf (entry, sizeof(entry), "newsb ");
+	j = strlen(entry);
+	strcpy (string + stringlength, entry);
+	stringlength += j;
+		
 	// add the clients in sorted order
 	if (total > 12)
 		total = 12;
@@ -580,22 +577,12 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		cl = &game.clients[sorted[i]];
 		cl_ent = g_edicts + 1 + sorted[i];
 
-		if(g_oldscorebd->value) {
-			x = (i>=6) ? 160 : 0;
-			y = 32 + 32 * (i%6);
-		}
-		else {
-			x = 0;
-			y = 32 + 32 * (i%12);
-		}
- 
+		x = 0;
+		y = 32 + 32 * (i%12);
+		 
 		// add a background
-		if(g_oldscorebd->value)
-			Com_sprintf (entry, sizeof(entry),
-				"xv %i yv %i picn %s ",x+32, y, "tag2");
-		else
-			Com_sprintf (entry, sizeof(entry),
-				"xv %i yv %i picn %s ",x, y, "playerbox");
+		Com_sprintf (entry, sizeof(entry),
+			"xv %i yv %i picn %s ",x, y, "playerbox");
 
 		j = strlen(entry);
 		if (stringlength + j > 1024)
@@ -623,43 +610,17 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	//weapon accuracy(don't do if map voting)
 	if(!mapvote) {
 		//add a background
-		if(g_oldscorebd->value) {
-			x = 0;
-			y = (total>=6) ? (32+(32*5)) : (32*total);
-		}
-		else {
-			x = 96;
-			y = 16*total;
-		}
-
-		y = (total>=6) ? (32+(32*5)) : (32*total);
+		x = 96;
+		y = 16*(total+1);
 		
-		if(g_oldscorebd->value) {
-			for (i=0 ; i<3 ; i++)
-			{
-				Com_sprintf (entry, sizeof(entry),
-					"xv %i yv %i picn %s ", x, y+((i+1)*32+24), "tag2");
-				j = strlen(entry);
-				if (stringlength + j > 1024)
-					break;
-				strcpy (string + stringlength, entry);
-				stringlength += j;
-				
-				// send the layout
-				if (stringlength + j > 1024)
-					break;
-			}
+		Com_sprintf (entry, sizeof(entry),
+			"xv %i yv %i picn %s ", x-4, y+48, "statbox");
+		j = strlen(entry);
+		if(stringlength + j < 1024) {
+			strcpy(string + stringlength, entry);
+			stringlength +=j;
 		}
-		else {
-			Com_sprintf (entry, sizeof(entry),
-				"xv %i yv %i picn %s ", x-4, y+48, "statbox");
-			j = strlen(entry);
-			if(stringlength + j < 1024) {
-				strcpy(string + stringlength, entry);
-				stringlength +=j;
-			}
-		}
-
+		
 		Com_sprintf(entry, sizeof(entry),
 			"xv %i yv %i string Accuracy ", x, y+56);
 		j = strlen(entry);

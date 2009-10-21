@@ -647,6 +647,7 @@ void SCR_DrawLoading (void)
 	}
 	else if (isMap) //loading bar...
 	{
+		//to do - add rotating model of Alien Arena logo
 
 		SCR_DrawLoadingBar(loadingPercent, font_size);
 
