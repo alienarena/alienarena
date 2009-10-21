@@ -100,9 +100,6 @@ cvar_t	*g_callvote;
 //reward point threshold
 cvar_t	*g_reward;
 
-//old scoreboard
-cvar_t	*g_oldscorebd;
-
 //force autobalanced teams
 cvar_t	*g_autobalance;
 

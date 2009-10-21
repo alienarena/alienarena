@@ -256,9 +256,6 @@ void InitGame (void)
 	g_antilag = gi.cvar("g_antilag", "1", CVAR_SERVERINFO);
 	g_antilagdebug = gi.cvar("g_antilagdebug", "0", CVAR_SERVERINFO);
 
-	//old scoreboard
-	g_oldscorebd = gi.cvar("g_oldscorebd", "0", CVAR_SERVERINFO);
-
 	// change anytime vars
 	dmflags = gi.cvar ("dmflags", "0", CVAR_SERVERINFO);
 	fraglimit = gi.cvar ("fraglimit", "0", CVAR_SERVERINFO);
