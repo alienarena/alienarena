@@ -731,3 +731,10 @@ maps/meshes/tech/railing
 		normalmap
 	}
 }
+models/objects/icon/icon
+{	
+	{
+		map models/objects/icon/icon_normal.jpg
+		normalmap
+	}
+}
