@@ -438,6 +438,60 @@ void SCR_DrawPause (void)
 SCR_DrawLoading
 ==============
 */
+
+
+void SCR_DrawRotatingIcon( void )
+{
+	extern float CalcFov( float fov_x, float w, float h );
+	refdef_t refdef;
+	static float yaw;
+	entity_t entity;
+
+	memset( &refdef, 0, sizeof( refdef ) );
+
+	refdef.width = viddef.width;
+	refdef.height = viddef.height;
+	refdef.x = 0;
+	refdef.y = 0;
+	refdef.fov_x = 90;
+	refdef.fov_y = CalcFov( refdef.fov_x, refdef.width, refdef.height );
+	refdef.time = cls.realtime*0.001;
+
+	memset( &entity, 0, sizeof( entity ) );
+
+	yaw += cls.frametime*50;
+	if (yaw > 360)
+		yaw = 0;
+
+	//i think this is where it's getting blown out, the model keeps getting overwritten or lost at map load
+	entity.model = R_RegisterModel( "models/objects/icon/tris.md2" );
+		
+	entity.flags = RF_FULLBRIGHT | RF_MENUMODEL;
+	entity.origin[0] = 80;
+	entity.origin[1] = 30;
+	entity.origin[2] = -5;
+	
+	VectorCopy( entity.origin, entity.oldorigin );
+	
+	entity.frame = 0;
+	entity.oldframe = 0;
+	entity.backlerp = 0.0;
+	entity.angles[1] = (int)yaw;
+
+	refdef.areabits = 0;
+	refdef.num_entities = 1;
+
+	refdef.entities = &entity;
+	refdef.lightstyles = 0;
+	refdef.rdflags = RDF_NOWORLDMODEL;
+
+	refdef.height += 4;
+
+	R_RenderFrame( &refdef );
+
+	free(entity.model);
+}
+
 void SCR_DrawLoadingBar (int percent, int scale)
 {
 	float hudscale;
@@ -647,7 +701,8 @@ void SCR_DrawLoading (void)
 	}
 	else if (isMap) //loading bar...
 	{
-		//to do - add rotating model of Alien Arena logo
+		//to do - fix
+		//SCR_DrawRotatingIcon();
 
 		SCR_DrawLoadingBar(loadingPercent, font_size);
 
