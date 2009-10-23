@@ -1133,12 +1133,18 @@ void R_DrawWorldCaster(void)
 	//set camera to look back from light to player, keeping z at light level
 	setupMatrices(dl->origin[0],dl->origin[1],dl->origin[2],r_origin[0],r_origin[1],dl->origin[2]);
 
+	qglEnable( GL_POLYGON_OFFSET_FILL );
+    qglPolygonOffset( 0.5f, 0.5f );
+    
 	//render world - very basic
 	R_DrawShadowMapWorld();
 	
 	setTextureMatrix();
 	
-	qglDepthMask (1);		// back to writing
+	qglDepthMask (1);		// back to writing  
+	
+	qglPolygonOffset( 0.0f, 0.0f );
+    qglDisable( GL_POLYGON_OFFSET_FILL );
 
 }
 
