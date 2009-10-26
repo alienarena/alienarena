@@ -25,13 +25,13 @@ Class13=CTTListBox
 Class14=UpdateDlg
 
 ResourceCount=8
-Resource1=IDD_BUDDYNAME
-Resource2=IDD_ABOUTBOX
-Resource3=IDD_SETPROFILE
-Resource4=IDD_HELPBOX
-Resource5=IDD_GALAXY_DIALOG
-Resource6=IDD_UPDATER
-Resource7=IDD_STARTUP
+Resource1=IDD_ABOUTBOX
+Resource2=IDD_STARTUP
+Resource3=IDD_HELPBOX
+Resource4=IDD_BUDDYNAME
+Resource5=IDD_UPDATER
+Resource6=IDD_SETPROFILE
+Resource7=IDD_GALAXY_DIALOG
 Class15=Help
 Resource8=IDR_MENU1
 

@@ -4,6 +4,12 @@ textures/arena7/light1
 		lensflare
 	}
 }
+textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
 textures/arena7/light5
 {
 	{

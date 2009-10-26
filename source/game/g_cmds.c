@@ -134,6 +134,12 @@ void ValidateSelectedItem (edict_t *ent)
 
 void DrawChatBubble (edict_t *ent)
 {
+
+	if(!ent->client)
+		return;
+	if(ent->client->resp.spectator)
+		return;
+
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_SAYICON);
 	gi.WritePosition (ent->s.origin);
