@@ -1129,8 +1129,6 @@ void CGalaxyDlg::OnButton4()
 	sprintf(mensaje,"NICK %s\n\r", user.nick);
 	sockete.sendData(mensaje);
 
-
-
 	sprintf(mensaje,"JOIN %s\n\r", "#alienarena");
 	sockete.sendData(mensaje);
 	Sleep(1000);
