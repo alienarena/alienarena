@@ -199,6 +199,7 @@ CODERED_OBJS = \
 	$(BUILDDIR)/client/cl_pred.o \
 	$(BUILDDIR)/client/cl_tent.o \
 	$(BUILDDIR)/client/cl_scrn.o \
+	$(BUILDDIR)/client/cl_stats.o \
 	$(BUILDDIR)/client/cl_view.o \
 	$(BUILDDIR)/client/cl_http.o \
 	$(BUILDDIR)/client/console.o \
@@ -293,6 +294,9 @@ $(BUILDDIR)/client/cl_tent.o :    $(CLIENT_DIR)/cl_tent.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_scrn.o :    $(CLIENT_DIR)/cl_scrn.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/cl_stats.o :    $(CLIENT_DIR)/cl_stats.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_view.o :    $(CLIENT_DIR)/cl_view.c

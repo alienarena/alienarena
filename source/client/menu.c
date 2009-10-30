@@ -71,6 +71,7 @@ void M_Menu_Main_f (void);
 		void M_Menu_Credits_f( void );
 	void M_Menu_JoinServer_f (void);
 			void M_Menu_AddressBook_f( void );
+			void M_Menu_PlayerRanking_f( void );
 	void M_Menu_StartServer_f (void);
 			void M_Menu_DMOptions_f (void);
 	void M_Menu_Video_f (void);
@@ -2920,6 +2921,7 @@ JOIN SERVER MENU
 static menuframework_s	s_joinserver_menu;
 static menuaction_s		s_joinserver_search_action;
 static menuaction_s		s_joinserver_address_book_action;
+static menuaction_s		s_joinserver_player_ranking_action;
 static menulist_s		s_joinserver_filterempty_action;
 static menuaction_s		s_joinserver_server_actions[MAX_LOCAL_SERVERS];
 static menuaction_s		s_joinserver_server_info[32];
@@ -3202,6 +3204,11 @@ void AddressBookFunc( void *self )
 	M_Menu_AddressBook_f();
 }
 
+void PlayerRankingFunc( void *self )
+{
+	M_Menu_PlayerRanking_f();
+}
+
 void NullCursorDraw( void *self )
 {
 }
@@ -3280,6 +3287,13 @@ void JoinServer_MenuInit( void )
 	s_joinserver_search_action.generic.callback = SearchLocalGamesFunc;
 	s_joinserver_search_action.generic.statusbar = "search for servers";
 
+	s_joinserver_player_ranking_action.generic.type	= MTYPE_ACTION;
+	s_joinserver_player_ranking_action.generic.name	= "Rank/Stats";
+	s_joinserver_player_ranking_action.generic.x		= -56*scale;
+	s_joinserver_player_ranking_action.generic.y		= 125*scale+offset;
+	s_joinserver_player_ranking_action.generic.cursor_offset = -16*scale;
+	s_joinserver_player_ranking_action.generic.callback = PlayerRankingFunc;
+
 	s_joinserver_filterempty_action.generic.type = MTYPE_SPINCONTROL;
 	s_joinserver_filterempty_action.generic.name	= "show empty";
 	s_joinserver_filterempty_action.itemnames = yesno_names;
@@ -3344,6 +3358,7 @@ void JoinServer_MenuInit( void )
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_address_book_action );
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_search_action );
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_filterempty_action );
+	Menu_AddItem( &s_joinserver_menu, &s_joinserver_player_ranking_action );
 
 	for ( i = 0; i < 16; i++ )
 		Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_actions[i] );
@@ -5349,6 +5364,180 @@ void M_Menu_AddressBook_f(void)
 {
 	AddressBook_MenuInit();
 	M_PushMenu( AddressBook_MenuDraw, AddressBook_MenuKey );
+}
+
+/* 
+=============================================================================
+
+PLAYER RANKING MENU
+
+=============================================================================
+*/
+
+static menuframework_s	s_playerranking_menu;
+static menuaction_s		s_playerranking_title;
+static menuaction_s		s_playerranking_name;
+static menuaction_s		s_playerranking_rank;
+static menuaction_s		s_playerranking_fragrate;
+static menuaction_s		s_playerranking_totaltime;
+static menuaction_s		s_playerranking_totalfrags;
+static menuaction_s		s_playerranking_ttheader;
+static menuaction_s		s_playerranking_topten[10];
+char rank[32];
+char fragrate[32];
+char playername[64];
+char totaltime[32];
+char totalfrags[32];
+char topTenList[10][64];
+
+int GetColorTokens( char *string)
+{
+	int i, x;
+
+	x = 0;
+
+	for(i=0; i<32; i++) {
+		if(string[i] == '^')
+			x++;
+	}
+
+	return x;
+}
+
+void PlayerRanking_MenuInit( void )
+{
+	extern cvar_t *name;
+	PLAYERSTATS player;
+	PLAYERSTATS topTenPlayers[10];
+	float scale;
+	int offset;
+	int i;
+
+	scale = (float)(viddef.height)/600;
+	if(scale < 1)
+		scale = 1;
+
+	banneralpha = 0.1;
+
+	s_playerranking_menu.x = viddef.width / 2 - 96*scale;
+	s_playerranking_menu.y = viddef.height / 2 - 96*scale;
+	s_playerranking_menu.nitems = 0;
+
+	getStatsDB();
+	strcpy(player.playername, name->string);
+	player.totalfrags = player.totaltime = player.ranking = 0;
+	player = getPlayerRanking ( player );
+
+	Com_sprintf(playername, sizeof(playername), "Name: %s", player.playername);
+	if(player.ranking > 0)
+		Com_sprintf(rank, sizeof(rank), "Rank: ^1%i", player.ranking);
+	else
+		Com_sprintf(rank, sizeof(rank), "Rank: ^1Unranked");
+	Com_sprintf(fragrate, sizeof(fragrate), "Frag Rate: %6.2f", (float)(player.totalfrags/player.totaltime));
+	Com_sprintf(totalfrags, sizeof(totalfrags), "Total Frags: ^1%i", player.totalfrags);
+	Com_sprintf(totaltime, sizeof(totaltime), "Total Time: %6.2f", player.totaltime);
+	
+	s_playerranking_title.generic.type	= MTYPE_ACTION;
+	s_playerranking_title.generic.name	= "Player Ranking and Stats";
+	s_playerranking_title.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_playerranking_title.generic.x		= 32*scale;
+	s_playerranking_title.generic.y		= 0;
+
+	offset = GetColorTokens(playername);
+
+	s_playerranking_name.generic.type	= MTYPE_COLORTXT;
+	s_playerranking_name.generic.name	= playername;
+	s_playerranking_name.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_playerranking_name.generic.x		= -8*offset*scale; 
+	s_playerranking_name.generic.y		= 20*scale;
+
+	s_playerranking_rank.generic.type	= MTYPE_COLORTXT;
+	s_playerranking_rank.generic.name	= rank;
+	s_playerranking_rank.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_playerranking_rank.generic.x		= 0;
+	s_playerranking_rank.generic.y		= 40*scale;
+
+	s_playerranking_fragrate.generic.type	= MTYPE_COLORTXT;
+	s_playerranking_fragrate.generic.name	= fragrate;
+	s_playerranking_fragrate.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_playerranking_fragrate.generic.x		= 16*scale;
+	s_playerranking_fragrate.generic.y		= 60*scale;
+
+	s_playerranking_totalfrags.generic.type	= MTYPE_COLORTXT;
+	s_playerranking_totalfrags.generic.name	= totalfrags;
+	s_playerranking_totalfrags.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_playerranking_totalfrags.generic.x		= 0;
+	s_playerranking_totalfrags.generic.y		= 80*scale;
+
+	s_playerranking_totaltime.generic.type	= MTYPE_COLORTXT;
+	s_playerranking_totaltime.generic.name	= totaltime;
+	s_playerranking_totaltime.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_playerranking_totaltime.generic.x		= 16*scale;
+	s_playerranking_totaltime.generic.y		= 100*scale;
+
+	s_playerranking_ttheader.generic.type	= MTYPE_ACTION;
+	s_playerranking_ttheader.generic.name	= "Top Ten Players";
+	s_playerranking_ttheader.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_playerranking_ttheader.generic.x		= 32*scale;
+	s_playerranking_ttheader.generic.y		= 120*scale;
+
+	Menu_AddItem( &s_playerranking_menu, &s_playerranking_title );
+	Menu_AddItem( &s_playerranking_menu, &s_playerranking_name );
+	Menu_AddItem( &s_playerranking_menu, &s_playerranking_rank );
+	Menu_AddItem( &s_playerranking_menu, &s_playerranking_fragrate );
+	Menu_AddItem( &s_playerranking_menu, &s_playerranking_totalfrags );
+	Menu_AddItem( &s_playerranking_menu, &s_playerranking_totaltime );
+	Menu_AddItem( &s_playerranking_menu, &s_playerranking_ttheader );
+
+	for(i = 0; i < 10; i++) {
+
+		topTenPlayers[i].totalfrags = topTenPlayers[i].totaltime = topTenPlayers[i].ranking = 0;
+		topTenPlayers[i] = getPlayerByRank ( i+1, topTenPlayers[i] );
+
+		if(i < 9)
+			Com_sprintf(topTenList[i], sizeof(topTenList[i]), "Rank: ^1%i %s", topTenPlayers[i].ranking, topTenPlayers[i].playername);
+		else
+			Com_sprintf(topTenList[i], sizeof(topTenList[i]), "Rank:^1%i %s", topTenPlayers[i].ranking, topTenPlayers[i].playername);
+
+		offset = GetColorTokens(topTenPlayers[i].playername);
+
+		s_playerranking_topten[i].generic.type	= MTYPE_COLORTXT;
+		s_playerranking_topten[i].generic.name	= topTenList[i];
+		s_playerranking_topten[i].generic.flags	= QMF_LEFT_JUSTIFY;
+		s_playerranking_topten[i].generic.x		= -16*offset*scale;
+		s_playerranking_topten[i].generic.y		= (140+(i*10))*scale;
+
+		Menu_AddItem( &s_playerranking_menu, &s_playerranking_topten[i] );
+	}
+}
+
+const char *PlayerRanking_MenuKey( int key )
+{
+	return Default_MenuKey( &s_playerranking_menu, key );
+}
+
+void PlayerRanking_MenuDraw(void)
+{
+	float scale;
+
+	scale = (float)(viddef.height)/600;
+	if(scale < 1)
+		scale = 1;
+
+	banneralpha += cls.frametime;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
+	M_Background( "menu_back");
+	M_Banner( "m_player", banneralpha );
+
+	Menu_Draw( &s_playerranking_menu );
+}
+
+void M_Menu_PlayerRanking_f(void)
+{
+	PlayerRanking_MenuInit();
+	M_PushMenu( PlayerRanking_MenuDraw, PlayerRanking_MenuKey );
 }
 
 /*

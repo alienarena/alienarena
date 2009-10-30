@@ -566,6 +566,21 @@ void CL_ParseClientinfo (int player);
 void CL_Download_f (void);
 
 //
+// cl_stats.c
+//
+
+typedef struct _PLAYERSTATS {
+	char playername[32];
+	int totalfrags;
+	double totaltime;
+	int ranking;
+} PLAYERSTATS;
+
+void getStatsDB( void );
+PLAYERSTATS getPlayerRanking ( PLAYERSTATS player );
+PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player );
+
+//
 // cl_view.c
 //
 
