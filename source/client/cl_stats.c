@@ -66,7 +66,7 @@ PLAYERSTATS getPlayerRanking ( PLAYERSTATS player )
 			
 			//name
 			fgets(name, sizeof(name), file);
-			name[strlen(name) - 2] = 0; //truncate garbage bytes
+			name[strlen(name) - 1] = 0; //truncate garbage byte
 			//remote address
 			fgets(remote_address, sizeof(remote_address), file);
 			//points
@@ -123,7 +123,6 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player )
 			
 			//name
 			fgets(name, sizeof(name), file);
-			name[strlen(name) - 2] = 0; //truncate garbage bytes
 			strcpy(player.playername, name);
 			//remote address
 			fgets(remote_address, sizeof(remote_address), file);

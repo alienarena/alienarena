@@ -2925,7 +2925,7 @@ static menuaction_s		s_joinserver_player_ranking_action;
 static menulist_s		s_joinserver_filterempty_action;
 static menuaction_s		s_joinserver_server_actions[MAX_LOCAL_SERVERS];
 static menuaction_s		s_joinserver_server_info[32];
-static menuaction_s		s_joinserver_server_data[5];
+static menuaction_s		s_joinserver_server_data[6];
 static menuaction_s		s_joinserver_moveup;
 static menuaction_s		s_joinserver_movedown;
 static menuslider_s		s_joinserver_scrollbar;
@@ -2939,7 +2939,7 @@ int		m_show_empty;
 #define	NO_SERVER_STRING	"<no server>"
 
 static char local_server_info[256][256];
-static char local_server_data[5][64];
+static char local_server_data[6][64];
 unsigned int starttime;
 
 char *GetLine (char **contents, int *len)
@@ -2985,6 +2985,7 @@ typedef struct _SERVERDATA {
 	char fraglimit[32];
 	char timelimit[32];
 	char playerInfo[64][80];
+	char skill[32];
 	int players;
 	int ping;
 	netadr_t local_server_netadr;
@@ -3003,7 +3004,8 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	int players = 0;
 	int result;
 	char playername[32];
-	int score, ping, i, x;
+	int score, ping, rankTotal, i, x;
+	PLAYERSTATS	player;
 
 	//if by some chance this gets called without the menu being up, return
 	if(cls.key_dest != key_menu)
@@ -3058,6 +3060,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	free (rLine);
 
 	//playerinfo
+	rankTotal = 0;
 	strcpy (seps, " ");
 	while ((rLine = GetLine (&status_string, &result)) && players < 32) {
 		/* Establish string and get the first token: */
@@ -3077,18 +3080,31 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		free (rLine);
 
 		playername[31] = '\0';
+		
+		//get ranking
+		strcpy(player.playername, playername);
+		player.totalfrags = player.totaltime = player.ranking = 0;
+		player = getPlayerRanking ( player );
+
 		Com_sprintf(mservers[m_num_servers].playerInfo[players], sizeof(mservers[m_num_servers].playerInfo[players]),
 			"%32s    %4i    %4i\n", playername, score, ping);
 
+		rankTotal += player.ranking;
+		
 		players++;
 	}
+
+	if(players)
+		Com_sprintf(mservers[m_num_servers].skill, sizeof(mservers[m_num_servers].skill), "Skill Level: %i", rankTotal/players);
+	else
+		Com_sprintf(mservers[m_num_servers].skill, sizeof(mservers[m_num_servers].skill), "Skill Level: Unknown");
 
 	if(!m_show_empty)
 		if(!players)
 			return;
 
 	mservers[m_num_servers].players = players;
-
+	
 	//build the string for the server (hostname - address - mapname - players/maxClients)
 	//pad the strings - gotta do this for both maps and hostname
 	x = 0;
@@ -3181,11 +3197,12 @@ void JoinServerFunc( void *self )
 		mservers[index+svridx].szAdmin[24] = 0; //trim some potential box offenders
 		mservers[index+svridx].szWebsite[24] = 0;
 		mservers[index+svridx].szVersion[24] = 0;
-		Com_sprintf(local_server_data[0], sizeof(local_server_data[0]), mservers[index+svridx].szAdmin);
-		Com_sprintf(local_server_data[1], sizeof(local_server_data[1]), mservers[index+svridx].szWebsite);
-		Com_sprintf(local_server_data[2], sizeof(local_server_data[2]), mservers[index+svridx].fraglimit);
-		Com_sprintf(local_server_data[3], sizeof(local_server_data[3]), mservers[index+svridx].timelimit);
-		Com_sprintf(local_server_data[4], sizeof(local_server_data[4]), mservers[index+svridx].szVersion);
+		Com_sprintf(local_server_data[0], sizeof(local_server_data[0]), mservers[index+svridx].skill);
+		Com_sprintf(local_server_data[1], sizeof(local_server_data[1]), mservers[index+svridx].szAdmin);
+		Com_sprintf(local_server_data[2], sizeof(local_server_data[2]), mservers[index+svridx].szWebsite);
+		Com_sprintf(local_server_data[3], sizeof(local_server_data[3]), mservers[index+svridx].fraglimit);
+		Com_sprintf(local_server_data[4], sizeof(local_server_data[4]), mservers[index+svridx].timelimit);
+		Com_sprintf(local_server_data[5], sizeof(local_server_data[5]), mservers[index+svridx].szVersion);
 
 		//players
 		for(i=0; i<mservers[index+svridx].players; i++)
@@ -3266,6 +3283,8 @@ void JoinServer_MenuInit( void )
 	banneralpha = 0.1;
 
 	m_show_empty = true;
+
+	getStatsDB();
 
 	s_joinserver_menu.x = viddef.width * 0.50 - 120*scale;
 	offset = viddef.height/2 - 326*scale;
@@ -3366,7 +3385,7 @@ void JoinServer_MenuInit( void )
 	for ( i = 0; i < 8; i++ ) //same here
 		Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_info[i] );
 
-	for ( i = 0; i < 5; i++ )
+	for ( i = 0; i < 6; i++ )
 		Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_data[i] );
 
 	//add items to move the index
@@ -3421,13 +3440,13 @@ void JoinServer_MenuDraw(void)
 		s_joinserver_server_info[i].generic.y		= 305*scale + i*10*scale+offset;
 	}
 
-	for ( i = 0; i < 5; i++)
+	for ( i = 0; i < 6; i++)
 	{
 		s_joinserver_server_data[i].generic.type	= MTYPE_SEPARATOR;
 		s_joinserver_server_data[i].generic.name	= local_server_data[i];
 		s_joinserver_server_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
 		s_joinserver_server_data[i].generic.x		= 30*scale;
-		s_joinserver_server_data[i].generic.y		= 335*scale + i*10*scale+offset;
+		s_joinserver_server_data[i].generic.y		= 325*scale + i*10*scale+offset;
 	}
 	s_joinserver_scrollbar.maxvalue = m_num_servers - 16;	
 	M_ArrowPics();
@@ -5417,13 +5436,12 @@ void PlayerRanking_MenuInit( void )
 	if(scale < 1)
 		scale = 1;
 
-	banneralpha = 0.1;
+	banneralpha = 0.1; 
 
 	s_playerranking_menu.x = viddef.width / 2 - 96*scale;
 	s_playerranking_menu.y = viddef.height / 2 - 96*scale;
 	s_playerranking_menu.nitems = 0;
 
-	getStatsDB();
 	strcpy(player.playername, name->string);
 	player.totalfrags = player.totaltime = player.ranking = 0;
 	player = getPlayerRanking ( player );
