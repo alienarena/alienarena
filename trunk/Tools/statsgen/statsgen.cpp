@@ -18,7 +18,7 @@
 using namespace std;
 
 typedef struct _PLAYERINFO {
-	char playername[16];
+	char playername[32];
 	int ping;
 	int score;
 	int rank;

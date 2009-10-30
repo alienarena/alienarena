@@ -1063,7 +1063,7 @@ Advances the world by 0.1 seconds
 */
 void G_RunFrame (void)
 {
-	int		i;
+	int		i, numActiveClients;
 	edict_t	*ent;
 
 	level.previousTime = gi.Sys_Milliseconds() - 100; //100 milleseconds(1/10 of a second)
@@ -1112,6 +1112,9 @@ void G_RunFrame (void)
 			ClientBeginServerFrame (ent);
 		}
 
+		if(ent->inuse && ent->client && !ent->is_bot)
+			numActiveClients++;
+
 		//this next block of code may not be practical for a server running at 10fps
 /*		if(ent->movetype & MOVETYPE_FLYMISSILE) {
 			//unlagged
@@ -1147,7 +1150,14 @@ void G_RunFrame (void)
 		playervote.time = level.time;
 		if(playervote.time-playervote.starttime > 15 ){ //15 seconds
 			//execute command if votes are sufficient
-			if(playervote.yay > 2 && playervote.yay > playervote.nay+1) {
+			if(numActiveClients <= 2 && playervote.yay > playervote.nay+1) { //minimum of 2 votes to pass
+				safe_bprintf(PRINT_HIGH, "Vote ^2Passed\n");
+				
+				//parse command(we will allow kick, map, fraglimit, timelimit).
+				G_ParseVoteCommand();
+				
+			}
+			else if(playervote.yay > 2 && playervote.yay > playervote.nay+1) { //3-1 minimum to pass
 				safe_bprintf(PRINT_HIGH, "Vote ^2Passed\n");
 				
 				//parse command(we will allow kick, map, fraglimit, timelimit).
