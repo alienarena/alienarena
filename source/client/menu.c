@@ -2940,7 +2940,22 @@ int		m_show_empty;
 
 static char local_server_info[256][256];
 static char local_server_data[6][64];
+static int	local_server_rankings[64];
 unsigned int starttime;
+
+int GetColorTokens( char *string)
+{
+	int i, x;
+
+	x = 0;
+
+	for(i=0; i<32; i++) {
+		if(string[i] == '^')
+			x++;
+	}
+
+	return x;
+}
 
 char *GetLine (char **contents, int *len)
 {
@@ -2985,6 +3000,7 @@ typedef struct _SERVERDATA {
 	char fraglimit[32];
 	char timelimit[32];
 	char playerInfo[64][80];
+	int	 playerRankings[64];
 	char skill[32];
 	int players;
 	int ping;
@@ -2995,10 +3011,13 @@ typedef struct _SERVERDATA {
 
 SERVERDATA mservers[MAX_LOCAL_SERVERS];
 
+PLAYERSTATS thisPlayer;
+
 void M_AddToServerList (netadr_t adr, char *status_string)
 {
 	char *rLine;
 	char *token;
+	char skillLevel[24];
 	char lasttoken[256];
 	char seps[]   = "\\";
 	int players = 0;
@@ -3089,13 +3108,24 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		Com_sprintf(mservers[m_num_servers].playerInfo[players], sizeof(mservers[m_num_servers].playerInfo[players]),
 			"%32s    %4i    %4i\n", playername, score, ping);
 
+		mservers[m_num_servers].playerRankings[players] = player.ranking;
+
 		rankTotal += player.ranking;
 		
 		players++;
 	}
 
-	if(players)
-		Com_sprintf(mservers[m_num_servers].skill, sizeof(mservers[m_num_servers].skill), "Skill Level: %i", rankTotal/players);
+	if(players) {
+
+		if(thisPlayer.ranking < (rankTotal/players) - 100)
+			strcpy(skillLevel, "Your Skill is ^1Higher");
+		else if(thisPlayer.ranking > (rankTotal/players + 100))
+			strcpy(skillLevel, "Your Skill is ^4Lower");
+		else
+			strcpy(skillLevel, "Your Skill is ^3Even");
+
+		Com_sprintf(mservers[m_num_servers].skill, sizeof(mservers[m_num_servers].skill), "Skill: %s", skillLevel);
+	}
 	else
 		Com_sprintf(mservers[m_num_servers].skill, sizeof(mservers[m_num_servers].skill), "Skill Level: Unknown");
 
@@ -3205,8 +3235,10 @@ void JoinServerFunc( void *self )
 		Com_sprintf(local_server_data[5], sizeof(local_server_data[5]), mservers[index+svridx].szVersion);
 
 		//players
-		for(i=0; i<mservers[index+svridx].players; i++)
+		for(i=0; i<mservers[index+svridx].players; i++) {
 			Com_sprintf(local_server_info[i], sizeof(local_server_info[i]), mservers[index+svridx].playerInfo[i]);
+			local_server_rankings[i] = mservers[index+svridx].playerRankings[i];
+		}
 
 		return;
 	}
@@ -3268,6 +3300,7 @@ void JoinServer_MenuInit( void )
 {
 	int i;
 	float scale, offset;
+	extern cvar_t *name;
 	
 	static const char *yesno_names[] =
 	{
@@ -3285,6 +3318,10 @@ void JoinServer_MenuInit( void )
 	m_show_empty = true;
 
 	getStatsDB();
+
+	strcpy(thisPlayer.playername, name->string);
+	thisPlayer.totalfrags = thisPlayer.totaltime = thisPlayer.ranking = 0;
+	thisPlayer = getPlayerRanking ( thisPlayer );
 
 	s_joinserver_menu.x = viddef.width * 0.50 - 120*scale;
 	offset = viddef.height/2 - 326*scale;
@@ -3404,7 +3441,8 @@ void JoinServer_MenuInit( void )
 void JoinServer_MenuDraw(void)
 {
 	int i;
-	float scale, offset;
+	float scale, offset, xoffset;
+	char ranktxt[8][32];
 
 	scale = (float)(viddef.height)/600;
 	if(scale < 1)
@@ -3414,7 +3452,7 @@ void JoinServer_MenuDraw(void)
 	if (banneralpha > 1)
 		banneralpha = 1;
 
-	M_Background( "menu_back" ); //draw black background first
+	M_Background( "menu_back" ); //draw background first
 	M_Banner( "m_joinserver", banneralpha );
 
 	offset = viddef.height/2 - 326*scale;
@@ -3433,19 +3471,27 @@ void JoinServer_MenuDraw(void)
 
 	for ( i = 0; i < 8; i++)
 	{
-		s_joinserver_server_info[i].generic.type	= MTYPE_COLORTXT;
+		Com_sprintf(ranktxt[i], sizeof(ranktxt[i]), "Player is ranked %i", local_server_rankings[i+playeridx]);
+		xoffset = GetColorTokens(local_server_info[i+playeridx]);
+		s_joinserver_server_info[i].generic.type	= MTYPE_COLORACTION;
 		s_joinserver_server_info[i].generic.name	= local_server_info[i+playeridx];
 		s_joinserver_server_info[i].generic.flags	= QMF_LEFT_JUSTIFY;
-		s_joinserver_server_info[i].generic.x		= -20*scale;
+		s_joinserver_server_info[i].generic.x		= (-20+(16*xoffset))*scale;
+		s_joinserver_server_info[i].generic.callback = NULL;
 		s_joinserver_server_info[i].generic.y		= 305*scale + i*10*scale+offset;
+		s_joinserver_server_info[i].generic.statusbar = ranktxt[i];
 	}
 
+	xoffset = GetColorTokens(local_server_data[0]); //only this line
 	for ( i = 0; i < 6; i++)
 	{
-		s_joinserver_server_data[i].generic.type	= MTYPE_SEPARATOR;
+		s_joinserver_server_data[i].generic.type	= MTYPE_COLORTXT;
 		s_joinserver_server_data[i].generic.name	= local_server_data[i];
 		s_joinserver_server_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
-		s_joinserver_server_data[i].generic.x		= 30*scale;
+		if(i == 0)
+			s_joinserver_server_data[i].generic.x		= (-150-(xoffset*16))*scale;
+		else
+			s_joinserver_server_data[i].generic.x		= -150*scale;
 		s_joinserver_server_data[i].generic.y		= 325*scale + i*10*scale+offset;
 	}
 	s_joinserver_scrollbar.maxvalue = m_num_servers - 16;	
@@ -5408,20 +5454,6 @@ char playername[64];
 char totaltime[32];
 char totalfrags[32];
 char topTenList[10][64];
-
-int GetColorTokens( char *string)
-{
-	int i, x;
-
-	x = 0;
-
-	for(i=0; i<32; i++) {
-		if(string[i] == '^')
-			x++;
-	}
-
-	return x;
-}
 
 void PlayerRanking_MenuInit( void )
 {
