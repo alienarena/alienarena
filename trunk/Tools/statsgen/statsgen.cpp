@@ -393,7 +393,7 @@ void GetServerList (void) {
 	struct sockaddr_in dgFrom;
 	char recvBuff[0xFFFF], *p;
 
-	hp = gethostbyname ("192.168.0.2");	
+	hp = gethostbyname ("master.corservers.com");	
 
 	if (!hp) {
 		printf("couldn't resolve master server");
@@ -1106,14 +1106,14 @@ void UploadStats(void) { //put all updated files on the server
     fceSetInteger(0, FCE_SET_MAX_RESPONSE_WAIT, 1000);
 	
 	// Connect to FTP server
-	error = fceConnect(0,"ftp.mysite.com","user","password");
+	error = fceConnect(0,"servername","username","password");
 	if(error < 0) {
 		printf("Error connecting to host!\n");
 		return;
 	}
 
 	//change to correct dir
-	error = fceSetServerDir (0, "cor.planetquake.gamespy.com/stats");
+	error = fceSetServerDir (0, "stats");
 	if(error < 0) {
 		printf("Error changing directory!\n");
 		fceClose(0);
@@ -1204,7 +1204,7 @@ void RecordPollNumber(void)
 
 void CheckInactivePlayers(void)
 {
-	char name[16], points[32], frags[32], totalfrags[32], time[16], totaltime[16], ip[16], poll[16], remote_address[21];
+	char name[32], points[32], frags[32], totalfrags[32], time[16], totaltime[16], ip[16], poll[16], remote_address[21];
 	ifstream infile;
 	ofstream outfile;
 	int diff;
@@ -1222,7 +1222,7 @@ void CheckInactivePlayers(void)
 	
 		while(strlen(name)) {
 
-			infile.getline(name, 16); //name
+			infile.getline(name, 32); //name
 			infile.getline(remote_address, 21); //remote address
 			infile.getline(points, 32); //points
 			pointnumber = atof(points); //so we can manipulate this
@@ -1266,7 +1266,7 @@ void CheckInactivePlayers(void)
 	return;
 }
 void RepairDb(void) {
-	char name[16], points[32], frags[32], totalfrags[32], time[16], totaltime[16], ip[16], poll[16];
+	char name[32], points[32], frags[32], totalfrags[32], time[16], totaltime[16], ip[16], poll[16];
 	ifstream infile;
 	ofstream outfile;
 
@@ -1279,7 +1279,7 @@ void RepairDb(void) {
 	
 		while(strlen(name)) {
 
-			infile.getline(name, 16); //name
+			infile.getline(name, 32); //name
 			infile.getline(points, 32); //points
 			infile.getline(frags, 32); //frags
 			infile.getline(totalfrags, 32); //total frags
