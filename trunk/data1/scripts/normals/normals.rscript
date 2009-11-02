@@ -401,7 +401,7 @@ models/weapons/v_blast/skin
 models/weapons/v_violator/skin
 {
 	{
-		map models/weapons/v_violator/skin_normal.tga
+		map models/weapons/v_violator/skin_normal.jpg
 		normalmap
 		map2 gfx/violatorfx.tga
 		glow
@@ -420,7 +420,7 @@ models/weapons/v_hyperb/skin
 models/weapons/v_rail/skin
 {
 	{
-		map models/weapons/v_rail/skin_normal.tga
+		map models/weapons/v_rail/skin_normal.jpg
 		normalmap
 		map2 gfx/beamfx.tga
 		glow
