@@ -1063,7 +1063,7 @@ Advances the world by 0.1 seconds
 */
 void G_RunFrame (void)
 {
-	int		i, numActiveClients;
+	int		i, numActiveClients = 0;
 	edict_t	*ent;
 
 	level.previousTime = gi.Sys_Milliseconds() - 100; //100 milleseconds(1/10 of a second)

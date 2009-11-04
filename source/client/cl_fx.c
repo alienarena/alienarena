@@ -2557,6 +2557,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 	vec3_t		right, up;
 	cparticle_t	*p;
 	int			i,j;
+	float		v;
 
 	color = getColor();
 
@@ -2568,34 +2569,8 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 	VectorCopy (vec, vec2);
 	VectorScale (vec, RAILTRAILSPACE, vec);
 	VectorCopy (start, move);
-
-	//muzzleflash	
-	VectorScale (vec2, -RAILTRAILSPACE/2, vec2);
-	VectorAdd(start, vec2, start);
-	for(i = 0; i < 3; i++) {
 	
-		if (!(p = new_particle()))
-			return;
-		p->alpha = 0.9;
-		p->alphavel = -.8 / (0.6+frand()*0.2);
-		p->blenddst = GL_ONE;
-		p->blendsrc = GL_SRC_ALPHA;
-		p->texnum = r_cflashtexture->texnum;
-		p->scale = 8/(i+1);
-		for(j=0; j< 3; j++)
-			p->angle[j] = 0;
-		p->type = PARTICLE_STANDARD;
-		p->scalevel = 4;
-		p->color = color;
-		for (j=0 ; j<3 ; j++)
-		{
-			p->org[j] = start[j];
-			p->vel[j] = 0;
-			p->accel[j] = 0;
-		}
-	}
-	
-	for (; len>0; len -= RAILTRAILSPACE)
+	for (i = 0; len>0; len -= RAILTRAILSPACE, i++)
 	{	
 		VectorCopy (move, last);	
 		VectorAdd (move, vec, move);
@@ -2604,10 +2579,24 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 				return;
 
 		p->alpha = 1;
-		p->alphavel = -.8 / (0.6+frand()*0.2);
+		p->alphavel = -1.0 - len/(i*200);
 		p->blenddst = GL_ONE;
 		p->blendsrc = GL_SRC_ALPHA;
-		p->texnum = r_beamtexture->texnum;
+		
+		if(i == 0)
+			p->texnum = r_dis1texture->texnum;
+		else if( i == 1)
+			p->texnum = r_dis2texture->texnum;
+		else {
+			v = frand();
+			if(v < 0.2)
+				p->texnum = r_dis3texture->texnum;
+			else if(v < 0.5)
+				p->texnum = r_dis2texture->texnum;
+			else
+				p->texnum = r_dis1texture->texnum;
+		}
+
 		p->scale = 4;
 		VectorCopy(move, p->angle);
 		p->type = PARTICLE_BEAM;
