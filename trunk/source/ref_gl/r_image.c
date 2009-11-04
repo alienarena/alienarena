@@ -1571,6 +1571,9 @@ void GL_FreeUnusedImages (void)
 	sun_object->registration_sequence = registration_sequence;
 	sun1_object->registration_sequence = registration_sequence;
 	sun2_object->registration_sequence = registration_sequence;
+	r_dis1texture->registration_sequence = registration_sequence;
+	r_dis2texture->registration_sequence = registration_sequence;
+	r_dis3texture->registration_sequence = registration_sequence;
 
 	for (i=0, image=gltextures ; i<numgltextures ; i++, image++)
 	{

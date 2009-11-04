@@ -60,6 +60,9 @@ image_t		*r_logotexture;
 image_t		*r_beamtexture;
 image_t		*r_beam2texture;
 image_t		*r_beam3texture;
+image_t		*r_dis1texture;
+image_t		*r_dis2texture;
+image_t		*r_dis3texture;
 image_t		*r_bullettexture;
 image_t		*r_bulletnormal;
 image_t		*r_voltagetexture;
@@ -367,6 +370,18 @@ void R_InitParticleTexture (void)
 	if(!sun2_object) {
 		sun2_object = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
 	}
+	r_dis1texture = R_RegisterParticlePic("disbeam1");
+	if (!r_dis1texture) {                                
+		r_dis1texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    } 
+	r_dis2texture = R_RegisterParticlePic("disbeam2");
+	if (!r_dis2texture) {                                
+		r_dis2texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    } 
+	r_dis3texture = R_RegisterParticlePic("disbeam3");
+	if (!r_dis3texture) {                                
+		r_dis3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }    
  
 	//
 	// also use this for bad textures, but without alpha
