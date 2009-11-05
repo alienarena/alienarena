@@ -619,7 +619,7 @@ struct model_s
 {
 	char		name[MAX_QPATH];
 };
-extern void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client);
+
 void CL_AddPacketEntities (frame_t *frame)
 {
 	entity_t			ent;
@@ -1114,6 +1114,10 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	if(!(strcmp("models/weapons/v_shotg2/tris.md2", gun.model->name))) {
 		if(gun.frame > 4 && gun.frame < 14)
 			CL_MuzzleFlashParticle(gun.origin, gun.angles, true);
+	}	
+	else if(!(strcmp("models/weapons/v_hyperb/tris.md2", gun.model->name))) {
+		if(gun.frame > 5 && gun.frame < 7)
+			CL_PlasmaFlashParticle(gun.origin, gun.angles, true);
 	}
 
 	V_AddViewEntity (&gun);

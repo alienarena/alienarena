@@ -466,6 +466,8 @@ void CL_SmallHealthParticles(vec3_t org);
 void CL_MedHealthParticles(vec3_t org);
 void CL_LargeHealthParticles(vec3_t org);
 void CL_BrassShells(vec3_t org, vec3_t dir, int count);
+void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client);
+void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client);
 
 int CL_ParseEntityBits (unsigned *bits);
 void CL_ParseDelta (entity_state_t *from, entity_state_t *to, int number, int bits);
