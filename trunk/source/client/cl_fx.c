@@ -2629,7 +2629,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 	VectorScale (vec, RAILTRAILSPACE, vec);
 	VectorCopy (start, move);
 
-	for (i = 0; len>0; len -= RAILTRAILSPACE, i++)
+	for (i = 0; len>0; len -= RAILTRAILSPACE, i+=100)
 	{	
 		VectorCopy (move, last);	
 		VectorAdd (move, vec, move);
@@ -2638,7 +2638,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 				return;
 
 		p->alpha = 1;
-		p->alphavel = -1.0 - len/(i*200);
+		p->alphavel = -1.0 - (len/(float)i);
 		p->blenddst = GL_ONE;
 		p->blendsrc = GL_SRC_ALPHA;
 		
@@ -2663,9 +2663,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 			p->vel[j] = 0;
 			p->accel[j] = 0;
 		}
-
 	}
-
 }
 
 void CL_LaserBeam (vec3_t start, vec3_t end) 
