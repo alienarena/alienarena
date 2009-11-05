@@ -1295,6 +1295,65 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 	p->alphavel = -100;
 	
 }
+
+void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
+{
+	int			i, j;
+	cparticle_t	*p;
+	vec3_t		mflashorg, vforward, vright, vup, vec;
+	float		rightoffset, len, color;
+
+	if(!from_client) {
+		VectorSubtract (org, cl.refdef.vieworg, vec);
+		len = VectorNormalize (vec);
+		if(len < 128)
+			return;
+	}
+	
+	VectorCopy(org, mflashorg);
+	for (j=0 ; j<3 ; j++)
+	{
+		mflashorg[j] = mflashorg[j] + ((rand()%2)-1);
+
+	}
+
+	if(from_client) {
+		AngleVectors (angles, vforward, vright, vup);
+		
+		if (r_lefthand->value == 1.0F)
+			rightoffset = -4.4;
+		else
+			rightoffset = 4.4;
+
+		VectorMA(mflashorg, 24, vforward, mflashorg);
+		VectorMA(mflashorg, rightoffset, vright, mflashorg);
+		VectorMA(mflashorg, -4.5, vup, mflashorg);
+	}
+
+	//muzzleflash
+	color = getColor();
+    for(i = 0; i < 3; i++) {
+
+        if (!(p = new_particle()))
+            return;
+        p->alpha = 0.4;
+        p->alphavel = -2.8 / (0.6+frand()*0.2);
+        p->blenddst = GL_ONE;
+        p->blendsrc = GL_SRC_ALPHA;
+        p->texnum = r_cflashtexture->texnum;
+        p->scale = 16/(i+1);
+        p->type = PARTICLE_STANDARD;
+        p->scalevel = 12;
+        p->color = color;
+        for (j=0 ; j<3 ; j++)
+		{
+			p->org[j] = mflashorg[j];
+			p->vel[j] = 0;
+			p->accel[j] = 0;
+		}
+    }
+	
+}
 /*
 ===============
 CL_SmartMuzzle
@@ -2569,7 +2628,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 	VectorCopy (vec, vec2);
 	VectorScale (vec, RAILTRAILSPACE, vec);
 	VectorCopy (start, move);
-	
+
 	for (i = 0; len>0; len -= RAILTRAILSPACE, i++)
 	{	
 		VectorCopy (move, last);	
