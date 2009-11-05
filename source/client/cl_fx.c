@@ -2642,20 +2642,14 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 		p->blenddst = GL_ONE;
 		p->blendsrc = GL_SRC_ALPHA;
 		
-		if(i == 0)
-			p->texnum = r_dis1texture->texnum;
-		else if( i == 1)
+		v = frand();
+		if(v < 0.2)
+			p->texnum = r_dis3texture->texnum;
+		else if(v < 0.5)
 			p->texnum = r_dis2texture->texnum;
-		else {
-			v = frand();
-			if(v < 0.2)
-				p->texnum = r_dis3texture->texnum;
-			else if(v < 0.5)
-				p->texnum = r_dis2texture->texnum;
-			else
-				p->texnum = r_dis1texture->texnum;
-		}
-
+		else
+			p->texnum = r_dis1texture->texnum;
+		
 		p->scale = 4;
 		VectorCopy(move, p->angle);
 		p->type = PARTICLE_BEAM;
