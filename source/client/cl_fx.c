@@ -1341,7 +1341,7 @@ void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
         p->blenddst = GL_ONE;
         p->blendsrc = GL_SRC_ALPHA;
         p->texnum = r_cflashtexture->texnum;
-        p->scale = 16/(i+1);
+        p->scale = 20/(i+1);
         p->type = PARTICLE_STANDARD;
         p->scalevel = 12;
         p->color = color;
