@@ -1139,7 +1139,7 @@ void CM_TestBoxInBrush (vec3_t mins, vec3_t maxs, vec3_t p1,
 		d1 = DotProduct (p1, plane->normal) - dist;
 
 		// if completely in front of face, no intersection
-		if (d1 > 0)
+		if (d1 > (DIST_EPSILON * 0.5f) )
 			return;
 
 	}
