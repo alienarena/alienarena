@@ -184,8 +184,6 @@ typedef struct entity_s
 
 	struct	rscript_t *script;
 
-	vec4_t  s_lerped[MAX_VERTS];
-
 } entity_t;
 
 #define ENTITY_FLAGS  68
