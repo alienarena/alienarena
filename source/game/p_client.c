@@ -2494,32 +2494,7 @@ loadgames will.
 qboolean ClientConnect (edict_t *ent, char *userinfo)
 {
 	char	*value;
-	int		i, numspec, numplayers, numbots;
-	edict_t *cl_ent;
-
-	//check to see if server is using botkick, if so, we need to ensure that bots and 
-	//players are not overwriting one another upon level reloads.
-	//higher threshold means more bots get allowed into server at level load, resulting 
-	//in more chances of bots and true clients being loaded at the same time into the same slot.
-	//This only occurs in full, or near full servers.  Bots search for slots from the rear, and 
-	//real players from the front.  When the two begin overlapping, this is where trouble begins.
-	//The following snippet of code prevents overlapping.
-	if(sv_botkickthreshold->value) { 
-		numplayers = 0;
-		for (i=0 ; i<game.maxclients ; i++)
-		{
-			cl_ent = g_edicts + 1 + i;
-			if (cl_ent->inuse && !cl_ent->is_bot) 
-				numplayers++;
-		}
-		numbots = ACESP_FindBotNum(); //number of potential bots	
-		if(sv_botkickthreshold->integer < numbots)
-			numbots = sv_botkickthreshold->integer;
-		if(numplayers >= game.maxclients - (numbots)) {
-			Info_SetValueForKey(userinfo, "rejmsg", "Server is full.");
-			return false;
-		}
-	}
+	int		i, numspec;
 
 	// check to see if they are on the banned IP list
 	value = Info_ValueForKey (userinfo, "ip");
@@ -2531,8 +2506,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 	//spectator mode
 	// check for a spectator
 	value = Info_ValueForKey (userinfo, "spectator");
-	if (deathmatch->value && *value && strcmp(value, "0")) {
-		
+	if (deathmatch->value && *value && strcmp(value, "0")) {		
 
 		if (*spectator_password->string &&
 			strcmp(spectator_password->string, "none") &&

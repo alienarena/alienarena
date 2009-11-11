@@ -161,6 +161,7 @@ void ClientCommand (edict_t *ent);
 void RunEntity (edict_t *ent);
 void InitGame (void);
 void G_RunFrame (void);
+int ACESP_FindBotNum(void);
 extern long filelength(int);
 
 //===================================================================
@@ -198,6 +199,7 @@ game_export_t *GetGameAPI (game_import_t *import)
 	globals.ClientDisconnect = ClientDisconnect;
 	globals.ClientBegin = ClientBegin;
 	globals.ClientCommand = ClientCommand;
+	globals.ACESP_FindBotNum = ACESP_FindBotNum;
 
 	globals.RunFrame = G_RunFrame;
 

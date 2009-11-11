@@ -224,6 +224,7 @@ extern	cvar_t		*sv_enforcetime;
 
 extern	client_t	*sv_client;
 extern	edict_t		*sv_player;
+extern  int			sv_numbots;
 
 //===========================================================
 
