@@ -29,6 +29,19 @@ SHADOW VOLUMES
 vec3_t ShadowArray[MAX_SHADOW_VERTS];
 static qboolean	triangleFacingLight	[MAX_INDICES / 3];
 
+static vec4_t shadow_lerped[MAX_VERTS];
+
+void GL_LerpVerts(int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float move[3], float frontv[3], float backv[3])
+{
+    int i;
+
+    for (i = 0; i < nverts; i++, v++, ov++, lerp += 4) {
+        lerp[0] = move[0] + ov->v[0]*backv[0] + v->v[0]*frontv[0];
+        lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1];
+        lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2];
+    }
+}
+
 /*
 ==============
 R_ShadowBlend
@@ -96,9 +109,9 @@ void R_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightOrg
 		
 		if(lerp) {
 
-			v0 = (float*)currententity->s_lerped[tris->index_xyz[0]];
-			v1 = (float*)currententity->s_lerped[tris->index_xyz[1]];
-			v2 = (float*)currententity->s_lerped[tris->index_xyz[2]];
+			v0 = (float*)shadow_lerped[tris->index_xyz[0]];
+			v1 = (float*)shadow_lerped[tris->index_xyz[1]];
+			v2 = (float*)shadow_lerped[tris->index_xyz[2]];
 		}
 		else {
 			v0 = (float*)currentmodel->r_mesh_verts[tris->index_xyz[0]];
@@ -146,17 +159,15 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 
 	for (i = 0, tris = ot, neighbors = currentmodel->neighbors;
 		 i < hdr->num_tris; i++, tris++, neighbors++) {
-		
 		if (!triangleFacingLight[i])
 			continue;
 		
 		if (neighbors->n[0] < 0 || !triangleFacingLight[neighbors->n[0]]) {
-			
 			for (j = 0; j < 3; j++) {
 
 				if(lerp) {
-					v0[j] = currententity->s_lerped[tris->index_xyz[1]][j];
-					v1[j] = currententity->s_lerped[tris->index_xyz[0]][j];
+					v0[j] = shadow_lerped[tris->index_xyz[1]][j];
+					v1[j] = shadow_lerped[tris->index_xyz[0]][j];
 				}
 				else {
 					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
@@ -168,31 +179,31 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 
 			}
 
-			VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+2], v2[0], v2[1], v2[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+3], v3[0], v3[1], v3[2]);            
+		VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
+		VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
+		VA_SetElem3(ShadowArray[shadow_vert+2], v2[0], v2[1], v2[2]);
+		VA_SetElem3(ShadowArray[shadow_vert+3], v3[0], v3[1], v3[2]);
+            
 
-			ShadowIndex[index++] = shadow_vert+0;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+2;
-			shadow_vert +=4;
+		ShadowIndex[index++] = shadow_vert+0;
+		ShadowIndex[index++] = shadow_vert+1;
+		ShadowIndex[index++] = shadow_vert+3;
+		ShadowIndex[index++] = shadow_vert+3;
+		ShadowIndex[index++] = shadow_vert+1;
+		ShadowIndex[index++] = shadow_vert+2;
+		shadow_vert +=4;
 		}
 
 		if (neighbors->n[1] < 0 || !triangleFacingLight[neighbors->n[1]]) {
-			
 			for (j = 0; j < 3; j++) {
 
 				if(lerp) {
 
-					v0[j] = currententity->s_lerped[tris->index_xyz[2]][j];
-					v1[j] = currententity->s_lerped[tris->index_xyz[1]][j];
+					v0[j] = shadow_lerped[tris->index_xyz[2]][j];
+					v1[j] = shadow_lerped[tris->index_xyz[1]][j];
 				}
 				else {
-						
+					
 					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
 					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
 				}
@@ -201,29 +212,28 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 				v3[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
 			}
 
-			VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+2], v2[0], v2[1], v2[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+3], v3[0], v3[1], v3[2]);
+		VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
+		VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
+		VA_SetElem3(ShadowArray[shadow_vert+2], v2[0], v2[1], v2[2]);
+		VA_SetElem3(ShadowArray[shadow_vert+3], v3[0], v3[1], v3[2]);
             
 
-			ShadowIndex[index++] = shadow_vert+0;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+2;
-			shadow_vert +=4;
+		ShadowIndex[index++] = shadow_vert+0;
+		ShadowIndex[index++] = shadow_vert+1;
+		ShadowIndex[index++] = shadow_vert+3;
+		ShadowIndex[index++] = shadow_vert+3;
+		ShadowIndex[index++] = shadow_vert+1;
+		ShadowIndex[index++] = shadow_vert+2;
+		shadow_vert +=4;
 		}
 
 		if (neighbors->n[2] < 0 || !triangleFacingLight[neighbors->n[2]]) {
-
 			for (j = 0; j < 3; j++) {
 
 				if(lerp) {
 
-					v0[j] = currententity->s_lerped[tris->index_xyz[0]][j];
-					v1[j] = currententity->s_lerped[tris->index_xyz[2]][j];
+					v0[j] = shadow_lerped[tris->index_xyz[0]][j];
+					v1[j] = shadow_lerped[tris->index_xyz[2]][j];
 				}
 				else {
 
@@ -235,20 +245,20 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 				v3[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
 			}
 
-		
-			VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+2], v2[0], v2[1], v2[2]);
-			VA_SetElem3(ShadowArray[shadow_vert+3], v3[0], v3[1], v3[2]);
+	
+		VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
+		VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
+		VA_SetElem3(ShadowArray[shadow_vert+2], v2[0], v2[1], v2[2]);
+		VA_SetElem3(ShadowArray[shadow_vert+3], v3[0], v3[1], v3[2]);
             
 
-			ShadowIndex[index++] = shadow_vert+0;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+3;
-			ShadowIndex[index++] = shadow_vert+1;
-			ShadowIndex[index++] = shadow_vert+2;
-			shadow_vert +=4;
+		ShadowIndex[index++] = shadow_vert+0;
+		ShadowIndex[index++] = shadow_vert+1;
+		ShadowIndex[index++] = shadow_vert+3;
+		ShadowIndex[index++] = shadow_vert+3;
+		ShadowIndex[index++] = shadow_vert+1;
+		ShadowIndex[index++] = shadow_vert+2;
+		shadow_vert +=4;
 		}
 	}
 	
@@ -260,20 +270,20 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 		if (!triangleFacingLight[i])
 			continue;
 	
-		for (j = 0; j < 3; j++) {
+			for (j = 0; j < 3; j++) {
 
-			if(lerp) {
-				v0[j] = currententity->s_lerped[tris->index_xyz[0]][j];
-				v1[j] = currententity->s_lerped[tris->index_xyz[1]][j];
-				v2[j] = currententity->s_lerped[tris->index_xyz[2]][j];
-			}
-			else {
+				if(lerp) {
+					v0[j] = shadow_lerped[tris->index_xyz[0]][j];
+					v1[j] = shadow_lerped[tris->index_xyz[1]][j];
+					v2[j] = shadow_lerped[tris->index_xyz[2]][j];
+				}
+				else {
 
-				v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
-				v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
-				v2[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
+					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
+					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
+					v2[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
+				}
 			}
-		}
 
 		VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
 		VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
@@ -284,27 +294,29 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 		ShadowIndex[index++] = shadow_vert+2;
         shadow_vert +=3;
 			
-		// rear cap (with flipped winding order)
+			// rear cap (with flipped winding order)
 
-		for (j = 0; j < 3; j++) {
+			for (j = 0; j < 3; j++) {
 
-			if(lerp) {
+				if(lerp) {
 
-				v0[j] = currententity->s_lerped[tris->index_xyz[0]][j];
-				v1[j] = currententity->s_lerped[tris->index_xyz[1]][j];
-				v2[j] = currententity->s_lerped[tris->index_xyz[2]][j];
+					v0[j] = shadow_lerped[tris->index_xyz[0]][j];
+					v1[j] = shadow_lerped[tris->index_xyz[1]][j];
+					v2[j] = shadow_lerped[tris->index_xyz[2]][j];
+				}
+				else {
+
+					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
+					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
+					v2[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
+				}
+
+
+				v0[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
+				v1[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
+				v2[j] = v2[j] + ((v2[j] - light[j]) * projectdistance);
+
 			}
-			else {
-
-				v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
-				v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
-				v2[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
-			}
-
-			v0[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
-			v1[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
-			v2[j] = v2[j] + ((v2[j] - light[j]) * projectdistance);
-		}
 			
 		VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
 		VA_SetElem3(ShadowArray[shadow_vert+1], v1[0], v1[1], v1[2]);
@@ -495,14 +507,20 @@ int CL_PMpointcontents(vec3_t point);
 void R_DrawShadowVolume(entity_t * e)
 {
 	dmdl_t *paliashdr;
-    daliasframe_t *frame;
-    vec3_t tmp;//, water;
+    daliasframe_t *frame, *oldframe;
+    dtrivertx_t *v, *ov, *verts;
+    int *order;
+    float   *lerp;
+    float frontlerp;
+    vec3_t move, delta, vectors[3];
+    vec3_t frontv, backv, tmp;//, water;
+    int i;
     float rad;
     trace_t r_trace;
-
+	
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
-	
+
 	VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
 	VectorScale (tmp, 1.666, tmp); 
 	rad = VectorLength (tmp);
@@ -511,8 +529,7 @@ void R_DrawShadowVolume(entity_t * e)
 		return;
 	
 	if (r_worldmodel ) {
-		//occulusion culling - why draw shadows of entities we cannot see?
-	
+		//occulusion culling - why draw shadows of entities we cannot see?	
 		r_trace = CM_BoxTrace(r_origin, e->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			return;
@@ -523,6 +540,41 @@ void R_DrawShadowVolume(entity_t * e)
 	frame = (daliasframe_t *) ((byte *) paliashdr   + paliashdr->ofs_frames
 						        + currententity->frame *
 							  paliashdr->framesize);
+
+	verts = v = frame->verts;
+
+	oldframe =
+		(daliasframe_t *) ((byte *) paliashdr + paliashdr->ofs_frames +
+						   currententity->oldframe * paliashdr->framesize);
+	ov = oldframe->verts;
+
+	order = (int *) ((byte *) paliashdr + paliashdr->ofs_glcmds);
+
+	frontlerp = 1.0 - currententity->backlerp;
+
+	// move should be the delta back to the previous frame * backlerp
+	VectorSubtract(currententity->oldorigin, currententity->origin, delta);
+	AngleVectors(currententity->angles, vectors[0], vectors[1],
+				 vectors[2]);
+
+	move[0] = DotProduct(delta, vectors[0]);	// forward
+	move[1] = -DotProduct(delta, vectors[1]);	// left
+	move[2] = DotProduct(delta, vectors[2]);	// up
+
+	VectorAdd(move, oldframe->translate, move);
+
+	for (i = 0; i < 3; i++) {
+		move[i] =
+			currententity->backlerp * move[i] +
+			frontlerp * frame->translate[i];
+		frontv[i] = frontlerp * frame->scale[i];
+		backv[i] = currententity->backlerp * oldframe->scale[i];
+	}
+
+	lerp = shadow_lerped[0];
+
+    GL_LerpVerts(paliashdr->num_xyz, v, ov, verts, lerp, move,
+                 frontv, backv);
 
 	qglPushMatrix();
 	qglDisable(GL_TEXTURE_2D);
