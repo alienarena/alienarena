@@ -172,7 +172,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib wsock32.lib glu32.lib client\mpglib.lib"
-				OutputFile="../crx.exe"
+				OutputFile="../crx86.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\release/crx.pdb"
@@ -213,26 +213,6 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90"
 			>
-			<File
-				RelativePath="client\cl_cin.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
 			<File
 				RelativePath="client\cl_ents.c"
 				>
@@ -354,26 +334,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="client\cl_newfx.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="client\cl_parse.c"
 				>
 				<FileConfiguration
@@ -432,6 +392,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\client\cl_stats.c"
+				>
 			</File>
 			<File
 				RelativePath="client\cl_tent.c"
@@ -1034,26 +998,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ref_gl\r_mapscript.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="ref_gl\r_math.c"
 				>
 				<FileConfiguration
@@ -1134,6 +1078,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ref_gl\r_particle.c"
+				>
+			</File>
+			<File
 				RelativePath="ref_gl\r_postprocess.c"
 				>
 				<FileConfiguration
@@ -1172,6 +1120,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\ref_gl\r_shadowmaps.c"
+				>
 			</File>
 			<File
 				RelativePath=".\ref_gl\r_shadows.c"
