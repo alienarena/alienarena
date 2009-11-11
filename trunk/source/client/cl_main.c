@@ -1934,7 +1934,7 @@ CL_Frame
 
 ==================
 */
-qboolean send_packet_now = false;  // instant packets, like firing weapons
+qboolean send_packet_now = false;  // instant packets
 extern float	r_frametime;
 
 void CL_Frame (int msec)

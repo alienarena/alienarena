@@ -373,9 +373,6 @@ void CL_FinishMove (usercmd_t *cmd)
 
 	cmd->impulse = in_impulse;
 	in_impulse = 0;
-
-	if( cmd->buttons & ( BUTTON_ATTACK | BUTTON_ATTACK2 | BUTTON_USE ) )
-		send_packet_now = true;
 }
 
 /*
