@@ -2509,7 +2509,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 		for (i=0 ; i<game.maxclients ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;
-			if (!cl_ent->is_bot) 
+			if (cl_ent->inuse && !cl_ent->is_bot) 
 				numplayers++;
 		}
 		numbots = ACESP_FindBotNum(); //number of potential bots	
