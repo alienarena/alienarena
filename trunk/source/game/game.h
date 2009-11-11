@@ -207,6 +207,8 @@ typedef struct
 	void		(*ClientCommand) (edict_t *ent);
 	void		(*ClientThink) (edict_t *ent, usercmd_t *cmd);
 
+	int			(*ACESP_FindBotNum) (void);
+
 	void		(*RunFrame) (void);
 
 	// ServerCommand will be called when an "sv <command>" command is issued on the

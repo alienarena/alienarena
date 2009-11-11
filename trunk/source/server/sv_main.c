@@ -35,14 +35,14 @@ cvar_t	*zombietime;			// seconds to sink messages after disconnect
 cvar_t	*rcon_password;			// password for remote server commands
 
 cvar_t	*allow_download;
-cvar_t *allow_download_players;
-cvar_t *allow_download_models;
-cvar_t *allow_download_sounds;
-cvar_t *allow_download_maps;
+cvar_t	*allow_download_players;
+cvar_t	*allow_download_models;
+cvar_t	*allow_download_sounds;
+cvar_t	*allow_download_maps;
 
-cvar_t *sv_airaccelerate;
+cvar_t	*sv_airaccelerate;
 
-cvar_t *sv_joustmode;
+cvar_t	*sv_joustmode;
 
 cvar_t	*sv_noreload;			// don't reload level state when reentering
 
@@ -57,7 +57,9 @@ cvar_t	*sv_reconnect_limit;	// minimum seconds between connect messages
 cvar_t	*sv_ratelimit_status;   //new security measures
 cvar_t	*sv_iplimit;
 
-cvar_t *sv_downloadurl;
+cvar_t	*sv_downloadurl;
+
+int		sv_numbots;
 
 void Master_Shutdown (void);
 
@@ -437,7 +439,7 @@ void SVC_DirectConnect (void)
 	int			qport;
 	int			challenge;
 	int			previousclients;
-	int			botnum;
+	int			botnum, botkick;
 
 	adr = net_from;
 
@@ -585,10 +587,22 @@ void SVC_DirectConnect (void)
 	}
 
 	// find a client slot
-	cl = &svs.clients[0]; //get the bots info from the first client
+	cl = &svs.clients[0]; //get the active bots info from the first client
 	botnum = cl->edict->client->ps.botnum;
 	//still need to reserve one slot
 	newcl = NULL;
+
+	//are we using botkickthreshold?
+	botkick = Cvar_VariableValue("sv_botkickthreshold");
+
+	//prevent client slot overwrites with bots rejoining after map change
+	if(botkick) {
+		
+		if(botkick < sv_numbots)
+			botnum = botkick;
+		else
+			botnum = sv_numbots;
+	}
 
 	for (i=0,cl=svs.clients ; i<maxclients->value-botnum; i++,cl++)
 	{

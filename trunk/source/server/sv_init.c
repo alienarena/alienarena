@@ -230,6 +230,9 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 	// set serverinfo variable
 	Cvar_FullSet ("mapname", sv.name, CVAR_SERVERINFO | CVAR_NOSET);
 
+	//get number of bots for bot kicking threshold cases
+	sv_numbots = ge->ACESP_FindBotNum();
+
 	Com_Printf ("-------------------------------------\n");
 }
 
