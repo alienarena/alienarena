@@ -1696,7 +1696,7 @@ void R_DrawAliasModel (entity_t *e)
 		if ( currententity->flags & RF_SHELL_GREEN )
 		{
 			shadelight[1] = 1.0;
-			shadelight[2] = 1.0;  //make it more of a cyan color...
+			shadelight[2] = 0.6;  //make it more of a cyan color...
 		}
 		if ( currententity->flags & RF_SHELL_BLUE )
 		{
