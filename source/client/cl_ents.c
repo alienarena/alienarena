@@ -1116,8 +1116,10 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 			CL_MuzzleFlashParticle(gun.origin, gun.angles, true);
 	}	
 	else if(!(strcmp("models/weapons/v_hyperb/tris.md2", gun.model->name))) {
-		if(gun.frame > 5 && gun.frame < 7)
+		if(gun.frame > 5 && gun.frame < 7) {
 			CL_PlasmaFlashParticle(gun.origin, gun.angles, true);
+			gun.flags |= RF_SHELL_GREEN;
+		}
 	}
 
 	V_AddViewEntity (&gun);
