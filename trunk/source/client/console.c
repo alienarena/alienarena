@@ -270,6 +270,7 @@ Con_MessageMode_f
 void Con_MessageMode_f (void)
 {
 	chat_team = false;
+	chat_irc = false;
 	cls.key_dest = key_message;
 	Cbuf_AddText("chatbubble\n"); 
 	Cbuf_Execute ();
@@ -283,9 +284,23 @@ Con_MessageMode2_f
 void Con_MessageMode2_f (void)
 {
 	chat_team = true;
+	chat_irc = false;
 	cls.key_dest = key_message;
 	Cbuf_AddText("chatbubble\n"); 
 	Cbuf_Execute ();
+}
+
+/*
+================
+Con_MessageMode3_f
+================
+*/
+void Con_MessageMode3_f (void)
+{
+	chat_team = false;
+	chat_irc = true;
+	cls.key_dest = key_message;
+	//Cbuf_AddText("chatbubble\n"); 
 }
 
 /*
@@ -375,6 +390,7 @@ void Con_Init (void)
 	Cmd_AddCommand ("togglechat", Con_ToggleChat_f);
 	Cmd_AddCommand ("messagemode", Con_MessageMode_f);
 	Cmd_AddCommand ("messagemode2", Con_MessageMode2_f);
+	Cmd_AddCommand ("messagemode3", Con_MessageMode3_f);
 	Cmd_AddCommand ("clear", Con_Clear_f);
 	Cmd_AddCommand ("condump", Con_Dump_f);
 	con.initialized = true;
@@ -636,6 +652,11 @@ void Con_DrawNotify (void)
 		{
 			DrawString (charscale, v, "say_team:");
 			skip = 11;
+		}
+		else if (chat_irc)
+		{
+			DrawString (charscale, v, "say_IRC:");
+			skip = 10;
 		}
 		else
 		{

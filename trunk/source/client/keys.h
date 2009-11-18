@@ -140,6 +140,7 @@ extern	int	anykeydown;
 extern char chat_buffer[];
 extern	int chat_bufferlen;
 extern	qboolean	chat_team;
+extern	qboolean	chat_irc; //to do - replace these with chat_type
 
 void Key_Event (int key, qboolean down, unsigned time);
 void Key_Init (void);
