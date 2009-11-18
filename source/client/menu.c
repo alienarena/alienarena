@@ -3010,12 +3010,25 @@ void IRC_MenuInit( void )
 
 void IRC_MenuDraw( void )
 {
+
+	float scale;
+
+	scale = (float)(viddef.height)/600;
+	if(scale < 1)
+		scale = 1;
+
 	banneralpha += cls.frametime;
 	if (banneralpha > 1)
 		banneralpha = 1;
 
 	M_Background( "menu_back"); //draw black background first
 	M_Banner( "m_irc", banneralpha ); 
+
+	if(cls.irc_connected) {
+		M_DrawTextBox( 108*scale, 200*scale, 24, 1 );
+		M_Print( 128*scale, 206*scale,  "Connected to IRC server..." );
+	}
+
 	Menu_AdjustCursor( &s_irc_menu, 1 );
 	Menu_Draw( &s_irc_menu );
 }
