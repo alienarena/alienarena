@@ -468,7 +468,7 @@ void CL_InitIRC(void)
 	char message[IRC_SEND_BUF_SIZE];
 	char name[32];
 	int i, j;
-#ifdef __unix___
+#ifdef __unix__
 	pthread_t pth;
 #endif
 
