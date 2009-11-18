@@ -21,28 +21,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "client.h"
 #ifdef _WINDOWS
-#include <winsock.h>
-#include <process.h>
+	#include <winsock.h>
+	#include <process.h>
+	typedef SOCKET irc_socket_t;
+#else
+	typedef int irc_socket_t;
 #endif
 
 #ifdef __unix__
-#include <unistd.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/param.h>
-#include <sys/ioctl.h>
-#include <sys/uio.h>
-#include <errno.h>
-#include <pthread.h>
+	#include <unistd.h>
+	#include <sys/socket.h>
+	#include <sys/time.h>
+	#include <netinet/in.h>
+	#include <netdb.h>
+	#include <sys/param.h>
+	#include <sys/ioctl.h>
+	#include <sys/uio.h>
+	#include <errno.h>
+	#include <pthread.h>
 #endif
 
 char Server[32];
 char sMessage[1000];
 char message[200];				   
 user_t user;
-SOCKET sock;                     /* socket details */
+irc_socket_t sock;               /* socket */
 struct sockaddr_in address;      /* socket address stuff */
 struct hostent * host;           /* host stuff */
 char File_Buf[3000];			 /* file buffer */
