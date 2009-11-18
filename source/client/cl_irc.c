@@ -135,6 +135,12 @@ void handle_error(void)
        break;
 	}
 }
+//#endif
+#else
+void handle_error( void )
+{
+	Com_Printf("IRC socket connection error.\n");
+}
 #endif
 
 void sendData(char *msg)
@@ -339,7 +345,11 @@ void CL_GetIRCData(void)
 	if((len=recv(sock,File_Buf,IRC_RECV_BUF_SIZE,0))>0) 
 	{
 	    // received a ping from server...
+#ifdef _WINDOWS	    
 		if (!strnicmp(File_Buf,"PING",4)) 
+#else
+		if (!strncasecmp(File_Buf,"PING",4)) 
+#endif		
 		{
 			File_Buf[1]='O'; 
 			sendData(File_Buf);
@@ -476,8 +486,12 @@ void CL_InitIRC(void)
 		Com_Printf("...already connected to IRC\n");
 
 	Com_Printf("...Initializing IRC client\n");
-   
+
+#ifdef _WINDOWS   
 	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET )
+#else
+	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == -1 )
+#endif
 		return;	
 
 	strcpy(name, Cvar_VariableString("name")); //we should force players to set name on startup
