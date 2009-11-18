@@ -506,6 +506,7 @@ void Key_Console (int key)
 //============================================================================
 
 qboolean	chat_team;
+qboolean	chat_irc;
 char		chat_buffer[MAXCMDLINE];
 int			chat_bufferlen = 0;
 
@@ -516,6 +517,8 @@ void Key_Message (int key)
 	{
 		if (chat_team)
 			Cbuf_AddText ("say_team \"");
+		else if (chat_irc)
+			Cbuf_AddText ("irc_say \"");
 		else
 			Cbuf_AddText ("say \"");
 		Cbuf_AddText(chat_buffer);

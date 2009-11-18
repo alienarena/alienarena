@@ -53,6 +53,7 @@ int ichar;
 #define IRC_SEND_BUF_SIZE 512
 #define IRC_RECV_BUF_SIZE 1024
 
+#ifdef _WINDOWS
 void handle_error(void)
 {
     switch ( WSAGetLastError() )
@@ -131,6 +132,7 @@ void handle_error(void)
        break;
 	}
 }
+#endif
 
 void sendData(char *msg)
 {
@@ -217,7 +219,7 @@ void analizeLine(char Line[1000])
 						msgLine[j] = outputmsg[j+(80*i)];
 					msgLine[80] = 0;
 
-					Com_Printf("IRC: %s\n", msgLine); //com_printf here for test
+					Com_Printf("^1IRC: %s\n", msgLine); //com_printf here for test
 
 					printed = true;
 				}
@@ -242,7 +244,7 @@ void analizeLine(char Line[1000])
 	   Response = SkipWords(Line,3);
 	   Response.word[0][strlen(Response.word[0])-2]= 0;
 		
-	   Com_Printf("IRC: %s\n", msgLine); //com_printf here for test
+	   Com_Printf("^1IRC: %s\n", msgLine); //com_printf here for test
 
 	   printed = true;
 	}
@@ -276,7 +278,7 @@ void analizeLine(char Line[1000])
 						msgLine[j] = outputmsg[j+(100*i)];
 					msgLine[100] = 0;
 
-					Com_Printf("IRC: %s\n", msgLine); //com_printf here for test
+					Com_Printf("^1IRC: %s\n", msgLine); //com_printf here for test
 
 					printed = true;
 				}
@@ -311,7 +313,7 @@ void analizeLine(char Line[1000])
 						msgLine[j] = outputmsg[j+(100*i)];
 					msgLine[100] = 0;
 
-					Com_Printf("IRC: %s\n", msgLine); //com_printf here for test
+					Com_Printf("^1IRC: %s\n", msgLine); //com_printf here for test
 
 				}
 			}
@@ -385,23 +387,29 @@ void CL_IRCSay(void)
 		for(i = 4; i < 1024; i++)
 			tempstring[i-4] = m_sendstring[i];
 		sprintf(message, "PRIVMSG #alienarena :\001ACTION %s\001\n\r", tempstring);
+
+#ifdef _WINDOWS
 		WSASetLastError(0);
+#endif
 		sendData(message);
 		//send a junk string to clear the command
 		sendData("PRIVMSG #alienarena :\n\r");
 	}
 	else {
 		sprintf(message, "PRIVMSG #alienarena :%s\n\r", m_sendstring);
-
+#ifdef _WINDOWS
 		WSASetLastError(0);
+#endif
 		sendData(message);
 	}
 
+#ifdef _WINDOWS
 	if(WSAGetLastError()) { //there was some error in connecting
 			handle_error();
-			Com_Printf("IRC: not connected to #alienarena");
+			Com_Printf("^1IRC: not connected to #alienarena");
 	}
 	else {
+#endif
 		//update the print buffer
 		sprintf(message, "<%s> :%s", user.nick, m_sendstring);
 
@@ -414,9 +422,11 @@ void CL_IRCSay(void)
 				msgLine[j] = message[j+(110*i)];
 			msgLine[110] = 0;
 
-			Com_Printf("IRC: %s\n", msgLine);
+			Com_Printf("^1IRC: %s\n", msgLine);
 		}
+#ifdef _WINDOWS
 	}
+#endif
 }
 
 #ifdef _WINDOWS
@@ -453,18 +463,36 @@ void CL_InitIRC(void)
 {
 
 	char message[IRC_SEND_BUF_SIZE];
+	char name[32];
+	int i, j;
 #ifdef __unix___
 	pthread_t pth;
 #endif
 
+	if(cls.irc_connected)
+		Com_Printf("...already connected to IRC\n");
+
 	Com_Printf("...Initializing IRC client\n");
    
 	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET )
-		return;
+		return;	
 
-	strcpy(user.nick, "irrtest");
-	strcpy(user.ident, "irrtest");
-	strcpy(user.email, "alienrace@comcast.net");
+	strcpy(name, Cvar_VariableString("name")); //we should force players to set name on startup
+
+	//strip color chars
+	j = 0;
+	for (i = 0; i < 16; i++)
+		user.nick[i] = 0;
+		for (i = 0; i < strlen(name) && i < 32; i++) {
+			if ( name[i] == '^' ) {
+				i += 1;
+				continue;
+			}
+		user.nick[j] = name[i];
+		j++;
+	}
+
+	strcpy(user.email, "mymail@mail.com"); //set in cvar
 
 	address.sin_family=AF_INET;       // internet 
     address.sin_port = htons(6667);    
@@ -493,7 +521,7 @@ void CL_InitIRC(void)
 		return;
 	}
 
-	sprintf(message,"USER %s %s: %s %s  \n\r", user.nick , user.email , user.ident , user.ident );
+	sprintf(message,"USER %s %s: %s %s  \n\r", user.nick , user.email , user.nick , user.nick );
 	sendData(message);
 	sprintf(message,"NICK %s\n\r", user.nick);
 	sendData(message);
@@ -501,15 +529,16 @@ void CL_InitIRC(void)
 	sprintf(message,"JOIN %s\n\r", "#alienarena");
 	sendData(message);
 
-	if(WSAGetLastError()) {
 #ifdef _WINDOWS
+	if(WSAGetLastError()) {
+
 		closesocket(sock);
-#else
-		close(sock);
-#endif
 		handle_error();
 		return; 
 	}
+#endif
+
+	cls.irc_connected = true;
 
 	Com_Printf("...Connected to IRC server\n");
 
@@ -530,6 +559,9 @@ void CL_IRCShutdown(void)
 	//logout
 	sprintf(message,"QUIT\n\r");
 	sendData(message);
+
+	cls.irc_connected = false;
+
 	Com_Printf("Disconnected from chat channel...");
 
 #ifdef _WINDOWS

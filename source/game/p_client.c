@@ -1477,6 +1477,8 @@ void BodySink( edict_t *ent ) {
 	}
 	ent->nextthink = level.time + .1;
 	ent->s.origin[2] -= 1;
+	ent->s.effects |= EF_COLOR_SHELL;
+	ent->s.renderfx |= RF_SHELL_GREEN;
 }
 
 void CopyToBodyQue (edict_t *ent)

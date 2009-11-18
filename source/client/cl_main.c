@@ -128,6 +128,9 @@ cvar_t  *cl_noblood;
 //beam color for disruptor
 cvar_t  *cl_disbeamclr;
 
+//IRC
+cvar_t	*cl_IRC_connect_at_startup;
+
 client_static_t	cls;
 client_state_t	cl;
 
@@ -1611,9 +1614,14 @@ void CL_InitLocal (void)
 	cls.state = ca_disconnected;
 	cls.realtime = Sys_Milliseconds ();
 
-	CL_InitInput ();
+	CL_InitInput ();	
 
 	CL_InitHttpDownload();
+
+	cl_IRC_connect_at_startup = Cvar_Get("cl_IRC_connect_at_startup", "0", CVAR_ARCHIVE);
+
+	if(cl_IRC_connect_at_startup->value)
+		CL_InitIRC();
 
 	adr0 = Cvar_Get( "adr0", "", CVAR_ARCHIVE );
 	adr1 = Cvar_Get( "adr1", "", CVAR_ARCHIVE );
@@ -1740,6 +1748,10 @@ void CL_InitLocal (void)
 	#ifdef __unix__
 	Cmd_AddCommand ("shell", CL_Shell_f);
 	#endif
+
+	Cmd_AddCommand ("irc_connect", CL_InitIRC);
+	Cmd_AddCommand ("irc_quit", CL_IRCShutdown);
+	Cmd_AddCommand ("irc_say", CL_IRCSay);
 
 	//
 	// forward to server commands
@@ -2095,11 +2107,12 @@ void CL_Shutdown(void)
 	isdown = true;
 
 	CL_ShutdownHttpDownload();
+	CL_IRCShutdown();
 	CL_WriteConfiguration ();
 
 	S_Shutdown();
 	IN_Shutdown ();
-	VID_Shutdown();
+	VID_Shutdown();	
 
 	RS_FreeAllScripts();
 }

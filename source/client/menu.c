@@ -56,7 +56,7 @@ extern cvar_t *fov;
 static char *menu_in_sound		= "misc/menu1.wav";
 static char *menu_move_sound	= "misc/menu2.wav";
 static char *menu_out_sound		= "misc/menu3.wav";
-static char *menu_background		= "misc/menuback.wav";
+static char *menu_background	= "misc/menuback.wav";
 int svridx;
 int playeridx;
 int hover_time;
@@ -74,6 +74,7 @@ void M_Menu_Main_f (void);
 			void M_Menu_PlayerRanking_f( void );
 	void M_Menu_StartServer_f (void);
 			void M_Menu_DMOptions_f (void);
+	void M_Menu_IRC_f (void);
 	void M_Menu_Video_f (void);
 	void M_Menu_Options_f (void);
 		void M_Menu_Keys_f (void);
@@ -488,13 +489,14 @@ MAIN MENU
 
 =======================================================================
 */
-#define	MAIN_ITEMS	6
+#define	MAIN_ITEMS	7
 
 char *main_names[] =
 {
 	"m_main_game",
 	"m_main_join",
 	"m_main_host",
+	"m_main_irc",
 	"m_main_options",
 	"m_main_video",
 	"m_main_quit",
@@ -588,12 +590,14 @@ void M_Main_Draw (void)
 		i = 1;
 	else if(!strcmp(litname, "m_main_host_sel"))
 		i = 2;
-	else if(!strcmp(litname, "m_main_options_sel"))
+	else if(!strcmp(litname, "m_main_irc_sel"))
 		i = 3;
-	else if(!strcmp(litname, "m_main_video_sel"))
+	else if(!strcmp(litname, "m_main_options_sel"))
 		i = 4;
-	else if(!strcmp(litname, "m_main_quit_sel"))
+	else if(!strcmp(litname, "m_main_video_sel"))
 		i = 5;
+	else if(!strcmp(litname, "m_main_quit_sel"))
+		i = 6;
 	Draw_StretchPic( xoffset + 100*scale + (20*i*scale), (int)(ystart + m_main_cursor * 32.5*scale + 13*scale), w*scale, h*scale, litname );
 }
 
@@ -636,10 +640,12 @@ void addButton (mainmenuobject_t *thisObj, int index, int x, int y)
 	case 2:
 		thisObj->OpenMenu = M_Menu_StartServer_f;
 	case 3:
-		thisObj->OpenMenu = M_Menu_Options_f;
+		thisObj->OpenMenu = M_Menu_IRC_f;
 	case 4:
-		thisObj->OpenMenu = M_Menu_Video_f;
+		thisObj->OpenMenu = M_Menu_Options_f;
 	case 5:
+		thisObj->OpenMenu = M_Menu_Video_f;
+	case 6:
 		thisObj->OpenMenu = M_Menu_Quit_f;
 	}
 }
@@ -661,14 +667,18 @@ void openMenuFromMain (void)
 			break;
 
 		case 3:
-			M_Menu_Options_f ();
+			M_Menu_IRC_f();
 			break;
 
 		case 4:
-			M_Menu_Video_f ();
+			M_Menu_Options_f ();
 			break;
 
 		case 5:
+			M_Menu_Video_f ();
+			break;
+
+		case 6:
 			M_Menu_Quit_f ();
 			break;
 	}
@@ -2912,6 +2922,119 @@ void M_Menu_Game_f (void)
 /*
 =============================================================================
 
+IRC MENU
+
+=============================================================================
+*/
+
+static int		m_IRC_cursor;
+
+static menuframework_s	s_irc_menu;
+static menuaction_s		s_irc_title;
+static menuaction_s		s_irc_join;
+static menuaction_s		s_irc_quit;
+static menulist_s		s_irc_joinatstartup;
+
+static void JoinIRCFunc( void *data )
+{
+	CL_InitIRC();
+}
+
+static void QuitIRCFunc( void *data )
+{
+	CL_IRCShutdown();
+}
+
+static void AutoIRCFunc( void *s)
+{
+	Cvar_SetValue("cl_IRC_connect_at_startup", s_irc_joinatstartup.curvalue);
+}
+
+void IRC_MenuInit( void )
+{	
+	float scale;
+
+	static const char *yes_no_names[] =
+	{
+		"no", "yes", 0
+	};
+
+	if(!cl_IRC_connect_at_startup)
+		cl_IRC_connect_at_startup = Cvar_Get("cl_IRC_connect_at_startup", "0", CVAR_ARCHIVE);
+
+	scale = (float)(viddef.height)/600;
+	if(scale < 1)
+		scale = 1;
+
+	banneralpha = 0.1;
+
+	s_irc_menu.x = viddef.width * 0.50;
+	s_irc_menu.nitems = 0;
+
+	s_irc_title.generic.type	= MTYPE_COLORTXT;
+	s_irc_title.generic.x		= -118*scale;
+	s_irc_title.generic.y		= 10*scale;
+	s_irc_title.generic.name	= "^3IRC ^1Chat ^1Utilities";
+
+	s_irc_join.generic.type	= MTYPE_ACTION;
+	s_irc_join.generic.x		= 64*scale;
+	s_irc_join.generic.y		= 50*scale;
+	s_irc_join.generic.cursor_offset = -16*scale;
+	s_irc_join.generic.name	= "Join IRC Chat";
+	s_irc_join.generic.callback = JoinIRCFunc;
+
+	s_irc_quit.generic.type	= MTYPE_ACTION;
+	s_irc_quit.generic.x		= 64*scale;
+	s_irc_quit.generic.y		= 60*scale;
+	s_irc_quit.generic.cursor_offset = -16*scale;
+	s_irc_quit.generic.name	= "Quit IRC Chat";
+	s_irc_quit.generic.callback = QuitIRCFunc;
+
+	s_irc_joinatstartup.generic.type	= MTYPE_SPINCONTROL;
+	s_irc_joinatstartup.generic.x		= 64*scale;
+	s_irc_joinatstartup.generic.y		= 80*scale;
+	s_irc_joinatstartup.generic.cursor_offset = -16*scale;
+	s_irc_joinatstartup.generic.name	= "Autojoin At Startup";
+	s_irc_joinatstartup.itemnames = yes_no_names;
+	s_irc_joinatstartup.curvalue = cl_IRC_connect_at_startup->value;
+	s_irc_joinatstartup.generic.callback = AutoIRCFunc;
+
+	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_title );
+	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_join );
+	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_quit );
+	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_joinatstartup );
+
+	Menu_Center( &s_irc_menu );
+}
+
+
+void IRC_MenuDraw( void )
+{
+	banneralpha += cls.frametime;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
+	M_Background( "menu_back"); //draw black background first
+	M_Banner( "m_irc", banneralpha ); 
+	Menu_AdjustCursor( &s_irc_menu, 1 );
+	Menu_Draw( &s_irc_menu );
+}
+
+const char *IRC_MenuKey( int key )
+{
+	return Default_MenuKey( &s_irc_menu, key );
+}
+
+void M_Menu_IRC_f (void)
+{
+	IRC_MenuInit();
+	M_PushMenu( IRC_MenuDraw, IRC_MenuKey );
+	m_IRC_cursor = 1;
+}
+
+/*
+=============================================================================
+
 JOIN SERVER MENU
 
 =============================================================================
@@ -2952,6 +3075,8 @@ int GetColorTokens( char *string)
 	for(i=0; i<32; i++) {
 		if(string[i] == '^')
 			x++;
+		if(string[i] == 0)
+			break;
 	}
 
 	return x;

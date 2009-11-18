@@ -452,12 +452,8 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 // texture coordinates come from the draw list
                 index_xyz = order[2];
 
-                if(currententity->flags & RF_WEAPONMODEL)
-                    //change scale
-                    shellscale = .1;
-                else
-                    shellscale = 1;
-
+                shellscale = .1;
+                
                 if(lerped) {
                     VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * POWERSUIT_SCALE * shellscale;;
                     VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * POWERSUIT_SCALE * shellscale;;
@@ -986,11 +982,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			{					
 				index_xyz = tris[i].index_xyz[j];
  
-				if(currententity->flags & RF_WEAPONMODEL)
-					//change scale
-					shellscale = .1;
-				else
-					shellscale = 1;
+				
+				shellscale = .1;
 					
 				if(lerped) {
 					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * POWERSUIT_SCALE * shellscale;;

@@ -79,6 +79,10 @@ SOURCE=.\client\cl_inv.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\client\cl_irc.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\client\cl_main.c
 # End Source File
 # Begin Source File

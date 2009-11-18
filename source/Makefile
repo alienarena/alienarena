@@ -52,7 +52,7 @@ else
 	_LIB := lib
 endif
 
-BASE_CFLAGS=$(CFLAGS) -Dstricmp=strcasecmp -D_stricmp=strcasecmp -I$(X11BASE)/include -fno-strict-aliasing -fmerge-constants -DHAVE_CURL
+BASE_CFLAGS=$(CFLAGS) -Dstricmp=strcasecmp -D_stricmp=strcasecmp -I$(X11BASE)/include -fno-strict-aliasing -fmerge-constants -DHAVE_CURL -lpthread
 
 # DATADIR / LIBDIR support.
 
@@ -194,6 +194,7 @@ CODERED_OBJS = \
 	$(BUILDDIR)/client/cl_fx.o \
 	$(BUILDDIR)/client/cl_input.o \
 	$(BUILDDIR)/client/cl_inv.o \
+	$(BUILDDIR)/client/cl_irc.o \
 	$(BUILDDIR)/client/cl_main.o \
 	$(BUILDDIR)/client/cl_parse.o \
 	$(BUILDDIR)/client/cl_pred.o \
@@ -279,6 +280,9 @@ $(BUILDDIR)/client/cl_input.o :   $(CLIENT_DIR)/cl_input.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_inv.o :     $(CLIENT_DIR)/cl_inv.c
+	$(DO_CC)
+	
+$(BUILDDIR)/client/cl_irc.o :     $(CLIENT_DIR)/cl_irc.c
 	$(DO_CC)
 
 $(BUILDDIR)/client/cl_main.o :    $(CLIENT_DIR)/cl_main.c

@@ -250,7 +250,6 @@ void Cbuf_Execute (void)
 	}
 }
 
-
 /*
 ===============
 Cbuf_AddEarlyCommands
