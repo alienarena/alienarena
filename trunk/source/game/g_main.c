@@ -698,41 +698,25 @@ void CheckDMRules (void)
 	if(!tca->value && !ctf->value && !cp->value && !((int)(dmflags->value) & DF_SKINTEAMS)) {
 		if(level.time <= warmuptime->value) {
 				if((warmuptime->value - level.time ) == 3) {
-					for (i=0 ; i<maxclients->value ; i++)
-					{
-						cl_ent = g_edicts + 1 + i;
-						if (!cl_ent->inuse || cl_ent->is_bot)
-							continue;
+					cl_ent = g_edicts + 1; //need only one for broadcast sound
+					if (cl_ent->inuse && !cl_ent->is_bot)
 						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/three.wav"), 1, ATTN_NONE, 0);
-					}
 				}
 				if((warmuptime->value - level.time ) == 2) {
-					for (i=0 ; i<maxclients->value ; i++)
-					{
-						cl_ent = g_edicts + 1 + i;
-						if (!cl_ent->inuse || cl_ent->is_bot)
-							continue;
+					cl_ent = g_edicts + 1;
+					if (cl_ent->inuse && !cl_ent->is_bot)
 						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/two.wav"), 1, ATTN_NONE, 0);
-					}
 				}
 				if((warmuptime->value - level.time ) == 1) {
-					for (i=0 ; i<maxclients->value ; i++)
-					{
-						cl_ent = g_edicts + 1 + i;
-						if (!cl_ent->inuse || cl_ent->is_bot)
-							continue;
+					cl_ent = g_edicts + 1;
+					if (cl_ent->inuse && !cl_ent->is_bot)
 						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/one.wav"), 1, ATTN_NONE, 0);
-					}
 				}
 				if(level.time == warmuptime->value) {
-					for (i=0 ; i<maxclients->value ; i++)
-					{
-					cl_ent = g_edicts + 1 + i;
-					if (!cl_ent->inuse || cl_ent->is_bot)
-						continue;
+					cl_ent = g_edicts + 1;
+					if (cl_ent->inuse && !cl_ent->is_bot)
 						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/fight.wav"), 1, ATTN_NONE, 0);
 						safe_centerprintf(cl_ent, "FIGHT!\n");
-					}
 					ResetLevel();
 				}
 				else if(level.time == ceil(level.time)){ //do only on the whole numer to avoid overflowing
@@ -836,7 +820,8 @@ void CheckDMRules (void)
 								cl_ent = g_edicts + 1 + i;
 								if (!cl_ent->inuse || cl_ent->is_bot)
 									continue;
-								gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/3frags.wav"), 1, ATTN_NONE, 0);
+								if(i == 0)
+									gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/3frags.wav"), 1, ATTN_NONE, 0);
 								safe_centerprintf(cl_ent, "3 frags remain!\n");
 							}
 							print3 = true;
@@ -849,7 +834,8 @@ void CheckDMRules (void)
 								cl_ent = g_edicts + 1 + i;
 								if (!cl_ent->inuse || cl_ent->is_bot)
 									continue;
-								gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/2frags.wav"), 1, ATTN_NONE, 0);
+								if(i == 0)
+									gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/2frags.wav"), 1, ATTN_NONE, 0);
 								safe_centerprintf(cl_ent, "2 frags remain!\n");
 							}
 							print2 = true;
@@ -862,7 +848,8 @@ void CheckDMRules (void)
 								cl_ent = g_edicts + 1 + i;
 								if (!cl_ent->inuse || cl_ent->is_bot)
 									continue;
-								gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/1frags.wav"), 1, ATTN_NONE, 0);
+								if(i == 0)
+									gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/1frags.wav"), 1, ATTN_NONE, 0);
 								safe_centerprintf(cl_ent, "1 frag remains!\n");
 							}
 							print1 = true;
