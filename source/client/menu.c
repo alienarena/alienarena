@@ -64,10 +64,11 @@ float mappicalpha;
 float banneralpha;
 float mainalpha;
 int montagepic = 1;
+int pNameUnique;
 
 void M_Menu_Main_f (void);
+	void M_Menu_PlayerConfig_f (void);
 	void M_Menu_Game_f (void);
-		void M_Menu_PlayerConfig_f (void);
 		void M_Menu_Credits_f( void );
 	void M_Menu_JoinServer_f (void);
 			void M_Menu_AddressBook_f( void );
@@ -463,7 +464,6 @@ void M_DrawTextBox (int x, int y, int width, int lines)
 		for (n = 0; n < lines; n++)
 		{
 			cy += charscale;
-			M_DrawCharacter (cx, cy, 5);
 		}
 		M_DrawCharacter (cx, cy+charscale, 8);
 		width -= 1;
@@ -489,10 +489,11 @@ MAIN MENU
 
 =======================================================================
 */
-#define	MAIN_ITEMS	7
+#define	MAIN_ITEMS	8
 
 char *main_names[] =
 {
+	"m_main_player",
 	"m_main_game",
 	"m_main_join",
 	"m_main_host",
@@ -584,20 +585,22 @@ void M_Main_Draw (void)
 	strcat( litname, "_sel" );
 	Draw_GetPicSize( &w, &h, litname );
 	//yuk
-	if(!strcmp(litname, "m_main_game_sel"))
+	if(!strcmp(litname, "m_main_player_sel"))
 		i = 0;
-	else if(!strcmp(litname, "m_main_join_sel"))
+	if(!strcmp(litname, "m_main_game_sel"))
 		i = 1;
-	else if(!strcmp(litname, "m_main_host_sel"))
+	else if(!strcmp(litname, "m_main_join_sel"))
 		i = 2;
-	else if(!strcmp(litname, "m_main_irc_sel"))
+	else if(!strcmp(litname, "m_main_host_sel"))
 		i = 3;
-	else if(!strcmp(litname, "m_main_options_sel"))
+	else if(!strcmp(litname, "m_main_irc_sel"))
 		i = 4;
-	else if(!strcmp(litname, "m_main_video_sel"))
+	else if(!strcmp(litname, "m_main_options_sel"))
 		i = 5;
-	else if(!strcmp(litname, "m_main_quit_sel"))
+	else if(!strcmp(litname, "m_main_video_sel"))
 		i = 6;
+	else if(!strcmp(litname, "m_main_quit_sel"))
+		i = 7;
 	Draw_StretchPic( xoffset + 100*scale + (20*i*scale), (int)(ystart + m_main_cursor * 32.5*scale + 13*scale), w*scale, h*scale, litname );
 }
 
@@ -634,18 +637,20 @@ void addButton (mainmenuobject_t *thisObj, int index, int x, int y)
 	switch (index)
 	{
 	case 0:
-		thisObj->OpenMenu = M_Menu_Game_f;
+		thisObj->OpenMenu = M_Menu_PlayerConfig_f;
 	case 1:
-		thisObj->OpenMenu = M_Menu_JoinServer_f;
+		thisObj->OpenMenu = M_Menu_Game_f;
 	case 2:
-		thisObj->OpenMenu = M_Menu_StartServer_f;
+		thisObj->OpenMenu = M_Menu_JoinServer_f;
 	case 3:
-		thisObj->OpenMenu = M_Menu_IRC_f;
+		thisObj->OpenMenu = M_Menu_StartServer_f;
 	case 4:
-		thisObj->OpenMenu = M_Menu_Options_f;
+		thisObj->OpenMenu = M_Menu_IRC_f;
 	case 5:
-		thisObj->OpenMenu = M_Menu_Video_f;
+		thisObj->OpenMenu = M_Menu_Options_f;
 	case 6:
+		thisObj->OpenMenu = M_Menu_Video_f;
+	case 7:
 		thisObj->OpenMenu = M_Menu_Quit_f;
 	}
 }
@@ -655,30 +660,33 @@ void openMenuFromMain (void)
 	switch (m_main_cursor)
 	{
 		case 0:
+			M_Menu_PlayerConfig_f();
+			break;
+		case 1:
 			M_Menu_Game_f ();
 			break;
 
-		case 1:
+		case 2:
 			M_Menu_JoinServer_f();
 			break;
 
-		case 2:
+		case 3:
 			M_Menu_StartServer_f();
 			break;
 
-		case 3:
+		case 4:
 			M_Menu_IRC_f();
 			break;
 
-		case 4:
+		case 5:
 			M_Menu_Options_f ();
 			break;
 
-		case 5:
+		case 6:
 			M_Menu_Video_f ();
 			break;
 
-		case 6:
+		case 7:
 			M_Menu_Quit_f ();
 			break;
 	}
@@ -787,26 +795,33 @@ const char *M_Main_Key (int key)
 		switch (m_main_cursor)
 		{
 		case 0:
+			M_Menu_PlayerConfig_f();
+			break;
+		case 1:
 			M_Menu_Game_f ();
 			break;
 
-		case 1:
+		case 2:
 			M_Menu_JoinServer_f();
 			break;
 
-		case 2:
+		case 3:
 			M_Menu_StartServer_f();
 			break;
 
-		case 3:
-			M_Menu_Options_f ();
-			break;
-
 		case 4:
-			M_Menu_Video_f ();
+			M_Menu_IRC_f();
 			break;
 
 		case 5:
+			M_Menu_Options_f ();
+			break;
+
+		case 6:
+			M_Menu_Video_f ();
+			break;
+
+		case 7:
 			M_Menu_Quit_f ();
 			break;
 		}
@@ -2937,7 +2952,8 @@ static menulist_s		s_irc_joinatstartup;
 
 static void JoinIRCFunc( void *data )
 {
-	CL_InitIRC();
+	if(pNameUnique)
+		CL_InitIRC();
 }
 
 static void QuitIRCFunc( void *data )
@@ -2953,11 +2969,17 @@ static void AutoIRCFunc( void *s)
 void IRC_MenuInit( void )
 {	
 	float scale;
+	extern cvar_t *name;
 
 	static const char *yes_no_names[] =
 	{
 		"no", "yes", 0
 	};
+
+	if(!strcmp(name->string, "Player"))
+		pNameUnique = false;
+	else
+		pNameUnique = true;
 
 	if(!cl_IRC_connect_at_startup)
 		cl_IRC_connect_at_startup = Cvar_Get("cl_IRC_connect_at_startup", "0", CVAR_ARCHIVE);
@@ -3024,7 +3046,13 @@ void IRC_MenuDraw( void )
 	M_Background( "menu_back"); //draw black background first
 	M_Banner( "m_irc", banneralpha ); 
 
-	if(cls.irc_connected) {
+	//warn user that they cannot join until changing default player name
+	if(!pNameUnique) {
+		M_DrawTextBox( 92*scale, 200*scale, 28, 2 );
+		M_Print( 118*scale, 206*scale,  "You must create your player" );
+		M_Print( 118*scale, 216*scale,  "name before joining a server!" );
+	}
+	else if(cls.irc_connected) {
 		M_DrawTextBox( 108*scale, 200*scale, 24, 1 );
 		M_Print( 128*scale, 206*scale,  "Connected to IRC server..." );
 	}
@@ -3381,6 +3409,9 @@ void JoinServerFunc( void *self )
 		return;
 	}
 
+	if(!pNameUnique)
+		return;
+
 	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[index+svridx].local_server_netadr));
 	Cbuf_AddText (buffer);
 	M_ForceMenuOff ();
@@ -3460,6 +3491,11 @@ void JoinServer_MenuInit( void )
 	strcpy(thisPlayer.playername, name->string);
 	thisPlayer.totalfrags = thisPlayer.totaltime = thisPlayer.ranking = 0;
 	thisPlayer = getPlayerRanking ( thisPlayer );
+
+	if(!strcmp(name->string, "Player"))
+		pNameUnique = false;
+	else
+		pNameUnique = true;
 
 	s_joinserver_menu.x = viddef.width * 0.50 - 120*scale;
 	offset = viddef.height/2 - 326*scale;
@@ -3593,6 +3629,13 @@ void JoinServer_MenuDraw(void)
 	M_Background( "menu_back" ); //draw background first
 	M_Banner( "m_joinserver", banneralpha );
 
+	//warn user that they cannot join until changing default player name
+	if(!pNameUnique) {
+		M_DrawTextBox( 68*scale, -50*scale, 28, 2 );
+		M_Print( 93*scale, -46*scale,  "You must create your player" );
+		M_Print( 93*scale, -36*scale,  "name before joining a server!" );
+	}
+
 	offset = viddef.height/2 - 326*scale;
 	for ( i = 0; i < 16; i++ )
 	{
@@ -3602,7 +3645,10 @@ void JoinServer_MenuDraw(void)
 		s_joinserver_server_actions[i].generic.y		= 90*scale + i*10*scale+offset;
 		s_joinserver_server_actions[i].generic.cursor_offset = -16*scale;
 		s_joinserver_server_actions[i].generic.callback = JoinServerFunc;
-		s_joinserver_server_actions[i].generic.statusbar = "press ENTER or DBL CLICK to connect";
+		if(pNameUnique)
+			s_joinserver_server_actions[i].generic.statusbar = "press ENTER or DBL CLICK to connect";
+		else
+			s_joinserver_server_actions[i].generic.statusbar = "you must change your player name from the default before connecting!";
 	}
 
 	//draw the server info here
