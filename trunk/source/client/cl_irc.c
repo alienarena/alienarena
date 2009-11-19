@@ -496,6 +496,11 @@ void CL_InitIRC(void)
 
 	strcpy(name, Cvar_VariableString("name")); //we should force players to set name on startup
 
+	if(!strcmp(name, "Player")) {
+		Com_Printf("...IRC rejected due to unset player name\n");
+		return;
+	}
+
 	//strip color chars
 	j = 0;
 	for (i = 0; i < 16; i++)
