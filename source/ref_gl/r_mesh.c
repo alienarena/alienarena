@@ -1789,8 +1789,10 @@ void R_DrawAliasModel (entity_t *e)
 		if ( currententity->flags & RF_SHELL_BLUE )
 		{
 			shadelight[2] = 1.0;
+			shadelight[1] = 0.01;
 			shadelight[0] = 0.6;
 		}
+
 	}
 	else if (currententity->flags & RF_FULLBRIGHT)
 	{
