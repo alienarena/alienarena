@@ -314,6 +314,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\client\cl_irc.c"
+				>
+			</File>
+			<File
 				RelativePath="client\cl_main.c"
 				>
 				<FileConfiguration

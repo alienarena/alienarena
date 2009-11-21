@@ -1017,6 +1017,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, r_shellnormal->texnum);
 			glUniform1iARB( g_location_normTex, 0);
+
+			GL_SelectTexture( GL_TEXTURE2);
+			qglBindTexture (GL_TEXTURE_2D, r_shelltexture->texnum);
+			glUniform1iARB( g_location_fxTex, 2);
 				
 			GL_SelectTexture( GL_TEXTURE0);
 
