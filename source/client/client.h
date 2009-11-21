@@ -589,6 +589,11 @@ void CL_ParseClientinfo (int player);
 void CL_Download_f (void);
 
 //
+// cl_scrn.c
+//
+void SCR_IRCPrintf (char *fmt, ...);
+
+//
 // cl_stats.c
 //
 

@@ -228,7 +228,7 @@ void analizeLine(char Line[1000])
 						msgLine[j] = outputmsg[j+(80*i)];
 					msgLine[80] = 0;
 
-					Com_Printf("^1IRC: %s\n", msgLine); //com_printf here for test
+					SCR_IRCPrintf("^1IRC: %s\n", msgLine); //com_printf here for test
 
 					printed = true;
 				}
@@ -253,7 +253,7 @@ void analizeLine(char Line[1000])
 	   Response = SkipWords(Line,3);
 	   Response.word[0][strlen(Response.word[0])-2]= 0;
 		
-	   Com_Printf("^1IRC: %s\n", msgLine); //com_printf here for test
+	   SCR_IRCPrintf("^1IRC: %s\n", msgLine); //com_printf here for test
 
 	   printed = true;
 	}
@@ -287,7 +287,7 @@ void analizeLine(char Line[1000])
 						msgLine[j] = outputmsg[j+(100*i)];
 					msgLine[100] = 0;
 
-					Com_Printf("^1IRC: %s\n", msgLine); //com_printf here for test
+					SCR_IRCPrintf("^1IRC: %s\n", msgLine); //com_printf here for test
 
 					printed = true;
 				}
@@ -322,7 +322,7 @@ void analizeLine(char Line[1000])
 						msgLine[j] = outputmsg[j+(100*i)];
 					msgLine[100] = 0;
 
-					Com_Printf("^1IRC: %s\n", msgLine); //com_printf here for test
+					SCR_IRCPrintf("^1IRC: %s\n", msgLine); 
 
 				}
 			}
@@ -435,7 +435,7 @@ void CL_IRCSay(void)
 				msgLine[j] = message[j+(110*i)];
 			msgLine[110] = 0;
 
-			Com_Printf("^1IRC: %s\n", msgLine);
+			SCR_IRCPrintf("^1IRC: %s\n", msgLine);
 		}
 #ifdef _WINDOWS
 	}
