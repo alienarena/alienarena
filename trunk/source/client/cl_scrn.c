@@ -279,6 +279,129 @@ void SCR_CheckDrawCenterString (void)
 	SCR_DrawCenterString ();
 }
 
+/*
+===============================================================================
+
+IRC PRINTING
+
+  we'll have 5 lines stored.
+  once full, start bumping lines, as in copying line 1 into line 0, and so forth
+
+===============================================================================
+*/
+
+char		scr_IRCstring[5][1024];
+float		scr_IRCtime_start;	// for slow victory printing
+float		scr_IRCtime_off;
+int			scr_IRC_lines = -1;
+
+/*
+==============
+SCR_IRCPrint
+
+Called for IRC messages
+==============
+*/
+
+void IRC_BumpMsg(void)
+{
+	int i;
+
+	for(i = 0; i < scr_IRC_lines; i++)		
+		strcpy(scr_IRCstring[i], scr_IRCstring[i+1]);
+}
+
+void SCR_IRCPrintf (char *fmt, ...)	
+{
+	va_list		argptr;
+	char		msg[1024];
+
+	va_start (argptr,fmt);
+	vsnprintf(msg, sizeof(msg), fmt, argptr);
+	va_end (argptr);
+
+	scr_IRCtime_off = 15;
+	scr_IRCtime_start = cl.time;
+
+	// count the number of lines
+	if(scr_IRC_lines < 4)
+		scr_IRC_lines += 1;
+	else
+		IRC_BumpMsg();
+
+	strncpy (scr_IRCstring[scr_IRC_lines], msg, sizeof(scr_IRCstring[scr_IRC_lines])-1);
+}
+
+extern vec4_t	Color_Table[8];
+
+void SCR_DrawColorString ( int x, int y, const char *str )
+{
+	int		num;
+	vec4_t	scolor;
+	int	charscale;
+
+	charscale = (float)(viddef.height)*8/600;
+	if(charscale < 8)
+		charscale = 8;
+
+	scolor[0] = 0; 
+	scolor[1] = 1;
+	scolor[2] = 0;
+	scolor[3] = 1;
+
+	while (*str) {
+		if ( Q_IsColorString( str ) ) {
+			VectorCopy ( Color_Table[ColorIndex(str[1])], scolor );
+			str += 2;
+			continue;
+		}
+		
+		Draw_ScaledColorChar (x, y, *str, scolor, charscale); //this is only ever used for names.
+		
+		num = *str++;
+		num &= 255;
+			
+		if ( (num&127) == 32 ) { //spaces reset colors
+			scolor[0] = 0;
+			scolor[1] = 1;
+			scolor[2] = 0;
+			scolor[3] = 1;
+		}
+
+		x += charscale;
+	}
+}
+void SCR_DrawIRCString (int lineNum)
+{
+	int		x, y;
+	int		charscale;
+
+	charscale = (float)(viddef.height)*8/600;
+	if(charscale < 8)
+		charscale = 8;
+
+	y = charscale*5 + lineNum*charscale;
+	x = 0;
+
+	SCR_AddDirtyPoint (x, y);
+	SCR_DrawColorString (x, y, scr_IRCstring[lineNum]);
+	SCR_AddDirtyPoint (x, y+charscale);
+
+}
+
+void SCR_CheckDrawIRCString (void)
+{
+	int i;
+
+	scr_IRCtime_off -= cls.frametime;
+
+	if (scr_IRCtime_off <= 0)
+		return;
+
+	for(i = 0; i <= scr_IRC_lines; i++)
+		SCR_DrawIRCString (i);
+}
+
 //=============================================================================
 
 /*
@@ -1790,6 +1913,7 @@ void SCR_UpdateScreen (void)
 
 			SCR_DrawNet ();
 			SCR_CheckDrawCenterString ();
+			SCR_CheckDrawIRCString();
 
 			if (scr_timegraph->value)
 				SCR_DebugGraph (cls.frametime*300, 0);
