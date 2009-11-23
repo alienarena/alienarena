@@ -5682,7 +5682,7 @@ void PlayerRanking_MenuInit( void )
 	s_playerranking_name.generic.type	= MTYPE_COLORTXT;
 	s_playerranking_name.generic.name	= playername;
 	s_playerranking_name.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_playerranking_name.generic.x		= -8*offset*scale; 
+	s_playerranking_name.generic.x		= -16*offset*scale+16*scale; 
 	s_playerranking_name.generic.y		= 20*scale;
 
 	s_playerranking_rank.generic.type	= MTYPE_COLORTXT;
