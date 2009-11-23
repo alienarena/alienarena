@@ -976,6 +976,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 		VArray = &VArrayVerts[0];
 
 		if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
+			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+			qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+		}
+		else
+			R_InitVArrays (VERT_COLOURED_TEXTURED);
+
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
 			
 			vec3_t lightVec, lightVal;
 
@@ -1100,13 +1107,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				va++;
 			} 				
 		}
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
-			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-			qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-		}
-		else
-			R_InitVArrays (VERT_COLOURED_TEXTURED);
-
+		
 		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
 
 				if(qglLockArraysEXT)						
