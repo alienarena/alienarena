@@ -1683,11 +1683,11 @@ void R_SetHighest( void )
 	Com_Printf("...autodetected HIGHEST game setting\n");
 }
 
-//Note - we need to get a linux version of this, as well as being able to check processor numbers
+#ifdef _WINDOWS
 double CPUSpeed()
 {    
  
-#ifdef _WINDOWS
+
 	DWORD BufSize = _MAX_PATH;    
 	DWORD dwMHz = _MAX_PATH;    
 	HKEY hKey;    // open the key where the proc speed is hidden:    
@@ -1704,8 +1704,9 @@ double CPUSpeed()
 	// query the key:    
 	RegQueryValueEx(hKey, "~MHz", NULL, NULL, (LPBYTE) &dwMHz, &BufSize);   
 	return (double)dwMHz;
-#endif
+
 }
+#endif
 
 /*
 ===============
@@ -2440,9 +2441,9 @@ int R_Init( void *hinstance, void *hWnd )
 	if(!r_firstrun->value) {
 
 		double CPUTotalSpeed = 4000.0; //default to this
-		
 		int OGLVer = atoi(&gl_config.version_string[0]);
 		//int OGLSubVer = atoi(&gl_config.version_string[2]);
+
 #ifdef _WINDOWS		
 		SYSTEM_INFO sysInfo;        
 		GetSystemInfo(&sysInfo);        
@@ -2450,6 +2451,25 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf("...CPU: %4.2f Cores: %d\n", CPUSpeed(), sysInfo.dwNumberOfProcessors);
 
 		CPUTotalSpeed = sysInfo.dwNumberOfProcessors * CPUSpeed();
+
+#endif
+#ifdef NEVER //needs testing on Linux
+		FILE	*fp;
+        char	res[128];
+		int		cores;
+
+        fp = popen("/bin/cat /proc/cpuinfo |grep -c '^processor'","r");
+        fread(res, 1, sizeof(res)-1, fp);
+        fclose(fp);
+		cores = atoi(res[0]);
+
+		fp = popen("/bin/cat /proc/cpuinfo |grep -c '^cpu MHz'","r");
+        fread(res, 1, sizeof(res)-1, fp); //not sure if this line is correct
+        fclose(fp);
+		CPUTotalSpeed = cores * atof(res);
+
+		Com_Printf("...CPU: %4.2f Cores: %d\n", atof(res), cores);
+
 #endif
 		if(OGLVer < 2) { //weak GPU, set low
 			R_SetLow();
