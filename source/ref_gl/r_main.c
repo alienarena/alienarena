@@ -1683,6 +1683,30 @@ void R_SetHighest( void )
 	Com_Printf("...autodetected HIGHEST game setting\n");
 }
 
+//Note - we need to get a linux version of this, as well as being able to check processor numbers
+double CPUSpeed()
+{    
+ 
+#ifdef _WINDOWS
+	DWORD BufSize = _MAX_PATH;    
+	DWORD dwMHz = _MAX_PATH;    
+	HKEY hKey;    // open the key where the proc speed is hidden:    
+	
+	long lError = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+		"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+		0,
+		KEY_READ,
+		&hKey);    
+	
+	if(lError != ERROR_SUCCESS) 
+		return 0;      
+
+	// query the key:    
+	RegQueryValueEx(hKey, "~MHz", NULL, NULL, (LPBYTE) &dwMHz, &BufSize);   
+	return (double)dwMHz;
+#endif
+}
+
 /*
 ===============
 R_Init
@@ -1704,8 +1728,6 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		r_turbsin[j] *= 0.5;
 	}
-
-	Com_Printf ("ref_gl version: "REF_VERSION"\n");
 
 	Draw_GetPalette ();
 
@@ -2415,18 +2437,35 @@ int R_Init( void *hinstance, void *hWnd )
 
 	//if running for the very first time, automatically set video settings
 	//disabled for now
-	if(0) {
+	if(!r_firstrun->value) {
+
+		double CPUTotalSpeed = 4000.0; //default to this
 		
 		int OGLVer = atoi(&gl_config.version_string[0]);
 		//int OGLSubVer = atoi(&gl_config.version_string[2]);
+#ifdef _WINDOWS		
+		SYSTEM_INFO sysInfo;        
+		GetSystemInfo(&sysInfo);        
 
-		if(OGLVer < 2) {
+		Com_Printf("...CPU: %4.2f Cores: %d\n", CPUSpeed(), sysInfo.dwNumberOfProcessors);
+
+		CPUTotalSpeed = sysInfo.dwNumberOfProcessors * CPUSpeed();
+#endif
+		if(OGLVer < 2) { //weak GPU, set low
 			R_SetLow();
 		}
-		else if(OGLVer == 3)
-			R_SetHighest();
-		else
-			R_SetHigh();
+		else if(OGLVer == 3) { //GPU is modern, check CPU
+			if(CPUTotalSpeed > 3800.0)
+				R_SetHighest();
+			else
+				R_SetMedium();
+		}
+		else {
+			if(CPUTotalSpeed > 3800.0)
+				R_SetHigh();
+			else
+				R_SetMedium();
+		}
 
 		//never run again
 		Cvar_SetValue("r_firstrun", 1);
