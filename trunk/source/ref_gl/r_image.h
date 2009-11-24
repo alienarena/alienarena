@@ -87,7 +87,6 @@ extern image_t		*r_leaderfieldtexture;
 extern image_t		*r_deathfieldtexture;
 extern image_t		*r_deathfieldtexture2;
 extern image_t      *r_shelltexture; 
-extern image_t		*r_shellnormal;    
 extern image_t		*r_hittexture;
 extern image_t		*r_bubbletexture;
 extern image_t		*r_reflecttexture;
