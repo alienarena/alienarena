@@ -68,8 +68,6 @@ typedef struct
 	char name[MAX_QPATH];
 } beam_t;
 
-#define POWERSUIT_SCALE		4.0F
-
 #define SHELL_RED_COLOR		0xF2
 #define SHELL_GREEN_COLOR	0xD0
 #define SHELL_BLUE_COLOR	0xF3
