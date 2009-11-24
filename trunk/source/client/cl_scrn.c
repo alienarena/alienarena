@@ -1555,11 +1555,9 @@ void SCR_ExecuteLayoutString (char *s)
 			//draw the zoom scope pic if we are using the zoom alt-fire of disruptor
 			if (cl.frame.playerstate.stats[STAT_ZOOMED])
 			{
-				int		w, h;
 				char zoompic[32];
 				sprintf(zoompic, "zoomscope%i", cl.frame.playerstate.stats[STAT_ZOOMED]);
-				Draw_GetPicSize (&w, &h, zoompic);
-				Draw_ScaledPic ((viddef.width-w*scale)/2, (viddef.height-h*scale)/2, scale, zoompic);
+				Draw_StretchPic (0, 0, viddef.width, viddef.height, zoompic);
 			}
 
 			continue;
