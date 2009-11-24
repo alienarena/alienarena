@@ -452,12 +452,12 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 // texture coordinates come from the draw list
                 index_xyz = order[2];
 
-                shellscale = .1;
+                shellscale = .4;
                 
                 if(lerped) {
-                    VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * POWERSUIT_SCALE * shellscale;;
-                    VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * POWERSUIT_SCALE * shellscale;;
-                    VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * POWERSUIT_SCALE * shellscale;;
+                    VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * shellscale;
+                    VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * shellscale;
+                    VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * shellscale;
 
                     VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
                     VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
@@ -959,9 +959,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 		}
 
 		if(currententity->flags & RF_VIEWERMODEL) { //lerp the vertices for self shadows, and leave
-			lerp = s_lerped[0];
-			GL_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
-			return;
+			if(gl_shadows->value && gl_shadows->value < 3) {
+				lerp = s_lerped[0];
+				GL_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
+				return;
+			}
+			else
+				return;
 		}
 	}
 
@@ -971,16 +975,15 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 	{
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
 		
-		// get the vertex count and primitive type
-		va=0;
-		VArray = &VArrayVerts[0];
-
 		if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
 			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 			qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 		}
 		else
 			R_InitVArrays (VERT_COLOURED_TEXTURED);
+
+		va=0;
+		VArray = &VArrayVerts[0];		
 
 		if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
 			
@@ -1052,12 +1055,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				index_xyz = tris[i].index_xyz[j];
  
 				
-				shellscale = .1;
+				shellscale = .4;
 					
 				if(lerped) {
-					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * POWERSUIT_SCALE * shellscale;;
-					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * POWERSUIT_SCALE * shellscale;;
-					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * POWERSUIT_SCALE * shellscale;;
+					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * shellscale;
+					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * shellscale;
+					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * shellscale;
 
 					VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
 					VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
@@ -1790,7 +1793,6 @@ void R_DrawAliasModel (entity_t *e)
 		if ( currententity->flags & RF_SHELL_BLUE )
 		{
 			shadelight[2] = 1.0;
-			shadelight[1] = 0.01;
 			shadelight[0] = 0.6;
 		}
 
