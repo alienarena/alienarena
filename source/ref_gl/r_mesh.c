@@ -931,10 +931,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 	else
 		basealpha = alpha = 1.0;
 
-	//bind shell texture
-	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) )
-		GL_Bind(r_shelltexture->texnum); 
-
 	if(lerped) {
 		frontlerp = 1.0 - backlerp;
 
@@ -1044,6 +1040,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 			glUniform1iARB( g_location_meshFog, map_fog);
 		}
+		else
+			GL_Bind(r_shelltexture->texnum); 
 
 		for (i=0; i<paliashdr->num_tris; i++)
 		{
