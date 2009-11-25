@@ -985,7 +985,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 				index_xyz = tris[i].index_xyz[j];
  				
-				shellscale = .4;
+				if(currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN))
+					shellscale = .4;
+				else
+					shellscale = 1.6;
 					
 				if(lerped) {
 					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * shellscale;
