@@ -1468,7 +1468,6 @@ void BodySink( edict_t *ent ) {
 	if ( level.time - ent->timestamp > 10.5 ) {
 		// the body ques are never actually freed, they are just unlinked
 		gi.unlinkentity( ent );
-		ent->solid = SOLID_NOT;
 		ent->s.modelindex = 0; //for good measure
 		ent->s.modelindex2 = 0;
 		ent->s.modelindex3 = 0;
@@ -1479,6 +1478,7 @@ void BodySink( edict_t *ent ) {
 	ent->s.origin[2] -= 1;
 	ent->s.effects |= EF_COLOR_SHELL;
 	ent->s.renderfx |= RF_SHELL_GREEN;
+	ent->solid = SOLID_NOT; //don't gib sinking bodies
 }
 
 void CopyToBodyQue (edict_t *ent)
