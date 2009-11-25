@@ -34,6 +34,10 @@ void DeathcamStart (edict_t *ent)
 	/* Now, make the angles of the player model, (!NOT THE HUMAN VIEW!) be
      * copied to the same angle of the chasecam entity */
     VectorCopy (ent->s.angles, chasecam->s.angles);
+
+	/*alt fire of zoom weapons-- reset some things.*/
+    ent->client->ps.fov = atoi(Info_ValueForKey(ent->client->pers.userinfo, "fov")); //alt fire - reset the fov;
+    ent->client->ps.stats[STAT_ZOOMED] = 0;
         
     /* Clear the size of the entity, so it DOES technically have a size,
      * but that of '0 0 0'-'0 0 0'. (xyz, xyz). mins = Minimum size,
