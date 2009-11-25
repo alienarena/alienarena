@@ -147,7 +147,7 @@ static void M_CrosshairPic( char *name )
 		scale = 1;
 
 	w = h = 64*scale;
-	Draw_StretchPic (viddef.width / 2 - w/2 - 110*scale, viddef.height / 2 + 110*scale, w, h, name);
+	Draw_StretchPic (viddef.width / 2 - w/2 - 110*scale, viddef.height / 2 + 100*scale, w, h, name);
 }
 static void M_Background( char *name)
 {
@@ -1486,7 +1486,6 @@ extern cvar_t *r_minimap;
 extern cvar_t *r_minimap_style;
 
 static menuframework_s	s_options_menu;
-static menuaction_s		s_player_setup_action;
 static menuaction_s		s_options_defaults_action;
 static menuaction_s		s_options_customize_options_action;
 static menuslider_s		s_options_sensitivity_slider;
@@ -1520,10 +1519,6 @@ static menulist_s		s_options_showtime_box;
 static menulist_s		s_options_paindist_box;
 static menulist_s		s_options_explosiondist_box;
 
-static void PlayerSetupFunc( void *unused )
-{
-	M_Menu_PlayerConfig_f();
-}
 static void TargetFunc( void *unused )
 {
 	Cvar_SetValue( "cl_showplayernames", s_options_target_box.curvalue);
@@ -2263,14 +2258,8 @@ void Options_MenuInit( void )
 	** configure controls menu and menu items
 	*/
 	s_options_menu.x = viddef.width / 2;
-	s_options_menu.y = viddef.height / 2 - 130*scale;
+	s_options_menu.y = viddef.height / 2 - 140*scale;
 	s_options_menu.nitems = 0;
-
-	s_player_setup_action.generic.type	= MTYPE_ACTION;
-	s_player_setup_action.generic.x		= 0;
-	s_player_setup_action.generic.y		= 0;
-	s_player_setup_action.generic.name	= "player setup";
-	s_player_setup_action.generic.callback = PlayerSetupFunc;
 
 	s_options_customize_options_action.generic.type	= MTYPE_ACTION;
 	s_options_customize_options_action.generic.x		= 0;
@@ -2498,7 +2487,6 @@ void Options_MenuInit( void )
 
 	ControlsSetMenuItemValues();
 
-	Menu_AddItem( &s_options_menu, ( void * ) &s_player_setup_action );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_customize_options_action );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_shaders_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_shadows_box );
