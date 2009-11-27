@@ -514,12 +514,12 @@ void CL_InitIRC(void)
 		j++;
 	}
 
-	strcpy(user.email, "mymail@mail.com"); //set in cvar
+	strcpy(user.email, "mymail@mail.com"); 
 
 	address.sin_family=AF_INET;       // internet 
     address.sin_port = htons(6667);    
 
-    sprintf(HostName, "irc.prison.net") ; //allow this to be a cvar
+	sprintf(HostName, cl_IRC_server->string);
 
     if ( (host=gethostbyname(HostName)) == NULL ) {
 #ifdef _WINDOWS

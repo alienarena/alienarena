@@ -2931,27 +2931,66 @@ IRC MENU
 */
 
 static int		m_IRC_cursor;
+char			IRC_key[64];
 
 static menuframework_s	s_irc_menu;
 static menuaction_s		s_irc_title;
+static menufield_s		s_irc_server;
 static menuaction_s		s_irc_join;
 static menuaction_s		s_irc_quit;
 static menulist_s		s_irc_joinatstartup;
+static menuaction_s		s_irc_key;
 
-static void JoinIRCFunc( void *data )
+static void JoinIRCFunc( void *unused )
 {
+	Cvar_Set( "cl_IRC_server", s_irc_server.buffer);
+
 	if(pNameUnique)
 		CL_InitIRC();
 }
 
-static void QuitIRCFunc( void *data )
+static void QuitIRCFunc( void *unused )
 {
 	CL_IRCShutdown();
 }
 
-static void AutoIRCFunc( void *s)
+static void AutoIRCFunc( void *unused)
 {
 	Cvar_SetValue("cl_IRC_connect_at_startup", s_irc_joinatstartup.curvalue);
+}
+
+void IRCServerAccept( void )
+{
+	Cvar_Set( "cl_IRC_server", s_irc_server.buffer);
+}
+
+static void M_FindIRCKey ( void )
+{
+	int		count;
+	int		j;
+	int		l;
+	char	*b;
+	int twokeys[2];
+
+	twokeys[0] = twokeys[1] = -1;
+	l = strlen("messagemode3");
+	count = 0;
+
+	for (j=0 ; j<256 ; j++)
+	{
+		b = keybindings[j];
+		if (!b)
+			continue;
+		if (!strncmp (b, "messagemode3", l) )
+		{
+			twokeys[count] = j;
+			count++;
+			if (count == 2)
+				break;
+		}
+	}
+	//got our key
+	Com_sprintf(IRC_key, sizeof(IRC_key), "IRC Chat Key is %s", Key_KeynumToString(twokeys[0]));
 }
 
 void IRC_MenuInit( void )
@@ -2972,6 +3011,8 @@ void IRC_MenuInit( void )
 	if(!cl_IRC_connect_at_startup)
 		cl_IRC_connect_at_startup = Cvar_Get("cl_IRC_connect_at_startup", "0", CVAR_ARCHIVE);
 
+	M_FindIRCKey();
+
 	scale = (float)(viddef.height)/600;
 	if(scale < 1)
 		scale = 1;
@@ -2983,36 +3024,55 @@ void IRC_MenuInit( void )
 
 	s_irc_title.generic.type	= MTYPE_COLORTXT;
 	s_irc_title.generic.x		= -118*scale;
-	s_irc_title.generic.y		= 10*scale;
+	s_irc_title.generic.y		= 30*scale;
 	s_irc_title.generic.name	= "^3IRC ^1Chat ^1Utilities";
 
+	s_irc_server.generic.type = MTYPE_FIELD;
+	s_irc_server.generic.name = "Server ";
+	s_irc_server.generic.x	= -32*scale;
+	s_irc_server.generic.y	= 50*scale;
+	s_irc_server.length = 32;
+	s_irc_server.visible_length = 16;
+	s_irc_server.generic.callback = 0;
+	s_irc_server.cursor = strlen( cl_IRC_server->string );
+	strcpy( s_irc_server.buffer, Cvar_VariableString("cl_IRC_server") );
+
 	s_irc_join.generic.type	= MTYPE_ACTION;
-	s_irc_join.generic.x		= 64*scale;
-	s_irc_join.generic.y		= 50*scale;
+	s_irc_join.generic.x		= 16*scale;
+	s_irc_join.generic.y		= 70*scale;
 	s_irc_join.generic.cursor_offset = -16*scale;
 	s_irc_join.generic.name	= "Join IRC Chat";
 	s_irc_join.generic.callback = JoinIRCFunc;
 
 	s_irc_quit.generic.type	= MTYPE_ACTION;
-	s_irc_quit.generic.x		= 64*scale;
-	s_irc_quit.generic.y		= 60*scale;
+	s_irc_quit.generic.x		= 16*scale;
+	s_irc_quit.generic.y		= 80*scale;
 	s_irc_quit.generic.cursor_offset = -16*scale;
 	s_irc_quit.generic.name	= "Quit IRC Chat";
 	s_irc_quit.generic.callback = QuitIRCFunc;
 
 	s_irc_joinatstartup.generic.type	= MTYPE_SPINCONTROL;
 	s_irc_joinatstartup.generic.x		= 64*scale;
-	s_irc_joinatstartup.generic.y		= 80*scale;
+	s_irc_joinatstartup.generic.y		= 100*scale;
 	s_irc_joinatstartup.generic.cursor_offset = -16*scale;
 	s_irc_joinatstartup.generic.name	= "Autojoin At Startup";
 	s_irc_joinatstartup.itemnames = yes_no_names;
 	s_irc_joinatstartup.curvalue = cl_IRC_connect_at_startup->value;
 	s_irc_joinatstartup.generic.callback = AutoIRCFunc;
 
+	s_irc_key.generic.type	= MTYPE_ACTION;
+	s_irc_key.generic.x		= 48*scale;
+	s_irc_key.generic.y		= 120*scale;
+	s_irc_key.generic.cursor_offset = -16*scale;
+	s_irc_key.generic.name	= IRC_key;
+	//s_irc_key.generic.callback = QuitIRCFunc;
+
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_title );
+	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_server );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_join );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_quit );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_joinatstartup );
+	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_key );
 
 	Menu_Center( &s_irc_menu );
 }
@@ -3051,6 +3111,9 @@ void IRC_MenuDraw( void )
 
 const char *IRC_MenuKey( int key )
 {
+	if ( key == K_ESCAPE )
+		IRCServerAccept();
+
 	return Default_MenuKey( &s_irc_menu, key );
 }
 

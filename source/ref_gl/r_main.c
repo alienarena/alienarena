@@ -2440,6 +2440,7 @@ int R_Init( void *hinstance, void *hWnd )
 	//disabled for now
 	if(!r_firstrun->value) {
 
+		qboolean ati_nvidia = false;
 		double CPUTotalSpeed = 4000.0; //default to this
 		int OGLVer = atoi(&gl_config.version_string[0]);
 		//int OGLSubVer = atoi(&gl_config.version_string[2]);
@@ -2471,17 +2472,23 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf("...CPU: %4.2f Cores: %d\n", atof(res), cores);
 
 #endif
+
+		//check to see if we are using ATI or NVIDIA, otherwise, we don't want to 
+		//deal with high settings on offbrand GPU's like Intel or Unichrome
+		if(!strcmp(gl_config.vendor_string, "ATI Technologies Inc.") || !strcmp(gl_config.vendor_string, "NVIDIA Corporation"))
+			ati_nvidia = true;		
+
 		if(OGLVer < 2) { //weak GPU, set low
 			R_SetLow();
 		}
 		else if(OGLVer == 3) { //GPU is modern, check CPU
-			if(CPUTotalSpeed > 3800.0)
+			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
 				R_SetHighest();
 			else
 				R_SetMedium();
 		}
 		else {
-			if(CPUTotalSpeed > 3800.0)
+			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
 				R_SetHigh();
 			else
 				R_SetMedium();
