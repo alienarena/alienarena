@@ -302,6 +302,7 @@ extern	cvar_t	*cl_vwep;
 extern  cvar_t  *background_music;
 
 extern  cvar_t	*cl_IRC_connect_at_startup;
+extern	cvar_t	*cl_IRC_server;
 
 typedef struct
 {
