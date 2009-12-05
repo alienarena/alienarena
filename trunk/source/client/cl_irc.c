@@ -578,6 +578,9 @@ void CL_IRCShutdown(void)
 {
 	char message[IRC_SEND_BUF_SIZE];
 
+	if(!cls.irc_connected)
+		return;
+
 	//logout
 	sprintf(message,"QUIT\n\r");
 	sendData(message);
