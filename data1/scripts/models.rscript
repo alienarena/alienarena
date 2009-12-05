@@ -385,6 +385,19 @@ maps/meshes/bignode
 		nolightmap
 	}
 }
+maps/meshes/eyejar
+{
+	{
+		map maps/meshes/eyejar.tga
+		alphamask
+	}
+	{
+		map maps/meshes/eyejar_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
 maps/meshes/arch
 {
 	{

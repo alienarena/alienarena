@@ -701,6 +701,15 @@ maps/meshes/controls
 		glow
 	}
 }
+maps/meshes/eyejar
+{
+	{
+		map maps/meshes/eyejar_normal.tga
+		normalmap
+		map2 maps/meshes/eyejar_fx.tga
+		glow
+	}
+}
 maps/meshes/gothic/freedom_statue_green
 {
 	{
