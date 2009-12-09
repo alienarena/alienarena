@@ -1784,23 +1784,54 @@ char		temp[32];
 void SCR_showFPS(void)
 {
 	float scale;
+	static qboolean restart = true;
+	static float update_trigger = 0.0f;
+	static float framecounter = 0.0f;	
+	static int start_msec;
+	int end_msec;
+	float time_sec;
+	float framerate;
 
 	if (cls.key_dest == key_menu || cls.key_dest == key_console)
+	{
+		restart = true;
 		return;
+	}		
+
+	if( restart )
+	{
+		start_msec = cls.realtime; 
+		framecounter = 0.0f;
+		update_trigger = 10.0f; // initial delay to update
+		temp[0] = 0; // blank the text buffer
+		restart = false;
+	}
+	else
+	{
+		framecounter += 1.0f;
+		if( framecounter >= update_trigger )
+		{
+			// calculate frames-per-second, using client frame current time
+			end_msec = cls.realtime;
+			time_sec = ((float)(end_msec - start_msec)) / 1000.0f;
+			framerate = framecounter / time_sec ;
+			
+			// update text buffer for display
+			Com_sprintf( temp, sizeof(temp), "%3.0ffps", framerate );
+			
+			// setup for next update
+			framecounter = 0.0f;
+			start_msec = end_msec;
+			update_trigger = framerate / 2.0 ; // for .5 sec update interval
+		}
+	}
 
 	scale = (float)(viddef.height)/600;
 	if(scale < 1)
 		scale = 1;
-
-	if ((cl.time + 1000) < fpscounter)
-		fpscounter = cl.time + 100;
-
-	if (cl.time > fpscounter)
-	{
-		Com_sprintf(temp, sizeof(temp),"%3.0ffps", 1/cls.frametime);
-		fpscounter = cl.time + 100;
-	}
+	
 	DrawString(viddef.width - 64*scale, viddef.height - 24*scale, temp);
+	
 }
 
 /*
