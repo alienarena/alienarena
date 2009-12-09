@@ -121,15 +121,16 @@ int Sys_Milliseconds (void)
 {
 	static int		base;
 	static qboolean	initialized = false;
+	int timeofday;
 
 	if (!initialized)
 	{	// let base retain 16 bits of effectively random data
 		base = timeGetTime() & 0xffff0000;
 		initialized = true;
 	}
-	curtime = timeGetTime() - base;
+	timeofday = timeGetTime() - base;
 
-	return curtime;
+	return timeofday;
 }
 
 void Sys_Mkdir (char *path)

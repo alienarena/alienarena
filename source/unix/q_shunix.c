@@ -133,6 +133,7 @@ int Sys_Milliseconds (void)
 	struct timeval tp;
 	struct timezone tzp;
 	static int		secbase;
+	int timeofday;
 
 	gettimeofday(&tp, &tzp);
 	
@@ -142,9 +143,9 @@ int Sys_Milliseconds (void)
 		return tp.tv_usec/1000;
 	}
 
-	curtime = (tp.tv_sec - secbase)*1000 + tp.tv_usec/1000;
+	timeofday = (tp.tv_sec - secbase)*1000 + tp.tv_usec/1000;
 	
-	return curtime;
+	return timeofday;
 }
 
 void Sys_Mkdir (char *path)

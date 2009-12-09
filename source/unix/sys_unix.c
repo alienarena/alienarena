@@ -320,6 +320,10 @@ int main (int argc, char **argv)
 			newtime = Sys_Milliseconds ();
 			time = newtime - oldtime;
 		} while (time < 1);
+		// curtime setting moved from Sys_Milliseconds()
+		//   so it consistent for entire frame 
+		curtime = newtime; 
+		
         Qcommon_Frame (time);
 		oldtime = newtime;
     }

@@ -1000,6 +1000,9 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 			newtime = Sys_Milliseconds();
 			time = newtime - oldtime;
 		} while (time < 1);
+		// curtime setting moved from Sys_Milliseconds()
+		//   so it consistent for entire frame 
+		curtime = newtime;
 
 		_controlfp(_PC_24, _MCW_PC);
 
