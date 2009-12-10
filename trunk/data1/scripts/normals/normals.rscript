@@ -325,12 +325,8 @@ maps/meshes/spingear
 	{
 		map maps/meshes/spingear_normal.jpg
 		normalmap
-	}
-	{
-		map maps/meshes/spingear_fx.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 0.8 .8
-		nolightmap
+		map2 maps/meshes/spingear_fx.tga
+		glow
 	}
 }
 maps/meshes/weaponpad
