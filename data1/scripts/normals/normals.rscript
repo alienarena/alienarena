@@ -743,3 +743,10 @@ models/objects/icon/icon
 		normalmap
 	}
 }
+models/misc/deathray/deathray
+{
+	{
+		map models/misc/deathray/deathray_normal.jpg
+		normalmap
+	}
+}

@@ -80,6 +80,7 @@ void SP_misc_teleporter (edict_t *self);
 void SP_misc_teleporter_dest (edict_t *self);
 
 void SP_npc_cow (edict_t *self);
+void SP_npc_deathray(edict_t *self);
 
 void SP_misc_spiderpod (edict_t *self);
 void SP_misc_rednode (edict_t *self);
@@ -163,6 +164,7 @@ spawn_t	spawns[] = {
 	{"misc_teleporter_dest", SP_misc_teleporter_dest},
 
 	{"npc_cow", SP_npc_cow},
+	{"npc_deathray", SP_npc_deathray},
 
 	{"misc_spiderpod", SP_misc_spiderpod},
 	{"misc_rednode", SP_misc_rednode},

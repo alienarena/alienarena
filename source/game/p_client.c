@@ -569,6 +569,21 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 
 	}
 
+	if(mod == MOD_DEATHRAY) {
+		safe_bprintf(PRINT_MEDIUM, "%s killed by Deathray!\n", self->client->pers.netname);
+
+		//immune player (activator) gets score increase
+		for (i=0 ; i<maxclients->value ; i++)
+		{
+			cl_ent = g_edicts + 1 + i;
+			if (!cl_ent->inuse || cl_ent->is_bot)
+				continue;
+			if(cl_ent->client)
+				if(cl_ent->client->rayImmunity)
+					cl_ent->client->resp.score++;
+		}
+	}
+
 	safe_bprintf (PRINT_MEDIUM,"%s died.\n", self->client->pers.netname);
 	if (deathmatch->value) {
 		self->client->resp.score--;
@@ -1684,6 +1699,8 @@ void PutClientInServer (edict_t *ent)
 	client->mapvote = 0;
 
 	client->lasttaunttime = 0;
+
+	client->rayImmunity = false;
 
 	resp = client->resp;
 	memcpy (userinfo, client->pers.userinfo, sizeof(userinfo));

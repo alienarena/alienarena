@@ -744,6 +744,11 @@ void button_use (edict_t *self, edict_t *other, edict_t *activator)
 
 void button_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
+
+	//do not allow buttons to be activated in warmup
+	if(level.time <= warmuptime->value) 
+		return;
+
 	if (!other->client)
 		return;
 
@@ -752,6 +757,12 @@ void button_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
 
 	self->activator = other;
 	button_fire (self);
+
+	//button pusher is immune to death rays - use spawn flags
+	if(self->spawnflags & 1) {
+		other->client->rayImmunity = true;
+		other->client->rayTime = level.time;
+	}
 }
 
 void button_killed (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)

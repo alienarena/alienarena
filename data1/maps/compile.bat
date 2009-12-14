@@ -1,4 +1,4 @@
-qbsp3 pose
-qvis3 pose
-qrad3 pose
+qbsp3 dm-deathray
+qvis3 dm-deathray
+qrad3 dm-deathray
 pause
