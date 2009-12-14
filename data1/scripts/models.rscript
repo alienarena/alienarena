@@ -396,6 +396,7 @@ maps/meshes/eyejar
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 .8
 		nolightmap
+		alphamask
 	}
 }
 maps/meshes/arch
