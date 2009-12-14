@@ -757,7 +757,8 @@ ARENA_OBJS = \
 	$(BUILDDIR)/arena/acebot_spawn.o \
 	$(BUILDDIR)/arena/q_shared.o \
 	$(BUILDDIR)/arena/c_cam.o \
-	$(BUILDDIR)/arena/cow.o \
+	$(BUILDDIR)/arena/g_cow.o \
+	$(BUILDDIR)/arena/g_deathray.o \
 	$(BUILDDIR)/arena/g_ai.o \
 	$(BUILDDIR)/arena/g_chase.o \
 	$(BUILDDIR)/arena/g_cmds.o \
@@ -814,7 +815,10 @@ $(BUILDDIR)/arena/acebot_spawn.o :        $(ARENA_DIR)/acesrc/acebot_spawn.c
 $(BUILDDIR)/arena/c_cam.o :        $(ARENA_DIR)/c_cam.c
 	$(DO_ARENA_SHLIB_CC)
 
-$(BUILDDIR)/arena/cow.o :        $(ARENA_DIR)/cow.c
+$(BUILDDIR)/arena/g_cow.o :        $(ARENA_DIR)/g_cow.c
+	$(DO_ARENA_SHLIB_CC)
+	
+$(BUILDDIR)/arena/g_deathray.o :        $(ARENA_DIR)/g_deathray.c
 	$(DO_ARENA_SHLIB_CC)
 
 $(BUILDDIR)/arena/g_ai.o :        $(ARENA_DIR)/g_ai.c
