@@ -14592,9 +14592,9 @@
 {
 ( 360 1336 -384 ) ( 80 1336 -384 ) ( 80 448 -384 ) martian/saucerwall1 -128 -128 0 1 1 0 0 0
 ( 80 448 -360 ) ( 80 1336 -360 ) ( 360 1336 -360 ) martian/saucerwall1 -128 -128 0 1 1 0 0 0
-( 80 448 -360 ) ( 360 448 -360 ) ( 360 448 -384 ) martian/saucerwall1 -128 -128 0 1 1 0 0 0
-( 408 448 -360 ) ( 408 1336 -360 ) ( 408 1336 -384 ) martian/saucerwall1 -128 -128 0 1 1 0 0 0
-( 360 1336 -360 ) ( 80 1336 -360 ) ( 80 1336 -384 ) martian/saucerwall1 -128 -128 0 1 1 0 0 0
+( 96 -208 -360 ) ( 376 -208 -360 ) ( 376 -208 -384 ) martian/saucerwall1 -128 -128 0 1 1 0 0 0
+( 960 376 -360 ) ( 960 1264 -360 ) ( 960 1264 -384 ) martian/saucerwall1 -128 -128 0 1 1 0 0 0
+( 344 1312 -360 ) ( 64 1312 -360 ) ( 64 1312 -384 ) martian/saucerwall1 -128 -128 0 1 1 0 0 0
 ( 80 1336 -360 ) ( 80 448 -360 ) ( 80 448 -384 ) martian/saucerwall1 -128 -128 0 1 1 0 0 0
 }
 }
@@ -14624,7 +14624,7 @@
 {
 "classname" "info_player_intermission"
 "angle" "270"
-"origin" "160 144 96"
+"origin" "-440 1056 96"
 }
 // entity 5
 {
@@ -14967,13 +14967,13 @@
 {
 "model" "maps/meshes/eyejar.md2"
 "angle" "135"
-"origin" "160 -56 8"
+"origin" "160 -56 32"
 "classname" "misc_mapmodel"
 }
 // entity 53
 {
 "classname" "misc_mapmodel"
-"origin" "160 -56 8"
+"origin" "160 -56 32"
 "angle" "135"
 "model" "maps/meshes/eyejarglass.md2"
 "spawnflags" "16"

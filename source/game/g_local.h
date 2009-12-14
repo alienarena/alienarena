@@ -519,11 +519,10 @@ extern  int print3;
 #define MOD_SPLASH			29
 #define MOD_TARGET_LASER	30
 #define MOD_TRIGGER_HURT	31
-#define MOD_HIT				32
+#define MOD_DEATHRAY		32
 #define MOD_TARGET_BLASTER	33
 #define MOD_GRAPPLE			34
-#define MOD_DEATHRAY		35
-#define MOD_FRIENDLY_FIRE	36
+#define MOD_FRIENDLY_FIRE   0x8000000
 
 extern	int	meansOfDeath;
 
