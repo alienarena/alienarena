@@ -760,8 +760,10 @@ void button_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
 
 	//button pusher is immune to death rays - use spawn flags
 	if(self->spawnflags & 1) {
-		other->client->rayImmunity = true;
-		other->client->rayTime = level.time;
+		if(other->client) {
+			other->client->rayImmunity = true;
+			other->client->rayTime = level.time;
+		}
 	}
 }
 
