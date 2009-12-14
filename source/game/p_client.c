@@ -283,6 +283,8 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				message = "was caught by";
 				message2 = "'s grapple";
 				break;
+			case MOD_HEADSHOT:
+				message = "had it's head blown off by";
 			}
 			//here is where the bot chat features will be added.
 			//default is on.  Setting to 1 turns it off.
@@ -468,6 +470,12 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						}
 						else
 							attacker->client->resp.reward_pts++;
+
+						if(mod == MOD_HEADSHOT) { //3 more pts for a headshot
+							attacker->client->resp.reward_pts+=3;
+							safe_centerprintf(attacker, "HEADSHOT!\n");
+							gi.sound(attacker, CHAN_VOICE, gi.soundindex("misc/headshot.wav"), 1, ATTN_NORM, 0);  
+						}
 
 						//mutators
 						if(vampire->value) {

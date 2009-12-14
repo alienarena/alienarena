@@ -291,14 +291,11 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
             }
         }
                                 
-        if ( head_success )
-        {
+        if ( head_success ) {
                                         
 			damage = damage*1.8 + 1;
-            if (attacker->client) {
-				safe_bprintf(PRINT_HIGH, "%s", "HEADSHOT!\n"); 
-                gi.sound(attacker, CHAN_VOICE, gi.soundindex("misc/headshot.wav"), 1, ATTN_NORM, 0);  
-			}
+            if (attacker->client)
+				mod = MOD_HEADSHOT;
         }                           
     }                
 			
