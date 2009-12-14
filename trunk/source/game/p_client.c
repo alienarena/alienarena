@@ -582,6 +582,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				if(cl_ent->client->rayImmunity)
 					cl_ent->client->resp.score++;
 		}
+		return;
 	}
 
 	safe_bprintf (PRINT_MEDIUM,"%s died.\n", self->client->pers.netname);
