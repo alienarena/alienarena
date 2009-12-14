@@ -590,7 +590,8 @@ GAME_OBJS = \
 	$(BUILDDIR)/game/acebot_nodes.o \
 	$(BUILDDIR)/game/acebot_spawn.o \
 	$(BUILDDIR)/game/c_cam.o \
-	$(BUILDDIR)/game/cow.o \
+	$(BUILDDIR)/game/g_cow.o \
+	$(BUILDDIR)/game/g_deathray.o \
 	$(BUILDDIR)/game/q_shared.o \
 	$(BUILDDIR)/game/g_ai.o \
 	$(BUILDDIR)/game/g_chase.o \
@@ -650,7 +651,10 @@ $(BUILDDIR)/game/acebot_spawn.o :        $(GAME_DIR)/acesrc/acebot_spawn.c
 $(BUILDDIR)/game/c_cam.o :        $(GAME_DIR)/c_cam.c
 	$(DO_SHLIB_CC)
 
-$(BUILDDIR)/game/cow.o :        $(GAME_DIR)/cow.c
+$(BUILDDIR)/game/g_cow.o :        $(GAME_DIR)/g_cow.c
+	$(DO_SHLIB_CC)
+	
+$(BUILDDIR)/game/g_deathray.o :        $(GAME_DIR)/g_deathray.c
 	$(DO_SHLIB_CC)
 
 $(BUILDDIR)/game/g_ai.o :        $(GAME_DIR)/g_ai.c

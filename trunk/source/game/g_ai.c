@@ -455,7 +455,7 @@ qboolean FindTarget (edict_t *self)
 		FoundTarget (self);
 
 		//tell player that he needs to move his cows to his team's goal!
-		if(self->enemy && !self->enemy->is_bot)
+		if(self->enemy && !self->enemy->is_bot && !strcmp(self->classname, "npc_cow"))
 			safe_centerprintf(self->enemy, "Lead this cow to your team's goal!");
 
 
@@ -528,9 +528,10 @@ qboolean M_CheckAttack (edict_t *self)
 		
 	if (level.time < self->monsterinfo.attack_finished)
 		return false;
-		
-	if (enemy_range == RANGE_FAR)
-		return false;
+	
+	if(strcmp(self->classname, "npc_deathray"))
+		if (enemy_range == RANGE_FAR)
+			return false;
 
 	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 	{
@@ -545,6 +546,10 @@ qboolean M_CheckAttack (edict_t *self)
 		chance = 0.1;
 	}
 	else if (enemy_range == RANGE_MID)
+	{
+		chance = 0.02;
+	}
+	else if (enemy_range == RANGE_FAR && !strcmp(self->classname, "npc_deathray"))
 	{
 		chance = 0.02;
 	}
@@ -759,6 +764,10 @@ qboolean ai_checkattack (edict_t *self, float dist)
 	VectorSubtract (self->enemy->s.origin, self->s.origin, temp);
 	enemy_yaw = vectoyaw(temp);
 
+	if(!strcmp(self->classname, "npc_deathray"))
+		if(self->enemy->client && self->enemy->inuse)
+			if(self->enemy->client->rayImmunity && ((level.time - self->enemy->client->rayTime) < 60))
+				return false;
 
 	// JDC self->ideal_yaw = enemy_yaw;
 

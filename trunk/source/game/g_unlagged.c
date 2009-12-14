@@ -215,6 +215,7 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	}
  
 	// do the full lag compensation
+	//time = ent->client->attackTime - ent->client->ping; //to do - test!
 	time = ent->client->attackTime;
 	
 	G_TimeShiftAllClients( time, ent );

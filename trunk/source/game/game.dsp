@@ -97,10 +97,6 @@ SOURCE=.\c_cam.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\cow.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\g_ai.c
 # End Source File
 # Begin Source File
@@ -117,11 +113,19 @@ SOURCE=.\g_combat.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\g_cow.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\g_ctf.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\g_deathball.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\g_deathray.c
 # End Source File
 # Begin Source File
 

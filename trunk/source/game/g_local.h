@@ -522,10 +522,10 @@ extern  int print3;
 #define MOD_HIT				32
 #define MOD_TARGET_BLASTER	33
 #define MOD_GRAPPLE			34
-#define MOD_FRIENDLY_FIRE	0x8000000
+#define MOD_DEATHRAY		35
+#define MOD_FRIENDLY_FIRE	36
 
 extern	int	meansOfDeath;
-
 
 extern	edict_t			*g_edicts;
 
@@ -1245,6 +1245,10 @@ struct gclient_s
 
 	//taunt message
 	float lasttaunttime;
+	
+	//deathray immunity
+	qboolean rayImmunity;
+	float rayTime;
 
 	//unlagged - backward reconciliation #1
 	// the serverTime the button was pressed
