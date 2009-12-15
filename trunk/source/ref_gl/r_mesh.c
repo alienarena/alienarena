@@ -1040,6 +1040,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
                 int k;
 
 				index_xyz = tris[i].index_xyz[j];
+				index_st = tris[i].index_st[j];
  				
 				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders))
 					shellscale = .4;
@@ -1050,14 +1051,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * shellscale;
 					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * shellscale;
 					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * shellscale;
-
+				
 					VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
 					VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
-
-					VArray[5] = shadelight[0];
-					VArray[6] = shadelight[1];
-					VArray[7] = shadelight[2];
-					VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);	
 					
 					if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
                         for (k=0; k<3; k++)
@@ -1065,7 +1061,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
                             ( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
                             r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
                     }
-
+					else {
+					
+						VArray[5] = shadelight[0];
+						VArray[6] = shadelight[1];
+						VArray[7] = shadelight[2];
+						VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
+					}
 				}
 				else {
 					VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
@@ -1075,15 +1077,17 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[3] = (currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f);
 					VArray[4] = currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
-					VArray[5] = shadelight[0];
-					VArray[6] = shadelight[1];
-					VArray[7] = shadelight[2];
-					VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);		
-
 					if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
                         for (k=0;k<3;k++)
                             normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
                     }
+					else {
+					
+						VArray[5] = shadelight[0];
+						VArray[6] = shadelight[1];
+						VArray[7] = shadelight[2];
+						VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);	
+					}				
 				}
 	
 				if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
