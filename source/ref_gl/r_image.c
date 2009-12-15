@@ -1529,7 +1529,9 @@ void GL_FreeUnusedImages (void)
 	// never free r_notexture or particle textures
 	r_notexture->registration_sequence = registration_sequence;
 	r_particletexture->registration_sequence = registration_sequence;
-    r_shelltexture->registration_sequence = registration_sequence;    
+    r_shelltexture->registration_sequence = registration_sequence;   
+	r_shelltexture2->registration_sequence = registration_sequence;
+	r_shellnormal->registration_sequence = registration_sequence;
 	r_reflecttexture->registration_sequence = registration_sequence;
 	r_mirrorspec->registration_sequence = registration_sequence;
 	r_flare->registration_sequence = registration_sequence;

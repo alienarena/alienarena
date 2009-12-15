@@ -215,10 +215,7 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	}
  
 	// do the full lag compensation
-	if(g_antilag->integer == 2)
-		time = ent->client->attackTime - ent->client->ping; 
-	else
-		time = ent->client->attackTime;
+	time = ent->client->attackTime - ent->client->ping; 
 	
 	G_TimeShiftAllClients( time, ent );
 }
