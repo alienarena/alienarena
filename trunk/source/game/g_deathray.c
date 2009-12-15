@@ -218,11 +218,11 @@ void SP_npc_deathray (edict_t *self)
 	VectorSet (self->maxs, 16, 16, 48);
 	self->movetype = MOVETYPE_STEP;
 	self->solid = SOLID_BBOX;
-
+	self->takedamage = DAMAGE_NO; //invincible
 	self->max_health = 5000;
 	self->health = self->max_health;
 	self->gib_health = 0;
-	self->mass = 250;
+	self->mass = 5000;
 
 	self->pain = deathray_pain;
 	self->die = deathray_die;

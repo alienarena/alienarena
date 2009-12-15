@@ -71,6 +71,13 @@ void Use_Multi (edict_t *ent, edict_t *other, edict_t *activator)
 
 void Touch_Multi (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
+
+	//not during warmup
+	if (self->spawnflags & 32) {
+		if(level.time <= warmuptime->value) 
+			return;
+	}
+
 	if(other->client)
 	{
 		if (self->spawnflags & 2)
