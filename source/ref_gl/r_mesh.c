@@ -974,7 +974,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 		va=0;
 		VArray = &VArrayVerts[0];		
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
 
             vec3_t lightVec, lightVal;
 
@@ -1042,7 +1042,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				index_xyz = tris[i].index_xyz[j];
 				index_st = tris[i].index_st[j];
  				
-				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders))
+				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value))
 					shellscale = .4;
 				else
 					shellscale = 1.6;
@@ -1055,7 +1055,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
 					VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 					
-					if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
+					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
                         for (k=0; k<3; k++)
                             normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
                             ( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
@@ -1077,7 +1077,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[3] = (currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f);
 					VArray[4] = currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
-					if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
+					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
                         for (k=0;k<3;k++)
                             normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
                     }
@@ -1090,7 +1090,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					}				
 				}
 	
-				if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
+				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
                     VectorNormalize ( normal );
                     AngleVectors(normal, NULL, tangent, NULL);
                     VectorCopy(normal, NormalsArray[va]); //shader needs normal array
@@ -1098,14 +1098,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
                 }
 
                 // increment pointer and counter
-                if(gl_glsl_shaders->value && gl_state.glsl_shaders)
+                if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
                     VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
                 else
                     VArray += VertexSizes[VERT_COLOURED_TEXTURED];
                 va++;
             }
         }
-        if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
+        if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
             R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
             qglNormalPointer(GL_FLOAT, 0, NormalsArray);
         }
@@ -1123,7 +1123,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					qglUnlockArraysEXT();
 		}
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
             glUseProgramObjectARB( 0 );
             GL_EnableMultitexture( false );
         }
