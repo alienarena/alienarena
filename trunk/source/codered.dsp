@@ -18,6 +18,7 @@ CFG=codered - Win32 Release
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
 !MESSAGE "codered - Win32 Release" (based on "Win32 (x86) Application")
+!MESSAGE "codered - Win32 Debug" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -27,6 +28,9 @@ CFG=codered - Win32 Release
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
+
+!IF  "$(CFG)" == "codered - Win32 Release"
+
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir ".\Release"
@@ -51,9 +55,42 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
 # ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib glu32.lib client\mpglib.lib Advapi32.lib /nologo /subsystem:windows /machine:I386 /out:"../crx.exe"
 # SUBTRACT LINK32 /incremental:yes /debug /nodefaultlib
+
+!ELSEIF  "$(CFG)" == "codered - Win32 Debug"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "codered___Win32_Debug"
+# PROP BASE Intermediate_Dir "codered___Win32_Debug"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "codered___Win32_Debug"
+# PROP Intermediate_Dir "codered___Win32_Debug"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /G5 /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "ARENA" /D "AL_NO_PROTOTYPES" /FR /YX /FD /c
+# ADD CPP /nologo /G5 /MT /W3 /GX /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "ARENA" /D "AL_NO_PROTOTYPES" /FR /YX /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib glu32.lib client\mpglib.lib Advapi32.lib /nologo /subsystem:windows /machine:I386 /out:"../crx.exe"
+# SUBTRACT BASE LINK32 /incremental:yes /debug /nodefaultlib
+# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib glu32.lib client\mpglib.lib Advapi32.lib /nologo /subsystem:windows /machine:I386 /out:"../crx.exe"
+# SUBTRACT LINK32 /incremental:yes /debug /nodefaultlib
+
+!ENDIF 
+
 # Begin Target
 
 # Name "codered - Win32 Release"
+# Name "codered - Win32 Debug"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90"
