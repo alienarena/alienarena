@@ -2346,7 +2346,7 @@ int R_Init( void *hinstance, void *hWnd )
 
 		g_location_meshlightPosition = glGetUniformLocationARB( g_meshprogramObj, "lightPos" );
 		g_location_baseTex = glGetUniformLocationARB( g_meshprogramObj, "baseTex" );
-		g_location_normTex = glGetUniformLocationARB( g_meshprogramObj, "normTex" );
+		g_location_normTex = glGetUniformLocationARB( g_meshprogramObj, "normalTex" );
 		g_location_fxTex = glGetUniformLocationARB( g_meshprogramObj, "fxTex" );
 		g_location_color = glGetUniformLocationARB(	g_meshprogramObj, "baseColor" );
 		g_location_meshNormal = glGetUniformLocationARB( g_meshprogramObj, "meshNormal" );
