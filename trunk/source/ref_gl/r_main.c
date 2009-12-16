@@ -2453,24 +2453,38 @@ int R_Init( void *hinstance, void *hWnd )
 
 		CPUTotalSpeed = sysInfo.dwNumberOfProcessors * CPUSpeed();
 
-#endif
-#ifdef NEVER //needs testing on Linux
+#else
 		FILE	*fp;
         char	res[128];
 		int		cores;
-
-        fp = popen("/bin/cat /proc/cpuinfo |grep -c '^processor'","r");
-        fread(res, 1, sizeof(res)-1, fp);
-        fclose(fp);
-		cores = atoi(res[0]);
-
-		fp = popen("/bin/cat /proc/cpuinfo |grep -c '^cpu MHz'","r");
-        fread(res, 1, sizeof(res)-1, fp); //not sure if this line is correct
-        fclose(fp);
-		CPUTotalSpeed = cores * atof(res);
-
-		Com_Printf("...CPU: %4.2f Cores: %d\n", atof(res), cores);
-
+		size_t	szrslt;
+		int     irslt; 
+        fp = popen("/bin/cat /proc/cpuinfo | grep -c '^processor'","r");
+        if ( fp == NULL ) 
+        	goto cpuinfo_error;
+        szrslt = fread(res, 1, sizeof(res)-1, fp);
+        res[szrslt] = 0;
+        pclose(fp);
+        if ( !szrslt ) 
+        	goto cpuinfo_error;
+		cores = atoi( &res[0] );
+		fp = popen("/bin/cat /proc/cpuinfo | grep '^cpu MHz'","r");
+		if ( fp == NULL ) 
+			goto cpuinfo_error;
+        szrslt = fread(res, 1, sizeof(res)-1, fp);  // about 20 bytes/cpu
+        res[szrslt] = 0;
+		pclose(fp);
+		if ( !szrslt )
+			goto cpuinfo_error;
+		irslt = sscanf( res, "cpu MHz : %lf", &CPUTotalSpeed );
+		if ( !irslt )
+			goto cpuinfo_error;
+		Com_Printf("...CPU: %4.2f Cores: %d\n", CPUTotalSpeed, cores);
+	    CPUTotalSpeed *= cores;
+	    goto cpuinfo_exit;
+cpuinfo_error:
+		Com_Printf("...Reading /proc/cpuinfo failed.\n");
+cpuinfo_exit:		
 #endif
 
 		//check to see if we are using ATI or NVIDIA, otherwise, we don't want to 

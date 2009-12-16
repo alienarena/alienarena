@@ -3220,7 +3220,7 @@ void CL_TeleportParticles (vec3_t start)
 	int			j;
 	cparticle_t	*p;
 	int			i;
-	vec3_t		dir, pos1, pos2, v;
+	vec3_t		pos1, pos2, v;
 	float		step = 16.0;
 	static vec3_t mins = { -1, -1, -1 }; 
     static vec3_t maxs = { 1, 1, 1 }; 
@@ -3302,7 +3302,7 @@ void CL_TeleportParticles (vec3_t start)
 		p->scale = 24 + (rand()&4) ;
 		p->scalevel = 0;
 		for(j = 0; j < 3; j++) {
-			p->org[j] = start[j] + dir[j];
+			p->org[j] = start[j];
 			p->vel[j] = 0;
 		}
 		p->vel[2] = PARTICLE_GRAVITY*2;
