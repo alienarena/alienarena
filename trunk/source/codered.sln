@@ -26,6 +26,7 @@ Global
 		{F0514D81-BDFE-4A57-9AC7-F4B814560EFB}.Debug|Win32.ActiveCfg = Debug|Win32
 		{F0514D81-BDFE-4A57-9AC7-F4B814560EFB}.Debug|Win32.Build.0 = Debug|Win32
 		{F0514D81-BDFE-4A57-9AC7-F4B814560EFB}.Release|Win32.ActiveCfg = Alien Arena|Win32
+		{F0514D81-BDFE-4A57-9AC7-F4B814560EFB}.Release|Win32.Build.0 = Alien Arena|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
