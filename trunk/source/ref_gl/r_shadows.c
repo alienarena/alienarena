@@ -509,12 +509,12 @@ void R_DrawShadowVolume(entity_t * e)
 	dmdl_t *paliashdr;
     daliasframe_t *frame, *oldframe;
     dtrivertx_t *v, *ov, *verts;
-    int *order;
     float   *lerp;
     float frontlerp;
     vec3_t move, delta, vectors[3];
     vec3_t frontv, backv, tmp;//, water;
     int i;
+	qboolean lerped;
     float rad;
     trace_t r_trace;
 	
@@ -537,54 +537,55 @@ void R_DrawShadowVolume(entity_t * e)
 
 	paliashdr = (dmdl_t *) currentmodel->extradata;
 
-	frame = (daliasframe_t *) ((byte *) paliashdr   + paliashdr->ofs_frames
-						        + currententity->frame *
-							  paliashdr->framesize);
+	if(e->frame == 0 && currentmodel->num_frames == 1) 
+		lerped = false;
+	else 
+		lerped = true;
 
+	if(lerped)
+		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+			+ currententity->frame * paliashdr->framesize);
+	else
+		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
 	verts = v = frame->verts;
 
-	oldframe =
-		(daliasframe_t *) ((byte *) paliashdr + paliashdr->ofs_frames +
-						   currententity->oldframe * paliashdr->framesize);
-	ov = oldframe->verts;
+	if(lerped) {
+		oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+			+ currententity->oldframe * paliashdr->framesize);
+		ov = oldframe->verts;
 
-	order = (int *) ((byte *) paliashdr + paliashdr->ofs_glcmds);
+		frontlerp = 1.0 - currententity->backlerp;
 
-	frontlerp = 1.0 - currententity->backlerp;
+		// move should be the delta back to the previous frame * backlerp
+		VectorSubtract(currententity->oldorigin, currententity->origin, delta);
+		AngleVectors(currententity->angles, vectors[0], vectors[1],
+					 vectors[2]);
 
-	// move should be the delta back to the previous frame * backlerp
-	VectorSubtract(currententity->oldorigin, currententity->origin, delta);
-	AngleVectors(currententity->angles, vectors[0], vectors[1],
-				 vectors[2]);
+		move[0] = DotProduct(delta, vectors[0]);	// forward
+		move[1] = -DotProduct(delta, vectors[1]);	// left
+		move[2] = DotProduct(delta, vectors[2]);	// up
 
-	move[0] = DotProduct(delta, vectors[0]);	// forward
-	move[1] = -DotProduct(delta, vectors[1]);	// left
-	move[2] = DotProduct(delta, vectors[2]);	// up
+		VectorAdd(move, oldframe->translate, move);
 
-	VectorAdd(move, oldframe->translate, move);
+		for (i = 0; i < 3; i++) {
+			move[i] =
+				currententity->backlerp * move[i] +
+				frontlerp * frame->translate[i];
+			frontv[i] = frontlerp * frame->scale[i];
+			backv[i] = currententity->backlerp * oldframe->scale[i];
+		}
 
-	for (i = 0; i < 3; i++) {
-		move[i] =
-			currententity->backlerp * move[i] +
-			frontlerp * frame->translate[i];
-		frontv[i] = frontlerp * frame->scale[i];
-		backv[i] = currententity->backlerp * oldframe->scale[i];
+		lerp = shadow_lerped[0];
+
+		GL_LerpVerts(paliashdr->num_xyz, v, ov, lerp, move, frontv, backv);
 	}
-
-	lerp = shadow_lerped[0];
-
-    GL_LerpVerts(paliashdr->num_xyz, v, ov, lerp, move,
-                 frontv, backv);
-
+		
 	qglPushMatrix();
 	qglDisable(GL_TEXTURE_2D);
 	qglTranslatef(e->origin[0], e->origin[1], e->origin[2]);
 	qglRotatef(e->angles[1], 0, 0, 1);
 
-	if(e->frame == 0 && currentmodel->num_frames == 1) 
-		GL_DrawAliasShadowVolume(paliashdr, false);
-	else
-		GL_DrawAliasShadowVolume(paliashdr, true);
+	GL_DrawAliasShadowVolume(paliashdr, lerped);
 		
 	qglEnable(GL_TEXTURE_2D);
 	qglPopMatrix();
