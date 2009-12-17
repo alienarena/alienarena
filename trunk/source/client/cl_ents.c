@@ -1079,7 +1079,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 {
 	entity_t	gun;		// view model
 	int			i;
-
+	qboolean	useFX = false;
 
 	memset (&gun, 0, sizeof(gun));
 
@@ -1118,7 +1118,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	else if(!(strcmp("models/weapons/v_hyperb/tris.md2", gun.model->name))) {
 		if(gun.frame > 5 && gun.frame < 7) {
 			CL_PlasmaFlashParticle(gun.origin, gun.angles, true);
-			gun.flags |= RF_SHELL_GREEN;
+			useFX = true;
 		}
 	}
 
@@ -1133,7 +1133,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 			{
 				int effects = s1->renderfx;
 
-				if (effects & (RF_SHELL_RED|RF_SHELL_BLUE|RF_SHELL_GREEN) || s1->effects&(EF_PENT|EF_QUAD))
+				if (effects & (RF_SHELL_RED|RF_SHELL_BLUE|RF_SHELL_GREEN) || s1->effects&(EF_PENT|EF_QUAD) || useFX)
 				{
 					if (effects & RF_SHELL_RED)
 						gun.flags |= RF_SHELL_RED;
@@ -1142,25 +1142,24 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 					if (effects & RF_SHELL_GREEN)
 						gun.flags |= RF_SHELL_GREEN;
 
+					if (useFX) 
+						gun.flags |= RF_SHELL_GREEN;
+
 					gun.flags |= RF_TRANSLUCENT;
 					gun.alpha = 0.30;
 
-					if (s1->effects & EF_COLOR_SHELL && gun.flags & (RF_SHELL_RED|RF_SHELL_BLUE|RF_SHELL_GREEN))
+					if (s1->effects & EF_COLOR_SHELL && gun.flags & (RF_SHELL_RED|RF_SHELL_BLUE|RF_SHELL_GREEN) || useFX)
 					{
-						gun.skin = R_RegisterSkin ("gfx/shell.pcx");
-
 						V_AddViewEntity (&gun);
 					}
 					if (s1->effects & EF_PENT)
 					{
-						gun.skin = R_RegisterSkin ("gfx/shell_pent.pcx");
 						gun.flags = oldeffects | RF_TRANSLUCENT | RF_SHELL_RED;
 
 						V_AddViewEntity (&gun);
 					}
 					if (s1->effects & EF_QUAD && cl_gun->value)
 					{
-						gun.skin = R_RegisterSkin ("gfx/shell_quad.pcx");
 						gun.flags = oldeffects | RF_TRANSLUCENT | RF_SHELL_BLUE;
 
 						V_AddViewEntity (&gun);
