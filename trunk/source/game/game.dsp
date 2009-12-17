@@ -18,6 +18,7 @@ CFG=game - Win32 Alien Arena
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
 !MESSAGE "game - Win32 Alien Arena" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "game - Win32 Alien Arena Debug" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -27,6 +28,9 @@ CFG=game - Win32 Alien Arena
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
+
+!IF  "$(CFG)" == "game - Win32 Alien Arena"
+
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir "game___Win32_Alien_Arena"
@@ -53,9 +57,41 @@ LINK32=link.exe
 # SUBTRACT BASE LINK32 /incremental:yes /debug
 # ADD LINK32 kernel32.lib user32.lib winmm.lib kernel32.lib user32.lib winmm.lib /nologo /base:"0x20000000" /subsystem:windows /dll /machine:I386 /out:"../../data1/gamex86.dll"
 # SUBTRACT LINK32 /incremental:yes /debug
+
+!ELSEIF  "$(CFG)" == "game - Win32 Alien Arena Debug"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "game___Win32_Alien_Arena_Debug"
+# PROP BASE Intermediate_Dir "game___Win32_Alien_Arena_Debug"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "game___Win32_Alien_Arena_Debug"
+# PROP Intermediate_Dir "game___Win32_Alien_Arena_Debug"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /G5 /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR /YX /FD /c
+# ADD CPP /nologo /G5 /MTd /W3 /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "_DEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 kernel32.lib user32.lib winmm.lib kernel32.lib user32.lib winmm.lib /nologo /base:"0x20000000" /subsystem:windows /dll /machine:I386 /out:"../../data1/gamex86.dll"
+# SUBTRACT BASE LINK32 /incremental:yes /debug
+# ADD LINK32 kernel32.lib user32.lib winmm.lib kernel32.lib user32.lib winmm.lib /nologo /base:"0x20000000" /subsystem:windows /dll /incremental:yes /debug /machine:I386 /out:"../../data1/gamex86.dll"
+
+!ENDIF 
+
 # Begin Target
 
 # Name "game - Win32 Alien Arena"
+# Name "game - Win32 Alien Arena Debug"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90"

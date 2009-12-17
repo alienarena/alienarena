@@ -71,7 +71,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /G5 /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "ARENA" /D "AL_NO_PROTOTYPES" /FR /YX /FD /c
-# ADD CPP /nologo /G5 /MT /W3 /GX /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "ARENA" /D "AL_NO_PROTOTYPES" /FR /YX /FD /c
+# ADD CPP /nologo /G5 /MTd /W3 /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "ARENA" /D "AL_NO_PROTOTYPES" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -82,8 +82,8 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib glu32.lib client\mpglib.lib Advapi32.lib /nologo /subsystem:windows /machine:I386 /out:"../crx.exe"
 # SUBTRACT BASE LINK32 /incremental:yes /debug /nodefaultlib
-# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib glu32.lib client\mpglib.lib Advapi32.lib /nologo /subsystem:windows /machine:I386 /out:"../crx.exe"
-# SUBTRACT LINK32 /incremental:yes /debug /nodefaultlib
+# ADD LINK32 winmm.lib wsock32.lib kernel32.lib user32.lib gdi32.lib glu32.lib client\mpglib.lib Advapi32.lib /nologo /subsystem:windows /incremental:yes /debug /machine:I386 /out:"../crx.exe"
+# SUBTRACT LINK32 /nodefaultlib
 
 !ENDIF 
 
