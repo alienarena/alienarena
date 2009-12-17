@@ -931,7 +931,6 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 		     GLdouble zNear, GLdouble zFar )
 {
 	GLdouble xmin, xmax, ymin, ymax;
-	const float correction = 0.1;
 
 	ymax = zNear * tan( fovy * M_PI / 360.0 );
 	ymin = -ymax;
@@ -1087,7 +1086,7 @@ void R_CastShadow(void)
 
 void R_DrawWorldCaster(void)
 {
-	int			sv_lnum, lnum;
+	int			sv_lnum = 0, lnum;
 	vec3_t		lightVec;
 	dlight_t	*dl;
 	float		add, brightest = 0;

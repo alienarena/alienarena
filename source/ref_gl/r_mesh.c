@@ -49,6 +49,7 @@ vec3_t	lightdir;
 m_dlight_t model_dlights[MAX_MODEL_DLIGHTS];
 int model_dlights_num;
 
+extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 extern rscript_t *rs_glass;
 extern image_t *r_mirrortexture;
@@ -122,7 +123,7 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
     }
 }
 
-void GL_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float move[3], float frontv[3], float backv[3] )
+void GL_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, float move[3], float frontv[3], float backv[3] )
 {
     int i;
     for (i=0 ; i < nverts; i++, v++, ov++, lerp+=4)
@@ -418,7 +419,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
 
         if(currententity->flags & RF_VIEWERMODEL) { //lerp the vertices for self shadows, and leave
             lerp = s_lerped[0];
-            GL_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
+            GL_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, lerp, move, frontv, backv);
             return;
         }
     }
@@ -658,8 +659,6 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 {
                     float os = ((float *)order)[0];
                     float ot = ((float *)order)[1];
-                    float os2 = ((float *)order)[0];
-                    float ot2 = ((float *)order)[1];
                     vec3_t normal;
                     int k;
 
@@ -957,7 +956,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 		if(currententity->flags & RF_VIEWERMODEL) { //lerp the vertices for self shadows, and leave
 			if(gl_shadows->value && gl_shadows->value < 3) {
 				lerp = s_lerped[0];
-				GL_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, verts, lerp, move, frontv, backv);
+				GL_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, lerp, move, frontv, backv);
 				return;
 			}
 			else
@@ -1740,7 +1739,6 @@ void R_DrawAliasModel (entity_t *e)
 	dmdl_t		*paliashdr;
 	vec3_t		bbox[8];
 	image_t		*skin;
-	rscript_t	*rs = NULL;
 
 	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(e->flags & RF_MENUMODEL))
 		return;
@@ -1871,9 +1869,7 @@ void R_DrawAliasModel (entity_t *e)
 		qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
 
 	if ((currententity->flags & RF_WEAPONMODEL) && r_lefthand->value != 2.0F)
-    {
-		extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
-
+    {		
 		qglMatrixMode(GL_PROJECTION);
 		qglPushMatrix();
 		qglLoadIdentity();

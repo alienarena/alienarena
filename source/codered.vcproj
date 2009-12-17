@@ -145,7 +145,7 @@
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="C:\vorbis\include;C:\ogg\include;&quot;C:\Program Files\OpenAL 1.1 SDK\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;ARENA;AL_NO_PROTOTYPES"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;ARENA;AL_NO_PROTOTYPES;_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"

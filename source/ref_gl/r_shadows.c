@@ -31,7 +31,7 @@ static qboolean	triangleFacingLight	[MAX_INDICES / 3];
 
 static vec4_t shadow_lerped[MAX_VERTS];
 
-void GL_LerpVerts(int nverts, dtrivertx_t *v, dtrivertx_t *ov, dtrivertx_t *verts, float *lerp, float move[3], float frontv[3], float backv[3])
+void GL_LerpVerts(int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, float move[3], float frontv[3], float backv[3])
 {
     int i;
 
@@ -370,7 +370,7 @@ void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolea
 	}
 }
 
-void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, int posenumm, qboolean lerp)
+void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 {
 	vec3_t light, temp;
 	int i, o;
@@ -573,7 +573,7 @@ void R_DrawShadowVolume(entity_t * e)
 
 	lerp = shadow_lerped[0];
 
-    GL_LerpVerts(paliashdr->num_xyz, v, ov, verts, lerp, move,
+    GL_LerpVerts(paliashdr->num_xyz, v, ov, lerp, move,
                  frontv, backv);
 
 	qglPushMatrix();
@@ -582,9 +582,9 @@ void R_DrawShadowVolume(entity_t * e)
 	qglRotatef(e->angles[1], 0, 0, 1);
 
 	if(e->frame == 0 && currentmodel->num_frames == 1) 
-		GL_DrawAliasShadowVolume(paliashdr, currententity->frame, false);
+		GL_DrawAliasShadowVolume(paliashdr, false);
 	else
-		GL_DrawAliasShadowVolume(paliashdr, currententity->frame, true);
+		GL_DrawAliasShadowVolume(paliashdr, true);
 		
 	qglEnable(GL_TEXTURE_2D);
 	qglPopMatrix();

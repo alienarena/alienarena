@@ -399,26 +399,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="cow.c"
-				>
-				<FileConfiguration
-					Name="Alien Arena|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="g_ai.c"
 				>
 				<FileConfiguration
@@ -499,6 +479,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\g_cow.c"
+				>
+			</File>
+			<File
 				RelativePath="g_ctf.c"
 				>
 				<FileConfiguration
@@ -537,6 +521,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\g_deathray.c"
+				>
 			</File>
 			<File
 				RelativePath="g_func.c"
