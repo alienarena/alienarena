@@ -474,7 +474,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						if(mod == MOD_HEADSHOT) { //3 more pts for a headshot
 							attacker->client->resp.reward_pts+=3;
 							safe_centerprintf(attacker, "HEADSHOT!\n");
-							gi.sound(attacker, CHAN_VOICE, gi.soundindex("misc/headshot.wav"), 1, ATTN_NONE, 0);  
+							gi.sound(attacker, CHAN_AUTO, gi.soundindex("misc/headshot.wav"), 1, ATTN_STATIC, 0);  
 						}
 
 						//mutators
