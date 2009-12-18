@@ -88,23 +88,120 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 #pragma optimize( "", on )
 #endif
 
+/*
+** Fast sincos function using polynomial approximation
+**
+** Profiling indicates that AngleVectors() is heavily used, which justifies
+**   (i hope) doing some "heroic" optimization.
+** Testing indicates that maximum variation from original calculation is 
+**   is around 0.000006
+**
+** sin(a) ~=  a - (0.16666 * a**3) + (0.0083143 a**5) - (0.00018542 * a**7)
+**   
+** Reference:
+**   Essential Mathematics for Games and Interactive Applications, Second Edition.
+**   by James M. Van Verth and Lars M. Bishop, Morgan-Kaufman Publishing.
+**   which bases this technique on:
+**   Robin Green's GDC 2003 session, "Faster Math Functions"
+** 
+** Arguments:
+**   angle : in radians
+*/
 
+#define kPI         3.1415926535897932384626433832795f
+#define kHalfPI     1.5707963267948966192313216916398f
+#define kTwoPI      2.0f*kPI
+static const float kTwoOverPI = 1.0f / kHalfPI;
+static const float kRationalHalfPI = 201.0f / 128.0f;
+static const float kRemainderHalfPI = 4.8382679e-4f;
+static const float kpoly3 = -0.16666f;
+static const float kpoly5 = 0.0083143f;
+static const float kpoly7 = -0.00018542f;
+
+float fast_sincosf_calc( float angle )
+{
+	float result;
+	float anglesq;
+	
+	anglesq = angle * angle;
+	result = angle * ( 1.0f + anglesq * (kpoly3 + anglesq * (kpoly5 
+		+ ( anglesq * kpoly7 ))));
+	return result;
+}
+
+void fast_sincosf( float angle, float *sina, float *cosa )
+{
+	qboolean negate;
+	float angle_radians;
+	float angle_float_part;
+	float angle_float_part_minus_halfpi;
+	int angle_int_part;
+	
+	// make negative angle non-negative for purposes of calculation
+	negate = false;
+	angle_radians = angle;
+	if( angle_radians < 0.0f )
+	{
+		negate = true;
+		angle_radians = -angle_radians;
+	}
+
+	// this is tricky. to prevent "catastophic cancelation" when subtracting 
+	//  near equal floating point numbers, the calculation is broken down
+	//  into 2 parts.
+	angle_float_part =  kTwoOverPI * angle_radians;
+	angle_int_part = (int)angle_float_part;
+	angle_float_part = (angle_radians - (kRationalHalfPI * angle_int_part)) 
+		- (kRemainderHalfPI * angle_int_part);
+	angle_float_part_minus_halfpi = (angle_float_part - kRationalHalfPI)
+		- kRemainderHalfPI;
+
+	switch( angle_int_part & 0x03 ) // mod 4 to get quadrant
+	{
+	case 0: // 0..PI/2
+		*sina = fast_sincosf_calc( angle_float_part );
+		*cosa = fast_sincosf_calc( -angle_float_part_minus_halfpi );
+		break;
+	case 1: // PI/2..PI
+		*sina = fast_sincosf_calc( -angle_float_part_minus_halfpi );
+		*cosa = fast_sincosf_calc( -angle_float_part );
+		break;
+	case 2: // PI..3/2 PI
+		*sina = fast_sincosf_calc( -angle_float_part );
+		*cosa = fast_sincosf_calc( angle_float_part_minus_halfpi );
+		break;
+	case 3: // 3/2 PI..2 PI
+		*sina = fast_sincosf_calc( angle_float_part_minus_halfpi );
+		*cosa = fast_sincosf_calc( angle_float_part );
+		break;
+	}
+
+	if( negate )
+	{
+		*sina = -(*sina);
+	}
+	
+}
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
 	float		angle;
+#ifdef _WINDOWS	
 	static float		sr, sp, sy, cr, cp, cy;
 	// static to help MS compiler fp bugs
+#else
+	float		sr, sp, sy, cr, cp, cy;
+#endif	
 
-	angle = angles[YAW] * (M_PI*2 / 360);
-	sy = sin(angle);
-	cy = cos(angle);
-	angle = angles[PITCH] * (M_PI*2 / 360);
-	sp = sin(angle);
-	cp = cos(angle);
-	angle = angles[ROLL] * (M_PI*2 / 360);
-	sr = sin(angle);
-	cr = cos(angle);
+	angle = angles[YAW] * (kTwoPI / 360.0f);
+	fast_sincosf( angle, &sy, &cy );
+	angle = angles[PITCH] * (kTwoPI / 360.0f );
+	fast_sincosf( angle, &sp, &cp );
+	if( right || up )
+	{ // if forward only, this is not used
+		angle = angles[ROLL] * (kTwoPI / 360.0f);
+		fast_sincosf( angle, &sr, &cr );
+	}
 
 	if (forward)
 	{
