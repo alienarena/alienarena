@@ -462,7 +462,7 @@ void MSG_WriteDeltaUsercmd (sizebuf_t *buf, usercmd_t *from, usercmd_t *cmd)
 void MSG_WriteDir (sizebuf_t *sb, vec3_t dir)
 {
 	int		i, best;
-	float	d, bestd;
+	float	d,x,y,z;
 
 	if (!dir)
 	{
@@ -470,17 +470,59 @@ void MSG_WriteDir (sizebuf_t *sb, vec3_t dir)
 		return;
 	}
 
-	bestd = 0;
+	x = dir[0];
+	y = dir[1];
+	z = dir[2];
 	best = 0;
-	for (i=0 ; i<NUMVERTEXNORMALS ; i++)
+	
+	d = (x*x) + (y*y) + (z*z);
+	// sometimes dir is {0,0,0}
+	if ( d == 0.0f )
 	{
-		d = DotProduct (dir, bytedirs[i]);
-		if (d > bestd)
-		{
-			bestd = d;
-			best = i;
+		MSG_WriteByte( sb, 0 );
+		return;
+	}
+	// sometimes dir is not normalized
+	if ( d < 0.999f || d > 1.001f )
+	{
+		d = 1.0 / sqrtf( d );
+		x *= d;
+		y *= d;
+		z *= d;
+	}
+	// frequently occurring axial cases, use known best index
+	if ( x == 0.0f && y == 0.0f )
+	{
+		best = ( z >= 0.999f ) ? 5  : 84;
+	}
+	else if ( x == 0.0f && z == 0.0f )
+	{
+		best = ( y >= 0.999f ) ? 32 : 104;
+	}
+	else if ( y == 0.0f && z == 0.0f )
+	{
+		best = ( x >= 0.999f ) ? 52 : 143;
+	}
+	else
+	{ // general case
+		float bestd = 0.0f;
+		for ( i = 0 ; i < NUMVERTEXNORMALS ; i++ )
+		{ // search for closest match
+			d = (x*bytedirs[i][0]) + (y*bytedirs[i][1]) + (z*bytedirs[i][2]);
+			if ( d > 0.985f )
+			{ // no other entry could be a closer match
+				//  0.9679495 is max dot product between anorm.h entries
+				best = i;
+				break;
+			}
+			if ( d > bestd )
+			{
+				bestd = d;
+				best = i;
+			}
 		}
 	}
+
 	MSG_WriteByte (sb, best);
 }
 
