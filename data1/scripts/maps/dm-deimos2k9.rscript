@@ -75,12 +75,17 @@ textures/arena9/trim2
 }
 textures/evil/e6launchengine
 {
-	{
-		map gfx/e6launchengine_glow.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 10 0.1 0.9
-		nolightmap
-	}
+    {
+        map gfx/e6launchengine_glow.tga
+        blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        alphashift 2.5 0.0 1.0
+        nolightmap
+    }
+    {
+        map textures/evil/e6launchengine.tga
+        blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        alphashift 2.5 0.0 1.0
+    }
 }
 textures/arena9/roundlight
 {
