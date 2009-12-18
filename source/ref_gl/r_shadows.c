@@ -565,7 +565,8 @@ void R_DrawShadowVolume(entity_t * e)
 		move[1] = -DotProduct(delta, vectors[1]);	// left
 		move[2] = DotProduct(delta, vectors[2]);	// up
 
-		VectorAdd(move, oldframe->translate, move);
+		if(oldframe && oldframe->translate)
+			VectorAdd(move, oldframe->translate, move);
 
 		for (i = 0; i < 3; i++) {
 			move[i] =

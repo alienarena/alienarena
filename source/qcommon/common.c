@@ -485,7 +485,7 @@ void MSG_WriteDir (sizebuf_t *sb, vec3_t dir)
 	// sometimes dir is not normalized
 	if ( d < 0.999f || d > 1.001f )
 	{
-		d = 1.0 / sqrtf( d );
+		d = 1.0 / sqrt( d );
 		x *= d;
 		y *= d;
 		z *= d;
