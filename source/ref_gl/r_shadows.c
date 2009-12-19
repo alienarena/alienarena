@@ -537,6 +537,13 @@ void R_DrawShadowVolume(entity_t * e)
 
 	paliashdr = (dmdl_t *) currentmodel->extradata;
 
+	if ( (currententity->frame >= paliashdr->num_frames)
+		|| (currententity->frame < 0) )	{
+
+		currententity->frame = 0;
+		currententity->oldframe = 0;
+	}
+
 	if(e->frame == 0 && currentmodel->num_frames == 1) 
 		lerped = false;
 	else 
@@ -548,25 +555,19 @@ void R_DrawShadowVolume(entity_t * e)
 	else
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
 	verts = v = frame->verts;
-
-	if ( (currententity->frame >= paliashdr->num_frames)
-		|| (currententity->frame < 0) )	{
-
-		currententity->frame = 0;
-		currententity->oldframe = 0;
-	}
 	
 	if(lerped) {
-		oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
-			+ currententity->oldframe * paliashdr->framesize);
-		ov = oldframe->verts;
-
+		
 		if ( (currententity->oldframe >= paliashdr->num_frames)
 			|| (currententity->oldframe < 0)) {
 
 			currententity->frame = 0;
 			currententity->oldframe = 0;
 		}
+
+		oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+			+ currententity->oldframe * paliashdr->framesize);
+		ov = oldframe->verts;	
 
 		if ( !r_lerpmodels->value )
 			currententity->backlerp = 0;
