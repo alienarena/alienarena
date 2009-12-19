@@ -3460,8 +3460,10 @@ void JoinServerFunc( void *self )
 		return;
 	}
 
-	if(!pNameUnique)
+	if(!pNameUnique) {
+		M_Menu_PlayerConfig_f();
 		return;
+	}
 
 	Com_sprintf (buffer, sizeof(buffer), "connect %s\n", NET_AdrToString (mservers[index+svridx].local_server_netadr));
 	Cbuf_AddText (buffer);
@@ -6323,6 +6325,17 @@ void PlayerConfig_MenuDraw( void )
 	refdef.fov_y = CalcFov( refdef.fov_x, refdef.width, refdef.height );
 	refdef.time = cls.realtime*0.001;
 
+	if(!strcmp(s_player_name_field.buffer, "Player"))
+		pNameUnique = false;
+	else
+		pNameUnique = true;
+
+	if(!pNameUnique) {
+		M_DrawTextBox( 68*scale, -20*scale, 28, 2 );
+		M_Print( 93*scale, -16*scale,  "You must change your player" );
+		M_Print( 93*scale, -6*scale,  "name before joining a server!" );
+	}
+
 	if ( s_pmi[s_player_model_box.curvalue].skindisplaynames )
 	{
 		static float mframe;
@@ -6449,7 +6462,7 @@ void PlayerConfig_MenuDraw( void )
 
 		refdef.y = viddef.height / 2 - 70*scale;
 		Draw_StretchPic( s_player_config_menu.x - 88, refdef.y, 32*scale, 32*scale, scratch );
-	}
+	}	
 }
 void PConfigAccept (void)
 {
@@ -6457,6 +6470,11 @@ void PConfigAccept (void)
 	char scratch[1024];
 
 	Cvar_Set( "name", s_player_name_field.buffer );
+
+	if(!strcmp(s_player_name_field.buffer, "Player"))
+		pNameUnique = false;
+	else
+		pNameUnique = true;
 
 	Com_sprintf( scratch, sizeof( scratch ), "%s/%s",
 		s_pmi[s_player_model_box.curvalue].directory,
