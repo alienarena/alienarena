@@ -100,7 +100,7 @@ ARENA_CFLAGS=-DARENA
 
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g -ggdb
 
-LDFLAGS+=-lm
+LDFLAGS+=-lm -rdynamic
 # In FreeBSD, dlopen() is in libc.
 ifeq ($(OSTYPE),linux)
 LDFLAGS+=-ldl
@@ -113,7 +113,6 @@ SHLIBCFLAGS=-fPIC
 SHLIBLDFLAGS=-shared
 
 OPPENALCFLAGS+=$(shell pkg-config --cflags openal)
-OPENALLDFLAGS=$(shell pkg-config --libs openal)
 
 VORBISCFLAGS+=$(shell pkg-config --cflags vorbisfile)
 VORBISLDFLAGS=$(shell pkg-config --libs vorbisfile)
@@ -185,9 +184,6 @@ targets: $(TARGETS)
 #############################################################################
 # CLIENT/SERVER
 #############################################################################
-
-SOUND_OPENAL_OBJS = \
-	
 
 CODERED_OBJS = \
 	$(BUILDDIR)/client/cl_ents.o \
@@ -267,8 +263,8 @@ REF_GL_GLX_OBJS = \
 	$(BUILDDIR)/ref_gl/gl_glx.o
 
 
-$(BUILDDIR)/crx : $(CODERED_OBJS) $(SOUND_OPENAL_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(OPENALLDFLAGS) $(VORBISLDFLAGS) $(CURLLDFLAGS) $(JPEGLDFLAGS)
+$(BUILDDIR)/crx : $(CODERED_OBJS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS)
+	$(CC) $(CFLAGS) -o $@ $(CODERED_OBJS) $(LDFLAGS) $(REF_GL_OBJS) $(REF_GL_GLX_OBJS) $(GLXLDFLAGS) $(VORBISLDFLAGS) $(CURLLDFLAGS) $(JPEGLDFLAGS)
 
 $(BUILDDIR)/client/cl_ents.o :    $(CLIENT_DIR)/cl_ents.c
 	$(DO_CC)
