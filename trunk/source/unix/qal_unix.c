@@ -30,8 +30,9 @@
 
 /*
  * OpenAL Library
+ *  OpenAL 1.1 required.  TODO: make soname configurable
  */
-const char libopenal_name[] = "libopenal.so";
+const char libopenal_name[] = "libopenal.so.1";
 void *dynlib;
 qboolean dlsym_error;
 
@@ -70,7 +71,7 @@ qboolean QAL_Init( void )
 	dynlib = dlopen( libopenal_name, RTLD_LAZY | RTLD_GLOBAL );
 	if( dynlib == NULL )
 	{
-		Com_Printf("dlopen() on %s failed\n");
+		Com_Printf("dlopen() on %s failed\n", libopenal_name );
 		return false;
 	}
 
