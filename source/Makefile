@@ -100,7 +100,7 @@ ARENA_CFLAGS=-DARENA
 
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g -ggdb
 
-LDFLAGS+=-lm -rdynamic
+LDFLAGS+=-lm
 # In FreeBSD, dlopen() is in libc.
 ifeq ($(OSTYPE),linux)
 LDFLAGS+=-ldl
