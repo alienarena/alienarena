@@ -359,6 +359,7 @@ void Draw_GetPicSize (int *w, int *h, char *pic)
 	*h = gl->height;
 	ShaderResizePic(gl, w, h);
 }
+
 #define DIV254BY255 (0.9960784313725490196078431372549f)
 void Draw_ShaderPic (image_t *gl, float alphaval)
 {
@@ -370,6 +371,12 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 	COM_StripExtension ( gl->name, shortname );
 	rs=RS_FindScript(shortname);
 
+	//if we draw the red team bar, we are on red team
+	if(!strcmp(shortname, "pics/i_team1"))
+		r_teamColor = 1;
+	else if(!strcmp(shortname, "pics/i_team2"))
+		r_teamColor = 2;
+
 	R_InitQuadVarrays(); 
 	
 	if (!rs) 
@@ -379,7 +386,19 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 		GLSTATE_DISABLE_ALPHATEST
 		GLSTATE_ENABLE_BLEND
 		GL_TexEnv( GL_MODULATE );
+
 		qglColor4f(1,1,1, alphaval);
+
+		//set color of hud by team
+		if(r_teamColor == 1) {
+			if(!strcmp(shortname, "pics/i_health")) 
+				qglColor4f(1, .2, .2, alphaval);
+		}
+		else if(r_teamColor == 2) {
+			if(!strcmp(shortname, "pics/i_health")) 
+				qglColor4f(.1, .4, .8, alphaval);
+		}
+			
 		VA_SetElem4(col_array[0], 1,1,1,1);
 		VA_SetElem4(col_array[1], 1,1,1,1);
 		VA_SetElem4(col_array[2], 1,1,1,1);

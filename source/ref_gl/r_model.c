@@ -1935,6 +1935,8 @@ void R_BeginRegistration (char *model)
 
 	r_viewcluster = -1;
 
+	r_teamColor = 0;
+
 }
 
 /*
