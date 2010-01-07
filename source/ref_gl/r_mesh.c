@@ -1860,7 +1860,8 @@ void R_DrawAliasModel (entity_t *e)
 	// locate the proper data
 	//
 
-	c_alias_polys += paliashdr->num_tris;
+	if ( !(currententity->flags & RF_VIEWERMODEL) )
+		c_alias_polys += paliashdr->num_tris; // for r_speeds epoly count
 
 	//
 	// draw all the triangles
