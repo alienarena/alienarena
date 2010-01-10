@@ -935,7 +935,7 @@ void Cmd_CallVote_f (edict_t *ent)
 
 	//start a vote
 	playervote.called = true; 
-	playervote.nay = playervote.nay = 0;
+	playervote.yay = playervote.nay = 0;
 	playervote.starttime = level.time;
 	if(strlen(gi.args()) < 128) {
 		strcpy(playervote.command, gi.args()); 
