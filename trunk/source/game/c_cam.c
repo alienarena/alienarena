@@ -121,6 +121,7 @@ void DeathcamTrack (edict_t *ent)
 void CheckDeathcam_Viewent (edict_t *ent)
 {
 	gclient_t       *cl;
+	int	tmp;
     
 	if (!ent->client->oldplayer->client)
     {
@@ -139,8 +140,10 @@ void CheckDeathcam_Viewent (edict_t *ent)
         VectorCopy (ent->s.origin, ent->client->oldplayer->s.origin);
         VectorCopy (ent->velocity, ent->client->oldplayer->velocity);
         VectorCopy (ent->s.angles, ent->client->oldplayer->s.angles);
-     }
-	 ent->client->oldplayer->s = ent->s;
+	}
+	tmp = ent->client->oldplayer->s.number;
+	ent->client->oldplayer->s = ent->s;
+	ent->client->oldplayer->s.number = tmp; // keep same s.number, not client's
 
 	 gi.linkentity (ent->client->oldplayer);
         
