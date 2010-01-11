@@ -1102,7 +1102,12 @@ void G_RunFrame (void)
 		}
 
 		if(ent->inuse && ent->client && !ent->is_bot)
-			numActiveClients++;
+		{
+			if ( ent->s.number <= maxclients->value )
+			{ // count actual players, not deathcam entities
+				numActiveClients++;
+			}
+		}
 
 		//this next block of code may not be practical for a server running at 10fps
 /*		if(ent->movetype & MOVETYPE_FLYMISSILE) {
