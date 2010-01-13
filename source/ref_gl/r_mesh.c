@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // r_mesh.c: triangle model functions
 
 #include "r_local.h"
-#include "vlights.h"
 
 /*
 =============================================================
@@ -72,9 +71,6 @@ GL_VlightAliasModel
 
 Vertex lighting for Alias models
 
-When rtlights is set we get a smoother, more accurate model shading.  If normalmaps are on
-we scale the light a bit less, as normalmaps tend to add a bit of contrast.
-
 Contrast has been added by finding a threshold point, and scaling values on either side in 
 opposite directions.  This gives the shading a more prounounced, defined look.
 
@@ -91,27 +87,9 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
 	VectorSubtract(currententity->origin, lightspot, lightdir);
 	VectorNormalize ( lightdir );
 
-    if (gl_rtlights->value)
-    {
-        l = lscale * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
-                                backlerp, lightdir, currententity->angles, false);
-
-        VectorScale(baselight, l, lightOut);
-
-        if (model_dlights_num)
-            for (i=0; i<model_dlights_num; i++)
-            {
-                l = lscale * VLight_LerpLight (verts->lightnormalindex, ov->lightnormalindex,
-                    backlerp, model_dlights[i].direction, currententity->angles, true );
-                VectorMA(lightOut, l, model_dlights[i].color, lightOut);
-            }
-    }
-    else
-    {
-        l = shadedots[verts->lightnormalindex];
-        VectorScale(baselight, l, lightOut);
-    }
-
+    l = shadedots[verts->lightnormalindex];
+    VectorScale(baselight, l, lightOut);
+    
     for (i=0; i<3; i++)
     {        
 		//add contrast - lights lighter, darks darker
@@ -954,7 +932,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 		}
 
 		if(currententity->flags & RF_VIEWERMODEL) { //lerp the vertices for self shadows, and leave
-			if(gl_shadows->value && gl_shadows->value < 3) {
+			if(gl_shadows->value && !gl_shadowmaps->value) {
 				lerp = s_lerped[0];
 				GL_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, lerp, move, frontv, backv);
 				return;
@@ -1801,16 +1779,6 @@ void R_DrawAliasModel (entity_t *e)
 		for (i=0 ; i<3 ; i++)
 			shadelight[i] = 1.0;
 	}
-	else if(gl_rtlights->value && !gl_normalmaps->value) //no need when normalmaps are used, which should be for all meshes.
-	{
-		int max = 3;
-
-		if (max<0)max=0;
-		if (max>MAX_MODEL_DLIGHTS)max=MAX_MODEL_DLIGHTS;
-
-		R_LightPointDynamics (currententity->origin, shadelight, model_dlights,
-			&model_dlights_num, max);
-	}
 	else
 	{
 		R_LightPoint (currententity->origin, shadelight, true);
@@ -1994,7 +1962,7 @@ void R_DrawAliasModel (entity_t *e)
 		qglDepthRange (gldepthmin, gldepthmax);
 
 	//old legacy shadows
-	if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL) && gl_shadows->value && gl_shadows->value < 3 && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
+	if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL) && gl_shadows->value && !gl_shadowmaps->value && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
 	{
 		float casted;
 		float an = currententity->angles[1]/180*M_PI;
@@ -2100,4 +2068,156 @@ void R_DrawAliasModel (entity_t *e)
 
 }
 
+void GL_DrawAliasCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
+{
+	daliasframe_t	*frame, *oldframe;
+	dtrivertx_t	*v, *ov, *verts;
+	dtriangle_t		*tris;
+	float	frontlerp;
+	vec3_t	move, delta, vectors[3];
+	vec3_t	frontv, backv;
+	int		i, j;
+	int		index_xyz, index_st;
+	int		va = 0;
+	fstvert_t *st;
 
+	if(lerped)
+		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+			+ currententity->frame * paliashdr->framesize);
+	else
+		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
+	verts = v = frame->verts;
+
+	if(lerped) {
+		oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
+			+ currententity->oldframe * paliashdr->framesize);
+		ov = oldframe->verts;
+	}
+
+	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
+
+	st = currentmodel->st;
+
+	if(lerped) {
+		frontlerp = 1.0 - backlerp;
+
+		// move should be the delta back to the previous frame * backlerp
+		VectorSubtract (currententity->oldorigin, currententity->origin, delta);
+	}
+
+	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
+
+	if(lerped) {
+		move[0] = DotProduct (delta, vectors[0]);	// forward
+		move[1] = -DotProduct (delta, vectors[1]);	// left
+		move[2] = DotProduct (delta, vectors[2]);	// up
+
+		VectorAdd (move, oldframe->translate, move);
+
+		for (i=0 ; i<3 ; i++)
+		{
+			move[i] = backlerp*move[i] + frontlerp*frame->translate[i];
+			frontv[i] = frontlerp*frame->scale[i];
+			backv[i] = backlerp*oldframe->scale[i];
+		}
+	
+	}
+
+	va=0;
+	VArray = &VArrayVerts[0];
+	R_InitVArrays (VERT_NO_TEXTURE);
+
+	for (i=0; i<paliashdr->num_tris; i++)
+	{
+		for (j=0; j<3; j++)
+		{			
+			index_xyz = tris[i].index_xyz[j];
+			index_st = tris[i].index_st[j];
+												
+			if(lerped) {
+				
+				VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
+				VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
+				VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
+	
+			}
+			else {				
+
+				VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
+				VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
+				VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+
+			}
+		
+			// increment pointer and counter
+			VArray += VertexSizes[VERT_NO_TEXTURE];
+			va++;			
+		} 	
+
+	}
+	
+	if(qglLockArraysEXT)						
+		qglLockArraysEXT(0, va);
+
+	qglDrawArrays(GL_TRIANGLES,0,va);
+			
+	if(qglUnlockArraysEXT)						
+		qglUnlockArraysEXT();
+
+	R_KillVArrays ();
+}
+
+//to do - alpha and alphamasks
+void R_DrawAliasModelCaster (entity_t *e)
+{
+	vec3_t		bbox[8];
+	dmdl_t		*paliashdr;
+
+	if(e->team) //don't draw flag models, handled by sprites
+		return;
+	
+	if ( e->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
+		return;
+
+	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) ) //no shells
+		return;
+
+	if ( R_CullAliasModel( bbox, e ) )
+		return;
+
+	paliashdr = (dmdl_t *)currentmodel->extradata;
+
+	// draw it
+
+    qglPushMatrix ();
+	e->angles[PITCH] = -e->angles[PITCH];
+	R_RotateForEntity (e);
+	e->angles[PITCH] = -e->angles[PITCH];
+
+	if ( (currententity->frame >= paliashdr->num_frames)
+		|| (currententity->frame < 0) )
+	{
+		currententity->frame = 0;
+		currententity->oldframe = 0;
+	}
+
+	if ( (currententity->oldframe >= paliashdr->num_frames)
+		|| (currententity->oldframe < 0))
+	{
+		currententity->frame = 0;
+		currententity->oldframe = 0;
+	}
+
+	if ( !r_lerpmodels->value )
+		currententity->backlerp = 0;
+
+	if(e->frame == 0 && currentmodel->num_frames == 1)
+		GL_DrawAliasCasterFrame(paliashdr, 0, false);
+	else
+		GL_DrawAliasCasterFrame(paliashdr, currententity->backlerp, true);
+
+	qglPopMatrix();
+	qglMatrixMode(GL_MODELVIEW);
+	qglPopMatrix();
+
+}

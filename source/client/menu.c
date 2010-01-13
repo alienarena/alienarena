@@ -1480,7 +1480,6 @@ extern cvar_t *cl_noblood;
 extern cvar_t *cl_noskins;
 extern cvar_t *gl_shadows;
 extern cvar_t *gl_dynamic;
-extern cvar_t *gl_rtlights;
 extern cvar_t *r_shaders;
 extern cvar_t *r_minimap;
 extern cvar_t *r_minimap_style;
@@ -1512,7 +1511,6 @@ static menulist_s		s_options_taunts_box;
 static menulist_s		s_options_shaders_box;
 static menulist_s		s_options_shadows_box;
 static menulist_s		s_options_dynamic_box;
-static menulist_s		s_options_rtlights_box;
 static menulist_s		s_options_minimap_box;
 static menulist_s		s_options_showfps_box;
 static menulist_s		s_options_showtime_box;
@@ -1523,39 +1521,42 @@ static void TargetFunc( void *unused )
 {
 	Cvar_SetValue( "cl_showplayernames", s_options_target_box.curvalue);
 }
+
 static void HealthauraFunc( void *unused )
 {
 	Cvar_SetValue( "cl_healthaura", s_options_healthaura_box.curvalue);
 }
+
 static void NoBloodFunc( void *unused )
 {
 	Cvar_SetValue( "cl_noblood", s_options_noblood_box.curvalue);
 }
+
 static void NoskinsFunc( void *unused )
 {
 	Cvar_SetValue( "cl_noskins", s_options_noskins_box.curvalue);
 }
+
 static void TauntsFunc( void *unused )
 {
 	Cvar_SetValue( "cl_playtaunts", s_options_taunts_box.curvalue);
 }
+
 static void ShadersFunc( void *unused )
 {
 	Cvar_SetValue( "r_shaders", s_options_shaders_box.curvalue);
 	if(!s_options_shaders_box.curvalue)
 		Cvar_SetValue("gl_normalmaps", 0); //because normal maps are controlled by shaders
 }
+
 static void ShadowsFunc( void *unused )
 {
 	Cvar_SetValue( "gl_shadows", s_options_shadows_box.curvalue);
 }
+
 static void DynamicFunc( void *unused )
 {
 	Cvar_SetValue( "gl_dynamic", s_options_dynamic_box.curvalue);
-}
-static void RTlightsFunc( void *unused )
-{
-	Cvar_SetValue( "gl_rtlights", s_options_rtlights_box.curvalue);
 }
 
 static void PainDistFunc( void *unused )
@@ -2062,14 +2063,11 @@ static void ControlsSetMenuItemValues( void )
 	Cvar_SetValue("r_shaders", ClampCvar(0, 1, r_shaders->value ) );
 	s_options_shaders_box.curvalue		= r_shaders->value;
 
-	Cvar_SetValue("gl_shadows", ClampCvar(0, 3, gl_shadows->value ) );
+	Cvar_SetValue("gl_shadows", ClampCvar(0, 2, gl_shadows->value ) );
 	s_options_shadows_box.curvalue		= gl_shadows->value;
 
 	Cvar_SetValue("gl_dynamic", ClampCvar(0, 2, gl_dynamic->value ) );
 	s_options_dynamic_box.curvalue		= gl_dynamic->value;
-
-	Cvar_SetValue("gl_rtlights", ClampCvar(0, 1, gl_rtlights->value ) );
-	s_options_rtlights_box.curvalue		= gl_rtlights->value;
 
 	Cvar_SetValue("cl_paindist", ClampCvar(0, 1, cl_paindist->value ) );
 	s_options_paindist_box.curvalue		= cl_paindist->value;
@@ -2216,7 +2214,6 @@ void Options_MenuInit( void )
 		"off",
 		"dynamic",
 		"dynamic+world",
-		"shadow volumes",
 		0
 	};
 	static const char *minimap_names[] =
@@ -2287,14 +2284,6 @@ void Options_MenuInit( void )
 	s_options_dynamic_box.generic.name	= "dynamic lights";
 	s_options_dynamic_box.generic.callback = DynamicFunc;
 	s_options_dynamic_box.itemnames = onoff_names;
-
-	s_options_rtlights_box.generic.type = MTYPE_SPINCONTROL;
-	s_options_rtlights_box.generic.x	= 0;
-	s_options_rtlights_box.generic.y	= 60*scale;
-	s_options_rtlights_box.generic.name	= "smooth gouraud shading";
-	s_options_rtlights_box.generic.callback = RTlightsFunc;
-	s_options_rtlights_box.itemnames = onoff_names;
-	s_options_paindist_box.generic.statusbar = "Unused if GLSL enabled";
 
 	s_options_paindist_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_paindist_box.generic.x	= 0;
@@ -2491,7 +2480,6 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_shaders_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_shadows_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_dynamic_box );
-	Menu_AddItem( &s_options_menu, ( void * ) &s_options_rtlights_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_paindist_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_explosiondist_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_target_box );

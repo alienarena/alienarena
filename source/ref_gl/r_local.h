@@ -165,7 +165,6 @@ extern	cvar_t	*gl_texturemode;
 extern	cvar_t	*gl_texturealphamode;
 extern	cvar_t	*gl_texturesolidmode;
 extern	cvar_t	*gl_lockpvs;
-extern	cvar_t	*gl_rtlights;
 
 extern	cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
@@ -176,16 +175,12 @@ extern	cvar_t	*intensity;
 extern cvar_t *r_anisotropic;
 extern cvar_t *r_ext_max_anisotropy;
 
-// Vic - begin
-
 extern cvar_t	*r_overbrightbits;
 extern cvar_t	*gl_ext_mtexcombine;
 
-// Vic - end
 extern cvar_t	*gl_normalmaps;
 extern cvar_t	*gl_shadowmaps;
 extern cvar_t	*gl_parallaxmaps;
-extern cvar_t	*gl_specular;
 extern cvar_t	*gl_glsl_postprocess;
 
 extern	cvar_t	*r_shaders;
@@ -237,7 +232,6 @@ void GL_EnableMultitexture( qboolean enable );
 void GL_SelectTexture( GLenum );
 void vectoangles (vec3_t value1, vec3_t angles);
 void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic);
-void R_LightPointDynamics (vec3_t p, vec3_t color, m_dlight_t *list, int *amount, int max);
 void R_PushDlights (void);
 void R_PushDlightsForBModel (entity_t *e);
 void SetVertexOverbrights (qboolean toggle);
@@ -529,17 +523,25 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean light
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
 
-// stencil volumes
-extern glStencilFuncSeparatePROC	qglStencilFuncSeparate;
-extern glStencilOpSeparatePROC		qglStencilOpSeparate;
-extern glStencilMaskSeparatePROC	qglStencilMaskSeparate;
-
 //shadow maps
-GLuint fboId;
-void setupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z);
-void setTextureMatrix();
-void R_DrawShadowMapWorld (void);
-extern image_t *r_depthtexture;
+extern	cvar_t		*r_shadowmapratio;
+extern  int			r_shadowmapcount;
+typedef struct
+{
+	image_t *r_depthtexture;
+} glDepthtexture_t;
+extern GLuint	fboId[4];
+extern			glDepthtexture_t depthtextures[4];
+typedef struct	ShadowCasterGroup {
+	vec3_t	group_origin;
+	vec3_t	accum_origin;
+	float	dist;
+} CasterGroup_t;
+extern			CasterGroup_t ShadowCasterGroups[40];
+extern void		R_DrawAliasModelCaster (entity_t *e);
+extern void		R_DrawDynamicCaster(void);
+extern void		R_DrawWorldCaster (void);
+
 
 //arb fragment
 extern unsigned int g_water_program_id;
@@ -560,12 +562,11 @@ extern GLuint		g_tangentSpaceTransform;
 extern GLuint		g_location_heightTexture;
 extern GLuint		g_location_lmTexture;
 extern GLuint		g_location_normalTexture;
-extern GLuint		g_location_bspShadowmapTexture;
-extern GLuint		g_heightMapID;
+extern GLuint		g_location_bspShadowmapTexture[4];
+extern GLuint		g_location_bspShadowmapNum;
 extern GLuint		g_location_fog;
 extern GLuint		g_location_parallax;
 extern GLuint		g_location_dynamic;
-extern GLuint		g_location_specular;
 extern GLuint		g_location_shadowmap;
 extern GLuint		g_location_lightPosition;
 extern GLuint		g_location_lightColour;

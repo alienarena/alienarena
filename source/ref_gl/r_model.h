@@ -39,6 +39,7 @@ typedef struct
 	vec3_t	origin; 
 	float	intensity;
 	void	*surf;
+	qboolean grouped;
 } worldLight_t; 
  
 worldLight_t r_worldLights[MAX_LIGHTS]; 

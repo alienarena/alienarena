@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // r_main.c
 #include "r_local.h"
 #include "r_script.h"
-#include "vlights.h"
 
 // stencil volumes
 glStencilFuncSeparatePROC			qglStencilFuncSeparate		= NULL;
@@ -71,12 +70,11 @@ GLuint		g_tangentSpaceTransform;
 GLuint      g_location_heightTexture;
 GLuint		g_location_lmTexture;
 GLuint		g_location_normalTexture;
-GLuint		g_location_bspShadowmapTexture;
-GLuint		g_heightMapID = 0;
+GLuint		g_location_bspShadowmapTexture[4];
+GLuint		g_location_bspShadowmapNum;
 GLuint		g_location_fog;
 GLuint	    g_location_parallax;
 GLuint		g_location_dynamic;
-GLuint		g_location_specular;
 GLuint		g_location_shadowmap;
 GLuint	    g_location_lightPosition;
 GLuint		g_location_lightColour;
@@ -122,7 +120,7 @@ viddef_t	vid;
 
 int r_viewport[4];
 
-int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3, GL_TEXTURE7;
+int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3, GL_TEXTURE4, GL_TEXTURE5, GL_TEXTURE6, GL_TEXTURE7;
 
 model_t		*r_worldmodel;
 
@@ -135,7 +133,6 @@ glstate_t		gl_state;
 cvar_t	*gl_normalmaps;
 cvar_t  *gl_shadowmaps;
 cvar_t	*gl_parallaxmaps;
-cvar_t  *gl_specular;
 cvar_t	*gl_glsl_postprocess;
 cvar_t	*gl_arb_fragment_program; 
 cvar_t	*gl_glsl_shaders;
@@ -149,6 +146,7 @@ cplane_t	frustum[4];
 
 int		r_visframecount;	// bumped when going to a new PVS
 int		r_framecount;		// used for dlight push checking
+int		r_shadowmapcount;	// number of shadowmaps rendered this frame
 
 // performance counters for r_speeds reports
 int last_c_brush_polys, c_brush_polys;
@@ -194,16 +192,13 @@ cvar_t	*r_lerpmodels;
 cvar_t	*r_lefthand;
 
 cvar_t  *r_wave; // Water waves
-// Vic - begin
+
+cvar_t	*r_shadowmapratio;
 
 cvar_t	*r_overbrightbits;
 cvar_t	*gl_ext_mtexcombine;
 
-// Vic - end
-
 cvar_t	*gl_nosubimage;
-
-cvar_t	*gl_vertex_arrays;
 
 cvar_t	*gl_particle_min_size;
 cvar_t	*gl_particle_max_size;
@@ -244,7 +239,6 @@ cvar_t	*gl_texturemode;
 cvar_t	*gl_texturealphamode;
 cvar_t	*gl_texturesolidmode;
 cvar_t	*gl_lockpvs;
-cvar_t	*gl_rtlights;
 
 cvar_t	*gl_3dlabs_broken;
 
@@ -266,7 +260,7 @@ qboolean	map_fog;
 
 cvar_t	*con_font;
 
-cvar_t	*r_minimap_size; // GLOOM radar
+cvar_t	*r_minimap_size;
 cvar_t	*r_minimap_zoom;
 cvar_t	*r_minimap_style;
 cvar_t	*r_minimap;
@@ -298,8 +292,6 @@ unsigned r_weather;
 /*
 =================
 R_ReadFogScript
-
-The linux "c" version of this function
 =================
 */
 
@@ -361,8 +353,6 @@ void R_ReadFogScript(char config_file[128])
 /*
 =================
 R_ReadMusicScript
-
-The linux "c" version of this function
 =================
 */
 
@@ -1012,141 +1002,6 @@ void R_SetupGL (void)
 	qglEnable(GL_DEPTH_TEST);
 }
 
-void R_CastShadow(void)
-{
-	int i;
-	vec3_t dist;
-	
-	if (gl_shadows->value < 3)
-		return;
-		
-	qglEnableClientState(GL_VERTEX_ARRAY);
-	qglVertexPointer(3, GL_FLOAT, sizeof(vec3_t), ShadowArray);
-
-	qglClear(GL_STENCIL_BUFFER_BIT);
-
-	qglColorMask(0,0,0,0);
-	qglEnable(GL_STENCIL_TEST);
-	
-	qglDepthFunc (GL_LESS);
-	qglDepthMask(0);
-
-	qglEnable(GL_POLYGON_OFFSET_FILL);
-	qglPolygonOffset(0.0f, 100.0f);
-
-	if(gl_state.separateStencil)
-		qglStencilFuncSeparate(GL_FRONT_AND_BACK, GL_ALWAYS, 0x0, 0xFF);
-	else
-		qglStencilFunc( GL_ALWAYS, 0x0, 0xFF);
-
-	for (i = 0; i < r_newrefdef.num_entities; i++) 
-	{
-		currententity = &r_newrefdef.entities[i];
-
-		if (currententity->flags & RF_TRANSLUCENT)
-			continue;	// transluscent
-
-		currentmodel = currententity->model; 
-
-		if (!currentmodel)
-			continue;
-		
-		if (currentmodel->type != mod_alias)
-			continue;
-
-		//get distance, set lod if available
-		VectorSubtract(r_origin, currententity->origin, dist);
-		if(VectorLength(dist) > 1000) {
-			if(currententity->lod2)
-				currentmodel = currententity->lod2;
-		}
-		else if(VectorLength(dist) > 500) {
-			if(currententity->lod1) 
-				currentmodel = currententity->lod1;
-		}
-
-		if (currententity->
-		flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED |
-				 RF_SHELL_BLUE | RF_SHELL_DOUBLE |
-				 RF_WEAPONMODEL | RF_NOSHADOWS))
-				 continue;
-		
-		R_DrawShadowVolume(currententity);
-	}
-
-	qglDisableClientState(GL_VERTEX_ARRAY);
-	qglColorMask(1,1,1,1);
-	
-	qglDepthMask(1);
-	qglDepthFunc(GL_LEQUAL);
-	
-	R_ShadowBlend(0.4);
-
-}
-
-void R_DrawWorldCaster(void)
-{
-	int			sv_lnum = 0, lnum;
-	vec3_t		lightVec;
-	dlight_t	*dl;
-	float		add, brightest = 0;
-
-	//get avg of dynamic lights that are nearby enough to matter.
-	dl = r_newrefdef.dlights;
-	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
-	{
-		VectorSubtract (r_origin, dl->origin, lightVec);
-		add = dl->intensity - VectorLength(lightVec)/10;
-		if (add > brightest) //only bother with lights close by
-		{
-			brightest = add;
-			sv_lnum = lnum; //remember the position of most influencial light
-		}
-	}
-	if(brightest > 0) { //we have a light
-		dl = r_newrefdef.dlights;
-		dl += sv_lnum; //our most influential light
-	}
-	else
-		return; 
-
-	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId); 
-	
-	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * 1),(int)(vid.height * 1));
-
-	// Clear previous frame values
-	qglClear( GL_DEPTH_BUFFER_BIT);
-		
-	//Disable color rendering, we only want to write to the Z-Buffer
-	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); 
-		
-	// Culling switching, rendering only frontfaces
-	qglCullFace(GL_BACK);
-
-	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
-			
-	//set camera to look back from light to player, keeping z at light level
-	setupMatrices(dl->origin[0],dl->origin[1],dl->origin[2],r_origin[0],r_origin[1],dl->origin[2]);
-
-	qglEnable( GL_POLYGON_OFFSET_FILL );
-    qglPolygonOffset( 0.5f, 0.5f );
-    
-	//render world - very basic
-	R_DrawShadowMapWorld();
-	
-	setTextureMatrix();
-	
-	qglDepthMask (1);		// back to writing  
-	
-	qglPolygonOffset( 0.0f, 0.0f );
-    qglDisable( GL_POLYGON_OFFSET_FILL );
-
-}
-
 /*
 =============
 R_Clear
@@ -1205,7 +1060,6 @@ void R_RenderView (refdef_t *fd)
 	r_newrefdef = *fd;
 
 	//shadowmaps
-
 	if(gl_shadowmaps->value) {
 
 		qglEnable(GL_DEPTH_TEST);
@@ -1215,19 +1069,14 @@ void R_RenderView (refdef_t *fd)
 		
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
-		//Render from the light POV to a FBO, store depth values only
-		//to do - this should be moved to a better place instead of this hack
-		//if(r_framecount == 1)
-		//	generateShadowFBO();
-
 		R_DrawWorldCaster(); 
+
+		R_DrawDynamicCaster();
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 		
 		//Enabling color write (previously disabled for light POV z-buffer rendering)
-		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); 
-			
-		//end shadow maps
+		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); 	
 	}
 
 	if (!r_worldmodel && !( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) )
@@ -1274,10 +1123,7 @@ void R_RenderView (refdef_t *fd)
 	
 	R_DrawEntitiesOnList ();
 
-	R_CastShadow();
-	
-	//Draw v_weaps last after shadows
-	R_DrawViewEntitiesOnList ();
+	R_DrawViewEntitiesOnList (); 
 
 	R_DrawSpecialSurfaces();
 
@@ -1411,9 +1257,6 @@ void R_Register( void )
 	gl_texturealphamode = Cvar_Get( "gl_texturealphamode", "default", CVAR_ARCHIVE );
 	gl_texturesolidmode = Cvar_Get( "gl_texturesolidmode", "default", CVAR_ARCHIVE );
 	gl_lockpvs = Cvar_Get( "gl_lockpvs", "0", 0 );
-	gl_rtlights = Cvar_Get("gl_rtlights", "0", CVAR_ARCHIVE );
-
-	gl_vertex_arrays = Cvar_Get( "gl_vertex_arrays", "0", CVAR_ARCHIVE );
 
 	gl_ext_swapinterval = Cvar_Get( "gl_ext_swapinterval", "1", CVAR_ARCHIVE );
 	gl_ext_palettedtexture = Cvar_Get( "gl_ext_palettedtexture", "0", CVAR_ARCHIVE );
@@ -1441,8 +1284,9 @@ void R_Register( void )
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
 	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE); 
-	gl_specular = Cvar_Get("gl_specular", "0", CVAR_ARCHIVE);
 	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
+
+	r_shadowmapratio = Cvar_Get( "r_shadowmapratio", "2", CVAR_ARCHIVE );
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
@@ -1540,14 +1384,12 @@ void R_SetLowest(void)
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 0);
-	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
 	Cvar_SetValue("r_shaders", 0);
 	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 0);
-	Cvar_SetValue("gl_rtlights", 0);
 	Cvar_SetValue("gl_mirror", 0);
 	Cvar_SetValue("r_legacy", 1);
 
@@ -1573,13 +1415,11 @@ void R_SetLow( void )
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 0);
-	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
 	Cvar_SetValue("r_shaders", 1);
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 0);
-	Cvar_SetValue("gl_rtlights", 0);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("r_legacy", 0);
 
@@ -1605,13 +1445,11 @@ void R_SetMedium( void )
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 0);
-	Cvar_SetValue("gl_specular", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
-	Cvar_SetValue("gl_rtlights", 0);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("r_legacy", 0);
 
@@ -1637,13 +1475,11 @@ void R_SetHigh( void )
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_parallaxmaps", 1);
-	Cvar_SetValue("gl_specular", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
-	Cvar_SetValue("gl_rtlights", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("r_legacy", 0);
 
@@ -1669,13 +1505,11 @@ void R_SetHighest( void )
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_shadowmaps", 1);
 	Cvar_SetValue("gl_parallaxmaps", 1);
-	Cvar_SetValue("gl_specular", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
-	Cvar_SetValue("gl_shadows", 3);
+	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 1);
-	Cvar_SetValue("gl_rtlights", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("r_legacy", 0);
 
@@ -1732,8 +1566,6 @@ int R_Init( void *hinstance, void *hWnd )
 	Draw_GetPalette ();
 
 	R_Register();
-
-	VLight_Init();
 
 	// initialize our QGL dynamic bindings
 	if ( !QGL_Init( gl_driver->string ) )
@@ -1875,6 +1707,9 @@ int R_Init( void *hinstance, void *hWnd )
 			GL_TEXTURE1 = GL_TEXTURE1_ARB;
 			GL_TEXTURE2 = GL_TEXTURE2_ARB;
 			GL_TEXTURE3 = GL_TEXTURE3_ARB;
+			GL_TEXTURE4 = GL_TEXTURE4_ARB;
+			GL_TEXTURE5 = GL_TEXTURE5_ARB;
+			GL_TEXTURE6 = GL_TEXTURE6_ARB;
 			GL_TEXTURE7 = GL_TEXTURE7_ARB;
 		}
 		else
@@ -2191,11 +2026,14 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_heightTexture = glGetUniformLocationARB( g_programObj, "HeightTexture" );
 		g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
 		g_location_normalTexture = glGetUniformLocationARB( g_programObj, "NormalTexture" );
-		g_location_bspShadowmapTexture = glGetUniformLocationARB( g_programObj, "ShadowMap" );
+		g_location_bspShadowmapTexture[0] = glGetUniformLocationARB( g_programObj, "ShadowMap" );
+		g_location_bspShadowmapTexture[1] = glGetUniformLocationARB( g_programObj, "ShadowMap1" );
+		g_location_bspShadowmapTexture[2] = glGetUniformLocationARB( g_programObj, "ShadowMap2" );
+		g_location_bspShadowmapTexture[3] = glGetUniformLocationARB( g_programObj, "ShadowMap3" );
+		g_location_bspShadowmapNum = glGetUniformLocationARB( g_programObj, "ShadowMapNum" );
 		g_location_fog = glGetUniformLocationARB( g_programObj, "FOG" );
 		g_location_parallax = glGetUniformLocationARB( g_programObj, "PARALLAX" );
 		g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
-		g_location_specular = glGetUniformLocationARB( g_programObj, "SPECULAR" );
 		g_location_shadowmap = glGetUniformLocationARB( g_programObj, "SHADOWMAP" );
 		g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
 		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );

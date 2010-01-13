@@ -613,12 +613,21 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
 #ifdef GL_TEXTURE3
 #undef GL_TEXTURE3
 #endif
+#ifdef GL_TEXTURE4
+#undef GL_TEXTURE4
+#endif
+#ifdef GL_TEXTURE5
+#undef GL_TEXTURE5
+#endif
+#ifdef GL_TEXTURE6
+#undef GL_TEXTURE6
+#endif
 #ifdef GL_TEXTURE7
 #undef GL_TEXTURE7
 #endif
 #endif
 
-extern int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3, GL_TEXTURE7;
+extern int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3, GL_TEXTURE4, GL_TEXTURE5, GL_TEXTURE6, GL_TEXTURE7;
 
 #define  GL_FRAGMENT_PROGRAM_ARB			0x8804 // jitwater
 #define  GL_PROGRAM_FORMAT_ASCII_ARB		0x8875 // jitwater
