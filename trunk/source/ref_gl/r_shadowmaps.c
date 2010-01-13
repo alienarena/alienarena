@@ -417,6 +417,9 @@ void R_DrawDynamicCaster(void)
 		if (currententity->flags & RF_NOSHADOWS || currententity->flags & RF_TRANSLUCENT)
 			continue;
 
+		if(!currententity->model)
+			continue;
+
 		if (currententity->model->type != mod_alias)
 		{
 			continue;
@@ -603,6 +606,9 @@ void R_DrawWorldCaster (void)
 			currententity = &r_newrefdef.entities[i];
 
 			if (currententity->flags & RF_NOSHADOWS || currententity->flags & RF_TRANSLUCENT)
+				continue;
+
+			if(!currententity->model)
 				continue;
 
 			if (currententity->model->type != mod_alias)
