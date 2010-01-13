@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdio.h>
 #include <winsock.h>
 #include <time.h>
+#include <stdlib.h>
 #else
 #include <stdio.h>
 #include <sys/types.h>
@@ -252,8 +253,6 @@ void SendServerListToClient (struct sockaddr_in *from)
 	int				buflen;
 	char			buff[0xFFFF];
 	server_t		*server = &servers;
-	struct sockaddr_in corservers;
-	unsigned int addr;
 
 	buflen = 0;
 	memset (buff, 0, sizeof(buff));
@@ -273,40 +272,7 @@ void SendServerListToClient (struct sockaddr_in *from)
 			buflen += 2;
 		//}
 	}
-    //we shall add the cor servers to list always - ugly but gotta do it.
-/*
-	addr = inet_addr("76.21.130.55");
-	
-	corservers.sin_port = htons (27910);
-	memcpy (buff + buflen, &addr, 4);
-	buflen +=4;
-	memcpy (buff + buflen, &corservers.sin_port, 4);
-	buflen +=2;
-
-	corservers.sin_port = htons (27920);
-	memcpy (buff + buflen, &addr, 4);
-	buflen +=4;
-	memcpy (buff + buflen, &corservers.sin_port, 4);
-	buflen +=2;
-
-	corservers.sin_port = htons (27930);
-	memcpy (buff + buflen, &addr, 4);
-	buflen +=4;
-	memcpy (buff + buflen, &corservers.sin_port, 4);
-	buflen +=2;
-
-	corservers.sin_port = htons (27940);
-	memcpy (buff + buflen, &addr, 4);
-	buflen +=4;
-	memcpy (buff + buflen, &corservers.sin_port, 4);
-	buflen +=2;
-
-	corservers.sin_port = htons (27915);
-	memcpy (buff + buflen, &addr, 4);
-	buflen +=4;
-	memcpy (buff + buflen, &corservers.sin_port, 4);
-	buflen +=2;
-*/
+   
 	//dprintf ("[I] query response (%d bytes) sent to %s:%d\n", buflen, inet_ntoa (from->sin_addr), ntohs (from->sin_port));
 	
 	if ((sendto (listener, buff, buflen, 0, (struct sockaddr *)from, sizeof(*from))) == SOCKET_ERROR)
@@ -422,13 +388,47 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	}
 }
 
-int main (int argc, char argv[])
+int NET_StringToSockaddr (char *s, struct sockaddr *sadr)
+{
+	struct hostent	*h;
+	char	*colon;
+	char	copy[128];
+	
+	memset (sadr, 0, sizeof(*sadr));
+	((struct sockaddr_in *)sadr)->sin_family = AF_INET;
+	
+	((struct sockaddr_in *)sadr)->sin_port = 0;
+
+	strcpy (copy, s);
+	// strip off a trailing :port if present
+	for (colon = copy ; *colon ; colon++)
+		if (*colon == ':')
+		{
+			*colon = 0;
+			((struct sockaddr_in *)sadr)->sin_port = htons((short)atoi(colon+1));	
+		}
+	
+	if (copy[0] >= '0' && copy[0] <= '9')
+	{
+		*(int *)&((struct sockaddr_in *)sadr)->sin_addr = inet_addr(copy);
+	}
+	else
+	{
+		if (! (h = gethostbyname(copy)) )
+			return 0;
+		*(int *)&((struct sockaddr_in *)sadr)->sin_addr = *(int *)h->h_addr_list[0];
+	}
+	
+	return 1;
+}
+
+main (int argc, char *argv[])
 {
 	int len;
 	int fromlen;
 	struct sockaddr_in from;
 		
-	printf ("crmaster 0.0.3\n(c) 2004 COR Entertainment\n\n");
+	printf ("crmaster 0.0.4\n(c) 2010 COR Entertainment\n\n");
 
 #ifdef WIN32
 	WSAStartup ((WORD)MAKEWORD (1,1), &ws);
@@ -441,7 +441,14 @@ int main (int argc, char argv[])
 
 	listenaddress.sin_family = AF_INET;
 	listenaddress.sin_port = htons(27900);
-	listenaddress.sin_addr.s_addr = INADDR_ANY; 
+
+	//Allow specifying of IP to bind
+	if (!NET_StringToSockaddr (argv[1], (struct sockaddr *)&listenaddress)) {
+		printf("[E] Bad address %s, using localhost\n", argv[1]);
+		listenaddress.sin_addr.s_addr = INADDR_ANY;
+	}
+	else
+		printf("Using IP %s\n", argv[1]);
 
 	if ((bind (listener, (struct sockaddr *)&listenaddress, sizeof(listenaddress))) == SOCKET_ERROR)
 	{
