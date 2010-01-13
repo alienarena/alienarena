@@ -22,8 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111 - 1307, USA.
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-#define SHADOW_MAP_RATIO 1.0
-
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 
 // GL_EXT_framebuffer_object
@@ -55,7 +53,8 @@ void            (APIENTRY * qglGenerateMipmapEXT) (GLenum target);
 // GL_EXT_framebuffer_blit
 void			(APIENTRY * qglBlitFramebufferEXT) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 
-#define MAX_GROUPS 16
+GLuint	fboId[4];
+CasterGroup_t ShadowCasterGroups[40];
 
 void getOpenGLFunctionPointers(void)
 {
@@ -68,8 +67,9 @@ void getOpenGLFunctionPointers(void)
 
 void generateShadowFBO()
 {
-	int shadowMapWidth = vid.width * SHADOW_MAP_RATIO;
-	int shadowMapHeight = vid.height * SHADOW_MAP_RATIO;
+	int shadowMapWidth = vid.width * r_shadowmapratio->value;
+	int shadowMapHeight = vid.height * r_shadowmapratio->value;
+	int i;
 	
 	GLenum FBOstatus;
 
@@ -80,31 +80,34 @@ void generateShadowFBO()
 		return;
 	}
 
-	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
+	for(i = 0; i < 4; i++) {
 
-	// GL_LINEAR does not make sense for depth texture. However, next tutorial shows usage of GL_LINEAR and PCF
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		
-	// Remove artefact on the edges of the shadowmap
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
-		
-	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available 
-	qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
-	qglBindTexture(GL_TEXTURE_2D, 0);
+		qglBindTexture(GL_TEXTURE_2D, depthtextures[i].r_depthtexture->texnum);
 
-	// create a framebuffer object
-	qglGenFramebuffersEXT(1, &fboId);
+		// GL_LINEAR does not make sense for depth texture. However, next tutorial shows usage of GL_LINEAR and PCF
+		qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId);
+		// Remove artifact on the edges of the shadowmap
+		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+		qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+			
+		// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available 
+		qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+		qglBindTexture(GL_TEXTURE_2D, 0);
 
-	// Instruct openGL that we won't bind a color texture with the currently binded FBO
-	qglDrawBuffer(GL_NONE);
-	qglReadBuffer(GL_NONE);
-		
-	// attach the texture to FBO depth attachment point
-	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
+		// create a framebuffer object
+		qglGenFramebuffersEXT(1, &fboId[i]);
+				
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[i]);
+
+		// Instruct openGL that we won't bind a color texture with the currently binded FBO
+		qglDrawBuffer(GL_NONE);
+		qglReadBuffer(GL_NONE);
+			
+		// attach the texture to FBO depth attachment point
+		qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, depthtextures[i].r_depthtexture->texnum, 0);
+	}
 		
 	// check FBO status
 	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
@@ -119,7 +122,9 @@ void generateShadowFBO()
 }
 #define M3D_INV_PI_DIV_180 (57.2957795130823229)
 #define m3dRadToDeg(x)	((x)*M3D_INV_PI_DIV_180)
-void setupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
+
+//to do - make sure this is still good for bsp geometry
+void setupDynamicMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
 {
 
 	qglMatrixMode(GL_PROJECTION);
@@ -129,8 +134,29 @@ void setupMatrices(float position_x,float position_y,float position_z,float look
 	qglLoadIdentity();
 	gluLookAt(position_x,position_y,position_z,lookAt_x,lookAt_y,lookAt_z,0,1,0);
 }
+void setupMatrices(vec3_t lightPosition, vec3_t lookAt)
+{
+	float fieldOfView;
+	float lightToSceneDistance;
+	vec3_t dist;
 
-void setTextureMatrix()
+	VectorSubtract(lightPosition, lookAt, dist);
+
+	lightToSceneDistance = VectorLength(dist);
+
+	//fov is key, so this region needs to be made precise in relation to true scene
+
+	fieldOfView = (GLfloat)m3dRadToDeg(2.0f * atan(2000 / lightToSceneDistance));
+
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity();
+	MYgluPerspective(fieldOfView,vid.width/vid.height,4.0f,4096.0f);
+	qglMatrixMode(GL_MODELVIEW);
+	qglLoadIdentity();
+	gluLookAt(lightPosition[0],lightPosition[1],lightPosition[2],lookAt[0],lookAt[1],lookAt[2],0,1,0);
+}
+
+void setTextureMatrix(int depthtexnum)
 {
 	static double modelView[16];
 	static double projection[16];
@@ -147,8 +173,21 @@ void setTextureMatrix()
 	qglGetDoublev(GL_PROJECTION_MATRIX, projection);
 		
 	qglMatrixMode(GL_TEXTURE);
-	qglActiveTextureARB(GL_TEXTURE7); 
-	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum); 
+	switch(depthtexnum) {
+		case 0:
+			qglActiveTextureARB(GL_TEXTURE4);
+			break;
+		case 1:
+			qglActiveTextureARB(GL_TEXTURE5);
+			break;
+		case 2:
+			qglActiveTextureARB(GL_TEXTURE6);
+			break;
+		case 3:
+			qglActiveTextureARB(GL_TEXTURE7);
+			break;
+	}  
+	qglBindTexture(GL_TEXTURE_2D, depthtextures[depthtexnum].r_depthtexture->texnum);
 
 	qglLoadIdentity();	
 	qglLoadMatrixd(bias);
@@ -306,3 +345,330 @@ void R_DrawShadowMapWorld (void)
 	R_RecursiveShadowMapWorldNode (r_worldmodel->nodes, 15);
 }
 
+//this will always use the last FBO
+void R_DrawDynamicCaster(void)
+{
+	int			sv_lnum = 0, lnum, i;
+	vec3_t		lightVec, dist, mins, maxs;
+	dlight_t	*dl;
+	float		add, brightest = 0;
+	trace_t		r_trace;
+
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs, 0, 0, 0);
+
+	//get avg of dynamic lights that are nearby enough to matter.
+	dl = r_newrefdef.dlights;
+	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
+	{
+		VectorSubtract (r_origin, dl->origin, lightVec);
+		add = dl->intensity - VectorLength(lightVec)/10;
+		if (add > brightest) //only bother with lights close by
+		{
+			brightest = add;
+			sv_lnum = lnum; //remember the position of most influencial light
+		}
+	}
+	if(brightest > 0) { //we have a light
+		dl = r_newrefdef.dlights;
+		dl += sv_lnum; //our most influential light
+	}
+	else
+		return; 
+
+	qglBindTexture(GL_TEXTURE_2D, depthtextures[3].r_depthtexture->texnum);
+
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[3]); 
+	
+	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
+	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));  //for now
+
+	// Clear previous frame values
+	qglClear( GL_DEPTH_BUFFER_BIT);
+		
+	//Disable color rendering, we only want to write to the Z-Buffer
+	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); 
+		
+	// Culling switching, rendering only frontfaces - to do - really?
+	qglCullFace(GL_BACK);
+
+	// attach the texture to FBO depth attachment point
+	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, depthtextures[3].r_depthtexture->texnum, 0);
+			
+	//set camera to look back from light to player, keeping z at light level
+	//to do - this really isn't right is it - camera should be looking down from light
+	setupDynamicMatrices(dl->origin[0],dl->origin[1],dl->origin[2]+64,dl->origin[0],dl->origin[1],dl->origin[2]-64);
+
+	qglEnable( GL_POLYGON_OFFSET_FILL );
+    qglPolygonOffset( 0.5f, 0.5f );
+    
+	//render world - very basic geometry
+	R_DrawShadowMapWorld();
+
+	//render entities near light
+	for (i=0 ; i<r_newrefdef.num_entities ; i++)
+	{
+
+		float thresh, offset;
+		vec3_t temp;
+		
+		currententity = &r_newrefdef.entities[i];
+
+		if (currententity->flags & RF_NOSHADOWS || currententity->flags & RF_TRANSLUCENT)
+			continue;
+
+		if (currententity->model->type != mod_alias)
+		{
+			continue;
+		}
+			
+		//distance from light, if too far, don't render(to do - check against brightness for dist!)
+		VectorSubtract(dl->origin, currententity->origin, dist);
+		if(VectorLength(dist) > 256.0f)
+			continue;						
+	
+		//trace visibility from light - we don't render objects the light doesn't hit!
+		r_trace = CM_BoxTrace(dl->origin, currententity->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+		if(r_trace.fraction != 1.0)
+			continue;
+
+		currentmodel = currententity->model;
+
+		//make sure the entity is at a reasonable angle to the light source.  We don't want extreme angles producing giant shadows
+		//as this will cause strange artifacts.
+		VectorCopy(dl->origin, temp);
+		temp[2] = currententity->origin[2];
+		
+		VectorSubtract(temp, currententity->origin, dist);
+			
+		// Only player models have these frames, which need to account for jump animations that often extend beyond original bbox calcs
+		// hacky, but necessary.
+		if(currententity->frame > 65 && currententity->frame < 69)
+			offset = currentmodel->maxs[2] + 42;
+		else				
+			offset = currentmodel->maxs[2];
+		thresh = dl->origin[2]+64 - (currententity->origin[2] + offset);
+		if(VectorLength(dist) > 4.75f * thresh) { //within a good angle of light source
+			continue; 
+		}		
+
+		//get view distance, set lod if available
+		VectorSubtract(r_origin, currententity->origin, dist);
+		if(VectorLength(dist) > 300) {
+			if(currententity->lod2)
+				currentmodel = currententity->lod2;
+		}
+		else if(VectorLength(dist) > 100) {
+			if(currententity->lod1) 
+				currentmodel = currententity->lod1;
+		}
+		
+		R_DrawAliasModelCaster (currententity);
+	}
+	
+	setTextureMatrix(3);
+
+	qglDepthMask (1);		// back to writing  
+	
+	qglPolygonOffset( 0.0f, 0.0f );
+    qglDisable( GL_POLYGON_OFFSET_FILL );
+
+}
+
+int distComp(const CasterGroup_t *a,const CasterGroup_t *b) 
+{
+  if (a->dist==b->dist)
+    return 0;
+  else
+    if (a->dist < b->dist)
+        return -1;
+     else
+      return 1;
+}
+
+void R_DrawWorldCaster (void)
+{
+	int			i, j;
+	vec3_t		dist, lookAt, mins, maxs;
+	trace_t		r_trace;
+	int			lnum = 0; 
+	int			groupnum = 0;
+	int			valid = 0;
+	qboolean	doneShadowGroups = false;
+	qboolean	lightWasGrouped = false;
+
+	if (!r_drawentities->value)
+		return;
+
+	//Com_Printf("active shadowmaps: %i\n", r_shadowmapcount);
+
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs, 0, 0, 0);
+
+	//to do - move light grouping routine to r_model.c at map load
+	for (i=0; i<r_numWorldLights; i++) { 
+		r_worldLights[i].grouped = false;
+	}
+
+	while(!doneShadowGroups) {	
+
+		lightWasGrouped = false;
+		for (i=0; i<r_numWorldLights; i++) {
+
+			if(!lnum && !r_worldLights[i].grouped) { //none in group yet, first light establishes the initial origin of the group
+				VectorCopy(r_worldLights[i].origin, ShadowCasterGroups[groupnum].group_origin);
+				VectorCopy(r_worldLights[i].origin, ShadowCasterGroups[groupnum].accum_origin);
+			}
+
+			VectorSubtract(ShadowCasterGroups[groupnum].group_origin, r_worldLights[i].origin, dist);
+			r_trace = CM_BoxTrace(ShadowCasterGroups[groupnum].group_origin, r_worldLights[i].origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+				
+			if(!r_worldLights[i].grouped && (lnum < r_numWorldLights) && r_trace.fraction == 1.0 && (VectorLength(dist) < 512.0f)) { 
+				r_worldLights[i].grouped = true;
+				VectorAdd(r_worldLights[i].origin, ShadowCasterGroups[groupnum].accum_origin, ShadowCasterGroups[groupnum].accum_origin);
+				lnum++;
+				//we grouped an light in this pass
+				lightWasGrouped = true;
+			}			
+		}
+		//we've reach the end, start a new group
+		VectorScale(ShadowCasterGroups[groupnum].accum_origin, 1.0/(float)(lnum+1), ShadowCasterGroups[groupnum].accum_origin);
+		VectorCopy(ShadowCasterGroups[groupnum].accum_origin, ShadowCasterGroups[groupnum].group_origin);
+
+		//record distance from pov
+		VectorSubtract(ShadowCasterGroups[groupnum].group_origin, r_origin, dist);
+		ShadowCasterGroups[groupnum].dist = VectorLength(dist);
+
+		//if out of frustom and far away, forget this one
+		if((R_CullOrigin(ShadowCasterGroups[groupnum].group_origin) && VectorLength(dist) > 1024.f) || VectorLength(dist) > 1024.f)
+			ShadowCasterGroups[groupnum].dist = 10000.0f; //insane distance to push it to rear
+		else
+			valid++;
+
+		groupnum++;
+		lnum = 0;
+			
+		if(!lightWasGrouped) {
+			doneShadowGroups = true;
+		}
+		
+		if(groupnum > 40) { //limit to 40(theoretically maps could have more, but hey, we gotta have some limit here)
+			doneShadowGroups = true;
+		}
+	}
+	
+	if(valid > 3)
+		r_shadowmapcount = 3;
+	else
+		r_shadowmapcount = valid;
+
+	//sort by distance(every frame)
+	qsort(ShadowCasterGroups, groupnum, sizeof(CasterGroup_t), distComp);
+
+	//Disable color rendering, we only want to write to the Z-Buffer
+	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); 
+			
+	// Culling switching, rendering only backfaces
+	qglEnable(GL_CULL_FACE);
+	qglCullFace(GL_FRONT);
+			
+	//group loop starts here - render 4 closest groups max
+	for(j = 0; j < r_shadowmapcount; j++) {	
+
+		// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
+		qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value)); //first groups will have higher res
+	
+		//render each group to FBO to create separate shadow maps.  Render only the 5 closest groups
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[j]); 
+			
+		qglBindTexture(GL_TEXTURE_2D, depthtextures[j].r_depthtexture->texnum);
+
+		// Clear previous frame values
+		qglClear( GL_DEPTH_BUFFER_BIT);
+
+		// attach the texture to FBO depth attachment point
+		qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, depthtextures[j].r_depthtexture->texnum, 0);
+
+		//set camera for each group
+		VectorCopy(ShadowCasterGroups[j].group_origin, lookAt);
+		lookAt[2] = r_origin[2]-128; //test/tweak if necessary(this is kind of a hack anyway)
+		setupMatrices(ShadowCasterGroups[j].group_origin, lookAt); 
+
+		//check entities near light groups
+		for (i=0 ; i<r_newrefdef.num_entities ; i++)
+		{
+			float thresh, offset;
+			vec3_t temp;
+		
+			currententity = &r_newrefdef.entities[i];
+
+			if (currententity->flags & RF_NOSHADOWS || currententity->flags & RF_TRANSLUCENT)
+				continue;
+
+			if (currententity->model->type != mod_alias)
+			{
+				continue;
+			}
+			
+			//distance from pov, if too far to really see shadow, don't render
+			VectorSubtract(r_origin, currententity->origin, dist);
+			if(VectorLength(dist) > 1024.0f)
+				continue;						
+					
+			//don't render shadows upwards, artifact city
+			if(currententity->origin[2] > ShadowCasterGroups[j].group_origin[2])
+				continue;
+
+
+			//make sure the entity is at a reasonable angle to the light source.  We don't want extreme angles producing giant shadows
+			//as this will cause strange artifacts.
+			VectorCopy(ShadowCasterGroups[j].group_origin, temp);
+			temp[2] = currententity->origin[2];
+		
+			VectorSubtract(temp, currententity->origin, dist);
+			
+			// Only player models have these frames, which need to account for jump animations that often extend beyond original bbox calcs
+			// hacky, but necessary.
+			if(currententity->frame > 65 && currententity->frame < 69)
+				offset = currentmodel->maxs[2] + 42;
+			else				
+				offset = currentmodel->maxs[2];
+			thresh = ShadowCasterGroups[j].group_origin[2] - (currententity->origin[2] + offset);
+			if(VectorLength(dist) > 4.75f * thresh) { //within a good angle of light source
+				continue; 
+			}
+
+			//check overall proximity - nothing too far, nothing too close(prevent artifacts)
+			VectorSubtract(ShadowCasterGroups[j].group_origin, currententity->origin, dist);
+			
+			thresh = VectorLength(dist);
+			
+			if(thresh > 768.0f)
+				continue;
+
+			//trace visibility from light - we don't render objects the light doesn't hit!
+			r_trace = CM_BoxTrace(ShadowCasterGroups[j].group_origin, currententity->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+			if(r_trace.fraction != 1.0)
+				continue;
+
+			currentmodel = currententity->model;
+
+			//get view distance, set lod if available
+			VectorSubtract(r_origin, currententity->origin, dist);
+			if(VectorLength(dist) > 300) {
+				if(currententity->lod2)
+					currentmodel = currententity->lod2;
+			}
+			else if(VectorLength(dist) > 100) {
+				if(currententity->lod1) 
+					currentmodel = currententity->lod1;
+			}
+			
+			R_DrawAliasModelCaster (currententity);
+		}
+		setTextureMatrix(j);	
+	}
+
+	qglDepthMask (1);		// back to writing
+
+}
