@@ -37,6 +37,8 @@ int		mod_numknown;
 // the inline * models from the current map are kept seperate
 model_t	mod_inline[MAX_MOD_KNOWN];
 
+int r_lightgroups;
+
 int		registration_sequence;
 
 #ifdef _WINDOWS
@@ -66,6 +68,62 @@ void Mod_LoadEntityStrn (lump_t *l)
 }
 
 extern char	*CM_EntityString (void);
+
+void R_RegisterLightGroups (void)
+{
+	int			i;
+	vec3_t		dist, mins, maxs;
+	trace_t		r_trace;
+	int			lnum = 0; 
+	qboolean	doneShadowGroups = false;
+	qboolean	lightWasGrouped = false;
+
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs, 0, 0, 0);
+
+	for (i=0; i<r_numWorldLights; i++) { 
+		r_worldLights[i].grouped = false;
+	}
+
+	r_lightgroups = 0;
+
+	while(!doneShadowGroups) {	
+
+		lightWasGrouped = false;
+		for (i=0; i<r_numWorldLights; i++) {
+
+			if(!lnum && !r_worldLights[i].grouped) { //none in group yet, first light establishes the initial origin of the group
+				VectorCopy(r_worldLights[i].origin, ShadowCasterGroups[r_lightgroups].group_origin);
+				VectorCopy(r_worldLights[i].origin, ShadowCasterGroups[r_lightgroups].accum_origin);
+			}
+
+			VectorSubtract(ShadowCasterGroups[r_lightgroups].group_origin, r_worldLights[i].origin, dist);
+			r_trace = CM_BoxTrace(ShadowCasterGroups[r_lightgroups].group_origin, r_worldLights[i].origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+				
+			if(!r_worldLights[i].grouped && (lnum < r_numWorldLights) && r_trace.fraction == 1.0 && (VectorLength(dist) < 512.0f)) { 
+				r_worldLights[i].grouped = true;
+				VectorAdd(r_worldLights[i].origin, ShadowCasterGroups[r_lightgroups].accum_origin, ShadowCasterGroups[r_lightgroups].accum_origin);
+				lnum++;
+				//we grouped an light in this pass
+				lightWasGrouped = true;
+			}			
+		}
+		//we've reach the end, start a new group
+		VectorScale(ShadowCasterGroups[r_lightgroups].accum_origin, 1.0/(float)(lnum+1), ShadowCasterGroups[r_lightgroups].accum_origin);
+		VectorCopy(ShadowCasterGroups[r_lightgroups].accum_origin, ShadowCasterGroups[r_lightgroups].group_origin);
+
+		r_lightgroups++;
+		lnum = 0;
+			
+		if(!lightWasGrouped) {
+			doneShadowGroups = true;
+		}
+		
+		if(r_lightgroups > 38) { //limit to 40(theoretically maps could have more, but hey, we gotta have some limit here)
+			doneShadowGroups = true;
+		}
+	}
+}
 
 /*
 ================
@@ -1936,7 +1994,8 @@ void R_BeginRegistration (char *model)
 	r_viewcluster = -1;
 
 	r_teamColor = 0;
-
+	
+	R_RegisterLightGroups();
 }
 
 /*

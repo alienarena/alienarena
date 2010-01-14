@@ -526,6 +526,7 @@ void R_KillNormalTMUs(void);
 //shadow maps
 extern	cvar_t		*r_shadowmapratio;
 extern  int			r_shadowmapcount;
+extern  int			r_lightgroups;
 typedef struct
 {
 	image_t *r_depthtexture;
@@ -541,7 +542,6 @@ extern			CasterGroup_t ShadowCasterGroups[40];
 extern void		R_DrawAliasModelCaster (entity_t *e);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_DrawWorldCaster (void);
-
 
 //arb fragment
 extern unsigned int g_water_program_id;

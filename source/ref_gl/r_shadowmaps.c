@@ -492,6 +492,7 @@ int distComp(const CasterGroup_t *a,const CasterGroup_t *b)
 void R_DrawWorldCaster (void)
 {
 	int			i, j;
+	CasterGroup_t TempShadowCasterGroups[40];
 	vec3_t		dist, lookAt, mins, maxs;
 	trace_t		r_trace;
 	int			lnum = 0; 
@@ -503,61 +504,22 @@ void R_DrawWorldCaster (void)
 	if (!r_drawentities->value)
 		return;
 
-	//Com_Printf("active shadowmaps: %i\n", r_shadowmapcount);
-
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
 
-	//to do - move light grouping routine to r_model.c at map load
-	for (i=0; i<r_numWorldLights; i++) { 
-		r_worldLights[i].grouped = false;
-	}
+	for(i = 0; i <= r_lightgroups; i++) {
 
-	while(!doneShadowGroups) {	
+		VectorCopy(ShadowCasterGroups[i].group_origin, TempShadowCasterGroups[i].group_origin);
 
-		lightWasGrouped = false;
-		for (i=0; i<r_numWorldLights; i++) {
+		VectorSubtract(TempShadowCasterGroups[i].group_origin, r_origin, dist);
+		TempShadowCasterGroups[i].dist = VectorLength(dist);
 
-			if(!lnum && !r_worldLights[i].grouped) { //none in group yet, first light establishes the initial origin of the group
-				VectorCopy(r_worldLights[i].origin, ShadowCasterGroups[groupnum].group_origin);
-				VectorCopy(r_worldLights[i].origin, ShadowCasterGroups[groupnum].accum_origin);
-			}
-
-			VectorSubtract(ShadowCasterGroups[groupnum].group_origin, r_worldLights[i].origin, dist);
-			r_trace = CM_BoxTrace(ShadowCasterGroups[groupnum].group_origin, r_worldLights[i].origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-				
-			if(!r_worldLights[i].grouped && (lnum < r_numWorldLights) && r_trace.fraction == 1.0 && (VectorLength(dist) < 512.0f)) { 
-				r_worldLights[i].grouped = true;
-				VectorAdd(r_worldLights[i].origin, ShadowCasterGroups[groupnum].accum_origin, ShadowCasterGroups[groupnum].accum_origin);
-				lnum++;
-				//we grouped an light in this pass
-				lightWasGrouped = true;
-			}			
-		}
-		//we've reach the end, start a new group
-		VectorScale(ShadowCasterGroups[groupnum].accum_origin, 1.0/(float)(lnum+1), ShadowCasterGroups[groupnum].accum_origin);
-		VectorCopy(ShadowCasterGroups[groupnum].accum_origin, ShadowCasterGroups[groupnum].group_origin);
-
-		//record distance from pov
-		VectorSubtract(ShadowCasterGroups[groupnum].group_origin, r_origin, dist);
-		ShadowCasterGroups[groupnum].dist = VectorLength(dist);
-
-		//if out of frustom and far away, forget this one
-		if((R_CullOrigin(ShadowCasterGroups[groupnum].group_origin) && VectorLength(dist) > 1024.f) || VectorLength(dist) > 1024.f)
-			ShadowCasterGroups[groupnum].dist = 10000.0f; //insane distance to push it to rear
+		//if out of frustom and far away
+		if((R_CullOrigin(TempShadowCasterGroups[i].group_origin) && TempShadowCasterGroups[i].dist > 1024.f))
+			TempShadowCasterGroups[i].dist = 10000.0f; //insane distance to push it to rear
 		else
 			valid++;
-
-		groupnum++;
-		lnum = 0;
-			
-		if(!lightWasGrouped) {
-			doneShadowGroups = true;
-		}
 		
-		if(groupnum > 40) { //limit to 40(theoretically maps could have more, but hey, we gotta have some limit here)
-			doneShadowGroups = true;
-		}
 	}
 	
 	if(valid > 3)
@@ -566,7 +528,7 @@ void R_DrawWorldCaster (void)
 		r_shadowmapcount = valid;
 
 	//sort by distance(every frame)
-	qsort(ShadowCasterGroups, groupnum, sizeof(CasterGroup_t), distComp);
+	qsort(TempShadowCasterGroups, r_lightgroups+1, sizeof(CasterGroup_t), distComp);
 
 	//Disable color rendering, we only want to write to the Z-Buffer
 	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); 
@@ -575,13 +537,13 @@ void R_DrawWorldCaster (void)
 	qglEnable(GL_CULL_FACE);
 	qglCullFace(GL_FRONT);
 			
-	//group loop starts here - render 4 closest groups max
+	//group loop starts here - render 3 closest groups max
 	for(j = 0; j < r_shadowmapcount; j++) {	
 
 		// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-		qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value)); //first groups will have higher res
+		qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));
 	
-		//render each group to FBO to create separate shadow maps.  Render only the 5 closest groups
+		//render each group to FBO to create separate shadow maps.
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[j]); 
 			
 		qglBindTexture(GL_TEXTURE_2D, depthtextures[j].r_depthtexture->texnum);
@@ -593,9 +555,9 @@ void R_DrawWorldCaster (void)
 		qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, depthtextures[j].r_depthtexture->texnum, 0);
 
 		//set camera for each group
-		VectorCopy(ShadowCasterGroups[j].group_origin, lookAt);
+		VectorCopy(TempShadowCasterGroups[j].group_origin, lookAt);
 		lookAt[2] = r_origin[2]-128; //test/tweak if necessary(this is kind of a hack anyway)
-		setupMatrices(ShadowCasterGroups[j].group_origin, lookAt); 
+		setupMatrices(TempShadowCasterGroups[j].group_origin, lookAt); 
 
 		//check entities near light groups
 		for (i=0 ; i<r_newrefdef.num_entities ; i++)
@@ -622,13 +584,12 @@ void R_DrawWorldCaster (void)
 				continue;						
 					
 			//don't render shadows upwards, artifact city
-			if(currententity->origin[2] > ShadowCasterGroups[j].group_origin[2])
+			if(currententity->origin[2] > TempShadowCasterGroups[j].group_origin[2])
 				continue;
-
 
 			//make sure the entity is at a reasonable angle to the light source.  We don't want extreme angles producing giant shadows
 			//as this will cause strange artifacts.
-			VectorCopy(ShadowCasterGroups[j].group_origin, temp);
+			VectorCopy(TempShadowCasterGroups[j].group_origin, temp);
 			temp[2] = currententity->origin[2];
 		
 			VectorSubtract(temp, currententity->origin, dist);
@@ -639,21 +600,21 @@ void R_DrawWorldCaster (void)
 				offset = currentmodel->maxs[2] + 42;
 			else				
 				offset = currentmodel->maxs[2];
-			thresh = ShadowCasterGroups[j].group_origin[2] - (currententity->origin[2] + offset);
+			thresh = TempShadowCasterGroups[j].group_origin[2] - (currententity->origin[2] + offset);
 			if(VectorLength(dist) > 4.75f * thresh) { //within a good angle of light source
 				continue; 
 			}
 
-			//check overall proximity - nothing too far, nothing too close(prevent artifacts)
-			VectorSubtract(ShadowCasterGroups[j].group_origin, currententity->origin, dist);
+			//check overall proximity
+			VectorSubtract(TempShadowCasterGroups[j].group_origin, currententity->origin, dist);
 			
 			thresh = VectorLength(dist);
-			
+
 			if(thresh > 768.0f)
 				continue;
 
 			//trace visibility from light - we don't render objects the light doesn't hit!
-			r_trace = CM_BoxTrace(ShadowCasterGroups[j].group_origin, currententity->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+			r_trace = CM_BoxTrace(TempShadowCasterGroups[j].group_origin, currententity->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 			if(r_trace.fraction != 1.0)
 				continue;
 
