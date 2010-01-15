@@ -210,7 +210,7 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	int time;
 
 	// don't time shift for mistakes or bots
-	if ( !ent->inuse || !ent->client || ent->is_bot ) {
+	if ( !ent->inuse || !ent->client || ent->is_bot || ent->client->ping <= 0 ) {
 		return;
 	}
  
@@ -277,7 +277,7 @@ Put everyone except for this client back where they were
 void G_UndoTimeShiftFor( edict_t *ent ) {
 
 	// don't un-time shift for mistakes or bots
-	if ( !ent->inuse || !ent->client || (ent->is_bot) ) {
+	if ( !ent->inuse || !ent->client || (ent->is_bot) || ent->client->ping <= 0) {
 		return;
 	}
 
