@@ -1221,6 +1221,9 @@ void ClientEndServerFrame (edict_t *ent)
 	G_SetClientSound (ent);
 
 	G_SetClientFrame (ent);
+	
+	if ( g_antilag->integer)
+		G_StoreHistory( ent );
 
 	VectorCopy (ent->velocity, ent->client->oldvelocity);
 	VectorCopy (ent->client->ps.viewangles, ent->client->oldviewangles);
@@ -1240,8 +1243,5 @@ void ClientEndServerFrame (edict_t *ent)
 	}
 	if (ent->client->chasetoggle == 1)
         CheckDeathcam_Viewent(ent);
-
-	if ( g_antilag->integer)
-		G_StoreHistory( ent );
 }
 
