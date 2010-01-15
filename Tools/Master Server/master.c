@@ -31,19 +31,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdio.h>
 #include <winsock.h>
 #include <time.h>
-#include <stdlib.h>
 #else
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <sys/param.h>
-#include <sys/ioctl.h>
-#include <sys/uio.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <netdb.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -393,47 +387,13 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	}
 }
 
-int NET_StringToSockaddr (char *s, struct sockaddr *sadr)
-{
-	struct hostent	*h;
-	char	*colon;
-	char	copy[128];
-	
-	memset (sadr, 0, sizeof(*sadr));
-	((struct sockaddr_in *)sadr)->sin_family = AF_INET;
-	
-	((struct sockaddr_in *)sadr)->sin_port = 0;
-
-	strcpy (copy, s);
-	// strip off a trailing :port if present
-	for (colon = copy ; *colon ; colon++)
-		if (*colon == ':')
-		{
-			*colon = 0;
-			((struct sockaddr_in *)sadr)->sin_port = htons((short)atoi(colon+1));	
-		}
-	
-	if (copy[0] >= '0' && copy[0] <= '9')
-	{
-		*(int *)&((struct sockaddr_in *)sadr)->sin_addr = inet_addr(copy);
-	}
-	else
-	{
-		if (! (h = gethostbyname(copy)) )
-			return 0;
-		*(int *)&((struct sockaddr_in *)sadr)->sin_addr = *(int *)h->h_addr_list[0];
-	}
-	
-	return 1;
-}
-
-main (int argc, char *argv[])
+int main (int argc, char argv[])
 {
 	int len;
 	int fromlen;
 	struct sockaddr_in from;
 		
-	printf ("crmaster 0.0.4\n(c) 2010 COR Entertainment\n\n");
+	printf ("crmaster 0.0.3\n(c) 2004 COR Entertainment\n\n");
 
 #ifdef WIN32
 	WSAStartup ((WORD)MAKEWORD (1,1), &ws);
@@ -446,14 +406,7 @@ main (int argc, char *argv[])
 
 	listenaddress.sin_family = AF_INET;
 	listenaddress.sin_port = htons(27900);
-
-	//Allow specifying of IP to bind
-	if (!NET_StringToSockaddr (argv[1], (struct sockaddr *)&listenaddress)) {
-		printf("[E] Bad address %s, using localhost\n", argv[1]);
-		listenaddress.sin_addr.s_addr = INADDR_ANY;
-	}
-	else
-		printf("Using IP %s\n", argv[1]);
+	listenaddress.sin_addr.s_addr = INADDR_ANY; 
 
 	if ((bind (listener, (struct sockaddr *)&listenaddress, sizeof(listenaddress))) == SOCKET_ERROR)
 	{
