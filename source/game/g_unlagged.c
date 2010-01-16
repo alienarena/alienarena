@@ -78,6 +78,11 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 
 	char	str[MAX_STRING_CHARS];
 
+	VectorCopy( ent->mins, ent->client->saved.mins );
+	VectorCopy( ent->maxs, ent->client->saved.maxs );
+	VectorCopy( ent->s.origin, ent->client->saved.currentOrigin );
+	ent->client->saved.leveltime = gi.Sys_Milliseconds();
+
 	if(g_antilagdebug->integer > 1) { //debug
 		Com_sprintf(str, sizeof(str), "print \"head: %i, %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i time: %i\n\"",
 			ent->client->historyHead,
@@ -123,15 +128,7 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 
 	// if we got past the first iteration above, we've sandwiched (or wrapped)
 	if ( j != k ) {
-		// make sure it doesn't get re-saved
-		if ( ent->client->saved.leveltime != gi.Sys_Milliseconds() ) {
-			// save the current origin and bounding box
-			VectorCopy( ent->mins, ent->client->saved.mins );
-			VectorCopy( ent->maxs, ent->client->saved.maxs );
-			VectorCopy( ent->s.origin, ent->client->saved.currentOrigin );
-			ent->client->saved.leveltime = gi.Sys_Milliseconds();
-		}
-	
+		
 		// if we haven't wrapped back to the head, we've sandwiched, so
 		// we shift the client's position back to where he was at "time"
 		if ( j != ent->client->historyHead ) {
@@ -210,7 +207,7 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	int time;
 
 	// don't time shift for mistakes or bots
-	if ( !ent->inuse || !ent->client || ent->is_bot || ent->client->ping <= 0 ) {
+	if ( !ent->inuse || !ent->client || ent->is_bot ) {
 		return;
 	}
  
@@ -277,7 +274,7 @@ Put everyone except for this client back where they were
 void G_UndoTimeShiftFor( edict_t *ent ) {
 
 	// don't un-time shift for mistakes or bots
-	if ( !ent->inuse || !ent->client || (ent->is_bot) || ent->client->ping <= 0) {
+	if ( !ent->inuse || !ent->client || (ent->is_bot) ) {
 		return;
 	}
 
