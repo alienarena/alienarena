@@ -226,8 +226,6 @@ Move a client back to where he was before the time shift
 ===================
 */
 void G_UnTimeShiftClient( edict_t *ent ) {
-	// if it was saved
-	if ( ent->client->saved.leveltime == gi.Sys_Milliseconds() ) {
 		// move it back
 		VectorCopy( ent->client->saved.mins, ent->mins );
 		VectorCopy( ent->client->saved.maxs, ent->maxs );
@@ -236,7 +234,6 @@ void G_UnTimeShiftClient( edict_t *ent ) {
 
 		// this will recalculate absmin and absmax
 		gi.linkentity( ent );
-	}
 }
 
 
