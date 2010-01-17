@@ -70,8 +70,7 @@ GLuint		g_tangentSpaceTransform;
 GLuint      g_location_heightTexture;
 GLuint		g_location_lmTexture;
 GLuint		g_location_normalTexture;
-GLuint		g_location_bspShadowmapTexture[4];
-GLuint		g_location_bspShadowmapNum;
+GLuint		g_location_bspShadowmapTexture;
 GLuint		g_location_fog;
 GLuint	    g_location_parallax;
 GLuint		g_location_dynamic;
@@ -1021,9 +1020,10 @@ void R_Clear (void)
 
 	qglDepthRange (gldepthmin, gldepthmax);
 
-	if (have_stencil && gl_shadows->integer) {
+	//our shadow system uses a combo of shadmaps and stencil volumes.
+	if (have_stencil && (gl_shadows->integer || gl_shadowmaps->value)) {
 
-		if(gl_shadows->integer > 2)
+		if(gl_shadowmaps->value)
 			qglClearStencil(0);
 		else
 			qglClearStencil(1);
@@ -1068,8 +1068,6 @@ void R_RenderView (refdef_t *fd)
 		qglEnable(GL_CULL_FACE);
 		
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
-
-		R_DrawWorldCaster(); 
 
 		R_DrawDynamicCaster();
 
@@ -1122,6 +1120,8 @@ void R_RenderView (refdef_t *fd)
 	R_DrawVegetationSurface ();
 	
 	R_DrawEntitiesOnList ();
+
+	R_CastShadow();
 
 	R_DrawViewEntitiesOnList (); 
 
@@ -2026,11 +2026,7 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_heightTexture = glGetUniformLocationARB( g_programObj, "HeightTexture" );
 		g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
 		g_location_normalTexture = glGetUniformLocationARB( g_programObj, "NormalTexture" );
-		g_location_bspShadowmapTexture[0] = glGetUniformLocationARB( g_programObj, "ShadowMap" );
-		g_location_bspShadowmapTexture[1] = glGetUniformLocationARB( g_programObj, "ShadowMap1" );
-		g_location_bspShadowmapTexture[2] = glGetUniformLocationARB( g_programObj, "ShadowMap2" );
-		g_location_bspShadowmapTexture[3] = glGetUniformLocationARB( g_programObj, "ShadowMap3" );
-		g_location_bspShadowmapNum = glGetUniformLocationARB( g_programObj, "ShadowMapNum" );
+		g_location_bspShadowmapTexture = glGetUniformLocationARB( g_programObj, "ShadowMap" );
 		g_location_fog = glGetUniformLocationARB( g_programObj, "FOG" );
 		g_location_parallax = glGetUniformLocationARB( g_programObj, "PARALLAX" );
 		g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
