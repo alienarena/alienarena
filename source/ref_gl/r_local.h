@@ -519,20 +519,15 @@ void R_KillVArrays (void);
 void R_InitQuadVarrays(void);
 void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
-void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean lightmap);
+void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
 
-//shadow maps
+//shadows
 extern	cvar_t		*r_shadowmapratio;
-extern  int			r_shadowmapcount;
 extern  int			r_lightgroups;
-typedef struct
-{
-	image_t *r_depthtexture;
-} glDepthtexture_t;
-extern GLuint	fboId[4];
-extern			glDepthtexture_t depthtextures[4];
+extern GLuint	fboId;
+extern image_t *r_depthtexture;
 typedef struct	ShadowCasterGroup {
 	vec3_t	group_origin;
 	vec3_t	accum_origin;
@@ -541,7 +536,7 @@ typedef struct	ShadowCasterGroup {
 extern			CasterGroup_t ShadowCasterGroups[40];
 extern void		R_DrawAliasModelCaster (entity_t *e);
 extern void		R_DrawDynamicCaster(void);
-extern void		R_DrawWorldCaster (void);
+extern void		R_CastShadow(void);
 
 //arb fragment
 extern unsigned int g_water_program_id;
@@ -562,7 +557,7 @@ extern GLuint		g_tangentSpaceTransform;
 extern GLuint		g_location_heightTexture;
 extern GLuint		g_location_lmTexture;
 extern GLuint		g_location_normalTexture;
-extern GLuint		g_location_bspShadowmapTexture[4];
+extern GLuint		g_location_bspShadowmapTexture;
 extern GLuint		g_location_bspShadowmapNum;
 extern GLuint		g_location_fog;
 extern GLuint		g_location_parallax;

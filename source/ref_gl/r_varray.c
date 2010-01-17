@@ -412,7 +412,7 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 	}
 }
 
-void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean lightmap)
+void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 {
 	glpoly_t *p = surf->polys;
 	float	*v;	
@@ -422,9 +422,7 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean light
 	{
 		// reset pointer and counter
 		VArray = &VArrayVerts[0];
-		VertexCounter = 0;
-
-	
+		VertexCounter = 0;	
 
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
@@ -437,18 +435,13 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll, qboolean light
 			VArray[3] = v[3] + scroll;
 			VArray[4] = v[4];
 
-			if(lightmap) {
-				// lightmap texture coords
-				VArray[5] = v[5];
-				VArray[6] = v[6];
-			}
+			// lightmap texture coords
+			VArray[5] = v[5];
+			VArray[6] = v[6];
 	
 			// nothing else is needed
 			// increment pointer and counter
-			if(lightmap)
-				VArray += VertexSizes[VERT_MULTI_TEXTURED];
-			else
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+			VArray += VertexSizes[VERT_MULTI_TEXTURED];
 			VertexCounter++;
 		}
 

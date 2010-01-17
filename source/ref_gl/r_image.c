@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 image_t		gltextures[MAX_GLTEXTURES];
 image_t		*r_mirrortexture;
-glDepthtexture_t depthtextures[4];
+image_t		*r_depthtexture;
 int			numgltextures;
 int			base_textureid;		// gltextures[i] = base_textureid+i
 
@@ -1645,7 +1645,7 @@ void R_InitMirrorTextures( void )
 void R_InitDepthTextures( void )
 {
 	byte	*data;
-	int		i, size, texture_height, texture_width;
+	int		size, texture_height, texture_width;
 
 	//find closer power of 2 to screen size 
 	for (texture_width = 1;texture_width < viddef.width;texture_width *= 2);
@@ -1660,12 +1660,10 @@ void R_InitDepthTextures( void )
 	//init the framebuffer textures
 	size = texture_width * texture_height * 4;
 
-	for(i = 0; i < 4; i++) {
-		data = malloc( size );
-		memset( data, 255, size );
-		depthtextures[i].r_depthtexture = GL_LoadPic( "***r_depthtexture***", (byte *)data, texture_width, texture_height, it_pic, 3 );
-		free ( data );	
-	}
+	data = malloc( size );
+	memset( data, 255, size );
+	r_depthtexture = GL_LoadPic( "***r_depthtexture***", (byte *)data, texture_width, texture_height, it_pic, 3 );
+	free ( data );	
 }
 
 
