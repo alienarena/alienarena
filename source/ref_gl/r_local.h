@@ -289,8 +289,6 @@ void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type);
-void R_DrawShadowVolume(entity_t * e);
-void R_ShadowBlend(float alpha);
 #ifdef __unix__
 void R_ReadFogScript(char config_file[128]);
 void R_ReadMusicScript(char config_file[128]);
@@ -517,6 +515,7 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 void R_InitVArrays (int varraytype);
 void R_KillVArrays (void);
 void R_InitQuadVarrays(void);
+void R_AddSurfToVArray (msurface_t *surf);
 void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll);
@@ -526,8 +525,8 @@ void R_KillNormalTMUs(void);
 //shadows
 extern	cvar_t		*r_shadowmapratio;
 extern  int			r_lightgroups;
-extern GLuint	fboId;
-extern image_t *r_depthtexture;
+extern  image_t		*r_depthtexture;
+extern GLuint   fboId;
 typedef struct	ShadowCasterGroup {
 	vec3_t	group_origin;
 	vec3_t	accum_origin;
