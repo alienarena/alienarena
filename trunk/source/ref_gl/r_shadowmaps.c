@@ -167,7 +167,7 @@ R_RecursiveWorldNode
 ================
 */
 static vec3_t modelorg;			// relative to viewpoint
-extern void DrawGLPoly (msurface_t *fa, int flags);
+extern void DrawGLTexturelessPoly (msurface_t *fa);
 void R_RecursiveShadowMapWorldNode (mnode_t *node, int clipflags)
 {
 	int			c, side, sidebit;
@@ -276,7 +276,7 @@ void R_RecursiveShadowMapWorldNode (mnode_t *node, int clipflags)
 		{
 			if ( qglMTexCoord2fSGIS && !( surf->flags & SURF_DRAWTURB ) )
 			{
-				DrawGLPoly (surf, surf->texinfo->flags);
+				DrawGLTexturelessPoly (surf);
 			}
 		}
 	}

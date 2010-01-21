@@ -378,13 +378,14 @@ void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolea
 void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 {
 	vec3_t light, temp;
-	int i, o;
+	int i, j;
 	worldLight_t *wl;
 	float cost, sint;
 	float is, it, dist;
 	int worldlight = 0;
+	float numlights, weight;
 	trace_t	r_trace;
-	vec3_t mins, maxs;
+	vec3_t mins, maxs, lightAdd;
 	
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
@@ -394,6 +395,11 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
+
+	//if it's in the dark, no shadow!
+	R_LightPoint (currententity->origin, light, false);
+	if(VectorLength(light) < 0.1)
+		return;
 	
 	VectorClear(light);
 	
@@ -401,6 +407,8 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
     sint =  sin(-currententity->angles[1] / 180 * M_PI);
 
 	//to do - here and most everywhere else, we want to use lightgroups instead
+	numlights = 0;
+	VectorClear(lightAdd);
 	for (i=0; i<r_numWorldLights; i++) {
 
 		wl = &r_worldLights[i];
@@ -419,20 +427,27 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 
 		if (dist > 1500)
 			continue;		// big distance!
-						
-		for (o = 0; o < 3; o++)
-			light[o] = -currententity->origin[o] + wl->origin[o];	
-		
+				
+		//accum and weight
+		weight = (int)250000/dist;
+		for(j = 0; j < 3; j++) 
+			lightAdd[j] += wl->origin[j]*weight;
+		numlights+=weight;	
+
+		worldlight++;			
+	}
+
+	if(worldlight && numlights > 0.0) {
+
+		for(i = 0; i < 3; i++) 
+			light[i] = -currententity->origin[i] + lightAdd[i]/numlights;
+
 		is = light[0], it = light[1];
 		light[0] = (cost * (is - 0) + sint * (0 - it) + 0);
 		light[1] = (cost * (it - 0) + sint * (is - 0) + 0);
 		light[2] += currententity->model->maxs[2] + 56;
-
-		worldlight++;
-			
-	}
-	
-	if (!worldlight) {
+	}	
+	else { //no lights found, create light straight down
 
 		VectorSet(light, 0, 0, 200);
 	

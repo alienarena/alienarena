@@ -122,6 +122,20 @@ void DrawGLPoly (msurface_t *fa, int flags)
 }
 
 /*
+================
+DrawGLTexturelessPoly
+================
+*/
+void DrawGLTexturelessPoly (msurface_t *fa)
+{	
+
+	R_InitVArrays(VERT_NO_TEXTURE);
+	R_AddSurfToVArray (fa);
+	R_KillVArrays();
+
+}
+
+/*
 ** R_DrawTriangleOutlines
 */
 void R_DrawTriangleOutlines (void)
