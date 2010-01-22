@@ -37,6 +37,7 @@ int		mod_numknown;
 // the inline * models from the current map are kept seperate
 model_t	mod_inline[MAX_MOD_KNOWN];
 
+LightGroup_t LightGroups[MAX_LIGHTS];
 int r_lightgroups;
 
 int		registration_sequence;
@@ -93,36 +94,46 @@ void R_RegisterLightGroups (void)
 		for (i=0; i<r_numWorldLights; i++) {
 
 			if(!lnum && !r_worldLights[i].grouped) { //none in group yet, first light establishes the initial origin of the group
-				VectorCopy(r_worldLights[i].origin, ShadowCasterGroups[r_lightgroups].group_origin);
-				VectorCopy(r_worldLights[i].origin, ShadowCasterGroups[r_lightgroups].accum_origin);
+				VectorCopy(r_worldLights[i].origin, LightGroups[r_lightgroups].group_origin);
+				VectorCopy(r_worldLights[i].origin, LightGroups[r_lightgroups].accum_origin);
+				LightGroups[i].avg_intensity = r_worldLights[i].intensity+1.0f;
+				r_worldLights[i].grouped = true;
+				lnum++;
+				lightWasGrouped = true;
 			}
 
-			VectorSubtract(ShadowCasterGroups[r_lightgroups].group_origin, r_worldLights[i].origin, dist);
-			r_trace = CM_BoxTrace(ShadowCasterGroups[r_lightgroups].group_origin, r_worldLights[i].origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+			VectorSubtract(LightGroups[r_lightgroups].group_origin, r_worldLights[i].origin, dist);
+			r_trace = CM_BoxTrace(LightGroups[r_lightgroups].group_origin, r_worldLights[i].origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 				
-			if(!r_worldLights[i].grouped && (lnum < r_numWorldLights) && r_trace.fraction == 1.0 && (VectorLength(dist) < 512.0f)) { 
+			if(!r_worldLights[i].grouped && (lnum < r_numWorldLights) && r_trace.fraction == 1.0f && (VectorLength(dist) < 256.0f)) { 
 				r_worldLights[i].grouped = true;
-				VectorAdd(r_worldLights[i].origin, ShadowCasterGroups[r_lightgroups].accum_origin, ShadowCasterGroups[r_lightgroups].accum_origin);
+				VectorAdd(r_worldLights[i].origin, LightGroups[r_lightgroups].accum_origin, LightGroups[r_lightgroups].accum_origin);
+				LightGroups[r_lightgroups].avg_intensity+=(r_worldLights[i].intensity+1.0f);
 				lnum++;
 				//we grouped an light in this pass
 				lightWasGrouped = true;
-			}			
+			}		
 		}
-		//we've reach the end, start a new group
-		VectorScale(ShadowCasterGroups[r_lightgroups].accum_origin, 1.0/(float)(lnum+1), ShadowCasterGroups[r_lightgroups].accum_origin);
-		VectorCopy(ShadowCasterGroups[r_lightgroups].accum_origin, ShadowCasterGroups[r_lightgroups].group_origin);
-
-		r_lightgroups++;
-		lnum = 0;
-			
-		if(!lightWasGrouped) {
+		
+		if(!lightWasGrouped)
 			doneShadowGroups = true;
+		else {
+			//we've reach the end, start a new group
+			if(lnum) {
+				VectorScale(LightGroups[r_lightgroups].accum_origin, 1.0/(float)(lnum), LightGroups[r_lightgroups].accum_origin);
+				LightGroups[r_lightgroups].avg_intensity /= (float)lnum;
+			}
+			VectorCopy(LightGroups[r_lightgroups].accum_origin, LightGroups[r_lightgroups].group_origin);
+
+			r_lightgroups++;
+			lnum = 0;	
 		}
 		
 		if(r_lightgroups > 38) { //limit to 40(theoretically maps could have more, but hey, we gotta have some limit here)
 			doneShadowGroups = true;
-		}
+		}		
 	}
+	Com_Printf("Condensed %i worldlights into %i lightgroups\n", r_numWorldLights, r_lightgroups);
 }
 
 /*
