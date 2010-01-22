@@ -20,10 +20,6 @@ float lookupDynshadow( void )
 	vec4 ShadowCoord;
 	vec4 shadowCoordinateWdivide;
 	float distanceFromLight;
-    vec4 tempShadowCoord;
-    float shadow1 = 1.0;
-    float shadow2 = 1.0;
-    float shadow3 = 1.0;
     float shadows = 1.0;
     
 	if(SHADOWMAP > 0 && DYNAMIC > 0) {
@@ -37,30 +33,7 @@ float lookupDynshadow( void )
       distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
 	            
       if (ShadowCoord.w > 0.0)
-          shadow1 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;
-      
-      //PCF
-      tempShadowCoord = ShadowCoord + vec4(.1, 0, 0, 0);    
-      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;
-      // Used to lower moiré pattern and self-shadowing
-      shadowCoordinateWdivide.z += 0.0005;   
-      
-      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
-                
-      if (ShadowCoord.w > 0.0)
-          shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;
-          
-      tempShadowCoord = ShadowCoord + vec4(0, .1, 0, 0);    
-      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;
-      // Used to lower moiré pattern and self-shadowing
-      shadowCoordinateWdivide.z += 0.0005;   
-      
-      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
-                
-      if (ShadowCoord.w > 0.0)
-          shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;   
-      
-      shadows = 0.33 * (shadow1 + shadow2 + shadow3);
+		shadows = distanceFromLight < shadowCoordinateWdivide.z ? 0.6 : 1.0 ;
     }    
     
    return shadows;
