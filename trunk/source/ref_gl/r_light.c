@@ -1040,10 +1040,10 @@ float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type)
 		}
 
 		//cap some limits of lightness, darkness, subtley.
-		if (intens < 0.3)
+		if (intens < 0.1)
+			intens = 0.1;
+		if (intens > 0.3)
 			intens = 0.3;
-		if (intens > 0.5)
-			intens = 0.5;
 	}
 
 	// Barnes improved code
