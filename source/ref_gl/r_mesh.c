@@ -112,13 +112,6 @@ void GL_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, float 
         }
 }
 
-/*
-=============
-GL_DrawAliasFrameLerp
-
-interpolates between two frames and origins
-=============
-*/
 float calcEntAlpha (float alpha, vec3_t point)
 {
 	float newAlpha;
@@ -183,7 +176,7 @@ void GL_GetLightVals()
 			if(dist == 0) 
 				dist = 1;
 			dist = dist*dist;
-			weight = (int)250000/(dist/LightGroups[i].avg_intensity);
+			weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
 			for(j = 0; j < 3; j++) 
 				lightAdd[j] += LightGroups[i].group_origin[j]*weight;
 			numlights+=weight;				
@@ -218,8 +211,8 @@ void GL_GetLightVals()
 					}
 					//make dynamic lights more influential than world
 					for(j = 0; j < 3; j++)
-						lightAdd[j] += temp[j]*100;
-					numlights+=100;
+						lightAdd[j] += temp[j]*100*dl->intensity;
+					numlights+=100*dl->intensity;
                 
 					VectorSubtract (dl->origin, currententity->origin, temp);
 					dynFactor += (dl->intensity/20.0)/VectorLength(temp);
@@ -1981,9 +1974,9 @@ void R_DrawAliasModel (entity_t *e)
 			qglEnable (GL_BLEND);
 
 			if (currententity->flags & RF_TRANSLUCENT)
-				qglColor4f (0,0,0,0.4 * currententity->alpha); //Knightmare- variable alpha
+				qglColor4f (0,0,0,0.3 * currententity->alpha); //Knightmare- variable alpha
 			else
-				qglColor4f (0,0,0,0.4);
+				qglColor4f (0,0,0,0.3);
 			
 			if(e->frame == 0 && currentmodel->num_frames == 1)
 				R_DrawAliasShadow (paliashdr, false);

@@ -93,10 +93,13 @@ void R_RegisterLightGroups (void)
 		lightWasGrouped = false;
 		for (i=0; i<r_numWorldLights; i++) {
 
+			if(r_worldLights[i].grouped)
+				continue;			
+
 			if(!lnum && !r_worldLights[i].grouped) { //none in group yet, first light establishes the initial origin of the group
 				VectorCopy(r_worldLights[i].origin, LightGroups[r_lightgroups].group_origin);
 				VectorCopy(r_worldLights[i].origin, LightGroups[r_lightgroups].accum_origin);
-				LightGroups[i].avg_intensity = r_worldLights[i].intensity+1.0f;
+				LightGroups[r_lightgroups].avg_intensity = r_worldLights[i].intensity;
 				r_worldLights[i].grouped = true;
 				lnum++;
 				lightWasGrouped = true;
@@ -108,7 +111,7 @@ void R_RegisterLightGroups (void)
 			if(!r_worldLights[i].grouped && (lnum < r_numWorldLights) && r_trace.fraction == 1.0f && (VectorLength(dist) < 256.0f)) { 
 				r_worldLights[i].grouped = true;
 				VectorAdd(r_worldLights[i].origin, LightGroups[r_lightgroups].accum_origin, LightGroups[r_lightgroups].accum_origin);
-				LightGroups[r_lightgroups].avg_intensity+=(r_worldLights[i].intensity+1.0f);
+				LightGroups[r_lightgroups].avg_intensity+=(r_worldLights[i].intensity);
 				lnum++;
 				//we grouped an light in this pass
 				lightWasGrouped = true;
@@ -124,16 +127,14 @@ void R_RegisterLightGroups (void)
 				LightGroups[r_lightgroups].avg_intensity /= (float)lnum;
 			}
 			VectorCopy(LightGroups[r_lightgroups].accum_origin, LightGroups[r_lightgroups].group_origin);
-
 			r_lightgroups++;
+			if(r_lightgroups > MAX_LIGHTS) 
+				doneShadowGroups = true;
+	
 			lnum = 0;	
-		}
-		
-		if(r_lightgroups > 38) { //limit to 40(theoretically maps could have more, but hey, we gotta have some limit here)
-			doneShadowGroups = true;
 		}		
 	}
-	Com_Printf("Condensed %i worldlights into %i lightgroups\n", r_numWorldLights, r_lightgroups);
+	Com_Printf("Condensed ^2%i worldlights into ^2%i lightgroups\n", r_numWorldLights, r_lightgroups);
 }
 
 /*

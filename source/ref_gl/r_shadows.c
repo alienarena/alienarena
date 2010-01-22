@@ -422,7 +422,7 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 		dist = VectorLength(temp);
 				
 		//accum and weight
-		weight = (int)250000/(dist/LightGroups[i].avg_intensity);
+		weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
 		for(j = 0; j < 3; j++) 
 			lightAdd[j] += LightGroups[i].group_origin[j]*weight;
 		numlights+=weight;
