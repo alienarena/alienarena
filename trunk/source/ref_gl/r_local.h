@@ -527,12 +527,13 @@ extern	cvar_t		*r_shadowmapratio;
 extern  int			r_lightgroups;
 extern  image_t		*r_depthtexture;
 extern GLuint   fboId;
-typedef struct	ShadowCasterGroup {
+typedef struct	LightGroup {
 	vec3_t	group_origin;
 	vec3_t	accum_origin;
+	float	avg_intensity;
 	float	dist;
-} CasterGroup_t;
-extern			CasterGroup_t ShadowCasterGroups[40];
+} LightGroup_t;
+extern			LightGroup_t LightGroups[MAX_LIGHTS];
 extern void		R_DrawAliasModelCaster (entity_t *e);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_CastShadow(void);

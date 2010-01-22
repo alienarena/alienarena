@@ -152,7 +152,6 @@ void GL_GetLightVals()
 {
 	int i, j, lnum;
 	dlight_t	*dl;
-	worldLight_t *wl;
 	float dist, xdist, ydist;
 	vec3_t	temp, lightAdd;
 	trace_t r_trace;
@@ -168,27 +167,25 @@ void GL_GetLightVals()
 
 	numlights = 0;
 	VectorClear(lightAdd);
-	for (i=0; i<r_numWorldLights; i++) {
-
-		wl = &r_worldLights[i];
+	for (i=0; i<r_lightgroups; i++) {
 
 		VectorCopy(currententity->origin, temp);
 		temp[2] += 24; //generates more consistent tracing
 
-		if((currententity->flags & RF_WEAPONMODEL) && (wl->origin[2] > currententity->origin[2]))
+		if((currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > currententity->origin[2]))
 			r_trace.fraction = 1.0; //don't do traces for weapon models, not smooth enough
 		else
-			r_trace = CM_BoxTrace(temp, wl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+			r_trace = CM_BoxTrace(temp, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 		
 		if(r_trace.fraction == 1.0) {
-			VectorSubtract(currententity->origin, wl->origin, temp);
+			VectorSubtract(currententity->origin, LightGroups[i].group_origin, temp);
 			dist = VectorLength(temp);
-			if(dist == 0)
+			if(dist == 0) 
 				dist = 1;
 			dist = dist*dist;
-			weight = (int)250000/dist;
+			weight = (int)250000/(dist/LightGroups[i].avg_intensity);
 			for(j = 0; j < 3; j++) 
-				lightAdd[j] += wl->origin[j]*weight;
+				lightAdd[j] += LightGroups[i].group_origin[j]*weight;
 			numlights+=weight;				
 		}
 	}

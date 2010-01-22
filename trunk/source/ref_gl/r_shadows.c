@@ -378,8 +378,7 @@ void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolea
 void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 {
 	vec3_t light, temp;
-	int i, j;
-	worldLight_t *wl;
+	int i, j, o;
 	float cost, sint;
 	float is, it, dist;
 	int worldlight = 0;
@@ -405,49 +404,45 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 	
 	cost =  cos(-currententity->angles[1] / 180 * M_PI), 
     sint =  sin(-currententity->angles[1] / 180 * M_PI);
-
-	//to do - here and most everywhere else, we want to use lightgroups instead
+	
 	numlights = 0;
 	VectorClear(lightAdd);
-	for (i=0; i<r_numWorldLights; i++) {
+	for (i=0; i<r_lightgroups; i++) {
 
-		wl = &r_worldLights[i];
-
-		if(wl->origin[2] < currententity->origin[2])
+		if(LightGroups[i].group_origin[2] < currententity->origin[2])
 			continue; //don't bother with world lights below the ent, creates undesirable shadows
 
 		//need a trace
-		r_trace = CM_BoxTrace(currententity->origin, wl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+		r_trace = CM_BoxTrace(currententity->origin, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			continue;
 
-		VectorSubtract(wl->origin, currententity->origin, temp);
+		VectorSubtract(LightGroups[i].group_origin, currententity->origin, temp);
 
 		dist = VectorLength(temp);
-
-		if (dist > 1500)
-			continue;		// big distance!
 				
 		//accum and weight
-		weight = (int)250000/dist;
+		weight = (int)250000/(dist/LightGroups[i].avg_intensity);
 		for(j = 0; j < 3; j++) 
-			lightAdd[j] += wl->origin[j]*weight;
-		numlights+=weight;	
+			lightAdd[j] += LightGroups[i].group_origin[j]*weight;
+		numlights+=weight;
+		
+		if(numlights > 0.0) {
 
-		worldlight++;			
+			for(o = 0; o < 3; o++) 
+				light[o] = -currententity->origin[o] + lightAdd[o]/numlights;
+
+			is = light[0], it = light[1];
+			light[0] = (cost * (is - 0) + sint * (0 - it) + 0);
+			light[1] = (cost * (it - 0) + sint * (is - 0) + 0);
+			light[2] += currententity->model->maxs[2] + 56;
+		}	
+
+		worldlight++;		
 	}
 
-	if(worldlight && numlights > 0.0) {
-
-		for(i = 0; i < 3; i++) 
-			light[i] = -currententity->origin[i] + lightAdd[i]/numlights;
-
-		is = light[0], it = light[1];
-		light[0] = (cost * (is - 0) + sint * (0 - it) + 0);
-		light[1] = (cost * (it - 0) + sint * (is - 0) + 0);
-		light[2] += currententity->model->maxs[2] + 56;
-	}	
-	else { //no lights found, create light straight down
+	
+	if(!worldlight) { //no lights found, create light straight down
 
 		VectorSet(light, 0, 0, 200);
 	
