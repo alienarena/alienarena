@@ -634,12 +634,13 @@ typedef struct
 #define RF_SHELL_RED		1024
 #define	RF_SHELL_GREEN		2048
 #define RF_SHELL_BLUE		4096
-#define RF_IR_VISIBLE		0x00008000		// 32768
+#define RF_BOBBING			0x00008000		// 32768
 #define	RF_SHELL_DOUBLE		0x00010000		// 65536
 #define	RF_SHELL_HALF_DAM	0x00020000
 #define RF_NOSHADOWS		0x00040000 //use this one for turning off shadows, etc.
 #define RF_MONSTER  		0x00080000
 #define RF_MENUMODEL		0x01280000 //for player menu
+
 
 // player_state_t->refdef flags
 #define	RDF_UNDERWATER		1		// warp the screen as apropriate
