@@ -377,12 +377,13 @@ void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolea
 
 void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 {
-	vec3_t light, temp;
+	vec3_t light, temp, tempOrg;
 	int i, j, o;
 	float cost, sint;
 	float is, it, dist;
 	int worldlight = 0;
 	float numlights, weight;
+	float bob;
 	trace_t	r_trace;
 	vec3_t mins, maxs, lightAdd;
 	
@@ -399,6 +400,14 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 	R_LightPoint (currententity->origin, light, false);
 	if(VectorLength(light) < 0.1)
 		return;
+
+	if(currententity->flags & RF_BOBBING) 
+		bob = currententity->bob;
+	else
+		bob = 0;
+
+	VectorCopy(currententity->origin, tempOrg);
+	tempOrg[2] -= bob;
 	
 	VectorClear(light);
 	
@@ -407,14 +416,14 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 	
 	numlights = 0;
 	VectorClear(lightAdd);
-	for (i=0; i<r_lightgroups; i++) {
+	for (i=0; i<r_lightgroups; i++) {	
 
-		if(LightGroups[i].group_origin[2] < currententity->origin[2])
+		if(LightGroups[i].group_origin[2] < currententity->origin[2] - bob)
 			continue; //don't bother with world lights below the ent, creates undesirable shadows
 
 		//need a trace(not for self model, too jerky when lights are blocked and reappear)
 		if(!(currententity->flags & RF_VIEWERMODEL)) {
-			r_trace = CM_BoxTrace(currententity->origin, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+			r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 			if(r_trace.fraction != 1.0)
 				continue;
 		}

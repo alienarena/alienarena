@@ -738,12 +738,6 @@ void CL_AddPacketEntities (frame_t *frame)
 			}
 		}
 
-		// render effects (fullbright, translucent, etc)
-		if ((effects & EF_COLOR_SHELL))
-			ent.flags = 0;	// renderfx go on color shell entity
-		else
-			ent.flags = renderfx;
-
 		// calculate angles
 		if (effects & EF_ROTATE)
 		{	// some bonus items auto-rotate
@@ -756,6 +750,9 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.oldorigin[2] += bob;
 			ent.origin[2] += bob;
 
+			ent.bob = bob;
+
+			renderfx |= RF_BOBBING;
 		}
 		else
 		{	// interpolate angles
@@ -768,6 +765,12 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.angles[i] = LerpAngle (a2, a1, cl.lerpfrac);
 			}
 		}
+
+		// render effects (fullbright, translucent, etc)
+		if ((effects & EF_COLOR_SHELL))
+			ent.flags = 0;	// renderfx go on color shell entity
+		else
+			ent.flags = renderfx;
 
 		if (s1->number == cl.playernum+1)
 		{

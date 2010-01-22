@@ -180,6 +180,8 @@ typedef struct entity_s
 
 	int		team;
 
+	float	bob;
+
 	struct	rscript_t *script;
 
 } entity_t;

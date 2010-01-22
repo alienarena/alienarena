@@ -1801,17 +1801,6 @@ void R_DrawAliasModel (entity_t *e)
 		}
 	}
 
-// =================
-// PGM	ir goggles color override
-	if ( r_newrefdef.rdflags & RDF_IRGOGGLES && currententity->flags & RF_IR_VISIBLE)
-	{
-		shadelight[0] = 1.0;
-		shadelight[1] = 0.0;
-		shadelight[2] = 0.0;
-	}
-// PGM
-// =================
-
 	shadedots = r_avertexnormal_dots[((int)(currententity->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
 
 	//
