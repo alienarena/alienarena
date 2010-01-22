@@ -413,7 +413,7 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 			continue; //don't bother with world lights below the ent, creates undesirable shadows
 
 		//need a trace(not for self model, too jerky when lights are blocked and reappear)
-		if(!currententity->flags & RF_VIEWERMODEL) {
+		if(!(currententity->flags & RF_VIEWERMODEL)) {
 			r_trace = CM_BoxTrace(currententity->origin, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 			if(r_trace.fraction != 1.0)
 				continue;
