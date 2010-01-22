@@ -146,10 +146,11 @@ void GL_GetLightVals()
 	int i, j, lnum;
 	dlight_t	*dl;
 	float dist, xdist, ydist;
-	vec3_t	temp, lightAdd;
+	vec3_t	temp, tempOrg, lightAdd;
 	trace_t r_trace;
 	vec3_t mins, maxs;
 	float numlights, weight;
+	float bob;
 	
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
@@ -158,17 +159,22 @@ void GL_GetLightVals()
 	VectorCopy(currententity->origin, lightPosition);
 	lightPosition[2] += 128; 
 
+	if(currententity->flags & RF_BOBBING) 
+		bob = currententity->bob;
+	else
+		bob = 0;
+
+	VectorCopy(currententity->origin, tempOrg);
+		tempOrg[2] += 24 - bob; //generates more consistent tracing
+
 	numlights = 0;
 	VectorClear(lightAdd);
-	for (i=0; i<r_lightgroups; i++) {
-
-		VectorCopy(currententity->origin, temp);
-		temp[2] += 24; //generates more consistent tracing
+	for (i=0; i<r_lightgroups; i++) {	
 
 		if((currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > currententity->origin[2]))
 			r_trace.fraction = 1.0; //don't do traces for weapon models, not smooth enough
 		else
-			r_trace = CM_BoxTrace(temp, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+			r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 		
 		if(r_trace.fraction == 1.0) {
 			VectorSubtract(currententity->origin, LightGroups[i].group_origin, temp);
