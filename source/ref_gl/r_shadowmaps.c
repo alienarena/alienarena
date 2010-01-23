@@ -366,10 +366,6 @@ void R_DrawDynamicCaster(void)
 	//render entities near light
 	for (i=0 ; i<r_newrefdef.num_entities ; i++)
 	{
-
-		float thresh, offset;
-		vec3_t temp;
-		
 		currententity = &r_newrefdef.entities[i];
 
 		if (currententity->flags & RF_NOSHADOWS || currententity->flags & RF_TRANSLUCENT)
@@ -394,25 +390,7 @@ void R_DrawDynamicCaster(void)
 			continue;
 
 		currentmodel = currententity->model;
-
-		//make sure the entity is at a reasonable angle to the light source.  We don't want extreme angles producing giant shadows
-		//as this will cause strange artifacts.
-		VectorCopy(dl->origin, temp);
-		temp[2] = currententity->origin[2];
-		
-		VectorSubtract(temp, currententity->origin, dist);
-			
-		// Only player models have these frames, which need to account for jump animations that often extend beyond original bbox calcs
-		// hacky, but necessary.
-		if(currententity->frame > 65 && currententity->frame < 69)
-			offset = currentmodel->maxs[2] + 42;
-		else				
-			offset = currentmodel->maxs[2];
-		thresh = dl->origin[2]+64 - (currententity->origin[2] + offset);
-		if(VectorLength(dist) > 4.75f * thresh) { //within a good angle of light source
-			continue; 
-		}		
-
+	
 		//get view distance, set lod if available
 		VectorSubtract(r_origin, currententity->origin, dist);
 		if(VectorLength(dist) > 300) {

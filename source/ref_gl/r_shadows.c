@@ -383,7 +383,7 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 	float is, it, dist;
 	int worldlight = 0;
 	float numlights, weight;
-	float bob;
+	float bob, project;
 	trace_t	r_trace;
 	vec3_t mins, maxs, lightAdd;
 	
@@ -437,7 +437,7 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 		for(j = 0; j < 3; j++) 
 			lightAdd[j] += LightGroups[i].group_origin[j]*weight;
 		numlights+=weight;
-		
+			
 		if(numlights > 0.0) {
 
 			for(o = 0; o < 3; o++) 
@@ -462,8 +462,13 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 		light[1] = (cost * (it - 0) + sint * (is - 0) + 0);
 		light[2] += 8;
 	}
+
+	if(currentmodel->maxs[2] - currentmodel->mins[2] > 200)
+		project = 2.0;
+	else
+		project = 1.5;
 	
-	GL_RenderVolumes(paliashdr, light, 15, lerp);
+	GL_RenderVolumes(paliashdr, light, project, lerp);
 }
 
 /*==============

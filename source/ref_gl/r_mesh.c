@@ -42,7 +42,6 @@ static	vec3_t	s_normals[MAX_VERTS];
 extern	vec3_t	lightspot;
 vec3_t	shadevector;
 float	shadelight[3];
-vec3_t	lightdir;
 
 #define MAX_MODEL_DLIGHTS 128
 m_dlight_t model_dlights[MAX_MODEL_DLIGHTS];
@@ -83,9 +82,6 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
     float lscale;
 
     lscale = 3.0;
-
-	VectorSubtract(currententity->origin, lightspot, lightdir);
-	VectorNormalize ( lightdir );
 
     l = shadedots[verts->lightnormalindex];
     VectorScale(baselight, l, lightOut);
