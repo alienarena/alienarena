@@ -803,7 +803,7 @@ float R_ShadowLight (vec3_t entPos, vec3_t lightAdd, int type)
 	}
 
 	// Barnes improved code
-	shadowdist = VectorNormalize(lightAdd);
+	shadowdist = VectorNormalize(lightAdd)/5.0;
 	if (shadowdist > 4) shadowdist = 4;
 	if (shadowdist <= 0) // old style static shadow
 	{
