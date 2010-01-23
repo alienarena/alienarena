@@ -721,19 +721,21 @@ void vectoangles (vec3_t value1, vec3_t angles)
 	angles[ROLL] = 0;
 }
 
-float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type)
+float R_ShadowLight (vec3_t entPos, vec3_t lightAdd, int type)
 {
 	int			lnum, i;
 	dlight_t	*dl;
-	vec3_t		dist, angle, mins, maxs;
+	vec3_t		pos, dist, angle, mins, maxs;
 	trace_t		r_trace;
 	float		add, shadowdist, bob;
-	float   	lintens, intens = 0;
+	float   	intens = 0;
 
 	if (!r_worldmodel)
 		return 0;
 	if (!r_worldmodel->lightdata) //keep old lame shadow
 		return 0;
+
+	VectorCopy(entPos, pos);
 
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
@@ -783,16 +785,13 @@ float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type)
 			}
 			
 			VectorSubtract (LightGroups[i].group_origin, pos, dist);
-			add = sqrt(LightGroups[i].avg_intensity*5.0f - VectorLength(dist));
+			add = sqrt(LightGroups[i].avg_intensity*50.0f - VectorLength(dist));
 			VectorNormalize(dist);
 			if (add > 0) 
 			{
 				VectorScale(dist, sqrt(add), dist);
 				VectorAdd (lightAdd, dist, lightAdd);
-				lintens = LightGroups[i].avg_intensity;
-				if(lintens < 300)
-					lintens = 300;
-				intens+=(lintens/1000 - VectorLength(dist)/50); //darken shadows where light is stronger
+				intens+=(LightGroups[i].avg_intensity - VectorLength(dist)*3.5f); //darken shadows where light is stronger
 			}
 		}
 
