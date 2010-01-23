@@ -677,3 +677,150 @@ void R_CastShadow(void)
 	R_ShadowBlend(0.3);   
 
 }
+
+
+/*
+===============
+R_ShadowLight - Planar stencil shadows
+===============
+*/
+void vectoangles (vec3_t value1, vec3_t angles)
+{
+	float	forward;
+	float	yaw, pitch;
+
+	if (value1[1] == 0 && value1[0] == 0)
+	{
+		yaw = 0;
+		if (value1[2] > 0)
+			pitch = 90;
+		else
+			pitch = 270;
+	}
+	else
+	{
+	// PMM - fixed to correct for pitch of 0
+		if (value1[0])
+			yaw = (atan2(value1[1], value1[0]) * 180 / M_PI);
+		else if (value1[1] > 0)
+			yaw = 90;
+		else
+			yaw = 270;
+
+		if (yaw < 0)
+			yaw += 360;
+
+		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
+		pitch = (atan2(value1[2], forward) * 180 / M_PI);
+		if (pitch < 0)
+			pitch += 360;
+	}
+
+	angles[PITCH] = -pitch;
+	angles[YAW] = yaw;
+	angles[ROLL] = 0;
+}
+
+float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type)
+{
+	int			lnum, i;
+	dlight_t	*dl;
+	vec3_t		dist, angle, mins, maxs;
+	trace_t		r_trace;
+	float		add, shadowdist, bob;
+	float   	lintens, intens = 0;
+
+	if (!r_worldmodel)
+		return 0;
+	if (!r_worldmodel->lightdata) //keep old lame shadow
+		return 0;
+
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs, 0, 0, 0);
+
+	VectorClear(lightAdd);
+	//
+	// add dynamic light shadow angles
+	//
+	if(!type) {
+		dl = r_newrefdef.dlights;
+		for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
+		{
+
+			VectorSubtract (dl->origin, pos, dist);
+			add = sqrt(dl->intensity - VectorLength(dist));
+			VectorNormalize(dist);
+			if (add > 0)
+			{
+				VectorScale(dist, add, dist);
+				VectorAdd (lightAdd, dist, lightAdd);
+				intens = 0.3;
+			}
+		}
+	}
+	//
+	// add world light shadow angles
+	//
+	if(currententity->flags & RF_BOBBING) 
+		bob = currententity->bob;
+	else
+		bob = 0;
+
+	pos[2] -= bob;
+
+	if(gl_shadows->integer == 2 && type) {
+
+		for (i=0; i<r_lightgroups; i++) {
+
+			if(LightGroups[i].group_origin[2] < currententity->origin[2] - bob)
+				continue; //don't bother with world lights below the ent, creates undesirable shadows
+
+			//need a trace(not for self model, too jerky when lights are blocked and reappear)
+			if(!(currententity->flags & RF_VIEWERMODEL)) {
+				r_trace = CM_BoxTrace(pos, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+				if(r_trace.fraction != 1.0)
+					continue;
+			}
+			
+			VectorSubtract (LightGroups[i].group_origin, pos, dist);
+			add = sqrt(LightGroups[i].avg_intensity*5.0f - VectorLength(dist));
+			VectorNormalize(dist);
+			if (add > 0) 
+			{
+				VectorScale(dist, sqrt(add), dist);
+				VectorAdd (lightAdd, dist, lightAdd);
+				lintens = LightGroups[i].avg_intensity;
+				if(lintens < 300)
+					lintens = 300;
+				intens+=(lintens/1000 - VectorLength(dist)/50); //darken shadows where light is stronger
+			}
+		}
+
+		//cap some limits of lightness, darkness, subtley.
+		if (intens < 0.1)
+			intens = 0.1;
+		if (intens > 0.3)
+			intens = 0.3;
+	}
+
+	// Barnes improved code
+	shadowdist = VectorNormalize(lightAdd);
+	if (shadowdist > 4) shadowdist = 4;
+	if (shadowdist <= 0) // old style static shadow
+	{
+		angle[PITCH] = currententity->angles[PITCH];
+		angle[YAW] =   -currententity->angles[YAW];
+		angle[ROLL] =   currententity->angles[ROLL];
+		shadowdist = 1;
+	}
+	else // shadow from dynamic lights
+	{
+		vectoangles (lightAdd, angle);
+		angle[YAW] -= currententity->angles[YAW];
+	}
+	AngleVectors (angle, dist, NULL, NULL);
+	VectorScale (dist, shadowdist, lightAdd);
+	// end Barnes improved code
+
+	return intens;
+}

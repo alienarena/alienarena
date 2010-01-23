@@ -155,9 +155,6 @@ static void R_ParseLightEntities (void)
 	vec3_t		origin;
 	float		intensity;
 
-	//DONT LOAD MAP ETS
-//	return;
-
 	entString = map_entitystring;
 
 	buf = CM_EntityString();
