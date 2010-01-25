@@ -1625,7 +1625,10 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "string"))
 		{
 			token = COM_Parse (&s);
-			DrawString (x, y, token);
+			//this line is an Alien Arena specific hack of sorts, remove if needed
+			if(!strcmp(token, "Vote"))
+				Draw_ScaledPic (viddef.width/2 - 85*scale, y-8*scale, scale, "votebox");
+			DrawString (x, y, token);			
 			continue;
 		}
 
