@@ -270,7 +270,7 @@ void BeginIntermission (edict_t *targ)
 			client->deadflag = DEAD_DEAD; //so we can know if he's dead for placement offsetting
 		}
 		if(!client->is_bot && g_mapvote->value)
-			safe_centerprintf(client, "Type \"vote #\" to vote for next map!");
+			safe_centerprintf(client, "Use F1-F4 to vote for next map!");
 	}
 
 	level.intermissiontime = level.time;
