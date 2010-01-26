@@ -971,6 +971,65 @@ void ExitLevel (void)
 
 /*
 ================
+G_Ban
+
+Ban player
+================
+*/
+/*
+=================
+SV_WriteIP_f
+=================
+*/
+void G_Ban (char *ip)
+{
+	FILE	*f;
+	char	name[MAX_OSPATH];
+	cvar_t	*game;
+	int		i;
+
+	//add to banlist file
+	game = gi.cvar("game", "", 0);
+
+	if (!*game->string)
+		sprintf (name, "%s/listip.cfg", GAMEVERSION);
+	else
+		sprintf (name, "%s/listip.cfg", game->string);
+
+	safe_cprintf (NULL, PRINT_HIGH, "Writing %s.\n", name);
+
+	f = fopen (name, "ab");
+	if (!f)
+	{
+		safe_cprintf (NULL, PRINT_HIGH, "Couldn't open %s\n", name);
+		return;
+	}
+
+	fprintf (f, "sv addip %s\n", ip);
+	
+	fclose (f);
+
+	//add to current ban list
+	for (i=0 ; i<numipfilters ; i++)
+		if (ipfilters[i].compare == 0xffffffff)
+			break;		// free spot
+	if (i == numipfilters)
+	{
+		if (numipfilters == MAX_IPFILTERS)
+		{
+			safe_cprintf (NULL, PRINT_HIGH, "IP filter list is full\n");
+			return;
+		}
+		numipfilters++;
+	}
+	
+	if (!StringToFilter (ip, &ipfilters[i]))
+		ipfilters[i].compare = 0xffffffff;
+}
+
+
+/*
+================
 G_ParseVoteCommand
 
 Parse and execute command
@@ -983,6 +1042,7 @@ void G_ParseVoteCommand (void)
 	char args[128];
 	edict_t *ent;
 	qboolean donearg = false;
+	char	*value;
 
 	//separate command from args
 	i = j = 0;
@@ -1025,6 +1085,30 @@ void G_ParseVoteCommand (void)
 			}
 		}
 	}
+	else if(!strcmp(command, "kickban")) { //kick and ban player from server
+	//get the correct client
+		for (i=0 ; i<maxclients->value ; i++)
+		{
+			ent = g_edicts + 1 + i;
+			if (!ent->inuse)
+				continue;
+
+			if(ent->client) {
+				if(!strcmp(ent->client->pers.netname, args)) {
+					if(ent->is_bot)
+						ACESP_KickBot(args);
+					else {
+						safe_bprintf(PRINT_HIGH, "%s was kickbanned\n", args);
+						ClientDisconnect (ent);
+					}
+					//now ban them
+					value = Info_ValueForKey (ent->client->pers.userinfo, "ip");
+					G_Ban(value);
+				}				
+			}
+		}
+	}
+
 	else if(!strcmp(command, "fraglimit")) { //change fraglimit
 		gi.cvar_set("fraglimit", args);
 		safe_bprintf(PRINT_HIGH, "Fraglimit changed to %s\n", args);

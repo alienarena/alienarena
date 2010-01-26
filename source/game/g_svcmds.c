@@ -57,23 +57,12 @@ If 0, then only addresses matching the list will be allowed.  This lets you easi
 ==============================================================================
 */
 
-typedef struct
-{
-	unsigned	mask;
-	unsigned	compare;
-} ipfilter_t;
-
-#define	MAX_IPFILTERS	1024
-
-ipfilter_t	ipfilters[MAX_IPFILTERS];
-int			numipfilters;
-
 /*
 =================
 StringToFilter
 =================
 */
-static qboolean StringToFilter (char *s, ipfilter_t *f)
+qboolean StringToFilter (char *s, ipfilter_t *f)
 {
 	char	num[128];
 	int		i, j;
