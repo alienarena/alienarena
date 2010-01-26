@@ -1509,6 +1509,19 @@ extern void DeathcamRemove (edict_t *ent, char *opt);
 extern void DeathcamStart (edict_t *ent);
 extern void DeathcamTrack (edict_t *ent);
 
+//IP information
+typedef struct
+{
+	unsigned	mask;
+	unsigned	compare;
+} ipfilter_t;
+
+#define	MAX_IPFILTERS	1024
+
+ipfilter_t	ipfilters[MAX_IPFILTERS];
+int			numipfilters;
+extern qboolean StringToFilter (char *s, ipfilter_t *f);
+
 //unlagged
 extern	cvar_t	*g_antilag;
 extern  cvar_t	*g_antilagdebug;
