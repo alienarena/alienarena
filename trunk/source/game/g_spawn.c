@@ -64,6 +64,7 @@ void SP_target_laser (edict_t *self);
 void SP_target_lightramp (edict_t *self);
 void SP_target_earthquake (edict_t *ent);
 void SP_target_fire (edict_t *ent);
+void SP_target_changelevel (edict_t *ent);
 
 void SP_worldspawn (edict_t *ent);
 
@@ -144,6 +145,7 @@ spawn_t	spawns[] = {
 	{"target_lightramp", SP_target_lightramp},
 	{"target_earthquake", SP_target_earthquake},
 	{"target_fire", SP_target_fire},
+	{"target_changelevel", SP_target_changelevel},
 
 	{"worldspawn", SP_worldspawn},
 
