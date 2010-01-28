@@ -18,6 +18,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+// for jpeglib
+#define HAVE_PROTOTYPES
+
 #include "r_local.h"
 #ifdef _WIN32
 #include "jpeg/jpeglib.h"
@@ -582,17 +585,17 @@ By Robert 'Heffo' Heffernan
 =================================================================
 */
 
-void jpg_null(j_decompress_ptr cinfo)
+void crjpg_null(j_decompress_ptr cinfo)
 {
 }
 
-unsigned char jpg_fill_input_buffer(j_decompress_ptr cinfo)
+int crjpg_fill_input_buffer(j_decompress_ptr cinfo)
 {
     Com_Printf("Premature end of JPEG data\n");
     return 1;
 }
 
-void jpg_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
+void crjpg_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
 {
         
     cinfo->src->next_input_byte += (size_t) num_bytes;
@@ -602,14 +605,14 @@ void jpg_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
 		Com_Printf("Premature end of JPEG data\n");
 }
 
-void jpeg_mem_src(j_decompress_ptr cinfo, byte *mem, int len)
+void crjpg_mem_src(j_decompress_ptr cinfo, byte *mem, int len)
 {
     cinfo->src = (struct jpeg_source_mgr *)(*cinfo->mem->alloc_small)((j_common_ptr) cinfo, JPOOL_PERMANENT, sizeof(struct jpeg_source_mgr));
-    cinfo->src->init_source = jpg_null;
-    cinfo->src->fill_input_buffer = jpg_fill_input_buffer;
-    cinfo->src->skip_input_data = jpg_skip_input_data;
+    cinfo->src->init_source = crjpg_null;
+    cinfo->src->fill_input_buffer = crjpg_fill_input_buffer;
+    cinfo->src->skip_input_data = crjpg_skip_input_data;
     cinfo->src->resync_to_restart = jpeg_resync_to_restart;
-    cinfo->src->term_source = jpg_null;
+    cinfo->src->term_source = crjpg_null;
     cinfo->src->bytes_in_buffer = len;
     cinfo->src->next_input_byte = mem;
 }
@@ -650,7 +653,7 @@ void LoadJPG (char *filename, byte **pic, int *width, int *height)
 	jpeg_create_decompress(&cinfo);
 
 	// Feed JPEG memory into the libJpeg Object
-	jpeg_mem_src(&cinfo, rawdata, rawsize);
+	crjpg_mem_src(&cinfo, rawdata, rawsize);
 
 	// Process JPEG header
 	jpeg_read_header(&cinfo, true); // bombs out here
