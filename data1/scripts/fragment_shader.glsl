@@ -101,9 +101,7 @@ void main( void )
       colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 4.0;
             
       litColour = vec4( attenuation * colour, 1.0 );
-      litColour = max(litColour, diffuse * lightmap * 2.0);
-         
-      gl_FragColor = litColour;
+      gl_FragColor = max(litColour, diffuse * lightmap * 2.0);
    }
    else {
       diffuse = texture2D(testTexture, gl_TexCoord[0].xy);     
@@ -143,8 +141,7 @@ void main( void )
       
       vec4 dynamicColour = vec4( attenuation * colour * dynshadowval * varyingLightColour, 1.0 );
       if(PARALLAX > 0) {
-         dynamicColour = max(dynamicColour, diffuse * lightmap * 2.0);
-         dynamicColour = max(dynamicColour, litColour);
+         dynamicColour = max(dynamicColour, gl_FragColor);
       }
       else {
          dynamicColour = max(dynamicColour, vec4(textureColour, 1.0) * lightmap * 2.0);
