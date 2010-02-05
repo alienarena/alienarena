@@ -203,6 +203,18 @@ models/weapons/v_rail/skin
 		nolightmap
 	}
 }
+models/weapons/v_rail/beamgun
+{
+	{
+		map models/weapons/v_rail/beamgun.tga
+	}
+	{
+		map gfx/beamgunfx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
 models/weapons/v_bfg/skin
 {
 	{
