@@ -422,6 +422,15 @@ models/weapons/v_rail/skin
 		glow
 	}
 }
+models/weapons/v_rail/beamgun
+{
+	{
+		map models/weapons/v_rail/beamgun_normal.jpg
+		normalmap
+		map2 gfx/beamgunfx.tga
+		glow
+	}
+}
 models/weapons/v_bfg/skin
 {	
 	{
