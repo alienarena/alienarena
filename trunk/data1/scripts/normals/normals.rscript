@@ -413,6 +413,16 @@ models/weapons/v_hyperb/skin
 	}
 		
 }
+models/weapons/v_hyperb/disruptor
+{
+	{	
+		map models/weapons/v_hyperb/disruptor_normal.tga
+		normalmap
+		map2 gfx/disruptorfx.tga
+		glow
+	}
+		
+}
 models/weapons/v_rail/skin
 {
 	{
