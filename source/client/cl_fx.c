@@ -542,7 +542,7 @@ float getColor(void)
 	switch(cl_disbeamclr->integer) {
 	case 0:
 	default:
-		color = 0xd4; //bright green
+		color = 0xd6; //bright green
 		break;
 	case 1:
 		color = 0x74; //blue 
@@ -567,7 +567,7 @@ void getColorvec(vec3_t colorvec)
 	default:
 		colorvec[0] = 0; //bright green
 		colorvec[1] = 1;
-		colorvec[2] = 0.2;
+		colorvec[2] = 0.6;
 		break;
 	case 1:
 		colorvec[0] = 0; //blue 
