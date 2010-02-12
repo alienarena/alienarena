@@ -480,9 +480,9 @@ players/martianenforcer/gamara
 players/martianenforcer/weapon
 {
 	{	
-		map models/weapons/v_hyperb/skin_normal.tga
+		map models/weapons/v_hyperb/disruptor_normal.tga
 		normalmap
-		map2 gfx/disruptormask.tga
+		map2 gfx/disruptorfx.tga
 		glow
 	}		
 }
