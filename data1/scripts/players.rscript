@@ -26,10 +26,10 @@ players/rustbot/atlas
 players/martianenforcer/weapon
 {
 	{
-		map models/weapons/v_hyperb/skin.tga
+		map models/weapons/v_hyperb/disruptor.jpg
 	}
 	{
-		map gfx/disruptormask.tga
+		map gfx/disruptorfx.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 .8
 		nolightmap
