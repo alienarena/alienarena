@@ -1,4 +1,4 @@
-qbsp3 dm-deathray
-qvis3 dm-deathray
-qrad3 dm-deathray
+qbsp3 ctf-oblivion
+qvis3 ctf-oblivion
+qrad3 ctf-oblivion
 pause
