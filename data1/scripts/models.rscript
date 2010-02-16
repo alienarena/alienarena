@@ -463,3 +463,43 @@ maps/meshes/gothic/lamp2
 		nolightmap
 	}
 }
+maps/meshes/tech/rotimage1
+{
+	{
+		map maps/meshes/tech/rotimage1
+		nolightmap
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 10 0.8 1.0
+		alphamask
+	}
+}
+maps/meshes/tech/rotimage2
+{
+	{
+		map maps/meshes/tech/rotimage2
+		nolightmap
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 15 0.8 1.0
+		alphamask
+	}
+}
+maps/meshes/tech/rotimage3
+{
+	{
+		map maps/meshes/tech/rotimage3
+		nolightmap
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 10 0.9 1.0
+		alphamask
+	}
+}
+maps/meshes/tech/rotimage4
+{
+	{
+		map maps/meshes/tech/rotimage4
+		nolightmap
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 15 0.9 1.0
+		alphamask
+	}
+}

@@ -778,3 +778,12 @@ models/misc/deathray/deathray
 		normalmap
 	}
 }
+maps/meshes/tech/rotator
+{
+	{
+		map maps/meshes/tech/rotator_normal.tga
+		normalmap
+		map2 maps/meshes/tech/rotator_fx.tga
+		glow
+	}
+}
