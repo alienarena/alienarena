@@ -66,3 +66,54 @@ textures/rage/metallight_2
 		lensflare
 	}
 }
+textures/arena10/neonsign8
+{
+	{
+		map textures/arena10/neonsign8
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2.5 0.2 0.4
+		nolightmap
+	}
+	{
+		map gfx/purpleline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static 2
+		alphashift 10 0.05 0.5
+		nolightmap
+	}
+}
+textures/arena10/neonsign7
+{
+	{
+		map textures/arena10/neonsign7
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2.5 0.2 0.4
+		nolightmap
+	}
+	{
+		map gfx/greenline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static 2
+		alphashift 10 0.05 0.5
+		nolightmap
+	}
+}
+textures/arena10/neonsign10
+{
+	{
+		map textures/arena10/neonsign10
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 2.5 0.2 0.4
+		nolightmap
+	}
+	{
+		map gfx/purpleline.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 2 static 2
+		scroll static 0 static 2
+		alphashift 10 0.05 0.5
+		nolightmap
+	}
+}
