@@ -463,6 +463,19 @@ maps/meshes/gothic/lamp2
 		nolightmap
 	}
 }
+maps/meshes/gothic/lamp2b
+{
+	{
+		map maps/meshes/gothic/lamp2b.tga
+		alphamask
+	}
+	{
+		map maps/meshes/gothic/lamp2b_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
 maps/meshes/tech/rotimage1
 {
 	{
