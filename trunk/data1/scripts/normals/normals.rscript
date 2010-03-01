@@ -757,6 +757,15 @@ maps/meshes/gothic/lamp2
 		glow
 	}
 }
+maps/meshes/gothic/lamp2b
+{
+	{
+		map maps/meshes/gothic/lamp2_normal.tga
+		normalmap
+		map2 maps/meshes/gothic/lamp2b_fx.tga
+		glow
+	}
+}
 maps/meshes/tech/railing
 {
 	{
