@@ -157,7 +157,7 @@ textures/arena10/floortile10w
 		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		alphashift 16 .3 .5
 		scale static 1 static 1
-		anim 0.02
+		anim 0.03
 			gfx/rainfxa.tga
 			gfx/rainfxb.tga
 			gfx/rainfxc.tga
