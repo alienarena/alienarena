@@ -1658,8 +1658,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	//for envmap by normals
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 
-	if(!r_bloom->value) //BLOOMS - this screws with blooms
-		SetVertexOverbrights(true);
+	SetVertexOverbrights(true);
 
 	do
 	{
@@ -1914,8 +1913,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		
 	} while (stage = stage->next);
 
-	if(!r_bloom->value)
-		SetVertexOverbrights(false);
+	SetVertexOverbrights(false);
 
 	// restore the original blend mode
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
