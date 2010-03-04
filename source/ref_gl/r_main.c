@@ -1114,6 +1114,8 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawWorld ();
 
+	R_DrawSpecialSurfaces();
+
 	if(r_lensflare->value)
 		R_RenderFlares ();
 
@@ -1125,11 +1127,9 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawViewEntitiesOnList (); 
 
-	R_DrawSpecialSurfaces();
-
-	R_DrawBeamSurface ();
-
 	R_DrawAlphaSurfaces ();
+	
+	R_DrawBeamSurface ();
 
 	qglLoadMatrixf (r_world_matrix); //moving trans brushes
 
