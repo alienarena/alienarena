@@ -445,8 +445,38 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 {
 	glpoly_t *p = surf->polys;
+	vec3_t	lightVec, lightAdd, temp;
+	float	dist, weight;
+	int		numlights;
 	float	*v;	
-	int		i;
+	int		i, j;
+
+	//send these to the shader program
+	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, surf->tangentSpaceTransform );
+	glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
+	glUniform1iARB( g_location_fog, map_fog);
+
+	//get light position relative to player's position
+	numlights = 0;
+	VectorClear(lightAdd);
+	for (i = 0; i < r_lightgroups; i++) {	
+		VectorSubtract(r_origin, LightGroups[i].group_origin, temp);
+		dist = VectorLength(temp);
+		if(dist == 0) 
+			dist = 1;
+		dist = dist*dist;
+		weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
+		for(j = 0; j < 3; j++) 
+			lightAdd[j] += LightGroups[i].group_origin[j]*weight;
+		numlights+=weight;				
+	}
+
+	if(numlights > 0.0) {
+		for(i = 0; i < 3; i++) 
+			lightVec[i] = lightAdd[i]/numlights;
+	}
+
+	glUniform3fARB( g_location_staticLightPosition, lightVec[0], lightVec[1], lightVec[2]);
 
 	for (; p; p = p->chain)
 	{
@@ -473,16 +503,7 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 			// increment pointer and counter
 			VArray += VertexSizes[VERT_MULTI_TEXTURED];
 			VertexCounter++;
-		}
-
-		//send these to the shader program
-		glUniformMatrix3fvARB( g_tangentSpaceTransform,
-								1,
-								GL_FALSE,
-								surf->tangentSpaceTransform );
-		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
-		glUniform1iARB( g_location_fog, map_fog);
-	
+		}	
 		// draw the poly
 		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 	}
