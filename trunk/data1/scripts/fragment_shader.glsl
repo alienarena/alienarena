@@ -13,6 +13,7 @@ uniform int SHADOWMAP;
 varying vec4 sPos;
 varying vec3 EyeDir;
 varying vec3 LightDir;
+varying vec3 StaticLightDir;
 varying float fog;
 
 float lookupDynshadow( void )
@@ -76,8 +77,8 @@ void main( void )
 
       diffuse = texture2D(testTexture, TexCoords);
           
-      distanceSquared = dot( EyeDir, EyeDir );
-      relativeLightDirection = EyeDir / sqrt( distanceSquared );
+      distanceSquared = dot( StaticLightDir, StaticLightDir );
+      relativeLightDirection = StaticLightDir / sqrt( distanceSquared );
 
       diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );
       colour = vec3( 0.0, 0.0, 0.0 );
@@ -101,6 +102,7 @@ void main( void )
       colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 4.0;
             
       litColour = vec4( attenuation * colour, 1.0 );
+      litColour = litColour * lightmap * 6.0;
       gl_FragColor = max(litColour, diffuse * lightmap * 2.0);
    }
    else {

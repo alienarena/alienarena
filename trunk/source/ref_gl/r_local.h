@@ -564,6 +564,7 @@ extern GLuint		g_location_parallax;
 extern GLuint		g_location_dynamic;
 extern GLuint		g_location_shadowmap;
 extern GLuint		g_location_lightPosition;
+extern GLuint		g_location_staticLightPosition;
 extern GLuint		g_location_lightColour;
 extern GLuint		g_location_lightCutoffSquared;
 

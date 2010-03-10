@@ -76,6 +76,7 @@ GLuint	    g_location_parallax;
 GLuint		g_location_dynamic;
 GLuint		g_location_shadowmap;
 GLuint	    g_location_lightPosition;
+GLuint		g_location_staticLightPosition;
 GLuint		g_location_lightColour;
 GLuint	    g_location_lightCutoffSquared;
 
@@ -2032,6 +2033,7 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
 		g_location_shadowmap = glGetUniformLocationARB( g_programObj, "SHADOWMAP" );
 		g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
+		g_location_staticLightPosition = glGetUniformLocationARB( g_programObj, "staticLightPosition" );
 		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
 		g_location_lightCutoffSquared = glGetUniformLocationARB( g_programObj, "lightCutoffSquared" );
 
