@@ -202,6 +202,9 @@ void SCR_CenterPrint (char *str)
 {
 	char	*s;
 
+	if(!cl_centerprint->value)
+		return;
+
 	strncpy (scr_centerstring, str, sizeof(scr_centerstring)-1);
 	scr_centertime_off = scr_centertime->value;
 	scr_centertime_start = cl.time;
