@@ -404,7 +404,7 @@ void NoAmmoWeaponChange (edict_t *ent)
 		return;
 	}
 
-	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))]
+	if ( ent->client->pers.inventory[ITEM_INDEX(FindItem("cells"))] > 3
 		&& ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] )
 	{
 		ent->client->newweapon = FindItem ("Alien Disruptor");
@@ -751,7 +751,7 @@ void weapon_plasma_fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if ((! ( (int)dmflags->value & DF_INFINITE_AMMO ) ) && !instagib->value )
-		ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-2;
+		ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-4;
 }
 
 void Weapon_Disruptor (edict_t *ent)
