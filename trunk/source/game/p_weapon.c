@@ -886,7 +886,7 @@ void weapon_flamethrower_fire (edict_t *ent)
 		VectorSet(offset, 8, 8, ent->viewheight-8);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-		fire_fireball (ent, start, forward, damage, 1500, damage_radius, 100);
+		fire_fireball (ent, start, forward, damage, 1500, damage_radius, 75);
 
 		// send muzzle flash
 		gi.WriteByte (svc_muzzleflash);
@@ -985,10 +985,16 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	if(ent->client->buttons & BUTTON_ATTACK2) //alt fire
 	{
-		if(excessive->value) //no homers in excessive!
+		if(ent->client->resp.homing_shots < 5) {
+			if(excessive->value) //no homers in excessive!
+				fire_rocket (ent, start, forward, damage, 900, damage_radius, radius_damage);
+			else
+				fire_homingrocket (ent, start, forward, damage, 250, damage_radius, radius_damage);
+		}
+		else {
+			safe_cprintf(ent, PRINT_HIGH, "Exceeded max number of homing missiles for this round!\n");
 			fire_rocket (ent, start, forward, damage, 900, damage_radius, radius_damage);
-		else
-			fire_homingrocket (ent, start, forward, damage, 250, damage_radius, radius_damage);
+		}
 	}
 	else
 		fire_rocket (ent, start, forward, damage, 900, damage_radius, radius_damage);

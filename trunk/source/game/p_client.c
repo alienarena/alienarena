@@ -2098,6 +2098,16 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	}
 
+	if(g_callvote->value)
+		safe_cprintf(ent, PRINT_HIGH, "Call voting is ^2ENABLED\n");
+	else
+		safe_cprintf(ent, PRINT_HIGH, "Call voting is ^1DISABLED\n");
+
+	if(g_antilag->value) 
+		safe_cprintf(ent, PRINT_HIGH, "Antilag is ^2ENABLED\n");
+	else 
+		safe_cprintf(ent, PRINT_HIGH, "Antilag is ^1DISABLED\n");
+
 	//check bots with each player connect
 	ACESP_LoadBots(ent, 0);
 
@@ -2125,6 +2135,8 @@ void ClientBegin (edict_t *ent)
 		ent->client->resp.weapon_hits[i] = 0;
 	}
 	ent->client->kill_streak = 0;
+
+	ent->client->resp.homing_shots = 0;
 
 	ClientBeginDeathmatch (ent);
 

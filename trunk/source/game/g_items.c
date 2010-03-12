@@ -250,6 +250,9 @@ void	Use_Invulnerability (edict_t *ent, gitem_t *item)
 	else
 		ent->client->invincible_framenum = level.framenum + 300;
 
+	//add full armor
+	ent->client->pers.inventory[combat_armor_index] = 200;
+
 	gi.sound(ent, CHAN_ITEM, gi.soundindex("items/protect.wav"), 1, ATTN_NORM, 0);
 }
 
@@ -552,9 +555,9 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 	if (ent->item->tag == ARMOR_SHARD)
 	{
 		if (!old_armor_index)
-			other->client->pers.inventory[jacket_armor_index] = 2;
+			other->client->pers.inventory[jacket_armor_index] = 5;
 		else
-			other->client->pers.inventory[old_armor_index] += 2;
+			other->client->pers.inventory[old_armor_index] += 5;
 	}
 
 	// if player has no armor, just use it
@@ -1747,7 +1750,7 @@ always owned, never in the world
 		"models/items/invulner/tris.md2", EF_ROTATE,
 		NULL,
 /* icon */		"p_invulnerability",
-/* pickup */	"Invulnerability",
+/* pickup */	"Alien Force", //now "Alien Force" - Damage reduced to 1/3, max armor added
 /* width */		2,
 		300,
 		NULL,

@@ -1093,6 +1093,9 @@ typedef struct
 	int reward_pts;
 	qboolean powered;
 
+	//homing rocket limits
+	int	homing_shots;
+
 	//voting
 	qboolean voted;
 

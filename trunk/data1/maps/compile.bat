@@ -1,4 +1,4 @@
-qbsp3 ctf-oblivion
-qvis3 ctf-oblivion
-qrad3 ctf-oblivion
+qbsp3 dm-oblivion
+qvis3 -fast dm-oblivion
+qrad3 dm-oblivion
 pause

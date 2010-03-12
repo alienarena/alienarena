@@ -263,6 +263,7 @@ extern  cvar_t	*cl_noblood;
 extern  cvar_t	*cl_disbeamclr;
 extern  cvar_t	*cl_brass;
 extern  cvar_t	*cl_playtaunts;
+extern	cvar_t	*cl_centerprint;
 
 extern	cvar_t	*cl_paindist;
 extern	cvar_t	*cl_explosiondist;

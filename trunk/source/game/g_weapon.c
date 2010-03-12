@@ -1075,6 +1075,7 @@ void fire_homingrocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int
 	edict_t	*rocket;
 
 	self->client->resp.weapon_shots[5]++;
+	self->client->resp.homing_shots++;
 
 	rocket = G_Spawn();
 	VectorCopy (start, rocket->s.origin);
