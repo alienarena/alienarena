@@ -1777,29 +1777,38 @@ void R_DrawAliasModel (entity_t *e)
 	}
 	if ( currententity->flags & RF_MINLIGHT )
 	{
+		float minlight;
+
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
+			minlight = 0.1;
+		else
+			minlight = 0.2;
 		for (i=0 ; i<3 ; i++)
-			if (shadelight[i] > 0.1)
+			if (shadelight[i] > minlight)
 				break;
 		if (i == 3)
 		{
-			shadelight[0] = 0.1;
-			shadelight[1] = 0.1;
-			shadelight[2] = 0.1;
+			shadelight[0] = minlight;
+			shadelight[1] = minlight;
+			shadelight[2] = minlight;
 		}
 	}
 
 	if ( currententity->flags & RF_GLOW )
 	{	// bonus items will pulse with time
 		float	scale;
-		float	min;
+		float	minlight;
 
 		scale = 0.2 * sin(r_newrefdef.time*7);
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
+			minlight = 0.1;
+		else
+			minlight = 0.2;
 		for (i=0 ; i<3 ; i++)
-		{
-			min = shadelight[i] * 0.8;
+		{			
 			shadelight[i] += scale;
-			if (shadelight[i] < min)
-				shadelight[i] = min;
+			if (shadelight[i] < minlight)
+				shadelight[i] = minlight;
 		}
 	}
 
