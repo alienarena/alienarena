@@ -191,7 +191,7 @@ void safe_centerprintf (edict_t *ent, char *fmt, ...)
 	len = vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
 	va_end (argptr);
 	
-	gi.centerprintf(ent, bigbuffer);
+	gi.centerprintf(ent,"%s", bigbuffer);
 	
 }
 
