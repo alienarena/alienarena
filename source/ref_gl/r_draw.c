@@ -40,7 +40,7 @@ void RefreshFont (void)
 	draw_chars = GL_FindImage (va("fonts/%s.tga", con_font->string), it_pic);
 	if (!draw_chars)
 	{
-		draw_chars = GL_FindImage ("pics/conchars.tga", it_pic);
+		draw_chars = GL_FindImage ("fonts/default.tga", it_pic);
 		Cvar_Set( "con_font", "default" );
 	}
 
