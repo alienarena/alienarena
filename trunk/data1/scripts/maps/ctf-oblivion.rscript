@@ -191,6 +191,47 @@ textures/arena10/floortile10w
 		end
 	}
 }
+textures/arena10/metalfloor21w
+{
+	{
+		map gfx/noise.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 10 static 10
+		alphashift 0 0.2 0.2
+	}
+	{
+		map gfx/noise.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static -10 static -10
+		alphashift 0 0.2 0.2
+	}
+	{		
+		map gfx/reflect.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 0 0.05 0.05
+		envmap
+	}
+	{
+		map gfx/rainfxa.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 16 .2 .3
+		scale static 1 static 1
+		anim 0.03
+			gfx/rainfxa.tga
+			gfx/rainfxb.tga
+			gfx/rainfxc.tga
+			gfx/rainfxd.tga
+			gfx/rainfxe.tga
+			gfx/rainfxf.tga
+			gfx/rainfxg.tga
+			gfx/rainfxh.tga
+		end
+	}
+}
 textures/arena10/neonsign11
 {
 
