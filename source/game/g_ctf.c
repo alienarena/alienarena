@@ -36,6 +36,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	int		sorted[2][MAX_CLIENTS];
 	int		sortedscores[2][MAX_CLIENTS];
 	int		score, total[2], totalscore[2];
+	
 	gclient_t	*cl;
 	edict_t		*cl_ent;
 	int team;
@@ -707,14 +708,63 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 				if (ctf_team == RED_TEAM)
 				{
 					red_team_score++;
+#ifdef NEWCTFSTUFF
+					if(red_team_score > blue_team_score){
+						reddiff = red_team_score - blue_team_score;
+						if(reddiff == 1){
+							gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_takes.wav"), 1, ATTN_NONE, 0);
+						}
+						else
+						{
+							gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_increases.wav"), 1, ATTN_NONE, 0);
+						}
+
+					}
+					else
+					{
+						if(red_team_score == blue_team_score){
+							gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/scores_tied.wav"), 1, ATTN_NONE, 0);
+						}
+						else
+						{
+							gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_scores.wav"), 1, ATTN_NONE, 0);
+						}
+					}
+#else
 					gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_scores.wav"), 1, ATTN_NONE, 0);
+#endif
+						
 				}
 				else
 				{
 					blue_team_score++;
-					gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_scores.wav"), 1, ATTN_NONE, 0);
-				}
+#ifdef NEWCTFSTUFF
+					if(blue_team_score > red_team_score){
+						bluediff = blue_team_score - red_team_score;
+						if(bluediff == 1){
+							gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_takes.wav"), 1, ATTN_NONE, 0);
+						}
+						else
+						{
+							gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_increases.wav"), 1, ATTN_NONE, 0);
+						}
 
+					}
+					else
+					{
+						if(red_team_score == blue_team_score){
+							gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/scores_tied.wav"), 1, ATTN_NONE, 0);
+						}
+						else
+						{
+							gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_scores.wav"), 1, ATTN_NONE, 0);
+						}
+					}
+#else
+					gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_scores.wav"), 1, ATTN_NONE, 0);
+#endif
+				}
+				
 				// other gets another 10 frag bonus
 				other->client->resp.score += 10;//CTF_CAPTURE_BONUS;
 				//reward points bonus

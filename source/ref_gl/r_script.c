@@ -561,13 +561,13 @@ void rs_stage_colormap (rs_stage_t *stage, char **token)
 	stage->colormap.enabled = true;
 
 	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->colormap.red = atoi(*token);
+	stage->colormap.red = atof(*token);
 
 	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->colormap.green = atoi(*token);
+	stage->colormap.green = atof(*token);
 
 	*token = strtok (NULL, TOK_DELIMINATORS);
-	stage->colormap.blue = atoi(*token);
+	stage->colormap.blue = atof(*token);
 }
 
 void rs_stage_frames (rs_stage_t *stage, char **token)
@@ -1558,6 +1558,7 @@ void R_DrawBeamSurface ( void )
 			qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);	
 
 			qglColor4f( beam->color[0],beam->color[1],beam->color[2], 1 );
+			GL_TexEnv( GL_MODULATE );
 
 			GL_Bind(beam->texnum);
 

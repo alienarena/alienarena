@@ -55,8 +55,8 @@ typedef struct
 // colormap
 typedef struct
 {
-	qboolean enabled;
-	int	red, green, blue;	// colors - duh!
+	qboolean	enabled;
+	float		red, green, blue;	// colors - duh!
 } rs_colormap_t;
 
 typedef struct
