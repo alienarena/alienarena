@@ -26,6 +26,9 @@ int red_team_cnt;
 int blue_team_cnt;
 int red_team_score;
 int blue_team_score;
+int reddiff;
+int bluediff;
+int redwinning;
 int print1, print2, print3;
 
 mmove_t mmove_reloc;
