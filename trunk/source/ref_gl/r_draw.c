@@ -34,15 +34,54 @@ extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 extern cvar_t *con_font;
 void Scrap_Upload (void);
 
+//small dot used for failsafe blank texture
+byte	blanktexture[16][16] =
+{
+	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+};
 
 void RefreshFont (void)
 {
+	int		x,y;
+	byte	data[16][16][4];
+
+	//
+	// tiny blank texture
+	//
+	for (x=0 ; x<16 ; x++)
+	{
+		for (y=0 ; y<16 ; y++)
+		{
+			data[y][x][0] = 255;
+			data[y][x][1] = 255;
+			data[y][x][2] = 255;
+			data[y][x][3] = blanktexture[x][y]; 
+		}
+	}
 
 	draw_chars = GL_FindImage (va("fonts/%s.tga", con_font->string), it_pic);
 	if (!draw_chars)
 	{
 		draw_chars = GL_FindImage ("fonts/default.tga", it_pic);
 		Cvar_Set( "con_font", "default" );
+
+		if(!draw_chars)
+			draw_chars = GL_LoadPic ("***font***", (byte *)data, 16, 16, it_pic, 32);
 	}
 
 	GL_Bind( draw_chars->texnum );
@@ -51,6 +90,9 @@ void RefreshFont (void)
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	menu_chars = GL_FindImage ("fonts/menu.tga", it_pic);
+
+	if(!menu_chars)
+		menu_chars = GL_LoadPic ("***font***", (byte *)data, 16, 16, it_pic, 32);
 
 	GL_Bind( menu_chars->texnum );
 	
