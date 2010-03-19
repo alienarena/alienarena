@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 image_t		*draw_chars;
+image_t		*menu_chars;
 
 extern	qboolean	scrap_dirty;
 extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
@@ -48,6 +49,10 @@ void RefreshFont (void)
 
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	menu_chars = GL_FindImage ("fonts/menu.tga", it_pic);
+
+	GL_Bind( menu_chars->texnum );
 	
 	con_font->modified = false;
 }
@@ -165,7 +170,7 @@ void Draw_ColorChar (int x, int y, int num, vec4_t color)
 	qglColor4f( 1,1,1,1 );
 }
 
-void Draw_ScaledChar (float x, float y, int num, float scale)
+void Draw_ScaledChar (float x, float y, int num, float scale, int from_menu)
 					
 {
 	int				row, col;
@@ -186,7 +191,11 @@ void Draw_ScaledChar (float x, float y, int num, float scale)
 	fcol = col*0.0625;
 	size = 0.0625;
 
-	GL_Bind(draw_chars->texnum);
+	if(from_menu)
+		GL_Bind(menu_chars->texnum);
+	else
+		GL_Bind(draw_chars->texnum);
+
 	qglColor4f( 1,1,1,1 );
 	qglBegin (GL_QUADS);
 	qglTexCoord2f (fcol, frow);
@@ -200,7 +209,7 @@ void Draw_ScaledChar (float x, float y, int num, float scale)
 	qglEnd();
 
 }
-void Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale)
+void Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale, int from_menu)
 {
 	int				row, col;
 	float			frow, fcol, size;
@@ -226,7 +235,10 @@ void Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale)
 	fcol = col*0.0625;
 	size = 0.0625;
 
-	GL_Bind (draw_chars->texnum);
+	if(from_menu)
+		GL_Bind(menu_chars->texnum);
+	else
+		GL_Bind(draw_chars->texnum);
 
 	qglColor4ubv( colors );
 	GL_TexEnv(GL_MODULATE);

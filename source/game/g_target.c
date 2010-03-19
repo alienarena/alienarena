@@ -87,10 +87,7 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 }
 void Target_Speaker_Think (edict_t *ent)
 {
-	if(!background_music->value) 
-		ent->s.sound = 0;
-	else
-		ent->s.sound = ent->noise_index;
+	ent->s.sound = ent->noise_index;
 
 	ent->nextthink = level.time + 1;	
 }

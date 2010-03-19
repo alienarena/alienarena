@@ -43,6 +43,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define LCOLUMN_OFFSET -MENU_FONT_SIZE*2	// was -16
 #define SLIDER_RANGE 10
 
+#define NUM_CURSOR_FRAMES 15
+#define FONTSCALE 1.5
+
+//menu mouse
+#define MOUSEBUTTON1 0
+#define MOUSEBUTTON2 1
+
 // normal keys should be passed as lowercased ascii
 
 #define	K_BACKSPACE		127

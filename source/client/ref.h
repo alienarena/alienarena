@@ -300,8 +300,8 @@ void	Draw_AlphaStretchPic (int x, int y, int w, int h, char *name, float alphava
 void	Draw_AlphaStretchPlayerIcon (int x, int y, int w, int h, char *pic, float alphaval);
 void	Draw_Char (int x, int y, int c);
 void	Draw_ColorChar (int x, int y, int num, vec4_t color);
-void	Draw_ScaledChar (float x, float y, int num, float scale);
-void	Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale);
+void	Draw_ScaledChar (float x, float y, int num, float scale, int from_menu);
+void	Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale, int from_menu);
 void	Draw_TileClear (int x, int y, int w, int h, char *name);
 void	Draw_Fill (int x, int y, int w, int h, int c);
 void	Draw_FadeScreen (void);
