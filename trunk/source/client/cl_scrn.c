@@ -255,7 +255,7 @@ void SCR_DrawCenterString (void)
 		SCR_AddDirtyPoint (x, y);
 		for (j=0 ; j<l ; j++, x+=charscale)
 		{
-			Draw_ScaledChar (x, y, start[j], charscale);
+			Draw_ScaledChar (x, y, start[j], charscale, false);
 			if (!remaining--)
 				return;
 		}
@@ -359,7 +359,7 @@ void SCR_DrawColorString ( int x, int y, const char *str )
 			continue;
 		}
 		
-		Draw_ScaledColorChar (x, y, *str, scolor, charscale); //this is only ever used for names.
+		Draw_ScaledColorChar (x, y, *str, scolor, charscale, false); //this is only ever used for names.
 		
 		num = *str++;
 		num &= 255;
@@ -1732,8 +1732,7 @@ void SCR_DrawPlayerIcon(void) {
 	h*=scale;
 
 	Draw_AlphaStretchPlayerIcon( -w+(w*iconPos), viddef.height/2 + h/2, w, h, scr_playericon, scr_playericonalpha);
-	Menu_DrawColorString(-w+(w*iconPos), viddef.height/2 + h + 32*scale, scr_playername);
-
+	SCR_DrawColorString ( -w+(w*iconPos), viddef.height/2 + h + 32*scale, scr_playername);
 }
 
 /*

@@ -48,7 +48,7 @@ void DrawString (int x, int y, char *s)
 		charscale = 8;
 	while (*s)
 	{
-		Draw_ScaledChar (x, y, *s, charscale);
+		Draw_ScaledChar (x, y, *s, charscale, false);
 		x+=charscale;
 		s++;
 	}
@@ -80,7 +80,7 @@ void Draw_ColorString ( int x, int y, char *str, float scale)
 			continue;
 		}
 		
-		Draw_ScaledColorChar (x, y, *str, scolor, charscale); //this is only ever used for names.
+		Draw_ScaledColorChar (x, y, *str, scolor, charscale, false); //this is only ever used for names.
 		
 		num = *str++;
 		num &= 255;
@@ -107,7 +107,7 @@ void DrawAltString (int x, int y, char *s)
 
 	while (*s)
 	{
-		Draw_ScaledChar (x, y, *s ^ 0x80, charscale);
+		Draw_ScaledChar (x, y, *s ^ 0x80, charscale, false);
 		x+=charscale;
 		s++;
 	}
@@ -625,7 +625,7 @@ void Con_DrawNotify (void)
 				continue;
 			}
 			
-			Draw_ScaledColorChar ((x+1)*charscale, v, *text, scolor, charscale);
+			Draw_ScaledColorChar ((x+1)*charscale, v, *text, scolor, charscale, false);
 				
 			num = *text++;
 			num &= 255;	
@@ -676,7 +676,7 @@ void Con_DrawNotify (void)
 				continue;
 			}
 			
-			Draw_ScaledColorChar ( (x+skip)*charscale, v, *s, scolor, charscale);
+			Draw_ScaledColorChar ( (x+skip)*charscale, v, *s, scolor, charscale, false);
 			
 			num = *s++;
 			num &= 255;	
@@ -691,7 +691,7 @@ void Con_DrawNotify (void)
 			x++;
 			
 		}
-		Draw_ScaledChar ( (x+skip)*charscale, v, 10+((cls.realtime>>charscale)&1), charscale);
+		Draw_ScaledChar ( (x+skip)*charscale, v, 10+((cls.realtime>>charscale)&1), charscale, false);
 		v += charscale;
 	}
 	
@@ -758,7 +758,7 @@ void Con_DrawConsole (float frac)
 	{
 	// draw arrows to show the buffer is backscrolled
 		for (x=0 ; x<con.linewidth ; x+=charscale*2)
-			Draw_ScaledChar ( (x+1)*charscale, y, '^', charscale);
+			Draw_ScaledChar ( (x+1)*charscale, y, '^', charscale, false);
 	
 		y -= charscale;
 		rows--;
@@ -789,7 +789,7 @@ void Con_DrawConsole (float frac)
 				(cls.downloadhttp ? "HTTP" : "UDP"), kb);
 		
 		for(i = 0; i < strlen(dl); i++)
-			Draw_ScaledChar(i * charscale, con.vislines - charscale, dl[i], charscale);
+			Draw_ScaledChar(i * charscale, con.vislines - charscale, dl[i], charscale, false);
 	}
 //ZOID
 
