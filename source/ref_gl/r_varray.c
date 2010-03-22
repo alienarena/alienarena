@@ -473,7 +473,7 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 
 	if(numlights > 0.0) {
 		for(i = 0; i < 3; i++) 
-			lightVec[i] = lightAdd[i]/numlights;
+			lightVec[i] = (lightAdd[i]/numlights + r_origin[i])/2.0;
 	}
 
 	glUniform3fARB( g_location_staticLightPosition, lightVec[0], lightVec[1], lightVec[2]);
