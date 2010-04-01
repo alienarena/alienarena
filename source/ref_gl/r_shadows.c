@@ -396,11 +396,6 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 
-	//if it's in the dark, no shadow!
-	R_LightPoint (currententity->origin, light, false);
-	if(VectorLength(light) < 0.1)
-		return;
-
 	if(currententity->flags & RF_BOBBING) 
 		bob = currententity->bob;
 	else

@@ -516,3 +516,15 @@ maps/meshes/tech/rotimage4
 		alphamask
 	}
 }
+maps/meshes/xempx/ceillight
+{
+	{
+		map maps/meshes/xempx/ceillight.jpg
+	}
+	{
+		map maps/meshes/xempx/ceillight_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1.0 1.0
+		nolightmap
+	}
+}

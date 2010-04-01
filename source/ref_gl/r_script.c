@@ -1524,8 +1524,8 @@ void R_DrawBeamSurface ( void )
 
 	beam = r_beams;
 
-	VectorSet(mins, 0, 0, 64);
-	VectorSet(maxs, 0, 0, -64);	
+	VectorSet(mins, 32, 32, 64);
+	VectorSet(maxs, -32, -32, -64);	
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 

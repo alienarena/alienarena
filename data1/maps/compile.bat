@@ -1,4 +1,4 @@
-qbsp3 dm-oblivion
-qvis3 dm-oblivion
-qrad3 dm-oblivion
+qbsp3 dm-warmachine2k10
+qvis3 dm-warmachine2k10
+qrad3 dm-warmachine2k10
 pause
