@@ -323,6 +323,7 @@ void SV_BeginDownload_f(void)
 	extern	cvar_t *allow_download_sounds;
 	extern	cvar_t *allow_download_maps;
 	extern	int		file_from_pak; // ZOID did file come from pak?
+	int		name_length; // For getting the final character.
 	int offset = 0;
 
 	name = Cmd_Argv(1);
@@ -333,6 +334,10 @@ void SV_BeginDownload_f(void)
 	// hacked by zoid to allow more conrol over download
 	// first off, no .. or global allow check
 	if (strstr (name, "..") || !allow_download->value
+		// prevent config downloading on Win32 systems
+		|| name[0] == '\\'
+		// negative offset causes crashing
+		|| offset < 0
 		// leading dot is no good
 		|| *name == '.' 
 		// leading slash bad as well, must be in subdir
@@ -354,6 +359,10 @@ void SV_BeginDownload_f(void)
 		return;
 	}
 
+	// If the name ends in a slash or dot, hack it off. Continue to do so just
+    // in case some tricky fellow puts multiple slashes or dots.
+    while (name[(name_length = strlen(name))] == '.' || name[name_length] == '/' )
+        name[name_length] = '\0';
 
 	if (sv_client->download)
 		FS_FreeFile (sv_client->download);
