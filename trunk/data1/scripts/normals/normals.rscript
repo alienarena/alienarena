@@ -810,6 +810,13 @@ maps/meshes/xempx/qtube
 		normalmap
 	}
 }
+maps/meshes/xempx/crate
+{
+	{
+		map maps/meshes/xempx/crate_normal.jpg
+		normalmap
+	}
+}
 maps/meshes/xempx/ceillight
 {
 	{
