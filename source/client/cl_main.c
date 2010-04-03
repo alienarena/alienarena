@@ -1300,6 +1300,7 @@ byte *precache_model; // used for skin checking in alias models
 // ENV_CNT is map load, ENV_CNT+1 is first env map
 #define ENV_CNT (CS_PLAYERSKINS + MAX_CLIENTS * PLAYER_MULT)
 #define TEXTURE_CNT (ENV_CNT+13)
+#define SCRIPT_CNT (TEXTURE_CNT+999)
 
 static const char *env_suf[6] = {"rt", "bk", "lf", "ft", "up", "dn"};
 
@@ -1307,7 +1308,10 @@ void CL_RequestNextDownload (void)
 {
 	unsigned	map_checksum;		// for detecting cheater maps
 	char fn[MAX_OSPATH];
+	char map[MAX_OSPATH];
+	char script[MAX_OSPATH];
 	dmdl_t *pheader;
+	int i, j;
 
 	if (cls.state != ca_connected)
 		return;
@@ -1315,12 +1319,11 @@ void CL_RequestNextDownload (void)
 	if (!allow_download->value && precache_check < ENV_CNT)
 		precache_check = ENV_CNT;
 
-//ZOID
 	if (precache_check == CS_MODELS) { // confirm map
 		precache_check = CS_MODELS+2; // 0 isn't used
 		if (allow_download_maps->value)
 			if (!CL_CheckOrDownloadFile(cl.configstrings[CS_MODELS+1]))
-				return; // started a download
+				return; // started a download		
 	}
 
 redoSkins:;
@@ -1394,6 +1397,7 @@ redoSkins:;
 		}
 		precache_check = CS_SOUNDS;
 	}
+
 	if (precache_check >= CS_SOUNDS && precache_check < CS_SOUNDS+MAX_SOUNDS) {
 		if (allow_download_sounds->value) {
 			if (precache_check == CS_SOUNDS)
@@ -1551,6 +1555,64 @@ redoSkins:;
 			}
 		}
 		precache_check = TEXTURE_CNT+999;
+	}
+
+	//get map related scripts
+	if (precache_check == SCRIPT_CNT) { 
+		if (allow_download_maps->value) {			
+
+			//get fog files
+			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
+
+			//remove "maps/" from string
+			for(i = 5, j = 0; i < strlen(fn); i++, j++) {
+				map[j] = fn[i];
+			}
+			map[i-5] = 0;
+
+			Com_sprintf(script, sizeof(script), "maps/scripts/%s.fog", map);
+			if (!CL_CheckOrDownloadFile(script))
+				return; // started a download
+		}
+		precache_check = SCRIPT_CNT+1;
+	}
+
+	if (precache_check == SCRIPT_CNT+1) { 
+		if (allow_download_maps->value) {			
+
+			//get mus files
+			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
+
+			//remove "maps/" from string
+			for(i = 5, j = 0; i < strlen(fn); i++, j++) {
+				map[j] = fn[i];
+			}
+			map[i-5] = 0;
+
+			Com_sprintf(script, sizeof(script), "maps/scripts/%s.mus", map);
+			if (!CL_CheckOrDownloadFile(script))
+				return; // started a download
+		}
+		precache_check = SCRIPT_CNT+2;
+	}
+
+	if (precache_check == SCRIPT_CNT+2) { 
+		if (allow_download_maps->value) {			
+
+			//get rscript files
+			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
+
+			//remove "maps/" from string
+			for(i = 5, j = 0; i < strlen(fn); i++, j++) {
+				map[j] = fn[i];
+			}
+			map[i-5] = 0;
+
+			Com_sprintf(script, sizeof(script), "scripts/maps/%s.rscript", map);
+			if (!CL_CheckOrDownloadFile(script))
+				return; // started a download
+		}
+		precache_check = SCRIPT_CNT+3;
 	}
 
 //ZOID
