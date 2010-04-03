@@ -1556,9 +1556,10 @@ redoSkins:;
 		}
 		precache_check = TEXTURE_CNT+999;
 	}
-/*
+
 	//get map related scripts
 	if (precache_check == SCRIPT_CNT) { 
+		precache_check = SCRIPT_CNT+1;
 		if (allow_download_maps->value) {			
 
 			//get fog files
@@ -1573,11 +1574,11 @@ redoSkins:;
 			Com_sprintf(script, sizeof(script), "maps/scripts/%s.fog", map);
 			if (!CL_CheckOrDownloadFile(script))
 				return; // started a download
-		}
-		precache_check = SCRIPT_CNT+1;
+		}		
 	}
 
 	if (precache_check == SCRIPT_CNT+1) { 
+		precache_check = SCRIPT_CNT+2;
 		if (allow_download_maps->value) {			
 
 			//get mus files
@@ -1592,13 +1593,12 @@ redoSkins:;
 			Com_sprintf(script, sizeof(script), "maps/scripts/%s.mus", map);
 			if (!CL_CheckOrDownloadFile(script))
 				return; // started a download
-		}
-		precache_check = SCRIPT_CNT+2;
+		}		
 	}
 
 	if (precache_check == SCRIPT_CNT+2) { 
-		if (allow_download_maps->value) {			
-
+		precache_check = SCRIPT_CNT+3;
+		if (allow_download_maps->value) {						
 			//get rscript files
 			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
 
@@ -1611,10 +1611,9 @@ redoSkins:;
 			Com_sprintf(script, sizeof(script), "scripts/maps/%s.rscript", map);
 			if (!CL_CheckOrDownloadFile(script))
 				return; // started a download
-		}
-		precache_check = SCRIPT_CNT+3;
+		}		
 	}
-*/
+
 //ZOID
 	CL_RegisterSounds ();
 	CL_PrepRefresh ();
