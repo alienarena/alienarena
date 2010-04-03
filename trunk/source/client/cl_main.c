@@ -1556,7 +1556,7 @@ redoSkins:;
 		}
 		precache_check = TEXTURE_CNT+999;
 	}
-
+/*
 	//get map related scripts
 	if (precache_check == SCRIPT_CNT) { 
 		if (allow_download_maps->value) {			
@@ -1614,7 +1614,7 @@ redoSkins:;
 		}
 		precache_check = SCRIPT_CNT+3;
 	}
-
+*/
 //ZOID
 	CL_RegisterSounds ();
 	CL_PrepRefresh ();
