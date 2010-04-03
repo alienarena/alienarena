@@ -499,7 +499,7 @@ void EndDMLevel (void)
 	/*
 	** load the list of map names
 	*/
-	Com_sprintf( mapsname, sizeof( mapsname ), "%s/maps.lst", "arena" );
+	Com_sprintf( mapsname, sizeof( mapsname ), "%s/maps.lst", "data1" );
 	if ( ( fp = fopen( mapsname, "rb" ) ) == 0 )
 	{
 		BeginIntermission (CreateTargetChangeLevel (level.mapname) );

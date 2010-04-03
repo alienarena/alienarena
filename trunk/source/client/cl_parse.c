@@ -108,7 +108,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	}
 
 	//if jpg, be sure to also try tga (player skin situation)
-    if(filename[strlen(filename)-1] == 'g')
+    if(filename[strlen(filename)-2] == 'e' && filename[strlen(filename)-1] == 'g')
 		jpg = true;
 	
 	if (FS_LoadFile (filename, NULL) != -1)	{
