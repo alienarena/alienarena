@@ -292,6 +292,8 @@ R_DrawWorld
 */
 void R_DrawShadowMapWorld (void)
 {
+	int i;
+
 	if (!r_drawworld->value)
 		return;
 
@@ -303,6 +305,25 @@ void R_DrawShadowMapWorld (void)
 	VectorCopy (r_newrefdef.vieworg, modelorg);
 
 	R_RecursiveShadowMapWorldNode (r_worldmodel->nodes, 15);
+
+	//draw brush models
+	for (i=0 ; i<r_newrefdef.num_entities ; i++)
+	{
+		currententity = &r_newrefdef.entities[i];
+		if (currententity->flags & RF_TRANSLUCENT)
+			continue;	// transluscent	
+
+		currentmodel = currententity->model;
+				
+		if (!currentmodel)
+		{
+			continue;
+		}
+		if( currentmodel->type == mod_brush)
+			R_DrawBrushModel (currententity);
+		else
+			continue;
+	}
 }
 
 void R_DrawDynamicCaster(void)
