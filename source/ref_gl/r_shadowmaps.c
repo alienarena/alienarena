@@ -319,10 +319,10 @@ void R_DrawShadowMapWorld (void)
 		{
 			continue;
 		}
-		if( currentmodel->type == mod_brush)
-			R_DrawBrushModel (currententity);
-		else
-			continue;
+		//if( currentmodel->type == mod_brush)
+		//	R_DrawBrushModel (currententity);
+		//else
+		//	continue;
 	}
 }
 
