@@ -1083,6 +1083,8 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	entity_t	gun;		// view model
 	int			i;
 	qboolean	useFX = false;
+	vec3_t		offset_down;
+	vec3_t		offset_right;
 
 	memset (&gun, 0, sizeof(gun));
 
@@ -1093,6 +1095,15 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 
 	if (!gun.model)
 		return;
+
+	// nudge gun down and right if in wide angle view
+	if(cl.refdef.fov_x > 90)
+	{
+		VectorScale(cl.v_up, 0.2 * (cl.refdef.fov_x - 90), offset_down);
+		VectorScale(cl.v_right, -0.15 * (cl.refdef.fov_x - 90), offset_right);
+	}
+	else
+		offset_down[0] = offset_down[1] = offset_down[2] = offset_right[0] = offset_right[1] = offset_right[2] = 0;
 
 	// set up gun position
 	for (i=0 ; i<3 ; i++)
@@ -1108,6 +1119,9 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 		gun.oldframe = 0;	// just changed weapons, don't lerp from old
 	else
 		gun.oldframe = ops->gunframe;
+
+	VectorSubtract(gun.origin, offset_down, gun.origin);
+	VectorSubtract(gun.origin, offset_right, gun.origin);
 	
 	gun.flags = RF_MINLIGHT | RF_DEPTHHACK | RF_WEAPONMODEL;
 	gun.backlerp = 1.0 - cl.lerpfrac;
