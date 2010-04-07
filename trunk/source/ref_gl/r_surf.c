@@ -135,6 +135,88 @@ void DrawGLTexturelessPoly (msurface_t *fa)
 
 }
 
+void R_DrawTexturelessInlineBModel (entity_t *e)
+{
+	int			i;
+	msurface_t	*psurf;
+
+	//
+	// draw texture
+	//
+	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
+	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
+	{
+
+	// draw the polygon
+		DrawGLTexturelessPoly( psurf );
+		psurf->visframe = r_framecount;
+	}
+
+	qglDisable (GL_BLEND);
+	qglColor4f (1,1,1,1);
+	GL_TexEnv( GL_REPLACE );	
+}
+
+void R_DrawTexturelessBrushModel (entity_t *e)
+{
+	vec3_t		mins, maxs;
+	int			i;
+	qboolean	rotated;
+
+	if (currentmodel->nummodelsurfaces == 0)
+		return;
+
+	currententity = e;
+
+	if (e->angles[0] || e->angles[1] || e->angles[2])
+	{
+		rotated = true;
+		for (i=0 ; i<3 ; i++)
+		{
+			mins[i] = e->origin[i] - currentmodel->radius;
+			maxs[i] = e->origin[i] + currentmodel->radius;
+		}
+	}
+	else
+	{
+		rotated = false;
+		VectorAdd (e->origin, currentmodel->mins, mins);
+		VectorAdd (e->origin, currentmodel->maxs, maxs);
+	}
+
+	if (R_CullBox (mins, maxs)) {
+		return;
+	}
+
+	qglColor3f (1,1,1);
+
+	VectorSubtract (r_newrefdef.vieworg, e->origin, modelorg);
+
+	if (rotated)
+	{
+		vec3_t	temp;
+		vec3_t	forward, right, up;
+
+		VectorCopy (modelorg, temp);
+		AngleVectors (e->angles, forward, right, up);
+		modelorg[0] = DotProduct (temp, forward);
+		modelorg[1] = -DotProduct (temp, right);
+		modelorg[2] = DotProduct (temp, up);
+	}
+
+    qglPushMatrix ();
+	e->angles[0] = -e->angles[0];	// stupid quake bug
+	e->angles[2] = -e->angles[2];	// stupid quake bug
+	R_RotateForEntity (e);
+	e->angles[0] = -e->angles[0];	// stupid quake bug
+	e->angles[2] = -e->angles[2];	// stupid quake bug
+
+	R_DrawTexturelessInlineBModel (e);
+
+	qglPopMatrix ();
+}
+
+
 /*
 ** R_DrawTriangleOutlines
 */

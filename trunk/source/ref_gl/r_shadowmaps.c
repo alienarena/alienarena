@@ -167,6 +167,7 @@ R_RecursiveWorldNode
 */
 static vec3_t modelorg;			// relative to viewpoint
 extern void DrawGLTexturelessPoly (msurface_t *fa);
+extern void R_DrawTexturelessBrushModel (entity_t *e);
 void R_RecursiveShadowMapWorldNode (mnode_t *node, int clipflags)
 {
 	int			c, side, sidebit;
@@ -319,10 +320,10 @@ void R_DrawShadowMapWorld (void)
 		{
 			continue;
 		}
-		//if( currentmodel->type == mod_brush)
-		//	R_DrawBrushModel (currententity);
-		//else
-		//	continue;
+		if( currentmodel->type == mod_brush)
+			R_DrawTexturelessBrushModel (currententity);
+		else
+			continue;
 	}
 }
 
