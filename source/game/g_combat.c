@@ -497,12 +497,8 @@ void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_
 			{
 				VectorSubtract (ent->s.origin, inflictor->s.origin, dir);
 				T_Damage (ent, inflictor, attacker, dir, inflictor->s.origin, vec3_origin, (int)points, (int)points, DAMAGE_RADIUS, mod);
-				if (ent != attacker) {
-					if(weapon == 1)
-						gi.sound (attacker, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-					else
-						gi.sound (attacker, CHAN_VOICE, gi.soundindex("misc/hit2.wav"), 1, ATTN_STATIC, 0);
-				}
+				if (ent != attacker) 
+					gi.sound (attacker, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 				if(weapon >=0)
 					attacker->client->resp.weapon_hits[weapon]++;
 			}
