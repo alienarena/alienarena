@@ -2081,6 +2081,9 @@ Mod_Free
 */
 void Mod_Free (model_t *mod)
 {
+	if ( mod->neighbors )
+        free( mod->neighbors );
+
 	Hunk_Free (mod->extradata);
 	memset (mod, 0, sizeof(*mod));
 }

@@ -718,6 +718,9 @@ void LoadJPG (char *filename, byte **pic, int *width, int *height)
 	// Destroy JPEG object
 	jpeg_destroy_decompress(&cinfo);
 
+	// Free the raw data now that it's done being processed
+    FS_FreeFile(rawdata);
+
 	// Return the 'rgbadata'
 	*pic = rgbadata;
 }
