@@ -708,7 +708,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 				if (ctf_team == RED_TEAM)
 				{
 					red_team_score++;
-#ifdef NEWCTFSTUFF
+
 					if(red_team_score > blue_team_score){
 						reddiff = red_team_score - blue_team_score;
 						if(reddiff == 1){
@@ -730,15 +730,12 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 							gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_scores.wav"), 1, ATTN_NONE, 0);
 						}
 					}
-#else
-					gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_scores.wav"), 1, ATTN_NONE, 0);
-#endif
 						
 				}
 				else
 				{
 					blue_team_score++;
-#ifdef NEWCTFSTUFF
+
 					if(blue_team_score > red_team_score){
 						bluediff = blue_team_score - red_team_score;
 						if(bluediff == 1){
@@ -760,9 +757,6 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 							gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_scores.wav"), 1, ATTN_NONE, 0);
 						}
 					}
-#else
-					gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_scores.wav"), 1, ATTN_NONE, 0);
-#endif
 				}
 				
 				// other gets another 10 frag bonus
