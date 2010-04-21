@@ -14,6 +14,8 @@ CURLM *curlm;
 CURL *curl;
 #endif
 
+extern cvar_t  *cl_stats_server;
+
 size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp)
 {
 	FILE* file;
@@ -32,15 +34,19 @@ size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp)
 void getStatsDB( void )
 {  	
 	FILE* file;
+	char statserver[128];
 
 	CURL* easyhandle = curl_easy_init() ;  
 
 	file = fopen( "stats.db", "w" ); //create new, blank file for writing
 	if(file)
 		fclose(file);
+
+	strncpy(statserver, cl_stats_server->string, sizeof(statserver)-16);
+	strncat(statserver, "/playerrank.db", sizeof("/playerrrank.db"));
 	
 	//to do - make this a cvar
-	curl_easy_setopt( easyhandle, CURLOPT_URL, "http://alienenforcer.com/alienarena/stats/playerrank.db" ) ;   
+	curl_easy_setopt( easyhandle, CURLOPT_URL, statserver ) ;   
 	
 	curl_easy_setopt( easyhandle, CURLOPT_WRITEFUNCTION, write_data ) ;   
 		
