@@ -133,6 +133,9 @@ cvar_t  *cl_disbeamclr;
 cvar_t	*cl_IRC_connect_at_startup;
 cvar_t	*cl_IRC_server;
 
+//Stats
+cvar_t  *cl_stats_server;
+
 client_static_t	cls;
 client_state_t	cl;
 
@@ -1778,6 +1781,9 @@ void CL_InitLocal (void)
 	//custom huds
 	cl_hudimage1 = Cvar_Get("cl_hudimage1", "pics/i_health.tga", CVAR_ARCHIVE);
 	cl_hudimage2 = Cvar_Get("cl_hudimage2", "pics/i_score.tga", CVAR_ARCHIVE);
+
+	//stats server
+	cl_stats_server = Cvar_Get("cl_stats_server", "http://92.48.88.135", CVAR_ARCHIVE);
 
 	//
 	// register our commands
