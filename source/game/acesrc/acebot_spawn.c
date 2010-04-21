@@ -129,10 +129,10 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	}
 
 	//bots and configurations will be loaded level specific
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
-		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
-	else if(sv_custombots->value)
+	if(sv_custombots->value)
 		sprintf(bot_filename, BOTDIR"/botinfo/custom%i.tmp", sv_custombots->integer);
+	else if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
+		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
 	else
 		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", level.mapname);
 
