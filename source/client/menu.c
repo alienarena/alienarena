@@ -3211,7 +3211,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		playername[16+x] = 0;
 
 		Com_sprintf(mservers[m_num_servers].playerInfo[players], sizeof(mservers[m_num_servers].playerInfo[players]),
-			"%s    %4i    %4i\n", playername, score, ping);
+			"%s    %4i    %4i", playername, score, ping);
 
 		mservers[m_num_servers].playerRankings[players] = player.ranking;
 
@@ -5601,7 +5601,7 @@ void PlayerRanking_MenuInit( void )
 	s_playerranking_name.generic.type	= MTYPE_COLORTXT;
 	s_playerranking_name.generic.name	= playername;
 	s_playerranking_name.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_playerranking_name.generic.x		= -24*offset*scale+16*scale; 
+	s_playerranking_name.generic.x		= -31*offset*scale+16*scale; 
 	s_playerranking_name.generic.y		= FONTSCALE*20*scale;
 
 	s_playerranking_rank.generic.type	= MTYPE_COLORTXT;

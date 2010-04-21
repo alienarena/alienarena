@@ -129,6 +129,7 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player )
 			//name
 			fgets(name, sizeof(name), file);
 			strcpy(player.playername, name);
+			player.playername[strlen(player.playername)-1] = 0; //remove line feed
 			//remote address
 			fgets(remote_address, sizeof(remote_address), file);
 			//points
