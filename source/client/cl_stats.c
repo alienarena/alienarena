@@ -42,8 +42,7 @@ void getStatsDB( void )
 	if(file)
 		fclose(file);
 
-	strncpy(statserver, cl_stats_server->string, sizeof(statserver)-16);
-	strncat(statserver, "/playerrank.db", sizeof("/playerrrank.db"));
+	Com_sprintf(statserver, sizeof(statserver), "%s%s", cl_stats_server->string, "/playerrank.db");
 	
 	//to do - make this a cvar
 	curl_easy_setopt( easyhandle, CURLOPT_URL, statserver ) ;   
