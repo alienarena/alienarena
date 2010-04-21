@@ -19,6 +19,13 @@ players/martianenforcer/blue
 		normalmap
 	}	
 }
+players/martianenforcer/martian
+{
+	{
+		map players/martianenforcer/default_normal.tga
+		normalmap
+	}
+}
 players/enforcer/default
 {
 	{

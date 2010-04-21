@@ -1783,7 +1783,7 @@ void CL_InitLocal (void)
 	cl_hudimage2 = Cvar_Get("cl_hudimage2", "pics/i_score.tga", CVAR_ARCHIVE);
 
 	//stats server
-	cl_stats_server = Cvar_Get("cl_stats_server", "http://92.48.88.135", CVAR_ARCHIVE);
+	cl_stats_server = Cvar_Get("cl_stats_server", "http://stats.planetarena.org", CVAR_ARCHIVE);
 
 	//
 	// register our commands
