@@ -1160,7 +1160,7 @@ gitem_t	itemlist[] =
 		0,
 		NULL,
 		0,
-/* precache */ "misc/red_scores.wav"
+/* precache */ "misc/red_scores.wav misc/red_takes.wav misc/red_increases.wav misc/red_wins.wav misc/scores_tied.wav misc/red_picked.wav"
 	},
 
 /*QUAKED item_flag_team2 (1 0.2 0) (-16 -16 -24) (16 16 32)
@@ -1183,7 +1183,7 @@ gitem_t	itemlist[] =
 		0,
 		NULL,
 		0,
-/* precache */ "misc/blue_scores.wav"
+/* precache */ "misc/blue_scores.wav misc/blue_takes.wav misc/blue_increases.wav misc/blue_wins.wav misc_blue_picked.wav"
 	},
 
 /*QUAKED item_bomber (1 0.2 0) (-16 -16 -24) (16 16 32)
