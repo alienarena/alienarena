@@ -721,6 +721,9 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	int	gib_effect = EF_GREENGIB;
 	int hasFlag = false;
 	gitem_t *it, *flag1_item, *flag2_item;
+	int mod;
+
+	mod = meansOfDeath & ~MOD_FRIENDLY_FIRE;
 
 	if (self->in_vehicle) {
 		Reset_player(self);	//get the player out of the vehicle
@@ -856,7 +859,10 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			gi.multicast (self->s.origin, MULTICAST_PVS);
 
 			for (n= 0; n < number_of_gibs; n++) {
-				ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_METALLIC, EF_GREENGIB);
+				if(mod == MOD_R_SPLASH || mod == MOD_ROCKET)
+					ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_METALLIC, EF_SHIPEXHAUST);
+				else
+					ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_METALLIC, EF_GREENGIB);
 				ThrowGib (self, "models/objects/debris2/tris.md2", damage, GIB_METALLIC, 0);
 			}
 		}
@@ -881,11 +887,17 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			gi.multicast (self->s.origin, MULTICAST_PVS);
 
 			gib_effect = EF_GIB;
-			for (n= 0; n < number_of_gibs; n++)
-				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_GIB);
+			for (n= 0; n < number_of_gibs; n++) {
+				if(mod == MOD_R_SPLASH || mod == MOD_ROCKET)
+					ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_SHIPEXHAUST);
+				else
+					ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_GIB);
+			}
 		}
 
 		if(self->usegibs) {
+			if(mod == MOD_R_SPLASH || mod == MOD_ROCKET)
+				gib_effect = EF_SHIPEXHAUST;
 			ThrowGib (self, self->head, damage, GIB_ORGANIC, gib_effect);
 			ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);
 			ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);
