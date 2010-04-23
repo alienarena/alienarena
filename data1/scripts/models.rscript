@@ -178,19 +178,6 @@ models/weapons/v_violator/skin
 		nolightmap
 	}
 }
-models/weapons/v_hyperb/skin
-{
-	{
-		map models/weapons/v_hyperb/skin.tga
-	}
-	{
-		map gfx/disruptormask.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 0.8 .8
-		nolightmap
-	}
-		
-}
 models/weapons/v_hyperb/disruptor
 {
 	{
@@ -203,18 +190,6 @@ models/weapons/v_hyperb/disruptor
 		nolightmap
 	}
 		
-}
-models/weapons/v_rail/skin
-{
-	{
-		map models/weapons/v_rail/skin.tga
-	}
-	{
-		map gfx/beamfx.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 0.8 .8
-		nolightmap
-	}
 }
 models/weapons/v_rail/beamgun
 {
