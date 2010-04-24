@@ -5981,7 +5981,9 @@ qboolean PlayerConfig_MenuInit( void )
 	if ( hand->value < 0 || hand->value > 2 )
 		Cvar_SetValue( "hand", 0 );
 
-	strcpy( currentdirectory, skin->string );
+	Q_strncpyz( currentdirectory, Cvar_VariableString ("skin"), sizeof(currentdirectory)-1);
+    // Richard Stanway's Q1 code says there is a buffer overflow here.
+    // strcpy( currentdirectory, skin->string );
 
 	if ( strchr( currentdirectory, '/' ) )
 	{
