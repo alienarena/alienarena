@@ -583,6 +583,7 @@ void CL_Record_f (void);
 // cl_parse.c
 //
 extern	char *svc_strings[256];
+extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 
 void CL_ParseServerMessage (void);
 void CL_LoadClientinfo (clientinfo_t *ci, char *s);
