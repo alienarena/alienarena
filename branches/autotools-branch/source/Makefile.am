@@ -5,12 +5,12 @@ ACLOCAL_AMFLAGS=`-I m4'
 bin_PROGRAMS = crx crded
 lib_LTLIBRARIES = game.la
 
-## <temporary>
-crx_CFLAGS=-DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp
-game_la_CFLAGS = -fPIC -Dstricmp=strcasecmp 
+## For 7.40 first cut.
+crx_CFLAGS=-DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp -DLIBDIR='"$(pkglibdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE
+game_la_CFLAGS = -Dstricmp=strcasecmp  -U_FORTIFY_SOURCE
 game_la_LDFLAGS = -module -avoid-version
-crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp
-## </temporary>
+crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -DLIBDIR='"$(pkglibdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE
+##
 
 crx_SOURCES =  \
 	client/anorms.h \

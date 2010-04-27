@@ -1,7 +1,12 @@
 # Process this file with autoconf to produce a configure script.
 
+#
+# 2010-04-25: This implementation does not fully use config.h for the first-cut 
+# on 7.40 release package. Not ideal, but safer for the short term.
+#
+
 AC_PREREQ(2.65)
-AC_INIT([alienarena],[7.40],[alienrace@comcast.net],[alienarena-linux],[http://red.planetarena.org/])
+AC_INIT([alienarena],[7.40],[alienrace@comcast.net],[alienarena],[http://red.planetarena.org/])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -10,26 +15,27 @@ AC_CONFIG_HEADERS([config/config.h])
 
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
+dnl For building game.so, which is dlopen'd by crx and crded
 LT_PREREQ([2.2.6b])
 LT_INIT([disable-static dlopen])
 
 AC_CANONICAL_HOST
 
-AS_CASE([$host],
-	[*-*-mingw*],
-		[AS_ECHO(["Win32"])],
-	[*-*-linux*],
-		[AS_ECHO(["Linux"])],
-	[*-*-freebsd*],
-		[AS_ECHO(["FreeBSD"])],
-	[AS_ECHO(["OS Not Known"])])
+dnl AS_CASE([$host],
+dnl	[*-*-mingw*],
+dnl		[AS_ECHO(["Win32"])],
+dnl	[*-*-linux*],
+dnl		[AS_ECHO(["Linux"])],
+dnl	[*-*-freebsd*],
+dnl		[AS_ECHO(["FreeBSD"])],
+dnl	[AS_ECHO(["OS Not Known"])])
 
-AS_CASE([$host],
-	[i686-*],
-		[AS_ECHO(["i686"])],
- 	[x86_64-*],
- 		[AS_ECHO(["x86_64"])],
- 	[AS_ECHO(["CPU Not Known"])])
+dnl AS_CASE([$host],
+dnl [i686-*],
+dnl		[AS_ECHO(["i686"])],
+dnl 	[x86_64-*],
+dnl 		[AS_ECHO(["x86_64"])],
+dnl 	[AS_ECHO(["CPU Not Known"])])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -43,6 +49,7 @@ AC_PROG_MAKE_SET
 # Checks for libraries.
 AC_PATH_X
 
+dnl TODO: figure out how dlopen'd GL and OpenAL should be checked
 AC_SEARCH_LIBS(acos,[m])
 AC_SEARCH_LIBS(dlopen,[dl])
 AC_SEARCH_LIBS(jpeg_read_header,[jpeg])
@@ -78,12 +85,11 @@ AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor gethostbyname gettimeofday memmove memset mkdir munmap putenv select socket sqrt strchr strdup strerror  strcasecmp strncasecmp strrchr strdup strstr])
-AC_CHECK_FUNCS([stricmp _stricmp])
-dnl todo: check jpeg for added lib in jpeg8
-
+dnl TODO: stricmp funcs renamed with -D in source/Makefile.am, like previous make
+dnl AC_CHECK_FUNCS([stricmp _stricmp])  
+dnl todo: check jpeg for added lib in jpeg8, maybe not, version in jpeg header?
 
 
 AC_CONFIG_FILES([Makefile source/Makefile])
 AC_OUTPUT
-
 
