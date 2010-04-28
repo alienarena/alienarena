@@ -3,13 +3,23 @@
 ACLOCAL_AMFLAGS=`-I m4'
 
 bin_PROGRAMS = crx crded
-lib_LTLIBRARIES = game.la
+pkglibexec_LTLIBRARIES = game.la
 
-## For 7.40 first cut.
-crx_CFLAGS=-DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp -DLIBDIR='"$(pkglibdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE
-game_la_CFLAGS = -Dstricmp=strcasecmp  -U_FORTIFY_SOURCE
+## For 7.40
+## Note: Not using config.h, yet
+## Note: game.so is not a general-purpose shared library; it is like a 
+##       Quake2-style game mod. It is dlopen'd by crx and crded. There does
+##       not seem to be any reason to install the game.la file. Further,
+##       this game.so should reside in $(pkglibexecdir)/data1, so mods
+##       can reside in other subdirectories in $(pkglibexedir). But, I haven't
+##       figured out how to do that yet.
+##
+crx_CFLAGS=-DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
+
+game_la_CFLAGS = -Dstricmp=strcasecmp  -U_FORTIFY_SOURCE -ffast-math
 game_la_LDFLAGS = -module -avoid-version
-crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -DLIBDIR='"$(pkglibdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE
+
+crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
 ##
 
 crx_SOURCES =  \

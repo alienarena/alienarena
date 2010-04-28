@@ -1,16 +1,10 @@
 /* config/config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Define to 1 if you have the <alc.h> header file. */
-#undef HAVE_ALC_H
-
 /* Define to 1 if you have the <AL/alc.h> header file. */
 #undef HAVE_AL_ALC_H
 
 /* Define to 1 if you have the <AL/al.h> header file. */
 #undef HAVE_AL_AL_H
-
-/* Define to 1 if you have the <al.h> header file. */
-#undef HAVE_AL_H
 
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #undef HAVE_ARPA_INET_H
@@ -35,6 +29,15 @@
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #undef HAVE_GETTIMEOFDAY
+
+/* Define to 1 if you have the <GL/glu.h> header file. */
+#undef HAVE_GL_GLU_H
+
+/* Define to 1 if you have the <GL/glx.h> header file. */
+#undef HAVE_GL_GLX_H
+
+/* Define to 1 if you have the <GL/gl.h> header file. */
+#undef HAVE_GL_GL_H
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -155,11 +158,17 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to 1 if you have the <vorbisfile.h> header file. */
-#undef HAVE_VORBISFILE_H
+/* Define to 1 if you have the <X11/cursorfont.h> header file. */
+#undef HAVE_X11_CURSORFONT_H
 
-/* Define to 1 if you have the <vorbis/vorbisfile.h> header file. */
-#undef HAVE_VORBIS_VORBISFILE_H
+/* Define to 1 if you have the <X11/keysym.h> header file. */
+#undef HAVE_X11_KEYSYM_H
+
+/* Define to 1 if you have the <X11/Xatom.h> header file. */
+#undef HAVE_X11_XATOM_H
+
+/* Define to 1 if you have the <X11/Xlib.h> header file. */
+#undef HAVE_X11_XLIB_H
 
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL

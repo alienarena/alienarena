@@ -225,6 +225,7 @@ top_srcdir = @top_srcdir@
 SUBDIRS = source 
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = \
+	alienarena.png \
 	docs/license.txt \
 	docs/README.txt \
 	arena \
@@ -668,7 +669,8 @@ install-dvi: install-dvi-recursive
 install-dvi-am:
 
 install-exec-am:
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-recursive
 
 install-html-am:
@@ -711,8 +713,8 @@ uninstall-am:
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) ctags-recursive \
-	install-am install-data-am install-strip tags-recursive \
-	uninstall-am
+	install-am install-data-am install-exec-am install-strip \
+	tags-recursive uninstall-am
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-am clean clean-generic \
@@ -723,13 +725,13 @@ uninstall-am:
 	distuninstallcheck dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am \
 	install-data-hook install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-hook
+	install-exec-am install-exec-hook install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am uninstall-hook
 
 
 dist-hook:
@@ -737,26 +739,26 @@ dist-hook:
 	rm -f $(distdir)/data1/gamex86.dll
 	rm -rf $(distdir)/data1/maps/mapsrc
 
-#
-# may should check for existence of libraries before doing this
-# force overwrite of existing files that match, but keep what is there
-# note: docdir contains package name
-#
 install-data-hook:
-	rm -rf $(DESTDIR)$(docdir)
 	mkdir -p $(DESTDIR)$(docdir)
-	rm -rf $(DESTDIR)$(pkgdatadir)
 	mkdir -p $(DESTDIR)$(pkgdatadir)
-	cp -r -p $(srcdir)/docs $(DESTDIR)$(docdir)
-	cp -r -p $(srcdir)/arena $(DESTDIR)$(pkgdatadir)
-	cp -r -p $(srcdir)/botinfo $(DESTDIR)$(pkgdatadir)
-	cp -r -p $(srcdir)/data1 $(DESTDIR)$(pkgdatadir)	
+	cp -r --preserve=mode $(srcdir)/docs $(DESTDIR)$(docdir)
+	cp --preserve=mode $(srcdir)/alienarena.png $(DESTDIR)$(pkgdatadir)
+	cp -r --preserve=mode $(srcdir)/arena $(DESTDIR)$(pkgdatadir)
+	cp -r --preserve=mode $(srcdir)/botinfo $(DESTDIR)$(pkgdatadir)
+	cp -r --preserve=mode $(srcdir)/data1 $(DESTDIR)$(pkgdatadir)	
 	chmod -R u+w $(DESTDIR)$(docdir)
 	chmod -R u+w $(DESTDIR)$(pkgdatadir)
+
+install-exec-hook:
+	mkdir -p $(DESTDIR)$(pkglibexecdir)/data1
+	mv -f $(DESTDIR)$(pkglibexecdir)/game.so $(DESTDIR)$(pkglibexecdir)/data1
+	mv -f $(DESTDIR)$(pkglibexecdir)/game.la $(DESTDIR)$(pkglibexecdir)/data1
 
 uninstall-hook:
 	rm -rf $(DESTDIR)$(docdir)
 	rm -rf $(DESTDIR)$(pkgdatadir)
+	rm -rf $(DESTDIR)$(pkglibexecdir)/data1
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

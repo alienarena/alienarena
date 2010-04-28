@@ -4,8 +4,8 @@ SUBDIRS = source
 
 ACLOCAL_AMFLAGS = -I m4
 
-##
 EXTRA_DIST = \
+	alienarena.png \
 	docs/license.txt \
 	docs/README.txt \
 	arena \
@@ -19,24 +19,34 @@ dist-hook:
 	rm -f $(distdir)/data1/gamex86.dll
 	rm -rf $(distdir)/data1/maps/mapsrc
 
-#
-# may should check for existence of libraries before doing this
-# force overwrite of existing files that match, but keep what is there
-# note: docdir contains package name
-#
+##
+## install/uninstall added rules for the game read-only data
+##
 install-data-hook:
-	rm -rf $(DESTDIR)$(docdir)
 	mkdir -p $(DESTDIR)$(docdir)
-	rm -rf $(DESTDIR)$(pkgdatadir)
 	mkdir -p $(DESTDIR)$(pkgdatadir)
-	cp -r -p $(srcdir)/docs $(DESTDIR)$(docdir)
-	cp -r -p $(srcdir)/arena $(DESTDIR)$(pkgdatadir)
-	cp -r -p $(srcdir)/botinfo $(DESTDIR)$(pkgdatadir)
-	cp -r -p $(srcdir)/data1 $(DESTDIR)$(pkgdatadir)	
+	cp -r --preserve=mode $(srcdir)/docs $(DESTDIR)$(docdir)
+	cp --preserve=mode $(srcdir)/alienarena.png $(DESTDIR)$(pkgdatadir)
+	cp -r --preserve=mode $(srcdir)/arena $(DESTDIR)$(pkgdatadir)
+	cp -r --preserve=mode $(srcdir)/botinfo $(DESTDIR)$(pkgdatadir)
+	cp -r --preserve=mode $(srcdir)/data1 $(DESTDIR)$(pkgdatadir)	
 	chmod -R u+w $(DESTDIR)$(docdir)
 	chmod -R u+w $(DESTDIR)$(pkgdatadir)
+	
+##	
+## the main program looks in $LIBDIR/arena/ and $LIBDIR/data1/ subdirectories
+##  for game.so. arena/ is for mods, data1/ is the main game module
+## so, until a better way is found, just create data1 and move the game.so,la
+##	
+install-exec-hook:
+	mkdir -p $(DESTDIR)$(pkglibexecdir)/data1
+	mv -f $(DESTDIR)$(pkglibexecdir)/game.so $(DESTDIR)$(pkglibexecdir)/data1
+	mv -f $(DESTDIR)$(pkglibexecdir)/game.la $(DESTDIR)$(pkglibexecdir)/data1
 
+## remove what install-hook installed
 uninstall-hook:
 	rm -rf $(DESTDIR)$(docdir)
 	rm -rf $(DESTDIR)$(pkgdatadir)
+	rm -rf $(DESTDIR)$(pkglibexecdir)/data1
+
 
