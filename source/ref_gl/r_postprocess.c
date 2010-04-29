@@ -158,7 +158,6 @@ void R_GLSLPostProcess(void)
 		R_TransformVectorToScreen(&r_newrefdef, r_explosionOrigin, fxScreenPos);
 
 		//translate so that center of screen reads 0,0
-		//to do - limit coords to prevent tearing
 		fxScreenPos[0] -= (float)viddef.width/2.0;
 		fxScreenPos[1] -= (float)viddef.height/2.0;
 

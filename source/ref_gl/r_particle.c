@@ -179,8 +179,6 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 		VectorSet ( corner[3],
 			corner0[0] + pright[0], corner0[1] + pright[1], corner0[2] + pright[2]);
 	
-
-		//to do - VBO first attempt here, since this is the simplest example of VA in the game
 		VArray = &VArrayVerts[0];
 
 		for(k = 0; k < 4; k++) {

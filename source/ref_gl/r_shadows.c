@@ -54,7 +54,6 @@ from stenciled volume
 ==============
 */
 
-//to do - can we blur this in glsl?
 void R_ShadowBlend(float alpha)
 {
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)

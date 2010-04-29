@@ -859,7 +859,7 @@ dynamic:
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
 			KillFlags |= KILL_TMU3_POINTER;
 
-			glUniform1iARB( g_location_shadowmap, 0); //world shadow handled by blurred stencil volumes
+			glUniform1iARB( g_location_shadowmap, 0); //static light shadow handled by stencil volumes
 			
 			if(is_dynamic) {
 						
