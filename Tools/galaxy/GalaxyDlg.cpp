@@ -61,6 +61,7 @@ char mensaje[200];				   // variable de todo uso.
 char servidor[100];
 cUser user;
 bool joinflg;
+bool connectedToIRC;
 
 char currBuddyName[32];
 char newBuddyName[32];
@@ -450,12 +451,17 @@ BOOL CGalaxyDlg::OnInitDialog()
 		if(WSAGetLastError()) { //there was some error in connecting
 			sockete.handle_error();
 			m_status2.SetWindowText("error connecting to #alienarena");
+			connectedToIRC = false;
 		}
-		else
+		else {
 			m_status2.SetWindowText("Connected to #alienarena");
+			connectedToIRC = true;
+		}
 	}
-	else
+	else {
 		m_status2.SetWindowText("Disconnected from chat channel...");
+		connectedToIRC = false;
+	}
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -1135,9 +1141,12 @@ void CGalaxyDlg::OnButton4()
 	if(WSAGetLastError()) { //there was some error in connecting
 			sockete.handle_error();
 			m_status2.SetWindowText("error connecting to #alienarena");
+			connectedToIRC = false;
 		}
-	else
+	else {
 		m_status2.SetWindowText("Connected to #alienarena");
+		connectedToIRC = true;
+	}
 
 	sockete.getData();
 	//send the buffer to a messagebox
@@ -1330,6 +1339,15 @@ void CGalaxyDlg::OnJoin(NMHDR* pNMHDR, LRESULT* pResult)
 	char cmdLine[512];
 	char myCRXPath[MAX_PATH];
 	FILE *file;
+	response Response;
+
+	//disconnect from IRC - since the game will connect itself, we don't want a clone
+	if(connectedToIRC) {
+		sprintf(mensaje,"QUIT\n\r");
+		sockete.sendData(mensaje);
+		m_status2.SetWindowText("Disconnected from chat channel...");
+		//don't set flag here, because we want to reconnect after returning from games
+	}
 
 	strcpy (myCRXPath, CRXPath);
 	memset (&s, 0, sizeof(s));
@@ -1362,6 +1380,43 @@ void CGalaxyDlg::OnJoin(NMHDR* pNMHDR, LRESULT* pResult)
 
 	sprintf (cmdLine, " +set game arena +set name %s +connect %s", user.nick, Server);
 	CreateProcess (CRXbuff, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myCRXPath, &s, &p);
+
+	if(connectedToIRC) {
+
+		Sleep(1000);
+
+		AfxMessageBox("Return to chat");
+
+		WSASetLastError(0);
+		sockete.init(6667,servidor);
+		sockete.connectf();
+
+		sprintf(mensaje,"USER %s %s: %s %s  \n\r", user.nick , user.email , user.ident , user.ident );
+		sockete.sendData(mensaje);
+		sprintf(mensaje,"NICK %s\n\r", user.nick);
+		sockete.sendData(mensaje);
+
+		sprintf(mensaje,"JOIN %s\n\r", "#alienarena");
+		sockete.sendData(mensaje);
+		Sleep(1000);
+		if(WSAGetLastError()) { //there was some error in connecting
+				sockete.handle_error();
+				m_status2.SetWindowText("error reconnecting to #alienarena");
+				connectedToIRC = false;
+			}
+		else {
+			m_status2.SetWindowText("Connected to #alienarena");
+			connectedToIRC = true;
+		}
+
+		sockete.getData();
+		//send the buffer to a messagebox
+		if (sockete.len > 1) 
+		{			
+			Response = SkipWords(sockete.File_Buf,0);
+			MessageBoxA(Response.word[0], "Welcome to #alienarena!", NULL);
+		}
+	}
 	
 	*pResult = 0;
 }
@@ -1373,6 +1428,15 @@ void CGalaxyDlg::OnJoin2()  //used from the menu pulldown, doesn't return pointe
 	char cmdLine[512];
 	char myCRXPath[MAX_PATH];
 	FILE *file;
+	response Response;
+
+	//disconnect from IRC - since the game will connect itself, we don't want a clone
+	if(connectedToIRC) {
+		sprintf(mensaje,"QUIT\n\r");
+		sockete.sendData(mensaje);
+		m_status2.SetWindowText("Disconnected from chat channel...");
+		//don't set flag here, because we want to reconnect after returning from games
+	}
 
 	strcpy (myCRXPath, CRXPath);
 	memset (&s, 0, sizeof(s));
@@ -1406,6 +1470,43 @@ void CGalaxyDlg::OnJoin2()  //used from the menu pulldown, doesn't return pointe
 	
 	sprintf (cmdLine, " +set game arena +set name %s +connect %s", user.nick, Server);
 	CreateProcess (CRXbuff, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myCRXPath, &s, &p);
+
+	if(connectedToIRC) {
+
+		Sleep(1000);
+
+		AfxMessageBox("Return to chat");
+
+		WSASetLastError(0);
+		sockete.init(6667,servidor);
+		sockete.connectf();
+
+		sprintf(mensaje,"USER %s %s: %s %s  \n\r", user.nick , user.email , user.ident , user.ident );
+		sockete.sendData(mensaje);
+		sprintf(mensaje,"NICK %s\n\r", user.nick);
+		sockete.sendData(mensaje);
+
+		sprintf(mensaje,"JOIN %s\n\r", "#alienarena");
+		sockete.sendData(mensaje);
+		Sleep(1000);
+		if(WSAGetLastError()) { //there was some error in connecting
+				sockete.handle_error();
+				m_status2.SetWindowText("error reconnecting to #alienarena");
+				connectedToIRC = false;
+			}
+		else {
+			m_status2.SetWindowText("Connected to #alienarena");
+			connectedToIRC = true;
+		}
+
+		sockete.getData();
+		//send the buffer to a messagebox
+		if (sockete.len > 1) 
+		{			
+			Response = SkipWords(sockete.File_Buf,0);
+			MessageBoxA(Response.word[0], "Welcome to #alienarena!", NULL);
+		}
+	}
 }
 
 void CGalaxyDlg::OnLaunch() 
@@ -1415,6 +1516,15 @@ void CGalaxyDlg::OnLaunch()
 	char cmdLine[512];
 	char myCRXPath[MAX_PATH];
 	FILE *file;
+	response Response;
+
+	//disconnect from IRC - since the game will connect itself, we don't want a clone
+	if(connectedToIRC) {
+		sprintf(mensaje,"QUIT\n\r");
+		sockete.sendData(mensaje);
+		m_status2.SetWindowText("Disconnected from chat channel...");
+		//don't set flag here, because we want to reconnect after returning from games
+	}
 	
 	strcpy (myCRXPath, CRXPath);
 	memset (&s, 0, sizeof(s));
@@ -1447,6 +1557,43 @@ void CGalaxyDlg::OnLaunch()
 	
 	sprintf (cmdLine, " +set game arena +set name %s", user.nick);
 	CreateProcess (CRXbuff, cmdLine, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, myCRXPath, &s, &p);
+
+	if(connectedToIRC) {
+
+		Sleep(1000);
+
+		AfxMessageBox("Return to chat");
+
+		WSASetLastError(0);
+		sockete.init(6667,servidor);
+		sockete.connectf();
+
+		sprintf(mensaje,"USER %s %s: %s %s  \n\r", user.nick , user.email , user.ident , user.ident );
+		sockete.sendData(mensaje);
+		sprintf(mensaje,"NICK %s\n\r", user.nick);
+		sockete.sendData(mensaje);
+
+		sprintf(mensaje,"JOIN %s\n\r", "#alienarena");
+		sockete.sendData(mensaje);
+		Sleep(1000);
+		if(WSAGetLastError()) { //there was some error in connecting
+				sockete.handle_error();
+				m_status2.SetWindowText("error reconnecting to #alienarena");
+				connectedToIRC = false;
+			}
+		else {
+			m_status2.SetWindowText("Connected to #alienarena");
+			connectedToIRC = true;
+		}
+
+		sockete.getData();
+		//send the buffer to a messagebox
+		if (sockete.len > 1) 
+		{			
+			Response = SkipWords(sockete.File_Buf,0);
+			MessageBoxA(Response.word[0], "Welcome to #alienarena!", NULL);
+		}
+	}
 }
 
 void CGalaxyDlg::OnButton6() 
@@ -1454,6 +1601,7 @@ void CGalaxyDlg::OnButton6()
 	sprintf(mensaje,"QUIT\n\r");
 	sockete.sendData(mensaje);
 	m_status2.SetWindowText("Disconnected from chat channel...");
+	connectedToIRC = false;
 }
 
 void CGalaxyDlg::Configure()
