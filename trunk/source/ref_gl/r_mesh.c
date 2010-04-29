@@ -2157,7 +2157,7 @@ void GL_DrawAliasCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped
 	R_KillVArrays ();
 }
 
-//to do - alpha and alphamasks
+//to do - alpha and alphamasks possible?
 void R_DrawAliasModelCaster (entity_t *e)
 {
 	vec3_t		bbox[8];

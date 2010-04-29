@@ -1304,7 +1304,7 @@ void R_Register( void )
 	gl_screenshot_type = Cvar_Get("gl_screenshot_type", "jpeg", CVAR_ARCHIVE);
 	gl_screenshot_jpeg_quality = Cvar_Get("gl_screenshot_jpeg_quality", "85", CVAR_ARCHIVE);
 
-	r_legacy = Cvar_Get("r_legacy", "0", CVAR_ARCHIVE); //to do - move this to automatic detection
+	r_legacy = Cvar_Get("r_legacy", "0", CVAR_ARCHIVE); 
 
 	r_firstrun = Cvar_Get("r_firstrun", "0", CVAR_ARCHIVE); //first time running the game
 
