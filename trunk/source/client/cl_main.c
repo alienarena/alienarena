@@ -2185,6 +2185,8 @@ void CL_Shutdown(void)
 	IN_Shutdown ();
 	VID_Shutdown();	
 
+	NET_Shutdown();
+
 	RS_FreeAllScripts();
 }
 
