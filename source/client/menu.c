@@ -4169,7 +4169,56 @@ void MapInfoFunc( void *self ) {
 	else
 		strcpy( startmap, "missing");
 
+#ifdef __unix__
+	// more than 2 possible locations.
+	sprintf(path, "levelshots/%s.txt", startmap);
+	FS_FOpenFile(path, &desc_file);
+	if (desc_file) {
+		if(fgets(line, 500, desc_file))
+		{
+			pLine = line;
+
+			result = strlen(line);
+
+			rLine = GetLine (&pLine, &result);
+
+			/* Establish string and get the first token: */
+			token = strtok( rLine, seps );
+			i = 0;
+			while( token != NULL && i < 5) {
+
+				/* Get next token: */
+				token = strtok( NULL, seps );
+				/* While there are tokens in "string" */
+				s_startserver_map_data[i].generic.type	= MTYPE_SEPARATOR;
+				s_startserver_map_data[i].generic.name	= token;
+				s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
+				s_startserver_map_data[i].generic.x		= 120*scale;
+				s_startserver_map_data[i].generic.y		= FONTSCALE*241*scale + offset + FONTSCALE*i*10*scale;
+
+				i++;
+			}
+
+		}
+
+		fclose(desc_file);
+
+	}
+	else
+	{
+		for (i = 0; i < 5; i++ )
+		{
+			s_startserver_map_data[i].generic.type	= MTYPE_SEPARATOR;
+			s_startserver_map_data[i].generic.name	= "no data";
+			s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
+			s_startserver_map_data[i].generic.x		= 120*scale;
+			s_startserver_map_data[i].generic.y		= FONTSCALE*241*scale + offset + FONTSCALE*i*10*scale;
+		}
+	}
+#else
+
 	sprintf(path, "%s/levelshots/%s.txt", FS_Gamedir(), startmap);
+
 	Menu_FindFile(path, &desc_file);
 	if(desc_file)
 		fclose(desc_file);
@@ -4219,6 +4268,8 @@ void MapInfoFunc( void *self ) {
 			s_startserver_map_data[i].generic.y		= FONTSCALE*241*scale + offset + FONTSCALE*i*10*scale;
 		}
 	}
+#endif
+
 }
 
 void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
