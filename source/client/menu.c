@@ -34,6 +34,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "client.h"
 #include "../client/qmenu.h"
 
+// Directory for botinfo, setup like existing acebot code
+#ifdef DATADIR
+#define BOTDIR DATADIR
+#else
+#define BOTDIR "."
+#endif
+
 static int	m_main_cursor;
 
 extern void RS_LoadScript(char *script);
@@ -3962,7 +3969,7 @@ void LoadBotInfo() {
 	char *info;
 	char *skin;
 
-	if((pIn = fopen("botinfo/allbots.tmp", "rb" )) == NULL)
+	if( (pIn = fopen( BOTDIR"/botinfo/allbots.tmp", "rb" )) == NULL)
 		return; // bail
 
 	fread(&count,sizeof (int),1,pIn);
@@ -4010,9 +4017,10 @@ void AddbotFunc(void *self) {
 		startmap[i] = tolower(startmap[i]);
 
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, "botinfo/team.tmp");
+		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
 	else
-		sprintf(bot_filename, "botinfo/%s.tmp", startmap);
+		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
+
 	if((pOut = fopen(bot_filename, "wb" )) == NULL)
 		return; // bail
 
@@ -4998,10 +5006,11 @@ void BotAction( void *self )
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 	for(i = 0; i < strlen(startmap); i++)
 		startmap[i] = tolower(startmap[i]);
+
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, "botinfo/team.tmp");
+		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
 	else
-		sprintf(bot_filename, "botinfo/%s.tmp", startmap);
+		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
 
 	if((pOut = fopen(bot_filename, "wb" )) == NULL)
 		return; // bail
@@ -5179,10 +5188,11 @@ void Read_Bot_Info()
 	char startmap[128];
 
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
+
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, "botinfo/team.tmp");
+		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
 	else
-		sprintf(bot_filename, "botinfo/%s.tmp", startmap);
+		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
 
 	if((pIn = fopen(bot_filename, "rb" )) == NULL)
 		return; // bail
