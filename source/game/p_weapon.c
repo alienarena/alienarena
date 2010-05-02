@@ -175,6 +175,21 @@ int Q2_FindFile (char *filename, FILE **file)
 
 	game = gi.cvar("game", "", 0);
 
+#ifdef DATADIR
+	if ( game && *game->string ) {
+		sprintf( name, DATADIR"/%s/%s", game->string, filename );
+		*file = fopen( name, "rb" );
+		if( *file )
+			return 1;
+	}
+	sprintf( name, "%s/%s/%s", DATADIR, GAMEVERSION, filename );
+	*file = fopen (name, "rb");
+	if( *file )
+		return 1;
+
+	return -1;
+#else
+
 	if (!*game->string) //if there is a gamedir try here first
 		sprintf (name, "%s/%s", GAMEVERSION, filename);
 	else
@@ -188,6 +203,7 @@ int Q2_FindFile (char *filename, FILE **file)
 	else
 		return 1;
 
+
 	if(!found) { //try basedir
 		sprintf (name, "%s/%s", GAMEVERSION, filename);
 		*file = fopen (name, "rb");
@@ -200,6 +216,8 @@ int Q2_FindFile (char *filename, FILE **file)
 	}
 	else
 		return -1;
+#endif
+
 }
 
 /*
