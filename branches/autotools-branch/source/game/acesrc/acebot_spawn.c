@@ -272,13 +272,14 @@ void ACESP_HoldSpawn(edict_t *self)
 }
 
 #ifdef __unix__
-void ACECO_ReadConfig(char config_file[128]) //use standard c routines for linux
+void ACECO_ReadConfig( char *config_file ) //use standard c routines for linux
 {
 	FILE *fp;
-	int k, length, rslt;
-	char a_string[128];
+	int k;
+	size_t length, result;
 	char *buffer;
 	char *s;
+	const char *delim = "\r\n";
 
 	//set bot defaults(in case no bot config file is present for that bot)
 	botvals.skill = 1; //medium
@@ -287,64 +288,85 @@ void ACECO_ReadConfig(char config_file[128]) //use standard c routines for linux
 		botvals.weapacc[k] = 1.0;
 	botvals.awareness = 0.7;
 
-	strcpy( botvals.chatmsg1, "%s: I am the destroyer %s, not you."); 
-	strcpy( botvals.chatmsg2, "%s: Are you using a bot %s?"); 
-	strcpy( botvals.chatmsg3, "%s: %s is a dead man." ); 
-	strcpy( botvals.chatmsg4, "%s: You will pay dearly %s!"); 
-	strcpy( botvals.chatmsg5, "%s: Ackity Ack Ack!"); 
-	strcpy( botvals.chatmsg6, "%s: Die %s!"); 
-	strcpy( botvals.chatmsg7, "%s: My blood is your blood %s." ); 
-	strcpy( botvals.chatmsg8, "%s: I will own you %s!"); 
+	strcpy( botvals.chatmsg1, "%s: You are a real jerk %s!"    );
+	strcpy( botvals.chatmsg2, "%s: Wait till next time %s."    );
+	strcpy( botvals.chatmsg3, "%s: Life was better alive, %s!" );
+	strcpy( botvals.chatmsg4, "%s: You will pay for this %s!"  );
+	strcpy( botvals.chatmsg5, "%s: You're using a bot %s!"     );
+	strcpy( botvals.chatmsg6, "%s: I will be hunting you %s!"  );
+	strcpy( botvals.chatmsg7, "%s: It hurts %s...it hurts..."  );
+	strcpy( botvals.chatmsg8, "%s: Just a lucky shot %s!"      );
 
-	if((fp = fopen(config_file, "rb" )) == NULL)
-	{
-		safe_bprintf (PRINT_HIGH, "no file\n");
+	if ( (fp = fopen(config_file, "rb" )) == NULL )
+	{ // no bot cfg file, use defaults
 		return;
 	}
-	else
-	{
-		fseek(fp, 0, SEEK_END);
-		length = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-
-		buffer = malloc( length + 1);
-		fread( buffer, length, 1, fp );
-		buffer[length] = 0;
+	if ( fseek(fp, 0, SEEK_END) )
+	{ // seek error
+		fclose( fp );
+		return;
 	}
-	s = buffer;
-	
-	strcpy( a_string, COM_Parse( &s ) ); 
-	botvals.skill = atoi(a_string);  //all we are getting in the linux version is the skill.
-/*  //we have a problem here with COM_Parse.  It just seems to not work right with whitespace here
-	strcpy( botvals.faveweap, COM_Parse( &s ) ); 
-	safe_bprintf (PRINT_HIGH, "Weap %s\n", botvals.faveweap);
-	for(k = 1; k < 10; k++) {
-		strcpy( a_string, COM_Parse( &s ) ); 
-		botvals.weapacc[k] = atof(a_string);
+	if ( (length = ftell(fp)) < 0L )
+	{ // tell error
+		fclose( fp );
+		return;
 	}
-
-	strcpy( a_string, COM_Parse( &s ) ); 
-	botvals.awareness = atof(a_string); 
-
-	strcpy( botvals.chatmsg1, COM_Parse( &s ) ); 
-	strcpy( botvals.chatmsg2, COM_Parse( &s ) ); 
-	strcpy( botvals.chatmsg3, COM_Parse( &s ) ); 
-	strcpy( botvals.chatmsg4, COM_Parse( &s ) ); 
-	strcpy( botvals.chatmsg5, COM_Parse( &s ) ); 
-	strcpy( botvals.chatmsg6, COM_Parse( &s ) ); 
-	strcpy( botvals.chatmsg7, COM_Parse( &s ) ); 
-	strcpy( botvals.chatmsg8, COM_Parse( &s ) ); 
-	 */
-	if ( fp != 0 )
-	{
-		fp = 0;
+	if ( fseek(fp, 0, SEEK_SET) )
+	{ // seek error
+		fclose( fp );
+		return;
+	}
+	buffer = malloc( length + 1);
+	if ( buffer == NULL )
+	{ // memory allocation error
+		fclose( fp );
+		return;
+	}
+	result = fread( buffer, 1, length, fp );
+	fclose( fp );
+	if ( result != length )
+	{ // read error
 		free( buffer );
+		return;
 	}
-	else
-	{
-		FS_FreeFile( buffer );
+	buffer[length] = 0;
+
+	// note: malloc'd buffer is modified by strtok
+	if ( (s = strtok( buffer, delim )) != NULL )
+		botvals.skill = atoi( s );
+
+	if ( s &&  ((s = strtok( NULL, delim )) != NULL) )
+		strncpy( botvals.faveweap, s, sizeof(botvals.faveweap)-1 );
+
+	for(k = 1; k < 10; k++) {
+		if ( s && ((s = strtok( NULL, delim )) != NULL ) )
+			botvals.weapacc[k] = atof( s );
 	}
+
+	if ( s && ((s = strtok( NULL, delim)) != NULL) )
+		botvals.awareness = atof( s );
+
+	if ( s && ((s = strtok( NULL, delim)) != NULL) )
+		strncpy( botvals.chatmsg1, s, sizeof(botvals.chatmsg1)-1 );
+	if ( s && ((s = strtok( NULL, delim)) != NULL) )
+		strncpy( botvals.chatmsg2, s, sizeof(botvals.chatmsg2)-1 );
+	if ( s && ((s = strtok( NULL, delim)) != NULL) )
+		strncpy( botvals.chatmsg3, s, sizeof(botvals.chatmsg3)-1 );
+	if ( s && ((s = strtok( NULL, delim)) != NULL) )
+		strncpy( botvals.chatmsg4, s, sizeof(botvals.chatmsg4)-1 );
+	if ( s && ((s = strtok( NULL, delim)) != NULL) )
+		strncpy( botvals.chatmsg5, s, sizeof(botvals.chatmsg5)-1 );
+	if ( s && ((s = strtok( NULL, delim)) != NULL) )
+		strncpy( botvals.chatmsg6, s, sizeof(botvals.chatmsg6)-1 );
+	if ( s && ((s = strtok( NULL, delim)) != NULL) )
+		strncpy( botvals.chatmsg7, s, sizeof(botvals.chatmsg7)-1 );
+	if ( s && ((s = strtok( NULL, delim)) != NULL) )
+		strncpy( botvals.chatmsg8, s, sizeof(botvals.chatmsg8)-1 );
+
+	free( buffer );
+
 }
+
 #endif
 
 ///////////////////////////////////////////////////////////////////////

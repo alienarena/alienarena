@@ -53,7 +53,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
 
+#ifdef HAVE_X11_EXTENSIONS_XXF86DGA_H
 #include <X11/extensions/Xxf86dga.h>
+#else
+// default to obsolete header
+#include <X11/extensions/xf86dga.h>
+#endif
 #include <X11/extensions/xf86vmode.h>
 
 #include <GL/glx.h>

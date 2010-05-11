@@ -16,18 +16,30 @@ CURL *curl;
 
 extern cvar_t  *cl_stats_server;
 
-size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp)
+static FILE* statsdb_open( const char* mode )
 {
 	FILE* file;
+	char pathbfr[MAX_OSPATH];
 
-	file = fopen( "stats.db", "a" ); //append, don't rewrite
+	Com_sprintf (pathbfr, sizeof(pathbfr)-1, "%s/%s", FS_Gamedir(), "stats.db");
+	file = fopen( pathbfr, mode );
+
+	return file;
+}
+
+size_t write_data(const void *buffer, size_t size, size_t nmemb, void *userp)
+{
+	FILE* file;
+	size_t bytecount;
+
+	file = statsdb_open( "a" ); //append, don't rewrite
 	
 	if(file) {
 		//write buffer to file
-		fprintf(file, buffer);
+		bytecount = fwrite( buffer, size, nmemb, file );
 		fclose(file);
 	}
-	return strlen(buffer);
+	return bytecount;
 }
 
 //get the stats database
@@ -38,13 +50,12 @@ void getStatsDB( void )
 
 	CURL* easyhandle = curl_easy_init() ;  
 
-	file = fopen( "stats.db", "w" ); //create new, blank file for writing
+	file = statsdb_open( "w" ); //create new, blank file for writing
 	if(file)
 		fclose(file);
 
 	Com_sprintf(statserver, sizeof(statserver), "%s%s", cl_stats_server->string, "/playerrank.db");
-	
-	//to do - make this a cvar
+
 	curl_easy_setopt( easyhandle, CURLOPT_URL, statserver ) ;   
 	
 	curl_easy_setopt( easyhandle, CURLOPT_WRITEFUNCTION, write_data ) ;   
@@ -62,7 +73,7 @@ PLAYERSTATS getPlayerRanking ( PLAYERSTATS player )
 	int foundplayer = false;
 
 	//open file, 
-	file = fopen( "stats.db", "r" ) ;
+	file = statsdb_open( "r" ) ;
 
 	if(file != NULL) {
 
@@ -119,7 +130,7 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player )
 	int foundplayer = false;
 
 	//open file, 
-	file = fopen( "stats.db", "r" ) ;
+	file = statsdb_open( "r" ) ;
 
 	if(file != NULL) {
 

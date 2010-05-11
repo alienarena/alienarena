@@ -1183,7 +1183,7 @@ gitem_t	itemlist[] =
 		0,
 		NULL,
 		0,
-/* precache */ "misc/blue_scores.wav misc/blue_takes.wav misc/blue_increases.wav misc/blue_wins.wav misc_blue_picked.wav"
+/* precache */ "misc/blue_scores.wav misc/blue_takes.wav misc/blue_increases.wav misc/blue_wins.wav misc/blue_picked.wav"
 	},
 
 /*QUAKED item_bomber (1 0.2 0) (-16 -16 -24) (16 16 32)

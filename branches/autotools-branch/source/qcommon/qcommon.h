@@ -20,10 +20,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // qcommon.h -- definitions common between client and server, but not game.dll
 
+#if 1
+	// jjb
+#define Com_DPrintf( x, ... )
+#endif
+
 #include "../game/q_shared.h"
 
 
-#define	VERSION		7.34
+#define	VERSION		7.40
 
 #define	BASEDIRNAME	"data1"
 
@@ -787,7 +792,10 @@ MISC
 void		Com_BeginRedirect (int target, char *buffer, int buffersize, void (*flush));
 void		Com_EndRedirect (void);
 void 		Com_Printf (char *fmt, ...);
+#if 0
+		// jjb
 void 		Com_DPrintf (char *fmt, ...);
+#endif 
 void 		Com_Error (int code, char *fmt, ...);
 void 		Com_Quit (void);
 

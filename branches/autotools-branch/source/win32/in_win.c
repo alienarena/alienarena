@@ -238,7 +238,7 @@ void IN_StartupMouse (void)
 
 	mouseinitialized = true;
 	mouseparmsvalid = SystemParametersInfo (SPI_GETMOUSE, 0, originalmouseparms, 0);
-	mouse_buttons = 3; //to do - should this be 5 or 7?
+	mouse_buttons = 7;
 }
 
 /*

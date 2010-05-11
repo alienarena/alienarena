@@ -174,6 +174,8 @@ void Com_Printf (char *fmt, ...)
 }
 
 
+#if 0
+	// jjb
 /*
 ================
 Com_DPrintf
@@ -195,6 +197,7 @@ void Com_DPrintf (char *fmt, ...)
 
 	Com_Printf ("%s", msg);
 }
+#endif
 
 
 /*

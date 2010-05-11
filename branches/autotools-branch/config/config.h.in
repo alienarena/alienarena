@@ -161,6 +161,15 @@
 /* Define to 1 if you have the <X11/cursorfont.h> header file. */
 #undef HAVE_X11_CURSORFONT_H
 
+/* Define to 1 if you have the <X11/extensions/xf86dga.h> header file. */
+#undef HAVE_X11_EXTENSIONS_XF86DGA_H
+
+/* Define to 1 if you have the <X11/extensions/xf86vmode.h> header file. */
+#undef HAVE_X11_EXTENSIONS_XF86VMODE_H
+
+/* Define to 1 if you have the <X11/extensions/Xxf86dga.h> header file. */
+#undef HAVE_X11_EXTENSIONS_XXF86DGA_H
+
 /* Define to 1 if you have the <X11/keysym.h> header file. */
 #undef HAVE_X11_KEYSYM_H
 

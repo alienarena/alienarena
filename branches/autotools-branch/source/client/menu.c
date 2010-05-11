@@ -34,6 +34,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "client.h"
 #include "../client/qmenu.h"
 
+// Directory for botinfo, setup like existing acebot code
+#ifdef DATADIR
+#define BOTDIR DATADIR
+#else
+#define BOTDIR "."
+#endif
+
 static int	m_main_cursor;
 
 extern void RS_LoadScript(char *script);
@@ -2466,12 +2473,14 @@ static const char *idcredits[] =
 	"Tony Jackson",
 	"Jim Bower",
 	"BlackIce",
+	"Dave Carter",
 	"Stephan Stahl",
 	"Kyle Hunter",
 	"Andres Mejia",
 	"",
 	"+ART",
 	"John Diamond",
+	"Dennis -xEMPx- Zedlach",
 	"Shawn Keeth",
 	"Enki",
 	"",
@@ -2489,7 +2498,7 @@ static const char *idcredits[] =
 	"",
 	"+SOUND EFFECTS AND MUSIC",
 	"Music/FX Composed and Produced by",
-	"John Diamond, Whitelipper",
+	"John Diamond, Whitelipper, Divinity",
 	"Arteria Games, Wooden Productions",
 	"and Soundrangers.com",
 	"",
@@ -3960,7 +3969,7 @@ void LoadBotInfo() {
 	char *info;
 	char *skin;
 
-	if((pIn = fopen("botinfo/allbots.tmp", "rb" )) == NULL)
+	if( (pIn = fopen( BOTDIR"/botinfo/allbots.tmp", "rb" )) == NULL)
 		return; // bail
 
 	fread(&count,sizeof (int),1,pIn);
@@ -4008,9 +4017,10 @@ void AddbotFunc(void *self) {
 		startmap[i] = tolower(startmap[i]);
 
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, "botinfo/team.tmp");
+		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
 	else
-		sprintf(bot_filename, "botinfo/%s.tmp", startmap);
+		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
+
 	if((pOut = fopen(bot_filename, "wb" )) == NULL)
 		return; // bail
 
@@ -4167,7 +4177,56 @@ void MapInfoFunc( void *self ) {
 	else
 		strcpy( startmap, "missing");
 
+#ifdef __unix__
+	// more than 2 possible locations.
+	sprintf(path, "levelshots/%s.txt", startmap);
+	FS_FOpenFile(path, &desc_file);
+	if (desc_file) {
+		if(fgets(line, 500, desc_file))
+		{
+			pLine = line;
+
+			result = strlen(line);
+
+			rLine = GetLine (&pLine, &result);
+
+			/* Establish string and get the first token: */
+			token = strtok( rLine, seps );
+			i = 0;
+			while( token != NULL && i < 5) {
+
+				/* Get next token: */
+				token = strtok( NULL, seps );
+				/* While there are tokens in "string" */
+				s_startserver_map_data[i].generic.type	= MTYPE_SEPARATOR;
+				s_startserver_map_data[i].generic.name	= token;
+				s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
+				s_startserver_map_data[i].generic.x		= 120*scale;
+				s_startserver_map_data[i].generic.y		= FONTSCALE*241*scale + offset + FONTSCALE*i*10*scale;
+
+				i++;
+			}
+
+		}
+
+		fclose(desc_file);
+
+	}
+	else
+	{
+		for (i = 0; i < 5; i++ )
+		{
+			s_startserver_map_data[i].generic.type	= MTYPE_SEPARATOR;
+			s_startserver_map_data[i].generic.name	= "no data";
+			s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
+			s_startserver_map_data[i].generic.x		= 120*scale;
+			s_startserver_map_data[i].generic.y		= FONTSCALE*241*scale + offset + FONTSCALE*i*10*scale;
+		}
+	}
+#else
+
 	sprintf(path, "%s/levelshots/%s.txt", FS_Gamedir(), startmap);
+
 	Menu_FindFile(path, &desc_file);
 	if(desc_file)
 		fclose(desc_file);
@@ -4217,6 +4276,8 @@ void MapInfoFunc( void *self ) {
 			s_startserver_map_data[i].generic.y		= FONTSCALE*241*scale + offset + FONTSCALE*i*10*scale;
 		}
 	}
+#endif
+
 }
 
 void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
@@ -4945,10 +5006,11 @@ void BotAction( void *self )
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 	for(i = 0; i < strlen(startmap); i++)
 		startmap[i] = tolower(startmap[i]);
+
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, "botinfo/team.tmp");
+		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
 	else
-		sprintf(bot_filename, "botinfo/%s.tmp", startmap);
+		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
 
 	if((pOut = fopen(bot_filename, "wb" )) == NULL)
 		return; // bail
@@ -5126,10 +5188,11 @@ void Read_Bot_Info()
 	char startmap[128];
 
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
+
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, "botinfo/team.tmp");
+		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
 	else
-		sprintf(bot_filename, "botinfo/%s.tmp", startmap);
+		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
 
 	if((pIn = fopen(bot_filename, "rb" )) == NULL)
 		return; // bail

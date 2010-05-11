@@ -16,7 +16,7 @@ pkglibexec_LTLIBRARIES = game.la
 ##
 crx_CFLAGS=-DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
 
-game_la_CFLAGS = -Dstricmp=strcasecmp  -U_FORTIFY_SOURCE -ffast-math
+game_la_CFLAGS = -Dstricmp=strcasecmp  -U_FORTIFY_SOURCE -ffast-math -DDATADIR='"$(pkgdatadir)"'
 game_la_LDFLAGS = -module -avoid-version
 
 crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
@@ -168,8 +168,11 @@ game_la_SOURCES =  \
 	game/p_weapon.c \
 	game/q_shared.c \
 	game/q_shared.h \
-	qcommon/qcommon.h \
 	qcommon/qfiles.h
+
+##
+##	qcommon/qcommon.h \  TODO: verify game lib does not use qcommon.h
+
 	
 crded_SOURCES = \
 	client/anorms.h \

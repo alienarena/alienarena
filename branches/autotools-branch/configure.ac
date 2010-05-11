@@ -6,7 +6,7 @@
 #
 
 AC_PREREQ(2.65)
-AC_INIT([alienarena-7.40],[7.40],[alienrace@comcast.net],[alienarena],[http://red.planetarena.org/])
+AC_INIT([alienarena],[7.40],[alienrace@comcast.net],[alienarena],[http://red.planetarena.org/])
 
 dnl This may not be a good idea since /usr/local/games/bin may not be in PATH
 dnl AC_PREFIX_DEFAULT([/usr/local/games])
@@ -80,15 +80,15 @@ AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
 
 dnl TODO: put support back in for deprecated headers for unix/gl_glx.c
 dnl deprecated version is checked, if first choice fails
-AC_CHECK_HEADER([X11/extensions/Xxf86dga.h],
+AC_CHECK_HEADERS([X11/extensions/Xxf86dga.h],
 	,
-	[AC_CHECK_HEADER([X11/extensions/xf86dga.h],
+	[AC_CHECK_HEADERS([X11/extensions/xf86dga.h],
 		,
 		[AC_MSG_ERROR("Required X11 x86 extension file not found")],
-		[#include <X11/Xlib.h #include <X11/Xproto.h>])],
+		[#include <X11/Xlib.h #include <X11/Xproto.h> #include <X11/Xfuncproto.h>] ) ],
 	[#include <X11/Xlib.h>  #include <X11/Xproto.h>])
 	
-AC_CHECK_HEADER([X11/extensions/xf86vmode.h],
+AC_CHECK_HEADERS([X11/extensions/xf86vmode.h],
 	,
 	[AC_MSG_ERROR("Required X11 x86 extension header file not found")],
 	[#include <X11/Xlib.h>])
