@@ -289,7 +289,6 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			//here is where the bot chat features will be added.
 			//default is on.  Setting to 1 turns it off.
 
-#ifndef __unix__
 			if ((!((int)(dmflags->value) & DF_BOTCHAT)) && self->is_bot)
 			{
 				msg = random() * 9;
@@ -332,50 +331,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					gi.multicast (self->s.origin, MULTICAST_PVS);
 				}
 			}
-#else
-			if ((!((int)(dmflags->value) & DF_BOTCHAT)) && self->is_bot)
-			{
-				msg = random() * 9;
-				switch(msg){
-				case 1:
-					chatmsg = "%s: You are a real jerk %s!";
-					break;
-				case 2:
-					chatmsg = "%s: Stop it %s, you punk!";
-					break;
-				case 3:
-					chatmsg = "%s: Life was better alive, %s!";
-					break;
-				case 4:
-					chatmsg = "%s: You will pay for this %s..";
-					break;
-				case 5:
-					chatmsg = "%s: Wait till next time %s.";
-					break;
-				case 6:
-					chatmsg = "%s: NOOOOO %s!!!";
-					break;
-				case 7:
-					chatmsg = "%s: It hurts %s...it hurts...";
-					break;
-				case 8:
-					chatmsg = "%s: You're using a bot %s!";
-					break;
-				default:
-					chatmsg = "%s: Stop it %s, you punk!";
-					break;
-				}
-				if(chatmsg) {
-					safe_bprintf (PRINT_CHAT, chatmsg, self->client->pers.netname, attacker->client->pers.netname);
-					safe_bprintf (PRINT_CHAT, "\n");
 
-					gi.WriteByte (svc_temp_entity);
-					gi.WriteByte (TE_SAYICON);
-					gi.WritePosition (self->s.origin);
-					gi.multicast (self->s.origin, MULTICAST_PVS);
-				}
-			}
-#endif
 			//bot taunts
 			if((!((int)(dmflags->value) & DF_BOTCHAT)) && attacker->is_bot) {
 
