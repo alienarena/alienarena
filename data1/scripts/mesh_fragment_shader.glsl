@@ -5,6 +5,7 @@ uniform vec3 baseColor;
 uniform int FOG;
 uniform int useFX;
 uniform int useGlow;
+uniform float minLight; 
 const vec3 specularMaterial = vec3(1.0, 1.0, 1.0);
 const float SpecularFactor = 0.5;
 
@@ -18,8 +19,8 @@ void main()
 	vec4 fx;
 	vec4 glow;
 	
-    vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;
-    vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
+    	vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;
+    	vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
 	
 	vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
 	
@@ -42,7 +43,7 @@ void main()
 	litColor = min(litColor + spec, vec3(1.0));
 	
 	//keep shadows from making meshes completely black
-	litColor = max(litColor, (textureColour * vec3(0.15)));
+	litColor = max(litColor, (textureColour * vec3(minLight)));
 	
 	gl_FragColor = vec4(litColor * baseColor, 1.0);
 	
