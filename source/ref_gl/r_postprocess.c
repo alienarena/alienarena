@@ -405,16 +405,14 @@ void R_FB_InitTextures( void )
 	free ( data );
 
 	//init the various FBO textures
-	size = vid.width * vid.height * 4;
 	data = malloc( size );
 	memset( data, 255, size );
-	r_colorbuffer = GL_LoadPic( "***r_colorbuffer***", (byte *)data, vid.width, vid.height, it_pic, 3 );
+	r_colorbuffer = GL_LoadPic( "***r_colorbuffer***", (byte *)data, FB_texture_width, FB_texture_width, it_pic, 3 );
 	free ( data );
 
-	size = vid.width * vid.height * 4;
 	data = malloc( size );
 	memset( data, 255, size );
-	r_shadowbuffer = GL_LoadPic( "***r_shadowbuffer***", (byte *)data, vid.width, vid.height, it_pic, 3 );
+	r_shadowbuffer = GL_LoadPic( "***r_shadowbuffer***", (byte *)data, FB_texture_width, FB_texture_width, it_pic, 3 );
 	free ( data );
 
 	qglBindTexture(GL_TEXTURE_2D, r_shadowbuffer->texnum);
