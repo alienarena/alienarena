@@ -205,7 +205,6 @@ from stenciled volume
 ==============
 */
 image_t *r_colorbuffer;
-image_t *r_shadowbuffer;
 
 void R_ShadowBlend(float alpha)
 {
@@ -271,14 +270,6 @@ void R_ShadowBlend(float alpha)
 	qglEnd();
 
 	if(r_test->value && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0) {
-
-		//we need to grab the frame buffer	
-		//qglViewport(0,0,vid.width,vid.height); //do if we are scaling down
-
-		//leave this because for ATI we may need to do this to prevent crashing(seems to be no performance hit)
-		//qglBindTexture(GL_TEXTURE_2D, r_shadowbuffer->texnum);
-		//qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, vid.width, vid.height);
-		//qglBindTexture(GL_TEXTURE_2D, 0);
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
@@ -405,18 +396,11 @@ void R_FB_InitTextures( void )
 	free ( data );
 
 	//init the various FBO textures
+	size = FB_texture_width * FB_texture_height * 4;
 	data = malloc( size );
 	memset( data, 255, size );
-	r_colorbuffer = GL_LoadPic( "***r_colorbuffer***", (byte *)data, FB_texture_width, FB_texture_width, it_pic, 3 );
+	r_colorbuffer = GL_LoadPic( "***r_colorbuffer***", (byte *)data, FB_texture_width, FB_texture_height, it_pic, 3 );
 	free ( data );
-
-	data = malloc( size );
-	memset( data, 255, size );
-	r_shadowbuffer = GL_LoadPic( "***r_shadowbuffer***", (byte *)data, FB_texture_width, FB_texture_width, it_pic, 3 );
-	free ( data );
-
-	qglBindTexture(GL_TEXTURE_2D, r_shadowbuffer->texnum);
-	qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, vid.width, vid.height, 0, GL_RGBA, GL_FLOAT, 0);
 
 	//init the distortion textures
 	if(FB_texture_height == FB_texture_width) {	
