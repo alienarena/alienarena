@@ -40,8 +40,6 @@ float r_fbeffectTime;
 int frames;
 int fbSampleSize;
 
-static int		FB_texture_width, FB_texture_height;
-
 void R_GLSLPostProcess(void)
 {
 	vec2_t fxScreenPos;
@@ -199,12 +197,196 @@ void R_GLSLPostProcess(void)
 	return;
 }
 
+/*
+==============
+R_ShadowBlend
+Draws projection shadow(s)
+from stenciled volume
+==============
+*/
+image_t *r_colorbuffer;
+image_t *r_shadowbuffer;
+
+void R_ShadowBlend(float alpha)
+{
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		return;
+
+	qglMatrixMode(GL_PROJECTION);
+	qglPushMatrix();
+	qglLoadIdentity();
+	qglOrtho(0, 1, 1, 0, -99999, 99999);
+
+	qglMatrixMode(GL_MODELVIEW);
+	qglPushMatrix();
+	qglLoadIdentity();
+
+	if(gl_state.hasFBOblit) {
+
+		alpha/=1.5; //necessary because we are blending two quads
+
+		//blit the stencil mask from main buffer
+		qglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
+		qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fboId[1]);
+
+		qglBlitFramebufferEXT(0, 0, vid.width, vid.height, 0, 0, viddef.width, viddef.height,
+			GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+
+		qglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
+		qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
+		
+		//render offscreen
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[1]);
+
+		qglDisable(GL_STENCIL_TEST);
+		GLSTATE_DISABLE_ALPHATEST
+		qglEnable( GL_BLEND );
+		qglDisable (GL_DEPTH_TEST);
+		qglDisable (GL_TEXTURE_2D);
+
+		qglColor4f (1,1,1, 1);
+
+		qglBegin(GL_TRIANGLES);
+		qglVertex2f(-5, -5);
+		qglVertex2f(10, -5);
+		qglVertex2f(-5, 10);
+		qglEnd();
+	}
+
+	qglColor4f (0,0,0, alpha);
+
+	GLSTATE_DISABLE_ALPHATEST
+	qglEnable( GL_BLEND );
+	qglDisable (GL_DEPTH_TEST);
+	qglDisable (GL_TEXTURE_2D);
+
+	qglEnable(GL_STENCIL_TEST);
+	qglStencilFunc( GL_NOTEQUAL, 0, 0xFF);
+	qglStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+
+	qglBegin(GL_TRIANGLES);
+	qglVertex2f(-5, -5);
+	qglVertex2f(10, -5);
+	qglVertex2f(-5, 10);
+	qglEnd();
+
+	if(gl_state.hasFBOblit) {
+
+		//we need to grab the frame buffer	
+		//qglViewport(0,0,vid.width,vid.height); //do if we are scaling down
+
+		//leave this because for ATI we may need to do this to prevent crashing(seems to be no performance hit)
+		qglBindTexture(GL_TEXTURE_2D, r_shadowbuffer->texnum);
+		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, vid.width, vid.height);
+		qglBindTexture(GL_TEXTURE_2D, 0);
+
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+
+		//revert settings
+		qglMatrixMode( GL_PROJECTION );
+		qglLoadIdentity ();
+		qglOrtho(0, vid.width, vid.height, 0, -10, 100);
+		qglDisable(GL_CULL_FACE);
+
+		qglEnable( GL_BLEND );
+		qglEnable( GL_TEXTURE_2D );
+
+		qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+		qglDisable (GL_DEPTH_TEST);
+		qglDisable(GL_STENCIL_TEST);
+
+		qglColor4f (1,1,1,1);
+
+		//render quad on screen	into FBO
+		//and blur it vertically
+	
+		glUseProgramObjectARB( g_blurprogramObj );
+
+		qglActiveTextureARB(GL_TEXTURE0);
+		qglBindTexture(GL_TEXTURE_2D, r_shadowbuffer->texnum);
+
+		glUniform1iARB( g_location_source, 0);
+
+		glUniform2fARB( g_location_scale, 5.0/vid.width, 2.0/vid.height);
+
+		qglEnableClientState (GL_VERTEX_ARRAY);
+		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]); 
+		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+		qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+
+		VA_SetElem2(twodvert_array[0],0, vid.height);
+		VA_SetElem2(twodvert_array[1],vid.width, vid.height);
+		VA_SetElem2(twodvert_array[2],vid.width, 0);
+		VA_SetElem2(twodvert_array[3],0, 0); 
+
+		VA_SetElem2(tex_array[0],r_shadowbuffer->sl, r_shadowbuffer->tl);
+		VA_SetElem2(tex_array[1],r_shadowbuffer->sh, r_shadowbuffer->tl);
+		VA_SetElem2(tex_array[2],r_shadowbuffer->sh, r_shadowbuffer->th);
+		VA_SetElem2(tex_array[3],r_shadowbuffer->sl, r_shadowbuffer->th);
+
+		qglDrawArrays (GL_QUADS, 0, 4);
+		
+		R_KillVArrays();
+
+		//now blur horizontally	
+
+		qglActiveTextureARB(GL_TEXTURE0);
+		qglBindTexture(GL_TEXTURE_2D, r_shadowbuffer->texnum);
+
+		glUniform1iARB( g_location_source, 0);
+
+		glUniform2fARB( g_location_scale, 2.0/vid.width, 5.0/vid.height);
+
+		qglEnableClientState (GL_VERTEX_ARRAY);
+		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]); 
+		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+		qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+
+		VA_SetElem2(twodvert_array[0],0, vid.height);
+		VA_SetElem2(twodvert_array[1],vid.width, vid.height);
+		VA_SetElem2(twodvert_array[2],vid.width, 0);
+		VA_SetElem2(twodvert_array[3],0, 0); 
+
+		VA_SetElem2(tex_array[0],r_shadowbuffer->sl, r_shadowbuffer->tl);
+		VA_SetElem2(tex_array[1],r_shadowbuffer->sh, r_shadowbuffer->tl);
+		VA_SetElem2(tex_array[2],r_shadowbuffer->sh, r_shadowbuffer->th);
+		VA_SetElem2(tex_array[3],r_shadowbuffer->sl, r_shadowbuffer->th);
+
+		qglDrawArrays (GL_QUADS, 0, 4);
+
+		R_KillVArrays();
+
+		glUseProgramObjectARB(0);
+
+	}
+
+	//revert settings	
+	qglMatrixMode(GL_PROJECTION);
+	qglPopMatrix();
+	qglMatrixMode(GL_MODELVIEW);
+	qglPopMatrix();
+
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDisable ( GL_BLEND );
+	qglEnable (GL_TEXTURE_2D);
+	qglEnable (GL_DEPTH_TEST);
+	qglDisable(GL_STENCIL_TEST);
+	qglEnable(GL_CULL_FACE);
+
+	qglColor4f(1,1,1,1);
+
+}
 
 /*
 =================
 R_FB_InitTextures
 =================
 */
+
 void R_FB_InitTextures( void )
 {
 	byte	*data;
@@ -226,6 +408,22 @@ void R_FB_InitTextures( void )
 	memset( data, 255, size );
 	r_framebuffer = GL_LoadPic( "***r_framebuffer***", (byte *)data, FB_texture_width, FB_texture_height, it_pic, 3 );
 	free ( data );
+
+	//init the various FBO textures
+	size = vid.width * vid.height * 4;
+	data = malloc( size );
+	memset( data, 255, size );
+	r_colorbuffer = GL_LoadPic( "***r_colorbuffer***", (byte *)data, vid.width, vid.height, it_pic, 3 );
+	free ( data );
+
+	size = vid.width * vid.height * 4;
+	data = malloc( size );
+	memset( data, 255, size );
+	r_shadowbuffer = GL_LoadPic( "***r_shadowbuffer***", (byte *)data, vid.width, vid.height, it_pic, 3 );
+	free ( data );
+
+	qglBindTexture(GL_TEXTURE_2D, r_shadowbuffer->texnum);
+	qglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, vid.width, vid.height, 0, GL_RGBA, GL_FLOAT, 0);
 
 	//init the distortion textures
 	if(FB_texture_height == FB_texture_width) {	

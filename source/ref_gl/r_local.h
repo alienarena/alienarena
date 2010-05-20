@@ -459,6 +459,7 @@ typedef struct
 	qboolean	separateStencil;
 	qboolean	stencil_wrap;
 	qboolean	vbo;
+	qboolean	hasFBOblit;
 
 } glstate_t;
 
@@ -526,7 +527,11 @@ void R_KillNormalTMUs(void);
 extern	cvar_t		*r_shadowmapratio;
 extern  int			r_lightgroups;
 extern  image_t		*r_depthtexture;
-extern GLuint   fboId;
+extern  image_t		*r_colorbuffer;
+extern  image_t		*r_shadowbuffer;
+extern	image_t		*r_shadowbufferBlur;
+extern GLuint   fboId[2];
+extern GLuint	rboId;
 typedef struct	LightGroup {
 	vec3_t	group_origin;
 	vec3_t	accum_origin;
@@ -537,6 +542,7 @@ extern			LightGroup_t LightGroups[MAX_LIGHTS];
 extern void		R_DrawAliasModelCaster (entity_t *e);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_CastShadow(void);
+int				FB_texture_width, FB_texture_height;
 
 //arb fragment
 extern unsigned int g_water_program_id;
@@ -546,6 +552,7 @@ extern GLhandleARB	g_programObj;
 extern GLhandleARB	g_waterprogramObj;
 extern GLhandleARB	g_meshprogramObj;
 extern GLhandleARB	g_fbprogramObj;
+extern GLhandleARB	g_blurprogramObj;
 
 extern GLhandleARB	g_vertexShader;
 extern GLhandleARB	g_fragmentShader;
@@ -593,7 +600,7 @@ extern GLuint		g_location_meshFog;
 extern GLuint		g_location_useFX;
 extern GLuint		g_location_useGlow;
 
-//fullscreen
+//fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;
 extern GLuint		g_location_distortTex;
 extern GLuint		g_location_frametime;
@@ -601,6 +608,10 @@ extern GLuint		g_location_fxType;
 extern GLuint		g_location_fxPos;
 extern GLuint		g_location_fxColor;
 extern GLuint		g_location_fbSampleSize;
+
+//blur 
+extern GLuint		g_location_scale;
+extern GLuint		g_location_source;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 

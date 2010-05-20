@@ -30,6 +30,8 @@ extern glStencilFuncSeparatePROC	qglStencilFuncSeparate;
 extern glStencilOpSeparatePROC		qglStencilOpSeparate;
 extern glStencilMaskSeparatePROC	qglStencilMaskSeparate;
 
+extern void R_ShadowBlend(float alpha);
+
 vec3_t ShadowArray[MAX_SHADOW_VERTS];
 static qboolean	triangleFacingLight	[MAX_INDICES / 3];
 
@@ -44,60 +46,6 @@ void GL_LerpVerts(int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, floa
         lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1];
         lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2];
     }
-}
-
-/*
-==============
-R_ShadowBlend
-Draws projection shadow(s)
-from stenciled volume
-==============
-*/
-
-void R_ShadowBlend(float alpha)
-{
-	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-
-	qglMatrixMode(GL_PROJECTION);
-	qglPushMatrix();
-	qglLoadIdentity();
-	qglOrtho(0, 1, 1, 0, -99999, 99999);
-
-	qglMatrixMode(GL_MODELVIEW);
-	qglPushMatrix();
-	qglLoadIdentity();
-
-	qglColor4f (0,0,0, alpha);
-
-	GLSTATE_DISABLE_ALPHATEST
-	qglEnable( GL_BLEND );
-	qglDisable (GL_DEPTH_TEST);
-	qglDisable (GL_TEXTURE_2D);
-
-	qglEnable(GL_STENCIL_TEST);
-	qglStencilFunc( GL_NOTEQUAL, 0, 0xFF);
-	qglStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-
-	qglBegin(GL_TRIANGLES);
-	qglVertex2f(-5, -5);
-	qglVertex2f(10, -5);
-	qglVertex2f(-5, 10);
-	qglEnd();
-
-	qglMatrixMode(GL_PROJECTION);
-	qglPopMatrix();
-	qglMatrixMode(GL_MODELVIEW);
-	qglPopMatrix();
-
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDisable ( GL_BLEND );
-	qglEnable (GL_TEXTURE_2D);
-	qglEnable (GL_DEPTH_TEST);
-	qglDisable(GL_STENCIL_TEST);
-
-	qglColor4f(1,1,1,1);
-
 }
 
 void R_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightOrg, qboolean lerp){
@@ -644,6 +592,11 @@ void R_CastShadow(void)
 
 		//get distance, set lod if available
 		VectorSubtract(r_origin, currententity->origin, dist);
+
+		//cull by distance if soft shadows(to do - test/tweak this)
+		if(VectorLength(dist) > 1024 && gl_state.hasFBOblit)
+			continue;
+
 		if(VectorLength(dist) > 1000) {
 			if(currententity->lod2)
 				currentmodel = currententity->lod2;

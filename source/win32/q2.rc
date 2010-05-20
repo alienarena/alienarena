@@ -161,6 +161,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_STRING1             "gl_glsl_postprocess"
+    IDS_STRING2             "r_colorbuffer"
 END
 
 #endif    // English (U.S.) resources
