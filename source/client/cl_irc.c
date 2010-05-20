@@ -442,47 +442,15 @@ void CL_IRCSay(void)
 #endif
 }
 
-#ifdef _WINDOWS
-void RecvThreadProc(void *dummy)
-{
 
-	while(1) {
-
-		//try not to eat up CPU
-		Sleep(1000); //time to recieve packets
-
-		CL_GetIRCData();	
-	}
-	return;
-}
-#endif
-
-#ifdef __unix__
-void *RecvThreadProc(void *dummy)
-{
-
-	while(1) {
-
-		//try not to eat up CPU
-		sleep(1); //time to recieve packets
-
-		CL_GetIRCData();	
-	}
-	return;
-}
-#endif
-
-void CL_InitIRC(void)
-{
+// returns true on success, false on failure.
+qboolean CL_JoinIRC(void){
 
 	char message[IRC_SEND_BUF_SIZE];
 	char name[32];
 	int i, j;
-#ifdef __unix__
-	pthread_t pth;
-#endif
 
-	if(cls.irc_connected)
+    if(cls.irc_connected)
 		Com_Printf("...already connected to IRC\n");
 
 	Com_Printf("...Initializing IRC client\n");
@@ -492,13 +460,13 @@ void CL_InitIRC(void)
 #else
 	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == -1 )
 #endif
-		return;	
+		return false; //IRC daemon will not continue
 
 	strcpy(name, Cvar_VariableString("name")); //we should force players to set name on startup
 
 	if(!strcmp(name, "Player")) {
 		Com_Printf("...IRC rejected due to unset player name\n");
-		return;
+		return false;
 	}
 
 	//strip color chars
@@ -528,7 +496,7 @@ void CL_InitIRC(void)
 		close(sock);
 #endif
 		handle_error();
- 		return;
+ 		return false;
 	}
 
     address.sin_addr.s_addr=*((unsigned long *) host->h_addr);
@@ -540,7 +508,7 @@ void CL_InitIRC(void)
 		close(sock);
 #endif
 		Com_Printf("...IRC connection refused.\n");
-		return;
+		return false;
 	}
 
 	sprintf(message,"USER %s %s: %s %s  \n\r", user.nick , user.email , user.nick , user.nick );
@@ -556,15 +524,59 @@ void CL_InitIRC(void)
 
 		closesocket(sock);
 		handle_error();
-		return; 
+		return false; 
 	}
 #endif
 
 	cls.irc_connected = true;
 
 	Com_Printf("...Connected to IRC server\n");
+	
+	return true; //IRC daemon will continue
+}
 
-	//we are in, start thread for data
+
+#ifdef _WINDOWS
+void RecvThreadProc(void *dummy)
+{
+    if (!CL_JoinIRC())
+        return; 
+
+	while(1) {
+
+		//try not to eat up CPU
+		Sleep(1000); //time to recieve packets
+
+		CL_GetIRCData();	
+	}
+	return;
+}
+#endif
+
+#ifdef __unix__
+void *RecvThreadProc(void *dummy)
+{
+    if (!CL_JoinIRC())
+        return; 
+
+	while(1) {
+
+		//try not to eat up CPU
+		sleep(1); //time to recieve packets
+
+		CL_GetIRCData();	
+	}
+	return;
+}
+#endif
+
+void CL_InitIRC(void)
+{
+#ifdef __unix__
+	pthread_t pth;
+#endif
+
+	//spin off thread right away
 #ifdef _WINDOWS
 	_beginthread( RecvThreadProc, 0, NULL );
 #endif
@@ -572,7 +584,7 @@ void CL_InitIRC(void)
 	pthread_create(&pth,NULL,RecvThreadProc,"dummy");
 #endif
 
-}
+} 
 
 void CL_IRCShutdown(void)
 {
