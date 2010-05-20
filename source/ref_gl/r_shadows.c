@@ -337,12 +337,6 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
 
-	if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 10))
-		return;
-
-	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-
 	if(currententity->flags & RF_BOBBING) 
 		bob = currententity->bob;
 	else
@@ -455,6 +449,9 @@ void R_DrawShadowVolume(entity_t * e)
     trace_t r_trace;
 	
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		return;
+	
+	if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 10))
 		return;
 
 	VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
