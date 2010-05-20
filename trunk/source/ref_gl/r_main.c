@@ -283,6 +283,9 @@ extern cvar_t *cl_noblood;
 //first time running game
 cvar_t	*r_firstrun;
 
+//for testing
+cvar_t  *r_test;
+
 //fog stuff
 struct r_fog
 {
@@ -1313,6 +1316,8 @@ void R_Register( void )
 	r_legacy = Cvar_Get("r_legacy", "0", CVAR_ARCHIVE); 
 
 	r_firstrun = Cvar_Get("r_firstrun", "0", CVAR_ARCHIVE); //first time running the game
+
+	r_test = Cvar_Get("r_test", "1", CVAR_ARCHIVE); //for testing things
 
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
 	Cmd_AddCommand( "screenshot", GL_ScreenShot_f );

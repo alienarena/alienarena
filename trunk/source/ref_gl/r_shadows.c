@@ -434,7 +434,7 @@ qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipfl
 
 int CL_PMpointcontents(vec3_t point);
 
-void R_DrawShadowVolume(entity_t * e)
+void R_DrawShadowVolume()
 {
 	dmdl_t *paliashdr;
     daliasframe_t *frame, *oldframe;
@@ -442,31 +442,9 @@ void R_DrawShadowVolume(entity_t * e)
     float   *lerp;
     float frontlerp;
     vec3_t move, delta, vectors[3];
-    vec3_t frontv, backv, tmp;//, water;
+    vec3_t frontv, backv;
     int i;
 	qboolean lerped;
-    float rad;
-    trace_t r_trace;
-	
-	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-	
-	if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 10))
-		return;
-
-	VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
-	VectorScale (tmp, 1.666, tmp); 
-	rad = VectorLength (tmp);
-	
-	if( R_CullSphere( e->origin, rad, 15 ) )
-		return;
-	
-	if (r_worldmodel ) {
-		//occulusion culling - why draw shadows of entities we cannot see?	
-		r_trace = CM_BoxTrace(r_origin, e->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
-		if(r_trace.fraction != 1.0)
-			return;
-	}
 
 	paliashdr = (dmdl_t *) currentmodel->extradata;
 
@@ -477,7 +455,7 @@ void R_DrawShadowVolume(entity_t * e)
 		currententity->oldframe = 0;
 	}
 
-	if(e->frame == 0 && currentmodel->num_frames == 1) 
+	if(currententity->frame == 0 && currentmodel->num_frames == 1) 
 		lerped = false;
 	else 
 		lerped = true;
@@ -534,8 +512,8 @@ void R_DrawShadowVolume(entity_t * e)
 		
 	qglPushMatrix();
 	qglDisable(GL_TEXTURE_2D);
-	qglTranslatef(e->origin[0], e->origin[1], e->origin[2]);
-	qglRotatef(e->angles[1], 0, 0, 1);
+	qglTranslatef(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
+	qglRotatef(currententity->angles[1], 0, 0, 1);
 
 	GL_DrawAliasShadowVolume(paliashdr, lerped);
 		
@@ -547,10 +525,15 @@ void R_DrawShadowVolume(entity_t * e)
 void R_CastShadow(void)
 {
 	int i;
-	vec3_t dist;
+	vec3_t dist, tmp;
+	float rad;
+    trace_t r_trace;
 	
 	//note - we use a combination of stencil volumes(for world light shadows) and shadowmaps(for dynamic shadows)
 	if (!gl_shadowmaps->value)
+		return;
+
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 		
 	qglEnableClientState(GL_VERTEX_ARRAY);
@@ -576,8 +559,11 @@ void R_CastShadow(void)
 	{
 		currententity = &r_newrefdef.entities[i];
 
-		if (currententity->flags & RF_TRANSLUCENT)
-			continue;	// transluscent
+		if (currententity->
+		flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED |
+				 RF_SHELL_BLUE | RF_SHELL_DOUBLE |
+				 RF_WEAPONMODEL | RF_NOSHADOWS | RF_TRANSLUCENT))
+				 continue;
 
 		currentmodel = currententity->model; 
 
@@ -587,11 +573,28 @@ void R_CastShadow(void)
 		if (currentmodel->type != mod_alias)
 			continue;
 
+		if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 10))
+			continue;
+
+		VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
+		VectorScale (tmp, 1.666, tmp); 
+		rad = VectorLength (tmp);
+		
+		if( R_CullSphere( currententity->origin, rad, 15 ) )
+			continue;
+		
+		if (r_worldmodel ) {
+			//occulusion culling - why draw shadows of entities we cannot see?	
+			r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+			if(r_trace.fraction != 1.0)
+				continue;
+		}
+
 		//get distance, set lod if available
 		VectorSubtract(r_origin, currententity->origin, dist);
 
 		//cull by distance if soft shadows(to do - test/tweak this)
-		if(VectorLength(dist) > 1024 && gl_state.hasFBOblit)
+		if(VectorLength(dist) > 1024 && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
 			continue;
 
 		if(VectorLength(dist) > 1000) {
@@ -602,14 +605,8 @@ void R_CastShadow(void)
 			if(currententity->lod1) 
 				currentmodel = currententity->lod1;
 		}
-
-		if (currententity->
-		flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED |
-				 RF_SHELL_BLUE | RF_SHELL_DOUBLE |
-				 RF_WEAPONMODEL | RF_NOSHADOWS))
-				 continue;
 		
-		R_DrawShadowVolume(currententity);
+		R_DrawShadowVolume();
 	}
 
 	qglDisableClientState(GL_VERTEX_ARRAY);

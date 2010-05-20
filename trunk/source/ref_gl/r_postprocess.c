@@ -221,7 +221,7 @@ void R_ShadowBlend(float alpha)
 	qglPushMatrix();
 	qglLoadIdentity();
 
-	if(gl_state.hasFBOblit) {
+	if(r_test->value && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0) {
 
 		alpha/=1.5; //necessary because we are blending two quads
 
@@ -270,15 +270,15 @@ void R_ShadowBlend(float alpha)
 	qglVertex2f(-5, 10);
 	qglEnd();
 
-	if(gl_state.hasFBOblit) {
+	if(r_test->value && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0) {
 
 		//we need to grab the frame buffer	
 		//qglViewport(0,0,vid.width,vid.height); //do if we are scaling down
 
 		//leave this because for ATI we may need to do this to prevent crashing(seems to be no performance hit)
-		qglBindTexture(GL_TEXTURE_2D, r_shadowbuffer->texnum);
-		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, vid.width, vid.height);
-		qglBindTexture(GL_TEXTURE_2D, 0);
+		//qglBindTexture(GL_TEXTURE_2D, r_shadowbuffer->texnum);
+		//qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, vid.width, vid.height);
+		//qglBindTexture(GL_TEXTURE_2D, 0);
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
@@ -303,7 +303,7 @@ void R_ShadowBlend(float alpha)
 		glUseProgramObjectARB( g_blurprogramObj );
 
 		qglActiveTextureARB(GL_TEXTURE0);
-		qglBindTexture(GL_TEXTURE_2D, r_shadowbuffer->texnum);
+		qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
 
 		glUniform1iARB( g_location_source, 0);
 
@@ -321,10 +321,10 @@ void R_ShadowBlend(float alpha)
 		VA_SetElem2(twodvert_array[2],vid.width, 0);
 		VA_SetElem2(twodvert_array[3],0, 0); 
 
-		VA_SetElem2(tex_array[0],r_shadowbuffer->sl, r_shadowbuffer->tl);
-		VA_SetElem2(tex_array[1],r_shadowbuffer->sh, r_shadowbuffer->tl);
-		VA_SetElem2(tex_array[2],r_shadowbuffer->sh, r_shadowbuffer->th);
-		VA_SetElem2(tex_array[3],r_shadowbuffer->sl, r_shadowbuffer->th);
+		VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
+		VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
+		VA_SetElem2(tex_array[2],r_colorbuffer->sh, r_colorbuffer->th);
+		VA_SetElem2(tex_array[3],r_colorbuffer->sl, r_colorbuffer->th);
 
 		qglDrawArrays (GL_QUADS, 0, 4);
 
@@ -346,10 +346,10 @@ void R_ShadowBlend(float alpha)
 		VA_SetElem2(twodvert_array[2],vid.width, 0);
 		VA_SetElem2(twodvert_array[3],0, 0); 
 
-		VA_SetElem2(tex_array[0],r_shadowbuffer->sl, r_shadowbuffer->tl);
-		VA_SetElem2(tex_array[1],r_shadowbuffer->sh, r_shadowbuffer->tl);
-		VA_SetElem2(tex_array[2],r_shadowbuffer->sh, r_shadowbuffer->th);
-		VA_SetElem2(tex_array[3],r_shadowbuffer->sl, r_shadowbuffer->th);
+		VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
+		VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
+		VA_SetElem2(tex_array[2],r_colorbuffer->sh, r_colorbuffer->th);
+		VA_SetElem2(tex_array[3],r_colorbuffer->sl, r_colorbuffer->th);
 
 		qglDrawArrays (GL_QUADS, 0, 4);
 
