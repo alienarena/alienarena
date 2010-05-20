@@ -679,7 +679,7 @@ qboolean GLimp_InitGL (void)
 		0,								// shift bit ignored
 		0,								// no accumulation buffer
 		0, 0, 0, 0, 					// accum bits ignored
-		24,								// 32-bit z-buffer
+		24,								// 24-bit z-buffer
 		8,								// 8 bit stencil buffer
 		0,								// no auxiliary buffer
 		PFD_MAIN_PLANE,					// main layer
