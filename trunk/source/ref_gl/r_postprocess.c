@@ -327,13 +327,8 @@ void R_ShadowBlend(float alpha)
 		VA_SetElem2(tex_array[3],r_shadowbuffer->sl, r_shadowbuffer->th);
 
 		qglDrawArrays (GL_QUADS, 0, 4);
-		
-		R_KillVArrays();
 
 		//now blur horizontally	
-
-		qglActiveTextureARB(GL_TEXTURE0);
-		qglBindTexture(GL_TEXTURE_2D, r_shadowbuffer->texnum);
 
 		glUniform1iARB( g_location_source, 0);
 
