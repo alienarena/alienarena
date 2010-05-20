@@ -212,6 +212,8 @@ extern	cvar_t	*gl_screenshot_jpeg_quality;
 
 extern	cvar_t	*r_legacy;
 
+extern  cvar_t  *r_test;
+
 extern	int		gl_lightmap_format;
 extern	int		gl_solid_format;
 extern	int		gl_alpha_format;
