@@ -1332,7 +1332,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
 				//if using shadowmaps, offset self shadowed areas a bit so not to get too dark
-				if(gl_shadowmaps->value && !(currententity->flags & RF_WEAPONMODEL))
+				if(gl_shadowmaps->value && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
 					glUniform1fARB( g_location_minLight, 0.20);
 				else
 					glUniform1fARB( g_location_minLight, 0.15);
