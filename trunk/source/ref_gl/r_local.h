@@ -593,6 +593,7 @@ extern GLuint		g_location_baseTex;
 extern GLuint		g_location_normTex;
 extern GLuint		g_location_fxTex;
 extern GLuint		g_location_color;
+extern GLuint		g_location_minLight;
 extern GLuint		g_location_meshNormal;
 extern GLuint		g_location_meshTangent;
 extern GLuint		g_location_meshTime;

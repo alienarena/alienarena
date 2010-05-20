@@ -99,6 +99,7 @@ GLuint		g_location_baseTex;
 GLuint		g_location_normTex;
 GLuint		g_location_fxTex;
 GLuint		g_location_color;
+GLuint		g_location_minLight;
 GLuint		g_location_meshNormal;
 GLuint		g_location_meshTangent;
 GLuint		g_location_meshTime;
@@ -2199,6 +2200,7 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_normTex = glGetUniformLocationARB( g_meshprogramObj, "normalTex" );
 		g_location_fxTex = glGetUniformLocationARB( g_meshprogramObj, "fxTex" );
 		g_location_color = glGetUniformLocationARB(	g_meshprogramObj, "baseColor" );
+		g_location_minLight = glGetUniformLocationARB( g_meshprogramObj, "minLight" );
 		g_location_meshNormal = glGetUniformLocationARB( g_meshprogramObj, "meshNormal" );
 		g_location_meshTangent = glGetUniformLocationARB( g_meshprogramObj, "meshTangent" );
 		g_location_meshTime = glGetUniformLocationARB( g_meshprogramObj, "time" );
