@@ -59,6 +59,7 @@ GLhandleARB g_programObj;
 GLhandleARB g_waterprogramObj;
 GLhandleARB g_meshprogramObj;
 GLhandleARB g_fbprogramObj;
+GLhandleARB g_blurprogramObj;
 
 GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
@@ -105,7 +106,7 @@ GLuint		g_location_meshFog;
 GLuint		g_location_useFX;
 GLuint		g_location_useGlow;
 
-//fullscreen
+//fullscreen distortion effects
 GLuint		g_location_framebuffTex;
 GLuint		g_location_distortTex;
 GLuint		g_location_frametime;
@@ -113,6 +114,10 @@ GLuint		g_location_fxType;
 GLuint		g_location_fxPos;
 GLuint		g_location_fxColor;
 GLuint		g_location_fbSampleSize;
+
+//blur
+GLuint		g_location_scale;
+GLuint		g_location_source;
 
 void R_Clear (void);
 
@@ -1823,6 +1828,16 @@ int R_Init( void *hinstance, void *hWnd )
 		gl_state.stencil_wrap = false;
 	}
 
+	// Framebuffer object blit
+	gl_state.hasFBOblit = false;
+	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit")) {
+		Com_Printf("...using GL_EXT_framebuffer_blit\n");
+		gl_state.hasFBOblit = true;
+	} else {
+		Com_Printf("...GL_EXT_framebuffer_blit not found\n");
+		gl_state.hasFBOblit = false;
+	}
+
 	qglStencilFuncSeparate		= (void *)qwglGetProcAddress("glStencilFuncSeparate");
 	qglStencilOpSeparate		= (void *)qwglGetProcAddress("glStencilOpSeparate");
 	qglStencilMaskSeparate		= (void *)qwglGetProcAddress("glStencilMaskSeparate");
@@ -1910,7 +1925,7 @@ int R_Init( void *hinstance, void *hWnd )
 	else
 		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "0", CVAR_ARCHIVE); 
 
-	//load glsl 
+	//load glsl (to do - move to own file)
 	if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ) && gl_state.fragment_program)
 	{
 
@@ -2191,7 +2206,7 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
 		g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow");
 
-		//fullscreen
+		//fullscreen distortion effects
 
 		g_fbprogramObj = glCreateProgramObjectARB();
 	
@@ -2264,6 +2279,75 @@ int R_Init( void *hinstance, void *hWnd )
 		g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" ); 
 		g_location_fxColor = glGetUniformLocationARB( g_fbprogramObj, "fxColor" );
 		g_location_fbSampleSize = glGetUniformLocationARB( g_fbprogramObj, "fbSampleSize" );
+
+		//blur
+
+		g_blurprogramObj = glCreateProgramObjectARB();
+	
+		//
+		// Vertex shader
+		//
+
+		len = FS_LoadFile("scripts/blur_vertex_shader.glsl", &shader_assembly);
+
+		if (len > 0) {
+			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+			shaderStrings[0] = (char*)shader_assembly;
+			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+			glCompileShaderARB( g_vertexShader);
+			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		}
+		else {
+			Com_Printf("...Unable to Locate Blur Vertex Shader");
+			nResult = 0;
+		}
+
+		if( nResult )
+			glAttachObjectARB( g_blurprogramObj, g_vertexShader );
+		else
+		{
+			Com_Printf("...Blur Vertex Shader Compile Error");
+		}
+
+		//
+		// Fragment shader
+		//
+		len = FS_LoadFile("scripts/blur_fragment_shader.glsl", &shader_assembly);
+		
+		if(len > 0) {
+			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+			shaderStrings[0] = (char*)shader_assembly;
+			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+			glCompileShaderARB( g_fragmentShader );
+			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		}
+		else {
+			Com_Printf("...Unable to Locate Blur Fragment Shader");
+			nResult = 0;
+		}
+
+		if( nResult )
+			glAttachObjectARB( g_blurprogramObj, g_fragmentShader );
+		else
+		{
+			Com_Printf("...Framebuffer Blur Shader Compile Error");
+		}
+
+		glLinkProgramARB( g_blurprogramObj );
+		glGetObjectParameterivARB( g_blurprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+		if( !nResult )
+		{
+			glGetInfoLogARB( g_blurprogramObj, sizeof(str), NULL, str );
+			Com_Printf("...Linking Error");
+		}
+
+		//
+		// Locate some parameters by name so we can set them later...
+		//
+
+		g_location_scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
+		g_location_source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
 	
 	}
 	else {
