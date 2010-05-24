@@ -284,6 +284,10 @@ SOURCE=.\ref_gl\r_postprocess.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ref_gl\r_program.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ref_gl\r_script.c
 # End Source File
 # Begin Source File

@@ -845,7 +845,7 @@ dynamic:
 			glUseProgramObjectARB( g_programObj );
     		
 			GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
-			glUniform1iARB( g_location_testTexture, 0); 
+			glUniform1iARB( g_location_surfTexture, 0); 
 		
 			GL_MBind( GL_TEXTURE1, surf->texinfo->heightMap->texnum);
 			glUniform1iARB( g_location_heightTexture, 1); 
@@ -907,7 +907,7 @@ dynamic:
 			glUseProgramObjectARB( g_programObj );
     		
 			GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
-			glUniform1iARB( g_location_testTexture, 0); 
+			glUniform1iARB( g_location_surfTexture, 0); 
 
 			GL_MBind( GL_TEXTURE1,  surf->texinfo->heightMap->texnum);
 			glUniform1iARB( g_location_heightTexture, 1);
@@ -974,8 +974,7 @@ dynamic:
 
 //This next section deals with bumpmapped surfaces.  Much of this was gathered from Mike Hiney
 //and "Paul's Projects" tutorials.  Note this is for self per-pixel shadowing of normalmapped bsp 
-//surfaces.  To Do:  Change viewangles to use the vectors we generated for real-time world light
-//positions for the glsl specular lighting.  
+//surfaces.  
 extern GLuint normalisationCubeMap;
 static void R_InitNormalSurfaces ()
 {	

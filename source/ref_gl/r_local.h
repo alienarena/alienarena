@@ -546,6 +546,10 @@ extern void		R_DrawDynamicCaster(void);
 extern void		R_CastShadow(void);
 int				FB_texture_width, FB_texture_height;
 
+//shader programs
+extern void R_LoadARBPrograms(void);
+extern void	R_LoadGLSLPrograms(void);
+
 //arb fragment
 extern unsigned int g_water_program_id;
 
@@ -560,7 +564,7 @@ extern GLhandleARB	g_vertexShader;
 extern GLhandleARB	g_fragmentShader;
 
 //standard bsp surfaces
-extern GLuint		g_location_testTexture;
+extern GLuint		g_location_surfTexture;
 extern GLuint		g_location_eyePos;
 extern GLuint		g_tangentSpaceTransform;
 extern GLuint		g_location_heightTexture;

@@ -1,4 +1,4 @@
-uniform sampler2D testTexture;
+uniform sampler2D surfTexture;
 uniform sampler2D HeightTexture;
 uniform sampler2D NormalTexture;
 uniform sampler2D lmTexture;
@@ -88,7 +88,7 @@ void main( void )
    
    vec3 relativeEyeDirection = normalize( EyeDir );
    vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
-   vec3 textureColour = texture2D( testTexture, gl_TexCoord[0].xy ).rgb;
+   vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;
    
    lightmap = texture2D(lmTexture, gl_TexCoord[1].st); 
    
@@ -101,7 +101,7 @@ void main( void )
       Offset = Offset * 0.04 - 0.02;
       vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;
 
-      diffuse = texture2D(testTexture, TexCoords);
+      diffuse = texture2D(surfTexture, TexCoords);
           
       distanceSquared = dot( StaticLightDir, StaticLightDir );
       relativeLightDirection = StaticLightDir / sqrt( distanceSquared );
@@ -132,7 +132,7 @@ void main( void )
       gl_FragColor = max(litColour, diffuse * lightmap * 2.0);
    }
    else {
-      diffuse = texture2D(testTexture, gl_TexCoord[0].xy);     
+      diffuse = texture2D(surfTexture, gl_TexCoord[0].xy);     
       gl_FragColor = (diffuse * lightmap * 2.0);
    }      
    
