@@ -2213,7 +2213,4 @@ void R_DrawAliasModelCaster (entity_t *e)
 		GL_DrawAliasCasterFrame(paliashdr, currententity->backlerp, true);
 
 	qglPopMatrix();
-	qglMatrixMode(GL_MODELVIEW);
-	qglPopMatrix();
-
 }
