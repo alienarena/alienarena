@@ -854,7 +854,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 	fstvert_t *st;
 	float os, ot, os2, ot2;
 	qboolean mirror = false;
-	qboolean use_vbo = true;
 
 	if(r_legacy->value) {
 		GL_DrawAliasFrameLegacy (paliashdr, backlerp, lerped);
@@ -1176,7 +1175,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 		
 		while (stage)
 		{
-			use_vbo = true;
 			va=0;
 			VArray = &VArrayVerts[0];
 			GLSTATE_ENABLE_ALPHATEST
@@ -1191,7 +1189,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			}
 
 			if(!stage->normalmap) {
-				use_vbo = false; //to do - moved here because non-bumpmapped meshes were not lighting properly
 				if(mirror) {	
 					if( !(currententity->flags & RF_WEAPONMODEL)) {
 						GL_EnableMultitexture( true );
@@ -1339,18 +1336,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				glUniform1fARB( g_location_meshTime, rs_realtime);
 
 				glUniform1iARB( g_location_meshFog, map_fog);
-			}
-				
-			//some other todo's here - non-bumpmapped meshes are not lit correctly.
-		
-			if (gl_state.vbo && use_vbo) 
-			{
-				currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
-				if (currentmodel->vbo_xyz) {
-					//Com_Printf("skipped\n");
-					goto skipLoad;
-				}
-			}
+			}						
 
 			for (i=0; i<paliashdr->num_tris; i++)
 			{
@@ -1396,9 +1382,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					if (stage->envmap)
 					{
 						vec3_t envmapvec;
-
-						use_vbo = false;
-							
+						
 						VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
 
 						if(mirror) {
@@ -1473,24 +1457,6 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 							VArray[8] = nAlpha;	
 						}
 					}
-
-					if(gl_state.vbo && use_vbo) {
-
-						vert_array[va][0] = VArray[0];
-						vert_array[va][1] = VArray[1];
-						vert_array[va][2] = VArray[2];
-
-						//if(!stage->normalmap) {
-						//	col_array[va][0] = VArray[5];
-						//	col_array[va][1] = VArray[6];
-						//	col_array[va][2] = VArray[7];
-						//	col_array[va][3] = VArray[8];
-						//}
-
-						norm_array[va][0] = normal[0];
-						norm_array[va][1] = normal[1];
-						norm_array[va][2] = normal[2];
-					}
 					
 					// increment pointer and counter
 					if(stage->normalmap) 
@@ -1503,48 +1469,16 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				} 
 			}
 
-			if(gl_state.vbo && use_vbo) { 
+			if(stage->normalmap) {
 
-				currentmodel->vbo_xyz = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &vert_array, VBO_STORE_XYZ, currententity);
-			//	if(!stage->normalmap)
-			//		currententity->vbo_lightp = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec4_t), &col_array, VBO_STORE_ANY, currententity);
-				currentmodel->vbo_normals = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &norm_array, VBO_STORE_NORMAL, currententity);
-			}				
-skipLoad:			
-			
-			if(gl_state.vbo && use_vbo) {
-
-				qglEnableClientState( GL_VERTEX_ARRAY );
-				GL_BindVBO(currentmodel->vbo_xyz);
-				qglVertexPointer(3, GL_FLOAT, 0, 0);
-
-				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				GL_BindVBO(currentmodel->vbo_st);
-				qglTexCoordPointer(2, GL_FLOAT, 0, 0);	
-				
-			//	if(!stage->normalmap) {
-			//		qglEnableClientState( GL_COLOR_ARRAY );
-			//		GL_BindVBO(currententity->vbo_lightp);
-			//		qglColorPointer (4, GL_FLOAT, 0, 0);
-			//	}
-
-				qglEnableClientState( GL_NORMAL_ARRAY );
-				GL_BindVBO(currentmodel->vbo_normals);
-				qglNormalPointer(GL_FLOAT, 0, 0);
+				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 			}
 			else {
-				if(stage->normalmap) {
-				
-					R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-					qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-				}
-				else {
-						
-					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
-						R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
-					else
-						R_InitVArrays (VERT_COLOURED_TEXTURED);
-				}
+				if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
+					R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
+				else
+					R_InitVArrays (VERT_COLOURED_TEXTURED);
 			}
 			
 			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
@@ -1586,9 +1520,6 @@ done:
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
 	R_KillVArrays ();
-
-	if (gl_state.vbo)
-		GL_BindVBO(NULL);
 
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
 		qglEnable( GL_TEXTURE_2D );
