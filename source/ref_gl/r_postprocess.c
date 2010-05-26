@@ -298,7 +298,7 @@ void R_ShadowBlend(float alpha)
 
 		glUniform1iARB( g_location_source, 0);
 
-		glUniform2fARB( g_location_scale, 5.0/vid.width, 2.0/vid.height);
+		glUniform2fARB( g_location_scale, 4.0/vid.width, 2.0/vid.height);
 
 		qglEnableClientState (GL_VERTEX_ARRAY);
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
@@ -323,7 +323,7 @@ void R_ShadowBlend(float alpha)
 
 		glUniform1iARB( g_location_source, 0);
 
-		glUniform2fARB( g_location_scale, 2.0/vid.width, 5.0/vid.height);
+		glUniform2fARB( g_location_scale, 2.0/vid.width, 4.0/vid.height);
 
 		qglEnableClientState (GL_VERTEX_ARRAY);
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
