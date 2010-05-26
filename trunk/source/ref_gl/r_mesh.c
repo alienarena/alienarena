@@ -1341,14 +1341,16 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				glUniform1iARB( g_location_meshFog, map_fog);
 			}
 				
-		/*	if (gl_state.vbo && use_vbo) 
+			//some other todo's here - non-bumpmapped meshes are not lit correctly.
+		
+			if (gl_state.vbo && use_vbo) 
 			{
 				currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
 				if (currentmodel->vbo_xyz) {
-					Com_Printf("skipped\n");
+					//Com_Printf("skipped\n");
 					goto skipLoad;
 				}
-			}*/
+			}
 
 			for (i=0; i<paliashdr->num_tris; i++)
 			{
@@ -1472,7 +1474,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						}
 					}
 
-				/*	if(gl_state.vbo && use_vbo) {
+					if(gl_state.vbo && use_vbo) {
 
 						vert_array[va][0] = VArray[0];
 						vert_array[va][1] = VArray[1];
@@ -1488,7 +1490,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						norm_array[va][0] = normal[0];
 						norm_array[va][1] = normal[1];
 						norm_array[va][2] = normal[2];
-					}*/
+					}
 					
 					// increment pointer and counter
 					if(stage->normalmap) 
@@ -1501,7 +1503,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				} 
 			}
 
-/*			if(gl_state.vbo && use_vbo) { 
+			if(gl_state.vbo && use_vbo) { 
 
 				currentmodel->vbo_xyz = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &vert_array, VBO_STORE_XYZ, currententity);
 			//	if(!stage->normalmap)
@@ -1530,7 +1532,7 @@ skipLoad:
 				GL_BindVBO(currentmodel->vbo_normals);
 				qglNormalPointer(GL_FLOAT, 0, 0);
 			}
-			else {*/
+			else {
 				if(stage->normalmap) {
 				
 					R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
@@ -1543,14 +1545,14 @@ skipLoad:
 					else
 						R_InitVArrays (VERT_COLOURED_TEXTURED);
 				}
-			//}
+			}
 			
 			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
 
 				if(qglLockArraysEXT)						
 					qglLockArraysEXT(0, va);
 
-				qglDrawArrays(GL_TRIANGLES,0,va);
+				qglDrawArrays(GL_TRIANGLES,0,paliashdr->num_tris*3);
 				
 				if(qglUnlockArraysEXT)						
 					qglUnlockArraysEXT();
@@ -1585,8 +1587,8 @@ done:
 
 	R_KillVArrays ();
 
-/*	if (gl_state.vbo)
-		GL_BindVBO(NULL);*/
+	if (gl_state.vbo)
+		GL_BindVBO(NULL);
 
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
 		qglEnable( GL_TEXTURE_2D );
