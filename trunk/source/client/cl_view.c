@@ -877,8 +877,8 @@ void V_RenderView( float stereo_separation )
 
 	cl.refdef.rdflags |= RDF_BLOOM;   //BLOOMS
 
-	R_VCFreeFrame();
-	need_free_vbo = false;
+//	R_VCFreeFrame();
+//	need_free_vbo = false;
 
 	R_RenderFrame (&cl.refdef);
 	if (cl_stats->value)
