@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // r_model.c -- model loading and caching
 
 #include "r_local.h"
+#include "r_iqm.h"
  
 model_t	*loadmodel;
 int		modfilelen;
@@ -456,8 +457,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	//
 	// fill it in
 	//
-
-
+ 
 	// call the apropriate loader
 	
 	switch (LittleLong(*(unsigned *)buf))
@@ -472,8 +472,12 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		Mod_LoadBrushModel (mod, buf);
 		break;
 
+	//to do - find out why this didn't work
+	//case IDINTERQUAKEMODELHEADER:
 	default:
-		Com_Error (ERR_DROP,"Mod_NumForName: unknown fileid for %s", mod->name);
+		//iqm - try interquake model
+		if(!Mod_INTERQUAKEMODEL_Load(mod, buf))
+			Com_Error (ERR_DROP,"Mod_NumForName: unknown fileid for %s", mod->name);
 		break;
 	}
 
@@ -1526,7 +1530,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	Mod_LoadLeafs (&header->lumps[LUMP_LEAFS]);
 	Mod_LoadNodes (&header->lumps[LUMP_NODES]);
 	Mod_LoadSubmodels (&header->lumps[LUMP_MODELS]);
-	mod->numframes = 2;		// regular and alternate animation
+	mod->num_frames = 2;		// regular and alternate animation
 	
 //
 // set up the submodels
@@ -1666,8 +1670,10 @@ void R_LoadMd2VertexArrays(model_t *md2model){
 	if(md2->num_xyz > MAX_VERTS)
 		return;
 
+	md2model->vertexes = (mvertex_t*)malloc(md2->num_xyz * sizeof(mvertex_t));
+
 	for(i = 0, md2v = md2frame->verts; i < md2->num_xyz; i++, md2v++){  // reconstruct the verts
-		VectorSet(md2model->r_mesh_verts[i],
+		VectorSet(md2model->vertexes[i].position,
 					md2v->v[0] * md2frame->scale[0] + md2frame->translate[0],
 					md2v->v[1] * md2frame->scale[1] + md2frame->translate[1],
 					md2v->v[2] * md2frame->scale[2] + md2frame->translate[2]);
@@ -2000,7 +2006,7 @@ struct model_s *R_RegisterModel (char *name)
 			for (i=0 ; i<pheader->num_skins ; i++)
 				mod->skins[i] = GL_FindImage ((char *)pheader + pheader->ofs_skins + i*MAX_SKINNAME, it_skin);
 //PGM
-			mod->numframes = pheader->num_frames;
+			mod->num_frames = pheader->num_frames;
 //PGM
 		}
 		else if (mod->type == mod_brush)

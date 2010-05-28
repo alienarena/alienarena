@@ -620,6 +620,11 @@ extern GLuint		g_location_fbSampleSize;
 extern GLuint		g_location_scale;
 extern GLuint		g_location_source;
 
+//iqm
+
+extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
+extern void R_DrawINTERQUAKEMODEL (entity_t *e);
+
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 
 // reduce runtime calcs

@@ -66,9 +66,9 @@ void R_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightOrg
 			v2 = (float*)shadow_lerped[tris->index_xyz[2]];
 		}
 		else {
-			v0 = (float*)currentmodel->r_mesh_verts[tris->index_xyz[0]];
-			v1 = (float*)currentmodel->r_mesh_verts[tris->index_xyz[1]];
-			v2 = (float*)currentmodel->r_mesh_verts[tris->index_xyz[2]];
+			v0 = (float*)currentmodel->vertexes[tris->index_xyz[0]].position;
+			v1 = (float*)currentmodel->vertexes[tris->index_xyz[1]].position;
+			v2 = (float*)currentmodel->vertexes[tris->index_xyz[2]].position;
 		}
 		
 		//Calculate shadow volume triangle normals
@@ -122,8 +122,8 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 					v1[j] = shadow_lerped[tris->index_xyz[0]][j];
 				}
 				else {
-					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
-					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
+					v0[j] = currentmodel->vertexes[tris->index_xyz[1]].position[j];
+					v1[j] = currentmodel->vertexes[tris->index_xyz[0]].position[j];
 				}
 
 				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
@@ -156,8 +156,8 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 				}
 				else {
 					
-					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
-					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
+					v0[j] = currentmodel->vertexes[tris->index_xyz[2]].position[j];
+					v1[j] = currentmodel->vertexes[tris->index_xyz[1]].position[j];
 				}
 
 				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
@@ -189,8 +189,8 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 				}
 				else {
 
-					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
-					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
+					v0[j] = currentmodel->vertexes[tris->index_xyz[0]].position[j];
+					v1[j] = currentmodel->vertexes[tris->index_xyz[2]].position[j];
 				}
 
 				v2[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
@@ -231,9 +231,9 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 				}
 				else {
 
-					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
-					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
-					v2[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
+					v0[j] = currentmodel->vertexes[tris->index_xyz[0]].position[j];
+					v1[j] = currentmodel->vertexes[tris->index_xyz[1]].position[j];
+					v2[j] = currentmodel->vertexes[tris->index_xyz[2]].position[j];
 				}
 			}
 
@@ -258,9 +258,9 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 				}
 				else {
 
-					v0[j] = currentmodel->r_mesh_verts[tris->index_xyz[0]][j];
-					v1[j] = currentmodel->r_mesh_verts[tris->index_xyz[1]][j];
-					v2[j] = currentmodel->r_mesh_verts[tris->index_xyz[2]][j];
+					v0[j] = currentmodel->vertexes[tris->index_xyz[0]].position[j];
+					v1[j] = currentmodel->vertexes[tris->index_xyz[1]].position[j];
+					v2[j] = currentmodel->vertexes[tris->index_xyz[2]].position[j];
 				}
 
 

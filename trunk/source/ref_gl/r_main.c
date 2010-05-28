@@ -506,6 +506,9 @@ void R_DrawEntitiesOnList (void)
 			case mod_brush:
 				R_DrawBrushModel (currententity);
 				break;
+			case mod_iqm:
+				R_DrawINTERQUAKEMODEL (currententity);
+				break;
 			default:
 				Com_Error(ERR_DROP, "Bad modeltype");
 				break;
@@ -559,6 +562,9 @@ void R_DrawEntitiesOnList (void)
 				break;
 			case mod_brush:
 				R_DrawBrushModel (currententity);
+				break;
+			case mod_iqm:
+				R_DrawINTERQUAKEMODEL (currententity);
 				break;
 			default:
 				Com_Error (ERR_DROP, "Bad modeltype");
@@ -624,6 +630,9 @@ void R_DrawViewEntitiesOnList (void)
 		case mod_alias:
 			R_DrawAliasModel (currententity);
 			break;
+		case mod_iqm:
+			R_DrawINTERQUAKEMODEL (currententity);
+			break;
 		default:
 			Com_Error(ERR_DROP, "Bad modeltype");
 			break;
@@ -673,6 +682,9 @@ void R_DrawViewEntitiesOnList (void)
 		{
 		case mod_alias:
 			R_DrawAliasModel (currententity);
+			break;
+		case mod_iqm:
+			R_DrawINTERQUAKEMODEL (currententity);
 			break;
 		default:
 			Com_Error (ERR_DROP, "Bad modeltype");
