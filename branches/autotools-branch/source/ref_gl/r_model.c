@@ -1682,10 +1682,10 @@ Mod_LoadAliasModel
 */
 void Mod_LoadAliasModel (model_t *mod, void *buffer)
 {
-	int					i, j, l;
+	int					i, j;
 	dmdl_t				*pinmodel, *pheader, *paliashdr;
 	dstvert_t			*pinst, *poutst;
-	dtriangle_t			*pintri, *pouttri, *tris;
+	dtriangle_t			*pintri, *pouttri;
 	daliasframe_t		*pinframe, *poutframe, *pframe;
 	int					*pincmd, *poutcmd;
 	int					version;
@@ -1871,37 +1871,6 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 		VectorCopy( tmp, mod->bbox[i] );
 	}
-	
-	if (gl_state.vbo)
-	{
-		int		index_st;
-		float	*map;
-
-		mod->vbo_st = NULL;
-		mod->vbo_xyz = NULL;
-
-		tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
-		map = (float*) vbo_shadow;	
-
-		for (l=0, i=0; i<pheader->num_tris; i++)
-		{
-			for (j=0; j<3; j++)
-			{
-				index_st = tris[i].index_st[j];
-				map[l++] = mod->st[index_st].s;
-				map[l++] = mod->st[index_st].t;
-			}
-		}
-
-		if (l>3*MAX_VBO_XYZs)
-			Com_Error(ERR_FATAL, "Temporary buffer overflow\n");
-
-
-		mod->vbo_st = R_VCLoadData(VBO_STATIC, l*sizeof(float), &vbo_shadow, VBO_STORE_ANY, NULL);
-		//mod->vbo_xyz = R_VCLoadData(VBO_STATIC, paliashdr->num_xyz*sizeof(vec3_t), &mod->r_mesh_verts, VBO_STORE_ANY, NULL);
-		GL_BindVBO(NULL);
-	}
-
 }
 
 //=============================================================================

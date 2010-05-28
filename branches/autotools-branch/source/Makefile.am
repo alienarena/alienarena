@@ -2,25 +2,26 @@
 
 ACLOCAL_AMFLAGS=`-I m4'
 
+##bin_PROGRAMS = crx crded
+##pkglibexec_LTLIBRARIES = game.la
+
+##crx_CFLAGS=-DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
+##crx_LDFLAGS=$(GLU_LIBS)
+
+##game_la_CFLAGS = -Dstricmp=strcasecmp  -U_FORTIFY_SOURCE -ffast-math -DDATADIR='"$(pkgdatadir)"'
+##game_la_LDFLAGS = -module -avoid-version
+
+##crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
+##
+
 bin_PROGRAMS = crx crded
-pkglibexec_LTLIBRARIES = game.la
+noinst_LTLIBRARIES = libgame.la
 
-## For 7.40
-## Note: Not using config.h, yet
-## Note: game.so is not a general-purpose shared library; it is like a 
-##       Quake2-style game mod. It is dlopen'd by crx and crded. There does
-##       not seem to be any reason to install the game.la file. Further,
-##       this game.so should reside in $(pkglibexecdir)/data1, so mods
-##       can reside in other subdirectories in $(pkglibexedir). But, I haven't
-##       figured out how to do that yet.
-##
-crx_CFLAGS=-DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
+crx_CFLAGS=-DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp -U_FORTIFY_SOURCE -ffast-math
+crx_LDFLAGS=$(LDFLAGS) $(GLU_LIBS) -lgame
 
-game_la_CFLAGS = -Dstricmp=strcasecmp  -U_FORTIFY_SOURCE -ffast-math -DDATADIR='"$(pkgdatadir)"'
-game_la_LDFLAGS = -module -avoid-version
-
-crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
-##
+crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -U_FORTIFY_SOURCE -ffast-math
+crded_LDFLAGS = -lgame
 
 crx_SOURCES =  \
 	client/anorms.h \
@@ -89,6 +90,7 @@ crx_SOURCES =  \
 	ref_gl/r_model.h \
 	ref_gl/r_particle.c \
 	ref_gl/r_postprocess.c \
+	ref_gl/r_program.c \
 	ref_gl/r_script.c \
 	ref_gl/r_script.h \
 	ref_gl/r_shadowmaps.c \
@@ -121,7 +123,7 @@ crx_SOURCES =  \
 	unix/sys_unix.c \
 	unix/vid_so.c 
 
-game_la_SOURCES =  \
+libgame_la_SOURCES =  \
 	client/anorms.h \
 	game/acesrc/acebot_ai.c \
 	game/acesrc/acebot_cmds.c \

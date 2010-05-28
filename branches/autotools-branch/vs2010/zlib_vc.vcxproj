@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{275507E3-071F-4A7D-9680-7E7EC749F872}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>zlib_vc</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_win32.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_win32.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_LIB;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <CompileAs>CompileAsC</CompileAs>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Bscmake>
+      <OutputFile>$(OutDir)$(TargetName).bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>
+      </FunctionLevelLinking>
+      <IntrinsicFunctions>
+      </IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <BrowseInformation>true</BrowseInformation>
+      <StringPooling>
+      </StringPooling>
+      <BufferSecurityCheck>
+      </BufferSecurityCheck>
+      <BasicRuntimeChecks>
+      </BasicRuntimeChecks>
+      <OmitFramePointers>
+      </OmitFramePointers>
+      <FavorSizeOrSpeed>
+      </FavorSizeOrSpeed>
+      <InlineFunctionExpansion>
+      </InlineFunctionExpansion>
+      <RuntimeTypeInfo>
+      </RuntimeTypeInfo>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MinimalRebuild>
+      </MinimalRebuild>
+      <SmallerTypeCheck>
+      </SmallerTypeCheck>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
+      <EnableEnhancedInstructionSet>
+      </EnableEnhancedInstructionSet>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Bscmake>
+      <OutputFile>$(OutDir)$(TargetName).bsc</OutputFile>
+    </Bscmake>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="$(ZlibSrcDir)adler32.c" />
+    <ClCompile Include="$(ZlibSrcDir)compress.c" />
+    <ClCompile Include="$(ZlibSrcDir)crc32.c" />
+    <ClCompile Include="$(ZlibSrcDir)deflate.c" />
+    <ClCompile Include="$(ZlibSrcDir)gzclose.c" />
+    <ClCompile Include="$(ZlibSrcDir)gzlib.c" />
+    <ClCompile Include="$(ZlibSrcDir)gzread.c" />
+    <ClCompile Include="$(ZlibSrcDir)gzwrite.c" />
+    <ClCompile Include="$(ZlibSrcDir)infback.c" />
+    <ClCompile Include="$(ZlibSrcDir)inffast.c" />
+    <ClCompile Include="$(ZlibSrcDir)inflate.c" />
+    <ClCompile Include="$(ZlibSrcDir)inftrees.c" />
+    <ClCompile Include="$(ZlibSrcDir)trees.c" />
+    <ClCompile Include="$(ZlibSrcDir)uncompr.c" />
+    <ClCompile Include="$(ZlibSrcDir)zutil.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(ZlibIncludeDir)crc32.h" />
+    <ClInclude Include="$(ZlibIncludeDir)deflate.h" />
+    <ClInclude Include="$(ZlibIncludeDir)gzguts.h" />
+    <ClInclude Include="$(ZlibIncludeDir)inffast.h" />
+    <ClInclude Include="$(ZlibIncludeDir)inffixed.h" />
+    <ClInclude Include="$(ZlibIncludeDir)inflate.h" />
+    <ClInclude Include="$(ZlibIncludeDir)inftrees.h" />
+    <ClInclude Include="$(ZlibIncludeDir)trees.h" />
+    <ClInclude Include="$(ZlibIncludeDir)zconf.h" />
+    <ClInclude Include="$(ZlibIncludeDir)zlib.h" />
+    <ClInclude Include="$(ZlibIncludeDir)zutil.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

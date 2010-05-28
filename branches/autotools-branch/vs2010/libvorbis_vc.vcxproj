@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8AE35F6D-2EE6-4674-BBB0-44597A0836C5}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libvorbis_vc</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_win32.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_win32.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <AdditionalIncludeDirectories>$(OggIncludeDir);$(VorbisIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <CompileAs>CompileAsC</CompileAs>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>
+      </FunctionLevelLinking>
+      <IntrinsicFunctions>
+      </IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <AdditionalIncludeDirectories>$(OggIncludeDir);$(VorbisIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <BrowseInformation>true</BrowseInformation>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <BufferSecurityCheck>
+      </BufferSecurityCheck>
+      <FloatingPointExceptions>
+      </FloatingPointExceptions>
+      <StringPooling>
+      </StringPooling>
+      <BasicRuntimeChecks>
+      </BasicRuntimeChecks>
+      <OmitFramePointers>
+      </OmitFramePointers>
+      <FavorSizeOrSpeed>
+      </FavorSizeOrSpeed>
+      <InlineFunctionExpansion>
+      </InlineFunctionExpansion>
+      <RuntimeTypeInfo>
+      </RuntimeTypeInfo>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MinimalRebuild>
+      </MinimalRebuild>
+      <SmallerTypeCheck>
+      </SmallerTypeCheck>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
+      <EnableEnhancedInstructionSet>
+      </EnableEnhancedInstructionSet>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="$(VorbisSrcDir)analysis.c" />
+    <ClCompile Include="$(VorbisSrcDir)bitrate.c" />
+    <ClCompile Include="$(VorbisSrcDir)block.c" />
+    <ClCompile Include="$(VorbisSrcDir)codebook.c" />
+    <ClCompile Include="$(VorbisSrcDir)envelope.c" />
+    <ClCompile Include="$(VorbisSrcDir)floor0.c" />
+    <ClCompile Include="$(VorbisSrcDir)floor1.c" />
+    <ClCompile Include="$(VorbisSrcDir)info.c" />
+    <ClCompile Include="$(VorbisSrcDir)lookup.c" />
+    <ClCompile Include="$(VorbisSrcDir)lpc.c" />
+    <ClCompile Include="$(VorbisSrcDir)lsp.c" />
+    <ClCompile Include="$(VorbisSrcDir)mapping0.c" />
+    <ClCompile Include="$(VorbisSrcDir)mdct.c" />
+    <ClCompile Include="$(VorbisSrcDir)psy.c" />
+    <ClCompile Include="$(VorbisSrcDir)registry.c" />
+    <ClCompile Include="$(VorbisSrcDir)res0.c" />
+    <ClCompile Include="$(VorbisSrcDir)sharedbook.c" />
+    <ClCompile Include="$(VorbisSrcDir)smallft.c" />
+    <ClCompile Include="$(VorbisSrcDir)synthesis.c" />
+    <ClCompile Include="$(VorbisSrcDir)vorbisenc.c" />
+    <ClCompile Include="$(VorbisSrcDir)window.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(VorbisIncludeDir)vorbis\codec.h" />
+    <ClInclude Include="$(VorbisIncludeDir)vorbis\vorbisenc.h" />
+    <ClInclude Include="$(VorbisIncludeDir)vorbis\vorbisfile.h" />
+    <ClInclude Include="$(VorbisSrcDir)backends.h" />
+    <ClInclude Include="$(VorbisSrcDir)bitrate.h" />
+    <ClInclude Include="$(VorbisSrcDir)books\coupled\res_books_stereo.h" />
+    <ClInclude Include="$(VorbisSrcDir)books\floor\floor_books.h" />
+    <ClInclude Include="$(VorbisSrcDir)books\uncoupled\res_books_uncoupled.h" />
+    <ClInclude Include="$(VorbisSrcDir)codebook.h" />
+    <ClInclude Include="$(VorbisSrcDir)codec_internal.h" />
+    <ClInclude Include="$(VorbisSrcDir)envelope.h" />
+    <ClInclude Include="$(VorbisSrcDir)highlevel.h" />
+    <ClInclude Include="$(VorbisSrcDir)lookup_data.h" />
+    <ClInclude Include="$(VorbisSrcDir)lookup.h" />
+    <ClInclude Include="$(VorbisSrcDir)lpc.h" />
+    <ClInclude Include="$(VorbisSrcDir)lsp.h" />
+    <ClInclude Include="$(VorbisSrcDir)masking.h" />
+    <ClInclude Include="$(VorbisSrcDir)mdct.h" />
+    <ClInclude Include="$(VorbisSrcDir)misc.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\floor_all.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\psych_11.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\psych_16.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\psych_44.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\psych_8.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\residue_16.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\residue_44.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\residue_44u.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\residue_8.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\setup_11.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\setup_16.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\setup_22.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\setup_32.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\setup_44.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\setup_44u.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\setup_8.h" />
+    <ClInclude Include="$(VorbisSrcDir)modes\setup_X.h" />
+    <ClInclude Include="$(VorbisSrcDir)os.h" />
+    <ClInclude Include="$(VorbisSrcDir)psy.h" />
+    <ClInclude Include="$(VorbisSrcDir)registry.h" />
+    <ClInclude Include="$(VorbisSrcDir)scales.h" />
+    <ClInclude Include="$(VorbisSrcDir)smallft.h" />
+    <ClInclude Include="$(VorbisSrcDir)window.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

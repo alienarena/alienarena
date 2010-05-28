@@ -76,6 +76,15 @@
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
 
+/* Define to 1 if you have the <OpenGL/glu.h> header file. */
+#undef HAVE_OPENGL_GLU_H
+
+/* Define to 1 if you have the <OpenGL/gl.h> header file. */
+#undef HAVE_OPENGL_GL_H
+
+/* Define if you have POSIX threads libraries and header files. */
+#undef HAVE_PTHREAD
+
 /* Define to 1 if the system has the type `ptrdiff_t'. */
 #undef HAVE_PTRDIFF_T
 
@@ -158,6 +167,12 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Use nonstandard varargs form for the GLU tesselator callback */
+#undef HAVE_VARARGS_GLU_TESSCB
+
+/* Define to 1 if you have the <windows.h> header file. */
+#undef HAVE_WINDOWS_H
+
 /* Define to 1 if you have the <X11/cursorfont.h> header file. */
 #undef HAVE_X11_CURSORFONT_H
 
@@ -186,6 +201,9 @@
    */
 #undef LT_OBJDIR
 
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+#undef NO_MINUS_C_MINUS_O
+
 /* Name of package */
 #undef PACKAGE
 
@@ -206,6 +224,10 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* Define to necessary symbol if this constant uses a non-standard name on
+   your system. */
+#undef PTHREAD_CREATE_JOINABLE
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

@@ -30,6 +30,8 @@ extern glStencilFuncSeparatePROC	qglStencilFuncSeparate;
 extern glStencilOpSeparatePROC		qglStencilOpSeparate;
 extern glStencilMaskSeparatePROC	qglStencilMaskSeparate;
 
+extern void R_ShadowBlend(float alpha);
+
 vec3_t ShadowArray[MAX_SHADOW_VERTS];
 static qboolean	triangleFacingLight	[MAX_INDICES / 3];
 
@@ -44,60 +46,6 @@ void GL_LerpVerts(int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, floa
         lerp[1] = move[1] + ov->v[1]*backv[1] + v->v[1]*frontv[1];
         lerp[2] = move[2] + ov->v[2]*backv[2] + v->v[2]*frontv[2];
     }
-}
-
-/*
-==============
-R_ShadowBlend
-Draws projection shadow(s)
-from stenciled volume
-==============
-*/
-
-void R_ShadowBlend(float alpha)
-{
-	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-
-	qglMatrixMode(GL_PROJECTION);
-	qglPushMatrix();
-	qglLoadIdentity();
-	qglOrtho(0, 1, 1, 0, -99999, 99999);
-
-	qglMatrixMode(GL_MODELVIEW);
-	qglPushMatrix();
-	qglLoadIdentity();
-
-	qglColor4f (0,0,0, alpha);
-
-	GLSTATE_DISABLE_ALPHATEST
-	qglEnable( GL_BLEND );
-	qglDisable (GL_DEPTH_TEST);
-	qglDisable (GL_TEXTURE_2D);
-
-	qglEnable(GL_STENCIL_TEST);
-	qglStencilFunc( GL_NOTEQUAL, 0, 0xFF);
-	qglStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-
-	qglBegin(GL_TRIANGLES);
-	qglVertex2f(-5, -5);
-	qglVertex2f(10, -5);
-	qglVertex2f(-5, 10);
-	qglEnd();
-
-	qglMatrixMode(GL_PROJECTION);
-	qglPopMatrix();
-	qglMatrixMode(GL_MODELVIEW);
-	qglPopMatrix();
-
-	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglDisable ( GL_BLEND );
-	qglEnable (GL_TEXTURE_2D);
-	qglEnable (GL_DEPTH_TEST);
-	qglDisable(GL_STENCIL_TEST);
-
-	qglColor4f(1,1,1,1);
-
 }
 
 void R_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightOrg, qboolean lerp){
@@ -389,12 +337,6 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
 
-	if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 10))
-		return;
-
-	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-
 	if(currententity->flags & RF_BOBBING) 
 		bob = currententity->bob;
 	else
@@ -492,7 +434,7 @@ qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipfl
 
 int CL_PMpointcontents(vec3_t point);
 
-void R_DrawShadowVolume(entity_t * e)
+void R_DrawShadowVolume()
 {
 	dmdl_t *paliashdr;
     daliasframe_t *frame, *oldframe;
@@ -500,28 +442,9 @@ void R_DrawShadowVolume(entity_t * e)
     float   *lerp;
     float frontlerp;
     vec3_t move, delta, vectors[3];
-    vec3_t frontv, backv, tmp;//, water;
+    vec3_t frontv, backv;
     int i;
 	qboolean lerped;
-    float rad;
-    trace_t r_trace;
-	
-	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-
-	VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
-	VectorScale (tmp, 1.666, tmp); 
-	rad = VectorLength (tmp);
-	
-	if( R_CullSphere( e->origin, rad, 15 ) )
-		return;
-	
-	if (r_worldmodel ) {
-		//occulusion culling - why draw shadows of entities we cannot see?	
-		r_trace = CM_BoxTrace(r_origin, e->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
-		if(r_trace.fraction != 1.0)
-			return;
-	}
 
 	paliashdr = (dmdl_t *) currentmodel->extradata;
 
@@ -532,7 +455,7 @@ void R_DrawShadowVolume(entity_t * e)
 		currententity->oldframe = 0;
 	}
 
-	if(e->frame == 0 && currentmodel->num_frames == 1) 
+	if(currententity->frame == 0 && currentmodel->num_frames == 1) 
 		lerped = false;
 	else 
 		lerped = true;
@@ -589,8 +512,8 @@ void R_DrawShadowVolume(entity_t * e)
 		
 	qglPushMatrix();
 	qglDisable(GL_TEXTURE_2D);
-	qglTranslatef(e->origin[0], e->origin[1], e->origin[2]);
-	qglRotatef(e->angles[1], 0, 0, 1);
+	qglTranslatef(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
+	qglRotatef(currententity->angles[1], 0, 0, 1);
 
 	GL_DrawAliasShadowVolume(paliashdr, lerped);
 		
@@ -602,10 +525,15 @@ void R_DrawShadowVolume(entity_t * e)
 void R_CastShadow(void)
 {
 	int i;
-	vec3_t dist;
+	vec3_t dist, tmp;
+	float rad;
+    trace_t r_trace;
 	
 	//note - we use a combination of stencil volumes(for world light shadows) and shadowmaps(for dynamic shadows)
 	if (!gl_shadowmaps->value)
+		return;
+
+	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 		
 	qglEnableClientState(GL_VERTEX_ARRAY);
@@ -631,8 +559,11 @@ void R_CastShadow(void)
 	{
 		currententity = &r_newrefdef.entities[i];
 
-		if (currententity->flags & RF_TRANSLUCENT)
-			continue;	// transluscent
+		if (currententity->
+		flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED |
+				 RF_SHELL_BLUE | RF_SHELL_DOUBLE |
+				 RF_WEAPONMODEL | RF_NOSHADOWS | RF_TRANSLUCENT))
+				 continue;
 
 		currentmodel = currententity->model; 
 
@@ -642,8 +573,30 @@ void R_CastShadow(void)
 		if (currentmodel->type != mod_alias)
 			continue;
 
+		if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 10))
+			continue;
+
+		VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
+		VectorScale (tmp, 1.666, tmp); 
+		rad = VectorLength (tmp);
+		
+		if( R_CullSphere( currententity->origin, rad, 15 ) )
+			continue;
+		
+		if (r_worldmodel ) {
+			//occulusion culling - why draw shadows of entities we cannot see?	
+			r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+			if(r_trace.fraction != 1.0)
+				continue;
+		}
+
 		//get distance, set lod if available
 		VectorSubtract(r_origin, currententity->origin, dist);
+
+		//cull by distance if soft shadows(to do - test/tweak this)
+		if(VectorLength(dist) > 1024 && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
+			continue;
+
 		if(VectorLength(dist) > 1000) {
 			if(currententity->lod2)
 				currentmodel = currententity->lod2;
@@ -652,14 +605,8 @@ void R_CastShadow(void)
 			if(currententity->lod1) 
 				currentmodel = currententity->lod1;
 		}
-
-		if (currententity->
-		flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED |
-				 RF_SHELL_BLUE | RF_SHELL_DOUBLE |
-				 RF_WEAPONMODEL | RF_NOSHADOWS))
-				 continue;
 		
-		R_DrawShadowVolume(currententity);
+		R_DrawShadowVolume();
 	}
 
 	qglDisableClientState(GL_VERTEX_ARRAY);
@@ -678,43 +625,6 @@ void R_CastShadow(void)
 R_ShadowLight - Planar stencil shadows
 ===============
 */
-void vectoangles (vec3_t value1, vec3_t angles)
-{
-	float	forward;
-	float	yaw, pitch;
-
-	if (value1[1] == 0 && value1[0] == 0)
-	{
-		yaw = 0;
-		if (value1[2] > 0)
-			pitch = 90;
-		else
-			pitch = 270;
-	}
-	else
-	{
-	// PMM - fixed to correct for pitch of 0
-		if (value1[0])
-			yaw = (atan2(value1[1], value1[0]) * 180 / M_PI);
-		else if (value1[1] > 0)
-			yaw = 90;
-		else
-			yaw = 270;
-
-		if (yaw < 0)
-			yaw += 360;
-
-		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
-		pitch = (atan2(value1[2], forward) * 180 / M_PI);
-		if (pitch < 0)
-			pitch += 360;
-	}
-
-	angles[PITCH] = -pitch;
-	angles[YAW] = yaw;
-	angles[ROLL] = 0;
-}
-
 float R_ShadowLight (vec3_t entPos, vec3_t lightAdd, int type)
 {
 	int			lnum, i;

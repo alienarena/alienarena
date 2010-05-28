@@ -71,11 +71,10 @@ typedef enum {false, true}	qboolean;
 #define	MAX_STRING_TOKENS	80		// max tokens resulting from Cmd_TokenizeString
 #define	MAX_TOKEN_CHARS		1024		// max length of an individual token
 
+#define	MAX_QPATH			64		// max length of a quake game pathname
 #ifdef __unix__
-#define	MAX_QPATH			256		// max length of a quake game pathname
 #define	MAX_OSPATH			256		// max length of a filesystem pathname
 #else
-#define	MAX_QPATH			64		// max length of a quake game pathname
 #define	MAX_OSPATH			128		// max length of a filesystem pathname
 #endif
 
@@ -204,6 +203,7 @@ void NormalToLatLong( const vec3_t normal, byte latlong[2] );
 void LatLongToNormal( byte latlong[2], vec3_t normal );
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
+void vectoangles (vec3_t value1, vec3_t angles); // -jjb-dl
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *plane);
 float	anglemod(float a);
 float LerpAngle (float a1, float a2, float frac);

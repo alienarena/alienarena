@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E342E49D-18D6-4805-A197-3A116BB2DF46}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libjpeg_vc</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_win32.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_win32.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_LIB;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BrowseInformation>true</BrowseInformation>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <FloatingPointExceptions>
+      </FloatingPointExceptions>
+      <CompileAs>CompileAsC</CompileAs>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <CustomBuildStep>
+      <Command>copy $(JpegIncludeDir)jconfig.vc $(JpegIncludeDir)jconfig.h</Command>
+      <Outputs>$(JpegIncludeDir)jconfig.h</Outputs>
+      <Message>Create jconfig.h by copy from jconfig.vc</Message>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>
+      </FunctionLevelLinking>
+      <IntrinsicFunctions>
+      </IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BrowseInformation>true</BrowseInformation>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <FavorSizeOrSpeed>
+      </FavorSizeOrSpeed>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <BufferSecurityCheck>
+      </BufferSecurityCheck>
+      <StringPooling>
+      </StringPooling>
+      <BasicRuntimeChecks>
+      </BasicRuntimeChecks>
+      <OmitFramePointers>
+      </OmitFramePointers>
+      <InlineFunctionExpansion>
+      </InlineFunctionExpansion>
+      <RuntimeTypeInfo>
+      </RuntimeTypeInfo>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MinimalRebuild>
+      </MinimalRebuild>
+      <SmallerTypeCheck>
+      </SmallerTypeCheck>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
+      <EnableEnhancedInstructionSet>
+      </EnableEnhancedInstructionSet>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <CustomBuildStep>
+      <Command>copy $(JpegIncludeDir)jconfig.vc $(JpegIncludeDir)jconfig.h</Command>
+      <Outputs>$(JpegIncludeDir)jconfig.h</Outputs>
+      <Message>Create jconfig.h by copy from jconfig.vc</Message>
+    </CustomBuildStep>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="$(JpegSrcDir)jaricom.c" />
+    <ClCompile Include="$(JpegSrcDir)jcapimin.c" />
+    <ClCompile Include="$(JpegSrcDir)jcapistd.c" />
+    <ClCompile Include="$(JpegSrcDir)jcarith.c" />
+    <ClCompile Include="$(JpegSrcDir)jccoefct.c" />
+    <ClCompile Include="$(JpegSrcDir)jccolor.c" />
+    <ClCompile Include="$(JpegSrcDir)jcdctmgr.c" />
+    <ClCompile Include="$(JpegSrcDir)jchuff.c" />
+    <ClCompile Include="$(JpegSrcDir)jcinit.c" />
+    <ClCompile Include="$(JpegSrcDir)jcmainct.c" />
+    <ClCompile Include="$(JpegSrcDir)jcmarker.c" />
+    <ClCompile Include="$(JpegSrcDir)jcmaster.c" />
+    <ClCompile Include="$(JpegSrcDir)jcomapi.c" />
+    <ClCompile Include="$(JpegSrcDir)jcparam.c" />
+    <ClCompile Include="$(JpegSrcDir)jcprepct.c" />
+    <ClCompile Include="$(JpegSrcDir)jcsample.c" />
+    <ClCompile Include="$(JpegSrcDir)jctrans.c" />
+    <ClCompile Include="$(JpegSrcDir)jdapimin.c" />
+    <ClCompile Include="$(JpegSrcDir)jdapistd.c" />
+    <ClCompile Include="$(JpegSrcDir)jdarith.c" />
+    <ClCompile Include="$(JpegSrcDir)jdatadst.c" />
+    <ClCompile Include="$(JpegSrcDir)jdatasrc.c" />
+    <ClCompile Include="$(JpegSrcDir)jdcoefct.c" />
+    <ClCompile Include="$(JpegSrcDir)jdcolor.c" />
+    <ClCompile Include="$(JpegSrcDir)jddctmgr.c" />
+    <ClCompile Include="$(JpegSrcDir)jdhuff.c" />
+    <ClCompile Include="$(JpegSrcDir)jdinput.c" />
+    <ClCompile Include="$(JpegSrcDir)jdmainct.c" />
+    <ClCompile Include="$(JpegSrcDir)jdmarker.c" />
+    <ClCompile Include="$(JpegSrcDir)jdmaster.c" />
+    <ClCompile Include="$(JpegSrcDir)jdmerge.c" />
+    <ClCompile Include="$(JpegSrcDir)jdpostct.c" />
+    <ClCompile Include="$(JpegSrcDir)jdsample.c" />
+    <ClCompile Include="$(JpegSrcDir)jdtrans.c" />
+    <ClCompile Include="$(JpegSrcDir)jerror.c" />
+    <ClCompile Include="$(JpegSrcDir)jfdctflt.c" />
+    <ClCompile Include="$(JpegSrcDir)jfdctfst.c" />
+    <ClCompile Include="$(JpegSrcDir)jfdctint.c" />
+    <ClCompile Include="$(JpegSrcDir)jidctflt.c" />
+    <ClCompile Include="$(JpegSrcDir)jidctfst.c" />
+    <ClCompile Include="$(JpegSrcDir)jidctint.c" />
+    <ClCompile Include="$(JpegSrcDir)jmemmgr.c" />
+    <ClCompile Include="$(JpegSrcDir)jquant1.c" />
+    <ClCompile Include="$(JpegSrcDir)jquant2.c">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Disabled</Optimization>
+      <BufferSecurityCheck Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</BufferSecurityCheck>
+    </ClCompile>
+    <ClCompile Include="$(JpegSrcDir)jmemnobs.c" />
+    <ClCompile Include="$(JpegSrcDir)jutils.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(JpegIncludeDir)jpeglib.h" />
+    <ClInclude Include="$(JpegIncludeDir)jerror.h" />
+    <ClInclude Include="$(JpegIncludeDir)jmorecfg.h" />
+    <ClInclude Include="$(JpegIncludeDir)jdct.h" />
+    <ClInclude Include="$(JpegIncludeDir)jinclude.h" />
+    <ClInclude Include="$(JpegIncludeDir)jmemsys.h" />
+    <ClInclude Include="$(JpegIncludeDir)jpegint.h" />
+    <ClInclude Include="$(JpegIncludeDir)jversion.h" />
+    <ClInclude Include="$(JpegIncludeDir)jconfig.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

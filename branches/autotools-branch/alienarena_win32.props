@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <OutDir>$(SolutionDir)win32_vc\$(Configuration)\</OutDir>
+	<OutputPath>$(SolutionDir)win32_vc\$(ProjectName)\$(Configuration)\</OutputPath>
+	<IntDir>$(OutputPath)</IntDir>
+    <SrcDir>$(SolutionDir)source\</SrcDir>
+    <LibSrcDir>$(SolutionDir)libsrc\</LibSrcDir>
+    <ZlibVersion>-1.2.5</ZlibVersion>
+    <ZlibSrcDir>$(LibSrcDir)zlib$(ZlibVersion)\</ZlibSrcDir>
+    <ZlibIncludeDir>$(ZlibSrcDir)</ZlibIncludeDir>
+    <CurlVersion>-7.20.1</CurlVersion>
+    <CurlSrcDir>$(LibSrcDir)curl$(CurlVersion)\</CurlSrcDir>
+    <CurlIncludeDir>$(CurlSrcDir)include\</CurlIncludeDir>
+    <VorbisVersion>-1.3.1</VorbisVersion>
+    <VorbisDir>$(LibSrcDir)libvorbis$(VorbisVersion)\</VorbisDir>
+    <VorbisSrcDir>$(VorbisDir)lib\</VorbisSrcDir>
+    <VorbisIncludeDir>$(VorbisDir)include\</VorbisIncludeDir>
+    <OggVersion>-1.2.0</OggVersion>
+    <OggDir>$(LibSrcDir)libogg$(OggVersion)\</OggDir>
+    <OggSrcDir>$(OggDir)src\</OggSrcDir>
+    <OggIncludeDir>$(OggDir)include\</OggIncludeDir>
+    <JpegVersion>-8b</JpegVersion>
+    <JpegSrcDir>$(LibSrcDir)jpeg$(JpegVersion)\</JpegSrcDir>
+    <JpegIncludeDir>$(JpegSrcDir)</JpegIncludeDir>
+    <OpenALSDKDir>$(ProgramFiles)\OpenAL 1.1 SDK\</OpenALSDKDir>
+    <OpenALIncludeDir>$(OpenALSDKDir)include\</OpenALIncludeDir>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup />
+  <ItemGroup />
+</Project>

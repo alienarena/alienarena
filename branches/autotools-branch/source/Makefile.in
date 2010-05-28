@@ -39,7 +39,10 @@ bin_PROGRAMS = crx$(EXEEXT) crded$(EXEEXT)
 subdir = source
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_gl.m4 \
+	$(top_srcdir)/m4/ax_check_glu.m4 \
+	$(top_srcdir)/m4/ax_lang_compiler_ms.m4 \
+	$(top_srcdir)/m4/ax_pthread.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/configure.ac
@@ -49,57 +52,25 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(pkglibexecdir)" "$(DESTDIR)$(bindir)"
-LTLIBRARIES = $(pkglibexec_LTLIBRARIES)
-game_la_LIBADD =
+LTLIBRARIES = $(noinst_LTLIBRARIES)
+libgame_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_game_la_OBJECTS = game/acesrc/game_la-acebot_ai.lo \
-	game/acesrc/game_la-acebot_cmds.lo \
-	game/acesrc/game_la-acebot_compress.lo \
-	game/acesrc/game_la-acebot_items.lo \
-	game/acesrc/game_la-acebot_movement.lo \
-	game/acesrc/game_la-acebot_nodes.lo \
-	game/acesrc/game_la-acebot_spawn.lo game/game_la-c_cam.lo \
-	game/game_la-g_ai.lo game/game_la-g_chase.lo \
-	game/game_la-g_cmds.lo game/game_la-g_combat.lo \
-	game/game_la-g_cow.lo game/game_la-g_ctf.lo \
-	game/game_la-g_deathball.lo game/game_la-g_deathray.lo \
-	game/game_la-g_func.lo game/game_la-g_items.lo \
-	game/game_la-g_main.lo game/game_la-g_misc.lo \
-	game/game_la-g_monster.lo game/game_la-g_phys.lo \
-	game/game_la-g_save.lo game/game_la-g_spawn.lo \
-	game/game_la-g_svcmds.lo game/game_la-g_target.lo \
-	game/game_la-g_trigger.lo game/game_la-g_unlagged.lo \
-	game/game_la-g_utils.lo game/game_la-g_vehicles.lo \
-	game/game_la-g_weapon.lo game/game_la-m_move.lo \
-	game/game_la-p_client.lo game/game_la-p_hud.lo \
-	game/game_la-p_trail.lo game/game_la-p_view.lo \
-	game/game_la-p_weapon.lo game/game_la-q_shared.lo
-game_la_OBJECTS = $(am_game_la_OBJECTS)
-game_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(game_la_CFLAGS) $(CFLAGS) \
-	$(game_la_LDFLAGS) $(LDFLAGS) -o $@
+am_libgame_la_OBJECTS = game/acesrc/acebot_ai.lo \
+	game/acesrc/acebot_cmds.lo game/acesrc/acebot_compress.lo \
+	game/acesrc/acebot_items.lo game/acesrc/acebot_movement.lo \
+	game/acesrc/acebot_nodes.lo game/acesrc/acebot_spawn.lo \
+	game/c_cam.lo game/g_ai.lo game/g_chase.lo game/g_cmds.lo \
+	game/g_combat.lo game/g_cow.lo game/g_ctf.lo \
+	game/g_deathball.lo game/g_deathray.lo game/g_func.lo \
+	game/g_items.lo game/g_main.lo game/g_misc.lo \
+	game/g_monster.lo game/g_phys.lo game/g_save.lo \
+	game/g_spawn.lo game/g_svcmds.lo game/g_target.lo \
+	game/g_trigger.lo game/g_unlagged.lo game/g_utils.lo \
+	game/g_vehicles.lo game/g_weapon.lo game/m_move.lo \
+	game/p_client.lo game/p_hud.lo game/p_trail.lo game/p_view.lo \
+	game/p_weapon.lo game/q_shared.lo
+libgame_la_OBJECTS = $(am_libgame_la_OBJECTS)
+am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_crded_OBJECTS = game/crded-q_shared.$(OBJEXT) \
 	null/crded-cl_null.$(OBJEXT) qcommon/crded-cmd.$(OBJEXT) \
@@ -116,7 +87,7 @@ am_crded_OBJECTS = game/crded-q_shared.$(OBJEXT) \
 crded_OBJECTS = $(am_crded_OBJECTS)
 crded_LDADD = $(LDADD)
 crded_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(crded_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	--mode=link $(CCLD) $(crded_CFLAGS) $(CFLAGS) $(crded_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am_crx_OBJECTS = client/crx-cl_ents.$(OBJEXT) \
 	client/crx-cl_fx.$(OBJEXT) client/crx-cl_http.$(OBJEXT) \
@@ -140,7 +111,7 @@ am_crx_OBJECTS = client/crx-cl_ents.$(OBJEXT) \
 	ref_gl/crx-r_mesh.$(OBJEXT) ref_gl/crx-r_misc.$(OBJEXT) \
 	ref_gl/crx-r_model.$(OBJEXT) ref_gl/crx-r_particle.$(OBJEXT) \
 	ref_gl/crx-r_postprocess.$(OBJEXT) \
-	ref_gl/crx-r_script.$(OBJEXT) \
+	ref_gl/crx-r_program.$(OBJEXT) ref_gl/crx-r_script.$(OBJEXT) \
 	ref_gl/crx-r_shadowmaps.$(OBJEXT) \
 	ref_gl/crx-r_shadows.$(OBJEXT) ref_gl/crx-r_surf.$(OBJEXT) \
 	ref_gl/crx-r_varray.$(OBJEXT) ref_gl/crx-r_vbo.$(OBJEXT) \
@@ -156,7 +127,7 @@ am_crx_OBJECTS = client/crx-cl_ents.$(OBJEXT) \
 crx_OBJECTS = $(am_crx_OBJECTS)
 crx_LDADD = $(LDADD)
 crx_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(crx_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	--mode=link $(CCLD) $(crx_CFLAGS) $(CFLAGS) $(crx_LDFLAGS) \
 	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/config
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -171,8 +142,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(game_la_SOURCES) $(crded_SOURCES) $(crx_SOURCES)
-DIST_SOURCES = $(game_la_SOURCES) $(crded_SOURCES) $(crx_SOURCES)
+SOURCES = $(libgame_la_SOURCES) $(crded_SOURCES) $(crx_SOURCES)
+DIST_SOURCES = $(libgame_la_SOURCES) $(crded_SOURCES) $(crx_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -203,6 +174,10 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+GLU_CFLAGS = @GLU_CFLAGS@
+GLU_LIBS = @GLU_LIBS@
+GL_CFLAGS = @GL_CFLAGS@
+GL_LIBS = @GL_LIBS@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -217,6 +192,7 @@ LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
@@ -233,6 +209,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PTHREAD_CC = @PTHREAD_CC@
+PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
+PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -252,6 +231,7 @@ am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
+ax_pthread_config = @ax_pthread_config@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -294,11 +274,11 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = `-I m4'
-pkglibexec_LTLIBRARIES = game.la
-crx_CFLAGS = -DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
-game_la_CFLAGS = -Dstricmp=strcasecmp  -U_FORTIFY_SOURCE -ffast-math -DDATADIR='"$(pkgdatadir)"'
-game_la_LDFLAGS = -module -avoid-version
-crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
+noinst_LTLIBRARIES = libgame.la
+crx_CFLAGS = -DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp -U_FORTIFY_SOURCE -ffast-math
+crx_LDFLAGS = $(LDFLAGS) $(GLU_LIBS) -lgame
+crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -U_FORTIFY_SOURCE -ffast-math
+crded_LDFLAGS = -lgame
 crx_SOURCES = \
 	client/anorms.h \
 	client/cl_ents.c \
@@ -366,6 +346,7 @@ crx_SOURCES = \
 	ref_gl/r_model.h \
 	ref_gl/r_particle.c \
 	ref_gl/r_postprocess.c \
+	ref_gl/r_program.c \
 	ref_gl/r_script.c \
 	ref_gl/r_script.h \
 	ref_gl/r_shadowmaps.c \
@@ -398,7 +379,7 @@ crx_SOURCES = \
 	unix/sys_unix.c \
 	unix/vid_so.c 
 
-game_la_SOURCES = \
+libgame_la_SOURCES = \
 	client/anorms.h \
 	game/acesrc/acebot_ai.c \
 	game/acesrc/acebot_cmds.c \
@@ -486,7 +467,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -511,37 +492,15 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure:  $(am__configure_deps)
+$(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-install-pkglibexecLTLIBRARIES: $(pkglibexec_LTLIBRARIES)
-	@$(NORMAL_INSTALL)
-	test -z "$(pkglibexecdir)" || $(MKDIR_P) "$(DESTDIR)$(pkglibexecdir)"
-	@list='$(pkglibexec_LTLIBRARIES)'; test -n "$(pkglibexecdir)" || list=; \
-	list2=; for p in $$list; do \
-	  if test -f $$p; then \
-	    list2="$$list2 $$p"; \
-	  else :; fi; \
-	done; \
-	test -z "$$list2" || { \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(pkglibexecdir)'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(pkglibexecdir)"; \
-	}
 
-uninstall-pkglibexecLTLIBRARIES:
-	@$(NORMAL_UNINSTALL)
-	@list='$(pkglibexec_LTLIBRARIES)'; test -n "$(pkglibexecdir)" || list=; \
-	for p in $$list; do \
-	  $(am__strip_dir) \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(pkglibexecdir)/$$f'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(pkglibexecdir)/$$f"; \
-	done
-
-clean-pkglibexecLTLIBRARIES:
-	-test -z "$(pkglibexec_LTLIBRARIES)" || rm -f $(pkglibexec_LTLIBRARIES)
-	@list='$(pkglibexec_LTLIBRARIES)'; for p in $$list; do \
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
 	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
 	  test "$$dir" != "$$p" || dir=.; \
 	  echo "rm -f \"$${dir}/so_locations\""; \
@@ -553,19 +512,19 @@ game/acesrc/$(am__dirstamp):
 game/acesrc/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) game/acesrc/$(DEPDIR)
 	@: > game/acesrc/$(DEPDIR)/$(am__dirstamp)
-game/acesrc/game_la-acebot_ai.lo: game/acesrc/$(am__dirstamp) \
+game/acesrc/acebot_ai.lo: game/acesrc/$(am__dirstamp) \
 	game/acesrc/$(DEPDIR)/$(am__dirstamp)
-game/acesrc/game_la-acebot_cmds.lo: game/acesrc/$(am__dirstamp) \
+game/acesrc/acebot_cmds.lo: game/acesrc/$(am__dirstamp) \
 	game/acesrc/$(DEPDIR)/$(am__dirstamp)
-game/acesrc/game_la-acebot_compress.lo: game/acesrc/$(am__dirstamp) \
+game/acesrc/acebot_compress.lo: game/acesrc/$(am__dirstamp) \
 	game/acesrc/$(DEPDIR)/$(am__dirstamp)
-game/acesrc/game_la-acebot_items.lo: game/acesrc/$(am__dirstamp) \
+game/acesrc/acebot_items.lo: game/acesrc/$(am__dirstamp) \
 	game/acesrc/$(DEPDIR)/$(am__dirstamp)
-game/acesrc/game_la-acebot_movement.lo: game/acesrc/$(am__dirstamp) \
+game/acesrc/acebot_movement.lo: game/acesrc/$(am__dirstamp) \
 	game/acesrc/$(DEPDIR)/$(am__dirstamp)
-game/acesrc/game_la-acebot_nodes.lo: game/acesrc/$(am__dirstamp) \
+game/acesrc/acebot_nodes.lo: game/acesrc/$(am__dirstamp) \
 	game/acesrc/$(DEPDIR)/$(am__dirstamp)
-game/acesrc/game_la-acebot_spawn.lo: game/acesrc/$(am__dirstamp) \
+game/acesrc/acebot_spawn.lo: game/acesrc/$(am__dirstamp) \
 	game/acesrc/$(DEPDIR)/$(am__dirstamp)
 game/$(am__dirstamp):
 	@$(MKDIR_P) game
@@ -573,70 +532,43 @@ game/$(am__dirstamp):
 game/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) game/$(DEPDIR)
 	@: > game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-c_cam.lo: game/$(am__dirstamp) \
+game/c_cam.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_ai.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_chase.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_cmds.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_combat.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_cow.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_ctf.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_deathball.lo: game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_ai.lo: game/$(am__dirstamp) \
+game/g_deathray.lo: game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_chase.lo: game/$(am__dirstamp) \
+game/g_func.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_items.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_main.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_misc.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_monster.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_phys.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_save.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_spawn.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_svcmds.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_target.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_trigger.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_unlagged.lo: game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_cmds.lo: game/$(am__dirstamp) \
+game/g_utils.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/g_vehicles.lo: game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_combat.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_cow.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_ctf.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_deathball.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_deathray.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_func.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_items.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_main.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_misc.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_monster.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_phys.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_save.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_spawn.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_svcmds.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_target.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_trigger.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_unlagged.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_utils.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_vehicles.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-g_weapon.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-m_move.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-p_client.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-p_hud.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-p_trail.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-p_view.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-p_weapon.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/game_la-q_shared.lo: game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game.la: $(game_la_OBJECTS) $(game_la_DEPENDENCIES) 
-	$(game_la_LINK) -rpath $(pkglibexecdir) $(game_la_OBJECTS) $(game_la_LIBADD) $(LIBS)
+game/g_weapon.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/m_move.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/p_client.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/p_hud.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/p_trail.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/p_view.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/p_weapon.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+game/q_shared.lo: game/$(am__dirstamp) game/$(DEPDIR)/$(am__dirstamp)
+libgame.la: $(libgame_la_OBJECTS) $(libgame_la_DEPENDENCIES) 
+	$(LINK)  $(libgame_la_OBJECTS) $(libgame_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -849,6 +781,8 @@ ref_gl/crx-r_particle.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_postprocess.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
+ref_gl/crx-r_program.$(OBJEXT): ref_gl/$(am__dirstamp) \
+	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_script.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_shadowmaps.$(OBJEXT): ref_gl/$(am__dirstamp) \
@@ -924,84 +858,84 @@ mostlyclean-compile:
 	-rm -f client/crx-snd_file.$(OBJEXT)
 	-rm -f client/crx-snd_openal.$(OBJEXT)
 	-rm -f client/crx-vid_menu.$(OBJEXT)
-	-rm -f game/acesrc/game_la-acebot_ai.$(OBJEXT)
-	-rm -f game/acesrc/game_la-acebot_ai.lo
-	-rm -f game/acesrc/game_la-acebot_cmds.$(OBJEXT)
-	-rm -f game/acesrc/game_la-acebot_cmds.lo
-	-rm -f game/acesrc/game_la-acebot_compress.$(OBJEXT)
-	-rm -f game/acesrc/game_la-acebot_compress.lo
-	-rm -f game/acesrc/game_la-acebot_items.$(OBJEXT)
-	-rm -f game/acesrc/game_la-acebot_items.lo
-	-rm -f game/acesrc/game_la-acebot_movement.$(OBJEXT)
-	-rm -f game/acesrc/game_la-acebot_movement.lo
-	-rm -f game/acesrc/game_la-acebot_nodes.$(OBJEXT)
-	-rm -f game/acesrc/game_la-acebot_nodes.lo
-	-rm -f game/acesrc/game_la-acebot_spawn.$(OBJEXT)
-	-rm -f game/acesrc/game_la-acebot_spawn.lo
+	-rm -f game/acesrc/acebot_ai.$(OBJEXT)
+	-rm -f game/acesrc/acebot_ai.lo
+	-rm -f game/acesrc/acebot_cmds.$(OBJEXT)
+	-rm -f game/acesrc/acebot_cmds.lo
+	-rm -f game/acesrc/acebot_compress.$(OBJEXT)
+	-rm -f game/acesrc/acebot_compress.lo
+	-rm -f game/acesrc/acebot_items.$(OBJEXT)
+	-rm -f game/acesrc/acebot_items.lo
+	-rm -f game/acesrc/acebot_movement.$(OBJEXT)
+	-rm -f game/acesrc/acebot_movement.lo
+	-rm -f game/acesrc/acebot_nodes.$(OBJEXT)
+	-rm -f game/acesrc/acebot_nodes.lo
+	-rm -f game/acesrc/acebot_spawn.$(OBJEXT)
+	-rm -f game/acesrc/acebot_spawn.lo
+	-rm -f game/c_cam.$(OBJEXT)
+	-rm -f game/c_cam.lo
 	-rm -f game/crded-q_shared.$(OBJEXT)
 	-rm -f game/crx-q_shared.$(OBJEXT)
-	-rm -f game/game_la-c_cam.$(OBJEXT)
-	-rm -f game/game_la-c_cam.lo
-	-rm -f game/game_la-g_ai.$(OBJEXT)
-	-rm -f game/game_la-g_ai.lo
-	-rm -f game/game_la-g_chase.$(OBJEXT)
-	-rm -f game/game_la-g_chase.lo
-	-rm -f game/game_la-g_cmds.$(OBJEXT)
-	-rm -f game/game_la-g_cmds.lo
-	-rm -f game/game_la-g_combat.$(OBJEXT)
-	-rm -f game/game_la-g_combat.lo
-	-rm -f game/game_la-g_cow.$(OBJEXT)
-	-rm -f game/game_la-g_cow.lo
-	-rm -f game/game_la-g_ctf.$(OBJEXT)
-	-rm -f game/game_la-g_ctf.lo
-	-rm -f game/game_la-g_deathball.$(OBJEXT)
-	-rm -f game/game_la-g_deathball.lo
-	-rm -f game/game_la-g_deathray.$(OBJEXT)
-	-rm -f game/game_la-g_deathray.lo
-	-rm -f game/game_la-g_func.$(OBJEXT)
-	-rm -f game/game_la-g_func.lo
-	-rm -f game/game_la-g_items.$(OBJEXT)
-	-rm -f game/game_la-g_items.lo
-	-rm -f game/game_la-g_main.$(OBJEXT)
-	-rm -f game/game_la-g_main.lo
-	-rm -f game/game_la-g_misc.$(OBJEXT)
-	-rm -f game/game_la-g_misc.lo
-	-rm -f game/game_la-g_monster.$(OBJEXT)
-	-rm -f game/game_la-g_monster.lo
-	-rm -f game/game_la-g_phys.$(OBJEXT)
-	-rm -f game/game_la-g_phys.lo
-	-rm -f game/game_la-g_save.$(OBJEXT)
-	-rm -f game/game_la-g_save.lo
-	-rm -f game/game_la-g_spawn.$(OBJEXT)
-	-rm -f game/game_la-g_spawn.lo
-	-rm -f game/game_la-g_svcmds.$(OBJEXT)
-	-rm -f game/game_la-g_svcmds.lo
-	-rm -f game/game_la-g_target.$(OBJEXT)
-	-rm -f game/game_la-g_target.lo
-	-rm -f game/game_la-g_trigger.$(OBJEXT)
-	-rm -f game/game_la-g_trigger.lo
-	-rm -f game/game_la-g_unlagged.$(OBJEXT)
-	-rm -f game/game_la-g_unlagged.lo
-	-rm -f game/game_la-g_utils.$(OBJEXT)
-	-rm -f game/game_la-g_utils.lo
-	-rm -f game/game_la-g_vehicles.$(OBJEXT)
-	-rm -f game/game_la-g_vehicles.lo
-	-rm -f game/game_la-g_weapon.$(OBJEXT)
-	-rm -f game/game_la-g_weapon.lo
-	-rm -f game/game_la-m_move.$(OBJEXT)
-	-rm -f game/game_la-m_move.lo
-	-rm -f game/game_la-p_client.$(OBJEXT)
-	-rm -f game/game_la-p_client.lo
-	-rm -f game/game_la-p_hud.$(OBJEXT)
-	-rm -f game/game_la-p_hud.lo
-	-rm -f game/game_la-p_trail.$(OBJEXT)
-	-rm -f game/game_la-p_trail.lo
-	-rm -f game/game_la-p_view.$(OBJEXT)
-	-rm -f game/game_la-p_view.lo
-	-rm -f game/game_la-p_weapon.$(OBJEXT)
-	-rm -f game/game_la-p_weapon.lo
-	-rm -f game/game_la-q_shared.$(OBJEXT)
-	-rm -f game/game_la-q_shared.lo
+	-rm -f game/g_ai.$(OBJEXT)
+	-rm -f game/g_ai.lo
+	-rm -f game/g_chase.$(OBJEXT)
+	-rm -f game/g_chase.lo
+	-rm -f game/g_cmds.$(OBJEXT)
+	-rm -f game/g_cmds.lo
+	-rm -f game/g_combat.$(OBJEXT)
+	-rm -f game/g_combat.lo
+	-rm -f game/g_cow.$(OBJEXT)
+	-rm -f game/g_cow.lo
+	-rm -f game/g_ctf.$(OBJEXT)
+	-rm -f game/g_ctf.lo
+	-rm -f game/g_deathball.$(OBJEXT)
+	-rm -f game/g_deathball.lo
+	-rm -f game/g_deathray.$(OBJEXT)
+	-rm -f game/g_deathray.lo
+	-rm -f game/g_func.$(OBJEXT)
+	-rm -f game/g_func.lo
+	-rm -f game/g_items.$(OBJEXT)
+	-rm -f game/g_items.lo
+	-rm -f game/g_main.$(OBJEXT)
+	-rm -f game/g_main.lo
+	-rm -f game/g_misc.$(OBJEXT)
+	-rm -f game/g_misc.lo
+	-rm -f game/g_monster.$(OBJEXT)
+	-rm -f game/g_monster.lo
+	-rm -f game/g_phys.$(OBJEXT)
+	-rm -f game/g_phys.lo
+	-rm -f game/g_save.$(OBJEXT)
+	-rm -f game/g_save.lo
+	-rm -f game/g_spawn.$(OBJEXT)
+	-rm -f game/g_spawn.lo
+	-rm -f game/g_svcmds.$(OBJEXT)
+	-rm -f game/g_svcmds.lo
+	-rm -f game/g_target.$(OBJEXT)
+	-rm -f game/g_target.lo
+	-rm -f game/g_trigger.$(OBJEXT)
+	-rm -f game/g_trigger.lo
+	-rm -f game/g_unlagged.$(OBJEXT)
+	-rm -f game/g_unlagged.lo
+	-rm -f game/g_utils.$(OBJEXT)
+	-rm -f game/g_utils.lo
+	-rm -f game/g_vehicles.$(OBJEXT)
+	-rm -f game/g_vehicles.lo
+	-rm -f game/g_weapon.$(OBJEXT)
+	-rm -f game/g_weapon.lo
+	-rm -f game/m_move.$(OBJEXT)
+	-rm -f game/m_move.lo
+	-rm -f game/p_client.$(OBJEXT)
+	-rm -f game/p_client.lo
+	-rm -f game/p_hud.$(OBJEXT)
+	-rm -f game/p_hud.lo
+	-rm -f game/p_trail.$(OBJEXT)
+	-rm -f game/p_trail.lo
+	-rm -f game/p_view.$(OBJEXT)
+	-rm -f game/p_view.lo
+	-rm -f game/p_weapon.$(OBJEXT)
+	-rm -f game/p_weapon.lo
+	-rm -f game/q_shared.$(OBJEXT)
+	-rm -f game/q_shared.lo
 	-rm -f null/crded-cl_null.$(OBJEXT)
 	-rm -f qcommon/crded-cmd.$(OBJEXT)
 	-rm -f qcommon/crded-cmodel.$(OBJEXT)
@@ -1032,6 +966,7 @@ mostlyclean-compile:
 	-rm -f ref_gl/crx-r_model.$(OBJEXT)
 	-rm -f ref_gl/crx-r_particle.$(OBJEXT)
 	-rm -f ref_gl/crx-r_postprocess.$(OBJEXT)
+	-rm -f ref_gl/crx-r_program.$(OBJEXT)
 	-rm -f ref_gl/crx-r_script.$(OBJEXT)
 	-rm -f ref_gl/crx-r_shadowmaps.$(OBJEXT)
 	-rm -f ref_gl/crx-r_shadows.$(OBJEXT)
@@ -1093,46 +1028,46 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-snd_file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-snd_openal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-vid_menu.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/c_cam.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/crded-q_shared.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/crx-q_shared.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-c_cam.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_ai.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_chase.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_cmds.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_combat.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_cow.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_ctf.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_deathball.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_deathray.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_func.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_items.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_main.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_misc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_monster.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_phys.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_save.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_spawn.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_svcmds.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_target.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_trigger.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_unlagged.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_utils.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_vehicles.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-g_weapon.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-m_move.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-p_client.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-p_hud.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-p_trail.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-p_view.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-p_weapon.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/game_la-q_shared.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/game_la-acebot_ai.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/game_la-acebot_cmds.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/game_la-acebot_compress.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/game_la-acebot_items.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/game_la-acebot_movement.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/game_la-acebot_nodes.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/game_la-acebot_spawn.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_ai.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_chase.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_cmds.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_combat.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_cow.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_ctf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_deathball.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_deathray.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_func.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_items.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_main.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_misc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_monster.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_phys.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_save.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_spawn.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_svcmds.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_target.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_trigger.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_unlagged.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_vehicles.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_weapon.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/m_move.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/p_client.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/p_hud.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/p_trail.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/p_view.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/p_weapon.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/q_shared.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/acebot_ai.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/acebot_cmds.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/acebot_compress.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/acebot_items.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/acebot_movement.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/acebot_nodes.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/acesrc/$(DEPDIR)/acebot_spawn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@null/$(DEPDIR)/crded-cl_null.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crded-cmd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crded-cmodel.Po@am__quote@
@@ -1163,6 +1098,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_particle.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_postprocess.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_program.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_script.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_shadowmaps.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_shadows.Po@am__quote@
@@ -1223,272 +1159,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
-
-game/acesrc/game_la-acebot_ai.lo: game/acesrc/acebot_ai.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/acesrc/game_la-acebot_ai.lo -MD -MP -MF game/acesrc/$(DEPDIR)/game_la-acebot_ai.Tpo -c -o game/acesrc/game_la-acebot_ai.lo `test -f 'game/acesrc/acebot_ai.c' || echo '$(srcdir)/'`game/acesrc/acebot_ai.c
-@am__fastdepCC_TRUE@	$(am__mv) game/acesrc/$(DEPDIR)/game_la-acebot_ai.Tpo game/acesrc/$(DEPDIR)/game_la-acebot_ai.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/acesrc/acebot_ai.c' object='game/acesrc/game_la-acebot_ai.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/acesrc/game_la-acebot_ai.lo `test -f 'game/acesrc/acebot_ai.c' || echo '$(srcdir)/'`game/acesrc/acebot_ai.c
-
-game/acesrc/game_la-acebot_cmds.lo: game/acesrc/acebot_cmds.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/acesrc/game_la-acebot_cmds.lo -MD -MP -MF game/acesrc/$(DEPDIR)/game_la-acebot_cmds.Tpo -c -o game/acesrc/game_la-acebot_cmds.lo `test -f 'game/acesrc/acebot_cmds.c' || echo '$(srcdir)/'`game/acesrc/acebot_cmds.c
-@am__fastdepCC_TRUE@	$(am__mv) game/acesrc/$(DEPDIR)/game_la-acebot_cmds.Tpo game/acesrc/$(DEPDIR)/game_la-acebot_cmds.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/acesrc/acebot_cmds.c' object='game/acesrc/game_la-acebot_cmds.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/acesrc/game_la-acebot_cmds.lo `test -f 'game/acesrc/acebot_cmds.c' || echo '$(srcdir)/'`game/acesrc/acebot_cmds.c
-
-game/acesrc/game_la-acebot_compress.lo: game/acesrc/acebot_compress.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/acesrc/game_la-acebot_compress.lo -MD -MP -MF game/acesrc/$(DEPDIR)/game_la-acebot_compress.Tpo -c -o game/acesrc/game_la-acebot_compress.lo `test -f 'game/acesrc/acebot_compress.c' || echo '$(srcdir)/'`game/acesrc/acebot_compress.c
-@am__fastdepCC_TRUE@	$(am__mv) game/acesrc/$(DEPDIR)/game_la-acebot_compress.Tpo game/acesrc/$(DEPDIR)/game_la-acebot_compress.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/acesrc/acebot_compress.c' object='game/acesrc/game_la-acebot_compress.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/acesrc/game_la-acebot_compress.lo `test -f 'game/acesrc/acebot_compress.c' || echo '$(srcdir)/'`game/acesrc/acebot_compress.c
-
-game/acesrc/game_la-acebot_items.lo: game/acesrc/acebot_items.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/acesrc/game_la-acebot_items.lo -MD -MP -MF game/acesrc/$(DEPDIR)/game_la-acebot_items.Tpo -c -o game/acesrc/game_la-acebot_items.lo `test -f 'game/acesrc/acebot_items.c' || echo '$(srcdir)/'`game/acesrc/acebot_items.c
-@am__fastdepCC_TRUE@	$(am__mv) game/acesrc/$(DEPDIR)/game_la-acebot_items.Tpo game/acesrc/$(DEPDIR)/game_la-acebot_items.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/acesrc/acebot_items.c' object='game/acesrc/game_la-acebot_items.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/acesrc/game_la-acebot_items.lo `test -f 'game/acesrc/acebot_items.c' || echo '$(srcdir)/'`game/acesrc/acebot_items.c
-
-game/acesrc/game_la-acebot_movement.lo: game/acesrc/acebot_movement.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/acesrc/game_la-acebot_movement.lo -MD -MP -MF game/acesrc/$(DEPDIR)/game_la-acebot_movement.Tpo -c -o game/acesrc/game_la-acebot_movement.lo `test -f 'game/acesrc/acebot_movement.c' || echo '$(srcdir)/'`game/acesrc/acebot_movement.c
-@am__fastdepCC_TRUE@	$(am__mv) game/acesrc/$(DEPDIR)/game_la-acebot_movement.Tpo game/acesrc/$(DEPDIR)/game_la-acebot_movement.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/acesrc/acebot_movement.c' object='game/acesrc/game_la-acebot_movement.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/acesrc/game_la-acebot_movement.lo `test -f 'game/acesrc/acebot_movement.c' || echo '$(srcdir)/'`game/acesrc/acebot_movement.c
-
-game/acesrc/game_la-acebot_nodes.lo: game/acesrc/acebot_nodes.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/acesrc/game_la-acebot_nodes.lo -MD -MP -MF game/acesrc/$(DEPDIR)/game_la-acebot_nodes.Tpo -c -o game/acesrc/game_la-acebot_nodes.lo `test -f 'game/acesrc/acebot_nodes.c' || echo '$(srcdir)/'`game/acesrc/acebot_nodes.c
-@am__fastdepCC_TRUE@	$(am__mv) game/acesrc/$(DEPDIR)/game_la-acebot_nodes.Tpo game/acesrc/$(DEPDIR)/game_la-acebot_nodes.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/acesrc/acebot_nodes.c' object='game/acesrc/game_la-acebot_nodes.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/acesrc/game_la-acebot_nodes.lo `test -f 'game/acesrc/acebot_nodes.c' || echo '$(srcdir)/'`game/acesrc/acebot_nodes.c
-
-game/acesrc/game_la-acebot_spawn.lo: game/acesrc/acebot_spawn.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/acesrc/game_la-acebot_spawn.lo -MD -MP -MF game/acesrc/$(DEPDIR)/game_la-acebot_spawn.Tpo -c -o game/acesrc/game_la-acebot_spawn.lo `test -f 'game/acesrc/acebot_spawn.c' || echo '$(srcdir)/'`game/acesrc/acebot_spawn.c
-@am__fastdepCC_TRUE@	$(am__mv) game/acesrc/$(DEPDIR)/game_la-acebot_spawn.Tpo game/acesrc/$(DEPDIR)/game_la-acebot_spawn.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/acesrc/acebot_spawn.c' object='game/acesrc/game_la-acebot_spawn.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/acesrc/game_la-acebot_spawn.lo `test -f 'game/acesrc/acebot_spawn.c' || echo '$(srcdir)/'`game/acesrc/acebot_spawn.c
-
-game/game_la-c_cam.lo: game/c_cam.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-c_cam.lo -MD -MP -MF game/$(DEPDIR)/game_la-c_cam.Tpo -c -o game/game_la-c_cam.lo `test -f 'game/c_cam.c' || echo '$(srcdir)/'`game/c_cam.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-c_cam.Tpo game/$(DEPDIR)/game_la-c_cam.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/c_cam.c' object='game/game_la-c_cam.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-c_cam.lo `test -f 'game/c_cam.c' || echo '$(srcdir)/'`game/c_cam.c
-
-game/game_la-g_ai.lo: game/g_ai.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_ai.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_ai.Tpo -c -o game/game_la-g_ai.lo `test -f 'game/g_ai.c' || echo '$(srcdir)/'`game/g_ai.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_ai.Tpo game/$(DEPDIR)/game_la-g_ai.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_ai.c' object='game/game_la-g_ai.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_ai.lo `test -f 'game/g_ai.c' || echo '$(srcdir)/'`game/g_ai.c
-
-game/game_la-g_chase.lo: game/g_chase.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_chase.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_chase.Tpo -c -o game/game_la-g_chase.lo `test -f 'game/g_chase.c' || echo '$(srcdir)/'`game/g_chase.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_chase.Tpo game/$(DEPDIR)/game_la-g_chase.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_chase.c' object='game/game_la-g_chase.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_chase.lo `test -f 'game/g_chase.c' || echo '$(srcdir)/'`game/g_chase.c
-
-game/game_la-g_cmds.lo: game/g_cmds.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_cmds.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_cmds.Tpo -c -o game/game_la-g_cmds.lo `test -f 'game/g_cmds.c' || echo '$(srcdir)/'`game/g_cmds.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_cmds.Tpo game/$(DEPDIR)/game_la-g_cmds.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_cmds.c' object='game/game_la-g_cmds.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_cmds.lo `test -f 'game/g_cmds.c' || echo '$(srcdir)/'`game/g_cmds.c
-
-game/game_la-g_combat.lo: game/g_combat.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_combat.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_combat.Tpo -c -o game/game_la-g_combat.lo `test -f 'game/g_combat.c' || echo '$(srcdir)/'`game/g_combat.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_combat.Tpo game/$(DEPDIR)/game_la-g_combat.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_combat.c' object='game/game_la-g_combat.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_combat.lo `test -f 'game/g_combat.c' || echo '$(srcdir)/'`game/g_combat.c
-
-game/game_la-g_cow.lo: game/g_cow.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_cow.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_cow.Tpo -c -o game/game_la-g_cow.lo `test -f 'game/g_cow.c' || echo '$(srcdir)/'`game/g_cow.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_cow.Tpo game/$(DEPDIR)/game_la-g_cow.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_cow.c' object='game/game_la-g_cow.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_cow.lo `test -f 'game/g_cow.c' || echo '$(srcdir)/'`game/g_cow.c
-
-game/game_la-g_ctf.lo: game/g_ctf.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_ctf.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_ctf.Tpo -c -o game/game_la-g_ctf.lo `test -f 'game/g_ctf.c' || echo '$(srcdir)/'`game/g_ctf.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_ctf.Tpo game/$(DEPDIR)/game_la-g_ctf.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_ctf.c' object='game/game_la-g_ctf.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_ctf.lo `test -f 'game/g_ctf.c' || echo '$(srcdir)/'`game/g_ctf.c
-
-game/game_la-g_deathball.lo: game/g_deathball.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_deathball.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_deathball.Tpo -c -o game/game_la-g_deathball.lo `test -f 'game/g_deathball.c' || echo '$(srcdir)/'`game/g_deathball.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_deathball.Tpo game/$(DEPDIR)/game_la-g_deathball.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_deathball.c' object='game/game_la-g_deathball.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_deathball.lo `test -f 'game/g_deathball.c' || echo '$(srcdir)/'`game/g_deathball.c
-
-game/game_la-g_deathray.lo: game/g_deathray.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_deathray.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_deathray.Tpo -c -o game/game_la-g_deathray.lo `test -f 'game/g_deathray.c' || echo '$(srcdir)/'`game/g_deathray.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_deathray.Tpo game/$(DEPDIR)/game_la-g_deathray.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_deathray.c' object='game/game_la-g_deathray.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_deathray.lo `test -f 'game/g_deathray.c' || echo '$(srcdir)/'`game/g_deathray.c
-
-game/game_la-g_func.lo: game/g_func.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_func.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_func.Tpo -c -o game/game_la-g_func.lo `test -f 'game/g_func.c' || echo '$(srcdir)/'`game/g_func.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_func.Tpo game/$(DEPDIR)/game_la-g_func.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_func.c' object='game/game_la-g_func.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_func.lo `test -f 'game/g_func.c' || echo '$(srcdir)/'`game/g_func.c
-
-game/game_la-g_items.lo: game/g_items.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_items.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_items.Tpo -c -o game/game_la-g_items.lo `test -f 'game/g_items.c' || echo '$(srcdir)/'`game/g_items.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_items.Tpo game/$(DEPDIR)/game_la-g_items.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_items.c' object='game/game_la-g_items.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_items.lo `test -f 'game/g_items.c' || echo '$(srcdir)/'`game/g_items.c
-
-game/game_la-g_main.lo: game/g_main.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_main.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_main.Tpo -c -o game/game_la-g_main.lo `test -f 'game/g_main.c' || echo '$(srcdir)/'`game/g_main.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_main.Tpo game/$(DEPDIR)/game_la-g_main.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_main.c' object='game/game_la-g_main.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_main.lo `test -f 'game/g_main.c' || echo '$(srcdir)/'`game/g_main.c
-
-game/game_la-g_misc.lo: game/g_misc.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_misc.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_misc.Tpo -c -o game/game_la-g_misc.lo `test -f 'game/g_misc.c' || echo '$(srcdir)/'`game/g_misc.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_misc.Tpo game/$(DEPDIR)/game_la-g_misc.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_misc.c' object='game/game_la-g_misc.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_misc.lo `test -f 'game/g_misc.c' || echo '$(srcdir)/'`game/g_misc.c
-
-game/game_la-g_monster.lo: game/g_monster.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_monster.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_monster.Tpo -c -o game/game_la-g_monster.lo `test -f 'game/g_monster.c' || echo '$(srcdir)/'`game/g_monster.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_monster.Tpo game/$(DEPDIR)/game_la-g_monster.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_monster.c' object='game/game_la-g_monster.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_monster.lo `test -f 'game/g_monster.c' || echo '$(srcdir)/'`game/g_monster.c
-
-game/game_la-g_phys.lo: game/g_phys.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_phys.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_phys.Tpo -c -o game/game_la-g_phys.lo `test -f 'game/g_phys.c' || echo '$(srcdir)/'`game/g_phys.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_phys.Tpo game/$(DEPDIR)/game_la-g_phys.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_phys.c' object='game/game_la-g_phys.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_phys.lo `test -f 'game/g_phys.c' || echo '$(srcdir)/'`game/g_phys.c
-
-game/game_la-g_save.lo: game/g_save.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_save.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_save.Tpo -c -o game/game_la-g_save.lo `test -f 'game/g_save.c' || echo '$(srcdir)/'`game/g_save.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_save.Tpo game/$(DEPDIR)/game_la-g_save.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_save.c' object='game/game_la-g_save.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_save.lo `test -f 'game/g_save.c' || echo '$(srcdir)/'`game/g_save.c
-
-game/game_la-g_spawn.lo: game/g_spawn.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_spawn.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_spawn.Tpo -c -o game/game_la-g_spawn.lo `test -f 'game/g_spawn.c' || echo '$(srcdir)/'`game/g_spawn.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_spawn.Tpo game/$(DEPDIR)/game_la-g_spawn.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_spawn.c' object='game/game_la-g_spawn.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_spawn.lo `test -f 'game/g_spawn.c' || echo '$(srcdir)/'`game/g_spawn.c
-
-game/game_la-g_svcmds.lo: game/g_svcmds.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_svcmds.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_svcmds.Tpo -c -o game/game_la-g_svcmds.lo `test -f 'game/g_svcmds.c' || echo '$(srcdir)/'`game/g_svcmds.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_svcmds.Tpo game/$(DEPDIR)/game_la-g_svcmds.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_svcmds.c' object='game/game_la-g_svcmds.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_svcmds.lo `test -f 'game/g_svcmds.c' || echo '$(srcdir)/'`game/g_svcmds.c
-
-game/game_la-g_target.lo: game/g_target.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_target.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_target.Tpo -c -o game/game_la-g_target.lo `test -f 'game/g_target.c' || echo '$(srcdir)/'`game/g_target.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_target.Tpo game/$(DEPDIR)/game_la-g_target.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_target.c' object='game/game_la-g_target.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_target.lo `test -f 'game/g_target.c' || echo '$(srcdir)/'`game/g_target.c
-
-game/game_la-g_trigger.lo: game/g_trigger.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_trigger.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_trigger.Tpo -c -o game/game_la-g_trigger.lo `test -f 'game/g_trigger.c' || echo '$(srcdir)/'`game/g_trigger.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_trigger.Tpo game/$(DEPDIR)/game_la-g_trigger.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_trigger.c' object='game/game_la-g_trigger.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_trigger.lo `test -f 'game/g_trigger.c' || echo '$(srcdir)/'`game/g_trigger.c
-
-game/game_la-g_unlagged.lo: game/g_unlagged.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_unlagged.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_unlagged.Tpo -c -o game/game_la-g_unlagged.lo `test -f 'game/g_unlagged.c' || echo '$(srcdir)/'`game/g_unlagged.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_unlagged.Tpo game/$(DEPDIR)/game_la-g_unlagged.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_unlagged.c' object='game/game_la-g_unlagged.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_unlagged.lo `test -f 'game/g_unlagged.c' || echo '$(srcdir)/'`game/g_unlagged.c
-
-game/game_la-g_utils.lo: game/g_utils.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_utils.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_utils.Tpo -c -o game/game_la-g_utils.lo `test -f 'game/g_utils.c' || echo '$(srcdir)/'`game/g_utils.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_utils.Tpo game/$(DEPDIR)/game_la-g_utils.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_utils.c' object='game/game_la-g_utils.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_utils.lo `test -f 'game/g_utils.c' || echo '$(srcdir)/'`game/g_utils.c
-
-game/game_la-g_vehicles.lo: game/g_vehicles.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_vehicles.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_vehicles.Tpo -c -o game/game_la-g_vehicles.lo `test -f 'game/g_vehicles.c' || echo '$(srcdir)/'`game/g_vehicles.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_vehicles.Tpo game/$(DEPDIR)/game_la-g_vehicles.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_vehicles.c' object='game/game_la-g_vehicles.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_vehicles.lo `test -f 'game/g_vehicles.c' || echo '$(srcdir)/'`game/g_vehicles.c
-
-game/game_la-g_weapon.lo: game/g_weapon.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-g_weapon.lo -MD -MP -MF game/$(DEPDIR)/game_la-g_weapon.Tpo -c -o game/game_la-g_weapon.lo `test -f 'game/g_weapon.c' || echo '$(srcdir)/'`game/g_weapon.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-g_weapon.Tpo game/$(DEPDIR)/game_la-g_weapon.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/g_weapon.c' object='game/game_la-g_weapon.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-g_weapon.lo `test -f 'game/g_weapon.c' || echo '$(srcdir)/'`game/g_weapon.c
-
-game/game_la-m_move.lo: game/m_move.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-m_move.lo -MD -MP -MF game/$(DEPDIR)/game_la-m_move.Tpo -c -o game/game_la-m_move.lo `test -f 'game/m_move.c' || echo '$(srcdir)/'`game/m_move.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-m_move.Tpo game/$(DEPDIR)/game_la-m_move.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/m_move.c' object='game/game_la-m_move.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-m_move.lo `test -f 'game/m_move.c' || echo '$(srcdir)/'`game/m_move.c
-
-game/game_la-p_client.lo: game/p_client.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-p_client.lo -MD -MP -MF game/$(DEPDIR)/game_la-p_client.Tpo -c -o game/game_la-p_client.lo `test -f 'game/p_client.c' || echo '$(srcdir)/'`game/p_client.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-p_client.Tpo game/$(DEPDIR)/game_la-p_client.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/p_client.c' object='game/game_la-p_client.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-p_client.lo `test -f 'game/p_client.c' || echo '$(srcdir)/'`game/p_client.c
-
-game/game_la-p_hud.lo: game/p_hud.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-p_hud.lo -MD -MP -MF game/$(DEPDIR)/game_la-p_hud.Tpo -c -o game/game_la-p_hud.lo `test -f 'game/p_hud.c' || echo '$(srcdir)/'`game/p_hud.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-p_hud.Tpo game/$(DEPDIR)/game_la-p_hud.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/p_hud.c' object='game/game_la-p_hud.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-p_hud.lo `test -f 'game/p_hud.c' || echo '$(srcdir)/'`game/p_hud.c
-
-game/game_la-p_trail.lo: game/p_trail.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-p_trail.lo -MD -MP -MF game/$(DEPDIR)/game_la-p_trail.Tpo -c -o game/game_la-p_trail.lo `test -f 'game/p_trail.c' || echo '$(srcdir)/'`game/p_trail.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-p_trail.Tpo game/$(DEPDIR)/game_la-p_trail.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/p_trail.c' object='game/game_la-p_trail.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-p_trail.lo `test -f 'game/p_trail.c' || echo '$(srcdir)/'`game/p_trail.c
-
-game/game_la-p_view.lo: game/p_view.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-p_view.lo -MD -MP -MF game/$(DEPDIR)/game_la-p_view.Tpo -c -o game/game_la-p_view.lo `test -f 'game/p_view.c' || echo '$(srcdir)/'`game/p_view.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-p_view.Tpo game/$(DEPDIR)/game_la-p_view.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/p_view.c' object='game/game_la-p_view.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-p_view.lo `test -f 'game/p_view.c' || echo '$(srcdir)/'`game/p_view.c
-
-game/game_la-p_weapon.lo: game/p_weapon.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-p_weapon.lo -MD -MP -MF game/$(DEPDIR)/game_la-p_weapon.Tpo -c -o game/game_la-p_weapon.lo `test -f 'game/p_weapon.c' || echo '$(srcdir)/'`game/p_weapon.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-p_weapon.Tpo game/$(DEPDIR)/game_la-p_weapon.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/p_weapon.c' object='game/game_la-p_weapon.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-p_weapon.lo `test -f 'game/p_weapon.c' || echo '$(srcdir)/'`game/p_weapon.c
-
-game/game_la-q_shared.lo: game/q_shared.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -MT game/game_la-q_shared.lo -MD -MP -MF game/$(DEPDIR)/game_la-q_shared.Tpo -c -o game/game_la-q_shared.lo `test -f 'game/q_shared.c' || echo '$(srcdir)/'`game/q_shared.c
-@am__fastdepCC_TRUE@	$(am__mv) game/$(DEPDIR)/game_la-q_shared.Tpo game/$(DEPDIR)/game_la-q_shared.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='game/q_shared.c' object='game/game_la-q_shared.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(game_la_CFLAGS) $(CFLAGS) -c -o game/game_la-q_shared.lo `test -f 'game/q_shared.c' || echo '$(srcdir)/'`game/q_shared.c
 
 game/crded-q_shared.o: game/q_shared.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crded_CFLAGS) $(CFLAGS) -MT game/crded-q_shared.o -MD -MP -MF game/$(DEPDIR)/crded-q_shared.Tpo -c -o game/crded-q_shared.o `test -f 'game/q_shared.c' || echo '$(srcdir)/'`game/q_shared.c
@@ -2400,6 +2070,20 @@ ref_gl/crx-r_postprocess.obj: ref_gl/r_postprocess.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_postprocess.obj `if test -f 'ref_gl/r_postprocess.c'; then $(CYGPATH_W) 'ref_gl/r_postprocess.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_postprocess.c'; fi`
 
+ref_gl/crx-r_program.o: ref_gl/r_program.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_program.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_program.Tpo -c -o ref_gl/crx-r_program.o `test -f 'ref_gl/r_program.c' || echo '$(srcdir)/'`ref_gl/r_program.c
+@am__fastdepCC_TRUE@	$(am__mv) ref_gl/$(DEPDIR)/crx-r_program.Tpo ref_gl/$(DEPDIR)/crx-r_program.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_program.c' object='ref_gl/crx-r_program.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_program.o `test -f 'ref_gl/r_program.c' || echo '$(srcdir)/'`ref_gl/r_program.c
+
+ref_gl/crx-r_program.obj: ref_gl/r_program.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_program.obj -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_program.Tpo -c -o ref_gl/crx-r_program.obj `if test -f 'ref_gl/r_program.c'; then $(CYGPATH_W) 'ref_gl/r_program.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_program.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) ref_gl/$(DEPDIR)/crx-r_program.Tpo ref_gl/$(DEPDIR)/crx-r_program.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_program.c' object='ref_gl/crx-r_program.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_program.obj `if test -f 'ref_gl/r_program.c'; then $(CYGPATH_W) 'ref_gl/r_program.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_program.c'; fi`
+
 ref_gl/crx-r_script.o: ref_gl/r_script.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_script.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_script.Tpo -c -o ref_gl/crx-r_script.o `test -f 'ref_gl/r_script.c' || echo '$(srcdir)/'`ref_gl/r_script.c
 @am__fastdepCC_TRUE@	$(am__mv) ref_gl/$(DEPDIR)/crx-r_script.Tpo ref_gl/$(DEPDIR)/crx-r_script.Po
@@ -2830,7 +2514,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
 installdirs:
-	for dir in "$(DESTDIR)$(pkglibexecdir)" "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -2877,7 +2561,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-pkglibexecLTLIBRARIES mostlyclean-am
+	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf client/$(DEPDIR) game/$(DEPDIR) game/acesrc/$(DEPDIR) null/$(DEPDIR) qcommon/$(DEPDIR) ref_gl/$(DEPDIR) server/$(DEPDIR) unix/$(DEPDIR)
@@ -2903,7 +2587,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS install-pkglibexecLTLIBRARIES
+install-exec-am: install-binPROGRAMS
 
 install-html: install-html-am
 
@@ -2943,25 +2627,23 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-pkglibexecLTLIBRARIES
+uninstall-am: uninstall-binPROGRAMS
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic clean-libtool clean-pkglibexecLTLIBRARIES ctags \
+	clean-generic clean-libtool clean-noinstLTLIBRARIES ctags \
 	distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-binPROGRAMS \
 	install-data install-data-am install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
 	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-pkglibexecLTLIBRARIES install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-binPROGRAMS \
-	uninstall-pkglibexecLTLIBRARIES
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-binPROGRAMS
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

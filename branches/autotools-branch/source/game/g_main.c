@@ -18,6 +18,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 #include "g_local.h"
 
 game_locals_t	game;
@@ -210,33 +215,33 @@ game_export_t *GetGameAPI (game_import_t *import)
 	return &globals;
 }
 
-#ifndef GAME_HARD_LINKED
+//#ifndef GAME_HARD_LINKED
 // this is only here so the functions in q_shared.c and q_shwin.c can link
-void Sys_Error (char *error, ...)
-{
-	va_list		argptr;
-	char		text[1024];
+//void Sys_Error (char *error, ...)
+//{
+//	va_list		argptr;
+//	char		text[1024];
+//
+//	va_start (argptr, error);
+//	vsnprintf(text, sizeof(text), error, argptr);
+//	va_end (argptr);
+//
+//	gi.error (ERR_FATAL, "%s", text);
+//}
+//
+//void Com_Printf (char *msg, ...)
+//{
+//	va_list		argptr;
+//	char		text[1024];
+//
+//	va_start (argptr, msg);
+//	vsnprintf(text, sizeof(text), msg, argptr);
+//	va_end (argptr);
+//
+//	gi.dprintf ("%s", text);
+//}
 
-	va_start (argptr, error);
-	vsnprintf(text, sizeof(text), error, argptr);
-	va_end (argptr);
-
-	gi.error (ERR_FATAL, "%s", text);
-}
-
-void Com_Printf (char *msg, ...)
-{
-	va_list		argptr;
-	char		text[1024];
-
-	va_start (argptr, msg);
-	vsnprintf(text, sizeof(text), msg, argptr);
-	va_end (argptr);
-
-	gi.dprintf ("%s", text);
-}
-
-#endif
+//#endif
 
 //======================================================================
 
@@ -254,38 +259,41 @@ typedef struct zhead_s
 
 zhead_t		z_chain;
 int		z_count, z_bytes;
-void Z_Free (void *ptr);
+
+//void Z_Free (void *ptr);
+
 /*
 =============
 FS_FreeFile
 =============
 */
-void FS_FreeFile (void *buffer)
-{
-	Z_Free (buffer);
-}
+
+//void FS_FreeFile (void *buffer)
+//{
+//	Z_Free (buffer);
+//}
 
 /*
 ========================
 Z_Free
 ========================
 */
-void Z_Free (void *ptr)
-{
-	zhead_t *z;
-
-	z = ((zhead_t *)ptr) - 1;
-
-	if (z->magic != Z_MAGIC)
-		Sys_Error (ERR_FATAL, "Z_Free: bad magic");
-
-	z->prev->next = z->next;
-	z->next->prev = z->prev;
-
-	z_count--;
-	z_bytes -= z->size;
-	free (z);
-}
+//void Z_Free (void *ptr)
+//{
+//	zhead_t *z;
+//
+//	z = ((zhead_t *)ptr) - 1;
+//
+//	if (z->magic != Z_MAGIC)
+//		Sys_Error (ERR_FATAL, "Z_Free: bad magic");
+//
+//	z->prev->next = z->next;
+//	z->next->prev = z->prev;
+//
+//	z_count--;
+//	z_bytes -= z->size;
+//	free (z);
+//}
 
 //#endif
 

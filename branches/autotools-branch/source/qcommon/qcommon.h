@@ -20,15 +20,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // qcommon.h -- definitions common between client and server, but not game.dll
 
-#if 1
-	// jjb
-#define Com_DPrintf( x, ... )
+#ifdef HAVE_CONFIG_H
+#ifndef CONFIG_H
+#define CONFIG_H
+#include "config.h"
+#endif
 #endif
 
-#include "../game/q_shared.h"
+#include "game/q_shared.h"
 
-
-#define	VERSION		7.40
+#ifndef VERSION
+#define	VERSION		"7.41.0"
+#endif
 
 #define	BASEDIRNAME	"data1"
 

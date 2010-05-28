@@ -63,7 +63,7 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent)
 			next = cache->next;
 			if (backlerp)
 			{	//  oldorigin è oldframe.
-				if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->backlerp == backlerp && cache->angles[0] == angles[0] && cache->angles[1] == angles[1] && cache->angles[2] == angles[2] && cache->origin[0] == orgs[0] && cache->origin[1] == orgs[1] && cache->origin[2] == orgs[2])
+				if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->backlerp == backlerp /*&& cache->angles[0] == angles[0] && cache->angles[1] == angles[1] && cache->angles[2] == angles[2] && cache->origin[0] == orgs[0] && cache->origin[1] == orgs[1] && cache->origin[2] == orgs[2]*/)
 				{	// already cached!
 					GL_BindVBO(cache);
 					return cache;

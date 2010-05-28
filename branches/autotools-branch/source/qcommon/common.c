@@ -18,6 +18,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // common.c -- misc functions used in client and server
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "qcommon.h"
 
 #include <setjmp.h>
@@ -174,8 +179,6 @@ void Com_Printf (char *fmt, ...)
 }
 
 
-#if 0
-	// jjb
 /*
 ================
 Com_DPrintf
@@ -197,8 +200,6 @@ void Com_DPrintf (char *fmt, ...)
 
 	Com_Printf ("%s", msg);
 }
-#endif
-
 
 /*
 =============
@@ -1546,7 +1547,7 @@ void Qcommon_Init (int argc, char **argv)
 	dedicated = Cvar_Get ("dedicated", "0", CVAR_LATCH);
 #endif
 
-	s = va("%4.2f %s %s %s", VERSION, CPUSTRING, __DATE__, BUILDSTRING);
+	s = va("%s %s %s %s", VERSION, CPUSTRING, __DATE__, BUILDSTRING);
 	Cvar_Get ("version", s, CVAR_SERVERINFO|CVAR_NOSET);
 
 	if (dedicated->value)
@@ -1582,7 +1583,7 @@ void Qcommon_Init (int argc, char **argv)
 	//drop console, to get it into menu
 	SCR_EndLoadingPlaque ();
 	// clear any lines of console text
-	Cbuf_AddText ("clear\n");
+	Cbuf_AddText ("clear\n"); // -jjb-ded
 #ifndef DEDICATED_ONLY
 	//play music
 	if (!dedicated->value)

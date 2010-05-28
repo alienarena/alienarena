@@ -1,3 +1,4 @@
+## Alien Arena top level Makefile.am
 ## Process this file with automake to produce Makefile.in
 
 SUBDIRS = source 
@@ -14,6 +15,7 @@ EXTRA_DIST = \
 
 ## remove subversion files from distribution directory before creating archive
 ## also remove Win32 dll, and mapsrc subdir
+## TODO: see if it is possible to svn export to the distribution directory
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 	rm -f $(distdir)/data1/gamex86.dll
@@ -38,6 +40,7 @@ install-data-hook:
 ##  for game.so. arena/ is for mods, data1/ is the main game module
 ## so, until a better way is found, just create data1 and move the game.so,la
 ##	
+## TODO: static link to game library eliminates need for this
 install-exec-hook:
 	mkdir -p $(DESTDIR)$(pkglibexecdir)/data1
 	mv -f $(DESTDIR)$(pkglibexecdir)/game.so $(DESTDIR)$(pkglibexecdir)/data1
@@ -47,6 +50,6 @@ install-exec-hook:
 uninstall-hook:
 	rm -rf $(DESTDIR)$(docdir)
 	rm -rf $(DESTDIR)$(pkgdatadir)
-	rm -rf $(DESTDIR)$(pkglibexecdir)/data1
+	rm -rf $(DESTDIR)$(pkglibexecdir)
 
 

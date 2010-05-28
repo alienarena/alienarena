@@ -841,7 +841,7 @@ Sys_GetGameAPI
 Loads the game dll
 =================
 */
-void *Sys_GetGameAPI (void *parms)
+void *Sys_GetGameAPI (void *parms)  // -jjb-dl planned: update for statically linked game
 {
 	void	*(*GetGameAPI) (void *);
 	char	name[MAX_OSPATH];

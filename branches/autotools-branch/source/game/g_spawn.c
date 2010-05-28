@@ -1,4 +1,15 @@
 
+
+#ifdef HAVE_CONFIG_H
+#ifndef CONFIG_H
+#include "config.h"
+#endif
+#endif
+
+#ifdef HAVE_STRCASECMP
+#define stricmp strcasecmp
+#endif
+
 #include "g_local.h"
 
 typedef struct

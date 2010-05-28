@@ -17,6 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -35,12 +40,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <errno.h>
-
 #include <dlfcn.h>
 
-#include "../qcommon/qcommon.h"
-
-#include "../unix/rw_unix.h"
+#include "qcommon/qcommon.h"
+#include "unix/rw_unix.h"
 
 cvar_t *nostdout;
 
@@ -48,6 +51,10 @@ unsigned	sys_frame_time;
 
 uid_t saved_euid;
 qboolean stdin_active = true;
+
+// attachment to statically linked game library
+extern void *GetGameAPI ( void *import);
+
 
 // =======================================================================
 // General routines
@@ -93,9 +100,6 @@ void Sys_Quit (void)
 
 void Sys_Init(void)
 {
-#if id386
-//	Sys_SetFPCW();
-#endif
 }
 
 //void Sys_Error (const char *error, ...)
@@ -198,7 +202,7 @@ Sys_UnloadGame
 void Sys_UnloadGame (void)
 {
 	if (game_library)
-		dlclose (game_library);
+		dlclose (game_library);  // -jjb-dl
 	game_library = NULL;
 }
 
@@ -211,13 +215,13 @@ Loads the game dll
 */
 void *Sys_GetGameAPI (void *parms)
 {
-	void	*(*GetGameAPI) (void *);
+	void	*(*ptrGetGameAPI) (void *) = NULL;
 
 	FILE	*fp;
 	char	name[MAX_OSPATH];
 	char	*path;
 	char	*str_p;
-	const char *gamename = "game.so";
+	const char *gamename = "game.so"; // -jjb-ac -jjb-dl
 
 	setreuid(getuid(), getuid());
 	setegid(getgid());
@@ -232,8 +236,15 @@ void *Sys_GetGameAPI (void *parms)
 	while (1)
 	{
 		path = FS_NextPath (path);
-		if (!path)
-			return NULL;		// couldn't find one anywhere
+
+//#ifndef GAME_HARD_LINKED
+//		if (!path)
+//			return NULL;		// couldn't find one anywhere
+//#else
+		if ( !path )
+			break;
+//#endif
+
 		snprintf (name, MAX_OSPATH, "%s/%s", path, gamename);
 
 		/* skip it if it just doesn't exist */
@@ -261,18 +272,27 @@ void *Sys_GetGameAPI (void *parms)
 
 			Com_Printf ("%s\n", str_p);
 
-			return NULL;
+			// return NULL;
+			break;  // -jjb-dl (not sure, file opened but did not dlopen)
 		}
 	}
 
-	GetGameAPI = (void *)dlsym (game_library, "GetGameAPI");
-	if (!GetGameAPI)
+	if ( game_library ) {
+		ptrGetGameAPI = (void *)dlsym (game_library, "GetGameAPI");
+	}
+
+//#ifdef GAME_HARD_LINKED
+	if ( !ptrGetGameAPI )
+		ptrGetGameAPI = &GetGameAPI;
+//#endif
+
+	if (!ptrGetGameAPI)
 	{
 		Sys_UnloadGame ();
 		return NULL;
 	}
 
-	return GetGameAPI (parms);
+	return ptrGetGameAPI (parms);
 }
 
 /*****************************************************************************/

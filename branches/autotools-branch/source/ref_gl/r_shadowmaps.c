@@ -53,7 +53,8 @@ void            (APIENTRY * qglGenerateMipmapEXT) (GLenum target);
 // GL_EXT_framebuffer_blit
 void			(APIENTRY * qglBlitFramebufferEXT) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 
-GLuint	fboId;
+GLuint	fboId[2];
+GLuint	rboId;
 
 void getOpenGLFunctionPointers(void)
 {
@@ -62,22 +63,29 @@ void getOpenGLFunctionPointers(void)
 	qglBindFramebufferEXT		= (PFNGLBINDFRAMEBUFFEREXTPROC)		qwglGetProcAddress("glBindFramebufferEXT");
 	qglFramebufferTexture2DEXT	= (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)	qwglGetProcAddress("glFramebufferTexture2DEXT");
 	qglCheckFramebufferStatusEXT	= (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)	qwglGetProcAddress("glCheckFramebufferStatusEXT");
+	qglGenRenderbuffersEXT		= (PFNGLGENRENDERBUFFERSEXTPROC)qwglGetProcAddress("glGenRenderbuffersEXT");
+    qglBindRenderbufferEXT		= (PFNGLBINDRENDERBUFFEREXTPROC)qwglGetProcAddress("glBindRenderbufferEXT");
+    qglRenderbufferStorageEXT	= (PFNGLRENDERBUFFERSTORAGEEXTPROC)qwglGetProcAddress("glRenderbufferStorageEXT");
+	qglFramebufferRenderbufferEXT = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)qwglGetProcAddress("glFramebufferRenderbufferEXT");
+	qglBlitFramebufferEXT = (PFNGLBLITFRAMEBUFFEREXTPROC)qwglGetProcAddress("glBlitFramebufferEXT");
 }
 
+//used for post process stencil volume blurring(we'll merge these two functions eventually here)
 void generateShadowFBO()
 {
 	int shadowMapWidth = vid.width * r_shadowmapratio->value;
-	int shadowMapHeight = vid.height * r_shadowmapratio->value;
-	
+    int shadowMapHeight = vid.height * r_shadowmapratio->value;
 	GLenum FBOstatus;
 
 	getOpenGLFunctionPointers();
 
-	if(!qglGenFramebuffersEXT || !qglBindFramebufferEXT || !qglFramebufferTexture2DEXT || !qglCheckFramebufferStatusEXT) {
-		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
+	if(!qglGenFramebuffersEXT || !qglBindFramebufferEXT || !qglFramebufferTexture2DEXT || !qglCheckFramebufferStatusEXT
+		|| !qglGenRenderbuffersEXT || !qglBindRenderbufferEXT || !qglRenderbufferStorageEXT || !qglFramebufferRenderbufferEXT) {
+		Com_Printf("!!!!GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
 		return;
 	}
 
+	//FBO for shadowmapping
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
 	// GL_LINEAR does not make sense for depth texture. However, next tutorial shows usage of GL_LINEAR and PCF
@@ -93,9 +101,9 @@ void generateShadowFBO()
 	qglBindTexture(GL_TEXTURE_2D, 0);
 
 	// create a framebuffer object
-	qglGenFramebuffersEXT(1, &fboId);
+	qglGenFramebuffersEXT(1, &fboId[0]);
 			
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId);
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[0]);
 
 	// Instruct openGL that we won't bind a color texture with the currently binded FBO
 	qglDrawBuffer(GL_NONE);
@@ -103,18 +111,56 @@ void generateShadowFBO()
 		
 	// attach the texture to FBO depth attachment point
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
+
+	// check FBO status
+	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
+		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
+	
+	//FBO for capturing stencil volumes
+
+	//must check for abilit to blit(Many old ATI drivers do not support)
+	if(gl_state.hasFBOblit) {
+		if(!qglBlitFramebufferEXT) {
+			Com_Printf("qglBlitFramebufferEXT not found...\n");
+			//no point in continuing on
+			gl_state.hasFBOblit = false;
+			return;
+		}
+	}
+
+    qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
+    qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vid.width, vid.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    qglBindTexture(GL_TEXTURE_2D, 0);
+
+	qglGenFramebuffersEXT(1, &fboId[1]);
+    qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[1]);
+
+    qglGenRenderbuffersEXT(1, &rboId);
+    qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rboId);
+    qglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_STENCIL_EXT, vid.width, vid.height);
+    qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+
+    // attach a texture to FBO color attachement point
+    qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, r_colorbuffer->texnum, 0);
+
+    // attach a renderbuffer to depth attachment point
+    qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
+
+	// attach a renderbuffer to stencil attachment point
+    qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
+
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[1]);
 		
 	// check FBO status
 	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
 		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
-	else {
-		Com_Printf("...Using framebuffer object\n");
-	}
-	
+
 	// switch back to window-system-provided framebuffer
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 }
+
 #define M3D_INV_PI_DIV_180 (57.2957795130823229)
 #define m3dRadToDeg(x)	((x)*M3D_INV_PI_DIV_180)
 
@@ -359,7 +405,7 @@ void R_DrawDynamicCaster(void)
 
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId); 
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]); 
 	
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
 	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));  //for now
