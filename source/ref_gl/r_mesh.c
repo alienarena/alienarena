@@ -439,17 +439,17 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                     VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
                 }
                 else {
-                    VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-                    VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-                    VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+                    VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+                    VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+                    VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
-                    VArray[3] = (currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f);
-                    VArray[4] = currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
+                    VArray[3] = (currentmodel->vertexes[index_xyz].position[1] + currentmodel->vertexes[index_xyz].position[0]) * (1.0f / 40.0f);
+                    VArray[4] = currentmodel->vertexes[index_xyz].position[2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
                     VArray[5] = shadelight[0];
                     VArray[6] = shadelight[1];
                     VArray[7] = shadelight[2];
-                    VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);
+                    VArray[8] = calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position);
                 }
 
                 // increment pointer and counter
@@ -518,9 +518,9 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 else {
                     GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 
-                    VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-                    VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-                    VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+                    VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+                    VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+                    VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
                     VArray[3] = ((float *) order)[0];
                     VArray[4] = ((float *) order)[1];
@@ -528,7 +528,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                     VArray[5] = lightcolor[0];
                     VArray[6] = lightcolor[1];
                     VArray[7] = lightcolor[2];
-                    VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);
+                    VArray[8] = calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position);
                 }
 
                 // increment pointer and counter
@@ -646,9 +646,9 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                         r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
                     }
                     else {
-                        VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-                        VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-                        VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+                        VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+                        VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+                        VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
                         for (k=0;k<3;k++)
                         normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
@@ -684,7 +684,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                                 calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
                         else
                             nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-                                calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
+                                calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position), normal, currentmodel->vertexes[index_xyz].position);
 
                         if (stage->lightmap) {
                             if(lerped)
@@ -814,7 +814,7 @@ void R_DrawAliasShadowLegacy(dmdl_t *paliashdr, qboolean lerped)
             if(lerped)
                 memcpy( point, s_lerped[order[2]], sizeof( point )  );
             else
-                memcpy( point, currentmodel->r_mesh_verts[order[2]], sizeof( point )  );
+                memcpy( point, currentmodel->vertexes[order[2]].position, sizeof( point )  );
 
             point[0] -= shadevector[0]*(point[2]+lheight);
             point[1] -= shadevector[1]*(point[2]+lheight);
@@ -1038,12 +1038,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					}
 				}
 				else {
-					VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-					VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-					VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+					VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+					VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
-					VArray[3] = (currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f);
-					VArray[4] = currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
+					VArray[3] = (currentmodel->vertexes[index_xyz].position[1] + currentmodel->vertexes[index_xyz].position[0]) * (1.0f / 40.0f);
+					VArray[4] = currentmodel->vertexes[index_xyz].position[2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
 					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
                         for (k=0;k<3;k++)
@@ -1054,7 +1054,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						VArray[5] = shadelight[0];
 						VArray[6] = shadelight[1];
 						VArray[7] = shadelight[2];
-						VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);	
+						VArray[8] = calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position);	
 					}				
 				}
 	
@@ -1129,9 +1129,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				else {
 					GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 
-					VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-					VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-					VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+					VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+					VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
 					VArray[3] = st[index_st].s;
 					VArray[4] = st[index_st].t;
@@ -1139,7 +1139,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[5] = lightcolor[0];
 					VArray[6] = lightcolor[1];
 					VArray[7] = lightcolor[2];
-					VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);			
+					VArray[8] = calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position);			
 				}
 
 				// increment pointer and counter
@@ -1363,9 +1363,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
 					}
 					else {
-						VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-						VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-						VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+						VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+						VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+						VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
 						for (k=0;k<3;k++)
 							normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
@@ -1432,7 +1432,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 								calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
 						else
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-								calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
+								calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position), normal, currentmodel->vertexes[index_xyz].position);
 
 						if (stage->lightmap) { 
 							if(lerped)
@@ -1602,7 +1602,7 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 			if(lerped)
 				memcpy( point, s_lerped[index_xyz], sizeof( point )  );
 			else
-				memcpy( point, currentmodel->r_mesh_verts[index_xyz], sizeof( point )  );
+				memcpy( point, currentmodel->vertexes[index_xyz].position, sizeof( point )  );
 
 			point[0] -= shadevector[0]*(point[2]+lheight);
 			point[1] -= shadevector[1]*(point[2]+lheight);
@@ -2069,9 +2069,9 @@ void GL_DrawAliasCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped
 			}
 			else {				
 
-				VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-				VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-				VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+				VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+				VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+				VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
 			}
 		

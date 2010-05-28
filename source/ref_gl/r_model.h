@@ -23,7 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 d*_t structures are on-disk representations
 m*_t structures are in-memory
 
+  
+
 */
+#include "r_iqm.h"
 /*
 ==============================================================================
 
@@ -102,6 +105,16 @@ typedef struct
 {
 	vec3_t		position;
 } mvertex_t;
+
+typedef struct
+{
+	vec3_t		dir;
+} mnormal_t;
+
+typedef struct
+{
+	vec3_t		dir;
+} mtangent_t;
 
 typedef struct
 {
@@ -256,7 +269,15 @@ typedef struct {
 	int n[3];
 } neighbors_t;
 
-typedef enum {mod_bad, mod_brush, mod_sprite, mod_alias } modtype_t;
+typedef struct aliasbone_s
+{
+	char name[64];
+	int flags;
+	int parent; // -1 for no parent
+}
+aliasbone_t;
+
+typedef enum {mod_bad, mod_brush, mod_sprite, mod_alias, mod_iqm } modtype_t;
 
 typedef struct model_s
 {
@@ -265,7 +286,6 @@ typedef struct model_s
 	int			registration_sequence;
 
 	modtype_t	type;
-	int			numframes;
 	
 	int			flags;
 
@@ -324,15 +344,24 @@ typedef struct model_s
 	int			extradatasize;
 	void		*extradata;
 
-	signed int	edge_tri[MAX_TRIANGLES][3];
-	qboolean	noshadow;
-
-	//vertex arrays for static meshes
 	int			num_frames;
-	vec3_t r_mesh_verts[MAX_VERTS];
+
+	//iqm skeletal model info
+	int				num_bones;
+	aliasbone_t		*bones;
+	float			num_posescale; // scaling factor from origin in poses6s format (includes divide by 32767)
+	float			num_poseinvscale; // scaling factor to origin in poses6s format (includes multiply by 32767)
+	int				num_poses;
+	short			*poses; // origin xyz, quat xyz, w implied negative, unit length, values normalized to +/-32767 range
+	float			*baseboneposeinverse;
+	int				num_triangles;
+	iqmtriangle_t	*tris;
+	mnormal_t		*normal;
+	mtangent_t		*tangent;
+	//end iqm
 
 	fstvert_t	*st;
-	neighbors_t *neighbors;
+	neighbors_t *neighbors;	
 
 	//vbo
 	vertCache_t	*vbo_st;

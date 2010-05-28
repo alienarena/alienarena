@@ -252,6 +252,10 @@ SOURCE=.\ref_gl\r_image.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ref_gl\r_iqm.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ref_gl\r_light.c
 # End Source File
 # Begin Source File
@@ -261,6 +265,10 @@ SOURCE=.\ref_gl\r_main.c
 # Begin Source File
 
 SOURCE=.\ref_gl\r_math.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ref_gl\r_matrixlib.c
 # End Source File
 # Begin Source File
 
@@ -445,6 +453,10 @@ SOURCE=.\client\qmenu.h
 # Begin Source File
 
 SOURCE=.\ref_gl\r_image.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ref_gl\r_iqm.h
 # End Source File
 # Begin Source File
 
