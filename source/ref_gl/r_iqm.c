@@ -3,7 +3,7 @@
 #include "r_matrixlib.h"
 
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
-
+qboolean testflag;
 qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 {
 	const char *text;
@@ -326,13 +326,14 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 */
 
 	Com_Printf("Successfully loaded %s\n", mod->name);
+	testflag = true;
 	return true;
 }
 
 
 void GL_AnimateIqmFrame(int posenum)
 {
-	//do the animation of vertexes
+	//do the animation of vertexes, I'm thinking this should be a blend between currentenity->frame and currententity->oldframe
 }
 
 extern void R_DrawNullModel (void);
@@ -345,61 +346,49 @@ void GL_DrawIqmFrame()
 
 	//render the model
 
-	//placeholder so we know we are reaching this code
-	//R_DrawNullModel ();
-
-	return; //code beyond here crashes
+	//bug - currentmodel is not retaining the verts at all
 
 	//just need a basic test render to get me started, once I have this, I can implement rscript and GLSL items among other things
 	va=0;
-	VArray = &VArrayVerts[0];
 
-	R_InitVArrays (VERT_COLOURED_TEXTURED);
-	GLSTATE_ENABLE_ALPHATEST
+	R_InitVArrays (VERT_NO_TEXTURE);
+
+	//Com_Printf("num verts: %i num indices: %i num_triangles %i\n", currentmodel->numvertexes, currentmodel->num_triangles*3, currentmodel->num_triangles);
 
 	//I know this section is inherently wrong, the vertexes should be coming from another array created by the animation routine
 	//Just wanted the overall structure of rendering outlined here
 	for (i=0; i<currentmodel->num_triangles; i++)
 	{
+	
 		for (j=0; j<3; j++)
 		{			
 			index_xyz = currentmodel->tris[i].vertex[j];
+
+			//if(testflag)
+			//	Com_Printf("vertex: %4.2f %4.2f %4.2f\n", currentmodel->vertexes[index_xyz].position[0], currentmodel->vertexes[index_xyz].position[1], currentmodel->vertexes[index_xyz].position[2]);
+	
 			
 			VArray[0] = currentmodel->vertexes[index_xyz].position[0];
 			VArray[1] = currentmodel->vertexes[index_xyz].position[1];
 			VArray[2] = currentmodel->vertexes[index_xyz].position[2];
-
-			//these cause a crash
-			VArray[3] = currentmodel->st[va].s;
-			VArray[4] = currentmodel->st[va].t;
-
-			VArray[5] = shadelight[0];
-			VArray[6] = shadelight[1];
-			VArray[7] = shadelight[2];
-			VArray[8] = 1.0;			
 			
 			// increment pointer and counter
-			VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+			VArray += VertexSizes[VERT_NO_TEXTURE];
 			va++;			
-		}
-		if(qglLockArraysEXT)						
-			qglLockArraysEXT(0, va);
-
-		qglDrawArrays(GL_TRIANGLES,0,va);
-				
-		if(qglUnlockArraysEXT)						
-			qglUnlockArraysEXT();
+		}		
 	}
 
-	GLSTATE_DISABLE_ALPHATEST
-	GLSTATE_DISABLE_BLEND
-	GLSTATE_DISABLE_TEXGEN
+	if(qglLockArraysEXT)						
+		qglLockArraysEXT(0, va);
 
-	qglDisableClientState( GL_NORMAL_ARRAY);
-	qglDisableClientState( GL_COLOR_ARRAY );
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	qglDrawArrays(GL_TRIANGLES,0,va);
+				
+	if(qglUnlockArraysEXT)						
+		qglUnlockArraysEXT();
 
 	R_KillVArrays ();
+
+	testflag = false;
 }
 		
 /*
