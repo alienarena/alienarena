@@ -1823,7 +1823,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	}
 
 	cx = pheader->num_st * sizeof(fstvert_t);
-     mod->st = st = (fstvert_t*)Hunk_Alloc (cx);
+    mod->st = st = (fstvert_t*)malloc (cx);
 		
 	// Calculate texcoords for triangles
     iw = 1.0 / pheader->skinwidth;

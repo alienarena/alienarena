@@ -4,6 +4,29 @@
 
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 qboolean testflag;
+
+extern 
+void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition)
+{
+	int i;
+
+	Com_Printf("numverts: %i\n", iqmmodel->numvertexes);
+
+	if(iqmmodel->numvertexes > 16384)
+		return;
+
+	iqmmodel->vertexes = (mvertex_t*)malloc(iqmmodel->numvertexes * sizeof(mvertex_t));
+
+	for(i=0; i<iqmmodel->numvertexes; i++){
+		VectorSet(iqmmodel->vertexes[i].position,
+					LittleFloat(vposition[0]),
+					LittleFloat(vposition[1]),
+					LittleFloat(vposition[2]));		
+		vposition += 3;
+	}
+	
+}
+
 qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 {
 	const char *text;
@@ -123,10 +146,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	mod->numvertexes = header->num_vertexes;
 	mod->num_triangles = header->num_triangles;
 
-	//I really don't know what I am doing here.  I don't fully understand some of the memory stuff going on
-	//I'll leave it for now, as nothing is crashing upon loading or exiting the game.  The memory allocation 
-	//really need full analysis and scrutiny in this routine, alot of it is guesswork.
-	mod->extradata = Hunk_Begin (0x300000);
+	Hunk_Begin (0x300000); //these next three items seem to need to be placed in hunk mem, I don't yet know why this is the case.
 
 	// load the bone info
 	joint = (iqmjoint_t *) (pbase + header->ofs_joints);
@@ -193,7 +213,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	mod->num_posescale = biggestorigin / 32767.0f;
 	mod->num_poseinvscale = 1.0f / mod->num_posescale;
 
-	// load the pose data
+	// load the pose data - fix this
 	framedata = (unsigned short *) (pbase + header->ofs_frames);
 	mod->poses = (short*)Hunk_Alloc (header->num_frames * 7 * sizeof(short));
 	for (i = 0, k = 0;i < (int)header->num_frames;i++)	
@@ -269,17 +289,10 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	//find triangle neighbors(note - this model format has these defined(save for later, work on basic stuff right now)
 
 	// load vertex data
-	mod->vertexes = (mvertex_t *)malloc(header->num_vertexes * sizeof(mvertex_t));
-
-	for (i = 0;i < (int)header->num_vertexes;i++)
-	{
-		mod->vertexes->position[0] = LittleFloat(vposition[0]);
-		mod->vertexes->position[1] = LittleFloat(vposition[1]);
-		mod->vertexes->position[2] = LittleFloat(vposition[2]);
-		vposition += 3;
-		mod->vertexes ++;
-	}
-
+	R_LoadIQMVertexArrays(mod, vposition);
+	
+	//fix this next section
+/*
 	// load texture coodinates
     mod->st = (fstvert_t*)Hunk_Alloc (header->num_vertexes * sizeof(fstvert_t));	
 
@@ -314,17 +327,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			mod->tangent ++;
 		}
 	}
-/*
-	//leave this, we may need this, don't know just yet
-	for (i = 0; i < (int)header->num_vertexes;i++)
-	{
-		blendweights_t weights;
-		memcpy(weights.index, vblendindexes + i*4, 4);
-		memcpy(weights.influence, vblendweights + i*4, 4);
-		mod->surfmesh.blends[i] = Mod_Skeletal_AddBlend(mod, &weights);
-	}
 */
-
 	Com_Printf("Successfully loaded %s\n", mod->name);
 	testflag = true;
 	return true;
@@ -345,15 +348,12 @@ void GL_DrawIqmFrame()
 	int		va;
 
 	//render the model
-
-	//bug - currentmodel is not retaining the verts at all
-
+	
 	//just need a basic test render to get me started, once I have this, I can implement rscript and GLSL items among other things
 	va=0;
 
 	R_InitVArrays (VERT_NO_TEXTURE);
 
-	//Com_Printf("num verts: %i num indices: %i num_triangles %i\n", currentmodel->numvertexes, currentmodel->num_triangles*3, currentmodel->num_triangles);
 
 	//I know this section is inherently wrong, the vertexes should be coming from another array created by the animation routine
 	//Just wanted the overall structure of rendering outlined here
@@ -363,10 +363,6 @@ void GL_DrawIqmFrame()
 		for (j=0; j<3; j++)
 		{			
 			index_xyz = currentmodel->tris[i].vertex[j];
-
-			//if(testflag)
-			//	Com_Printf("vertex: %4.2f %4.2f %4.2f\n", currentmodel->vertexes[index_xyz].position[0], currentmodel->vertexes[index_xyz].position[1], currentmodel->vertexes[index_xyz].position[2]);
-	
 			
 			VArray[0] = currentmodel->vertexes[index_xyz].position[0];
 			VArray[1] = currentmodel->vertexes[index_xyz].position[1];
@@ -410,7 +406,11 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 	//do culling after we know this renders ok!
 	//if ( R_CullAliasModel( bbox, e ) )
 	//	return;
-	
+	//bug - currentmodel is not retaining the verts at all
+	if(0) {
+		for (i=0; i<currentmodel->numvertexes; i++)
+			Com_Printf("vertex: %4.2f %4.2f %4.2f\n", currentmodel->vertexes[i].position[0], currentmodel->vertexes[i].position[1], currentmodel->vertexes[i].position[2]);
+	}
 	//will have to deal with shells at some point, for now just leave this here
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{
