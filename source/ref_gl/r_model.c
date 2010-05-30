@@ -1670,7 +1670,7 @@ void R_LoadMd2VertexArrays(model_t *md2model){
 	if(md2->num_xyz > MAX_VERTS)
 		return;
 
-	md2model->vertexes = (mvertex_t*)malloc(md2->num_xyz * sizeof(mvertex_t));
+	md2model->vertexes = (mvertex_t*)Hunk_Alloc(md2->num_xyz * sizeof(mvertex_t));
 
 	for(i = 0, md2v = md2frame->verts; i < md2->num_xyz; i++, md2v++){  // reconstruct the verts
 		VectorSet(md2model->vertexes[i].position,
@@ -1761,7 +1761,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 //
 // find neighbours
 //
-	mod->neighbors = malloc(pheader->num_tris * sizeof(neighbors_t));
+	mod->neighbors = Hunk_Alloc(pheader->num_tris * sizeof(neighbors_t));
 	Mod_BuildTriangleNeighbors(mod->neighbors, pouttri, pheader->num_tris);
 
 //
@@ -2056,8 +2056,6 @@ Mod_Free
 */
 void Mod_Free (model_t *mod)
 {
-	if ( mod->neighbors )
-        free( mod->neighbors );
 
 	Hunk_Free (mod->extradata);
 	memset (mod, 0, sizeof(*mod));
