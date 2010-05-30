@@ -15,7 +15,7 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition)
 	if(iqmmodel->numvertexes > 16384)
 		return;
 
-	iqmmodel->vertexes = (mvertex_t*)malloc(iqmmodel->numvertexes * sizeof(mvertex_t));
+	iqmmodel->vertexes = (mvertex_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mvertex_t));
 
 	for(i=0; i<iqmmodel->numvertexes; i++){
 		VectorSet(iqmmodel->vertexes[i].position,
@@ -146,7 +146,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	mod->numvertexes = header->num_vertexes;
 	mod->num_triangles = header->num_triangles;
 
-	Hunk_Begin (0x300000); //these next three items seem to need to be placed in hunk mem, I don't yet know why this is the case.
+	mod->extradata = Hunk_Begin (0x300000); 
 
 	// load the bone info
 	joint = (iqmjoint_t *) (pbase + header->ofs_joints);
@@ -276,7 +276,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	// load triangle data
 	inelements = (const int *) (pbase + header->ofs_triangles);
 
-	mod->tris = (iqmtriangle_t*)malloc(header->num_triangles * sizeof(iqmtriangle_t));
+	mod->tris = (iqmtriangle_t*)Hunk_Alloc(header->num_triangles * sizeof(iqmtriangle_t));
 
 	for (i = 0;i < (int)header->num_triangles;i++)
 	{
