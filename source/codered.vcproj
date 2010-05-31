@@ -145,7 +145,7 @@
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="C:\vorbis\include;C:\ogg\include;&quot;C:\Program Files\OpenAL 1.1 SDK\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;ARENA;AL_NO_PROTOTYPES;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;ARENA;AL_NO_PROTOTYPES;_CRT_SECURE_NO_WARNINGS;MSVC9"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -157,6 +157,8 @@
 				ProgramDataBaseFileName=".\release/"
 				WarningLevel="2"
 				SuppressStartupBanner="true"
+				CallingConvention="0"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -171,10 +173,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="/LTCG"
 				AdditionalDependencies="winmm.lib wsock32.lib glu32.lib client\mpglib.lib"
-				OutputFile="../crx86.exe"
+				OutputFile="../crx.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
+				GenerateManifest="false"
 				ProgramDatabaseFile=".\release/crx.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -962,6 +966,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ref_gl\r_iqm.c"
+				>
+			</File>
+			<File
 				RelativePath="ref_gl\r_light.c"
 				>
 				<FileConfiguration
@@ -1020,6 +1028,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\ref_gl\r_matrixlib.c"
+				>
 			</File>
 			<File
 				RelativePath="ref_gl\r_mesh.c"
@@ -1106,6 +1118,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ref_gl\r_program.c"
+				>
+			</File>
+			<File
 				RelativePath="ref_gl\r_script.c"
 				>
 				<FileConfiguration
@@ -1176,26 +1192,6 @@
 			<File
 				RelativePath=".\ref_gl\r_vbo.c"
 				>
-			</File>
-			<File
-				RelativePath="ref_gl\r_vlights.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="ref_gl\r_warp.c"
