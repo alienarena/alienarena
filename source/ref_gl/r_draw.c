@@ -22,10 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
-#ifdef __unix__
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
 image_t		*draw_chars;
 image_t		*menu_chars;
 

@@ -29,10 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ============================================================================== 
 */ 
 
-#ifdef __unix__
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
 static float Diamond8x[8][8] = { 
 		0.0f, 0.0f, 0.0f, 0.1f, 0.1f, 0.0f, 0.0f, 0.0f, 
 		0.0f, 0.0f, 0.2f, 0.3f, 0.3f, 0.2f, 0.0f, 0.0f, 
