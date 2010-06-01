@@ -292,7 +292,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	R_LoadIQMVertexArrays(mod, vposition);
 	
 	//fix this next section
-/*
+
 	// load texture coodinates
     mod->st = (fstvert_t*)Hunk_Alloc (header->num_vertexes * sizeof(fstvert_t));	
 
@@ -300,8 +300,10 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	{
 		mod->st[i].s = vtexcoord[0];
 		mod->st[i].t = vtexcoord[1];
-	}
 
+		vtexcoord+=2;
+	}
+/*
 	if(vnormal)
 	{
 		mod->normal = (mnormal_t*)malloc(header->num_vertexes * sizeof(mnormal_t));
@@ -344,7 +346,7 @@ extern vec3_t shadelight;
 void GL_DrawIqmFrame()
 {
 	int		i, j;
-	int		index_xyz;
+	int		index_xyz, index_st;
 	int		va;
 
 	//render the model
@@ -352,24 +354,29 @@ void GL_DrawIqmFrame()
 	//just need a basic test render to get me started, once I have this, I can implement rscript and GLSL items among other things
 	va=0;
 
-	R_InitVArrays (VERT_NO_TEXTURE);
-
-
+	R_InitVArrays (VERT_SINGLE_TEXTURED);
 	//I know this section is inherently wrong, the vertexes should be coming from another array created by the animation routine
 	//Just wanted the overall structure of rendering outlined here
+
+	GL_SelectTexture( GL_TEXTURE0);
+	qglBindTexture (GL_TEXTURE_2D, r_cowtest->texnum);
+
+	//Note - we will build this section in the animation of the vertexes eventually
 	for (i=0; i<currentmodel->num_triangles; i++)
-	{
-	
+	{	
 		for (j=0; j<3; j++)
 		{			
-			index_xyz = currentmodel->tris[i].vertex[j];
+			index_xyz = index_st = currentmodel->tris[i].vertex[j];
 			
 			VArray[0] = currentmodel->vertexes[index_xyz].position[0];
 			VArray[1] = currentmodel->vertexes[index_xyz].position[1];
 			VArray[2] = currentmodel->vertexes[index_xyz].position[2];
+
+			VArray[3] = currentmodel->st[index_st].s;
+			VArray[4] = currentmodel->st[index_st].t;
 			
 			// increment pointer and counter
-			VArray += VertexSizes[VERT_NO_TEXTURE];
+			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 			va++;			
 		}		
 	}
