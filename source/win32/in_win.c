@@ -106,6 +106,7 @@ void IN_JoyMove (usercmd_t *cmd);
 
 // mouse variables
 cvar_t	*m_filter;
+cvar_t	*m_accel;
 
 qboolean	mlooking;
 
@@ -127,7 +128,7 @@ qboolean	mouseactive;	// false when not focus app
 
 qboolean	restore_spi;
 qboolean	mouseinitialized;
-int		originalmouseparms[3], newmouseparms[3] = {0, 0, 1};
+int		originalmouseparms[3], newmouseparms[3] = {0, 0, 1}, noaccelmouseparms[3] = {0, 0, 0};
 qboolean	mouseparmsvalid;
 
 int			window_center_x, window_center_y;
@@ -157,8 +158,17 @@ void IN_ActivateMouse (void)
 
 	mouseactive = true;
 
-	if (mouseparmsvalid)
-		restore_spi = SystemParametersInfo (SPI_SETMOUSE, 0, newmouseparms, 0);
+	if (mouseparmsvalid) {
+		switch(m_accel->integer) {
+			case 0:
+				restore_spi = SystemParametersInfo (SPI_SETMOUSE, 0, noaccelmouseparms, 0);
+				break;
+			case 1:
+			default:
+				restore_spi = SystemParametersInfo (SPI_SETMOUSE, 0, newmouseparms, 0);
+				break;
+		}
+	}
 
 	width = GetSystemMetrics (SM_CXSCREEN);
 	height = GetSystemMetrics (SM_CYSCREEN);
@@ -430,8 +440,9 @@ void IN_Init (void)
 {
 	// mouse variables
 	m_filter				= Cvar_Get ("m_filter",					"0",		0);
+	m_accel					= Cvar_Get ("m_accel",					"1",		CVAR_ARCHIVE);
     in_mouse				= Cvar_Get ("in_mouse",					"1",		CVAR_ARCHIVE);
-
+	
 	// joystick variables
 	in_joystick				= Cvar_Get ("in_joystick",				"0",		CVAR_ARCHIVE);
 	joy_name				= Cvar_Get ("joy_name",					"joystick",	0);
