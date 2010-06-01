@@ -81,6 +81,7 @@ image_t		*r_distort;
 image_t		*sun_object;
 image_t		*sun1_object;
 image_t		*sun2_object;
+image_t		*r_cowtest;
 
 //Normalisation cube map
 GLuint normalisationCubeMap;
@@ -392,6 +393,11 @@ void R_InitParticleTexture (void)
 	if (!r_dis3texture) {                                
 		r_dis3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }    
+
+	r_cowtest = GL_FindImage("maps/meshes/test/cow.jpg", it_pic);
+	if (!r_cowtest) {                                
+		r_cowtest = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    } 
  
 	//
 	// also use this for bad textures, but without alpha
