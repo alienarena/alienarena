@@ -27,6 +27,7 @@ m*_t structures are in-memory
 
 */
 #include "r_iqm.h"
+#include "r_matrixlib.h"
 /*
 ==============================================================================
 
@@ -348,11 +349,11 @@ typedef struct model_s
 
 	//iqm skeletal model info
 	int				num_bones;
-	aliasbone_t		*bones;
-	float			num_posescale; // scaling factor from origin in poses6s format (includes divide by 32767)
-	float			num_poseinvscale; // scaling factor to origin in poses6s format (includes multiply by 32767)
+	aliasbone_t		*bones; //we may want to do this differently
+	matrix3x4_t		*frames;
+	float			num_posescale; 
+	float			num_poseinvscale; 
 	int				num_poses;
-	short			*poses; // origin xyz, quat xyz, w implied negative, unit length, values normalized to +/-32767 range
 	float			*baseboneposeinverse;
 	int				num_triangles;
 	iqmtriangle_t	*tris;
