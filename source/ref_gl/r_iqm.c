@@ -37,7 +37,9 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	unsigned char *vblendindexes = NULL, *vblendweights = NULL;
 	unsigned char *pbase;
 	iqmjoint_t *joint;
-	iqmpose_t *pose;
+	matrix3x4_t	*baseframe;
+	matrix3x4_t	*inversebaseframe;
+	iqmpose_t *poses;
 	iqmbounds_t *bounds;
 	iqmvertexarray_t *va;
 	unsigned short *framedata;
@@ -148,7 +150,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 	mod->extradata = Hunk_Begin (0x300000); 
 
-	// load the bone info
+	// load the bone info(I think this can stay the same but check)
 	joint = (iqmjoint_t *) (pbase + header->ofs_joints);
 	mod->bones = (aliasbone_t*)Hunk_Alloc (header->num_joints * sizeof(aliasbone_t));
 	mod->baseboneposeinverse = (float*)Hunk_Alloc (header->num_joints * sizeof(float));
@@ -178,60 +180,67 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		else Matrix4x4_ToArray12FloatD3D(&relinvbase, mod->baseboneposeinverse + 12*i);
 	}
 
-	pose = (iqmpose_t *) (pbase + header->ofs_poses);
-	biggestorigin = 0;
-	for (i = 0;i < (int)header->num_poses;i++)
-	{
-		float f;
-		pose[i].parent = LittleLong(pose[i].parent);
-		pose[i].channelmask = LittleLong(pose[i].channelmask);
-		pose[i].channeloffset[0] = LittleFloat(pose[i].channeloffset[0]);
-		pose[i].channeloffset[1] = LittleFloat(pose[i].channeloffset[1]);
-		pose[i].channeloffset[2] = LittleFloat(pose[i].channeloffset[2]);	
-		pose[i].channeloffset[3] = LittleFloat(pose[i].channeloffset[3]);
-		pose[i].channeloffset[4] = LittleFloat(pose[i].channeloffset[4]);
-		pose[i].channeloffset[5] = LittleFloat(pose[i].channeloffset[5]);
-		pose[i].channeloffset[6] = LittleFloat(pose[i].channeloffset[6]);
-		pose[i].channeloffset[7] = LittleFloat(pose[i].channeloffset[7]);
-		pose[i].channeloffset[8] = LittleFloat(pose[i].channeloffset[8]);
-		pose[i].channelscale[0] = LittleFloat(pose[i].channelscale[0]);
-		pose[i].channelscale[1] = LittleFloat(pose[i].channelscale[1]);
-		pose[i].channelscale[2] = LittleFloat(pose[i].channelscale[2]);
-		pose[i].channelscale[3] = LittleFloat(pose[i].channelscale[3]);
-		pose[i].channelscale[4] = LittleFloat(pose[i].channelscale[4]);
-		pose[i].channelscale[5] = LittleFloat(pose[i].channelscale[5]);
-		pose[i].channelscale[6] = LittleFloat(pose[i].channelscale[6]);
-		pose[i].channelscale[7] = LittleFloat(pose[i].channelscale[7]);
-		pose[i].channelscale[8] = LittleFloat(pose[i].channelscale[8]);
-		f = fabs(pose[i].channeloffset[0]); biggestorigin = max(biggestorigin, f);
-		f = fabs(pose[i].channeloffset[1]); biggestorigin = max(biggestorigin, f);
-		f = fabs(pose[i].channeloffset[2]); biggestorigin = max(biggestorigin, f);
-		f = fabs(pose[i].channeloffset[0] + 0xFFFF*pose[i].channelscale[0]); biggestorigin = max(biggestorigin, f);
-		f = fabs(pose[i].channeloffset[1] + 0xFFFF*pose[i].channelscale[1]); biggestorigin = max(biggestorigin, f);
-		f = fabs(pose[i].channeloffset[2] + 0xFFFF*pose[i].channelscale[2]); biggestorigin = max(biggestorigin, f);
-	}
-	mod->num_posescale = biggestorigin / 32767.0f;
-	mod->num_poseinvscale = 1.0f / mod->num_posescale;
+	//get this area working before moving on at all.  There is alot of math issues to resolve.
+	//once this is finished, the rest will be a alot easier
+	
+	//these don't need to be a part of mod - remember to free them
+	baseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
+	inversebaseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
+    for(i = 0; i < (int)header->num_joints; i++)
+    {
+		vec3_t rot;
+		vec4_t q_rot;
+        iqmjoint_t j = joint[i]; 
 
-	// load the pose data - fix this
-	framedata = (unsigned short *) (pbase + header->ofs_frames);
-	mod->poses = (short*)Hunk_Alloc (header->num_frames * 7 * sizeof(short));
-	for (i = 0, k = 0;i < (int)header->num_frames;i++)	
-	{
-		for (j = 0;j < (int)header->num_poses;j++, k++)
-		{
-			mod->poses[k*6 + 0] = mod->num_poseinvscale * (pose[j].channeloffset[0] + (pose[j].channelmask&1 ? (unsigned short)LittleShort(*framedata++) * pose[j].channelscale[0] : 0));
-			mod->poses[k*6 + 1] = mod->num_poseinvscale * (pose[j].channeloffset[1] + (pose[j].channelmask&2 ? (unsigned short)LittleShort(*framedata++) * pose[j].channelscale[1] : 0));
-			mod->poses[k*6 + 2] = mod->num_poseinvscale * (pose[j].channeloffset[2] + (pose[j].channelmask&4 ? (unsigned short)LittleShort(*framedata++) * pose[j].channelscale[2] : 0));
-			mod->poses[k*6 + 3] = 32767.0f * (pose[j].channeloffset[3] + (pose[j].channelmask&8 ? (unsigned short)LittleShort(*framedata++) * pose[j].channelscale[3] : 0));
-			mod->poses[k*6 + 4] = 32767.0f * (pose[j].channeloffset[4] + (pose[j].channelmask&16 ? (unsigned short)LittleShort(*framedata++) * pose[j].channelscale[4] : 0));
-			mod->poses[k*6 + 5] = 32767.0f * (pose[j].channeloffset[5] + (pose[j].channelmask&32 ? (unsigned short)LittleShort(*framedata++) * pose[j].channelscale[5] : 0));
-			// skip scale data for now
-			if(pose[j].channelmask&64) framedata++;
-			if(pose[j].channelmask&128) framedata++;
-			if(pose[j].channelmask&256) framedata++;
-		}
-	}
+		//first need to make a vec4 quat from our rotation vec
+		VectorSet(rot, j.rotation[0], j.rotation[1], j.rotation[2]);
+		Vector4Set(q_rot, j.rotation[0], j.rotation[1], j.rotation[2], -sqrt(max(1.0 - VectorLength(rot) * VectorLength(rot), 0.0)));
+		//check these vals against w^2 = 1 - (x^2 + y^2 + z^2)
+
+		//get this from the demo
+		//Matrix3x4_FromVectors(mod->baseframe[i], q_rot, j.origin, j.scale);
+
+        //inversebaseframe[i].invert(baseframe[i]);
+        if(j.parent >= 0) 
+        {
+			//Going to need to create matrix multiplier funcs for 3x4 matrixes.
+            //baseframe[i].m = baseframe[j.parent].m * baseframe[i].m;
+            //inversebaseframe[i].m *= inversebaseframe[j.parent].m;
+        }
+    }
+
+	poses = (iqmpose_t *) (pbase + header->ofs_poses);
+	mod->frames = (matrix3x4_t*)Hunk_Alloc (header->num_frames * header->num_poses * sizeof(matrix3x4_t));
+    framedata = (unsigned short *) (pbase + header->ofs_frames);
+
+    for(i = 0; i < header->num_frames; i++)
+    {
+        for(j = 0; j < header->num_poses; j++)
+        {
+            iqmpose_t p = poses[j];
+            vec3_t translate, rotate, scale;
+            translate[0] = p.channeloffset[0]; if(p.channelmask&0x01) translate[0] += *framedata++ * p.channelscale[0];
+            translate[1] = p.channeloffset[1]; if(p.channelmask&0x02) translate[1] += *framedata++ * p.channelscale[1];
+            translate[2] = p.channeloffset[2]; if(p.channelmask&0x04) translate[2] += *framedata++ * p.channelscale[2];
+            rotate[0] = p.channeloffset[3]; if(p.channelmask&0x08) rotate[0] += *framedata++ * p.channelscale[3];
+            rotate[1] = p.channeloffset[4]; if(p.channelmask&0x10) rotate[1] += *framedata++ * p.channelscale[4];
+            rotate[2] = p.channeloffset[5]; if(p.channelmask&0x20) rotate[2] += *framedata++ * p.channelscale[5];
+            scale[0] = p.channeloffset[6]; if(p.channelmask&0x40) scale[0] += *framedata++ * p.channelscale[6];
+            scale[1] = p.channeloffset[7]; if(p.channelmask&0x80) scale[1] += *framedata++ * p.channelscale[7];
+            scale[2] = p.channeloffset[8]; if(p.channelmask&0x100) scale[2] += *framedata++ * p.channelscale[8];
+            // Concatenate each pose with the inverse base pose to avoid doing this at animation time.
+            // If the joint has a parent, then it needs to be pre-concatenated with its parent's base pose.
+            // Thus it all negates at animation time like so: 
+            //   (parentPose * parentInverseBasePose) * (parentBasePose * childPose * childInverseBasePose) =>
+            //   parentPose * (parentInverseBasePose * parentBasePose) * childPose * childInverseBasePose =>
+            //   parentPose * childPose * childInverseBasePose
+       /*     Matrix3x4 m(Quat(rotate), translate, scale);
+            if(p.parent >= 0) 
+				mod->frames[i*header->num_poses + j] = baseframe[p.parent] * m * inversebaseframe[j];
+            else 
+				mod->frames[i*header->num_poses + j] = m * inversebaseframe[j];*/
+        }
+    }
 
 	// load bounding box data(still need to set mod->bbox)
 	if (header->ofs_bounds)
@@ -332,13 +341,106 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 */
 	Com_Printf("Successfully loaded %s\n", mod->name);
 	testflag = true;
+
+	//free temp non hunk mem
+	if(baseframe)
+		free(baseframe);
+	if(inversebaseframe)
+		free(inversebaseframe);
+
 	return true;
 }
 
 
-void GL_AnimateIqmFrame(int posenum)
+void GL_AnimateIqmFrame(float curframe)
 {
-	//do the animation of vertexes, I'm thinking this should be a blend between currentenity->frame and currententity->oldframe
+    int frame1 = (int)floor(curframe),
+        frame2 = frame1 + 1;
+    float frameoffset = curframe - frame1;
+	frame1 %= currentmodel->num_frames;
+	frame2 %= currentmodel->num_frames;
+  /*
+    matrix3x4_t *mat1 = &mod->frames[frame1 * currentmodel->num_bones],
+              *mat2 = &mod->frames[frame2 * currentmodel->num_bones];
+
+    // Interpolate matrixes between the two closest frames and concatenate with parent matrix if necessary.
+    // Concatenate the result with the inverse of the base pose.
+    // You would normally do animation blending and inter-frame blending here in a 3D engine.
+    for(int i = 0; i < currentmodel->num_bones; i++)
+    {
+        matrix3x4_t mat = mat1[i]*(1 - frameoffset) + mat2[i]*frameoffset;
+        if(currentmodel->bones[i].parent >= 0) 
+			outframe[i] = outframe[currentmodel->bones[i].parent] * mat;
+        else 
+			outframe[i] = mat;
+    }
+  
+	// The actual vertex generation based on the matrixes follows...
+	//John's note - the "in" vars, need to define and figure these out
+	//I THINK inposition is the original vertex position, innorm, original normal, etc
+	const mvertex_t *srcpos = (const mvertex_t *)currentmodel->vertexes;
+	const mnormal_t *srcnorm = (const mnormal_t *)currentmodel->normal;
+	const mtangent_t *srctan = (const mtangent_t *)currentmodel->tangent; 
+
+    mvertex_t *dstpos = (mvertex_t *)outposition;
+	*dstnorm = (mnormal_t *)outnormal;
+	*dsttan = (mtangent_t *)outtangent;
+	//*dstbitan = (vec3_t *)outbitangent; //we don't need these
+
+	//not sure about these
+    const uchar *index = inblendindex, *weight = inblendweight;
+
+	//this next section need major translation to our codebase
+	for(int i = 0; i < currentmodel->numvertexes; i++)
+    {
+        // Blend matrixes for this vertex according to its blend weights. 
+        // the first index/weight is always present, and the weights are
+        // guaranteed to add up to 255. So if only the first weight is
+        // presented, you could optimize this case by skipping any weight
+        // multiplies and intermediate storage of a blended matrix. 
+        // There are only at most 4 weights per vertex, and they are in 
+        // sorted order from highest weight to lowest weight. Weights with 
+        // 0 values, which are always at the end, are unused.
+        Matrix3x4 mat = outframe[index[0]] * (weight[0]/255.0f);
+        for(int j = 1; j < 4 && weight[j]; j++)
+            mat += outframe[index[j]] * (weight[j]/255.0f);
+
+        // Transform attributes by the blended matrix.
+        // Position uses the full 3x4 transformation matrix.
+        // Normals and tangents only use the 3x3 rotation part 
+        // of the transformation matrix.
+        *dstpos = mat.transform(*srcpos);
+        // Note that if the matrix includes non-uniform scaling, normal vectors
+        // must be transformed by the inverse-transpose of the matrix to have the
+        // correct relative scale. Note that invert(mat) = adjoint(mat)/determinant(mat),
+        // and since the absolute scale is not important for a vector that will later
+        // be renormalized, the adjoint-transpose matrix will work fine, which can be
+        // cheaply generated by 3 cross-products.
+        //
+        // If you don't need to use joint scaling in your models, you can simply use the
+        // upper 3x3 part of the position matrix instead of the adjoint-transpose shown 
+        // here.
+        Matrix3x3 matnorm(mat.b.cross3(mat.c), mat.c.cross3(mat.a), mat.a.cross3(mat.b));
+        *dstnorm = matnorm.transform(*srcnorm);
+        // Note that input tangent data has 4 coordinates, 
+        // so only transform the first 3 as the tangent vector.
+        *dsttan = matnorm.transform(Vec3(*srctan));
+        // Note that bitangent = cross(normal, tangent) * sign, 
+        // where the sign is stored in the 4th coordinate of the input tangent data.
+        *dstbitan = dstnorm->cross(*dsttan) * srctan->w;
+
+		//all of this will be using currentmodel data vars
+        srcpos++;
+        srcnorm++;
+        srctan++;
+        dstpos++;
+        dstnorm++;
+        dsttan++;
+        dstbitan++;
+
+        index += 4;
+        weight += 4;
+    }*/
 }
 
 extern void R_DrawNullModel (void);
