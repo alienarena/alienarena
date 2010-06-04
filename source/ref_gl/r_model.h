@@ -348,6 +348,7 @@ typedef struct model_s
 	int			num_frames;
 
 	//iqm skeletal model info
+	mvertex_t		*animatevertexes;
 	int				num_bones;
 	aliasbone_t		*bones; //we may want to do this differently
 	matrix3x4_t		*frames;

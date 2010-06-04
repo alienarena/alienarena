@@ -476,7 +476,7 @@ extern glstate_t   gl_state;
 
 // vertex arrays
 
-#define MAX_ARRAY MAX_PARTICLES*4
+#define MAX_ARRAY (MAX_PARTICLES*4)
 
 #define VA_SetElem2(v,a,b)		((v)[0]=(a),(v)[1]=(b))
 #define VA_SetElem3(v,a,b,c)	((v)[0]=(a),(v)[1]=(b),(v)[2]=(c))
@@ -487,12 +487,12 @@ extern float	vert_array[MAX_ARRAY][3];
 extern float	col_array[MAX_ARRAY][4];
 extern float	norm_array[MAX_ARRAY][3];
 
-#define MAX_VARRAY_VERTS MAX_VERTS + 2
+#define MAX_VARRAY_VERTS (MAX_VERTS + 2)
 #define MAX_VARRAY_VERTEX_SIZE 11
 
-#define MAX_VERTICES		16384
-#define MAX_INDICES		MAX_VERTICES * 4
-#define MAX_SHADOW_VERTS	16384
+#define MAX_VERTICES 16384
+#define MAX_INDICES	(MAX_VERTICES * 4)
+#define MAX_SHADOW_VERTS 16384
 
 extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
