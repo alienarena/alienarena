@@ -138,6 +138,14 @@ typedef	int	fixed4_t;
 typedef	int	fixed8_t;
 typedef	int	fixed16_t;
 
+typedef struct matrix3x4_s
+{
+	vec4_t a;
+	vec4_t b;
+	vec4_t c;
+}
+matrix3x4_t;
+
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif

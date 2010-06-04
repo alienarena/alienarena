@@ -5,6 +5,80 @@
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 qboolean testflag;
 
+//these matrix functions should be moved to matrixlib.c or similar
+void Matrix3x4_Invert(matrix3x4_t *out, matrix3x4_t *in)
+{
+	vec3_t a, b, c, trans;
+
+	//Matrix3x3 invrot(Vec3(o.a.x, o.b.x, o.c.x), Vec3(o.a.y, o.b.y, o.c.y), Vec3(o.a.z, o.b.z, o.c.z));
+	VectorSet(a, in->a[0], in->b[0], in->c[0]);
+	VectorSet(b, in->a[1], in->b[1], in->c[1]);
+	VectorSet(c, in->a[2], in->b[2], in->c[2]);
+
+    //invrot.a /= invrot.a.squaredlen();
+    //invrot.b /= invrot.b.squaredlen();
+    //invrot.c /= invrot.c.squaredlen();
+	VectorScale(a, 1/pow(VectorLength(a), 2), a);
+	VectorScale(b, 1/pow(VectorLength(b), 2), b);
+	VectorScale(c, 1/pow(VectorLength(c), 2), c);
+
+    //Vec3 trans(o.a.w, o.b.w, o.c.w);
+	VectorSet(trans, in->a[3], in->b[3], in->c[3]);
+
+    //a = Vec4(invrot.a, -invrot.a.dot(trans));
+    //b = Vec4(invrot.b, -invrot.b.dot(trans));
+    //c = Vec4(invrot.c, -invrot.c.dot(trans));
+	Vector4Set(out->a, a[0], a[1], a[2], -_DotProduct(a, trans));
+	Vector4Set(out->b, b[0], b[1], b[2], -_DotProduct(b, trans));
+	Vector4Set(out->c, c[0], c[1], c[2], -_DotProduct(c, trans));
+}
+void Matrix3x4_FromQuatAndVectors(matrix3x4_t *out, vec4_t rot, const float trans[3], const float scale[3])
+{
+	vec3_t a, b, c;
+
+    //Convert the quat
+    {
+        float x = rot[0], y = rot[1], z = rot[2], w = rot[3],
+              tx = 2*x, ty = 2*y, tz = 2*z,
+              txx = tx*x, tyy = ty*y, tzz = tz*z,
+              txy = tx*y, txz = tx*z, tyz = ty*z,
+              twx = w*tx, twy = w*ty, twz = w*tz;
+        VectorSet(a, 1 - (tyy + tzz), txy - twz, txz + twy);
+        VectorSet(b, txy + twz, 1 - (txx + tzz), tyz - twx);
+        VectorSet(c, txz - twy, tyz + twx, 1 - (txx + tyy));
+    }
+
+	Vector4Set(out->a, a[0]*scale[0], a[1]*scale[1], a[2]*scale[2], trans[0]);
+	Vector4Set(out->b, b[0]*scale[0], b[1]*scale[1], b[2]*scale[2], trans[1]);
+	Vector4Set(out->c, c[0]*scale[0], c[1]*scale[1], c[2]*scale[2], trans[2]);
+}
+
+Matrix3x4_Multiply(matrix3x4_t *out, matrix3x4_t *mat1, matrix3x4_t *mat2)
+{
+	vec3_t a, b, c, d;
+
+	VectorScale(mat2->a, mat1->a[0], a);
+	VectorScale(mat2->b, mat1->a[1], b);
+	VectorScale(mat2->c, mat1->a[2], c);
+	VectorAdd(a, b, d);
+	VectorAdd(d, c, d);
+	Vector4Set(out->a, d[0], d[1], d[2], mat1->a[3]);
+
+	VectorScale(mat2->a, mat1->b[0], a);
+	VectorScale(mat2->b, mat1->b[1], b);
+	VectorScale(mat2->c, mat1->b[2], c);
+	VectorAdd(a, b, d);
+	VectorAdd(d, c, d);
+	Vector4Set(out->b, d[0], d[1], d[2], mat1->b[3]);
+
+	VectorScale(mat2->a, mat1->c[0], a);
+	VectorScale(mat2->b, mat1->c[1], b);
+	VectorScale(mat2->c, mat1->c[2], c);
+	VectorAdd(a, b, d);
+	VectorAdd(d, c, d);
+	Vector4Set(out->c, d[0], d[1], d[2], mat1->c[3]);
+}
+
 extern 
 void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition)
 {
@@ -192,20 +266,18 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		vec4_t q_rot;
         iqmjoint_t j = joint[i]; 
 
-		//first need to make a vec4 quat from our rotation vec
+		//first need to make a vec4 quat from our rotation vec(move this to a func at some point)
 		VectorSet(rot, j.rotation[0], j.rotation[1], j.rotation[2]);
-		Vector4Set(q_rot, j.rotation[0], j.rotation[1], j.rotation[2], -sqrt(max(1.0 - VectorLength(rot) * VectorLength(rot), 0.0)));
+		Vector4Set(q_rot, j.rotation[0], j.rotation[1], j.rotation[2], -sqrt(max(1.0 - pow(VectorLength(rot),2), 0.0)));
 		//check these vals against w^2 = 1 - (x^2 + y^2 + z^2)
 
-		//get this from the demo
-		//Matrix3x4_FromVectors(mod->baseframe[i], q_rot, j.origin, j.scale);
+		Matrix3x4_FromQuatAndVectors(&baseframe[i], q_rot, j.origin, j.scale);
+		Matrix3x4_Invert(&inversebaseframe[i], &baseframe[i]);
 
-        //inversebaseframe[i].invert(baseframe[i]);
         if(j.parent >= 0) 
         {
-			//Going to need to create matrix multiplier funcs for 3x4 matrixes.
-            //baseframe[i].m = baseframe[j.parent].m * baseframe[i].m;
-            //inversebaseframe[i].m *= inversebaseframe[j.parent].m;
+			Matrix3x4_Multiply(&baseframe[j.parent], &baseframe[i], &baseframe[i]); 
+			Matrix3x4_Multiply(&inversebaseframe[j.parent], &inversebaseframe[j.parent], &inversebaseframe[i]);
         }
     }
 
@@ -219,6 +291,9 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
         {
             iqmpose_t p = poses[j];
             vec3_t translate, rotate, scale;
+			vec4_t q_rot;
+			matrix3x4_t *m, *temp;
+
             translate[0] = p.channeloffset[0]; if(p.channelmask&0x01) translate[0] += *framedata++ * p.channelscale[0];
             translate[1] = p.channeloffset[1]; if(p.channelmask&0x02) translate[1] += *framedata++ * p.channelscale[1];
             translate[2] = p.channeloffset[2]; if(p.channelmask&0x04) translate[2] += *framedata++ * p.channelscale[2];
@@ -234,11 +309,24 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
             //   (parentPose * parentInverseBasePose) * (parentBasePose * childPose * childInverseBasePose) =>
             //   parentPose * (parentInverseBasePose * parentBasePose) * childPose * childInverseBasePose =>
             //   parentPose * childPose * childInverseBasePose
-       /*     Matrix3x4 m(Quat(rotate), translate, scale);
-            if(p.parent >= 0) 
-				mod->frames[i*header->num_poses + j] = baseframe[p.parent] * m * inversebaseframe[j];
+
+			Vector4Set(q_rot, rotate[0], rotate[1], rotate[2], -sqrt(max(1.0 - pow(VectorLength(rotate),2), 0.0)));
+
+			m = (matrix3x4_t*)malloc(sizeof(matrix3x4_t));
+			temp = (matrix3x4_t*)malloc(sizeof(matrix3x4_t));
+			Matrix3x4_FromQuatAndVectors(m, q_rot, translate, scale);
+
+			if(p.parent >= 0) {
+				Matrix3x4_Multiply(temp, &baseframe[p.parent], m);
+				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], temp, &inversebaseframe[j]);
+			}
             else 
-				mod->frames[i*header->num_poses + j] = m * inversebaseframe[j];*/
+				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], m, &inversebaseframe[j]);
+
+			if(m)
+				free(m);
+			if(temp)
+				free(temp);
         }
     }
 
