@@ -270,14 +270,6 @@ typedef struct {
 	int n[3];
 } neighbors_t;
 
-typedef struct aliasbone_s
-{
-	char name[64];
-	int flags;
-	int parent; // -1 for no parent
-}
-aliasbone_t;
-
 typedef enum {mod_bad, mod_brush, mod_sprite, mod_alias, mod_iqm } modtype_t;
 
 typedef struct model_s
@@ -349,13 +341,12 @@ typedef struct model_s
 
 	//iqm skeletal model info
 	mvertex_t		*animatevertexes;
-	int				num_bones;
-	aliasbone_t		*bones; //we may want to do this differently
+	int				num_joints;
+	iqmjoint_t		*joints;
 	matrix3x4_t		*frames;
 	float			num_posescale; 
 	float			num_poseinvscale; 
 	int				num_poses;
-	float			*baseboneposeinverse;
 	int				num_triangles;
 	iqmtriangle_t	*tris;
 	mnormal_t		*normal;
