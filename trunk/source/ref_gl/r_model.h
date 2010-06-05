@@ -359,7 +359,9 @@ typedef struct model_s
 	int				num_triangles;
 	iqmtriangle_t	*tris;
 	mnormal_t		*normal;
+	mnormal_t		*animatenormal;
 	mtangent_t		*tangent;
+	mtangent_t		*animatetangent;
 	//end iqm
 
 	fstvert_t	*st;
