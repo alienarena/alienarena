@@ -130,14 +130,16 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, 
 					LittleFloat(vnormal[1]),
 					LittleFloat(vnormal[2]));	
 
-		VectorSet(iqmmodel->tangent[i].dir,
+		//fix me - I think these are actually x4!
+		Vector4Set(iqmmodel->tangent[i].dir,
 					LittleFloat(vtangent[0]),
 					LittleFloat(vtangent[1]),
-					LittleFloat(vtangent[2]));
+					LittleFloat(vtangent[2]),
+					LittleFloat(vtangent[3]));
 
 		vposition += 3;
 		vnormal += 3;
-		vtangent +=3;
+		vtangent +=4;
 	}
 	
 }

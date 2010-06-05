@@ -114,8 +114,18 @@ typedef struct
 
 typedef struct
 {
-	vec3_t		dir;
+	vec4_t		dir;
 } mtangent_t;
+
+typedef struct
+{
+	vec4_t		idx;
+} mblendindex_t;
+
+typedef struct
+{
+	vec4_t		weight;
+} mblendweight_t;
 
 typedef struct
 {
@@ -344,8 +354,6 @@ typedef struct model_s
 	int				num_joints;
 	iqmjoint_t		*joints;
 	matrix3x4_t		*frames;
-	float			num_posescale; 
-	float			num_poseinvscale; 
 	int				num_poses;
 	int				num_triangles;
 	iqmtriangle_t	*tris;
@@ -353,16 +361,18 @@ typedef struct model_s
 	mnormal_t		*animatenormal;
 	mtangent_t		*tangent;
 	mtangent_t		*animatetangent;
+	mblendindex_t	*blendindexes;
+	mblendweight_t	*blendweights;
 	//end iqm
 
 	fstvert_t	*st;
 	neighbors_t *neighbors;	
 
 	//vbo
-	vertCache_t	*vbo_st;
-	vertCache_t	*vbo_xyz;
-	vertCache_t	*vbo_color;
-	vertCache_t	*vbo_normals;
+	//vertCache_t	*vbo_st;
+	//vertCache_t	*vbo_xyz;
+	//vertCache_t	*vbo_color;
+	//vertCache_t	*vbo_normals;
 
 } model_t;
 
