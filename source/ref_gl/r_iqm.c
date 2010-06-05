@@ -258,45 +258,27 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	text = header->num_text && header->ofs_text ? (const char *)(pbase + header->ofs_text) : "";
 	
 	mod->num_frames = header->num_anims;
-	mod->num_bones = header->num_joints;
+	mod->num_joints = header->num_joints;
 	mod->num_poses = header->num_frames;
 	mod->numvertexes = header->num_vertexes;
 	mod->num_triangles = header->num_triangles;
 
 	mod->extradata = Hunk_Begin (0x300000); 
 
-	// load the bone info(I think this can stay the same but check)
+	// load the joints
 	joint = (iqmjoint_t *) (pbase + header->ofs_joints);
-	mod->bones = (aliasbone_t*)Hunk_Alloc (header->num_joints * sizeof(aliasbone_t));
-	mod->baseboneposeinverse = (float*)Hunk_Alloc (header->num_joints * sizeof(float));
-	for (i = 0;i < mod->num_bones;i++)
+	mod->joints = (iqmjoint_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint_t));
+	for (i = 0;i < mod->num_joints;i++)
 	{
-		matrix4x4_t relbase, relinvbase, pinvbase, invbase;
-		joint[i].name = LittleLong(joint[i].name);
-		joint[i].parent = LittleLong(joint[i].parent);
+		mod->joints[i].name = LittleLong(joint[i].name);
+		mod->joints[i].parent = LittleLong(joint[i].parent);
 		for (j = 0;j < 3;j++)
 		{
-			joint[i].origin[j] = LittleFloat(joint[i].origin[j]);
-			joint[i].rotation[j] = LittleFloat(joint[i].rotation[j]);
-			joint[i].scale[j] = LittleFloat(joint[i].scale[j]);
+			mod->joints[i].origin[j] = LittleFloat(joint[i].origin[j]);
+			mod->joints[i].rotation[j] = LittleFloat(joint[i].rotation[j]);
+			mod->joints[i].scale[j] = LittleFloat(joint[i].scale[j]);
 		}
-		Q_strncpyz(mod->bones[i].name, &text[joint[i].name], sizeof(mod->bones[i].name));
-		mod->bones[i].parent = joint[i].parent;
-		if (mod->bones[i].parent >= i)
-			Com_Printf("%s bone[%i].parent >= %i", mod->name, i, i);
-		Matrix4x4_FromDoom3Joint(&relbase, joint[i].origin[0], joint[i].origin[1], joint[i].origin[2], joint[i].rotation[0], joint[i].rotation[1], joint[i].rotation[2]);
-		Matrix4x4_Invert_Simple(&relinvbase, &relbase);
-		if (mod->bones[i].parent >= 0)
-		{
-			Matrix4x4_FromArray12FloatD3D(&pinvbase, mod->baseboneposeinverse + 12*mod->bones[i].parent);
-			Matrix4x4_Concat(&invbase, &relinvbase, &pinvbase);
-			Matrix4x4_ToArray12FloatD3D(&invbase, mod->baseboneposeinverse + 12*i);
-		}	
-		else Matrix4x4_ToArray12FloatD3D(&relinvbase, mod->baseboneposeinverse + 12*i);
 	}
-
-	//get this area working before moving on at all.  There is alot of math issues to resolve.
-	//once this is finished, the rest will be a alot easier
 	
 	//these don't need to be a part of mod - remember to free them
 	baseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
@@ -459,22 +441,22 @@ void GL_AnimateIqmFrame(float curframe)
 	frame2 %= currentmodel->num_frames;
  
 	{
-		matrix3x4_t *mat1 = &currentmodel->frames[frame1 * currentmodel->num_bones],
-			*mat2 = &currentmodel->frames[frame2 * currentmodel->num_bones];
+		matrix3x4_t *mat1 = &currentmodel->frames[frame1 * currentmodel->num_joints],
+			*mat2 = &currentmodel->frames[frame2 * currentmodel->num_joints];
 	
 		// Interpolate matrixes between the two closest frames and concatenate with parent matrix if necessary.
 		// Concatenate the result with the inverse of the base pose.
 		// You would normally do animation blending and inter-frame blending here in a 3D engine.
 
-		for(i = 0; i < currentmodel->num_bones; i++)
+		for(i = 0; i < currentmodel->num_joints; i++)
 		{
 			matrix3x4_t mat, temp; 
 			Matrix3x4_Scale(&mat, mat1[i], 1-frameoffset);
 			Matrix3x4_Scale(&temp, mat2[i], frameoffset);
 			Matrix3x4_Add(&mat, mat, temp);
 
-			if(currentmodel->bones[i].parent >= 0) 
-				Matrix3x4_Multiply(&outframe[i], outframe[currentmodel->bones[i].parent], mat);
+			if(currentmodel->joints[i].parent >= 0) 
+				Matrix3x4_Multiply(&outframe[i], outframe[currentmodel->joints[i].parent], mat);
 			else 
 				Matrix3x4_Copy(&outframe[i], mat);
 		}
@@ -491,7 +473,7 @@ void GL_AnimateIqmFrame(float curframe)
 	}
 
 	//not sure about these, need to read in this stuff yet
-    //const uchar *index = inblendindex, *weight = inblendweight;
+    //const uchar *index = currentmodel->inblendindex, *weight = currentmodel->inblendweight;
 
 	//this next section need major translation to our codebase
 	for(i = 0; i < currentmodel->numvertexes; i++)
