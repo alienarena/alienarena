@@ -1,0 +1,182 @@
+{
+"classname" "worldspawn"
+"gravity" "500"
+"message" "Deimos Station"
+"sky" "space1"
+// brush 0
+{
+( 512 1152 -640 ) ( 448 1152 -640 ) ( 448 1120 -640 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1136 -608 ) ( 448 1168 -608 ) ( 512 1168 -608 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1120 -576 ) ( 512 1120 -576 ) ( 512 1120 -608 ) martian/metalrings2 0 0 0 1 1 134217728 0 0
+( 512 1120 -576 ) ( 512 1152 -576 ) ( 512 1152 -608 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 512 1152 -576 ) ( 448 1152 -576 ) ( 448 1152 -608 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1152 -576 ) ( 448 1120 -576 ) ( 448 1120 -608 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+}
+// brush 1
+{
+( 512 1152 -608 ) ( 448 1152 -608 ) ( 448 1136 -608 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1136 -576 ) ( 448 1152 -576 ) ( 512 1152 -576 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1120 -608 ) ( 448 1136 -576 ) ( 512 1136 -576 ) martian/metalrings2 0 0 0 1 1 134217728 0 0
+( 512 1136 -464 ) ( 512 1152 -464 ) ( 512 1152 -576 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 512 1152 -464 ) ( 448 1152 -464 ) ( 448 1152 -576 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1152 -464 ) ( 448 1136 -464 ) ( 448 1136 -576 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+}
+// brush 2
+{
+( 512 1120 -576 ) ( 448 1120 -576 ) ( 448 1104 -576 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1104 -464 ) ( 448 1120 -464 ) ( 512 1120 -464 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1136 -432 ) ( 512 1136 -432 ) ( 512 1136 -464 ) martian/metalrings2 0 0 0 1 1 134217728 0 0
+( 512 1104 -432 ) ( 512 1120 -432 ) ( 512 1120 -464 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 512 1152 -432 ) ( 448 1152 -432 ) ( 448 1152 -464 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1120 -432 ) ( 448 1104 -432 ) ( 448 1104 -464 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+}
+// brush 3
+{
+( 512 1152 -464 ) ( 448 1152 -464 ) ( 448 1104 -464 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1104 -432 ) ( 448 1152 -432 ) ( 512 1152 -432 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1136 -464 ) ( 448 1104 -432 ) ( 512 1104 -432 ) martian/metalrings2 0 0 0 1 1 134217728 0 0
+( 512 1104 -432 ) ( 512 1152 -432 ) ( 512 1152 -480 ) arena4/floor3 0 -48 0 1 1 134217728 0 0
+( 512 1152 -432 ) ( 448 1152 -432 ) ( 448 1152 -480 ) arena4/floor3 0 -48 0 1 1 134217728 0 0
+( 448 1152 -432 ) ( 448 1104 -432 ) ( 448 1104 -480 ) arena4/floor3 0 -48 0 1 1 134217728 0 0
+}
+// brush 4
+{
+( 512 1136 -432 ) ( 448 1136 -432 ) ( 448 1104 -432 ) arena4/floor3 0 -16 0 1 1 134217728 0 0
+( 448 1104 -384 ) ( 448 1136 -384 ) ( 512 1136 -384 ) arena4/floor3 0 -16 0 1 1 134217728 0 0
+( 448 1104 -384 ) ( 512 1104 -384 ) ( 512 1104 -448 ) martian/metalrings2 0 0 0 1 1 134217728 0 0
+( 512 1104 -384 ) ( 512 1136 -384 ) ( 512 1136 -448 ) arena4/floor3 16 0 0 1 1 134217728 0 0
+( 512 1152 -384 ) ( 448 1152 -384 ) ( 448 1152 -448 ) arena4/floor3 0 0 0 1 1 134217728 0 0
+( 448 1136 -384 ) ( 448 1104 -384 ) ( 448 1104 -448 ) arena4/floor3 16 0 0 1 1 134217728 0 0
+}
+// brush 5
+{
+( 128 1152 -384 ) ( 128 1104 -384 ) ( 128 1104 -448 ) arena4/floor2 0 0 0 1 1 0 0 0
+( 912 1152 -384 ) ( 128 1152 -384 ) ( 128 1152 -448 ) arena4/floor2 0 0 0 1 1 0 0 0
+( 896 1104 -384 ) ( 896 1152 -384 ) ( 896 1152 -448 ) arena4/floor3 0 0 0 1 1 0 0 0
+( 128 1120 -384 ) ( 912 1120 -384 ) ( 912 1120 -448 ) arena4/floor2 0 0 0 1 1 0 0 0
+( 128 1104 -384 ) ( 128 1152 -384 ) ( 912 1152 -384 ) arena4/floor2 0 0 0 1 1 0 0 0
+( 912 1120 -416 ) ( 912 1152 -448 ) ( 128 1152 -448 ) arena4/floor2 0 0 0 1 1 0 0 0
+}
+}
+// entity 1
+// entity 2
+// entity 3
+// entity 4
+// entity 5
+// entity 6
+// entity 7
+// entity 8
+// entity 9
+// entity 10
+// entity 11
+// entity 12
+// entity 13
+// entity 14
+// entity 15
+// entity 16
+// entity 17
+// entity 18
+// entity 19
+// entity 20
+// entity 21
+// entity 22
+// entity 23
+// entity 24
+// entity 25
+// entity 26
+// entity 27
+// entity 28
+// entity 29
+// entity 30
+// entity 31
+// entity 32
+// entity 33
+// entity 34
+// entity 35
+// entity 36
+// entity 37
+// entity 38
+// entity 39
+// entity 40
+// entity 41
+// entity 42
+// entity 43
+// entity 44
+// entity 45
+// entity 46
+// entity 47
+// entity 48
+// entity 49
+// entity 50
+// entity 51
+// entity 52
+// entity 53
+// entity 54
+// entity 55
+// entity 56
+// entity 57
+// entity 58
+// entity 59
+// entity 60
+// entity 61
+// entity 62
+// entity 63
+// entity 64
+// entity 65
+// entity 66
+// entity 67
+// entity 68
+// entity 69
+// entity 70
+// entity 71
+// entity 72
+// entity 73
+// entity 74
+// entity 75
+// entity 76
+// entity 77
+// entity 78
+// entity 79
+// entity 80
+// entity 81
+// entity 82
+// entity 83
+// entity 84
+// entity 85
+// entity 86
+// entity 87
+// entity 88
+// entity 89
+// entity 90
+// entity 91
+// entity 92
+// entity 93
+// entity 94
+// entity 95
+// entity 96
+// entity 97
+// entity 98
+// entity 99
+// entity 100
+// entity 101
+// entity 102
+// entity 103
+// entity 104
+// entity 105
+// entity 106
+// entity 107
+// entity 108
+// entity 109
+// entity 110
+// entity 111
+// entity 112
+// entity 113
+// entity 114
+// entity 115
+// entity 116
+// entity 117
+// entity 118
+// entity 119
+// entity 120
+// entity 121
+// entity 122
