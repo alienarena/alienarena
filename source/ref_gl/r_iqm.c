@@ -6,14 +6,14 @@ extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 qboolean testflag;
 
 //these matrix functions should be moved to matrixlib.c or similar
-void Matrix3x4_Invert(matrix3x4_t *out, matrix3x4_t *in)
+void Matrix3x4_Invert(matrix3x4_t *out, matrix3x4_t in)
 {
 	vec3_t a, b, c, trans;
 
 	//Matrix3x3 invrot(Vec3(o.a.x, o.b.x, o.c.x), Vec3(o.a.y, o.b.y, o.c.y), Vec3(o.a.z, o.b.z, o.c.z));
-	VectorSet(a, in->a[0], in->b[0], in->c[0]);
-	VectorSet(b, in->a[1], in->b[1], in->c[1]);
-	VectorSet(c, in->a[2], in->b[2], in->c[2]);
+	VectorSet(a, in.a[0], in.b[0], in.c[0]);
+	VectorSet(b, in.a[1], in.b[1], in.c[1]);
+	VectorSet(c, in.a[2], in.b[2], in.c[2]);
 
     //invrot.a /= invrot.a.squaredlen();
     //invrot.b /= invrot.b.squaredlen();
@@ -23,7 +23,7 @@ void Matrix3x4_Invert(matrix3x4_t *out, matrix3x4_t *in)
 	VectorScale(c, 1/pow(VectorLength(c), 2), c);
 
     //Vec3 trans(o.a.w, o.b.w, o.c.w);
-	VectorSet(trans, in->a[3], in->b[3], in->c[3]);
+	VectorSet(trans, in.a[3], in.b[3], in.c[3]);
 
     //a = Vec4(invrot.a, -invrot.a.dot(trans));
     //b = Vec4(invrot.b, -invrot.b.dot(trans));
@@ -53,34 +53,55 @@ void Matrix3x4_FromQuatAndVectors(matrix3x4_t *out, vec4_t rot, const float tran
 	Vector4Set(out->c, c[0]*scale[0], c[1]*scale[1], c[2]*scale[2], trans[2]);
 }
 
-Matrix3x4_Multiply(matrix3x4_t *out, matrix3x4_t *mat1, matrix3x4_t *mat2)
+Matrix3x4_Multiply(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
 {
 	vec3_t a, b, c, d;
 
-	VectorScale(mat2->a, mat1->a[0], a);
-	VectorScale(mat2->b, mat1->a[1], b);
-	VectorScale(mat2->c, mat1->a[2], c);
+	VectorScale(mat2.a, mat1.a[0], a);
+	VectorScale(mat2.b, mat1.a[1], b);
+	VectorScale(mat2.c, mat1.a[2], c);
 	VectorAdd(a, b, d);
 	VectorAdd(d, c, d);
-	Vector4Set(out->a, d[0], d[1], d[2], mat1->a[3]);
+	Vector4Set(out->a, d[0], d[1], d[2], mat1.a[3]);
 
-	VectorScale(mat2->a, mat1->b[0], a);
-	VectorScale(mat2->b, mat1->b[1], b);
-	VectorScale(mat2->c, mat1->b[2], c);
+	VectorScale(mat2.a, mat1.b[0], a);
+	VectorScale(mat2.b, mat1.b[1], b);
+	VectorScale(mat2.c, mat1.b[2], c);
 	VectorAdd(a, b, d);
 	VectorAdd(d, c, d);
-	Vector4Set(out->b, d[0], d[1], d[2], mat1->b[3]);
+	Vector4Set(out->b, d[0], d[1], d[2], mat1.b[3]);
 
-	VectorScale(mat2->a, mat1->c[0], a);
-	VectorScale(mat2->b, mat1->c[1], b);
-	VectorScale(mat2->c, mat1->c[2], c);
+	VectorScale(mat2.a, mat1.c[0], a);
+	VectorScale(mat2.b, mat1.c[1], b);
+	VectorScale(mat2.c, mat1.c[2], c);
 	VectorAdd(a, b, d);
 	VectorAdd(d, c, d);
-	Vector4Set(out->c, d[0], d[1], d[2], mat1->c[3]);
+	Vector4Set(out->c, d[0], d[1], d[2], mat1.c[3]);
+}
+
+Matrix3x4_Scale(matrix3x4_t *out, matrix3x4_t in, float scale)
+{
+	Vector4Scale(in.a, scale, out->a);
+	Vector4Scale(in.b, scale, out->b);
+	Vector4Scale(in.c, scale, out->c);
+}
+
+Matrix3x4_Add(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
+{
+	Vector4Add(mat1.a, mat2.a, out->a);
+	Vector4Add(mat1.b, mat2.b, out->b);
+	Vector4Add(mat1.c, mat2.b, out->c);
+}
+
+Matrix3x4_Copy(matrix3x4_t *out, matrix3x4_t in)
+{
+	Vector4Copy(in.a, out->a);
+	Vector4Copy(in.b, out->b);
+	Vector4Copy(in.c, out->c);
 }
 
 extern 
-void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition)
+void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent)
 {
 	int i;
 
@@ -90,13 +111,33 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition)
 		return;
 
 	iqmmodel->vertexes = (mvertex_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mvertex_t));
+	iqmmodel->normal = (mnormal_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mnormal_t));
+	iqmmodel->tangent = (mtangent_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mtangent_t));
+
+	//set this now for later use
+	iqmmodel->animatevertexes = (mvertex_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mvertex_t));
+	iqmmodel->animatenormal = (mnormal_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mnormal_t));
+	iqmmodel->animatetangent = (mtangent_t*)Hunk_Alloc(iqmmodel->numvertexes * sizeof(mtangent_t));
 
 	for(i=0; i<iqmmodel->numvertexes; i++){
 		VectorSet(iqmmodel->vertexes[i].position,
 					LittleFloat(vposition[0]),
 					LittleFloat(vposition[1]),
 					LittleFloat(vposition[2]));		
+
+		VectorSet(iqmmodel->normal[i].dir,
+					LittleFloat(vnormal[0]),
+					LittleFloat(vnormal[1]),
+					LittleFloat(vnormal[2]));	
+
+		VectorSet(iqmmodel->tangent[i].dir,
+					LittleFloat(vtangent[0]),
+					LittleFloat(vtangent[1]),
+					LittleFloat(vtangent[2]));
+
 		vposition += 3;
+		vnormal += 3;
+		vtangent +=3;
 	}
 	
 }
@@ -272,12 +313,12 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		//check these vals against w^2 = 1 - (x^2 + y^2 + z^2)
 
 		Matrix3x4_FromQuatAndVectors(&baseframe[i], q_rot, j.origin, j.scale);
-		Matrix3x4_Invert(&inversebaseframe[i], &baseframe[i]);
+		Matrix3x4_Invert(&inversebaseframe[i], baseframe[i]);
 
         if(j.parent >= 0) 
         {
-			Matrix3x4_Multiply(&baseframe[j.parent], &baseframe[i], &baseframe[i]); 
-			Matrix3x4_Multiply(&inversebaseframe[j.parent], &inversebaseframe[j.parent], &inversebaseframe[i]);
+			Matrix3x4_Multiply(&baseframe[j.parent], baseframe[i], baseframe[i]); 
+			Matrix3x4_Multiply(&inversebaseframe[j.parent], inversebaseframe[j.parent], inversebaseframe[i]);
         }
     }
 
@@ -292,7 +333,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
             iqmpose_t p = poses[j];
             vec3_t translate, rotate, scale;
 			vec4_t q_rot;
-			matrix3x4_t *m, *temp;
+			matrix3x4_t m, temp;
 
             translate[0] = p.channeloffset[0]; if(p.channelmask&0x01) translate[0] += *framedata++ * p.channelscale[0];
             translate[1] = p.channeloffset[1]; if(p.channelmask&0x02) translate[1] += *framedata++ * p.channelscale[1];
@@ -312,21 +353,14 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 			Vector4Set(q_rot, rotate[0], rotate[1], rotate[2], -sqrt(max(1.0 - pow(VectorLength(rotate),2), 0.0)));
 
-			m = (matrix3x4_t*)malloc(sizeof(matrix3x4_t));
-			temp = (matrix3x4_t*)malloc(sizeof(matrix3x4_t));
-			Matrix3x4_FromQuatAndVectors(m, q_rot, translate, scale);
+			Matrix3x4_FromQuatAndVectors(&m, q_rot, translate, scale);
 
 			if(p.parent >= 0) {
-				Matrix3x4_Multiply(temp, &baseframe[p.parent], m);
-				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], temp, &inversebaseframe[j]);
+				Matrix3x4_Multiply(&temp, baseframe[p.parent], m);
+				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], temp, inversebaseframe[j]);
 			}
             else 
-				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], m, &inversebaseframe[j]);
-
-			if(m)
-				free(m);
-			if(temp)
-				free(temp);
+				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], m, inversebaseframe[j]);
         }
     }
 
@@ -386,7 +420,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	//find triangle neighbors(note - this model format has these defined(save for later, work on basic stuff right now)
 
 	// load vertex data
-	R_LoadIQMVertexArrays(mod, vposition);
+	R_LoadIQMVertexArrays(mod, vposition, vnormal, vtangent);
 	
 	//fix this next section
 
@@ -400,33 +434,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 		vtexcoord+=2;
 	}
-/*
-	if(vnormal)
-	{
-		mod->normal = (mnormal_t*)malloc(header->num_vertexes * sizeof(mnormal_t));
-		for (i = 0;i < (int)header->num_vertexes;i++)
-		{
-			mod->normal->dir[0] = LittleFloat(vnormal[0]);
-			mod->normal->dir[1] = LittleFloat(vnormal[1]);
-			mod->normal->dir[2] = LittleFloat(vnormal[2]);
-			vnormal += 3;
-			mod->normal ++;
-		}
-	}
 
-	if(vtangent)
-	{
-		mod->tangent = (mtangent_t*)malloc(header->num_vertexes * sizeof(mtangent_t));
-		for (i = 0;i < (int)header->num_vertexes;i++)
-		{
-			mod->tangent->dir[0] = LittleFloat(vtangent[0]);
-			mod->tangent->dir[1] = LittleFloat(vtangent[1]);
-			mod->tangent->dir[2] = LittleFloat(vtangent[2]);
-			vtangent += 3;
-			mod->tangent ++;
-		}
-	}
-*/
 	Com_Printf("Successfully loaded %s\n", mod->name);
 	testflag = true;
 
@@ -439,48 +447,56 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	return true;
 }
 
+matrix3x4_t outframe[5096]; //find out what max frames might be
 
 void GL_AnimateIqmFrame(float curframe)
 {
+	int i;
     int frame1 = (int)floor(curframe),
         frame2 = frame1 + 1;
     float frameoffset = curframe - frame1;
 	frame1 %= currentmodel->num_frames;
 	frame2 %= currentmodel->num_frames;
-  /*
-    matrix3x4_t *mat1 = &mod->frames[frame1 * currentmodel->num_bones],
-              *mat2 = &mod->frames[frame2 * currentmodel->num_bones];
+ 
+	{
+		matrix3x4_t *mat1 = &currentmodel->frames[frame1 * currentmodel->num_bones],
+			*mat2 = &currentmodel->frames[frame2 * currentmodel->num_bones];
+	
+		// Interpolate matrixes between the two closest frames and concatenate with parent matrix if necessary.
+		// Concatenate the result with the inverse of the base pose.
+		// You would normally do animation blending and inter-frame blending here in a 3D engine.
 
-    // Interpolate matrixes between the two closest frames and concatenate with parent matrix if necessary.
-    // Concatenate the result with the inverse of the base pose.
-    // You would normally do animation blending and inter-frame blending here in a 3D engine.
-    for(int i = 0; i < currentmodel->num_bones; i++)
-    {
-        matrix3x4_t mat = mat1[i]*(1 - frameoffset) + mat2[i]*frameoffset;
-        if(currentmodel->bones[i].parent >= 0) 
-			outframe[i] = outframe[currentmodel->bones[i].parent] * mat;
-        else 
-			outframe[i] = mat;
-    }
-  
+		for(i = 0; i < currentmodel->num_bones; i++)
+		{
+			matrix3x4_t mat, temp; 
+			Matrix3x4_Scale(&mat, mat1[i], 1-frameoffset);
+			Matrix3x4_Scale(&temp, mat2[i], frameoffset);
+			Matrix3x4_Add(&mat, mat, temp);
+
+			if(currentmodel->bones[i].parent >= 0) 
+				Matrix3x4_Multiply(&outframe[i], outframe[currentmodel->bones[i].parent], mat);
+			else 
+				Matrix3x4_Copy(&outframe[i], mat);
+		}
+	}
 	// The actual vertex generation based on the matrixes follows...
-	//John's note - the "in" vars, need to define and figure these out
-	//I THINK inposition is the original vertex position, innorm, original normal, etc
-	const mvertex_t *srcpos = (const mvertex_t *)currentmodel->vertexes;
-	const mnormal_t *srcnorm = (const mnormal_t *)currentmodel->normal;
-	const mtangent_t *srctan = (const mtangent_t *)currentmodel->tangent; 
+	{
+		const mvertex_t *srcpos = (const mvertex_t *)currentmodel->vertexes;
+		const mnormal_t *srcnorm = (const mnormal_t *)currentmodel->normal;
+		const mtangent_t *srctan = (const mtangent_t *)currentmodel->tangent; 
+	
+		mvertex_t *dstpos = (mvertex_t *)currentmodel->animatevertexes;
+		mnormal_t *dstnorm = (mnormal_t *)currentmodel->animatenormal;
+		mtangent_t *dsttan = (mtangent_t *)currentmodel->animatetangent;
+	}
 
-    mvertex_t *dstpos = (mvertex_t *)outposition;
-	*dstnorm = (mnormal_t *)outnormal;
-	*dsttan = (mtangent_t *)outtangent;
-	//*dstbitan = (vec3_t *)outbitangent; //we don't need these
-
-	//not sure about these
-    const uchar *index = inblendindex, *weight = inblendweight;
+	//not sure about these, need to read in this stuff yet
+    //const uchar *index = inblendindex, *weight = inblendweight;
 
 	//this next section need major translation to our codebase
-	for(int i = 0; i < currentmodel->numvertexes; i++)
+	for(i = 0; i < currentmodel->numvertexes; i++)
     {
+		matrix3x4_t mat, matnorm, temp;
         // Blend matrixes for this vertex according to its blend weights. 
         // the first index/weight is always present, and the weights are
         // guaranteed to add up to 255. So if only the first weight is
@@ -489,15 +505,20 @@ void GL_AnimateIqmFrame(float curframe)
         // There are only at most 4 weights per vertex, and they are in 
         // sorted order from highest weight to lowest weight. Weights with 
         // 0 values, which are always at the end, are unused.
-        Matrix3x4 mat = outframe[index[0]] * (weight[0]/255.0f);
-        for(int j = 1; j < 4 && weight[j]; j++)
-            mat += outframe[index[j]] * (weight[j]/255.0f);
-
+/*
+		Matrix3x4_Scale(&mat, outframe[index[0]], weight[0]/255.0f);
+		for(int j = 1; j < 4 && weight[j]; j++) {
+			Matrix3x4_Scale(&temp, outframe[index[j]], weight[j]/255.0f);
+			Matrix3x4_Add(&mat, mat, temp);
+		}
+  */
         // Transform attributes by the blended matrix.
         // Position uses the full 3x4 transformation matrix.
         // Normals and tangents only use the 3x3 rotation part 
         // of the transformation matrix.
-        *dstpos = mat.transform(*srcpos);
+
+        //*dstpos = mat.transform(*srcpos);
+
         // Note that if the matrix includes non-uniform scaling, normal vectors
         // must be transformed by the inverse-transpose of the matrix to have the
         // correct relative scale. Note that invert(mat) = adjoint(mat)/determinant(mat),
@@ -508,27 +529,26 @@ void GL_AnimateIqmFrame(float curframe)
         // If you don't need to use joint scaling in your models, you can simply use the
         // upper 3x3 part of the position matrix instead of the adjoint-transpose shown 
         // here.
-        Matrix3x3 matnorm(mat.b.cross3(mat.c), mat.c.cross3(mat.a), mat.a.cross3(mat.b));
-        *dstnorm = matnorm.transform(*srcnorm);
+
+        //Matrix3x3 matnorm(mat.b.cross3(mat.c), mat.c.cross3(mat.a), mat.a.cross3(mat.b));
+        //*dstnorm = matnorm.transform(*srcnorm);
+
         // Note that input tangent data has 4 coordinates, 
         // so only transform the first 3 as the tangent vector.
-        *dsttan = matnorm.transform(Vec3(*srctan));
-        // Note that bitangent = cross(normal, tangent) * sign, 
-        // where the sign is stored in the 4th coordinate of the input tangent data.
-        *dstbitan = dstnorm->cross(*dsttan) * srctan->w;
+
+        //*dsttan = matnorm.transform(Vec3(*srctan));
 
 		//all of this will be using currentmodel data vars
-        srcpos++;
+    /*    srcpos++;
         srcnorm++;
         srctan++;
         dstpos++;
         dstnorm++;
         dsttan++;
-        dstbitan++;
 
         index += 4;
-        weight += 4;
-    }*/
+        weight += 4;*/
+    }
 }
 
 extern void R_DrawNullModel (void);
