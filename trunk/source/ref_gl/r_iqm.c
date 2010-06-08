@@ -6,28 +6,51 @@ extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 qboolean testflag;
 
 //these matrix functions should be moved to matrixlib.c or similar
+
+void Matrix3x3CrossFromMatrix3x4(matrix3x3_t *out, matrix3x4_t in)
+{
+	vec3_t a3, b3, c3;
+	int i;
+
+	for(i=0; i<3; i++) {
+		a3[i] = in.a[i];
+		b3[i] = in.b[i];
+		c3[i] = in.c[i];
+	}
+
+	CrossProduct(b3, c3, out->a);
+	CrossProduct(c3, a3, out->b);
+	CrossProduct(a3, b3, out->c);
+}
+
+void Matrix3x3_TransformNormal(mnormal_t *out, matrix3x3_t mat, const mnormal_t in)
+{
+	out->dir[0] = DotProduct(mat.a, in.dir);
+	out->dir[1] = DotProduct(mat.b, in.dir);
+	out->dir[2] = DotProduct(mat.c, in.dir);
+}
+
+void Matrix3x3_TransformTangent(mtangent_t *out, matrix3x3_t mat, const mtangent_t in)
+{
+	out->dir[0] = DotProduct(mat.a, in.dir);
+	out->dir[1] = DotProduct(mat.b, in.dir);
+	out->dir[2] = DotProduct(mat.c, in.dir);
+}
+
 void Matrix3x4_Invert(matrix3x4_t *out, matrix3x4_t in)
 {
 	vec3_t a, b, c, trans;
 
-	//Matrix3x3 invrot(Vec3(o.a.x, o.b.x, o.c.x), Vec3(o.a.y, o.b.y, o.c.y), Vec3(o.a.z, o.b.z, o.c.z));
 	VectorSet(a, in.a[0], in.b[0], in.c[0]);
 	VectorSet(b, in.a[1], in.b[1], in.c[1]);
 	VectorSet(c, in.a[2], in.b[2], in.c[2]);
 
-    //invrot.a /= invrot.a.squaredlen();
-    //invrot.b /= invrot.b.squaredlen();
-    //invrot.c /= invrot.c.squaredlen();
 	VectorScale(a, 1/pow(VectorLength(a), 2), a);
 	VectorScale(b, 1/pow(VectorLength(b), 2), b);
 	VectorScale(c, 1/pow(VectorLength(c), 2), c);
 
-    //Vec3 trans(o.a.w, o.b.w, o.c.w);
 	VectorSet(trans, in.a[3], in.b[3], in.c[3]);
 
-    //a = Vec4(invrot.a, -invrot.a.dot(trans));
-    //b = Vec4(invrot.b, -invrot.b.dot(trans));
-    //c = Vec4(invrot.c, -invrot.c.dot(trans));
 	Vector4Set(out->a, a[0], a[1], a[2], -_DotProduct(a, trans));
 	Vector4Set(out->b, b[0], b[1], b[2], -_DotProduct(b, trans));
 	Vector4Set(out->c, c[0], c[1], c[2], -_DotProduct(c, trans));
@@ -100,6 +123,13 @@ Matrix3x4_Copy(matrix3x4_t *out, matrix3x4_t in)
 	Vector4Copy(in.c, out->c);
 }
 
+Matrix3x4_Transform(mvertex_t *out, matrix3x4_t mat, const mvertex_t in)
+{
+	out->position[0] = DotProduct(mat.a, in.position);
+	out->position[1] = DotProduct(mat.b, in.position);
+	out->position[2] = DotProduct(mat.c, in.position);
+}
+
 extern 
 void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent)
 {
@@ -130,7 +160,6 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, 
 					LittleFloat(vnormal[1]),
 					LittleFloat(vnormal[2]));	
 
-		//fix me - I think these are actually x4!
 		Vector4Set(iqmmodel->tangent[i].dir,
 					LittleFloat(vtangent[0]),
 					LittleFloat(vtangent[1]),
@@ -141,7 +170,6 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, 
 		vnormal += 3;
 		vtangent +=4;
 	}
-	
 }
 
 qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
@@ -405,8 +433,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 	// load vertex data
 	R_LoadIQMVertexArrays(mod, vposition, vnormal, vtangent);
-	
-	//fix this next section
 
 	// load texture coodinates
     mod->st = (fstvert_t*)Hunk_Alloc (header->num_vertexes * sizeof(fstvert_t));	
@@ -419,8 +445,14 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		vtexcoord+=2;
 	}
 
-	Com_Printf("Successfully loaded %s\n", mod->name);
-	testflag = true;
+	//to do - verify these come in ok
+	mod->blendindexes = (unsigned char*)Hunk_Alloc (header->num_vertexes * 4 * sizeof(unsigned char));
+	mod->blendweights = (unsigned char*)Hunk_Alloc (header->num_vertexes * 4 * sizeof(unsigned char));
+	for (i = 0; i < (int)header->num_vertexes;i++)
+	{
+		memcpy(mod->blendindexes, vblendindexes + i*4, 4);
+		memcpy(mod->blendweights, vblendweights + i*4, 4);
+	}
 
 	//free temp non hunk mem
 	if(baseframe)
@@ -435,7 +467,7 @@ matrix3x4_t outframe[5096]; //find out what max frames might be
 
 void GL_AnimateIqmFrame(float curframe)
 {
-	int i;
+	int i, j;
     int frame1 = (int)floor(curframe),
         frame2 = frame1 + 1;
     float frameoffset = curframe - frame1;
@@ -472,67 +504,67 @@ void GL_AnimateIqmFrame(float curframe)
 		mvertex_t *dstpos = (mvertex_t *)currentmodel->animatevertexes;
 		mnormal_t *dstnorm = (mnormal_t *)currentmodel->animatenormal;
 		mtangent_t *dsttan = (mtangent_t *)currentmodel->animatetangent;
-	}
 
-	//not sure about these, need to read in this stuff yet
-    //const uchar *index = currentmodel->inblendindex, *weight = currentmodel->inblendweight;
+		const unsigned char *index = currentmodel->blendindexes, *weight = currentmodel->blendweights;
 
-	//this next section need major translation to our codebase
-	for(i = 0; i < currentmodel->numvertexes; i++)
-    {
-		matrix3x4_t mat, matnorm, temp;
-        // Blend matrixes for this vertex according to its blend weights. 
-        // the first index/weight is always present, and the weights are
-        // guaranteed to add up to 255. So if only the first weight is
-        // presented, you could optimize this case by skipping any weight
-        // multiplies and intermediate storage of a blended matrix. 
-        // There are only at most 4 weights per vertex, and they are in 
-        // sorted order from highest weight to lowest weight. Weights with 
-        // 0 values, which are always at the end, are unused.
-/*
-		Matrix3x4_Scale(&mat, outframe[index[0]], weight[0]/255.0f);
-		for(int j = 1; j < 4 && weight[j]; j++) {
-			Matrix3x4_Scale(&temp, outframe[index[j]], weight[j]/255.0f);
-			Matrix3x4_Add(&mat, mat, temp);
+		//this next section need major translation to our codebase
+		for(i = 0; i < currentmodel->numvertexes; i++)
+		{
+			matrix3x4_t mat, temp;
+			matrix3x3_t matnorm;
+
+			// Blend matrixes for this vertex according to its blend weights. 
+			// the first index/weight is always present, and the weights are
+			// guaranteed to add up to 255. So if only the first weight is
+			// presented, you could optimize this case by skipping any weight
+			// multiplies and intermediate storage of a blended matrix. 
+			// There are only at most 4 weights per vertex, and they are in 
+			// sorted order from highest weight to lowest weight. Weights with 
+			// 0 values, which are always at the end, are unused.
+
+			Matrix3x4_Scale(&mat, outframe[index[0]], weight[0]/255.0f);
+			for(j = 1; j < 4 && weight[j]; j++) {
+				Matrix3x4_Scale(&temp, outframe[index[j]], weight[j]/255.0f);
+				Matrix3x4_Add(&mat, mat, temp);
+			}
+
+			// Transform attributes by the blended matrix.
+			// Position uses the full 3x4 transformation matrix.
+			// Normals and tangents only use the 3x3 rotation part 
+			// of the transformation matrix.
+
+			Matrix3x4_Transform(dstpos, mat, *srcpos);
+
+			// Note that if the matrix includes non-uniform scaling, normal vectors
+			// must be transformed by the inverse-transpose of the matrix to have the
+			// correct relative scale. Note that invert(mat) = adjoint(mat)/determinant(mat),
+			// and since the absolute scale is not important for a vector that will later
+			// be renormalized, the adjoint-transpose matrix will work fine, which can be
+			// cheaply generated by 3 cross-products.
+			//
+			// If you don't need to use joint scaling in your models, you can simply use the
+			// upper 3x3 part of the position matrix instead of the adjoint-transpose shown 
+			// here.
+
+			Matrix3x3CrossFromMatrix3x4(&matnorm, mat);
+			Matrix3x3_TransformNormal(dstnorm, matnorm, *srcnorm);
+
+			// Note that input tangent data has 4 coordinates, 
+			// so only transform the first 3 as the tangent vector.
+
+			Matrix3x3_TransformTangent(dsttan, matnorm, *srctan);
+
+		    srcpos++;
+			srcnorm++;
+			srctan++;
+			dstpos++;
+			dstnorm++;
+			dsttan++;
+
+			index += 4;
+			weight += 4;
 		}
-  */
-        // Transform attributes by the blended matrix.
-        // Position uses the full 3x4 transformation matrix.
-        // Normals and tangents only use the 3x3 rotation part 
-        // of the transformation matrix.
-
-        //*dstpos = mat.transform(*srcpos);
-
-        // Note that if the matrix includes non-uniform scaling, normal vectors
-        // must be transformed by the inverse-transpose of the matrix to have the
-        // correct relative scale. Note that invert(mat) = adjoint(mat)/determinant(mat),
-        // and since the absolute scale is not important for a vector that will later
-        // be renormalized, the adjoint-transpose matrix will work fine, which can be
-        // cheaply generated by 3 cross-products.
-        //
-        // If you don't need to use joint scaling in your models, you can simply use the
-        // upper 3x3 part of the position matrix instead of the adjoint-transpose shown 
-        // here.
-
-        //Matrix3x3 matnorm(mat.b.cross3(mat.c), mat.c.cross3(mat.a), mat.a.cross3(mat.b));
-        //*dstnorm = matnorm.transform(*srcnorm);
-
-        // Note that input tangent data has 4 coordinates, 
-        // so only transform the first 3 as the tangent vector.
-
-        //*dsttan = matnorm.transform(Vec3(*srctan));
-
-		//all of this will be using currentmodel data vars
-    /*    srcpos++;
-        srcnorm++;
-        srctan++;
-        dstpos++;
-        dstnorm++;
-        dsttan++;
-
-        index += 4;
-        weight += 4;*/
-    }
+	}
 }
 
 extern void R_DrawNullModel (void);

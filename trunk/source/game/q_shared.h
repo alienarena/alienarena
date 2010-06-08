@@ -138,6 +138,14 @@ typedef	int	fixed4_t;
 typedef	int	fixed8_t;
 typedef	int	fixed16_t;
 
+typedef struct matrix3x3_s
+{
+	vec3_t a;
+	vec3_t b;
+	vec3_t c;
+}
+matrix3x3_t;
+
 typedef struct matrix3x4_s
 {
 	vec4_t a;
