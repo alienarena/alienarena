@@ -119,16 +119,6 @@ typedef struct
 
 typedef struct
 {
-	vec4_t		idx;
-} mblendindex_t;
-
-typedef struct
-{
-	vec4_t		weight;
-} mblendweight_t;
-
-typedef struct
-{
 	vec3_t		mins, maxs;
 	float		radius;
 	int			headnode;
@@ -361,8 +351,8 @@ typedef struct model_s
 	mnormal_t		*animatenormal;
 	mtangent_t		*tangent;
 	mtangent_t		*animatetangent;
-	mblendindex_t	*blendindexes;
-	mblendweight_t	*blendweights;
+	unsigned char	*blendindexes;
+	unsigned char	*blendweights;
 	//end iqm
 
 	fstvert_t	*st;
