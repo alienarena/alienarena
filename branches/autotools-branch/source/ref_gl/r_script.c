@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -20,11 +20,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // gl_script.c - scripted texture rendering - MrG
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "r_local.h"
 
 #ifdef _WINDOWS
 #include <io.h>
 #endif
+
+#if defined HAVE_STRCASECMP && !defined HAVE__STRICMP
+#define _stricmp strcasecmp
+#endif
+
 
 void CIN_FreeCin (int texnum);
 
@@ -57,10 +66,10 @@ int	RS_Random(rs_stage_t *stage, msurface_t *surf)
 int RS_Animate (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
-	float			time = rs_realtime * 1000 - 
+	float			time = rs_realtime * 1000 -
 		(stage->last_anim_time + stage->anim_delay);
 
-	while (stage->last_anim_time < rs_realtime) 
+	while (stage->last_anim_time < rs_realtime)
 	{
 		anim = anim->next;
 		if (!anim)
@@ -75,10 +84,10 @@ int RS_Animate (rs_stage_t *stage)
 void *RS_AnimateSkin (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
-	float			time = rs_realtime * 1000 - 
+	float			time = rs_realtime * 1000 -
 		(stage->last_anim_time + stage->anim_delay);
 
-	while (stage->last_anim_time < rs_realtime) 
+	while (stage->last_anim_time < rs_realtime)
 	{
 		anim = anim->next;
 		if (!anim)
@@ -106,13 +115,13 @@ void RS_ResetScript (rscript_t *rs)
 	random_stage_t	*randStage, *tmp_rand;
 
 	rs->name[0] = 0;
-	
+
 	while (stage != NULL)
 	{
-		if (stage->anim_count) 
+		if (stage->anim_count)
 		{
 			anim = stage->anim_stage;
-			while (anim != NULL) 
+			while (anim != NULL)
 			{
 				tmp_anim = anim;
 				if (anim->texture)
@@ -122,10 +131,10 @@ void RS_ResetScript (rscript_t *rs)
 				free (tmp_anim);
 			}
 		}
-		if (stage->rand_count) 
+		if (stage->rand_count)
 		{
 			randStage = stage->rand_stage;
-			while (randStage != NULL) 
+			while (randStage != NULL)
 			{
 				tmp_rand = randStage;
 				if (randStage->texture)
@@ -155,7 +164,7 @@ void RS_ResetScript (rscript_t *rs)
 	rs->warpspeed = 0;
 	rs->ready = false;
 
-	
+
 }
 
 void RS_ClearStage (rs_stage_t *stage)
@@ -164,13 +173,13 @@ void RS_ClearStage (rs_stage_t *stage)
 	random_stage_t	*randStage = stage->rand_stage, *tmp_rand;
 
 
-	while (anim != NULL) 
+	while (anim != NULL)
 	{
 		tmp_anim = anim;
 		anim = anim->next;
 		free (tmp_anim);
 	}
-	while (randStage != NULL) 
+	while (randStage != NULL)
 	{
 		tmp_rand = randStage;
 		randStage = randStage->next;
@@ -183,7 +192,7 @@ void RS_ClearStage (rs_stage_t *stage)
 
 	stage->anim_delay = 0;
 	stage->anim_stage = NULL;
-	
+
 	stage->rand_count = 0;
 	stage->rand_stage = NULL;
 
@@ -219,7 +228,7 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->frames.end = 0;
 
 	stage->rot_speed = 0;
-	
+
 	VectorClear(stage->origin);
 	VectorClear(stage->angle);
 
@@ -249,12 +258,12 @@ rscript_t *RS_NewScript (char *name)
 	rscript_t	*rs;
 	unsigned int	i;
 
-	if (!rs_rootscript) 
+	if (!rs_rootscript)
 	{
 		rs_rootscript = (rscript_t *)malloc(sizeof(rscript_t));
 		rs = rs_rootscript;
-	} 
-	else 
+	}
+	else
 	{
 		rs = rs_rootscript;
 
@@ -288,11 +297,11 @@ rs_stage_t *RS_NewStage (rscript_t *rs)
 {
 	rs_stage_t	*stage;
 
-	if (rs->stage == NULL) 
+	if (rs->stage == NULL)
 	{
 		rs->stage = (rs_stage_t *)malloc(sizeof(rs_stage_t));
 		stage = rs->stage;
-	} 
+	}
 	else
 	{
 		stage = rs->stage;
@@ -320,7 +329,7 @@ void RS_FreeAllScripts (void)
 {
 	rscript_t	*rs = rs_rootscript, *tmp_rs;
 
-	while (rs != NULL) 
+	while (rs != NULL)
 	{
 		tmp_rs = rs->next;
 		RS_ResetScript(rs);
@@ -346,7 +355,7 @@ void RS_FreeScript(rscript_t *rs)
 	if (!rs)
 		return;
 
-	if (rs_rootscript == rs) 
+	if (rs_rootscript == rs)
 	{
 		rs_rootscript = rs_rootscript->next;
 		RS_ResetScript(rs);
@@ -368,7 +377,7 @@ void RS_FreeUnmarked (void)
 {
 	rscript_t	*rs = rs_rootscript, *tmp_rs;
 
-	while (rs != NULL) 
+	while (rs != NULL)
 	{
 		tmp_rs = rs->next;
 
@@ -386,7 +395,7 @@ rscript_t *RS_FindScript(char *name)
 
 	COMPUTE_HASH_KEY(hash_key, name, i);
 
-	while (rs != NULL) 
+	while (rs != NULL)
 	{
 		if (rs->hash_key == hash_key && !_stricmp(rs->name, name))
 		{
@@ -422,7 +431,7 @@ void RS_ReadyScript (rscript_t *rs)
 
 		//set anim
 		anim = stage->anim_stage;
-		while (anim != NULL) 
+		while (anim != NULL)
 		{
 			anim->texture = GL_FindImage (anim->name, mode);
 			if (!anim->texture)
@@ -433,7 +442,7 @@ void RS_ReadyScript (rscript_t *rs)
 
 		//set tiling
 		randStage = stage->rand_stage;
-		while (randStage != NULL) 
+		while (randStage != NULL)
 		{
 			randStage->texture = GL_FindImage (randStage->name, mode);
 			if (!randStage->texture)
@@ -443,11 +452,11 @@ void RS_ReadyScript (rscript_t *rs)
 		}
 
 		//set name
-		if (stage->name[0]) 
+		if (stage->name[0])
 			stage->texture = GL_FindImage (stage->name, mode);
 		if (!stage->texture)
 			stage->texture = r_notexture;
-		if (stage->name2[0]) 
+		if (stage->name2[0])
 			stage->texture2 = GL_FindImage (stage->name2, mode);
 		if (!stage->texture2)
 			stage->texture2 = r_notexture;
@@ -534,7 +543,7 @@ scriptname
 	}
 }
 */
- 
+
 void rs_stage_map (rs_stage_t *stage, char **token)
 {
 	*token = strtok (NULL, TOK_DELIMINATORS);
@@ -590,7 +599,7 @@ void rs_stage_scroll (rs_stage_t *stage, char **token)
 	stage->scroll.typeX = RS_FuncName(*token);
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->scroll.speedX = atof(*token);
-	
+
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->scroll.typeY = RS_FuncName(*token);
 	*token = strtok (NULL, TOK_DELIMINATORS);
@@ -603,22 +612,22 @@ void rs_stage_blendfunc (rs_stage_t *stage, char **token)
 
 	*token = strtok (NULL, TOK_DELIMINATORS);
 
-	if (!Q_stricmp (*token, "add")) 
+	if (!Q_stricmp (*token, "add"))
 	{
 		stage->blendfunc.source = GL_ONE;
 		stage->blendfunc.dest = GL_ONE;
-	} 
-	else if (!Q_stricmp (*token, "blend")) 
+	}
+	else if (!Q_stricmp (*token, "blend"))
 	{
 		stage->blendfunc.source = GL_SRC_ALPHA;
 		stage->blendfunc.dest = GL_ONE_MINUS_SRC_ALPHA;
-	} 
-	else if (!Q_stricmp (*token, "filter")) 
+	}
+	else if (!Q_stricmp (*token, "filter"))
 	{
 		stage->blendfunc.source = GL_ZERO;
 		stage->blendfunc.dest = GL_SRC_COLOR;
-	} 
-	else 
+	}
+	else
 	{
 		stage->blendfunc.source = RS_BlendID (*token);
 
@@ -647,8 +656,8 @@ void rs_stage_random (rs_stage_t *stage, char **token)
 	stage->rand_count = 0;
 
 	*token = strtok(NULL, TOK_DELIMINATORS);
-	
-	while (_stricmp (*token, "end")) 
+
+	while (_stricmp (*token, "end"))
 	{
 		stage->rand_count++;
 
@@ -658,7 +667,7 @@ void rs_stage_random (rs_stage_t *stage, char **token)
 
 		*token = strtok(NULL, TOK_DELIMINATORS);
 
-		if (!_stricmp (*token, "end")) 
+		if (!_stricmp (*token, "end"))
 		{
 			rand->next = NULL;
 			break;
@@ -680,8 +689,8 @@ void rs_stage_anim (rs_stage_t *stage, char **token)
 	stage->last_anim = anim;
 
 	*token = strtok(NULL, TOK_DELIMINATORS);
-	
-	while (_stricmp (*token, "end")) 
+
+	while (_stricmp (*token, "end"))
 	{
 		stage->anim_count++;
 
@@ -691,7 +700,7 @@ void rs_stage_anim (rs_stage_t *stage, char **token)
 
 		*token = strtok(NULL, TOK_DELIMINATORS);
 
-		if (!_stricmp (*token, "end")) 
+		if (!_stricmp (*token, "end"))
 		{
 			anim->next = NULL;
 			break;
@@ -738,10 +747,10 @@ void rs_stage_origin (rs_stage_t *stage, char **token)
 {
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->origin[0] = (float)atof(*token);
-	
+
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->origin[1] = (float)atof(*token);
-	
+
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->origin[2] = (float)atof(*token);
 }
@@ -750,10 +759,10 @@ void rs_stage_angle (rs_stage_t *stage, char **token)
 {
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->angle[0] = (float)atof(*token);
-	
+
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->angle[1] = (float)atof(*token);
-	
+
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->angle[2] = (float)atof(*token);
 }
@@ -764,7 +773,7 @@ void rs_stage_scale (rs_stage_t *stage, char **token)
 	stage->scale.typeX = RS_FuncName(*token);
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->scale.scaleX = atof(*token);
-	
+
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->scale.typeY = RS_FuncName(*token);
 	*token = strtok (NULL, TOK_DELIMINATORS);
@@ -827,7 +836,7 @@ void rs_stage_glow (rs_stage_t *stage, char **token)
 {
 	stage->glow = true;
 }
-static rs_stagekey_t rs_stagekeys[] = 
+static rs_stagekey_t rs_stagekeys[] =
 {
 	{	"colormap",		&rs_stage_colormap		},
 	{	"map",			&rs_stage_map			},
@@ -877,7 +886,7 @@ void rs_script_subdivide (rscript_t *rs, char **token)
 
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	divsize = atoi (*token);
- 
+
 	// cap max & min subdivide sizes
 	if (divsize > 128)
 		divsize = 128;
@@ -923,12 +932,12 @@ void rs_script_picsize (rscript_t *rs, char **token)
 
 	*token = strtok(NULL, TOK_DELIMINATORS);
 	rs->picsize.width = atof (*token);
-	
+
 	*token = strtok(NULL, TOK_DELIMINATORS);
 	rs->picsize.height = atof (*token);
 }
 
-static rs_scriptkey_t rs_scriptkeys[] = 
+static rs_scriptkey_t rs_scriptkeys[] =
 {
 	{	"safe",			&rs_script_safe			},
 	{	"subdivide",	&rs_script_subdivide	},
@@ -955,7 +964,7 @@ void RS_LoadScript(char *script)
 
 	len = FS_LoadFile (script, (void **)&fbuf);
 
-	if (!fbuf || len < 16) 
+	if (!fbuf || len < 16)
 	{
 	//	Con_Printf (PRINT_ALL, "Could not load script %s\n", script);
 		return;
@@ -969,7 +978,7 @@ void RS_LoadScript(char *script)
 
 	token = strtok (buf, TOK_DELIMINATORS);
 
-	while (token != NULL) 
+	while (token != NULL)
 	{
 		if (!_stricmp (token, "/*") || !_stricmp (token, "["))
 			ignored++;
@@ -980,9 +989,9 @@ void RS_LoadScript(char *script)
 		{
 			//IGNORE
 		}
-		else if (!inscript && !ignored) 
+		else if (!inscript && !ignored)
 		{
-			if (!_stricmp (token, "{")) 
+			if (!_stricmp (token, "{"))
 			{
 				inscript = true;
 			}
@@ -995,20 +1004,20 @@ void RS_LoadScript(char *script)
 
 				rs = RS_NewScript(token);
 			}
-		} 
-		else if (inscript && !ignored) 
+		}
+		else if (inscript && !ignored)
 		{
 			if (!_stricmp(token, "}"))
 			{
-				if (instage) 
+				if (instage)
 				{
 					instage = false;
-				} 
-				else 
+				}
+				else
 				{
 					inscript = false;
 				}
-			} 
+			}
 			else if (!_stricmp(token, "{"))
 			{
 				if (!instage) {
@@ -1018,7 +1027,7 @@ void RS_LoadScript(char *script)
 			}
 			else
 			{
-				if (instage && !ignored) 
+				if (instage && !ignored)
 				{
 					for (i = 0; i < num_stagekeys; i++) {
 						if (!_stricmp (rs_stagekeys[i].stage, token))
@@ -1028,18 +1037,18 @@ void RS_LoadScript(char *script)
 						}
 					}
 				}
-				else 
+				else
 				{
-					for (i = 0; i < num_scriptkeys; i++) 
+					for (i = 0; i < num_scriptkeys; i++)
 					{
-						if (!_stricmp (rs_scriptkeys[i].script, token)) 
+						if (!_stricmp (rs_scriptkeys[i].script, token))
 						{
 							rs_scriptkeys[i].func (rs, &token);
 							break;
 						}
 					}
 				}
-			}			
+			}
 		}
 
 		token = strtok (NULL, TOK_DELIMINATORS);
@@ -1070,7 +1079,7 @@ void RS_ScanPathForScripts (void)
 
 	script_count = 0;
 	if(gl_normalmaps->value) { //search for normal map scripts ONLY if we are using normal mapping, do last to overide anything
-		
+
 		script_list = FS_ListFilesInFS("scripts/normals/*.rscript", &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
 
 		if(script_list) {
@@ -1089,11 +1098,11 @@ void RS_ScanPathForScripts (void)
 void RS_SetEnvmap (vec3_t v, float *os, float *ot)
 {
 	vec3_t vert;
-	
+
 	vert[0] = v[0]*r_world_matrix[0]+v[1]*r_world_matrix[4]+v[2]*r_world_matrix[8] +r_world_matrix[12];
 	vert[1] = v[0]*r_world_matrix[1]+v[1]*r_world_matrix[5]+v[2]*r_world_matrix[9] +r_world_matrix[13];
 	vert[2] = v[0]*r_world_matrix[2]+v[1]*r_world_matrix[6]+v[2]*r_world_matrix[10]+r_world_matrix[14];
-	
+
 	VectorNormalize (vert);
 
 	*os = vert[0];
@@ -1105,9 +1114,9 @@ void RS_ScaleTexcoords (rs_stage_t *stage, float *os, float *ot)
 	float	txm = 0, tym = 0;
 
 	// scale
-	if (stage->scale.scaleX) 
+	if (stage->scale.scaleX)
 	{
-		switch (stage->scale.typeX) 
+		switch (stage->scale.typeX)
 		{
 		case 0:	// static
 			*os *= stage->scale.scaleX;
@@ -1121,9 +1130,9 @@ void RS_ScaleTexcoords (rs_stage_t *stage, float *os, float *ot)
 		}
 	}
 
-	if (stage->scale.scaleY) 
+	if (stage->scale.scaleY)
 	{
-		switch (stage->scale.typeY) 
+		switch (stage->scale.typeY)
 		{
 		case 0:	// static
 			*ot *= stage->scale.scaleY;
@@ -1181,7 +1190,7 @@ void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
 	float	txm = 0, tym = 0;
 
 	// scale
-	if (stage->scale.scaleX) 
+	if (stage->scale.scaleX)
 	{
 		switch (stage->scale.typeX)
 		{
@@ -1218,9 +1227,9 @@ void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
 	if (stage->rot_speed)
 		RS_RotateST2 (os, ot, -stage->rot_speed * rs_realtime * 0.0087266388888888888888888888888889);
 
-	if (stage->scroll.speedX) 
+	if (stage->scroll.speedX)
 	{
-		switch(stage->scroll.typeX) 
+		switch(stage->scroll.typeX)
 		{
 			case 0:	// static
 				txm=rs_realtime*stage->scroll.speedX;
@@ -1232,13 +1241,13 @@ void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
 				txm=cos(rs_realtime*stage->scroll.speedX);
 				break;
 		}
-	} 
+	}
 	else
 		txm=0;
 
-	if (stage->scroll.speedY) 
+	if (stage->scroll.speedY)
 	{
-		switch(stage->scroll.typeY) 
+		switch(stage->scroll.typeY)
 		{
 			case 0:	// static
 				tym=rs_realtime*stage->scroll.speedY;
@@ -1250,7 +1259,7 @@ void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot)
 				tym=cos(rs_realtime*stage->scroll.speedY);
 				break;
 		}
-	} 
+	}
 	else
 		tym=0;
 
@@ -1323,7 +1332,7 @@ rscript_t	*surfaceScript(msurface_t *surf)
 }
 void SetVertexOverbrights (qboolean toggle)
 {
-	if (!r_overbrightbits->value || !gl_ext_mtexcombine->value) 
+	if (!r_overbrightbits->value || !gl_ext_mtexcombine->value)
 		return;
 
 	if (toggle)//turn on
@@ -1332,7 +1341,7 @@ void SetVertexOverbrights (qboolean toggle)
 		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
 		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
 		qglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_MODULATE);
-		
+
 		GL_TexEnv( GL_COMBINE_EXT );
 	}
 	else //turn off
@@ -1381,20 +1390,20 @@ void R_DrawVegetationSurface ( void )
 	grass = r_grasses;
 
 	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs,	0, 0, 0);	
+	VectorSet(maxs,	0, 0, 0);
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
     for (i=0; i<r_numgrasses; i++, grass++) {
 
-		scale = 10.0*grass->size; 
-		 
+		scale = 10.0*grass->size;
+
 		VectorCopy(r_newrefdef.viewangles, angle);
 
-		if(!grass->type) 
+		if(!grass->type)
 			angle[0] = 0;  // keep vertical by removing pitch(grass and plants grow upwards)
 
-		AngleVectors(angle, NULL, right, up);	
+		AngleVectors(angle, NULL, right, up);
 		VectorScale(right, scale, right);
 		VectorScale(up, scale, up);
 		VectorCopy(grass->origin, origin);
@@ -1410,12 +1419,12 @@ void R_DrawVegetationSurface ( void )
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 
 		if(visible) {
-	
+
 			//render grass polygon
-			qglDepthMask( GL_FALSE );	 	
+			qglDepthMask( GL_FALSE );
 			qglEnable( GL_BLEND);
 			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-					
+
 			GL_Bind(grass->texnum);
 
 			if(gl_dynamic->value)
@@ -1425,7 +1434,7 @@ void R_DrawVegetationSurface ( void )
 			VectorScale(lightLevel, 2.0, lightLevel);
 			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
 			GL_TexEnv( GL_MODULATE );
-			
+
 			VectorSet (corner[0],
 				origin[0] + (up[0] + right[0])*(-0.5),
 				origin[1] + (up[1] + right[1])*(-0.5),
@@ -1441,18 +1450,18 @@ void R_DrawVegetationSurface ( void )
 				sway = 2;
 
 			VectorSet ( corner[1],
-				corner0[0] + up[0] + sway*sin (rs_realtime*sway), 
-				corner0[1] + up[1] + sway*sin (rs_realtime*sway), 
+				corner0[0] + up[0] + sway*sin (rs_realtime*sway),
+				corner0[1] + up[1] + sway*sin (rs_realtime*sway),
 				corner0[2] + up[2]);
 
-			VectorSet ( corner[2], 
+			VectorSet ( corner[2],
 				corner0[0] + (up[0]+right[0] + sway*sin (rs_realtime*sway)),
-				corner0[1] + (up[1]+right[1] + sway*sin (rs_realtime*sway)), 
+				corner0[1] + (up[1]+right[1] + sway*sin (rs_realtime*sway)),
 				corner0[2] + (up[2]+right[2]));
 
 			VectorSet ( corner[3],
-				corner0[0] + right[0], 
-				corner0[1] + right[1], 
+				corner0[0] + right[0],
+				corner0[1] + right[1],
 				corner0[2] + right[2]);
 
 			VArray = &VArrayVerts[0];
@@ -1485,12 +1494,12 @@ void R_DrawVegetationSurface ( void )
 				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 			}
 
-			if(qglLockArraysEXT)						
+			if(qglLockArraysEXT)
 				qglLockArraysEXT(0, 4);
 
 			qglDrawArrays(GL_QUADS,0,4);
-					
-			if(qglUnlockArraysEXT)						
+
+			if(qglUnlockArraysEXT)
 				qglUnlockArraysEXT();
 
 			c_grasses++;
@@ -1503,7 +1512,7 @@ void R_DrawVegetationSurface ( void )
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglColor4f( 1,1,1,1 );
 	qglDisable(GL_BLEND);
-	qglDepthMask( GL_TRUE );	
+	qglDepthMask( GL_TRUE );
 	GL_TexEnv( GL_REPLACE );
 }
 
@@ -1525,21 +1534,21 @@ void R_DrawBeamSurface ( void )
 	beam = r_beams;
 
 	VectorSet(mins, 32, 32, 64);
-	VectorSet(maxs, -32, -32, -64);	
+	VectorSet(maxs, -32, -32, -64);
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
     for (i=0; i<r_numbeams; i++, beam++) {
-		 
-		scale = 10.0*beam->size; 
+
+		scale = 10.0*beam->size;
 
 		VectorCopy(r_newrefdef.viewangles, angle);
 
 		angle[0] = 0;  // keep vertical by removing pitch
 
-		AngleVectors(angle, NULL, right, up);	
+		AngleVectors(angle, NULL, right, up);
 		VectorScale(right, scale, right);
-		VectorScale(up, scale, up); 
+		VectorScale(up, scale, up);
 		VectorCopy(beam->origin, origin);
 
 		if(!beam->type)
@@ -1549,13 +1558,13 @@ void R_DrawBeamSurface ( void )
 
 		r_trace = CM_BoxTrace(r_origin, origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		visible = r_trace.fraction == 1.0;
-		
+
 		if(visible) {
 
 			//render polygon
-			qglDepthMask( GL_FALSE );	 	
+			qglDepthMask( GL_FALSE );
 			qglEnable( GL_BLEND);
-			qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);	
+			qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);
 
 			qglColor4f( beam->color[0],beam->color[1],beam->color[2], 1 );
 			GL_TexEnv( GL_MODULATE );
@@ -1568,18 +1577,18 @@ void R_DrawBeamSurface ( void )
 				origin[2] + (up[2] + right[2])*(-0.5));
 
 			VectorSet ( corner[1],
-				corner0[0] + up[0], 
-				corner0[1] + up[1], 
+				corner0[0] + up[0],
+				corner0[1] + up[1],
 				corner0[2] + up[2]);
 
-			VectorSet ( corner[2], 
+			VectorSet ( corner[2],
 				corner0[0] + (up[0]+right[0]),
-				corner0[1] + (up[1]+right[1]), 
+				corner0[1] + (up[1]+right[1]),
 				corner0[2] + (up[2]+right[2]));
 
 			VectorSet ( corner[3],
-				corner0[0] + right[0], 
-				corner0[1] + right[1], 
+				corner0[0] + right[0],
+				corner0[1] + right[1],
 				corner0[2] + right[2]);
 
 				VArray = &VArrayVerts[0];
@@ -1612,12 +1621,12 @@ void R_DrawBeamSurface ( void )
 				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 			}
 
-			if(qglLockArraysEXT)						
+			if(qglLockArraysEXT)
 				qglLockArraysEXT(0, 4);
 
 			qglDrawArrays(GL_QUADS,0,4);
-					
-			if(qglUnlockArraysEXT)						
+
+			if(qglUnlockArraysEXT)
 				qglUnlockArraysEXT();
 
 			c_beams++;
@@ -1630,15 +1639,15 @@ void R_DrawBeamSurface ( void )
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglColor4f( 1,1,1,1 );
 	qglDisable(GL_BLEND);
-	qglDepthMask( GL_TRUE );	
+	qglDepthMask( GL_TRUE );
 	GL_TexEnv( GL_REPLACE );
 }
 
 
 //to do - rewrite using vertex arrays
 
-//This is the shader drawing routine for bsp surfaces - it will draw on top of the 
-//existing texture.  
+//This is the shader drawing routine for bsp surfaces - it will draw on top of the
+//existing texture.
 void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 {
 	glpoly_t	*p;
@@ -1648,7 +1657,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	rs_stage_t	*stage;
 	float		os, ot, alpha;
 	float		scale, time, txm, tym;
-	
+
 	if (!rs)
 		return;
 
@@ -1680,7 +1689,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		 	GL_Bind (stage->texture->texnum);
 		}
 
-		if (stage->blendfunc.blend) 
+		if (stage->blendfunc.blend)
 		{
 			GL_BlendFunction(stage->blendfunc.source, stage->blendfunc.dest);
 			GLSTATE_ENABLE_BLEND
@@ -1690,7 +1699,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			GLSTATE_ENABLE_BLEND
 		}
-		else 
+		else
 		{
 			GLSTATE_DISABLE_BLEND
 		}
@@ -1698,26 +1707,26 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		// sane defaults
 		alpha = 1.0f;
 
-		if (stage->alphashift.min || stage->alphashift.speed) 
+		if (stage->alphashift.min || stage->alphashift.speed)
 		{
-			if (!stage->alphashift.speed && stage->alphashift.min > 0) 
+			if (!stage->alphashift.speed && stage->alphashift.min > 0)
 			{
 				alpha = stage->alphashift.min;
-			} 
-			else if (stage->alphashift.speed) 
+			}
+			else if (stage->alphashift.speed)
 			{
 				alpha = sin (rs_realtime * stage->alphashift.speed);
 				alpha = (alpha + 1)*0.5f;
-				if (alpha > stage->alphashift.max) 
+				if (alpha > stage->alphashift.max)
 					alpha = stage->alphashift.max;
-				if (alpha < stage->alphashift.min) 
+				if (alpha < stage->alphashift.min)
 					alpha = stage->alphashift.min;
 			}
 		}
 
-		if (stage->scroll.speedX) 
+		if (stage->scroll.speedX)
 		{
-			switch (stage->scroll.typeX) 
+			switch (stage->scroll.typeX)
 			{
 			case 0:	// static
 				txm = rs_realtime*stage->scroll.speedX;
@@ -1732,10 +1741,10 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		}
 		else
 			txm=0;
-	
-		if (stage->scroll.speedY) 
+
+		if (stage->scroll.speedY)
 		{
-			switch (stage->scroll.typeY) 
+			switch (stage->scroll.typeY)
 			{
 			case 0:	// static
 				tym = rs_realtime*stage->scroll.speedY;
@@ -1752,15 +1761,15 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 
 		qglColor4f (1, 1, 1, alpha);
 
-		if (stage->alphamask) 
+		if (stage->alphamask)
 		{
 			GLSTATE_ENABLE_ALPHATEST
-		} 
-		else 
+		}
+		else
 		{
 			GLSTATE_DISABLE_ALPHATEST
 		}
-	
+
 		if (rs->subdivide)
 		{
 			glpoly_t *bp;
@@ -1769,11 +1778,11 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			for (bp = surf->polys; bp; bp = bp->next)
 			{
 				p = bp;
- 
+
 				qglBegin(GL_TRIANGLE_FAN);
 				for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
 				{
-					if (stage->envmap) 
+					if (stage->envmap)
 					{
 						RS_SetEnvmap (v, &os, &ot);
 						//move by normal & position
@@ -1782,7 +1791,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 
 						if (surf->texinfo->flags & SURF_FLOWING)
 							txm = tym = 0;
-					} 
+					}
 					else if (fabs(stage->depthhack))
 					{
 						vec3_t vec;
@@ -1793,7 +1802,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 						os = v[3] + cutDot(vec, surf->texinfo->vecs[0])*stage->depthhack*0.01;
 						ot = v[4] + cutDot(vec, surf->texinfo->vecs[1])*stage->depthhack*0.01;
 					}
-					else 
+					else
 					{
 						os = v[3];
 						ot = v[4];
@@ -1821,7 +1830,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 
 					if (!rs->warpsmooth)
 						qglVertex3fv (v);
-					else 
+					else
 					{
 						scale = rs->warpdist * sin(v[0]*rs->warpsmooth+time)*sin(v[1]*rs->warpsmooth+time)*sin(v[2]*rs->warpsmooth+time);
 						VectorMA (v, scale, surf->plane->normal, wv);
@@ -1831,8 +1840,8 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 				qglEnd();
 			}
 
-		} 
-		else 
+		}
+		else
 		{
 
 			for (p = surf->polys; p; p = p->chain)
@@ -1842,7 +1851,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 				for (i = 0, v = p->verts[0]; i < nv; i++, v += VERTEXSIZE)
 				{
 
-					if (stage->envmap) 
+					if (stage->envmap)
 					{
 						RS_SetEnvmap (v, &os, &ot);
 						//move by normal & position
@@ -1862,7 +1871,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 						os = v[3] + cutDot(vec, surf->texinfo->vecs[0])*stage->depthhack*0.01;
 						ot = v[4] + cutDot(vec, surf->texinfo->vecs[1])*stage->depthhack*0.01;
 					}
-					else 
+					else
 					{
 						os = v[3];
 						ot = v[4];
@@ -1871,9 +1880,9 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 					RS_SetTexcoords (stage, &os, &ot, surf);
 
 					{
-						
+
 						float red=255, green=255, blue=255;
-							
+
 						if (stage->colormap.enabled)
 						{
 							red *= stage->colormap.red/255.0f;
@@ -1893,25 +1902,25 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 
 					if (!rs->warpsmooth)
 						qglVertex3fv (v);
-					else 
+					else
 					{
 						scale = rs->warpdist * sin(v[0]*rs->warpsmooth+time)*sin(v[1]*rs->warpsmooth+time)*sin(v[2]*rs->warpsmooth+time);
 						VectorMA (v, scale, surf->plane->normal, wv);
 						qglVertex3fv (wv);
 					}
 
-				} 
+				}
 
 				qglEnd ();
-	
+
 			}
 
 		}
 
 		qglColor4f(1,1,1,1);
 		if (stage->colormap.enabled)
-			qglEnable (GL_TEXTURE_2D); 
-		
+			qglEnable (GL_TEXTURE_2D);
+
 	} while (stage = stage->next);
 
 	SetVertexOverbrights(false);
@@ -1920,7 +1929,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglEnable (GL_BLEND);
 
-	
+
 }
 
 rscript_t *rs_caustics;
@@ -1941,7 +1950,7 @@ void RS_SpecialSurface (msurface_t *surf)
 
 	//Underwater Caustics
 	//hack - can't seem to find fix for when there is no gun model
-	if (surf->flags & SURF_UNDERWATER && cl_gun->value && r_lefthand->value != 2.0F) 
+	if (surf->flags & SURF_UNDERWATER && cl_gun->value && r_lefthand->value != 2.0F)
 			RS_DrawSurfaceTexture(surf, rs_caustics);
 
 	//this was moved here to handle all textures shaders as well.

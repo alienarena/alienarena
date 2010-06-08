@@ -361,6 +361,8 @@ void GLimp_Shutdown( void )
 CPU Detect from Q2E
 ===================
 */
+// -jjb-ac does not appear to be used
+/*
 extern void	Q_strncpyz( char *dest, const char *src, size_t size );
 extern void Q_strncatz( char *dest, const char *src, size_t size );
 qboolean Sys_DetectCPU (char *cpuString, int maxSize)
@@ -580,28 +582,29 @@ NoExtFunction:
 
 
 }
+*/
 
 static void Sys_SetCpuCore (void)
-{ 
+{
 	SYSTEM_INFO cpuInfo;
 /*
-	cpumask=1 - use core #0 
-	cpumask=2 - use core #1 
+	cpumask=1 - use core #0
+	cpumask=2 - use core #1
 	cpumask=3 - use cores #0 & #1
 */
 	if(!sys_affinity->value)
 		return;
-	
+
 	if(sys_affinity->value >3)
 		Cvar_SetValue("sys_affinity", 3);
 
-	GetSystemInfo(&cpuInfo); 
-	
-	/* if number of cpu core > 1 
-	we can run run game on second core or use both cores*/ 	
-	if (cpuInfo.dwNumberOfProcessors > 1) 
-			SetProcessAffinityMask(GetCurrentProcess(), (DWORD32)sys_affinity->value); 
-	
+	GetSystemInfo(&cpuInfo);
+
+	/* if number of cpu core > 1
+	we can run run game on second core or use both cores*/
+	if (cpuInfo.dwNumberOfProcessors > 1)
+			SetProcessAffinityMask(GetCurrentProcess(), (DWORD32)sys_affinity->value);
+
 	CloseHandle(GetCurrentProcess());
 }
 

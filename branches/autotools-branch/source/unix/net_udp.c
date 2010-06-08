@@ -17,9 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-// net_wins.c
 
-#include "../qcommon/qcommon.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "qcommon/qcommon.h"
 
 #include <unistd.h>
 #include <sys/socket.h>
@@ -32,9 +35,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/uio.h>
 #include <errno.h>
 
-#ifdef NeXT
-#include <libc.h>
+#if defined HAVE_STRCASECMP && !defined HAVE_STRICMP
+#define stricmp strcasecmp
 #endif
+
 
 int			server_port;
 netadr_t	net_local_adr;

@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // q_shared.h -- included first by ALL program modules
 
+/* -jjb-ac
 #ifdef _WIN32
 // unknown pragmas are SUPPOSED to be ignored, but....
 #pragma warning(disable : 4244)     // MIPS
@@ -30,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #pragma warning(disable : 4305)		// truncation from const double to float
 
 #endif
+*/
 
 #include <assert.h>
 #include <math.h>
@@ -41,6 +43,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <ctype.h>
 
+// -jjb-ac
+/*
 #if (defined _M_IX86 || defined __i386__) && !defined C_ONLY && !defined __sun__
 #define id386	1
 #else
@@ -52,6 +56,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #else
 #define idaxp	0
 #endif
+*/
 
 typedef unsigned char 		byte;
 typedef enum {false, true}	qboolean;
@@ -71,7 +76,14 @@ typedef enum {false, true}	qboolean;
 #define	MAX_STRING_TOKENS	80		// max tokens resulting from Cmd_TokenizeString
 #define	MAX_TOKEN_CHARS		1024		// max length of an individual token
 
+/*
+ * Note: MAX_QPATH also sets the length of configstrings. See server.h
+ * and client.h. It must be 64, otherwise client/server protocol breaks.
+ */
 #define	MAX_QPATH			64		// max length of a quake game pathname
+
+// -jjb-ac Possible to detect this with configure? The real maximums can be way
+//  more than these, to the point of being impractical
 #ifdef __unix__
 #define	MAX_OSPATH			256		// max length of a filesystem pathname
 #else
@@ -153,11 +165,11 @@ extern vec3_t vec3_origin;
 // microsoft's fabs seems to be ungodly slow...
 //float Q_fabs (float f);
 //#define	fabs(f) Q_fabs(f)
-#if !defined C_ONLY && !defined __unix__ && !defined __sgi
-extern long Q_ftol( float f );
-#else
+//#if !defined C_ONLY && !defined __unix__ && !defined __sgi
+//extern long Q_ftol( float f );
+//#else
 #define Q_ftol( f ) ( long ) (f)
-#endif
+//#endif
 
 #define DotProduct(x,y)			(x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
 #define VectorSubtract(a,b,c)	(c[0]=a[0]-b[0],c[1]=a[1]-b[1],c[2]=a[2]-b[2])
@@ -231,6 +243,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 
 //=============================================
 
+// -jjb-ac
 /* FIXME: Beware - _vsnprintf does not end with \0 - vsnprintf (*nix) does */
 #ifdef _WIN32
 #define vsnprintf	_vsnprintf
@@ -329,6 +342,8 @@ void	Sys_FindClose (void);
 void Sys_Error (char *error, ...);
 void Com_Printf (char *msg, ...);
 
+// -jjb-ac  unused or redundant
+/*
 #ifdef _WIN32
 
 #define Q_INLINE	__inline
@@ -339,6 +354,7 @@ void Com_Printf (char *msg, ...);
 #define Q_INLINE	inline
 
 #endif
+*/
 /*
 ==========================================================
 
@@ -866,7 +882,7 @@ typedef enum
 	EV_FALL,
 	EV_FALLFAR,
 	EV_PLAYER_TELEPORT,
-	EV_OTHER_TELEPORT, 
+	EV_OTHER_TELEPORT,
 	EV_WADE
 } entity_event_t;
 

@@ -237,13 +237,8 @@ void *Sys_GetGameAPI (void *parms)
 	{
 		path = FS_NextPath (path);
 
-//#ifndef GAME_HARD_LINKED
-//		if (!path)
-//			return NULL;		// couldn't find one anywhere
-//#else
 		if ( !path )
-			break;
-//#endif
+			break; // Search did not turn up a game shared library
 
 		snprintf (name, MAX_OSPATH, "%s/%s", path, gamename);
 
@@ -281,10 +276,11 @@ void *Sys_GetGameAPI (void *parms)
 		ptrGetGameAPI = (void *)dlsym (game_library, "GetGameAPI");
 	}
 
-//#ifdef GAME_HARD_LINKED
+	/*
+	 * No shared game library found, use statically linked game
+	 */
 	if ( !ptrGetGameAPI )
 		ptrGetGameAPI = &GetGameAPI;
-//#endif
 
 	if (!ptrGetGameAPI)
 	{

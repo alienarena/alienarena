@@ -19,7 +19,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // cmd.c -- Quake script command processing module
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "qcommon.h"
+
+#if defined HAVE_STRCASECMP && !defined HAVE_STRICMP
+#define stricmp strcasecmp
+#endif
+
 
 #define	MAX_ALIAS_NAME	32
 

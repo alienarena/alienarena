@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // r_mesh.c: triangle model functions
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "r_local.h"
 
 /*
@@ -70,7 +74,7 @@ GL_VlightAliasModel
 
 Vertex lighting for Alias models
 
-Contrast has been added by finding a threshold point, and scaling values on either side in 
+Contrast has been added by finding a threshold point, and scaling values on either side in
 opposite directions.  This gives the shading a more prounounced, defined look.
 
 =============
@@ -85,12 +89,12 @@ void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov,
 
     l = shadedots[verts->lightnormalindex];
     VectorScale(baselight, l, lightOut);
-    
+
     for (i=0; i<3; i++)
-    {        
+    {
 		//add contrast - lights lighter, darks darker
 		lightOut[i] += (lightOut[i] - 0.25);
-		
+
 		//keep values sane
         if (lightOut[i]<0) lightOut[i] = 0;
         if (lightOut[i]>1) lightOut[i] = 1;
@@ -132,7 +136,7 @@ float calcEntAlpha (float alpha, vec3_t point)
 	return newAlpha;
 }
 
-//This routine bascially finds the average light position, by factoring in all lights and 
+//This routine bascially finds the average light position, by factoring in all lights and
 //accounting for their distance, visiblity, and intensity.
 
 vec3_t	lightPosition;
@@ -147,15 +151,15 @@ void GL_GetLightVals()
 	vec3_t mins, maxs;
 	float numlights, weight;
 	float bob;
-	
+
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
 
 	//light shining down if there are no lights at all
 	VectorCopy(currententity->origin, lightPosition);
-	lightPosition[2] += 128; 
+	lightPosition[2] += 128;
 
-	if(currententity->flags & RF_BOBBING) 
+	if(currententity->flags & RF_BOBBING)
 		bob = currententity->bob;
 	else
 		bob = 0;
@@ -165,23 +169,23 @@ void GL_GetLightVals()
 
 	numlights = 0;
 	VectorClear(lightAdd);
-	for (i=0; i<r_lightgroups; i++) {	
+	for (i=0; i<r_lightgroups; i++) {
 
 		if((currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > currententity->origin[2]))
 			r_trace.fraction = 1.0; //don't do traces for weapon models, not smooth enough
 		else
 			r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-		
+
 		if(r_trace.fraction == 1.0) {
 			VectorSubtract(currententity->origin, LightGroups[i].group_origin, temp);
 			dist = VectorLength(temp);
-			if(dist == 0) 
+			if(dist == 0)
 				dist = 1;
 			dist = dist*dist;
 			weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
-			for(j = 0; j < 3; j++) 
+			for(j = 0; j < 3; j++)
 				lightAdd[j] += LightGroups[i].group_origin[j]*weight;
-			numlights+=weight;				
+			numlights+=weight;
 		}
 	}
 
@@ -190,15 +194,15 @@ void GL_GetLightVals()
 		dl = r_newrefdef.dlights;
 		//limit to five lights(maybe less)?
 		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) {
-			
+
 			VectorSubtract(currententity->origin, dl->origin, temp);
 			dist = VectorLength(temp);
 
 			VectorCopy(currententity->origin, temp);
 			temp[2] += 24; //generates more consistent tracing
-		
+
 			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-			
+
 			if(r_trace.fraction == 1.0) {
 				if(dist < 100) {
 					VectorCopy(dl->origin, temp);
@@ -215,7 +219,7 @@ void GL_GetLightVals()
 					for(j = 0; j < 3; j++)
 						lightAdd[j] += temp[j]*100*dl->intensity;
 					numlights+=100*dl->intensity;
-                
+
 					VectorSubtract (dl->origin, currententity->origin, temp);
 					dynFactor += (dl->intensity/20.0)/VectorLength(temp);
 				}
@@ -224,19 +228,19 @@ void GL_GetLightVals()
 	}
 
 	if(numlights > 0.0) {
-		for(i = 0; i < 3; i++) 
+		for(i = 0; i < 3; i++)
 			lightPosition[i] = lightAdd[i]/numlights;
 	}
 }
 
-void R_ModelViewTransform(const vec3_t in, vec3_t out){ 
-	const float *v = in; 
-    const float *m = r_world_matrix; 
- 
-    out[0] = m[0] * v[0] + m[4] * v[1] + m[8]  * v[2] + m[12]; 
-    out[1] = m[1] * v[0] + m[5] * v[1] + m[9]  * v[2] + m[13]; 
-    out[2] = m[2] * v[0] + m[6] * v[1] + m[10] * v[2] + m[14]; 
-} 
+void R_ModelViewTransform(const vec3_t in, vec3_t out){
+	const float *v = in;
+    const float *m = r_world_matrix;
+
+    out[0] = m[0] * v[0] + m[4] * v[1] + m[8]  * v[2] + m[12];
+    out[1] = m[1] * v[0] + m[5] * v[1] + m[9]  * v[2] + m[13];
+    out[2] = m[2] * v[0] + m[6] * v[1] + m[10] * v[2] + m[14];
+}
 
 
 /*
@@ -252,7 +256,7 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 
 	if (r_worldmodel ) {
 		//occulusion culling - why draw entities we cannot see?
-	
+
 		r_trace = CM_BoxTrace(r_origin, e->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			return true;
@@ -394,8 +398,6 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
         }
     }
 
-    qglEnableClientState( GL_COLOR_ARRAY );
-
     if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
     {
         qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
@@ -424,7 +426,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 index_xyz = order[2];
 
                 shellscale = .4;
-                
+
                 if(lerped) {
                     VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * shellscale;
                     VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * shellscale;
@@ -439,17 +441,17 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                     VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
                 }
                 else {
-                    VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-                    VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-                    VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+                    VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+                    VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+                    VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
-                    VArray[3] = (currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f);
-                    VArray[4] = currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
+                    VArray[3] = (currentmodel->vertexes[index_xyz].position[1] + currentmodel->vertexes[index_xyz].position[0]) * (1.0f / 40.0f);
+                    VArray[4] = currentmodel->vertexes[index_xyz].position[2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
                     VArray[5] = shadelight[0];
                     VArray[6] = shadelight[1];
                     VArray[7] = shadelight[2];
-                    VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);
+                    VArray[8] = calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position);
                 }
 
                 // increment pointer and counter
@@ -459,12 +461,12 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
             } while (--count);
             if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ){
 
-				if(qglLockArraysEXT)						
+				if(qglLockArraysEXT)
 					qglLockArraysEXT(0, va);
 
 				qglDrawArrays(mode,0,va);
-				
-				if(qglUnlockArraysEXT)						
+
+				if(qglUnlockArraysEXT)
 					qglUnlockArraysEXT();
 			}
         }
@@ -518,9 +520,9 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 else {
                     GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 
-                    VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-                    VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-                    VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+                    VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+                    VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+                    VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
                     VArray[3] = ((float *) order)[0];
                     VArray[4] = ((float *) order)[1];
@@ -528,7 +530,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                     VArray[5] = lightcolor[0];
                     VArray[6] = lightcolor[1];
                     VArray[7] = lightcolor[2];
-                    VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);
+                    VArray[8] = calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position);
                 }
 
                 // increment pointer and counter
@@ -538,12 +540,12 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
             } while (--count);
             if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
 
-				if(qglLockArraysEXT)						
+				if(qglLockArraysEXT)
 					qglLockArraysEXT(0, va);
 
 				qglDrawArrays(mode,0,va);
-				
-				if(qglUnlockArraysEXT)						
+
+				if(qglUnlockArraysEXT)
 					qglUnlockArraysEXT();
 			}
         }
@@ -624,7 +626,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 {
                     GLSTATE_DISABLE_ALPHATEST
                 }
-                
+
                 do
                 {
                     float os = ((float *)order)[0];
@@ -646,9 +648,9 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                         r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
                     }
                     else {
-                        VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-                        VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-                        VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+                        VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+                        VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+                        VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
                         for (k=0;k<3;k++)
                         normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
@@ -678,13 +680,13 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
 
                     {
                         float red = 1, green = 1, blue = 1, nAlpha;
-  
+
                         if(lerped)
                             nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
                                 calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
                         else
                             nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-                                calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
+                                calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position), normal, currentmodel->vertexes[index_xyz].position);
 
                         if (stage->lightmap) {
                             if(lerped)
@@ -695,7 +697,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                             green = lightcolor[1];
                             blue = lightcolor[2];
                         }
-                     
+
 						VArray[5] = red;
                         VArray[6] = green;
                         VArray[7] = blue;
@@ -710,15 +712,15 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
 
                 if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
 
-					if(qglLockArraysEXT)						
+					if(qglLockArraysEXT)
 						qglLockArraysEXT(0, va);
 
 					qglDrawArrays(mode,0,va);
-					
-					if(qglUnlockArraysEXT)						
+
+					if(qglUnlockArraysEXT)
 						qglUnlockArraysEXT();
 				}
-                
+
                 qglColor4f(1,1,1,1);
 
                 stage=stage->next;
@@ -814,7 +816,7 @@ void R_DrawAliasShadowLegacy(dmdl_t *paliashdr, qboolean lerped)
             if(lerped)
                 memcpy( point, s_lerped[order[2]], sizeof( point )  );
             else
-                memcpy( point, currentmodel->r_mesh_verts[order[2]], sizeof( point )  );
+                memcpy( point, currentmodel->vertexes[order[2]].position, sizeof( point )  );
 
             point[0] -= shadevector[0]*(point[2]+lheight);
             point[1] -= shadevector[1]*(point[2]+lheight);
@@ -933,14 +935,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 		}
 	}
 
-	qglEnableClientState( GL_COLOR_ARRAY );
-
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
 	{
 		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
-		
+
 		va=0;
-		VArray = &VArrayVerts[0];		
+		VArray = &VArrayVerts[0];
 
 		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
 
@@ -998,39 +998,40 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
             glUniform1iARB( g_location_meshFog, map_fog);
         }
 		else
-			GL_Bind(r_shelltexture->texnum); 
+			GL_Bind(r_shelltexture->texnum);
 
 		for (i=0; i<paliashdr->num_tris; i++)
 		{
 			for (j=0; j<3; j++)
-			{		
+			{
 				vec3_t normal, tangent;
                 int k;
 
 				index_xyz = tris[i].index_xyz[j];
 				index_st = tris[i].index_st[j];
- 				
+
 				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value))
 					shellscale = .4;
 				else
 					shellscale = 1.6;
-					
+
 				if(lerped) {
 					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * shellscale;
 					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * shellscale;
 					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * shellscale;
-				
+
 					VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
 					VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
-					
+
 					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+
                         for (k=0; k<3; k++)
                             normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
                             ( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
                             r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
                     }
 					else {
-					
+
 						VArray[5] = shadelight[0];
 						VArray[6] = shadelight[1];
 						VArray[7] = shadelight[2];
@@ -1038,38 +1039,61 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					}
 				}
 				else {
-					VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-					VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-					VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+					VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+					VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
-					VArray[3] = (currentmodel->r_mesh_verts[index_xyz][1] + currentmodel->r_mesh_verts[index_xyz][0]) * (1.0f / 40.0f);
-					VArray[4] = currentmodel->r_mesh_verts[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
+					VArray[3] = (currentmodel->vertexes[index_xyz].position[1] + currentmodel->vertexes[index_xyz].position[0]) * (1.0f / 40.0f);
+					VArray[4] = currentmodel->vertexes[index_xyz].position[2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
 					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+#if 1
+						// -jjb-fix optimize hack, compiler may already do this
+						byte *plni = &r_avertexnormals[verts[index_xyz].lightnormalindex][0];
+						normal[0] = *plni++ ;
+                        normal[1] = *plni++ ;
+						normal[2] = *plni ;
+#else
+
                         for (k=0;k<3;k++)
                             normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
+#endif
                     }
 					else {
-					
+
 						VArray[5] = shadelight[0];
 						VArray[6] = shadelight[1];
 						VArray[7] = shadelight[2];
-						VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);	
-					}				
+						VArray[8] = calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position);
+					}
 				}
-	
+
 				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+#if 0
+					// -jjb-fix  redundant?
                     VectorNormalize ( normal );
+#endif
                     AngleVectors(normal, NULL, tangent, NULL);
                     VectorCopy(normal, NormalsArray[va]); //shader needs normal array
+#if 0
+                    // -jjb-fix suspect this is not right?
                     glUniform3fARB( g_location_meshTangent, tangent[0], tangent[1], tangent[2] );
                 }
+#endif
+#if 1
+                // -jjb-fix  optimize hack
+				VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
+			}
+                else
+                    VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 
-                // increment pointer and counter
+#else
+				// increment pointer and counter
                 if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
                     VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
                 else
                     VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+#endif
                 va++;
             }
         }
@@ -1079,15 +1103,15 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
         }
         else
             R_InitVArrays (VERT_COLOURED_TEXTURED);
-		
+
 		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
 
-				if(qglLockArraysEXT)						
+				if(qglLockArraysEXT)
 					qglLockArraysEXT(0, va);
 
 				qglDrawArrays(GL_TRIANGLES,0,va);
-				
-				if(qglUnlockArraysEXT)						
+
+				if(qglUnlockArraysEXT)
 					qglUnlockArraysEXT();
 		}
 
@@ -1107,10 +1131,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 		for (i=0; i<paliashdr->num_tris; i++)
 		{
 			for (j=0; j<3; j++)
-			{			
+			{
 				index_xyz = tris[i].index_xyz[j];
 				index_st = tris[i].index_st[j];
-												
+
 				if(lerped) {
 					GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 
@@ -1124,14 +1148,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[5] = lightcolor[0];
 					VArray[6] = lightcolor[1];
 					VArray[7] = lightcolor[2];
-					VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);			
+					VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
 				}
 				else {
 					GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 
-					VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-					VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-					VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+					VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+					VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
 					VArray[3] = st[index_st].s;
 					VArray[4] = st[index_st].t;
@@ -1139,23 +1163,23 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[5] = lightcolor[0];
 					VArray[6] = lightcolor[1];
 					VArray[7] = lightcolor[2];
-					VArray[8] = calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]);			
+					VArray[8] = calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position);
 				}
 
 				// increment pointer and counter
 				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
-				va++;			
-			} 	
+				va++;
+			}
 
 		}
 		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
 
-				if(qglLockArraysEXT)						
+				if(qglLockArraysEXT)
 					qglLockArraysEXT(0, va);
 
 				qglDrawArrays(GL_TRIANGLES,0,va);
-				
-				if(qglUnlockArraysEXT)						
+
+				if(qglUnlockArraysEXT)
 					qglUnlockArraysEXT();
 		}
 
@@ -1172,7 +1196,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			qglDepthMask(false);
 
 		stage=rs->stage;
-		
+
 		while (stage)
 		{
 			va=0;
@@ -1183,13 +1207,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				if(stage->next) {
 					stage = stage->next;
 					continue;
-				}	
+				}
 				else
 					goto done;
 			}
 
 			if(!stage->normalmap) {
-				if(mirror) {	
+				if(mirror) {
 					if( !(currententity->flags & RF_WEAPONMODEL)) {
 						GL_EnableMultitexture( true );
 						GL_SelectTexture( GL_TEXTURE0);
@@ -1209,7 +1233,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				}
 				else
 					GL_Bind (stage->texture->texnum);
-		
+
 
 				if (stage->blendfunc.blend)
 				{
@@ -1276,12 +1300,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) { //fixed light source
 
 					//fixed light source pointing down, slightly forward and to the left
-					lightPosition[0] = -1.0; 
-					lightPosition[1] = 4.0; 
-					lightPosition[2] = 8.0; 
+					lightPosition[0] = -1.0;
+					lightPosition[1] = 4.0;
+					lightPosition[2] = 8.0;
 					R_ModelViewTransform(lightPosition, lightVec);
 				}
-				else { 
+				else {
 					//simple directional(relative light position)
 					VectorSubtract(lightPosition, currententity->origin, lightVec);
 					if(dynFactor == 0.0) //do for world lights only
@@ -1290,29 +1314,29 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						R_ModelViewTransform(lightPosition, lightVec);
 					}
 
-					//brighten things slightly 
+					//brighten things slightly
 					for (i = 0; i < 3; i++ )
 						lightVal[i] *= 1.25;
 				}
-										
+
 				GL_EnableMultitexture( true );
-			
+
 				glUseProgramObjectARB( g_meshprogramObj );
-				
+
 				glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
-				
+
 				GL_SelectTexture( GL_TEXTURE1);
 				qglBindTexture (GL_TEXTURE_2D, skinnum);
-				glUniform1iARB( g_location_baseTex, 1); 
+				glUniform1iARB( g_location_baseTex, 1);
 
 				GL_SelectTexture( GL_TEXTURE0);
 				qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
-				glUniform1iARB( g_location_normTex, 0); 
+				glUniform1iARB( g_location_normTex, 0);
 
 				GL_SelectTexture( GL_TEXTURE2);
 				qglBindTexture (GL_TEXTURE_2D, stage->texture2->texnum);
 				glUniform1iARB( g_location_fxTex, 2);
-				
+
 				GL_SelectTexture( GL_TEXTURE0);
 
 				if(stage->fx)
@@ -1320,7 +1344,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				else
 					glUniform1iARB( g_location_useFX, 0);
 
-				if(stage->glow) 
+				if(stage->glow)
 					glUniform1iARB( g_location_useGlow, 1);
 				else
 					glUniform1iARB( g_location_useGlow, 0);
@@ -1336,20 +1360,20 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				glUniform1fARB( g_location_meshTime, rs_realtime);
 
 				glUniform1iARB( g_location_meshFog, map_fog);
-			}						
+			}
 
 			for (i=0; i<paliashdr->num_tris; i++)
 			{
 				for (j=0; j<3; j++)
-				{	
+				{
 					vec3_t normal, tangent;
 					int k;
-					
+
 					index_xyz = tris[i].index_xyz[j];
 					index_st = tris[i].index_st[j];
 
 					os = os2 = st[index_st].s;
-					ot = ot2 = st[index_st].t;					
+					ot = ot2 = st[index_st].t;
 
 					if(lerped) {
 
@@ -1363,9 +1387,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
 					}
 					else {
-						VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-						VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-						VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
+						VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+						VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+						VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
 						for (k=0;k<3;k++)
 							normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
@@ -1382,12 +1406,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					if (stage->envmap)
 					{
 						vec3_t envmapvec;
-						
+
 						VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
 
 						if(mirror) {
 							if( !(currententity->flags & RF_WEAPONMODEL)) {
-									stage->scale.scaleX = -0.5; 
+									stage->scale.scaleX = -0.5;
 									stage->scale.scaleY = 0.5;
 									os -= DotProduct (normal , vectors[1]);
 									ot += DotProduct (normal, vectors[2]);
@@ -1396,7 +1420,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 								stage->scale.scaleX = -1.0;
 								stage->scale.scaleY = 1.0;
 							}
-		
+
 						}
 						else {
 							RS_SetEnvmap (envmapvec, &os, &ot);
@@ -1408,9 +1432,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 							ot += DotProduct (normal, vectors[2] );
 						}
 					}
-													
+
 					RS_SetTexcoords2D(stage, &os, &ot);
-								
+
 					VArray[3] = os;
 					VArray[4] = ot;
 
@@ -1422,26 +1446,26 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						VArray[5] = os2;
 						VArray[6] = ot2;
 					}
-			
+
 					if(!stage->normalmap) {
 
 						float red = 1, green = 1, blue = 1, nAlpha;
 
-						if(lerped) 
+						if(lerped)
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 								calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
 						else
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-								calcEntAlpha(alpha, currentmodel->r_mesh_verts[index_xyz]), normal, currentmodel->r_mesh_verts[index_xyz]);
+								calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position), normal, currentmodel->vertexes[index_xyz].position);
 
-						if (stage->lightmap) { 
+						if (stage->lightmap) {
 							if(lerped)
 								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
 							else
 								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
-							blue = lightcolor[2];						
+							blue = lightcolor[2];
 						}
 
 						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
@@ -1454,19 +1478,19 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 							VArray[5] = red;
 							VArray[6] = green;
 							VArray[7] = blue;
-							VArray[8] = nAlpha;	
+							VArray[8] = nAlpha;
 						}
 					}
-					
+
 					// increment pointer and counter
-					if(stage->normalmap) 
+					if(stage->normalmap)
 						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
 					else if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 						VArray += VertexSizes[VERT_COLOURED_MULTI_TEXTURED];
 					else
 						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 					va++;
-				} 
+				}
 			}
 
 			if(stage->normalmap) {
@@ -1475,25 +1499,25 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 			}
 			else {
-				if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
+				if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 					R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
 				else
 					R_InitVArrays (VERT_COLOURED_TEXTURED);
 			}
-			
+
 			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
 
-				if(qglLockArraysEXT)						
+				if(qglLockArraysEXT)
 					qglLockArraysEXT(0, va);
 
 				qglDrawArrays(GL_TRIANGLES,0,paliashdr->num_tris*3);
-				
-				if(qglUnlockArraysEXT)						
+
+				if(qglUnlockArraysEXT)
 					qglUnlockArraysEXT();
 			}
-			
+
 			qglColor4f(1,1,1,1);
-			
+
 			if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 				GL_EnableMultitexture( false );
 
@@ -1503,14 +1527,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 				GL_EnableMultitexture( false );
 			}
-			
+
 			stage=stage->next;
 		}
 	}
 done:
 	if (depthmaskrscipt)
 		qglDepthMask(true);
-	
+
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
@@ -1558,7 +1582,7 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 			+ currententity->frame * paliashdr->framesize);
 	else
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
-	
+
 	verts = frame->verts;
 
 	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
@@ -1595,19 +1619,19 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 	for (i=0; i<paliashdr->num_tris; i++)
 	{
 		for (j=0; j<3; j++)
-		{			
+		{
 			index_xyz = tris[i].index_xyz[j];
 			index_st = tris[i].index_st[j];
-	
+
 			if(lerped)
 				memcpy( point, s_lerped[index_xyz], sizeof( point )  );
 			else
-				memcpy( point, currentmodel->r_mesh_verts[index_xyz], sizeof( point )  );
+				memcpy( point, currentmodel->vertexes[index_xyz].position, sizeof( point )  );
 
 			point[0] -= shadevector[0]*(point[2]+lheight);
 			point[1] -= shadevector[1]*(point[2]+lheight);
 			point[2] = height;
-				
+
 			VArray[0] = point[0];
 			VArray[1] = point[1];
 			VArray[2] = point[2];
@@ -1623,7 +1647,7 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 	}
 
 	qglDrawArrays(GL_TRIANGLES,0,va);
-	
+
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
@@ -1651,7 +1675,7 @@ void R_DrawAliasModel (entity_t *e)
 
 	if(e->team) //don't draw flag models, handled by sprites
 		return;
-	
+
 	if ( !( e->flags & RF_WEAPONMODEL ) )
 	{
 		if ( R_CullAliasModel( bbox, e ) )
@@ -1715,7 +1739,7 @@ void R_DrawAliasModel (entity_t *e)
 	{
 		float minlight;
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
@@ -1736,12 +1760,12 @@ void R_DrawAliasModel (entity_t *e)
 		float	minlight;
 
 		scale = 0.2 * sin(r_newrefdef.time*7);
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
 		for (i=0 ; i<3 ; i++)
-		{			
+		{
 			shadelight[i] += scale;
 			if (shadelight[i] < minlight)
 				shadelight[i] = minlight;
@@ -1764,7 +1788,7 @@ void R_DrawAliasModel (entity_t *e)
 		qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
 
 	if ((currententity->flags & RF_WEAPONMODEL) && r_lefthand->value != 2.0F)
-    {		
+    {
 		qglMatrixMode(GL_PROJECTION);
 		qglPushMatrix();
 		qglLoadIdentity();
@@ -1913,7 +1937,7 @@ void R_DrawAliasModel (entity_t *e)
 				qglColor4f (0,0,0,0.3 * currententity->alpha); //Knightmare- variable alpha
 			else
 				qglColor4f (0,0,0,0.3);
-			
+
 			if(e->frame == 0 && currentmodel->num_frames == 1)
 				R_DrawAliasShadow (paliashdr, false);
 			else
@@ -2046,7 +2070,7 @@ void GL_DrawAliasCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped
 			frontv[i] = frontlerp*frame->scale[i];
 			backv[i] = backlerp*oldframe->scale[i];
 		}
-	
+
 	}
 
 	va=0;
@@ -2056,38 +2080,38 @@ void GL_DrawAliasCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped
 	for (i=0; i<paliashdr->num_tris; i++)
 	{
 		for (j=0; j<3; j++)
-		{			
+		{
 			index_xyz = tris[i].index_xyz[j];
 			index_st = tris[i].index_st[j];
-												
+
 			if(lerped) {
-				
+
 				VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
 				VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
 				VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
-	
-			}
-			else {				
-
-				VArray[0] = currentmodel->r_mesh_verts[index_xyz][0];
-				VArray[1] = currentmodel->r_mesh_verts[index_xyz][1];
-				VArray[2] = currentmodel->r_mesh_verts[index_xyz][2];
 
 			}
-		
+			else {
+
+				VArray[0] = currentmodel->vertexes[index_xyz].position[0];
+				VArray[1] = currentmodel->vertexes[index_xyz].position[1];
+				VArray[2] = currentmodel->vertexes[index_xyz].position[2];
+
+			}
+
 			// increment pointer and counter
 			VArray += VertexSizes[VERT_NO_TEXTURE];
-			va++;			
-		} 	
+			va++;
+		}
 
 	}
-	
-	if(qglLockArraysEXT)						
+
+	if(qglLockArraysEXT)
 		qglLockArraysEXT(0, va);
 
 	qglDrawArrays(GL_TRIANGLES,0,va);
-			
-	if(qglUnlockArraysEXT)						
+
+	if(qglUnlockArraysEXT)
 		qglUnlockArraysEXT();
 
 	R_KillVArrays ();
@@ -2101,7 +2125,7 @@ void R_DrawAliasModelCaster (entity_t *e)
 
 	if(e->team) //don't draw flag models, handled by sprites
 		return;
-	
+
 	if ( e->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
 		return;
 

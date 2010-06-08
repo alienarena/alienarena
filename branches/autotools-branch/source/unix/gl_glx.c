@@ -17,24 +17,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-/*
-** GLW_IMP.C
-**
-** This file contains ALL Linux specific stuff having to do with the
-** OpenGL refresh.  When a port is being made the following functions
-** must be implemented by the port:
-**
-** GLimp_EndFrame
-** GLimp_Init
-** GLimp_Shutdown
-**
-*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-#ifdef __linux__
-#include <sys/vt.h>
+#ifdef HAVE_SYS_VT_H
+#include <sys/vt.h>     // -jjb-ac  necessary?
 #endif
 #include <stdarg.h>
 #include <stdio.h>
@@ -42,23 +35,33 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <signal.h>
 #include <dlfcn.h>
 
-#include "../ref_gl/r_local.h"
+#include "ref_gl/r_local.h"
 
-#include "../client/keys.h"
+#include "client/keys.h"
 
-#include "../unix/glw_unix.h"
+#include "unix/glw_unix.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
 
+// xf86dga.h is deprecated, Xxf86dga.h is preferred
+// if neither exists, don't use DGA
 #ifdef HAVE_X11_EXTENSIONS_XXF86DGA_H
 #include <X11/extensions/Xxf86dga.h>
 #else
-// default to obsolete header
-#include <X11/extensions/xf86dga.h>
+	#ifdef HAVE_X11_EXTENSIONS_XF86DGA_H
+	#include <X11/extensions/xf86dga.h>
+	#else
+	#define NO_XXF86DGA 1
+	#endif
 #endif
+
+/* For testing and OSX porting  --jjb-ac */
+#define NO_XXF86DGA 1
+/*-----------------------------*/
+
 #include <X11/extensions/xf86vmode.h>
 
 #include <GL/glx.h>
@@ -124,8 +127,14 @@ static Cursor CreateNullCursor(Display *display, Window root)
 
 void install_grabs(void)
 {
-	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
 
+#ifdef NO_XXF86DGA
+	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
+	XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
+	Cvar_Set( "in_dgamouse", "0" );
+	dgamouse = false;
+#else
+	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
 	if (in_dgamouse->integer)
 	{
 		int MajorVersion, MinorVersion;
@@ -143,6 +152,7 @@ void install_grabs(void)
 	} else {
 		XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
 	}
+#endif
 
 	XGrabKeyboard(dpy, win, False, GrabModeAsync, GrabModeAsync, CurrentTime);
 
@@ -155,10 +165,12 @@ void uninstall_grabs(void)
 	if (!dpy || !win)
 		return;
 
+#ifndef NO_XXF86DGA
 	if (dgamouse) {
 		dgamouse = false;
 		XF86DGADirectVideo(dpy, DefaultScreen(dpy), 0);
 	}
+#endif
 
 	XUngrabPointer(dpy, CurrentTime);
 	XUngrabKeyboard(dpy, CurrentTime);

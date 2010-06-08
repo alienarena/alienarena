@@ -744,6 +744,12 @@ void CL_Disconnect (void)
 	}
 
 	cls.state = ca_disconnected;
+
+// -jjb-ac
+	if ( cl_timedemo->value )
+	{ // hack for running max's test. (modified to ~/bin/aatimetest)
+		CL_Quit_f(); //for testing, quit at end of demo run
+	}
 }
 
 void CL_Disconnect_f (void)
@@ -1326,7 +1332,7 @@ void CL_RequestNextDownload (void)
 		precache_check = CS_MODELS+2; // 0 isn't used
 		if (allow_download_maps->value)
 			if (!CL_CheckOrDownloadFile(cl.configstrings[CS_MODELS+1]))
-				return; // started a download		
+				return; // started a download
 	}
 
 redoSkins:;
@@ -1561,9 +1567,9 @@ redoSkins:;
 	}
 
 	//get map related scripts
-	if (precache_check == SCRIPT_CNT) { 
+	if (precache_check == SCRIPT_CNT) {
 		precache_check = SCRIPT_CNT+1;
-		if (allow_download_maps->value) {			
+		if (allow_download_maps->value) {
 
 			//get fog files
 			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
@@ -1577,12 +1583,12 @@ redoSkins:;
 			Com_sprintf(script, sizeof(script), "maps/scripts/%s.fog", map);
 			if (!CL_CheckOrDownloadFile(script))
 				return; // started a download
-		}		
+		}
 	}
 
-	if (precache_check == SCRIPT_CNT+1) { 
+	if (precache_check == SCRIPT_CNT+1) {
 		precache_check = SCRIPT_CNT+2;
-		if (allow_download_maps->value) {			
+		if (allow_download_maps->value) {
 
 			//get mus files
 			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
@@ -1596,12 +1602,12 @@ redoSkins:;
 			Com_sprintf(script, sizeof(script), "maps/scripts/%s.mus", map);
 			if (!CL_CheckOrDownloadFile(script))
 				return; // started a download
-		}		
+		}
 	}
 
-	if (precache_check == SCRIPT_CNT+2) { 
+	if (precache_check == SCRIPT_CNT+2) {
 		precache_check = SCRIPT_CNT+3;
-		if (allow_download_maps->value) {						
+		if (allow_download_maps->value) {
 			//get rscript files
 			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
 
@@ -1614,7 +1620,7 @@ redoSkins:;
 			Com_sprintf(script, sizeof(script), "scripts/maps/%s.rscript", map);
 			if (!CL_CheckOrDownloadFile(script))
 				return; // started a download
-		}		
+		}
 	}
 
 //ZOID
@@ -1680,7 +1686,7 @@ void CL_InitLocal (void)
 	cls.state = ca_disconnected;
 	cls.realtime = Sys_Milliseconds ();
 
-	CL_InitInput ();	
+	CL_InitInput ();
 
 	CL_InitHttpDownload();
 
@@ -1937,7 +1943,7 @@ typedef struct
 
 cheatvar_t	cheatvars[] = {
 	{"timescale", "1"},
-	{"timedemo", "0"},
+/*	{"timedemo", "0"},*/  // -jjb-fix want to run demos with players/bots
 	{"r_drawworld", "1"},
 	{"cl_testlights", "0"},
 	{"r_fullbright", "0"},
@@ -2130,6 +2136,8 @@ void CL_Init (void)
 	// all archived variables will now be loaded
 
 	Con_Init ();
+
+// -jjb-ac  try the vid first init on linux
 #if defined __unix__ || defined __sgi
 	S_Init ();
 	VID_Init ();
@@ -2183,7 +2191,7 @@ void CL_Shutdown(void)
 
 	S_Shutdown();
 	IN_Shutdown ();
-	VID_Shutdown();	
+	VID_Shutdown();
 
 	NET_Shutdown();
 

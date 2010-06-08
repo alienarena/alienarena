@@ -151,6 +151,7 @@ typedef struct
 	char		gamedir[MAX_QPATH];
 	int			playernum;
 
+	// client/server protocol depends on MAX_QPATH being 64.
 	char		configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
 
 	//
@@ -564,7 +565,7 @@ typedef struct IRCresponse_s
 
 typedef struct user_s
 {
-	char nick[32]; 
+	char nick[32];
 	char email[100];
 } user_t;
 

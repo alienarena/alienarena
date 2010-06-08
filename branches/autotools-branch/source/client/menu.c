@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <ctype.h>
 #ifdef _WINDOWS
 #include <winsock.h>
@@ -32,13 +36,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "client.h"
-#include "../client/qmenu.h"
+#include "client/qmenu.h"
 
 // Directory for botinfo, setup like existing acebot code
 #ifdef DATADIR
-#define BOTDIR DATADIR
+#define BOTDIR DATADIR   // -jjb-ac
 #else
 #define BOTDIR "."
+#endif
+
+#if defined HAVE_STRCASECMP && !defined HAVE__STRICMP
+#define _stricmp strcasecmp
 #endif
 
 static int	m_main_cursor;
@@ -6225,7 +6233,7 @@ void PlayerConfig_MenuDraw( void )
 {
 	extern float CalcFov( float fov_x, float w, float h );
 	refdef_t refdef;
-	char scratch[MAX_QPATH];
+	char scratch[MAX_OSPATH];
 	FILE *modelfile;
 	int helmet = false;
 	int rack = false;

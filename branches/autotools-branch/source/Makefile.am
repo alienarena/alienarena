@@ -14,16 +14,98 @@ ACLOCAL_AMFLAGS=`-I m4'
 ##crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
 ##
 
-bin_PROGRAMS = crx crded
-noinst_LTLIBRARIES = libgame.la
+if BUILD_UNIX
+bin_PROGRAMS = crded
+if BUILD_CLIENT
+bin_PROGRAMS += crx
+endif
+else
+bin_PROGRAMS = crx
+endif
 
-crx_CFLAGS=-DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp -U_FORTIFY_SOURCE -ffast-math
-crx_LDFLAGS=$(LDFLAGS) $(GLU_LIBS) -lgame
+noinst_LIBRARIES = libgame.a
 
-crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -U_FORTIFY_SOURCE -ffast-math
-crded_LDFLAGS = -lgame
+if BUILD_UNIX
+crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -ffast-math
+crded_LDADD = libgame.a
+if BUILD_CLIENT
+crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math 
+crx_LDADD = libgame.a
+endif
+else
+crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math 
+crx_LDADD = libgame.a
+endif
 
-crx_SOURCES =  \
+libgame_a_CFLAGS = -U_FORTIFY_SOURCE -ffast-math
+
+if BUILD_UNIX
+crded_SOURCES = \
+	client/anorms.h \
+	game/game.h \
+	game/q_shared.c \
+	game/q_shared.h \
+	game/q_shared.h \
+	null/cl_null.c \
+	qcommon/cmd.c \
+	qcommon/cmodel.c \
+	qcommon/common.c \
+	qcommon/crc.c \
+	qcommon/cvar.c \
+	qcommon/files.c \
+	qcommon/mdfour.c \
+	qcommon/net_chan.c \
+	qcommon/pmove.c \
+	qcommon/qcommon.h \
+	qcommon/qfiles.h \
+	server/server.h \
+	server/sv_ccmds.c \
+	server/sv_ents.c \
+	server/sv_game.c \
+	server/sv_init.c \
+	server/sv_main.c \
+	server/sv_send.c \
+	server/sv_user.c \
+	server/sv_world.c \
+	unix/glob.c \
+	unix/glob.h \
+	unix/glob.h \
+	unix/net_udp.c \
+	unix/q_shunix.c \
+	unix/rw_unix.h \
+	unix/sys_unix.c
+endif
+
+if BUILD_WIN32
+crx_SOURCES = \
+	win32\conproc.c \
+	win32\glw_imp.c \
+	win32\in_win.c \
+	win32\net_wins.c \
+	win32\qal_win.c \
+	win32\qgl_win.c \
+	win32\q_shwin.c \
+	win32\sys_win.c \
+	win32\vid_dll.c
+else
+if BUILD_CLIENT
+crx_SOURCES = \
+	unix/gl_glx.c \
+	unix/glw_unix.h \
+	unix/net_udp.c \
+	unix/qal_unix.c \
+	unix/qasm.h \
+	unix/qgl_unix.c \
+	unix/q_shunix.c \
+	unix/rw_unix.c \
+	unix/rw_unix.h \
+	unix/sys_unix.c \
+	unix/vid_so.c
+endif	
+endif	
+
+if BUILD_CLIENT
+crx_SOURCES +=  \
 	client/anorms.h \
 	client/cl_ents.c \
 	client/cl_fx.c \
@@ -109,21 +191,12 @@ crx_SOURCES =  \
 	server/sv_send.c \
 	server/sv_user.c \
 	server/sv_world.c \
-	unix/gl_glx.c \
 	unix/glob.c \
-	unix/glob.h \
-	unix/glw_unix.h \
-	unix/net_udp.c \
-	unix/qal_unix.c \
-	unix/qasm.h \
-	unix/qgl_unix.c \
-	unix/q_shunix.c \
-	unix/rw_unix.c \
-	unix/rw_unix.h \
-	unix/sys_unix.c \
-	unix/vid_so.c 
+	unix/glob.h
+endif	
 
-libgame_la_SOURCES =  \
+
+libgame_a_SOURCES =  \
 	client/anorms.h \
 	game/acesrc/acebot_ai.c \
 	game/acesrc/acebot_cmds.c \
@@ -174,41 +247,3 @@ libgame_la_SOURCES =  \
 
 ##
 ##	qcommon/qcommon.h \  TODO: verify game lib does not use qcommon.h
-
-	
-crded_SOURCES = \
-	client/anorms.h \
-	game/game.h \
-	game/q_shared.c \
-	game/q_shared.h \
-	game/q_shared.h \
-	null/cl_null.c \
-	qcommon/cmd.c \
-	qcommon/cmodel.c \
-	qcommon/common.c \
-	qcommon/crc.c \
-	qcommon/cvar.c \
-	qcommon/files.c \
-	qcommon/mdfour.c \
-	qcommon/net_chan.c \
-	qcommon/pmove.c \
-	qcommon/qcommon.h \
-	qcommon/qfiles.h \
-	server/server.h \
-	server/sv_ccmds.c \
-	server/sv_ents.c \
-	server/sv_game.c \
-	server/sv_init.c \
-	server/sv_main.c \
-	server/sv_send.c \
-	server/sv_user.c \
-	server/sv_world.c \
-	unix/glob.c \
-	unix/glob.h \
-	unix/glob.h \
-	unix/net_udp.c \
-	unix/q_shunix.c \
-	unix/rw_unix.h \
-	unix/sys_unix.c
-	
-

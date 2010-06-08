@@ -1536,10 +1536,10 @@ extern  cvar_t	*g_antilagdebug;
 #include "acesrc/acebot.h"
 // ACEBOT_END
 
-#ifdef __unix__  // -jjb-dl -jjb-ac
+// #ifdef __unix__  // -jjb-dl -jjb-ac
 void	FS_FreeFile (void *buffer);
 void	Z_Free (void *ptr);
 void	Com_Error (int code, char *fmt, ...);
-#endif
+// #endif
 
 

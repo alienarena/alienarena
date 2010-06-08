@@ -1604,9 +1604,9 @@ static int Mod_FindTriangleWithEdge(neighbors_t * neighbors, dtriangle_t * tris,
 	}
 
 	// normal edge, setup neighbour pointers
-	if (!dup && found != -1) {	// / FIXED by BERSERKER: в Tenebrae не
-								// проверяется случай, когда found == -1
-								// -> ошибка защиты памяти!
+	if (!dup && found != -1) {	// / FIXED by BERSERKER: пїЅ Tenebrae пїЅпїЅ
+								// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ found == -1
+								// -> пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ!
 		neighbors[found].n[foundj] = triIndex;
 		return found;
 	}
@@ -1666,8 +1666,10 @@ void R_LoadMd2VertexArrays(model_t *md2model){
 	if(md2->num_xyz > MAX_VERTS)
 		return;
 
+	md2model->vertexes = (mvertex_t*)Hunk_Alloc(md2->num_xyz * sizeof(mvertex_t));
+
 	for(i = 0, md2v = md2frame->verts; i < md2->num_xyz; i++, md2v++){  // reconstruct the verts
-		VectorSet(md2model->r_mesh_verts[i],
+		VectorSet(md2model->vertexes[i].position,
 					md2v->v[0] * md2frame->scale[0] + md2frame->translate[0],
 					md2v->v[1] * md2frame->scale[1] + md2frame->translate[1],
 					md2v->v[2] * md2frame->scale[2] + md2frame->translate[2]);
@@ -1755,7 +1757,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 //
 // find neighbours
 //
-	mod->neighbors = malloc(pheader->num_tris * sizeof(neighbors_t));
+	mod->neighbors = Hunk_Alloc(pheader->num_tris * sizeof(neighbors_t));
 	Mod_BuildTriangleNeighbors(mod->neighbors, pouttri, pheader->num_tris);
 
 //
@@ -2050,8 +2052,6 @@ Mod_Free
 */
 void Mod_Free (model_t *mod)
 {
-	if ( mod->neighbors )
-        free( mod->neighbors );
 
 	Hunk_Free (mod->extradata);
 	memset (mod, 0, sizeof(*mod));

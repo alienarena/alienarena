@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -157,20 +157,20 @@ typedef struct entity_s
 	/*
 	** most recent data
 	*/
-	float				origin[3];	
-	int					frame;		
+	float				origin[3];
+	int					frame;
 
 	/*
 	** previous data for lerping
 	*/
-	float				oldorigin[3];	
+	float				oldorigin[3];
 	int					oldframe;
 
 	/*
 	** misc
 	*/
 	float	backlerp;				// 0.0 = current, 1.0 = old
-	int		skinnum;				
+	int		skinnum;
 
 	int		lightstyle;				// for flashing entities
 	float	alpha;					// ignore if RF_TRANSLUCENT isn't set
@@ -182,7 +182,7 @@ typedef struct entity_s
 
 	float	bob;
 
-	struct	rscript_t *script;
+	struct rscript_s *script; // -jjb-ac -jjb-fix
 
 } entity_t;
 
@@ -331,7 +331,7 @@ void	R_AppActivate( qboolean active );
 #define MAX_RADAR_ENTS 512
 typedef struct RadarEnt_s{
   float color[4];
-  vec3_t org;  
+  vec3_t org;
 }RadarEnt_t;
 
 

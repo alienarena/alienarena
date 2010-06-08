@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -22,8 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //define	PARANOID			// speed sapping error checking
 
-#include "../qcommon/qcommon.h"
-#include "../game/game.h"
+#include "qcommon/qcommon.h"
+#include "game/game.h"
 
 //=============================================================================
 
@@ -51,6 +51,7 @@ typedef struct
 	char		name[MAX_QPATH];			// map name, or cinematic name
 	struct cmodel_s		*models[MAX_MODELS];
 
+	// client/server protocol depends on MAX_QPATH being 64.
 	char		configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
 	entity_state_t	baselines[MAX_EDICTS];
 
@@ -165,7 +166,7 @@ typedef struct
 	qboolean	initialized;				// sv_init has completed
 	int			realtime;					// always increasing, no clamping, etc
 
-	char		mapcmd[MAX_TOKEN_CHARS];	// ie: *intro.cin+base 
+	char		mapcmd[MAX_TOKEN_CHARS];	// ie: *intro.cin+base
 
 	int			spawncount;					// incremented each server start
 											// used to check late spawns

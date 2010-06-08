@@ -40,6 +40,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "qgl.h"
 #include "r_math.h"
 
+#if !defined min
+#define min(a,b) (((a)<(b)) ? (a) : (b))
+#endif
+
 // up / down
 #define	PITCH	0
 
@@ -200,7 +204,7 @@ extern  cvar_t		*r_minimap_style;
 
 extern	cvar_t	*gl_mirror;
 
-extern	cvar_t	*gl_arb_fragment_program; 
+extern	cvar_t	*gl_arb_fragment_program;
 extern	cvar_t	*gl_glsl_shaders;
 
 
@@ -456,7 +460,7 @@ typedef struct
 	qboolean	alpha_test;
 	qboolean	blend;
 	qboolean	texgen;
-	qboolean	fragment_program; 
+	qboolean	fragment_program;
 	qboolean	glsl_shaders;
 	qboolean	separateStencil;
 	qboolean	stencil_wrap;
@@ -470,7 +474,7 @@ extern glstate_t   gl_state;
 
 // vertex arrays
 
-#define MAX_ARRAY MAX_PARTICLES*4
+#define MAX_ARRAY (MAX_PARTICLES*4)
 
 #define VA_SetElem2(v,a,b)		((v)[0]=(a),(v)[1]=(b))
 #define VA_SetElem3(v,a,b,c)	((v)[0]=(a),(v)[1]=(b),(v)[2]=(c))
@@ -481,11 +485,11 @@ extern float	vert_array[MAX_ARRAY][3];
 extern float	col_array[MAX_ARRAY][4];
 extern float	norm_array[MAX_ARRAY][3];
 
-#define MAX_VARRAY_VERTS MAX_VERTS + 2
+#define MAX_VARRAY_VERTS (MAX_VERTS + 2)
 #define MAX_VARRAY_VERTEX_SIZE 11
 
 #define MAX_VERTICES		16384
-#define MAX_INDICES		MAX_VERTICES * 4
+#define MAX_INDICES		(MAX_VERTICES * 4)
 #define MAX_SHADOW_VERTS	16384
 
 extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
@@ -616,11 +620,11 @@ extern GLuint		g_location_fxPos;
 extern GLuint		g_location_fxColor;
 extern GLuint		g_location_fbSampleSize;
 
-//blur 
+//blur
 extern GLuint		g_location_scale;
 extern GLuint		g_location_source;
 
-#define TURBSCALE2 (256.0 / (2 * M_PI)) 
+#define TURBSCALE2 (256.0 / (2 * M_PI))
 
 // reduce runtime calcs
 #define TURBSCALE 40.743665431525205956834243423364

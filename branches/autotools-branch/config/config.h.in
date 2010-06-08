@@ -9,8 +9,11 @@
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #undef HAVE_ARPA_INET_H
 
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
+/* Define to 1 if you have the <curl/curl.h> header file. */
+#undef HAVE_CURL_CURL_H
+
+/* Define to 1 if you have the `dnl' function. */
+#undef HAVE_DNL
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
@@ -42,6 +45,9 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the <jpeglib.h> header file. */
+#undef HAVE_JPEGLIB_H
+
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
 
@@ -67,6 +73,9 @@
 /* Define to 1 if you have a working `mmap' system call. */
 #undef HAVE_MMAP
 
+/* Define to 1 if you have the `mremap' function. */
+#undef HAVE_MREMAP
+
 /* Define to 1 if you have the `munmap' function. */
 #undef HAVE_MUNMAP
 
@@ -75,15 +84,6 @@
 
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
-
-/* Define to 1 if you have the <OpenGL/glu.h> header file. */
-#undef HAVE_OPENGL_GLU_H
-
-/* Define to 1 if you have the <OpenGL/gl.h> header file. */
-#undef HAVE_OPENGL_GL_H
-
-/* Define if you have POSIX threads libraries and header files. */
-#undef HAVE_PTHREAD
 
 /* Define to 1 if the system has the type `ptrdiff_t'. */
 #undef HAVE_PTRDIFF_T
@@ -128,6 +128,9 @@
 /* Define to 1 if you have the `strerror' function. */
 #undef HAVE_STRERROR
 
+/* Define to 1 if you have the `stricmp' function. */
+#undef HAVE_STRICMP
+
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
@@ -161,17 +164,17 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
+/* Define to 1 if you have the <sys/vt.h> header file. */
+#undef HAVE_SYS_VT_H
+
 /* Define to 1 if you have the <termios.h> header file. */
 #undef HAVE_TERMIOS_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Use nonstandard varargs form for the GLU tesselator callback */
-#undef HAVE_VARARGS_GLU_TESSCB
-
-/* Define to 1 if you have the <windows.h> header file. */
-#undef HAVE_WINDOWS_H
+/* Define to 1 if you have the <vorbis/vorbisfile.h> header file. */
+#undef HAVE_VORBIS_VORBISFILE_H
 
 /* Define to 1 if you have the <X11/cursorfont.h> header file. */
 #undef HAVE_X11_CURSORFONT_H
@@ -197,9 +200,8 @@
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
-#undef LT_OBJDIR
+/* Define to 1 if you have the `_stricmp' function. */
+#undef HAVE__STRICMP
 
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
 #undef NO_MINUS_C_MINUS_O
@@ -225,15 +227,17 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Define to necessary symbol if this constant uses a non-standard name on
-   your system. */
-#undef PTHREAD_CREATE_JOINABLE
-
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* unix specific conditional compile */
+#undef UNIX_VARIANT
+
 /* Version number of package */
 #undef VERSION
+
+/* win32 specific conditional compile */
+#undef WIN32_VARIANT
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef gid_t
