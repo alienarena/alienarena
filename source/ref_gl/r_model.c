@@ -2056,6 +2056,10 @@ Mod_Free
 */
 void Mod_Free (model_t *mod)
 {
+	if(mod->blendindexes)
+		free(mod->blendindexes);
+	if(mod->blendweights)
+		free(mod->blendweights);
 
 	Hunk_Free (mod->extradata);
 	memset (mod, 0, sizeof(*mod));

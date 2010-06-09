@@ -135,8 +135,6 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, 
 {
 	int i;
 
-	Com_Printf("numverts: %i\n", iqmmodel->numvertexes);
-
 	if(iqmmodel->numvertexes > 16384)
 		return;
 
@@ -166,9 +164,9 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, 
 					LittleFloat(vtangent[2]),
 					LittleFloat(vtangent[3]));
 
-		vposition += 3;
-		vnormal += 3;
-		vtangent +=4;
+		vposition	+= 3;
+		vnormal		+=3;
+		vtangent	+=4;
 	}
 }
 
@@ -179,7 +177,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	int i, j, k;
 	const int *inelements;
 	float *vposition = NULL, *vtexcoord = NULL, *vnormal = NULL, *vtangent = NULL;
-	unsigned char *vblendindexes = NULL, *vblendweights = NULL;
 	unsigned char *pbase;
 	iqmjoint_t *joint;
 	matrix3x4_t	*baseframe;
@@ -271,15 +268,15 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			break;
 		case IQM_BLENDINDEXES:
 			if (va[i].format == IQM_UBYTE && va[i].size == 4)
-				vblendindexes = (unsigned char *)(pbase + va[i].offset);
+				mod->blendindexes = (unsigned char *)(pbase + va[i].offset);
 			break;
 		case IQM_BLENDWEIGHTS:
-			if (va[i].format == IQM_UBYTE && va[i].size == 4)
-				vblendweights = (unsigned char *)(pbase + va[i].offset);
+			if (va[i].format == IQM_UBYTE && va[i].size == 4) 
+				mod->blendweights = (unsigned char *)(pbase + va[i].offset);
 			break;
 		}
 	}
-	if (!vposition || !vtexcoord || !vblendindexes || !vblendweights)
+	if (!vposition || !vtexcoord || !mod->blendindexes || !mod->blendweights)
 	{
 		Com_Printf("%s is missing vertex array data\n", mod->name);
 		return false;
@@ -319,10 +316,9 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		vec4_t q_rot;
         iqmjoint_t j = joint[i]; 
 
-		//first need to make a vec4 quat from our rotation vec(move this to a func at some point)
+		//first need to make a vec4 quat from our rotation vec
 		VectorSet(rot, j.rotation[0], j.rotation[1], j.rotation[2]);
 		Vector4Set(q_rot, j.rotation[0], j.rotation[1], j.rotation[2], -sqrt(max(1.0 - pow(VectorLength(rot),2), 0.0)));
-		//check these vals against w^2 = 1 - (x^2 + y^2 + z^2)
 
 		Matrix3x4_FromQuatAndVectors(&baseframe[i], q_rot, j.origin, j.scale);
 		Matrix3x4_Invert(&inversebaseframe[i], baseframe[i]);
@@ -365,7 +361,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 			Vector4Set(q_rot, rotate[0], rotate[1], rotate[2], -sqrt(max(1.0 - pow(VectorLength(rotate),2), 0.0)));
 
-			Matrix3x4_FromQuatAndVectors(&m, q_rot, translate, scale);
+			Matrix3x4_FromQuatAndVectors(&m, q_rot, translate, scale); 
 
 			if(p.parent >= 0) {
 				Matrix3x4_Multiply(&temp, baseframe[p.parent], m);
@@ -445,15 +441,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		vtexcoord+=2;
 	}
 
-	//to do - verify these come in ok
-	mod->blendindexes = (unsigned char*)Hunk_Alloc (header->num_vertexes * 4 * sizeof(unsigned char));
-	mod->blendweights = (unsigned char*)Hunk_Alloc (header->num_vertexes * 4 * sizeof(unsigned char));
-	for (i = 0; i < (int)header->num_vertexes;i++)
-	{
-		memcpy(mod->blendindexes, vblendindexes + i*4, 4);
-		memcpy(mod->blendweights, vblendweights + i*4, 4);
-	}
-
 	//free temp non hunk mem
 	if(baseframe)
 		free(baseframe);
@@ -463,7 +450,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	return true;
 }
 
-matrix3x4_t outframe[5096]; //find out what max frames might be
+matrix3x4_t outframe[5096]; //to do - find out what max frames/joints might be
 
 void GL_AnimateIqmFrame(float curframe)
 {
@@ -503,11 +490,10 @@ void GL_AnimateIqmFrame(float curframe)
 	
 		mvertex_t *dstpos = (mvertex_t *)currentmodel->animatevertexes;
 		mnormal_t *dstnorm = (mnormal_t *)currentmodel->animatenormal;
-		mtangent_t *dsttan = (mtangent_t *)currentmodel->animatetangent;
+		mtangent_t *dsttan = (mtangent_t *)currentmodel->animatetangent;		
 
 		const unsigned char *index = currentmodel->blendindexes, *weight = currentmodel->blendweights;
 
-		//this next section need major translation to our codebase
 		for(i = 0; i < currentmodel->numvertexes; i++)
 		{
 			matrix3x4_t mat, temp;
@@ -523,6 +509,7 @@ void GL_AnimateIqmFrame(float curframe)
 			// 0 values, which are always at the end, are unused.
 
 			Matrix3x4_Scale(&mat, outframe[index[0]], weight[0]/255.0f);
+	
 			for(j = 1; j < 4 && weight[j]; j++) {
 				Matrix3x4_Scale(&temp, outframe[index[j]], weight[j]/255.0f);
 				Matrix3x4_Add(&mat, mat, temp);
@@ -533,7 +520,10 @@ void GL_AnimateIqmFrame(float curframe)
 			// Normals and tangents only use the 3x3 rotation part 
 			// of the transformation matrix.
 
-			Matrix3x4_Transform(dstpos, mat, *srcpos);
+			Matrix3x4_Transform(dstpos, mat, *srcpos); 
+			//note - replacing this line with 
+			//*dstpos = *srcpos;
+			//and the model renders correctly, so the problems exist with the transformations or the matrixes
 
 			// Note that if the matrix includes non-uniform scaling, normal vectors
 			// must be transformed by the inverse-transpose of the matrix to have the
@@ -577,26 +567,23 @@ void GL_DrawIqmFrame()
 
 	//render the model
 	
-	//just need a basic test render to get me started, once I have this, I can implement rscript and GLSL items among other things
+	//just need a basic test render to get started, once I have this, I can implement rscript and GLSL items among other things
 	va=0;
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
-	//I know this section is inherently wrong, the vertexes should be coming from another array created by the animation routine
-	//Just wanted the overall structure of rendering outlined here
-
+	
 	GL_SelectTexture( GL_TEXTURE0);
 	qglBindTexture (GL_TEXTURE_2D, r_cowtest->texnum);
 
-	//Note - we will build this section in the animation of the vertexes eventually
 	for (i=0; i<currentmodel->num_triangles; i++)
 	{	
 		for (j=0; j<3; j++)
 		{			
 			index_xyz = index_st = currentmodel->tris[i].vertex[j];
 			
-			VArray[0] = currentmodel->vertexes[index_xyz].position[0];
-			VArray[1] = currentmodel->vertexes[index_xyz].position[1];
-			VArray[2] = currentmodel->vertexes[index_xyz].position[2];
+			VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];
+			VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];
+			VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];
 
 			VArray[3] = currentmodel->st[index_st].s;
 			VArray[4] = currentmodel->st[index_st].t;
@@ -627,6 +614,7 @@ R_DrawINTERQUAKEMODEL - initially this will only deal with player models, so muc
 */
 
 //much of this will need work, but for now for the basic render, this suffices
+int testframe = 0;
 void R_DrawINTERQUAKEMODEL (entity_t *e)
 {
 	int			i;
@@ -639,11 +627,7 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 	//do culling after we know this renders ok!
 	//if ( R_CullAliasModel( bbox, e ) )
 	//	return;
-	//bug - currentmodel is not retaining the verts at all
-	if(0) {
-		for (i=0; i<currentmodel->numvertexes; i++)
-			Com_Printf("vertex: %4.2f %4.2f %4.2f\n", currentmodel->vertexes[i].position[0], currentmodel->vertexes[i].position[1], currentmodel->vertexes[i].position[2]);
-	}
+	
 	//will have to deal with shells at some point, for now just leave this here
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{
@@ -745,8 +729,12 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 		qglBlendFunc (GL_ONE, GL_ONE);
 	}
 
-	//frame/oldframe stuff for blending?
-	GL_AnimateIqmFrame(currententity->frame);
+	GL_AnimateIqmFrame(testframe);
+	//just for testing
+	testframe++;
+	if(testframe > 15)
+		testframe = 0;
+
 	GL_DrawIqmFrame();
 
 	GL_TexEnv( GL_REPLACE );
