@@ -438,6 +438,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	if(inversebaseframe)
 		free(inversebaseframe);
 
+	Com_Printf("num frames: %i\n", mod->num_poses);
+
 	return true;
 }
 
@@ -449,8 +451,8 @@ void GL_AnimateIqmFrame(float curframe)
     int frame1 = (int)floor(curframe),
         frame2 = frame1 + 1;
     float frameoffset = curframe - frame1;
-	frame1 %= currentmodel->num_frames;
-	frame2 %= currentmodel->num_frames;
+	frame1 %= currentmodel->num_poses;
+	frame2 %= currentmodel->num_poses;
  
 	{
 		matrix3x4_t *mat1 = &currentmodel->frames[frame1 * currentmodel->num_joints],
