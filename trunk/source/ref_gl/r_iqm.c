@@ -30,14 +30,14 @@ void Matrix3x4_Invert(matrix3x4_t *out, matrix3x4_t in)
 	VectorSet(c, in.a[2], in.b[2], in.c[2]);
 
 	VectorScale(a, 1/DotProduct(a, a), a);
-	VectorScale(b, 1/DotProduct(a, a), b);
-	VectorScale(c, 1/DotProduct(a, a), c);
+	VectorScale(b, 1/DotProduct(b, b), b);
+	VectorScale(c, 1/DotProduct(c, c), c);
 
 	VectorSet(trans, in.a[3], in.b[3], in.c[3]);
 
-	Vector4Set(out->a, a[0], a[1], a[2], -_DotProduct(a, trans));
-	Vector4Set(out->b, b[0], b[1], b[2], -_DotProduct(b, trans));
-	Vector4Set(out->c, c[0], c[1], c[2], -_DotProduct(c, trans));
+	Vector4Set(out->a, a[0], a[1], a[2], -DotProduct(a, trans));
+	Vector4Set(out->b, b[0], b[1], b[2], -DotProduct(b, trans));
+	Vector4Set(out->c, c[0], c[1], c[2], -DotProduct(c, trans));
 }
 
 void Matrix3x4_FromQuatAndVectors(matrix3x4_t *out, vec4_t rot, const float trans[3], const float scale[3])
