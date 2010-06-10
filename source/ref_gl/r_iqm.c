@@ -223,6 +223,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		Com_Printf("%s has no animations\n", mod->name);
 		return false;
 	}
+	
+	mod->extradata = Hunk_Begin (0x300000); 
 
 	va = (iqmvertexarray_t *)(pbase + header->ofs_vertexarrays);
 	for (i = 0;i < (int)header->num_vertexarrays;i++)
@@ -277,8 +279,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	mod->num_poses = header->num_frames;
 	mod->numvertexes = header->num_vertexes;
 	mod->num_triangles = header->num_triangles;
-
-	mod->extradata = Hunk_Begin (0x300000); 
 
 	// load the joints
 	joint = (iqmjoint_t *) (pbase + header->ofs_joints);
