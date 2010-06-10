@@ -251,12 +251,16 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 				vtangent = (float *)(pbase + va[i].offset);
 			break;
 		case IQM_BLENDINDEXES:
-			if (va[i].format == IQM_UBYTE && va[i].size == 4)
-				mod->blendindexes = (unsigned char *)(pbase + va[i].offset);
+			if (va[i].format == IQM_UBYTE && va[i].size == 4) {
+				mod->blendindexes = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
+				mod->blendindexes = (pbase + va[i].offset);
+			}
 			break;
 		case IQM_BLENDWEIGHTS:
-			if (va[i].format == IQM_UBYTE && va[i].size == 4) 
-				mod->blendweights = (unsigned char *)(pbase + va[i].offset);
+			if (va[i].format == IQM_UBYTE && va[i].size == 4) {
+				mod->blendweights = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
+				mod->blendweights = (pbase + va[i].offset);
+			}
 			break;
 		}
 	}
@@ -307,10 +311,13 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		Matrix3x4_FromQuatAndVectors(&baseframe[i], q_rot, j.origin, j.scale);
 		Matrix3x4_Invert(&inversebaseframe[i], baseframe[i]);
 
-        if(j.parent >= 0) 
+        if(j.parent >= 0)
         {
-			Matrix3x4_Multiply(&baseframe[j.parent], baseframe[i], baseframe[i]); 
-			Matrix3x4_Multiply(&inversebaseframe[j.parent], inversebaseframe[j.parent], inversebaseframe[i]);
+            matrix3x4_t temp;
+            Matrix3x4_Multiply(&temp, baseframe[j.parent], baseframe[i]);
+            baseframe[i] = temp;
+            Matrix3x4_Multiply(&temp, inversebaseframe[i], inversebaseframe[j.parent]);
+            inversebaseframe[i] = temp;
         }
     }
 
