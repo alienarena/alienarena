@@ -253,13 +253,13 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		case IQM_BLENDINDEXES:
 			if (va[i].format == IQM_UBYTE && va[i].size == 4) {
 				mod->blendindexes = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
-				mod->blendindexes = (pbase + va[i].offset);
+				memcpy(mod->blendindexes, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
 			}
 			break;
 		case IQM_BLENDWEIGHTS:
 			if (va[i].format == IQM_UBYTE && va[i].size == 4) {
 				mod->blendweights = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
-				mod->blendweights = (pbase + va[i].offset);
+				memcpy(mod->blendweights, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
 			}
 			break;
 		}
