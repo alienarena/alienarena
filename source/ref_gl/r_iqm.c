@@ -511,10 +511,7 @@ void GL_AnimateIqmFrame(float curframe)
 			// of the transformation matrix.
 
 			Matrix3x4_Transform(dstpos, mat, *srcpos); 
-			//note - replacing this line with 
-			//*dstpos = *srcpos;
-			//and the model renders correctly, so the problems exist with the transformations or the matrixes
-
+			
 			// Note that if the matrix includes non-uniform scaling, normal vectors
 			// must be transformed by the inverse-transpose of the matrix to have the
 			// correct relative scale. Note that invert(mat) = adjoint(mat)/determinant(mat),
