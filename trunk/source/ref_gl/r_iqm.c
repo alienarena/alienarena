@@ -7,30 +7,14 @@ qboolean testflag;
 
 //these matrix functions should be moved to matrixlib.c or similar
 
-void Matrix3x3CrossFromMatrix3x4(matrix3x3_t *out, matrix3x4_t in)
-{
-	vec3_t a3, b3, c3;
-	int i;
-
-	for(i=0; i<3; i++) {
-		a3[i] = in.a[i];
-		b3[i] = in.b[i];
-		c3[i] = in.c[i];
-	}
-
-	CrossProduct(b3, c3, out->a);
-	CrossProduct(c3, a3, out->b);
-	CrossProduct(a3, b3, out->c);
-}
-
-void Matrix3x3_TransformNormal(mnormal_t *out, matrix3x3_t mat, const mnormal_t in)
+void Matrix3x4_TransformNormal(mnormal_t *out, matrix3x4_t mat, const mnormal_t in)
 {
 	out->dir[0] = DotProduct(mat.a, in.dir);
 	out->dir[1] = DotProduct(mat.b, in.dir);
 	out->dir[2] = DotProduct(mat.c, in.dir);
 }
 
-void Matrix3x3_TransformTangent(mtangent_t *out, matrix3x3_t mat, const mtangent_t in)
+void Matrix3x4_TransformTangent(mtangent_t *out, matrix3x4_t mat, const mtangent_t in)
 {
 	out->dir[0] = DotProduct(mat.a, in.dir);
 	out->dir[1] = DotProduct(mat.b, in.dir);
@@ -45,9 +29,9 @@ void Matrix3x4_Invert(matrix3x4_t *out, matrix3x4_t in)
 	VectorSet(b, in.a[1], in.b[1], in.c[1]);
 	VectorSet(c, in.a[2], in.b[2], in.c[2]);
 
-	VectorScale(a, 1/pow(VectorLength(a), 2), a);
-	VectorScale(b, 1/pow(VectorLength(b), 2), b);
-	VectorScale(c, 1/pow(VectorLength(c), 2), c);
+	VectorScale(a, 1/DotProduct(a, a), a);
+	VectorScale(b, 1/DotProduct(a, a), b);
+	VectorScale(c, 1/DotProduct(a, a), c);
 
 	VectorSet(trans, in.a[3], in.b[3], in.c[3]);
 
@@ -55,6 +39,7 @@ void Matrix3x4_Invert(matrix3x4_t *out, matrix3x4_t in)
 	Vector4Set(out->b, b[0], b[1], b[2], -_DotProduct(b, trans));
 	Vector4Set(out->c, c[0], c[1], c[2], -_DotProduct(c, trans));
 }
+
 void Matrix3x4_FromQuatAndVectors(matrix3x4_t *out, vec4_t rot, const float trans[3], const float scale[3])
 {
 	vec3_t a, b, c;
@@ -76,58 +61,58 @@ void Matrix3x4_FromQuatAndVectors(matrix3x4_t *out, vec4_t rot, const float tran
 	Vector4Set(out->c, c[0]*scale[0], c[1]*scale[1], c[2]*scale[2], trans[2]);
 }
 
-Matrix3x4_Multiply(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
+void Matrix3x4_Multiply(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
 {
-	vec3_t a, b, c, d;
+	vec4_t a, b, c, d;
 
-	VectorScale(mat2.a, mat1.a[0], a);
-	VectorScale(mat2.b, mat1.a[1], b);
-	VectorScale(mat2.c, mat1.a[2], c);
-	VectorAdd(a, b, d);
-	VectorAdd(d, c, d);
-	Vector4Set(out->a, d[0], d[1], d[2], mat1.a[3]);
+    Vector4Scale(mat2.a, mat1.a[0], a);
+    Vector4Scale(mat2.b, mat1.a[1], b);
+    Vector4Scale(mat2.c, mat1.a[2], c);
+    Vector4Add(a, b, d);
+    Vector4Add(d, c, d);
+    Vector4Set(out->a, d[0], d[1], d[2], d[3] + mat1.a[3]);
 
-	VectorScale(mat2.a, mat1.b[0], a);
-	VectorScale(mat2.b, mat1.b[1], b);
-	VectorScale(mat2.c, mat1.b[2], c);
-	VectorAdd(a, b, d);
-	VectorAdd(d, c, d);
-	Vector4Set(out->b, d[0], d[1], d[2], mat1.b[3]);
+    Vector4Scale(mat2.a, mat1.b[0], a);
+    Vector4Scale(mat2.b, mat1.b[1], b);
+    Vector4Scale(mat2.c, mat1.b[2], c);
+    Vector4Add(a, b, d);
+    Vector4Add(d, c, d);
+    Vector4Set(out->b, d[0], d[1], d[2], d[3] + mat1.b[3]);
 
-	VectorScale(mat2.a, mat1.c[0], a);
-	VectorScale(mat2.b, mat1.c[1], b);
-	VectorScale(mat2.c, mat1.c[2], c);
-	VectorAdd(a, b, d);
-	VectorAdd(d, c, d);
-	Vector4Set(out->c, d[0], d[1], d[2], mat1.c[3]);
+    Vector4Scale(mat2.a, mat1.c[0], a);
+    Vector4Scale(mat2.b, mat1.c[1], b);
+    Vector4Scale(mat2.c, mat1.c[2], c);
+    Vector4Add(a, b, d);
+    Vector4Add(d, c, d);
+    Vector4Set(out->c, d[0], d[1], d[2], d[3] + mat1.c[3]);
 }
 
-Matrix3x4_Scale(matrix3x4_t *out, matrix3x4_t in, float scale)
+void Matrix3x4_Scale(matrix3x4_t *out, matrix3x4_t in, float scale)
 {
 	Vector4Scale(in.a, scale, out->a);
 	Vector4Scale(in.b, scale, out->b);
 	Vector4Scale(in.c, scale, out->c);
 }
 
-Matrix3x4_Add(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
+void Matrix3x4_Add(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
 {
 	Vector4Add(mat1.a, mat2.a, out->a);
 	Vector4Add(mat1.b, mat2.b, out->b);
 	Vector4Add(mat1.c, mat2.b, out->c);
 }
 
-Matrix3x4_Copy(matrix3x4_t *out, matrix3x4_t in)
+void Matrix3x4_Copy(matrix3x4_t *out, matrix3x4_t in)
 {
 	Vector4Copy(in.a, out->a);
 	Vector4Copy(in.b, out->b);
 	Vector4Copy(in.c, out->c);
 }
 
-Matrix3x4_Transform(mvertex_t *out, matrix3x4_t mat, const mvertex_t in)
+void Matrix3x4_Transform(mvertex_t *out, matrix3x4_t mat, const mvertex_t in)
 {
-	out->position[0] = DotProduct(mat.a, in.position);
-	out->position[1] = DotProduct(mat.b, in.position);
-	out->position[2] = DotProduct(mat.c, in.position);
+	out->position[0] = DotProduct(mat.a, in.position) + mat.a[3];
+    out->position[1] = DotProduct(mat.b, in.position) + mat.b[3];
+    out->position[2] = DotProduct(mat.c, in.position) + mat.c[3];
 }
 
 extern 
@@ -164,7 +149,7 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, 
 					LittleFloat(vtangent[2]),
 					LittleFloat(vtangent[3]));
 
-		vposition	+= 3;
+		vposition	+=3;
 		vnormal		+=3;
 		vtangent	+=4;
 	}
@@ -174,7 +159,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 {
 	const char *text;
 	iqmheader_t *header;
-	int i, j, k;
+	int i, j;
 	const int *inelements;
 	float *vposition = NULL, *vtexcoord = NULL, *vnormal = NULL, *vtangent = NULL;
 	unsigned char *pbase;
@@ -185,7 +170,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	iqmbounds_t *bounds;
 	iqmvertexarray_t *va;
 	unsigned short *framedata;
-	float biggestorigin;
 
 	pbase = (unsigned char *)buffer;
 	header = (iqmheader_t *)buffer;
@@ -497,7 +481,6 @@ void GL_AnimateIqmFrame(float curframe)
 		for(i = 0; i < currentmodel->numvertexes; i++)
 		{
 			matrix3x4_t mat, temp;
-			matrix3x3_t matnorm;
 
 			// Blend matrixes for this vertex according to its blend weights. 
 			// the first index/weight is always present, and the weights are
@@ -536,13 +519,12 @@ void GL_AnimateIqmFrame(float curframe)
 			// upper 3x3 part of the position matrix instead of the adjoint-transpose shown 
 			// here.
 
-			Matrix3x3CrossFromMatrix3x4(&matnorm, mat);
-			Matrix3x3_TransformNormal(dstnorm, matnorm, *srcnorm);
+			Matrix3x4_TransformNormal(dstnorm, mat, *srcnorm);
 
 			// Note that input tangent data has 4 coordinates, 
 			// so only transform the first 3 as the tangent vector.
 
-			Matrix3x3_TransformTangent(dsttan, matnorm, *srctan);
+			Matrix3x4_TransformTangent(dsttan, mat, *srctan);
 
 		    srcpos++;
 			srcnorm++;
