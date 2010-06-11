@@ -443,6 +443,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	//
 	// load the file
 	//
+	//to do - if .md2, check for IQM version first
 	modfilelen = FS_LoadFile (mod->name, &buf);
 	if (!buf)
 	{
