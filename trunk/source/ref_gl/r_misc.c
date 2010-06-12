@@ -81,7 +81,7 @@ image_t		*r_distort;
 image_t		*sun_object;
 image_t		*sun1_object;
 image_t		*sun2_object;
-image_t		*r_cowtest;
+image_t		*r_iqmtest;
 
 //Normalisation cube map
 GLuint normalisationCubeMap;
@@ -394,9 +394,9 @@ void R_InitParticleTexture (void)
 		r_dis3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }    
 
-	r_cowtest = GL_FindImage("maps/meshes/test/cow.jpg", it_pic);
-	if (!r_cowtest) {                                
-		r_cowtest = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+	r_iqmtest = GL_FindImage("players/martianenforcer/default.jpg", it_pic);
+	if (!r_iqmtest) {                                
+		r_iqmtest = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     } 
  
 	//
