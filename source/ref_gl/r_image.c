@@ -1582,7 +1582,7 @@ void GL_FreeUnusedImages (void)
 	r_dis1texture->registration_sequence = registration_sequence;
 	r_dis2texture->registration_sequence = registration_sequence;
 	r_dis3texture->registration_sequence = registration_sequence;
-	r_cowtest->registration_sequence = registration_sequence;
+	r_iqmtest->registration_sequence = registration_sequence;
 
 	for (i=0, image=gltextures ; i<numgltextures ; i++, image++)
 	{

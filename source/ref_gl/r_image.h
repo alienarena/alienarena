@@ -113,7 +113,7 @@ extern image_t		*r_flagtexture;
 extern image_t		*r_logotexture;
 extern image_t		*r_distort;
 extern image_t		*r_mirrortexture;
-extern image_t		*r_cowtest;
+extern image_t		*r_iqmtest;
 
 extern	image_t		gltextures[MAX_GLTEXTURES];
 extern	int			numgltextures;

@@ -279,6 +279,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	mod->num_poses = header->num_frames;
 	mod->numvertexes = header->num_vertexes;
 	mod->num_triangles = header->num_triangles;
+	
+	Com_Printf("Mesh tris: %i mesh verts: %i\n", mod->num_triangles, mod->numvertexes);
 
 	// load the joints
 	joint = (iqmjoint_t *) (pbase + header->ofs_joints);
@@ -561,7 +563,7 @@ void GL_DrawIqmFrame()
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 	
 	GL_SelectTexture( GL_TEXTURE0);
-	qglBindTexture (GL_TEXTURE_2D, r_cowtest->texnum);
+	qglBindTexture (GL_TEXTURE_2D, r_iqmtest->texnum);
 
 	for (i=0; i<currentmodel->num_triangles; i++)
 	{	
@@ -602,7 +604,6 @@ R_DrawINTERQUAKEMODEL - initially this will only deal with player models, so muc
 */
 
 //much of this will need work, but for now for the basic render, this suffices
-int testframe = 0;
 void R_DrawINTERQUAKEMODEL (entity_t *e)
 {
 	int			i;
@@ -717,11 +718,7 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 		qglBlendFunc (GL_ONE, GL_ONE);
 	}
 
-	GL_AnimateIqmFrame(testframe);
-	//just for testing
-	testframe++;
-	if(testframe > 15)
-		testframe = 0;
+	GL_AnimateIqmFrame(currententity->frame);
 
 	GL_DrawIqmFrame();
 
