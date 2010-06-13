@@ -328,6 +328,17 @@ void R_RenderSun();
 vec3_t sun_origin;
 qboolean spacebox;
 
+//Shared mesh items
+extern vec3_t	shadelight;
+extern vec3_t	shadevector;
+extern int		model_dlights_num;
+extern m_dlight_t model_dlights[128];
+extern image_t	*r_mirrortexture;
+extern cvar_t	*cl_gun;
+extern vec3_t	lightPosition;
+extern float	dynFactor;
+extern void		GL_GetLightVals();
+
 //Player icons
 extern float	scr_playericonalpha;
 

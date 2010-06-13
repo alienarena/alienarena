@@ -75,13 +75,10 @@ opposite directions.  This gives the shading a more prounounced, defined look.
 
 =============
 */
-void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov, float backlerp, vec3_t lightOut)
+void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, vec3_t lightOut)
 {
     int i;
     float l;
-    float lscale;
-
-    lscale = 3.0;
 
     l = shadedots[verts->lightnormalindex];
     VectorScale(baselight, l, lightOut);
@@ -499,7 +496,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 index_xyz = order[2];
 
                 if(lerped) {
-                    GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+                    GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 
                     VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
                     VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
@@ -514,7 +511,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                     VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
                 }
                 else {
-                    GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+                    GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 
                     VArray[0] = currentmodel->vertexes[index_xyz].position[0];
                     VArray[1] = currentmodel->vertexes[index_xyz].position[1];
@@ -686,9 +683,9 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
 
                         if (stage->lightmap) {
                             if(lerped)
-                                GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+                                GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
                             else
-                                GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+                                GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
                             red = lightcolor[0];
                             green = lightcolor[1];
                             blue = lightcolor[2];
@@ -1108,7 +1105,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				index_st = tris[i].index_st[j];
 												
 				if(lerped) {
-					GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+					GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 
 					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
 					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
@@ -1123,7 +1120,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);			
 				}
 				else {
-					GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+					GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 
 					VArray[0] = currentmodel->vertexes[index_xyz].position[0];
 					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
@@ -1432,9 +1429,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 						if (stage->lightmap) { 
 							if(lerped)
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 							else
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
 							blue = lightcolor[2];						
