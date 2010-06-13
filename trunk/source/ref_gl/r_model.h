@@ -105,6 +105,7 @@ BRUSH MODELS
 typedef struct
 {
 	vec3_t		position;
+	byte		lightnormalindex;
 } mvertex_t;
 
 typedef struct
