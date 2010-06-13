@@ -18,6 +18,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // r_program.c
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "r_local.h"
 
 //ARB fragment program extensions
@@ -32,11 +37,11 @@ unsigned int g_water_program_id;
 char *fragment_program_text;
 
 //GLSL
-PFNGLCREATEPROGRAMOBJECTARBPROC		glCreateProgramObjectARB	= NULL;	
+PFNGLCREATEPROGRAMOBJECTARBPROC		glCreateProgramObjectARB	= NULL;
 PFNGLDELETEOBJECTARBPROC			glDeleteObjectARB			= NULL;
 PFNGLUSEPROGRAMOBJECTARBPROC		glUseProgramObjectARB		= NULL;
 PFNGLCREATESHADEROBJECTARBPROC		glCreateShaderObjectARB		= NULL;
-PFNGLSHADERSOURCEARBPROC			glShaderSourceARB			= NULL;		
+PFNGLSHADERSOURCEARBPROC			glShaderSourceARB			= NULL;
 PFNGLCOMPILESHADERARBPROC			glCompileShaderARB			= NULL;
 PFNGLGETOBJECTPARAMETERIVARBPROC	glGetObjectParameterivARB	= NULL;
 PFNGLATTACHOBJECTARBPROC			glAttachObjectARB			= NULL;
@@ -143,16 +148,16 @@ void R_LoadARBPrograms(void)
 	{
 		gl_state.fragment_program = false;
 		Com_Printf("...GL_ARB_fragment_program not found\n");
-	}	
+	}
 
 	if (gl_state.fragment_program)
 	{
-		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "1", CVAR_ARCHIVE); 
-		
+		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "1", CVAR_ARCHIVE);
+
 		qglGenProgramsARB(1, &g_water_program_id);
 		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
 		qglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 1.0f, 0.1f, 0.6f, 0.5f); // jitest
-		len = FS_LoadFile("scripts/water1.arbf", &fragment_program_text);
+		len = FS_LoadFile("scripts/water1.arbf", (void*)&fragment_program_text);
 
 		if (len > 0) {
 			qglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, len, fragment_program_text);
@@ -161,7 +166,7 @@ void R_LoadARBPrograms(void)
 		else
 			Com_Printf("Unable to find scripts/water1.arbf\n");
 
-		
+
 		// Make sure the program loaded correctly
 		{
 			int err = 0;
@@ -170,7 +175,7 @@ void R_LoadARBPrograms(void)
 		}
 	}
 	else
-		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "0", CVAR_ARCHIVE); 
+		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "0", CVAR_ARCHIVE);
 }
 
 void R_LoadGLSLPrograms(void)
@@ -205,8 +210,8 @@ void R_LoadGLSLPrograms(void)
 		glUniformMatrix3fvARB	  = (PFNGLUNIFORMMATRIX3FVARBPROC)qwglGetProcAddress("glUniformMatrix3fvARB");
 
 		if( !glCreateProgramObjectARB || !glDeleteObjectARB || !glUseProgramObjectARB ||
-		    !glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB || 
-		    !glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB || 
+		    !glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB ||
+		    !glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB ||
 		    !glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
 				!glUniform1iARB || !glUniform1fARB || !glUniformMatrix3fvARB)
 		{
@@ -215,7 +220,7 @@ void R_LoadGLSLPrograms(void)
 		}
 	}
 	else
-	{            
+	{
 		Com_Printf("...One or more GL_ARB_shader_objects functions were not found");
 		gl_state.glsl_shaders = false;
 	}
@@ -223,18 +228,18 @@ void R_LoadGLSLPrograms(void)
 	if(gl_state.glsl_shaders) {
 
 		//we have them, set defaults accordingly
-		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "1", CVAR_ARCHIVE); 
+		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "1", CVAR_ARCHIVE);
 		gl_dynamic = Cvar_Get ("gl_dynamic", "1", CVAR_ARCHIVE);
 
 		//standard bsp surfaces
 
 		g_programObj = glCreateProgramObjectARB();
-	
+
 		//
 		// Vertex shader
 		//
 
-		len = FS_LoadFile("scripts/vertex_shader.glsl", &shader_assembly);
+		len = FS_LoadFile("scripts/vertex_shader.glsl", (void*)&shader_assembly);
 
 		if (len > 0) {
 			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
@@ -258,8 +263,8 @@ void R_LoadGLSLPrograms(void)
 		//
 		// Fragment shader
 		//
-		len = FS_LoadFile("scripts/fragment_shader.glsl", &shader_assembly);
-		
+		len = FS_LoadFile("scripts/fragment_shader.glsl", (void*)&shader_assembly);
+
 		if(len > 0) {
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
@@ -311,7 +316,7 @@ void R_LoadGLSLPrograms(void)
 		//warp(water) bsp surfaces
 
 		g_waterprogramObj = glCreateProgramObjectARB();
-	
+
 		//
 		// Vertex shader
 		//
@@ -340,8 +345,8 @@ void R_LoadGLSLPrograms(void)
 		//
 		// Fragment shader
 		//
-		len = FS_LoadFile("scripts/water_fragment_shader.glsl", &shader_assembly);
-		
+		len = FS_LoadFile("scripts/water_fragment_shader.glsl", (void*)&shader_assembly);
+
 		if(len > 0) {
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
@@ -387,12 +392,12 @@ void R_LoadGLSLPrograms(void)
 		//meshes
 
 		g_meshprogramObj = glCreateProgramObjectARB();
-	
+
 		//
 		// Vertex shader
 		//
 
-		len = FS_LoadFile("scripts/mesh_vertex_shader.glsl", &shader_assembly);
+		len = FS_LoadFile("scripts/mesh_vertex_shader.glsl", (void*)&shader_assembly);
 
 		if (len > 0) {
 			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
@@ -417,7 +422,7 @@ void R_LoadGLSLPrograms(void)
 		// Fragment shader
 		//
 		len = FS_LoadFile("scripts/mesh_fragment_shader.glsl", &shader_assembly);
-		
+
 		if(len > 0) {
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
@@ -466,7 +471,7 @@ void R_LoadGLSLPrograms(void)
 		//fullscreen distortion effects
 
 		g_fbprogramObj = glCreateProgramObjectARB();
-	
+
 		//
 		// Vertex shader
 		//
@@ -496,7 +501,7 @@ void R_LoadGLSLPrograms(void)
 		// Fragment shader
 		//
 		len = FS_LoadFile("scripts/fb_fragment_shader.glsl", &shader_assembly);
-		
+
 		if(len > 0) {
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
@@ -533,14 +538,14 @@ void R_LoadGLSLPrograms(void)
 		g_location_distortTex = glGetUniformLocationARB( g_fbprogramObj, "distorttexture");
 		g_location_frametime = glGetUniformLocationARB( g_fbprogramObj, "frametime" );
 		g_location_fxType = glGetUniformLocationARB( g_fbprogramObj, "fxType" );
-		g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" ); 
+		g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" );
 		g_location_fxColor = glGetUniformLocationARB( g_fbprogramObj, "fxColor" );
 		g_location_fbSampleSize = glGetUniformLocationARB( g_fbprogramObj, "fbSampleSize" );
 
 		//blur
 
 		g_blurprogramObj = glCreateProgramObjectARB();
-	
+
 		//
 		// Vertex shader
 		//
@@ -570,7 +575,7 @@ void R_LoadGLSLPrograms(void)
 		// Fragment shader
 		//
 		len = FS_LoadFile("scripts/blur_fragment_shader.glsl", &shader_assembly);
-		
+
 		if(len > 0) {
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
@@ -605,10 +610,10 @@ void R_LoadGLSLPrograms(void)
 
 		g_location_scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
 		g_location_source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
-	
+
 	}
 	else {
-		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE); 
+		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE);
 		gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
 	}
 }

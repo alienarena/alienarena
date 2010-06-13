@@ -20,10 +20,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Main windowed and fullscreen graphics interface module. This module
 // is used for both the software and OpenGL rendering versions of the
 // Quake refresh engine.
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <assert.h>
 #include <float.h>
 
-#include "..\client\client.h"
+#include "client\client.h"
 #include "winquake.h"
 //#include "zmouse.h"
 
@@ -70,8 +75,8 @@ static void WIN_DisableAltTab( void )
 	if ( s_win95 )
 	{
 		BOOL old;
-
-		SystemParametersInfo( SPI_SCREENSAVERRUNNING, 1, &old, 0 );
+// -jjb-ac same value, but not def'd in mingw winuser.h
+		SystemParametersInfo( SPI_SETSCREENSAVERRUNNING, 1, &old, 0 );
 	}
 	else
 	{
@@ -88,8 +93,8 @@ static void WIN_EnableAltTab( void )
 		if ( s_win95 )
 		{
 			BOOL old;
-
-			SystemParametersInfo( SPI_SCREENSAVERRUNNING, 0, &old, 0 );
+//-jjb-ac see above
+			SystemParametersInfo( SPI_SETSCREENSAVERRUNNING, 0, &old, 0 );
 		}
 		else
 		{

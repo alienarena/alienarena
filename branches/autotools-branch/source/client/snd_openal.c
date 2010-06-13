@@ -28,6 +28,9 @@
  *	 http://kcat.strangesoft.net/openal.html  (OpenAL Soft)
  *
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <stdio.h>
 #include <malloc.h>

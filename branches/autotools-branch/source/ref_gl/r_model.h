@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -32,17 +32,17 @@ WORLD LIGHTS
 ==============================================================================
 */
 
-#define MAX_LIGHTS 4096 
- 
-typedef struct 
-{ 
-	vec3_t	origin; 
+#define MAX_LIGHTS 4096
+
+typedef struct
+{
+	vec3_t	origin;
 	float	intensity;
 	void	*surf;
 	qboolean grouped;
-} worldLight_t; 
- 
-worldLight_t r_worldLights[MAX_LIGHTS]; 
+} worldLight_t;
+
+worldLight_t r_worldLights[MAX_LIGHTS];
 int r_numWorldLights;
 /*
 ==============================================================================
@@ -176,7 +176,7 @@ typedef struct msurface_s
 
 	int			firstedge;	// look up in model->surfedges[], negative numbers
 	int			numedges;	// are backwards edges
-	
+
 	int			texturemins[2];
 	int			extents[2];
 
@@ -202,7 +202,7 @@ typedef struct msurface_s
 	byte		*samples;		// [numstyles*surfsize]
 
 	entity_t	*entity;
-	
+
 	float	tangentSpaceTransform[3][3];
 
 } msurface_t;
@@ -212,14 +212,14 @@ typedef struct mnode_s
 // common with leaf
 	int			contents;		// -1, to differentiate from leafs
 	int			visframe;		// node needs to be traversed if current
-	
+
 	float		minmaxs[6];		// for bounding box culling
 
 	struct mnode_s	*parent;
 
 // node specific
 	cplane_t	*plane;
-	struct mnode_s	*children[2];	
+	struct mnode_s	*children[2];
 
 	unsigned short		firstsurface;
 	unsigned short		numsurfaces;
@@ -266,12 +266,12 @@ typedef struct model_s
 
 	modtype_t	type;
 	int			numframes;
-	
+
 	int			flags;
 
 //
 // volume occupied by the model graphics
-//		
+//
 	vec3_t		mins, maxs;
 	float		radius;
 	vec3_t		bbox[8];
@@ -319,7 +319,7 @@ typedef struct model_s
 	// for alias models and skins
 	image_t		*skins[MAX_MD2SKINS];
 
-	struct rscript_t	*script[MAX_MD2SKINS];
+	struct rscript_s	*script[MAX_MD2SKINS];
 
 	int			extradatasize;
 	void		*extradata;

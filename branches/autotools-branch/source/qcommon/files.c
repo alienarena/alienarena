@@ -18,12 +18,90 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+/*
+-------------------------------------------------------------------------------
+Alien Arena File System
+
+
+---- Windows Install ----
+
+c:\Alien Arena\
+	data1\
+	arena\
+	botinfo\
+	crx.exe
+
+( MinGW builds??? )
+
+
+---- GNU Autotools Standard Install Linux/Unix ----
+
+prefix (/usr/local/games)
+execprefix (/usr/local/games)
+
+bindir (/usr/local/games/bin)
+  crx
+  crx-ded
+
+datarootdir (/usr/local/games/share)
+datadir (/usr/local/games/share/)
+
+pkgdatadir (/usr/local/games/share/alienarena/)   READ-ONLY
+  data1/
+  arena/
+  botinfo/
+
+docdir (/usr/local/share/doc/)
+pkgdocdir (/usr/local/share/doc/alienarena)
+
+
+COR_GAME (/home/$(whoami)/.codered)   READ/WRITE
+  data1/
+  arena/
+
+  maps/
+  demos/
+  screenshots/
+  botinfo/
+  config.cfg
+  autoexec.cfg
+
+
+--- GNU Autotools Single Directory/SVN Install ---
+
+
+
+
+--- Original Quake File System Comments ---
+All of Quake's data access is through a hierchal file system, but the contents
+of the file system can be transparently merged from several sources.
+
+The "base directory" is the path to the directory holding the quake.exe and all
+game directories.  The sys_* files pass this to host_init in
+quakeparms_t->basedir.  This can be overridden with the "-basedir" command line
+parm to allow code debugging in a different directory. The base directory is
+only used during filesystem initialization.
+
+The "game directory" is the first tree on the search path and directory that all
+generated files (savegames, screenshots, demos, config files) will be saved to.
+This can be overridden with the "-game" command line parameter. The game
+directory can never be changed while quake is executing. This is a precacution
+against having a malicious server instruct clients to write files over areas
+they shouldn't.
+
+-------------------------------------------------------------------------------
+*/
+
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "qcommon.h"
-#include "../unix/glob.h"
+#include "unix/glob.h"
 
-// define this to dissalow any data but the demo pak file
-//#define	NO_ADDONS
 
+#if defined PACKFILE_SUPPORT
 // if a packfile directory differs from this, it is assumed to be hacked
 // Full version
 #define	PAK0_CHECKSUM	0x40e614e0
@@ -31,6 +109,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //#define	PAK0_CHECKSUM	0xb2c6d7ea
 // OEM
 //#define	PAK0_CHECKSUM	0x78e135c
+#endif
 
 /*
 =============================================================================
@@ -39,12 +118,7 @@ QUAKE FILESYSTEM
 
 =============================================================================
 */
-
-
-//
-// in memory
-//
-
+#if defined PACKFILE_SUPPORT
 typedef struct
 {
 	char	name[MAX_QPATH];
@@ -58,6 +132,7 @@ typedef struct pack_s
 	int		numfiles;
 	packfile_t	*files;
 } pack_t;
+#endif
 
 char	fs_gamedir[MAX_OSPATH];
 cvar_t	*fs_basedir;
@@ -83,17 +158,6 @@ typedef struct searchpath_s
 searchpath_t	*fs_searchpaths;
 searchpath_t	*fs_base_searchpaths;	// without gamedirs
 
-
-/*
-
-All of Quake's data access is through a hierchal file system, but the contents of the file system can be transparently merged from several sources.
-
-The "base directory" is the path to the directory holding the quake.exe and all game directories.  The sys_* files pass this to host_init in quakeparms_t->basedir.  This can be overridden with the "-basedir" command line parm to allow code debugging in a different directory.  The base directory is
-only used during filesystem initialization.
-
-The "game directory" is the first tree on the search path and directory that all generated files (savegames, screenshots, demos, config files) will be saved to.  This can be overridden with the "-game" command line parameter.  The game directory can never be changed while quake is executing.  This is a precacution against having a malicious server instruct clients to write files over areas they shouldn't.
-
-*/
 
 
 /*
@@ -142,7 +206,7 @@ void	FS_CreatePath (char *path)
 ==============
 FS_FCloseFile
 
-For some reason, other dll's can't just cal fclose()
+For some reason, other dll's can't just call fclose()
 on files returned by FS_FOpenFile...
 ==============
 */
@@ -222,14 +286,20 @@ int FS_FOpenFile (char *filename, FILE **file)
 			if (!*file)
 				continue;
 
+#if 0
+			// -jjb-fix flooding
 			Com_DPrintf ("FindFile: %s\n",netpath);
+#endif
 
 			return FS_filelength (*file);
 		}
 
 	}
 
+#if 0
+	// -jjb-fix flooding
 	Com_DPrintf ("FindFile: can't find %s\n", filename);
+#endif
 
 	*file = NULL;
 	return -1;
@@ -257,7 +327,10 @@ int FS_FOpenFile (char *filename, FILE **file)
 		if (!*file)
 			return -1;
 
+#if 0
+		// -jjb-fix flooding
 		Com_DPrintf ("FindFile: %s\n",netpath);
+#endif
 
 		return FS_filelength (*file);
 	}
@@ -285,7 +358,10 @@ int FS_FOpenFile (char *filename, FILE **file)
 			return pak->files[i].filelen;
 		}
 
+#if 0
+	// -jjb-fix flooding
 	Com_DPrintf ("FindFile: can't find %s\n", filename);
+#endif
 
 	*file = NULL;
 	return -1;
@@ -436,6 +512,8 @@ of the list so they override previous pack files.
 */
 pack_t *FS_LoadPackFile (char *packfile)
 {
+#if defined PACKFILE_SUPPORT
+
 	dpackheader_t	header;
 	int				i;
 	packfile_t		*newfiles;
@@ -480,6 +558,7 @@ pack_t *FS_LoadPackFile (char *packfile)
 	if (checksum != PAK0_CHECKSUM)
 		return NULL;
 #endif
+
 // parse the directory
 	for (i=0 ; i<numpackfiles ; i++)
 	{
@@ -496,6 +575,10 @@ pack_t *FS_LoadPackFile (char *packfile)
 
 	Com_Printf ("Added packfile %s (%i files)\n", packfile, numpackfiles);
 	return pack;
+
+#else
+	return NULL;
+#endif
 }
 
 /*
@@ -529,22 +612,27 @@ void FS_AddGameDirectory (char *dir)
 	searchpath_t	*search;
 	pack_t			*pak;
 	char			pakfile[MAX_OSPATH];
-#ifdef _WINDOWS
+
+#if defined WIN32_VARIANT
 	strcpy (fs_gamedir, dir);
 #endif
+
 	//
 	// add the directory to the search path
 	//
 	search = Z_Malloc (sizeof(searchpath_t));
-#ifdef __unix__
+
+#if defined UNIX_VARIANT
 	strncpy (search->filename, dir, sizeof(search->filename)-1);
 	search->filename[sizeof(search->filename)-1] = 0;
 #else
 	strcpy (search->filename, dir);
 #endif
+
 	search->next = fs_searchpaths;
 	fs_searchpaths = search;
 
+#if defined PACKFILE_SUPPORT
 	//
 	// add any pak files in the format pak0.pak pak1.pak, ...
 	//
@@ -559,11 +647,11 @@ void FS_AddGameDirectory (char *dir)
 		search->next = fs_searchpaths;
 		fs_searchpaths = search;
 	}
-
+#endif
 
 }
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 /*
 ================
 FS_AddHomeAsGameDirectory
@@ -586,6 +674,8 @@ void FS_AddHomeAsGameDirectory (char *dir)
 		homedir = getenv("HOME");
 		if (!homedir)
 			return;
+// -jjb-ac
+//  renaming .codered, handle with autoconf ???
 		len = snprintf(gdir,sizeof(gdir),"%s/.codered/%s/", homedir, dir);
 	}
 
@@ -611,14 +701,30 @@ Called to find where to write a file (demos, savegames, etc)
 */
 char *FS_Gamedir (void)
 {
-#ifdef __unix__
+#if defined UNIX_VARIANT
 	return fs_gamedir;
 #else
+// -jjb-fix is this really what we want? BASEDIRNAME is "data1"
+// if game is set to data1 then "extra stuff" will be written there
+// by current convention this should be "arena"
+// looks like fs_gamedir is always set by default to "arena"
 	if (*fs_gamedir)
 		return fs_gamedir;
 	else
 		return BASEDIRNAME;
 #endif
+
+/**
+	Possibly
+	if ( !*fs_gamedir )
+	{
+		error
+	}
+	else
+	{
+		stat and make sure it is writeable on init
+	}
+**/
 }
 
 /*
@@ -708,11 +814,14 @@ void FS_SetGamedir (char *dir)
 	//
 	// flush all data, so it will be forced to reload
 	//
+// -jjb-ac  source of "double loading" ???
 	if (dedicated && !dedicated->value)
 		Cbuf_AddText ("vid_restart\nsnd_restart\n");
-#ifdef _WINDOWS
+
+#if defined WIN_VARIANT
 	Com_sprintf (fs_gamedir, sizeof(fs_gamedir), "%s/%s", fs_basedir->string, dir);
 #endif
+
 	if (!strcmp(dir,BASEDIRNAME) || (*dir == 0))
 	{
 		Cvar_FullSet ("gamedir", "", CVAR_SERVERINFO|CVAR_NOSET);
@@ -721,16 +830,21 @@ void FS_SetGamedir (char *dir)
 	else
 	{
 		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO|CVAR_NOSET);
+
 #ifdef DATADIR
 		FS_AddGameDirectory (va("%s/%s", DATADIR, dir) );
 #endif
-#ifdef LIBDIR
-		FS_AddGameDirectory (va("%s/%s", LIBDIR, dir) );
-#endif
+
+//#ifdef LIBDIR
+//		FS_AddGameDirectory (va("%s/%s", LIBDIR, dir) );
+//#endif
+
 		FS_AddGameDirectory (va("%s/%s", fs_basedir->string, dir) );
-#ifdef __unix__
+
+#ifdef UNIX_VARIANT
 		FS_AddHomeAsGameDirectory(dir);
 #endif
+
 	}
 }
 
@@ -1127,18 +1241,13 @@ void FS_InitFilesystem (void)
 	Cmd_AddCommand ("link", FS_Link_f);
 	Cmd_AddCommand ("dir", FS_Dir_f );
 
-	//
-	// DATADIR / LIBDIR support.
-	// Both directories are used to load data and libraries from, allowing
-	// different OSes to have them where they want, according to their
-	// conventions.
-	//
-#ifdef DATADIR
+#if defined DATADIR
 	FS_AddGameDirectory (va("%s/"BASEDIRNAME, DATADIR));
 #endif
-#ifdef LIBDIR
-	FS_AddGameDirectory (va("%s/"BASEDIRNAME, LIBDIR));
-#endif
+
+//#ifdef LIBDIR
+//	FS_AddGameDirectory (va("%s/"BASEDIRNAME, LIBDIR));
+//#endif
 
 	//
 	// basedir <path>
@@ -1147,13 +1256,14 @@ void FS_InitFilesystem (void)
 	fs_basedir = Cvar_Get ("basedir", ".", CVAR_NOSET);
 
 	//
-	// start up with baseq2 by default
+	// start up with BASEDIRNAME by default
 	//
 	FS_AddGameDirectory (va("%s/"BASEDIRNAME, fs_basedir->string) );
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 	FS_AddHomeAsGameDirectory(BASEDIRNAME);
 #endif
+
 	// any set gamedirs will be freed up to here
 	fs_base_searchpaths = fs_searchpaths;
 

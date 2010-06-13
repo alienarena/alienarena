@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "r_local.h"
 
@@ -51,13 +55,13 @@ void R_GLSLPostProcess(void)
 
 	if(!gl_glsl_postprocess->value)
 		return;
-	
+
 	//don't allow on low resolutions, too much tearing at edges
-	if(!gl_glsl_shaders->value || vid.width < 1024 || vid.width > 2048 || !gl_state.glsl_shaders) 
+	if(!gl_glsl_shaders->value || vid.width < 1024 || vid.width > 2048 || !gl_state.glsl_shaders)
 		return;
 
 	if(r_fbFxType == EXPLOSION) {
-		
+
 		//is it in our view?
 		AngleVectors (r_newrefdef.viewangles, forward, NULL, NULL);
 		VectorSubtract (r_explosionOrigin, r_newrefdef.vieworg, vec);
@@ -78,7 +82,7 @@ void R_GLSLPostProcess(void)
 	//if not doing stuff, return
 	if(!r_drawing_fbeffect)
 		return;
-		
+
 	frames++;
 
 	//set up full screen workspace
@@ -101,9 +105,9 @@ void R_GLSLPostProcess(void)
 	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
 				0, 0, 0, 0, FB_texture_width, FB_texture_height);
 
-	qglViewport(0,0,viddef.width, viddef.height);	
+	qglViewport(0,0,viddef.width, viddef.height);
 
-	//render quad on screen	
+	//render quad on screen
 
 	offsetY = viddef.height - FB_texture_height;
 	offsetX = viddef.width - FB_texture_width;
@@ -111,34 +115,34 @@ void R_GLSLPostProcess(void)
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]); 
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
 	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
 	VA_SetElem2(twodvert_array[0],0, viddef.height);
 	VA_SetElem2(twodvert_array[1],viddef.width-offsetX, viddef.height);
 	VA_SetElem2(twodvert_array[2],viddef.width-offsetX, offsetY);
-	VA_SetElem2(twodvert_array[3],0, offsetY); 
+	VA_SetElem2(twodvert_array[3],0, offsetY);
 
 	VA_SetElem2(tex_array[0],r_framebuffer->sl, r_framebuffer->tl);
 	VA_SetElem2(tex_array[1],r_framebuffer->sh, r_framebuffer->tl);
 	VA_SetElem2(tex_array[2],r_framebuffer->sh, r_framebuffer->th);
 	VA_SetElem2(tex_array[3],r_framebuffer->sl, r_framebuffer->th);
 
-	//do some glsl 
+	//do some glsl
 	glUseProgramObjectARB( g_fbprogramObj );
 
-	qglActiveTextureARB(GL_TEXTURE1); 
+	qglActiveTextureARB(GL_TEXTURE1);
 	qglBindTexture (GL_TEXTURE_2D,r_framebuffer->texnum);
-	glUniform1iARB( g_location_framebuffTex, 1); 
+	glUniform1iARB( g_location_framebuffTex, 1);
 	KillFlags |= KILL_TMU0_POINTER;
-   	
+
 	qglActiveTextureARB(GL_TEXTURE0);
 	if(r_fbFxType == EXPLOSION)
 		qglBindTexture(GL_TEXTURE_2D, r_distortwave->texnum);
 	else
 		qglBindTexture (GL_TEXTURE_2D, r_flashnoise->texnum);
-	glUniform1iARB( g_location_distortTex, 0); 
+	glUniform1iARB( g_location_distortTex, 0);
 	KillFlags |= KILL_TMU1_POINTER;
 
 	qglActiveTextureARB(GL_TEXTURE0);
@@ -152,7 +156,7 @@ void R_GLSLPostProcess(void)
 
 	//get position of focal point of warp if we are doing a warp effect
 	if(r_fbFxType == EXPLOSION) {
-		
+
 		R_TransformVectorToScreen(&r_newrefdef, r_explosionOrigin, fxScreenPos);
 
 		//translate so that center of screen reads 0,0
@@ -164,8 +168,8 @@ void R_GLSLPostProcess(void)
 		fxScreenPos[1] *= 0.25;
 
 		//offset according to framebuffer sample size
-		offsetX = (1024 - FB_texture_width)/512 * 32; 
-		offsetY = (1024 - FB_texture_height)/512 * 48; 
+		offsetX = (1024 - FB_texture_width)/512 * 32;
+		offsetY = (1024 - FB_texture_height)/512 * 48;
 		fxScreenPos[0] += offsetX;
 		fxScreenPos[1] += offsetY;
 		fxScreenPos[0] -= frames*5;
@@ -175,9 +179,9 @@ void R_GLSLPostProcess(void)
 	else {
 		//offset according to framebuffer sample size
 		offsetX = (1024 - FB_texture_width)/512 * 48;
-		offsetY = (1024 - FB_texture_height)/512 * 48; 
+		offsetY = (1024 - FB_texture_height)/512 * 48;
 		fxScreenPos[0] += offsetX;
-		fxScreenPos[1] += offsetY;  
+		fxScreenPos[1] += offsetY;
 		fxScreenPos[0] += frames*1;
 		fxScreenPos[1] -= frames*1;
 		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
@@ -233,7 +237,7 @@ void R_ShadowBlend(float alpha)
 
 		qglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
 		qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
-		
+
 		//render offscreen
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[1]);
 
@@ -290,7 +294,7 @@ void R_ShadowBlend(float alpha)
 
 		//render quad on screen	into FBO
 		//and blur it vertically
-	
+
 		glUseProgramObjectARB( g_blurprogramObj );
 
 		qglActiveTextureARB(GL_TEXTURE0);
@@ -303,14 +307,14 @@ void R_ShadowBlend(float alpha)
 		qglEnableClientState (GL_VERTEX_ARRAY);
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
-		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]); 
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
 		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
 		qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
 		VA_SetElem2(twodvert_array[0],0, vid.height);
 		VA_SetElem2(twodvert_array[1],vid.width, vid.height);
 		VA_SetElem2(twodvert_array[2],vid.width, 0);
-		VA_SetElem2(twodvert_array[3],0, 0); 
+		VA_SetElem2(twodvert_array[3],0, 0);
 
 		VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
 		VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
@@ -319,7 +323,7 @@ void R_ShadowBlend(float alpha)
 
 		qglDrawArrays (GL_QUADS, 0, 4);
 
-		//now blur horizontally	
+		//now blur horizontally
 
 		glUniform1iARB( g_location_source, 0);
 
@@ -328,14 +332,14 @@ void R_ShadowBlend(float alpha)
 		qglEnableClientState (GL_VERTEX_ARRAY);
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
-		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]); 
+		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
 		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
 		qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
 		VA_SetElem2(twodvert_array[0],0, vid.height);
 		VA_SetElem2(twodvert_array[1],vid.width, vid.height);
 		VA_SetElem2(twodvert_array[2],vid.width, 0);
-		VA_SetElem2(twodvert_array[3],0, 0); 
+		VA_SetElem2(twodvert_array[3],0, 0);
 
 		VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
 		VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
@@ -350,7 +354,7 @@ void R_ShadowBlend(float alpha)
 
 	}
 
-	//revert settings	
+	//revert settings
 	qglMatrixMode(GL_PROJECTION);
 	qglPopMatrix();
 	qglMatrixMode(GL_MODELVIEW);
@@ -378,7 +382,7 @@ void R_FB_InitTextures( void )
 	byte	*data;
 	int		size;
 
-	//find closer power of 2 to screen size 
+	//find closer power of 2 to screen size
 	for (FB_texture_width = 1;FB_texture_width < viddef.width;FB_texture_width *= 2);
 	for (FB_texture_height = 1;FB_texture_height < viddef.height;FB_texture_height *= 2);
 
@@ -387,7 +391,7 @@ void R_FB_InitTextures( void )
 		FB_texture_width = 2048;
 	if(FB_texture_height > 2048)
 		FB_texture_height = 2048;
-	
+
 	//init the framebuffer texture
 	size = FB_texture_width * FB_texture_height * 4;
 	data = malloc( size );
@@ -403,54 +407,54 @@ void R_FB_InitTextures( void )
 	free ( data );
 
 	//init the distortion textures
-	if(FB_texture_height == FB_texture_width) {	
-		
+	if(FB_texture_height == FB_texture_width) {
+
 		if(FB_texture_height == 1024) {
 			r_flashnoise = GL_FindImage("gfx/flash_noise.jpg",it_pic);
-			if (!r_flashnoise) {                                
+			if (!r_flashnoise) {
 				r_flashnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-			}  
-			
+			}
+
 			r_distortwave = GL_FindImage("gfx/distortwave.jpg",it_pic);
-			if (!r_distortwave) {                                
+			if (!r_distortwave) {
 				r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-			}  
+			}
 
 			fbSampleSize = 1; //1024x1024
 		}
-		else { 
-			
+		else {
+
 			r_flashnoise = GL_FindImage("gfx/wt_flash_noise.jpg",it_pic);
-			if (!r_flashnoise) {                                
+			if (!r_flashnoise) {
 				r_flashnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-			}  
-			
+			}
+
 			r_distortwave = GL_FindImage("gfx/wt_distortwave.jpg",it_pic);
-			if (!r_distortwave) {                                
+			if (!r_distortwave) {
 				r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-			}  
+			}
 
 			fbSampleSize = 3; //2048x2048
-		}	
+		}
 	}
-	else { //use wider pic for 2 to 1 framebuffer ratio cases to keep effect similar 
+	else { //use wider pic for 2 to 1 framebuffer ratio cases to keep effect similar
 		r_flashnoise = GL_FindImage("gfx/w_flash_noise.jpg",it_pic);
-		if (!r_flashnoise) {                                
+		if (!r_flashnoise) {
 			r_flashnoise = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-		}  
-		
+		}
+
 		r_distortwave = GL_FindImage("gfx/w_distortwave.jpg",it_pic);
-		if (!r_distortwave) {                                
+		if (!r_distortwave) {
 			r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 		}
-		
-		fbSampleSize = 2;  
+
+		fbSampleSize = 2;
 	}
 }
 
 
 
-					
+
 
 
 

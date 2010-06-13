@@ -17,20 +17,15 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+// qcommon.h -- definitions common between client and server, but not game module
 
-// qcommon.h -- definitions common between client and server, but not game.dll
-
-#ifdef HAVE_CONFIG_H
-#ifndef CONFIG_H
-#define CONFIG_H
-#include "config.h"
-#endif
-#endif
+#if !defined Q_COMMON_H_
+#define Q_COMMON_H_
 
 #include "game/q_shared.h"
 
-#ifndef VERSION
-#define	VERSION		"7.41.0"
+#if !defined VERSION
+#define	VERSION		"7.41pre"
 #endif
 
 #define	BASEDIRNAME	"data1"
@@ -41,62 +36,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEFAULTMODEL		"martianenforcer"
 #define DEFAULTSKIN			"default"
 
-#ifdef WIN32
+#if defined WIN32_VARIANT
 
+#if !defined BUILDSTRING
 #ifdef NDEBUG
 #define BUILDSTRING "Win32 RELEASE"
 #else
 #define BUILDSTRING "Win32 DEBUG"
 #endif
+#endif
 
-#ifdef _M_IX86
+#if !defined CPUSTRING
 #define	CPUSTRING	"x86"
-#elif defined _M_ALPHA
-#define	CPUSTRING	"AXP"
 #endif
 
-#elif defined __linux__
-
-#define BUILDSTRING "Linux"
-
-#ifdef __i386__
-#define CPUSTRING "i386"
-#elif defined __alpha__
-#define CPUSTRING "axp"
 #else
-#define CPUSTRING "Unknown"
+
+#if !defined BUILDSTRING
+#define BUILDSTRING "?OS?"
 #endif
 
-#elif defined __FreeBSD__
-
-#define BUILDSTRING "FreeBSD"
-
-#ifdef __i386__
-#define CPUSTRING "i386"
-#elif defined __amd64__
-#define CPUSTRING "amd64"
-#else
-#define CPUSTRING "Unknown"
+#if !defined CPUSTRING
+#define CPUSTRING "?CPU?"
 #endif
 
-#elif defined __sun__
-
-#elif defined __sun__
-
-#define BUILDSTRING "Solaris"
-
-#ifdef __i386__
-#define CPUSTRING "i386"
-#else
-#define CPUSTRING "sparc"
 #endif
 
-#else	// !WIN32
-
-#define BUILDSTRING "NON-WIN32"
-#define	CPUSTRING	"NON-WIN32"
-
-#endif
 
 //============================================================================
 
@@ -785,9 +750,12 @@ MISC
 #define	ERR_DROP	1		// print to console and disconnect from game
 #define	ERR_QUIT	2		// not an error, just a normal exit
 
+/*
+ * -jjb-ac  redundant
 #define	EXEC_NOW	0		// don't return until completed
 #define	EXEC_INSERT	1		// insert at current position, but don't run yet
 #define	EXEC_APPEND	2		// add to end of the command buffer
+*/
 
 #define	PRINT_ALL		0
 #define PRINT_DEVELOPER	1	// only print when "developer 1"
@@ -795,10 +763,7 @@ MISC
 void		Com_BeginRedirect (int target, char *buffer, int buffersize, void (*flush));
 void		Com_EndRedirect (void);
 void 		Com_Printf (char *fmt, ...);
-#if 0
-		// jjb
 void 		Com_DPrintf (char *fmt, ...);
-#endif 
 void 		Com_Error (int code, char *fmt, ...);
 void 		Com_Quit (void);
 
@@ -885,5 +850,5 @@ void SV_Init (void);
 void SV_Shutdown (char *finalmsg, qboolean reconnect);
 void SV_Frame (int msec);
 
-
+#endif /* Q_COMMON_H_ */
 

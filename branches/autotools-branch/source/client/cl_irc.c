@@ -23,9 +23,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+#if !defined HAVE_CLOSESOCKET
+#define closesocket close
+#endif
+
+#if !defined INVALID_SOCKET
+#define INVALID_SOCKET -1
+#endif
+
 #include "client.h"
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 	#include <winsock.h>
 	#include <process.h>
 	typedef SOCKET irc_socket_t;
@@ -33,8 +41,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	typedef int irc_socket_t;
 #endif
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
+#if defined HAVE_UNISTD_H
 	#include <unistd.h>
+#endif	
 	#include <sys/socket.h>
 	#include <sys/time.h>
 	#include <netinet/in.h>
@@ -45,6 +55,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	#include <errno.h>
 	#include <pthread.h>
 #endif
+
 
 char Server[32];
 char sMessage[1000];
@@ -61,7 +72,7 @@ int ichar;
 #define IRC_SEND_BUF_SIZE 512
 #define IRC_RECV_BUF_SIZE 1024
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 void handle_error(void)
 {
     switch ( WSAGetLastError() )
@@ -140,7 +151,6 @@ void handle_error(void)
        break;
 	}
 }
-//#endif
 #else
 void handle_error( void )
 {
@@ -350,10 +360,12 @@ void CL_GetIRCData(void)
 	if((len=recv(sock,File_Buf,IRC_RECV_BUF_SIZE,0))>0)
 	{
 	    // received a ping from server...
-#ifdef _WINDOWS
+#if defined HAVE_STRNICMP
 		if (!strnicmp(File_Buf,"PING",4))
-#else
+#elif defined HAVE_STRNCASECMP
 		if (!strncasecmp(File_Buf,"PING",4))
+#else
+#error Neither strnicmp() nor strncasecmp() found.
 #endif
 		{
 			File_Buf[1]='O';
@@ -406,7 +418,7 @@ void CL_IRCSay(void)
 			tempstring[i-4] = m_sendstring[i];
 		sprintf(message, "PRIVMSG #alienarena :\001ACTION %s\001\n\r", tempstring);
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 		WSASetLastError(0);
 #endif
 		sendData(message);
@@ -415,13 +427,13 @@ void CL_IRCSay(void)
 	}
 	else {
 		sprintf(message, "PRIVMSG #alienarena :%s\n\r", m_sendstring);
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 		WSASetLastError(0);
 #endif
 		sendData(message);
 	}
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 	if(WSAGetLastError()) { //there was some error in connecting
 			handle_error();
 			Com_Printf("^1IRC: not connected to #alienarena");
@@ -442,7 +454,7 @@ void CL_IRCSay(void)
 
 			SCR_IRCPrintf("^1IRC: %s\n", msgLine);
 		}
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 	}
 #endif
 }
@@ -460,11 +472,7 @@ qboolean CL_JoinIRC(void){
 
 	Com_Printf("...Initializing IRC client\n");
 
-#ifdef _WINDOWS
 	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET )
-#else
-	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == -1 )
-#endif
 		return false; //IRC daemon will not continue
 
 	strcpy(name, Cvar_VariableString("name")); //we should force players to set name on startup
@@ -495,12 +503,7 @@ qboolean CL_JoinIRC(void){
 	sprintf(HostName, cl_IRC_server->string);
 
     if ( (host=gethostbyname(HostName)) == NULL ) {
-// -jjb-ac
-#ifdef _WINDOWS
 		closesocket(sock);
-#else
-		close(sock);
-#endif
 		handle_error();
  		return false;
 	}
@@ -508,11 +511,7 @@ qboolean CL_JoinIRC(void){
     address.sin_addr.s_addr=*((unsigned long *) host->h_addr);
 
 	if ( (connect(sock,(struct sockaddr *) &address, sizeof(address))) != 0) {
-#ifdef _WINDOWS
 		closesocket(sock);
-#else
-		close(sock);
-#endif
 		Com_Printf("...IRC connection refused.\n");
 		return false;
 	}
@@ -525,9 +524,8 @@ qboolean CL_JoinIRC(void){
 	sprintf(message,"JOIN %s\n\r", "#alienarena");
 	sendData(message);
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 	if(WSAGetLastError()) {
-
 		closesocket(sock);
 		handle_error();
 		return false;
@@ -542,7 +540,7 @@ qboolean CL_JoinIRC(void){
 }
 
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 void RecvThreadProc(void *dummy)
 {
     if (!CL_JoinIRC())
@@ -559,7 +557,7 @@ void RecvThreadProc(void *dummy)
 }
 #endif
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 void *RecvThreadProc(void *dummy)
 {
     if (!CL_JoinIRC())
@@ -578,16 +576,17 @@ void *RecvThreadProc(void *dummy)
 
 void CL_InitIRC(void)
 {
-#ifdef __unix__
+#if defined UNIX_VARIANT
 	pthread_t pth;
 #endif
 
 	//spin off thread right away
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 	_beginthread( RecvThreadProc, 0, NULL );
-#endif
-#ifdef __unix__
+#elif defined HAVE_PTHREAD_CREATE
 	pthread_create(&pth,NULL,RecvThreadProc,"dummy");
+#else
+#error No pthread_create() function.	
 #endif
 
 }
@@ -607,11 +606,7 @@ void CL_IRCShutdown(void)
 
 	Com_Printf("Disconnected from chat channel...");
 
-#ifdef _WINDOWS
 	closesocket(sock);
-#else
-	close(sock);
-#endif
 	return;
 }
 

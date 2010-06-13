@@ -1049,7 +1049,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
 #if 1
 						// -jjb-fix optimize hack, compiler may already do this
-						byte *plni = &r_avertexnormals[verts[index_xyz].lightnormalindex][0];
+						float *plni = &r_avertexnormals[verts[index_xyz].lightnormalindex][0];
 						normal[0] = *plni++ ;
                         normal[1] = *plni++ ;
 						normal[2] = *plni ;

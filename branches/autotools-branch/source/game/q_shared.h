@@ -20,18 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // q_shared.h -- included first by ALL program modules
 
-/* -jjb-ac
-#ifdef _WIN32
-// unknown pragmas are SUPPOSED to be ignored, but....
-#pragma warning(disable : 4244)     // MIPS
-#pragma warning(disable : 4136)     // X86
-#pragma warning(disable : 4051)     // ALPHA
-
-#pragma warning(disable : 4018)     // signed/unsigned mismatch
-#pragma warning(disable : 4305)		// truncation from const double to float
-
-#endif
-*/
+#if !defined Q_SHARED_H_
+#define Q_SHARED_H_
 
 #include <assert.h>
 #include <math.h>
@@ -43,24 +33,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <ctype.h>
 
-// -jjb-ac
-/*
-#if (defined _M_IX86 || defined __i386__) && !defined C_ONLY && !defined __sun__
-#define id386	1
-#else
-#define id386	0
-#endif
-
-#if defined _M_ALPHA && !defined C_ONLY
-#define idaxp	1
-#else
-#define idaxp	0
-#endif
-*/
-
 typedef unsigned char 		byte;
-typedef enum {false, true}	qboolean;
 
+// -jjb-ac this might work
+//  comes from stdbool.h, which could be included, or maybe not
+#if defined HAVE__BOOL
+#if defined true && defined false
+typedef _bool qboolean;
+else
+typedef enum {false, true}	qboolean;
+#endif
+#else
+typedef enum {false, true}	qboolean;
+#endif
 
 #ifndef NULL
 #define NULL ((void *)0)
@@ -342,19 +327,6 @@ void	Sys_FindClose (void);
 void Sys_Error (char *error, ...);
 void Com_Printf (char *msg, ...);
 
-// -jjb-ac  unused or redundant
-/*
-#ifdef _WIN32
-
-#define Q_INLINE	__inline
-#define vsnprintf	_vsnprintf
-
-#else
-
-#define Q_INLINE	inline
-
-#endif
-*/
 /*
 ==========================================================
 
@@ -993,3 +965,4 @@ typedef struct
 #define MAX_LATENT_CMDS 64
 //unlagged - lag simulation #2
 
+#endif  /* Q_SHARED_H_ */

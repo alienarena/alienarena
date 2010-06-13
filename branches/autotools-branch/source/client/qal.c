@@ -27,9 +27,13 @@
  * Note: functions wrap the function pointers for ease of development.
  *
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
-#ifdef WIN32
-#  include <windows.h>
+#if defined WIN32_VARIANT
+#include <windows.h>
+#define AL_NO_PROTOTYPES
 #endif
 
 #include "client.h"

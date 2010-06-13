@@ -26,7 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
-#ifdef _WINDOWS
+// -jjb-ac is this used?
+#if defined WIN32_VARIANT
 #include <io.h>
 #endif
 
@@ -1146,11 +1147,8 @@ void RS_ScaleTexcoords (rs_stage_t *stage, float *os, float *ot)
 		}
 	}
 }
-#ifdef __unix__
-__inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
-#else
-_inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
-#endif
+
+inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
 {
 	float cost = cos(degrees), sint = sin(degrees);
 	float is = *os, it = *ot, c_s, c_t;
@@ -1163,11 +1161,7 @@ _inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
 
 }
 
-#ifdef __unix__
-__inline void RS_RotateST2 (float *os, float *ot, float degrees)
-#else
-_inline void RS_RotateST2 (float *os, float *ot, float degrees)
-#endif
+inline void RS_RotateST2 (float *os, float *ot, float degrees)
 {
 	float cost = cos(degrees), sint = sin(degrees);
 	float is = *os, it = *ot;

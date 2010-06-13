@@ -33,8 +33,9 @@ crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math
 crx_LDADD = libgame.a
 endif
 else
-crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math 
+crx_CFLAGS = -DCURL_STATICLIB -DAL_NO_PROTOTYPES -DC_ONLY -U_FORTIFY_SOURCE -ffast-math
 crx_LDADD = libgame.a
+LIBS += $(WIN32_LIBS)
 endif
 
 libgame_a_CFLAGS = -U_FORTIFY_SOURCE -ffast-math
@@ -78,15 +79,15 @@ endif
 
 if BUILD_WIN32
 crx_SOURCES = \
-	win32\conproc.c \
-	win32\glw_imp.c \
-	win32\in_win.c \
-	win32\net_wins.c \
-	win32\qal_win.c \
-	win32\qgl_win.c \
-	win32\q_shwin.c \
-	win32\sys_win.c \
-	win32\vid_dll.c
+	win32/conproc.c \
+	win32/glw_imp.c \
+	win32/in_win.c \
+	win32/net_wins.c \
+	win32/qal_win.c \
+	win32/qgl_win.c \
+	win32/q_shwin.c \
+	win32/sys_win.c \
+	win32/vid_dll.c
 else
 if BUILD_CLIENT
 crx_SOURCES = \

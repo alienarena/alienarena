@@ -38,7 +38,8 @@ host_triplet = @host@
 @BUILD_UNIX_FALSE@bin_PROGRAMS = crx$(EXEEXT)
 @BUILD_UNIX_TRUE@bin_PROGRAMS = crded$(EXEEXT) $(am__EXEEXT_1)
 @BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@am__append_1 = crx
-@BUILD_CLIENT_TRUE@am__append_2 = \
+@BUILD_UNIX_FALSE@am__append_2 = $(WIN32_LIBS)
+@BUILD_CLIENT_TRUE@am__append_3 = \
 @BUILD_CLIENT_TRUE@	client/anorms.h \
 @BUILD_CLIENT_TRUE@	client/cl_ents.c \
 @BUILD_CLIENT_TRUE@	client/cl_fx.c \
@@ -248,10 +249,10 @@ am__crx_SOURCES_DIST = unix/gl_glx.c unix/glw_unix.h unix/net_udp.c \
 	ref_gl/warpsin.h server/server.h server/sv_ccmds.c \
 	server/sv_ents.c server/sv_game.c server/sv_init.c \
 	server/sv_main.c server/sv_send.c server/sv_user.c \
-	server/sv_world.c unix/glob.c unix/glob.h win32\conproc.c \
-	win32\glw_imp.c win32\in_win.c win32\net_wins.c \
-	win32\qal_win.c win32\qgl_win.c win32\q_shwin.c \
-	win32\sys_win.c win32\vid_dll.c
+	server/sv_world.c unix/glob.c unix/glob.h win32/conproc.c \
+	win32/glw_imp.c win32/in_win.c win32/net_wins.c \
+	win32/qal_win.c win32/qgl_win.c win32/q_shwin.c \
+	win32/sys_win.c win32/vid_dll.c
 @BUILD_CLIENT_TRUE@am__objects_1 = client/crx-cl_ents.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	client/crx-cl_fx.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	client/crx-cl_http.$(OBJEXT) \
@@ -320,15 +321,15 @@ am__crx_SOURCES_DIST = unix/gl_glx.c unix/glw_unix.h unix/net_udp.c \
 @BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@	unix/crx-sys_unix.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@	unix/crx-vid_so.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@	$(am__objects_1)
-@BUILD_WIN32_TRUE@am_crx_OBJECTS = crx-win32\conproc.$(OBJEXT) \
-@BUILD_WIN32_TRUE@	crx-win32\glw_imp.$(OBJEXT) \
-@BUILD_WIN32_TRUE@	crx-win32\in_win.$(OBJEXT) \
-@BUILD_WIN32_TRUE@	crx-win32\net_wins.$(OBJEXT) \
-@BUILD_WIN32_TRUE@	crx-win32\qal_win.$(OBJEXT) \
-@BUILD_WIN32_TRUE@	crx-win32\qgl_win.$(OBJEXT) \
-@BUILD_WIN32_TRUE@	crx-win32\q_shwin.$(OBJEXT) \
-@BUILD_WIN32_TRUE@	crx-win32\sys_win.$(OBJEXT) \
-@BUILD_WIN32_TRUE@	crx-win32\vid_dll.$(OBJEXT) $(am__objects_1)
+@BUILD_WIN32_TRUE@am_crx_OBJECTS = win32/crx-conproc.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-glw_imp.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-in_win.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-net_wins.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-qal_win.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-qgl_win.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-q_shwin.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-sys_win.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-vid_dll.$(OBJEXT) $(am__objects_1)
 crx_OBJECTS = $(am_crx_OBJECTS)
 @BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_DEPENDENCIES = libgame.a
 @BUILD_UNIX_FALSE@crx_DEPENDENCIES = libgame.a
@@ -378,7 +379,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
-LIBS = @LIBS@
+LIBS = @LIBS@ $(am__append_2)
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
@@ -398,6 +399,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WIN32_LIBS = @WIN32_LIBS@
 XMKMF = @XMKMF@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -455,7 +457,7 @@ noinst_LIBRARIES = libgame.a
 @BUILD_UNIX_TRUE@crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -ffast-math
 @BUILD_UNIX_TRUE@crded_LDADD = libgame.a
 @BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math 
-@BUILD_UNIX_FALSE@crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math 
+@BUILD_UNIX_FALSE@crx_CFLAGS = -DCURL_STATICLIB -DAL_NO_PROTOTYPES -DC_ONLY -U_FORTIFY_SOURCE -ffast-math
 @BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_LDADD = libgame.a
 @BUILD_UNIX_FALSE@crx_LDADD = libgame.a
 libgame_a_CFLAGS = -U_FORTIFY_SOURCE -ffast-math
@@ -505,12 +507,12 @@ libgame_a_CFLAGS = -U_FORTIFY_SOURCE -ffast-math
 @BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@	unix/rw_unix.h \
 @BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@	unix/sys_unix.c \
 @BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@	unix/vid_so.c \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@	$(am__append_2)
-@BUILD_WIN32_TRUE@crx_SOURCES = win32\conproc.c win32\glw_imp.c \
-@BUILD_WIN32_TRUE@	win32\in_win.c win32\net_wins.c \
-@BUILD_WIN32_TRUE@	win32\qal_win.c win32\qgl_win.c \
-@BUILD_WIN32_TRUE@	win32\q_shwin.c win32\sys_win.c \
-@BUILD_WIN32_TRUE@	win32\vid_dll.c $(am__append_2)
+@BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@	$(am__append_3)
+@BUILD_WIN32_TRUE@crx_SOURCES = win32/conproc.c win32/glw_imp.c \
+@BUILD_WIN32_TRUE@	win32/in_win.c win32/net_wins.c \
+@BUILD_WIN32_TRUE@	win32/qal_win.c win32/qgl_win.c \
+@BUILD_WIN32_TRUE@	win32/q_shwin.c win32/sys_win.c \
+@BUILD_WIN32_TRUE@	win32/vid_dll.c $(am__append_3)
 libgame_a_SOURCES = \
 	client/anorms.h \
 	game/acesrc/acebot_ai.c \
@@ -952,6 +954,30 @@ server/crx-sv_world.$(OBJEXT): server/$(am__dirstamp) \
 	server/$(DEPDIR)/$(am__dirstamp)
 unix/crx-glob.$(OBJEXT): unix/$(am__dirstamp) \
 	unix/$(DEPDIR)/$(am__dirstamp)
+win32/$(am__dirstamp):
+	@$(MKDIR_P) win32
+	@: > win32/$(am__dirstamp)
+win32/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) win32/$(DEPDIR)
+	@: > win32/$(DEPDIR)/$(am__dirstamp)
+win32/crx-conproc.$(OBJEXT): win32/$(am__dirstamp) \
+	win32/$(DEPDIR)/$(am__dirstamp)
+win32/crx-glw_imp.$(OBJEXT): win32/$(am__dirstamp) \
+	win32/$(DEPDIR)/$(am__dirstamp)
+win32/crx-in_win.$(OBJEXT): win32/$(am__dirstamp) \
+	win32/$(DEPDIR)/$(am__dirstamp)
+win32/crx-net_wins.$(OBJEXT): win32/$(am__dirstamp) \
+	win32/$(DEPDIR)/$(am__dirstamp)
+win32/crx-qal_win.$(OBJEXT): win32/$(am__dirstamp) \
+	win32/$(DEPDIR)/$(am__dirstamp)
+win32/crx-qgl_win.$(OBJEXT): win32/$(am__dirstamp) \
+	win32/$(DEPDIR)/$(am__dirstamp)
+win32/crx-q_shwin.$(OBJEXT): win32/$(am__dirstamp) \
+	win32/$(DEPDIR)/$(am__dirstamp)
+win32/crx-sys_win.$(OBJEXT): win32/$(am__dirstamp) \
+	win32/$(DEPDIR)/$(am__dirstamp)
+win32/crx-vid_dll.$(OBJEXT): win32/$(am__dirstamp) \
+	win32/$(DEPDIR)/$(am__dirstamp)
 crx$(EXEEXT): $(crx_OBJECTS) $(crx_DEPENDENCIES) 
 	@rm -f crx$(EXEEXT)
 	$(crx_LINK) $(crx_OBJECTS) $(crx_LDADD) $(LIBS)
@@ -1086,19 +1112,19 @@ mostlyclean-compile:
 	-rm -f unix/crx-rw_unix.$(OBJEXT)
 	-rm -f unix/crx-sys_unix.$(OBJEXT)
 	-rm -f unix/crx-vid_so.$(OBJEXT)
+	-rm -f win32/crx-conproc.$(OBJEXT)
+	-rm -f win32/crx-glw_imp.$(OBJEXT)
+	-rm -f win32/crx-in_win.$(OBJEXT)
+	-rm -f win32/crx-net_wins.$(OBJEXT)
+	-rm -f win32/crx-q_shwin.$(OBJEXT)
+	-rm -f win32/crx-qal_win.$(OBJEXT)
+	-rm -f win32/crx-qgl_win.$(OBJEXT)
+	-rm -f win32/crx-sys_win.$(OBJEXT)
+	-rm -f win32/crx-vid_dll.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-win32\conproc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-win32\glw_imp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-win32\in_win.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-win32\net_wins.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-win32\q_shwin.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-win32\qal_win.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-win32\qgl_win.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-win32\sys_win.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-win32\vid_dll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-cl_ents.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-cl_fx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-cl_http.Po@am__quote@
@@ -1227,6 +1253,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@unix/$(DEPDIR)/crx-rw_unix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@unix/$(DEPDIR)/crx-sys_unix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@unix/$(DEPDIR)/crx-vid_so.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@win32/$(DEPDIR)/crx-conproc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@win32/$(DEPDIR)/crx-glw_imp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@win32/$(DEPDIR)/crx-in_win.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@win32/$(DEPDIR)/crx-net_wins.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@win32/$(DEPDIR)/crx-q_shwin.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@win32/$(DEPDIR)/crx-qal_win.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@win32/$(DEPDIR)/crx-qgl_win.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@win32/$(DEPDIR)/crx-sys_win.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@win32/$(DEPDIR)/crx-vid_dll.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -3036,131 +3071,131 @@ unix/crx-glob.obj: unix/glob.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o unix/crx-glob.obj `if test -f 'unix/glob.c'; then $(CYGPATH_W) 'unix/glob.c'; else $(CYGPATH_W) '$(srcdir)/unix/glob.c'; fi`
 
-crx-win32\conproc.o: win32\conproc.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\conproc.o -MD -MP -MF $(DEPDIR)/crx-win32\conproc.Tpo -c -o crx-win32\conproc.o `test -f 'win32\conproc.c' || echo '$(srcdir)/'`win32\conproc.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\conproc.Tpo $(DEPDIR)/crx-win32\conproc.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\conproc.c' object='crx-win32\conproc.o' libtool=no @AMDEPBACKSLASH@
+win32/crx-conproc.o: win32/conproc.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-conproc.o -MD -MP -MF win32/$(DEPDIR)/crx-conproc.Tpo -c -o win32/crx-conproc.o `test -f 'win32/conproc.c' || echo '$(srcdir)/'`win32/conproc.c
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-conproc.Tpo win32/$(DEPDIR)/crx-conproc.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/conproc.c' object='win32/crx-conproc.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\conproc.o `test -f 'win32\conproc.c' || echo '$(srcdir)/'`win32\conproc.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-conproc.o `test -f 'win32/conproc.c' || echo '$(srcdir)/'`win32/conproc.c
 
-crx-win32\conproc.obj: win32\conproc.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\conproc.obj -MD -MP -MF $(DEPDIR)/crx-win32\conproc.Tpo -c -o crx-win32\conproc.obj `if test -f 'win32\conproc.c'; then $(CYGPATH_W) 'win32\conproc.c'; else $(CYGPATH_W) '$(srcdir)/win32\conproc.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\conproc.Tpo $(DEPDIR)/crx-win32\conproc.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\conproc.c' object='crx-win32\conproc.obj' libtool=no @AMDEPBACKSLASH@
+win32/crx-conproc.obj: win32/conproc.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-conproc.obj -MD -MP -MF win32/$(DEPDIR)/crx-conproc.Tpo -c -o win32/crx-conproc.obj `if test -f 'win32/conproc.c'; then $(CYGPATH_W) 'win32/conproc.c'; else $(CYGPATH_W) '$(srcdir)/win32/conproc.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-conproc.Tpo win32/$(DEPDIR)/crx-conproc.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/conproc.c' object='win32/crx-conproc.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\conproc.obj `if test -f 'win32\conproc.c'; then $(CYGPATH_W) 'win32\conproc.c'; else $(CYGPATH_W) '$(srcdir)/win32\conproc.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-conproc.obj `if test -f 'win32/conproc.c'; then $(CYGPATH_W) 'win32/conproc.c'; else $(CYGPATH_W) '$(srcdir)/win32/conproc.c'; fi`
 
-crx-win32\glw_imp.o: win32\glw_imp.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\glw_imp.o -MD -MP -MF $(DEPDIR)/crx-win32\glw_imp.Tpo -c -o crx-win32\glw_imp.o `test -f 'win32\glw_imp.c' || echo '$(srcdir)/'`win32\glw_imp.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\glw_imp.Tpo $(DEPDIR)/crx-win32\glw_imp.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\glw_imp.c' object='crx-win32\glw_imp.o' libtool=no @AMDEPBACKSLASH@
+win32/crx-glw_imp.o: win32/glw_imp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-glw_imp.o -MD -MP -MF win32/$(DEPDIR)/crx-glw_imp.Tpo -c -o win32/crx-glw_imp.o `test -f 'win32/glw_imp.c' || echo '$(srcdir)/'`win32/glw_imp.c
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-glw_imp.Tpo win32/$(DEPDIR)/crx-glw_imp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/glw_imp.c' object='win32/crx-glw_imp.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\glw_imp.o `test -f 'win32\glw_imp.c' || echo '$(srcdir)/'`win32\glw_imp.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-glw_imp.o `test -f 'win32/glw_imp.c' || echo '$(srcdir)/'`win32/glw_imp.c
 
-crx-win32\glw_imp.obj: win32\glw_imp.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\glw_imp.obj -MD -MP -MF $(DEPDIR)/crx-win32\glw_imp.Tpo -c -o crx-win32\glw_imp.obj `if test -f 'win32\glw_imp.c'; then $(CYGPATH_W) 'win32\glw_imp.c'; else $(CYGPATH_W) '$(srcdir)/win32\glw_imp.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\glw_imp.Tpo $(DEPDIR)/crx-win32\glw_imp.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\glw_imp.c' object='crx-win32\glw_imp.obj' libtool=no @AMDEPBACKSLASH@
+win32/crx-glw_imp.obj: win32/glw_imp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-glw_imp.obj -MD -MP -MF win32/$(DEPDIR)/crx-glw_imp.Tpo -c -o win32/crx-glw_imp.obj `if test -f 'win32/glw_imp.c'; then $(CYGPATH_W) 'win32/glw_imp.c'; else $(CYGPATH_W) '$(srcdir)/win32/glw_imp.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-glw_imp.Tpo win32/$(DEPDIR)/crx-glw_imp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/glw_imp.c' object='win32/crx-glw_imp.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\glw_imp.obj `if test -f 'win32\glw_imp.c'; then $(CYGPATH_W) 'win32\glw_imp.c'; else $(CYGPATH_W) '$(srcdir)/win32\glw_imp.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-glw_imp.obj `if test -f 'win32/glw_imp.c'; then $(CYGPATH_W) 'win32/glw_imp.c'; else $(CYGPATH_W) '$(srcdir)/win32/glw_imp.c'; fi`
 
-crx-win32\in_win.o: win32\in_win.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\in_win.o -MD -MP -MF $(DEPDIR)/crx-win32\in_win.Tpo -c -o crx-win32\in_win.o `test -f 'win32\in_win.c' || echo '$(srcdir)/'`win32\in_win.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\in_win.Tpo $(DEPDIR)/crx-win32\in_win.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\in_win.c' object='crx-win32\in_win.o' libtool=no @AMDEPBACKSLASH@
+win32/crx-in_win.o: win32/in_win.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-in_win.o -MD -MP -MF win32/$(DEPDIR)/crx-in_win.Tpo -c -o win32/crx-in_win.o `test -f 'win32/in_win.c' || echo '$(srcdir)/'`win32/in_win.c
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-in_win.Tpo win32/$(DEPDIR)/crx-in_win.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/in_win.c' object='win32/crx-in_win.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\in_win.o `test -f 'win32\in_win.c' || echo '$(srcdir)/'`win32\in_win.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-in_win.o `test -f 'win32/in_win.c' || echo '$(srcdir)/'`win32/in_win.c
 
-crx-win32\in_win.obj: win32\in_win.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\in_win.obj -MD -MP -MF $(DEPDIR)/crx-win32\in_win.Tpo -c -o crx-win32\in_win.obj `if test -f 'win32\in_win.c'; then $(CYGPATH_W) 'win32\in_win.c'; else $(CYGPATH_W) '$(srcdir)/win32\in_win.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\in_win.Tpo $(DEPDIR)/crx-win32\in_win.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\in_win.c' object='crx-win32\in_win.obj' libtool=no @AMDEPBACKSLASH@
+win32/crx-in_win.obj: win32/in_win.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-in_win.obj -MD -MP -MF win32/$(DEPDIR)/crx-in_win.Tpo -c -o win32/crx-in_win.obj `if test -f 'win32/in_win.c'; then $(CYGPATH_W) 'win32/in_win.c'; else $(CYGPATH_W) '$(srcdir)/win32/in_win.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-in_win.Tpo win32/$(DEPDIR)/crx-in_win.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/in_win.c' object='win32/crx-in_win.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\in_win.obj `if test -f 'win32\in_win.c'; then $(CYGPATH_W) 'win32\in_win.c'; else $(CYGPATH_W) '$(srcdir)/win32\in_win.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-in_win.obj `if test -f 'win32/in_win.c'; then $(CYGPATH_W) 'win32/in_win.c'; else $(CYGPATH_W) '$(srcdir)/win32/in_win.c'; fi`
 
-crx-win32\net_wins.o: win32\net_wins.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\net_wins.o -MD -MP -MF $(DEPDIR)/crx-win32\net_wins.Tpo -c -o crx-win32\net_wins.o `test -f 'win32\net_wins.c' || echo '$(srcdir)/'`win32\net_wins.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\net_wins.Tpo $(DEPDIR)/crx-win32\net_wins.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\net_wins.c' object='crx-win32\net_wins.o' libtool=no @AMDEPBACKSLASH@
+win32/crx-net_wins.o: win32/net_wins.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-net_wins.o -MD -MP -MF win32/$(DEPDIR)/crx-net_wins.Tpo -c -o win32/crx-net_wins.o `test -f 'win32/net_wins.c' || echo '$(srcdir)/'`win32/net_wins.c
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-net_wins.Tpo win32/$(DEPDIR)/crx-net_wins.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/net_wins.c' object='win32/crx-net_wins.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\net_wins.o `test -f 'win32\net_wins.c' || echo '$(srcdir)/'`win32\net_wins.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-net_wins.o `test -f 'win32/net_wins.c' || echo '$(srcdir)/'`win32/net_wins.c
 
-crx-win32\net_wins.obj: win32\net_wins.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\net_wins.obj -MD -MP -MF $(DEPDIR)/crx-win32\net_wins.Tpo -c -o crx-win32\net_wins.obj `if test -f 'win32\net_wins.c'; then $(CYGPATH_W) 'win32\net_wins.c'; else $(CYGPATH_W) '$(srcdir)/win32\net_wins.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\net_wins.Tpo $(DEPDIR)/crx-win32\net_wins.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\net_wins.c' object='crx-win32\net_wins.obj' libtool=no @AMDEPBACKSLASH@
+win32/crx-net_wins.obj: win32/net_wins.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-net_wins.obj -MD -MP -MF win32/$(DEPDIR)/crx-net_wins.Tpo -c -o win32/crx-net_wins.obj `if test -f 'win32/net_wins.c'; then $(CYGPATH_W) 'win32/net_wins.c'; else $(CYGPATH_W) '$(srcdir)/win32/net_wins.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-net_wins.Tpo win32/$(DEPDIR)/crx-net_wins.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/net_wins.c' object='win32/crx-net_wins.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\net_wins.obj `if test -f 'win32\net_wins.c'; then $(CYGPATH_W) 'win32\net_wins.c'; else $(CYGPATH_W) '$(srcdir)/win32\net_wins.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-net_wins.obj `if test -f 'win32/net_wins.c'; then $(CYGPATH_W) 'win32/net_wins.c'; else $(CYGPATH_W) '$(srcdir)/win32/net_wins.c'; fi`
 
-crx-win32\qal_win.o: win32\qal_win.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\qal_win.o -MD -MP -MF $(DEPDIR)/crx-win32\qal_win.Tpo -c -o crx-win32\qal_win.o `test -f 'win32\qal_win.c' || echo '$(srcdir)/'`win32\qal_win.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\qal_win.Tpo $(DEPDIR)/crx-win32\qal_win.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\qal_win.c' object='crx-win32\qal_win.o' libtool=no @AMDEPBACKSLASH@
+win32/crx-qal_win.o: win32/qal_win.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-qal_win.o -MD -MP -MF win32/$(DEPDIR)/crx-qal_win.Tpo -c -o win32/crx-qal_win.o `test -f 'win32/qal_win.c' || echo '$(srcdir)/'`win32/qal_win.c
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-qal_win.Tpo win32/$(DEPDIR)/crx-qal_win.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/qal_win.c' object='win32/crx-qal_win.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\qal_win.o `test -f 'win32\qal_win.c' || echo '$(srcdir)/'`win32\qal_win.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-qal_win.o `test -f 'win32/qal_win.c' || echo '$(srcdir)/'`win32/qal_win.c
 
-crx-win32\qal_win.obj: win32\qal_win.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\qal_win.obj -MD -MP -MF $(DEPDIR)/crx-win32\qal_win.Tpo -c -o crx-win32\qal_win.obj `if test -f 'win32\qal_win.c'; then $(CYGPATH_W) 'win32\qal_win.c'; else $(CYGPATH_W) '$(srcdir)/win32\qal_win.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\qal_win.Tpo $(DEPDIR)/crx-win32\qal_win.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\qal_win.c' object='crx-win32\qal_win.obj' libtool=no @AMDEPBACKSLASH@
+win32/crx-qal_win.obj: win32/qal_win.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-qal_win.obj -MD -MP -MF win32/$(DEPDIR)/crx-qal_win.Tpo -c -o win32/crx-qal_win.obj `if test -f 'win32/qal_win.c'; then $(CYGPATH_W) 'win32/qal_win.c'; else $(CYGPATH_W) '$(srcdir)/win32/qal_win.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-qal_win.Tpo win32/$(DEPDIR)/crx-qal_win.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/qal_win.c' object='win32/crx-qal_win.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\qal_win.obj `if test -f 'win32\qal_win.c'; then $(CYGPATH_W) 'win32\qal_win.c'; else $(CYGPATH_W) '$(srcdir)/win32\qal_win.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-qal_win.obj `if test -f 'win32/qal_win.c'; then $(CYGPATH_W) 'win32/qal_win.c'; else $(CYGPATH_W) '$(srcdir)/win32/qal_win.c'; fi`
 
-crx-win32\qgl_win.o: win32\qgl_win.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\qgl_win.o -MD -MP -MF $(DEPDIR)/crx-win32\qgl_win.Tpo -c -o crx-win32\qgl_win.o `test -f 'win32\qgl_win.c' || echo '$(srcdir)/'`win32\qgl_win.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\qgl_win.Tpo $(DEPDIR)/crx-win32\qgl_win.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\qgl_win.c' object='crx-win32\qgl_win.o' libtool=no @AMDEPBACKSLASH@
+win32/crx-qgl_win.o: win32/qgl_win.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-qgl_win.o -MD -MP -MF win32/$(DEPDIR)/crx-qgl_win.Tpo -c -o win32/crx-qgl_win.o `test -f 'win32/qgl_win.c' || echo '$(srcdir)/'`win32/qgl_win.c
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-qgl_win.Tpo win32/$(DEPDIR)/crx-qgl_win.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/qgl_win.c' object='win32/crx-qgl_win.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\qgl_win.o `test -f 'win32\qgl_win.c' || echo '$(srcdir)/'`win32\qgl_win.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-qgl_win.o `test -f 'win32/qgl_win.c' || echo '$(srcdir)/'`win32/qgl_win.c
 
-crx-win32\qgl_win.obj: win32\qgl_win.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\qgl_win.obj -MD -MP -MF $(DEPDIR)/crx-win32\qgl_win.Tpo -c -o crx-win32\qgl_win.obj `if test -f 'win32\qgl_win.c'; then $(CYGPATH_W) 'win32\qgl_win.c'; else $(CYGPATH_W) '$(srcdir)/win32\qgl_win.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\qgl_win.Tpo $(DEPDIR)/crx-win32\qgl_win.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\qgl_win.c' object='crx-win32\qgl_win.obj' libtool=no @AMDEPBACKSLASH@
+win32/crx-qgl_win.obj: win32/qgl_win.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-qgl_win.obj -MD -MP -MF win32/$(DEPDIR)/crx-qgl_win.Tpo -c -o win32/crx-qgl_win.obj `if test -f 'win32/qgl_win.c'; then $(CYGPATH_W) 'win32/qgl_win.c'; else $(CYGPATH_W) '$(srcdir)/win32/qgl_win.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-qgl_win.Tpo win32/$(DEPDIR)/crx-qgl_win.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/qgl_win.c' object='win32/crx-qgl_win.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\qgl_win.obj `if test -f 'win32\qgl_win.c'; then $(CYGPATH_W) 'win32\qgl_win.c'; else $(CYGPATH_W) '$(srcdir)/win32\qgl_win.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-qgl_win.obj `if test -f 'win32/qgl_win.c'; then $(CYGPATH_W) 'win32/qgl_win.c'; else $(CYGPATH_W) '$(srcdir)/win32/qgl_win.c'; fi`
 
-crx-win32\q_shwin.o: win32\q_shwin.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\q_shwin.o -MD -MP -MF $(DEPDIR)/crx-win32\q_shwin.Tpo -c -o crx-win32\q_shwin.o `test -f 'win32\q_shwin.c' || echo '$(srcdir)/'`win32\q_shwin.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\q_shwin.Tpo $(DEPDIR)/crx-win32\q_shwin.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\q_shwin.c' object='crx-win32\q_shwin.o' libtool=no @AMDEPBACKSLASH@
+win32/crx-q_shwin.o: win32/q_shwin.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-q_shwin.o -MD -MP -MF win32/$(DEPDIR)/crx-q_shwin.Tpo -c -o win32/crx-q_shwin.o `test -f 'win32/q_shwin.c' || echo '$(srcdir)/'`win32/q_shwin.c
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-q_shwin.Tpo win32/$(DEPDIR)/crx-q_shwin.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/q_shwin.c' object='win32/crx-q_shwin.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\q_shwin.o `test -f 'win32\q_shwin.c' || echo '$(srcdir)/'`win32\q_shwin.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-q_shwin.o `test -f 'win32/q_shwin.c' || echo '$(srcdir)/'`win32/q_shwin.c
 
-crx-win32\q_shwin.obj: win32\q_shwin.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\q_shwin.obj -MD -MP -MF $(DEPDIR)/crx-win32\q_shwin.Tpo -c -o crx-win32\q_shwin.obj `if test -f 'win32\q_shwin.c'; then $(CYGPATH_W) 'win32\q_shwin.c'; else $(CYGPATH_W) '$(srcdir)/win32\q_shwin.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\q_shwin.Tpo $(DEPDIR)/crx-win32\q_shwin.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\q_shwin.c' object='crx-win32\q_shwin.obj' libtool=no @AMDEPBACKSLASH@
+win32/crx-q_shwin.obj: win32/q_shwin.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-q_shwin.obj -MD -MP -MF win32/$(DEPDIR)/crx-q_shwin.Tpo -c -o win32/crx-q_shwin.obj `if test -f 'win32/q_shwin.c'; then $(CYGPATH_W) 'win32/q_shwin.c'; else $(CYGPATH_W) '$(srcdir)/win32/q_shwin.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-q_shwin.Tpo win32/$(DEPDIR)/crx-q_shwin.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/q_shwin.c' object='win32/crx-q_shwin.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\q_shwin.obj `if test -f 'win32\q_shwin.c'; then $(CYGPATH_W) 'win32\q_shwin.c'; else $(CYGPATH_W) '$(srcdir)/win32\q_shwin.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-q_shwin.obj `if test -f 'win32/q_shwin.c'; then $(CYGPATH_W) 'win32/q_shwin.c'; else $(CYGPATH_W) '$(srcdir)/win32/q_shwin.c'; fi`
 
-crx-win32\sys_win.o: win32\sys_win.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\sys_win.o -MD -MP -MF $(DEPDIR)/crx-win32\sys_win.Tpo -c -o crx-win32\sys_win.o `test -f 'win32\sys_win.c' || echo '$(srcdir)/'`win32\sys_win.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\sys_win.Tpo $(DEPDIR)/crx-win32\sys_win.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\sys_win.c' object='crx-win32\sys_win.o' libtool=no @AMDEPBACKSLASH@
+win32/crx-sys_win.o: win32/sys_win.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-sys_win.o -MD -MP -MF win32/$(DEPDIR)/crx-sys_win.Tpo -c -o win32/crx-sys_win.o `test -f 'win32/sys_win.c' || echo '$(srcdir)/'`win32/sys_win.c
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-sys_win.Tpo win32/$(DEPDIR)/crx-sys_win.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/sys_win.c' object='win32/crx-sys_win.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\sys_win.o `test -f 'win32\sys_win.c' || echo '$(srcdir)/'`win32\sys_win.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-sys_win.o `test -f 'win32/sys_win.c' || echo '$(srcdir)/'`win32/sys_win.c
 
-crx-win32\sys_win.obj: win32\sys_win.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\sys_win.obj -MD -MP -MF $(DEPDIR)/crx-win32\sys_win.Tpo -c -o crx-win32\sys_win.obj `if test -f 'win32\sys_win.c'; then $(CYGPATH_W) 'win32\sys_win.c'; else $(CYGPATH_W) '$(srcdir)/win32\sys_win.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\sys_win.Tpo $(DEPDIR)/crx-win32\sys_win.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\sys_win.c' object='crx-win32\sys_win.obj' libtool=no @AMDEPBACKSLASH@
+win32/crx-sys_win.obj: win32/sys_win.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-sys_win.obj -MD -MP -MF win32/$(DEPDIR)/crx-sys_win.Tpo -c -o win32/crx-sys_win.obj `if test -f 'win32/sys_win.c'; then $(CYGPATH_W) 'win32/sys_win.c'; else $(CYGPATH_W) '$(srcdir)/win32/sys_win.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-sys_win.Tpo win32/$(DEPDIR)/crx-sys_win.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/sys_win.c' object='win32/crx-sys_win.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\sys_win.obj `if test -f 'win32\sys_win.c'; then $(CYGPATH_W) 'win32\sys_win.c'; else $(CYGPATH_W) '$(srcdir)/win32\sys_win.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-sys_win.obj `if test -f 'win32/sys_win.c'; then $(CYGPATH_W) 'win32/sys_win.c'; else $(CYGPATH_W) '$(srcdir)/win32/sys_win.c'; fi`
 
-crx-win32\vid_dll.o: win32\vid_dll.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\vid_dll.o -MD -MP -MF $(DEPDIR)/crx-win32\vid_dll.Tpo -c -o crx-win32\vid_dll.o `test -f 'win32\vid_dll.c' || echo '$(srcdir)/'`win32\vid_dll.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\vid_dll.Tpo $(DEPDIR)/crx-win32\vid_dll.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\vid_dll.c' object='crx-win32\vid_dll.o' libtool=no @AMDEPBACKSLASH@
+win32/crx-vid_dll.o: win32/vid_dll.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-vid_dll.o -MD -MP -MF win32/$(DEPDIR)/crx-vid_dll.Tpo -c -o win32/crx-vid_dll.o `test -f 'win32/vid_dll.c' || echo '$(srcdir)/'`win32/vid_dll.c
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-vid_dll.Tpo win32/$(DEPDIR)/crx-vid_dll.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/vid_dll.c' object='win32/crx-vid_dll.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\vid_dll.o `test -f 'win32\vid_dll.c' || echo '$(srcdir)/'`win32\vid_dll.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-vid_dll.o `test -f 'win32/vid_dll.c' || echo '$(srcdir)/'`win32/vid_dll.c
 
-crx-win32\vid_dll.obj: win32\vid_dll.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT crx-win32\vid_dll.obj -MD -MP -MF $(DEPDIR)/crx-win32\vid_dll.Tpo -c -o crx-win32\vid_dll.obj `if test -f 'win32\vid_dll.c'; then $(CYGPATH_W) 'win32\vid_dll.c'; else $(CYGPATH_W) '$(srcdir)/win32\vid_dll.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/crx-win32\vid_dll.Tpo $(DEPDIR)/crx-win32\vid_dll.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32\vid_dll.c' object='crx-win32\vid_dll.obj' libtool=no @AMDEPBACKSLASH@
+win32/crx-vid_dll.obj: win32/vid_dll.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT win32/crx-vid_dll.obj -MD -MP -MF win32/$(DEPDIR)/crx-vid_dll.Tpo -c -o win32/crx-vid_dll.obj `if test -f 'win32/vid_dll.c'; then $(CYGPATH_W) 'win32/vid_dll.c'; else $(CYGPATH_W) '$(srcdir)/win32/vid_dll.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) win32/$(DEPDIR)/crx-vid_dll.Tpo win32/$(DEPDIR)/crx-vid_dll.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='win32/vid_dll.c' object='win32/crx-vid_dll.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o crx-win32\vid_dll.obj `if test -f 'win32\vid_dll.c'; then $(CYGPATH_W) 'win32\vid_dll.c'; else $(CYGPATH_W) '$(srcdir)/win32\vid_dll.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o win32/crx-vid_dll.obj `if test -f 'win32/vid_dll.c'; then $(CYGPATH_W) 'win32/vid_dll.c'; else $(CYGPATH_W) '$(srcdir)/win32/vid_dll.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -3288,6 +3323,8 @@ distclean-generic:
 	-rm -f server/$(am__dirstamp)
 	-rm -f unix/$(DEPDIR)/$(am__dirstamp)
 	-rm -f unix/$(am__dirstamp)
+	-rm -f win32/$(DEPDIR)/$(am__dirstamp)
+	-rm -f win32/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -3298,7 +3335,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-noinstLIBRARIES \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) client/$(DEPDIR) game/$(DEPDIR) game/acesrc/$(DEPDIR) null/$(DEPDIR) qcommon/$(DEPDIR) ref_gl/$(DEPDIR) server/$(DEPDIR) unix/$(DEPDIR)
+	-rm -rf client/$(DEPDIR) game/$(DEPDIR) game/acesrc/$(DEPDIR) null/$(DEPDIR) qcommon/$(DEPDIR) ref_gl/$(DEPDIR) server/$(DEPDIR) unix/$(DEPDIR) win32/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -3344,7 +3381,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) client/$(DEPDIR) game/$(DEPDIR) game/acesrc/$(DEPDIR) null/$(DEPDIR) qcommon/$(DEPDIR) ref_gl/$(DEPDIR) server/$(DEPDIR) unix/$(DEPDIR)
+	-rm -rf client/$(DEPDIR) game/$(DEPDIR) game/acesrc/$(DEPDIR) null/$(DEPDIR) qcommon/$(DEPDIR) ref_gl/$(DEPDIR) server/$(DEPDIR) unix/$(DEPDIR) win32/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

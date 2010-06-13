@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,11 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
 
 #include <termios.h>
 #include <sys/ioctl.h>
@@ -35,38 +33,102 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <signal.h>
 #include <dlfcn.h>
 
+// -jjb-ac review what is required
+#include "qcommon/qcommon.h"
 #include "ref_gl/r_local.h"
-
 #include "client/keys.h"
-
 #include "unix/glw_unix.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
-
+#include <X11/extensions/xf86vmode.h>
 // xf86dga.h is deprecated, Xxf86dga.h is preferred
 // if neither exists, don't use DGA
 #ifdef HAVE_X11_EXTENSIONS_XXF86DGA_H
 #include <X11/extensions/Xxf86dga.h>
 #else
-	#ifdef HAVE_X11_EXTENSIONS_XF86DGA_H
-	#include <X11/extensions/xf86dga.h>
-	#else
-	#define NO_XXF86DGA 1
-	#endif
-#endif
-
-/* For testing and OSX porting  --jjb-ac */
+#ifdef HAVE_X11_EXTENSIONS_XF86DGA_H
+#include <X11/extensions/xf86dga.h>
+#else
 #define NO_XXF86DGA 1
-/*-----------------------------*/
-
-#include <X11/extensions/xf86vmode.h>
+#endif
+#endif
 
 #include <GL/glx.h>
 
+#if 0
+// -jjb-ac see if these can be moved to qcommon.h
+/* external types */
+
+typedef struct
+{
+	unsigned		width, height;			// coordinates from main game
+} viddef_t;
+
+#endif
+
+#if 0
+typedef enum
+{
+	rserr_ok,
+	rserr_invalid_fullscreen,
+	rserr_invalid_mode,
+	rserr_unknown
+} rserr_t;
+#endif
+
+#define MENU_CURSOR_BUTTON_MAX 2
+
+#define MENUITEM_ACTION		1
+#define MENUITEM_ROTATE		2
+#define MENUITEM_SLIDER		3
+#define MENUITEM_TEXT		4
+#define MENUITEM_VERTSLIDER 5
+
+#if 0
+typedef struct
+{
+	//only 2 buttons for menus
+	float		buttontime[MENU_CURSOR_BUTTON_MAX];
+	int			buttonclicks[MENU_CURSOR_BUTTON_MAX];
+	int			buttonused[MENU_CURSOR_BUTTON_MAX];
+	qboolean	buttondown[MENU_CURSOR_BUTTON_MAX];
+
+	qboolean	mouseaction;
+
+	//this is the active item that cursor is on.
+	int			menuitemtype;
+	void		*menuitem;
+	void		*menu;
+
+	//coords
+	int		x;
+	int		y;
+
+	int		oldx;
+	int		oldy;
+} cursor_t;
+#endif
+
+/* extern globals */
 extern cursor_t cursor;
+extern float rs_realtime;
+extern viddef_t vid;
+
+void		GLimp_BeginFrame( float camera_separation );
+void		GLimp_EndFrame( void );
+qboolean	GLimp_Init( void *hinstance, void *hWnd );
+void		GLimp_Shutdown( void );
+rserr_t    	GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen );
+void		GLimp_AppActivate( qboolean active );
+void		GLimp_EnableLogging( qboolean enable );
+void		GLimp_LogNewFrame( void );
+
+
+//---------------------------------------------------------------------------
+
 
 glwstate_t glw_state;
 
@@ -105,7 +167,7 @@ qboolean vidmode_ext = false;
 
 static Cursor CreateNullCursor(Display *display, Window root)
 {
-    Pixmap cursormask; 
+    Pixmap cursormask;
     XGCValues xgc;
     GC gc;
     XColor dummycolour;
@@ -128,7 +190,7 @@ static Cursor CreateNullCursor(Display *display, Window root)
 void install_grabs(void)
 {
 
-#ifdef NO_XXF86DGA
+#if defined NO_XXF86DGA
 	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
 	XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
 	Cvar_Set( "in_dgamouse", "0" );
@@ -165,7 +227,7 @@ void uninstall_grabs(void)
 	if (!dpy || !win)
 		return;
 
-#ifndef NO_XXF86DGA
+#if !defined NO_XXF86DGA
 	if (dgamouse) {
 		dgamouse = false;
 		XF86DGADirectVideo(dpy, DefaultScreen(dpy), 0);
@@ -178,7 +240,7 @@ void uninstall_grabs(void)
 	mouse_active = false;
 }
 
-static void IN_DeactivateMouse( void ) 
+static void IN_DeactivateMouse( void )
 {
 	if (!dpy || !win)
 		return;
@@ -189,7 +251,7 @@ static void IN_DeactivateMouse( void )
 	}
 }
 
-static void IN_ActivateMouse( void ) 
+static void IN_ActivateMouse( void )
 {
 	if (!dpy || !win)
 		return;
@@ -291,13 +353,13 @@ static int XLateKey(XKeyEvent *ev)
 		case XK_Shift_L:
 		case XK_Shift_R:	key = K_SHIFT;		break;
 
-		case XK_Execute: 
-		case XK_Control_L: 
+		case XK_Execute:
+		case XK_Control_L:
 		case XK_Control_R:	key = K_CTRL;		 break;
 
-		case XK_Alt_L:	
-		case XK_Meta_L: 
-		case XK_Alt_R:	
+		case XK_Alt_L:
+		case XK_Meta_L:
+		case XK_Alt_R:
 		case XK_Meta_R: key = K_ALT;			break;
 
 		case XK_KP_Begin: key = K_KP_5;	break;
@@ -317,7 +379,7 @@ static int XLateKey(XKeyEvent *ev)
 			if (key >= 1 && key <= 26) /* ctrl+alpha */
 				key = key + 'a' - 1;
 			break;
-	} 
+	}
 
 	return key;
 }
@@ -331,14 +393,14 @@ void HandleEvents(void)
 	int mwy = vid.height/2;
 	int multiclicktime = 750;
 	int mouse_button;
-	
+
 	if (!dpy)
 		return;
 
 	while (XPending(dpy)) {
 
 		XNextEvent(dpy, &event);
-		
+
 		if(event.xbutton.button == 2)
 			mouse_button = 2;
 		else if(event.xbutton.button == 3)
@@ -357,8 +419,8 @@ void HandleEvents(void)
 				if (dgamouse) {
 					mx += (event.xmotion.x + (vidmode_active ? 0 : win_x)) * 2;
 					my += (event.xmotion.y + (vidmode_active ? 0 : win_y)) * 2;
-				} 
-				else 
+				}
+				else
 				{
 					mx += ((int)event.xmotion.x - mwx);
 					my += ((int)event.xmotion.y - mwy);
@@ -377,7 +439,7 @@ void HandleEvents(void)
 
 
 		case ButtonPress:
-			
+
 			if (event.xbutton.button) {
 				if (Sys_Milliseconds()-cursor.buttontime[mouse_button] < multiclicktime)
 					cursor.buttonclicks[mouse_button] += 1;
@@ -393,7 +455,7 @@ void HandleEvents(void)
 				cursor.buttonused[mouse_button] = false;
 				cursor.mouseaction = true;
 			}
-			
+
 			if (event.xbutton.button == 1) Key_Event(K_MOUSE1, event.type == ButtonPress, Sys_Milliseconds());
 			else if (event.xbutton.button == 2) Key_Event(K_MOUSE3, event.type == ButtonPress, Sys_Milliseconds());
 			else if (event.xbutton.button == 3) Key_Event(K_MOUSE2, event.type == ButtonPress, Sys_Milliseconds());
@@ -404,7 +466,7 @@ void HandleEvents(void)
 			else if (event.xbutton.button == 8) Key_Event(K_MOUSE6, event.type == ButtonPress, Sys_Milliseconds());
 			else if (event.xbutton.button == 9) Key_Event(K_MOUSE7, event.type == ButtonPress, Sys_Milliseconds());
 			break;
-			
+
 		case ButtonRelease:
 			if (event.xbutton.button) {
 				cursor.buttondown[mouse_button] = false;
@@ -438,7 +500,7 @@ void HandleEvents(void)
 			break;
 		}
 	}
-		  
+
 	if (dowarp) {
 		/* move the mouse to the window center again */
 		XWarpPointer(dpy,None,win,0,0,0,0, vid.width/2,vid.height/2);
@@ -472,17 +534,17 @@ static void InitSig(void)
 /*
 ** GLimp_SetMode
 */
-int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
+rserr_t GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 {
 	int width, height;
 	int attrib[] = {
-		GLX_RGBA, 
-		GLX_DOUBLEBUFFER, 
-		GLX_RED_SIZE, 4, 
-		GLX_GREEN_SIZE, 4, 
-		GLX_BLUE_SIZE, 4, 
-		GLX_DEPTH_SIZE, 24, 
-		GLX_STENCIL_SIZE, 8, 
+		GLX_RGBA,
+		GLX_DOUBLEBUFFER,
+		GLX_RED_SIZE, 4,
+		GLX_GREEN_SIZE, 4,
+		GLX_BLUE_SIZE, 4,
+		GLX_DEPTH_SIZE, 24,
+		GLX_STENCIL_SIZE, 8,
 		None
 	};
 	int attrib2[] = { //no stencil buffer, original settings
@@ -534,7 +596,7 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 
 	// Get video mode list
 	MajorVersion = MinorVersion = 0;
-	if (!XF86VidModeQueryVersion(dpy, &MajorVersion, &MinorVersion)) { 
+	if (!XF86VidModeQueryVersion(dpy, &MajorVersion, &MinorVersion)) {
 		vidmode_ext = false;
 	} else {
 		Com_Printf ( "Using XFree86-VidModeExtension Version %d.%d\n",
@@ -557,7 +619,7 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	vidmode_active = false;
 	if (vidmode_ext) {
 		int best_fit, best_dist, dist, x, y;
-		
+
 		XF86VidModeGetAllModeLines(dpy, scrnum, &num_vidmodes, &vidmodes);
 
 		// Are we going fullscreen?  If so, let's change video mode
@@ -600,7 +662,7 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 	attr.colormap = XCreateColormap(dpy, root, visinfo->visual, AllocNone);
 	attr.event_mask = X_MASK;
 	if (vidmode_active) {
-		mask = CWBackPixel | CWColormap | CWSaveUnder | CWBackingStore | 
+		mask = CWBackPixel | CWColormap | CWSaveUnder | CWBackingStore |
 			CWEventMask | CWOverrideRedirect;
 		attr.override_redirect = True;
 		attr.backing_store = NotUseful;
@@ -620,7 +682,7 @@ int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
 		sizehints->max_height = height;
 		sizehints->base_width = width;
 		sizehints->base_height = vid.height;
-		
+
 		sizehints->flags = PMinSize | PMaxSize | PBaseSize;
 	}
 
@@ -703,9 +765,10 @@ void GLimp_Shutdown( void )
 ** GLimp_Init
 **
 ** This routine is responsible for initializing the OS specific portions
-** of OpenGL.  
+** of OpenGL.
 */
-int GLimp_Init( void *hinstance, void *wndproc )
+// jjb-fix
+qboolean GLimp_Init( void *hinstance, void *wndproc )
 {
 	InitSig();
 
@@ -721,7 +784,7 @@ void GLimp_BeginFrame( float camera_seperation )
 
 /*
 ** GLimp_EndFrame
-** 
+**
 ** Responsible for doing a swapbuffers and possibly for other stuff
 ** as yet to be determined.  Probably better not to make this a GLimp
 ** function and instead do a call to GLimp_SwapBuffers.

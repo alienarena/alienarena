@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -19,8 +19,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // r_model.c -- model loading and caching
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "r_local.h"
- 
+
 model_t	*loadmodel;
 int		modfilelen;
 
@@ -42,10 +46,11 @@ int r_lightgroups;
 
 int		registration_sequence;
 
-#ifdef _WINDOWS
-extern void R_ReadFogScript(char config_file[128]);
-extern void R_ReadMusicScript(char config_file[128]);
-#endif
+// -jjb-ac  now declared in header
+//#ifdef _WINDOWS
+//extern void R_ReadFogScript(char config_file[128]);
+//extern void R_ReadMusicScript(char config_file[128]);
+//#endif
 
 char map_music[128];
 extern unsigned r_weather;
@@ -75,26 +80,26 @@ void R_RegisterLightGroups (void)
 	int			i;
 	vec3_t		dist, mins, maxs;
 	trace_t		r_trace;
-	int			lnum = 0; 
+	int			lnum = 0;
 	qboolean	doneShadowGroups = false;
 	qboolean	lightWasGrouped = false;
 
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
 
-	for (i=0; i<r_numWorldLights; i++) { 
+	for (i=0; i<r_numWorldLights; i++) {
 		r_worldLights[i].grouped = false;
 	}
 
 	r_lightgroups = 0;
 
-	while(!doneShadowGroups) {	
+	while(!doneShadowGroups) {
 
 		lightWasGrouped = false;
 		for (i=0; i<r_numWorldLights; i++) {
 
 			if(r_worldLights[i].grouped)
-				continue;			
+				continue;
 
 			if(!lnum && !r_worldLights[i].grouped) { //none in group yet, first light establishes the initial origin of the group
 				VectorCopy(r_worldLights[i].origin, LightGroups[r_lightgroups].group_origin);
@@ -107,17 +112,17 @@ void R_RegisterLightGroups (void)
 
 			VectorSubtract(LightGroups[r_lightgroups].group_origin, r_worldLights[i].origin, dist);
 			r_trace = CM_BoxTrace(LightGroups[r_lightgroups].group_origin, r_worldLights[i].origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-				
-			if(!r_worldLights[i].grouped && (lnum < r_numWorldLights) && r_trace.fraction == 1.0f && (VectorLength(dist) < 256.0f)) { 
+
+			if(!r_worldLights[i].grouped && (lnum < r_numWorldLights) && r_trace.fraction == 1.0f && (VectorLength(dist) < 256.0f)) {
 				r_worldLights[i].grouped = true;
 				VectorAdd(r_worldLights[i].origin, LightGroups[r_lightgroups].accum_origin, LightGroups[r_lightgroups].accum_origin);
 				LightGroups[r_lightgroups].avg_intensity+=(r_worldLights[i].intensity);
 				lnum++;
 				//we grouped an light in this pass
 				lightWasGrouped = true;
-			}		
+			}
 		}
-		
+
 		if(!lightWasGrouped)
 			doneShadowGroups = true;
 		else {
@@ -128,11 +133,11 @@ void R_RegisterLightGroups (void)
 			}
 			VectorCopy(LightGroups[r_lightgroups].accum_origin, LightGroups[r_lightgroups].group_origin);
 			r_lightgroups++;
-			if(r_lightgroups > MAX_LIGHTS) 
+			if(r_lightgroups > MAX_LIGHTS)
 				doneShadowGroups = true;
-	
-			lnum = 0;	
-		}		
+
+			lnum = 0;
+		}
 	}
 	Com_Printf("Condensed ^2%i worldlights into ^2%i lightgroups\n", r_numWorldLights, r_lightgroups);
 }
@@ -243,7 +248,7 @@ mleaf_t *Mod_PointInLeaf (vec3_t p, model_t *model)
 	mnode_t		*node;
 	float		d;
 	cplane_t	*plane;
-	
+
 	if (!model || !model->nodes)
 		Com_Printf ("Mod_PointInLeaf: bad model");
 
@@ -259,7 +264,7 @@ mleaf_t *Mod_PointInLeaf (vec3_t p, model_t *model)
 		else
 			node = node->children[1];
 	}
-	
+
 	return NULL;	// never reached
 }
 
@@ -276,7 +281,7 @@ byte *Mod_DecompressVis (byte *in, model_t *model)
 	byte	*out;
 	int		row;
 
-	row = (model->vis->numclusters+7)>>3;	
+	row = (model->vis->numclusters+7)>>3;
 	out = decompressed;
 
 	if (!in)
@@ -286,7 +291,7 @@ byte *Mod_DecompressVis (byte *in, model_t *model)
 			*out++ = 0xff;
 			row--;
 		}
-		return decompressed;		
+		return decompressed;
 	}
 
 	do
@@ -296,7 +301,7 @@ byte *Mod_DecompressVis (byte *in, model_t *model)
 			*out++ = *in++;
 			continue;
 		}
-	
+
 		c = in[1];
 		in += 2;
 		while (c)
@@ -305,7 +310,7 @@ byte *Mod_DecompressVis (byte *in, model_t *model)
 			c--;
 		}
 	} while (out - decompressed < row);
-	
+
 	return decompressed;
 }
 
@@ -372,10 +377,10 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	model_t	*mod;
 	unsigned *buf;
 	int		i;
-	
+
 	if (!name[0])
 		Com_Error (ERR_DROP, "Mod_ForName: NULL name");
-		
+
 	//
 	// inline models are grabbed only from worldmodel
 	//
@@ -402,16 +407,17 @@ model_t *Mod_ForName (char *name, qboolean crash)
 				int i = 0;
 				image_t *img;
 				img=mod->skins[i];
-			
+
 				while (img != NULL) {
 					strcpy(rs,mod->skins[i]->name);
 					rs[strlen(rs)-4]=0;
 
-#ifdef _WINDOWS
-					(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
-#else
+// -jjb-ac
+//#ifdef _WINDOWS
+//					(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
+//#else
 					mod->script[i] = RS_FindScript(rs); //make it gcc 4.1.1 compatible
-#endif
+//#endif
 					if (mod->script[i])
 						RS_ReadyScript((rscript_t *)mod->script[i]);
 					i++;
@@ -422,7 +428,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 			return mod;
 		}
 	}
-	
+
 	//
 	// find a free model slot spot
 	//
@@ -438,7 +444,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		mod_numknown++;
 	}
 	strcpy (mod->name, name);
-	
+
 	//
 	// load the file
 	//
@@ -450,7 +456,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		memset (mod->name, 0, sizeof(mod->name));
 		return NULL;
 	}
-	
+
 	loadmodel = mod;
 
 	//
@@ -459,14 +465,14 @@ model_t *Mod_ForName (char *name, qboolean crash)
 
 
 	// call the apropriate loader
-	
+
 	switch (LittleLong(*(unsigned *)buf))
 	{
 	case IDALIASHEADER:
 		loadmodel->extradata = Hunk_Begin (0x300000);
 		Mod_LoadAliasModel (mod, buf);
 		break;
-		
+
 	case IDBSPHEADER:
 		loadmodel->extradata = Hunk_Begin (0x1500000);
 		Mod_LoadBrushModel (mod, buf);
@@ -507,7 +513,7 @@ void Mod_LoadLighting (lump_t *l)
 		loadmodel->lightdata = NULL;
 		return;
 	}
-	loadmodel->lightdata = Hunk_Alloc ( l->filelen);	
+	loadmodel->lightdata = Hunk_Alloc ( l->filelen);
 	memcpy (loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
 }
 
@@ -526,7 +532,7 @@ void Mod_LoadVisibility (lump_t *l)
 		loadmodel->vis = NULL;
 		return;
 	}
-	loadmodel->vis = Hunk_Alloc ( l->filelen);	
+	loadmodel->vis = Hunk_Alloc ( l->filelen);
 	memcpy (loadmodel->vis, mod_base + l->fileofs, l->filelen);
 
 	loadmodel->vis->numclusters = LittleLong (loadmodel->vis->numclusters);
@@ -553,7 +559,7 @@ void Mod_LoadVertexes (lump_t *l)
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size in %s",loadmodel->name);
 	count = l->filelen / sizeof(*in);
-	out = Hunk_Alloc ( count*sizeof(*out));	
+	out = Hunk_Alloc ( count*sizeof(*out));
 
 	loadmodel->vertexes = out;
 	loadmodel->numvertexes = count;
@@ -600,7 +606,7 @@ void Mod_LoadSubmodels (lump_t *l)
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size in %s",loadmodel->name);
 	count = l->filelen / sizeof(*in);
-	out = Hunk_Alloc ( count*sizeof(*out));	
+	out = Hunk_Alloc ( count*sizeof(*out));
 
 	loadmodel->submodels = out;
 	loadmodel->numsubmodels = count;
@@ -634,7 +640,7 @@ void Mod_LoadEdges (lump_t *l)
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size in %s",loadmodel->name);
 	count = l->filelen / sizeof(*in);
-	out = Hunk_Alloc ( (count + 1) * sizeof(*out));	
+	out = Hunk_Alloc ( (count + 1) * sizeof(*out));
 
 	loadmodel->edges = out;
 	loadmodel->numedges = count;
@@ -664,7 +670,7 @@ void Mod_LoadTexinfo (lump_t *l)
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size in %s",loadmodel->name);
 	count = l->filelen / sizeof(*in);
-	out = Hunk_Alloc ( count*sizeof(*out));	
+	out = Hunk_Alloc ( count*sizeof(*out));
 
 	loadmodel->texinfo = out;
 	loadmodel->numtexinfo = count;
@@ -695,24 +701,24 @@ void Mod_LoadTexinfo (lump_t *l)
 		{
 			strcat( name, "_nm.tga" );
 			out->normalMap = GL_FindImage( name, it_bump );
-			if( out->normalMap == NULL ) 
-				out->normalMap = out->image; 
-		
+			if( out->normalMap == NULL )
+				out->normalMap = out->image;
+
 		}
 		else
-			out->normalMap = out->image; 
+			out->normalMap = out->image;
 
 		strcpy(name, sv_name);
 		if( ( strlen( name ) + 8 ) <= MAX_QPATH )
 		{
 			strcat( name, "_hm.tga" );
 			out->heightMap = GL_FindImage( name, it_bump );
-			if( out->heightMap == NULL ) 
-				out->heightMap = out->image; 
-		
+			if( out->heightMap == NULL )
+				out->heightMap = out->image;
+
 		}
 		else
-			out->heightMap = out->image; 
+			out->heightMap = out->image;
 	}
 
 	// count animation frames
@@ -744,7 +750,7 @@ void CalcSurfaceExtents (msurface_t *s)
 	maxs[0] = maxs[1] = -99999;
 
 	tex = s->texinfo;
-	
+
 	for (i=0 ; i<s->numedges ; i++)
 	{
 		e = loadmodel->surfedges[s->firstedge+i];
@@ -752,10 +758,10 @@ void CalcSurfaceExtents (msurface_t *s)
 			v = &loadmodel->vertexes[loadmodel->edges[e].v[0]];
 		else
 			v = &loadmodel->vertexes[loadmodel->edges[-e].v[1]];
-		
+
 		for (j=0 ; j<2 ; j++)
 		{
-			val = v->position[0] * tex->vecs[j][0] + 
+			val = v->position[0] * tex->vecs[j][0] +
 				v->position[1] * tex->vecs[j][1] +
 				v->position[2] * tex->vecs[j][2] +
 				tex->vecs[j][3];
@@ -767,7 +773,7 @@ void CalcSurfaceExtents (msurface_t *s)
 	}
 
 	for (i=0 ; i<2 ; i++)
-	{	
+	{
 		bmins[i] = floor(mins[i]/16);
 		bmaxs[i] = ceil(maxs[i]/16);
 
@@ -790,26 +796,26 @@ void GL_AddFlareSurface (msurface_t *surf, int type )
 {
      int i, width, height, intens;
      glpoly_t *poly;
-     flare_t  *light; 
+     flare_t  *light;
      byte     *buffer;
 	 byte     *p;
      float    *v, surf_bound;
 	 vec3_t origin = {0,0,0}, color = {1,1,1}, tmp, rgbSum;
      vec3_t poly_center, mins, maxs, tmp1;
-     
+
      if (surf->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING|SURF_DRAWTURB|SURF_WARP))
           return;
 
      if (!(surf->texinfo->flags & (SURF_LIGHT)))
           return;
-  
+
 	 if (r_numflares >= MAX_FLARES)
 			return;
 
     light = &r_flares[r_numflares++];
     intens = surf->texinfo->value;
 
-     
+
      //if (intens < 100) //if not a lighted surf, don't do a flare, right?
 	//	 return;
     /*
@@ -820,24 +826,24 @@ void GL_AddFlareSurface (msurface_t *surf, int type )
 	VectorSet(mins, 999999, 999999, 999999);
 	VectorSet(maxs, -999999, -999999, -999999);
 
-    for ( poly = surf->polys; poly; poly = poly->chain ) { 
-         for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE) { 
-                
-               if(v[0] > maxs[0])   maxs[0] = v[0]; 
-               if(v[1] > maxs[1])   maxs[1] = v[1]; 
-               if(v[2] > maxs[2])   maxs[2] = v[2]; 
+    for ( poly = surf->polys; poly; poly = poly->chain ) {
+         for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE) {
 
-               if(v[0] < mins[0])   mins[0] = v[0]; 
-               if(v[1] < mins[1])   mins[1] = v[1]; 
-               if(v[2] < mins[2])   mins[2] = v[2]; 
-            } 
-      } 
+               if(v[0] > maxs[0])   maxs[0] = v[0];
+               if(v[1] > maxs[1])   maxs[1] = v[1];
+               if(v[2] > maxs[2])   maxs[2] = v[2];
 
-     poly_center[0] = (mins[0] + maxs[0]) /2; 
-     poly_center[1] = (mins[1] + maxs[1]) /2; 
+               if(v[0] < mins[0])   mins[0] = v[0];
+               if(v[1] < mins[1])   mins[1] = v[1];
+               if(v[2] < mins[2])   mins[2] = v[2];
+            }
+      }
+
+     poly_center[0] = (mins[0] + maxs[0]) /2;
+     poly_center[1] = (mins[1] + maxs[1]) /2;
      poly_center[2] = (mins[2] + maxs[2]) /2;
 	 VectorCopy(poly_center, origin);
-     
+
      /*
 	=====================================
 	calc light surf bounds and flare size
@@ -864,20 +870,20 @@ void GL_AddFlareSurface (msurface_t *surf, int type )
      GL_Bind( surf->texinfo->image->texnum );
      width = surf->texinfo->image->upload_width;
 	 height = surf->texinfo->image->upload_height;
-     
+
      buffer = malloc(width * height * 3);
      qglGetTexImage (GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
      VectorClear(rgbSum);
 
-     for (i=0, p=buffer; i<width*height; i++, p += 3) 
+     for (i=0, p=buffer; i<width*height; i++, p += 3)
       {
         rgbSum[0] += (float)p[0]  * (1.0 / 255);
         rgbSum[1] += (float)p[1]  * (1.0 / 255);
         rgbSum[2] += (float)p[2]  * (1.0 / 255);
       }
-     
+
       VectorScale(rgbSum, r_lensflare_intens->value / (width *height), color);
-     
+
       for (i=0; i<3; i++) {
           if (color[i] < 0.5)
                color[i] = color[i] * 0.5;
@@ -885,7 +891,7 @@ void GL_AddFlareSurface (msurface_t *surf, int type )
                color[i] = color[i] * 0.5 + 0.5;
           }
       VectorCopy(color, light->color);
-      
+
 	/*
 	==================================
 	move flare origin in to map bounds
@@ -896,13 +902,13 @@ void GL_AddFlareSurface (msurface_t *surf, int type )
 		VectorNegate(surf->plane->normal, tmp);
      else
 		VectorCopy(surf->plane->normal, tmp);
-     
+
      VectorMA(origin, 2, tmp, origin);
      VectorCopy(origin, light->origin);
-    
+
      light->style = type;
 
-     free (buffer); 
+     free (buffer);
 }
 
 //vegetation
@@ -918,7 +924,7 @@ static void R_ClearGrasses(void)
 void GL_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type)
 {
     glpoly_t *poly;
-    grass_t  *grass; 
+    grass_t  *grass;
 	image_t *gl;
 	vec3_t origin = {0,0,0}, binormal, tangent, tmp;
 
@@ -927,33 +933,33 @@ void GL_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float 
 
 	if(size == 0.0)
 		size = 1.0f;
- 	  
+
 	poly = surf->polys;
-         
+
 	VectorCopy(poly->verts[0], origin);
-   
+
 	AngleVectors(surf->plane->normal, NULL, tangent, binormal);
 	VectorNormalize(tangent);
 	VectorNormalize(binormal);
-	
+
 	VectorMA(origin, -32*frand(), tangent, origin);
 
 	if (surf->flags & SURF_PLANEBACK)
 		VectorNegate(surf->plane->normal, tmp);
 	else
 		VectorCopy(surf->plane->normal, tmp);
-     
+
 	VectorMA(origin, 2, tmp, origin);
-		
+
 	grass = &r_grasses[r_numgrasses++];
 	VectorCopy(origin, grass->origin);
-	
+
 	gl = R_RegisterGfxPic (name);
 	if (gl)
 		grass->texsize = gl->height;
 	else
 		grass->texsize = 64; //sane default
-	
+
 	grass->texnum = texnum;
 	VectorCopy(color, grass->color);
 	grass->size = size;
@@ -973,7 +979,7 @@ static void R_ClearBeams(void)
 void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type)
 {
     glpoly_t *poly;
-    beam_t  *beam; 
+    beam_t  *beam;
 	image_t *gl;
 	vec3_t poly_center, mins, maxs;
 	float *v;
@@ -985,9 +991,9 @@ void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, 
 
 	if(size == 0.0)
 		size = 1.0f;
- 	  
+
 	poly = surf->polys;
-         
+
 	 /*
 	===================
 	find poligon centre
@@ -996,24 +1002,24 @@ void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, 
 	VectorSet(mins, 999999, 999999, 999999);
 	VectorSet(maxs, -999999, -999999, -999999);
 
-    for ( poly = surf->polys; poly; poly = poly->chain ) { 
-         for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE) { 
-                
-               if(v[0] > maxs[0])   maxs[0] = v[0]; 
-               if(v[1] > maxs[1])   maxs[1] = v[1]; 
-               if(v[2] > maxs[2])   maxs[2] = v[2]; 
+    for ( poly = surf->polys; poly; poly = poly->chain ) {
+         for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE) {
 
-               if(v[0] < mins[0])   mins[0] = v[0]; 
-               if(v[1] < mins[1])   mins[1] = v[1]; 
-               if(v[2] < mins[2])   mins[2] = v[2]; 
-            } 
-      } 
+               if(v[0] > maxs[0])   maxs[0] = v[0];
+               if(v[1] > maxs[1])   maxs[1] = v[1];
+               if(v[2] > maxs[2])   maxs[2] = v[2];
 
-     poly_center[0] = (mins[0] + maxs[0]) /2; 
-     poly_center[1] = (mins[1] + maxs[1]) /2; 
+               if(v[0] < mins[0])   mins[0] = v[0];
+               if(v[1] < mins[1])   mins[1] = v[1];
+               if(v[2] < mins[2])   mins[2] = v[2];
+            }
+      }
+
+     poly_center[0] = (mins[0] + maxs[0]) /2;
+     poly_center[1] = (mins[1] + maxs[1]) /2;
      poly_center[2] = (mins[2] + maxs[2]) /2;
 	 VectorCopy(poly_center, origin);
-   
+
 	AngleVectors(surf->plane->normal, NULL, tangent, binormal);
 	VectorNormalize(tangent);
 	VectorNormalize(binormal);
@@ -1022,18 +1028,18 @@ void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, 
 		VectorNegate(surf->plane->normal, tmp);
 	else
 		VectorCopy(surf->plane->normal, tmp);
-     
+
 	VectorMA(origin, 2, tmp, origin);
-		
+
 	beam = &r_beams[r_numbeams++];
 	VectorCopy(origin, beam->origin);
-	
+
 	gl = R_RegisterGfxPic (name);
 	if (gl)
 		beam->texsize = gl->height;
 	else
 		beam->texsize = 64; //sane default
-	
+
 	beam->texnum = texnum;
 	VectorCopy(color, beam->color);
 	beam->size = size;
@@ -1045,7 +1051,7 @@ void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, 
 GL_CalcSurfaceNormals(msurface_t *surf) {
 
 	glpoly_t *p = surf->polys;
-	float	*v;	
+	float	*v;
 	int		i;
 
 	for (; p; p = p->chain)
@@ -1057,7 +1063,7 @@ GL_CalcSurfaceNormals(msurface_t *surf) {
 
 		_VectorSubtract( p->verts[ 1 ], p->verts[0], v01 );
 		vec = p->verts[0];
-		_VectorCopy(surf->plane->normal, normal); 
+		_VectorCopy(surf->plane->normal, normal);
 
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
@@ -1101,7 +1107,7 @@ GL_CalcSurfaceNormals(msurface_t *surf) {
 		VectorScale( v02, p->verts[ 1 ][ 4 ] - p->verts[ 0 ][ 4 ], temp2 );
 		_VectorSubtract( temp1, temp2, temp3 );
 		VectorScale( temp3, s, tangent );
-		VectorNormalize( tangent ); 
+		VectorNormalize( tangent );
 
 		surf->tangentSpaceTransform[ 0 ][ 0 ] = tangent[ 0 ];
 		surf->tangentSpaceTransform[ 1 ][ 0 ] = tangent[ 1 ];
@@ -1112,7 +1118,7 @@ GL_CalcSurfaceNormals(msurface_t *surf) {
 		VectorScale( v01, vec[ 3 ] - p->verts[ 0 ][ 3 ], temp2 );
 		_VectorSubtract( temp1, temp2, temp3 );
 		VectorScale( temp3, s, binormal );
-		VectorNormalize( binormal ); 
+		VectorNormalize( binormal );
 
 		surf->tangentSpaceTransform[ 0 ][ 1 ] = binormal[ 0 ];
 		surf->tangentSpaceTransform[ 1 ][ 1 ] = binormal[ 1 ];
@@ -1149,7 +1155,7 @@ void Mod_LoadFaces (lump_t *l)
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size in %s",loadmodel->name);
 	count = l->filelen / sizeof(*in);
-	out = Hunk_Alloc ( count*sizeof(*out));	
+	out = Hunk_Alloc ( count*sizeof(*out));
 
 	loadmodel->surfaces = out;
 	loadmodel->numsurfaces = count;
@@ -1161,14 +1167,14 @@ void Mod_LoadFaces (lump_t *l)
 	for ( surfnum=0 ; surfnum<count ; surfnum++, in++, out++)
 	{
 		out->firstedge = LittleLong(in->firstedge);
-		out->numedges = LittleShort(in->numedges);		
+		out->numedges = LittleShort(in->numedges);
 		out->flags = 0;
 		out->polys = NULL;
 
 		planenum = LittleShort(in->planenum);
 		side = LittleShort(in->side);
 		if (side)
-			out->flags |= SURF_PLANEBACK;			
+			out->flags |= SURF_PLANEBACK;
 
 		out->plane = loadmodel->planes + planenum;
 
@@ -1210,26 +1216,28 @@ void Mod_LoadFaces (lump_t *l)
 		}
 
 		// create lightmaps and polygons
-		if ( !SurfaceHasNoLightmap(out) ) 
+		if ( !SurfaceHasNoLightmap(out) )
 		{
 			GL_CreateSurfaceLightmap (out);
 		}
 
-		if ( (! (out->texinfo->flags & SURF_WARP)) || (gl_state.glsl_shaders && gl_glsl_shaders->value && !fod)) 
+		if ( (! (out->texinfo->flags & SURF_WARP)) || (gl_state.glsl_shaders && gl_glsl_shaders->value && !fod))
 			GL_BuildPolygonFromSurface(out);
-		
+
 		rs = (rscript_t *)out->texinfo->image->script;
-	
+
 		if(rs)	{
-#ifdef __unix__
-			rs_stage_t	*stage;
-			stage = rs->stage;
-#else
+
+// -jjb-ac this should be ok for gcc
+//#ifdef __unix__
+//			rs_stage_t	*stage;
+//			stage = rs->stage;
+//#else
 			rs_stage_t	*stage = rs->stage;
-#endif
+//#endif
 			do {
 				if (stage->lensflare) {
-					if(r_lensflare->value) 	
+					if(r_lensflare->value)
 						GL_AddFlareSurface(out, stage->flaretype);
 				}
 				if (stage->grass && stage->texture) {
@@ -1250,7 +1258,7 @@ void Mod_LoadFaces (lump_t *l)
 				}
 			} while (stage = stage->next);
 		}
-		GL_CalcSurfaceNormals(out);	
+		GL_CalcSurfaceNormals(out);
 	}
 	GL_EndBuildingLightmaps ();
 }
@@ -1285,7 +1293,7 @@ void Mod_LoadNodes (lump_t *l)
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size in %s",loadmodel->name);
 	count = l->filelen / sizeof(*in);
-	out = Hunk_Alloc ( count*sizeof(*out));	
+	out = Hunk_Alloc ( count*sizeof(*out));
 
 	loadmodel->nodes = out;
 	loadmodel->numnodes = count;
@@ -1297,7 +1305,7 @@ void Mod_LoadNodes (lump_t *l)
 			out->minmaxs[j] = LittleShort (in->mins[j]);
 			out->minmaxs[3+j] = LittleShort (in->maxs[j]);
 		}
-	
+
 		p = LittleLong(in->planenum);
 		out->plane = loadmodel->planes + p;
 
@@ -1315,7 +1323,7 @@ void Mod_LoadNodes (lump_t *l)
 		}
 
 	}
-	
+
 	Mod_SetParent (loadmodel->nodes, NULL);	// sets nodes and leafs
 }
 
@@ -1335,7 +1343,7 @@ void Mod_LoadLeafs (lump_t *l)
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size in %s",loadmodel->name);
 	count = l->filelen / sizeof(*in);
-	out = Hunk_Alloc ( count*sizeof(*out));	
+	out = Hunk_Alloc ( count*sizeof(*out));
 
 	loadmodel->leafs = out;
 	loadmodel->numleafs = count;
@@ -1368,7 +1376,7 @@ void Mod_LoadLeafs (lump_t *l)
 					poly->flags |= SURF_UNDERWATER;
 			}
 		}
-	}	
+	}
 }
 
 /*
@@ -1377,16 +1385,16 @@ Mod_LoadMarksurfaces
 =================
 */
 void Mod_LoadMarksurfaces (lump_t *l)
-{	
+{
 	int		i, j, count;
 	short		*in;
 	msurface_t **out;
-	
+
 	in = (void *)(mod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size in %s",loadmodel->name);
 	count = l->filelen / sizeof(*in);
-	out = Hunk_Alloc ( count*sizeof(*out));	
+	out = Hunk_Alloc ( count*sizeof(*out));
 
 	loadmodel->marksurfaces = out;
 	loadmodel->nummarksurfaces = count;
@@ -1406,10 +1414,10 @@ Mod_LoadSurfedges
 =================
 */
 void Mod_LoadSurfedges (lump_t *l)
-{	
+{
 	int		i, count;
 	int		*in, *out;
-	
+
 	in = (void *)(mod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size in %s",loadmodel->name);
@@ -1418,7 +1426,7 @@ void Mod_LoadSurfedges (lump_t *l)
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: bad surfedges count in %s: %i",
 		loadmodel->name, count);
 
-	out = Hunk_Alloc ( count*sizeof(*out));	
+	out = Hunk_Alloc ( count*sizeof(*out));
 
 	loadmodel->surfedges = out;
 	loadmodel->numsurfedges = count;
@@ -1440,13 +1448,13 @@ void Mod_LoadPlanes (lump_t *l)
 	dplane_t 	*in;
 	int			count;
 	int			bits;
-	
+
 	in = (void *)(mod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size in %s",loadmodel->name);
 	count = l->filelen / sizeof(*in);
-	out = Hunk_Alloc ( count*sizeof(*out));	
-	
+	out = Hunk_Alloc ( count*sizeof(*out));
+
 	loadmodel->planes = out;
 	loadmodel->numplanes = count;
 
@@ -1527,7 +1535,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	Mod_LoadNodes (&header->lumps[LUMP_NODES]);
 	Mod_LoadSubmodels (&header->lumps[LUMP_MODELS]);
 	mod->numframes = 2;		// regular and alternate animation
-	
+
 //
 // set up the submodels
 //
@@ -1539,7 +1547,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		starmod = &mod_inline[i];
 
 		*starmod = *loadmodel;
-		
+
 		starmod->firstmodelsurface = bm->firstface;
 		starmod->nummodelsurfaces = bm->numfaces;
 		starmod->firstnode = bm->headnode;
@@ -1549,7 +1557,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		VectorCopy (bm->maxs, starmod->maxs);
 		VectorCopy (bm->mins, starmod->mins);
 		starmod->radius = bm->radius;
-	
+
 		if (i == 0)
 			*loadmodel = *starmod;
 
@@ -1632,7 +1640,7 @@ static void Mod_BuildTriangleNeighbors(neighbors_t * neighbors,
 	}
 
 	// generate edges information (for shadow volumes)
-	// NOTE: We do this with the original vertices not the reordered onces 
+	// NOTE: We do this with the original vertices not the reordered onces
 	// since reordering them
 	// duplicates vertices and we only compare indices
 	for (i = 0; i < numtris; i++) {
@@ -1648,7 +1656,7 @@ static void Mod_BuildTriangleNeighbors(neighbors_t * neighbors,
 /*
 R_LoadMd2VertexArrays
 */
-extern 
+extern
 void R_LoadMd2VertexArrays(model_t *md2model){
 
 	dmdl_t *md2;
@@ -1660,7 +1668,7 @@ void R_LoadMd2VertexArrays(model_t *md2model){
 		return;
 
 	md2 = (dmdl_t *)md2model->extradata;
-	
+
 	md2frame = (daliasframe_t *)((byte *)md2 + md2->ofs_frames);
 
 	if(md2->num_xyz > MAX_VERTS)
@@ -1674,7 +1682,7 @@ void R_LoadMd2VertexArrays(model_t *md2model){
 					md2v->v[1] * md2frame->scale[1] + md2frame->translate[1],
 					md2v->v[2] * md2frame->scale[2] + md2frame->translate[2]);
 	}
-	
+
 }
 
 /*
@@ -1703,7 +1711,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 				 mod->name, version, ALIAS_VERSION);
 
 	pheader = Hunk_Alloc (LittleLong(pinmodel->ofs_end));
-	
+
 	// byte swap the header fields and sanity check
 	for (i=0 ; i<sizeof(dmdl_t)/sizeof(int) ; i++)
 		((int *)pheader)[i] = LittleLong (((int *)buffer)[i]);
@@ -1765,9 +1773,9 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 //
 	for (i=0 ; i<pheader->num_frames ; i++)
 	{
-		pinframe = (daliasframe_t *) ((byte *)pinmodel 
+		pinframe = (daliasframe_t *) ((byte *)pinmodel
 			+ pheader->ofs_frames + i * pheader->framesize);
-		poutframe = (daliasframe_t *) ((byte *)pheader 
+		poutframe = (daliasframe_t *) ((byte *)pheader
 			+ pheader->ofs_frames + i * pheader->framesize);
 
 		memcpy (poutframe->name, pinframe->name, sizeof(poutframe->name));
@@ -1777,7 +1785,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 			poutframe->translate[j] = LittleFloat (pinframe->translate[j]);
 		}
 		// verts are all 8 bit, so no swapping needed
-		memcpy (poutframe->verts, pinframe->verts, 
+		memcpy (poutframe->verts, pinframe->verts,
 			pheader->num_xyz*sizeof(dtrivertx_t));
 
 	}
@@ -1808,19 +1816,20 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 		rs[strlen(rs)-4]=0;
 
-#ifdef _WINDOWS
-		(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
-#else
+// -jjb-ac should be ok now
+//#ifdef _WINDOWS
+//		(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
+//#else
 		mod->script[i] = RS_FindScript(rs); //make it gcc 4.1.1 compatible
-#endif
-		
+//#endif
+
 		if (mod->script[i])
 			RS_ReadyScript((rscript_t *)mod->script[i]);
 	}
 
 	cx = pheader->num_st * sizeof(fstvert_t);
      mod->st = st = (fstvert_t*)Hunk_Alloc (cx);
-		
+
 	// Calculate texcoords for triangles
     iw = 1.0 / pheader->skinwidth;
     ih = 1.0 / pheader->skinheight;
@@ -1886,7 +1895,7 @@ Specifies the model that will be used as the world
 */
 int R_FindFile (char *filename, FILE **file)
 {
-			
+
 	*file = fopen (filename, "rb");
 	if (!*file) {
 		*file = NULL;
@@ -1974,7 +1983,7 @@ void R_BeginRegistration (char *model)
 	r_viewcluster = -1;
 
 	r_teamColor = 0;
-	
+
 	R_RegisterLightGroups();
 }
 
@@ -1989,7 +1998,7 @@ struct model_s *R_RegisterModel (char *name)
 	model_t	*mod;
 	int		i;
 	dmdl_t		*pheader;
-	
+
 	mod = Mod_ForName (name, false);
 	if (mod)
 	{

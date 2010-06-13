@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -24,13 +24,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef __QGL_H__
 #define __QGL_H__
 
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 #  include <windows.h>
 #endif
 
 #include <GL/gl.h>
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 //#include <GL/fxmesa.h>
 #include <GL/glx.h>
 #endif
@@ -449,7 +449,9 @@ extern GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offs
 #endif
 //END VBO
 
-#ifndef __unix__ // FIXME: already have in GL/glx.h (all Unix or FreeBSD?)
+#if !defined UNIX_VARIANT
+// -jjb-ac  look for alternate HAVE_ def
+//  #ifndef __unix__ // FIXME: already have in GL/glx.h (all Unix or FreeBSD?)
 // jitwater - fragment programs (pixel shaders)
 typedef void (APIENTRY * PFNGLPROGRAMSTRINGARBPROC) (GLenum target, GLenum format, GLsizei len, const GLvoid *string);
 typedef void (APIENTRY * PFNGLBINDPROGRAMARBPROC) (GLenum target, GLuint program);
@@ -488,7 +490,7 @@ typedef void (APIENTRY * PFNGLUNIFORM3FARBPROC) (GLint location, GLfloat v0, GLf
 typedef void (APIENTRY * PFNGLUNIFORM2FARBPROC) (GLint location, GLfloat v0, GLfloat v1);
 typedef void (APIENTRY * PFNGLUNIFORM1IARBPROC) (GLint location, GLint v0);
 typedef void (APIENTRY * PFNGLUNIFORM1FARBPROC) (GLint location, GLfloat v0);
-typedef void (APIENTRY * PFNGLUNIFORMMATRIX3FVARBPROC)(GLint location, GLsizei count, GLboolean transpose, GLfloat [3][3]); 
+typedef void (APIENTRY * PFNGLUNIFORMMATRIX3FVARBPROC)(GLint location, GLsizei count, GLboolean transpose, GLfloat [3][3]);
 
 //Framebuffer objects
 typedef GLboolean (APIENTRY * PFNGLISRENDERBUFFEREXTPROC) (GLuint renderbuffer);
@@ -508,13 +510,13 @@ typedef void (APIENTRY * PFNGLFRAMEBUFFERTEXTURE3DEXTPROC) (GLenum target, GLenu
 typedef void (APIENTRY * PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC) (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
 typedef void (APIENTRY * PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC) (GLenum target, GLenum attachment, GLenum pname, GLint *params);
 typedef void (APIENTRY * PFNGLGENERATEMIPMAPEXTPROC) (GLenum target);
-typedef void (APIENTRY * PFNGLBLITFRAMEBUFFEREXTPROC) (GLint  srcX0, GLint  srcY0, GLint  srcX1, GLint  srcY1, GLint  dstX0, 
-			  GLint  dstY0, GLint  dstX1, GLint  dstY1, GLbitfield  mask, GLenum  filter);   
+typedef void (APIENTRY * PFNGLBLITFRAMEBUFFEREXTPROC) (GLint  srcX0, GLint  srcY0, GLint  srcX1, GLint  srcY1, GLint  dstX0,
+			  GLint  dstY0, GLint  dstX1, GLint  dstY1, GLbitfield  mask, GLenum  filter);
 
 
 #endif
 
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 
 extern  int   ( WINAPI * qwglChoosePixelFormat )(HDC, CONST PIXELFORMATDESCRIPTOR *);
 extern  int   ( WINAPI * qwglDescribePixelFormat) (HDC, int, UINT, LPPIXELFORMATDESCRIPTOR);
@@ -552,7 +554,7 @@ extern BOOL ( WINAPI * qwglSetDeviceGammaRampEXT ) ( const unsigned char *pRed, 
 
 #endif
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 
 // local function in dll
 extern void *qwglGetProcAddress(char *symbol);
@@ -582,7 +584,7 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
                              GLsizei width, GLenum format, GLenum type,
                              const GLvoid *table );
 
-#endif // linux
+#endif
 
 /*
 ** extension constants
@@ -703,11 +705,11 @@ extern	PFNGLPROGRAMLOCALPARAMETER4FARBPROC qglProgramLocalParameter4fARB;
 // jitwater ===
 
 //add glsl program extensions
-extern	PFNGLCREATEPROGRAMOBJECTARBPROC		glCreateProgramObjectARB;	
+extern	PFNGLCREATEPROGRAMOBJECTARBPROC		glCreateProgramObjectARB;
 extern	PFNGLDELETEOBJECTARBPROC			glDeleteObjectARB;
 extern	PFNGLUSEPROGRAMOBJECTARBPROC		glUseProgramObjectARB;
 extern	PFNGLCREATESHADEROBJECTARBPROC		glCreateShaderObjectARB;
-extern  PFNGLSHADERSOURCEARBPROC			glShaderSourceARB;		
+extern  PFNGLSHADERSOURCEARBPROC			glShaderSourceARB;
 extern	PFNGLCOMPILESHADERARBPROC			glCompileShaderARB;
 extern	PFNGLGETOBJECTPARAMETERIVARBPROC	glGetObjectParameterivARB;
 extern	PFNGLATTACHOBJECTARBPROC			glAttachObjectARB;
@@ -819,4 +821,4 @@ extern void     (APIENTRY * qglGenerateMipmapEXT) (GLenum target);
 
 extern void		(APIENTRY * qglBlitFramebufferEXT) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 
-#endif
+#endif /* __QGL_H__ */

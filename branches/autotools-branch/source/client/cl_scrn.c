@@ -935,8 +935,11 @@ void SCR_BeginLoadingPlaque (void)
 	S_StopAllSounds ();
 	cl.sound_prepped = false;		// don't play ambients
 
-	if (developer->value)
+	if (developer->value) {
+		// -jjb-fix
+//		curtime = Sys_Milliseconds(); // affects SCR_showFPS()
 		return;
+	}
 
 	scr_draw_loading = 1;
 
@@ -1805,7 +1808,8 @@ void SCR_showFPS(void)
 
 	if( restart )
 	{
-		start_msec = cls.realtime;
+		//start_msec = cls.realtime;
+		start_msec = Sys_Milliseconds();
 		framecounter = 0.0f;
 		update_trigger = 10.0f; // initial delay to update
 		temp[0] = 0; // blank the text buffer
@@ -1817,12 +1821,18 @@ void SCR_showFPS(void)
 		if( framecounter >= update_trigger )
 		{
 			// calculate frames-per-second, using client frame current time
-			end_msec = cls.realtime;
+			//end_msec = cls.realtime;
+			end_msec = Sys_Milliseconds();
 			time_sec = ((float)(end_msec - start_msec)) / 1000.0f;
 			framerate = framecounter / time_sec ;
 
 			// update text buffer for display
 			Com_sprintf( temp, sizeof(temp), "%3.1ffps", framerate );
+
+#if 1
+			Com_DPrintf("[showFPS:%i:%i:%f:%f:%f:]\n",
+					start_msec, end_msec, time_sec, framecounter, framerate );
+#endif
 
 			// setup for next update
 			framecounter = 0.0f;

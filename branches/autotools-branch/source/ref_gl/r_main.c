@@ -216,7 +216,7 @@ R_ReadFogScript
 =================
 */
 
-void R_ReadFogScript(char config_file[128])
+void R_ReadFogScript( char *config_file )
 {
 	FILE *fp;
 	int length;
@@ -277,7 +277,7 @@ R_ReadMusicScript
 =================
 */
 
-void R_ReadMusicScript(char config_file[128])
+void R_ReadMusicScript( char *config_file )
 {
 	FILE *fp;
 	int length;
@@ -476,12 +476,7 @@ void R_DrawEntitiesOnList (void)
             }
 
 			if (rs)
-// -jjb-ac see ref.h, incorrect declaration of .script
-//#ifdef _WINDOWS
-//				(struct rscript_s *)currententity->script = rs;
-//#else
 				currententity->script = rs;
-//#endif
 			else
 				currententity->script = NULL;
 		}
@@ -542,12 +537,7 @@ void R_DrawEntitiesOnList (void)
             }
 
 			if (rs)
-// -jjb-ac is this necessary? no. see above
-//#ifdef _WINDOWS
-//				(struct rscript_s *)currententity->script = rs;
-//#else
 				currententity->script = rs;
-//#endif
 			else
 				currententity->script = NULL;
 		}
@@ -610,12 +600,7 @@ void R_DrawViewEntitiesOnList (void)
             }
 
 			if (rs)
-// -jjb-ac  see above
-//#ifdef _WINDOWS
-//				(struct rscript_s *)currententity->script = rs;
-//#else
 				currententity->script = rs;
-//#endif
 			else
 				currententity->script = NULL;
 		}
@@ -662,12 +647,7 @@ void R_DrawViewEntitiesOnList (void)
             }
 
 			if (rs)
-// -jjb-ac see above
-//#ifdef _WINDOWS
-//				(struct rscript_s *)currententity->script = rs;
-//#else
 				currententity->script = rs;
-//#endif
 			else
 				currententity->script = NULL;
 		}
@@ -1088,8 +1068,8 @@ void R_RenderView (refdef_t *fd)
 	{ // display other counters, of unknown utility
 		if ( !(++printf_throttle % 32) )
 		{
-			Com_Printf( "%5i flares %5i grasses %5i vlmaps %5i vtex\n",
-			c_flares, c_grasses, c_visible_lightmaps, c_visible_textures );
+			Com_Printf( "%5i flares %5i grasses %5i vlmaps %5i vtex %5i beams\n",
+			c_flares, c_grasses, c_visible_lightmaps, c_visible_textures, c_beams );
 		}
 	}
 
@@ -1176,11 +1156,17 @@ void R_Register( void )
 	gl_playermip = Cvar_Get ("gl_playermip", "0", 0);
 
 // -jjb-ac This wants to be in configure. need to pass to config.h
-#ifdef __unix__
+// OPENGL_DRIVER
+/*
+#if defined UNIX_VARIANT
 	gl_driver = Cvar_Get( "gl_driver", "libGL.so.1", CVAR_ARCHIVE );
-#else
+#elif defined WIN32_VARIANT
 	gl_driver = Cvar_Get( "gl_driver", "opengl32", CVAR_ARCHIVE );
+#else
+#error opengl driver not defined
 #endif
+*/
+	gl_driver = Cvar_Get( "gl_driver", OPENGL_DRIVER, CVAR_ARCHIVE );
 
 	gl_texturemode = Cvar_Get( "gl_texturemode", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
 	gl_texturealphamode = Cvar_Get( "gl_texturealphamode", "default", CVAR_ARCHIVE );
@@ -1582,6 +1568,7 @@ int R_Init( void *hinstance, void *hWnd )
 	}
 
 // -jjb-ac  is this archaic?, why is it __unix__
+/*
 #ifdef __unix__
 	if ( strstr( gl_config.extensions_string, "3DFX_set_global_palette" ))
 	{
@@ -1601,6 +1588,7 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...3DFX_set_global_palette not found\n" );
 	}
 #endif
+*/
 
 	if ( !qglColorTableEXT &&
 		strstr( gl_config.extensions_string, "GL_EXT_paletted_texture" ) &&

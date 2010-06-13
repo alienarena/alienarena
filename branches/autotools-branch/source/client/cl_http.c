@@ -19,21 +19,20 @@
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-#include "client.h"
-
-#ifdef _WIN32 // All CURL libs are distributed in Windows.
-#define HAVE_CURL
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
-#ifdef __unix__
+#include "client.h"
+
+
+#if defined UNIX_VARIANT
 #include <unistd.h>
 #endif
 
-#ifdef HAVE_CURL
 #include "curl/curl.h"
 CURLM *curlm;
 CURL *curl;
-#endif
 
 // generic encapsulation for common http response codes
 typedef struct response_s {
@@ -69,7 +68,6 @@ the current gamedir.  We use cURL's multi interface, even tho we only ever
 perform one download at a time, because it is non-blocking.
 */
 qboolean CL_HttpDownload(void){
-#ifdef HAVE_CURL
         char game[64];
 
         if(!curlm)
@@ -117,9 +115,6 @@ qboolean CL_HttpDownload(void){
         curl_multi_add_handle(curlm, curl);
 
 		return true;
-#else
-        return false;
-#endif
 }
 
 
@@ -144,7 +139,6 @@ If a download is currently taking place, clean it up.  This is called
 both to finalize completed downloads as well as abort incomplete ones.
 */
 void CL_HttpDownloadCleanup(){
-#ifdef HAVE_CURL
         char *c;
 
         if(!cls.download || !cls.downloadhttp)
@@ -154,7 +148,7 @@ void CL_HttpDownloadCleanup(){
 
         fclose(cls.download);  // always close the file
         cls.download = NULL;
-    
+
 		if(success){
 		        cls.downloadname[0] = 0;
         }
@@ -170,15 +164,13 @@ void CL_HttpDownloadCleanup(){
 
                 unlink(file);  // delete partial or empty file
         }
-	
+
         cls.downloadpercent = 0;
         cls.downloadhttp = false;
 
         status = length = 0;
         success = false;
-#endif
 }
-
 
 
 /*
@@ -191,7 +183,6 @@ we leave cls.download.tempname in tact during our cleanup, when the
 download is parsed back in the client, it will fopen and begin.
 */
 void CL_HttpDownloadThink(void){
-#ifdef HAVE_CURL
         CURLMsg *msg;
         int i;
 		int runt;
@@ -234,7 +225,6 @@ void CL_HttpDownloadThink(void){
                         return;
                 }
         }
-#endif
 }
 
 
@@ -242,13 +232,11 @@ void CL_HttpDownloadThink(void){
 CL_InitHttpDownload
 */
 void CL_InitHttpDownload(void){
-#ifdef HAVE_CURL
         if(!(curlm = curl_multi_init()))
                 return;
 
         if(!(curl = curl_easy_init()))
                 return;
-#endif
 }
 
 
@@ -256,7 +244,6 @@ void CL_InitHttpDownload(void){
 CL_ShutdownHttpDownload
 */
 void CL_ShutdownHttpDownload(void){
-#ifdef HAVE_CURL
         CL_HttpDownloadCleanup();
 
         curl_easy_cleanup(curl);
@@ -264,5 +251,4 @@ void CL_ShutdownHttpDownload(void){
 
         curl_multi_cleanup(curlm);
         curlm = NULL;
-#endif
 }

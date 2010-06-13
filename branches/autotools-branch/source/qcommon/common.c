@@ -137,6 +137,7 @@ void Com_Printf (char *fmt, ...)
 	// also echo to debugging console
 	Sys_ConsoleOutput (msg);
 
+// -jjb-ac
 #ifndef __unix__
 	// Also echo to dedicated console
 	Sys_Print(msg);
@@ -478,7 +479,7 @@ void MSG_WriteDir (sizebuf_t *sb, vec3_t dir)
 	y = dir[1];
 	z = dir[2];
 	best = 0;
-	
+
 	d = (x*x) + (y*y) + (z*z);
 	// sometimes dir is {0,0,0}
 	if ( d == 0.0f )
@@ -1601,7 +1602,7 @@ void Qcommon_Frame (int msec)
 {
 
 	int		time_before, time_between, time_after;
-#ifdef __unix__
+#if defined UNIX_VARIANT
 	char	*s;
 #endif
 
@@ -1651,7 +1652,8 @@ void Qcommon_Frame (int msec)
 		c_brush_traces = 0;
 		c_pointcontents = 0;
 	}
-#ifdef __unix__
+// -jjb-ac
+#if defined UNIX_VARIANT
 	do
 	{
 		s = Sys_ConsoleInput ();

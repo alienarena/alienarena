@@ -192,7 +192,7 @@ char *Sys_ConsoleInput(void)
 
 /*****************************************************************************/
 
-static void *game_library;
+static void *game_library = NULL;
 
 /*
 =================
@@ -201,7 +201,7 @@ Sys_UnloadGame
 */
 void Sys_UnloadGame (void)
 {
-	if (game_library)
+	if ( game_library != NULL )
 		dlclose (game_library);  // -jjb-dl
 	game_library = NULL;
 }
@@ -226,10 +226,10 @@ void *Sys_GetGameAPI (void *parms)
 	setreuid(getuid(), getuid());
 	setegid(getgid());
 
-	if (game_library)
+	if (game_library != NULL)
 		Com_Error (ERR_FATAL, "Sys_GetGameAPI without Sys_UnloadingGame");
 
-	Com_Printf("------- Loading %s -------\n", gamename);
+	// Com_Printf("------- Loading %s -------\n", gamename);
 
 	// now run through the search paths
 	path = NULL;
@@ -249,14 +249,14 @@ void *Sys_GetGameAPI (void *parms)
 		fclose(fp);
 
 		game_library = dlopen (name, RTLD_NOW);
-		if (game_library)
+		if (game_library != NULL )
 		{
-			Com_Printf ("LoadLibrary (%s)\n",name);
+			Com_DPrintf ("LoadLibrary (%s)\n",name);
 			break;
 		}
 		else
 		{
-			Com_Printf ("LoadLibrary (%s):", name);
+			Com_DPrintf ("LoadLibrary (%s):", name);
 
 			path = dlerror();
 			str_p = strchr(path, ':'); // skip the path (already shown)
@@ -265,25 +265,28 @@ void *Sys_GetGameAPI (void *parms)
 			else
 				str_p++;
 
-			Com_Printf ("%s\n", str_p);
+			Com_DPrintf ("%s\n", str_p);
 
 			// return NULL;
 			break;  // -jjb-dl (not sure, file opened but did not dlopen)
 		}
 	}
 
-	if ( game_library ) {
+	if ( game_library != NULL )
+	{ // game module from dlopen'd shared library
 		ptrGetGameAPI = (void *)dlsym (game_library, "GetGameAPI");
 	}
 
 	/*
-	 * No shared game library found, use statically linked game
+	 * No game shared library found, use statically linked game
 	 */
-	if ( !ptrGetGameAPI )
-		ptrGetGameAPI = &GetGameAPI;
-
-	if (!ptrGetGameAPI)
+	if ( ptrGetGameAPI == NULL )
 	{
+		ptrGetGameAPI = &GetGameAPI;
+	}
+
+	if ( ptrGetGameAPI == NULL )
+	{ // program error
 		Sys_UnloadGame ();
 		return NULL;
 	}
@@ -337,9 +340,9 @@ int main (int argc, char **argv)
 			time = newtime - oldtime;
 		} while (time < 1);
 		// curtime setting moved from Sys_Milliseconds()
-		//   so it consistent for entire frame 
-		curtime = newtime; 
-		
+		//   so it consistent for entire frame
+		curtime = newtime;
+
         Qcommon_Frame (time);
 		oldtime = newtime;
     }
