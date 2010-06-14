@@ -442,7 +442,7 @@ void R_DrawDynamicCaster(void)
 		if(!currententity->model)
 			continue;
 
-		if (currententity->model->type != mod_alias)
+		if (currententity->model->type != mod_alias && currententity->model->type != mod_iqm)
 		{
 			continue;
 		}
@@ -470,7 +470,10 @@ void R_DrawDynamicCaster(void)
 				currentmodel = currententity->lod1;
 		}
 		
-		R_DrawAliasModelCaster (currententity);
+		if(currentmodel->type == mod_iqm)
+			R_DrawIQMCaster (currententity);
+		else
+			R_DrawAliasModelCaster (currententity);
 	}
 	
 	setTextureMatrix();

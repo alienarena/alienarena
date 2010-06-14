@@ -1452,6 +1452,7 @@ void Machinegun_Fire (edict_t *ent)
 
 	if ((ent->client->ps.gunframe == 5) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
 	{
+		
 		ent->client->ps.gunframe = 14;
 		ent->client->weapon_sound = 0;
 		return;
@@ -1468,7 +1469,7 @@ void Machinegun_Fire (edict_t *ent)
 			return;
 		}
 		ent->altfire = true;
-		ent->client->ps.gunframe = 14;
+		ent->client->ps.gunframe++;
 	}
 	else if (ent->client->buttons & BUTTON_ATTACK2)
 	{
@@ -1479,7 +1480,7 @@ void Machinegun_Fire (edict_t *ent)
 		ent->client->ps.gunframe++;
 		ent->altfire = false;
 	}
-	else
+	else 
 		ent->client->ps.gunframe++;
 
 	shots = 1;
