@@ -446,7 +446,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 matrix3x4_t outframe[5096]; //to do - find out what max frames/joints might be
 
-void GL_AnimateIqmFrame(float curframe)
+void GL_AnimateIQMFrame(float curframe)
 {
 	int i, j;
     int frame1 = (int)floor(curframe),
@@ -548,12 +548,12 @@ void GL_AnimateIqmFrame(float curframe)
 
 extern rscript_t *rs_glass;
 
-void GL_VlightIqmModel (vec3_t baselight, mvertex_t *verts, vec3_t lightOut)
+void GL_VlightIQM (vec3_t baselight, mvertex_t *verts, vec3_t lightOut)
 {
     //need to write routine for this
 }
 
-void GL_DrawIqmFrame()
+void GL_DrawIQMFrame()
 {
 	int		i, j;
 	vec3_t	move, delta, vectors[3];
@@ -670,7 +670,7 @@ void GL_DrawIqmFrame()
 					VArray[4] = currentmodel->st[index_st].t;
 				}
 
-				GL_VlightIqmModel (shadelight, &currentmodel->animatevertexes[index_xyz], lightcolor);
+				GL_VlightIQM (shadelight, &currentmodel->animatevertexes[index_xyz], lightcolor);
 									
 				if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
 					VArray[7] = lightcolor[0];
@@ -895,7 +895,7 @@ void GL_DrawIqmFrame()
 						float red = 1, green = 1, blue = 1;
 
 						if (stage->lightmap) { 
-							GL_VlightIqmModel (shadelight, &currentmodel->animatevertexes[index_xyz], lightcolor);
+							GL_VlightIQM (shadelight, &currentmodel->animatevertexes[index_xyz], lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
 							blue = lightcolor[2];						
@@ -981,7 +981,7 @@ extern	vec3_t			lightspot;
 R_DrawIqmShadow
 =============
 */
-void R_DrawIqmShadow()
+void R_DrawIQMShadow()
 {
 	vec3_t	point;
 	float	height, lheight;
@@ -1178,9 +1178,9 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 		qglBlendFunc (GL_ONE, GL_ONE);
 	}
 
-	GL_AnimateIqmFrame(currententity->frame);
+	GL_AnimateIQMFrame(currententity->frame);
 
-	GL_DrawIqmFrame();
+	GL_DrawIQMFrame();
 
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);
@@ -1220,7 +1220,7 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 			else
 				qglColor4f (0,0,0,0.3);
 			
-			R_DrawIqmShadow ();
+			R_DrawIQMShadow ();
 			
 			qglEnable (GL_TEXTURE_2D);
 			qglDisable (GL_BLEND);
@@ -1241,7 +1241,7 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 			else
 				qglColor4f (0,0,0,casted);
 
-			R_DrawIqmShadow ();
+			R_DrawIQMShadow ();
 
 			qglEnable (GL_TEXTURE_2D);
 			qglDisable (GL_BLEND);
@@ -1261,7 +1261,7 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 				else
 					qglColor4f (0,0,0,casted);
 
-				R_DrawIqmShadow ();
+				R_DrawIQMShadow ();
 
 				qglEnable (GL_TEXTURE_2D);
 				qglDisable (GL_BLEND);
@@ -1289,3 +1289,73 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 		numRadarEnts++;
 	}
 }	
+
+void GL_DrawIQMCasterFrame ()
+{
+	int     i, j;
+    int     index_xyz, index_st;
+    int     va;
+
+    va=0;
+
+    R_InitVArrays (VERT_NO_TEXTURE);
+
+    for (i=0; i<currentmodel->num_triangles; i++)
+    {
+        for (j=0; j<3; j++)
+        {
+            index_xyz = index_st = currentmodel->tris[i].vertex[j];
+
+            VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];
+            VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];
+            VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];
+
+            VArray[3] = currentmodel->st[index_st].s;
+            VArray[4] = currentmodel->st[index_st].t;
+
+            // increment pointer and counter
+            VArray += VertexSizes[VERT_NO_TEXTURE];
+            va++;
+        }
+    }
+
+    if(qglLockArraysEXT)
+        qglLockArraysEXT(0, va);
+
+    qglDrawArrays(GL_TRIANGLES,0,va);
+
+    if(qglUnlockArraysEXT)
+        qglUnlockArraysEXT();
+
+    R_KillVArrays ();
+
+
+}
+
+void R_DrawIQMCaster (entity_t *e)
+{
+	vec3_t		bbox[8];
+	dmdl_t		*paliashdr;
+
+	if(e->team) //don't draw flag models, handled by sprites
+		return;
+	
+	if ( e->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
+		return;
+
+	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) ) //no shells
+		return;
+
+	//if ( R_CullAliasModel( bbox, e ) )
+	//	return;
+
+    qglPushMatrix ();
+	e->angles[PITCH] = -e->angles[PITCH];
+	R_RotateForEntity (e);
+	e->angles[PITCH] = -e->angles[PITCH];
+
+	GL_AnimateIQMFrame(currententity->frame);
+	GL_DrawIQMCasterFrame();
+
+	qglPopMatrix();
+}
