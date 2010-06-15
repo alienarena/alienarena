@@ -1,3 +1,10 @@
+maps/meshes/test/martian
+{
+	{
+		map maps/meshes/test/martian_normal.tga
+		normalmap
+	}
+}
 players/martianenforcer/red
 {
 	{

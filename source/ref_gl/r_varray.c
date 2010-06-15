@@ -44,6 +44,7 @@ float *VArray = &VArrayVerts[0];
 
 // array for dynamic normal allocation
 static vec3_t NormalsArray[MAX_TRIANGLES*3];
+static vec4_t TangentsArray[MAX_TRIANGLES*4];
 
 // number of verts allocated
 static int VertexCounter = 0;
