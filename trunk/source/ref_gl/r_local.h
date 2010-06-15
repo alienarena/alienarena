@@ -509,6 +509,7 @@ extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
 extern float *VArray;
 static vec3_t NormalsArray[MAX_TRIANGLES*3];
+static vec4_t TangentsArray[MAX_TRIANGLES*4];
 extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
@@ -624,6 +625,7 @@ extern GLuint		g_location_meshTime;
 extern GLuint		g_location_meshFog;
 extern GLuint		g_location_useFX;
 extern GLuint		g_location_useGlow;
+extern GLuint		g_location_isMD2;
 
 //fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;

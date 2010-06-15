@@ -364,7 +364,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
         }
     }
 
-	// load bounding box data(still need to set mod->bbox)
+	// load bounding box data
+	//this is not working correctly, vals are a bit odd
 	if (header->ofs_bounds)
 	{
 		float xyradius = 0, radius = 0;
@@ -381,20 +382,14 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			bounds[i].maxs[2] = LittleFloat(bounds[i].maxs[2]);	
 			bounds[i].xyradius = LittleFloat(bounds[i].xyradius);
 			bounds[i].radius = LittleFloat(bounds[i].radius);
-			if (!i)
-			{
-				VectorCopy(bounds[i].mins, mod->mins);
-				VectorCopy(bounds[i].maxs, mod->maxs);
-			}
-			else
-			{
-				if (mod->mins[0] > bounds[i].mins[0]) mod->mins[0] = bounds[i].mins[0];
-				if (mod->mins[1] > bounds[i].mins[1]) mod->mins[1] = bounds[i].mins[1];
-				if (mod->mins[2] > bounds[i].mins[2]) mod->mins[2] = bounds[i].mins[2];
-				if (mod->maxs[0] < bounds[i].maxs[0]) mod->maxs[0] = bounds[i].maxs[0];
-				if (mod->maxs[1] < bounds[i].maxs[1]) mod->maxs[1] = bounds[i].maxs[1];
-				if (mod->maxs[2] < bounds[i].maxs[2]) mod->maxs[2] = bounds[i].maxs[2];
-			}
+			
+			if (mod->mins[0] > bounds[i].mins[0]) mod->mins[0] = bounds[i].mins[0];
+			if (mod->mins[1] > bounds[i].mins[1]) mod->mins[1] = bounds[i].mins[1];
+			if (mod->mins[2] > bounds[i].mins[2]) mod->mins[2] = bounds[i].mins[2];
+			if (mod->maxs[0] < bounds[i].maxs[0]) mod->maxs[0] = bounds[i].maxs[0];
+			if (mod->maxs[1] < bounds[i].maxs[1]) mod->maxs[1] = bounds[i].maxs[1];
+			if (mod->maxs[2] < bounds[i].maxs[2]) mod->maxs[2] = bounds[i].maxs[2];
+			
 			if (bounds[i].xyradius > xyradius)
 				xyradius = bounds[i].xyradius;
 			if (bounds[i].radius > radius)
@@ -402,6 +397,32 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		}
 		
 		mod->radius = radius;
+
+		//Com_Printf("iqm %s bounds: mins %4.2f, %4.2f, %4.2f maxs %4.2f %4.2f %4.2f\n", mod->name, mod->mins[0], mod->mins[1], mod->mins[2],
+		//	mod->maxs[0], mod->maxs[1], mod->maxs[2]);
+	}
+
+	//compute a full bounding box
+	for ( i = 0; i < 8; i++ )
+	{
+		vec3_t   tmp;
+
+		if ( i & 1 )
+			tmp[0] = mod->mins[0];
+		else
+			tmp[0] = mod->maxs[0];
+
+		if ( i & 2 )
+			tmp[1] = mod->mins[1];
+		else
+			tmp[1] = mod->maxs[1];
+
+		if ( i & 4 )
+			tmp[2] = mod->mins[2];
+		else
+			tmp[2] = mod->maxs[2];
+
+		VectorCopy( tmp, mod->bbox[i] );
 	}
 
 	// load triangle data
@@ -417,7 +438,21 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		inelements += 3;
 	}
 	
-	//find triangle neighbors(note - this model format has these defined(save for later, work on basic stuff right now)
+	//load triangle neighbors
+	if (header->ofs_neighbors)
+	{
+		inelements = (const int *) (pbase + header->ofs_neighbors);
+
+		mod->neighbors = Hunk_Alloc(header->num_triangles * sizeof(neighbors_t));
+
+		for (i = 0;i < (int)header->num_triangles;i++)
+		{
+			mod->neighbors[i].n[0] = LittleLong(inelements[0]);		
+			mod->neighbors[i].n[1] = LittleLong(inelements[1]);
+			mod->neighbors[i].n[2] = LittleLong(inelements[2]);
+			inelements += 3;
+		}
+	}
 
 	// load vertex data
 	R_LoadIQMVertexArrays(mod, vposition, vnormal, vtangent);
@@ -606,7 +641,6 @@ void GL_DrawIQMFrame()
 
 	//render the model
 	
-	//just need a basic test render to get started, once I have this, I can implement rscript and GLSL items among other things
 	va=0;
 
 	if(0) 
@@ -886,8 +920,7 @@ void GL_DrawIQMFrame()
 					
 					if(stage->normalmap) { //send tangent to shader
 						VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
-						//to do - test out using attrib stuff later
-						glUniform3fARB( g_location_meshTangent, currentmodel->animatetangent[index_xyz].dir[0], currentmodel->animatetangent[index_xyz].dir[1], currentmodel->animatetangent[index_xyz].dir[2] );
+						Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
 					}
 
 					if(!stage->normalmap)
@@ -928,6 +961,9 @@ void GL_DrawIQMFrame()
 			{
 				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+				glEnableVertexAttribArrayARB (1);
+				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+				glUniform1iARB( g_location_isMD2, 0);
 			}
 			else 
 				R_InitVArrays (VERT_COLOURED_TEXTURED);
@@ -1054,6 +1090,73 @@ void R_DrawIQMShadow()
 	if (have_stencil) 
 		qglDisable(GL_STENCIL_TEST);
 }
+
+static qboolean R_CullIQMModel( void )
+{
+	int i;
+	vec3_t	vectors[3];
+	vec3_t  angles;
+	trace_t r_trace;
+	vec3_t	dist;
+	vec3_t bbox[8];
+
+	if (r_worldmodel ) {
+		//occulusion culling - why draw entities we cannot see?
+	
+		r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+		if(r_trace.fraction != 1.0)
+			return true;
+	}
+
+	VectorSubtract(r_origin, currententity->origin, dist);
+
+	/*
+	** rotate the bounding box
+	*/
+	VectorCopy( currententity->angles, angles );
+	angles[YAW] = -angles[YAW];
+	AngleVectors( angles, vectors[0], vectors[1], vectors[2] );
+
+	for ( i = 0; i < 8; i++ )
+	{
+		vec3_t tmp;
+
+		VectorCopy( currentmodel->bbox[i], tmp );
+
+		bbox[i][0] = DotProduct( vectors[0], tmp );
+		bbox[i][1] = -DotProduct( vectors[1], tmp );
+		bbox[i][2] = DotProduct( vectors[2], tmp );
+
+		VectorAdd( currententity->origin, bbox[i], bbox[i] );
+	}
+
+	{
+		int p, f, aggregatemask = ~0;
+
+		for ( p = 0; p < 8; p++ )
+		{
+			int mask = 0;
+
+			for ( f = 0; f < 4; f++ )
+			{
+				float dp = DotProduct( frustum[f].normal, bbox[p] );
+
+				if ( ( dp - frustum[f].dist ) < 0 )
+				{
+					mask |= ( 1 << f );
+				}
+			}
+			aggregatemask &= mask;
+		}
+
+		if ( aggregatemask && (VectorLength(dist) > 150)) //so shadows don't blatantly disappear when out of frustom
+		{
+			return true;
+		}
+
+		return false;
+	}
+}
 		
 /*
 =================
@@ -1064,7 +1167,6 @@ R_DrawINTERQUAKEMODEL
 void R_DrawINTERQUAKEMODEL (entity_t *e)
 {
 	int			i;
-	//vec3_t		bbox[8];
 	image_t		*skin;
 
 	if(currententity->flags & RF_VIEWERMODEL) 
@@ -1073,11 +1175,10 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(e->flags & RF_MENUMODEL))
 		return;
 	
-	//do culling after we know this renders ok!
-	//if ( R_CullAliasModel( bbox, e ) )
-	//	return;
+	//do culling
+	if ( R_CullIQMModel() )
+		return;
 	
-	//will have to deal with shells at some point, for now just leave this here
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{
 
@@ -1105,7 +1206,6 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 			shadelight[2] = 1.0;
 			shadelight[0] = 0.6;
 		}
-
 	}
 	else if (currententity->flags & RF_FULLBRIGHT)
 	{
@@ -1249,7 +1349,8 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 			//dynamic
 			casted = 0;
 		 	casted = R_ShadowLight (currententity->origin, shadevector, 0);
-			if (casted > 0) { //only draw if there's a dynamic light there
+			if (casted > 0) 
+			{ //only draw if there's a dynamic light there
 				qglPushMatrix ();
 				qglTranslatef	(e->origin[0], e->origin[1], e->origin[2]);
 				qglRotatef (e->angles[1], 0, 0, 1);
@@ -1328,13 +1429,10 @@ void GL_DrawIQMCasterFrame ()
         qglUnlockArraysEXT();
 
     R_KillVArrays ();
-
-
 }
 
 void R_DrawIQMCaster (entity_t *e)
 {
-	vec3_t		bbox[8];
 	dmdl_t		*paliashdr;
 
 	if(e->team) //don't draw flag models, handled by sprites
@@ -1346,8 +1444,8 @@ void R_DrawIQMCaster (entity_t *e)
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) ) //no shells
 		return;
 
-	//if ( R_CullAliasModel( bbox, e ) )
-	//	return;
+	if ( R_CullIQMModel() )
+		return;
 
     qglPushMatrix ();
 	e->angles[PITCH] = -e->angles[PITCH];

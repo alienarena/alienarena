@@ -1069,6 +1069,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
         if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
             R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
             qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+			glUniform1iARB( g_location_isMD2, 1);
         }
         else
             R_InitVArrays (VERT_COLOURED_TEXTURED);
@@ -1466,6 +1467,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+				glUniform1iARB( g_location_isMD2, 1);
 			}
 			else {
 				if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 

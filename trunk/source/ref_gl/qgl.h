@@ -488,7 +488,10 @@ typedef void (APIENTRY * PFNGLUNIFORM3FARBPROC) (GLint location, GLfloat v0, GLf
 typedef void (APIENTRY * PFNGLUNIFORM2FARBPROC) (GLint location, GLfloat v0, GLfloat v1);
 typedef void (APIENTRY * PFNGLUNIFORM1IARBPROC) (GLint location, GLint v0);
 typedef void (APIENTRY * PFNGLUNIFORM1FARBPROC) (GLint location, GLfloat v0);
-typedef void (APIENTRY * PFNGLUNIFORMMATRIX3FVARBPROC)(GLint location, GLsizei count, GLboolean transpose, GLfloat [3][3]); 
+typedef void (APIENTRY * PFNGLUNIFORMMATRIX3FVARBPROC) (GLint location, GLsizei count, GLboolean transpose, GLfloat [3][3]); 
+typedef void (APIENTRY * PFNGLVERTEXATTRIBPOINTERARBPROC) (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid *);
+typedef void (APIENTRY * PFNGLENABLEVERTEXATTRIBARRAYARBPROC) (GLuint);
+typedef void (APIENTRY * PFNGLBINDATTRIBLOCATIONARBPROC) (GLhandleARB programObj, GLuint index, const GLcharARB *name);
 
 //Framebuffer objects
 typedef GLboolean (APIENTRY * PFNGLISRENDERBUFFEREXTPROC) (GLuint renderbuffer);
@@ -719,6 +722,9 @@ extern	PFNGLUNIFORM2FARBPROC				glUniform2fARB;
 extern	PFNGLUNIFORM1IARBPROC				glUniform1iARB;
 extern  PFNGLUNIFORM1FARBPROC				glUniform1fARB;
 extern  PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB;
+extern	PFNGLVERTEXATTRIBPOINTERARBPROC		glVertexAttribPointerARB;
+extern	PFNGLENABLEVERTEXATTRIBARRAYARBPROC glEnableVertexAttribArrayARB;
+extern	PFNGLBINDATTRIBLOCATIONARBPROC		qglBindAttribLocationARB;
 
 //framebuffer objects
 #ifndef GL_EXT_framebuffer_object
