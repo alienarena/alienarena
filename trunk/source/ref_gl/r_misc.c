@@ -81,7 +81,6 @@ image_t		*r_distort;
 image_t		*sun_object;
 image_t		*sun1_object;
 image_t		*sun2_object;
-image_t		*r_iqmtest;
 
 //Normalisation cube map
 GLuint normalisationCubeMap;
@@ -394,11 +393,6 @@ void R_InitParticleTexture (void)
 		r_dis3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }    
 
-	r_iqmtest = GL_FindImage("maps/meshes/test/martian.jpg", it_pic);
-	if (!r_iqmtest) {                                
-		r_iqmtest = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    } 
- 
 	//
 	// also use this for bad textures, but without alpha
 	//

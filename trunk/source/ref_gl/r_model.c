@@ -373,6 +373,8 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	model_t	*mod;
 	unsigned *buf;
 	int		i;
+	char shortname[MAX_QPATH];
+	qboolean mod_iqm = false;
 	
 	if (!name[0])
 		Com_Error (ERR_DROP, "Mod_ForName: NULL name");
@@ -397,7 +399,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 			continue;
 		if (!strcmp (mod->name, name) ) {
 
-			if (mod->type == mod_alias) {
+			if (mod->type == mod_alias || mod->type == mod_iqm) {
 				// Make sure models scripts are definately reloaded between maps - MrG
 				char rs[MAX_OSPATH];
 				int i = 0;
@@ -444,13 +446,25 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	// load the file
 	//
 	//to do - if .md2, check for IQM version first
-	modfilelen = FS_LoadFile (mod->name, &buf);
-	if (!buf)
+	COM_StripExtension(mod->name, shortname);
+	strcat(shortname, ".iqm");
+
+	modfilelen = FS_LoadFile (shortname, &buf);
+
+	if(!buf) 
 	{
-		if (crash)
-			Com_Error (ERR_DROP, "Mod_NumForName: %s not found", mod->name);
-		memset (mod->name, 0, sizeof(mod->name));
-		return NULL;
+		modfilelen = FS_LoadFile (mod->name, &buf);
+		if (!buf)
+		{
+			if (crash)
+				Com_Error (ERR_DROP, "Mod_NumForName: %s not found", mod->name);
+			memset (mod->name, 0, sizeof(mod->name));
+			return NULL;
+		}
+	}
+	else {
+		mod_iqm = true;
+		strcpy(mod->name, shortname);
 	}
 	
 	loadmodel = mod;
@@ -460,26 +474,30 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	//
  
 	// call the apropriate loader
-	
-	switch (LittleLong(*(unsigned *)buf))
+	//iqm - try interquake model first
+	if(mod_iqm)
 	{
-	case IDALIASHEADER:
-		loadmodel->extradata = Hunk_Begin (0x300000);
-		Mod_LoadAliasModel (mod, buf);
-		break;
-		
-	case IDBSPHEADER:
-		loadmodel->extradata = Hunk_Begin (0x1500000);
-		Mod_LoadBrushModel (mod, buf);
-		break;
-
-	//to do - find out why this didn't work
-	//case IDINTERQUAKEMODELHEADER:
-	default:
-		//iqm - try interquake model
 		if(!Mod_INTERQUAKEMODEL_Load(mod, buf))
+			Com_Error (ERR_DROP,"Mod_NumForName: wrong fileid for %s", mod->name);
+	}
+	else
+	{
+		switch (LittleLong(*(unsigned *)buf))
+		{
+		case IDALIASHEADER:
+			loadmodel->extradata = Hunk_Begin (0x300000);
+			Mod_LoadAliasModel (mod, buf);
+			break;
+			
+		case IDBSPHEADER:
+			loadmodel->extradata = Hunk_Begin (0x1500000);
+			Mod_LoadBrushModel (mod, buf);
+			break;
+
+		default:		
 			Com_Error (ERR_DROP,"Mod_NumForName: unknown fileid for %s", mod->name);
-		break;
+			break;
+		}
 	}
 
 	loadmodel->extradatasize = Hunk_End ();

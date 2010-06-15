@@ -154,6 +154,45 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, 
 	}
 }
 
+qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath)
+{
+	FILE *fp;
+	int length;
+	char *buffer;
+	char *s;
+
+	if((fp = fopen(skin_file, "rb" )) == NULL)
+	{
+		return false;
+	}
+	else
+	{
+		fseek(fp, 0, SEEK_END);
+		length = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+
+		buffer = malloc( length + 1 );
+		fread( buffer, length, 1, fp );
+		buffer[length] = 0;
+	}
+	s = buffer;
+
+	strcpy( skinpath, COM_Parse( &s ) );
+	Com_Printf("from file %s\n", skinpath);
+	skinpath[length] = 0; //clear any possible garbage
+
+	if ( fp != 0 )
+	{
+		fp = 0;
+		free( buffer );
+	}
+	else
+	{
+		FS_FreeFile( buffer );
+	}
+	return true;
+}
+
 qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 {
 	const char *text;
@@ -169,6 +208,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	iqmbounds_t *bounds;
 	iqmvertexarray_t *va;
 	unsigned short *framedata;
+	char skinname[MAX_QPATH], shortname[MAX_QPATH], fullname[MAX_OSPATH], *path;
 
 	pbase = (unsigned char *)buffer;
 	header = (iqmheader_t *)buffer;
@@ -279,8 +319,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	mod->numvertexes = header->num_vertexes;
 	mod->num_triangles = header->num_triangles;
 	
-	Com_Printf("Mesh tris: %i mesh verts: %i\n", mod->num_triangles, mod->numvertexes);
-
 	// load the joints
 	joint = (iqmjoint_t *) (pbase + header->ofs_joints);
 	mod->joints = (iqmjoint_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint_t));
@@ -468,13 +506,47 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		vtexcoord+=2;
 	}
 
+	//load skin from skin file
+	COM_StripExtension(mod->name, shortname);
+	strcat(shortname, ".skin");
+	path = NULL;
+	for(;;)
+	{
+		path = FS_NextPath( path );
+		if( !path )
+		{
+			break;
+		}
+		if(path)
+			Com_sprintf(fullname, sizeof(fullname), "%s/%s", path, shortname);
+
+		i = 0;
+		do
+			fullname[i] = tolower(fullname[i]);
+		while (fullname[i++]);
+
+		if (Mod_ReadSkinFile(fullname, skinname))
+		{
+			mod->skins[0] = GL_FindImage (skinname, it_skin);
+
+			//load shader for skin
+			COM_StripExtension ( skinname, shortname );
+	#ifdef _WINDOWS
+			(struct rscript_s *)mod->script[0] = RS_FindScript(shortname);
+	#else
+			mod->script[0] = RS_FindScript(shortname); //make it gcc 4.1.1 compatible
+	#endif
+				
+			if (mod->script[0])
+				RS_ReadyScript((rscript_t *)mod->script[0]);
+		}
+	}
+
 	//free temp non hunk mem
 	if(baseframe)
 		free(baseframe);
 	if(inversebaseframe)
 		free(inversebaseframe);
-
-	Com_Printf("num frames: %i\n", mod->num_poses);
 
 	return true;
 }
@@ -588,7 +660,7 @@ void GL_VlightIQM (vec3_t baselight, mvertex_t *verts, vec3_t lightOut)
     //need to write routine for this
 }
 
-void GL_DrawIQMFrame()
+void GL_DrawIQMFrame(int skinnum)
 {
 	int		i, j;
 	vec3_t	move, delta, vectors[3];
@@ -625,11 +697,8 @@ void GL_DrawIQMFrame()
 	else
 		alpha = basealpha = 1.0;
 
-	//test stuff
-	COM_StripExtension ( r_iqmtest->name, shortname );
-    rs = RS_FindScript(shortname);
-    if(rs)
-		RS_ReadyScript(rs);
+	if (r_shaders->value)
+		rs=(rscript_t *)currententity->script;
 
 	VectorSubtract (currententity->oldorigin, currententity->origin, delta);
 
@@ -680,7 +749,7 @@ void GL_DrawIQMFrame()
 		else 
 		{ 
 			GL_SelectTexture( GL_TEXTURE0);
-			qglBindTexture (GL_TEXTURE_2D, r_iqmtest->texnum);
+			qglBindTexture (GL_TEXTURE_2D, skinnum);
 		}
 
 		for (i=0; i<currentmodel->num_triangles; i++)
@@ -771,8 +840,7 @@ void GL_DrawIQMFrame()
 
 			if(!stage->normalmap) 
 			{
-				GL_Bind (r_iqmtest->texnum);
-				//	GL_Bind (stage->texture->texnum);
+				GL_Bind (stage->texture->texnum);
 	
 				if (stage->blendfunc.blend)
 				{
@@ -806,8 +874,6 @@ void GL_DrawIQMFrame()
 				}
 				else
 					alpha=basealpha;
-
-				alpha = currententity->alpha;
 
 				if (!stage->alphamask)
 				{
@@ -869,7 +935,7 @@ void GL_DrawIQMFrame()
 				glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
 					
 				GL_SelectTexture( GL_TEXTURE1);
-				qglBindTexture (GL_TEXTURE_2D, r_iqmtest->texnum);
+				qglBindTexture (GL_TEXTURE_2D, skinnum);
 				glUniform1iARB( g_location_baseTex, 1); 
 
 				GL_SelectTexture( GL_TEXTURE0);
@@ -1262,6 +1328,10 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 	if (currententity->skin) {
 		skin = currententity->skin;
 	}
+	else
+	{
+		skin = currentmodel->skins[0];
+	}
 	if (!skin)
 		skin = r_notexture;	// fallback...
 	GL_Bind(skin->texnum);
@@ -1280,7 +1350,7 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 
 	GL_AnimateIQMFrame(currententity->frame);
 
-	GL_DrawIQMFrame();
+	GL_DrawIQMFrame(skin->texnum);
 
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);
