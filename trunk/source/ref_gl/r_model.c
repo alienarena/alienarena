@@ -451,7 +451,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 
 	modfilelen = FS_LoadFile (shortname, &buf);
 
-	if(!buf) 
+	if(!buf) //could not find iqm
 	{
 		modfilelen = FS_LoadFile (mod->name, &buf);
 		if (!buf)
@@ -462,8 +462,37 @@ model_t *Mod_ForName (char *name, qboolean crash)
 			return NULL;
 		}
 	}
-	else {
-		mod_iqm = true;
+	else 
+	{	//we have an .iqm
+		//if r_legacy, check for .md2, if none, load the .iqm
+		if(r_legacy->value) 
+		{
+			COM_StripExtension(mod->name, shortname);
+			strcat(shortname, ".md2");
+
+			modfilelen = FS_LoadFile (shortname, &buf);
+
+			if(!buf) 
+			{ //no .md2 for this .iqm, so revert to using the .iqm
+				COM_StripExtension(mod->name, shortname);
+				strcat(shortname, ".iqm");
+
+				modfilelen = FS_LoadFile (shortname, &buf);
+
+				if (!buf)
+				{ //be cautious 
+					if (crash)
+						Com_Error (ERR_DROP, "Mod_NumForName: %s not found", mod->name);
+					memset (mod->name, 0, sizeof(mod->name));
+					return NULL;
+				}
+
+				mod_iqm = true;
+			}
+		}
+		else {
+			mod_iqm = true;
+		}
 		strcpy(mod->name, shortname);
 	}
 	
