@@ -1234,6 +1234,7 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 {
 	int			i;
 	image_t		*skin;
+	float		frame, time;
 
 	if(currententity->flags & RF_VIEWERMODEL) 
 		return;
@@ -1347,8 +1348,20 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 		qglEnable (GL_BLEND);
 		qglBlendFunc (GL_ONE, GL_ONE);
 	}
+	
+	//frame interpolation
+	time = (Sys_Milliseconds() - currententity->frametime) / 100;
+	if(time > 1.0)
+		time = 1.0;
 
-	GL_AnimateIQMFrame(currententity->frame);
+	if(currententity->frame == currententity->oldframe || (currententity->frame - currententity->oldframe > 1))
+		frame = currententity->frame;
+	else if(currententity->oldframe - currententity->frame > 1 && currententity->model->num_poses > 160)
+		frame = currententity->oldframe;
+	else
+		frame = currententity->oldframe + time;
+
+	GL_AnimateIQMFrame(frame);
 
 	GL_DrawIQMFrame(skin->texnum);
 

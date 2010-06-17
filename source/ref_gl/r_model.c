@@ -373,7 +373,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	model_t	*mod;
 	unsigned *buf;
 	int		i;
-	char shortname[MAX_QPATH];
+	char shortname[MAX_QPATH], nameShortname[MAX_QPATH];
 	qboolean mod_iqm = false;
 	
 	if (!name[0])
@@ -397,19 +397,24 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	{
 		if (!mod->name[0])
 			continue;
-		if (!strcmp (mod->name, name) ) {
 
-			if (mod->type == mod_alias || mod->type == mod_iqm) {
+		COM_StripExtension(mod->name, shortname);
+		COM_StripExtension(name, nameShortname);
+
+		if (!strcmp (shortname, nameShortname) ) 
+		{
+			if (mod->type == mod_alias || mod->type == mod_iqm) 
+			{
 				// Make sure models scripts are definately reloaded between maps - MrG
 				char rs[MAX_OSPATH];
 				int i = 0;
 				image_t *img;
 				img=mod->skins[i];
 			
-				while (img != NULL) {
+				while (img != NULL) 
+				{
 					strcpy(rs,mod->skins[i]->name);
 					rs[strlen(rs)-4]=0;
-
 #ifdef _WINDOWS
 					(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
 #else
