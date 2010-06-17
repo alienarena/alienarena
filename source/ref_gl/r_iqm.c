@@ -553,11 +553,11 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 matrix3x4_t outframe[5096]; //to do - find out what max frames/joints might be
 
-void GL_AnimateIQMFrame(float curframe)
+void GL_AnimateIQMFrame(float curframe, int nextframe)
 {
 	int i, j;
     int frame1 = (int)floor(curframe),
-        frame2 = frame1 + 1;
+        frame2 = nextframe;
     float frameoffset = curframe - frame1;
 	frame1 %= currentmodel->num_poses;
 	frame2 %= currentmodel->num_poses;
@@ -1223,7 +1223,60 @@ static qboolean R_CullIQMModel( void )
 		return false;
 	}
 }
-		
+
+qboolean inAnimGroup(int frame, int oldframe)
+{
+	//check if we are in a player anim group that is commonly looping
+	if(frame >= 0 && frame <= 39 && oldframe >=0 && oldframe <= 39)
+		return true; //standing, or 40 frame static mesh
+	else if(frame >= 40 && frame <=45 && oldframe >= 40 && oldframe <=45)
+		return true; //running
+	else if(frame >= 66 && frame <= 71 && oldframe >= 66 && oldframe <= 71)
+		return true; //jumping
+	else if(frame >= 0 && frame <= 23 && oldframe >= 0 && oldframe <= 23)
+		return true; //static meshes are 24 frames
+	else 
+		return false;
+}
+
+int NextFrame(int frame)
+{
+	int outframe;
+
+	switch(frame)
+	{
+		case 23:
+		case 39:
+			outframe = 0;
+			break;
+		case 45:
+			outframe = 40;
+			break;
+		case 71:
+			outframe = 66;
+			break;
+		case 154:
+			outframe = 136;
+			break;
+		case 160:
+			outframe = 155;
+			break;
+		//deaths
+		case 220:
+			outframe = 220;
+			break;
+		case 238:
+			outframe = 238;
+			break;
+		case 258:
+			outframe = 258;
+			break;
+		default:
+			outframe = frame + 1;
+			break;
+	}
+	return outframe;
+}
 /*
 =================
 R_DrawINTERQUAKEMODEL
@@ -1235,6 +1288,7 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 	int			i;
 	image_t		*skin;
 	float		frame, time;
+	int			nextframe;
 
 	if(currententity->flags & RF_VIEWERMODEL) 
 		return;
@@ -1354,14 +1408,17 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 	if(time > 1.0)
 		time = 1.0;
 
-	if(currententity->frame == currententity->oldframe || (currententity->frame - currententity->oldframe > 1))
-		frame = currententity->frame;
-	else if(currententity->oldframe - currententity->frame > 1 && currententity->model->num_poses > 160)
-		frame = currententity->oldframe;
-	else
-		frame = currententity->oldframe + time;
+	
+	if((currententity->frame == currententity->oldframe ) && !inAnimGroup(currententity->frame, currententity->oldframe)) 
+		time = 0;
 
-	GL_AnimateIQMFrame(frame);
+	//Check for stopped death anims
+	if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
+		time = 0;
+	
+	frame = currententity->frame + time;
+
+	GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
 
 	GL_DrawIQMFrame(skin->texnum);
 
@@ -1535,7 +1592,7 @@ void R_DrawIQMCaster (entity_t *e)
 	R_RotateForEntity (e);
 	e->angles[PITCH] = -e->angles[PITCH];
 
-	GL_AnimateIQMFrame(currententity->frame);
+	GL_AnimateIQMFrame(currententity->frame, currententity->frame + 1);
 	GL_DrawIQMCasterFrame();
 
 	qglPopMatrix();
