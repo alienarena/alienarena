@@ -2041,7 +2041,7 @@ R_RegisterModel
 
 @@@@@@@@@@@@@@@@@@@@@
 */
-qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath);
+extern qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath);
 struct model_s *R_RegisterModel (char *name)
 {
 	model_t	*mod;
