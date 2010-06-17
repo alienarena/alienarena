@@ -471,9 +471,9 @@ void R_DrawDynamicCaster(void)
 		}
 		
 		if(currentmodel->type == mod_iqm)
-			R_DrawIQMCaster (currententity);
+			R_DrawIQMCaster ();
 		else
-			R_DrawAliasModelCaster (currententity);
+			R_DrawAliasModelCaster ();
 	}
 	
 	setTextureMatrix();
