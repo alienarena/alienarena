@@ -19,8 +19,8 @@ void main()
 	vec4 fx;
 	vec4 glow;
 	
-    	vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;
-    	vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
+    vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;
+    vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );
 	
 	vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);
 	
