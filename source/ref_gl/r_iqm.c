@@ -1245,6 +1245,11 @@ int NextFrame(int frame)
 	switch(frame)
 	{
 		case 23:
+			if(currentmodel->num_poses > 24)
+				outframe = frame + 1;
+			else
+				outframe = 0;
+			break;
 		case 39:
 			outframe = 0;
 			break;
@@ -1406,7 +1411,6 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 	time = (Sys_Milliseconds() - currententity->frametime) / 100;
 	if(time > 1.0)
 		time = 1.0;
-
 	
 	if((currententity->frame == currententity->oldframe ) && !inAnimGroup(currententity->frame, currententity->oldframe)) 
 		time = 0;
