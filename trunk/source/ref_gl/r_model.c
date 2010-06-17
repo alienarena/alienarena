@@ -2041,11 +2041,13 @@ R_RegisterModel
 
 @@@@@@@@@@@@@@@@@@@@@
 */
+qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath);
 struct model_s *R_RegisterModel (char *name)
 {
 	model_t	*mod;
 	int		i;
 	dmdl_t		*pheader;
+	char skinname[MAX_QPATH], shortname[MAX_QPATH], fullname[MAX_OSPATH], *path;
 	
 	mod = Mod_ForName (name, false);
 	if (mod)
@@ -2061,6 +2063,33 @@ struct model_s *R_RegisterModel (char *name)
 //PGM
 			mod->num_frames = pheader->num_frames;
 //PGM
+		}
+		else if (mod->type == mod_iqm) 
+		{
+			//load skin from skin file
+			COM_StripExtension(mod->name, shortname);
+			strcat(shortname, ".skin");
+			path = NULL;
+			for(;;)
+			{
+				path = FS_NextPath( path );
+				if( !path )
+				{
+					break;
+				}
+				if(path)
+					Com_sprintf(fullname, sizeof(fullname), "%s/%s", path, shortname);
+
+				i = 0;
+				do
+					fullname[i] = tolower(fullname[i]);
+				while (fullname[i++]);
+
+				if (Mod_ReadSkinFile(fullname, skinname))
+				{
+					mod->skins[0] = GL_FindImage (skinname, it_skin);
+				}
+			}
 		}
 		else if (mod->type == mod_brush)
 		{

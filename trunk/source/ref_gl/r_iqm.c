@@ -178,7 +178,6 @@ qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath)
 	s = buffer;
 
 	strcpy( skinpath, COM_Parse( &s ) );
-	Com_Printf("from file %s\n", skinpath);
 	skinpath[length] = 0; //clear any possible garbage
 
 	if ( fp != 0 )
