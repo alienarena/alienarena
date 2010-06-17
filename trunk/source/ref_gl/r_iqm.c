@@ -1244,24 +1244,30 @@ int NextFrame(int frame)
 
 	switch(frame)
 	{
+		//map models can be 24 or 40 frames
 		case 23:
 			if(currentmodel->num_poses > 24)
 				outframe = frame + 1;
 			else
 				outframe = 0;
 			break;
+		//player standing 
 		case 39:
 			outframe = 0;
 			break;
+		//player running
 		case 45:
 			outframe = 40;
 			break;
+		//player jumping
 		case 71:
 			outframe = 66;
 			break;
+		//player crouched
 		case 154:
 			outframe = 136;
 			break;
+		//player crouched walking
 		case 160:
 			outframe = 155;
 			break;
@@ -1287,17 +1293,14 @@ R_DrawINTERQUAKEMODEL
 =================
 */
 
-void R_DrawINTERQUAKEMODEL (entity_t *e)
+void R_DrawINTERQUAKEMODEL ()
 {
 	int			i;
 	image_t		*skin;
 	float		frame, time;
 	int			nextframe;
 
-	if(currententity->flags & RF_VIEWERMODEL) 
-		return;
-
-	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(e->flags & RF_MENUMODEL))
+	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return;
 	
 	//do culling
@@ -1379,9 +1382,9 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 	}
 
     qglPushMatrix ();
-	e->angles[PITCH] = -e->angles[PITCH];
-	R_RotateForEntity (e);
-	e->angles[PITCH] = -e->angles[PITCH];
+	currententity->angles[PITCH] = -currententity->angles[PITCH];
+	R_RotateForEntity (currententity);
+	currententity->angles[PITCH] = -currententity->angles[PITCH];
 
 	// select skin
 	if (currententity->skin) {
@@ -1423,7 +1426,8 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 
 	GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
 
-	GL_DrawIQMFrame(skin->texnum);
+	if(!(currententity->flags & RF_VIEWERMODEL))
+		GL_DrawIQMFrame(skin->texnum);
 
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);
@@ -1453,8 +1457,8 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 		case 1: //dynamic only - always cast something
 			casted = R_ShadowLight (currententity->origin, shadevector, 0);
 			qglPushMatrix ();
-			qglTranslatef	(e->origin[0], e->origin[1], e->origin[2]);
-			qglRotatef (e->angles[1], 0, 0, 1);
+			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
+			qglRotatef (currententity->angles[1], 0, 0, 1);
 			qglDisable (GL_TEXTURE_2D);
 			qglEnable (GL_BLEND);
 
@@ -1474,8 +1478,8 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 			//world
 			casted = R_ShadowLight (currententity->origin, shadevector, 1);
 			qglPushMatrix ();
-			qglTranslatef	(e->origin[0], e->origin[1], e->origin[2]);
-			qglRotatef (e->angles[1], 0, 0, 1);
+			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
+			qglRotatef (currententity->angles[1], 0, 0, 1);
 			qglDisable (GL_TEXTURE_2D);
 			qglEnable (GL_BLEND);
 
@@ -1495,8 +1499,8 @@ void R_DrawINTERQUAKEMODEL (entity_t *e)
 			if (casted > 0) 
 			{ //only draw if there's a dynamic light there
 				qglPushMatrix ();
-				qglTranslatef	(e->origin[0], e->origin[1], e->origin[2]);
-				qglRotatef (e->angles[1], 0, 0, 1);
+				qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
+				qglRotatef (currententity->angles[1], 0, 0, 1);
 				qglDisable (GL_TEXTURE_2D);
 				qglEnable (GL_BLEND);
 
@@ -1574,14 +1578,15 @@ void GL_DrawIQMCasterFrame ()
     R_KillVArrays ();
 }
 
-void R_DrawIQMCaster (entity_t *e)
+void R_DrawIQMCaster ( void )
 {
 	dmdl_t		*paliashdr;
+	float		frame, time;
 
-	if(e->team) //don't draw flag models, handled by sprites
+	if(currententity->team) //don't draw flag models, handled by sprites
 		return;
 	
-	if ( e->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
+	if ( currententity->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
 		return;
 
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) ) //no shells
@@ -1591,11 +1596,26 @@ void R_DrawIQMCaster (entity_t *e)
 		return;
 
     qglPushMatrix ();
-	e->angles[PITCH] = -e->angles[PITCH];
-	R_RotateForEntity (e);
-	e->angles[PITCH] = -e->angles[PITCH];
+	currententity->angles[PITCH] = -currententity->angles[PITCH];
+	R_RotateForEntity (currententity);
+	currententity->angles[PITCH] = -currententity->angles[PITCH];
 
-	GL_AnimateIQMFrame(currententity->frame, currententity->frame + 1);
+	//frame interpolation
+	time = (Sys_Milliseconds() - currententity->frametime) / 100;
+	if(time > 1.0)
+		time = 1.0;
+	
+	if((currententity->frame == currententity->oldframe ) && !inAnimGroup(currententity->frame, currententity->oldframe)) 
+		time = 0;
+
+	//Check for stopped death anims
+	if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
+		time = 0;
+	
+	frame = currententity->frame + time;
+
+	GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
+
 	GL_DrawIQMCasterFrame();
 
 	qglPopMatrix();

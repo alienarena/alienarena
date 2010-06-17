@@ -274,9 +274,8 @@ void R_Shutdown( void );
 
 void R_RenderView (refdef_t *fd);
 void GL_ScreenShot_f (void);
-void R_DrawAliasModel (entity_t *e);
-void R_DrawBrushModel (entity_t *e);
-void R_DrawBeam( entity_t *e );
+void R_DrawAliasModel (void);
+void R_DrawBrushModel (void);
 void R_DrawWorld (void);
 void R_RenderDlights (void);
 void R_DrawAlphaSurfaces (void);
@@ -559,8 +558,8 @@ typedef struct	LightGroup {
 	float	dist;
 } LightGroup_t;
 extern			LightGroup_t LightGroups[MAX_LIGHTS];
-extern void		R_DrawAliasModelCaster (entity_t *e);
-extern void		R_DrawIQMCaster (entity_t *e);
+extern void		R_DrawAliasModelCaster (void);
+extern void		R_DrawIQMCaster (void);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_CastShadow(void);
 int				FB_texture_width, FB_texture_height;
@@ -643,7 +642,7 @@ extern GLuint		g_location_source;
 //iqm
 
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
-extern void R_DrawINTERQUAKEMODEL (entity_t *e);
+extern void R_DrawINTERQUAKEMODEL (void);
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 

@@ -239,7 +239,7 @@ void R_ModelViewTransform(const vec3_t in, vec3_t out){
 /*
 ** R_CullAliasModel
 */
-static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
+static qboolean R_CullAliasModel( vec3_t bbox[8] )
 {
 	int i;
 	vec3_t	vectors[3];
@@ -250,17 +250,17 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 	if (r_worldmodel ) {
 		//occulusion culling - why draw entities we cannot see?
 	
-		r_trace = CM_BoxTrace(r_origin, e->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+		r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			return true;
 	}
 
-	VectorSubtract(r_origin, e->origin, dist);
+	VectorSubtract(r_origin, currententity->origin, dist);
 
 	/*
 	** rotate the bounding box
 	*/
-	VectorCopy( e->angles, angles );
+	VectorCopy( currententity->angles, angles );
 	angles[YAW] = -angles[YAW];
 	AngleVectors( angles, vectors[0], vectors[1], vectors[2] );
 
@@ -274,7 +274,7 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 		bbox[i][1] = -DotProduct( vectors[1], tmp );
 		bbox[i][2] = DotProduct( vectors[2], tmp );
 
-		VectorAdd( e->origin, bbox[i], bbox[i] );
+		VectorAdd( currententity->origin, bbox[i], bbox[i] );
 	}
 
 	{
@@ -1634,22 +1634,22 @@ R_DrawAliasModel
 
 =================
 */
-void R_DrawAliasModel (entity_t *e)
+void R_DrawAliasModel ( void )
 {
 	int			i;
 	dmdl_t		*paliashdr;
 	vec3_t		bbox[8];
 	image_t		*skin;
 
-	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(e->flags & RF_MENUMODEL))
+	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return;
 
-	if(e->team) //don't draw flag models, handled by sprites
+	if(currententity->team) //don't draw flag models, handled by sprites
 		return;
 	
-	if ( !( e->flags & RF_WEAPONMODEL ) )
+	if ( !( currententity->flags & RF_WEAPONMODEL ) )
 	{
-		if ( R_CullAliasModel( bbox, e ) )
+		if ( R_CullAliasModel( bbox ) )
 			return;
 	}
 	else
@@ -1778,9 +1778,9 @@ void R_DrawAliasModel (entity_t *e)
     }
 
     qglPushMatrix ();
-	e->angles[PITCH] = -e->angles[PITCH];	// sigh.
-	R_RotateForEntity (e);
-	e->angles[PITCH] = -e->angles[PITCH];	// sigh.
+	currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
+	R_RotateForEntity (currententity);
+	currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
 
 	// select skin
 	if (currententity->skin) {
@@ -1841,7 +1841,7 @@ void R_DrawAliasModel (entity_t *e)
 	if ( !r_lerpmodels->value )
 		currententity->backlerp = 0;
 
-	if(e->frame == 0 && currentmodel->num_frames == 1) {
+	if(currententity->frame == 0 && currentmodel->num_frames == 1) {
 		if(!(currententity->flags & RF_VIEWERMODEL))
 			GL_DrawAliasFrame(paliashdr, 0, false, skin->texnum);
 	}
@@ -1899,8 +1899,8 @@ void R_DrawAliasModel (entity_t *e)
 		case 1: //dynamic only - always cast something
 			casted = R_ShadowLight (currententity->origin, shadevector, 0);
 			qglPushMatrix ();
-			qglTranslatef	(e->origin[0], e->origin[1], e->origin[2]);
-			qglRotatef (e->angles[1], 0, 0, 1);
+			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
+			qglRotatef (currententity->angles[1], 0, 0, 1);
 			qglDisable (GL_TEXTURE_2D);
 			qglEnable (GL_BLEND);
 
@@ -1909,7 +1909,7 @@ void R_DrawAliasModel (entity_t *e)
 			else
 				qglColor4f (0,0,0,0.3);
 			
-			if(e->frame == 0 && currentmodel->num_frames == 1)
+			if(currententity->frame == 0 && currentmodel->num_frames == 1)
 				R_DrawAliasShadow (paliashdr, false);
 			else
 				R_DrawAliasShadow (paliashdr, true);
@@ -1923,8 +1923,8 @@ void R_DrawAliasModel (entity_t *e)
 			//world
 			casted = R_ShadowLight (currententity->origin, shadevector, 1);
 			qglPushMatrix ();
-			qglTranslatef	(e->origin[0], e->origin[1], e->origin[2]);
-			qglRotatef (e->angles[1], 0, 0, 1);
+			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
+			qglRotatef (currententity->angles[1], 0, 0, 1);
 			qglDisable (GL_TEXTURE_2D);
 			qglEnable (GL_BLEND);
 
@@ -1933,7 +1933,7 @@ void R_DrawAliasModel (entity_t *e)
 			else
 				qglColor4f (0,0,0,casted);
 
-			if(e->frame == 0 && currentmodel->num_frames == 1)
+			if(currententity->frame == 0 && currentmodel->num_frames == 1)
 				R_DrawAliasShadow (paliashdr, false);
 			else
 				R_DrawAliasShadow (paliashdr, true);
@@ -1946,8 +1946,8 @@ void R_DrawAliasModel (entity_t *e)
 		 	casted = R_ShadowLight (currententity->origin, shadevector, 0);
 			if (casted > 0) { //only draw if there's a dynamic light there
 				qglPushMatrix ();
-				qglTranslatef	(e->origin[0], e->origin[1], e->origin[2]);
-				qglRotatef (e->angles[1], 0, 0, 1);
+				qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
+				qglRotatef (currententity->angles[1], 0, 0, 1);
 				qglDisable (GL_TEXTURE_2D);
 				qglEnable (GL_BLEND);
 
@@ -1956,7 +1956,7 @@ void R_DrawAliasModel (entity_t *e)
 				else
 					qglColor4f (0,0,0,casted);
 
-				if(e->frame == 0 && currentmodel->num_frames == 1)
+				if(currententity->frame == 0 && currentmodel->num_frames == 1)
 					R_DrawAliasShadow (paliashdr, false);
 				else
 					R_DrawAliasShadow (paliashdr, true);
@@ -2089,21 +2089,21 @@ void GL_DrawAliasCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped
 }
 
 //to do - alpha and alphamasks possible?
-void R_DrawAliasModelCaster (entity_t *e)
+void R_DrawAliasModelCaster ( void )
 {
 	vec3_t		bbox[8];
 	dmdl_t		*paliashdr;
 
-	if(e->team) //don't draw flag models, handled by sprites
+	if(currententity->team) //don't draw flag models, handled by sprites
 		return;
 	
-	if ( e->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
+	if ( currententity->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
 		return;
 
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) ) //no shells
 		return;
 
-	if ( R_CullAliasModel( bbox, e ) )
+	if ( R_CullAliasModel( bbox ) )
 		return;
 
 	paliashdr = (dmdl_t *)currentmodel->extradata;
@@ -2111,9 +2111,9 @@ void R_DrawAliasModelCaster (entity_t *e)
 	// draw it
 
     qglPushMatrix ();
-	e->angles[PITCH] = -e->angles[PITCH];
-	R_RotateForEntity (e);
-	e->angles[PITCH] = -e->angles[PITCH];
+	currententity->angles[PITCH] = -currententity->angles[PITCH];
+	R_RotateForEntity (currententity);
+	currententity->angles[PITCH] = -currententity->angles[PITCH];
 
 	if ( (currententity->frame >= paliashdr->num_frames)
 		|| (currententity->frame < 0) )
@@ -2132,7 +2132,7 @@ void R_DrawAliasModelCaster (entity_t *e)
 	if ( !r_lerpmodels->value )
 		currententity->backlerp = 0;
 
-	if(e->frame == 0 && currentmodel->num_frames == 1)
+	if(currententity->frame == 0 && currentmodel->num_frames == 1)
 		GL_DrawAliasCasterFrame(paliashdr, 0, false);
 	else
 		GL_DrawAliasCasterFrame(paliashdr, currententity->backlerp, true);
