@@ -672,6 +672,7 @@ void GL_DrawIQMFrame(int skinnum)
 	int		index_xyz, index_st;
 	int		va = 0;
 	qboolean mirror = false;
+	qboolean glass = false;
 	qboolean depthmaskrscipt = false;
 
 	if (r_shaders->value)
@@ -682,16 +683,18 @@ void GL_DrawIQMFrame(int skinnum)
 		VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
 	VectorNormalize(lightcolor);
 
-	if (currententity->flags & RF_TRANSLUCENT) {
+	if (currententity->flags & RF_TRANSLUCENT) 
+	{
 		alpha = currententity->alpha;
-
-		rs=(rscript_t *)rs_glass;
-		if(!rs)
-			GL_Bind(r_reflecttexture->texnum);
-		else if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) {
+		if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) 
+		{
 			if(gl_mirror->value)
 				mirror = true;
+			else
+				glass = true;
 		}
+		else 
+			glass = true;
 	}
 	else
 		alpha = basealpha = 1.0;
@@ -712,7 +715,8 @@ void GL_DrawIQMFrame(int skinnum)
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
 	{	
 		//shell render
-		qglColor4f( shadelight[0], shadelight[1], shadelight[2], alpha);
+		GLSTATE_ENABLE_BLEND
+        GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 		va=0;
 		VArray = &VArrayVerts[0];		
@@ -773,7 +777,7 @@ void GL_DrawIQMFrame(int skinnum)
             glUniform1iARB( g_location_meshFog, map_fog);
         }
 		else
-			GL_Bind(r_shelltexture->texnum); 
+			GL_Bind(r_shelltexture2->texnum); 
 
 		for (i=0; i<currentmodel->num_triangles; i++)
         {
@@ -802,7 +806,7 @@ void GL_DrawIQMFrame(int skinnum)
 				VArray[5] = shadelight[0];
 				VArray[6] = shadelight[1];
 				VArray[7] = shadelight[2];
-				VArray[8] = alpha;	
+				VArray[8] = 0.33;
 				
                 // increment pointer and counter
                 if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
@@ -840,7 +844,7 @@ void GL_DrawIQMFrame(int skinnum)
             GL_EnableMultitexture( false );
         }
 	}
-	else if(!rs || mirror) 
+	else if(!rs || mirror || glass) 
 	{	//base render no shaders
 		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 			R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
@@ -870,6 +874,11 @@ void GL_DrawIQMFrame(int skinnum)
 				qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
 			}
 		}
+		else if(glass) 
+		{
+			GL_SelectTexture( GL_TEXTURE0);
+			qglBindTexture (GL_TEXTURE_2D, r_reflecttexture->texnum);
+		}
 		else 
 		{ 
 			GL_SelectTexture( GL_TEXTURE0);
@@ -886,7 +895,7 @@ void GL_DrawIQMFrame(int skinnum)
 				VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1];
 				VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2];
 
-				if(mirror) 
+				if(mirror || glass) //this may not be right here
 				{
 					VArray[5] = VArray[3] = -(currentmodel->st[index_st].s - DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[1]));
 					VArray[6] = VArray[4] = currentmodel->st[index_st].t + DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[2]);
@@ -1049,7 +1058,7 @@ void GL_DrawIQMFrame(int skinnum)
 
 					//brighten things slightly 
 					for (i = 0; i < 3; i++ )
-						lightVal[i] *= 1.25;
+						lightVal[i] *= 1.15;
 				}
 											
 				GL_EnableMultitexture( true );
