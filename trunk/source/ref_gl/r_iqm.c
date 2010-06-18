@@ -652,11 +652,20 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 	}
 }
 
-extern rscript_t *rs_glass;
-
-void GL_VlightIQM (vec3_t baselight, mvertex_t *verts, vec3_t lightOut)
+void GL_VlightIQM (vec3_t baselight, mvertex_t *vert, mnormal_t *normal, vec3_t lightOut)
 {
-    //need to write routine for this
+	float l;
+	float lscale;
+	int i;
+	vec3_t lightdir;
+
+	VectorSubtract(currententity->origin, lightPosition, lightdir);
+
+	lscale = 3.0;
+
+    l = lscale * VLight_LerpLight (normal->dir, lightdir, currententity->angles, false);
+
+    VectorScale(baselight, l, lightOut);
 }
 
 void GL_DrawIQMFrame(int skinnum)
@@ -714,10 +723,7 @@ void GL_DrawIQMFrame(int skinnum)
 
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
 	{	
-		//shell render
-		GLSTATE_ENABLE_BLEND
-        GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
+		//shell render		
 		va=0;
 		VArray = &VArrayVerts[0];		
 
@@ -725,7 +731,7 @@ void GL_DrawIQMFrame(int skinnum)
 
             vec3_t lightVec, lightVal;
 
-            GL_GetLightVals();
+            GL_GetLightVals(false);
 
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
@@ -794,8 +800,8 @@ void GL_DrawIQMFrame(int skinnum)
                 VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1];
                 VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2];
 
-				VArray[3] = currentmodel->st[index_st].s;
-                VArray[4] = currentmodel->st[index_st].t - r_newrefdef.time * 0.25f;
+				VArray[3] = (currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
+                VArray[4] = currentmodel->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
 
 				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
 				{
@@ -883,6 +889,8 @@ void GL_DrawIQMFrame(int skinnum)
 		{ 
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, skinnum);
+			
+ 			GL_GetLightVals(false);
 		}
 
 		for (i=0; i<currentmodel->num_triangles; i++)
@@ -895,10 +903,15 @@ void GL_DrawIQMFrame(int skinnum)
 				VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1];
 				VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2];
 
-				if(mirror || glass) //this may not be right here
+				if(mirror)
 				{
 					VArray[5] = VArray[3] = -(currentmodel->st[index_st].s - DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[1]));
 					VArray[6] = VArray[4] = currentmodel->st[index_st].t + DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[2]);
+				}
+				else if(glass) 
+				{
+					VArray[3] = -(currentmodel->st[index_st].s - DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[1]));
+					VArray[4] = currentmodel->st[index_st].t + DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[2]);
 				}
 				else 
 				{
@@ -906,7 +919,7 @@ void GL_DrawIQMFrame(int skinnum)
 					VArray[4] = currentmodel->st[index_st].t;
 				}
 
-				GL_VlightIQM (shadelight, &currentmodel->animatevertexes[index_xyz], lightcolor);
+				GL_VlightIQM (shadelight, &currentmodel->animatevertexes[index_xyz], &currentmodel->animatenormal[index_xyz], lightcolor);
 									
 				if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
 					VArray[7] = lightcolor[0];
@@ -947,9 +960,7 @@ void GL_DrawIQMFrame(int skinnum)
 	{	//render with shaders
 		
 		if (rs->stage && rs->stage->has_alpha)
-		{
 			depthmaskrscipt = true;
-		}
 
 		if (depthmaskrscipt)
 			qglDepthMask(false);
@@ -1009,16 +1020,17 @@ void GL_DrawIQMFrame(int skinnum)
 					alpha=basealpha;
 
 				if (!stage->alphamask)
-				{
 					GLSTATE_DISABLE_ALPHATEST
-				}
+
+				if(stage->lightmap)
+					GL_GetLightVals(false);
 			}
 
 			if(stage->normalmap) 
 			{
 				vec3_t lightVec, lightVal;
 
-				GL_GetLightVals();
+				GL_GetLightVals(true);
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
@@ -1117,8 +1129,8 @@ void GL_DrawIQMFrame(int skinnum)
 					VArray[3] = currentmodel->st[index_st].s;
 					VArray[4] = currentmodel->st[index_st].t;
 					
-					if(stage->normalmap) { //send tangent to shader
-						VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
+					if(stage->normalmap) { //send normals and tangents to shader
+						VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]);
 						Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
 					}
 
@@ -1127,12 +1139,11 @@ void GL_DrawIQMFrame(int skinnum)
 						float red = 1, green = 1, blue = 1;
 
 						if (stage->lightmap) { 
-							GL_VlightIQM (shadelight, &currentmodel->animatevertexes[index_xyz], lightcolor);
+							GL_VlightIQM (shadelight, &currentmodel->animatevertexes[index_xyz], &currentmodel->animatenormal[index_xyz], lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
 							blue = lightcolor[2];						
 						}
-						//to do - recalc alpha vals for script
 						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
 							VArray[7] = red;
 							VArray[8] = green;

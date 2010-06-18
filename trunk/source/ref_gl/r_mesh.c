@@ -134,7 +134,7 @@ float calcEntAlpha (float alpha, vec3_t point)
 
 vec3_t	lightPosition;
 float	dynFactor;
-void GL_GetLightVals()
+void GL_GetLightVals(qboolean dynamic)
 {
 	int i, j, lnum;
 	dlight_t	*dl;
@@ -183,38 +183,45 @@ void GL_GetLightVals()
 	}
 
 	dynFactor = 0;
-	if((!(currententity->flags & RF_NOSHADOWS)) || currententity->flags & RF_MINLIGHT) {
-		dl = r_newrefdef.dlights;
-		//limit to five lights(maybe less)?
-		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) {
-			
-			VectorSubtract(currententity->origin, dl->origin, temp);
-			dist = VectorLength(temp);
+	if(dynamic)
+	{
+		if((!(currententity->flags & RF_NOSHADOWS)) || currententity->flags & RF_MINLIGHT) 
+		{
+			dl = r_newrefdef.dlights;
+			//limit to five lights(maybe less)?
+			for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) 
+			{			
+				VectorSubtract(currententity->origin, dl->origin, temp);
+				dist = VectorLength(temp);
 
-			VectorCopy(currententity->origin, temp);
-			temp[2] += 24; //generates more consistent tracing
-		
-			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+				VectorCopy(currententity->origin, temp);
+				temp[2] += 24; //generates more consistent tracing
 			
-			if(r_trace.fraction == 1.0) {
-				if(dist < 100) {
-					VectorCopy(dl->origin, temp);
-					//translate for when viewangles are negative - done because otherwise the
-					//lighting effect is backwards - stupid quake bug rearing it's head?
-					if(r_newrefdef.viewangles[1] < 0) {
-						//translate according viewangles
-						xdist = temp[0] - currententity->origin[0];
-						ydist = temp[1] - currententity->origin[1];
-						temp[0] -= 2 * xdist;
-						temp[1] -= 2 * ydist;
+				r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+				
+				if(r_trace.fraction == 1.0) 
+				{
+					if(dist < 100) 
+					{
+						VectorCopy(dl->origin, temp);
+						//translate for when viewangles are negative - done because otherwise the
+						//lighting effect is backwards - stupid quake bug rearing it's head?
+						if(r_newrefdef.viewangles[1] < 0) 
+						{
+							//translate according viewangles
+							xdist = temp[0] - currententity->origin[0];
+							ydist = temp[1] - currententity->origin[1];
+							temp[0] -= 2 * xdist;
+							temp[1] -= 2 * ydist;
+						}
+						//make dynamic lights more influential than world
+						for(j = 0; j < 3; j++)
+							lightAdd[j] += temp[j]*100*dl->intensity;
+						numlights+=100*dl->intensity;
+	                
+						VectorSubtract (dl->origin, currententity->origin, temp);
+						dynFactor += (dl->intensity/20.0)/VectorLength(temp);
 					}
-					//make dynamic lights more influential than world
-					for(j = 0; j < 3; j++)
-						lightAdd[j] += temp[j]*100*dl->intensity;
-					numlights+=100*dl->intensity;
-                
-					VectorSubtract (dl->origin, currententity->origin, temp);
-					dynFactor += (dl->intensity/20.0)/VectorLength(temp);
 				}
 			}
 		}
@@ -939,7 +946,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
             vec3_t lightVec, lightVal;
 
-            GL_GetLightVals();
+            GL_GetLightVals(true);
 
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
@@ -1202,8 +1209,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						GL_Bind(r_mirrortexture->texnum);
 				}
 				else
-					GL_Bind (stage->texture->texnum);
-		
+					GL_Bind (stage->texture->texnum);		
 
 				if (stage->blendfunc.blend)
 				{
@@ -1248,7 +1254,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 				vec3_t lightVec, lightVal;
 
-				GL_GetLightVals();
+				GL_GetLightVals(true);
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);

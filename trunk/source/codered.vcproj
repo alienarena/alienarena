@@ -2144,6 +2144,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ref_gl\r_vlights.c"
+				>
+			</File>
+			<File
 				RelativePath="ref_gl\r_warp.c"
 				>
 				<FileConfiguration
