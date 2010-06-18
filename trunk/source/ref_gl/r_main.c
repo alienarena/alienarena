@@ -460,12 +460,10 @@ void R_DrawEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			if(currententity->model->type != mod_iqm) 
-			{
-				rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-				if(!rs)
-					rs=(rscript_t *)currententity->model->script[0]; //try 0
-			}
+			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
+			if(!rs)
+				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			
 			//custom player skin (must be done here)
 			if (currententity->skin) 
 			{ 
@@ -532,12 +530,10 @@ void R_DrawEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			if(currententity->model->type != mod_iqm) 
-			{
-				rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-				if(!rs)
-					rs=(rscript_t *)currententity->model->script[0]; //try 0
-			}
+			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
+			if(!rs)
+				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			
 			//custom player skin (must be done here)
 			if (currententity->skin) 
 			{ 
@@ -606,12 +602,10 @@ void R_DrawViewEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			if(currententity->model->type != mod_iqm) 
-			{
-				rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-				if(!rs)
-					rs=(rscript_t *)currententity->model->script[0]; //try 0
-			}
+			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
+			if(!rs)
+				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			
 			//custom player skin (must be done here)
 			if (currententity->skin) 
 			{ 
@@ -664,12 +658,10 @@ void R_DrawViewEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			if(currententity->model->type != mod_iqm) 
-			{
-				rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-				if(!rs)
-					rs=(rscript_t *)currententity->model->script[0]; //try 0
-			}
+			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
+			if(!rs)
+				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			
 			//custom player skin (must be done here)
 			if (currententity->skin) 
 			{ 
