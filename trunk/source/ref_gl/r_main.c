@@ -110,6 +110,8 @@ cvar_t	*r_shadowmapratio;
 cvar_t	*r_overbrightbits;
 cvar_t	*gl_ext_mtexcombine;
 
+cvar_t	*gl_vlights;
+
 cvar_t	*gl_nosubimage;
 
 cvar_t	*gl_particle_min_size;
@@ -1225,6 +1227,8 @@ void R_Register( void )
 	vid_contrast = Cvar_Get( "vid_contrast", "1.0", CVAR_ARCHIVE);
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
 
+	gl_vlights = Cvar_Get("gl_vlights", "1", CVAR_ARCHIVE);
+
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
 	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE); 
@@ -1337,6 +1341,7 @@ void R_SetLowest(void)
 	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 0);
+	Cvar_SetValue("gl_vlights", 0);
 	Cvar_SetValue("r_legacy", 1);
 
 	Com_Printf("...autodetected LOWEST game setting\n");
@@ -1367,6 +1372,7 @@ void R_SetLow( void )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 0);
 	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected LOW game setting\n");
@@ -1397,6 +1403,7 @@ void R_SetMedium( void )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected MEDIUM game setting\n");
@@ -1427,6 +1434,7 @@ void R_SetHigh( void )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected HIGH game setting\n");
@@ -1457,6 +1465,7 @@ void R_SetHighest( void )
 	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected HIGHEST game setting\n");

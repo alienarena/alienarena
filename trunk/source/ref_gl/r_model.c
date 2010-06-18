@@ -398,7 +398,6 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		if (!mod->name[0])
 			continue;
 
-		//fix
 		COM_StripExtension(mod->name, shortname);
 		COM_StripExtension(name, nameShortname);
 		

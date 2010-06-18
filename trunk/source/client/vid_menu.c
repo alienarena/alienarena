@@ -32,6 +32,7 @@ extern cvar_t *gl_parallaxmaps;
 extern cvar_t *gl_glsl_postprocess;
 extern cvar_t *gl_glsl_shaders;
 extern cvar_t *gl_modulate;
+extern cvar_t *gl_vlights;
 extern cvar_t *r_legacy;
 
 extern cvar_t *vid_width;
@@ -207,6 +208,7 @@ static void SetLowest( void *unused )
 	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 0);
+	Cvar_SetValue("gl_vlights", 0);
 	Cvar_SetValue("r_legacy", 1);
 
 	VID_MenuInit();
@@ -232,6 +234,7 @@ static void SetLow( void *unused )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 0);
 	Cvar_SetValue("r_legacy", 0);
 
 	VID_MenuInit();
@@ -258,6 +261,7 @@ static void SetMedium( void *unused )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_legacy", 0);
 
 	VID_MenuInit();
@@ -284,6 +288,7 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_legacy", 0);
 
 	VID_MenuInit();
@@ -310,6 +315,7 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_legacy", 0);
 
 	VID_MenuInit();
