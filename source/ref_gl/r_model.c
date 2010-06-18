@@ -403,7 +403,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		
 		if (!strcmp (shortname, nameShortname) ) 
 		{
-			if (mod->type == mod_alias || mod->type == mod_iqm) 
+			if (mod->type == mod_alias || mod->type == 4) //note find out why mod_iqm evals to 0 here!
 			{
 				// Make sure models scripts are definately reloaded between maps - MrG
 				char rs[MAX_OSPATH];

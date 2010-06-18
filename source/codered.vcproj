@@ -50,6 +50,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="C:\vorbis\include;C:\ogg\include;&quot;C:\Program Files\OpenAL 1.1 SDK\include&quot;"
 				PreprocessorDefinitions="INHOUSE;WIN32;_DEBUG;_WINDOWS;EXTREME"
 				RuntimeLibrary="1"
 				PrecompiledHeaderFile=".\debug/codered.pch"
@@ -57,7 +58,7 @@
 				ObjectFile=".\debug/"
 				ProgramDataBaseFileName=".\debug/"
 				BrowseInformation="1"
-				WarningLevel="3"
+				WarningLevel="2"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
 			/>
