@@ -659,6 +659,9 @@ void GL_VlightIQM (vec3_t baselight, mvertex_t *vert, mnormal_t *normal, vec3_t 
 	int i;
 	vec3_t lightdir;
 
+	if(!gl_vlights->value)
+		return;
+	
 	VectorSubtract(currententity->origin, lightPosition, lightdir);
 
 	lscale = 3.0;
