@@ -296,6 +296,8 @@ void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type);
+void  VLight_Init (void);
+float VLight_LerpLight ( vec3_t normal, vec3_t dir, vec3_t angles, qboolean dlight );
 #ifdef __unix__
 void R_ReadFogScript(char config_file[128]);
 void R_ReadMusicScript(char config_file[128]);
@@ -336,7 +338,7 @@ extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
 extern vec3_t	lightPosition;
 extern float	dynFactor;
-extern void		GL_GetLightVals();
+extern void		GL_GetLightVals(qboolean dynamic);
 
 //Player icons
 extern float	scr_playericonalpha;

@@ -1895,6 +1895,7 @@ cpuinfo_exit:
 	Draw_InitLocal ();
 
 	generateShadowFBO(); 
+	VLight_Init();
 
 	scr_playericonalpha = 0.0;
 

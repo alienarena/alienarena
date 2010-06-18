@@ -257,6 +257,7 @@ CODERED_OBJS = \
 	$(BUILDDIR)/ref_gl/r_surf.o \
 	$(BUILDDIR)/ref_gl/r_varray.o \
 	$(BUILDDIR)/ref_gl/r_vbo.o \
+	$(BUILDDIR)/ref_gl/r_vlights.o \
 	$(BUILDDIR)/ref_gl/r_warp.o \
 	\
 	$(BUILDDIR)/ref_gl/qgl_unix.o
@@ -467,6 +468,9 @@ $(BUILDDIR)/ref_gl/r_varray.o:     $(REF_GL_DIR)/r_varray.c
 	$(DO_GL_SHLIB_CC)
 	
 $(BUILDDIR)/ref_gl/r_vbo.o:     $(REF_GL_DIR)/r_vbo.c
+	$(DO_GL_SHLIB_CC)
+	
+$(BUILDDIR)/ref_gl/r_vlights.o:     $(REF_GL_DIR)/r_vlights.c
 	$(DO_GL_SHLIB_CC)
 
 $(BUILDDIR)/ref_gl/qgl_unix.o :      $(UNIX_DIR)/qgl_unix.c
