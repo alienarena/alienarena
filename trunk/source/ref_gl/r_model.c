@@ -398,17 +398,10 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		if (!mod->name[0])
 			continue;
 
-		if (mod->type == mod_alias || mod->type == mod_iqm) 
-		{
-			COM_StripExtension(mod->name, shortname);
-			COM_StripExtension(name, nameShortname);
-		}
-		else
-		{
-			strcpy(shortname, mod->name);
-			strcpy(nameShortname, name);
-		}
-
+		//fix
+		COM_StripExtension(mod->name, shortname);
+		COM_StripExtension(name, nameShortname);
+		
 		if (!strcmp (shortname, nameShortname) ) 
 		{
 			if (mod->type == mod_alias || mod->type == mod_iqm) 
@@ -459,14 +452,9 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	// load the file
 	//
 	//if .md2, check for IQM version first
-	//if(!r_legacy->value) 
-	//{
-		COM_StripExtension(mod->name, shortname);
-		strcat(shortname, ".iqm");
-	//}
-	//else
-	//	strcpy(shortname, mod->name);
-
+	COM_StripExtension(mod->name, shortname);
+	strcat(shortname, ".iqm");
+	
 	modfilelen = FS_LoadFile (shortname, &buf);
 
 	if(!buf) //could not find iqm
