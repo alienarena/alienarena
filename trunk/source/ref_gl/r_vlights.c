@@ -23,14 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define VLIGHT_CLAMP_MIN	50.0f
 #define VLIGHT_CLAMP_MAX	256.0f
 
-#define VLIGHT_GRIDSIZE_X	256
-#define VLIGHT_GRIDSIZE_Y	256
+#define VLIGHT_GRIDSIZE_X	64
+#define VLIGHT_GRIDSIZE_Y	64
 
 vec3_t	vlightgrid[VLIGHT_GRIDSIZE_X][VLIGHT_GRIDSIZE_Y];
-
-static vec3_t r_avertexnormals[NUMVERTEXNORMALS] = {
-	#include "anorms.h"
-};
 
 void VLight_InitAnormTable (void)
 {
@@ -105,11 +101,6 @@ float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw
 		light = VLIGHT_CLAMP_MIN;
 		
 	return light * ( 1.0f / 256.0f );	
-}
-
-float VLight_LerpLight ( vec3_t normal, vec3_t dir, vec3_t angles, qboolean dlight )
-{
-	return VLight_GetLightValue( normal, dir, angles[PITCH], angles[YAW]);
 }
 
 void VLight_Init (void)

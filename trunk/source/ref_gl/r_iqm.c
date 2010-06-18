@@ -663,7 +663,7 @@ void GL_VlightIQM (vec3_t baselight, mvertex_t *vert, mnormal_t *normal, vec3_t 
 
 	lscale = 3.0;
 
-    l = lscale * VLight_LerpLight (normal->dir, lightdir, currententity->angles, false);
+    l = lscale * VLight_GetLightValue (normal->dir, lightdir, currententity->angles[PITCH], currententity->angles[YAW]);
 
     VectorScale(baselight, l, lightOut);
 }
