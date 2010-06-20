@@ -402,7 +402,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
     }
 
 	// load bounding box data
-	//this is not working correctly, vals are a bit odd
 	if (header->ofs_bounds)
 	{
 		float xyradius = 0, radius = 0;
@@ -434,9 +433,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		}
 		
 		mod->radius = radius;
-
-		//Com_Printf("iqm %s bounds: mins %4.2f, %4.2f, %4.2f maxs %4.2f %4.2f %4.2f\n", mod->name, mod->mins[0], mod->mins[1], mod->mins[2],
-		//	mod->maxs[0], mod->maxs[1], mod->maxs[2]);
 	}
 
 	//compute a full bounding box

@@ -646,6 +646,7 @@ extern GLuint		g_location_source;
 
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
 extern void R_DrawINTERQUAKEMODEL (void);
+extern void GL_AnimateIQMFrame(float curframe, int nextframe);
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 

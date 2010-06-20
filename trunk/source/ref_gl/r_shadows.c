@@ -746,10 +746,6 @@ int CL_PMpointcontents(vec3_t point);
 void R_DrawShadowVolume()
 {
 	dmdl_t *paliashdr;
-    daliasframe_t *frame, *oldframe;
-    dtrivertx_t *v, *ov, *verts;
-    float   *lerp;
-    float frontlerp;
     vec3_t move, delta, vectors[3];
     vec3_t frontv, backv;
     int i;
@@ -757,6 +753,11 @@ void R_DrawShadowVolume()
 
 	if(currentmodel->type == mod_alias)
 	{
+		daliasframe_t *frame, *oldframe;
+		dtrivertx_t *v, *ov, *verts;
+		float   *lerp;
+		float frontlerp;
+
 		paliashdr = (dmdl_t *) currentmodel->extradata;
 
 		if ( (currententity->frame >= paliashdr->num_frames)
@@ -829,8 +830,27 @@ void R_DrawShadowVolume()
 
 	if(currentmodel->type == mod_alias)
 		GL_DrawAliasShadowVolume(paliashdr, lerped);
-	else
+	else {
+		float time, frame;
+
+		//frame interpolation
+		time = (Sys_Milliseconds() - currententity->frametime) / 100;
+		if(time > 1.0)
+			time = 1.0;
+		
+		if((currententity->frame == currententity->oldframe ) && !inAnimGroup(currententity->frame, currententity->oldframe)) 
+			time = 0;
+
+		//Check for stopped death anims
+		if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
+			time = 0;
+		
+		frame = currententity->frame + time;
+
+		GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
+
 		GL_DrawIQMShadowVolume();
+	}
 		
 	qglEnable(GL_TEXTURE_2D);
 	qglPopMatrix();
