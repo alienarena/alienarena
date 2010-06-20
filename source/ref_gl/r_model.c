@@ -374,7 +374,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	unsigned *buf;
 	int		i;
 	char shortname[MAX_QPATH], nameShortname[MAX_QPATH];
-	qboolean mod_iqm = false;
+	qboolean is_iqm = false;
 	
 	if (!name[0])
 		Com_Error (ERR_DROP, "Mod_ForName: NULL name");
@@ -403,7 +403,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		
 		if (!strcmp (shortname, nameShortname) ) 
 		{
-			if (mod->type == mod_alias || mod->type == 4) //note find out why mod_iqm evals to 0 here!
+			if (mod->type == mod_alias || mod->type == mod_iqm) 
 			{
 				// Make sure models scripts are definately reloaded between maps - MrG
 				char rs[MAX_OSPATH];
@@ -492,11 +492,11 @@ model_t *Mod_ForName (char *name, qboolean crash)
 					return NULL;
 				}
 
-				mod_iqm = true;
+				is_iqm = true;
 			}
 		}
 		else {
-			mod_iqm = true;
+			is_iqm = true;
 		}
 		strcpy(mod->name, shortname);
 	}
@@ -509,7 +509,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
  
 	// call the apropriate loader
 	//iqm - try interquake model first
-	if(mod_iqm)
+	if(is_iqm)
 	{
 		if(!Mod_INTERQUAKEMODEL_Load(mod, buf))
 			Com_Error (ERR_DROP,"Mod_NumForName: wrong fileid for %s", mod->name);
