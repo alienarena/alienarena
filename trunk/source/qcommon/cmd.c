@@ -271,7 +271,7 @@ void Cbuf_AddEarlyCommands (qboolean clear)
 	for (i=0 ; i<COM_Argc() ; i++)
 	{
 		s = COM_Argv(i);
-		if (stricmp (s, "+set"))
+		if (_stricmp (s, "+set"))
 			continue;
 		Cbuf_AddText (va("set %s %s\n", COM_Argv(i+1), COM_Argv(i+2)));
 		if (clear)

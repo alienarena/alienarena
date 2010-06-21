@@ -29,7 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 void CIN_FreeCin (int texnum);
 
 extern float	r_turbsin[];
-extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 
 #define		TOK_DELIMINATORS "\r\n\t "
 

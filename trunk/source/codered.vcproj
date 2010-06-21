@@ -253,7 +253,7 @@
 				AssemblerListingLocation=".\release/"
 				ObjectFile=".\release/"
 				ProgramDataBaseFileName=".\release/"
-				WarningLevel="2"
+				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CallingConvention="0"
 				CompileAs="1"

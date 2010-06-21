@@ -1593,13 +1593,13 @@ void insertFont (char ** list, char *insert, int len )
 			for (j=len; j>i ;j--)
 				list[j] = list[j-1];
 
-			list[i] = strdup(insert);
+			list[i] = _strdup(insert);
 
 			return;
 		}
 	}
 
-	list[len] = strdup(insert);
+	list[len] = _strdup(insert);
 }
 
 char **SetFontNames (void)
@@ -1613,7 +1613,7 @@ char **SetFontNames (void)
 	list = malloc( sizeof( char * ) * MAX_FONTS );
 	memset( list, 0, sizeof( char * ) * MAX_FONTS );
 
-	list[0] = strdup("default");
+	list[0] = _strdup("default");
 
 	nfontnames = 1;
 
@@ -1637,7 +1637,7 @@ char **SetFontNames (void)
 
 		if (!fontInList(curFont, nfontnames, list))
 		{
-			insertFont(list, strdup(curFont),nfontnames);
+			insertFont(list, _strdup(curFont),nfontnames);
 			nfontnames++;
 		}
 
@@ -1706,13 +1706,13 @@ void insertCrosshair (char ** list, char *insert, int len )
 			for (j=len; j>i ;j--)
 				list[j] = list[j-1];
 
-			list[i] = strdup(insert);
+			list[i] = _strdup(insert);
 
 			return;
 		}
 	}
 
-	list[len] = strdup(insert);
+	list[len] = _strdup(insert);
 }
 
 char **SetCrosshairNames (void)
@@ -1728,10 +1728,10 @@ char **SetCrosshairNames (void)
 
 	ncrosshairnames = 4;
 
-	list[0] = strdup("none"); //the old crosshairs
-	list[1] = strdup("ch1");
-	list[2] = strdup("ch2");
-	list[3] = strdup("ch3");
+	list[0] = _strdup("none"); //the old crosshairs
+	list[1] = _strdup("ch1");
+	list[2] = _strdup("ch2");
+	list[3] = _strdup("ch3");
 
 	crosshairfiles = FS_ListFilesInFS( "pics/crosshairs/*.tga",
 	    &ncrosshairs, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
@@ -1755,7 +1755,7 @@ char **SetCrosshairNames (void)
 
 		if (!fontInList(curCrosshair, ncrosshairnames, list))
 		{
-			insertCrosshair(list, strdup(curCrosshair),ncrosshairnames);
+			insertCrosshair(list, _strdup(curCrosshair),ncrosshairnames);
 			ncrosshairnames++;
 		}
 
@@ -1843,13 +1843,13 @@ void insertHud (char ** list, char *insert, int len )
 			for (j=len; j>i ;j--)
 				list[j] = list[j-1];
 
-			list[i] = strdup(insert);
+			list[i] = _strdup(insert);
 
 			return;
 		}
 	}
 
-	list[len] = strdup(insert);
+	list[len] = _strdup(insert);
 
 }
 
@@ -1866,8 +1866,8 @@ char **SetHudNames (void)
 
 	nhudnames = 2;
 
-	list[0] = strdup("none");
-	list[1] = strdup("default"); //the default hud
+	list[0] = _strdup("none");
+	list[1] = _strdup("default"); //the default hud
 
 	hudfiles = FS_ListFilesInFS( "pics/huds/*.tga", &nhuds, 0,
 	    SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
@@ -1891,7 +1891,7 @@ char **SetHudNames (void)
 
 		if (!fontInList(curHud, nhudnames, list))
 		{
-			insertHud(list, strdup(curHud),nhudnames);
+			insertHud(list, _strdup(curHud),nhudnames);
 			nhudnames++;
 		}
 
@@ -4319,7 +4319,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	else
 	{
 #ifdef _WIN32
-		length = filelength( fileno( fp  ) );
+		length = _filelength( _fileno( fp  ) );
 #else
 		fseek(fp, 0, SEEK_END);
 		length = ftell(fp);
@@ -5961,7 +5961,7 @@ static void PlayerConfig_ScanDirectories( void )
 					if ( strrchr( scratch, '.' ) )
 						*strrchr( scratch, '.' ) = 0;
 
-					skinnames[s] = strdup( scratch );
+					skinnames[s] = _strdup( scratch );
 					s++;
 				}
 			}

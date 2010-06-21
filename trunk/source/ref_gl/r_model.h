@@ -102,7 +102,7 @@ BRUSH MODELS
 //
 // in memory representation
 //
-typedef struct
+typedef struct	mvertex_s
 {
 	vec3_t		position;
 } mvertex_t;
@@ -344,6 +344,7 @@ typedef struct model_s
 	int				num_joints;
 	iqmjoint_t		*joints;
 	matrix3x4_t		*frames;
+	matrix3x4_t		*outframe;
 	int				num_poses;
 	int				num_triangles;
 	iqmtriangle_t	*tris;

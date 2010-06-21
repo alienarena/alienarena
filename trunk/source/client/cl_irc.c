@@ -346,7 +346,7 @@ void CL_GetIRCData(void)
 	{
 	    // received a ping from server...
 #ifdef _WINDOWS	    
-		if (!strnicmp(File_Buf,"PING",4)) 
+		if (!_strnicmp(File_Buf,"PING",4)) 
 #else
 		if (!strncasecmp(File_Buf,"PING",4)) 
 #endif		

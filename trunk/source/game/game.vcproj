@@ -52,7 +52,7 @@
 				Optimization="3"
 				InlineFunctionExpansion="2"
 				FavorSizeOrSpeed="1"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;ARENA"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;ARENA;_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -61,7 +61,7 @@
 				ObjectFile=".\game___Win32_Alien_Arena/"
 				ProgramDataBaseFileName=".\game___Win32_Alien_Arena/"
 				BrowseInformation="1"
-				WarningLevel="2"
+				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
 			<Tool

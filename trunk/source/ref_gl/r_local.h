@@ -340,6 +340,8 @@ extern cvar_t	*cl_gun;
 extern vec3_t	lightPosition;
 extern float	dynFactor;
 extern void		GL_GetLightVals(qboolean dynamic);
+extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
+extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 
 //Player icons
 extern float	scr_playericonalpha;
@@ -647,6 +649,8 @@ extern GLuint		g_location_source;
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
 extern void R_DrawINTERQUAKEMODEL (void);
 extern void GL_AnimateIQMFrame(float curframe, int nextframe);
+extern qboolean inAnimGroup(int frame, int oldframe);
+extern int NextFrame(int frame);
 
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 
