@@ -61,10 +61,10 @@ void ACECO_ReadConfig(char config_file[128])
 
 		for(k = 1; k < 10; k++) {
 			infile.getline(a_string, 128);
-			botvals.weapacc[k] = atof(a_string);
+			botvals.weapacc[k] = (float)atof(a_string);
 		}
 		infile.getline(a_string, 128);
-		botvals.awareness = atof(a_string); 
+		botvals.awareness = (float)atof(a_string); 
 
 		infile.getline(botvals.chatmsg1, 128);
 		infile.getline(botvals.chatmsg2, 128);

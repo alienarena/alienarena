@@ -48,7 +48,6 @@ m_dlight_t model_dlights[MAX_MODEL_DLIGHTS];
 int model_dlights_num;
 
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
-extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 extern rscript_t *rs_glass;
 extern image_t *r_mirrortexture;
 

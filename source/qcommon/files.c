@@ -817,9 +817,9 @@ char **FS_ListFiles( char *findname, int *numfiles, unsigned musthave, unsigned 
 	{
 		if ( s[strlen(s)-1] != '.' )
 		{
-			list[nfiles] = strdup( s );
+			list[nfiles] = _strdup( s );
 #ifdef _WIN32
-			strlwr( list[nfiles] );
+			_strlwr( list[nfiles] );
 #endif
 			nfiles++;
 		}
@@ -938,7 +938,7 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave,
 				if (ComparePackFiles(findname,
 				    search->pack->files[i].name,
 				    musthave, canthave, path, sizeof(path)))
-					list[j++] = strdup(path);
+					list[j++] = _strdup(path);
 		} else if (search->filename != NULL) {
 			if (musthave & SFF_INPACK)
 				continue;
@@ -953,7 +953,7 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave,
 				for (i = 0, j = nfiles - tmpnfiles;
 				    i < tmpnfiles;
 				    i++, j++)
-					list[j] = strdup(tmplist[i] +
+					list[j] = _strdup(tmplist[i] +
 					    strlen(search->filename) + 1);
 				FS_FreeFileList(tmplist, tmpnfiles);
 			}

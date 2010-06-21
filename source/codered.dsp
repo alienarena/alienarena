@@ -320,6 +320,10 @@ SOURCE=.\ref_gl\r_vbo.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ref_gl\r_vlights.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ref_gl\r_warp.c
 # End Source File
 # Begin Source File

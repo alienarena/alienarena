@@ -691,7 +691,6 @@ void MakeSkyVec (float s, float t, int axis, float *tex_s, float *tex_t, float *
 R_DrawSkyBox
 ==============
 */
-extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 int	skytexorder[6] = {0,2,1,3,4,5};
 void R_DrawSkyBox (void)
 {

@@ -389,7 +389,7 @@ void EndDMLevel (void)
 			qboolean same = ( g_votesame ? (g_votesame->value == 1) : 1 );
 
 			memset( names, 0 , sizeof(names) );
-			s = strdup( sv_maplist->string );
+			s = _strdup( sv_maplist->string );
 			t = strtok( s, seps );
 			do {
 				// if using the same map is disallowed, skip it
@@ -464,7 +464,7 @@ void EndDMLevel (void)
 	}
 	// see if it's in the map list
 	if (*sv_maplist->string) {
-		s = strdup(sv_maplist->string);
+		s = _strdup(sv_maplist->string);
 		f = NULL;
 		t = strtok(s, seps);
 		while (t != NULL) {
@@ -508,7 +508,7 @@ void EndDMLevel (void)
 	else
 	{
 #ifdef _WIN32
-		length = filelength( fileno( fp  ) );
+		length = filelength( _fileno( fp  ) );
 #else
 		fseek(fp, 0, SEEK_END);
 		length = ftell(fp);

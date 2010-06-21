@@ -321,8 +321,6 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 
 void BuildIQMShadowVolume(vec3_t light, float projectdistance)
 {
-	iqmtriangle_t *ot, *tris;
-	neighbors_t *neighbors;
 	int i, j, shadow_vert = 0, index = 0;
 	unsigned	ShadowIndex[MAX_INDICES];
 	vec3_t v0, v1, v2, v3;
@@ -830,7 +828,8 @@ void R_DrawShadowVolume()
 
 	if(currentmodel->type == mod_alias)
 		GL_DrawAliasShadowVolume(paliashdr, lerped);
-	else {
+	else 
+	{
 		float time, frame;
 
 		//frame interpolation

@@ -168,7 +168,7 @@ void CL_HttpDownloadCleanup(){
                 MSG_WriteByte(&cls.netchan.message, clc_stringcmd);
                 MSG_WriteString(&cls.netchan.message, va("download %s", cls.downloadname));
 
-                unlink(file);  // delete partial or empty file
+                _unlink(file);  // delete partial or empty file
         }
 	
         cls.downloadpercent = 0;

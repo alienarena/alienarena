@@ -26,7 +26,6 @@ image_t		*draw_chars;
 image_t		*menu_chars;
 
 extern	qboolean	scrap_dirty;
-extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 extern cvar_t *con_font;
 void Scrap_Upload (void);
 

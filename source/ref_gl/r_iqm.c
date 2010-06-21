@@ -114,7 +114,6 @@ void Matrix3x4_Transform(mvertex_t *out, matrix3x4_t mat, const mvertex_t in)
     out->position[2] = DotProduct(mat.c, in.position) + mat.c[3];
 }
 
-extern 
 void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent)
 {
 	int i;
@@ -401,6 +400,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
         }
     }
 
+	mod->outframe = (matrix3x4_t *)Hunk_Alloc(mod->num_joints * sizeof(matrix3x4_t));
+
 	// load bounding box data
 	if (header->ofs_bounds)
 	{
@@ -546,8 +547,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	return true;
 }
 
-matrix3x4_t outframe[5096]; //to do - find out what max frames/joints might be
-
 void GL_AnimateIQMFrame(float curframe, int nextframe)
 {
 	int i, j;
@@ -556,7 +555,7 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
     float frameoffset = curframe - frame1;
 	frame1 %= currentmodel->num_poses;
 	frame2 %= currentmodel->num_poses;
- 
+
 	{
 		matrix3x4_t *mat1 = &currentmodel->frames[frame1 * currentmodel->num_joints],
 			*mat2 = &currentmodel->frames[frame2 * currentmodel->num_joints];
@@ -573,9 +572,9 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 			Matrix3x4_Add(&mat, mat, temp);
 
 			if(currentmodel->joints[i].parent >= 0) 
-				Matrix3x4_Multiply(&outframe[i], outframe[currentmodel->joints[i].parent], mat);
+				Matrix3x4_Multiply(&currentmodel->outframe[i], currentmodel->outframe[currentmodel->joints[i].parent], mat);
 			else 
-				Matrix3x4_Copy(&outframe[i], mat);
+				Matrix3x4_Copy(&currentmodel->outframe[i], mat);
 		}
 	}
 	// The actual vertex generation based on the matrixes follows...
@@ -586,8 +585,8 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 	
 		mvertex_t *dstpos = (mvertex_t *)currentmodel->animatevertexes;
 		mnormal_t *dstnorm = (mnormal_t *)currentmodel->animatenormal;
-		mtangent_t *dsttan = (mtangent_t *)currentmodel->animatetangent;		
-
+		mtangent_t *dsttan = (mtangent_t *)currentmodel->animatetangent;
+		
 		const unsigned char *index = currentmodel->blendindexes, *weight = currentmodel->blendweights;
 
 		for(i = 0; i < currentmodel->numvertexes; i++)
@@ -603,10 +602,10 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 			// sorted order from highest weight to lowest weight. Weights with 
 			// 0 values, which are always at the end, are unused.
 
-			Matrix3x4_Scale(&mat, outframe[index[0]], weight[0]/255.0f);
+			Matrix3x4_Scale(&mat, currentmodel->outframe[index[0]], weight[0]/255.0f);
 	
 			for(j = 1; j < 4 && weight[j]; j++) {
-				Matrix3x4_Scale(&temp, outframe[index[j]], weight[j]/255.0f);
+				Matrix3x4_Scale(&temp, currentmodel->outframe[index[j]], weight[j]/255.0f);
 				Matrix3x4_Add(&mat, mat, temp);
 			}
 
@@ -635,7 +634,7 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 
 			Matrix3x4_TransformTangent(dsttan, mat, *srctan);
 
-		    srcpos++;
+			srcpos++;
 			srcnorm++;
 			srctan++;
 			dstpos++;
@@ -645,14 +644,13 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 			index += 4;
 			weight += 4;
 		}
-	}
+	}	
 }
 
 void GL_VlightIQM (vec3_t baselight, mvertex_t *vert, mnormal_t *normal, vec3_t lightOut)
 {
 	float l;
 	float lscale;
-	int i;
 	vec3_t lightdir;
 
 	if(!gl_vlights->value)
@@ -676,7 +674,6 @@ void GL_DrawIQMFrame(int skinnum)
 	float	shellscale;
 	float	alpha, basealpha;
 	vec3_t	lightcolor;
-	char    shortname[MAX_QPATH];
 	int		index_xyz, index_st;
 	int		va = 0;
 	qboolean mirror = false;
@@ -1437,12 +1434,11 @@ R_DrawINTERQUAKEMODEL
 =================
 */
 
-void R_DrawINTERQUAKEMODEL ()
+void R_DrawINTERQUAKEMODEL ( void )
 {
 	int			i;
 	image_t		*skin;
 	float		frame, time;
-	int			nextframe;
 
 	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return;
@@ -1724,7 +1720,6 @@ void GL_DrawIQMCasterFrame ()
 
 void R_DrawIQMCaster ( void )
 {
-	dmdl_t		*paliashdr;
 	float		frame, time;
 
 	if(currententity->team) //don't draw flag models, handled by sprites
