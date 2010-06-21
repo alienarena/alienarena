@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2010 COR Entertainment
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -21,9 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-#ifdef HAVE_MREMAP
-#define _GNU_SOURCE   // -jjb-ac necessary?, mremap() is GNU extension
-// shouldn't this be in config.h or built-in ???
+#if defined HAVE_MREMAP
+#define _GNU_SOURCE
 #endif
 
 #include <sys/types.h>
@@ -42,7 +42,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*
  * State of currently open Hunk.
  * Valid between Hunk_Begin() and Hunk_End()
- * -jjb-fix  maybe should update to use mmap2()
  */
 byte *hunk_base = NULL;
 size_t *phunk_size_store = NULL;
@@ -52,34 +51,12 @@ size_t rsvd_hunk_size;
 size_t user_hunk_size;
 size_t total_hunk_used_size;
 
-
-#ifndef HAVE_MREMAP
-static size_t round_page( size_t requested_size )
-{
-	size_t page_size;
-	size_t num_pages;
-
-	/* round requested size to next higher page aligned size
-	 * assumes requested_size is non-zero, so always yields at least one page
-	 * also always yields at least 1 byte more than requested size
-	 */
-	page_size = (size_t)sysconf( _SC_PAGESIZE );
-	num_pages = (requested_size / page_size) + 1;
-	page_size *= even_pages;
-
-	return page_size;
-}
-#endif
-
-
 void *Hunk_Begin (int maxsize)
 {
-#if 0
-	// -jjb-dbg
-	Com_Printf("[Hunk_Begin : 0x%X :]\n", maxsize );
+
+	Com_DPrintf("[Hunk_Begin : 0x%X :]\n", maxsize );
 	if ( hunk_base != NULL )
-		Com_Printf("Warning: Hunk_Begin possible program error\n");
-#endif
+		Com_DPrintf("Warning: Hunk_Begin: hunk_base != NULL\n");
 
 	// reserve virtual memory space
 	rsvd_hunk_size = (size_t)maxsize + hunk_header_size;
@@ -106,54 +83,106 @@ void *Hunk_Alloc (int size)
 	size_t new_user_hunk_size;
 
 	if ( hunk_base == NULL ) {
-		Sys_Error("Hunk program error");
+		Sys_Error("Program Error: Hunk_Alloc: hunk_base==NULL");
 	}
 
-	user_hunk_block_size = ((size_t)size + 1) & ~0x01; // size is sometimes odd
+	// size is sometimes odd, so increment size to even boundary to avoid
+	//  odd-aligned accesses.
+	user_hunk_block_size = ((size_t)size + 1) & ~0x01;
 	new_user_hunk_size = user_hunk_size + user_hunk_block_size;
 	total_hunk_used_size += user_hunk_block_size;
 
 	if ( total_hunk_used_size > rsvd_hunk_size )
-		Sys_Error("Hunk_Alloc overflow");
+		Sys_Error("Program Error: Hunk_Alloc: overflow");
 
 	user_hunk_bfr = user_hunk_base + user_hunk_size; // set base of new block
 	user_hunk_size = new_user_hunk_size; // then update user hunk size
 
-#if 0
-	// -jjb-dbg
-	Com_Printf("[Hunk_Alloc : %u @ %p :]\n",
+	if ( developer && developer->integer == 2 )
+		Com_DPrintf("[Hunk_Alloc : %u @ %p :]\n",
 			user_hunk_block_size, user_hunk_bfr );
-#endif
 
 	return (void *)user_hunk_bfr;
 }
 
+#if defined HAVE_MREMAP
+// easy version, mremap() should be available on all Linux
 int Hunk_End (void)
 {
 	byte *remap_base;
 	size_t new_rsvd_hunk_size;
 
-	// shrink reserved size to size used
 	new_rsvd_hunk_size = total_hunk_used_size;
 	remap_base = mremap( hunk_base, rsvd_hunk_size, new_rsvd_hunk_size, 0 );
 	if ( remap_base != hunk_base ) {
 		Sys_Error("Hunk_End:  Could not remap virtual block (%d)", errno);
 	}
-
 	// "close" this hunk, setting reserved size for Hunk_Free
 	rsvd_hunk_size = new_rsvd_hunk_size;
 	*phunk_size_store = rsvd_hunk_size;
 
-#if 0
-	// -jjb-dbg
-	Com_Printf("[Hunk_End : 0x%X @ %p :]\n", rsvd_hunk_size, remap_base );
-#endif
+	Com_DPrintf("[Hunk_End : 0x%X @ %p :]\n", rsvd_hunk_size, remap_base );
 
 	hunk_base = user_hunk_base = NULL;
 	phunk_size_store = NULL;
 
 	return user_hunk_size; // user buffer is user_hunk_size @ user_hunk_base
 }
+
+#else
+// portable version (we hope)
+int Hunk_End()
+{
+	size_t sys_pagesize;
+	size_t rsvd_pages;
+	size_t rsvd_size;
+	size_t used_pages;
+	size_t used_size;
+	size_t unmap_size;
+	void *unmap_base;
+
+	// the portable way to get pagesize, according to documentation
+	sys_pagesize = (size_t)sysconf( _SC_PAGESIZE );
+
+	// calculate page-aligned size that was reserved
+	rsvd_pages = ( rsvd_hunk_size / sys_pagesize );
+	if ( (rsvd_hunk_size % sys_pagesize) != 0 )
+		rsvd_pages += 1;
+	rsvd_size = rsvd_pages * sys_pagesize;
+
+	// calculate page-aligned size that was used
+	used_pages = total_hunk_used_size / sys_pagesize;
+	if ( ( total_hunk_used_size % sys_pagesize ) != 0 )
+		used_pages += 1;
+	used_size = used_pages * sys_pagesize;
+
+	// unmap the unused space
+	if ( used_size < rsvd_size ) {
+		unmap_size = rsvd_size - used_size;
+		unmap_base = (void *)(hunk_base + used_size);
+		if ( ( munmap( unmap_base, unmap_size )) != 0 ) {
+			Com_DPrintf("Hunk_End: munmap failed [0x%X @ %p]\n",
+					unmap_size, unmap_base );
+			// throwing a Sys_Error is probably too drastic
+			// Sys_Error("Program Error: Hunk_End: munmap failed");
+		}
+		else
+		{
+			// update size reserved for Hunk_Free
+			rsvd_hunk_size = used_size;
+			*phunk_size_store = rsvd_hunk_size;
+		}
+
+	}
+
+	Com_DPrintf("Hunk_End: [0x%X @ %p]\n", rsvd_hunk_size, hunk_base );
+
+	hunk_base = user_hunk_base = NULL;
+	phunk_size_store = NULL;
+
+}
+#endif
+
 
 void Hunk_Free (void *base)
 {
@@ -165,10 +194,9 @@ void Hunk_Free (void *base)
 		// find hunk base and retreive the hunk reserved size
 		hunk_base = base - hunk_header_size;
 		hunk_rsvd_size = *((size_t *)hunk_base);
-#if 0
-		// -jjb-dbg
-		Com_Printf("[Hunk_Free : 0x%X @ %p :]\n", hunk_rsvd_size, hunk_base );
-#endif
+
+		Com_DPrintf("[Hunk_Free : 0x%X @ %p :]\n", hunk_rsvd_size, hunk_base );
+
 		if ( munmap( hunk_base, hunk_rsvd_size ) )
 			Sys_Error("Hunk_Free: munmap failed (%d)", errno);
 	}
@@ -206,7 +234,31 @@ int Sys_Milliseconds (void)
 
 void Sys_Mkdir (char *path)
 {
-    mkdir (path, 0777);
+#if 1
+	// -jjb-fix
+	struct stat statbuf;
+
+	if ( stat( path, &statbuf )) {
+		if ( errno == ENOENT ) {
+			// does not exist, attempt creation
+			Com_DPrintf("[Sys_Mkdir: creating %s]\n", path );
+			if ( mkdir( path, 0700 ) ) // assume this is for .codered/ dirs
+			{
+				Com_Printf("Warning: Could not create directory %s\n", path );
+			}
+		}
+		else {
+			Com_DPrintf("[Sys_Mkdir: stat error %d\n]", errno );
+		}
+	}
+	else {
+		if ( !statbuf.st_mode & (S_IFDIR ) ) {
+			Com_DPrintf("[Sys_Mkdir: non-directory in path.]\n");
+		}
+	}
+#else
+	mkdir( path, 0777 );
+#endif
 }
 
 //============================================

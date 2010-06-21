@@ -1156,7 +1156,7 @@ void R_Register( void )
 	gl_playermip = Cvar_Get ("gl_playermip", "0", 0);
 
 // -jjb-ac This wants to be in configure. need to pass to config.h
-// OPENGL_DRIVER
+// OPENGL_DRIVER.  MAC/Darwin probably different
 /*
 #if defined UNIX_VARIANT
 	gl_driver = Cvar_Get( "gl_driver", "libGL.so.1", CVAR_ARCHIVE );
@@ -1433,7 +1433,7 @@ void R_SetHighest( void )
 	Com_Printf("...autodetected HIGHEST game setting\n");
 }
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 double CPUSpeed()
 {
 
@@ -1538,7 +1538,7 @@ int R_Init( void *hinstance, void *hWnd )
 	}
 
 // -jjb-ac
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 	if ( strstr( gl_config.extensions_string, "WGL_EXT_swap_control" ) )
 	{
 		qwglSwapIntervalEXT = ( BOOL (WINAPI *)(int)) qwglGetProcAddress( "wglSwapIntervalEXT" );
@@ -1567,9 +1567,7 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...GL_EXT_point_parameters not found\n" );
 	}
 
-// -jjb-ac  is this archaic?, why is it __unix__
-/*
-#ifdef __unix__
+#if defined UNIX_VARIANT
 	if ( strstr( gl_config.extensions_string, "3DFX_set_global_palette" ))
 	{
 		if ( gl_ext_palettedtexture->value )
@@ -1588,7 +1586,6 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...3DFX_set_global_palette not found\n" );
 	}
 #endif
-*/
 
 	if ( !qglColorTableEXT &&
 		strstr( gl_config.extensions_string, "GL_EXT_paletted_texture" ) &&
@@ -1798,7 +1795,7 @@ int R_Init( void *hinstance, void *hWnd )
 // -jjb-ac
 //  check this as GetSystemInfo or popen existence ???
 //   or make a os-dependent subroutine. MAC most likely different
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 		SYSTEM_INFO sysInfo;
 		GetSystemInfo(&sysInfo);
 

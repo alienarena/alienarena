@@ -213,12 +213,24 @@ typedef struct
 									// > cls.disable_servercount, clear disable_screen
 
 // connection information
+#if 1
+	// moving netchan here seems to help some obscure bug, possibly
+	//  an alignment problem. where netchan_t.outgoing sequence is
+	//  overwritten with a stale value.
+	// -jjb-dbg
+	netchan_t	netchan;
+#endif
+
 	char		servername[MAX_OSPATH];	// name of server from original connect
 	float		connect_time;		// for connection retransmits
 
 	int			quakePort;			// a 16 bit value that allows quake servers
 									// to work around address translating routers
+#if 0
+	// -jjb-dbg
 	netchan_t	netchan;
+#endif
+
 	int			serverProtocol;		// in case we are doing some kind of version hack
 
 	int			challenge;			// from the server to use for connecting

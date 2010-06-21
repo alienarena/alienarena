@@ -310,9 +310,9 @@ void fire_blasterball (edict_t *self, vec3_t start, vec3_t dir, int damage, int 
 	bolt->nextthink = level.time + 2;
 	bolt->think = G_FreeEdict;
 	bolt->dmg = damage;
-	
+
 	bolt->classname = "bolt";
-	
+
 	gi.linkentity (bolt);
 
 	tr = gi.trace (self->s.origin, NULL, NULL, bolt->s.origin, bolt, MASK_SHOT);
@@ -1794,7 +1794,12 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 			gi.WriteByte (4);
 			gi.WritePosition (tr.endpos);
 			gi.WriteDir (tr.plane.normal);
-			gi.WriteByte (self->s.skinnum);
+#if 0
+			gi.WriteByte (self->s.skinnum); // -jjb-dbg can be >255 (3077)
+#else
+			gi.WriteByte (1); // -jjb-dbg can be >255 (3077)
+			// but probably not used in svc_temp_entity for TE_LASER_SPARKS
+#endif
 			gi.multicast (tr.endpos, MULTICAST_PVS);
 
 		}

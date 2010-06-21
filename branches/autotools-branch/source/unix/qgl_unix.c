@@ -3039,7 +3039,7 @@ qboolean QGL_Init( const char *dllname )
 	{
 		char	fn[MAX_OSPATH];
 		char	*path;
-		FILE *fp;
+		// FILE *fp; // -jjb-unused
 
 //		Com_Printf(PRINT_ALL, "QGL_Init: Can't load %s from /etc/ld.so.conf: %s\n",
 //				dllname, dlerror());

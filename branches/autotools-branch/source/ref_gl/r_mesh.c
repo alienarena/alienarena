@@ -41,7 +41,7 @@ float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
 
 static  vec4_t  s_lerped[MAX_VERTS];
 
-static	vec3_t	s_normals[MAX_VERTS];
+// static	vec3_t	s_normals[MAX_VERTS]; // -jjb-fix not used
 
 extern	vec3_t	lightspot;
 vec3_t	shadevector;
@@ -316,8 +316,8 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 //legacy code - this is for ancient hardware that cannot handle GL_TRIANGLE useage
 void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 {
-    daliasframe_t   *frame, *oldframe;
-    dtrivertx_t *v, *ov, *verts;
+    daliasframe_t   *frame, *oldframe=NULL;
+    dtrivertx_t *v, *ov=NULL, *verts;
     int     *order, *startorder, *tmp_order;
     int     count, tmp_count;
     float   frontlerp;
@@ -837,8 +837,8 @@ void R_DrawAliasShadowLegacy(dmdl_t *paliashdr, qboolean lerped)
 
 void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skinnum)
 {
-	daliasframe_t	*frame, *oldframe;
-	dtrivertx_t	*v, *ov, *verts;
+	daliasframe_t	*frame, *oldframe=NULL;
+	dtrivertx_t	*v, *ov=NULL, *verts;
 	dtriangle_t		*tris;
 	float	frontlerp;
 	float	alpha, basealpha;
@@ -1047,17 +1047,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[4] = currentmodel->vertexes[index_xyz].position[2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
 					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
-#if 1
-						// -jjb-fix optimize hack, compiler may already do this
-						float *plni = &r_avertexnormals[verts[index_xyz].lightnormalindex][0];
-						normal[0] = *plni++ ;
-                        normal[1] = *plni++ ;
-						normal[2] = *plni ;
-#else
-
                         for (k=0;k<3;k++)
                             normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
-#endif
                     }
 					else {
 
@@ -1069,31 +1060,17 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				}
 
 				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
-#if 0
-					// -jjb-fix  redundant?
                     VectorNormalize ( normal );
-#endif
                     AngleVectors(normal, NULL, tangent, NULL);
                     VectorCopy(normal, NormalsArray[va]); //shader needs normal array
-#if 0
-                    // -jjb-fix suspect this is not right?
                     glUniform3fARB( g_location_meshTangent, tangent[0], tangent[1], tangent[2] );
                 }
-#endif
-#if 1
-                // -jjb-fix  optimize hack
-				VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
-			}
-                else
-                    VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 
-#else
 				// increment pointer and counter
                 if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
                     VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
                 else
                     VArray += VertexSizes[VERT_COLOURED_TEXTURED];
-#endif
                 va++;
             }
         }
@@ -2021,7 +1998,7 @@ void R_DrawAliasModel (entity_t *e)
 void GL_DrawAliasCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 {
 	daliasframe_t	*frame, *oldframe;
-	dtrivertx_t	*v, *ov, *verts;
+	dtrivertx_t	*v, *ov=NULL, *verts;
 	dtriangle_t		*tris;
 	float	frontlerp;
 	vec3_t	move, delta, vectors[3];

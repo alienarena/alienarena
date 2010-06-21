@@ -805,7 +805,7 @@ dynamic:
 	}
 
 	if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
-		dlight_t	*dl;
+		dlight_t	*dl = NULL;
 		int			lnum, sv_lnum = 0;
 		float		add, brightest = 0;
 		vec3_t		lightVec;

@@ -1,6 +1,23 @@
 # Alien Arena auto configuration source
 # Process this file with autoconf to produce a configure script.
 #
+# Copyright (C) 2010 COR Entertainment
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# 
+# See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#
 
 AC_PREREQ(2.65)
 AC_INIT([alienarena],[7.41pre],[alienrace@comcast.net],[alienarena])
@@ -181,7 +198,7 @@ AS_IF([ test "x${cond_build_unix}" = xyes ],
 [
 
 dnl TODO darwin might require something different
-AC_DEFINE([OPENGL_DRIVER],["libgl.so.1"],[OpenGL shared library name])
+AC_DEFINE([OPENGL_DRIVER],["libGL.so.1"],[OpenGL shared library name])
 	 		
 AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
 	[AC_MSG_ERROR("Required X11 header files not found")])

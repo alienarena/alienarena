@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // cl_scrn.c -- master for refresh, status bar, console, chat, notify, etc
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 /*
 
   full screen console
@@ -589,7 +593,6 @@ void SCR_DrawRotatingIcon( void )
 	if (yaw > 360)
 		yaw = 0;
 
-	//i think this is where it's getting blown out, the model keeps getting overwritten or lost at map load
 	entity.model = R_RegisterModel( "models/objects/icon/tris.md2" );
 
 	entity.flags = RF_FULLBRIGHT | RF_MENUMODEL;
@@ -686,7 +689,12 @@ void SCR_DrawLoading (void)
 	else
 		Draw_Fill (0, 0, viddef.width, viddef.height, 0);
 
+#if 0
 	Draw_StretchPic (0, 0, viddef.width, viddef.height, "m_background");
+#else
+	// -jjb-fix  m_background does not exist, not sure what to use instead
+	Draw_StretchPic (0, 0, viddef.width, viddef.height, "m_menu");
+#endif
 
 	//loading message stuff...
 	if (isMap)
@@ -936,8 +944,6 @@ void SCR_BeginLoadingPlaque (void)
 	cl.sound_prepped = false;		// don't play ambients
 
 	if (developer->value) {
-		// -jjb-fix
-//		curtime = Sys_Milliseconds(); // affects SCR_showFPS()
 		return;
 	}
 
@@ -1231,7 +1237,7 @@ SCR_ExecuteLayoutString
 */
 void SCR_ExecuteLayoutString (char *s)
 {
-	int		x, y, ny; //ny is coordinates used for new sb layout client tags only
+	int		x, y, ny=0; //ny is coordinates used for new sb layout client tags only
 	int		value;
 	char	*token;
 	int		width;
@@ -1808,8 +1814,8 @@ void SCR_showFPS(void)
 
 	if( restart )
 	{
-		//start_msec = cls.realtime;
-		start_msec = Sys_Milliseconds();
+		start_msec = cls.realtime;
+		//start_msec = Sys_Milliseconds();
 		framecounter = 0.0f;
 		update_trigger = 10.0f; // initial delay to update
 		temp[0] = 0; // blank the text buffer
@@ -1821,18 +1827,16 @@ void SCR_showFPS(void)
 		if( framecounter >= update_trigger )
 		{
 			// calculate frames-per-second, using client frame current time
-			//end_msec = cls.realtime;
-			end_msec = Sys_Milliseconds();
+			end_msec = cls.realtime;
+			//end_msec = Sys_Milliseconds();
 			time_sec = ((float)(end_msec - start_msec)) / 1000.0f;
 			framerate = framecounter / time_sec ;
 
 			// update text buffer for display
 			Com_sprintf( temp, sizeof(temp), "%3.1ffps", framerate );
 
-#if 1
-			Com_DPrintf("[showFPS:%i:%i:%f:%f:%f:]\n",
-					start_msec, end_msec, time_sec, framecounter, framerate );
-#endif
+			//Com_DPrintf("[showFPS:%i:%i:%f:%f:%f:]\n",
+				//	start_msec, end_msec, time_sec, framecounter, framerate );
 
 			// setup for next update
 			framecounter = 0.0f;

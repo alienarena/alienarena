@@ -17,20 +17,16 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-#include "q_shared.h"
 
-// jjb-ac  redundant
-// #define DEG2RAD( a ) ( a * M_PI ) / 180.0F
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "q_shared.h"
 
 vec3_t vec3_origin = {0,0,0};
 
 //============================================================================
-
-/* -jjb-ac
-#ifdef _WIN32
-#pragma optimize( "", off )
-#endif
-*/
 
 void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees )
 {
@@ -86,12 +82,6 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 		dst[i] = rot[i][0] * point[0] + rot[i][1] * point[1] + rot[i][2] * point[2];
 	}
 }
-
-/* -jjb-ac
-#ifdef _WIN32
-#pragma optimize( "", on )
-#endif
-*/
 
 /*
 ** Fast sincos function using polynomial approximation
@@ -191,14 +181,7 @@ void fast_sincosf( float angle, float *sina, float *cosa )
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
 	float		angle;
-
-// -jjb-ac
-//#ifdef _WINDOWS
-//	static float		sr, sp, sy, cr, cp, cy;
-//	// static to help MS compiler fp bugs
-//#else
 	float		sr, sp, sy, cr, cp, cy;
-//#endif
 
 	angle = angles[YAW] * (kTwoPI / 360.0f);
 	fast_sincosf( angle, &sy, &cy );
@@ -389,7 +372,7 @@ void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4])
 //============================================================================
 
 
-// -jjb-ac these are probably obsolete
+// these are probably obsolete (2010-06-13)
 /*
 float Q_fabs (float f)
 {
@@ -403,10 +386,7 @@ float Q_fabs (float f)
 	return * ( float * ) &tmp;
 #endif
 }
-*/
 
-// -jjb-ac
-/*
 #if defined _M_IX86 && !defined C_ONLY
 #pragma warning (disable:4035)
 __declspec( naked ) long Q_ftol( float f )
@@ -492,8 +472,6 @@ BoxOnPlaneSide
 Returns 1, 2, or 1 + 2
 ==================
 */
-// -jjb-ac
-// #if !id386 || defined __unix__
 
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 {
@@ -557,13 +535,10 @@ dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
 	if (dist2 < p->dist)
 		sides |= 2;
 
-//	assert( sides != 0 );
-//-JD - commented this out, it caused crashes on DM14.  Not even sure of it's purpose.
-
 	return sides;
 }
-/*
-#else
+
+/*  probably obsolete (2010-06-13)
 #pragma warning( disable: 4035 )
 
 __declspec( naked ) int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
@@ -830,12 +805,57 @@ int VectorCompare (vec3_t v1, vec3_t v2)
 }
 
 
+#if 0
+// -jjb-exp
+/*
+ * tricky fast inverse square root using Newton-Raphson approximation
+ * and some magic numbers.
+ * used in Quake3 apparently, but origins are lost in the mists of time.
+ */
+float InvSqrt( float x )
+{
+    float xhalf = 0.5f * x;
+    int i = *(int*)&x;
+    i = 0x5f3759df - ( i>>1 );
+    x = *(float*)&i;
+    x = x * ( 1.5f - (xhalf * x * x ));
+    return x;
+}
+
 vec_t VectorNormalize (vec3_t v)
 {
 	float	length, ilength;
 
 	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = sqrt (length);		// FIXME
+
+	if ( length > 0.00001f  )
+	{
+		ilength = InvSqrt( length );
+		v[0] *= ilength;
+		v[1] *= ilength;
+		v[2] *= ilength;
+
+		// for callers that don't use length, would be nice to have an
+		//  alternate that did not do this divide.
+		length = 1.0f / ilength ;
+
+	}
+	else
+	{
+		length = 0.0f;
+	}
+
+	return length;
+
+}
+
+#else
+vec_t VectorNormalize (vec3_t v)
+{
+	float	length, ilength;
+
+	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+	length = sqrt (length);
 
 	if (length)
 	{
@@ -848,13 +868,14 @@ vec_t VectorNormalize (vec3_t v)
 	return length;
 
 }
+#endif
 
 vec_t VectorNormalize2 (vec3_t v, vec3_t out)
 {
 	float	length, ilength;
 
 	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = sqrt (length);		// FIXME
+	length = sqrt (length);
 
 	if (length)
 	{
@@ -943,7 +964,7 @@ void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
 	cross[2] = v1[0]*v2[1] - v1[1]*v2[0];
 }
 
-double sqrt(double x);
+// double sqrt(double x); // -jjb-fix
 
 vec_t VectorLength(vec3_t v)
 {
@@ -953,7 +974,7 @@ vec_t VectorLength(vec3_t v)
 	length = 0;
 	for (i=0 ; i< 3 ; i++)
 		length += v[i]*v[i];
-	length = sqrt (length);		// FIXME
+	length = sqrt (length);
 
 	return length;
 }
@@ -1568,13 +1589,15 @@ void Com_PageInMemory (byte *buffer, int size)
 // FIXME: replace all Q_stricmp with Q_strcasecmp
 int Q_stricmp (char *s1, char *s2)
 {
-#if defined(WIN32)
+// -jjb-ac
+#if defined HAVE__STRICMP
 	return _stricmp (s1, s2);
-#else
+#elif defined HAVE_STRCASECMP
 	return strcasecmp (s1, s2);
+#else
+#error Q_stricmp: missing string compare function
 #endif
 }
-
 
 int Q_strncasecmp (char *s1, char *s2, int n)
 {
@@ -1613,7 +1636,9 @@ void Com_sprintf (char *dest, int size, char *fmt, ...)
 {
 	int		len;
 	va_list		argptr;
-	char	bigbuffer[0x10000];
+
+//	char	bigbuffer[0x10000];
+	char bigbuffer[6000]; // -jjb-fix  should more than be big enough
 
 	va_start (argptr,fmt);
 	len = vsnprintf (bigbuffer,sizeof(bigbuffer), fmt,argptr);
@@ -1635,6 +1660,7 @@ void Com_sprintf (char *dest, int size, char *fmt, ...)
 ============================================================================
 */
 
+// not used, may be obsolete (2010-06-13)
 /*
 ==============
 Q_strncpyz
@@ -1658,11 +1684,11 @@ void Q_strncpyz( char *dest, const char *src, size_t size )
 Q_strncatz
 ==============
 */
-// -jjb-ac  probably not used (see glw_imp.c)
+
 /*
 void Q_strncatz( char *dest, const char *src, size_t size )
 {
-// -jjb-ac
+
 #ifdef HAVE_STRLCAT
 	strlcat( dest, src, size );
 #else

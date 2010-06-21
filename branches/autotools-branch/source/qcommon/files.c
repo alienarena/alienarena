@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2010 COR Entertainment
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -22,19 +23,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -------------------------------------------------------------------------------
 Alien Arena File System
 
+---- Windows Install or Single Directory ----
 
----- Windows Install ----
-
-c:\Alien Arena\
+c:\Alien Arena\ [~\games\alienarena]
 	data1\
 	arena\
 	botinfo\
 	crx.exe
 
-( MinGW builds??? )
+( MinGW builds TBD )
 
 
----- GNU Autotools Standard Install Linux/Unix ----
+---- GNU Autotools Standard Install Linux/Darwin ----
 
 prefix (/usr/local/games)
 execprefix (/usr/local/games)
@@ -44,12 +44,18 @@ bindir (/usr/local/games/bin)
   crx-ded
 
 datarootdir (/usr/local/games/share)
-datadir (/usr/local/games/share/)
-
-pkgdatadir (/usr/local/games/share/alienarena/)   READ-ONLY
+datadir (/usr/local/games/share)
+pkgdatadir (/usr/local/games/share/alienarena/)  USER READ-ONLY
   data1/
   arena/
   botinfo/
+    nav/
+      <mapname>.nod
+    allbots.tmp
+    team.tmp
+    custom?.tmp
+    <botname>.cfg
+    <mapname>.tmp
 
 docdir (/usr/local/share/doc/)
 pkgdocdir (/usr/local/share/doc/alienarena)
@@ -58,18 +64,22 @@ pkgdocdir (/usr/local/share/doc/alienarena)
 COR_GAME (/home/$(whoami)/.codered)   READ/WRITE
   data1/
   arena/
+    maps/
+    demos/
+    screenshots/
+    config.cfg
+    autoexec.cfg
 
-  maps/
-  demos/
-  screenshots/
   botinfo/
-  config.cfg
-  autoexec.cfg
+    bot.tmp
+    team.tmp
+    custom?.tmp
+    <botname>.cfg
+    <mapname>.tmp
 
 
 --- GNU Autotools Single Directory/SVN Install ---
-
-
+TBD.
 
 
 --- Original Quake File System Comments ---
@@ -92,7 +102,6 @@ they shouldn't.
 -------------------------------------------------------------------------------
 */
 
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -100,6 +109,7 @@ they shouldn't.
 #include "qcommon.h"
 #include "unix/glob.h"
 
+//#define PACKFILE_SUPPORT
 
 #if defined PACKFILE_SUPPORT
 // if a packfile directory differs from this, it is assumed to be hacked
@@ -151,14 +161,33 @@ filelink_t	*fs_links;
 typedef struct searchpath_s
 {
 	char	filename[MAX_OSPATH];
+#if defined PACKFILE_SUPPORT
 	pack_t	*pack;		// only one of filename / pack will be used
+#endif
 	struct searchpath_s *next;
 } searchpath_t;
 
 searchpath_t	*fs_searchpaths;
 searchpath_t	*fs_base_searchpaths;	// without gamedirs
 
+/*===
+Alien Arena ACEBOT File System
 
+ - botinfo can be in one place or two places depending on the installation
+ - botinfo_userdir has priority for reads, and is read-write.
+ - botinfo_datadir may not exist. It is read-only for non-root/admin.
+
+ -- botinfo files and file types --
+  - allbots.tmp   : data for bots included in the Add Bot menu.
+  - team.tmp      : data for default set of bots spawned for a team game.
+  - <botname>.cfg : config data for bots by name.
+  - <mapname>.tmp : data for the set of bots spawned in a map.
+
+
+===*/
+char user_homedir[MAX_OSPATH];
+char botinfo_userdir[MAX_OSPATH];
+char botinfo_datadir[MAX_OSPATH];
 
 /*
 ================
@@ -226,13 +255,17 @@ a seperate file.
 ===========
 */
 int file_from_pak = 0;
-#ifndef NO_ADDONS
+// #ifndef NO_ADDONS
 int FS_FOpenFile (char *filename, FILE **file)
 {
 	searchpath_t	*search;
 	char			netpath[MAX_OSPATH];
+
+#if defined PACKFILE_SUPPORT
 	pack_t			*pak;
 	int				i;
+#endif
+
 	filelink_t		*link;
 
 	file_from_pak = 0;
@@ -256,6 +289,7 @@ int FS_FOpenFile (char *filename, FILE **file)
 //
 // search through the path, one element at a time
 //
+#if defined PACKFILE_SUPPORT
 	for (search = fs_searchpaths ; search ; search = search->next)
 	{
 	// is the element a pak file?
@@ -286,25 +320,46 @@ int FS_FOpenFile (char *filename, FILE **file)
 			if (!*file)
 				continue;
 
-#if 0
-			// -jjb-fix flooding
-			Com_DPrintf ("FindFile: %s\n",netpath);
-#endif
+			if ( developer &&
+					( developer->integer == 3  || developer->integer == 4 ) )
+				Com_DPrintf ("FindFile: %s\n",netpath);
 
 			return FS_filelength (*file);
 		}
+	}
+#else
 
+	for (search = fs_searchpaths ; search ; search = search->next)
+	{
+		if ( developer && developer->integer == 4 )
+			Com_DPrintf("[FS_FOpenFile: search: %s ]\n", search );
+
+		Com_sprintf (netpath, sizeof(netpath), "%s/%s",search->filename, filename);
+
+		*file = fopen( netpath, "rb" );
+		if ( !*file ) {
+			if ( developer && developer->integer == 4 )
+				Com_DPrintf("[FS_FOpenFile: !*file: %s/%s ]\n",
+						search->filename, filename );
+			continue;
+		}
+
+		if ( developer && ( developer->integer == 3  || developer->integer == 4 ))
+				Com_DPrintf ("FindFile: %s\n",netpath);
+
+		return FS_filelength( *file );
 	}
 
-#if 0
-	// -jjb-fix flooding
-	Com_DPrintf ("FindFile: can't find %s\n", filename);
 #endif
+
+	if ( developer && developer->integer == 5 )
+		Com_DPrintf ("FindFile: can't find %s\n", filename);
 
 	*file = NULL;
 	return -1;
 }
 
+/*
 #else
 
 // this is just for demos to prevent add on hacking
@@ -327,10 +382,8 @@ int FS_FOpenFile (char *filename, FILE **file)
 		if (!*file)
 			return -1;
 
-#if 0
 		// -jjb-fix flooding
 		Com_DPrintf ("FindFile: %s\n",netpath);
-#endif
 
 		return FS_filelength (*file);
 	}
@@ -358,16 +411,14 @@ int FS_FOpenFile (char *filename, FILE **file)
 			return pak->files[i].filelen;
 		}
 
-#if 0
-	// -jjb-fix flooding
 	Com_DPrintf ("FindFile: can't find %s\n", filename);
-#endif
 
 	*file = NULL;
 	return -1;
 }
 
 #endif
+*/
 
 
 /*
@@ -510,9 +561,9 @@ Loads the header and directory, adding the files at the beginning
 of the list so they override previous pack files.
 =================
 */
+#if defined PACKFILE_SUPPORT
 pack_t *FS_LoadPackFile (char *packfile)
 {
-#if defined PACKFILE_SUPPORT
 
 	dpackheader_t	header;
 	int				i;
@@ -554,10 +605,12 @@ pack_t *FS_LoadPackFile (char *packfile)
 // crc the directory to check for modifications
 	checksum = Com_BlockChecksum ((void *)info, header.dirlen);
 
+/*
 #ifdef NO_ADDONS
 	if (checksum != PAK0_CHECKSUM)
 		return NULL;
 #endif
+*/
 
 // parse the directory
 	for (i=0 ; i<numpackfiles ; i++)
@@ -576,10 +629,8 @@ pack_t *FS_LoadPackFile (char *packfile)
 	Com_Printf ("Added packfile %s (%i files)\n", packfile, numpackfiles);
 	return pack;
 
-#else
-	return NULL;
-#endif
 }
+#endif
 
 /*
  * ========= FS_FileExists ========
@@ -608,10 +659,12 @@ then loads and adds pak1.pak pak2.pak ...
 */
 void FS_AddGameDirectory (char *dir)
 {
+#if defined PACKFILE_SUPPORT
 	int				i;
-	searchpath_t	*search;
 	pack_t			*pak;
 	char			pakfile[MAX_OSPATH];
+#endif
+	searchpath_t	*search;
 
 #if defined WIN32_VARIANT
 	strcpy (fs_gamedir, dir);
@@ -651,7 +704,7 @@ void FS_AddGameDirectory (char *dir)
 
 }
 
-#if defined UNIX_VARIANT
+#if defined DATADIR || defined UNIX_VARIANT
 /*
 ================
 FS_AddHomeAsGameDirectory
@@ -674,8 +727,6 @@ void FS_AddHomeAsGameDirectory (char *dir)
 		homedir = getenv("HOME");
 		if (!homedir)
 			return;
-// -jjb-ac
-//  renaming .codered, handle with autoconf ???
 		len = snprintf(gdir,sizeof(gdir),"%s/.codered/%s/", homedir, dir);
 	}
 
@@ -689,6 +740,19 @@ void FS_AddHomeAsGameDirectory (char *dir)
 	fs_gamedir[sizeof(fs_gamedir)-1] = 0;
 
 	FS_AddGameDirectory (gdir);
+
+//!!!!!!!!!!!!!111
+/*
+
+	// -jjb-ac  For writing botinfo  ! this happens twice on startup!
+	//  have to put it some other place
+	Com_sprintf( botinfo_userdir, sizeof(user_homedir),
+			"%s/.codered/botinfo/", homedir );
+	Com_Printf("using %s for writing\n", botinfo_userdir );
+
+*/
+//!!!!!!!!!!!!!!!!!
+
  }
 #endif
 
@@ -704,27 +768,11 @@ char *FS_Gamedir (void)
 #if defined UNIX_VARIANT
 	return fs_gamedir;
 #else
-// -jjb-fix is this really what we want? BASEDIRNAME is "data1"
-// if game is set to data1 then "extra stuff" will be written there
-// by current convention this should be "arena"
-// looks like fs_gamedir is always set by default to "arena"
 	if (*fs_gamedir)
 		return fs_gamedir;
 	else
 		return BASEDIRNAME;
 #endif
-
-/**
-	Possibly
-	if ( !*fs_gamedir )
-	{
-		error
-	}
-	else
-	{
-		stat and make sure it is writeable on init
-	}
-**/
 }
 
 /*
@@ -732,31 +780,68 @@ char *FS_Gamedir (void)
 FS_ExecAutoexec
 =============
 */
+#if defined UNIX_VARIANT
+
 void FS_ExecAutoexec (void)
 {
-#ifdef __unix__
 	searchpath_t *s, *end;
-#else
-	char *dir;
-#endif
-	char name [MAX_QPATH];
-#ifdef __unix__
-	if (fs_searchpaths == fs_base_searchpaths)
+	char name [MAX_OSPATH];
+
+	if ( fs_searchpaths == fs_base_searchpaths )
 		end = NULL;
-#else
-	dir = Cvar_VariableString("gamedir");
-	if (*dir)
-		Com_sprintf(name, sizeof(name), "%s/%s/autoexec.cfg", fs_basedir->string, dir);
-#endif
 	else
-#ifdef __unix__
 		end = fs_base_searchpaths;
 
 	// search through all the paths for an autoexec.cfg file
 	for (s = fs_searchpaths ; s != end ; s = s->next)
 	{
+		Com_sprintf(name, sizeof(name), "%s/autoexec.cfg", s->filename);
+
+		if ( Sys_FindFirst( name, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM ))
+		{
+			Cbuf_AddText ("exec autoexec.cfg\n");
+			Sys_FindClose();
+			break;
+		}
+		Sys_FindClose();
+	}
+}
+
+#else
+
+void FS_ExecAutoexec (void)
+{
+#if defined UNIX_VARIANT
+	searchpath_t *s, *end;
+#else
+	char *dir;
+#endif
+
+	char name [MAX_OSPATH];
+
+#if defined UNIX_VARIANT
+
+	if (fs_searchpaths == fs_base_searchpaths)
+		end = NULL;
+#else
+
+	dir = Cvar_VariableString("gamedir");
+	if (*dir)
+		Com_sprintf(name, sizeof(name), "%s/%s/autoexec.cfg", fs_basedir->string, dir);
+#endif
+
+	else
+
+#if defined UNIX_VARIANT
+		end = fs_base_searchpaths;
+
+	// search through all the paths for an autoexec.cfg file
+	for (s = fs_searchpaths ; s != end ; s = s->next)
+	{
+#if defined PACKFILE_SUPPORT
 		if (s->pack)
 			continue;
+#endif
 
 		Com_sprintf(name, sizeof(name), "%s/autoexec.cfg", s->filename);
 
@@ -775,6 +860,7 @@ void FS_ExecAutoexec (void)
 	Sys_FindClose();
 #endif
 }
+#endif
 
 
 /*
@@ -800,12 +886,14 @@ void FS_SetGamedir (char *dir)
 	//
 	while (fs_searchpaths != fs_base_searchpaths)
 	{
+#if defined PACKFILE_SUPPORT
 		if (fs_searchpaths->pack)
 		{
 			fclose (fs_searchpaths->pack->handle);
 			Z_Free (fs_searchpaths->pack->files);
 			Z_Free (fs_searchpaths->pack);
 		}
+#endif
 		next = fs_searchpaths->next;
 		Z_Free (fs_searchpaths);
 		fs_searchpaths = next;
@@ -818,7 +906,7 @@ void FS_SetGamedir (char *dir)
 	if (dedicated && !dedicated->value)
 		Cbuf_AddText ("vid_restart\nsnd_restart\n");
 
-#if defined WIN_VARIANT
+#if defined WIN32_VARIANT
 	Com_sprintf (fs_gamedir, sizeof(fs_gamedir), "%s/%s", fs_basedir->string, dir);
 #endif
 
@@ -831,7 +919,7 @@ void FS_SetGamedir (char *dir)
 	{
 		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO|CVAR_NOSET);
 
-#ifdef DATADIR
+#if defined DATADIR
 		FS_AddGameDirectory (va("%s/%s", DATADIR, dir) );
 #endif
 
@@ -841,7 +929,7 @@ void FS_SetGamedir (char *dir)
 
 		FS_AddGameDirectory (va("%s/%s", fs_basedir->string, dir) );
 
-#ifdef UNIX_VARIANT
+#if defined UNIX_VARIANT
 		FS_AddHomeAsGameDirectory(dir);
 #endif
 
@@ -932,7 +1020,7 @@ char **FS_ListFiles( char *findname, int *numfiles, unsigned musthave, unsigned 
 		if ( s[strlen(s)-1] != '.' )
 		{
 			list[nfiles] = strdup( s );
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 			strlwr( list[nfiles] );
 #endif
 			nfiles++;
@@ -957,6 +1045,7 @@ void FS_FreeFileList (char **list, int n) // jit
 	free(list);
 }
 
+#if defined PACKFILE_SUPPORT
 /*
  * CompareAttributesPack
  *
@@ -1008,6 +1097,7 @@ ComparePackFiles(const char *findname, const char *name,
 
 	return (retval);
 }
+#endif
 
 /*
  * FS_ListFilesInFS
@@ -1033,6 +1123,8 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave,
 	list = malloc(sizeof(char *));
 
 	for (search = fs_searchpaths; search != NULL; search = search->next) {
+
+#if defined PACKFILE_SUPPORT
 		if (search->pack != NULL) {
 			if (canthave & SFF_INPACK)
 				continue;
@@ -1054,8 +1146,14 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave,
 				    musthave, canthave, path, sizeof(path)))
 					list[j++] = strdup(path);
 		} else if (search->filename != NULL) {
+#else
+		if ( search->filename != NULL ) {
+#endif
+
+#if defined PACKFILE_SUPPORT
 			if (musthave & SFF_INPACK)
 				continue;
+#endif
 
 			Com_sprintf(path, sizeof(path), "%s/%s",
 			    search->filename, findname);
@@ -1182,9 +1280,11 @@ void FS_Path_f (void)
 	{
 		if (s == fs_base_searchpaths)
 			Com_Printf ("----------\n");
+#if defined PACKFILE_SUPPORT
 		if (s->pack)
 			Com_Printf ("%s (%i files)\n", s->pack->filename, s->pack->numfiles);
 		else
+#endif
 			Com_Printf ("%s\n", s->filename);
 	}
 
@@ -1205,7 +1305,7 @@ char *FS_NextPath (char *prevpath)
 	searchpath_t	*s;
 	char			*prev;
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 	prev = NULL; /* fs_gamedir is the first directory in the searchpath */
 #else
 	if (!prevpath)
@@ -1215,9 +1315,13 @@ char *FS_NextPath (char *prevpath)
 #endif
 	for (s=fs_searchpaths ; s ; s=s->next)
 	{
+
+#if defined PACKFILE_SUPPORT
 		if (s->pack)
 			continue;
-#ifdef __unix__
+#endif
+
+#if defined UNIX_VARIANT
 		if (prevpath == NULL)
 			return s->filename;
 #endif
@@ -1237,6 +1341,7 @@ FS_InitFilesystem
 */
 void FS_InitFilesystem (void)
 {
+
 	Cmd_AddCommand ("path", FS_Path_f);
 	Cmd_AddCommand ("link", FS_Link_f);
 	Cmd_AddCommand ("dir", FS_Dir_f );
@@ -1244,10 +1349,6 @@ void FS_InitFilesystem (void)
 #if defined DATADIR
 	FS_AddGameDirectory (va("%s/"BASEDIRNAME, DATADIR));
 #endif
-
-//#ifdef LIBDIR
-//	FS_AddGameDirectory (va("%s/"BASEDIRNAME, LIBDIR));
-//#endif
 
 	//
 	// basedir <path>
@@ -1260,7 +1361,7 @@ void FS_InitFilesystem (void)
 	//
 	FS_AddGameDirectory (va("%s/"BASEDIRNAME, fs_basedir->string) );
 
-#if defined UNIX_VARIANT
+#if defined DATADIR || defined UNIX_VARIANT
 	FS_AddHomeAsGameDirectory(BASEDIRNAME);
 #endif
 
@@ -1273,4 +1374,16 @@ void FS_InitFilesystem (void)
 		FS_SetGamedir (fs_gamedirvar->string);
 	else
 		FS_SetGamedir ("arena");
+
+/*
+ * Alien Arena ACEBOT File System Initialization
+ */
+#if defined DATADIR
+	//
+	Com_sprintf( botinfo_datadir, sizeof(botinfo_datadir),
+			"$DATADIR/botinfo" ); //-jjb-fix ???
+#endif
+
 }
+
+

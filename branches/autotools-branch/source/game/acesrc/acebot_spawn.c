@@ -57,15 +57,13 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
-#include "../g_local.h"
-#include "../m_player.h"
+#include "game/g_local.h"
+#include "game/m_player.h"
 #include "acebot.h"
-
-// -jjb-dl
-//#ifdef _WINDOWS
-//extern void ACECO_ReadConfig(char config_file[128]);
-//#endif
 
 ///////////////////////////////////////////////////////////////////////
 // Had to add this function in this version for some reason.
@@ -272,9 +270,16 @@ void ACESP_HoldSpawn(edict_t *self)
 
 }
 
-// -jjb-dl
-//#ifdef __unix__
-void ACECO_ReadConfig( char *config_file ) //use standard c routines for linux
+/*===
+  ACECO_ReadConfig()
+
+  System-independent bot configuration file reader.
+  2010-06: Replaces function in acebot_config.cpp for Windows
+
+  Should be called with absolute path to the .cfg file.
+
+===*/
+void ACECO_ReadConfig( char *config_file )
 {
 	FILE *fp;
 	int k;
@@ -368,8 +373,6 @@ void ACECO_ReadConfig( char *config_file ) //use standard c routines for linux
 	free( buffer );
 
 }
-
-//#endif
 
 ///////////////////////////////////////////////////////////////////////
 // Modified version of id's code
@@ -592,6 +595,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 		//if not a respawn, load bot configuration file(specific to each bot)
 		info = Info_ValueForKey (bot->client->pers.userinfo, "name");
 
+		// -jjb-ac  problem  this needs to know the 2 places botinfo can be
 		sprintf(bot_configfilename, BOTDIR"/botinfo/%s.cfg", info);
 		ACECO_ReadConfig(bot_configfilename);
 
@@ -675,7 +679,7 @@ void ACESP_Respawn (edict_t *self)
 ///////////////////////////////////////////////////////////////////////
 edict_t *ACESP_FindFreeClient (void)
 {
-	edict_t *bot;
+	edict_t *bot = NULL;
 	int	i;
 	int max_count=0;
 
@@ -820,7 +824,12 @@ void ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 		return;
 	}
 
+#if 0
 	bot->yaw_speed = 100; // yaw speed
+#else
+	// -jjb-experiment
+	bot->yaw_speed = 37; // yaw speed, angle in degrees
+#endif
 	bot->inuse = true;
 	bot->is_bot = true;
 

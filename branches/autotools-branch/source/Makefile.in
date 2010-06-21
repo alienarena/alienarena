@@ -15,6 +15,27 @@
 
 @SET_MAKE@
 
+# Alien Arena source sub-directory Makefile.am
+# Process this file with automake to produce Makefile.in
+#
+# Copyright (C) 2010 COR Entertainment
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# 
+# See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#
+
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -454,13 +475,13 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = `-I m4'
 noinst_LIBRARIES = libgame.a
-@BUILD_UNIX_TRUE@crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -ffast-math
+@BUILD_UNIX_TRUE@crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall 
 @BUILD_UNIX_TRUE@crded_LDADD = libgame.a
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math 
+@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall 
 @BUILD_UNIX_FALSE@crx_CFLAGS = -DCURL_STATICLIB -DAL_NO_PROTOTYPES -DC_ONLY -U_FORTIFY_SOURCE -ffast-math
 @BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_LDADD = libgame.a
 @BUILD_UNIX_FALSE@crx_LDADD = libgame.a
-libgame_a_CFLAGS = -U_FORTIFY_SOURCE -ffast-math
+libgame_a_CFLAGS = -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall
 @BUILD_UNIX_TRUE@crded_SOURCES = \
 @BUILD_UNIX_TRUE@	client/anorms.h \
 @BUILD_UNIX_TRUE@	game/game.h \

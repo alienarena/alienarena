@@ -506,6 +506,11 @@ void CL_SendConnectPacket (void)
 	netadr_t	adr;
 	int		port;
 
+#if 0
+	// -jjb-test
+	Com_Printf("[CL_SendConnectPacket]\n");
+#endif
+
 	if (!NET_StringToAdr (cls.servername, &adr))
 	{
 		Com_Printf ("Bad server address\n");
@@ -520,6 +525,7 @@ void CL_SendConnectPacket (void)
 
 	Netchan_OutOfBandPrint (NS_CLIENT, adr, "connect %i %i %i \"%s\"\n",
 		PROTOCOL_VERSION, port, cls.challenge, Cvar_Userinfo() );
+
 }
 
 /*
@@ -750,6 +756,7 @@ void CL_Disconnect (void)
 	cls.state = ca_disconnected;
 
 /*
+    //  -jjb-test
 	// for automated test runs using demo (.dm2) files
 	// example of how to exit at end of each demo run
 	if ( cl_timedemo->value )
@@ -2145,16 +2152,8 @@ void CL_Init (void)
 
 	Con_Init ();
 
-/*
-// -jjb-ac  try the vid first init on linux
-#if defined __unix__ || defined __sgi
+	VID_Init ();
 	S_Init ();
-	VID_Init ();
-#else
-*/
-	VID_Init ();
-	S_Init (); // sound must be initialized after window is created
-//#endif
 
 	V_Init ();
 

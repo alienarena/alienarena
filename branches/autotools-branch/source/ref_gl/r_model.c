@@ -412,7 +412,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 					strcpy(rs,mod->skins[i]->name);
 					rs[strlen(rs)-4]=0;
 
-// -jjb-ac
+// -jjb-fix  rscript declaration fixed
 //#ifdef _WINDOWS
 //					(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
 //#else

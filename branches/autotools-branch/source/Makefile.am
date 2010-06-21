@@ -1,18 +1,25 @@
-## Process this file with automake to produce Makefile.in
+# Alien Arena source sub-directory Makefile.am
+# Process this file with automake to produce Makefile.in
+#
+# Copyright (C) 2010 COR Entertainment
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# 
+# See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#
 
 ACLOCAL_AMFLAGS=`-I m4'
-
-##bin_PROGRAMS = crx crded
-##pkglibexec_LTLIBRARIES = game.la
-
-##crx_CFLAGS=-DHAVE_CURL -Dstricmp=strcasecmp -D_stricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
-##crx_LDFLAGS=$(GLU_LIBS)
-
-##game_la_CFLAGS = -Dstricmp=strcasecmp  -U_FORTIFY_SOURCE -ffast-math -DDATADIR='"$(pkgdatadir)"'
-##game_la_LDFLAGS = -module -avoid-version
-
-##crded_CFLAGS = -DDEDICATED_ONLY -Dstricmp=strcasecmp -DLIBDIR='"$(pkglibexecdir)"' -DDATADIR='"$(pkgdatadir)"' -U_FORTIFY_SOURCE -ffast-math
-##
 
 if BUILD_UNIX
 bin_PROGRAMS = crded
@@ -26,10 +33,10 @@ endif
 noinst_LIBRARIES = libgame.a
 
 if BUILD_UNIX
-crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -ffast-math
+crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall 
 crded_LDADD = libgame.a
 if BUILD_CLIENT
-crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math 
+crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall 
 crx_LDADD = libgame.a
 endif
 else
@@ -38,7 +45,7 @@ crx_LDADD = libgame.a
 LIBS += $(WIN32_LIBS)
 endif
 
-libgame_a_CFLAGS = -U_FORTIFY_SOURCE -ffast-math
+libgame_a_CFLAGS = -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall
 
 if BUILD_UNIX
 crded_SOURCES = \
@@ -245,6 +252,4 @@ libgame_a_SOURCES =  \
 	game/q_shared.c \
 	game/q_shared.h \
 	qcommon/qfiles.h
-
-##
-##	qcommon/qcommon.h \  TODO: verify game lib does not use qcommon.h
+	

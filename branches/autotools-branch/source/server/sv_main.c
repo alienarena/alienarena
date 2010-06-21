@@ -141,7 +141,7 @@ char	*SV_StatusString (void)
 		cl = &svs.clients[i];
 		if (cl->state == cs_connected || cl->state == cs_spawned )
 		{
-			name = cl->name; 
+			name = cl->name;
 #ifdef NOTUSED
 			//handle color chars
 			nametxt[0] = 0;
@@ -159,7 +159,7 @@ char	*SV_StatusString (void)
 					break;
 			}
 			nametxt[k]=0;
-#else		
+#else
 			//allow color chars to be sent
 			strcpy(nametxt, name);
 			nametxt[31] = '\0'; //failsafe
@@ -180,7 +180,7 @@ char	*SV_StatusString (void)
 	if(cl->edict->client->ps.botnum) {
 		for(i = 0; i < cl->edict->client->ps.botnum; i++) {
 
-			name = cl->edict->client->ps.bots[i].name; 
+			name = cl->edict->client->ps.bots[i].name;
 #ifdef NOTUSED
 			//handle color chars
 			nametxt[0] = 0;
@@ -448,7 +448,8 @@ void SVC_DirectConnect (void)
 	version = atoi(Cmd_Argv(1));
 	if (version != PROTOCOL_VERSION)
 	{
-		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nServer is version %4.2f.\n", VERSION);
+		// -jjb-ac
+		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nServer is version %s\n", VERSION);
 		Com_DPrintf ("    rejected connect from version %i\n", version);
 		return;
 	}
@@ -461,7 +462,12 @@ void SVC_DirectConnect (void)
 
 	//limit connections from a single IP
 	previousclients = 0;
+#if 1
+	// -jjb-fix  everywhere else is "value"
+	for (i=0,cl=svs.clients ; i<maxclients->value ; i++,cl++)
+#else
 	for (i=0,cl=svs.clients ; i<maxclients->integer ; i++,cl++)
+#endif
 	{
 		if (cl->state == cs_free)
 			continue;
@@ -597,7 +603,7 @@ void SVC_DirectConnect (void)
 
 	//prevent client slot overwrites with bots rejoining after map change
 	if(botkick) {
-		
+
 		if(botkick < sv_numbots)
 			botnum = botkick;
 		else
@@ -749,6 +755,12 @@ void SV_ConnectionlessPacket (void)
 		return;
 	}
 
+#if 0
+	// -jjb-
+	Com_Printf("[SV_ConnectionlessPacket: \n");
+	Com_Printf("   net_message.name %s\n", net_message.name );
+	Com_Printf("   net_message.readcount %s\n", net_message.readcount );
+#endif
 
 	MSG_BeginReading (&net_message);
 	MSG_ReadLong (&net_message);		// skip the -1 marker
@@ -874,7 +886,16 @@ void SV_ReadPackets (void)
 	while (NET_GetPacket (NS_SERVER, &net_from, &net_message))
 	{
 		// check for connectionless packet (0xffffffff) first
-		if (*(int *)net_message.data == -1)
+#if 0
+		// -jjb-test
+		if ( net_message.data[0] == 0xff &&
+			net_message.data[1] == 0xff &&
+			net_message.data[2] == 0xff &&
+			net_message.data[3] == 0xff	)
+
+#else
+		if (  *(int *)net_message.data == -1 )
+#endif
 		{
 			SV_ConnectionlessPacket ();
 			continue;
@@ -1336,7 +1357,7 @@ void SV_Init (void)
 	sv_iplimit = Cvar_Get ("sv_iplimit", "3", 0);
 
 	SZ_Init (&net_message, net_message_buffer, sizeof(net_message_buffer));
-	SZ_SetName (&net_message, "Net message buffer", true);
+	SZ_SetName (&net_message, "Net Message Buffer", true);
 }
 
 /*

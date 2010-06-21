@@ -533,8 +533,6 @@ void Sys_PumpMessages (void){
 	// Grab frame time
 	sys_frameTime = timeGetTime();	// FIXME: should this be at start?
 }
-// -jjb-ac
-//#endif
 
 void Sys_Quit (void)
 {
@@ -604,11 +602,8 @@ void Sys_Init (void)
 #endif
 
 	timeBeginPeriod( 1 );
-// -jjb-ac
-//#ifndef __unix__
 	Cvar_Get("sys_hInstance", va("%i", sys_hInstance), CVAR_ROM);
 	Cvar_Get("sys_wndProc", va("%i", MainWndProc), CVAR_ROM);
-//#endif
 
 	vinfo.dwOSVersionInfoSize = sizeof(vinfo);
 
@@ -622,21 +617,6 @@ void Sys_Init (void)
 	else if ( vinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )
 		s_win95 = true;
 
-/*
- * -jjb-ac
-#ifdef __unix__
-	if (dedicated->value)
-	{
-		if (!AllocConsole ())
-			Sys_Error ("Couldn't create dedicated server console");
-		hinput = GetStdHandle (STD_INPUT_HANDLE);
-		houtput = GetStdHandle (STD_OUTPUT_HANDLE);
-
-		// let QHOST hook in
-		InitConProc (argc, argv);
-	}
-#endif
-*/
 }
 
 
@@ -859,7 +839,7 @@ Sys_GetGameAPI
 Loads the game dll
 =================
 */
-void *Sys_GetGameAPI (void *parms)  // -jjb-dl planned: update for statically linked game
+void *Sys_GetGameAPI (void *parms)  // -jjb-dl static link of game module
 {
 	void	*(*ptrGetGameAPI) (void *) = NULL; // -jjb-dl
 	char	name[MAX_OSPATH];

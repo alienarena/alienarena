@@ -230,7 +230,7 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 {
 	int			newnum;
 	int			bits;
-	entity_state_t	*oldstate;
+	entity_state_t	*oldstate = NULL;
 	int			oldindex, oldnum;
 
 	newframe->parse_entities = cl.parse_entities;
@@ -649,7 +649,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		cent = &cl_entities[s1->number];
 
 		playermodel = false;
-		
+
 		effects = s1->effects;
 		renderfx = s1->renderfx;
 
@@ -698,9 +698,9 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.model = ci->model;
 
 			ent.lod1 = ci->lod1;
-			
+
 			ent.lod2 = ci->lod2;
-			
+
 			if (!ent.skin || !ent.model)
 			{
 				ent.skin = cl.baseclientinfo.skin;
@@ -715,7 +715,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.skin = NULL;
 			ent.model = cl.model_draw[s1->modelindex];
 		}
-		
+
 		if (renderfx & (RF_FRAMELERP))
 		{	// step origin discretely, because the frames
 			// do the animation properly
@@ -808,17 +808,17 @@ void CL_AddPacketEntities (frame_t *frame)
 			CL_FlagEffects(ent.origin, 1);
 			ent.team = 2;
 		}
-		
+
 		// add to refresh list
 		V_AddEntity (&ent);
 
 		// color shells generate a seperate entity for the main model
 		if ((effects & EF_COLOR_SHELL) && !(s1->number == cl.playernum+1))
 		{
-		
+
 			ent.flags = renderfx | RF_TRANSLUCENT;
 			ent.alpha = 0.30;
-			V_AddViewEntity (&ent);			
+			V_AddViewEntity (&ent);
 		}
 
 		ent.skin = NULL;		// never use a custom skin on others
@@ -847,14 +847,14 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.flags |= RF_TRANSLUCENT;
 			ent.alpha = 0.30;
 			V_AddEntity (&ent);
-		}	
+		}
 		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.md2")) {
 			//add clear cover
 			ent.model = R_RegisterModel("models/weapons/g_hyperb/cover.md2");
 			ent.flags |= RF_TRANSLUCENT;
 			ent.alpha = 0.30;
 			V_AddEntity (&ent);
-		}		
+		}
 
 		if (s1->modelindex2)
 		{
@@ -877,7 +877,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.model = cl.model_draw[s1->modelindex2];
 			}
 
-			
+
 			//here is where we will set the alpha for certain model parts - would like to eventually
 			//do something a little less uh, hardcoded.
 			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/items/healing/globe/tris.md2"))
@@ -914,7 +914,7 @@ void CL_AddPacketEntities (frame_t *frame)
 
 			ent.alpha = 0.4;
 			ent.flags = RF_TRANSLUCENT;
-			
+
 			if (s1->number == cl.playernum+1) {
 				ent.flags |= RF_VIEWERMODEL;
 			}
@@ -1121,7 +1121,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 
 	VectorSubtract(gun.origin, offset_down, gun.origin);
 	VectorSubtract(gun.origin, offset_right, gun.origin);
-	
+
 	gun.flags = RF_MINLIGHT | RF_DEPTHHACK | RF_WEAPONMODEL;
 	gun.backlerp = 1.0 - cl.lerpfrac;
 	VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all
@@ -1130,7 +1130,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	if(!(strcmp("models/weapons/v_shotg2/tris.md2", gun.model->name))) {
 		if(gun.frame > 4 && gun.frame < 14)
 			CL_MuzzleFlashParticle(gun.origin, gun.angles, true);
-	}	
+	}
 	else if(!(strcmp("models/weapons/v_hyperb/tris.md2", gun.model->name))) {
 		if(gun.frame > 5 && gun.frame < 7) {
 			CL_PlasmaFlashParticle(gun.origin, gun.angles, true);
@@ -1158,7 +1158,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 					if (effects & RF_SHELL_GREEN)
 						gun.flags |= RF_SHELL_GREEN;
 
-					if (useFX) 
+					if (useFX)
 						gun.flags |= RF_SHELL_GREEN;
 
 					gun.flags |= RF_TRANSLUCENT;
@@ -1187,7 +1187,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	}
 
 	//add glass pieces
-	
+
 	if(!(strcmp("models/weapons/v_rocket/tris.md2", gun.model->name))) {
 		gun.model = R_RegisterModel("models/weapons/v_rocket/cover.md2");
 		gun.flags |= RF_TRANSLUCENT;
@@ -1451,8 +1451,8 @@ void CL_AddClEntities()
 	qboolean onground;
 	char soundname[64];
 	float time, time2, grav = Cvar_VariableValue("sv_gravity");
-	static vec3_t mins = { -2, -2, -2 }; 
-    static vec3_t maxs = { 2, 2, 2 }; 
+	static vec3_t mins = { -2, -2, -2 };
+    static vec3_t maxs = { 2, 2, 2 };
 
 	if (!grav)
 		grav = 1;
@@ -1509,7 +1509,7 @@ void CL_AddClEntities()
 
 		if (alpha > 1.0)
 			alpha = 1;
-		
+
 		if(le->flags & CLM_NOSHADOW)
 			ent.flags |= RF_NOSHADOWS;
 
@@ -1534,7 +1534,7 @@ void CL_AddClEntities()
 				}
 			}
 		}
-		
+
 		if (le->flags & CLM_BOUNCE)
 		{
 			trace_t trace = CL_PMTraceWorld (le->lastOrg, mins, maxs, org, MASK_SOLID);
@@ -1550,7 +1550,7 @@ void CL_AddClEntities()
 
 				VectorSet(vel, le->vel[0], le->vel[1], le->vel[2] + le->accel[2] * time * grav);
 				VectorReflect(vel, trace.plane.normal, le->vel);
-				
+
 				// Check for stop or slide along the plane
 				if (trace.plane.normal[2] > 0 && le->vel[2] < 1)
 				{
@@ -1598,7 +1598,7 @@ void CL_AddClEntities()
 			le->alpha = 0;
 			continue;
 		}
-		
+
 		ent.model = le->model;
 		if (!ent.model)
 			continue;
@@ -1615,9 +1615,9 @@ void CL_AddClEntities()
 			((le->flags & CLM_ROTATE) ? (time * le->avel) : 0);
 
 		ent.frame = ent.oldframe = 0;
-			
+
 		V_AddEntity(&ent);
-		
+
 	}
 
 	active_clentities = active;

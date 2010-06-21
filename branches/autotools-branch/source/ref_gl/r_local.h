@@ -496,7 +496,8 @@ extern float	norm_array[MAX_ARRAY][3];
 extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
 extern float *VArray;
-static vec3_t NormalsArray[MAX_TRIANGLES*3];
+//static vec3_t NormalsArray[MAX_TRIANGLES*3];
+extern vec3_t NormalsArray[MAX_TRIANGLES*3]; // -jjb-fix
 extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
@@ -511,6 +512,7 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #define VERT_BUMPMAPPED_COLOURED		8		// verts and st for 1 tmu, 2 texoord pointers and colour
 #define VERT_NORMAL_COLOURED_TEXTURED	9		// verts and st for 1tmu and color, with normals
 
+#if 0
 // vertex array kill flags
 #define KILL_TMU0_POINTER	1
 #define KILL_TMU1_POINTER	2
@@ -518,6 +520,15 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #define KILL_TMU3_POINTER	4
 #define KILL_RGBA_POINTER	5
 #define KILL_NORMAL_POINTER 6
+#else
+// -jjb-experiment  looks like these should be bit flags
+#define KILL_TMU0_POINTER	0x01
+#define KILL_TMU1_POINTER	0x02
+#define KILL_TMU2_POINTER	0x04
+#define KILL_TMU3_POINTER	0x08
+#define KILL_RGBA_POINTER	0x10
+#define KILL_NORMAL_POINTER 0x20
+#endif
 
 // vertex array subsystem
 void R_InitVArrays (int varraytype);

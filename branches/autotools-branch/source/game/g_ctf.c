@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -36,7 +36,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	int		sorted[2][MAX_CLIENTS];
 	int		sortedscores[2][MAX_CLIENTS];
 	int		score, total[2], totalscore[2];
-	
+
 	gclient_t	*cl;
 	edict_t		*cl_ent;
 	int team;
@@ -99,12 +99,12 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			"xv 264 yv 4 num 3 22 ");
 		len = strlen(string);
 	}
-	
+
 	for (i=0 ; i<16 ; i++)
 	{
 		if (i >= total[0] && i >= total[1])
 			break; // we're done
-		
+
 		*entry = 0;
 
 		// left side
@@ -122,7 +122,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			if (cl_ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
 				sprintf(entry + strlen(entry), "xv -92 yv %d picn sbfctf2 ",
 					43 + i * 16);
-			
+
 			if (maxsize - len > strlen(entry)) {
 				strcat(string, entry);
 				len = strlen(string);
@@ -155,28 +155,28 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	if(mapvote) {
 		y = 64;
 		x = 96;
-		Com_sprintf(entry, sizeof(entry), 
+		Com_sprintf(entry, sizeof(entry),
 			"xv %i yt %i string Vote ", x, y);
 		if(maxsize - len > strlen(entry)) {
 			strcat(string, entry);
 			len = strlen(string);
 		}
 		x = 136;
-		Com_sprintf(entry, sizeof(entry), 
+		Com_sprintf(entry, sizeof(entry),
 			"xv %i yt %i string for ", x, y);
 		if(maxsize - len > strlen(entry)) {
 			strcat(string, entry);
 			len = strlen(string);
 		}
 		x = 168;
-		Com_sprintf(entry, sizeof(entry), 
+		Com_sprintf(entry, sizeof(entry),
 			"xv %i yt %i string next ", x, y);
 		if(maxsize - len > strlen(entry)) {
 			strcat(string, entry);
 			len = strlen(string);
 		}
 		x = 208;
-		Com_sprintf(entry, sizeof(entry), 
+		Com_sprintf(entry, sizeof(entry),
 			"xv %i yt %i string map: ", x, y);
 		if(maxsize - len > strlen(entry)) {
 			strcat(string, entry);
@@ -184,8 +184,8 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		}
 		x = 96;
 		for(i=0; i<4; i++) {
-			
-			Com_sprintf(entry, sizeof(entry), 
+
+			Com_sprintf(entry, sizeof(entry),
 			"xv %i yt %i string %i.%s ", x, y+((i+1)*9)+9, i+1, votedmap[i].mapname);
 			if(maxsize - len > strlen(entry)) {
 				strcat(string, entry);
@@ -241,7 +241,7 @@ void CTFResetGrapple(edict_t *self)
 
 void CTFGrappleTouch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	float volume = 1.0;
+	// float volume = 1.0;
 
 	if (other == self->owner)
 		return;
@@ -430,14 +430,14 @@ void CTFFireGrapple (edict_t *self, vec3_t start, vec3_t dir, int damage, int sp
 		VectorMA (grapple->s.origin, -10, dir, grapple->s.origin);
 		grapple->touch (grapple, tr.ent, NULL, NULL);
 	}
-}	
+}
 
 void CTFGrappleFire (edict_t *ent, vec3_t g_offset, int damage, int effect)
 {
 	vec3_t	forward, right;
 	vec3_t	start;
 	vec3_t	offset;
-	float volume = 1.0;
+	// float volume = 1.0;
 
 	if (ent->client->ctf_grapplestate > CTF_GRAPPLE_STATE_FLY)
 		return; // it's already out
@@ -473,12 +473,12 @@ void CTFWeapon_Grapple (edict_t *ent)
 	int prevstate;
 
 	// if the the attack button is still down, stay in the firing frame
-	if ((ent->client->buttons & BUTTON_ATTACK) && 
+	if ((ent->client->buttons & BUTTON_ATTACK) &&
 		ent->client->weaponstate == WEAPON_FIRING &&
 		ent->client->ctf_grapple)
 		ent->client->ps.gunframe = 9;
 
-	if (!(ent->client->buttons & BUTTON_ATTACK) && 
+	if (!(ent->client->buttons & BUTTON_ATTACK) &&
 		ent->client->ctf_grapple) {
 		CTFResetGrapple(ent->client->ctf_grapple);
 		if (ent->client->weaponstate == WEAPON_FIRING)
@@ -486,7 +486,7 @@ void CTFWeapon_Grapple (edict_t *ent)
 	}
 
 
-	if (ent->client->newweapon && 
+	if (ent->client->newweapon &&
 		ent->client->ctf_grapplestate > CTF_GRAPPLE_STATE_FLY &&
 		ent->client->weaponstate == WEAPON_FIRING) {
 		// he wants to change weapons while grappled
@@ -495,7 +495,7 @@ void CTFWeapon_Grapple (edict_t *ent)
 	}
 
 	prevstate = ent->client->weaponstate;
-	Weapon_Generic (ent, 5, 9, 31, 36, pause_frames, fire_frames, 
+	Weapon_Generic (ent, 5, 9, 31, 36, pause_frames, fire_frames,
 		CTFWeapon_Grapple_Fire);
 
 	// if we just switched back to grapple, immediately go to fire frame
@@ -532,7 +532,7 @@ void CTFFlagSetup (edict_t *ent)
 	else
 		gi.setmodel (ent, ent->item->world_model);
 	ent->solid = SOLID_TRIGGER;
-	ent->movetype = MOVETYPE_TOSS;  
+	ent->movetype = MOVETYPE_TOSS;
 	ent->touch = Touch_Item;
 
 	v = tv(0,0,-128);
@@ -569,7 +569,7 @@ void CTFEffects(edict_t *player)
 }
 qboolean CTFDrop_Flag(edict_t *ent, gitem_t *item)
 {
-	if (rand() & 1) 
+	if (rand() & 1)
 		safe_cprintf(ent, PRINT_HIGH, "Only lusers drop flags.\n");
 	else
 		safe_cprintf(ent, PRINT_HIGH, "Winners don't drop flags.\n");
@@ -612,7 +612,7 @@ void CTFResetFlags(void)
 static void CTFDropFlagTouch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	//owner (who dropped us) can't touch for two secs
-	if (other == ent->owner && 
+	if (other == ent->owner &&
 		ent->nextthink - level.time > 28)
 		return;
 
@@ -730,7 +730,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 							gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_scores.wav"), 1, ATTN_NONE, 0);
 						}
 					}
-						
+
 				}
 				else
 				{
@@ -758,12 +758,12 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 						}
 					}
 				}
-				
+
 				// other gets another 10 frag bonus
 				other->client->resp.score += 10;//CTF_CAPTURE_BONUS;
 				//reward points bonus
 				other->client->resp.reward_pts+=5;
-				
+
 				if(other->client->resp.reward_pts >= g_reward->integer && !other->client->resp.powered) { //give them speed and invis powerups
 					it = FindItem("Invisibility");
 					other->client->pers.inventory[ITEM_INDEX(it)] += 1;
@@ -777,15 +777,15 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 					other->client->resp.powered = true;
 
 					gi.sound (other, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
-				}			
-				
+				}
+
 				CTFResetFlags();
 				return false;
 			}
 			return false; // its at home base already
-		}	
+		}
 		// hey, its not home.  return it by teleporting it back
-		safe_bprintf(PRINT_HIGH, "%s returned the %s flag!\n", 
+		safe_bprintf(PRINT_HIGH, "%s returned the %s flag!\n",
 			other->client->pers.netname, team_name);
 		other->client->resp.score += 2;//CTF_RECOVERY_BONUS;
 		if(!strcmp("Red", team_name))
@@ -795,7 +795,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 
 		//reward points bonus
 		other->client->resp.reward_pts+=2;
-				
+
 		if(other->client->resp.reward_pts >= g_reward->integer && !other->client->resp.powered) { //give them speed and invis powerups
 			it = FindItem("Invisibility");
 			other->client->pers.inventory[ITEM_INDEX(it)] += 1;
@@ -809,8 +809,8 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 			other->client->resp.powered = true;
 
 			gi.sound (other, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
-		}	
-		
+		}
+
 		//CTFResetFlag will remove this entity!  We must return false
 		CTFResetFlag(ctf_team);
 		return false;
@@ -824,9 +824,9 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 		gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_picked.wav"), 1, ATTN_NONE, 0);
 	else
 		gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_picked.wav"), 1, ATTN_NONE, 0);
-	
+
 	other->client->resp.reward_pts+=2;
-				
+
 	if(other->client->resp.reward_pts >= g_reward->integer && !other->client->resp.powered) { //give them speed and invis powerups
 		it = FindItem("Invisibility");
 		other->client->pers.inventory[ITEM_INDEX(it)] += 1;
@@ -840,8 +840,8 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 		other->client->resp.powered = true;
 
 		gi.sound (other, CHAN_AUTO, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
-	}	
-	
+	}
+
 	other->client->pers.inventory[ITEM_INDEX(flag_item)] = 1;
 
 	// pick up the flag

@@ -1,12 +1,9 @@
 
-
 #ifdef HAVE_CONFIG_H
-#ifndef CONFIG_H
 #include "config.h"
 #endif
-#endif
 
-#ifdef HAVE_STRCASECMP
+#if defined HAVE_STRCASECMP && !defined HAVE_STRICMP
 #define stricmp strcasecmp
 #endif
 

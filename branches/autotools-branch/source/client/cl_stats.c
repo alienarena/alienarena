@@ -49,7 +49,7 @@ static FILE* statsdb_open( const char* mode )
 size_t write_data(const void *buffer, size_t size, size_t nmemb, void *userp)
 {
 	FILE* file;
-	size_t bytecount;
+	size_t bytecount = 0;
 
 	file = statsdb_open( "a" ); //append, don't rewrite
 

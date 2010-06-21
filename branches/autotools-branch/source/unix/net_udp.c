@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -131,12 +131,14 @@ qboolean	NET_CompareBaseAdr (netadr_t a, netadr_t b)
 			return true;
 		return false;
 	}
+
+	return false;
 }
 
 char	*NET_AdrToString (netadr_t a)
 {
 	static	char	s[64];
-	
+
 	Com_sprintf (s, sizeof(s), "%i.%i.%i.%i:%i", a.ip[0], a.ip[1], a.ip[2], a.ip[3], ntohs(a.port));
 
 	return s;
@@ -145,7 +147,7 @@ char	*NET_AdrToString (netadr_t a)
 char	*NET_BaseAdrToString (netadr_t a)
 {
 	static	char	s[64];
-	
+
 	Com_sprintf (s, sizeof(s), "%i.%i.%i.%i", a.ip[0], a.ip[1], a.ip[2], a.ip[3]);
 
 	return s;
@@ -167,10 +169,10 @@ qboolean	NET_StringToSockaddr (char *s, struct sockaddr *sadr)
 	struct hostent	*h;
 	char	*colon;
 	char	copy[128];
-	
+
 	memset (sadr, 0, sizeof(*sadr));
 	((struct sockaddr_in *)sadr)->sin_family = AF_INET;
-	
+
 	((struct sockaddr_in *)sadr)->sin_port = 0;
 
 	strcpy (copy, s);
@@ -179,9 +181,9 @@ qboolean	NET_StringToSockaddr (char *s, struct sockaddr *sadr)
 		if (*colon == ':')
 		{
 			*colon = 0;
-			((struct sockaddr_in *)sadr)->sin_port = htons((short)atoi(colon+1));	
+			((struct sockaddr_in *)sadr)->sin_port = htons((short)atoi(colon+1));
 		}
-	
+
 	if (copy[0] >= '0' && copy[0] <= '9')
 	{
 		*(int *)&((struct sockaddr_in *)sadr)->sin_addr = inet_addr(copy);
@@ -192,7 +194,7 @@ qboolean	NET_StringToSockaddr (char *s, struct sockaddr *sadr)
 			return 0;
 		*(int *)&((struct sockaddr_in *)sadr)->sin_addr = *(int *)h->h_addr_list[0];
 	}
-	
+
 	return true;
 }
 
@@ -210,7 +212,7 @@ idnewt:28000
 qboolean	NET_StringToAdr (char *s, netadr_t *a)
 {
 	struct sockaddr_in sadr;
-	
+
 	if (!strcmp (s, "localhost"))
 	{
 		memset (a, 0, sizeof(*a));
@@ -220,7 +222,7 @@ qboolean	NET_StringToAdr (char *s, netadr_t *a)
 
 	if (!NET_StringToSockaddr (s, (struct sockaddr *)&sadr))
 		return false;
-	
+
 	SockadrToNetadr (&sadr, a);
 
 	return true;
@@ -254,13 +256,21 @@ qboolean	NET_GetLoopPacket (netsrc_t sock, netadr_t *net_from, sizebuf_t *net_me
 		return false;
 
 	i = loop->get & (MAX_LOOPBACK-1);
+
+#if 0
+	// -jjb-test
+	Com_Printf( "[NET_GetLoopPacket for %s\n",
+			(sock==NS_CLIENT ? "Client" : "Server"));
+	Com_Printf( "  :send:%d::get:%d:]\n", (loop->send & 0x3), i );
+#endif
+
 	loop->get++;
 
 	memcpy (net_message->data, loop->msgs[i].data, loop->msgs[i].datalen);
 	net_message->cursize = loop->msgs[i].datalen;
 	*net_from = net_local_adr;
-	return true;
 
+	return true;
 }
 
 
@@ -272,10 +282,20 @@ void NET_SendLoopPacket (netsrc_t sock, int length, void *data, netadr_t to)
 	loop = &loopbacks[sock^1];
 
 	i = loop->send & (MAX_LOOPBACK-1);
+
+#if 0
+	// -jjb-test
+	Com_Printf( "[NET_SendLoopPacket from %s\n",
+			(sock==NS_CLIENT ? "Client" : "Server"));
+	Com_Printf( "  :send:%d::get:%d:]\n", i, (loop->get & 0x3));
+#endif
+
 	loop->send++;
+
 
 	memcpy (loop->msgs[i].data, data, length);
 	loop->msgs[i].datalen = length;
+
 }
 
 //=============================================================================
@@ -284,7 +304,7 @@ qboolean	NET_GetPacket (netsrc_t sock, netadr_t *net_from, sizebuf_t *net_messag
 {
 	int 	ret;
 	struct sockaddr_in	from;
-	int		fromlen;
+	size_t	fromlen; // -jjb-fix
 	int		net_socket;
 	int		protocol;
 	int		err;
@@ -334,11 +354,11 @@ qboolean	NET_GetPacket (netsrc_t sock, netadr_t *net_from, sizebuf_t *net_messag
 
 //=============================================================================
 
-void NET_SendPacket (netsrc_t sock, int length, void *data, netadr_t to)
+void NET_SendPacket (netsrc_t sock, int length, void *data, netadr_t to )
 {
 	int		ret;
 	struct sockaddr_in	addr;
-	int		net_socket;
+	int		net_socket = 0;
 
 	if ( to.type == NA_LOOPBACK )
 	{
@@ -379,7 +399,7 @@ void NET_SendPacket (netsrc_t sock, int length, void *data, netadr_t to)
 	if (ret == -1)
 	{
 		Com_Printf ("NET_SendPacket ERROR: %s to %s\n", NET_ErrorString(),
-				NET_AdrToString (to));
+				NET_AdrToString ( to ));
 	}
 }
 
@@ -548,8 +568,30 @@ void NET_Sleep(int msec)
 	extern cvar_t *dedicated;
 	extern qboolean stdin_active;
 
+	/*
+	 * 2010-06-15
+	 * (not local server).OR.(not dedicated server) probably always true.
+	 * Looks like intention is to suspend the server until the next frame
+	 * time, unless clients send something -- which might be a good thing.
+	 *
+	 * But, it is not checking for loopback ???
+	 * maybe that is ok, all loopbacks would have to be processed before
+	 * getting here.
+	 *
+	 *
+	 */
+
+#if 0
+	// -jjb-fix : put this back the way it was if it appears to cause problems
 	if (!ip_sockets[NS_SERVER] || (dedicated && !dedicated->value))
 		return; // we're not a server, just run full speed
+#else
+	return;
+
+	// (not local server).AND.(not dedicated server)
+	if ( !ip_sockets[NS_SERVER] && ( dedicated && !dedicated->value ) )
+		return;
+#endif
 
 	FD_ZERO(&fdset);
 	if (stdin_active)

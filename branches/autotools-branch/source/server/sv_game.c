@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -18,6 +18,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // sv_game.c -- interface to the game module
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 
 #include "server.h"
 
@@ -65,7 +70,7 @@ void PF_dprintf (char *fmt, ...)
 {
 	char		msg[1024];
 	va_list		argptr;
-	
+
 	va_start (argptr,fmt);
 	vsnprintf(msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
@@ -117,7 +122,7 @@ void PF_centerprintf (edict_t *ent, char *fmt, ...)
 	char		msg[1024];
 	va_list		argptr;
 	int			n;
-	
+
 	n = NUM_FOR_EDICT(ent);
 	if (n < 1 || n > maxclients->value)
 		return;	// Com_Error (ERR_DROP, "centerprintf to a non-client");
@@ -143,7 +148,7 @@ void PF_error (char *fmt, ...)
 {
 	char		msg[1024];
 	va_list		argptr;
-	
+
 	va_start (argptr,fmt);
 	vsnprintf(msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
@@ -169,7 +174,7 @@ void PF_setmodel (edict_t *ent, char *name)
 		//Com_Error (ERR_DROP, "PF_setmodel: NULL");
 
 	i = SV_ModelIndex (name);
-		
+
 //	ent->model = name;
 	ent->s.modelindex = i;
 
@@ -201,7 +206,7 @@ void PF_Configstring (int index, char *val)
 	// change the string in sv
 	strcpy (sv.configstrings[index], val);
 
-	
+
 	if (sv.state != ss_loading)
 	{	// send the update to everyone
 		SZ_Clear (&sv.multicast);
@@ -322,6 +327,13 @@ Init the game subsystem for a new map
 */
 void SCR_DebugGraph (float value, int color);
 
+
+/*
+ * BIG HACK -jjb-
+ */
+extern int (*ptrGame_FS_FOpenFile)( char* filename, FILE **file );
+
+
 void SV_InitGameProgs (void)
 {
 	game_import_t	import;
@@ -395,6 +407,12 @@ void SV_InitGameProgs (void)
 	if (ge->apiversion != GAME_API_VERSION)
 		Com_Error (ERR_DROP, "game is version %i, not %i", ge->apiversion,
 		GAME_API_VERSION);
+
+/*
+ * BIG HACK -jjb-
+ *  set pointer so game static library can see the augmented file system
+ */
+	ptrGame_FS_FOpenFile = FS_FOpenFile;
 
 	ge->Init ();
 }

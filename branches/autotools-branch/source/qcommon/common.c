@@ -23,6 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+// -jjb-dbg  check msg write byte, char, short
+#define PARANOID 1
+
 #include "qcommon.h"
 
 #include <setjmp.h>
@@ -138,7 +141,7 @@ void Com_Printf (char *fmt, ...)
 	Sys_ConsoleOutput (msg);
 
 // -jjb-ac
-#ifndef __unix__
+#if defined WIN32_VARIANT
 	// Also echo to dedicated console
 	Sys_Print(msg);
 #endif
@@ -187,6 +190,8 @@ Com_DPrintf
 A Com_Printf that only shows up if the "developer" cvar is set
 ================
 */
+#if defined NDEBUG
+// -jjb-experiment  remove for for non-debug version
 void Com_DPrintf (char *fmt, ...)
 {
 	va_list		argptr;
@@ -201,6 +206,7 @@ void Com_DPrintf (char *fmt, ...)
 
 	Com_Printf ("%s", msg);
 }
+#endif
 
 /*
 =============
@@ -321,8 +327,11 @@ void MSG_WriteChar (sizebuf_t *sb, int c)
 	byte	*buf;
 
 #ifdef PARANOID
-	if (c < -128 || c > 127)
-		Com_Error (ERR_FATAL, "MSG_WriteChar: range error");
+	if (c < -128 || c > 127) {
+		// -jjb-dbg
+		Com_Printf( "MSG_WriteChar: range error: %i\n", c);
+		//Com_Error (ERR_FATAL, "MSG_WriteChar: range error");
+	}
 #endif
 
 	buf = SZ_GetSpace (sb, 1);
@@ -334,8 +343,11 @@ void MSG_WriteByte (sizebuf_t *sb, int c)
 	byte	*buf;
 
 #ifdef PARANOID
-	if (c < 0 || c > 255)
-		Com_Error (ERR_FATAL, "MSG_WriteByte: range error");
+	if (c < 0 || c > 255) {
+		// -jjb-dbg
+		Com_Printf( "MSG_WriteByte: range error: %i\n", c );
+		//Com_Error (ERR_FATAL, "MSG_WriteByte: range error");
+	}
 #endif
 
 	buf = SZ_GetSpace (sb, 1);
@@ -347,8 +359,12 @@ void MSG_WriteShort (sizebuf_t *sb, int c)
 	byte	*buf;
 
 #ifdef PARANOID
-	if (c < ((short)0x8000) || c > (short)0x7fff)
-		Com_Error (ERR_FATAL, "MSG_WriteShort: range error");
+	if ( c > 65535 )
+	{ // unsigned short actually
+		// -jjb-dbg
+		Com_Printf("MSG_WriteShort: range error: %i \n", c);
+		//Com_Error (ERR_FATAL, "MSG_WriteShort: range error");
+	}
 #endif
 
 	buf = SZ_GetSpace (sb, 2);
@@ -538,7 +554,7 @@ void MSG_ReadDir (sizebuf_t *sb, vec3_t dir)
 
 	b = MSG_ReadByte (sb);
 	if (b >= NUMVERTEXNORMALS)
-		Com_Error (ERR_DROP, "MSF_ReadDir: out of range");
+		Com_Error (ERR_DROP, "MSG_ReadDir: out of range");
 	VectorCopy (bytedirs[b], dir);
 }
 
@@ -766,7 +782,7 @@ int MSG_ReadChar (sizebuf_t *msg_read)
 		c = -1;
 	else
 		c = (signed char)msg_read->data[msg_read->readcount];
-	msg_read->readcount++;
+		msg_read->readcount++;
 
 	return c;
 }
@@ -779,7 +795,7 @@ int MSG_ReadByte (sizebuf_t *msg_read)
 		c = -1;
 	else
 		c = (unsigned char)msg_read->data[msg_read->readcount];
-	msg_read->readcount++;
+		msg_read->readcount++;
 
 	return c;
 }
@@ -794,7 +810,7 @@ int MSG_ReadShort (sizebuf_t *msg_read)
 		c = (short)(msg_read->data[msg_read->readcount]
 		+ (msg_read->data[msg_read->readcount+1]<<8));
 
-	msg_read->readcount += 2;
+		msg_read->readcount += 2;
 
 	return c;
 }
@@ -811,7 +827,7 @@ int MSG_ReadLong (sizebuf_t *msg_read)
 		+ (msg_read->data[msg_read->readcount+2]<<16)
 		+ (msg_read->data[msg_read->readcount+3]<<24);
 
-	msg_read->readcount += 4;
+		msg_read->readcount += 4;
 
 	return c;
 }
@@ -834,7 +850,7 @@ float MSG_ReadFloat (sizebuf_t *msg_read)
 		dat.b[2] =	msg_read->data[msg_read->readcount+2];
 		dat.b[3] =	msg_read->data[msg_read->readcount+3];
 	}
-	msg_read->readcount += 4;
+		msg_read->readcount += 4;
 
 	dat.l = LittleLong (dat.l);
 
@@ -969,7 +985,7 @@ void SZ_SetName(sizebuf_t * buf, const char * name, qboolean print_it)
 {
 	strncpy(buf->name, name, sizeof(buf->name) - 1);
 	if ( print_it )
-		Com_Printf("SZ_SetName: buffer '%s' (address = 0x%.12x) initialised\n", buf->name, buf);
+		Com_DPrintf("SZ_SetName: buffer '%s' (address = 0x%.12x) initialised\n", buf->name, buf);
 }
 #endif	//BUFFER_DEBUG
 
@@ -1583,8 +1599,10 @@ void Qcommon_Init (int argc, char **argv)
 
 	//drop console, to get it into menu
 	SCR_EndLoadingPlaque ();
+
 	// clear any lines of console text
-	Cbuf_AddText ("clear\n"); // -jjb-ded
+	Cbuf_AddText ("clear\n"); // -jjb-ded ???
+
 #ifndef DEDICATED_ONLY
 	//play music
 	if (!dedicated->value)
@@ -1681,6 +1699,8 @@ void Qcommon_Frame (int msec)
 
 	SV_Frame (msec);
 
+#if defined WIN32_VARIANT
+	// -jjb-ac -jjb-ded  don't start dedicated server from here for Linux
 	if(dedicated->modified) {
 		dedicated->modified = false;
 		if ( dedicated->value ) {
@@ -1688,6 +1708,7 @@ void Qcommon_Frame (int msec)
 			CL_Shutdown();
 		}
 	}
+#endif
 
 	if (host_speeds->value)
 		time_between = Sys_Milliseconds ();

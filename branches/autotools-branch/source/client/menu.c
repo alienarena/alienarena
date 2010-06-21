@@ -22,16 +22,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include <ctype.h>
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 #include <winsock.h>
 #endif
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 #include <sys/time.h>
 #include <unistd.h>
 #endif
 
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 #include <io.h>
 #endif
 
@@ -39,7 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "client/qmenu.h"
 
 // Directory for botinfo, setup like existing acebot code
-#ifdef DATADIR
+// -jjb-ac need botdir in user writeable home dir
+#if defined DATADIR
 #define BOTDIR DATADIR   // -jjb-ac
 #else
 #define BOTDIR "."
@@ -139,7 +140,7 @@ static void M_MapPic( char *name, float alpha )
 	Draw_AlphaStretchPic (viddef.width / 2 - w + 240*scale, viddef.height / 2 - 140*scale, w, h, name, alpha);
 }
 static void M_MontagePic( char *name, float alpha )
-{	
+{
 	Draw_AlphaStretchPic (0, 0, viddef.width, viddef.height, name, alpha);
 }
 static void M_CrosshairPic( char *name )
@@ -561,7 +562,7 @@ void M_Main_Draw (void)
 			montagepic = 1;
 		}
 	}
-	sprintf(backgroundpic, "m_main_mont%i", (montagepic==1)?5:montagepic-1);	
+	sprintf(backgroundpic, "m_main_mont%i", (montagepic==1)?5:montagepic-1);
 	sprintf(montagepicname, "m_main_mont%i", montagepic);
 	M_Background(backgroundpic);
 	M_MontagePic(montagepicname, mainalpha);
@@ -1238,7 +1239,7 @@ static void Keys_MenuInit( void )
 	s_keys_vtaunt3_action.generic.ownerdraw = DrawKeyBindingFunc;
 	s_keys_vtaunt3_action.generic.localdata[0] = ++i;
 	s_keys_vtaunt3_action.generic.name	= bindnames[s_keys_vtaunt3_action.generic.localdata[0]][1];
-	
+
 	s_keys_vtaunt4_action.generic.type	= MTYPE_ACTION;
 	s_keys_vtaunt4_action.generic.x		= 0;
 	s_keys_vtaunt4_action.generic.y		= y += FONTSCALE*9*scale;
@@ -1252,7 +1253,7 @@ static void Keys_MenuInit( void )
 	s_keys_vtaunt5_action.generic.ownerdraw = DrawKeyBindingFunc;
 	s_keys_vtaunt5_action.generic.localdata[0] = ++i;
 	s_keys_vtaunt5_action.generic.name	= bindnames[s_keys_vtaunt5_action.generic.localdata[0]][1];
-	
+
 	s_keys_vtauntauto_action.generic.type	= MTYPE_ACTION;
 	s_keys_vtauntauto_action.generic.x		= 0;
 	s_keys_vtauntauto_action.generic.y		= y += FONTSCALE*9*scale;
@@ -1789,7 +1790,7 @@ static void HudFunc( void *unused )
 {
 	char hud1[MAX_OSPATH];
 	char hud2[MAX_OSPATH];
-	
+
 	if(s_options_hud_box.curvalue == 0) { //none
 		sprintf(hud1, "none");
 		sprintf(hud2, "none");
@@ -1817,7 +1818,7 @@ void SetHudCursor (void)
 	char hudcomp[MAX_OSPATH];
 
 	s_options_hud_box.curvalue = 1;
- 
+
 	if (!cl_hudimage1)
 		cl_hudimage1 = Cvar_Get ("cl_hudimage1", "pics/i_health.tga", CVAR_ARCHIVE);
 	else {
@@ -1983,7 +1984,7 @@ static void ControlsSetMenuItemValues( void )
 
 	Cvar_SetValue("cl_explosiondist", ClampCvar(0, 1, cl_explosiondist->value ) );
 	s_options_explosiondist_box.curvalue		= cl_explosiondist->value;
-	
+
 	Cvar_SetValue("cl_healthaura", ClampCvar(0, 1, cl_healthaura->value ) );
 	s_options_healthaura_box.curvalue		= cl_healthaura->value;
 
@@ -2011,7 +2012,7 @@ static void ControlsResetDefaultsFunc( void *unused )
 
 	CL_Snd_Restart_f();
 	S_StartMenuMusic();
-	
+
 }
 
 //JD - the next three functions were completely screwed up out of the box by id...so they
@@ -2080,7 +2081,7 @@ static void UpdateDopplerEffectFunc( void *unused )
 	{
 		Cvar_SetValue( "s_doppler", 0.0f ); // off
 	}
-	
+
 	R_EndFrame(); // buffer swap needed to show text box
 	S_UpdateDopplerFactor();
 
@@ -2132,7 +2133,7 @@ void Options_MenuInit( void )
 		"rotating",
 		0
 	};
-	static const char *playerid_names[] = 
+	static const char *playerid_names[] =
 	{
 		"off",
 		"centered",
@@ -2140,7 +2141,7 @@ void Options_MenuInit( void )
 		0
 	};
 
-	static const char *color_names[] = 
+	static const char *color_names[] =
 	{
 		"green",
 		"blue",
@@ -2153,7 +2154,7 @@ void Options_MenuInit( void )
 	float scale;
 
 	scale = (float)(viddef.height)/600;
-	
+
 	banneralpha = 0.1;
 
 	win_noalttab = Cvar_Get( "win_noalttab", "0", CVAR_ARCHIVE );
@@ -2493,7 +2494,7 @@ static const char *idcredits[] =
 	"Enki",
 	"",
 	"+FONT",
-	"John Diamond", 
+	"John Diamond",
 	"the-interceptor from http://www.quakeworld.nu/",
 	"",
 	"+LOGO",
@@ -2537,8 +2538,8 @@ static const char *idcredits[] =
 	"+LANGUAGE TRANSLATIONS",
 	"Ken Deguisse",
 	"",
-	"+STORYLINE", 
-	"Sinnocent", 
+	"+STORYLINE",
+	"Sinnocent",
 	"",
 	"+SPECIAL THANKS",
 	"The Alien Arena Community",
@@ -2732,6 +2733,7 @@ static void CreditsFunc( void *unused )
 
 void Game_MenuInit( void )
 {
+/*
 	static const char *difficulty_names[] =
 	{
 		"easy",
@@ -2739,6 +2741,7 @@ void Game_MenuInit( void )
 		"hard",
 		0
 	};
+*/
 	float scale;;
 	scale = (float)(viddef.height)/600;
 
@@ -2889,7 +2892,7 @@ static void M_FindIRCKey ( void )
 }
 
 void IRC_MenuInit( void )
-{	
+{
 	float scale;
 	extern cvar_t *name;
 
@@ -2909,7 +2912,7 @@ void IRC_MenuInit( void )
 	M_FindIRCKey();
 
 	scale = (float)(viddef.height)/600;
-	
+
 	banneralpha = 0.1;
 
 	s_irc_menu.x = viddef.width * 0.50;
@@ -2983,7 +2986,7 @@ void IRC_MenuDraw( void )
 		banneralpha = 1;
 
 	M_Background( "menu_back"); //draw black background first
-	M_Banner( "m_irc", banneralpha ); 
+	M_Banner( "m_irc", banneralpha );
 
 	//warn user that they cannot join until changing default player name
 	if(!pNameUnique) {
@@ -3179,7 +3182,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		else if (!_stricmp (lasttoken, "maxclients"))
 			Com_sprintf(mservers[m_num_servers].maxClients, sizeof(mservers[m_num_servers].maxClients), "%s", token);
 
-		/* Get next token: */	
+		/* Get next token: */
 		Com_sprintf(lasttoken, sizeof(lasttoken), "%s", token);
 		token = strtok( NULL, seps );
 	}
@@ -3207,7 +3210,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		free (rLine);
 
 		playername[31] = '\0';
-		
+
 		//get ranking
 		strcpy(player.playername, playername);
 		player.totalfrags = player.totaltime = player.ranking = 0;
@@ -3233,7 +3236,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		mservers[m_num_servers].playerRankings[players] = player.ranking;
 
 		rankTotal += player.ranking;
-		
+
 		players++;
 	}
 
@@ -3256,7 +3259,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 			return;
 
 	mservers[m_num_servers].players = players;
-	
+
 	//build the string for the server (hostname - address - mapname - players/maxClients)
 	//pad the strings - gotta do this for both maps and hostname
 	x = 0;
@@ -3330,7 +3333,7 @@ void JoinServerFunc( void *self )
 
 	index = ( menuaction_s * ) self - s_joinserver_server_actions;
 
-	playeridx = s_playerlist_scrollbar.curvalue = 0; 
+	playeridx = s_playerlist_scrollbar.curvalue = 0;
 
 	if ( Q_stricmp( mservers[index+svridx].szHostName, NO_SERVER_STRING ) == 0 )
 		return;
@@ -3405,8 +3408,10 @@ void SearchLocalGames( void )
 	// send out info packets
 	CL_PingServers_f();
 
-#ifdef __unix__
-	sleep(1);
+#if defined UNIX_VARIANT
+	// -jjb-ac review this.  also, probably should be 2 seconds
+	// sleep(1);
+	sleep( 2 );
 #else
 	Sleep(1000); //time to recieve packets
 #endif
@@ -3428,7 +3433,7 @@ void JoinServer_MenuInit( void )
 	int i;
 	float scale, offset;
 	extern cvar_t *name;
-	
+
 	static const char *yesno_names[] =
 	{
 		"no",
@@ -3488,7 +3493,7 @@ void JoinServer_MenuInit( void )
 	s_joinserver_filterempty_action.generic.cursor_offset = -16*scale;
 	s_joinserver_filterempty_action.curvalue = m_show_empty;
 	s_joinserver_filterempty_action.generic.callback = FilterEmptyFunc;
-	
+
 	s_joinserver_moveup.generic.type	= MTYPE_ACTION;
 	s_joinserver_moveup.generic.name	= "     ";
 	s_joinserver_moveup.generic.flags	= QMF_LEFT_JUSTIFY;
@@ -3631,7 +3636,7 @@ void JoinServer_MenuDraw(void)
 			s_joinserver_server_data[i].generic.x		= -380*scale;
 		s_joinserver_server_data[i].generic.y		= FONTSCALE*169*scale + FONTSCALE*i*10*scale+offset;
 	}
-	s_joinserver_scrollbar.maxvalue = m_num_servers - 16;	
+	s_joinserver_scrollbar.maxvalue = m_num_servers - 16;
 	M_ArrowPics();
 	Menu_Draw( &s_joinserver_menu );
 }
@@ -3950,6 +3955,10 @@ ADD BOTS MENU
 
 =============================================================================
 */
+// -jjb-ac needs user-writeable directory
+//  possibly FS_botfile_read, FS_botfile_write
+//  what about *.nav files?
+
 static menuframework_s	s_addbots_menu;
 static menuaction_s		s_addbots_bot_action[16];
 static menulist_s	s_startmap_list;
@@ -3972,11 +3981,12 @@ struct botinfo {
 int slot;
 
 void LoadBotInfo() {
-	FILE *pIn;
+	FILE *pIn; // -jjb-ac
 	int i, count;
 	char *info;
 	char *skin;
 
+	// -jjb-ac
 	if( (pIn = fopen( BOTDIR"/botinfo/allbots.tmp", "rb" )) == NULL)
 		return; // bail
 
@@ -3986,7 +3996,7 @@ void LoadBotInfo() {
 
 	for(i=0;i<count;i++)
 	{
-
+		// -jjb-ac
 		fread(bots[i].userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
 
 		info = Info_ValueForKey (bots[i].userinfo, "name");
@@ -3995,7 +4005,7 @@ void LoadBotInfo() {
 		sprintf(bots[i].model, "bots/%s_i", skin);
 	}
 	totalbots = count;
-    fclose(pIn);
+    fclose(pIn); // -jjb-ac
 }
 
 void AddbotFunc(void *self) {
@@ -4025,13 +4035,14 @@ void AddbotFunc(void *self) {
 		startmap[i] = tolower(startmap[i]);
 
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
+		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp"); // -jjb-ac
 	else
-		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
+		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap); // -jjb-ac
 
-	if((pOut = fopen(bot_filename, "wb" )) == NULL)
+	if((pOut = fopen(bot_filename, "wb" )) == NULL) // -jjb-ac
 		return; // bail
 
+	// -jjb-ac
 	fwrite(&count,sizeof (int),1,pOut); // Write number of bots
 
 	for (i = 7; i > -1; i--) {
@@ -4039,12 +4050,13 @@ void AddbotFunc(void *self) {
 			fwrite(bot[i].userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
 	}
 
-    fclose(pOut);
+    fclose(pOut); // -jjb-ac
 
 	//kick back to previous menu
 	M_PopMenu();
 
 }
+
 void Addbots_MenuInit( void )
 {
 	int i;
@@ -4057,7 +4069,7 @@ void Addbots_MenuInit( void )
 
 	totalbots = 0;
 
-	LoadBotInfo();
+	LoadBotInfo(); // -jjb-ac  load from files here
 
 	s_addbots_menu.x = viddef.width * 0.50 - 50*scale;
 	s_addbots_menu.nitems = 0;
@@ -4070,10 +4082,10 @@ void Addbots_MenuInit( void )
 		s_addbots_bot_action[i].generic.y		= y+=20*scale;
 		s_addbots_bot_action[i].generic.cursor_offset = -16*scale;
 		s_addbots_bot_action[i].generic.callback = AddbotFunc;
+			// -jjb-ac write bot data with AddbotFunc
 
 		Menu_AddItem( &s_addbots_menu, &s_addbots_bot_action[i] );
 	}
-
 
 }
 
@@ -4185,9 +4197,13 @@ void MapInfoFunc( void *self ) {
 	else
 		strcpy( startmap, "missing");
 
-#ifdef __unix__
+#if defined UNIX_VARIANT || defined WIN32_VARIANT
+	// -jjb-ac review. this should work for win32
+	//  Menu_FindFile is a simple file open
+	//  FS_FOpenFile handles the system dependent search path
+
 	// more than 2 possible locations.
-	sprintf(path, "levelshots/%s.txt", startmap);
+	Com_sprintf(path, sizeof(path), "levelshots/%s.txt", startmap);
 	FS_FOpenFile(path, &desc_file);
 	if (desc_file) {
 		if(fgets(line, 500, desc_file))
@@ -4231,6 +4247,7 @@ void MapInfoFunc( void *self ) {
 			s_startserver_map_data[i].generic.y		= FONTSCALE*241*scale + offset + FONTSCALE*i*10*scale;
 		}
 	}
+
 #else
 
 	sprintf(path, "%s/levelshots/%s.txt", FS_Gamedir(), startmap);
@@ -4238,7 +4255,7 @@ void MapInfoFunc( void *self ) {
 	Menu_FindFile(path, &desc_file);
 	if(desc_file)
 		fclose(desc_file);
-	else 
+	else
 		sprintf(path, "%s/levelshots/%s.txt", BASEDIRNAME, startmap);
 
 	if ((map_file = fopen(path, "rb")) != NULL)
@@ -4326,7 +4343,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	}
 	else
 	{
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 		length = filelength( fileno( fp  ) );
 #else
 		fseek(fp, 0, SEEK_END);
@@ -4556,11 +4573,20 @@ void StartServerActionFunc( void *self )
 	Cvar_SetValue ("fraglimit", ClampCvar( 0, fraglimit, fraglimit ) );
 	Cvar_Set("hostname", s_hostname_field.buffer );
 	Cvar_SetValue("sv_public", s_public_box.curvalue );
+
+// -jjb-ac
+// Running a dedicated server from menu does not work in Linux
+// Listen server should be ok.
 	if(s_dedicated_box.curvalue) {
+#if defined WIN32_VARIANT
 		Cvar_ForceSet("dedicated", "1");
+#else
+		Cvar_ForceSet("dedicated", "0");
+#endif
 		Cvar_Set("sv_maplist", startmap);
 		Cbuf_AddText ("setmaster master.corservers.com master2.corservers.com\n");
 	}
+
 	Cvar_SetValue( "skill", s_skill_box.curvalue );
 	Cvar_SetValue( "grapple", s_grapple_box.curvalue);
 	Cvar_SetValue( "g_antilag", s_antilag_box.curvalue);
@@ -4716,7 +4742,7 @@ void StartServer_MenuInit( void )
 		0
 	};
 	float scale;
-	
+
 	scale = (float)(viddef.height)/600;
 
 	/*
@@ -4821,12 +4847,23 @@ void StartServer_MenuInit( void )
 	s_public_box.itemnames = public_yn;
 	s_public_box.curvalue = 1;
 
+	// -jjb-ac  breaks in Linux
+#if defined WIN32_VARIANT
 	s_dedicated_box.generic.type = MTYPE_SPINCONTROL;
 	s_dedicated_box.generic.x	= -8*scale;
 	s_dedicated_box.generic.y	= FONTSCALE*164*scale + offset;
 	s_dedicated_box.generic.name = "dedicated server";
 	s_dedicated_box.itemnames = public_yn;
 	s_dedicated_box.curvalue = 0;
+#else
+	// -jjb-ac  need this?
+	s_dedicated_box.generic.type = -1;
+	s_dedicated_box.generic.x	= 0;
+	s_dedicated_box.generic.y	= 0;
+	s_dedicated_box.generic.name = NULL;
+	s_dedicated_box.itemnames = NULL;
+	s_dedicated_box.curvalue = 0;
+#endif
 
 	s_skill_box.generic.type = MTYPE_SPINCONTROL;
 	s_skill_box.generic.x	= -8*scale;
@@ -4868,7 +4905,10 @@ void StartServer_MenuInit( void )
 	Menu_AddItem( &s_startserver_menu, &s_maxclients_field );
 	Menu_AddItem( &s_startserver_menu, &s_hostname_field );
 	Menu_AddItem( &s_startserver_menu, &s_public_box );
+#if defined WIN32_VARIANT
+	// -jjb-ac might work, might not
 	Menu_AddItem( &s_startserver_menu, &s_dedicated_box );
+#endif
 	Menu_AddItem( &s_startserver_menu, &s_skill_box );
 	Menu_AddItem( &s_startserver_menu, &s_startserver_dmoptions_action );
 	Menu_AddItem( &s_startserver_menu, &s_startserver_start_action );
@@ -5607,7 +5647,7 @@ void M_Menu_AddressBook_f(void)
 	M_PushMenu( AddressBook_MenuDraw, AddressBook_MenuKey );
 }
 
-/* 
+/*
 =============================================================================
 
 PLAYER RANKING MENU
@@ -5642,7 +5682,7 @@ void PlayerRanking_MenuInit( void )
 
 	scale = (float)(viddef.height)/600;
 
-	banneralpha = 0.1; 
+	banneralpha = 0.1;
 
 	s_playerranking_menu.x = viddef.width / 2 - 170*scale;
 	s_playerranking_menu.y = viddef.height / 2 - 160*scale;
@@ -5660,7 +5700,7 @@ void PlayerRanking_MenuInit( void )
 	Com_sprintf(fragrate, sizeof(fragrate), "Frag Rate: %6.2f", (float)(player.totalfrags/player.totaltime));
 	Com_sprintf(totalfrags, sizeof(totalfrags), "Total Frags: ^1%i", player.totalfrags);
 	Com_sprintf(totaltime, sizeof(totaltime), "Total Time: %6.2f", player.totaltime);
-	
+
 	s_playerranking_title.generic.type	= MTYPE_ACTION;
 	s_playerranking_title.generic.name	= "Player Ranking and Stats";
 	s_playerranking_title.generic.flags	= QMF_LEFT_JUSTIFY;
@@ -5672,7 +5712,7 @@ void PlayerRanking_MenuInit( void )
 	s_playerranking_name.generic.type	= MTYPE_COLORTXT;
 	s_playerranking_name.generic.name	= playername;
 	s_playerranking_name.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_playerranking_name.generic.x		= -31*offset*scale+16*scale; 
+	s_playerranking_name.generic.x		= -31*offset*scale+16*scale;
 	s_playerranking_name.generic.y		= FONTSCALE*20*scale;
 
 	s_playerranking_rank.generic.type	= MTYPE_COLORTXT;
@@ -5851,7 +5891,7 @@ static qboolean IconOfSkinExists( char *skin, char **pcxfiles, int npcxfiles )
 		if ( strcmp( pcxfiles[i], scratch ) == 0 )
 			return true;
 	}
-	
+
 	strcpy( scratch, skin );
 	*strrchr( scratch, '.' ) = 0;
 	strcat( scratch, "_i.jpg" );
@@ -6233,7 +6273,8 @@ void PlayerConfig_MenuDraw( void )
 {
 	extern float CalcFov( float fov_x, float w, float h );
 	refdef_t refdef;
-	char scratch[MAX_OSPATH];
+	char scratch[MAX_OSPATH]; // -jjb-fix more room req'd i think
+
 	FILE *modelfile;
 	int helmet = false;
 	int rack = false;
@@ -6301,6 +6342,23 @@ void PlayerConfig_MenuDraw( void )
 		entity[1].skin = R_RegisterSkin( scratch );
 
 		//if a helmet or other special device
+#if defined UNIX_VARIANT || defined WIN32_VARIANT
+
+		// -jjb-ac  DATADIR dependent, FS_FOpenFile should work fine for win32
+		// corrects bug with helmet not being displayed in player setup menu
+
+		Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.md2", s_pmi[s_player_model_box.curvalue].directory );
+		FS_FOpenFile( scratch, &modelfile);
+		if(modelfile) {
+			helmet = true;
+			// Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.md2", s_pmi[s_player_model_box.curvalue].directory );
+			entity[2].model = R_RegisterModel( scratch );
+			Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.tga", s_pmi[s_player_model_box.curvalue].directory );
+			entity[2].skin = R_RegisterSkin( scratch );
+			fclose(modelfile);
+		}
+
+#else
 		Com_sprintf( scratch, sizeof( scratch ), "%s/players/%s/helmet.md2", FS_Gamedir(), s_pmi[s_player_model_box.curvalue].directory );
 		Menu_FindFile (scratch, &modelfile);
 		if(modelfile) {
@@ -6323,9 +6381,26 @@ void PlayerConfig_MenuDraw( void )
 				fclose(modelfile);
 			}
 		}
+#endif
+
+#if defined UNIX_VARIANT || defined WIN32_VARIANT
+// -jjb-ac
+		Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.md2", s_pmi[s_player_model_box.curvalue].directory );
+		FS_FOpenFile( scratch, &modelfile);
+		if(modelfile) {
+			rack = true;
+			// Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.md2", s_pmi[s_player_model_box.curvalue].directory );
+			entity[2].model = R_RegisterModel( scratch );
+			Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.tga", s_pmi[s_player_model_box.curvalue].directory );
+			entity[2].skin = R_RegisterSkin( scratch );
+			fclose(modelfile);
+		}
+
+#else
 		//don't bother with gamedirs, this is a special case. Damn brainlets.
-		Com_sprintf( scratch, sizeof( scratch ), "%s/players/%s/gunrack.md2", BASEDIRNAME, s_pmi[s_player_model_box.curvalue].directory );
 		Menu_FindFile (scratch, &modelfile);
+		Com_sprintf( scratch, sizeof( scratch ), "%s/players/%s/gunrack.md2", BASEDIRNAME, s_pmi[s_player_model_box.curvalue].directory );
+
 		if(modelfile) {
 			rack = true;
 			Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.md2", s_pmi[s_player_model_box.curvalue].directory );
@@ -6334,7 +6409,9 @@ void PlayerConfig_MenuDraw( void )
 			entity[2].skin = R_RegisterSkin( scratch );
 			fclose(modelfile);
 		}
-		
+
+#endif
+
 		entity[0].flags = RF_FULLBRIGHT | RF_MENUMODEL;
 		entity[0].origin[0] = 80;
 		entity[0].origin[1] = -30;
@@ -6398,7 +6475,7 @@ void PlayerConfig_MenuDraw( void )
 
 		refdef.y = viddef.height / 2 - 70*scale;
 		Draw_StretchPic( s_player_config_menu.x - 120*scale, refdef.y - 56*scale, 64*scale, 64*scale, scratch );
-	}	
+	}
 }
 void PConfigAccept (void)
 {

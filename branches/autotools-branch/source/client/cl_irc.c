@@ -44,7 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #if defined UNIX_VARIANT
 #if defined HAVE_UNISTD_H
 	#include <unistd.h>
-#endif	
+#endif
 	#include <sys/socket.h>
 	#include <sys/time.h>
 	#include <netinet/in.h>
@@ -561,7 +561,7 @@ void RecvThreadProc(void *dummy)
 void *RecvThreadProc(void *dummy)
 {
     if (!CL_JoinIRC())
-        return;
+        return NULL;
 
 	while(1) {
 
@@ -570,7 +570,7 @@ void *RecvThreadProc(void *dummy)
 
 		CL_GetIRCData();
 	}
-	return;
+	return NULL;
 }
 #endif
 
@@ -586,7 +586,7 @@ void CL_InitIRC(void)
 #elif defined HAVE_PTHREAD_CREATE
 	pthread_create(&pth,NULL,RecvThreadProc,"dummy");
 #else
-#error No pthread_create() function.	
+#error No pthread_create() function.
 #endif
 
 }

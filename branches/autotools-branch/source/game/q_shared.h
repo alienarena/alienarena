@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2010 COR Entertainment
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -35,17 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 typedef unsigned char 		byte;
 
-// -jjb-ac this might work
-//  comes from stdbool.h, which could be included, or maybe not
-#if defined HAVE__BOOL
-#if defined true && defined false
-typedef _bool qboolean;
-else
 typedef enum {false, true}	qboolean;
-#endif
-#else
-typedef enum {false, true}	qboolean;
-#endif
 
 #ifndef NULL
 #define NULL ((void *)0)
@@ -67,9 +58,7 @@ typedef enum {false, true}	qboolean;
  */
 #define	MAX_QPATH			64		// max length of a quake game pathname
 
-// -jjb-ac Possible to detect this with configure? The real maximums can be way
-//  more than these, to the point of being impractical
-#ifdef __unix__
+#if defined UNIX_VARIANT
 #define	MAX_OSPATH			256		// max length of a filesystem pathname
 #else
 #define	MAX_OSPATH			128		// max length of a filesystem pathname
@@ -147,14 +136,7 @@ extern vec3_t vec3_origin;
 
 #define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
-// microsoft's fabs seems to be ungodly slow...
-//float Q_fabs (float f);
-//#define	fabs(f) Q_fabs(f)
-//#if !defined C_ONLY && !defined __unix__ && !defined __sgi
-//extern long Q_ftol( float f );
-//#else
 #define Q_ftol( f ) ( long ) (f)
-//#endif
 
 #define DotProduct(x,y)			(x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
 #define VectorSubtract(a,b,c)	(c[0]=a[0]-b[0],c[1]=a[1]-b[1],c[2]=a[2]-b[2])
@@ -809,7 +791,34 @@ typedef struct
 ==========================================================
 */
 
+#if 0
+// -jjb-test
+// this is for unsigned short, are all converted angles positive ?
+//#define	ANGLE2SHORT(x)	((int)((x)*65536/360) & 65535)
+static inline int ANGLE2SHORT( float x )
+{
+	float x1;
+	int x2;
+
+	while ( x < 0.0f ) { // negative to positive
+		x += 360.0f;
+	}
+	while ( x > 360.0f ) {
+		x -= 360.0f;
+	}
+
+	x1 = x * 182.0f; //  ~=65536 / 360.0
+	x2 = (int)(x1);
+
+	if ( x2 > 65535 )
+		Com_Printf("[ANGLE2SHORT range error: %i\n", x2);
+
+	return x2;
+}
+#else
 #define	ANGLE2SHORT(x)	((int)((x)*65536/360) & 65535)
+#endif
+
 #define	SHORT2ANGLE(x)	((x)*(360.0/65536))
 
 
