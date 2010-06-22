@@ -647,8 +647,9 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 	}	
 }
 
-void GL_VlightIQM (vec3_t baselight, mvertex_t *vert, mnormal_t *normal, vec3_t lightOut)
-{
+//to do - this needs to work smoother, lerping of normal perhaps?
+void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
+{	
 	float l;
 	float lscale;
 	vec3_t lightdir;
@@ -915,7 +916,7 @@ void GL_DrawIQMFrame(int skinnum)
 					VArray[4] = currentmodel->st[index_st].t;
 				}
 
-				GL_VlightIQM (shadelight, &currentmodel->animatevertexes[index_xyz], &currentmodel->animatenormal[index_xyz], lightcolor);
+				GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], lightcolor);
 									
 				if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
 					VArray[7] = lightcolor[0];
@@ -1065,8 +1066,13 @@ void GL_DrawIQMFrame(int skinnum)
 					}
 
 					//brighten things slightly 
-					for (i = 0; i < 3; i++ )
-						lightVal[i] *= 1.15;
+					for (i = 0; i < 3; i++ ) 
+					{
+						if(currententity->flags & RF_WEAPONMODEL)
+							lightVal[i] *= 0.9;
+						else
+							lightVal[i] *= 1.15;
+					}
 				}
 											
 				GL_EnableMultitexture( true );
@@ -1135,7 +1141,7 @@ void GL_DrawIQMFrame(int skinnum)
 						float red = 1, green = 1, blue = 1;
 
 						if (stage->lightmap) { 
-							GL_VlightIQM (shadelight, &currentmodel->animatevertexes[index_xyz], &currentmodel->animatenormal[index_xyz], lightcolor);
+							GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
 							blue = lightcolor[2];						
