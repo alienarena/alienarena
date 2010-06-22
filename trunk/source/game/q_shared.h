@@ -41,6 +41,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <ctype.h>
 
+#if defined __unix__
+#define _unlink unlink
+#define _putenv putenv
+#define _strdup strdup
+#endif
+
 #if (defined _M_IX86 || defined __i386__) && !defined C_ONLY && !defined __sun__
 #define id386	1
 #else
@@ -881,7 +887,7 @@ typedef enum
 	EV_FALL,
 	EV_FALLFAR,
 	EV_PLAYER_TELEPORT,
-	EV_OTHER_TELEPORT, 
+	EV_OTHER_TELEPORT,
 	EV_WADE
 } entity_event_t;
 
