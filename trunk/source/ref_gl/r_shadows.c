@@ -882,7 +882,7 @@ void R_CastShadow(void)
 	qglDepthMask(0);
 
 	qglEnable(GL_POLYGON_OFFSET_FILL);
-	qglPolygonOffset(0.0f, 100.0f);
+	qglPolygonOffset(0.0f, 1000.0f);
 
 	if(gl_state.separateStencil)
 		qglStencilFuncSeparate(GL_FRONT_AND_BACK, GL_ALWAYS, 0x0, 0xFF);
