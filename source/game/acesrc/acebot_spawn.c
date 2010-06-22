@@ -11,9 +11,9 @@
 //
 //	Please see liscense.txt in the source directory for the copyright
 //	information regarding those files belonging to Id Software, Inc.
-//	
+//
 //	Should you decide to release a modified version of ACE, you MUST
-//	include the following text (minus the BEGIN and END lines) in the 
+//	include the following text (minus the BEGIN and END lines) in the
 //	documentation for your modification.
 //
 //	--- BEGIN ---
@@ -24,7 +24,7 @@
 //	This program is a modification of the ACE Bot, and is therefore
 //	in NO WAY supported by Steve Yeager.
 
-//	This program MUST NOT be sold in ANY form. If you have paid for 
+//	This program MUST NOT be sold in ANY form. If you have paid for
 //	this product, you should contact Steve Yeager immediately, via
 //	the ACE Bot homepage.
 //
@@ -44,7 +44,7 @@
 //  Telefragged.com - For giving ACE a home.
 //  Microsoft       - For giving us such a wonderful crash free OS.
 //  id              - Need I say more.
-//  
+//
 //  And to all the other testers, pathers, and players and people
 //  who I can't remember who the heck they were, but helped out.
 //
@@ -52,7 +52,7 @@
 
 ///////////////////////////////////////////////////////////////////////
 //
-//  acebot_spawn.c - This file contains all of the 
+//  acebot_spawn.c - This file contains all of the
 //                   spawing support routines for the ACE bot.
 //
 ///////////////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ extern void ACECO_ReadConfig(char config_file[128]);
 ///////////////////////////////////////////////////////////////////////
 // Had to add this function in this version for some reason.
 // any globals are wiped out between level changes....so
-// save the bots out to a file. 
+// save the bots out to a file.
 //
 // NOTE: There is still a bug when the bots are saved for
 //       a dm game and then reloaded into a CTF game.
@@ -82,7 +82,7 @@ void ACESP_SaveBots()
 
 	if((pOut = fopen("botinfo/bots.tmp", "wb" )) == NULL)
 		return; // bail
-	
+
 	// Get number of bots
 	for (i = maxclients->value; i > 0; i--)
 	{
@@ -91,7 +91,7 @@ void ACESP_SaveBots()
 		if (bot->inuse && bot->is_bot)
 			count++;
 	}
-	
+
 	fwrite(&count,sizeof (int),1,pOut); // Write number of bots
 
 	for (i = maxclients->value; i > 0; i--)
@@ -99,9 +99,9 @@ void ACESP_SaveBots()
 		bot = g_edicts + i + 1;
 
 		if (bot->inuse && bot->is_bot)
-			fwrite(bot->client->pers.userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut); 
+			fwrite(bot->client->pers.userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
 	}
-		
+
     fclose(pOut);
 }
 
@@ -123,7 +123,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	int found;
 	int real_players, total_players;
 	edict_t *cl_ent;
-	
+
 	if (((int)(dmflags->value) & DF_BOTS)) {
 		return; // don't load any bots.
 	}
@@ -139,7 +139,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	if((pIn = fopen(bot_filename, "rb" )) == NULL)
 		return; // bail
 
-	fread(&count,sizeof (int),1,pIn); 
+	fread(&count,sizeof (int),1,pIn);
 
 	if(g_duel->value) {
 		count = 1; //never more than 1 bot no matter what in duel mode
@@ -149,7 +149,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 		spawnkicknum = sv_botkickthreshold->integer;
 	else
 		spawnkicknum = 0;
-	
+
 	ent->client->resp.botnum = 0;
 
 	//probably want to count total REAL players here...
@@ -161,7 +161,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 			cl_ent = g_edicts + 1 + i;
 			if (cl_ent->inuse && !cl_ent->is_bot){
 				cl_ent->client->resp.botnum = 0;
-				if(g_duel->value) 
+				if(g_duel->value)
 					real_players++;
 				else if(!game.clients[i].resp.spectator)
 					real_players++;
@@ -178,14 +178,14 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	{
 		total_players = real_players + i + 1;
 
-		fread(userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn); 
+		fread(userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
 
 		info = Info_ValueForKey (userinfo, "name");
-		skin = Info_ValueForKey (userinfo, "skin");	
+		skin = Info_ValueForKey (userinfo, "skin");
 
 		strcpy(ent->client->resp.bots[i].name, info);
 
-		if(spawnkicknum) { 
+		if(spawnkicknum) {
 				for (j=0 ; j<game.maxclients ; j++)
 				{
 					cl_ent = g_edicts + 1 + j;
@@ -200,24 +200,24 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 		else {
 			ent->client->resp.botnum++;
 		}
-        
+
 		//look for existing bots of same name, so that server doesn't fill up with bots
 		//when clients enter the game
 		found = false;
 		found = ACESP_FindBot(info);
-		
-		if(!found && ((total_players <= spawnkicknum) || !spawnkicknum)) { 
 
-			if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) 
+		if(!found && ((total_players <= spawnkicknum) || !spawnkicknum)) {
+
+			if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 				ACESP_SpawnBot(info, skin, NULL); //we may be changing the info further on
-			else 
-				ACESP_SpawnBot (NULL, NULL, userinfo);			
+			else
+				ACESP_SpawnBot (NULL, NULL, userinfo);
 		}
-		else if(found && ((total_players > spawnkicknum) && spawnkicknum)) 
+		else if(found && ((total_players > spawnkicknum) && spawnkicknum))
 			ACESP_KickBot(info);
-		
+
 	}
-		
+
     fclose(pIn);
 
 }
@@ -239,11 +239,11 @@ int ACESP_FindBotNum(void)
 	if((pIn = fopen(bot_filename, "rb" )) == NULL)
 		return 0; // bail
 
-	fread(&count,sizeof (int),1,pIn); 
+	fread(&count,sizeof (int),1,pIn);
 
 	fclose(pIn);
-	
-	return count; 
+
+	return count;
 }
 ///////////////////////////////////////////////////////////////////////
 // Called by PutClient in Server to actually release the bot into the game
@@ -266,7 +266,7 @@ void ACESP_HoldSpawn(edict_t *self)
 	gi.WriteByte (MZ_LOGIN);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
-	
+
 	safe_bprintf (PRINT_MEDIUM, "%s entered the game\n", self->client->pers.netname);
 
 }
@@ -284,7 +284,7 @@ void ACECO_ReadConfig( char *config_file ) //use standard c routines for linux
 	//set bot defaults(in case no bot config file is present for that bot)
 	botvals.skill = 1; //medium
 	strcpy(botvals.faveweap, "None");
-	for(k = 1; k < 10; k++) 
+	for(k = 1; k < 10; k++)
 		botvals.weapacc[k] = 1.0;
 	botvals.awareness = 0.7;
 
@@ -393,7 +393,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	// do it before setting health back up, so farthest
 	// ranging doesn't count this client
 	SelectSpawnPoint (bot, spawn_origin, spawn_angles);
-	
+
 	index = bot-g_edicts-1;
 	client = bot->client;
 
@@ -409,16 +409,16 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	}
 	else
 		memset (&resp, 0, sizeof(resp));
-	
+
 	// clear everything but the persistant data
 	saved = client->pers;
 	memset (client, 0, sizeof(*client));
 	client->pers = saved;
 	client->resp = resp;
-	
+
 	// copy some data from the client to the entity
 	FetchClientEntData (bot);
-	
+
 	// clear entity values
 	bot->groundentity = NULL;
 	bot->client = &game.clients[index];
@@ -447,14 +447,14 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 
 	//deathball
 	bot->in_deathball = false;
-	
+
 	VectorCopy (mins, bot->mins);
 	VectorCopy (maxs, bot->maxs);
 	VectorClear (bot->velocity);
 
 	// clear playerstate values
 	memset (&bot->client->ps, 0, sizeof(client->ps));
-	
+
 	client->ps.pmove.origin[0] = spawn_origin[0]*8;
 	client->ps.pmove.origin[1] = spawn_origin[1]*8;
 	client->ps.pmove.origin[2] = spawn_origin[2]*8;
@@ -508,7 +508,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 		bot->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
 	}
-	else 
+	else
 		bot->s.modelindex3 = 0;
 
 	//check for class file
@@ -567,7 +567,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	bot->s.angles[ROLL] = 0;
 	VectorCopy (bot->s.angles, client->ps.viewangles);
 	VectorCopy (bot->s.angles, client->v_angle);
-	
+
 	// force the current weapon up
 	client->newweapon = client->pers.weapon;
 	ChangeWeapon (bot);
@@ -576,27 +576,27 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	client->is_bot = 1;
 
 	bot->enemy = NULL;
-	bot->movetarget = NULL; 
+	bot->movetarget = NULL;
 	bot->state = STATE_MOVE;
 
 	// Set the current node
 	bot->current_node = ACEND_FindClosestReachableNode(bot,NODE_DENSITY, NODE_ALL);
 	bot->goal_node = bot->current_node;
 	bot->next_node = bot->current_node;
-	bot->next_move_time = level.time;		
+	bot->next_move_time = level.time;
 	bot->suicide_timeout = level.time + 15.0;
 
 	if(!respawn) {
 		//if not a respawn, load bot configuration file(specific to each bot)
 		info = Info_ValueForKey (bot->client->pers.userinfo, "name");
- 
+
 		sprintf(bot_configfilename, BOTDIR"/botinfo/%s.cfg", info);
 		ACECO_ReadConfig(bot_configfilename);
 
 		//set config items
 		bot->skill = botvals.skill;
 		strcpy(bot->faveweap, botvals.faveweap);
-		for(k = 1; k < 10; k++) 
+		for(k = 1; k < 10; k++)
 			bot->weapacc[k] = botvals.weapacc[k];
 		bot->accuracy = 1.0; //start with this(changes when bot selects a weapon
 		bot->awareness = botvals.awareness;
@@ -611,7 +611,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 
 		//allow skill level settings to affect overall skills(single player games)
 		if(skill->value == 0.0) {
-			bot->skill = 0; //dumb as a box of rocks	
+			bot->skill = 0; //dumb as a box of rocks
 		}
 		if(skill->value == 2.0) {
 			bot->skill += 1;
@@ -645,7 +645,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 		gi.multicast (bot->s.origin, MULTICAST_PVS);
 	}
 	client->spawnprotecttime = level.time;
-	
+
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -654,7 +654,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 void ACESP_Respawn (edict_t *self)
 {
 	CopyToBodyQue (self);
-	
+
 	ACESP_PutClientInServer (self,true,0);
 
 	// add a teleportation effect
@@ -676,12 +676,12 @@ edict_t *ACESP_FindFreeClient (void)
 	edict_t *bot;
 	int	i;
 	int max_count=0;
-	
+
 	// This is for the naming of the bots
 	for (i = maxclients->value; i > 0; i--)
 	{
 		bot = g_edicts + i + 1;
-		
+
 		if(bot->count > max_count)
 			max_count = bot->count;
 	}
@@ -699,7 +699,7 @@ edict_t *ACESP_FindFreeClient (void)
 
 	if (bot->inuse)
 		bot = NULL;
-	
+
 	return bot;
 }
 
@@ -734,7 +734,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin)
 	bot->dmteam = NO_TEAM; //default
 
 	// skin
-	
+
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //only do this for skin teams, red, blue
 	{
 		copychar = false;
@@ -743,7 +743,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin)
 		j = k = 0;
 		for(i = 0; i <= strlen(skin2) && i < MAX_INFO_STRING; i++)
 		{
-			if(copychar){ 
+			if(copychar){
 				playerskin[k] = skin2[i];
 				k++;
 			}
@@ -753,11 +753,11 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin)
 			}
 			if(skin2[i] == '/')
 				copychar = true;
-				
-			
+
+
 		}
 		playermodel[j] = 0;
-		
+
 		if(blue_team_cnt < red_team_cnt)
 		{
 			strcpy(playerskin, "blue");
@@ -770,23 +770,23 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin)
 			//red_team_cnt++;
 			bot->dmteam = RED_TEAM;
 		}
-	
+
 		strcpy(skin2, playermodel);
 		strcat(skin2, playerskin);
 
 	}
-		
+
 	if(strlen(skin2) == 0)
 	{
-		// randomly choose skin 
+		// randomly choose skin
 		rnd = random();
 		if(rnd  < 0.5)
 			sprintf(bot_skin,"martianenforcer/red");
-		
-		else 
+
+		else
 			sprintf(bot_skin,"martianenforcer/blue");
 	}
-	else 
+	else
 		strcpy(bot_skin,skin2);
 
 	// initialise userinfo
@@ -817,19 +817,19 @@ void ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 		safe_bprintf (PRINT_MEDIUM, "Server is full, increase Maxclients.\n");
 		return;
 	}
-	
-	bot->yaw_speed = 100; // yaw speed
+
+	bot->yaw_speed = 37; // yaw speed. angle in degrees
 	bot->inuse = true;
 	bot->is_bot = true;
 
 	// To allow bots to respawn
 	if(userinfo == NULL)
 		ACESP_SetName(bot, name, skin);
-	else 
+	else
 	{
 		bot->dmteam = NO_TEAM; //default
 		if(!ClientConnect (bot, userinfo))
-		{	
+		{
 			/* Tony: Sometimes bots are refused entry to servers - give up gracefully */
 			safe_bprintf (PRINT_MEDIUM, "Bot was refused entry to server.\n");
 			bot->inuse = false;
@@ -837,7 +837,7 @@ void ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 			return;
 		}
 	}
-	
+
 	G_InitEdict (bot);
 
 	InitClientResp (bot->client);
@@ -885,7 +885,7 @@ void ACESP_RemoveBot(char *name)
 				if(ctf->value)
 					CTFDeadDropFlag(bot);
 
-				DeadDropDeathball(bot);	
+				DeadDropDeathball(bot);
 				if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
 				{
 					if(bot->dmteam == BLUE_TEAM)
@@ -903,11 +903,11 @@ void ACESP_RemoveBot(char *name)
 		}
 	}
 
-	if(!freed)	
+	if(!freed)
 		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
 	else
 		game.num_bots--;
-	
+
 	ACESP_SaveBots(); // Save them again
 }
 
@@ -945,11 +945,11 @@ void ACESP_KickBot(char *name)
 		{
 			if(bot->is_bot && (strcmp(bot->client->pers.netname,name)==0))
 			{
-			
+
 				if(ctf->value)
 					CTFDeadDropFlag(bot);
 
-				DeadDropDeathball(bot);	
+				DeadDropDeathball(bot);
 
 				if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
 				{
@@ -958,9 +958,9 @@ void ACESP_KickBot(char *name)
 					else
 						red_team_cnt-=1;
 				}
-				
+
 				//safe_bprintf(PRINT_HIGH, "(kicked) red: %i blue: %i\n", red_team_cnt, blue_team_cnt);
-			
+
 				// send effect
 				gi.WriteByte (svc_muzzleflash);
 				gi.WriteShort (bot-g_edicts);
@@ -981,11 +981,11 @@ void ACESP_KickBot(char *name)
 			if(freed) {
 				bot->client->resp.botnum--; //we have one less bot
 				bot->client->ps.botnum = bot->client->resp.botnum;
-			
+
 
 				//if in duel mode, we need to bump people down the queue if its the player in game leaving
-	
-				if(g_duel->value) if(g_duel->value) { 
+
+				if(g_duel->value) if(g_duel->value) {
 					MoveClientsDownQueue(bot);
 					if(!bot->client->resp.spectator) {
 						for (j = 0; j < maxclients->value; j++)  //clear scores if player was in duel
