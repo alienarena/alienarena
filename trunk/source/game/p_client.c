@@ -1672,11 +1672,9 @@ void PutClientInServer (edict_t *ent)
 	client = ent->client;
 	client->is_bot = 0;
 	client->kill_streak = 0;
-
+	client->homing_shots = 0;
 	client->mapvote = 0;
-
 	client->lasttaunttime = 0;
-
 	client->rayImmunity = false;
 
 	resp = client->resp;
@@ -2104,7 +2102,7 @@ void ClientBegin (edict_t *ent)
 	}
 	ent->client->kill_streak = 0;
 
-	ent->client->resp.homing_shots = 0;
+	ent->client->homing_shots = 0;
 
 	ClientBeginDeathmatch (ent);
 

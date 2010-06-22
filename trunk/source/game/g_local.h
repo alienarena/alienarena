@@ -1094,10 +1094,7 @@ typedef struct
 
 	//reward points
 	int reward_pts;
-	qboolean powered;
-
-	//homing rocket limits
-	int	homing_shots;
+	qboolean powered;	
 
 	//voting
 	qboolean voted;
@@ -1236,6 +1233,9 @@ struct gclient_s
 
 	//joust attempts - for limiting how many times you can joust at a time
 	int joustattempts;
+
+	//homing rocket limits
+	int	homing_shots;
 
 	//movetime - used for special moves
 	float lastmovetime;

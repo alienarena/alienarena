@@ -643,7 +643,7 @@ void ResetLevel (void) //for resetting players and items after warmup
 			PutClientInServer (ent);
 			ACESP_LoadBots(ent, 0);
 		}
-		ent->client->resp.homing_shots = 0;
+		ent->client->homing_shots = 0;
 	}
 	blue_team_score = 0;
 	red_team_score = 0;
@@ -922,7 +922,7 @@ void ExitLevel (void)
 			ent->client->resp.score = 0;
 			ent->client->resp.deaths = 0;
 			ent->client->resp.reward_pts = 0;
-			ent->client->resp.homing_shots = 0;
+			ent->client->homing_shots = 0;
 			if(!ent->is_bot) { //players
 				ent->takedamage = DAMAGE_AIM;
 				ent->solid = SOLID_BBOX;

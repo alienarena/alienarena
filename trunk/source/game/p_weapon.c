@@ -1003,14 +1003,14 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	if(ent->client->buttons & BUTTON_ATTACK2) //alt fire
 	{
-		if(ent->client->resp.homing_shots < 5) {
+		if(ent->client->homing_shots < 5) {
 			if(excessive->value) //no homers in excessive!
 				fire_rocket (ent, start, forward, damage, 900, damage_radius, radius_damage);
 			else
 				fire_homingrocket (ent, start, forward, damage, 250, damage_radius, radius_damage);
 		}
 		else {
-			safe_cprintf(ent, PRINT_HIGH, "Exceeded max number of homing missiles for this round!\n");
+			safe_cprintf(ent, PRINT_HIGH, "Exceeded max number of homing missiles for this life!\n");
 			fire_rocket (ent, start, forward, damage, 900, damage_radius, radius_damage);
 		}
 	}
