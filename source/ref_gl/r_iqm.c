@@ -1370,6 +1370,7 @@ static qboolean R_CullIQMModel( void )
 	}
 }
 
+//Can these next two be replaced with some type of animation grouping from the model?
 qboolean inAnimGroup(int frame, int oldframe)
 {
 	//check if we are in a player anim group that is commonly looping
@@ -1389,6 +1390,12 @@ int NextFrame(int frame)
 {
 	int outframe;
 
+	//just for now
+	if(currententity->flags & RF_WEAPONMODEL) {
+		outframe = frame + 1;
+		return outframe;
+	}
+
 	switch(frame)
 	{
 		//map models can be 24 or 40 frames
@@ -1406,27 +1413,34 @@ int NextFrame(int frame)
 		case 45:
 			outframe = 40;
 			break;
+		//player shooting
+		case 53:
+			outframe = 46;
+			break;
 		//player jumping
 		case 71:
-			outframe = 66;
+			outframe = 0;
 			break;
 		//player crouched
-		case 154:
-			outframe = 136;
+		case 153:
+			outframe = 135;
 			break;
 		//player crouched walking
-		case 160:
-			outframe = 155;
+		case 159:
+			outframe = 154;
+			break;
+		case 168:
+			outframe = 160;
 			break;
 		//deaths
-		case 220:
-			outframe = 220;
+		case 219:
+			outframe = 219;
 			break;
-		case 238:
-			outframe = 238;
+		case 237:
+			outframe = 237;
 			break;
-		case 258:
-			outframe = 258;
+		case 257:
+			outframe = 257;
 			break;
 		default:
 			outframe = frame + 1;
