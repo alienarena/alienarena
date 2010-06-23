@@ -181,7 +181,7 @@ qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath)
 
 	if ( fp != 0 )
 	{
-		fp = 0;
+		fclose(fp);
 		free( buffer );
 	}
 	else
@@ -524,6 +524,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		if (Mod_ReadSkinFile(fullname, skinname))
 		{
 			mod->skins[0] = GL_FindImage (skinname, it_skin);
+			strcpy(mod->skinname, skinname);
 
 			//load shader for skin
 			COM_StripExtension ( skinname, shortname );
@@ -647,7 +648,7 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 	}	
 }
 
-//to do - this needs to work smoother, lerping of normal perhaps?
+//to do - this needs to work smoother
 void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
 {	
 	float l;

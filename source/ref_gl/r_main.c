@@ -257,7 +257,7 @@ void R_ReadFogScript(char config_file[128])
 
 	if ( fp != 0 )
 	{
-		fp = 0;
+		fclose(fp);
 		free( buffer );
 	}
 	else
@@ -302,7 +302,7 @@ void R_ReadMusicScript(char config_file[128])
 
 	if ( fp != 0 )
 	{
-		fp = 0;
+		fclose(fp);
 		free( buffer );
 	}
 	else
