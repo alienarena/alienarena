@@ -354,6 +354,7 @@ typedef struct model_s
 	mtangent_t		*animatetangent;
 	unsigned char	*blendindexes;
 	unsigned char	*blendweights;
+	char			skinname[MAX_QPATH];
 	//end iqm
 
 	fstvert_t	*st;
