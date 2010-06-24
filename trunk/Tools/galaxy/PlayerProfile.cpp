@@ -67,8 +67,8 @@ BOOL PlayerProfile::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	//initialize drop list
-	m_ircselectserver.AddString("irc.efnet.org");
-	m_ircselectserver.AddString("irc.prison.net");
+	m_ircselectserver.AddString("irc.planetarena.org");
+	m_ircselectserver.AddString("irc.efnet.net");
 	m_ircselectserver.AddString("irc.anynet.org");
 
 	GetPrivateProfileString("Galaxy", "chatstart", "true", user.joinatstart, 12, "galaxy.ini");
@@ -142,20 +142,20 @@ void PlayerProfile::OnSelchangeIrcserver()
 
 	switch(index) {
 	case 0:
-		WritePrivateProfileString("Galaxy", "server", "irc.efnet.org", "galaxy.ini");
-		strcpy(servidor, "irc.efnet.org");
+		WritePrivateProfileString("Galaxy", "server", "irc.planetarena.org", "galaxy.ini");
+		strcpy(servidor, "irc.planetarena.org");
 		break;
 	case 1:
-		WritePrivateProfileString("Galaxy", "server", "irc.prison.net", "galaxy.ini");
-		strcpy(servidor, "irc.prison.net");
+		WritePrivateProfileString("Galaxy", "server", "irc.efnet.net", "galaxy.ini");
+		strcpy(servidor, "irc.efnet.net");
 		break;
 	case 2:
 		WritePrivateProfileString("Galaxy", "server", "irc.anynet.org", "galaxy.ini");
 		strcpy(servidor, "irc.anynet.org");
 		break;
 	default:
-		WritePrivateProfileString("Galaxy", "server", "irc.efnet.org", "galaxy.ini");
-		strcpy(servidor, "irc.efnet.org");
+		WritePrivateProfileString("Galaxy", "server", "irc.planetarena.org", "galaxy.ini");
+		strcpy(servidor, "irc.planetarena.org");
 	}
 }
 
