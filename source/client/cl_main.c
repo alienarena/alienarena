@@ -1685,7 +1685,7 @@ void CL_InitLocal (void)
 	CL_InitHttpDownload();
 
 	cl_IRC_connect_at_startup = Cvar_Get("cl_IRC_connect_at_startup", "1", CVAR_ARCHIVE);
-	cl_IRC_server = Cvar_Get("cl_IRC_server", "irc.efnet.org", CVAR_ARCHIVE);
+	cl_IRC_server = Cvar_Get("cl_IRC_server", "irc.planetarena.org", CVAR_ARCHIVE);
 
 	if(cl_IRC_connect_at_startup->value)
 		CL_InitIRC();
