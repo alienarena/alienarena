@@ -180,7 +180,8 @@ IRCresponse_t GetWords(char msg[200])
 	{
 		res.word[word][ichar] = msg[t];
 		ichar++;
-		if (msg[t]==' ') {
+		if (msg[t]==' ') 
+		{
 			ichar=0;
 			word++; 
 		};
@@ -280,7 +281,8 @@ void analizeLine(char Line[1000])
 				outputmsg[strlen(outputmsg)-2] = 0; //don't want that linefeed showing up
 							
 				lines = strlen(outputmsg)/100 + 1; //how many lines do we have?
-				for(i=0; i<lines; i++) {
+				for(i=0; i<lines; i++) 
+				{
 					//get a segment of the total message
 					memset(msgLine,'\0', 101);
 					for(j=0; j<100; j++) 
@@ -364,9 +366,12 @@ void CL_GetIRCData(void)
 		{
 			line[ichar]= File_Buf[t];
 			ichar++;
-			if(File_Buf[t]==13) {
+			if(File_Buf[t]==13) 
+			{
 				ichar=0;
-				if(!strcmp(line, prevLine)) { //don't print duplicate messages
+				if(!strcmp(line, prevLine)) 
+				{ 
+					//don't print duplicate messages
 					memset(line,0,IRC_RECV_BUF_SIZE);
 					return;
 				}
@@ -395,7 +400,8 @@ void CL_IRCSay(void)
 	strcpy(m_sendstring, Cmd_Argv (1));
 
 	//check if it's an "action"
-	if(m_sendstring[0] == '/' && m_sendstring[1] == 'm' && m_sendstring[2] == 'e') {
+	if(m_sendstring[0] == '/' && m_sendstring[1] == 'm' && m_sendstring[2] == 'e') 
+	{
 		//trim out the command
 		for(i = 4; i < 1024; i++)
 			tempstring[i-4] = m_sendstring[i];
@@ -408,7 +414,8 @@ void CL_IRCSay(void)
 		//send a junk string to clear the command
 		sendData("PRIVMSG #alienarena :\n\r");
 	}
-	else {
+	else 
+	{
 		sprintf(message, "PRIVMSG #alienarena :%s\n\r", m_sendstring);
 #ifdef _WINDOWS
 		WSASetLastError(0);
@@ -417,11 +424,14 @@ void CL_IRCSay(void)
 	}
 
 #ifdef _WINDOWS
-	if(WSAGetLastError()) { //there was some error in connecting
-			handle_error();
-			Com_Printf("^1IRC: not connected to #alienarena");
+	if(WSAGetLastError()) 
+	{ 
+		//there was some error in connecting
+		handle_error();
+		Com_Printf("^1IRC: not connected to #alienarena");
 	}
-	else {
+	else 
+	{
 #endif
 		//update the print buffer
 		sprintf(message, "<%s> :%s", user.nick, m_sendstring);
@@ -444,8 +454,8 @@ void CL_IRCSay(void)
 
 
 // returns true on success, false on failure.
-qboolean CL_JoinIRC(void){
-
+qboolean CL_JoinIRC(void)
+{
 	char message[IRC_SEND_BUF_SIZE];
 	char name[32];
 	int i, j;
@@ -464,7 +474,8 @@ qboolean CL_JoinIRC(void){
 
 	strcpy(name, Cvar_VariableString("name")); //we should force players to set name on startup
 
-	if(!strcmp(name, "Player")) {
+	if(!strcmp(name, "Player")) 
+	{
 		Com_Printf("...IRC rejected due to unset player name\n");
 		return false;
 	}
@@ -473,11 +484,13 @@ qboolean CL_JoinIRC(void){
 	j = 0;
 	for (i = 0; i < 16; i++)
 		user.nick[i] = 0;
-		for (i = 0; i < strlen(name) && i < 32; i++) {
-			if ( name[i] == '^' ) {
-				i += 1;
-				continue;
-			}
+	for (i = 0; i < strlen(name) && i < 32; i++) 
+	{
+		if ( name[i] == '^' ) 
+		{
+			i += 1;
+			continue;
+		}
 		user.nick[j] = name[i];
 		j++;
 	}
@@ -489,7 +502,8 @@ qboolean CL_JoinIRC(void){
 
 	sprintf(HostName, cl_IRC_server->string);
 
-    if ( (host=gethostbyname(HostName)) == NULL ) {
+    if ( (host=gethostbyname(HostName)) == NULL ) 
+	{
 #ifdef _WINDOWS
 		closesocket(sock);
 #else
@@ -501,7 +515,8 @@ qboolean CL_JoinIRC(void){
 
     address.sin_addr.s_addr=*((unsigned long *) host->h_addr);
 
-	if ( (connect(sock,(struct sockaddr *) &address, sizeof(address))) != 0) {
+	if ( (connect(sock,(struct sockaddr *) &address, sizeof(address))) != 0) 
+	{
 #ifdef _WINDOWS
 		closesocket(sock);
 #else
@@ -516,12 +531,22 @@ qboolean CL_JoinIRC(void){
 	sprintf(message,"NICK %s\n\r", user.nick);
 	sendData(message);
 
+	CL_GetIRCData();
+	//give server time to log in before joining
+#ifdef _WINDOWS
+	Sleep(2000);
+#else
+	sleep(2);
+#endif
+
 	sprintf(message,"JOIN %s\n\r", "#alienarena");
 	sendData(message);
 
-#ifdef _WINDOWS
-	if(WSAGetLastError()) {
+	CL_GetIRCData();
 
+#ifdef _WINDOWS
+	if(WSAGetLastError()) 
+	{
 		closesocket(sock);
 		handle_error();
 		return false; 
@@ -534,7 +559,7 @@ qboolean CL_JoinIRC(void){
 	
 	return true; //IRC daemon will continue
 }
-
+ 
 
 #ifdef _WINDOWS
 void RecvThreadProc(void *dummy)
@@ -542,8 +567,8 @@ void RecvThreadProc(void *dummy)
     if (!CL_JoinIRC())
         return; 
 
-	while(1) {
-
+	while(1) 
+	{
 		//try not to eat up CPU
 		Sleep(1000); //time to recieve packets
 
@@ -559,8 +584,8 @@ void *RecvThreadProc(void *dummy)
     if (!CL_JoinIRC())
         return; 
 
-	while(1) {
-
+	while(1) 
+	{
 		//try not to eat up CPU
 		sleep(1); //time to recieve packets
 

@@ -210,12 +210,14 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 	pbase = (unsigned char *)buffer;
 	header = (iqmheader_t *)buffer;
-	if (memcmp(header->id, "INTERQUAKEMODEL", 16)) {
+	if (memcmp(header->id, "INTERQUAKEMODEL", 16)) 
+	{
 		Com_Printf ("Mod_INTERQUAKEMODEL_Load: %s is not an Inter-Quake Model", mod->name);
 		return false;
 	}
 
-	if (LittleLong(header->version) != 1) {
+	if (LittleLong(header->version) != 1) 
+	{
 		Com_Printf ("Mod_INTERQUAKEMODEL_Load: only version 1 models are currently supported (name = %s)", mod->name);
 		return false;
 	}
@@ -290,13 +292,15 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 				vtangent = (float *)(pbase + va[i].offset);
 			break;
 		case IQM_BLENDINDEXES:
-			if (va[i].format == IQM_UBYTE && va[i].size == 4) {
+			if (va[i].format == IQM_UBYTE && va[i].size == 4) 
+			{
 				mod->blendindexes = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
 				memcpy(mod->blendindexes, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
 			}
 			break;
 		case IQM_BLENDWEIGHTS:
-			if (va[i].format == IQM_UBYTE && va[i].size == 4) {
+			if (va[i].format == IQM_UBYTE && va[i].size == 4) 
+			{
 				mod->blendweights = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
 				memcpy(mod->blendweights, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
 			}
@@ -391,7 +395,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 			Matrix3x4_FromQuatAndVectors(&m, q_rot, translate, scale); 
 
-			if(p.parent >= 0) {
+			if(p.parent >= 0) 
+			{
 				Matrix3x4_Multiply(&temp, baseframe[p.parent], m);
 				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], temp, inversebaseframe[j]);
 			}
@@ -919,13 +924,15 @@ void GL_DrawIQMFrame(int skinnum)
 
 				GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], lightcolor);
 									
-				if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
+				if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) 
+				{
 					VArray[7] = lightcolor[0];
 					VArray[8] = lightcolor[1];
 					VArray[9] = lightcolor[2];
 					VArray[10] = alpha;
 				}
-				else {
+				else 
+				{
 					VArray[5] = lightcolor[0];
 					VArray[6] = lightcolor[1];
 					VArray[7] = lightcolor[2];
@@ -971,8 +978,10 @@ void GL_DrawIQMFrame(int skinnum)
 			VArray = &VArrayVerts[0];
 			GLSTATE_ENABLE_ALPHATEST
 
-			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders)) {
-				if(stage->next) {
+			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders)) 
+			{
+				if(stage->next) 
+				{
 					stage = stage->next;
 					continue;
 				}	
@@ -1042,7 +1051,8 @@ void GL_DrawIQMFrame(int skinnum)
 						if(lightVal[i] > 1.5)
 							lightVal[i] = 1.5;
 					}
-					else {
+					else 
+					{
 						if(lightVal[i] > 1.0+dynFactor)
 							lightVal[i] = 1.0+dynFactor;
 					}
@@ -1141,19 +1151,22 @@ void GL_DrawIQMFrame(int skinnum)
 					{
 						float red = 1, green = 1, blue = 1;
 
-						if (stage->lightmap) { 
+						if (stage->lightmap) 
+						{ 
 							GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
 							blue = lightcolor[2];						
 						}
-						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
+						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) 
+						{
 							VArray[7] = red;
 							VArray[8] = green;
 							VArray[9] = blue;
 							VArray[10] = alpha;	
 						}
-						else {
+						else 
+						{
 							VArray[5] = red;
 							VArray[6] = green;
 							VArray[7] = blue;
@@ -1251,16 +1264,12 @@ void R_DrawIQMShadow()
 	if (r_newrefdef.vieworg[2] < (currententity->origin[2] + height))
 		return;
 
-	if (have_stencil) {
-
+	if (have_stencil) 
+	{
 		qglDepthMask(0);
-
 		qglEnable(GL_STENCIL_TEST);
-
 		qglStencilFunc(GL_EQUAL,1,2);
-
 		qglStencilOp(GL_KEEP,GL_KEEP,GL_INCR);
-
 	}
 
 	va=0;
@@ -1313,7 +1322,8 @@ static qboolean R_CullIQMModel( void )
 	vec3_t	dist;
 	vec3_t bbox[8];
 
-	if (r_worldmodel ) {
+	if (r_worldmodel ) 
+	{
 		//occulusion culling - why draw entities we cannot see?
 	
 		r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
@@ -1392,7 +1402,8 @@ int NextFrame(int frame)
 	int outframe;
 
 	//just for now
-	if(currententity->flags & RF_WEAPONMODEL) {
+	if(currententity->flags & RF_WEAPONMODEL) 
+	{
 		outframe = frame + 1;
 		return outframe;
 	}
