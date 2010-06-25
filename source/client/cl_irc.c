@@ -340,7 +340,8 @@ void CL_GetIRCData(void)
 	char prevLine[IRC_RECV_BUF_SIZE]; 
 	int t;
 
-	//to do - flag if connected or not
+	if(!cls.irc_connected)
+		return;
 
 	len=0;	
 	memset(File_Buf,0,IRC_RECV_BUF_SIZE);
@@ -532,17 +533,6 @@ qboolean CL_JoinIRC(void)
 	sendData(message);
 
 	CL_GetIRCData();
-	//give server time to log in before joining
-#ifdef _WINDOWS
-	Sleep(2000);
-#else
-	sleep(2);
-#endif
-
-	sprintf(message,"JOIN %s\n\r", "#alienarena");
-	sendData(message);
-
-	CL_GetIRCData();
 
 #ifdef _WINDOWS
 	if(WSAGetLastError()) 
@@ -554,6 +544,8 @@ qboolean CL_JoinIRC(void)
 #endif
 
 	cls.irc_connected = true;
+	cls.irc_joinedchannel = false;
+	cls.irc_connectime = Sys_Milliseconds();
 
 	Com_Printf("...Connected to IRC server\n");
 	
@@ -569,10 +561,20 @@ void RecvThreadProc(void *dummy)
 
 	while(1) 
 	{
+		if((Sys_Milliseconds() - cls.irc_connectime) > 500 && cls.irc_joinedchannel == false)
+		{
+			WSASetLastError(0);
+
+			sendData("JOIN #alienarena\n\r");
+			cls.irc_joinedchannel = true;
+			Com_Printf("Joining #alienarena\n");
+		}
+
 		//try not to eat up CPU
 		Sleep(1000); //time to recieve packets
 
 		CL_GetIRCData();	
+		
 	}
 	return;
 }
@@ -590,6 +592,13 @@ void *RecvThreadProc(void *dummy)
 		sleep(1); //time to recieve packets
 
 		CL_GetIRCData();	
+
+		if((Sys_Milliseconds() - cls.irc_connectime) > 1100 && cls.irc_joinedchannel == false)
+		{
+			sendData("JOIN #alienarena\n\r");
+			cls.irc_joinedchannel = true;
+			Com_Printf("Joining #alienarena\n");
+		}
 	}
 	return;
 }
@@ -623,6 +632,7 @@ void CL_IRCShutdown(void)
 	sendData(message);
 
 	cls.irc_connected = false;
+	cls.irc_joinedchannel = false;
 
 	Com_Printf("Disconnected from chat channel...");
 
