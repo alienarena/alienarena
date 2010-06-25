@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "winsock.h"
 #include "time.h"
-#include <iostream.h>
+#include <iostream>
 #include <iomanip> 
 #include <fstream>
 #include <wininet.h>
@@ -23,6 +23,8 @@
 #include <shlobj.h>
 #include <direct.h>
 #include  <io.h>
+#include <mmsystem.h>
+
 using namespace std;
 
 #ifdef _DEBUG
@@ -61,7 +63,8 @@ char mensaje[200];				   // variable de todo uso.
 char servidor[100];
 cUser user;
 bool joinflg;
-bool connectedToIRC;
+bool connectedToIRC = true;
+int	 connectTime;
 
 char currBuddyName[32];
 char newBuddyName[32];
@@ -192,13 +195,37 @@ BEGIN_MESSAGE_MAP(CGalaxyDlg, CDialog)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+int Sys_Milliseconds (void)
+{
+	static int		base;
+	static bool	initialized = false;
+	int timeofday;
+
+	if (!initialized)
+	{	// let base retain 16 bits of effectively random data
+		base = timeGetTime() & 0xffff0000;
+		initialized = true;
+	}
+	timeofday = timeGetTime() - base;
+
+	return timeofday;
+}
+
 UINT RecvThreadProc(LPVOID pParam)
 {
 
-	while(1) {
+	while(1) 
+	{
 		Sleep(1000); //try not to eat up CPU
 		sockete.getData();	
 		//if an error - break - will have to set something up
+
+		if(!connectedToIRC && (Sys_Milliseconds() - connectTime > 500)) 
+		{
+			sockete.sendData("JOIN #alienarena\n\r");
+			connectedToIRC = true;
+			AfxMessageBox("Joining #alienarena");
+		}
 	}
 	return 0;
 }
@@ -426,6 +453,12 @@ BOOL CGalaxyDlg::OnInitDialog()
 
 	}
 
+	//set up data thread
+	AfxBeginThread(RecvThreadProc, GetSafeHwnd(),
+	               THREAD_PRIORITY_IDLE);
+
+	SetTimer(100,1000,NULL); //parse data if it's there
+
 	strcpy(user.ident, user.nick);
 
 	if(!strcmp(user.joinatstart, "true")) {
@@ -437,33 +470,16 @@ BOOL CGalaxyDlg::OnInitDialog()
 		sockete.sendData(mensaje);
 		sprintf(mensaje,"NICK %s\n\r", user.nick);
 		sockete.sendData(mensaje);
-	}
-	
-	//set up data thread
-	AfxBeginThread(RecvThreadProc, GetSafeHwnd(),
-	               THREAD_PRIORITY_IDLE);
+		connectTime = Sys_Milliseconds();
+		connectedToIRC = false;
+		m_status2.SetWindowText("connected to server");
 
-	SetTimer(100,1000,NULL); //parse data if it's there
-
-	if(!strcmp(user.joinatstart, "true")) {
-		Sleep(2000);
-		sprintf(mensaje,"JOIN %s\n\r", "#alienarena");
-		sockete.sendData(mensaje);
-		if(WSAGetLastError()) { //there was some error in connecting
-			sockete.handle_error();
-			m_status2.SetWindowText("error connecting to #alienarena");
-			connectedToIRC = false;
-		}
-		else {
-			m_status2.SetWindowText("Connected to #alienarena");
-			connectedToIRC = true;
-		}
-	}
+		sockete.getData();
+	}	
 	else {
 		m_status2.SetWindowText("Disconnected from chat channel...");
-		connectedToIRC = false;
 	}
-
+	
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -1138,21 +1154,10 @@ void CGalaxyDlg::OnButton4()
 	sprintf(mensaje,"NICK %s\n\r", user.nick);
 	sockete.sendData(mensaje);
 
-	Sleep(2000);
-
-	sprintf(mensaje,"JOIN %s\n\r", "#alienarena");
-	sockete.sendData(mensaje);
-	Sleep(1000);
-	if(WSAGetLastError()) { //there was some error in connecting
-			sockete.handle_error();
-			m_status2.SetWindowText("error connecting to #alienarena");
-			connectedToIRC = false;
-		}
-	else {
-		m_status2.SetWindowText("Connected to #alienarena");
-		connectedToIRC = true;
-	}
-
+	connectTime = Sys_Milliseconds();
+	connectedToIRC = false;
+	m_status2.SetWindowText("connected to server");
+	
 	sockete.getData();
 	//send the buffer to a messagebox
 	if (sockete.len > 1) 
@@ -1471,7 +1476,6 @@ void CGalaxyDlg::OnButton6()
 	sprintf(mensaje,"QUIT\n\r");
 	sockete.sendData(mensaje);
 	m_status2.SetWindowText("Disconnected from chat channel...");
-	connectedToIRC = false;
 }
 
 void CGalaxyDlg::Configure()

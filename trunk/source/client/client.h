@@ -236,6 +236,8 @@ typedef struct
 	qboolean	downloadhttp;
 
 	int			irc_connected;		//track irc connection
+	int			irc_joinedchannel;
+	int			irc_connectime;
 
 // demo recording info must be here, so it isn't cleared on level change
 	qboolean	demorecording;
