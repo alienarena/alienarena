@@ -1949,3 +1949,9 @@ void CGalaxyDlg::GetNews()
 	news.close();
 	remove("news.db");
 }
+
+void IRCDisconnect() 
+{
+	sprintf(mensaje,"QUIT\n\r");
+	sockete.sendData(mensaje);
+}

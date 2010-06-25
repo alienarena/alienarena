@@ -14,6 +14,7 @@ static char THIS_FILE[] = __FILE__;
 
 extern void Open_Winsock(void);
 extern void Close_Winsock(void);
+extern void IRCDisconnect(void);
 
 /////////////////////////////////////////////////////////////////////////////
 // CGalaxyApp
@@ -67,10 +68,12 @@ BOOL CGalaxyApp::InitInstance()
 
 	if (nResponse == IDOK)
 	{
+		IRCDisconnect();
 		Close_Winsock();
 		exit(0);
 	}
 
+	IRCDisconnect();
 	Close_Winsock();
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
