@@ -556,6 +556,7 @@ qboolean CL_JoinIRC(void)
 #ifdef _WINDOWS
 void RecvThreadProc(void *dummy)
 {
+
     if (!CL_JoinIRC())
         return; 
 
@@ -588,23 +589,23 @@ void *RecvThreadProc(void *dummy)
 
 	while(1) 
 	{
-		//try not to eat up CPU
-		sleep(1); //time to recieve packets
-
-		CL_GetIRCData();	
-
-		if((Sys_Milliseconds() - cls.irc_connectime) > 1100 && cls.irc_joinedchannel == false)
+		if((Sys_Milliseconds() - cls.irc_connectime) > 500 && cls.irc_joinedchannel == false)
 		{
 			sendData("JOIN #alienarena\n\r");
 			cls.irc_joinedchannel = true;
 			Com_Printf("Joining #alienarena\n");
 		}
+
+		//try not to eat up CPU
+		sleep(1); //time to recieve packets
+
+		CL_GetIRCData();			
 	}
 	return;
 }
 #endif
 
-void CL_InitIRC(void)
+void CL_InitIRC()
 {
 #ifdef __unix__
 	pthread_t pth;
