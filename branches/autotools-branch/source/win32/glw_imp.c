@@ -58,7 +58,7 @@ static qboolean VerifyDriver( void )
 	char buffer[1024];
 
 	strcpy( buffer, qglGetString( GL_RENDERER ) );
-	strlwr( buffer );
+	_strlwr( buffer );
 	if ( strcmp( buffer, "gdi generic" ) == 0 )
 		if ( !glw_state.mcd_accelerated )
 			return false;
@@ -165,7 +165,7 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 /*
 ** GLimp_SetMode
 */
-rserr_t GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
+rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen )
 {
 	int width, height;
 	const char *win_fs[] = { "W", "FS" };

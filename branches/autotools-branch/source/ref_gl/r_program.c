@@ -53,6 +53,9 @@ PFNGLUNIFORM2FARBPROC				glUniform2fARB				= NULL;
 PFNGLUNIFORM1IARBPROC				glUniform1iARB				= NULL;
 PFNGLUNIFORM1FARBPROC				glUniform1fARB				= NULL;
 PFNGLUNIFORMMATRIX3FVARBPROC		glUniformMatrix3fvARB		= NULL;
+PFNGLVERTEXATTRIBPOINTERARBPROC     glVertexAttribPointerARB	= NULL;
+PFNGLENABLEVERTEXATTRIBARRAYARBPROC glEnableVertexAttribArrayARB = NULL;
+PFNGLBINDATTRIBLOCATIONARBPROC		glBindAttribLocationARB		= NULL;
 
 GLhandleARB g_programObj;
 GLhandleARB g_waterprogramObj;
@@ -105,6 +108,7 @@ GLuint		g_location_meshTime;
 GLuint		g_location_meshFog;
 GLuint		g_location_useFX;
 GLuint		g_location_useGlow;
+GLuint		g_location_isMD2;
 
 //fullscreen distortion effects
 GLuint		g_location_framebuffTex;
@@ -208,12 +212,17 @@ void R_LoadGLSLPrograms(void)
 		glUniform1iARB            = (PFNGLUNIFORM1IARBPROC)qwglGetProcAddress("glUniform1iARB");
 		glUniform1fARB		  = (PFNGLUNIFORM1FARBPROC)qwglGetProcAddress("glUniform1fARB");
 		glUniformMatrix3fvARB	  = (PFNGLUNIFORMMATRIX3FVARBPROC)qwglGetProcAddress("glUniformMatrix3fvARB");
+		glVertexAttribPointerARB = (PFNGLVERTEXATTRIBPOINTERARBPROC)qwglGetProcAddress("glVertexAttribPointerARB");
+		glEnableVertexAttribArrayARB = (PFNGLENABLEVERTEXATTRIBARRAYARBPROC)qwglGetProcAddress("glEnableVertexAttribArrayARB");
+		glBindAttribLocationARB = (PFNGLBINDATTRIBLOCATIONARBPROC)qwglGetProcAddress("glBindAttribLocationARB");
 
 		if( !glCreateProgramObjectARB || !glDeleteObjectARB || !glUseProgramObjectARB ||
 		    !glCreateShaderObjectARB || !glCreateShaderObjectARB || !glCompileShaderARB ||
 		    !glGetObjectParameterivARB || !glAttachObjectARB || !glGetInfoLogARB ||
 		    !glLinkProgramARB || !glGetUniformLocationARB || !glUniform3fARB ||
-				!glUniform1iARB || !glUniform1fARB || !glUniformMatrix3fvARB)
+				!glUniform1iARB || !glUniform1fARB || !glUniformMatrix3fvARB ||
+				!glVertexAttribPointerARB || !glEnableVertexAttribArrayARB ||
+				!glBindAttribLocationARB)
 		{
 			Com_Printf("...One or more GL_ARB_shader_objects functions were not found");
 			gl_state.glsl_shaders = false;
@@ -321,7 +330,7 @@ void R_LoadGLSLPrograms(void)
 		// Vertex shader
 		//
 
-		len = FS_LoadFile("scripts/water_vertex_shader.glsl", &shader_assembly);
+		len = FS_LoadFile("scripts/water_vertex_shader.glsl", (void*)&shader_assembly);
 
 		if (len > 0) {
 			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
@@ -421,7 +430,7 @@ void R_LoadGLSLPrograms(void)
 		//
 		// Fragment shader
 		//
-		len = FS_LoadFile("scripts/mesh_fragment_shader.glsl", &shader_assembly);
+		len = FS_LoadFile("scripts/mesh_fragment_shader.glsl", (void*)&shader_assembly);
 
 		if(len > 0) {
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
@@ -442,6 +451,7 @@ void R_LoadGLSLPrograms(void)
 			Com_Printf("...Mesh Fragment Shader Compile Error");
 		}
 
+		glBindAttribLocationARB(g_meshprogramObj, 1, "tangent");
 		glLinkProgramARB( g_meshprogramObj );
 		glGetObjectParameterivARB( g_meshprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
 
@@ -467,6 +477,7 @@ void R_LoadGLSLPrograms(void)
 		g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
 		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
 		g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow");
+		g_location_isMD2 = glGetUniformLocationARB( g_meshprogramObj, "MD2");
 
 		//fullscreen distortion effects
 
@@ -476,7 +487,7 @@ void R_LoadGLSLPrograms(void)
 		// Vertex shader
 		//
 
-		len = FS_LoadFile("scripts/fb_vertex_shader.glsl", &shader_assembly);
+		len = FS_LoadFile("scripts/fb_vertex_shader.glsl", (void*)&shader_assembly);
 
 		if (len > 0) {
 			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
@@ -500,7 +511,7 @@ void R_LoadGLSLPrograms(void)
 		//
 		// Fragment shader
 		//
-		len = FS_LoadFile("scripts/fb_fragment_shader.glsl", &shader_assembly);
+		len = FS_LoadFile("scripts/fb_fragment_shader.glsl", (void*)&shader_assembly);
 
 		if(len > 0) {
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
@@ -550,7 +561,7 @@ void R_LoadGLSLPrograms(void)
 		// Vertex shader
 		//
 
-		len = FS_LoadFile("scripts/blur_vertex_shader.glsl", &shader_assembly);
+		len = FS_LoadFile("scripts/blur_vertex_shader.glsl", (void*)&shader_assembly);
 
 		if (len > 0) {
 			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
@@ -574,7 +585,7 @@ void R_LoadGLSLPrograms(void)
 		//
 		// Fragment shader
 		//
-		len = FS_LoadFile("scripts/blur_fragment_shader.glsl", &shader_assembly);
+		len = FS_LoadFile("scripts/blur_fragment_shader.glsl", (void*)&shader_assembly);
 
 		if(len > 0) {
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );

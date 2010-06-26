@@ -197,6 +197,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if you have the `unlink' function. */
+#undef HAVE_UNLINK
+
 /* Define to 1 if you have the <vorbis/vorbisfile.h> header file. */
 #undef HAVE_VORBIS_VORBISFILE_H
 
@@ -227,8 +230,17 @@
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 
+/* Define to 1 if you have the `_putenv' function. */
+#undef HAVE__PUTENV
+
+/* Define to 1 if you have the `_strdup' function. */
+#undef HAVE__STRDUP
+
 /* Define to 1 if you have the `_stricmp' function. */
 #undef HAVE__STRICMP
+
+/* Define to 1 if you have the `_unlink' function. */
+#undef HAVE__UNLINK
 
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
 #undef NO_MINUS_C_MINUS_O

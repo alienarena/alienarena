@@ -61,8 +61,12 @@
 //       to provide a "higher" level of AI.
 ////////////////////////////////////////////////////////////////////////
 
-#include "../g_local.h"
-#include "../m_player.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "game/g_local.h"
+#include "game/m_player.h"
 
 #include "acebot.h"
 

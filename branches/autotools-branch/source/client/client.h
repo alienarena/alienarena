@@ -62,6 +62,10 @@ typedef struct
 	vec3_t		lerp_origin;		// for trails (variable hz)
 
 	int			fly_stoptime;
+
+	float		frametime;
+	int			prevframe;
+
 } centity_t;
 
 #define MAX_CLIENTWEAPONMODELS		20		// PGM -- upped from 16 to fit the chainfist vwep
@@ -152,6 +156,7 @@ typedef struct
 	int			playernum;
 
 	// client/server protocol depends on MAX_QPATH being 64.
+	// might be a good idea to NOT use MAX_QPATH here, or maybe not. TBD.
 	char		configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
 
 	//
@@ -245,6 +250,8 @@ typedef struct
 	qboolean	downloadhttp;
 
 	int			irc_connected;		//track irc connection
+	int			irc_joinedchannel;
+	int			irc_connectime;
 
 // demo recording info must be here, so it isn't cleared on level change
 	qboolean	demorecording;

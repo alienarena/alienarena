@@ -33,19 +33,19 @@ endif
 noinst_LIBRARIES = libgame.a
 
 if BUILD_UNIX
-crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall 
+crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall 
 crded_LDADD = libgame.a
 if BUILD_CLIENT
-crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall 
+crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall 
 crx_LDADD = libgame.a
 endif
 else
-crx_CFLAGS = -DCURL_STATICLIB -DAL_NO_PROTOTYPES -DC_ONLY -U_FORTIFY_SOURCE -ffast-math
+crx_CFLAGS = -DCURL_STATICLIB -DAL_NO_PROTOTYPES -DC_ONLY -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math
 crx_LDADD = libgame.a
 LIBS += $(WIN32_LIBS)
 endif
 
-libgame_a_CFLAGS = -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall
+libgame_a_CFLAGS = -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall
 
 if BUILD_UNIX
 crded_SOURCES = \
@@ -169,11 +169,15 @@ crx_SOURCES +=  \
 	ref_gl/r_draw.c \
 	ref_gl/r_image.c \
 	ref_gl/r_image.h \
+	ref_gl/r_iqm.h \
+	ref_gl/r_iqm.c \
 	ref_gl/r_light.c \
 	ref_gl/r_local.h \
 	ref_gl/r_main.c \
 	ref_gl/r_math.c \
 	ref_gl/r_math.h \
+	ref_gl/r_matrixlib.c \
+	ref_gl/r_matrixlib.h \
 	ref_gl/r_mesh.c \
 	ref_gl/r_misc.c \
 	ref_gl/r_model.c \
@@ -188,6 +192,7 @@ crx_SOURCES +=  \
 	ref_gl/r_surf.c \
 	ref_gl/r_varray.c \
 	ref_gl/r_vbo.c \
+	ref_gl/r_vlights.c \
 	ref_gl/r_warp.c \
 	ref_gl/warpsin.h \
 	server/server.h \

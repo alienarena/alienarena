@@ -116,11 +116,15 @@ host_triplet = @host@
 @BUILD_CLIENT_TRUE@	ref_gl/r_draw.c \
 @BUILD_CLIENT_TRUE@	ref_gl/r_image.c \
 @BUILD_CLIENT_TRUE@	ref_gl/r_image.h \
+@BUILD_CLIENT_TRUE@	ref_gl/r_iqm.h \
+@BUILD_CLIENT_TRUE@	ref_gl/r_iqm.c \
 @BUILD_CLIENT_TRUE@	ref_gl/r_light.c \
 @BUILD_CLIENT_TRUE@	ref_gl/r_local.h \
 @BUILD_CLIENT_TRUE@	ref_gl/r_main.c \
 @BUILD_CLIENT_TRUE@	ref_gl/r_math.c \
 @BUILD_CLIENT_TRUE@	ref_gl/r_math.h \
+@BUILD_CLIENT_TRUE@	ref_gl/r_matrixlib.c \
+@BUILD_CLIENT_TRUE@	ref_gl/r_matrixlib.h \
 @BUILD_CLIENT_TRUE@	ref_gl/r_mesh.c \
 @BUILD_CLIENT_TRUE@	ref_gl/r_misc.c \
 @BUILD_CLIENT_TRUE@	ref_gl/r_model.c \
@@ -135,6 +139,7 @@ host_triplet = @host@
 @BUILD_CLIENT_TRUE@	ref_gl/r_surf.c \
 @BUILD_CLIENT_TRUE@	ref_gl/r_varray.c \
 @BUILD_CLIENT_TRUE@	ref_gl/r_vbo.c \
+@BUILD_CLIENT_TRUE@	ref_gl/r_vlights.c \
 @BUILD_CLIENT_TRUE@	ref_gl/r_warp.c \
 @BUILD_CLIENT_TRUE@	ref_gl/warpsin.h \
 @BUILD_CLIENT_TRUE@	server/server.h \
@@ -260,20 +265,22 @@ am__crx_SOURCES_DIST = unix/gl_glx.c unix/glw_unix.h unix/net_udp.c \
 	qcommon/pmove.c qcommon/qcommon.h qcommon/qfiles.h \
 	ref_gl/anorms.h ref_gl/anormtab.h ref_gl/glext.h ref_gl/qgl.h \
 	ref_gl/r_bloom.c ref_gl/r_draw.c ref_gl/r_image.c \
-	ref_gl/r_image.h ref_gl/r_light.c ref_gl/r_local.h \
-	ref_gl/r_main.c ref_gl/r_math.c ref_gl/r_math.h \
-	ref_gl/r_mesh.c ref_gl/r_misc.c ref_gl/r_model.c \
-	ref_gl/r_model.h ref_gl/r_particle.c ref_gl/r_postprocess.c \
-	ref_gl/r_program.c ref_gl/r_script.c ref_gl/r_script.h \
-	ref_gl/r_shadowmaps.c ref_gl/r_shadows.c ref_gl/r_surf.c \
-	ref_gl/r_varray.c ref_gl/r_vbo.c ref_gl/r_warp.c \
-	ref_gl/warpsin.h server/server.h server/sv_ccmds.c \
-	server/sv_ents.c server/sv_game.c server/sv_init.c \
-	server/sv_main.c server/sv_send.c server/sv_user.c \
-	server/sv_world.c unix/glob.c unix/glob.h win32/conproc.c \
-	win32/glw_imp.c win32/in_win.c win32/net_wins.c \
-	win32/qal_win.c win32/qgl_win.c win32/q_shwin.c \
-	win32/sys_win.c win32/vid_dll.c
+	ref_gl/r_image.h ref_gl/r_iqm.h ref_gl/r_iqm.c \
+	ref_gl/r_light.c ref_gl/r_local.h ref_gl/r_main.c \
+	ref_gl/r_math.c ref_gl/r_math.h ref_gl/r_matrixlib.c \
+	ref_gl/r_matrixlib.h ref_gl/r_mesh.c ref_gl/r_misc.c \
+	ref_gl/r_model.c ref_gl/r_model.h ref_gl/r_particle.c \
+	ref_gl/r_postprocess.c ref_gl/r_program.c ref_gl/r_script.c \
+	ref_gl/r_script.h ref_gl/r_shadowmaps.c ref_gl/r_shadows.c \
+	ref_gl/r_surf.c ref_gl/r_varray.c ref_gl/r_vbo.c \
+	ref_gl/r_vlights.c ref_gl/r_warp.c ref_gl/warpsin.h \
+	server/server.h server/sv_ccmds.c server/sv_ents.c \
+	server/sv_game.c server/sv_init.c server/sv_main.c \
+	server/sv_send.c server/sv_user.c server/sv_world.c \
+	unix/glob.c unix/glob.h win32/conproc.c win32/glw_imp.c \
+	win32/in_win.c win32/net_wins.c win32/qal_win.c \
+	win32/qgl_win.c win32/q_shwin.c win32/sys_win.c \
+	win32/vid_dll.c
 @BUILD_CLIENT_TRUE@am__objects_1 = client/crx-cl_ents.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	client/crx-cl_fx.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	client/crx-cl_http.$(OBJEXT) \
@@ -308,9 +315,11 @@ am__crx_SOURCES_DIST = unix/gl_glx.c unix/glw_unix.h unix/net_udp.c \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_bloom.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_draw.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_image.$(OBJEXT) \
+@BUILD_CLIENT_TRUE@	ref_gl/crx-r_iqm.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_light.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_main.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_math.$(OBJEXT) \
+@BUILD_CLIENT_TRUE@	ref_gl/crx-r_matrixlib.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_mesh.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_misc.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_model.$(OBJEXT) \
@@ -323,6 +332,7 @@ am__crx_SOURCES_DIST = unix/gl_glx.c unix/glw_unix.h unix/net_udp.c \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_surf.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_varray.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_vbo.$(OBJEXT) \
+@BUILD_CLIENT_TRUE@	ref_gl/crx-r_vlights.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	ref_gl/crx-r_warp.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	server/crx-sv_ccmds.$(OBJEXT) \
 @BUILD_CLIENT_TRUE@	server/crx-sv_ents.$(OBJEXT) \
@@ -475,13 +485,13 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = `-I m4'
 noinst_LIBRARIES = libgame.a
-@BUILD_UNIX_TRUE@crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall 
+@BUILD_UNIX_TRUE@crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall 
 @BUILD_UNIX_TRUE@crded_LDADD = libgame.a
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall 
-@BUILD_UNIX_FALSE@crx_CFLAGS = -DCURL_STATICLIB -DAL_NO_PROTOTYPES -DC_ONLY -U_FORTIFY_SOURCE -ffast-math
+@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall 
+@BUILD_UNIX_FALSE@crx_CFLAGS = -DCURL_STATICLIB -DAL_NO_PROTOTYPES -DC_ONLY -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math
 @BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_LDADD = libgame.a
 @BUILD_UNIX_FALSE@crx_LDADD = libgame.a
-libgame_a_CFLAGS = -U_FORTIFY_SOURCE -ffast-math -fstack-protector -Wall
+libgame_a_CFLAGS = -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall
 @BUILD_UNIX_TRUE@crded_SOURCES = \
 @BUILD_UNIX_TRUE@	client/anorms.h \
 @BUILD_UNIX_TRUE@	game/game.h \
@@ -925,11 +935,15 @@ ref_gl/crx-r_draw.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_image.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
+ref_gl/crx-r_iqm.$(OBJEXT): ref_gl/$(am__dirstamp) \
+	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_light.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_main.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_math.$(OBJEXT): ref_gl/$(am__dirstamp) \
+	ref_gl/$(DEPDIR)/$(am__dirstamp)
+ref_gl/crx-r_matrixlib.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_mesh.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
@@ -954,6 +968,8 @@ ref_gl/crx-r_surf.$(OBJEXT): ref_gl/$(am__dirstamp) \
 ref_gl/crx-r_varray.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_vbo.$(OBJEXT): ref_gl/$(am__dirstamp) \
+	ref_gl/$(DEPDIR)/$(am__dirstamp)
+ref_gl/crx-r_vlights.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_warp.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
@@ -1088,9 +1104,11 @@ mostlyclean-compile:
 	-rm -f ref_gl/crx-r_bloom.$(OBJEXT)
 	-rm -f ref_gl/crx-r_draw.$(OBJEXT)
 	-rm -f ref_gl/crx-r_image.$(OBJEXT)
+	-rm -f ref_gl/crx-r_iqm.$(OBJEXT)
 	-rm -f ref_gl/crx-r_light.$(OBJEXT)
 	-rm -f ref_gl/crx-r_main.$(OBJEXT)
 	-rm -f ref_gl/crx-r_math.$(OBJEXT)
+	-rm -f ref_gl/crx-r_matrixlib.$(OBJEXT)
 	-rm -f ref_gl/crx-r_mesh.$(OBJEXT)
 	-rm -f ref_gl/crx-r_misc.$(OBJEXT)
 	-rm -f ref_gl/crx-r_model.$(OBJEXT)
@@ -1103,6 +1121,7 @@ mostlyclean-compile:
 	-rm -f ref_gl/crx-r_surf.$(OBJEXT)
 	-rm -f ref_gl/crx-r_varray.$(OBJEXT)
 	-rm -f ref_gl/crx-r_vbo.$(OBJEXT)
+	-rm -f ref_gl/crx-r_vlights.$(OBJEXT)
 	-rm -f ref_gl/crx-r_warp.$(OBJEXT)
 	-rm -f server/crded-sv_ccmds.$(OBJEXT)
 	-rm -f server/crded-sv_ents.$(OBJEXT)
@@ -1229,9 +1248,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_bloom.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_draw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_image.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_iqm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_light.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_math.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_matrixlib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_mesh.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_model.Po@am__quote@
@@ -1244,6 +1265,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_surf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_varray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_vbo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_vlights.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_warp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@server/$(DEPDIR)/crded-sv_ccmds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@server/$(DEPDIR)/crded-sv_ents.Po@am__quote@
@@ -2742,6 +2764,20 @@ ref_gl/crx-r_image.obj: ref_gl/r_image.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_image.obj `if test -f 'ref_gl/r_image.c'; then $(CYGPATH_W) 'ref_gl/r_image.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_image.c'; fi`
 
+ref_gl/crx-r_iqm.o: ref_gl/r_iqm.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_iqm.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_iqm.Tpo -c -o ref_gl/crx-r_iqm.o `test -f 'ref_gl/r_iqm.c' || echo '$(srcdir)/'`ref_gl/r_iqm.c
+@am__fastdepCC_TRUE@	$(am__mv) ref_gl/$(DEPDIR)/crx-r_iqm.Tpo ref_gl/$(DEPDIR)/crx-r_iqm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_iqm.c' object='ref_gl/crx-r_iqm.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_iqm.o `test -f 'ref_gl/r_iqm.c' || echo '$(srcdir)/'`ref_gl/r_iqm.c
+
+ref_gl/crx-r_iqm.obj: ref_gl/r_iqm.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_iqm.obj -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_iqm.Tpo -c -o ref_gl/crx-r_iqm.obj `if test -f 'ref_gl/r_iqm.c'; then $(CYGPATH_W) 'ref_gl/r_iqm.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_iqm.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) ref_gl/$(DEPDIR)/crx-r_iqm.Tpo ref_gl/$(DEPDIR)/crx-r_iqm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_iqm.c' object='ref_gl/crx-r_iqm.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_iqm.obj `if test -f 'ref_gl/r_iqm.c'; then $(CYGPATH_W) 'ref_gl/r_iqm.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_iqm.c'; fi`
+
 ref_gl/crx-r_light.o: ref_gl/r_light.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_light.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_light.Tpo -c -o ref_gl/crx-r_light.o `test -f 'ref_gl/r_light.c' || echo '$(srcdir)/'`ref_gl/r_light.c
 @am__fastdepCC_TRUE@	$(am__mv) ref_gl/$(DEPDIR)/crx-r_light.Tpo ref_gl/$(DEPDIR)/crx-r_light.Po
@@ -2783,6 +2819,20 @@ ref_gl/crx-r_math.obj: ref_gl/r_math.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_math.c' object='ref_gl/crx-r_math.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_math.obj `if test -f 'ref_gl/r_math.c'; then $(CYGPATH_W) 'ref_gl/r_math.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_math.c'; fi`
+
+ref_gl/crx-r_matrixlib.o: ref_gl/r_matrixlib.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_matrixlib.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_matrixlib.Tpo -c -o ref_gl/crx-r_matrixlib.o `test -f 'ref_gl/r_matrixlib.c' || echo '$(srcdir)/'`ref_gl/r_matrixlib.c
+@am__fastdepCC_TRUE@	$(am__mv) ref_gl/$(DEPDIR)/crx-r_matrixlib.Tpo ref_gl/$(DEPDIR)/crx-r_matrixlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_matrixlib.c' object='ref_gl/crx-r_matrixlib.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_matrixlib.o `test -f 'ref_gl/r_matrixlib.c' || echo '$(srcdir)/'`ref_gl/r_matrixlib.c
+
+ref_gl/crx-r_matrixlib.obj: ref_gl/r_matrixlib.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_matrixlib.obj -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_matrixlib.Tpo -c -o ref_gl/crx-r_matrixlib.obj `if test -f 'ref_gl/r_matrixlib.c'; then $(CYGPATH_W) 'ref_gl/r_matrixlib.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_matrixlib.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) ref_gl/$(DEPDIR)/crx-r_matrixlib.Tpo ref_gl/$(DEPDIR)/crx-r_matrixlib.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_matrixlib.c' object='ref_gl/crx-r_matrixlib.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_matrixlib.obj `if test -f 'ref_gl/r_matrixlib.c'; then $(CYGPATH_W) 'ref_gl/r_matrixlib.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_matrixlib.c'; fi`
 
 ref_gl/crx-r_mesh.o: ref_gl/r_mesh.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_mesh.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_mesh.Tpo -c -o ref_gl/crx-r_mesh.o `test -f 'ref_gl/r_mesh.c' || echo '$(srcdir)/'`ref_gl/r_mesh.c
@@ -2951,6 +3001,20 @@ ref_gl/crx-r_vbo.obj: ref_gl/r_vbo.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_vbo.c' object='ref_gl/crx-r_vbo.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_vbo.obj `if test -f 'ref_gl/r_vbo.c'; then $(CYGPATH_W) 'ref_gl/r_vbo.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_vbo.c'; fi`
+
+ref_gl/crx-r_vlights.o: ref_gl/r_vlights.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_vlights.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_vlights.Tpo -c -o ref_gl/crx-r_vlights.o `test -f 'ref_gl/r_vlights.c' || echo '$(srcdir)/'`ref_gl/r_vlights.c
+@am__fastdepCC_TRUE@	$(am__mv) ref_gl/$(DEPDIR)/crx-r_vlights.Tpo ref_gl/$(DEPDIR)/crx-r_vlights.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_vlights.c' object='ref_gl/crx-r_vlights.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_vlights.o `test -f 'ref_gl/r_vlights.c' || echo '$(srcdir)/'`ref_gl/r_vlights.c
+
+ref_gl/crx-r_vlights.obj: ref_gl/r_vlights.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_vlights.obj -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_vlights.Tpo -c -o ref_gl/crx-r_vlights.obj `if test -f 'ref_gl/r_vlights.c'; then $(CYGPATH_W) 'ref_gl/r_vlights.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_vlights.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) ref_gl/$(DEPDIR)/crx-r_vlights.Tpo ref_gl/$(DEPDIR)/crx-r_vlights.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_vlights.c' object='ref_gl/crx-r_vlights.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_vlights.obj `if test -f 'ref_gl/r_vlights.c'; then $(CYGPATH_W) 'ref_gl/r_vlights.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_vlights.c'; fi`
 
 ref_gl/crx-r_warp.o: ref_gl/r_warp.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(crx_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_warp.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_warp.Tpo -c -o ref_gl/crx-r_warp.o `test -f 'ref_gl/r_warp.c' || echo '$(srcdir)/'`ref_gl/r_warp.c

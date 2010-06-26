@@ -112,11 +112,6 @@ void Netchan_OutOfBand (int net_socket, netadr_t adr, int length, byte *data)
 	sizebuf_t	send;
 	byte		send_buf[MAX_MSGLEN];
 
-#if 0
-	// -jjb-test
-	Com_Printf("[Netchan_OutOfBand]\n");
-#endif
-
 // write the packet header
 	SZ_Init (&send, send_buf, sizeof(send_buf));
 	SZ_SetName (&send, "Net OOB buffer", false);
@@ -138,13 +133,7 @@ Sends a text message in an out-of-band datagram
 void Netchan_OutOfBandPrint (int net_socket, netadr_t adr, char *format, ...)
 {
 	va_list		argptr;
-#if 0
-	// -jjb-test
-	char string[MAX_MSGLEN - 4];
-	Com_Printf("[Netchan_OutOfBandPrint]\n");
-#else
 	static char		string[MAX_MSGLEN - 4];
-#endif
 
 	va_start (argptr, format);
 	vsnprintf(string, sizeof(string), format, argptr);
@@ -172,25 +161,6 @@ void Netchan_Setup (netsrc_t sock, netchan_t *chan, netadr_t adr, int qport)
 	chan->last_received = curtime;
 	chan->incoming_sequence = 0;
 	chan->outgoing_sequence = 1;
-
-#if 0
-	// -jjb-test
-	Com_Printf("[Netchan_Setup:\n");
-	Com_Printf("    chan:   @ %p\n", chan);
-	Com_Printf("    message: @ %p\n", chan->message );
-	Com_Printf("    message_buf: @ %p\n", chan->message_buf);
-	Com_Printf("    sock:   %s\n", (chan->sock == NS_CLIENT ? "Client" : "Server") );
-	Com_Printf("    remote_address type: %s\n",
-			(chan->remote_address.type == NA_LOOPBACK ? "Loopback" :
-				( chan->remote_address.type == NA_BROADCAST ? "Broadcast" : "IP")
-			));
-	 // NA_LOOPBACK 0, NA_BROADCAST, NA_IP, NA_IPX, NA_BROADCAST_IPX
-	Com_Printf("    qport:  %i\n", chan->qport );
-	Com_Printf("    last_received: %i\n", chan->last_received );
-	Com_Printf("    incoming_sequence: %i\n", chan->incoming_sequence );
-	Com_Printf("    outgoing_sequence: %i\n", chan->outgoing_sequence );
-	Com_Printf("]\n");
-#endif
 
 	SZ_Init (&chan->message, chan->message_buf, sizeof(chan->message_buf));
 	SZ_SetName (&chan->message, va("Net channel %s", NET_AdrToString(adr)), true);
@@ -250,15 +220,6 @@ void Netchan_Transmit (netchan_t *chan, int length, byte *data)
 	qboolean	send_reliable;
 	unsigned	w1, w2;
 
-#if 1
-	// -jjb-dbg
-	if ( chan->outgoing_sequence == 0 )
-	{
-		chan->outgoing_sequence = 1;
-		Com_Printf("[correct outgoing_sequence]\n");
-	}
-#endif
-
 // check for message overflow
 	if (chan->message.overflowed)
 	{
@@ -278,7 +239,6 @@ void Netchan_Transmit (netchan_t *chan, int length, byte *data)
 		chan->reliable_sequence ^= 1;
 	}
 
-
 // write the packet header
 	SZ_Init (&send, send_buf, sizeof(send_buf));
 	SZ_SetName (&send, va("Transmit buffer (%s)", NET_AdrToString(chan->remote_address)), false);
@@ -286,16 +246,9 @@ void Netchan_Transmit (netchan_t *chan, int length, byte *data)
 	w1 = ( chan->outgoing_sequence & ~(1<<31) ) | (send_reliable<<31);
 	w2 = ( chan->incoming_sequence & ~(1<<31) ) | (chan->incoming_reliable_sequence<<31);
 
-#if 0
-	// -jjb-dbg
-	Com_Printf("[oseq:%d:", chan->outgoing_sequence );
-#endif
-	chan->outgoing_sequence++;
-#if 0
-	Com_Printf(":%d:]\n", chan->outgoing_sequence );
-#endif
-
-	chan->last_sent = curtime;
+	// -jjb-experiment  moved below
+	// chan->outgoing_sequence++;
+	// chan->last_sent = curtime;
 
 	MSG_WriteLong (&send, w1);
 	MSG_WriteLong (&send, w2);
@@ -332,10 +285,15 @@ void Netchan_Transmit (netchan_t *chan, int length, byte *data)
 		else
 			Com_Printf ("send %4i : s=%i ack=%i rack=%i\n"
 				, send.cursize
-				, w1 // chan->outgoing_sequence
-				, w2 // chan->incoming_sequence
+				, chan->outgoing_sequence
+				, chan->incoming_sequence
 				, chan->incoming_reliable_sequence);
 	}
+
+	// -jjb-experiment
+	chan->outgoing_sequence++;
+	chan->last_sent = curtime;
+
 }
 
 /*

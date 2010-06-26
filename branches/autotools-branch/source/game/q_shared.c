@@ -805,57 +805,12 @@ int VectorCompare (vec3_t v1, vec3_t v2)
 }
 
 
-#if 0
-// -jjb-exp
-/*
- * tricky fast inverse square root using Newton-Raphson approximation
- * and some magic numbers.
- * used in Quake3 apparently, but origins are lost in the mists of time.
- */
-float InvSqrt( float x )
-{
-    float xhalf = 0.5f * x;
-    int i = *(int*)&x;
-    i = 0x5f3759df - ( i>>1 );
-    x = *(float*)&i;
-    x = x * ( 1.5f - (xhalf * x * x ));
-    return x;
-}
-
 vec_t VectorNormalize (vec3_t v)
 {
 	float	length, ilength;
 
 	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-
-	if ( length > 0.00001f  )
-	{
-		ilength = InvSqrt( length );
-		v[0] *= ilength;
-		v[1] *= ilength;
-		v[2] *= ilength;
-
-		// for callers that don't use length, would be nice to have an
-		//  alternate that did not do this divide.
-		length = 1.0f / ilength ;
-
-	}
-	else
-	{
-		length = 0.0f;
-	}
-
-	return length;
-
-}
-
-#else
-vec_t VectorNormalize (vec3_t v)
-{
-	float	length, ilength;
-
-	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = sqrt (length);
+	length = sqrt (length);		// FIXME
 
 	if (length)
 	{
@@ -868,7 +823,6 @@ vec_t VectorNormalize (vec3_t v)
 	return length;
 
 }
-#endif
 
 vec_t VectorNormalize2 (vec3_t v, vec3_t out)
 {

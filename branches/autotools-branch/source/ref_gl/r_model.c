@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "r_local.h"
+#include "r_iqm.h"
 
 model_t	*loadmodel;
 int		modfilelen;
@@ -377,6 +378,8 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	model_t	*mod;
 	unsigned *buf;
 	int		i;
+	char shortname[MAX_QPATH], nameShortname[MAX_QPATH];
+	qboolean is_iqm = false;
 
 	if (!name[0])
 		Com_Error (ERR_DROP, "Mod_ForName: NULL name");
@@ -399,16 +402,22 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	{
 		if (!mod->name[0])
 			continue;
-		if (!strcmp (mod->name, name) ) {
 
-			if (mod->type == mod_alias) {
+		COM_StripExtension(mod->name, shortname);
+		COM_StripExtension(name, nameShortname);
+
+		if (!strcmp (shortname, nameShortname) )
+		{
+			if (mod->type == mod_alias || mod->type == mod_iqm)
+			{
 				// Make sure models scripts are definately reloaded between maps - MrG
 				char rs[MAX_OSPATH];
 				int i = 0;
 				image_t *img;
 				img=mod->skins[i];
 
-				while (img != NULL) {
+				while (img != NULL)
+				{
 					strcpy(rs,mod->skins[i]->name);
 					rs[strlen(rs)-4]=0;
 
@@ -448,13 +457,55 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	//
 	// load the file
 	//
-	modfilelen = FS_LoadFile (mod->name, &buf);
+	//if .md2, check for IQM version first
+	COM_StripExtension(mod->name, shortname);
+	strcat(shortname, ".iqm");
+
+	modfilelen = FS_LoadFile (shortname, (void*)&buf);
+
+	if(!buf) //could not find iqm
+	{
+	modfilelen = FS_LoadFile (mod->name, (void*)&buf);
 	if (!buf)
 	{
 		if (crash)
 			Com_Error (ERR_DROP, "Mod_NumForName: %s not found", mod->name);
 		memset (mod->name, 0, sizeof(mod->name));
 		return NULL;
+	}
+	}
+	else
+	{	//we have an .iqm
+		//if r_legacy, check for .md2, if none, load the .iqm
+		if(r_legacy->value)
+		{
+			COM_StripExtension(mod->name, shortname);
+			strcat(shortname, ".md2");
+
+			modfilelen = FS_LoadFile (shortname, (void*)&buf);
+
+			if(!buf)
+			{ //no .md2 for this .iqm, so revert to using the .iqm
+				COM_StripExtension(mod->name, shortname);
+				strcat(shortname, ".iqm");
+
+				modfilelen = FS_LoadFile (shortname, (void*)&buf);
+
+				if (!buf)
+				{ //be cautious
+					if (crash)
+						Com_Error (ERR_DROP, "Mod_NumForName: %s not found", mod->name);
+					memset (mod->name, 0, sizeof(mod->name));
+					return NULL;
+				}
+
+				is_iqm = true;
+			}
+		}
+		else {
+			is_iqm = true;
+		}
+		strcpy(mod->name, shortname);
 	}
 
 	loadmodel = mod;
@@ -465,7 +516,14 @@ model_t *Mod_ForName (char *name, qboolean crash)
 
 
 	// call the apropriate loader
-
+	//iqm - try interquake model first
+	if(is_iqm)
+	{
+		if(!Mod_INTERQUAKEMODEL_Load(mod, buf))
+			Com_Error (ERR_DROP,"Mod_NumForName: wrong fileid for %s", mod->name);
+	}
+	else
+	{
 	switch (LittleLong(*(unsigned *)buf))
 	{
 	case IDALIASHEADER:
@@ -481,6 +539,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	default:
 		Com_Error (ERR_DROP,"Mod_NumForName: unknown fileid for %s", mod->name);
 		break;
+	}
 	}
 
 	loadmodel->extradatasize = Hunk_End ();
@@ -1048,7 +1107,7 @@ void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, 
 
 }
 
-GL_CalcSurfaceNormals(msurface_t *surf) {
+void GL_CalcSurfaceNormals(msurface_t *surf) { // -jjb-fix add void
 
 	glpoly_t *p = surf->polys;
 	float	*v;
@@ -1256,7 +1315,7 @@ void Mod_LoadFaces (lump_t *l)
 					}
 					GL_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->beamtype);
 				}
-			} while (stage = stage->next);
+			} while ( (stage = stage->next) );
 		}
 		GL_CalcSurfaceNormals(out);
 	}
@@ -1534,7 +1593,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	Mod_LoadLeafs (&header->lumps[LUMP_LEAFS]);
 	Mod_LoadNodes (&header->lumps[LUMP_NODES]);
 	Mod_LoadSubmodels (&header->lumps[LUMP_MODELS]);
-	mod->numframes = 2;		// regular and alternate animation
+	mod->num_frames = 2;		// regular and alternate animation
 
 //
 // set up the submodels
@@ -1924,7 +1983,7 @@ void R_BeginRegistration (char *model)
 	map_fog = false;
 	for(;;)
 	{
-		path = FS_NextPath( path );
+		path = FS_NextPath( path ); // -jjb-ac  file hierarchy
 		if( !path )
 		{
 			break;
@@ -1948,7 +2007,7 @@ void R_BeginRegistration (char *model)
 	path = NULL;
 	for(;;)
 	{
-		path = FS_NextPath( path );
+		path = FS_NextPath( path ); // -jjb-ac  file hierarchy
 		if( !path )
 		{
 			break;
@@ -1993,6 +2052,7 @@ R_RegisterModel
 
 @@@@@@@@@@@@@@@@@@@@@
 */
+extern qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath);
 struct model_s *R_RegisterModel (char *name)
 {
 	model_t	*mod;
@@ -2011,8 +2071,12 @@ struct model_s *R_RegisterModel (char *name)
 			for (i=0 ; i<pheader->num_skins ; i++)
 				mod->skins[i] = GL_FindImage ((char *)pheader + pheader->ofs_skins + i*MAX_SKINNAME, it_skin);
 //PGM
-			mod->numframes = pheader->num_frames;
+			mod->num_frames = pheader->num_frames;
 //PGM
+		}
+		else if (mod->type == mod_iqm)
+		{
+			mod->skins[0] = GL_FindImage (mod->skinname, it_skin);
 		}
 		else if (mod->type == mod_brush)
 		{

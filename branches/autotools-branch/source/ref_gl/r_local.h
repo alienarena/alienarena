@@ -170,6 +170,7 @@ extern	cvar_t	*gl_texturemode;
 extern	cvar_t	*gl_texturealphamode;
 extern	cvar_t	*gl_texturesolidmode;
 extern	cvar_t	*gl_lockpvs;
+extern	cvar_t	*gl_vlights;
 
 extern	cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
@@ -273,9 +274,8 @@ void R_Shutdown( void );
 
 void R_RenderView (refdef_t *fd);
 void GL_ScreenShot_f (void);
-void R_DrawAliasModel (entity_t *e);
-void R_DrawBrushModel (entity_t *e);
-void R_DrawBeam( entity_t *e );
+void R_DrawAliasModel (void);
+void R_DrawBrushModel (void);
 void R_DrawWorld (void);
 void R_RenderDlights (void);
 void R_DrawAlphaSurfaces (void);
@@ -296,7 +296,10 @@ void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type);
-#ifdef __unix__
+void  VLight_Init (void);
+float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );
+#if defined UNIX_VARIANT
+// -jjb-ac  fog and music script conditional. TBD
 void R_ReadFogScript(char config_file[128]);
 void R_ReadMusicScript(char config_file[128]);
 #endif
@@ -326,6 +329,19 @@ void R_InitSun();
 void R_RenderSun();
 vec3_t sun_origin;
 qboolean spacebox;
+
+//Shared mesh items
+extern vec3_t	shadelight;
+extern vec3_t	shadevector;
+extern int		model_dlights_num;
+extern m_dlight_t model_dlights[128];
+extern image_t	*r_mirrortexture;
+extern cvar_t	*cl_gun;
+extern vec3_t	lightPosition;
+extern float	dynFactor;
+extern void		GL_GetLightVals(qboolean dynamic);
+extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
+extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 
 //Player icons
 extern float	scr_playericonalpha;
@@ -497,7 +513,7 @@ extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
 extern float *VArray;
 //static vec3_t NormalsArray[MAX_TRIANGLES*3];
-extern vec3_t NormalsArray[MAX_TRIANGLES*3]; // -jjb-fix
+//extern vec3_t NormalsArray[MAX_TRIANGLES*3]; // -jjb-fix
 extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
@@ -557,7 +573,8 @@ typedef struct	LightGroup {
 	float	dist;
 } LightGroup_t;
 extern			LightGroup_t LightGroups[MAX_LIGHTS];
-extern void		R_DrawAliasModelCaster (entity_t *e);
+extern void		R_DrawAliasModelCaster (void);
+extern void		R_DrawIQMCaster (void);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_CastShadow(void);
 int				FB_texture_width, FB_texture_height;
@@ -622,6 +639,7 @@ extern GLuint		g_location_meshTime;
 extern GLuint		g_location_meshFog;
 extern GLuint		g_location_useFX;
 extern GLuint		g_location_useGlow;
+extern GLuint		g_location_isMD2;
 
 //fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;
@@ -635,6 +653,14 @@ extern GLuint		g_location_fbSampleSize;
 //blur
 extern GLuint		g_location_scale;
 extern GLuint		g_location_source;
+
+//iqm
+
+extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
+extern void R_DrawINTERQUAKEMODEL (void);
+extern void GL_AnimateIQMFrame(float curframe, int nextframe);
+extern qboolean inAnimGroup(int frame, int oldframe);
+extern int NextFrame(int frame);
 
 #define TURBSCALE2 (256.0 / (2 * M_PI))
 
@@ -654,7 +680,7 @@ void		GLimp_BeginFrame( float camera_separation );
 void		GLimp_EndFrame( void );
 qboolean	GLimp_Init( void *hinstance, void *hWnd );
 void		GLimp_Shutdown( void );
-rserr_t    	GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen );
+rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
 void		GLimp_AppActivate( qboolean active );
 void		GLimp_EnableLogging( qboolean enable );
 void		GLimp_LogNewFrame( void );

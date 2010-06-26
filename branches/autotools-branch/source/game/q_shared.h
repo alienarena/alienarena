@@ -124,6 +124,22 @@ typedef	int	fixed4_t;
 typedef	int	fixed8_t;
 typedef	int	fixed16_t;
 
+typedef struct matrix3x3_s
+{
+	vec3_t a;
+	vec3_t b;
+	vec3_t c;
+}
+matrix3x3_t;
+
+typedef struct matrix3x4_s
+{
+	vec4_t a;
+	vec4_t b;
+	vec4_t c;
+}
+matrix3x4_t;
+
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
@@ -791,34 +807,7 @@ typedef struct
 ==========================================================
 */
 
-#if 0
-// -jjb-test
-// this is for unsigned short, are all converted angles positive ?
-//#define	ANGLE2SHORT(x)	((int)((x)*65536/360) & 65535)
-static inline int ANGLE2SHORT( float x )
-{
-	float x1;
-	int x2;
-
-	while ( x < 0.0f ) { // negative to positive
-		x += 360.0f;
-	}
-	while ( x > 360.0f ) {
-		x -= 360.0f;
-	}
-
-	x1 = x * 182.0f; //  ~=65536 / 360.0
-	x2 = (int)(x1);
-
-	if ( x2 > 65535 )
-		Com_Printf("[ANGLE2SHORT range error: %i\n", x2);
-
-	return x2;
-}
-#else
 #define	ANGLE2SHORT(x)	((int)((x)*65536/360) & 65535)
-#endif
-
 #define	SHORT2ANGLE(x)	((x)*(360.0/65536))
 
 

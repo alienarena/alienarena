@@ -506,11 +506,6 @@ void CL_SendConnectPacket (void)
 	netadr_t	adr;
 	int		port;
 
-#if 0
-	// -jjb-test
-	Com_Printf("[CL_SendConnectPacket]\n");
-#endif
-
 	if (!NET_StringToAdr (cls.servername, &adr))
 	{
 		Com_Printf ("Bad server address\n");
@@ -755,14 +750,9 @@ void CL_Disconnect (void)
 
 	cls.state = ca_disconnected;
 
-/*
-    //  -jjb-test
-	// for automated test runs using demo (.dm2) files
-	// example of how to exit at end of each demo run
-	if ( cl_timedemo->value )
-	{
-		CL_Quit_f();
-	}
+/* 
+** From Max's timedemo benchmarks:
+**	For automated test runs using demos, can exit here by calling CL_Quit_f() 
 */
 
 }
@@ -1677,8 +1667,11 @@ void CL_Precache_f (void)
 }
 
 #if defined UNIX_VARIANT
-void CL_Shell_f (void) {
-	if(Cmd_Argc() < 2) {
+// -jjb-dedicated-server  move this where dedicated server can use it (maybe)
+void CL_Shell_f (void) 
+{
+	if(Cmd_Argc() < 2) 
+	{
 		Com_Printf("Usage: shell command");
 		return;
 	}
@@ -1706,7 +1699,7 @@ void CL_InitLocal (void)
 	CL_InitHttpDownload();
 
 	cl_IRC_connect_at_startup = Cvar_Get("cl_IRC_connect_at_startup", "1", CVAR_ARCHIVE);
-	cl_IRC_server = Cvar_Get("cl_IRC_server", "irc.efnet.org", CVAR_ARCHIVE);
+	cl_IRC_server = Cvar_Get("cl_IRC_server", "irc.planetarena.org", CVAR_ARCHIVE);
 
 	if(cl_IRC_connect_at_startup->value)
 		CL_InitIRC();

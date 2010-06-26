@@ -2468,7 +2468,7 @@ END GAME MENU
 */
 static int credits_start_time;
 static const char **credits;
-static char *creditsIndex[256];
+//static char *creditsIndex[256];
 static char *creditsBuffer;
 static const char *idcredits[] =
 {
@@ -3987,7 +3987,7 @@ void LoadBotInfo() {
 	char *skin;
 
 	// -jjb-ac
-	if( (pIn = fopen( BOTDIR"/botinfo/allbots.tmp", "rb" )) == NULL)
+	if( (pIn = fopen( BOTDIR"/botinfo/allbots.tmp", "rb" )) == NULL) // -jjb-bot
 		return; // bail
 
 	fread(&count,sizeof (int),1,pIn);
@@ -4035,9 +4035,9 @@ void AddbotFunc(void *self) {
 		startmap[i] = tolower(startmap[i]);
 
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp"); // -jjb-ac
+		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp"); // -jjb-ac bot
 	else
-		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap); // -jjb-ac
+		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap); // -jjb-ac bot
 
 	if((pOut = fopen(bot_filename, "wb" )) == NULL) // -jjb-ac
 		return; // bail
@@ -4575,8 +4575,10 @@ void StartServerActionFunc( void *self )
 	Cvar_SetValue("sv_public", s_public_box.curvalue );
 
 // -jjb-ac
-// Running a dedicated server from menu does not work in Linux
-// Listen server should be ok.
+// Running a dedicated server from menu does not always work right in Linux, if program is 
+//  invoked from a gui menu system. Listen server should be ok.
+// Removing option from menu for now, since it is possible to start server running in
+//  background without realizing it.
 	if(s_dedicated_box.curvalue) {
 #if defined WIN32_VARIANT
 		Cvar_ForceSet("dedicated", "1");
@@ -5056,9 +5058,9 @@ void BotAction( void *self )
 		startmap[i] = tolower(startmap[i]);
 
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
+		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp"); // -jjb-bot
 	else
-		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
+		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap); // -jjb-bot
 
 	if((pOut = fopen(bot_filename, "wb" )) == NULL)
 		return; // bail
@@ -5829,7 +5831,7 @@ typedef struct
 	int		nskins;
 	char	**skindisplaynames;
 	char	displayname[MAX_DISPLAYNAME];
-	char	directory[MAX_QPATH];
+	char	directory[MAX_OSPATH];
 } playermodelinfo_s;
 
 static playermodelinfo_s s_pmi[MAX_PLAYERMODELS];
@@ -6273,8 +6275,7 @@ void PlayerConfig_MenuDraw( void )
 {
 	extern float CalcFov( float fov_x, float w, float h );
 	refdef_t refdef;
-	char scratch[MAX_OSPATH]; // -jjb-fix more room req'd i think
-
+	char scratch[MAX_OSPATH];
 	FILE *modelfile;
 	int helmet = false;
 	int rack = false;

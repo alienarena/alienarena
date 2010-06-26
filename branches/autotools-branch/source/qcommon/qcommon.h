@@ -771,7 +771,7 @@ MISC
 void		Com_BeginRedirect (int target, char *buffer, int buffersize, void (*flush));
 void		Com_EndRedirect (void);
 void 		Com_Printf (char *fmt, ...);
-#if defined NDEBUG
+#if !defined NDEBUG
 void 		Com_DPrintf (char *fmt, ...);
 #else
 // -jjb-experiment  remove developer printfs from released version ?

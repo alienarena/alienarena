@@ -167,6 +167,12 @@ typedef struct entity_s
 	int					oldframe;
 
 	/*
+	** frame and timestamp (iqm lerping)
+	*/
+	float				frametime;
+	int					prevframe;
+
+	/*
 	** misc
 	*/
 	float	backlerp;				// 0.0 = current, 1.0 = old

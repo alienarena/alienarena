@@ -227,6 +227,7 @@ int ACESP_FindBotNum(void)
 	int count;
 	char bot_filename[MAX_OSPATH];
 
+	// -jjb-botinfo
 	//bots and configurations are loaded level specific
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
@@ -824,12 +825,7 @@ void ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 		return;
 	}
 
-#if 0
-	bot->yaw_speed = 100; // yaw speed
-#else
-	// -jjb-experiment
-	bot->yaw_speed = 37; // yaw speed, angle in degrees
-#endif
+	bot->yaw_speed = 37; // yaw speed. angle in degrees
 	bot->inuse = true;
 	bot->is_bot = true;
 
@@ -875,53 +871,6 @@ void ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 
 }
 
-///////////////////////////////////////////////////////////////////////
-// Remove a bot by name or all bots
-///////////////////////////////////////////////////////////////////////
-void ACESP_RemoveBot(char *name)
-{
-	int i;
-	qboolean freed=false;
-	edict_t *bot;
-
-	for(i=0;i<maxclients->value;i++)
-	{
-		bot = g_edicts + i + 1;
-		if(bot->inuse)
-		{
-			if(bot->is_bot && (strcmp(bot->client->pers.netname,name)==0 || strcmp(name,"all")==0))
-			{
-				bot->health = 0;
-				player_die (bot, bot, bot, 100000, vec3_origin);
-				if(ctf->value)
-					CTFDeadDropFlag(bot);
-
-				DeadDropDeathball(bot);
-				if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
-				{
-					if(bot->dmteam == BLUE_TEAM)
-						blue_team_cnt-=1;
-					else
-						red_team_cnt-=1;
-				}
-				// don't even bother waiting for death frames
-				bot->deadflag = DEAD_DEAD;
-				bot->inuse = false;
-				freed = true;
-				safe_bprintf (PRINT_MEDIUM, "%s removed\n", bot->client->pers.netname);
-			}
-
-		}
-	}
-
-	if(!freed)
-		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
-	else
-		game.num_bots--;
-
-	ACESP_SaveBots(); // Save them again
-}
-
 int ACESP_FindBot(char *name)
 {
 	int i;
@@ -943,73 +892,200 @@ int ACESP_FindBot(char *name)
 	return foundbot;
 }
 
-void ACESP_KickBot(char *name)
+///////////////////////////////////////////////////////////////////////
+// Remove/Kick Bots
+///////////////////////////////////////////////////////////////////////
+
+/*===
+
+ match_botname()
+
+ case-sensitive name string compare, stripping color codes
+
+===*/
+static qboolean match_botname( edict_t *bot, const char *match_string )
 {
-	int i,j;
+	char *bot_netname = bot->client->pers.netname;
+	size_t bot_netname_sizecnt = sizeof( bot->client->pers.netname );
+	char *pchar_in = bot_netname;
+	const char *pchar_match = match_string;
+	qboolean matched = false;
+
+	while ( *pchar_in && *pchar_match && bot_netname_sizecnt-- )
+	{
+		if ( *pchar_in == '^' )
+		{ // escape char for color codes
+			++pchar_in;
+			if ( *pchar_in && bot_netname_sizecnt )
+			{ // skip over color code
+				++pchar_in;
+				--bot_netname_sizecnt;
+			}
+		}
+		else
+		{
+			if ( *pchar_in != *pchar_match )
+			{ // no match
+				break;
+			}
+			++pchar_in;
+			++pchar_match;
+		}
+		if ( ( matched = !(*pchar_in) && !(*pchar_match) ) )
+		{ // at end of both strings
+			break;
+		}
+	}
+
+	return matched;
+}
+
+/*===
+ remove_bot()
+
+ common routine for removal or kick of a bot
+ adapted from player_die(), and previous ACESP_RemoveBot(), ACESP_KickBot()
+
+=== */
+static void remove_bot( edict_t *bot )
+{
+
+	VectorClear( bot->avelocity );
+
+	if ( bot->in_vehicle )
+	{
+		VehicleDeadDrop( bot );
+	}
+
+	if ( ctf->value )
+	{
+		CTFDeadDropFlag( bot );
+	}
+
+	if ( bot->in_deathball )
+	{
+		DeadDropDeathball( bot );
+	}
+
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value
+			|| cp->value)
+	{ // team game, adjust teams
+		if ( bot->dmteam == BLUE_TEAM )
+			blue_team_cnt -= 1;
+		else if ( bot->dmteam == RED_TEAM )
+			red_team_cnt -= 1;
+	}
+
+	if ( g_duel->value )
+	{// duel mode, we need to bump people down the queue if its the player in game leaving
+		MoveClientsDownQueue(bot);
+		if( !bot->client->resp.spectator )
+		{ // bot was in duel
+			int j;
+			for ( j = 1; j <= maxclients->value; j++)
+			{ // clear scores of other players
+				if ( g_edicts[j].inuse && g_edicts[j].client )
+					g_edicts[j].client->resp.score = 0;
+			}
+		}
+	}
+
+	bot->inuse = false;
+	bot->solid = SOLID_NOT;
+	bot->classname = "disconnected";
+
+	bot->s.modelindex = 0;
+	bot->s.modelindex2= 0;
+	bot->s.modelindex3 = 0;
+	bot->s.modelindex4 = 0;
+	bot->s.angles[0] = 0;  // ?
+	bot->s.angles[2] = 0;  // ?
+	bot->s.sound = 0;
+	bot->client->weapon_sound = 0;
+
+	// remove powerups
+	bot->client->quad_framenum = 0;
+	bot->client->invincible_framenum = 0;
+	bot->client->haste_framenum = 0;
+	bot->client->sproing_framenum = 0;
+	bot->client->invis_framenum = 0;
+
+	// clear inventory
+	memset( bot->client->pers.inventory, 0, sizeof(bot->client->pers.inventory));
+
+	bot->client->pers.connected = false;
+	// -jjb- ???  shouldn't this be for other bots, with botnum>this one
+	bot->client->resp.botnum--; //we have one less bot
+	bot->client->ps.botnum = bot->client->resp.botnum;
+
+	// particle effect for exit from game
+	gi.WriteByte (svc_muzzleflash);
+	gi.WriteShort (bot-g_edicts);
+	gi.WriteByte (MZ_LOGOUT);
+	gi.multicast (bot->s.origin, MULTICAST_PVS);
+
+	// blank the skin? not sure of purpose.
+	gi.configstring( CS_PLAYERSKINS + ( ((ptrdiff_t)(bot - g_edicts))-1 ), "");
+
+	// unlink from world
+	gi.unlinkentity( bot );
+
+}
+
+// remove by server command, "removebot"
+void ACESP_RemoveBot(char *name)
+{
+	int i;
 	qboolean freed=false;
 	edict_t *bot;
 
-	for(i=0;i<maxclients->value;i++)
+	for ( i=1; i <= maxclients->value; i++ )
 	{
-		bot = g_edicts + i + 1;
-		if(bot->inuse)
-		{
-			if(bot->is_bot && (strcmp(bot->client->pers.netname,name)==0))
-			{
-
-				if(ctf->value)
-					CTFDeadDropFlag(bot);
-
-				DeadDropDeathball(bot);
-
-				if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
-				{
-					if(bot->dmteam == BLUE_TEAM)
-						blue_team_cnt-=1;
-					else
-						red_team_cnt-=1;
-				}
-
-				//safe_bprintf(PRINT_HIGH, "(kicked) red: %i blue: %i\n", red_team_cnt, blue_team_cnt);
-
-				// send effect
-				gi.WriteByte (svc_muzzleflash);
-				gi.WriteShort (bot-g_edicts);
-				gi.WriteByte (MZ_LOGOUT);
-				gi.multicast (bot->s.origin, MULTICAST_PVS);
-
-				bot->deadflag = DEAD_DEAD;
-				freed = true;
-				gi.unlinkentity (bot);
-				bot->s.modelindex = 0;
-				bot->solid = SOLID_NOT;
-				bot->inuse = false;
-				bot->classname = "disconnected";
-				bot->client->pers.connected = false;
-
-				safe_bprintf (PRINT_MEDIUM, "%s was kicked\n", bot->client->pers.netname);
-			}
-			if(freed) {
-				bot->client->resp.botnum--; //we have one less bot
-				bot->client->ps.botnum = bot->client->resp.botnum;
-
-
-				//if in duel mode, we need to bump people down the queue if its the player in game leaving
-
-				if(g_duel->value) if(g_duel->value) {
-					MoveClientsDownQueue(bot);
-					if(!bot->client->resp.spectator) {
-						for (j = 0; j < maxclients->value; j++)  //clear scores if player was in duel
-							if(g_edicts[j+1].inuse && g_edicts[j+1].client && !g_edicts[j+1].is_bot)
-								g_edicts[j+1].client->resp.score = 0;
-					}
-				}
+		bot = &g_edicts[i];
+		if( bot->inuse && bot->is_bot )
+		{ // client slot in use and is a bot
+			if ( match_botname( bot, name ) || !strncmp(name,"all",3) )
+			{ // case-sensitive, non-color-code sensitive match
+				remove_bot( bot );
+				freed = true; // one, or at least one of all removed
+				game.num_bots--;
+				safe_bprintf (PRINT_MEDIUM, "%s removed\n", bot->client->pers.netname);
 			}
 		}
 	}
 
 	if(!freed)
 		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
-	else
-		game.num_bots--;
+
+	// update bots.tmp
+	ACESP_SaveBots(); // Save them again  -jjb-bots  not sure why
+	// i suppose so that it doesn't in next game ???
+
 }
+
+// remove by automatic bot kick or by player vote
+void ACESP_KickBot(char *name)
+{
+	int i;
+	qboolean freed=false;
+	edict_t *bot;
+
+	for ( i=1; i <= maxclients->value; i++ )
+	{
+		bot = &g_edicts[i];
+		if ( bot->inuse && bot->is_bot )
+		{ // client slot in use and is a bot
+			if ( match_botname( bot, name ))
+			{ // case-sensitive, color-code-insensitive match
+				remove_bot( bot );
+				freed = true;
+				game.num_bots--;
+				safe_bprintf (PRINT_MEDIUM, "%s kicked\n", bot->client->pers.netname);
+			}
+		}
+	}
+
+	if(!freed)
+		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
+}
+

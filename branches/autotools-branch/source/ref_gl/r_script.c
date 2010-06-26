@@ -39,7 +39,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 void CIN_FreeCin (int texnum);
 
 extern float	r_turbsin[];
-extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 
 #define		TOK_DELIMINATORS "\r\n\t "
 
@@ -67,8 +66,11 @@ int	RS_Random(rs_stage_t *stage, msurface_t *surf)
 int RS_Animate (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
+
+/* -jjb-unused
 	float			time = rs_realtime * 1000 -
 		(stage->last_anim_time + stage->anim_delay);
+*/
 
 	while (stage->last_anim_time < rs_realtime)
 	{
@@ -85,8 +87,11 @@ int RS_Animate (rs_stage_t *stage)
 void *RS_AnimateSkin (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
+
+/* -jjb-unused
 	float			time = rs_realtime * 1000 -
 		(stage->last_anim_time + stage->anim_delay);
+*/
 
 	while (stage->last_anim_time < rs_realtime)
 	{
@@ -959,8 +964,8 @@ void RS_LoadScript(char *script)
 	char			ignored = 0;
 	char			*token, *fbuf, *buf;
 	rscript_t		*rs = NULL;
-	rs_stage_t		*stage;
-	unsigned char	tcmod = 0;
+	rs_stage_t		*stage = NULL;
+	// unsigned char	tcmod = 0; // -jjb-unused
 	unsigned int	len, i;
 
 	len = FS_LoadFile (script, (void **)&fbuf);
@@ -1112,7 +1117,7 @@ void RS_SetEnvmap (vec3_t v, float *os, float *ot)
 
 void RS_ScaleTexcoords (rs_stage_t *stage, float *os, float *ot)
 {
-	float	txm = 0, tym = 0;
+	// float	txm = 0, tym = 0; // -jjb-unused
 
 	// scale
 	if (stage->scale.scaleX)
@@ -1290,7 +1295,7 @@ endalpha:
 
 float RS_AlphaFuncAlias (int alphafunc, float alpha, vec3_t normal, vec3_t org)
 {
-	float oldalpha = alpha;
+	// float oldalpha = alpha; // -jjb-unused
 
 	if (!abs(alphafunc))
 		goto endalpha;
@@ -1650,7 +1655,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	vec3_t		wv, vectors[3];
 	rs_stage_t	*stage;
 	float		os, ot, alpha;
-	float		scale, time, txm, tym;
+	float		scale, time, txm=0.0f, tym=0.0f;
 
 	if (!rs)
 		return;

@@ -57,7 +57,11 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
-#include "../g_local.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "game/g_local.h"
 #include "acebot.h"
 
 // flags
@@ -647,7 +651,8 @@ void ACEND_UpdateNodeEdge(int from, int to)
 
 	// Now for the self-referencing part, linear time for each link added
 	for(i=0;i<numnodes;i++)
-		if(path_table[i][from] != INVALID) {
+		if(path_table[i][from] != INVALID) 
+		{
 			if(i == to)
 				path_table[i][to] = INVALID; // make sure we terminate
 			else
@@ -698,7 +703,8 @@ void ACEND_ResolveAllPaths()
 
 			// Now for the self-referencing part linear time for each link added
 			for(i=0;i<numnodes;i++)
-				if(path_table[i][from] != -1) {
+				if(path_table[i][from] != -1)
+				{
 					if(i == to)
 						path_table[i][to] = -1; // make sure we terminate
 					else
@@ -730,7 +736,7 @@ void ACEND_SaveNodes()
 
 	safe_bprintf(PRINT_MEDIUM,"Saving node table...");
 
-	strcpy(filename,"botinfo/nav/");
+	strcpy(filename,"botinfo/nav/"); // -jjb-botinfo
 
 	strcat(filename,level.mapname);
 	strcat(filename,".nod");
@@ -765,7 +771,7 @@ void ACEND_LoadNodes(void)
 	char filename[MAX_OSPATH];
 	int version;
 
-	strcpy(filename,BOTDIR"/botinfo/nav/");
+	strcpy(filename,BOTDIR"/botinfo/nav/"); // -jjb-botinfo
 	strcat(filename,level.mapname);
 	strcat(filename,".nod");
 

@@ -756,7 +756,7 @@ void SV_ConnectionlessPacket (void)
 	}
 
 #if 0
-	// -jjb-
+	// -jjb-dbg net loopback problem
 	Com_Printf("[SV_ConnectionlessPacket: \n");
 	Com_Printf("   net_message.name %s\n", net_message.name );
 	Com_Printf("   net_message.readcount %s\n", net_message.readcount );
@@ -1357,7 +1357,7 @@ void SV_Init (void)
 	sv_iplimit = Cvar_Get ("sv_iplimit", "3", 0);
 
 	SZ_Init (&net_message, net_message_buffer, sizeof(net_message_buffer));
-	SZ_SetName (&net_message, "Net Message Buffer", true);
+	SZ_SetName (&net_message, "Net message buffer", true);
 }
 
 /*

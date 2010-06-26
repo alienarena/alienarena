@@ -24,6 +24,8 @@ d*_t structures are on-disk representations
 m*_t structures are in-memory
 
 */
+#include "r_iqm.h"
+#include "r_matrixlib.h"
 /*
 ==============================================================================
 
@@ -98,10 +100,20 @@ BRUSH MODELS
 //
 // in memory representation
 //
-typedef struct
+typedef struct	mvertex_s
 {
 	vec3_t		position;
 } mvertex_t;
+
+typedef struct
+{
+	vec3_t		dir;
+} mnormal_t;
+
+typedef struct
+{
+	vec4_t		dir;
+} mtangent_t;
 
 typedef struct
 {
@@ -256,7 +268,7 @@ typedef struct {
 	int n[3];
 } neighbors_t;
 
-typedef enum {mod_bad, mod_brush, mod_sprite, mod_alias } modtype_t;
+typedef enum {mod_bad, mod_brush, mod_sprite, mod_alias, mod_iqm } modtype_t;
 
 typedef struct model_s
 {
@@ -265,7 +277,6 @@ typedef struct model_s
 	int			registration_sequence;
 
 	modtype_t	type;
-	int			numframes;
 
 	int			flags;
 
@@ -324,21 +335,34 @@ typedef struct model_s
 	int			extradatasize;
 	void		*extradata;
 
-	signed int	edge_tri[MAX_TRIANGLES][3];
-	qboolean	noshadow;
-
-	//vertex arrays for static meshes
 	int			num_frames;
-	vec3_t r_mesh_verts[MAX_VERTS];
+
+	//iqm skeletal model info
+	mvertex_t		*animatevertexes;
+	int				num_joints;
+	iqmjoint_t		*joints;
+	matrix3x4_t		*frames;
+	matrix3x4_t		*outframe;
+	int				num_poses;
+	int				num_triangles;
+	iqmtriangle_t	*tris;
+	mnormal_t		*normal;
+	mnormal_t		*animatenormal;
+	mtangent_t		*tangent;
+	mtangent_t		*animatetangent;
+	unsigned char	*blendindexes;
+	unsigned char	*blendweights;
+	char			skinname[MAX_QPATH];
+	//end iqm
 
 	fstvert_t	*st;
 	neighbors_t *neighbors;
 
 	//vbo
-	vertCache_t	*vbo_st;
-	vertCache_t	*vbo_xyz;
-	vertCache_t	*vbo_color;
-	vertCache_t	*vbo_normals;
+	//vertCache_t	*vbo_st;
+	//vertCache_t	*vbo_xyz;
+	//vertCache_t	*vbo_color;
+	//vertCache_t	*vbo_normals;
 
 } model_t;
 

@@ -43,6 +43,8 @@ static  vec4_t  s_lerped[MAX_VERTS];
 
 // static	vec3_t	s_normals[MAX_VERTS]; // -jjb-fix not used
 
+static vec3_t NormalsArray[MAX_TRIANGLES*3]; // -jjb-experiment
+
 extern	vec3_t	lightspot;
 vec3_t	shadevector;
 float	shadelight[3];
@@ -52,7 +54,6 @@ m_dlight_t model_dlights[MAX_MODEL_DLIGHTS];
 int model_dlights_num;
 
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
-extern  void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 extern rscript_t *rs_glass;
 extern image_t *r_mirrortexture;
 
@@ -79,13 +80,10 @@ opposite directions.  This gives the shading a more prounounced, defined look.
 
 =============
 */
-void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, dtrivertx_t *ov, float backlerp, vec3_t lightOut)
+void GL_VlightAliasModel (vec3_t baselight, dtrivertx_t *verts, vec3_t lightOut)
 {
     int i;
     float l;
-    float lscale;
-
-    lscale = 3.0;
 
     l = shadedots[verts->lightnormalindex];
     VectorScale(baselight, l, lightOut);
@@ -141,7 +139,7 @@ float calcEntAlpha (float alpha, vec3_t point)
 
 vec3_t	lightPosition;
 float	dynFactor;
-void GL_GetLightVals()
+void GL_GetLightVals(qboolean dynamic)
 {
 	int i, j, lnum;
 	dlight_t	*dl;
@@ -190,11 +188,14 @@ void GL_GetLightVals()
 	}
 
 	dynFactor = 0;
-	if((!(currententity->flags & RF_NOSHADOWS)) || currententity->flags & RF_MINLIGHT) {
+	if(dynamic)
+	{
+		if((!(currententity->flags & RF_NOSHADOWS)) || currententity->flags & RF_MINLIGHT) 
+		{
 		dl = r_newrefdef.dlights;
 		//limit to five lights(maybe less)?
-		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) {
-
+			for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) 
+			{			
 			VectorSubtract(currententity->origin, dl->origin, temp);
 			dist = VectorLength(temp);
 
@@ -203,12 +204,15 @@ void GL_GetLightVals()
 
 			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 
-			if(r_trace.fraction == 1.0) {
-				if(dist < 100) {
+				if(r_trace.fraction == 1.0) 
+				{
+					if(dist < 100) 
+					{
 					VectorCopy(dl->origin, temp);
 					//translate for when viewangles are negative - done because otherwise the
 					//lighting effect is backwards - stupid quake bug rearing it's head?
-					if(r_newrefdef.viewangles[1] < 0) {
+					if(r_newrefdef.viewangles[1] < 0) 
+						{
 						//translate according viewangles
 						xdist = temp[0] - currententity->origin[0];
 						ydist = temp[1] - currententity->origin[1];
@@ -225,6 +229,7 @@ void GL_GetLightVals()
 				}
 			}
 		}
+	}
 	}
 
 	if(numlights > 0.0) {
@@ -246,7 +251,7 @@ void R_ModelViewTransform(const vec3_t in, vec3_t out){
 /*
 ** R_CullAliasModel
 */
-static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
+static qboolean R_CullAliasModel( vec3_t bbox[8] )
 {
 	int i;
 	vec3_t	vectors[3];
@@ -257,17 +262,17 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 	if (r_worldmodel ) {
 		//occulusion culling - why draw entities we cannot see?
 
-		r_trace = CM_BoxTrace(r_origin, e->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+		r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			return true;
 	}
 
-	VectorSubtract(r_origin, e->origin, dist);
+	VectorSubtract(r_origin, currententity->origin, dist);
 
 	/*
 	** rotate the bounding box
 	*/
-	VectorCopy( e->angles, angles );
+	VectorCopy( currententity->angles, angles );
 	angles[YAW] = -angles[YAW];
 	AngleVectors( angles, vectors[0], vectors[1], vectors[2] );
 
@@ -281,7 +286,7 @@ static qboolean R_CullAliasModel( vec3_t bbox[8], entity_t *e )
 		bbox[i][1] = -DotProduct( vectors[1], tmp );
 		bbox[i][2] = DotProduct( vectors[2], tmp );
 
-		VectorAdd( e->origin, bbox[i], bbox[i] );
+		VectorAdd( currententity->origin, bbox[i], bbox[i] );
 	}
 
 	{
@@ -503,7 +508,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                 index_xyz = order[2];
 
                 if(lerped) {
-                    GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+                    GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 
                     VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
                     VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
@@ -518,7 +523,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
                     VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
                 }
                 else {
-                    GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+                    GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 
                     VArray[0] = currentmodel->vertexes[index_xyz].position[0];
                     VArray[1] = currentmodel->vertexes[index_xyz].position[1];
@@ -690,9 +695,9 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
 
                         if (stage->lightmap) {
                             if(lerped)
-                                GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+                                GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
                             else
-                                GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+                                GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
                             red = lightcolor[0];
                             green = lightcolor[1];
                             blue = lightcolor[2];
@@ -946,7 +951,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
             vec3_t lightVec, lightVal;
 
-            GL_GetLightVals();
+            GL_GetLightVals(true);
 
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
@@ -1077,6 +1082,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
         if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
             R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
             qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+			glUniform1iARB( g_location_isMD2, 1);
         }
         else
             R_InitVArrays (VERT_COLOURED_TEXTURED);
@@ -1113,7 +1119,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				index_st = tris[i].index_st[j];
 
 				if(lerped) {
-					GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+					GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 
 					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
 					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
@@ -1128,7 +1134,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
 				}
 				else {
-					GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+					GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 
 					VArray[0] = currentmodel->vertexes[index_xyz].position[0];
 					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
@@ -1255,7 +1261,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 				vec3_t lightVec, lightVal;
 
-				GL_GetLightVals();
+				GL_GetLightVals(true);
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
@@ -1437,9 +1443,9 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 						if (stage->lightmap) {
 							if(lerped)
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &ov[index_xyz], backlerp, lightcolor);
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 							else
-								GL_VlightAliasModel (shadelight, &verts[index_xyz], &verts[index_xyz], 0, lightcolor);
+								GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
 							blue = lightcolor[2];
@@ -1474,6 +1480,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+				glUniform1iARB( g_location_isMD2, 1);
 			}
 			else {
 				if(mirror && !(currententity->flags & RF_WEAPONMODEL))
@@ -1640,22 +1647,22 @@ R_DrawAliasModel
 
 =================
 */
-void R_DrawAliasModel (entity_t *e)
+void R_DrawAliasModel ( void )
 {
 	int			i;
 	dmdl_t		*paliashdr;
 	vec3_t		bbox[8];
 	image_t		*skin;
 
-	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(e->flags & RF_MENUMODEL))
+	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return;
 
-	if(e->team) //don't draw flag models, handled by sprites
+	if(currententity->team) //don't draw flag models, handled by sprites
 		return;
 
-	if ( !( e->flags & RF_WEAPONMODEL ) )
+	if ( !( currententity->flags & RF_WEAPONMODEL ) )
 	{
-		if ( R_CullAliasModel( bbox, e ) )
+		if ( R_CullAliasModel( bbox ) )
 			return;
 	}
 	else
@@ -1784,9 +1791,9 @@ void R_DrawAliasModel (entity_t *e)
     }
 
     qglPushMatrix ();
-	e->angles[PITCH] = -e->angles[PITCH];	// sigh.
-	R_RotateForEntity (e);
-	e->angles[PITCH] = -e->angles[PITCH];	// sigh.
+	currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
+	R_RotateForEntity (currententity);
+	currententity->angles[PITCH] = -currententity->angles[PITCH];	// sigh.
 
 	// select skin
 	if (currententity->skin) {
@@ -1847,7 +1854,7 @@ void R_DrawAliasModel (entity_t *e)
 	if ( !r_lerpmodels->value )
 		currententity->backlerp = 0;
 
-	if(e->frame == 0 && currentmodel->num_frames == 1) {
+	if(currententity->frame == 0 && currentmodel->num_frames == 1) {
 		if(!(currententity->flags & RF_VIEWERMODEL))
 			GL_DrawAliasFrame(paliashdr, 0, false, skin->texnum);
 	}
@@ -1905,8 +1912,8 @@ void R_DrawAliasModel (entity_t *e)
 		case 1: //dynamic only - always cast something
 			casted = R_ShadowLight (currententity->origin, shadevector, 0);
 			qglPushMatrix ();
-			qglTranslatef	(e->origin[0], e->origin[1], e->origin[2]);
-			qglRotatef (e->angles[1], 0, 0, 1);
+			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
+			qglRotatef (currententity->angles[1], 0, 0, 1);
 			qglDisable (GL_TEXTURE_2D);
 			qglEnable (GL_BLEND);
 
@@ -1915,7 +1922,7 @@ void R_DrawAliasModel (entity_t *e)
 			else
 				qglColor4f (0,0,0,0.3);
 
-			if(e->frame == 0 && currentmodel->num_frames == 1)
+			if(currententity->frame == 0 && currentmodel->num_frames == 1)
 				R_DrawAliasShadow (paliashdr, false);
 			else
 				R_DrawAliasShadow (paliashdr, true);
@@ -1929,8 +1936,8 @@ void R_DrawAliasModel (entity_t *e)
 			//world
 			casted = R_ShadowLight (currententity->origin, shadevector, 1);
 			qglPushMatrix ();
-			qglTranslatef	(e->origin[0], e->origin[1], e->origin[2]);
-			qglRotatef (e->angles[1], 0, 0, 1);
+			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
+			qglRotatef (currententity->angles[1], 0, 0, 1);
 			qglDisable (GL_TEXTURE_2D);
 			qglEnable (GL_BLEND);
 
@@ -1939,7 +1946,7 @@ void R_DrawAliasModel (entity_t *e)
 			else
 				qglColor4f (0,0,0,casted);
 
-			if(e->frame == 0 && currentmodel->num_frames == 1)
+			if(currententity->frame == 0 && currentmodel->num_frames == 1)
 				R_DrawAliasShadow (paliashdr, false);
 			else
 				R_DrawAliasShadow (paliashdr, true);
@@ -1952,8 +1959,8 @@ void R_DrawAliasModel (entity_t *e)
 		 	casted = R_ShadowLight (currententity->origin, shadevector, 0);
 			if (casted > 0) { //only draw if there's a dynamic light there
 				qglPushMatrix ();
-				qglTranslatef	(e->origin[0], e->origin[1], e->origin[2]);
-				qglRotatef (e->angles[1], 0, 0, 1);
+				qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
+				qglRotatef (currententity->angles[1], 0, 0, 1);
 				qglDisable (GL_TEXTURE_2D);
 				qglEnable (GL_BLEND);
 
@@ -1962,7 +1969,7 @@ void R_DrawAliasModel (entity_t *e)
 				else
 					qglColor4f (0,0,0,casted);
 
-				if(e->frame == 0 && currentmodel->num_frames == 1)
+				if(currententity->frame == 0 && currentmodel->num_frames == 1)
 					R_DrawAliasShadow (paliashdr, false);
 				else
 					R_DrawAliasShadow (paliashdr, true);
@@ -2095,21 +2102,21 @@ void GL_DrawAliasCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped
 }
 
 //to do - alpha and alphamasks possible?
-void R_DrawAliasModelCaster (entity_t *e)
+void R_DrawAliasModelCaster ( void )
 {
 	vec3_t		bbox[8];
 	dmdl_t		*paliashdr;
 
-	if(e->team) //don't draw flag models, handled by sprites
+	if(currententity->team) //don't draw flag models, handled by sprites
 		return;
 
-	if ( e->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
+	if ( currententity->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
 		return;
 
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) ) //no shells
 		return;
 
-	if ( R_CullAliasModel( bbox, e ) )
+	if ( R_CullAliasModel( bbox ) )
 		return;
 
 	paliashdr = (dmdl_t *)currentmodel->extradata;
@@ -2117,9 +2124,9 @@ void R_DrawAliasModelCaster (entity_t *e)
 	// draw it
 
     qglPushMatrix ();
-	e->angles[PITCH] = -e->angles[PITCH];
-	R_RotateForEntity (e);
-	e->angles[PITCH] = -e->angles[PITCH];
+	currententity->angles[PITCH] = -currententity->angles[PITCH];
+	R_RotateForEntity (currententity);
+	currententity->angles[PITCH] = -currententity->angles[PITCH];
 
 	if ( (currententity->frame >= paliashdr->num_frames)
 		|| (currententity->frame < 0) )
@@ -2138,7 +2145,7 @@ void R_DrawAliasModelCaster (entity_t *e)
 	if ( !r_lerpmodels->value )
 		currententity->backlerp = 0;
 
-	if(e->frame == 0 && currentmodel->num_frames == 1)
+	if(currententity->frame == 0 && currentmodel->num_frames == 1)
 		GL_DrawAliasCasterFrame(paliashdr, 0, false);
 	else
 		GL_DrawAliasCasterFrame(paliashdr, currententity->backlerp, true);

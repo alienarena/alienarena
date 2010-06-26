@@ -2,6 +2,9 @@ uniform vec3 lightPos;
 uniform vec3 meshTangent;
 uniform float time;
 uniform int FOG;
+uniform int MD2;
+
+attribute vec4 tangent;
 
 varying vec3 LightDir;
 varying vec3 EyeDir;
@@ -9,14 +12,27 @@ varying float fog;
 
 void main()
 {
+	vec3 t;
+	vec3 b;
+	
 	gl_Position = ftransform();
 
 	EyeDir = vec3(gl_ModelViewMatrix * gl_Vertex);
 	gl_TexCoord[0] = gl_MultiTexCoord0;
 	
 	vec3 n = normalize(gl_NormalMatrix * gl_Normal);
-	vec3 t = normalize(gl_NormalMatrix * meshTangent);
-	vec3 b = cross(n, t);
+	
+	if(MD2 == 1) 
+	{
+		t = normalize(gl_NormalMatrix * meshTangent);
+		b = cross(n, t);
+	}
+	else
+	{
+		vec3 tangent3 = vec3(tangent);
+		t = normalize(gl_NormalMatrix * tangent3);
+		b = tangent[3] * cross(n, t);
+	}
 	
 	vec3 v;
 	v.x = dot(lightPos, t);

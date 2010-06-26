@@ -1341,6 +1341,9 @@ void SP_misc_bluespidernode (edict_t *ent)
 
 void misc_mapmodel_think (edict_t *ent)
 {
+	if(ent->spawnflags & 2)
+		ent->s.frame = (ent->s.frame + 1) % 39;
+	else
 	ent->s.frame = (ent->s.frame + 1) % 24;
 	ent->nextthink = level.time + FRAMETIME;
 }
@@ -1358,6 +1361,9 @@ void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
 		ent->s.renderfx = RF_TRANSLUCENT;
 
 	if(ent->spawnflags & 32) { //animated mesh
+		if(ent->spawnflags & 128)
+			ent->s.frame = 0;
+		else
 		ent->s.frame = rand()%24;
 		ent->think = misc_mapmodel_think;
 		ent->nextthink = level.time + FRAMETIME;

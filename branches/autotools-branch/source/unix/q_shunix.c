@@ -54,7 +54,7 @@ size_t total_hunk_used_size;
 void *Hunk_Begin (int maxsize)
 {
 
-	Com_DPrintf("[Hunk_Begin : 0x%X :]\n", maxsize );
+	Com_DPrintf("Hunk_Begin:0x%X:\n", maxsize );
 	if ( hunk_base != NULL )
 		Com_DPrintf("Warning: Hunk_Begin: hunk_base != NULL\n");
 
@@ -98,8 +98,7 @@ void *Hunk_Alloc (int size)
 	user_hunk_bfr = user_hunk_base + user_hunk_size; // set base of new block
 	user_hunk_size = new_user_hunk_size; // then update user hunk size
 
-	if ( developer && developer->integer == 2 )
-		Com_DPrintf("[Hunk_Alloc : %u @ %p :]\n",
+	Com_DPrintf("Hunk_Alloc:%u @ %p:\n",
 			user_hunk_block_size, user_hunk_bfr );
 
 	return (void *)user_hunk_bfr;
@@ -121,7 +120,7 @@ int Hunk_End (void)
 	rsvd_hunk_size = new_rsvd_hunk_size;
 	*phunk_size_store = rsvd_hunk_size;
 
-	Com_DPrintf("[Hunk_End : 0x%X @ %p :]\n", rsvd_hunk_size, remap_base );
+	Com_DPrintf("Hunk_End:0x%X @ %p:\n", rsvd_hunk_size, remap_base );
 
 	hunk_base = user_hunk_base = NULL;
 	phunk_size_store = NULL;
@@ -175,7 +174,7 @@ int Hunk_End()
 
 	}
 
-	Com_DPrintf("Hunk_End: [0x%X @ %p]\n", rsvd_hunk_size, hunk_base );
+	Com_DPrintf("Hunk_End:0x%X @ %p:\n", rsvd_hunk_size, hunk_base );
 
 	hunk_base = user_hunk_base = NULL;
 	phunk_size_store = NULL;
@@ -195,7 +194,7 @@ void Hunk_Free (void *base)
 		hunk_base = base - hunk_header_size;
 		hunk_rsvd_size = *((size_t *)hunk_base);
 
-		Com_DPrintf("[Hunk_Free : 0x%X @ %p :]\n", hunk_rsvd_size, hunk_base );
+		Com_DPrintf("Hunk_Free:0x%X @ %p:\n", hunk_rsvd_size, hunk_base );
 
 		if ( munmap( hunk_base, hunk_rsvd_size ) )
 			Sys_Error("Hunk_Free: munmap failed (%d)", errno);
@@ -241,19 +240,19 @@ void Sys_Mkdir (char *path)
 	if ( stat( path, &statbuf )) {
 		if ( errno == ENOENT ) {
 			// does not exist, attempt creation
-			Com_DPrintf("[Sys_Mkdir: creating %s]\n", path );
+			Com_DPrintf("Sys_Mkdir:creating %s:\n", path );
 			if ( mkdir( path, 0700 ) ) // assume this is for .codered/ dirs
 			{
 				Com_Printf("Warning: Could not create directory %s\n", path );
 			}
 		}
 		else {
-			Com_DPrintf("[Sys_Mkdir: stat error %d\n]", errno );
+			Com_DPrintf("Sys_Mkdir: stat error %d\n]", errno );
 		}
 	}
 	else {
-		if ( !statbuf.st_mode & (S_IFDIR ) ) {
-			Com_DPrintf("[Sys_Mkdir: non-directory in path.]\n");
+		if ( !(statbuf.st_mode & (S_IFDIR )) ) {
+			Com_DPrintf("Sys_Mkdir: non-directory in path.\n");
 		}
 	}
 #else

@@ -1,6 +1,25 @@
+/*
+Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2006-2010 COR Entertainment
 
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
 
-// g_weapon.c
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+*/
+// p_weapon.c
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -8,10 +27,9 @@
 #include "g_local.h"
 #include "m_player.h"
 
-
 static qboolean	is_quad;
 static byte		is_silenced;
-static qboolean altfire;
+// static qboolean altfire;
 
 float damage_buildup = 1.0;
 
@@ -324,7 +342,7 @@ void ChangeWeapon (edict_t *ent)
 
 	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
-#if defined UNIX_VARIANT
+#if defined UNIX_VARIANT || defined WIN32_VARIANT
 	// -jjb-ac  should be ok for win32
 	if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_violator/tris.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
@@ -1037,14 +1055,14 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	if(ent->client->buttons & BUTTON_ATTACK2) //alt fire
 	{
-		if(ent->client->resp.homing_shots < 5) {
+		if(ent->client->homing_shots < 5) {
 			if(excessive->value) //no homers in excessive!
 				fire_rocket (ent, start, forward, damage, 900, damage_radius, radius_damage);
 			else
 				fire_homingrocket (ent, start, forward, damage, 250, damage_radius, radius_damage);
 		}
 		else {
-			safe_cprintf(ent, PRINT_HIGH, "Exceeded max number of homing missiles for this round!\n");
+			safe_cprintf(ent, PRINT_HIGH, "Exceeded max number of homing missiles for this life!\n");
 			fire_rocket (ent, start, forward, damage, 900, damage_radius, radius_damage);
 		}
 	}

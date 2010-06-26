@@ -22,6 +22,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+#if !defined HAVE__STRDUP
+#define _strdup strdup
+#endif
+
 #include "g_local.h"
 
 game_locals_t	game;
@@ -396,7 +400,7 @@ void EndDMLevel (void)
 			qboolean same = ( g_votesame ? (g_votesame->value == 1) : 1 );
 
 			memset( names, 0 , sizeof(names) );
-			s = strdup( sv_maplist->string );
+			s = _strdup( sv_maplist->string );
 			t = strtok( s, seps );
 			do {
 				// if using the same map is disallowed, skip it
@@ -471,7 +475,7 @@ void EndDMLevel (void)
 	}
 	// see if it's in the map list
 	if (*sv_maplist->string) {
-		s = strdup(sv_maplist->string);
+		s = _strdup(sv_maplist->string);
 		f = NULL;
 		t = strtok(s, seps);
 		while (t != NULL) {
@@ -514,7 +518,7 @@ void EndDMLevel (void)
 	}
 	else
 	{
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 		length = filelength( fileno( fp  ) );
 #else
 		fseek(fp, 0, SEEK_END);
@@ -651,7 +655,7 @@ void ResetLevel (void) //for resetting players and items after warmup
 			PutClientInServer (ent);
 			ACESP_LoadBots(ent, 0);
 		}
-		ent->client->resp.homing_shots = 0;
+		ent->client->homing_shots = 0;
 	}
 	blue_team_score = 0;
 	red_team_score = 0;
@@ -930,7 +934,7 @@ void ExitLevel (void)
 			ent->client->resp.score = 0;
 			ent->client->resp.deaths = 0;
 			ent->client->resp.reward_pts = 0;
-			ent->client->resp.homing_shots = 0;
+			ent->client->homing_shots = 0;
 			if(!ent->is_bot) { //players
 				ent->takedamage = DAMAGE_AIM;
 				ent->solid = SOLID_BBOX;

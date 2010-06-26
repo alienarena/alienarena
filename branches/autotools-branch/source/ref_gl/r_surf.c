@@ -740,7 +740,7 @@ void DrawTextureChains (void)
 extern int KillFlags;
 static void GL_RenderLightmappedPoly( msurface_t *surf )
 {
-	int		nv = surf->polys->numverts;
+	// int		nv = surf->polys->numverts; // -jjb-unused
 	int		map;
 	float	scroll;
 	image_t *image = R_TextureAnimation( surf->texinfo );
@@ -809,7 +809,7 @@ dynamic:
 		int			lnum, sv_lnum = 0;
 		float		add, brightest = 0;
 		vec3_t		lightVec;
-		float		lightCutoffSquared;
+		float		lightCutoffSquared = 0.0f;
 
 		if(is_dynamic) {
 
@@ -1091,7 +1091,7 @@ static void R_DrawNormalSurfaces (void)
 R_DrawInlineBModel
 =================
 */
-void R_DrawInlineBModel (entity_t *e)
+void R_DrawInlineBModel ( void )
 {
 	int			i;
 	cplane_t	*pplane;
@@ -1127,7 +1127,7 @@ void R_DrawInlineBModel (entity_t *e)
 			{	// add to the translucent chain
 				psurf->texturechain = r_alpha_surfaces;
 				r_alpha_surfaces = psurf;
-				psurf->entity = e;
+				psurf->entity = currententity;
 			}
 			else if ( qglMTexCoord2fSGIS && !( psurf->flags & SURF_DRAWTURB ) )
 			{
@@ -1169,7 +1169,7 @@ void R_DrawInlineBModel (entity_t *e)
 R_DrawBrushModel
 =================
 */
-void R_DrawBrushModel (entity_t *e)
+void R_DrawBrushModel ( void )
 {
 	vec3_t		mins, maxs;
 	int			i;
@@ -1178,23 +1178,22 @@ void R_DrawBrushModel (entity_t *e)
 	if (currentmodel->nummodelsurfaces == 0)
 		return;
 
-	currententity = e;
 	gl_state.currenttextures[0] = gl_state.currenttextures[1] = -1;
 
-	if (e->angles[0] || e->angles[1] || e->angles[2])
+	if (currententity->angles[0] || currententity->angles[1] || currententity->angles[2])
 	{
 		rotated = true;
 		for (i=0 ; i<3 ; i++)
 		{
-			mins[i] = e->origin[i] - currentmodel->radius;
-			maxs[i] = e->origin[i] + currentmodel->radius;
+			mins[i] = currententity->origin[i] - currentmodel->radius;
+			maxs[i] = currententity->origin[i] + currentmodel->radius;
 		}
 	}
 	else
 	{
 		rotated = false;
-		VectorAdd (e->origin, currentmodel->mins, mins);
-		VectorAdd (e->origin, currentmodel->maxs, maxs);
+		VectorAdd (currententity->origin, currentmodel->mins, mins);
+		VectorAdd (currententity->origin, currentmodel->maxs, maxs);
 	}
 
 	if (R_CullBox (mins, maxs)) {
@@ -1204,7 +1203,7 @@ void R_DrawBrushModel (entity_t *e)
 	qglColor3f (1,1,1);
 	memset (gl_lms.lightmap_surfaces, 0, sizeof(gl_lms.lightmap_surfaces));
 
-	VectorSubtract (r_newrefdef.vieworg, e->origin, modelorg);
+	VectorSubtract (r_newrefdef.vieworg, currententity->origin, modelorg);
 
 	if (rotated)
 	{
@@ -1212,18 +1211,18 @@ void R_DrawBrushModel (entity_t *e)
 		vec3_t	forward, right, up;
 
 		VectorCopy (modelorg, temp);
-		AngleVectors (e->angles, forward, right, up);
+		AngleVectors (currententity->angles, forward, right, up);
 		modelorg[0] = DotProduct (temp, forward);
 		modelorg[1] = -DotProduct (temp, right);
 		modelorg[2] = DotProduct (temp, up);
 	}
 
     qglPushMatrix ();
-	e->angles[0] = -e->angles[0];	// stupid quake bug
-	e->angles[2] = -e->angles[2];	// stupid quake bug
-	R_RotateForEntity (e);
-	e->angles[0] = -e->angles[0];	// stupid quake bug
-	e->angles[2] = -e->angles[2];	// stupid quake bug
+	currententity->angles[0] = -currententity->angles[0];	// stupid quake bug
+	currententity->angles[2] = -currententity->angles[2];	// stupid quake bug
+	R_RotateForEntity (currententity);
+	currententity->angles[0] = -currententity->angles[0];	// stupid quake bug
+	currententity->angles[2] = -currententity->angles[2];	// stupid quake bug
 
 	GL_EnableMultitexture( true );
 	GL_SelectTexture( GL_TEXTURE0);
@@ -1268,7 +1267,7 @@ void R_DrawBrushModel (entity_t *e)
 
 	}
 
-	R_DrawInlineBModel (e);
+	R_DrawInlineBModel ();
 	GL_EnableMultitexture( false );
 
 	qglPopMatrix ();

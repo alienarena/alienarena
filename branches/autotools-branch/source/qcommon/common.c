@@ -147,7 +147,9 @@ void Com_Printf (char *fmt, ...)
 #endif
 
 	// if logfile_active or logfile_name have been modified, close the current log file
-	if ( (logfile_active && logfile_active->modified || logfile_name && logfile_name->modified) && logfile ) {
+	if ( ( (logfile_active && logfile_active->modified)
+			|| (logfile_name && logfile_name->modified) ) && logfile )
+	{
 		fclose (logfile);
 		logfile = NULL;
 		if (logfile_active) {
@@ -190,7 +192,7 @@ Com_DPrintf
 A Com_Printf that only shows up if the "developer" cvar is set
 ================
 */
-#if defined NDEBUG
+#if !defined NDEBUG
 // -jjb-experiment  remove for for non-debug version
 void Com_DPrintf (char *fmt, ...)
 {
@@ -1619,7 +1621,7 @@ Qcommon_Frame
 void Qcommon_Frame (int msec)
 {
 
-	int		time_before, time_between, time_after;
+	int		time_before=0, time_between=0, time_after=0;
 #if defined UNIX_VARIANT
 	char	*s;
 #endif

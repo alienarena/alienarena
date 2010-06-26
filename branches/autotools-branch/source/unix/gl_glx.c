@@ -59,6 +59,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <GL/glx.h>
 
 /* extern globals */
+// using include files for these has some problems
 extern cursor_t cursor;
 extern float rs_realtime;
 extern viddef_t vid;
@@ -67,7 +68,7 @@ void		GLimp_BeginFrame( float camera_separation );
 void		GLimp_EndFrame( void );
 qboolean	GLimp_Init( void *hinstance, void *hWnd );
 void		GLimp_Shutdown( void );
-rserr_t    	GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen );
+rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
 void		GLimp_AppActivate( qboolean active );
 void		GLimp_EnableLogging( qboolean enable );
 void		GLimp_LogNewFrame( void );
@@ -478,7 +479,7 @@ static void InitSig(void)
 /*
 ** GLimp_SetMode
 */
-rserr_t GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
+rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen )
 {
 	int width, height;
 	int attrib[] = {

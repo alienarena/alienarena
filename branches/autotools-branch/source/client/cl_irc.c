@@ -195,7 +195,8 @@ IRCresponse_t GetWords(char msg[200])
 	{
 		res.word[word][ichar] = msg[t];
 		ichar++;
-		if (msg[t]==' ') {
+		if (msg[t]==' ')
+		{
 			ichar=0;
 			word++;
 		};
@@ -295,7 +296,8 @@ void analizeLine(char Line[1000])
 				outputmsg[strlen(outputmsg)-2] = 0; //don't want that linefeed showing up
 
 				lines = strlen(outputmsg)/100 + 1; //how many lines do we have?
-				for(i=0; i<lines; i++) {
+				for(i=0; i<lines; i++)
+				{
 					//get a segment of the total message
 					memset(msgLine,'\0', 101);
 					for(j=0; j<100; j++)
@@ -353,7 +355,8 @@ void CL_GetIRCData(void)
 	char prevLine[IRC_RECV_BUF_SIZE];
 	int t;
 
-	//to do - flag if connected or not
+	if(!cls.irc_connected)
+		return;
 
 	len=0;
 	memset(File_Buf,0,IRC_RECV_BUF_SIZE);
@@ -381,9 +384,12 @@ void CL_GetIRCData(void)
 		{
 			line[ichar]= File_Buf[t];
 			ichar++;
-			if(File_Buf[t]==13) {
+			if(File_Buf[t]==13)
+			{
 				ichar=0;
-				if(!strcmp(line, prevLine)) { //don't print duplicate messages
+				if(!strcmp(line, prevLine))
+				{
+					//don't print duplicate messages
 					memset(line,0,IRC_RECV_BUF_SIZE);
 					return;
 				}
@@ -412,7 +418,8 @@ void CL_IRCSay(void)
 	strcpy(m_sendstring, Cmd_Argv (1));
 
 	//check if it's an "action"
-	if(m_sendstring[0] == '/' && m_sendstring[1] == 'm' && m_sendstring[2] == 'e') {
+	if(m_sendstring[0] == '/' && m_sendstring[1] == 'm' && m_sendstring[2] == 'e')
+	{
 		//trim out the command
 		for(i = 4; i < 1024; i++)
 			tempstring[i-4] = m_sendstring[i];
@@ -425,7 +432,8 @@ void CL_IRCSay(void)
 		//send a junk string to clear the command
 		sendData("PRIVMSG #alienarena :\n\r");
 	}
-	else {
+	else 
+	{
 		sprintf(message, "PRIVMSG #alienarena :%s\n\r", m_sendstring);
 #if defined WIN32_VARIANT
 		WSASetLastError(0);
@@ -434,11 +442,14 @@ void CL_IRCSay(void)
 	}
 
 #if defined WIN32_VARIANT
-	if(WSAGetLastError()) { //there was some error in connecting
+	if(WSAGetLastError())
+	{
+		//there was some error in connecting
 			handle_error();
 			Com_Printf("^1IRC: not connected to #alienarena");
 	}
-	else {
+	else
+	{
 #endif
 		//update the print buffer
 		sprintf(message, "<%s> :%s", user.nick, m_sendstring);
@@ -461,8 +472,8 @@ void CL_IRCSay(void)
 
 
 // returns true on success, false on failure.
-qboolean CL_JoinIRC(void){
-
+qboolean CL_JoinIRC(void)
+{
 	char message[IRC_SEND_BUF_SIZE];
 	char name[32];
 	int i, j;
@@ -477,7 +488,8 @@ qboolean CL_JoinIRC(void){
 
 	strcpy(name, Cvar_VariableString("name")); //we should force players to set name on startup
 
-	if(!strcmp(name, "Player")) {
+	if(!strcmp(name, "Player"))
+	{
 		Com_Printf("...IRC rejected due to unset player name\n");
 		return false;
 	}
@@ -486,8 +498,10 @@ qboolean CL_JoinIRC(void){
 	j = 0;
 	for (i = 0; i < 16; i++)
 		user.nick[i] = 0;
-		for (i = 0; i < strlen(name) && i < 32; i++) {
-			if ( name[i] == '^' ) {
+	for (i = 0; i < strlen(name) && i < 32; i++)
+	{
+		if ( name[i] == '^' )
+		{
 				i += 1;
 				continue;
 			}
@@ -502,7 +516,8 @@ qboolean CL_JoinIRC(void){
 
 	sprintf(HostName, cl_IRC_server->string);
 
-    if ( (host=gethostbyname(HostName)) == NULL ) {
+    if ( (host=gethostbyname(HostName)) == NULL )
+	{
 		closesocket(sock);
 		handle_error();
  		return false;
@@ -510,7 +525,8 @@ qboolean CL_JoinIRC(void){
 
     address.sin_addr.s_addr=*((unsigned long *) host->h_addr);
 
-	if ( (connect(sock,(struct sockaddr *) &address, sizeof(address))) != 0) {
+	if ( (connect(sock,(struct sockaddr *) &address, sizeof(address))) != 0)
+	{
 		closesocket(sock);
 		Com_Printf("...IRC connection refused.\n");
 		return false;
@@ -521,11 +537,11 @@ qboolean CL_JoinIRC(void){
 	sprintf(message,"NICK %s\n\r", user.nick);
 	sendData(message);
 
-	sprintf(message,"JOIN %s\n\r", "#alienarena");
-	sendData(message);
+	CL_GetIRCData();
 
 #if defined WIN32_VARIANT
-	if(WSAGetLastError()) {
+	if(WSAGetLastError())
+	{
 		closesocket(sock);
 		handle_error();
 		return false;
@@ -533,6 +549,8 @@ qboolean CL_JoinIRC(void){
 #endif
 
 	cls.irc_connected = true;
+	cls.irc_joinedchannel = false;
+	cls.irc_connectime = Sys_Milliseconds();
 
 	Com_Printf("...Connected to IRC server\n");
 
@@ -541,12 +559,23 @@ qboolean CL_JoinIRC(void){
 
 
 #if defined WIN32_VARIANT
+// RecvThreadProc and CL_InitIRC  Windows Flavor
+
 void RecvThreadProc(void *dummy)
 {
     if (!CL_JoinIRC())
         return;
 
-	while(1) {
+	while(1)
+	{
+		if((Sys_Milliseconds() - cls.irc_connectime) > 500 && cls.irc_joinedchannel == false)
+		{
+			WSASetLastError(0);
+
+			sendData("JOIN #alienarena\n\r");
+			cls.irc_joinedchannel = true;
+			Com_Printf("Joining #alienarena\n");
+		}
 
 		//try not to eat up CPU
 		Sleep(1000); //time to recieve packets
@@ -555,41 +584,52 @@ void RecvThreadProc(void *dummy)
 	}
 	return;
 }
+
+void CL_InitIRC(void)
+{
+	//spin off thread right away
+	_beginthread( RecvThreadProc, 0, NULL );
+}
+
 #endif
 
 #if defined UNIX_VARIANT
+// RecvThreadProc and CL_InitIRC  Linux/Unix Flavor
+
 void *RecvThreadProc(void *dummy)
 {
     if (!CL_JoinIRC())
         return NULL;
 
-	while(1) {
+	while(1)
+	{
+		if((Sys_Milliseconds() - cls.irc_connectime) > 500 && cls.irc_joinedchannel == false)
+		{
+			sendData("JOIN #alienarena\n\r");
+			cls.irc_joinedchannel = true;
+			Com_Printf("Joining #alienarena\n");
+		}
 
 		//try not to eat up CPU
 		sleep(1); //time to recieve packets
 
 		CL_GetIRCData();
+
 	}
 	return NULL;
 }
-#endif
 
 void CL_InitIRC(void)
 {
-#if defined UNIX_VARIANT
 	pthread_t pth;
-#endif
 
 	//spin off thread right away
-#if defined WIN32_VARIANT
-	_beginthread( RecvThreadProc, 0, NULL );
-#elif defined HAVE_PTHREAD_CREATE
 	pthread_create(&pth,NULL,RecvThreadProc,"dummy");
-#else
-#error No pthread_create() function.
-#endif
 
 }
+
+#endif
+
 
 void CL_IRCShutdown(void)
 {
@@ -603,6 +643,7 @@ void CL_IRCShutdown(void)
 	sendData(message);
 
 	cls.irc_connected = false;
+	cls.irc_joinedchannel = false;
 
 	Com_Printf("Disconnected from chat channel...");
 

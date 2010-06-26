@@ -70,9 +70,8 @@ AC_MSG_CHECKING(whether to build win32 version)
 AC_MSG_RESULT(${cond_build_win32})
 AC_MSG_CHECKING(whether to build unix version)
 AC_MSG_RESULT(${cond_build_unix})
-AC_MSG_CHECKING(whether to build darwin unix version)
+AC_MSG_CHECKING(whether to build darwin version)
 AC_MSG_RESULT(${cond_build_darwin})
-
 
 cond_build_client=yes
 AS_IF( [ test "x${no_client}" != xno ],
@@ -251,9 +250,9 @@ AC_CHECK_FUNCS([ closesocket socket ])
 AC_CHECK_FUNCS([ pthread_create _begin_thread ])
 
 AC_CHECK_FUNCS([ floor gethostbyname gettimeofday memmove memset mkdir dnl
-		munmap mremap putenv select sqrt strchr strdup strerror dnl
-		stricmp _stricmp strcasecmp strncasecmp strrchr strdup strstr dnl 
-		strnicmp ]) dnl
+		munmap mremap putenv _putenv select sqrt strchr strdup _strdup dnl
+		strerror stricmp _stricmp strcasecmp strncasecmp strrchr strstr dnl 
+		strnicmp unlink _unlink ]) dnl
 
 # outputs
 AC_CONFIG_FILES([Makefile source/Makefile])

@@ -693,7 +693,8 @@ void SCR_DrawLoading (void)
 	Draw_StretchPic (0, 0, viddef.width, viddef.height, "m_background");
 #else
 	// -jjb-fix  m_background does not exist, not sure what to use instead
-	Draw_StretchPic (0, 0, viddef.width, viddef.height, "m_menu");
+	// -jjb-duh  it is supposed to be the levelshot
+	// Draw_StretchPic (0, 0, viddef.width, viddef.height, "menu_back");
 #endif
 
 	//loading message stuff...
@@ -943,9 +944,12 @@ void SCR_BeginLoadingPlaque (void)
 	S_StopAllSounds ();
 	cl.sound_prepped = false;		// don't play ambients
 
+/*
+	// -jjb-experiment  not sure what the point of this is
 	if (developer->value) {
 		return;
 	}
+*/
 
 	scr_draw_loading = 1;
 
@@ -1814,8 +1818,7 @@ void SCR_showFPS(void)
 
 	if( restart )
 	{
-		start_msec = cls.realtime;
-		//start_msec = Sys_Milliseconds();
+		start_msec = Sys_Milliseconds();
 		framecounter = 0.0f;
 		update_trigger = 10.0f; // initial delay to update
 		temp[0] = 0; // blank the text buffer
@@ -1826,17 +1829,20 @@ void SCR_showFPS(void)
 		framecounter += 1.0f;
 		if( framecounter >= update_trigger )
 		{
-			// calculate frames-per-second, using client frame current time
-			end_msec = cls.realtime;
-			//end_msec = Sys_Milliseconds();
+			// calculate frames-per-second
+			end_msec = Sys_Milliseconds();
 			time_sec = ((float)(end_msec - start_msec)) / 1000.0f;
 			framerate = framecounter / time_sec ;
 
 			// update text buffer for display
-			Com_sprintf( temp, sizeof(temp), "%3.1ffps", framerate );
-
-			//Com_DPrintf("[showFPS:%i:%i:%f:%f:%f:]\n",
-				//	start_msec, end_msec, time_sec, framecounter, framerate );
+			if ( cl_drawfps->integer == 2 )
+			{ // for developers
+				Com_sprintf( temp, sizeof(temp), "%3.1ffps", framerate );
+			}
+			else
+			{
+				Com_sprintf( temp, sizeof(temp), "%3.0ffps", framerate );
+			}
 
 			// setup for next update
 			framecounter = 0.0f;

@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -131,7 +131,7 @@ void ai_stand (edict_t *self, float dist)
 
 	if (FindTarget (self))
 		return;
-	
+
 	if (level.time > self->monsterinfo.pausetime)
 	{
 		self->monsterinfo.walk (self);
@@ -219,7 +219,7 @@ void ai_turn (edict_t *self, float dist)
 
 	if (FindTarget (self))
 		return;
-	
+
 	M_ChangeYaw (self);
 }
 
@@ -301,7 +301,7 @@ qboolean visible (edict_t *self, edict_t *other)
 	VectorCopy (other->s.origin, spot2);
 	spot2[2] += other->viewheight;
 	trace = gi.trace (spot1, vec3_origin, vec3_origin, spot2, self, MASK_OPAQUE);
-	
+
 	if (trace.fraction == 1.0)
 		return true;
 	return false;
@@ -320,12 +320,12 @@ qboolean infront (edict_t *self, edict_t *other)
 	vec3_t	vec;
 	float	dot;
 	vec3_t	forward;
-	
+
 	AngleVectors (self->s.angles, forward, NULL, NULL);
 	VectorSubtract (other->s.origin, self->s.origin, vec);
 	VectorNormalize (vec);
 	dot = DotProduct (vec, forward);
-	
+
 	if (dot > 0.3)
 		return true;
 	return false;
@@ -388,7 +388,7 @@ void FoundTarget (edict_t *self)
 	// clear out our combattarget, these are a one shot deal
 	self->combattarget = NULL;
 	self->monsterinfo.aiflags |= AI_COMBAT_POINT;
-	
+
 
 	// clear the targetname, that point is ours!
 	self->movetarget->targetname = NULL;
@@ -429,21 +429,21 @@ qboolean FindTarget (edict_t *self)
 	{
 		ent = g_edicts + i + 1;
 		if(ent == NULL || ent == self || !ent->inuse ||
-		   ent->solid == SOLID_NOT) 
+		   ent->solid == SOLID_NOT)
 		   continue;
-	
+
 		if(!ent->deadflag && infront(self, ent) && gi.inPVS (self->s.origin, ent->s.origin))
 		{
 			VectorSubtract(self->s.origin, ent->s.origin, dist);
 			weight = VectorLength( dist );
-			
+
 			// Check if best target, or better than current target
 			if (weight < bestweight)
 			{
 				bestweight = weight;
 				bestenemy = ent;
 			}
-			
+
 		}
 	}
 	if(bestenemy) {
@@ -460,7 +460,7 @@ qboolean FindTarget (edict_t *self)
 
 
 		if (!(self->monsterinfo.aiflags & AI_SOUND_TARGET) && (self->monsterinfo.sight))
-			self->monsterinfo.sight (self, self->enemy);	
+			self->monsterinfo.sight (self, self->enemy);
 		return true;
 	}
 	return false;
@@ -508,7 +508,7 @@ qboolean M_CheckAttack (edict_t *self)
 		if (tr.ent != self->enemy)
 			return false;
 	}
-	
+
 	// melee attack
 	if (enemy_range == RANGE_MELEE)
 	{
@@ -521,14 +521,14 @@ qboolean M_CheckAttack (edict_t *self)
 			self->monsterinfo.attack_state = AS_MISSILE;
 		return true;
 	}
-	
+
 // missile attack
 	if (!self->monsterinfo.attack)
 		return false;
-		
+
 	if (level.time < self->monsterinfo.attack_finished)
 		return false;
-	
+
 	if(strcmp(self->classname, "npc_deathray"))
 		if (enemy_range == RANGE_FAR)
 			return false;
@@ -632,7 +632,7 @@ Strafe sideways, but stay at aproximately the same range
 void ai_run_slide(edict_t *self, float distance)
 {
 	float	ofs;
-	
+
 	self->ideal_yaw = enemy_yaw;
 	M_ChangeYaw (self);
 
@@ -640,10 +640,10 @@ void ai_run_slide(edict_t *self, float distance)
 		ofs = 90;
 	else
 		ofs = -90;
-	
+
 	if (M_walkmove (self, self->ideal_yaw + ofs, distance))
 		return;
-		
+
 	self->monsterinfo.lefty = 1 - self->monsterinfo.lefty;
 	M_walkmove (self, self->ideal_yaw - ofs, distance);
 }
@@ -673,10 +673,12 @@ qboolean ai_checkattack (edict_t *self, float dist)
 			if ((level.time - self->enemy->teleport_time) > 5.0)
 			{
 				if (self->goalentity == self->enemy)
+				{
 					if (self->movetarget)
 						self->goalentity = self->movetarget;
 					else
 						self->goalentity = NULL;
+				}
 				self->monsterinfo.aiflags &= ~AI_SOUND_TARGET;
 				if (self->monsterinfo.aiflags & AI_TEMP_STAND_GROUND)
 					self->monsterinfo.aiflags &= ~(AI_STAND_GROUND | AI_TEMP_STAND_GROUND);

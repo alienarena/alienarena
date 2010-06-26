@@ -25,14 +25,14 @@ void deathray_search (edict_t *self)
 
 mframe_t deathray_frames_stand [] =
 {
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL
-	
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL}
+
 };
 mmove_t deathray_move_stand = {FRAME_stand01, FRAME_stand06, deathray_frames_stand, NULL};
 
@@ -43,12 +43,12 @@ void deathray_stand (edict_t *self)
 
 mframe_t deathray_frames_run1 [] =
 {
-	ai_run, 0, NULL,
-	ai_run, 0, NULL,
-	ai_run, 0, NULL,
-	ai_run, 0, NULL,
-	ai_run, 0, NULL,
-	ai_run, 0, NULL
+	{ai_run, 0, NULL},
+	{ai_run, 0, NULL},
+	{ai_run, 0, NULL},
+	{ai_run, 0, NULL},
+	{ai_run, 0, NULL},
+	{ai_run, 0, NULL}
 };
 mmove_t deathray_move_run1 = {FRAME_stand01, FRAME_stand06, deathray_frames_run1, NULL};
 
@@ -81,7 +81,7 @@ void deathrayShot (edict_t *self)
 	end[2] -= 32;
     start[2] += 64;
     VectorCopy (start, from);
-    tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);      
+    tr = gi.trace (from, NULL, NULL, end, self, MASK_SHOT);
     VectorCopy (tr.endpos, from);
 
 	// send muzzle flash
@@ -100,30 +100,30 @@ void deathrayShot (edict_t *self)
 	gi.WriteByte (TE_BFG_BIGEXPLOSION);
 	gi.WritePosition (end);
 	gi.multicast (end, MULTICAST_PVS);
-	
+
 	gi.sound (self, CHAN_VOICE, sound_punch, 1, ATTN_NORM, 0);
-	
+
 	if ((tr.ent != self) && (tr.ent->takedamage))
 		T_Damage (tr.ent, self, self, dir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_DEATHRAY);
 	else if (!((tr.surface) && (tr.surface->flags & SURF_SKY)))
-	{  
+	{
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_SCREEN_SPARKS);
 		gi.WritePosition (tr.endpos);
 		gi.WriteDir (tr.plane.normal);
 		gi.multicast (self->s.origin, MULTICAST_PVS);
 	}
-}	
+}
 
 mframe_t deathray_frames_attack_shoot [] =
-{	
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, deathrayShot,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL
+{
+	{ai_charge, 0, NULL},
+	{ai_charge, 0, NULL},
+	{ai_charge, 0, NULL},
+	{ai_charge, 0, NULL},
+	{ai_charge, 0, deathrayShot},
+	{ai_charge, 0, NULL},
+	{ai_charge, 0, NULL}
 };
 mmove_t deathray_move_attack_shoot = {FRAME_stand01, FRAME_stand06, deathray_frames_attack_shoot, deathray_run};
 
@@ -132,7 +132,7 @@ void deathray_sight (edict_t *self, edict_t *other)
 {
 	gi.sound (self, CHAN_VOICE, sound_sight, 1, ATTN_NORM, 0);
 	self->monsterinfo.currentmove = &deathray_move_run1;
-    
+
 }
 
 void deathray_attack (edict_t *self)
@@ -142,12 +142,12 @@ void deathray_attack (edict_t *self)
 
 mframe_t deathray_frames_pain1 [] =
 {
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL}
 };
 mmove_t deathray_move_pain1 = {FRAME_stand01, FRAME_stand06, deathray_frames_pain1, deathray_run};
 
@@ -178,13 +178,13 @@ void deathray_dead (edict_t *self)
 
 mframe_t deathray_frames_death1 [] =
 {
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL
-	
-	
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL}
+
+
 };
 mmove_t deathray_move_death1 = {FRAME_stand01, FRAME_stand05, deathray_frames_death1, deathray_dead};
 
@@ -197,12 +197,12 @@ void deathray_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int dam
 	gi.WriteByte (TE_EXPLOSION1);
 	gi.WritePosition (self->s.origin);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
-	
+
 	self->deadflag = DEAD_DEAD;
 }
 
 void SP_npc_deathray (edict_t *self)
-{	
+{
 
 	// pre-caches
 	sound_pain  = gi.soundindex ("misc/deathray/fizz.wav");

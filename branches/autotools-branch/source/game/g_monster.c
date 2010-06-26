@@ -58,7 +58,7 @@ void M_CatagorizePosition (edict_t *ent)
 //
 	point[0] = ent->s.origin[0];
 	point[1] = ent->s.origin[1];
-	point[2] = ent->s.origin[2] + ent->mins[2] + 1;	
+	point[2] = ent->s.origin[2] + ent->mins[2] + 1;
 	cont = gi.pointcontents (point);
 
 	if (!(cont & MASK_WATER))
@@ -126,11 +126,11 @@ void M_WorldEffects (edict_t *ent)
 			}
 		}
 	}
-	
+
 	if (ent->waterlevel == 0)
 	{
 		if (ent->flags & FL_INWATER)
-		{	
+		{
 			gi.sound (ent, CHAN_BODY, gi.soundindex("player/watr_out.wav"), 1, ATTN_NORM, 0);
 			ent->flags &= ~FL_INWATER;
 		}
@@ -153,9 +153,9 @@ void M_WorldEffects (edict_t *ent)
 			T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, 4*ent->waterlevel, 0, 0, MOD_SLIME);
 		}
 	}
-	
+
 	if ( !(ent->flags & FL_INWATER) )
-	{	
+	{
 		if (!(ent->svflags & SVF_DEADMONSTER))
 		{
 			if (ent->watertype & CONTENTS_LAVA)
@@ -183,7 +183,7 @@ void M_droptofloor (edict_t *ent)
 	ent->s.origin[2] += 1;
 	VectorCopy (ent->s.origin, end);
 	end[2] -= 256;
-	
+
 	trace = gi.trace (ent->s.origin, ent->mins, ent->maxs, end, ent, MASK_MONSTERSOLID);
 
 	if (trace.fraction == 1 || trace.allsolid)
@@ -207,7 +207,7 @@ void M_SetEffects (edict_t *ent)
 		ent->s.effects |= EF_COLOR_SHELL;
 		ent->s.renderfx |= RF_SHELL_BLUE;
 	}
-	
+
 	if (ent->health <= 0)
 		return;
 }
@@ -261,10 +261,12 @@ void M_MoveFrame (edict_t *self)
 
 	index = self->s.frame - move->firstframe;
 	if (move->frame[index].aifunc)
+	{
 		if (!(self->monsterinfo.aiflags & AI_HOLD_FRAME))
 			move->frame[index].aifunc (self, move->frame[index].dist * self->monsterinfo.scale);
 		else
 			move->frame[index].aifunc (self, 0);
+	}
 
 	if (move->frame[index].thinkfunc)
 		move->frame[index].thinkfunc (self);
@@ -302,7 +304,7 @@ void monster_use (edict_t *self, edict_t *other, edict_t *activator)
 		return;
 	if (!(activator->client) && !(activator->monsterinfo.aiflags & AI_GOOD_GUY))
 		return;
-	
+
 // delay reaction so if the monster is teleported, its sound is still heard
 	self->enemy = activator;
 	FoundTarget (self);
@@ -471,7 +473,7 @@ void monster_start_go (edict_t *self)
 		edict_t		*target;
 
 		target = NULL;
-		
+
 		while ((target = G_Find (target, FOFS(targetname), self->combattarget)) != NULL)
 		{
 			if (strcmp(target->classname, "point_combat") != 0)
@@ -529,7 +531,7 @@ void walkmonster_start_go (edict_t *self)
 			if (!M_walkmove (self, 0, 0))
 				gi.dprintf ("%s in solid at %s\n", self->classname, vtos(self->s.origin));
 	}
-	
+
 	if (!self->yaw_speed)
 		self->yaw_speed = 20;
 	self->viewheight = 25;

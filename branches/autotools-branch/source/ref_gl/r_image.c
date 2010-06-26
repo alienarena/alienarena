@@ -505,10 +505,7 @@ void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *heigh
 	len = FS_LoadFile (filename, (void **)&raw);
 	if (!raw)
 	{
-#if 0
-		// -jjb-fix flooding
 		Com_DPrintf ("Bad pcx file %s\n", filename);
-#endif
 		return;
 	}
 
@@ -535,10 +532,7 @@ void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *heigh
 		|| pcx->xmax >= 1024
 		|| pcx->ymax >= 512)
 	{
-#if 0
-		// -jjb-fix flooding
 		Com_Printf ("Bad pcx file %s\n", filename);
-#endif
 		FS_FreeFile (pcx);
 		return;
 	}
@@ -782,10 +776,7 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 	length = FS_LoadFile (name, (void **)&buffer);
 	if (!buffer)
 	{
-#if 0
-		// -jjb-fix flooding
-		Com_DPrintf ("Bad tga file %s\n", name);
-#endif
+		Com_DPrintf ("LoadTGA: Bad tga file %s\n", name);
 		return;
 	}
 
@@ -875,7 +866,7 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 		}
 	}
 	else if (targa_header.image_type==10) {   // Runlength encoded RGB images
-		unsigned char red,green,blue,alphabyte,packetHeader,packetSize,j;
+		unsigned char red=0,green=0,blue=0,alphabyte=0,packetHeader,packetSize,j;
 		for(row=rows-1; row>=0; row--) {
 			pixbuf = targa_rgba + row*columns*4;
 			for(column=0; column<columns; ) {
@@ -1444,8 +1435,9 @@ Finds or loads the given image
 ===============
 */
 
-static double totalTimeFindImage = 0;
-static unsigned int totalCountFindImage = 0;
+// static double totalTimeFindImage = 0;
+// static unsigned int totalCountFindImage = 0;
+
 image_t	*GL_FindImage (char *name, imagetype_t type)
 {
 	image_t		*image = NULL;

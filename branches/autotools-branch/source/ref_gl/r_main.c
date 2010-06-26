@@ -116,6 +116,8 @@ cvar_t	*r_shadowmapratio;
 cvar_t	*r_overbrightbits;
 cvar_t	*gl_ext_mtexcombine;
 
+cvar_t	*gl_vlights;
+
 cvar_t	*gl_nosubimage;
 
 cvar_t	*gl_particle_min_size;
@@ -223,7 +225,9 @@ void R_ReadFogScript( char *config_file )
 	char a_string[128];
 	char *buffer;
 	char *s;
+	size_t result;
 
+#if 0
 	if((fp = fopen(config_file, "rb" )) == NULL)
 	{
 		return;
@@ -261,13 +265,59 @@ void R_ReadFogScript( char *config_file )
 
 	if ( fp != 0 )
 	{
-		fp = 0;
+		fclose(fp);
 		free( buffer );
 	}
 	else
 	{
 		FS_FreeFile( buffer );
 	}
+
+#else
+	// -jjb-fix above is somewhat odd
+	if((fp = fopen(config_file, "rb" )) == NULL)
+	{
+		return;
+	}
+
+	fseek(fp, 0, SEEK_END);
+	length = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	buffer = malloc( length + 1 );
+	if ( buffer != NULL )
+	{
+		buffer[length] = 0;
+		result = fread( buffer, length, 1, fp );
+		if ( result == 1 )
+		{
+			s = buffer;
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.red = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.green = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.blue = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.start = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.end = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.density = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			r_weather = atoi(a_string);
+
+			if(fog.density > 0)
+				map_fog = true;
+
+		} else {
+			Com_DPrintf("R_ReadFogScript: read fail: %s\n", config_file);
+		}
+		free( buffer );
+	}
+	fclose( fp );
+
+#endif
 	return;
 }
 
@@ -283,7 +333,9 @@ void R_ReadMusicScript( char *config_file )
 	int length;
 	char *buffer;
 	char *s;
+	size_t result;
 
+#if 0
 	if((fp = fopen(config_file, "rb" )) == NULL)
 	{
 		return;
@@ -306,13 +358,44 @@ void R_ReadMusicScript( char *config_file )
 
 	if ( fp != 0 )
 	{
-		fp = 0;
+		fclose(fp);
 		free( buffer );
 	}
 	else
 	{
 		FS_FreeFile( buffer );
 	}
+#else
+	// -jjb-fix  above is somewhat odd
+	if((fp = fopen(config_file, "rb" )) == NULL)
+	{
+		return;
+	}
+
+	fseek(fp, 0, SEEK_END);
+	length = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	buffer = malloc( length + 1 );
+	if ( buffer != NULL )
+	{
+		result = fread( buffer, length, 1, fp );
+		if ( result == 1 )
+		{
+			buffer[length] = 0;
+			s = buffer;
+			strcpy( map_music, COM_Parse( &s ) );
+			map_music[length] = 0; //clear any possible garbage
+		} else {
+			Com_DPrintf("R_ReadMusicScript: read fail: %s\n", config_file);
+		}
+
+		free( buffer );
+	}
+	fclose( fp );
+
+#endif
+
 	return;
 }
 
@@ -468,7 +551,9 @@ void R_DrawEntitiesOnList (void)
 			if(!rs)
 				rs=(rscript_t *)currententity->model->script[0]; //try 0
 
-			if (currententity->skin) { //custom player skin (must be done here)
+			//custom player skin (must be done here)
+			if (currententity->skin)
+			{
                 COM_StripExtension ( currententity->skin->name, shortname );
                 rs = RS_FindScript(shortname);
                 if(rs)
@@ -503,10 +588,13 @@ void R_DrawEntitiesOnList (void)
 		switch (currentmodel->type)
 		{
 			case mod_alias:
-				R_DrawAliasModel (currententity);
+				R_DrawAliasModel ();
 				break;
 			case mod_brush:
-				R_DrawBrushModel (currententity);
+				R_DrawBrushModel ();
+				break;
+			case mod_iqm:
+				R_DrawINTERQUAKEMODEL ();
 				break;
 			default:
 				Com_Error(ERR_DROP, "Bad modeltype");
@@ -529,7 +617,9 @@ void R_DrawEntitiesOnList (void)
 			if(!rs)
 				rs=(rscript_t *)currententity->model->script[0]; //try 0
 
-			if (currententity->skin) { //custom player skin
+			//custom player skin (must be done here)
+			if (currententity->skin) 
+			{ 
                 COM_StripExtension ( currententity->skin->name, shortname );
                 rs = RS_FindScript(shortname);
                 if(rs)
@@ -553,10 +643,13 @@ void R_DrawEntitiesOnList (void)
 		switch (currentmodel->type)
 		{
 			case mod_alias:
-				R_DrawAliasModel (currententity);
+				R_DrawAliasModel();
 				break;
 			case mod_brush:
-				R_DrawBrushModel (currententity);
+				R_DrawBrushModel();
+				break;
+			case mod_iqm:
+				R_DrawINTERQUAKEMODEL ();
 				break;
 			default:
 				Com_Error (ERR_DROP, "Bad modeltype");
@@ -592,7 +685,9 @@ void R_DrawViewEntitiesOnList (void)
 			if(!rs)
 				rs=(rscript_t *)currententity->model->script[0]; //try 0
 
-			if (currententity->skin) { //custom player skin (must be done here)
+			//custom player skin (must be done here)
+			if (currententity->skin)
+			{
                 COM_StripExtension ( currententity->skin->name, shortname );
                 rs = RS_FindScript(shortname);
                 if(rs)
@@ -616,7 +711,10 @@ void R_DrawViewEntitiesOnList (void)
 		switch (currentmodel->type)
 		{
 		case mod_alias:
-			R_DrawAliasModel (currententity);
+			R_DrawAliasModel ();
+			break;
+		case mod_iqm:
+			R_DrawINTERQUAKEMODEL ();
 			break;
 		default:
 			Com_Error(ERR_DROP, "Bad modeltype");
@@ -639,7 +737,9 @@ void R_DrawViewEntitiesOnList (void)
 			if(!rs)
 				rs=(rscript_t *)currententity->model->script[0]; //try 0
 
-			if (currententity->skin) { //custom player skin
+			//custom player skin (must be done here)
+			if (currententity->skin)
+			{
                 COM_StripExtension ( currententity->skin->name, shortname );
                 rs = RS_FindScript(shortname);
                 if(rs)
@@ -662,7 +762,10 @@ void R_DrawViewEntitiesOnList (void)
 		switch (currentmodel->type)
 		{
 		case mod_alias:
-			R_DrawAliasModel (currententity);
+			R_DrawAliasModel ();
+			break;
+		case mod_iqm:
+			R_DrawINTERQUAKEMODEL ();
 			break;
 		default:
 			Com_Error (ERR_DROP, "Bad modeltype");
@@ -1196,6 +1299,8 @@ void R_Register( void )
 	vid_contrast = Cvar_Get( "vid_contrast", "1.0", CVAR_ARCHIVE);
 	vid_ref = Cvar_Get( "vid_ref", "gl", CVAR_ARCHIVE );
 
+	gl_vlights = Cvar_Get("gl_vlights", "1", CVAR_ARCHIVE);
+
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
 	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE);
@@ -1308,6 +1413,7 @@ void R_SetLowest(void)
 	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 0);
+	Cvar_SetValue("gl_vlights", 0);
 	Cvar_SetValue("r_legacy", 1);
 
 	Com_Printf("...autodetected LOWEST game setting\n");
@@ -1338,6 +1444,7 @@ void R_SetLow( void )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 0);
 	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected LOW game setting\n");
@@ -1368,6 +1475,7 @@ void R_SetMedium( void )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected MEDIUM game setting\n");
@@ -1398,6 +1506,7 @@ void R_SetHigh( void )
 	Cvar_SetValue("gl_shadows", 2);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected HIGH game setting\n");
@@ -1428,6 +1537,7 @@ void R_SetHighest( void )
 	Cvar_SetValue("gl_shadows", 0);
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
+	Cvar_SetValue("gl_vlights", 1);
 	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected HIGHEST game setting\n");
@@ -1870,6 +1980,7 @@ cpuinfo_exit:
 	Draw_InitLocal ();
 
 	generateShadowFBO();
+	VLight_Init();
 
 	scr_playericonalpha = 0.0;
 

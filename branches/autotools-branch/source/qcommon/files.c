@@ -194,6 +194,7 @@ char botinfo_datadir[MAX_OSPATH];
 FS_filelength
 ================
 */
+// -jjb-ac  should convert other file length queries to call this
 int FS_filelength (FILE *f)
 {
 	int		pos;
@@ -320,9 +321,7 @@ int FS_FOpenFile (char *filename, FILE **file)
 			if (!*file)
 				continue;
 
-			if ( developer &&
-					( developer->integer == 3  || developer->integer == 4 ) )
-				Com_DPrintf ("FindFile: %s\n",netpath);
+			Com_DPrintf ("FindFile: %s\n",netpath);
 
 			return FS_filelength (*file);
 		}
@@ -331,29 +330,22 @@ int FS_FOpenFile (char *filename, FILE **file)
 
 	for (search = fs_searchpaths ; search ; search = search->next)
 	{
-		if ( developer && developer->integer == 4 )
-			Com_DPrintf("[FS_FOpenFile: search: %s ]\n", search );
-
 		Com_sprintf (netpath, sizeof(netpath), "%s/%s",search->filename, filename);
 
 		*file = fopen( netpath, "rb" );
 		if ( !*file ) {
-			if ( developer && developer->integer == 4 )
-				Com_DPrintf("[FS_FOpenFile: !*file: %s/%s ]\n",
-						search->filename, filename );
+			Com_DPrintf("FS_FOpenFile:fopen fail:%s:\n", netpath);
 			continue;
 		}
 
-		if ( developer && ( developer->integer == 3  || developer->integer == 4 ))
-				Com_DPrintf ("FindFile: %s\n",netpath);
+		Com_DPrintf ("FS_FOpenFile:fopen success:%s:\n",netpath);
 
 		return FS_filelength( *file );
 	}
 
 #endif
 
-	if ( developer && developer->integer == 5 )
-		Com_DPrintf ("FindFile: can't find %s\n", filename);
+	Com_DPrintf ("FS_FOpenFile:cannot find:%s:\n", filename);
 
 	*file = NULL;
 	return -1;
@@ -1381,7 +1373,7 @@ void FS_InitFilesystem (void)
 #if defined DATADIR
 	//
 	Com_sprintf( botinfo_datadir, sizeof(botinfo_datadir),
-			"$DATADIR/botinfo" ); //-jjb-fix ???
+			"$DATADIR/botinfo" ); //-jjb-ac  this probably is not enough
 #endif
 
 }

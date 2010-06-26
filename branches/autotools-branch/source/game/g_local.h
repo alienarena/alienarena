@@ -19,13 +19,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // g_local.h -- local definitions for game module
 
-#include "game/q_shared.h"
+#include "q_shared.h"
 
 // define GAME_INCLUDE so that game.h does not define the
 // short, server-visible gclient_t and edict_t structures,
 // because we define the full size ones in this file
 #define	GAME_INCLUDE
-#include "game/game.h"
+#include "game.h"
 
 // the "gameversion" client command will print this plus compile date
 #define	GAMEVERSION	"data1"
@@ -1012,7 +1012,9 @@ void GetChaseTarget(edict_t *ent);
 typedef struct
 {
 	char		userinfo[MAX_INFO_STRING];
-	char		netname[48];			// considering 1 colour change / character, that's 16
+
+	// -jjb-fix  shouldn't this be 49 (50) for terminating '\0'
+	char		netname[48]; // considering 1 colour change / character, that's 16
 	int			hand;
 
 	qboolean	connected;			// a loadgame will leave valid entities that
@@ -1095,9 +1097,6 @@ typedef struct
 	//reward points
 	int reward_pts;
 	qboolean powered;
-
-	//homing rocket limits
-	int	homing_shots;
 
 	//voting
 	qboolean voted;
@@ -1236,6 +1235,9 @@ struct gclient_s
 
 	//joust attempts - for limiting how many times you can joust at a time
 	int joustattempts;
+
+	//homing rocket limits
+	int	homing_shots;
 
 	//movetime - used for special moves
 	float lastmovetime;

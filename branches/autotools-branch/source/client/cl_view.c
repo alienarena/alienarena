@@ -571,7 +571,7 @@ float CalcFov (float fov_x, float width, float height)
 	if (fov_x < 1 || fov_x > 179)
 		Com_Error (ERR_DROP, "Bad fov: %f", fov_x);
 
-	x = width/tan(fov_x/360*M_PI);
+	x = width/tanf(fov_x/360*M_PI);
     a = atan (height/x);
     a = a*360/M_PI;
 

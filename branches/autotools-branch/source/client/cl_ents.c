@@ -683,6 +683,14 @@ void CL_AddPacketEntities (frame_t *frame)
 		ent.oldframe = cent->prev.frame;
 		ent.backlerp = 1.0 - cl.lerpfrac;
 
+		//animation timestamps are set here
+		if(cent->prevframe != s1->frame) {
+			cent->prevframe = s1->frame;
+			cent->frametime = Sys_Milliseconds();
+		}
+		ent.prevframe = cent->prevframe;
+		ent.frametime = cent->frametime;
+
 		// create a new entity
 
 		ent.lod1 = NULL;

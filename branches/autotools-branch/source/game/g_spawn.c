@@ -7,6 +7,10 @@
 #define stricmp strcasecmp
 #endif
 
+#if !defined HAVE__STRICMP
+#define _stricmp strcasecmp
+#endif
+
 #include "g_local.h"
 
 typedef struct
@@ -320,6 +324,7 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 				((float *)(b+f->ofs))[2] = 0;
 				break;
 			case F_IGNORE:
+			default:
 				break;
 			}
 			return;
@@ -491,7 +496,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 		entities = ED_ParseEdict (entities, ent);
 
 		// yet another map hack
-		if (!stricmp(level.mapname, "command") && !stricmp(ent->classname, "trigger_once") && !stricmp(ent->model, "*27"))
+		if (!_stricmp(level.mapname, "command") && !_stricmp(ent->classname, "trigger_once") && !_stricmp(ent->model, "*27"))
 			ent->spawnflags &= ~SPAWNFLAG_NOT_HARD;
 
 		// remove things (except the world) from different skill levels or deathmatch
