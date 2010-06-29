@@ -407,23 +407,20 @@ model_t *Mod_ForName (char *name, qboolean crash)
 			{
 				// Make sure models scripts are definately reloaded between maps - MrG
 				char rs[MAX_OSPATH];
-				int i = 0;
 				image_t *img;
-				img=mod->skins[i];
+				img=mod->skins[0];
 			
-				while (img != NULL) 
+				if (img != NULL) 
 				{
-					strcpy(rs,mod->skins[i]->name);
+					strcpy(rs,mod->skins[0]->name);
 					rs[strlen(rs)-4]=0;
 #ifdef _WINDOWS
-					(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
+					(struct rscript_s *)mod->script = RS_FindScript(rs);
 #else
-					mod->script[i] = RS_FindScript(rs); //make it gcc 4.1.1 compatible
+					mod->script = RS_FindScript(rs); //make it gcc 4.1.1 compatible
 #endif
-					if (mod->script[i])
-						RS_ReadyScript((rscript_t *)mod->script[i]);
-					i++;
-					img=mod->skins[i];
+					if (mod->script)
+						RS_ReadyScript((rscript_t *)mod->script);
 				}
 			}
 
@@ -1855,24 +1852,25 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	memcpy ((char *)pheader + pheader->ofs_skins, (char *)pinmodel + pheader->ofs_skins,
 		pheader->num_skins*MAX_SKINNAME);
 	for (i=0 ; i<pheader->num_skins ; i++)
+		mod->skins[i] = GL_FindImage ((char *)pheader + pheader->ofs_skins + i*MAX_SKINNAME, it_skin);
+
+	// load script
+	if(pheader->num_skins) 
 	{
 		char rs[MAX_OSPATH];
 
-		mod->skins[i] = GL_FindImage ((char *)pheader + pheader->ofs_skins + i*MAX_SKINNAME
-			, it_skin);
-
-		strcpy(rs,(char *)pinmodel + LittleLong(pinmodel->ofs_skins) + i*MAX_SKINNAME);
+		strcpy(rs,(char *)pinmodel + LittleLong(pinmodel->ofs_skins));
 
 		rs[strlen(rs)-4]=0;
 
 #ifdef _WINDOWS
-		(struct rscript_s *)mod->script[i] = RS_FindScript(rs);
+		(struct rscript_s *)mod->script = RS_FindScript(rs);
 #else
-		mod->script[i] = RS_FindScript(rs); //make it gcc 4.1.1 compatible
+		mod->script = RS_FindScript(rs); //make it gcc 4.1.1 compatible
 #endif
 		
-		if (mod->script[i])
-			RS_ReadyScript((rscript_t *)mod->script[i]);
+		if (mod->script)
+			RS_ReadyScript((rscript_t *)mod->script);
 	}
 
 	cx = pheader->num_st * sizeof(fstvert_t);

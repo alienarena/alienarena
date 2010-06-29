@@ -460,9 +460,7 @@ void R_DrawEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-			if(!rs)
-				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			rs=(rscript_t *)currententity->model->script;
 			
 			//custom player skin (must be done here)
 			if (currententity->skin) 
@@ -530,9 +528,7 @@ void R_DrawEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-			if(!rs)
-				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			rs=(rscript_t *)currententity->model->script;
 			
 			//custom player skin (must be done here)
 			if (currententity->skin) 
@@ -602,9 +598,7 @@ void R_DrawViewEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-			if(!rs)
-				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			rs=(rscript_t *)currententity->model->script;
 			
 			//custom player skin (must be done here)
 			if (currententity->skin) 
@@ -658,9 +652,7 @@ void R_DrawViewEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-			if(!rs)
-				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			rs=(rscript_t *)currententity->model->script;
 			
 			//custom player skin (must be done here)
 			if (currententity->skin) 
