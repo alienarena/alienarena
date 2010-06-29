@@ -534,13 +534,13 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			//load shader for skin
 			COM_StripExtension ( skinname, shortname );
 	#ifdef _WINDOWS
-			(struct rscript_s *)mod->script[0] = RS_FindScript(shortname);
+			(struct rscript_s *)mod->script = RS_FindScript(shortname);
 	#else
-			mod->script[0] = RS_FindScript(shortname); //make it gcc 4.1.1 compatible
+			mod->script = RS_FindScript(shortname); //make it gcc 4.1.1 compatible
 	#endif
 				
-			if (mod->script[0])
-				RS_ReadyScript((rscript_t *)mod->script[0]);
+			if (mod->script)
+				RS_ReadyScript((rscript_t *)mod->script);
 		}
 	}
 
