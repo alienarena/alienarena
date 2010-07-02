@@ -1062,7 +1062,7 @@ void GL_DrawIQMFrame(int skinnum)
 				{ 
 					//fixed light source pointing down, slightly forward and to the left
 					lightPosition[0] = -1.0; 
-					lightPosition[1] = 4.0; 
+					lightPosition[1] = 12.0; 
 					lightPosition[2] = 8.0; 
 					R_ModelViewTransform(lightPosition, lightVec);
 				}
