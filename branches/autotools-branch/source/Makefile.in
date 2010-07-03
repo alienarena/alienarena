@@ -485,13 +485,13 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = `-I m4'
 noinst_LIBRARIES = libgame.a
-@BUILD_UNIX_TRUE@crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall 
+@BUILD_UNIX_TRUE@crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math 
 @BUILD_UNIX_TRUE@crded_LDADD = libgame.a
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall 
+@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math 
 @BUILD_UNIX_FALSE@crx_CFLAGS = -DCURL_STATICLIB -DAL_NO_PROTOTYPES -DC_ONLY -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math
 @BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_LDADD = libgame.a
 @BUILD_UNIX_FALSE@crx_LDADD = libgame.a
-libgame_a_CFLAGS = -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall
+libgame_a_CFLAGS = -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math 
 @BUILD_UNIX_TRUE@crded_SOURCES = \
 @BUILD_UNIX_TRUE@	client/anorms.h \
 @BUILD_UNIX_TRUE@	game/game.h \

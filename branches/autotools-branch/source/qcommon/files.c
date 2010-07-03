@@ -21,66 +21,89 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
 -------------------------------------------------------------------------------
-Alien Arena File System
+Alien Arena File System  (circa June 2010)
 
----- Windows Install or Single Directory ----
+------ Windows XP, Vista, Windows 7 ------
 
-c:\Alien Arena\ [~\games\alienarena]
-	data1\
-	arena\
-	botinfo\
-	crx.exe
-
-( MinGW builds TBD )
-
-
----- GNU Autotools Standard Install Linux/Darwin ----
-
-prefix (/usr/local/games)
-execprefix (/usr/local/games)
-
-bindir (/usr/local/games/bin)
-  crx
-  crx-ded
-
-datarootdir (/usr/local/games/share)
-datadir (/usr/local/games/share)
-pkgdatadir (/usr/local/games/share/alienarena/)  USER READ-ONLY
-  data1/
-  arena/
-  botinfo/
-    nav/
-      <mapname>.nod
-    allbots.tmp
-    team.tmp
-    custom?.tmp
-    <botname>.cfg
-    <mapname>.tmp
-
-docdir (/usr/local/share/doc/)
-pkgdocdir (/usr/local/share/doc/alienarena)
+  c:\Alien Arena\
+    data1\
+      --- game data from release package
+    arena\
+      --- 3rd party, legacy, and downloaded game data
+      --- screenshots, demos
+      config.cfg
+      autoexec.cfg
+      qconsole.log
+    botinfo\
+    Tools\doc\
+    crx.exe
 
 
-COR_GAME (/home/$(whoami)/.codered)   READ/WRITE
-  data1/
-  arena/
-    maps/
-    demos/
-    screenshots/
-    config.cfg
-    autoexec.cfg
+------ Linux, Unix, Darwin ------
 
-  botinfo/
-    bot.tmp
-    team.tmp
-    custom?.tmp
-    <botname>.cfg
-    <mapname>.tmp
+ --- Standard Install ---
+
+  $prefix/          /usr/local/games
+    $bindir/          bin/
+      crx
+      crx-ded
+    $datadir/         share/
+      $pkgdatadir
+        data1/
+          --- shared game data from release package
+        arena/
+          --- shared 3rd party and legacy game data
+        botinfo/
+          --- shared bot information
+
+  $COR_GAME         ~/.codered
+    arena/
+      --- downloaded 3rd party, legacy game data
+      --- screenshots, demos
+      config.cfg
+      autoexec.cfg
+      qconsole.log
+    botinfo/
+      --- user custom bot information
+
+ --- Traditional Install ---
+
+  $prefix/          /home/user/games/
+    $bindir/          alienarena/
+      crx, crx-ded
+    $datadir/         alienarena/
+      data1/
+      arena/
+      botinfo/
+
+  $COR_GAME         ~/.codered
+    --- Same as "Standard" Install ---
+    [Note: if COR_GAME set to $datadir, then what?]
 
 
---- GNU Autotools Single Directory/SVN Install ---
-TBD.
+--- Alien Arena ACEBOT File System ---
 
+ - botinfo can be in one place or two places depending on the installation
+
+ -- botinfo files and file types --
+  - allbots.tmp   : data for bots included in the Add Bot menu.
+  - team.tmp      : data for default set of bots spawned for a team game.
+  - <botname>.cfg : config data for bots by name.
+  - <mapname>.tmp : data for the set of bots spawned in a map.
+
+
+--- Other Notes ---
+
+.pak file support removed because:
+  1. Alien Arena does not use it.
+  2. simplifies filesystem modifications
+
+link command removed because:
+  1. its probably obsolete (hack for DOS to simulate Unix link?)
+  2. simplifies filesystem modifcations
+  3. might be a security issue?
+
+basedir cvar removed because it is probably an unnecessary complication
 
 --- Original Quake File System Comments ---
 All of Quake's data access is through a hierchal file system, but the contents
@@ -101,111 +124,275 @@ they shouldn't.
 
 -------------------------------------------------------------------------------
 */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+#if defined HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#if defined HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+
+#include <errno.h>
+
 #include "qcommon.h"
+#include "game/q_shared.h"
 #include "unix/glob.h"
 
-//#define PACKFILE_SUPPORT
 
-#if defined PACKFILE_SUPPORT
-// if a packfile directory differs from this, it is assumed to be hacked
-// Full version
-#define	PAK0_CHECKSUM	0x40e614e0
-// Demo
-//#define	PAK0_CHECKSUM	0xb2c6d7ea
-// OEM
-//#define	PAK0_CHECKSUM	0x78e135c
-#endif
+extern void Q_strncpyz2 (char *dst, const char *src, int dstSize);
 
-/*
-=============================================================================
+char fs_gamedir[MAX_OSPATH];
+cvar_t *fs_gamedirvar; // for the "game" cvar, default is "arena"
 
-QUAKE FILESYSTEM
+// -jjb-filesystem  not useful
+//cvar_t	*fs_basedir; // for redirecting data tree from CWD to somewhere else
+//					// in a "Traditional" install, default is "data1"
 
-=============================================================================
-*/
-#if defined PACKFILE_SUPPORT
-typedef struct
-{
-	char	name[MAX_QPATH];
-	int		filepos, filelen;
-} packfile_t;
+// search paths
+#define GAME_SEARCH_SLOTS 6
+char fs_gamesearch[GAME_SEARCH_SLOTS][MAX_OSPATH];
 
-typedef struct pack_s
-{
-	char	filename[MAX_OSPATH];
-	FILE	*handle;
-	int		numfiles;
-	packfile_t	*files;
-} pack_t;
-#endif
-
-char	fs_gamedir[MAX_OSPATH];
-cvar_t	*fs_basedir;
-cvar_t	*fs_gamedirvar;
-
-typedef struct filelink_s
-{
-	struct filelink_s	*next;
-	char	*from;
-	int		fromlength;
-	char	*to;
-} filelink_t;
-
-filelink_t	*fs_links;
+#define BOT_SEARCH_SLOTS 3
+char fs_botsearch[BOT_SEARCH_SLOTS][MAX_OSPATH];
 
 typedef struct searchpath_s
 {
-	char	filename[MAX_OSPATH];
-#if defined PACKFILE_SUPPORT
-	pack_t	*pack;		// only one of filename / pack will be used
-#endif
+	char *filename;
 	struct searchpath_s *next;
-} searchpath_t;
+} searchpath_t, *psearchpath_t;
 
-searchpath_t	*fs_searchpaths;
-searchpath_t	*fs_base_searchpaths;	// without gamedirs
+searchpath_t fs_searchpath[GAME_SEARCH_SLOTS];
+psearchpath_t fs_searchpaths;
 
-/*===
-Alien Arena ACEBOT File System
+/*
+===
+ FS_init_paths()
 
- - botinfo can be in one place or two places depending on the installation
- - botinfo_userdir has priority for reads, and is read-write.
- - botinfo_datadir may not exist. It is read-only for non-root/admin.
+===
+*/
+static void FS_init_paths( void )
+{
+	int i, j;
+	char fs_bindir[MAX_OSPATH];
+	char fs_datadir[MAX_OSPATH];
+	char fs_homedir[MAX_OSPATH];
+	char *cwdstr;
+	char *homestr;
 
- -- botinfo files and file types --
-  - allbots.tmp   : data for bots included in the Add Bot menu.
-  - team.tmp      : data for default set of bots spawned for a team game.
-  - <botname>.cfg : config data for bots by name.
-  - <mapname>.tmp : data for the set of bots spawned in a map.
+	char base_gamedata[MAX_OSPATH];
+	char game_gamedata[MAX_OSPATH];
+	char bot_gamedata[MAX_OSPATH];
 
+#if defined UNIX_VARIANT
+	char user_base_gamedata[MAX_OSPATH]; // player models only (???)
+	char user_game_gamedata[MAX_OSPATH]; // other user data
+	char user_bot_gamedata[MAX_OSPATH]; //  bot information data
+#endif
 
-===*/
-char user_homedir[MAX_OSPATH];
-char botinfo_userdir[MAX_OSPATH];
-char botinfo_datadir[MAX_OSPATH];
+	memset(fs_bindir, 0, sizeof(fs_bindir));
+	memset(fs_datadir, 0, sizeof(fs_datadir));
+	memset(fs_homedir, 0, sizeof(fs_homedir));
+
+	cwdstr = getcwd( fs_bindir, sizeof(fs_bindir) );
+	if ( cwdstr == NULL )
+	{
+		Sys_Error( strerror(errno) );
+	}
+	homestr = getenv( "COR_GAME" );
+	if ( homestr != NULL )
+	{
+		if ( strlen( homestr) >= sizeof(fs_homedir) )
+		{
+			Sys_Error( "COR_GAME size error" );
+		}
+		Q_strncpyz2( fs_homedir, homestr, sizeof( fs_homedir) );
+	}
+	else
+	{
+		homestr = getenv( "HOME" );
+		if ( homestr != NULL )
+		{
+			Com_sprintf( fs_homedir, sizeof( fs_homedir), "%s/%s",
+					homestr, USER_GAMEDATA );
+		}
+		else
+		{
+			fs_homedir[0] = 0;
+		}
+	}
+
+#if !defined DATADIR
+	// "Traditional" install, expect game data in current directory
+	Q_strncpyz2( fs_datadir, fs_bindir, sizeof(fs_datadir) );
+#else
+	if ( !Q_strncasecmp( fs_bindir, DATADIR, sizeof(fs_bindir)) )
+	{ // DATADIR defined, but game data in current directory
+		Q_strncpyz2( fs_datadir, fs_bindir, sizeof(fs_datadir) );
+	}
+	else
+	{ // "Standard" install. game data is not in same directory as executables
+		if ( strlen( DATADIR ) > strlen( datadir ) )
+		{
+			Sys_Error("DATADIR size error");
+		}
+		Q_strncpyz2( fs_datadir, DATADIR, sizeof(fs_datadir) );
+	}
+#endif
+
+	// set path for "data1"
+	memset( base_gamedata, 0, sizeof(base_gamedata) );
+	Com_sprintf( base_gamedata, sizeof(base_gamedata), "%s/%s",
+			fs_datadir, BASE_GAMEDATA );
+
+	// set path for "arena" or mod
+	memset( game_gamedata, 0, sizeof(game_gamedata) );
+	fs_gamedirvar = Cvar_Get( "game", "", CVAR_LATCH|CVAR_SERVERINFO);
+	if ( *fs_gamedirvar->string
+		&& Q_strncasecmp( fs_gamedirvar->string, BASE_GAMEDATA, MAX_OSPATH )
+		&& Q_strncasecmp( fs_gamedirvar->string, GAME_GAMEDATA, MAX_OSPATH ))
+	{ // not empty, "data1" nor "arena", expect a mod data directory
+		Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
+				fs_datadir, fs_gamedirvar->value );
+	}
+	else
+	{ // "arena"
+		Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
+				fs_datadir, GAME_GAMEDATA );
+	}
+
+	// set path for "botinfo"
+	// note: the "botinfo" part of the path, will be in the relative path
+	//  so do not include it here
+	memset( bot_gamedata, 0, sizeof(bot_gamedata) );
+	Com_sprintf( bot_gamedata, sizeof(bot_gamedata), "%s/", fs_datadir );
+
+#if defined UNIX_VARIANT
+	if ( fs_homedir[0] )
+	{ // have a user HOME as expected
+		/*
+		 * use the ".codered"/$COR_GAME directory, even if this is a Traditional
+		 *  install.
+		 */
+		// set "data1" path for user writeable data
+		// Alien Arena maybe never uses this
+		memset( user_base_gamedata, 0, sizeof(user_base_gamedata) );
+		Com_sprintf( user_base_gamedata, sizeof(user_base_gamedata),
+			"%s/%s", fs_homedir, BASE_GAMEDATA );
+
+		// set "arena" path for user writeable data
+		memset( user_game_gamedata, 0, sizeof(user_game_gamedata) );
+		Com_sprintf( user_game_gamedata, sizeof(user_game_gamedata),
+			"%s/%s", fs_homedir, GAME_GAMEDATA );
+
+		// set "botinfo" path for user writeable data
+		memset( user_bot_gamedata, 0, sizeof(user_bot_gamedata) );
+		Com_sprintf( user_bot_gamedata, sizeof(user_bot_gamedata),
+				"%s", fs_homedir );
+	}
+#endif
+
+	//
+	// set up search priority sequence
+	//
+	// 2 or 4 places for game data
+	for ( i = 0 ; i < GAME_SEARCH_SLOTS ; i++ )
+	{
+		memset( fs_gamesearch[i], 0, MAX_OSPATH );
+	}
+	i = 0;
+	if ( user_game_gamedata[0] )
+	{ // default: ~/.codered/arena or $COR_GAME/arena
+		Q_strncpyz2( fs_gamesearch[i], user_game_gamedata, sizeof(fs_gamesearch[0]));
+		i++;
+	}
+	if ( game_gamedata[0] )
+	{ // default: $DATADIR/arena or $CWD/arena
+		Q_strncpyz2( fs_gamesearch[i], game_gamedata, sizeof(fs_gamesearch[0]));
+		i++;
+	}
+	if ( user_base_gamedata[0] )
+	{ // default: ~/.codered/data1  or $COR_GAME/data1 ?is this ever needed?
+		Q_strncpyz2( fs_gamesearch[i], user_base_gamedata, sizeof(fs_gamesearch[0]));
+		i++;
+	}
+	if ( base_gamedata[0] )
+	{ // default: $DATADIR/data1 or $CWD/data1
+		Q_strncpyz2( fs_gamesearch[i], base_gamedata, sizeof(fs_gamesearch[0]));
+	}
+
+	// one or two places for bot information
+	for ( i = 0 ; i < BOT_SEARCH_SLOTS ; i++ )
+	{
+		memset( fs_botsearch[i], 0, MAX_OSPATH );
+	}
+	i = 0;
+	if ( user_bot_gamedata[0] )
+	{
+		Q_strncpyz2( fs_botsearch[i], user_bot_gamedata, sizeof(fs_botsearch[0]));
+		i++;
+	}
+	if ( bot_gamedata[0] )
+	{
+		Q_strncpyz2( fs_botsearch[i], bot_gamedata, sizeof(fs_botsearch[0]));
+	}
+
+	// build linked list search path for FS_NextPath()
+	for ( i = 0, j = 1 ; fs_gamesearch[i][0] ; i++, j++ )
+	{
+		fs_searchpath[i].filename = fs_gamesearch[i];
+		if ( fs_gamesearch[j][0] )
+		{
+			fs_searchpath[i].next = &fs_searchpath[j];
+		}
+		else
+		{
+			fs_searchpath[i].next = NULL;
+		}
+	} while ( fs_gamesearch[j][0] );
+	fs_searchpaths = &fs_searchpath[0];
+
+}
 
 /*
 ================
 FS_filelength
 ================
 */
-// -jjb-ac  should convert other file length queries to call this
-int FS_filelength (FILE *f)
+int FS_filelength( FILE *f )
 {
-	int		pos;
-	int		end;
+	int length = -1;
 
-	pos = ftell (f);
-	fseek (f, 0, SEEK_END);
-	end = ftell (f);
-	fseek (f, pos, SEEK_SET);
+#if defined HAVE_FILELENGTH
 
-	return end;
+	length = filelength( fileno( f ) );
+
+#elif defined HAVE_FSTAT
+
+	struct stat statbfr;
+	int result;
+
+	result = fstat( fileno(f), &statbfr );
+	if ( result != -1 )
+	{
+		length = (int)statbfr.st_size;
+	}
+
+#else
+
+	long int pos;
+
+	pos = ftell( f );
+	fseek( f, 0L, SEEK_END );
+	length = ftell( f );
+	fseek( f, pos, SEEK_SET );
+
+#endif
+
+	return length;
 }
 
 
@@ -216,6 +403,7 @@ FS_CreatePath
 Creates any directories needed to store the given filename
 ============
 */
+// -jjb-ac  review, possible uneeded directories being created
 void	FS_CreatePath (char *path)
 {
 	char	*ofs;
@@ -231,13 +419,121 @@ void	FS_CreatePath (char *path)
 	}
 }
 
+/*
+===
+FS_FullPath
+
+Given a relative path to a file
+  search for the file in the installation-dependent filesystem hierarchy
+  if found, return true, with the constructed full path
+  otherwise, return false, with a constructed writeable full path
+
+if ext_list is not NULL, it points to an array of file path suffix strings
+(including the dot if required), in priority search order. The array is
+terminated with an empty string.
+
+Each is appended and searched for in each path in the filesystem hierarchy
+
+===
+ */
+#if defined HAVE_STAT
+// stat() version
+qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
+{
+	char search_path[MAX_OSPATH];
+	struct stat statbfr;
+	int result;
+	qboolean found = false;
+	int i;
+
+	assert( strlen( relative_path ) < MAX_QPATH  );
+	if ( strlen( relative_path ) > MAX_QPATH )
+	{
+		Com_DPrintf("FS_FullPath: relative path size error: %s\n", relative_path );
+		return false;
+	}
+
+	if ( !Q_strncasecmp( relative_path, BOT_GAMEDATA, strlen(BOT_GAMEDATA) ) )
+	{ // search in botinfo places
+		for ( i = 0; fs_botsearch[i][0] && !found ; i++ )
+		{
+			// note: relative path contains "botinfo", so fs_botsearch does not
+			Com_sprintf( search_path, sizeof(search_path), "%s/%s",
+						fs_botsearch[i], relative_path);
+			result = stat( search_path, &statbfr );
+			if ( result != -1 && S_ISREG(statbfr.st_mode) )
+			{ // regular file exists
+				found = true;
+			}
+		}
+	}
+	else
+	{ // search in the usual game data places
+		for ( i = 0; fs_gamesearch[i][0] && !found ; i++ )
+		{
+			Com_sprintf( search_path, sizeof(search_path), "%s/%s",
+						fs_gamesearch[i], relative_path);
+			result = stat( search_path, &statbfr );
+			if ( result != -1 && S_ISREG(statbfr.st_mode) )
+			{ // regular file exists
+				found = true;
+			}
+		}
+	}
+	if ( found )
+	{
+		if ( strlen( search_path ) < pathsize )
+		{
+			Q_strncpyz2( full_path, search_path, pathsize );
+		}
+		else
+		{
+			Com_DPrintf("FS_FullPath: full path size error: %s\n", search_path );
+			found = false;
+		}
+	}
+
+	return found;
+}
+#endif
+
+/*
+===
+ FS_FullWritePath()
+
+  Given a relative path for a file to be written
+    Using the game writeable directory
+    Create any sub-directories required
+    Return the generated full path for file
+
+===
+*/
+void FS_FullWritePath( char *full_path, size_t pathsize, const char* relative_path)
+{
+
+	assert( strlen( relative_path ) < MAX_QPATH  );
+	if ( strlen( relative_path ) > MAX_QPATH )
+	{
+		Com_DPrintf("FS_WritePath: relative path size error: %s\n", relative_path );
+		return;
+	}
+
+	if ( !Q_strncasecmp( relative_path, BOT_GAMEDATA, strlen(BOT_GAMEDATA) ) )
+	{
+		Com_sprintf( full_path, pathsize, "%s/%s", fs_botsearch[0], relative_path);
+	}
+	else
+	{
+		Com_sprintf( full_path, pathsize, "%s/%s", fs_gamesearch[0], relative_path);
+	}
+
+	FS_CreatePath( full_path );
+
+}
 
 /*
 ==============
 FS_FCloseFile
-
-For some reason, other dll's can't just call fclose()
-on files returned by FS_FOpenFile...
 ==============
 */
 void FS_FCloseFile (FILE *f)
@@ -249,169 +545,38 @@ void FS_FCloseFile (FILE *f)
 ===========
 FS_FOpenFile
 
-Finds the file in the search path.
-returns filesize and an open FILE *
-Used for streaming data out of either a pak file or
-a seperate file.
+ Given relative path, search for a file
+  if found, open it and return length
+  if not found, return -1
+
 ===========
 */
-int file_from_pak = 0;
-// #ifndef NO_ADDONS
 int FS_FOpenFile (char *filename, FILE **file)
 {
-	searchpath_t	*search;
-	char			netpath[MAX_OSPATH];
+	char netpath[MAX_OSPATH];
+	qboolean found;
+	int length = -1;
 
-#if defined PACKFILE_SUPPORT
-	pack_t			*pak;
-	int				i;
-#endif
-
-	filelink_t		*link;
-
-	file_from_pak = 0;
-
-	// check for links first
-	for (link = fs_links ; link ; link=link->next)
+	found = FS_FullPath( netpath, sizeof(netpath), filename );
+	if ( found )
 	{
-		if (!strncmp (filename, link->from, link->fromlength))
+		*file = fopen( netpath, "rb" );
+		if ( !(*file) )
 		{
-			Com_sprintf (netpath, sizeof(netpath), "%s%s",link->to, filename+link->fromlength);
-			*file = fopen (netpath, "rb");
-			if (*file)
-			{
-				Com_DPrintf ("link file: %s\n",netpath);
-				return FS_filelength (*file);
-			}
-			return -1;
-		}
-	}
-
-//
-// search through the path, one element at a time
-//
-#if defined PACKFILE_SUPPORT
-	for (search = fs_searchpaths ; search ; search = search->next)
-	{
-	// is the element a pak file?
-		if (search->pack)
-		{
-		// look through all the pak file elements
-			pak = search->pack;
-			for (i=0 ; i<pak->numfiles ; i++)
-				if (!Q_strcasecmp (pak->files[i].name, filename))
-				{	// found it!
-					file_from_pak = 1;
-					Com_DPrintf ("PackFile: %s : %s\n",pak->filename, filename);
-				// open a new file on the pakfile
-					*file = fopen (pak->filename, "rb");
-					if (!*file)
-						Com_Error (ERR_FATAL, "Couldn't reopen %s", pak->filename);
-					fseek (*file, pak->files[i].filepos, SEEK_SET);
-					return pak->files[i].filelen;
-				}
+			Com_DPrintf("FS_FOpenFile:fopen fail:%s:\n", netpath);
 		}
 		else
 		{
-	// check a file in the directory tree
-
-			Com_sprintf (netpath, sizeof(netpath), "%s/%s",search->filename, filename);
-
-			*file = fopen (netpath, "rb");
-			if (!*file)
-				continue;
-
-			Com_DPrintf ("FindFile: %s\n",netpath);
-
-			return FS_filelength (*file);
+			length = FS_filelength( *file );
 		}
 	}
-#else
-
-	for (search = fs_searchpaths ; search ; search = search->next)
-	{
-		Com_sprintf (netpath, sizeof(netpath), "%s/%s",search->filename, filename);
-
-		*file = fopen( netpath, "rb" );
-		if ( !*file ) {
-			Com_DPrintf("FS_FOpenFile:fopen fail:%s:\n", netpath);
-			continue;
-		}
-
-		Com_DPrintf ("FS_FOpenFile:fopen success:%s:\n",netpath);
-
-		return FS_filelength( *file );
-	}
-
-#endif
-
-	Com_DPrintf ("FS_FOpenFile:cannot find:%s:\n", filename);
-
-	*file = NULL;
-	return -1;
-}
-
-/*
-#else
-
-// this is just for demos to prevent add on hacking
-
-int FS_FOpenFile (char *filename, FILE **file)
-{
-	searchpath_t	*search;
-	char			netpath[MAX_OSPATH];
-	pack_t			*pak;
-	int				i;
-
-	file_from_pak = 0;
-
-	// get config from directory, everything else from pak
-	if (!strcmp(filename, "config.cfg") || !strncmp(filename, "players/", 8))
-	{
-		Com_sprintf (netpath, sizeof(netpath), "%s/%s",FS_Gamedir(), filename);
-
-		*file = fopen (netpath, "rb");
-		if (!*file)
-			return -1;
-
-		// -jjb-fix flooding
-		Com_DPrintf ("FindFile: %s\n",netpath);
-
-		return FS_filelength (*file);
-	}
-
-	for (search = fs_searchpaths ; search ; search = search->next)
-		if (search->pack)
-			break;
-	if (!search)
+	else
 	{
 		*file = NULL;
-		return -1;
 	}
 
-	pak = search->pack;
-	for (i=0 ; i<pak->numfiles ; i++)
-		if (!Q_strcasecmp (pak->files[i].name, filename))
-		{	// found it!
-			file_from_pak = 1;
-			Com_DPrintf ("PackFile: %s : %s\n",pak->filename, filename);
-		// open a new file on the pakfile
-			*file = fopen (pak->filename, "rb");
-			if (!*file)
-				Com_Error (ERR_FATAL, "Couldn't reopen %s", pak->filename);
-			fseek (*file, pak->files[i].filepos, SEEK_SET);
-			return pak->files[i].filelen;
-		}
-
-	Com_DPrintf ("FindFile: can't find %s\n", filename);
-
-	*file = NULL;
-	return -1;
+	return length;
 }
-
-#endif
-*/
-
 
 /*
 =================
@@ -487,19 +652,18 @@ char *FS_TolowerPath (char *path)
 ============
 FS_LoadFile
 
-Filename are reletive to the quake search path
-a null buffer will just return the file length without loading
+Given relative path
+ if buffer arg is NULL, just return the file length
+ otherwise,
+   Z_malloc a buffer, read the file into it, return pointer to the new buffer
 ============
 */
 int FS_LoadFile (char *path, void **buffer)
 {
 	FILE	*h;
-	byte	*buf;
+	byte	*buf = NULL;
 	int		len;
 
-	buf = NULL;	// quiet compiler warning
-
-// look for it in the filesystem or pack files
 	len = FS_FOpenFile (path, &h);
 
 	//-JR
@@ -544,88 +708,9 @@ void FS_FreeFile (void *buffer)
 }
 
 /*
-=================
-FS_LoadPackFile
-
-Takes an explicit (not game tree related) path to a pak file.
-
-Loads the header and directory, adding the files at the beginning
-of the list so they override previous pack files.
-=================
-*/
-#if defined PACKFILE_SUPPORT
-pack_t *FS_LoadPackFile (char *packfile)
-{
-
-	dpackheader_t	header;
-	int				i;
-	packfile_t		*newfiles;
-	int				numpackfiles;
-	pack_t			*pack;
-	FILE			*packhandle;
-	dpackfile_t		info[MAX_FILES_IN_PACK];
-	unsigned		checksum;
-
-	packhandle = fopen(packfile, "rb");
-
-	//-JR
-	if (!packhandle)
-	{
-		packfile = FS_TolowerPath (packfile);
-		packhandle = fopen(packfile, "rb");
-	}
-
-	if (!packhandle)
-		return NULL;
-
-	fread (&header, 1, sizeof(header), packhandle);
-	if (LittleLong(header.ident) != IDPAKHEADER)
-		Com_Error (ERR_FATAL, "%s is not a packfile", packfile);
-	header.dirofs = LittleLong (header.dirofs);
-	header.dirlen = LittleLong (header.dirlen);
-
-	numpackfiles = header.dirlen / sizeof(dpackfile_t);
-
-	if (numpackfiles > MAX_FILES_IN_PACK)
-		Com_Error (ERR_FATAL, "%s has %i files", packfile, numpackfiles);
-
-	newfiles = Z_Malloc (numpackfiles * sizeof(packfile_t));
-
-	fseek (packhandle, header.dirofs, SEEK_SET);
-	fread (info, 1, header.dirlen, packhandle);
-
-// crc the directory to check for modifications
-	checksum = Com_BlockChecksum ((void *)info, header.dirlen);
-
-/*
-#ifdef NO_ADDONS
-	if (checksum != PAK0_CHECKSUM)
-		return NULL;
-#endif
-*/
-
-// parse the directory
-	for (i=0 ; i<numpackfiles ; i++)
-	{
-		strcpy (newfiles[i].name, info[i].name);
-		newfiles[i].filepos = LittleLong(info[i].filepos);
-		newfiles[i].filelen = LittleLong(info[i].filelen);
-	}
-
-	pack = Z_Malloc (sizeof (pack_t));
-	strcpy (pack->filename, packfile);
-	pack->handle = packhandle;
-	pack->numfiles = numpackfiles;
-	pack->files = newfiles;
-
-	Com_Printf ("Added packfile %s (%i files)\n", packfile, numpackfiles);
-	return pack;
-
-}
-#endif
-
-/*
- * ========= FS_FileExists ========
+=========
+FS_FileExists
+========
  */
 qboolean
 FS_FileExists(char *path)
@@ -641,21 +726,19 @@ FS_FileExists(char *path)
 	return (false);
 }
 
+#if 0
+
+// -jjb-filesystem implement this later, maybe not needed
+
 /*
 ================
 FS_AddGameDirectory
 
-Sets fs_gamedir, adds the directory to the head of the path,
-then loads and adds pak1.pak pak2.pak ...
+Sets fs_gamedir, adds the directory to the head of the path
 ================
 */
 void FS_AddGameDirectory (char *dir)
 {
-#if defined PACKFILE_SUPPORT
-	int				i;
-	pack_t			*pak;
-	char			pakfile[MAX_OSPATH];
-#endif
 	searchpath_t	*search;
 
 #if defined WIN32_VARIANT
@@ -677,26 +760,9 @@ void FS_AddGameDirectory (char *dir)
 	search->next = fs_searchpaths;
 	fs_searchpaths = search;
 
-#if defined PACKFILE_SUPPORT
-	//
-	// add any pak files in the format pak0.pak pak1.pak, ...
-	//
-	for (i=0; i<10; i++)
-	{
-		Com_sprintf (pakfile, sizeof(pakfile), "%s/pak%i.pak", dir, i);
-		pak = FS_LoadPackFile (pakfile);
-		if (!pak)
-			continue;
-		search = Z_Malloc (sizeof(searchpath_t));
-		search->pack = pak;
-		search->next = fs_searchpaths;
-		fs_searchpaths = search;
-	}
-#endif
-
 }
 
-#if defined DATADIR || defined UNIX_VARIANT
+#if defined UNIX_VARIANT
 /*
 ================
 FS_AddHomeAsGameDirectory
@@ -733,19 +799,9 @@ void FS_AddHomeAsGameDirectory (char *dir)
 
 	FS_AddGameDirectory (gdir);
 
-//!!!!!!!!!!!!!111
-/*
-
-	// -jjb-ac  For writing botinfo  ! this happens twice on startup!
-	//  have to put it some other place
-	Com_sprintf( botinfo_userdir, sizeof(user_homedir),
-			"%s/.codered/botinfo/", homedir );
-	Com_Printf("using %s for writing\n", botinfo_userdir );
-
-*/
-//!!!!!!!!!!!!!!!!!
-
  }
+#endif
+
 #endif
 
 /*
@@ -757,6 +813,10 @@ Called to find where to write a file (demos, savegames, etc)
 */
 char *FS_Gamedir (void)
 {
+
+	return fs_gamesearch[0]; // first one in list is where writes go
+
+#if 0
 #if defined UNIX_VARIANT
 	return fs_gamedir;
 #else
@@ -765,6 +825,8 @@ char *FS_Gamedir (void)
 	else
 		return BASEDIRNAME;
 #endif
+#endif
+
 }
 
 /*
@@ -772,70 +834,15 @@ char *FS_Gamedir (void)
 FS_ExecAutoexec
 =============
 */
-#if defined UNIX_VARIANT
-
 void FS_ExecAutoexec (void)
 {
-	searchpath_t *s, *end;
 	char name [MAX_OSPATH];
-
-	if ( fs_searchpaths == fs_base_searchpaths )
-		end = NULL;
-	else
-		end = fs_base_searchpaths;
+	int i;
 
 	// search through all the paths for an autoexec.cfg file
-	for (s = fs_searchpaths ; s != end ; s = s->next)
+	for ( i = 0; fs_gamesearch[i][0] ; i++ )
 	{
-		Com_sprintf(name, sizeof(name), "%s/autoexec.cfg", s->filename);
-
-		if ( Sys_FindFirst( name, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM ))
-		{
-			Cbuf_AddText ("exec autoexec.cfg\n");
-			Sys_FindClose();
-			break;
-		}
-		Sys_FindClose();
-	}
-}
-
-#else
-
-void FS_ExecAutoexec (void)
-{
-#if defined UNIX_VARIANT
-	searchpath_t *s, *end;
-#else
-	char *dir;
-#endif
-
-	char name [MAX_OSPATH];
-
-#if defined UNIX_VARIANT
-
-	if (fs_searchpaths == fs_base_searchpaths)
-		end = NULL;
-#else
-
-	dir = Cvar_VariableString("gamedir");
-	if (*dir)
-		Com_sprintf(name, sizeof(name), "%s/%s/autoexec.cfg", fs_basedir->string, dir);
-#endif
-
-	else
-
-#if defined UNIX_VARIANT
-		end = fs_base_searchpaths;
-
-	// search through all the paths for an autoexec.cfg file
-	for (s = fs_searchpaths ; s != end ; s = s->next)
-	{
-#if defined PACKFILE_SUPPORT
-		if (s->pack)
-			continue;
-#endif
-
-		Com_sprintf(name, sizeof(name), "%s/autoexec.cfg", s->filename);
+		Com_sprintf(name, sizeof(name), "%s/autoexec.cfg", fs_gamesearch[i] );
 
 		if (Sys_FindFirst(name, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM))
 		{
@@ -845,26 +852,19 @@ void FS_ExecAutoexec (void)
 		}
 		Sys_FindClose();
 	}
-#else
-		Com_sprintf(name, sizeof(name), "%s/%s/autoexec.cfg", fs_basedir->string, BASEDIRNAME);
-	if (Sys_FindFirst(name, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM))
-		Cbuf_AddText ("exec autoexec.cfg\n");
-	Sys_FindClose();
-#endif
 }
-#endif
-
 
 /*
 ================
 FS_SetGamedir
 
 Sets the gamedir and path to a different directory.
+
+-jjb-filesystem  this is only going to change something if there is a mod
 ================
 */
 void FS_SetGamedir (char *dir)
 {
-	searchpath_t	*next;
 
 	if (strstr(dir, "..") || strstr(dir, "/")
 		|| strstr(dir, "\\") || strstr(dir, ":") )
@@ -872,107 +872,33 @@ void FS_SetGamedir (char *dir)
 		Com_Printf ("Gamedir should be a single filename, not a path\n");
 		return;
 	}
-
-	//
-	// free up any current game dir info
-	//
-	while (fs_searchpaths != fs_base_searchpaths)
-	{
-#if defined PACKFILE_SUPPORT
-		if (fs_searchpaths->pack)
-		{
-			fclose (fs_searchpaths->pack->handle);
-			Z_Free (fs_searchpaths->pack->files);
-			Z_Free (fs_searchpaths->pack);
-		}
-#endif
-		next = fs_searchpaths->next;
-		Z_Free (fs_searchpaths);
-		fs_searchpaths = next;
-	}
-
 	//
 	// flush all data, so it will be forced to reload
 	//
-// -jjb-ac  source of "double loading" ???
-	if (dedicated && !dedicated->value)
+	if ( dedicated && !dedicated->value )
+	{ // set up for client restart
 		Cbuf_AddText ("vid_restart\nsnd_restart\n");
+	}
 
+/* -jjb-filesystem  fs_basedir deprecated (maybe)
 #if defined WIN32_VARIANT
 	Com_sprintf (fs_gamedir, sizeof(fs_gamedir), "%s/%s", fs_basedir->string, dir);
 #endif
+*/
 
-	if (!strcmp(dir,BASEDIRNAME) || (*dir == 0))
-	{
+	if ( !strcmp( dir, BASE_GAMEDATA ) || ( *dir == 0 ) )
+	{ // -jjb-filesystem  what is the purpose of this??
 		Cvar_FullSet ("gamedir", "", CVAR_SERVERINFO|CVAR_NOSET);
 		Cvar_FullSet ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
 	}
 	else
 	{
 		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO|CVAR_NOSET);
-
-#if defined DATADIR
-		FS_AddGameDirectory (va("%s/%s", DATADIR, dir) );
-#endif
-
-//#ifdef LIBDIR
-//		FS_AddGameDirectory (va("%s/%s", LIBDIR, dir) );
-//#endif
-
-		FS_AddGameDirectory (va("%s/%s", fs_basedir->string, dir) );
-
-#if defined UNIX_VARIANT
-		FS_AddHomeAsGameDirectory(dir);
-#endif
-
-	}
-}
-
-
-/*
-================
-FS_Link_f
-
-Creates a filelink_t
-================
-*/
-void FS_Link_f (void)
-{
-	filelink_t	*l, **prev;
-
-	if (Cmd_Argc() != 3)
-	{
-		Com_Printf ("USAGE: link <from> <to>\n");
-		return;
 	}
 
-	// see if the link already exists
-	prev = &fs_links;
-	for (l=fs_links ; l ; l=l->next)
-	{
-		if (!strcmp (l->from, Cmd_Argv(1)))
-		{
-			Z_Free (l->to);
-			if (!strlen(Cmd_Argv(2)))
-			{	// delete it
-				*prev = l->next;
-				Z_Free (l->from);
-				Z_Free (l);
-				return;
-			}
-			l->to = CopyString (Cmd_Argv(2));
-			return;
-		}
-		prev = &l->next;
-	}
+	// re-initialize search paths
+	FS_init_paths();
 
-	// create a new link
-	l = Z_Malloc(sizeof(*l));
-	l->next = fs_links;
-	fs_links = l;
-	l->from = CopyString(Cmd_Argv(1));
-	l->fromlength = strlen(l->from);
-	l->to = CopyString(Cmd_Argv(2));
 }
 
 /*
@@ -1037,59 +963,6 @@ void FS_FreeFileList (char **list, int n) // jit
 	free(list);
 }
 
-#if defined PACKFILE_SUPPORT
-/*
- * CompareAttributesPack
- *
- * Compare file attributes (musthave and canthave) in packed files. If
- * "output" is not NULL, "size" is greater than zero and the file matches the
- * attributes then a copy of the matching string will be placed there (with
- * SFF_SUBDIR it changes).
- *
- * Returns a boolean value, true if the attributes match the file.
- */
-qboolean
-ComparePackFiles(const char *findname, const char *name,
-    unsigned musthave, unsigned canthave, char *output, int size)
-{
-	qboolean	 retval;
-	char		*ptr;
-	char		 buffer[MAX_OSPATH];
-
-	strncpy(buffer, name, sizeof(buffer)-1);
-	buffer[sizeof(buffer)-1] = '\0';
-
-	if ((canthave & SFF_SUBDIR) && name[strlen(name)-1] == '/')
-		return (false);
-
-	if (musthave & SFF_SUBDIR) {
-		if ((ptr = strrchr(buffer, '/')) != NULL)
-			*ptr = '\0';
-		else
-			return (false);
-	}
-
-	if ((musthave & SFF_HIDDEN) || (canthave & SFF_HIDDEN)) {
-		if ((ptr = strrchr(buffer, '/')) == NULL)
-			ptr = buffer;
-		if (((musthave & SFF_HIDDEN) && ptr[1] != '.') ||
-		    ((canthave & SFF_HIDDEN) && ptr[1] == '.'))
-			return (false);
-	}
-
-	if (canthave & SFF_RDONLY)
-		return (false);
-
-	retval = glob_match((char *)findname, buffer);
-
-	if (retval && output != NULL) {
-		strncpy(output, buffer, size-1);
-		buffer[size-1] = '\0';
-	}
-
-	return (retval);
-}
-#endif
 
 /*
  * FS_ListFilesInFS
@@ -1097,76 +970,41 @@ ComparePackFiles(const char *findname, const char *name,
  * Create a list of files that match a criteria.
  *
  * Searchs are relative to the game directory and use all the search paths
- * including .pak and .pk3 files.
  */
 char **
-FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave,
-    unsigned canthave)
+FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned canthave)
 {
-	searchpath_t	*search;		/* Search path. */
+//	searchpath_t	*search;		/* Search path. */
 	int		i, j;			/* Loop counters. */
 	int		nfiles;			/* Number of files found. */
 	int		tmpnfiles;		/* Temp number of files. */
 	char		**tmplist;		/* Temporary list of files. */
 	char		**list;			/* List of files found. */
 	char		path[MAX_OSPATH];	/* Temporary path. */
+	int s;
 
 	nfiles = 0;
 	list = malloc(sizeof(char *));
 
-	for (search = fs_searchpaths; search != NULL; search = search->next) {
-
-#if defined PACKFILE_SUPPORT
-		if (search->pack != NULL) {
-			if (canthave & SFF_INPACK)
-				continue;
-
-			for (i = 0, j = 0; i < search->pack->numfiles; i++)
-				if (ComparePackFiles(findname,
-				    search->pack->files[i].name,
-				    musthave, canthave, NULL, 0))
-					j++;
-			if (j == 0)
-				continue;
-			nfiles += j;
+	for ( s = 0 ; fs_gamesearch[s][0]; s++ )
+	{
+		Com_sprintf(path, sizeof(path), "%s/%s",fs_gamesearch[s], findname);
+		tmplist = FS_ListFiles(path, &tmpnfiles, musthave, canthave);
+		if (tmplist != NULL)
+		{
+			nfiles += tmpnfiles;
 			list = realloc(list, nfiles * sizeof(char *));
-			for (i = 0, j = nfiles - j;
-			    i < search->pack->numfiles;
-			    i++)
-				if (ComparePackFiles(findname,
-				    search->pack->files[i].name,
-				    musthave, canthave, path, sizeof(path)))
-					list[j++] = strdup(path);
-		} else if (search->filename != NULL) {
-#else
-		if ( search->filename != NULL ) {
-#endif
+			for (i = 0, j = nfiles - tmpnfiles; i < tmpnfiles; i++, j++)
+				list[j] = strdup(tmplist[i] + strlen(fs_gamesearch[s]) + 1);
 
-#if defined PACKFILE_SUPPORT
-			if (musthave & SFF_INPACK)
-				continue;
-#endif
-
-			Com_sprintf(path, sizeof(path), "%s/%s",
-			    search->filename, findname);
-			tmplist = FS_ListFiles(path, &tmpnfiles, musthave,
-			    canthave);
-			if (tmplist != NULL) {
-				nfiles += tmpnfiles;
-				list = realloc(list, nfiles * sizeof(char *));
-				for (i = 0, j = nfiles - tmpnfiles;
-				    i < tmpnfiles;
-				    i++, j++)
-					list[j] = strdup(tmplist[i] +
-					    strlen(search->filename) + 1);
-				FS_FreeFileList(tmplist, tmpnfiles);
-			}
+			FS_FreeFileList(tmplist, tmpnfiles);
 		}
 	}
 
 	/* Delete duplicates. */
 	tmpnfiles = 0;
-	for (i = 0; i < nfiles; i++) {
+	for (i = 0; i < nfiles; i++)
+	{
 		if (list[i] == NULL)
 			continue;
 		for (j = i + 1; j < nfiles; j++)
@@ -1189,11 +1027,13 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave,
 	}
 
 	/* Add a guard. */
-	if (nfiles > 0) {
+	if (nfiles > 0)
+	{
 		nfiles++;
 		list = realloc(list, nfiles * sizeof(char *));
 		list[nfiles - 1] = NULL;
-	} else {
+	} else
+	{
 		free(list);
 		list = NULL;
 	}
@@ -1260,29 +1100,25 @@ void FS_Dir_f( void )
 ============
 FS_Path_f
 
+ target of "path" command
+
 ============
 */
 void FS_Path_f (void)
 {
-	searchpath_t	*s;
-	filelink_t		*l;
+	int i;
 
-	Com_Printf ("Current search path:\n");
-	for (s=fs_searchpaths ; s ; s=s->next)
+	Com_Printf ("Game data search path:\n");
+	for ( i = 0; fs_gamesearch[i][0] ; i++ )
 	{
-		if (s == fs_base_searchpaths)
-			Com_Printf ("----------\n");
-#if defined PACKFILE_SUPPORT
-		if (s->pack)
-			Com_Printf ("%s (%i files)\n", s->pack->filename, s->pack->numfiles);
-		else
-#endif
-			Com_Printf ("%s\n", s->filename);
+		Com_Printf( "%s\n", fs_gamesearch[i] );
+	}
+	Com_Printf ("Bot data search path:\n");
+	for ( i = 0; fs_botsearch[i][0] ; i++ )
+	{
+		Com_Printf( "%s/%s\n", fs_botsearch[i], BOT_GAMEDATA );
 	}
 
-	Com_Printf ("\nLinks:\n");
-	for (l=fs_links ; l ; l=l->next)
-		Com_Printf ("%s : %s\n", l->from, l->to);
 }
 
 /*
@@ -1292,6 +1128,8 @@ FS_NextPath
 Allows enumerating all of the directories in the search path
 ================
 */
+// -jjb-filesystem  need to maintain the linked list for this
+
 char *FS_NextPath (char *prevpath)
 {
 	searchpath_t	*s;
@@ -1305,13 +1143,8 @@ char *FS_NextPath (char *prevpath)
 
 	prev = fs_gamedir;
 #endif
-	for (s=fs_searchpaths ; s ; s=s->next)
+	for ( s = fs_searchpaths; s ; s = s->next )
 	{
-
-#if defined PACKFILE_SUPPORT
-		if (s->pack)
-			continue;
-#endif
 
 #if defined UNIX_VARIANT
 		if (prevpath == NULL)
@@ -1325,7 +1158,6 @@ char *FS_NextPath (char *prevpath)
 	return NULL;
 }
 
-
 /*
 ================
 FS_InitFilesystem
@@ -1335,47 +1167,8 @@ void FS_InitFilesystem (void)
 {
 
 	Cmd_AddCommand ("path", FS_Path_f);
-	Cmd_AddCommand ("link", FS_Link_f);
 	Cmd_AddCommand ("dir", FS_Dir_f );
 
-#if defined DATADIR
-	FS_AddGameDirectory (va("%s/"BASEDIRNAME, DATADIR));
-#endif
-
-	//
-	// basedir <path>
-	// allows the game to run from outside the data tree
-	//
-	fs_basedir = Cvar_Get ("basedir", ".", CVAR_NOSET);
-
-	//
-	// start up with BASEDIRNAME by default
-	//
-	FS_AddGameDirectory (va("%s/"BASEDIRNAME, fs_basedir->string) );
-
-#if defined DATADIR || defined UNIX_VARIANT
-	FS_AddHomeAsGameDirectory(BASEDIRNAME);
-#endif
-
-	// any set gamedirs will be freed up to here
-	fs_base_searchpaths = fs_searchpaths;
-
-	// check for game override
-	fs_gamedirvar = Cvar_Get ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
-	if (fs_gamedirvar->string[0])
-		FS_SetGamedir (fs_gamedirvar->string);
-	else
-		FS_SetGamedir ("arena");
-
-/*
- * Alien Arena ACEBOT File System Initialization
- */
-#if defined DATADIR
-	//
-	Com_sprintf( botinfo_datadir, sizeof(botinfo_datadir),
-			"$DATADIR/botinfo" ); //-jjb-ac  this probably is not enough
-#endif
+	FS_init_paths();
 
 }
-
-

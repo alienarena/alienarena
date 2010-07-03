@@ -562,7 +562,12 @@ void GL_ScreenShot_TGA (void)
 
 	// create the scrnshots directory if it doesn't exist
 	Com_sprintf (checkname, sizeof(checkname), "%s/scrnshot", FS_Gamedir());
+#if 0
 	Sys_Mkdir (checkname);
+#else
+	// -jjb-filesystem is FS_CreatePath() everywhere else
+	FS_CreatePath( checkname );
+#endif
 
 	// find a file name to save it to
 	strcpy(picname,"AlienArena_000.tga");

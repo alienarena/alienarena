@@ -651,7 +651,7 @@ void ACEND_UpdateNodeEdge(int from, int to)
 
 	// Now for the self-referencing part, linear time for each link added
 	for(i=0;i<numnodes;i++)
-		if(path_table[i][from] != INVALID) 
+		if(path_table[i][from] != INVALID)
 		{
 			if(i == to)
 				path_table[i][to] = INVALID; // make sure we terminate
@@ -728,6 +728,7 @@ void ACEND_SaveNodes()
 {
 	FILE *pOut;
 	char filename[MAX_OSPATH];
+	char relative_path[MAX_QPATH];
 	int i,j;
 	int version = 1;
 
@@ -736,13 +737,29 @@ void ACEND_SaveNodes()
 
 	safe_bprintf(PRINT_MEDIUM,"Saving node table...");
 
-	strcpy(filename,"botinfo/nav/"); // -jjb-botinfo
+#if 1
+	// -jjb-filesystem
+	strcpy( relative_path, BOT_GAMEDATA"/nav/" );
+	strcat( relative_path, level.mapname );
+	strcat( relative_path, ".nod" );
 
+	gi.FullWritePath( filename, sizeof(filename), relative_path );
+
+	if ( (pOut = fopen(filename, "wb" )) == NULL )
+	{
+		gi.dprintf("ACEND_SaveNodes: failed fopen for write: %s\n", filename );
+		return;
+	}
+
+#else
+	strcpy(filename,"botinfo/nav/"); // -jjb-filesystem
 	strcat(filename,level.mapname);
 	strcat(filename,".nod");
 
+
 	if((pOut = fopen(filename, "wb" )) == NULL)
 		return; // bail
+#endif
 
 	fwrite(&version,sizeof(int),1,pOut); // write version
 	fwrite(&numnodes,sizeof(int),1,pOut); // write count
@@ -768,12 +785,26 @@ void ACEND_LoadNodes(void)
 {
 	FILE *pIn;
 	int i,j;
+	char relative_path[MAX_QPATH];
 	char filename[MAX_OSPATH];
 	int version;
 
+#if 1
+	// -jjb-filesystem
+	strcpy( relative_path, BOT_GAMEDATA"/nav/" );
+	strcat( relative_path, level.mapname );
+	strcat( relative_path, ".nod" );
+
+	if ( !gi.FullPath( filename, sizeof(filename), relative_path ) )
+	{
+		gi.dprintf("ACEND_LoadNodes: not found: %s\n", filename );
+	}
+
+#else
 	strcpy(filename,BOTDIR"/botinfo/nav/"); // -jjb-botinfo
 	strcat(filename,level.mapname);
 	strcat(filename,".nod");
+#endif
 
 	if((pIn = fopen(filename, "rb" )) == NULL)
     {

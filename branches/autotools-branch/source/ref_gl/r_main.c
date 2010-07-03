@@ -531,7 +531,7 @@ R_DrawEntitiesOnList
 void R_DrawEntitiesOnList (void)
 {
 	int		i;
-	rscript_t	*rs = NULL;
+	rscript_t *rs = NULL;
 	vec3_t	dist;
 	char    shortname[MAX_QPATH];
 
@@ -547,9 +547,7 @@ void R_DrawEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-			if(!rs)
-				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			rs=(rscript_t *)currententity->model->script;
 
 			//custom player skin (must be done here)
 			if (currententity->skin)
@@ -564,8 +562,10 @@ void R_DrawEntitiesOnList (void)
 				currententity->script = rs;
 			else
 				currententity->script = NULL;
-		}
 
+			// Com_Printf("[(b):rs:%p]\n", rs ); // -jjb-dbg
+
+		}
 
 		currentmodel = currententity->model;
 
@@ -613,13 +613,11 @@ void R_DrawEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-			if(!rs)
-				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			rs=(rscript_t *)currententity->model->script;
 
 			//custom player skin (must be done here)
-			if (currententity->skin) 
-			{ 
+			if (currententity->skin)
+			{
                 COM_StripExtension ( currententity->skin->name, shortname );
                 rs = RS_FindScript(shortname);
                 if(rs)
@@ -632,6 +630,7 @@ void R_DrawEntitiesOnList (void)
 				currententity->script = NULL;
 		}
 
+		// Com_Printf("[(d):rs:%p]\n", rs ); // -jjb-dbg
 
 		currentmodel = currententity->model;
 
@@ -681,9 +680,7 @@ void R_DrawViewEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-			if(!rs)
-				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			rs=(rscript_t *)currententity->model->script;
 
 			//custom player skin (must be done here)
 			if (currententity->skin)
@@ -733,9 +730,7 @@ void R_DrawViewEntitiesOnList (void)
 
 		if (currententity->model && r_shaders->value)
 		{
-			rs=(rscript_t *)currententity->model->script[currententity->skinnum];
-			if(!rs)
-				rs=(rscript_t *)currententity->model->script[0]; //try 0
+			rs=(rscript_t *)currententity->model->script;
 
 			//custom player skin (must be done here)
 			if (currententity->skin)

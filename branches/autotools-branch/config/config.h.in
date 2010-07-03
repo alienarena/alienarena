@@ -33,11 +33,20 @@
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
+/* Define to 1 if you have the `filelength' function. */
+#undef HAVE_FILELENGTH
+
 /* Define to 1 if you have the <float.h> header file. */
 #undef HAVE_FLOAT_H
 
 /* Define to 1 if you have the `floor' function. */
 #undef HAVE_FLOOR
+
+/* Define to 1 if you have the `fstat' function. */
+#undef HAVE_FSTAT
+
+/* Define to 1 if you have the `getcwd' function. */
+#undef HAVE_GETCWD
 
 /* Define to 1 if you have the `gethostbyname' function. */
 #undef HAVE_GETHOSTBYNAME
@@ -125,6 +134,9 @@
 /* Define to 1 if you have the `sqrt' function. */
 #undef HAVE_SQRT
 
+/* Define to 1 if you have the `stat' function. */
+#undef HAVE_STAT
+
 /* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H
 
@@ -157,6 +169,9 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
+
+/* Define to 1 if you have the `strlcpy' function. */
+#undef HAVE_STRLCPY
 
 /* Define to 1 if you have the `strncasecmp' function. */
 #undef HAVE_STRNCASECMP

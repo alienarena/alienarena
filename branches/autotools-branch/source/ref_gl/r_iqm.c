@@ -546,14 +546,9 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 			//load shader for skin
 			COM_StripExtension ( skinname, shortname );
-	#ifdef _WINDOWS
-			(struct rscript_s *)mod->script[0] = RS_FindScript(shortname);
-	#else
-			mod->script[0] = RS_FindScript(shortname); //make it gcc 4.1.1 compatible
-	#endif
-
-			if (mod->script[0])
-				RS_ReadyScript((rscript_t *)mod->script[0]);
+			mod->script = RS_FindScript(shortname); // jjb-ac rscript decl
+			if (mod->script)
+				RS_ReadyScript((rscript_t *)mod->script);
 		}
 	}
 
@@ -701,7 +696,7 @@ void GL_DrawIQMFrame(int skinnum)
 	qboolean depthmaskrscipt = false;
 
 	if (r_shaders->value)
-			rs=(rscript_t *)currententity->script;
+			rs = currententity->script;
 
 	VectorCopy(shadelight, lightcolor);
 	for (i=0;i<model_dlights_num;i++)
@@ -725,7 +720,7 @@ void GL_DrawIQMFrame(int skinnum)
 		alpha = basealpha = 1.0;
 
 	if (r_shaders->value)
-		rs=(rscript_t *)currententity->script;
+		rs = currententity->script;
 
 	VectorSubtract (currententity->oldorigin, currententity->origin, delta);
 
@@ -1075,7 +1070,7 @@ void GL_DrawIQMFrame(int skinnum)
 				{
 					//fixed light source pointing down, slightly forward and to the left
 					lightPosition[0] = -1.0;
-					lightPosition[1] = 4.0;
+					lightPosition[1] = 12.0;
 					lightPosition[2] = 8.0;
 					R_ModelViewTransform(lightPosition, lightVec);
 				}

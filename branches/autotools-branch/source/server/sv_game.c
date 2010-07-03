@@ -327,13 +327,6 @@ Init the game subsystem for a new map
 */
 void SCR_DebugGraph (float value, int color);
 
-
-/*
- * BIG HACK -jjb-
- */
-extern int (*ptrGame_FS_FOpenFile)( char* filename, FILE **file );
-
-
 void SV_InitGameProgs (void)
 {
 	game_import_t	import;
@@ -399,6 +392,9 @@ void SV_InitGameProgs (void)
 
 	import.Sys_Milliseconds = Sys_Milliseconds;
 
+	import.FullPath = FS_FullPath;
+	import.FullWritePath = FS_FullWritePath;
+
 	ge = (game_export_t *)Sys_GetGameAPI (&import);
 
 	if (!ge)
@@ -407,12 +403,6 @@ void SV_InitGameProgs (void)
 	if (ge->apiversion != GAME_API_VERSION)
 		Com_Error (ERR_DROP, "game is version %i, not %i", ge->apiversion,
 		GAME_API_VERSION);
-
-/*
- * BIG HACK -jjb-
- *  set pointer so game static library can see the augmented file system
- */
-	ptrGame_FS_FOpenFile = FS_FOpenFile;
 
 	ge->Init ();
 }

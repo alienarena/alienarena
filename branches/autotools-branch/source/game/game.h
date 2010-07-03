@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -76,7 +76,7 @@ struct edict_s
 
 	// FIXME: move these fields to a server private sv_entity_t
 	link_t		area;				// linked to a division node or leaf
-	
+
 	int			num_clusters;		// if -1, use headnode instead
 	int			clusternums[MAX_ENT_CLUSTERS];
 	int			headnode;			// unused if num_clusters != -1
@@ -181,6 +181,10 @@ typedef struct
 
 	int		(*Sys_Milliseconds) (void);
 
+	// File System path from relative path (added 2010-07)
+	qboolean (*FullPath)(char *full_path, size_t pathsize, const char *relative_path);
+	void (*FullWritePath)(char *full_path, size_t pathsize,	const char *relative_path);
+
 } game_import_t;
 
 //
@@ -200,7 +204,7 @@ typedef struct
 	void		(*SpawnEntities) (char *mapname, char *entstring, char *spawnpoint);
 
 	qboolean	(*ClientConnect)( edict_t *ent, char *userinfo);
-	
+
 	void		(*ClientBegin) (edict_t *ent);
 	void		(*ClientUserinfoChanged) (edict_t *ent, char *userinfo, int whereFrom);
 	void		(*ClientDisconnect) (edict_t *ent);
@@ -223,7 +227,7 @@ typedef struct
 
 	// The edict array is allocated in the game dll so it
 	// can vary in size from one game to another.
-	// 
+	//
 	// The size will be fixed when ge->Init() is called
 	struct edict_s	*edicts;
 	int			edict_size;

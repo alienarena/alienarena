@@ -53,22 +53,9 @@ EXTRA_DIST = \
 ## 	chmod -R u+w $(DESTDIR)$(docdir)
 ## 	chmod -R u+w $(DESTDIR)$(pkgdatadir)
 
-	
-##	
-## the main program looks in $LIBDIR/arena/ and $LIBDIR/data1/ subdirectories
-##  for game.so. arena/ is for mods, data1/ is the main game module
-## so, until a better way is found, just create data1 and move the game.so,la
-##	
-## TODO: static link to game library eliminates need for this
-##install-exec-hook:
-##	mkdir -p $(DESTDIR)$(pkglibexecdir)/data1
-##	mv -f $(DESTDIR)$(pkglibexecdir)/game.so $(DESTDIR)$(pkglibexecdir)/data1
-##	mv -f $(DESTDIR)$(pkglibexecdir)/game.la $(DESTDIR)$(pkglibexecdir)/data1
 
 ## remove what install-hook installed
 ##uninstall-hook:
 ##	rm -rf $(DESTDIR)$(docdir)
 ##	rm -rf $(DESTDIR)$(pkgdatadir)
 ##	rm -rf $(DESTDIR)$(pkglibexecdir)
-
-

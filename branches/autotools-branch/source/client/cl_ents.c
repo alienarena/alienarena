@@ -722,6 +722,10 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.skinnum = s1->skinnum;
 			ent.skin = NULL;
 			ent.model = cl.model_draw[s1->modelindex];
+
+			// -jjb-dbg
+			//Com_Printf("[CL_AddPacketEntities:ent.skinnum:%i]\n", ent.skinnum );
+
 		}
 
 		if (renderfx & (RF_FRAMELERP))

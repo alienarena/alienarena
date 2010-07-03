@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -100,7 +100,7 @@ void SV_New_f (void)
 
 	//
 	// game server
-	// 
+	//
 	if (sv.state == ss_game)
 	{
 		// set up the entity for the client
@@ -140,7 +140,7 @@ void SV_Configstrings_f (void)
 		SV_New_f ();
 		return;
 	}
-	
+
 	start = atoi(Cmd_Argv(2));
 	if( start < 0 ) {
 		start = 0;	// sku - catch negative offsets
@@ -148,7 +148,7 @@ void SV_Configstrings_f (void)
 
 	// write a packet full of data
 
-	while ( sv_client->netchan.message.cursize < MAX_MSGLEN/4 
+	while ( sv_client->netchan.message.cursize < MAX_MSGLEN/4
 		&& start < MAX_CONFIGSTRINGS)
 	{
 		if (sv.configstrings[start][0])
@@ -201,7 +201,7 @@ void SV_Baselines_f (void)
 		Com_Printf ("baselines not valid -- already spawned\n");
 		return;
 	}
-	
+
 	// handle the case of a level changing while a client was connecting
 	if ( atoi(Cmd_Argv(1)) != svs.spawncount )
 	{
@@ -209,7 +209,7 @@ void SV_Baselines_f (void)
 		SV_New_f ();
 		return;
 	}
-	
+
 	start = atoi(Cmd_Argv(2));
 	if( start < 0 ) {
 		start = 0;
@@ -263,7 +263,7 @@ void SV_Begin_f (void)
 	}
 
 	sv_client->state = cs_spawned;
-	
+
 	// call the game begin function
 	ge->ClientBegin (sv_player);
 
@@ -288,7 +288,7 @@ void SV_NextDownload_f (void)
 
 	r = sv_client->downloadsize - sv_client->downloadcount;
 
-	if (r > 1280) //was 1024 should speed up 
+	if (r > 1280) //was 1024 should speed up
 			r = 1280;
 	MSG_WriteByte (&sv_client->netchan.message, svc_download);
 	MSG_WriteShort (&sv_client->netchan.message, r);
@@ -322,7 +322,7 @@ void SV_BeginDownload_f(void)
 	extern	cvar_t *allow_download_models;
 	extern	cvar_t *allow_download_sounds;
 	extern	cvar_t *allow_download_maps;
-	extern	int		file_from_pak; // ZOID did file come from pak?
+	// extern	int		file_from_pak; // -jjb-unused
 	int		name_length; // For getting the final character.
 	int offset = 0;
 
@@ -339,7 +339,7 @@ void SV_BeginDownload_f(void)
 		// negative offset causes crashing
 		|| offset < 0
 		// leading dot is no good
-		|| *name == '.' 
+		|| *name == '.'
 		// leading slash bad as well, must be in subdir
 		|| *name == '/'
 		// next up, skin check
@@ -350,8 +350,8 @@ void SV_BeginDownload_f(void)
 		|| (strncmp(name, "sound/", 6) == 0 && !allow_download_sounds->value)
 		// now maps (note special case for maps, must not be in pak)
 		|| (strncmp(name, "maps/", 6) == 0 && !allow_download_maps->value)
-		// MUST be in a subdirectory	
-		|| !strstr (name, "/") )	
+		// MUST be in a subdirectory
+		|| !strstr (name, "/") )
 	{	// don't allow anything with .. path
 		MSG_WriteByte (&sv_client->netchan.message, svc_download);
 		MSG_WriteShort (&sv_client->netchan.message, -1);
@@ -373,10 +373,7 @@ void SV_BeginDownload_f(void)
 	if (offset > sv_client->downloadsize)
 		sv_client->downloadcount = sv_client->downloadsize;
 
-	if (!sv_client->download
-		// special check for maps, if it came from a pak file, don't allow
-		// download  ZOID
-		|| (strncmp(name, "maps/", 5) == 0 && file_from_pak))
+	if ( !sv_client->download )
 	{
 		Com_DPrintf ("Couldn't download %s to %s\n", name, sv_client->name);
 		if (sv_client->download) {
@@ -409,7 +406,7 @@ The client is going to disconnect, so remove the connection immediately
 void SV_Disconnect_f (void)
 {
 //	SV_EndRedirect ();
-	SV_DropClient (sv_client);	
+	SV_DropClient (sv_client);
 }
 
 
@@ -484,7 +481,7 @@ ucmd_t ucmds[] =
 
 	{"disconnect", SV_Disconnect_f},
 
-	// issued by hand at client consoles	
+	// issued by hand at client consoles
 	{"info", SV_ShowServerinfo_f},
 
 	{"download", SV_BeginDownload_f},
@@ -501,7 +498,7 @@ SV_ExecuteUserCommand
 void SV_ExecuteUserCommand (char *s)
 {
 	ucmd_t	*u;
-	
+
 	Cmd_TokenizeString (s, false);
 	sv_player = sv_client->edict;
 
@@ -582,19 +579,19 @@ void SV_ExecuteClientMessage (client_t *cl)
 			Com_Printf ("SV_ReadClientMessage: badread\n");
 			SV_DropClient (cl);
 			return;
-		}	
+		}
 
 		c = MSG_ReadByte (&net_message);
 		if (c == -1)
 			break;
-				
+
 		switch (c)
 		{
 		default:
 			Com_Printf ("SV_ReadClientMessage: unknown command char\n");
 			SV_DropClient (cl);
 			return;
-						
+
 		case clc_nop:
 			break;
 
@@ -617,7 +614,7 @@ void SV_ExecuteClientMessage (client_t *cl)
 			if (lastframe != cl->lastframe) {
 				cl->lastframe = lastframe;
 				if (cl->lastframe > 0) {
-					cl->frame_latency[cl->lastframe&(LATENCY_COUNTS-1)] = 
+					cl->frame_latency[cl->lastframe&(LATENCY_COUNTS-1)] =
 						svs.realtime - cl->frames[cl->lastframe & UPDATE_MASK].senttime;
 				}
 			}
@@ -656,8 +653,8 @@ void SV_ExecuteClientMessage (client_t *cl)
 
 			if (calculatedChecksum != checksum)
 			{
-				Com_DPrintf ("Failed command checksum for %s (%d != %d)/%d\n", 
-					cl->name, calculatedChecksum, checksum, 
+				Com_DPrintf ("Failed command checksum for %s (%d != %d)/%d\n",
+					cl->name, calculatedChecksum, checksum,
 					cl->netchan.incoming_sequence);
 				return;
 			}
@@ -690,7 +687,7 @@ void SV_ExecuteClientMessage (client_t *cl)
 			cl->lastcmd = newcmd;
 			break;
 
-		case clc_stringcmd:	
+		case clc_stringcmd:
 			s = MSG_ReadString (&net_message);
 
 			// malicious users may try using too many string commands

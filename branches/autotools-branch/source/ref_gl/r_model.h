@@ -330,7 +330,7 @@ typedef struct model_s
 	// for alias models and skins
 	image_t		*skins[MAX_MD2SKINS];
 
-	struct rscript_s	*script[MAX_MD2SKINS];
+	struct rscript_s	*script;
 
 	int			extradatasize;
 	void		*extradata;

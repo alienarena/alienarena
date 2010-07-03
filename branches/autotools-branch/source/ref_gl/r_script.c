@@ -1920,7 +1920,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		if (stage->colormap.enabled)
 			qglEnable (GL_TEXTURE_2D);
 
-	} while (stage = stage->next);
+	} while ( (stage = stage->next) );
 
 	SetVertexOverbrights(false);
 

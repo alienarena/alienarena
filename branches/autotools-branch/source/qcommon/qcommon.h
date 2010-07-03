@@ -28,7 +28,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	VERSION		"7.41pre"
 #endif
 
-#define	BASEDIRNAME	"data1"
+/* ---- Default locations of game data ---*/
+#if !defined BASE_GAMEDATA
+#define BASE_GAMEDATA "data1"
+#endif
+
+#if !defined MOD_GAMEDATA
+#define GAME_GAMEDATA "arena"
+#endif
+
+#if !defined BOT_GAMEDATA
+#define BOT_GAMEDATA "botinfo"
+#endif
+
+#if !defined USER_GAMEDATA
+// default for COR_GAME environment variable
+#define USER_GAMEDATA ".codered"
+#endif
+/*----------------------------------------*/
+
 
 #define MENU_STATIC_WIDTH	720.0f
 #define MENU_FONT_SIZE 12
@@ -714,12 +732,15 @@ FILESYSTEM
 ==============================================================
 */
 
+int FS_filelength( FILE *f );
 void	FS_InitFilesystem (void);
 void	FS_SetGamedir (char *dir);
 char	*FS_Gamedir (void);
 char	*FS_NextPath (char *prevpath);
 void	FS_ExecAutoexec (void);
 
+qboolean FS_FullPath( char *full_path, size_t pathsize,const char *relative_path );
+void    FS_FullWritePath( char *full_path, size_t pathsize,const char *relative_path );
 int		FS_FOpenFile (char *filename, FILE **file);
 void	FS_FCloseFile (FILE *f);
 // note: this can't be called from another DLL, due to MS libc issues

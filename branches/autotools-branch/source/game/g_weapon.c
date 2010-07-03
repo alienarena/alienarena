@@ -1797,7 +1797,8 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 #if 0
 			gi.WriteByte (self->s.skinnum); // -jjb-dbg can be >255 (3077)
 #else
-			gi.WriteByte (1); // -jjb-dbg can be >255 (3077)
+			// -jjb-fix skinnum problem SHOULD BE 0 NOT 1
+			gi.WriteByte (0); // -jjb-dbg can be >255 (3077)
 			// but probably not used in svc_temp_entity for TE_LASER_SPARKS
 #endif
 			gi.multicast (tr.endpos, MULTICAST_PVS);

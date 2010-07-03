@@ -78,9 +78,20 @@ void ACESP_SaveBots()
     edict_t *bot;
     FILE *pOut;
 	int i,count = 0;
+	char full_path[MAX_OSPATH];
 
+#if 1
+	// -jjb-filesystem
+	gi.FullWritePath( full_path, sizeof(full_path), BOT_GAMEDATA"/bots.tmp" );
+	if ( ( pOut = fopen( full_path, "wb" )) == NULL )
+	{
+		gi.dprintf("ACESP_SaveBots: fopen for write failed: %s\n", full_path );
+		return;
+	}
+#else
 	if((pOut = fopen("botinfo/bots.tmp", "wb" )) == NULL)
 		return; // bail
+#endif
 
 	// Get number of bots
 	for (i = maxclients->value; i > 0; i--)
@@ -119,6 +130,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	char *info;
 	char *skin;
 	char bot_filename[MAX_OSPATH];
+	char stem[MAX_QPATH];
 	int found;
 	int real_players, total_players;
 	edict_t *cl_ent;
@@ -128,6 +140,28 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	}
 
 	//bots and configurations will be loaded level specific
+#if 1
+	// -jjb-filesystem
+	// note: see FindBotNum(), custombots has priority over team. (?)
+	if (sv_custombots->value)
+		sprintf( stem, BOT_GAMEDATA"/custom%i.tmp", sv_custombots->integer);
+	else if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
+		strcpy( stem, BOT_GAMEDATA"/team.tmp");
+	else
+		sprintf( stem, BOT_GAMEDATA"/%s.tmp", level.mapname);
+
+	if ( !gi.FullPath( bot_filename, sizeof(bot_filename), stem ))
+	{
+		gi.dprintf( "ACESP_LoadBots: not found: %s\n", stem );
+		return;
+	}
+	if ( (pIn = fopen( bot_filename, "rb" )) == NULL )
+	{
+		gi.dprintf("ACESP_LoadBots: failed fopen for read: %s", bot_filename );
+		return;
+	}
+
+#else
 	if(sv_custombots->value)
 		sprintf(bot_filename, BOTDIR"/botinfo/custom%i.tmp", sv_custombots->integer);
 	else if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
@@ -137,6 +171,8 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 
 	if((pIn = fopen(bot_filename, "rb" )) == NULL)
 		return; // bail
+#endif
+
 
 	fread(&count,sizeof (int),1,pIn);
 
@@ -226,9 +262,32 @@ int ACESP_FindBotNum(void)
     FILE *pIn;
 	int count;
 	char bot_filename[MAX_OSPATH];
+	char stem[MAX_QPATH];
 
-	// -jjb-botinfo
 	//bots and configurations are loaded level specific
+#if 1
+	// -jjb-filesystem
+	// note: see LoadBots, custombots have priority over team (?)
+	if(sv_custombots->value)
+		sprintf( stem, BOT_GAMEDATA"/custom%i.tmp", sv_custombots->integer);
+	else if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
+		strcpy( stem, BOT_GAMEDATA"/team.tmp");
+	else
+		sprintf( stem, BOT_GAMEDATA"/%s.tmp", level.mapname);
+
+	if ( !gi.FullPath( bot_filename, sizeof(bot_filename), stem ))
+	{
+		gi.dprintf( "ACESP_FindBotNum: not found: %s\n", stem );
+		return 0;
+	}
+	if ( (pIn = fopen( bot_filename, "rb" )) == NULL )
+	{
+		gi.dprintf("ACESP_FindBotNum: failed fopen for read: %s", bot_filename );
+		return 0;
+	}
+
+#else
+
 	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
 	else if(sv_custombots->value)
@@ -236,8 +295,10 @@ int ACESP_FindBotNum(void)
 	else
 		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", level.mapname);
 
+
 	if((pIn = fopen(bot_filename, "rb" )) == NULL)
 		return 0; // bail
+#endif
 
 	fread(&count,sizeof (int),1,pIn);
 
@@ -391,6 +452,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	client_respawn_t	resp;
 	char    *info;
 	char bot_configfilename[MAX_OSPATH];
+	char relative_path[MAX_QPATH];
 	char playermodel[MAX_OSPATH] = " ";
 	char modelpath[MAX_OSPATH] = " ";
 	FILE *file;
@@ -596,8 +658,13 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 		//if not a respawn, load bot configuration file(specific to each bot)
 		info = Info_ValueForKey (bot->client->pers.userinfo, "name");
 
-		// -jjb-ac  problem  this needs to know the 2 places botinfo can be
+#if 1
+		// -jjb-filesystem
+		sprintf( bot_configfilename, BOT_GAMEDATA"/%s.cfg", info );
+#else
 		sprintf(bot_configfilename, BOTDIR"/botinfo/%s.cfg", info);
+#endif
+
 		ACECO_ReadConfig(bot_configfilename);
 
 		//set config items
@@ -1014,7 +1081,6 @@ static void remove_bot( edict_t *bot )
 	memset( bot->client->pers.inventory, 0, sizeof(bot->client->pers.inventory));
 
 	bot->client->pers.connected = false;
-	// -jjb- ???  shouldn't this be for other bots, with botnum>this one
 	bot->client->resp.botnum--; //we have one less bot
 	bot->client->ps.botnum = bot->client->resp.botnum;
 
@@ -1058,8 +1124,7 @@ void ACESP_RemoveBot(char *name)
 		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
 
 	// update bots.tmp
-	ACESP_SaveBots(); // Save them again  -jjb-bots  not sure why
-	// i suppose so that it doesn't in next game ???
+	ACESP_SaveBots();
 
 }
 

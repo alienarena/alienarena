@@ -38,14 +38,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "client.h"
 #include "client/qmenu.h"
 
-// Directory for botinfo, setup like existing acebot code
-// -jjb-ac need botdir in user writeable home dir
-#if defined DATADIR
-#define BOTDIR DATADIR   // -jjb-ac
-#else
-#define BOTDIR "."
-#endif
-
 #if defined HAVE_STRCASECMP && !defined HAVE__STRICMP
 #define _stricmp strcasecmp
 #endif
@@ -2417,7 +2409,7 @@ void Options_MenuInit( void )
 
 void Options_MenuDraw (void)
 {
-	char path[MAX_QPATH];
+	char path[MAX_OSPATH];
 
 	banneralpha += cls.frametime;
 	if (banneralpha > 1)
@@ -3955,9 +3947,6 @@ ADD BOTS MENU
 
 =============================================================================
 */
-// -jjb-ac needs user-writeable directory
-//  possibly FS_botfile_read, FS_botfile_write
-//  what about *.nav files?
 
 static menuframework_s	s_addbots_menu;
 static menuaction_s		s_addbots_bot_action[16];
@@ -3980,15 +3969,32 @@ struct botinfo {
 
 int slot;
 
-void LoadBotInfo() {
-	FILE *pIn; // -jjb-ac
+void LoadBotInfo( void )
+{
+	FILE *pIn;
 	int i, count;
 	char *info;
 	char *skin;
 
+#if 1
+	// -jjb-botinfo
+	char fullpath[MAX_OSPATH];
+
+	if ( !FS_FullPath( fullpath, sizeof(fullpath), BOT_GAMEDATA"/allbots.tmp" ) )
+	{ // could not find it
+		Com_DPrintf("LoadBotInfo: %s/allbots.tmp not found\n", BOT_GAMEDATA );
+		return;
+	}
+	if( (pIn = fopen( fullpath, "rb" )) == NULL )
+	{
+		Com_DPrintf("LoadBotInfo: failed open: %s\n", fullpath );
+		return;
+	}
+#else
 	// -jjb-ac
 	if( (pIn = fopen( BOTDIR"/botinfo/allbots.tmp", "rb" )) == NULL) // -jjb-bot
 		return; // bail
+#endif
 
 	fread(&count,sizeof (int),1,pIn);
 	if(count>16)
@@ -4008,16 +4014,21 @@ void LoadBotInfo() {
     fclose(pIn); // -jjb-ac
 }
 
-void AddbotFunc(void *self) {
+void AddbotFunc(void *self)
+{
 	int i, count;
-	char startmap[128];
-	char bot_filename[128];
+	char startmap[MAX_QPATH];
+	char relative_path[MAX_QPATH];
+	char bot_filename[MAX_OSPATH];
 	FILE *pOut;
+
 	menulist_s *f = ( menulist_s * ) self;
 
 	//get the name and copy that config string into the proper slot name
-	for(i = 0; i < totalbots; i++) {
-		if(!strcmp(f->generic.name, bots[i].name)) { //this is our selected bot
+	for(i = 0; i < totalbots; i++)
+	{
+		if(!strcmp(f->generic.name, bots[i].name))
+		{ //this is our selected bot
 			strcpy(bot[slot].name, bots[i].name);
 			strcpy(bot[slot].userinfo, bots[i].userinfo);
 			s_bots_bot_action[slot].generic.name = bots[i].name;
@@ -4026,7 +4037,8 @@ void AddbotFunc(void *self) {
 
 	//save off bot file
 	count = 8;
-	for(i = 0; i < 8; i++) {
+	for(i = 0; i < 8; i++)
+	{
 		if(!strcmp(bot[i].name, "...empty slot"))
 			count--;
 	}
@@ -4034,15 +4046,34 @@ void AddbotFunc(void *self) {
 	for(i = 0; i < strlen(startmap); i++)
 		startmap[i] = tolower(startmap[i]);
 
+#if 1
+	if (s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
+	{ // team game
+		FS_FullWritePath( bot_filename, sizeof(bot_filename), BOT_GAMEDATA"/team.tmp" );
+	}
+	else
+	{ // non-team, bots per map
+		char relative_path[MAX_QPATH];
+		Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", startmap );
+		FS_FullWritePath( bot_filename, sizeof(bot_filename), relative_path );
+	}
+
+	if ( (pOut = fopen(bot_filename, "wb" )) == NULL )
+	{
+		Com_DPrintf("AddbotFunc: failed fopen for write: %s\n", bot_filename );
+		return; // bail
+	}
+
+#else
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
 		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp"); // -jjb-ac bot
 	else
 		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap); // -jjb-ac bot
 
-	if((pOut = fopen(bot_filename, "wb" )) == NULL) // -jjb-ac
+	if((pOut = fopen(bot_filename, "wb" )) == NULL)
 		return; // bail
+#endif
 
-	// -jjb-ac
 	fwrite(&count,sizeof (int),1,pOut); // Write number of bots
 
 	for (i = 7; i > -1; i--) {
@@ -4050,7 +4081,7 @@ void AddbotFunc(void *self) {
 			fwrite(bot[i].userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
 	}
 
-    fclose(pOut); // -jjb-ac
+    fclose(pOut);
 
 	//kick back to previous menu
 	M_PopMenu();
@@ -4069,7 +4100,7 @@ void Addbots_MenuInit( void )
 
 	totalbots = 0;
 
-	LoadBotInfo(); // -jjb-ac  load from files here
+	LoadBotInfo();
 
 	s_addbots_menu.x = viddef.width * 0.50 - 50*scale;
 	s_addbots_menu.nitems = 0;
@@ -4170,7 +4201,7 @@ int Menu_FindFile (char *filename, FILE **file)
 
 void MapInfoFunc( void *self ) {
 
-	FILE *map_file;
+	// FILE *map_file; // -jjb-unused
 	FILE *desc_file;
 	char line[500];
 	char *pLine;
@@ -4320,7 +4351,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	int nmaps = 0;
 	int totalmaps;
 	char **mapfiles;
-	char *path = NULL;
+	// char *path = NULL; // -jjb-unused
 	static char **bspnames;
 	int		j, l;
 
@@ -4343,13 +4374,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	}
 	else
 	{
-#if defined WIN32_VARIANT
-		length = filelength( fileno( fp  ) );
-#else
-		fseek(fp, 0, SEEK_END);
-		length = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-#endif
+		length = FS_filelength( fp );
 		buffer = malloc( length + 1 );
 		fread( buffer, length, 1, fp );
 		buffer[length] = 0;
@@ -4575,7 +4600,7 @@ void StartServerActionFunc( void *self )
 	Cvar_SetValue("sv_public", s_public_box.curvalue );
 
 // -jjb-ac
-// Running a dedicated server from menu does not always work right in Linux, if program is 
+// Running a dedicated server from menu does not always work right in Linux, if program is
 //  invoked from a gui menu system. Listen server should be ok.
 // Removing option from menu for now, since it is possible to start server running in
 //  background without realizing it.
@@ -5018,8 +5043,11 @@ void BotAction( void *self )
 {
 	FILE *pOut;
 	int i, count;
-	char startmap[128];
-	char bot_filename[128];
+
+	char stem[MAX_QPATH];
+	char relative_path[MAX_QPATH];
+	char bot_filename[MAX_OSPATH];
+
 	menulist_s *f = ( menulist_s * ) self;
 
 	slot = f->curvalue;
@@ -5053,6 +5081,22 @@ void BotAction( void *self )
 
 	//write out bot file
 
+#if 1
+	// -jjb-filesystem
+	if (s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
+	{ // team game
+		strcpy( stem, "team" );
+	}
+	else
+	{ // non-team, bots per map
+		strcpy( stem, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
+		for(i = 0; i < strlen(stem); i++)
+			stem[i] = tolower( stem[i] );
+	}
+	Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", stem );
+	FS_FullWritePath( bot_filename, sizeof(bot_filename), relative_path );
+
+#else
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 	for(i = 0; i < strlen(startmap); i++)
 		startmap[i] = tolower(startmap[i]);
@@ -5061,9 +5105,13 @@ void BotAction( void *self )
 		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp"); // -jjb-bot
 	else
 		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap); // -jjb-bot
+#endif
 
 	if((pOut = fopen(bot_filename, "wb" )) == NULL)
+	{
+		Com_DPrintf("BotAction: failed fopen for write: %s\n", bot_filename );
 		return; // bail
+	}
 
 	fwrite(&count,sizeof (int),1,pOut); // Write number of bots
 
@@ -5232,10 +5280,31 @@ setvalue:
 void Read_Bot_Info()
 {
 	FILE *pIn;
-	char bot_filename[128];
 	int i, count;
 	char *info;
-	char startmap[128];
+	char bot_filename[MAX_OSPATH];
+	char stem[MAX_QPATH];
+	char relative_path[MAX_QPATH];
+
+#if 1
+	// -jjb-filesystem
+	if (s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
+	{ // team game
+		strcpy( stem, "team" );
+	}
+	else
+	{ // non-team, bots per map
+		strcpy( stem, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
+		for(i = 0; i < strlen(stem); i++)
+			stem[i] = tolower( stem[i] );
+	}
+	Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", stem );
+	if ( !FS_FullPath( bot_filename, sizeof(bot_filename), relative_path ) )
+	{
+		Com_DPrintf("Read_Bot_Info: %s/%s not found\n", BOT_GAMEDATA, relative_path );
+		return;
+	}
+#else
 
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 
@@ -5244,8 +5313,13 @@ void Read_Bot_Info()
 	else
 		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
 
+#endif
+
 	if((pIn = fopen(bot_filename, "rb" )) == NULL)
-		return; // bail
+	{
+		Com_DPrintf("Read_Bot_Info: failed fopen for read: %s", bot_filename );
+		return;
+	}
 
 	fread(&count,sizeof (int),1,pIn);
 	if(count>8)
@@ -6066,7 +6140,7 @@ static int pmicmpfnc( const void *_a, const void *_b )
 qboolean PlayerConfig_MenuInit( void )
 {
 	extern cvar_t *name;
-	extern cvar_t *team;
+	// extern cvar_t *team; // -jjb-unused
 	extern cvar_t *skin;
 	char currentdirectory[1024];
 	char currentskin[1024];

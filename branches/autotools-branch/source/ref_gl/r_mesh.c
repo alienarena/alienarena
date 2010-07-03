@@ -190,12 +190,12 @@ void GL_GetLightVals(qboolean dynamic)
 	dynFactor = 0;
 	if(dynamic)
 	{
-		if((!(currententity->flags & RF_NOSHADOWS)) || currententity->flags & RF_MINLIGHT) 
+		if((!(currententity->flags & RF_NOSHADOWS)) || currententity->flags & RF_MINLIGHT)
 		{
 		dl = r_newrefdef.dlights;
 		//limit to five lights(maybe less)?
-			for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) 
-			{			
+			for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++)
+			{
 			VectorSubtract(currententity->origin, dl->origin, temp);
 			dist = VectorLength(temp);
 
@@ -204,14 +204,14 @@ void GL_GetLightVals(qboolean dynamic)
 
 			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 
-				if(r_trace.fraction == 1.0) 
+				if(r_trace.fraction == 1.0)
 				{
-					if(dist < 100) 
+					if(dist < 100)
 					{
 					VectorCopy(dl->origin, temp);
 					//translate for when viewangles are negative - done because otherwise the
 					//lighting effect is backwards - stupid quake bug rearing it's head?
-					if(r_newrefdef.viewangles[1] < 0) 
+					if(r_newrefdef.viewangles[1] < 0)
 						{
 						//translate according viewangles
 						xdist = temp[0] - currententity->origin[0];
@@ -885,7 +885,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 	st = currentmodel->st;
 
 	if (r_shaders->value)
-			rs=(rscript_t *)currententity->script;
+		rs=(rscript_t *)currententity->script;
 
 	VectorCopy(shadelight, lightcolor);
 	for (i=0;i<model_dlights_num;i++)

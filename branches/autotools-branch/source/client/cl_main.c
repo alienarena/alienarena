@@ -274,6 +274,7 @@ void CL_Record_f (void)
 
 	Com_Printf ("recording to %s.\n", name);
 	FS_CreatePath (name);
+
 	cls.demofile = fopen (name, "wb");
 	if (!cls.demofile)
 	{
@@ -750,9 +751,9 @@ void CL_Disconnect (void)
 
 	cls.state = ca_disconnected;
 
-/* 
+/*
 ** From Max's timedemo benchmarks:
-**	For automated test runs using demos, can exit here by calling CL_Quit_f() 
+**	For automated test runs using demos, can exit here by calling CL_Quit_f()
 */
 
 }
@@ -1668,9 +1669,9 @@ void CL_Precache_f (void)
 
 #if defined UNIX_VARIANT
 // -jjb-dedicated-server  move this where dedicated server can use it (maybe)
-void CL_Shell_f (void) 
+void CL_Shell_f (void)
 {
-	if(Cmd_Argc() < 2) 
+	if(Cmd_Argc() < 2)
 	{
 		Com_Printf("Usage: shell command");
 		return;
@@ -1919,6 +1920,7 @@ void CL_WriteConfiguration (void)
 	if (cls.state == ca_uninitialized)
 		return;
 
+	// -jjb-filesystem
 	Com_sprintf (path, sizeof(path),"%s/config.cfg",FS_Gamedir());
 	f = fopen (path, "w");
 	if (!f)

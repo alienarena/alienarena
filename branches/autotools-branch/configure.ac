@@ -167,7 +167,8 @@ AC_CHECK_HEADERS(
 	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h sys/vt.h unistd.h netdb.h termios.h])
 
 AC_CHECK_HEADERS(
-	[fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h sys/time.h unistd.h])
+	[ fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h dnl 
+	sys/time.h unistd.h sys/stat.h ])
 	
 AS_IF( [ test "x${cond_build_client}" = xyes ],
 [
@@ -252,7 +253,9 @@ AC_CHECK_FUNCS([ pthread_create _begin_thread ])
 AC_CHECK_FUNCS([ floor gethostbyname gettimeofday memmove memset mkdir dnl
 		munmap mremap putenv _putenv select sqrt strchr strdup _strdup dnl
 		strerror stricmp _stricmp strcasecmp strncasecmp strrchr strstr dnl 
-		strnicmp unlink _unlink ]) dnl
+		strnicmp unlink _unlink strlcpy ]) dnl
+		
+AC_CHECK_FUNCS([ filelength stat fstat getcwd ])		
 
 # outputs
 AC_CONFIG_FILES([Makefile source/Makefile])

@@ -137,6 +137,11 @@ static Cursor CreateNullCursor(Display *display, Window root)
 void install_grabs(void)
 {
 
+	// -jjb-dbg temporary  no grabs
+	mouse_active = true;
+	return;
+
+
 #if defined NO_XXF86DGA
 	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
 	XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
@@ -162,6 +167,8 @@ void install_grabs(void)
 		XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
 	}
 #endif
+
+	XGrabKeyboard(dpy, win, False, GrabModeAsync, GrabModeAsync, CurrentTime);
 
 	mouse_active = true;
 
@@ -463,8 +470,27 @@ static void signal_handler(int sig)
 	exit(0);
 }
 
+/*
+static void segfault_sigaction( int signal, siginfo_t *si, void *arg )
+{
+// report address of fault, and backtrace()
+}
+*/
+
 static void InitSig(void)
 {
+/*
+	struct sigaction sa;
+
+	memset(&sa, 0, sizeof(sigaction));
+	sigemptyset( &sa.sa_mask );
+	sa.sa_sigaction = segfault_sigaction;
+	sa.sa_flags = SA_SIGINFO;
+	sigaction( SIGSEGV, &sa, NULL );
+*/
+
+	return; // -jjb-dbg temporary
+
 	signal(SIGHUP, signal_handler);
 	signal(SIGQUIT, signal_handler);
 	signal(SIGILL, signal_handler);
@@ -472,8 +498,12 @@ static void InitSig(void)
 	signal(SIGIOT, signal_handler);
 	signal(SIGBUS, signal_handler);
 	signal(SIGFPE, signal_handler);
-	signal(SIGSEGV, signal_handler);
+//	signal(SIGSEGV, signal_handler); // -jjb-segfault let it core dump
 	signal(SIGTERM, signal_handler);
+
+
+
+
 }
 
 /*
@@ -826,6 +856,6 @@ char *Sys_GetClipboardData(void)
 
 	XDeleteProperty(dpy, win, cor_clipboard);
 
-	return output;
+	return (char*)output;
 }
 

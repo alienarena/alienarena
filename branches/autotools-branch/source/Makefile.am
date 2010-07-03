@@ -33,10 +33,10 @@ endif
 noinst_LIBRARIES = libgame.a
 
 if BUILD_UNIX
-crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall 
+crded_CFLAGS = -DDEDICATED_ONLY -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math 
 crded_LDADD = libgame.a
 if BUILD_CLIENT
-crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall 
+crx_CFLAGS = -DHAVE_CURL -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math 
 crx_LDADD = libgame.a
 endif
 else
@@ -45,7 +45,7 @@ crx_LDADD = libgame.a
 LIBS += $(WIN32_LIBS)
 endif
 
-libgame_a_CFLAGS = -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math -fstack-protector -Wall
+libgame_a_CFLAGS = -U_FORTIFY_SOURCE -fno-strict-aliasing -ffast-math 
 
 if BUILD_UNIX
 crded_SOURCES = \

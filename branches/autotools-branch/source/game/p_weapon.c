@@ -1,23 +1,3 @@
-/*
-Copyright (C) 1997-2001 Id Software, Inc.
-Copyright (C) 2006-2010 COR Entertainment
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-*/
 // p_weapon.c
 
 #ifdef HAVE_CONFIG_H
@@ -181,93 +161,38 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 
 /*
 ===========
-FS_FOpenFile
+Q2_FindFile
 
 Finds the file in the search path.
-returns filesize and an open FILE *
-Used for streaming data out of either a pak file or
-a seperate file.
+returns filesize and an open FILE * for reading
 ===========
 */
 
-#if 1
-// -jjb-ac
-//  eventually, duplicate whatever FS_OpenFile is doing
-//  this is a problem
-
-
-/*
- * BIG HACK -jjb-bighack
- */
-int (*ptrGame_FS_FOpenFile)( char* filename, FILE **file );
-
 int Q2_FindFile( char *filename, FILE **file )
 {
+	char full_path[MAX_OSPATH];
 	int result = -1;
 
-	if ( ptrGame_FS_FOpenFile != NULL )
+	*file = NULL;
+	if ( !gi.FullPath( full_path, sizeof(full_path), filename ) )
 	{
-		result = ptrGame_FS_FOpenFile( filename, file );
+		// gi.dprintf("Q2_FindFile: not found: %s\n", filename );
+	}
+	else
+	{
+		*file = fopen( full_path, "rb" );
+		if ( *file )
+		{
+			result = 1;
+		}
+		else
+		{
+			gi.dprintf("Q2_FindFile: failed fopen for read: %s", full_path );
+		}
 	}
 
 	return result;
 }
-
-#else
-int Q2_FindFile (char *filename, FILE **file)
-{
-	char	name[MAX_OSPATH];
-	cvar_t	*game;
-	qboolean found = false;
-
-	game = gi.cvar("game", "", 0);
-
-// -jjb-ac  review this
-#if defined DATADIR
-	if ( game && *game->string ) {
-		sprintf( name, DATADIR"/%s/%s", game->string, filename );
-		*file = fopen( name, "rb" );
-		if( *file )
-			return 1;
-	}
-	sprintf( name, "%s/%s/%s", DATADIR, GAMEVERSION, filename );
-	*file = fopen (name, "rb");
-	if( *file )
-		return 1;
-
-	return -1;
-#else
-
-	if (!*game->string) //if there is a gamedir try here first
-		sprintf (name, "%s/%s", GAMEVERSION, filename);
-	else
-		sprintf (name, "%s/%s", game->string, filename);
-
-	*file = fopen (name, "rb");
-	if (!*file) {
-		*file = NULL;
-		found = false;
-	}
-	else
-		return 1;
-
-
-	if(!found) { //try basedir
-		sprintf (name, "%s/%s", GAMEVERSION, filename);
-		*file = fopen (name, "rb");
-		if (!*file) {
-			*file = NULL;
-			return -1;
-		}
-		else
-			return 1;
-	}
-	else
-		return -1;
-#endif
-
-}
-#endif
 
 /*
 ===============

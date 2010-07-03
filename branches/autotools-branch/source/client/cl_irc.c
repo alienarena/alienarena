@@ -244,7 +244,7 @@ void analizeLine(char Line[1000])
 						msgLine[j] = outputmsg[j+(80*i)];
 					msgLine[80] = 0;
 
-					SCR_IRCPrintf("^1IRC: %s\n", msgLine); //com_printf here for test
+					SCR_IRCPrintf("^1IRC: %s\n", msgLine); 
 
 					printed = true;
 				}
@@ -269,7 +269,7 @@ void analizeLine(char Line[1000])
 	   Response = SkipWords(Line,3);
 	   Response.word[0][strlen(Response.word[0])-2]= 0;
 
-	   SCR_IRCPrintf("^1IRC: %s\n", msgLine); //com_printf here for test
+	   SCR_IRCPrintf("^1IRC: %s\n", msgLine); 
 
 	   printed = true;
 	}
@@ -371,6 +371,8 @@ void CL_GetIRCData(void)
 #error Neither strnicmp() nor strncasecmp() found.
 #endif
 		{
+			Com_Printf("Received a ping!\n");
+			cls.irc_canjoin = true; 
 			File_Buf[1]='O';
 			sendData(File_Buf);
 		};
@@ -408,6 +410,12 @@ void CL_IRCSay(void)
 	char tempstring[1024];
 	int i, j, lines;
 	char m_sendstring[1024];
+
+	if(!cls.irc_connected)
+	{
+		Com_Printf("IRC: Not connected\n");
+		return;
+	}
 
 	if (Cmd_Argc() != 2)
 	{
@@ -550,7 +558,7 @@ qboolean CL_JoinIRC(void)
 
 	cls.irc_connected = true;
 	cls.irc_joinedchannel = false;
-	cls.irc_connectime = Sys_Milliseconds();
+	cls.irc_canjoin = false;;
 
 	Com_Printf("...Connected to IRC server\n");
 
@@ -568,10 +576,8 @@ void RecvThreadProc(void *dummy)
 
 	while(1)
 	{
-		if((Sys_Milliseconds() - cls.irc_connectime) > 500 && cls.irc_joinedchannel == false)
+		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel) 
 		{
-			WSASetLastError(0);
-
 			sendData("JOIN #alienarena\n\r");
 			cls.irc_joinedchannel = true;
 			Com_Printf("Joining #alienarena\n");
@@ -603,7 +609,7 @@ void *RecvThreadProc(void *dummy)
 
 	while(1)
 	{
-		if((Sys_Milliseconds() - cls.irc_connectime) > 500 && cls.irc_joinedchannel == false)
+		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel) 
 		{
 			sendData("JOIN #alienarena\n\r");
 			cls.irc_joinedchannel = true;
@@ -644,6 +650,7 @@ void CL_IRCShutdown(void)
 
 	cls.irc_connected = false;
 	cls.irc_joinedchannel = false;
+	cls.irc_canjoin = false;
 
 	Com_Printf("Disconnected from chat channel...");
 

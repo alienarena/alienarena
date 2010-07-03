@@ -95,10 +95,13 @@ static menulist_s		s_parallaxmaps_box;
 static menulist_s		s_postprocess_box;
 static menulist_s		s_glsl_box;
 
+#if 0
+// -jjb-unused
 static void DriverCallback( void *unused )
 {
 	s_current_menu = &s_opengl_menu;
 }
+#endif
 
 static void BrightnessCallback( void *s )
 {
@@ -141,7 +144,7 @@ static void ModulateCallback( void *s )
 static void NormalMapsCallback( void *s )
 {
 	Cvar_SetValue("gl_normalmaps", s_normalmaps_box.curvalue);
-	if(s_normalmaps_box.curvalue) { //must turn this on for normal 
+	if(s_normalmaps_box.curvalue) { //must turn this on for normal
 		Cvar_SetValue("gl_glsl_shaders", s_normalmaps_box.curvalue);
 		s_glsl_box.curvalue = s_normalmaps_box.curvalue;
 	}
@@ -150,7 +153,7 @@ static void NormalMapsCallback( void *s )
 static void ShadowMapsCallback( void *s )
 {
 	Cvar_SetValue("gl_shadowmaps", s_shadowmaps_box.curvalue);
-	if(s_shadowmaps_box.curvalue) { //must turn this on for shadowmaps 
+	if(s_shadowmaps_box.curvalue) { //must turn this on for shadowmaps
 		Cvar_SetValue("gl_glsl_shaders", s_shadowmaps_box.curvalue);
 		Cvar_SetValue("gl_shadows", 0);
 		s_glsl_box.curvalue = s_shadowmaps_box.curvalue;
@@ -160,7 +163,7 @@ static void ShadowMapsCallback( void *s )
 static void ParallaxCallback( void *s )
 {
 	Cvar_SetValue("gl_parallaxmaps", s_parallaxmaps_box.curvalue);
-	if(s_parallaxmaps_box.curvalue) { //must turn this on for parallax 
+	if(s_parallaxmaps_box.curvalue) { //must turn this on for parallax
 		Cvar_SetValue("gl_glsl_shaders", s_parallaxmaps_box.curvalue);
 		s_glsl_box.curvalue = s_parallaxmaps_box.curvalue;
 	}
@@ -168,7 +171,7 @@ static void ParallaxCallback( void *s )
 static void PostProcessCallback( void *s )
 {
 	Cvar_SetValue("gl_parallaxmaps", s_postprocess_box.curvalue);
-	if(s_postprocess_box.curvalue) { //must turn this on for parallax 
+	if(s_postprocess_box.curvalue) { //must turn this on for parallax
 		Cvar_SetValue("gl_glsl_postprocess", s_postprocess_box.curvalue);
 		s_glsl_box.curvalue = s_postprocess_box.curvalue;
 	}
@@ -176,7 +179,7 @@ static void PostProcessCallback( void *s )
 static void GlslCallback( void *s )
 {
 	Cvar_SetValue("gl_glsl_shaders", s_glsl_box.curvalue);
-	if(!s_glsl_box.curvalue) { 
+	if(!s_glsl_box.curvalue) {
 		Cvar_SetValue("gl_parallaxmaps", s_glsl_box.curvalue);
 		s_parallaxmaps_box.curvalue = s_glsl_box.curvalue;
 		Cvar_SetValue("gl_normalmaps", s_glsl_box.curvalue);
@@ -370,7 +373,7 @@ static void ApplyChanges( void *unused )
 		Cvar_SetValue("vid_height", h);
 	}
 	else
-		Cvar_SetValue( "gl_mode", s_mode_list.curvalue ); 
+		Cvar_SetValue( "gl_mode", s_mode_list.curvalue );
 
 	Cvar_SetValue( "r_bloom", s_bloom_box.curvalue);
 	Cvar_SetValue( "r_bloom_intensity", s_bloom_slider.curvalue/10);
@@ -386,7 +389,7 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "gl_glsl_shaders", s_glsl_box.curvalue);
 	if(s_normalmaps_box.curvalue)
 		Cvar_SetValue("r_shaders", 1); //shaders must be enabled for this to work
-									  
+
 	vid_ref->modified = true;
 #ifdef __unix__
 	vid_restart = true;
@@ -480,7 +483,7 @@ void VID_MenuInit( void )
 	if(gl_mode->value == -1)
 		s_mode_list.curvalue = 10;
 	else
-		s_mode_list.curvalue = gl_mode->value; 
+		s_mode_list.curvalue = gl_mode->value;
 
 	if ( s_mode_list.curvalue < 0 )
 		s_mode_list.curvalue = 0;
@@ -580,7 +583,7 @@ void VID_MenuInit( void )
 	s_overbright_slider.generic.name	= "overbright bits";
 	s_overbright_slider.minvalue = 1;
 	s_overbright_slider.maxvalue = 3;
-	s_overbright_slider.curvalue = 
+	s_overbright_slider.curvalue =
 		(r_overbrightbits->value == 4.0f) ? 3.0f : r_overbrightbits->value;
 
 	s_tq_slider.generic.type	= MTYPE_SLIDER;
