@@ -1106,20 +1106,20 @@ void UploadStats(void) { //put all updated files on the server
     fceSetInteger(0, FCE_SET_MAX_RESPONSE_WAIT, 1000);
 	
 	// Connect to FTP server
-	error = fceConnect(0,"server","user","password");
+	error = fceConnect(0,"servername","username","passwored");
 	if(error < 0) {
 		printf("Error connecting to host!\n");
 		return;
 	}
 
 	//change to correct dir
-	error = fceSetServerDir (0, "web/stats");
+	error = fceSetServerDir (0, "/web");
 	if(error < 0) {
 		printf("Error changing directory!\n");
 		fceClose(0);
 		return;
 	}
-	else
+	else 
 		printf("Connected Succesfully!\n");
 	
 	for(i = 1; i < 11; i++) {
