@@ -353,7 +353,7 @@ void CL_GetIRCData(void)
 		if (!strncasecmp(File_Buf,"PING",4)) 
 #endif		
 		{
-			Com_Printf("Received a ping!\n");
+			Com_Printf("IRC: Received a ping\n");
 			cls.irc_canjoin = true; 
 			File_Buf[1]='O'; 
 			sendData(File_Buf);
