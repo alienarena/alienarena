@@ -220,7 +220,7 @@ UINT RecvThreadProc(LPVOID pParam)
 		sockete.getData();	
 		//if an error - break - will have to set something up
 
-		if(!connectedToIRC && (Sys_Milliseconds() - connectTime > 500)) 
+		if(!connectedToIRC && (Sys_Milliseconds() - connectTime > 750)) 
 		{
 			sockete.sendData("JOIN #alienarena\n\r");
 			connectedToIRC = true;
