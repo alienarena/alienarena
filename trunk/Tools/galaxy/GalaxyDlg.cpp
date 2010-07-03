@@ -63,8 +63,8 @@ char mensaje[200];				   // variable de todo uso.
 char servidor[100];
 cUser user;
 bool joinflg;
-bool connectedToIRC = true;
-int	 connectTime;
+bool connectedToChannel = true;
+bool canJoin = false;
 
 char currBuddyName[32];
 char newBuddyName[32];
@@ -220,10 +220,10 @@ UINT RecvThreadProc(LPVOID pParam)
 		sockete.getData();	
 		//if an error - break - will have to set something up
 
-		if(!connectedToIRC && (Sys_Milliseconds() - connectTime > 750)) 
+		if(!connectedToChannel && canJoin) 
 		{
 			sockete.sendData("JOIN #alienarena\n\r");
-			connectedToIRC = true;
+			connectedToChannel = true;
 			AfxMessageBox("Joining #alienarena");
 		}
 	}
@@ -470,8 +470,7 @@ BOOL CGalaxyDlg::OnInitDialog()
 		sockete.sendData(mensaje);
 		sprintf(mensaje,"NICK %s\n\r", user.nick);
 		sockete.sendData(mensaje);
-		connectTime = Sys_Milliseconds();
-		connectedToIRC = false;
+		connectedToChannel = false;
 		m_status2.SetWindowText("connected to server");
 
 		sockete.getData();
@@ -1051,6 +1050,7 @@ void cSocket::getData(void)
 	    // received a ping from server...
 		if (!strnicmp(File_Buf,"PING",4)) 
 		{
+			canJoin = true;
 			File_Buf[1]='O'; //cause of echo??
 			sendData(File_Buf);
 		};
@@ -1141,8 +1141,6 @@ void cSocket::handle_error(void)
 void CGalaxyDlg::OnButton4() 
 {
 
-	//to do - this should be in a background thread!
-
 	response Response;
 
 	WSASetLastError(0);
@@ -1154,8 +1152,7 @@ void CGalaxyDlg::OnButton4()
 	sprintf(mensaje,"NICK %s\n\r", user.nick);
 	sockete.sendData(mensaje);
 
-	connectTime = Sys_Milliseconds();
-	connectedToIRC = false;
+	connectedToChannel = false;
 	m_status2.SetWindowText("connected to server");
 	
 	sockete.getData();
@@ -1169,7 +1166,7 @@ void CGalaxyDlg::OnButton4()
 
 void CGalaxyDlg::OnShowusers() 
 { 
-	//put in background thread!
+
 	response Response;
 
 	WSASetLastError(0);
@@ -1476,6 +1473,8 @@ void CGalaxyDlg::OnButton6()
 	sprintf(mensaje,"QUIT\n\r");
 	sockete.sendData(mensaje);
 	m_status2.SetWindowText("Disconnected from chat channel...");
+	canJoin = false;
+	connectedToChannel = false;
 }
 
 void CGalaxyDlg::Configure()
