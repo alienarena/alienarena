@@ -797,7 +797,7 @@ void GL_DrawIQMFrame(int skinnum)
 				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value))
 					shellscale = .4;
 				else
-					shellscale = 2.6;
+					shellscale = 1.6;
 				
 				VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0];
                 VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1];
