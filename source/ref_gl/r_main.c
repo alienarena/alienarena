@@ -50,6 +50,7 @@ cvar_t	*gl_arb_fragment_program;
 cvar_t	*gl_glsl_shaders;
 
 cvar_t	*r_legacy;
+cvar_t	*r_usemd2;
 
 entity_t	*currententity;
 model_t	*currentmodel;
@@ -1236,6 +1237,7 @@ void R_Register( void )
 	gl_screenshot_jpeg_quality = Cvar_Get("gl_screenshot_jpeg_quality", "85", CVAR_ARCHIVE);
 
 	r_legacy = Cvar_Get("r_legacy", "0", CVAR_ARCHIVE); 
+	r_usemd2 = Cvar_Get("r_usemd2", "0", CVAR_ARCHIVE); 
 
 	r_firstrun = Cvar_Get("r_firstrun", "0", CVAR_ARCHIVE); //first time running the game
 

@@ -467,7 +467,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	else 
 	{	//we have an .iqm
 		//if r_legacy, check for .md2, if none, load the .iqm
-		if(r_legacy->value) 
+		if(r_usemd2->value) 
 		{
 			COM_StripExtension(mod->name, shortname);
 			strcat(shortname, ".md2");
