@@ -17,6 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -24,16 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-#ifdef HAVE_SYS_VT_H
-#include <sys/vt.h>     // -jjb-ac  necessary?
-#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <signal.h>
 #include <dlfcn.h>
 
-// -jjb-ac review what is required
 #include "qcommon/qcommon.h"
 #include "ref_gl/r_local.h"
 #include "client/keys.h"
@@ -137,9 +134,12 @@ static Cursor CreateNullCursor(Display *display, Window root)
 void install_grabs(void)
 {
 
-	// -jjb-dbg temporary  no grabs
+#if defined DEBUG_GDB_NOGRAB
+	Cvar_Set( "in_dgamouse", "0" );
+	dgamouse = false;
 	mouse_active = true;
 	return;
+#endif
 
 
 #if defined NO_XXF86DGA
@@ -470,26 +470,8 @@ static void signal_handler(int sig)
 	exit(0);
 }
 
-/*
-static void segfault_sigaction( int signal, siginfo_t *si, void *arg )
-{
-// report address of fault, and backtrace()
-}
-*/
-
 static void InitSig(void)
 {
-/*
-	struct sigaction sa;
-
-	memset(&sa, 0, sizeof(sigaction));
-	sigemptyset( &sa.sa_mask );
-	sa.sa_sigaction = segfault_sigaction;
-	sa.sa_flags = SA_SIGINFO;
-	sigaction( SIGSEGV, &sa, NULL );
-*/
-
-	return; // -jjb-dbg temporary
 
 	signal(SIGHUP, signal_handler);
 	signal(SIGQUIT, signal_handler);
@@ -498,11 +480,8 @@ static void InitSig(void)
 	signal(SIGIOT, signal_handler);
 	signal(SIGBUS, signal_handler);
 	signal(SIGFPE, signal_handler);
-//	signal(SIGSEGV, signal_handler); // -jjb-segfault let it core dump
+	signal(SIGSEGV, signal_handler);
 	signal(SIGTERM, signal_handler);
-
-
-
 
 }
 
@@ -742,7 +721,6 @@ void GLimp_Shutdown( void )
 ** This routine is responsible for initializing the OS specific portions
 ** of OpenGL.
 */
-// jjb-fix
 qboolean GLimp_Init( void *hinstance, void *wndproc )
 {
 	InitSig();

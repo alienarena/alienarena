@@ -75,8 +75,8 @@ static void WIN_DisableAltTab( void )
 	if ( s_win95 )
 	{
 		BOOL old;
-// -jjb-ac same value, but not def'd in mingw winuser.h
 		SystemParametersInfo( SPI_SETSCREENSAVERRUNNING, 1, &old, 0 );
+			// using MinGW compatible equivalent SPI constant
 	}
 	else
 	{
@@ -93,8 +93,8 @@ static void WIN_EnableAltTab( void )
 		if ( s_win95 )
 		{
 			BOOL old;
-//-jjb-ac see above
 			SystemParametersInfo( SPI_SETSCREENSAVERRUNNING, 0, &old, 0 );
+				// using MinGW compatible equivalent SPI constant
 		}
 		else
 		{

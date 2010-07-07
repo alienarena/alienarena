@@ -740,7 +740,7 @@ void DrawTextureChains (void)
 extern int KillFlags;
 static void GL_RenderLightmappedPoly( msurface_t *surf )
 {
-	// int		nv = surf->polys->numverts; // -jjb-unused
+	// int		nv = surf->polys->numverts; // unused
 	int		map;
 	float	scroll;
 	image_t *image = R_TextureAnimation( surf->texinfo );

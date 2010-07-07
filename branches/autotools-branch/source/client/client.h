@@ -219,10 +219,9 @@ typedef struct
 
 // connection information
 #if 1
-	// moving netchan here seems to help some obscure bug, possibly
-	//  an alignment problem. where netchan_t.outgoing sequence is
-	//  overwritten with a stale value.
-	// -jjb-dbg
+	// TODO: find what is causing this.
+	// moving netchan here seems to help some obscure bug,
+	//  where netchan_t.outgoing sequence is overwritten
 	netchan_t	netchan;
 #endif
 
@@ -232,7 +231,6 @@ typedef struct
 	int			quakePort;			// a 16 bit value that allows quake servers
 									// to work around address translating routers
 #if 0
-	// -jjb-dbg
 	netchan_t	netchan;
 #endif
 

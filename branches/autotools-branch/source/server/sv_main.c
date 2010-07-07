@@ -448,7 +448,6 @@ void SVC_DirectConnect (void)
 	version = atoi(Cmd_Argv(1));
 	if (version != PROTOCOL_VERSION)
 	{
-		// -jjb-ac
 		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nServer is version %s\n", VERSION);
 		Com_DPrintf ("    rejected connect from version %i\n", version);
 		return;
@@ -462,12 +461,7 @@ void SVC_DirectConnect (void)
 
 	//limit connections from a single IP
 	previousclients = 0;
-#if 1
-	// -jjb-fix  everywhere else is "value"
 	for (i=0,cl=svs.clients ; i<maxclients->value ; i++,cl++)
-#else
-	for (i=0,cl=svs.clients ; i<maxclients->integer ; i++,cl++)
-#endif
 	{
 		if (cl->state == cs_free)
 			continue;
@@ -755,13 +749,6 @@ void SV_ConnectionlessPacket (void)
 		return;
 	}
 
-#if 0
-	// -jjb-dbg net loopback problem
-	Com_Printf("[SV_ConnectionlessPacket: \n");
-	Com_Printf("   net_message.name %s\n", net_message.name );
-	Com_Printf("   net_message.readcount %s\n", net_message.readcount );
-#endif
-
 	MSG_BeginReading (&net_message);
 	MSG_ReadLong (&net_message);		// skip the -1 marker
 
@@ -886,16 +873,7 @@ void SV_ReadPackets (void)
 	while (NET_GetPacket (NS_SERVER, &net_from, &net_message))
 	{
 		// check for connectionless packet (0xffffffff) first
-#if 0
-		// -jjb-test
-		if ( net_message.data[0] == 0xff &&
-			net_message.data[1] == 0xff &&
-			net_message.data[2] == 0xff &&
-			net_message.data[3] == 0xff	)
-
-#else
 		if (  *(int *)net_message.data == -1 )
-#endif
 		{
 			SV_ConnectionlessPacket ();
 			continue;

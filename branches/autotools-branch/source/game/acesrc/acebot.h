@@ -60,13 +60,6 @@
 #ifndef _ACEBOT_H
 #define _ACEBOT_H
 
-// Directory for reading files in "botinfo", writing is always done in "."
-// -jjb-ac needs work
-//#ifdef DATADIR
-//#define BOTDIR	DATADIR
-//#else
-//#define BOTDIR	"."
-//#endif
 #if !defined BOT_GAMEDATA
 #define BOT_GAMEDATA "botinfo"
 #endif

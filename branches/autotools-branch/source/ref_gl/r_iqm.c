@@ -11,9 +11,8 @@
 #include "r_iqm.h"
 #include "r_matrixlib.h"
 
-// -jjb-experiment  for static arrays
-static vec3_t NormalsArray[MAX_TRIANGLES*3]; // -jjb-experiment
-static vec4_t TangentsArray[MAX_TRIANGLES*4]; // -jjb-experiment
+static vec3_t NormalsArray[MAX_TRIANGLES*3];
+static vec4_t TangentsArray[MAX_TRIANGLES*4];
 
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 
@@ -546,7 +545,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 			//load shader for skin
 			COM_StripExtension ( skinname, shortname );
-			mod->script = RS_FindScript(shortname); // jjb-ac rscript decl
+			mod->script = RS_FindScript(shortname);
 			if (mod->script)
 				RS_ReadyScript((rscript_t *)mod->script);
 		}
@@ -757,11 +756,8 @@ void GL_DrawIQMFrame(int skinnum)
 
             //simple directional(relative light position)
             VectorSubtract(lightPosition, currententity->origin, lightVec);
-            if(dynFactor == 0.0) //do for world lights only
-            {
-                VectorMA(lightPosition, 1.0, lightVec, lightPosition);
-                R_ModelViewTransform(lightPosition, lightVec);
-            }
+            VectorMA(lightPosition, 1.0, lightVec, lightPosition);
+			R_ModelViewTransform(lightPosition, lightVec);
 
             //brighten things slightly
             for (i = 0; i < 3; i++ )
@@ -839,7 +835,6 @@ void GL_DrawIQMFrame(int skinnum)
             qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 			glEnableVertexAttribArrayARB (1);
             glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
-			glUniform1iARB( g_location_isMD2, 0); //fix me
         }
         else
             R_InitVArrays (VERT_COLOURED_TEXTURED);
@@ -1078,19 +1073,13 @@ void GL_DrawIQMFrame(int skinnum)
 				{
 					//simple directional(relative light position)
 					VectorSubtract(lightPosition, currententity->origin, lightVec);
-					if(dynFactor == 0.0) //do for world lights only
-					{
-						VectorMA(lightPosition, 1.0, lightVec, lightPosition);
+					VectorMA(lightPosition, 5.0, lightVec, lightPosition);
 						R_ModelViewTransform(lightPosition, lightVec);
-					}
 
 					//brighten things slightly
 					for (i = 0; i < 3; i++ )
 					{
-						if(currententity->flags & RF_WEAPONMODEL)
-							lightVal[i] *= 0.9;
-						else
-							lightVal[i] *= 1.15;
+						lightVal[i] *= 1.05;
 					}
 				}
 
@@ -1197,7 +1186,6 @@ void GL_DrawIQMFrame(int skinnum)
 				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 				glEnableVertexAttribArrayARB (1);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
-				glUniform1iARB( g_location_isMD2, 0);
 			}
 			else
 				R_InitVArrays (VERT_COLOURED_TEXTURED);

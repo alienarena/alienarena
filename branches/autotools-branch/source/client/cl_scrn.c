@@ -690,11 +690,8 @@ void SCR_DrawLoading (void)
 		Draw_Fill (0, 0, viddef.width, viddef.height, 0);
 
 #if 0
+	// no m_background pic, but a pic here over-writes the levelshot ???
 	Draw_StretchPic (0, 0, viddef.width, viddef.height, "m_background");
-#else
-	// -jjb-fix  m_background does not exist, not sure what to use instead
-	// -jjb-duh  it is supposed to be the levelshot
-	// Draw_StretchPic (0, 0, viddef.width, viddef.height, "menu_back");
 #endif
 
 	//loading message stuff...
@@ -943,13 +940,6 @@ void SCR_BeginLoadingPlaque (void)
 {
 	S_StopAllSounds ();
 	cl.sound_prepped = false;		// don't play ambients
-
-/*
-	// -jjb-experiment  not sure what the point of this is
-	if (developer->value) {
-		return;
-	}
-*/
 
 	scr_draw_loading = 1;
 
@@ -1896,8 +1886,6 @@ void SCR_UpdateScreen (void)
 	int i;
 	float separation[2] = { 0, 0 };
 
-	// if the screen is disabled (loading plaque is up, or vid mode changing)
-	// do nothing at all
 	// if the screen is disabled (loading plaque is up, or vid mode changing)
 	// do nothing at all
 	if (cls.disable_screen)

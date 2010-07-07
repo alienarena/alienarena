@@ -80,18 +80,12 @@ void ACESP_SaveBots()
 	int i,count = 0;
 	char full_path[MAX_OSPATH];
 
-#if 1
-	// -jjb-filesystem
 	gi.FullWritePath( full_path, sizeof(full_path), BOT_GAMEDATA"/bots.tmp" );
 	if ( ( pOut = fopen( full_path, "wb" )) == NULL )
 	{
 		gi.dprintf("ACESP_SaveBots: fopen for write failed: %s\n", full_path );
 		return;
 	}
-#else
-	if((pOut = fopen("botinfo/bots.tmp", "wb" )) == NULL)
-		return; // bail
-#endif
 
 	// Get number of bots
 	for (i = maxclients->value; i > 0; i--)
@@ -140,8 +134,6 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	}
 
 	//bots and configurations will be loaded level specific
-#if 1
-	// -jjb-filesystem
 	// note: see FindBotNum(), custombots has priority over team. (?)
 	if (sv_custombots->value)
 		sprintf( stem, BOT_GAMEDATA"/custom%i.tmp", sv_custombots->integer);
@@ -160,19 +152,6 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 		gi.dprintf("ACESP_LoadBots: failed fopen for read: %s", bot_filename );
 		return;
 	}
-
-#else
-	if(sv_custombots->value)
-		sprintf(bot_filename, BOTDIR"/botinfo/custom%i.tmp", sv_custombots->integer);
-	else if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
-		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
-	else
-		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", level.mapname);
-
-	if((pIn = fopen(bot_filename, "rb" )) == NULL)
-		return; // bail
-#endif
-
 
 	fread(&count,sizeof (int),1,pIn);
 
@@ -265,8 +244,6 @@ int ACESP_FindBotNum(void)
 	char stem[MAX_QPATH];
 
 	//bots and configurations are loaded level specific
-#if 1
-	// -jjb-filesystem
 	// note: see LoadBots, custombots have priority over team (?)
 	if(sv_custombots->value)
 		sprintf( stem, BOT_GAMEDATA"/custom%i.tmp", sv_custombots->integer);
@@ -285,20 +262,6 @@ int ACESP_FindBotNum(void)
 		gi.dprintf("ACESP_FindBotNum: failed fopen for read: %s", bot_filename );
 		return 0;
 	}
-
-#else
-
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
-		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
-	else if(sv_custombots->value)
-		sprintf(bot_filename, BOTDIR"/botinfo/custom%i.tmp", sv_custombots->integer);
-	else
-		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", level.mapname);
-
-
-	if((pIn = fopen(bot_filename, "rb" )) == NULL)
-		return 0; // bail
-#endif
 
 	fread(&count,sizeof (int),1,pIn);
 
@@ -338,11 +301,12 @@ void ACESP_HoldSpawn(edict_t *self)
   System-independent bot configuration file reader.
   2010-06: Replaces function in acebot_config.cpp for Windows
 
-  Should be called with absolute path to the .cfg file.
+  To be called with relative path to the .cfg file.
 
 ===*/
 void ACECO_ReadConfig( char *config_file )
 {
+	char full_path[ MAX_OSPATH];
 	FILE *fp;
 	int k;
 	size_t length, result;
@@ -366,8 +330,13 @@ void ACECO_ReadConfig( char *config_file )
 	strcpy( botvals.chatmsg7, "%s: It hurts %s...it hurts..."  );
 	strcpy( botvals.chatmsg8, "%s: Just a lucky shot %s!"      );
 
-	if ( (fp = fopen(config_file, "rb" )) == NULL )
-	{ // no bot cfg file, use defaults
+	if ( !gi.FullPath( full_path, sizeof(full_path), config_file ) )
+	{ // bot not configured, use defaults
+		return;
+	}
+	if ( (fp = fopen( full_path, "rb" )) == NULL )
+	{
+		gi.dprintf("ACECO_ReadConfig: failed open for read: %s\n", full_path );
 		return;
 	}
 	if ( fseek(fp, 0, SEEK_END) )
@@ -452,7 +421,6 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	client_respawn_t	resp;
 	char    *info;
 	char bot_configfilename[MAX_OSPATH];
-	char relative_path[MAX_QPATH];
 	char playermodel[MAX_OSPATH] = " ";
 	char modelpath[MAX_OSPATH] = " ";
 	FILE *file;
@@ -657,14 +625,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	if(!respawn) {
 		//if not a respawn, load bot configuration file(specific to each bot)
 		info = Info_ValueForKey (bot->client->pers.userinfo, "name");
-
-#if 1
-		// -jjb-filesystem
 		sprintf( bot_configfilename, BOT_GAMEDATA"/%s.cfg", info );
-#else
-		sprintf(bot_configfilename, BOTDIR"/botinfo/%s.cfg", info);
-#endif
-
 		ACECO_ReadConfig(bot_configfilename);
 
 		//set config items

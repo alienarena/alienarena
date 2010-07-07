@@ -142,31 +142,24 @@ they shouldn't.
 #include "game/q_shared.h"
 #include "unix/glob.h"
 
-
-extern void Q_strncpyz2 (char *dst, const char *src, int dstSize);
-
 char fs_gamedir[MAX_OSPATH];
 cvar_t *fs_gamedirvar; // for the "game" cvar, default is "arena"
 
-// -jjb-filesystem  not useful
+// probably not useful, and complicates filesystem search
 //cvar_t	*fs_basedir; // for redirecting data tree from CWD to somewhere else
-//					// in a "Traditional" install, default is "data1"
 
-// search paths
-#define GAME_SEARCH_SLOTS 6
+/* --- Search Paths ---
+ *
+ * Pathname strings do not include a trailing '/' (tried it, did not like it)
+ * The last slot is guard, containing an empty string
+ * The bot pathname strings do not include the "botinfo" part.
+ *
+ */
+#define GAME_SEARCH_SLOTS 7
 char fs_gamesearch[GAME_SEARCH_SLOTS][MAX_OSPATH];
 
 #define BOT_SEARCH_SLOTS 3
 char fs_botsearch[BOT_SEARCH_SLOTS][MAX_OSPATH];
-
-typedef struct searchpath_s
-{
-	char *filename;
-	struct searchpath_s *next;
-} searchpath_t, *psearchpath_t;
-
-searchpath_t fs_searchpath[GAME_SEARCH_SLOTS];
-psearchpath_t fs_searchpaths;
 
 /*
 ===
@@ -176,7 +169,7 @@ psearchpath_t fs_searchpaths;
 */
 static void FS_init_paths( void )
 {
-	int i, j;
+	int i;
 	char fs_bindir[MAX_OSPATH];
 	char fs_datadir[MAX_OSPATH];
 	char fs_homedir[MAX_OSPATH];
@@ -188,9 +181,9 @@ static void FS_init_paths( void )
 	char bot_gamedata[MAX_OSPATH];
 
 #if defined UNIX_VARIANT
-	char user_base_gamedata[MAX_OSPATH]; // player models only (???)
-	char user_game_gamedata[MAX_OSPATH]; // other user data
-	char user_bot_gamedata[MAX_OSPATH]; //  bot information data
+	char user_base_gamedata[MAX_OSPATH]; // possibly never used in Alien Arena
+	char user_game_gamedata[MAX_OSPATH]; // configuration, logs, downloaded data
+	char user_bot_gamedata[MAX_OSPATH]; //  user custom bot data
 #endif
 
 	memset(fs_bindir, 0, sizeof(fs_bindir));
@@ -200,14 +193,16 @@ static void FS_init_paths( void )
 	cwdstr = getcwd( fs_bindir, sizeof(fs_bindir) );
 	if ( cwdstr == NULL )
 	{
-		Sys_Error( strerror(errno) );
+		Sys_Error( "path initialization (getcwd error: %i)", strerror(errno) );
 	}
+
+#if defined UNIX_VARIANT
 	homestr = getenv( "COR_GAME" );
 	if ( homestr != NULL )
 	{
-		if ( strlen( homestr) >= sizeof(fs_homedir) )
+		if ( strlen( homestr) >= sizeof(fs_homedir) || !strlen( homestr ) )
 		{
-			Sys_Error( "COR_GAME size error" );
+			Sys_Error( "path initialization (getenv COR_GAME is %s", homestr );
 		}
 		Q_strncpyz2( fs_homedir, homestr, sizeof( fs_homedir) );
 	}
@@ -224,13 +219,17 @@ static void FS_init_paths( void )
 			fs_homedir[0] = 0;
 		}
 	}
+#else
+	homestr = NULL;
+	fs_homedir[0] = 0;
+#endif
 
 #if !defined DATADIR
 	// "Traditional" install, expect game data in current directory
 	Q_strncpyz2( fs_datadir, fs_bindir, sizeof(fs_datadir) );
 #else
 	if ( !Q_strncasecmp( fs_bindir, DATADIR, sizeof(fs_bindir)) )
-	{ // DATADIR defined, but game data in current directory
+	{ // DATADIR defined, but game data is in current directory
 		Q_strncpyz2( fs_datadir, fs_bindir, sizeof(fs_datadir) );
 	}
 	else
@@ -268,14 +267,14 @@ static void FS_init_paths( void )
 	// note: the "botinfo" part of the path, will be in the relative path
 	//  so do not include it here
 	memset( bot_gamedata, 0, sizeof(bot_gamedata) );
-	Com_sprintf( bot_gamedata, sizeof(bot_gamedata), "%s/", fs_datadir );
+	Com_sprintf( bot_gamedata, sizeof(bot_gamedata), "%s", fs_datadir );
 
 #if defined UNIX_VARIANT
 	if ( fs_homedir[0] )
 	{ // have a user HOME as expected
 		/*
-		 * use the ".codered"/$COR_GAME directory, even if this is a Traditional
-		 *  install.
+		 * use the ".codered" or $COR_GAME directory,
+		 *  even if this is a Traditional install.
 		 */
 		// set "data1" path for user writeable data
 		// Alien Arena maybe never uses this
@@ -315,7 +314,7 @@ static void FS_init_paths( void )
 		i++;
 	}
 	if ( user_base_gamedata[0] )
-	{ // default: ~/.codered/data1  or $COR_GAME/data1 ?is this ever needed?
+	{ // default: ~/.codered/data1  or $COR_GAME/data1 (may not be needed)
 		Q_strncpyz2( fs_gamesearch[i], user_base_gamedata, sizeof(fs_gamesearch[0]));
 		i++;
 	}
@@ -340,20 +339,9 @@ static void FS_init_paths( void )
 		Q_strncpyz2( fs_botsearch[i], bot_gamedata, sizeof(fs_botsearch[0]));
 	}
 
-	// build linked list search path for FS_NextPath()
-	for ( i = 0, j = 1 ; fs_gamesearch[i][0] ; i++, j++ )
-	{
-		fs_searchpath[i].filename = fs_gamesearch[i];
-		if ( fs_gamesearch[j][0] )
-		{
-			fs_searchpath[i].next = &fs_searchpath[j];
-		}
-		else
-		{
-			fs_searchpath[i].next = NULL;
-		}
-	} while ( fs_gamesearch[j][0] );
-	fs_searchpaths = &fs_searchpath[0];
+	// set up fs_gamedir, location for writing various files
+	//  this is the first directory in the search path
+	Q_strncpyz2( fs_gamedir, fs_gamesearch[0], sizeof(fs_gamedir) );
 
 }
 
@@ -403,8 +391,7 @@ FS_CreatePath
 Creates any directories needed to store the given filename
 ============
 */
-// -jjb-ac  review, possible uneeded directories being created
-void	FS_CreatePath (char *path)
+void FS_CreatePath (char *path)
 {
 	char	*ofs;
 
@@ -436,13 +423,15 @@ Each is appended and searched for in each path in the filesystem hierarchy
 
 ===
  */
-#if defined HAVE_STAT
-// stat() version
 qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
 {
 	char search_path[MAX_OSPATH];
+#if defined HAVE_STAT
 	struct stat statbfr;
 	int result;
+#else
+	FILE *pfile;
+#endif
 	qboolean found = false;
 	int i;
 
@@ -460,11 +449,20 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 			// note: relative path contains "botinfo", so fs_botsearch does not
 			Com_sprintf( search_path, sizeof(search_path), "%s/%s",
 						fs_botsearch[i], relative_path);
+#if defined HAVE_STAT
 			result = stat( search_path, &statbfr );
 			if ( result != -1 && S_ISREG(statbfr.st_mode) )
 			{ // regular file exists
 				found = true;
 			}
+#else
+			pfile = fopen( search_path, "rb");
+			if ( pfile )
+			{
+				found = true;
+				fclose( pfile );
+			}
+#endif
 		}
 	}
 	else
@@ -473,11 +471,20 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 		{
 			Com_sprintf( search_path, sizeof(search_path), "%s/%s",
 						fs_gamesearch[i], relative_path);
+#if defined HAVE_STAT
 			result = stat( search_path, &statbfr );
 			if ( result != -1 && S_ISREG(statbfr.st_mode) )
 			{ // regular file exists
 				found = true;
 			}
+#else
+			pfile = fopen( search_path, "rb");
+			if ( pfile )
+			{
+				found = true;
+				fclose( pfile );
+			}
+#endif
 		}
 	}
 	if ( found )
@@ -495,7 +502,6 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 
 	return found;
 }
-#endif
 
 /*
 ===
@@ -510,21 +516,15 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 */
 void FS_FullWritePath( char *full_path, size_t pathsize, const char* relative_path)
 {
-
 	assert( strlen( relative_path ) < MAX_QPATH  );
-	if ( strlen( relative_path ) > MAX_QPATH )
-	{
-		Com_DPrintf("FS_WritePath: relative path size error: %s\n", relative_path );
-		return;
-	}
 
 	if ( !Q_strncasecmp( relative_path, BOT_GAMEDATA, strlen(BOT_GAMEDATA) ) )
-	{
+	{ // a "botinfo/" prefixed relative path
 		Com_sprintf( full_path, pathsize, "%s/%s", fs_botsearch[0], relative_path);
 	}
 	else
-	{
-		Com_sprintf( full_path, pathsize, "%s/%s", fs_gamesearch[0], relative_path);
+	{ // writeable path for game data, same as fs_gamesearch[0]
+		Com_sprintf( full_path, pathsize, "%s/%s", fs_gamedir, relative_path);
 	}
 
 	FS_CreatePath( full_path );
@@ -547,7 +547,7 @@ FS_FOpenFile
 
  Given relative path, search for a file
   if found, open it and return length
-  if not found, return -1
+  if not found, return length -1 and NULL file
 
 ===========
 */
@@ -726,84 +726,6 @@ FS_FileExists(char *path)
 	return (false);
 }
 
-#if 0
-
-// -jjb-filesystem implement this later, maybe not needed
-
-/*
-================
-FS_AddGameDirectory
-
-Sets fs_gamedir, adds the directory to the head of the path
-================
-*/
-void FS_AddGameDirectory (char *dir)
-{
-	searchpath_t	*search;
-
-#if defined WIN32_VARIANT
-	strcpy (fs_gamedir, dir);
-#endif
-
-	//
-	// add the directory to the search path
-	//
-	search = Z_Malloc (sizeof(searchpath_t));
-
-#if defined UNIX_VARIANT
-	strncpy (search->filename, dir, sizeof(search->filename)-1);
-	search->filename[sizeof(search->filename)-1] = 0;
-#else
-	strcpy (search->filename, dir);
-#endif
-
-	search->next = fs_searchpaths;
-	fs_searchpaths = search;
-
-}
-
-#if defined UNIX_VARIANT
-/*
-================
-FS_AddHomeAsGameDirectory
-
-Use ~/.codered/dir as fs_gamedir
-================
-*/
-void FS_AddHomeAsGameDirectory (char *dir)
-{
-	char gdir[MAX_OSPATH];
-	char *homedir = getenv("COR_GAME");
-	int len;
-
-	if (homedir)
-	{
-		len = snprintf (gdir, sizeof(gdir), "%s/%s/", homedir, dir);
-	}
-	else
-	{
-		homedir = getenv("HOME");
-		if (!homedir)
-			return;
-		len = snprintf(gdir,sizeof(gdir),"%s/.codered/%s/", homedir, dir);
-	}
-
-	Com_Printf("using %s for writing\n",gdir);
-	FS_CreatePath (gdir);
-
-	if ((len > 0) && (len < sizeof(gdir)) && (gdir[len-1] == '/'))
-		gdir[len-1] = 0;
-
-	strncpy(fs_gamedir,gdir,sizeof(fs_gamedir)-1);
-	fs_gamedir[sizeof(fs_gamedir)-1] = 0;
-
-	FS_AddGameDirectory (gdir);
-
- }
-#endif
-
-#endif
-
 /*
 ============
 FS_Gamedir
@@ -814,18 +736,7 @@ Called to find where to write a file (demos, savegames, etc)
 char *FS_Gamedir (void)
 {
 
-	return fs_gamesearch[0]; // first one in list is where writes go
-
-#if 0
-#if defined UNIX_VARIANT
 	return fs_gamedir;
-#else
-	if (*fs_gamedir)
-		return fs_gamedir;
-	else
-		return BASEDIRNAME;
-#endif
-#endif
 
 }
 
@@ -860,7 +771,6 @@ FS_SetGamedir
 
 Sets the gamedir and path to a different directory.
 
--jjb-filesystem  this is only going to change something if there is a mod
 ================
 */
 void FS_SetGamedir (char *dir)
@@ -880,14 +790,8 @@ void FS_SetGamedir (char *dir)
 		Cbuf_AddText ("vid_restart\nsnd_restart\n");
 	}
 
-/* -jjb-filesystem  fs_basedir deprecated (maybe)
-#if defined WIN32_VARIANT
-	Com_sprintf (fs_gamedir, sizeof(fs_gamedir), "%s/%s", fs_basedir->string, dir);
-#endif
-*/
-
 	if ( !strcmp( dir, BASE_GAMEDATA ) || ( *dir == 0 ) )
-	{ // -jjb-filesystem  what is the purpose of this??
+	{
 		Cvar_FullSet ("gamedir", "", CVAR_SERVERINFO|CVAR_NOSET);
 		Cvar_FullSet ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
 	}
@@ -909,16 +813,17 @@ void FS_SetGamedir (char *dir)
 */
 char **FS_ListFiles( char *findname, int *numfiles, unsigned musthave, unsigned canthave )
 {
-	char *s;
+	char *namestr;
 	int nfiles = 0;
-	char **list = 0;
+	char **list = NULL; // pointer to array of pointers
 
-	s = Sys_FindFirst( findname, musthave, canthave );
-	while ( s )
+	// --- count the matching files ---
+	namestr = Sys_FindFirst( findname, musthave, canthave );
+	while ( namestr  )
 	{
-		if ( s[strlen(s)-1] != '.' )
+		if ( namestr[ strlen( namestr )-1 ] != '.' ) // not '..' nor '.'
 			nfiles++;
-		s = Sys_FindNext( musthave, canthave );
+		namestr = Sys_FindNext( musthave, canthave );
 	}
 	Sys_FindClose ();
 
@@ -928,22 +833,23 @@ char **FS_ListFiles( char *findname, int *numfiles, unsigned musthave, unsigned 
 	*numfiles = nfiles;
 	nfiles++; // add space for a guard
 
-	list = malloc( sizeof( char * ) * nfiles );
+	// --- create the file name string array ---
+	list = malloc( sizeof( char * ) * nfiles ); // array of pointers
 	memset( list, 0, sizeof( char * ) * nfiles );
 
-	s = Sys_FindFirst( findname, musthave, canthave );
+	namestr = Sys_FindFirst( findname, musthave, canthave );
 	nfiles = 0;
-	while ( s )
+	while ( namestr )
 	{
-		if ( s[strlen(s)-1] != '.' )
+		if ( namestr[ strlen(namestr) - 1] != '.' )  // not ".." nor "."
 		{
-			list[nfiles] = strdup( s );
+			list[nfiles] = strdup( namestr );  // list[n] <- malloc'd pointer
 #if defined WIN32_VARIANT
 			strlwr( list[nfiles] );
 #endif
 			nfiles++;
 		}
-		s = Sys_FindNext( musthave, canthave );
+		namestr = Sys_FindNext( musthave, canthave );
 	}
 	Sys_FindClose ();
 
@@ -987,7 +893,7 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned cant
 	list = malloc(sizeof(char *));
 
 	for ( s = 0 ; fs_gamesearch[s][0]; s++ )
-	{
+	{ // for non-empty search slots
 		Com_sprintf(path, sizeof(path), "%s/%s",fs_gamesearch[s], findname);
 		tmplist = FS_ListFiles(path, &tmpnfiles, musthave, canthave);
 		if (tmplist != NULL)
@@ -995,8 +901,9 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned cant
 			nfiles += tmpnfiles;
 			list = realloc(list, nfiles * sizeof(char *));
 			for (i = 0, j = nfiles - tmpnfiles; i < tmpnfiles; i++, j++)
-				list[j] = strdup(tmplist[i] + strlen(fs_gamesearch[s]) + 1);
-
+			{ // copy from full path to relative path
+				list[j] = strdup( tmplist[i] + strlen( fs_gamesearch[s] ) + 1  );
+			}
 			FS_FreeFileList(tmplist, tmpnfiles);
 		}
 	}
@@ -1048,6 +955,8 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned cant
 
 /*
 ** FS_Dir_f
+**
+** target of "dir" command
 */
 void FS_Dir_f( void )
 {
@@ -1111,12 +1020,12 @@ void FS_Path_f (void)
 	Com_Printf ("Game data search path:\n");
 	for ( i = 0; fs_gamesearch[i][0] ; i++ )
 	{
-		Com_Printf( "%s\n", fs_gamesearch[i] );
+		Com_Printf( "%s/\n", fs_gamesearch[i] );
 	}
 	Com_Printf ("Bot data search path:\n");
 	for ( i = 0; fs_botsearch[i][0] ; i++ )
 	{
-		Com_Printf( "%s/%s\n", fs_botsearch[i], BOT_GAMEDATA );
+		Com_Printf( "%s/%s/\n", fs_botsearch[i], BOT_GAMEDATA );
 	}
 
 }
@@ -1126,36 +1035,38 @@ void FS_Path_f (void)
 FS_NextPath
 
 Allows enumerating all of the directories in the search path
+
+ prevpath to NULL on first call, previously returned char* on subsequent
+ returns NULL when done
+
 ================
 */
-// -jjb-filesystem  need to maintain the linked list for this
-
 char *FS_NextPath (char *prevpath)
 {
-	searchpath_t	*s;
-	char			*prev;
+	char *nextpath;
 
-#if defined UNIX_VARIANT
-	prev = NULL; /* fs_gamedir is the first directory in the searchpath */
-#else
-	if (!prevpath)
-		return fs_gamedir;
-
-	prev = fs_gamedir;
-#endif
-	for ( s = fs_searchpaths; s ; s = s->next )
-	{
-
-#if defined UNIX_VARIANT
-		if (prevpath == NULL)
-			return s->filename;
-#endif
-		if (prevpath == prev)
-			return s->filename;
-		prev = s->filename;
+	if ( prevpath == NULL )
+	{ // return the first
+		nextpath = fs_gamesearch[0];
+	}
+	else
+	{ // scan the fs_gamesearch elements for an address match with prevpath
+		nextpath = NULL;
+		int i = 0;
+		while ( prevpath != fs_gamesearch[i++] )
+		{
+			if ( i >= GAME_SEARCH_SLOTS )
+			{
+				Sys_Error("Program Error in FS_NextPath()");
+			}
+		}
+		if ( fs_gamesearch[i][0] )
+		{ // non-empty slot
+			nextpath = fs_gamesearch[i];
+		}
 	}
 
-	return NULL;
+	return nextpath;
 }
 
 /*
@@ -1170,5 +1081,9 @@ void FS_InitFilesystem (void)
 	Cmd_AddCommand ("dir", FS_Dir_f );
 
 	FS_init_paths();
+
+#if defined UNIX_VARIANT
+	Com_Printf("using %s for writing\n", fs_gamedir );
+#endif
 
 }

@@ -54,10 +54,7 @@ unsigned	sys_frame_time;
 // attachment to statically linked game library
 extern void *GetGameAPI ( void *import);
 
-// -jjb-ac
-//#ifndef __unix__
 extern void Q_strncpyz( char *dest, const char *src, size_t size );
-//#endif
 
 static HANDLE		qwclsemaphore;
 
@@ -883,7 +880,6 @@ const char *gamename = "gamex86.dll";
 			while (1)
 			{
 				path = FS_NextPath (path);
-				// -jjb-dl
 				if (!path)
 					break; // Search did not turn up a game DLL
 

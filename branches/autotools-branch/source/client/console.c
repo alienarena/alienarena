@@ -206,7 +206,7 @@ void Con_Dump_f (void)
 	Com_sprintf (name, sizeof(name), "%s/%s.txt", FS_Gamedir(), Cmd_Argv(1));
 
 	Com_Printf ("Dumped console text to %s.\n", name);
-	// FS_CreatePath (name);  // -jjb-filesystem  necessary? not in subdir
+	FS_CreatePath (name);
 	f = fopen (name, "w");
 	if (!f)
 	{

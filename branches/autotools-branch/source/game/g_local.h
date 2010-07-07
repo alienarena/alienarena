@@ -1013,8 +1013,7 @@ typedef struct
 {
 	char		userinfo[MAX_INFO_STRING];
 
-	// -jjb-fix  shouldn't this be 49 (50) for terminating '\0'
-	char		netname[48]; // considering 1 colour change / character, that's 16
+	char		netname[50]; // considering 1 colour change/character + nul, that's 16
 	int			hand;
 
 	qboolean	connected;			// a loadgame will leave valid entities that
@@ -1537,11 +1536,3 @@ extern  cvar_t	*g_antilagdebug;
 // ACEBOT_ADD
 #include "acesrc/acebot.h"
 // ACEBOT_END
-
-// #ifdef __unix__  // -jjb-dl -jjb-ac
-void	FS_FreeFile (void *buffer);
-void	Z_Free (void *ptr);
-void	Com_Error (int code, char *fmt, ...);
-// #endif
-
-

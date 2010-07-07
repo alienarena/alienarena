@@ -56,6 +56,7 @@ cvar_t	*gl_arb_fragment_program;
 cvar_t	*gl_glsl_shaders;
 
 cvar_t	*r_legacy;
+cvar_t	*r_usemd2;
 
 entity_t	*currententity;
 model_t	*currentmodel;
@@ -227,62 +228,12 @@ void R_ReadFogScript( char *config_file )
 	char *s;
 	size_t result;
 
-#if 0
-	if((fp = fopen(config_file, "rb" )) == NULL)
-	{
-		return;
-	}
-	else
-	{
-
-		fseek(fp, 0, SEEK_END);
-		length = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-
-		buffer = malloc( length + 1 );
-		buffer[length] = 0;
-		fread( buffer, length, 1, fp );
-	}
-	s = buffer;
-
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.red = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.green = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.blue = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.start = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.end = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.density = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	r_weather = atoi(a_string);
-
-	if(fog.density > 0)
-		map_fog = true;
-
-	if ( fp != 0 )
-	{
-		fclose(fp);
-		free( buffer );
-	}
-	else
-	{
-		FS_FreeFile( buffer );
-	}
-
-#else
-	// -jjb-fix above is somewhat odd
 	if((fp = fopen(config_file, "rb" )) == NULL)
 	{
 		return;
 	}
 
-	fseek(fp, 0, SEEK_END);
-	length = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
+	length = FS_filelength( fp );
 
 	buffer = malloc( length + 1 );
 	if ( buffer != NULL )
@@ -317,7 +268,6 @@ void R_ReadFogScript( char *config_file )
 	}
 	fclose( fp );
 
-#endif
 	return;
 }
 
@@ -335,38 +285,6 @@ void R_ReadMusicScript( char *config_file )
 	char *s;
 	size_t result;
 
-#if 0
-	if((fp = fopen(config_file, "rb" )) == NULL)
-	{
-		return;
-	}
-	else
-	{
-
-		fseek(fp, 0, SEEK_END);
-		length = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-
-		buffer = malloc( length + 1 );
-		fread( buffer, length, 1, fp );
-		buffer[length] = 0;
-	}
-	s = buffer;
-
-	strcpy( map_music, COM_Parse( &s ) );
-	map_music[length] = 0; //clear any possible garbage
-
-	if ( fp != 0 )
-	{
-		fclose(fp);
-		free( buffer );
-	}
-	else
-	{
-		FS_FreeFile( buffer );
-	}
-#else
-	// -jjb-fix  above is somewhat odd
 	if((fp = fopen(config_file, "rb" )) == NULL)
 	{
 		return;
@@ -393,8 +311,6 @@ void R_ReadMusicScript( char *config_file )
 		free( buffer );
 	}
 	fclose( fp );
-
-#endif
 
 	return;
 }
@@ -563,8 +479,6 @@ void R_DrawEntitiesOnList (void)
 			else
 				currententity->script = NULL;
 
-			// Com_Printf("[(b):rs:%p]\n", rs ); // -jjb-dbg
-
 		}
 
 		currentmodel = currententity->model;
@@ -629,8 +543,6 @@ void R_DrawEntitiesOnList (void)
 			else
 				currententity->script = NULL;
 		}
-
-		// Com_Printf("[(d):rs:%p]\n", rs ); // -jjb-dbg
 
 		currentmodel = currententity->model;
 
@@ -1253,17 +1165,7 @@ void R_Register( void )
 	gl_flashblend = Cvar_Get ("gl_flashblend", "0", CVAR_ARCHIVE);
 	gl_playermip = Cvar_Get ("gl_playermip", "0", 0);
 
-// -jjb-ac This wants to be in configure. need to pass to config.h
-// OPENGL_DRIVER.  MAC/Darwin probably different
-/*
-#if defined UNIX_VARIANT
-	gl_driver = Cvar_Get( "gl_driver", "libGL.so.1", CVAR_ARCHIVE );
-#elif defined WIN32_VARIANT
-	gl_driver = Cvar_Get( "gl_driver", "opengl32", CVAR_ARCHIVE );
-#else
-#error opengl driver not defined
-#endif
-*/
+// OPENGL_DRIVER defined by config.  MAC/Darwin probably different.
 	gl_driver = Cvar_Get( "gl_driver", OPENGL_DRIVER, CVAR_ARCHIVE );
 
 	gl_texturemode = Cvar_Get( "gl_texturemode", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
@@ -1319,6 +1221,7 @@ void R_Register( void )
 	gl_screenshot_jpeg_quality = Cvar_Get("gl_screenshot_jpeg_quality", "85", CVAR_ARCHIVE);
 
 	r_legacy = Cvar_Get("r_legacy", "0", CVAR_ARCHIVE);
+	r_usemd2 = Cvar_Get("r_usemd2", "0", CVAR_ARCHIVE);
 
 	r_firstrun = Cvar_Get("r_firstrun", "0", CVAR_ARCHIVE); //first time running the game
 
@@ -1642,7 +1545,6 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...GL_EXT_compiled_vertex_array not found\n" );
 	}
 
-// -jjb-ac
 #if defined WIN32_VARIANT
 	if ( strstr( gl_config.extensions_string, "WGL_EXT_swap_control" ) )
 	{
@@ -1897,9 +1799,6 @@ int R_Init( void *hinstance, void *hWnd )
 		int OGLVer = atoi(&gl_config.version_string[0]);
 		//int OGLSubVer = atoi(&gl_config.version_string[2]);
 
-// -jjb-ac
-//  check this as GetSystemInfo or popen existence ???
-//   or make a os-dependent subroutine. MAC most likely different
 #if defined WIN32_VARIANT
 		SYSTEM_INFO sysInfo;
 		GetSystemInfo(&sysInfo);

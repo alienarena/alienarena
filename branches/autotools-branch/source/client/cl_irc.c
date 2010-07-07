@@ -244,7 +244,7 @@ void analizeLine(char Line[1000])
 						msgLine[j] = outputmsg[j+(80*i)];
 					msgLine[80] = 0;
 
-					SCR_IRCPrintf("^1IRC: %s\n", msgLine); 
+					SCR_IRCPrintf("^1IRC: %s\n", msgLine);
 
 					printed = true;
 				}
@@ -269,7 +269,7 @@ void analizeLine(char Line[1000])
 	   Response = SkipWords(Line,3);
 	   Response.word[0][strlen(Response.word[0])-2]= 0;
 
-	   SCR_IRCPrintf("^1IRC: %s\n", msgLine); 
+	   SCR_IRCPrintf("^1IRC: %s\n", msgLine);
 
 	   printed = true;
 	}
@@ -371,8 +371,8 @@ void CL_GetIRCData(void)
 #error Neither strnicmp() nor strncasecmp() found.
 #endif
 		{
-			Com_Printf("Received a ping!\n");
-			cls.irc_canjoin = true; 
+			Com_Printf("IRC: Received a ping\n");
+			cls.irc_canjoin = true;
 			File_Buf[1]='O';
 			sendData(File_Buf);
 		};
@@ -440,7 +440,7 @@ void CL_IRCSay(void)
 		//send a junk string to clear the command
 		sendData("PRIVMSG #alienarena :\n\r");
 	}
-	else 
+	else
 	{
 		sprintf(message, "PRIVMSG #alienarena :%s\n\r", m_sendstring);
 #if defined WIN32_VARIANT
@@ -522,7 +522,8 @@ qboolean CL_JoinIRC(void)
 	address.sin_family=AF_INET;       // internet
     address.sin_port = htons(6667);
 
-	sprintf(HostName, cl_IRC_server->string);
+	//sprintf(HostName, cl_IRC_server->string);
+	Q_strncpyz2( HostName, cl_IRC_server->string, sizeof(HostName) );
 
     if ( (host=gethostbyname(HostName)) == NULL )
 	{
@@ -576,7 +577,7 @@ void RecvThreadProc(void *dummy)
 
 	while(1)
 	{
-		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel) 
+		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel)
 		{
 			sendData("JOIN #alienarena\n\r");
 			cls.irc_joinedchannel = true;
@@ -609,7 +610,7 @@ void *RecvThreadProc(void *dummy)
 
 	while(1)
 	{
-		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel) 
+		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel)
 		{
 			sendData("JOIN #alienarena\n\r");
 			cls.irc_joinedchannel = true;

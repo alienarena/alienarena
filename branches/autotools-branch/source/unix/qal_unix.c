@@ -1,5 +1,5 @@
 /*
- Copyright (C) 1997-2001 Id Software, Inc.
+ Copyright (C) 2009 COR Entertainment
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -21,18 +21,26 @@
  * qal_unix.c
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stddef.h>
 #include <stdio.h>
 #include <dlfcn.h>
 
-#include "../client/client.h"
-#include "../client/qal.h"
+#include "client/client.h"
+#include "client/qal.h"
 
 /*
  * OpenAL Library
- *  OpenAL 1.1 required.  TODO: make soname configurable
+ *  OpenAL 1.1 required.
  */
+#if defined OPENAL_DRIVER
+const char libopenal_name[] = OPENAL_DRIVER;
+#else
 const char libopenal_name[] = "libopenal.so.1";
+#endif
 void *dynlib;
 qboolean dlsym_error;
 

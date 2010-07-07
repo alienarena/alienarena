@@ -594,7 +594,7 @@ void Menu_DrawStatusBar( const char *string )
 	if ( string )
 	{
 		int l = strlen( string );
-		// int maxrow = VID_HEIGHT / charscale; // -jjb-unused
+		// int maxrow = VID_HEIGHT / charscale; // unused
 		int maxcol = VID_WIDTH / charscale;
 		int col = maxcol / 2 - l / 2;
 

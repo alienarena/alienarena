@@ -366,7 +366,7 @@ void GLimp_Shutdown( void )
 CPU Detect from Q2E
 ===================
 */
-// -jjb-ac does not appear to be used
+// does not appear to be used
 /*
 extern void	Q_strncpyz( char *dest, const char *src, size_t size );
 extern void Q_strncatz( char *dest, const char *src, size_t size );

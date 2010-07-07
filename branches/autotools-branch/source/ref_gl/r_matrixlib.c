@@ -6,13 +6,6 @@
 #include <math.h>
 #include "r_matrixlib.h"
 
-/*  -jjb-warnings
-#ifdef _MSC_VER
-#pragma warning(disable : 4244)     // LordHavoc: MSVC++ 4 x86, double/float
-#pragma warning(disable : 4305)         // LordHavoc: MSVC++ 6 x86, double/float
-#endif
-*/
-
 const matrix4x4_t identitymatrix =
 {
 	{

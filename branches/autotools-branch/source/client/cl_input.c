@@ -472,8 +472,7 @@ CL_SendCmd
 void CL_SendCmd (void)
 {
 	sizebuf_t	buf;
-	//byte		data[128];
-	byte		data[512]; //-jjb-experiment
+	byte		data[128];
 	int			i;
 	usercmd_t	*cmd, *oldcmd;
 	usercmd_t	nullcmd;

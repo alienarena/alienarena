@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "game/q_shared.h"
 
 #if !defined VERSION
-#define	VERSION		"7.41pre"
+#define	VERSION		"7.50pre"
 #endif
 
 /* ---- Default locations of game data ---*/
@@ -609,20 +609,12 @@ typedef struct
 	int			qport;				// qport value to write when transmitting
 
 // sequencing variables
-#if 1
-	// -jjb-dbg
-	// this does not help - still screws up outgoing_sequence
-	int			outgoing_sequence;
-#endif
 	int			incoming_sequence;
 	int			incoming_acknowledged;
 	int			incoming_reliable_acknowledged;	// single bit
 
 	int			incoming_reliable_sequence;		// single bit, maintained local
-#if 0
-	// -jjb-dbg
 	int			outgoing_sequence;
-#endif
 
 	int			reliable_sequence;			// single bit
 	int			last_reliable_sequence;		// sequence number of last send
@@ -778,13 +770,10 @@ MISC
 #define	ERR_DROP	1		// print to console and disconnect from game
 #define	ERR_QUIT	2		// not an error, just a normal exit
 
-/*
- * -jjb-ac  redundant
- */
-#define	EXEC_NOW	0		// don't return until completed
-#define	EXEC_INSERT	1		// insert at current position, but don't run yet
-#define	EXEC_APPEND	2		// add to end of the command buffer
-/**/
+// redundant
+//#define	EXEC_NOW	0		// don't return until completed
+//#define	EXEC_INSERT	1		// insert at current position, but don't run yet
+//#define	EXEC_APPEND	2		// add to end of the command buffer
 
 #define	PRINT_ALL		0
 #define PRINT_DEVELOPER	1	// only print when "developer 1"
@@ -792,12 +781,9 @@ MISC
 void		Com_BeginRedirect (int target, char *buffer, int buffersize, void (*flush));
 void		Com_EndRedirect (void);
 void 		Com_Printf (char *fmt, ...);
-#if !defined NDEBUG
-void 		Com_DPrintf (char *fmt, ...);
-#else
-// -jjb-experiment  remove developer printfs from released version ?
-#define Com_DPrintf(fmt,...)
-#endif
+
+void Com_DPrintf (char *fmt, ...);
+
 void 		Com_Error (int code, char *fmt, ...);
 void 		Com_Quit (void);
 

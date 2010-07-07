@@ -19,15 +19,24 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
-AC_PREREQ(2.65)
-AC_INIT([alienarena],[7.41pre],[alienrace@comcast.net],[alienarena])
+# configure.ac for
+#  Linux/Unix
+#  Windows using MinGW 
+#  Mac OSX Darwin 
+
+AC_PREREQ(2.61)
+AC_INIT([alienarena],[7.50pre],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([config/config.h])
 
-AM_INIT_AUTOMAKE([foreign subdir-objects -Wall])
+AC_PREFIX_DEFAULT([/home/jbower/games/install_test])
+
+AM_INIT_AUTOMAKE([foreign subdir-objects])
+
+AM_SILENT_RULES([yes])
 
 AM_MAINTAINER_MODE
 
@@ -55,7 +64,9 @@ AC_ARG_ENABLE(
 AC_MSG_CHECKING([for dedicated server only build])
 AC_MSG_RESULT([${no_client}])	
 
-# check of host environment
+#
+# check host environment
+#
 cond_build_win32=no
 cond_build_unix=no
 cond_build_darwin=no
@@ -84,13 +95,18 @@ AC_MSG_RESULT(${cond_build_client});
 AM_CONDITIONAL( BUILD_WIN32, test "x${cond_build_win32}" = xyes )
 AM_CONDITIONAL( BUILD_UNIX,  test "x${cond_build_unix}" = xyes )
 AM_CONDITIONAL( BUILD_CLIENT, test "x${cond_build_client}" = xyes )
+AM_CONDITIONAL( BUILD_DARWIN, test "x${cond_build_darwin}" = xyes )
 
-dnl seeing how it shows up in config
+dnl symbols for config.h
 AS_IF([ test "x${cond_build_unix}" = xyes ],
 	[AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])])
 
 AS_IF([ test "x${cond_build_win32}" = xyes ],
 	[AC_DEFINE([WIN32_VARIANT],1,[win32-specific conditional compile])])
+	
+dnl for cases where darwin differs from unix/linux	
+AS_IF([ test "x${cond_build_darwin}" = xyes ],
+	[AC_DEFINE([DARWIN_SPECIAL_CASE],1,[darwin-specific conditional compile])])
 
 AC_DEFINE_UNQUOTED(CPUSTRING, "${host_cpu}", [Canonical CPU identification])
 AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
@@ -107,6 +123,12 @@ AC_SUBST([WIN32_LIBS],[$win32_syslibs])
 
 AS_IF([ test "x${cond_build_win32}" = xyes ],
 	[AC_DEFINE([OPENGL_DRIVER],["opengl32"],[OpenGL DLL name])])
+
+dnl 2010-07-06 this is just a wild guess
+darwin_syslibs=""
+AS_IF([ test "x${cond_build_darwin}" = xyes ],
+	[ darwin_syslibs="-framework OpenGL -framework OpenAL"])
+AC_SUBST([DARWIN_LIBS],[$darwin_syslibs])	
 
 AC_SEARCH_LIBS(acos,[m])
 AC_SEARCH_LIBS(pthread_mutex_init,[pthread])
@@ -132,13 +154,19 @@ AC_SEARCH_LIBS([ov_open_callbacks],[vorbisfile],,
 
 AC_SEARCH_LIBS([alGenBuffers],[openal openal32 openal-soft],,
 	[AC_MSG_ERROR(["Required openal library not found."])])
+	
+AS_IF([ test "x${cond_build_unix}" = xyes ],
+	[AC_DEFINE([OPENAL_DRIVER],["libopenal.so.1"],[OpenAL shared lib name])])
+
+AS_IF([ test "x${cond_build_win32}" = xyes ],
+	[AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])])
 
 curl_xtralibs=""
 AS_IF( [ test "x${cond_build_win32}" = xyes ],
 	[curl_xtralibs=" -lz -lwsock32"])
 
 AC_SEARCH_LIBS([curl_easy_reset],[curl],,
-	[AC_MSG_ERROR(["Required curl library not found."])],
+	[AC_MSG_WARN(["Recommended curl library not found."])],
 	[ $curl_xtralibs ]) 
 
 AC_PATH_X
@@ -164,7 +192,7 @@ dnl headers not in mingw because min means minimalist
 dnl separated only for information  TODO combine again
 dnl TODO see if any of these are not really used, see if any are missing
 AC_CHECK_HEADERS(
-	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h sys/vt.h unistd.h netdb.h termios.h])
+	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h unistd.h netdb.h termios.h])
 
 AC_CHECK_HEADERS(
 	[ fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h dnl 
@@ -255,8 +283,9 @@ AC_CHECK_FUNCS([ floor gethostbyname gettimeofday memmove memset mkdir dnl
 		strerror stricmp _stricmp strcasecmp strncasecmp strrchr strstr dnl 
 		strnicmp unlink _unlink strlcpy ]) dnl
 		
-AC_CHECK_FUNCS([ filelength stat fstat getcwd ])		
+AC_CHECK_FUNCS([ filelength stat fstat getcwd ])
 
 # outputs
-AC_CONFIG_FILES([Makefile source/Makefile])
+AC_CONFIG_FILES([Makefile])
+
 AC_OUTPUT

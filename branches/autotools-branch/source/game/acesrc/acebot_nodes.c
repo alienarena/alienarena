@@ -737,8 +737,6 @@ void ACEND_SaveNodes()
 
 	safe_bprintf(PRINT_MEDIUM,"Saving node table...");
 
-#if 1
-	// -jjb-filesystem
 	strcpy( relative_path, BOT_GAMEDATA"/nav/" );
 	strcat( relative_path, level.mapname );
 	strcat( relative_path, ".nod" );
@@ -750,16 +748,6 @@ void ACEND_SaveNodes()
 		gi.dprintf("ACEND_SaveNodes: failed fopen for write: %s\n", filename );
 		return;
 	}
-
-#else
-	strcpy(filename,"botinfo/nav/"); // -jjb-filesystem
-	strcat(filename,level.mapname);
-	strcat(filename,".nod");
-
-
-	if((pOut = fopen(filename, "wb" )) == NULL)
-		return; // bail
-#endif
 
 	fwrite(&version,sizeof(int),1,pOut); // write version
 	fwrite(&numnodes,sizeof(int),1,pOut); // write count
@@ -789,8 +777,6 @@ void ACEND_LoadNodes(void)
 	char filename[MAX_OSPATH];
 	int version;
 
-#if 1
-	// -jjb-filesystem
 	strcpy( relative_path, BOT_GAMEDATA"/nav/" );
 	strcat( relative_path, level.mapname );
 	strcat( relative_path, ".nod" );
@@ -799,12 +785,6 @@ void ACEND_LoadNodes(void)
 	{
 		gi.dprintf("ACEND_LoadNodes: not found: %s\n", filename );
 	}
-
-#else
-	strcpy(filename,BOTDIR"/botinfo/nav/"); // -jjb-botinfo
-	strcat(filename,level.mapname);
-	strcat(filename,".nod");
-#endif
 
 	if((pIn = fopen(filename, "rb" )) == NULL)
     {

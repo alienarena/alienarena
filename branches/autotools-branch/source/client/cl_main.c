@@ -1668,7 +1668,6 @@ void CL_Precache_f (void)
 }
 
 #if defined UNIX_VARIANT
-// -jjb-dedicated-server  move this where dedicated server can use it (maybe)
 void CL_Shell_f (void)
 {
 	if(Cmd_Argc() < 2)
@@ -1831,9 +1830,9 @@ void CL_InitLocal (void)
 
 	Cmd_AddCommand ("download", CL_Download_f);
 
-	#ifdef __unix__
+#if defined UNIX_VARIANT
 	Cmd_AddCommand ("shell", CL_Shell_f);
-	#endif
+#endif
 
 	Cmd_AddCommand ("irc_connect", CL_InitIRC);
 	Cmd_AddCommand ("irc_quit", CL_IRCShutdown);
@@ -1920,7 +1919,6 @@ void CL_WriteConfiguration (void)
 	if (cls.state == ca_uninitialized)
 		return;
 
-	// -jjb-filesystem
 	Com_sprintf (path, sizeof(path),"%s/config.cfg",FS_Gamedir());
 	f = fopen (path, "w");
 	if (!f)

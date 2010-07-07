@@ -450,8 +450,6 @@ extern GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offs
 //END VBO
 
 #if !defined UNIX_VARIANT
-// -jjb-ac  look for alternate HAVE_ def
-//  #ifndef __unix__ // FIXME: already have in GL/glx.h (all Unix or FreeBSD?)
 // jitwater - fragment programs (pixel shaders)
 typedef void (APIENTRY * PFNGLPROGRAMSTRINGARBPROC) (GLenum target, GLenum format, GLsizei len, const GLvoid *string);
 typedef void (APIENTRY * PFNGLBINDPROGRAMARBPROC) (GLenum target, GLuint program);

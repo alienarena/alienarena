@@ -202,7 +202,7 @@ Sys_UnloadGame
 void Sys_UnloadGame (void)
 {
 	if ( game_library != NULL )
-		dlclose (game_library);  // -jjb-dl
+		dlclose (game_library);
 	game_library = NULL;
 }
 
@@ -221,15 +221,13 @@ void *Sys_GetGameAPI (void *parms)
 	char	name[MAX_OSPATH];
 	char	*path;
 	char	*str_p;
-	const char *gamename = "game.so"; // -jjb-ac -jjb-dl
+	const char *gamename = "game.so";
 
 	setreuid(getuid(), getuid());
 	setegid(getgid());
 
 	if (game_library != NULL)
 		Com_Error (ERR_FATAL, "Sys_GetGameAPI without Sys_UnloadingGame");
-
-	// Com_Printf("------- Loading %s -------\n", gamename);
 
 	// now run through the search paths
 	path = NULL;
@@ -251,7 +249,7 @@ void *Sys_GetGameAPI (void *parms)
 		game_library = dlopen (name, RTLD_NOW);
 		if (game_library != NULL )
 		{
-			Com_DPrintf ("LoadLibrary (%s)\n",name);
+			Com_Printf("------- Loading %s -------\n", gamename);
 			break;
 		}
 		else
@@ -267,8 +265,7 @@ void *Sys_GetGameAPI (void *parms)
 
 			Com_DPrintf ("%s\n", str_p);
 
-			// return NULL;
-			break;  // -jjb-dl (not sure, file opened but did not dlopen)
+			break; // file opened but did not dlopen
 		}
 	}
 

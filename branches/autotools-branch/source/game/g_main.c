@@ -353,7 +353,7 @@ void EndDMLevel (void)
 	char *s, *t, *f;
 	static const char *seps = " ,\n\r";
 	char *buffer;
-	char  mapsname[1024];
+	char  mapsname[MAX_OSPATH];
 	int length;
 	static char **mapnames;
 	static int	  nummaps;
@@ -469,7 +469,8 @@ void EndDMLevel (void)
 		return;
 	}
 
-	if((((int)(ctf->value) || (int)(cp->value))) && (!(int)(dedicated->value))) { //ctf will just stay on same level unless specified by dedicated list
+	if((((int)(ctf->value) || (int)(cp->value))) && (!(int)(dedicated->value)))
+	{ //ctf will just stay on same level unless specified by dedicated list
 		BeginIntermission (CreateTargetChangeLevel (level.mapname));
 		return;
 	}
@@ -507,28 +508,34 @@ void EndDMLevel (void)
     //check the maps.lst file and read in those, which will overide anything in the level
 	//write this code here
 
+	// TODO: verify that this code executes, under what conditions?
+
 	/*
 	** load the list of map names
 	*/
-	Com_sprintf( mapsname, sizeof( mapsname ), "%s/maps.lst", "data1" );
+	if ( !gi.FullPath( mapsname, sizeof(mapsname), "maps.lst" ) )
+	{ // no maps.lst.
+		// note: originally this was looked for in "./data1/" only
+		//   hope it is ok to use FullPath() search path.
+		BeginIntermission (CreateTargetChangeLevel (level.mapname) );
+		return;
+	}
 	if ( ( fp = fopen( mapsname, "rb" ) ) == 0 )
 	{
 		BeginIntermission (CreateTargetChangeLevel (level.mapname) );
-			return;
+		return;
 	}
-	else
-	{
-#if defined WIN32_VARIANT
-		length = filelength( fileno( fp  ) );
+
+#if defined HAVE_FILELENGTH
+	length = filelength( fileno( fp  ) );
 #else
-		fseek(fp, 0, SEEK_END);
-		length = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
+	fseek(fp, 0, SEEK_END);
+	length = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
 #endif
-		buffer = malloc( length + 1 );
-		fread( buffer, length, 1, fp );
-		buffer[length] = 0;
-	}
+	buffer = malloc( length + 1 );
+	fread( buffer, length, 1, fp );
+	buffer[length] = 0;
 
 	s = buffer;
 
@@ -547,15 +554,14 @@ void EndDMLevel (void)
 
 	for ( i = 0; i < nummaps; i++ )
 	{
-    char  shortname[MAX_TOKEN_CHARS];
-    char  longname[MAX_TOKEN_CHARS];
+		char  shortname[MAX_TOKEN_CHARS];
+		char  longname[MAX_TOKEN_CHARS];
 		char  scratch[200];
-		int		l;
-		//int		j, l;
+		int  j, l;
 
 		strcpy( shortname, COM_Parse( &s ) );
 		l = strlen(shortname);
-#ifndef __unix__
+#if defined WIN32_VARIANT
 		for (j=0 ; j<l ; j++)
 			shortname[j] = toupper(shortname[j]);
 #endif
@@ -567,16 +573,8 @@ void EndDMLevel (void)
 	}
 	mapnames[nummaps] = 0;
 
-	if ( fp != 0 )
-	{
-		fp = 0;
-		free( buffer );
-	}
-
-	else
-	{
-		FS_FreeFile( buffer );
-	}
+	fclose(fp);
+	free( buffer);
 
 	//find map, goto next map - if one doesn't exist, repeat list
 	//stick something in here to filter out CTF, and just make it loop back

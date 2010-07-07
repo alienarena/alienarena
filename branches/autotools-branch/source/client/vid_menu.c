@@ -96,7 +96,7 @@ static menulist_s		s_postprocess_box;
 static menulist_s		s_glsl_box;
 
 #if 0
-// -jjb-unused
+// unused
 static void DriverCallback( void *unused )
 {
 	s_current_menu = &s_opengl_menu;

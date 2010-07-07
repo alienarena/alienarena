@@ -1,3 +1,8 @@
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 #include "m_player.h"
 
@@ -2388,7 +2393,7 @@ void ClientChangeSkin (edict_t *ent)
 	int		i, j, k, copychar;
 	char playermodel[MAX_OSPATH] = " ";
 	char playerskin[MAX_INFO_STRING] = " ";
-	// char modelpath[MAX_OSPATH] = " "; // -jjb-unused
+	// char modelpath[MAX_OSPATH] = " "; // unused
 	char		userinfo[MAX_INFO_STRING];
 
 	//get the userinfo

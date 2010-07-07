@@ -26,7 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
-// -jjb-ac is this used?
 #if defined WIN32_VARIANT
 #include <io.h>
 #endif
@@ -67,7 +66,7 @@ int RS_Animate (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
 
-/* -jjb-unused
+/* unused
 	float			time = rs_realtime * 1000 -
 		(stage->last_anim_time + stage->anim_delay);
 */
@@ -88,7 +87,7 @@ void *RS_AnimateSkin (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
 
-/* -jjb-unused
+/* unused
 	float			time = rs_realtime * 1000 -
 		(stage->last_anim_time + stage->anim_delay);
 */
@@ -965,7 +964,7 @@ void RS_LoadScript(char *script)
 	char			*token, *fbuf, *buf;
 	rscript_t		*rs = NULL;
 	rs_stage_t		*stage = NULL;
-	// unsigned char	tcmod = 0; // -jjb-unused
+	// unsigned char	tcmod = 0; // unused
 	unsigned int	len, i;
 
 	len = FS_LoadFile (script, (void **)&fbuf);
@@ -1117,7 +1116,7 @@ void RS_SetEnvmap (vec3_t v, float *os, float *ot)
 
 void RS_ScaleTexcoords (rs_stage_t *stage, float *os, float *ot)
 {
-	// float	txm = 0, tym = 0; // -jjb-unused
+	// float	txm = 0, tym = 0; // unused
 
 	// scale
 	if (stage->scale.scaleX)
@@ -1295,7 +1294,7 @@ endalpha:
 
 float RS_AlphaFuncAlias (int alphafunc, float alpha, vec3_t normal, vec3_t org)
 {
-	// float oldalpha = alpha; // -jjb-unused
+	// float oldalpha = alpha; // unused
 
 	if (!abs(alphafunc))
 		goto endalpha;

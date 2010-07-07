@@ -357,7 +357,7 @@ void Reset_player(edict_t *ent)
 	char		userinfo[MAX_INFO_STRING];
 	int		i, done;
 	char playermodel[MAX_OSPATH] = " ";
-	// char playerskin[MAX_INFO_STRING] = " "; -jjb-unused
+	// char playerskin[MAX_INFO_STRING] = " "; // unused
 	char modelpath[MAX_OSPATH] = " ";
 	FILE *file;
 	char *s;

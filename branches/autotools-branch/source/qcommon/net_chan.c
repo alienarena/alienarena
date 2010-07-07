@@ -246,9 +246,8 @@ void Netchan_Transmit (netchan_t *chan, int length, byte *data)
 	w1 = ( chan->outgoing_sequence & ~(1<<31) ) | (send_reliable<<31);
 	w2 = ( chan->incoming_sequence & ~(1<<31) ) | (chan->incoming_reliable_sequence<<31);
 
-	// -jjb-experiment  moved below
-	// chan->outgoing_sequence++;
-	// chan->last_sent = curtime;
+	chan->outgoing_sequence++;
+	chan->last_sent = curtime;
 
 	MSG_WriteLong (&send, w1);
 	MSG_WriteLong (&send, w2);
@@ -289,10 +288,6 @@ void Netchan_Transmit (netchan_t *chan, int length, byte *data)
 				, chan->incoming_sequence
 				, chan->incoming_reliable_sequence);
 	}
-
-	// -jjb-experiment
-	chan->outgoing_sequence++;
-	chan->last_sent = curtime;
 
 }
 

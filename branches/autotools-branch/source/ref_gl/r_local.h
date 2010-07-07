@@ -28,12 +28,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 #include "glext.h"
 
-// -jjb-ac see if this is ok
-//#ifndef __unix__
 #ifndef GL_COLOR_INDEX8_EXT
 #define GL_COLOR_INDEX8_EXT GL_COLOR_INDEX
 #endif
-//#endif
 
 #include "client/ref.h"
 #include "client/vid.h"
@@ -217,6 +214,7 @@ extern	cvar_t	*gl_screenshot_type;
 extern	cvar_t	*gl_screenshot_jpeg_quality;
 
 extern	cvar_t	*r_legacy;
+extern  cvar_t	*r_usemd2;
 
 extern  cvar_t  *r_test;
 
@@ -298,11 +296,8 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type);
 void  VLight_Init (void);
 float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );
-#if defined UNIX_VARIANT
-// -jjb-ac  fog and music script conditional. TBD
 void R_ReadFogScript(char config_file[128]);
 void R_ReadMusicScript(char config_file[128]);
-#endif
 void R_GLSLPostProcess(void);
 void R_FB_InitTextures(void);
 
@@ -512,8 +507,6 @@ extern float	norm_array[MAX_ARRAY][3];
 extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
 extern float *VArray;
-//static vec3_t NormalsArray[MAX_TRIANGLES*3];
-//extern vec3_t NormalsArray[MAX_TRIANGLES*3]; // -jjb-fix
 extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
@@ -537,7 +530,7 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #define KILL_RGBA_POINTER	5
 #define KILL_NORMAL_POINTER 6
 #else
-// -jjb-experiment  looks like these should be bit flags
+// looks like these should be bit flags
 #define KILL_TMU0_POINTER	0x01
 #define KILL_TMU1_POINTER	0x02
 #define KILL_TMU2_POINTER	0x04
@@ -627,19 +620,16 @@ extern GLuint		g_location_fogamount;
 
 //mesh
 extern GLuint		g_location_meshlightPosition;
-extern GLuint		g_location_meshnormal;
 extern GLuint		g_location_baseTex;
 extern GLuint		g_location_normTex;
 extern GLuint		g_location_fxTex;
 extern GLuint		g_location_color;
 extern GLuint		g_location_minLight;
 extern GLuint		g_location_meshNormal;
-extern GLuint		g_location_meshTangent;
 extern GLuint		g_location_meshTime;
 extern GLuint		g_location_meshFog;
 extern GLuint		g_location_useFX;
 extern GLuint		g_location_useGlow;
-extern GLuint		g_location_isMD2;
 
 //fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;

@@ -429,7 +429,7 @@ void ResetWeaponModel (edict_t *ent)
 	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
 #if defined UNIX_VARIANT
-	// -jjb-ac this should work for Win32 also
+	// TODO: should work for Win32, to be tested.
 	if( !Q_strcasecmp( ent->client->pers.weapon->view_model, "models/weapons/v_violator/tris.md2" ))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
 	else if( !Q_strcasecmp( ent->client->pers.weapon->view_model, "models/weapons/v_rocket/tris.md2"))

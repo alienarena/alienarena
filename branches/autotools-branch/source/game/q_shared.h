@@ -197,7 +197,7 @@ void NormalToLatLong( const vec3_t normal, byte latlong[2] );
 void LatLongToNormal( byte latlong[2], vec3_t normal );
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
-void vectoangles (vec3_t value1, vec3_t angles); // -jjb-dl
+void vectoangles (vec3_t value1, vec3_t angles);
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *plane);
 float	anglemod(float a);
 float LerpAngle (float a1, float a2, float frac);
@@ -225,9 +225,8 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 
 //=============================================
 
-// -jjb-ac
 /* FIXME: Beware - _vsnprintf does not end with \0 - vsnprintf (*nix) does */
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 #define vsnprintf	_vsnprintf
 #endif
 
@@ -259,6 +258,9 @@ int Q_strncasecmp (const char *s1, const char *s2, int n);
 void Q_strcat (char *dst, const char *src, int dstSize);
 int Q_strnicmp (const char *string1, const char *string2, int n);
 char *Q_strlwr(char *s);
+//
+void Q_strncpyz2 (char *dst, const char *src, int dstSize);
+
 //=============================================
 
 short	BigShort(short l);

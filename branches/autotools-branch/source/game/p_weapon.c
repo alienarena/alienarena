@@ -267,8 +267,8 @@ void ChangeWeapon (edict_t *ent)
 
 	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
-#if defined UNIX_VARIANT || defined WIN32_VARIANT
-	// -jjb-ac  should be ok for win32
+#if defined UNIX_VARIANT
+	// TODO: should work on Windows, to be tested
 	if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_violator/tris.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
 	else if( !Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_rocket/tris.md2"))
@@ -316,7 +316,7 @@ void ChangeWeapon (edict_t *ent)
 	Q2_FindFile (weaponpath, &file); //does it really exist?
 	if(!file) {
 #if defined UNIX_VARIANT
-		// -jjb-ac should be ok for Win32
+		// TODO: should work on Windows, to be tested
 		sprintf(weaponpath, "%s%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
 #else
 		sprintf(weaponpath, "%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
@@ -335,7 +335,7 @@ void ChangeWeapon (edict_t *ent)
 
 	//play a sound like in Q3, except for blaster, so it doesn't do it on spawn.
 #if defined UNIX_VARIANT
-	// -jjb-ac should be ok for Win32
+	// should be ok for Windows, to be tested
 	if( Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.md2") )
 		gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/whoosh.wav"), 1, ATTN_NORM, 0);
 #else

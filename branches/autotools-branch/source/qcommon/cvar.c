@@ -238,9 +238,7 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 
 			if (Com_ServerState())
 			{
-				// -jjb-fix so thats what that message means, added "cvar"
-				//  not sure that this is always correct information
-				Com_Printf ("%s cvar will be changed for next game.\n", var_name);
+				Com_Printf ("(cvar) %s will be changed for next game.\n", var_name);
 				var->latched_string = CopyString(value);
 			}
 			else

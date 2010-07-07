@@ -1,4 +1,8 @@
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 int floater_timer;
@@ -1794,13 +1798,8 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 			gi.WriteByte (4);
 			gi.WritePosition (tr.endpos);
 			gi.WriteDir (tr.plane.normal);
-#if 0
-			gi.WriteByte (self->s.skinnum); // -jjb-dbg can be >255 (3077)
-#else
-			// -jjb-fix skinnum problem SHOULD BE 0 NOT 1
-			gi.WriteByte (0); // -jjb-dbg can be >255 (3077)
-			// but probably not used in svc_temp_entity for TE_LASER_SPARKS
-#endif
+			// skinnum is sometimes larger, why?, but does it matter?
+			gi.WriteByte( ((self->s.skinnum > 255) ? 0 : self->s.skinnum) );
 			gi.multicast (tr.endpos, MULTICAST_PVS);
 
 		}

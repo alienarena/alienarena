@@ -25,6 +25,7 @@
 
 #include "client.h"
 
+#if defined HAVE_CURL_CURL_H || defined WIN32_VARIANT
 
 #if defined UNIX_VARIANT
 #include <unistd.h>
@@ -48,7 +49,7 @@ response_t responses[] = {
 char curlerr[MAX_STRING_CHARS];  // curl's error buffer
 
 char url[MAX_OSPATH];  // remote url to fetch from
-char file[MAX_OSPATH];  // local path to save to
+char dnld_file[MAX_OSPATH];  // local path to save to
 
 long status, length;  // for current transfer
 qboolean success;
@@ -76,13 +77,13 @@ qboolean CL_HttpDownload(void){
         if(!curl)
                 return false;
 
-        memset(file, 0, sizeof(file));  // resolve local file name
-        Com_sprintf(file, sizeof(file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
+        memset(dnld_file, 0, sizeof(dnld_file));  // resolve local file name
+        Com_sprintf(dnld_file, sizeof(dnld_file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
 
-        FS_CreatePath(file);  // create the directory
+        FS_CreatePath(dnld_file);  // create the directory
 
-        if(!(cls.download = fopen(file, "wb"))){
-                Com_Printf("Failed to open %s.\n", file);
+        if(!(cls.download = fopen(dnld_file, "wb"))){
+                Com_Printf("Failed to open %s.\n", dnld_file);
                 return false;  // and open the file
         }
 
@@ -162,7 +163,7 @@ void CL_HttpDownloadCleanup(){
                 MSG_WriteByte(&cls.netchan.message, clc_stringcmd);
                 MSG_WriteString(&cls.netchan.message, va("download %s", cls.downloadname));
 
-                unlink(file);  // delete partial or empty file
+                unlink(dnld_file);  // delete partial or empty file
         }
 
         cls.downloadpercent = 0;
@@ -252,3 +253,14 @@ void CL_ShutdownHttpDownload(void){
         curl_multi_cleanup(curlm);
         curlm = NULL;
 }
+
+#else
+// !defined HAVE_CURL_CURL_H
+
+void CL_InitHttpDownload(void){}
+void CL_HttpDownloadCleanup(void){}
+qboolean CL_HttpDownload(void){ return false; }
+void CL_HttpDownloadThink(void){}
+void CL_ShutdownHttpDownload(void){}
+
+#endif

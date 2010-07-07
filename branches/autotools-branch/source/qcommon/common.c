@@ -23,9 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-// -jjb-dbg  check msg write byte, char, short
-#define PARANOID 1
-
 #include "qcommon.h"
 
 #include <setjmp.h>
@@ -140,7 +137,6 @@ void Com_Printf (char *fmt, ...)
 	// also echo to debugging console
 	Sys_ConsoleOutput (msg);
 
-// -jjb-ac
 #if defined WIN32_VARIANT
 	// Also echo to dedicated console
 	Sys_Print(msg);
@@ -163,7 +159,7 @@ void Com_Printf (char *fmt, ...)
 	// logfile
 	if (logfile_active && logfile_active->value)
 	{
-		char		name[MAX_QPATH];
+		char		name[MAX_OSPATH];
 		const char 	*f_name;
 
 		if (!logfile)
@@ -192,8 +188,6 @@ Com_DPrintf
 A Com_Printf that only shows up if the "developer" cvar is set
 ================
 */
-#if !defined NDEBUG
-// -jjb-experiment  remove for for non-debug version
 void Com_DPrintf (char *fmt, ...)
 {
 	va_list		argptr;
@@ -208,7 +202,6 @@ void Com_DPrintf (char *fmt, ...)
 
 	Com_Printf ("%s", msg);
 }
-#endif
 
 /*
 =============
@@ -330,9 +323,8 @@ void MSG_WriteChar (sizebuf_t *sb, int c)
 
 #ifdef PARANOID
 	if (c < -128 || c > 127) {
-		// -jjb-dbg
-		Com_Printf( "MSG_WriteChar: range error: %i\n", c);
-		//Com_Error (ERR_FATAL, "MSG_WriteChar: range error");
+		// Com_Printf( "MSG_WriteChar: range error: %i\n", c);
+		Com_Error (ERR_FATAL, "MSG_WriteChar: range error");
 	}
 #endif
 
@@ -346,9 +338,8 @@ void MSG_WriteByte (sizebuf_t *sb, int c)
 
 #ifdef PARANOID
 	if (c < 0 || c > 255) {
-		// -jjb-dbg
-		Com_Printf( "MSG_WriteByte: range error: %i\n", c );
-		//Com_Error (ERR_FATAL, "MSG_WriteByte: range error");
+		//Com_Printf( "MSG_WriteByte: range error: %i\n", c );
+		Com_Error (ERR_FATAL, "MSG_WriteByte: range error");
 	}
 #endif
 
@@ -363,9 +354,8 @@ void MSG_WriteShort (sizebuf_t *sb, int c)
 #ifdef PARANOID
 	if ( c > 65535 )
 	{ // unsigned short actually
-		// -jjb-dbg
-		Com_Printf("MSG_WriteShort: range error: %i \n", c);
-		//Com_Error (ERR_FATAL, "MSG_WriteShort: range error");
+		//Com_Printf("MSG_WriteShort: range error: %i \n", c);
+		Com_Error (ERR_FATAL, "MSG_WriteShort: range error");
 	}
 #endif
 
@@ -1557,7 +1547,9 @@ void Qcommon_Init (int argc, char **argv)
 	developer = Cvar_Get ("developer", "0", 0);
 	timescale = Cvar_Get ("timescale", "1", 0);
 	fixedtime = Cvar_Get ("fixedtime", "0", 0);
-	logfile_active = Cvar_Get ("logfile", "3", CVAR_ARCHIVE);
+	// 2010-07 logfile default to "1" to prevent unbounded growth & flush on write
+	// rationale: expert user can figure out when "2" or "3" are appropriate
+	logfile_active = Cvar_Get ("logfile", "1", CVAR_ARCHIVE);
 	logfile_name = Cvar_Get ("logname", "qconsole.log", CVAR_ARCHIVE);
 	showtrace = Cvar_Get ("showtrace", "0", 0);
 #ifdef DEDICATED_ONLY
@@ -1603,7 +1595,7 @@ void Qcommon_Init (int argc, char **argv)
 	SCR_EndLoadingPlaque ();
 
 	// clear any lines of console text
-	Cbuf_AddText ("clear\n"); // -jjb-ded ???
+	Cbuf_AddText ("clear\n");
 
 #ifndef DEDICATED_ONLY
 	//play music
@@ -1672,7 +1664,7 @@ void Qcommon_Frame (int msec)
 		c_brush_traces = 0;
 		c_pointcontents = 0;
 	}
-// -jjb-ac
+
 #if defined UNIX_VARIANT
 	do
 	{
@@ -1702,7 +1694,7 @@ void Qcommon_Frame (int msec)
 	SV_Frame (msec);
 
 #if defined WIN32_VARIANT
-	// -jjb-ac -jjb-ded  don't start dedicated server from here for Linux
+	// not good for Linux when run from menu or icon without a terminal
 	if(dedicated->modified) {
 		dedicated->modified = false;
 		if ( dedicated->value ) {

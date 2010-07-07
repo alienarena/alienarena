@@ -3037,13 +3037,19 @@ qboolean QGL_Init( const char *dllname )
 
 	if ( ( glw_state.OpenGLLib = dlopen( dllname, RTLD_LAZY | RTLD_GLOBAL ) ) == 0 )
 	{
+#if 1
+		// basedir deprecated.
+		return false;
+
+#else
 		char	fn[MAX_OSPATH];
 		char	*path;
-		// FILE *fp; // -jjb-unused
+		// FILE *fp; // unused
 
 //		Com_Printf(PRINT_ALL, "QGL_Init: Can't load %s from /etc/ld.so.conf: %s\n",
 //				dllname, dlerror());
 
+		// probably not useful in unix/linux
 		// try basedir next
 		path = Cvar_Get ("basedir", ".", CVAR_NOSET)->string;
 		snprintf (fn, MAX_OSPATH, "%s/%s", path, dllname );
@@ -3051,6 +3057,7 @@ qboolean QGL_Init( const char *dllname )
 			Com_Printf( PRINT_ALL, "%s\n", dlerror() );
 			return false;
 		}
+#endif
 	}
 
 	gl_config.allow_cds = true;

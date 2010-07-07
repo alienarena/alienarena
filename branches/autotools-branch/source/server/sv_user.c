@@ -322,7 +322,6 @@ void SV_BeginDownload_f(void)
 	extern	cvar_t *allow_download_models;
 	extern	cvar_t *allow_download_sounds;
 	extern	cvar_t *allow_download_maps;
-	// extern	int		file_from_pak; // -jjb-unused
 	int		name_length; // For getting the final character.
 	int offset = 0;
 
@@ -343,13 +342,13 @@ void SV_BeginDownload_f(void)
 		// leading slash bad as well, must be in subdir
 		|| *name == '/'
 		// next up, skin check
-		|| (strncmp(name, "players/", 6) == 0 && !allow_download_players->value)
+		|| (strncmp(name, "players/", 8) == 0 && !allow_download_players->value)
 		// now models
-		|| (strncmp(name, "models/", 6) == 0 && !allow_download_models->value)
+		|| (strncmp(name, "models/", 7) == 0 && !allow_download_models->value)
 		// now sounds
 		|| (strncmp(name, "sound/", 6) == 0 && !allow_download_sounds->value)
 		// now maps (note special case for maps, must not be in pak)
-		|| (strncmp(name, "maps/", 6) == 0 && !allow_download_maps->value)
+		|| (strncmp(name, "maps/", 5) == 0 && !allow_download_maps->value)
 		// MUST be in a subdirectory
 		|| !strstr (name, "/") )
 	{	// don't allow anything with .. path

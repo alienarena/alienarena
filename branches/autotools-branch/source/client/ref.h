@@ -188,7 +188,7 @@ typedef struct entity_s
 
 	float	bob;
 
-	struct rscript_s *script; // -jjb-ac -jjb-fix
+	struct rscript_s *script;
 
 } entity_t;
 

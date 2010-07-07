@@ -36,8 +36,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/time.h>
 
 #include "unix/glob.h"
-
 #include "qcommon/qcommon.h"
+
 
 /*
  * State of currently open Hunk.
@@ -233,31 +233,21 @@ int Sys_Milliseconds (void)
 
 void Sys_Mkdir (char *path)
 {
-#if 1
-	// -jjb-fix
-	struct stat statbuf;
+	int result;
 
-	if ( stat( path, &statbuf )) {
-		if ( errno == ENOENT ) {
-			// does not exist, attempt creation
-			Com_DPrintf("Sys_Mkdir:creating %s:\n", path );
-			if ( mkdir( path, 0700 ) ) // assume this is for .codered/ dirs
-			{
-				Com_Printf("Warning: Could not create directory %s\n", path );
-			}
-		}
-		else {
-			Com_DPrintf("Sys_Mkdir: stat error %d\n]", errno );
+	result = mkdir( path, 0700 );
+	// drwx------ appears to be preferred unix/linux practice for home dirs
+	if ( !result )
+	{ // success
+		Com_Printf("Created directory %s\n", path );
+	}
+	else
+	{
+		if ( errno != EEXIST )
+		{
+			Com_DPrintf("Creating directory %s failed\n", path );
 		}
 	}
-	else {
-		if ( !(statbuf.st_mode & (S_IFDIR )) ) {
-			Com_DPrintf("Sys_Mkdir: non-directory in path.\n");
-		}
-	}
-#else
-	mkdir( path, 0777 );
-#endif
 }
 
 //============================================
@@ -354,5 +344,3 @@ void Sys_FindClose (void)
 
 
 //============================================
-
-

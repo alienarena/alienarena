@@ -71,23 +71,11 @@ void Q_strncpyz( char *dest, const char *src, size_t size )
 
 //=============================================================================
 
-void CL_DownloadFileName(char *dest, int destlen, char *fn) // -jjb-filesystem
+void CL_DownloadFileName(char *dest, int destlen, char *fn)
 {
-	// -jjb-filesystem  player models always downloaded to data1, why???
-	//  "conceptual" problem here. need a writeable data1 ???
-	if (strncmp(fn, "players", 7) == 0)
-	{
-#if defined UNIX_VARIANT
-		// -jjb-filesystem, for now put in user writeable game dir
-		Com_sprintf (dest, destlen, "%s/%s", FS_Gamedir(), fn);
-#else
-		Com_sprintf (dest, destlen, "%s/%s", BASEDIRNAME, fn);
-#endif
-	}
-	else
-	{
-		Com_sprintf (dest, destlen, "%s/%s", FS_Gamedir(), fn);
-	}
+	// 2010-07 note: originally this directed "players" to "data1/"
+	//   does not appear to be any reason for that in Alien Arena
+	Com_sprintf (dest, destlen, "%s/%s", FS_Gamedir(), fn);
 }
 
 /*
@@ -156,6 +144,9 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	// a runt file wont be left
 	COM_StripExtension (cls.downloadname, cls.downloadtempname);
 	strcat (cls.downloadtempname, ".tmp");
+
+	// -jjb-filesystem downloads
+	Com_Printf("[Starting download: %s\n]", cls.downloadtempname );
 
 	// attempt an http download if available(never try to dl game model skins here)
 	if(cls.downloadurl[0] && CL_HttpDownload())
