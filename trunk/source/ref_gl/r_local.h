@@ -618,19 +618,16 @@ extern GLuint		g_location_fogamount;
 
 //mesh
 extern GLuint		g_location_meshlightPosition;
-extern GLuint		g_location_meshnormal;
 extern GLuint		g_location_baseTex;
 extern GLuint		g_location_normTex;
 extern GLuint		g_location_fxTex;
 extern GLuint		g_location_color;
 extern GLuint		g_location_minLight;
 extern GLuint		g_location_meshNormal;
-extern GLuint		g_location_meshTangent;
 extern GLuint		g_location_meshTime;
 extern GLuint		g_location_meshFog;
 extern GLuint		g_location_useFX;
 extern GLuint		g_location_useGlow;
-extern GLuint		g_location_isMD2;
 
 //fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;

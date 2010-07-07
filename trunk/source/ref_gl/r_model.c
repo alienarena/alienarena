@@ -41,6 +41,10 @@ model_t	mod_inline[MAX_MOD_KNOWN];
 LightGroup_t LightGroups[MAX_LIGHTS];
 int r_lightgroups;
 
+static float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
+#include "anorms.h"
+};
+
 int		registration_sequence;
 
 #ifdef _WINDOWS
@@ -466,7 +470,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	}
 	else 
 	{	//we have an .iqm
-		//if r_legacy, check for .md2, if none, load the .iqm
+		//if r_usemd2, check for .md2, if none, load the .iqm
 		if(r_usemd2->value) 
 		{
 			COM_StripExtension(mod->name, shortname);
@@ -1731,6 +1735,119 @@ void R_LoadMd2VertexArrays(model_t *md2model){
 	
 }
 
+byte Normal2Index(const vec3_t vec)
+{
+	int i, best;
+	float d, bestd;
+
+	bestd = best = 0;
+	for (i=0 ; i<NUMVERTEXNORMALS ; i++)
+	{
+		d = DotProduct (vec, r_avertexnormals[i]);
+		if (d > bestd)
+		{
+			bestd = d;
+			best = i;
+		}
+	}
+
+	return best;
+}
+
+void RecalcVertsLightNormalIdx (dmdl_t *pheader)
+{
+	int				i, j, k, l;
+	daliasframe_t	*frame;
+	dtrivertx_t		*verts, *v;
+	vec3_t			normal, triangle[3], v1, v2;
+	dtriangle_t		*tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
+	vec3_t	normals_[MAX_VERTS];
+
+	//for all frames
+	for (i=0; i<pheader->num_frames; i++)
+	{
+		frame = (daliasframe_t *)((byte *)pheader + pheader->ofs_frames + i * pheader->framesize);
+		verts = frame->verts;
+
+		memset(normals_, 0, pheader->num_xyz*sizeof(vec3_t));
+
+		//for all tris
+		for (j=0; j<pheader->num_tris; j++)
+		{
+			//make 3 vec3_t's of this triangle's vertices
+			for (k=0; k<3; k++)
+			{
+				l = tris[j].index_xyz[k];
+				v = &verts[l];
+				for (l=0; l<3; l++)
+					triangle[k][l] = v->v[l];
+			}
+
+			//calculate normal
+			VectorSubtract(triangle[0], triangle[1], v1);
+			VectorSubtract(triangle[2], triangle[1], v2);
+			CrossProduct(v2,v1, normal);
+			VectorScale(normal, -1.0/VectorLength(normal), normal);
+
+			for (k=0; k<3; k++)
+			{
+				l = tris[j].index_xyz[k];
+				VectorAdd(normals_[l], normal, normals_[l]);
+			}
+		}
+
+		for (j=0; j<pheader->num_xyz; j++)
+			for (k=j+1; k<pheader->num_xyz; k++)
+				if(verts[j].v[0] == verts[k].v[0] && verts[j].v[1] == verts[k].v[1] && verts[j].v[2] == verts[k].v[2])
+				{
+					float *jnormal = r_avertexnormals[verts[j].lightnormalindex];
+					float *knormal = r_avertexnormals[verts[k].lightnormalindex];
+					if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))		
+					{
+						VectorAdd(normals_[j], normals_[k], normals_[j]);
+						VectorCopy(normals_[j], normals_[k]);
+					}
+				}
+
+		//normalize average
+		for (j=0; j<pheader->num_xyz; j++)
+		{
+			VectorNormalize(normals_[j]);
+			verts[j].lightnormalindex = Normal2Index(normals_[j]);
+		}
+
+	}
+
+}
+
+void VecsForTris(float *v0, float *v1, float *v2, float *st0, float *st1, float *st2, vec3_t Tangent)
+{
+	vec3_t	vec1, vec2;
+	vec3_t	planes[3];
+	float	tmp;
+	int		i;
+
+	for (i=0; i<3; i++)
+	{
+		vec1[0] = v1[i]-v0[i];
+		vec1[1] = st1[0]-st0[0];
+		vec1[2] = st1[1]-st0[1];
+		vec2[0] = v2[i]-v0[i];
+		vec2[1] = st2[0]-st0[0];
+		vec2[2] = st2[1]-st0[1];
+		VectorNormalize(vec1);
+		VectorNormalize(vec2);
+		CrossProduct(vec1,vec2,planes[i]);
+	}
+
+	for (i=0; i<3; i++)
+	{
+		tmp = 1.0 / planes[i][0];
+		Tangent[i] = -planes[i][1]*tmp;
+	}
+	VectorNormalize(Tangent);
+}
+
 /*
 =================
 Mod_LoadAliasModel
@@ -1738,10 +1855,10 @@ Mod_LoadAliasModel
 */
 void Mod_LoadAliasModel (model_t *mod, void *buffer)
 {
-	int					i, j;
+	int					i, j, k, l;
 	dmdl_t				*pinmodel, *pheader, *paliashdr;
 	dstvert_t			*pinst, *poutst;
-	dtriangle_t			*pintri, *pouttri;
+	dtriangle_t			*pintri, *pouttri, *tris;
 	daliasframe_t		*pinframe, *poutframe, *pframe;
 	int					*pincmd, *poutcmd;
 	int					version;
@@ -1749,6 +1866,10 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	float				s, t;
 	float				iw, ih;
 	fstvert_t			*st;
+	daliasframe_t		*frame;
+	dtrivertx_t			*verts;
+	byte				*norms = NULL, *tangents;
+	vec3_t				tangents_[MAX_VERTS];
 	pinmodel = (dmdl_t *)buffer;
 
 	version = LittleLong (pinmodel->version);
@@ -1782,7 +1903,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 		Com_Printf("model %s has no frames", mod->name);
 
 //
-// load base s and t vertices (not used in gl version)
+// load base s and t vertices
 //
 	pinst = (dstvert_t *) ((byte *)pinmodel + pheader->ofs_st);
 	poutst = (dstvert_t *) ((byte *)pheader + pheader->ofs_st);
@@ -1888,6 +2009,75 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
     }
 
 	R_LoadMd2VertexArrays(mod);
+
+	RecalcVertsLightNormalIdx(pheader);
+
+	cx = pheader->num_xyz * pheader->num_frames * sizeof(byte);
+		
+	// Calculate tangents
+	mod->tangents = tangents = (byte*)Hunk_Alloc (cx);
+
+	tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
+	
+	//for all frames
+	for (i=0; i<pheader->num_frames; i++)
+	{
+		//set temp to zero
+		memset(tangents_, 0, pheader->num_xyz*sizeof(vec3_t));
+
+		frame = (daliasframe_t *)((byte *)pheader + pheader->ofs_frames + i * pheader->framesize);
+		verts = frame->verts;
+
+		//for all tris
+		for (j=0; j<pheader->num_tris; j++)
+		{
+			vec3_t	vv0,vv1,vv2;
+			vec3_t tangent;
+
+			vv0[0] = (float)verts[tris[j].index_xyz[0]].v[0];
+			vv0[1] = (float)verts[tris[j].index_xyz[0]].v[1];
+			vv0[2] = (float)verts[tris[j].index_xyz[0]].v[2];
+			vv1[0] = (float)verts[tris[j].index_xyz[1]].v[0];
+			vv1[1] = (float)verts[tris[j].index_xyz[1]].v[1];
+			vv1[2] = (float)verts[tris[j].index_xyz[1]].v[2];
+			vv2[0] = (float)verts[tris[j].index_xyz[2]].v[0];
+			vv2[1] = (float)verts[tris[j].index_xyz[2]].v[1];
+			vv2[2] = (float)verts[tris[j].index_xyz[2]].v[2];
+
+			VecsForTris(vv0, vv1, vv2,
+						&st[tris[j].index_st[0]].s,
+						&st[tris[j].index_st[1]].s,
+						&st[tris[j].index_st[2]].s,
+						tangent);
+
+			for (k=0; k<3; k++)
+			{
+				l = tris[j].index_xyz[k];
+				VectorAdd(tangents_[l], tangent, tangents_[l]);
+			}
+		}
+
+		for (j=0; j<pheader->num_xyz; j++)
+			for (k=j+1; k<pheader->num_xyz; k++)
+				if(verts[j].v[0] == verts[k].v[0] && verts[j].v[1] == verts[k].v[1] && verts[j].v[2] == verts[k].v[2])
+				{
+					float *jnormal = r_avertexnormals[verts[j].lightnormalindex];
+					float *knormal = r_avertexnormals[verts[k].lightnormalindex];
+					if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))
+					{
+						VectorAdd(tangents_[j], tangents_[k], tangents_[j]);
+						VectorCopy(tangents_[j], tangents_[k]);
+					}
+				}
+
+		//normalize averages
+		for (j=0; j<pheader->num_xyz; j++)
+		{
+			VectorNormalize(tangents_[j]);
+			tangents[i * pheader->num_xyz + j] = Normal2Index(tangents_[j]);
+		}
+	}
+	
 
 	paliashdr = (dmdl_t *)mod->extradata;
 

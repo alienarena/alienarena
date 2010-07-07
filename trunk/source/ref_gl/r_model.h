@@ -357,6 +357,9 @@ typedef struct model_s
 	char			skinname[MAX_QPATH];
 	//end iqm
 
+	//temporary md2 - will use .iqm struct instead
+	byte		*tangents;
+
 	fstvert_t	*st;
 	neighbors_t *neighbors;	
 

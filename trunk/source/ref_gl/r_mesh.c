@@ -137,7 +137,7 @@ void GL_GetLightVals(qboolean dynamic)
 {
 	int i, j, lnum;
 	dlight_t	*dl;
-	float dist, xdist, ydist;
+	float dist;
 	vec3_t	temp, tempOrg, lightAdd;
 	trace_t r_trace;
 	vec3_t mins, maxs;
@@ -161,14 +161,15 @@ void GL_GetLightVals(qboolean dynamic)
 
 	numlights = 0;
 	VectorClear(lightAdd);
-	for (i=0; i<r_lightgroups; i++) {	
-
+	for (i=0; i<r_lightgroups; i++) 
+	{	
 		if((currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > currententity->origin[2]))
-			r_trace.fraction = 1.0; //don't do traces for weapon models, not smooth enough
+			r_trace.fraction = 1.0; //don't do traces for lights above weapon models, not smooth enough
 		else
 			r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 		
-		if(r_trace.fraction == 1.0) {
+		if(r_trace.fraction == 1.0) 
+		{
 			VectorSubtract(currententity->origin, LightGroups[i].group_origin, temp);
 			dist = VectorLength(temp);
 			if(dist == 0) 
@@ -184,43 +185,29 @@ void GL_GetLightVals(qboolean dynamic)
 	dynFactor = 0;
 	if(dynamic)
 	{
-		if((!(currententity->flags & RF_NOSHADOWS)) || currententity->flags & RF_MINLIGHT) 
-		{
-			dl = r_newrefdef.dlights;
-			//limit to five lights(maybe less)?
-			for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) 
-			{			
-				VectorSubtract(currententity->origin, dl->origin, temp);
-				dist = VectorLength(temp);
+		dl = r_newrefdef.dlights;
+		//limit to five lights(maybe less)?
+		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++) 
+		{			
+			VectorSubtract(currententity->origin, dl->origin, temp);
+			dist = VectorLength(temp);
 
-				VectorCopy(currententity->origin, temp);
-				temp[2] += 24; //generates more consistent tracing
+			VectorCopy(currententity->origin, temp);
+			temp[2] += 24; //generates more consistent tracing
 			
-				r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 				
-				if(r_trace.fraction == 1.0) 
-				{
-					if(dist < 100) 
-					{
-						VectorCopy(dl->origin, temp);
-						//translate for when viewangles are negative - done because otherwise the
-						//lighting effect is backwards - stupid quake bug rearing it's head?
-						if(r_newrefdef.viewangles[1] < 0) 
-						{
-							//translate according viewangles
-							xdist = temp[0] - currententity->origin[0];
-							ydist = temp[1] - currententity->origin[1];
-							temp[0] -= 2 * xdist;
-							temp[1] -= 2 * ydist;
-						}
-						//make dynamic lights more influential than world
-						for(j = 0; j < 3; j++)
-							lightAdd[j] += temp[j]*100*dl->intensity;
-						numlights+=100*dl->intensity;
-	                
-						VectorSubtract (dl->origin, currententity->origin, temp);
-						dynFactor += (dl->intensity/20.0)/VectorLength(temp);
-					}
+			if(r_trace.fraction == 1.0) 
+			{
+				if(dist < dl->intensity) 
+				{												
+					//make dynamic lights more influential than world
+					for(j = 0; j < 3; j++)
+						lightAdd[j] += dl->origin[j]*100*dl->intensity;
+					numlights+=100*dl->intensity;
+
+					VectorSubtract (dl->origin, currententity->origin, temp);
+					dynFactor += (dl->intensity/20.0)/VectorLength(temp);
 				}
 			}
 		}
@@ -854,6 +841,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 	float   *lerp;
 	fstvert_t *st;
 	float os, ot, os2, ot2;
+	unsigned offs, offs2;
+	byte *tangents, *oldtangents;
 	qboolean mirror = false;
 
 	if(r_legacy->value) {
@@ -861,17 +850,25 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			return;
 	}
 
+	offs = paliashdr->num_xyz;
+
 	if(lerped)
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
 			+ currententity->frame * paliashdr->framesize);
 	else
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames);
+
 	verts = v = frame->verts;
+	offs2 = offs*currententity->frame;
+	tangents = currentmodel->tangents + offs2;
 
 	if(lerped) {
 		oldframe = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames
 			+ currententity->oldframe * paliashdr->framesize);
 		ov = oldframe->verts;
+
+		offs2 = offs*currententity->oldframe;
+		oldtangents = currentmodel->tangents + offs2;
 	}
 
 	tris = (dtriangle_t *) ((byte *)paliashdr + paliashdr->ofs_tris);
@@ -960,15 +957,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
             //simple directional(relative light position)
             VectorSubtract(lightPosition, currententity->origin, lightVec);
-            if(dynFactor == 0.0) //do for world lights only
-            {
-                VectorMA(lightPosition, 1.0, lightVec, lightPosition);
-                R_ModelViewTransform(lightPosition, lightVec);
-            }
-
+            VectorMA(lightPosition, 1.0, lightVec, lightPosition);
+            R_ModelViewTransform(lightPosition, lightVec);
+            
             //brighten things slightly
             for (i = 0; i < 3; i++ )
-                lightVal[i] *= 1.25;
+                lightVal[i] *= 3.0; 
 
             GL_EnableMultitexture( true );
 
@@ -1014,7 +1008,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				else
 					shellscale = 1.6;
 					
-				if(lerped) {
+				if(lerped) 
+				{
 					VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0] + r_avertexnormals[verts[index_xyz].lightnormalindex][0] * shellscale;
 					VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1] + r_avertexnormals[verts[index_xyz].lightnormalindex][1] * shellscale;
 					VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2] + r_avertexnormals[verts[index_xyz].lightnormalindex][2] * shellscale;
@@ -1022,13 +1017,19 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
 					VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 					
-					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
+					{
                         for (k=0; k<3; k++)
                             normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
                             ( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
                             r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
+
+							tangent[k] = r_avertexnormals[tangents[index_xyz]][k] +
+							( r_avertexnormals[oldtangents[index_xyz]][k] -
+							r_avertexnormals[tangents[index_xyz]][k] ) * backlerp;
                     }
-					else {
+					else 
+					{
 					
 						VArray[5] = shadelight[0];
 						VArray[6] = shadelight[1];
@@ -1036,7 +1037,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
 					}
 				}
-				else {
+				else 
+				{
 					VArray[0] = currentmodel->vertexes[index_xyz].position[0];
 					VArray[1] = currentmodel->vertexes[index_xyz].position[1];
 					VArray[2] = currentmodel->vertexes[index_xyz].position[2];
@@ -1044,11 +1046,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[3] = (currentmodel->vertexes[index_xyz].position[1] + currentmodel->vertexes[index_xyz].position[0]) * (1.0f / 40.0f);
 					VArray[4] = currentmodel->vertexes[index_xyz].position[2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
-					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
+					{
                         for (k=0;k<3;k++)
                             normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
+							tangent[k] = r_avertexnormals[tangents[index_xyz]][k];
                     }
-					else {
+					else 
+					{
 					
 						VArray[5] = shadelight[0];
 						VArray[6] = shadelight[1];
@@ -1057,11 +1062,12 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					}				
 				}
 	
-				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
+				{
                     VectorNormalize ( normal );
-                    AngleVectors(normal, NULL, tangent, NULL);
                     VectorCopy(normal, NormalsArray[va]); //shader needs normal array
-                    glUniform3fARB( g_location_meshTangent, tangent[0], tangent[1], tangent[2] );
+					VectorCopy(tangent, TangentsArray[va]);
+  
                 }
 
                 // increment pointer and counter
@@ -1075,7 +1081,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
         if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
             R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
             qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-			glUniform1iARB( g_location_isMD2, 1);
+			glEnableVertexAttribArrayARB (1);
+			glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
         }
         else
             R_InitVArrays (VERT_COLOURED_TEXTURED);
@@ -1148,8 +1155,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			} 	
 
 		}
-		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
-
+		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+		{
 				if(qglLockArraysEXT)						
 					qglLockArraysEXT(0, va);
 
@@ -1179,8 +1186,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			VArray = &VArrayVerts[0];
 			GLSTATE_ENABLE_ALPHATEST
 
-			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders)) {
-				if(stage->next) {
+			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders)) 
+			{
+				if(stage->next) 
+				{
 					stage = stage->next;
 					continue;
 				}	
@@ -1188,8 +1197,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					goto done;
 			}
 
-			if(!stage->normalmap) {
-				if(mirror) {	
+			if(!stage->normalmap) 
+			{
+				if(mirror) 
+				{	
 					if( !(currententity->flags & RF_WEAPONMODEL)) {
 						GL_EnableMultitexture( true );
 						GL_SelectTexture( GL_TEXTURE0);
@@ -1283,15 +1294,14 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				else { 
 					//simple directional(relative light position)
 					VectorSubtract(lightPosition, currententity->origin, lightVec);
-					if(dynFactor == 0.0) //do for world lights only
-					{
-						VectorMA(lightPosition, 1.0, lightVec, lightPosition);
-						R_ModelViewTransform(lightPosition, lightVec);
-					}
-
+					VectorMA(lightPosition, 5.0, lightVec, lightPosition);
+					R_ModelViewTransform(lightPosition, lightVec);
+					
 					//brighten things slightly 
-					for (i = 0; i < 3; i++ )
-						lightVal[i] *= 1.25;
+					for (i = 0; i < 3; i++ ) 
+					{
+						lightVal[i] *= 1.15;
+					}
 				}
 										
 				GL_EnableMultitexture( true );
@@ -1341,7 +1351,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			{
 				for (j=0; j<3; j++)
 				{	
-					vec3_t normal, tangent;
+					vec3_t normal;
+					vec4_t tangent;
 					int k;
 					
 					index_xyz = tris[i].index_xyz[j];
@@ -1350,32 +1361,44 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					os = os2 = st[index_st].s;
 					ot = ot2 = st[index_st].t;					
 
-					if(lerped) {
-
+					if(lerped) 
+					{
 						VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
 						VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
 						VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
 
-						for (k=0; k<3; k++)
-						normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
-						( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
-						r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
+						for (k=0; k<3; k++) 
+						{
+							normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
+							( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
+							r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
+
+							tangent[k] = r_avertexnormals[tangents[index_xyz]][k] +
+							( r_avertexnormals[oldtangents[index_xyz]][k] -
+							r_avertexnormals[tangents[index_xyz]][k] ) * backlerp;
+						}
 					}
-					else {
+					else 
+					{
 						VArray[0] = currentmodel->vertexes[index_xyz].position[0];
 						VArray[1] = currentmodel->vertexes[index_xyz].position[1];
 						VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
-						for (k=0;k<3;k++)
+						for (k=0;k<3;k++) 
+						{
 							normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
+							tangent[k] = r_avertexnormals[tangents[index_xyz]][k];
+						}
 					}
 
 					VectorNormalize ( normal );
+					tangent[3] = 1.0;
 
-					if(stage->normalmap) { //send tangent to shader
-						AngleVectors(normal, NULL, tangent, NULL);
+					if(stage->normalmap) 
+					{ 
+						//send tangent to shader
 						VectorCopy(normal, NormalsArray[va]); //shader needs normal array
-						glUniform3fARB( g_location_meshTangent, tangent[0], tangent[1], tangent[2] );
+						Vector4Copy(tangent, TangentsArray[va]);
 					}
 
 					if (stage->envmap)
@@ -1384,20 +1407,24 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						
 						VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
 
-						if(mirror) {
-							if( !(currententity->flags & RF_WEAPONMODEL)) {
+						if(mirror) 
+						{
+							if( !(currententity->flags & RF_WEAPONMODEL)) 
+							{
 									stage->scale.scaleX = -0.5; 
 									stage->scale.scaleY = 0.5;
 									os -= DotProduct (normal , vectors[1]);
 									ot += DotProduct (normal, vectors[2]);
 							}
-							else {
+							else 
+							{
 								stage->scale.scaleX = -1.0;
 								stage->scale.scaleY = 1.0;
 							}
 		
 						}
-						else {
+						else 
+						{
 							RS_SetEnvmap (envmapvec, &os, &ot);
 
 							if (currententity->flags & RF_TRANSLUCENT) //return to original glass script's scale(mostly for when going into menu)
@@ -1413,7 +1440,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					VArray[3] = os;
 					VArray[4] = ot;
 
-					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) {
+					if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
+					{
 						os2 -= DotProduct (normal , vectors[1] );
 						ot2 += DotProduct (normal, vectors[2] );
 						RS_SetTexcoords2D(stage, &os2, &ot2);
@@ -1422,8 +1450,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						VArray[6] = ot2;
 					}
 			
-					if(!stage->normalmap) {
-
+					if(!stage->normalmap) 
+					{
 						float red = 1, green = 1, blue = 1, nAlpha;
 
 						if(lerped) 
@@ -1472,7 +1500,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
 				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-				glUniform1iARB( g_location_isMD2, 1);
+				glEnableVertexAttribArrayARB (1);
+				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 			}
 			else {
 				if(mirror && !(currententity->flags & RF_WEAPONMODEL)) 
