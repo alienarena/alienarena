@@ -1,8 +1,6 @@
 uniform vec3 lightPos;
-uniform vec3 meshTangent;
 uniform float time;
 uniform int FOG;
-uniform int MD2;
 
 attribute vec4 tangent;
 
@@ -22,17 +20,9 @@ void main()
 	
 	vec3 n = normalize(gl_NormalMatrix * gl_Normal);
 	
-	if(MD2 == 1) 
-	{
-		t = normalize(gl_NormalMatrix * meshTangent);
-		b = cross(n, t);
-	}
-	else
-	{
-		vec3 tangent3 = vec3(tangent);
-		t = normalize(gl_NormalMatrix * tangent3);
-		b = tangent[3] * cross(n, t);
-	}
+	vec3 tangent3 = vec3(tangent);
+	t = normalize(gl_NormalMatrix * tangent3);
+	b = tangent[3] * cross(n, t);
 	
 	vec3 v;
 	v.x = dot(lightPos, t);

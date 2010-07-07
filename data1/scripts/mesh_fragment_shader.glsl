@@ -6,7 +6,6 @@ uniform int FOG;
 uniform int useFX;
 uniform int useGlow;
 uniform float minLight; 
-const vec3 specularMaterial = vec3(1.0, 1.0, 1.0);
 const float SpecularFactor = 0.5;
 
 varying vec3 LightDir;

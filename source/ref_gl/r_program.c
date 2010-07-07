@@ -91,19 +91,16 @@ GLuint		g_location_fogamount;
 
 //mesh
 GLuint		g_location_meshlightPosition;
-GLuint		g_location_meshnormal;
 GLuint		g_location_baseTex;
 GLuint		g_location_normTex;
 GLuint		g_location_fxTex;
 GLuint		g_location_color;
 GLuint		g_location_minLight;
 GLuint		g_location_meshNormal;
-GLuint		g_location_meshTangent;
 GLuint		g_location_meshTime;
 GLuint		g_location_meshFog;
 GLuint		g_location_useFX;
 GLuint		g_location_useGlow;
-GLuint		g_location_isMD2;
 
 //fullscreen distortion effects
 GLuint		g_location_framebuffTex;
@@ -467,12 +464,10 @@ void R_LoadGLSLPrograms(void)
 		g_location_color = glGetUniformLocationARB(	g_meshprogramObj, "baseColor" );
 		g_location_minLight = glGetUniformLocationARB( g_meshprogramObj, "minLight" );
 		g_location_meshNormal = glGetUniformLocationARB( g_meshprogramObj, "meshNormal" );
-		g_location_meshTangent = glGetUniformLocationARB( g_meshprogramObj, "meshTangent" );
 		g_location_meshTime = glGetUniformLocationARB( g_meshprogramObj, "time" );
 		g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
 		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
 		g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow");
-		g_location_isMD2 = glGetUniformLocationARB( g_meshprogramObj, "MD2");
 
 		//fullscreen distortion effects
 
