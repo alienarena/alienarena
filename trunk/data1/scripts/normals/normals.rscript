@@ -776,6 +776,13 @@ maps/meshes/tech/rotator
 		glow
 	}
 }
+maps/meshes/tech/bigribtube
+{
+	{
+		map maps/meshes/tech/bigribtube_normal.jpg
+		normalmap
+	}
+}
 maps/meshes/xempx/tripes1
 {
 	{
