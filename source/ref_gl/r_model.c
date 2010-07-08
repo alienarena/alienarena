@@ -2076,12 +2076,11 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 			VectorNormalize(tangents_[j]);
 			tangents[i * pheader->num_xyz + j] = Normal2Index(tangents_[j]);
 		}
-	}
-	
+	}	
 
 	paliashdr = (dmdl_t *)mod->extradata;
 
-	//just use frame zero - we never scale frames in Alien Arena
+	//redo this using max/min from all frames
 	pframe = ( daliasframe_t * ) ( ( byte * ) paliashdr +
 		                              paliashdr->ofs_frames);
 

@@ -42,9 +42,9 @@ float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 // pointer for dynamic vert allocation
 float *VArray = &VArrayVerts[0];
 
-// array for dynamic normal allocation
-static vec3_t NormalsArray[MAX_TRIANGLES*3];
-static vec4_t TangentsArray[MAX_TRIANGLES*4];
+// arrays for normalmapping in glsl
+static vec3_t NormalsArray[MAX_VERTICES];
+static vec4_t TangentsArray[MAX_VERTICES];
 
 // number of verts allocated
 static int VertexCounter = 0;

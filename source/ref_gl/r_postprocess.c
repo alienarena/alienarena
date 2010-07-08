@@ -220,7 +220,7 @@ void R_ShadowBlend(float alpha)
 	qglPushMatrix();
 	qglLoadIdentity();
 
-	if(r_test->value && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0) {
+	if(gl_state.fbo && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0) {
 
 		alpha/=1.5; //necessary because we are blending two quads
 
@@ -269,7 +269,7 @@ void R_ShadowBlend(float alpha)
 	qglVertex2f(-5, 10);
 	qglEnd();
 
-	if(r_test->value && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0) {
+	if(gl_state.fbo && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0) {
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 

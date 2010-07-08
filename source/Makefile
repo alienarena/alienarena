@@ -243,7 +243,6 @@ CODERED_OBJS = \
 	$(BUILDDIR)/ref_gl/r_iqm.o \
 	$(BUILDDIR)/ref_gl/r_light.o \
 	$(BUILDDIR)/ref_gl/r_main.o \
-	$(BUILDDIR)/ref_gl/r_matrixlib.o \
 	$(BUILDDIR)/ref_gl/r_mesh.o \
 	$(BUILDDIR)/ref_gl/r_misc.o \
 	$(BUILDDIR)/ref_gl/r_model.o \
@@ -435,9 +434,6 @@ $(BUILDDIR)/ref_gl/r_warp.o :        $(REF_GL_DIR)/r_warp.c
 	$(DO_GL_SHLIB_CC)
 
 $(BUILDDIR)/ref_gl/r_image.o :       $(REF_GL_DIR)/r_image.c
-	$(DO_GL_SHLIB_CC)
-	
-$(BUILDDIR)/ref_gl/r_matrixlib.o :       $(REF_GL_DIR)/r_matrixlib.c
 	$(DO_GL_SHLIB_CC)
 
 $(BUILDDIR)/ref_gl/r_mesh.o :        $(REF_GL_DIR)/r_mesh.c

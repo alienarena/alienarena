@@ -39,6 +39,7 @@ Global
 		{F0514D81-BDFE-4A57-9AC7-F4B814560EFB}.Debug|x64.ActiveCfg = Debug|x64
 		{F0514D81-BDFE-4A57-9AC7-F4B814560EFB}.Debug|x64.Build.0 = Debug|x64
 		{F0514D81-BDFE-4A57-9AC7-F4B814560EFB}.Release|Win32.ActiveCfg = Alien Arena|Win32
+		{F0514D81-BDFE-4A57-9AC7-F4B814560EFB}.Release|Win32.Build.0 = Alien Arena|Win32
 		{F0514D81-BDFE-4A57-9AC7-F4B814560EFB}.Release|x64.ActiveCfg = Alien Arena|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
