@@ -70,18 +70,22 @@ void getOpenGLFunctionPointers(void)
 	qglBlitFramebufferEXT = (PFNGLBLITFRAMEBUFFEREXTPROC)qwglGetProcAddress("glBlitFramebufferEXT");
 }
 
-//used for post process stencil volume blurring(we'll merge these two functions eventually here)
+//used for post process stencil volume blurring and shadowmapping
 void generateShadowFBO()
 {
 	int shadowMapWidth = vid.width * r_shadowmapratio->value;
     int shadowMapHeight = vid.height * r_shadowmapratio->value;
 	GLenum FBOstatus;
 
+	gl_state.fbo = true;
+
 	getOpenGLFunctionPointers();
 
 	if(!qglGenFramebuffersEXT || !qglBindFramebufferEXT || !qglFramebufferTexture2DEXT || !qglCheckFramebufferStatusEXT
-		|| !qglGenRenderbuffersEXT || !qglBindRenderbufferEXT || !qglRenderbufferStorageEXT || !qglFramebufferRenderbufferEXT) {
-		Com_Printf("!!!!GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
+		|| !qglGenRenderbuffersEXT || !qglBindRenderbufferEXT || !qglRenderbufferStorageEXT || !qglFramebufferRenderbufferEXT) 
+	{
+		Com_Printf("...GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
+		gl_state.fbo = false;
 		return;
 	}
 
@@ -115,7 +119,11 @@ void generateShadowFBO()
 	// check FBO status
 	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
+	{
 		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
+		gl_state.fbo = false;
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	}		
 	
 	//FBO for capturing stencil volumes
 
@@ -155,7 +163,7 @@ void generateShadowFBO()
 	// check FBO status
 	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
-		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
+		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use secondary FBO\n");
 
 	// switch back to window-system-provided framebuffer
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);

@@ -27,7 +27,6 @@ m*_t structures are in-memory
 
 */
 #include "r_iqm.h"
-#include "r_matrixlib.h"
 /*
 ==============================================================================
 

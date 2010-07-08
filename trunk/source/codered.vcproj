@@ -51,7 +51,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="C:\vorbis\include;C:\ogg\include;&quot;C:\Program Files\OpenAL 1.1 SDK\include&quot;"
-				PreprocessorDefinitions="INHOUSE;WIN32;_DEBUG;_WINDOWS;EXTREME"
+				PreprocessorDefinitions="INHOUSE;WIN32;_DEBUG;_WINDOWS;ARENA;AL_NO_PROTOTYPES;_CRT_SECURE_NO_WARNINGS;MSVC9"
 				RuntimeLibrary="1"
 				PrecompiledHeaderFile=".\debug/codered.pch"
 				AssemblerListingLocation=".\debug/"
@@ -1867,10 +1867,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\ref_gl\r_matrixlib.c"
-				>
 			</File>
 			<File
 				RelativePath="ref_gl\r_mesh.c"

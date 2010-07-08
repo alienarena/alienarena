@@ -268,10 +268,6 @@ SOURCE=.\ref_gl\r_math.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ref_gl\r_matrixlib.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\ref_gl\r_mesh.c
 # End Source File
 # Begin Source File
