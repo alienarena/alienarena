@@ -849,6 +849,9 @@ void GL_DrawIQMFrame(int skinnum)
 	}
 	else if(!rs || mirror || glass) 
 	{	//base render no shaders
+		va=0;
+		VArray = &VArrayVerts[0];
+
 		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 			R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
 		else
@@ -856,6 +859,8 @@ void GL_DrawIQMFrame(int skinnum)
 
 		if(mirror) 
 		{
+			qglDepthMask(false);
+
 			if( !(currententity->flags & RF_WEAPONMODEL)) 
 			{
 				GL_EnableMultitexture( true );
@@ -876,16 +881,13 @@ void GL_DrawIQMFrame(int skinnum)
 				GL_SelectTexture( GL_TEXTURE0);
 				qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
 			}
-			GLSTATE_ENABLE_BLEND
-			GL_BlendFunction(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		}
 		else if(glass) 
 		{
+			qglDepthMask(false);
+
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, r_reflecttexture->texnum);
-
-			GLSTATE_ENABLE_BLEND
-			GL_BlendFunction(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		}
 		else 
 		{ 
@@ -946,6 +948,7 @@ void GL_DrawIQMFrame(int skinnum)
 				va++;			
 			}		
 		}
+
 		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
 		{
 			if(qglLockArraysEXT)						
@@ -959,6 +962,9 @@ void GL_DrawIQMFrame(int skinnum)
 			
 		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 			GL_EnableMultitexture( false );
+
+		if(mirror || glass)
+			qglDepthMask(true);
 	}
 	else 
 	{	//render with shaders
