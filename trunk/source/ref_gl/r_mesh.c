@@ -942,6 +942,11 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 
             vec3_t lightVec, lightVal;
 
+			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+            qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+			glEnableVertexAttribArrayARB (1);
+			glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+
             GL_GetLightVals(true);
 
             //send light level and color to shader, ramp up a bit
@@ -962,7 +967,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
             
             //brighten things slightly
             for (i = 0; i < 3; i++ )
-                lightVal[i] *= 3.0; 
+                lightVal[i] *= 2.5; 
 
             GL_EnableMultitexture( true );
 
@@ -991,7 +996,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
             glUniform1iARB( g_location_meshFog, map_fog);
         }
 		else
+		{
+			R_InitVArrays (VERT_COLOURED_TEXTURED);
 			GL_Bind(r_shelltexture->texnum); 
+		}
 
 		for (i=0; i<paliashdr->num_tris; i++)
 		{
@@ -1078,15 +1086,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
                     VArray += VertexSizes[VERT_COLOURED_TEXTURED];
                 va++;
             }
-        }
-        if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
-            R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-            qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-			glEnableVertexAttribArrayARB (1);
-			glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
-        }
-        else
-            R_InitVArrays (VERT_COLOURED_TEXTURED);
+        }       
 		
 		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
 
