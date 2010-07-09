@@ -123,7 +123,6 @@ void main( void )
       swamp *= swamp;
       swamp *= swamp;
       swamp *= swamp;
-      swamp /= 1.0;
 
       colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 4.0;
             
@@ -163,7 +162,6 @@ void main( void )
       swamp *= swamp;
       swamp *= swamp;
       swamp *= swamp;
-      swamp /= 1.0;
 
       colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 3.0;
       
