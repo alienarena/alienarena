@@ -42,8 +42,8 @@ float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
 static  vec4_t  s_lerped[MAX_VERTS];
 
 // static	vec3_t	s_normals[MAX_VERTS]; // unused
-static vec3_t NormalsArray[MAX_TRIANGLES*3];
-static vec4_t TangentsArray[MAX_TRIANGLES*4];
+static vec3_t NormalsArray[MAX_VERTICES];
+static vec4_t TangentsArray[MAX_VERTICES];
 
 extern	vec3_t	lightspot;
 vec3_t	shadevector;
@@ -1066,12 +1066,13 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						VArray[8] = calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position);
 					}
 				}
+				tangent[3] = 1.0;
 
 				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
 				{
                     VectorNormalize ( normal );
                     VectorCopy(normal, NormalsArray[va]); //shader needs normal array
-					VectorCopy(tangent, TangentsArray[va]);
+					Vector4Copy(tangent, TangentsArray[va]);
 
                 }
 
@@ -1206,7 +1207,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			{
 				if(mirror)
 				{
-					if( !(currententity->flags & RF_WEAPONMODEL)) {
+					if( !(currententity->flags & RF_WEAPONMODEL))
+					{
+						R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
+
 						GL_EnableMultitexture( true );
 						GL_SelectTexture( GL_TEXTURE0);
 						GL_TexEnv ( GL_COMBINE_EXT );
@@ -1221,10 +1225,16 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 						qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
 					}
 					else
+					{
+						R_InitVArrays (VERT_COLOURED_TEXTURED);
 						GL_Bind(r_mirrortexture->texnum);
+					}
 				}
 				else
+				{
+					R_InitVArrays (VERT_COLOURED_TEXTURED);
 					GL_Bind (stage->texture->texnum);
+				}
 
 
 				if (stage->blendfunc.blend)
@@ -1266,38 +1276,48 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				}
 			}
 
-			if(stage->normalmap) {
+			if(stage->normalmap)
+			{
 
 				vec3_t lightVec, lightVal;
+
+				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+				glEnableVertexAttribArrayARB (1);
+				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
 				GL_GetLightVals(true);
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
-				for(i = 0; i < 3; i++) {
+				for(i = 0; i < 3; i++)
+				{
 					if(lightVal[i] < shadelight[i]/2)
 						lightVal[i] = shadelight[i]/2; //never go completely black
 					lightVal[i] *= 5;
 					lightVal[i] += dynFactor;
-					if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) {
+					if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+					{
 						if(lightVal[i] > 1.5)
 							lightVal[i] = 1.5;
 					}
-					else {
+					else
+					{
 						if(lightVal[i] > 1.0+dynFactor)
 							lightVal[i] = 1.0+dynFactor;
 					}
 				}
 
-				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) { //fixed light source
-
+				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+				{
 					//fixed light source pointing down, slightly forward and to the left
 					lightPosition[0] = -1.0;
 					lightPosition[1] = 4.0;
 					lightPosition[2] = 8.0;
 					R_ModelViewTransform(lightPosition, lightVec);
 				}
-				else {
+				else
+				{
 					//simple directional(relative light position)
 					VectorSubtract(lightPosition, currententity->origin, lightVec);
 					VectorMA(lightPosition, 5.0, lightVec, lightPosition);
@@ -1467,7 +1487,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 								calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position), normal, currentmodel->vertexes[index_xyz].position);
 
-						if (stage->lightmap) {
+						if (stage->lightmap)
+						{
 							if(lerped)
 								GL_VlightAliasModel (shadelight, &verts[index_xyz], lightcolor);
 							else
@@ -1477,7 +1498,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 							blue = lightcolor[2];
 						}
 
-						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) {
+						if(mirror && !(currententity->flags & RF_WEAPONMODEL) )
+						{
 							VArray[7] = red;
 							VArray[8] = green;
 							VArray[9] = blue;
@@ -1502,22 +1524,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				}
 			}
 
-			if(stage->normalmap) {
-
-				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-				glEnableVertexAttribArrayARB (1);
-				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
-			}
-			else {
-				if(mirror && !(currententity->flags & RF_WEAPONMODEL))
-					R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
-				else
-					R_InitVArrays (VERT_COLOURED_TEXTURED);
-			}
-
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
-
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+			{
 				if(qglLockArraysEXT)
 					qglLockArraysEXT(0, va);
 
@@ -1532,8 +1540,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 				GL_EnableMultitexture( false );
 
-			if(stage->normalmap) {
-
+			if(stage->normalmap)
+			{
 				glUseProgramObjectARB( 0 );
 
 				GL_EnableMultitexture( false );

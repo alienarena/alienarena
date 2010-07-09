@@ -32,8 +32,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([config/config.h])
 
-AC_PREFIX_DEFAULT([/home/jbower/games/install_test])
-
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AM_SILENT_RULES([yes])
@@ -54,6 +52,7 @@ AC_PROG_RANLIB
 AM_PROG_CC_C_O
 
 # Unix/Linux host dedicated server only build option
+AC_MSG_CHECKING([for dedicated server only build])
 no_client=no
 AC_ARG_ENABLE( 
 	[no_client],
@@ -61,8 +60,23 @@ AC_ARG_ENABLE(
 		[build dedicated server only, not the client (default:no)])],
 	[no_client=${enableval}],
 	[no_client=no])
-AC_MSG_CHECKING([for dedicated server only build])
-AC_MSG_RESULT([${no_client}])	
+AC_MSG_RESULT([${no_client}])
+
+# Alternate Install. Install in the traditional single directory way.
+# Probably required for map making tools to work. Also, good when updating
+# from SVN regularly. Affects how Makefile sets DATADIR and does make-install.
+#  
+AC_MSG_CHECKING([for alternate_install])	
+alternate_install=no
+AC_ARG_ENABLE(
+	[alternate_install],
+	[AS_HELP_STRING([--enable-alternate-install],
+		[traditional single directory, in-place installation (default:no)])],
+	[alternate_install=${enableval}],
+	[alternate_install=no])
+AC_MSG_RESULT([${alternate_install}])
+AM_CONDITIONAL(ALTERNATE_INSTALL, test "x${alternate_install}" = xyes)
+ 	
 
 #
 # check host environment
@@ -285,7 +299,8 @@ AC_CHECK_FUNCS([ floor gethostbyname gettimeofday memmove memset mkdir dnl
 		
 AC_CHECK_FUNCS([ filelength stat fstat getcwd ])
 
+
 # outputs
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile source/Makefile])
 
 AC_OUTPUT

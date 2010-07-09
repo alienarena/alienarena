@@ -477,6 +477,7 @@ typedef struct
 	qboolean	separateStencil;
 	qboolean	stencil_wrap;
 	qboolean	vbo;
+	qboolean	fbo;
 	qboolean	hasFBOblit;
 
 } glstate_t;

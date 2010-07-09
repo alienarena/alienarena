@@ -9,10 +9,9 @@
 
 #include "r_local.h"
 #include "r_iqm.h"
-#include "r_matrixlib.h"
 
-static vec3_t NormalsArray[MAX_TRIANGLES*3];
-static vec4_t TangentsArray[MAX_TRIANGLES*4];
+static vec3_t NormalsArray[MAX_VERTICES];
+static vec4_t TangentsArray[MAX_VERTICES];
 
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 
@@ -741,6 +740,11 @@ void GL_DrawIQMFrame(int skinnum)
 
             vec3_t lightVec, lightVal;
 
+			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+            qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+			glEnableVertexAttribArrayARB (1);
+            glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+
             GL_GetLightVals(false);
 
             //send light level and color to shader, ramp up a bit
@@ -790,7 +794,10 @@ void GL_DrawIQMFrame(int skinnum)
             glUniform1iARB( g_location_meshFog, map_fog);
         }
 		else
+		{
 			GL_Bind(r_shelltexture2->texnum);
+			R_InitVArrays (VERT_COLOURED_TEXTURED);
+		}
 
 		for (i=0; i<currentmodel->num_triangles; i++)
         {
@@ -829,15 +836,6 @@ void GL_DrawIQMFrame(int skinnum)
                 va++;
             }
         }
-        if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
-		{
-            R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-            qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-			glEnableVertexAttribArrayARB (1);
-            glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
-        }
-        else
-            R_InitVArrays (VERT_COLOURED_TEXTURED);
 
 		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
@@ -994,6 +992,8 @@ void GL_DrawIQMFrame(int skinnum)
 
 			if(!stage->normalmap)
 			{
+				R_InitVArrays (VERT_COLOURED_TEXTURED);
+
 				GL_Bind (stage->texture->texnum);
 
 				if (stage->blendfunc.blend)
@@ -1039,6 +1039,11 @@ void GL_DrawIQMFrame(int skinnum)
 			if(stage->normalmap)
 			{
 				vec3_t lightVec, lightVal;
+
+				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+				glEnableVertexAttribArrayARB (1);
+				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
 				GL_GetLightVals(true);
 
@@ -1179,16 +1184,6 @@ void GL_DrawIQMFrame(int skinnum)
 					va++;
 				}
 			}
-
-			if(stage->normalmap)
-			{
-				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-				glEnableVertexAttribArrayARB (1);
-				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
-			}
-			else
-				R_InitVArrays (VERT_COLOURED_TEXTURED);
 
 			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 			{

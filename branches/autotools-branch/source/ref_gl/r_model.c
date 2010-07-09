@@ -2070,7 +2070,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 	paliashdr = (dmdl_t *)mod->extradata;
 
-	//just use frame zero - we never scale frames in Alien Arena
+	//redo this using max/min from all frames
 	pframe = ( daliasframe_t * ) ( ( byte * ) paliashdr +
 		                              paliashdr->ofs_frames);
 

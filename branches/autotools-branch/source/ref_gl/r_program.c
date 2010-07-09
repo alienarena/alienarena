@@ -160,7 +160,8 @@ void R_LoadARBPrograms(void)
 		qglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 1.0f, 0.1f, 0.6f, 0.5f); // jitest
 		len = FS_LoadFile("scripts/water1.arbf", (void*)&fragment_program_text);
 
-		if (len > 0) {
+		if (len > 0) 
+		{
 			qglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, len, fragment_program_text);
 			FS_FreeFile(fragment_program_text);
 		}
@@ -221,18 +222,18 @@ void R_LoadGLSLPrograms(void)
 				!glVertexAttribPointerARB || !glEnableVertexAttribArrayARB ||
 				!glBindAttribLocationARB)
 		{
-			Com_Printf("...One or more GL_ARB_shader_objects functions were not found");
+			Com_Printf("...One or more GL_ARB_shader_objects functions were not found\n");
 			gl_state.glsl_shaders = false;
 		}
 	}
 	else
 	{
-		Com_Printf("...One or more GL_ARB_shader_objects functions were not found");
+		Com_Printf("...One or more GL_ARB_shader_objects functions were not found\n");
 		gl_state.glsl_shaders = false;
 	}
 
-	if(gl_state.glsl_shaders) {
-
+	if(gl_state.glsl_shaders) 
+	{
 		//we have them, set defaults accordingly
 		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "1", CVAR_ARCHIVE);
 		gl_dynamic = Cvar_Get ("gl_dynamic", "1", CVAR_ARCHIVE);
@@ -247,15 +248,17 @@ void R_LoadGLSLPrograms(void)
 
 		len = FS_LoadFile("scripts/vertex_shader.glsl", (void*)&shader_assembly);
 
-		if (len > 0) {
+		if (len > 0) 
+		{
 			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
 			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
 			glCompileShaderARB( g_vertexShader);
 			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 		}
-		else {
-			Com_Printf("...Unable to Locate Vertex Shader");
+		else 
+		{
+			Com_Printf("...Unable to Locate Vertex Shader\n");
 			nResult = 0;
 		}
 
@@ -263,23 +266,25 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_programObj, g_vertexShader );
 		else
 		{
-			Com_Printf("...Vertex Shader Compile Error");
+			Com_Printf("...Vertex Shader Compile Error\n");
 		}
 
 		//
 		// Fragment shader
 		//
-		len = FS_LoadFile("scripts/fragment_shader.glsl", (void*)&shader_assembly);
+		len = FS_LoadFile("scripts/fragment_shader.glsl", &shader_assembly);
 
-		if(len > 0) {
+		if(len > 0) 
+		{
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
 			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
 			glCompileShaderARB( g_fragmentShader );
 			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 		}
-		else {
-			Com_Printf("...Unable to Locate Fragment Shader");
+		else 
+		{
+			Com_Printf("...Unable to Locate Fragment Shader\n");
 			nResult = 0;
 		}
 
@@ -287,7 +292,7 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_programObj, g_fragmentShader );
 		else
 		{
-			Com_Printf("...Fragment Shader Compile Error");
+			Com_Printf("...Fragment Shader Compile Error\n");
 		}
 
 		glLinkProgramARB( g_programObj );
@@ -296,7 +301,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_programObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error");
+			Com_Printf("...Linking Error\n");
 		}
 
 		//
@@ -329,15 +334,17 @@ void R_LoadGLSLPrograms(void)
 
 		len = FS_LoadFile("scripts/water_vertex_shader.glsl", (void*)&shader_assembly);
 
-		if (len > 0) {
+		if (len > 0) 
+		{
 			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
 			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
 			glCompileShaderARB( g_vertexShader);
 			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 		}
-		else {
-			Com_Printf("...Unable to Locate Water Vertex Shader");
+		else 
+		{
+			Com_Printf("...Unable to Locate Water Vertex Shader\n");
 			nResult = 0;
 		}
 
@@ -345,7 +352,7 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_waterprogramObj, g_vertexShader );
 		else
 		{
-			Com_Printf("...Water Vertex Shader Compile Error");
+			Com_Printf("...Water Vertex Shader Compile Error\n");
 		}
 
 		//
@@ -353,15 +360,17 @@ void R_LoadGLSLPrograms(void)
 		//
 		len = FS_LoadFile("scripts/water_fragment_shader.glsl", (void*)&shader_assembly);
 
-		if(len > 0) {
+		if(len > 0) 
+		{
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
 			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
 			glCompileShaderARB( g_fragmentShader );
 			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 		}
-		else {
-			Com_Printf("...Unable to Locate Water Fragment Shader");
+		else 
+		{
+			Com_Printf("...Unable to Locate Water Fragment Shader\n");
 			nResult = 0;
 		}
 
@@ -369,7 +378,7 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_waterprogramObj, g_fragmentShader );
 		else
 		{
-			Com_Printf("...Water Fragment Shader Compile Error");
+			Com_Printf("...Water Fragment Shader Compile Error\n");
 		}
 
 		glLinkProgramARB( g_waterprogramObj );
@@ -378,7 +387,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_waterprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error");
+			Com_Printf("...Linking Error\n");
 		}
 
 		//
@@ -405,15 +414,17 @@ void R_LoadGLSLPrograms(void)
 
 		len = FS_LoadFile("scripts/mesh_vertex_shader.glsl", (void*)&shader_assembly);
 
-		if (len > 0) {
+		if (len > 0) 
+		{
 			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
 			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
 			glCompileShaderARB( g_vertexShader);
 			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 		}
-		else {
-			Com_Printf("...Unable to Locate Mesh Vertex Shader");
+		else 
+		{
+			Com_Printf("...Unable to Locate Mesh Vertex Shader\n");
 			nResult = 0;
 		}
 
@@ -421,7 +432,7 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_meshprogramObj, g_vertexShader );
 		else
 		{
-			Com_Printf("...Mesh Vertex Shader Compile Error");
+			Com_Printf("...Mesh Vertex Shader Compile Error\n");
 		}
 
 		//
@@ -429,15 +440,17 @@ void R_LoadGLSLPrograms(void)
 		//
 		len = FS_LoadFile("scripts/mesh_fragment_shader.glsl", (void*)&shader_assembly);
 
-		if(len > 0) {
+		if(len > 0) 
+		{
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
 			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
 			glCompileShaderARB( g_fragmentShader );
 			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 		}
-		else {
-			Com_Printf("...Unable to Locate Mesh Fragment Shader");
+		else 
+		{
+			Com_Printf("...Unable to Locate Mesh Fragment Shader\n");
 			nResult = 0;
 		}
 
@@ -445,7 +458,7 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_meshprogramObj, g_fragmentShader );
 		else
 		{
-			Com_Printf("...Mesh Fragment Shader Compile Error");
+			Com_Printf("...Mesh Fragment Shader Compile Error\n");
 		}
 
 		glBindAttribLocationARB(g_meshprogramObj, 1, "tangent");
@@ -455,7 +468,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_meshprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error");
+			Com_Printf("...Linking Error\n");
 		}
 
 		//
@@ -484,15 +497,17 @@ void R_LoadGLSLPrograms(void)
 
 		len = FS_LoadFile("scripts/fb_vertex_shader.glsl", (void*)&shader_assembly);
 
-		if (len > 0) {
+		if (len > 0) 
+		{
 			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
 			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
 			glCompileShaderARB( g_vertexShader);
 			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 		}
-		else {
-			Com_Printf("...Unable to Locate Framebuffer Vertex Shader");
+		else 
+		{
+			Com_Printf("...Unable to Locate Framebuffer Vertex Shader\n");
 			nResult = 0;
 		}
 
@@ -500,7 +515,7 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_fbprogramObj, g_vertexShader );
 		else
 		{
-			Com_Printf("...Framebuffer Vertex Shader Compile Error");
+			Com_Printf("...Framebuffer Vertex Shader Compile Error\n");
 		}
 
 		//
@@ -508,15 +523,17 @@ void R_LoadGLSLPrograms(void)
 		//
 		len = FS_LoadFile("scripts/fb_fragment_shader.glsl", (void*)&shader_assembly);
 
-		if(len > 0) {
+		if(len > 0) 
+		{
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
 			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
 			glCompileShaderARB( g_fragmentShader );
 			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 		}
-		else {
-			Com_Printf("...Unable to Locate Framebuffer Fragment Shader");
+		else 
+		{
+			Com_Printf("...Unable to Locate Framebuffer Fragment Shader\n");
 			nResult = 0;
 		}
 
@@ -524,7 +541,7 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_fbprogramObj, g_fragmentShader );
 		else
 		{
-			Com_Printf("...Framebuffer Fragment Shader Compile Error");
+			Com_Printf("...Framebuffer Fragment Shader Compile Error\n");
 		}
 
 		glLinkProgramARB( g_fbprogramObj );
@@ -533,7 +550,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_fbprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error");
+			Com_Printf("...Linking Error\n");
 		}
 
 		//
@@ -558,15 +575,17 @@ void R_LoadGLSLPrograms(void)
 
 		len = FS_LoadFile("scripts/blur_vertex_shader.glsl", (void*)&shader_assembly);
 
-		if (len > 0) {
+		if (len > 0) 
+		{
 			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
 			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
 			glCompileShaderARB( g_vertexShader);
 			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 		}
-		else {
-			Com_Printf("...Unable to Locate Blur Vertex Shader");
+		else 
+		{
+			Com_Printf("...Unable to Locate Blur Vertex Shader\n");
 			nResult = 0;
 		}
 
@@ -574,7 +593,7 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_blurprogramObj, g_vertexShader );
 		else
 		{
-			Com_Printf("...Blur Vertex Shader Compile Error");
+			Com_Printf("...Blur Vertex Shader Compile Error\n");
 		}
 
 		//
@@ -582,15 +601,17 @@ void R_LoadGLSLPrograms(void)
 		//
 		len = FS_LoadFile("scripts/blur_fragment_shader.glsl", (void*)&shader_assembly);
 
-		if(len > 0) {
+		if(len > 0) 
+		{
 			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
 			shaderStrings[0] = (char*)shader_assembly;
 			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
 			glCompileShaderARB( g_fragmentShader );
 			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 		}
-		else {
-			Com_Printf("...Unable to Locate Blur Fragment Shader");
+		else 
+		{
+			Com_Printf("...Unable to Locate Blur Fragment Shader\n");
 			nResult = 0;
 		}
 
@@ -598,7 +619,7 @@ void R_LoadGLSLPrograms(void)
 			glAttachObjectARB( g_blurprogramObj, g_fragmentShader );
 		else
 		{
-			Com_Printf("...Framebuffer Blur Shader Compile Error");
+			Com_Printf("...Framebuffer Blur Shader Compile Error\n");
 		}
 
 		glLinkProgramARB( g_blurprogramObj );
@@ -607,7 +628,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_blurprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error");
+			Com_Printf("...Linking Error\n");
 		}
 
 		//
@@ -618,7 +639,8 @@ void R_LoadGLSLPrograms(void)
 		g_location_source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
 
 	}
-	else {
+	else 
+	{
 		gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE);
 		gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
 	}

@@ -1704,9 +1704,8 @@ int R_Init( void *hinstance, void *hWnd )
 		}
 	}
 
-
-	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic")) {
-
+	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic")) 
+	{
 		qglGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
 
 		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE );
@@ -1718,15 +1717,14 @@ int R_Init( void *hinstance, void *hWnd )
 
 		aniso_level = r_anisotropic->value;
 
-		if (r_anisotropic->value == 1) {
+		if (r_anisotropic->value == 1) 
 			Com_Printf("...ignoring GL_EXT_texture_filter_anisotropic\n");
-
-		} else {
-
+		else 
 			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n");
 
 		}
-	} else {
+	else 
+	{
 		Com_Printf("...GL_EXT_texture_filter_anisotropic not found\n");
 		r_anisotropic = Cvar_Get("r_anisotropic", "0", CVAR_ARCHIVE);
 		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE);
@@ -1734,20 +1732,24 @@ int R_Init( void *hinstance, void *hWnd )
 
 	// openGL 2.0 Unified Separate Stencil
 	gl_state.stencil_wrap = false;
-	if (strstr(gl_config.extensions_string, "GL_EXT_stencil_wrap")) {
+	if (strstr(gl_config.extensions_string, "GL_EXT_stencil_wrap")) 
+	{
 		Com_Printf("...using GL_EXT_stencil_wrap\n");
 		gl_state.stencil_wrap = true;
-	} else {
+	} else 
+	{
 		Com_Printf("...GL_EXT_stencil_wrap not found\n");
 		gl_state.stencil_wrap = false;
 	}
 
 	// Framebuffer object blit
 	gl_state.hasFBOblit = false;
-	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit")) {
+	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit")) 
+	{
 		Com_Printf("...using GL_EXT_framebuffer_blit\n");
 		gl_state.hasFBOblit = true;
-	} else {
+	} else 
+	{
 		Com_Printf("...GL_EXT_framebuffer_blit not found\n");
 		gl_state.hasFBOblit = false;
 	}
@@ -1757,30 +1759,33 @@ int R_Init( void *hinstance, void *hWnd )
 	qglStencilMaskSeparate		= (void *)qwglGetProcAddress("glStencilMaskSeparate");
 
 	gl_state.separateStencil = false;
-	if(qglStencilFuncSeparate && qglStencilOpSeparate && qglStencilMaskSeparate){
+	if(qglStencilFuncSeparate && qglStencilOpSeparate && qglStencilMaskSeparate)
+	{
 			Com_Printf("...using GL_EXT_stencil_two_side\n");
 			gl_state.separateStencil = true;
 
-	}else
+	}
+	else
 		Com_Printf("...GL_EXT_stencil_two_side not found\n");
 
 	gl_state.vbo = false;
 
-	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object")) {
-
+	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object")) 
+	{			
 		qglBindBufferARB = (void *)qwglGetProcAddress("glBindBufferARB");
 		qglDeleteBuffersARB = (void *)qwglGetProcAddress("glDeleteBuffersARB");
 		qglGenBuffersARB = (void *)qwglGetProcAddress("glGenBuffersARB");
 		qglBufferDataARB = (void *)qwglGetProcAddress("glBufferDataARB");
 		qglBufferSubDataARB = (void *)qwglGetProcAddress("glBufferSubDataARB");
 
-		if (qglGenBuffersARB && qglBindBufferARB && qglBufferDataARB && qglDeleteBuffersARB){
-
+		if (qglGenBuffersARB && qglBindBufferARB && qglBufferDataARB && qglDeleteBuffersARB)
+		{				
 			Com_Printf("...using GL_ARB_vertex_buffer_object\n");
 			gl_state.vbo = true;
 			R_VCInit();
 		}
-	} else {
+	} else 
+	{
 		Com_Printf(S_COLOR_RED "...GL_ARB_vertex_buffer_object not found\n");
 		gl_state.vbo = false;
 	}
@@ -1792,8 +1797,8 @@ int R_Init( void *hinstance, void *hWnd )
 
 	//if running for the very first time, automatically set video settings
 	//disabled for now
-	if(!r_firstrun->value) {
-
+	if(!r_firstrun->value) 
+	{
 		qboolean ati_nvidia = false;
 		double CPUTotalSpeed = 4000.0; //default to this
 		int OGLVer = atoi(&gl_config.version_string[0]);
@@ -1846,16 +1851,21 @@ cpuinfo_exit:
 		if(!strcmp(gl_config.vendor_string, "ATI Technologies Inc.") || !strcmp(gl_config.vendor_string, "NVIDIA Corporation"))
 			ati_nvidia = true;
 
-		if(OGLVer < 2) { //weak GPU, set low
+		if(OGLVer < 2) 
+		{ 
+			//weak GPU, set low
 			R_SetLow();
 		}
-		else if(OGLVer == 3) { //GPU is modern, check CPU
+		else if(OGLVer == 3) 
+		{ 
+			//GPU is modern, check CPU
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
 				R_SetHighest();
 			else
 				R_SetMedium();
 		}
-		else {
+		else 
+		{
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
 				R_SetHigh();
 			else

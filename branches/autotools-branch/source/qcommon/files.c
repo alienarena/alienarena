@@ -23,9 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 -------------------------------------------------------------------------------
 Alien Arena File System  (circa June 2010)
 
------- Windows XP, Vista, Windows 7 ------
+------ Windows XP, Vista, Windows 7 (MSVC or MinGW builds) ------
 
-  c:\Alien Arena\
+  c:\alienarena\
     data1\
       --- game data from release package
     arena\
@@ -38,17 +38,16 @@ Alien Arena File System  (circa June 2010)
     Tools\doc\
     crx.exe
 
-
 ------ Linux, Unix, Darwin ------
 
  --- Standard Install ---
 
-  $prefix/          /usr/local/games
-    $bindir/          bin/
+  $prefix/          /usr/local/
+    $bindir/          /usr/local/bin/
       crx
       crx-ded
-    $datadir/         share/
-      $pkgdatadir
+    $datadir/         /usr/local/share/
+      $pkgdatadir       /usr/local/share/alienarena/
         data1/
           --- shared game data from release package
         arena/
@@ -68,10 +67,10 @@ Alien Arena File System  (circa June 2010)
 
  --- Traditional Install ---
 
-  $prefix/          /home/user/games/
-    $bindir/          alienarena/
+  $prefix/          /home/me/games/
+    $bindir/          /home/me/games/alienarena/
       crx, crx-ded
-    $datadir/         alienarena/
+    $datadir/         /home/me/games/alienarena/
       data1/
       arena/
       botinfo/
@@ -79,7 +78,6 @@ Alien Arena File System  (circa June 2010)
   $COR_GAME         ~/.codered
     --- Same as "Standard" Install ---
     [Note: if COR_GAME set to $datadir, then what?]
-
 
 --- Alien Arena ACEBOT File System ---
 
@@ -103,7 +101,7 @@ link command removed because:
   2. simplifies filesystem modifcations
   3. might be a security issue?
 
-basedir cvar removed because it is probably an unnecessary complication
+basedir cvar removed because it is an unnecessary complication
 
 --- Original Quake File System Comments ---
 All of Quake's data access is through a hierchal file system, but the contents
@@ -229,12 +227,13 @@ static void FS_init_paths( void )
 	Q_strncpyz2( fs_datadir, fs_bindir, sizeof(fs_datadir) );
 #else
 	if ( !Q_strncasecmp( fs_bindir, DATADIR, sizeof(fs_bindir)) )
-	{ // DATADIR defined, but game data is in current directory
+	{ // DATADIR defined, but it is current directory for executable
+		// note: this may not need to be a special case
 		Q_strncpyz2( fs_datadir, fs_bindir, sizeof(fs_datadir) );
 	}
 	else
 	{ // "Standard" install. game data is not in same directory as executables
-		if ( strlen( DATADIR ) > strlen( datadir ) )
+		if ( strlen( DATADIR ) >= sizeof( fs_datadir ) )
 		{
 			Sys_Error("DATADIR size error");
 		}
@@ -309,7 +308,7 @@ static void FS_init_paths( void )
 		i++;
 	}
 	if ( game_gamedata[0] )
-	{ // default: $DATADIR/arena or $CWD/arena
+	{ // default: SHARED_DATADIR/arena or $CWD/arena
 		Q_strncpyz2( fs_gamesearch[i], game_gamedata, sizeof(fs_gamesearch[0]));
 		i++;
 	}
@@ -319,7 +318,7 @@ static void FS_init_paths( void )
 		i++;
 	}
 	if ( base_gamedata[0] )
-	{ // default: $DATADIR/data1 or $CWD/data1
+	{ // default: SHARED_DATADIR/data1 or $CWD/data1
 		Q_strncpyz2( fs_gamesearch[i], base_gamedata, sizeof(fs_gamesearch[0]));
 	}
 

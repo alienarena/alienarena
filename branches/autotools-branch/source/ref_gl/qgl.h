@@ -585,7 +585,7 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
                              GLsizei width, GLenum format, GLenum type,
                              const GLvoid *table );
 
-#endif
+#endif // linux
 
 /*
 ** extension constants
