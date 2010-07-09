@@ -876,11 +876,16 @@ void GL_DrawIQMFrame(int skinnum)
 				GL_SelectTexture( GL_TEXTURE0);
 				qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
 			}
+			GLSTATE_ENABLE_BLEND
+			GL_BlendFunction(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		}
 		else if(glass) 
 		{
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, r_reflecttexture->texnum);
+
+			GLSTATE_ENABLE_BLEND
+			GL_BlendFunction(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		}
 		else 
 		{ 
