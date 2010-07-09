@@ -451,7 +451,7 @@ models/weapons/v_rocket/skin
 players/martianenforcer/gamara
 {
 	{
-		map players/martianenforcer/default_normal.tga
+		map players/martianenforcer/gamara_normal.tga
 		normalmap
 		map2 gfx/gamarafx.tga
 		glow
