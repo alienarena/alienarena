@@ -354,6 +354,7 @@ typedef struct model_s
 	unsigned char	*blendindexes;
 	unsigned char	*blendweights;
 	char			skinname[MAX_QPATH];
+	char			*jointname;
 	//end iqm
 
 	//temporary md2 - will use .iqm struct instead
