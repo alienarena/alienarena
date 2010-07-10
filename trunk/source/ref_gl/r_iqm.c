@@ -659,7 +659,7 @@ void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
 	float lscale;
 	vec3_t lightdir;
 
-	VectorScale(baselight, gl_modulate->value/2.0, lightOut);
+	VectorScale(baselight, gl_modulate->value, lightOut);
 
 	if(!gl_vlights->value)
 		return;
