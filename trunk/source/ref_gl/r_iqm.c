@@ -192,7 +192,6 @@ qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath)
 
 qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 {
-	const char *text;
 	iqmheader_t *header;
 	int i, j;
 	const int *inelements;
@@ -312,7 +311,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		return false;
 	}
 
-	text = header->num_text && header->ofs_text ? (const char *)(pbase + header->ofs_text) : "";
+	//mod->text = (const char *)Hunk_Alloc(header->num_text * sizeof(const char *));
+	mod->jointname = header->num_text && header->ofs_text ? (char *)(pbase + header->ofs_text) : "";
 	
 	mod->num_frames = header->num_anims;
 	mod->num_joints = header->num_joints;
@@ -333,7 +333,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			mod->joints[i].rotation[j] = LittleFloat(joint[i].rotation[j]);
 			mod->joints[i].scale[j] = LittleFloat(joint[i].scale[j]);
 		}
-	}
+	}	
 	
 	//these don't need to be a part of mod - remember to free them
 	baseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
@@ -549,6 +549,9 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	if(inversebaseframe)
 		free(inversebaseframe);
 
+	//for (i = 0;i < mod->num_joints;i++)
+	//	Com_Printf("bone: %s\n", &mod->jointname[mod->joints[i].name]);
+
 	return true;
 }
 
@@ -571,10 +574,29 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 
 		for(i = 0; i < currentmodel->num_joints; i++)
 		{
-			matrix3x4_t mat, temp; 
+			matrix3x4_t mat, rmat, temp; 
+			vec3_t rot, origin, scale;
+			vec4_t q_rot;
 			Matrix3x4_Scale(&mat, mat1[i], 1-frameoffset);
 			Matrix3x4_Scale(&temp, mat2[i], frameoffset);
+
 			Matrix3x4_Add(&mat, mat, temp);
+
+			//Com_Printf("bone: %s\n", &currentmodel->jointname[currentmodel->joints[i].name]);
+
+			if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "spine")) 
+			{ 		
+				Com_Printf("spine? %s\n", &currentmodel->jointname[currentmodel->joints[i].name]);
+				//build rotation matrix(store in "temp")
+				VectorSet(rot, currententity->angles[0], currententity->angles[1], 0);
+				VectorSet(origin, 0, 0, 0);
+				VectorSet(scale, 1, 1, 1);
+				Vector4Set(q_rot, currententity->angles[0], currententity->angles[1], 0, -sqrt(max(1.0 - pow(VectorLength(rot),2), 0.0)));
+				Matrix3x4_FromQuatAndVectors(&temp, q_rot, origin, scale);
+
+				Matrix3x4_Multiply(&rmat, temp, mat); 
+				Matrix3x4_Copy(&mat, rmat);
+			}
 
 			if(currentmodel->joints[i].parent >= 0) 
 				Matrix3x4_Multiply(&currentmodel->outframe[i], currentmodel->outframe[currentmodel->joints[i].parent], mat);
