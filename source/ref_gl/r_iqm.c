@@ -659,6 +659,8 @@ void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
 	float lscale;
 	vec3_t lightdir;
 
+	VectorScale(baselight, gl_modulate->value/2.0, lightOut);
+
 	if(!gl_vlights->value)
 		return;
 	
@@ -948,7 +950,7 @@ void GL_DrawIQMFrame(int skinnum)
 				va++;			
 			}		
 		}
-
+		
 		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
 		{
 			if(qglLockArraysEXT)						
