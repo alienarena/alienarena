@@ -1005,7 +1005,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 		{
 			for (j=0; j<3; j++)
 			{		
-				vec3_t normal, tangent;
+				vec3_t normal;
+				vec4_t tangent;
                 int k;
 
 				index_xyz = tris[i].index_xyz[j];
