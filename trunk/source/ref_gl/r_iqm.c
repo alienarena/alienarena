@@ -113,13 +113,13 @@ void Matrix3x4_Transform(mvertex_t *out, matrix3x4_t mat, const mvertex_t in)
     out->position[2] = DotProduct(mat.c, in.position) + mat.c[3];
 }
 
-void Maxtrix3x4GenRotate(matrix3x4_t *out, float angle, const vec3_t axis)
+void Maxtrix3x4GenJointRotate(matrix3x4_t *out, float angle, const vec3_t axis, const vec3_t trans)
 {
 	float ck = cosf(angle), sk = sinf(angle);
 
-	Vector4Set(out->a, axis[0]*axis[0]*(1-ck)+ck, axis[0]*axis[1]*(1-ck)-axis[2]*sk, axis[0]*axis[2]*(1-ck)+axis[1]*sk, 0);
-	Vector4Set(out->b, axis[1]*axis[0]*(1-ck)+axis[2]*sk, axis[1]*axis[1]*(1-ck)+ck, axis[1]*axis[2]*(1-ck)-axis[0]*sk, 0);
-	Vector4Set(out->c, axis[0]*axis[2]*(1-ck)-axis[1]*sk, axis[1]*axis[2]*(1-ck)+axis[0]*sk, axis[2]*axis[2]*(1-ck)+ck, 0);
+	Vector4Set(out->a, axis[0]*axis[0]*(1-ck)+ck, axis[0]*axis[1]*(1-ck)-axis[2]*sk, axis[0]*axis[2]*(1-ck)+axis[1]*sk, trans[0]);
+	Vector4Set(out->b, axis[1]*axis[0]*(1-ck)+axis[2]*sk, axis[1]*axis[1]*(1-ck)+ck, axis[1]*axis[2]*(1-ck)-axis[0]*sk, trans[1]);
+	Vector4Set(out->c, axis[0]*axis[2]*(1-ck)-axis[1]*sk, axis[1]*axis[2]*(1-ck)+axis[0]*sk, axis[2]*axis[2]*(1-ck)+ck, trans[2]);
 }
 
 void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent)
@@ -584,18 +584,33 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 		for(i = 0; i < currentmodel->num_joints; i++)
 		{
 			matrix3x4_t mat, rmat, temp; 
-			vec3_t rot;
+			vec3_t rot, trans;
 			Matrix3x4_Scale(&mat, mat1[i], 1-frameoffset);
 			Matrix3x4_Scale(&temp, mat2[i], frameoffset);
 
 			Matrix3x4_Add(&mat, mat, temp);
 
+			////some hard coded nums to test some things here.
 			//if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine")) 
 			//{ 		
+			//	//I think we should be able to figure out the translation distance by the origin of the bone, 
+			//	//but how do we account for length of the bone?
 			//	//build rotation matrix(store in "temp")
 			//	//angles are in rads
-			//	VectorSet(rot, 1, 0, 0);
-			//	Maxtrix3x4GenRotate(&temp, -0.25, rot);
+			//	VectorSet(rot, 1, 0, 0); //axis of rotation(we need only do pitch(leaning forward back)
+			//	VectorSet(trans, 0, -2, 2);
+			//	Maxtrix3x4GenJointRotate(&temp, -0.25, rot, trans);
+
+			//	Matrix3x4_Multiply(&rmat, mat, temp); 
+			//	Matrix3x4_Copy(&mat, rmat);
+			//}
+			////rotate the thigh bones back
+			//if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "thigh.l") ||
+			//	!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "thigh.r")) 
+			//{ 		
+			//	VectorSet(rot, 1, 0, 0); 
+			//	VectorSet(trans, 0, 2, -2);
+			//	Maxtrix3x4GenJointRotate(&temp, 0.25, rot, trans);
 
 			//	Matrix3x4_Multiply(&rmat, mat, temp); 
 			//	Matrix3x4_Copy(&mat, rmat);

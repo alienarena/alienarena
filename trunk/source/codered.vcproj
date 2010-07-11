@@ -2730,6 +2730,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ref_gl\r_iqm.h"
+				>
+			</File>
+			<File
 				RelativePath="ref_gl\r_local.h"
 				>
 			</File>
