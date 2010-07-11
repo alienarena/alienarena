@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // g_combat.c
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 /*
@@ -232,8 +236,8 @@ void VerifyHeadShot( vec3_t point, vec3_t dir, float height, vec3_t newpoint)
 {
         vec3_t normdir;
         vec3_t normdir2;
-        
-        
+
+
         VectorNormalize2(dir, normdir);
         VectorScale( normdir, height, normdir2 );
         VectorAdd( point, normdir2, newpoint );
@@ -250,8 +254,8 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	int			asave;
 	int			te_sparks;
 	int         head_success = 0;
-    float       z_rel; 
-    int         height; 
+    float       z_rel;
+    int         height;
     float		from_top;
     float       targ_maxs2;
 
@@ -266,39 +270,39 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	//headshots for disruptors
 	targ_maxs2 = targ->maxs[2];
     if (targ_maxs2 == 4)
-		targ_maxs2 = CROUCHING_MAXS2; 
-        
-    height = abs(targ->mins[2]) + targ_maxs2; 
-        
+		targ_maxs2 = CROUCHING_MAXS2;
+
+    height = abs(targ->mins[2]) + targ_maxs2;
+
     if (targ->client && mod == MOD_DISRUPTOR) {
-		
-		z_rel = point[2] - targ->s.origin[2]; 
+
+		z_rel = point[2] - targ->s.origin[2];
         from_top = targ_maxs2 - z_rel;
-        
-		if (from_top < 0.0)     
-			from_top = 0.0;  
+
+		if (from_top < 0.0)
+			from_top = 0.0;
 
         if ( from_top < 2*HEAD_HEIGHT ) {
 			vec3_t new_point;
             VerifyHeadShot( point, dir, HEAD_HEIGHT, new_point );
             VectorSubtract( new_point, targ->s.origin, new_point );
-                                        
-            if ( (targ_maxs2 - new_point[2]) < HEAD_HEIGHT 
-				&& (abs(new_point[1])) < HEAD_HEIGHT*.8 
+
+            if ( (targ_maxs2 - new_point[2]) < HEAD_HEIGHT
+				&& (abs(new_point[1])) < HEAD_HEIGHT*.8
                 && (abs(new_point[0])) < HEAD_HEIGHT*.8 ) {
-                                           
+
 				head_success = 1;
             }
         }
-                                
+
         if ( head_success ) {
-                                        
+
 			damage = damage*1.8 + 1;
             if (attacker->client)
 				mod = MOD_HEADSHOT;
-        }                           
-    }                
-			
+        }
+    }
+
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs
@@ -497,7 +501,7 @@ void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_
 			{
 				VectorSubtract (ent->s.origin, inflictor->s.origin, dir);
 				T_Damage (ent, inflictor, attacker, dir, inflictor->s.origin, vec3_origin, (int)points, (int)points, DAMAGE_RADIUS, mod);
-				if (ent != attacker) 
+				if (ent != attacker)
 					gi.sound (attacker, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 				if(weapon >=0)
 					attacker->client->resp.weapon_hits[weapon]++;

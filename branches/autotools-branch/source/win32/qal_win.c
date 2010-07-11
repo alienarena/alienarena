@@ -1,5 +1,5 @@
 /*
- Copyright (C) 1997-2001 Id Software, Inc.
+ Copyright (C) 2009 COR Entertainment
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -21,13 +21,17 @@
  * qal_win.c
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <windows.h>
 
 #include <al.h>
 #include <alc.h>
 
-#include "../client/client.h"
-#include "../client/qal.h"
+#include "client/client.h"
+#include "client/qal.h"
 
 /*
  * OpenAL Library

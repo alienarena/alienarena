@@ -13,6 +13,10 @@ trap will get rewarded with points, and that cow will be respawned.
 ==============================================================================
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 #include "cow.h"
 

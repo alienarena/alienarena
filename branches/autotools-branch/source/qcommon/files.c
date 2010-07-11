@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*
 -------------------------------------------------------------------------------
 Alien Arena File System  (circa June 2010)
+ *** with autotools build and filesystem update modifications ***
 
 ------ Windows XP, Vista, Windows 7 (MSVC or MinGW builds) ------
 
@@ -65,19 +66,17 @@ Alien Arena File System  (circa June 2010)
     botinfo/
       --- user custom bot information
 
- --- Traditional Install ---
+ --- Alternate (Traditional) Install ---
 
-  $prefix/          /home/me/games/
-    $bindir/          /home/me/games/alienarena/
-      crx, crx-ded
-    $datadir/         /home/me/games/alienarena/
-      data1/
-      arena/
-      botinfo/
+  /home/user/games/alienarena/  (for example)
+    crx
+    crx-ded
+    data1/
+    arena/
+    botinfo/
 
   $COR_GAME         ~/.codered
-    --- Same as "Standard" Install ---
-    [Note: if COR_GAME set to $datadir, then what?]
+    --- Same as Standard Install
 
 --- Alien Arena ACEBOT File System ---
 
@@ -89,7 +88,6 @@ Alien Arena File System  (circa June 2010)
   - <botname>.cfg : config data for bots by name.
   - <mapname>.tmp : data for the set of bots spawned in a map.
 
-
 --- Other Notes ---
 
 .pak file support removed because:
@@ -97,11 +95,13 @@ Alien Arena File System  (circa June 2010)
   2. simplifies filesystem modifications
 
 link command removed because:
-  1. its probably obsolete (hack for DOS to simulate Unix link?)
-  2. simplifies filesystem modifcations
+  1. it is probably obsolete (hack for DOS to simulate Unix link?)
+  2. simplifies filesystem modifications
   3. might be a security issue?
 
-basedir cvar removed because it is an unnecessary complication
+basedir cvar removed because:
+  1. it is probably an unnecessary complication.
+
 
 --- Original Quake File System Comments ---
 All of Quake's data access is through a hierchal file system, but the contents
@@ -148,7 +148,7 @@ cvar_t *fs_gamedirvar; // for the "game" cvar, default is "arena"
 
 /* --- Search Paths ---
  *
- * Pathname strings do not include a trailing '/' (tried it, did not like it)
+ * Pathname strings do not include a trailing '/'
  * The last slot is guard, containing an empty string
  * The bot pathname strings do not include the "botinfo" part.
  *
@@ -308,7 +308,7 @@ static void FS_init_paths( void )
 		i++;
 	}
 	if ( game_gamedata[0] )
-	{ // default: SHARED_DATADIR/arena or $CWD/arena
+	{ // default: DATADIR/arena or $CWD/arena
 		Q_strncpyz2( fs_gamesearch[i], game_gamedata, sizeof(fs_gamesearch[0]));
 		i++;
 	}
@@ -318,7 +318,7 @@ static void FS_init_paths( void )
 		i++;
 	}
 	if ( base_gamedata[0] )
-	{ // default: SHARED_DATADIR/data1 or $CWD/data1
+	{ // default: DATADIR/data1 or $CWD/data1
 		Q_strncpyz2( fs_gamesearch[i], base_gamedata, sizeof(fs_gamesearch[0]));
 	}
 

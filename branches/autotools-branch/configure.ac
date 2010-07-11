@@ -25,7 +25,7 @@
 #  Mac OSX Darwin 
 
 AC_PREREQ(2.61)
-AC_INIT([alienarena],[7.50pre],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.45alpha],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -98,12 +98,11 @@ AC_MSG_RESULT(${cond_build_unix})
 AC_MSG_CHECKING(whether to build darwin version)
 AC_MSG_RESULT(${cond_build_darwin})
 
+AC_MSG_CHECKING(whether to build client)
 cond_build_client=yes
 AS_IF( [ test "x${no_client}" != xno ],
 	[AS_IF( [ test "x${cond_build_unix}" = xyes ],[cond_build_client=no],
 		[AC_MSG_WARN( "--no_client option valid only for unix build" )])])
-	
-AC_MSG_CHECKING(whether to build client)
 AC_MSG_RESULT(${cond_build_client});	
 
 AM_CONDITIONAL( BUILD_WIN32, test "x${cond_build_win32}" = xyes )
@@ -202,9 +201,10 @@ AC_SEARCH_LIBS([gluGetString],[GLU],,
 
 ]) dnl end of conditional client build library check
 
-dnl headers not in mingw because min means minimalist
-dnl separated only for information  TODO combine again
-dnl TODO see if any of these are not really used, see if any are missing
+#
+# Checks for header files
+# TODO: verify these are used and needed
+#
 AC_CHECK_HEADERS(
 	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h unistd.h netdb.h termios.h])
 
@@ -258,7 +258,8 @@ AS_IF([test "x${have_Xxf86dga}" = xyes],
 				[found=yes],
 				[have_Xxf86dga=no],
 				[#include <X11/Xlib.h #include <X11/Xproto.h> #include <X11/Xfuncproto.h>])],
-		[#include <X11/Xlib.h>  #include <X11/Xproto.h>])])])
+		[#include <X11/Xlib.h>  #include <X11/Xproto.h>])])
+])
 	
 AC_CHECK_HEADERS([GL/gl.h GL/glu.h],,
 	[AC_MSG_ERROR("Required OpenGL header files not found.")])
@@ -280,25 +281,30 @@ AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 AC_CHECK_TYPES([ptrdiff_t])
 
+#
 # Checks for library functions.
+# note: some checks to help in manual edit of config.h for Win32/MSVC build
+#
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_FUNC_REALLOC
 
 # network functions
-AC_CHECK_FUNCS([ closesocket socket ]) 
+AC_CHECK_FUNCS([ closesocket socket gethostbyname ]) 
 
 # thread functions
 AC_CHECK_FUNCS([ pthread_create _begin_thread ])
 
-AC_CHECK_FUNCS([ floor gethostbyname gettimeofday memmove memset mkdir dnl
-		munmap mremap putenv _putenv select sqrt strchr strdup _strdup dnl
-		strerror stricmp _stricmp strcasecmp strncasecmp strrchr strstr dnl 
-		strnicmp unlink _unlink strlcpy ]) dnl
+# string functions
+AC_CHECK_FUNCS([ strchr strdup _strdup strerror stricmp _stricmp dnl 
+		strcasecmp strncasecmp strrchr strstr strnicmp strlcpy ]) dnl
 		
-AC_CHECK_FUNCS([ filelength stat fstat getcwd ])
-
+# file system functions
+AC_CHECK_FUNCS([ filelength stat fstat getcwd unlink _unlink mkdir ])
+		
+AC_CHECK_FUNCS([ floor gettimeofday memmove memset munmap mremap dnl
+		putenv _putenv select ]) 
 
 # outputs
 AC_CONFIG_FILES([Makefile source/Makefile])

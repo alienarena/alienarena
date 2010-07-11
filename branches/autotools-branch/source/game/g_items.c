@@ -17,6 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 qboolean	Pickup_Weapon (edict_t *ent, edict_t *other);
@@ -173,7 +178,7 @@ qboolean Pickup_Powerup (edict_t *ent, edict_t *other)
 			randomSpawn = 10 + rand() % (30 - 10); //10 to 30 seconds randomness
 		else
 			randomSpawn = 0;
-		
+
 		if (!(ent->spawnflags & DROPPED_ITEM) )
 			SetRespawn (ent, ent->item->quantity + randomSpawn);
 		if (((int)dmflags->value & DF_INSTANT_ITEMS) || ((ent->item->use == Use_Quad) && (ent->spawnflags & DROPPED_PLAYER_ITEM)))
@@ -1015,7 +1020,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 	else if((strcmp(ent->classname, "item_quad") == 0)) {
 		ent->s.modelindex2 = gi.modelindex("models/items/quaddama/unit.md2");
 	}
-	
+
 	if (ent->model)
 		gi.modelindex (ent->model);
 
@@ -1855,7 +1860,7 @@ gives +1 to maximum health
 		NULL,
 		NULL,
 		"items/powerup.wav",
-		NULL, 
+		NULL,
 		EF_ROTATE,
 		NULL,
 		NULL,
@@ -1869,7 +1874,7 @@ gives +1 to maximum health
 		0,
 /* precache */ "items/protect2.wav"
 	},
-	
+
 	// end of list marker
 	{NULL}
 };

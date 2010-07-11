@@ -135,6 +135,7 @@ void install_grabs(void)
 {
 
 #if defined DEBUG_GDB_NOGRAB
+// for running on gdb debug. prevents "lockup".
 	Cvar_Set( "in_dgamouse", "0" );
 	dgamouse = false;
 	mouse_active = true;

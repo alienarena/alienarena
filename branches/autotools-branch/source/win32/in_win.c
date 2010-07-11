@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -20,7 +20,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // in_win.c -- windows 95 mouse and joystick code
 // 02/21/97 JCB Added extended DirectInput code to support external controllers.
 
-#include "../client/client.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "client/client.h"
 #include "winquake.h"
 
 extern	unsigned	sys_msg_time;
@@ -237,8 +241,8 @@ void IN_StartupMouse (void)
 	cvar_t		*cv;
 
 	cv = Cvar_Get ("in_initmouse", "1", CVAR_NOSET);
-	if ( !cv->value ) 
-		return; 
+	if ( !cv->value )
+		return;
 
 	// Knightmare- added Psychospaz's menu mouse support
 	refreshCursorMenu();
@@ -278,8 +282,8 @@ void IN_MouseEvent (int mstate)
 		{
 				Key_Event (K_MOUSE1 + i, false, sys_msg_time);
 		}
-	}	
-	
+	}
+
 	//set menu cursor buttons
 	if (cls.key_dest == key_menu)
 	{
@@ -311,8 +315,8 @@ void IN_MouseEvent (int mstate)
 				cursor.buttonused[i] = false;
 				cursor.mouseaction = true;
 			}
-		}			
-	}	
+		}
+	}
 
 	mouse_oldbuttonstate = mstate;
 }
@@ -396,7 +400,7 @@ void IN_MouseMove (usercmd_t *cmd)
 
 		//mouse_x *= sensitivity->value;
 		//mouse_y *= sensitivity->value;
-		
+
 	// add mouse X/Y movement to cmd
 		if ( (in_strafe.state & 1) || (lookstrafe->value && mlooking ))
 			cmd->sidemove += m_side->value * mouse_x;
@@ -521,7 +525,7 @@ void IN_Frame (void)
 		IN_DeactivateMouse ();
 		return;
 	}
-	
+
 	if ( !cl.refresh_prepped && cls.key_dest != key_menu || cls.key_dest == key_console)
 	{
 		// temporarily deactivate if in fullscreen
@@ -547,7 +551,7 @@ void IN_Move (usercmd_t *cmd)
 	// Knightmare- added Psychospaz's mouse support
 	if (cls.key_dest == key_menu && cls.key_dest != key_console) // Knightmare added
 		M_Think_MouseCursor();
-	
+
 	if (ActiveApp)
 		IN_JoyMove (cmd);
 }
@@ -574,26 +578,26 @@ JOYSTICK
 =========================================================================
 */
 
-/* 
-=============== 
-IN_StartupJoystick 
-=============== 
-*/  
-void IN_StartupJoystick (void) 
-{ 
+/*
+===============
+IN_StartupJoystick
+===============
+*/
+void IN_StartupJoystick (void)
+{
 	int			numdevs;
 	JOYCAPS		jc;
 	MMRESULT	mmr;
 	cvar_t		*cv;
 
  	// assume no joystick
-	joy_avail = false; 
+	joy_avail = false;
 
 	// abort startup if user requests no joystick
 	cv = Cvar_Get ("in_initjoy", "1", CVAR_NOSET);
-	if ( !cv->value ) 
-		return; 
- 
+	if ( !cv->value )
+		return;
+
 	// verify joystick driver is present
 	if ((numdevs = joyGetNumDevs ()) == 0)
 	{
@@ -610,7 +614,7 @@ void IN_StartupJoystick (void)
 
 		if ((mmr = joyGetPosEx (joy_id, &ji)) == JOYERR_NOERROR)
 			break;
-	} 
+	}
 
 	// abort startup if we didn't find a valid joystick
 	if (mmr != JOYERR_NOERROR)
@@ -624,7 +628,7 @@ void IN_StartupJoystick (void)
 	memset (&jc, 0, sizeof(jc));
 	if ((mmr = joyGetDevCaps (joy_id, &jc, sizeof(jc))) != JOYERR_NOERROR)
 	{
-		Com_Printf ("\njoystick not found -- invalid joystick capabilities (%x)\n\n", mmr); 
+		Com_Printf ("\njoystick not found -- invalid joystick capabilities (%x)\n\n", mmr);
 		return;
 	}
 
@@ -638,10 +642,10 @@ void IN_StartupJoystick (void)
 	// mark the joystick as available and advanced initialization not completed
 	// this is needed as cvars are not available during initialization
 
-	joy_avail = true; 
+	joy_avail = true;
 	joy_advancedinit = false;
 
-	Com_Printf ("\njoystick detected\n\n"); 
+	Com_Printf ("\njoystick detected\n\n");
 }
 
 
@@ -759,7 +763,7 @@ void IN_Commands (void)
 		return;
 	}
 
-	
+
 	// loop through the joystick buttons
 	// key a joystick event or auxillary event for higher number buttons for each state change
 	buttonstate = ji.dwButtons;
@@ -814,11 +818,11 @@ void IN_Commands (void)
 }
 
 
-/* 
-=============== 
+/*
+===============
 IN_ReadJoystick
-=============== 
-*/  
+===============
+*/
 qboolean IN_ReadJoystick (void)
 {
 
@@ -864,9 +868,9 @@ void IN_JoyMove (usercmd_t *cmd)
 	// verify joystick is available and that the user wants to use it
 	if (!joy_avail || !in_joystick->value)
 	{
-		return; 
+		return;
 	}
- 
+
 	// collect the joystick data, if possible
 	if (IN_ReadJoystick () != true)
 	{
@@ -887,7 +891,7 @@ void IN_JoyMove (usercmd_t *cmd)
 		// move centerpoint to zero
 		fAxisValue -= 32768.0;
 
-		// convert range from -32768..32767 to -1..1 
+		// convert range from -32768..32767 to -1..1
 		fAxisValue /= 32768.0;
 
 		switch (dwAxisMap[i])
@@ -897,7 +901,7 @@ void IN_JoyMove (usercmd_t *cmd)
 			{
 				// user wants forward control to become look control
 				if (fabs(fAxisValue) > joy_pitchthreshold->value)
-				{		
+				{
 					// if mouse invert is on, invert the joystick pitch value
 					// only absolute control support here (joy_advanced is false)
 					if (m_pitch->value < 0.0)

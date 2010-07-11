@@ -37,22 +37,27 @@ EXTRA_DIST = \
 	botinfo \
 	data1
 
-# remove files that do not belong in Linux distribution
-# "svn export" into a distribution build directory to avoid having to deal
-#   with hidden svn subdirectories and other unwanted files 
+# Remove files that do not belong in distribution
+# Probably good idea to "svn export" into a another directory to avoid 
+#  having to deal with hidden svn subdirectories and other unwanted files 
 dist-hook:
 	rm -rf $(distdir)/data1/maps/mapsrc
-
-# remove hidden svn directories 	
-#	rm -rf `find $(distdir) -name .svn`
-
+	rm -rf `find $(distdir) -name .svn`
 
 #
-# Alternate Install: 
+# Alternate Install
+# This non-standard target is used for traditional single directory, 
+# in-place install. Good for map makers, frequent SVN updates.
+# Use: 
+#  ./configure --enable-alternate-install && make && make install-alternate
 #
+# TODO: this does not support program name translation and other fancy stuff
 install-alternate:
 if ALTERNATE_INSTALL
 	cp $(srcdir)/source/crx $(srcdir)/crx
+	cp $(srcdir)/source/crx-ded $(srcdir)/crx-ded
+	strip $(srcdir)/crx
+	strip $(srcdir)/crx-ded
 else
 	@echo "make install-alternate requires configuring with --enable-alternate-install"
 endif		
@@ -60,8 +65,8 @@ endif
 #
 # install/uninstall added rules for the game read-only data
 #
-# TODO: when installing in standard way, may need to rm .svn directories
-#   from $(pkgdatadir) if they exist.
+# TODO: when installing in standard way from SVN workcopy, may need to 
+#   rm .svn directories from $(pkgdatadir).
 #
 install-data-hook:
 if ALTERNATE_INSTALL

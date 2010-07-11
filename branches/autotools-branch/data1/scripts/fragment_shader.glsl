@@ -32,7 +32,7 @@ float lookupDynshadow( void )
 	ShadowCoord = gl_TextureMatrix[7] * sPos;		
 		
       shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
-      // Used to lower moiré pattern and self-shadowing
+      // Used to lower moirï¿½ pattern and self-shadowing
       shadowCoordinateWdivide.z += 0.0005;   
       
       distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;
@@ -163,7 +163,6 @@ void main( void )
       swamp *= swamp;
       swamp *= swamp;
       swamp *= swamp;
-      swamp /= 1.0;
 
       colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 3.0;
       

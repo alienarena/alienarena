@@ -145,7 +145,6 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	COM_StripExtension (cls.downloadname, cls.downloadtempname);
 	strcat (cls.downloadtempname, ".tmp");
 
-	// -jjb-filesystem downloads
 	Com_Printf("[Starting download: %s\n]", cls.downloadtempname );
 
 	// attempt an http download if available(never try to dl game model skins here)

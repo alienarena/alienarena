@@ -177,12 +177,13 @@ qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath)
 	}
 	else
 	{
+		size_t sz;
 		fseek(fp, 0, SEEK_END);
 		length = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
 
 		buffer = malloc( length + 1 );
-		fread( buffer, length, 1, fp );
+		sz = fread( buffer, length, 1, fp );
 		buffer[length] = 0;
 	}
 	s = buffer;
@@ -204,7 +205,6 @@ qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath)
 
 qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 {
-	const char *text;
 	iqmheader_t *header;
 	int i, j;
 	const int *inelements;
@@ -217,6 +217,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	iqmbounds_t *bounds;
 	iqmvertexarray_t *va;
 	unsigned short *framedata;
+	char *text;
 	char skinname[MAX_QPATH], shortname[MAX_QPATH], fullname[MAX_OSPATH], *path;
 
 	pbase = (unsigned char *)buffer;
@@ -324,7 +325,10 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		return false;
 	}
 
-	text = header->num_text && header->ofs_text ? (const char *)(pbase + header->ofs_text) : "";
+	text = header->num_text && header->ofs_text ? (char *)(pbase + header->ofs_text) : "";
+
+	mod->jointname = (char *)Hunk_Alloc(header->num_text * sizeof(char *));
+	memcpy(mod->jointname, text, header->num_text * sizeof(char *));
 
 	mod->num_frames = header->num_anims;
 	mod->num_joints = header->num_joints;
@@ -578,10 +582,25 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 
 		for(i = 0; i < currentmodel->num_joints; i++)
 		{
-			matrix3x4_t mat, temp;
+			matrix3x4_t mat, rmat, temp; 
+			vec3_t rot, origin, scale;
+			vec4_t q_rot;
 			Matrix3x4_Scale(&mat, mat1[i], 1-frameoffset);
 			Matrix3x4_Scale(&temp, mat2[i], frameoffset);
 			Matrix3x4_Add(&mat, mat, temp);
+
+			//if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine")) 
+			//{ 		
+			//	//build rotation matrix(store in "temp")
+			//	VectorSet(rot, currententity->angles[0], currententity->angles[1], 0);
+			//	VectorSet(origin, 0, 0, 0);
+			//	VectorSet(scale, 1, 1, 1);
+			//	Vector4Set(q_rot, currententity->angles[0], currententity->angles[1], 0, -sqrt(max(1.0 - pow(VectorLength(rot),2), 0.0)));
+			//	Matrix3x4_FromQuatAndVectors(&temp, q_rot, origin, scale);
+
+			//	Matrix3x4_Multiply(&rmat, temp, mat); 
+			//	Matrix3x4_Copy(&mat, rmat);
+			//}
 
 			if(currentmodel->joints[i].parent >= 0)
 				Matrix3x4_Multiply(&currentmodel->outframe[i], currentmodel->outframe[currentmodel->joints[i].parent], mat);
@@ -665,6 +684,8 @@ void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
 	float l;
 	float lscale;
 	vec3_t lightdir;
+
+	VectorScale(baselight, gl_modulate->value, lightOut);
 
 	if(!gl_vlights->value)
 		return;
@@ -856,6 +877,9 @@ void GL_DrawIQMFrame(int skinnum)
 	}
 	else if(!rs || mirror || glass)
 	{	//base render no shaders
+		va=0;
+		VArray = &VArrayVerts[0];
+
 		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 			R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
 		else
@@ -863,6 +887,8 @@ void GL_DrawIQMFrame(int skinnum)
 
 		if(mirror)
 		{
+			qglDepthMask(false);
+
 			if( !(currententity->flags & RF_WEAPONMODEL))
 			{
 				GL_EnableMultitexture( true );
@@ -886,6 +912,8 @@ void GL_DrawIQMFrame(int skinnum)
 		}
 		else if(glass)
 		{
+			qglDepthMask(false);
+
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, r_reflecttexture->texnum);
 		}
@@ -961,6 +989,9 @@ void GL_DrawIQMFrame(int skinnum)
 
 		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 			GL_EnableMultitexture( false );
+
+		if(mirror || glass)
+			qglDepthMask(true);
 	}
 	else
 	{	//render with shaders

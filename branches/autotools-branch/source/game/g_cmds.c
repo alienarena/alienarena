@@ -17,6 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 #include "m_player.h"
 
@@ -934,11 +939,11 @@ void Cmd_CallVote_f (edict_t *ent)
 	}
 
 	//start a vote
-	playervote.called = true; 
+	playervote.called = true;
 	playervote.yay = playervote.nay = 0;
 	playervote.starttime = level.time;
 	if(strlen(gi.args()) < 128) {
-		strcpy(playervote.command, gi.args()); 
+		strcpy(playervote.command, gi.args());
 		safe_bprintf(PRINT_HIGH, "%s called a vote: %s\n", ent->client->pers.netname, playervote.command);
 	}
 }
@@ -1087,7 +1092,7 @@ void Cmd_VoiceTaunt_f (edict_t *ent)
 			strcpy(name, ent->client->pers.netname);
 			info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
 			info[96] = 0; //truncate to prevent bad people from harming the server
-			
+
 			i = 0;
 			done = false;
 			while(!done)
@@ -1103,7 +1108,7 @@ void Cmd_VoiceTaunt_f (edict_t *ent)
 
 			sprintf(tauntsound, "taunts/%s/taunt%i.wav", playermodel, index);
 
-			Com_sprintf(string, sizeof(string), 
+			Com_sprintf(string, sizeof(string),
 				"%s %s %s ", info, tauntsound, name);
 
 			//send to all clients as a general config string

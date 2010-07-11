@@ -1,5 +1,6 @@
 /*
  Copyright (C) 1997-2001 Id Software, Inc.
+ Copyright (C) 2009 COR Entertainment
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -26,6 +27,10 @@
  *   Vorbisfile API Reference (vorbisfile version 1.2.0 - 20070723)
  *   from: http://www.xiph.org/vorbis/doc/vorbisfile/index.html
  */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <vorbis/vorbisfile.h>
 

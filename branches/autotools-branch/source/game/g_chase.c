@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -16,10 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-JKD - 032207 - removed some very heinous things like bumping up the view 
+JKD - 032207 - removed some very heinous things like bumping up the view
 during jumps, and using the old "look at player" angles upon dying.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 void UpdateChaseCam(edict_t *ent)
@@ -65,7 +70,7 @@ void UpdateChaseCam(edict_t *ent)
 	// jump animation lifts
 	if (!targ->groundentity)
 		o[2] += 16;
-	
+
 	trace = gi.trace(ownerv, vec3_origin, vec3_origin, o, targ, MASK_SOLID);
 
 	VectorCopy(trace.endpos, goal);

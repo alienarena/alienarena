@@ -4286,7 +4286,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	** reload the list of map names, based on rules
 	*/
 	// maps.lst normally in "data1/"
-	//  need  to add a function to FS_ if that is the only place it can be
+	//  need  to add a function to FS_ if that is the only place it is allowed
 	if ( !FS_FullPath( mapsname, sizeof( mapsname ), "maps.lst" ) )
 	{
 		Com_Error( ERR_DROP, "couldn't find maps.lst\n" );

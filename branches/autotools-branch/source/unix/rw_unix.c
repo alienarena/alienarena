@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,7 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-#include "../client/client.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "client/client.h"
 
 extern int mx, my;
 extern qboolean mouse_active;
@@ -32,12 +37,12 @@ cvar_t	*in_mouse;
 cvar_t	*in_dgamouse;
 cvar_t	*in_joystick;
 
-void IN_MLookDown (void) 
-{ 
+void IN_MLookDown (void)
+{
 	mlooking = true;
 }
 
-void IN_MLookUp (void) 
+void IN_MLookUp (void)
 {
 	mlooking = false;
 	if (!freelook->integer && lookspring->integer)
@@ -56,8 +61,8 @@ void IN_Init(void)
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
 
-	mx = my = 0.0;  
-	mouse_avail = true;	
+	mx = my = 0.0;
+	mouse_avail = true;
 
 	// Knightmare- added Psychospaz's menu mouse support
 	refreshCursorMenu();

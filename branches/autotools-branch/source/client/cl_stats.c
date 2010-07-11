@@ -29,9 +29,11 @@
 #endif
 #endif
 
+#if defined HAVE_CURL_CURL_H
 #include "curl/curl.h"
 CURLM *curlm;
 CURL *curl;
+#endif
 
 extern cvar_t  *cl_stats_server;
 

@@ -738,27 +738,33 @@ uninstall-am:
 	tags-recursive uninstall uninstall-am uninstall-hook
 
 
-# remove files that do not belong in Linux distribution
-# "svn export" into a distribution build directory to avoid having to deal
-#   with hidden svn subdirectories and other unwanted files 
+# Remove files that do not belong in distribution
+# Probably good idea to "svn export" into a another directory to avoid 
+#  having to deal with hidden svn subdirectories and other unwanted files 
 dist-hook:
 	rm -rf $(distdir)/data1/maps/mapsrc
-
-# remove hidden svn directories 	
-#	rm -rf `find $(distdir) -name .svn`
+	rm -rf `find $(distdir) -name .svn`
 
 #
-# Alternate Install: 
+# Alternate Install
+# This non-standard target is used for traditional single directory, 
+# in-place install. Good for map makers, frequent SVN updates.
+# Use: 
+#  ./configure --enable-alternate-install && make && make install-alternate
 #
+# TODO: this does not support program name translation and other fancy stuff
 install-alternate:
 @ALTERNATE_INSTALL_TRUE@	cp $(srcdir)/source/crx $(srcdir)/crx
+@ALTERNATE_INSTALL_TRUE@	cp $(srcdir)/source/crx-ded $(srcdir)/crx-ded
+@ALTERNATE_INSTALL_TRUE@	strip $(srcdir)/crx
+@ALTERNATE_INSTALL_TRUE@	strip $(srcdir)/crx-ded
 @ALTERNATE_INSTALL_FALSE@	@echo "make install-alternate requires configuring with --enable-alternate-install"
 
 #
 # install/uninstall added rules for the game read-only data
 #
-# TODO: when installing in standard way, may need to rm .svn directories
-#   from $(pkgdatadir) if they exist.
+# TODO: when installing in standard way from SVN workcopy, may need to 
+#   rm .svn directories from $(pkgdatadir).
 #
 install-data-hook:
 @ALTERNATE_INSTALL_TRUE@	@echo "Using --enable-alternate-install. Data install disabled."
