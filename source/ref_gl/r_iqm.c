@@ -113,6 +113,15 @@ void Matrix3x4_Transform(mvertex_t *out, matrix3x4_t mat, const mvertex_t in)
     out->position[2] = DotProduct(mat.c, in.position) + mat.c[3];
 }
 
+void Maxtrix3x4GenRotate(matrix3x4_t *out, float angle, const vec3_t axis)
+{
+	float ck = cosf(angle), sk = sinf(angle);
+
+	Vector4Set(out->a, axis[0]*axis[0]*(1-ck)+ck, axis[0]*axis[1]*(1-ck)-axis[2]*sk, axis[0]*axis[2]*(1-ck)+axis[1]*sk, 0);
+	Vector4Set(out->b, axis[1]*axis[0]*(1-ck)+axis[2]*sk, axis[1]*axis[1]*(1-ck)+ck, axis[1]*axis[2]*(1-ck)-axis[0]*sk, 0);
+	Vector4Set(out->c, axis[0]*axis[2]*(1-ck)-axis[1]*sk, axis[1]*axis[2]*(1-ck)+axis[0]*sk, axis[2]*axis[2]*(1-ck)+ck, 0);
+}
+
 void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent)
 {
 	int i;
@@ -575,8 +584,7 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 		for(i = 0; i < currentmodel->num_joints; i++)
 		{
 			matrix3x4_t mat, rmat, temp; 
-			vec3_t rot, origin, scale;
-			vec4_t q_rot;
+			vec3_t rot;
 			Matrix3x4_Scale(&mat, mat1[i], 1-frameoffset);
 			Matrix3x4_Scale(&temp, mat2[i], frameoffset);
 
@@ -585,13 +593,11 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 			//if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine")) 
 			//{ 		
 			//	//build rotation matrix(store in "temp")
-			//	VectorSet(rot, currententity->angles[0], currententity->angles[1], 0);
-			//	VectorSet(origin, 0, 0, 0);
-			//	VectorSet(scale, 1, 1, 1);
-			//	Vector4Set(q_rot, currententity->angles[0], currententity->angles[1], 0, -sqrt(max(1.0 - pow(VectorLength(rot),2), 0.0)));
-			//	Matrix3x4_FromQuatAndVectors(&temp, q_rot, origin, scale);
+			//	//angles are in rads
+			//	VectorSet(rot, 1, 0, 0);
+			//	Maxtrix3x4GenRotate(&temp, -0.25, rot);
 
-			//	Matrix3x4_Multiply(&rmat, temp, mat); 
+			//	Matrix3x4_Multiply(&rmat, mat, temp); 
 			//	Matrix3x4_Copy(&mat, rmat);
 			//}
 
