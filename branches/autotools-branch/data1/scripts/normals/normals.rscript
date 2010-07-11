@@ -451,7 +451,7 @@ models/weapons/v_rocket/skin
 players/martianenforcer/gamara
 {
 	{
-		map players/martianenforcer/default_normal.tga
+		map players/martianenforcer/gamara_normal.tga
 		normalmap
 		map2 gfx/gamarafx.tga
 		glow
@@ -774,6 +774,13 @@ maps/meshes/tech/rotator
 		normalmap
 		map2 maps/meshes/tech/rotator_fx.tga
 		glow
+	}
+}
+maps/meshes/tech/bigribtube
+{
+	{
+		map maps/meshes/tech/bigribtube_normal.jpg
+		normalmap
 	}
 }
 maps/meshes/xempx/tripes1
