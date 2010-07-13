@@ -115,7 +115,7 @@ void Matrix3x4_Transform(mvertex_t *out, matrix3x4_t mat, const mvertex_t in)
 
 void Maxtrix3x4GenJointRotate(matrix3x4_t *out, float angle, const vec3_t axis, const vec3_t trans)
 {
-	float ck = cosf(angle), sk = sinf(angle);
+	float ck = cos(angle), sk = sin(angle);
 
 	Vector4Set(out->a, axis[0]*axis[0]*(1-ck)+ck, axis[0]*axis[1]*(1-ck)-axis[2]*sk, axis[0]*axis[2]*(1-ck)+axis[1]*sk, trans[0]);
 	Vector4Set(out->b, axis[1]*axis[0]*(1-ck)+axis[2]*sk, axis[1]*axis[1]*(1-ck)+ck, axis[1]*axis[2]*(1-ck)-axis[0]*sk, trans[1]);
@@ -570,18 +570,16 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	return true;
 }
 
+float pitch;
 void GL_AnimateIQMFrame(float curframe, int nextframe)
 {
 	int i, j;
-	float pitch;
+	
     int frame1 = (int)floor(curframe),
         frame2 = nextframe;
     float frameoffset = curframe - frame1;
 	frame1 %= currentmodel->num_poses;
 	frame2 %= currentmodel->num_poses;
-
-	//pitch = 0.52 * sinf(rs_realtime); //use this for testing only
-	pitch = -1.0*degreeToRadian(currententity->angles[0]);
 
 	{
 		matrix3x4_t *mat1 = &currentmodel->frames[frame1 * currentmodel->num_joints],
@@ -806,8 +804,7 @@ void GL_DrawIQMFrame(int skinnum)
 
 	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
 
-	//move[0] = DotProduct (delta, vectors[0]);	// forward
-	move[0] = 0; //pitch done with spine rotation
+	move[0] = DotProduct (delta, vectors[0]);	// forward
 	move[1] = -DotProduct (delta, vectors[1]);	// left
 	move[2] = DotProduct (delta, vectors[2]);	// up
 
@@ -1638,10 +1635,13 @@ void R_DrawINTERQUAKEMODEL ( void )
 		}
 	}
 
+	//pitch = 0.52 * sinf(rs_realtime); //use this for testing only
+	pitch = degreeToRadian(currententity->angles[PITCH]);
+
     qglPushMatrix ();
-	currententity->angles[PITCH] = -currententity->angles[PITCH];
+	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
 	R_RotateForEntity (currententity);
-	currententity->angles[PITCH] = -currententity->angles[PITCH];
+
 
 	// select skin
 	if (currententity->skin) {
@@ -1851,10 +1851,12 @@ void R_DrawIQMCaster ( void )
 	if ( R_CullIQMModel() )
 		return;
 
+	//pitch = 0.52 * sinf(rs_realtime); //use this for testing only
+	pitch = degreeToRadian(currententity->angles[PITCH]);
+
     qglPushMatrix ();
-	currententity->angles[PITCH] = -currententity->angles[PITCH];
+	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
 	R_RotateForEntity (currententity);
-	currententity->angles[PITCH] = -currententity->angles[PITCH];
 
 	//frame interpolation
 	time = (Sys_Milliseconds() - currententity->frametime) / 100;
