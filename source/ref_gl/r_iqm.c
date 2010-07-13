@@ -1053,7 +1053,7 @@ void GL_DrawIQMFrame(int skinnum)
 		if(mirror || glass)
 			qglDepthMask(true);
 	}
-	else 
+	else if(rs)
 	{	//render with shaders
 		
 		if (rs->stage && rs->stage->has_alpha)

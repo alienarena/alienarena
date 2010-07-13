@@ -1173,7 +1173,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 		}
 
 	}
-	else
+	else if(rs)
 	{
 		if (rs->stage && rs->stage->has_alpha)
 		{
