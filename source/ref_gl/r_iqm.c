@@ -737,23 +737,19 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 	}	
 }
 
-//to do - this needs to work smoother
 void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
 {	
 	float l;
 	float lscale;
-	vec3_t lightdir;
 
 	VectorScale(baselight, gl_modulate->value, lightOut);
 
 	if(!gl_vlights->value)
 		return;
-	
-	VectorSubtract(currententity->origin, lightPosition, lightdir);
 
 	lscale = 3.0;
 
-    l = lscale * VLight_GetLightValue (normal->dir, lightdir, currententity->angles[PITCH], currententity->angles[YAW]);
+    l = lscale * VLight_GetLightValue (normal->dir, lightPosition, currententity->angles[PITCH], currententity->angles[YAW]);
 
     VectorScale(baselight, l, lightOut);
 }

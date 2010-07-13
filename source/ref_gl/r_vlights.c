@@ -58,6 +58,8 @@ float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw
 	int pitchofs, yawofs;
 	float angle1, angle2, light;
 
+	ayaw += 90;
+
 	if ( normal[1] == 0 && normal[0] == 0 )
 	{
 		angle2 = 0;
@@ -93,7 +95,7 @@ float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw
 	while (yawofs < 0)
 		yawofs += VLIGHT_GRIDSIZE_Y;
 	
-	light = ( DotProduct( vlightgrid[pitchofs][yawofs], dir ) + 2.0f ) * 63.5f;
+	light = ( DotProduct( vlightgrid[pitchofs][yawofs], dir ) + 2.0f ) * 1.5f;
 		
 	if (light > VLIGHT_CLAMP_MAX)
 		light = VLIGHT_CLAMP_MAX;
