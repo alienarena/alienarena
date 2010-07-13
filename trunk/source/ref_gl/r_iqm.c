@@ -122,6 +122,15 @@ void Maxtrix3x4GenJointRotate(matrix3x4_t *out, float angle, const vec3_t axis, 
 	Vector4Set(out->c, axis[0]*axis[2]*(1-ck)-axis[1]*sk, axis[1]*axis[2]*(1-ck)+axis[0]*sk, axis[2]*axis[2]*(1-ck)+ck, trans[2]);
 }
 
+#define pi 3.14159265
+
+double degreeToRadian(double degree)
+{
+	double radian = 0;
+	radian = degree * (pi/180);
+	return radian;
+}
+
 void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent)
 {
 	int i;
@@ -207,7 +216,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	float *vposition = NULL, *vtexcoord = NULL, *vnormal = NULL, *vtangent = NULL;
 	unsigned char *pbase;
 	iqmjoint_t *joint;
-	matrix3x4_t	*baseframe;
 	matrix3x4_t	*inversebaseframe;
 	iqmpose_t *poses;
 	iqmbounds_t *bounds;
@@ -348,7 +356,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	}	
 	
 	//these don't need to be a part of mod - remember to free them
-	baseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
+	mod->baseframe = (matrix3x4_t*)Hunk_Alloc (header->num_joints * sizeof(matrix3x4_t));
 	inversebaseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
     for(i = 0; i < (int)header->num_joints; i++)
     {
@@ -360,14 +368,14 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		VectorSet(rot, j.rotation[0], j.rotation[1], j.rotation[2]);
 		Vector4Set(q_rot, j.rotation[0], j.rotation[1], j.rotation[2], -sqrt(max(1.0 - pow(VectorLength(rot),2), 0.0)));
 
-		Matrix3x4_FromQuatAndVectors(&baseframe[i], q_rot, j.origin, j.scale);
-		Matrix3x4_Invert(&inversebaseframe[i], baseframe[i]);
+		Matrix3x4_FromQuatAndVectors(&mod->baseframe[i], q_rot, j.origin, j.scale);
+		Matrix3x4_Invert(&inversebaseframe[i], mod->baseframe[i]);
 
         if(j.parent >= 0)
         {
             matrix3x4_t temp;
-            Matrix3x4_Multiply(&temp, baseframe[j.parent], baseframe[i]);
-            baseframe[i] = temp;
+            Matrix3x4_Multiply(&temp, mod->baseframe[j.parent], mod->baseframe[i]);
+            mod->baseframe[i] = temp;
             Matrix3x4_Multiply(&temp, inversebaseframe[i], inversebaseframe[j.parent]);
             inversebaseframe[i] = temp;
         }
@@ -408,7 +416,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 			if(p.parent >= 0) 
 			{
-				Matrix3x4_Multiply(&temp, baseframe[p.parent], m);
+				Matrix3x4_Multiply(&temp, mod->baseframe[p.parent], m);
 				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], temp, inversebaseframe[j]);
 			}
             else 
@@ -556,8 +564,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	}
 
 	//free temp non hunk mem
-	if(baseframe)
-		free(baseframe);
 	if(inversebaseframe)
 		free(inversebaseframe);
 
@@ -567,11 +573,15 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 void GL_AnimateIQMFrame(float curframe, int nextframe)
 {
 	int i, j;
+	float pitch;
     int frame1 = (int)floor(curframe),
         frame2 = nextframe;
     float frameoffset = curframe - frame1;
 	frame1 %= currentmodel->num_poses;
 	frame2 %= currentmodel->num_poses;
+
+	//pitch = 0.52 * sinf(rs_realtime); //use this for testing only
+	pitch = -1.0*degreeToRadian(currententity->angles[0]);
 
 	{
 		matrix3x4_t *mat1 = &currentmodel->frames[frame1 * currentmodel->num_joints],
@@ -588,38 +598,75 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 			Matrix3x4_Scale(&mat, mat1[i], 1-frameoffset);
 			Matrix3x4_Scale(&temp, mat2[i], frameoffset);
 
-			Matrix3x4_Add(&mat, mat, temp);
-
-			////some hard coded nums to test some things here.
-			//if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine")) 
-			//{ 		
-			//	//I think we should be able to figure out the translation distance by the origin of the bone, 
-			//	//but how do we account for length of the bone?
-			//	//build rotation matrix(store in "temp")
-			//	//angles are in rads
-			//	VectorSet(rot, 1, 0, 0); //axis of rotation(we need only do pitch(leaning forward back)
-			//	VectorSet(trans, 0, -2, 2);
-			//	Maxtrix3x4GenJointRotate(&temp, -0.25, rot, trans);
-
-			//	Matrix3x4_Multiply(&rmat, mat, temp); 
-			//	Matrix3x4_Copy(&mat, rmat);
-			//}
-			////rotate the thigh bones back
-			//if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "thigh.l") ||
-			//	!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "thigh.r")) 
-			//{ 		
-			//	VectorSet(rot, 1, 0, 0); 
-			//	VectorSet(trans, 0, 2, -2);
-			//	Maxtrix3x4GenJointRotate(&temp, 0.25, rot, trans);
-
-			//	Matrix3x4_Multiply(&rmat, mat, temp); 
-			//	Matrix3x4_Copy(&mat, rmat);
-			//}
+			Matrix3x4_Add(&mat, mat, temp);			
 
 			if(currentmodel->joints[i].parent >= 0) 
 				Matrix3x4_Multiply(&currentmodel->outframe[i], currentmodel->outframe[currentmodel->joints[i].parent], mat);
 			else 
 				Matrix3x4_Copy(&currentmodel->outframe[i], mat);
+
+			//bend the model at the waist for player pitch
+			if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine")||
+				!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine.001"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
+				VectorSet(trans, 0, 0, 0);
+				Maxtrix3x4GenJointRotate(&rmat, pitch, rot, trans);
+				
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
+					 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
+					 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+				   
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+			
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+			}
+			//now rotate the legs back
+			if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "hip.l")||
+				!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "hip.r"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				VectorSet(rot, 0, 1, 0);
+				VectorSet(trans, 0, 0, 0);
+				Maxtrix3x4GenJointRotate(&rmat, -pitch, rot, trans);
+				
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
+					 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
+					 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+				   
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+			
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+			}
 		}
 	}
 	// The actual vertex generation based on the matrixes follows...
@@ -759,7 +806,8 @@ void GL_DrawIQMFrame(int skinnum)
 
 	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
 
-	move[0] = DotProduct (delta, vectors[0]);	// forward
+	//move[0] = DotProduct (delta, vectors[0]);	// forward
+	move[0] = 0; //pitch done with spine rotation
 	move[1] = -DotProduct (delta, vectors[1]);	// left
 	move[2] = DotProduct (delta, vectors[2]);	// up
 

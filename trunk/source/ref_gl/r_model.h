@@ -344,6 +344,7 @@ typedef struct model_s
 	iqmjoint_t		*joints;
 	matrix3x4_t		*frames;
 	matrix3x4_t		*outframe;
+	matrix3x4_t		*baseframe;
 	int				num_poses;
 	int				num_triangles;
 	iqmtriangle_t	*tris;
