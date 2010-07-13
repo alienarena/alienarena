@@ -731,6 +731,7 @@ void ACEND_SaveNodes()
 	char relative_path[MAX_QPATH];
 	int i,j;
 	int version = 1;
+	size_t sz;
 
 	// Resolve paths
 	ACEND_ResolveAllPaths();
@@ -749,17 +750,17 @@ void ACEND_SaveNodes()
 		return;
 	}
 
-	fwrite(&version,sizeof(int),1,pOut); // write version
-	fwrite(&numnodes,sizeof(int),1,pOut); // write count
-	fwrite(&num_items,sizeof(int),1,pOut); // write facts count
+	sz = fwrite(&version,sizeof(int),1,pOut); // write version
+	sz = fwrite(&numnodes,sizeof(int),1,pOut); // write count
+	sz = fwrite(&num_items,sizeof(int),1,pOut); // write facts count
 
-	fwrite(nodes,sizeof(node_t),numnodes,pOut); // write nodes
+	sz = fwrite(nodes,sizeof(node_t),numnodes,pOut); // write nodes
 
 	for(i=0;i<numnodes;i++)
 		for(j=0;j<numnodes;j++)
-			fwrite(&path_table[i][j],sizeof(short int),1,pOut); // write count
+			sz = fwrite(&path_table[i][j],sizeof(short int),1,pOut); // write count
 
-	fwrite(item_table,sizeof(item_table_t),num_items,pOut); 		// write out the fact table
+	sz = fwrite(item_table,sizeof(item_table_t),num_items,pOut); 		// write out the fact table
 
 	fclose(pOut);
 
@@ -776,6 +777,7 @@ void ACEND_LoadNodes(void)
 	char relative_path[MAX_QPATH];
 	char filename[MAX_OSPATH];
 	int version;
+	size_t sz;
 
 	strcpy( relative_path, BOT_GAMEDATA"/nav/" );
 	strcat( relative_path, level.mapname );
@@ -796,22 +798,22 @@ void ACEND_LoadNodes(void)
 	}
 
 	// determine version
-	fread(&version,sizeof(int),1,pIn); // read version
+	sz = fread(&version,sizeof(int),1,pIn); // read version
 
 	if(version == 1)
 	{
 		gi.dprintf("ACE: Loading node table...");
 
-		fread(&numnodes,sizeof(int),1,pIn); // read count
-		fread(&num_items,sizeof(int),1,pIn); // read facts count
-		fread(nodes,sizeof(node_t),numnodes,pIn);
+		sz = fread(&numnodes,sizeof(int),1,pIn); // read count
+		sz = fread(&num_items,sizeof(int),1,pIn); // read facts count
+		sz = fread(nodes,sizeof(node_t),numnodes,pIn);
 
 		for(i=0;i<numnodes;i++)
 			for(j=0;j<numnodes;j++)
-				fread(&path_table[i][j],sizeof(short int),1,pIn); // write count
+				sz = fread(&path_table[i][j],sizeof(short int),1,pIn); // write count
 
 	    for(i=0;i<num_items;i++)
-			fread(item_table,sizeof(item_table_t),1,pIn);
+			sz = fread(item_table,sizeof(item_table_t),1,pIn);
 		fclose(pIn);
 	}
 	else

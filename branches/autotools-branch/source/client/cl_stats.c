@@ -37,6 +37,8 @@ CURL *curl;
 
 extern cvar_t  *cl_stats_server;
 
+static char *cpr;
+
 static FILE* statsdb_open( const char* mode )
 {
 	FILE* file;
@@ -102,28 +104,28 @@ PLAYERSTATS getPlayerRanking ( PLAYERSTATS player )
 		while(player.ranking < 1000) {
 
 			//name
-			fgets(name, sizeof(name), file);
+			cpr = fgets(name, sizeof(name), file);
 			name[strlen(name) - 1] = 0; //truncate garbage byte
 			//remote address
-			fgets(remote_address, sizeof(remote_address), file);
+			cpr = fgets(remote_address, sizeof(remote_address), file);
 			//points
-			fgets(points, sizeof(points), file);
+			cpr = fgets(points, sizeof(points), file);
 			//frags
-			fgets(frags, sizeof(frags), file);
+			cpr = fgets(frags, sizeof(frags), file);
 			//total frags
-			fgets(totalfrags, sizeof(totalfrags), file);
+			cpr = fgets(totalfrags, sizeof(totalfrags), file);
 			if(!strcmp(player.playername, name))
 				player.totalfrags = atoi(totalfrags);
 			//current time in poll
-			fgets(time, sizeof(time), file);
+			cpr = fgets(time, sizeof(time), file);
 			//total time
-			fgets(totaltime, sizeof(totaltime), file);
+			cpr = fgets(totaltime, sizeof(totaltime), file);
 			if(!strcmp(player.playername, name))
 				player.totaltime = atof(totaltime);
 			//last server.ip
-			fgets(ip, sizeof(ip), file);
+			cpr = fgets(ip, sizeof(ip), file);
 			//what poll
-			fgets(poll, sizeof(poll), file);
+			cpr = fgets(poll, sizeof(poll), file);
 
 			player.ranking++;
 
@@ -159,27 +161,27 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player )
 		while(player.ranking < 1000) {
 
 			//name
-			fgets(name, sizeof(name), file);
+			cpr = fgets(name, sizeof(name), file);
 			strcpy(player.playername, name);
 			player.playername[strlen(player.playername)-1] = 0; //remove line feed
 			//remote address
-			fgets(remote_address, sizeof(remote_address), file);
+			cpr = fgets(remote_address, sizeof(remote_address), file);
 			//points
-			fgets(points, sizeof(points), file);
+			cpr = fgets(points, sizeof(points), file);
 			//frags
-			fgets(frags, sizeof(frags), file);
+			cpr = fgets(frags, sizeof(frags), file);
 			//total frags
-			fgets(totalfrags, sizeof(totalfrags), file);
+			cpr = fgets(totalfrags, sizeof(totalfrags), file);
 			player.totalfrags = atoi(totalfrags);
 			//current time in poll
-			fgets(time, sizeof(time), file);
+			cpr = fgets(time, sizeof(time), file);
 			//total time
-			fgets(totaltime, sizeof(totaltime), file);
+			cpr = fgets(totaltime, sizeof(totaltime), file);
 			player.totaltime = atof(totaltime);
 			//last server.ip
-			fgets(ip, sizeof(ip), file);
+			cpr = fgets(ip, sizeof(ip), file);
 			//what poll
-			fgets(poll, sizeof(poll), file);
+			cpr = fgets(poll, sizeof(poll), file);
 
 			player.ranking++;
 

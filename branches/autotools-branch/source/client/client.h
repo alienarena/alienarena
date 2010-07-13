@@ -155,8 +155,7 @@ typedef struct
 	char		gamedir[MAX_QPATH];
 	int			playernum;
 
-	// client/server protocol depends on MAX_QPATH being 64.
-	// might be a good idea to NOT use MAX_QPATH here, or maybe not. TBD.
+	// Alien Arena client/server protocol depends on MAX_QPATH being 64.
 	char		configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
 
 	//

@@ -434,8 +434,7 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 	qboolean found = false;
 	int i;
 
-	assert( strlen( relative_path ) < MAX_QPATH  );
-	if ( strlen( relative_path ) > MAX_QPATH )
+	if ( strlen( relative_path ) >= MAX_QPATH )
 	{
 		Com_DPrintf("FS_FullPath: relative path size error: %s\n", relative_path );
 		return false;
@@ -498,6 +497,13 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 			found = false;
 		}
 	}
+	else
+	{
+		// This is not necessarily an error and can produce a flood of messages.
+		// Don't show unless developer set to 2
+		if ( developer && developer->value == 2 )
+			Com_DPrintf("FS_FullPath: file not found: %s\n", relative_path );
+	}
 
 	return found;
 }
@@ -515,7 +521,12 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 */
 void FS_FullWritePath( char *full_path, size_t pathsize, const char* relative_path)
 {
-	assert( strlen( relative_path ) < MAX_QPATH  );
+	if ( strlen( relative_path ) >= MAX_QPATH )
+	{
+		Com_DPrintf("FS_FullPath: relative path size error: %s\n", relative_path );
+		*full_path = 0;
+		return;
+	}
 
 	if ( !Q_strncasecmp( relative_path, BOT_GAMEDATA, strlen(BOT_GAMEDATA) ) )
 	{ // a "botinfo/" prefixed relative path
@@ -562,7 +573,7 @@ int FS_FOpenFile (char *filename, FILE **file)
 		*file = fopen( netpath, "rb" );
 		if ( !(*file) )
 		{
-			Com_DPrintf("FS_FOpenFile:fopen fail:%s:\n", netpath);
+			Com_DPrintf("FS_FOpenFile: failed file open: %s:\n", netpath);
 		}
 		else
 		{
@@ -605,9 +616,12 @@ void FS_Read (void *buffer, int len, FILE *f)
 		read = fread (buf, 1, block, f);
 		if (read == 0)
 		{
+			if ( feof( f ) )
+				Com_Error( ERR_FATAL, "FS_Read: premature end-of-file");
+			if ( ferror( f ) )
+				Com_Error( ERR_FATAL, "FS_Read: file read error");
 			Com_Error (ERR_FATAL, "FS_Read: 0 bytes read");
 		}
-
 		if (read == -1)
 			Com_Error (ERR_FATAL, "FS_Read: -1 bytes read");
 

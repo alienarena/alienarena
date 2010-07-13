@@ -23,9 +23,9 @@ SUBDIRS = source
 
 ACLOCAL_AMFLAGS = -I m4
 
-if ALTERNATE_INSTALL
-AM_MAKEFLAGS = DESTDIR=$(top_srcdir)
-endif
+#if ALTERNATE_INSTALL
+#AM_MAKEFLAGS = DESTDIR=$(top_srcdir)
+#endif
 
 # TODO: create "official" INSTALL, README, etc.
 EXTRA_DIST = \
@@ -54,8 +54,8 @@ dist-hook:
 # TODO: this does not support program name translation and other fancy stuff
 install-alternate:
 if ALTERNATE_INSTALL
-	cp $(srcdir)/source/crx $(srcdir)/crx
-	cp $(srcdir)/source/crx-ded $(srcdir)/crx-ded
+	cp $(top_builddir)/source/crx $(srcdir)/crx
+	cp $(top_builddir)/source/crx-ded $(srcdir)/crx-ded
 	strip $(srcdir)/crx
 	strip $(srcdir)/crx-ded
 else

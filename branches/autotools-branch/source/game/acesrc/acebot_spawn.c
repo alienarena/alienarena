@@ -65,6 +65,8 @@
 #include "game/m_player.h"
 #include "acebot.h"
 
+static size_t szr;
+
 ///////////////////////////////////////////////////////////////////////
 // Had to add this function in this version for some reason.
 // any globals are wiped out between level changes....so
@@ -96,14 +98,14 @@ void ACESP_SaveBots()
 			count++;
 	}
 
-	fwrite(&count,sizeof (int),1,pOut); // Write number of bots
+	szr = fwrite(&count,sizeof (int),1,pOut); // Write number of bots
 
 	for (i = maxclients->value; i > 0; i--)
 	{
 		bot = g_edicts + i + 1;
 
 		if (bot->inuse && bot->is_bot)
-			fwrite(bot->client->pers.userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
+			szr = fwrite(bot->client->pers.userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
 	}
 
     fclose(pOut);
@@ -153,7 +155,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 		return;
 	}
 
-	fread(&count,sizeof (int),1,pIn);
+	szr = fread(&count,sizeof (int),1,pIn);
 
 	if(g_duel->value) {
 		count = 1; //never more than 1 bot no matter what in duel mode
@@ -192,7 +194,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	{
 		total_players = real_players + i + 1;
 
-		fread(userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
+		szr = fread(userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
 
 		info = Info_ValueForKey (userinfo, "name");
 		skin = Info_ValueForKey (userinfo, "skin");
@@ -263,7 +265,7 @@ int ACESP_FindBotNum(void)
 		return 0;
 	}
 
-	fread(&count,sizeof (int),1,pIn);
+	szr = fread(&count,sizeof (int),1,pIn);
 
 	fclose(pIn);
 

@@ -172,6 +172,8 @@ void G_RunFrame (void);
 int ACESP_FindBotNum(void);
 extern long filelength(int);
 
+static size_t szr;
+
 //===================================================================
 
 
@@ -534,7 +536,7 @@ void EndDMLevel (void)
 	fseek(fp, 0, SEEK_SET);
 #endif
 	buffer = malloc( length + 1 );
-	fread( buffer, length, 1, fp );
+	szr = fread( buffer, length, 1, fp );
 	buffer[length] = 0;
 
 	s = buffer;
@@ -557,7 +559,10 @@ void EndDMLevel (void)
 		char  shortname[MAX_TOKEN_CHARS];
 		char  longname[MAX_TOKEN_CHARS];
 		char  scratch[200];
-		int  j, l;
+#if defined WIN32_VARIANT
+		int  j
+#endif
+		int l;
 
 		strcpy( shortname, COM_Parse( &s ) );
 		l = strlen(shortname);

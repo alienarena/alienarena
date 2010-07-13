@@ -378,7 +378,7 @@ void SV_BeginDownload_f(void)
 
 	if ( !sv_client->download )
 	{
-		Com_DPrintf ("Couldn't download %s to %s\n", name, sv_client->name);
+		Com_DPrintf ("Could not download %s to %s\n", name, sv_client->name);
 		if (sv_client->download) {
 			FS_FreeFile (sv_client->download);
 			sv_client->download = NULL;

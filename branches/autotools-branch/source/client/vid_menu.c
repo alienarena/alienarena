@@ -71,7 +71,7 @@ MENU INTERACTION
 
 static menuframework_s	s_opengl_menu;
 static menuframework_s *s_current_menu;
-static int				s_current_menu_index;
+// static int				s_current_menu_index; // unused
 
 static menulist_s		s_mode_list;
 static menuslider_s		s_tq_slider;

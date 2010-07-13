@@ -51,10 +51,7 @@ typedef enum {false, true}	qboolean;
 #define	MAX_STRING_TOKENS	80		// max tokens resulting from Cmd_TokenizeString
 #define	MAX_TOKEN_CHARS		1024		// max length of an individual token
 
-/*
- * Note: MAX_QPATH also sets the length of configstrings. See server.h
- * and client.h. It must be 64, otherwise client/server protocol breaks.
- */
+// MAX_QPATH must be 64 for Alien Arena client/server protocol.
 #define	MAX_QPATH			64		// max length of a quake game pathname
 
 #if defined UNIX_VARIANT
@@ -816,6 +813,7 @@ typedef struct
 // config strings are a general means of communication from
 // the server to all connected clients.
 // Each config string can be at most MAX_QPATH characters.
+// Alien Arena client/server protocol depends on MAX_QPATH being 64
 //
 #define	CS_NAME				0
 #define	CS_SKY				2

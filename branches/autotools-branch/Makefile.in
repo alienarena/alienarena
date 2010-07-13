@@ -236,7 +236,10 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = source 
 ACLOCAL_AMFLAGS = -I m4
-@ALTERNATE_INSTALL_TRUE@AM_MAKEFLAGS = DESTDIR=$(top_srcdir)
+
+#if ALTERNATE_INSTALL
+#AM_MAKEFLAGS = DESTDIR=$(top_srcdir)
+#endif
 
 # TODO: create "official" INSTALL, README, etc.
 EXTRA_DIST = \
@@ -754,8 +757,8 @@ dist-hook:
 #
 # TODO: this does not support program name translation and other fancy stuff
 install-alternate:
-@ALTERNATE_INSTALL_TRUE@	cp $(srcdir)/source/crx $(srcdir)/crx
-@ALTERNATE_INSTALL_TRUE@	cp $(srcdir)/source/crx-ded $(srcdir)/crx-ded
+@ALTERNATE_INSTALL_TRUE@	cp $(top_builddir)/source/crx $(srcdir)/crx
+@ALTERNATE_INSTALL_TRUE@	cp $(top_builddir)/source/crx-ded $(srcdir)/crx-ded
 @ALTERNATE_INSTALL_TRUE@	strip $(srcdir)/crx
 @ALTERNATE_INSTALL_TRUE@	strip $(srcdir)/crx-ded
 @ALTERNATE_INSTALL_FALSE@	@echo "make install-alternate requires configuring with --enable-alternate-install"

@@ -91,6 +91,8 @@ qboolean	m_entersound;		// play after drawing a frame, so caching
 void	(*m_drawfunc) (void);
 const char *(*m_keyfunc) (int key);
 
+static size_t szr;
+
 //=============================================================================
 /* Support Routines */
 
@@ -1486,10 +1488,13 @@ static void AlwaysRunFunc( void *unused )
 	Cvar_SetValue( "cl_run", s_options_alwaysrun_box.curvalue );
 }
 
+/*
+// unused
 static void FreeLookFunc( void *unused )
 {
 	Cvar_SetValue( "freelook", s_options_freelook_box.curvalue );
 }
+*/
 
 static void DisColorFunc( void *unused )
 {
@@ -3985,17 +3990,17 @@ void LoadBotInfo( void )
 	}
 	if( (pIn = fopen( fullpath, "rb" )) == NULL )
 	{
-		Com_DPrintf("LoadBotInfo: failed open: %s\n", fullpath );
+		Com_DPrintf("LoadBotInfo: failed file open: %s\n", fullpath );
 		return;
 	}
 
-	fread(&count,sizeof (int),1,pIn);
+	szr = fread(&count,sizeof (int),1,pIn);
 	if(count>16)
 		count = 16;
 
 	for(i=0;i<count;i++)
 	{
-		fread(bots[i].userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
+		szr = fread(bots[i].userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
 
 		info = Info_ValueForKey (bots[i].userinfo, "name");
 		skin = Info_ValueForKey (bots[i].userinfo, "skin");
@@ -4054,11 +4059,11 @@ void AddbotFunc(void *self)
 		return; // bail
 	}
 
-	fwrite(&count,sizeof (int),1,pOut); // Write number of bots
+	szr = fwrite(&count,sizeof (int),1,pOut); // Write number of bots
 
 	for (i = 7; i > -1; i--) {
 		if(strcmp(bot[i].name, "...empty slot"))
-			fwrite(bot[i].userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
+			szr = fwrite(bot[i].userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
 	}
 
     fclose(pOut);
@@ -4300,7 +4305,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 
 	length = FS_filelength( fp );
 	buffer = malloc( length + 1 );
-	fread( buffer, length, 1, fp );
+	szr = fread( buffer, length, 1, fp );
 	buffer[length] = 0;
 
 	i = 0;
@@ -5017,11 +5022,11 @@ void BotAction( void *self )
 		return; // bail
 	}
 
-	fwrite(&count,sizeof (int),1,pOut); // Write number of bots
+	szr = fwrite(&count,sizeof (int),1,pOut); // Write number of bots
 
 	for (i = 7; i > -1; i--) {
 		if(strcmp(bot[i].name, "...empty slot"))
-			fwrite(bot[i].userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
+			szr = fwrite(bot[i].userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
 	}
 
     fclose(pOut);
@@ -5209,18 +5214,18 @@ void Read_Bot_Info()
 
 	if((pIn = fopen(bot_filename, "rb" )) == NULL)
 	{
-		Com_DPrintf("Read_Bot_Info: failed fopen for read: %s", bot_filename );
+		Com_DPrintf("Read_Bot_Info: failed file open for read: %s", bot_filename );
 		return;
 	}
 
-	fread(&count,sizeof (int),1,pIn);
+	szr = fread(&count,sizeof (int),1,pIn);
 	if(count>8)
 		count = 8;
 
 	for(i=0;i<count;i++)
 	{
 
-		fread(bot[i].userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
+		szr = fread(bot[i].userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
 
 		info = Info_ValueForKey (bot[i].userinfo, "name");
 		strcpy(bot[i].name, info);
@@ -5490,9 +5495,9 @@ DOWNLOADOPTIONS BOOK MENU
 
 =============================================================================
 */
-static menuframework_s s_downloadoptions_menu;
+// static menuframework_s s_downloadoptions_menu; // unused
 
-static menuseparator_s	s_download_title;
+// static menuseparator_s	s_download_title; // unused
 static menulist_s	s_allow_download_box;
 static menulist_s	s_allow_download_maps_box;
 static menulist_s	s_allow_download_models_box;
@@ -5783,10 +5788,10 @@ static menulist_s		s_player_model_box;
 static menulist_s		s_player_skin_box;
 static menulist_s		s_player_handedness_box;
 static menulist_s		s_player_rate_box;
-static menuseparator_s	s_player_skin_title;
-static menuseparator_s	s_player_model_title;
-static menuseparator_s	s_player_hand_title;
-static menuseparator_s	s_player_rate_title;
+// static menuseparator_s	s_player_skin_title; // unused
+// static menuseparator_s	s_player_model_title; // unused
+// static menuseparator_s	s_player_hand_title; // unused
+// static menuseparator_s	s_player_rate_title; // unused
 static menufield_s		s_player_fov_field;
 
 #define MAX_DISPLAYNAME 16

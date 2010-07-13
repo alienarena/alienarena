@@ -167,7 +167,7 @@ Cbuf_InsertFromDefer
 */
 void Cbuf_InsertFromDefer (void)
 {
-	Cbuf_InsertText (defer_text_buf);
+	Cbuf_InsertText ( (char *)defer_text_buf );
 	defer_text_buf[0] = 0;
 }
 
@@ -394,7 +394,7 @@ void Cmd_Exec_f (void)
 	len = FS_LoadFile (Cmd_Argv(1), (void **)&f);
 	if (!f)
 	{
-		Com_Printf ("couldn't exec %s\n",Cmd_Argv(1));
+		Com_Printf ("Could not exec %s\n",Cmd_Argv(1));
 		return;
 	}
 	Com_Printf ("execing %s\n",Cmd_Argv(1));

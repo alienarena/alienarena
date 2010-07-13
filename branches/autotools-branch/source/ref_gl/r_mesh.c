@@ -848,7 +848,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 	fstvert_t *st;
 	float os, ot, os2, ot2;
 	unsigned offs, offs2;
-	byte *tangents, *oldtangents;
+	byte *tangents, *oldtangents = NULL;
 	qboolean mirror = false;
 
 	if(r_legacy->value) {
@@ -1034,6 +1034,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
 					{
                         for (k=0; k<3; k++)
+                        {
                             normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k] +
                             ( r_avertexnormals[ov[index_xyz].lightnormalindex][k] -
                             r_avertexnormals[verts[index_xyz].lightnormalindex][k] ) * backlerp;
@@ -1041,6 +1042,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 							tangent[k] = r_avertexnormals[tangents[index_xyz]][k] +
 							( r_avertexnormals[oldtangents[index_xyz]][k] -
 							r_avertexnormals[tangents[index_xyz]][k] ) * backlerp;
+                        }
                     }
 					else
 					{
@@ -1063,8 +1065,10 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
 					{
                         for (k=0;k<3;k++)
+                        {
                             normal[k] = r_avertexnormals[verts[index_xyz].lightnormalindex][k];
 							tangent[k] = r_avertexnormals[tangents[index_xyz]][k];
+                        }
                     }
 					else
 					{

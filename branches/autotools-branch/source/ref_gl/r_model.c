@@ -466,7 +466,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	else
 	{	//we have an .iqm
 		//if r_usemd2, check for .md2, if none, load the .iqm
-		if(r_usemd2->value) 
+		if(r_usemd2->value)
 		{
 			COM_StripExtension(mod->name, shortname);
 			strcat(shortname, ".md2");
@@ -1795,7 +1795,7 @@ void RecalcVertsLightNormalIdx (dmdl_t *pheader)
 				{
 					float *jnormal = r_avertexnormals[verts[j].lightnormalindex];
 					float *knormal = r_avertexnormals[verts[k].lightnormalindex];
-					if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))		
+					if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))
 					{
 						VectorAdd(normals_[j], normals_[k], normals_[j]);
 						VectorCopy(normals_[j], normals_[k]);
@@ -1861,7 +1861,8 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	fstvert_t			*st;
 	daliasframe_t		*frame;
 	dtrivertx_t			*verts;
-	byte				*norms = NULL, *tangents;
+	//byte				*norms = NULL; // unused
+	byte				*tangents;
 	vec3_t				tangents_[MAX_VERTS];
 	pinmodel = (dmdl_t *)buffer;
 
@@ -2002,12 +2003,12 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	RecalcVertsLightNormalIdx(pheader);
 
 	cx = pheader->num_xyz * pheader->num_frames * sizeof(byte);
-		
+
 	// Calculate tangents
 	mod->tangents = tangents = (byte*)Hunk_Alloc (cx);
 
 	tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
-	
+
 	//for all frames
 	for (i=0; i<pheader->num_frames; i++)
 	{
@@ -2066,7 +2067,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 			tangents[i * pheader->num_xyz + j] = Normal2Index(tangents_[j]);
 		}
 	}
-	
+
 
 	paliashdr = (dmdl_t *)mod->extradata;
 
@@ -2218,7 +2219,7 @@ R_RegisterModel
 
 @@@@@@@@@@@@@@@@@@@@@
 */
-extern qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath);
+extern qboolean Mod_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath);
 struct model_s *R_RegisterModel (char *name)
 {
 	model_t	*mod;

@@ -179,6 +179,8 @@ SERVERINFO servers[64];
 int numServers = 0;
 extern unsigned int starttime;
 
+static size_t szr;
+
 //======================================================================
 
 
@@ -199,8 +201,8 @@ void CL_WriteDemoMessage (void)
 	if (!swlen)
 		return;
 
-	fwrite (&swlen, 4, 1, cls.demofile);
-	fwrite (net_message.data+8,	len, 1, cls.demofile);
+	szr = fwrite (&swlen, 4, 1, cls.demofile);
+	szr = fwrite (net_message.data+8,	len, 1, cls.demofile);
 }
 
 
@@ -223,7 +225,7 @@ void CL_Stop_f (void)
 
 // finish up
 	len = -1;
-	fwrite (&len, 4, 1, cls.demofile);
+	szr = fwrite (&len, 4, 1, cls.demofile);
 	fclose (cls.demofile);
 	cls.demofile = NULL;
 	cls.demorecording = false;
@@ -289,7 +291,7 @@ void CL_Record_f (void)
 	//
 	// write out messages to hold the startup information
 	//
-	SZ_Init (&buf, buf_data, sizeof(buf_data));
+	SZ_Init (&buf, (byte *)buf_data, sizeof(buf_data));
 	SZ_SetName ( &buf, "CL_Record_f", false );
 
 	// send the serverdata
@@ -310,8 +312,8 @@ void CL_Record_f (void)
 			if (buf.cursize + strlen (cl.configstrings[i]) + 32 > buf.maxsize)
 			{	// write it out
 				len = LittleLong (buf.cursize);
-				fwrite (&len, 4, 1, cls.demofile);
-				fwrite (buf.data, buf.cursize, 1, cls.demofile);
+				szr = fwrite (&len, 4, 1, cls.demofile);
+				szr = fwrite (buf.data, buf.cursize, 1, cls.demofile);
 				buf.cursize = 0;
 			}
 
@@ -333,8 +335,8 @@ void CL_Record_f (void)
 		if (buf.cursize + 64 > buf.maxsize)
 		{	// write it out
 			len = LittleLong (buf.cursize);
-			fwrite (&len, 4, 1, cls.demofile);
-			fwrite (buf.data, buf.cursize, 1, cls.demofile);
+			szr = fwrite (&len, 4, 1, cls.demofile);
+			szr = fwrite (buf.data, buf.cursize, 1, cls.demofile);
 			buf.cursize = 0;
 		}
 
@@ -348,8 +350,8 @@ void CL_Record_f (void)
 	// write it to the demo file
 
 	len = LittleLong (buf.cursize);
-	fwrite (&len, 4, 1, cls.demofile);
-	fwrite (buf.data, buf.cursize, 1, cls.demofile);
+	szr = fwrite (&len, 4, 1, cls.demofile);
+	szr = fwrite (buf.data, buf.cursize, 1, cls.demofile);
 
 	// the rest of the demo file will be individual frames
 }
@@ -707,6 +709,7 @@ This is also called on Com_Error, so it shouldn't cause any errors
 void CL_Disconnect (void)
 {
 	byte	final[32];
+	int repeat;
 
 	if (cls.state == ca_disconnected)
 		return;
@@ -734,9 +737,8 @@ void CL_Disconnect (void)
 	// send a disconnect message to the server
 	final[0] = clc_stringcmd;
 	strcpy ((char *)final+1, "disconnect");
-	Netchan_Transmit (&cls.netchan, strlen(final), final);
-	Netchan_Transmit (&cls.netchan, strlen(final), final);
-	Netchan_Transmit (&cls.netchan, strlen(final), final);
+	for ( repeat = 3 ; repeat-- ;)
+		Netchan_Transmit( &cls.netchan, (int)strlen( (char*)final ), final );
 
 	CL_ClearState ();
 

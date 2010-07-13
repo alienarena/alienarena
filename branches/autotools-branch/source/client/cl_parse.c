@@ -52,6 +52,8 @@ char *svc_strings[256] =
 	"svc_frame"
 };
 
+static size_t szr;
+
 /*
 ==============
 Q_strncpyz
@@ -110,15 +112,16 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		sprintf(filename, "%s.tga", shortname);
 	}
 
-	//if jpg, be sure to also try tga (player skin situation)
-    if(filename[strlen(filename)-2] == 'p' && filename[strlen(filename)-1] == 'g')
+    //if jpg, be sure to also try tga (player skin situation)
+	if (filename[strlen(filename)-2] == 'p' && filename[strlen(filename)-1] == 'g')
 		jpg = true;
 
 	if (FS_LoadFile (filename, NULL) != -1)	{
 		// it exists, no need to download
 		return true;
 	}
-	else if(modelskin){
+
+	if(modelskin){
 		//try for .jpg
 		COM_StripExtension ( filename, shortname );
 		sprintf(filename, "%s.jpg", shortname);
@@ -144,8 +147,6 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	// a runt file wont be left
 	COM_StripExtension (cls.downloadname, cls.downloadtempname);
 	strcat (cls.downloadtempname, ".tmp");
-
-	Com_Printf("[Starting download: %s\n]", cls.downloadtempname );
 
 	// attempt an http download if available(never try to dl game model skins here)
 	if(cls.downloadurl[0] && CL_HttpDownload())
@@ -303,7 +304,7 @@ void CL_ParseDownload (void)
 		}
 	}
 
-	fwrite (net_message.data + net_message.readcount, 1, size, cls.download);
+	szr = fwrite (net_message.data + net_message.readcount, 1, size, cls.download);
 	net_message.readcount += size;
 
 	if (percent != 100)
@@ -417,7 +418,7 @@ void CL_ParseBaseline (void)
 
 	memset (&nullstate, 0, sizeof(nullstate));
 
-	newnum = CL_ParseEntityBits (&bits);
+	newnum = CL_ParseEntityBits ( (unsigned *)&bits );
 	es = &cl_entities[newnum].baseline;
 	CL_ParseDelta (&nullstate, es, newnum, bits);
 }
@@ -654,6 +655,7 @@ void CL_ParseConfigString (void)
 		}
 		else
 		{
+			// Alien Arena client/server protocol depends on MAX_QPATH being 64
 			if (length >= MAX_QPATH)
 				Com_Printf ("WARNING: Configstring %d of length %d exceeds MAX_QPATH.\n", i, length);
 			Q_strncpyz (cl.configstrings[i], s, sizeof(cl.configstrings[i])-1);

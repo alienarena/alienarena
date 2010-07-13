@@ -84,7 +84,7 @@ typedef struct sfx_s
 	int oalFormat; //            file format code from OpenAL
 	ALuint oalBuffer; //         index into collection of OpenAL buffers
 	qboolean aliased; //         the file loaded is an alias for the truename
-	char name[MAX_QPATH]; //     full file path
+	char name[MAX_QPATH]; //     relative file path
 	char truename[MAX_QPATH]; // in case 'name' is an 'alias'
 } sfx_t;
 

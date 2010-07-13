@@ -51,6 +51,8 @@ static int glob_match_after_star(char *pattern, char *text)
 	}
 }
 
+#if 0
+// unused
 /* Return nonzero if PATTERN has any special globbing chars in it.  */
 static int glob_pattern_p(char *pattern)
 {
@@ -79,6 +81,7 @@ static int glob_pattern_p(char *pattern)
 
 	return 0;
 }
+#endif
 
 /* Match the pattern PATTERN against the string TEXT;
    return 1 if it matches, 0 otherwise.

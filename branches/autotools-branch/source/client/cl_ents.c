@@ -257,7 +257,7 @@ void CL_ParsePacketEntities (frame_t *oldframe, frame_t *newframe)
 
 	while (1)
 	{
-		newnum = CL_ParseEntityBits (&bits);
+		newnum = CL_ParseEntityBits ( (unsigned *)&bits );
 		if (newnum >= MAX_EDICTS)
 			Com_Error (ERR_DROP,"CL_ParsePacketEntities: bad number:%i", newnum);
 
@@ -844,7 +844,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		ci = &cl.clientinfo[s1->skinnum & 0xff];
 
 		//give health an "aura"
-		if(cl_healthaura->value) 
+		if(cl_healthaura->value)
 		{
 			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/small/tris.md2"))
 				CL_SmallHealthParticles(ent.origin);
@@ -854,7 +854,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				CL_LargeHealthParticles(ent.origin);
 		}
 
-		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_rocket/tris.md2")) 
+		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_rocket/tris.md2"))
 		{
 			//add clear cover
 			ent.model = R_RegisterModel("models/weapons/g_rocket/cover.md2");
@@ -862,7 +862,7 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.alpha = 0.30;
 			V_AddEntity (&ent);
 		}
-		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.md2")) 
+		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.md2"))
 		{
 			//add clear cover
 			ent.model = R_RegisterModel("models/weapons/g_hyperb/cover.md2");
@@ -880,7 +880,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				if (!cl_vwep->value || i > MAX_CLIENTWEAPONMODELS - 1)
 					i = 0;
 				ent.model = ci->weaponmodel[i];
-				if (!ent.model) 
+				if (!ent.model)
 				{
 					if (i != 0)
 						ent.model = ci->weaponmodel[0];
@@ -888,7 +888,7 @@ void CL_AddPacketEntities (frame_t *frame)
 						ent.model = cl.baseclientinfo.weaponmodel[0];
 				}
 			}
-			else 
+			else
 			{
 				ent.model = cl.model_draw[s1->modelindex2];
 			}
@@ -907,7 +907,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				ent.flags = RF_TRANSLUCENT;
 			}
 
-			if (s1->number == cl.playernum+1) 
+			if (s1->number == cl.playernum+1)
 				ent.flags |= RF_VIEWERMODEL;
 
 			V_AddEntity (&ent);
@@ -1141,12 +1141,12 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 	VectorCopy (gun.origin, gun.oldorigin);	// don't lerp at all
 
 	//add an attached muzzleflash for chaingun
-	if(!(strcmp("models/weapons/v_shotg2/tris.md2", gun.model->name))) 
+	if(!(strcmp("models/weapons/v_shotg2/tris.md2", gun.model->name)))
 	{
 		if(gun.frame > 4 && gun.frame < 14)
 			CL_MuzzleFlashParticle(gun.origin, gun.angles, true);
 	}
-	else if(!(strcmp("models/weapons/v_hyperb/tris.md2", gun.model->name))) 
+	else if(!(strcmp("models/weapons/v_hyperb/tris.md2", gun.model->name)))
 	{
 		if(gun.frame > 5 && gun.frame < 7) {
 			CL_PlasmaFlashParticle(gun.origin, gun.angles, true);
@@ -1204,21 +1204,21 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 
 	//add glass pieces
 
-	if(!(strcmp("models/weapons/v_rocket/tris.md2", gun.model->name))) 
+	if(!(strcmp("models/weapons/v_rocket/tris.md2", gun.model->name)))
 	{
 		gun.model = R_RegisterModel("models/weapons/v_rocket/cover.md2");
 		gun.flags |= RF_TRANSLUCENT;
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
 	}
-	if(!(strcmp("models/weapons/v_hyperb/tris.md2", gun.model->name))) 
+	if(!(strcmp("models/weapons/v_hyperb/tris.md2", gun.model->name)))
 	{
 		gun.model = R_RegisterModel("models/weapons/v_hyperb/cover.md2");
 		gun.flags |= RF_TRANSLUCENT;
 		gun.alpha = 0.30;
 		V_AddViewEntity (&gun);
 	}
-	if(!(strcmp("models/weapons/v_blast/tris.md2", gun.model->name))) 
+	if(!(strcmp("models/weapons/v_blast/tris.md2", gun.model->name)))
 	{
 		gun.model = R_RegisterModel("models/weapons/v_blast/cover.md2");
 		gun.flags |= RF_TRANSLUCENT;

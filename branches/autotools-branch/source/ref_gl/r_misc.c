@@ -86,6 +86,8 @@ image_t		*sun_object;
 image_t		*sun1_object;
 image_t		*sun2_object;
 
+static size_t szr;
+
 //Normalisation cube map
 GLuint normalisationCubeMap;
 
@@ -606,7 +608,7 @@ void GL_ScreenShot_TGA (void)
 	}
 
 	f = fopen (checkname, "wb");
-	fwrite (buffer, 1, c, f);
+	szr = fwrite (buffer, 1, c, f);
 	fclose (f);
 
 	free (buffer);
