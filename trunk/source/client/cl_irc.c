@@ -468,10 +468,11 @@ qboolean CL_JoinIRC(void)
 	char name[32];
 	int i, j;
 
-    if(cls.irc_connected)
+    if(cls.irc_connected && cls.irc_canjoin)
 		Com_Printf("...already connected to IRC\n");
 
-	Com_Printf("...Initializing IRC client\n");
+	if(!cls.irc_connected)
+		Com_Printf("...Initializing IRC client\n");
 
 #ifdef _WINDOWS   
 	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET )
@@ -563,8 +564,14 @@ qboolean CL_JoinIRC(void)
 #ifdef _WINDOWS
 void RecvThreadProc(void *dummy)
 {
-    if (!CL_JoinIRC())
-        return; 
+
+	if (!CL_JoinIRC())
+		return;
+
+	//something went wrong, try again
+	if(!cls.irc_canjoin)
+		if (!CL_JoinIRC())
+			return;
 
 	while(1) 
 	{

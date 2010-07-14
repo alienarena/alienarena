@@ -466,6 +466,8 @@ BOOL CGalaxyDlg::OnInitDialog()
 		sockete.init(6667,servidor);
 		sockete.connectf();
 
+		Sleep(1000); //just a short sleep to allow the socket to open all the way
+
 		sprintf(mensaje,"USER %s %s: %s %s  \n\r", user.nick , user.email , user.ident , user.ident );
 		sockete.sendData(mensaje);
 		sprintf(mensaje,"NICK %s\n\r", user.nick);
