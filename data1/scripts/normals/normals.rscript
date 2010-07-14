@@ -387,7 +387,7 @@ models/objects/dmspot/skin
 models/weapons/v_blast/skin
 {
 	{
-		map models/weapons/v_blast/skin_normal.tga
+		map models/weapons/v_blast/skin_normal.jpg
 		normalmap
 		map2 gfx/blasterfx.tga
 		glow
