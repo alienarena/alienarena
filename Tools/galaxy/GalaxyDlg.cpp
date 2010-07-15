@@ -227,6 +227,12 @@ UINT RecvThreadProc(LPVOID pParam)
 			connectedToChannel = true;
 			AfxMessageBox("Joining #alienarena");
 		}
+		
+		if(Sys_Milliseconds() - lastPing > (200 * 1000))
+		{
+			//send a pong if no ping received in 200 secondsas a desperation attempt to keep us connected to server
+			sockete.sendData("PONG");
+		}
 	}
 	return 0;
 }
@@ -1059,12 +1065,6 @@ void cSocket::getData(void)
 			sendData(File_Buf);
 		};
 	}
-	else if(Sys_Milliseconds() - lastPing > (200 * 1000))
-	{
-		//send a pong if no ping received in 200 seconds as a desperation attempt to keep us connected to server
-		sendData("PONG");
-	}
-
 }
 
 void cSocket::handle_error(void)
