@@ -6228,7 +6228,6 @@ void PlayerConfig_MenuDraw( void )
 	char scratch[MAX_QPATH];
 	FILE *modelfile;
 	int helmet = false;
-	int rack = false;
 	float scale;
 
 	scale = (float)(viddef.height)/600;
@@ -6304,6 +6303,7 @@ void PlayerConfig_MenuDraw( void )
 			fclose(modelfile);
 		}
 		else {
+			helmet = false;
 			Com_sprintf( scratch, sizeof( scratch ), "%s/players/%s/helmet.md2", BASEDIRNAME, s_pmi[s_player_model_box.curvalue].directory );
 			Menu_FindFile (scratch, &modelfile);
 			if(modelfile) {
@@ -6315,17 +6315,6 @@ void PlayerConfig_MenuDraw( void )
 				fclose(modelfile);
 			}
 		}
-		//don't bother with gamedirs, this is a special case. Damn brainlets.
-		Com_sprintf( scratch, sizeof( scratch ), "%s/players/%s/gunrack.md2", BASEDIRNAME, s_pmi[s_player_model_box.curvalue].directory );
-		Menu_FindFile (scratch, &modelfile);
-		if(modelfile) {
-			rack = true;
-			Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.md2", s_pmi[s_player_model_box.curvalue].directory );
-			entity[2].model = R_RegisterModel( scratch );
-			Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.tga", s_pmi[s_player_model_box.curvalue].directory );
-			entity[2].skin = R_RegisterSkin( scratch );
-			fclose(modelfile);
-		}
 		
 		entity[0].flags = RF_FULLBRIGHT | RF_MENUMODEL;
 		entity[0].origin[0] = 80;
@@ -6336,17 +6325,16 @@ void PlayerConfig_MenuDraw( void )
 		entity[1].origin[0] = 80;
 		entity[1].origin[1] = -30;
 		entity[1].origin[2] = -5;
-
+		
 		if(helmet)
+		{
 			entity[2].flags = RF_FULLBRIGHT | RF_TRANSLUCENT | RF_MENUMODEL;
-		else
-			entity[2].flags = RF_FULLBRIGHT | RF_MENUMODEL;
-		entity[2].origin[0] = 80;
-		entity[2].origin[1] = -30;
-		entity[2].origin[2] = -5;
-		if(helmet)
+			entity[2].origin[0] = 80;
+			entity[2].origin[1] = -30;
+			entity[2].origin[2] = -5;
 			entity[2].alpha = 0.4;
-
+		}
+		
 		VectorCopy( entity[0].origin, entity[0].oldorigin );
 
 		VectorCopy( entity[1].origin, entity[1].oldorigin );
@@ -6369,7 +6357,7 @@ void PlayerConfig_MenuDraw( void )
 		entity[2].angles[1] = (int)yaw;
 
 		refdef.areabits = 0;
-		if((helmet) || (rack))
+		if(helmet)
 			refdef.num_entities = 3;
 		else
 			refdef.num_entities = 2;
