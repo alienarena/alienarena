@@ -598,6 +598,11 @@ void *RecvThreadProc(void *dummy)
     if (!CL_JoinIRC())
         return; 
 
+	//something went wrong, try again
+	if(!cls.irc_canjoin)
+		if (!CL_JoinIRC())
+			return;
+
 	while(1) 
 	{
 		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel) 
