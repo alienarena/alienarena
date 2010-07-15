@@ -65,6 +65,7 @@ cUser user;
 bool joinflg;
 bool connectedToChannel = true;
 bool canJoin = false;
+int	lastPing = 0;
 
 char currBuddyName[32];
 char newBuddyName[32];
@@ -1052,10 +1053,16 @@ void cSocket::getData(void)
 	    // received a ping from server...
 		if (!strnicmp(File_Buf,"PING",4)) 
 		{
+			lastPing = Sys_Milliseconds();
 			canJoin = true;
 			File_Buf[1]='O'; //cause of echo??
 			sendData(File_Buf);
 		};
+	}
+	else if(Sys_Milliseconds() - lastPing > (200 * 1000))
+	{
+		//send a pong if no ping received in 200 seconds as a desperation attempt to keep us connected to server
+		sendData("PONG");
 	}
 
 }
@@ -1168,7 +1175,8 @@ void CGalaxyDlg::OnButton4()
 
 void CGalaxyDlg::OnShowusers() 
 { 
-
+ 
+	return; //broken - fix later
 	response Response;
 
 	WSASetLastError(0);
