@@ -537,7 +537,7 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
         }
 
     }
-    else
+    else if(rs)
     {
 
         if (rs->stage && rs->stage->has_alpha)
