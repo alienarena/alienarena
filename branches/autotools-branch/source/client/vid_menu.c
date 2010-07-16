@@ -57,7 +57,7 @@ extern float banneralpha;
 
 extern void M_ForceMenuOff( void );
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 extern qboolean vid_restart;
 #endif
 
@@ -396,7 +396,7 @@ static void ApplyChanges( void *unused )
 		Cvar_SetValue("r_shaders", 1); //shaders must be enabled for this to work
 
 	vid_ref->modified = true;
-#ifdef __unix__
+#if defined UNIX_VARIANT
 	vid_restart = true;
 #endif
 

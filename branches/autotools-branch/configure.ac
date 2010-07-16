@@ -25,7 +25,7 @@
 #  Mac OSX Darwin 
 
 AC_PREREQ(2.61)
-AC_INIT([alienarena],[7.45alpha],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.41alpha],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -147,6 +147,9 @@ AC_SEARCH_LIBS(acos,[m])
 AC_SEARCH_LIBS(pthread_mutex_init,[pthread])
 AC_SEARCH_LIBS(dlopen,[dl])
 
+dnl
+dnl start of client-only library requirements
+dnl
 AS_IF( [ test "x${cond_build_client}" = xyes ],
 [
 AC_SEARCH_LIBS(zlibVersion,[z zlib],,
@@ -165,12 +168,28 @@ AC_SEARCH_LIBS([ov_open_callbacks],[vorbisfile],,
 	[AC_MSG_ERROR(["Required vorbisfile library not found."])],
 	[ -lvorbis -logg ])
 
-AC_SEARCH_LIBS([alGenBuffers],[openal openal32 openal-soft],,
-	[AC_MSG_ERROR(["Required openal library not found."])])
+dnl theory: darwin always has openal in a framework
+dnl: TODO: find out what the name of the darwin openal driver is
+AS_IF([ test "x${cond_build_darwin}" = xno ],
+	[AC_SEARCH_LIBS([alGenBuffers],[openal openal32 openal-soft],,
+		[AC_MSG_ERROR(["Required openal library not found."])])])		
 	
 AS_IF([ test "x${cond_build_unix}" = xyes ],
+[
+
+dnl TODO: find real name of darwin framework dynamic lib
+AS_IF( [ test "x${cond_build_darwin}" = xyes ],
+	[AC_DEFINE([OPENGL_DRIVER],["libopengl.dylib"],[OpenGL dynamic lib name])],
+	[AC_DEFINE([OPENGL_DRIVER],["libGL.so.1"],[OpenGL shared lib name])])
+])
+
+dnl TODO: find real name of darwin framework dynamic lib
+AS_IF( [ test "x${cond_build_darwin}" = xyes ],
+	[AC_DEFINE([OPENAL_DRIVER],["libopenal.dylib"],[OpenAL dynamic lib name])],
 	[AC_DEFINE([OPENAL_DRIVER],["libopenal.so.1"],[OpenAL shared lib name])])
 
+]) dnl unix
+	
 AS_IF([ test "x${cond_build_win32}" = xyes ],
 	[AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])])
 
@@ -190,16 +209,19 @@ have_Xxf86dga=no
 AC_SEARCH_LIBS([XF86DGAQueryVersion],[Xxf86dga],[have_Xxf86dga=yes])
 
 dnl opengl32 and glu32 handled as win32 system libs above
-AS_IF( [ test "x${cond_build_win32}" = xno ],
+dnl darwin framework opengl also above
+AS_IF( [ test "x${cond_build_win32}" = xno -a "x${cond_build_darwin}" = xno ],
 [
 AC_SEARCH_LIBS([glGetError],[GL],,
 	[AC_MSG_ERROR(["Required OpenGL library not found."])])
 	
 AC_SEARCH_LIBS([gluGetString],[GLU],,
 	[AC_MSG_ERROR(["Required GLU library not found."])])
+	
 ])	
-
-]) dnl end of conditional client build library check
+dnl 
+dnl end of client-only library requirements
+dnl
 
 #
 # Checks for header files
@@ -211,12 +233,16 @@ AC_CHECK_HEADERS(
 AC_CHECK_HEADERS(
 	[ fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h dnl 
 	sys/time.h unistd.h sys/stat.h ])
-	
+
+dnl	
+dnl start of client-only header requirements
+dnl	
 AS_IF( [ test "x${cond_build_client}" = xyes ],
 [
 
+dnl for Darwin, using macports jpeg6b. TODO: is jpeg8 available?
 jpeglib_h_found=no
-AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h],[ jpeglib_h_found=yes ])
+AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h jpeg6b/include/jpeglib.h],[ jpeglib_h_found=yes ])
 AS_IF([ test "x${jpeglib_h_found}" = xno ],
 	[AC_MSG_ERROR("Required JPEG header file not found.")])
 
@@ -224,12 +250,12 @@ AC_CHECK_HEADERS([vorbis/vorbisfile.h],,
 	[AC_MSG_ERROR("Required Ogg-Vorbis header file not found.")])
 
 openal_h_found=no
-AC_CHECK_HEADERS([AL/al.h al.h],[ openal_h_found=yes ])
+AC_CHECK_HEADERS([AL/al.h al.h OpenAL/al.h],[ openal_h_found=yes ])
 AS_IF([ test "x${openal_h_found}" = xno ],
 	[AC_MSG_ERROR("Required OpenAL header file not found.")])
 
 openalc_h_found=no
-AC_CHECK_HEADERS([AL/alc.h alc.h],[ openalc_h_found=yes ])
+AC_CHECK_HEADERS([AL/alc.h alc.h OpenAL/alc.h],[ openalc_h_found=yes ])
 AS_IF([ test "x${openalc_h_found}" = xno ],
 	[AC_MSG_ERROR("Required OpenAL header file not found.")])
 
@@ -238,10 +264,7 @@ AC_CHECK_HEADERS([curl/curl.h],,
 
 AS_IF([ test "x${cond_build_unix}" = xyes ],
 [
-
-dnl TODO darwin might require something different
-AC_DEFINE([OPENGL_DRIVER],["libGL.so.1"],[OpenGL shared library name])
-	 		
+ 		
 AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
 	[AC_MSG_ERROR("Required X11 header files not found")])
 
@@ -269,7 +292,10 @@ AS_IF([ test "x${cond_build_unix}" = xyes ],
 	[AC_CHECK_HEADERS([GL/glx.h],,
 		[AC_MSG_ERROR("Required OpenGL header files not found.")])])	
 
-]) dnl end build client conditional for headers
+])
+dnl 
+dnl end of client-only header requirements
+dnl
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

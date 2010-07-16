@@ -484,14 +484,19 @@ void R_DrawEntitiesOnList (void)
 		currentmodel = currententity->model;
 
 		//get distance, set lod if available
+		if(r_newrefdef.fov_y >= 90)
+		{
 		VectorSubtract(r_origin, currententity->origin, dist);
-		if(VectorLength(dist) > 1000) {
+			if(VectorLength(dist) > 1000) 
+			{
 			if(currententity->lod2)
 				currentmodel = currententity->lod2;
 		}
-		else if(VectorLength(dist) > 500) {
+			else if(VectorLength(dist) > 500) 
+			{
 			if(currententity->lod1)
 				currentmodel = currententity->lod1;
+		}
 		}
 
 		if (!currentmodel)

@@ -23,17 +23,16 @@ SUBDIRS = source
 
 ACLOCAL_AMFLAGS = -I m4
 
-#if ALTERNATE_INSTALL
-#AM_MAKEFLAGS = DESTDIR=$(top_srcdir)
-#endif
-
 # TODO: create "official" INSTALL, README, etc.
+# TODO: maybe create a subdirectory Makefile.am for install of arena/
+#   and doc/ files
 EXTRA_DIST = \
 	alienarena.png \
+	arena/motd.txt \
+	arena/server.cfg \
 	docs/license.txt \
 	docs/README.txt \
 	m4 \
-	arena \
 	botinfo \
 	data1
 
@@ -52,6 +51,8 @@ dist-hook:
 #  ./configure --enable-alternate-install && make && make install-alternate
 #
 # TODO: this does not support program name translation and other fancy stuff
+#   (can install.sh be used here?)
+#
 install-alternate:
 if ALTERNATE_INSTALL
 	cp $(top_builddir)/source/crx $(srcdir)/crx
@@ -64,21 +65,38 @@ endif
 
 #
 # install/uninstall added rules for the game read-only data
+# 
+# - Normally requires root privelages.
 #
-# TODO: when installing in standard way from SVN workcopy, may need to 
-#   rm .svn directories from $(pkgdatadir).
+# For $(DESTDIR)$(pkgdatadir) and
+# - existing botinfo/ and data1/ directories are removed on install.
+# - any game.so in arena/ is removed, but otherwise existing arena 3rd party
+#    data should remain. It is possible that assets from data1/ used by 
+#    3rd party maps may not exist after a new install.
+# - any .svn subdirectories are removed.
+#
+# TODO: Maybe move some of this to an arena/Makefile.am and a doc/Makefile.am 
+#
 #
 install-data-hook:
 if ALTERNATE_INSTALL
-	@echo "Using --enable-alternate-install. Data install disabled."
+	@echo "Using --enable-alternate-install. Data install not needed."
 else
 	mkdir -p $(DESTDIR)$(docdir)
 	mkdir -p $(DESTDIR)$(pkgdatadir)
-	cp -r --preserve=mode $(srcdir)/docs $(DESTDIR)$(docdir)
+	mkdir -p $(DESTDIR)$(pkgdatadir)/arena
+	rm -rf $(DESTDIR)$(pkgdatadir)/botinfo
+	rm -rf $(DESTDIR)$(pkgdatadir)/data1
+	rm -f $(DESTDIR)$(pkgdatadir)/arena/game.so
 	cp --preserve=mode $(srcdir)/alienarena.png $(DESTDIR)$(pkgdatadir)
-	cp -r --preserve=mode $(srcdir)/arena $(DESTDIR)$(pkgdatadir)
+	cp --preserve=mode $(srcdir)/arena/motd.txt $(DESTDIR)$(pkgdatadir)/arena
+	cp --preserve=mode $(srcdir)/arena/server.cfg $(DESTDIR)$(pkgdatadir)/arena
+	cp --preserve=mode $(srcdir)/docs/license.txt $(DESTDIR)$(docdir)
+	cp --preserve=mode $(srcdir)/docs/README.txt $(DESTDIR)$(docdir)
 	cp -r --preserve=mode $(srcdir)/botinfo $(DESTDIR)$(pkgdatadir)
-	cp -r --preserve=mode $(srcdir)/data1 $(DESTDIR)$(pkgdatadir)	
+	@echo "copying game data, please be patient."
+	cp -r --preserve=mode $(srcdir)/data1 $(DESTDIR)$(pkgdatadir)
+	rm -rf `find $(DESTDIR)$(pkgdatadir) -name .svn`
 	chmod -R u+w $(DESTDIR)$(docdir)
 	chmod -R u+w $(DESTDIR)$(pkgdatadir)
 endif	
@@ -90,7 +108,6 @@ if ALTERNATE_INSTALL
 else
 	rm -rf $(DESTDIR)$(docdir)
 	rm -rf $(DESTDIR)$(pkgdatadir)
-	rm -rf $(DESTDIR)$(pkglibexecdir)
 endif
 	
 	

@@ -6249,7 +6249,6 @@ void PlayerConfig_MenuDraw( void )
 	char scratch[MAX_OSPATH];
 	FILE *modelfile;
 	int helmet = false;
-	int rack = false;
 	float scale;
 
 	scale = (float)(viddef.height)/600;
@@ -6314,27 +6313,16 @@ void PlayerConfig_MenuDraw( void )
 		entity[1].skin = R_RegisterSkin( scratch );
 
 		//if a helmet or other special device
-		Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.md2", s_pmi[s_player_model_box.curvalue].directory );
-		FS_FOpenFile( scratch, &modelfile);
-		if(modelfile) {
+		Com_sprintf( scratch, sizeof(scratch), "players/%s/helmet.md2", s_pmi[s_player_model_box.curvalue].directory );
+		FS_FOpenFile( scratch, &modelfile );
+		if ( modelfile )
+		{
 			helmet = true;
-			Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.md2", s_pmi[s_player_model_box.curvalue].directory );
+			Com_sprintf( scratch, sizeof(scratch), "players/%s/helmet.md2", s_pmi[s_player_model_box.curvalue].directory );
 			entity[2].model = R_RegisterModel( scratch );
-			Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.tga", s_pmi[s_player_model_box.curvalue].directory );
+			Com_sprintf( scratch, sizeof(scratch), "players/%s/helmet.tga", s_pmi[s_player_model_box.curvalue].directory );
 			entity[2].skin = R_RegisterSkin( scratch );
-			fclose(modelfile);
-		}
-
-		// 2010-07 note: this is probably obsolete
-		Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.md2", s_pmi[s_player_model_box.curvalue].directory );
-		FS_FOpenFile( scratch, &modelfile);
-		if(modelfile) {
-			rack = true;
-			Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.md2", s_pmi[s_player_model_box.curvalue].directory );
-			entity[2].model = R_RegisterModel( scratch );
-			Com_sprintf( scratch, sizeof( scratch ), "players/%s/gunrack.tga", s_pmi[s_player_model_box.curvalue].directory );
-			entity[2].skin = R_RegisterSkin( scratch );
-			fclose(modelfile);
+			fclose( modelfile );
 		}
 
 		entity[0].flags = RF_FULLBRIGHT | RF_MENUMODEL;
@@ -6347,15 +6335,14 @@ void PlayerConfig_MenuDraw( void )
 		entity[1].origin[1] = -30;
 		entity[1].origin[2] = -5;
 
-		if(helmet)
+		if ( helmet )
+		{
 			entity[2].flags = RF_FULLBRIGHT | RF_TRANSLUCENT | RF_MENUMODEL;
-		else
-			entity[2].flags = RF_FULLBRIGHT | RF_MENUMODEL;
-		entity[2].origin[0] = 80;
-		entity[2].origin[1] = -30;
-		entity[2].origin[2] = -5;
-		if(helmet)
+			entity[2].origin[0] = 80;
+			entity[2].origin[1] = -30;
+			entity[2].origin[2] = -5;
 			entity[2].alpha = 0.4;
+		}
 
 		VectorCopy( entity[0].origin, entity[0].oldorigin );
 
@@ -6379,7 +6366,7 @@ void PlayerConfig_MenuDraw( void )
 		entity[2].angles[1] = (int)yaw;
 
 		refdef.areabits = 0;
-		if((helmet) || (rack))
+		if(helmet)
 			refdef.num_entities = 3;
 		else
 			refdef.num_entities = 2;

@@ -30,8 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "jpeg/jpeglib.h"
 #elif defined HAVE_JPEGLIB_H
 #include "jpeglib.h"
+#elif defined HAVE_JPEG6B_INCLUDE_JPEGLIB_H
+#include "jpeg6b/include/jpeglib.h"
 #else
-#error jpeglib.h missing
+#error jpeglib.h include not defined.
 #endif
 
 image_t		*r_notexture;		// use for bad textures

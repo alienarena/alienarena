@@ -86,6 +86,9 @@ qboolean SV_SetPlayer (void)
 	if (Cmd_Argc() < 2)
 		return false;
 
+	if ( svs.clients == NULL )
+		return false; // unlikely, but possible, to call here before initialized
+
 	s = Cmd_Argv(1);
 
 	// numeric values are just slot numbers

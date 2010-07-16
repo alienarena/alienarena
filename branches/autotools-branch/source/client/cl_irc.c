@@ -486,9 +486,10 @@ qboolean CL_JoinIRC(void)
 	char name[32];
 	int i, j;
 
-    if(cls.irc_connected)
+    if(cls.irc_connected && cls.irc_canjoin)
 		Com_Printf("...already connected to IRC\n");
 
+	if(!cls.irc_connected)
 	Com_Printf("...Initializing IRC client\n");
 
 	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET )
@@ -522,7 +523,6 @@ qboolean CL_JoinIRC(void)
 	address.sin_family=AF_INET;       // internet
     address.sin_port = htons(6667);
 
-	//sprintf(HostName, cl_IRC_server->string);
 	Q_strncpyz2( HostName, cl_IRC_server->string, sizeof(HostName) );
 
     if ( (host=gethostbyname(HostName)) == NULL )
@@ -575,6 +575,11 @@ void RecvThreadProc(void *dummy)
     if (!CL_JoinIRC())
         return;
 
+	//something went wrong, try again
+	if(!cls.irc_canjoin)
+		if (!CL_JoinIRC())
+			return;
+
 	while(1)
 	{
 		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel)
@@ -607,6 +612,11 @@ void *RecvThreadProc(void *dummy)
 {
     if (!CL_JoinIRC())
         return NULL;
+
+	//something went wrong, try again
+	if(!cls.irc_canjoin)
+		if (!CL_JoinIRC())
+			return NULL;
 
 	while(1)
 	{

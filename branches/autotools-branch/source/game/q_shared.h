@@ -35,12 +35,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 typedef unsigned char 		byte;
 
-typedef enum {false, true}	qboolean;
+// -jjb- for darwin this may be better,
+// TODO: check for implementation defined boolean
+// typedef enum {false, true}	qboolean;
+#ifndef true
+# define false 0
+# define true 1
+#endif
+typedef int qboolean;
 
 #ifndef NULL
 #define NULL ((void *)0)
 #endif
-
 
 // angle indexes
 #define	PITCH				0		// up / down

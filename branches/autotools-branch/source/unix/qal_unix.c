@@ -29,6 +29,19 @@
 #include <stdio.h>
 #include <dlfcn.h>
 
+#if defined HAVE_AL_H
+#include <al.h>
+#include <alc.h>
+#elif defined HAVE_AL_AL_H
+#include <AL/al.h>
+#include <AL/alc.h>
+#elif defined HAVE_OPENAL_AL_H
+#include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+#else
+#error OpenAL header includes not defined.
+#endif
+
 #include "client/client.h"
 #include "client/qal.h"
 

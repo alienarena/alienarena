@@ -237,17 +237,16 @@ top_srcdir = @top_srcdir@
 SUBDIRS = source 
 ACLOCAL_AMFLAGS = -I m4
 
-#if ALTERNATE_INSTALL
-#AM_MAKEFLAGS = DESTDIR=$(top_srcdir)
-#endif
-
 # TODO: create "official" INSTALL, README, etc.
+# TODO: maybe create a subdirectory Makefile.am for install of arena/
+#   and doc/ files
 EXTRA_DIST = \
 	alienarena.png \
+	arena/motd.txt \
+	arena/server.cfg \
 	docs/license.txt \
 	docs/README.txt \
 	m4 \
-	arena \
 	botinfo \
 	data1
 
@@ -756,6 +755,8 @@ dist-hook:
 #  ./configure --enable-alternate-install && make && make install-alternate
 #
 # TODO: this does not support program name translation and other fancy stuff
+#   (can install.sh be used here?)
+#
 install-alternate:
 @ALTERNATE_INSTALL_TRUE@	cp $(top_builddir)/source/crx $(srcdir)/crx
 @ALTERNATE_INSTALL_TRUE@	cp $(top_builddir)/source/crx-ded $(srcdir)/crx-ded
@@ -765,19 +766,36 @@ install-alternate:
 
 #
 # install/uninstall added rules for the game read-only data
+# 
+# - Normally requires root privelages.
 #
-# TODO: when installing in standard way from SVN workcopy, may need to 
-#   rm .svn directories from $(pkgdatadir).
+# For $(DESTDIR)$(pkgdatadir) and
+# - existing botinfo/ and data1/ directories are removed on install.
+# - any game.so in arena/ is removed, but otherwise existing arena 3rd party
+#    data should remain. It is possible that assets from data1/ used by 
+#    3rd party maps may not exist after a new install.
+# - any .svn subdirectories are removed.
+#
+# TODO: Maybe move some of this to an arena/Makefile.am and a doc/Makefile.am 
+#
 #
 install-data-hook:
-@ALTERNATE_INSTALL_TRUE@	@echo "Using --enable-alternate-install. Data install disabled."
+@ALTERNATE_INSTALL_TRUE@	@echo "Using --enable-alternate-install. Data install not needed."
 @ALTERNATE_INSTALL_FALSE@	mkdir -p $(DESTDIR)$(docdir)
 @ALTERNATE_INSTALL_FALSE@	mkdir -p $(DESTDIR)$(pkgdatadir)
-@ALTERNATE_INSTALL_FALSE@	cp -r --preserve=mode $(srcdir)/docs $(DESTDIR)$(docdir)
+@ALTERNATE_INSTALL_FALSE@	mkdir -p $(DESTDIR)$(pkgdatadir)/arena
+@ALTERNATE_INSTALL_FALSE@	rm -rf $(DESTDIR)$(pkgdatadir)/botinfo
+@ALTERNATE_INSTALL_FALSE@	rm -rf $(DESTDIR)$(pkgdatadir)/data1
+@ALTERNATE_INSTALL_FALSE@	rm -f $(DESTDIR)$(pkgdatadir)/arena/game.so
 @ALTERNATE_INSTALL_FALSE@	cp --preserve=mode $(srcdir)/alienarena.png $(DESTDIR)$(pkgdatadir)
-@ALTERNATE_INSTALL_FALSE@	cp -r --preserve=mode $(srcdir)/arena $(DESTDIR)$(pkgdatadir)
+@ALTERNATE_INSTALL_FALSE@	cp --preserve=mode $(srcdir)/arena/motd.txt $(DESTDIR)$(pkgdatadir)/arena
+@ALTERNATE_INSTALL_FALSE@	cp --preserve=mode $(srcdir)/arena/server.cfg $(DESTDIR)$(pkgdatadir)/arena
+@ALTERNATE_INSTALL_FALSE@	cp --preserve=mode $(srcdir)/docs/license.txt $(DESTDIR)$(docdir)
+@ALTERNATE_INSTALL_FALSE@	cp --preserve=mode $(srcdir)/docs/README.txt $(DESTDIR)$(docdir)
 @ALTERNATE_INSTALL_FALSE@	cp -r --preserve=mode $(srcdir)/botinfo $(DESTDIR)$(pkgdatadir)
-@ALTERNATE_INSTALL_FALSE@	cp -r --preserve=mode $(srcdir)/data1 $(DESTDIR)$(pkgdatadir)	
+@ALTERNATE_INSTALL_FALSE@	@echo "copying game data, please be patient."
+@ALTERNATE_INSTALL_FALSE@	cp -r --preserve=mode $(srcdir)/data1 $(DESTDIR)$(pkgdatadir)
+@ALTERNATE_INSTALL_FALSE@	rm -rf `find $(DESTDIR)$(pkgdatadir) -name .svn`
 @ALTERNATE_INSTALL_FALSE@	chmod -R u+w $(DESTDIR)$(docdir)
 @ALTERNATE_INSTALL_FALSE@	chmod -R u+w $(DESTDIR)$(pkgdatadir)
 
@@ -786,7 +804,6 @@ uninstall-hook:
 @ALTERNATE_INSTALL_TRUE@	@echo "Using --enable-alternate-install. Data uninstall disabled."
 @ALTERNATE_INSTALL_FALSE@	rm -rf $(DESTDIR)$(docdir)
 @ALTERNATE_INSTALL_FALSE@	rm -rf $(DESTDIR)$(pkgdatadir)
-@ALTERNATE_INSTALL_FALSE@	rm -rf $(DESTDIR)$(pkglibexecdir)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

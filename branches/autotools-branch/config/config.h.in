@@ -72,6 +72,9 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the <jpeg6b/include/jpeglib.h> header file. */
+#undef HAVE_JPEG6B_INCLUDE_JPEGLIB_H
+
 /* Define to 1 if you have the <jpeglib.h> header file. */
 #undef HAVE_JPEGLIB_H
 
@@ -114,6 +117,12 @@
 
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
+
+/* Define to 1 if you have the <OpenAL/alc.h> header file. */
+#undef HAVE_OPENAL_ALC_H
+
+/* Define to 1 if you have the <OpenAL/al.h> header file. */
+#undef HAVE_OPENAL_AL_H
 
 /* Define to 1 if you have the `pthread_create' function. */
 #undef HAVE_PTHREAD_CREATE
@@ -260,7 +269,7 @@
 /* OpenAL dll name */
 #undef OPENAL_DRIVER
 
-/* OpenGL shared library name */
+/* OpenGL shared lib name */
 #undef OPENGL_DRIVER
 
 /* Name of package */
