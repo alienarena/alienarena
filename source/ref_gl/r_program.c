@@ -115,10 +115,90 @@ GLuint		g_location_fbSampleSize;
 GLuint		g_location_scale;
 GLuint		g_location_source;
 
+static char water_ARB_program[] = 
+"!!ARBfp1.0\n"
+
+"# Scroll and scale the distortion texture coordinates.\n"
+"# Scroll coordinates are specified externally.\n"
+"PARAM scroll1 = program.local[0];\n"
+"PARAM scroll2 = program.local[1];\n"
+"PARAM texScale1 = { 0.008, 0.008, 1.0, 1.0 };\n"
+"PARAM texScale2 = { 0.007, 0.007, 1.0, 1.0 };\n"
+"TEMP texCoord1;\n"
+"TEMP texCoord2;\n"
+"MUL texCoord1, fragment.texcoord[1], texScale1;\n"
+"MUL texCoord2, fragment.texcoord[1], texScale2;\n"
+"ADD texCoord1, texCoord1, scroll1;\n"
+"ADD texCoord2, texCoord2, scroll2;\n"
+
+"# Load the distortion textures and add them together.\n"
+"TEMP distortColor;\n"
+"TEMP distortColor2;\n"
+"TXP distortColor, texCoord1, texture[0], 2D;\n"
+"TXP distortColor2, texCoord2, texture[0], 2D;\n"
+"ADD distortColor, distortColor, distortColor2;\n"
+
+"# Subtract 1.0 and scale by 2.0.\n"
+"# Textures will be distorted from -2.0 to 2.0 texels.\n"
+"PARAM scaleFactor = { 2.0, 2.0, 2.0, 2.0 };\n"
+"PARAM one = { 1.0, 1.0, 1.0, 1.0 };\n"
+"SUB distortColor, distortColor, one;\n"
+"MUL distortColor, distortColor, scaleFactor;\n"
+
+"# Apply distortion to reflection texture coordinates.\n"
+"TEMP distortCoord;\n"
+"TEMP endColor;\n"
+"ADD distortCoord, distortColor, fragment.texcoord[0];\n"
+"TXP endColor, distortCoord, texture, 2D;\n"
+
+"# Get a vector from the surface to the view origin\n"
+"PARAM vieworg = program.local[2];\n"
+"TEMP eyeVec;\n"
+"TEMP trans;\n"
+"SUB eyeVec, vieworg, fragment.texcoord[1];\n"
+
+"# Normalize the vector to the eye position\n"
+"TEMP temp;\n"
+"TEMP invLen;\n"
+"DP3 temp, eyeVec, eyeVec;\n"
+"RSQ invLen, temp.x;\n"
+"MUL eyeVec, eyeVec, invLen;\n"
+"ABS eyeVec.z, eyeVec.z; # so it works underwater, too\n"
+
+"# Load the ripple normal map\n"
+"TEMP normalColor;\n"
+"TEMP normalColor2;\n"
+"# Scale texture\n"
+"MUL texCoord1, fragment.texcoord[2], texScale2;\n"
+"MUL texCoord2, fragment.texcoord[2], texScale1;\n"
+"# Scroll texture\n"
+"ADD texCoord1, texCoord1, scroll1;\n"
+"ADD texCoord2, texCoord2, scroll2;\n"
+"# Get texel color\n"
+"TXP normalColor, texCoord1, texture[1], 2D;\n"
+"TXP normalColor2, texCoord2, texture[1], 2D;\n"
+"# Combine normal maps\n"
+"ADD normalColor, normalColor, normalColor2;\n"
+"SUB normalColor, normalColor, 1.0;\n"
+
+"# Normalize normal texture\n"
+"DP3 temp, normalColor, normalColor;\n"
+"RSQ invLen, temp.x;\n"
+"MUL normalColor, invLen, normalColor;\n"
+
+"# Fresenel approximation\n"
+"DP3 trans.w, normalColor, eyeVec;\n"
+"SUB endColor.w, 1.0, trans.w;\n"
+"MAX endColor.w, endColor.w, 0.4; # MAX sets the min?  How odd.\n"
+"MIN endColor.w, endColor.w, 0.9; # Leave a LITTLE bit of transparency always\n"
+
+"# Put the color in the output (TODO: put this in final OP)\n"
+"MOV result.color, endColor;\n"
+
+"END\n";
+
 void R_LoadARBPrograms(void)
 {
-	int len;
-
 	if (strstr(gl_config.extensions_string, "GL_ARB_fragment_program"))
 	{
 		gl_state.fragment_program = true;
@@ -152,18 +232,9 @@ void R_LoadARBPrograms(void)
 		
 		qglGenProgramsARB(1, &g_water_program_id);
 		qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
-		qglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 1.0f, 0.1f, 0.6f, 0.5f); // jitest
-		len = FS_LoadFile("scripts/water1.arbf", &fragment_program_text);
-
-		if (len > 0) 
-		{
-			qglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, len, fragment_program_text);
-			FS_FreeFile(fragment_program_text);
-		}
-		else
-			Com_Printf("Unable to find scripts/water1.arbf\n");
-
-		
+		qglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 1.0f, 0.1f, 0.6f, 0.5f); 		
+		qglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, strlen(water_ARB_program), water_ARB_program);
+				
 		// Make sure the program loaded correctly
 		{
 			int err = 0;
@@ -175,13 +246,572 @@ void R_LoadARBPrograms(void)
 		gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "0", CVAR_ARCHIVE); 
 }
 
+//GLSL Programs
+
+//BSP Surfaces
+static char bsp_vertex_program[] = 
+"uniform mat3 tangentSpaceTransform;\n"
+"uniform vec3 Eye;\n"
+"uniform vec3 lightPosition;\n"
+"uniform vec3 staticLightPosition;\n"
+"uniform int FOG;\n"
+
+"varying vec3 EyeDir;\n"
+"varying vec3 LightDir;\n"
+"varying vec3 StaticLightDir;\n"
+"varying vec4 sPos;\n"
+"varying float fog;\n"
+
+"void main( void )\n"
+"{\n"
+"   sPos = gl_Vertex;\n"
+
+"   gl_Position = ftransform();\n" 
+    
+"   gl_FrontColor = gl_Color;\n"
+          
+"   EyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );\n"
+"   LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);\n"
+"   StaticLightDir = tangentSpaceTransform * (staticLightPosition - gl_Vertex.xyz);\n"
+
+"   // pass any active texunits through\n" 
+"    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+"    gl_TexCoord[1] = gl_MultiTexCoord1;\n"
+
+"    //fog\n"
+"    if(FOG > 0){\n"
+"      fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);\n"
+"      fog = clamp(fog, 0.0, 1.0);\n"
+"    }\n"
+"}\n";
+
+static char bsp_fragment_program[] = 
+"uniform sampler2D surfTexture;\n"
+"uniform sampler2D HeightTexture;\n"
+"uniform sampler2D NormalTexture;\n"
+"uniform sampler2D lmTexture;\n"
+"uniform sampler2D ShadowMap;\n"
+"uniform vec3 lightColour;\n"
+"uniform float lightCutoffSquared;\n"
+"uniform int FOG;\n"
+"uniform int PARALLAX;\n"
+"uniform int DYNAMIC;\n"
+"uniform int SHADOWMAP;\n"
+
+"varying vec4 sPos;\n"
+"varying vec3 EyeDir;\n"
+"varying vec3 LightDir;\n"
+"varying vec3 StaticLightDir;\n"
+"varying float fog;\n"
+
+"float lookupDynshadow( void )\n"
+"{\n"
+"	vec4 ShadowCoord;\n"
+"	vec4 shadowCoordinateWdivide;\n"
+"	float distanceFromLight;\n"
+"    	vec4 tempShadowCoord;\n"
+"    	float shadow1 = 1.0;\n"
+"    	float shadow2 = 1.0;\n"
+"    	float shadow3 = 1.0;\n"
+"    	float shadows = 1.0;\n"
+    
+"	if(SHADOWMAP > 0 && DYNAMIC > 0) {\n"
+
+"	ShadowCoord = gl_TextureMatrix[7] * sPos;\n"		
+		
+"      shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;\n"
+"      // Used to lower moiré pattern and self-shadowing\n"
+"      shadowCoordinateWdivide.z += 0.0005;\n"   
+      
+"      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;\n"
+	            
+"      if (ShadowCoord.w > 0.0)\n"
+"		shadows = distanceFromLight < shadowCoordinateWdivide.z ? 0.6 : 1.0 ;\n"
+
+"	//Blur shadows a bit\n"
+"      tempShadowCoord = ShadowCoord + vec4(.2, 0, 0, 0);\n"
+"      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;\n"
+"      shadowCoordinateWdivide.z += 0.0005;\n"
+
+"      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;\n"
+
+"      if (ShadowCoord.w > 0.0)\n"
+"          shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;\n"
+
+"      tempShadowCoord = ShadowCoord + vec4(0, .2, 0, 0);\n"
+"      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;\n"
+"      shadowCoordinateWdivide.z += 0.0005;\n"
+
+"      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;\n"
+
+"      if (ShadowCoord.w > 0.0)\n"
+"          shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;\n"
+
+"      shadows = 0.33 * (shadow1 + shadow2 + shadow3);\n"
+
+"    }\n"    
+    
+"   return shadows;\n"
+"}\n"
+
+"void main( void )\n"
+"{\n"
+"   vec4 diffuse;\n"
+"   vec4 lightmap;\n"
+"   float distanceSquared;\n"
+"   vec3 relativeLightDirection;\n"
+"   float diffuseTerm;\n"
+"   vec3 colour;\n"
+"   vec3 halfAngleVector;\n"
+"   float specularTerm;\n"
+"   float swamp;\n"
+"   float attenuation;\n"
+"   vec4 litColour;\n"
+"   vec3 varyingLightColour;\n"
+"   float varyingLightCutoffSquared;\n"
+"   float dynshadowval;\n"
+   
+"   varyingLightColour = lightColour;\n"
+"   varyingLightCutoffSquared = lightCutoffSquared;\n"
+   
+"   vec3 relativeEyeDirection = normalize( EyeDir );\n"
+"   vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );\n"
+"   vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;\n"
+   
+"   lightmap = texture2D(lmTexture, gl_TexCoord[1].st);\n" 
+   
+"   //shadows\n"
+"   dynshadowval = lookupDynshadow();\n"
+  
+"   if(PARALLAX > 0) {\n"
+"      //do the parallax mapping\n"
+"      vec4 Offset = texture2D(HeightTexture,gl_TexCoord[0].xy);\n"
+"      Offset = Offset * 0.04 - 0.02;\n"
+"      vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;\n"
+
+"      diffuse = texture2D(surfTexture, TexCoords);\n"
+          
+"      distanceSquared = dot( StaticLightDir, StaticLightDir );\n"
+"      relativeLightDirection = StaticLightDir / sqrt( distanceSquared );\n"
+
+"      diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );\n"
+"      colour = vec3( 0.0, 0.0, 0.0 );\n"
+
+"	  if( diffuseTerm > 0.0 )\n"
+"	  {\n"
+"		halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );\n"
+         
+"        specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );\n"
+"        specularTerm = pow( specularTerm, 32.0 );\n"
+
+"        colour = specularTerm * vec3( 1.0, 1.0, 1.0 ) / 2.0;\n"
+"      }\n"
+"      attenuation = 0.25;\n"
+"      swamp = attenuation;\n"
+"      swamp *= swamp;\n"
+"      swamp *= swamp;\n"
+"      swamp *= swamp;\n"
+
+"      colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 4.0;\n"
+            
+"      litColour = vec4( attenuation * colour, 1.0 );\n"
+"      litColour = litColour * lightmap * 6.0;\n"
+"      gl_FragColor = max(litColour, diffuse * lightmap * 2.0);\n"
+"   }\n"
+"   else {\n"
+"      diffuse = texture2D(surfTexture, gl_TexCoord[0].xy);\n"     
+"      gl_FragColor = (diffuse * lightmap * 2.0);\n"
+"   }\n"
+   
+"   if(DYNAMIC > 0) {\n"
+
+"	  lightmap = texture2D(lmTexture, gl_TexCoord[1].st);\n"
+	  
+"      //now do the dynamic lighting\n"
+"      distanceSquared = dot( LightDir, LightDir );\n"
+"      relativeLightDirection = LightDir / sqrt( distanceSquared );\n"
+
+"      diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );\n"
+"      colour = vec3( 0.0, 0.0, 0.0 );\n"
+
+"      if( diffuseTerm > 0.0 )\n"
+"      {\n"
+"         halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );\n"
+   
+"         float specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );\n"
+"         specularTerm = pow( specularTerm, 32.0 );\n"
+
+"         colour = specularTerm * vec3( 1.0, 1.0, 1.0 ) / 2.0;\n"
+"      }\n"
+
+"      attenuation = clamp( 1.0 - ( distanceSquared / varyingLightCutoffSquared ), 0.0, 1.0 );\n"
+
+"      swamp = attenuation;\n"
+"      swamp *= swamp;\n"
+"      swamp *= swamp;\n"
+"      swamp *= swamp;\n"
+
+"      colour += ( ( ( 0.5 - swamp ) * diffuseTerm ) + swamp ) * textureColour * 3.0;\n"
+      
+"      vec4 dynamicColour = vec4( attenuation * colour * dynshadowval * varyingLightColour, 1.0 );\n"
+"      if(PARALLAX > 0) {\n"
+"         dynamicColour = max(dynamicColour, gl_FragColor);\n"
+"      }\n"
+"      else {\n"
+"         dynamicColour = max(dynamicColour, vec4(textureColour, 1.0) * lightmap * 2.0);\n"
+"      }\n"
+"      gl_FragColor = dynamicColour;\n" 
+"   }\n"
+"   if(FOG > 0)\n"
+"      gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);\n"
+"}\n";
+
+//MESHES
+static char mesh_vertex_program[] = 
+"uniform vec3 lightPos;\n"
+"uniform float time;\n"
+"uniform int FOG;\n"
+
+"attribute vec4 tangent;\n"
+
+"varying vec3 LightDir;\n"
+"varying vec3 EyeDir;\n"
+"varying float fog;\n"
+
+"void main()\n"
+"{\n"
+"	vec3 t;\n"
+"	vec3 b;\n"
+	
+"	gl_Position = ftransform();\n"
+
+"	EyeDir = vec3(gl_ModelViewMatrix * gl_Vertex);\n"
+"	gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+	
+"	vec3 n = normalize(gl_NormalMatrix * gl_Normal);\n"
+	
+"	vec3 tangent3 = vec3(tangent);\n"
+"	t = normalize(gl_NormalMatrix * tangent3);\n"
+"	b = tangent[3] * cross(n, t);\n"
+	
+"	vec3 v;\n"
+"	v.x = dot(lightPos, t);\n"
+"	v.y = dot(lightPos, b);\n"
+"	v.z = dot(lightPos, n);\n"
+"	LightDir = normalize(v);\n"
+	
+"	v.x = dot(EyeDir, t);\n"
+"	v.y = dot(EyeDir, b);\n"
+"	v.z = dot(EyeDir, n);\n"
+"	EyeDir = normalize(v);\n"
+	
+"	//for scrolling fx\n"
+"	vec4 texco = gl_MultiTexCoord0;\n" 
+"	texco.s = texco.s + time*1.0;\n"
+"	texco.t = texco.t + time*1.0;\n"
+"	gl_TexCoord[1] = texco;\n" 
+	
+"	//fog\n"
+"   if(FOG > 0){\n"
+"		fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);\n"
+"		fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear\n"
+"   	}\n"
+"}\n";
+
+static char mesh_fragment_program[] = 
+"uniform sampler2D baseTex;\n"
+"uniform sampler2D normalTex;\n"
+"uniform sampler2D fxTex;\n"
+"uniform vec3 baseColor;\n"
+"uniform int FOG;\n"
+"uniform int useFX;\n"
+"uniform int useGlow;\n"
+"uniform float minLight;\n" 
+"const float SpecularFactor = 0.5;\n"
+
+"varying vec3 LightDir;\n"
+"varying vec3 EyeDir;\n"
+"varying float fog;\n"
+
+"void main()\n"
+"{\n"
+"	vec3 litColor;\n"
+"	vec4 fx;\n"
+"	vec4 glow;\n"
+	
+"    vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;\n"
+"    vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );\n"
+	
+"	vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);\n"
+"	vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);\n"
+	
+"	//moving fx texture\n"
+"	if(useFX > 0)\n"
+"		fx = texture2D( fxTex, gl_TexCoord[1].xy );\n"
+"	else\n"
+"		fx = vec4(0.0, 0.0, 0.0, 0.0);\n"
+
+"	//glowing fx texture\n"
+"	if(useGlow > 0)\n"
+"		glow = texture2D(fxTex, gl_TexCoord[0].xy );\n"
+	
+"	litColor = textureColour * max(dot(normal, LightDir), 0.0);\n"
+"	vec3 reflectDir = reflect(LightDir, normal);\n"
+	
+"	float spec = max(dot(EyeDir, reflectDir), 0.0);\n"
+"	spec = pow(spec, 6.0);\n"
+"	spec *= (SpecularFactor*specmask.a);\n"
+"	litColor = min(litColor + spec, vec3(1.0));\n"
+	
+"	//keep shadows from making meshes completely black\n"
+"	litColor = max(litColor, (textureColour * vec3(minLight)));\n"
+	
+"	gl_FragColor = vec4(litColor * baseColor, 1.0);\n"
+	
+"	gl_FragColor = mix(fx, gl_FragColor, alphamask.a);\n"
+
+"	if(useGlow > 0)\n"
+"		gl_FragColor = mix(gl_FragColor, glow, glow.a);\n"
+
+"	if(FOG > 0)\n"
+"		gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);\n"
+"}\n";
+
+static char water_vertex_program[] = 
+"const float Eta = 0.66;\n"
+"const float FresnelPower = 5.0;\n" 
+
+"const float F = ((1.0-Eta) * (1.0-Eta))/((1.0+Eta) * (1.0+Eta));\n"
+"varying float FresRatio;\n" 
+
+"varying vec3 lightDir;\n" 
+"varying vec3 eyeDir;\n"
+"varying vec3 reflectDir;\n"
+"varying vec3 refractDir;\n" 
+
+"varying float fog;\n"
+
+"uniform vec3 stangent;\n"
+"uniform vec3 LightPos;\n"
+"uniform float time;\n" 
+"uniform int	REFLECT;\n"
+"uniform int FOG;\n"
+
+"void main(void)\n"
+"{\n" 
+
+"	vec4 v = vec4(gl_Vertex);\n"
+"	gl_Position = ftransform();\n"
+	
+"	vec3 norm = normalize(gl_NormalMatrix * gl_Normal);\n"
+"	vec3 tang = normalize(gl_NormalMatrix * stangent);\n"
+"	vec3 binorm = cross(norm,tang);\n"
+
+"	eyeDir = vec3(gl_ModelViewMatrix * v);\n"
+	
+"	//for refraction\n"
+"	vec4 neyeDir = gl_ModelViewMatrix * v;\n"
+"	vec3 refeyeDir = neyeDir.xyz / neyeDir.w;\n"
+"	refeyeDir = normalize(refeyeDir);\n" 
+	
+"	refeyeDir.x *= -1.0;\n"
+"	refeyeDir.y *= -1.0;\n"
+"	refeyeDir.z *= -1.0;\n"
+
+"	reflectDir = reflect(eyeDir,norm);\n"
+"	refractDir = refract(eyeDir,norm,Eta);\n"
+"	refractDir = vec3(gl_TextureMatrix[0] * vec4(refractDir,1.0));\n"
+"	FresRatio = F + (1.0-F) * pow((1.0-dot(-refeyeDir,norm)),FresnelPower);\n"
+
+"	vec3 tmp;\n"
+"	tmp.x = dot(LightPos,tang);\n"
+"	tmp.y = dot(LightPos,binorm);\n"
+"	tmp.z = dot(LightPos,norm);\n"
+"	lightDir = normalize(tmp);\n"
+
+"	tmp.x = dot(eyeDir,tang);\n"
+"	tmp.y = dot(eyeDir,binorm);\n"
+"	tmp.z = dot(eyeDir,norm);\n"
+"	eyeDir = normalize(tmp);\n"
+
+"	vec4 texco = gl_MultiTexCoord0;\n" 
+"	if(REFLECT > 0) {\n"
+"		texco.s = texco.s - LightPos.x/256.0;\n"
+"		texco.t = texco.t + LightPos.y/256.0;\n" 
+"	}\n"
+
+"	gl_TexCoord[0] = texco;\n"
+
+"	texco = gl_MultiTexCoord0;\n"
+"	texco.s = texco.s + time*0.05;\n"
+"	texco.t = texco.t + time*0.05;\n" 
+
+"	gl_TexCoord[1] = texco;\n" 
+
+"	texco = gl_MultiTexCoord0;\n"
+"	texco.s = texco.s + -time*0.05;\n"
+"	texco.t = texco.t + -time*0.05;\n" 
+"	gl_TexCoord[2] = texco;\n"
+	
+"	//fog\n"
+"   if(FOG > 0){\n"
+"		fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);\n"
+"		fog = clamp(fog, 0.0, 1.0);\n"
+"  	}\n"
+"}\n";
+
+static char water_fragment_program[] = 
+"varying vec3 lightDir;\n" 
+"varying vec3 eyeDir;\n"
+"varying float FresRatio;\n"
+
+"varying float fog;\n"
+
+"uniform sampler2D refTexture;\n"
+"uniform sampler2D normalMap;\n"
+"uniform sampler2D baseTexture;\n"
+
+"uniform int REFLECT;\n"
+"uniform int TRANSPARENT;\n"
+"uniform int FOG;\n"
+
+"void main (void)\n"
+"{\n" 
+"	vec4 refColor;\n"
+
+"	float distSqr = dot(lightDir, lightDir);\n"
+"	float att = clamp(1.0 - 0.0 * sqrt(distSqr), 0.0, 1.0);\n"
+"	vec3 lVec = lightDir * inversesqrt(distSqr);\n" 
+
+"	vec3 vVec = normalize(eyeDir);\n" 
+
+"	vec4 base = vec4(0.15,0.67,0.93,1.0); //base water color\n"
+"	if(REFLECT > 0)\n"
+"		refColor = mix(base, texture2D(refTexture, gl_TexCoord[0].xy), 1.0);\n"
+"	else\n"
+"		refColor = mix(base, texture2D(baseTexture, gl_TexCoord[0].xy), 1.0);\n"
+
+"	vec3 bump = normalize( texture2D(normalMap, gl_TexCoord[1].xy).xyz * 2.0 - 1.0);\n"
+"	vec3 secbump = normalize( texture2D(normalMap, gl_TexCoord[2].xy).xyz * 2.0 - 1.0);\n"
+"	vec3 modbump = mix(secbump,bump,0.5);\n"
+
+"	vec3 reflection = reflect(eyeDir,modbump);\n"
+"	vec3 refraction = refract(eyeDir,modbump,0.66);\n"
+	
+"	vec4 Tl = texture2DProj(baseTexture, vec4(reflection.xy, 1.0, 1.0) );\n"
+"   vec4 Tr = texture2DProj(baseTexture, vec4(refraction.xy, 1.0, 1.0) );\n"
+
+"	vec4 cubemap = mix(Tl,Tr,FresRatio);\n"
+
+"	gl_FragColor = mix(cubemap,refColor,0.5);\n"
+"	if(TRANSPARENT > 0)\n"
+"		gl_FragColor.a = 0.5;\n"
+	
+"	if(FOG > 0)\n"
+"		gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);\n"	
+	
+"}\n";
+
+//FRAMEBUFFER DISTORTION EFFECTS
+static char fb_vertex_program[] = 
+"void main( void )\n"
+"{\n" 
+"    gl_Position = ftransform();\n" 
+ 
+"    gl_TexCoord[0] = gl_MultiTexCoord0;\n" 
+"}\n";
+
+static char fb_fragment_program[] = 
+"uniform sampler2D fbtexture;\n"
+"uniform sampler2D distortiontexture;\n"
+"uniform float frametime;\n"
+"uniform vec2 fxPos;\n"
+"uniform int fxType;\n"
+"uniform vec3 fxColor;\n"
+"uniform int fbSampleSize;\n"
+
+"void main(void)\n"
+"{\n"
+"	vec3 noiseVec;\n"
+"	vec2 displacement;\n"
+"	float wScissor;\n"
+"	float hScissor;\n"
+    
+"    displacement = gl_TexCoord[0].st;\n"
+
+"	displacement.x -= fxPos.x*0.002;\n"
+"	displacement.y -= fxPos.y*0.002;\n"
+
+"	noiseVec = normalize(texture2D(distortiontexture, displacement.xy)).xyz;\n"
+"	noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"
+
+"	//clamp edges to prevent artifacts\n"
+	
+"	//different sample sizes need different clamps\n"
+"	if(fbSampleSize == 1) {\n"
+"		wScissor = 0.9;\n"
+"		hScissor = 0.6;\n"
+"	}\n"
+"	else if(fbSampleSize == 2) {\n"
+"		wScissor = 0.5;\n"
+"		hScissor = 0.6;\n"
+"	}\n"
+"	else if(fbSampleSize == 3) {\n"
+"		wScissor = 0.8;\n"
+"		hScissor = 0.5;\n"
+"	}\n"
+		
+"	if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < wScissor)\n"
+"		displacement.x = gl_TexCoord[0].s + noiseVec.x;\n"
+"	else\n"
+"		displacement.x = gl_TexCoord[0].s;\n"
+		
+"	if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < hScissor) \n"
+"		displacement.y = gl_TexCoord[0].t + noiseVec.y;\n"
+"	else\n"
+"		displacement.y = gl_TexCoord[0].t;\n"
+		
+"	gl_FragColor = texture2D(fbtexture, displacement.xy);\n"
+
+"	if(fxType == 2)\n"
+"		gl_FragColor = mix(gl_FragColor, vec4(fxColor, 1.0), 0.3);\n"
+"}\n";
+
+//GAUSSIAN BLUR EFFECTS
+static char blur_vertex_program[] = 
+"void main()\n"
+"{\n"
+"	gl_Position = ftransform();\n"
+"	gl_TexCoord[0] =  gl_MultiTexCoord0;\n"
+"}\n";
+
+static char blur_fragment_program[] = 
+"uniform vec2 ScaleU;\n"
+"uniform sampler2D textureSource;\n"
+ 
+"void main()\n"
+"{\n"
+"   vec4 sum = vec4(0.0);\n"
+
+"   // take nine samples\n"
+"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 4.0*ScaleU.x, gl_TexCoord[0].y - 4.0*ScaleU.y)) * 0.05;\n"
+"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 3.0*ScaleU.x, gl_TexCoord[0].y - 3.0*ScaleU.y)) * 0.09;\n"
+"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - 2.0*ScaleU.x, gl_TexCoord[0].y - 2.0*ScaleU.y)) * 0.12;\n"
+"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x - ScaleU.x, gl_TexCoord[0].y - ScaleU.y)) * 0.15;\n"
+"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x, gl_TexCoord[0].y)) * 0.16;\n"
+"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + ScaleU.x, gl_TexCoord[0].y + ScaleU.y)) * 0.15;\n"
+"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 2.0*ScaleU.x, gl_TexCoord[0].y + 2.0*ScaleU.y)) * 0.12;\n"
+"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 3.0*ScaleU.x, gl_TexCoord[0].y + 3.0*ScaleU.y)) * 0.09;\n"
+"   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 4.0*ScaleU.x, gl_TexCoord[0].y + 4.0*ScaleU.y)) * 0.05;\n"
+ 
+"   gl_FragColor = sum;\n"
+"}\n";
+
 void R_LoadGLSLPrograms(void)
 {
 	const char *shaderStrings[1];
-	unsigned char *shader_assembly;
     int		nResult;
     char	str[4096];
-	int		len;
 
 	//load glsl (to do - move to own file)
 	if (strstr(gl_config.extensions_string,  "GL_ARB_shader_objects" ) && gl_state.fragment_program)
@@ -240,21 +870,11 @@ void R_LoadGLSLPrograms(void)
 		// Vertex shader
 		//
 
-		len = FS_LoadFile("scripts/vertex_shader.glsl", &shader_assembly);
-
-		if (len > 0) 
-		{
-			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-			shaderStrings[0] = (char*)shader_assembly;
-			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-			glCompileShaderARB( g_vertexShader);
-			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-		}
-		else 
-		{
-			Com_Printf("...Unable to Locate Vertex Shader\n");
-			nResult = 0;
-		}
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)bsp_vertex_program;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
 
 		if( nResult )
 			glAttachObjectARB( g_programObj, g_vertexShader );
@@ -266,22 +886,13 @@ void R_LoadGLSLPrograms(void)
 		//
 		// Fragment shader
 		//
-		len = FS_LoadFile("scripts/fragment_shader.glsl", &shader_assembly);
-		
-		if(len > 0) 
-		{
-			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-			shaderStrings[0] = (char*)shader_assembly;
-			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-			glCompileShaderARB( g_fragmentShader );
-			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-		}
-		else 
-		{
-			Com_Printf("...Unable to Locate Fragment Shader\n");
-			nResult = 0;
-		}
 
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)bsp_fragment_program;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		
 		if( nResult )
 			glAttachObjectARB( g_programObj, g_fragmentShader );
 		else
@@ -326,22 +937,12 @@ void R_LoadGLSLPrograms(void)
 		// Vertex shader
 		//
 
-		len = FS_LoadFile("scripts/water_vertex_shader.glsl", &shader_assembly);
-
-		if (len > 0) 
-		{
-			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-			shaderStrings[0] = (char*)shader_assembly;
-			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-			glCompileShaderARB( g_vertexShader);
-			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-		}
-		else 
-		{
-			Com_Printf("...Unable to Locate Water Vertex Shader\n");
-			nResult = 0;
-		}
-
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)water_vertex_program;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		
 		if( nResult )
 			glAttachObjectARB( g_waterprogramObj, g_vertexShader );
 		else
@@ -352,22 +953,13 @@ void R_LoadGLSLPrograms(void)
 		//
 		// Fragment shader
 		//
-		len = FS_LoadFile("scripts/water_fragment_shader.glsl", &shader_assembly);
-		
-		if(len > 0) 
-		{
-			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-			shaderStrings[0] = (char*)shader_assembly;
-			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-			glCompileShaderARB( g_fragmentShader );
-			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-		}
-		else 
-		{
-			Com_Printf("...Unable to Locate Water Fragment Shader\n");
-			nResult = 0;
-		}
 
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)water_fragment_program;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		
 		if( nResult )
 			glAttachObjectARB( g_waterprogramObj, g_fragmentShader );
 		else
@@ -406,22 +998,12 @@ void R_LoadGLSLPrograms(void)
 		// Vertex shader
 		//
 
-		len = FS_LoadFile("scripts/mesh_vertex_shader.glsl", &shader_assembly);
-
-		if (len > 0) 
-		{
-			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-			shaderStrings[0] = (char*)shader_assembly;
-			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-			glCompileShaderARB( g_vertexShader);
-			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-		}
-		else 
-		{
-			Com_Printf("...Unable to Locate Mesh Vertex Shader\n");
-			nResult = 0;
-		}
-
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)mesh_vertex_program;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		
 		if( nResult )
 			glAttachObjectARB( g_meshprogramObj, g_vertexShader );
 		else
@@ -432,22 +1014,13 @@ void R_LoadGLSLPrograms(void)
 		//
 		// Fragment shader
 		//
-		len = FS_LoadFile("scripts/mesh_fragment_shader.glsl", &shader_assembly);
-		
-		if(len > 0) 
-		{
-			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-			shaderStrings[0] = (char*)shader_assembly;
-			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-			glCompileShaderARB( g_fragmentShader );
-			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-		}
-		else 
-		{
-			Com_Printf("...Unable to Locate Mesh Fragment Shader\n");
-			nResult = 0;
-		}
 
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)mesh_fragment_program;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		
 		if( nResult )
 			glAttachObjectARB( g_meshprogramObj, g_fragmentShader );
 		else
@@ -489,22 +1062,12 @@ void R_LoadGLSLPrograms(void)
 		// Vertex shader
 		//
 
-		len = FS_LoadFile("scripts/fb_vertex_shader.glsl", &shader_assembly);
-
-		if (len > 0) 
-		{
-			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-			shaderStrings[0] = (char*)shader_assembly;
-			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-			glCompileShaderARB( g_vertexShader);
-			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-		}
-		else 
-		{
-			Com_Printf("...Unable to Locate Framebuffer Vertex Shader\n");
-			nResult = 0;
-		}
-
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)fb_vertex_program;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		
 		if( nResult )
 			glAttachObjectARB( g_fbprogramObj, g_vertexShader );
 		else
@@ -515,22 +1078,13 @@ void R_LoadGLSLPrograms(void)
 		//
 		// Fragment shader
 		//
-		len = FS_LoadFile("scripts/fb_fragment_shader.glsl", &shader_assembly);
 		
-		if(len > 0) 
-		{
-			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-			shaderStrings[0] = (char*)shader_assembly;
-			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-			glCompileShaderARB( g_fragmentShader );
-			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-		}
-		else 
-		{
-			Com_Printf("...Unable to Locate Framebuffer Fragment Shader\n");
-			nResult = 0;
-		}
-
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)fb_fragment_program;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		
 		if( nResult )
 			glAttachObjectARB( g_fbprogramObj, g_fragmentShader );
 		else
@@ -567,22 +1121,12 @@ void R_LoadGLSLPrograms(void)
 		// Vertex shader
 		//
 
-		len = FS_LoadFile("scripts/blur_vertex_shader.glsl", &shader_assembly);
-
-		if (len > 0) 
-		{
-			g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
-			shaderStrings[0] = (char*)shader_assembly;
-			glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
-			glCompileShaderARB( g_vertexShader);
-			glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-		}
-		else 
-		{
-			Com_Printf("...Unable to Locate Blur Vertex Shadet\n");
-			nResult = 0;
-		}
-
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)blur_vertex_program;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		
 		if( nResult )
 			glAttachObjectARB( g_blurprogramObj, g_vertexShader );
 		else
@@ -593,22 +1137,13 @@ void R_LoadGLSLPrograms(void)
 		//
 		// Fragment shader
 		//
-		len = FS_LoadFile("scripts/blur_fragment_shader.glsl", &shader_assembly);
 		
-		if(len > 0) 
-		{
-			g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
-			shaderStrings[0] = (char*)shader_assembly;
-			glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
-			glCompileShaderARB( g_fragmentShader );
-			glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
-		}
-		else 
-		{
-			Com_Printf("...Unable to Locate Blur Fragment Shader\n");
-			nResult = 0;
-		}
-
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)blur_fragment_program;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+		
 		if( nResult )
 			glAttachObjectARB( g_blurprogramObj, g_fragmentShader );
 		else
