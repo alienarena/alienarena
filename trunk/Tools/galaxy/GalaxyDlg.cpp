@@ -231,7 +231,7 @@ UINT RecvThreadProc(LPVOID pParam)
 		if(Sys_Milliseconds() - lastPing > (200 * 1000))
 		{
 			//send a pong if no ping received in 200 seconds as a desperation attempt to keep us connected to server
-			sockete.sendData("PONG");
+			sockete.sendData("PONG\n\r");
 			lastPing = Sys_Milliseconds();
 		}
 	}
