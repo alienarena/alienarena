@@ -6210,9 +6210,11 @@ qboolean PlayerConfig_MenuInit( void )
 
 	//add in shader support for player models, if the player goes into the menu before entering a
 	//level, that way we see the shaders.  We only want to do this if they are NOT loaded yet.
+	//to do - I think this is where the menu bugs might be occuring when applying video settings
 	scriptsloaded = Cvar_Get("scriptsloaded", "0", 0);
-	if(!scriptsloaded->value) {
-		Cvar_SetValue("scriptsloaded", 1);
+	if(!scriptsloaded->value) 
+	{
+		Cvar_SetValue("scriptsloaded", 1); //this needs to be set on vid_restart I believe
 		RS_LoadScript("scripts/models.rscript");
 		RS_LoadScript("scripts/caustics.rscript");
 		RS_LoadSpecialScripts();
