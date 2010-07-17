@@ -52,6 +52,8 @@ extern float banneralpha;
 
 extern void M_ForceMenuOff( void );
 
+extern void RS_FreeUnmarked( void );
+
 #ifdef __unix__
 extern qboolean vid_restart;
 #endif
@@ -386,6 +388,9 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "gl_glsl_shaders", s_glsl_box.curvalue);
 	if(s_normalmaps_box.curvalue)
 		Cvar_SetValue("r_shaders", 1); //shaders must be enabled for this to work
+
+	RS_FreeUnmarked();
+	Cvar_SetValue("scriptsloaded", 0); //scripts get flushed
 									  
 	vid_ref->modified = true;
 #ifdef __unix__
