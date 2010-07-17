@@ -343,7 +343,8 @@ void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped
     if (currententity->flags & RF_TRANSLUCENT) {
         basealpha = alpha = currententity->alpha;
 
-        rs=(rscript_t *)rs_glass;
+		if(rs_glass)
+			rs=(rscript_t *)rs_glass;
         if(!rs)
             GL_Bind(r_reflecttexture->texnum);
     }
@@ -886,7 +887,8 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 	if (currententity->flags & RF_TRANSLUCENT) {
 		basealpha = alpha = currententity->alpha;
 
-		rs=(rscript_t *)rs_glass;
+		if(rs_glass)
+			rs=(rscript_t *)rs_glass;
 		if(!rs)
 			GL_Bind(r_reflecttexture->texnum);
 		else if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) {
