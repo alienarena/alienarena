@@ -1163,6 +1163,7 @@ void CGalaxyDlg::OnButton4()
 	sockete.sendData(mensaje);
 
 	connectedToChannel = false;
+	canJoin = false;
 	m_status2.SetWindowText("connected to server");
 	
 	sockete.getData();
