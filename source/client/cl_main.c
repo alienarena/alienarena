@@ -1741,6 +1741,7 @@ void CL_InitLocal (void)
 	freelook = Cvar_Get( "freelook", "0", CVAR_ARCHIVE );
 	lookspring = Cvar_Get ("lookspring", "0", CVAR_ARCHIVE);
 	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE);
+	m_accel	= Cvar_Get ("m_accel", "1",	CVAR_ARCHIVE);
 	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE);
 	menu_sensitivity = Cvar_Get("menu_sensitivity", "3", CVAR_ARCHIVE);
 
