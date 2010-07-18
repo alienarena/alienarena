@@ -114,8 +114,8 @@ void IN_Move (usercmd_t *cmd)
 
 		if ( mouse_active )
 		{
-			cursor.x += mx * .25;//sensitivity->value/10;
-			cursor.y += my * .25;//sensitivity->value/10;
+			cursor.x += mx * menu_sensitivity->value/10;
+			cursor.y += my * menu_sensitivity->value/10;
 			mx = my = 0;
 		}
 		else

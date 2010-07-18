@@ -84,6 +84,7 @@ cvar_t	*cl_timedemo;
 cvar_t	*lookspring;
 cvar_t	*lookstrafe;
 cvar_t	*sensitivity;
+cvar_t	*menu_sensitivity;
 
 cvar_t	*m_smoothing;
 cvar_t	*m_pitch;
@@ -1741,6 +1742,7 @@ void CL_InitLocal (void)
 	lookspring = Cvar_Get ("lookspring", "0", CVAR_ARCHIVE);
 	lookstrafe = Cvar_Get ("lookstrafe", "0", CVAR_ARCHIVE);
 	sensitivity = Cvar_Get ("sensitivity", "3", CVAR_ARCHIVE);
+	menu_sensitivity = Cvar_Get("menu_sensitivity", "3", CVAR_ARCHIVE);
 
 	m_smoothing = Cvar_Get("m_smoothing", "0", CVAR_ARCHIVE);
 	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE);

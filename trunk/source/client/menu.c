@@ -1381,7 +1381,6 @@ extern cvar_t *cl_noblood;
 extern cvar_t *cl_noskins;
 extern cvar_t *gl_shadows;
 extern cvar_t *gl_dynamic;
-extern cvar_t *r_shaders;
 extern cvar_t *r_minimap;
 extern cvar_t *r_minimap_style;
 
@@ -1389,6 +1388,7 @@ static menuframework_s	s_options_menu;
 static menuaction_s		s_options_defaults_action;
 static menuaction_s		s_options_customize_options_action;
 static menuslider_s		s_options_sensitivity_slider;
+static menuslider_s		s_options_menu_sensitivity_slider;
 static menulist_s		s_options_smoothing_box;
 static menulist_s		s_options_freelook_box;
 static menulist_s		s_options_noalttab_box;
@@ -1409,7 +1409,6 @@ static menulist_s		s_options_healthaura_box;
 static menulist_s		s_options_noblood_box;
 static menulist_s		s_options_noskins_box;
 static menulist_s		s_options_taunts_box;
-static menulist_s		s_options_shaders_box;
 static menulist_s		s_options_shadows_box;
 static menulist_s		s_options_dynamic_box;
 static menulist_s		s_options_minimap_box;
@@ -1441,13 +1440,6 @@ static void NoskinsFunc( void *unused )
 static void TauntsFunc( void *unused )
 {
 	Cvar_SetValue( "cl_playtaunts", s_options_taunts_box.curvalue);
-}
-
-static void ShadersFunc( void *unused )
-{
-	Cvar_SetValue( "r_shaders", s_options_shaders_box.curvalue);
-	if(!s_options_shaders_box.curvalue)
-		Cvar_SetValue("gl_normalmaps", 0); //because normal maps are controlled by shaders
 }
 
 static void ShadowsFunc( void *unused )
@@ -1498,6 +1490,11 @@ static void DisColorFunc( void *unused )
 static void MouseSpeedFunc( void *unused )
 {
 	Cvar_SetValue( "sensitivity", s_options_sensitivity_slider.curvalue / 2.0F );
+}
+
+static void MenuMouseSpeedFunc( void *unused )
+{
+	Cvar_SetValue( "menu_sensitivity", s_options_menu_sensitivity_slider.curvalue / 2.0F );
 }
 
 static void MouseSmoothingFunc( void *unused )
@@ -1925,6 +1922,7 @@ static void ControlsSetMenuItemValues( void )
 		s_options_doppler_effect_list.curvalue = 0;
 
 	s_options_sensitivity_slider.curvalue	= ( sensitivity->value ) * 2;
+	s_options_menu_sensitivity_slider.curvalue	= ( menu_sensitivity->value ) * 2;
 
 	Cvar_SetValue("m_smoothing", ClampCvar(0, 1, m_smoothing->value ) );
 	s_options_smoothing_box.curvalue		= m_smoothing->value;
@@ -1960,9 +1958,6 @@ static void ControlsSetMenuItemValues( void )
 
 	Cvar_SetValue("cl_drawtimer", ClampCvar(0, 1, cl_drawtimer->value ) );
 	s_options_showtime_box.curvalue		= cl_drawtimer->value;
-
-	Cvar_SetValue("r_shaders", ClampCvar(0, 1, r_shaders->value ) );
-	s_options_shaders_box.curvalue		= r_shaders->value;
 
 	Cvar_SetValue("gl_shadows", ClampCvar(0, 2, gl_shadows->value ) );
 	s_options_shadows_box.curvalue		= gl_shadows->value;
@@ -2163,30 +2158,23 @@ void Options_MenuInit( void )
 	s_options_customize_options_action.generic.name	= "customize controls";
 	s_options_customize_options_action.generic.callback = CustomizeControlsFunc;
 
-	s_options_shaders_box.generic.type = MTYPE_SPINCONTROL;
-	s_options_shaders_box.generic.x	= 0;
-	s_options_shaders_box.generic.y	= FONTSCALE*30*scale;
-	s_options_shaders_box.generic.name	= "shaders";
-	s_options_shaders_box.generic.callback = ShadersFunc;
-	s_options_shaders_box.itemnames = onoff_names;
-
 	s_options_shadows_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_shadows_box.generic.x	= 0;
-	s_options_shadows_box.generic.y	= FONTSCALE*40*scale;
+	s_options_shadows_box.generic.y	= FONTSCALE*30*scale;
 	s_options_shadows_box.generic.name	= "shadows";
 	s_options_shadows_box.generic.callback = ShadowsFunc;
 	s_options_shadows_box.itemnames = shadow_names;
 
 	s_options_dynamic_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_dynamic_box.generic.x	= 0;
-	s_options_dynamic_box.generic.y	= FONTSCALE*50*scale;
+	s_options_dynamic_box.generic.y	= FONTSCALE*40*scale;
 	s_options_dynamic_box.generic.name	= "dynamic lights";
 	s_options_dynamic_box.generic.callback = DynamicFunc;
 	s_options_dynamic_box.itemnames = onoff_names;
 
 	s_options_paindist_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_paindist_box.generic.x	= 0;
-	s_options_paindist_box.generic.y	= FONTSCALE*60*scale;
+	s_options_paindist_box.generic.y	= FONTSCALE*50*scale;
 	s_options_paindist_box.generic.name	= "pain distortion fx";
 	s_options_paindist_box.generic.callback = PainDistFunc;
 	s_options_paindist_box.itemnames = onoff_names;
@@ -2194,7 +2182,7 @@ void Options_MenuInit( void )
 
 	s_options_explosiondist_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_explosiondist_box.generic.x	= 0;
-	s_options_explosiondist_box.generic.y	= FONTSCALE*70*scale;
+	s_options_explosiondist_box.generic.y	= FONTSCALE*60*scale;
 	s_options_explosiondist_box.generic.name	= "explosion distortion fx";
 	s_options_explosiondist_box.generic.callback = ExplosionDistFunc;
 	s_options_explosiondist_box.itemnames = onoff_names;
@@ -2202,42 +2190,42 @@ void Options_MenuInit( void )
 
 	s_options_target_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_target_box.generic.x	= 0;
-	s_options_target_box.generic.y	= FONTSCALE*80*scale;
+	s_options_target_box.generic.y	= FONTSCALE*70*scale;
 	s_options_target_box.generic.name	= "identify target";
 	s_options_target_box.generic.callback = TargetFunc;
 	s_options_target_box.itemnames = playerid_names;
 
 	s_options_healthaura_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_healthaura_box.generic.x	= 0;
-	s_options_healthaura_box.generic.y	= FONTSCALE*90*scale;
+	s_options_healthaura_box.generic.y	= FONTSCALE*80*scale;
 	s_options_healthaura_box.generic.name	= "health auras";
 	s_options_healthaura_box.generic.callback = HealthauraFunc;
 	s_options_healthaura_box.itemnames = onoff_names;
 
 	s_options_noblood_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_noblood_box.generic.x	= 0;
-	s_options_noblood_box.generic.y	= FONTSCALE*100*scale;
+	s_options_noblood_box.generic.y	= FONTSCALE*90*scale;
 	s_options_noblood_box.generic.name	= "No Blood";
 	s_options_noblood_box.generic.callback = NoBloodFunc;
 	s_options_noblood_box.itemnames = onoff_names;
 
 	s_options_noskins_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_noskins_box.generic.x	= 0;
-	s_options_noskins_box.generic.y	= FONTSCALE*110*scale;
+	s_options_noskins_box.generic.y	= FONTSCALE*100*scale;
 	s_options_noskins_box.generic.name	= "force martian models";
 	s_options_noskins_box.generic.callback = NoskinsFunc;
 	s_options_noskins_box.itemnames = onoff_names;
 
 	s_options_taunts_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_taunts_box.generic.x	= 0;
-	s_options_taunts_box.generic.y	= FONTSCALE*120*scale;
+	s_options_taunts_box.generic.y	= FONTSCALE*110*scale;
 	s_options_taunts_box.generic.name	= "player taunts";
 	s_options_taunts_box.generic.callback = TauntsFunc;
 	s_options_taunts_box.itemnames = onoff_names;
 
 	s_options_sfxvolume_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sfxvolume_slider.generic.x	= 0;
-	s_options_sfxvolume_slider.generic.y	= FONTSCALE*130*scale;
+	s_options_sfxvolume_slider.generic.y	= FONTSCALE*120*scale;
 	s_options_sfxvolume_slider.generic.name	= "global volume";
 	s_options_sfxvolume_slider.generic.callback	= UpdateVolumeFunc;
 	s_options_sfxvolume_slider.minvalue		= 0;
@@ -2246,7 +2234,7 @@ void Options_MenuInit( void )
 
 	s_options_bgvolume_slider.generic.type	= MTYPE_SLIDER;
 	s_options_bgvolume_slider.generic.x	= 0;
-	s_options_bgvolume_slider.generic.y	= FONTSCALE*140*scale;
+	s_options_bgvolume_slider.generic.y	= FONTSCALE*130*scale;
 	s_options_bgvolume_slider.generic.name	= "music volume";
 	s_options_bgvolume_slider.generic.callback	= UpdateBGVolumeFunc;
 	s_options_bgvolume_slider.minvalue		= 0;
@@ -2255,7 +2243,7 @@ void Options_MenuInit( void )
 
 	s_options_bgmusic_box.generic.type	= MTYPE_SPINCONTROL;
 	s_options_bgmusic_box.generic.x		= 0;
-	s_options_bgmusic_box.generic.y		= FONTSCALE*150*scale;
+	s_options_bgmusic_box.generic.y		= FONTSCALE*140*scale;
 	s_options_bgmusic_box.generic.name	= "Background music";
 	s_options_bgmusic_box.generic.callback	= UpdateBGMusicFunc;
 	s_options_bgmusic_box.itemnames		= background_music_items;
@@ -2263,7 +2251,7 @@ void Options_MenuInit( void )
 
 	s_options_doppler_effect_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_doppler_effect_list.generic.x		= 0;
-	s_options_doppler_effect_list.generic.y		= FONTSCALE*160*scale;
+	s_options_doppler_effect_list.generic.y		= FONTSCALE*150*scale;
 	s_options_doppler_effect_list.generic.name	= "doppler sound effect";
 	s_options_doppler_effect_list.generic.callback = UpdateDopplerEffectFunc;
 	s_options_doppler_effect_list.itemnames		= doppler_effect_items;
@@ -2271,11 +2259,19 @@ void Options_MenuInit( void )
 
 	s_options_sensitivity_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sensitivity_slider.generic.x		= 0;
-	s_options_sensitivity_slider.generic.y		= FONTSCALE*170*scale;
+	s_options_sensitivity_slider.generic.y		= FONTSCALE*160*scale;
 	s_options_sensitivity_slider.generic.name	= "mouse speed";
 	s_options_sensitivity_slider.generic.callback = MouseSpeedFunc;
 	s_options_sensitivity_slider.minvalue		= 2;
 	s_options_sensitivity_slider.maxvalue		= 22;
+
+	s_options_menu_sensitivity_slider.generic.type	= MTYPE_SLIDER;
+	s_options_menu_sensitivity_slider.generic.x		= 0;
+	s_options_menu_sensitivity_slider.generic.y		= FONTSCALE*170*scale;
+	s_options_menu_sensitivity_slider.generic.name	= "menu mouse speed";
+	s_options_menu_sensitivity_slider.generic.callback = MenuMouseSpeedFunc;
+	s_options_menu_sensitivity_slider.minvalue		= 2;
+	s_options_menu_sensitivity_slider.maxvalue		= 22;
 
 	s_options_smoothing_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_smoothing_box.generic.x	= 0;
@@ -2376,7 +2372,6 @@ void Options_MenuInit( void )
 	ControlsSetMenuItemValues();
 
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_customize_options_action );
-	Menu_AddItem( &s_options_menu, ( void * ) &s_options_shaders_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_shadows_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_dynamic_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_paindist_box );
@@ -2391,6 +2386,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_bgmusic_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_doppler_effect_list );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_sensitivity_slider );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_menu_sensitivity_slider );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_smoothing_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_alwaysrun_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_invertmouse_box );
