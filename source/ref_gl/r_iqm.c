@@ -570,7 +570,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	return true;
 }
 
-float pitch;
+float modelpitch;
 void GL_AnimateIQMFrame(float curframe, int nextframe)
 {
 	int i, j;
@@ -610,7 +610,7 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 				vec3_t basePosition, oldPosition, newPosition;
 				VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
 				VectorSet(trans, 0, 0, 0);
-				Maxtrix3x4GenJointRotate(&rmat, pitch, rot, trans);
+				Maxtrix3x4GenJointRotate(&rmat, modelpitch, rot, trans);
 				
 				// concatenate the rotation with the bone
 				Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
@@ -641,7 +641,7 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 				vec3_t basePosition, oldPosition, newPosition;
 				VectorSet(rot, 0, 1, 0);
 				VectorSet(trans, 0, 0, 0);
-				Maxtrix3x4GenJointRotate(&rmat, -pitch, rot, trans);
+				Maxtrix3x4GenJointRotate(&rmat, -modelpitch, rot, trans);
 				
 				// concatenate the rotation with the bone
 				Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
@@ -1631,8 +1631,8 @@ void R_DrawINTERQUAKEMODEL ( void )
 		}
 	}
 
-	//pitch = 0.52 * sinf(rs_realtime); //use this for testing only
-	pitch = degreeToRadian(currententity->angles[PITCH]);
+	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
+	modelpitch = degreeToRadian(currententity->angles[PITCH]);
 
     qglPushMatrix ();
 	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
@@ -1847,8 +1847,8 @@ void R_DrawIQMCaster ( void )
 	if ( R_CullIQMModel() )
 		return;
 
-	//pitch = 0.52 * sinf(rs_realtime); //use this for testing only
-	pitch = degreeToRadian(currententity->angles[PITCH]);
+	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
+	modelpitch = degreeToRadian(currententity->angles[PITCH]);
 
     qglPushMatrix ();
 	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;

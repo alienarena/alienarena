@@ -740,7 +740,8 @@ qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipfl
 }
 
 int CL_PMpointcontents(vec3_t point);
-
+extern float modelpitch;
+extern double degreeToRadian(double degree);
 void R_DrawShadowVolume()
 {
 	dmdl_t *paliashdr;
@@ -831,6 +832,8 @@ void R_DrawShadowVolume()
 	else 
 	{
 		float time, frame;
+
+		modelpitch = degreeToRadian(currententity->angles[PITCH]);
 
 		//frame interpolation
 		time = (Sys_Milliseconds() - currententity->frametime) / 100;
