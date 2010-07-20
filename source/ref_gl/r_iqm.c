@@ -1051,7 +1051,7 @@ void GL_DrawIQMFrame(int skinnum)
 	}
 	else if(rs)
 	{	//render with shaders
-		
+
 		if (rs->stage && rs->stage->has_alpha)
 			depthmaskrscipt = true;
 
