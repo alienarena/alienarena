@@ -6201,7 +6201,8 @@ qboolean PlayerConfig_MenuInit( void )
 	scriptsloaded = Cvar_Get("scriptsloaded", "0", 0);
 	if(!scriptsloaded->value) 
 	{
-		Cvar_SetValue("scriptsloaded", 1); //this needs to be set on vid_restart
+		Cvar_SetValue("scriptsloaded", 1); //this needs to be reset on vid_restart
+		RS_ScanPathForScripts();
 		RS_LoadScript("scripts/models.rscript");
 		RS_LoadScript("scripts/caustics.rscript");
 		RS_LoadSpecialScripts();
