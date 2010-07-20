@@ -31,6 +31,7 @@ cvar_t	*m_filter;
 cvar_t	*in_mouse;
 cvar_t	*in_dgamouse;
 cvar_t	*in_joystick;
+cvar_t	*m_accel;
 
 void IN_MLookDown (void) 
 { 
