@@ -63,7 +63,8 @@ char mensaje[200];				   // variable de todo uso.
 char servidor[100];
 cUser user;
 bool joinflg;
-bool connectedToChannel = true;
+bool connectedToServer = false;
+bool connectedToChannel = false;
 bool canJoin = false;
 int	lastPing = 0;
 
@@ -482,11 +483,13 @@ BOOL CGalaxyDlg::OnInitDialog()
 		sockete.sendData(mensaje);
 		connectedToChannel = false;
 		m_status2.SetWindowText("connected to server");
+		connectedToServer = true;
 
 		sockete.getData();
 	}	
 	else {
 		m_status2.SetWindowText("Disconnected from chat channel...");
+		connectedToServer = false;
 	}
 	
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -1165,6 +1168,7 @@ void CGalaxyDlg::OnButton4()
 	connectedToChannel = false;
 	canJoin = false;
 	m_status2.SetWindowText("connected to server");
+	connectedToServer = true;
 	
 	sockete.getData();
 	//send the buffer to a messagebox
@@ -1178,6 +1182,11 @@ void CGalaxyDlg::OnButton4()
 void CGalaxyDlg::OnShowusers() 
 { 
  
+	if(connectedToServer)
+		sockete.sendData("JOIN #alienarena\n\r");
+	else
+		AfxMessageBox("Must connect to chat server first!");
+
 	return; //broken - fix later
 	response Response;
 
@@ -1429,6 +1438,8 @@ void CGalaxyDlg::OnJoin2()  //used from the menu pulldown, doesn't return pointe
 			if (!file) {
 				AfxMessageBox("Unable to locate crx.exe in this folder!");
 			}
+			else
+				WritePrivateProfileString("Galaxy", "exe", myCRXPath, "galaxy.ini");
 		}
 	}
 
@@ -1472,6 +1483,8 @@ void CGalaxyDlg::OnLaunch()
 			if (!file) {
 				AfxMessageBox("Unable to locate crx.exe in this folder!");
 			}
+			else
+				WritePrivateProfileString("Galaxy", "exe", myCRXPath, "galaxy.ini");
 		}
 	}
 	
@@ -1487,6 +1500,7 @@ void CGalaxyDlg::OnButton6()
 	m_status2.SetWindowText("Disconnected from chat channel...");
 	canJoin = false;
 	connectedToChannel = false;
+	connectedToServer = false;
 }
 
 void CGalaxyDlg::Configure()
@@ -1600,6 +1614,9 @@ void CGalaxyDlg::OnPlayersort()
 	LVITEM lvi;
 	char txt[128];
 
+	if(!refreshed)
+		return;
+
 	//destroy list
 	m_serverinfo.DeleteAllItems();
 
@@ -1676,6 +1693,9 @@ void CGalaxyDlg::OnPingsort()
 	int lowestPing;
 	LVITEM lvi;
 	char txt[128];
+
+	if(!refreshed)
+		return;
 
 	//destroy list
 	m_serverinfo.DeleteAllItems();
