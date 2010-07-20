@@ -52,13 +52,13 @@ The call to battle beats through your heart and soul like the drums of war. Will
 
 (Windows)
 
-Installation has been made very simple.  After downloading, simply click on the .exe file and the installation will begin.  Follow the instructions of the Installshield setup program. If you are running Windows 2000 or XP, you should have administrative privileges.  If not, you may get some errors when the program tries to write the uninstall information to the registry.  If so, simply click "ignore", and the installation will continue without problem.
+Installation has been made very simple.  After downloading, simply click on the .exe file and the installation will begin.  Follow the instructions of the Innosetup program. If you are running Windows, you should have administrative privileges.  If not, you may get some errors when the program tries to write the uninstall information to the registry.  If so, simply click "ignore", and the installation will continue without problem.
 
-Once finished, you can click on the Alien Arena icon that has been placed on your desktop to start a game or the Alien Arena Server icon to start a dedicated server.
+Once finished, you can click on the Alien Arena icon that has been placed on your desktop to start a game or the Alien Arena Chat icon to join the IRC chat channel.
 
 (Linux)
 
-Simply unzip the archive in your /usr/local/games folder or wherever you wish to place the game.
+Simply unzip the archive in your HOME directory.  It is recommended to always do this.  
 
 Type ./crx in the shell to run the game, or ./crded to start a dedicated server or use the shortcuts installed in the menu.  OpenGL for graphics and OpenAL 1.1 for sound, are required.
 
@@ -134,7 +134,7 @@ For Linux users, you simply just need to delete your Alien Arena folder.
 There is a long list of credits - ALIEN ARENA is greatly indebted to the following for it's creation and completion:
 
 Design:  John Diamond with input from the community at large.
-Programming:  John Diamond, Jim Bower, Dave Carter, "BlackIce", Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia.
+Programming:  John Diamond, Jim Bower, Dave Stewart, "BlackIce", Lee Salzman, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia.
 Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
 Maps:  John Diamond, Dennis "xEMPx" Zedlach
 Textures and Artwork:  John Diamond, Dennis "xEMPx" Zedlach, Enki, Adam Saizlai, Yves Allaire
@@ -146,9 +146,9 @@ Linux Port: Shane Bayer, John Diamond, Jim Bower
 FreeBSD port: "Ale"
 Gentoo portage: Paul Bredbury
 Debian packaging: Andres Mejia
-Alien Arena IRC Channel: Jon "Astralsin" Ward
+Alien Arena IRC Channel: Victor B "Bonfire" (visit us @ irc.planetarena.org #alienarena)
 
-There are other major contributions from the community from QuakeSrc.org, including MrG, Jay Dolan, Psychospaz, Barnes, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  A very special thanks goes out to the community members who contributed to the crosshair and hud contest. A full list of those contributors can be found in the in-game credit list.
+There are other major contributions from the gaming community, including MrG, Jay Dolan, Psychospaz, Barnes, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, and Carbon14.  Without this wonderful group of people, and the release of their accomplishments, many features would not have been possible.  A special thanks for Lee Salzman for creating the new model format(IQM) and his assistance in getting it working for us.  A very special thanks goes out to the community members who contributed to the crosshair and hud contest. A full list of those contributors can be found in the in-game credit list.
 
 8.	COPYRIGHT INFORMATION
 

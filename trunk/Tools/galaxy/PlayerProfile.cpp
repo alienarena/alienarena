@@ -68,8 +68,8 @@ BOOL PlayerProfile::OnInitDialog()
 
 	//initialize drop list
 	m_ircselectserver.AddString("irc.planetarena.org");
-	m_ircselectserver.AddString("irc.efnet.net");
-	m_ircselectserver.AddString("irc.anynet.org");
+	m_ircselectserver.AddString("irc2.planetarena.org");
+	m_ircselectserver.AddString("irc3.planetarena.org");
 
 	GetPrivateProfileString("Galaxy", "chatstart", "true", user.joinatstart, 12, "galaxy.ini");
 	//set the join flag for the dialog bool
@@ -146,12 +146,12 @@ void PlayerProfile::OnSelchangeIrcserver()
 		strcpy(servidor, "irc.planetarena.org");
 		break;
 	case 1:
-		WritePrivateProfileString("Galaxy", "server", "irc.efnet.net", "galaxy.ini");
-		strcpy(servidor, "irc.efnet.net");
+		WritePrivateProfileString("Galaxy", "server", "irc2.planetarena.org", "galaxy.ini");
+		strcpy(servidor, "irc2.planetarena.org");
 		break;
 	case 2:
-		WritePrivateProfileString("Galaxy", "server", "irc.anynet.org", "galaxy.ini");
-		strcpy(servidor, "irc.anynet.org");
+		WritePrivateProfileString("Galaxy", "server", "irc3.planetarena.org", "galaxy.ini");
+		strcpy(servidor, "irc3.planetarena.org");
 		break;
 	default:
 		WritePrivateProfileString("Galaxy", "server", "irc.planetarena.org", "galaxy.ini");
