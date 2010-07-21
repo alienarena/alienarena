@@ -16,13 +16,13 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName=c:/Alien Arena 7_40
+DefaultDirName=c:/Alien Arena 7_45
 DefaultGroupName={#MyAppName}
 LicenseFile=C:\Alien Arena 2007\docs\license.txt
 InfoBeforeFile=C:\Alien Arena 2007\docs\README.txt
 InfoAfterFile=
 OutputDir=C:\Alien Arena Files\Bundle\Bundle
-OutputBaseFilename=alienarena-20100429
+OutputBaseFilename=alienarena-20100720
 SetupIconFile=C:\Alien Arena 2007\Aa1.ico
 Compression=lzma
 SolidCompression=true
@@ -208,7 +208,6 @@ Source: ..\..\..\Alien Arena 2007\data1\levelshots\tca-zion.txt; DestDir: {app}\
 Source: ..\..\..\Alien Arena 2007\data1\maps\aoa-atlantis.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\aoa-morpheus.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\aoa-zorn.bsp; DestDir: {app}\data1\maps
-Source: ..\..\..\Alien Arena 2007\data1\maps\compile.bat; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\cp-grindery.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\ctf-atlantis.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\ctf-chromium.bsp; DestDir: {app}\data1\maps
@@ -342,7 +341,6 @@ Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_bfg\skin.jpg; DestDir: 
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_bfg\skin_normal.tga; DestDir: {app}\data1\models\weapons\v_bfg
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_bfg\tris.md2; DestDir: {app}\data1\models\weapons\v_bfg
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_blast\skin.jpg; DestDir: {app}\data1\models\weapons\v_blast
-Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_blast\skin_normal.tga; DestDir: {app}\data1\models\weapons\v_blast
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_blast\tris.md2; DestDir: {app}\data1\models\weapons\v_blast
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_chain\skin.jpg; DestDir: {app}\data1\models\weapons\v_chain
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_chain\skin_normal.tga; DestDir: {app}\data1\models\weapons\v_chain
@@ -771,19 +769,11 @@ Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_sshotgun.md2; 
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_violator.md2; DestDir: {app}\data1\players\martianenforcer
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\weapon.md2; DestDir: {app}\data1\players\martianenforcer
 Source: ..\..\..\Alien Arena 2007\data1\scripts\caustics.rscript; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\chrome.rscript; DestDir: {app}\data1\scripts
 Source: ..\..\..\Alien Arena 2007\data1\scripts\consoles.rscript; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\electrics.rscript; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\electrics2.rscript; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\electrics3.rscript; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\fragment_shader.glsl; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\gunmen.rscript; DestDir: {app}\data1\scripts
 Source: ..\..\..\Alien Arena 2007\data1\scripts\menu.rscript; DestDir: {app}\data1\scripts
 Source: ..\..\..\Alien Arena 2007\data1\scripts\models.rscript; DestDir: {app}\data1\scripts
 Source: ..\..\..\Alien Arena 2007\data1\scripts\players.rscript; DestDir: {app}\data1\scripts
 Source: ..\..\..\Alien Arena 2007\data1\scripts\textures.rscript; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\water.rscript; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\water1.arbf; DestDir: {app}\data1\scripts
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\aoa-atlantis.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\aoa-morpheus.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\aoa-zorn.rscript; DestDir: {app}\data1\scripts\maps
@@ -1451,7 +1441,6 @@ Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_violator\skin.jpg; Dest
 Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_violator\tris.md2; DestDir: {app}\data1\models\weapons\v_violator
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\factorybricks1.tga; DestDir: {app}\data1\textures\arena9
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\factorybricks1_nm.tga; DestDir: {app}\data1\textures\arena9
-Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\factorybricks1_sm.tga; DestDir: {app}\data1\textures\arena9
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\floor1.tga; DestDir: {app}\data1\textures\arena9
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\floor1_nm.tga; DestDir: {app}\data1\textures\arena9
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\floor2.tga; DestDir: {app}\data1\textures\arena9
@@ -1744,8 +1733,6 @@ Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\lod2.md2; DestDir:
 Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\lod1.md2; DestDir: {app}\data1\players\martiancyborg
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\lod2.md2; DestDir: {app}\data1\players\martianenforcer
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\lod1.md2; DestDir: {app}\data1\players\martianenforcer
-Source: ..\..\..\Alien Arena 2007\data1\scripts\fragment_shader.glsl; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\vertex_shader.glsl; DestDir: {app}\data1\scripts
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\skullite_hm.tga; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena6\bricks1_hm.tga; DestDir: {app}\data1\textures\arena6
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\metaltrim2_hm.tga; DestDir: {app}\data1\textures\arena8
@@ -2067,8 +2054,6 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\lightgid2.tga; DestDir: 
 Source: ..\..\..\Alien Arena 2007\data1\pics\timer.tga; DestDir: {app}\data1\pics
 Source: ..\..\..\Alien Arena 2007\data1\particles\watersplash.tga; DestDir: {app}\data1\particles
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-vesuvius.mus; DestDir: {app}\data1\maps\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\water_fragment_shader.glsl; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\water_vertex_shader.glsl; DestDir: {app}\data1\scripts
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena3\water_nm.tga; DestDir: {app}\data1\textures\arena3
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\slime_nm.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\water\clearwater_nm.tga; DestDir: {app}\data1\textures\water
@@ -2185,10 +2170,6 @@ Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-invasion.jpg; DestDir: {ap
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\aoa-frost2k9.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-deimos2k9.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-deimos2k9.jpg; DestDir: {app}\data1\levelshots
-Source: ..\..\..\Alien Arena 2007\data1\scripts\fb_fragment_shader.glsl; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\fb_vertex_shader.glsl; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\mesh_fragment_shader.glsl; DestDir: {app}\data1\scripts
-Source: ..\..\..\Alien Arena 2007\data1\scripts\mesh_vertex_shader.glsl; DestDir: {app}\data1\scripts
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-chasmatic2k9.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-invasion.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-warmachine2k9.rscript; DestDir: {app}\data1\scripts\maps
@@ -2415,7 +2396,6 @@ Source: ..\..\..\Alien Arena 2007\data1\players\commander\tris.md2; DestDir: {ap
 Source: ..\..\..\Alien Arena 2007\data1\players\commander\red_i.jpg; DestDir: {app}\data1\players\commander
 Source: ..\..\..\Alien Arena 2007\data1\players\commander\blue_i.jpg; DestDir: {app}\data1\players\commander
 Source: ..\..\..\Alien Arena 2007\data1\players\commander\default_i.jpg; DestDir: {app}\data1\players\commander
-Source: ..\..\..\Alien Arena 2007\data1\players\commander\default_normal.jpg; DestDir: {app}\data1\players\commander
 Source: ..\..\..\Alien Arena 2007\data1\players\commander\red.jpg; DestDir: {app}\data1\players\commander
 Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_violator.md2; DestDir: {app}\data1\players\commander
 Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_sshotgun.md2; DestDir: {app}\data1\players\commander
@@ -3012,6 +2992,173 @@ Source: ..\..\..\Alien Arena 2007\GSAdminC.exe; DestDir: {app}
 Source: ..\..\..\Alien Arena 2007\botinfo\dm-warmachine2k10.tmp; DestDir: {app}\botinfo
 Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\weapon.jpg; DestDir: {app}\data1\players\martiancyborg
 Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\weapon.jpg; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\tris.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\lod2.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\lod1.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\helmet.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\default_normal.tga; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_blaster.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\weapon.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_hyperblaster.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_violator.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_railgun.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_shotgun.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_sshotgun.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_rlauncher.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_chaingun.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_bfg.iqm; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_sshotgun.skin; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_hyperblaster.skin; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_bfg.skin; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_chaingun.skin; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_shotgun.skin; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_rlauncher.skin; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_railgun.skin; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_violator.skin; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\w_blaster.skin; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\weapon.jpg; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\lod2.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\lod1.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\weapon.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_blaster.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_shotgun.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_sshotgun.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_hyperblaster.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_violator.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_chaingun.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_railgun.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_rlauncher.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_bfg.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\tris.iqm; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\default_normal.tga; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_sshotgun.skin; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_hyperblaster.skin; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_bfg.skin; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_chaingun.skin; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_shotgun.skin; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_rlauncher.skin; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_railgun.skin; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_violator.skin; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\lauren\w_blaster.skin; DestDir: {app}\data1\players\lauren
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\weapon.jpg; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\lod2.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\lod1.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\tris.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\weapon.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_blaster.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_chaingun.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_hyperblaster.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_violator.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_sshotgun.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_railgun.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_rlauncher.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_bfg.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_shotgun.iqm; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_sshotgun.skin; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_hyperblaster.skin; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_bfg.skin; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_chaingun.skin; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_shotgun.skin; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_rlauncher.skin; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_railgun.skin; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_violator.skin; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\w_blaster.skin; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\weapon.jpg; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\lod2.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\lod1.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\tris.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\weapon.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_blaster.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_chaingun.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_hyperblaster.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_violator.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_railgun.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_sshotgun.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_shotgun.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_rlauncher.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_bfg.iqm; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_sshotgun.skin; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_hyperblaster.skin; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_bfg.skin; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_chaingun.skin; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_shotgun.skin; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_rlauncher.skin; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_railgun.skin; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_violator.skin; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\players\slashbot\w_blaster.skin; DestDir: {app}\data1\players\slashbot
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena10\stonewall2_nm.tga; DestDir: {app}\data1\textures\arena10
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena10\stonewall2_hm.tga; DestDir: {app}\data1\textures\arena10
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena10\bluetile_hm.tga; DestDir: {app}\data1\textures\arena10
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena10\bluetile.tga; DestDir: {app}\data1\textures\arena10
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena10\bluetile_nm.tga; DestDir: {app}\data1\textures\arena10
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\pulsar_normal.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\ribtube_normal.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\bigribpipe_normal.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\bigribpipe.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\martian_normal.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\martian.jpg; DestDir: {app}\data1\maps\meshes
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\bigribtube_normal.jpg; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\bigribtube.jpg; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_blast\skin_normal.jpg; DestDir: {app}\data1\models\weapons\v_blast
+Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_blast\skin.jpg; DestDir: {app}\data1\models\weapons\v_blast
+Source: ..\..\..\Alien Arena 2007\data1\models\weapons\v_blast\cover.md2; DestDir: {app}\data1\models\weapons\v_blast
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\helmet.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\helmet.md2; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\weapon.jpg; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\lod2.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\lod1.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\tris.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\default_normal.tga; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_chaingun.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\weapon.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_blaster.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_shotgun.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_sshotgun.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_hyperblaster.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_violator.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_railgun.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_rlauncher.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_bfg.iqm; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_sshotgun.skin; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_hyperblaster.skin; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_bfg.skin; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_chaingun.skin; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_shotgun.skin; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_rlauncher.skin; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_railgun.skin; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_violator.skin; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\enforcer\w_blaster.skin; DestDir: {app}\data1\players\enforcer
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\weapon.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_hyperblaster.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_blaster.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_chaingun.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_sshotgun.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_railgun.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_shotgun.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_violator.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_rlauncher.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_bfg.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\lod2.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\lod1.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\helmet.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\tris.iqm; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_sshotgun.skin; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_hyperblaster.skin; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_bfg.skin; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_chaingun.skin; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_shotgun.skin; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_rlauncher.skin; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_railgun.skin; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_violator.skin; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\martiancyborg\w_blaster.skin; DestDir: {app}\data1\players\martiancyborg
+Source: ..\..\..\Alien Arena 2007\data1\players\commander\default_normal.tga; DestDir: {app}\data1\players\commander
+Source: ..\..\..\Alien Arena 2007\data1\players\martianenforcer\gamara_normal.tga; DestDir: {app}\data1\players\martianenforcer
+Source: ..\..\..\Alien Arena 2007\data1\models\items\adrenaline\skin_normal.tga; DestDir: {app}\data1\models\items\adrenaline
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\gothic\lamp2b_fx.tga; DestDir: {app}\data1\maps\meshes\gothic
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\gothic\lamp2b.tga; DestDir: {app}\data1\maps\meshes\gothic
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\gothic\lamp2_normal.tga; DestDir: {app}\data1\maps\meshes\gothic
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\gothic\lamp2_fx.tga; DestDir: {app}\data1\maps\meshes\gothic
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\gothic\lamp2.tga; DestDir: {app}\data1\maps\meshes\gothic
 
 [Icons]
 Name: {group}\{cm:ProgramOnTheWeb,{#MyAppName}}; Filename: {#MyAppURL}
@@ -3182,6 +3329,7 @@ Name: {app}\arena; Type: filesandordirs
 Name: {app}\Aa1.ico; Type: files
 Name: {app}\crx.exe; Type: files
 Name: {app}\fce16.dll; Type: files
+Name: {win}\galaxy.ini; Type: files
 
 #include ".\Source\bundlescr.iss"
 [Run]
