@@ -1,0 +1,222 @@
+ARÈNE ÉTRANGÈRE 2007
+
+1. Conditions 3. De Système De l'Introduction 2. Obtenant
+Commencées
+* Installation
+* Commandes De base
+* Deathmatch
+* Reliant à un serveur 4 l'information de copyright du BOT 5. du CÆ
+de CodeRED
+
+
+1. INTRODUCTION
+
+L'ARÈNE ÉTRANGÈRE 2007 est un tireur en ligne de deathmatch
+de la personne 3D premier autonome ouvré du code source original du
+tremblement II et du tremblement III, libéré par le logiciel
+d'identification sous le permis de GPL. Avec des dispositifs
+comprenant 32 graphiques de bit, le nouveau moteur de particules et
+les effets, fleurs légères, eau r3fléchissante, salut des textures
+de résolution et des peaux, salut de poly modèles, cartes de tache,
+l'ARÈNE ÉTRANGÈRE pousse l'enveloppe de la beauté graphique
+rivalisant les jeux supérieurs de today.s.  
+
+Le jeu comporte 37 niveaux, qui peuvent être joués en ligne contre
+d'autres joueurs, ou contre établis dans des bots de CodeRED.  
+
+L'arène étrangère offre CTF, AOA(All hors du mode d'assaut), en
+lequel les joueurs peuvent s'élever dans des véhicules pour faire la
+bataille, le Deathball, et l'assaut de noyau d'équipe. Entrez
+simplement dans le menu multijoueur pour mettre en marche un serveur,
+changez les règles de jeu, et choisissez une carte pour jouer dessus.
+Vous pouvez également choisir parmi le mutators(instagib cinq
+différent, le grav, le regen, et le vampire d'arène de fusée,
+excessifs, bas) pour adapter plus loin votre expérience de jeu.
+
+2. CONDITIONS DE SYSTÈME
+
+accélérateur de l'espace de disque dur de mb de la RAM 500 de
+mb de 1 gigahertz 256 3D
+
+3. OBTENIR COMMENCÉ
+
+1. INSTALLATION
+
+(Windows)
+
+L'installation a été rendue très simple. Après
+téléchargement, simplement le clic sur le dossier
+d'alienarena2007.exe et l'installation commenceront. Suivez les
+instructions du programme d'installation d'Installshield. Si vous
+courez Windows 2000 ou XP, vous devriez avoir des privilèges
+administratifs. Si pas, vous pouvez obtenir quelques erreurs quand le
+programme essaye d'écrire l'information d'uninstall à
+l'enregistrement. Si oui, simplement l'ignore. de clic, et
+l'installation continueront sans problème.  
+
+Une fois que fini, vous pouvez cliquer sur l'icône
+étrangère d'arène qui a été placée sur votre dessus de bureau
+pour commencer un jeu ou l'icône étrangère de serveur d'arène pour
+mettre en marche un serveur consacré.
+
+(Linux)
+
+Ouvrez simplement alienarena2007-linux20070121-x86.zip dans
+votre chemise d'usr/local/games ou partout où vous souhaitez placer
+le jeu.  
+
+Dactylographiez le /AlienArena pour courir le jeu, ou le
+/AlienArenaDedicated pour mettre en marche un serveur consacré ou
+pour utiliser les raccourcis installés dans le menu.
+
+Les fichiers source sont inclus, ainsi vous pouvez compiler les
+binaries vous-même si neccessary. Veuillez visiter le forum si vous
+avez n'importe quelles questions concernant ceci.
+
+2. LE BASIC COMMANDE
+
+L'ARÈNE ÉTRANGÈRE fonctionne infiniment comme le
+tremblement 2/3, à quelques exceptions notables.
+
+Le joueur aura les armes suivantes :
+
+1. Vaporizer Futé Étranger D'Étranger Du Disrupteur 8. Du Pistolet
+7. Du Lanceur 6. À chaînes De Fusée Du Lanceur 5. De Flamme Du
+Pistolet 4. Du Disrupteur 3. D'Étranger De la Sableuse 2.
+
+Les armes ont maintenant également des modes alternatifs de
+mise à feu. Dans vous le menu de commandes, choisissent votre clef
+secondaire du feu et ceci vous permettra d'employer ces modes.  
+
+Il y a de nouveaux powerups tels que la rapidité et sproing, en plus
+des dommages vénérables de quadruple et invulerabilty.  
+
+Le joueur aura également une lampe-torche, qui est toujours
+présente, et très utile. La clef de F. active et met la
+lampe-torche, ou vous pouvez lier quelque clef vous souhaitiez à la
+"lampe-torche" qui la tournera marche-arrêt.
+
+Il serait recommandé que vous changiez les arrangements visuels pour
+cependant vous souhait pour regarder le jeu, et ce qui vous donne
+l'exécution raisonnable. Dans Linux, vous pouvez devoir
+dactylographier l'"vid_restart" à la console afin qu'ils puissent
+pour entrer en vigueur, selon votre système et version de X vous
+fonctionnent. Les arrangements de défaut du jeu sont à un mi
+arrangement de gamme, ainsi essayez de tordre eux ou des effets
+d'adding/removing selon votre framerate. Si vous souhaitez voir votre
+framerate, vous pouvez dactylographier "placez les cl_drawfps 1" au
+console(brought employant vers le bas la clef de `).  
+
+L'ARÈNE ÉTRANGÈRE tient compte également des noms colorés justes
+comme le tremblement 3, en utilisant ^ le caractère suivi d'un nombre
+pour placer la couleur.
+
+EXÉCUTION DES NIVEAUX
+
+Dans l'arène étrangère vous pouvez jouer un tournoi simple
+de joueur où votre volonté de but devoir atteindre le fraglimit
+avant un BOT . Si vous échouez, vous serez forcé de répéter le
+niveau jusqu'à ce que vous . Ces règles peuvent être changées dans
+le système de menu. Vous pouvez également jouer des personnes en
+ligne, où votre but est d'atteindre le fraglimit avant vos
+adversaires, ou en marquant les la plupart des frags avant le délai
+est vers le haut.
+
+En mode de CTF, vous serez sur une équipe, et essayer de capturer le
+drapeau de l'ennemi et de le renvoyer à l'endroit de votre propre
+drapeau. L'équipe atteignant la limite de capture d'abord, victoires.
+
+Dans Deathball, le but est de marquer autant de points comme possible,
+en tuant vos adversaires, ou en trouvant la boule et en la tirant dans
+les frags du goal(worth 10). Quand un joueur est à l'intérieur de du
+deathball, il est defensless.
+
+Dans l'assaut de noyau d'équipe, votre but est de neutraliser vos
+noeuds ennemis de puissance d'équipes, détruisent alors le noeud
+central d'araignée. Vous pouvez seulement faire des dommages au noeud
+d'araignée quand tous autres noeuds de puissance sont handicapés.
+
+SE RELIER À un SERVEUR
+
+Vous pouvez ou choisi "joindre le serveur" du menu
+"multijoueur" et choisir un serveur dans la liste, ou vous pouvez
+employer le navigateur de serveur de galaxie de CodeRED seulement).
+Dans le navigateur de dans-jeu, des serveurs sont énumérés par
+ordre de cinglement, avec le plus bas cinglement au dessus de la
+liste.  
+
+4. LE BOT DU CÆ DE CODERED
+
+Bots sont construit dans le dispositif de l'ARÈNE ÉTRANGÈRE
+2007. Plusieurs bots sont déjà configurés pour les jeux
+multijoueurs, et dans l'arène étrangère, chaque niveau a un dossier
+spécifique de BOT pour quels bots doivent être joués dans chaque
+niveau.
+
+Pour ajouter un BOT, dactylographiez "le nom model/ski d'addbot de
+sv"., et pour enlever des nae d'un removebot du BOT type".sv".. Vous
+pouvez également ajouter des bots dans le menu, dans le secteur de
+drapeaux de deathmatch/bots.
+
+Dans vos options de Deathmatch, vous pouvez configurer d'autres
+options telles que causer, économie de noeud, et viser.
+
+Ces bots sont entièrement configurables en utilisant le programme de
+Botconfigurator. Vous pouvez changer leurs niveaux de compétence,
+exactitude, arme favorisant, conscience, et cordes de causerie.
+
+Des bots du niveau de compétence il est tout à fait facile battre 0.
+Les bots du niveau de compétence 1 sont peu des plus durs, et font
+plus d'esquiver et sont plus précis. Les bots du niveau de
+compétence 2  esquiver plus avançé, fusée sautant, et sont bien
+plus précis. Les bots du niveau 3 sont extrêmement habiles, et
+mitrailleront, et des sauts en rase-mottes de bombardement autour du
+niveau. Ils de volonté taunt également vous après le massacre vous.
+Si dans l'arène étrangère, vous jouez le tournoi simple de joueur
+contre les bots, choix "facile" ferez tout le niveau de compétence de
+bots 0. Le choix de la "normale" les laissera à quelque niveau ils
+soient configuré. Le choix "dur" les fera tous relever 1 niveau de
+compétence.
+
+5. CRÉDITS
+
+Il y a une longue liste de crédits - l'ARÈNE ÉTRANGÈRE
+2007 est considérablement endettée au suivant pour la création et
+l'accomplissement d'it.s :
+
+Conception : Diamant de John avec l'entrée de la communauté à la
+grande programmation : Diamant de John, vainqueur Luchits, Shane
+Bayer, janv. Rafaj, modèles Élégants de Jackson et peaux :
+Diamant De John, Cartes D'Alex Perez : Textures De Diamant De John :
+Bruits De Diamant De John : Diamant De John, Peu de Club De Musique,
+Musique Saine De Gardes forestiers : PuzzleFighter, WhiteLipper,
+productions en bois, et port et installation de SoundRangers Linux :
+La Manche Étrangère d'IRC D'Arène De Shane Bayer : Astralsin
+
+Il y a d'autres contributions principales de la communauté de
+QuakeSrc.org, y compris MrG, Psychospaz, Jalisko, Heffo, Chayfo,
+Dukey, Jitspoe, Knightmare, et Carbon14. Sans ce groupe de personnes
+merveilleux, et dégagement de leurs accomplissements, beaucoup de
+dispositifs n'auraient pas été possibles.  
+
+5. L'INFORMATION DE COPYRIGHT
+
+L'ARÈNE ÉTRANGÈRE 2007 et lui est contenu original sont
+copyright de divertissement de COR, LLC.  
+
+Le code source est libéré sous le permis de GPL et peut être
+employé ou modifié pour n'importe quel but, s'il aussi est libéré
+sous le permis de GPL.  
+
+Dans aucunes circonstances mettez en boîte l'ARÈNE ÉTRANGÈRE 2007
+soit vendu ou employé pour le bénéfice, sans consentement exprès
+de divertissement de COR. L'ARÈNE ÉTRANGÈRE 2007 peut être incluse
+en compilation libre CD.s et paquets semblables sans consentement, si
+les archives restent non modifiées.
+
+Le contenu original dans l'ARÈNE ÉTRANGÈRE 2007 peut être employé
+avec la permission pour tous les gratuitement buts.
+
+Contact : http://red.planetarena.org
+
+email : irritant@planetquake.com

@@ -1,0 +1,135 @@
+ALIEN ARENA 2007 (ARENA DE EXTRATERRESTRES 2007)
+
+1. Introducción
+2. Requisitos Para la Sistema
+3. Empezando
+	* Instalación
+	* Comandos Básicos
+	* Deathmatch
+	* Terminar Niveles
+	* Conectando con un servidor
+4. El ACE Bot de CodeRED
+5. Información del Copyright
+
+1. INTRODUCCIÓN
+
+ALIEN ARENA 2007 es un juego tiroteo de deathmatch sobre red con imágenes 3D. Este juego fue hecho de código original de Quake II y de Quake III, código distribuido por id Software bajo la licencia GPL. ALIEN ARENA 2007 tiene funciónes incluyendo imágenes de 32 bit, nuevo motor y efectos partículos, floraciones de luz, agua reflexiva, texturas y skins de alta resolución, modelos de alta polígono, y mapas de mancha. ALIEN ARENA empuja el nivel de gráficas hermosas que rivaliza juegos superiores de hoy día.
+
+El juego ofrece 37 niveles, que se pueden jugar sobre red contra otros jugadores, o contra los bots de CodeRED.
+
+Alien Arena ofrece CTF, AOA(All Out Assault (modo del asalto total)), en el cual los jugadores pueden subir en los vehículo para hacer batalla. También ofrece Deathball, y Team Core Assault (asalto de la base del equipo). Solamente entre al menú multiplayer, empieza un servidor, cambie las reglas del juego, y elija un mapa para jugar. Usted puede también seleccionar de cinco diverso mutators(instagib (muerte inmediata), rocket arena (arena de bazuca), excessive (excesivo), low grav (gravedad bajo), regen (regenardo), and vampire (vampiro)) para modificar más su diversión del juego.
+
+2. REQUISITOS PARA LA SISTEMA
+
+1 GHz
+256 MB RAM
+500 MB espacio de disco duro
+Tarjeta gráfica con acelerador 3D
+
+3. Empezando
+
+* INSTALACIÓN
+
+(Windows)
+
+La instalación se ha hecho muy simple. Después de bajar el juego, simplemente doble tecles el archivo de alienarena2007.exe y la instalación comenzará. Siga las instrucciones del programa Installshield. Si usted está usando Windows 2000 o Windows XP, usted debe de tener privilegios administrativos. Si no, el instalación puede conseguir algunos errores cuando el programa intenta escribir la información del uninstall al registro de Windows. Si es así simplemente eligen "ignore" del tecleo, y la instalación continuará sin problema.
+
+Cuando termine, usted puede doble teclar el icono de Alien Arena que se ha puesto en su tablero del escritorio para comenzar un juego o el icono de Alien Arena server para prender un servidor dedicado.
+
+(Linux)
+
+Desabroche simplemente alienarena2007-linux20070121-x86.zip en el directorio de /usr/local/games o dondequiera que usted desee poner el juego.
+
+Escribe el comando crx or ./crx para empezar a jugar, o el comando crded o ./crded para prender un servidor dedicado.
+
+El código original son incluidos, así que usted puede compilar los binaries usted mismo si es necesario. Visite por favor el foro si usted tiene cualquier pregunta con respecto a esto.
+
+* COMANDOS BÁSICOS
+
+ALIEN ARENA trabaja mucho como Quake 2/3, con algunas excepciones notables.
+
+El jugador tendrá las armas siguientes:
+
+1.	Blaster (Arenador)
+2.	Alien Disruptor (Interruptor de Extraterrestres)
+3.	Chaingun (Cañón Gatling)
+4.	Flame Thrower (Lanzallamas)
+5.	Rocket Launcher (Bazuca)
+6.	Alien Smart Gun (Pistola Inteligente de Extraterrestres)
+7.	Disruptor (Interruptor)
+8.	Alien Vaporizer (Vaporizador de Extraterrestres)
+
+Las armas ahora también tienen modos alternos de disparo. En el menú de controles, selecciona su llave secundaria de disparo y éste permitirá que usted utilice estos modos.
+
+Hay nuevos powerups también como haste (rapidez) y sproing (saltador), en adición de venerable del quad damage (cuadrángulo daño) y del invulnerability (invulnerabilidad).
+
+El jugador también tendrá una linterna, que está siempre presente, y muy útil. La llave del "F" activa y desactiva la linterna, o usted puede atar cualquier llave usted desea a "linterna" que le dará vuelta por intervalos.
+
+Sería recomendable qué usted cambie los ajustes video a lo qué deseas, y qué le da funcionamiento razonable. En Linux, usted puede tener que mecanografiar el "vid_restart" en la consola para que los combios toman effecto, dependiendo de su sistema y versión de X qué su sistema de Linux esta manejando. Si usted desea ver su framerate, usted puede mecanografiar "set cl_drawfps 1" en el console(sacado cuando usas la llave `).
+
+ALIEN ARENA también permite los nombres coloreados justos como Quake 3, usando el carácter ^ seguido por un número para fijar el color.
+
+TERMINAR NIVELES
+
+En Alien Arena, usted puedes jugar un torneo de jugador solo donde lo hace su voluntad de alcanzar el fraglimit antes de un BOT. Si usted falla, le forzarán repetir el nivel hasta que usted lo hace. Estas reglas se pueden cambiar en el sistema del menú. Usted puedes también jugar a gente sobre red, donde su meta es a alcanzar el fraglimit antes de sus opositores, o anotando la mayoría de los frags antes del límite de tiempo se termine.
+
+En modo de CTF, usted estará en un equipo, y intentar capturar la bandera del enemigo y volverla a la localización de su propia bandera. El equipo que alcanza el límite de la captura primero triunfan.
+
+En Deathball, la meta es anotar tantos puntos como sea posible, matando a sus opositores, o encontrando la deathball (bola) y encajar la deathball a la porteria del equipo rival, ganando 10 puntos para cada gol. Cuando un jugador está dentro del deathball, él es indefenso.
+
+En Team Core Assault (asalto de la base del equipo), su meta es inhabilitar los nodos del enemigo, y despues destruyír el nodo central de araña del enemigo. Usted puede hacer solamente daño al nodo de la araña cuando el resto de los nodos del enemigo no tienen energía.
+
+* CONNECTANDO CON UN SERVIDOR
+
+Usted puede selectar "join server" del menú "multiplayer" y seleccionar un servidor en la lista, o usted puede utilizar el CodeRED Galaxy browser de servidores (Windows solamente). En el browser del juego, los servidores se enumeran en la orden del ping, con el ping más bajo primero en la lista.
+
+4. EL ACE BOT DE CODERED
+
+Bots son construido para ALIEN ARENA 2007. Varios bots estan configurado para los juegos multiplayer, y en Alien Arena, cada nivel tiene un archivo específico del BOT para qué bots deben ser jugados en cada nivel.
+
+Para agregar un BOT, mecanografíe "sv addbot name model/skin" y para quitar un BOT mecanografíe "sv removebot name". La palabra "name" es el nombre del BOT. Usted puede también agregar bots en el menú, en el área de las banderas de deathmatch/bots.
+
+En sus opciones de Deathmatch, usted puede configurar otras opciones tales como chatting (charla), node saving (ahorro del nodo), y aiming (apuntar).
+
+Estos bots son completamente configurables con el programa de Botconfigurator. Usted puede cambiar sus niveles de habilidad, exactitud, la arma favoreciendo, el conocimiento, y secuencias de la charla.
+
+Los bots del nivel de habilidad 0 son absolutamente fáciles de ganar. Los bots del nivel de habilidad 1 son poco más resistentes, y hacen más esquivar y son más exactos. Los bots del nivel de habilidad 2 el esquivar más avanzado, acen saltos con bazuca, y son aún más exactos. Los bots del nivel 3 son extremadamente expertos, y moveran a los lados, y saltaran a los lados alrededor del nivel. Ellos de la voluntad le hacen burla después que te maten. Si en Alien Arena, usted juega el torneo solo contra los bots, el seleccion "easy" (fácil) hará todo el nivel de habilidad de los bots 0. El seleccion "normal" los dejará en cualquier nivel que tienen en sus configuraciones. El seleccion "hard" (difícil) hará que todos los BOTS se levantan 1 nivel de habilidad.
+
+5. CRÉDITOS
+
+Hay una lista larga de créditos - ALIEN ARENA 2007 es grandemente endeudada al siguiente para la creación y la terminación de este juego:
+
+Diseño:  John Diamond con ayuda de la comunidad en grande.
+Programación:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia.
+Modelos y Skins:  John Diamond, Alex Perez, Shawn Keeth.
+Mapas:  John Diamond
+Texturas y Ilustraciones:  John Diamond, Enki, Adam Saizlai
+Sonidos:  John Diamond, Sound Rangers
+Música:  John Diamond, WhiteLipper, Wooden Productions, and SoundRangers
+Compatibilidad para Linux: Shane Bayer
+Compatibilidad para FreeBSD: "Ale"
+Gentoo portage: Paul Bredbury
+Empaquetando para Debian: Andres Mejia
+Canal IRC de Alien Arena: Astralsin
+
+Hay otras contribuciones importantes de la comunidad de QuakeSrc.org, incluyendo MrG, Psychospaz, Jalisko, Heffo, Chayfo, Dukey, Jitspoe, Knightmare, Barens, MH, y Carbon14.  Sin este grupo de gente maravilloso, y el distribución de sus trabajo, muchas funciones no habrían sido posibles. Un agradecimiento muy especial se va a los miembros de la comunidad queines contribuieron en la competencia de retículo y de hud. Un lista completo de los quien contribuieron se puede encontrar in la lista de créditos dentro el juego.
+
+5. INFORMACIÓN DEL COPYRIGHT
+
+ALIEN ARENA 2007 y sus contenidos originales es un copyright de COR Entertainment, LLC.
+
+El código de fuente se lanza debajo de la licencia del GPL y se puede utilizar o modificar para cualquier propósito, con tal que se lance también debajo de la licencia del GPL.
+
+Es solamente permitido a distribuir los datos del juego(modelos, mapas, texturas, sonidos, etc.) así completo, con el intención de que se va usar con Alien Arena. No es permitido a distribuir porciones individuales o artículos de los datos del juego sin el consentimiento de COR Entertainment, LLC.
+
+Los 'rcon' y 'svstat' escrituras ruby son Copyright (C) 2007 Tony Jackson y licenciado bajo el GNU Lesser General Public License. Una copia de este licencia se puede encontrar en http://www.gnu.org/copyleft/lgpl.html
+
+El trabajo de empaquetando para Debian es (C) 2007, Andres Mejia <mcitadel@gmail.com> y es licenciado bajo el GNU General Public License. Una copia de este licencia se puede encontrar en http://www.gnu.org/copyleft/gpl.html
+
+Bajo ningunas circunstancias ALIEN ARENA 2007 se puede vender o se puede utilizar para el beneficio monetario, sin consentimiento expreso de COR Entertainment. ALIEN ARENA 2007 se puede incluir en la compilación libres de CDs y paquetes similares sin consentimiento, con tal que los archivos sigan siendo sin modificar.
+
+El contenido original en ALIEN ARENA 2007 se puede utilizar con el permiso para cualquier propósito gratuitamente.
+
+Contacto: http://red.planetarena.org
+
+email: irritant@planetquake.com
