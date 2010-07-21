@@ -2021,6 +2021,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ref_gl\r_ragdoll.c"
+				>
+			</File>
+			<File
 				RelativePath="ref_gl\r_script.c"
 				>
 				<FileConfiguration
