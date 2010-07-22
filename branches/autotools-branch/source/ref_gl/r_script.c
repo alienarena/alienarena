@@ -1937,9 +1937,11 @@ extern cvar_t *cl_gun;
 void RS_LoadSpecialScripts (void) //the special cases of glass and water caustics
 {
 	rs_caustics = RS_FindScript("caustics");
-	RS_ReadyScript(rs_caustics);
+	if(rs_caustics)
+		RS_ReadyScript(rs_caustics);
 	rs_glass = RS_FindScript("glass");
-	RS_ReadyScript(rs_glass);
+	if(rs_glass)
+		RS_ReadyScript(rs_glass);
 }
 
 void RS_SpecialSurface (msurface_t *surf)
@@ -1948,7 +1950,8 @@ void RS_SpecialSurface (msurface_t *surf)
 
 	//Underwater Caustics
 	//hack - can't seem to find fix for when there is no gun model
-	if (surf->flags & SURF_UNDERWATER && cl_gun->value && r_lefthand->value != 2.0F)
+	if(rs_caustics)
+		if (surf->flags & SURF_UNDERWATER && cl_gun->value && r_lefthand->value != 2.0F)
 			RS_DrawSurfaceTexture(surf, rs_caustics);
 
 	//this was moved here to handle all textures shaders as well.

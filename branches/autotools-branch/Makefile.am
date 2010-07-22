@@ -26,6 +26,8 @@ ACLOCAL_AMFLAGS = -I m4
 # TODO: create "official" INSTALL, README, etc.
 # TODO: maybe create a subdirectory Makefile.am for install of arena/
 #   and doc/ files
+# TODO: maybe create a data1 Makefile.am for explicit install of files
+#
 EXTRA_DIST = \
 	alienarena.png \
 	arena/motd.txt \

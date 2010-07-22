@@ -372,8 +372,16 @@ void IN_MouseMove (usercmd_t *cmd)
 	}
 	else
 	{
+		if (cls.key_dest == key_menu)
+		{
+			mouse_x *= menu_sensitivity->value;
+			mouse_y *= menu_sensitivity->value;
+		}
+		else
+		{
 		mouse_x *= sensitivity->value;
 		mouse_y *= sensitivity->value;
+	}
 	}
 
 	//now to set the menu cursor
@@ -382,8 +390,8 @@ void IN_MouseMove (usercmd_t *cmd)
 		cursor.oldx = cursor.x;
 		cursor.oldy = cursor.y;
 
-		cursor.x += mouse_x * .25;//sensitivity->value/10;
-		cursor.y += mouse_y * .25;//sensitivity->value/10;
+		cursor.x += mouse_x * .35;
+		cursor.y += mouse_y * .35;
 
 		if (cursor.x!=cursor.oldx || cursor.y!=cursor.oldy)
 			cursor.mouseaction = true;
@@ -444,7 +452,6 @@ void IN_Init (void)
 {
 	// mouse variables
 	m_filter				= Cvar_Get ("m_filter",					"0",		0);
-	m_accel					= Cvar_Get ("m_accel",					"1",		CVAR_ARCHIVE);
     in_mouse				= Cvar_Get ("in_mouse",					"1",		CVAR_ARCHIVE);
 
 	// joystick variables

@@ -25,7 +25,7 @@
 #  Mac OSX Darwin 
 
 AC_PREREQ(2.61)
-AC_INIT([alienarena],[7.41alpha],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.45.1925],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -49,7 +49,8 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
-AM_PROG_CC_C_O
+AC_PROG_MKDIR_P
+dnl AM_PROG_CC_C_O
 
 # Unix/Linux host dedicated server only build option
 AC_MSG_CHECKING([for dedicated server only build])
@@ -176,18 +177,16 @@ AS_IF([ test "x${cond_build_darwin}" = xno ],
 	
 AS_IF([ test "x${cond_build_unix}" = xyes ],
 [
+dnl TODO: find real name of darwin framework dynamic lib
+	AS_IF( [ test "x${cond_build_darwin}" = xyes ],
+		[AC_DEFINE([OPENGL_DRIVER],["libGL.1.dylib"],[OpenGL dynamic lib name])],
+		[AC_DEFINE([OPENGL_DRIVER],["libGL.so.1"],[OpenGL shared lib name])])
+	])
 
 dnl TODO: find real name of darwin framework dynamic lib
-AS_IF( [ test "x${cond_build_darwin}" = xyes ],
-	[AC_DEFINE([OPENGL_DRIVER],["libopengl.dylib"],[OpenGL dynamic lib name])],
-	[AC_DEFINE([OPENGL_DRIVER],["libGL.so.1"],[OpenGL shared lib name])])
-])
-
-dnl TODO: find real name of darwin framework dynamic lib
-AS_IF( [ test "x${cond_build_darwin}" = xyes ],
-	[AC_DEFINE([OPENAL_DRIVER],["libopenal.dylib"],[OpenAL dynamic lib name])],
-	[AC_DEFINE([OPENAL_DRIVER],["libopenal.so.1"],[OpenAL shared lib name])])
-
+	AS_IF( [ test "x${cond_build_darwin}" = xyes ],
+		[AC_DEFINE([OPENAL_DRIVER],["libopenal.1.dylib"],[OpenAL dynamic lib name])],
+		[AC_DEFINE([OPENAL_DRIVER],["libopenal.so.1"],[OpenAL shared lib name])])
 ]) dnl unix
 	
 AS_IF([ test "x${cond_build_win32}" = xyes ],
@@ -209,14 +208,14 @@ have_Xxf86dga=no
 AC_SEARCH_LIBS([XF86DGAQueryVersion],[Xxf86dga],[have_Xxf86dga=yes])
 
 dnl opengl32 and glu32 handled as win32 system libs above
-dnl darwin framework opengl also above
+dnl darwin framework opengl also above (questionable)
 AS_IF( [ test "x${cond_build_win32}" = xno -a "x${cond_build_darwin}" = xno ],
 [
-AC_SEARCH_LIBS([glGetError],[GL],,
-	[AC_MSG_ERROR(["Required OpenGL library not found."])])
+	AC_SEARCH_LIBS([glGetError],[GL],,
+		[AC_MSG_ERROR(["Required OpenGL library not found."])])
 	
-AC_SEARCH_LIBS([gluGetString],[GLU],,
-	[AC_MSG_ERROR(["Required GLU library not found."])])
+	AC_SEARCH_LIBS([gluGetString],[GLU],,
+		[AC_MSG_ERROR(["Required GLU library not found."])])
 	
 ])	
 dnl 
@@ -264,24 +263,23 @@ AC_CHECK_HEADERS([curl/curl.h],,
 
 AS_IF([ test "x${cond_build_unix}" = xyes ],
 [
- 		
-AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
-	[AC_MSG_ERROR("Required X11 header files not found")])
+	AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
+		[AC_MSG_ERROR("Required X11 header files not found")])
 
-AC_CHECK_HEADERS([X11/extensions/xf86vmode.h],
-	,
-	[AC_MSG_ERROR("Required X11 x86 extension header file not found")],
-	[#include <X11/Xlib.h>])
+	AC_CHECK_HEADERS([X11/extensions/xf86vmode.h],
+		,
+		[AC_MSG_ERROR("Required X11 x86 extension header file not found")],
+		[#include <X11/Xlib.h>])
 
-AS_IF([test "x${have_Xxf86dga}" = xyes],
-	[AC_CHECK_HEADERS(
-		[X11/extensions/Xxf86dga.h],
-		[found=yes],
-			[AC_CHECK_HEADERS([X11/extensions/xf86dga.h],
-				[found=yes],
-				[have_Xxf86dga=no],
-				[#include <X11/Xlib.h #include <X11/Xproto.h> #include <X11/Xfuncproto.h>])],
-		[#include <X11/Xlib.h>  #include <X11/Xproto.h>])])
+	AS_IF([test "x${have_Xxf86dga}" = xyes],
+		[AC_CHECK_HEADERS(
+			[X11/extensions/Xxf86dga.h],
+			[found=yes],
+				[AC_CHECK_HEADERS([X11/extensions/xf86dga.h],
+					[found=yes],
+					[have_Xxf86dga=no],
+					[#include <X11/Xlib.h #include <X11/Xproto.h> #include <X11/Xfuncproto.h>])],
+			[#include <X11/Xlib.h>  #include <X11/Xproto.h>])])
 ])
 	
 AC_CHECK_HEADERS([GL/gl.h GL/glu.h],,
@@ -329,7 +327,7 @@ AC_CHECK_FUNCS([ strchr strdup _strdup strerror stricmp _stricmp dnl
 # file system functions
 AC_CHECK_FUNCS([ filelength stat fstat getcwd unlink _unlink mkdir ])
 		
-AC_CHECK_FUNCS([ floor gettimeofday memmove memset munmap mremap dnl
+AC_CHECK_FUNCS([ pow sqrt floor gettimeofday memmove memset munmap mremap dnl
 		putenv _putenv select ]) 
 
 # outputs

@@ -1,3 +1,22 @@
+/*
+Copyright (C) 2010 COR Entertainment, LLC.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+*/
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -578,7 +597,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	return true;
 }
 
-float pitch;
+float modelpitch;
 void GL_AnimateIQMFrame(float curframe, int nextframe)
 {
 	int i, j;
@@ -616,8 +635,8 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 				vec3_t basePosition, oldPosition, newPosition;
 				VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
 				VectorSet(trans, 0, 0, 0);
-				Maxtrix3x4GenJointRotate(&rmat, pitch, rot, trans);
-				
+				Maxtrix3x4GenJointRotate(&rmat, modelpitch, rot, trans);
+
 				// concatenate the rotation with the bone
 				Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
 
@@ -632,11 +651,11 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
 	   				 DotProduct(basePosition, temp.b) + temp.b[3],
 					 DotProduct(basePosition, temp.c) + temp.c[3]);
-				   
+
 			    temp.a[3] += oldPosition[0] - newPosition[0];
 			    temp.b[3] += oldPosition[1] - newPosition[1];
 			    temp.c[3] += oldPosition[2] - newPosition[2];
-			
+
 			    // replace the old matrix with the rotated one
 			    Matrix3x4_Copy(&currentmodel->outframe[i], temp);
 		}
@@ -647,8 +666,8 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 				vec3_t basePosition, oldPosition, newPosition;
 				VectorSet(rot, 0, 1, 0);
 				VectorSet(trans, 0, 0, 0);
-				Maxtrix3x4GenJointRotate(&rmat, -pitch, rot, trans);
-				
+				Maxtrix3x4GenJointRotate(&rmat, -modelpitch, rot, trans);
+
 				// concatenate the rotation with the bone
 				Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
 
@@ -663,11 +682,11 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
 	   				 DotProduct(basePosition, temp.b) + temp.b[3],
 					 DotProduct(basePosition, temp.c) + temp.c[3]);
-				   
+
 			    temp.a[3] += oldPosition[0] - newPosition[0];
 			    temp.b[3] += oldPosition[1] - newPosition[1];
 			    temp.c[3] += oldPosition[2] - newPosition[2];
-			
+
 			    // replace the old matrix with the rotated one
 			    Matrix3x4_Copy(&currentmodel->outframe[i], temp);
 			}
@@ -1636,8 +1655,8 @@ void R_DrawINTERQUAKEMODEL ( void )
 		}
 	}
 
-	//pitch = 0.52 * sinf(rs_realtime); //use this for testing only
-	pitch = degreeToRadian(currententity->angles[PITCH]);
+	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
+	modelpitch = degreeToRadian(currententity->angles[PITCH]);
 
     qglPushMatrix ();
 	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
@@ -1851,8 +1870,8 @@ void R_DrawIQMCaster ( void )
 	if ( R_CullIQMModel() )
 		return;
 
-	//pitch = 0.52 * sinf(rs_realtime); //use this for testing only
-	pitch = degreeToRadian(currententity->angles[PITCH]);
+	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
+	modelpitch = degreeToRadian(currententity->angles[PITCH]);
 
     qglPushMatrix ();
 	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;

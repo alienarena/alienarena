@@ -60,8 +60,9 @@ crx_LIBS = $(WIN32_LIBS)
 endif
 
 if BUILD_UNIX
-if BUILD_CLIENT
 if BUILD_DARWIN
+crx_ded_LIBS = $(DARWIN_LIBS)
+if BUILD_CLIENT
 crx_LIBS = $(DARWIN_LIBS)
 endif
 endif

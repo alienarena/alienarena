@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2009 COR Entertainment
+Copyright (C) 2009 COR Entertainment, LLC
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -746,7 +746,8 @@ qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipfl
 }
 
 int CL_PMpointcontents(vec3_t point);
-
+extern float modelpitch;
+extern double degreeToRadian(double degree);
 void R_DrawShadowVolume()
 {
 	dmdl_t *paliashdr=NULL;
@@ -837,6 +838,8 @@ void R_DrawShadowVolume()
 	else
 	{
 		float time, frame;
+
+		modelpitch = degreeToRadian(currententity->angles[PITCH]);
 
 		//frame interpolation
 		time = (Sys_Milliseconds() - currententity->frametime) / 100;

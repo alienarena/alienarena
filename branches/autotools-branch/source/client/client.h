@@ -302,7 +302,9 @@ extern	cvar_t	*cl_showclamp;
 
 extern	cvar_t	*lookspring;
 extern	cvar_t	*lookstrafe;
+extern  cvar_t	*m_accel;
 extern	cvar_t	*sensitivity;
+extern  cvar_t  *menu_sensitivity;
 
 extern	cvar_t	*m_smoothing;
 extern	cvar_t	*m_pitch;
