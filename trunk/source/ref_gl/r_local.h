@@ -645,6 +645,8 @@ extern GLuint		g_location_source;
 
 //iqm
 
+#define pi 3.14159265
+
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
 extern void R_DrawINTERQUAKEMODEL (void);
 extern void GL_AnimateIQMFrame(float curframe, int nextframe);

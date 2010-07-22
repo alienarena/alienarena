@@ -142,8 +142,6 @@ void Maxtrix3x4GenJointRotate(matrix3x4_t *out, float angle, const vec3_t axis, 
 	Vector4Set(out->c, axis[0]*axis[2]*(1-ck)-axis[1]*sk, axis[1]*axis[2]*(1-ck)+axis[0]*sk, axis[2]*axis[2]*(1-ck)+ck, trans[2]);
 }
 
-#define pi 3.14159265
-
 double degreeToRadian(double degree)
 {
 	double radian = 0;

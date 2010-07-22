@@ -2746,6 +2746,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ref_gl\r_ragdoll.h"
+				>
+			</File>
+			<File
 				RelativePath="ref_gl\r_script.h"
 				>
 			</File>
