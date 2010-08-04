@@ -653,6 +653,10 @@ extern void GL_AnimateIQMFrame(float curframe, int nextframe);
 extern qboolean inAnimGroup(int frame, int oldframe);
 extern int NextFrame(int frame);
 
+//Ragdoll
+int r_DrawingRagDoll;
+int r_SurfaceCount;
+
 #define TURBSCALE2 (256.0 / (2 * M_PI)) 
 
 // reduce runtime calcs

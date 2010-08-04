@@ -1106,7 +1106,7 @@ void UploadStats(void) { //put all updated files on the server
     fceSetInteger(0, FCE_SET_MAX_RESPONSE_WAIT, 1000);
 	
 	// Connect to FTP server
-	error = fceConnect(0,"ftp://92.48.88.135","alienarena","password");
+	error = fceConnect(0,"92.48.88.135","alienarena","WH7I8mI");
 	if(error < 0) {
 		printf("Error connecting to host!\n");
 		return;

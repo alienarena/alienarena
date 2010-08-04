@@ -45,6 +45,7 @@ static int	m_main_cursor;
 
 extern void RS_LoadScript(char *script);
 extern void RS_LoadSpecialScripts(void);
+extern void RS_ScanPathForScripts(void);
 extern cvar_t *scriptsloaded;
 extern char map_music[128];
 extern cvar_t *background_music;

@@ -32,6 +32,7 @@ has to take place at least every time the primitive type changes (that's vertex 
 */
 
 #include "r_local.h"
+#include "r_ragdoll.h"
 
 // this must be equal to MAX_VERTS as it's possible for a single MDL to be composed of only one triangle fan or strip.
 // the storage overhead is only in the order of 100K anyway, so it's no big deal.
@@ -381,7 +382,11 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 {
 	glpoly_t *p = surf->polys;
 	float	*v;	
-	int i;
+	int		i, j;
+	int		ODEIndexCount = 0;
+	float	ODEVerts[MAX_VARRAY_VERTS]; //can, should this be done dynamically?
+	int		ODEIndices[MAX_INDICES];
+	int		ODETris = 0;
 
 	for (; p; p = p->chain)
 	{
@@ -410,9 +415,6 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 			VertexCounter++;
 		}
 
-		// draw the poly
-		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
-
 		/*
 		 * Mapping tool. Outline the light-mapped polygons.
 		 *  gl_showpolys == 1 : perform depth test.
@@ -439,10 +441,52 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 			qglEnable (GL_DEPTH_TEST);
 			qglEnable (GL_TEXTURE_2D);
 		}
+		if(r_DrawingRagDoll)
+		{
+			//winding order for ODE
+			const int indices[6] = {2,1,0,
+									3,2,0};
 
+			//create indices for each tri
+			ODETris = p->numverts - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
+			ODEIndexCount += 3*ODETris; //3 indices per tri
+			
+			//this next block is to create indices for the entire mesh.  I think it should work in theory, but 
+			//it's only my theory, and not confirmed just yet.
+			j = 0;
+			for(i = 0; i < ODETris; i++)
+			{
+				if(j > 3)
+					j = 0;
+				ODEIndices[i+0] = indices[0+j]+i;
+				ODEIndices[i+1] = indices[1+j]+i;
+				ODEIndices[i+2] = indices[2+j]+i;
+				j+=3;
+			}
+		}
+	}
+	// draw the polys
+	qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+
+	//if rendering ragdolls, we need to build the trimesh geometry for this surface
+	if(r_DrawingRagDoll)
+	{
+		triMesh[r_SurfaceCount] = dGeomTriMeshDataCreate();
+
+		// Build the mesh from the data 
+		dGeomTriMeshDataBuildSimple(triMesh[r_SurfaceCount], (dReal*)ODEVerts,
+			VertexCounter, (dTriIndex*)ODEIndices, ODEIndexCount); 
+
+		WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh[r_SurfaceCount], NULL, NULL, NULL);
+		dGeomSetData(WorldGeometry[r_SurfaceCount], "surface");
+
+		//note - do we need to translate to a location?  I think we don't but that I am not totally sure of.
+
+		r_SurfaceCount++;
 	}
 }
 
+//leave just in here until this all tests ok
 void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 {
 	glpoly_t *p = surf->polys;
@@ -451,6 +495,10 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 	int		numlights;
 	float	*v;	
 	int		i, j;
+	int		ODEIndexCount = 0;
+	float	ODEVerts[MAX_VARRAY_VERTS]; //can, should this be done dynamically?
+	int		ODEIndices[MAX_INDICES];
+	int		ODETris = 0;
 
 	//send these to the shader program
 	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, surf->tangentSpaceTransform );
@@ -499,14 +547,61 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 			// lightmap texture coords
 			VArray[5] = v[5];
 			VArray[6] = v[6];
+
+			if(r_DrawingRagDoll)
+			{
+				ODEVerts[VertexCounter] = v[0];
+				ODEVerts[VertexCounter+1] = v[1];
+				ODEVerts[VertexCounter+2] = v[2];
+			}
 	
 			// nothing else is needed
 			// increment pointer and counter
 			VArray += VertexSizes[VERT_MULTI_TEXTURED];
 			VertexCounter++;
-		}	
-		// draw the poly
-		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+		}
+		if(r_DrawingRagDoll)
+		{
+			//winding order for ODE
+			const int indices[6] = {2,1,0,
+									3,2,0};
+
+			//create indices for each tri
+			ODETris = p->numverts - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
+			ODEIndexCount += 3*ODETris; //3 indices per tri
+			
+			//this next block is to create indices for the entire mesh.  I think it should work in theory, but 
+			//it's only my theory, and not confirmed just yet.
+			j = 0;
+			for(i = 0; i < ODETris; i++)
+			{
+				if(j > 3)
+					j = 0;
+				ODEIndices[i+0] = indices[0+j]+i;
+				ODEIndices[i+1] = indices[1+j]+i;
+				ODEIndices[i+2] = indices[2+j]+i;
+				j+=3;
+			}
+		}
+	}
+	// draw the polys
+	qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+
+	//if rendering ragdolls, we need to build the trimesh geometry for this surface
+	if(r_DrawingRagDoll)
+	{
+		triMesh[r_SurfaceCount] = dGeomTriMeshDataCreate();
+
+		// Build the mesh from the data 
+		dGeomTriMeshDataBuildSimple(triMesh[r_SurfaceCount], (dReal*)ODEVerts,
+			VertexCounter, (dTriIndex*)ODEIndices, ODEIndexCount); 
+
+		WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh[r_SurfaceCount], NULL, NULL, NULL);
+		dGeomSetData(WorldGeometry[r_SurfaceCount], "surface");
+
+		//note - do we need to translate to a location?  I think we don't but that I am not totally sure of.
+
+		r_SurfaceCount++;
 	}
 }
 
@@ -558,10 +653,10 @@ void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 		glUniform3fARB( g_location_lightPos, lightPos[0], lightPos[1], lightPos[2]);
 		glUniform1iARB( g_location_fogamount, map_fog);
 		glUniform1fARB( g_location_time, rs_realtime);
-	
-		// draw the poly
-		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 	}
+		
+	// draw the polys
+	qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 }
 
 

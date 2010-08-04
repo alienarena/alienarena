@@ -160,6 +160,15 @@ typedef struct matrix3x4_s
 }
 matrix3x4_t;
 
+typedef struct matrix4x4_s
+{
+	vec4_t a;
+	vec4_t b;
+	vec4_t c;
+	vec4_t d;
+}
+matrix4x4_t;
+
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
