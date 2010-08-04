@@ -106,7 +106,7 @@ ifeq ($(OSTYPE),linux)
 LDFLAGS+=-ldl
 endif
 
-GLXLDFLAGS=-L$(X11BASE)/$(_LIB) -L$(LOCALBASE)/$(_LIB) -lX11 -lXext -lXxf86dga -lXxf86vm -lm -ljpeg -lGL -lGLU
+GLXLDFLAGS=-L$(X11BASE)/$(_LIB) -L$(LOCALBASE)/$(_LIB) -lX11 -lXext -lXxf86dga -lXxf86vm -lm -ljpeg -lGL -lGLU -lode
 
 SHLIBEXT=so
 SHLIBCFLAGS=-fPIC
@@ -254,6 +254,7 @@ CODERED_OBJS = \
 	$(BUILDDIR)/ref_gl/r_shadowmaps.o \
 	$(BUILDDIR)/ref_gl/r_shadows.o \
 	$(BUILDDIR)/ref_gl/r_surf.o \
+	$(BUILDDIR)/ref_gl/r_ragdoll.o \
 	$(BUILDDIR)/ref_gl/r_varray.o \
 	$(BUILDDIR)/ref_gl/r_vbo.o \
 	$(BUILDDIR)/ref_gl/r_vlights.o \
@@ -458,6 +459,9 @@ $(BUILDDIR)/ref_gl/r_shadowmaps.o:     $(REF_GL_DIR)/r_shadowmaps.c
 	$(DO_GL_SHLIB_CC)
 	
 $(BUILDDIR)/ref_gl/r_shadows.o:     $(REF_GL_DIR)/r_shadows.c
+	$(DO_GL_SHLIB_CC)
+	
+$(BUILDDIR)/ref_gl/r_ragdoll.o:     $(REF_GL_DIR)/r_ragdoll.c
 	$(DO_GL_SHLIB_CC)
 	
 $(BUILDDIR)/ref_gl/r_varray.o:     $(REF_GL_DIR)/r_varray.c

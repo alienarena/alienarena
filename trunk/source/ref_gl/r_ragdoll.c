@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 #include "r_ragdoll.h"
-#include "ode/ode.h"
 
 //This file will handle all of the ragdoll calculations, etc.
 
@@ -35,22 +34,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //Once the frames are at the death stage, the ragdoll takes over.
 
-//From what I best understand from reading the tuts, we have to build a "world" in which things collide.  These would be done easily
-//by the existing bsp drawing routines, and simply putting some calls before the vertex arrays are built.  
+//From what I best understand from reading the tuts, we have to build a "world" in which things collide.  These would be done 
+//by the existing bsp drawing routines, and simply putting some calls before the vertex arrays are built.  This will use the 
+//ODE trimesh functions.  These are not completely straightforward, as there appears to be a need for the verts to be done with 
+//indices so that normals are correctly built.
 
-//The ragdoll will need to either be hardcoded in, or created by an external program and read in at load time.  To begin, we will
-//hardcode one in, using the tuts.  Since our playermodels use roughly the same skeleton, this shouldn't be too bad.
+//The ragdoll will need to either be hardcoded in, or read in at load time.  To begin, we will
+//hardcode one in.  Since our playermodels use roughly the same skeleton, this shouldn't be too bad for initial testing.
 
-//So how does the ragoll then animate the mesh?  As best I can tell, we would need to get rotation and location vectors from the
+//So how does the ragoll then animate the mesh?  We need to get rotation and location vectors from the
 //ragdoll, and apply them to the models skeleton.  We would need to use the same tech we use for player pitch spine bending to 
-//manipulate the skeleton.  Note - the ragdoll is not actually drawn.  We get rotation and location of body parts, and that is it.
+//manipulate the skeleton.  We get rotation and location of body parts, and that is it.
+
+//This data will need to be individually linked to each entity.  
 
 //This tutorial is straightforward and useful, and though it's in python, it's easily translated into C code.
 
 //There are several examples at http://opende.sourceforge.net/wiki/index.php/HOWTO_rag-doll
 
-
-//Stage 1 - math funcs needed - note some of these we already have, but for now we will write new ones
+//Stage 1 - math funcs needed
 
 signed int sign(signed int x)
 {
@@ -215,65 +217,128 @@ vec_t* zaxis(matrix3x3_t m)
 	return rm;
 }
 
-/*
-def calcRotMatrix(axis, angle):
-	"""
-	Returns the row-major 3x3 rotation matrix defining a rotation around axis by
-	angle.
-	"""
-	cosTheta = cos(angle)
-	sinTheta = sin(angle)
-	t = 1.0 - cosTheta
-	return (
-		t * axis[0]**2 + cosTheta,
-		t * axis[0] * axis[1] - sinTheta * axis[2],
-		t * axis[0] * axis[2] + sinTheta * axis[1],
-		t * axis[0] * axis[1] + sinTheta * axis[2],
-		t * axis[1]**2 + cosTheta,
-		t * axis[1] * axis[2] - sinTheta * axis[0],
-		t * axis[0] * axis[2] - sinTheta * axis[1],
-		t * axis[1] * axis[2] + sinTheta * axis[0],
-		t * axis[2]**2 + cosTheta)
+matrix3x3_t* calcRotMatrix(vec3_t axis, float angle)
+{
+	float cosTheta = cosf(angle);
+	float sinTheta = sinf(angle);
+	float t = 1.0 - cosTheta;
 
-def makeOpenGLMatrix(r, p):
-	"""
-	Returns an OpenGL compatible (column-major, 4x4 homogeneous) transformation
-	matrix from ODE compatible (row-major, 3x3) rotation matrix r and position
-	vector p.
-	"""
-	return (
-		r[0], r[3], r[6], 0.0,
-		r[1], r[4], r[7], 0.0,
-		r[2], r[5], r[8], 0.0,
-		p[0], p[1], p[2], 1.0)
+	matrix3x3_t *rm = NULL;
 
-*/
+	rm->a[0] = t * pow(axis[0],2) + cosTheta;
+	rm->a[1] = t * axis[0] * axis[1] - sinTheta * axis[2];
+	rm->a[2] = t * axis[0] * axis[2] + sinTheta * axis[1];
+	rm->b[0] = t * axis[0] * axis[1] + sinTheta * axis[2];
+	rm->b[1] = t * pow(axis[1], 2) + cosTheta;
+	rm->b[2] = t * axis[1] * axis[2] - sinTheta * axis[0];
+	rm->c[0] = t * axis[0] * axis[2] - sinTheta * axis[1];
+	rm->c[1] = t * axis[1] * axis[2] + sinTheta * axis[0];
+	rm->c[2] = t * pow(axis[2], 2) + cosTheta;
 
+	return rm;
+}
+
+matrix4x4_t* makeOpenGLMatrix(matrix3x3_t r, vec3_t p)
+{
+	matrix4x4_t *rm = NULL;
+
+	rm->a[0] = r.a[0];
+	rm->a[1] = r.b[0];
+	rm->a[2] = r.c[0];
+	rm->a[3] = 0.0;
+	rm->b[0] = r.a[1];
+	rm->b[1] = r.b[1];
+	rm->b[2] = r.c[1];
+	rm->b[3] = 0.0;
+	rm->c[0] = r.a[2];
+	rm->c[1] = r.b[2];
+	rm->c[2] = r.c[2];
+	rm->c[3] = 0.0;
+	rm->d[0] = p[0];
+	rm->d[1] = p[1];
+	rm->d[2] = p[2];
+	rm->d[3] = 1.0;
+
+	return rm;
+}
+
+//routine to create ragdoll body parts between two joints
+void R_addBody(char *name, int objectID, vec3_t p1, vec3_t p2, float radius, float density)
+{
+	//Adds a capsule body between joint positions p1 and p2 and with given
+	//radius to the ragdoll.
+	float length;
+	vec3_t xa, ya, za, temp;
+	dMatrix3 rot;
+
+	p1 = add3(p1, currententity->origin);
+	p2 = add3(p2, currententity->origin);
+
+	//cylinder length not including endcaps, make capsules overlap by half
+	//radius at joints
+	length = dist3(p1, p2) - radius;
+
+	//create body id
+	RagDollObject[objectID].body = dBodyCreate(RagDollWorld);
+
+	//set it's mass
+	dMassSetCapsule (&RagDollObject[objectID].mass, density, 3, radius, length); 
+	dBodySetMass(RagDollObject[objectID].body, &RagDollObject[objectID].mass);
+
+	//creat the geometry and give it a name
+	RagDollObject[objectID].geom = dCreateCapsule (RagDollSpace, radius, length);
+	dGeomSetData(RagDollObject[objectID].geom, name);
+	dGeomSetBody(RagDollObject[objectID].geom, RagDollObject[objectID].body);
+
+	//define body rotation automatically from body axis
+	VectorCopy(norm3(sub3(p2, p1)), za);
+		
+	VectorSet(temp, 1.0, 0.0, 0.0);
+	if (abs(dot3(za, temp)) < 0.7)
+		VectorSet(xa, 1.0, 0.0, 0.0);
+	else
+		VectorSet(xa, 0.0, 1.0, 0.0);
+		
+	VectorCopy(cross(za, xa), ya);
+
+	VectorCopy(norm3(cross(ya, za)), xa);
+	VectorCopy(cross(za, xa), ya);	
+
+	rot[0] = xa[0];
+	rot[1] = ya[0];
+	rot[2] = za[0];
+	rot[3] = xa[1];
+	rot[4] = ya[1];
+	rot[5] = za[1];
+	rot[6] = xa[2];
+	rot[7] = ya[2];
+	rot[8] = za[2];
+
+	VectorCopy(mul3(add3(p1, p2), 0.5), temp);
+	dGeomSetPosition(RagDollObject[objectID].geom, temp[0], temp[1], temp[2]);
+	dGeomSetRotation(RagDollObject[objectID].geom, rot);
+}
+
+R_CreateWorldObject( void )
+{
+	// Initialize the world
+	RagDollWorld = dWorldCreate();
+	dWorldSetGravity(RagDollWorld, 0.0, -4.0, 0.0);
+
+	RagDollSpace = dSimpleSpaceCreate(0);
+
+	contactGroup = dJointGroupCreate(0);
+}
+
+R_DestroyWorldObject( void )
+{
+	dWorldDestroy(RagDollWorld);
+}
+
+//set initial position of ragdoll - note this will need to get some information from the skeleton on the first death frame
 void R_RagdollBody_Init( void )
 {
 	vec3_t temp;
-
-	//init positions - note - these should probably be read in from the skeleton's initial death anim position
-	//or the previous frame's position if possible
-	vec3_t R_SHOULDER_POS; 
-	vec3_t L_SHOULDER_POS;
-	vec3_t R_ELBOW_POS;
-	vec3_t L_ELBOW_POS;
-	vec3_t R_WRIST_POS;
-	vec3_t L_WRIST_POS;
-	vec3_t R_FINGERS_POS;
-	vec3_t L_FINGERS_POS;
-
-	vec3_t R_HIP_POS; 
-	vec3_t L_HIP_POS;
-	vec3_t R_KNEE_POS; 
-	vec3_t L_KNEE_POS; 
-	vec3_t R_ANKLE_POS; 
-	vec3_t L_ANKLE_POS;
-	vec3_t R_HEEL_POS;
-	vec3_t L_HEEL_POS;
-	vec3_t R_TOES_POS;
-	vec3_t L_TOES_POS;
 
 	//set upper body
 	VectorSet(R_SHOULDER_POS, -SHOULDER_W * 0.5, SHOULDER_H, 0.0);
@@ -303,4 +368,32 @@ void R_RagdollBody_Init( void )
 	VectorSet(temp, 0.0, 0.0, FOOT_LEN);
 	VectorCopy(add3(R_ANKLE_POS, temp), R_TOES_POS);
 	VectorCopy(add3(L_ANKLE_POS, temp), L_TOES_POS);
+}
+
+/*
+	Callback function for the collide() method.
+
+	This function checks if the given geoms do collide and creates contact
+	joints if they do.
+*/
+void near_callback(dGeomID geom1, dGeomID geom2)
+{
+	dContact contact[MAX_CONTACTS];
+	int i;
+	dJointID j;
+	dBodyID body1 = dGeomGetBody(geom1);
+	dBodyID body2 = dGeomGetBody(geom2);
+
+	if (dAreConnected(body1, body2))
+		return;
+
+	// create contact joints
+	for (i = 0; i < MAX_CONTACTS; i++) {
+		contact[i].surface.mode = dContactBounce; // Bouncy surface
+		contact[i].surface.bounce = 0.2;
+		contact[i].surface.mu = 500.0; // Friction
+
+		j = dJointCreateContact(RagDollWorld, contactGroup, &contact[i]);
+		dJointAttach(j, body1, body2);
+	}
 }

@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // r_main.c
 #include "r_local.h"
 #include "r_script.h"
+#include "r_ragdoll.h"
 
 // stencil volumes
 glStencilFuncSeparatePROC			qglStencilFuncSeparate		= NULL;
@@ -988,8 +989,8 @@ void R_RenderView (refdef_t *fd)
 	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
 	static int printf_throttle;
 
-	numRadarEnts=0;
-
+	numRadarEnts = 0;
+	
 	if (r_norefresh->value)
 		return;
 
@@ -1048,6 +1049,8 @@ void R_RenderView (refdef_t *fd)
 		qglEnable(GL_FOG);
 	}
 
+	R_CreateWorldObject();
+
 	R_DrawWorld ();
 
 	R_DrawSpecialSurfaces();
@@ -1056,6 +1059,8 @@ void R_RenderView (refdef_t *fd)
 		R_RenderFlares ();
 
 	R_DrawVegetationSurface ();
+
+	r_DrawingRagDoll = false; //set here after R_DrawWorld because we want the ODE world built in case the ragdolls need it
 	
 	R_DrawEntitiesOnList ();
 
@@ -1107,6 +1112,7 @@ void R_RenderView (refdef_t *fd)
 		qglDisable(GL_FOG);
 
 	GL_DrawRadar();
+	R_DestroyWorldObject();
 }
 
 void	R_SetGL2D (void)
@@ -1906,6 +1912,9 @@ cpuinfo_exit:
 	generateShadowFBO(); 
 	VLight_Init();
 
+	//Initialize ODE
+	dInitODE2(0);
+
 	scr_playericonalpha = 0.0;
 
 	err = qglGetError();
@@ -1948,6 +1957,9 @@ void R_Shutdown (void)
 		glDeleteObjectARB( g_fragmentShader );
 		glDeleteObjectARB( g_programObj );
 	}
+
+	//Shutdown ODE
+	dCloseODE();
 }
 
 

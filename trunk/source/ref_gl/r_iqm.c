@@ -755,6 +755,16 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 	}	
 }
 
+void GL_AnimateIQMRagdoll(void)
+{
+	r_DrawingRagDoll = true;
+
+	//animate using the rotations from our corresponding ODE objects.  These will probably have to have their vectors translated
+	//into model space.
+
+	//If the object vectors are relative, then this will be much easier, if not, then we have a more complex operation to do.
+}
+
 void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
 {	
 	float l;
@@ -900,13 +910,13 @@ void GL_DrawIQMFrame(int skinnum)
                 index_xyz = index_st = currentmodel->tris[i].vertex[j];
 
 				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value))
-					shellscale = .4;
+					shellscale = 0.4;
 				else
 					shellscale = 1.6;
 				
-				VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0];
-                VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1];
-                VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2];
+				VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0] + currentmodel->animatenormal[index_xyz].dir[0]*shellscale;
+                VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatenormal[index_xyz].dir[1]*shellscale;
+                VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2] + currentmodel->animatenormal[index_xyz].dir[2]*shellscale;
 
 				VArray[3] = (currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
                 VArray[4] = currentmodel->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
@@ -1695,7 +1705,11 @@ void R_DrawINTERQUAKEMODEL ( void )
 	
 	frame = currententity->frame + time;
 
-	GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
+	//ragdoll takes over here. (put this everywhere GL_AnimateIQMFrame is called)
+	//if(frame > 198)
+	//	GL_AnimateIQMRagdoll();
+	//else
+		GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
 
 	if(!(currententity->flags & RF_VIEWERMODEL))
 		GL_DrawIQMFrame(skin->texnum);

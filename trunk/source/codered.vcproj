@@ -243,7 +243,7 @@
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="C:\vorbis\include;C:\ogg\include;&quot;C:\Program Files\OpenAL 1.1 SDK\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;ARENA;AL_NO_PROTOTYPES;_CRT_SECURE_NO_WARNINGS;MSVC9"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;ARENA;AL_NO_PROTOTYPES;_CRT_SECURE_NO_WARNINGS;MSVC9;dDOUBLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -277,6 +277,8 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				GenerateManifest="false"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\release/crx.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -2853,6 +2855,10 @@
 		</File>
 		<File
 			RelativePath=".\win32\lib\libvorbisfile_static.lib"
+			>
+		</File>
+		<File
+			RelativePath=".\ref_gl\ode\ode_double.lib"
 			>
 		</File>
 	</Files>
