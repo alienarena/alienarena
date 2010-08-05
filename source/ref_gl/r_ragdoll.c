@@ -41,12 +41,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //The ragdoll will need to either be hardcoded in, or read in at load time.  To begin, we will
 //hardcode one in.  Since our playermodels use roughly the same skeleton, this shouldn't be too bad for initial testing.
+//Constraints are pretty straightforward, and very easy to deal with.  ODE allows for a variety of joint types that make
+//this much easier.
 
 //So how does the ragoll then animate the mesh?  We need to get rotation and location vectors from the
 //ragdoll, and apply them to the models skeleton.  We would need to use the same tech we use for player pitch spine bending to 
 //manipulate the skeleton.  We get rotation and location of body parts, and that is it.
 
-//This data will need to be individually linked to each entity.  
+//Ragdolls will be batched and drawn just as regular entities, which also means that entities should not be drawn in their normal
+//batch once in a death animation.  When death animations begin, a ragdoll will be generated with the appropriate properties including
+//position, velocity, etc.  The ragdoll will be timestamped, and will be removed from the stack after a certain amount of time has 
+//elapsed.
 
 //This tutorial is straightforward and useful, and though it's in python, it's easily translated into C code.
 
@@ -263,7 +268,8 @@ matrix4x4_t* makeOpenGLMatrix(matrix3x3_t r, vec3_t p)
 }
 
 //routine to create ragdoll body parts between two joints
-void R_addBody(char *name, int objectID, vec3_t p1, vec3_t p2, float radius, float density)
+//to do - define the object id's to body parts
+void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, float radius, float density)
 {
 	//Adds a capsule body between joint positions p1 and p2 and with given
 	//radius to the ragdoll.
@@ -279,16 +285,16 @@ void R_addBody(char *name, int objectID, vec3_t p1, vec3_t p2, float radius, flo
 	length = dist3(p1, p2) - radius;
 
 	//create body id
-	RagDollObject[objectID].body = dBodyCreate(RagDollWorld);
+	RagDoll[RagDollID].RagDollObject[objectID].body = dBodyCreate(RagDollWorld);
 
 	//set it's mass
-	dMassSetCapsule (&RagDollObject[objectID].mass, density, 3, radius, length); 
-	dBodySetMass(RagDollObject[objectID].body, &RagDollObject[objectID].mass);
+	dMassSetCapsule (&RagDoll[RagDollID].RagDollObject[objectID].mass, density, 3, radius, length); 
+	dBodySetMass(RagDoll[RagDollID].RagDollObject[objectID].body, &RagDoll[RagDollID].RagDollObject[objectID].mass);
 
 	//creat the geometry and give it a name
-	RagDollObject[objectID].geom = dCreateCapsule (RagDollSpace, radius, length);
-	dGeomSetData(RagDollObject[objectID].geom, name);
-	dGeomSetBody(RagDollObject[objectID].geom, RagDollObject[objectID].body);
+	RagDoll[RagDollID].RagDollObject[objectID].geom = dCreateCapsule (RagDollSpace, radius, length);
+	dGeomSetData(RagDoll[RagDollID].RagDollObject[objectID].geom, name);
+	dGeomSetBody(RagDoll[RagDollID].RagDollObject[objectID].geom, RagDoll[RagDollID].RagDollObject[objectID].body);
 
 	//define body rotation automatically from body axis
 	VectorCopy(norm3(sub3(p2, p1)), za);
@@ -315,11 +321,32 @@ void R_addBody(char *name, int objectID, vec3_t p1, vec3_t p2, float radius, flo
 	rot[8] = za[2];
 
 	VectorCopy(mul3(add3(p1, p2), 0.5), temp);
-	dGeomSetPosition(RagDollObject[objectID].geom, temp[0], temp[1], temp[2]);
-	dGeomSetRotation(RagDollObject[objectID].geom, rot);
+	dGeomSetPosition(RagDoll[RagDollID].RagDollObject[objectID].geom, temp[0], temp[1], temp[2]);
+	dGeomSetRotation(RagDoll[RagDollID].RagDollObject[objectID].geom, rot);
 }
 
-R_CreateWorldObject( void )
+//joint creation routines
+void R_addFixedJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2)
+{
+		RagDoll[RagDollID].RagDollJoint[jointID] = dJointCreateFixed(RagDollWorld, 0);
+		dJointAttach(RagDoll[RagDollID].RagDollJoint[jointID], body1, body2);
+}
+
+void R_addHingeJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2, vec3_t anchor, vec3_t axis, float loStop, float hiStop)
+{
+	anchor = add3(anchor, currententity->origin);
+
+	RagDoll[RagDollID].RagDollJoint[jointID] = dJointCreateHinge(RagDollWorld, 0);
+
+	dJointAttach(RagDoll[RagDollID].RagDollJoint[jointID], body1, body2);
+
+	dJointSetHingeAnchor(RagDoll[RagDollID].RagDollJoint[jointID], anchor[0], anchor[1], anchor[2]);
+    dJointSetHingeAxis(RagDoll[RagDollID].RagDollJoint[jointID], axis[0], axis[1], axis[2]);
+    dJointSetHingeParam(RagDoll[RagDollID].RagDollJoint[jointID], dParamLoStop, loStop);
+    dJointSetHingeParam(RagDoll[RagDollID].RagDollJoint[jointID], dParamHiStop,  hiStop);
+}
+
+void R_CreateWorldObject( void )
 {
 	// Initialize the world
 	RagDollWorld = dWorldCreate();
@@ -330,44 +357,49 @@ R_CreateWorldObject( void )
 	contactGroup = dJointGroupCreate(0);
 }
 
-R_DestroyWorldObject( void )
+void R_DestroyWorldObject( void )
 {
 	dWorldDestroy(RagDollWorld);
 }
 
-//set initial position of ragdoll - note this will need to get some information from the skeleton on the first death frame
-void R_RagdollBody_Init( void )
+//build and set initial position of ragdoll - note this will need to get some information from the skeleton on the first death frame
+void R_RagdollBody_Init( int RagDollID )
 {
 	vec3_t temp;
 
+	RagDoll[RagDollID].spawnTime = Sys_Milliseconds();
+	RagDoll[RagDollID].destroyed = false;
+
 	//set upper body
-	VectorSet(R_SHOULDER_POS, -SHOULDER_W * 0.5, SHOULDER_H, 0.0);
-	VectorSet(L_SHOULDER_POS, SHOULDER_W * 0.5, SHOULDER_H, 0.0);
+	VectorSet(RagDoll[RagDollID].R_SHOULDER_POS, -SHOULDER_W * 0.5, SHOULDER_H, 0.0);
+	VectorSet(RagDoll[RagDollID].L_SHOULDER_POS, SHOULDER_W * 0.5, SHOULDER_H, 0.0);
 
 	VectorSet(temp, UPPER_ARM_LEN, 0.0, 0.0);
-	VectorCopy(sub3(R_SHOULDER_POS, temp), R_ELBOW_POS);
-	VectorCopy(add3(L_SHOULDER_POS, temp), L_ELBOW_POS);
+	VectorCopy(sub3(RagDoll[RagDollID].R_SHOULDER_POS, temp), RagDoll[RagDollID].R_ELBOW_POS);
+	VectorCopy(add3(RagDoll[RagDollID].L_SHOULDER_POS, temp), RagDoll[RagDollID].L_ELBOW_POS);
 	VectorSet(temp, FORE_ARM_LEN, 0.0, 0.0);
-	VectorCopy(sub3(R_ELBOW_POS, temp), R_WRIST_POS);
-	VectorCopy(add3(L_ELBOW_POS, temp), L_WRIST_POS);
+	VectorCopy(sub3(RagDoll[RagDollID].R_ELBOW_POS, temp), RagDoll[RagDollID].R_WRIST_POS);
+	VectorCopy(add3(RagDoll[RagDollID].L_ELBOW_POS, temp), RagDoll[RagDollID].L_WRIST_POS);
 	VectorSet(temp, HAND_LEN, 0.0, 0.0);
-	VectorCopy(sub3(R_WRIST_POS, temp), R_FINGERS_POS);
-	VectorCopy(add3(L_WRIST_POS, temp), L_FINGERS_POS);
+	VectorCopy(sub3(RagDoll[RagDollID].R_WRIST_POS, temp), RagDoll[RagDollID].R_FINGERS_POS);
+	VectorCopy(add3(RagDoll[RagDollID].L_WRIST_POS, temp), RagDoll[RagDollID].L_FINGERS_POS);
 
 	//set lower body
-	VectorSet(R_HIP_POS, -LEG_W * 0.5, HIP_H, 0.0);
-	VectorSet(L_HIP_POS, LEG_W * 0.5, HIP_H, 0.0);
-	VectorSet(R_KNEE_POS, -LEG_W * 0.5, KNEE_H, 0.0);
-	VectorSet(L_KNEE_POS, LEG_W * 0.5, KNEE_H, 0.0);
-	VectorSet(R_ANKLE_POS, -LEG_W * 0.5, ANKLE_H, 0.0);
-	VectorSet(L_ANKLE_POS, LEG_W * 0.5, ANKLE_H, 0.0);
+	VectorSet(RagDoll[RagDollID].R_HIP_POS, -LEG_W * 0.5, HIP_H, 0.0);
+	VectorSet(RagDoll[RagDollID].L_HIP_POS, LEG_W * 0.5, HIP_H, 0.0);
+	VectorSet(RagDoll[RagDollID].R_KNEE_POS, -LEG_W * 0.5, KNEE_H, 0.0);
+	VectorSet(RagDoll[RagDollID].L_KNEE_POS, LEG_W * 0.5, KNEE_H, 0.0);
+	VectorSet(RagDoll[RagDollID].R_ANKLE_POS, -LEG_W * 0.5, ANKLE_H, 0.0);
+	VectorSet(RagDoll[RagDollID].L_ANKLE_POS, LEG_W * 0.5, ANKLE_H, 0.0);
 
 	VectorSet(temp, 0.0, 0.0, HEEL_LEN);
-	VectorCopy(sub3(R_ANKLE_POS, temp), R_HEEL_POS);
-	VectorCopy(sub3(L_ANKLE_POS, temp), L_HEEL_POS);
+	VectorCopy(sub3(RagDoll[RagDollID].R_ANKLE_POS, temp), RagDoll[RagDollID].R_HEEL_POS);
+	VectorCopy(sub3(RagDoll[RagDollID].L_ANKLE_POS, temp), RagDoll[RagDollID].L_HEEL_POS);
 	VectorSet(temp, 0.0, 0.0, FOOT_LEN);
-	VectorCopy(add3(R_ANKLE_POS, temp), R_TOES_POS);
-	VectorCopy(add3(L_ANKLE_POS, temp), L_TOES_POS);
+	VectorCopy(add3(RagDoll[RagDollID].R_ANKLE_POS, temp), RagDoll[RagDollID].R_TOES_POS);
+	VectorCopy(add3(RagDoll[RagDollID].L_ANKLE_POS, temp), RagDoll[RagDollID].L_TOES_POS);
+
+	//build the ragdoll parts
 }
 
 /*
@@ -396,4 +428,59 @@ void near_callback(dGeomID geom1, dGeomID geom2)
 		j = dJointCreateContact(RagDollWorld, contactGroup, &contact[i]);
 		dJointAttach(j, body1, body2);
 	}
+}
+
+//This is called on every map load
+void R_ClearAllRagdolls( void )
+{
+	int RagDollID;
+
+	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
+	{
+		//add routine to do the actual destruction
+		RagDoll[RagDollID].destroyed = true;
+	}
+}
+
+void R_AddNewRagdoll( void )
+{
+	int RagDollID;
+
+	//add a ragdoll, look for first open slot
+	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
+	{
+		if(RagDoll[RagDollID].destroyed) 
+		{
+			R_RagdollBody_Init(RagDollID);
+			break;
+		}
+	}
+}
+
+void R_RenderAllRagdolls ( void )
+{
+	int RagDollID;
+	//Iterate though the ragdoll stack, and render each one.
+
+	//This function would look very similar to the iqm/alias entity routine, but will call a 
+	//different animation function.  This function will keep track of the time as well, and 
+	//handle any expired ragdolls off of the stack.  
+
+	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
+	{
+		if(Sys_Milliseconds() - RagDoll[RagDollID].spawnTime > RAGDOLL_DURATION)
+		{
+			if(!RagDoll[RagDollID].destroyed)
+			{
+				//add routines to destroy all ragdoll elements
+				RagDoll[RagDollID].destroyed = true;
+			}
+			continue;
+		}
+
+		//else - we handle the ragdoll's physics, then render the mesh with skeleton adjusted by ragdoll
+		//body object positions
+		r_DrawingRagDoll = true; //we are rendering a Ragdoll somewhere
+	}
+
 }

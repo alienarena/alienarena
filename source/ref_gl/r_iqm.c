@@ -1578,6 +1578,13 @@ void R_DrawINTERQUAKEMODEL ( void )
 	image_t		*skin;
 	float		frame, time;
 
+	////Ragdolls take over at beginning of each death sequence
+	//if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
+	//	R_AddNewRagdoll();
+	////Do not render deathframes if using ragdolls
+	//if(currententity->frame > 198)
+	//	return;
+
 	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return;
 	
@@ -1705,11 +1712,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 	
 	frame = currententity->frame + time;
 
-	//ragdoll takes over here. (put this everywhere GL_AnimateIQMFrame is called)
-	//if(frame > 198)
-	//	GL_AnimateIQMRagdoll();
-	//else
-		GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
+	GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
 
 	if(!(currententity->flags & RF_VIEWERMODEL))
 		GL_DrawIQMFrame(skin->texnum);

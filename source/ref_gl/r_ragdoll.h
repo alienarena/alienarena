@@ -20,10 +20,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <ode/ode.h>
 
-#define MAX_RAGDOLLS 16 //we can test to see if we can handle more at a time
+#define MAX_RAGDOLLS 64 
 #define MAX_RAGDOLL_OBJECTS 32
+#define MAX_RAGDOLL_JOINTS 32
 #define MAX_SURFACES 16384 //check on this, this seems extreme
 #define MAX_CONTACTS 4 //this might be best set to 1, check
+#define RAGDOLL_DURATION 10000 //10 seconds
 
 //Hard coded definitions(if no ragdoll read in)
 //note we need to adjust this for our world, which would likely be these vals * 32
@@ -62,30 +64,43 @@ typedef struct RagDollObject_s {
 	dGeomID geom;
 } RagDollObject_t;
 
-//need to put these into a ragdolls struct that can link to each entity
-RagDollObject_t RagDollObject[MAX_RAGDOLL_OBJECTS];
+typedef struct RagDoll_s {
+
+	RagDollObject_t RagDollObject[MAX_RAGDOLL_OBJECTS];
+	dJointID RagDollJoint[MAX_RAGDOLL_JOINTS];
+
+	//Ragdoll  positions
+	vec3_t R_SHOULDER_POS; 
+	vec3_t L_SHOULDER_POS;
+	vec3_t R_ELBOW_POS;
+	vec3_t L_ELBOW_POS;
+	vec3_t R_WRIST_POS;
+	vec3_t L_WRIST_POS;
+	vec3_t R_FINGERS_POS;
+	vec3_t L_FINGERS_POS;
+
+	vec3_t R_HIP_POS; 
+	vec3_t L_HIP_POS;
+	vec3_t R_KNEE_POS; 
+	vec3_t L_KNEE_POS; 
+	vec3_t R_ANKLE_POS; 
+	vec3_t L_ANKLE_POS;
+	vec3_t R_HEEL_POS;
+	vec3_t L_HEEL_POS;
+	vec3_t R_TOES_POS;
+	vec3_t L_TOES_POS;
+
+	float spawnTime;
+
+	int destroyed;
+
+} RagDoll_t;
+
+RagDoll_t RagDoll[MAX_RAGDOLLS]; 
 
 //Funcs
-R_CreateWorldObject( void );
-R_DestroyWorldObject( void );
-
-//Ragdoll  positions
-vec3_t R_SHOULDER_POS; 
-vec3_t L_SHOULDER_POS;
-vec3_t R_ELBOW_POS;
-vec3_t L_ELBOW_POS;
-vec3_t R_WRIST_POS;
-vec3_t L_WRIST_POS;
-vec3_t R_FINGERS_POS;
-vec3_t L_FINGERS_POS;
-
-vec3_t R_HIP_POS; 
-vec3_t L_HIP_POS;
-vec3_t R_KNEE_POS; 
-vec3_t L_KNEE_POS; 
-vec3_t R_ANKLE_POS; 
-vec3_t L_ANKLE_POS;
-vec3_t R_HEEL_POS;
-vec3_t L_HEEL_POS;
-vec3_t R_TOES_POS;
-vec3_t L_TOES_POS;
+extern void R_CreateWorldObject( void );
+extern void R_DestroyWorldObject( void );
+extern void R_RenderAllRagdolls ( void );
+extern void R_AddNewRagdoll( void );
+extern void R_ClearAllRagdolls( void );
