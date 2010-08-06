@@ -1,7 +1,6 @@
-# Alien Arena source sub-directory Makefile.am
 # Process this file with automake to produce Makefile.in
 #
-# Copyright (C) 2010 COR Entertainment
+# Copyright (C) 2010 COR Entertainment, LLC
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,123 +18,63 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 
-
 ACLOCAL_AMFLAGS=`-I m4'
 
 AM_CPPFLAGS = -I $(top_srcdir)/source
 
-AM_CFLAGS = -fno-strict-aliasing -ffast-math
-#  -fno-strict-aliasing and -ffast-math are required 
+noinst_LIBRARIES = libgame.a
+
+# Note: indenting assignments with TABs can be bad for generated Makefiles
 
 if BUILD_UNIX
 bin_PROGRAMS = crx-ded
-if BUILD_CLIENT
-bin_PROGRAMS += crx
-endif
-else
-bin_PROGRAMS = crx
-endif
-
-noinst_LIBRARIES = libgame.a
-
-if BUILD_UNIX
+crx_ded_LDADD = libgame.a
 if ALTERNATE_INSTALL
 crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
 else
 crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY -DDATADIR='"$(pkgdatadir)"'
 endif
-crx_ded_LDADD = libgame.a
 if BUILD_CLIENT
+bin_PROGRAMS += crx
+crx_LDADD = libgame.a
 if ALTERNATE_INSTALL
 crx_CPPFLAGS = $(AM_CPPFLAGS)
 else
 crx_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR='"$(pkgdatadir)"'
 endif
-crx_LDADD = libgame.a
 endif
-else
-crx_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DAL_NO_PROTOTYPES
-crx_LDADD = libgame.a
-crx_LIBS = $(WIN32_LIBS)
 endif
 
-if BUILD_UNIX
 if BUILD_DARWIN
-crx_ded_LIBS = $(DARWIN_LIBS)
+bin_PROGRAMS = crx-ded
+if ALTERNATE_INSTALL
+crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
+else
+crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY -DDATADIR='"$(pkgdatadir)"'
+endif
 if BUILD_CLIENT
-crx_LIBS = $(DARWIN_LIBS)
+bin_PROGRAMS += crx
+crx_LDADD = libgame.a
+crx_LDFLAGS = $(DARWIN_FRAMEWORKS)
+if ALTERNATE_INSTALL
+crx_CPPFLAGS = $(AM_CPPFLAGS)
+else
+crx_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR='"$(pkgdatadir)"'
 endif
 endif
-endif
-
-
-if BUILD_UNIX
-crx_ded_SOURCES = \
-	client/anorms.h \
-	game/game.h \
-	game/q_shared.c \
-	game/q_shared.h \
-	game/q_shared.h \
-	null/cl_null.c \
-	qcommon/cmd.c \
-	qcommon/cmodel.c \
-	qcommon/common.c \
-	qcommon/crc.c \
-	qcommon/cvar.c \
-	qcommon/files.c \
-	qcommon/mdfour.c \
-	qcommon/net_chan.c \
-	qcommon/pmove.c \
-	qcommon/qcommon.h \
-	qcommon/qfiles.h \
-	server/server.h \
-	server/sv_ccmds.c \
-	server/sv_ents.c \
-	server/sv_game.c \
-	server/sv_init.c \
-	server/sv_main.c \
-	server/sv_send.c \
-	server/sv_user.c \
-	server/sv_world.c \
-	unix/glob.c \
-	unix/glob.h \
-	unix/glob.h \
-	unix/net_udp.c \
-	unix/q_shunix.c \
-	unix/rw_unix.h \
-	unix/sys_unix.c
 endif
 
 if BUILD_WIN32
-crx_SOURCES = \
-	win32/conproc.c \
-	win32/glw_imp.c \
-	win32/in_win.c \
-	win32/net_wins.c \
-	win32/qal_win.c \
-	win32/qgl_win.c \
-	win32/q_shwin.c \
-	win32/sys_win.c \
-	win32/vid_dll.c
-else
-if BUILD_CLIENT
-crx_SOURCES = \
-	unix/gl_glx.c \
-	unix/glw_unix.h \
-	unix/net_udp.c \
-	unix/qal_unix.c \
-	unix/qasm.h \
-	unix/qgl_unix.c \
-	unix/q_shunix.c \
-	unix/rw_unix.c \
-	unix/rw_unix.h \
-	unix/sys_unix.c \
-	unix/vid_so.c
-endif	
-endif	
+bin_PROGRAMS = crx
+crx_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DAL_NO_PROTOTYPES -DNDEBUG
+crx_LDADD = libgame.a
+LIBS += $(WIN32_LIBS)
+endif
 
+
+# common client sources
 if BUILD_CLIENT
-crx_SOURCES +=  \
+crx_SOURCES = \
 	client/anorms.h \
 	client/cl_ents.c \
 	client/cl_fx.c \
@@ -228,6 +167,132 @@ crx_SOURCES +=  \
 	unix/glob.h
 endif	
 
+# linux/unix sources
+if BUILD_UNIX
+crx_ded_SOURCES = \
+	client/anorms.h \
+	game/game.h \
+	game/q_shared.c \
+	game/q_shared.h \
+	game/q_shared.h \
+	null/cl_null.c \
+	qcommon/cmd.c \
+	qcommon/cmodel.c \
+	qcommon/common.c \
+	qcommon/crc.c \
+	qcommon/cvar.c \
+	qcommon/files.c \
+	qcommon/mdfour.c \
+	qcommon/net_chan.c \
+	qcommon/pmove.c \
+	qcommon/qcommon.h \
+	qcommon/qfiles.h \
+	server/server.h \
+	server/sv_ccmds.c \
+	server/sv_ents.c \
+	server/sv_game.c \
+	server/sv_init.c \
+	server/sv_main.c \
+	server/sv_send.c \
+	server/sv_user.c \
+	server/sv_world.c \
+	unix/glob.c \
+	unix/glob.h \
+	unix/glob.h \
+	unix/net_udp.c \
+	unix/q_shunix.c \
+	unix/rw_unix.h \
+	unix/sys_unix.c
+if BUILD_CLIENT
+crx_SOURCES += \
+	unix/gl_glx.c \
+	unix/glw_unix.h \
+	unix/net_udp.c \
+	unix/qal_unix.c \
+	unix/qasm.h \
+	unix/qgl_unix.c \
+	unix/q_shunix.c \
+	unix/rw_unix.c \
+	unix/rw_unix.h \
+	unix/sys_unix.c \
+	unix/vid_so.c
+endif	
+endif
+
+# OSX Darwin X11 sources
+if BUILD_DARWIN
+crx_ded_SOURCES = \
+	client/anorms.h \
+	game/game.h \
+	game/q_shared.c \
+	game/q_shared.h \
+	game/q_shared.h \
+	null/cl_null.c \
+	qcommon/cmd.c \
+	qcommon/cmodel.c \
+	qcommon/common.c \
+	qcommon/crc.c \
+	qcommon/cvar.c \
+	qcommon/files.c \
+	qcommon/mdfour.c \
+	qcommon/net_chan.c \
+	qcommon/pmove.c \
+	qcommon/qcommon.h \
+	qcommon/qfiles.h \
+	server/server.h \
+	server/sv_ccmds.c \
+	server/sv_ents.c \
+	server/sv_game.c \
+	server/sv_init.c \
+	server/sv_main.c \
+	server/sv_send.c \
+	server/sv_user.c \
+	server/sv_world.c \
+	unix/glob.c \
+	unix/glob.h \
+	unix/glob.h \
+	unix/net_udp.c \
+	unix/q_shunix.c \
+	unix/rw_unix.h \
+	unix/sys_unix.c
+if BUILD_CLIENT
+crx_SOURCES += \
+	unix/gl_glx.c \
+	unix/glw_unix.h \
+	unix/net_udp.c \
+	unix/qal_unix.c \
+	unix/qasm.h \
+	unix/qgl_unix.c \
+	unix/q_shunix.c \
+	unix/rw_unix.c \
+	unix/rw_unix.h \
+	unix/sys_unix.c \
+	unix/vid_so.c
+endif
+endif
+
+# Win32 MinGW sources
+# (BUILD_CLIENT always true, but Automake needs the conditional)
+if BUILD_WIN32
+if BUILD_CLIENT
+crx_SOURCES += \
+	win32/conproc.c \
+	win32/conproc.h \
+	win32/glw_imp.c \
+	win32/glw_win.h \
+	win32/in_win.c \
+	win32/net_wins.c \
+	win32/qal_win.c \
+	win32/qgl_win.c \
+	win32/q_shwin.c \
+	win32/sys_win.c \
+	win32/vid_dll.c \
+	win32/winquake.h \
+	win32/resource.h
+endif	
+endif
+
+# Game module sources
 libgame_a_SOURCES =  \
 	client/anorms.h \
 	game/acesrc/acebot_ai.c \
@@ -275,4 +340,3 @@ libgame_a_SOURCES =  \
 	game/q_shared.c \
 	game/q_shared.h \
 	qcommon/qfiles.h
-	

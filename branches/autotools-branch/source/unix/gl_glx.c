@@ -41,15 +41,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
 #include <X11/extensions/xf86vmode.h>
+#if defined HAVE_XXF86DGA
 // xf86dga.h is deprecated, Xxf86dga.h is preferred
-// if neither exists, don't use DGA
-#ifdef HAVE_X11_EXTENSIONS_XXF86DGA_H
+#if defined HAVE_X11_EXTENSIONS_XXF86DGA_H
 #include <X11/extensions/Xxf86dga.h>
 #else
-#ifdef HAVE_X11_EXTENSIONS_XF86DGA_H
+#if defined HAVE_X11_EXTENSIONS_XF86DGA_H
 #include <X11/extensions/xf86dga.h>
-#else
-#define NO_XXF86DGA 1
+#endif
 #endif
 #endif
 
@@ -143,7 +142,7 @@ void install_grabs(void)
 #endif
 
 
-#if defined NO_XXF86DGA
+#if !defined HAVE_XXF86DGA
 	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
 	XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
 	Cvar_Set( "in_dgamouse", "0" );
@@ -180,7 +179,7 @@ void uninstall_grabs(void)
 	if (!dpy || !win)
 		return;
 
-#if !defined NO_XXF86DGA
+#if defined HAVE_XXF86DGA
 	if (dgamouse) {
 		dgamouse = false;
 		XF86DGADirectVideo(dpy, DefaultScreen(dpy), 0);

@@ -252,7 +252,7 @@ static void FS_init_paths( void )
 	if ( *fs_gamedirvar->string
 		&& Q_strncasecmp( fs_gamedirvar->string, BASE_GAMEDATA, MAX_OSPATH )
 		&& Q_strncasecmp( fs_gamedirvar->string, GAME_GAMEDATA, MAX_OSPATH ))
-	{ // not empty, "data1" nor "arena", expect a mod data directory
+	{ // not empty, "data1" nor "arena". expect a mod data directory
 		Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
 				fs_datadir, fs_gamedirvar->value );
 	}
@@ -302,21 +302,25 @@ static void FS_init_paths( void )
 		memset( fs_gamesearch[i], 0, MAX_OSPATH );
 	}
 	i = 0;
+#if defined UNIX_VARIANT
 	if ( user_game_gamedata[0] )
 	{ // default: ~/.codered/arena or $COR_GAME/arena
 		Q_strncpyz2( fs_gamesearch[i], user_game_gamedata, sizeof(fs_gamesearch[0]));
 		i++;
 	}
+#endif
 	if ( game_gamedata[0] )
 	{ // default: DATADIR/arena or $CWD/arena
 		Q_strncpyz2( fs_gamesearch[i], game_gamedata, sizeof(fs_gamesearch[0]));
 		i++;
 	}
+#if defined UNIX_VARIANT
 	if ( user_base_gamedata[0] )
 	{ // default: ~/.codered/data1  or $COR_GAME/data1 (may not be needed)
 		Q_strncpyz2( fs_gamesearch[i], user_base_gamedata, sizeof(fs_gamesearch[0]));
 		i++;
 	}
+#endif
 	if ( base_gamedata[0] )
 	{ // default: DATADIR/data1 or $CWD/data1
 		Q_strncpyz2( fs_gamesearch[i], base_gamedata, sizeof(fs_gamesearch[0]));
@@ -328,11 +332,13 @@ static void FS_init_paths( void )
 		memset( fs_botsearch[i], 0, MAX_OSPATH );
 	}
 	i = 0;
+#if defined UNIX_VARIANT
 	if ( user_bot_gamedata[0] )
 	{
 		Q_strncpyz2( fs_botsearch[i], user_bot_gamedata, sizeof(fs_botsearch[0]));
 		i++;
 	}
+#endif
 	if ( bot_gamedata[0] )
 	{
 		Q_strncpyz2( fs_botsearch[i], bot_gamedata, sizeof(fs_botsearch[0]));

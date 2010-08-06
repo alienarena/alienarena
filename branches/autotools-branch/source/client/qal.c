@@ -33,7 +33,6 @@
 
 #if defined WIN32_VARIANT
 #include <windows.h>
-#define AL_NO_PROTOTYPES
 #endif
 
 #if defined HAVE_AL_H

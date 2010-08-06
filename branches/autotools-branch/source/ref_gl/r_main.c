@@ -487,12 +487,12 @@ void R_DrawEntitiesOnList (void)
 		if(r_newrefdef.fov_y >= 90)
 		{
 		VectorSubtract(r_origin, currententity->origin, dist);
-			if(VectorLength(dist) > 1000) 
+			if(VectorLength(dist) > 1000)
 			{
 			if(currententity->lod2)
 				currentmodel = currententity->lod2;
 		}
-			else if(VectorLength(dist) > 500) 
+			else if(VectorLength(dist) > 500)
 			{
 			if(currententity->lod1)
 				currentmodel = currententity->lod1;
@@ -1523,13 +1523,13 @@ int R_Init( void *hinstance, void *hWnd )
 	/*
 	** get our various GL strings
 	*/
-	gl_config.vendor_string = qglGetString (GL_VENDOR);
+	gl_config.vendor_string = (const char*)qglGetString (GL_VENDOR);
 	Com_Printf ("GL_VENDOR: %s\n", gl_config.vendor_string );
-	gl_config.renderer_string = qglGetString (GL_RENDERER);
+	gl_config.renderer_string = (const char*)qglGetString (GL_RENDERER);
 	Com_Printf ("GL_RENDERER: %s\n", gl_config.renderer_string );
-	gl_config.version_string = qglGetString (GL_VERSION);
+	gl_config.version_string = (const char*)qglGetString (GL_VERSION);
 	Com_Printf ("GL_VERSION: %s\n", gl_config.version_string );
-	gl_config.extensions_string = qglGetString (GL_EXTENSIONS);
+	gl_config.extensions_string = (const char*)qglGetString (GL_EXTENSIONS);
 	Com_Printf ("GL_EXTENSIONS: %s\n", gl_config.extensions_string );
 
 	gl_config.allow_cds = true;
@@ -1542,8 +1542,8 @@ int R_Init( void *hinstance, void *hWnd )
 		 strstr( gl_config.extensions_string, "GL_SGI_compiled_vertex_array" ) )
 	{
 		Com_Printf ("...enabling GL_EXT_compiled_vertex_array\n" );
-		qglLockArraysEXT = ( void * ) qwglGetProcAddress( "glLockArraysEXT" );
-		qglUnlockArraysEXT = ( void * ) qwglGetProcAddress( "glUnlockArraysEXT" );
+		qglLockArraysEXT = (void*)qwglGetProcAddress( "glLockArraysEXT" );
+		qglUnlockArraysEXT = (void*)qwglGetProcAddress( "glUnlockArraysEXT" );
 	}
 	else
 	{
@@ -1586,7 +1586,7 @@ int R_Init( void *hinstance, void *hWnd )
 		{
 			Com_Printf ("...using 3DFX_set_global_palette\n" );
 			qgl3DfxSetPaletteEXT = ( void ( APIENTRY * ) (GLuint *) )qwglGetProcAddress( "gl3DfxSetPaletteEXT" );
-			qglColorTableEXT = Fake_glColorTableEXT;
+			qglColorTableEXT = (void*)Fake_glColorTableEXT;
 		}
 		else
 		{
@@ -1709,7 +1709,7 @@ int R_Init( void *hinstance, void *hWnd )
 		}
 	}
 
-	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic")) 
+	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic"))
 	{
 		qglGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
 
@@ -1722,13 +1722,13 @@ int R_Init( void *hinstance, void *hWnd )
 
 		aniso_level = r_anisotropic->value;
 
-		if (r_anisotropic->value == 1) 
+		if (r_anisotropic->value == 1)
 			Com_Printf("...ignoring GL_EXT_texture_filter_anisotropic\n");
-		else 
+		else
 			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n");
 
 		}
-	else 
+	else
 	{
 		Com_Printf("...GL_EXT_texture_filter_anisotropic not found\n");
 		r_anisotropic = Cvar_Get("r_anisotropic", "0", CVAR_ARCHIVE);
@@ -1737,11 +1737,11 @@ int R_Init( void *hinstance, void *hWnd )
 
 	// openGL 2.0 Unified Separate Stencil
 	gl_state.stencil_wrap = false;
-	if (strstr(gl_config.extensions_string, "GL_EXT_stencil_wrap")) 
+	if (strstr(gl_config.extensions_string, "GL_EXT_stencil_wrap"))
 	{
 		Com_Printf("...using GL_EXT_stencil_wrap\n");
 		gl_state.stencil_wrap = true;
-	} else 
+	} else
 	{
 		Com_Printf("...GL_EXT_stencil_wrap not found\n");
 		gl_state.stencil_wrap = false;
@@ -1749,11 +1749,11 @@ int R_Init( void *hinstance, void *hWnd )
 
 	// Framebuffer object blit
 	gl_state.hasFBOblit = false;
-	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit")) 
+	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit"))
 	{
 		Com_Printf("...using GL_EXT_framebuffer_blit\n");
 		gl_state.hasFBOblit = true;
-	} else 
+	} else
 	{
 		Com_Printf("...GL_EXT_framebuffer_blit not found\n");
 		gl_state.hasFBOblit = false;
@@ -1775,8 +1775,8 @@ int R_Init( void *hinstance, void *hWnd )
 
 	gl_state.vbo = false;
 
-	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object")) 
-	{			
+	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
+	{
 		qglBindBufferARB = (void *)qwglGetProcAddress("glBindBufferARB");
 		qglDeleteBuffersARB = (void *)qwglGetProcAddress("glDeleteBuffersARB");
 		qglGenBuffersARB = (void *)qwglGetProcAddress("glGenBuffersARB");
@@ -1784,12 +1784,12 @@ int R_Init( void *hinstance, void *hWnd )
 		qglBufferSubDataARB = (void *)qwglGetProcAddress("glBufferSubDataARB");
 
 		if (qglGenBuffersARB && qglBindBufferARB && qglBufferDataARB && qglDeleteBuffersARB)
-		{				
+		{
 			Com_Printf("...using GL_ARB_vertex_buffer_object\n");
 			gl_state.vbo = true;
 			R_VCInit();
 		}
-	} else 
+	} else
 	{
 		Com_Printf(S_COLOR_RED "...GL_ARB_vertex_buffer_object not found\n");
 		gl_state.vbo = false;
@@ -1802,7 +1802,7 @@ int R_Init( void *hinstance, void *hWnd )
 
 	//if running for the very first time, automatically set video settings
 	//disabled for now
-	if(!r_firstrun->value) 
+	if(!r_firstrun->value)
 	{
 		qboolean ati_nvidia = false;
 		double CPUTotalSpeed = 4000.0; //default to this
@@ -1856,20 +1856,20 @@ cpuinfo_exit:
 		if(!strcmp(gl_config.vendor_string, "ATI Technologies Inc.") || !strcmp(gl_config.vendor_string, "NVIDIA Corporation"))
 			ati_nvidia = true;
 
-		if(OGLVer < 2) 
-		{ 
+		if(OGLVer < 2)
+		{
 			//weak GPU, set low
 			R_SetLow();
 		}
-		else if(OGLVer == 3) 
-		{ 
+		else if(OGLVer == 3)
+		{
 			//GPU is modern, check CPU
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
 				R_SetHighest();
 			else
 				R_SetMedium();
 		}
-		else 
+		else
 		{
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
 				R_SetHigh();

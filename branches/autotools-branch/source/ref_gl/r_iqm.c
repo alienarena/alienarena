@@ -907,13 +907,13 @@ void GL_DrawIQMFrame(int skinnum)
                 index_xyz = index_st = currentmodel->tris[i].vertex[j];
 
 				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value))
-					shellscale = .4;
+					shellscale = 0.4;
 				else
 					shellscale = 1.6;
 
-				VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0];
-                VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1];
-                VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2];
+				VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0] + currentmodel->animatenormal[index_xyz].dir[0]*shellscale;
+                VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatenormal[index_xyz].dir[1]*shellscale;
+                VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2] + currentmodel->animatenormal[index_xyz].dir[2]*shellscale;
 
 				VArray[3] = (currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
                 VArray[4] = currentmodel->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;

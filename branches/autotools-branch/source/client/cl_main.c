@@ -29,7 +29,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #if defined UNIX_VARIANT
+#if defined HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <netinet/in.h>
@@ -1670,6 +1672,8 @@ void CL_Precache_f (void)
 	CL_RequestNextDownload();
 }
 
+/*
+ * TODO: Removing pending review. May not be safe.
 #if defined UNIX_VARIANT
 void CL_Shell_f (void)
 {
@@ -1686,6 +1690,7 @@ void CL_Shell_f (void)
 	pclose(fp);
  }
 #endif
+*/
 
 /*
 =================
@@ -1835,9 +1840,10 @@ void CL_InitLocal (void)
 
 	Cmd_AddCommand ("download", CL_Download_f);
 
-#if defined UNIX_VARIANT
-	Cmd_AddCommand ("shell", CL_Shell_f);
-#endif
+// TODO: Removing this pending review. it may not be safe.
+//#if defined UNIX_VARIANT
+//	Cmd_AddCommand ("shell", CL_Shell_f);
+//#endif
 
 	Cmd_AddCommand ("irc_connect", CL_InitIRC);
 	Cmd_AddCommand ("irc_quit", CL_IRCShutdown);

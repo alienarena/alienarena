@@ -22,6 +22,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+#if defined HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#if defined HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+
 #if !defined HAVE__STRDUP
 #define _strdup strdup
 #endif
@@ -174,6 +182,40 @@ extern long filelength(int);
 
 static size_t szr;
 
+static int g_filelength( FILE *f )
+{
+	int length = -1;
+
+#if defined HAVE_FILELENGTH
+
+	length = filelength( fileno( f ) );
+
+#elif defined HAVE_FSTAT
+
+	struct stat statbfr;
+	int result;
+
+	result = fstat( fileno(f), &statbfr );
+	if ( result != -1 )
+	{
+		length = (int)statbfr.st_size;
+	}
+
+#else
+
+	long int pos;
+
+	pos = ftell( f );
+	fseek( f, 0L, SEEK_END );
+	length = ftell( f );
+	fseek( f, pos, SEEK_SET );
+
+#endif
+
+	return length;
+}
+
+
 //===================================================================
 
 
@@ -220,37 +262,6 @@ game_export_t *GetGameAPI (game_import_t *import)
 	return &globals;
 }
 
-//#ifndef GAME_HARD_LINKED
-// this is only here so the functions in q_shared.c and q_shwin.c can link
-//void Sys_Error (char *error, ...)
-//{
-//	va_list		argptr;
-//	char		text[1024];
-//
-//	va_start (argptr, error);
-//	vsnprintf(text, sizeof(text), error, argptr);
-//	va_end (argptr);
-//
-//	gi.error (ERR_FATAL, "%s", text);
-//}
-//
-//void Com_Printf (char *msg, ...)
-//{
-//	va_list		argptr;
-//	char		text[1024];
-//
-//	va_start (argptr, msg);
-//	vsnprintf(text, sizeof(text), msg, argptr);
-//	va_end (argptr);
-//
-//	gi.dprintf ("%s", text);
-//}
-
-//#endif
-
-//======================================================================
-
-//#ifdef __unix__
 
 #define Z_MAGIC		0x1d1d
 
@@ -265,42 +276,6 @@ typedef struct zhead_s
 zhead_t		z_chain;
 int		z_count, z_bytes;
 
-//void Z_Free (void *ptr);
-
-/*
-=============
-FS_FreeFile
-=============
-*/
-
-//void FS_FreeFile (void *buffer)
-//{
-//	Z_Free (buffer);
-//}
-
-/*
-========================
-Z_Free
-========================
-*/
-//void Z_Free (void *ptr)
-//{
-//	zhead_t *z;
-//
-//	z = ((zhead_t *)ptr) - 1;
-//
-//	if (z->magic != Z_MAGIC)
-//		Sys_Error (ERR_FATAL, "Z_Free: bad magic");
-//
-//	z->prev->next = z->next;
-//	z->next->prev = z->prev;
-//
-//	z_count--;
-//	z_bytes -= z->size;
-//	free (z);
-//}
-
-//#endif
 
 /*
 =================
@@ -528,13 +503,7 @@ void EndDMLevel (void)
 		return;
 	}
 
-#if defined HAVE_FILELENGTH
-	length = filelength( fileno( fp  ) );
-#else
-	fseek(fp, 0, SEEK_END);
-	length = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-#endif
+	length = g_filelength( fp );
 	buffer = malloc( length + 1 );
 	szr = fread( buffer, length, 1, fp );
 	buffer[length] = 0;
@@ -560,7 +529,7 @@ void EndDMLevel (void)
 		char  longname[MAX_TOKEN_CHARS];
 		char  scratch[200];
 #if defined WIN32_VARIANT
-		int  j
+		int  j;
 #endif
 		int l;
 

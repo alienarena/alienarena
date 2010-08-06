@@ -28,7 +28,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #if defined UNIX_VARIANT
 #include <sys/time.h>
+#if defined HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #endif
 
 #if defined WIN32_VARIANT

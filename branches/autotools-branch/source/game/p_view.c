@@ -428,8 +428,9 @@ void ResetWeaponModel (edict_t *ent)
 
 	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
-#if defined UNIX_VARIANT
+#if defined UNIX_VARIANT || defined WIN32_VARIANT
 	// TODO: should work for Win32, to be tested.
+	// other branch may not work with MinGW gcc
 	if( !Q_strcasecmp( ent->client->pers.weapon->view_model, "models/weapons/v_violator/tris.md2" ))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
 	else if( !Q_strcasecmp( ent->client->pers.weapon->view_model, "models/weapons/v_rocket/tris.md2"))
@@ -476,7 +477,7 @@ void ResetWeaponModel (edict_t *ent)
 	sprintf(weaponpath, "%s", weaponmodel);
 	Q2_FindFile (weaponpath, &file); //does it really exist?
 	if(!file) {
-#if defined UNIX_VARIANT
+#if defined UNIX_VARIANT || defined WIN32_VARIANT
 		sprintf(weaponpath, "%s%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
 #else
 		sprintf(weaponpath, "%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?

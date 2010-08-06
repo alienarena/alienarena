@@ -1,7 +1,8 @@
-# Alien Arena auto configuration source
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright (C) 2010 COR Entertainment
+# Alien Arena auto configuration source
+#
+# Copyright (C) 2010 COR Entertainment, LLC
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,22 +21,27 @@
 #
 
 # configure.ac for
-#  Linux/Unix
-#  Windows using MinGW 
-#  Mac OSX Darwin 
+#  GNU/Linux, Unix
+#  Windows (32-bit) using MinGW
+#  Mac OSX using X11/Darwin (in development)
 
 AC_PREREQ(2.61)
-AC_INIT([alienarena],[7.45.1925],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.45.0806],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([config/config.h])
 
-AM_INIT_AUTOMAKE([foreign subdir-objects])
-
+dnl foreign = do not apply GNU doc requirements
+dnl subdir-objects = compile objects into their sub directories
+dnl silent-rules = less output
+dnl 1.11 = require automake 1.11 or greater
+dnl dist-zip = build .zip distribution in addition to .tar.gz 
+AM_INIT_AUTOMAKE([foreign subdir-objects silent-rules 1.11 dist-zip ])
 AM_SILENT_RULES([yes])
 
+dnl use --enable-maintainer-mode to get full set of make targets
 AM_MAINTAINER_MODE
 
 AC_CANONICAL_HOST
@@ -50,34 +56,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PROG_MKDIR_P
-dnl AM_PROG_CC_C_O
-
-# Unix/Linux host dedicated server only build option
-AC_MSG_CHECKING([for dedicated server only build])
-no_client=no
-AC_ARG_ENABLE( 
-	[no_client],
-	[AS_HELP_STRING([--enable-no-client],
-		[build dedicated server only, not the client (default:no)])],
-	[no_client=${enableval}],
-	[no_client=no])
-AC_MSG_RESULT([${no_client}])
-
-# Alternate Install. Install in the traditional single directory way.
-# Probably required for map making tools to work. Also, good when updating
-# from SVN regularly. Affects how Makefile sets DATADIR and does make-install.
-#  
-AC_MSG_CHECKING([for alternate_install])	
-alternate_install=no
-AC_ARG_ENABLE(
-	[alternate_install],
-	[AS_HELP_STRING([--enable-alternate-install],
-		[traditional single directory, in-place installation (default:no)])],
-	[alternate_install=${enableval}],
-	[alternate_install=no])
-AC_MSG_RESULT([${alternate_install}])
-AM_CONDITIONAL(ALTERNATE_INSTALL, test "x${alternate_install}" = xyes)
- 	
+AM_PROG_CC_C_O
 
 #
 # check host environment
@@ -87,39 +66,63 @@ cond_build_unix=no
 cond_build_darwin=no
 AS_CASE([ ${host} ],
 	[ *-*-mingw* ],[ cond_build_win32=yes ],
-	[ *-*-darwin*],[ cond_build_darwin=yes cond_build_unix=yes],
+	[ *-*-darwin*],[ cond_build_darwin=yes ],
 	[ cond_build_unix=yes ])
 
-AC_MSG_CHECKING(host)
-AC_MSG_RESULT(${host})
-AC_MSG_CHECKING(whether to build win32 version)
-AC_MSG_RESULT(${cond_build_win32})
-AC_MSG_CHECKING(whether to build unix version)
-AC_MSG_RESULT(${cond_build_unix})
-AC_MSG_CHECKING(whether to build darwin version)
-AC_MSG_RESULT(${cond_build_darwin})
+AM_CONDITIONAL([BUILD_WIN32],[ test "x${cond_build_win32}" = xyes ])
+AM_CONDITIONAL([BUILD_UNIX],[ test "x${cond_build_unix}" = xyes ])
+AM_CONDITIONAL([BUILD_DARWIN],[ test "x${cond_build_darwin}" = xyes ])
 
-AC_MSG_CHECKING(whether to build client)
-cond_build_client=yes
-AS_IF( [ test "x${no_client}" != xno ],
-	[AS_IF( [ test "x${cond_build_unix}" = xyes ],[cond_build_client=no],
-		[AC_MSG_WARN( "--no_client option valid only for unix build" )])])
-AC_MSG_RESULT(${cond_build_client});	
+#
+# Unix/Linux/Darwin dedicated server only build option
+#
+no_client=no
+AM_COND_IF([BUILD_WIN32],,
+	[
+	AC_MSG_CHECKING([whether to build dedicated server only])
+	AC_ARG_ENABLE( 
+		[no_client],
+		[AS_HELP_STRING([--enable-no-client],
+			[build dedicated server only, not the client (default:no)])],
+		[no_client=${enableval}],
+		[no_client=no])
+	AC_MSG_RESULT([${no_client}])
+	])
+AM_CONDITIONAL([BUILD_CLIENT],[ test "x${no_client}" = xno ])
 
-AM_CONDITIONAL( BUILD_WIN32, test "x${cond_build_win32}" = xyes )
-AM_CONDITIONAL( BUILD_UNIX,  test "x${cond_build_unix}" = xyes )
-AM_CONDITIONAL( BUILD_CLIENT, test "x${cond_build_client}" = xyes )
-AM_CONDITIONAL( BUILD_DARWIN, test "x${cond_build_darwin}" = xyes )
+# Alternate Install. Install in the traditional single directory way.
+# Probably required for map making tools to work. Also, good when updating
+# from SVN regularly. Affects how Makefile sets DATADIR and does make-install.
+# for now, win32 is always alternate install
+#
+alternate_install=no
+AM_COND_IF([BUILD_WIN32],
+	[alternate_install=yes],
+	[
+	AC_MSG_CHECKING([for traditional single directory, in place installation])
+	AC_ARG_ENABLE(
+		[alternate_install],
+		[AS_HELP_STRING([--enable-alternate-install],
+			[traditional single directory, in-place installation (default:no)])],
+		[alternate_install=${enableval}],
+		[alternate_install=no]
+		)
+	AC_MSG_RESULT([${alternate_install}])
+])
 
+AM_CONDITIONAL([ALTERNATE_INSTALL],[ test "x${alternate_install}" = xyes ])
+
+dnl
 dnl symbols for config.h
-AS_IF([ test "x${cond_build_unix}" = xyes ],
+dnl
+AM_COND_IF([BUILD_UNIX], 
 	[AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])])
 
-AS_IF([ test "x${cond_build_win32}" = xyes ],
+AM_COND_IF([BUILD_WIN32],
 	[AC_DEFINE([WIN32_VARIANT],1,[win32-specific conditional compile])])
 	
 dnl for cases where darwin differs from unix/linux	
-AS_IF([ test "x${cond_build_darwin}" = xyes ],
+AM_COND_IF([BUILD_DARWIN],
 	[AC_DEFINE([DARWIN_SPECIAL_CASE],1,[darwin-specific conditional compile])])
 
 AC_DEFINE_UNQUOTED(CPUSTRING, "${host_cpu}", [Canonical CPU identification])
@@ -129,94 +132,86 @@ AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
 # Checks for libraries.
 #
 
-# TODO: this may not be the best way to do this
-win32_syslibs=""
-AS_IF([ test "x${cond_build_win32}" = xyes ],
-	[ win32_syslibs="-lglu32 -lmingw32 -lwinmm -lwsock32 -lws2_32 -lgdi32 -luser32"])
-AC_SUBST([WIN32_LIBS],[$win32_syslibs])
-
-AS_IF([ test "x${cond_build_win32}" = xyes ],
-	[AC_DEFINE([OPENGL_DRIVER],["opengl32"],[OpenGL DLL name])])
-
-dnl 2010-07-06 this is just a wild guess
-darwin_syslibs=""
-AS_IF([ test "x${cond_build_darwin}" = xyes ],
-	[ darwin_syslibs="-framework OpenGL -framework OpenAL"])
-AC_SUBST([DARWIN_LIBS],[$darwin_syslibs])	
-
 AC_SEARCH_LIBS(acos,[m])
-AC_SEARCH_LIBS(pthread_mutex_init,[pthread])
-AC_SEARCH_LIBS(dlopen,[dl])
+
+dnl could be AC_SEARCH_LIBS(pthread_mutex_init,[pthread])
+dnl but this is probably more portable
+dnl
+AX_PTHREAD(,[AC_MSG_ERROR(["Required pthreads support not found."])])
+LIBS="$PTHREAD_LIBS $LIBS"
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+CC="$PTHREAD_CC"
+
+AC_SEARCH_LIBS([dlopen],[dl])
 
 dnl
 dnl start of client-only library requirements
 dnl
-AS_IF( [ test "x${cond_build_client}" = xyes ],
+AM_COND_IF([BUILD_CLIENT],
 [
-AC_SEARCH_LIBS(zlibVersion,[z zlib],,
-	[AC_MSG_ERROR(["Required zlib library not found."])])
+	AC_SEARCH_LIBS([zlibVersion],[z zlib],,
+		[AC_MSG_ERROR(["Required zlib library not found."])])
 
-AC_SEARCH_LIBS(jpeg_read_header,[jpeg],,
-	[AC_MSG_ERROR(["Required jpeg library not found."])])
+	AC_SEARCH_LIBS([jpeg_read_header],[jpeg],,
+		[AC_MSG_ERROR(["Required jpeg library not found."])])
 
-AC_SEARCH_LIBS([ogg_stream_init],[ogg],,
-	[AC_MSG_ERROR(["Required ogg library not found."])])
-		
-AC_SEARCH_LIBS([vorbis_block_init],[vorbis],,
-	[AC_MSG_ERROR(["Required vorbis library not found."])])
+	AC_SEARCH_LIBS([ogg_stream_init],[ogg],,
+		[AC_MSG_ERROR(["Required ogg library not found."])])
 
-AC_SEARCH_LIBS([ov_open_callbacks],[vorbisfile],,
-	[AC_MSG_ERROR(["Required vorbisfile library not found."])],
-	[ -lvorbis -logg ])
+	AC_SEARCH_LIBS([vorbis_block_init],[vorbis],,
+		[AC_MSG_ERROR(["Required vorbis library not found."])])
+
+	AC_SEARCH_LIBS([ov_open_callbacks],[vorbisfile],,
+		[AC_MSG_ERROR(["Required vorbisfile library not found."])],
+		[ -lvorbis -logg ])
 
 dnl theory: darwin always has openal in a framework
-dnl: TODO: find out what the name of the darwin openal driver is
-AS_IF([ test "x${cond_build_darwin}" = xno ],
-	[AC_SEARCH_LIBS([alGenBuffers],[openal openal32 openal-soft],,
-		[AC_MSG_ERROR(["Required openal library not found."])])])		
-	
-AS_IF([ test "x${cond_build_unix}" = xyes ],
-[
-dnl TODO: find real name of darwin framework dynamic lib
-	AS_IF( [ test "x${cond_build_darwin}" = xyes ],
-		[AC_DEFINE([OPENGL_DRIVER],["libGL.1.dylib"],[OpenGL dynamic lib name])],
-		[AC_DEFINE([OPENGL_DRIVER],["libGL.so.1"],[OpenGL shared lib name])])
-	])
+dnl TODO: find out how to search for the darwin openal driver
+dnl TEMPORARY BYPASS
+	AM_COND_IF([BUILD_DARWIN],,
+		[AC_SEARCH_LIBS([alGenBuffers],[openal openal32 openal-soft],,
+			[AC_MSG_ERROR(["Required openal library not found."])])])
 
-dnl TODO: find real name of darwin framework dynamic lib
-	AS_IF( [ test "x${cond_build_darwin}" = xyes ],
-		[AC_DEFINE([OPENAL_DRIVER],["libopenal.1.dylib"],[OpenAL dynamic lib name])],
-		[AC_DEFINE([OPENAL_DRIVER],["libopenal.so.1"],[OpenAL shared lib name])])
-]) dnl unix
-	
-AS_IF([ test "x${cond_build_win32}" = xyes ],
-	[AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])])
+	curl_xtralibs=""
+	AM_COND_IF([BUILD_WIN32],
+		[
+		curl_xtralibs=" -lz -lwsock32"
+		])
 
-curl_xtralibs=""
-AS_IF( [ test "x${cond_build_win32}" = xyes ],
-	[curl_xtralibs=" -lz -lwsock32"])
+	AC_SEARCH_LIBS([curl_easy_reset],[curl],,
+		[AC_MSG_WARN(["Required curl library not found."])],
+		[ $curl_xtralibs ])
 
-AC_SEARCH_LIBS([curl_easy_reset],[curl],,
-	[AC_MSG_WARN(["Recommended curl library not found."])],
-	[ $curl_xtralibs ]) 
+	AC_PATH_X
 
-AC_PATH_X
+	AC_SEARCH_LIBS([XF86VidModeQueryVersion],[Xxf86vm])
 
-AC_SEARCH_LIBS([XF86VidModeQueryVersion],[Xxf86vm])
+	have_Xxf86dga=no
+	AC_SEARCH_LIBS([XF86DGAQueryVersion],[Xxf86dga xxf86dga],[have_Xxf86dga=yes])
+	AS_IF([ test "x${have_Xxf86dga}" = xyes ],
+		[AC_DEFINE([HAVE_XXF86DGA],1,
+			[Define to 1 if you have the Xxf86dga library])])
 
-have_Xxf86dga=no
-AC_SEARCH_LIBS([XF86DGAQueryVersion],[Xxf86dga],[have_Xxf86dga=yes])
+# these set GL_CFLAGS, GL_LIBS, GLU_CFLAGS, GLU_LIBS
+	AX_CHECK_GL
+	AX_CHECK_GLU
+	CFLAGS="$CFLAGS $GL_CFLAGS $GLU_CFLAGS"
+	LIBS="$GLU_LIBS $LIBS"
 
-dnl opengl32 and glu32 handled as win32 system libs above
-dnl darwin framework opengl also above (questionable)
-AS_IF( [ test "x${cond_build_win32}" = xno -a "x${cond_build_darwin}" = xno ],
-[
-	AC_SEARCH_LIBS([glGetError],[GL],,
-		[AC_MSG_ERROR(["Required OpenGL library not found."])])
-	
-	AC_SEARCH_LIBS([gluGetString],[GLU],,
-		[AC_MSG_ERROR(["Required GLU library not found."])])
-	
+# Hack in the extras for Win32 and Darwin
+# TODO: this may not be the best way to do this
+	win32_syslibs=""
+	AM_COND_IF([BUILD_WIN32],
+		[ win32_syslibs="-lmingw32 -lwinmm -lwsock32 -lws2_32 -lgdi32 -luser32"])
+	AC_SUBST([WIN32_LIBS],[$win32_syslibs])
+
+dnl
+dnl TODO: not sure if the -framework stuff is used for dlopened libs
+	darwin_frameworks=""
+	AM_COND_IF([BUILD_DARWIN],
+		[ darwin_frameworks="-framework OpenGL -framework OpenAL"])
+	AC_SUBST([DARWIN_FRAMEWORKS],[$darwin_frameworks])
+
 ])	
 dnl 
 dnl end of client-only library requirements
@@ -224,72 +219,81 @@ dnl
 
 #
 # Checks for header files
-# TODO: verify these are used and needed
 #
+
+dnl TODO: verify these are used and needed
 AC_CHECK_HEADERS(
 	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h unistd.h netdb.h termios.h])
 
 AC_CHECK_HEADERS(
-	[ fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h dnl 
-	sys/time.h unistd.h sys/stat.h ])
+	[ fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h sys/time.h unistd.h sys/stat.h ])
+	
+dnl for config.h generation, maybe others?	
+AC_CHECK_HEADERS([ windows.h winsock.h winsock2.h ])	
 
 dnl	
 dnl start of client-only header requirements
 dnl	
-AS_IF( [ test "x${cond_build_client}" = xyes ],
+AM_COND_IF([BUILD_CLIENT],
 [
 
 dnl for Darwin, using macports jpeg6b. TODO: is jpeg8 available?
-jpeglib_h_found=no
-AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h jpeg6b/include/jpeglib.h],[ jpeglib_h_found=yes ])
-AS_IF([ test "x${jpeglib_h_found}" = xno ],
-	[AC_MSG_ERROR("Required JPEG header file not found.")])
+dnl jpeg may be available in a Framework
+	jpeglib_h_found=no
+	AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h jpeg6b/include/jpeglib.h],[ jpeglib_h_found=yes ])
+	AS_IF([ test "x${jpeglib_h_found}" = xno ],
+		[AC_MSG_ERROR("Required JPEG header file not found.")])
 
-AC_CHECK_HEADERS([vorbis/vorbisfile.h],,
-	[AC_MSG_ERROR("Required Ogg-Vorbis header file not found.")])
+	AC_CHECK_HEADERS([vorbis/vorbisfile.h],,
+		[AC_MSG_ERROR("Required Ogg-Vorbis header file not found.")])
 
-openal_h_found=no
-AC_CHECK_HEADERS([AL/al.h al.h OpenAL/al.h],[ openal_h_found=yes ])
-AS_IF([ test "x${openal_h_found}" = xno ],
-	[AC_MSG_ERROR("Required OpenAL header file not found.")])
+	openal_h_found=no
+	AC_CHECK_HEADERS([AL/al.h al.h OpenAL/al.h],[ openal_h_found=yes ])
+	AS_IF([ test "x${openal_h_found}" = xno ],
+		[AC_MSG_ERROR("Required OpenAL header file not found.")])
 
-openalc_h_found=no
-AC_CHECK_HEADERS([AL/alc.h alc.h OpenAL/alc.h],[ openalc_h_found=yes ])
-AS_IF([ test "x${openalc_h_found}" = xno ],
-	[AC_MSG_ERROR("Required OpenAL header file not found.")])
+	openalc_h_found=no
+	AC_CHECK_HEADERS([AL/alc.h alc.h OpenAL/alc.h],[ openalc_h_found=yes ])
+	AS_IF([ test "x${openalc_h_found}" = xno ],
+		[AC_MSG_ERROR("Required OpenAL header file not found.")])
 
-AC_CHECK_HEADERS([curl/curl.h],,
-	[AC_MSG_ERROR("Required cURL header file not found.")])
+	AC_CHECK_HEADERS(
+		[curl/curl.h],,
+		[AC_MSG_ERROR("Required cURL header file not found.")])
 
-AS_IF([ test "x${cond_build_unix}" = xyes ],
-[
-	AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
-		[AC_MSG_ERROR("Required X11 header files not found")])
+	AM_COND_IF([BUILD_UNIX],
+	[
+		AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
+			[AC_MSG_ERROR("Required X11 header files not found")])
 
-	AC_CHECK_HEADERS([X11/extensions/xf86vmode.h],
-		,
-		[AC_MSG_ERROR("Required X11 x86 extension header file not found")],
-		[#include <X11/Xlib.h>])
+		AC_CHECK_HEADERS([X11/extensions/xf86vmode.h],,
+			[AC_MSG_ERROR("Required X11 x86 extension header file not found")],
+			[#include <X11/Xlib.h>])
 
-	AS_IF([test "x${have_Xxf86dga}" = xyes],
-		[AC_CHECK_HEADERS(
-			[X11/extensions/Xxf86dga.h],
-			[found=yes],
-				[AC_CHECK_HEADERS([X11/extensions/xf86dga.h],
-					[found=yes],
-					[have_Xxf86dga=no],
-					[#include <X11/Xlib.h #include <X11/Xproto.h> #include <X11/Xfuncproto.h>])],
-			[#include <X11/Xlib.h>  #include <X11/Xproto.h>])])
-])
-	
-AC_CHECK_HEADERS([GL/gl.h GL/glu.h],,
-	[AC_MSG_ERROR("Required OpenGL header files not found.")])
+		dga_found=no
+		AC_CHECK_HEADERS(
+			[X11/extensions/Xxf86dga.h X11/extensions/xf86dga.h],
+			[dga_found=yes],,
+			[
+			#include <X11/Xlib.h>  
+			#include <X11/Xproto.h>
+			#include <X11/Xfuncproto.h>
+			])
+			
+		AS_IF([ test "x${dga_found}" = xno ],
+			[AC_MSG_WARN("X11 x86 DGA header file not found")])
 
-dnl TODO: mingw has this, figure out the right way to do it
-AS_IF([ test "x${cond_build_unix}" = xyes ],
-	[AC_CHECK_HEADERS([GL/glx.h],,
-		[AC_MSG_ERROR("Required OpenGL header files not found.")])])	
+		AC_CHECK_HEADERS([GL/gl.h GL/glu.h GL/glx.h],,
+			[AC_MSG_ERROR("Required OpenGL header files not found.")])
 
+	])
+
+dnl MinGW supplies these (also GL/glx.h)	
+	AM_COND_IF([BUILD_WIN32],
+	[
+		AC_CHECK_HEADERS([GL/gl.h GL/glu.h],,
+		[AC_MSG_ERROR("Required OpenGL header files not found.")])
+	])
 ])
 dnl 
 dnl end of client-only header requirements
@@ -307,30 +311,67 @@ AC_CHECK_TYPES([ptrdiff_t])
 
 #
 # Checks for library functions.
-# note: some checks to help in manual edit of config.h for Win32/MSVC build
 #
+
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_FUNC_REALLOC
 
 # network functions
-AC_CHECK_FUNCS([ closesocket socket gethostbyname ]) 
+AC_CHECK_FUNCS([closesocket socket gethostbyname])
 
 # thread functions
-AC_CHECK_FUNCS([ pthread_create _begin_thread ])
+AC_CHECK_FUNCS([pthread_create _begin_thread])
 
 # string functions
-AC_CHECK_FUNCS([ strchr strdup _strdup strerror stricmp _stricmp dnl 
-		strcasecmp strncasecmp strrchr strstr strnicmp strlcpy ]) dnl
-		
+AC_CHECK_FUNCS([strchr strerror strrchr strstr strlcpy])
+AC_CHECK_FUNCS([strcasecmp strncasecmp strnicmp ])
+AC_CHECK_FUNCS([strdup _strdup stricmp _stricmp])
+
 # file system functions
-AC_CHECK_FUNCS([ filelength stat fstat getcwd unlink _unlink mkdir ])
-		
-AC_CHECK_FUNCS([ pow sqrt floor gettimeofday memmove memset munmap mremap dnl
-		putenv _putenv select ]) 
+AC_CHECK_FUNCS([filelength stat fstat getcwd unlink _unlink mkdir])
+
+# math functions
+AC_CHECK_FUNCS([pow sqrt floor])
+
+# mem mgmt functions
+AC_CHECK_FUNCS([memmove memset munmap mremap])
+
+# other functions
+AC_CHECK_FUNCS([gettimeofday putenv _putenv select])
+
+#
+# Set names of dlopened libraries for config.h
+#
+
+AM_COND_IF([BUILD_UNIX],
+	[AC_DEFINE([OPENGL_DRIVER],["libGL.so.1"],[OpenGL shared lib name])])
+
+AM_COND_IF([BUILD_UNIX],
+	[AC_DEFINE([OPENAL_DRIVER],["libopenal.so.1"],[OpenAL shared lib name])])
+
+dnl
+dnl TODO: Determine real file names for OSX OpenGL and OpenAL
+dnl  Note: these can be hacked into config.h file to try other names
+dnl
+AM_COND_IF([BUILD_DARWIN],
+	[AC_DEFINE([OPENGL_DRIVER],["libGL.so"],[OpenGL dynamic lib name])])
+
+AM_COND_IF([BUILD_DARWIN],
+	[AC_DEFINE([OPENAL_DRIVER],["libopenal.so"],[OpenAL dynamic lib name])])
+
+AM_COND_IF([BUILD_WIN32],
+	[AC_DEFINE([OPENGL_DRIVER],["opengl32"],[OpenGL DLL name])])
+
+AM_COND_IF([BUILD_WIN32],
+	[AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])])
+
+# 2 required gcc options
+AX_CFLAGS_GCC_OPTION([-ffast-math])
+AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
 
 # outputs
-AC_CONFIG_FILES([Makefile source/Makefile])
+AC_CONFIG_FILES([ Makefile 	source/Makefile ])
 
 AC_OUTPUT
