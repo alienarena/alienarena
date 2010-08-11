@@ -4829,7 +4829,12 @@ fi
 
 if  test "x${cond_build_darwin}" = xyes ; then
 
+
 $as_echo "#define DARWIN_SPECIAL_CASE 1" >>confdefs.h
+
+
+$as_echo "#define UNIX_VARIANT 1" >>confdefs.h
+
 
 fi
 
@@ -7655,7 +7660,7 @@ _ACEOF
 fi
 done
 
-for ac_func in strcasecmp strncasecmp strnicmp
+for ac_func in strcasecmp strncasecmp
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -7668,7 +7673,7 @@ _ACEOF
 fi
 done
 
-for ac_func in strdup _strdup stricmp _stricmp
+for ac_func in strdup _strdup stricmp _stricmp strnicmp _strnicmp
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

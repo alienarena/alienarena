@@ -123,7 +123,10 @@ AM_COND_IF([BUILD_WIN32],
 	
 dnl for cases where darwin differs from unix/linux	
 AM_COND_IF([BUILD_DARWIN],
-	[AC_DEFINE([DARWIN_SPECIAL_CASE],1,[darwin-specific conditional compile])])
+	[
+	AC_DEFINE([DARWIN_SPECIAL_CASE],1,[darwin-specific conditional compile])
+	AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])
+	])
 
 AC_DEFINE_UNQUOTED(CPUSTRING, "${host_cpu}", [Canonical CPU identification])
 AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
@@ -326,8 +329,8 @@ AC_CHECK_FUNCS([pthread_create _begin_thread])
 
 # string functions
 AC_CHECK_FUNCS([strchr strerror strrchr strstr strlcpy])
-AC_CHECK_FUNCS([strcasecmp strncasecmp strnicmp ])
-AC_CHECK_FUNCS([strdup _strdup stricmp _stricmp])
+AC_CHECK_FUNCS([strcasecmp strncasecmp ])
+AC_CHECK_FUNCS([strdup _strdup stricmp _stricmp strnicmp _strnicmp])
 
 # file system functions
 AC_CHECK_FUNCS([filelength stat fstat getcwd unlink _unlink mkdir])

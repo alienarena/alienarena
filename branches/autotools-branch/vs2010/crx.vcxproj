@@ -13,8 +13,8 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{79F07E75-8F44-4C0E-96A9-F4529D29B925}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>crx_vc</RootNamespace>
-    <ProjectName>crx_vc</ProjectName>
+    <RootNamespace>crx</RootNamespace>
+    <ProjectName>crx</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -33,11 +33,11 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(SolutionDir)alienarena_win32.props" />
+    <Import Project="$(SolutionDir)alienarena_w32.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(SolutionDir)alienarena_win32.props" />
+    <Import Project="$(SolutionDir)alienarena_w32.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -45,23 +45,24 @@
     </LinkIncremental>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
     <GenerateManifest>false</GenerateManifest>
-    <OutDir>$(SolutionDir)</OutDir>
+    <OutDir>$(LocalBin)$(Configuration)\</OutDir>
+    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
-    <OutDir>$(SolutionDir)</OutDir>
+    <OutDir>$(LocalBin)$(Configuration)\</OutDir>
+    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_WIN32;VS2010;C_ONLY;AL_NO_PROTOTYPES;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalIncludeDirectories>$(JpegIncludeDir);$(OggIncludeDir);$(VorbisIncludeDir);$(CurlIncludeDir);$(OpenALIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SrcDir);$(OpenALIncludeDir);$(LocalInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BrowseInformation>true</BrowseInformation>
-      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
-      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <DisableSpecificWarnings>4996;4244</DisableSpecificWarnings>
       <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -79,8 +80,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ShowProgress>LinkVerboseLib</ShowProgress>
-      <AdditionalDependencies>libjpeg_vc.lib;libogg_vc.lib;libvorbis_vc.lib;libvorbisfile_vc.lib;zlib_vc.lib;libcurl_vc.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir)win32_vc\Debug\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>game.lib;libjpeg.lib;libogg.lib;libvorbis.lib;libvorbisfile.lib;zlib.lib;libcurl.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(LocalLib)$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
   </ItemDefinitionGroup>
@@ -88,12 +89,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Full</Optimization>
-      <PreprocessorDefinitions>WIN32;_WIN32;VS2010;C_ONLY;AL_NO_PROTOTYPES;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalIncludeDirectories>$(JpegIncludeDir);$(OggIncludeDir);$(VorbisIncludeDir);$(CurlIncludeDir);$(OpenALIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SrcDir);$(OpenALIncludeDir);$(LocalInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BrowseInformation>true</BrowseInformation>
-      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
-      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <DisableSpecificWarnings>4996;4244</DisableSpecificWarnings>
       <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
@@ -108,18 +108,19 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>libjpeg_vc.lib;libogg_vc.lib;libvorbis_vc.lib;libvorbisfile_vc.lib;zlib_vc.lib;libcurl_vc.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir)win32_vc\Release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libjpeg.lib;game.lib;libogg.lib;libvorbis.lib;libvorbisfile.lib;zlib.lib;libcurl.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(LocalLib)$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>
       </EnableCOMDATFolding>
       <GenerateMapFile>true</GenerateMapFile>
+      <OutputFile>$(LocalBin)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -158,6 +159,7 @@
     <ClCompile Include="$(SrcDir)ref_gl\r_bloom.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_draw.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_image.c" />
+    <ClCompile Include="$(SrcDir)ref_gl\r_iqm.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_light.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_main.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_math.c" />
@@ -173,6 +175,7 @@
     <ClCompile Include="$(SrcDir)ref_gl\r_surf.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_varray.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_vbo.c" />
+    <ClCompile Include="$(SrcDir)ref_gl\r_vlights.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_warp.c" />
     <ClCompile Include="$(SrcDir)server\sv_ccmds.c" />
     <ClCompile Include="$(SrcDir)server\sv_ents.c" />
@@ -194,6 +197,7 @@
     <ClCompile Include="$(SrcDir)win32\vid_dll.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(LocalInclude)config.h" />
     <ClInclude Include="$(SrcDir)client\client.h" />
     <ClInclude Include="$(SrcDir)client\console.h" />
     <ClInclude Include="$(SrcDir)client\input.h" />

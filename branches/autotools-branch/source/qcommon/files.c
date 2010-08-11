@@ -75,7 +75,7 @@ Alien Arena File System  (circa June 2010)
     arena/
     botinfo/
 
-  $COR_GAME         ~/.codered
+  $COR_GAME         $(HOME)/.codered
     --- Same as Standard Install
 
 --- Alien Arena ACEBOT File System ---
@@ -1063,6 +1063,7 @@ Allows enumerating all of the directories in the search path
 char *FS_NextPath (char *prevpath)
 {
 	char *nextpath;
+	int i = 0;
 
 	if ( prevpath == NULL )
 	{ // return the first
@@ -1071,7 +1072,6 @@ char *FS_NextPath (char *prevpath)
 	else
 	{ // scan the fs_gamesearch elements for an address match with prevpath
 		nextpath = NULL;
-		int i = 0;
 		while ( prevpath != fs_gamesearch[i++] )
 		{
 			if ( i >= GAME_SEARCH_SLOTS )
