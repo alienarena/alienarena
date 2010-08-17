@@ -1242,6 +1242,7 @@ struct gclient_s
 	int lastsidemove;
 	int dodge;
 	int moved;
+	float lastdodge;
 
 	float spawnprotecttime;
 	qboolean spawnprotected;
