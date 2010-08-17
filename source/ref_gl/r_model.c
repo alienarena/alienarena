@@ -1370,7 +1370,7 @@ void Mod_LoadFaces (lump_t *l)
 			} while (stage = stage->next);
 		}
 		GL_CalcSurfaceNormals(out);
-		GL_BuildODEGeoms(out);
+		//GL_BuildODEGeoms(out);
 	}
 	GL_EndBuildingLightmaps ();
 }
