@@ -359,7 +359,14 @@ void R_CreateWorldObject( void )
 
 void R_DestroyWorldObject( void )
 {
-	dWorldDestroy(RagDollWorld);
+	if(RagDollWorld)
+		dWorldDestroy(RagDollWorld);
+
+	if(RagDollSpace)
+		dSpaceDestroy (RagDollSpace);
+
+	if(contactGroup)
+		dJointGroupDestroy(contactGroup);
 }
 
 //build and set initial position of ragdoll - note this will need to get some information from the skeleton on the first death frame
