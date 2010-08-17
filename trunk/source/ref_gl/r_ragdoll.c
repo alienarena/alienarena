@@ -365,7 +365,8 @@ void R_DestroyWorldObject( void )
 //build and set initial position of ragdoll - note this will need to get some information from the skeleton on the first death frame
 void R_RagdollBody_Init( int RagDollID )
 {
-	vec3_t temp;
+	vec3_t temp, p1, p2;
+	float density;
 
 	RagDoll[RagDollID].spawnTime = Sys_Milliseconds();
 	RagDoll[RagDollID].destroyed = false;
@@ -400,6 +401,67 @@ void R_RagdollBody_Init( int RagDollID )
 	VectorCopy(add3(RagDoll[RagDollID].L_ANKLE_POS, temp), RagDoll[RagDollID].L_TOES_POS);
 
 	//build the ragdoll parts
+
+	//define some ragdoll object id's in h
+
+	VectorSet(p1, -CHEST_W * 0.5, CHEST_H, 0.0);
+	VectorSet(p2, CHEST_W * 0.5, CHEST_H, 0.0);
+	R_addBody(RagDollID, "chest", CHEST, p1, p2, 0.13, density); //what will the density be?
+
+
+		//self.belly = self.addBody((0.0, CHEST_H - 0.1, 0.0),
+		//	(0.0, HIP_H + 0.1, 0.0), 0.125)
+		//self.midSpine = self.addFixedJoint(self.chest, self.belly)
+		//self.pelvis = self.addBody((-PELVIS_W * 0.5, HIP_H, 0.0),
+		//	(PELVIS_W * 0.5, HIP_H, 0.0), 0.125)
+		//self.lowSpine = self.addFixedJoint(self.belly, self.pelvis)
+
+		//self.head = self.addBody((0.0, BROW_H, 0.0), (0.0, MOUTH_H, 0.0), 0.11)
+		//self.neck = self.addBallJoint(self.chest, self.head,
+		//	(0.0, NECK_H, 0.0))
+
+		//self.rightUpperLeg = self.addBody(R_HIP_POS, R_KNEE_POS, 0.11)
+		//self.rightHip = self.addBallJoint(self.pelvis, self.rightUpperLeg,
+		//	R_HIP_POS)
+		//self.leftUpperLeg = self.addBody(L_HIP_POS, L_KNEE_POS, 0.11)
+		//self.leftHip = self.addBallJoint(self.pelvis, self.leftUpperLeg,
+		//	L_HIP_POS)
+
+		//self.rightLowerLeg = self.addBody(R_KNEE_POS, R_ANKLE_POS, 0.09)
+		//self.rightKnee = self.addBallJoint(self.rightUpperLeg,
+		//	self.rightLowerLeg, R_KNEE_POS)
+		//self.leftLowerLeg = self.addBody(L_KNEE_POS, L_ANKLE_POS, 0.09)
+		//self.leftKnee = self.addBallJoint(self.leftUpperLeg,
+		//	self.leftLowerLeg, L_KNEE_POS)
+
+		//self.rightFoot = self.addBody(R_HEEL_POS, R_TOES_POS, 0.09)
+		//self.rightAnkle = self.addBallJoint(self.rightLowerLeg,
+		//	self.rightFoot, R_ANKLE_POS)
+		//self.leftFoot = self.addBody(L_HEEL_POS, L_TOES_POS, 0.09)
+		//self.leftAnkle = self.addBallJoint(self.leftLowerLeg,
+		//	self.leftFoot, L_ANKLE_POS)
+
+		//self.rightUpperArm = self.addBody(R_SHOULDER_POS, R_ELBOW_POS, 0.08)
+		//self.rightShoulder = self.addBallJoint(self.chest, self.rightUpperArm,
+		//	R_SHOULDER_POS)
+		//self.leftUpperArm = self.addBody(L_SHOULDER_POS, L_ELBOW_POS, 0.08)
+		//self.leftShoulder = self.addBallJoint(self.chest, self.leftUpperArm,
+		//	L_SHOULDER_POS)
+
+		//self.rightForeArm = self.addBody(R_ELBOW_POS, R_WRIST_POS, 0.075)
+		//self.rightElbow = self.addBallJoint(self.rightUpperArm,
+		//	self.rightForeArm, R_ELBOW_POS)
+		//self.leftForeArm = self.addBody(L_ELBOW_POS, L_WRIST_POS, 0.075)
+		//self.leftElbow = self.addBallJoint(self.leftUpperArm,
+		//	self.leftForeArm, L_ELBOW_POS)
+
+		//self.rightHand = self.addBody(R_WRIST_POS, R_FINGERS_POS, 0.075)
+		//self.rightWrist = self.addBallJoint(self.rightForeArm,
+		//	self.rightHand, R_WRIST_POS)
+		//self.leftHand = self.addBody(L_WRIST_POS, L_FINGERS_POS, 0.075)
+		//self.leftWrist = self.addBallJoint(self.leftForeArm,
+		//	self.leftHand, L_WRIST_POS)
+
 }
 
 /*

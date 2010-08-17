@@ -2804,14 +2804,15 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	
 		//dodging 
 		client->dodge = false;
-		if(ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && client->moved == false && ((level.time - client->lastmovetime) < .15))
+		if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && client->moved == false 
+			&& ((level.time - client->lastmovetime) < .15))
 		{
 			if((ucmd->sidemove < 0 && client->lastsidemove < 0) || (ucmd->sidemove > 0 && client->lastsidemove > 0)) {
 				if(ucmd->sidemove > 0)
 					client->dodge = 1;
 				else
 					client->dodge = -1;
-				ucmd->upmove += 100;
+				ucmd->upmove += 100;				
 			}
 		}
 
@@ -2871,7 +2872,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			}
 			VectorAdd(ent->velocity, addspeed, ent->velocity);
 			client->dodge = false;
-			client->lastmovetime = level.time;
+			client->lastdodge = client->lastmovetime = level.time;
 		}
 
 		VectorCopy (pm.mins, ent->mins);

@@ -27,6 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_CONTACTS 4 //this might be best set to 1, check
 #define RAGDOLL_DURATION 10000 //10 seconds
 
+#define CHEST 0
+
 //Hard coded definitions(if no ragdoll read in)
 //note we need to adjust this for our world, which would likely be these vals * 32
 //however, from what I have read, ODE prefers things to be done in meters, so we shall see.  How will
