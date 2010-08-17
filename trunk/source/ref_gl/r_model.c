@@ -1192,6 +1192,9 @@ void GL_BuildODEGeoms(msurface_t *surf)
 	const int indices[6] = {2,1,0,
 							3,2,0};
 
+	if(r_SurfaceCount > MAX_SURFACES - 1 )
+		return;
+
 	for (; p; p = p->chain)
 	{
 		// reset pointer and counter
@@ -1238,8 +1241,6 @@ void GL_BuildODEGeoms(msurface_t *surf)
 	WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh[r_SurfaceCount], NULL, NULL, NULL);
 	dGeomSetData(WorldGeometry[r_SurfaceCount], "surface");
 
-	//note - do we need to translate to a location?  I think we don't but that I am not totally sure of.
-
 	r_SurfaceCount++;
 }
 
@@ -1276,6 +1277,8 @@ void Mod_LoadFaces (lump_t *l)
 	currentmodel = loadmodel;
 
 	GL_BeginBuildingLightmaps (loadmodel);
+	
+	r_SurfaceCount = 0;
 
 	for ( surfnum=0 ; surfnum<count ; surfnum++, in++, out++)
 	{
@@ -1370,7 +1373,7 @@ void Mod_LoadFaces (lump_t *l)
 			} while (stage = stage->next);
 		}
 		GL_CalcSurfaceNormals(out);
-		//GL_BuildODEGeoms(out);
+		GL_BuildODEGeoms(out);
 	}
 	GL_EndBuildingLightmaps ();
 }
@@ -1603,7 +1606,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 		R_ClearFlares();
 	R_ClearGrasses();
 	R_ClearBeams();
-	// rscript - MrG
+
 	RS_FreeUnmarked();
 	strcpy(tmp,loadmodel->name+5);
 	tmp[strlen(tmp)-4]=0;
@@ -1613,7 +1616,11 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	RS_ReloadImageScriptLinks();
 	RS_LoadSpecialScripts();
 	Cvar_SetValue("scriptsloaded", 1);
-	// end
+	
+	//ODE - create new world(flush out old first?)
+	R_DestroyWorldObject();
+	R_CreateWorldObject();
+
 	r_numWorldLights = 0;
 
 	loadmodel->type = mod_brush;

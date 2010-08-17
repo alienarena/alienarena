@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_RAGDOLLS 64 
 #define MAX_RAGDOLL_OBJECTS 32
 #define MAX_RAGDOLL_JOINTS 32
-#define MAX_SURFACES 16384 //check on this, this seems extreme
+#define MAX_SURFACES 65536 //check on this, this seems extreme
 #define MAX_CONTACTS 4 //this might be best set to 1, check
 #define RAGDOLL_DURATION 10000 //10 seconds
 

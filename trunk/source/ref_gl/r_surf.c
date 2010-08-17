@@ -1459,8 +1459,6 @@ void R_DrawWorld (void)
 
 	r_normalsurfaces = NULL;
 
-	r_SurfaceCount = 0;
-
 	R_ClearSkyBox ();
 
 	if ( qglMTexCoord2fSGIS )

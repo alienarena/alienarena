@@ -1049,8 +1049,6 @@ void R_RenderView (refdef_t *fd)
 		qglEnable(GL_FOG);
 	}
 
-	R_CreateWorldObject();
-
 	R_DrawWorld ();
 
 	R_DrawSpecialSurfaces();
@@ -1112,7 +1110,6 @@ void R_RenderView (refdef_t *fd)
 		qglDisable(GL_FOG);
 
 	GL_DrawRadar();
-	R_DestroyWorldObject();
 }
 
 void	R_SetGL2D (void)
