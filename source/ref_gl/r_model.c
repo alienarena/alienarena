@@ -1183,7 +1183,7 @@ void GL_BuildODEGeoms(msurface_t *surf)
 {
 	glpoly_t *p = surf->polys;
 	float	*v;	
-	int		i, j, VertexCounter;
+	int		i, j, k, offset, VertexCounter;
 	int		ODEIndexCount = 0;
 	float	ODEVerts[MAX_VARRAY_VERTS]; //can, should this be done dynamically?
 	int		ODEIndices[MAX_INDICES];
@@ -1195,12 +1195,11 @@ void GL_BuildODEGeoms(msurface_t *surf)
 	if(r_SurfaceCount > MAX_SURFACES - 1 )
 		return;
 
+	// reset pointer and counter
+	VertexCounter = k = 0;
+	
 	for (; p; p = p->chain)
 	{
-		// reset pointer and counter
-		VArray = &VArrayVerts[0];
-		VertexCounter = 0;
-
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
 
@@ -1208,8 +1207,6 @@ void GL_BuildODEGeoms(msurface_t *surf)
 			ODEVerts[VertexCounter+1] = v[1];
 			ODEVerts[VertexCounter+2] = v[2];
 
-			// nothing else is needed
-			// increment pointer and counter
 			VertexCounter++;
 		}
 	
@@ -1219,22 +1216,27 @@ void GL_BuildODEGeoms(msurface_t *surf)
 			
 		//this next block is to create indices for the entire mesh.  I think it should work in theory, but 
 		//it's only my theory, and not confirmed just yet.
-		j = 0;
+		j = offset = 0;
 		for(i = 0; i < ODETris; i++)
 		{
 			if(j > 3)
+			{
 				j = 0;
-			ODEIndices[i+0] = indices[0+j]+i;
-			ODEIndices[i+1] = indices[1+j]+i;
-			ODEIndices[i+2] = indices[2+j]+i;
+				offset+=2;
+			}
+			ODEIndices[k+0] = indices[0+j]+offset;
+			ODEIndices[k+1] = indices[1+j]+offset;
+			ODEIndices[k+2] = indices[2+j]+offset;
 			j+=3;
+			k+=3;
 		}
 	}
 
 	//we need to build the trimesh geometry for this surface
+	//note - would it be better/faster in the collision detection to just build one huge trimesh of all surfaces?
 	triMesh[r_SurfaceCount] = dGeomTriMeshDataCreate();
 
-	// Build the mesh from the data 
+	//// Build the mesh from the data 
 	dGeomTriMeshDataBuildSimple(triMesh[r_SurfaceCount], (dReal*)ODEVerts,
 		VertexCounter, (dTriIndex*)ODEIndices, ODEIndexCount); 
 
@@ -1373,7 +1375,7 @@ void Mod_LoadFaces (lump_t *l)
 			} while (stage = stage->next);
 		}
 		GL_CalcSurfaceNormals(out);
-		//GL_BuildODEGeoms(out);
+		GL_BuildODEGeoms(out);
 	}
 	GL_EndBuildingLightmaps ();
 }
