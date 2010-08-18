@@ -62,9 +62,6 @@ static HANDLE		qwclsemaphore;
 int			argc;
 char		*argv[MAX_NUM_ARGVS];
 
-// -jjb-ac
-//#ifndef __unix__
-
 #define CONSOLE_WINDOW_CLASS_NAME	"CRX Console"
 #define CONSOLE_WINDOW_NAME			"Alien Arena Console"
 #define CONSOLE_WINDOW_STYLE		(WS_OVERLAPPED|WS_BORDER|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX|WS_CLIPCHILDREN|WS_GROUP)
@@ -820,7 +817,6 @@ Sys_UnloadGame
 */
 void Sys_UnloadGame (void)
 {
-	// -jjb-dl
 	if ( game_library != NULL )
 	{
 		if (!FreeLibrary (game_library))
@@ -836,9 +832,9 @@ Sys_GetGameAPI
 Loads the game dll
 =================
 */
-void *Sys_GetGameAPI (void *parms)  // -jjb-dl static link of game module
+void *Sys_GetGameAPI (void *parms)
 {
-	void	*(*ptrGetGameAPI) (void *) = NULL; // -jjb-dl
+	void	*(*ptrGetGameAPI) (void *) = NULL;
 	char	name[MAX_OSPATH];
 	char	*path;
 	char	cwd[MAX_OSPATH];

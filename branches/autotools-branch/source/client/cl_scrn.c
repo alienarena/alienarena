@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2010 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -690,7 +691,7 @@ void SCR_DrawLoading (void)
 		Draw_Fill (0, 0, viddef.width, viddef.height, 0);
 
 #if 0
-	// no m_background pic, but a pic here over-writes the levelshot ???
+	// no m_background pic, but a pic here over-writes the levelshot
 	Draw_StretchPic (0, 0, viddef.width, viddef.height, "m_background");
 #endif
 

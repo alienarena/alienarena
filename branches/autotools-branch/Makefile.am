@@ -28,10 +28,11 @@ EXTRA_DIST = m4
 # TODO: create "official" INSTALL, README, etc.
 dist_doc_DATA = docs/license.txt docs/README.txt
 
+# Not needed unless something is installed using copy command
 # remove svn directories from distribution staging area after creating
 #  distribution in staging area and before running archiver
-dist-hook:
-	rm -rf `find $(distdir) -name .svn`
+#dist-hook:
+#	rm -rf `find $(distdir) -name .svn`
 
 #
 # Alternate Install

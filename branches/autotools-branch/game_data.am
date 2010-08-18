@@ -2268,7 +2268,11 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena6/skull.tga \
 	data1/textures/arena6/snow_nm.tga \
 	data1/textures/arena6/snow.tga \
+	data1/textures/arena6/tech1_hm.tga \
+	data1/textures/arena6/tech1_nm.tga \
 	data1/textures/arena6/tech1.tga \
+	data1/textures/arena6/wires1_hm.tga \
+	data1/textures/arena6/wires1_nm.tga \
 	data1/textures/arena6/wires1.tga \
 	data1/textures/arena7/bluegrid.tga \
 	data1/textures/arena7/ceiling1.tga \

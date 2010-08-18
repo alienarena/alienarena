@@ -27,7 +27,9 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#if defined HAVE_DLFCN_H
 #include <dlfcn.h>
+#endif
 
 #if defined HAVE_AL_H
 #include <al.h>

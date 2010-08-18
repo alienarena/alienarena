@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 config.h for Alien Arena Microsoft Visual C/C++ Version
 
-Manual edit based on GNU Autotools autoheader generated 
+Manual edit based on GNU Autotools autoheader generated
 config.h.in and config.h from GNU/Linux and MinGW/MSys
 
 IMPORTANT: When the version changes, the version string needs to be updated
@@ -39,16 +39,19 @@ where the location of header files differs between systems.
 
 */
 
-// TODO: Get this from the compiler built-ins  ??
-/* Canonical OS identification */
-//#undef BUILDSTRING
+/* this is not Canonical OS identification */
 #define BUILDSTRING "Win32"
 
-// TODO: Get this from the compiler built-ins
-/* Canonical CPU identification */
-#define CPUSTRING "TBD"
+/* this is not Canonical CPU identification, probably always 'x86' */
+#if defined _M_X64
+#define CPUSTRING "x86-64"
+#elif defined _M_IA64
+#define CPUSTRING "IA-64"
+#elif defined _M_IX86
+#define CPUSTRING "x86"
+#endif
 
-/* Version number of package */
+/* Version number of package. UPDATE ON VERSION CHANGE */
 #define VERSION "7.45.vs2010"
 
 /* OpenAL dll name */
@@ -69,6 +72,9 @@ where the location of header files differs between systems.
 /* Define to 1 if you have the <GL/gl.h> header file. */
 #define HAVE_GL_GL_H 1
 
+/* for OpenAL */
+#define AL_NO_PROTOTYPES 1
+
 /* Define to 1 if you have the <alc.h> header file. */
 #define HAVE_ALC_H 1
 
@@ -80,6 +86,9 @@ where the location of header files differs between systems.
 
 /* Define to 1 if you have the <vorbis/vorbisfile.h> header file. */
 #define HAVE_VORBIS_VORBISFILE_H 1
+
+/* Define to 1 if you have the <jpeg/jpeglib.h> header file. */
+#define HAVE_JPEG_JPEGLIB_H 1
 
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 /* #undef HAVE_ARPA_INET_H */
@@ -93,29 +102,24 @@ where the location of header files differs between systems.
 /* Define to 1 if you have the `strnicmp' function. */
 #define HAVE_STRNICMP 1
 
-/* for OpenAL */
-#define AL_NO_PROTOTYPES 1
-
-//=========================================================================
-
 /*
   Handling deprecated function names for Posix functions:
-  
+
   For a function that should have the alternate name (because it is
-  Posix OS-dependent, and not Standard C)
-  
+  Posix OS-dependent, and not ISO C)
+
   #if defined HAVE_SOMEPOSIXFUNCTION && !defined HAVE__SOMEPOSIXFUNCTION
   #define _someposixfunction someposixfunction
   #endif
-  
+
   If both are available then not a problem. Except configure.ac needs to
   check for both on systems that have Autotools configuration.
 
-  For MSVC, #define HAVE__FUNC 1 is sufficient.  
-*/ 
+  For MSVC, #define HAVE__FUNC 1 is sufficient.
+*/
 
 /* Define to 1 if you have the `_putenv' function. */
-#define HAVE__PUTENV 1 
+#define HAVE__PUTENV 1
 
 /* Define to 1 if you have the `_strdup' function. */
 #define HAVE__STRDUP 1
@@ -132,11 +136,22 @@ where the location of header files differs between systems.
 #define inline __inline
 #endif
 
-//=========================================================================
+
+/* ====== TBD =======*/
+
+/* Define to 1 if you have the ANSI C header files. */
+#define STDC_HEADERS 1
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#define gid_t int
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#define uid_t int
 
 
 
 
+/* ======== probable extraneous stuff  ==========*/
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
@@ -156,13 +171,8 @@ where the location of header files differs between systems.
 /* Define to 1 if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY 1
 
-
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
-
-/* Define to 1 if you have the <jpeg/jpeglib.h> header file. */
-#define HAVE_JPEG_JPEGLIB_H 1
-
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
@@ -318,35 +328,30 @@ where the location of header files differs between systems.
 /* #undef NO_MINUS_C_MINUS_O */
 
 /* Name of package */
-#define PACKAGE "alienarena"
+//#define PACKAGE "alienarena"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "alienrace@comcast.net"
+//#define PACKAGE_BUGREPORT "alienrace@comcast.net"
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "alienarena"
+//#define PACKAGE_NAME "alienarena"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "alienarena 7.41.x1"
+//#define PACKAGE_STRING "alienarena 7.41.x1"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "alienarena"
+//#define PACKAGE_TARNAME "alienarena"
 
 /* Define to the home page for this package. */
-#define PACKAGE_URL ""
+//#define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "7.45.vs2010"
+//#define PACKAGE_VERSION "7.45.vs2010"
 
-/* Define to 1 if you have the ANSI C header files. */
-#define STDC_HEADERS 1
 
 /* unix specific conditional compile */
 /* #undef UNIX_VARIANT */
 
-
-/* Define to `int' if <sys/types.h> doesn't define. */
-#define gid_t int
 
 
 /* Define to rpl_malloc if the replacement function should be used. */
@@ -358,6 +363,4 @@ where the location of header files differs between systems.
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 /* #undef size_t */
 
-/* Define to `int' if <sys/types.h> doesn't define. */
-#define uid_t int
 

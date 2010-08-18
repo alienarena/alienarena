@@ -57,6 +57,11 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
+/*
+File system modifications are:
+Copyright (C) 2010 COR Entertainment, LLC.
+*/
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif

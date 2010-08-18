@@ -1,7 +1,8 @@
 /*
-* Copyright(c) 1997-2001 Id Software, Inc.
-* Copyright(c) 2002 The Quakeforge Project.
-* Copyright(c) 2006 Quake2World.
+* Copyright (C) 1997-2001 Id Software, Inc.
+* Copyright (C) 2002 The Quakeforge Project.
+* Copyright (C) 2006 Quake2World.
+* Copyright (C) 2010 COR Entertainment, LLC
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License

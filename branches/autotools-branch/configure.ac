@@ -26,19 +26,19 @@
 #  Mac OSX using X11/Darwin (in development)
 
 AC_PREREQ(2.61)
-AC_INIT([alienarena],[7.45.0806],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.45.0812],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([config/config.h])
 
+dnl 1.11 = require automake 1.11 or greater
 dnl foreign = do not apply GNU doc requirements
 dnl subdir-objects = compile objects into their sub directories
 dnl silent-rules = less output
-dnl 1.11 = require automake 1.11 or greater
 dnl dist-zip = build .zip distribution in addition to .tar.gz 
-AM_INIT_AUTOMAKE([foreign subdir-objects silent-rules 1.11 dist-zip ])
+AM_INIT_AUTOMAKE([ 1.11 foreign subdir-objects silent-rules dist-zip ])
 AM_SILENT_RULES([yes])
 
 dnl use --enable-maintainer-mode to get full set of make targets
@@ -137,7 +137,7 @@ AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
 
 AC_SEARCH_LIBS(acos,[m])
 
-dnl could be AC_SEARCH_LIBS(pthread_mutex_init,[pthread])
+dnl could be AC_SEARCH_LIBS([pthread_mutex_init],[pthread])
 dnl but this is probably more portable
 dnl
 AX_PTHREAD(,[AC_MSG_ERROR(["Required pthreads support not found."])])
@@ -229,7 +229,7 @@ AC_CHECK_HEADERS(
 	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h unistd.h netdb.h termios.h])
 
 AC_CHECK_HEADERS(
-	[ fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h sys/time.h unistd.h sys/stat.h ])
+	[ dlfcn.h fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h sys/time.h unistd.h sys/stat.h ])
 	
 dnl for config.h generation, maybe others?	
 AC_CHECK_HEADERS([ windows.h winsock.h winsock2.h ])	
@@ -373,8 +373,26 @@ AM_COND_IF([BUILD_WIN32],
 # 2 required gcc options
 AX_CFLAGS_GCC_OPTION([-ffast-math])
 AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
+# TODO: consider putting -DDedicated here
 
 # outputs
 AC_CONFIG_FILES([ Makefile 	source/Makefile ])
 
 AC_OUTPUT
+
+AS_ECHO(["-------------------------------------------"])
+AS_ECHO(["Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"])
+AS_ECHO([" OS ................. ${host_os}"])
+AS_ECHO([" CPU: ............... ${host_cpu}"])
+AM_COND_IF([BUILD_WIN32],,
+[AS_ECHO([" Dedicated Only: .... ${no_client}"])])
+AS_ECHO([" Alternate Install .. ${alternate_install}"])
+AS_ECHO([" Prefix: ............ '${prefix}'"])
+
+AM_COND_IF([ALTERNATE_INSTALL],
+[AS_ECHO(["Run \"make\" to build, then \"make install-alternate\" to install."])],
+[AS_ECHO(["Run \"make\" to build, then \"make install\" to install."])])
+
+AS_ECHO(["--------------------------------------------"])
+
+

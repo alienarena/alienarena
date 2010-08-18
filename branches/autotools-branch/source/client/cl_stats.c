@@ -23,12 +23,11 @@
 
 #include "client.h"
 
-#if defined UNIX_VARIANT
 #if defined HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#endif
 
+// TODO: either implement stubs like cl_http.c, or require curl here and there
 #if defined HAVE_CURL_CURL_H
 #include "curl/curl.h"
 CURLM *curlm;

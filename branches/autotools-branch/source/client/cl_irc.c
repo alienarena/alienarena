@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2010 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -23,13 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-#if !defined HAVE_CLOSESOCKET
-#define closesocket close
-#endif
-
-#if !defined INVALID_SOCKET
-#define INVALID_SOCKET -1
-#endif
 
 #include "client.h"
 
@@ -58,6 +52,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 #endif
 
+// close(socket) same as winsock's closesocket(socket)
+#if !defined HAVE_CLOSESOCKET
+#define closesocket close
+#endif
+
+#if !defined INVALID_SOCKET
+#define INVALID_SOCKET -1
+#endif
 
 char Server[32];
 char sMessage[1000];
@@ -364,15 +366,9 @@ void CL_GetIRCData(void)
 	memset(File_Buf,0,IRC_RECV_BUF_SIZE);
 	if((len=recv(sock,File_Buf,IRC_RECV_BUF_SIZE,0))>0)
 	{
-	    // received a ping from server...
-#if defined HAVE_STRNICMP
-		if (!strnicmp(File_Buf,"PING",4))
-#elif defined HAVE_STRNCASECMP
-		if (!strncasecmp(File_Buf,"PING",4))
-#else
-#error Neither strnicmp() nor strncasecmp() found.
-#endif
+		if ( !Q_strncasecmp( File_Buf, "PING", 4 ))
 		{
+	    // received a ping from server...
 			Com_Printf("IRC: Received a ping\n");
 			cls.irc_canjoin = true;
 			File_Buf[1]='O';
@@ -569,6 +565,11 @@ qboolean CL_JoinIRC(void)
 }
 
 
+/*
+ * Caution: RecvThreadProc() and CL_InitIRC() have separate "VARIANTS".
+ *  Note different return types on RecvThreadProc() and completely
+ *  different CL_InitIRC() implementations.
+ */
 #if defined WIN32_VARIANT
 // RecvThreadProc and CL_InitIRC  Windows Flavor
 
@@ -609,6 +610,7 @@ void CL_InitIRC(void)
 
 #if defined UNIX_VARIANT
 // RecvThreadProc and CL_InitIRC  Linux/Unix Flavor
+// (note different function return type)
 
 void *RecvThreadProc(void *dummy)
 {
