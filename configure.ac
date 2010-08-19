@@ -14,19 +14,19 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # 
 # See the GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
 # configure.ac for
 #  GNU/Linux, Unix
 #  Windows (32-bit) using MinGW
-#  Mac OSX using X11/Darwin (in development)
+#  Mac OSX using X11/Darwin (incomplete)
 
 AC_PREREQ(2.61)
-AC_INIT([alienarena],[7.45.0812],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.46.alpha],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -139,6 +139,7 @@ AC_SEARCH_LIBS(acos,[m])
 
 dnl could be AC_SEARCH_LIBS([pthread_mutex_init],[pthread])
 dnl but this is probably more portable
+dnl TODO: figure out why it puts 3 -pthreads on the command line
 dnl
 AX_PTHREAD(,[AC_MSG_ERROR(["Required pthreads support not found."])])
 LIBS="$PTHREAD_LIBS $LIBS"
@@ -200,6 +201,10 @@ dnl TEMPORARY BYPASS
 	AX_CHECK_GLU
 	CFLAGS="$CFLAGS $GL_CFLAGS $GLU_CFLAGS"
 	LIBS="$GLU_LIBS $LIBS"
+
+# ODE lib for ragdoll
+	AC_SEARCH_LIBS([dWorldCreate],[ode],,
+		[AC_MSG_ERROR(["Required ode library not found."])])
 
 # Hack in the extras for Win32 and Darwin
 # TODO: this may not be the best way to do this
@@ -290,6 +295,9 @@ dnl jpeg may be available in a Framework
 			[AC_MSG_ERROR("Required OpenGL header files not found.")])
 
 	])
+
+	AC_CHECK_HEADERS([ode/ode.h],,
+		[AC_MSG_ERROR("Required Open Dynamic Engine header file not found.")])
 
 dnl MinGW supplies these (also GL/glx.h)	
 	AM_COND_IF([BUILD_WIN32],

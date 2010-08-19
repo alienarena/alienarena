@@ -12,9 +12,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
 
@@ -52,7 +52,7 @@ where the location of header files differs between systems.
 #endif
 
 /* Version number of package. UPDATE ON VERSION CHANGE */
-#define VERSION "7.45.vs2010"
+#define VERSION "7.46.alpha"
 
 /* OpenAL dll name */
 #define OPENAL_DRIVER "OpenAL32.dll"

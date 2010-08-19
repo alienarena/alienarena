@@ -1,6 +1,6 @@
 # Process this file with automake to produce Makefile.in
 #
-# Copyright (C) 2010 COR Entertainment, LLC
+# Copyright (C) 2010 COR Entertainment, LLC.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -13,9 +13,9 @@
 # 
 # See the GNU General Public License for more details.
 # 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
 SUBDIRS = source
@@ -26,6 +26,7 @@ ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = m4
 
 # TODO: create "official" INSTALL, README, etc.
+# (the README, and maybe some others should be in top dir in dist. tarball)
 dist_doc_DATA = docs/license.txt docs/README.txt
 
 # Not needed unless something is installed using copy command
