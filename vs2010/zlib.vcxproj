@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{275507E3-071F-4A7D-9680-7E7EC749F872}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>zlib</RootNamespace>
+    <ProjectName>zlib</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_w32.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_w32.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(LocalLib)$(Configuration)\</OutDir>
+    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(LocalLib)$(Configuration)\</OutDir>
+    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_LIB;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <BrowseInformation>true</BrowseInformation>
+      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <CompileAs>CompileAsC</CompileAs>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Bscmake>
+      <OutputFile>$(OutDir)$(TargetName).bsc</OutputFile>
+    </Bscmake>
+    <CustomBuildStep>
+      <Command>FOR %%h IN ( $(LibzlibSrc)zlib.h $(LibzlibSrc)zconf.h ) DO copy %%h  $(LocalInclude)
+</Command>
+      <Outputs>
+      </Outputs>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>FOR %%h IN ( $(LibzlibSrc)zlib.h $(LibzlibSrc)zconf.h ) DO copy %%h  $(LocalInclude)</Command>
+      <Message>copy header files to common local include directory</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>
+      </FunctionLevelLinking>
+      <IntrinsicFunctions>
+      </IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <BrowseInformation>true</BrowseInformation>
+      <StringPooling>
+      </StringPooling>
+      <BufferSecurityCheck>
+      </BufferSecurityCheck>
+      <BasicRuntimeChecks>
+      </BasicRuntimeChecks>
+      <OmitFramePointers>
+      </OmitFramePointers>
+      <FavorSizeOrSpeed>
+      </FavorSizeOrSpeed>
+      <InlineFunctionExpansion>
+      </InlineFunctionExpansion>
+      <RuntimeTypeInfo>
+      </RuntimeTypeInfo>
+      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MinimalRebuild>
+      </MinimalRebuild>
+      <SmallerTypeCheck>
+      </SmallerTypeCheck>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
+      <EnableEnhancedInstructionSet>
+      </EnableEnhancedInstructionSet>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Bscmake>
+      <OutputFile>$(OutDir)$(TargetName).bsc</OutputFile>
+    </Bscmake>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+    <CustomBuildStep>
+      <Command>FOR %h IN ( $(LibzlibSrc)zlib.h $(LibzlibSrc)zconf.h ) DO copy %h  $(LocalInclude)
+</Command>
+      <Outputs>
+      </Outputs>
+    </CustomBuildStep>
+    <PostBuildEvent>
+      <Command>FOR %%h IN ( $(LibzlibSrc)zlib.h $(LibzlibSrc)zconf.h ) DO copy %%h  $(LocalInclude)</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>copy header files to common local include directory</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="$(LibzlibSrc)adler32.c" />
+    <ClCompile Include="$(LibzlibSrc)compress.c" />
+    <ClCompile Include="$(LibzlibSrc)crc32.c" />
+    <ClCompile Include="$(LibzlibSrc)deflate.c" />
+    <ClCompile Include="$(LibzlibSrc)gzclose.c" />
+    <ClCompile Include="$(LibzlibSrc)gzlib.c" />
+    <ClCompile Include="$(LibzlibSrc)gzread.c" />
+    <ClCompile Include="$(LibzlibSrc)gzwrite.c" />
+    <ClCompile Include="$(LibzlibSrc)infback.c" />
+    <ClCompile Include="$(LibzlibSrc)inffast.c" />
+    <ClCompile Include="$(LibzlibSrc)inflate.c" />
+    <ClCompile Include="$(LibzlibSrc)inftrees.c" />
+    <ClCompile Include="$(LibzlibSrc)trees.c" />
+    <ClCompile Include="$(LibzlibSrc)uncompr.c" />
+    <ClCompile Include="$(LibzlibSrc)zutil.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(LibzlibSrc)crc32.h" />
+    <ClInclude Include="$(LibzlibSrc)deflate.h" />
+    <ClInclude Include="$(LibzlibSrc)gzguts.h" />
+    <ClInclude Include="$(LibzlibSrc)inffast.h" />
+    <ClInclude Include="$(LibzlibSrc)inffixed.h" />
+    <ClInclude Include="$(LibzlibSrc)inflate.h" />
+    <ClInclude Include="$(LibzlibSrc)inftrees.h" />
+    <ClInclude Include="$(LibzlibSrc)trees.h" />
+    <ClInclude Include="$(LibzlibSrc)zconf.h" />
+    <ClInclude Include="$(LibzlibSrc)zlib.h" />
+    <ClInclude Include="$(LibzlibSrc)zutil.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
