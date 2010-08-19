@@ -18,6 +18,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // r_main.c
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "r_local.h"
 #include "r_script.h"
 #include "r_ragdoll.h"
@@ -47,7 +52,7 @@ cvar_t	*gl_normalmaps;
 cvar_t  *gl_shadowmaps;
 cvar_t	*gl_parallaxmaps;
 cvar_t	*gl_glsl_postprocess;
-cvar_t	*gl_arb_fragment_program; 
+cvar_t	*gl_arb_fragment_program;
 cvar_t	*gl_glsl_shaders;
 
 cvar_t	*r_legacy;
@@ -206,7 +211,7 @@ struct r_fog
 	float end;
 	float density;
 } fog;
-unsigned r_weather;  
+unsigned r_weather;
 
 /*
 =================
@@ -463,10 +468,10 @@ void R_DrawEntitiesOnList (void)
 		if (currententity->model && r_shaders->value)
 		{
 			rs=(rscript_t *)currententity->model->script;
-			
+
 			//custom player skin (must be done here)
-			if (currententity->skin) 
-			{ 
+			if (currententity->skin)
+			{
                 COM_StripExtension ( currententity->skin->name, shortname );
                 rs = RS_FindScript(shortname);
                 if(rs)
@@ -490,18 +495,18 @@ void R_DrawEntitiesOnList (void)
 		if(r_newrefdef.fov_y >= 90)
 		{
 			VectorSubtract(r_origin, currententity->origin, dist);
-			if(VectorLength(dist) > 1000) 
+			if(VectorLength(dist) > 1000)
 			{
 				if(currententity->lod2)
 					currentmodel = currententity->lod2;
 			}
-			else if(VectorLength(dist) > 500) 
+			else if(VectorLength(dist) > 500)
 			{
-				if(currententity->lod1) 
+				if(currententity->lod1)
 					currentmodel = currententity->lod1;
 			}
 		}
-			
+
 		if (!currentmodel)
 		{
 			R_DrawNullModel ();
@@ -536,10 +541,10 @@ void R_DrawEntitiesOnList (void)
 		if (currententity->model && r_shaders->value)
 		{
 			rs=(rscript_t *)currententity->model->script;
-			
+
 			//custom player skin (must be done here)
-			if (currententity->skin) 
-			{ 
+			if (currententity->skin)
+			{
                 COM_StripExtension ( currententity->skin->name, shortname );
                 rs = RS_FindScript(shortname);
                 if(rs)
@@ -606,10 +611,10 @@ void R_DrawViewEntitiesOnList (void)
 		if (currententity->model && r_shaders->value)
 		{
 			rs=(rscript_t *)currententity->model->script;
-			
+
 			//custom player skin (must be done here)
-			if (currententity->skin) 
-			{ 
+			if (currententity->skin)
+			{
                 COM_StripExtension ( currententity->skin->name, shortname );
                 rs = RS_FindScript(shortname);
                 if(rs)
@@ -628,7 +633,7 @@ void R_DrawViewEntitiesOnList (void)
 
 
 		currentmodel = currententity->model;
-			
+
 		if (!currentmodel)
 		{
 			R_DrawNullModel ();
@@ -660,10 +665,10 @@ void R_DrawViewEntitiesOnList (void)
 		if (currententity->model && r_shaders->value)
 		{
 			rs=(rscript_t *)currententity->model->script;
-			
+
 			//custom player skin (must be done here)
-			if (currententity->skin) 
-			{ 
+			if (currententity->skin)
+			{
                 COM_StripExtension ( currententity->skin->name, shortname );
                 rs = RS_FindScript(shortname);
                 if(rs)
@@ -720,7 +725,7 @@ void R_PolyBlend (void)
 		return;
 
 	if(!r_drawing_fbeffect && cl_paindist->value) {
-		if(v_blend[0] > 2*v_blend[1] && v_blend[0] > 2*v_blend[2]) { 
+		if(v_blend[0] > 2*v_blend[1] && v_blend[0] > 2*v_blend[2]) {
 			r_drawing_fbeffect = true;
 			r_fbFxType = 2; //FLASH DISTORTION
 			r_fbeffectTime = rs_realtime;
@@ -868,7 +873,7 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect,
 	xmax += -( 2 * gl_state.camera_separation ) / zNear;
 
 	qglFrustum( xmin, xmax, ymin, ymax, zNear, zFar );
-	
+
 }
 
 
@@ -895,19 +900,19 @@ void R_SetupGL (void)
 	h = y - y2;
 
 	qglViewport (x, y2, w, h);	// MPO : note this happens every frame interestingly enough
-	
+
 	//
 	// set up projection matrix
 	//
     screenaspect = (float)r_newrefdef.width/r_newrefdef.height;
 	qglMatrixMode(GL_PROJECTION);
     qglLoadIdentity ();
-    
+
 	if(r_newrefdef.fov_y < 90)
 		MYgluPerspective (r_newrefdef.fov_y,  screenaspect,  4,  128000);
 	else
 		MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4 * 74 / r_newrefdef.fov_y, 15000); //Phenax
-		
+
 	qglCullFace(GL_FRONT);
 
 	qglMatrixMode(GL_MODELVIEW);
@@ -916,13 +921,13 @@ void R_SetupGL (void)
     qglRotatef (-90, 1, 0, 0);	    // put Z going up
     qglRotatef (90,  0, 0, 1);	    // put Z going up
 
-    qglRotatef (-r_newrefdef.viewangles[2],  1, 0, 0);	
-	qglRotatef (-r_newrefdef.viewangles[0],  0, 1, 0);	
-	qglRotatef (-r_newrefdef.viewangles[1],  0, 0, 1);	
+    qglRotatef (-r_newrefdef.viewangles[2],  1, 0, 0);
+	qglRotatef (-r_newrefdef.viewangles[0],  0, 1, 0);
+	qglRotatef (-r_newrefdef.viewangles[1],  0, 0, 1);
 	qglTranslatef (-r_newrefdef.vieworg[0],  -r_newrefdef.vieworg[1],  -r_newrefdef.vieworg[2]);
-	
+
 	qglGetFloatv (GL_MODELVIEW_MATRIX, r_world_matrix);
-	qglGetFloatv(GL_PROJECTION_MATRIX, r_project_matrix);	
+	qglGetFloatv(GL_PROJECTION_MATRIX, r_project_matrix);
 	qglGetIntegerv(GL_VIEWPORT, (int *) r_viewport);
 
 	//
@@ -990,7 +995,7 @@ void R_RenderView (refdef_t *fd)
 	static int printf_throttle;
 
 	numRadarEnts = 0;
-	
+
 	if (r_norefresh->value)
 		return;
 
@@ -1001,17 +1006,17 @@ void R_RenderView (refdef_t *fd)
 
 		qglEnable(GL_DEPTH_TEST);
 		qglClearColor(0,0,0,1.0f);
-		
+
 		qglEnable(GL_CULL_FACE);
-		
+
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
 		R_DrawDynamicCaster();
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
-		
+
 		//Enabling color write (previously disabled for light POV z-buffer rendering)
-		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); 	
+		qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	}
 
 	if (!r_worldmodel && !( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) )
@@ -1027,7 +1032,7 @@ void R_RenderView (refdef_t *fd)
 	c_beams = 0;
 
 	R_PushDlights ();
-	
+
 	if (gl_finish->value)
 		qglFinish ();
 
@@ -1059,15 +1064,15 @@ void R_RenderView (refdef_t *fd)
 	R_DrawVegetationSurface ();
 
 	r_DrawingRagDoll = false; //set here after R_DrawWorld because we want the ODE world built in case the ragdolls need it
-	
+
 	R_DrawEntitiesOnList ();
 
 	R_CastShadow();
 
-	R_DrawViewEntitiesOnList (); 
+	R_DrawViewEntitiesOnList ();
 
 	R_DrawAlphaSurfaces ();
-	
+
 	R_DrawBeamSurface ();
 
 	qglLoadMatrixf (r_world_matrix); //moving trans brushes
@@ -1105,7 +1110,7 @@ void R_RenderView (refdef_t *fd)
 			c_flares, c_grasses, c_visible_lightmaps, c_visible_textures );
 		}
 	}
-	
+
 	if(map_fog)
 		qglDisable(GL_FOG);
 
@@ -1209,7 +1214,7 @@ void R_Register( void )
 	gl_3dlabs_broken = Cvar_Get( "gl_3dlabs_broken", "1", CVAR_ARCHIVE );
 
 	r_shaders = Cvar_Get ("r_shaders", "1", CVAR_ARCHIVE);
-	
+
 	r_overbrightbits = Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE );
 	gl_ext_mtexcombine = Cvar_Get( "gl_ext_mtexcombine", "1", CVAR_ARCHIVE );
 
@@ -1224,7 +1229,7 @@ void R_Register( void )
 
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
-	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE); 
+	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE);
 	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
 
 	r_shadowmapratio = Cvar_Get( "r_shadowmapratio", "2", CVAR_ARCHIVE );
@@ -1244,8 +1249,8 @@ void R_Register( void )
 	gl_screenshot_type = Cvar_Get("gl_screenshot_type", "jpeg", CVAR_ARCHIVE);
 	gl_screenshot_jpeg_quality = Cvar_Get("gl_screenshot_jpeg_quality", "85", CVAR_ARCHIVE);
 
-	r_legacy = Cvar_Get("r_legacy", "0", CVAR_ARCHIVE); 
-	r_usemd2 = Cvar_Get("r_usemd2", "0", CVAR_ARCHIVE); 
+	r_legacy = Cvar_Get("r_legacy", "0", CVAR_ARCHIVE);
+	r_usemd2 = Cvar_Get("r_usemd2", "0", CVAR_ARCHIVE);
 
 	r_firstrun = Cvar_Get("r_firstrun", "0", CVAR_ARCHIVE); //first time running the game
 
@@ -1316,7 +1321,7 @@ R_SetLowest
 ===============
 */
 
-void R_SetLowest(void) 
+void R_SetLowest(void)
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
@@ -1467,24 +1472,24 @@ void R_SetHighest( void )
 
 #ifdef _WINDOWS
 double CPUSpeed()
-{    
- 
+{
 
-	DWORD BufSize = _MAX_PATH;    
-	DWORD dwMHz = _MAX_PATH;    
-	HKEY hKey;    // open the key where the proc speed is hidden:    
-	
+
+	DWORD BufSize = _MAX_PATH;
+	DWORD dwMHz = _MAX_PATH;
+	HKEY hKey;    // open the key where the proc speed is hidden:
+
 	long lError = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
 		"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
 		0,
 		KEY_READ,
-		&hKey);    
-	
-	if(lError != ERROR_SUCCESS) 
-		return 0;      
+		&hKey);
 
-	// query the key:    
-	RegQueryValueEx(hKey, "~MHz", NULL, NULL, (LPBYTE) &dwMHz, &BufSize);   
+	if(lError != ERROR_SUCCESS)
+		return 0;
+
+	// query the key:
+	RegQueryValueEx(hKey, "~MHz", NULL, NULL, (LPBYTE) &dwMHz, &BufSize);
 	return (double)dwMHz;
 
 }
@@ -1690,7 +1695,7 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		Com_Printf ("...GL_SGIS_multitexture not found\n" );
 	}
-	
+
 	gl_config.mtexcombine = false;
 	if ( strstr( gl_config.extensions_string, "GL_ARB_texture_env_combine" ) )
 	{
@@ -1728,10 +1733,10 @@ int R_Init( void *hinstance, void *hWnd )
 		}
 	}
 
-	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic")) 
+	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic"))
 	{
 		qglGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
-	
+
 		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE );
 		Cvar_SetValue("r_ext_max_anisotropy", max_aniso);
 
@@ -1741,12 +1746,12 @@ int R_Init( void *hinstance, void *hWnd )
 
 		aniso_level = r_anisotropic->value;
 
-		if (r_anisotropic->value == 1) 
+		if (r_anisotropic->value == 1)
 			Com_Printf("...ignoring GL_EXT_texture_filter_anisotropic\n");
-		else 
+		else
 			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n");
-	} 
-	else 
+	}
+	else
 	{
 		Com_Printf("...GL_EXT_texture_filter_anisotropic not found\n");
 		r_anisotropic = Cvar_Get("r_anisotropic", "0", CVAR_ARCHIVE);
@@ -1755,11 +1760,11 @@ int R_Init( void *hinstance, void *hWnd )
 
 	// openGL 2.0 Unified Separate Stencil
 	gl_state.stencil_wrap = false;
-	if (strstr(gl_config.extensions_string, "GL_EXT_stencil_wrap")) 
+	if (strstr(gl_config.extensions_string, "GL_EXT_stencil_wrap"))
 	{
 		Com_Printf("...using GL_EXT_stencil_wrap\n");
 		gl_state.stencil_wrap = true;
-	} else 
+	} else
 	{
 		Com_Printf("...GL_EXT_stencil_wrap not found\n");
 		gl_state.stencil_wrap = false;
@@ -1767,11 +1772,11 @@ int R_Init( void *hinstance, void *hWnd )
 
 	// Framebuffer object blit
 	gl_state.hasFBOblit = false;
-	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit")) 
+	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit"))
 	{
 		Com_Printf("...using GL_EXT_framebuffer_blit\n");
 		gl_state.hasFBOblit = true;
-	} else 
+	} else
 	{
 		Com_Printf("...GL_EXT_framebuffer_blit not found\n");
 		gl_state.hasFBOblit = false;
@@ -1780,34 +1785,34 @@ int R_Init( void *hinstance, void *hWnd )
 	qglStencilFuncSeparate		= (void *)qwglGetProcAddress("glStencilFuncSeparate");
 	qglStencilOpSeparate		= (void *)qwglGetProcAddress("glStencilOpSeparate");
 	qglStencilMaskSeparate		= (void *)qwglGetProcAddress("glStencilMaskSeparate");
-	
+
 	gl_state.separateStencil = false;
 	if(qglStencilFuncSeparate && qglStencilOpSeparate && qglStencilMaskSeparate)
 	{
 			Com_Printf("...using GL_EXT_stencil_two_side\n");
 			gl_state.separateStencil = true;
-	
+
 	}
 	else
 		Com_Printf("...GL_EXT_stencil_two_side not found\n");
 
 	gl_state.vbo = false;
 
-	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object")) 
-	{			
+	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
+	{
 		qglBindBufferARB = (void *)qwglGetProcAddress("glBindBufferARB");
 		qglDeleteBuffersARB = (void *)qwglGetProcAddress("glDeleteBuffersARB");
 		qglGenBuffersARB = (void *)qwglGetProcAddress("glGenBuffersARB");
 		qglBufferDataARB = (void *)qwglGetProcAddress("glBufferDataARB");
 		qglBufferSubDataARB = (void *)qwglGetProcAddress("glBufferSubDataARB");
-			
+
 		if (qglGenBuffersARB && qglBindBufferARB && qglBufferDataARB && qglDeleteBuffersARB)
-		{				
+		{
 			Com_Printf("...using GL_ARB_vertex_buffer_object\n");
 			gl_state.vbo = true;
 			R_VCInit();
 		}
-	} else 
+	} else
 	{
 		Com_Printf(S_COLOR_RED "...GL_ARB_vertex_buffer_object not found\n");
 		gl_state.vbo = false;
@@ -1820,16 +1825,16 @@ int R_Init( void *hinstance, void *hWnd )
 
 	//if running for the very first time, automatically set video settings
 	//disabled for now
-	if(!r_firstrun->value) 
+	if(!r_firstrun->value)
 	{
 		qboolean ati_nvidia = false;
 		double CPUTotalSpeed = 4000.0; //default to this
 		int OGLVer = atoi(&gl_config.version_string[0]);
 		//int OGLSubVer = atoi(&gl_config.version_string[2]);
 
-#ifdef _WINDOWS		
-		SYSTEM_INFO sysInfo;        
-		GetSystemInfo(&sysInfo);        
+#ifdef _WINDOWS
+		SYSTEM_INFO sysInfo;
+		GetSystemInfo(&sysInfo);
 
 		Com_Printf("...CPU: %4.2f Cores: %d\n", CPUSpeed(), sysInfo.dwNumberOfProcessors);
 
@@ -1840,18 +1845,18 @@ int R_Init( void *hinstance, void *hWnd )
         char	res[128];
 		int		cores;
 		size_t	szrslt;
-		int     irslt; 
+		int     irslt;
         fp = popen("/bin/cat /proc/cpuinfo | grep -c '^processor'","r");
-        if ( fp == NULL ) 
+        if ( fp == NULL )
         	goto cpuinfo_error;
         szrslt = fread(res, 1, sizeof(res)-1, fp);
         res[szrslt] = 0;
         pclose(fp);
-        if ( !szrslt ) 
+        if ( !szrslt )
         	goto cpuinfo_error;
 		cores = atoi( &res[0] );
 		fp = popen("/bin/cat /proc/cpuinfo | grep '^cpu MHz'","r");
-		if ( fp == NULL ) 
+		if ( fp == NULL )
 			goto cpuinfo_error;
         szrslt = fread(res, 1, sizeof(res)-1, fp);  // about 20 bytes/cpu
         res[szrslt] = 0;
@@ -1866,28 +1871,28 @@ int R_Init( void *hinstance, void *hWnd )
 	    goto cpuinfo_exit;
 cpuinfo_error:
 		Com_Printf("...Reading /proc/cpuinfo failed.\n");
-cpuinfo_exit:		
+cpuinfo_exit:
 #endif
 
-		//check to see if we are using ATI or NVIDIA, otherwise, we don't want to 
+		//check to see if we are using ATI or NVIDIA, otherwise, we don't want to
 		//deal with high settings on offbrand GPU's like Intel or Unichrome
 		if(!strcmp(gl_config.vendor_string, "ATI Technologies Inc.") || !strcmp(gl_config.vendor_string, "NVIDIA Corporation"))
-			ati_nvidia = true;		
+			ati_nvidia = true;
 
-		if(OGLVer < 2) 
-		{ 
+		if(OGLVer < 2)
+		{
 			//weak GPU, set low
 			R_SetLow();
 		}
-		else if(OGLVer == 3) 
-		{ 
+		else if(OGLVer == 3)
+		{
 			//GPU is modern, check CPU
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
 				R_SetHighest();
 			else
 				R_SetMedium();
 		}
-		else 
+		else
 		{
 			if(CPUTotalSpeed > 3800.0 && ati_nvidia)
 				R_SetHigh();
@@ -1898,7 +1903,7 @@ cpuinfo_exit:
 		//never run again
 		Cvar_SetValue("r_firstrun", 1);
 	}
-	
+
 	GL_SetDefaultState();
 
 	GL_InitImages ();
@@ -1906,7 +1911,7 @@ cpuinfo_exit:
 	R_InitParticleTexture ();
 	Draw_InitLocal ();
 
-	generateShadowFBO(); 
+	generateShadowFBO();
 	VLight_Init();
 
 	//Initialize ODE
@@ -1917,7 +1922,7 @@ cpuinfo_exit:
 	err = qglGetError();
 	if ( err != GL_NO_ERROR )
 		Com_Printf ("glGetError() = 0x%x\n", err);
-	
+
 	return 0;
 }
 
@@ -2142,10 +2147,10 @@ float R_FarClip( void )
 			mins[i] = r_worldmodel->nodes[0].minmaxs[i];
 			maxs[i] = r_worldmodel->nodes[0].minmaxs[3+i];
 		}
-		dist = (vpn[0] < 0 ? mins[0] : maxs[0]) * vpn[0] + 
+		dist = (vpn[0] < 0 ? mins[0] : maxs[0]) * vpn[0] +
 			(vpn[1] < 0 ? mins[1] : maxs[1]) * vpn[1] +
 			(vpn[2] < 0 ? mins[2] : maxs[2]) * vpn[2];
-		if( dist > farclip )  
+		if( dist > farclip )
 			farclip = dist;
 	}
 
@@ -2213,27 +2218,27 @@ void R_SetupModelviewMatrix( refdef_t *rd, mat4x4_t m )
 	Matrix4_Translate( m, -rd->vieworg[0], -rd->vieworg[1], -rd->vieworg[2] );
 }
 
-void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out ) 
-{ 
-   mat4x4_t p, m; 
-   vec4_t temp, temp2; 
+void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out )
+{
+   mat4x4_t p, m;
+   vec4_t temp, temp2;
 
-   if( !rd || !in || !out ) 
-      return; 
+   if( !rd || !in || !out )
+      return;
 
-   temp[0] = in[0]; 
-   temp[1] = in[1]; 
-   temp[2] = in[2]; 
-   temp[3] = 1.0f; 
+   temp[0] = in[0];
+   temp[1] = in[1];
+   temp[2] = in[2];
+   temp[3] = 1.0f;
 
-   R_SetupProjectionMatrix( rd, p ); 
-   R_SetupModelviewMatrix( rd, m ); 
+   R_SetupProjectionMatrix( rd, p );
+   R_SetupModelviewMatrix( rd, m );
 
-   Matrix4_Multiply_Vector( m, temp, temp2 ); 
-   Matrix4_Multiply_Vector( p, temp2, temp ); 
+   Matrix4_Multiply_Vector( m, temp, temp2 );
+   Matrix4_Multiply_Vector( p, temp2, temp );
 
-   if( !temp[3] ) 
-      return; 
-   out[0] = rd->x + (temp[0] / temp[3] + 1.0f) * rd->width * 0.5f; 
-   out[1] = rd->y + (temp[1] / temp[3] + 1.0f) * rd->height * 0.5f; 
+   if( !temp[3] )
+      return;
+   out[0] = rd->x + (temp[0] / temp[3] + 1.0f) * rd->width * 0.5f;
+   out[1] = rd->y + (temp[1] / temp[3] + 1.0f) * rd->height * 0.5f;
 }

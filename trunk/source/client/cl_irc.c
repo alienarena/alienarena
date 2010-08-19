@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // cl_irc.c  -- irc client
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "client.h"
 #ifdef _WINDOWS
 	#include <winsock.h>
@@ -43,14 +47,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 char Server[32];
 char sMessage[1000];
-char message[200];				   
+char message[200];
 user_t user;
 irc_socket_t sock;               /* socket */
 struct sockaddr_in address;      /* socket address stuff */
 struct hostent * host;           /* host stuff */
 char File_Buf[3000];			 /* file buffer */
 char HostName[100];              /* host name from user */
-int len;                         
+int len;
 int ichar;
 
 #define IRC_SEND_BUF_SIZE 512
@@ -71,9 +75,9 @@ void handle_error(void)
         Com_Printf("Specified address is not available from the local machine.\n");
       break;
       case WSAECONNREFUSED :
-        Com_Printf("The attempt to connect was forcefully rejected.\n"); 
-        break; 
-      case WSAEDESTADDRREQ : 
+        Com_Printf("The attempt to connect was forcefully rejected.\n");
+        break;
+      case WSAEDESTADDRREQ :
         Com_Printf("address destination address is required.\n");
       break;
       case WSAEFAULT :
@@ -88,7 +92,7 @@ void handle_error(void)
       case WSAEADDRINUSE :
         Com_Printf("The specified address is already in use.\n");
       break;
-      case WSAEMFILE : 
+      case WSAEMFILE :
         Com_Printf("No more file descriptors are available.\n");
       break;
       case WSAENOBUFS :
@@ -96,13 +100,13 @@ void handle_error(void)
       break;
       case WSAEPROTONOSUPPORT :
         Com_Printf("The specified protocol is not supported.\n");
-        break; 
+        break;
       case WSAEPROTOTYPE :
         Com_Printf("The specified protocol is the wrong type for this socket.\n");
       break;
-      case WSAENETUNREACH : 
+      case WSAENETUNREACH :
         Com_Printf("The network can't be reached from this host at this time.\n");
-      break; 
+      break;
       case WSAENOTSOCK :
          Com_Printf("The descriptor is not a socket.\n");
       break;
@@ -145,7 +149,7 @@ void handle_error( void )
 
 void sendData(char *msg)
 {
-	send(sock, msg,strlen(msg),0); 
+	send(sock, msg,strlen(msg),0);
 }
 
 IRCresponse_t SkipWords(char msg[250],int skip)
@@ -180,10 +184,10 @@ IRCresponse_t GetWords(char msg[200])
 	{
 		res.word[word][ichar] = msg[t];
 		ichar++;
-		if (msg[t]==' ') 
+		if (msg[t]==' ')
 		{
 			ichar=0;
-			word++; 
+			word++;
 		};
 	}
 	res.words = word;
@@ -193,7 +197,7 @@ IRCresponse_t GetWords(char msg[200])
 void analizeLine(char Line[1000])
 {
 	IRCresponse_t Response;
-    char cmpmsg[10][200]; 
+    char cmpmsg[10][200];
     char outputmsg[1000];
 	char msgLine[101];
 	int i, j, ti, lines;
@@ -207,35 +211,35 @@ void analizeLine(char Line[1000])
     {
 		memset((sMessage),'\0',1000);
 		memset((Response.word[0]),'\0',1000);
-		memset((outputmsg),'\0',1000);	
+		memset((outputmsg),'\0',1000);
 		for(ti=0;ti<40;ti++)
 		{
 			sMessage[ti]=Line[ti];
-			if (Line[ti]==':') 
+			if (Line[ti]==':')
 			{
 				Response = SkipWords(Line,6);
-						
-				//this is the string we need to check length of, and if it's over the size of 
+
+				//this is the string we need to check length of, and if it's over the size of
 				//the window width, we need to split it into multiple lines.  Should not be too
 				//difficult to implement.
 				sprintf(outputmsg,"<%s> %s ",sMessage,Response.word[0]);
 				outputmsg[strlen(outputmsg)-2] = 0; //don't want that linefeed showing up
-							
+
 				lines = strlen(outputmsg)/80 + 1; //how many lines do we have?
 				for(i=0; i<lines; i++) {
 					//get a segment of the total message
 					memset(msgLine,'\0', 81);
-					for(j=0; j<80; j++) 
+					for(j=0; j<80; j++)
 						msgLine[j] = outputmsg[j+(80*i)];
 					msgLine[80] = 0;
 
-					SCR_IRCPrintf("^1IRC: %s\n", msgLine); 
+					SCR_IRCPrintf("^1IRC: %s\n", msgLine);
 
 					printed = true;
 				}
 			}
 		}
-		
+
 	 }
 
      sprintf(cmpmsg[0],"372 %s", user.nick);
@@ -247,14 +251,14 @@ void analizeLine(char Line[1000])
      sprintf(cmpmsg[6],"322 %s", user.nick); // <-- LIST
      sprintf(cmpmsg[7],"421 %s", user.nick); // <-- unkwown command, etc.
      sprintf(cmpmsg[8],"461 %s", user.nick); // <-- no enougth parameters, etc.
-				    
+
    if ((strstr(Line,cmpmsg[0]) != NULL)||(strstr(Line,cmpmsg[1]) != NULL)||(strstr(Line,cmpmsg[2]) != NULL)||(strstr(Line,cmpmsg[3]) != NULL)||(strstr(Line,cmpmsg[4]) != NULL)||(strstr(Line,cmpmsg[5]) != NULL)||(strstr(Line,cmpmsg[6]) != NULL)||(strstr(Line,cmpmsg[7]) != NULL)||(strstr(Line,cmpmsg[8]) != NULL))
    {
 	   memset((Response.word[0]),'\0',256);
 	   Response = SkipWords(Line,3);
 	   Response.word[0][strlen(Response.word[0])-2]= 0;
-		
-	   SCR_IRCPrintf("^1IRC: %s\n", msgLine); 
+
+	   SCR_IRCPrintf("^1IRC: %s\n", msgLine);
 
 	   printed = true;
 	}
@@ -265,26 +269,26 @@ void analizeLine(char Line[1000])
 		memset((sMessage),'\0',1000);
 		memset((Response.word[0]),'\0',1000);
 		memset((outputmsg),'\0',1000);
-					
+
 		for(ti=0;ti<40;ti++)
 		{
 			sMessage[ti]=Line[ti];
-			if (Line[ti]=='!') 
+			if (Line[ti]=='!')
 			{
 				Response = SkipWords(Line,3);
-						
-				//this is the string we need to check length of, and if it's over the size of 
+
+				//this is the string we need to check length of, and if it's over the size of
 				//the window width, we need to split it into multiple lines.  Should not be too
 				//difficult to implement.
 				sprintf(outputmsg,"<%s> %s ",sMessage,Response.word[0]);
 				outputmsg[strlen(outputmsg)-2] = 0; //don't want that linefeed showing up
-							
+
 				lines = strlen(outputmsg)/100 + 1; //how many lines do we have?
-				for(i=0; i<lines; i++) 
+				for(i=0; i<lines; i++)
 				{
 					//get a segment of the total message
 					memset(msgLine,'\0', 101);
-					for(j=0; j<100; j++) 
+					for(j=0; j<100; j++)
 						msgLine[j] = outputmsg[j+(100*i)];
 					msgLine[100] = 0;
 
@@ -295,35 +299,35 @@ void analizeLine(char Line[1000])
 			}
 		}
 	}
-	
+
 	if(!printed) //users coming and going
 	{
 		memset((sMessage),'\0',1000);
 		memset((Response.word[0]),'\0',1000);
 		memset((outputmsg),'\0',1000);
-			
+
 		for(ti=0;ti<40;ti++)
 		{
 			sMessage[ti]=Line[ti];
-			if (Line[ti]=='!') 
+			if (Line[ti]=='!')
 			{
 				Response = SkipWords(Line,1);
-						
-				//this is the string we need to check length of, and if it's over the size of 
+
+				//this is the string we need to check length of, and if it's over the size of
 				//the window width, we need to split it into multiple lines.  Should not be too
 				//difficult to implement.
 				sprintf(outputmsg,"<%s> %s ",sMessage,Response.word[0]);
 				outputmsg[strlen(outputmsg)-2] = 0; //don't want that linefeed showing up
-							
+
 				lines = strlen(outputmsg)/100 + 1; //how many lines do we have?
 				for(i=0; i<lines; i++) {
 					//get a segment of the total message
 					memset(msgLine,'\0', 101);
-					for(j=0; j<100; j++) 
+					for(j=0; j<100; j++)
 						msgLine[j] = outputmsg[j+(100*i)];
 					msgLine[100] = 0;
 
-					SCR_IRCPrintf("^1IRC: %s\n", msgLine); 
+					SCR_IRCPrintf("^1IRC: %s\n", msgLine);
 
 				}
 			}
@@ -332,47 +336,47 @@ void analizeLine(char Line[1000])
 
 }
 
-void CL_GetIRCData(void) 
+void CL_GetIRCData(void)
 {
 	int ichar =0;
 	char line[IRC_RECV_BUF_SIZE];
-	char prevLine[IRC_RECV_BUF_SIZE]; 
+	char prevLine[IRC_RECV_BUF_SIZE];
 	int t;
 
 	if(!cls.irc_connected)
 		return;
 
-	len=0;	
+	len=0;
 	memset(File_Buf,0,IRC_RECV_BUF_SIZE);
-	if((len=recv(sock,File_Buf,IRC_RECV_BUF_SIZE,0))>0) 
+	if((len=recv(sock,File_Buf,IRC_RECV_BUF_SIZE,0))>0)
 	{
 	    // received a ping from server...
-#ifdef _WINDOWS	    
-		if (!_strnicmp(File_Buf,"PING",4)) 
+#ifdef _WINDOWS
+		if (!_strnicmp(File_Buf,"PING",4))
 #else
-		if (!strncasecmp(File_Buf,"PING",4)) 
-#endif		
+		if (!strncasecmp(File_Buf,"PING",4))
+#endif
 		{
 			Com_Printf("IRC: Received a ping\n");
-			cls.irc_canjoin = true; 
-			File_Buf[1]='O'; 
+			cls.irc_canjoin = true;
+			File_Buf[1]='O';
 			sendData(File_Buf);
 		};
 	}
 
 	//send the buffer to be analyzed
-	if (len > 1) 
-	{		
+	if (len > 1)
+	{
 		memset(line,0,IRC_RECV_BUF_SIZE);
 		for (t=0;t<strlen(File_Buf);t++)
 		{
 			line[ichar]= File_Buf[t];
 			ichar++;
-			if(File_Buf[t]==13) 
+			if(File_Buf[t]==13)
 			{
 				ichar=0;
-				if(!strcmp(line, prevLine)) 
-				{ 
+				if(!strcmp(line, prevLine))
+				{
 					//don't print duplicate messages
 					memset(line,0,IRC_RECV_BUF_SIZE);
 					return;
@@ -386,10 +390,10 @@ void CL_GetIRCData(void)
 
 }
 
-void CL_IRCSay(void) 
+void CL_IRCSay(void)
 {
 	char msgLine[111];
-	char tempstring[1024]; 
+	char tempstring[1024];
 	int i, j, lines;
 	char m_sendstring[1024];
 
@@ -408,7 +412,7 @@ void CL_IRCSay(void)
 	strcpy(m_sendstring, Cmd_Argv (1));
 
 	//check if it's an "action"
-	if(m_sendstring[0] == '/' && m_sendstring[1] == 'm' && m_sendstring[2] == 'e') 
+	if(m_sendstring[0] == '/' && m_sendstring[1] == 'm' && m_sendstring[2] == 'e')
 	{
 		//trim out the command
 		for(i = 4; i < 1024; i++)
@@ -422,7 +426,7 @@ void CL_IRCSay(void)
 		//send a junk string to clear the command
 		sendData("PRIVMSG #alienarena :\n\r");
 	}
-	else 
+	else
 	{
 		sprintf(message, "PRIVMSG #alienarena :%s\n\r", m_sendstring);
 #ifdef _WINDOWS
@@ -432,13 +436,13 @@ void CL_IRCSay(void)
 	}
 
 #ifdef _WINDOWS
-	if(WSAGetLastError()) 
-	{ 
+	if(WSAGetLastError())
+	{
 		//there was some error in connecting
 		handle_error();
 		Com_Printf("^1IRC: not connected to #alienarena");
 	}
-	else 
+	else
 	{
 #endif
 		//update the print buffer
@@ -449,7 +453,7 @@ void CL_IRCSay(void)
 		for(i=0; i<lines; i++) {
 			//get a segment of the total message
 			memset(msgLine,'\0', 111);
-			for(j=0; j<110; j++) 
+			for(j=0; j<110; j++)
 				msgLine[j] = message[j+(110*i)];
 			msgLine[110] = 0;
 
@@ -474,7 +478,7 @@ qboolean CL_JoinIRC(void)
 	if(!cls.irc_connected)
 		Com_Printf("...Initializing IRC client\n");
 
-#ifdef _WINDOWS   
+#ifdef _WINDOWS
 	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET )
 #else
 	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == -1 )
@@ -483,7 +487,7 @@ qboolean CL_JoinIRC(void)
 
 	strcpy(name, Cvar_VariableString("name")); //we should force players to set name on startup
 
-	if(!strcmp(name, "Player")) 
+	if(!strcmp(name, "Player"))
 	{
 		Com_Printf("...IRC rejected due to unset player name\n");
 		return false;
@@ -493,9 +497,9 @@ qboolean CL_JoinIRC(void)
 	j = 0;
 	for (i = 0; i < 16; i++)
 		user.nick[i] = 0;
-	for (i = 0; i < strlen(name) && i < 32; i++) 
+	for (i = 0; i < strlen(name) && i < 32; i++)
 	{
-		if ( name[i] == '^' ) 
+		if ( name[i] == '^' )
 		{
 			i += 1;
 			continue;
@@ -504,14 +508,14 @@ qboolean CL_JoinIRC(void)
 		j++;
 	}
 
-	strcpy(user.email, "mymail@mail.com"); 
+	strcpy(user.email, "mymail@mail.com");
 
-	address.sin_family=AF_INET;       // internet 
-    address.sin_port = htons(6667);    
+	address.sin_family=AF_INET;       // internet
+    address.sin_port = htons(6667);
 
 	sprintf(HostName, cl_IRC_server->string);
 
-    if ( (host=gethostbyname(HostName)) == NULL ) 
+    if ( (host=gethostbyname(HostName)) == NULL )
 	{
 #ifdef _WINDOWS
 		closesocket(sock);
@@ -524,7 +528,7 @@ qboolean CL_JoinIRC(void)
 
     address.sin_addr.s_addr=*((unsigned long *) host->h_addr);
 
-	if ( (connect(sock,(struct sockaddr *) &address, sizeof(address))) != 0) 
+	if ( (connect(sock,(struct sockaddr *) &address, sizeof(address))) != 0)
 	{
 #ifdef _WINDOWS
 		closesocket(sock);
@@ -543,11 +547,11 @@ qboolean CL_JoinIRC(void)
 	CL_GetIRCData();
 
 #ifdef _WINDOWS
-	if(WSAGetLastError()) 
+	if(WSAGetLastError())
 	{
 		closesocket(sock);
 		handle_error();
-		return false; 
+		return false;
 	}
 #endif
 
@@ -556,10 +560,10 @@ qboolean CL_JoinIRC(void)
 	cls.irc_canjoin = false;;
 
 	Com_Printf("...Connected to IRC server\n");
-	
+
 	return true; //IRC daemon will continue
 }
- 
+
 
 #ifdef _WINDOWS
 void RecvThreadProc(void *dummy)
@@ -573,9 +577,9 @@ void RecvThreadProc(void *dummy)
 		if (!CL_JoinIRC())
 			return;
 
-	while(1) 
+	while(1)
 	{
-		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel) 
+		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel)
 		{
 			sendData("JOIN #alienarena\n\r");
 			cls.irc_joinedchannel = true;
@@ -585,8 +589,8 @@ void RecvThreadProc(void *dummy)
 		//try not to eat up CPU
 		Sleep(1000); //time to recieve packets
 
-		CL_GetIRCData();	
-		
+		CL_GetIRCData();
+
 	}
 	return;
 }
@@ -596,16 +600,16 @@ void RecvThreadProc(void *dummy)
 void *RecvThreadProc(void *dummy)
 {
     if (!CL_JoinIRC())
-        return; 
+        return;
 
 	//something went wrong, try again
 	if(!cls.irc_canjoin)
 		if (!CL_JoinIRC())
 			return;
 
-	while(1) 
+	while(1)
 	{
-		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel) 
+		if(cls.irc_connected && cls.irc_canjoin && !cls.irc_joinedchannel)
 		{
 			sendData("JOIN #alienarena\n\r");
 			cls.irc_joinedchannel = true;
@@ -615,7 +619,7 @@ void *RecvThreadProc(void *dummy)
 		//try not to eat up CPU
 		sleep(1); //time to recieve packets
 
-		CL_GetIRCData();			
+		CL_GetIRCData();
 	}
 	return;
 }
@@ -635,7 +639,7 @@ void CL_InitIRC()
 	pthread_create(&pth,NULL,RecvThreadProc,"dummy");
 #endif
 
-} 
+}
 
 void CL_IRCShutdown(void)
 {

@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -16,7 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-*/ 
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "r_local.h"
 #include <GL/gl.h>
@@ -82,7 +86,7 @@ void generateShadowFBO()
 	getOpenGLFunctionPointers();
 
 	if(!qglGenFramebuffersEXT || !qglBindFramebufferEXT || !qglFramebufferTexture2DEXT || !qglCheckFramebufferStatusEXT
-		|| !qglGenRenderbuffersEXT || !qglBindRenderbufferEXT || !qglRenderbufferStorageEXT || !qglFramebufferRenderbufferEXT) 
+		|| !qglGenRenderbuffersEXT || !qglBindRenderbufferEXT || !qglRenderbufferStorageEXT || !qglFramebufferRenderbufferEXT)
 	{
 		Com_Printf("...GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
 		gl_state.fbo = false;
@@ -95,24 +99,24 @@ void generateShadowFBO()
 	// GL_LINEAR does not make sense for depth texture. However, next tutorial shows usage of GL_LINEAR and PCF
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		
+
 	// Remove artefact on the edges of the shadowmap
 	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
 	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
-		
-	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available 
+
+	// No need to force GL_DEPTH_COMPONENT24, drivers usually give you the max precision if available
 	qglTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 	qglBindTexture(GL_TEXTURE_2D, 0);
 
 	// create a framebuffer object
 	qglGenFramebuffersEXT(1, &fboId[0]);
-			
+
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[0]);
 
 	// Instruct openGL that we won't bind a color texture with the currently binded FBO
 	qglDrawBuffer(GL_NONE);
 	qglReadBuffer(GL_NONE);
-		
+
 	// attach the texture to FBO depth attachment point
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
 
@@ -123,8 +127,8 @@ void generateShadowFBO()
 		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use FBO\n");
 		gl_state.fbo = false;
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	}		
-	
+	}
+
 	//FBO for capturing stencil volumes
 
 	//must check for abilit to blit(Many old ATI drivers do not support)
@@ -159,7 +163,7 @@ void generateShadowFBO()
     qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
 
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[1]);
-		
+
 	// check FBO status
 	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
@@ -177,7 +181,7 @@ void setupMatrices(float position_x,float position_y,float position_z,float look
 
 	qglMatrixMode(GL_PROJECTION);
 	qglLoadIdentity();
-	MYgluPerspective(120.0f, vid.width/vid.height, 10.0f, 4096.0f); 
+	MYgluPerspective(120.0f, vid.width/vid.height, 10.0f, 4096.0f);
 	qglMatrixMode(GL_MODELVIEW);
 	qglLoadIdentity();
 	gluLookAt(position_x,position_y,position_z,lookAt_x,lookAt_y,lookAt_z,0,1,0);
@@ -188,28 +192,28 @@ void setTextureMatrix( void )
 	static double modelView[16];
 	static double projection[16];
 
-	// Moving from unit cube [-1,1] to [0,1]  
-	const GLdouble bias[16] = {	
-		0.5, 0.0, 0.0, 0.0, 
+	// Moving from unit cube [-1,1] to [0,1]
+	const GLdouble bias[16] = {
+		0.5, 0.0, 0.0, 0.0,
 		0.0, 0.5, 0.0, 0.0,
 		0.0, 0.0, 0.5, 0.0,
 		0.5, 0.5, 0.5, 1.0};
-	
+
 	// Grab modelview and transformation matrices
 	qglGetDoublev(GL_MODELVIEW_MATRIX, modelView);
 	qglGetDoublev(GL_PROJECTION_MATRIX, projection);
-	
+
 	qglMatrixMode(GL_TEXTURE);
 	qglActiveTextureARB(GL_TEXTURE7);
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
-	qglLoadIdentity();	
+	qglLoadIdentity();
 	qglLoadMatrixd(bias);
-	
+
 	// concatating all matrice into one.
 	qglMultMatrixd (projection);
 	qglMultMatrixd (modelView);
-	
+
 	// Go back to normal matrix mode
 	qglMatrixMode(GL_MODELVIEW);
 }
@@ -366,10 +370,10 @@ void R_DrawShadowMapWorld (void)
 	{
 		currententity = &r_newrefdef.entities[i];
 		if (currententity->flags & RF_TRANSLUCENT)
-			continue;	// transluscent	
+			continue;	// transluscent
 
 		currentmodel = currententity->model;
-				
+
 		if (!currentmodel)
 		{
 			continue;
@@ -409,33 +413,33 @@ void R_DrawDynamicCaster(void)
 		dl += sv_lnum; //our most influential light
 	}
 	else
-		return; 
+		return;
 
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]); 
-	
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]);
+
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
 	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));  //for now
 
 	// Clear previous frame values
 	qglClear( GL_DEPTH_BUFFER_BIT);
-		
+
 	//Disable color rendering, we only want to write to the Z-Buffer
-	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); 
-		
+	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
 	// Culling switching, rendering only frontfaces - to do - really?
 	qglCullFace(GL_BACK);
 
 	// attach the texture to FBO depth attachment point
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
-			
+
 	//set camera
 	setupMatrices(dl->origin[0],dl->origin[1],dl->origin[2]+64,dl->origin[0],dl->origin[1],dl->origin[2]-64);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
     qglPolygonOffset( 0.5f, 0.5f );
-    
+
 	//render world - very basic geometry
 	R_DrawShadowMapWorld();
 
@@ -454,19 +458,19 @@ void R_DrawDynamicCaster(void)
 		{
 			continue;
 		}
-			
+
 		//distance from light, if too far, don't render(to do - check against brightness for dist!)
 		VectorSubtract(dl->origin, currententity->origin, dist);
 		if(VectorLength(dist) > 256.0f)
-			continue;						
-	
+			continue;
+
 		//trace visibility from light - we don't render objects the light doesn't hit!
 		r_trace = CM_BoxTrace(dl->origin, currententity->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			continue;
 
 		currentmodel = currententity->model;
-	
+
 		//get view distance, set lod if available
 		VectorSubtract(r_origin, currententity->origin, dist);
 		if(VectorLength(dist) > 300) {
@@ -474,20 +478,20 @@ void R_DrawDynamicCaster(void)
 				currentmodel = currententity->lod2;
 		}
 		else if(VectorLength(dist) > 100) {
-			if(currententity->lod1) 
+			if(currententity->lod1)
 				currentmodel = currententity->lod1;
 		}
-		
+
 		if(currentmodel->type == mod_iqm)
 			R_DrawIQMCaster ();
 		else
 			R_DrawAliasModelCaster ();
 	}
-	
+
 	setTextureMatrix();
 
-	qglDepthMask (1);		// back to writing  
-	
+	qglDepthMask (1);		// back to writing
+
 	qglPolygonOffset( 0.0f, 0.0f );
     qglDisable( GL_POLYGON_OFFSET_FILL );
 

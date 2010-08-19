@@ -18,6 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "server.h"
 
 master_sv_t	master_status[MAX_MASTERS];	// status of master servers
@@ -141,7 +145,7 @@ char	*SV_StatusString (void)
 		cl = &svs.clients[i];
 		if (cl->state == cs_connected || cl->state == cs_spawned )
 		{
-			name = cl->name; 
+			name = cl->name;
 #ifdef NOTUSED
 			//handle color chars
 			nametxt[0] = 0;
@@ -159,7 +163,7 @@ char	*SV_StatusString (void)
 					break;
 			}
 			nametxt[k]=0;
-#else		
+#else
 			//allow color chars to be sent
 			strcpy(nametxt, name);
 			nametxt[31] = '\0'; //failsafe
@@ -180,7 +184,7 @@ char	*SV_StatusString (void)
 	if(cl->edict->client->ps.botnum) {
 		for(i = 0; i < cl->edict->client->ps.botnum; i++) {
 
-			name = cl->edict->client->ps.bots[i].name; 
+			name = cl->edict->client->ps.bots[i].name;
 #ifdef NOTUSED
 			//handle color chars
 			nametxt[0] = 0;
@@ -597,7 +601,7 @@ void SVC_DirectConnect (void)
 
 	//prevent client slot overwrites with bots rejoining after map change
 	if(botkick) {
-		
+
 		if(botkick < sv_numbots)
 			botnum = botkick;
 		else

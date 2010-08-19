@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 // r_draw.c
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "r_local.h"
 
@@ -65,7 +69,7 @@ void RefreshFont (void)
 			data[y][x][0] = 255;
 			data[y][x][1] = 255;
 			data[y][x][2] = 255;
-			data[y][x][3] = blanktexture[x][y]; 
+			data[y][x][3] = blanktexture[x][y];
 		}
 	}
 
@@ -90,7 +94,7 @@ void RefreshFont (void)
 		menu_chars = GL_LoadPic ("***font***", (byte *)data, 16, 16, it_pic, 32);
 
 	GL_Bind( menu_chars->texnum );
-	
+
 	con_font->modified = false;
 }
 
@@ -121,7 +125,7 @@ void Draw_Char (int x, int y, int num)
 	float			frow, fcol, size;
 
 	num &= 255;
-	
+
 	if ( (num&127) == 32 )
 		return;		// space
 
@@ -176,7 +180,7 @@ void Draw_ColorChar (int x, int y, int num, vec4_t color)
 	colors[3] = R_FloatToByte( color[3] );
 
 	num &= 255;
-	
+
 	if ( (num&127) == 32 )
 		return;		// space
 
@@ -208,19 +212,19 @@ void Draw_ColorChar (int x, int y, int num, vec4_t color)
 }
 
 void Draw_ScaledChar (float x, float y, int num, float scale, int from_menu)
-					
+
 {
 	int				row, col;
 	float			frow, fcol, size;
 
 	num &= 255;
-	
+
 	if ( (num&127) == 32 )
 		return;		// space
 
 	if (y <= -8)
 		return;			// totally off screen
-	
+
 	row = num>>4;
 	col = num&15;
 
@@ -258,7 +262,7 @@ void Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale,
 	colors[3] = R_FloatToByte( color[3] );
 
 	num &= 255;
-	
+
 	if ( (num&127) == 32 )
 		return;		// space
 
@@ -387,7 +391,7 @@ void ShaderResizePic( image_t *gl, int *w, int *h)
 
 	COM_StripExtension ( gl->name, shortname );
 	rs=RS_FindScript(shortname);
-	
+
 	if (!rs)
 		return;
 	if (!rs->picsize.enable)
@@ -426,9 +430,9 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 	else if(!strcmp(shortname, "pics/i_team2"))
 		r_teamColor = 2;
 
-	R_InitQuadVarrays(); 
-	
-	if (!rs) 
+	R_InitQuadVarrays();
+
+	if (!rs)
 	{
 		qglDisable (GL_ALPHA_TEST);
 		qglEnable (GL_BLEND);
@@ -440,14 +444,14 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 
 		//set color of hud by team
 		if(r_teamColor == 1) {
-			if(!strcmp(shortname, "pics/i_health")) 
+			if(!strcmp(shortname, "pics/i_health"))
 				qglColor4f(1, .2, .2, alphaval);
 		}
 		else if(r_teamColor == 2) {
-			if(!strcmp(shortname, "pics/i_health")) 
+			if(!strcmp(shortname, "pics/i_health"))
 				qglColor4f(.1, .4, .8, alphaval);
 		}
-			
+
 		VA_SetElem4(col_array[0], 1,1,1,1);
 		VA_SetElem4(col_array[1], 1,1,1,1);
 		VA_SetElem4(col_array[2], 1,1,1,1);
@@ -461,17 +465,17 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 		qglEnable (GL_ALPHA_TEST);
 		qglDisable (GL_BLEND);
 		R_KillVArrays();
-	} 
-	else 
+	}
+	else
 	{
 		RS_ReadyScript(rs);
 
 		stage=rs->stage;
-		while (stage) 
+		while (stage)
 		{
 			float red = 1, green = 1, blue = 1;
 
-			if (stage->blendfunc.blend) 
+			if (stage->blendfunc.blend)
 			{
 				GLSTATE_ENABLE_BLEND
 				GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
@@ -482,13 +486,13 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 			}
 
 			alpha=1.0f;
-			if (stage->alphashift.min || stage->alphashift.speed) 
+			if (stage->alphashift.min || stage->alphashift.speed)
 			{
-				if (!stage->alphashift.speed && stage->alphashift.min > 0) 
+				if (!stage->alphashift.speed && stage->alphashift.min > 0)
 				{
 					alpha=stage->alphashift.min;
-				} 
-				else if (stage->alphashift.speed) 
+				}
+				else if (stage->alphashift.speed)
 				{
 					alpha=sin(rs_realtime * stage->alphashift.speed);
 					alpha=(alpha+1)*0.5f;
@@ -497,11 +501,11 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 				}
 			}
 
-			if (stage->alphamask) 
+			if (stage->alphamask)
 			{
 				GLSTATE_ENABLE_ALPHATEST
-			} 
-			else 
+			}
+			else
 			{
 				GLSTATE_DISABLE_ALPHATEST
 			}
@@ -875,13 +879,13 @@ void Draw_StretchRaw (int x, int y, int w, int h, int cols, int rows, byte *data
 			}
 		}
 
-		qglTexImage2D( GL_TEXTURE_2D, 
-			           0, 
-					   GL_COLOR_INDEX8_EXT, 
-					   256, 256, 
-					   0, 
-					   GL_COLOR_INDEX, 
-					   GL_UNSIGNED_BYTE, 
+		qglTexImage2D( GL_TEXTURE_2D,
+			           0,
+					   GL_COLOR_INDEX8_EXT,
+					   256, 256,
+					   0,
+					   GL_COLOR_INDEX,
+					   GL_UNSIGNED_BYTE,
 					   image8 );
 	}
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

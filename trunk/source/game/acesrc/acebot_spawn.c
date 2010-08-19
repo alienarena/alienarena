@@ -57,6 +57,9 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "../g_local.h"
 #include "../m_player.h"

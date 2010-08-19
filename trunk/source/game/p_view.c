@@ -18,6 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 #include "m_player.h"
 
@@ -360,7 +364,7 @@ void SV_CalcGunOffset (edict_t *ent)
 		ent->client->ps.gunoffset[i] += up[i]* (-gun_z->value);
 
 	}
-	
+
 	//landing on jumps
 	if(ent->s.event == EV_FALLSHORT || ent->s.event == EV_FALL || ent->s.event == EV_FALLFAR) {
 		ent->client->ps.gunoffset[2] -=1.5;
@@ -638,7 +642,7 @@ void P_FallingDamage (edict_t *ent)
 
 	if (ent->movetype == MOVETYPE_NOCLIP)
 		return;
-	
+
 	if(joustmode->value)
 		return;
 
@@ -676,7 +680,7 @@ void P_FallingDamage (edict_t *ent)
 // 		ent->s.event = EV_FOOTSTEP;
 // 		return;
 // 	}
-	
+
 	ent->client->fall_value = delta;
 	if (ent->client->fall_value > 20)
 		ent->client->fall_value = 20;
@@ -910,7 +914,7 @@ void G_SetClientEffects (edict_t *ent)
 
 	//invisibility
 	if(ent->client->invis_framenum > level.framenum) {
-		ent->s.renderfx |= RF_TRANSLUCENT; 
+		ent->s.renderfx |= RF_TRANSLUCENT;
 		ent->s.modelindex2 = 0;
 	}
 
@@ -931,12 +935,12 @@ void G_SetClientEvent (edict_t *ent)
 	{
 		if ( (int)(current_client->bobtime+bobmove) != bobcycle )
 			ent->s.event = EV_FOOTSTEP;
-		
+
 		if ( ((ent->waterlevel == 1) || (ent->waterlevel == 2)) && (xyspeed > 100) )
 		{
 			if ( (int)(current_client->bobtime+bobmove) != bobcycle )
-			{				
-				ent->s.event = EV_WADE;	 
+			{
+				ent->s.event = EV_WADE;
 			}
 		}
 	}
@@ -1240,7 +1244,7 @@ void ClientEndServerFrame (edict_t *ent)
 	}
 	if (ent->client->chasetoggle == 1)
         CheckDeathcam_Viewent(ent);
-		
+
 	if ( g_antilag->integer)
 		G_StoreHistory( ent );
 }

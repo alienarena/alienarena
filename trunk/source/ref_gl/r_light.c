@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // r_light.c
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "r_local.h"
 
 int	r_dlightframecount;
@@ -42,13 +46,13 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
           float              dist;
           msurface_t         *surf;
           int                i, sidebit;
-          
+
           if (node->contents != -1)
                    return;
- 
+
           splitplane = node->plane;
           dist = DotProduct (light->origin, splitplane->normal) - splitplane->dist;
- 
+
           if (dist > light->intensity-DLIGHT_CUTOFF) {
                    R_MarkLights (light, bit, node->children[0]);
                    return;
@@ -57,7 +61,7 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
                    R_MarkLights (light, bit, node->children[1]);
                    return;
           }
- 
+
 // mark the polygons
           surf = r_worldmodel->surfaces + node->firstsurface;
           for (i=0 ; i<node->numsurfaces ; i++, surf++)
@@ -67,10 +71,10 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
                              sidebit = 0;                                                                      //Discoloda
                    else                                                                                        //Discoloda
                              sidebit = SURF_PLANEBACK;                                                //Discoloda
- 
+
                    if ( (surf->flags & SURF_PLANEBACK) != sidebit )                                   //Discoloda
                              continue;                                                                //Discoloda
- 
+
                    if (surf->dlightframe != r_dlightframecount)
                    {
                              surf->dlightbits = bit;
@@ -78,7 +82,7 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node)
                    } else
                              surf->dlightbits |= bit;
           }
- 
+
           R_MarkLights (light, bit, node->children[0]);
           R_MarkLights (light, bit, node->children[1]);
 }
@@ -706,17 +710,17 @@ void R_RenderFlares (void)
 
 		// periodically test visibility to ramp alpha
 		if(rs_realtime - l->time > 0.02){
-			
+
 			r_trace = CM_BoxTrace(r_origin, l->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 			visible = r_trace.fraction == 1.0;
-			
+
 			l->alpha += (visible ? 0.03 : -0.15);  // ramp
-			
+
 			if(l->alpha > 0.5)  // clamp
 				l->alpha = 0.5;
 			else if(l->alpha < 0)
 				l->alpha = 0.0;
-			
+
 			l->time = rs_realtime;
 		}
 
@@ -764,8 +768,8 @@ void transform_point(float out[4], const float m[16], const float in[4])
 }
 
 
-qboolean gluProject2(float objx, float objy, float objz, const float model[16], const float proj[16], const int viewport[4], float *winx, float *winy)	// /, 
-																																						// float 
+qboolean gluProject2(float objx, float objy, float objz, const float model[16], const float proj[16], const int viewport[4], float *winx, float *winy)	// /,
+																																						// float
 																																						// *winz)
 {
 	/* matrice de transformation */
@@ -816,7 +820,7 @@ void R_InitSun()
 
 	draw_sun = true;
 
-	gluProject2(sun_origin[0], sun_origin[1], sun_origin[2], r_world_matrix, r_project_matrix, (int *) r_viewport, &sun_x, &sun_y);	// /, 
+	gluProject2(sun_origin[0], sun_origin[1], sun_origin[2], r_world_matrix, r_project_matrix, (int *) r_viewport, &sun_x, &sun_y);	// /,
 																																	// &sun_z);
 	sun_y = r_newrefdef.height - sun_y;
 }
@@ -879,7 +883,7 @@ void R_RenderSun()
 	if(rs_realtime - sun_time > 0.02) {
 
 		sun_alpha += (l == 1.0 ? 0.15 : -0.15);  // ramp
-			
+
 		if(sun_alpha > 1.0)  // clamp
 			sun_alpha = 1.0;
 		else if(sun_alpha < 0)
@@ -914,7 +918,7 @@ void R_RenderSun()
 		size = r_newrefdef.width * sun_size;
 		R_RenderSunFlare(sun_object, 0, size, .75, .75, .75, sun_alpha);
 		if (r_drawsun->value == 2) {
-	
+
 			R_RenderSunFlare(sun2_object, -0.9, size * 0.07, 0.1, 0.1, 0, sun_alpha);
 			R_RenderSunFlare(sun2_object, -0.7, size * 0.15, 0, 0, 0.1, sun_alpha);
 			R_RenderSunFlare(sun2_object, -0.5, size * 0.085, 0.1, 0, 0, sun_alpha);

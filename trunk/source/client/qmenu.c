@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <string.h>
 #include <ctype.h>
 
@@ -77,7 +82,7 @@ void ColorAction_Draw( menuaction_s *a )
 		Menu_DrawStringDark( a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET, a->generic.y + a->generic.parent->y, a->generic.name );
 	else
 		Menu_DrawColorString( a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET, a->generic.y + a->generic.parent->y, a->generic.name );
-	
+
 	if ( a->generic.ownerdraw )
 		a->generic.ownerdraw( a );
 }
@@ -211,7 +216,7 @@ qboolean Field_Key( menufield_s *f, int key )
 		 ( ( ( key == K_INS ) || ( key == K_KP_INS ) ) && keydown[K_SHIFT] ) )
 	{
 		char *cbd;
-		
+
 		if ( ( cbd = Sys_GetClipboardData() ) != 0 )
 		{
 			strtok( cbd, "\n\r\b" );
@@ -395,7 +400,7 @@ void Menu_Draw( menuframework_s *menu )
 		case MTYPE_VERTSLIDER:
 			VertSlider_Draw( ( menuslider_s * ) menu->items[i] );
 			break;
-		case MTYPE_COLORTXT: 
+		case MTYPE_COLORTXT:
 			ColorTxt_Draw ( ( menutxt_s * ) menu->items[i] );
 			break;
 		case MTYPE_COLORACTION:
@@ -436,7 +441,7 @@ void Menu_Draw( menuframework_s *menu )
 				case MTYPE_COLORACTION:
 					{
 						len = strlen(item->name);
-						
+
 						if (item->flags & QMF_LEFT_JUSTIFY || item->type == MTYPE_COLORACTION)
 						{
 							min[0] += (LCOLUMN_OFFSET*2);
@@ -500,9 +505,9 @@ void Menu_Draw( menuframework_s *menu )
 					continue;
 			}
 
-			if (cursor.x>=min[0] && 
+			if (cursor.x>=min[0] &&
 				cursor.x<=max[0] &&
-				cursor.y>=min[1] && 
+				cursor.y>=min[1] &&
 				cursor.y<=max[1])
 			{
 				//new item
@@ -519,7 +524,7 @@ void Menu_Draw( menuframework_s *menu )
 
 				cursor.menuitem = item;
 				cursor.menuitemtype = type;
-				
+
 				menu->cursor = i;
 
 				break;
@@ -638,7 +643,7 @@ void Menu_DrawColorString ( int x, int y, const char *str )
 
 	charscale = (float)(viddef.height)*16/600;
 
-	scolor[0] = 0; 
+	scolor[0] = 0;
 	scolor[1] = 1;
 	scolor[2] = 0;
 	scolor[3] = 1;
@@ -650,12 +655,12 @@ void Menu_DrawColorString ( int x, int y, const char *str )
 			color_offset +=2;
 			continue;
 		}
-		
+
 		Draw_ScaledColorChar (x, y, *str, scolor, charscale, true); //this is only ever used for names.
-		
+
 		num = *str++;
 		num &= 255;
-			
+
 		if ( (num&127) == 32 ) { //spaces reset colors
 			scolor[0] = 0;
 			scolor[1] = 1;
@@ -674,12 +679,12 @@ void Menu_DrawColorStringL2R ( int x, int y, const char *str )
 
 	charscale = (float)(viddef.height)*16/600;
 
-	scolor[0] = 0; 
+	scolor[0] = 0;
 	scolor[1] = 1;
 	scolor[2] = 0;
 	scolor[3] = 1;
 
-	//need to know just how many color chars there are before hand, so that it will draw in 
+	//need to know just how many color chars there are before hand, so that it will draw in
 	//correct place
 	for ( i = 0; i < strlen( str ); i++ )
 	{
@@ -696,12 +701,12 @@ void Menu_DrawColorStringL2R ( int x, int y, const char *str )
 			color_offset +=2;
 			continue;
 		}
-		
+
 		Draw_ScaledColorChar (x, y, *str, scolor, charscale, true); //this is only ever used for names.
-		
+
 		num = *str++;
 		num &= 255;
-			
+
 		if ( (num&127) == 32 ) { //spaces reset colors
 			scolor[0] = 0;
 			scolor[1] = 1;
@@ -727,12 +732,12 @@ void Menu_DrawFilteredString ( int x, int y, const char *str )
 			color_offset +=2;
 			continue;
 		}
-		
+
 		Draw_ScaledChar (x, y, *str, charscale, true);
-		
+
 		num = *str++;
 		num &= 255;
-			
+
 		if ( (num&127) == 32 ) { //spaces reset colors
 			scolor[0] = 0;
 			scolor[1] = 1;
@@ -926,7 +931,7 @@ void Separator2_Draw( menuseparator_s *s )
 {
 	if ( s->generic.name )
 		Menu_DrawStringR2L( s->generic.x + s->generic.parent->x, s->generic.y + s->generic.parent->y, s->generic.name );
-}	
+}
 void ColorTxt_Draw( menutxt_s *s )
 {
 	if ( s->generic.name )
@@ -954,7 +959,7 @@ void Slider_Draw( menuslider_s *s )
 
 
 	Menu_DrawStringR2LDark( s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
-		                s->generic.y + s->generic.parent->y, 
+		                s->generic.y + s->generic.parent->y,
 						s->generic.name );
 
 	s->range = ( s->curvalue - s->minvalue ) / ( float ) ( s->maxvalue - s->minvalue );
@@ -963,15 +968,15 @@ void Slider_Draw( menuslider_s *s )
 		s->range = 0;
 	if ( s->range > 1)
 		s->range = 1;
-	Draw_ScaledChar( s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET, 
+	Draw_ScaledChar( s->generic.x + s->generic.parent->x + RCOLUMN_OFFSET,
 		s->generic.y + s->generic.parent->y + charscale/2, 128, charscale, true);
 	for ( i = 0; i < SLIDER_RANGE; i++ )
-		Draw_ScaledChar( RCOLUMN_OFFSET + s->generic.x + i*charscale + s->generic.parent->x + charscale, 
+		Draw_ScaledChar( RCOLUMN_OFFSET + s->generic.x + i*charscale + s->generic.parent->x + charscale,
 		s->generic.y + s->generic.parent->y + charscale/2, 129, charscale, true);
-	Draw_ScaledChar( RCOLUMN_OFFSET + s->generic.x + i*charscale + s->generic.parent->x + charscale, 
+	Draw_ScaledChar( RCOLUMN_OFFSET + s->generic.x + i*charscale + s->generic.parent->x + charscale,
 		s->generic.y + s->generic.parent->y + charscale/2, 130, charscale, true);
 
-	Draw_ScaledChar( ( int ) ( charscale + RCOLUMN_OFFSET + s->generic.parent->x + s->generic.x + (SLIDER_RANGE-1)*charscale * s->range ), 
+	Draw_ScaledChar( ( int ) ( charscale + RCOLUMN_OFFSET + s->generic.parent->x + s->generic.x + (SLIDER_RANGE-1)*charscale * s->range ),
 		s->generic.y + s->generic.parent->y + charscale/2, 139, charscale, true);
 }
 
@@ -989,25 +994,25 @@ void VertSlider_Draw( menuslider_s *s )
 	if ( s->range > 1)
 		s->range = 1;
 	//top
-	Draw_ScaledChar( s->generic.x + s->generic.parent->x + charscale, 
+	Draw_ScaledChar( s->generic.x + s->generic.parent->x + charscale,
 		s->generic.y + s->generic.parent->y - charscale, 18, charscale, true);
-	Draw_ScaledChar( s->generic.x + s->generic.parent->x + 2*charscale, 
+	Draw_ScaledChar( s->generic.x + s->generic.parent->x + 2*charscale,
 		s->generic.y + s->generic.parent->y - charscale, 20, charscale, true);
 
 	for ( i = 0; i <= s->size; i++ ) {
-		Draw_ScaledChar( s->generic.x + s->generic.parent->x + charscale, 
+		Draw_ScaledChar( s->generic.x + s->generic.parent->x + charscale,
 			s->generic.y + i*charscale + s->generic.parent->y, 21, charscale, true);
-		Draw_ScaledChar( s->generic.x + s->generic.parent->x + 2*charscale, 
-			s->generic.y + i*charscale + s->generic.parent->y, 23, charscale, true);	
+		Draw_ScaledChar( s->generic.x + s->generic.parent->x + 2*charscale,
+			s->generic.y + i*charscale + s->generic.parent->y, 23, charscale, true);
 	}
 	//bottom
-	Draw_ScaledChar( s->generic.parent->x + s->generic.x + charscale, 
+	Draw_ScaledChar( s->generic.parent->x + s->generic.x + charscale,
 		(s->size+1)*charscale + s->generic.y + s->generic.parent->y, 24, charscale, true);
-	Draw_ScaledChar( s->generic.parent->x + s->generic.x + 2*charscale, 
+	Draw_ScaledChar( s->generic.parent->x + s->generic.x + 2*charscale,
 		(s->size+1)*charscale + s->generic.y + s->generic.parent->y, 26, charscale, true);
 
 	//cursor
-	Draw_ScaledChar( (int)( s->generic.parent->x + s->generic.x + 1.5*charscale), 
+	Draw_ScaledChar( (int)( s->generic.parent->x + s->generic.x + 1.5*charscale),
 		( int ) (s->generic.y + s->generic.parent->y + (s->size)*charscale * s->range), 11, charscale, true);
 
 }
@@ -1041,8 +1046,8 @@ void SpinControl_Draw( menulist_s *s )
 
 	if ( s->generic.name )
 	{
-		Menu_DrawStringR2LDark( s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET, 
-							s->generic.y + s->generic.parent->y, 
+		Menu_DrawStringR2LDark( s->generic.x + s->generic.parent->x + LCOLUMN_OFFSET,
+							s->generic.y + s->generic.parent->y,
 							s->generic.name );
 	}
 	if ( !strchr( s->itemnames[s->curvalue], '\n' ) )

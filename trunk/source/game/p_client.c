@@ -1,3 +1,27 @@
+/*
+Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 20?? COR Entertainment, LLC.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 #include "m_player.h"
 
@@ -338,7 +362,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				if(!(attacker->client->ps.pmove.pm_flags & PMF_DUCKED)) {
 					attacker->state = STATE_STAND;
 					attacker->s.frame = FRAME_taunt01-1;
-					attacker->client->anim_end = FRAME_taunt17;			
+					attacker->client->anim_end = FRAME_taunt17;
 
 					//print a taunt, or send taunt sound
 					msg = random() * 24;
@@ -417,9 +441,9 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						}
 					}
 					else {
-						
+
 						attacker->client->resp.score++;
-												
+
 						if(!self->groundentity) {
 							attacker->client->resp.reward_pts+=3;
 							safe_centerprintf(attacker, "Midair shot!\n");
@@ -430,7 +454,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						if(mod == MOD_HEADSHOT) { //3 more pts for a headshot
 							attacker->client->resp.reward_pts+=3;
 							safe_centerprintf(attacker, "HEADSHOT!\n");
-							gi.sound(attacker, CHAN_AUTO, gi.soundindex("misc/headshot.wav"), 1, ATTN_STATIC, 0);  
+							gi.sound(attacker, CHAN_AUTO, gi.soundindex("misc/headshot.wav"), 1, ATTN_STATIC, 0);
 						}
 
 						//mutators
@@ -729,19 +753,19 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 				TossClientWeapon (self);
 		}
 
-		if(ctf->value) {			
+		if(ctf->value) {
 			//check to see if they had a flag
 			flag1_item = flag2_item = NULL;
 
 			flag1_item = FindItemByClassname("item_flag_red");
 			flag2_item = FindItemByClassname("item_flag_blue");
 
-			if (self->client->pers.inventory[ITEM_INDEX(flag1_item)] || self->client->pers.inventory[ITEM_INDEX(flag1_item)]) 
+			if (self->client->pers.inventory[ITEM_INDEX(flag1_item)] || self->client->pers.inventory[ITEM_INDEX(flag1_item)])
 				hasFlag = true;
 
 			CTFDeadDropFlag(self);
 			if(anticamp->value && meansOfDeath == MOD_SUICIDE && hasFlag) {
-				
+
 				//make campers really pay for hiding flags
 				if(self->dmteam == BLUE_TEAM)
 					CTFResetFlag(RED_TEAM);
@@ -786,12 +810,12 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 
 	// clear inventory
 	memset(self->client->pers.inventory, 0, sizeof(self->client->pers.inventory));
-	
+
 	if (self->health < -40)
 	{	// gib
 		self->takedamage	= DAMAGE_NO;
 		self->s.modelindex3	= 0;    //remove helmet, if a martian
-	
+
 		if(self->client->chasetoggle == 1)
 		{
 			/* If deathcam is active, switch client model to nothing */
@@ -1404,7 +1428,7 @@ void InitBodyQue (void)
 
 void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
-	int	n;	
+	int	n;
 	int gib_effect = EF_GREENGIB;
 	self->s.modelindex3 = 0;    //remove helmet, if a martian
 	self->s.modelindex4 = 0;
@@ -1793,7 +1817,7 @@ void PutClientInServer (edict_t *ent)
 		ent->s.modelindex3 = 0;
 
 	ent->s.modelindex4 = 0;
-	
+
 	//check for class file
 	ent->ctype = 0; //alien is default
 	sprintf(modelpath, "players/%s/human", playermodel);
@@ -1892,12 +1916,12 @@ void PutClientInServer (edict_t *ent)
 void ClientPlaceInQueue(edict_t *ent)
 {
 	int		i;
-	int		highestpos, induel, numplayers; 
+	int		highestpos, induel, numplayers;
 
 	highestpos = induel = numplayers = 0;
-	
+
 	for (i = 0; i < maxclients->value; i++) {
-		if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
+		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			if(g_edicts[i+1].client->pers.queue > highestpos) //only count players that are actually in
 				highestpos = g_edicts[i+1].client->pers.queue;
 			if(g_edicts[i+1].client->pers.queue && g_edicts[i+1].client->pers.queue < 3)
@@ -1911,7 +1935,7 @@ void ClientPlaceInQueue(edict_t *ent)
 		if(highestpos < 2)
 			highestpos = 2; //in case two people somehow managed to have pos 1
 	if(highestpos < numplayers)
-		highestpos = numplayers; 
+		highestpos = numplayers;
 
 	if(!ent->client->pers.queue)
 		ent->client->pers.queue = highestpos+1;
@@ -1932,12 +1956,12 @@ void ClientCheckQueue(edict_t *ent)
 	}
 	else {
 		for (i = 0; i < maxclients->value; i++) {
-			if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
+			if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 				if(!g_edicts[i+1].client->pers.spectator && g_edicts[i+1].client->pers.queue)
 					numplayers++;
 			}
 		}
-		if(numplayers < 3) //only put him in if there are less than two 
+		if(numplayers < 3) //only put him in if there are less than two
 			ent->client->pers.spectator = ent->client->resp.spectator = false;
 	}
 }
@@ -1948,7 +1972,7 @@ void MoveClientsDownQueue(edict_t *ent)
 
 	for (i = 0; i < maxclients->value; i++) { //move everyone down
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
-			if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue) 
+			if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue)
 				g_edicts[i+1].client->pers.queue--;
 
 			if(!putonein && g_edicts[i+1].client->pers.queue == 2 && g_edicts[i+1].client->resp.spectator) { //make sure those who should be in game are
@@ -1957,14 +1981,14 @@ void MoveClientsDownQueue(edict_t *ent)
 				g_edicts[i+1].movetype = MOVETYPE_WALK;
 				g_edicts[i+1].solid = SOLID_BBOX;
 				if(!g_edicts[i+1].is_bot)
-					PutClientInServer(g_edicts+i+1);	
+					PutClientInServer(g_edicts+i+1);
 				else
 					ACESP_PutClientInServer (g_edicts+i+1,true,0);
 				safe_bprintf(PRINT_HIGH, "%s has entered the duel!\n", g_edicts[i+1].client->pers.netname);
 				putonein = true;
 			}
 		}
-			
+
 	}
 	if(ent->client)
 		ent->client->pers.queue = 0;
@@ -2020,14 +2044,14 @@ void ClientBeginDeathmatch (edict_t *ent)
 		}
 
 	}
-	
+
 	//if duel mode, then check number of existing players.  If more there are already two in the game, force
 	//this player to spectator mode, and assign a queue position(we can use the spectator cvar for this)
 	else if(g_duel->value) {
 		ClientPlaceInQueue(ent);
-		ClientCheckQueue(ent);	
+		ClientCheckQueue(ent);
 	}
-	
+
 	// send effect
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -2069,9 +2093,9 @@ void ClientBeginDeathmatch (edict_t *ent)
 	else
 		safe_cprintf(ent, PRINT_HIGH, "Call voting is ^1DISABLED\n");
 
-	if(g_antilag->value) 
+	if(g_antilag->value)
 		safe_cprintf(ent, PRINT_HIGH, "Antilag is ^2ENABLED\n");
-	else 
+	else
 		safe_cprintf(ent, PRINT_HIGH, "Antilag is ^1DISABLED\n");
 
 	//check bots with each player connect
@@ -2148,7 +2172,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	if(whereFrom != SPAWN && whereFrom != CONNECT)
 		whereFrom = INGAME;
 
-	if(playervote.called && whereFrom == INGAME) 
+	if(playervote.called && whereFrom == INGAME)
 		return; //do not allow people to change info during votes
 
 	if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM))
@@ -2197,7 +2221,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		// spectators need to be reset in CTF
 		if (deathmatch->value && *s && strcmp(s, "0"))
 			ent->client->pers.spectator = atoi(s);
-		else 
+		else
 			ent->client->pers.spectator = false;
 	}
 	//end spectator mode
@@ -2274,7 +2298,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 	//check for duplicates(but not on respawns)
 	duplicate = false;
-	if(whereFrom != SPAWN) { 
+	if(whereFrom != SPAWN) {
 
 		for (j=0; j<maxclients->value ; j++) {
 
@@ -2288,7 +2312,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 					duplicate = true;
 			}
 		}
-		
+
 		if(duplicate && playernum < 100) { //just paranoia, should never be more than 64
 
 			sprintf(slot, "%i", playernum);
@@ -2352,7 +2376,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		sprintf(ent->arm, "players/%s/arm.md2", playermodel);
 		fclose(file);
 	}
-	
+
 	// fov
 	if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV))
 	{
@@ -2512,7 +2536,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 	//spectator mode
 	// check for a spectator
 	value = Info_ValueForKey (userinfo, "spectator");
-	if (deathmatch->value && *value && strcmp(value, "0")) {		
+	if (deathmatch->value && *value && strcmp(value, "0")) {
 
 		if (*spectator_password->string &&
 			strcmp(spectator_password->string, "none") &&
@@ -2628,7 +2652,7 @@ void ClientDisconnect (edict_t *ent)
 	ent->inuse = false;
 	ent->classname = "disconnected";
 	ent->client->pers.connected = false;
-	
+
 	playernum = ent-g_edicts-1;
 	gi.configstring (CS_PLAYERSKINS+playernum, "");
 
@@ -2689,20 +2713,20 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	client = ent->client;
 
 	//unlagged
-	if ( g_antilag->integer)		
-		client->attackTime = gi.Sys_Milliseconds(); 
+	if ( g_antilag->integer)
+		client->attackTime = gi.Sys_Milliseconds();
 
 	if (level.intermissiontime)
 	{
 		client->ps.pmove.pm_type = PM_FREEZE;
-		
+
 		// can exit intermission after 10 seconds, or 20 if map voting enables
 		// (voting will only work if g_mapvote wasn't modified during intermission)
 		if (g_mapvote->value && ! g_mapvote->modified) {
 
 			//print out results, track winning map
 			mostvotes = 0;
-			
+
 			for (j = 0; j < 4; j++) {
 				if (votedmap[j].tally > mostvotes)
 					mostvotes = votedmap[j].tally;
@@ -2734,12 +2758,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 					break;
 				}
 			}
-			
+
 			if (level.time > level.intermissiontime + 20.0
 				&& (ucmd->buttons & BUTTON_ANY) )
 				level.exitintermission = true;
 		}
-		else {		
+		else {
 			if (level.time > level.intermissiontime + 10.0
 				&& (ucmd->buttons & BUTTON_ANY) )
 				level.exitintermission = true;
@@ -2801,10 +2825,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 
 		ucmd->forwardmove *= 1.3;
-	
-		//dodging 
+
+		//dodging
 		client->dodge = false;
-		if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && client->moved == false 
+		if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && client->moved == false
 			&& ((level.time - client->lastmovetime) < .15))
 		{
 			if((ucmd->sidemove < 0 && client->lastsidemove < 0) || (ucmd->sidemove > 0 && client->lastsidemove > 0)) {
@@ -2812,7 +2836,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 					client->dodge = 1;
 				else
 					client->dodge = -1;
-				ucmd->upmove += 100;				
+				ucmd->upmove += 100;
 			}
 		}
 
@@ -2845,7 +2869,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		// perform a pmove
 		gi.Pmove (&pm);
-		
+
 		// save results of pmove
 		client->ps.pmove = pm.s;
 		client->old_pmove = pm.s;

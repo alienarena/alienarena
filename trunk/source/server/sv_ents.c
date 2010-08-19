@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "server.h"
 
@@ -537,7 +541,7 @@ void SV_BuildClientFrame (client_t *client)
 				len = VectorLength (delta);
 				if (len > 400)
 					continue;
-			}			
+			}
 		}
 
 		// add it to the circular client_entities array
@@ -591,12 +595,12 @@ void SV_RecordDemoMessage (void)
 
 	e = 1;
 	ent = EDICT_NUM(e);
-	while (e < ge->num_edicts) 
+	while (e < ge->num_edicts)
 	{
 		// ignore ents without visible models unless they have an effect
 		if (ent->inuse &&
-			ent->s.number && 
-			(ent->s.modelindex || ent->s.effects || ent->s.sound || ent->s.event) && 
+			ent->s.number &&
+			(ent->s.modelindex || ent->s.effects || ent->s.sound || ent->s.event) &&
 			!(ent->svflags & SVF_NOCLIENT))
 			MSG_WriteDeltaEntity (&nostate, &ent->s, &buf, false, true);
 

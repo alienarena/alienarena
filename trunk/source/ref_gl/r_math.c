@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -18,15 +18,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // r_math.c
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "../game/q_shared.h"
 #include "r_math.h"
 
-const mat4x4_t mat4x4_identity = 
+const mat4x4_t mat4x4_identity =
 {
-	1, 0, 0, 0, 
-	0, 1, 0, 0, 
-	0, 0, 1, 0, 
-	0, 0, 0, 1 
+	1, 0, 0, 0,
+	0, 1, 0, 0,
+	0, 0, 1, 0,
+	0, 0, 0, 1
 };
 
 void Matrix4_Identity( mat4x4_t m )
@@ -106,7 +111,7 @@ void Matrix4_Rotate( mat4x4_t m, vec_t angle, vec_t x, vec_t y, vec_t z )
 	vec_t c = cos( DEG2RAD(angle) );
 	vec_t s = sin( DEG2RAD(angle) );
 	vec_t mc = 1 - c, t1, t2;
-	
+
 	t[0]  = (x * x * mc) + c;
 	t[5]  = (y * y * mc) + c;
 	t[10] = (z * z * mc) + c;

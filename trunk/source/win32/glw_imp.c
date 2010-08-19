@@ -30,6 +30,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ** GLimp_SwitchFullscreen
 **
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <assert.h>
 #include <windows.h>
 #include "../ref_gl/r_local.h"
@@ -582,26 +587,26 @@ NoExtFunction:
 }
 
 static void Sys_SetCpuCore (void)
-{ 
+{
 	SYSTEM_INFO cpuInfo;
 /*
-	cpumask=1 - use core #0 
-	cpumask=2 - use core #1 
+	cpumask=1 - use core #0
+	cpumask=2 - use core #1
 	cpumask=3 - use cores #0 & #1
 */
 	if(!sys_affinity->value)
 		return;
-	
+
 	if(sys_affinity->value >3)
 		Cvar_SetValue("sys_affinity", 3);
 
-	GetSystemInfo(&cpuInfo); 
-	
-	/* if number of cpu core > 1 
-	we can run run game on second core or use both cores*/ 	
-	if (cpuInfo.dwNumberOfProcessors > 1) 
-			SetProcessAffinityMask(GetCurrentProcess(), (DWORD32)sys_affinity->value); 
-	
+	GetSystemInfo(&cpuInfo);
+
+	/* if number of cpu core > 1
+	we can run run game on second core or use both cores*/
+	if (cpuInfo.dwNumberOfProcessors > 1)
+			SetProcessAffinityMask(GetCurrentProcess(), (DWORD32)sys_affinity->value);
+
 	CloseHandle(GetCurrentProcess());
 }
 

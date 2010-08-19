@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -18,6 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // cl.input.c  -- builds an intended movement command to send to the server
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "client.h"
 
@@ -67,7 +71,7 @@ void KeyDown (kbutton_t *b)
 {
 	int		k;
 	char	*c;
-	
+
 	c = Cmd_Argv(1);
 	if (c[0])
 		k = atoi(c);
@@ -76,7 +80,7 @@ void KeyDown (kbutton_t *b)
 
 	if (k == b->down[0] || k == b->down[1])
 		return;		// repeating key
-	
+
 	if (!b->down[0])
 		b->down[0] = k;
 	else if (!b->down[1])
@@ -86,7 +90,7 @@ void KeyDown (kbutton_t *b)
 		Com_Printf ("Three keys down for a button!\n");
 		return;
 	}
-	
+
 	if (b->state & 1)
 		return;		// still down
 
@@ -246,7 +250,7 @@ void CL_AdjustAngles (void)
 {
 	float	speed;
 	float	up, down;
-	
+
 	if (in_speed.state & 1)
 		speed = cls.frametime * cl_anglespeedkey->value;
 	else
@@ -262,10 +266,10 @@ void CL_AdjustAngles (void)
 		cl.viewangles[PITCH] -= speed*cl_pitchspeed->value * CL_KeyState (&in_forward);
 		cl.viewangles[PITCH] += speed*cl_pitchspeed->value * CL_KeyState (&in_back);
 	}
-	
+
 	up = CL_KeyState (&in_lookup);
 	down = CL_KeyState(&in_lookdown);
-	
+
 	cl.viewangles[PITCH] -= speed*cl_pitchspeed->value * up;
 	cl.viewangles[PITCH] += speed*cl_pitchspeed->value * down;
 }
@@ -278,11 +282,11 @@ Send the intended movement message to the server
 ================
 */
 void CL_BaseMove (usercmd_t *cmd)
-{	
+{
 	CL_AdjustAngles ();
-	
+
 	memset (cmd, 0, sizeof(*cmd));
-	
+
 	VectorCopy (cl.viewangles, cmd->angles);
 	if (in_strafe.state & 1)
 	{
@@ -297,10 +301,10 @@ void CL_BaseMove (usercmd_t *cmd)
 	cmd->upmove -= cl_upspeed->value * CL_KeyState (&in_down);
 
 	if (! (in_klook.state & 1) )
-	{	
+	{
 		cmd->forwardmove += cl_forwardspeed->value * CL_KeyState (&in_forward);
 		cmd->forwardmove -= cl_forwardspeed->value * CL_KeyState (&in_back);
-	}	
+	}
 
 //
 // adjust for speed key / running
@@ -310,7 +314,7 @@ void CL_BaseMove (usercmd_t *cmd)
 		cmd->forwardmove *= 2;
 		cmd->sidemove *= 2;
 		cmd->upmove *= 2;
-	}	
+	}
 }
 
 void CL_ClampPitch (void)
@@ -344,16 +348,16 @@ void CL_FinishMove (usercmd_t *cmd)
 
 //
 // figure button bits
-//	
+//
 	if ( in_attack.state & 3 )
 		cmd->buttons |= BUTTON_ATTACK;
 	in_attack.state &= ~2;
 
 	//alt fire
-	if ( in_attack2.state & 3 ) 
+	if ( in_attack2.state & 3 )
 		cmd->buttons |= BUTTON_ATTACK2;
 	in_attack2.state &= ~2;
-	
+
 	if (in_use.state & 3)
 		cmd->buttons |= BUTTON_USE;
 	in_use.state &= ~2;
@@ -389,7 +393,7 @@ usercmd_t CL_CreateCmd (void)
 		frame_msec = 1;
 	if (frame_msec > 200)
 		frame_msec = 200;
-	
+
 	// get basic movement from keyboard
 	CL_BaseMove (&cmd);
 
@@ -453,7 +457,7 @@ void CL_InitInput (void)
 	Cmd_AddCommand ("-klook", IN_KLookUp);
 	//alt fire
 	Cmd_AddCommand ("+attack2", IN_Attack2Down);
-	Cmd_AddCommand ("-attack2", IN_Attack2Up);	
+	Cmd_AddCommand ("-attack2", IN_Attack2Up);
 
 	cl_nodelta = Cvar_Get ("cl_nodelta", "0", 0);
 }
@@ -491,7 +495,7 @@ void CL_SendCmd (void)
 	if ( cls.state == ca_connected)
 	{
 		if (cls.netchan.message.cursize	|| curtime - cls.netchan.last_sent > 1000 )
-			Netchan_Transmit (&cls.netchan, 0, data);	
+			Netchan_Transmit (&cls.netchan, 0, data);
 		return;
 	}
 
@@ -546,7 +550,7 @@ void CL_SendCmd (void)
 	//
 	// deliver the message
 	//
-	Netchan_Transmit (&cls.netchan, buf.cursize, buf.data);	
+	Netchan_Transmit (&cls.netchan, buf.cursize, buf.data);
 }
 
 

@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // sys_win.h
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "../qcommon/qcommon.h"
 #include "winquake.h"
 #include "resource.h"
@@ -1001,7 +1005,7 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 			time = newtime - oldtime;
 		} while (time < 1);
 		// curtime setting moved from Sys_Milliseconds()
-		//   so it consistent for entire frame 
+		//   so it consistent for entire frame
 		curtime = newtime;
 
 		_controlfp(_PC_24, _MCW_PC);

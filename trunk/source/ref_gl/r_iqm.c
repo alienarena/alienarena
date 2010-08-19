@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "r_local.h"
 #include "r_iqm.h"
@@ -169,12 +173,12 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, 
 		VectorSet(iqmmodel->vertexes[i].position,
 					LittleFloat(vposition[0]),
 					LittleFloat(vposition[1]),
-					LittleFloat(vposition[2]));		
+					LittleFloat(vposition[2]));
 
 		VectorSet(iqmmodel->normal[i].dir,
 					LittleFloat(vnormal[0]),
 					LittleFloat(vnormal[1]),
-					LittleFloat(vnormal[2]));	
+					LittleFloat(vnormal[2]));
 
 		Vector4Set(iqmmodel->tangent[i].dir,
 					LittleFloat(vtangent[0]),
@@ -244,13 +248,13 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 	pbase = (unsigned char *)buffer;
 	header = (iqmheader_t *)buffer;
-	if (memcmp(header->id, "INTERQUAKEMODEL", 16)) 
+	if (memcmp(header->id, "INTERQUAKEMODEL", 16))
 	{
 		Com_Printf ("Mod_INTERQUAKEMODEL_Load: %s is not an Inter-Quake Model", mod->name);
 		return false;
 	}
 
-	if (LittleLong(header->version) != 1) 
+	if (LittleLong(header->version) != 1)
 	{
 		Com_Printf ("Mod_INTERQUAKEMODEL_Load: only version 1 models are currently supported (name = %s)", mod->name);
 		return false;
@@ -296,8 +300,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		Com_Printf("%s has no animations\n", mod->name);
 		return false;
 	}
-	
-	mod->extradata = Hunk_Begin (0x300000); 
+
+	mod->extradata = Hunk_Begin (0x300000);
 
 	va = (iqmvertexarray_t *)(pbase + header->ofs_vertexarrays);
 	for (i = 0;i < (int)header->num_vertexarrays;i++)
@@ -326,14 +330,14 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 				vtangent = (float *)(pbase + va[i].offset);
 			break;
 		case IQM_BLENDINDEXES:
-			if (va[i].format == IQM_UBYTE && va[i].size == 4) 
+			if (va[i].format == IQM_UBYTE && va[i].size == 4)
 			{
 				mod->blendindexes = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
 				memcpy(mod->blendindexes, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
 			}
 			break;
 		case IQM_BLENDWEIGHTS:
-			if (va[i].format == IQM_UBYTE && va[i].size == 4) 
+			if (va[i].format == IQM_UBYTE && va[i].size == 4)
 			{
 				mod->blendweights = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
 				memcpy(mod->blendweights, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
@@ -351,13 +355,13 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 	mod->jointname = (char *)Hunk_Alloc(header->num_text * sizeof(char *));
 	memcpy(mod->jointname, text, header->num_text * sizeof(char *));
-	
+
 	mod->num_frames = header->num_anims;
 	mod->num_joints = header->num_joints;
 	mod->num_poses = header->num_frames;
 	mod->numvertexes = header->num_vertexes;
 	mod->num_triangles = header->num_triangles;
-	
+
 	// load the joints
 	joint = (iqmjoint_t *) (pbase + header->ofs_joints);
 	mod->joints = (iqmjoint_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint_t));
@@ -371,8 +375,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			mod->joints[i].rotation[j] = LittleFloat(joint[i].rotation[j]);
 			mod->joints[i].scale[j] = LittleFloat(joint[i].scale[j]);
 		}
-	}	
-	
+	}
+
 	//these don't need to be a part of mod - remember to free them
 	mod->baseframe = (matrix3x4_t*)Hunk_Alloc (header->num_joints * sizeof(matrix3x4_t));
 	inversebaseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
@@ -380,7 +384,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
     {
 		vec3_t rot;
 		vec4_t q_rot;
-        iqmjoint_t j = joint[i]; 
+        iqmjoint_t j = joint[i];
 
 		//first need to make a vec4 quat from our rotation vec
 		VectorSet(rot, j.rotation[0], j.rotation[1], j.rotation[2]);
@@ -423,21 +427,21 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
             scale[2] = p.channeloffset[8]; if(p.channelmask&0x100) scale[2] += *framedata++ * p.channelscale[8];
             // Concatenate each pose with the inverse base pose to avoid doing this at animation time.
             // If the joint has a parent, then it needs to be pre-concatenated with its parent's base pose.
-            // Thus it all negates at animation time like so: 
+            // Thus it all negates at animation time like so:
             //   (parentPose * parentInverseBasePose) * (parentBasePose * childPose * childInverseBasePose) =>
             //   parentPose * (parentInverseBasePose * parentBasePose) * childPose * childInverseBasePose =>
             //   parentPose * childPose * childInverseBasePose
 
 			Vector4Set(q_rot, rotate[0], rotate[1], rotate[2], -sqrt(max(1.0 - pow(VectorLength(rotate),2), 0.0)));
 
-			Matrix3x4_FromQuatAndVectors(&m, q_rot, translate, scale); 
+			Matrix3x4_FromQuatAndVectors(&m, q_rot, translate, scale);
 
-			if(p.parent >= 0) 
+			if(p.parent >= 0)
 			{
 				Matrix3x4_Multiply(&temp, mod->baseframe[p.parent], m);
 				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], temp, inversebaseframe[j]);
 			}
-            else 
+            else
 				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], m, inversebaseframe[j]);
         }
     }
@@ -456,25 +460,25 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			bounds[i].mins[0] = LittleFloat(bounds[i].mins[0]);
 			bounds[i].mins[1] = LittleFloat(bounds[i].mins[1]);
 			bounds[i].mins[2] = LittleFloat(bounds[i].mins[2]);
-			bounds[i].maxs[0] = LittleFloat(bounds[i].maxs[0]);			
-			bounds[i].maxs[1] = LittleFloat(bounds[i].maxs[1]);	
-			bounds[i].maxs[2] = LittleFloat(bounds[i].maxs[2]);	
+			bounds[i].maxs[0] = LittleFloat(bounds[i].maxs[0]);
+			bounds[i].maxs[1] = LittleFloat(bounds[i].maxs[1]);
+			bounds[i].maxs[2] = LittleFloat(bounds[i].maxs[2]);
 			bounds[i].xyradius = LittleFloat(bounds[i].xyradius);
 			bounds[i].radius = LittleFloat(bounds[i].radius);
-			
+
 			if (mod->mins[0] > bounds[i].mins[0]) mod->mins[0] = bounds[i].mins[0];
 			if (mod->mins[1] > bounds[i].mins[1]) mod->mins[1] = bounds[i].mins[1];
 			if (mod->mins[2] > bounds[i].mins[2]) mod->mins[2] = bounds[i].mins[2];
 			if (mod->maxs[0] < bounds[i].maxs[0]) mod->maxs[0] = bounds[i].maxs[0];
 			if (mod->maxs[1] < bounds[i].maxs[1]) mod->maxs[1] = bounds[i].maxs[1];
 			if (mod->maxs[2] < bounds[i].maxs[2]) mod->maxs[2] = bounds[i].maxs[2];
-			
+
 			if (bounds[i].xyradius > xyradius)
 				xyradius = bounds[i].xyradius;
 			if (bounds[i].radius > radius)
 				radius = bounds[i].radius;
 		}
-		
+
 		mod->radius = radius;
 	}
 
@@ -508,12 +512,12 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 	for (i = 0;i < (int)header->num_triangles;i++)
 	{
-		mod->tris[i].vertex[0] = LittleLong(inelements[0]);		
+		mod->tris[i].vertex[0] = LittleLong(inelements[0]);
 		mod->tris[i].vertex[1] = LittleLong(inelements[1]);
 		mod->tris[i].vertex[2] = LittleLong(inelements[2]);
 		inelements += 3;
 	}
-	
+
 	//load triangle neighbors
 	if (header->ofs_neighbors)
 	{
@@ -523,7 +527,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 		for (i = 0;i < (int)header->num_triangles;i++)
 		{
-			mod->neighbors[i].n[0] = LittleLong(inelements[0]);		
+			mod->neighbors[i].n[0] = LittleLong(inelements[0]);
 			mod->neighbors[i].n[1] = LittleLong(inelements[1]);
 			mod->neighbors[i].n[2] = LittleLong(inelements[2]);
 			inelements += 3;
@@ -534,7 +538,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	R_LoadIQMVertexArrays(mod, vposition, vnormal, vtangent);
 
 	// load texture coodinates
-    mod->st = (fstvert_t*)Hunk_Alloc (header->num_vertexes * sizeof(fstvert_t));	
+    mod->st = (fstvert_t*)Hunk_Alloc (header->num_vertexes * sizeof(fstvert_t));
 
 	for (i = 0;i < (int)header->num_vertexes;i++)
 	{
@@ -575,7 +579,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	#else
 			mod->script = RS_FindScript(shortname); //make it gcc 4.1.1 compatible
 	#endif
-				
+
 			if (mod->script)
 				RS_ReadyScript((rscript_t *)mod->script);
 		}
@@ -592,7 +596,7 @@ float modelpitch;
 void GL_AnimateIQMFrame(float curframe, int nextframe)
 {
 	int i, j;
-	
+
     int frame1 = (int)floor(curframe),
         frame2 = nextframe;
     float frameoffset = curframe - frame1;
@@ -602,23 +606,23 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 	{
 		matrix3x4_t *mat1 = &currentmodel->frames[frame1 * currentmodel->num_joints],
 			*mat2 = &currentmodel->frames[frame2 * currentmodel->num_joints];
-	
+
 		// Interpolate matrixes between the two closest frames and concatenate with parent matrix if necessary.
 		// Concatenate the result with the inverse of the base pose.
 		// You would normally do animation blending and inter-frame blending here in a 3D engine.
 
 		for(i = 0; i < currentmodel->num_joints; i++)
 		{
-			matrix3x4_t mat, rmat, temp; 
+			matrix3x4_t mat, rmat, temp;
 			vec3_t rot, trans;
 			Matrix3x4_Scale(&mat, mat1[i], 1-frameoffset);
 			Matrix3x4_Scale(&temp, mat2[i], frameoffset);
 
-			Matrix3x4_Add(&mat, mat, temp);			
+			Matrix3x4_Add(&mat, mat, temp);
 
-			if(currentmodel->joints[i].parent >= 0) 
+			if(currentmodel->joints[i].parent >= 0)
 				Matrix3x4_Multiply(&currentmodel->outframe[i], currentmodel->outframe[currentmodel->joints[i].parent], mat);
-			else 
+			else
 				Matrix3x4_Copy(&currentmodel->outframe[i], mat);
 
 			//bend the model at the waist for player pitch
@@ -629,7 +633,7 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 				VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
 				VectorSet(trans, 0, 0, 0);
 				Maxtrix3x4GenJointRotate(&rmat, modelpitch, rot, trans);
-				
+
 				// concatenate the rotation with the bone
 				Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
 
@@ -644,11 +648,11 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
 	   				 DotProduct(basePosition, temp.b) + temp.b[3],
 					 DotProduct(basePosition, temp.c) + temp.c[3]);
-				   
+
 			    temp.a[3] += oldPosition[0] - newPosition[0];
 			    temp.b[3] += oldPosition[1] - newPosition[1];
 			    temp.c[3] += oldPosition[2] - newPosition[2];
-			
+
 			    // replace the old matrix with the rotated one
 			    Matrix3x4_Copy(&currentmodel->outframe[i], temp);
 			}
@@ -660,7 +664,7 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 				VectorSet(rot, 0, 1, 0);
 				VectorSet(trans, 0, 0, 0);
 				Maxtrix3x4GenJointRotate(&rmat, -modelpitch, rot, trans);
-				
+
 				// concatenate the rotation with the bone
 				Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
 
@@ -675,11 +679,11 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
 	   				 DotProduct(basePosition, temp.b) + temp.b[3],
 					 DotProduct(basePosition, temp.c) + temp.c[3]);
-				   
+
 			    temp.a[3] += oldPosition[0] - newPosition[0];
 			    temp.b[3] += oldPosition[1] - newPosition[1];
 			    temp.c[3] += oldPosition[2] - newPosition[2];
-			
+
 			    // replace the old matrix with the rotated one
 			    Matrix3x4_Copy(&currentmodel->outframe[i], temp);
 			}
@@ -689,29 +693,29 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 	{
 		const mvertex_t *srcpos = (const mvertex_t *)currentmodel->vertexes;
 		const mnormal_t *srcnorm = (const mnormal_t *)currentmodel->normal;
-		const mtangent_t *srctan = (const mtangent_t *)currentmodel->tangent; 
-	
+		const mtangent_t *srctan = (const mtangent_t *)currentmodel->tangent;
+
 		mvertex_t *dstpos = (mvertex_t *)currentmodel->animatevertexes;
 		mnormal_t *dstnorm = (mnormal_t *)currentmodel->animatenormal;
 		mtangent_t *dsttan = (mtangent_t *)currentmodel->animatetangent;
-		
+
 		const unsigned char *index = currentmodel->blendindexes, *weight = currentmodel->blendweights;
 
 		for(i = 0; i < currentmodel->numvertexes; i++)
 		{
 			matrix3x4_t mat, temp;
 
-			// Blend matrixes for this vertex according to its blend weights. 
+			// Blend matrixes for this vertex according to its blend weights.
 			// the first index/weight is always present, and the weights are
 			// guaranteed to add up to 255. So if only the first weight is
 			// presented, you could optimize this case by skipping any weight
-			// multiplies and intermediate storage of a blended matrix. 
-			// There are only at most 4 weights per vertex, and they are in 
-			// sorted order from highest weight to lowest weight. Weights with 
+			// multiplies and intermediate storage of a blended matrix.
+			// There are only at most 4 weights per vertex, and they are in
+			// sorted order from highest weight to lowest weight. Weights with
 			// 0 values, which are always at the end, are unused.
 
 			Matrix3x4_Scale(&mat, currentmodel->outframe[index[0]], weight[0]/255.0f);
-	
+
 			for(j = 1; j < 4 && weight[j]; j++) {
 				Matrix3x4_Scale(&temp, currentmodel->outframe[index[j]], weight[j]/255.0f);
 				Matrix3x4_Add(&mat, mat, temp);
@@ -719,11 +723,11 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 
 			// Transform attributes by the blended matrix.
 			// Position uses the full 3x4 transformation matrix.
-			// Normals and tangents only use the 3x3 rotation part 
+			// Normals and tangents only use the 3x3 rotation part
 			// of the transformation matrix.
 
-			Matrix3x4_Transform(dstpos, mat, *srcpos); 
-			
+			Matrix3x4_Transform(dstpos, mat, *srcpos);
+
 			// Note that if the matrix includes non-uniform scaling, normal vectors
 			// must be transformed by the inverse-transpose of the matrix to have the
 			// correct relative scale. Note that invert(mat) = adjoint(mat)/determinant(mat),
@@ -732,12 +736,12 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 			// cheaply generated by 3 cross-products.
 			//
 			// If you don't need to use joint scaling in your models, you can simply use the
-			// upper 3x3 part of the position matrix instead of the adjoint-transpose shown 
+			// upper 3x3 part of the position matrix instead of the adjoint-transpose shown
 			// here.
 
 			Matrix3x4_TransformNormal(dstnorm, mat, *srcnorm);
 
-			// Note that input tangent data has 4 coordinates, 
+			// Note that input tangent data has 4 coordinates,
 			// so only transform the first 3 as the tangent vector.
 
 			Matrix3x4_TransformTangent(dsttan, mat, *srctan);
@@ -752,7 +756,7 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 			index += 4;
 			weight += 4;
 		}
-	}	
+	}
 }
 
 void GL_AnimateIQMRagdoll(void)
@@ -766,7 +770,7 @@ void GL_AnimateIQMRagdoll(void)
 }
 
 void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
-{	
+{
 	float l;
 	float lscale;
 
@@ -805,17 +809,17 @@ void GL_DrawIQMFrame(int skinnum)
 		VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
 	VectorNormalize(lightcolor);
 
-	if (currententity->flags & RF_TRANSLUCENT) 
+	if (currententity->flags & RF_TRANSLUCENT)
 	{
 		alpha = currententity->alpha;
-		if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) 
+		if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 		{
 			if(gl_mirror->value)
 				mirror = true;
 			else
 				glass = true;
 		}
-		else 
+		else
 			glass = true;
 	}
 	else
@@ -835,10 +839,10 @@ void GL_DrawIQMFrame(int skinnum)
 	//render the model
 
 	if(( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM) ) )
-	{	
-		//shell render		
+	{
+		//shell render
 		va=0;
-		VArray = &VArrayVerts[0];		
+		VArray = &VArrayVerts[0];
 
 		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
 
@@ -866,7 +870,7 @@ void GL_DrawIQMFrame(int skinnum)
             VectorSubtract(lightPosition, currententity->origin, lightVec);
             VectorMA(lightPosition, 1.0, lightVec, lightPosition);
             R_ModelViewTransform(lightPosition, lightVec);
-            
+
             //brighten things slightly
             for (i = 0; i < 3; i++ )
                 lightVal[i] *= 1.25;
@@ -899,7 +903,7 @@ void GL_DrawIQMFrame(int skinnum)
         }
 		else
 		{
-			GL_Bind(r_shelltexture2->texnum); 
+			GL_Bind(r_shelltexture2->texnum);
 			R_InitVArrays (VERT_COLOURED_TEXTURED);
 		}
 
@@ -913,7 +917,7 @@ void GL_DrawIQMFrame(int skinnum)
 					shellscale = 0.4;
 				else
 					shellscale = 1.6;
-				
+
 				VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0] + currentmodel->animatenormal[index_xyz].dir[0]*shellscale;
                 VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatenormal[index_xyz].dir[1]*shellscale;
                 VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2] + currentmodel->animatenormal[index_xyz].dir[2]*shellscale;
@@ -921,17 +925,17 @@ void GL_DrawIQMFrame(int skinnum)
 				VArray[3] = (currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
                 VArray[4] = currentmodel->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
 
-				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
+				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
 				{
 					VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
                     Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
 				}
-				
+
 				VArray[5] = shadelight[0];
 				VArray[6] = shadelight[1];
 				VArray[7] = shadelight[2];
 				VArray[8] = 0.33;
-				
+
                 // increment pointer and counter
                 if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
                     VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
@@ -939,26 +943,26 @@ void GL_DrawIQMFrame(int skinnum)
                     VArray += VertexSizes[VERT_COLOURED_TEXTURED];
                 va++;
             }
-        }        
-		
-		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+        }
+
+		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
-			if(qglLockArraysEXT)						
+			if(qglLockArraysEXT)
 				qglLockArraysEXT(0, va);
 
 			qglDrawArrays(GL_TRIANGLES,0,va);
-			
-			if(qglUnlockArraysEXT)						
+
+			if(qglUnlockArraysEXT)
 				qglUnlockArraysEXT();
 		}
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
 		{
             glUseProgramObjectARB( 0 );
             GL_EnableMultitexture( false );
         }
 	}
-	else if(!rs || mirror || glass) 
+	else if(!rs || mirror || glass)
 	{	//base render no shaders
 		va=0;
 		VArray = &VArrayVerts[0];
@@ -968,11 +972,11 @@ void GL_DrawIQMFrame(int skinnum)
 		else
 			R_InitVArrays (VERT_COLOURED_TEXTURED);
 
-		if(mirror) 
+		if(mirror)
 		{
 			qglDepthMask(false);
 
-			if( !(currententity->flags & RF_WEAPONMODEL)) 
+			if( !(currententity->flags & RF_WEAPONMODEL))
 			{
 				GL_EnableMultitexture( true );
 				GL_SelectTexture( GL_TEXTURE0);
@@ -987,33 +991,33 @@ void GL_DrawIQMFrame(int skinnum)
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
 			}
-			else 
+			else
 			{
 				GL_SelectTexture( GL_TEXTURE0);
 				qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
 			}
 		}
-		else if(glass) 
+		else if(glass)
 		{
 			qglDepthMask(false);
 
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, r_reflecttexture->texnum);
 		}
-		else 
-		{ 
+		else
+		{
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, skinnum);
-			
+
  			GL_GetLightVals(false);
 		}
 
 		for (i=0; i<currentmodel->num_triangles; i++)
-		{	
+		{
 			for (j=0; j<3; j++)
-			{			
+			{
 				index_xyz = index_st = currentmodel->tris[i].vertex[j];
-				
+
 				VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0];
 				VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1];
 				VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2];
@@ -1023,27 +1027,27 @@ void GL_DrawIQMFrame(int skinnum)
 					VArray[5] = VArray[3] = -(currentmodel->st[index_st].s - DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[1]));
 					VArray[6] = VArray[4] = currentmodel->st[index_st].t + DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[2]);
 				}
-				else if(glass) 
+				else if(glass)
 				{
 					VArray[3] = -(currentmodel->st[index_st].s - DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[1]));
 					VArray[4] = currentmodel->st[index_st].t + DotProduct (currentmodel->animatenormal[index_xyz].dir, vectors[2]);
 				}
-				else 
+				else
 				{
 					VArray[3] = currentmodel->st[index_st].s;
 					VArray[4] = currentmodel->st[index_st].t;
 				}
 
 				GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], lightcolor);
-									
-				if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) 
+
+				if(mirror && !(currententity->flags & RF_WEAPONMODEL) )
 				{
 					VArray[7] = lightcolor[0];
 					VArray[8] = lightcolor[1];
 					VArray[9] = lightcolor[2];
 					VArray[10] = alpha;
 				}
-				else 
+				else
 				{
 					VArray[5] = lightcolor[0];
 					VArray[6] = lightcolor[1];
@@ -1056,21 +1060,21 @@ void GL_DrawIQMFrame(int skinnum)
 					VArray += VertexSizes[VERT_COLOURED_MULTI_TEXTURED];
 				else
 					VArray += VertexSizes[VERT_COLOURED_TEXTURED];
-				va++;			
-			}		
+				va++;
+			}
 		}
-		
-		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+
+		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
-			if(qglLockArraysEXT)						
+			if(qglLockArraysEXT)
 				qglLockArraysEXT(0, va);
 
 			qglDrawArrays(GL_TRIANGLES,0,va);
-				
-			if(qglUnlockArraysEXT)						
+
+			if(qglUnlockArraysEXT)
 				qglUnlockArraysEXT();
 		}
-			
+
 		if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 			GL_EnableMultitexture( false );
 
@@ -1094,23 +1098,23 @@ void GL_DrawIQMFrame(int skinnum)
 			VArray = &VArrayVerts[0];
 			GLSTATE_ENABLE_ALPHATEST
 
-			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders)) 
+			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders))
 			{
-				if(stage->next) 
+				if(stage->next)
 				{
 					stage = stage->next;
 					continue;
-				}	
+				}
 				else
 					goto done;
 			}
 
-			if(!stage->normalmap) 
+			if(!stage->normalmap)
 			{
 				R_InitVArrays (VERT_COLOURED_TEXTURED);
 
 				GL_Bind (stage->texture->texnum);
-	
+
 				if (stage->blendfunc.blend)
 				{
 					GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
@@ -1151,7 +1155,7 @@ void GL_DrawIQMFrame(int skinnum)
 					GL_GetLightVals(false);
 			}
 
-			if(stage->normalmap) 
+			if(stage->normalmap)
 			{
 				vec3_t lightVec, lightVal;
 
@@ -1164,7 +1168,7 @@ void GL_DrawIQMFrame(int skinnum)
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
-				for(i = 0; i < 3; i++) 
+				for(i = 0; i < 3; i++)
 				{
 					if(lightVal[i] < shadelight[i]/2)
 						lightVal[i] = shadelight[i]/2; //never go completely black
@@ -1174,53 +1178,53 @@ void GL_DrawIQMFrame(int skinnum)
 						if(lightVal[i] > 1.5)
 							lightVal[i] = 1.5;
 					}
-					else 
+					else
 					{
 						if(lightVal[i] > 1.0+dynFactor)
 							lightVal[i] = 1.0+dynFactor;
 					}
 				}
 
-				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) 
-				{ 
+				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+				{
 					//fixed light source pointing down, slightly forward and to the left
-					lightPosition[0] = -1.0; 
-					lightPosition[1] = 12.0; 
-					lightPosition[2] = 8.0; 
+					lightPosition[0] = -1.0;
+					lightPosition[1] = 12.0;
+					lightPosition[2] = 8.0;
 					R_ModelViewTransform(lightPosition, lightVec);
 				}
-				else 
-				{ 
+				else
+				{
 					//simple directional(relative light position)
 					VectorSubtract(lightPosition, currententity->origin, lightVec);
 					VectorMA(lightPosition, 5.0, lightVec, lightPosition);
 					R_ModelViewTransform(lightPosition, lightVec);
-					
-					//brighten things slightly 
-					for (i = 0; i < 3; i++ ) 
+
+					//brighten things slightly
+					for (i = 0; i < 3; i++ )
 					{
 						lightVal[i] *= 1.05;
 					}
 				}
-											
+
 				GL_EnableMultitexture( true );
-			
+
 				glUseProgramObjectARB( g_meshprogramObj );
-					
+
 				glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
-					
+
 				GL_SelectTexture( GL_TEXTURE1);
 				qglBindTexture (GL_TEXTURE_2D, skinnum);
-				glUniform1iARB( g_location_baseTex, 1); 
+				glUniform1iARB( g_location_baseTex, 1);
 
 				GL_SelectTexture( GL_TEXTURE0);
 				qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
-				glUniform1iARB( g_location_normTex, 0); 
+				glUniform1iARB( g_location_normTex, 0);
 
 				GL_SelectTexture( GL_TEXTURE2);
 				qglBindTexture (GL_TEXTURE_2D, stage->texture2->texnum);
 				glUniform1iARB( g_location_fxTex, 2);
-					
+
 				GL_SelectTexture( GL_TEXTURE0);
 
 				if(stage->fx)
@@ -1228,7 +1232,7 @@ void GL_DrawIQMFrame(int skinnum)
 				else
 					glUniform1iARB( g_location_useFX, 0);
 
-				if(stage->glow) 
+				if(stage->glow)
 					glUniform1iARB( g_location_useGlow, 1);
 				else
 					glUniform1iARB( g_location_useGlow, 0);
@@ -1244,21 +1248,21 @@ void GL_DrawIQMFrame(int skinnum)
 				glUniform1fARB( g_location_meshTime, rs_realtime);
 
 				glUniform1iARB( g_location_meshFog, map_fog);
-			}				
+			}
 
 			for (i=0; i<currentmodel->num_triangles; i++)
-			{	
+			{
 				for (j=0; j<3; j++)
-				{			
+				{
 					index_xyz = index_st = currentmodel->tris[i].vertex[j];
-						
+
 					VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0];
 					VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1];
 					VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2];
 
 					VArray[3] = currentmodel->st[index_st].s;
 					VArray[4] = currentmodel->st[index_st].t;
-					
+
 					if(stage->normalmap) { //send normals and tangents to shader
 						VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]);
 						Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
@@ -1268,57 +1272,57 @@ void GL_DrawIQMFrame(int skinnum)
 					{
 						float red = 1, green = 1, blue = 1;
 
-						if (stage->lightmap) 
-						{ 
+						if (stage->lightmap)
+						{
 							GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
-							blue = lightcolor[2];						
+							blue = lightcolor[2];
 						}
-						if(mirror && !(currententity->flags & RF_WEAPONMODEL) ) 
+						if(mirror && !(currententity->flags & RF_WEAPONMODEL) )
 						{
 							VArray[7] = red;
 							VArray[8] = green;
 							VArray[9] = blue;
-							VArray[10] = alpha;	
+							VArray[10] = alpha;
 						}
-						else 
+						else
 						{
 							VArray[5] = red;
 							VArray[6] = green;
 							VArray[7] = blue;
-							VArray[8] = alpha;	
+							VArray[8] = alpha;
 						}
 					}
 
 					// increment pointer and counter
-					if(stage->normalmap) 
+					if(stage->normalmap)
 						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
 					else
-						VArray += VertexSizes[VERT_COLOURED_TEXTURED];	
+						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 					va++;
-				}		
-			}		
-				
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+				}
+			}
+
+			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 			{
-				if(qglLockArraysEXT)						
+				if(qglLockArraysEXT)
 					qglLockArraysEXT(0, va);
 
 				qglDrawArrays(GL_TRIANGLES,0,va);
-					
-				if(qglUnlockArraysEXT)						
+
+				if(qglUnlockArraysEXT)
 					qglUnlockArraysEXT();
 			}
-				
+
 			qglColor4f(1,1,1,1);
 
-			if(stage->normalmap) 
+			if(stage->normalmap)
 			{
 				glUseProgramObjectARB( 0 );
 				GL_EnableMultitexture( false );
 			}
-			
+
 			stage=stage->next;
 		}
 	}
@@ -1370,7 +1374,7 @@ void R_DrawIQMShadow()
 	if (r_newrefdef.vieworg[2] < (currententity->origin[2] + height))
 		return;
 
-	if (have_stencil) 
+	if (have_stencil)
 	{
 		qglDepthMask(0);
 		qglEnable(GL_STENCIL_TEST);
@@ -1387,13 +1391,13 @@ void R_DrawIQMShadow()
         for (j=0; j<3; j++)
         {
             index_xyz = index_st = currentmodel->tris[i].vertex[j];
-	
+
 			memcpy( point, currentmodel->animatevertexes[index_xyz].position, sizeof( point )  );
 
 			point[0] -= shadevector[0]*(point[2]+lheight);
 			point[1] -= shadevector[1]*(point[2]+lheight);
 			point[2] = height;
-				
+
 			VArray[0] = point[0];
 			VArray[1] = point[1];
 			VArray[2] = point[2];
@@ -1408,14 +1412,14 @@ void R_DrawIQMShadow()
 	}
 
 	qglDrawArrays(GL_TRIANGLES,0,va);
-	
+
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
 	R_KillVArrays ();
 	qglDepthMask(1);
 	qglColor4f(1,1,1,1);
-	if (have_stencil) 
+	if (have_stencil)
 		qglDisable(GL_STENCIL_TEST);
 }
 
@@ -1428,10 +1432,10 @@ static qboolean R_CullIQMModel( void )
 	vec3_t	dist;
 	vec3_t bbox[8];
 
-	if (r_worldmodel ) 
+	if (r_worldmodel )
 	{
 		//occulusion culling - why draw entities we cannot see?
-	
+
 		r_trace = CM_BoxTrace(r_origin, currententity->origin, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			return true;
@@ -1499,7 +1503,7 @@ qboolean inAnimGroup(int frame, int oldframe)
 		return true; //jumping
 	else if(frame >= 0 && frame <= 23 && oldframe >= 0 && oldframe <= 23)
 		return true; //static meshes are 24 frames
-	else 
+	else
 		return false;
 }
 
@@ -1508,7 +1512,7 @@ int NextFrame(int frame)
 	int outframe;
 
 	//just for now
-	if(currententity->flags & RF_WEAPONMODEL) 
+	if(currententity->flags & RF_WEAPONMODEL)
 	{
 		outframe = frame + 1;
 		return outframe;
@@ -1523,7 +1527,7 @@ int NextFrame(int frame)
 			else
 				outframe = 0;
 			break;
-		//player standing 
+		//player standing
 		case 39:
 			outframe = 0;
 			break;
@@ -1587,11 +1591,11 @@ void R_DrawINTERQUAKEMODEL ( void )
 
 	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return;
-	
+
 	//do culling
 	if ( R_CullIQMModel() )
 		return;
-	
+
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{
 
@@ -1633,7 +1637,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 	{
 		float minlight;
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
@@ -1654,12 +1658,12 @@ void R_DrawINTERQUAKEMODEL ( void )
 		float	minlight;
 
 		scale = 0.2 * sin(r_newrefdef.time*7);
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) 
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
 		for (i=0 ; i<3 ; i++)
-		{			
+		{
 			shadelight[i] += scale;
 			if (shadelight[i] < minlight)
 				shadelight[i] = minlight;
@@ -1697,19 +1701,19 @@ void R_DrawINTERQUAKEMODEL ( void )
 		qglEnable (GL_BLEND);
 		qglBlendFunc (GL_ONE, GL_ONE);
 	}
-	
+
 	//frame interpolation
 	time = (Sys_Milliseconds() - currententity->frametime) / 100;
 	if(time > 1.0)
 		time = 1.0;
-	
-	if((currententity->frame == currententity->oldframe ) && !inAnimGroup(currententity->frame, currententity->oldframe)) 
+
+	if((currententity->frame == currententity->oldframe ) && !inAnimGroup(currententity->frame, currententity->oldframe))
 		time = 0;
 
 	//Check for stopped death anims
 	if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
 		time = 0;
-	
+
 	frame = currententity->frame + time;
 
 	GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
@@ -1754,9 +1758,9 @@ void R_DrawINTERQUAKEMODEL ( void )
 				qglColor4f (0,0,0,0.3 * currententity->alpha); //Knightmare- variable alpha
 			else
 				qglColor4f (0,0,0,0.3);
-			
+
 			R_DrawIQMShadow ();
-			
+
 			qglEnable (GL_TEXTURE_2D);
 			qglDisable (GL_BLEND);
 			qglPopMatrix ();
@@ -1784,7 +1788,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 			//dynamic
 			casted = 0;
 		 	casted = R_ShadowLight (currententity->origin, shadevector, 0);
-			if (casted > 0) 
+			if (casted > 0)
 			{ //only draw if there's a dynamic light there
 				qglPushMatrix ();
 				qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
@@ -1824,7 +1828,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 		VectorCopy(currententity->origin,RadarEnts[numRadarEnts].org);
 		numRadarEnts++;
 	}
-}	
+}
 
 void GL_DrawIQMCasterFrame ()
 {
@@ -1872,7 +1876,7 @@ void R_DrawIQMCaster ( void )
 
 	if(currententity->team) //don't draw flag models, handled by sprites
 		return;
-	
+
 	if ( currententity->flags & RF_WEAPONMODEL ) //don't draw weapon model shadow casters
 		return;
 
@@ -1893,14 +1897,14 @@ void R_DrawIQMCaster ( void )
 	time = (Sys_Milliseconds() - currententity->frametime) / 100;
 	if(time > 1.0)
 		time = 1.0;
-	
-	if((currententity->frame == currententity->oldframe ) && !inAnimGroup(currententity->frame, currententity->oldframe)) 
+
+	if((currententity->frame == currententity->oldframe ) && !inAnimGroup(currententity->frame, currententity->oldframe))
 		time = 0;
 
 	//Check for stopped death anims
 	if(currententity->frame == 257 || currententity->frame == 237 || currententity->frame == 219)
 		time = 0;
-	
+
 	frame = currententity->frame + time;
 
 	GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));

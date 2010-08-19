@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 
@@ -49,7 +54,7 @@ void multi_trigger (edict_t *ent)
 
 	G_UseTargets (ent, ent->activator);
 
-	if (ent->wait > 0)	
+	if (ent->wait > 0)
 	{
 		ent->think = multi_wait;
 		ent->nextthink = level.time + ent->wait;
@@ -74,7 +79,7 @@ void Touch_Multi (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *su
 
 	//not during warmup
 	if (self->spawnflags & 32) {
-		if(level.time <= warmuptime->value) 
+		if(level.time <= warmuptime->value)
 			return;
 	}
 
@@ -88,7 +93,7 @@ void Touch_Multi (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *su
 		if (!(self->spawnflags & 1))
 			return;
 	}
-	
+
 	else
 		return;
 
@@ -131,7 +136,7 @@ void SP_trigger_multiple (edict_t *ent)
 		ent->noise_index = gi.soundindex ("misc/talk.wav");
 	else if (ent->sounds == 3)
 		ent->noise_index = gi.soundindex ("misc/trigger1.wav");
-	
+
 	if (!ent->wait)
 		ent->wait = 0.2;
 	ent->touch = Touch_Multi;
@@ -238,7 +243,7 @@ void trigger_key_use (edict_t *self, edict_t *other, edict_t *activator)
 	}
 
 	gi.sound (activator, CHAN_AUTO, gi.soundindex ("misc/keyuse.wav"), 1, ATTN_NORM, 0);
-	
+
 	activator->client->pers.inventory[index]--;
 
 	G_UseTargets (self, activator);
@@ -294,7 +299,7 @@ void trigger_counter_use(edict_t *self, edict_t *other, edict_t *activator)
 {
 	if (self->count == 0)
 		return;
-	
+
 	self->count--;
 
 	if (self->count)
@@ -306,7 +311,7 @@ void trigger_counter_use(edict_t *self, edict_t *other, edict_t *activator)
 		}
 		return;
 	}
-	
+
 	if (! (self->spawnflags & 1))
 	{
 		safe_centerprintf(activator, "Sequence completed!");
@@ -543,7 +548,7 @@ void trigger_monsterjump_touch (edict_t *self, edict_t *other, cplane_t *plane, 
 // set XY even if not on ground, so the jump will clear lips
 	other->velocity[0] = self->movedir[0] * self->speed;
 	other->velocity[1] = self->movedir[1] * self->speed;
-	
+
 	other->groundentity = NULL;
 	other->velocity[2] = self->movedir[2];
 
@@ -587,7 +592,7 @@ void deathballtarget_touch (edict_t *self, edict_t *other, cplane_t *plane, csur
 		return;
 
 	self->timestamp = level.time + FRAMETIME;
-	
+
 	if(strcmp(other->classname, "item_deathball") == 0) {
 
 		if (!((int)(dmflags->value) & DF_SKINTEAMS))
@@ -674,26 +679,26 @@ void cowtarget_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t
 		return;
 
 	self->timestamp = level.time + FRAMETIME;
-	
+
 	if(strcmp(other->classname, "cow") == 0) {
 
-	
-		if(strcmp(self->classname, "trigger_bluecowtarget") == 0) 
+
+		if(strcmp(self->classname, "trigger_bluecowtarget") == 0)
 			blue_team_score++;
-		if(strcmp(self->classname, "trigger_redcowtarget") == 0) 
+		if(strcmp(self->classname, "trigger_redcowtarget") == 0)
 			red_team_score++;
-	
+
 		//send an effect
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_BFG_BIGEXPLOSION);
 		gi.WritePosition (other->s.origin);
 		gi.multicast (other->s.origin, MULTICAST_PHS);
 		gi.sound (other, CHAN_AUTO, gi.soundindex("misc/db_score.wav"), 1, ATTN_NONE, 0);
-		
+
 		//get rid of the cow, it's been beamed into the void....(back to pasture)
 		other->health = other->max_health;
 		other->s.event = EV_PLAYER_TELEPORT;
-		VectorCopy(other->s.spawn_pos, other->s.origin);	
+		VectorCopy(other->s.spawn_pos, other->s.origin);
 
 		//reward the player who was controlling the cow
 		if(other->enemy)

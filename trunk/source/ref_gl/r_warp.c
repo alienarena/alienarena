@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -18,6 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // r_warp.c -- sky and water polygons
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "r_local.h"
 
@@ -218,23 +222,23 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 	float		s, t, os, ot;
 	float		scroll;
 	float		rdt = r_newrefdef.time;
-	vec3_t		nv;  
+	vec3_t		nv;
 	qboolean	fod;
 
 	if (fa->texinfo->flags & SURF_FLOWING)
 		scroll = -64.0f * ((r_newrefdef.time * 0.5f) - (int)(r_newrefdef.time * 0.5f));
 	else
 		scroll = 0.0f;
-	
+
 	//special case - note one day we should find a way to check for contents such as mist to do this.
 	if(!Q_stricmp(fa->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_stricmp(fa->texinfo->image->name, "textures/arena5/fod.wal"))
 		fod = true;
 	else
 		fod = false;
 
-	if(!fod && gl_state.glsl_shaders && gl_glsl_shaders->value  
+	if(!fod && gl_state.glsl_shaders && gl_glsl_shaders->value
 			&& strcmp(fa->texinfo->normalMap->name, fa->texinfo->image->name)) {
-		
+
 		if (SurfaceIsAlphaBlended(fa))
 			qglEnable( GL_ALPHA_TEST );
 
@@ -243,10 +247,10 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 		glUseProgramObjectARB( g_waterprogramObj );
 
 		GL_EnableMultitexture( true );
-    	
+
 		qglActiveTextureARB(GL_TEXTURE1);
 		qglBindTexture (GL_TEXTURE_2D, fa->texinfo->image->texnum);
-		glUniform1iARB( g_location_baseTexture, 1); 
+		glUniform1iARB( g_location_baseTexture, 1);
 		KillFlags |= KILL_TMU1_POINTER;
 
 		glUniform1iARB( g_location_normTexture, 2);
@@ -262,12 +266,12 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 		if(texnum) {
 			qglActiveTextureARB(GL_TEXTURE3);
 			qglBindTexture(GL_TEXTURE_2D, texnum);
-			glUniform1iARB( g_location_refTexture, 3); 
+			glUniform1iARB( g_location_refTexture, 3);
 			glUniform1iARB( g_location_reflect, 1);
 		}
 		else
 			glUniform1iARB( g_location_reflect, 0);
-			
+
 		R_AddGLSLShadedWarpSurfToVArray (fa, scroll);
 
 		glUseProgramObjectARB( 0 );
@@ -293,10 +297,10 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 				rs_realtime * -0.2f, 10.0f, 1.0f, 1.0f);
 			qglProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2,
 				(fa->polys[0].verts[0][3]-r_newrefdef.vieworg[0]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[1]), (fa->polys[0].verts[0][4]-r_newrefdef.vieworg[2]), 1.0f);
-			
-			GL_MBind(GL_TEXTURE1, r_distort->texnum); 
+
+			GL_MBind(GL_TEXTURE1, r_distort->texnum);
 		}
-		
+
 		GL_MBind(GL_TEXTURE0, fa->texinfo->image->texnum);
 
 		for (p=fa->polys ; p ; p=p->next)
@@ -364,9 +368,9 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 	//env map if specified by shader
 	if(texnum)
 		GL_Bind(texnum);
-	else 
+	else
 		return;
-		
+
 	for (p=fa->polys ; p ; p=p->next)
 	{
 		qglBegin (GL_TRIANGLE_FAN);
@@ -377,7 +381,7 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 
 			if(texnum)
 				qglTexCoord2f(1.0/512*scaleX*os, 1.0/512*scaleY*ot);
-				
+
 			if (!(fa->texinfo->flags & SURF_FLOWING))
 			{
 				nv[0] =v[0];
@@ -406,7 +410,7 @@ vec3_t	skyclip[6] = {
 	{0,-1,1},
 	{0,1,1},
 	{1,0,1},
-	{-1,0,1} 
+	{-1,0,1}
 };
 
 // 1 = s, 2 = t, 3 = 2048
@@ -653,9 +657,9 @@ void MakeSkyVec (float s, float t, int axis, float *tex_s, float *tex_t, float *
 	vec3_t		v, b;
 	int			j, k;
 
-	b[0] = s * size; 
-	b[1] = t * size; 
-	b[2] = size;  
+	b[0] = s * size;
+	b[1] = t * size;
+	b[2] = size;
 
 	for (j=0 ; j<3 ; j++)
 	{
@@ -764,10 +768,10 @@ void R_DrawSkyBox (void)
 		{
 			rs=(rscript_t *)sky_images[skytexorder[i]]->script;
 
-			if(rs) {	
-				
+			if(rs) {
+
 				stage=rs->stage;
-				while (stage) 
+				while (stage)
 				{
 					qglDepthMask( GL_FALSE );	 	// no z buffering
 					qglEnable( GL_BLEND);
@@ -776,42 +780,42 @@ void R_DrawSkyBox (void)
 
 					GL_Bind (stage->texture->texnum);
 
-					if (stage->blendfunc.blend) 
+					if (stage->blendfunc.blend)
 					{
 						GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
 						GLSTATE_ENABLE_BLEND
-					} 
-					else 
+					}
+					else
 					{
 						GLSTATE_DISABLE_BLEND
 					}
 
-					if (stage->alphashift.min || stage->alphashift.speed) 
+					if (stage->alphashift.min || stage->alphashift.speed)
 					{
 						alpha=0.0f;
 
-						if (!stage->alphashift.speed && stage->alphashift.min > 0) 
+						if (!stage->alphashift.speed && stage->alphashift.min > 0)
 						{
 							alpha=stage->alphashift.min;
-						} 
-						else if (stage->alphashift.speed) 
+						}
+						else if (stage->alphashift.speed)
 						{
 							alpha=sin(rs_realtime * stage->alphashift.speed);
 							alpha=(alpha+1)*0.5f;
 							if (alpha > stage->alphashift.max) alpha=stage->alphashift.max;
 							if (alpha < stage->alphashift.min) alpha=stage->alphashift.min;
 						}
-					} 
+					}
 					else
 						alpha=1.0f;
 
 					qglColor4f(1,1,1,alpha);
 
-					if (stage->alphamask) 
+					if (stage->alphamask)
 					{
 						GLSTATE_ENABLE_ALPHATEST
-					} 
-					else 
+					}
+					else
 					{
 						GLSTATE_DISABLE_ALPHATEST
 					}
@@ -844,10 +848,10 @@ void R_DrawSkyBox (void)
 					qglVertex3fv (point);
 
 					qglEnd();
-		
+
 					stage=stage->next;
 				}
-			}		
+			}
 		}
 		// restore the original blend mode
 		GLSTATE_DISABLE_ALPHATEST
@@ -898,7 +902,7 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 				sky_images[i]->script = RS_FindScript(pathname);
 				if(sky_images[i]->script)
 					RS_ReadyScript(sky_images[i]->script);
-			} 
+			}
 		}
 
 		if (strstr(pathname, "space")) {
@@ -924,7 +928,7 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 			sky_min = 1.0/256;
 			sky_max = 255.0/256;
 		}
-		else	
+		else
 		{
 			sky_min = 1.0/512;
 			sky_max = 511.0/512;

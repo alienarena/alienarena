@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "g_local.h"
 
@@ -30,7 +34,7 @@ void	Svcmd_Test_f (void)
 ==============================================================================
 
 PACKET FILTERING
- 
+
 
 You can add or remove addresses from the filter list with:
 
@@ -68,13 +72,13 @@ qboolean StringToFilter (char *s, ipfilter_t *f)
 	int		i, j;
 	byte	b[4];
 	byte	m[4];
-	
+
 	for (i=0 ; i<4 ; i++)
 	{
 		b[i] = 0;
 		m[i] = 0;
 	}
-	
+
 	for (i=0 ; i<4 ; i++)
 	{
 		if (*s < '0' || *s > '9')
@@ -82,7 +86,7 @@ qboolean StringToFilter (char *s, ipfilter_t *f)
 			safe_cprintf(NULL, PRINT_HIGH, "Bad filter address: %s\n", s);
 			return false;
 		}
-		
+
 		j = 0;
 		while (*s >= '0' && *s <= '9')
 		{
@@ -97,10 +101,10 @@ qboolean StringToFilter (char *s, ipfilter_t *f)
 			break;
 		s++;
 	}
-	
+
 	f->mask = *(unsigned *)m;
 	f->compare = *(unsigned *)b;
-	
+
 	return true;
 }
 
@@ -128,7 +132,7 @@ qboolean SV_FilterPacket (char *from)
 			break;
 		i++, p++;
 	}
-	
+
 	in = *(unsigned *)m;
 
 	for (i=0 ; i<numipfilters ; i++)
@@ -147,7 +151,7 @@ SV_AddIP_f
 void SVCmd_AddIP_f (void)
 {
 	int		i;
-	
+
 	if (gi.argc() < 3) {
 		safe_cprintf(NULL, PRINT_HIGH, "Usage:  addip <ip-mask>\n");
 		return;
@@ -165,7 +169,7 @@ void SVCmd_AddIP_f (void)
 		}
 		numipfilters++;
 	}
-	
+
 	if (!StringToFilter (gi.argv(2), &ipfilters[i]))
 		ipfilters[i].compare = 0xffffffff;
 }
@@ -247,7 +251,7 @@ void SVCmd_WriteIP_f (void)
 		safe_cprintf (NULL, PRINT_HIGH, "Couldn't open %s\n", name);
 		return;
 	}
-	
+
 	fprintf(f, "set filterban %d\n", (int)filterban->value);
 
 	for (i=0 ; i<numipfilters ; i++)
@@ -255,7 +259,7 @@ void SVCmd_WriteIP_f (void)
 		*(unsigned *)b = ipfilters[i].compare;
 		fprintf (f, "sv addip %i.%i.%i.%i\n", b[0], b[1], b[2], b[3]);
 	}
-	
+
 	fclose (f);
 }
 
@@ -298,19 +302,19 @@ void	ServerCommand (void)
 		}
 
 	else if (Q_stricmp (cmd, "addbot") == 0)
-	{ 
-		
+	{
+
 		ACESP_SpawnBot (gi.argv(2), gi.argv(3), NULL);
-	}	
+	}
 
 	// removebot
     else if(Q_stricmp (cmd, "removebot") == 0)
     	ACESP_RemoveBot(gi.argv(2));
-	
+
 	// Node saving
 	else if(Q_stricmp (cmd, "savenodes") == 0)
     	ACEND_SaveNodes();
-	
+
 // ACEBOT_END
 	else
 		safe_cprintf (NULL, PRINT_HIGH, "Unknown server command \"%s\"\n", cmd);

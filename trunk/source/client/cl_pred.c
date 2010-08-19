@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -20,6 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "client.h"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 /*
 ===================
@@ -52,7 +55,7 @@ void CL_CheckPredictionError (void)
 	else
 	{
 		if (cl_showmiss->value && (delta[0] || delta[1] || delta[2]) )
-			Com_Printf ("prediction miss on %i: %i\n", cl.frame.serverframe, 
+			Com_Printf ("prediction miss on %i: %i\n", cl.frame.serverframe,
 			delta[0] + delta[1] + delta[2]);
 
 		VectorCopy (cl.frame.playerstate.pmove.origin, cl.predicted_origins[frame]);
@@ -188,32 +191,32 @@ int		CL_PMpointcontents (vec3_t point)
 	return contents;
 }
 
-//Knightmare added- this can check using masks, good for checking surface flags 
-//   also checks for bmodels 
-/* 
-================ 
-CL_PMSurfaceTrace 
-================ 
-*/ 
-trace_t CL_PMSurfaceTrace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int contentmask) 
-{ 
-   trace_t   t; 
+//Knightmare added- this can check using masks, good for checking surface flags
+//   also checks for bmodels
+/*
+================
+CL_PMSurfaceTrace
+================
+*/
+trace_t CL_PMSurfaceTrace (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int contentmask)
+{
+   trace_t   t;
 
-   if (!mins) 
-      mins = vec3_origin; 
-   if (!maxs) 
-      maxs = vec3_origin; 
+   if (!mins)
+      mins = vec3_origin;
+   if (!maxs)
+      maxs = vec3_origin;
 
-   // check against world 
-   t = CM_BoxTrace (start, end, mins, maxs, 0, contentmask); 
-   if (t.fraction < 1.0) 
-      t.ent = (struct edict_s *)1; 
+   // check against world
+   t = CM_BoxTrace (start, end, mins, maxs, 0, contentmask);
+   if (t.fraction < 1.0)
+      t.ent = (struct edict_s *)1;
 
-   // check all other solid models 
-   CL_ClipMoveToEntities (start, mins, maxs, end, &t); 
+   // check all other solid models
+   CL_ClipMoveToEntities (start, mins, maxs, end, &t);
 
-   return t; 
-} 
+   return t;
+}
 
 
 /*
@@ -257,7 +260,7 @@ void CL_PredictMovement (void)
 	{
 		if (cl_showmiss->value)
 			Com_Printf ("exceeded CMD_BACKUP\n");
-		return;	
+		return;
 	}
 
 	// copy current state to pmove

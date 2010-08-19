@@ -18,6 +18,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // r_particle.c
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "r_local.h"
 
 gparticle_t gparticles[MAX_PARTICLES];
@@ -57,7 +62,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 
 			blendsrc = GL_SRC_ALPHA;
 			blenddst = GL_ONE;
-			
+
 			*(int *)color = colortable[p->color];
 			scale = 1;
 		}
@@ -142,7 +147,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 		else if(p->type == PARTICLE_WEATHER || p->type == PARTICLE_VERT){  // keep it vertical
 			VectorCopy(r_newrefdef.viewangles, v);
 			v[0] = 0;  // keep weather particles vertical by removing pitch
-			AngleVectors(v, NULL, right, up);	
+			AngleVectors(v, NULL, right, up);
 			VectorScale(right, 3*scale, pright);
 			VectorScale(up, 3*scale, pup);
 		}
@@ -158,7 +163,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 				v[2] = yawOrRoll;
 			else
 				v[1] = yawOrRoll+180;
-			AngleVectors(v, NULL, right, up);	
+			AngleVectors(v, NULL, right, up);
 			VectorScale(right, 3*scale, pright);
 			VectorScale(up, 3*scale, pup);
 		}
@@ -178,7 +183,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			corner0[1] + (pup[1]+pright[1]), corner0[2] + (pup[2]+pright[2]));
 		VectorSet ( corner[3],
 			corner0[0] + pright[0], corner0[1] + pright[1], corner0[2] + pright[2]);
-	
+
 		VArray = &VArrayVerts[0];
 
 		for(k = 0; k < 4; k++) {
@@ -209,14 +214,14 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			 VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 		}
 
-		if(qglLockArraysEXT)						
+		if(qglLockArraysEXT)
 			qglLockArraysEXT(0, 4);
 
 		qglDrawArrays(GL_QUADS,0,4);
-				
-		if(qglUnlockArraysEXT)						
+
+		if(qglUnlockArraysEXT)
 			qglUnlockArraysEXT();
-		
+
 	}
 
 	R_KillVArrays ();

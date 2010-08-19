@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -18,6 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // cl_view.c -- player rendering positioning
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "client.h"
 
@@ -315,7 +319,7 @@ void CL_PrepRefresh ()
 	float		rotate;
 	vec3_t		axis;
 	qboolean	newPlaque = needLoadingPlaque();
-	
+
 	loadingPercent = 0;
 	rocketlauncher = 0;
 	rocketlauncher_drawn = 0;
@@ -349,7 +353,7 @@ void CL_PrepRefresh ()
 
 	if (!cl.configstrings[CS_MODELS+1][0])
 		return;		// no map loaded
-    
+
 	if (newPlaque)
 		SCR_BeginLoadingPlaque();
 
@@ -371,16 +375,16 @@ void CL_PrepRefresh ()
 	//this was moved here, to prevent having a pic loaded over and over again, which was
 	//totally killing performance after a dozen or so maps.
 	map_pic_loaded = (ptrdiff_t)(R_RegisterPic(va("/levelshots/%s.pcx", mapname)));
-	
-	Com_Printf ("Map: %s\r", mapname); 
+
+	Com_Printf ("Map: %s\r", mapname);
 	SCR_UpdateScreen ();
 	R_BeginRegistration (mapname);
 	Com_Printf ("                                     \r");
 	Com_sprintf (loadingMessages[0], sizeof(loadingMessages[0]), "loading map...done");
 	loadingPercent += 20;
-	
+
 	// precache status bar pics
-	Com_Printf ("pics\r"); 
+	Com_Printf ("pics\r");
 	SCR_UpdateScreen ();
 	SCR_TouchPics ();
 	Com_Printf ("                                     \r");
@@ -399,7 +403,7 @@ void CL_PrepRefresh ()
 			Com_Printf ("%s\r", name);
 
 			//only make max of 20 chars long
-			Com_sprintf (loadingMessages[1], sizeof(loadingMessages[1]), "loading models...%s", 
+			Com_sprintf (loadingMessages[1], sizeof(loadingMessages[1]), "loading models...%s",
 				(strlen(name)>20)? &name[strlen(name)-20]: name);
 
 			//check for types
@@ -434,7 +438,7 @@ void CL_PrepRefresh ()
 		}
 
 		SCR_UpdateScreen ();
-	
+
 		Sys_SendKeyEvents ();	// pump message loop
 		if (name[0] == '#')
 		{
@@ -445,7 +449,7 @@ void CL_PrepRefresh ()
 					sizeof(cl_weaponmodels[num_cl_weaponmodels]) - 1);
 				num_cl_weaponmodels++;
 			}
-		} 
+		}
 		else
 		{
 			cl.model_draw[i] = R_RegisterModel (cl.configstrings[CS_MODELS+i]);
@@ -460,10 +464,10 @@ void CL_PrepRefresh ()
 		loadingPercent += 60.0f/(float)max;
 	}
 	Com_sprintf (loadingMessages[1], sizeof(loadingMessages[1]), "loading models...done");
-	
 
 
-	Com_Printf ("images\r", i); 
+
+	Com_Printf ("images\r", i);
 	SCR_UpdateScreen ();
 
 	for (i=1, max=0 ; i<MAX_IMAGES && cl.configstrings[CS_IMAGES+i][0] ; i++)
@@ -471,14 +475,14 @@ void CL_PrepRefresh ()
 	for (i=1 ; i<MAX_IMAGES && cl.configstrings[CS_IMAGES+i][0] ; i++)
 	{
 		cl.image_precache[i] = R_RegisterPic (cl.configstrings[CS_IMAGES+i]);
-		Sys_SendKeyEvents ();	// pump message loop		
+		Sys_SendKeyEvents ();	// pump message loop
 		loadingPercent += 10.0f/(float)max;
 	}
 	Com_sprintf (loadingMessages[2], sizeof(loadingMessages[2]), "loading pics...done");
 
 	Com_Printf ("                                     \r");
 
-	//refresh the player model/skin info 
+	//refresh the player model/skin info
 	CL_LoadClientinfo (&cl.baseclientinfo, va("unnamed\\%s\\%s", DEFAULTMODEL, DEFAULTSKIN));
 
 	for (i=1, max=0 ; i<MAX_CLIENTS ; i++)
@@ -490,7 +494,7 @@ void CL_PrepRefresh ()
 			continue;
 
 		Com_sprintf (loadingMessages[3], sizeof(loadingMessages[3]), "loading clients...%i", i);
-		Com_Printf ("client %i\r", i); 
+		Com_Printf ("client %i\r", i);
 		SCR_UpdateScreen ();
 		Sys_SendKeyEvents ();	// pump message loop
 		CL_ParseClientinfo (i);
@@ -503,10 +507,10 @@ void CL_PrepRefresh ()
 	loadingPercent = 100;
 
 	// set sky textures and speed
-	Com_Printf ("sky\r", i); 
+	Com_Printf ("sky\r", i);
 	SCR_UpdateScreen ();
 	rotate = atof (cl.configstrings[CS_SKYROTATE]);
-	sscanf (cl.configstrings[CS_SKYAXIS], "%f %f %f", 
+	sscanf (cl.configstrings[CS_SKYAXIS], "%f %f %f",
 		&axis[0], &axis[1], &axis[2]);
 	R_SetSky (cl.configstrings[CS_SKY], rotate, axis);
 	Com_Printf ("                                     \r");
@@ -576,8 +580,8 @@ float CalcFov (float fov_x, float width, float height)
 #else
 	x = width/tan(fov_x/360*M_PI);
 #endif
-    a = atan (height/x);   
-    a = a*360/M_PI; 
+    a = atan (height/x);
+    a = a*360/M_PI;
 
 	return a;
 }
@@ -610,144 +614,144 @@ qboolean InFront (vec3_t target)
 	vec3_t	vec;
 	float	dot;
 	vec3_t	forward;
-	
+
 	AngleVectors (cl.refdef.viewangles, forward, NULL, NULL);
 	VectorSubtract (target, cl.refdef.vieworg, vec);
 	VectorNormalize (vec);
 	dot = DotProduct (vec, forward);
-	
+
 	if (dot > 0.3)
 		return true;
 	return false;
 }
-//============== 
+//==============
 //SCR_DrawPlayerNamesCenter
-// shows player names at center of screen 
-//============== 
-void SCR_DrawPlayerNamesCenter( void ) 
-{ 
-   int         i; 
-   centity_t   *cent; 
-   float      dist, mindist; 
+// shows player names at center of screen
+//==============
+void SCR_DrawPlayerNamesCenter( void )
+{
+   int         i;
+   centity_t   *cent;
+   float      dist, mindist;
    trace_t   trace;
-   vec3_t vecdist; 
-   vec3_t temp; 
-   vec3_t axis[3]; 
-   static vec3_t mins = { -8, -8, -8 }; 
-   static vec3_t maxs = { 8, 8, 8 }; 
+   vec3_t vecdist;
+   vec3_t temp;
+   vec3_t axis[3];
+   static vec3_t mins = { -8, -8, -8 };
+   static vec3_t maxs = { 8, 8, 8 };
    int closest;
 
-   if( !cl_showPlayerNames->integer ) 
-      return; 
+   if( !cl_showPlayerNames->integer )
+      return;
 
    mindist = 1000;
    closest = 0;
- 
-   for( i = 0; i < MAX_CLIENTS; i++ ) 
-   { 
-      
-	  cent = cl_entities + i + 1; 
-	
-	  if( !cent->current.modelindex ) 
-		 continue; 
-	 
+
+   for( i = 0; i < MAX_CLIENTS; i++ )
+   {
+
+	  cent = cl_entities + i + 1;
+
+	  if( !cent->current.modelindex )
+		 continue;
+
 	  if(!strcmp(cl.clientinfo[i].name, name->string))
 		  continue;
 
-	  trace = CL_Trace ( cl.refdef.vieworg, mins, maxs, cent->current.origin, -1, MASK_PLAYERSOLID, true, NULL); 
-	  if (trace.fraction != 1.0)	
+	  trace = CL_Trace ( cl.refdef.vieworg, mins, maxs, cent->current.origin, -1, MASK_PLAYERSOLID, true, NULL);
+	  if (trace.fraction != 1.0)
 		  continue;
 
-	  VectorSubtract(cent->current.origin, cl.refdef.vieworg, vecdist); 
-	  dist = VectorLength(vecdist); 
+	  VectorSubtract(cent->current.origin, cl.refdef.vieworg, vecdist);
+	  dist = VectorLength(vecdist);
 
-	  if (dist >= 1000) 
-		  continue; 
+	  if (dist >= 1000)
+		  continue;
 
 	  if(dist < mindist && (strlen(cl.clientinfo[i].name) > 1) && InFront(cent->current.origin) ) {
 		  mindist = dist;
 		  closest = i;
 	  }
-      
-	  VectorSubtract (cent->current.origin, cl.refdef.vieworg, temp); 
-	  VectorNormalize (temp); 
 
-	  AngleVectors(cl.refdef.viewangles, axis[0], axis[1], axis[2]); 
+	  VectorSubtract (cent->current.origin, cl.refdef.vieworg, temp);
+	  VectorNormalize (temp);
 
-	  if (DotProduct (temp, axis[0]) < 0) 
-	      continue; 
+	  AngleVectors(cl.refdef.viewangles, axis[0], axis[1], axis[2]);
+
+	  if (DotProduct (temp, axis[0]) < 0)
+	      continue;
 
 	  }
 	  if(closest)
 		  Draw_ColorString( (int)(cl.refdef.width/2 - strlen(cl.clientinfo[closest].name)*3), (int)(cl.refdef.height/1.8), cl.clientinfo[closest].name, 1);
-  		
+
 }
 
-//============== 
-//SCR_DrawPlayerNames 
-// shows player names at their feets. 
-//============== 
+//==============
+//SCR_DrawPlayerNames
+// shows player names at their feets.
+//==============
 extern void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out );
-void SCR_DrawPlayerNames( void ) 
-{ 
-   static vec4_t   whiteTransparent = { 1.0f, 1.0f, 1.0f, 0.5f }; 
-   int         i; 
-   centity_t   *cent; 
-   float      dist; 
+void SCR_DrawPlayerNames( void )
+{
+   static vec4_t   whiteTransparent = { 1.0f, 1.0f, 1.0f, 0.5f };
+   int         i;
+   centity_t   *cent;
+   float      dist;
    trace_t   trace;
-   vec2_t screen_pos; 
-   vec3_t vecdist; 
-   vec3_t temp; 
-   vec3_t axis[3]; 
-   int y; 
-   static vec3_t mins = { -4, -4, -4 }; 
-   static vec3_t maxs = { 4, 4, 4 }; 
+   vec2_t screen_pos;
+   vec3_t vecdist;
+   vec3_t temp;
+   vec3_t axis[3];
+   int y;
+   static vec3_t mins = { -4, -4, -4 };
+   static vec3_t maxs = { 4, 4, 4 };
 
-   if( !cl_showPlayerNames->integer ) 
-      return; 
-  
-   for( i = 0; i < MAX_CLIENTS; i++ ) 
-   { 
-      
-	  cent = cl_entities + i + 1; 
-	
-	  if( !cent->current.modelindex ) 
-		 continue; 
-	 
+   if( !cl_showPlayerNames->integer )
+      return;
+
+   for( i = 0; i < MAX_CLIENTS; i++ )
+   {
+
+	  cent = cl_entities + i + 1;
+
+	  if( !cent->current.modelindex )
+		 continue;
+
 	  if(!strcmp(cl.clientinfo[i].name, name->string))
 		  continue;
-	
-	  trace = CL_Trace ( cl.refdef.vieworg, mins, maxs, cent->current.origin, -1, MASK_PLAYERSOLID, true, NULL); 
-	  if (trace.fraction != 1.0)	
+
+	  trace = CL_Trace ( cl.refdef.vieworg, mins, maxs, cent->current.origin, -1, MASK_PLAYERSOLID, true, NULL);
+	  if (trace.fraction != 1.0)
 		  continue;
 
-	  VectorSubtract(cent->current.origin, cl.refdef.vieworg, vecdist); 
-	  dist = VectorLength(vecdist); 
+	  VectorSubtract(cent->current.origin, cl.refdef.vieworg, vecdist);
+	  dist = VectorLength(vecdist);
 
-	  if (dist >= 1000 || !InFront(cent->current.origin)) 
-		  continue; 
-      
-	  VectorSubtract (cent->current.origin, cl.refdef.vieworg, temp); 
-	  VectorNormalize (temp); 
+	  if (dist >= 1000 || !InFront(cent->current.origin))
+		  continue;
 
-	  AngleVectors(cl.refdef.viewangles, axis[0], axis[1], axis[2]); 
+	  VectorSubtract (cent->current.origin, cl.refdef.vieworg, temp);
+	  VectorNormalize (temp);
 
-	  if (DotProduct (temp, axis[0]) < 0) 
-	      continue; 
+	  AngleVectors(cl.refdef.viewangles, axis[0], axis[1], axis[2]);
 
-	  R_TransformVectorToScreen(&cl.refdef, cent->current.origin, screen_pos); 
-	  y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6; 
-	  Draw_ColorString ( (int)screen_pos[0], y, cl.clientinfo[i].name, 1 ); 
+	  if (DotProduct (temp, axis[0]) < 0)
+	      continue;
 
-   } 
+	  R_TransformVectorToScreen(&cl.refdef, cent->current.origin, screen_pos);
+	  y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6;
+	  Draw_ColorString ( (int)screen_pos[0], y, cl.clientinfo[i].name, 1 );
+
+   }
 }
 
 void SCR_DrawBases (void)
 {
 	int			i;
 	entity_t	*ent;
-    vec2_t screen_pos; 
-    int y; 
+    vec2_t screen_pos;
+    int y;
 
 	for (i=0 ; i<cl.refdef.num_entities; i++)
 	{
@@ -756,13 +760,13 @@ void SCR_DrawBases (void)
 		if(!ent->team)
 			continue;
 
-		if (!InFront(ent->origin)) 
-			continue; 
-    
-		R_TransformVectorToScreen(&cl.refdef, ent->origin, screen_pos); 
-		y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6; 
+		if (!InFront(ent->origin))
+			continue;
+
+		R_TransformVectorToScreen(&cl.refdef, ent->origin, screen_pos);
+		y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6;
 		if(ent->team == 2)
-			Draw_ColorString ( (int)screen_pos[0], y, "^4Blue Flag", 1 ); 
+			Draw_ColorString ( (int)screen_pos[0], y, "^4Blue Flag", 1 );
 		else if(ent->team == 1)
 			Draw_ColorString ( (int)screen_pos[0], y, "^1Red Flag", 1 );
 
@@ -916,7 +920,7 @@ V_Viewpos_f
 void V_Viewpos_f (void)
 {
 	Com_Printf ("(%i %i %i) : %i\n", (int)cl.refdef.vieworg[0],
-		(int)cl.refdef.vieworg[1], (int)cl.refdef.vieworg[2], 
+		(int)cl.refdef.vieworg[1], (int)cl.refdef.vieworg[2],
 		(int)cl.refdef.viewangles[YAW]);
 }
 

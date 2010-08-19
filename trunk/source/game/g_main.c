@@ -18,6 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 game_locals_t	game;
@@ -676,11 +680,11 @@ void ResetLevel (void) //for resetting players and items after warmup
 	else
 		safe_bprintf(PRINT_HIGH, "Call voting is ^1DISABLED\n");
 
-	if(g_antilag->value) 
+	if(g_antilag->value)
 		safe_bprintf(PRINT_HIGH, "Antilag is ^2ENABLED\n");
-	else 
+	else
 		safe_bprintf(PRINT_HIGH, "Antilag is ^1DISABLED\n");
-	
+
 	return;
 }
 
@@ -900,7 +904,7 @@ void ExitLevel (void)
 		Com_sprintf (command, sizeof(command), "map \"%s\"\n", level.changemap);
 		gi.AddCommandString (command);
 	}
-	else 
+	else
 		stayed = true; //no need to reload map if staying on same level!
 
 	level.changemap = NULL;
@@ -917,7 +921,7 @@ void ExitLevel (void)
 			continue;
 		if (ent->health > ent->client->pers.max_health)
 			ent->health = ent->client->pers.max_health;
-		
+
 		if(stayed) {
 			ent->client->resp.score = 0;
 			ent->client->resp.deaths = 0;
@@ -926,7 +930,7 @@ void ExitLevel (void)
 			if(!ent->is_bot) { //players
 				ent->takedamage = DAMAGE_AIM;
 				ent->solid = SOLID_BBOX;
-				ent->deadflag = DEAD_NO;	
+				ent->deadflag = DEAD_NO;
 				PutClientInServer (ent);
 			}
 			else { //reset various bot junk
@@ -937,7 +941,7 @@ void ExitLevel (void)
 			}
 			if(g_duel->value) {
 				ClientPlaceInQueue(ent);
-				ClientCheckQueue(ent);	
+				ClientCheckQueue(ent);
 			}
 		}
 	}
@@ -1008,7 +1012,7 @@ void G_Ban (char *ip)
 	}
 
 	fprintf (f, "sv addip %s\n", ip);
-	
+
 	fclose (f);
 
 	//add to current ban list
@@ -1024,7 +1028,7 @@ void G_Ban (char *ip)
 		}
 		numipfilters++;
 	}
-	
+
 	if (!StringToFilter (ip, &ipfilters[i]))
 		ipfilters[i].compare = 0xffffffff;
 }
@@ -1053,7 +1057,7 @@ void G_ParseVoteCommand (void)
 		if(playervote.command[i] == ' ')
 			donearg = true;
 
-		if(!donearg) 
+		if(!donearg)
 			command[i] = playervote.command[i];
 		else
 			command[i] = 0;
@@ -1083,7 +1087,7 @@ void G_ParseVoteCommand (void)
 						ClientDisconnect (ent);
 					}
 				}
-				
+
 			}
 		}
 	}
@@ -1106,7 +1110,7 @@ void G_ParseVoteCommand (void)
 					//now ban them
 					value = Info_ValueForKey (ent->client->pers.userinfo, "ip");
 					G_Ban(value);
-				}				
+				}
 			}
 		}
 	}
@@ -1160,8 +1164,8 @@ void G_RunFrame (void)
 	//
 	// treat each object in turn
 	// even the world gets a chance to think
-	//	
-	
+	//
+
 	ent = &g_edicts[0];
 	for (i=0 ; i<globals.num_edicts ; i++, ent++)
 	{
@@ -1199,7 +1203,7 @@ void G_RunFrame (void)
 /*		if(ent->movetype & MOVETYPE_FLYMISSILE) {
 			//unlagged
 			if ( g_antilag->integer)
-				G_TimeShiftAllClients( level.previousTime, NULL );	
+				G_TimeShiftAllClients( level.previousTime, NULL );
 
 			G_RunEntity (ent);
 
@@ -1232,21 +1236,21 @@ void G_RunFrame (void)
 			//execute command if votes are sufficient
 			if(numActiveClients <= 2 && playervote.yay > playervote.nay+1) { //minimum of 2 votes to pass
 				safe_bprintf(PRINT_HIGH, "Vote ^2Passed\n");
-				
+
 				//parse command(we will allow kick, map, fraglimit, timelimit).
 				G_ParseVoteCommand();
-				
+
 			}
 			else if(playervote.yay > 2 && playervote.yay > playervote.nay+1) { //3-1 minimum to pass
 				safe_bprintf(PRINT_HIGH, "Vote ^2Passed\n");
-				
+
 				//parse command(we will allow kick, map, fraglimit, timelimit).
 				G_ParseVoteCommand();
-				
+
 			}
 			else
 				safe_bprintf(PRINT_HIGH, "Vote ^1Failed\n");
-		
+
 			//clear
 			playervote.called = false;
 			playervote.yay = playervote.nay = 0;

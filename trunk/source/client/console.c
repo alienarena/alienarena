@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -18,6 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // console.c
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "client.h"
 
@@ -79,12 +83,12 @@ void Draw_ColorString ( int x, int y, char *str, float scale)
 			str += 2;
 			continue;
 		}
-		
+
 		Draw_ScaledColorChar (x, y, *str, scolor, charscale, false); //this is only ever used for names.
-		
+
 		num = *str++;
 		num &= 255;
-			
+
 		if ( (num&127) == 32 ) { //spaces reset colors
 			scolor[0] = 0;
 			scolor[1] = 1;
@@ -140,9 +144,9 @@ void Con_ToggleConsole_f (void)
 	else
 	{
 		M_ForceMenuOff ();
-		cls.key_dest = key_console;	
+		cls.key_dest = key_console;
 
-		if (Cvar_VariableValue ("maxclients") == 1 
+		if (Cvar_VariableValue ("maxclients") == 1
 			&& Com_ServerState ())
 			Cvar_Set ("paused", "1");
 	}
@@ -167,7 +171,7 @@ void Con_ToggleChat_f (void)
 	}
 	else
 		cls.key_dest = key_console;
-	
+
 	Con_ClearNotify ();
 }
 
@@ -181,7 +185,7 @@ void Con_Clear_f (void)
 	memset (con.text, ' ', CON_TEXTSIZE);
 }
 
-						
+
 /*
 ================
 Con_Dump_f
@@ -247,7 +251,7 @@ void Con_Dump_f (void)
 	fclose (f);
 }
 
-						
+
 /*
 ================
 Con_ClearNotify
@@ -256,12 +260,12 @@ Con_ClearNotify
 void Con_ClearNotify (void)
 {
 	int		i;
-	
+
 	for (i=0 ; i<NUM_CON_TIMES ; i++)
 		con.times[i] = 0;
 }
 
-						
+
 /*
 ================
 Con_MessageMode_f
@@ -272,7 +276,7 @@ void Con_MessageMode_f (void)
 	chat_team = false;
 	chat_irc = false;
 	cls.key_dest = key_message;
-	Cbuf_AddText("chatbubble\n"); 
+	Cbuf_AddText("chatbubble\n");
 	Cbuf_Execute ();
 }
 
@@ -286,7 +290,7 @@ void Con_MessageMode2_f (void)
 	chat_team = true;
 	chat_irc = false;
 	cls.key_dest = key_message;
-	Cbuf_AddText("chatbubble\n"); 
+	Cbuf_AddText("chatbubble\n");
 	Cbuf_Execute ();
 }
 
@@ -300,7 +304,7 @@ void Con_MessageMode3_f (void)
 	chat_team = false;
 	chat_irc = true;
 	cls.key_dest = key_message;
-	//Cbuf_AddText("chatbubble\n"); 
+	//Cbuf_AddText("chatbubble\n");
 }
 
 /*
@@ -343,7 +347,7 @@ void Con_CheckResize (void)
 			numlines = con.totallines;
 
 		numchars = oldwidth;
-	
+
 		if (con.linewidth < numchars)
 			numchars = con.linewidth;
 
@@ -378,7 +382,7 @@ void Con_Init (void)
 	con.linewidth = -1;
 
 	Con_CheckResize ();
-	
+
 	Com_Printf ("Console initialized.\n");
 
 //
@@ -428,7 +432,7 @@ void Con_Print (char *txt)
 	static int	cr;
 	int		mask;
 	qboolean mask_skip;
-	
+
 	if (!con.initialized)
 		return;
 
@@ -452,7 +456,7 @@ void Con_Print (char *txt)
 	// word wrap
 		if (l != con.linewidth && (con.x + l > con.linewidth) )
 			con.x = 0;
-	
+
 		txt++;
 
 		if (cr)
@@ -461,7 +465,7 @@ void Con_Print (char *txt)
 			cr = false;
 		}
 
-		
+
 		if (!con.x)
 		{
 			Con_Linefeed ();
@@ -488,13 +492,13 @@ void Con_Print (char *txt)
 				mask_skip = true;
 			}
 			else
-				con.text[y*con.linewidth+con.x] = c | mask | con.ormask; 
+				con.text[y*con.linewidth+con.x] = c | mask | con.ormask;
 			con.x++;
 			if (con.x >= con.linewidth)
 				con.x = 0;
 			break;
 		}
-		
+
 	}
 }
 
@@ -596,7 +600,7 @@ void Con_DrawNotify (void)
 	charscale = (float)(viddef.height)*8/600;
 	if(charscale < 8)
 		charscale = 8;
-	
+
 	scolor[0] = 1;
 	scolor[1] = 1;
 	scolor[2] = 1;
@@ -614,7 +618,7 @@ void Con_DrawNotify (void)
 		if (time > con_notifytime->value*1000)
 			continue;
 		text = con.text + (i % con.totallines)*con.linewidth;
-		
+
 	    x = 0;
 		spacer = 0;
 		while (*text && x < con.linewidth-spacer) {
@@ -624,30 +628,30 @@ void Con_DrawNotify (void)
 				spacer +=2;
 				continue;
 			}
-			
+
 			Draw_ScaledColorChar ((x+1)*charscale, v, *text, scolor, charscale, false);
-				
+
 			num = *text++;
-			num &= 255;	
+			num &= 255;
 
 			if ( (num&127) == 32 ) { //spaces reset colors
 				scolor[0] = 1;
 				scolor[1] = 1;
 				scolor[2] = 1;
 				scolor[3] = 1;
-			}	
-			
+			}
+
 			x++;
-			
+
 		}
-	
+
 		v += charscale;
 	}
 
 
 	if (cls.key_dest == key_message)
 	{
-		
+
 		if (chat_team)
 		{
 			DrawString (charscale, v, "say_team:");
@@ -667,7 +671,7 @@ void Con_DrawNotify (void)
 		s = chat_buffer;
 		if (chat_bufferlen > (viddef.width/charscale)-(skip+1))
 			s += chat_bufferlen - ((viddef.width/charscale)-(skip+1));
-		
+
 		x = 0;
 		while (*s) {
 			if ( Q_IsColorString( s ) ) {
@@ -675,26 +679,26 @@ void Con_DrawNotify (void)
 				s += 2;
 				continue;
 			}
-			
+
 			Draw_ScaledColorChar ( (x+skip)*charscale, v, *s, scolor, charscale, false);
-			
+
 			num = *s++;
-			num &= 255;	
+			num &= 255;
 
 			if ( (num&127) == 32 ) { //spaces reset colors
 				scolor[0] = 1;
 				scolor[1] = 1;
 				scolor[2] = 1;
 				scolor[3] = 1;
-			}	
-								
+			}
+
 			x++;
-			
+
 		}
 		Draw_ScaledChar ( (x+skip)*charscale, v, 10+((cls.realtime>>charscale)&1), charscale, false);
 		v += charscale;
 	}
-	
+
 	if (v)
 	{
 		SCR_AddDirtyPoint (0,0);
@@ -741,13 +745,13 @@ void Con_DrawConsole (float frac)
 	Draw_StretchPic (0, lines-viddef.height, viddef.width, viddef.height, "conback");
 	SCR_AddDirtyPoint (0,0);
 	SCR_AddDirtyPoint (viddef.width-1,lines-1);
- 
+
 	Com_sprintf (version, sizeof(version), "v%4.2f", VERSION);
 	DrawString(viddef.width-charscale*(strlen(version)+1), lines-charscale-1, version);
 
 // draw the text
 	con.vislines = lines;
-	
+
 	rows = (lines-22)/charscale;		// rows of text to draw
 
 	y = lines - 3.75*charscale;
@@ -759,11 +763,11 @@ void Con_DrawConsole (float frac)
 	// draw arrows to show the buffer is backscrolled
 		for (x=0 ; x<con.linewidth ; x+=charscale*2)
 			Draw_ScaledChar ( (x+1)*charscale, y, '^', charscale, false);
-	
+
 		y -= charscale;
 		rows--;
 	}
-	
+
 	row = con.display;
 	for (i=0 ; i<rows ; i++, y-=charscale, row--)
 	{
@@ -771,9 +775,9 @@ void Con_DrawConsole (float frac)
 			break;
 		if (con.current - row >= con.totallines)
 			break;		// past scrollback wrap point
-			
+
 		text = con.text + (row % con.totallines)*con.linewidth;
-	
+
 		Com_sprintf (output, sizeof(output), "");
 		for (x=0 ; x<con.linewidth ; x++)
 			Com_sprintf (output, sizeof(output), "%s%c", output, text[x]);
@@ -787,7 +791,7 @@ void Con_DrawConsole (float frac)
 
 		Com_sprintf(dl, sizeof(dl), "%s [%s] %dKB ", cls.downloadname,
 				(cls.downloadhttp ? "HTTP" : "UDP"), kb);
-		
+
 		for(i = 0; i < strlen(dl); i++)
 			Draw_ScaledChar(i * charscale, con.vislines - charscale, dl[i], charscale, false);
 	}

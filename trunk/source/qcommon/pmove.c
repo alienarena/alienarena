@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "qcommon.h"
 
@@ -84,7 +88,7 @@ void PM_ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, float overbounce)
 	float	backoff;
 	float	change;
 	int		i;
-	
+
 	backoff = DotProduct (in, normal) * overbounce;
 
 	for (i=0 ; i<3 ; i++)
@@ -124,12 +128,12 @@ void PM_StepSlideMove_ (void)
 	trace_t	trace;
 	vec3_t		end;
 	float		time_left;
-	
+
 	numbumps = 4;
-	
+
 	VectorCopy (pml.velocity, primal_velocity);
 	numplanes = 0;
-	
+
 	time_left = pml.frametime;
 
 	for (bumpcount=0 ; bumpcount<numbumps ; bumpcount++)
@@ -160,7 +164,7 @@ void PM_StepSlideMove_ (void)
 			pm->touchents[pm->numtouch] = trace.ent;
 			pm->numtouch++;
 		}
-		
+
 		time_left -= time_left * trace.fraction;
 
 		// slide along this plane
@@ -230,7 +234,7 @@ void PM_StepSlideMove_ (void)
 			if (j == numplanes)
 				break;
 		}
-		
+
 		if (i != numplanes)
 		{	// go along this plane
 		}
@@ -350,9 +354,9 @@ void PM_Friction (void)
 	float	speed, newspeed, control;
 	float	friction;
 	float	drop;
-	
+
 	vel = pml.velocity;
-	
+
 	speed = sqrt(vel[0]*vel[0] +vel[1]*vel[1] + vel[2]*vel[2]);
 	if (speed < 1)
 	{
@@ -408,16 +412,16 @@ void PM_Accelerate (vec3_t wishdir, float wishspeed, float accel)
 	accelspeed = accel*pml.frametime*wishspeed;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
-	
+
 	for (i=0 ; i<3 ; i++)
-		pml.velocity[i] += accelspeed*wishdir[i];	
+		pml.velocity[i] += accelspeed*wishdir[i];
 }
 
 void PM_AirAccelerate (vec3_t wishdir, float wishspeed, float accel)
 {
 	int			i;
 	float		addspeed, accelspeed, currentspeed, wishspd = wishspeed;
-		
+
 	if (wishspd > 30)
 		wishspd = 30;
 	currentspeed = DotProduct (pml.velocity, wishdir);
@@ -427,9 +431,9 @@ void PM_AirAccelerate (vec3_t wishdir, float wishspeed, float accel)
 	accelspeed = accel * wishspeed * pml.frametime;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
-	
+
 	for (i=0 ; i<3 ; i++)
-		pml.velocity[i] += accelspeed*wishdir[i];	
+		pml.velocity[i] += accelspeed*wishdir[i];
 }
 
 /*
@@ -585,7 +589,7 @@ void PM_AirMove (void)
 
 	fmove = pm->cmd.forwardmove;
 	smove = pm->cmd.sidemove;
-	
+
 //!!!!! pitch should be 1/3 so this isn't needed??!
 #if 0
 	pml.forward[2] = 0;
@@ -613,7 +617,7 @@ void PM_AirMove (void)
 		VectorScale (wishvel, maxspeed/wishspeed, wishvel);
 		wishspeed = maxspeed;
 	}
-	
+
 	if ( pml.ladder )
 	{
 		PM_Accelerate (wishdir, wishspeed, pm_accelerate);
@@ -681,7 +685,7 @@ void PM_CatagorizePosition (void)
 // if the player hull point one unit down is solid, the player
 // is on ground
 
-// see if standing on something solid	
+// see if standing on something solid
 	point[0] = pml.origin[0];
 	point[1] = pml.origin[1];
 	point[2] = pml.origin[2] - 0.15; //Irritant - changed from 0.25 - this seems to fix the issue
@@ -724,7 +728,7 @@ void PM_CatagorizePosition (void)
 					pm->s.pm_flags |= PMF_TIME_LAND;
 					// don't allow another jump for a little while
 					if (pml.velocity[2] < -400)
-						pm->s.pm_time = 25;	
+						pm->s.pm_time = 25;
 					else
 						pm->s.pm_time = 18;
 				}
@@ -752,7 +756,7 @@ void PM_CatagorizePosition (void)
 	sample2 = pm->viewheight - pm->mins[2];
 	sample1 = sample2 / 2;
 
-	point[2] = pml.origin[2] + pm->mins[2] + 1;	
+	point[2] = pml.origin[2] + pm->mins[2] + 1;
 	cont = pm->pointcontents (point);
 
 	if (cont & MASK_WATER)
@@ -796,7 +800,7 @@ void PM_CheckJump (void)
 		pm->s.pm_flags &= ~PMF_JUMP_HELD;
 		return;
 	}
-	
+
 	// must wait for jump to be released
 	if (pm->s.pm_flags & PMF_JUMP_HELD)
 		return;
@@ -934,7 +938,7 @@ void PM_FlyMove (qboolean doclip)
 	// accelerate
 	fmove = pm->cmd.forwardmove;
 	smove = pm->cmd.sidemove;
-	
+
 	VectorNormalize (pml.forward);
 	VectorNormalize (pml.right);
 
@@ -962,9 +966,9 @@ void PM_FlyMove (qboolean doclip)
 	accelspeed = pm_accelerate*pml.frametime*wishspeed;
 	if (accelspeed > addspeed)
 		accelspeed = addspeed;
-	
+
 	for (i=0 ; i<3 ; i++)
-		pml.velocity[i] += accelspeed*wishdir[i];	
+		pml.velocity[i] += accelspeed*wishdir[i];
 
 	if (doclip) {
 		for (i=0 ; i<3 ; i++)
@@ -1108,7 +1112,7 @@ void PM_SnapPosition (void)
 	{
 		if (pml.origin[i] >= 0)
 			sign[i] = 1;
-		else 
+		else
 			sign[i] = -1;
 		pm->s.origin[i] = (int)(pml.origin[i]*8);
 		if (pm->s.origin[i]*0.125 == pml.origin[i])
@@ -1321,7 +1325,7 @@ void Pmove (pmove_t *pmove)
 		msec = pm->cmd.msec >> 3;
 		if (!msec)
 			msec = 1;
-		if ( msec >= pm->s.pm_time) 
+		if ( msec >= pm->s.pm_time)
 		{
 			pm->s.pm_flags &= ~(PMF_TIME_WATERJUMP | PMF_TIME_LAND | PMF_TIME_TELEPORT);
 			pm->s.pm_time = 0;
