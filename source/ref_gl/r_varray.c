@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111 - 1307, USA.
 
-*/ 
+*/
 
 /*
 ==========================================================================================================================================
@@ -30,6 +30,10 @@ has to take place at least every time the primitive type changes (that's vertex 
 
 ==========================================================================================================================================
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "r_local.h"
 #include "r_ragdoll.h"
@@ -149,7 +153,7 @@ void R_InitVArrays (int varraytype)
 		// uses array indices 5, 6, 7, 8
 		qglEnableClientState (GL_COLOR_ARRAY);
 		qglColorPointer (4, GL_FLOAT, sizeof (float) * VertexSizes[VERT_BUMPMAPPED_COLOURED], &VArrayVerts[5]);
-		
+
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_RGBA_POINTER);
 
 		return;
@@ -241,7 +245,7 @@ void R_InitVArrays (int varraytype)
 
 		// normal data
 		qglEnableClientState( GL_NORMAL_ARRAY );
-		
+
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
 
 		return;
@@ -297,7 +301,7 @@ void R_KillVArrays (void)
 void R_AddSurfToVArray (msurface_t *surf)
 {
 	glpoly_t *p = surf->polys;
-	float	*v;	
+	float	*v;
 	int i;
 
 	for (; p; p = p->chain)
@@ -337,7 +341,7 @@ It's assumed that the programmer has set up the vertex arrays properly before ca
 void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll)
 {
 	glpoly_t *p = surf->polys;
-	float	*v;	
+	float	*v;
 	int i;
 
 	for (; p; p = p->chain)
@@ -381,9 +385,9 @@ It's assumed that the programmer has set up the vertex arrays properly before ca
 void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 {
 	glpoly_t *p = surf->polys;
-	float	*v;	
+	float	*v;
 	int		i;
-	
+
 	for (; p; p = p->chain)
 	{
 		// reset pointer and counter
@@ -449,7 +453,7 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 	vec3_t	lightVec, lightAdd, temp;
 	float	dist, weight;
 	int		numlights;
-	float	*v;	
+	float	*v;
 	int		i, j;
 
 	//send these to the shader program
@@ -460,20 +464,20 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 	//get light position relative to player's position
 	numlights = 0;
 	VectorClear(lightAdd);
-	for (i = 0; i < r_lightgroups; i++) {	
+	for (i = 0; i < r_lightgroups; i++) {
 		VectorSubtract(r_origin, LightGroups[i].group_origin, temp);
 		dist = VectorLength(temp);
-		if(dist == 0) 
+		if(dist == 0)
 			dist = 1;
 		dist = dist*dist;
 		weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
-		for(j = 0; j < 3; j++) 
+		for(j = 0; j < 3; j++)
 			lightAdd[j] += LightGroups[i].group_origin[j]*weight;
-		numlights+=weight;				
+		numlights+=weight;
 	}
 
 	if(numlights > 0.0) {
-		for(i = 0; i < 3; i++) 
+		for(i = 0; i < 3; i++)
 			lightVec[i] = (lightAdd[i]/numlights + r_origin[i])/2.0;
 	}
 
@@ -483,7 +487,7 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 	{
 		// reset pointer and counter
 		VArray = &VArrayVerts[0];
-		VertexCounter = 0;	
+		VertexCounter = 0;
 
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
@@ -499,7 +503,7 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 			// lightmap texture coords
 			VArray[5] = v[5];
 			VArray[6] = v[6];
-	
+
 			// nothing else is needed
 			// increment pointer and counter
 			VArray += VertexSizes[VERT_MULTI_TEXTURED];
@@ -513,7 +517,7 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 {
 	glpoly_t *p = surf->polys;
-	float	*v;	
+	float	*v;
 	int		i;
 
 	for (; p; p = p->chain)
@@ -551,7 +555,7 @@ void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 		//send these to the shader program
 		glUniform3fARB( g_location_tangent, tangent[0], tangent[1], tangent[2]);
 
-		for(i=0; i<3; i++) 
+		for(i=0; i<3; i++)
 			lightPos[i] = r_origin[i];
 		lightPos[2] += 512;
 
@@ -559,7 +563,7 @@ void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 		glUniform1iARB( g_location_fogamount, map_fog);
 		glUniform1fARB( g_location_time, rs_realtime);
 	}
-		
+
 	// draw the polys
 	qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 }
@@ -577,7 +581,7 @@ void R_InitQuadVarrays(void) {
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
-	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]); 
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
 	qglVertexPointer (3, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 

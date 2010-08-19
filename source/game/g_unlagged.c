@@ -1,3 +1,26 @@
+/*
+Copyright (C) 2009 COR Entertainment, LLC.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 /*
@@ -45,7 +68,7 @@ void G_StoreHistory( edict_t *ent ) {
 	VectorCopy( ent->mins, ent->client->history[head].mins );
 	VectorCopy( ent->maxs, ent->client->history[head].maxs );
 	VectorCopy( ent->s.origin, ent->client->history[head].currentOrigin );
-	SnapVector( ent->client->history[head].currentOrigin ); 
+	SnapVector( ent->client->history[head].currentOrigin );
 	ent->client->history[head].leveltime = gi.Sys_Milliseconds();
 }
 
@@ -106,12 +129,12 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 			time );
 		safe_bprintf(PRINT_HIGH, "%s\n", str);
 	}
-	
+
 	// find two entries in the history whose times sandwich "time"
 	// assumes no two adjacent records have the same timestamp
 	j = k = ent->client->historyHead;
 	do {
-		
+
 		if ( ent->client->history[j].leveltime <= time )
 			break;
 
@@ -123,12 +146,12 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 	}
 	while ( j != ent->client->historyHead );
 
-	if(g_antilagdebug->value) 
+	if(g_antilagdebug->value)
 		safe_bprintf(PRINT_HIGH, "reconciled time at: %i\n", k);
 
 	// if we got past the first iteration above, we've sandwiched (or wrapped)
 	if ( j != k ) {
-		
+
 		// if we haven't wrapped back to the head, we've sandwiched, so
 		// we shift the client's position back to where he was at "time"
 		if ( j != ent->client->historyHead ) {
@@ -147,12 +170,12 @@ void G_TimeShiftClient( edict_t *ent, int time, qboolean debug, edict_t *debugge
 
 			TimeShiftLerp( frac,
 				ent->client->history[j].maxs, ent->client->history[k].maxs,
-				ent->maxs );		
+				ent->maxs );
 
 			// this will recalculate absmin and absmax
 			gi.linkentity( ent );
 
-						
+
 		} else {
 			// we wrapped, so grab the earliest
 			VectorCopy( ent->client->history[k].currentOrigin, ent->s.origin );
@@ -177,12 +200,12 @@ except for "skip"
 void G_TimeShiftAllClients( int time, edict_t *skip ) {
 	int			i;
 	edict_t	*ent;
-	
+
 	for (i=0 ; i<maxclients->value ; i++)
 	{
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse || !ent->client)
-			continue;	
+			continue;
 
 		if ( ent->client && ent->inuse && !ent->client->resp.spectator && ent != skip ) {
 			G_TimeShiftClient( ent, time, false, skip );
@@ -198,11 +221,11 @@ G_DoTimeShiftFor
 Decide what time to shift everyone back to, and do it
 ================
 */
-void G_DoTimeShiftFor( edict_t *ent ) {	
-	
+void G_DoTimeShiftFor( edict_t *ent ) {
+
 	//check this, because this will be different for alien arena for sure.
 //	int wpflags[10] = { 0, 0, 2, 4, 0, 0, 8, 16, 0, 0 };
-	
+
 //	int wpflag = wpflags[ent->client->ps.weapon];
 	int time;
 
@@ -210,10 +233,10 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	if ( !ent->inuse || !ent->client || ent->is_bot ) {
 		return;
 	}
- 
+
 	// do the full lag compensation
-	time = ent->client->attackTime - ent->client->ping; 
-	
+	time = ent->client->attackTime - ent->client->ping;
+
 	G_TimeShiftAllClients( time, ent );
 }
 

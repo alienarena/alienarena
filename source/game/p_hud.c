@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 
@@ -77,10 +82,10 @@ void MoveClientToIntermission (edict_t *ent)
 void dumb_think(edict_t *ent) {
 
 	//just a generic think
-    
-    ent->nextthink = level.time + 0.100;   
+
+    ent->nextthink = level.time + 0.100;
 }
-void PlaceWinnerOnVictoryPad(edict_t *winner, int offset) 
+void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 {
 	edict_t *pad;
 	edict_t *chasecam;
@@ -97,21 +102,21 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	}
 
 	VectorCopy (level.intermission_angle, winner->s.angles);
-	
+
 	//move it infront of everyone
 	AngleVectors (level.intermission_angle, forward, right, NULL);
 
 	VectorMA (level.intermission_origin, 100+abs(offset), forward, winner->s.origin);
 	VectorMA (winner->s.origin, offset, right, winner->s.origin);
 	winner->s.origin[2] +=8;
-	
+
 	winner->client->ps.pmove.origin[0] = winner->s.origin[0];
 	winner->client->ps.pmove.origin[1] = winner->s.origin[1];
 	winner->client->ps.pmove.origin[2] = winner->s.origin[2];
 
 	if (deathmatch->value)
 		winner->client->showscores = true;
-	
+
 	winner->client->ps.gunindex = 0;
 	winner->client->ps.pmove.pm_type = PM_FREEZE;
 	winner->client->ps.blend[3] = 0;
@@ -128,10 +133,10 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 
 	winner->s.effects = EF_ROTATE;
 	winner->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
-	
+
 	winner->s.sound = 0;
 	winner->solid = SOLID_NOT;
-	
+
 	// add the layout
 
 	if (deathmatch->value)
@@ -145,7 +150,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 
 	//create a new entity for the pad
 	pad = G_Spawn();
-	VectorMA (winner->s.origin, 8, right, pad->s.origin);	
+	VectorMA (winner->s.origin, 8, right, pad->s.origin);
 	VectorCopy (level.intermission_angle, pad->s.angles);
 
 	pad->s.origin[2] -= 8;
@@ -162,7 +167,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	VectorCopy(pad->s.origin, origin);
 	origin[2] -= 24;
 
-	//if map is going to repeat - don't put these here as we have no way to remove them 
+	//if map is going to repeat - don't put these here as we have no way to remove them
 	//if map is not reloaded
 	if(strcmp(level.mapname, level.changemap)) {
 		gi.WriteByte (svc_temp_entity);
@@ -186,7 +191,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	}
 
     winner->client->chasetoggle = 1;
-       
+
     chasecam = G_Spawn ();
     chasecam->owner = winner;
     chasecam->solid = SOLID_NOT;
@@ -196,12 +201,12 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 
 	VectorClear (chasecam->mins);
     VectorClear (chasecam->maxs);
-    
+
 	VectorCopy (level.intermission_origin, chasecam->s.origin);
-       
+
     chasecam->classname = "chasecam";
     chasecam->think = NULL;
-	winner->client->chasecam = chasecam;     
+	winner->client->chasecam = chasecam;
     winner->client->oldplayer = G_Spawn();
 
 	if (!winner->client->oldplayer->client)
@@ -254,7 +259,7 @@ void BeginIntermission (edict_t *targ)
 	if (level.intermissiontime)
 		return;		// already activated
 
-	if (((int)(dmflags->value) & DF_BOT_AUTOSAVENODES)) 
+	if (((int)(dmflags->value) & DF_BOT_AUTOSAVENODES))
 			ACECM_Store(); //store the nodes automatically when changing levels.
 
 	game.autosaved = false;
@@ -301,7 +306,7 @@ void BeginIntermission (edict_t *targ)
 
 	VectorCopy (ent->s.origin, level.intermission_origin);
 	VectorCopy (ent->s.angles, level.intermission_angle);
-		
+
 	low_score = 0;
 	//get the lowest score in the game, and use that as the base high score to start
 	for (i=0; i<game.maxclients; i++) {
@@ -354,7 +359,7 @@ void BeginIntermission (edict_t *targ)
 			high_score = game.clients[i].resp.score;
 		}
 	}
-	
+
 	if(!winner)
 		winner = g_edicts;
 	if(!firstrunnerup)
@@ -376,7 +381,7 @@ void BeginIntermission (edict_t *targ)
 			if ((!((int)(dmflags->value) & DF_SKINTEAMS)) && !(ctf->value || tca->value || cp->value)) { //don't do this in team play
 				if(winner->is_bot)
 					gi.sound (ent, CHAN_AUTO, gi.soundindex("world/botwon.wav"), 1, ATTN_NONE, 0);
-				else				
+				else
 					gi.sound (winner, CHAN_AUTO, gi.soundindex("world/youwin.wav"), 1, ATTN_STATIC, 0);
 			}
 	}
@@ -392,12 +397,12 @@ void BeginIntermission (edict_t *targ)
 		else {
 			if(ctf->value || tca->value || cp->value)
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/red_wins_ctf.wav"), 1, ATTN_NONE, 0);
-			
+
 			else
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/red_wins.wav"), 1, ATTN_NONE, 0);
 		}
 	}
-	
+
 	//place winner on victory pads, ala Q3
 	if(winner && winner->client && winner->inuse)
 		PlaceWinnerOnVictoryPad(winner, 0);
@@ -418,11 +423,11 @@ void MoveEveryoneDownQueue(void) {
 			//move everyone else down a notch(never less than 0)
 			if(induel > 1 && g_edicts[i+1].client->pers.queue <= 3) //houston, we have a problem
 				return; //abort, stop moving people
-			if(g_edicts[i+1].client->pers.queue > 1) 
-					g_edicts[i+1].client->pers.queue-=1; 
+			if(g_edicts[i+1].client->pers.queue > 1)
+					g_edicts[i+1].client->pers.queue-=1;
 			if(g_edicts[i+1].client->pers.queue < 3)
 				induel++;
-		}		
+		}
 	}
 }
 void CheckDuelWinner(void) {
@@ -435,7 +440,7 @@ void CheckDuelWinner(void) {
 	induel = 0;
 
 	for (i = 0; i < maxclients->value; i++) {
-		if(g_edicts[i+1].inuse && g_edicts[i+1].client) { 
+		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			if(g_edicts[i+1].client->resp.score > highscore)
 				highscore = g_edicts[i+1].client->resp.score;
 			if(g_edicts[i+1].client->pers.queue > highestpos)
@@ -450,7 +455,7 @@ void CheckDuelWinner(void) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			if((g_edicts[i+1].client->resp.score < highscore) && g_edicts[i+1].client->pers.queue < 3) {
 				g_edicts[i+1].client->pers.queue = highestpos+1; //loser, kicked to the back of the line
-				highestpos++; 
+				highestpos++;
 			}
 		}
 	}
@@ -464,7 +469,7 @@ void CheckDuelWinner(void) {
 		for (i = 0; i < maxclients->value; i++) {
 			if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 				if(g_edicts[i+1].client->pers.queue < 3 && g_edicts[i+1].client->pers.queue)
-					induel++;			
+					induel++;
 			}
 		}
 		if(induel < 2) //something is wrong(i.e winner left), move everyone down.
@@ -557,17 +562,17 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		sortedscores[j] = score;
 		total++;
 	}
-	
+
 	// print level name and exit rules
 	string[0] = 0;
-	
+
 	stringlength = strlen(string);
 
 	Com_sprintf (entry, sizeof(entry), "newsb ");
 	j = strlen(entry);
 	strcpy (string + stringlength, entry);
 	stringlength += j;
-		
+
 	// add the clients in sorted order
 	if (total > 12)
 		total = 12;
@@ -579,7 +584,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 
 		x = 0;
 		y = 32 + 32 * (i%12);
-		 
+
 		// add a background
 		Com_sprintf (entry, sizeof(entry),
 			"xv %i yv %i picn %s ",x, y, "playerbox");
@@ -589,7 +594,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			break;
 		strcpy (string + stringlength, entry);
 		stringlength += j;
-		
+
 		// send the layout
 		if(!cl->resp.spectator)
 			Com_sprintf (entry, sizeof(entry),
@@ -598,8 +603,8 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		else //duel mode will have queued spectators
 			Com_sprintf (entry, sizeof(entry),
 				"queued %i %i %i %i %i %i ",
-				x, y, sorted[i], cl->resp.score, cl->ping, cl->pers.queue-2);	
-					
+				x, y, sorted[i], cl->resp.score, cl->ping, cl->pers.queue-2);
+
 		j = strlen(entry);
 		if (stringlength + j > 1024)
 			break;
@@ -612,7 +617,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		//add a background
 		x = 96;
 		y = 16*(total+1);
-		
+
 		Com_sprintf (entry, sizeof(entry),
 			"xv %i yv %i picn %s ", x-4, y+48, "statbox");
 		j = strlen(entry);
@@ -620,7 +625,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			strcpy(string + stringlength, entry);
 			stringlength +=j;
 		}
-		
+
 		Com_sprintf(entry, sizeof(entry),
 			"xv %i yv %i string Accuracy ", x, y+56);
 		j = strlen(entry);
@@ -682,7 +687,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	if(mapvote) {
 		y = 64;
 		x = 96;
-		Com_sprintf(entry, sizeof(entry), 
+		Com_sprintf(entry, sizeof(entry),
 			"xv %i yt %i string Vote ", x, y);
 		j = strlen(entry);
 		if(stringlength + j < 1024) {
@@ -690,7 +695,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			stringlength +=j;
 		}
 		x = 136;
-		Com_sprintf(entry, sizeof(entry), 
+		Com_sprintf(entry, sizeof(entry),
 			"xv %i yt %i string for ", x, y);
 		j = strlen(entry);
 		if(stringlength + j < 1024) {
@@ -698,7 +703,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			stringlength +=j;
 		}
 		x = 168;
-		Com_sprintf(entry, sizeof(entry), 
+		Com_sprintf(entry, sizeof(entry),
 			"xv %i yt %i string next ", x, y);
 		j = strlen(entry);
 		if(stringlength + j < 1024) {
@@ -706,7 +711,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			stringlength +=j;
 		}
 		x = 208;
-		Com_sprintf(entry, sizeof(entry), 
+		Com_sprintf(entry, sizeof(entry),
 			"xv %i yt %i string map: ", x, y);
 		j = strlen(entry);
 		if(stringlength + j < 1024) {
@@ -715,8 +720,8 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		}
 		x = 96;
 		for(i=0; i<4; i++) {
-			
-			Com_sprintf(entry, sizeof(entry), 
+
+			Com_sprintf(entry, sizeof(entry),
 			"xv %i yt %i string F%i.%s ", x, y+((i+1)*9)+9, i+1, votedmap[i].mapname);
 			j = strlen(entry);
 			if(stringlength + j < 1024) {
@@ -811,7 +816,7 @@ void G_SetStats (edict_t *ent)
 	int high_score = 0;
 	gitem_t *flag1_item, *flag2_item;
 
-	
+
 	flag1_item = FindItemByClassname("item_flag_red");
 	flag2_item = FindItemByClassname("item_flag_blue");
 
@@ -835,7 +840,7 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex (item->icon);
 		ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
 	}
-	
+
 	//
 	// armor
 	//
@@ -912,7 +917,7 @@ void G_SetStats (edict_t *ent)
 	ent->client->ps.stats[STAT_SELECTED_ITEM] = ent->client->pers.selected_item;
 
 	//ctf
-	if(ctf->value) { 
+	if(ctf->value) {
 		if (ent->client->pers.inventory[ITEM_INDEX(flag1_item)])
 			ent->client->ps.stats[STAT_FLAG_ICON] = gi.imageindex ("i_flag1");
 		else if (ent->client->pers.inventory[ITEM_INDEX(flag2_item)])
@@ -966,7 +971,7 @@ void G_SetStats (edict_t *ent)
 	for (i = 0, e2 = g_edicts + 1; i < maxclients->value; i++, e2++) {
 		if (!e2->inuse)
 			continue;
-	
+
 		if(e2->client->resp.score > high_score)
 			high_score = e2->client->resp.score;
 	}
@@ -987,7 +992,7 @@ void G_SetStats (edict_t *ent)
 	//end bot score info
 
 	//weapon/ammo inventories
-	for(i = 0; i < 7; i++) 
+	for(i = 0; i < 7; i++)
 		ent->client->ps.stats[STAT_WEAPN1+i] = 0;
 	i = 0;
 	if(ent->client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] &&
@@ -1086,7 +1091,7 @@ void G_SetSpectatorStats (edict_t *ent)
 		cl->ps.stats[STAT_LAYOUTS] |= 2;
 
 	if (cl->chase_target && cl->chase_target->inuse)
-		cl->ps.stats[STAT_CHASE] = CS_PLAYERSKINS + 
+		cl->ps.stats[STAT_CHASE] = CS_PLAYERSKINS +
 			(cl->chase_target - g_edicts) - 1;
 	else
 		cl->ps.stats[STAT_CHASE] = 0;

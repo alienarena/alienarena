@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -18,12 +18,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "server.h"
 
 server_static_t	svs;				// persistant server info
 server_t		sv;					// local server
 
-extern cvar_t	*public_server;	
+extern cvar_t	*public_server;
 cvar_t		*sv_excessive;
 cvar_t		*sv_playerspeed;
 extern float pm_maxspeed;
@@ -38,7 +42,7 @@ SV_FindIndex
 int SV_FindIndex (char *name, int start, int max, qboolean create)
 {
 	int		i;
-	
+
 	if (!name || !name[0])
 		return 0;
 
@@ -95,7 +99,7 @@ baseline will be transmitted
 void SV_CreateBaseline (void)
 {
 	edict_t			*svent;
-	int				entnum;	
+	int				entnum;
 
 	for (entnum = 1; entnum < ge->num_edicts ; entnum++)
 	{
@@ -175,7 +179,7 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 	}
 
 	sv.time = 1000;
-	
+
 	strcpy (sv.name, server);
 	strcpy (sv.configstrings[CS_NAME], server);
 
@@ -196,7 +200,7 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 	// clear physics interaction links
 	//
 	SV_ClearWorld ();
-	
+
 	for (i=1 ; i< CM_NumInlineModels() ; i++)
 	{
 		Com_sprintf (sv.configstrings[CS_MODELS+1+i], sizeof(sv.configstrings[CS_MODELS+1+i]),
@@ -206,7 +210,7 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 
 	//
 	// spawn the rest of the entities on the map
-	//	
+	//
 
 	// precache and static commands can be issued during
 	// map initialization
@@ -223,7 +227,7 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 	// all precaches are complete
 	sv.state = serverstate;
 	Com_SetServerState (sv.state);
-	
+
 	// create a baseline for more efficient communications
 	SV_CreateBaseline ();
 
@@ -274,9 +278,9 @@ void SV_InitGame (void)
 	//set player move speed according to excessive value
 	sv_excessive = Cvar_Get ("excessive", "0", CVAR_LATCH);
 	sv_playerspeed = Cvar_Get ("playerspeed", "0", CVAR_LATCH);
-	if(sv_excessive->value || sv_playerspeed->value)	
-		pm_maxspeed = 450; 
-	else 
+	if(sv_excessive->value || sv_playerspeed->value)
+		pm_maxspeed = 450;
+	else
 		pm_maxspeed = 300;
 
 	// init clients

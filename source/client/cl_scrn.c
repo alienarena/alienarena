@@ -31,6 +31,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
   */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "client.h"
 #include "qmenu.h"
 
@@ -310,11 +314,11 @@ void IRC_BumpMsg(void)
 {
 	int i;
 
-	for(i = 0; i < scr_IRC_lines; i++)		
+	for(i = 0; i < scr_IRC_lines; i++)
 		strcpy(scr_IRCstring[i], scr_IRCstring[i+1]);
 }
 
-void SCR_IRCPrintf (char *fmt, ...)	
+void SCR_IRCPrintf (char *fmt, ...)
 {
 	va_list		argptr;
 	char		msg[1024];
@@ -347,7 +351,7 @@ void SCR_DrawColorString ( int x, int y, const char *str )
 	if(charscale < 8)
 		charscale = 8;
 
-	scolor[0] = 0; 
+	scolor[0] = 0;
 	scolor[1] = 1;
 	scolor[2] = 0;
 	scolor[3] = 1;
@@ -358,12 +362,12 @@ void SCR_DrawColorString ( int x, int y, const char *str )
 			str += 2;
 			continue;
 		}
-		
+
 		Draw_ScaledColorChar (x, y, *str, scolor, charscale, false); //this is only ever used for names.
-		
+
 		num = *str++;
 		num &= 255;
-			
+
 		if ( (num&127) == 32 ) { //spaces reset colors
 			scolor[0] = 0;
 			scolor[1] = 1;
@@ -591,14 +595,14 @@ void SCR_DrawRotatingIcon( void )
 
 	//i think this is where it's getting blown out, the model keeps getting overwritten or lost at map load
 	entity.model = R_RegisterModel( "models/objects/icon/tris.md2" );
-		
+
 	entity.flags = RF_FULLBRIGHT | RF_MENUMODEL;
 	entity.origin[0] = 80;
 	entity.origin[1] = 30;
 	entity.origin[2] = -5;
-	
+
 	VectorCopy( entity.origin, entity.oldorigin );
-	
+
 	entity.frame = 0;
 	entity.oldframe = 0;
 	entity.backlerp = 0.0;
@@ -901,18 +905,18 @@ void SCR_DrawConsole (void)
 	}
 	else
 	{
-		if (cls.key_dest == key_game || cls.key_dest == key_message) 
+		if (cls.key_dest == key_game || cls.key_dest == key_message)
 			Con_DrawNotify ();	// only draw notify in game
 	}
 
-	//draw chat bubble 
-	if(cls.key_dest == key_message || scr_con_current) { 
+	//draw chat bubble
+	if(cls.key_dest == key_message || scr_con_current) {
 		//only send this every couple of seconds no need to flood
 		sendBubbleNow += cls.frametime;
 		if(sendBubbleNow >= 1) {
-			Cbuf_AddText("chatbubble\n"); 
+			Cbuf_AddText("chatbubble\n");
 			Cbuf_Execute ();
-			sendBubbleNow = 0; 
+			sendBubbleNow = 0;
 		}
 	}
 }
@@ -1318,7 +1322,7 @@ void SCR_ExecuteLayoutString (char *s)
 		}
 
 		if (!strcmp(token, "newsb"))
-		{		
+		{
 			//print header here
 			x = viddef.width/2 - 160*scale;
 			y = viddef.height/2 - 64*scale;
@@ -1333,7 +1337,7 @@ void SCR_ExecuteLayoutString (char *s)
 		}
 
 		if (!strcmp(token, "newctfsb"))
-		{		
+		{
 			//print header here
 			x = viddef.width/2 - 160*scale;
 			y = viddef.height/2 - 72*scale;
@@ -1379,7 +1383,7 @@ void SCR_ExecuteLayoutString (char *s)
 
 			token = COM_Parse (&s);
 			ping = atoi(token);
- 
+
 			token = COM_Parse (&s);
 			time = atoi(token);
 
@@ -1498,7 +1502,7 @@ void SCR_ExecuteLayoutString (char *s)
 				if(team) { //draw pic on left side(done client side to save packetsize
 					Draw_ScaledPic (x, y-2*scale, scale, "/pics/blueplayerbox");
 				}
-				else 
+				else
 					Draw_ScaledPic(x, y-2*scale, scale, "/pics/redplayerbox");
 			}
 			else {
@@ -1554,7 +1558,7 @@ void SCR_ExecuteLayoutString (char *s)
 
 				SCR_DrawField (x, y, color, width, value, scale);
 			}
-	
+
 			//draw the zoom scope pic if we are using the zoom alt-fire of disruptor
 			if (cl.frame.playerstate.stats[STAT_ZOOMED])
 			{
@@ -1631,7 +1635,7 @@ void SCR_ExecuteLayoutString (char *s)
 			//this line is an Alien Arena specific hack of sorts, remove if needed
 			if(!strcmp(token, "Vote"))
 				Draw_ScaledPic (viddef.width/2 - 85*scale, y-8*scale, scale, "votebox");
-			DrawString (x, y, token);			
+			DrawString (x, y, token);
 			continue;
 		}
 
@@ -1705,7 +1709,7 @@ char		scr_playericon[MAX_OSPATH];
 char		scr_playername[32];
 float		scr_playericonalpha;
 void SCR_DrawPlayerIcon(void) {
-	
+
 	int w, h;
 	float scale, iconPos;
 
@@ -1791,7 +1795,7 @@ void SCR_showFPS(void)
 	float scale;
 	static qboolean restart = true;
 	static float update_trigger = 0.0f;
-	static float framecounter = 0.0f;	
+	static float framecounter = 0.0f;
 	static int start_msec;
 	int end_msec;
 	float time_sec;
@@ -1801,11 +1805,11 @@ void SCR_showFPS(void)
 	{
 		restart = true;
 		return;
-	}		
+	}
 
 	if( restart )
 	{
-		start_msec = cls.realtime; 
+		start_msec = cls.realtime;
 		framecounter = 0.0f;
 		update_trigger = 10.0f; // initial delay to update
 		temp[0] = 0; // blank the text buffer
@@ -1820,10 +1824,10 @@ void SCR_showFPS(void)
 			end_msec = cls.realtime;
 			time_sec = ((float)(end_msec - start_msec)) / 1000.0f;
 			framerate = framecounter / time_sec ;
-			
+
 			// update text buffer for display
 			Com_sprintf( temp, sizeof(temp), "%3.0ffps", framerate );
-			
+
 			// setup for next update
 			framecounter = 0.0f;
 			start_msec = end_msec;
@@ -1834,9 +1838,9 @@ void SCR_showFPS(void)
 	scale = (float)(viddef.height)/600;
 	if(scale < 1)
 		scale = 1;
-	
+
 	DrawString(viddef.width - 64*scale, viddef.height - 24*scale, temp);
-	
+
 }
 
 /*
@@ -1849,14 +1853,14 @@ void SCR_showRSpeeds( void )
  	float scale;
  	extern int c_brush_polys;
  	extern int c_alias_polys;
- 
+
  	if (cls.key_dest == key_menu || cls.key_dest == key_console)
  		return;
- 
+
  	scale = (float)(viddef.height)/600;
  	if(scale < 1)
  		scale = 1;
- 
+
  	Com_sprintf( prtstring, sizeof( prtstring ),
  		"%5.5i wpoly %5.5i epoly",  c_brush_polys, c_alias_polys );
  	DrawString(	viddef.width/2, viddef.height - 48*scale,	prtstring );
@@ -1927,10 +1931,10 @@ void SCR_UpdateScreen (void)
 
 			if (cls.disable_screen)
 				scr_draw_loading = 2;
-	
+
 			//NO CONSOLE!!!
 			continue;
-		}		
+		}
 		else
 		{
 			// do 3D refresh drawing, and then update the screen
@@ -1959,7 +1963,7 @@ void SCR_UpdateScreen (void)
 
 			SCR_DrawConsole ();
 
-//			if (need_free_vbo)		
+//			if (need_free_vbo)
 //				R_VCFreeFrame();
 
 			M_Draw ();

@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,12 +17,16 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
-//Deathball 
+//Deathball
 
 static void DeathballThink(edict_t *ent)
-{	
+{
 	ent->nextthink = level.time + FRAMETIME;
 }
 void DeathballSetup (edict_t *ent)
@@ -41,7 +45,7 @@ void DeathballSetup (edict_t *ent)
 	else
 		gi.setmodel (ent, ent->item->world_model);
 	ent->solid = SOLID_TRIGGER;
-	ent->movetype = MOVETYPE_TOSS;  
+	ent->movetype = MOVETYPE_TOSS;
 	ent->touch = Touch_Item;
 
 	v = tv(0,0,-128);
@@ -64,7 +68,7 @@ void DeathballSetup (edict_t *ent)
 }
 qboolean DeathballDrop(edict_t *ent, gitem_t *item)
 {
-	if (rand() & 1) 
+	if (rand() & 1)
 		safe_cprintf(ent, PRINT_HIGH, "Only lusers drop the ball!\n");
 	else
 		safe_cprintf(ent, PRINT_HIGH, "Winners don't drop their balls!\n");
@@ -93,7 +97,7 @@ void ResetDeathball()
 static void DropDeathballTouch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	//owner (who dropped us) can't touch for two secs
-	if (other == ent->owner && 
+	if (other == ent->owner &&
 		ent->nextthink - level.time > 2)
 		return;
 	other->in_deathball = true;
@@ -103,10 +107,10 @@ static void DropDeathballThink(edict_t *ent)
 {
 	// auto return the ball
 	// reset ball will remove ourselves
-	
+
 	ResetDeathball();
 	safe_bprintf(PRINT_HIGH, "The ball has returned!\n");
-	
+
 }
 void DeadDropDeathball(edict_t *self)
 {
@@ -137,7 +141,7 @@ void DeadDropDeathball(edict_t *self)
 
 qboolean Pickup_deathball (edict_t *ent, edict_t *other)
 {
-	
+
 	gitem_t *bomber;
 	gitem_t *strafer;
 	gitem_t *hover;
@@ -153,7 +157,7 @@ qboolean Pickup_deathball (edict_t *ent, edict_t *other)
 	if((other->client->pers.inventory[ITEM_INDEX(bomber)] == 1) || (other->client->pers.inventory[ITEM_INDEX(strafer)] == 1)
 		|| (other->client->pers.inventory[ITEM_INDEX(hover)] == 1))
 		return false;
-	
+
 	deathball = FindItemByClassname(ent->classname);
 
 	// get in the ball
@@ -164,10 +168,10 @@ qboolean Pickup_deathball (edict_t *ent, edict_t *other)
 	other->s.modelindex4 = gi.modelindex("vehicles/deathball/deathball.md2");
 
 	other->in_deathball = true;
-	
+
 	other->client->pers.inventory[ITEM_INDEX(deathball)] = 1;
 	other->client->newweapon = ent->item;
-	
+
 	if (!(ent->spawnflags & DROPPED_ITEM)) {
 		ent->flags |= FL_RESPAWN;
 		ent->svflags |= SVF_NOCLIENT;

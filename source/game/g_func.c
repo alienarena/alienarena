@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 /*
@@ -183,10 +188,10 @@ void AngleMove_Begin (edict_t *ent)
 		VectorSubtract (ent->moveinfo.end_angles, ent->s.angles, destdelta);
 	else
 		VectorSubtract (ent->moveinfo.start_angles, ent->s.angles, destdelta);
-	
+
 	// calculate length of vector
 	len = VectorLength (destdelta);
-	
+
 	// divide by speed to get time to reach dest
 	traveltime = len / ent->moveinfo.speed;
 
@@ -411,7 +416,7 @@ void plat_blocked (edict_t *self, edict_t *other)
 	{
 		// give it a chance to go away on it's own terms (like gibs)
 		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
-	
+
 		return;
 	}
 
@@ -425,7 +430,7 @@ void plat_blocked (edict_t *self, edict_t *other)
 
 
 void Use_Plat (edict_t *ent, edict_t *other, edict_t *activator)
-{ 
+{
 	if (ent->think)
 		return;		// already down
 	plat_go_down (ent);
@@ -436,7 +441,7 @@ void Touch_Plat_Center (edict_t *ent, edict_t *other, cplane_t *plane, csurface_
 {
 	if (!other->client)
 		return;
-		
+
 	if (other->health <= 0)
 		return;
 
@@ -454,13 +459,13 @@ void plat_spawn_inside_trigger (edict_t *ent)
 
 //
 // middle trigger
-//	
+//
 	trigger = G_Spawn();
 	trigger->touch = Touch_Plat_Center;
 	trigger->movetype = MOVETYPE_NONE;
 	trigger->solid = SOLID_TRIGGER;
 	trigger->enemy = ent;
-	
+
 	tmin[0] = ent->mins[0] + 25;
 	tmin[1] = ent->mins[1] + 25;
 	tmin[2] = ent->mins[2];
@@ -473,7 +478,7 @@ void plat_spawn_inside_trigger (edict_t *ent)
 
 	if (ent->spawnflags & PLAT_LOW_TRIGGER)
 		tmax[2] = tmin[2] + 8;
-	
+
 	if (tmax[0] - tmin[0] <= 0)
 	{
 		tmin[0] = (ent->mins[0] + ent->maxs[0]) *0.5;
@@ -484,7 +489,7 @@ void plat_spawn_inside_trigger (edict_t *ent)
 		tmin[1] = (ent->mins[1] + ent->maxs[1]) *0.5;
 		tmax[1] = tmin[1] + 1;
 	}
-	
+
 	VectorCopy (tmin, trigger->mins);
 	VectorCopy (tmax, trigger->maxs);
 
@@ -550,7 +555,7 @@ void SP_func_plat (edict_t *ent)
 
 	ent->use = Use_Plat;
 
-	plat_spawn_inside_trigger (ent);	// the "start moving" trigger	
+	plat_spawn_inside_trigger (ent);	// the "start moving" trigger
 
 	if (ent->targetname)
 	{
@@ -660,7 +665,7 @@ void SP_func_rotating (edict_t *ent)
 		ent->solid = SOLID_BSP;
 
 	if(!(ent->spawnflags & 128))
-		ent->s.renderfx = (RF_NOSHADOWS | RF_MINLIGHT); 
+		ent->s.renderfx = (RF_NOSHADOWS | RF_MINLIGHT);
 
 	gi.setmodel (ent, ent->model);
 	gi.linkentity (ent);
@@ -746,7 +751,7 @@ void button_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *s
 {
 
 	//do not allow buttons to be activated in warmup
-	if(level.time <= warmuptime->value) 
+	if(level.time <= warmuptime->value)
 		return;
 
 	if (!other->client)
@@ -785,7 +790,7 @@ void SP_func_button (edict_t *ent)
 
 	if (ent->sounds != 1)
 		ent->moveinfo.sound_start = gi.soundindex ("world/button2.wav");
-	
+
 	if (!ent->speed)
 		ent->speed = 40;
 	if (!ent->accel)
@@ -923,7 +928,7 @@ void door_go_down (edict_t *self)
 		self->takedamage = DAMAGE_YES;
 		self->health = self->max_health;
 	}
-	
+
 	self->moveinfo.state = STATE_DOWN;
 	if (strcmp(self->classname, "func_door") == 0)
 		Move_Calc (self, self->moveinfo.start_origin, door_hit_bottom);
@@ -942,7 +947,7 @@ void door_go_up (edict_t *self, edict_t *activator)
 			self->nextthink = level.time + self->moveinfo.wait;
 		return;
 	}
-	
+
 	if (!(self->flags & FL_TEAMSLAVE))
 	{
 		if (self->moveinfo.sound_start)
@@ -980,7 +985,7 @@ void door_use (edict_t *self, edict_t *other, edict_t *activator)
 			return;
 		}
 	}
-	
+
 	// trigger all paired doors
 	for (ent = self ; ent ; ent = ent->teamchain)
 	{
@@ -1065,7 +1070,7 @@ void Think_SpawnDoorTrigger (edict_t *ent)
 		AddPointToBounds (other->absmax, mins, maxs);
 	}
 
-	// expand 
+	// expand
 	mins[0] -= 60;
 	mins[1] -= 60;
 	maxs[0] += 60;
@@ -1094,7 +1099,7 @@ void door_blocked  (edict_t *self, edict_t *other)
 	{
 		// give it a chance to go away on it's own terms (like gibs)
 		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
-		
+
 		return;
 	}
 
@@ -1164,7 +1169,7 @@ void SP_func_door (edict_t *ent)
 
 	ent->blocked = door_blocked;
 	ent->use = door_use;
-	
+
 	if (!ent->speed)
 		ent->speed = 100;
 	if (deathmatch->value)
@@ -1211,7 +1216,7 @@ void SP_func_door (edict_t *ent)
 		gi.soundindex ("misc/talk.wav");
 		ent->touch = door_touch;
 	}
-	
+
 	ent->moveinfo.speed = ent->speed;
 	ent->moveinfo.accel = ent->accel;
 	ent->moveinfo.decel = ent->decel;
@@ -1337,7 +1342,7 @@ void SP_func_door_rotating (edict_t *ent)
 		ent->die = door_killed;
 		ent->max_health = ent->health;
 	}
-	
+
 	if (ent->targetname && ent->message)
 	{
 		gi.soundindex ("misc/talk.wav");
@@ -1475,7 +1480,7 @@ void train_blocked (edict_t *self, edict_t *other)
 	{
 		// give it a chance to go away on it's own terms (like gibs)
 		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 100000, 1, 0, MOD_CRUSH);
-		
+
 		return;
 	}
 
@@ -1533,7 +1538,7 @@ void train_wait (edict_t *self)
 	{
 		train_next (self);
 	}
-	
+
 }
 
 void train_next (edict_t *self)
@@ -1629,7 +1634,7 @@ void func_train_find (edict_t *self)
 		return;
 	}
 	self->target = ent->target;
-	
+
 
 	VectorSubtract (ent->s.origin, self->mins, self->s.origin);
 
@@ -1639,8 +1644,8 @@ void func_train_find (edict_t *self)
 	if (!self->targetname)
 		self->spawnflags |= TRAIN_START_ON;
 
-	
-	
+
+
 	if (self->spawnflags & TRAIN_START_ON)
 	{
 		self->nextthink = level.time + FRAMETIME;
@@ -2054,7 +2059,7 @@ void SP_func_door_secret (edict_t *ent)
 		gi.soundindex ("misc/talk.wav");
 		ent->touch = door_touch;
 	}
-	
+
 	ent->classname = "func_door";
 
 	gi.linkentity (ent);

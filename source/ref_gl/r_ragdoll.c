@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "r_local.h"
 #include "r_ragdoll.h"
@@ -29,14 +33,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //We will need to get a velocity vector.  This could be done by either calculating the distance from entity origin's last frame, or
 //by some other means such as a nearby effect like a rocket explosion to get the vector.  We also may need to figure out which part
-//of the ragdoll to apply this velocity to - ie, say an explosion hits their feet rather than their torso.  For starting out, let's 
+//of the ragdoll to apply this velocity to - ie, say an explosion hits their feet rather than their torso.  For starting out, let's
 //concentrate on the torso.
 
 //Once the frames are at the death stage, the ragdoll takes over.
 
-//From what I best understand from reading the tuts, we have to build a "world" in which things collide.  These would be done 
-//by the existing bsp drawing routines, and simply putting some calls before the vertex arrays are built.  This will use the 
-//ODE trimesh functions.  These are not completely straightforward, as there appears to be a need for the verts to be done with 
+//From what I best understand from reading the tuts, we have to build a "world" in which things collide.  These would be done
+//by the existing bsp drawing routines, and simply putting some calls before the vertex arrays are built.  This will use the
+//ODE trimesh functions.  These are not completely straightforward, as there appears to be a need for the verts to be done with
 //indices so that normals are correctly built.
 
 //The ragdoll will need to either be hardcoded in, or read in at load time.  To begin, we will
@@ -45,12 +49,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //this much easier.
 
 //So how does the ragoll then animate the mesh?  We need to get rotation and location vectors from the
-//ragdoll, and apply them to the models skeleton.  We would need to use the same tech we use for player pitch spine bending to 
+//ragdoll, and apply them to the models skeleton.  We would need to use the same tech we use for player pitch spine bending to
 //manipulate the skeleton.  We get rotation and location of body parts, and that is it.
 
 //Ragdolls will be batched and drawn just as regular entities, which also means that entities should not be drawn in their normal
 //batch once in a death animation.  When death animations begin, a ragdoll will be generated with the appropriate properties including
-//position, velocity, etc.  The ragdoll will be timestamped, and will be removed from the stack after a certain amount of time has 
+//position, velocity, etc.  The ragdoll will be timestamped, and will be removed from the stack after a certain amount of time has
 //elapsed.
 
 //This tutorial is straightforward and useful, and though it's in python, it's easily translated into C code.
@@ -90,7 +94,7 @@ vec_t* add3(vec3_t a, vec3_t b)
 	rv[0] = a[0] + b[0];
 	rv[1] = a[1] + b[1];
 	rv[2] = a[2] + b[2];
-	
+
 	return rv;
 }
 
@@ -160,7 +164,7 @@ float dot3(vec3_t a, vec3_t b)
 vec_t* cross(vec3_t a, vec3_t b)
 {
 	vec_t *crossP = NULL;
-	
+
 	CrossProduct(a, b, crossP);
 	return crossP;
 }
@@ -288,7 +292,7 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	RagDoll[RagDollID].RagDollObject[objectID].body = dBodyCreate(RagDollWorld);
 
 	//set it's mass
-	dMassSetCapsule (&RagDoll[RagDollID].RagDollObject[objectID].mass, density, 3, radius, length); 
+	dMassSetCapsule (&RagDoll[RagDollID].RagDollObject[objectID].mass, density, 3, radius, length);
 	dBodySetMass(RagDoll[RagDollID].RagDollObject[objectID].body, &RagDoll[RagDollID].RagDollObject[objectID].mass);
 
 	//creat the geometry and give it a name
@@ -298,17 +302,17 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 
 	//define body rotation automatically from body axis
 	VectorCopy(norm3(sub3(p2, p1)), za);
-		
+
 	VectorSet(temp, 1.0, 0.0, 0.0);
 	if (abs(dot3(za, temp)) < 0.7)
 		VectorSet(xa, 1.0, 0.0, 0.0);
 	else
 		VectorSet(xa, 0.0, 1.0, 0.0);
-		
+
 	VectorCopy(cross(za, xa), ya);
 
 	VectorCopy(norm3(cross(ya, za)), xa);
-	VectorCopy(cross(za, xa), ya);	
+	VectorCopy(cross(za, xa), ya);
 
 	rot[0] = xa[0];
 	rot[1] = ya[0];
@@ -518,7 +522,7 @@ void R_AddNewRagdoll( void )
 	//add a ragdoll, look for first open slot
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
-		if(RagDoll[RagDollID].destroyed) 
+		if(RagDoll[RagDollID].destroyed)
 		{
 			R_RagdollBody_Init(RagDollID);
 			break;
@@ -531,9 +535,9 @@ void R_RenderAllRagdolls ( void )
 	int RagDollID;
 	//Iterate though the ragdoll stack, and render each one.
 
-	//This function would look very similar to the iqm/alias entity routine, but will call a 
-	//different animation function.  This function will keep track of the time as well, and 
-	//handle any expired ragdolls off of the stack.  
+	//This function would look very similar to the iqm/alias entity routine, but will call a
+	//different animation function.  This function will keep track of the time as well, and
+	//handle any expired ragdolls off of the stack.
 
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{

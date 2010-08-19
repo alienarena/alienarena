@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // cl_ents.c -- entity parsing and management
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "client.h"
 
 clentity_t *active_clentities, *free_clentities;

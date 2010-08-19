@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 /*QUAKED target_temp_entity (1 0 0) (-8 -8 -8) (8 8 8)
@@ -61,7 +66,7 @@ void Use_Target_Speaker (edict_t *ent, edict_t *other, edict_t *activator)
 
 	if (ent->spawnflags & 3)
 	{	// looping sound toggles
-	
+
 		if (ent->s.sound)
 			ent->s.sound = 0;	// turn it off
 		else
@@ -82,7 +87,7 @@ void Target_Speaker_Think (edict_t *ent)
 {
 	ent->s.sound = ent->noise_index;
 
-	ent->nextthink = level.time + 1;	
+	ent->nextthink = level.time + 1;
 }
 void SP_target_speaker (edict_t *ent)
 {
@@ -422,8 +427,8 @@ void target_laser_think (edict_t *self)
 			gi.WriteByte (TE_LASERBEAM);
 		gi.WritePosition (start);
 		gi.WritePosition (end);
-		gi.multicast (start, MULTICAST_PHS); 
-		
+		gi.multicast (start, MULTICAST_PHS);
+
 		if (!tr.ent)
 			break;
 
@@ -571,53 +576,53 @@ void SP_target_laser (edict_t *self)
 	self->nextthink = level.time + 1;
 }
 
-/*QUAKED target_changelevel (1 0 0) (-8 -8 -8) (8 8 8)   
-Changes level to "map" when fired   
-*/   
-void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)   
-{   
-	if (level.intermissiontime)   
-		return;         // already activated   
-     
-    if (!deathmatch->value)   
-    {   
-		if (g_edicts[1].health <= 0)   
-			return;   
-    }  
-     
-    // if noexit, do a ton of damage to other   
-    if (deathmatch->value && !( (int)dmflags->value & DF_ALLOW_EXIT) && other != world)   
-    {   
-		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 10 * other->max_health, 1000, 0, MOD_EXIT);   
-        return;   
-    }   
-     
-    // if multiplayer, let everyone know who hit the exit   
-    if (deathmatch->value)   
-    {   
-		if (activator && activator->client)   
-			safe_bprintf (PRINT_HIGH, "%s exited the level.\n", activator->client->pers.netname);   
-    } 
-     
-	// if going to a new unit, clear cross triggers   
-    if (strstr(self->map, "*"))   
-		game.serverflags &= ~(SFL_CROSS_TRIGGER_MASK);   
-     
-    BeginIntermission (self);   
-}   
-     
-void SP_target_changelevel (edict_t *ent)   
-{   
-	if (!ent->map)   
-    {   
-		gi.dprintf("target_changelevel with no map at %s\n", vtos(ent->s.origin));   
-        G_FreeEdict (ent);   
-        return;   
-    }   
-     
-    ent->use = use_target_changelevel;   
-    ent->svflags = SVF_NOCLIENT;   
-}  
+/*QUAKED target_changelevel (1 0 0) (-8 -8 -8) (8 8 8)
+Changes level to "map" when fired
+*/
+void use_target_changelevel (edict_t *self, edict_t *other, edict_t *activator)
+{
+	if (level.intermissiontime)
+		return;         // already activated
+
+    if (!deathmatch->value)
+    {
+		if (g_edicts[1].health <= 0)
+			return;
+    }
+
+    // if noexit, do a ton of damage to other
+    if (deathmatch->value && !( (int)dmflags->value & DF_ALLOW_EXIT) && other != world)
+    {
+		T_Damage (other, self, self, vec3_origin, other->s.origin, vec3_origin, 10 * other->max_health, 1000, 0, MOD_EXIT);
+        return;
+    }
+
+    // if multiplayer, let everyone know who hit the exit
+    if (deathmatch->value)
+    {
+		if (activator && activator->client)
+			safe_bprintf (PRINT_HIGH, "%s exited the level.\n", activator->client->pers.netname);
+    }
+
+	// if going to a new unit, clear cross triggers
+    if (strstr(self->map, "*"))
+		game.serverflags &= ~(SFL_CROSS_TRIGGER_MASK);
+
+    BeginIntermission (self);
+}
+
+void SP_target_changelevel (edict_t *ent)
+{
+	if (!ent->map)
+    {
+		gi.dprintf("target_changelevel with no map at %s\n", vtos(ent->s.origin));
+        G_FreeEdict (ent);
+        return;
+    }
+
+    ent->use = use_target_changelevel;
+    ent->svflags = SVF_NOCLIENT;
+}
 
 //==========================================================
 

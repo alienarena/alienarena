@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // r_misc.c
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "r_local.h"
 #include <GL/glu.h>
 
@@ -48,9 +52,9 @@ image_t		*r_cflashtexture;
 image_t		*r_leaderfieldtexture;
 image_t		*r_deathfieldtexture;
 image_t		*r_deathfieldtexture2;
-image_t		*r_shelltexture; 
+image_t		*r_shelltexture;
 image_t		*r_shelltexture2;
-image_t		*r_shellnormal;  
+image_t		*r_shellnormal;
 image_t		*r_hittexture;
 image_t		*r_bubbletexture;
 image_t		*r_reflecttexture;
@@ -72,11 +76,11 @@ image_t		*r_raintexture;
 image_t		*r_leaftexture;
 image_t		*r_splashtexture;
 image_t		*r_splash2texture;
-image_t		*r_radarmap; 
+image_t		*r_radarmap;
 image_t		*r_around;
 image_t		*r_flare;
 image_t		*r_flare1;
-image_t		*r_mirrorspec; 
+image_t		*r_mirrorspec;
 image_t		*r_distort;
 image_t		*sun_object;
 image_t		*sun1_object;
@@ -131,7 +135,7 @@ void R_InitCubemapTextures (void)
 	qglTexParameteri (GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	qglTexParameteri (GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	qglTexParameteri (GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	
+
 	for (i = 0; i < 6; i++)
 	{
 		for (y = 0; y < CUBEMAP_MAXSIZE; y++)
@@ -196,178 +200,178 @@ void R_InitParticleTexture (void)
 			data[y][x][0] = 255;
 			data[y][x][1] = 255;
 			data[y][x][2] = 255;
-			data[y][x][3] = dottexture[x][y]; 
+			data[y][x][3] = dottexture[x][y];
 		}
 	}
 
 	r_particletexture = R_RegisterParticlePic("particle");
-	if (!r_particletexture) {                                
+	if (!r_particletexture) {
 		r_particletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 	r_smoketexture = R_RegisterParticlePic("smoke");
-	if (!r_smoketexture) {                                
+	if (!r_smoketexture) {
 		r_smoketexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_explosiontexture = R_RegisterParticlePic("explosion");
-	if (!r_explosiontexture) {                                
+	if (!r_explosiontexture) {
 		r_explosiontexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_explosion1texture = R_RegisterParticlePic("r_explod_1");
-	if (!r_explosion1texture) {                                
+	if (!r_explosion1texture) {
 		r_explosion1texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_explosion2texture = R_RegisterParticlePic("r_explod_2");
-	if (!r_explosion2texture) {                                
+	if (!r_explosion2texture) {
 		r_explosion2texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_explosion3texture = R_RegisterParticlePic("r_explod_3");
-	if (!r_explosion3texture) {                                
+	if (!r_explosion3texture) {
 		r_explosion3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_explosion4texture = R_RegisterParticlePic("r_explod_4");
-	if (!r_explosion4texture) {                                
+	if (!r_explosion4texture) {
 		r_explosion4texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_explosion5texture = R_RegisterParticlePic("r_explod_5");
-	if (!r_explosion5texture) {                                
+	if (!r_explosion5texture) {
 		r_explosion5texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_explosion6texture = R_RegisterParticlePic("r_explod_6");
-	if (!r_explosion6texture) {                                
+	if (!r_explosion6texture) {
 		r_explosion6texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_explosion7texture = R_RegisterParticlePic("r_explod_7");
-	if (!r_explosion7texture) {                                
+	if (!r_explosion7texture) {
 		r_explosion7texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_bloodtexture = R_RegisterParticlePic("blood");
-	if (!r_bloodtexture) {                                
+	if (!r_bloodtexture) {
 		r_bloodtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_pufftexture = R_RegisterParticlePic("puff");
-	if (!r_pufftexture) {                                
+	if (!r_pufftexture) {
 		r_pufftexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_bflashtexture = R_RegisterParticlePic("bflash");
-	if (!r_bflashtexture) {                                
+	if (!r_bflashtexture) {
 		r_bflashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_cflashtexture = R_RegisterParticlePic("cflash");
-	if (!r_cflashtexture) {                                
+	if (!r_cflashtexture) {
 		r_cflashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_leaderfieldtexture = R_RegisterParticlePic("leaderfield");
-	if (!r_leaderfieldtexture) {                                
+	if (!r_leaderfieldtexture) {
 		r_leaderfieldtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_deathfieldtexture = R_RegisterParticlePic("deathfield");
-	if (!r_deathfieldtexture) {                                
+	if (!r_deathfieldtexture) {
 		r_deathfieldtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_deathfieldtexture2 = R_RegisterParticlePic("deathfield2");
-	if (!r_deathfieldtexture2) {                                
+	if (!r_deathfieldtexture2) {
 		r_deathfieldtexture2 = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_shelltexture = R_RegisterParticlePic("shell");
-	if (!r_shelltexture) {                                
+	if (!r_shelltexture) {
 		r_shelltexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }  
+    }
 	r_shelltexture2 = R_RegisterParticlePic("shell2");
-	if (!r_shelltexture2) {                                
+	if (!r_shelltexture2) {
 		r_shelltexture2 = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    } 
+    }
 	r_shellnormal = R_RegisterParticlePic("shell2_normal");
-	if (!r_shellnormal) {                                
+	if (!r_shellnormal) {
 		r_shellnormal = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    } 
+    }
 	r_hittexture = R_RegisterParticlePic("aflash");
-	if (!r_hittexture) {                                
+	if (!r_hittexture) {
 		r_hittexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_bubbletexture = R_RegisterParticlePic("bubble");
-	if (!r_bubbletexture) {                                
+	if (!r_bubbletexture) {
 		r_bubbletexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_reflecttexture = R_RegisterParticlePic("reflect");
-	if (!r_reflecttexture) {                                
+	if (!r_reflecttexture) {
 		r_reflecttexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_mirrorspec = R_RegisterGfxPic("mirrorspec");
-	if (!r_mirrorspec) {                                
+	if (!r_mirrorspec) {
 		r_mirrorspec = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_shottexture = R_RegisterParticlePic("dflash");
-	if (!r_shottexture) {                                
+	if (!r_shottexture) {
 		r_shottexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_sayicontexture = R_RegisterParticlePic("sayicon");
-	if (!r_sayicontexture) {                                
+	if (!r_sayicontexture) {
 		r_sayicontexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_flaretexture = R_RegisterParticlePic("flare");
-	if (!r_flaretexture) {                                
+	if (!r_flaretexture) {
 		r_flaretexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_flagtexture = R_RegisterParticlePic("flag");
-	if (!r_flagtexture) {                                
+	if (!r_flagtexture) {
 		r_flagtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_logotexture = R_RegisterParticlePic("logo");
-	if (!r_logotexture) {                                
+	if (!r_logotexture) {
 		r_logotexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_beamtexture = R_RegisterGfxPic("glightning");
-	if (!r_beamtexture) {                                
+	if (!r_beamtexture) {
 		r_beamtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_beam2texture = R_RegisterGfxPic("greenline");
-	if (!r_beam2texture) {                                
+	if (!r_beam2texture) {
 		r_beam2texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_beam3texture = R_RegisterGfxPic("electrics3d");
-	if (!r_beam3texture) {                                
+	if (!r_beam3texture) {
 		r_beam3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_bullettexture = R_RegisterParticlePic("bullethole");
-	if (!r_bullettexture) {                                
+	if (!r_bullettexture) {
 		r_bullettexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_bulletnormal = R_RegisterParticleNormal("bullethole2");
-	if (!r_bulletnormal) {                                
+	if (!r_bulletnormal) {
 		r_bulletnormal = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_voltagetexture = R_RegisterParticlePic("voltage");
-	if (!r_voltagetexture) {                                
+	if (!r_voltagetexture) {
 		r_voltagetexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_raintexture = R_RegisterParticlePic("beam");
-	if (!r_raintexture) {                                
+	if (!r_raintexture) {
 		r_raintexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 	r_leaftexture = R_RegisterParticlePic("leaf");
-	if (!r_leaftexture) {                                
+	if (!r_leaftexture) {
 		r_leaftexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }   
+    }
 	r_splashtexture = R_RegisterParticlePic("ripples");
-	if (!r_splashtexture) {                                
+	if (!r_splashtexture) {
 		r_splashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }   
+    }
 	r_splash2texture = R_RegisterParticlePic("watersplash");
-	if (!r_splash2texture) {                                
+	if (!r_splash2texture) {
 		r_splash2texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }  
+    }
 	r_radarmap = GL_FindImage("gfx/radar/radarmap",it_pic);
-	if (!r_radarmap) {                                
+	if (!r_radarmap) {
 		r_radarmap = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 	r_around = GL_FindImage("gfx/radar/around",it_pic);
-	if (!r_around) {                                
+	if (!r_around) {
 		r_around = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }                                          
+    }
 	r_distort = GL_FindImage("gfx/water/distort1.tga", it_pic);
-	if (!r_distort) {                                
+	if (!r_distort) {
 		r_distort = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    } 
+    }
 	sun_object = R_RegisterGfxPic("sun");
 	if(!sun_object) {
 		sun_object = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
@@ -381,17 +385,17 @@ void R_InitParticleTexture (void)
 		sun2_object = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
 	}
 	r_dis1texture = R_RegisterParticlePic("disbeam1");
-	if (!r_dis1texture) {                                
+	if (!r_dis1texture) {
 		r_dis1texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    } 
+    }
 	r_dis2texture = R_RegisterParticlePic("disbeam2");
-	if (!r_dis2texture) {                                
+	if (!r_dis2texture) {
 		r_dis2texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    } 
+    }
 	r_dis3texture = R_RegisterParticlePic("disbeam3");
-	if (!r_dis3texture) {                                
+	if (!r_dis3texture) {
 		r_dis3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }    
+    }
 
 	//
 	// also use this for bad textures, but without alpha
@@ -401,27 +405,27 @@ void R_InitParticleTexture (void)
 		for (y=0 ; y<16 ; y++)
 		{
 			data[y][x][0] = dottexture[x&3][y&3]*255;
-			data[y][x][1] = 0; 
-			data[y][x][2] = 0; 
+			data[y][x][1] = 0;
+			data[y][x][2] = 0;
 			data[y][x][3] = 255;
 		}
 	}
 	r_notexture = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 
-	R_InitCubemapTextures (); 
+	R_InitCubemapTextures ();
 
 	//will eventually add more flaretypes
 	Com_sprintf (flares, sizeof(flares), "gfx/flares/flare0.tga");
 	r_flare = GL_FindImage(flares, it_pic);
-	if (!r_flare) {                                
+	if (!r_flare) {
 		r_flare = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }     
+    }
 
 	Com_sprintf (flares, sizeof(flares), "gfx/flares/flare1.tga");
 	r_flare1 = GL_FindImage(flares, it_pic);
-	if (!r_flare1) {                                
+	if (!r_flare1) {
 		r_flare1 = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }   
+    }
 }
 
 

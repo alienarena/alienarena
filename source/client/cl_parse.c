@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // cl_parse.c  -- parse a message received from the server
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "client.h"
 
 char *svc_strings[256] =
@@ -96,7 +100,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		Com_Printf ("Refusing to download a path with ..\n");
 		return true;
 	}
-	
+
     //if pcx, strip extension and change to .tga, we never dl .pcx anymore
     if(filename[strlen(filename)-1] == 'x') {
 		modelskin = true;
@@ -110,7 +114,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	//if jpg, be sure to also try tga (player skin situation)
     if(filename[strlen(filename)-2] == 'p' && filename[strlen(filename)-1] == 'g')
 		jpg = true;
-	
+
 	if (FS_LoadFile (filename, NULL) != -1)	{
 		// it exists, no need to download
 		return true;
@@ -118,7 +122,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	else if(modelskin){
 		//try for .jpg
 		COM_StripExtension ( filename, shortname );
-		sprintf(filename, "%s.jpg", shortname);	
+		sprintf(filename, "%s.jpg", shortname);
 		if (FS_LoadFile (filename, NULL) != -1)	{
 			// it exists, no need to download
 			return true;
@@ -127,7 +131,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	else if(jpg) { //didn't find .jpg skin, try for .tga skin, convoluted, yes indeed.
 		//try for .tga
 		COM_StripExtension ( filename, shortname );
-		sprintf(filename, "%s.tga", shortname);	
+		sprintf(filename, "%s.tga", shortname);
 		if (FS_LoadFile (filename, NULL) != -1)	{
 			// it exists, no need to download
 			return true;
@@ -143,9 +147,9 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	strcat (cls.downloadtempname, ".tmp");
 
 	// attempt an http download if available(never try to dl game model skins here)
-	if(cls.downloadurl[0] && CL_HttpDownload())  
+	if(cls.downloadurl[0] && CL_HttpDownload())
 			return false;
-	
+
 
 //ZOID
 	// check to see if we already have a tmp for this file, if so, try to resume
@@ -267,7 +271,7 @@ void CL_ParseDownload (void)
 	if (size < 0) //fix issues with bad data being dl'd
 	{
 		Com_Printf ("Server does not have file %s.\n", cls.downloadname);
-		
+
 		//nuke the temp filename, we don't want that getting left around.
 		cls.downloadtempname[0] = 0;
 		cls.downloadname[0] = 0;
@@ -288,7 +292,7 @@ void CL_ParseDownload (void)
 		CL_DownloadFileName(name, sizeof(name), cls.downloadtempname);
 
 		FS_CreatePath (name);
- 
+
 		cls.download = fopen (name, "wb");
 		if (!cls.download)
 		{
@@ -535,13 +539,13 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		model_filename[i] = tolower(model_filename[i]);
 	while (model_filename[i++]);
 
-	FS_FOpenFile (model_filename, &file); 
+	FS_FOpenFile (model_filename, &file);
 	if(file) {
 		//exists
 		fclose(file);
-		ci->lod1 = R_RegisterModel(model_filename);	
+		ci->lod1 = R_RegisterModel(model_filename);
 	}
-	else 
+	else
 		ci->lod1 = NULL;
 
 	Com_sprintf(model_filename, sizeof(model_filename), "players/%s/lod2.md2", model_name);
@@ -550,15 +554,15 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		model_filename[i] = tolower(model_filename[i]);
 	while (model_filename[i++]);
 
-	FS_FOpenFile (model_filename, &file); 
+	FS_FOpenFile (model_filename, &file);
 	if(file) {
 		//exists
 		fclose(file);
-		ci->lod2 = R_RegisterModel(model_filename);		
+		ci->lod2 = R_RegisterModel(model_filename);
 	}
 	else
 		ci->lod2 = NULL;
-	
+
 	// must have loaded all data types to be valid
 	if (!ci->skin || !ci->icon || !ci->model || !ci->weaponmodel[0])
 	{
@@ -590,7 +594,7 @@ void CL_ParseClientinfo (int player)
 	CL_LoadClientinfo (ci, s);
 }
 
-void CL_ParseTaunt( char *s) 
+void CL_ParseTaunt( char *s)
 {
 	int l, j;
 	char tauntsound[MAX_OSPATH];
@@ -603,16 +607,16 @@ void CL_ParseTaunt( char *s)
 		scr_playericon[j] = tolower(scr_playericon[j]);
 
 	Com_sprintf(scr_playericon, sizeof(scr_playericon), "%s_i", scr_playericon);
-	
+
 	strcpy( tauntsound, COM_Parse( &s ) );
-	
-	strcpy( scr_playername, COM_Parse( &s ) ); //fix	
+
+	strcpy( scr_playername, COM_Parse( &s ) ); //fix
 
 	if(cl_playtaunts->value) {
-		S_StartSound (NULL, 0, 0, S_RegisterSound (tauntsound), 1, ATTN_NONE, 0);		
+		S_StartSound (NULL, 0, 0, S_RegisterSound (tauntsound), 1, ATTN_NONE, 0);
 		scr_playericonalpha = 2.0;
 	}
-	
+
 }
 
 /*

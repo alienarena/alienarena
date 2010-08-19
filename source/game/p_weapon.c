@@ -1,4 +1,27 @@
-// g_weapon.c
+/*
+Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 20?? COR Entertainment, LLC.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+// p_weapon.c
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "g_local.h"
 #include "m_player.h"
@@ -142,7 +165,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 					if(ent->item->weapmodel == WEAP_VAPORIZER)
 						SetRespawn (ent, 10);
 					else
-						SetRespawn (ent, 5); 
+						SetRespawn (ent, 5);
 				}
 			}
 		}
@@ -796,7 +819,7 @@ void weapon_energy_field_fire (edict_t *ent)
 
 	if (is_quad)
 	{
-		radius_damage *=2; 
+		radius_damage *=2;
 		damage *= 2;
 		kick *= 4;
 	}
@@ -938,7 +961,7 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (is_quad) 
+	if (is_quad)
 		damage *= 2;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
@@ -989,7 +1012,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	damage_radius = 120;
 	if (is_quad)
 	{
-		damage *= 2; 
+		damage *= 2;
 		radius_damage *= 2;
 	}
 
@@ -1058,7 +1081,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	vec3_t	offset;
 
 	if (is_quad)
-		damage *= 2; 
+		damage *= 2;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
@@ -1108,7 +1131,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 		gi.WriteByte (MZ_BLASTER | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 	PlayerNoise(ent, start, PNOISE_WEAPON);
-	
+
 	//create visual muzzle flash sprite!
 	if(!hyper || (ent->client->buttons & BUTTON_ATTACK2))
 	{
@@ -1157,7 +1180,7 @@ void Weapon_Bomber_Fire (edict_t *ent)
 	damage_radius = 250;
 	if (is_quad)
 	{
-		damage *= 2; 
+		damage *= 2;
 		radius_damage *= 2;
 	}
 
@@ -1168,7 +1191,7 @@ void Weapon_Bomber_Fire (edict_t *ent)
 
 	VectorSet(offset, 8, 8, ent->viewheight-4);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	
+
 	if(ent->client->buttons & BUTTON_ATTACK2 && ent->client->ps.gunframe != 12) {
 		fire_rocket (ent, start, forward, damage/3, 1400, damage_radius/2, radius_damage/2);
 		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/rocklr1b.wav"), 1, ATTN_NORM, 0);
@@ -1223,7 +1246,7 @@ void Weapon_Strafer_Fire (edict_t *ent)
 		damage = 20;
 
 	if (is_quad)
-		damage *= 2; 
+		damage *= 2;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
@@ -1237,7 +1260,7 @@ void Weapon_Strafer_Fire (edict_t *ent)
 
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 
-	if(ent->client->buttons & BUTTON_ATTACK2) 
+	if(ent->client->buttons & BUTTON_ATTACK2)
 		fire_rocket (ent, start, forward, damage, 1200, damage_radius, radius_damage);
 	else
 		fire_blaster_beam (ent, start, forward, damage, 0, true);
@@ -1272,7 +1295,7 @@ void Weapon_Strafer_Fire (edict_t *ent)
 		fire_rocket (ent, start, forward, damage, 1200, damage_radius, radius_damage);
 		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/rocklr1b.wav"), 1, ATTN_NORM, 0);
 	}
-	else {		
+	else {
 		fire_blaster_beam (ent, start, forward, damage, 0, true);
 		gi.sound (ent, CHAN_WEAPON, gi.soundindex("vehicles/shootlaser.wav"), 1, ATTN_NORM, 0);
 	}
@@ -1315,7 +1338,7 @@ void Weapon_Hover_Fire (edict_t *ent)
 		damage = 20;
 
 	if (is_quad)
-		damage *= 2; 
+		damage *= 2;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
@@ -1333,7 +1356,7 @@ void Weapon_Hover_Fire (edict_t *ent)
 	else if(ent->client->ps.gunframe == 6) {
 		fire_hover_beam (ent, start, forward, damage, 0, true);
 		gi.sound (ent, CHAN_WEAPON, gi.soundindex("weapons/biglaser.wav"), 1, ATTN_NORM, 0);
-		
+
 		VectorAdd(start, forward, start);
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_CHAINGUNSMOKE);
@@ -1402,12 +1425,12 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 				effect = EF_HYPERBLASTER;
 			else
 				effect = 0;
-		
+
 			if(excessive->value)
 				damage = 25;
 			else
-				damage = 10; 
-					
+				damage = 10;
+
 			Blaster_Fire (ent, offset, damage, true, effect);
 			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
 				ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -1452,7 +1475,7 @@ void Machinegun_Fire (edict_t *ent)
 
 	if ((ent->client->ps.gunframe == 5) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
 	{
-		
+
 		ent->client->ps.gunframe = 14;
 		ent->client->weapon_sound = 0;
 		return;
@@ -1480,7 +1503,7 @@ void Machinegun_Fire (edict_t *ent)
 		ent->client->ps.gunframe++;
 		ent->altfire = false;
 	}
-	else 
+	else
 		ent->client->ps.gunframe++;
 
 	shots = 1;
@@ -1504,13 +1527,13 @@ void Machinegun_Fire (edict_t *ent)
 
 	if (is_quad)
 	{
-		damage *= 2; 
+		damage *= 2;
 		kick *= 2;
 	}
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);//was up
 	if(ent->client->ps.gunframe == 6 || ent->client->ps.gunframe == 8 || ent->client->ps.gunframe == 10 || ent->client->ps.gunframe == 12)
-	{	
+	{
 		if(ent->altfire)
 			ent->client->kick_angles[0] = -3; /* Kick view up */
 		else
@@ -1616,7 +1639,7 @@ void weapon_floater_fire (edict_t *ent)
 	damage_radius = 120;
 	if (is_quad || excessive->value)
 	{
-		damage *= 2; 
+		damage *= 2;
 		radius_damage *= 2;
 	}
 
@@ -1746,7 +1769,7 @@ void Violator_Fire (edict_t *ent)
 		damage = 200;
 	else
 		damage = 40;
-	
+
 	if ((ent->client->ps.gunframe == 6) && !(ent->client->buttons & BUTTON_ATTACK || ent->client->buttons & BUTTON_ATTACK2))
 	{
 		ent->client->ps.gunframe = 14;
@@ -1778,7 +1801,7 @@ void Violator_Fire (edict_t *ent)
 	else
 		ent->client->ps.gunframe++;
 
-	if (is_quad) { 
+	if (is_quad) {
 		damage *= 2;
 		kick *=2;
 	}
@@ -1792,7 +1815,7 @@ void Violator_Fire (edict_t *ent)
 	VectorScale (forward, -10, back);
 
 	if(ent->client->ps.gunframe == 6 && ent->client->buttons & BUTTON_ATTACK2) {
-	
+
 		VectorSet(offset, 1, 1, ent->viewheight-0.5);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 		fire_violator(ent, start, forward, damage/2, kick*20, 1);
@@ -1809,7 +1832,7 @@ void Violator_Fire (edict_t *ent)
 		gi.WriteShort (ent-g_edicts);
 		gi.WriteByte (MZ_RAILGUN | is_silenced);
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
-		
+
 		VectorScale(forward, 1.4, forward);
 		VectorAdd(start, forward, start);
 		VectorScale(right, -0.5, right);
@@ -1850,7 +1873,7 @@ void Violator_Fire (edict_t *ent)
 		VectorAdd(start, forward, start);
 		VectorScale(right, -0.5, right);
 		VectorAdd(start, right, start);
-	
+
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_VOLTAGE);
 		gi.WritePosition (start);
@@ -1872,7 +1895,7 @@ void Weapon_Violator (edict_t *ent)
 	static int	pause_frames[]	= {43, 0};
 	static int	fire_frames[]	= {5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
 	static int	bot_fire_frames[] = {5, 6, 7, 8, 9, 10, 11, 12, 13};
-	if(ent->is_bot) //done because bots need one frame in which to "escape" from firing 
+	if(ent->is_bot) //done because bots need one frame in which to "escape" from firing
 		Weapon_Generic (ent, 4, 14, 43, 46, pause_frames, bot_fire_frames, Violator_Fire);
 	else
 		Weapon_Generic (ent, 4, 14, 43, 46, pause_frames, fire_frames, Violator_Fire);

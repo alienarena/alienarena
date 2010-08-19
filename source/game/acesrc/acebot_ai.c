@@ -11,9 +11,9 @@
 //
 //	Please see liscense.txt in the source directory for the copyright
 //	information regarding those files belonging to Id Software, Inc.
-//	
+//
 //	Should you decide to release a modified version of ACE, you MUST
-//	include the following text (minus the BEGIN and END lines) in the 
+//	include the following text (minus the BEGIN and END lines) in the
 //	documentation for your modification.
 //
 //	--- BEGIN ---
@@ -24,7 +24,7 @@
 //	This program is a modification of the ACE Bot, and is therefore
 //	in NO WAY supported by Steve Yeager.
 
-//	This program MUST NOT be sold in ANY form. If you have paid for 
+//	This program MUST NOT be sold in ANY form. If you have paid for
 //	this product, you should contact Steve Yeager immediately, via
 //	the ACE Bot homepage.
 //
@@ -44,22 +44,26 @@
 //  Telefragged.com - For giving ACE a home.
 //  Microsoft       - For giving us such a wonderful crash free OS.
 //  id              - Need I say more.
-//  
+//
 //  And to all the other testers, pathers, and players and people
 //  who I can't remember who the heck they were, but helped out.
 //
 ///////////////////////////////////////////////////////////////////////
-	
+
 ///////////////////////////////////////////////////////////////////////
 //
-//  acebot_ai.c -      This file contains all of the 
+//  acebot_ai.c -      This file contains all of the
 //                     AI routines for the ACE II bot.
 //
 //
 // NOTE: I went back and pulled out most of the brains from
-//       a number of these functions. They can be expanded on 
-//       to provide a "higher" level of AI. 
+//       a number of these functions. They can be expanded on
+//       to provide a "higher" level of AI.
 ////////////////////////////////////////////////////////////////////////
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "../g_local.h"
 #include "../m_player.h"
@@ -82,20 +86,20 @@ void ACEAI_Think (edict_t *self)
 	memset (&ucmd, 0, sizeof (ucmd));
 	self->enemy = NULL;
 	self->movetarget = NULL;
-	
-	// Force respawn 
+
+	// Force respawn
 	if (self->deadflag)
 	{
 		self->client->buttons = 0;
 		ucmd.buttons = BUTTON_ATTACK;
 	}
-	
+
 	if(self->state == STATE_WANDER && self->wander_timeout < level.time)
 	  ACEAI_PickLongRangeGoal(self); // pick a new long range goal
 
-	// Kill the bot if completely stuck somewhere 
-	
-	if(VectorLength(self->velocity) > 37) 
+	// Kill the bot if completely stuck somewhere
+
+	if(VectorLength(self->velocity) > 37)
 		self->suicide_timeout = level.time + 10.0;
 
 	if(self->suicide_timeout < level.time && self->takedamage == DAMAGE_AIM && !level.intermissiontime)
@@ -108,17 +112,17 @@ void ACEAI_Think (edict_t *self)
 	if(self->suicide_timeout < level.time + 8)
 		self->state = STATE_WANDER;
 
-	//times up on spawn protection 
+	//times up on spawn protection
 	if(level.time > self->client->spawnprotecttime + g_spawnprotect->integer)
 		self->client->spawnprotected = false;
-	
+
 	// Find any short range goal - but not if in air(ie, jumping a jumppad)
 	if(self->groundentity)
 		ACEAI_PickShortRangeGoal(self);
-	
+
 	// Look for enemies
 	if(ACEAI_FindEnemy(self))
-	{	
+	{
 		ACEAI_ChooseWeapon(self);
 		ACEMV_Attack (self, &ucmd);
 	}
@@ -130,7 +134,7 @@ void ACEAI_Think (edict_t *self)
 		else if(self->state == STATE_MOVE)
 			ACEMV_Move(self,&ucmd);
 	}
-	
+
 	//debug_printf("State: %d\n",self->state);
 
 	// set approximate ping
@@ -142,16 +146,16 @@ void ACEAI_Think (edict_t *self)
 	ucmd.angles[PITCH] = ANGLE2SHORT(self->s.angles[PITCH]);
 	ucmd.angles[YAW] = ANGLE2SHORT(self->s.angles[YAW]);
 	ucmd.angles[ROLL] = ANGLE2SHORT(self->s.angles[ROLL]);
-	
+
 	// send command through id's code
 	ClientThink (self, &ucmd);
-	
+
 	self->nextthink = level.time + FRAMETIME;
 }
 
 ///////////////////////////////////////////////////////////////////////
 // Evaluate the best long range goal and send the bot on
-// its way. This is a good time waster, so use it sparingly. 
+// its way. This is a good time waster, so use it sparingly.
 // Do not call it for every think cycle.
 ///////////////////////////////////////////////////////////////////////
 void ACEAI_PickLongRangeGoal(edict_t *self)
@@ -163,12 +167,12 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 	int current_node,goal_node;
 	edict_t *goal_ent, *ent;
 	float cost;
-	
-	// look for a target 
+
+	// look for a target
 	current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
 
 	self->current_node = current_node;
-	
+
 	if(current_node == -1)
 	{
 		self->state = STATE_WANDER;
@@ -184,17 +188,17 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 	{
 		if(item_table[i].ent == NULL || item_table[i].ent->solid == SOLID_NOT) // ignore items that are not there.
 			continue;
-		
+
 		cost = ACEND_FindCost(current_node,item_table[i].node);
-		
+
 		if(cost == INVALID || cost < 2) // ignore invalid and very short hops
 			continue;
-	
+
 		weight = ACEIT_ItemNeed(self, item_table[i].item);
 
 		weight *= random(); // Allow random variations
 		weight /= cost; // Check against cost of getting there
-				
+
 		if(weight > best_weight)
 		{
 			best_weight = weight;
@@ -220,18 +224,18 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 		if(cost == INVALID || cost < 3) // ignore invalid and very short hops
 			continue;
 
-		weight = 0.3; 
-		
+		weight = 0.3;
+
 		weight *= random(); // Allow random variations
 		weight /= cost; // Check against cost of getting there
-		
+
 		//check for flag, and if enemy has the flag, up the weight.
 		if(weight > best_weight)
-		{		
+		{
 			best_weight = weight;
 			goal_node = node;
 			goal_ent = ent;
-		}	
+		}
 	}
 
 	// If do not find a goal, go wandering....
@@ -242,13 +246,13 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 		self->wander_timeout = level.time + 1.0;
 		if(debug_mode)
 			debug_printf("%s did not find a LR goal, wandering.\n",self->client->pers.netname);
-		return; // no path? 
+		return; // no path?
 	}
-	
+
 	// OK, everything valid, let's start moving to our goal.
 	self->state = STATE_MOVE;
 	self->tries = 0; // Reset the count of how many times we tried this goal
-	 
+
 	if(goal_ent != NULL && debug_mode)
 		debug_printf("%s selected a %s at node %d for LR goal.\n",self->client->pers.netname, goal_ent->classname, goal_node);
 
@@ -271,13 +275,13 @@ qboolean ACEIT_IsVisibleSolid(edict_t *self, edict_t *other)
 		if(other->client->invis_framenum > level.framenum)
 			return false;
 	}
-	
+
 	tr = gi.trace (self->s.origin, vec3_origin, vec3_origin, other->s.origin, self, MASK_SOLID);
-		
+
 	// Blocked, do not shoot
 	if (tr.fraction != 1.0)
-		return false; 
-	
+		return false;
+
 	return true;
 
 }
@@ -288,20 +292,20 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 	float weight,best_weight=0.0;
 	edict_t *best;
 	int index;
-	
+
 	// look for a target (should make more efficent later)
 	target = findradius(NULL, self->s.origin, 200);//was 200
-	
+
 	while(target)
 	{
 		if(target->classname == NULL)
 			return;
-		
+
 		// Missle avoidance code
-		// Set our movetarget to be the rocket or grenade fired at us. 
+		// Set our movetarget to be the rocket or grenade fired at us.
 		if(strcmp(target->classname,"rocket")==0 || strcmp(target->classname,"grenade") ==0)
 		{
-			if(debug_mode) 
+			if(debug_mode)
 				debug_printf("ROCKET ALERT!\n");
 
 			self->movetarget = target;
@@ -320,7 +324,7 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 			{
 				index = ACEIT_ClassnameToIndex(target->classname);
 				weight = ACEIT_ItemNeed(self, index);
-				
+
 				if(weight > best_weight)
 				{
 					best_weight = weight;
@@ -336,10 +340,10 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 	if(best_weight)
 	{
 		self->movetarget = best;
-		
+
 		if(debug_mode && self->goalentity != self->movetarget)
 			debug_printf("%s selected a %s for SR goal.\n",self->client->pers.netname, self->movetarget->classname);
-		
+
 		self->goalentity = best;
 
 	}
@@ -347,7 +351,7 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Scan for enemy 
+// Scan for enemy
 ///////////////////////////////////////////////////////////////////////
 
 qboolean ACEAI_infront (edict_t *self, edict_t *other)
@@ -356,7 +360,7 @@ qboolean ACEAI_infront (edict_t *self, edict_t *other)
 	float	dot;
 	vec3_t	forward;
 	gitem_t *vehicle;
-	
+
 	vehicle = FindItemByClassname("item_bomber");
 
 	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
@@ -410,7 +414,7 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 				self->enemy = target;
 			else if(self->dmteam == NO_TEAM && (strcmp(target->classname, "item_dbtarget") == 0))
 				self->enemy = target;
-			target = findradius(target, self->s.origin, 200); 
+			target = findradius(target, self->s.origin, 200);
 		}
 		if(self->enemy) {
 			//safe_bprintf(PRINT_MEDIUM, "Target Aquired!\n");
@@ -450,7 +454,7 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 				return false;
 		}
 	}
-	
+
 	if(self->oldenemy != NULL) //(was shot from behind)
 	{
 		self->enemy = self->oldenemy;
@@ -462,22 +466,22 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 	{
 		ent = g_edicts + i + 1;
 		if(ent == NULL || ent == self || !ent->inuse ||
-		   ent->solid == SOLID_NOT) 
+		   ent->solid == SOLID_NOT)
 		   continue;
-	
+
 		if(!ent->deadflag && ACEAI_infront(self, ent) && ACEIT_IsVisibleSolid(self, ent) && gi.inPVS (self->s.origin, ent->s.origin)
 			&& (!OnSameTeam(self, ent)))
 		{
 			VectorSubtract(self->s.origin, ent->s.origin, dist);
 			weight = VectorLength( dist );
-			
+
 			// Check if best target, or better than current target
 			if (weight < bestweight)
 			{
 				bestweight = weight;
 				bestenemy = ent;
 			}
-			
+
 		}
 	}
 	if(bestenemy) {
@@ -490,7 +494,7 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 		}
 		//if carrying a flag, and not close to an enemy, continue running to goal
 		if(ctf->value) {
-			if (((self->client->pers.inventory[ITEM_INDEX(flag1_item)]) || 
+			if (((self->client->pers.inventory[ITEM_INDEX(flag1_item)]) ||
 				(self->client->pers.inventory[ITEM_INDEX(flag2_item)])) && bestweight > 300) {
 				self->enemy = NULL;
 				return false;
@@ -499,7 +503,7 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 		return true;
 	}
 	return false;
-  
+
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -510,11 +514,11 @@ qboolean ACEAI_CheckShot(edict_t *self)
 	trace_t tr;
 
 	tr = gi.trace (self->s.origin, tv(-8,-8,-8), tv(8,8,8), self->enemy->s.origin, self, MASK_SOLID);
-	
+
 	// Blocked, do not shoot
 	if (tr.fraction != 1.0)
-		return false; 
-	
+		return false;
+
 	return true;
 }
 
@@ -595,18 +599,18 @@ void ACEAI_Use_Sproing (edict_t *ent)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Choose the best weapon for bot 
+// Choose the best weapon for bot
 ///////////////////////////////////////////////////////////////////////
 void ACEAI_ChooseWeapon(edict_t *self)
-{	
+{
 	float range;
 	vec3_t v;
 	float c;
-	
+
 	if (self->in_vehicle) {
-		return; 
+		return;
 	}
-	
+
 	if (self->in_deathball) {
 		return; //cannot switch or fire weapons when in a deathball.
 	}
@@ -634,8 +638,8 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	range = VectorLength(v);
 
 	//what is the bot's favorite weapon? The bot will always check for it's favorite
-	//weapon first, which is set in the bot's config file. 
-	
+	//weapon first, which is set in the bot's config file.
+
 	if(!strcmp(self->faveweap, "Alien Vaporizer") && self->skill > 1)
 	{
 		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
@@ -652,7 +656,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 			return;
 		}
 	}
-	if(!strcmp(self->faveweap, "Disruptor")) 
+	if(!strcmp(self->faveweap, "Disruptor"))
 	{
 		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
 		{
@@ -674,9 +678,9 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		{
 			self->accuracy = self->weapacc[7];
 			return;
-		}	
+		}
 	}
-	if(!strcmp(self->faveweap, "Rocket Launcher")) 
+	if(!strcmp(self->faveweap, "Rocket Launcher"))
 	{
 		if(range > 200)
 		{
@@ -703,7 +707,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 				if(ACEIT_ChangeWeapon(self,FindItem("Violator")))
 				{
 					self->accuracy = 1.0;
-					return; 
+					return;
 				}
 		}
 	}
@@ -724,13 +728,13 @@ void ACEAI_ChooseWeapon(edict_t *self)
 			return;
 		}
 	}
-	
+
 	if(ACEAI_CheckShot(self) && ACEIT_ChangeWeapon(self, FindItem("Alien Smartgun")))
 	{
 		self->accuracy = self->weapacc[7];
 		return;
-	}	
-	
+	}
+
 	// Longer range so the bot doesn't blow himself up!
 	if(range > 200)
 	{
@@ -740,10 +744,10 @@ void ACEAI_ChooseWeapon(edict_t *self)
 			return;
 		}
 	}
-	
+
 	// Only use FT in certain ranges
 	if(range < 500 || (range < 800 && self->skill == 3)) {
-	
+
 			if(ACEIT_ChangeWeapon(self,FindItem("Flame Thrower")))
 			{
 				self->accuracy = self->weapacc[4];
@@ -756,25 +760,25 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		self->accuracy = self->weapacc[8];
 		return;
 	}
-	
+
 	if(ACEIT_ChangeWeapon(self,FindItem("Pulse Rifle")))
 	{
 		self->accuracy = self->weapacc[3];
 		return;
 	}
-	
+
 	if(ACEIT_ChangeWeapon(self,FindItem("Alien Disruptor")))
 	{
 		self->accuracy = self->weapacc[2];
 		return;
-	}	
-	
+	}
+
 	if(ACEIT_ChangeWeapon(self,FindItem("Blaster")))
    	{
 		self->accuracy = self->weapacc[1];
 		return;
 	}
-	
+
 	return;
 
 }

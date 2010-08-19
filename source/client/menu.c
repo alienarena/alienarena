@@ -17,6 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <ctype.h>
 #ifdef _WINDOWS
 #include <winsock.h>
@@ -132,7 +137,7 @@ static void M_MapPic( char *name, float alpha )
 	Draw_AlphaStretchPic (viddef.width / 2 - w + 240*scale, viddef.height / 2 - 140*scale, w, h, name, alpha);
 }
 static void M_MontagePic( char *name, float alpha )
-{	
+{
 	Draw_AlphaStretchPic (0, 0, viddef.width, viddef.height, name, alpha);
 }
 static void M_CrosshairPic( char *name )
@@ -554,7 +559,7 @@ void M_Main_Draw (void)
 			montagepic = 1;
 		}
 	}
-	sprintf(backgroundpic, "m_main_mont%i", (montagepic==1)?5:montagepic-1);	
+	sprintf(backgroundpic, "m_main_mont%i", (montagepic==1)?5:montagepic-1);
 	sprintf(montagepicname, "m_main_mont%i", montagepic);
 	M_Background(backgroundpic);
 	M_MontagePic(montagepicname, mainalpha);
@@ -1231,7 +1236,7 @@ static void Keys_MenuInit( void )
 	s_keys_vtaunt3_action.generic.ownerdraw = DrawKeyBindingFunc;
 	s_keys_vtaunt3_action.generic.localdata[0] = ++i;
 	s_keys_vtaunt3_action.generic.name	= bindnames[s_keys_vtaunt3_action.generic.localdata[0]][1];
-	
+
 	s_keys_vtaunt4_action.generic.type	= MTYPE_ACTION;
 	s_keys_vtaunt4_action.generic.x		= 0;
 	s_keys_vtaunt4_action.generic.y		= y += FONTSCALE*9*scale;
@@ -1245,7 +1250,7 @@ static void Keys_MenuInit( void )
 	s_keys_vtaunt5_action.generic.ownerdraw = DrawKeyBindingFunc;
 	s_keys_vtaunt5_action.generic.localdata[0] = ++i;
 	s_keys_vtaunt5_action.generic.name	= bindnames[s_keys_vtaunt5_action.generic.localdata[0]][1];
-	
+
 	s_keys_vtauntauto_action.generic.type	= MTYPE_ACTION;
 	s_keys_vtauntauto_action.generic.x		= 0;
 	s_keys_vtauntauto_action.generic.y		= y += FONTSCALE*9*scale;
@@ -1778,7 +1783,7 @@ static void HudFunc( void *unused )
 {
 	char hud1[MAX_OSPATH];
 	char hud2[MAX_OSPATH];
-	
+
 	if(s_options_hud_box.curvalue == 0) { //none
 		sprintf(hud1, "none");
 		sprintf(hud2, "none");
@@ -1806,7 +1811,7 @@ void SetHudCursor (void)
 	char hudcomp[MAX_OSPATH];
 
 	s_options_hud_box.curvalue = 1;
- 
+
 	if (!cl_hudimage1)
 		cl_hudimage1 = Cvar_Get ("cl_hudimage1", "pics/i_health.tga", CVAR_ARCHIVE);
 	else {
@@ -1969,7 +1974,7 @@ static void ControlsSetMenuItemValues( void )
 
 	Cvar_SetValue("cl_explosiondist", ClampCvar(0, 1, cl_explosiondist->value ) );
 	s_options_explosiondist_box.curvalue		= cl_explosiondist->value;
-	
+
 	Cvar_SetValue("cl_healthaura", ClampCvar(0, 1, cl_healthaura->value ) );
 	s_options_healthaura_box.curvalue		= cl_healthaura->value;
 
@@ -1997,7 +2002,7 @@ static void ControlsResetDefaultsFunc( void *unused )
 
 	CL_Snd_Restart_f();
 	S_StartMenuMusic();
-	
+
 }
 
 //JD - the next three functions were completely screwed up out of the box by id...so they
@@ -2066,7 +2071,7 @@ static void UpdateDopplerEffectFunc( void *unused )
 	{
 		Cvar_SetValue( "s_doppler", 0.0f ); // off
 	}
-	
+
 	R_EndFrame(); // buffer swap needed to show text box
 	S_UpdateDopplerFactor();
 
@@ -2111,7 +2116,7 @@ void Options_MenuInit( void )
 		"rotating",
 		0
 	};
-	static const char *playerid_names[] = 
+	static const char *playerid_names[] =
 	{
 		"off",
 		"centered",
@@ -2119,7 +2124,7 @@ void Options_MenuInit( void )
 		0
 	};
 
-	static const char *color_names[] = 
+	static const char *color_names[] =
 	{
 		"green",
 		"blue",
@@ -2132,7 +2137,7 @@ void Options_MenuInit( void )
 	float scale;
 
 	scale = (float)(viddef.height)/600;
-	
+
 	banneralpha = 0.1;
 
 	win_noalttab = Cvar_Get( "win_noalttab", "0", CVAR_ARCHIVE );
@@ -2474,7 +2479,7 @@ static const char *idcredits[] =
 	"Enki",
 	"",
 	"+FONT",
-	"John Diamond", 
+	"John Diamond",
 	"the-interceptor from http://www.quakeworld.nu/",
 	"",
 	"+LOGO",
@@ -2518,8 +2523,8 @@ static const char *idcredits[] =
 	"+LANGUAGE TRANSLATIONS",
 	"Ken Deguisse",
 	"",
-	"+STORYLINE", 
-	"Sinnocent", 
+	"+STORYLINE",
+	"Sinnocent",
 	"",
 	"+SPECIAL THANKS",
 	"The Alien Arena Community",
@@ -2870,7 +2875,7 @@ static void M_FindIRCKey ( void )
 }
 
 void IRC_MenuInit( void )
-{	
+{
 	float scale;
 	extern cvar_t *name;
 
@@ -2890,7 +2895,7 @@ void IRC_MenuInit( void )
 	M_FindIRCKey();
 
 	scale = (float)(viddef.height)/600;
-	
+
 	banneralpha = 0.1;
 
 	s_irc_menu.x = viddef.width * 0.50;
@@ -2964,7 +2969,7 @@ void IRC_MenuDraw( void )
 		banneralpha = 1;
 
 	M_Background( "menu_back"); //draw black background first
-	M_Banner( "m_irc", banneralpha ); 
+	M_Banner( "m_irc", banneralpha );
 
 	//warn user that they cannot join until changing default player name
 	if(!pNameUnique) {
@@ -3160,7 +3165,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		else if (!_stricmp (lasttoken, "maxclients"))
 			Com_sprintf(mservers[m_num_servers].maxClients, sizeof(mservers[m_num_servers].maxClients), "%s", token);
 
-		/* Get next token: */	
+		/* Get next token: */
 		Com_sprintf(lasttoken, sizeof(lasttoken), "%s", token);
 		token = strtok( NULL, seps );
 	}
@@ -3188,7 +3193,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		free (rLine);
 
 		playername[31] = '\0';
-		
+
 		//get ranking
 		strcpy(player.playername, playername);
 		player.totalfrags = player.totaltime = player.ranking = 0;
@@ -3214,7 +3219,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		mservers[m_num_servers].playerRankings[players] = player.ranking;
 
 		rankTotal += player.ranking;
-		
+
 		players++;
 	}
 
@@ -3237,7 +3242,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 			return;
 
 	mservers[m_num_servers].players = players;
-	
+
 	//build the string for the server (hostname - address - mapname - players/maxClients)
 	//pad the strings - gotta do this for both maps and hostname
 	x = 0;
@@ -3311,7 +3316,7 @@ void JoinServerFunc( void *self )
 
 	index = ( menuaction_s * ) self - s_joinserver_server_actions;
 
-	playeridx = s_playerlist_scrollbar.curvalue = 0; 
+	playeridx = s_playerlist_scrollbar.curvalue = 0;
 
 	if ( Q_stricmp( mservers[index+svridx].szHostName, NO_SERVER_STRING ) == 0 )
 		return;
@@ -3409,7 +3414,7 @@ void JoinServer_MenuInit( void )
 	int i;
 	float scale, offset;
 	extern cvar_t *name;
-	
+
 	static const char *yesno_names[] =
 	{
 		"no",
@@ -3469,7 +3474,7 @@ void JoinServer_MenuInit( void )
 	s_joinserver_filterempty_action.generic.cursor_offset = -16*scale;
 	s_joinserver_filterempty_action.curvalue = m_show_empty;
 	s_joinserver_filterempty_action.generic.callback = FilterEmptyFunc;
-	
+
 	s_joinserver_moveup.generic.type	= MTYPE_ACTION;
 	s_joinserver_moveup.generic.name	= "     ";
 	s_joinserver_moveup.generic.flags	= QMF_LEFT_JUSTIFY;
@@ -3612,7 +3617,7 @@ void JoinServer_MenuDraw(void)
 			s_joinserver_server_data[i].generic.x		= -380*scale;
 		s_joinserver_server_data[i].generic.y		= FONTSCALE*169*scale + FONTSCALE*i*10*scale+offset;
 	}
-	s_joinserver_scrollbar.maxvalue = m_num_servers - 16;	
+	s_joinserver_scrollbar.maxvalue = m_num_servers - 16;
 	M_ArrowPics();
 	Menu_Draw( &s_joinserver_menu );
 }
@@ -4219,7 +4224,7 @@ void MapInfoFunc( void *self ) {
 	Menu_FindFile(path, &desc_file);
 	if(desc_file)
 		fclose(desc_file);
-	else 
+	else
 		sprintf(path, "%s/levelshots/%s.txt", BASEDIRNAME, startmap);
 
 	if ((map_file = fopen(path, "rb")) != NULL)
@@ -4697,7 +4702,7 @@ void StartServer_MenuInit( void )
 		0
 	};
 	float scale;
-	
+
 	scale = (float)(viddef.height)/600;
 
 	/*
@@ -5588,7 +5593,7 @@ void M_Menu_AddressBook_f(void)
 	M_PushMenu( AddressBook_MenuDraw, AddressBook_MenuKey );
 }
 
-/* 
+/*
 =============================================================================
 
 PLAYER RANKING MENU
@@ -5623,7 +5628,7 @@ void PlayerRanking_MenuInit( void )
 
 	scale = (float)(viddef.height)/600;
 
-	banneralpha = 0.1; 
+	banneralpha = 0.1;
 
 	s_playerranking_menu.x = viddef.width / 2 - 170*scale;
 	s_playerranking_menu.y = viddef.height / 2 - 160*scale;
@@ -5641,7 +5646,7 @@ void PlayerRanking_MenuInit( void )
 	Com_sprintf(fragrate, sizeof(fragrate), "Frag Rate: %6.2f", (float)(player.totalfrags/player.totaltime));
 	Com_sprintf(totalfrags, sizeof(totalfrags), "Total Frags: ^1%i", player.totalfrags);
 	Com_sprintf(totaltime, sizeof(totaltime), "Total Time: %6.2f", player.totaltime);
-	
+
 	s_playerranking_title.generic.type	= MTYPE_ACTION;
 	s_playerranking_title.generic.name	= "Player Ranking and Stats";
 	s_playerranking_title.generic.flags	= QMF_LEFT_JUSTIFY;
@@ -5653,7 +5658,7 @@ void PlayerRanking_MenuInit( void )
 	s_playerranking_name.generic.type	= MTYPE_COLORTXT;
 	s_playerranking_name.generic.name	= playername;
 	s_playerranking_name.generic.flags	= QMF_LEFT_JUSTIFY;
-	s_playerranking_name.generic.x		= -31*offset*scale+16*scale; 
+	s_playerranking_name.generic.x		= -31*offset*scale+16*scale;
 	s_playerranking_name.generic.y		= FONTSCALE*20*scale;
 
 	s_playerranking_rank.generic.type	= MTYPE_COLORTXT;
@@ -5832,7 +5837,7 @@ static qboolean IconOfSkinExists( char *skin, char **pcxfiles, int npcxfiles )
 		if ( strcmp( pcxfiles[i], scratch ) == 0 )
 			return true;
 	}
-	
+
 	strcpy( scratch, skin );
 	*strrchr( scratch, '.' ) = 0;
 	strcat( scratch, "_i.jpg" );
@@ -6200,7 +6205,7 @@ qboolean PlayerConfig_MenuInit( void )
 	//add in shader support for player models, if the player goes into the menu before entering a
 	//level, that way we see the shaders.  We only want to do this if they are NOT loaded yet.
 	scriptsloaded = Cvar_Get("scriptsloaded", "0", 0);
-	if(!scriptsloaded->value) 
+	if(!scriptsloaded->value)
 	{
 		Cvar_SetValue("scriptsloaded", 1); //this needs to be reset on vid_restart
 		RS_ScanPathForScripts();
@@ -6306,7 +6311,7 @@ void PlayerConfig_MenuDraw( void )
 				fclose(modelfile);
 			}
 		}
-		
+
 		entity[0].flags = RF_FULLBRIGHT | RF_MENUMODEL;
 		entity[0].origin[0] = 80;
 		entity[0].origin[1] = -30;
@@ -6316,7 +6321,7 @@ void PlayerConfig_MenuDraw( void )
 		entity[1].origin[0] = 80;
 		entity[1].origin[1] = -30;
 		entity[1].origin[2] = -5;
-		
+
 		if(helmet)
 		{
 			entity[2].flags = RF_FULLBRIGHT | RF_TRANSLUCENT | RF_MENUMODEL;
@@ -6325,7 +6330,7 @@ void PlayerConfig_MenuDraw( void )
 			entity[2].origin[2] = -5;
 			entity[2].alpha = 0.4;
 		}
-		
+
 		VectorCopy( entity[0].origin, entity[0].oldorigin );
 
 		VectorCopy( entity[1].origin, entity[1].oldorigin );
@@ -6369,7 +6374,7 @@ void PlayerConfig_MenuDraw( void )
 
 		refdef.y = viddef.height / 2 - 70*scale;
 		Draw_StretchPic( s_player_config_menu.x - 120*scale, refdef.y - 56*scale, 64*scale, 64*scale, scratch );
-	}	
+	}
 }
 void PConfigAccept (void)
 {

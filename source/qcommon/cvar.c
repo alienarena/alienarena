@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -18,6 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // cvar.c -- dynamic variable tracking
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "qcommon.h"
 
@@ -48,7 +52,7 @@ static cvar_t *Cvar_FindVar (char *var_name)
 {
 	cvar_t		*var;
 	unsigned int	i, hash_key;
-	
+
 	COMPUTE_HASH_KEY( hash_key, var_name , i );
 	for (var=cvar_vars ; var && var->hash_key <= hash_key ; var=var->next)
 		if (var->hash_key == hash_key && !Q_strcasecmp (var_name, var->name))
@@ -65,7 +69,7 @@ Cvar_VariableValue
 float Cvar_VariableValue (char *var_name)
 {
 	cvar_t	*var;
-	
+
 	var = Cvar_FindVar (var_name);
 	if (!var)
 		return 0;
@@ -81,7 +85,7 @@ Cvar_VariableString
 char *Cvar_VariableString (char *var_name)
 {
 	cvar_t *var;
-	
+
 	var = Cvar_FindVar (var_name);
 	if (!var)
 		return "";
@@ -99,7 +103,7 @@ char *Cvar_CompleteVariable (char *partial)
 	cvar_t		*cvar;
 	int		len, i;
 	unsigned int	hash_key;
-	
+
 	len = strlen(partial);
 	if (!len)
 		return NULL;
@@ -266,9 +270,9 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 
 	if (var->flags & CVAR_USERINFO)
 		userinfo_modified = true;	// transmit at next oportunity
-	
+
 	Z_Free (var->string);	// free the old value string
-	
+
 	var->string = CopyString(value);
 	var->value = atof (var->string);
 	var->integer = atoi(var->string);
@@ -304,7 +308,7 @@ Cvar_FullSet
 cvar_t *Cvar_FullSet (char *var_name, char *value, int flags)
 {
 	cvar_t	*var;
-	
+
 	// FIXME: this bit is inefficient, it looks up the variable twice (BlackIce)
 	var = Cvar_FindVar (var_name);
 	if (!var)
@@ -316,9 +320,9 @@ cvar_t *Cvar_FullSet (char *var_name, char *value, int flags)
 
 	if (var->flags & CVAR_USERINFO)
 		userinfo_modified = true;	// transmit at next oportunity
-	
+
 	Z_Free (var->string);	// free the old value string
-	
+
 	var->string = CopyString(value);
 	var->value = atof (var->string);
 	var->integer = atoi(var->string);
@@ -387,7 +391,7 @@ qboolean Cvar_Command (void)
 	v = Cvar_FindVar (Cmd_Argv(0));
 	if (!v)
 		return false;
-		
+
 // perform a variable print or set
 	if (Cmd_Argc() == 1)
 	{

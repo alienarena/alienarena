@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,9 +17,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "q_shared.h"
 
-#define DEG2RAD( a ) ( a * M_PI ) / 180.0F   
+#define DEG2RAD( a ) ( a * M_PI ) / 180.0F
 
 vec3_t vec3_origin = {0,0,0};
 
@@ -93,17 +98,17 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 **
 ** Profiling indicates that AngleVectors() is heavily used, which justifies
 **   (i hope) doing some "heroic" optimization.
-** Testing indicates that maximum variation from original calculation is 
+** Testing indicates that maximum variation from original calculation is
 **   is around 0.000006
 **
 ** sin(a) ~=  a - (0.16666 * a**3) + (0.0083143 a**5) - (0.00018542 * a**7)
-**   
+**
 ** Reference:
 **   Essential Mathematics for Games and Interactive Applications, Second Edition.
 **   by James M. Van Verth and Lars M. Bishop, Morgan-Kaufman Publishing.
 **   which bases this technique on:
 **   Robin Green's GDC 2003 session, "Faster Math Functions"
-** 
+**
 ** Arguments:
 **   angle : in radians
 */
@@ -122,9 +127,9 @@ float fast_sincosf_calc( float angle )
 {
 	float result;
 	float anglesq;
-	
+
 	anglesq = angle * angle;
-	result = angle * ( 1.0f + anglesq * (kpoly3 + anglesq * (kpoly5 
+	result = angle * ( 1.0f + anglesq * (kpoly3 + anglesq * (kpoly5
 		+ ( anglesq * kpoly7 ))));
 	return result;
 }
@@ -136,7 +141,7 @@ void fast_sincosf( float angle, float *sina, float *cosa )
 	float angle_float_part;
 	float angle_float_part_minus_halfpi;
 	int angle_int_part;
-	
+
 	// make negative angle non-negative for purposes of calculation
 	negate = false;
 	angle_radians = angle;
@@ -146,12 +151,12 @@ void fast_sincosf( float angle, float *sina, float *cosa )
 		angle_radians = -angle_radians;
 	}
 
-	// this is tricky. to prevent "catastophic cancelation" when subtracting 
+	// this is tricky. to prevent "catastophic cancelation" when subtracting
 	//  near equal floating point numbers, the calculation is broken down
 	//  into 2 parts.
 	angle_float_part =  kTwoOverPI * angle_radians;
 	angle_int_part = (int)angle_float_part;
-	angle_float_part = (angle_radians - (kRationalHalfPI * angle_int_part)) 
+	angle_float_part = (angle_radians - (kRationalHalfPI * angle_int_part))
 		- (kRemainderHalfPI * angle_int_part);
 	angle_float_part_minus_halfpi = (angle_float_part - kRationalHalfPI)
 		- kRemainderHalfPI;
@@ -180,18 +185,18 @@ void fast_sincosf( float angle, float *sina, float *cosa )
 	{
 		*sina = -(*sina);
 	}
-	
+
 }
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
 	float		angle;
-#ifdef _WINDOWS	
+#ifdef _WINDOWS
 	static float		sr, sp, sy, cr, cp, cy;
 	// static to help MS compiler fp bugs
 #else
 	float		sr, sp, sy, cr, cp, cy;
-#endif	
+#endif
 
 	angle = angles[YAW] * (kTwoPI / 360.0f);
 	fast_sincosf( angle, &sy, &cy );
@@ -457,7 +462,7 @@ int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 			return 2;
 		return 3;
 	}
-	
+
 // general case
 	switch (p->signbits)
 	{
@@ -521,11 +526,11 @@ __declspec( naked ) int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplan
 	__asm {
 
 		push ebx
-			
+
 		cmp bops_initialized, 1
 		je  initialized
 		mov bops_initialized, 1
-		
+
 		mov Ljmptab[0*4], offset Lcase0
 		mov Ljmptab[1*4], offset Lcase1
 		mov Ljmptab[2*4], offset Lcase2
@@ -534,7 +539,7 @@ __declspec( naked ) int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplan
 		mov Ljmptab[5*4], offset Lcase5
 		mov Ljmptab[6*4], offset Lcase6
 		mov Ljmptab[7*4], offset Lcase7
-			
+
 initialized:
 
 		mov edx,ds:dword ptr[4+12+esp]
@@ -771,7 +776,7 @@ int VectorCompare (vec3_t v1, vec3_t v2)
 {
 	if (v1[0] != v2[0] || v1[1] != v2[1] || v1[2] != v2[2])
 			return 0;
-			
+
 	return 1;
 }
 
@@ -790,7 +795,7 @@ vec_t VectorNormalize (vec3_t v)
 		v[1] *= ilength;
 		v[2] *= ilength;
 	}
-		
+
 	return length;
 
 }
@@ -809,7 +814,7 @@ vec_t VectorNormalize2 (vec3_t v, vec3_t out)
 		out[1] = v[1]*ilength;
 		out[2] = v[2]*ilength;
 	}
-		
+
 	return length;
 
 }
@@ -895,7 +900,7 @@ vec_t VectorLength(vec3_t v)
 {
 	int		i;
 	float	length;
-	
+
 	length = 0;
 	for (i=0 ; i< 3 ; i++)
 		length += v[i]*v[i];
@@ -939,7 +944,7 @@ COM_SkipPath
 char *COM_SkipPath (char *pathname)
 {
 	char	*last;
-	
+
 	last = pathname;
 	while (*pathname)
 	{
@@ -991,15 +996,15 @@ COM_FileBase
 void COM_FileBase (char *in, char *out)
 {
 	char *s, *s2;
-	
+
 	s = in + strlen(in) - 1;
-	
+
 	while (s != in && *s != '.')
 		s--;
-	
+
 	for (s2 = s ; s2 != in && *s2 != '/' ; s2--)
 	;
-	
+
 	if (s-s2 < 2)
 		out[0] = 0;
 	else
@@ -1020,9 +1025,9 @@ Returns the path up to, but not including the last /
 void COM_FilePath (char *in, char *out)
 {
 	char *s;
-	
+
 	s = in + strlen(in) - 1;
-	
+
 	while (s != in && *s != '/')
 		s--;
 
@@ -1120,8 +1125,8 @@ float FloatSwap (float f)
 		float	f;
 		byte	b[4];
 	} dat1, dat2;
-	
-	
+
+
 	dat1.f = f;
 	dat2.b[0] = dat1.b[3];
 	dat2.b[1] = dat1.b[2];
@@ -1144,7 +1149,7 @@ void Swap_Init (void)
 {
 	byte	swaptest[2] = {1,0};
 
-// set the byte swapping variables in a portable manner	
+// set the byte swapping variables in a portable manner
 	if ( *(short *)swaptest == 1)
 	{
 		bigendien = false;
@@ -1183,12 +1188,12 @@ char	*va(char *format, ...)
 {
 	va_list		argptr;
 	static char		string[1024];
-	
+
 	va_start (argptr, format);
 	vsnprintf(string, sizeof(string), format, argptr);
 	va_end (argptr);
 
-	return string;	
+	return string;
 }
 
 
@@ -1210,13 +1215,13 @@ char *COM_Parse (char **data_p)
 	data = *data_p;
 	len = 0;
 	com_token[0] = 0;
-	
+
 	if (!data)
 	{
 		*data_p = NULL;
 		return "";
 	}
-		
+
 // skip whitespace
 skipwhite:
 	while ( (c = *data) <= ' ')
@@ -1228,7 +1233,7 @@ skipwhite:
 		}
 		data++;
 	}
-	
+
 // skip // comments
 	if (c=='/' && data[1] == '/')
 	{
@@ -1282,207 +1287,207 @@ skipwhite:
 }
 
 int Q_strnicmp (const char *string1, const char *string2, int n)
-{ 
-	int c1, c2; 
-	 
+{
+	int c1, c2;
+
 	if (string1 == NULL)
-	{ 
-		if (string2 == NULL) 
-			return 0; 
-		else 
-			return -1; 
-	} 
-	else if (string2 == NULL) 
-		return 1; 
-	 
-	do 
-	{ 
-		c1 = *string1++; 
-		c2 = *string2++; 
-		 
-		if (!n--) 
-			return 0;// Strings are equal until end point 
-		 
+	{
+		if (string2 == NULL)
+			return 0;
+		else
+			return -1;
+	}
+	else if (string2 == NULL)
+		return 1;
+
+	do
+	{
+		c1 = *string1++;
+		c2 = *string2++;
+
+		if (!n--)
+			return 0;// Strings are equal until end point
+
 		if (c1 != c2)
-		{ 
-			if (c1 >= 'a' && c1 <= 'z') 
-				c1 -= ('a' - 'A'); 
-			if (c2 >= 'a' && c2 <= 'z') 
-				c2 -= ('a' - 'A'); 
-			 
-			if (c1 != c2) 
-				return c1 < c2 ? -1 : 1; 
-		} 
-	} while (c1); 
-	 
-	return 0;// Strings are equal 
+		{
+			if (c1 >= 'a' && c1 <= 'z')
+				c1 -= ('a' - 'A');
+			if (c2 >= 'a' && c2 <= 'z')
+				c2 -= ('a' - 'A');
+
+			if (c1 != c2)
+				return c1 < c2 ? -1 : 1;
+		}
+	} while (c1);
+
+	return 0;// Strings are equal
 }
 void Q_strncpyz2 (char *dst, const char *src, int dstSize)
 {
-	if (!dst) 
-		Sys_Error(ERR_FATAL, "Q_strncpyz: NULL dst"); 
-		
-	if (!src) 
-		Sys_Error(ERR_FATAL, "Q_strncpyz: NULL src"); 
-		
-	if (dstSize < 1) 
-		Sys_Error(ERR_FATAL, "Q_strncpyz: dstSize < 1"); 
-		
-	strncpy(dst, src, dstSize-1); 
-	dst[dstSize-1] = 0; 
+	if (!dst)
+		Sys_Error(ERR_FATAL, "Q_strncpyz: NULL dst");
+
+	if (!src)
+		Sys_Error(ERR_FATAL, "Q_strncpyz: NULL src");
+
+	if (dstSize < 1)
+		Sys_Error(ERR_FATAL, "Q_strncpyz: dstSize < 1");
+
+	strncpy(dst, src, dstSize-1);
+	dst[dstSize-1] = 0;
 }
 
 void Q_strcat (char *dst, const char *src, int dstSize)
-{ 
-	 
-	int len; 
-	 
-	len = strlen(dst); 
-	if (len >= dstSize) 
-		Sys_Error(ERR_FATAL, "Q_strcat: already overflowed"); 
-	 
-	Q_strncpyz2(dst + len, src, dstSize - len); 
+{
+
+	int len;
+
+	len = strlen(dst);
+	if (len >= dstSize)
+		Sys_Error(ERR_FATAL, "Q_strcat: already overflowed");
+
+	Q_strncpyz2(dst + len, src, dstSize - len);
 }
 
 char *Com_SkipWhiteSpace (char *data_p, qboolean *hasNewLines)
-{ 
-	int c; 
-	 
+{
+	int c;
+
 	while ((c = *data_p) <= ' ')
-	{ 
-		if (!c) 
-			return NULL; 
-		 
+	{
+		if (!c)
+			return NULL;
+
 		if (c == '\n')
-		{ 
-			com_parseLine++; 
-			*hasNewLines = true; 
-		} 
-		data_p++; 
-	} 
-	return data_p; 
+		{
+			com_parseLine++;
+			*hasNewLines = true;
+		}
+		data_p++;
+	}
+	return data_p;
 }
 void Com_SkipRestOfLine (char **data_p)
-{ 
-	char*data; 
-	int c; 
-	 
-	data = *data_p; 
+{
+	char*data;
+	int c;
+
+	data = *data_p;
 	while ((c = *data++) != 0)
-	{ 
+	{
 		if (c == '\n')
-		{ 
-			com_parseLine++; 
-			break; 
-		} 
-	} 
-	 
-	*data_p = data; 
+		{
+			com_parseLine++;
+			break;
+		}
+	}
+
+	*data_p = data;
 }
 char *Com_ParseExt (char **data_p, qboolean allowNewLines)
-{ 
-	int c, len = 0; 
-	char *data; 
-	qboolean hasNewLines = false; 
-	 
-	data = *data_p; 
-	com_token[0] = 0; 
-	 
-	// Make sure incoming data is valid 
+{
+	int c, len = 0;
+	char *data;
+	qboolean hasNewLines = false;
+
+	data = *data_p;
+	com_token[0] = 0;
+
+	// Make sure incoming data is valid
 	if (!data)
-	{ 
-		*data_p = NULL; 
-		return com_token; 
-	} 
-	 
-	// Backup the session data so we can unget easily 
-//	Com_BackupParseSession(data_p); 
-	 
+	{
+		*data_p = NULL;
+		return com_token;
+	}
+
+	// Backup the session data so we can unget easily
+//	Com_BackupParseSession(data_p);
+
 	while (1)
-	{ 
-		// Skip whitespace 
-		data = Com_SkipWhiteSpace(data, &hasNewLines); 
+	{
+		// Skip whitespace
+		data = Com_SkipWhiteSpace(data, &hasNewLines);
 		if (!data)
-		{ 
-			*data_p = NULL; 
-			return com_token; 
-		} 
-		 
+		{
+			*data_p = NULL;
+			return com_token;
+		}
+
 		if (hasNewLines && !allowNewLines)
-		{ 
-			*data_p = data; 
-			return com_token; 
-		} 
-		 
-		c = *data; 
-		 
-		// Skip // comments 
+		{
+			*data_p = data;
+			return com_token;
+		}
+
+		c = *data;
+
+		// Skip // comments
 		if (c == '/' && data[1] == '/')
-		{ 
-			while (*data && *data != '\n') 
-			data++; 
-		} 
-		 
-		// Skip /* */ comments 
+		{
+			while (*data && *data != '\n')
+			data++;
+		}
+
+		// Skip /* */ comments
 		else if (c == '/' && data[1] == '*')
-		{ 
-			data += 2; 
-			 
+		{
+			data += 2;
+
 			while (*data && (*data != '*' || data[1] != '/'))
-			{ 
-				if (*data == '\n') 
-					com_parseLine++; 
-			 
-				data++; 
-			} 
-		 
-			if (*data) 
-			data += 2; 
-		} 
-			 
-			// An actual token 
-			else 
-			break; 
-	} 
-	 
-	// Handle quoted strings specially 
+			{
+				if (*data == '\n')
+					com_parseLine++;
+
+				data++;
+			}
+
+			if (*data)
+			data += 2;
+		}
+
+			// An actual token
+			else
+			break;
+	}
+
+	// Handle quoted strings specially
 	if (c == '\"')
-	{ 
-		data++; 
+	{
+		data++;
 		while (1)
-		{ 
-			c = *data++; 
-			if (c == '\n') 
-				com_parseLine++; 
-			 
+		{
+			c = *data++;
+			if (c == '\n')
+				com_parseLine++;
+
 			if (c == '\"' || !c)
-			{ 
-				*data_p = data; 
-				com_token[len] = 0; 
-				return com_token; 
-			} 
-			if (len < MAX_TOKEN_CHARS) 
-			com_token[len++] = c; 
-		} 
-	} 
-	 
-	// Parse a regular word 
-	do 
-	{ 
-		if (len < MAX_TOKEN_CHARS) 
-			com_token[len++] = c; 
-		 
-		data++; 
-		c = *data; 
-	} while (c > 32); 
-	 
-	if (len == MAX_TOKEN_CHARS) 
-		len = 0; 
-	 
-	com_token[len] = 0; 
-	 
-	*data_p = data; 
-	return com_token; 
+			{
+				*data_p = data;
+				com_token[len] = 0;
+				return com_token;
+			}
+			if (len < MAX_TOKEN_CHARS)
+			com_token[len++] = c;
+		}
+	}
+
+	// Parse a regular word
+	do
+	{
+		if (len < MAX_TOKEN_CHARS)
+			com_token[len++] = c;
+
+		data++;
+		c = *data;
+	} while (c > 32);
+
+	if (len == MAX_TOKEN_CHARS)
+		len = 0;
+
+	com_token[len] = 0;
+
+	*data_p = data;
+	return com_token;
 }
 
 /*
@@ -1525,7 +1530,7 @@ int Q_stricmp (char *s1, char *s2)
 int Q_strncasecmp (char *s1, char *s2, int n)
 {
 	int		c1, c2;
-	
+
 	do
 	{
 		c1 = *s1++;
@@ -1533,7 +1538,7 @@ int Q_strncasecmp (char *s1, char *s2, int n)
 
 		if (!n--)
 			return 0;		// strings are equal until end point
-		
+
 		if (c1 != c2)
 		{
 			if (c1 >= 'a' && c1 <= 'z')
@@ -1544,7 +1549,7 @@ int Q_strncasecmp (char *s1, char *s2, int n)
 				return -1;		// strings not equal
 		}
 	} while (c1);
-	
+
 	return 0;		// strings are equal
 }
 
@@ -1564,9 +1569,9 @@ void Com_sprintf (char *dest, int size, char *fmt, ...)
 	va_start (argptr,fmt);
 	len = vsnprintf (bigbuffer,sizeof(bigbuffer), fmt,argptr);
 	va_end (argptr);
-	if (len >= size) 
+	if (len >= size)
 		Com_Printf ("Com_sprintf: overflow of %i in %i\n", len, size);
-		
+
 	//JD - Fix for potential server crashes.
 	bigbuffer[size-1] = '\0';
 	//strcpy (dest, bigbuffer);
@@ -1661,7 +1666,7 @@ char *Info_ValueForKey (char *s, char *key)
 								// work without stomping on each other
 	static	int	valueindex;
 	char	*o;
-	
+
 	valueindex ^= 1;
 	if (*s == '\\')
 		s++;
@@ -1820,7 +1825,7 @@ qboolean Info_KeyExists (const char *s, const char *key)
 {
 	char	pkey[512];
 	char	*o;
-	
+
 	if (*s == '\\')
 		s++;
 

@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -20,6 +20,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // Main windowed and fullscreen graphics interface module. This module
 // is used for both the software and OpenGL rendering versions of the
 // Quake refresh engine.
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <assert.h>
 #include <dlfcn.h> // ELF dl loader
@@ -88,7 +92,7 @@ static int s_numVidModes = ( sizeof(vid_modes) / sizeof(vid_modes[0]));
 qboolean VID_GetModeInfo ( int *width, int *height, int mode)
 {
 	vidmode_t *vm;
-	
+
 	if ( mode < -1 )
 	{
 		return false;
@@ -107,7 +111,7 @@ qboolean VID_GetModeInfo ( int *width, int *height, int mode)
 	}
 
 	vm = &vid_modes[mode];
-	
+
 	*width = vm->width;
 	*height = vm->height;
 
@@ -139,7 +143,7 @@ void VID_NewWindow ( int width, int height)
 VID_CheckChanges
 
 This function gets called once just before drawing each frame, and it's sole purpose in life
-is to check to see if any of the video mode parameters have changed, and if they have to 
+is to check to see if any of the video mode parameters have changed, and if they have to
 update the rendering DLL and/or video mode to match.
 ============
 */
@@ -192,14 +196,14 @@ void VID_Init (void)
 	vid_gamma = Cvar_Get( "vid_gamma", "1", CVAR_ARCHIVE );
 	vid_width = Cvar_Get ( "vid_width", "640", CVAR_ARCHIVE );
 	vid_height = Cvar_Get ( "vid_height", "480", CVAR_ARCHIVE );
-	
+
 	/* Add some console commands that we want to handle */
 	Cmd_AddCommand ("vid_restart", VID_Restart_f);
 	Cmd_AddCommand ("vid_modelist", VID_ModeList_f);
 
 	/* Disable the 3Dfx splash screen */
 	putenv("FX_GLIDE_NO_SPLASH=0");
-		
+
 	/* Start the graphics mode and load refresh DLL */
 	vid_restart = true;
 	vid_active = false;

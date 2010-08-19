@@ -19,6 +19,10 @@
 * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "client.h"
 
 #ifdef _WIN32 // All CURL libs are distributed in Windows.
@@ -154,7 +158,7 @@ void CL_HttpDownloadCleanup(){
 
         fclose(cls.download);  // always close the file
         cls.download = NULL;
-    
+
 		if(success){
 		        cls.downloadname[0] = 0;
         }
@@ -170,7 +174,7 @@ void CL_HttpDownloadCleanup(){
 
                 _unlink(file);  // delete partial or empty file
         }
-	
+
         cls.downloadpercent = 0;
         cls.downloadhttp = false;
 

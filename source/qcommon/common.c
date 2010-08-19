@@ -18,6 +18,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // common.c -- misc functions used in client and server
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "qcommon.h"
 
 #include <setjmp.h>
@@ -474,7 +479,7 @@ void MSG_WriteDir (sizebuf_t *sb, vec3_t dir)
 	y = dir[1];
 	z = dir[2];
 	best = 0;
-	
+
 	d = (x*x) + (y*y) + (z*z);
 	// sometimes dir is {0,0,0}
 	if ( d == 0.0f )

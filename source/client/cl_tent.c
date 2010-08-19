@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // cl_tent.c -- client side temporary entities
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "client.h"
 
 cl_sustain_t	cl_sustains[MAX_SUSTAINS];
@@ -134,7 +138,7 @@ void CL_ParseSteam (void)
 				r = 0xd2; //lime green
 				break;
 			case 2:
-				r = 0x74; //blue 
+				r = 0x74; //blue
 				break;
 			case 3:
 				r = 0xe8; //red
@@ -285,8 +289,8 @@ void CL_ParseTEnt (void)
 	int		color;
 	int		r;
 	trace_t	trace;
-	static vec3_t mins = { -8, -8, -8 }; 
-    static vec3_t maxs = { 8, 8, 8 }; 
+	static vec3_t mins = { -8, -8, -8 };
+    static vec3_t maxs = { 8, 8, 8 };
 
 	type = MSG_ReadByte (&net_message);
 
@@ -310,7 +314,7 @@ void CL_ParseTEnt (void)
 
 		if (type == TE_GUNSHOT) {
 			CL_ParticleEffect (pos, dir, 425, 10);
-			trace = CL_Trace ( pos, mins, maxs, pos, -1, MASK_SOLID, true, NULL); 
+			trace = CL_Trace ( pos, mins, maxs, pos, -1, MASK_SOLID, true, NULL);
 			if(trace.contents)
 				CL_BulletMarks(pos, dir);
 		}
@@ -337,7 +341,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
 		if (type == TE_SCREEN_SPARKS) {
-			trace = CL_Trace ( pos, mins, maxs, pos, -1, MASK_SOLID, true, NULL); 
+			trace = CL_Trace ( pos, mins, maxs, pos, -1, MASK_SOLID, true, NULL);
 			if(trace.contents)
 				CL_BeamgunMark(pos, dir, 0.8, false);
 			CL_LaserSparks (pos, dir, 0xd0, 20);
@@ -362,7 +366,7 @@ void CL_ParseTEnt (void)
 			color = 0x00;
 		else
 			color = splash_color[r];
-		
+
 		CL_SplashEffect (pos, dir, color, cnt);
 
 		if (r == SPLASH_SPARKS)
@@ -396,7 +400,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_DisruptorBeam (pos, pos2);
-		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL); 
+		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL);
 		if(trace.contents)
 			CL_BeamgunMark(pos2, trace.plane.normal, 0.4, true);
 		S_StartSound (pos, 0, 0, cl_sfx_railg, 1, ATTN_NORM, 0);
@@ -457,9 +461,9 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_VaporizerBeam (pos, pos2);
-		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL); 
+		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL);
 		if(trace.contents)
-			CL_VaporizerMarks(pos2, trace.plane.normal);	
+			CL_VaporizerMarks(pos2, trace.plane.normal);
 		break;
 
 	case TE_STEAM:
@@ -521,7 +525,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
 		CL_BlasterBeam (pos, pos2);
-		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL); 
+		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL);
 		if(trace.contents)
 			CL_BlasterMark(pos2, trace.plane.normal);
 		break;

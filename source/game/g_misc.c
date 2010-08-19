@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -18,6 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // g_misc.c
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "g_local.h"
 
@@ -63,7 +67,7 @@ void VelocityForDamage (int damage, vec3_t v)
 
 	if (damage < 50)
 		VectorScale (v, 0.7, v);
-	else 
+	else
 		VectorScale (v, 1.2, v);
 }
 
@@ -187,7 +191,7 @@ void ThrowClientHead (edict_t *self, int damage)
 
 	gibname = "models/objects/gibs/sm_meat/tris.md2";
 		self->s.skinnum = 0;
-	
+
 	self->s.origin[2] += 32;
 	self->s.frame = 0;
 	gi.setmodel (self, gibname);
@@ -230,7 +234,7 @@ void debris_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 }
 
 void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin)
-{ 
+{
 	edict_t	*chunk;
 	vec3_t	v;
 
@@ -258,7 +262,7 @@ void ThrowDebris (edict_t *self, char *modelname, float speed, vec3_t origin)
 }
 
 void ThrowDebris2 (edict_t *self, char *modelname, float speed, vec3_t origin)
-{ 
+{
 	edict_t	*chunk;
 	vec3_t	v;
 
@@ -319,7 +323,7 @@ void path_corner_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface
 
 	if (other->movetarget != self)
 		return;
-	
+
 	if (other->enemy)
 		return;
 
@@ -996,7 +1000,7 @@ void SP_misc_teleporter (edict_t *ent)
 	VectorSet (trig->mins, -8, -8, 8);
 	VectorSet (trig->maxs, 8, 8, 24);
 	gi.linkentity (trig);
-	
+
 }
 
 /*QUAKED misc_teleporter_dest (1 0 0) (-32 -32 -24) (32 32 -16)
@@ -1014,19 +1018,19 @@ void SP_misc_teleporter_dest (edict_t *ent)
 
 void spidervolts (edict_t *self)
 {
-	
+
 	vec3_t	start;
 	vec3_t	end;
 	int		damage = 30;
 	int		x;
-	int		aim;					     
- 		
+	int		aim;
+
 	VectorCopy (self->s.origin, start);
 	VectorCopy (start, end);
 	start[2] = start[2] + 128;
 	for(x = 0; x<20; x++)
 	{
-			
+
 		if(random() < .5)
 			aim = -1000;
 		else
@@ -1042,19 +1046,19 @@ void spidervolts (edict_t *self)
 		else
 			aim = 1000;
 		end[2] = end[2] + random()*aim;
-		
+
 
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_LIGHTNING);
 		gi.WritePosition (start);
 		gi.WritePosition (end);
-		gi.multicast (start, MULTICAST_PHS); 
+		gi.multicast (start, MULTICAST_PHS);
 
 		T_RadiusDamage(self, self, 300, NULL, 800, MOD_R_SPLASH, -1);
-		
+
 	}
 	gi.sound (self, CHAN_AUTO, gi.soundindex("weapons/electroball.wav"), 1, ATTN_NONE, 0);
-}	
+}
 void misc_spiderpod_think (edict_t *ent)
 {
 	ent->s.frame = (ent->s.frame + 1) % 13;
@@ -1070,9 +1074,9 @@ void SP_misc_spiderpod (edict_t *ent)
 {
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
-	
-	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.md2"); 
-	
+
+	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.md2");
+
 	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
 	VectorSet (ent->mins, -64, -64, 0);
 	VectorSet (ent->maxs, 64, 64, 128);
@@ -1116,7 +1120,7 @@ void rednode_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 			safe_centerprintf(other, "Red Powernode Disabled!\n");
 		}
 	}
-	
+
 	//if off, and blue player, nothing
 	//if on, and red player, nothing
 }
@@ -1125,7 +1129,7 @@ void rednode_think (edict_t *ent)
 	vec3_t start, end;
 
 	if(ent->powered){
-		
+
 		VectorCopy(ent->s.origin, start);
 		start[2] -= 24;
 		VectorCopy(ent->s.origin, end);
@@ -1136,9 +1140,9 @@ void rednode_think (edict_t *ent)
 		gi.WriteByte (TE_REDLASER);
 		gi.WritePosition (start);
 		gi.WritePosition (end);
-		gi.multicast (start, MULTICAST_PHS);   
+		gi.multicast (start, MULTICAST_PHS);
 	}
-	
+
 	ent->nextthink = level.time + FRAMETIME;
 }
 void SP_misc_rednode (edict_t *ent)
@@ -1146,8 +1150,8 @@ void SP_misc_rednode (edict_t *ent)
 	ent->movetype = MOVETYPE_NONE;
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
-	ent->s.modelindex = gi.modelindex ("models/objects/dmspot/tris.md2"); 
-	
+	ent->s.modelindex = gi.modelindex ("models/objects/dmspot/tris.md2");
+
 	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
 	VectorSet (ent->mins, -32, -32, -24);
 	VectorSet (ent->maxs, 32, 32, -8);
@@ -1158,8 +1162,8 @@ void SP_misc_rednode (edict_t *ent)
 	ent->touch = rednode_touch;
 	ent->think = rednode_think;
 	ent->nextthink = level.time + FRAMETIME;
-	
-	gi.linkentity (ent);	
+
+	gi.linkentity (ent);
 	M_droptofloor (ent);
 }
 void bluenode_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
@@ -1200,7 +1204,7 @@ void bluenode_think (edict_t *ent)
 	vec3_t start, end;
 
 	if(ent->powered){
-		
+
 		VectorCopy(ent->s.origin, start);
 		start[2] -= 24;
 		VectorCopy(ent->s.origin, end);
@@ -1211,9 +1215,9 @@ void bluenode_think (edict_t *ent)
 		gi.WriteByte (TE_BLASTERBEAM);
 		gi.WritePosition (start);
 		gi.WritePosition (end);
-		gi.multicast (start, MULTICAST_PHS);   
+		gi.multicast (start, MULTICAST_PHS);
 	}
-	
+
 	ent->nextthink = level.time + FRAMETIME;
 }
 void SP_misc_bluenode (edict_t *ent)
@@ -1222,20 +1226,20 @@ void SP_misc_bluenode (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
 
-	ent->s.modelindex = gi.modelindex ("models/objects/dmspot/tris.md2"); 
-	
+	ent->s.modelindex = gi.modelindex ("models/objects/dmspot/tris.md2");
+
 	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
 	VectorSet (ent->mins, -32, -32, -32);
 	VectorSet (ent->maxs, 32, 32, -16);
 
 	ent->s.frame = 0;
 	ent->powered = true; //start on
-	
+
 	gi.linkentity (ent);
 	ent->touch = bluenode_touch;
 	ent->think = bluenode_think;
 	ent->nextthink = level.time + FRAMETIME;
-		
+
 	M_droptofloor (ent);
 }
 void redspidernode_think (edict_t *ent)
@@ -1256,7 +1260,7 @@ void redspidernode_die (edict_t *self, edict_t *inflictor, edict_t *attacker, in
 {
 	self->takedamage = DAMAGE_NO;
 	self->activator = attacker;
-	
+
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_BFG_BIGEXPLOSION);
 	gi.WritePosition (self->s.origin);
@@ -1264,7 +1268,7 @@ void redspidernode_die (edict_t *self, edict_t *inflictor, edict_t *attacker, in
 
 	if(attacker->dmteam == BLUE_TEAM && attacker->client)
 		attacker->client->resp.score+=50;
-	
+
 	gi.sound (self, CHAN_AUTO, gi.soundindex("players/martiancyborg/death1.wav"), 1, ATTN_NONE, 0);
 	self->think = red_roundend;
 	self->nextthink = level.time + 2;
@@ -1275,8 +1279,8 @@ void SP_misc_redspidernode (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
 
-	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.md2"); 
-	
+	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.md2");
+
 	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
 	VectorSet (ent->mins, -64, -64, 0);
 	VectorSet (ent->maxs, 64, 64, 128);
@@ -1306,7 +1310,7 @@ void bluespidernode_die (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 {
 	self->takedamage = DAMAGE_NO;
 	self->activator = attacker;
-	
+
 	gi.WriteByte (svc_temp_entity);
 	gi.WriteByte (TE_BFG_BIGEXPLOSION);
 	gi.WritePosition (self->s.origin);
@@ -1314,7 +1318,7 @@ void bluespidernode_die (edict_t *self, edict_t *inflictor, edict_t *attacker, i
 
 	if(attacker->dmteam == RED_TEAM && attacker->client)
 		attacker->client->resp.score+=50;
-	
+
 	gi.sound (self, CHAN_AUTO, gi.soundindex("players/martiancyborg/death1.wav"), 1, ATTN_NONE, 0);
 	self->think = blue_roundend;
 	self->nextthink = level.time + 2;
@@ -1325,8 +1329,8 @@ void SP_misc_bluespidernode (edict_t *ent)
 	ent->solid = SOLID_BBOX;
 	ent->takedamage = DAMAGE_NO;
 
-	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.md2"); 
-	
+	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.md2");
+
 	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
 	VectorSet (ent->mins, -64, -64, 0);
 	VectorSet (ent->maxs, 64, 64, 128);
@@ -1354,7 +1358,7 @@ void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
 	ent->solid = SOLID_NOT; //will need clipping brushes around it
 
 	//disable shadows(also disables per-pixel dynamic lighting unless minlight set
-	if(ent->spawnflags & 1) 
+	if(ent->spawnflags & 1)
 		ent->s.renderfx = RF_NOSHADOWS;
 
 	if(ent->spawnflags & 16)
@@ -1370,12 +1374,12 @@ void SP_misc_mapmodel (edict_t *ent) //random .md2 map models
 	}
 	else //static mesh
 		ent->s.frame = 0;
- 
+
 	//allow dynamic per-pixel lighting
 	if(ent->spawnflags & 64)
 		ent->s.renderfx |= RF_MINLIGHT;
-	
-	gi.linkentity (ent);	
+
+	gi.linkentity (ent);
 }
 
 void watersplash_think (edict_t *ent)
@@ -1392,7 +1396,7 @@ void watersplash_think (edict_t *ent)
 	gi.WriteByte (8);
 	gi.WritePosition (ent->s.origin);
 	gi.WriteDir (up);
-	gi.WriteByte (SPLASH_BLUE_WATER); //we should allow spawnflags to change this 
+	gi.WriteByte (SPLASH_BLUE_WATER); //we should allow spawnflags to change this
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	ent->nextthink = level.time + 1.0;

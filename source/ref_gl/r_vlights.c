@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "r_local.h"
 
@@ -33,7 +37,7 @@ void VLight_InitAnormTable (void)
 	int x, y;
 	float angle;
 	float sp, sy, cp, cy;
-	
+
 	for ( x = 0; x < VLIGHT_GRIDSIZE_X; x++ )
 	{
 		angle = (x * 360 / VLIGHT_GRIDSIZE_X) * ( M_PI / 180.0f );
@@ -45,7 +49,7 @@ void VLight_InitAnormTable (void)
 			angle = (y * 360 / VLIGHT_GRIDSIZE_X) * ( M_PI / 180.0f );
 			sp = sin(angle);
 			cp = cos(angle);
-			
+
 			vlightgrid[x][y][0] = cp*cy;
 			vlightgrid[x][y][1] = cp*sy;
 			vlightgrid[x][y][2] = -sp;
@@ -75,13 +79,13 @@ float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw
 		angle2 = atan2( normal[1], normal[0] ) * ( 180.0f / M_PI );
 		if (angle2 < 0)
 			angle2 += 360;
-		
+
 		forward = sqrt ( normal[0]*normal[0] + normal[1]*normal[1] );
 		angle1 = atan2( normal[2], forward ) * ( 180.0f / M_PI );
 		if (angle1 < 0)
 			angle1 += 360;
 	}
-	
+
 	pitchofs = ( angle1 + apitch ) * VLIGHT_GRIDSIZE_X / 360;
 	yawofs = ( angle2 + ayaw ) * VLIGHT_GRIDSIZE_Y / 360;
 
@@ -94,15 +98,15 @@ float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw
 		yawofs -= VLIGHT_GRIDSIZE_Y;
 	while (yawofs < 0)
 		yawofs += VLIGHT_GRIDSIZE_Y;
-	
+
 	light = ( DotProduct( vlightgrid[pitchofs][yawofs], dir ) + 2.0f ) * 1.5f;
-		
+
 	if (light > VLIGHT_CLAMP_MAX)
 		light = VLIGHT_CLAMP_MAX;
 	if (light < VLIGHT_CLAMP_MIN)
 		light = VLIGHT_CLAMP_MIN;
-		
-	return light * ( 1.0f / 256.0f );	
+
+	return light * ( 1.0f / 256.0f );
 }
 
 void VLight_Init (void)

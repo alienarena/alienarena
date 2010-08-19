@@ -18,6 +18,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 // R_SURF.C: surface-related refresh code
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <assert.h>
 
 #include "r_local.h"
@@ -128,7 +133,7 @@ DrawGLTexturelessPoly
 ================
 */
 void DrawGLTexturelessPoly (msurface_t *fa)
-{	
+{
 
 	R_InitVArrays(VERT_NO_TEXTURE);
 	R_AddSurfToVArray (fa);
@@ -155,7 +160,7 @@ void R_DrawTexturelessInlineBModel (entity_t *e)
 
 	qglDisable (GL_BLEND);
 	qglColor4f (1,1,1,1);
-	GL_TexEnv( GL_REPLACE );	
+	GL_TexEnv( GL_REPLACE );
 }
 
 void R_DrawTexturelessBrushModel (entity_t *e)
@@ -438,7 +443,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 					gl_state.inverse_intensity,
 					1.0F );
 		GL_RenderWaterPolys(fa, 0, 1, 1);
-		
+
 		GL_TexEnv( GL_REPLACE );
 
 		return;
@@ -550,7 +555,7 @@ void R_DrawAlphaSurfaces (void)
 	rs_stage_t	*stage = NULL;
 	int			texnum = 0;
 	float		scaleX = 1, scaleY = 1;
- 
+
 	// the textures are prescaled up for a better lighting range,
 	// so scale it back down
 	intens = gl_state.inverse_intensity;
@@ -584,7 +589,7 @@ void R_DrawAlphaSurfaces (void)
 		}
 
 		if (s->flags & SURF_DRAWTURB) {
-			//water shaders		
+			//water shaders
 			if(r_shaders->value) {
 				rs_shader = (rscript_t *)s->texinfo->image->script;
 				if(rs_shader) {
@@ -741,7 +746,7 @@ static void GL_RenderLightmappedPoly( msurface_t *surf )
 	image_t *image = R_TextureAnimation( surf->texinfo );
 	qboolean is_dynamic = false;
 	unsigned lmtex = surf->lightmaptexturenum;
-	
+
 	surf->normalchain = r_normalsurfaces;
 	r_normalsurfaces = surf;
 
@@ -762,7 +767,7 @@ dynamic:
 		}
 	}
 
-	if ( is_dynamic && !(gl_glsl_shaders->value && gl_state.glsl_shaders) ) 
+	if ( is_dynamic && !(gl_glsl_shaders->value && gl_state.glsl_shaders) )
 	{
 		unsigned	temp[DYNAMIC_LIGHT_WIDTH*DYNAMIC_LIGHT_HEIGHT];
 		int			smax, tmax;
@@ -801,7 +806,7 @@ dynamic:
 
 	if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
 		dlight_t	*dl;
-		int			lnum, sv_lnum = 0;	
+		int			lnum, sv_lnum = 0;
 		float		add, brightest = 0;
 		vec3_t		lightVec;
 		float		lightCutoffSquared;
@@ -825,10 +830,10 @@ dynamic:
 				VectorSubtract(dl->origin, r_origin, lightVec);
 				VectorNormalize(lightVec);
 				VectorScale(lightVec, brightest/20, lightVec);
-			
+
 				lightCutoffSquared = ( dl->intensity - DLIGHT_CUTOFF );
 
-				if( lightCutoffSquared <= 0.0f ) 
+				if( lightCutoffSquared <= 0.0f )
 					lightCutoffSquared = 0.0f;
 
 				lightCutoffSquared *= 2.0f;
@@ -837,19 +842,19 @@ dynamic:
 		}
 
 		//parallax maps
-		if(gl_parallaxmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name) 
+		if(gl_parallaxmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)
 			&& strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
-		
+
 			R_InitVArrays (VERT_MULTI_TEXTURED);
 
 			glUseProgramObjectARB( g_programObj );
-    		
+
 			GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
-			glUniform1iARB( g_location_surfTexture, 0); 
-		
+			glUniform1iARB( g_location_surfTexture, 0);
+
 			GL_MBind( GL_TEXTURE1, surf->texinfo->heightMap->texnum);
-			glUniform1iARB( g_location_heightTexture, 1); 
-			
+			glUniform1iARB( g_location_heightTexture, 1);
+
 			glUniform1iARB( g_location_lmTexture, 2);
 			qglActiveTextureARB(GL_TEXTURE2);
 			qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
@@ -861,20 +866,20 @@ dynamic:
 			KillFlags |= KILL_TMU3_POINTER;
 
 			glUniform1iARB( g_location_shadowmap, 0); //static light shadow handled by stencil volumes
-			
+
 			if(is_dynamic) {
-						
+
 				if(brightest > 0) {
-					
+
 					glUniform3fARB( g_location_lightPosition, dl->origin[0], dl->origin[1], dl->origin[2]);
 					glUniform3fARB( g_location_lightColour, dl->color[0], dl->color[1], dl->color[2]);
 
 					glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
-					
+
 					glUniform1iARB( g_location_dynamic, 1);
 
-					if(gl_shadowmaps->value) { 
-						
+					if(gl_shadowmaps->value) {
+
 						//dynamic shadow
 						glUniform1iARB( g_location_bspShadowmapTexture, 7);
 						qglActiveTextureARB(GL_TEXTURE7);
@@ -889,11 +894,11 @@ dynamic:
 					glUniform1iARB( g_location_dynamic, 0);
 				}
 			}
-			else 
+			else
 				glUniform1iARB( g_location_dynamic, 0);
-				
+
 			glUniform1iARB( g_location_parallax, 1);
-						
+
 			R_AddGLSLShadedSurfToVArray (surf, scroll);
 
 			glUseProgramObjectARB( 0 );
@@ -901,13 +906,13 @@ dynamic:
 		}
 		//normal mapped surface for dynamic lights
 		else if(is_dynamic && brightest > 0 && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
-					
+
 			R_InitVArrays (VERT_MULTI_TEXTURED);
 
 			glUseProgramObjectARB( g_programObj );
-    		
+
 			GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
-			glUniform1iARB( g_location_surfTexture, 0); 
+			glUniform1iARB( g_location_surfTexture, 0);
 
 			GL_MBind( GL_TEXTURE1,  surf->texinfo->heightMap->texnum);
 			glUniform1iARB( g_location_heightTexture, 1);
@@ -922,8 +927,8 @@ dynamic:
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
 			KillFlags |= KILL_TMU3_POINTER;
 
-			if(gl_shadowmaps->value) { 
-				
+			if(gl_shadowmaps->value) {
+
 				//dynamic shadow
 				glUniform1iARB( g_location_bspShadowmapTexture, 7);
 				qglActiveTextureARB(GL_TEXTURE7);
@@ -933,39 +938,39 @@ dynamic:
 			}
 			else
 				glUniform1iARB( g_location_shadowmap, 0);
-	
+
 			glUniform3fARB( g_location_lightPosition, dl->origin[0], dl->origin[1], dl->origin[2]);
 			glUniform3fARB( g_location_lightColour, dl->color[0], dl->color[1], dl->color[2]);
 			glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
 			glUniform1iARB( g_location_dynamic, 1);
 			glUniform1iARB( g_location_parallax, 0);
-			
+
 			R_AddGLSLShadedSurfToVArray (surf, scroll);
 
 			glUseProgramObjectARB( 0 );
 
-		}		
+		}
 		//surface has no normalmap
 		else {
-		
+
 			GL_MBind( GL_TEXTURE0, image->texnum );
 			GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );
-		
-			R_InitVArrays (VERT_MULTI_TEXTURED);	
-			
+
+			R_InitVArrays (VERT_MULTI_TEXTURED);
+
 			R_AddLightMappedSurfToVArray (surf, scroll);
 		}
 	}
 	else {	//no glsl, standard render
-		
+
 		GL_MBind( GL_TEXTURE0, image->texnum );
 		GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );
-		
-		R_InitVArrays (VERT_MULTI_TEXTURED);	
-			
+
+		R_InitVArrays (VERT_MULTI_TEXTURED);
+
 		R_AddLightMappedSurfToVArray (surf, scroll);
 	}
-		
+
 	R_KillVArrays ();
 
 	if (SurfaceIsAlphaBlended(surf))
@@ -973,11 +978,11 @@ dynamic:
 }
 
 //This next section deals with bumpmapped surfaces.  Much of this was gathered from Mike Hiney
-//and "Paul's Projects" tutorials.  Note this is for self per-pixel shadowing of normalmapped bsp 
-//surfaces.  
+//and "Paul's Projects" tutorials.  Note this is for self per-pixel shadowing of normalmapped bsp
+//surfaces.
 extern GLuint normalisationCubeMap;
 static void R_InitNormalSurfaces ()
-{	
+{
 
 	qglActiveTextureARB (GL_TEXTURE0);
 	qglDisable (GL_TEXTURE_2D);
@@ -990,7 +995,7 @@ static void R_InitNormalSurfaces ()
 	// rotate around Y to bring blue/pink to the front
 	qglRotatef (145, 0, 1, 0);
 
-	// now reposition so that the bright spot is center screen, and up a little 
+	// now reposition so that the bright spot is center screen, and up a little
 	qglRotatef (-45, 1, 0, 0);
 	qglRotatef (-45, 0, 0, 1);
 
@@ -1016,7 +1021,7 @@ static void R_InitNormalSurfaces ()
 }
 
 void R_KillNormalTMUs(void) {
-	
+
 	//kill TMU1
 	qglActiveTextureARB (GL_TEXTURE1);
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -1055,11 +1060,11 @@ static void R_DrawNormalSurfaces (void)
 	qglTexEnvi (GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
 	qglTexEnvi (GL_TEXTURE_ENV, GL_OPERAND1_RGB_ARB, GL_SRC_COLOR);
 
-	qglEnable (GL_BLEND); 
+	qglEnable (GL_BLEND);
 
-	// set the correct blending mode for normal maps 
-	qglBlendFunc (GL_ZERO, GL_SRC_COLOR); 
-	
+	// set the correct blending mode for normal maps
+	qglBlendFunc (GL_ZERO, GL_SRC_COLOR);
+
 	for (; surf; surf = surf->normalchain)
 	{
 		if (SurfaceIsAlphaBlended(surf))
@@ -1475,7 +1480,7 @@ void R_DrawWorld (void)
 				GL_TexEnv( GL_REPLACE );
 			else
 				GL_TexEnv( GL_MODULATE );
-		
+
 		} else {
 			GL_TexEnv ( GL_COMBINE_EXT );
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
@@ -1503,7 +1508,7 @@ void R_DrawWorld (void)
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
 			}
 		}
-		
+
 		R_RecursiveWorldNode (r_worldmodel->nodes, 15);
 
 		GL_EnableMultitexture( false );
@@ -1522,7 +1527,7 @@ void R_DrawWorld (void)
 
 	GL_EnableMultitexture( true );
 	R_DrawNormalSurfaces ();
-	GL_EnableMultitexture( false );	
+	GL_EnableMultitexture( false );
 
 	R_InitSun();
 

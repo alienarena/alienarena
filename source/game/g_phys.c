@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // g_phys.c
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 /*
@@ -26,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 pushmove objects do not obey gravity, and do not interact with each other or trigger fields, but block normal movement and push normal objects when they move.
 
-onground is set for toss objects when they come to a complete rest.  it is set for steping or walking objects 
+onground is set for toss objects when they come to a complete rest.  it is set for steping or walking objects
 
 doors, plats, etc are SOLID_BSP, and MOVETYPE_PUSH
 bonus items are SOLID_TRIGGER touch, and MOVETYPE_TOSS
@@ -56,10 +60,10 @@ edict_t	*SV_TestEntityPosition (edict_t *ent)
 	else
 		mask = MASK_SOLID;
 	trace = gi.trace (ent->s.origin, ent->mins, ent->maxs, ent->s.origin, ent, mask);
-	
+
 	if (trace.startsolid)
 		return g_edicts;
-		
+
 	return NULL;
 }
 
@@ -98,7 +102,7 @@ qboolean SV_RunThink (edict_t *ent)
 
 	if(!strcmp(ent->classname, "func_train")) {
 		//if animated mesh, animate at this target
-		if (ent->spawnflags & 32) 
+		if (ent->spawnflags & 32)
 				ent->s.frame = (ent->s.frame + 1)%24;
 	}
 
@@ -108,7 +112,7 @@ qboolean SV_RunThink (edict_t *ent)
 		return true;
 	if (thinktime > level.time+0.001)
 		return true;
-	
+
 	ent->nextthink = 0;
 	if (!ent->think)
 		gi.error ("NULL ent->think");
@@ -133,7 +137,7 @@ void SV_Impact (edict_t *e1, trace_t *trace)
 
 	if (e1->touch && e1->solid != SOLID_NOT)
 		e1->touch (e1, e2, &trace->plane, trace->surface);
-	
+
 	if (e2->touch && e2->solid != SOLID_NOT)
 		e2->touch (e2, e1, NULL, NULL);
 }
@@ -154,13 +158,13 @@ int ClipVelocity (vec3_t in, vec3_t normal, vec3_t out, float overbounce)
 	float	backoff;
 	float	change;
 	int		i, blocked;
-	
+
 	blocked = 0;
 	if (normal[2] > 0)
 		blocked |= 1;		// floor
 	if (!normal[2])
 		blocked |= 2;		// step
-	
+
 	backoff = DotProduct (in, normal) * overbounce;
 
 	for (i=0 ; i<3 ; i++)
@@ -201,14 +205,14 @@ int SV_FlyMove (edict_t *ent, float time, int mask)
 	vec3_t		end;
 	float		time_left;
 	int			blocked;
-	
+
 	numbumps = 4;
-	
+
 	blocked = 0;
 	VectorCopy (ent->velocity, original_velocity);
 	VectorCopy (ent->velocity, primal_velocity);
 	numplanes = 0;
-	
+
 	time_left = time;
 
 	ent->groundentity = NULL;
@@ -258,9 +262,9 @@ int SV_FlyMove (edict_t *ent, float time, int mask)
 		if (!ent->inuse)
 			break;		// removed by the impact function
 
-		
+
 		time_left -= time_left * trace.fraction;
-		
+
 	// cliped to another plane
 		if (numplanes >= MAX_CLIP_PLANES)
 		{	// this shouldn't really happen
@@ -287,7 +291,7 @@ int SV_FlyMove (edict_t *ent, float time, int mask)
 			if (j == numplanes)
 				break;
 		}
-		
+
 		if (i != numplanes)
 		{	// go along this plane
 			VectorCopy (new_velocity, ent->velocity);
@@ -391,7 +395,7 @@ retry:
 		G_TouchTriggers (ent);
 
 	return trace;
-}					
+}
 
 
 typedef struct
@@ -498,7 +502,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 			VectorCopy (check->s.angles, pushed_p->angles);
 			pushed_p++;
 
-			// try moving the contacted entity 
+			// try moving the contacted entity
 			VectorAdd (check->s.origin, move, check->s.origin);
 			if (check->client)
 			{	// FIXME: doesn't rotate monsters?
@@ -536,7 +540,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 				continue;
 			}
 		}
-		
+
 		// save off the obstacle so we can call the block function
 		obstacle = check;
 
@@ -658,7 +662,7 @@ void SV_Physics_Noclip (edict_t *ent)
 // regular thinking
 	if (!SV_RunThink (ent))
 		return;
-	
+
 	VectorMA (ent->s.angles, FRAMETIME, ent->avelocity, ent->s.angles);
 	VectorMA (ent->s.origin, FRAMETIME, ent->velocity, ent->s.origin);
 
@@ -738,7 +742,7 @@ void SV_Physics_Toss (edict_t *ent)
 
 	// stop if on ground
 		if (trace.plane.normal[2] > 0.7)
-		{		
+		{
 			if (ent->velocity[2] < 60 || ent->movetype != MOVETYPE_BOUNCE )
 			{
 				ent->groundentity = trace.ent;
@@ -751,7 +755,7 @@ void SV_Physics_Toss (edict_t *ent)
 //		if (ent->touch)
 //			ent->touch (ent, trace.ent, &trace.plane, trace.surface);
 	}
-	
+
 // check for water transition
 	wasinwater = (ent->watertype & MASK_WATER);
 	ent->watertype = gi.pointcontents (ent->s.origin);
@@ -842,7 +846,7 @@ void SV_Physics_Step (edict_t *ent)
 		wasonground = true;
 	else
 		wasonground = false;
-		
+
 	if (ent->avelocity[0] || ent->avelocity[1] || ent->avelocity[2])
 		SV_AddRotationalFriction (ent);
 
@@ -964,6 +968,6 @@ void G_RunEntity (edict_t *ent)
 		SV_Physics_Toss (ent);
 		break;
 	default:
-		gi.error ("SV_Physics: bad movetype %i", (int)ent->movetype);			
+		gi.error ("SV_Physics: bad movetype %i", (int)ent->movetype);
 	}
 }

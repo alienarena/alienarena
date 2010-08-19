@@ -1,3 +1,26 @@
+/*
+Copyright (C) 20?? COR Entertainment, LLC.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "g_local.h"
 
 
@@ -34,12 +57,12 @@ qboolean Jet_Active( edict_t *ent )
   and produces a little explosion*/
 void Jet_Explosion( edict_t *ent )
 {
-  
+
   gi.WriteByte( svc_temp_entity );
   gi.WriteByte( TE_EXPLOSION1 );   /*TE_EXPLOSION2 is possible too*/
   gi.WritePosition( ent->s.origin );
   gi.multicast( ent->s.origin, MULTICAST_PVS );
- 
+
 }
 
 
@@ -108,11 +131,11 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
   vec3_t forward, right;
   int    i;
   gitem_t *vehicle;
-	
+
   vehicle = FindItemByClassname("item_hover");
 
   /*clear gravity so we dont have to compensate it with the Boosters*/
-  if(!(ent->client->pers.inventory[ITEM_INDEX(vehicle)]))	
+  if(!(ent->client->pers.inventory[ITEM_INDEX(vehicle)]))
 	ent->client->ps.pmove.gravity = 0;
   else //make hovercraft fall quicker
 	ent->client->ps.pmove.gravity = sv_gravity->value * 4;
@@ -144,12 +167,12 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
       /*add the acceleration for each direction*/
 	  if(!(ent->client->pers.inventory[ITEM_INDEX(vehicle)])) {
 		  acc[0] += direction * forward[0] * 60;
-		  acc[1] += direction * forward[1] * 60;	
+		  acc[1] += direction * forward[1] * 60;
 		  acc[2] += direction * forward[2] * 60;
 	  }
 	  else {
 		  acc[0] += direction * forward[0] * 120;
-		  acc[1] += direction * forward[1] * 120;	
+		  acc[1] += direction * forward[1] * 120;
 	  }
     }
 
@@ -220,17 +243,17 @@ void Jet_ApplyJet( edict_t *ent, usercmd_t *ucmd )
 
 void Use_Jet ( edict_t *ent)
 {
-    
+
     /*jetpack in inventory but no fuel time? must be one of the
       give all/give jetpack cheats, so put fuel in*/
     if ( ent->client->Jet_remaining == 0 )
-      ent->client->Jet_remaining = 700;  
+      ent->client->Jet_remaining = 700;
 
-    if ( Jet_Active(ent) ) 
-      ent->client->Jet_framenum = 0; 
+    if ( Jet_Active(ent) )
+      ent->client->Jet_framenum = 0;
     else
       ent->client->Jet_framenum = level.framenum + ent->client->Jet_remaining;
-    
+
     gi.sound( ent, CHAN_ITEM, gi.soundindex("vehicles/got_in.wav"), 0.8, ATTN_NORM, 0 );
 }
 static void VehicleThink(edict_t *ent)
@@ -257,7 +280,7 @@ void VehicleSetup (edict_t *ent)
 		ent->s.modelindex3 = gi.modelindex("vehicles/bomber/helmet.md2");
 
 	ent->solid = SOLID_TRIGGER;
-	ent->movetype = MOVETYPE_TOSS;  
+	ent->movetype = MOVETYPE_TOSS;
 	ent->touch = Touch_Item;
 
 	v = tv(0,0,-128);
@@ -282,7 +305,7 @@ void VehicleSetup (edict_t *ent)
 static void VehicleDropTouch(edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	//owner (who dropped us) can't touch for two secs
-	if (other == ent->owner && 
+	if (other == ent->owner &&
 		ent->nextthink - level.time > 2)
 		return;
 
@@ -302,9 +325,9 @@ void VehicleDeadDrop(edict_t *self)
 	gitem_t *vehicle;
 
 	dropped = NULL;
-	
-	vehicle = FindItemByClassname("item_bomber"); 
-	
+
+	vehicle = FindItemByClassname("item_bomber");
+
 	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
 		dropped = Drop_Item(self, vehicle);
 		self->client->pers.inventory[ITEM_INDEX(vehicle)] = 0;
@@ -319,8 +342,8 @@ void VehicleDeadDrop(edict_t *self)
 		return;
 	}
 	//didn't find a bomber, try a strafer
-	vehicle = FindItemByClassname("item_strafer"); 
-	
+	vehicle = FindItemByClassname("item_strafer");
+
 	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
 		dropped = Drop_Item(self, vehicle);
 		self->client->pers.inventory[ITEM_INDEX(vehicle)] = 0;
@@ -335,8 +358,8 @@ void VehicleDeadDrop(edict_t *self)
 		return;
 	}
 	//didn't find a strafer, try a hovercraft
-	vehicle = FindItemByClassname("item_hover"); 
-	
+	vehicle = FindItemByClassname("item_hover");
+
 	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
 		dropped = Drop_Item(self, vehicle);
 		self->client->pers.inventory[ITEM_INDEX(vehicle)] = 0;
@@ -369,10 +392,10 @@ void Reset_player(edict_t *ent)
 		ent->client->newweapon = FindItem("Rocket Launcher");
 	else
 		ent->client->newweapon = FindItem("blaster");
-		  		
+
 	memcpy (userinfo, ent->client->pers.userinfo, sizeof(userinfo));
 	s = Info_ValueForKey (userinfo, "skin");
-			
+
 	i = 0;
 	done = false;
 	strcpy(playermodel, " ");
@@ -386,7 +409,7 @@ void Reset_player(edict_t *ent)
 		i++;
 	}
 	playermodel[i-1] = 0;
-		  
+
 	ent->s.modelindex = 255;
 
 	sprintf(modelpath, "players/%s/helmet.md2", playermodel);
@@ -396,20 +419,20 @@ void Reset_player(edict_t *ent)
 		ent->s.modelindex3 = gi.modelindex(modelpath);
 		fclose(file);
 	}
-	else 
+	else
 	   	ent->s.modelindex3 = 0;
-			
+
 	ent->s.modelindex4 = 0;
-	
+
 	ent->in_vehicle = false;
 }
-qboolean Leave_vehicle(edict_t *ent, gitem_t *item) 
+qboolean Leave_vehicle(edict_t *ent, gitem_t *item)
 {
 
 	Reset_player(ent);
-	
+
 	ent->client->Jet_framenum = level.framenum;
-		
+
 	ent->client->pers.inventory[ITEM_INDEX(item)] = 0;
 
 	gi.sound( ent, CHAN_ITEM, gi.soundindex("vehicles/got_in.wav"), 0.8, ATTN_NORM, 0 );
@@ -422,8 +445,8 @@ qboolean Leave_vehicle(edict_t *ent, gitem_t *item)
 
 qboolean Get_in_vehicle (edict_t *ent, edict_t *other)
 {
-	
-	gitem_t *vehicle; 
+
+	gitem_t *vehicle;
 
 	float		*v;
 
@@ -461,14 +484,14 @@ qboolean Get_in_vehicle (edict_t *ent, edict_t *other)
 	v = tv(64,64,64);
 	VectorCopy (v, other->maxs);
 	other->s.origin[2] +=24;
-	
+
 	other->client->pers.inventory[ITEM_INDEX(vehicle)] = 1;
 	other->client->newweapon = ent->item;
-	
+
 	if (!(ent->spawnflags & DROPPED_ITEM)) {
 		SetRespawn (ent, 60);
 	}
-	
+
 	Use_Jet(other);
 
 	ent->owner = other;
