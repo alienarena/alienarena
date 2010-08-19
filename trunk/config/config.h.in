@@ -118,6 +118,9 @@
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
 
+/* Define to 1 if you have the <ode/ode.h> header file. */
+#undef HAVE_ODE_ODE_H
+
 /* Define to 1 if you have the <OpenAL/alc.h> header file. */
 #undef HAVE_OPENAL_ALC_H
 

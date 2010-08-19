@@ -13,9 +13,9 @@
 # 
 # See the GNU General Public License for more details.
 # 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
 ACLOCAL_AMFLAGS=`-I m4'
@@ -66,7 +66,7 @@ endif
 
 if BUILD_WIN32
 bin_PROGRAMS = crx
-crx_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DAL_NO_PROTOTYPES -DNDEBUG
+crx_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DNDEBUG
 crx_LDADD = libgame.a
 LIBS += $(WIN32_LIBS)
 endif
@@ -149,6 +149,8 @@ crx_SOURCES = \
 	ref_gl/r_shadowmaps.c \
 	ref_gl/r_shadows.c \
 	ref_gl/r_surf.c \
+	ref_gl/r_ragdoll.c \
+	ref_gl/r_ragdoll.h \
 	ref_gl/r_varray.c \
 	ref_gl/r_vbo.c \
 	ref_gl/r_vlights.c \

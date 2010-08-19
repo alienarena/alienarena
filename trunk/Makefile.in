@@ -308,7 +308,7 @@ dist_doc_DATA = docs/license.txt docs/README.txt
 #
 nobase_dist_pkgdata_DATA = \
 	Aa1.ico \
-	alienarena.png \
+	aa.png \
 	arena/motd.txt \
 	arena/server.cfg \
 	botinfo/^3Marty.cfg \
