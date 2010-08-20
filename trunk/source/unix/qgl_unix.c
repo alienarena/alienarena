@@ -33,13 +33,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include <float.h>
-#include "../ref_gl/r_local.h"
+#include "ref_gl/r_local.h"
 #include "glw_unix.h"
 
 //#include <GL/fxmesa.h>
 #include <GL/glx.h>
 
+#if defined HAVE_DLFCN_H
 #include <dlfcn.h>
+#endif
 
 /*
 //FX Mesa Functions
@@ -3030,13 +3032,19 @@ qboolean QGL_Init( const char *dllname )
 
 	if ( ( glw_state.OpenGLLib = dlopen( dllname, RTLD_LAZY | RTLD_GLOBAL ) ) == 0 )
 	{
+#if 1
+		// basedir deprecated.
+		return false;
+
+#else
 		char	fn[MAX_OSPATH];
 		char	*path;
-		FILE *fp;
+		// FILE *fp; // unused
 
 //		Com_Printf(PRINT_ALL, "QGL_Init: Can't load %s from /etc/ld.so.conf: %s\n",
 //				dllname, dlerror());
 
+		// probably not useful in unix/linux
 		// try basedir next
 		path = Cvar_Get ("basedir", ".", CVAR_NOSET)->string;
 		snprintf (fn, MAX_OSPATH, "%s/%s", path, dllname );
@@ -3044,6 +3052,7 @@ qboolean QGL_Init( const char *dllname )
 			Com_Printf( PRINT_ALL, "%s\n", dlerror() );
 			return false;
 		}
+#endif
 	}
 
 	gl_config.allow_cds = true;

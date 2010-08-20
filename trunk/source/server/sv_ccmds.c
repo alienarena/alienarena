@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "server.h"
 
+static size_t szr; // just for quieting unused result warnings
 
 /*
 ===============================================================================
@@ -84,6 +85,9 @@ qboolean SV_SetPlayer (void)
 
 	if (Cmd_Argc() < 2)
 		return false;
+
+	if ( svs.clients == NULL )
+		return false; // unlikely, but possible, to call here before initialized
 
 	s = Cmd_Argv(1);
 
@@ -156,7 +160,7 @@ void SV_Map_f (void)
 		Com_sprintf (expanded, sizeof(expanded), "maps/%s.bsp", map);
 		if (FS_LoadFile (expanded, NULL) == -1)
 		{
-			Com_Printf ("Can't find %s\n", expanded);
+			Com_Printf ("Cannot find %s\n", expanded);
 			return;
 		}
 	}
@@ -179,7 +183,7 @@ void SV_StartMap_f (void)
 		Com_sprintf (expanded, sizeof(expanded), "maps/%s.bsp", map);
 		if (FS_LoadFile (expanded, NULL) == -1)
 		{
-			Com_Printf ("Can't find %s\n", expanded);
+			Com_Printf ("Cannot find %s\n", expanded);
 			return;
 		}
 	}
@@ -422,7 +426,7 @@ void SV_ServerRecord_f (void)
 	//
 	// write a single giant fake message with all the startup info
 	//
-	SZ_Init (&buf, buf_data, sizeof(buf_data));
+	SZ_Init (&buf, (byte *)buf_data, (int)(sizeof(buf_data)));
 	SZ_SetName (&buf, "Giant fake msg buffer", true);
 
 	//
@@ -451,8 +455,8 @@ void SV_ServerRecord_f (void)
 	// write it to the demo file
 	Com_DPrintf ("signon message length: %i\n", buf.cursize);
 	len = LittleLong (buf.cursize);
-	fwrite (&len, 4, 1, svs.demofile);
-	fwrite (buf.data, buf.cursize, 1, svs.demofile);
+	szr = fwrite (&len, 4, 1, svs.demofile);
+	szr = fwrite (buf.data, buf.cursize, 1, svs.demofile);
 
 	// the rest of the demo file will be individual frames
 }

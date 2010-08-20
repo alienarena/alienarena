@@ -17,7 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-// sv_game.c -- interface to the game dll
+// sv_game.c -- interface to the game module
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -391,10 +391,14 @@ void SV_InitGameProgs (void)
 
 	import.Sys_Milliseconds = Sys_Milliseconds;
 
+	import.FullPath = FS_FullPath;
+	import.FullWritePath = FS_FullWritePath;
+
 	ge = (game_export_t *)Sys_GetGameAPI (&import);
 
 	if (!ge)
-		Com_Error (ERR_DROP, "failed to load game DLL");
+		Com_Error (ERR_DROP, "failed to load game module");
+
 	if (ge->apiversion != GAME_API_VERSION)
 		Com_Error (ERR_DROP, "game is version %i, not %i", ge->apiversion,
 		GAME_API_VERSION);

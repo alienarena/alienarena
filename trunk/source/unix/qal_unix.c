@@ -27,16 +27,35 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <stddef.h>
 #include <stdio.h>
+#if defined HAVE_DLFCN_H
 #include <dlfcn.h>
+#endif
 
-#include "../client/client.h"
-#include "../client/qal.h"
+#if defined HAVE_AL_H
+#include <al.h>
+#include <alc.h>
+#elif defined HAVE_AL_AL_H
+#include <AL/al.h>
+#include <AL/alc.h>
+#elif defined HAVE_OPENAL_AL_H
+#include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+#else
+#error OpenAL header includes not defined.
+#endif
+
+#include "client/client.h"
+#include "client/qal.h"
 
 /*
  * OpenAL Library
- *  OpenAL 1.1 required.  TODO: make soname configurable
+ *  OpenAL 1.1 required.
  */
+#if defined OPENAL_DRIVER
+const char libopenal_name[] = OPENAL_DRIVER;
+#else
 const char libopenal_name[] = "libopenal.so.1";
+#endif
 void *dynlib;
 qboolean dlsym_error;
 

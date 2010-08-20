@@ -26,12 +26,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include <assert.h>
+#if defined HAVE_DLFCN_H
 #include <dlfcn.h> // ELF dl loader
+#endif
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
 
-#include "../client/client.h"
+#include "client/client.h"
 
 // Console variables that we need to access from this module
 cvar_t		*vid_gamma;
@@ -201,8 +203,11 @@ void VID_Init (void)
 	Cmd_AddCommand ("vid_restart", VID_Restart_f);
 	Cmd_AddCommand ("vid_modelist", VID_ModeList_f);
 
+#if 0
+	// 2010-08 Probably very obsolete.
 	/* Disable the 3Dfx splash screen */
 	putenv("FX_GLIDE_NO_SPLASH=0");
+#endif	
 
 	/* Start the graphics mode and load refresh DLL */
 	vid_restart = true;
