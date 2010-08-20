@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-#include "../qcommon/qcommon.h"
+#include "qcommon/qcommon.h"
 
 #include <unistd.h>
 #include <sys/socket.h>
@@ -36,8 +36,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/uio.h>
 #include <errno.h>
 
-#ifdef NeXT
-#include <libc.h>
+#if defined HAVE_STRCASECMP && !defined HAVE_STRICMP
+#define stricmp strcasecmp
 #endif
 
 int			server_port;
@@ -131,6 +131,8 @@ qboolean	NET_CompareBaseAdr (netadr_t a, netadr_t b)
 			return true;
 		return false;
 	}
+
+	return false;
 }
 
 char	*NET_AdrToString (netadr_t a)
@@ -284,7 +286,7 @@ qboolean	NET_GetPacket (netsrc_t sock, netadr_t *net_from, sizebuf_t *net_messag
 {
 	int 	ret;
 	struct sockaddr_in	from;
-	int		fromlen;
+	size_t	fromlen;
 	int		net_socket;
 	int		protocol;
 	int		err;
@@ -338,7 +340,7 @@ void NET_SendPacket (netsrc_t sock, int length, void *data, netadr_t to)
 {
 	int		ret;
 	struct sockaddr_in	addr;
-	int		net_socket;
+	int		net_socket = 0;
 
 	if ( to.type == NA_LOOPBACK )
 	{
@@ -543,13 +545,25 @@ char *NET_ErrorString (void)
 // sleeps msec or until net socket is ready
 void NET_Sleep(int msec)
 {
+#if 1
+	return;
+#else
+/*
+ * 2010-06-15
+ *  was: (not local server).OR.(not dedicated server), probably always true
+ * so this was a no-op function.
+ * Looks like intention is to suspend the server until the next frame
+ * time, unless clients send something -- which might be a good thing
+ * for a dedicated server, but maybe not a local server.
+ */
     struct timeval timeout;
 	fd_set	fdset;
 	extern cvar_t *dedicated;
 	extern qboolean stdin_active;
 
-	if (!ip_sockets[NS_SERVER] || (dedicated && !dedicated->value))
-		return; // we're not a server, just run full speed
+	// (not local server).AND.(not dedicated server)
+	if ( !ip_sockets[NS_SERVER] && ( dedicated && !dedicated->value ) )
+		return;
 
 	FD_ZERO(&fdset);
 	if (stdin_active)
@@ -558,5 +572,6 @@ void NET_Sleep(int msec)
 	timeout.tv_sec = msec/1000;
 	timeout.tv_usec = (msec%1000)*1000;
 	select(ip_sockets[NS_SERVER]+1, &fdset, NULL, NULL, &timeout);
+#endif
 }
 

@@ -22,8 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //define	PARANOID			// speed sapping error checking
 
-#include "../qcommon/qcommon.h"
-#include "../game/game.h"
+#include "qcommon/qcommon.h"
+#include "game/game.h"
 
 //=============================================================================
 
@@ -51,6 +51,7 @@ typedef struct
 	char		name[MAX_QPATH];			// map name, or cinematic name
 	struct cmodel_s		*models[MAX_MODELS];
 
+	// client/server protocol depends on MAX_QPATH being 64.
 	char		configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
 	entity_state_t	baselines[MAX_EDICTS];
 

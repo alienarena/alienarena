@@ -452,7 +452,7 @@ void SVC_DirectConnect (void)
 	version = atoi(Cmd_Argv(1));
 	if (version != PROTOCOL_VERSION)
 	{
-		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nServer is version %4.2f.\n", VERSION);
+		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nServer is version %s\n", VERSION);
 		Com_DPrintf ("    rejected connect from version %i\n", version);
 		return;
 	}
@@ -465,7 +465,7 @@ void SVC_DirectConnect (void)
 
 	//limit connections from a single IP
 	previousclients = 0;
-	for (i=0,cl=svs.clients ; i<maxclients->integer ; i++,cl++)
+	for (i=0,cl=svs.clients ; i<maxclients->value ; i++,cl++)
 	{
 		if (cl->state == cs_free)
 			continue;

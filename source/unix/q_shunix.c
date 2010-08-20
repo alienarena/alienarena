@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2010 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -22,7 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+#if defined HAVE_MREMAP
 #define _GNU_SOURCE
+#endif
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,93 +36,168 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/mman.h>
 #include <sys/time.h>
 
-#include "../unix/glob.h"
+#include "unix/glob.h"
+#include "qcommon/qcommon.h"
 
-#include "../qcommon/qcommon.h"
 
-#ifndef __linux__
-/* For round_page() macro. */
-#include <machine/param.h>
-#endif
-
-//===============================================================================
-
-byte *membase;
-int maxhunksize;
-int curhunksize;
+/*
+ * State of currently open Hunk.
+ * Valid between Hunk_Begin() and Hunk_End()
+ */
+byte *hunk_base = NULL;
+size_t *phunk_size_store = NULL;
+static const size_t hunk_header_size = 32;
+byte *user_hunk_base = NULL ;
+size_t rsvd_hunk_size;
+size_t user_hunk_size;
+size_t total_hunk_used_size;
 
 void *Hunk_Begin (int maxsize)
 {
-	// reserve a huge chunk of memory, but don't commit any yet
-	maxhunksize = maxsize + sizeof(int);
-	curhunksize = 0;
-	membase = mmap(0, maxhunksize, PROT_READ|PROT_WRITE,
+
+	Com_DPrintf("Hunk_Begin:0x%X:\n", maxsize );
+	if ( hunk_base != NULL )
+		Com_DPrintf("Warning: Hunk_Begin: hunk_base != NULL\n");
+
+	// reserve virtual memory space
+	rsvd_hunk_size = (size_t)maxsize + hunk_header_size;
+	hunk_base = mmap(0, rsvd_hunk_size, PROT_READ|PROT_WRITE,
 		MAP_PRIVATE|MAP_ANON, -1, 0);
-	if (membase == NULL || membase == (byte *)-1)
+	if ( hunk_base == NULL || hunk_base == (byte *)-1)
 		Sys_Error("unable to virtual allocate %d bytes", maxsize);
 
-	*((int *)membase) = curhunksize;
+	total_hunk_used_size = hunk_header_size;
+	user_hunk_size = 0;
+	user_hunk_base = hunk_base + hunk_header_size;
 
-	return membase + sizeof(int);
+	// store the size reserved for Hunk_Free()
+	phunk_size_store = (size_t *)hunk_base;
+	*phunk_size_store = rsvd_hunk_size; // the initial reserved size
+
+	return user_hunk_base;
 }
 
 void *Hunk_Alloc (int size)
 {
-	byte *buf;
+	byte *user_hunk_bfr;
+	size_t user_hunk_block_size;
+	size_t new_user_hunk_size;
 
-	// round to cacheline
-	size = (size+31)&~31;
-	if (curhunksize + size > maxhunksize)
-		Sys_Error("Hunk_Alloc overflow");
-	buf = membase + sizeof(int) + curhunksize;
-	curhunksize += size;
-	return buf;
+	if ( hunk_base == NULL ) {
+		Sys_Error("Program Error: Hunk_Alloc: hunk_base==NULL");
+	}
+
+	// size is sometimes odd, so increment size to even boundary to avoid
+	//  odd-aligned accesses.
+	user_hunk_block_size = ((size_t)size + 1) & ~0x01;
+	new_user_hunk_size = user_hunk_size + user_hunk_block_size;
+	total_hunk_used_size += user_hunk_block_size;
+
+	if ( total_hunk_used_size > rsvd_hunk_size )
+		Sys_Error("Program Error: Hunk_Alloc: overflow");
+
+	user_hunk_bfr = user_hunk_base + user_hunk_size; // set base of new block
+	user_hunk_size = new_user_hunk_size; // then update user hunk size
+
+	Com_DPrintf("Hunk_Alloc:%u @ %p:\n",
+			user_hunk_block_size, user_hunk_bfr );
+
+	return (void *)user_hunk_bfr;
 }
 
+#if defined HAVE_MREMAP
+// easy version, mremap() should be available on all Linux
 int Hunk_End (void)
 {
-	byte *n;
+	byte *remap_base;
+	size_t new_rsvd_hunk_size;
 
-#ifndef __linux__
-	/*
-	 * The Linux system call mremap() is not present, so a wrapper is
-	 * needed. This code frees the unused part of the allocated memory
-	 * (equivalent to mremap() when shrinking a block of memory).
-	 */
-
-	size_t old_size = maxhunksize;
-	size_t new_size = curhunksize + sizeof(int);
-	void * unmap_base;
-	size_t unmap_len;
-
-	new_size = round_page(new_size);
-	old_size = round_page(old_size);
-
-	if (new_size > old_size)
-		n = 0; /* error */
-	else if (new_size < old_size)
-	{
-		unmap_base = (caddr_t)(membase + new_size);
-		unmap_len = old_size - new_size;
-		n = munmap(unmap_base, unmap_len) + membase;
-	}
-#else
-	n = mremap(membase, maxhunksize, curhunksize + sizeof(int), 0);
-#endif
-	if (n != membase)
+	new_rsvd_hunk_size = total_hunk_used_size;
+	remap_base = mremap( hunk_base, rsvd_hunk_size, new_rsvd_hunk_size, 0 );
+	if ( remap_base != hunk_base ) {
 		Sys_Error("Hunk_End:  Could not remap virtual block (%d)", errno);
-	*((int *)membase) = curhunksize + sizeof(int);
+	}
+	// "close" this hunk, setting reserved size for Hunk_Free
+	rsvd_hunk_size = new_rsvd_hunk_size;
+	*phunk_size_store = rsvd_hunk_size;
 
-	return curhunksize;
+	Com_DPrintf("Hunk_End:0x%X @ %p:\n", rsvd_hunk_size, remap_base );
+
+	hunk_base = user_hunk_base = NULL;
+	phunk_size_store = NULL;
+
+	return user_hunk_size; // user buffer is user_hunk_size @ user_hunk_base
 }
+
+#else
+// portable version (we hope)
+int Hunk_End()
+{
+	size_t sys_pagesize;
+	size_t rsvd_pages;
+	size_t rsvd_size;
+	size_t used_pages;
+	size_t used_size;
+	size_t unmap_size;
+	void * unmap_base;
+
+	// the portable way to get pagesize, according to documentation
+	sys_pagesize = (size_t)sysconf( _SC_PAGESIZE );
+
+	// calculate page-aligned size that was reserved
+	rsvd_pages = ( rsvd_hunk_size / sys_pagesize );
+	if ( (rsvd_hunk_size % sys_pagesize) != 0 )
+		rsvd_pages += 1;
+	rsvd_size = rsvd_pages * sys_pagesize;
+
+	// calculate page-aligned size that was used
+	used_pages = total_hunk_used_size / sys_pagesize;
+	if ( ( total_hunk_used_size % sys_pagesize ) != 0 )
+		used_pages += 1;
+	used_size = used_pages * sys_pagesize;
+
+	// unmap the unused space
+	if ( used_size < rsvd_size ) {
+		unmap_size = rsvd_size - used_size;
+		unmap_base = (void *)(hunk_base + used_size);
+		if ( ( munmap( unmap_base, unmap_size )) != 0 ) {
+			Com_DPrintf("Hunk_End: munmap failed [0x%X @ %p]\n",
+					unmap_size, unmap_base );
+			// throwing a Sys_Error is probably too drastic
+			// Sys_Error("Program Error: Hunk_End: munmap failed");
+		}
+		else
+	{
+			// update size reserved for Hunk_Free
+			rsvd_hunk_size = used_size;
+			*phunk_size_store = rsvd_hunk_size;
+		}
+
+	}
+
+	Com_DPrintf("Hunk_End:0x%X @ %p:\n", rsvd_hunk_size, hunk_base );
+
+	hunk_base = user_hunk_base = NULL;
+	phunk_size_store = NULL;
+
+	}
+#endif
+
 
 void Hunk_Free (void *base)
 {
-	byte *m;
+	byte *hunk_base;
+	size_t hunk_rsvd_size;
 
-	if (base) {
-		m = ((byte *)base) - sizeof(int);
-		if (munmap(m, *((int *)m)))
+	if ( base != NULL )
+	{
+		// find hunk base and retreive the hunk reserved size
+		hunk_base = base - hunk_header_size;
+		hunk_rsvd_size = *((size_t *)hunk_base);
+
+		Com_DPrintf("Hunk_Free:0x%X @ %p:\n", hunk_rsvd_size, hunk_base );
+
+		if ( munmap( hunk_base, hunk_rsvd_size ) )
 			Sys_Error("Hunk_Free: munmap failed (%d)", errno);
 	}
 }
@@ -155,7 +233,21 @@ int Sys_Milliseconds (void)
 
 void Sys_Mkdir (char *path)
 {
-    mkdir (path, 0777);
+	int result;
+
+	result = mkdir( path, 0700 );
+	// drwx------ appears to be preferred unix/linux practice for home dirs
+	if ( !result )
+	{ // success
+		Com_Printf("Created directory %s\n", path );
+	}
+	else
+	{
+		if ( errno != EEXIST )
+		{
+			Com_DPrintf("Creating directory %s failed\n", path );
+		}
+	}
 }
 
 //============================================

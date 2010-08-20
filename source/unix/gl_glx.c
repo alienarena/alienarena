@@ -17,18 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-/*
-** GLW_IMP.C
-**
-** This file contains ALL Linux specific stuff having to do with the
-** OpenGL refresh.  When a port is being made the following functions
-** must be implemented by the port:
-**
-** GLimp_EndFrame
-** GLimp_Init
-** GLimp_Shutdown
-**
-*/
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -37,37 +25,57 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-#ifdef __linux__
-#include <sys/vt.h>
-#endif
 #include <stdarg.h>
 #include <stdio.h>
+#if defined HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <signal.h>
+#if defined HAVE_DLFCN_H
 #include <dlfcn.h>
+#endif
 
-#include "../ref_gl/r_local.h"
-
-#include "../client/keys.h"
-
-#include "../unix/glw_unix.h"
+#include "qcommon/qcommon.h"
+#include "ref_gl/r_local.h"
+#include "client/keys.h"
+#include "unix/glw_unix.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
-
-#ifdef HAVE_X11_EXTENSIONS_XXF86DGA_H
+#include <X11/extensions/xf86vmode.h>
+#if defined HAVE_XXF86DGA
+// xf86dga.h is deprecated, Xxf86dga.h is preferred
+#if defined HAVE_X11_EXTENSIONS_XXF86DGA_H
 #include <X11/extensions/Xxf86dga.h>
 #else
-// default to obsolete header
+#if defined HAVE_X11_EXTENSIONS_XF86DGA_H
 #include <X11/extensions/xf86dga.h>
 #endif
-#include <X11/extensions/xf86vmode.h>
+#endif
+#endif
 
 #include <GL/glx.h>
 
+/* extern globals */
+// using include files for these has some problems
 extern cursor_t cursor;
+extern float rs_realtime;
+extern viddef_t vid;
+
+void		GLimp_BeginFrame( float camera_separation );
+void		GLimp_EndFrame( void );
+qboolean	GLimp_Init( void *hinstance, void *hWnd );
+void		GLimp_Shutdown( void );
+rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
+void		GLimp_AppActivate( qboolean active );
+void		GLimp_EnableLogging( qboolean enable );
+void		GLimp_LogNewFrame( void );
+
+
+//---------------------------------------------------------------------------
+
 
 glwstate_t glw_state;
 
@@ -128,6 +136,22 @@ static Cursor CreateNullCursor(Display *display, Window root)
 
 void install_grabs(void)
 {
+
+#if defined DEBUG_GDB_NOGRAB
+// for running on gdb debug. prevents "lockup".
+	Cvar_Set( "in_dgamouse", "0" );
+	dgamouse = false;
+	mouse_active = true;
+	return;
+#endif
+
+
+#if !defined HAVE_XXF86DGA
+	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
+	XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
+	Cvar_Set( "in_dgamouse", "0" );
+	dgamouse = false;
+#else
 	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
 
 	if (in_dgamouse->integer)
@@ -147,6 +171,7 @@ void install_grabs(void)
 	} else {
 		XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
 	}
+#endif
 
 	XGrabKeyboard(dpy, win, False, GrabModeAsync, GrabModeAsync, CurrentTime);
 
@@ -159,10 +184,12 @@ void uninstall_grabs(void)
 	if (!dpy || !win)
 		return;
 
+#if defined HAVE_XXF86DGA
 	if (dgamouse) {
 		dgamouse = false;
 		XF86DGADirectVideo(dpy, DefaultScreen(dpy), 0);
 	}
+#endif
 
 	XUngrabPointer(dpy, CurrentTime);
 	XUngrabKeyboard(dpy, CurrentTime);
@@ -464,7 +491,7 @@ static void InitSig(void)
 /*
 ** GLimp_SetMode
 */
-int GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
+rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen )
 {
 	int width, height;
 	int attrib[] = {
@@ -697,7 +724,7 @@ void GLimp_Shutdown( void )
 ** This routine is responsible for initializing the OS specific portions
 ** of OpenGL.
 */
-int GLimp_Init( void *hinstance, void *wndproc )
+qboolean GLimp_Init( void *hinstance, void *wndproc )
 {
 	InitSig();
 
@@ -810,6 +837,6 @@ char *Sys_GetClipboardData(void)
 
 	XDeleteProperty(dpy, win, cor_clipboard);
 
-	return output;
+	return (char*)output;
 }
 

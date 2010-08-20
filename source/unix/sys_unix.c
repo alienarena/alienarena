@@ -22,13 +22,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+#if defined HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <signal.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -40,12 +41,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <errno.h>
-
+#if defined HAVE_DLFCN_H
 #include <dlfcn.h>
+#endif
 
-#include "../qcommon/qcommon.h"
-
-#include "../unix/rw_unix.h"
+#include "qcommon/qcommon.h"
+#include "unix/rw_unix.h"
 
 cvar_t *nostdout;
 
@@ -53,6 +54,10 @@ unsigned	sys_frame_time;
 
 uid_t saved_euid;
 qboolean stdin_active = true;
+
+// attachment to statically linked game library
+extern void *GetGameAPI ( void *import);
+
 
 // =======================================================================
 // General routines
@@ -98,9 +103,6 @@ void Sys_Quit (void)
 
 void Sys_Init(void)
 {
-#if id386
-//	Sys_SetFPCW();
-#endif
 }
 
 //void Sys_Error (const char *error, ...)
@@ -193,7 +195,7 @@ char *Sys_ConsoleInput(void)
 
 /*****************************************************************************/
 
-static void *game_library;
+static void *game_library = NULL;
 
 /*
 =================
@@ -202,7 +204,7 @@ Sys_UnloadGame
 */
 void Sys_UnloadGame (void)
 {
-	if (game_library)
+	if ( game_library != NULL )
 		dlclose (game_library);
 	game_library = NULL;
 }
@@ -216,7 +218,7 @@ Loads the game dll
 */
 void *Sys_GetGameAPI (void *parms)
 {
-	void	*(*GetGameAPI) (void *);
+	void	*(*ptrGetGameAPI) (void *) = NULL;
 
 	FILE	*fp;
 	char	name[MAX_OSPATH];
@@ -227,10 +229,8 @@ void *Sys_GetGameAPI (void *parms)
 	setreuid(getuid(), getuid());
 	setegid(getgid());
 
-	if (game_library)
+	if (game_library != NULL)
 		Com_Error (ERR_FATAL, "Sys_GetGameAPI without Sys_UnloadingGame");
-
-	Com_Printf("------- Loading %s -------\n", gamename);
 
 	// now run through the search paths
 	path = NULL;
@@ -238,7 +238,8 @@ void *Sys_GetGameAPI (void *parms)
 	{
 		path = FS_NextPath (path);
 		if (!path)
-			return NULL;		// couldn't find one anywhere
+			break; // Search did not turn up a game shared library
+
 		snprintf (name, MAX_OSPATH, "%s/%s", path, gamename);
 
 		/* skip it if it just doesn't exist */
@@ -248,14 +249,14 @@ void *Sys_GetGameAPI (void *parms)
 		fclose(fp);
 
 		game_library = dlopen (name, RTLD_NOW);
-		if (game_library)
+		if (game_library != NULL )
 		{
-			Com_Printf ("LoadLibrary (%s)\n",name);
+			Com_Printf("------- Loading %s -------\n", gamename);
 			break;
 		}
 		else
 		{
-			Com_Printf ("LoadLibrary (%s):", name);
+			Com_DPrintf ("LoadLibrary (%s):", name);
 
 			path = dlerror();
 			str_p = strchr(path, ':'); // skip the path (already shown)
@@ -264,20 +265,32 @@ void *Sys_GetGameAPI (void *parms)
 			else
 				str_p++;
 
-			Com_Printf ("%s\n", str_p);
+			Com_DPrintf ("%s\n", str_p);
 
-			return NULL;
+			break; // file opened but did not dlopen
 		}
 	}
 
-	GetGameAPI = (void *)dlsym (game_library, "GetGameAPI");
-	if (!GetGameAPI)
+	if ( game_library != NULL )
+	{ // game module from dlopen'd shared library
+		ptrGetGameAPI = (void *)dlsym (game_library, "GetGameAPI");
+	}
+
+	/*
+	 * No game shared library found, use statically linked game
+	 */
+	if ( ptrGetGameAPI == NULL )
 	{
+		ptrGetGameAPI = &GetGameAPI;
+	}
+
+	if ( ptrGetGameAPI == NULL )
+	{ // program error
 		Sys_UnloadGame ();
 		return NULL;
 	}
 
-	return GetGameAPI (parms);
+	return ptrGetGameAPI (parms);
 }
 
 /*****************************************************************************/

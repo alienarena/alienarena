@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "server.h"
 
+static size_t szr; // just for quieting unused result warnings
+
 /*
 =============================================================================
 
@@ -42,7 +44,7 @@ Writes a delta update of an entity_state_t list to the message.
 */
 void SV_EmitPacketEntities (client_frame_t *from, client_frame_t *to, sizebuf_t *msg)
 {
-	entity_state_t	*oldent, *newent;
+	entity_state_t	*oldent=NULL, *newent=NULL;
 	int		oldindex, newindex;
 	int		oldnum, newnum;
 	int		from_num_entities;
@@ -616,7 +618,7 @@ void SV_RecordDemoMessage (void)
 
 	// now write the entire message to the file, prefixed by the length
 	len = LittleLong (buf.cursize);
-	fwrite (&len, 4, 1, svs.demofile);
-	fwrite (buf.data, buf.cursize, 1, svs.demofile);
+	szr = fwrite (&len, 4, 1, svs.demofile);
+	szr = fwrite (buf.data, buf.cursize, 1, svs.demofile);
 }
 
