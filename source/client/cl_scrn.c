@@ -593,7 +593,6 @@ void SCR_DrawRotatingIcon( void )
 	if (yaw > 360)
 		yaw = 0;
 
-	//i think this is where it's getting blown out, the model keeps getting overwritten or lost at map load
 	entity.model = R_RegisterModel( "models/objects/icon/tris.md2" );
 
 	entity.flags = RF_FULLBRIGHT | RF_MENUMODEL;
@@ -690,7 +689,10 @@ void SCR_DrawLoading (void)
 	else
 		Draw_Fill (0, 0, viddef.width, viddef.height, 0);
 
+#if 0
+	// no m_background pic, but a pic here over-writes the levelshot
 	Draw_StretchPic (0, 0, viddef.width, viddef.height, "m_background");
+#endif
 
 	//loading message stuff...
 	if (isMap)
@@ -938,9 +940,6 @@ void SCR_BeginLoadingPlaque (void)
 {
 	S_StopAllSounds ();
 	cl.sound_prepped = false;		// don't play ambients
-
-	if (developer->value)
-		return;
 
 	scr_draw_loading = 1;
 
@@ -1232,7 +1231,7 @@ SCR_ExecuteLayoutString
 */
 void SCR_ExecuteLayoutString (char *s)
 {
-	int		x, y, ny; //ny is coordinates used for new sb layout client tags only
+	int		x, y, ny=0; //ny is coordinates used for new sb layout client tags only
 	int		value;
 	char	*token;
 	int		width;
@@ -1809,7 +1808,7 @@ void SCR_showFPS(void)
 
 	if( restart )
 	{
-		start_msec = cls.realtime;
+		start_msec = Sys_Milliseconds();
 		framecounter = 0.0f;
 		update_trigger = 10.0f; // initial delay to update
 		temp[0] = 0; // blank the text buffer
@@ -1820,13 +1819,20 @@ void SCR_showFPS(void)
 		framecounter += 1.0f;
 		if( framecounter >= update_trigger )
 		{
-			// calculate frames-per-second, using client frame current time
-			end_msec = cls.realtime;
+			// calculate frames-per-second
+			end_msec = Sys_Milliseconds();
 			time_sec = ((float)(end_msec - start_msec)) / 1000.0f;
 			framerate = framecounter / time_sec ;
 
 			// update text buffer for display
-			Com_sprintf( temp, sizeof(temp), "%3.0ffps", framerate );
+			if ( cl_drawfps->integer == 2 )
+			{ // for developers
+				Com_sprintf( temp, sizeof(temp), "%3.1ffps", framerate );
+			}
+			else
+			{
+				Com_sprintf( temp, sizeof(temp), "%3.0ffps", framerate );
+			}
 
 			// setup for next update
 			framecounter = 0.0f;
@@ -1880,8 +1886,6 @@ void SCR_UpdateScreen (void)
 	int i;
 	float separation[2] = { 0, 0 };
 
-	// if the screen is disabled (loading plaque is up, or vid mode changing)
-	// do nothing at all
 	// if the screen is disabled (loading plaque is up, or vid mode changing)
 	// do nothing at all
 	if (cls.disable_screen)
