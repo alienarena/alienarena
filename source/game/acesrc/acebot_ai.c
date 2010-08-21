@@ -65,8 +65,8 @@
 #include "config.h"
 #endif
 
-#include "../g_local.h"
-#include "../m_player.h"
+#include "game/g_local.h"
+#include "game/m_player.h"
 
 #include "acebot.h"
 
@@ -164,8 +164,8 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 	int i;
 	int node;
 	float weight,best_weight=0.0;
-	int current_node,goal_node;
-	edict_t *goal_ent, *ent;
+	int current_node,goal_node=0;
+	edict_t *goal_ent=NULL, *ent;
 	float cost;
 
 	// look for a target
@@ -290,7 +290,7 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 {
 	edict_t *target;
 	float weight,best_weight=0.0;
-	edict_t *best;
+	edict_t *best = NULL;
 	int index;
 
 	// look for a target (should make more efficent later)
@@ -389,7 +389,7 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 	edict_t		*bestenemy = NULL;
 	float		bestweight = 99999;
 	float		weight;
-	gitem_t *flag1_item, *flag2_item;
+	gitem_t *flag1_item=NULL, *flag2_item=NULL;
 	edict_t *target;
 	edict_t	*ent;
 

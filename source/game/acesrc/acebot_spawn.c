@@ -61,13 +61,11 @@
 #include "config.h"
 #endif
 
-#include "../g_local.h"
-#include "../m_player.h"
+#include "game/g_local.h"
+#include "game/m_player.h"
 #include "acebot.h"
 
-#ifdef _WINDOWS
-extern void ACECO_ReadConfig(char config_file[128]);
-#endif
+static size_t szr; // just for unused result warnings
 
 ///////////////////////////////////////////////////////////////////////
 // Had to add this function in this version for some reason.
@@ -82,9 +80,14 @@ void ACESP_SaveBots()
     edict_t *bot;
     FILE *pOut;
 	int i,count = 0;
+	char full_path[MAX_OSPATH];
 
-	if((pOut = fopen("botinfo/bots.tmp", "wb" )) == NULL)
-		return; // bail
+	gi.FullWritePath( full_path, sizeof(full_path), BOT_GAMEDATA"/bots.tmp" );
+	if ( ( pOut = fopen( full_path, "wb" )) == NULL )
+	{
+		gi.dprintf("ACESP_SaveBots: fopen for write failed: %s\n", full_path );
+		return;
+	}
 
 	// Get number of bots
 	for (i = maxclients->value; i > 0; i--)
@@ -95,14 +98,14 @@ void ACESP_SaveBots()
 			count++;
 	}
 
-	fwrite(&count,sizeof (int),1,pOut); // Write number of bots
+	szr = fwrite(&count,sizeof (int),1,pOut); // Write number of bots
 
 	for (i = maxclients->value; i > 0; i--)
 	{
 		bot = g_edicts + i + 1;
 
 		if (bot->inuse && bot->is_bot)
-			fwrite(bot->client->pers.userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
+			szr = fwrite(bot->client->pers.userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
 	}
 
     fclose(pOut);
@@ -123,6 +126,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	char *info;
 	char *skin;
 	char bot_filename[MAX_OSPATH];
+	char stem[MAX_QPATH];
 	int found;
 	int real_players, total_players;
 	edict_t *cl_ent;
@@ -132,17 +136,26 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	}
 
 	//bots and configurations will be loaded level specific
+	// note: see FindBotNum(), custombots has priority over team. (?)
 	if(sv_custombots->value)
-		sprintf(bot_filename, BOTDIR"/botinfo/custom%i.tmp", sv_custombots->integer);
+		sprintf( stem, BOT_GAMEDATA"/custom%i.tmp", sv_custombots->integer);
 	else if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
-		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
+		strcpy( stem, BOT_GAMEDATA"/team.tmp");
 	else
-		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", level.mapname);
+		sprintf( stem, BOT_GAMEDATA"/%s.tmp", level.mapname);
 
+	if ( !gi.FullPath( bot_filename, sizeof(bot_filename), stem ))
+	{
+		gi.dprintf( "ACESP_LoadBots: not found: %s\n", stem );
+		return;
+	}
 	if((pIn = fopen(bot_filename, "rb" )) == NULL)
-		return; // bail
+	{
+		gi.dprintf("ACESP_LoadBots: failed fopen for read: %s", bot_filename );
+		return;
+	}
 
-	fread(&count,sizeof (int),1,pIn);
+	szr = fread(&count,sizeof (int),1,pIn);
 
 	if(g_duel->value) {
 		count = 1; //never more than 1 bot no matter what in duel mode
@@ -181,7 +194,7 @@ void ACESP_LoadBots(edict_t *ent, int playerleft)
 	{
 		total_players = real_players + i + 1;
 
-		fread(userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
+		szr = fread(userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
 
 		info = Info_ValueForKey (userinfo, "name");
 		skin = Info_ValueForKey (userinfo, "skin");
@@ -230,19 +243,29 @@ int ACESP_FindBotNum(void)
     FILE *pIn;
 	int count;
 	char bot_filename[MAX_OSPATH];
+	char stem[MAX_QPATH];
 
 	//bots and configurations are loaded level specific
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
-		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
-	else if(sv_custombots->value)
-		sprintf(bot_filename, BOTDIR"/botinfo/custom%i.tmp", sv_custombots->integer);
+	// note: see LoadBots, custombots have priority over team (?)
+	if(sv_custombots->value)
+		sprintf( stem, BOT_GAMEDATA"/custom%i.tmp", sv_custombots->integer);
+	else if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
+		strcpy( stem, BOT_GAMEDATA"/team.tmp");
 	else
-		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", level.mapname);
+		sprintf( stem, BOT_GAMEDATA"/%s.tmp", level.mapname);
 
+	if ( !gi.FullPath( bot_filename, sizeof(bot_filename), stem ))
+	{
+		gi.dprintf( "ACESP_FindBotNum: not found: %s\n", stem );
+		return 0;
+	}
 	if((pIn = fopen(bot_filename, "rb" )) == NULL)
-		return 0; // bail
+	{
+		gi.dprintf("ACESP_FindBotNum: failed fopen for read: %s", bot_filename );
+		return 0;
+	}
 
-	fread(&count,sizeof (int),1,pIn);
+	szr = fread(&count,sizeof (int),1,pIn);
 
 	fclose(pIn);
 
@@ -274,9 +297,18 @@ void ACESP_HoldSpawn(edict_t *self)
 
 }
 
-#ifdef __unix__
-void ACECO_ReadConfig( char *config_file ) //use standard c routines for linux
+/*===
+  ACECO_ReadConfig()
+
+  System-independent bot configuration file reader.
+  2010-08: Replaces function in acebot_config.cpp for Windows
+
+  To be called with relative path to the .cfg file.
+
+===*/
+void ACECO_ReadConfig( char *config_file )
 {
+	char full_path[ MAX_OSPATH];
 	FILE *fp;
 	int k;
 	size_t length, result;
@@ -300,8 +332,13 @@ void ACECO_ReadConfig( char *config_file ) //use standard c routines for linux
 	strcpy( botvals.chatmsg7, "%s: It hurts %s...it hurts..."  );
 	strcpy( botvals.chatmsg8, "%s: Just a lucky shot %s!"      );
 
-	if ( (fp = fopen(config_file, "rb" )) == NULL )
-	{ // no bot cfg file, use defaults
+	if ( !gi.FullPath( full_path, sizeof(full_path), config_file ) )
+	{ // bot not configured, use defaults
+		return;
+	}
+	if ( (fp = fopen( full_path, "rb" )) == NULL )
+	{
+		gi.dprintf("ACECO_ReadConfig: failed open for read: %s\n", full_path );
 		return;
 	}
 	if ( fseek(fp, 0, SEEK_END) )
@@ -369,8 +406,6 @@ void ACECO_ReadConfig( char *config_file ) //use standard c routines for linux
 	free( buffer );
 
 }
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////
 // Modified version of id's code
@@ -592,8 +627,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team)
 	if(!respawn) {
 		//if not a respawn, load bot configuration file(specific to each bot)
 		info = Info_ValueForKey (bot->client->pers.userinfo, "name");
-
-		sprintf(bot_configfilename, BOTDIR"/botinfo/%s.cfg", info);
+		sprintf( bot_configfilename, BOT_GAMEDATA"/%s.cfg", info );
 		ACECO_ReadConfig(bot_configfilename);
 
 		//set config items
@@ -676,7 +710,7 @@ void ACESP_Respawn (edict_t *self)
 ///////////////////////////////////////////////////////////////////////
 edict_t *ACESP_FindFreeClient (void)
 {
-	edict_t *bot;
+	edict_t *bot = NULL;
 	int	i;
 	int max_count=0;
 
@@ -867,53 +901,6 @@ void ACESP_SpawnBot (char *name, char *skin, char *userinfo)
 
 }
 
-///////////////////////////////////////////////////////////////////////
-// Remove a bot by name or all bots
-///////////////////////////////////////////////////////////////////////
-void ACESP_RemoveBot(char *name)
-{
-	int i;
-	qboolean freed=false;
-	edict_t *bot;
-
-	for(i=0;i<maxclients->value;i++)
-	{
-		bot = g_edicts + i + 1;
-		if(bot->inuse)
-		{
-			if(bot->is_bot && (strcmp(bot->client->pers.netname,name)==0 || strcmp(name,"all")==0))
-			{
-				bot->health = 0;
-				player_die (bot, bot, bot, 100000, vec3_origin);
-				if(ctf->value)
-					CTFDeadDropFlag(bot);
-
-				DeadDropDeathball(bot);
-				if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
-				{
-					if(bot->dmteam == BLUE_TEAM)
-						blue_team_cnt-=1;
-					else
-						red_team_cnt-=1;
-				}
-				// don't even bother waiting for death frames
-				bot->deadflag = DEAD_DEAD;
-				bot->inuse = false;
-				freed = true;
-				safe_bprintf (PRINT_MEDIUM, "%s removed\n", bot->client->pers.netname);
-			}
-
-		}
-	}
-
-	if(!freed)
-		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
-	else
-		game.num_bots--;
-
-	ACESP_SaveBots(); // Save them again
-}
-
 int ACESP_FindBot(char *name)
 {
 	int i;
@@ -929,79 +916,203 @@ int ACESP_FindBot(char *name)
 			{
 				foundbot = true;
 			}
+				}
+			}
+
+	return foundbot;
+		}
+
+///////////////////////////////////////////////////////////////////////
+// Remove/Kick Bots
+///////////////////////////////////////////////////////////////////////
+
+/*===
+
+ match_botname()
+
+ case-sensitive name string compare, stripping color codes
+
+===*/
+static qboolean match_botname( edict_t *bot, const char *match_string )
+{
+	char *bot_netname = bot->client->pers.netname;
+	size_t bot_netname_sizecnt = sizeof( bot->client->pers.netname );
+	char *pchar_in = bot_netname;
+	const char *pchar_match = match_string;
+	qboolean matched = false;
+
+	while ( *pchar_in && *pchar_match && bot_netname_sizecnt-- )
+	{
+		if ( *pchar_in == '^' )
+		{ // escape char for color codes
+			++pchar_in;
+			if ( *pchar_in && bot_netname_sizecnt )
+			{ // skip over color code
+				++pchar_in;
+				--bot_netname_sizecnt;
+			}
+		}
+		else
+		{
+			if ( *pchar_in != *pchar_match )
+			{ // no match
+				break;
+			}
+			++pchar_in;
+			++pchar_match;
+			}
+		if ( ( matched = !(*pchar_in) && !(*pchar_match) ) )
+		{ // at end of both strings
+			break;
 		}
 	}
 
-	return foundbot;
+	return matched;
 }
 
-void ACESP_KickBot(char *name)
+/*===
+ remove_bot()
+
+ common routine for removal or kick of a bot
+ adapted from player_die(), and previous ACESP_RemoveBot(), ACESP_KickBot()
+
+=== */
+static void remove_bot( edict_t *bot )
 {
-	int i,j;
+
+	VectorClear( bot->avelocity );
+
+	if ( bot->in_vehicle )
+	{
+		VehicleDeadDrop( bot );
+	}
+
+	if(ctf->value)
+	{
+		CTFDeadDropFlag(bot);
+	}
+
+	if ( bot->in_deathball )
+	{
+		DeadDropDeathball(bot);
+	}
+
+	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value
+			|| cp->value)
+	{ // team game, adjust teams
+		if(bot->dmteam == BLUE_TEAM)
+			blue_team_cnt-=1;
+		else if ( bot->dmteam == RED_TEAM )
+			red_team_cnt-=1;
+	}
+
+	if ( g_duel->value )
+	{// duel mode, we need to bump people down the queue if its the player in game leaving
+		MoveClientsDownQueue(bot);
+		if( !bot->client->resp.spectator )
+		{ // bot was in duel
+			int j;
+			for ( j = 1; j <= maxclients->value; j++)
+			{ // clear scores of other players
+				if ( g_edicts[j].inuse && g_edicts[j].client )
+					g_edicts[j].client->resp.score = 0;
+			}
+		}
+	}
+
+	bot->inuse = false;
+	bot->solid = SOLID_NOT;
+	bot->classname = "disconnected";
+
+	bot->s.modelindex = 0;
+	bot->s.modelindex2= 0;
+	bot->s.modelindex3 = 0;
+	bot->s.modelindex4 = 0;
+	bot->s.angles[0] = 0;  // ?
+	bot->s.angles[2] = 0;  // ?
+	bot->s.sound = 0;
+	bot->client->weapon_sound = 0;
+
+	// remove powerups
+	bot->client->quad_framenum = 0;
+	bot->client->invincible_framenum = 0;
+	bot->client->haste_framenum = 0;
+	bot->client->sproing_framenum = 0;
+	bot->client->invis_framenum = 0;
+
+	// clear inventory
+	memset( bot->client->pers.inventory, 0, sizeof(bot->client->pers.inventory));
+
+	bot->client->pers.connected = false;
+	bot->client->resp.botnum--; //we have one less bot
+	bot->client->ps.botnum = bot->client->resp.botnum;
+
+	// particle effect for exit from game
+	gi.WriteByte (svc_muzzleflash);
+	gi.WriteShort (bot-g_edicts);
+	gi.WriteByte (MZ_LOGOUT);
+	gi.multicast (bot->s.origin, MULTICAST_PVS);
+
+	// blank the skin? not sure of purpose.
+	gi.configstring( CS_PLAYERSKINS + ( ((ptrdiff_t)(bot - g_edicts))-1 ), "");
+
+	// unlink from world
+	gi.unlinkentity (bot);
+
+}
+
+// remove by server command, "removebot"
+void ACESP_RemoveBot(char *name)
+{
+	int i;
 	qboolean freed=false;
 	edict_t *bot;
 
-	for(i=0;i<maxclients->value;i++)
+	for ( i=1; i <= maxclients->value; i++ )
 	{
-		bot = g_edicts + i + 1;
-		if(bot->inuse)
-		{
-			if(bot->is_bot && (strcmp(bot->client->pers.netname,name)==0))
-			{
-
-				if(ctf->value)
-					CTFDeadDropFlag(bot);
-
-				DeadDropDeathball(bot);
-
-				if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
-				{
-					if(bot->dmteam == BLUE_TEAM)
-						blue_team_cnt-=1;
-					else
-						red_team_cnt-=1;
-				}
-
-				//safe_bprintf(PRINT_HIGH, "(kicked) red: %i blue: %i\n", red_team_cnt, blue_team_cnt);
-
-				// send effect
-				gi.WriteByte (svc_muzzleflash);
-				gi.WriteShort (bot-g_edicts);
-				gi.WriteByte (MZ_LOGOUT);
-				gi.multicast (bot->s.origin, MULTICAST_PVS);
-
-				bot->deadflag = DEAD_DEAD;
-				freed = true;
-				gi.unlinkentity (bot);
-				bot->s.modelindex = 0;
-				bot->solid = SOLID_NOT;
-				bot->inuse = false;
-				bot->classname = "disconnected";
-				bot->client->pers.connected = false;
-
-				safe_bprintf (PRINT_MEDIUM, "%s was kicked\n", bot->client->pers.netname);
-			}
-			if(freed) {
-				bot->client->resp.botnum--; //we have one less bot
-				bot->client->ps.botnum = bot->client->resp.botnum;
-
-
-				//if in duel mode, we need to bump people down the queue if its the player in game leaving
-
-				if(g_duel->value) if(g_duel->value) {
-					MoveClientsDownQueue(bot);
-					if(!bot->client->resp.spectator) {
-						for (j = 0; j < maxclients->value; j++)  //clear scores if player was in duel
-							if(g_edicts[j+1].inuse && g_edicts[j+1].client && !g_edicts[j+1].is_bot)
-								g_edicts[j+1].client->resp.score = 0;
-					}
-				}
+		bot = &g_edicts[i];
+		if( bot->inuse && bot->is_bot )
+		{ // client slot in use and is a bot
+			if ( match_botname( bot, name ) || !strncmp(name,"all",3) )
+			{ // case-sensitive, non-color-code sensitive match
+				remove_bot( bot );
+				freed = true; // one, or at least one of all removed
+				game.num_bots--;
+				safe_bprintf (PRINT_MEDIUM, "%s removed\n", bot->client->pers.netname);
 			}
 		}
 	}
 
 	if(!freed)
 		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
-	else
-		game.num_bots--;
+
+	// update bots.tmp
+	ACESP_SaveBots();
+
+}
+
+// remove by automatic bot kick or by player vote
+void ACESP_KickBot(char *name)
+{
+	int i;
+	qboolean freed=false;
+	edict_t *bot;
+
+	for ( i=1; i <= maxclients->value; i++ )
+	{
+		bot = &g_edicts[i];
+		if ( bot->inuse && bot->is_bot )
+		{ // client slot in use and is a bot
+			if ( match_botname( bot, name ))
+			{ // case-sensitive, color-code-insensitive match
+				remove_bot( bot );
+				freed = true;
+				game.num_bots--;
+				safe_bprintf (PRINT_MEDIUM, "%s kicked\n", bot->client->pers.netname);
+			}
+		}
+	}
+
+	if(!freed)
+		safe_bprintf (PRINT_MEDIUM, "%s not found\n", name);
 }
