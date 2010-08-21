@@ -595,7 +595,7 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum)
 
 	length = FS_LoadFile (name, (void **)&buf);
 	if (!buf)
-		Com_Error (ERR_DROP, "Couldn't load %s", name);
+		Com_Error (ERR_DROP, "Could not load %s", name);
 
 	last_checksum = LittleLong (Com_BlockChecksum (buf, length));
 	*checksum = last_checksum;
@@ -1448,9 +1448,11 @@ Handles offseting and rotation of the end points for moving and
 rotating entities
 ==================
 */
+/*
 #ifdef _WIN32
 #pragma optimize( "", off )
 #endif
+*/
 
 
 trace_t		CM_TransformedBoxTrace (vec3_t start, vec3_t end,
@@ -1513,9 +1515,11 @@ trace_t		CM_TransformedBoxTrace (vec3_t start, vec3_t end,
 	return trace;
 }
 
+/*
 #ifdef _WIN32
 #pragma optimize( "", on )
 #endif
+*/
 
 
 
@@ -1723,10 +1727,13 @@ CM_WritePortalState
 Writes the portal state to a savegame file
 ===================
 */
+/*
+// unused
 void	CM_WritePortalState (FILE *f)
 {
 	fwrite (portalopen, sizeof(portalopen), 1, f);
 }
+*/
 
 /*
 ===================
@@ -1736,11 +1743,14 @@ Reads the portal state from a savegame file
 and recalculates the area connections
 ===================
 */
+/*
+// unused
 void	CM_ReadPortalState (FILE *f)
 {
 	FS_Read (portalopen, sizeof(portalopen), f);
 	FloodAreaConnections ();
 }
+*/
 
 /*
 =============

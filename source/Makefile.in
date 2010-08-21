@@ -597,7 +597,6 @@ noinst_LIBRARIES = libgame.a
 @BUILD_UNIX_TRUE@	game/game.h \
 @BUILD_UNIX_TRUE@	game/q_shared.c \
 @BUILD_UNIX_TRUE@	game/q_shared.h \
-@BUILD_UNIX_TRUE@	game/q_shared.h \
 @BUILD_UNIX_TRUE@	null/cl_null.c \
 @BUILD_UNIX_TRUE@	qcommon/cmd.c \
 @BUILD_UNIX_TRUE@	qcommon/cmodel.c \

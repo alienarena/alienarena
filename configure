@@ -7767,7 +7767,7 @@ done
 
 
 # file system functions
-for ac_func in filelength stat fstat getcwd unlink _unlink mkdir
+for ac_func in filelength stat fstat getcwd _getcwd unlink _unlink mkdir _mkdir
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -9459,6 +9459,7 @@ $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
 
+
 $as_echo "-------------------------------------------"
 $as_echo "Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"
 $as_echo " OS ................. ${host_os}"
@@ -9469,12 +9470,17 @@ else
   $as_echo " Dedicated Only: .... ${no_client}"
 fi
 $as_echo " Alternate Install .. ${alternate_install}"
-$as_echo " Prefix: ............ '${prefix}'"
+
+if  test "x${alternate_install}" = xyes ; then
+  :
+else
+  $as_echo " Prefix: ............ '${prefix}'"
+fi
 
 if  test "x${alternate_install}" = xyes ; then
   $as_echo "Run \"make\" to build, then \"make install-alternate\" to install."
 else
-  $as_echo "Run \"make\" to build, then \"make install\" to install."
+  $as_echo "Run \"make\" to build, then \"sudo make install\" to install."
 fi
 
 $as_echo "--------------------------------------------"

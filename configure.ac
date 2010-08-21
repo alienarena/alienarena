@@ -2,7 +2,7 @@
 #
 # Alien Arena auto configuration source
 #
-# Copyright (C) 2010 COR Entertainment, LLC
+# Copyright (C) 2010 COR Entertainment, LLC.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -341,7 +341,7 @@ AC_CHECK_FUNCS([strcasecmp strncasecmp ])
 AC_CHECK_FUNCS([strdup _strdup stricmp _stricmp strnicmp _strnicmp])
 
 # file system functions
-AC_CHECK_FUNCS([filelength stat fstat getcwd unlink _unlink mkdir])
+AC_CHECK_FUNCS([filelength stat fstat getcwd _getcwd unlink _unlink mkdir _mkdir])
 
 # math functions
 AC_CHECK_FUNCS([pow sqrt floor])
@@ -388,6 +388,8 @@ AC_CONFIG_FILES([ Makefile 	source/Makefile ])
 
 AC_OUTPUT
 
+dnl TODO: add an option to disable this message.
+
 AS_ECHO(["-------------------------------------------"])
 AS_ECHO(["Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"])
 AS_ECHO([" OS ................. ${host_os}"])
@@ -395,11 +397,13 @@ AS_ECHO([" CPU: ............... ${host_cpu}"])
 AM_COND_IF([BUILD_WIN32],,
 [AS_ECHO([" Dedicated Only: .... ${no_client}"])])
 AS_ECHO([" Alternate Install .. ${alternate_install}"])
-AS_ECHO([" Prefix: ............ '${prefix}'"])
+
+AM_COND_IF([ALTERNATE_INSTALL],,
+[AS_ECHO([" Prefix: ............ '${prefix}'"])])
 
 AM_COND_IF([ALTERNATE_INSTALL],
 [AS_ECHO(["Run \"make\" to build, then \"make install-alternate\" to install."])],
-[AS_ECHO(["Run \"make\" to build, then \"make install\" to install."])])
+[AS_ECHO(["Run \"make\" to build, then \"sudo make install\" to install."])])
 
 AS_ECHO(["--------------------------------------------"])
 

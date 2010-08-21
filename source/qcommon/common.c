@@ -137,13 +137,15 @@ void Com_Printf (char *fmt, ...)
 	// also echo to debugging console
 	Sys_ConsoleOutput (msg);
 
-#ifndef __unix__
+#if defined WIN32_VARIANT
 	// Also echo to dedicated console
 	Sys_Print(msg);
 #endif
 
 	// if logfile_active or logfile_name have been modified, close the current log file
-	if ( (logfile_active && logfile_active->modified || logfile_name && logfile_name->modified) && logfile ) {
+	if ( ( (logfile_active && logfile_active->modified)
+			|| (logfile_name && logfile_name->modified) ) && logfile )
+	{
 		fclose (logfile);
 		logfile = NULL;
 		if (logfile_active) {
@@ -157,7 +159,7 @@ void Com_Printf (char *fmt, ...)
 	// logfile
 	if (logfile_active && logfile_active->value)
 	{
-		char		name[MAX_QPATH];
+		char		name[MAX_OSPATH];
 		const char 	*f_name;
 
 		if (!logfile)
@@ -321,8 +323,11 @@ void MSG_WriteChar (sizebuf_t *sb, int c)
 	byte	*buf;
 
 #ifdef PARANOID
-	if (c < -128 || c > 127)
+	if (c < -128 || c > 127) 
+	{
+		// Com_Printf( "MSG_WriteChar: range error: %i\n", c);
 		Com_Error (ERR_FATAL, "MSG_WriteChar: range error");
+	}
 #endif
 
 	buf = SZ_GetSpace (sb, 1);
@@ -334,8 +339,10 @@ void MSG_WriteByte (sizebuf_t *sb, int c)
 	byte	*buf;
 
 #ifdef PARANOID
-	if (c < 0 || c > 255)
+	if (c < 0 || c > 255) {
+		//Com_Printf( "MSG_WriteByte: range error: %i\n", c );
 		Com_Error (ERR_FATAL, "MSG_WriteByte: range error");
+	}
 #endif
 
 	buf = SZ_GetSpace (sb, 1);
@@ -347,8 +354,11 @@ void MSG_WriteShort (sizebuf_t *sb, int c)
 	byte	*buf;
 
 #ifdef PARANOID
-	if (c < ((short)0x8000) || c > (short)0x7fff)
+	if ( c > 65535 )
+	{ // unsigned short actually
+		//Com_Printf("MSG_WriteShort: range error: %i \n", c);
 		Com_Error (ERR_FATAL, "MSG_WriteShort: range error");
+	}
 #endif
 
 	buf = SZ_GetSpace (sb, 2);
@@ -538,7 +548,7 @@ void MSG_ReadDir (sizebuf_t *sb, vec3_t dir)
 
 	b = MSG_ReadByte (sb);
 	if (b >= NUMVERTEXNORMALS)
-		Com_Error (ERR_DROP, "MSF_ReadDir: out of range");
+		Com_Error (ERR_DROP, "MSG_ReadDir: out of range");
 	VectorCopy (bytedirs[b], dir);
 }
 
@@ -969,7 +979,7 @@ void SZ_SetName(sizebuf_t * buf, const char * name, qboolean print_it)
 {
 	strncpy(buf->name, name, sizeof(buf->name) - 1);
 	if ( print_it )
-		Com_Printf("SZ_SetName: buffer '%s' (address = 0x%.12x) initialised\n", buf->name, buf);
+		Com_DPrintf("SZ_SetName: buffer '%s' (address = 0x%.12x) initialised\n", buf->name, buf);
 }
 #endif	//BUFFER_DEBUG
 
@@ -1539,7 +1549,9 @@ void Qcommon_Init (int argc, char **argv)
 	developer = Cvar_Get ("developer", "0", 0);
 	timescale = Cvar_Get ("timescale", "1", 0);
 	fixedtime = Cvar_Get ("fixedtime", "0", 0);
-	logfile_active = Cvar_Get ("logfile", "3", CVAR_ARCHIVE);
+	// 2010-08 logfile default to "1" to prevent unbounded growth (also no flush on write)
+	// rationale: expert user can figure out when "2" or "3" are appropriate
+	logfile_active = Cvar_Get ("logfile", "1", CVAR_ARCHIVE);
 	logfile_name = Cvar_Get ("logname", "qconsole.log", CVAR_ARCHIVE);
 	showtrace = Cvar_Get ("showtrace", "0", 0);
 #ifdef DEDICATED_ONLY
@@ -1548,7 +1560,7 @@ void Qcommon_Init (int argc, char **argv)
 	dedicated = Cvar_Get ("dedicated", "0", CVAR_LATCH);
 #endif
 
-	s = va("%4.2f %s %s %s", VERSION, CPUSTRING, __DATE__, BUILDSTRING);
+	s = va("%s %s %s %s", VERSION, CPUSTRING, __DATE__, BUILDSTRING);
 	Cvar_Get ("version", s, CVAR_SERVERINFO|CVAR_NOSET);
 
 	if (dedicated->value)
@@ -1601,8 +1613,8 @@ Qcommon_Frame
 void Qcommon_Frame (int msec)
 {
 
-	int		time_before, time_between, time_after;
-#ifdef __unix__
+	int		time_before=0, time_between=0, time_after=0;
+#if defined UNIX_VARIANT
 	char	*s;
 #endif
 
@@ -1652,7 +1664,8 @@ void Qcommon_Frame (int msec)
 		c_brush_traces = 0;
 		c_pointcontents = 0;
 	}
-#ifdef __unix__
+
+#if defined UNIX_VARIANT
 	do
 	{
 		s = Sys_ConsoleInput ();
@@ -1680,6 +1693,8 @@ void Qcommon_Frame (int msec)
 
 	SV_Frame (msec);
 
+#if defined WIN32_VARIANT
+	// not good for Linux when run from menu or icon without a terminal
 	if(dedicated->modified) {
 		dedicated->modified = false;
 		if ( dedicated->value ) {
@@ -1687,6 +1702,7 @@ void Qcommon_Frame (int msec)
 			CL_Shutdown();
 		}
 	}
+#endif
 
 	if (host_speeds->value)
 		time_between = Sys_Milliseconds ();
