@@ -720,7 +720,7 @@ void Con_DrawConsole (float frac)
 	char			*text, dl[MAX_STRING_CHARS], output[1024];
 	int				row;
 	int				lines;
-	char			version[64];
+	//char			version[64];
 	int kb;
 	vec4_t	scolor;
 	int		charscale;
@@ -746,8 +746,7 @@ void Con_DrawConsole (float frac)
 	SCR_AddDirtyPoint (0,0);
 	SCR_AddDirtyPoint (viddef.width-1,lines-1);
 
-	Com_sprintf (version, sizeof(version), "v%4.2f", VERSION);
-	DrawString(viddef.width-charscale*(strlen(version)+1), lines-charscale-1, version);
+	DrawString(viddef.width-charscale*(strlen(VERSION)+1), lines-charscale-1, VERSION);
 
 // draw the text
 	con.vislines = lines;

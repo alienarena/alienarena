@@ -59,7 +59,7 @@ extern void M_ForceMenuOff( void );
 
 extern void RS_FreeUnmarked( void );
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 extern qboolean vid_restart;
 #endif
 
@@ -73,7 +73,7 @@ MENU INTERACTION
 
 static menuframework_s	s_opengl_menu;
 static menuframework_s *s_current_menu;
-static int				s_current_menu_index;
+// static int				s_current_menu_index; // unused
 
 static menulist_s		s_mode_list;
 static menuslider_s		s_tq_slider;
@@ -102,10 +102,13 @@ static menulist_s		s_parallaxmaps_box;
 static menulist_s		s_postprocess_box;
 static menulist_s		s_glsl_box;
 
+#if 0
+// unused
 static void DriverCallback( void *unused )
 {
 	s_current_menu = &s_opengl_menu;
 }
+#endif
 
 static void BrightnessCallback( void *s )
 {
@@ -398,7 +401,7 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue("scriptsloaded", 0); //scripts get flushed
 
 	vid_ref->modified = true;
-#ifdef __unix__
+#if defined UNIX_VARIANT
 	vid_restart = true;
 #endif
 

@@ -22,12 +22,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 #endif
 
-#if defined HAVE_STRCASECMP && !defined HAVE__STRICMP
+#if !defined HAVE__STRICMP
+#if defined HAVE_STRICMP
+#define _stricmp stricmp
+#elif defined HAVE_STRCASECMP
 #define _stricmp strcasecmp
 #endif
-
-#if !defined HAVE__STRICMP && defined HAVE_STRICMP
-#define _stricmp stricmp
 #endif
 
 #include "g_local.h"

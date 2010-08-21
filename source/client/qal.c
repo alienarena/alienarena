@@ -31,8 +31,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 #endif
 
-#ifdef WIN32
+#if defined WIN32_VARIANT
 #  include <windows.h>
+#endif
+
+#if defined HAVE_AL_H
+#include <al.h>
+#include <alc.h>
+#elif defined HAVE_AL_AL_H
+#include <AL/al.h>
+#include <AL/alc.h>
+#elif defined HAVE_OPENAL_AL_H
+#include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+#else
+#error OpenAL header includes not defined.
 #endif
 
 #include "client.h"

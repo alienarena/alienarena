@@ -546,12 +546,14 @@ void CL_ProcessSustain ()
 	for (i=0, s=cl_sustains; i< MAX_SUSTAINS; i++, s++)
 	{
 		if (s->id)
+		{
 			if ((s->endtime >= cl.time) && (cl.time >= s->nextthink))
 			{
 				s->think (s);
 			}
 			else if (s->endtime < cl.time)
 				s->id = 0;
+		}
 	}
 }
 

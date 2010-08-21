@@ -22,12 +22,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-#if defined HAVE_STRCASECMP && !defined HAVE__STRICMP
+#if !defined HAVE__STRICMP
+#if defined HAVE_STRICMP
+#define _stricmp stricmp
+#elif defined HAVE_STRCASECMP
 #define _stricmp strcasecmp
 #endif
-
-#if !defined HAVE__STRICMP && defined HAVE_STRICMP
-#define _stricmp stricmp
 #endif
 
 #include "g_local.h"

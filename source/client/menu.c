@@ -23,27 +23,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include <ctype.h>
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 #include <winsock.h>
 #endif
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 #include <sys/time.h>
+#if defined HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#endif
 
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 #include <io.h>
 #endif
 
 #include "client.h"
-#include "../client/qmenu.h"
+#include "client/qmenu.h"
 
-// Directory for botinfo, setup like existing acebot code
-#ifdef DATADIR
-#define BOTDIR DATADIR
-#else
-#define BOTDIR "."
+#if !defined HAVE__STRICMP
+#if defined HAVE_STRICMP
+#define _stricmp stricmp
+#elif defined HAVE_STRCASECMP
+#define _stricmp strcasecmp
+#endif
+#endif
+
+#if !defined HAVE__STRDUP
+#if defined HAVE_STRDUP
+#define _strdup strdup
+#endif
 #endif
 
 static int	m_main_cursor;
@@ -63,7 +72,7 @@ extern cvar_t *fov;
 static char *menu_in_sound		= "misc/menu1.wav";
 static char *menu_move_sound	= "misc/menu2.wav";
 static char *menu_out_sound		= "misc/menu3.wav";
-static char *menu_background	= "misc/menuback.wav";
+// static char *menu_background	= "misc/menuback.wav"; // unused
 int svridx;
 int playeridx;
 int hover_time;
@@ -95,6 +104,8 @@ qboolean	m_entersound;		// play after drawing a frame, so caching
 
 void	(*m_drawfunc) (void);
 const char *(*m_keyfunc) (int key);
+
+static size_t szr; // just for unused result warnings
 
 //=============================================================================
 /* Support Routines */
@@ -1477,10 +1488,13 @@ static void AlwaysRunFunc( void *unused )
 	Cvar_SetValue( "cl_run", s_options_alwaysrun_box.curvalue );
 }
 
+/*
+// unused
 static void FreeLookFunc( void *unused )
 {
 	Cvar_SetValue( "freelook", s_options_freelook_box.curvalue );
 }
+*/
 
 static void DisColorFunc( void *unused )
 {
@@ -1507,10 +1521,12 @@ static void MouseSmoothingFunc( void *unused )
 	Cvar_SetValue( "m_smoothing", s_options_smoothing_box.curvalue );
 }
 
+#if !defined UNIX_VARIANT
 static void NoAltTabFunc( void *unused )
 {
 	Cvar_SetValue( "win_noalttab", s_options_noalttab_box.curvalue );
 }
+#endif
 
 static void MinimapFunc( void *unused )
 {
@@ -2402,7 +2418,7 @@ void Options_MenuInit( void )
 
 void Options_MenuDraw (void)
 {
-	char path[MAX_QPATH];
+	char path[MAX_OSPATH];
 
 	banneralpha += cls.frametime;
 	if (banneralpha > 1)
@@ -2453,7 +2469,7 @@ END GAME MENU
 */
 static int credits_start_time;
 static const char **credits;
-static char *creditsIndex[256];
+//static char *creditsIndex[256];
 static char *creditsBuffer;
 static const char *idcredits[] =
 {
@@ -2718,6 +2734,7 @@ static void CreditsFunc( void *unused )
 
 void Game_MenuInit( void )
 {
+/*
 	static const char *difficulty_names[] =
 	{
 		"easy",
@@ -2725,6 +2742,7 @@ void Game_MenuInit( void )
 		"hard",
 		0
 	};
+*/
 	float scale;;
 	scale = (float)(viddef.height)/600;
 
@@ -3391,7 +3409,7 @@ void SearchLocalGames( void )
 	// send out info packets
 	CL_PingServers_f();
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 	sleep(1);
 #else
 	Sleep(1000); //time to recieve packets
@@ -3957,23 +3975,33 @@ struct botinfo {
 
 int slot;
 
-void LoadBotInfo() {
+void LoadBotInfo( void )
+{
 	FILE *pIn;
 	int i, count;
 	char *info;
 	char *skin;
 
-	if( (pIn = fopen( BOTDIR"/botinfo/allbots.tmp", "rb" )) == NULL)
-		return; // bail
+	char fullpath[MAX_OSPATH];
 
-	fread(&count,sizeof (int),1,pIn);
+	if ( !FS_FullPath( fullpath, sizeof(fullpath), BOT_GAMEDATA"/allbots.tmp" ) )
+	{
+		Com_DPrintf("LoadBotInfo: %s/allbots.tmp not found\n", BOT_GAMEDATA );
+		return;
+	}
+	if( (pIn = fopen( fullpath, "rb" )) == NULL )
+	{
+		Com_DPrintf("LoadBotInfo: failed file open: %s\n", fullpath );
+		return;
+	}
+
+	szr = fread(&count,sizeof (int),1,pIn);
 	if(count>16)
 		count = 16;
 
 	for(i=0;i<count;i++)
 	{
-
-		fread(bots[i].userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
+		szr = fread(bots[i].userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
 
 		info = Info_ValueForKey (bots[i].userinfo, "name");
 		skin = Info_ValueForKey (bots[i].userinfo, "skin");
@@ -3984,16 +4012,19 @@ void LoadBotInfo() {
     fclose(pIn);
 }
 
-void AddbotFunc(void *self) {
+void AddbotFunc(void *self)
+{
 	int i, count;
-	char startmap[128];
-	char bot_filename[128];
+	char startmap[MAX_QPATH];
+	char bot_filename[MAX_OSPATH];
 	FILE *pOut;
 	menulist_s *f = ( menulist_s * ) self;
 
 	//get the name and copy that config string into the proper slot name
-	for(i = 0; i < totalbots; i++) {
-		if(!strcmp(f->generic.name, bots[i].name)) { //this is our selected bot
+	for(i = 0; i < totalbots; i++)
+	{
+		if(!strcmp(f->generic.name, bots[i].name))
+		{ //this is our selected bot
 			strcpy(bot[slot].name, bots[i].name);
 			strcpy(bot[slot].userinfo, bots[i].userinfo);
 			s_bots_bot_action[slot].generic.name = bots[i].name;
@@ -4002,7 +4033,8 @@ void AddbotFunc(void *self) {
 
 	//save off bot file
 	count = 8;
-	for(i = 0; i < 8; i++) {
+	for(i = 0; i < 8; i++)
+	{
 		if(!strcmp(bot[i].name, "...empty slot"))
 			count--;
 	}
@@ -4011,18 +4043,27 @@ void AddbotFunc(void *self) {
 		startmap[i] = tolower(startmap[i]);
 
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
+	{ // team game
+		FS_FullWritePath( bot_filename, sizeof(bot_filename), BOT_GAMEDATA"/team.tmp" );
+	}
 	else
-		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
+	{ // non-team, bots per map
+		char relative_path[MAX_QPATH];
+		Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", startmap );
+		FS_FullWritePath( bot_filename, sizeof(bot_filename), relative_path );
+	}
 
 	if((pOut = fopen(bot_filename, "wb" )) == NULL)
+	{
+		Com_DPrintf("AddbotFunc: failed fopen for write: %s\n", bot_filename );
 		return; // bail
+	}
 
-	fwrite(&count,sizeof (int),1,pOut); // Write number of bots
+	szr = fwrite(&count,sizeof (int),1,pOut); // Write number of bots
 
 	for (i = 7; i > -1; i--) {
 		if(strcmp(bot[i].name, "...empty slot"))
-			fwrite(bot[i].userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
+			szr = fwrite(bot[i].userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
 	}
 
     fclose(pOut);
@@ -4144,7 +4185,7 @@ int Menu_FindFile (char *filename, FILE **file)
 
 void MapInfoFunc( void *self ) {
 
-	FILE *map_file;
+	// FILE *map_file; // unused
 	FILE *desc_file;
 	char line[500];
 	char *pLine;
@@ -4171,9 +4212,7 @@ void MapInfoFunc( void *self ) {
 	else
 		strcpy( startmap, "missing");
 
-#ifdef __unix__
-	// more than 2 possible locations.
-	sprintf(path, "levelshots/%s.txt", startmap);
+	Com_sprintf(path, sizeof(path), "levelshots/%s.txt", startmap);
 	FS_FOpenFile(path, &desc_file);
 	if (desc_file) {
 		if(fgets(line, 500, desc_file))
@@ -4217,60 +4256,6 @@ void MapInfoFunc( void *self ) {
 			s_startserver_map_data[i].generic.y		= FONTSCALE*241*scale + offset + FONTSCALE*i*10*scale;
 		}
 	}
-#else
-
-	sprintf(path, "%s/levelshots/%s.txt", FS_Gamedir(), startmap);
-
-	Menu_FindFile(path, &desc_file);
-	if(desc_file)
-		fclose(desc_file);
-	else
-		sprintf(path, "%s/levelshots/%s.txt", BASEDIRNAME, startmap);
-
-	if ((map_file = fopen(path, "rb")) != NULL)
-	{
-		if(fgets(line, 500, map_file))
-		{
-			pLine = line;
-
-			result = strlen(line);
-
-			rLine = GetLine (&pLine, &result);
-
-			/* Establish string and get the first token: */
-			token = strtok( rLine, seps );
-			i = 0;
-			while( token != NULL && i < 5) {
-
-				/* Get next token: */
-				token = strtok( NULL, seps );
-				/* While there are tokens in "string" */
-				s_startserver_map_data[i].generic.type	= MTYPE_SEPARATOR;
-				s_startserver_map_data[i].generic.name	= token;
-				s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
-				s_startserver_map_data[i].generic.x		= 120*scale;
-				s_startserver_map_data[i].generic.y		= FONTSCALE*241*scale + offset + FONTSCALE*i*10*scale;
-
-				i++;
-			}
-
-		}
-
-		fclose(map_file);
-
-	}
-	else
-	{
-		for (i = 0; i < 5; i++ )
-		{
-			s_startserver_map_data[i].generic.type	= MTYPE_SEPARATOR;
-			s_startserver_map_data[i].generic.name	= "no data";
-			s_startserver_map_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
-			s_startserver_map_data[i].generic.x		= 120*scale;
-			s_startserver_map_data[i].generic.y		= FONTSCALE*241*scale + offset + FONTSCALE*i*10*scale;
-		}
-	}
-#endif
 
 }
 
@@ -4289,7 +4274,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	int nmaps = 0;
 	int totalmaps;
 	char **mapfiles;
-	char *path = NULL;
+	// char *path = NULL; // unused
 	static char **bspnames;
 	int		j, l;
 
@@ -4304,39 +4289,38 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	/*
 	** reload the list of map names, based on rules
 	*/
-	Com_sprintf( mapsname, sizeof( mapsname ), "%s/maps.lst", FS_Gamedir() );
+	// maps.lst normally in "data1/"
+	//  need  to add a function to FS_ if that is the only place it is allowed
+	if ( !FS_FullPath( mapsname, sizeof( mapsname ), "maps.lst" ) )
+	{
+			Com_Error( ERR_DROP, "couldn't find maps.lst\n" );
+		return; // for show, no maps.lst is fatal error
+	}
 	if ( ( fp = fopen( mapsname, "rb" ) ) == 0 )
 	{
-		if ( ( length = FS_LoadFile( "maps.lst", ( void ** ) &buffer ) ) == -1 )
-			Com_Error( ERR_DROP, "couldn't find maps.lst\n" );
-	}
-	else
-	{
-#ifdef _WIN32
-		length = _filelength( _fileno( fp  ) );
-#else
-		fseek(fp, 0, SEEK_END);
-		length = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-#endif
-		buffer = malloc( length + 1 );
-		fread( buffer, length, 1, fp );
-		buffer[length] = 0;
+		Com_Error( ERR_DROP, "couldn't open maps.lst\n" );
+		return; // for "show". above is fatal error.
 	}
 
-	s = buffer;
+	length = FS_filelength( fp );
+	buffer = malloc( length + 1 );
+	szr = fread( buffer, length, 1, fp );
+	buffer[length] = 0;
 
 	i = 0;
 	while ( i < length )
 	{
-		if ( s[i] == '\r' )
+		if ( buffer[i] == '\r' )
 			nummaps++;
 		i++;
 	}
 	totalmaps = nummaps;
 
 	if ( nummaps == 0 )
+	{
 		Com_Error( ERR_DROP, "no maps in maps.lst\n" );
+		return; // for showing above is fatal.
+	}
 
 	mapnames = malloc( sizeof( char * ) * ( MAX_MAPS + 2 ) );  //was + 1, but caused memory errors
 	memset( mapnames, 0, sizeof( char * ) * ( MAX_MAPS + 2 ) );
@@ -4352,10 +4336,10 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 
 		strcpy( shortname, COM_Parse( &s ) );
 		l = strlen(shortname);
-
+#if defined WIN32_VARIANT
 		for (j=0 ; j<l ; j++)
 			shortname[j] = tolower(shortname[j]);
-
+#endif
 		//keep a list of the shortnames for later comparison to bsp files
 		bspnames[i] = malloc( strlen( shortname ) + 1 );
 		strcpy(bspnames[i], shortname);
@@ -4407,16 +4391,9 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 		}
 
 	}
-
-	if ( fp != 0 )
-	{
-		fp = 0;
-		free( buffer );
-	}
-	else
-	{
-		FS_FreeFile( buffer );
-	}
+	// done with maps.lst
+	fclose( fp );
+	free( buffer );
 
 	//now, check the folders and add the maps not in the list yet
 
@@ -4427,8 +4404,10 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	{
 		int num;
 
-		s = strstr(mapfiles[i], "maps/"); s++;
-		s = strstr(s, "/"); s++;
+		s = strstr( mapfiles[i], "maps/");
+		s++;
+		s = strstr(s, "/");
+		s++;
 
 		if (!strstr(s, ".bsp"))
 			continue;
@@ -4440,19 +4419,23 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 
 		l = strlen(curMap);
 
+#if defined WIN32_VARIANT
 		for (j=0 ; j<l ; j++)
 			curMap[j] = tolower(curMap[j]);
+#endif
 
 		Com_sprintf( scratch, sizeof( scratch ), "%s\n%s", "Custom Map", curMap );
 
 		//check game type, and if not already in maps.lst, add it
 		l = 0;
-		for(j = 0; j < nummaps; j++) {
+		for ( j = 0 ; j < nummaps ; j++ )
+		{
 			l = Q_strcasecmp(curMap, bspnames[j]);
 			if(!l)
 				break; //already there, don't bother adding
 		}
-		if(l) { //didn't find it in our list
+		if ( l )
+		{ //didn't find it in our list
 			if (s_rules_box.curvalue == 0) {
 				if((curMap[0] == 'd' && curMap[1] == 'm') || (curMap[0] == 't' && curMap[1] == 'o')) {
 					mapnames[k] = malloc( strlen( scratch ) + 1 );
@@ -4542,8 +4525,17 @@ void StartServerActionFunc( void *self )
 	Cvar_SetValue ("fraglimit", ClampCvar( 0, fraglimit, fraglimit ) );
 	Cvar_Set("hostname", s_hostname_field.buffer );
 	Cvar_SetValue("sv_public", s_public_box.curvalue );
+
+// Running a dedicated server from menu does not always work right in Linux, if program is
+//  invoked from a gui menu system. Listen server should be ok.
+// Removing option from menu for now, since it is possible to start server running in
+//  background without realizing it.
 	if(s_dedicated_box.curvalue) {
+#if defined WIN32_VARIANT
 		Cvar_ForceSet("dedicated", "1");
+#else
+		Cvar_ForceSet("dedicated", "0");
+#endif
 		Cvar_Set("sv_maplist", startmap);
 		Cbuf_AddText ("setmaster master.corservers.com master2.corservers.com\n");
 	}
@@ -4807,12 +4799,23 @@ void StartServer_MenuInit( void )
 	s_public_box.itemnames = public_yn;
 	s_public_box.curvalue = 1;
 
+
+#if defined WIN32_VARIANT
 	s_dedicated_box.generic.type = MTYPE_SPINCONTROL;
 	s_dedicated_box.generic.x	= -8*scale;
 	s_dedicated_box.generic.y	= FONTSCALE*164*scale + offset;
 	s_dedicated_box.generic.name = "dedicated server";
 	s_dedicated_box.itemnames = public_yn;
 	s_dedicated_box.curvalue = 0;
+#else
+	// may or may not need this when disabling dedicated server menu
+	s_dedicated_box.generic.type = -1;
+	s_dedicated_box.generic.x	= 0;
+	s_dedicated_box.generic.y	= 0;
+	s_dedicated_box.generic.name = NULL;
+	s_dedicated_box.itemnames = NULL;
+	s_dedicated_box.curvalue = 0;
+#endif
 
 	s_skill_box.generic.type = MTYPE_SPINCONTROL;
 	s_skill_box.generic.x	= -8*scale;
@@ -4854,7 +4857,9 @@ void StartServer_MenuInit( void )
 	Menu_AddItem( &s_startserver_menu, &s_maxclients_field );
 	Menu_AddItem( &s_startserver_menu, &s_hostname_field );
 	Menu_AddItem( &s_startserver_menu, &s_public_box );
+#if defined WIN32_VARIANT
 	Menu_AddItem( &s_startserver_menu, &s_dedicated_box );
+#endif
 	Menu_AddItem( &s_startserver_menu, &s_skill_box );
 	Menu_AddItem( &s_startserver_menu, &s_startserver_dmoptions_action );
 	Menu_AddItem( &s_startserver_menu, &s_startserver_start_action );
@@ -4962,8 +4967,11 @@ void BotAction( void *self )
 {
 	FILE *pOut;
 	int i, count;
-	char startmap[128];
-	char bot_filename[128];
+
+	char stem[MAX_QPATH];
+	char relative_path[MAX_QPATH];
+	char bot_filename[MAX_OSPATH];
+
 	menulist_s *f = ( menulist_s * ) self;
 
 	slot = f->curvalue;
@@ -4996,24 +5004,30 @@ void BotAction( void *self )
 	}
 
 	//write out bot file
-
-	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
-	for(i = 0; i < strlen(startmap); i++)
-		startmap[i] = tolower(startmap[i]);
-
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
+	{ // team game
+		strcpy( stem, "team" );
+	}
 	else
-		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
+	{ // non-team, bots per map
+		strcpy( stem, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
+		for(i = 0; i < strlen(stem); i++)
+			stem[i] = tolower( stem[i] );
+	}
+	Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", stem );
+	FS_FullWritePath( bot_filename, sizeof(bot_filename), relative_path );
 
 	if((pOut = fopen(bot_filename, "wb" )) == NULL)
+	{
+		Com_DPrintf("BotAction: failed fopen for write: %s\n", bot_filename );
 		return; // bail
+	}
 
-	fwrite(&count,sizeof (int),1,pOut); // Write number of bots
+	szr = fwrite(&count,sizeof (int),1,pOut); // Write number of bots
 
 	for (i = 7; i > -1; i--) {
 		if(strcmp(bot[i].name, "...empty slot"))
-			fwrite(bot[i].userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
+			szr = fwrite(bot[i].userinfo,sizeof (char) * MAX_INFO_STRING,1,pOut);
 	}
 
     fclose(pOut);
@@ -5176,29 +5190,43 @@ setvalue:
 void Read_Bot_Info()
 {
 	FILE *pIn;
-	char bot_filename[128];
 	int i, count;
 	char *info;
-	char startmap[128];
-
-	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
+	char bot_filename[MAX_OSPATH];
+	char stem[MAX_QPATH];
+	char relative_path[MAX_QPATH];
 
 	if(s_rules_box.curvalue == 1 || s_rules_box.curvalue == 4 || s_rules_box.curvalue == 5)
-		strcpy(bot_filename, BOTDIR"/botinfo/team.tmp");
+	{ // team game
+		strcpy( stem, "team" );
+	}
 	else
-		sprintf(bot_filename, BOTDIR"/botinfo/%s.tmp", startmap);
+	{ // non-team, bots per map
+		strcpy( stem, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
+		for(i = 0; i < strlen(stem); i++)
+			stem[i] = tolower( stem[i] );
+	}
+	Com_sprintf( relative_path, sizeof(relative_path), BOT_GAMEDATA"/%s.tmp", stem );
+	if ( !FS_FullPath( bot_filename, sizeof(bot_filename), relative_path ) )
+	{
+		Com_DPrintf("Read_Bot_Info: %s/%s not found\n", BOT_GAMEDATA, relative_path );
+		return;
+	}
 
 	if((pIn = fopen(bot_filename, "rb" )) == NULL)
-		return; // bail
+	{
+		Com_DPrintf("Read_Bot_Info: failed file open for read: %s", bot_filename );
+		return;
+	}
 
-	fread(&count,sizeof (int),1,pIn);
+	szr = fread(&count,sizeof (int),1,pIn);
 	if(count>8)
 		count = 8;
 
 	for(i=0;i<count;i++)
 	{
 
-		fread(bot[i].userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
+		szr = fread(bot[i].userinfo,sizeof(char) * MAX_INFO_STRING,1,pIn);
 
 		info = Info_ValueForKey (bot[i].userinfo, "name");
 		strcpy(bot[i].name, info);
@@ -5468,9 +5496,9 @@ DOWNLOADOPTIONS BOOK MENU
 
 =============================================================================
 */
-static menuframework_s s_downloadoptions_menu;
+// static menuframework_s s_downloadoptions_menu; // unused
 
-static menuseparator_s	s_download_title;
+// static menuseparator_s	s_download_title; // unused
 static menulist_s	s_allow_download_box;
 static menulist_s	s_allow_download_maps_box;
 static menulist_s	s_allow_download_models_box;
@@ -5761,10 +5789,10 @@ static menulist_s		s_player_model_box;
 static menulist_s		s_player_skin_box;
 static menulist_s		s_player_handedness_box;
 static menulist_s		s_player_rate_box;
-static menuseparator_s	s_player_skin_title;
-static menuseparator_s	s_player_model_title;
-static menuseparator_s	s_player_hand_title;
-static menuseparator_s	s_player_rate_title;
+// static menuseparator_s	s_player_skin_title; // unused
+// static menuseparator_s	s_player_model_title; // unused
+// static menuseparator_s	s_player_hand_title; // unused
+// static menuseparator_s	s_player_rate_title; // unused
 static menufield_s		s_player_fov_field;
 
 #define MAX_DISPLAYNAME 16
@@ -5775,7 +5803,7 @@ typedef struct
 	int		nskins;
 	char	**skindisplaynames;
 	char	displayname[MAX_DISPLAYNAME];
-	char	directory[MAX_QPATH];
+	char	directory[MAX_OSPATH];
 } playermodelinfo_s;
 
 static playermodelinfo_s s_pmi[MAX_PLAYERMODELS];
@@ -6010,8 +6038,8 @@ static int pmicmpfnc( const void *_a, const void *_b )
 qboolean PlayerConfig_MenuInit( void )
 {
 	extern cvar_t *name;
-	extern cvar_t *team;
-	extern cvar_t *skin;
+	// extern cvar_t *team; // unused
+	// extern cvar_t *skin; // unused
 	char currentdirectory[1024];
 	char currentskin[1024];
 	int i = 0;
@@ -6221,7 +6249,7 @@ void PlayerConfig_MenuDraw( void )
 {
 	extern float CalcFov( float fov_x, float w, float h );
 	refdef_t refdef;
-	char scratch[MAX_QPATH];
+	char scratch[MAX_OSPATH];
 	FILE *modelfile;
 	int helmet = false;
 	float scale;
@@ -6288,28 +6316,16 @@ void PlayerConfig_MenuDraw( void )
 		entity[1].skin = R_RegisterSkin( scratch );
 
 		//if a helmet or other special device
-		Com_sprintf( scratch, sizeof( scratch ), "%s/players/%s/helmet.md2", FS_Gamedir(), s_pmi[s_player_model_box.curvalue].directory );
-		Menu_FindFile (scratch, &modelfile);
-		if(modelfile) {
-			helmet = true;
 			Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.md2", s_pmi[s_player_model_box.curvalue].directory );
-			entity[2].model = R_RegisterModel( scratch );
-			Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.tga", s_pmi[s_player_model_box.curvalue].directory );
-			entity[2].skin = R_RegisterSkin( scratch );
-			fclose(modelfile);
-		}
-		else {
-			helmet = false;
-			Com_sprintf( scratch, sizeof( scratch ), "%s/players/%s/helmet.md2", BASEDIRNAME, s_pmi[s_player_model_box.curvalue].directory );
-			Menu_FindFile (scratch, &modelfile);
-			if(modelfile) {
+		FS_FOpenFile( scratch, &modelfile );
+		if ( modelfile )
+		{
 				helmet = true;
 				Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.md2", s_pmi[s_player_model_box.curvalue].directory );
 				entity[2].model = R_RegisterModel( scratch );
 				Com_sprintf( scratch, sizeof( scratch ), "players/%s/helmet.tga", s_pmi[s_player_model_box.curvalue].directory );
 				entity[2].skin = R_RegisterSkin( scratch );
 				fclose(modelfile);
-			}
 		}
 
 		entity[0].flags = RF_FULLBRIGHT | RF_MENUMODEL;
@@ -6640,7 +6656,7 @@ void Slider_CheckSlide( menuslider_s *s )
 
 void Menu_DragSlideItem (menuframework_s *menu, void *menuitem)
 {
-	menucommon_s *item = ( menucommon_s * ) menuitem;
+	// menucommon_s *item = ( menucommon_s * ) menuitem; // unused
 	menuslider_s *slider = ( menuslider_s * ) menuitem;
 
 	slider->curvalue = newSliderValueForX(cursor.x, slider);
@@ -6649,7 +6665,7 @@ void Menu_DragSlideItem (menuframework_s *menu, void *menuitem)
 
 void Menu_DragVertSlideItem (menuframework_s *menu, void *menuitem)
 {
-	menucommon_s *item = ( menucommon_s * ) menuitem;
+	// menucommon_s *item = ( menucommon_s * ) menuitem; // unused
 	menuslider_s *slider = ( menuslider_s * ) menuitem;
 
 	slider->curvalue = newSliderValueForY(cursor.y, slider);
