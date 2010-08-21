@@ -60,7 +60,7 @@
 #include "config.h"
 #endif
 
-#include "../g_local.h"
+#include "game/g_local.h"
 #include "acebot.h"
 
 qboolean debug_mode=false;

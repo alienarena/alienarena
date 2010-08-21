@@ -560,7 +560,6 @@ noinst_LIBRARIES = libgame.a
 @BUILD_DARWIN_TRUE@	game/game.h \
 @BUILD_DARWIN_TRUE@	game/q_shared.c \
 @BUILD_DARWIN_TRUE@	game/q_shared.h \
-@BUILD_DARWIN_TRUE@	game/q_shared.h \
 @BUILD_DARWIN_TRUE@	null/cl_null.c \
 @BUILD_DARWIN_TRUE@	qcommon/cmd.c \
 @BUILD_DARWIN_TRUE@	qcommon/cmodel.c \

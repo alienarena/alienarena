@@ -60,11 +60,8 @@
 #ifndef _ACEBOT_H
 #define _ACEBOT_H
 
-// Directory for reading files in "botinfo", writing is always done in "."
-#ifdef DATADIR
-#define BOTDIR	DATADIR
-#else
-#define BOTDIR	"."
+#if !defined BOT_GAMEDATA
+#define BOT_GAMEDATA "botinfo"
 #endif
 
 // Only 100 allowed for now (probably never be enough edicts for 'em
@@ -157,7 +154,6 @@
 #define ITEMLIST_DEATHBALL			38
 #define ITEMLIST_HOVER				39
 
-// 2008-02-06 jjb
 // Special CONTENT mask for acebots, so they can detect and climb ladders
 // replaces MASK_OPAQUE defined in game/q_shared.h
 #define BOTMASK_OPAQUE (CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_LAVA|CONTENTS_LADDER)

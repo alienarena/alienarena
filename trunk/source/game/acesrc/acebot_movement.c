@@ -60,7 +60,7 @@
 #include "config.h"
 #endif
 
-#include "../g_local.h"
+#include "game/g_local.h"
 #include "acebot.h"
 
 ///////////////////////////////////////////////////////////////////////
@@ -220,7 +220,7 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	G_ProjectSource (self->s.origin, offset, forward, right, upend);
 	traceFront = gi.trace(self->s.origin, self->mins, self->maxs, upend, self, BOTMASK_OPAQUE);
 
-	if ( traceFront.contents & CONTENTS_LADDER ) // 2008-02-06 jjb : should be ok now
+	if ( traceFront.contents & CONTENTS_LADDER )
 	{
 		ucmd->upmove = 400;
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
@@ -724,7 +724,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 	float crouch_thresh;
 	float aim;
 	gitem_t *vehicle;
-	float range;
+	float range = 0.0f;
 	vec3_t v;
 
 	vehicle = FindItemByClassname("item_bomber");
