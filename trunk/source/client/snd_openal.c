@@ -36,6 +36,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <malloc.h>
 #include <string.h>
 
+#if defined HAVE_AL_H
+#include <al.h>
+#include <alc.h>
+#elif defined HAVE_AL_AL_H
+#include <AL/al.h>
+#include <AL/alc.h>
+#elif defined HAVE_OPENAL_AL_H
+#include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+#else
+#error OpenAL header includes not defined.
+#endif
+
 #include "client.h"
 #include "qal.h"
 
@@ -84,7 +97,7 @@ typedef struct sfx_s
 	int oalFormat; //            file format code from OpenAL
 	ALuint oalBuffer; //         index into collection of OpenAL buffers
 	qboolean aliased; //         the file loaded is an alias for the truename
-	char name[MAX_QPATH]; //     full file path
+	char name[MAX_QPATH]; //     relative file path
 	char truename[MAX_QPATH]; // in case 'name' is an 'alias'
 } sfx_t;
 

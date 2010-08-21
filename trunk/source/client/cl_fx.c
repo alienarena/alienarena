@@ -24,8 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "client.h"
-#include "../ref_gl/r_image.h"
-#include "../ref_gl/qgl.h"
+#include "ref_gl/r_image.h"
+#include "ref_gl/qgl.h"
 
 extern cparticle_t	particles[MAX_PARTICLES];
 extern int			cl_numparticles;
@@ -500,11 +500,7 @@ void CL_ClearParticles (void)
 	particles[cl_numparticles-1].next = NULL;
 }
 
-#ifdef _WIN32
-static __inline cparticle_t *new_particle (void)
-#else
 static inline cparticle_t *new_particle (void)
-#endif
 {
 	cparticle_t	*p;
 	int j;
@@ -2945,7 +2941,7 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 	int			i;
 	float		skewx, skewy, skewz;
 	float		x, y, z;
-	byte		clr = 0xd4;
+	// byte		clr = 0xd4;
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
@@ -3226,8 +3222,8 @@ void CL_TeleportParticles (vec3_t start)
 	int			i;
 	vec3_t		pos1, pos2, v;
 	float		step = 16.0;
-	static vec3_t mins = { -1, -1, -1 };
-    static vec3_t maxs = { 1, 1, 1 };
+	// static vec3_t mins = { -1, -1, -1 };
+    // static vec3_t maxs = { 1, 1, 1 };
 
 	VectorCopy(start, pos1);
 	pos2[2] = 1;
@@ -3766,7 +3762,7 @@ void CL_AddParticles (void)
 {
 	cparticle_t		*p, *next;
 	float			alpha, light;
-	float			time, time2;
+	float			time = 0.0f, time2;
 	vec3_t			org, curorg;
 	cparticle_t		*active, *tail;
 	float			scale;

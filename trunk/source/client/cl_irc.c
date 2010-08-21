@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2010 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -24,7 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "client.h"
-#ifdef _WINDOWS
+
+#if defined WIN32_VARIANT
 	#include <winsock.h>
 	#include <process.h>
 	typedef SOCKET irc_socket_t;
@@ -32,8 +34,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	typedef int irc_socket_t;
 #endif
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
+#if defined HAVE_UNISTD_H
 	#include <unistd.h>
+#endif
 	#include <sys/socket.h>
 	#include <sys/time.h>
 	#include <netinet/in.h>
@@ -42,7 +46,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	#include <sys/ioctl.h>
 	#include <sys/uio.h>
 	#include <errno.h>
+#if defined HAVE_PTHREAD
 	#include <pthread.h>
+#endif
+#endif
+
+// close(socket) same as winsock's closesocket(socket)
+#if !defined HAVE_CLOSESOCKET
+#define closesocket close
+#endif
+
+#if !defined INVALID_SOCKET
+#define INVALID_SOCKET -1
 #endif
 
 char Server[32];
@@ -60,7 +75,7 @@ int ichar;
 #define IRC_SEND_BUF_SIZE 512
 #define IRC_RECV_BUF_SIZE 1024
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 void handle_error(void)
 {
     switch ( WSAGetLastError() )
@@ -139,7 +154,6 @@ void handle_error(void)
        break;
 	}
 }
-//#endif
 #else
 void handle_error( void )
 {
@@ -350,13 +364,9 @@ void CL_GetIRCData(void)
 	memset(File_Buf,0,IRC_RECV_BUF_SIZE);
 	if((len=recv(sock,File_Buf,IRC_RECV_BUF_SIZE,0))>0)
 	{
-	    // received a ping from server...
-#ifdef _WINDOWS
-		if (!_strnicmp(File_Buf,"PING",4))
-#else
-		if (!strncasecmp(File_Buf,"PING",4))
-#endif
+		if ( !Q_strncasecmp( File_Buf, "PING", 4 ))
 		{
+	    // received a ping from server...
 			Com_Printf("IRC: Received a ping\n");
 			cls.irc_canjoin = true;
 			File_Buf[1]='O';
@@ -419,7 +429,7 @@ void CL_IRCSay(void)
 			tempstring[i-4] = m_sendstring[i];
 		sprintf(message, "PRIVMSG #alienarena :\001ACTION %s\001\n\r", tempstring);
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 		WSASetLastError(0);
 #endif
 		sendData(message);
@@ -429,13 +439,13 @@ void CL_IRCSay(void)
 	else
 	{
 		sprintf(message, "PRIVMSG #alienarena :%s\n\r", m_sendstring);
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 		WSASetLastError(0);
 #endif
 		sendData(message);
 	}
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 	if(WSAGetLastError())
 	{
 		//there was some error in connecting
@@ -459,7 +469,7 @@ void CL_IRCSay(void)
 
 			SCR_IRCPrintf("^1IRC: %s\n", msgLine);
 		}
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 	}
 #endif
 }
@@ -478,11 +488,7 @@ qboolean CL_JoinIRC(void)
 	if(!cls.irc_connected)
 		Com_Printf("...Initializing IRC client\n");
 
-#ifdef _WINDOWS
 	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET )
-#else
-	if ( (sock = socket(AF_INET, SOCK_STREAM, 0)) == -1 )
-#endif
 		return false; //IRC daemon will not continue
 
 	strcpy(name, Cvar_VariableString("name")); //we should force players to set name on startup
@@ -513,15 +519,11 @@ qboolean CL_JoinIRC(void)
 	address.sin_family=AF_INET;       // internet
     address.sin_port = htons(6667);
 
-	sprintf(HostName, cl_IRC_server->string);
+	Q_strncpyz2( HostName, cl_IRC_server->string, sizeof(HostName) );
 
     if ( (host=gethostbyname(HostName)) == NULL )
 	{
-#ifdef _WINDOWS
 		closesocket(sock);
-#else
-		close(sock);
-#endif
 		handle_error();
  		return false;
 	}
@@ -530,11 +532,7 @@ qboolean CL_JoinIRC(void)
 
 	if ( (connect(sock,(struct sockaddr *) &address, sizeof(address))) != 0)
 	{
-#ifdef _WINDOWS
 		closesocket(sock);
-#else
-		close(sock);
-#endif
 		Com_Printf("...IRC connection refused.\n");
 		return false;
 	}
@@ -546,7 +544,7 @@ qboolean CL_JoinIRC(void)
 
 	CL_GetIRCData();
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 	if(WSAGetLastError())
 	{
 		closesocket(sock);
@@ -565,7 +563,14 @@ qboolean CL_JoinIRC(void)
 }
 
 
-#ifdef _WINDOWS
+/*
+ * Caution: RecvThreadProc() and CL_InitIRC() have separate "VARIANTS".
+ *  Note different return types on RecvThreadProc() and completely
+ *  different CL_InitIRC() implementations.
+ */
+#if defined WIN32_VARIANT
+// RecvThreadProc and CL_InitIRC  Windows Flavor
+
 void RecvThreadProc(void *dummy)
 {
 
@@ -594,18 +599,28 @@ void RecvThreadProc(void *dummy)
 	}
 	return;
 }
+
+void CL_InitIRC(void)
+{
+	//spin off thread right away
+	_beginthread( RecvThreadProc, 0, NULL );
+}
+
 #endif
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
+// RecvThreadProc and CL_InitIRC  Linux/Unix Flavor
+// (note different function return type)
+
 void *RecvThreadProc(void *dummy)
 {
     if (!CL_JoinIRC())
-        return;
+        return NULL;
 
 	//something went wrong, try again
 	if(!cls.irc_canjoin)
 		if (!CL_JoinIRC())
-			return;
+			return NULL;
 
 	while(1)
 	{
@@ -621,25 +636,20 @@ void *RecvThreadProc(void *dummy)
 
 		CL_GetIRCData();
 	}
-	return;
+	return NULL;
 }
-#endif
 
-void CL_InitIRC()
+void CL_InitIRC(void)
 {
-#ifdef __unix__
 	pthread_t pth;
-#endif
 
 	//spin off thread right away
-#ifdef _WINDOWS
-	_beginthread( RecvThreadProc, 0, NULL );
-#endif
-#ifdef __unix__
 	pthread_create(&pth,NULL,RecvThreadProc,"dummy");
-#endif
 
 }
+
+#endif
+
 
 void CL_IRCShutdown(void)
 {
@@ -658,11 +668,7 @@ void CL_IRCShutdown(void)
 
 	Com_Printf("Disconnected from chat channel...");
 
-#ifdef _WINDOWS
 	closesocket(sock);
-#else
-	close(sock);
-#endif
 	return;
 }
 

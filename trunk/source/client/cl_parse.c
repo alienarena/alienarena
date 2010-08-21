@@ -52,6 +52,8 @@ char *svc_strings[256] =
 	"svc_frame"
 };
 
+static size_t szr; // just for unused result warnings
+
 /*
 ==============
 Q_strncpyz
@@ -59,7 +61,7 @@ Q_strncpyz
 */
 void Q_strncpyz( char *dest, const char *src, size_t size )
 {
-#ifdef HAVE_STRLCPY
+#if defined HAVE_STRLCPY
 	strlcpy( dest, src, size );
 #else
 	if( size ) {
@@ -73,9 +75,8 @@ void Q_strncpyz( char *dest, const char *src, size_t size )
 
 void CL_DownloadFileName(char *dest, int destlen, char *fn)
 {
-	if (strncmp(fn, "players", 7) == 0)
-		Com_sprintf (dest, destlen, "%s/%s", BASEDIRNAME, fn);
-	else
+	// 2010-08 note: originally this directed "players" to "data1/"
+	//   does not appear to be any reason for that in Alien Arena
 		Com_sprintf (dest, destlen, "%s/%s", FS_Gamedir(), fn);
 }
 
@@ -119,7 +120,8 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		// it exists, no need to download
 		return true;
 	}
-	else if(modelskin){
+
+	if(modelskin){
 		//try for .jpg
 		COM_StripExtension ( filename, shortname );
 		sprintf(filename, "%s.jpg", shortname);
@@ -161,9 +163,8 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	fp = fopen (name, "r+b");
 	if (fp) { // it exists
 		int len;
-		fseek(fp, 0, SEEK_END);
-		len = ftell(fp);
 
+		len = FS_filelength( fp );
 		cls.download = fp;
 
 		// give the server an offset to start the download
@@ -303,7 +304,7 @@ void CL_ParseDownload (void)
 		}
 	}
 
-	fwrite (net_message.data + net_message.readcount, 1, size, cls.download);
+	szr = fwrite (net_message.data + net_message.readcount, 1, size, cls.download);
 	net_message.readcount += size;
 
 	if (percent != 100)
@@ -417,7 +418,7 @@ void CL_ParseBaseline (void)
 
 	memset (&nullstate, 0, sizeof(nullstate));
 
-	newnum = CL_ParseEntityBits (&bits);
+	newnum = CL_ParseEntityBits ( (unsigned *)&bits );
 	es = &cl_entities[newnum].baseline;
 	CL_ParseDelta (&nullstate, es, newnum, bits);
 }
@@ -654,6 +655,7 @@ void CL_ParseConfigString (void)
 		}
 		else
 		{
+			// Alien Arena client/server protocol depends on MAX_QPATH being 64
 			if (length >= MAX_QPATH)
 				Com_Printf ("WARNING: Configstring %d of length %d exceeds MAX_QPATH.\n", i, length);
 			Q_strncpyz (cl.configstrings[i], s, sizeof(cl.configstrings[i])-1);

@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static void	 Action_DoEnter( menuaction_s *a );
 static void	 Action_Draw( menuaction_s *a );
 static void  Menu_DrawStatusBar( const char *string );
-static void	 Menulist_DoEnter( menulist_s *l );
+// static void	 Menulist_DoEnter( menulist_s *l ); // unused
 static void	 MenuList_Draw( menulist_s *l );
 static void	 Separator_Draw( menuseparator_s *s );
 static void	 Separator2_Draw( menuseparator_s *s );
@@ -39,7 +39,7 @@ static void  ColorTxt_Draw( menutxt_s *s );
 static void	 Slider_DoSlide( menuslider_s *s, int dir );
 static void	 Slider_Draw( menuslider_s *s );
 static void  VertSlider_Draw( menuslider_s *s );
-static void	 SpinControl_DoEnter( menulist_s *s );
+// static void	 SpinControl_DoEnter( menulist_s *s ); // unused
 static void	 SpinControl_Draw( menulist_s *s );
 static void	 SpinControl_DoSlide( menulist_s *s, int dir );
 
@@ -599,7 +599,7 @@ void Menu_DrawStatusBar( const char *string )
 	if ( string )
 	{
 		int l = strlen( string );
-		int maxrow = VID_HEIGHT / charscale;
+		// int maxrow = VID_HEIGHT / charscale; // unused
 		int maxcol = VID_WIDTH / charscale;
 		int col = maxcol / 2 - l / 2;
 
@@ -891,6 +891,8 @@ int Menu_TallySlots( menuframework_s *menu )
 	return total;
 }
 
+#if 0
+// unused
 void Menulist_DoEnter( menulist_s *l )
 {
 	int start;
@@ -902,6 +904,7 @@ void Menulist_DoEnter( menulist_s *l )
 	if ( l->generic.callback )
 		l->generic.callback( l );
 }
+#endif
 
 void MenuList_Draw( menulist_s *l )
 {
@@ -1017,6 +1020,8 @@ void VertSlider_Draw( menuslider_s *s )
 
 }
 
+#if 0
+// unused
 void SpinControl_DoEnter( menulist_s *s )
 {
 	s->curvalue++;
@@ -1026,6 +1031,7 @@ void SpinControl_DoEnter( menulist_s *s )
 	if ( s->generic.callback )
 		s->generic.callback( s );
 }
+#endif
 
 void SpinControl_DoSlide( menulist_s *s, int dir )
 {

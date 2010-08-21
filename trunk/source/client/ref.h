@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef __REF_H
 #define __REF_H
 
-#include "../qcommon/qcommon.h"
+#include "qcommon/qcommon.h"
 
 #define DIV254BY255 (0.9960784313725490196078431372549f)
 #define DIV255 (0.003921568627450980392156862745098f)
@@ -188,7 +188,7 @@ typedef struct entity_s
 
 	float	bob;
 
-	struct	rscript_t *script;
+	struct rscript_s *script;
 
 } entity_t;
 

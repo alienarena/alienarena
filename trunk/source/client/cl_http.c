@@ -1,7 +1,8 @@
 /*
-* Copyright(c) 1997-2001 Id Software, Inc.
-* Copyright(c) 2002 The Quakeforge Project.
-* Copyright(c) 2006 Quake2World.
+* Copyright (C) 1997-2001 Id Software, Inc.
+* Copyright (C) 2002 The Quakeforge Project.
+* Copyright (C) 2006 Quake2World.
+* Copyright (C) 2010 COR Entertainment, LLC.
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
@@ -25,19 +26,19 @@
 
 #include "client.h"
 
-#ifdef _WIN32 // All CURL libs are distributed in Windows.
-#define HAVE_CURL
-#endif
+#if defined HAVE_CURL_CURL_H || defined WIN32_VARIANT
 
-#ifdef __unix__
+#if defined HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#ifdef HAVE_CURL
+#if defined HAVE_UNLINK && !defined HAVE__UNLINK
+#define _unlink unlink
+#endif
+
 #include "curl/curl.h"
 CURLM *curlm;
 CURL *curl;
-#endif
 
 // generic encapsulation for common http response codes
 typedef struct response_s {
@@ -53,7 +54,7 @@ response_t responses[] = {
 char curlerr[MAX_STRING_CHARS];  // curl's error buffer
 
 char url[MAX_OSPATH];  // remote url to fetch from
-char file[MAX_OSPATH];  // local path to save to
+char dnld_file[MAX_OSPATH];  // local path to save to
 
 long status, length;  // for current transfer
 qboolean success;
@@ -73,7 +74,6 @@ the current gamedir.  We use cURL's multi interface, even tho we only ever
 perform one download at a time, because it is non-blocking.
 */
 qboolean CL_HttpDownload(void){
-#ifdef HAVE_CURL
         char game[64];
 
         if(!curlm)
@@ -82,13 +82,13 @@ qboolean CL_HttpDownload(void){
         if(!curl)
                 return false;
 
-        memset(file, 0, sizeof(file));  // resolve local file name
-        Com_sprintf(file, sizeof(file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
+        memset(dnld_file, 0, sizeof(dnld_file));  // resolve local file name
+        Com_sprintf(dnld_file, sizeof(dnld_file) - 1, "%s/%s", FS_Gamedir(), cls.downloadname);
 
-        FS_CreatePath(file);  // create the directory
+        FS_CreatePath(dnld_file);  // create the directory
 
-        if(!(cls.download = fopen(file, "wb"))){
-                Com_Printf("Failed to open %s.\n", file);
+        if(!(cls.download = fopen(dnld_file, "wb"))){
+                Com_Printf("Failed to open %s.\n", dnld_file);
                 return false;  // and open the file
         }
 
@@ -121,9 +121,6 @@ qboolean CL_HttpDownload(void){
         curl_multi_add_handle(curlm, curl);
 
 		return true;
-#else
-        return false;
-#endif
 }
 
 
@@ -148,7 +145,6 @@ If a download is currently taking place, clean it up.  This is called
 both to finalize completed downloads as well as abort incomplete ones.
 */
 void CL_HttpDownloadCleanup(){
-#ifdef HAVE_CURL
         char *c;
 
         if(!cls.download || !cls.downloadhttp)
@@ -172,7 +168,7 @@ void CL_HttpDownloadCleanup(){
                 MSG_WriteByte(&cls.netchan.message, clc_stringcmd);
                 MSG_WriteString(&cls.netchan.message, va("download %s", cls.downloadname));
 
-                _unlink(file);  // delete partial or empty file
+                _unlink(dnld_file);  // delete partial or empty file
         }
 
         cls.downloadpercent = 0;
@@ -180,7 +176,6 @@ void CL_HttpDownloadCleanup(){
 
         status = length = 0;
         success = false;
-#endif
 }
 
 
@@ -195,7 +190,6 @@ we leave cls.download.tempname in tact during our cleanup, when the
 download is parsed back in the client, it will fopen and begin.
 */
 void CL_HttpDownloadThink(void){
-#ifdef HAVE_CURL
         CURLMsg *msg;
         int i;
 		int runt;
@@ -238,7 +232,6 @@ void CL_HttpDownloadThink(void){
                         return;
                 }
         }
-#endif
 }
 
 
@@ -246,13 +239,11 @@ void CL_HttpDownloadThink(void){
 CL_InitHttpDownload
 */
 void CL_InitHttpDownload(void){
-#ifdef HAVE_CURL
         if(!(curlm = curl_multi_init()))
                 return;
 
         if(!(curl = curl_easy_init()))
                 return;
-#endif
 }
 
 
@@ -260,7 +251,6 @@ void CL_InitHttpDownload(void){
 CL_ShutdownHttpDownload
 */
 void CL_ShutdownHttpDownload(void){
-#ifdef HAVE_CURL
         CL_HttpDownloadCleanup();
 
         curl_easy_cleanup(curl);
@@ -268,5 +258,15 @@ void CL_ShutdownHttpDownload(void){
 
         curl_multi_cleanup(curlm);
         curlm = NULL;
-#endif
 }
+
+#else
+// !defined HAVE_CURL_CURL_H
+
+void CL_InitHttpDownload(void){}
+void CL_HttpDownloadCleanup(void){}
+qboolean CL_HttpDownload(void){ return false; }
+void CL_HttpDownloadThink(void){}
+void CL_ShutdownHttpDownload(void){}
+
+#endif

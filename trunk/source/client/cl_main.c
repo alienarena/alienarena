@@ -24,12 +24,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "client.h"
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 #include <winsock.h>
 #endif
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
+#if defined HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <netinet/in.h>
@@ -38,6 +40,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/ioctl.h>
 #include <sys/uio.h>
 #include <errno.h>
+#endif
+
+#if defined HAVE_PUTENV && !defined HAVE__PUTENV
+#define _putenv putenv
 #endif
 
 cvar_t	*freelook;
@@ -180,6 +186,8 @@ SERVERINFO servers[64];
 int numServers = 0;
 extern unsigned int starttime;
 
+static size_t szr; // just for unused result warnings
+
 //======================================================================
 
 
@@ -200,8 +208,8 @@ void CL_WriteDemoMessage (void)
 	if (!swlen)
 		return;
 
-	fwrite (&swlen, 4, 1, cls.demofile);
-	fwrite (net_message.data+8,	len, 1, cls.demofile);
+	szr = fwrite (&swlen, 4, 1, cls.demofile);
+	szr = fwrite (net_message.data+8,	len, 1, cls.demofile);
 }
 
 
@@ -224,7 +232,7 @@ void CL_Stop_f (void)
 
 // finish up
 	len = -1;
-	fwrite (&len, 4, 1, cls.demofile);
+	szr = fwrite (&len, 4, 1, cls.demofile);
 	fclose (cls.demofile);
 	cls.demofile = NULL;
 	cls.demorecording = false;
@@ -289,7 +297,7 @@ void CL_Record_f (void)
 	//
 	// write out messages to hold the startup information
 	//
-	SZ_Init (&buf, buf_data, sizeof(buf_data));
+	SZ_Init (&buf, (byte *)buf_data, sizeof(buf_data));
 	SZ_SetName ( &buf, "CL_Record_f", false );
 
 	// send the serverdata
@@ -310,8 +318,8 @@ void CL_Record_f (void)
 			if (buf.cursize + strlen (cl.configstrings[i]) + 32 > buf.maxsize)
 			{	// write it out
 				len = LittleLong (buf.cursize);
-				fwrite (&len, 4, 1, cls.demofile);
-				fwrite (buf.data, buf.cursize, 1, cls.demofile);
+				szr = fwrite (&len, 4, 1, cls.demofile);
+				szr = fwrite (buf.data, buf.cursize, 1, cls.demofile);
 				buf.cursize = 0;
 			}
 
@@ -333,8 +341,8 @@ void CL_Record_f (void)
 		if (buf.cursize + 64 > buf.maxsize)
 		{	// write it out
 			len = LittleLong (buf.cursize);
-			fwrite (&len, 4, 1, cls.demofile);
-			fwrite (buf.data, buf.cursize, 1, cls.demofile);
+			szr = fwrite (&len, 4, 1, cls.demofile);
+			szr = fwrite (buf.data, buf.cursize, 1, cls.demofile);
 			buf.cursize = 0;
 		}
 
@@ -348,8 +356,8 @@ void CL_Record_f (void)
 	// write it to the demo file
 
 	len = LittleLong (buf.cursize);
-	fwrite (&len, 4, 1, cls.demofile);
-	fwrite (buf.data, buf.cursize, 1, cls.demofile);
+	szr = fwrite (&len, 4, 1, cls.demofile);
+	szr = fwrite (buf.data, buf.cursize, 1, cls.demofile);
 
 	// the rest of the demo file will be individual frames
 }
@@ -706,6 +714,7 @@ This is also called on Com_Error, so it shouldn't cause any errors
 void CL_Disconnect (void)
 {
 	byte	final[32];
+	int repeat;
 
 	if (cls.state == ca_disconnected)
 		return;
@@ -733,9 +742,8 @@ void CL_Disconnect (void)
 	// send a disconnect message to the server
 	final[0] = clc_stringcmd;
 	strcpy ((char *)final+1, "disconnect");
-	Netchan_Transmit (&cls.netchan, strlen(final), final);
-	Netchan_Transmit (&cls.netchan, strlen(final), final);
-	Netchan_Transmit (&cls.netchan, strlen(final), final);
+	for ( repeat = 3 ; repeat-- ;)
+		Netchan_Transmit( &cls.netchan, (int)strlen( (char*)final ), final );
 
 	CL_ClearState ();
 
@@ -749,6 +757,12 @@ void CL_Disconnect (void)
 	}
 
 	cls.state = ca_disconnected;
+
+/*
+** From Max's timedemo benchmarks:
+**	For automated test runs using demos, can exit here by calling CL_Quit_f()
+*/
+
 }
 
 void CL_Disconnect_f (void)
@@ -1660,9 +1674,13 @@ void CL_Precache_f (void)
 	CL_RequestNextDownload();
 }
 
- #ifdef __unix__
- void CL_Shell_f (void) {
-	if(Cmd_Argc() < 2) {
+/*
+ * TODO: Removing pending review. May not be safe.
+#if defined UNIX_VARIANT
+void CL_Shell_f (void)
+{
+	if(Cmd_Argc() < 2)
+	{
 		Com_Printf("Usage: shell command");
 		return;
 	}
@@ -1674,6 +1692,7 @@ void CL_Precache_f (void)
 	pclose(fp);
  }
  #endif
+*/
 
 /*
 =================
@@ -1751,7 +1770,7 @@ void CL_InitLocal (void)
 
 	m_smoothing = Cvar_Get("m_smoothing", "0", CVAR_ARCHIVE);
 	m_pitch = Cvar_Get ("m_pitch", "0.022", CVAR_ARCHIVE);
-	m_yaw = Cvar_Get ("m_yaw", "0.022", 0);
+	m_yaw = Cvar_Get ("m_yaw", "0.022", CVAR_ARCHIVE);
 	m_forward = Cvar_Get ("m_forward", "1", 0);
 	m_side = Cvar_Get ("m_side", "1", 0);
 
@@ -1823,9 +1842,10 @@ void CL_InitLocal (void)
 
 	Cmd_AddCommand ("download", CL_Download_f);
 
-	#ifdef __unix__
-	Cmd_AddCommand ("shell", CL_Shell_f);
-	#endif
+// TODO: Removing this pending review. it may not be safe.
+//#if defined UNIX_VARIANT
+//	Cmd_AddCommand ("shell", CL_Shell_f);
+//#endif
 
 	Cmd_AddCommand ("irc_connect", CL_InitIRC);
 	Cmd_AddCommand ("irc_quit", CL_IRCShutdown);
@@ -1920,7 +1940,7 @@ void CL_WriteConfiguration (void)
 		return;
 	}
 
-	fprintf (f, "// generated by quake, do not modify\n");
+	fprintf (f, "// generated by Alien Arena. Use autoexec.cfg for custom settings.\n");
 	Key_WriteBindings (f);
 	fclose (f);
 
@@ -2137,13 +2157,9 @@ void CL_Init (void)
 	// all archived variables will now be loaded
 
 	Con_Init ();
-#if defined __unix__ || defined __sgi
+
+	VID_Init ();
 	S_Init ();
-	VID_Init ();
-#else
-	VID_Init ();
-	S_Init ();	// sound must be initialized after window is created
-#endif
 
 	V_Init ();
 
@@ -2158,8 +2174,7 @@ void CL_Init (void)
 	CL_InitLocal ();
 	IN_Init ();
 
-//	Cbuf_AddText ("exec autoexec.cfg\n");
-	FS_ExecAutoexec ();
+	FS_ExecAutoexec (); // add commands from autoexec.cfg
 	Cbuf_Execute ();
 
 }

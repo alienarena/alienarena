@@ -155,6 +155,7 @@ typedef struct
 	char		gamedir[MAX_QPATH];
 	int			playernum;
 
+	// Alien Arena client/server protocol depends on MAX_QPATH being 64.
 	char		configstrings[MAX_CONFIGSTRINGS][MAX_QPATH];
 
 	//
@@ -216,12 +217,22 @@ typedef struct
 									// > cls.disable_servercount, clear disable_screen
 
 // connection information
+#if 1
+	// TODO: find what is causing this.
+	// moving netchan here seems to help some obscure bug,
+	//  where netchan_t.outgoing sequence is overwritten
+	netchan_t	netchan;
+#endif
+
 	char		servername[MAX_OSPATH];	// name of server from original connect
 	float		connect_time;		// for connection retransmits
 
 	int			quakePort;			// a 16 bit value that allows quake servers
 									// to work around address translating routers
+#if 0
 	netchan_t	netchan;
+#endif
+
 	int			serverProtocol;		// in case we are doing some kind of version hack
 
 	int			challenge;			// from the server to use for connecting

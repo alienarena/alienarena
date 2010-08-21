@@ -371,7 +371,7 @@ void Key_Console (int key)
 		if (key_linepos < key_linelen) {
 			if ( keydown[K_CTRL] )
 			{
-				qboolean found_char = false, printable;
+				qboolean found_char = false, printable = false;
 				while (key_linepos < key_linelen && (! found_char || printable))
 				{
 					key_linepos ++;
@@ -895,7 +895,7 @@ void Key_Event (int key, qboolean down, unsigned time)
 			return;	// ignore most autorepeats
 
 		if (key >= 200 && !keybindings[key])
-			Com_Printf ("%s is unbound, hit F4 to set.\n", Key_KeynumToString (key) );
+			Com_Printf ("%s is not bound to a command.\n", Key_KeynumToString (key) );
 	}
 	else
 	{
