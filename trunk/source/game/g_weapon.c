@@ -1817,7 +1817,8 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 			gi.WriteByte (4);
 			gi.WritePosition (tr.endpos);
 			gi.WriteDir (tr.plane.normal);
-			gi.WriteByte (self->s.skinnum);
+			// skinnum is sometimes larger, why?, but does it matter?
+			gi.WriteByte( ((self->s.skinnum > 255) ? 0 : self->s.skinnum) );
 			gi.multicast (tr.endpos, MULTICAST_PVS);
 
 		}

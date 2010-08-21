@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 static qboolean	is_quad;
 static byte		is_silenced;
-static qboolean altfire;
+// static qboolean altfire;
 
 float damage_buildup = 1.0;
 
@@ -181,65 +181,30 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 
 /*
 ===========
-FS_FOpenFile
+Q2_FindFile
 
 Finds the file in the search path.
-returns filesize and an open FILE *
-Used for streaming data out of either a pak file or
-a seperate file.
+Given a relative path, returns an open FILE* for reading
 ===========
 */
 
-int Q2_FindFile (char *filename, FILE **file)
+void Q2_FindFile (char *filename, FILE **file)
 {
-	char	name[MAX_OSPATH];
-	cvar_t	*game;
-	qboolean found = false;
+	char full_path[MAX_OSPATH];
 
-	game = gi.cvar("game", "", 0);
+	*file = NULL;
 
-#ifdef DATADIR
-	if ( game && *game->string ) {
-		sprintf( name, DATADIR"/%s/%s", game->string, filename );
-		*file = fopen( name, "rb" );
-		if( *file )
-			return 1;
-	}
-	sprintf( name, "%s/%s/%s", DATADIR, GAMEVERSION, filename );
-	*file = fopen (name, "rb");
-	if( *file )
-		return 1;
+	if ( gi.FullPath( full_path, sizeof(full_path), filename ) )
+	{
+		*file = fopen( full_path, "rb" );
 
-	return -1;
-#else
-
-	if (!*game->string) //if there is a gamedir try here first
-		sprintf (name, "%s/%s", GAMEVERSION, filename);
-	else
-		sprintf (name, "%s/%s", game->string, filename);
-
-	*file = fopen (name, "rb");
-	if (!*file) {
-		*file = NULL;
-		found = false;
-	}
-	else
-		return 1;
-
-
-	if(!found) { //try basedir
-		sprintf (name, "%s/%s", GAMEVERSION, filename);
-		*file = fopen (name, "rb");
-		if (!*file) {
-			*file = NULL;
-			return -1;
+		if( *file == NULL )
+		{
+			gi.dprintf("Q2_FindFile: failed fopen for read: %s", full_path );
 		}
-		else
-			return 1;
 	}
-	else
-		return -1;
-#endif
+	// else
+	//   gi.dprintf("Q2_FindFile: not found: %s\n", filename );
 
 }
 
@@ -316,7 +281,6 @@ void ChangeWeapon (edict_t *ent)
 
 	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
-#ifdef __unix__
 	if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_violator/tris.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
 	else if( !Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_rocket/tris.md2"))
@@ -337,41 +301,17 @@ void ChangeWeapon (edict_t *ent)
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
 	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"vehicles/deathball/v_wep.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
-#else
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_violator/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_rocket/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_rlauncher.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_blast/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_blaster.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_bfg/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_bfg.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_rail/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_railgun.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_shotg2/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_sshotgun.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_shotg/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_shotgun.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_hyperb/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_hyperblaster.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_chain/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
-	if(ent->client->pers.weapon->view_model == "vehicles/deathball/v_wep.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
-#endif
 
 	sprintf(weaponpath, "%s", weaponmodel);
 	Q2_FindFile (weaponpath, &file); //does it really exist?
-	if(!file) {
-#ifdef __unix__
+	if(!file)
+	{
 		sprintf(weaponpath, "%s%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
-#else
-		sprintf(weaponpath, "%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
-#endif
 		Q2_FindFile (weaponpath, &file);
 		if(!file) //server does not have this player model
 			sprintf(weaponmodel, "players/martianenforcer/weapon.md2");//default player(martian)
-		else { //have the model, but it has no w_weaps
+		else
+		{ //have the model, but it has no w_weaps
 			sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //custom weapon
 			fclose(file);
 		}
@@ -381,13 +321,9 @@ void ChangeWeapon (edict_t *ent)
 	ent->s.modelindex2 = gi.modelindex(weaponmodel);
 
 	//play a sound like in Q3, except for blaster, so it doesn't do it on spawn.
-#ifdef __unix__
 	if( Q_strcasecmp( ent->client->pers.weapon->view_model,"models/weapons/v_blast/tris.md2") )
 		gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/whoosh.wav"), 1, ATTN_NORM, 0);
-#else
-	if(!(ent->client->pers.weapon->view_model == "models/weapons/v_blast/tris.md2"))
-		gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/whoosh.wav"), 1, ATTN_NORM, 0);
-#endif
+
 	ent->client->anim_priority = ANIM_PAIN;
 	if(ent->client->ps.pmove.pm_flags & PMF_DUCKED)
 	{

@@ -22,6 +22,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 #endif
 
+#if defined HAVE_STRCASECMP && !defined HAVE__STRICMP
+#define _stricmp strcasecmp
+#endif
+
+#if !defined HAVE__STRICMP && defined HAVE_STRICMP
+#define _stricmp stricmp
+#endif
+
 #include "g_local.h"
 
 typedef struct
@@ -335,6 +343,7 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 				((float *)(b+f->ofs))[2] = 0;
 				break;
 			case F_IGNORE:
+			default:
 				break;
 			}
 			return;

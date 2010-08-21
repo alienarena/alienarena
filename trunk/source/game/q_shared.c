@@ -24,15 +24,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "q_shared.h"
 
-#define DEG2RAD( a ) ( a * M_PI ) / 180.0F
-
 vec3_t vec3_origin = {0,0,0};
 
 //============================================================================
-
-#ifdef _WIN32
-#pragma optimize( "", off )
-#endif
 
 void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees )
 {
@@ -88,10 +82,6 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 		dst[i] = rot[i][0] * point[0] + rot[i][1] * point[1] + rot[i][2] * point[2];
 	}
 }
-
-#ifdef _WIN32
-#pragma optimize( "", on )
-#endif
 
 /*
 ** Fast sincos function using polynomial approximation
@@ -191,12 +181,7 @@ void fast_sincosf( float angle, float *sina, float *cosa )
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
 	float		angle;
-#ifdef _WINDOWS
-	static float		sr, sp, sy, cr, cp, cy;
-	// static to help MS compiler fp bugs
-#else
 	float		sr, sp, sy, cr, cp, cy;
-#endif
 
 	angle = angles[YAW] * (kTwoPI / 360.0f);
 	fast_sincosf( angle, &sy, &cy );
@@ -228,6 +213,43 @@ void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 	}
 }
 
+
+void vectoangles (vec3_t value1, vec3_t angles)
+{
+	float	forward;
+	float	yaw, pitch;
+
+	if (value1[1] == 0.0f && value1[0] == 0.0f )
+	{
+		yaw = 0.0f;
+		if (value1[2] > 0.0f)
+			pitch = 90.0f;
+		else
+			pitch = 270.0f;
+	}
+	else
+	{
+	// PMM - fixed to correct for pitch of 0
+		if (value1[0])
+			yaw = (atan2(value1[1], value1[0]) * 180.0f / M_PI);
+		else if (value1[1] > 0)
+			yaw = 90.0f;
+		else
+			yaw = 270.0f;
+
+		if (yaw < 0.0f)
+			yaw += 360.0f;
+
+		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
+		pitch = (atan2(value1[2], forward) * 180.0f / M_PI);
+		if (pitch < 0.0f)
+			pitch += 360.0f;
+	}
+
+	angles[PITCH] = -pitch;
+	angles[YAW] = yaw;
+	angles[ROLL] = 0.0f;
+}
 
 void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal )
 {
@@ -350,6 +372,8 @@ void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4])
 //============================================================================
 
 
+// these are probably obsolete (2010-06-13)
+/*
 float Q_fabs (float f)
 {
 #if 0
@@ -375,6 +399,7 @@ __declspec( naked ) long Q_ftol( float f )
 }
 #pragma warning (default:4035)
 #endif
+*/
 
 /*
 ===============
@@ -400,7 +425,7 @@ float	anglemod(float a)
 	else
 		a += 360*( 1 + (int)(-a/360) );
 #endif
-	a = (360.0/65536) * ((int)(a*(65536/360.0)) & 65535);
+	a = (360.0f/65536.0f) * ((int)(a*(65536.0f/360.0f)) & 65535);
 	return a;
 }
 
@@ -447,7 +472,7 @@ BoxOnPlaneSide
 Returns 1, 2, or 1 + 2
 ==================
 */
-#if !id386 || defined __unix__
+
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 {
 	float	dist1, dist2;
@@ -510,12 +535,10 @@ dist2 = p->normal[0]*emaxs[0] + p->normal[1]*emaxs[1] + p->normal[2]*emaxs[2];
 	if (dist2 < p->dist)
 		sides |= 2;
 
-//	assert( sides != 0 );
-//-JD - commented this out, it caused crashes on DM14.  Not even sure of it's purpose.
-
 	return sides;
 }
-#else
+
+/*  probably obsolete (2010-08)
 #pragma warning( disable: 4035 )
 
 __declspec( naked ) int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *p)
@@ -749,6 +772,7 @@ Lerror:
 }
 #pragma warning( default: 4035 )
 #endif
+*/
 
 void ClearBounds (vec3_t mins, vec3_t maxs)
 {
@@ -805,7 +829,7 @@ vec_t VectorNormalize2 (vec3_t v, vec3_t out)
 	float	length, ilength;
 
 	length = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-	length = sqrt (length);		// FIXME
+	length = sqrt (length);
 
 	if (length)
 	{
@@ -894,8 +918,6 @@ void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
 	cross[2] = v1[0]*v2[1] - v1[1]*v2[0];
 }
 
-double sqrt(double x);
-
 vec_t VectorLength(vec3_t v)
 {
 	int		i;
@@ -904,7 +926,7 @@ vec_t VectorLength(vec3_t v)
 	length = 0;
 	for (i=0 ; i< 3 ; i++)
 		length += v[i]*v[i];
-	length = sqrt (length);		// FIXME
+	length = sqrt (length);
 
 	return length;
 }
@@ -1519,15 +1541,16 @@ void Com_PageInMemory (byte *buffer, int size)
 // FIXME: replace all Q_stricmp with Q_strcasecmp
 int Q_stricmp (char *s1, char *s2)
 {
-#if defined(WIN32)
+#if defined HAVE__STRICMP
 	return _stricmp (s1, s2);
-#else
+#elif defined HAVE_STRCASECMP
 	return strcasecmp (s1, s2);
+#else
+#error Q_stricmp: missing string compare function
 #endif
 }
 
-
-int Q_strncasecmp (char *s1, char *s2, int n)
+int Q_strncasecmp (const char *s1, const char *s2, int n)
 {
 	int		c1, c2;
 
@@ -1586,6 +1609,7 @@ void Com_sprintf (char *dest, int size, char *fmt, ...)
 ============================================================================
 */
 
+// not used, may be obsolete (2010-08)
 /*
 ==============
 Q_strncpyz
@@ -1609,6 +1633,8 @@ void Q_strncpyz( char *dest, const char *src, size_t size )
 Q_strncatz
 ==============
 */
+
+/*
 void Q_strncatz( char *dest, const char *src, size_t size )
 {
 #ifdef HAVE_STRLCAT
@@ -1624,6 +1650,7 @@ void Q_strncatz( char *dest, const char *src, size_t size )
 	}
 #endif
 }
+*/
 
 /*
 ==============

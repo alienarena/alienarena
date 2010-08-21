@@ -430,7 +430,6 @@ void ResetWeaponModel (edict_t *ent)
 
 	sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //default
 
-#ifdef __unix__
 	if( !Q_strcasecmp( ent->client->pers.weapon->view_model, "models/weapons/v_violator/tris.md2" ))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
 	else if( !Q_strcasecmp( ent->client->pers.weapon->view_model, "models/weapons/v_rocket/tris.md2"))
@@ -451,41 +450,17 @@ void ResetWeaponModel (edict_t *ent)
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
 	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model, "vehicles/deathball/v_wep.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
-#else
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_violator/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_violator.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_rocket/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_rlauncher.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_blast/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_blaster.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_bfg/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_bfg.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_rail/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_railgun.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_shotg2/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_sshotgun.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_shotg/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_shotgun.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_hyperb/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_hyperblaster.md2");
-	if(ent->client->pers.weapon->view_model == "models/weapons/v_chain/tris.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
-	if(ent->client->pers.weapon->view_model == "vehicles/deathball/v_wep.md2")
-		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
-#endif
 
 	sprintf(weaponpath, "%s", weaponmodel);
 	Q2_FindFile (weaponpath, &file); //does it really exist?
-	if(!file) {
-#ifdef __unix__
+	if(!file)
+	{
 		sprintf(weaponpath, "%s%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
-#else
-		sprintf(weaponpath, "%s", weaponame, "weapon.md2"); //no w_weaps, do we have this model?
-#endif
 		Q2_FindFile (weaponpath, &file);
 		if(!file) //server does not have this player model
 			sprintf(weaponmodel, "players/martianenforcer/weapon.md2");//default player(martian)
-		else { //have the model, but it has no w_weaps
+		else
+		{ //have the model, but it has no w_weaps
 			sprintf(weaponmodel, "players/%s%s", weaponame, "weapon.md2"); //custom weapon
 			fclose(file);
 		}

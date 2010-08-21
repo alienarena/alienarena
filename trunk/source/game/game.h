@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-// game.h -- game dll information visible to server
+// game.h -- game module information visible to server
 
 #define	GAME_API_VERSION	3
 
@@ -180,6 +180,10 @@ typedef struct
 	void	(*DebugGraph) (float value, int color);
 
 	int		(*Sys_Milliseconds) (void);
+
+	// File System path from relative path (added 2010-08)
+	qboolean (*FullPath)(char *full_path, size_t pathsize, const char *relative_path);
+	void (*FullWritePath)(char *full_path, size_t pathsize,	const char *relative_path);
 
 } game_import_t;
 

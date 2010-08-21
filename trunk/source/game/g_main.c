@@ -22,6 +22,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+#if defined HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#if defined HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+
+#if !defined HAVE__STRDUP
+#define _strdup strdup
+#endif
+
 #include "g_local.h"
 
 game_locals_t	game;
@@ -168,6 +180,42 @@ void G_RunFrame (void);
 int ACESP_FindBotNum(void);
 extern long filelength(int);
 
+static size_t szr;
+
+static int g_filelength( FILE *f )
+{
+	int length = -1;
+
+#if defined HAVE_FILELENGTH
+
+	length = filelength( fileno( f ) );
+
+#elif defined HAVE_FSTAT
+
+	struct stat statbfr;
+	int result;
+
+	result = fstat( fileno(f), &statbfr );
+	if ( result != -1 )
+	{
+		length = (int)statbfr.st_size;
+	}
+
+#else
+
+	long int pos;
+
+	pos = ftell( f );
+	fseek( f, 0L, SEEK_END );
+	length = ftell( f );
+	fseek( f, pos, SEEK_SET );
+
+#endif
+
+	return length;
+}
+
+
 //===================================================================
 
 
@@ -214,37 +262,6 @@ game_export_t *GetGameAPI (game_import_t *import)
 	return &globals;
 }
 
-#ifndef GAME_HARD_LINKED
-// this is only here so the functions in q_shared.c and q_shwin.c can link
-void Sys_Error (char *error, ...)
-{
-	va_list		argptr;
-	char		text[1024];
-
-	va_start (argptr, error);
-	vsnprintf(text, sizeof(text), error, argptr);
-	va_end (argptr);
-
-	gi.error (ERR_FATAL, "%s", text);
-}
-
-void Com_Printf (char *msg, ...)
-{
-	va_list		argptr;
-	char		text[1024];
-
-	va_start (argptr, msg);
-	vsnprintf(text, sizeof(text), msg, argptr);
-	va_end (argptr);
-
-	gi.dprintf ("%s", text);
-}
-
-#endif
-
-//======================================================================
-
-//#ifdef __unix__
 
 #define Z_MAGIC		0x1d1d
 
@@ -258,40 +275,7 @@ typedef struct zhead_s
 
 zhead_t		z_chain;
 int		z_count, z_bytes;
-void Z_Free (void *ptr);
-/*
-=============
-FS_FreeFile
-=============
-*/
-void FS_FreeFile (void *buffer)
-{
-	Z_Free (buffer);
-}
 
-/*
-========================
-Z_Free
-========================
-*/
-void Z_Free (void *ptr)
-{
-	zhead_t *z;
-
-	z = ((zhead_t *)ptr) - 1;
-
-	if (z->magic != Z_MAGIC)
-		Sys_Error (ERR_FATAL, "Z_Free: bad magic");
-
-	z->prev->next = z->next;
-	z->next->prev = z->prev;
-
-	z_count--;
-	z_bytes -= z->size;
-	free (z);
-}
-
-//#endif
 
 /*
 =================
@@ -346,7 +330,7 @@ void EndDMLevel (void)
 	char *s, *t, *f;
 	static const char *seps = " ,\n\r";
 	char *buffer;
-	char  mapsname[1024];
+	char  mapsname[MAX_OSPATH];
 	int length;
 	static char **mapnames;
 	static int	  nummaps;
@@ -462,7 +446,8 @@ void EndDMLevel (void)
 		return;
 	}
 
-	if((((int)(ctf->value) || (int)(cp->value))) && (!(int)(dedicated->value))) { //ctf will just stay on same level unless specified by dedicated list
+	if((((int)(ctf->value) || (int)(cp->value))) && (!(int)(dedicated->value)))
+	{ //ctf will just stay on same level unless specified by dedicated list
 		BeginIntermission (CreateTargetChangeLevel (level.mapname));
 		return;
 	}
@@ -503,25 +488,23 @@ void EndDMLevel (void)
 	/*
 	** load the list of map names
 	*/
-	Com_sprintf( mapsname, sizeof( mapsname ), "%s/maps.lst", "data1" );
+	if ( !gi.FullPath( mapsname, sizeof(mapsname), "maps.lst" ) )
+	{ // no maps.lst.
+		// note: originally this was looked for in "./data1/" only
+		//   hope it is ok to use FullPath() search path.
+		BeginIntermission (CreateTargetChangeLevel (level.mapname) );
+		return;
+	}
 	if ( ( fp = fopen( mapsname, "rb" ) ) == 0 )
 	{
 		BeginIntermission (CreateTargetChangeLevel (level.mapname) );
 			return;
 	}
-	else
-	{
-#ifdef _WIN32
-		length = filelength( _fileno( fp  ) );
-#else
-		fseek(fp, 0, SEEK_END);
-		length = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-#endif
-		buffer = malloc( length + 1 );
-		fread( buffer, length, 1, fp );
-		buffer[length] = 0;
-	}
+
+	length = g_filelength( fp );
+	buffer = malloc( length + 1 );
+	szr = fread( buffer, length, 1, fp );
+	buffer[length] = 0;
 
 	s = buffer;
 
@@ -543,11 +526,14 @@ void EndDMLevel (void)
     char  shortname[MAX_TOKEN_CHARS];
     char  longname[MAX_TOKEN_CHARS];
 		char  scratch[200];
-		int		j, l;
+#if defined WIN32_VARIANT
+		int  j;
+#endif
+		int l;
 
 		strcpy( shortname, COM_Parse( &s ) );
 		l = strlen(shortname);
-#ifndef __unix__
+#if defined WIN32_VARIANT
 		for (j=0 ; j<l ; j++)
 			shortname[j] = toupper(shortname[j]);
 #endif
@@ -559,16 +545,8 @@ void EndDMLevel (void)
 	}
 	mapnames[nummaps] = 0;
 
-	if ( fp != 0 )
-	{
-		fp = 0;
-		free( buffer );
-	}
-
-	else
-	{
-		FS_FreeFile( buffer );
-	}
+	fclose(fp);
+	free( buffer );
 
 	//find map, goto next map - if one doesn't exist, repeat list
 	//stick something in here to filter out CTF, and just make it loop back

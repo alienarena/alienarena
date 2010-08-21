@@ -20,16 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // q_shared.h -- included first by ALL program modules
 
-#ifdef _WIN32
-// unknown pragmas are SUPPOSED to be ignored, but....
-#pragma warning(disable : 4244)     // MIPS
-#pragma warning(disable : 4136)     // X86
-#pragma warning(disable : 4051)     // ALPHA
-
-#pragma warning(disable : 4018)     // signed/unsigned mismatch
-#pragma warning(disable : 4305)		// truncation from const double to float
-
-#endif
+#if !defined Q_SHARED_H_
+#define Q_SHARED_H_
 
 #include <assert.h>
 #include <math.h>
@@ -41,27 +33,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <ctype.h>
 
-#if defined __unix__
-#define _unlink unlink
-#define _putenv putenv
-#define _strdup strdup
-#endif
-
-#if (defined _M_IX86 || defined __i386__) && !defined C_ONLY && !defined __sun__
-#define id386	1
-#else
-#define id386	0
-#endif
-
-#if defined _M_ALPHA && !defined C_ONLY
-#define idaxp	1
-#else
-#define idaxp	0
-#endif
-
 typedef unsigned char 		byte;
-typedef enum {false, true}	qboolean;
 
+// TODO: check for implementation defined boolean
+// typedef enum {false, true}	qboolean;
+#ifndef true
+# define false 0
+# define true 1
+#endif
+typedef int qboolean;
 
 #ifndef NULL
 #define NULL ((void *)0)
@@ -77,8 +57,10 @@ typedef enum {false, true}	qboolean;
 #define	MAX_STRING_TOKENS	80		// max tokens resulting from Cmd_TokenizeString
 #define	MAX_TOKEN_CHARS		1024		// max length of an individual token
 
+// MAX_QPATH must be 64 for Alien Arena client/server protocol.
 #define	MAX_QPATH			64		// max length of a quake game pathname
-#ifdef __unix__
+
+#if defined UNIX_VARIANT
 #define	MAX_OSPATH			256		// max length of a filesystem pathname
 #else
 #define	MAX_OSPATH			128		// max length of a filesystem pathname
@@ -181,14 +163,7 @@ extern vec3_t vec3_origin;
 
 #define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
 
-// microsoft's fabs seems to be ungodly slow...
-//float Q_fabs (float f);
-//#define	fabs(f) Q_fabs(f)
-#if !defined C_ONLY && !defined __unix__ && !defined __sgi
-extern long Q_ftol( float f );
-#else
 #define Q_ftol( f ) ( long ) (f)
-#endif
 
 #define DotProduct(x,y)			(x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
 #define VectorSubtract(a,b,c)	(c[0]=a[0]-b[0],c[1]=a[1]-b[1],c[2]=a[2]-b[2])
@@ -207,8 +182,8 @@ void VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
 #define Vector4Add(a,b,c)		((c)[0]=(((a[0])+(b[0]))),(c)[1]=(((a[1])+(b[1]))),(c)[2]=(((a[2])+(b[2]))),(c)[3]=(((a[3])+(b[3]))))
 #define Vector4Avg(a,b,c)		((c)[0]=(((a[0])+(b[0]))*0.5f),(c)[1]=(((a[1])+(b[1]))*0.5f),(c)[2]=(((a[2])+(b[2]))*0.5f),(c)[3]=(((a[3])+(b[3]))*0.5f))
 
-#define DEG2RAD( a ) ( a * M_PI ) / 180.0F
-#define RAD2DEG( a ) ( a * 180.0F ) / M_PI
+#define DEG2RAD( a ) (( (a) * M_PI ) / 180.0F)
+#define RAD2DEG( a ) (( (a) * 180.0F ) / M_PI)
 
 // just in case you do't want to use the macros
 vec_t _DotProduct (vec3_t v1, vec3_t v2);
@@ -234,6 +209,7 @@ void NormalToLatLong( const vec3_t normal, byte latlong[2] );
 void LatLongToNormal( byte latlong[2], vec3_t normal );
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
+void vectoangles (vec3_t value1, vec3_t angles);
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *plane);
 float	anglemod(float a);
 float LerpAngle (float a1, float a2, float frac);
@@ -262,7 +238,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 //=============================================
 
 /* FIXME: Beware - _vsnprintf does not end with \0 - vsnprintf (*nix) does */
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 #define vsnprintf	_vsnprintf
 #endif
 
@@ -290,10 +266,13 @@ void Com_PageInMemory (byte *buffer, int size);
 // portable case insensitive compare
 int Q_stricmp (char *s1, char *s2);
 int Q_strcasecmp (char *s1, char *s2);
-int Q_strncasecmp (char *s1, char *s2, int n);
+int Q_strncasecmp (const char *s1, const char *s2, int n);
 void Q_strcat (char *dst, const char *src, int dstSize);
 int Q_strnicmp (const char *string1, const char *string2, int n);
 char *Q_strlwr(char *s);
+//
+void Q_strncpyz2 (char *dst, const char *src, int dstSize);
+
 //=============================================
 
 short	BigShort(short l);
@@ -359,16 +338,6 @@ void	Sys_FindClose (void);
 void Sys_Error (char *error, ...);
 void Com_Printf (char *msg, ...);
 
-#ifdef _WIN32
-
-#define Q_INLINE	__inline
-#define vsnprintf	_vsnprintf
-
-#else
-
-#define Q_INLINE	inline
-
-#endif
 /*
 ==========================================================
 
@@ -859,6 +828,7 @@ typedef struct
 // config strings are a general means of communication from
 // the server to all connected clients.
 // Each config string can be at most MAX_QPATH characters.
+// Alien Arena client/server protocol depends on MAX_QPATH being 64
 //
 #define	CS_NAME				0
 #define	CS_SKY				2
@@ -1007,3 +977,4 @@ typedef struct
 #define MAX_LATENT_CMDS 64
 //unlagged - lag simulation #2
 
+#endif  /* Q_SHARED_H_ */

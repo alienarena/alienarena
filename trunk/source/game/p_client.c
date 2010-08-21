@@ -105,7 +105,7 @@ qboolean IsFemale (edict_t *ent)
 
 void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 {
-	int		mod, msg;
+	int		mod=0, msg;
 	char		*message;
 	char		*message2;
 	qboolean	ff;
@@ -937,7 +937,7 @@ but is called after each death and level change in deathmatch
 void InitClientPersistant (gclient_t *client)
 {
 	gitem_t		*item;
-	int			queue;
+	int			queue=0;
 
 	if(g_duel->value) //need to save this off in duel mode.  Potentially dangerous?
 		queue = client->pers.queue;
@@ -2410,7 +2410,7 @@ void ClientChangeSkin (edict_t *ent)
 	int		i, j, k, copychar;
 	char playermodel[MAX_OSPATH] = " ";
 	char playerskin[MAX_INFO_STRING] = " ";
-	char modelpath[MAX_OSPATH] = " ";
+	// char modelpath[MAX_OSPATH] = " "; // unused
 	char		userinfo[MAX_INFO_STRING];
 
 	//get the userinfo
