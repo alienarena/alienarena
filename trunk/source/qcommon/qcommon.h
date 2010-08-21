@@ -17,15 +17,36 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+// qcommon.h -- definitions common between client and server, but not game module
 
-// qcommon.h -- definitions common between client and server, but not game.dll
+#if !defined Q_COMMON_H_
+#define Q_COMMON_H_
 
-#include "../game/q_shared.h"
+#include "game/q_shared.h"
 
+#if !defined VERSION
+#define	VERSION		"7.45"
+#endif
 
-#define	VERSION		7.45
+/* ---- Default locations of game data ---*/
+#if !defined BASE_GAMEDATA
+#define BASE_GAMEDATA "data1"
+#endif
 
-#define	BASEDIRNAME	"data1"
+#if !defined MOD_GAMEDATA
+#define GAME_GAMEDATA "arena"
+#endif
+
+#if !defined BOT_GAMEDATA
+#define BOT_GAMEDATA "botinfo"
+#endif
+
+#if !defined USER_GAMEDATA
+// default for COR_GAME environment variable
+#define USER_GAMEDATA ".codered"
+#endif
+/*----------------------------------------*/
+
 
 #define MENU_STATIC_WIDTH	720.0f
 #define MENU_FONT_SIZE 12
@@ -33,60 +54,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DEFAULTMODEL		"martianenforcer"
 #define DEFAULTSKIN			"default"
 
-#ifdef WIN32
+#if defined WIN32_VARIANT
 
+#if !defined BUILDSTRING
 #ifdef NDEBUG
 #define BUILDSTRING "Win32 RELEASE"
 #else
 #define BUILDSTRING "Win32 DEBUG"
 #endif
+#endif
 
-#ifdef _M_IX86
+#if !defined CPUSTRING
 #define	CPUSTRING	"x86"
-#elif defined _M_ALPHA
-#define	CPUSTRING	"AXP"
 #endif
 
-#elif defined __linux__
-
-#define BUILDSTRING "Linux"
-
-#ifdef __i386__
-#define CPUSTRING "i386"
-#elif defined __alpha__
-#define CPUSTRING "axp"
 #else
-#define CPUSTRING "Unknown"
+
+#if !defined BUILDSTRING
+#define BUILDSTRING "?OS?"
 #endif
 
-#elif defined __FreeBSD__
-
-#define BUILDSTRING "FreeBSD"
-
-#ifdef __i386__
-#define CPUSTRING "i386"
-#elif defined __amd64__
-#define CPUSTRING "amd64"
-#else
-#define CPUSTRING "Unknown"
+#if !defined CPUSTRING
+#define CPUSTRING "?CPU?"
 #endif
-
-#elif defined __sun__
-
-#elif defined __sun__
-
-#define BUILDSTRING "Solaris"
-
-#ifdef __i386__
-#define CPUSTRING "i386"
-#else
-#define CPUSTRING "sparc"
-#endif
-
-#else	// !WIN32
-
-#define BUILDSTRING "NON-WIN32"
-#define	CPUSTRING	"NON-WIN32"
 
 #endif
 
@@ -608,7 +598,7 @@ typedef struct
 {
 	qboolean	fatal_error;
 
-	netsrc_t	sock;
+	netsrc_t	sock; // either NS_CLIENT or NS_SERVER
 
 	int			dropped;			// between last packet and previous
 
@@ -624,8 +614,8 @@ typedef struct
 	int			incoming_reliable_acknowledged;	// single bit
 
 	int			incoming_reliable_sequence;		// single bit, maintained local
-
 	int			outgoing_sequence;
+
 	int			reliable_sequence;			// single bit
 	int			last_reliable_sequence;		// sequence number of last send
 
@@ -664,7 +654,7 @@ CMODEL
 */
 
 
-#include "../qcommon/qfiles.h"
+#include "qcommon/qfiles.h"
 
 cmodel_t	*CM_LoadMap (char *name, qboolean clientload, unsigned *checksum);
 cmodel_t	*CM_InlineModel (char *name);	// *1, *2, etc
@@ -734,11 +724,16 @@ FILESYSTEM
 ==============================================================
 */
 
+int FS_filelength( FILE *f );
 void	FS_InitFilesystem (void);
 void	FS_SetGamedir (char *dir);
 char	*FS_Gamedir (void);
 char	*FS_NextPath (char *prevpath);
 void	FS_ExecAutoexec (void);
+
+// 2 Filesystem functions added 2010-08
+qboolean FS_FullPath( char *full_path, size_t pathsize,const char *relative_path );
+void    FS_FullWritePath( char *full_path, size_t pathsize,const char *relative_path );
 
 int		FS_FOpenFile (char *filename, FILE **file);
 void	FS_FCloseFile (FILE *f);
@@ -777,9 +772,10 @@ MISC
 #define	ERR_DROP	1		// print to console and disconnect from game
 #define	ERR_QUIT	2		// not an error, just a normal exit
 
-#define	EXEC_NOW	0		// don't return until completed
-#define	EXEC_INSERT	1		// insert at current position, but don't run yet
-#define	EXEC_APPEND	2		// add to end of the command buffer
+// redundant
+//#define	EXEC_NOW	0		// don't return until completed
+//#define	EXEC_INSERT	1		// insert at current position, but don't run yet
+//#define	EXEC_APPEND	2		// add to end of the command buffer
 
 #define	PRINT_ALL		0
 #define PRINT_DEVELOPER	1	// only print when "developer 1"
@@ -874,5 +870,6 @@ void SV_Init (void);
 void SV_Shutdown (char *finalmsg, qboolean reconnect);
 void SV_Frame (int msec);
 
+#endif /* Q_COMMON_H_ */
 
 

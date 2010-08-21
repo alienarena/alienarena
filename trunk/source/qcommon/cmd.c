@@ -25,6 +25,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "qcommon.h"
 
+#if defined HAVE_STRCASECMP && !defined HAVE__STRICMP
+#define _stricmp strcasecmp
+#endif
+
+#if defined HAVE_STRICMP && !defined HAVE__STRICMP
+#define _stricmp stricmp
+#endif
+
+
 #define	MAX_ALIAS_NAME	32
 
 typedef struct cmdalias_s
@@ -162,7 +171,7 @@ Cbuf_InsertFromDefer
 */
 void Cbuf_InsertFromDefer (void)
 {
-	Cbuf_InsertText (defer_text_buf);
+	Cbuf_InsertText ( (char *)defer_text_buf );
 	defer_text_buf[0] = 0;
 }
 
@@ -389,7 +398,7 @@ void Cmd_Exec_f (void)
 	len = FS_LoadFile (Cmd_Argv(1), (void **)&f);
 	if (!f)
 	{
-		Com_Printf ("couldn't exec %s\n",Cmd_Argv(1));
+		Com_Printf ("Could not exec %s\n",Cmd_Argv(1));
 		return;
 	}
 	Com_Printf ("execing %s\n",Cmd_Argv(1));

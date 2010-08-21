@@ -176,7 +176,6 @@ crx_ded_SOURCES = \
 	game/game.h \
 	game/q_shared.c \
 	game/q_shared.h \
-	game/q_shared.h \
 	null/cl_null.c \
 	qcommon/cmd.c \
 	qcommon/cmodel.c \

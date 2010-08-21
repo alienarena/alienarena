@@ -238,7 +238,7 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 
 			if (Com_ServerState())
 			{
-				Com_Printf ("%s will be changed for next game.\n", var_name);
+				Com_Printf ("(cvar) %s will be changed for next game.\n", var_name);
 				var->latched_string = CopyString(value);
 			}
 			else
