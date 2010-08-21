@@ -25,6 +25,11 @@ Death Ray Gun
 ==============================================================================
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
 #include "g_local.h"
 #include "g_deathray.h"
 
@@ -44,13 +49,13 @@ void deathray_search (edict_t *self)
 
 mframe_t deathray_frames_stand [] =
 {
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL}
 
 };
 mmove_t deathray_move_stand = {FRAME_stand01, FRAME_stand06, deathray_frames_stand, NULL};
@@ -62,12 +67,12 @@ void deathray_stand (edict_t *self)
 
 mframe_t deathray_frames_run1 [] =
 {
-	ai_run, 0, NULL,
-	ai_run, 0, NULL,
-	ai_run, 0, NULL,
-	ai_run, 0, NULL,
-	ai_run, 0, NULL,
-	ai_run, 0, NULL
+	{ai_run, 0, NULL},
+	{ai_run, 0, NULL},
+	{ai_run, 0, NULL},
+	{ai_run, 0, NULL},
+	{ai_run, 0, NULL},
+	{ai_run, 0, NULL}
 };
 mmove_t deathray_move_run1 = {FRAME_stand01, FRAME_stand06, deathray_frames_run1, NULL};
 
@@ -136,13 +141,13 @@ void deathrayShot (edict_t *self)
 
 mframe_t deathray_frames_attack_shoot [] =
 {
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL,
-	ai_charge, 0, deathrayShot,
-	ai_charge, 0, NULL,
-	ai_charge, 0, NULL
+	{ai_charge, 0, NULL},
+	{ai_charge, 0, NULL},
+	{ai_charge, 0, NULL},
+	{ai_charge, 0, NULL},
+	{ai_charge, 0, deathrayShot},
+	{ai_charge, 0, NULL},
+	{ai_charge, 0, NULL}
 };
 mmove_t deathray_move_attack_shoot = {FRAME_stand01, FRAME_stand06, deathray_frames_attack_shoot, deathray_run};
 
@@ -161,12 +166,12 @@ void deathray_attack (edict_t *self)
 
 mframe_t deathray_frames_pain1 [] =
 {
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL}
 };
 mmove_t deathray_move_pain1 = {FRAME_stand01, FRAME_stand06, deathray_frames_pain1, deathray_run};
 
@@ -197,11 +202,11 @@ void deathray_dead (edict_t *self)
 
 mframe_t deathray_frames_death1 [] =
 {
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL}
 
 
 };

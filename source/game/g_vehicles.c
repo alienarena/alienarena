@@ -38,7 +38,7 @@ qboolean Jet_AvoidGround( edict_t *ent )
   new_origin[2] = ent->s.origin[2] + 0.5;
   trace = gi.trace( ent->s.origin, ent->mins, ent->maxs, new_origin, ent, MASK_MONSTERSOLID );
 
-  if ( success=(trace.plane.normal[2]==0) )	/*no ceiling?*/
+  if ( (success=(trace.plane.normal[2]) == 0 ) )	/*no ceiling?*/
     ent->s.origin[2] += 0.5;			/*then make sure off ground*/
 
   return success;
@@ -380,7 +380,7 @@ void Reset_player(edict_t *ent)
 	char		userinfo[MAX_INFO_STRING];
 	int		i, done;
 	char playermodel[MAX_OSPATH] = " ";
-	char playerskin[MAX_INFO_STRING] = " ";
+	// char playerskin[MAX_INFO_STRING] = " "; // unused
 	char modelpath[MAX_OSPATH] = " ";
 	FILE *file;
 	char *s;

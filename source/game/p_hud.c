@@ -245,7 +245,7 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 void BeginIntermission (edict_t *targ)
 {
 	int		i;
-	edict_t	*ent, *client;
+	edict_t	*ent, *client=NULL;
 	edict_t *winner = NULL;
 	edict_t *firstrunnerup = NULL;
 	edict_t *secondrunnerup = NULL;

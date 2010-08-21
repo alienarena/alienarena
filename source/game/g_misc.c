@@ -1021,7 +1021,7 @@ void spidervolts (edict_t *self)
 
 	vec3_t	start;
 	vec3_t	end;
-	int		damage = 30;
+	// int		damage = 30;
 	int		x;
 	int		aim;
 

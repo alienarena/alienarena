@@ -245,7 +245,7 @@ void CTFResetGrapple(edict_t *self)
 
 void CTFGrappleTouch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
-	float volume = 1.0;
+	// float volume = 1.0;
 
 	if (other == self->owner)
 		return;
@@ -441,7 +441,7 @@ void CTFGrappleFire (edict_t *ent, vec3_t g_offset, int damage, int effect)
 	vec3_t	forward, right;
 	vec3_t	start;
 	vec3_t	offset;
-	float volume = 1.0;
+	// float volume = 1.0;
 
 	if (ent->client->ctf_grapplestate > CTF_GRAPPLE_STATE_FLY)
 		return; // it's already out

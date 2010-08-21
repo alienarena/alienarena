@@ -54,26 +54,26 @@ void cow_search (edict_t *self)
 
 mframe_t cow_frames_stand [] =
 {
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL,
-	ai_stand, 0, NULL
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL},
+	{ai_stand, 0, NULL}
 
 };
 mmove_t cow_move_stand = {FRAME_stand01, FRAME_stand20, cow_frames_stand, NULL};
@@ -109,18 +109,18 @@ void cow_step (edict_t *self)
 
 mframe_t cow_frames_walk [] =
 {
-	ai_run, 42.0, NULL,
-	ai_run, 22.0, NULL,
-	ai_run, 5.0, NULL,
-	ai_run, 3.0, NULL,
-	ai_run, 0.0, NULL,
-	ai_run, 0.0, cow_step,
-	ai_run, 0.0, NULL,
-	ai_run, 17.0, NULL,
-	ai_run, 42.0, NULL,
-	ai_run, 14.0, NULL,
-	ai_run, 5.0, cow_step,
-	ai_run, 0.0, NULL
+	{ai_run, 42.0, NULL},
+	{ai_run, 22.0, NULL},
+	{ai_run, 5.0, NULL},
+	{ai_run, 3.0, NULL},
+	{ai_run, 0.0, NULL},
+	{ai_run, 0.0, cow_step},
+	{ai_run, 0.0, NULL},
+	{ai_run, 17.0, NULL},
+	{ai_run, 42.0, NULL},
+	{ai_run, 14.0, NULL},
+	{ai_run, 5.0, cow_step},
+	{ai_run, 0.0, NULL}
 };
 mmove_t cow_move_walk = {FRAME_walk01, FRAME_walk12, cow_frames_walk, NULL};
 
@@ -145,17 +145,17 @@ void cow_sight (edict_t *self, edict_t *other)
 
 mframe_t cow_frames_pain [] =
 {
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL,
-	ai_move, 0, NULL
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL},
+	{ai_move, 0, NULL}
 };
 mmove_t cow_move_pain = {FRAME_pain01, FRAME_pain11, cow_frames_pain, cow_walk};
 

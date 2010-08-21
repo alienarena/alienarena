@@ -908,7 +908,7 @@ void InitClientPersistant (gclient_t *client);
 void InitClientResp (gclient_t *client);
 void InitBodyQue (void);
 void ClientBeginServerFrame (edict_t *ent);
-int Q2_FindFile (char *filename, FILE **file);
+void Q2_FindFile (char *filename, FILE **file);
 void ClientPlaceInQueue(edict_t *ent);
 void ClientCheckQueue(edict_t *ent);
 void MoveClientsDownQueue(edict_t *ent);
@@ -1012,7 +1012,8 @@ void GetChaseTarget(edict_t *ent);
 typedef struct
 {
 	char		userinfo[MAX_INFO_STRING];
-	char		netname[48];			// considering 1 colour change / character, that's 16
+
+	char		netname[50]; // considering 1 colour change/character + nul, that's 16
 	int			hand;
 
 	qboolean	connected;			// a loadgame will leave valid entities that
@@ -1094,7 +1095,7 @@ typedef struct
 
 	//reward points
 	int reward_pts;
-	qboolean powered;	
+	qboolean powered;
 
 	//voting
 	qboolean voted;
@@ -1252,7 +1253,7 @@ struct gclient_s
 
 	//taunt message
 	float lasttaunttime;
-	
+
 	//deathray immunity
 	qboolean rayImmunity;
 	float rayTime;
@@ -1537,8 +1538,3 @@ extern  cvar_t	*g_antilagdebug;
 #include "acesrc/acebot.h"
 // ACEBOT_END
 
-#ifdef __unix__
-void	FS_FreeFile (void *buffer);
-void	Z_Free (void *ptr);
-void	Com_Error (int code, char *fmt, ...);
-#endif
