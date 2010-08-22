@@ -26,12 +26,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define HAVE_PROTOTYPES
 
 #include "r_local.h"
-#ifdef _WIN32
+
+#if defined HAVE_JPEG_JPEGLIB_H
 #include "jpeg/jpeglib.h"
+#elif defined HAVE_JPEGLIB_H
+#include "jpeglib.h"
+#elif defined HAVE_JPEG6B_INCLUDE_JPEGLIB_H
+#include "jpeg6b/include/jpeglib.h"
+#else
+#error jpeglib.h include not defined
 #endif
-#ifndef _WIN32
-#include <jpeglib.h>
-#endif
+
 #include <GL/glu.h>
 
 image_t		gltextures[MAX_GLTEXTURES];
@@ -501,7 +506,6 @@ void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *heigh
 	len = FS_LoadFile (filename, (void **)&raw);
 	if (!raw)
 	{
-		Com_DPrintf ("Bad pcx file %s\n", filename);
 		return;
 	}
 
@@ -772,7 +776,6 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 	length = FS_LoadFile (name, (void **)&buffer);
 	if (!buffer)
 	{
-		Com_DPrintf ("Bad tga file %s\n", name);
 		return;
 	}
 
@@ -862,7 +865,7 @@ void LoadTGA (char *name, byte **pic, int *width, int *height)
 		}
 	}
 	else if (targa_header.image_type==10) {   // Runlength encoded RGB images
-		unsigned char red,green,blue,alphabyte,packetHeader,packetSize,j;
+		unsigned char red=0,green=0,blue=0,alphabyte=0,packetHeader,packetSize,j;
 		for(row=rows-1; row>=0; row--) {
 			pixbuf = targa_rgba + row*columns*4;
 			for(column=0; column<columns; ) {
@@ -1408,7 +1411,6 @@ image_t *GL_LoadWal (char *name)
 	FS_LoadFile (name, (void **)&mt);
 	if (!mt)
 	{
-		Com_Printf ("GL_FindImage: can't load %s\n", name);
 		return r_notexture;
 	}
 
@@ -1430,9 +1432,6 @@ GL_FindImage
 Finds or loads the given image
 ===============
 */
-
-static double totalTimeFindImage = 0;
-static unsigned int totalCountFindImage = 0;
 image_t	*GL_FindImage (char *name, imagetype_t type)
 {
 	image_t		*image = NULL;
@@ -1596,7 +1595,7 @@ void GL_FreeUnusedImages (void)
 		if (image->type == it_pic)
 			continue;		// don't free pics
 		// free it
-		qglDeleteTextures (1, &image->texnum);
+		qglDeleteTextures (1, (unsigned *)&image->texnum );
 		memset (image, 0, sizeof(*image));
 	}
 }
@@ -1693,9 +1692,9 @@ void	GL_InitImages (void)
 
 	if ( qglColorTableEXT )
 	{
-		FS_LoadFile( "pics/16to8.dat", &gl_state.d_16to8table );
+		FS_LoadFile( "pics/16to8.dat", (void *)&gl_state.d_16to8table );
 		if ( !gl_state.d_16to8table )
-			Sys_Error( ERR_FATAL, "Couldn't load pics/16to8.pcx");
+			Sys_Error( ERR_FATAL, "Could not load pics/16to8.pcx");
 	}
 
 	R_InitBloomTextures();//BLOOMS
@@ -1719,7 +1718,7 @@ void	GL_ShutdownImages (void)
 		if (!image->registration_sequence)
 			continue;		// free image_t slot
 		// free it
-		qglDeleteTextures (1, &image->texnum);
+		qglDeleteTextures (1, (unsigned *)&image->texnum);
 		memset (image, 0, sizeof(*image));
 	}
 }

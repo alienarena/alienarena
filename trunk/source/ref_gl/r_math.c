@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-#include "../game/q_shared.h"
+#include "game/q_shared.h"
 #include "r_math.h"
 
 const mat4x4_t mat4x4_identity =

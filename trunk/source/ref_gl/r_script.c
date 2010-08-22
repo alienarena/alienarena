@@ -26,9 +26,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 #include <io.h>
 #endif
+
+#if !defined HAVE__STRICMP
+#if defined HAVE_STRICMP
+#define _stricmp stricmp
+#elif defined HAVE_STRCASECMP
+#define _stricmp strcasecmp
+#endif
+#endif
+
 
 void CIN_FreeCin (int texnum);
 
@@ -60,8 +69,11 @@ int	RS_Random(rs_stage_t *stage, msurface_t *surf)
 int RS_Animate (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
+
+/* unused
 	float			time = rs_realtime * 1000 -
 		(stage->last_anim_time + stage->anim_delay);
+*/
 
 	while (stage->last_anim_time < rs_realtime)
 	{
@@ -78,8 +90,11 @@ int RS_Animate (rs_stage_t *stage)
 void *RS_AnimateSkin (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
+
+/* unused
 	float			time = rs_realtime * 1000 -
 		(stage->last_anim_time + stage->anim_delay);
+*/
 
 	while (stage->last_anim_time < rs_realtime)
 	{
@@ -952,8 +967,8 @@ void RS_LoadScript(char *script)
 	char			ignored = 0;
 	char			*token, *fbuf, *buf;
 	rscript_t		*rs = NULL;
-	rs_stage_t		*stage;
-	unsigned char	tcmod = 0;
+	rs_stage_t		*stage = NULL;
+	// unsigned char	tcmod = 0; // unused
 	unsigned int	len, i;
 
 	len = FS_LoadFile (script, (void **)&fbuf);
@@ -1105,7 +1120,7 @@ void RS_SetEnvmap (vec3_t v, float *os, float *ot)
 
 void RS_ScaleTexcoords (rs_stage_t *stage, float *os, float *ot)
 {
-	float	txm = 0, tym = 0;
+	// float	txm = 0, tym = 0; // unused
 
 	// scale
 	if (stage->scale.scaleX)
@@ -1140,11 +1155,8 @@ void RS_ScaleTexcoords (rs_stage_t *stage, float *os, float *ot)
 		}
 	}
 }
-#ifdef __unix__
-__inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
-#else
-_inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
-#endif
+
+inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
 {
 	float cost = cos(degrees), sint = sin(degrees);
 	float is = *os, it = *ot, c_s, c_t;
@@ -1157,11 +1169,7 @@ _inline void RS_RotateST (float *os, float *ot, float degrees, msurface_t *fa)
 
 }
 
-#ifdef __unix__
-__inline void RS_RotateST2 (float *os, float *ot, float degrees)
-#else
-_inline void RS_RotateST2 (float *os, float *ot, float degrees)
-#endif
+inline void RS_RotateST2 (float *os, float *ot, float degrees)
 {
 	float cost = cos(degrees), sint = sin(degrees);
 	float is = *os, it = *ot;
@@ -1290,7 +1298,7 @@ endalpha:
 
 float RS_AlphaFuncAlias (int alphafunc, float alpha, vec3_t normal, vec3_t org)
 {
-	float oldalpha = alpha;
+	// float oldalpha = alpha; // unused
 
 	if (!abs(alphafunc))
 		goto endalpha;
@@ -1650,7 +1658,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	vec3_t		wv, vectors[3];
 	rs_stage_t	*stage;
 	float		os, ot, alpha;
-	float		scale, time, txm, tym;
+	float		scale, time, txm=0.0f, tym=0.0f;
 
 	if (!rs)
 		return;
@@ -1915,7 +1923,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		if (stage->colormap.enabled)
 			qglEnable (GL_TEXTURE_2D);
 
-	} while (stage = stage->next);
+	} while ( (stage = stage->next) );
 
 	SetVertexOverbrights(false);
 

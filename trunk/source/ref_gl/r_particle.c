@@ -39,10 +39,10 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 	const gparticle_t *p;
 	int				i, k;
 	vec3_t			corner[4], up, right, pup, pright, dir;
-	float			scale, oldscale;
-	byte			color[4], oldcolor[4];
+	float			scale, oldscale=0.0f;
+	byte			color[4], oldcolor[4]= {0,0,0,0};
 	int			    oldtype;
-	int				texnum, blenddst, blendsrc;
+	int				texnum=0, blenddst, blendsrc;
 	float			*corner0 = corner[0];
 	vec3_t move, delta, v;
 

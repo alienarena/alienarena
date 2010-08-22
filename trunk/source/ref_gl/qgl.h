@@ -24,14 +24,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef __QGL_H__
 #define __QGL_H__
 
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 #  include <windows.h>
 #endif
 
+#if defined HAVE_GL_GL_H
 #include <GL/gl.h>
+#endif
 
-#ifdef __unix__
-//#include <GL/fxmesa.h>
+#if defined HAVE_GL_GLX_H
 #include <GL/glx.h>
 #endif
 
@@ -449,7 +450,7 @@ extern GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offs
 #endif
 //END VBO
 
-#ifndef __unix__ // FIXME: already have in GL/glx.h (all Unix or FreeBSD?)
+#if !defined UNIX_VARIANT
 // jitwater - fragment programs (pixel shaders)
 typedef void (APIENTRY * PFNGLPROGRAMSTRINGARBPROC) (GLenum target, GLenum format, GLsizei len, const GLvoid *string);
 typedef void (APIENTRY * PFNGLBINDPROGRAMARBPROC) (GLenum target, GLuint program);
@@ -517,7 +518,7 @@ typedef void (APIENTRY * PFNGLBLITFRAMEBUFFEREXTPROC) (GLint  srcX0, GLint  srcY
 
 #endif
 
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 
 extern  int   ( WINAPI * qwglChoosePixelFormat )(HDC, CONST PIXELFORMATDESCRIPTOR *);
 extern  int   ( WINAPI * qwglDescribePixelFormat) (HDC, int, UINT, LPPIXELFORMATDESCRIPTOR);
@@ -555,10 +556,10 @@ extern BOOL ( WINAPI * qwglSetDeviceGammaRampEXT ) ( const unsigned char *pRed, 
 
 #endif
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 
 // local function in dll
-#define qwglGetProcAddress glXGetProcAddress
+#define qwglGetProcAddress(s) glXGetProcAddress((const GLubyte*)(s))
 
 extern void (*qgl3DfxSetPaletteEXT)(GLuint *);
 
@@ -825,4 +826,4 @@ extern void     (APIENTRY * qglGenerateMipmapEXT) (GLenum target);
 
 extern void		(APIENTRY * qglBlitFramebufferEXT) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 
-#endif
+#endif /* __QGL_H__ */

@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 #  include <windows.h>
 #endif
 
@@ -28,22 +28,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 #include "glext.h"
 
-#ifndef __unix__
 #ifndef GL_COLOR_INDEX8_EXT
 #define GL_COLOR_INDEX8_EXT GL_COLOR_INDEX
 #endif
-#endif
 
-#include "../client/ref.h"
-#include "../client/vid.h"
+#include "client/ref.h"
+#include "client/vid.h"
 
 #include "qgl.h"
 #include "r_math.h"
 
-//min max
-#ifdef __unix__
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#define max(a,b) ((a) > (b) ? (a) : (b))
+#if !defined min
+#define min(a,b) (((a)<(b)) ? (a) : (b))
 #endif
 
 // up / down
@@ -300,10 +296,8 @@ void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type);
 void  VLight_Init (void);
 float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );
-#ifdef __unix__
 void R_ReadFogScript(char config_file[128]);
 void R_ReadMusicScript(char config_file[128]);
-#endif
 void R_GLSLPostProcess(void);
 void R_FB_InitTextures(void);
 
@@ -514,8 +508,6 @@ extern float	norm_array[MAX_ARRAY][3];
 extern float VArrayVerts[MAX_VARRAY_VERTS * MAX_VARRAY_VERTEX_SIZE];
 extern int VertexSizes[];
 extern float *VArray;
-static vec3_t NormalsArray[MAX_VERTICES];
-static vec4_t TangentsArray[MAX_VERTICES];
 extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 
 // define our vertex types
@@ -530,6 +522,7 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #define VERT_BUMPMAPPED_COLOURED		8		// verts and st for 1 tmu, 2 texoord pointers and colour
 #define VERT_NORMAL_COLOURED_TEXTURED	9		// verts and st for 1tmu and color, with normals
 
+#if 0
 // vertex array kill flags
 #define KILL_TMU0_POINTER	1
 #define KILL_TMU1_POINTER	2
@@ -537,6 +530,15 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #define KILL_TMU3_POINTER	4
 #define KILL_RGBA_POINTER	5
 #define KILL_NORMAL_POINTER 6
+#else
+// looks like these should be bit flags (2010-08)
+#define KILL_TMU0_POINTER	0x01
+#define KILL_TMU1_POINTER	0x02
+#define KILL_TMU2_POINTER	0x04
+#define KILL_TMU3_POINTER	0x08
+#define KILL_RGBA_POINTER	0x10
+#define KILL_NORMAL_POINTER 0x20
+#endif
 
 // vertex array subsystem
 void R_InitVArrays (int varraytype);
@@ -673,9 +675,9 @@ IMPLEMENTATION SPECIFIC FUNCTIONS
 
 void		GLimp_BeginFrame( float camera_separation );
 void		GLimp_EndFrame( void );
-int 		GLimp_Init( void *hinstance, void *hWnd );
+qboolean	GLimp_Init( void *hinstance, void *hWnd );
 void		GLimp_Shutdown( void );
-int     	GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen );
+rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
 void		GLimp_AppActivate( qboolean active );
 void		GLimp_EnableLogging( qboolean enable );
 void		GLimp_LogNewFrame( void );

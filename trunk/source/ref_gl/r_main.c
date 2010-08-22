@@ -219,58 +219,58 @@ R_ReadFogScript
 =================
 */
 
-void R_ReadFogScript(char config_file[128])
+void R_ReadFogScript( char *config_file )
 {
 	FILE *fp;
 	int length;
 	char a_string[128];
 	char *buffer;
 	char *s;
+	size_t result;
 
 	if((fp = fopen(config_file, "rb" )) == NULL)
 	{
 		return;
 	}
-	else
+
+	length = FS_filelength( fp );
+
+	buffer = malloc( length + 1 );
+	if ( buffer != NULL )
 	{
-
-		fseek(fp, 0, SEEK_END);
-		length = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-
-		buffer = malloc( length + 1 );
 		buffer[length] = 0;
-		fread( buffer, length, 1, fp );
-	}
-	s = buffer;
+		result = fread( buffer, length, 1, fp );
+		if ( result == 1 )
+		{
+			s = buffer;
 
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.red = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.green = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.blue = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.start = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.end = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	fog.density = atof(a_string);
-	strcpy( a_string, COM_Parse( &s ) );
-	r_weather = atoi(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.red = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.green = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.blue = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.start = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.end = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			fog.density = atof(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			r_weather = atoi(a_string);
 
-	if(fog.density > 0)
-		map_fog = true;
+			if(fog.density > 0)
+				map_fog = true;
 
-	if ( fp != 0 )
-	{
-		fclose(fp);
+		}
+		else 
+		{
+			Com_DPrintf("R_ReadFogScript: read fail: %s\n", config_file);
+		}
 		free( buffer );
 	}
-	else
-	{
-		FS_FreeFile( buffer );
-	}
+	fclose( fp );
+
 	return;
 }
 
@@ -280,42 +280,41 @@ R_ReadMusicScript
 =================
 */
 
-void R_ReadMusicScript(char config_file[128])
+void R_ReadMusicScript( char *config_file )
 {
 	FILE *fp;
 	int length;
 	char *buffer;
 	char *s;
+	size_t result;
 
 	if((fp = fopen(config_file, "rb" )) == NULL)
 	{
 		return;
 	}
-	else
+
+	length = FS_filelength( fp );
+
+	buffer = malloc( length + 1 );
+	if ( buffer != NULL )
 	{
+		result = fread( buffer, length, 1, fp );
+		if ( result == 1 )
+		{
+			buffer[length] = 0;
+			s = buffer;
+			strcpy( map_music, COM_Parse( &s ) );
+			map_music[length] = 0; //clear any possible garbage
+		} 
+		else 
+		{
+			Com_DPrintf("R_ReadMusicScript: read fail: %s\n", config_file);
+		}
 
-		fseek(fp, 0, SEEK_END);
-		length = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-
-		buffer = malloc( length + 1 );
-		fread( buffer, length, 1, fp );
-		buffer[length] = 0;
-	}
-	s = buffer;
-
-	strcpy( map_music, COM_Parse( &s ) );
-	map_music[length] = 0; //clear any possible garbage
-
-	if ( fp != 0 )
-	{
-		fclose(fp);
 		free( buffer );
 	}
-	else
-	{
-		FS_FreeFile( buffer );
-	}
+	fclose( fp );
+
 	return;
 }
 
@@ -479,11 +478,7 @@ void R_DrawEntitiesOnList (void)
             }
 
 			if (rs)
-#ifdef _WINDOWS
-				(struct rscript_s *)currententity->script = rs;
-#else
 				currententity->script = rs;
-#endif
 			else
 				currententity->script = NULL;
 		}
@@ -552,11 +547,7 @@ void R_DrawEntitiesOnList (void)
             }
 
 			if (rs)
-#ifdef _WINDOWS
-				(struct rscript_s *)currententity->script = rs;
-#else
 				currententity->script = rs;
-#endif
 			else
 				currententity->script = NULL;
 		}
@@ -622,11 +613,7 @@ void R_DrawViewEntitiesOnList (void)
             }
 
 			if (rs)
-#ifdef _WINDOWS
-				(struct rscript_s *)currententity->script = rs;
-#else
 				currententity->script = rs;
-#endif
 			else
 				currententity->script = NULL;
 		}
@@ -676,11 +663,7 @@ void R_DrawViewEntitiesOnList (void)
             }
 
 			if (rs)
-#ifdef _WINDOWS
-				(struct rscript_s *)currententity->script = rs;
-#else
 				currententity->script = rs;
-#endif
 			else
 				currententity->script = NULL;
 		}
@@ -1106,8 +1089,8 @@ void R_RenderView (refdef_t *fd)
 	{ // display other counters, of unknown utility
 		if ( !(++printf_throttle % 32) )
 		{
-			Com_Printf( "%5i flares %5i grasses %5i vlmaps %5i vtex\n",
-			c_flares, c_grasses, c_visible_lightmaps, c_visible_textures );
+			Com_Printf( "%5i flares %5i grasses %5i vlmaps %5i vtex %5i beams\n",
+			c_flares, c_grasses, c_visible_lightmaps, c_visible_textures, c_beams );
 		}
 	}
 
@@ -1192,11 +1175,10 @@ void R_Register( void )
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", 0);
 	gl_flashblend = Cvar_Get ("gl_flashblend", "0", CVAR_ARCHIVE);
 	gl_playermip = Cvar_Get ("gl_playermip", "0", 0);
-#ifdef __unix__
-	gl_driver = Cvar_Get( "gl_driver", "libGL.so.1", CVAR_ARCHIVE );
-#else
-	gl_driver = Cvar_Get( "gl_driver", "opengl32", CVAR_ARCHIVE );
-#endif
+
+// OPENGL_DRIVER defined by in config.h
+	gl_driver = Cvar_Get( "gl_driver", OPENGL_DRIVER, CVAR_ARCHIVE );
+
 	gl_texturemode = Cvar_Get( "gl_texturemode", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
 	gl_texturealphamode = Cvar_Get( "gl_texturealphamode", "default", CVAR_ARCHIVE );
 	gl_texturesolidmode = Cvar_Get( "gl_texturesolidmode", "default", CVAR_ARCHIVE );
@@ -1470,7 +1452,7 @@ void R_SetHighest( void )
 	Com_Printf("...autodetected HIGHEST game setting\n");
 }
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 double CPUSpeed()
 {
 
@@ -1547,13 +1529,13 @@ int R_Init( void *hinstance, void *hWnd )
 	/*
 	** get our various GL strings
 	*/
-	gl_config.vendor_string = qglGetString (GL_VENDOR);
+	gl_config.vendor_string = (const char*)qglGetString (GL_VENDOR);
 	Com_Printf ("GL_VENDOR: %s\n", gl_config.vendor_string );
-	gl_config.renderer_string = qglGetString (GL_RENDERER);
+	gl_config.renderer_string = (const char*)qglGetString (GL_RENDERER);
 	Com_Printf ("GL_RENDERER: %s\n", gl_config.renderer_string );
-	gl_config.version_string = qglGetString (GL_VERSION);
+	gl_config.version_string = (const char*)qglGetString (GL_VERSION);
 	Com_Printf ("GL_VERSION: %s\n", gl_config.version_string );
-	gl_config.extensions_string = qglGetString (GL_EXTENSIONS);
+	gl_config.extensions_string = (const char*)qglGetString (GL_EXTENSIONS);
 	Com_Printf ("GL_EXTENSIONS: %s\n", gl_config.extensions_string );
 
 	gl_config.allow_cds = true;
@@ -1574,7 +1556,7 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...GL_EXT_compiled_vertex_array not found\n" );
 	}
 
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 	if ( strstr( gl_config.extensions_string, "WGL_EXT_swap_control" ) )
 	{
 		qwglSwapIntervalEXT = ( BOOL (WINAPI *)(int)) qwglGetProcAddress( "wglSwapIntervalEXT" );
@@ -1603,14 +1585,14 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...GL_EXT_point_parameters not found\n" );
 	}
 
-#ifdef __unix__
+#if defined UNIX_VARIANT
 	if ( strstr( gl_config.extensions_string, "3DFX_set_global_palette" ))
 	{
 		if ( gl_ext_palettedtexture->value )
 		{
 			Com_Printf ("...using 3DFX_set_global_palette\n" );
 			qgl3DfxSetPaletteEXT = ( void ( APIENTRY * ) (GLuint *) )qwglGetProcAddress( "gl3DfxSetPaletteEXT" );
-			qglColorTableEXT = Fake_glColorTableEXT;
+			qglColorTableEXT = (void*)Fake_glColorTableEXT;
 		}
 		else
 		{
@@ -1832,7 +1814,7 @@ int R_Init( void *hinstance, void *hWnd )
 		int OGLVer = atoi(&gl_config.version_string[0]);
 		//int OGLSubVer = atoi(&gl_config.version_string[2]);
 
-#ifdef _WINDOWS
+#if defined WIN32_VARIANT
 		SYSTEM_INFO sysInfo;
 		GetSystemInfo(&sysInfo);
 
