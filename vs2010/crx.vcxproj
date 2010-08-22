@@ -80,7 +80,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ShowProgress>LinkVerboseLib</ShowProgress>
-      <AdditionalDependencies>game.lib;libjpeg.lib;libogg.lib;libvorbis.lib;libvorbisfile.lib;zlib.lib;libcurl.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>game.lib;ode_double.lib;libjpeg.lib;libogg.lib;libvorbis.lib;libvorbisfile.lib;zlib.lib;libcurl.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LocalLib)$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
@@ -173,6 +173,7 @@
     <ClCompile Include="$(SrcDir)ref_gl\r_shadowmaps.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_shadows.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_surf.c" />
+    <ClCompile Include="$(SrcDir)ref_gl\r_ragdoll.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_varray.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_vbo.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_vlights.c" />
@@ -218,6 +219,7 @@
     <ClInclude Include="$(SrcDir)ref_gl\r_local.h" />
     <ClInclude Include="$(SrcDir)ref_gl\r_model.h" />
     <ClInclude Include="$(SrcDir)ref_gl\r_script.h" />
+    <ClInclude Include="$(SrcDir)ref_gl\r_ragdoll.h" />
     <ClInclude Include="$(SrcDir)ref_gl\warpsin.h" />
     <ClInclude Include="$(SrcDir)server\server.h" />
     <ClInclude Include="$(SrcDir)win32\conproc.h" />
