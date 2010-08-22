@@ -52,11 +52,6 @@ static float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
 
 int		registration_sequence;
 
-#ifdef _WINDOWS
-extern void R_ReadFogScript(char config_file[128]);
-extern void R_ReadMusicScript(char config_file[128]);
-#endif
-
 char map_music[128];
 extern unsigned r_weather;
 
@@ -423,13 +418,9 @@ model_t *Mod_ForName (char *name, qboolean crash)
 				{
 					strcpy(rs,mod->skins[0]->name);
 					rs[strlen(rs)-4]=0;
-#ifdef _WINDOWS
-					(struct rscript_s *)mod->script = RS_FindScript(rs);
-#else
-					mod->script = RS_FindScript(rs); //make it gcc 4.1.1 compatible
-#endif
+					mod->script = RS_FindScript(rs);
 					if (mod->script)
-						RS_ReadyScript((rscript_t *)mod->script);
+						RS_ReadyScript( mod->script );
 				}
 			}
 
@@ -460,11 +451,11 @@ model_t *Mod_ForName (char *name, qboolean crash)
 	COM_StripExtension(mod->name, shortname);
 	strcat(shortname, ".iqm");
 
-	modfilelen = FS_LoadFile (shortname, &buf);
+	modfilelen = FS_LoadFile (shortname, (void*)&buf);
 
 	if(!buf) //could not find iqm
 	{
-		modfilelen = FS_LoadFile (mod->name, &buf);
+	modfilelen = FS_LoadFile (mod->name, (void*)&buf);
 		if (!buf)
 		{
 			if (crash)
@@ -481,14 +472,14 @@ model_t *Mod_ForName (char *name, qboolean crash)
 			COM_StripExtension(mod->name, shortname);
 			strcat(shortname, ".md2");
 
-			modfilelen = FS_LoadFile (shortname, &buf);
+			modfilelen = FS_LoadFile (shortname, (void*)&buf);
 
 			if(!buf)
 			{ //no .md2 for this .iqm, so revert to using the .iqm
 				COM_StripExtension(mod->name, shortname);
 				strcat(shortname, ".iqm");
 
-				modfilelen = FS_LoadFile (shortname, &buf);
+				modfilelen = FS_LoadFile (shortname, (void*)&buf);
 
 				if (!buf)
 				{ //be cautious
@@ -1105,7 +1096,8 @@ void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, 
 
 }
 
-GL_CalcSurfaceNormals(msurface_t *surf) {
+void GL_CalcSurfaceNormals(msurface_t *surf)
+{
 
 	glpoly_t *p = surf->polys;
 	float	*v;
@@ -1349,12 +1341,8 @@ void Mod_LoadFaces (lump_t *l)
 		rs = (rscript_t *)out->texinfo->image->script;
 
 		if(rs)	{
-#ifdef __unix__
-			rs_stage_t	*stage;
-			stage = rs->stage;
-#else
+
 			rs_stage_t	*stage = rs->stage;
-#endif
 			do {
 				if (stage->lensflare) {
 					if(r_lensflare->value)
@@ -1376,7 +1364,7 @@ void Mod_LoadFaces (lump_t *l)
 					}
 					GL_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->beamtype);
 				}
-			} while (stage = stage->next);
+			} while ( (stage = stage->next) );
 		}
 		GL_CalcSurfaceNormals(out);
 		GL_BuildODEGeoms(out);
@@ -1943,7 +1931,8 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	fstvert_t			*st;
 	daliasframe_t		*frame;
 	dtrivertx_t			*verts;
-	byte				*norms = NULL, *tangents;
+	//byte				*norms = NULL; // unused
+	byte				*tangents;
 	vec3_t				tangents_[MAX_VERTS];
 	pinmodel = (dmdl_t *)buffer;
 
@@ -2059,14 +2048,10 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 
 		rs[strlen(rs)-4]=0;
 
-#ifdef _WINDOWS
-		(struct rscript_s *)mod->script = RS_FindScript(rs);
-#else
-		mod->script = RS_FindScript(rs); //make it gcc 4.1.1 compatible
-#endif
+		mod->script = RS_FindScript(rs);
 
 		if (mod->script)
-			RS_ReadyScript((rscript_t *)mod->script);
+			RS_ReadyScript( mod->script );
 	}
 
 	cx = pheader->num_st * sizeof(fstvert_t);
@@ -2303,7 +2288,7 @@ R_RegisterModel
 
 @@@@@@@@@@@@@@@@@@@@@
 */
-extern qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath);
+extern qboolean Mod_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath);
 struct model_s *R_RegisterModel (char *name)
 {
 	model_t	*mod;

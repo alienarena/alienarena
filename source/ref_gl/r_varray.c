@@ -49,7 +49,7 @@ float *VArray = &VArrayVerts[0];
 
 // arrays for normalmapping in glsl
 static vec3_t NormalsArray[MAX_VERTICES];
-static vec4_t TangentsArray[MAX_VERTICES];
+// static vec4_t TangentsArray[MAX_VERTICES]; // unused
 
 // number of verts allocated
 static int VertexCounter = 0;

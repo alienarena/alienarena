@@ -740,7 +740,7 @@ void DrawTextureChains (void)
 extern int KillFlags;
 static void GL_RenderLightmappedPoly( msurface_t *surf )
 {
-	int		nv = surf->polys->numverts;
+	// int		nv = surf->polys->numverts; // unused
 	int		map;
 	float	scroll;
 	image_t *image = R_TextureAnimation( surf->texinfo );
@@ -805,11 +805,11 @@ dynamic:
 	}
 
 	if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
-		dlight_t	*dl;
+		dlight_t	*dl = NULL;
 		int			lnum, sv_lnum = 0;
 		float		add, brightest = 0;
 		vec3_t		lightVec;
-		float		lightCutoffSquared;
+		float		lightCutoffSquared = 0.0f;
 
 		if(is_dynamic) {
 

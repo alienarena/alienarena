@@ -41,7 +41,9 @@ float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
 
 static  vec4_t  s_lerped[MAX_VERTS];
 
-static	vec3_t	s_normals[MAX_VERTS];
+// static	vec3_t	s_normals[MAX_VERTS]; // unused
+static vec3_t NormalsArray[MAX_VERTICES];
+static vec4_t TangentsArray[MAX_VERTICES];
 
 extern	vec3_t	lightspot;
 vec3_t	shadevector;
@@ -306,8 +308,8 @@ static qboolean R_CullAliasModel( vec3_t bbox[8] )
 //legacy code - this is for ancient hardware that cannot handle GL_TRIANGLE useage
 void GL_DrawAliasFrameLegacy (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 {
-    daliasframe_t   *frame, *oldframe;
-    dtrivertx_t *v, *ov, *verts;
+    daliasframe_t   *frame, *oldframe=NULL;
+    dtrivertx_t *v, *ov=NULL, *verts;
     int     *order, *startorder, *tmp_order;
     int     count, tmp_count;
     float   frontlerp;
@@ -828,8 +830,8 @@ void R_DrawAliasShadowLegacy(dmdl_t *paliashdr, qboolean lerped)
 
 void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skinnum)
 {
-	daliasframe_t	*frame, *oldframe;
-	dtrivertx_t	*v, *ov, *verts;
+	daliasframe_t	*frame, *oldframe=NULL;
+	dtrivertx_t	*v, *ov=NULL, *verts;
 	dtriangle_t		*tris;
 	float	frontlerp;
 	float	alpha, basealpha;
@@ -847,7 +849,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 	fstvert_t *st;
 	float os, ot, os2, ot2;
 	unsigned offs, offs2;
-	byte *tangents, *oldtangents;
+	byte *tangents, *oldtangents = NULL;
 	qboolean mirror = false;
 
 	if(r_legacy->value) {
@@ -2044,7 +2046,7 @@ void R_DrawAliasModel ( void )
 void GL_DrawAliasCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 {
 	daliasframe_t	*frame, *oldframe;
-	dtrivertx_t	*v, *ov, *verts;
+	dtrivertx_t	*v, *ov=NULL, *verts;
 	dtriangle_t		*tris;
 	float	frontlerp;
 	vec3_t	move, delta, vectors[3];

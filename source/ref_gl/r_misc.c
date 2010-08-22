@@ -27,11 +27,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <GL/glu.h>
 
 //For screenshots
-#ifdef _WIN32
+#if defined HAVE_JPEG_JPEGLIB_H
 #include "jpeg/jpeglib.h"
-#endif
-#ifndef _WIN32
-#include <jpeglib.h>
+#elif defined HAVE_JPEGLIB_H
+#include "jpeglib.h"
+#elif defined HAVE_JPEG6B_INCLUDE_JPEGLIB_H
+#include "jpeg6b/include/jpeglib.h"
+#else
+#error jpeglib.h include not defined.
 #endif
 
 image_t		*r_notexture;		// use for bad textures
@@ -85,6 +88,8 @@ image_t		*r_distort;
 image_t		*sun_object;
 image_t		*sun1_object;
 image_t		*sun2_object;
+
+static size_t szr; // just for unused result warnings
 
 //Normalisation cube map
 GLuint normalisationCubeMap;
@@ -461,8 +466,8 @@ void GL_ScreenShot_JPEG(void)
 	int			i, offset;
 
 	/* Create the scrnshots directory if it doesn't exist */
-	Com_sprintf(checkname, sizeof(checkname), "%s/scrnshot", FS_Gamedir());
-	Sys_Mkdir(checkname);
+	Com_sprintf(checkname, sizeof(checkname), "%s/scrnshot/", FS_Gamedir());
+	FS_CreatePath( checkname );
 
 	strcpy(picname,"AlienArena_000.jpg");
 
@@ -561,8 +566,8 @@ void GL_ScreenShot_TGA (void)
 	FILE		*f;
 
 	// create the scrnshots directory if it doesn't exist
-	Com_sprintf (checkname, sizeof(checkname), "%s/scrnshot", FS_Gamedir());
-	Sys_Mkdir (checkname);
+	Com_sprintf (checkname, sizeof(checkname), "%s/scrnshot/", FS_Gamedir());
+	FS_CreatePath( checkname );
 
 	// find a file name to save it to
 	strcpy(picname,"AlienArena_000.tga");
@@ -606,7 +611,7 @@ void GL_ScreenShot_TGA (void)
 	}
 
 	f = fopen (checkname, "wb");
-	fwrite (buffer, 1, c, f);
+	szr = fwrite (buffer, 1, c, f);
 	fclose (f);
 
 	free (buffer);
@@ -702,7 +707,7 @@ void GL_UpdateSwapInterval( void )
 
 		if ( !gl_state.stereo_enabled )
 		{
-#ifdef _WIN32
+#if defined WIN32_VARIANT
 			if ( qwglSwapIntervalEXT )
 				qwglSwapIntervalEXT( gl_swapinterval->value );
 #endif

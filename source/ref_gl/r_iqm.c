@@ -22,8 +22,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+#if !defined max
+#define max(a,b)  (((a)<(b)) ? (b) : (a))
+#endif
+
 #include "r_local.h"
 #include "r_iqm.h"
+
+static vec3_t NormalsArray[MAX_VERTICES];
+static vec4_t TangentsArray[MAX_VERTICES];
 
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 
@@ -192,7 +199,7 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, 
 	}
 }
 
-qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath)
+qboolean Mod_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath)
 {
 	FILE *fp;
 	int length;
@@ -205,12 +212,13 @@ qboolean Mod_ReadSkinFile(char skin_file[MAX_QPATH], char *skinpath)
 	}
 	else
 	{
+		size_t sz;
 		fseek(fp, 0, SEEK_END);
 		length = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
 
 		buffer = malloc( length + 1 );
-		fread( buffer, length, 1, fp );
+		sz = fread( buffer, length, 1, fp );
 		buffer[length] = 0;
 	}
 	s = buffer;
@@ -574,12 +582,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 			//load shader for skin
 			COM_StripExtension ( skinname, shortname );
-	#ifdef _WINDOWS
-			(struct rscript_s *)mod->script = RS_FindScript(shortname);
-	#else
-			mod->script = RS_FindScript(shortname); //make it gcc 4.1.1 compatible
-	#endif
-
+			mod->script = RS_FindScript(shortname);
 			if (mod->script)
 				RS_ReadyScript((rscript_t *)mod->script);
 		}
@@ -802,7 +805,7 @@ void GL_DrawIQMFrame(int skinnum)
 	qboolean depthmaskrscipt = false;
 
 	if (r_shaders->value)
-			rs=(rscript_t *)currententity->script;
+		rs = currententity->script;
 
 	VectorCopy(shadelight, lightcolor);
 	for (i=0;i<model_dlights_num;i++)
@@ -826,7 +829,7 @@ void GL_DrawIQMFrame(int skinnum)
 		alpha = basealpha = 1.0;
 
 	if (r_shaders->value)
-		rs=(rscript_t *)currententity->script;
+		rs = currententity->script;
 
 	VectorSubtract (currententity->oldorigin, currententity->origin, delta);
 
