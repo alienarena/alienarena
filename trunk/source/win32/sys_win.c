@@ -17,13 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-// sys_win.h
+// sys_win.c
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include "../qcommon/qcommon.h"
+#include "qcommon/qcommon.h"
 #include "winquake.h"
 #include "resource.h"
 #include <errno.h>
@@ -32,8 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdio.h>
 #include <direct.h>
 #include <io.h>
-#include <conio.h>
-#include "../win32/conproc.h"
+
+#include "conproc.h"
 
 #define MINIMUM_WIN_MEMORY	0x0a00000
 #define MAXIMUM_WIN_MEMORY	0x1000000
@@ -51,17 +51,16 @@ static HANDLE		hinput, houtput;
 unsigned	sys_msg_time;
 unsigned	sys_frame_time;
 
-#ifndef __unix__
+// attachment to statically linked game library
+extern void *GetGameAPI ( void *import);
+
 extern void Q_strncpyz( char *dest, const char *src, size_t size );
-#endif
 
 static HANDLE		qwclsemaphore;
 
 #define	MAX_NUM_ARGVS	128
 int			argc;
 char		*argv[MAX_NUM_ARGVS];
-
-#ifndef __unix__
 
 #define CONSOLE_WINDOW_CLASS_NAME	"CRX Console"
 #define CONSOLE_WINDOW_NAME			"Alien Arena Console"
@@ -528,7 +527,6 @@ void Sys_PumpMessages (void){
 	// Grab frame time
 	sys_frameTime = timeGetTime();	// FIXME: should this be at start?
 }
-#endif
 
 void Sys_Quit (void)
 {
@@ -598,10 +596,8 @@ void Sys_Init (void)
 #endif
 
 	timeBeginPeriod( 1 );
-#ifndef __unix__
 	Cvar_Get("sys_hInstance", va("%i", sys_hInstance), CVAR_ROM);
 	Cvar_Get("sys_wndProc", va("%i", MainWndProc), CVAR_ROM);
-#endif
 
 	vinfo.dwOSVersionInfoSize = sizeof(vinfo);
 
@@ -615,19 +611,7 @@ void Sys_Init (void)
 	else if ( vinfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS )
 		s_win95 = true;
 
-#ifdef __unix__
-	if (dedicated->value)
-	{
-		if (!AllocConsole ())
-			Sys_Error ("Couldn't create dedicated server console");
-		hinput = GetStdHandle (STD_INPUT_HANDLE);
-		houtput = GetStdHandle (STD_OUTPUT_HANDLE);
-
-		// let QHOST hook in
-		InitConProc (argc, argv);
 	}
-#endif
-}
 
 
 static char	console_text[256];
@@ -824,7 +808,7 @@ GAME DLL
 ========================================================================
 */
 
-static HINSTANCE	game_library;
+static HINSTANCE	game_library = NULL;
 
 /*
 =================
@@ -833,8 +817,11 @@ Sys_UnloadGame
 */
 void Sys_UnloadGame (void)
 {
+	if ( game_library != NULL )
+	{
 	if (!FreeLibrary (game_library))
 		Com_Error (ERR_FATAL, "FreeLibrary failed for game library");
+	}
 	game_library = NULL;
 }
 
@@ -847,11 +834,10 @@ Loads the game dll
 */
 void *Sys_GetGameAPI (void *parms)
 {
-	void	*(*GetGameAPI) (void *);
+	void	*(*ptrGetGameAPI) (void *) = NULL;
 	char	name[MAX_OSPATH];
 	char	*path;
 	char	cwd[MAX_OSPATH];
-#if defined _M_IX86
 
 const char *gamename = "gamex86.dll";
 
@@ -861,25 +847,14 @@ const char *gamename = "gamex86.dll";
 	const char *debugdir = "debug";
 #endif
 
-#elif defined _M_ALPHA
-	const char *gamename = "gameaxp.dll";
-
-#ifdef NDEBUG
-	const char *debugdir = "releaseaxp";
-#else
-	const char *debugdir = "debugaxp";
-#endif
-
-#endif
-
-	if (game_library)
+	if (game_library != NULL)
 		Com_Error (ERR_FATAL, "Sys_GetGameAPI without Sys_UnloadingGame");
 
 	// check the current debug directory first for development purposes
 	_getcwd (cwd, sizeof(cwd));
 	Com_sprintf (name, sizeof(name), "%s/%s/%s", cwd, debugdir, gamename);
 	game_library = LoadLibrary ( name );
-	if (game_library)
+	if (game_library != NULL )
 	{
 		Com_DPrintf ("LoadLibrary (%s)\n", name);
 	}
@@ -902,7 +877,8 @@ const char *gamename = "gamex86.dll";
 			{
 				path = FS_NextPath (path);
 				if (!path)
-					return NULL;		// couldn't find one anywhere
+					break; // Search did not turn up a game DLL
+
 				Com_sprintf (name, sizeof(name), "%s/%s", path, gamename);
 				game_library = LoadLibrary (name);
 				if (game_library)
@@ -914,14 +890,26 @@ const char *gamename = "gamex86.dll";
 		}
 	}
 
-	GetGameAPI = (void *)GetProcAddress (game_library, "GetGameAPI");
-	if (!GetGameAPI)
+	if ( game_library != NULL )
+	{ // game module from DLL
+		ptrGetGameAPI = (void *)GetProcAddress (game_library, "GetGameAPI");
+	}
+
+	/*
+	 * No game DLL found, use statically linked game
+	 */
+	if ( ptrGetGameAPI == NULL )
 	{
+		ptrGetGameAPI = &GetGameAPI;
+	}
+
+	if ( ptrGetGameAPI == NULL )
+	{ // program error
 		Sys_UnloadGame ();
 		return NULL;
 	}
 
-	return GetGameAPI (parms);
+	return ptrGetGameAPI (parms);
 }
 
 //=======================================================================

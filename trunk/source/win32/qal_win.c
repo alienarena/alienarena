@@ -30,13 +30,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <al.h>
 #include <alc.h>
 
-#include "../client/client.h"
-#include "../client/qal.h"
+#include "client/client.h"
+#include "client/qal.h"
 
 /*
  * OpenAL Library
  */
-const char libopenal_name[] = "openal32.dll";
+const char libopenal_name[] = OPENAL_DRIVER ;
 HINSTANCE hinstOpenAL; // HINSTANCE for the OpenAL library
 qboolean dlsym_error;
 

@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <assert.h>
 #include <float.h>
 
-#include "..\client\client.h"
+#include "client\client.h"
 #include "winquake.h"
 //#include "zmouse.h"
 
@@ -75,8 +75,8 @@ static void WIN_DisableAltTab( void )
 	if ( s_win95 )
 	{
 		BOOL old;
-
-		SystemParametersInfo( SPI_SCREENSAVERRUNNING, 1, &old, 0 );
+		SystemParametersInfo( SPI_SETSCREENSAVERRUNNING, 1, &old, 0 );
+			// using MinGW compatible equivalent SPI constant
 	}
 	else
 	{
@@ -93,8 +93,8 @@ static void WIN_EnableAltTab( void )
 		if ( s_win95 )
 		{
 			BOOL old;
-
-			SystemParametersInfo( SPI_SCREENSAVERRUNNING, 0, &old, 0 );
+			SystemParametersInfo( SPI_SETSCREENSAVERRUNNING, 0, &old, 0 );
+				// using MinGW compatible equivalent SPI constant
 		}
 		else
 		{

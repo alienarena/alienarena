@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-#include "../client/client.h"
+#include "client/client.h"
 #include "winquake.h"
 
 extern	unsigned	sys_msg_time;

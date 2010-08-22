@@ -23,11 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <windows.h>
 
-#ifdef MSVC9
-#include "dsound.h"
-#else
-#include <dsound.h>
-#endif
+// not used
+// #include <dsound.h>
 
 #define	WINDOW_STYLE	(WS_OVERLAPPED|WS_BORDER|WS_CAPTION|WS_VISIBLE)
 
@@ -39,7 +36,9 @@ extern LPDIRECTSOUNDBUFFER pDSBuf;
 extern DWORD gSndBufSize;
 
 extern HWND			cl_hwnd;
-extern qboolean		ActiveApp, Minimized;
+extern int      ActiveApp;
+extern qboolean Minimized;
+
 
 void IN_Activate (qboolean active);
 void IN_MouseEvent (int mstate);

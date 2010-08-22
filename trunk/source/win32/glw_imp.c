@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <assert.h>
 #include <windows.h>
-#include "../ref_gl/r_local.h"
+#include "ref_gl/r_local.h"
 #include "glw_win.h"
 #include "winquake.h"
 #include "resource.h"
@@ -165,7 +165,7 @@ qboolean VID_CreateWindow( int width, int height, qboolean fullscreen )
 /*
 ** GLimp_SetMode
 */
-rserr_t GLimp_SetMode( int *pwidth, int *pheight, int mode, qboolean fullscreen )
+rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen )
 {
 	int width, height;
 	const char *win_fs[] = { "W", "FS" };
@@ -366,6 +366,8 @@ void GLimp_Shutdown( void )
 CPU Detect from Q2E
 ===================
 */
+// does not appear to be used
+/*
 extern void	Q_strncpyz( char *dest, const char *src, size_t size );
 extern void Q_strncatz( char *dest, const char *src, size_t size );
 qboolean Sys_DetectCPU (char *cpuString, int maxSize)
@@ -585,6 +587,7 @@ NoExtFunction:
 
 
 }
+*/
 
 static void Sys_SetCpuCore (void)
 {
