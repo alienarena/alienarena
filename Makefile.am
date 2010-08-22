@@ -48,6 +48,8 @@ dist_doc_DATA = docs/license.txt docs/README.txt
 # TODO: this does not support program name translation and other fancy stuff
 #   (can install-sh be used here?)
 #
+# 2010-08-22  Temporary fixes for Escaped Turkey SVN script
+#
 install-alternate:
 if ALTERNATE_INSTALL
 if BUILD_CLIENT
@@ -56,7 +58,11 @@ if BUILD_CLIENT
 endif	
 if BUILD_UNIX	
 	cp $(top_builddir)/source/crx-ded $(srcdir)/crx-ded
+	cp $(top_builddir)/source/crx-ded $(srcdir)/crded
 	strip $(srcdir)/crx-ded
+	strip $(srcdir)/crded
+	rm -f $(srcdir)/arena/game.so
+	rm -f $(srcdir)/data1/game.so
 endif	
 else
 	@echo "make install-alternate requires configuring with --enable-alternate-install"
