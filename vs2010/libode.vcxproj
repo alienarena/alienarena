@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{FFB5B720-9A89-EF4F-8E25-3A715FB62AD9}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libode</RootNamespace>
+    <ProjectName>libode</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_w32.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(SolutionDir)alienarena_w32.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(LocalLib)$(Configuration)\</OutDir>
+    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(LocalLib)$(Configuration)\</OutDir>
+    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(LibodeSrc)include;$(LibodeInclude);$(LocalInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;dSINGLE;WIN32;_CRT_SECURE_NO_WARNINGS;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDataBaseFileName>$(OutDir)libode.pdb</ProgramDataBaseFileName>
+    </Link>
+    <PostBuildEvent>
+      <Command>FOR %%h IN ( $(LibodeSrc)include\ode\*.h ) DO copy %%h  $(LocalInclude)ode\</Command>
+      <Message>Copy header files to common local include directory</Message>
+    </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(LocalLib)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSingleLib|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <AdditionalIncludeDirectories>$(LibodeInclude);$(LocalInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>dSINGLE;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <ProgramDataBaseFileName>$(OutDir)libode.pdb</ProgramDataBaseFileName>
+    </Link>
+    <PostBuildEvent>
+      <Command>FOR %%h IN ( $(LibodeSrc)include\ode\ode.h  ) DO copy %%h  $(LocalInclude)ode\</Command>
+      <Message>Copy header files to common local include directory</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(LibodeSrc)include;$(LibodeInclude);$(LocalInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <Optimization>Full</Optimization>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <OmitFramePointers>true</OmitFramePointers>
+      <PreprocessorDefinitions>dSINGLE;WIN32;_CRT_SECURE_NO_WARNINGS;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(LocalLib)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
+    <PostBuildEvent>
+      <Command>FOR %%h IN ( $(LibodeSrc)include\ode\*.h ) DO copy %%h  $(LocalInclude)ode\</Command>
+      <Message>Copy header files to common local include directory</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="$(LibodeSrc)include\ode\collision.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\collision_space.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\collision_trimesh.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\common.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\compatibility.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\contact.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\error.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\export-dif.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\mass.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\matrix.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\memory.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\misc.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\objects.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\ode.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\odeconfig.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\odecpp.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\odecpp_collision.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\odeinit.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\odemath.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\rotation.h" />
+    <ClInclude Include="$(LibodeSrc)include\ode\timer.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\amotor.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\ball.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\contact.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\fixed.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\hinge.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\hinge2.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\joint.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\joints.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\joint_internal.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\lmotor.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\null.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\piston.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\plane2d.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\pr.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\pu.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\slider.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\joints\universal.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\array.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\collision_kernel.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\collision_space_internal.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\collision_std.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\collision_transform.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\collision_util.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\config.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\heightfield.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\lcp.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\mat.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\objects.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\obstack.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\odeou.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\odetls.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\quickstep.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\step.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\testing.h" />
+    <ClInclude Include="$(LibodeSrc)ode\src\util.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\amotor.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\ball.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\contact.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\fixed.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\hinge.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\hinge2.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\joint.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\lmotor.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\null.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\piston.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\plane2d.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\pr.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\pu.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\slider.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\joints\universal.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\fastdot.c" />
+    <ClCompile Include="$(LibodeSrc)ode\src\fastldlt.c" />
+    <ClCompile Include="$(LibodeSrc)ode\src\fastlsolve.c" />
+    <ClCompile Include="$(LibodeSrc)ode\src\fastltsolve.c" />
+    <ClCompile Include="$(LibodeSrc)ode\src\array.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\box.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\capsule.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\collision_cylinder_box.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\collision_cylinder_plane.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\collision_cylinder_sphere.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\collision_kernel.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\collision_quadtreespace.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\collision_sapspace.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\collision_space.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\collision_transform.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\collision_trimesh_disabled.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\collision_trimesh_trimesh_new.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\collision_util.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\convex.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\cylinder.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\error.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\export-dif.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\heightfield.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\lcp.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\mass.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\mat.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\matrix.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\memory.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\misc.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\obstack.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\ode.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\odeinit.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\odemath.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\odeou.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\odetls.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\plane.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\quickstep.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\ray.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\rotation.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\sphere.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\step.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\stepfast.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\testing.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\timer.cpp" />
+    <ClCompile Include="$(LibodeSrc)ode\src\util.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
