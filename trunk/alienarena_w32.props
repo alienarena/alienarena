@@ -14,6 +14,7 @@
     <LibvorbisSrc>$(LibSrc)libvorbis-1.3.1\</LibvorbisSrc>
     <LibjpegSrc>$(LibSrc)jpeg-8b\</LibjpegSrc>
     <OpenALIncludeDir>C:\Program Files (x86)\OpenAL 1.1 SDK\include\</OpenALIncludeDir>
+    <LibodeSrc>$(LibSrc)ode-0.11.1\</LibodeSrc>
   </PropertyGroup>
   <PropertyGroup>
     <_PropertySheetDisplayName>alienarena_w32</_PropertySheetDisplayName>
@@ -58,6 +59,9 @@
     </BuildMacro>
     <BuildMacro Include="OpenALIncludeDir">
       <Value>$(OpenALIncludeDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LibodeSrc">
+      <Value>$(LibodeSrc)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

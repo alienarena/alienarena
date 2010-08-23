@@ -128,6 +128,9 @@ they shouldn't.
 
 #if defined HAVE_UNISTD_H
 #include <unistd.h>
+#elif defined HAVE_DIRECT_H
+/* for _getcwd in Windows */
+#include <direct.h>
 #endif
 
 #if defined HAVE_SYS_STAT_H
@@ -139,6 +142,10 @@ they shouldn't.
 #include "qcommon.h"
 #include "game/q_shared.h"
 #include "unix/glob.h"
+
+#if !defined HAVE__GETCWD && defined HAVE_GETCWD
+#define _getcwd getcwd
+#endif
 
 char fs_gamedir[MAX_OSPATH];
 cvar_t *fs_gamedirvar; // for the "game" cvar, default is "arena"
@@ -188,7 +195,7 @@ static void FS_init_paths( void )
 	memset(fs_datadir, 0, sizeof(fs_datadir));
 	memset(fs_homedir, 0, sizeof(fs_homedir));
 
-	cwdstr = getcwd( fs_bindir, sizeof(fs_bindir) );
+	cwdstr = _getcwd( fs_bindir, sizeof(fs_bindir) );
 	if ( cwdstr == NULL )
 	{
 		Sys_Error( "path initialization (getcwd error: %i)", strerror(errno) );

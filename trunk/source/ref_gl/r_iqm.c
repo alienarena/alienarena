@@ -22,12 +22,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
+#include "r_local.h"
+#include "r_iqm.h"
+
 #if !defined max
 #define max(a,b)  (((a)<(b)) ? (b) : (a))
 #endif
-
-#include "r_local.h"
-#include "r_iqm.h"
 
 static vec3_t NormalsArray[MAX_VERTICES];
 static vec4_t TangentsArray[MAX_VERTICES];
