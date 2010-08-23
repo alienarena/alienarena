@@ -103,29 +103,23 @@
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>
       </FunctionLevelLinking>
-      <IntrinsicFunctions>
-      </IntrinsicFunctions>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BrowseInformation>true</BrowseInformation>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <FavorSizeOrSpeed>
-      </FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <ExceptionHandling>
       </ExceptionHandling>
-      <BufferSecurityCheck>
-      </BufferSecurityCheck>
-      <StringPooling>
-      </StringPooling>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>
       </BasicRuntimeChecks>
-      <OmitFramePointers>
-      </OmitFramePointers>
-      <InlineFunctionExpansion>
-      </InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <RuntimeTypeInfo>
       </RuntimeTypeInfo>
       <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MinimalRebuild>
       </MinimalRebuild>
@@ -151,7 +145,7 @@
       </Message>
     </CustomBuildStep>
     <Lib>
-      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
       <OutputFile>$(LocalLib)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
     <PreBuildEvent>

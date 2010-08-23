@@ -66,6 +66,9 @@ where the location of header files differs between systems.
 /* Define to 1 if you have the <windows.h> header file. */
 #define HAVE_WINDOWS_H 1
 
+/* Define to 1 if you have the <direct.h> header file */
+#define HAVE_DIRECT_H 1
+
 /* Define to 1 if you have the <GL/glu.h> header file. */
 #define HAVE_GL_GLU_H 1
 
@@ -129,6 +132,9 @@ where the location of header files differs between systems.
 
 /* Define to 1 if you have the `_unlink' function. */
 #define HAVE__UNLINK 1
+
+/* Define to 1 if you have the `_getcwd` function */
+#define HAVE__GETCWD 1
 
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */

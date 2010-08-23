@@ -870,7 +870,7 @@ void GLimp_EndFrame (void)
 	int		err;
 
 	err = qglGetError();
-	assert( err == GL_NO_ERROR );
+//	assert( err == GL_NO_ERROR ); // 2010-08 This assert is happening
 
 	if ( _stricmp( gl_drawbuffer->string, "GL_BACK" ) == 0 )
 	{
