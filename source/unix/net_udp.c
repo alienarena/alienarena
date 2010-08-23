@@ -545,25 +545,14 @@ char *NET_ErrorString (void)
 // sleeps msec or until net socket is ready
 void NET_Sleep(int msec)
 {
-#if 1
-	return;
-#else
-/*
- * 2010-06-15
- *  was: (not local server).OR.(not dedicated server), probably always true
- * so this was a no-op function.
- * Looks like intention is to suspend the server until the next frame
- * time, unless clients send something -- which might be a good thing
- * for a dedicated server, but maybe not a local server.
- */
-    struct timeval timeout;
+
+	struct timeval timeout;
 	fd_set	fdset;
 	extern cvar_t *dedicated;
 	extern qboolean stdin_active;
 
-	// (not local server).AND.(not dedicated server)
-	if ( !ip_sockets[NS_SERVER] && ( dedicated && !dedicated->value ) )
-		return;
+	if (!ip_sockets[NS_SERVER] || (dedicated && !dedicated->value))
+		return; // we're not a server, just run full speed
 
 	FD_ZERO(&fdset);
 	if (stdin_active)
@@ -572,6 +561,6 @@ void NET_Sleep(int msec)
 	timeout.tv_sec = msec/1000;
 	timeout.tv_usec = (msec%1000)*1000;
 	select(ip_sockets[NS_SERVER]+1, &fdset, NULL, NULL, &timeout);
-#endif
+
 }
 
