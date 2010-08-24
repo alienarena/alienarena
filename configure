@@ -730,6 +730,7 @@ enable_dependency_tracking
 enable_no_client
 enable_alternate_install
 with_x
+enable_build_status
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1378,6 +1379,8 @@ Optional Features:
   --enable-alternate-install
                           traditional single directory, in-place installation
                           (default:no)
+  --disable-build-status  hide the status message at the end of the
+                          configuration script (default:no)
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -7541,6 +7544,7 @@ int
 main ()
 {
   char *data, *data2, *data3;
+  const char *cdata2;
   int i, pagesize;
   int fd, fd2;
 
@@ -7565,10 +7569,10 @@ main ()
   fd2 = open ("conftest.txt", O_RDWR | O_CREAT | O_TRUNC, 0600);
   if (fd2 < 0)
     return 4;
-  data2 = "";
-  if (write (fd2, data2, 1) != 1)
+  cdata2 = "";
+  if (write (fd2, cdata2, 1) != 1)
     return 5;
-  data2 = mmap (0, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, fd2, 0L);
+  data2 = (char *) mmap (0, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, fd2, 0L);
   if (data2 == MAP_FAILED)
     return 6;
   for (i = 0; i < pagesize; ++i)
@@ -9459,30 +9463,40 @@ $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
 
+hide_status=no
+# Check whether --enable-build-status was given.
+if test "${enable_build_status+set}" = set; then :
+  enableval=$enable_build_status; hide_status=yes
+else
+  hide_status=no
+fi
 
-$as_echo "-------------------------------------------"
-$as_echo "Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"
-$as_echo " OS ................. ${host_os}"
-$as_echo " CPU: ............... ${host_cpu}"
-if  test "x${cond_build_win32}" = xyes ; then
+
+if test "x$hide_status" = "xno"; then :
+
+	$as_echo "-------------------------------------------"
+	$as_echo "Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"
+	$as_echo " OS ................. ${host_os}"
+	$as_echo " CPU: ............... ${host_cpu}"
+	if  test "x${cond_build_win32}" = xyes ; then
   :
 else
   $as_echo " Dedicated Only: .... ${no_client}"
 fi
-$as_echo " Alternate Install .. ${alternate_install}"
+	$as_echo " Alternate Install .. ${alternate_install}"
 
-if  test "x${alternate_install}" = xyes ; then
+	if  test "x${alternate_install}" = xyes ; then
   :
 else
   $as_echo " Prefix: ............ '${prefix}'"
 fi
 
-if  test "x${alternate_install}" = xyes ; then
+	if  test "x${alternate_install}" = xyes ; then
   $as_echo "Run \"make\" to build, then \"make install-alternate\" to install."
 else
   $as_echo "Run \"make\" to build, then \"sudo make install\" to install."
 fi
 
-$as_echo "--------------------------------------------"
+	$as_echo "--------------------------------------------"
 
-
+fi
