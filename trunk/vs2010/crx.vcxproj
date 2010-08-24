@@ -227,6 +227,12 @@
     <ClInclude Include="$(SrcDir)win32\winquake.h" />
     <ClInclude Include="$(SrcDir)client\qal.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\source\win32\Q2.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\source\win32\q2.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
