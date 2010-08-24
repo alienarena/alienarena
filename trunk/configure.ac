@@ -388,23 +388,26 @@ AC_CONFIG_FILES([ Makefile 	source/Makefile ])
 
 AC_OUTPUT
 
-dnl TODO: add an option to disable this message.
+dnl Option to disable this message.
+hide_status=no
+AC_ARG_ENABLE([build-status],[AS_HELP_STRING([--disable-build-status],
+			[hide the status message at the end of the configuration script (default:no)])],[hide_status=yes],[hide_status=no])
 
-AS_ECHO(["-------------------------------------------"])
-AS_ECHO(["Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"])
-AS_ECHO([" OS ................. ${host_os}"])
-AS_ECHO([" CPU: ............... ${host_cpu}"])
-AM_COND_IF([BUILD_WIN32],,
-[AS_ECHO([" Dedicated Only: .... ${no_client}"])])
-AS_ECHO([" Alternate Install .. ${alternate_install}"])
+AS_IF([test "x$hide_status" = "xno"],[
+	AS_ECHO(["-------------------------------------------"])
+	AS_ECHO(["Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"])
+	AS_ECHO([" OS ................. ${host_os}"])
+	AS_ECHO([" CPU: ............... ${host_cpu}"])
+	AM_COND_IF([BUILD_WIN32],,
+	[AS_ECHO([" Dedicated Only: .... ${no_client}"])])
+	AS_ECHO([" Alternate Install .. ${alternate_install}"])
 
-AM_COND_IF([ALTERNATE_INSTALL],,
-[AS_ECHO([" Prefix: ............ '${prefix}'"])])
+	AM_COND_IF([ALTERNATE_INSTALL],,
+		[AS_ECHO([" Prefix: ............ '${prefix}'"])])
 
-AM_COND_IF([ALTERNATE_INSTALL],
-[AS_ECHO(["Run \"make\" to build, then \"make install-alternate\" to install."])],
-[AS_ECHO(["Run \"make\" to build, then \"sudo make install\" to install."])])
+	AM_COND_IF([ALTERNATE_INSTALL],
+		[AS_ECHO(["Run \"make\" to build, then \"make install-alternate\" to install."])],
+		[AS_ECHO(["Run \"make\" to build, then \"sudo make install\" to install."])])
 
-AS_ECHO(["--------------------------------------------"])
-
-
+	AS_ECHO(["--------------------------------------------"])
+])
