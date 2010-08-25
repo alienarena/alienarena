@@ -161,7 +161,7 @@ Die Liste der Credits ist lang - ALIEN ARENA profitiert aber vor allem durch die
 für ihre Kreationen und Fertigstellungen:
 
 Design:  John Diamond unter großem Mitwirken der Community.
-Programming:  John Diamond, Jim Bower, "Blackice", Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia.
+Programming:  John Diamond, Jim Bower, Emmanuel Benoit, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia.
 Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
 Maps:  John Diamond, Dennis "xEMPx" Zedlach
 Textures and Artwork:  John Diamond, Enki, Adam Saizlai
