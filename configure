@@ -730,6 +730,7 @@ enable_dependency_tracking
 enable_client
 enable_alternate_install
 with_x
+with_xf86dga
 enable_build_status
 '
       ac_precious_vars='build_alias
@@ -1386,6 +1387,7 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-x                use the X Window System
+  --with(out)-xf86dga     include XF86 DGA support (default: check)
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -1639,6 +1641,37 @@ fi
 
 } # ac_fn_c_try_link
 
+# ac_fn_c_check_header_compile LINENO HEADER VAR INCLUDES
+# -------------------------------------------------------
+# Tests whether HEADER exists and can be compiled using the include files in
+# INCLUDES, setting the cache variable VAR accordingly.
+ac_fn_c_check_header_compile ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+#include <$2>
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$3=yes"
+else
+  eval "$3=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
+
+} # ac_fn_c_check_header_compile
+
 # ac_fn_c_check_header_mongrel LINENO HEADER VAR INCLUDES
 # -------------------------------------------------------
 # Tests whether HEADER exists, giving a warning if it cannot be compiled using
@@ -1773,37 +1806,6 @@ fi
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_try_run
-
-# ac_fn_c_check_header_compile LINENO HEADER VAR INCLUDES
-# -------------------------------------------------------
-# Tests whether HEADER exists and can be compiled using the include files in
-# INCLUDES, setting the cache variable VAR accordingly.
-ac_fn_c_check_header_compile ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
-$as_echo_n "checking for $2... " >&6; }
-if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-#include <$2>
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  eval "$3=yes"
-else
-  eval "$3=no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-eval ac_res=\$$3
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-  eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
-
-} # ac_fn_c_check_header_compile
 
 # ac_fn_c_check_type LINENO TYPE VAR INCLUDES
 # -------------------------------------------
@@ -6018,6 +6020,7 @@ $as_echo "$as_me: WARNING: \"Required curl library not found.\"" >&2;}
 fi
 
 
+
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for X" >&5
 $as_echo_n "checking for X... " >&6; }
 
@@ -6269,8 +6272,19 @@ if test "$ac_res" != no; then :
 fi
 
 
+
+
+# Check whether --with-xf86dga was given.
+if test "${with_xf86dga+set}" = set; then :
+  withval=$with_xf86dga;
+else
+  with_xf86dga=check
+fi
+
 	have_Xxf86dga=no
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing XF86DGAQueryVersion" >&5
+	if  test "x$with_xf86dga" != "xno" ; then :
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing XF86DGAQueryVersion" >&5
 $as_echo_n "checking for library containing XF86DGAQueryVersion... " >&6; }
 if test "${ac_cv_search_XF86DGAQueryVersion+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -6323,12 +6337,45 @@ $as_echo "$ac_cv_search_XF86DGAQueryVersion" >&6; }
 ac_res=$ac_cv_search_XF86DGAQueryVersion
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-  have_Xxf86dga=yes
-fi
 
-	if  test "x${have_Xxf86dga}" = xyes ; then :
+			for ac_header in X11/extensions/Xxf86dga.h X11/extensions/xf86dga.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
+				#include <X11/Xlib.h>
+				#include <X11/Xproto.h>
+				#include <X11/Xfuncproto.h>
+
+"
+eval as_val=\$$as_ac_Header
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
 
 $as_echo "#define HAVE_XXF86DGA 1" >>confdefs.h
+
+				have_Xxf86dga=yes
+
+fi
+
+done
+
+
+fi
+
+		if  test "x$with_xf86dga" = "xyes" ; then :
+
+			if  test "x${have_Xxf86dga}" = "xno" ; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error "--with-xf86dga specified, but the library could not be found
+See \`config.log' for more details." "$LINENO" 5; }
+
+fi
+
+fi
 
 fi
 
@@ -9490,6 +9537,7 @@ fi
 		$as_echo " Dedicated Only: .... ${dedicated_only}"
 
 fi
+	$as_echo " XF86 DGA support ... ${have_Xxf86dga}"
 	$as_echo " Alternate Install .. ${alternate_install}"
 
 	if  test "x${alternate_install}" = xyes ; then
