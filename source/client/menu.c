@@ -2482,7 +2482,7 @@ static const char *idcredits[] =
 	"Shane Bayer",
 	"Tony Jackson",
 	"Jim Bower",
-	"BlackIce",
+	"Emmanuel Benoit",
 	"Dave Carter",
 	"Stephan Stahl",
 	"Kyle Hunter",
