@@ -125,6 +125,65 @@ char *Cvar_CompleteVariable (char *partial)
 
 /*
 ============
+Cvar_Allocate
+
+Creates a new variable's record
+============
+*/
+inline static cvar_t *Cvar_Allocate(char *var_name, char *var_value, int flags, unsigned int hash_key)
+{
+	cvar_t *nvar;
+
+	nvar = Z_Malloc (sizeof(cvar_t));
+	nvar->name = CopyString (var_name);
+	nvar->string = CopyString (var_value);
+	nvar->modified = true;
+	nvar->value = atof (nvar->string);
+	nvar->integer = atoi (nvar->string);
+	nvar->flags = flags;
+	nvar->hash_key = hash_key;
+
+	return nvar;
+}
+
+
+/*
+============
+Cvar_AddBetween
+
+Adds a variable between two others. 
+============
+*/
+inline static cvar_t *Cvar_AddBetween(char *var_name, char *var_value, int flags, unsigned int hash_key,cvar_t **prev, cvar_t *next)
+{
+	cvar_t *nvar;
+
+	// variable needs to be created, check parameters
+	if (!var_value)
+		return NULL;
+
+	if (flags & (CVAR_USERINFO | CVAR_SERVERINFO))
+	{
+		if (!Cvar_InfoValidate (var_value))
+		{
+			Com_Printf("invalid info cvar value\n");
+			return NULL;
+		}
+	}
+
+	// create the variable
+	nvar = Cvar_Allocate( var_name , var_value , flags , hash_key );
+
+	// link the variable in
+	nvar->next = next;
+	*prev = nvar;
+
+	return nvar;
+}
+
+
+/*
+============
 Cvar_Get
 
 If the variable already exists, the value will not be set
@@ -133,7 +192,7 @@ The flags will be or'ed in if the variable exists.
 */
 cvar_t *Cvar_Get (char *var_name, char *var_value, int flags)
 {
-	cvar_t		*var, **prev, *nvar;
+	cvar_t		*var, **prev;
 	unsigned int	i, hash_key;
 
 	// validate variable name
@@ -159,35 +218,42 @@ cvar_t *Cvar_Get (char *var_name, char *var_value, int flags)
 		prev = &( var->next );
 	}
 
-	// variable needs to be created, check parameters
-	if (!var_value)
-		return NULL;
+	return Cvar_AddBetween(var_name , var_value , flags , hash_key , prev , var);
+}
 
-	if (flags & (CVAR_USERINFO | CVAR_SERVERINFO))
+
+/*
+============
+Cvar_FindOrCreate
+
+This function is mostly similar to Cvar_Get(name,value,0). However, it starts
+by attempting to find the variable, as there are no flags. In addition, it
+returns a boolean depending on whether the variable was found or created, and
+sets the pointer to the variable through a parameter.
+============
+*/
+inline static qboolean Cvar_FindOrCreate (char *var_name, char *var_value, cvar_t **found)
+{
+	cvar_t		*var, **prev;
+	unsigned int	i, hash_key;
+
+	// try finding the variable
+	prev = &cvar_vars;
+	COMPUTE_HASH_KEY( hash_key , var_name , i );
+	for (var = cvar_vars ; var && var->hash_key <= hash_key ; var=var->next)
 	{
-		if (!Cvar_InfoValidate (var_value))
+		if (var->hash_key == hash_key && !Q_strcasecmp (var_name, var->name))
 		{
-			Com_Printf("invalid info cvar value\n");
-			return NULL;
+			*found = var;
+			return true;
 		}
+		prev = &( var->next );
 	}
 
-	// create the variable
-	nvar = Z_Malloc (sizeof(cvar_t));
-	nvar->name = CopyString (var_name);
-	nvar->string = CopyString (var_value);
-	nvar->modified = true;
-	nvar->value = atof (nvar->string);
-	nvar->integer = atoi (nvar->string);
-	nvar->flags = flags;
-	nvar->hash_key = hash_key;
-
-	// link the variable in
-	nvar->next = var;
-	*prev = nvar;
-
-	return nvar;
+	*found = Cvar_AddBetween(var_name , var_value , 0 , hash_key , prev , var);
+	return false;
 }
+
 
 /*
 ============
@@ -198,12 +264,9 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 {
 	cvar_t	*var;
 
-	// FIXME: this bit is inefficient, it looks up the variable twice (BlackIce)
-	var = Cvar_FindVar (var_name);
-	if (!var)
-	{	// create it
-		return Cvar_Get (var_name, value, 0);
-	}
+	// Find the variable; if it does not exist, create it and return at once
+	if (!Cvar_FindOrCreate (var_name, value, &var))
+		return var;
 
 	if (var->flags & (CVAR_USERINFO | CVAR_SERVERINFO))
 	{
@@ -309,12 +372,8 @@ cvar_t *Cvar_FullSet (char *var_name, char *value, int flags)
 {
 	cvar_t	*var;
 
-	// FIXME: this bit is inefficient, it looks up the variable twice (BlackIce)
-	var = Cvar_FindVar (var_name);
-	if (!var)
-	{	// create it
-		return Cvar_Get (var_name, value, flags);
-	}
+	if (!Cvar_FindOrCreate (var_name, value, &var))
+		return var;
 
 	var->modified = true;
 
