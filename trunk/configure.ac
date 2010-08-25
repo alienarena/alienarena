@@ -76,19 +76,19 @@ AM_CONDITIONAL([BUILD_DARWIN],[ test "x${cond_build_darwin}" = xyes ])
 #
 # Unix/Linux/Darwin dedicated server only build option
 #
-no_client=no
+build_client=yes
 AM_COND_IF([BUILD_WIN32],,
 	[
-	AC_MSG_CHECKING([whether to build dedicated server only])
+	AC_MSG_CHECKING([whether to build the client])
 	AC_ARG_ENABLE( 
-		[no_client],
-		[AS_HELP_STRING([--enable-no-client],
+		[client],
+		[AS_HELP_STRING([--disable-client],
 			[build dedicated server only, not the client (default:no)])],
-		[no_client=${enableval}],
-		[no_client=no])
-	AC_MSG_RESULT([${no_client}])
+		[build_client=${enableval}],
+		[build_client=yes])
+	AC_MSG_RESULT([${build_client}])
 	])
-AM_CONDITIONAL([BUILD_CLIENT],[ test "x${no_client}" = xno ])
+AM_CONDITIONAL([BUILD_CLIENT],[ test "x${build_client}" = xyes ])
 
 # Alternate Install. Install in the traditional single directory way.
 # Probably required for map making tools to work. Also, good when updating
@@ -398,8 +398,10 @@ AS_IF([test "x$hide_status" = "xno"],[
 	AS_ECHO(["Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"])
 	AS_ECHO([" OS ................. ${host_os}"])
 	AS_ECHO([" CPU: ............... ${host_cpu}"])
-	AM_COND_IF([BUILD_WIN32],,
-	[AS_ECHO([" Dedicated Only: .... ${no_client}"])])
+	AM_COND_IF([BUILD_WIN32],,[
+		AS_IF([ test "x$build_client" = "xyes" ],[dedicated_only=no],[dedicated_only=yes])
+		AS_ECHO([" Dedicated Only: .... ${dedicated_only}"])
+	])
 	AS_ECHO([" Alternate Install .. ${alternate_install}"])
 
 	AM_COND_IF([ALTERNATE_INSTALL],,
