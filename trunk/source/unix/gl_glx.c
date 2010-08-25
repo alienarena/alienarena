@@ -44,7 +44,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 #include <X11/cursorfont.h>
+#if defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 #include <X11/extensions/xf86vmode.h>
+#endif // defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 #if defined HAVE_XXF86DGA
 // xf86dga.h is deprecated, Xxf86dga.h is preferred
 #if defined HAVE_X11_EXTENSIONS_XXF86DGA_H
@@ -104,8 +106,9 @@ static cvar_t	*r_fakeFullscreen;
 extern cvar_t	*in_dgamouse;
 static int win_x, win_y;
 
+#if defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 static XF86VidModeModeInfo **vidmodes;
-static int num_vidmodes;
+#endif // defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 static qboolean vidmode_active = false;
 
 qboolean mouse_active = false;
@@ -142,16 +145,13 @@ void install_grabs(void)
 	Cvar_Set( "in_dgamouse", "0" );
 	dgamouse = false;
 	mouse_active = true;
-	return;
-#endif
-
-
-#if !defined HAVE_XXF86DGA
+#else // defined DEBUG_GDB_NOGRAB
+# if !defined HAVE_XXF86DGA
 	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
 	XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
 	Cvar_Set( "in_dgamouse", "0" );
 	dgamouse = false;
-#else
+# else // !defined HAVE_XXF86DGA
 	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
 
 	if (in_dgamouse->integer)
@@ -171,12 +171,12 @@ void install_grabs(void)
 	} else {
 		XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
 	}
-#endif
+# endif // !defined HAVE_XXF86DGA
 
 	XGrabKeyboard(dpy, win, False, GrabModeAsync, GrabModeAsync, CurrentTime);
 
 	mouse_active = true;
-
+#endif // defined DEBUG_GDB_NOGRAB
 }
 
 void uninstall_grabs(void)
@@ -552,6 +552,7 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	root = RootWindow(dpy, scrnum);
 
 	// Get video mode list
+#if defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 	MajorVersion = MinorVersion = 0;
 	if (!XF86VidModeQueryVersion(dpy, &MajorVersion, &MinorVersion)) {
 		vidmode_ext = false;
@@ -560,6 +561,9 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 			MajorVersion, MinorVersion);
 		vidmode_ext = true;
 	}
+#else // defined HAVE_X11_EXTENSIONS_XF86VMODE_H
+	vidmode_ext = false;
+#endif // defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 
 	visinfo = qglXChooseVisual(dpy, scrnum, attrib);
 	if (!visinfo) {
@@ -574,8 +578,9 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 		have_stencil = true;
 
 	vidmode_active = false;
+#if defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 	if (vidmode_ext) {
-		int best_fit, best_dist, dist, x, y;
+		int best_fit, best_dist, dist, x, y, num_vidmodes;
 
 		XF86VidModeGetAllModeLines(dpy, scrnum, &num_vidmodes, &vidmodes);
 
@@ -612,6 +617,7 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 				fullscreen = 0;
 		}
 	}
+#endif // defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 
 	/* window attributes */
 	attr.background_pixel = 0;
@@ -658,6 +664,7 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 
 	XMapWindow(dpy, win);
 
+#if defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 	if (vidmode_active) {
 		XMoveWindow(dpy, win, 0, 0);
 		XRaiseWindow(dpy, win);
@@ -666,6 +673,7 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 		// Move the viewport to top left
 		XF86VidModeSetViewPort(dpy, scrnum, 0, 0);
 	}
+#endif // defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 
 	XFlush(dpy);
 
@@ -708,8 +716,10 @@ void GLimp_Shutdown( void )
 			qglXDestroyContext(dpy, ctx);
 		if (win)
 			XDestroyWindow(dpy, win);
+#if defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 		if (vidmode_active)
 			XF86VidModeSwitchToMode(dpy, scrnum, vidmodes[0]);
+#endif // defined HAVE_X11_EXTENSIONS_XF86VMODE_H
 		XUngrabKeyboard(dpy, CurrentTime);
 		XCloseDisplay(dpy);
 	}

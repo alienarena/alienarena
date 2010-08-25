@@ -730,6 +730,7 @@ enable_dependency_tracking
 enable_client
 enable_alternate_install
 with_x
+with_xf86vm
 with_xf86dga
 enable_build_status
 '
@@ -1387,6 +1388,7 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-x                use the X Window System
+  --with(out)-xf86vm      include XF86 VidMode support (default: check)
   --with(out)-xf86dga     include XF86 DGA support (default: check)
 
 Some influential environment variables:
@@ -6215,7 +6217,18 @@ $as_echo "libraries $x_libraries, headers $x_includes" >&6; }
 fi
 
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing XF86VidModeQueryVersion" >&5
+
+# Check whether --with-xf86vm was given.
+if test "${with_xf86vm+set}" = set; then :
+  withval=$with_xf86vm;
+else
+  with_xf86vm=check
+fi
+
+	have_Xxf86vm=no
+	if  test "x$with_xf86vm" != "xno" ; then :
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing XF86VidModeQueryVersion" >&5
 $as_echo_n "checking for library containing XF86VidModeQueryVersion... " >&6; }
 if test "${ac_cv_search_XF86VidModeQueryVersion+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -6269,8 +6282,38 @@ ac_res=$ac_cv_search_XF86VidModeQueryVersion
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
+			for ac_header in X11/extensions/xf86vmode.h
+do :
+  ac_fn_c_check_header_compile "$LINENO" "X11/extensions/xf86vmode.h" "ac_cv_header_X11_extensions_xf86vmode_h" "
+				#include <X11/Xlib.h>
+
+"
+if test "x$ac_cv_header_X11_extensions_xf86vmode_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_X11_EXTENSIONS_XF86VMODE_H 1
+_ACEOF
+ have_Xxf86vm=yes
 fi
 
+done
+
+
+fi
+
+
+		if  test "x$with_xf86vm" = "xyes" ; then :
+
+			if  test "x${have_Xxf86vm}" = "xno" ; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error "--with-xf86vm specified, but the library or headers could not be found
+See \`config.log' for more details." "$LINENO" 5; }
+
+fi
+
+fi
+
+fi
 
 
 
@@ -6370,7 +6413,7 @@ fi
 			if  test "x${have_Xxf86dga}" = "xno" ; then :
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error "--with-xf86dga specified, but the library could not be found
+as_fn_error "--with-xf86dga specified, but the library or headers could not be found
 See \`config.log' for more details." "$LINENO" 5; }
 
 fi
@@ -7061,48 +7104,6 @@ fi
 
 done
 
-
-		for ac_header in X11/extensions/xf86vmode.h
-do :
-  ac_fn_c_check_header_compile "$LINENO" "X11/extensions/xf86vmode.h" "ac_cv_header_X11_extensions_xf86vmode_h" "#include <X11/Xlib.h>
-"
-if test "x$ac_cv_header_X11_extensions_xf86vmode_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_X11_EXTENSIONS_XF86VMODE_H 1
-_ACEOF
-
-else
-  as_fn_error "\"Required X11 x86 extension header file not found\"" "$LINENO" 5
-fi
-
-done
-
-
-		dga_found=no
-		for ac_header in X11/extensions/Xxf86dga.h X11/extensions/xf86dga.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
-			#include <X11/Xlib.h>
-			#include <X11/Xproto.h>
-			#include <X11/Xfuncproto.h>
-
-"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- dga_found=yes
-fi
-
-done
-
-
-		if  test "x${dga_found}" = xno ; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: \"X11 x86 DGA header file not found\"" >&5
-$as_echo "$as_me: WARNING: \"X11 x86 DGA header file not found\"" >&2;}
-fi
 
 		for ac_header in GL/gl.h GL/glu.h GL/glx.h
 do :
@@ -9523,8 +9524,8 @@ if test "x$hide_status" = "xno"; then :
 
 	$as_echo "-------------------------------------------"
 	$as_echo "Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"
-	$as_echo " OS ................. ${host_os}"
-	$as_echo " CPU: ............... ${host_cpu}"
+	$as_echo " OS: .................... ${host_os}"
+	$as_echo " CPU: ................... ${host_cpu}"
 	if  test "x${cond_build_win32}" = xyes ; then
   :
 else
@@ -9534,16 +9535,17 @@ else
 else
   dedicated_only=yes
 fi
-		$as_echo " Dedicated Only: .... ${dedicated_only}"
+		$as_echo " Dedicated Only: ........ ${dedicated_only}"
 
 fi
-	$as_echo " XF86 DGA support ... ${have_Xxf86dga}"
-	$as_echo " Alternate Install .. ${alternate_install}"
+	$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
+	$as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
+	$as_echo " Alternate install: ..... ${alternate_install}"
 
 	if  test "x${alternate_install}" = xyes ; then
   :
 else
-  $as_echo " Prefix: ............ '${prefix}'"
+  $as_echo " Prefix: ................ '${prefix}'"
 fi
 
 	if  test "x${alternate_install}" = xyes ; then
