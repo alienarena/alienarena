@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-ACLOCAL_AMFLAGS=`-I m4'
+ACLOCAL_AMFLAGS= -I m4 
 
 AM_CPPFLAGS = -I $(top_srcdir)/source
 

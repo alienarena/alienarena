@@ -194,8 +194,8 @@ dnl TEMPORARY BYPASS
 	dnl XF86 VidMode extension
 	dnl
 	dnl If no option is specified, then check for the library and act accordingly.
-	dnl If "--without-xf86dga" is specified, do not check, and disable the library.
-	dnl If "--with-xf86dga" is specified, check and bail out if it cannot be found.
+	dnl If "--without-xf86vm" is specified, do not check, and disable the library.
+	dnl If "--with-xf86vm" is specified, check and bail out if it cannot be found.
 	dnl
 	AC_ARG_WITH([xf86vm],
 		[AS_HELP_STRING([--with(out)-xf86vm],[include XF86 VidMode support (default: check)])],
