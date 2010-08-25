@@ -190,7 +190,31 @@ dnl TEMPORARY BYPASS
 
 	AC_PATH_X
 
-	AC_SEARCH_LIBS([XF86VidModeQueryVersion],[Xxf86vm])
+	dnl
+	dnl XF86 VidMode extension
+	dnl
+	dnl If no option is specified, then check for the library and act accordingly.
+	dnl If "--without-xf86dga" is specified, do not check, and disable the library.
+	dnl If "--with-xf86dga" is specified, check and bail out if it cannot be found.
+	dnl
+	AC_ARG_WITH([xf86vm],
+		[AS_HELP_STRING([--with(out)-xf86vm],[include XF86 VidMode support (default: check)])],
+		[],
+		[with_xf86vm=check])
+	have_Xxf86vm=no
+	AS_IF([ test "x$with_xf86vm" != "xno" ],[
+		AC_SEARCH_LIBS([XF86VidModeQueryVersion],[Xxf86vm],[
+			AC_CHECK_HEADERS([X11/extensions/xf86vmode.h],[have_Xxf86vm=yes],,[
+				#include <X11/Xlib.h>
+			])
+		])
+
+		AS_IF([ test "x$with_xf86vm" = "xyes" ],[
+			AS_IF([ test "x${have_Xxf86vm}" = "xno" ],
+				[AC_MSG_FAILURE([--with-xf86vm specified, but the library or headers could not be found])
+			])
+		])
+	])
 
 
 	dnl
@@ -218,7 +242,7 @@ dnl TEMPORARY BYPASS
 		])
 		AS_IF([ test "x$with_xf86dga" = "xyes" ],[
 			AS_IF([ test "x${have_Xxf86dga}" = "xno" ],
-				[AC_MSG_FAILURE([--with-xf86dga specified, but the library could not be found])
+				[AC_MSG_FAILURE([--with-xf86dga specified, but the library or headers could not be found])
 			])
 		])
 	])
@@ -300,10 +324,6 @@ dnl jpeg may be available in a Framework
 	[
 		AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
 			[AC_MSG_ERROR("Required X11 header files not found")])
-
-		AC_CHECK_HEADERS([X11/extensions/xf86vmode.h],,
-			[AC_MSG_ERROR("Required X11 x86 extension header file not found")],
-			[#include <X11/Xlib.h>])
 
 		AC_CHECK_HEADERS([GL/gl.h GL/glu.h GL/glx.h],,
 			[AC_MSG_ERROR("Required OpenGL header files not found.")])
@@ -410,17 +430,18 @@ AC_ARG_ENABLE([build-status],[AS_HELP_STRING([--disable-build-status],
 AS_IF([test "x$hide_status" = "xno"],[
 	AS_ECHO(["-------------------------------------------"])
 	AS_ECHO(["Package: ${PACKAGE_NAME} Version: ${PACKAGE_VERSION}"])
-	AS_ECHO([" OS ................. ${host_os}"])
-	AS_ECHO([" CPU: ............... ${host_cpu}"])
+	AS_ECHO([" OS: .................... ${host_os}"])
+	AS_ECHO([" CPU: ................... ${host_cpu}"])
 	AM_COND_IF([BUILD_WIN32],,[
 		AS_IF([ test "x$build_client" = "xyes" ],[dedicated_only=no],[dedicated_only=yes])
-		AS_ECHO([" Dedicated Only: .... ${dedicated_only}"])
+		AS_ECHO([" Dedicated Only: ........ ${dedicated_only}"])
 	])
-	AS_ECHO([" XF86 DGA support ... ${have_Xxf86dga}"])
-	AS_ECHO([" Alternate Install .. ${alternate_install}"])
+	AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
+	AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+	AS_ECHO([" Alternate install: ..... ${alternate_install}"])
 
 	AM_COND_IF([ALTERNATE_INSTALL],,
-		[AS_ECHO([" Prefix: ............ '${prefix}'"])])
+		[AS_ECHO([" Prefix: ................ '${prefix}'"])])
 
 	AM_COND_IF([ALTERNATE_INSTALL],
 		[AS_ECHO(["Run \"make\" to build, then \"make install-alternate\" to install."])],
