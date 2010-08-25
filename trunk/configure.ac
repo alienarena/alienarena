@@ -186,15 +186,42 @@ dnl TEMPORARY BYPASS
 		[AC_MSG_WARN(["Required curl library not found."])],
 		[ $curl_xtralibs ])
 
+	dnl TODO: do we really have to search for X11 and DGA while building for Win32? - BlackIce
+
 	AC_PATH_X
 
 	AC_SEARCH_LIBS([XF86VidModeQueryVersion],[Xxf86vm])
 
+
+	dnl
+	dnl XF86 DGA extension
+	dnl
+	dnl If no option is specified, then check for the library and act accordingly.
+	dnl If "--without-xf86dga" is specified, do not check, and disable the library.
+	dnl If "--with-xf86dga" is specified, check and bail out if it cannot be found.
+	dnl
+	AC_ARG_WITH([xf86dga],
+		[AS_HELP_STRING([--with(out)-xf86dga],[include XF86 DGA support (default: check)])],
+		[],
+		[with_xf86dga=check])
 	have_Xxf86dga=no
-	AC_SEARCH_LIBS([XF86DGAQueryVersion],[Xxf86dga xxf86dga],[have_Xxf86dga=yes])
-	AS_IF([ test "x${have_Xxf86dga}" = xyes ],
-		[AC_DEFINE([HAVE_XXF86DGA],1,
-			[Define to 1 if you have the Xxf86dga library])])
+	AS_IF([ test "x$with_xf86dga" != "xno" ],[
+		AC_SEARCH_LIBS([XF86DGAQueryVersion],[Xxf86dga xxf86dga],[
+			AC_CHECK_HEADERS([X11/extensions/Xxf86dga.h X11/extensions/xf86dga.h],[
+				AC_DEFINE([HAVE_XXF86DGA],1,[Define to 1 if you have the Xxf86dga library])
+				have_Xxf86dga=yes
+			],,[
+				#include <X11/Xlib.h>  
+				#include <X11/Xproto.h>
+				#include <X11/Xfuncproto.h>
+			])
+		])
+		AS_IF([ test "x$with_xf86dga" = "xyes" ],[
+			AS_IF([ test "x${have_Xxf86dga}" = "xno" ],
+				[AC_MSG_FAILURE([--with-xf86dga specified, but the library could not be found])
+			])
+		])
+	])
 
 # these set GL_CFLAGS, GL_LIBS, GLU_CFLAGS, GLU_LIBS
 	AX_CHECK_GL
@@ -277,19 +304,6 @@ dnl jpeg may be available in a Framework
 		AC_CHECK_HEADERS([X11/extensions/xf86vmode.h],,
 			[AC_MSG_ERROR("Required X11 x86 extension header file not found")],
 			[#include <X11/Xlib.h>])
-
-		dga_found=no
-		AC_CHECK_HEADERS(
-			[X11/extensions/Xxf86dga.h X11/extensions/xf86dga.h],
-			[dga_found=yes],,
-			[
-			#include <X11/Xlib.h>  
-			#include <X11/Xproto.h>
-			#include <X11/Xfuncproto.h>
-			])
-			
-		AS_IF([ test "x${dga_found}" = xno ],
-			[AC_MSG_WARN("X11 x86 DGA header file not found")])
 
 		AC_CHECK_HEADERS([GL/gl.h GL/glu.h GL/glx.h],,
 			[AC_MSG_ERROR("Required OpenGL header files not found.")])
@@ -402,6 +416,7 @@ AS_IF([test "x$hide_status" = "xno"],[
 		AS_IF([ test "x$build_client" = "xyes" ],[dedicated_only=no],[dedicated_only=yes])
 		AS_ECHO([" Dedicated Only: .... ${dedicated_only}"])
 	])
+	AS_ECHO([" XF86 DGA support ... ${have_Xxf86dga}"])
 	AS_ECHO([" Alternate Install .. ${alternate_install}"])
 
 	AM_COND_IF([ALTERNATE_INSTALL],,
