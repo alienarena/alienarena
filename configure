@@ -727,7 +727,7 @@ enable_option_checking
 enable_silent_rules
 enable_maintainer_mode
 enable_dependency_tracking
-enable_no_client
+enable_client
 enable_alternate_install
 with_x
 enable_build_status
@@ -1374,7 +1374,7 @@ Optional Features:
 			  (and sometimes confusing) to the casual installer
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
-  --enable-no-client      build dedicated server only, not the client
+  --disable-client        build dedicated server only, not the client
                           (default:no)
   --enable-alternate-install
                           traditional single directory, in-place installation
@@ -4757,25 +4757,25 @@ fi
 #
 # Unix/Linux/Darwin dedicated server only build option
 #
-no_client=no
+build_client=yes
 if  test "x${cond_build_win32}" = xyes ; then
   :
 else
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build dedicated server only" >&5
-$as_echo_n "checking whether to build dedicated server only... " >&6; }
-	# Check whether --enable-no_client was given.
-if test "${enable_no_client+set}" = set; then :
-  enableval=$enable_no_client; no_client=${enableval}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build the client" >&5
+$as_echo_n "checking whether to build the client... " >&6; }
+	# Check whether --enable-client was given.
+if test "${enable_client+set}" = set; then :
+  enableval=$enable_client; build_client=${enableval}
 else
-  no_client=no
+  build_client=yes
 fi
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${no_client}" >&5
-$as_echo "${no_client}" >&6; }
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${build_client}" >&5
+$as_echo "${build_client}" >&6; }
 
 fi
- if  test "x${no_client}" = xno ; then
+ if  test "x${build_client}" = xyes ; then
   BUILD_CLIENT_TRUE=
   BUILD_CLIENT_FALSE='#'
 else
@@ -5591,7 +5591,7 @@ fi
 done
 
 
-if  test "x${no_client}" = xno ; then
+if  test "x${build_client}" = xyes ; then
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing zlibVersion" >&5
 $as_echo_n "checking for library containing zlibVersion... " >&6; }
@@ -6906,7 +6906,7 @@ fi
 done
 
 
-if  test "x${no_client}" = xno ; then
+if  test "x${build_client}" = xyes ; then
 
 
 	jpeglib_h_found=no
@@ -9481,7 +9481,14 @@ if test "x$hide_status" = "xno"; then :
 	if  test "x${cond_build_win32}" = xyes ; then
   :
 else
-  $as_echo " Dedicated Only: .... ${no_client}"
+
+		if  test "x$build_client" = "xyes" ; then :
+  dedicated_only=no
+else
+  dedicated_only=yes
+fi
+		$as_echo " Dedicated Only: .... ${dedicated_only}"
+
 fi
 	$as_echo " Alternate Install .. ${alternate_install}"
 
