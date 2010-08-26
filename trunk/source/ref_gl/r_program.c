@@ -363,6 +363,7 @@ static char bsp_fragment_program[] =
 "{\n"
 "   vec4 diffuse;\n"
 "   vec4 lightmap;\n"
+"	vec4 alphamask;\n"
 "   float distanceSquared;\n"
 "   vec3 relativeLightDirection;\n"
 "   float diffuseTerm;\n"
@@ -383,18 +384,19 @@ static char bsp_fragment_program[] =
 "   vec3 normal = 2.0 * ( texture2D( NormalTexture, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );\n"
 "   vec3 textureColour = texture2D( surfTexture, gl_TexCoord[0].xy ).rgb;\n"
 
-"   lightmap = texture2D(lmTexture, gl_TexCoord[1].st);\n"
+"   lightmap = texture2D( lmTexture, gl_TexCoord[1].st );\n"
+"	alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );\n"
 
 "   //shadows\n"
 "   dynshadowval = lookupDynshadow();\n"
 
 "   if(PARALLAX > 0) {\n"
 "      //do the parallax mapping\n"
-"      vec4 Offset = texture2D(HeightTexture,gl_TexCoord[0].xy);\n"
+"      vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
 "      Offset = Offset * 0.04 - 0.02;\n"
 "      vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;\n"
 
-"      diffuse = texture2D(surfTexture, TexCoords);\n"
+"      diffuse = texture2D( surfTexture, TexCoords );\n"
 
 "      distanceSquared = dot( StaticLightDir, StaticLightDir );\n"
 "      relativeLightDirection = StaticLightDir / sqrt( distanceSquared );\n"
@@ -467,6 +469,7 @@ static char bsp_fragment_program[] =
 "      }\n"
 "      gl_FragColor = dynamicColour;\n"
 "   }\n"
+"	gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);\n"
 "   if(FOG > 0)\n"
 "      gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);\n"
 "}\n";
