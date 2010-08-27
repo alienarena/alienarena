@@ -813,3 +813,10 @@ maps/meshes/xempx/ceillight
 		glow
 	}
 }
+maps/meshes/toxicbarrell
+{
+	{
+		map maps/meshes/toxicbarrell_normal.jpg
+		normalmap
+	}
+}
