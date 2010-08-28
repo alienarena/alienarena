@@ -50,8 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * While I have added Cvar's that control some of the IRC client's behaviour
  * (port, channel, nickname override, delay before autorejoin, delay before
  * reconnection), these should probably be added to a sub-menu of the IRC
- * client menu. In addition, the IRC client's current status is no longer
- * displayed on the IRC menu screen, but that shouldn't be hard to fix.
+ * client menu.
  *
  *
  *  PRIVATE MESSAGES
@@ -61,15 +60,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * will send an automated "not supported" message (see IRCH_Message()).
  * However this could be exploited to flood an user out of the IRC server,
  * some measures should be taken to prevent that from happening.
- *
- *
- *  NON-ASCII CHARACTERS
- * ----------------------
- *
- * Non-ASCII characters are not filtered out at this time. Or'ing them with
- * 0x7f is definitely a bad idea as it would possibly add control characters
- * to the input. For now, they are "displayed" which kind of messes up the
- * colours.
  *
  *
  *  THREAD STATUS
