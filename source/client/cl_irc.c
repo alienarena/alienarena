@@ -728,6 +728,8 @@ static qboolean IRC_Parser( char next )
 			} else if ( next == ' ' || iscntrl( next ) ) {
 				P_AUTO_ERROR;
 			} else {
+				if ( next & 0x80 )
+					next = '?';
 				P_SET_STATE(MID_PARAM);
 				P_START_PARAM;
 			}
@@ -746,6 +748,8 @@ static qboolean IRC_Parser( char next )
 			} else if ( iscntrl( next ) ) {
 				P_ERROR(RECOVERY);
 			} else {
+				if ( next & 0x80 )
+					next = '?';
 				P_ADD_PARAM;
 			}
 			break;
@@ -759,8 +763,11 @@ static qboolean IRC_Parser( char next )
 			if ( next == '\r' ) {
 				P_SET_STATE(LF);
 			} else {
-				if ( iscntrl( next ) )
+				if ( iscntrl( next ) ) {
 					next = ' ';
+				} else if ( next & 0x80 ) {
+					next = '?';
+				}
 				P_ADD_PARAM;
 			}
 			break;
