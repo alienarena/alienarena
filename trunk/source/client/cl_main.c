@@ -140,10 +140,6 @@ cvar_t  *cl_noblood;
 //beam color for disruptor
 cvar_t  *cl_disbeamclr;
 
-//IRC
-cvar_t	*cl_IRC_connect_at_startup;
-cvar_t	*cl_IRC_server;
-
 //Stats
 cvar_t  *cl_stats_server;
 
@@ -1708,11 +1704,7 @@ void CL_InitLocal (void)
 
 	CL_InitHttpDownload();
 
-	cl_IRC_connect_at_startup = Cvar_Get("cl_IRC_connect_at_startup", "1", CVAR_ARCHIVE);
-	cl_IRC_server = Cvar_Get("cl_IRC_server", "irc.planetarena.org", CVAR_ARCHIVE);
-
-	if(cl_IRC_connect_at_startup->value)
-		CL_InitIRC();
+	CL_IRCSetup( );
 
 	adr0 = Cvar_Get( "adr0", "", CVAR_ARCHIVE );
 	adr1 = Cvar_Get( "adr1", "", CVAR_ARCHIVE );
