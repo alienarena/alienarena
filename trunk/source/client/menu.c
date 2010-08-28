@@ -2994,10 +2994,12 @@ void IRC_MenuDraw( void )
 		M_DrawTextBox( -32*scale, (int)(FONTSCALE*-95*scale), 40/scale, 2 );
 		M_Print( (int)(FONTSCALE*32*scale), (int)(FONTSCALE*-85*scale),  "You must create your player" );
 		M_Print( (int)(FONTSCALE*32*scale), (int)(FONTSCALE*-75*scale),  "name before joining a server!" );
-	}
-	else if(cls.irc_connected) {
+	} else if(CL_IRCIsConnected()) {
 		M_DrawTextBox( -28*scale, (int)(FONTSCALE*-95*scale), 36/scale, 1 );
-		M_Print( (int)(FONTSCALE*28*scale), (int)(FONTSCALE*-80*scale),  "Connected to IRC server..." );
+		M_Print( (int)(FONTSCALE*28*scale), (int)(FONTSCALE*-80*scale),  "Connected to IRC server." );
+	} else if(CL_IRCIsRunning()) {
+		M_DrawTextBox( -28*scale, (int)(FONTSCALE*-95*scale), 36/scale, 1 );
+		M_Print( (int)(FONTSCALE*28*scale), (int)(FONTSCALE*-80*scale),  "Connecting to IRC server..." );
 	}
 
 	Menu_AdjustCursor( &s_irc_menu, 1 );
