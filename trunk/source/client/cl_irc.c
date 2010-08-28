@@ -263,13 +263,14 @@ static struct irc_user_t IRC_User;
  * Events that can be displayed and flags that apply to them.
  */
 
-#define IRC_EVT_SAY	0x00000000	// Standard message
-#define IRC_EVT_ACT	0x00000001	// /me message
-#define IRC_EVT_JOIN	0x00000002	// Join
-#define IRC_EVT_PART	0x00000003	// Part
-#define IRC_EVT_QUIT	0x00000004	// Quit
-#define IRC_EVT_KICK	0x00000005	// Kick
-#define IRC_EVTF_SELF	0x00000100	// Event applies to current user
+#define IRC_EVT_SAY		0x00000000	// Standard message
+#define IRC_EVT_ACT		0x00000001	// /me message
+#define IRC_EVT_JOIN		0x00000002	// Join
+#define IRC_EVT_PART		0x00000003	// Part
+#define IRC_EVT_QUIT		0x00000004	// Quit
+#define IRC_EVT_KICK		0x00000005	// Kick
+#define IRC_EVT_NICK_CHANGE	0x00000006	// Nick change
+#define IRC_EVTF_SELF		0x00000100	// Event applies to current user
 
 
 #define IRC_EventType(evt) ( evt & 0xff )
@@ -1081,6 +1082,14 @@ static void IRC_Display( int event , const char * nick , const char *message )
 				fmt_string = "^5<- ^7%s^5 has been kicked: %s.";
 			}
 			break;
+		case IRC_EVT_NICK_CHANGE:
+			has_nick = has_message = true;
+			if ( IRC_EventIsSelf( event ) ) {
+				fmt_string = "^2** ^7%s^2 is now known as ^7%s^2.";
+			} else {
+				fmt_string = "^5** ^7%s^5 is now known as ^7%s^5.";
+			}
+			break;
 		default:
 			has_nick = has_message = false;
 			fmt_string = "unknown message received";
@@ -1278,6 +1287,32 @@ static int IRCH_Kick( )
 	} else {
 		IRC_Display( IRC_MakeEvent(KICK, 0) , IRC_ReceivedMessage.arg_values[ 1 ] , IRC_ReceivedMessage.arg_values[ 2 ] );
 	}
+	return IRC_CMD_SUCCESS;
+}
+
+
+/*
+ * Received NICK
+ *
+ * While the AA client does not support changing the current nickname,
+ * it is still possible to receive a NICK applying to the connected user
+ * because of e.g. OperServ's SVSNICK command.
+ */
+static int IRCH_Nick( )
+{
+	int event;
+
+	if ( IRC_ReceivedMessage.arg_count != 1 )
+		return IRC_CMD_SUCCESS;
+
+	if ( !strcmp( IRC_ReceivedMessage.pfx_nickOrServer , IRC_User.nick ) ) {
+		strncpy( IRC_User.nick , IRC_ReceivedMessage.arg_values[ 0 ] , 15 );
+		Com_Printf( "%s\n", IRC_User.nick );
+		event = IRC_MakeEvent(NICK_CHANGE, 1);
+	} else {
+		event = IRC_MakeEvent(NICK_CHANGE, 0);
+	}
+	IRC_Display( event , IRC_ReceivedMessage.pfx_nickOrServer , IRC_ReceivedMessage.arg_values[ 0 ] );
 	return IRC_CMD_SUCCESS;
 }
 
@@ -1750,6 +1785,7 @@ static void IRC_Thread( )
 	IRC_AddHandler( "QUIT" , &IRCH_Quit );		// Client quit
 	IRC_AddHandler( "PRIVMSG" , &IRCH_Message );	// Message
 	IRC_AddHandler( "KICK" , &IRCH_Kick );		// Kick
+	IRC_AddHandler( "NICK" , &IRCH_Nick );		// Nick change
 	IRC_AddHandler( "001" , &IRCH_Connected );	// Connection established
 	IRC_AddHandler( "404" , &IRCH_Banned );		// Banned (when sending message)
 	IRC_AddHandler( "432" , &IRCH_FatalError );	// Erroneous nick name
