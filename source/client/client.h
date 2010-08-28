@@ -246,10 +246,6 @@ typedef struct
 	char		downloadurl[MAX_OSPATH];  // for http downloads
 	qboolean	downloadhttp;
 
-	int			irc_connected;		//track irc connection
-	int			irc_joinedchannel;
-	int			irc_canjoin;
-
 // demo recording info must be here, so it isn't cleared on level change
 	qboolean	demorecording;
 	qboolean	demowaiting;	// don't record until a non-delta message is received
@@ -325,6 +321,10 @@ extern  cvar_t	*cl_IRC_connect_at_startup;
 extern	cvar_t	*cl_IRC_server;
 extern	cvar_t	*cl_IRC_channel;
 extern	cvar_t	*cl_IRC_port;
+extern	cvar_t	*cl_IRC_override_nickname;
+extern	cvar_t	*cl_IRC_nickname;
+extern	cvar_t	*cl_IRC_kick_rejoin;
+extern	cvar_t	*cl_IRC_reconnect_delay;
 
 typedef struct
 {
@@ -581,6 +581,8 @@ void CL_IRCSetup(void);
 void CL_InitIRC(void);
 void CL_IRCShutdown(void);
 void CL_IRCSay(void);
+qboolean CL_IRCIsConnected(void);
+qboolean CL_IRCIsRunning(void);
 
 //
 // cl_demo.c

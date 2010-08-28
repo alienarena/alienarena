@@ -1879,3 +1879,15 @@ void CL_IRCShutdown(void)
 	IRC_QuitRequested = true;
 	IRC_WaitThread( );
 }
+
+
+qboolean CL_IRCIsConnected(void)
+{
+	return ( IRC_ThreadStatus == IRC_THREAD_JOINED );
+}
+
+
+qboolean CL_IRCIsRunning(void)
+{
+	return ( IRC_ThreadStatus != IRC_THREAD_DEAD );
+}
