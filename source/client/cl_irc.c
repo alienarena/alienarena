@@ -35,15 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * entirely possible that some of them will not even compile.
  *
  *
- *  IRC PROTOCOL
- * --------------
- *
- * I had completely forgotten that RFC 2812 existed. Therefore, while the code
- * in this version is RFC 1459-compliant, some stuff might not really work as
- * it's supposed to. I haven't had any problems with it, but having it comply
- * with the updated RFC should be a priority.
- *
- *
  *  CONTROL
  * ---------
  *
@@ -210,7 +201,7 @@ static qboolean IRC_ParserError;
  * probably be a pointless exercise).
  */
 
-#define IRC_MAX_PARAMS 254
+#define IRC_MAX_PARAMS 14
 
 struct irc_message_t {
 	char pfx_nickOrServer[508];		// Nickname / server name
@@ -604,15 +595,13 @@ static qboolean IRC_Parser( char next )
 			break;
 
 		/*
-		 * User name; ' ' and '@' will cause state changes, '!' and
+		 * User name; '@' will cause state changes, '!' , ' ' and
 		 * control characters will cause errors.
 		 */
 		case IRC_PARSER_PFX_USER:
 			if ( next == '@' ) {
 				P_SET_STATE(PFX_HOST_START);
-			} else if ( next == ' ' ) {
-				P_SET_STATE(COMMAND_START);
-			} else if ( next == '!' || iscntrl( next ) ) {
+			} else if ( next == '!' || next == ' ' || iscntrl( next ) ) {
 				P_AUTO_ERROR;
 			} else {
 				P_ADD_STRING(pfx_user);
@@ -1549,10 +1538,10 @@ static qboolean IRC_InitialiseUser( const char * name )
 		}
 
 		c = source[i ++];
-		if ( j == 0 && !isalpha( c ) ) {
-			c = 'X';
+		if ( j == 0 && !( isalpha( c ) || strchr( "[]\\`_^{|}" , c ) ) ) {
+			c = '_';
 			replaced ++;
-		} else if ( j > 0 && !( isalnum( c ) || strchr( "-[]\\`^{}" , c ) ) ) {
+		} else if ( j > 0 && !( isalnum( c ) || strchr( "-[]\\`_^{|}" , c ) ) ) {
 			c = '_';
 			replaced ++;
 		}
