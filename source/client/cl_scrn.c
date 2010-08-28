@@ -297,10 +297,28 @@ IRC PRINTING
 ===============================================================================
 */
 
-char		scr_IRCstring[5][1024];
-float		scr_IRCtime_start;	// for slow victory printing
-float		scr_IRCtime_off;
+extern vec4_t		Color_Table[8];
+extern console_t	con;
+
+#define SCR_IRC_LINES	5
+#define SCR_IRC_DLINES	2
+#define SCR_IRC_INDENT	8
+
+#define SCR_IRC_DISPLAY_HIDE 0		// During line bumping
+#define SCR_IRC_DISPLAY_PARTIAL 1	// When a new line is being added
+#define SCR_IRC_DISPLAY_FULL 2		// No problemo
+
+struct scr_ircstring_t {
+	int n_lines;
+	char lines[SCR_IRC_DLINES][512];
+};
+
+struct scr_ircstring_t	scr_IRCstring_contents[SCR_IRC_LINES];
+struct scr_ircstring_t *scr_IRCstring[SCR_IRC_LINES];
+float			scr_IRCtime_start;	// for slow victory printing
+float			scr_IRCtime_off;
 int			scr_IRC_lines = -1;
+int			scr_IRC_display = SCR_IRC_DISPLAY_FULL;
 
 /*
 ==============
@@ -310,55 +328,112 @@ Called for IRC messages
 ==============
 */
 
-void IRC_BumpMsg(void)
-{
-	int i;
 
-	for(i = 0; i < scr_IRC_lines; i++)
-		strcpy(scr_IRCstring[i], scr_IRCstring[i+1]);
+void IRC_SetNextLine( int len , const char *buffer )
+{
+	struct scr_ircstring_t * to_set;
+	int i , next_space , cur_len;
+	qboolean new_line;
+
+	// Access the correct line buffer
+	scr_IRC_display = SCR_IRC_DISPLAY_HIDE;
+	if ( scr_IRC_lines < SCR_IRC_LINES - 1 ) {
+		scr_IRC_lines ++;
+		to_set = scr_IRCstring_contents + scr_IRC_lines;
+	} else {
+		to_set = scr_IRCstring[ 0 ];
+		for ( i = 0 ; i < SCR_IRC_LINES - 1 ; i ++ )
+			scr_IRCstring[ i ] = scr_IRCstring[ i + 1 ];
+	}
+	scr_IRCstring[ scr_IRC_lines ] = to_set;
+	scr_IRC_display = SCR_IRC_DISPLAY_PARTIAL;
+
+	// Handle wrapping
+	memset( to_set , 0 , sizeof( struct scr_ircstring_t ) );
+	i = cur_len = 0;
+	new_line = true;
+	while ( i < len ) {
+		while ( i < len && buffer[ i ] == ' ' )
+			i ++;
+		if ( i == len )
+			break;
+
+		if ( new_line ) {
+			if ( to_set->n_lines == SCR_IRC_DLINES )
+				break;
+
+			if ( to_set->n_lines ++ ) {
+				memset( to_set->lines[ to_set->n_lines - 1 ] , ' ' , SCR_IRC_INDENT );
+				cur_len = SCR_IRC_INDENT;
+			} else {
+				cur_len = 0;
+			}
+			new_line = false;
+		}
+
+		// Find next space
+		next_space = i;
+		while ( next_space < len && buffer[ next_space ] != ' ' )
+			next_space ++;
+		if ( next_space == len )
+			next_space --;
+
+		if ( cur_len + next_space - i < con.linewidth ) {
+			// The word fits.
+			memcpy( to_set->lines[ to_set->n_lines - 1 ] + cur_len , buffer + i , next_space - i + 1 );
+			cur_len += next_space - i + 1;
+			i = next_space + 1;
+		} else {
+			if ( next_space - i + 1 >= con.linewidth - SCR_IRC_INDENT ) {
+				// Long "word" that would not fit in any case, break it
+				memcpy( to_set->lines[ to_set->n_lines - 1 ] + cur_len , buffer + i , con.linewidth - cur_len );
+				i += con.linewidth - cur_len;
+			}
+			new_line = true;
+		}
+	}
+
+	// Restore IRC display and update time-related variables
+	scr_IRCtime_off = 15;
+	scr_IRCtime_start = cl.time;
+	scr_IRC_display = SCR_IRC_DISPLAY_FULL;
 }
+
 
 void SCR_IRCPrintf (char *fmt, ...)
 {
 	va_list		argptr;
 	char		msg[1024];
+	int		len;
 
 	va_start (argptr,fmt);
-	vsnprintf(msg, sizeof(msg), fmt, argptr);
+	len = vsnprintf(msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
 
-	scr_IRCtime_off = 15;
-	scr_IRCtime_start = cl.time;
+	if ( len >= sizeof(msg) )
+		len = sizeof( msg ) - 1;
 
-	// count the number of lines
-	if(scr_IRC_lines < 4)
-		scr_IRC_lines += 1;
-	else
-		IRC_BumpMsg();
-
-	strncpy (scr_IRCstring[scr_IRC_lines], msg, sizeof(scr_IRCstring[scr_IRC_lines])-1);
+	IRC_SetNextLine( len , msg );
 }
 
-extern vec4_t	Color_Table[8];
 
-void SCR_DrawColorString ( int x, int y, const char *str )
+int SCR_DrawColorString ( int x, int y, const char *str , qboolean reset_color , int color )
 {
-	int		num;
+	int	num;
 	vec4_t	scolor;
 	int	charscale;
+	int	ccolor;
 
 	charscale = (float)(viddef.height)*8/600;
 	if(charscale < 8)
 		charscale = 8;
 
-	scolor[0] = 0;
-	scolor[1] = 1;
-	scolor[2] = 0;
+	VectorCopy ( Color_Table[ccolor = color], scolor );
 	scolor[3] = 1;
 
 	while (*str) {
 		if ( Q_IsColorString( str ) ) {
-			VectorCopy ( Color_Table[ColorIndex(str[1])], scolor );
+			VectorCopy ( Color_Table[ccolor = ColorIndex(str[1])], scolor );
 			str += 2;
 			continue;
 		}
@@ -368,45 +443,44 @@ void SCR_DrawColorString ( int x, int y, const char *str )
 		num = *str++;
 		num &= 255;
 
-		if ( (num&127) == 32 ) { //spaces reset colors
-			scolor[0] = 0;
-			scolor[1] = 1;
-			scolor[2] = 0;
-			scolor[3] = 1;
+		if ( reset_color && (num&127) == 32 ) { //spaces reset colors
+			VectorCopy ( Color_Table[ccolor = color], scolor );
 		}
 
 		x += charscale;
 	}
+	return ccolor;
 }
-void SCR_DrawIRCString (int lineNum)
-{
-	int		x, y;
-	int		charscale;
 
-	charscale = (float)(viddef.height)*8/600;
-	if(charscale < 8)
-		charscale = 8;
-
-	y = charscale*5 + lineNum*charscale;
-	x = 0;
-
-	SCR_AddDirtyPoint (x, y);
-	SCR_DrawColorString (x, y, scr_IRCstring[lineNum]);
-	SCR_AddDirtyPoint (x, y+charscale);
-
-}
 
 void SCR_CheckDrawIRCString (void)
 {
-	int i;
+	int		i , j , last_line;
+	int		ccolor;
+	int		charscale;
+	int		y;
 
 	scr_IRCtime_off -= cls.frametime;
-
-	if (scr_IRCtime_off <= 0)
+	if (scr_IRCtime_off <= 0 || scr_IRC_display == SCR_IRC_DISPLAY_HIDE)
 		return;
 
-	for(i = 0; i <= scr_IRC_lines; i++)
-		SCR_DrawIRCString (i);
+	last_line = ( scr_IRC_display == SCR_IRC_DISPLAY_FULL ) ? scr_IRC_lines : ( scr_IRC_lines - 1 );
+	if ( last_line == -1 )
+		return;
+
+	charscale = (float)(viddef.height)*8/600;
+	if (charscale < 8)
+		charscale = 8;
+	y = charscale * 5;
+	ccolor = 2;
+
+	for ( i = 0 ; i <= last_line ; i ++ ) {
+		for ( j = 0 ; j < scr_IRCstring[ i ]->n_lines ; j ++ , y += charscale ) {
+			SCR_AddDirtyPoint (0, y);
+			ccolor = SCR_DrawColorString (0, y, scr_IRCstring[ i ]->lines[ j ] , false , ccolor);
+			SCR_AddDirtyPoint (0, y+charscale);
+		}
+	}
 }
 
 //=============================================================================
@@ -1735,7 +1809,7 @@ void SCR_DrawPlayerIcon(void) {
 	h*=scale;
 
 	Draw_AlphaStretchPlayerIcon( -w+(w*iconPos), viddef.height/2 + h/2, w, h, scr_playericon, scr_playericonalpha);
-	SCR_DrawColorString ( -w+(w*iconPos), viddef.height/2 + h + 32*scale, scr_playername);
+	SCR_DrawColorString ( -w+(w*iconPos), viddef.height/2 + h + 32*scale, scr_playername , true , 2);
 }
 
 /*

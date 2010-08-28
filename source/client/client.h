@@ -323,6 +323,8 @@ extern  cvar_t  *background_music;
 
 extern  cvar_t	*cl_IRC_connect_at_startup;
 extern	cvar_t	*cl_IRC_server;
+extern	cvar_t	*cl_IRC_channel;
+extern	cvar_t	*cl_IRC_port;
 
 typedef struct
 {
@@ -575,18 +577,7 @@ float CL_KeyState (kbutton_t *key);
 char *Key_KeynumToString (int keynum);
 
 //cl_irc.c
-typedef struct IRCresponse_s
-{
-	char word[200][50];
-	int words;
-} IRCresponse_t;
-
-typedef struct user_s
-{
-	char nick[32]; 
-	char email[100];
-} user_t;
-
+void CL_IRCSetup(void);
 void CL_InitIRC(void);
 void CL_IRCShutdown(void);
 void CL_IRCSay(void);
