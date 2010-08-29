@@ -415,6 +415,13 @@ AM_COND_IF([BUILD_WIN32],
 # 2 required gcc options
 AX_CFLAGS_GCC_OPTION([-ffast-math])
 AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
+AC_ARG_ENABLE([debugging-symbols],
+	[AS_HELP_STRING([--enable-debugging-symbols],[Compile Alien Arena with full debugging information (default:no)])],
+	[AX_CFLAGS_GCC_OPTION([-g])])
+AC_ARG_ENABLE([full-warnings],
+	[AS_HELP_STRING([--enable-full-warnings],[Make GCC really whiny (default:no)])],
+	[AX_CFLAGS_GCC_OPTION([-Wall])])
+			
 # TODO: consider putting -DDedicated here
 
 # outputs
