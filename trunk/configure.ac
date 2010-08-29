@@ -416,17 +416,24 @@ AM_COND_IF([BUILD_WIN32],
 AX_CFLAGS_GCC_OPTION([-ffast-math])
 AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
 # TODO: consider putting -DDedicated here
+
 AC_ARG_ENABLE([debugging-symbols],
 	[AS_HELP_STRING([--enable-debugging-symbols],[Compile Alien Arena with full debugging information (default:no)])],
-	[AX_CFLAGS_GCC_OPTION([-g])])
+	[debug_syms=${enableval}],[debug_syms=no])
+AS_IF([ test "x$debug_syms" = "xyes" ], [AX_CFLAGS_GCC_OPTION([-g3])])
+AM_CONDITIONAL(REMOVE_SYMBOLS,[ test "x$debug_syms" = "xno" ])
+
 AC_ARG_ENABLE([full-warnings],
 	[AS_HELP_STRING([--enable-full-warnings],[Make GCC really whiny (default:no)])],
-	[AX_CFLAGS_GCC_OPTION([-Wall])])
+	[gcc_whining=${enableval}],[gcc_whining=no])
+AS_IF([ test "x$gcc_whining" = "xyes" ], [AX_CFLAGS_GCC_OPTION([-Wall])])
 
 
 # Specific debugging
 AC_ARG_ENABLE([irc-debugging],
 	[AS_HELP_STRING([--enable-irc-debugging],[Debug IRC messages (default: no)])],
+	[irc_debug=${enableval}],[irc_debug=no])
+AS_IF([ test "x$irc_debug" = "xyes" ], 
 	[AC_DEFINE([DEBUG_DUMP_IRC],1,[Enable IRC message debugging])])
 
 # outputs
@@ -435,9 +442,9 @@ AC_CONFIG_FILES([ Makefile 	source/Makefile ])
 AC_OUTPUT
 
 dnl Option to disable this message.
-hide_status=no
 AC_ARG_ENABLE([build-status],[AS_HELP_STRING([--disable-build-status],
-			[hide the status message at the end of the configuration script (default:no)])],[hide_status=yes],[hide_status=no])
+			[hide the status message at the end of the configuration script (default:no)])],
+			[hide_status=${enableval}],[hide_status=no])
 
 AS_IF([test "x$hide_status" = "xno"],[
 	AS_ECHO(["-------------------------------------------"])
@@ -454,6 +461,13 @@ AS_IF([test "x$hide_status" = "xno"],[
 
 	AM_COND_IF([ALTERNATE_INSTALL],,
 		[AS_ECHO([" Prefix: ................ '${prefix}'"])])
+
+	AS_IF([ test "x$gcc_whining" = "xyes" || test "x$debug_syms" = "xyes" || test "x$irc_debug" = "xyes" ],[
+		AS_ECHO(["- DEBUGGING OPTIONS ------------------------"])
+		AS_ECHO(["   All compiler warnings: ${gcc_whining}"])
+		AS_ECHO(["   Debugging symbols: ... ${debug_syms}"])
+		AS_ECHO(["   IRC protocol dump: ... ${irc_debug}"])
+	])
 
 	AM_COND_IF([ALTERNATE_INSTALL],
 		[AS_ECHO(["Run \"make\" to build, then \"make install-alternate\" to install."])],

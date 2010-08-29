@@ -54,13 +54,17 @@ install-alternate:
 if ALTERNATE_INSTALL
 if BUILD_CLIENT
 	cp $(top_builddir)/source/crx@EXEEXT@ $(srcdir)/crx@EXEEXT@
+if REMOVE_SYMBOLS
 	strip $(srcdir)/crx@EXEEXT@
+endif
 endif	
 if BUILD_UNIX	
 	cp $(top_builddir)/source/crx-ded $(srcdir)/crx-ded
 	cp $(top_builddir)/source/crx-ded $(srcdir)/crded
+if REMOVE_SYMBOLS
 	strip $(srcdir)/crx-ded
 	strip $(srcdir)/crded
+endif
 	rm -f $(srcdir)/arena/game.so
 	rm -f $(srcdir)/data1/game.so
 endif	
