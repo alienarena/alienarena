@@ -1840,9 +1840,10 @@ static void IRC_Thread( )
 
 static HANDLE IRC_ThreadHandle = NULL;
 
-static void IRC_SystemThreadProc(void *dummy)
+static DWORD WINAPI IRC_SystemThreadProc( LPVOID dummy)
 {
 	IRC_Thread( );
+	return 0;
 }
 
 
