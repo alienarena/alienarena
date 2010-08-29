@@ -100,8 +100,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 # endif
 #endif
 
-#include <ctype.h>
-
 
 /* IRC control cvars */
 cvar_t * cl_IRC_connect_at_startup;
@@ -329,7 +327,6 @@ static void IRC_FreeHandlers( )
 static int IRC_ExecuteHandler( )
 {
 	struct irc_handler_t * handler;
-	int hash_key , i;
 	qboolean found;
 
 	handler = IRC_Handlers;
@@ -539,10 +536,10 @@ static qboolean IRC_Parser( char next )
 				P_INIT_MESSAGE(PFX_NOS_START);
 			} else if ( next == '\r' ) {
 				P_SET_STATE(LF);
-			} else if ( isdigit( next ) ) {
+			} else if ( next >= '0' && next <= '9' ) {
 				P_INIT_MESSAGE(NUM_COMMAND_2);
 				P_INIT_COMMAND;
-			} else if ( isalpha( next ) && isupper( next ) ) {
+			} else if ( next >= 'A' && next <= 'Z' ) {
 				P_INIT_MESSAGE(STR_COMMAND);
 				P_INIT_COMMAND;
 			} else {
@@ -555,7 +552,7 @@ static qboolean IRC_Parser( char next )
 		 * and control characters which all cause an error recovery.
 		 */
 		case IRC_PARSER_PFX_NOS_START:
-			if ( next == '!' || next == '@' || next == ' ' || iscntrl( next ) ) {
+			if ( next == '!' || next == '@' || next == ' ' || ( next >= 0 && next <= 31 ) ) {
 				P_AUTO_ERROR;
 			} else {
 				P_SET_STATE(PFX_NOS);
@@ -574,7 +571,7 @@ static qboolean IRC_Parser( char next )
 				P_SET_STATE(PFX_HOST_START);
 			} else if ( next == ' ' ) {
 				P_SET_STATE(COMMAND_START);
-			} else if ( iscntrl( next ) ) {
+			} else if ( next >= 0 && next <= 31 ) {
 				P_AUTO_ERROR;
 			} else {
 				P_ADD_STRING(pfx_nickOrServer);
@@ -586,7 +583,7 @@ static qboolean IRC_Parser( char next )
 		 * and control characters which cause an error.
 		 */
 		case IRC_PARSER_PFX_USER_START:
-			if ( next == '!' || next == '@' || next == ' ' || iscntrl( next ) ) {
+			if ( next == '!' || next == '@' || next == ' ' || ( next >= 0 && next <= 31 ) ) {
 				P_AUTO_ERROR;
 			} else {
 				P_SET_STATE(PFX_USER);
@@ -601,7 +598,7 @@ static qboolean IRC_Parser( char next )
 		case IRC_PARSER_PFX_USER:
 			if ( next == '@' ) {
 				P_SET_STATE(PFX_HOST_START);
-			} else if ( next == '!' || next == ' ' || iscntrl( next ) ) {
+			} else if ( next == '!' || next == ' ' || ( next >= 0 && next <= 31 ) ) {
 				P_AUTO_ERROR;
 			} else {
 				P_ADD_STRING(pfx_user);
@@ -613,7 +610,7 @@ static qboolean IRC_Parser( char next )
 		 * and control characters which cause an error.
 		 */
 		case IRC_PARSER_PFX_HOST_START:
-			if ( next == '!' || next == '@' || next == ' ' || iscntrl( next ) ) {
+			if ( next == '!' || next == '@' || next == ' ' || ( next >= 0 && next <= 31 ) ) {
 				P_AUTO_ERROR;
 			} else {
 				P_SET_STATE(PFX_HOST);
@@ -628,7 +625,7 @@ static qboolean IRC_Parser( char next )
 		case IRC_PARSER_PFX_HOST:
 			if ( next == ' ' ) {
 				P_SET_STATE(COMMAND_START);
-			} else if ( next == '!' || next == '@' || iscntrl( next ) ) {
+			} else if ( next == '!' || next == '@' || ( next >= 0 && next <= 31 ) ) {
 				P_AUTO_ERROR;
 			} else {
 				P_ADD_STRING(pfx_host);
@@ -640,10 +637,10 @@ static qboolean IRC_Parser( char next )
 		 * commands; anything else is an error.
 		 */
 		case IRC_PARSER_COMMAND_START:
-			if ( isdigit( next ) ) {
+			if ( next >= '0' && next <= '9' ) {
 				P_SET_STATE(NUM_COMMAND_2);
 				P_INIT_COMMAND;
-			} else if ( isalpha( next ) && isupper( next ) ) {
+			} else if ( next >= 'A' && next <= 'Z' ) {
 				P_SET_STATE(STR_COMMAND);
 				P_INIT_COMMAND;
 			} else {
@@ -662,7 +659,7 @@ static qboolean IRC_Parser( char next )
 				P_SET_STATE(PARAM_START);
 			} else if ( next == '\r' ) {
 				P_SET_STATE(LF);
-			} else if ( isalpha( next ) && isupper( next ) ) {
+			} else if ( next >= 'A' && next <= 'Z' ) {
 				P_ADD_COMMAND;
 			} else {
 				P_ERROR(RECOVERY);
@@ -675,7 +672,7 @@ static qboolean IRC_Parser( char next )
 		 */
 		case IRC_PARSER_NUM_COMMAND_2:
 		case IRC_PARSER_NUM_COMMAND_3:
-			if ( isdigit( next ) ) {
+			if ( ( next >= '0' && next <= '9' ) ) {
 				IRC_ParserState ++;
 				P_ADD_COMMAND;
 			} else {
@@ -705,7 +702,7 @@ static qboolean IRC_Parser( char next )
 			if ( next == ':' ) {
 				P_SET_STATE(TRAILING_PARAM);
 				P_NEXT_PARAM;
-			} else if ( next == ' ' || iscntrl( next ) ) {
+			} else if ( next == ' ' || ( next >= 0 && next <= 31 ) ) {
 				P_AUTO_ERROR;
 			} else {
 				if ( next & 0x80 )
@@ -725,7 +722,7 @@ static qboolean IRC_Parser( char next )
 				P_SET_STATE(PARAM_START);
 			} else if ( next == '\r' ) {
 				P_SET_STATE(LF);
-			} else if ( iscntrl( next ) ) {
+			} else if ( next >= 0 && next <= 31 ) {
 				P_ERROR(RECOVERY);
 			} else {
 				if ( next & 0x80 )
@@ -743,7 +740,7 @@ static qboolean IRC_Parser( char next )
 			if ( next == '\r' ) {
 				P_SET_STATE(LF);
 			} else {
-				if ( iscntrl( next ) ) {
+				if ( next >= 0 && next <= 31 ) {
 					next = ' ';
 				} else if ( next & 0x80 ) {
 					next = '?';
@@ -1087,11 +1084,11 @@ static void IRC_Display( int event , const char * nick , const char *message )
 
 	// Format message
 	if ( has_nick && has_message ) {
-		snprintf( buffer , IRC_RECV_BUF_SIZE * 2 - 1 , fmt_string , nick , message );
+		sprintf( buffer , fmt_string , nick , message );
 	} else if ( has_nick ) {
-		snprintf( buffer , IRC_RECV_BUF_SIZE * 2 - 1 , fmt_string , nick );
+		sprintf( buffer , fmt_string , nick );
 	} else if ( has_message ) {
-		snprintf( buffer , IRC_RECV_BUF_SIZE * 2 - 1 , fmt_string , message );
+		sprintf( buffer , fmt_string , message );
 	} else {
 		strncpy( buffer , fmt_string , IRC_RECV_BUF_SIZE * 2 - 1 );
 	}
@@ -1311,10 +1308,10 @@ static int IRCH_Nick( )
  */
 static int IRCH_Message( )
 {
-	int event , i;
+	int event;
 	const char *string;
 	if ( IRC_ReceivedMessage.arg_count != 2 ) {
-		return;
+		return IRC_CMD_SUCCESS;
 	}
 
 	if ( IRC_ReceivedMessage.arg_values[ 0 ][ 0 ] == '#'
@@ -1426,7 +1423,7 @@ void CL_IRCSay( )
 	if ( m_sendstring[ 0 ] == 0 )
 		return;
 
-	if ( ( m_sendstring[ 0 ] == '/' || m_sendstring[ 0 ] == '.' ) && !strncasecmp( m_sendstring + 1 , "me " , 3 ) && m_sendstring[ 4 ] != 0 ) {
+	if ( ( m_sendstring[ 0 ] == '/' || m_sendstring[ 0 ] == '.' ) && !Q_strnicmp( m_sendstring + 1 , "me " , 3 ) && m_sendstring[ 4 ] != 0 ) {
 		send_result = IRC_AddSendItem( true , m_sendstring + 4 );
 	} else {
 		send_result = IRC_AddSendItem( false , m_sendstring );
@@ -1538,10 +1535,10 @@ static qboolean IRC_InitialiseUser( const char * name )
 		}
 
 		c = source[i ++];
-		if ( j == 0 && !( isalpha( c ) || strchr( "[]\\`_^{|}" , c ) ) ) {
+		if ( j == 0 && !( c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || strchr( "[]\\`_^{|}" , c ) ) ) {
 			c = '_';
 			replaced ++;
-		} else if ( j > 0 && !( isalnum( c ) || strchr( "-[]\\`_^{|}" , c ) ) ) {
+		} else if ( j > 0 && !( c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || strchr( "-[]\\`_^{|}" , c ) ) ) {
 			c = '_';
 			replaced ++;
 		}
@@ -1581,7 +1578,7 @@ static int IRC_AttemptConnection( )
 
 	// Force players to use a non-default name
 	strcpy( name, Cvar_VariableString( "name" ) );
-	if (! strcasecmp( name , "player" ) ) {
+	if (! Q_strnicmp( name , "player" , 7 ) ) {
 		Com_Printf("...IRC: rejected due to unset player name\n");
 		return IRC_CMD_FATAL;
 	}
