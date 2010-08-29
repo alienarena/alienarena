@@ -1801,20 +1801,19 @@ static void IRC_Thread( )
 
 /****** THREAD HANDLING - WINDOWS VARIANT ******/
 
-static HANDLE IRC_ThreadHandle = (HANDLE) 0;
+static HANDLE IRC_ThreadHandle = NULL;
 
-// FIXME(Win): I made this function static, but it might cause problems, as I
-//             have no idea how Windows' _beginthread will react to that.
 static void IRC_SystemThreadProc(void *dummy)
 {
 	IRC_Thread( );
 }
 
 
+// FIXME(Win): untested code
 static void IRC_StartThread()
 {
-	if ( IRC_ThreadHandle == 0 )
-		IRC_ThreadHandle = (HANDLE) _beginthread( IRC_SystemThreadProc, 0, NULL );
+	if ( IRC_ThreadHandle == NULL )
+		IRC_ThreadHandle = CreateThread( NULL , 0 , IRC_SystemThreadProc , NULL , 0 , NULL );
 }
 
 
@@ -1824,10 +1823,10 @@ static void IRC_StartThread()
 //             connection is shut down.
 static void IRC_WaitThread()
 {
-	if ( IRC_ThreadHandle != 0) {
+	if ( IRC_ThreadHandle != NULL ) {
 		WaitForSingleObject( IRC_ThreadHandle , 10000 );
 		CloseHandle( IRC_ThreadHandle );
-		IRC_ThreadHandle = (HANDLE) 0;
+		IRC_ThreadHandle = NULL;
 	}
 }
 
