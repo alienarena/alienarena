@@ -3831,11 +3831,11 @@ uninstall-am: uninstall-dist_docDATA uninstall-local \
 #
 install-alternate:
 @ALTERNATE_INSTALL_TRUE@@BUILD_CLIENT_TRUE@	cp $(top_builddir)/source/crx@EXEEXT@ $(srcdir)/crx@EXEEXT@
-@ALTERNATE_INSTALL_TRUE@@BUILD_CLIENT_TRUE@	strip $(srcdir)/crx@EXEEXT@
+@ALTERNATE_INSTALL_TRUE@@BUILD_CLIENT_TRUE@@REMOVE_SYMBOLS_TRUE@	strip $(srcdir)/crx@EXEEXT@
 @ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@	cp $(top_builddir)/source/crx-ded $(srcdir)/crx-ded
 @ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@	cp $(top_builddir)/source/crx-ded $(srcdir)/crded
-@ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@	strip $(srcdir)/crx-ded
-@ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@	strip $(srcdir)/crded
+@ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@@REMOVE_SYMBOLS_TRUE@	strip $(srcdir)/crx-ded
+@ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@@REMOVE_SYMBOLS_TRUE@	strip $(srcdir)/crded
 @ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@	rm -f $(srcdir)/arena/game.so
 @ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@	rm -f $(srcdir)/data1/game.so
 @ALTERNATE_INSTALL_FALSE@	@echo "make install-alternate requires configuring with --enable-alternate-install"
