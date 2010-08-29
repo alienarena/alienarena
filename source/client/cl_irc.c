@@ -113,6 +113,14 @@ cvar_t * cl_IRC_reconnect_delay;
 
 
 
+/* Ctype-like macros */
+#define IS_UPPER(c) ( (c) >= 'A' && (c) <= 'Z' )
+#define IS_LOWER(c) ( (c) >= 'a' && (c) <= 'z' )
+#define IS_DIGIT(c) ( (c) >= '0' && (c) <= '9' )
+#define IS_CNTRL(c) ( (c) >= 0 && (c) <= 31 )
+
+
+
 /* IRC command status; used to determine if connection should be re-attempted or not */
 #define IRC_CMD_SUCCESS		0	// Success
 #define IRC_CMD_FATAL		1	// Fatal error, don't bother retrying
@@ -420,7 +428,6 @@ static qboolean IRC_DequeueDelayed( )
  */
 static void IRC_FlushDEQueue( )
 {
-	struct irc_delayed_t * found;
 	while ( IRC_DequeueDelayed( ) ) {
 		// PURPOSEDLY EMPTY
 	}
@@ -536,10 +543,10 @@ static qboolean IRC_Parser( char next )
 				P_INIT_MESSAGE(PFX_NOS_START);
 			} else if ( next == '\r' ) {
 				P_SET_STATE(LF);
-			} else if ( next >= '0' && next <= '9' ) {
+			} else if ( IS_DIGIT( next ) ) {
 				P_INIT_MESSAGE(NUM_COMMAND_2);
 				P_INIT_COMMAND;
-			} else if ( next >= 'A' && next <= 'Z' ) {
+			} else if ( IS_UPPER( next ) ) {
 				P_INIT_MESSAGE(STR_COMMAND);
 				P_INIT_COMMAND;
 			} else {
@@ -552,7 +559,7 @@ static qboolean IRC_Parser( char next )
 		 * and control characters which all cause an error recovery.
 		 */
 		case IRC_PARSER_PFX_NOS_START:
-			if ( next == '!' || next == '@' || next == ' ' || ( next >= 0 && next <= 31 ) ) {
+			if ( next == '!' || next == '@' || next == ' ' || IS_CNTRL( next ) ) {
 				P_AUTO_ERROR;
 			} else {
 				P_SET_STATE(PFX_NOS);
@@ -571,7 +578,7 @@ static qboolean IRC_Parser( char next )
 				P_SET_STATE(PFX_HOST_START);
 			} else if ( next == ' ' ) {
 				P_SET_STATE(COMMAND_START);
-			} else if ( next >= 0 && next <= 31 ) {
+			} else if IS_CNTRL( next ) {
 				P_AUTO_ERROR;
 			} else {
 				P_ADD_STRING(pfx_nickOrServer);
@@ -583,7 +590,7 @@ static qboolean IRC_Parser( char next )
 		 * and control characters which cause an error.
 		 */
 		case IRC_PARSER_PFX_USER_START:
-			if ( next == '!' || next == '@' || next == ' ' || ( next >= 0 && next <= 31 ) ) {
+			if ( next == '!' || next == '@' || next == ' ' || IS_CNTRL( next ) ) {
 				P_AUTO_ERROR;
 			} else {
 				P_SET_STATE(PFX_USER);
@@ -598,7 +605,7 @@ static qboolean IRC_Parser( char next )
 		case IRC_PARSER_PFX_USER:
 			if ( next == '@' ) {
 				P_SET_STATE(PFX_HOST_START);
-			} else if ( next == '!' || next == ' ' || ( next >= 0 && next <= 31 ) ) {
+			} else if ( next == '!' || next == ' ' || IS_CNTRL( next ) ) {
 				P_AUTO_ERROR;
 			} else {
 				P_ADD_STRING(pfx_user);
@@ -610,7 +617,7 @@ static qboolean IRC_Parser( char next )
 		 * and control characters which cause an error.
 		 */
 		case IRC_PARSER_PFX_HOST_START:
-			if ( next == '!' || next == '@' || next == ' ' || ( next >= 0 && next <= 31 ) ) {
+			if ( next == '!' || next == '@' || next == ' ' || IS_CNTRL( next ) ) {
 				P_AUTO_ERROR;
 			} else {
 				P_SET_STATE(PFX_HOST);
@@ -625,7 +632,7 @@ static qboolean IRC_Parser( char next )
 		case IRC_PARSER_PFX_HOST:
 			if ( next == ' ' ) {
 				P_SET_STATE(COMMAND_START);
-			} else if ( next == '!' || next == '@' || ( next >= 0 && next <= 31 ) ) {
+			} else if ( next == '!' || next == '@' || IS_CNTRL( next ) ) {
 				P_AUTO_ERROR;
 			} else {
 				P_ADD_STRING(pfx_host);
@@ -637,10 +644,10 @@ static qboolean IRC_Parser( char next )
 		 * commands; anything else is an error.
 		 */
 		case IRC_PARSER_COMMAND_START:
-			if ( next >= '0' && next <= '9' ) {
+			if ( IS_DIGIT( next ) ) {
 				P_SET_STATE(NUM_COMMAND_2);
 				P_INIT_COMMAND;
-			} else if ( next >= 'A' && next <= 'Z' ) {
+			} else if ( IS_UPPER( next ) ) {
 				P_SET_STATE(STR_COMMAND);
 				P_INIT_COMMAND;
 			} else {
@@ -659,7 +666,7 @@ static qboolean IRC_Parser( char next )
 				P_SET_STATE(PARAM_START);
 			} else if ( next == '\r' ) {
 				P_SET_STATE(LF);
-			} else if ( next >= 'A' && next <= 'Z' ) {
+			} else if ( IS_UPPER( next ) ) {
 				P_ADD_COMMAND;
 			} else {
 				P_ERROR(RECOVERY);
@@ -672,7 +679,7 @@ static qboolean IRC_Parser( char next )
 		 */
 		case IRC_PARSER_NUM_COMMAND_2:
 		case IRC_PARSER_NUM_COMMAND_3:
-			if ( ( next >= '0' && next <= '9' ) ) {
+			if ( IS_DIGIT( next ) ) {
 				IRC_ParserState ++;
 				P_ADD_COMMAND;
 			} else {
@@ -702,7 +709,7 @@ static qboolean IRC_Parser( char next )
 			if ( next == ':' ) {
 				P_SET_STATE(TRAILING_PARAM);
 				P_NEXT_PARAM;
-			} else if ( next == ' ' || ( next >= 0 && next <= 31 ) ) {
+			} else if ( next == ' ' || IS_CNTRL( next ) ) {
 				P_AUTO_ERROR;
 			} else {
 				if ( next & 0x80 )
@@ -722,7 +729,7 @@ static qboolean IRC_Parser( char next )
 				P_SET_STATE(PARAM_START);
 			} else if ( next == '\r' ) {
 				P_SET_STATE(LF);
-			} else if ( next >= 0 && next <= 31 ) {
+			} else if ( IS_CNTRL( next ) ) {
 				P_ERROR(RECOVERY);
 			} else {
 				if ( next & 0x80 )
@@ -740,7 +747,7 @@ static qboolean IRC_Parser( char next )
 			if ( next == '\r' ) {
 				P_SET_STATE(LF);
 			} else {
-				if ( next >= 0 && next <= 31 ) {
+				if ( IS_CNTRL( next ) ) {
 					next = ' ';
 				} else if ( next & 0x80 ) {
 					next = '?';
@@ -771,6 +778,7 @@ static qboolean IRC_Parser( char next )
 /*
  * Debugging function that dumps the IRC message.
  */
+#ifdef DEBUG_DUMP_IRC
 static void IRC_DumpMessage( )
 {
 	int i;
@@ -785,6 +793,7 @@ static void IRC_DumpMessage( )
 		Com_Printf( " ARG %d = %s\n" , i + 1 , IRC_ReceivedMessage.arg_values[ i ] );
 	}
 }
+#endif // DEBUG_DUMP_IRC
 
 
 
@@ -1535,10 +1544,10 @@ static qboolean IRC_InitialiseUser( const char * name )
 		}
 
 		c = source[i ++];
-		if ( j == 0 && !( c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || strchr( "[]\\`_^{|}" , c ) ) ) {
+		if ( j == 0 && !( IS_UPPER( c ) || IS_LOWER( c ) || strchr( "[]\\`_^{|}" , c ) ) ) {
 			c = '_';
 			replaced ++;
-		} else if ( j > 0 && !( c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || strchr( "-[]\\`_^{|}" , c ) ) ) {
+		} else if ( j > 0 && !( IS_UPPER( c ) || IS_LOWER( c ) || IS_DIGIT( c ) || strchr( "-[]\\`_^{|}" , c ) ) ) {
 			c = '_';
 			replaced ++;
 		}
