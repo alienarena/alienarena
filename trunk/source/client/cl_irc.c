@@ -1833,8 +1833,10 @@ static void IRC_StartThread()
 static void IRC_WaitThread()
 {
 	if ( IRC_ThreadHandle != NULL ) {
-		WaitForSingleObject( IRC_ThreadHandle , 10000 );
-		CloseHandle( IRC_ThreadHandle );
+		if ( IRC_ThreadStatus != IRC_THREAD_DEAD ) {
+			WaitForSingleObject( IRC_ThreadHandle , 10000 );
+			CloseHandle( IRC_ThreadHandle );
+		}
 		IRC_ThreadHandle = NULL;
 	}
 }
@@ -1865,7 +1867,8 @@ static void IRC_StartThread(void)
 static void IRC_WaitThread() 
 {
 	if ( IRC_ThreadHandle != (pthread_t) NULL ) {
-		pthread_join( IRC_ThreadHandle , NULL );
+		if ( IRC_ThreadStatus != IRC_THREAD_DEAD )
+			pthread_join( IRC_ThreadHandle , NULL );
 		IRC_ThreadHandle = (pthread_t) NULL;
 	}
 }
