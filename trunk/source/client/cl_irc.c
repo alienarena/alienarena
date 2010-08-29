@@ -118,6 +118,8 @@ cvar_t * cl_IRC_reconnect_delay;
 #define IS_LOWER(c) ( (c) >= 'a' && (c) <= 'z' )
 #define IS_DIGIT(c) ( (c) >= '0' && (c) <= '9' )
 #define IS_CNTRL(c) ( (c) >= 0 && (c) <= 31 )
+#define IS_ALPHA(c) ( IS_UPPER(c) || IS_LOWER(c) )
+#define IS_ALNUM(c) ( IS_ALPHA(c) || IS_DIGIT(c) )
 
 
 
@@ -195,11 +197,10 @@ static qboolean IRC_ParserError;
  * 2) a command, which may be either a word or 3 numbers,
  * 3) any number of arguments.
  *
- * Assuming that a command is at least 1 character, and counting the CRLF,
- * a message may contain up to 253 arguments of 1 character and one of 2
- * characters, and the longest possible argument is 508 bytes long. The
- * longest possible prefix is 507 bytes long, and the longest possible
- * command is 510 bytes long.
+ * RFC 2812 says that there are at most 14 "middle" parameters and a trailing
+ * parameter. However, UnrealIRCd does not respect this, and sends messages
+ * that contain an extra parameter. While the message in question could be
+ * ignored, it's better to avoid entering the error recovery state.
  *
  * Since we won't be handling messages in parallel, we will create a
  * static record and use that to store everything, as we can definitely
@@ -207,7 +208,7 @@ static qboolean IRC_ParserError;
  * probably be a pointless exercise).
  */
 
-#define IRC_MAX_PARAMS 14
+#define IRC_MAX_PARAMS 16
 
 struct irc_message_t {
 	char pfx_nickOrServer[508];		// Nickname / server name
@@ -473,10 +474,20 @@ static int IRC_ProcessDEQueue( )
 	IRC_ParserInMessage = true; \
 	memset( &IRC_ReceivedMessage , 0 , sizeof( struct irc_message_t ) ); \
 }
+#if defined DEBUG_DUMP_IRC
+#define P_ERROR(S) { \
+	if ( ! IRC_ParserError ) { \
+		Com_Printf( "IRC PARSER ERROR (state: %d , received: %d)\n" , IRC_ParserState , next ); \
+	} \
+	P_SET_STATE(S); \
+	IRC_ParserError = true; \
+}
+#else // defined DEBUG_DUMP_IRC
 #define P_ERROR(S) { \
 	P_SET_STATE(S); \
 	IRC_ParserError = true; \
 }
+#endif // defined DEBUG_DUMP_IRC
 #define P_AUTO_ERROR { \
 	if ( next == '\r' ) { \
 		P_ERROR(LF); \
@@ -538,6 +549,7 @@ static qboolean IRC_Parser( char next )
 		 * it. Anything else is an error.
 		 */
 		case IRC_PARSER_START:
+			IRC_ParserError = false;
 			IRC_ParserInMessage = false;
 			if ( next == ':' ) {
 				P_INIT_MESSAGE(PFX_NOS_START);
@@ -769,6 +781,14 @@ static qboolean IRC_Parser( char next )
 				P_AUTO_ERROR;
 			}
 			break;
+
+		/*
+		 * Error recovery: wait for an '\r'.
+		 */
+		case IRC_PARSER_RECOVERY:
+			if ( next == '\r' )
+				P_SET_STATE(LF);
+			break;
 	}
 
 	return has_msg && !IRC_ParserError;
@@ -924,6 +944,9 @@ static int IRC_Send( const char * format , ... )
 	}
 
 	// Add CRLF terminator
+#if defined DEBUG_DUMP_IRC
+	Com_Printf( "SENDING IRC MESSAGE: %s\n" , buffer );
+#endif
 	buffer[ len++ ] = '\r';
 	buffer[ len++ ] = '\n';
 
@@ -1544,15 +1567,20 @@ static qboolean IRC_InitialiseUser( const char * name )
 		}
 
 		c = source[i ++];
-		if ( j == 0 && !( IS_UPPER( c ) || IS_LOWER( c ) || strchr( "[]\\`_^{|}" , c ) ) ) {
+		if ( j == 0 && !( IS_ALPHA( c ) || strchr( "[]\\`_^{|}" , c ) ) ) {
 			c = '_';
 			replaced ++;
-		} else if ( j > 0 && !( IS_UPPER( c ) || IS_LOWER( c ) || IS_DIGIT( c ) || strchr( "-[]\\`_^{|}" , c ) ) ) {
+		} else if ( j > 0 && !( IS_ALNUM( c ) || strchr( "-[]\\`_^{|}" , c ) ) ) {
 			c = '_';
 			replaced ++;
 		}
+		IRC_User.nick[j] = c;
 
-		IRC_User.nick[j] = IRC_User.username[j] = c;
+		// User names are even more sensitive
+		if ( ! ( c == '-' || c == '.' || c == '_' || IS_ALNUM( c ) ) )
+			c = '_';
+		IRC_User.username[j] = c;
+
 		IRC_User.nicklen = ++j;
 	}
 
@@ -1631,7 +1659,7 @@ static int IRC_AttemptConnection( )
 
 	// Send username and nick name
 	CHECK_SHUTDOWN_CLOSE;
-	err_code = IRC_Send( "USER %s %s %s :%s" , IRC_User.nick , IRC_User.email , host_name , IRC_User.username );
+	err_code = IRC_Send( "USER %s %s %s :%s" , IRC_User.username , IRC_User.email , host_name , IRC_User.nick );
 	if ( err_code == IRC_CMD_SUCCESS )
 		err_code = IRC_SendNickname( );
 	if ( err_code != IRC_CMD_SUCCESS ) {
