@@ -9,6 +9,9 @@
 /* darwin-specific conditional compile */
 #undef DARWIN_SPECIAL_CASE
 
+/* Enable IRC message debugging */
+#undef DEBUG_DUMP_IRC
+
 /* Define to 1 if you have the <alc.h> header file. */
 #undef HAVE_ALC_H
 

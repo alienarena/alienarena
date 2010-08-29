@@ -734,6 +734,7 @@ with_xf86vm
 with_xf86dga
 enable_debugging_symbols
 enable_full_warnings
+enable_irc_debugging
 enable_build_status
 '
       ac_precious_vars='build_alias
@@ -1387,6 +1388,7 @@ Optional Features:
                           Compile Alien Arena with full debugging information
                           (default:no)
   --enable-full-warnings  Make GCC really whiny (default:no)
+  --enable-irc-debugging  Debug IRC messages (default: no)
   --disable-build-status  hide the status message at the end of the
                           configuration script (default:no)
 
@@ -8051,6 +8053,7 @@ case ".$ax_cv_cflags_gcc_option__fno_strict_aliasing" in
  ;;
 esac
 
+# TODO: consider putting -DDedicated here
 # Check whether --enable-debugging-symbols was given.
 if test "${enable_debugging_symbols+set}" = set; then :
   enableval=$enable_debugging_symbols; { $as_echo "$as_me:${as_lineno-$LINENO}: checking CFLAGS for gcc -g" >&5
@@ -8186,7 +8189,15 @@ esac
 fi
 
 
-# TODO: consider putting -DDedicated here
+
+# Specific debugging
+# Check whether --enable-irc-debugging was given.
+if test "${enable_irc_debugging+set}" = set; then :
+  enableval=$enable_irc_debugging;
+$as_echo "#define DEBUG_DUMP_IRC 1" >>confdefs.h
+
+fi
+
 
 # outputs
 ac_config_files="$ac_config_files Makefile source/Makefile"
