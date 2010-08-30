@@ -92,6 +92,7 @@ void M_Menu_Main_f (void);
 	void M_Menu_StartServer_f (void);
 			void M_Menu_DMOptions_f (void);
 	void M_Menu_IRC_f (void);
+			void M_Menu_IRCSettings_f (void);
 	void M_Menu_Video_f (void);
 	void M_Menu_Options_f (void);
 		void M_Menu_Keys_f (void);
@@ -2824,7 +2825,7 @@ void M_Menu_Game_f (void)
 /*
 =============================================================================
 
-IRC MENU
+IRC MENUS
 
 =============================================================================
 */
@@ -2834,16 +2835,14 @@ char			IRC_key[64];
 
 static menuframework_s	s_irc_menu;
 static menuaction_s		s_irc_title;
-static menufield_s		s_irc_server;
 static menuaction_s		s_irc_join;
-static menuaction_s		s_irc_quit;
 static menulist_s		s_irc_joinatstartup;
 static menuaction_s		s_irc_key;
+static menuaction_s		s_irc_editsettings;
+
 
 static void JoinIRCFunc( void *unused )
 {
-	Cvar_Set( "cl_IRC_server", s_irc_server.buffer);
-
 	if(pNameUnique)
 		CL_InitIRC();
 }
@@ -2860,7 +2859,7 @@ static void AutoIRCFunc( void *unused)
 
 void IRCServerAccept( void )
 {
-	Cvar_Set( "cl_IRC_server", s_irc_server.buffer);
+	//Cvar_Set( "cl_IRC_server", s_irc_server.buffer);
 }
 
 static void M_FindIRCKey ( void )
@@ -2890,6 +2889,11 @@ static void M_FindIRCKey ( void )
 	}
 	//got our key
 	Com_sprintf(IRC_key, sizeof(IRC_key), "IRC Chat Key is %s", Key_KeynumToString(twokeys[0]));
+}
+
+static void IRCSettingsFunc( void * self )
+{
+	M_Menu_IRCSettings_f( );
 }
 
 void IRC_MenuInit( void )
@@ -2924,52 +2928,40 @@ void IRC_MenuInit( void )
 	s_irc_title.generic.y		= FONTSCALE*30*scale;
 	s_irc_title.generic.name	= "^3IRC ^1Chat ^1Utilities";
 
-	s_irc_server.generic.type = MTYPE_FIELD;
-	s_irc_server.generic.name = "Server ";
-	s_irc_server.generic.x	= -70*scale;
-	s_irc_server.generic.y	= FONTSCALE*50*scale;
-	s_irc_server.length = 32;
-	s_irc_server.visible_length = 16;
-	s_irc_server.generic.callback = 0;
-	s_irc_server.cursor = strlen( cl_IRC_server->string );
-	strcpy( s_irc_server.buffer, Cvar_VariableString("cl_IRC_server") );
-
 	s_irc_join.generic.type	= MTYPE_ACTION;
 	s_irc_join.generic.x		= 24*scale;
-	s_irc_join.generic.y		= FONTSCALE*70*scale;
+	s_irc_join.generic.y		= FONTSCALE*50*scale;
 	s_irc_join.generic.cursor_offset = -24*scale;
 	s_irc_join.generic.name	= "Join IRC Chat";
 	s_irc_join.generic.callback = JoinIRCFunc;
 
-	s_irc_quit.generic.type	= MTYPE_ACTION;
-	s_irc_quit.generic.x		= 24*scale;
-	s_irc_quit.generic.y		= FONTSCALE*80*scale;
-	s_irc_quit.generic.cursor_offset = -24*scale;
-	s_irc_quit.generic.name	= "Quit IRC Chat";
-	s_irc_quit.generic.callback = QuitIRCFunc;
-
 	s_irc_joinatstartup.generic.type	= MTYPE_SPINCONTROL;
 	s_irc_joinatstartup.generic.x		= 118*scale;
-	s_irc_joinatstartup.generic.y		= FONTSCALE*100*scale;
+	s_irc_joinatstartup.generic.y		= FONTSCALE*80*scale;
 	s_irc_joinatstartup.generic.cursor_offset = -24*scale;
 	s_irc_joinatstartup.generic.name	= "Autojoin At Startup";
 	s_irc_joinatstartup.itemnames = yes_no_names;
 	s_irc_joinatstartup.curvalue = cl_IRC_connect_at_startup->value;
 	s_irc_joinatstartup.generic.callback = AutoIRCFunc;
 
-	s_irc_key.generic.type	= MTYPE_ACTION;
-	s_irc_key.generic.x		= 86*scale;
-	s_irc_key.generic.y		= FONTSCALE*120*scale;
-	s_irc_key.generic.cursor_offset = -16*scale;
+	s_irc_key.generic.type	= MTYPE_COLORTXT;
+	s_irc_key.generic.x		= - (int)strlen( IRC_key ) * 8 * scale;
+	s_irc_key.generic.y		= FONTSCALE*100*scale;
 	s_irc_key.generic.name	= IRC_key;
-	//s_irc_key.generic.callback = QuitIRCFunc;
+
+	s_irc_editsettings.generic.type = MTYPE_ACTION;
+	s_irc_editsettings.generic.x	= 24*scale;
+	s_irc_editsettings.generic.y	= FONTSCALE*140*scale;
+	s_irc_editsettings.generic.cursor_offset = -24 * scale;
+	s_irc_editsettings.generic.name	= "IRC settings";
+	s_irc_editsettings.generic.callback = IRCSettingsFunc;
 
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_title );
-	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_server );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_join );
-	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_quit );
+	//Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_quit );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_joinatstartup );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_key );
+	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_editsettings );
 
 	Menu_Center( &s_irc_menu );
 }
@@ -3002,6 +2994,15 @@ void IRC_MenuDraw( void )
 		M_Print( (int)(FONTSCALE*28*scale), (int)(FONTSCALE*-80*scale),  "Connecting to IRC server..." );
 	}
 
+	// Update join/quit menu entry
+	if ( CL_IRCIsRunning( ) ) {
+		s_irc_join.generic.name	= "Quit IRC Chat";
+		s_irc_join.generic.callback = QuitIRCFunc;
+	} else {
+		s_irc_join.generic.name	= "Join IRC Chat";
+		s_irc_join.generic.callback = JoinIRCFunc;
+	}
+
 	Menu_AdjustCursor( &s_irc_menu, 1 );
 	Menu_Draw( &s_irc_menu );
 }
@@ -3014,12 +3015,216 @@ const char *IRC_MenuKey( int key )
 	return Default_MenuKey( &s_irc_menu, key );
 }
 
+
 void M_Menu_IRC_f (void)
 {
 	IRC_MenuInit();
 	M_PushMenu( IRC_MenuDraw, IRC_MenuKey );
 	m_IRC_cursor = 1;
 }
+
+
+
+/*
+=============================================================================
+
+IRC SETTINGS MENU
+
+=============================================================================
+*/
+
+static menuframework_s		s_irc_settings_menu;
+static menuaction_s		s_irc_settings_title;
+static menufield_s		s_irc_server;
+static menufield_s		s_irc_channel;
+static menufield_s		s_irc_port;
+static menulist_s		s_irc_ovnickname;
+static menufield_s		s_irc_nickname;
+static menufield_s		s_irc_kickrejoin;
+static menufield_s		s_irc_reconnectdelay;
+static menuaction_s		s_irc_settings_apply;
+
+
+static void ApplyIRCSettings( void * self )
+{
+	qboolean running = CL_IRCIsRunning( );
+	if ( running )
+		CL_IRCShutdown( );
+
+	Cvar_Set(	"cl_IRC_server" ,		s_irc_server.buffer);
+	Cvar_Set(	"cl_IRC_channel" ,		s_irc_channel.buffer);
+	Cvar_SetValue(	"cl_IRC_port" , 		atoi( s_irc_port.buffer ) );
+	Cvar_SetValue(	"cl_IRC_override_nickname" ,	s_irc_ovnickname.curvalue );
+	Cvar_Set(	"cl_IRC_nickname" ,		s_irc_nickname.buffer );
+	Cvar_SetValue(	"cl_IRC_kick_rejoin" ,		atoi( s_irc_kickrejoin.buffer ) );
+	Cvar_SetValue(	"cl_IRC_reconnect_delay" ,	atoi( s_irc_reconnectdelay.buffer ) );
+
+	if ( running )
+		CL_InitIRC( );
+
+	M_PopMenu( );
+}
+
+
+static void IRC_SettingsMenuInit( )
+{
+	float scale;
+	extern cvar_t *name;
+
+	static const char *yes_no_names[] =
+	{
+		"no", "yes", 0
+	};
+
+	scale = (float)(viddef.height)/600;
+	banneralpha = 0.1;
+
+	s_irc_settings_menu.x			= viddef.width * 0.50;
+	s_irc_settings_menu.nitems		= 0;
+
+	s_irc_settings_title.generic.type	= MTYPE_COLORTXT;
+	s_irc_settings_title.generic.x		= -224*scale;
+	s_irc_settings_title.generic.y		= FONTSCALE*30*scale;
+	s_irc_settings_title.generic.name	= "IRC Chat Settings";
+
+	s_irc_server.generic.type		= MTYPE_FIELD;
+	s_irc_server.generic.name		= "Server ";
+	s_irc_server.generic.x			= -67*scale;
+	s_irc_server.generic.y			= FONTSCALE*48*scale;
+	s_irc_server.generic.statusbar		= "Address or name of the IRC server";
+	s_irc_server.length			= 32;
+	s_irc_server.visible_length		= 16;
+	s_irc_server.generic.callback		= 0;
+	s_irc_server.cursor			= strlen( cl_IRC_server->string );
+	strcpy( s_irc_server.buffer, Cvar_VariableString("cl_IRC_server") );
+
+	s_irc_channel.generic.type		= MTYPE_FIELD;
+	s_irc_channel.generic.name		= "Channel ";
+	s_irc_channel.generic.x			= -67*scale;
+	s_irc_channel.generic.y			= FONTSCALE*64*scale;
+	s_irc_channel.generic.statusbar		= "Name of the channel to join";
+	s_irc_channel.length 			= 16;
+	s_irc_channel.visible_length		= 16;
+	s_irc_channel.generic.callback		= 0;
+	s_irc_channel.cursor			= strlen( cl_IRC_channel->string );
+	strcpy( s_irc_channel.buffer, Cvar_VariableString("cl_IRC_channel") );
+
+	s_irc_port.generic.type			= MTYPE_FIELD;
+	s_irc_port.generic.name			= "TCP Port ";
+	s_irc_port.generic.x			= -67*scale;
+	s_irc_port.generic.y			= FONTSCALE*80*scale;
+	s_irc_port.generic.statusbar		= "Port to connect to on the server";
+	s_irc_port.length 			= 5;
+	s_irc_port.visible_length		= 6;
+	s_irc_port.generic.callback		= 0;
+	s_irc_port.cursor			= strlen( cl_IRC_port->string );
+	strcpy( s_irc_port.buffer, Cvar_VariableString("cl_IRC_port") );
+
+	s_irc_ovnickname.generic.type		= MTYPE_SPINCONTROL;
+	s_irc_ovnickname.generic.x		= 118*scale;
+	s_irc_ovnickname.generic.y		= FONTSCALE*96*scale;
+	s_irc_ovnickname.generic.cursor_offset	= -24*scale;
+	s_irc_ovnickname.generic.name		= "Override nick";
+	s_irc_ovnickname.generic.callback	= 0;
+	s_irc_ovnickname.generic.statusbar	= "Enable this to override the default, player-based nick";
+	s_irc_ovnickname.itemnames		= yes_no_names;
+	s_irc_ovnickname.curvalue		= cl_IRC_override_nickname->value ? 1 : 0;
+
+	s_irc_nickname.generic.type		= MTYPE_FIELD;
+	s_irc_nickname.generic.name		= "Nick ";
+	s_irc_nickname.generic.x		= -67*scale;
+	s_irc_nickname.generic.y		= FONTSCALE*112*scale;
+	s_irc_nickname.generic.statusbar	= "Nickname override to use";
+	s_irc_nickname.length 			= 15;
+	s_irc_nickname.visible_length		= 16;
+	s_irc_nickname.generic.callback		= 0;
+	s_irc_nickname.cursor			= strlen( cl_IRC_nickname->string );
+	strcpy( s_irc_nickname.buffer, Cvar_VariableString("cl_IRC_nickname") );
+
+	s_irc_kickrejoin.generic.type		= MTYPE_FIELD;
+	s_irc_kickrejoin.generic.name		= "Autorejoin ";
+	s_irc_kickrejoin.generic.x		= -67*scale;
+	s_irc_kickrejoin.generic.y		= FONTSCALE*128*scale;
+	s_irc_kickrejoin.generic.statusbar	= "Delay before automatic rejoin after kick (0 to disable)";
+	s_irc_kickrejoin.length 		= 3;
+	s_irc_kickrejoin.visible_length		= 4;
+	s_irc_kickrejoin.generic.callback	= 0;
+	s_irc_kickrejoin.cursor			= strlen( cl_IRC_kick_rejoin->string );
+	strcpy( s_irc_kickrejoin.buffer, Cvar_VariableString("cl_IRC_kick_rejoin") );
+
+	s_irc_reconnectdelay.generic.type	= MTYPE_FIELD;
+	s_irc_reconnectdelay.generic.name	= "Reconnect ";
+	s_irc_reconnectdelay.generic.x		= -67*scale;
+	s_irc_reconnectdelay.generic.y		= FONTSCALE*144*scale;
+	s_irc_reconnectdelay.generic.statusbar	= "Delay between reconnection attempts (minimum 5)";
+	s_irc_reconnectdelay.length 		= 3;
+	s_irc_reconnectdelay.visible_length	= 4;
+	s_irc_reconnectdelay.generic.callback	= 0;
+	s_irc_reconnectdelay.cursor		= strlen( cl_IRC_reconnect_delay->string );
+	strcpy( s_irc_reconnectdelay.buffer, Cvar_VariableString("cl_IRC_reconnect_delay") );
+
+	s_irc_settings_apply.generic.type	= MTYPE_ACTION;
+	s_irc_settings_apply.generic.x		= 24*scale;
+	s_irc_settings_apply.generic.y		= FONTSCALE*160*scale;
+	s_irc_settings_apply.generic.cursor_offset = -24 * scale;
+	s_irc_settings_apply.generic.name	= "Apply settings";
+	s_irc_settings_apply.generic.callback	= ApplyIRCSettings;
+
+	Menu_AddItem( &s_irc_settings_menu, ( void * ) &s_irc_settings_title );
+	Menu_AddItem( &s_irc_settings_menu, ( void * ) &s_irc_server );
+	Menu_AddItem( &s_irc_settings_menu, ( void * ) &s_irc_channel );
+	Menu_AddItem( &s_irc_settings_menu, ( void * ) &s_irc_port );
+	Menu_AddItem( &s_irc_settings_menu, ( void * ) &s_irc_ovnickname );
+	Menu_AddItem( &s_irc_settings_menu, ( void * ) &s_irc_nickname );
+	Menu_AddItem( &s_irc_settings_menu, ( void * ) &s_irc_kickrejoin );
+	Menu_AddItem( &s_irc_settings_menu, ( void * ) &s_irc_reconnectdelay );
+	Menu_AddItem( &s_irc_settings_menu, ( void * ) &s_irc_settings_apply );
+
+	Menu_Center( &s_irc_settings_menu );
+}
+
+void IRC_SettingsMenuDraw( void )
+{
+
+	float scale;
+	scale = (float)(viddef.height)/600;
+
+	banneralpha += cls.frametime;
+	if (banneralpha > 1)
+		banneralpha = 1;
+
+	M_Background( "menu_back");
+	M_Banner( "m_irc", banneralpha );
+
+	if(!pNameUnique) {
+		M_DrawTextBox( -32*scale, (int)(FONTSCALE*-95*scale), 40/scale, 2 );
+		M_Print( (int)(FONTSCALE*32*scale), (int)(FONTSCALE*-85*scale),  "You must create your player" );
+		M_Print( (int)(FONTSCALE*32*scale), (int)(FONTSCALE*-75*scale),  "name before joining a server!" );
+	} else if(CL_IRCIsConnected()) {
+		M_DrawTextBox( -28*scale, (int)(FONTSCALE*-95*scale), 36/scale, 1 );
+		M_Print( (int)(FONTSCALE*28*scale), (int)(FONTSCALE*-80*scale),  "Connected to IRC server." );
+	} else if(CL_IRCIsRunning()) {
+		M_DrawTextBox( -28*scale, (int)(FONTSCALE*-95*scale), 36/scale, 1 );
+		M_Print( (int)(FONTSCALE*28*scale), (int)(FONTSCALE*-80*scale),  "Connecting to IRC server..." );
+	}
+
+	Menu_AdjustCursor( &s_irc_settings_menu, 1 );
+	Menu_Draw( &s_irc_settings_menu );
+}
+
+const char *IRC_SettingsMenuKey( int key )
+{
+	return Default_MenuKey( &s_irc_settings_menu, key );
+}
+
+
+void M_Menu_IRCSettings_f (void)
+{
+	IRC_SettingsMenuInit( );
+	M_PushMenu( IRC_SettingsMenuDraw , IRC_SettingsMenuKey );
+}
+
+
 
 /*
 =============================================================================
