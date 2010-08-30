@@ -32,15 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * testing.
  *
  *
- *  PRIVATE MESSAGES
- * ------------------
- *
- * At the moment, sending private messages to someone connected through AA
- * will send an automated "not supported" message (see IRCH_Message()).
- * However this could be exploited to flood an user out of the IRC server,
- * some measures should be taken to prevent that from happening.
- *
- *
  *  THREAD STATUS
  * ---------------
  *
@@ -180,7 +171,6 @@ static irc_socket_t IRC_Socket;               // Socket
 #define IRC_PARSER_LF			15	// End of line
 
 static int IRC_ParserState;
-static int IRC_ParserStringLen;
 static qboolean IRC_ParserInMessage;
 static qboolean IRC_ParserError;
 
@@ -212,20 +202,38 @@ static qboolean IRC_ParserError;
  * probably be a pointless exercise).
  */
 
+
+#define irc_string_t(len) struct { \
+	unsigned int length; \
+	char string[ len ]; \
+}
+
+
+#define IRC_MAX_NICK_LEN 64
+#define IRC_MAX_ARG_LEN 509
 #define IRC_MAX_PARAMS 16
 
 struct irc_message_t {
-	char pfx_nickOrServer[508];		// Nickname / server name
-	char pfx_user[506];			// Username
-	char pfx_host[506];			// User host name
-	char cmd_string[511];			// Command string
-	int cmd_hashkey;			// Command hash key
-	char arg_values[IRC_MAX_PARAMS][509];	// 254 arguments of at most 508
-						// characters
-	unsigned int arg_count;			// Argument count
+	// Prefix
+	irc_string_t(IRC_MAX_NICK_LEN) pfx_nickOrServer;
+	irc_string_t(IRC_MAX_NICK_LEN) pfx_user;
+	irc_string_t(IRC_MAX_NICK_LEN) pfx_host;
+
+	// Command
+	irc_string_t(32) cmd_string;
+	int cmd_hashkey;
+
+	// Arguments
+	irc_string_t(IRC_MAX_ARG_LEN) arg_values[IRC_MAX_PARAMS];
+	unsigned int arg_count;
 };
 
 static struct irc_message_t IRC_ReceivedMessage;
+
+
+// Macros to access the message's various fields
+#define IRC_String(N) (IRC_ReceivedMessage.N.string)
+#define IRC_Length(N) (IRC_ReceivedMessage.N.length)
 
 
 /*
@@ -235,11 +243,13 @@ static struct irc_message_t IRC_ReceivedMessage;
  */
 
 typedef int (*irc_handler_func_t)( );
+typedef int (*ctcp_handler_func_t)( qboolean is_channel , const char * message );
 
 struct irc_handler_t {
 	char cmd_string[32];		// Command string
 	int cmd_hashkey;		// Command hash key
-	irc_handler_func_t handler;	// Handler function
+	qboolean is_ctcp;		// Whether this is a CTCP handler
+	void * handler;			// Handler function
 	struct irc_handler_t * next;	// Next handler in list
 };
 
@@ -281,14 +291,40 @@ static struct irc_user_t IRC_User;
 
 
 
+/*
+ * Rate limiters for various events.
+ *
+ * The rate limiter works on a per-event basis, it doesn't know nor care
+ * about users.
+ * Its threshold and increase constants (which will be scaled depending on
+ * the timing controls) determine the amount of responses per second, while
+ * also allowing "bursts".
+ */
+
+/* Rate limiter threshold - above that, no response */
+#define IRC_LIMIT_THRESHOLD	3
+
+/* Rate limiter increase per check */
+#define IRC_LIMIT_INCREASE	1
+
+#define IRC_RL_MESSAGE		0
+#define IRC_RL_PING		1
+#define IRC_RL_VERSION		2
+
+static unsigned int IRC_RateLimiter[ 3 ];
+
+
+
+
 /*--------------------------------------------------------------------------*/
 /* FUNCTIONS THAT MANAGE IRC COMMAND HANDLERS                               */
 /*--------------------------------------------------------------------------*/
 
+
 /*
- * Registers a new IRC command handler.
+ * Registers a command handler (generic for both IRC and CTCP)
  */
-static void IRC_AddHandler( const char * command , irc_handler_func_t handler )
+static void IRC_PutHandler( const char * command , void * handler , qboolean is_ctcp )
 {
 	struct irc_handler_t * next , ** prev , * new_handler;
 	int hash_key , i;
@@ -301,7 +337,7 @@ static void IRC_AddHandler( const char * command , irc_handler_func_t handler )
 	prev = &IRC_Handlers;
 	next = IRC_Handlers;
 	while ( next && next->cmd_hashkey <= hash_key ) {
-		assert( !( next->cmd_hashkey == hash_key && !strcmp( command, next->cmd_string )) );
+		assert( !( next->cmd_hashkey == hash_key && !strcmp( command, next->cmd_string ) && next->is_ctcp == is_ctcp ) );
 		prev = &( next->next );
 		next = next->next;
 	}
@@ -311,8 +347,27 @@ static void IRC_AddHandler( const char * command , irc_handler_func_t handler )
 	strcpy( new_handler->cmd_string , command );
 	new_handler->cmd_hashkey = hash_key;
 	new_handler->handler = handler;
+	new_handler->is_ctcp = is_ctcp;
 	new_handler->next = next;
 	*prev = new_handler;
+}
+
+
+/*
+ * Registers a new IRC command handler.
+ */
+static inline void IRC_AddHandler( const char * command , irc_handler_func_t handler )
+{
+	IRC_PutHandler( command , handler , false );
+}
+
+
+/*
+ * Registers a new CTCP command handler.
+ */
+static void IRC_AddCTCPHandler( const char * command , ctcp_handler_func_t handler )
+{
+	IRC_PutHandler( command , handler , true );
 }
 
 
@@ -346,8 +401,36 @@ static int IRC_ExecuteHandler( )
 	found = false;
 
 	while ( handler && handler->cmd_hashkey <= IRC_ReceivedMessage.cmd_hashkey ) {
-		if ( handler->cmd_hashkey == IRC_ReceivedMessage.cmd_hashkey
-				&& !strcmp( IRC_ReceivedMessage.cmd_string , handler->cmd_string ) ) {
+		if ( handler->cmd_hashkey == IRC_ReceivedMessage.cmd_hashkey && !handler->is_ctcp
+				&& !strcmp( IRC_String(cmd_string) , handler->cmd_string ) ) {
+			found = true;
+			break;
+		}
+		handler = handler->next;
+	}
+
+	if ( !found )
+		return IRC_CMD_SUCCESS;
+	return ((irc_handler_func_t)(handler->handler))( );
+}
+
+
+/*
+ * Executes a CTCP command handler.
+ */
+static int IRC_ExecuteCTCPHandler( const char * command , qboolean is_channel , const char *argument )
+{
+	struct irc_handler_t * handler;
+	qboolean found;
+	int hashkey , i;
+
+	COMPUTE_HASH_KEY( hashkey , command , i );
+	handler = IRC_Handlers;
+	found = false;
+
+	while ( handler && handler->cmd_hashkey <= hashkey ) {
+		if ( handler->cmd_hashkey == hashkey && handler->is_ctcp
+				&& !strcmp( command , handler->cmd_string ) ) {
 			found = true;
 			break;
 		}
@@ -357,7 +440,7 @@ static int IRC_ExecuteHandler( )
 	if ( !found ) {
 		return IRC_CMD_SUCCESS;
 	}
-	return (handler->handler)( );
+	return ((ctcp_handler_func_t)(handler->handler))( is_channel , argument );
 }
 
 
@@ -500,14 +583,14 @@ static int IRC_ProcessDEQueue( )
 	} \
 }
 #define P_INIT_STRING(S) { \
-	IRC_ReceivedMessage.S[0] = next; \
-	IRC_ParserStringLen = 1; \
+	IRC_ReceivedMessage.S.string[0] = next; \
+	IRC_ReceivedMessage.S.length = 1; \
 }
 #define P_ADD_STRING(S) { \
-	if ( IRC_ParserStringLen == sizeof( IRC_ReceivedMessage.S ) - 1 ) { \
+	if ( IRC_ReceivedMessage.S.length == sizeof( IRC_ReceivedMessage.S.string ) - 1 ) { \
 		P_ERROR(RECOVERY); \
 	} else { \
-		IRC_ReceivedMessage.S[IRC_ParserStringLen ++] = next; \
+		IRC_ReceivedMessage.S.string[IRC_ReceivedMessage.S.length ++] = next; \
 	} \
 }
 #define P_INIT_COMMAND { \
@@ -521,8 +604,6 @@ static int IRC_ProcessDEQueue( )
 #define P_NEXT_PARAM { \
 	if ( ( ++ IRC_ReceivedMessage.arg_count ) == IRC_MAX_PARAMS ) { \
 		P_ERROR(RECOVERY); \
-	} else { \
-		IRC_ParserStringLen = 0; \
 	} \
 }
 #define P_START_PARAM { \
@@ -756,16 +837,13 @@ static qboolean IRC_Parser( char next )
 
 		/*
 		 * Trailing parameter; '\r' means the end of the command,
-		 * control characters are replaced with spaces, and anything
-		 * else is just added to the string.
+		 * and anything else is just added to the string.
 		 */
 		case IRC_PARSER_TRAILING_PARAM:
 			if ( next == '\r' ) {
 				P_SET_STATE(LF);
 			} else {
-				if ( IS_CNTRL( next ) ) {
-					next = ' ';
-				} else if ( next & 0x80 ) {
+				if ( next & 0x80 ) {
 					next = '?';
 				}
 				P_ADD_PARAM;
@@ -808,13 +886,13 @@ static void IRC_DumpMessage( )
 	int i;
 
 	Com_Printf( "----------- IRC MESSAGE RECEIVED -----------\n" );
-	Com_Printf( " (pfx) nick/server .... %s\n" , IRC_ReceivedMessage.pfx_nickOrServer );
-	Com_Printf( " (pfx) user ........... %s\n" , IRC_ReceivedMessage.pfx_user );
-	Com_Printf( " (pfx) host ........... %s\n" , IRC_ReceivedMessage.pfx_host );
-	Com_Printf( " command string ....... %s\n" , IRC_ReceivedMessage.cmd_string );
-	Com_Printf( " arguments ............ %d\n" , IRC_ReceivedMessage.arg_count );
+	Com_Printf( " (pfx) nick/server .... [%.3d]%s\n" , IRC_Length( pfx_nickOrServer ) , IRC_String( pfx_nickOrServer ) );
+	Com_Printf( " (pfx) user ........... [%.3d]%s\n" , IRC_Length( pfx_user ) , IRC_String( pfx_user ) );
+	Com_Printf( " (pfx) host ........... [%.3d]%s\n" , IRC_Length( pfx_host ) , IRC_String( pfx_host ) );
+	Com_Printf( " command string ....... [%.3d]%s\n" , IRC_Length( cmd_string ) , IRC_String( cmd_string ) );
+	Com_Printf( " arguments ............  %.3d\n" , IRC_ReceivedMessage.arg_count );
 	for ( i = 0 ; i < IRC_ReceivedMessage.arg_count ; i ++ ) {
-		Com_Printf( " ARG %d = %s\n" , i + 1 , IRC_ReceivedMessage.arg_values[ i ] );
+		Com_Printf( " ARG %d = [%.3d]%s\n" , i + 1 , IRC_Length( arg_values[ i ] ) , IRC_String( arg_values[ i ] ) );
 	}
 }
 #endif // DEBUG_DUMP_IRC
@@ -1023,13 +1101,78 @@ static void IRC_Sleep( int seconds )
 
 
 /*--------------------------------------------------------------------------*/
+/* RATE LIMITS                                                              */
+/*--------------------------------------------------------------------------*/
+
+
+/*
+ * Checks if some action can be effected using the rate limiter. If it can,
+ * the rate limiter's status will be updated.
+ */
+static inline qboolean IRC_CheckEventRate( int event_type )
+{
+	if ( IRC_RateLimiter[ event_type ] >= IRC_LIMIT_THRESHOLD * IRC_TIMEOUTS_PER_SEC )
+		return false;
+	IRC_RateLimiter[ event_type ] += IRC_LIMIT_INCREASE * IRC_TIMEOUTS_PER_SEC;
+	return true;
+}
+
+
+/*
+ * Decrease all non-zero rate limiter entries.
+ */
+static inline void IRC_UpdateRateLimiter( )
+{
+	int i;
+	for ( i = 0 ; i < sizeof( IRC_RateLimiter ) / sizeof( unsigned int ) ; i ++ )
+		if ( IRC_RateLimiter[ i ] ) {
+			IRC_RateLimiter[ i ] --;
+		}
+}
+
+
+/*
+ * Initialise the rate limiter.
+ */
+static inline void IRC_InitRateLimiter( )
+{
+	int i;
+	for ( i = 0 ; i < sizeof( IRC_RateLimiter ) / sizeof( unsigned int ) ; i ++ )
+		IRC_RateLimiter[ i ] = 0;
+}
+
+
+
+/*--------------------------------------------------------------------------*/
 /* DISPLAY CODE                                                             */
 /*--------------------------------------------------------------------------*/
+
+
+static void IRC_NeutraliseString( char * buffer , const char * source )
+{
+	while ( *source ) {
+		char c = *source;
+		if ( IS_CNTRL( c ) ) {
+			*( buffer ++ ) = ' ';
+		} else if ( c & 0x80 ) {
+			*( buffer ++ ) = '?';
+		} else if ( c == Q_COLOR_ESCAPE ) {
+			*( buffer ++ ) = Q_COLOR_ESCAPE;
+			*( buffer ++ ) = Q_COLOR_ESCAPE;
+		} else {
+			*( buffer ++ ) = c;
+		}
+		source ++;
+	}
+	*buffer = 0;
+}
 
 
 static void IRC_Display( int event , const char * nick , const char *message )
 {
 	char buffer[ IRC_RECV_BUF_SIZE * 2 ];
+	char nick_copy[ IRC_MAX_NICK_LEN * 2 ];
+	char message_copy[ IRC_MAX_ARG_LEN * 2 ];
 	const char *fmt_string;
 	qboolean has_nick;
 	qboolean has_message;
@@ -1112,13 +1255,19 @@ static void IRC_Display( int event , const char * nick , const char *message )
 			break;
 	}
 
+	// Neutralise required strings
+	if ( has_nick )
+		IRC_NeutraliseString( nick_copy , nick );
+	if ( has_message )
+		IRC_NeutraliseString( message_copy , message );
+
 	// Format message
 	if ( has_nick && has_message ) {
-		sprintf( buffer , fmt_string , nick , message );
+		sprintf( buffer , fmt_string , nick_copy , message_copy );
 	} else if ( has_nick ) {
-		sprintf( buffer , fmt_string , nick );
+		sprintf( buffer , fmt_string , nick_copy );
 	} else if ( has_message ) {
-		sprintf( buffer , fmt_string , message );
+		sprintf( buffer , fmt_string , message_copy );
 	} else {
 		strncpy( buffer , fmt_string , IRC_RECV_BUF_SIZE * 2 - 1 );
 	}
@@ -1158,7 +1307,7 @@ static int IRC_JoinChannel( )
 static int IRCH_Ping( )
 {
 	if ( IRC_ReceivedMessage.arg_count == 1 )
-		return IRC_Send( "PONG :%s" , IRC_ReceivedMessage.arg_values[ 0 ] );
+		return IRC_Send( "PONG :%s" , IRC_String( arg_values[ 0 ] ) );
 	return IRC_CMD_SUCCESS;
 }
 
@@ -1173,7 +1322,7 @@ static int IRCH_ServerError( )
 	}
 
 	if ( IRC_ReceivedMessage.arg_count == 1 ) {
-		Com_Printf( "IRC: server error - %s\n" , IRC_ReceivedMessage.arg_values[ 0 ] );
+		Com_Printf( "IRC: server error - %s\n" , IRC_String( arg_values[ 0 ] ) );
 	} else {
 		Com_Printf( "IRC: server error\n" );
 	}
@@ -1254,13 +1403,13 @@ static int IRCH_Joined( )
 		return IRC_CMD_RETRY;
 	}
 
-	if ( !strcmp( IRC_ReceivedMessage.pfx_nickOrServer , IRC_User.nick ) ) {
+	if ( !strcmp( IRC_String( pfx_nickOrServer ) , IRC_User.nick ) ) {
 		IRC_ThreadStatus = IRC_THREAD_JOINED;
 		event = IRC_MakeEvent(JOIN,1);
 	} else {
 		event = IRC_MakeEvent(JOIN,0);
 	}
-	IRC_Display( event , IRC_ReceivedMessage.pfx_nickOrServer , NULL );
+	IRC_Display( event , IRC_String( pfx_nickOrServer ) , NULL );
 	return IRC_CMD_SUCCESS;
 }
 
@@ -1270,7 +1419,7 @@ static int IRCH_Joined( )
  */
 static int IRCH_Part( )
 {
-	IRC_Display( IRC_MakeEvent(PART, 0) , IRC_ReceivedMessage.pfx_nickOrServer , IRC_ReceivedMessage.arg_values[ 1 ] );
+	IRC_Display( IRC_MakeEvent(PART, 0) , IRC_String( pfx_nickOrServer ) , IRC_String( arg_values[ 1 ] ) );
 	return IRC_CMD_SUCCESS;
 }
 
@@ -1280,7 +1429,7 @@ static int IRCH_Part( )
  */
 static int IRCH_Quit( )
 {
-	IRC_Display( IRC_MakeEvent(QUIT, 0) , IRC_ReceivedMessage.pfx_nickOrServer , IRC_ReceivedMessage.arg_values[ 0 ] );
+	IRC_Display( IRC_MakeEvent(QUIT, 0) , IRC_String( pfx_nickOrServer ) , IRC_String( arg_values[ 0 ] ) );
 	return IRC_CMD_SUCCESS;
 }
 
@@ -1290,8 +1439,8 @@ static int IRCH_Quit( )
  */
 static int IRCH_Kick( )
 {
-	if ( !strcmp( IRC_ReceivedMessage.arg_values[ 1 ] , IRC_User.nick ) ) {
-		IRC_Display( IRC_MakeEvent(KICK, 1) , IRC_ReceivedMessage.pfx_nickOrServer , IRC_ReceivedMessage.arg_values[ 2 ] );
+	if ( !strcmp( IRC_String( arg_values[ 1 ] ) , IRC_User.nick ) ) {
+		IRC_Display( IRC_MakeEvent(KICK, 1) , IRC_String( pfx_nickOrServer ) , IRC_String( arg_values[ 2 ] ) );
 		if ( cl_IRC_kick_rejoin->integer > 0 ) {
 			IRC_ThreadStatus = IRC_THREAD_CONNECTED;
 			IRC_SetTimeout( &IRC_JoinChannel , cl_IRC_kick_rejoin->integer );
@@ -1301,7 +1450,7 @@ static int IRCH_Kick( )
 			return IRC_CMD_FATAL;
 		}
 	} else {
-		IRC_Display( IRC_MakeEvent(KICK, 0) , IRC_ReceivedMessage.arg_values[ 1 ] , IRC_ReceivedMessage.arg_values[ 2 ] );
+		IRC_Display( IRC_MakeEvent(KICK, 0) , IRC_String( arg_values[ 1 ] ) , IRC_String( arg_values[ 2 ] ) );
 	}
 	return IRC_CMD_SUCCESS;
 }
@@ -1321,44 +1470,88 @@ static int IRCH_Nick( )
 	if ( IRC_ReceivedMessage.arg_count != 1 )
 		return IRC_CMD_SUCCESS;
 
-	if ( !strcmp( IRC_ReceivedMessage.pfx_nickOrServer , IRC_User.nick ) ) {
-		strncpy( IRC_User.nick , IRC_ReceivedMessage.arg_values[ 0 ] , 15 );
+	if ( !strcmp( IRC_String( pfx_nickOrServer ) , IRC_User.nick ) ) {
+		strncpy( IRC_User.nick , IRC_String( arg_values[ 0 ] ) , 15 );
 		Com_Printf( "%s\n", IRC_User.nick );
 		event = IRC_MakeEvent(NICK_CHANGE, 1);
 	} else {
 		event = IRC_MakeEvent(NICK_CHANGE, 0);
 	}
-	IRC_Display( event , IRC_ReceivedMessage.pfx_nickOrServer , IRC_ReceivedMessage.arg_values[ 0 ] );
+	IRC_Display( event , IRC_String( pfx_nickOrServer ) , IRC_String( arg_values[ 0 ] ) );
 	return IRC_CMD_SUCCESS;
 }
 
 
 /*
- * Received PRIVMSG
+ * Handles an actual message.
  */
-static int IRCH_Message( )
+static int IRC_HandleMessage( qboolean is_channel , const char * string )
 {
-	int event;
-	const char *string;
+	if ( is_channel ) {
+		IRC_Display( IRC_MakeEvent(SAY, 0) , IRC_String( pfx_nickOrServer ) , string );
+		return IRC_CMD_SUCCESS;
+	}
+
+	if ( IRC_CheckEventRate( IRC_RL_MESSAGE ) )
+		return IRC_Send( "PRIVMSG %s :Sorry, AlienArena's IRC client does not support private messages" , IRC_String( pfx_nickOrServer ) );
+	return IRC_CMD_SUCCESS;
+}
+
+
+/*
+ * Splits a CTCP message into action and argument, then call
+ * its handler (if there is one).
+ */
+static int IRC_HandleCTCP( qboolean is_channel , char * string , int string_len )
+{
+	char * end_of_action;
+
+	end_of_action = strchr( string , ' ' );
+	if ( end_of_action == NULL ) {
+		end_of_action = string + string_len - 1;
+		*end_of_action = 0;
+	} else {
+		*( string + string_len - 1 ) = 0;
+		*end_of_action = 0;
+		end_of_action ++;
+	}
+
+#if defined DEBUG_DUMP_IRC
+	Com_Printf( "--- IRC/CTCP ---\n" );
+	Com_Printf( " Command:     %s\n Argument(s): %s\n" , string , end_of_action );
+#endif
+
+	return IRC_ExecuteCTCPHandler( string , is_channel , end_of_action );
+}
+
+
+
+/*
+ * Received PRIVMSG.
+ *
+ * This is either an actual message (to the channel or to the user) or a
+ * CTCP command (action, version, etc...)
+ */
+static int IRCH_PrivMsg( )
+{
+	qboolean is_channel;
+
 	if ( IRC_ReceivedMessage.arg_count != 2 ) {
 		return IRC_CMD_SUCCESS;
 	}
 
-	if ( IRC_ReceivedMessage.arg_values[ 0 ][ 0 ] == '#'
-			&& ! strcmp( &( IRC_ReceivedMessage.arg_values[ 0 ][ 1 ] ) , cl_IRC_channel->string ) ) {
-		string = IRC_ReceivedMessage.arg_values[ 1 ];
-		if ( !strncmp( string , " ACTION " , 8 ) ) {
-			event = IRC_MakeEvent(ACT, 0);
-			string += 8;
-		} else {
-			event = IRC_MakeEvent(SAY, 0);
-		}
-		IRC_Display( event , IRC_ReceivedMessage.pfx_nickOrServer , string );
-	} else {
-		// FIXME: we should take additional precautions here, or we might get flooded
-		return IRC_Send( "PRIVMSG %s :Sorry, AlienArena's IRC client does not support private messages" , IRC_ReceivedMessage.pfx_nickOrServer );
+	// Check message to channel (bail out if it isn't our channel)
+	is_channel = IRC_String( arg_values[ 0 ] )[ 0 ] == '#';
+	if ( is_channel && strcmp( &( IRC_String( arg_values[ 0 ] )[ 1 ] ) , cl_IRC_channel->string ) )
+		return IRC_CMD_SUCCESS;
+
+	if ( IRC_Length( arg_values[ 1 ] ) > 2
+			&& IRC_String( arg_values[ 1 ] )[ 0 ] == 1
+			&& IRC_String( arg_values[ 1 ] )[ IRC_Length( arg_values[ 1 ] ) - 1 ] == 1 ) {
+		return IRC_HandleCTCP( is_channel , IRC_String( arg_values[ 1 ] ) + 1 , IRC_Length( arg_values[ 1 ] ) - 1 );
 	}
-	return IRC_CMD_SUCCESS;
+
+	return IRC_HandleMessage( is_channel , IRC_String( arg_values[ 1 ] ) );
 }
 
 
@@ -1371,6 +1564,58 @@ static int IRCH_Banned( )
 	IRC_Send( "QUIT :b&!" );
 	return IRC_CMD_FATAL;
 }
+
+
+
+/*--------------------------------------------------------------------------*/
+/* CTCP COMMAND HANDLERS                                                    */
+/*--------------------------------------------------------------------------*/
+
+/*
+ * Action command aka "/me"
+ */
+static int CTCP_Action( qboolean is_channel , const char * argument )
+{
+	if ( !*argument )
+		return IRC_CMD_SUCCESS;
+
+	if ( is_channel ) {
+		IRC_Display( IRC_MakeEvent(ACT, 0) , IRC_String( pfx_nickOrServer ) , argument );
+		return IRC_CMD_SUCCESS;
+	}
+
+	if ( IRC_CheckEventRate( IRC_RL_MESSAGE ) )
+		return IRC_Send( "PRIVMSG %s :Sorry, AlienArena's IRC client does not support private messages" , IRC_String( pfx_nickOrServer ) );
+	return IRC_CMD_SUCCESS;
+}
+
+
+/*
+ * PING requests
+ */
+static int CTCP_Ping( qboolean is_channel , const char * argument )
+{
+	if ( is_channel || !IRC_CheckEventRate( IRC_RL_PING ) )
+		return IRC_CMD_SUCCESS;
+
+	if ( *argument )
+		return IRC_Send( "NOTICE %s :\001PING %s\001" , IRC_String( pfx_nickOrServer ) , argument );
+
+	return IRC_Send( "NOTICE %s :\001PING\001" , IRC_String( pfx_nickOrServer ) );
+}
+
+
+/*
+ * VERSION requests, let's advertise AA a lil'.
+ */
+static int CTCP_Version( qboolean is_channel , const char * argument )
+{
+	if ( is_channel || !IRC_CheckEventRate( IRC_RL_VERSION ) )
+		return IRC_CMD_SUCCESS;
+
+	return IRC_Send( "NOTICE %s :\001VERSION AlienArena IRC client - v" VERSION "\001" , IRC_String( pfx_nickOrServer ) );
+}
+
 
 
 /*--------------------------------------------------------------------------*/
@@ -1762,8 +2007,9 @@ static void IRC_MainLoop()
 					// We have some data, process it
 					err_code = IRC_ProcessData( );
 				} else if ( err_code == IRC_CMD_RETRY ) {
-					// Timed out, handle timers
+					// Timed out, handle timers and update rate limiter
 					err_code = IRC_ProcessDEQueue();
+					IRC_UpdateRateLimiter( );
 				} else {
 					// Disconnected, but reconnection should be attempted
 					err_code = IRC_CMD_RETRY;
@@ -1795,16 +2041,17 @@ static void IRC_MainLoop()
  */
 static void IRC_Thread( )
 {
-	// Init. send queue
+	// Init. send queue & rate limiter
 	IRC_InitSendQueue( );
+	IRC_InitRateLimiter( );
 
-	// Init. handlers
+	// Init. IRC handlers
 	IRC_AddHandler( "PING" , &IRCH_Ping );		// Ping request
 	IRC_AddHandler( "ERROR" , &IRCH_ServerError );	// Server error
 	IRC_AddHandler( "JOIN" , &IRCH_Joined );	// Channel join
 	IRC_AddHandler( "PART" , &IRCH_Part );		// Channel part
 	IRC_AddHandler( "QUIT" , &IRCH_Quit );		// Client quit
-	IRC_AddHandler( "PRIVMSG" , &IRCH_Message );	// Message
+	IRC_AddHandler( "PRIVMSG" , &IRCH_PrivMsg );	// Message or CTCP
 	IRC_AddHandler( "KICK" , &IRCH_Kick );		// Kick
 	IRC_AddHandler( "NICK" , &IRCH_Nick );		// Nick change
 	IRC_AddHandler( "001" , &IRCH_Connected );	// Connection established
@@ -1812,6 +2059,11 @@ static void IRC_Thread( )
 	IRC_AddHandler( "432" , &IRCH_FatalError );	// Erroneous nick name
 	IRC_AddHandler( "433" , &IRCH_NickError );	// Nick name in use
 	IRC_AddHandler( "474" , &IRCH_Banned );		// Banned (when joining)
+
+	// Init. CTCP handlers
+	IRC_AddCTCPHandler( "ACTION" , &CTCP_Action );	// "/me"
+	IRC_AddCTCPHandler( "PING" , &CTCP_Ping );
+	IRC_AddCTCPHandler( "VERSION" , &CTCP_Version );
 
 	// Enter loop
 	IRC_MainLoop( );
@@ -1829,8 +2081,8 @@ static void IRC_Thread( )
  * Caution: IRC_SystemThreadProc(), IRC_StartThread() and IRC_WaitThread()
  *  have separate "VARIANTS".
  *
- * Note different return types on IRC_SystemThreadProc() and completely
- *  different IRC_StartThread()/IRC_WaitThread() implementations.
+ * Note different prototypes for IRC_SystemThreadProc() and completely
+ * different IRC_StartThread()/IRC_WaitThread() implementations.
  */
 #if defined WIN32_VARIANT
 
@@ -1870,8 +2122,6 @@ static void IRC_WaitThread()
 static pthread_t IRC_ThreadHandle = (pthread_t) NULL;
 
 
-// IRC_SystemThreadProc and IRC_StartThread  Linux/Unix Flavor
-// (note different function return type)
 static void *IRC_SystemThreadProc(void *dummy)
 {
 	IRC_Thread( );
