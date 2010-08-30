@@ -284,12 +284,12 @@ void NET_SendLoopPacket (netsrc_t sock, int length, void *data, netadr_t to)
 
 qboolean	NET_GetPacket (netsrc_t sock, netadr_t *net_from, sizebuf_t *net_message)
 {
-	int 	ret;
+	int			ret;
 	struct sockaddr_in	from;
-	size_t	fromlen;
-	int		net_socket;
-	int		protocol;
-	int		err;
+	socklen_t		fromlen;
+	int			net_socket;
+	int			protocol;
+	int			err;
 
 	if (NET_GetLoopPacket (sock, net_from, net_message))
 		return true;
