@@ -28,19 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *  WINDOWS
  * ----------
  *
- * I have in fact completely rewritten most of the code. Now, while this
- * version is quite stable on Linux, I did change some of the Windows-specific
- * code but have no way to test it. These changes are tagged with a
- * "FIXME(Win)" string before the comments. These sections may crash.
- *
- *
- *  CONTROL
- * ---------
- *
- * While I have added Cvar's that control some of the IRC client's behaviour
- * (port, channel, nickname override, delay before autorejoin, delay before
- * reconnection), these should probably be added to a sub-menu of the IRC
- * client menu.
+ * While the Windows version seems to work now, it still requires more
+ * testing.
  *
  *
  *  PRIVATE MESSAGES
@@ -919,9 +908,6 @@ static void IRC_HandleError(void)
 		break;
 	}
 
-	// FIXME(Win): I moved this here to avoid having to execute it after
-	//             calls to IRC_HandleError(). This might, however, turn
-	//             out to be a bad idea.
 	WSASetLastError( 0 );
 }
 #elif defined UNIX_VARIANT
@@ -1859,7 +1845,6 @@ static DWORD WINAPI IRC_SystemThreadProc( LPVOID dummy)
 }
 
 
-// FIXME(Win): untested code
 static void IRC_StartThread()
 {
 	if ( IRC_ThreadHandle == NULL )
@@ -1867,10 +1852,6 @@ static void IRC_StartThread()
 }
 
 
-// FIXME(Win): this is UNTESTED code - I used online doc to find out how that
-//             stuff is supposed to work, but I have *no idea* if it does.
-//             It might not compile, or it might crash the game when the IRC
-//             connection is shut down.
 static void IRC_WaitThread()
 {
 	if ( IRC_ThreadHandle != NULL ) {
