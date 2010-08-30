@@ -31,8 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * I have in fact completely rewritten most of the code. Now, while this
  * version is quite stable on Linux, I did change some of the Windows-specific
  * code but have no way to test it. These changes are tagged with a
- * "FIXME(Win)" string before the comments. These sections may crash, and it's
- * entirely possible that some of them will not even compile.
+ * "FIXME(Win)" string before the comments. These sections may crash.
  *
  *
  *  CONTROL
@@ -110,6 +109,22 @@ cvar_t * cl_IRC_override_nickname;
 cvar_t * cl_IRC_nickname;
 cvar_t * cl_IRC_kick_rejoin;
 cvar_t * cl_IRC_reconnect_delay;
+
+
+/*
+ * Timing controls
+ *
+ * In order to avoid actively waiting like crazy, there are many parts of the
+ * IRC client code that need to sleep or wait for a timeout. However, if the
+ * wait is too long, it makes the whole thing unreactive to e.g. the irc_say
+ * command; if the wait is too shot, it starts using CPU time.
+ *
+ * The constants below control the timeouts.
+ */
+
+#define IRC_TIMEOUT_MS		250
+#define IRC_TIMEOUT_US		( IRC_TIMEOUT_MS * 1000 )
+#define IRC_TIMEOUTS_PER_SEC	( 1000 / IRC_TIMEOUT_MS)
 
 
 
@@ -385,7 +400,7 @@ static void IRC_SetTimeout( irc_handler_func_t function , int time )
 	// Create entry
 	qe = (struct irc_delayed_t *) malloc( sizeof( struct irc_delayed_t ) );
 	qe->handler = function;
-	qe->time_left = time;
+	qe->time_left = time * IRC_TIMEOUTS_PER_SEC;
 
 	// Find insert location
 	if ( IRC_DEQueue ) {
@@ -967,9 +982,6 @@ static int IRC_Send( const char * format , ... )
  *
  * If data is received, SUCCESS is returned; otherwise, RETRY will be returned
  * on timeout and FATAL on error.
- *
- * FIXME(Win): Use of select() here done solely from documentation. The brown
- *             matter *may* hit the revolving implement.
  */
 
 #if defined WIN32_VARIANT
@@ -986,12 +998,12 @@ static int IRC_Wait( )
 	fd_set read_set;
 	int rv;
 
-	// Wait for data to be available, 1 second timeout
+	// Wait for data to be available
 	do {
 		FD_ZERO( &read_set );
 		FD_SET( IRC_Socket, &read_set );
-		timeout.tv_sec = 1;
-		timeout.tv_usec = 0;
+		timeout.tv_sec = 0;
+		timeout.tv_usec = IRC_TIMEOUT_US;
 		rv = select( SELECT_ARG , &read_set , NULL , NULL , &timeout );
 	} while ( SELECT_CHECK );
 
@@ -1013,11 +1025,11 @@ static void IRC_Sleep( int seconds )
 {
 	int i;
 	assert( seconds > 0 );
-	for ( i = 0 ; i < seconds && !IRC_QuitRequested ; i ++ ) {
+	for ( i = 0 ; i < seconds * IRC_TIMEOUTS_PER_SEC && !IRC_QuitRequested ; i ++ ) {
 #if defined WIN32_VARIANT
-		Sleep( 1000 );
+		Sleep( IRC_TIMEOUT_MS );
 #elif defined UNIX_VARIANT
-		sleep( 1 );
+		usleep( IRC_TIMEOUT_US );
 #endif
 	}
 }
