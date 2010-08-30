@@ -457,7 +457,7 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 	int		i, j;
 
 	//send these to the shader program
-	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, surf->tangentSpaceTransform );
+	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
 	glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
 	glUniform1iARB( g_location_fog, map_fog);
 

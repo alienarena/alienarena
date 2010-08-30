@@ -1561,7 +1561,7 @@ static float ClampCvar( float min, float max, float value )
 
 extern cvar_t *con_font;
 #define MAX_FONTS 32
-char **font_names;
+char **font_names = NULL;
 int	numfonts;
 
 static void FontFunc( void *unused )
@@ -1674,7 +1674,7 @@ char **SetFontNames (void)
 
 extern cvar_t *crosshair;
 #define MAX_CROSSHAIRS 256
-char **crosshair_names;
+char **crosshair_names = NULL;
 int	numcrosshairs;
 
 static void CrosshairFunc( void *unused )
@@ -1793,7 +1793,7 @@ char **SetCrosshairNames (void)
 extern cvar_t *cl_hudimage1;
 extern cvar_t *cl_hudimage2;
 #define MAX_HUDS 256
-char **hud_names;
+char **hud_names = NULL;
 int	numhuds;
 
 static void HudFunc( void *unused )
@@ -2309,31 +2309,36 @@ void Options_MenuInit( void )
 	s_options_invertmouse_box.generic.callback = InvertMouseFunc;
 	s_options_invertmouse_box.itemnames = yesno_names;
 
-	font_names = SetFontNames ();
+	// Do not re-allocate font/crosshair/HUD names each time the menu is
+	// displayed - BlackIce
+	if ( font_names == NULL )
+		font_names = SetFontNames ();
 	s_options_font_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_font_box.generic.x	= 0;
 	s_options_font_box.generic.y	= FONTSCALE*210*scale;
 	s_options_font_box.generic.name	= "font";
 	s_options_font_box.generic.callback = FontFunc;
-	s_options_font_box.itemnames = font_names;
+	s_options_font_box.itemnames = (const char **) font_names;
 	s_options_font_box.generic.statusbar	= "select your font";
 
-	crosshair_names = SetCrosshairNames ();
+	if ( crosshair_names == NULL )
+		crosshair_names = SetCrosshairNames ();
 	s_options_crosshair_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_crosshair_box.generic.x	= 0;
 	s_options_crosshair_box.generic.y	= FONTSCALE*220*scale;
 	s_options_crosshair_box.generic.name	= "crosshair";
 	s_options_crosshair_box.generic.callback = CrosshairFunc;
-	s_options_crosshair_box.itemnames = crosshair_names;
+	s_options_crosshair_box.itemnames = (const char **) crosshair_names;
 	s_options_crosshair_box.generic.statusbar	= "select your crosshair";
 
-	hud_names = SetHudNames ();
+	if ( hud_names == NULL )
+		hud_names = SetHudNames ();
 	s_options_hud_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_hud_box.generic.x	= 0;
 	s_options_hud_box.generic.y	= FONTSCALE*230*scale;
 	s_options_hud_box.generic.name	= "hud";
 	s_options_hud_box.generic.callback = HudFunc;
-	s_options_hud_box.itemnames = hud_names;
+	s_options_hud_box.itemnames = (const char **) hud_names;
 	s_options_hud_box.generic.statusbar	= "select your hud style";
 
 	s_options_discolor_box.generic.type = MTYPE_SPINCONTROL;
@@ -4706,7 +4711,7 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	}
 
 	s_startmap_list.generic.name	= "initial map";
-	s_startmap_list.itemnames = mapnames;
+	s_startmap_list.itemnames = (const char **)mapnames;
 	s_startmap_list.curvalue = 0;
 
 	//set map info
@@ -4917,7 +4922,7 @@ void StartServer_MenuInit( void )
 	s_startmap_list.generic.x	= -8*scale;
 	s_startmap_list.generic.y	= 0 + offset;
 	s_startmap_list.generic.name	= "initial map";
-	s_startmap_list.itemnames = mapnames;
+	s_startmap_list.itemnames = (const char **) mapnames;
 	s_startmap_list.generic.callback = MapInfoFunc;
 
 	s_rules_box.generic.type = MTYPE_SPINCONTROL;
@@ -6034,7 +6039,7 @@ static void RateCallback( void *unused )
 
 static void ModelCallback( void *unused )
 {
-	s_player_skin_box.itemnames = s_pmi[s_player_model_box.curvalue].skindisplaynames;
+	s_player_skin_box.itemnames = (const char **) s_pmi[s_player_model_box.curvalue].skindisplaynames;
 	s_player_skin_box.curvalue = 0;
 }
 
@@ -6338,7 +6343,7 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_model_box.generic.callback = ModelCallback;
 	s_player_model_box.generic.cursor_offset = -56;
 	s_player_model_box.curvalue = currentdirectoryindex;
-	s_player_model_box.itemnames = s_pmnames;
+	s_player_model_box.itemnames = (const char **) s_pmnames;
 
 	s_player_skin_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_skin_box.generic.name = "skin";
@@ -6347,7 +6352,7 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_skin_box.generic.callback = 0;
 	s_player_skin_box.generic.cursor_offset = -56;
 	s_player_skin_box.curvalue = currentskinindex;
-	s_player_skin_box.itemnames = s_pmi[currentdirectoryindex].skindisplaynames;
+	s_player_skin_box.itemnames = (const char **) s_pmi[currentdirectoryindex].skindisplaynames;
 
 	s_player_handedness_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_handedness_box.generic.name = "handedness";

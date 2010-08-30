@@ -1180,7 +1180,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 					gun.flags |= RF_TRANSLUCENT;
 					gun.alpha = 0.30;
 
-					if (s1->effects & EF_COLOR_SHELL && gun.flags & (RF_SHELL_RED|RF_SHELL_BLUE|RF_SHELL_GREEN) || useFX)
+					if ( ( s1->effects & EF_COLOR_SHELL && gun.flags & (RF_SHELL_RED|RF_SHELL_BLUE|RF_SHELL_GREEN) ) || useFX)
 					{
 						V_AddViewEntity (&gun);
 					}
