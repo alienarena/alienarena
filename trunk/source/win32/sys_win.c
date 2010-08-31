@@ -829,7 +829,13 @@ void Sys_UnloadGame (void)
 =================
 Sys_GetGameAPI
 
-Loads the game dll
+Loads the game module
+
+2010-08 : Implements a statically linked game module. Loading a game module DLL
+  is supported if it exists.
+  To prevent problems with attempting to load an older, incompatible version,
+    a DLL will not be loaded from arena/ nor data1/
+
 =================
 */
 void *Sys_GetGameAPI (void *parms)
@@ -837,10 +843,12 @@ void *Sys_GetGameAPI (void *parms)
 	void	*(*ptrGetGameAPI) (void *) = NULL;
 	char	name[MAX_OSPATH];
 	char	*path;
-	char	cwd[MAX_OSPATH];
+	size_t pathlen;
+//	char	cwd[MAX_OSPATH];
 
-const char *gamename = "gamex86.dll";
+	const char *gamename = "gamex86.dll";
 
+/*
 #ifdef NDEBUG
 	const char *debugdir = "release";
 #else
@@ -872,6 +880,7 @@ const char *gamename = "gamex86.dll";
 #endif
 		{
 			// now run through the search paths
+
 			path = NULL;
 			while (1)
 			{
@@ -889,9 +898,39 @@ const char *gamename = "gamex86.dll";
 			}
 		}
 	}
+*/
+
+// 2010-08
+
+	if (game_library != NULL)
+		Com_Error (ERR_FATAL, "Sys_GetGameAPI without Sys_UnloadingGame");
+
+	path = NULL;
+	for (;;)
+	{
+		path = FS_NextPath( path );
+		if ( !path )
+			break;
+
+		pathlen = strlen( path );
+		// old game DLL in data1 is a problem
+		if ( !Q_strncasecmp( "data1", path[ pathlen-5 ], 5 ) )
+			continue;
+		// may want to have a game DLL in arena, but disable for now
+		if ( !Q_strncasecmp( "arena", path[ pathlen-5 ], 5 ) )
+			continue;
+
+		Com_sprintf (name, sizeof(name), "%s/%s", path, gamename);
+		game_library = LoadLibrary (name);
+		if (game_library)
+		{ // found a game module DLL
+			break;
+		}
+	}
 
 	if ( game_library != NULL )
 	{ // game module from DLL
+		Com_Printf ("LoadLibrary (%s)\n",name);
 		ptrGetGameAPI = (void *)GetProcAddress (game_library, "GetGameAPI");
 	}
 

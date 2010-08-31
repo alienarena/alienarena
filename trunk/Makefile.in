@@ -961,6 +961,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/tech/rotimage4.tga \
 	data1/maps/meshes/toxicbarrell.jpg \
 	data1/maps/meshes/toxicbarrell.md2 \
+	data1/maps/meshes/toxicbarrell_normal.jpg \
 	data1/maps/meshes/tubecover.md2 \
 	data1/maps/meshes/tube.md2 \
 	data1/maps/meshes/tube.tga \
