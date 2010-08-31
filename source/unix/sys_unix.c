@@ -213,7 +213,12 @@ void Sys_UnloadGame (void)
 =================
 Sys_GetGameAPI
 
-Loads the game dll
+Loads the game module
+
+2010-08 : Implements a statically linked game module. Loading a game module lib
+  is supported if it exists.
+  To prevent problems with attempting to load an older, incompatible version,
+    a lib will not be loaded from arena/ nor data1/
 =================
 */
 void *Sys_GetGameAPI (void *parms)
@@ -223,6 +228,7 @@ void *Sys_GetGameAPI (void *parms)
 	FILE	*fp;
 	char	name[MAX_OSPATH];
 	char	*path;
+	size_t  pathlen;
 	char	*str_p;
 	const char *gamename = "game.so";
 
@@ -239,6 +245,14 @@ void *Sys_GetGameAPI (void *parms)
 		path = FS_NextPath (path);
 		if (!path)
 			break; // Search did not turn up a game shared library
+
+		pathlen = strlen( path );
+		// old game lib in data1 is a problem
+		if ( !Q_strncasecmp( "data1", &path[ pathlen-5 ], 5 ) )
+			continue;
+		// may want to have a game lib in arena, but disable for now
+		if ( !Q_strncasecmp( "arena", &path[ pathlen-5 ], 5 ) )
+			continue;
 
 		snprintf (name, MAX_OSPATH, "%s/%s", path, gamename);
 
