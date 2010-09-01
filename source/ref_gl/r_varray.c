@@ -521,12 +521,35 @@ void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll)
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 {
 	glpoly_t *p = surf->polys;
+	vec3_t	lightVec, lightAdd, temp;
+	float	dist, weight;
+	int		numlights;
 	float	*v;
-	int		i;
+	int		i, j;
+
+	//get light position relative to player's position
+	numlights = 0;
+	VectorClear(lightAdd);
+	for (i = 0; i < r_lightgroups; i++) {
+		VectorSubtract(r_origin, LightGroups[i].group_origin, temp);
+		dist = VectorLength(temp);
+		if(dist == 0)
+			dist = 1;
+		dist = dist*dist;
+		weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
+		for(j = 0; j < 3; j++)
+			lightAdd[j] += LightGroups[i].group_origin[j]*weight;
+		numlights+=weight;
+	}
+
+	if(numlights > 0.0) {
+		for(i = 0; i < 3; i++)
+			lightVec[i] = (lightAdd[i]/numlights + r_origin[i])/2.0;
+	}
 
 	for (; p; p = p->chain)
 	{
-		vec3_t	tangent, lightPos;
+		vec3_t	tangent;
 
 		// reset pointer and counter
 		VArray = &VArrayVerts[0];
@@ -559,11 +582,7 @@ void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 		//send these to the shader program
 		glUniform3fARB( g_location_tangent, tangent[0], tangent[1], tangent[2]);
 
-		for(i=0; i<3; i++)
-			lightPos[i] = r_origin[i];
-		lightPos[2] += 512;
-
-		glUniform3fARB( g_location_lightPos, lightPos[0], lightPos[1], lightPos[2]);
+		glUniform3fARB( g_location_lightPos, lightVec[0], lightVec[1], lightVec[2]);
 		glUniform1iARB( g_location_fogamount, map_fog);
 		glUniform1fARB( g_location_time, rs_realtime);
 	}
