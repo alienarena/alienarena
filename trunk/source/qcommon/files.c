@@ -1003,6 +1003,13 @@ void FS_Dir_f( void )
 
 		Com_sprintf( findname, sizeof(findname), "%s/%s", path, wildcard );
 
+		// limit to game directories.
+		// FIXME: figure out a way to look in botinfo directories
+		if ( strstr( findname, ".." ) )
+		{
+			continue;
+		}
+
 		while ( *tmp != 0 )
 		{
 			if ( *tmp == '\\' )

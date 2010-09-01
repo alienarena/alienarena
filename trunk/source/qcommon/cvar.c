@@ -151,7 +151,7 @@ inline static cvar_t *Cvar_Allocate(char *var_name, char *var_value, int flags, 
 ============
 Cvar_AddBetween
 
-Adds a variable between two others. 
+Adds a variable between two others.
 ============
 */
 inline static cvar_t *Cvar_AddBetween(char *var_name, char *var_value, int flags, unsigned int hash_key,cvar_t **prev, cvar_t *next)
@@ -232,7 +232,8 @@ returns a boolean depending on whether the variable was found or created, and
 sets the pointer to the variable through a parameter.
 ============
 */
-inline static qboolean Cvar_FindOrCreate (char *var_name, char *var_value, cvar_t **found)
+inline static qboolean Cvar_FindOrCreate (
+		char *var_name, char *var_value, int flags, cvar_t **found)
 {
 	cvar_t		*var, **prev;
 	unsigned int	i, hash_key;
@@ -244,13 +245,14 @@ inline static qboolean Cvar_FindOrCreate (char *var_name, char *var_value, cvar_
 	{
 		if (var->hash_key == hash_key && !Q_strcasecmp (var_name, var->name))
 		{
+			var->flags |= flags;
 			*found = var;
 			return true;
 		}
 		prev = &( var->next );
 	}
 
-	*found = Cvar_AddBetween(var_name , var_value , 0 , hash_key , prev , var);
+	*found = Cvar_AddBetween(var_name , var_value , flags , hash_key , prev , var);
 	return false;
 }
 
@@ -265,7 +267,7 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 	cvar_t	*var;
 
 	// Find the variable; if it does not exist, create it and return at once
-	if (!Cvar_FindOrCreate (var_name, value, &var))
+	if (!Cvar_FindOrCreate (var_name, value, 0, &var))
 		return var;
 
 	if (var->flags & (CVAR_USERINFO | CVAR_SERVERINFO))
@@ -372,7 +374,7 @@ cvar_t *Cvar_FullSet (char *var_name, char *value, int flags)
 {
 	cvar_t	*var;
 
-	if (!Cvar_FindOrCreate (var_name, value, &var))
+	if (!Cvar_FindOrCreate (var_name, value, flags, &var))
 		return var;
 
 	var->modified = true;
@@ -540,6 +542,9 @@ void Cvar_List_f (void)
 	i = 0;
 	for (var = cvar_vars ; var ; var = var->next, i++)
 	{
+		if ( developer && developer->integer )
+			Com_Printf ("[0x%8x] : ", var->hash_key );
+
 		if (var->flags & CVAR_ARCHIVE)
 			Com_Printf ("*");
 		else
