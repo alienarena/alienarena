@@ -501,6 +501,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/aaglow.tga \
 	data1/gfx/adrenalbase.tga \
 	data1/gfx/adrenalmask.tga \
+	data1/gfx/annhiliationreflection.jpg \
 	data1/gfx/alienarena2gl.tga \
 	data1/gfx/bannerfx.tga \
 	data1/gfx/bconsole2.tga \
@@ -1027,6 +1028,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-aquous.mus \
 	data1/maps/scripts/dm-atlantis2k8.mus \
 	data1/maps/scripts/dm-annhiliation.fog \
+    data1/maps/scripts/dm-annhiliation.mus \
 	data1/maps/scripts/dm-babel.fog \
 	data1/maps/scripts/dm-babel.mus \
 	data1/maps/scripts/dm-beyond.mus \
@@ -2217,6 +2219,11 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/building10_broken_nm.tga \
 	data1/textures/arena10/building10_broken.tga \
 	data1/textures/arena10/building10_nm.tga \
+	data1/textures/arena10/building11.tga \
+	data1/textures/arena10/building12.tga \
+	data1/textures/arena10/building13.tga \
+	data1/textures/arena10/building14.tga \
+	data1/textures/arena10/building15.tga \
 	data1/textures/arena10/building1_nm.tga \
 	data1/textures/arena10/building1.tga \
 	data1/textures/arena10/building1_broken_nm.tga \
@@ -3220,6 +3227,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/water/bluewater.tga \
 	data1/textures/water/clearwater_nm.tga \
 	data1/textures/water/clearwater.tga \
+	data1/textures/water/flowingwater.tga \
 	data1/textures/water/waterpx.tga \
 	data1/textures/xempx/a3light1b.tga \
 	data1/textures/xempx/a6bt.tga \
