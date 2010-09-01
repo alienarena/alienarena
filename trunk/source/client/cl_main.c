@@ -1840,7 +1840,7 @@ void CL_InitLocal (void)
 //#endif
 
 	Cmd_AddCommand ("irc_connect", CL_InitIRC);
-	Cmd_AddCommand ("irc_quit", CL_IRCShutdown);
+	Cmd_AddCommand ("irc_quit", CL_IRCInitiateShutdown);
 	Cmd_AddCommand ("irc_say", CL_IRCSay);
 
 	//
@@ -2191,13 +2191,14 @@ void CL_Shutdown(void)
 	}
 	isdown = true;
 
+	CL_IRCInitiateShutdown();
 	CL_ShutdownHttpDownload();
-	CL_IRCShutdown();
 	CL_WriteConfiguration ();
 
 	S_Shutdown();
 	IN_Shutdown ();
 	VID_Shutdown();
+	CL_IRCWaitShutdown( );
 
 	NET_Shutdown();
 

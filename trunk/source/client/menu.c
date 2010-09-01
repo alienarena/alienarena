@@ -2854,7 +2854,7 @@ static void JoinIRCFunc( void *unused )
 
 static void QuitIRCFunc( void *unused )
 {
-	CL_IRCShutdown();
+	CL_IRCInitiateShutdown();
 }
 
 static void AutoIRCFunc( void *unused)
@@ -3053,8 +3053,10 @@ static menuaction_s		s_irc_settings_apply;
 static void ApplyIRCSettings( void * self )
 {
 	qboolean running = CL_IRCIsRunning( );
-	if ( running )
-		CL_IRCShutdown( );
+	if ( running ) {
+		CL_IRCInitiateShutdown( );
+		CL_IRCWaitShutdown( );
+	}
 
 	Cvar_Set(	"cl_IRC_server" ,		s_irc_server.buffer);
 	Cvar_Set(	"cl_IRC_channel" ,		s_irc_channel.buffer);

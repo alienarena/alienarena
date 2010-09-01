@@ -21,31 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // cl_irc.c  -- irc client
 
 
-/*
- * /!\ IMPORTANT NOTES REGARDING THIS MODIFIED VERSION - PLEASE READ /!\
- *
- *
- *  WINDOWS
- * ----------
- *
- * While the Windows version seems to work now, it still requires more
- * testing.
- *
- *
- *  THREAD STATUS
- * ---------------
- *
- * In some cases, using the menu's "Quit IRC chat" command while the server's
- * just lost connection / refused a connection will cause the IRC thread to be
- * killed but the main thread will still think it's alive, therefore refusing
- * to start a new one.
- *
- *
- *
- * -- BlackIce
- *
- */
-
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1177,6 +1152,10 @@ static void IRC_Display( int event , const char * nick , const char *message )
 	qboolean has_nick;
 	qboolean has_message;
 
+	// If we're quitting, just skip this
+	if ( IRC_QuitRequested )
+		return;
+
 	// Determine message format
 	switch ( IRC_EventType( event ) ) {
 		case IRC_EVT_SAY:
@@ -2176,9 +2155,14 @@ void CL_InitIRC(void)
 }
 
 
-void CL_IRCShutdown(void)
+void CL_IRCInitiateShutdown(void)
 {
 	IRC_QuitRequested = true;
+}
+
+
+void CL_IRCWaitShutdown( void )
+{
 	IRC_WaitThread( );
 }
 
