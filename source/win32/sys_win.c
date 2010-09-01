@@ -914,10 +914,10 @@ void *Sys_GetGameAPI (void *parms)
 
 		pathlen = strlen( path );
 		// old game DLL in data1 is a problem
-		if ( !Q_strncasecmp( "data1", path[ pathlen-5 ], 5 ) )
+		if ( !Q_strncasecmp( "data1", &path[ pathlen-5 ], 5 ) )
 			continue;
 		// may want to have a game DLL in arena, but disable for now
-		if ( !Q_strncasecmp( "arena", path[ pathlen-5 ], 5 ) )
+		if ( !Q_strncasecmp( "arena", &path[ pathlen-5 ], 5 ) )
 			continue;
 
 		Com_sprintf (name, sizeof(name), "%s/%s", path, gamename);
