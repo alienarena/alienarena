@@ -418,6 +418,41 @@ void FS_CreatePath (char *path)
 	}
 }
 
+
+/*
+===
+FS_CheckFile
+
+Given the full path to a file, find out whether or not the file actually
+exists.
+===
+*/
+#if defined HAVE_STAT
+
+static qboolean FS_CheckFile( const char * search_path )
+{
+	struct stat statbfr;
+	int result;
+	result = stat( search_path, &statbfr );
+	return ( result != -1 && S_ISREG(statbfr.st_mode) );
+}
+
+#else	// HAVE_STAT
+
+static qboolean FS_CheckFile( const char * search_path )
+{
+	FILE *pfile;
+
+	pfile = fopen( search_path, "rb");
+	if ( ! pfile )
+		return false;
+	fclose( pfile );
+	return true;
+}
+
+#endif	// HAVE_STAT
+
+
 /*
 ===
 FS_FullPath
@@ -438,14 +473,8 @@ Each is appended and searched for in each path in the filesystem hierarchy
 qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
 {
 	char search_path[MAX_OSPATH];
-#if defined HAVE_STAT
-	struct stat statbfr;
-	int result;
-#else
-	FILE *pfile;
-#endif
+	char * to_search;
 	qboolean found = false;
-	int i;
 
 	if ( strlen( relative_path ) >= MAX_QPATH )
 	{
@@ -455,49 +484,21 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 
 	if ( !Q_strncasecmp( relative_path, BOT_GAMEDATA, strlen(BOT_GAMEDATA) ) )
 	{ // search in botinfo places
-		for ( i = 0; fs_botsearch[i][0] && !found ; i++ )
-		{
-			// note: relative path contains "botinfo", so fs_botsearch does not
-			Com_sprintf( search_path, sizeof(search_path), "%s/%s",
-						fs_botsearch[i], relative_path);
-#if defined HAVE_STAT
-			result = stat( search_path, &statbfr );
-			if ( result != -1 && S_ISREG(statbfr.st_mode) )
-			{ // regular file exists
-				found = true;
-			}
-#else
-			pfile = fopen( search_path, "rb");
-			if ( pfile )
-			{
-				found = true;
-				fclose( pfile );
-			}
-#endif
-		}
+		to_search = &fs_botsearch[0][0];
 	}
 	else
 	{ // search in the usual game data places
-		for ( i = 0; fs_gamesearch[i][0] && !found ; i++ )
-		{
-			Com_sprintf( search_path, sizeof(search_path), "%s/%s",
-						fs_gamesearch[i], relative_path);
-#if defined HAVE_STAT
-			result = stat( search_path, &statbfr );
-			if ( result != -1 && S_ISREG(statbfr.st_mode) )
-			{ // regular file exists
-				found = true;
-			}
-#else
-			pfile = fopen( search_path, "rb");
-			if ( pfile )
-			{
-				found = true;
-				fclose( pfile );
-			}
-#endif
-		}
+		to_search = &fs_gamesearch[0][0];
 	}
+
+	while ( to_search[0] && !found )
+	{
+		Com_sprintf( search_path, sizeof(search_path), "%s/%s",
+					to_search, relative_path);
+		found = FS_CheckFile( search_path );
+		to_search += MAX_OSPATH;
+	}
+
 	if ( found )
 	{
 		if ( strlen( search_path ) < pathsize )
@@ -510,16 +511,16 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 			found = false;
 		}
 	}
-	else
+	else if ( developer && developer->value == 2 )
 	{
 		// This is not necessarily an error and can produce a flood of messages.
 		// Don't show unless developer set to 2
-		if ( developer && developer->value == 2 )
-			Com_DPrintf("FS_FullPath: file not found: %s\n", relative_path );
+		Com_DPrintf("FS_FullPath: file not found: %s\n", relative_path );
 	}
 
 	return found;
 }
+
 
 /*
 ===
@@ -591,6 +592,14 @@ int FS_FOpenFile (char *filename, FILE **file)
 		else
 		{
 			length = FS_filelength( *file );
+
+			// On error, the file's length will be negative, and we probably
+			// can't read from that.
+			if ( length < 0 )
+			{
+				FS_FCloseFile( *file );
+				*file = NULL;
+			}
 		}
 	}
 	else
@@ -708,7 +717,7 @@ int FS_LoadFile (char *path, void **buffer)
 
 	if (!buffer)
 	{
-		fclose (h);
+		FS_FCloseFile (h);
 		return len;
 	}
 
@@ -718,7 +727,7 @@ int FS_LoadFile (char *path, void **buffer)
 
 	FS_Read (buf, len, h);
 
-	fclose (h);
+	FS_FCloseFile (h);
 
 	return len;
 }
