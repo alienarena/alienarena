@@ -729,7 +729,7 @@ void CTFScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote);
 void CTFPrecache(void);
 void CTFFlagSetup (edict_t *ent);
 qboolean CTFPickup_Flag (edict_t *ent, edict_t *other);
-qboolean CTFDrop_Flag(edict_t *ent, gitem_t *item);
+void CTFDrop_Flag(edict_t *ent, gitem_t *item);
 
 //Vehicles
 void Reset_player(edict_t *ent);
@@ -740,14 +740,14 @@ qboolean Jet_AvoidGround( edict_t *ent );
 void VehicleDeadDrop(edict_t *self);
 void VehicleSetup (edict_t *ent);
 qboolean Get_in_vehicle (edict_t *ent, edict_t *other);
-qboolean Leave_vehicle(edict_t *ent, gitem_t *item);
+void Leave_vehicle(edict_t *ent, gitem_t *item);
 
 //deathball
 void ResetDeathball();
 void DeadDropDeathball(edict_t *self);
 void DeathballSetup (edict_t *ent);
 qboolean Pickup_deathball (edict_t *ent, edict_t *other);
-qboolean DeathballDrop(edict_t *ent, gitem_t *item);
+void DeathballDrop(edict_t *ent, gitem_t *item);
 
 //
 // g_utils.c
