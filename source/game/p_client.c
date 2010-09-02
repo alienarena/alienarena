@@ -308,7 +308,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				message2 = "'s grapple";
 				break;
 			case MOD_HEADSHOT:
-				message = "had it's head blown off by";
+				message = "had its head blown off by";
 			}
 			//here is where the bot chat features will be added.
 			//default is on.  Setting to 1 turns it off.
