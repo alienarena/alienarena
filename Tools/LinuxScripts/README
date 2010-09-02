@@ -20,3 +20,5 @@ correctly for your executable.
 output for server admin.
 
 'rcon' is a ruby script that sends rcon commands to servers
+
+'view-ip-log' is a shell script that parses the contents of the IP log.

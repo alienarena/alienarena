@@ -63,6 +63,8 @@ cvar_t	*sv_iplimit;
 
 cvar_t	*sv_downloadurl;
 
+cvar_t	*sv_iplogfile;		// Log file by IP address
+
 int		sv_numbots;
 
 void Master_Shutdown (void);
@@ -70,6 +72,34 @@ void Master_Shutdown (void);
 short   ShortSwap (short l);
 
 //============================================================================
+
+
+/*
+=====================
+SV_LogEvent
+
+Logs an event to the IP log.
+=====================
+*/
+static void SV_LogEvent( netadr_t address , const char * event , const char * name )
+{
+	FILE * file;
+
+	if ( !( sv_iplogfile && sv_iplogfile->string[0] ) )
+		return;
+
+
+	file = fopen( sv_iplogfile->string , "a" );
+	if ( !file ) {
+		Com_DPrintf( "Failed to write to IP log file '%s'\n" , sv_iplogfile->string );
+		return;
+	}
+	fprintf( file , "%s\t%s\t%d\t%s\r\n" , NET_AdrToString(address) , event ,
+			( name != NULL ) , ( name != NULL ) ? name : "" );
+	fclose( file );
+}
+
+
 
 
 /*
@@ -100,6 +130,7 @@ void SV_DropClient (client_t *drop)
 		drop->download = NULL;
 	}
 
+	SV_LogEvent( drop->netchan.remote_address , "DCN" , drop->name );
 	drop->state = cs_zombie;		// become free in a few seconds
 	drop->name[0] = 0;
 }
@@ -454,6 +485,7 @@ void SVC_DirectConnect (void)
 	{
 		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nServer is version %s\n", VERSION);
 		Com_DPrintf ("    rejected connect from version %i\n", version);
+		SV_LogEvent( adr , "RVR" , NULL );
 		return;
 	}
 
@@ -483,6 +515,7 @@ void SVC_DirectConnect (void)
 	{
 		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nToo many connections from your host.\n");
 		Com_DPrintf ("    too many connections\n");
+		SV_LogEvent( adr , "R00" , NULL );
 		return;
 	}
 
@@ -495,12 +528,14 @@ void SVC_DirectConnect (void)
 	{
 		Com_DPrintf ("    userinfo length exceeded\n");
 		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nUserinfo string length exceeded.\n");
+		SV_LogEvent( adr , "R01" , NULL );
 		return;
 	}
 	else if (!userinfo[0])
 	{
 		Com_DPrintf ("    empty userinfo string\n");
 		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nBad userinfo string.\n");
+		SV_LogEvent( adr , "R02" , NULL );
 		return;
 	}
 
@@ -513,6 +548,7 @@ void SVC_DirectConnect (void)
 		if (ptr < userinfo)
 			ptr = userinfo;
 		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nConnection refused due to attempted exploit!\n");
+		SV_LogEvent( adr , "R03" , NULL );
 		return;
 	}
 	if (Info_KeyExists (userinfo, "ip"))
@@ -520,6 +556,7 @@ void SVC_DirectConnect (void)
 		char	*p;
 		p = Info_ValueForKey(userinfo, "ip");
 		Com_Printf ("EXPLOIT: Client %s attempted to spoof IP address: %s\n", Info_ValueForKey (userinfo, "name"), NET_AdrToString(adr));
+		SV_LogEvent( adr , "R04" , NULL );
 		return;
 	}
 
@@ -533,6 +570,7 @@ void SVC_DirectConnect (void)
 		{
 			Com_Printf ("Remote connect in attract loop.  Ignored.\n");
 			Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nConnection refused.\n");
+			SV_LogEvent( adr , "R05" , NULL );
 			return;
 		}
 	}
@@ -547,12 +585,14 @@ void SVC_DirectConnect (void)
 				if (challenge == svs.challenges[i].challenge)
 					break;		// good
 				Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nBad challenge.\n");
+				SV_LogEvent( adr , "R06" , NULL );
 				return;
 			}
 		}
 		if (i == MAX_CHALLENGES)
 		{
 			Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nNo challenge for address.\n");
+			SV_LogEvent( adr , "R07" , NULL );
 			return;
 		}
 	}
@@ -575,15 +615,18 @@ void SVC_DirectConnect (void)
 			{
 				Com_DPrintf ("    client already found\n");
 				Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nPlayer '%s' is already connected from %s.\n", cl->name, NET_AdrToString(adr));
+				SV_LogEvent( adr , "R08" , cl->name );
 				return;
 			}
 
 			if (!NET_IsLocalAddress (adr) && (svs.realtime - cl->lastconnect) < ((int)sv_reconnect_limit->integer * 1000))
 			{
 				Com_DPrintf ("%s:reconnect rejected : too soon\n", NET_AdrToString (adr));
+				SV_LogEvent( adr , "R09" , NULL );
 				return;
 			}
 			Com_Printf ("%s:reconnect\n", NET_AdrToString (adr));
+			SV_LogEvent( adr , "RCN" , NULL );
 
 			newcl = cl;
 			goto gotnewcl;
@@ -620,10 +663,13 @@ void SVC_DirectConnect (void)
 	{
 		Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nServer is full.\n");
 		Com_DPrintf ("Rejected a connection.\n");
+		SV_LogEvent( adr , "R10" , NULL );
 		return;
 	}
+	SV_LogEvent( adr , "NCN" , NULL );
 
 gotnewcl:
+
 	// build a new connection
 	// accept the new client
 	// this is the only place a client_t is ever initialized
@@ -644,6 +690,7 @@ gotnewcl:
 				Info_ValueForKey (userinfo, "rejmsg"));
 		else
 			Netchan_OutOfBandPrint (NS_SERVER, adr, "print\nConnection refused.\n" );
+		SV_LogEvent( adr , "GRJ" , NULL );
 		Com_DPrintf ("Game rejected a connection.\n");
 		return;
 	}
@@ -651,6 +698,7 @@ gotnewcl:
 	// parse some info from the info strings
 	strncpy (newcl->userinfo, userinfo, sizeof(newcl->userinfo)-1);
 	SV_UserinfoChanged (newcl);
+	SV_LogEvent( adr , "UUS" , newcl->name );
 
 	// send the connect packet to the client
 	Netchan_OutOfBandPrint(NS_SERVER, adr, "client_connect %s", sv_downloadurl->string);
@@ -1324,6 +1372,8 @@ void SV_Init (void)
 	allow_download_sounds = Cvar_Get ("allow_download_sounds", "1", CVAR_ARCHIVE);
 	allow_download_maps	  = Cvar_Get ("allow_download_maps", "1", CVAR_ARCHIVE);
 	sv_downloadurl = Cvar_Get("sv_downloadurl", "http://icculus.org/alienarena/sv_downloadurl", CVAR_SERVERINFO);
+
+	sv_iplogfile = Cvar_Get("sv_iplogfile" , "" , CVAR_ARCHIVE);
 
 	sv_noreload = Cvar_Get ("sv_noreload", "0", 0);
 
