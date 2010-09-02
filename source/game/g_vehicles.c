@@ -426,7 +426,7 @@ void Reset_player(edict_t *ent)
 
 	ent->in_vehicle = false;
 }
-qboolean Leave_vehicle(edict_t *ent, gitem_t *item)
+void Leave_vehicle(edict_t *ent, gitem_t *item)
 {
 
 	Reset_player(ent);
@@ -440,7 +440,6 @@ qboolean Leave_vehicle(edict_t *ent, gitem_t *item)
 	Drop_Item (ent, item);
 
 	safe_bprintf(PRINT_HIGH, "Vehicle has been dropped!\n");
-	return true;
 }
 
 qboolean Get_in_vehicle (edict_t *ent, edict_t *other)

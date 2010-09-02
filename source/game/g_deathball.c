@@ -66,13 +66,12 @@ void DeathballSetup (edict_t *ent)
 	ent->nextthink = level.time + FRAMETIME;
 	ent->think = DeathballThink;
 }
-qboolean DeathballDrop(edict_t *ent, gitem_t *item)
+void DeathballDrop(edict_t *ent, gitem_t *item)
 {
 	if (rand() & 1)
 		safe_cprintf(ent, PRINT_HIGH, "Only lusers drop the ball!\n");
 	else
 		safe_cprintf(ent, PRINT_HIGH, "Winners don't drop their balls!\n");
-	return false;
 }
 void ResetDeathball()
 {

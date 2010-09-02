@@ -3002,7 +3002,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				if((ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM)) {
 					client->pers.spectator = false; //we have a team, join
 				}
-				else if((((int)(dmflags->value) & DF_SKINTEAMS) || (ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM) && client->resp.spectator < 3) {
+				else if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM && client->resp.spectator < 3) {
 					if(red_team_cnt < blue_team_cnt)
 						ent->dmteam = RED_TEAM; //gonna put the autojoin here
 					else
