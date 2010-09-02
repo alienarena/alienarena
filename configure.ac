@@ -417,24 +417,66 @@ AX_CFLAGS_GCC_OPTION([-ffast-math])
 AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
 # TODO: consider putting -DDedicated here
 
+
+
+#########################################################################################################
+# DEBUGGING OPTIONS
+#########################################################################################################
+
+debug=no
+
+# Debugging support + symbols removal
 AC_ARG_ENABLE([debugging-symbols],
 	[AS_HELP_STRING([--enable-debugging-symbols],[Compile Alien Arena with full debugging information (default:no)])],
 	[debug_syms=${enableval}],[debug_syms=no])
-AS_IF([ test "x$debug_syms" = "xyes" ], [AX_CFLAGS_GCC_OPTION([-g3])])
+AS_IF([ test "x$debug_syms" = "xyes" ], [
+	AX_CFLAGS_GCC_OPTION([-g3])
+	debug=yes
+])
 AM_CONDITIONAL(REMOVE_SYMBOLS,[ test "x$debug_syms" = "xno" ])
 
+# Compiler warnings
 AC_ARG_ENABLE([full-warnings],
-	[AS_HELP_STRING([--enable-full-warnings],[Make GCC really whiny (default:no)])],
+	[AS_HELP_STRING([--enable-full-warnings],[Display all compiler warnings (default:no)])],
 	[gcc_whining=${enableval}],[gcc_whining=no])
-AS_IF([ test "x$gcc_whining" = "xyes" ], [AX_CFLAGS_GCC_OPTION([-Wall])])
+AS_IF([ test "x$gcc_whining" = "xyes" ], [
+	AX_CFLAGS_GCC_OPTION([-Wall])
+	debug=yes
+])
 
-
-# Specific debugging
+# IRC client debugging
 AC_ARG_ENABLE([irc-debugging],
 	[AS_HELP_STRING([--enable-irc-debugging],[Debug IRC messages (default: no)])],
 	[irc_debug=${enableval}],[irc_debug=no])
-AS_IF([ test "x$irc_debug" = "xyes" ], 
-	[AC_DEFINE([DEBUG_DUMP_IRC],1,[Enable IRC message debugging])])
+AS_IF([ test "x$irc_debug" = "xyes" ],[
+	AC_DEFINE([DEBUG_DUMP_IRC],1,[Enable IRC message debugging])
+	debug=yes
+])
+
+# Buffer size debugging
+AC_ARG_ENABLE([buffer-debugging],
+	[AS_HELP_STRING([--enable-buffer-debugging],[Debug buffers (default: no)])],
+	[buffer_debug=${enableval}],[buffer_debug=no])
+AS_IF([ test "x$buffer_debug" = "xyes" ],[
+	AC_DEFINE([BUFFER_DEBUG],1,[Enable buffer debugging])
+	debug=yes
+])
+
+# Paranoid message checking
+AC_ARG_ENABLE([paranoid-io],
+	[AS_HELP_STRING([--enable-paranoid-io],
+		[Activate paranoid, speed-sapping message checking (default: no)])
+	],[paranoid_io=${enableval}],[paranoid_io=no])
+AS_IF([ test "x$paranoid_io" = "xyes" ],[
+	AC_DEFINE([PARANOID],1,[Enable paranoid, speed-sapping message checking])
+	debug=yes
+])
+
+#########################################################################################################
+# END OF DEBUGGING OPTIONS
+#########################################################################################################
+
+
 
 # outputs
 AC_CONFIG_FILES([ Makefile 	source/Makefile ])
@@ -462,11 +504,13 @@ AS_IF([test "x$hide_status" = "xno"],[
 	AM_COND_IF([ALTERNATE_INSTALL],,
 		[AS_ECHO([" Prefix: ................ '${prefix}'"])])
 
-	AS_IF([ test "x$gcc_whining" = "xyes" || test "x$debug_syms" = "xyes" || test "x$irc_debug" = "xyes" ],[
+	AS_IF([ test "x$debug" = "xyes" ],[
 		AS_ECHO(["- DEBUGGING OPTIONS ------------------------"])
-		AS_ECHO(["   All compiler warnings: ${gcc_whining}"])
-		AS_ECHO(["   Debugging symbols: ... ${debug_syms}"])
-		AS_ECHO(["   IRC protocol dump: ... ${irc_debug}"])
+		AS_ECHO(["   All compiler warnings: .... ${gcc_whining}"])
+		AS_ECHO(["   Debugging symbols: ........ ${debug_syms}"])
+		AS_ECHO(["   IRC protocol dump: ........ ${irc_debug}"])
+		AS_ECHO(["   Buffer debugging: ......... ${buffer_debug}"])
+		AS_ECHO(["   Paranoid message checks: .. ${buffer_debug}"])
 	])
 
 	AM_COND_IF([ALTERNATE_INSTALL],
