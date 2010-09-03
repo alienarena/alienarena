@@ -820,3 +820,17 @@ maps/meshes/toxicbarrell
 		normalmap
 	}
 }
+maps/meshes/gothic/skeleton
+{
+	{
+		map maps/meshes/gothic/skeleton_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/gothic/root
+{
+	{
+		map maps/meshes/gothic/root_normal.jpg
+		normalmap
+	}
+}
