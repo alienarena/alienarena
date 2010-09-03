@@ -2862,11 +2862,6 @@ static void AutoIRCFunc( void *unused)
 	Cvar_SetValue("cl_IRC_connect_at_startup", s_irc_joinatstartup.curvalue);
 }
 
-void IRCServerAccept( void )
-{
-	//Cvar_Set( "cl_IRC_server", s_irc_server.buffer);
-}
-
 static void M_FindIRCKey ( void )
 {
 	int		count;
@@ -2963,7 +2958,6 @@ void IRC_MenuInit( void )
 
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_title );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_join );
-	//Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_quit );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_joinatstartup );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_key );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_editsettings );
@@ -3014,9 +3008,6 @@ void IRC_MenuDraw( void )
 
 const char *IRC_MenuKey( int key )
 {
-	if ( key == K_ESCAPE )
-		IRCServerAccept();
-
 	return Default_MenuKey( &s_irc_menu, key );
 }
 
