@@ -558,6 +558,10 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 	//load skin from skin file
 	COM_StripExtension(mod->name, shortname);
+	i = 0;
+	do
+		shortname[i] = tolower(shortname[i]);
+	while (shortname[i++]);
 	strcat(shortname, ".skin");
 	path = NULL;
 	for(;;)
@@ -569,11 +573,6 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		}
 		if(path)
 			Com_sprintf(fullname, sizeof(fullname), "%s/%s", path, shortname);
-
-		i = 0;
-		do
-			fullname[i] = tolower(fullname[i]);
-		while (fullname[i++]);
 
 		if (Mod_ReadSkinFile(fullname, skinname))
 		{
