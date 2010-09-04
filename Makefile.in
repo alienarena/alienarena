@@ -336,6 +336,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/db-chromium.tmp \
 	botinfo/db-icarus.tmp \
 	botinfo/db-vesuvius.tmp \
+	botinfo/dm-annhiliation.tmp \
 	botinfo/dm-aquous.tmp \
 	botinfo/dm-atlantis2k8.tmp \
 	botinfo/dm-babel.tmp \
@@ -661,6 +662,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/db-icarus.txt \
 	data1/levelshots/db-vesuvius.jpg \
 	data1/levelshots/db-vesuvius.txt \
+	data1/levelshots/dm-annhiliation.jpg \
+	data1/levelshots/dm-annhiliation.txt \
 	data1/levelshots/dm-aquous.jpg \
 	data1/levelshots/dm-aquous.txt \
 	data1/levelshots/dm-atlantis2k8.jpg \
@@ -871,6 +874,14 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/gothic/lamp.md2 \
 	data1/maps/meshes/gothic/lamp_normal.tga \
 	data1/maps/meshes/gothic/lamp.tga \
+	data1/maps/meshes/gothic/root.jpg \
+	data1/maps/meshes/gothic/root.md2 \
+	data1/maps/meshes/gothic/root_normal.jpg \
+	data1/maps/meshes/gothic/skeleton1.md2 \
+	data1/maps/meshes/gothic/skeleton2.md2 \
+	data1/maps/meshes/gothic/skeleton3.md2 \
+	data1/maps/meshes/gothic/skeleton.jpg \
+	data1/maps/meshes/gothic/skeleton_normal.jpg \
 	data1/maps/meshes/hanger.md2 \
 	data1/maps/meshes/hanger_normal.jpg \
 	data1/maps/meshes/hanger.tga \
@@ -2361,6 +2372,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/vinewall1_hm.tga \
 	data1/textures/arena10/vinewall1_nm.tga \
 	data1/textures/arena10/vinewall1.tga \
+	data1/textures/arena10/wires2.tga \
+	data1/textures/arena10/wires1.tga \
 	data1/textures/arena1/jpad1a.tga \
 	data1/textures/arena1/jpad1a.wal \
 	data1/textures/arena1/jpad1b.tga \
@@ -3575,6 +3588,9 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
+	$(MAKE) $(AM_MAKEFLAGS) \
+	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
+	  dist-hook
 	-test -n "$(am__skip_mode_fix)" \
 	|| find "$(distdir)" -type d ! -perm -755 \
 		-exec chmod u+rwx,go+rx {} \; -o \
@@ -3801,27 +3817,27 @@ uninstall-am: uninstall-dist_docDATA uninstall-local \
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-am clean clean-generic \
 	ctags ctags-recursive dist dist-all dist-bzip2 dist-gzip \
-	dist-lzma dist-shar dist-tarZ dist-xz dist-zip distcheck \
-	distclean distclean-generic distclean-hdr distclean-tags \
-	distcleancheck distdir distuninstallcheck dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-data-local install-dist_docDATA \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-html install-html-am install-info install-info-am \
-	install-man install-nobase_dist_pkgdataDATA install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-dist_docDATA uninstall-local \
-	uninstall-nobase_dist_pkgdataDATA
+	dist-hook dist-lzma dist-shar dist-tarZ dist-xz dist-zip \
+	distcheck distclean distclean-generic distclean-hdr \
+	distclean-tags distcleancheck distdir distuninstallcheck dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-data-local \
+	install-dist_docDATA install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-nobase_dist_pkgdataDATA \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags \
+	tags-recursive uninstall uninstall-am uninstall-dist_docDATA \
+	uninstall-local uninstall-nobase_dist_pkgdataDATA
 
 
-# Not needed unless something is installed using copy command
 # remove svn directories from distribution staging area after creating
 #  distribution in staging area and before running archiver
-#dist-hook:
-#	rm -rf `find $(distdir) -name .svn`
+#  needed for EXTRA_DIST
+dist-hook:
+	rm -rf `find $(distdir) -name .svn`
 
 #
 # Alternate Install
@@ -3851,16 +3867,7 @@ install-alternate:
 
 #
 # install/uninstall added rules for the game read-only data
-# 
-# - Normally requires root privelages.
-#
-# For $(DESTDIR)$(pkgdatadir) and
-# - existing botinfo/ and data1/ directories are removed on install.
-# - any game.so in arena/ is removed, but otherwise existing arena 3rd party
-#    data should remain. It is possible that assets from data1/ used by 
-#    3rd party maps may not exist after a new install.
-# - any .svn subdirectories are removed.
-#
+# - Normally requires root privileges.
 #
 install-data-local:
 @ALTERNATE_INSTALL_TRUE@	@echo "Alternate install: Use "make install-alternate"!!!
@@ -3869,6 +3876,8 @@ install-data-local:
 #
 #install-exec-hook:
 #  TODO: may want to check for game.so files in data1 and arena here
+#
+#install-exec-hook:
 #
 
 uninstall-local:

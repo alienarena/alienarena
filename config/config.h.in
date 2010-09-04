@@ -1,5 +1,8 @@
 /* config/config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Enable buffer debugging */
+#undef BUFFER_DEBUG
+
 /* Canonical OS identification */
 #undef BUILDSTRING
 
@@ -337,6 +340,9 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* Enable paranoid, speed-sapping message checking */
+#undef PARANOID
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */

@@ -54,6 +54,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/db-chromium.tmp \
 	botinfo/db-icarus.tmp \
 	botinfo/db-vesuvius.tmp \
+	botinfo/dm-annhiliation.tmp \
 	botinfo/dm-aquous.tmp \
 	botinfo/dm-atlantis2k8.tmp \
 	botinfo/dm-babel.tmp \
@@ -379,6 +380,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/db-icarus.txt \
 	data1/levelshots/db-vesuvius.jpg \
 	data1/levelshots/db-vesuvius.txt \
+	data1/levelshots/dm-annhiliation.jpg \
+	data1/levelshots/dm-annhiliation.txt \
 	data1/levelshots/dm-aquous.jpg \
 	data1/levelshots/dm-aquous.txt \
 	data1/levelshots/dm-atlantis2k8.jpg \
@@ -589,6 +592,14 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/gothic/lamp.md2 \
 	data1/maps/meshes/gothic/lamp_normal.tga \
 	data1/maps/meshes/gothic/lamp.tga \
+	data1/maps/meshes/gothic/root.jpg \
+	data1/maps/meshes/gothic/root.md2 \
+	data1/maps/meshes/gothic/root_normal.jpg \
+	data1/maps/meshes/gothic/skeleton1.md2 \
+	data1/maps/meshes/gothic/skeleton2.md2 \
+	data1/maps/meshes/gothic/skeleton3.md2 \
+	data1/maps/meshes/gothic/skeleton.jpg \
+	data1/maps/meshes/gothic/skeleton_normal.jpg \
 	data1/maps/meshes/hanger.md2 \
 	data1/maps/meshes/hanger_normal.jpg \
 	data1/maps/meshes/hanger.tga \
@@ -2079,6 +2090,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/vinewall1_hm.tga \
 	data1/textures/arena10/vinewall1_nm.tga \
 	data1/textures/arena10/vinewall1.tga \
+	data1/textures/arena10/wires2.tga \
+	data1/textures/arena10/wires1.tga \
 	data1/textures/arena1/jpad1a.tga \
 	data1/textures/arena1/jpad1a.wal \
 	data1/textures/arena1/jpad1b.tga \
@@ -2999,3 +3012,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/vehicles/strafer/tris.md2 \
 	data1/vehicles/strafer/v_wep.md2 \
 	data1/vehicles/strafer/window.md2
+	
+	
+	

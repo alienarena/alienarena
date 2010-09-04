@@ -23,17 +23,18 @@ SUBDIRS = source
 ACLOCAL_AMFLAGS = -I m4
 
 # TODO: Add additional release package content from Tools
+
 EXTRA_DIST = m4
 
 # TODO: create "official" INSTALL, README, etc.
 # (the README, and maybe some others should be in top dir in dist. tarball)
 dist_doc_DATA = docs/license.txt docs/README.txt
 
-# Not needed unless something is installed using copy command
 # remove svn directories from distribution staging area after creating
 #  distribution in staging area and before running archiver
-#dist-hook:
-#	rm -rf `find $(distdir) -name .svn`
+#  needed for EXTRA_DIST
+dist-hook:
+	rm -rf `find $(distdir) -name .svn`
 
 #
 # Alternate Install
@@ -74,16 +75,7 @@ endif
 
 #
 # install/uninstall added rules for the game read-only data
-# 
-# - Normally requires root privelages.
-#
-# For $(DESTDIR)$(pkgdatadir) and
-# - existing botinfo/ and data1/ directories are removed on install.
-# - any game.so in arena/ is removed, but otherwise existing arena 3rd party
-#    data should remain. It is possible that assets from data1/ used by 
-#    3rd party maps may not exist after a new install.
-# - any .svn subdirectories are removed.
-#
+# - Normally requires root privileges.
 #
 install-data-local:
 if ALTERNATE_INSTALL
@@ -94,6 +86,8 @@ endif
 #
 #install-exec-hook:
 #  TODO: may want to check for game.so files in data1 and arena here
+#
+#install-exec-hook:
 #
 
 uninstall-local:
