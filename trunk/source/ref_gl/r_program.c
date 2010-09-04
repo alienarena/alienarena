@@ -356,7 +356,7 @@ static char bsp_fragment_program[] =
 
 "    }\n"
 
-"   return shadows;\n"
+"   return pow(shadows,3.0);\n"
 "}\n"
 
 "void main( void )\n"

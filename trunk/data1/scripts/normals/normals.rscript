@@ -834,3 +834,10 @@ maps/meshes/gothic/root
 		normalmap
 	}
 }
+maps/meshes/railcar
+{
+	{
+		map maps/meshes/railcar_normal.jpg
+		normalmap
+	}
+}
