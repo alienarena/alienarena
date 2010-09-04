@@ -827,9 +827,6 @@ dynamic:
 			if(brightest > 0) { //we have a light
 				dl = r_newrefdef.dlights;
 				dl += sv_lnum; //our most influential light
-				VectorSubtract(dl->origin, r_origin, lightVec);
-				VectorNormalize(lightVec);
-				VectorScale(lightVec, brightest/20, lightVec);
 
 				lightCutoffSquared = ( dl->intensity - DLIGHT_CUTOFF );
 
