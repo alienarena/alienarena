@@ -378,47 +378,6 @@ typedef struct cl_sustain
 
 //=================================================
 
-// ========
-// PGM
-typedef struct
-{
-	qboolean	isactive;
-
-	vec3_t		lightcol;
-	float		light;
-	float		lightvel;
-} cplight_t;
-
-#define P_LIGHTS_MAX 8
-
-typedef struct particle_s
-{
-	struct particle_s	*next;
-
-	cplight_t	lights[P_LIGHTS_MAX];
-
-	float		time;
-
-	vec3_t		org;
-	vec3_t		angle;
-	vec3_t		vel;
-	vec3_t		accel;
-	vec3_t		end;
-	float		color;
-	float		colorvel;
-	float		alpha;
-	float		alphavel;
-	int			type;		// 0 standard, 1 smoke, etc etc...
-	int			texnum;
-	int			blenddst;
-	int			blendsrc;
-	float		scale;
-	float		scalevel;
-	qboolean	fromsustainedeffect;
-
-} cparticle_t;
-
-
 #define	PARTICLE_GRAVITY	40
 #define BLASTER_PARTICLE_COLOR		0xe0
 // PMM
@@ -663,7 +622,7 @@ void V_Init (void);
 void V_RenderView( float stereo_separation );
 void V_AddEntity (entity_t *ent);
 void V_AddViewEntity (entity_t *ent);
-void V_AddParticle (vec3_t org, vec3_t angle, int color, int type, int texnum, int blenddst, int blendsrc, float alpha, float scale);
+void V_AddParticle (particle_t	*p);
 void V_AddLight (vec3_t org, float intensity, float r, float g, float b);
 void V_AddTeamLight (vec3_t org, float intensity, float r, float g, float b, int team);
 void V_AddLightStyle (int style, float r, float g, float b);

@@ -98,12 +98,12 @@ extern	int c_beams;
 extern	int			gl_filter_min, gl_filter_max;
 
 //
-// view origin
+// view origin moved to ref.h. -M.
 //
-extern	vec3_t	vup;
-extern	vec3_t	vpn;
-extern	vec3_t	vright;
-extern	vec3_t	r_origin;
+//extern	vec3_t	vup;
+//extern	vec3_t	vpn;
+//extern	vec3_t	vright;
+//extern	vec3_t	r_origin;
 
 //
 // screen size info
@@ -244,20 +244,6 @@ void SetVertexOverbrights (qboolean toggle);
 void RefreshFont (void);
 
 //====================================================================
-typedef struct
-{
-	vec3_t	origin;
-	vec3_t  angle;
-	float	alpha;
-	float	dist;
-	int		type;
-	int		texnum;
-	int		blenddst;
-	int		blendsrc;
-	int		color;
-	float   scale;
-} gparticle_t;
-
 extern	model_t	*r_worldmodel;
 
 extern	unsigned	d_8to24table[256];

@@ -70,7 +70,7 @@ int			r_numviewentities;
 entity_t	r_viewentities[MAX_ENTITIES];
 
 int			r_numparticles;
-particle_t	r_particles[MAX_PARTICLES];
+particle_t	*r_particles[MAX_PARTICLES];
 
 lightstyle_t	r_lightstyles[MAX_LIGHTSTYLES];
 
@@ -126,22 +126,12 @@ V_AddParticle
 
 =====================
 */
-void V_AddParticle (vec3_t org, vec3_t angle, int color, int type, int texnum, int blenddst, int blendsrc, float alpha, float scale)
+void V_AddParticle (particle_t	*p)
 {
-	particle_t	*p;
 
 	if (r_numparticles >= MAX_PARTICLES)
 		return;
-	p = &r_particles[r_numparticles++];
-	VectorCopy (org, p->origin);
-	VectorCopy (angle, p->angle);
-	p->color = color;
-	p->alpha = alpha;
-	p->type = type;
-	p->texnum = texnum;
-	p->blenddst = blenddst;
-	p->blendsrc = blendsrc;
-	p->scale = scale;
+	r_particles[r_numparticles++] = p;
 }
 
 /*
@@ -214,6 +204,8 @@ If cl_testparticles is set, create 4096 particles in the view
 */
 void V_TestParticles (void)
 {
+#if 0
+//TODO: this will probably need moving to cl_fx.c and to use new_particle
 	particle_t	*p;
 	int			i, j;
 	float		d, r, u;
@@ -227,12 +219,13 @@ void V_TestParticles (void)
 		p = &r_particles[i];
 
 		for (j=0 ; j<3 ; j++)
-			p->origin[j] = cl.refdef.vieworg[j] + cl.v_forward[j]*d +
+			p->current_origin[j] = cl.refdef.vieworg[j] + cl.v_forward[j]*d +
 			cl.v_right[j]*r + cl.v_up[j]*u;
 
-		p->color = 8;
-		p->alpha = cl_testparticles->value;
+		p->current_color = 8;
+		p->current_alpha = cl_testparticles->value;
 	}
+#endif
 }
 
 /*
@@ -905,6 +898,7 @@ void V_RenderView( float stereo_separation )
 
 		SCR_DrawBases();
 	}
+	
 }
 
 

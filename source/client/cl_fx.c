@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ref_gl/r_image.h"
 #include "ref_gl/qgl.h"
 
-extern cparticle_t	particles[MAX_PARTICLES];
+extern particle_t	particles[MAX_PARTICLES];
 extern int			cl_numparticles;
 extern cvar_t		*vid_ref;
 
@@ -453,12 +453,12 @@ PARTICLE MANAGEMENT
 ==============================================================
 */
 
-cparticle_t	*active_particles, *free_particles;
+particle_t	*active_particles, *free_particles;
 
-cparticle_t	particles[MAX_PARTICLES];
+particle_t	particles[MAX_PARTICLES];
 int			cl_numparticles = MAX_PARTICLES;
 
-void addParticleLight (cparticle_t *p, float light, float lightvel, float lcol0, float lcol1, float lcol2)
+void addParticleLight (particle_t *p, float light, float lightvel, float lcol0, float lcol1, float lcol2)
 {
 	int i;
 
@@ -500,9 +500,9 @@ void CL_ClearParticles (void)
 	particles[cl_numparticles-1].next = NULL;
 }
 
-static inline cparticle_t *new_particle (void)
+static inline particle_t *new_particle (void)
 {
-	cparticle_t	*p;
+	particle_t	*p;
 	int j;
 
 	if (!free_particles)
@@ -602,7 +602,7 @@ Wall impact puffs
 void CL_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		d;
 
 	if((color == 450 || color == 550) && cl_noblood->value)
@@ -685,7 +685,7 @@ CL_ParticleEffect2
 void CL_ParticleEffect2 (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		d;
 
 	for (i=0 ; i<count ; i++)
@@ -726,7 +726,7 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 {
 	int			i, j, k;
 	float		inc, scale, nudge;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for( i=0; i<3; i++) {
 		nudge = frand();
@@ -806,7 +806,7 @@ void CL_SplashEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j, k;
 	float		scale, nudge;
-	cparticle_t	*p;
+	particle_t	*p;
 	vec3_t		angle;
 
 	//draw rings that expand outward
@@ -889,7 +889,7 @@ void CL_LaserSparks (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j, k;
 	float		inc, scale, nudge;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for( i=0; i<3; i++) {
 		nudge = frand();
@@ -965,7 +965,7 @@ CL_LogoutEffect
 void CL_LogoutEffect (vec3_t org, int type)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for (i=0 ; i<500 ; i++)
 	{
@@ -1004,7 +1004,7 @@ CL_ItemRespawnParticles
 void CL_ItemRespawnParticles (vec3_t org)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for (i=0 ; i<64 ; i++)
 	{
@@ -1052,7 +1052,7 @@ extern float rs_realtime;
 void CL_ExplosionParticles (vec3_t org)
 {
 	int			i, j, k;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	//for glsl framebuffer distortion effects
 	if(!r_drawing_fbeffect && cl_explosiondist->value) {
@@ -1174,7 +1174,7 @@ CL_MuzzleParticles - changed this to a smoke effect in 6.06
 void CL_MuzzleParticles (vec3_t org)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for ( i = 0; i < 4; i++)
 	{
@@ -1208,7 +1208,7 @@ CL_MuzzleParticles - Blue
 void CL_BlueMuzzleParticles (vec3_t org)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for ( i = 0; i < 4; i++)
 	{
@@ -1244,7 +1244,7 @@ extern cvar_t *r_lefthand;
 void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 {
 	int			j;
-	cparticle_t	*p;
+	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup, vec;
 	float		rightoffset, len;
 
@@ -1299,7 +1299,7 @@ void CL_MuzzleFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 void CL_PlasmaFlashParticle (vec3_t org, vec3_t angles, qboolean from_client)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 	vec3_t		mflashorg, vforward, vright, vup, vec;
 	float		rightoffset, len, color;
 
@@ -1362,7 +1362,7 @@ CL_SmartMuzzle
 void CL_SmartMuzzle (vec3_t org)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for ( i = 0; i < 3; i++)
 	{
@@ -1398,7 +1398,7 @@ CL_SmartMuzzle
 void CL_Voltage (vec3_t org)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for ( i = 0; i < 3; i++)
 	{
@@ -1433,7 +1433,7 @@ CL_Deathfield
 void CL_Deathfield (vec3_t org, int type)
 {
 	int			j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	if (!(p = new_particle()))
 		return;
@@ -1471,7 +1471,7 @@ Displays an icon above a player when talking
 
 void CL_SayIcon(vec3_t org)
 {
-	cparticle_t *p;
+	particle_t *p;
 	int j;
 
 	if(!(p = new_particle()))
@@ -1505,7 +1505,7 @@ CL_DustParticles
 void CL_DustParticles (vec3_t org)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for (i=0 ; i<64 ; i++)
 	{
@@ -1541,7 +1541,7 @@ CL_BigTeleportParticles
 void CL_BigTeleportParticles (vec3_t org)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for (i=1 ; i<3 ; i++)
 	{
@@ -1584,7 +1584,7 @@ CL_HealthParticles
 */
 void CL_SmallHealthParticles (vec3_t org)
 {
-	cparticle_t	*p;
+	particle_t	*p;
 	float		angle, dist;
 
 	if (!(p = new_particle()))
@@ -1617,7 +1617,7 @@ void CL_SmallHealthParticles (vec3_t org)
 }
 void CL_MedHealthParticles (vec3_t org)
 {
-	cparticle_t	*p;
+	particle_t	*p;
 	float		angle, dist;
 
 	if (!(p = new_particle()))
@@ -1650,7 +1650,7 @@ void CL_MedHealthParticles (vec3_t org)
 }
 void CL_LargeHealthParticles (vec3_t org)
 {
-	cparticle_t	*p;
+	particle_t	*p;
 	float		angle, dist;
 
 	if (!(p = new_particle()))
@@ -1691,7 +1691,7 @@ Wall impact puffs for standard blaster.
 void CL_BlasterParticles (vec3_t org, vec3_t dir)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 	float d;
 	for (i=0 ; i<16 ; i++)
 	{
@@ -1735,7 +1735,7 @@ void CL_BlasterBall (vec3_t start, vec3_t end)
 	vec3_t		vec;
 	float		len;
 	int			j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
@@ -1818,7 +1818,7 @@ void CL_BlueTeamLight(vec3_t pos)
 {
 
 	int			i,j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for(i=1; i<3; i++) {
 		if (!(p = new_particle()))
@@ -1846,7 +1846,7 @@ void CL_RedTeamLight(vec3_t pos)
 {
 
 	int			j,i;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	for(i=1; i<3; i++) {
 		if (!(p = new_particle()))
@@ -1874,7 +1874,7 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 {
 
 	int			i;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		dist, angle;
 
 	if (!(p = new_particle()))
@@ -1964,7 +1964,7 @@ CL_BloodSplatter - simple blood effects
 
 void CL_BloodSplatter ( vec3_t pos, vec3_t pos2, int color, int blend )
 {
-	cparticle_t *p;
+	particle_t *p;
 	vec3_t		v;
 	int			j;
 	trace_t	trace;
@@ -2016,7 +2016,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags)
 	vec3_t		vec;
 	float		len;
 	int			j;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		dec;
 	float		orgscale;
 	float		velscale;
@@ -2172,7 +2172,7 @@ void CL_BlasterTrail (vec3_t start, vec3_t end, centity_t *old)
 	vec3_t		vec;
 	float		len;
 	int			j;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		dec;
 
 	VectorCopy (start, move);
@@ -2219,7 +2219,7 @@ void CL_ShipExhaust (vec3_t start, vec3_t end, centity_t *old)
 	vec3_t		vec;
 	float		len;
 	int			j;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		dec;
 
 	VectorCopy (start, move);
@@ -2266,7 +2266,7 @@ void CL_RocketExhaust (vec3_t start, vec3_t end, centity_t *old)
 	vec3_t		vec;
 	float		len;
 	int			j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
@@ -2357,7 +2357,7 @@ Wall Impacts
 */
 
 void CL_BulletMarks(vec3_t org, vec3_t dir){
-	cparticle_t *p;
+	particle_t *p;
 	vec3_t		v;
 	int			j;
 
@@ -2385,7 +2385,7 @@ void CL_BulletMarks(vec3_t org, vec3_t dir){
 	}
 }
 void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur, qboolean isDis){
-	cparticle_t *p;
+	particle_t *p;
 	vec3_t		v;
 	int			j;
 	float		color;
@@ -2482,7 +2482,7 @@ void CL_BeamgunMark(vec3_t org, vec3_t dir, float dur, qboolean isDis){
 }
 
 void CL_BlasterMark(vec3_t org, vec3_t dir){
-	cparticle_t *p;
+	particle_t *p;
 	vec3_t		v;
 	int			j;
 
@@ -2535,7 +2535,7 @@ void CL_BlasterMark(vec3_t org, vec3_t dir){
 }
 
 void CL_VaporizerMarks(vec3_t org, vec3_t dir){
-	cparticle_t *p;
+	particle_t *p;
 	vec3_t		v, forward, right, up;
 	int			i,j;
 	float		scatter;
@@ -2614,7 +2614,7 @@ void CL_DisruptorBeam (vec3_t start, vec3_t end)
 	vec3_t		vec, point, last, vec2;
 	float		len, color;
 	vec3_t		right, up;
-	cparticle_t	*p;
+	particle_t	*p;
 	int			i,j;
 	float		v;
 
@@ -2673,7 +2673,7 @@ void CL_LaserBeam (vec3_t start, vec3_t end)
 	vec3_t		vec, point, last, vec2;
 	float		len;
 	vec3_t		right, up;
-	cparticle_t	*p;
+	particle_t	*p;
 	int			i,j;
 
 	VectorSubtract (end, start, vec);
@@ -2756,7 +2756,7 @@ void CL_BlasterBeam (vec3_t start, vec3_t end)
 	vec3_t		vec, point, last, vec2;
 	float		len;
 	vec3_t		right, up;
-	cparticle_t	*p;
+	particle_t	*p;
 	int			i,j;
 
 	VectorSubtract (end, start, vec);
@@ -2836,7 +2836,7 @@ void CL_VaporizerBeam (vec3_t start, vec3_t end)
 	vec3_t		vec, point, last, vec2;
 	float		len;
 	vec3_t		right, up;
-	cparticle_t	*p;
+	particle_t	*p;
 	int			i,j;
 
 	VectorSubtract (end, start, vec);
@@ -2935,7 +2935,7 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 	vec3_t		vec;
 	float		len;
 	int			j;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		dec;
 	vec3_t		right, up;
 	int			i;
@@ -3017,7 +3017,7 @@ void CL_RedBlasterBeam (vec3_t start, vec3_t end)
 	vec3_t		vec, point, last, vec2;
 	float		len;
 	vec3_t		right, up;
-	cparticle_t	*p;
+	particle_t	*p;
 	int			i,j;
 
 	VectorCopy (start, move);
@@ -3101,7 +3101,7 @@ void CL_BubbleTrail (vec3_t start, vec3_t end)
 	vec3_t		vec;
 	float		len;
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		dec;
 
 	VectorCopy (start, move);
@@ -3147,7 +3147,7 @@ CL_BFGExplosionParticles
 void CL_BFGExplosionParticles (vec3_t org)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	//for glsl framebuffer distortion effects
 	if(!r_drawing_fbeffect && cl_explosiondist->value) {
@@ -3218,7 +3218,7 @@ void CL_TeleportParticles (vec3_t start)
 	vec3_t		end;
 	float		len;
 	int			j;
-	cparticle_t	*p;
+	particle_t	*p;
 	int			i;
 	vec3_t		pos1, pos2, v;
 	float		step = 16.0;
@@ -3327,7 +3327,7 @@ void Cl_WeatherEffects(){
 	vec3_t start, end;
 	trace_t tr;
 	float ceiling;
-	cparticle_t *p;
+	particle_t *p;
 
 	if(!r_weather)
 		return;
@@ -3473,7 +3473,7 @@ Powered up effects
 void CL_PoweredEffects (vec3_t origin)
 {
 	int			i;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		angle;
 	float		sr, sp, sy, cr, cp, cy;
 	vec3_t		forward;
@@ -3580,7 +3580,7 @@ void CL_SmokeTrail (vec3_t start, vec3_t end, int colorStart, int colorRun, int 
 	vec3_t		vec;
 	float		len;
 	int			j;
-	cparticle_t	*p;
+	particle_t	*p;
 
 	VectorCopy (start, move);
 	VectorSubtract (end, start, vec);
@@ -3622,7 +3622,7 @@ Puffs with velocity along direction, with some randomness thrown in
 void CL_ParticleSteamEffect (cl_sustain_t *self)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		d;
 	vec3_t		r, u;
 	vec3_t		dir;
@@ -3666,7 +3666,7 @@ void CL_ParticleSteamEffect (cl_sustain_t *self)
 void CL_ParticleFireEffect2 (cl_sustain_t *self)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		d;
 	vec3_t		r, u;
 	vec3_t		dir;
@@ -3711,7 +3711,7 @@ void CL_ParticleFireEffect2 (cl_sustain_t *self)
 void CL_ParticleSmokeEffect2 (cl_sustain_t *self)
 {
 	int			i, j;
-	cparticle_t	*p;
+	particle_t	*p;
 	float		d;
 	vec3_t		r, u;
 	vec3_t		dir;
@@ -3760,12 +3760,10 @@ CL_AddParticles
 */
 void CL_AddParticles (void)
 {
-	cparticle_t		*p, *next;
-	float			alpha, light;
-	float			time = 0.0f, time2;
-	vec3_t			org, curorg;
-	cparticle_t		*active, *tail;
-	float			scale;
+	particle_t		*p, *next;
+	float			light;
+	float			time = 0.0f;
+	particle_t		*active, *tail;
 	int				i;
 
 	Cl_WeatherEffects();
@@ -3781,8 +3779,8 @@ void CL_AddParticles (void)
 		if (p->alphavel != INSTANT_PARTICLE)
 		{
 			time = (cl.time - p->time)*0.001;
-			alpha = p->alpha + time*p->alphavel;
-			if (alpha <= 0)
+			p->current_alpha = p->alpha + time*p->alphavel;
+			if (p->current_alpha <= 0)
 			{	// faded out
 				if(p->type == PARTICLE_WEATHER)
 					weather_particles--;
@@ -3793,23 +3791,34 @@ void CL_AddParticles (void)
 		}
 		else
 		{
-			alpha = p->alpha;
+			p->current_alpha = p->alpha;
 		}
 		if(p->scalevel > 1) {
 			time = (cl.time - p->time)*0.001;
-			scale = p->scale + time * p->scalevel;
+			p->current_scale = p->scale + time * p->scalevel;
 		}
 		else
-			scale = p->scale;
+			p->current_scale = p->scale;
+			
+        if (p->colorvel != 0) {
+            time = (cl.time - p->time)*0.001;
+            p->current_color = (p->color + time * p->colorvel);
+        } else
+            p->current_color = p->color;
 
-		if(scale > 64)
-			scale = 64; //don't want them getting too large.
+		if(p->current_scale > 64)
+			p->current_scale = 64; //don't want them getting too large.
+		if(p->current_scale < 0)
+		    p->current_scale = 0;
+		
+		if(p->current_color < 0)
+		    p->current_color = 0;
 
 		// free up weather particles that have hit the ground
 		for(i = 0; i < 3; i++) {
-			curorg[i] = p->org[i] + p->vel[i]*time + p->accel[i]*(time*time);
+			p->current_origin[i] = p->org[i] + p->vel[i]*time + p->accel[i]*(time*time);
 		}
-		if(p->type == PARTICLE_WEATHER && (curorg[2] <= p->end[2])){
+		if(p->type == PARTICLE_WEATHER && (p->current_origin[2] <= p->end[2])){
 			p->next = free_particles;
 			free_particles = p;
 			weather_particles--;
@@ -3825,26 +3834,32 @@ void CL_AddParticles (void)
 			tail = p;
 		}
 
-		if (alpha > 1.0)
-			alpha = 1;
-
-		time2 = time*time;
-
-		for(i = 0; i < 3; i++) {
-			org[i] = p->org[i] + p->vel[i]*time + p->accel[i]*time2;
-		}
+		if (p->current_alpha > 1.0)
+			p->current_alpha = 1;
 
 		for (i=0;i<P_LIGHTS_MAX;i++)
 		{
 			const cplight_t *plight = &p->lights[i];
 			if (plight->isactive && !p->fromsustainedeffect)
 			{
-				light = plight->light*alpha*2.0 + plight->lightvel*time;
-				V_AddLight (org, light, plight->lightcol[0], plight->lightcol[1], plight->lightcol[2]);
+				light = plight->light*p->current_alpha*2.0 + plight->lightvel*time;
+				V_AddLight (p->current_origin, light, plight->lightcol[0], plight->lightcol[1], plight->lightcol[2]);
 			}
 		}
+		
+		// hack a scale up to keep particles from disapearing
+        p->dist = ( p->current_origin[0] - r_origin[0] ) * vpn[0] +
+                ( p->current_origin[1] - r_origin[1] ) * vpn[1] +
+                ( p->current_origin[2] - r_origin[2] ) * vpn[2];
 
-		V_AddParticle (org, p->angle, p->color, p->type, p->texnum, p->blenddst, p->blendsrc, alpha, scale);
+        if (p->dist < 0)
+            continue;
+        else if (p->dist >= 40)
+            p->dist = 2 + p->dist * 0.004;
+        else
+            p->dist = 2;
+
+		V_AddParticle (p);
 		// PMM
 		if (p->alphavel == INSTANT_PARTICLE)
 		{
@@ -3913,7 +3928,7 @@ void CL_FootSteps (entity_state_t *ent, qboolean loud)
 
 void CL_WaterWade (entity_state_t *ent)
 {
-	cparticle_t	*p;
+	particle_t	*p;
 	trace_t   tr;
     vec3_t   end, angle;
 	int		j;

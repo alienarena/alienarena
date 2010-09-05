@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
-gparticle_t gparticles[MAX_PARTICLES];
+particle_t gparticles[MAX_PARTICLES];
 int			num_gparticles;
 
 /*
@@ -34,9 +34,10 @@ GL_DrawParticles
 ===============
 */
 static float yawOrRoll;
-void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigned colortable[768])
+void GL_DrawParticles( int num_particles, particle_t **particles, const unsigned colortable[768])
 {
-	const gparticle_t *p;
+	const particle_t **p1;
+	const particle_t *p;
 	int				i, k;
 	vec3_t			corner[4], up, right, pup, pright, dir;
 	float			scale, oldscale=0.0f;
@@ -55,26 +56,27 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
-	for ( p = particles, i=0, oldtype=-1 ; i < num_particles ; i++,p++)
+	for ( p1 = particles, i=0, oldtype=-1 ; i < num_particles ; i++,p1++)
 	{
+	    p = *p1;
 
 		if(p->type == PARTICLE_NONE) {
 
 			blendsrc = GL_SRC_ALPHA;
 			blenddst = GL_ONE;
 
-			*(int *)color = colortable[p->color];
+			*(int *)color = colortable[p->current_color];
 			scale = 1;
 		}
 		else {
 			texnum = p->texnum;
 			blendsrc = p->blendsrc;
 			blenddst = p->blenddst;
-			scale = p->scale;
-			*(int *)color = colortable[p->color];
+			scale = p->current_scale;
+			*(int *)color = colortable[p->current_color];
 		}
 
-		color[3] = p->alpha*255;
+		color[3] = p->current_alpha*255;
 
 		if (
 			p->type != oldtype
@@ -108,7 +110,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 
 		if(p->type == PARTICLE_BEAM) {
 
-			VectorSubtract(p->origin, p->angle, move);
+			VectorSubtract(p->current_origin, p->angle, move);
 			VectorNormalize(move);
 
 			VectorCopy(move, pup);
@@ -135,7 +137,7 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 			dir[0] = -90;  // and splash particles horizontal by setting it
 			AngleVectors(dir, NULL, right, up);
 
-			if(p->origin[2] > r_newrefdef.vieworg[2]){  // it's above us
+			if(p->current_origin[2] > r_newrefdef.vieworg[2]){  // it's above us
 				VectorScale(right, 5*scale, pright);
 				VectorScale(up, 5*scale, pup);
 			}
@@ -173,9 +175,9 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 		}
 
 		VectorSet (corner[0],
-			p->origin[0] + (pup[0] + pright[0])*(-0.5),
-			p->origin[1] + (pup[1] + pright[1])*(-0.5),
-			p->origin[2] + (pup[2] + pright[2])*(-0.5));
+			p->current_origin[0] + (pup[0] + pright[0])*(-0.5),
+			p->current_origin[1] + (pup[1] + pright[1])*(-0.5),
+			p->current_origin[2] + (pup[2] + pright[2])*(-0.5));
 
 		VectorSet ( corner[1],
 			corner0[0] + pup[0], corner0[1] + pup[1], corner0[2] + pup[2]);
@@ -235,99 +237,19 @@ void GL_DrawParticles( int num_particles, gparticle_t particles[], const unsigne
 
 /*
 ===============
-R_SortParticles
-===============
-*/
-#define R_CopyParticle(a,b) (a.type=b.type,a.alpha=b.alpha,a.color=b.color,a.dist=b.dist,a.scale=b.scale, a.texnum=b.texnum, a.blenddst=b.blenddst, a.blendsrc=b.blendsrc, VectorCopy(b.origin,a.origin), VectorCopy(b.angle, a.angle))
-
-static void R_SortParticles (gparticle_t *particles, int Li, int Ri)
-{
-	int pivot;
-	gparticle_t temppart;
-	int li, ri;
-
-mark0:
-	li = Li;
-	ri = Ri;
-
-	pivot = particles[(Li+Ri) >> 1].type;
-	while (li < ri)
-	{
-		while (particles[li].type < pivot) li++;
-		while (particles[ri].type > pivot) ri--;
-
-		if (li <= ri)
-		{
-			R_CopyParticle( temppart, particles[ri] );
-			R_CopyParticle( particles[ri], particles[li] );
-			R_CopyParticle( particles[li], temppart );
-
-			li++;
-			ri--;
-		}
-	}
-
-	if ( Li < ri ) {
-		R_SortParticles( particles, Li, ri );
-	}
-	if (li < Ri) {
-		Li = li;
-		goto mark0;
-	}
-}
-
-/*
-===============
 R_DrawParticles
 ===============
 */
 void R_DrawParticles (void)
 {
-	int				i;
-	float			dist;
-	gparticle_t		*gp;
-	const particle_t *p;
+    if ( !r_newrefdef.num_particles )
+        return;
 
-	if ( !r_newrefdef.num_particles )
-		return;
+    if(map_fog)
+        qglDisable(GL_FOG);
 
-	gp = gparticles;
-	num_gparticles = 0;
-	for ( p = r_newrefdef.particles, i=0 ; i < r_newrefdef.num_particles ; i++,p++)
-	{
-		// hack a scale up to keep particles from disapearing
-		dist = ( p->origin[0] - r_origin[0] ) * vpn[0] +
-			    ( p->origin[1] - r_origin[1] ) * vpn[1] +
-			    ( p->origin[2] - r_origin[2] ) * vpn[2];
+    GL_DrawParticles( r_newrefdef.num_particles, r_newrefdef.particles, d_8to24table);
 
-		if (dist < 0)
-			continue;
-		else if (dist >= 40)
-			dist = 2 + dist * 0.004;
-		else
-			dist = 2;
-
-		gp->alpha = p->alpha;
-		gp->color = p->color;
-		gp->type = p->type;
-		gp->dist = dist;
-		gp->scale = p->scale;
-		gp->texnum = p->texnum;
-		gp->blenddst = p->blenddst;
-		gp->blendsrc = p->blendsrc;
-		VectorCopy ( p->origin, gp->origin );
-		VectorCopy ( p->angle, gp->angle );
-
-		gp++;
-		num_gparticles++;
-
-	}
-	if(map_fog)
-		qglDisable(GL_FOG);
-	R_SortParticles ( gparticles, 0, num_gparticles - 1 );
-
-	// we are always going to used textured particles!
-	GL_DrawParticles( num_gparticles, gparticles, d_8to24table);
-	if(map_fog)
-		qglEnable(GL_FOG);
+    if(map_fog)
+        qglEnable(GL_FOG);
 }
