@@ -175,7 +175,7 @@ void SCR_DrawDebugGraph (void)
 
 		if (v < 0)
 			v += scr_graphheight->value * (1+(int)(-v/scr_graphheight->value));
-		h = (int)v % (int)scr_graphheight->value;
+		h = (int)v % scr_graphheight->integer;
 		Draw_Fill (x+w-1-a, y - h, 1,	h, color);
 	}
 }

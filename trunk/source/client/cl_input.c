@@ -309,7 +309,7 @@ void CL_BaseMove (usercmd_t *cmd)
 //
 // adjust for speed key / running
 //
-	if ( (in_speed.state & 1) ^ (int)(cl_run->value) )
+	if ( (in_speed.state & 1) ^ cl_run->integer )
 	{
 		cmd->forwardmove *= 2;
 		cmd->sidemove *= 2;

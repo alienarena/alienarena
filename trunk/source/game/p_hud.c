@@ -259,7 +259,7 @@ void BeginIntermission (edict_t *targ)
 	if (level.intermissiontime)
 		return;		// already activated
 
-	if (((int)(dmflags->value) & DF_BOT_AUTOSAVENODES))
+	if ((dmflags->integer & DF_BOT_AUTOSAVENODES))
 			ACECM_Store(); //store the nodes automatically when changing levels.
 
 	game.autosaved = false;
@@ -377,16 +377,7 @@ void BeginIntermission (edict_t *targ)
 			MoveClientToIntermission (client);
 	}
 
-	if (!((int)(dmflags->value) & DF_BOT_LEVELAD)) {
-			if ((!((int)(dmflags->value) & DF_SKINTEAMS)) && !(ctf->value || tca->value || cp->value)) { //don't do this in team play
-				if(winner->is_bot)
-					gi.sound (ent, CHAN_AUTO, gi.soundindex("world/botwon.wav"), 1, ATTN_NONE, 0);
-				else
-					gi.sound (winner, CHAN_AUTO, gi.soundindex("world/youwin.wav"), 1, ATTN_STATIC, 0);
-			}
-	}
-
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //team stuff
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //team stuff
 	{
 		if(blue_team_score > red_team_score) {
 			if(ctf->value || tca->value || cp->value)
@@ -401,6 +392,13 @@ void BeginIntermission (edict_t *targ)
 			else
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/red_wins.wav"), 1, ATTN_NONE, 0);
 		}
+	}
+	else if ( !(dmflags->integer & DF_BOT_LEVELAD) )
+	{
+		if(winner->is_bot)
+			gi.sound (ent, CHAN_AUTO, gi.soundindex("world/botwon.wav"), 1, ATTN_NONE, 0);
+		else
+			gi.sound (winner, CHAN_AUTO, gi.soundindex("world/youwin.wav"), 1, ATTN_STATIC, 0);
 	}
 
 	//place winner on victory pads, ala Q3
@@ -535,7 +533,7 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	if (ent->is_bot)
 		return;
 
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
 		CTFScoreboardMessage (ent, killer, mapvote);
 		return;
 	}

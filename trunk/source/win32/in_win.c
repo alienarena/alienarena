@@ -884,7 +884,7 @@ void IN_JoyMove (usercmd_t *cmd)
 		return;
 	}
 
-	if ( (in_speed.state & 1) ^ (int)cl_run->value)
+	if ( (in_speed.state & 1) ^ cl_run->integer)
 		speed = 2;
 	else
 		speed = 1;

@@ -1937,7 +1937,7 @@ void R_DrawAliasModel ( void )
 		qglDepthRange (gldepthmin, gldepthmax);
 
 	//old legacy shadows
-	if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL) && gl_shadows->value && !gl_shadowmaps->value && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
+	if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL) && gl_shadows->integer && !gl_shadowmaps->integer && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
 	{
 		float casted;
 		float an = currententity->angles[1]/180*M_PI;
@@ -1946,7 +1946,7 @@ void R_DrawAliasModel ( void )
 		shadevector[2] = 1;
 		VectorNormalize (shadevector);
 
-		switch ((int)(gl_shadows->value))
+		switch (gl_shadows->integer)
 		{
 		case 0:
 			break;

@@ -381,7 +381,7 @@ void SVC_Info (void)
 			count += cl->edict->client->ps.botnum; //add the bots
 		//end bot score info
 
-		Com_sprintf (string, sizeof(string), "%16s %8s %2i/%2i\n", hostname->string, sv.name, count, (int)maxclients->value);
+		Com_sprintf (string, sizeof(string), "%16s %8s %2i/%2i\n", hostname->string, sv.name, count, maxclients->integer);
 	}
 
 	Netchan_OutOfBandPrint (NS_SERVER, net_from, "info\n%s", string);

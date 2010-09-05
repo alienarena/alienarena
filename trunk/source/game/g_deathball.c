@@ -188,7 +188,7 @@ qboolean Pickup_deathball (edict_t *ent, edict_t *other)
 		cleanname[j] = other->client->pers.netname[i]+128;
 		j++;
 	}
-	if((int)(dmflags->value) & DF_SKINTEAMS) {
+	if(dmflags->integer & DF_SKINTEAMS) {
 		for (i=0 ; i<maxclients->value ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;

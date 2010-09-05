@@ -133,7 +133,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 	if(instagib->value || rocket_arena->value)
 		return false; //why pick them up in these modes?
 
-	if ( ( ((int)(dmflags->value) & DF_WEAPONS_STAY))
+	if ( ( (dmflags->integer & DF_WEAPONS_STAY))
 		&& other->client->pers.inventory[index])
 	{
 		if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM) ) )
@@ -147,7 +147,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 	{
 		// give them some ammo with it
 		ammo = FindItem (ent->item->ammo);
-		if ( (int)dmflags->value & DF_INFINITE_AMMO )
+		if ( dmflags->integer & DF_INFINITE_AMMO )
 			Add_Ammo (other, ammo, 1000, true, true);
 		else if (ent->spawnflags & DROPPED_PLAYER_ITEM)
 			Add_Ammo (other, ammo, ammo->quantity, true, true); //DROPPED WEAPON give full ammo
@@ -158,7 +158,7 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		{
 			if (deathmatch->value)
 			{
-				if ((int)(dmflags->value) & DF_WEAPONS_STAY)
+				if (dmflags->integer & DF_WEAPONS_STAY)
 					ent->flags |= FL_RESPAWN;
 				else {
 					//weapon = FindItem (ent->item->weapon);
@@ -473,7 +473,7 @@ void Drop_Weapon (edict_t *ent, gitem_t *item)
 {
 	int		index;
 
-	if (((int)(dmflags->value) & DF_WEAPONS_STAY) || instagib->value || rocket_arena->value)
+	if ((dmflags->integer & DF_WEAPONS_STAY) || instagib->value || rocket_arena->value)
 		return;
 
 	index = ITEM_INDEX(item);
@@ -727,7 +727,7 @@ void weapon_plasma_fire (edict_t *ent)
 	ent->client->ps.gunframe++;
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if ((! ( (int)dmflags->value & DF_INFINITE_AMMO ) ) && !instagib->value )
+	if (! ( (dmflags->integer & DF_INFINITE_AMMO) || instagib->integer ) )
 		ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-5;
 }
 
@@ -802,13 +802,13 @@ void weapon_energy_field_fire (edict_t *ent)
 			forward[1] = forward[1] * 4.6;
 			forward[2] = forward[2] * 4.6;
 			fire_bomb (ent, start, forward, damage, 250, damage_radius, radius_damage, 8);
-			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+			if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
 				ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-1;
 
 		}
 		else {
 				fire_energy_field (ent, start, forward, damage, kick);
-				if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+				if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
 					ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-2;
 		}
 
@@ -875,7 +875,7 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 		PlayerNoise(ent, start, PNOISE_WEAPON);
 
-		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) ) {
+		if (! ( dmflags->integer & DF_INFINITE_AMMO ) ) {
 			ent->client->pers.inventory[ent->client->ammo_index] -= ent->client->pers.weapon->quantity*10;
 			if(ent->client->pers.inventory[ent->client->ammo_index] < 0)
 				ent->client->pers.inventory[ent->client->ammo_index] = 0;
@@ -911,7 +911,7 @@ void weapon_flamethrower_fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) ) {
+	if (! ( dmflags->integer & DF_INFINITE_AMMO ) ) {
 		ent->client->pers.inventory[ent->client->ammo_index] -= ent->client->pers.weapon->quantity;
 		if(ent->client->pers.inventory[ent->client->ammo_index] < 0)
 			ent->client->pers.inventory[ent->client->ammo_index] = 0;
@@ -986,7 +986,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if ((! ( (int)dmflags->value & DF_INFINITE_AMMO ) ) && !rocket_arena->value)
+	if ((! ( dmflags->integer & DF_INFINITE_AMMO ) ) && !rocket_arena->value)
 		ent->client->pers.inventory[ent->client->ammo_index]--;
 }
 
@@ -1150,7 +1150,7 @@ void Weapon_Bomber_Fire (edict_t *ent)
 	ent->client->ps.gunframe++;
 
 	//might want to work with this some
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
 }
 void Weapon_Bomber (edict_t *ent)
@@ -1368,7 +1368,7 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 				damage = 10;
 
 			Blaster_Fire (ent, offset, damage, true, effect);
-			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+			if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
 				ent->client->pers.inventory[ent->client->ammo_index]--;
 		}
 
@@ -1512,7 +1512,7 @@ void Machinegun_Fire (edict_t *ent)
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
 
-		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+		if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
 			ent->client->pers.inventory[ent->client->ammo_index] -= 10;
 
 		//kick it ahead, we don't want spinning
@@ -1547,7 +1547,7 @@ void Machinegun_Fire (edict_t *ent)
 		gi.WriteByte (TE_CHAINGUNSMOKE);
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
-		if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+		if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
 			ent->client->pers.inventory[ent->client->ammo_index] -= shots;
 	}
 
@@ -1618,7 +1618,7 @@ void weapon_floater_fire (edict_t *ent)
 	gi.WritePosition (start);
 	gi.multicast (start, MULTICAST_PVS);
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+	if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
 		ent->client->pers.inventory[ent->client->ammo_index]--;
 }
 
