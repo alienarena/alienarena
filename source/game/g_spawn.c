@@ -831,10 +831,10 @@ void SP_worldspawn (edict_t *ent)
 	gi.configstring (CS_SKYAXIS, va("%f %f %f",
 		st.skyaxis[0], st.skyaxis[1], st.skyaxis[2]) );
 
-	gi.configstring (CS_MAXCLIENTS, va("%i", (int)(maxclients->value) ) );
+	gi.configstring (CS_MAXCLIENTS, va("%i", maxclients->integer ) );
 
 	// status bar program
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 	{
 		gi.configstring (CS_STATUSBAR, team_statusbar);
 		if(ctf->value)

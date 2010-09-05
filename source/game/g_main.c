@@ -434,19 +434,19 @@ void EndDMLevel (void)
 	}
 
 	// stay on same level flag
-	if ((int)dmflags->value & DF_SAME_LEVEL)
+	if (dmflags->integer & DF_SAME_LEVEL)
 	{
 		BeginIntermission (CreateTargetChangeLevel (level.mapname) );
 		return;
 	}
 
-	if ((bot_won) && (!((int)(dmflags->value) & DF_BOT_LEVELAD)) && !ctf->value)
+	if (bot_won && !(dmflags->integer & DF_BOT_LEVELAD) && !ctf->value)
 	{
 		BeginIntermission (CreateTargetChangeLevel (level.mapname) );
 		return;
 	}
 
-	if((((int)(ctf->value) || (int)(cp->value))) && (!(int)(dedicated->value)))
+	if( ( ctf->integer || cp->integer ) && ! dedicated->integer )
 	{ //ctf will just stay on same level unless specified by dedicated list
 		BeginIntermission (CreateTargetChangeLevel (level.mapname));
 		return;
@@ -477,7 +477,7 @@ void EndDMLevel (void)
 		free(s);
 	}
 
-	if((int)(ctf->value)) { //wasn't in the dedicated list
+	if(ctf->integer) { //wasn't in the dedicated list
 		BeginIntermission (CreateTargetChangeLevel (level.mapname));
 		return;
 	}
@@ -678,46 +678,46 @@ void CheckDMRules (void)
 	gclient_t	*cl;
 	edict_t		*cl_ent;
 
-	if(!tca->value && !ctf->value && !cp->value && !((int)(dmflags->value) & DF_SKINTEAMS)) {
+	if(!tca->value && !ctf->value && !cp->value && !(dmflags->integer & DF_SKINTEAMS)) {
 		if(level.time <= warmuptime->value) {
-				if((warmuptime->value - level.time ) == 3) {
-					cl_ent = g_edicts + 1; //need only one for broadcast sound
-					if (cl_ent->inuse && !cl_ent->is_bot)
-						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/three.wav"), 1, ATTN_NONE, 0);
-				}
-				if((warmuptime->value - level.time ) == 2) {
-					cl_ent = g_edicts + 1;
-					if (cl_ent->inuse && !cl_ent->is_bot)
-						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/two.wav"), 1, ATTN_NONE, 0);
-				}
-				if((warmuptime->value - level.time ) == 1) {
-					cl_ent = g_edicts + 1;
-					if (cl_ent->inuse && !cl_ent->is_bot)
-						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/one.wav"), 1, ATTN_NONE, 0);
-				}
-				if(level.time == warmuptime->value) {
-					cl_ent = g_edicts + 1;
-					if (cl_ent->inuse && !cl_ent->is_bot)
-						gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/fight.wav"), 1, ATTN_NONE, 0);
-						safe_centerprintf(cl_ent, "FIGHT!\n");
-					ResetLevel();
-				}
-				else if(level.time == ceil(level.time)){ //do only on the whole numer to avoid overflowing
-					for (i=0 ; i<maxclients->value ; i++)
-					{
-						cl_ent = g_edicts + 1 + i;
-						if (!cl_ent->inuse || cl_ent->is_bot)
-							continue;
-						int_time = warmuptime->value - level.time;
-						real_time = warmuptime->value - level.time;
-						if(int_time <= 3) {
-							if(int_time == real_time)
-								safe_centerprintf(cl_ent, "%i...\n", int_time);
-						}
-						else if(int_time/2 == real_time/2)
+			if((warmuptime->value - level.time ) == 3) {
+				cl_ent = g_edicts + 1; //need only one for broadcast sound
+				if (cl_ent->inuse && !cl_ent->is_bot)
+					gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/three.wav"), 1, ATTN_NONE, 0);
+			}
+			if((warmuptime->value - level.time ) == 2) {
+				cl_ent = g_edicts + 1;
+				if (cl_ent->inuse && !cl_ent->is_bot)
+					gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/two.wav"), 1, ATTN_NONE, 0);
+			}
+			if((warmuptime->value - level.time ) == 1) {
+				cl_ent = g_edicts + 1;
+				if (cl_ent->inuse && !cl_ent->is_bot)
+					gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/one.wav"), 1, ATTN_NONE, 0);
+			}
+			if(level.time == warmuptime->value) {
+				cl_ent = g_edicts + 1;
+				if (cl_ent->inuse && !cl_ent->is_bot)
+					gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/fight.wav"), 1, ATTN_NONE, 0);
+					safe_centerprintf(cl_ent, "FIGHT!\n");
+				ResetLevel();
+			}
+			else if(level.time == ceil(level.time)){ //do only on the whole numer to avoid overflowing
+				for (i=0 ; i<maxclients->value ; i++)
+				{
+					cl_ent = g_edicts + 1 + i;
+					if (!cl_ent->inuse || cl_ent->is_bot)
+						continue;
+					int_time = warmuptime->value - level.time;
+					real_time = warmuptime->value - level.time;
+					if(int_time <= 3) {
+						if(int_time == real_time)
 							safe_centerprintf(cl_ent, "%i...\n", int_time);
 					}
+					else if(int_time/2 == real_time/2)
+						safe_centerprintf(cl_ent, "%i...\n", int_time);
 				}
+			}
 		}
 	}
 
@@ -729,7 +729,7 @@ void CheckDMRules (void)
 
 	if (timelimit->value)
 	{
-		if (level.time >= timelimit->value*60 && ((tca->value || ctf->value  || cp->value || ((int)(dmflags->value) & DF_SKINTEAMS)) || level.time > warmuptime->value))
+		if (level.time >= timelimit->value*60 && ((tca->value || ctf->value  || cp->value || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
 		{
 			safe_bprintf (PRINT_HIGH, "Timelimit hit.\n");
 			EndDMLevel ();
@@ -737,11 +737,11 @@ void CheckDMRules (void)
 		}
 	}
 
-	if (fraglimit->value && ((tca->value || ctf->value || cp->value || ((int)(dmflags->value) & DF_SKINTEAMS)) || level.time > warmuptime->value))
+	if (fraglimit->value && ((tca->value || ctf->value || cp->value || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
 	{
 
 		//team scores
-		if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || cp->value) //it's all about the team!
+		if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || cp->value) //it's all about the team!
 		{
 			if(blue_team_score >= fraglimit->value)
 			{
@@ -775,7 +775,6 @@ void CheckDMRules (void)
 
 				if (cl->resp.score >= fraglimit->value)
 				{
-
 					if(cl->is_bot){
 						bot_won = 1; //a bot has won the match
 						safe_bprintf (PRINT_HIGH, "Fraglimit hit by bot.\n");
@@ -783,10 +782,7 @@ void CheckDMRules (void)
 					else
 					{
 						bot_won = 0;
-
-
-					safe_bprintf (PRINT_HIGH, "Fraglimit hit.\n");
-
+						safe_bprintf (PRINT_HIGH, "Fraglimit hit.\n");
 					}
 
 					EndDMLevel ();
@@ -905,17 +901,13 @@ void ExitLevel (void)
 			ent->client->resp.deaths = 0;
 			ent->client->resp.reward_pts = 0;
 			ent->client->homing_shots = 0;
-			if(!ent->is_bot) { //players
-				ent->takedamage = DAMAGE_AIM;
-				ent->solid = SOLID_BBOX;
-				ent->deadflag = DEAD_NO;
-				PutClientInServer (ent);
-			}
-			else { //reset various bot junk
-				ent->takedamage = DAMAGE_AIM;
-				ent->solid = SOLID_BBOX;
-				ent->deadflag = DEAD_NO;
+			ent->takedamage = DAMAGE_AIM;
+			ent->solid = SOLID_BBOX;
+			ent->deadflag = DEAD_NO;
+			if(ent->is_bot) { //players
 				ACESP_PutClientInServer (ent,true,0);
+			} else { //reset various bot junk
+				PutClientInServer (ent);
 			}
 			if(g_duel->value) {
 				ClientPlaceInQueue(ent);
@@ -926,11 +918,8 @@ void ExitLevel (void)
 	if(stayed) {
 		for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) {
 
-			if (!ent->inuse)
+			if (!ent->inuse || ent->client)
 				continue;
-			if(ent->client) {//not players
-				continue;
-			}
 			//remove podiums
 			if(!strcmp(ent->classname, "pad"))
 				G_FreeEdict(ent);

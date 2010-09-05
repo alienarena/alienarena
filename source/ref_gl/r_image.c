@@ -1195,8 +1195,8 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, q
 		// let people sample down the world textures for speed
 		if (mipmap)
 		{
-			scaled_width >>= (int)gl_picmip->value;
-			scaled_height >>= (int)gl_picmip->value;
+			scaled_width >>= gl_picmip->integer;
+			scaled_height >>= gl_picmip->integer;
 		}
         if (scaled_width > max_size)
             scaled_width = max_size;

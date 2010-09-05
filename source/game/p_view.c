@@ -678,7 +678,7 @@ void P_FallingDamage (edict_t *ent)
 			damage = 10;
 		VectorSet (dir, 0, 0, 1);
 
-		if (!deathmatch->value || !((int)dmflags->value & DF_NO_FALLING) )
+		if (!deathmatch->value || !(dmflags->integer & DF_NO_FALLING) )
 			T_Damage (ent, world, world, dir, ent->s.origin, vec3_origin, damage, 0, 0, MOD_FALLING);
 	}
 	else
@@ -857,7 +857,7 @@ void G_SetClientEffects (edict_t *ent)
 	if(ctf->value)
 		CTFEffects(ent);
 
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value )
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value )
 		TeamEffects(ent);
 
 	if (ent->client->quad_framenum > level.framenum)

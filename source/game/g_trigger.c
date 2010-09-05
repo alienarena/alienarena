@@ -595,10 +595,10 @@ void deathballtarget_touch (edict_t *self, edict_t *other, cplane_t *plane, csur
 
 	if(strcmp(other->classname, "item_deathball") == 0) {
 
-		if (!((int)(dmflags->value) & DF_SKINTEAMS))
+		if (!(dmflags->integer & DF_SKINTEAMS))
 			other->owner->client->resp.score += 10;
 
-		if (((int)(dmflags->value) & DF_SKINTEAMS)) {
+		if ((dmflags->integer & DF_SKINTEAMS)) {
 			if(other->owner->dmteam == RED_TEAM && strcmp(self->classname, "trigger_bluedeathballtarget") == 0) {
 				red_team_score+=10;
 				other->owner->client->resp.score += 10;

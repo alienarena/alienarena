@@ -313,7 +313,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			//here is where the bot chat features will be added.
 			//default is on.  Setting to 1 turns it off.
 
-			if ((!((int)(dmflags->value) & DF_BOTCHAT)) && self->is_bot)
+			if ( !(dmflags->integer & DF_BOTCHAT) && self->is_bot)
 			{
 				msg = random() * 9;
 				switch(msg){
@@ -357,7 +357,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 			}
 
 			//bot taunts
-			if((!((int)(dmflags->value) & DF_BOTCHAT)) && attacker->is_bot) {
+			if(!(dmflags->integer & DF_BOTCHAT) && attacker->is_bot) {
 
 				if(!(attacker->client->ps.pmove.pm_flags & PMF_DUCKED)) {
 					attacker->state = STATE_STAND;
@@ -433,7 +433,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 					if (ff) {
 						attacker->client->resp.score--;
 						attacker->client->resp.deaths++;
-						if (((int)(dmflags->value) & DF_SKINTEAMS) && !ctf->value) {
+						if ((dmflags->integer & DF_SKINTEAMS) && !ctf->value) {
 							if(attacker->dmteam == RED_TEAM)
 								red_team_score--;
 							else
@@ -465,7 +465,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						}
 						self->client->resp.deaths++;
 
-						if (((int)(dmflags->value) & DF_SKINTEAMS)  && !ctf->value) {
+						if ((dmflags->integer & DF_SKINTEAMS)  && !ctf->value) {
 							if(attacker->dmteam == RED_TEAM){
 								red_team_score++;
 								safe_bprintf(PRINT_MEDIUM, "Red Team scores!\n");
@@ -604,7 +604,7 @@ void TossClientWeapon (edict_t *self)
 	if (item && (strcmp (item->pickup_name, "Violator") == 0))
 		item = NULL;
 
-	if (!((int)(dmflags->value) & DF_QUAD_DROP))
+	if (!(dmflags->integer & DF_QUAD_DROP))
 		quad = false;
 	else
 		quad = (self->client->quad_framenum > (level.framenum + 10));
@@ -1294,7 +1294,7 @@ edict_t *SelectFarthestDeathmatchSpawnPoint (void)
 
 edict_t *SelectDeathmatchSpawnPoint (void)
 {
-	if ( (int)(dmflags->value) & DF_SPAWN_FARTHEST)
+	if ( dmflags->integer & DF_SPAWN_FARTHEST)
 		return SelectFarthestDeathmatchSpawnPoint ();
 	else
 		return SelectRandomDeathmatchSpawnPoint ();
@@ -1385,7 +1385,7 @@ void	SelectSpawnPoint (edict_t *ent, vec3_t origin, vec3_t angles)
 	edict_t	*spot = NULL;
 
 	if (deathmatch->value) {
-		if (ctf->value || tca->value || cp->value || ((int)(dmflags->value) & DF_SKINTEAMS)) {
+		if (ctf->value || tca->value || cp->value || (dmflags->integer & DF_SKINTEAMS)) {
 			spot = SelectCTFSpawnPoint(ent);
 			if(!spot)
 				spot = SelectDeathmatchSpawnPoint ();
@@ -1502,7 +1502,7 @@ void CopyToBodyQue (edict_t *ent)
 	edict_t		*body;
 
 	// grab a body que and cycle to the next one
-	body = &g_edicts[(int)maxclients->value + level.body_que + 1];
+	body = &g_edicts[maxclients->integer + level.body_que + 1];
 	level.body_que = (level.body_que + 1) % BODY_QUEUE_SIZE;
 
 	gi.unlinkentity (ent);
@@ -1770,7 +1770,7 @@ void PutClientInServer (edict_t *ent)
 	if(ent->client->chasecam)
 		G_FreeEdict (ent->client->chasecam);
 
-	if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV))
+	if (deathmatch->value && (dmflags->integer & DF_FIXED_FOV))
 	{
 		client->ps.fov = 90;
 	}
@@ -2022,7 +2022,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 	PutClientInServer (ent);
 
 	//in ctf, initially start in chase mode, and allow them to choose a team
-	if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
+	if((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
 
 		ent->client->pers.spectator = true;
 		ent->client->chase_target = NULL;
@@ -2035,7 +2035,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 		//bring up scoreboard if not on a team
 		if(ent->dmteam == NO_TEAM) {
 			ent->client->showscores = true;
-			if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
+			if((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
 				CTFScoreboardMessage (ent, NULL, false);
 			else
 				DeathmatchScoreboardMessage (ent, NULL, false);
@@ -2175,10 +2175,10 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	if(playervote.called && whereFrom == INGAME)
 		return; //do not allow people to change info during votes
 
-	if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM))
+	if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM))
 		ent->client->pers.spectator = false; //cannot spectate if you've joined a team
 
-	if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
+	if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
 		safe_bprintf (PRINT_MEDIUM, "Illegal to change teams after CTF match has started!\n");
 		return;
 	}
@@ -2231,7 +2231,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 	//do the team skin check
 	if(true) {
-		if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //only do this for skin teams, red, blue
+		if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //only do this for skin teams, red, blue
 		{
 			copychar = false;
 			strcpy(playerskin, " ");
@@ -2378,7 +2378,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	}
 
 	// fov
-	if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV))
+	if (deathmatch->value && (dmflags->integer & DF_FIXED_FOV))
 	{
 		ent->client->ps.fov = 90;
 	}
@@ -2484,7 +2484,7 @@ void ClientChangeSkin (edict_t *ent)
 	gi.configstring (CS_PLAYERSKINS+playernum, va("%s\\%s", ent->client->pers.netname, s) );
 
 	// fov
-	if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV))
+	if (deathmatch->value && (dmflags->integer & DF_FIXED_FOV))
 	{
 		ent->client->ps.fov = 90;
 	}
@@ -2578,7 +2578,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 			InitClientPersistant (ent->client);
 	}
 
-	if(((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
+	if((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
 		ent->dmteam = NO_TEAM;
 		ent->teamset = false;
 	}
@@ -2618,7 +2618,7 @@ void ClientDisconnect (edict_t *ent)
 	if(ent->deadflag && ent->client->chasetoggle == 1)
 		DeathcamRemove(ent, "off");
 
-	if (((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
+	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
 	{
 		if(ent->dmteam == BLUE_TEAM)
 			blue_team_cnt-=1;
@@ -3002,7 +3002,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				if((ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM)) {
 					client->pers.spectator = false; //we have a team, join
 				}
-				else if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM && client->resp.spectator < 3) {
+				else if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM && client->resp.spectator < 3) {
 					if(red_team_cnt < blue_team_cnt)
 						ent->dmteam = RED_TEAM; //gonna put the autojoin here
 					else
@@ -3025,7 +3025,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	if (client->resp.spectator) {
-		if((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && client->resp.spectator < 2) {
+		if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && client->resp.spectator < 2) {
 			if(ent->dmteam == NO_TEAM && (level.time/2 == ceil(level.time/2))) {
 				if(g_autobalance->value)
 					safe_centerprintf(ent, "\n\n\nPress <fire> to join\nautobalanced team\n");
@@ -3035,7 +3035,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 		if (ucmd->upmove >= 10) {
 			if(!(g_autobalance->value)) {
-				if(((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM) && client->resp.spectator < 2) {
+				if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM && client->resp.spectator < 2) {
 					ent->dmteam = BLUE_TEAM; //join BLUE
 					client->pers.spectator = false;
 					ClientChangeSkin(ent);
@@ -3049,8 +3049,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 					GetChaseTarget(ent);
 			}
 		}
-		else if(((((int)(dmflags->value) & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM &&
-			(ucmd->upmove < 0))  && client->resp.spectator < 2 && !(g_autobalance->value)){
+		else if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM &&
+			ucmd->upmove < 0 && client->resp.spectator < 2 && !g_autobalance->integer ){
 
 			ent->dmteam = RED_TEAM; //join RED
 			client->pers.spectator = false;
@@ -3158,7 +3158,7 @@ void ClientBeginServerFrame (edict_t *ent)
 
 			//should probably add in a force respawn option
 			if (( client->latched_buttons & buttonMask ) ||
-				(deathmatch->value && ((int)dmflags->value & DF_FORCE_RESPAWN) ) )
+				(deathmatch->value && (dmflags->integer & DF_FORCE_RESPAWN) ) )
 			{
 
 				if(!ent->is_bot)
