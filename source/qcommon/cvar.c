@@ -310,6 +310,7 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 			{
 				var->string = CopyString(value);
 				var->value = atof (var->string);
+				var->integer = atoi (var->string);
 				if (!Q_strcasecmp(var->name, "game"))
 				{
 					FS_SetGamedir (var->string);
