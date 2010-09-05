@@ -209,18 +209,55 @@ typedef struct
 	vec3_t	color;
 } m_dlight_t;
 
+// ========
+// PGM
 typedef struct
 {
-	vec3_t	origin;
-	vec3_t	angle;
-	int		color;
-	float	alpha;
-	int		type;
-	int		texnum;
-	int		blendsrc;
-	int		blenddst;
-	float	scale;
+	qboolean	isactive;
+
+	vec3_t		lightcol;
+	float		light;
+	float		lightvel;
+} cplight_t;
+
+#define P_LIGHTS_MAX 8
+
+typedef struct particle_s
+{
+	struct particle_s	*next;
+
+	cplight_t	lights[P_LIGHTS_MAX];
+
+	float		time;
+
+	vec3_t		org;
+	vec3_t		angle;
+	vec3_t		vel;
+	vec3_t		accel;
+	vec3_t		end;
+	float		color;
+	float		colorvel;
+	float		alpha;
+	float		alphavel;
+	int			type;		// 0 standard, 1 smoke, etc etc...
+	int			texnum;
+	int			blenddst;
+	int			blendsrc;
+	float		scale;
+	float		scalevel;
+	qboolean	fromsustainedeffect;
+	float       dist;
+	
+	// These are computed from the foo and foovel values-- for example, 
+	// current_color is computed from color and colorvel and its value 
+	// changes every frame.
+	vec3_t	current_origin;
+	int		current_color;
+	float	current_alpha;
+	float	current_scale;
+
 } particle_t;
+
 
 typedef struct
 {
@@ -252,7 +289,7 @@ typedef struct
 	dlight_t	*dlights;
 
 	int			num_particles;
-	particle_t	*particles;
+	particle_t	**particles;
 
 	int         num_flares;
     flare_t     *flares;
@@ -264,6 +301,14 @@ typedef struct
 	beam_t		*beams;
 
 } refdef_t;
+
+//
+// view origin moved from r_local.h. -M.
+//
+extern	vec3_t	vup;
+extern	vec3_t	vpn;
+extern	vec3_t	vright;
+extern	vec3_t	r_origin;
 
 // Knightmare- added Psychospaz's menu cursor
 //cursor - psychospaz
