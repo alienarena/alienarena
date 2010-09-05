@@ -395,6 +395,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/db-chromium.nod \
 	botinfo/nav/db-icarus.nod \
 	botinfo/nav/db-vesuvius.nod \
+	botinfo/nav/dm-annhiliation.nod \
 	botinfo/nav/dm-aquous.nod \
 	botinfo/nav/dm-atlantis2k8.nod \
 	botinfo/nav/dm-babel.nod \
