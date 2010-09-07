@@ -1353,7 +1353,7 @@ void SV_Init (void)
 	Cvar_Get ("skill", "1", 0);
 	Cvar_Get ("deathmatch", "1", CVAR_LATCH); //Alien Arena is *always* deathmatch
 	Cvar_Get ("ctf", "0", CVAR_LATCH);
-	Cvar_Get ("dmflags", va("%i", DF_INSTANT_ITEMS), CVAR_SERVERINFO);
+	Cvar_Get ("dmflags", va("%i", DF_INSTANT_ITEMS+DF_BOT_LEVELAD), CVAR_SERVERINFO);
 	Cvar_Get ("fraglimit", "0", CVAR_SERVERINFO);
 	Cvar_Get ("timelimit", "0", CVAR_SERVERINFO);
 	Cvar_Get ("cheats", "0", CVAR_SERVERINFO|CVAR_LATCH);
