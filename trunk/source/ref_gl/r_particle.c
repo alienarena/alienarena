@@ -59,7 +59,10 @@ void GL_DrawParticles( int num_particles, particle_t **particles, const unsigned
 	for ( p1 = particles, i=0, oldtype=-1 ; i < num_particles ; i++,p1++)
 	{
 	    p = *p1;
-				
+
+		if( R_CullSphere( p->current_origin, 64, 15 ) )
+			continue;
+
 		if(p->type == PARTICLE_NONE) {
 
 			blendsrc = GL_SRC_ALPHA;
