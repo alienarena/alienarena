@@ -272,6 +272,7 @@ void Draw_InitLocal (void);
 void GL_SubdivideSurface (msurface_t *fa);
 qboolean R_CullBox (vec3_t mins, vec3_t maxs);
 qboolean R_CullOrigin(vec3_t origin);
+qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags );
 void R_RotateForEntity (entity_t *e);
 void R_MarkLeaves (void);
 void R_AddSkySurface (msurface_t *fa);
