@@ -27,13 +27,47 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_CONTACTS 4 //this might be best set to 1, check
 #define RAGDOLL_DURATION 10000 //10 seconds
 
+//body id's
 #define CHEST 0
+#define BELLY 1
+#define PELVIS 2
+#define HEAD 3
+#define RIGHTUPPERLEG 4
+#define LEFTUPPERLEG 5
+#define RIGHTLOWERLEG 6
+#define LEFTLOWERLEG 7
+#define RIGHTFOOT 8
+#define LEFTFOOT 9
+#define RIGHTUPPERARM 10
+#define LEFTUPPERARM 11
+#define RIGHTFOREARM 12
+#define LEFTFOREARM 13
+#define RIGHTHAND 14
+#define LEFTHAND 15
+
+//join id's
+#define MIDSPINE 0
+#define LOWSPINE 1
+#define NECK 2
+#define RIGHTHIP 3
+#define LEFTHIP 4
+#define RIGHTKNEE 5
+#define LEFTKNEE 6
+#define RIGHTANKLE 7
+#define LEFTANKLE 8
+#define RIGHTSHOULDER 9
+#define LEFTSHOULDER 10
+#define RIGHTELBOW 11
+#define LEFTELBOW 12
+#define RIGHTWRIST 13
+#define LEFTWRIST 14
 
 //Hard coded definitions(if no ragdoll read in)
 //note we need to adjust this for our world, which would likely be these vals * 32
 //however, from what I have read, ODE prefers things to be done in meters, so we shall see.  How will
 //this match up to the world mesh?
 
+#define HEAD_H 0.20
 #define UPPER_ARM_LEN 0.30
 #define FORE_ARM_LEN 0.25
 #define HAND_LEN 0.13 // wrist to mid-fingers only
