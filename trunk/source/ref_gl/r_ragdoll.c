@@ -272,7 +272,6 @@ matrix4x4_t* makeOpenGLMatrix(matrix3x3_t r, vec3_t p)
 }
 
 //routine to create ragdoll body parts between two joints
-//to do - define the object id's to body parts
 void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, float radius, float density)
 {
 	//Adds a capsule body between joint positions p1 and p2 and with given
@@ -350,6 +349,17 @@ void R_addHingeJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2, v
     dJointSetHingeParam(RagDoll[RagDollID].RagDollJoint[jointID], dParamHiStop,  hiStop);
 }
 
+void R_addBallJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2, vec3_t anchor)
+{
+	anchor = add3(anchor, currententity->origin);
+
+	RagDoll[RagDollID].RagDollJoint[jointID] = dJointCreateBall(RagDollWorld, 0);
+
+	dJointAttach(RagDoll[RagDollID].RagDollJoint[jointID], body1, body2);
+
+	dJointSetBallAnchor(RagDoll[RagDollID].RagDollJoint[jointID], anchor[0], anchor[1], anchor[2]);
+}
+
 void R_CreateWorldObject( void )
 {
 	// Initialize the world
@@ -413,66 +423,94 @@ void R_RagdollBody_Init( int RagDollID )
 
 	//build the ragdoll parts
 
-	//define some ragdoll object id's in h
+	density = 1; //for now
 
 	VectorSet(p1, -CHEST_W * 0.5, CHEST_H, 0.0);
 	VectorSet(p2, CHEST_W * 0.5, CHEST_H, 0.0);
-	R_addBody(RagDollID, "chest", CHEST, p1, p2, 0.13, density); //what will the density be?
+	R_addBody(RagDollID, "chest", CHEST, p1, p2, 0.13, density); 
+
+	VectorSet(p1, 0.0, CHEST_H - 0.1, 0.0);
+	VectorSet(p2, 0.0, HIP_H + 0.1, 0.0);
+	R_addBody(RagDollID, "belly", BELLY, p1, p2, 0.125, density);
+
+	R_addFixedJoint(RagDollID, MIDSPINE, RagDoll[RagDollID].RagDollObject[CHEST].body, RagDoll[RagDollID].RagDollObject[BELLY].body);
+
+	VectorSet(p1, -PELVIS_W * 0.5, HIP_H, 0.0);
+	VectorSet(p2, PELVIS_W * 0.5, HIP_H, 0.0);
+	R_addBody(RagDollID, "pelvis", PELVIS, p1, p2, 0.125, density);
+
+	R_addFixedJoint(RagDollID, LOWSPINE, RagDoll[RagDollID].RagDollObject[BELLY].body, RagDoll[RagDollID].RagDollObject[PELVIS].body);
+
+	VectorSet(p1, 0.0, HEAD_H, 0.0);
+	VectorSet(p2, 0.0, -HEAD_H, 0.0);
+	R_addBody(RagDollID, "head", HEAD, p1, p2, 0.11, density);
+
+	VectorSet(p1, 0.0, NECK_H, 0.0);
+	R_addBallJoint(RagDollID, NECK, RagDoll[RagDollID].RagDollObject[CHEST].body, RagDoll[RagDollID].RagDollObject[HEAD].body, p1);
+
+	R_addBody(RagDollID, "rightupperleg", RIGHTUPPERLEG, RagDoll[RagDollID].R_HIP_POS, RagDoll[RagDollID].R_KNEE_POS, 0.11, density);
+
+	R_addBallJoint(RagDollID, RIGHTHIP, RagDoll[RagDollID].RagDollObject[PELVIS].body, RagDoll[RagDollID].RagDollObject[RIGHTUPPERLEG].body,
+		RagDoll[RagDollID].R_HIP_POS);
+
+	R_addBody(RagDollID, "leftupperleg", LEFTUPPERLEG, RagDoll[RagDollID].L_HIP_POS, RagDoll[RagDollID].L_KNEE_POS, 0.11, density);
+
+	R_addBallJoint(RagDollID, LEFTHIP, RagDoll[RagDollID].RagDollObject[PELVIS].body, RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body,
+		RagDoll[RagDollID].L_HIP_POS);
 
 
-		//self.belly = self.addBody((0.0, CHEST_H - 0.1, 0.0),
-		//	(0.0, HIP_H + 0.1, 0.0), 0.125)
-		//self.midSpine = self.addFixedJoint(self.chest, self.belly)
-		//self.pelvis = self.addBody((-PELVIS_W * 0.5, HIP_H, 0.0),
-		//	(PELVIS_W * 0.5, HIP_H, 0.0), 0.125)
-		//self.lowSpine = self.addFixedJoint(self.belly, self.pelvis)
+	R_addBody(RagDollID, "rightlowerleg", RIGHTLOWERLEG, RagDoll[RagDollID].R_KNEE_POS, RagDoll[RagDollID].R_ANKLE_POS, 0.09, density);
 
-		//self.head = self.addBody((0.0, BROW_H, 0.0), (0.0, MOUTH_H, 0.0), 0.11)
-		//self.neck = self.addBallJoint(self.chest, self.head,
-		//	(0.0, NECK_H, 0.0))
+	//note - these next few will be changed to use hinge joints 
+	R_addBallJoint(RagDollID, RIGHTKNEE, RagDoll[RagDollID].RagDollObject[RIGHTUPPERLEG].body, 
+		RagDoll[RagDollID].RagDollObject[RIGHTLOWERLEG].body, RagDoll[RagDollID].R_KNEE_POS);
 
-		//self.rightUpperLeg = self.addBody(R_HIP_POS, R_KNEE_POS, 0.11)
-		//self.rightHip = self.addBallJoint(self.pelvis, self.rightUpperLeg,
-		//	R_HIP_POS)
-		//self.leftUpperLeg = self.addBody(L_HIP_POS, L_KNEE_POS, 0.11)
-		//self.leftHip = self.addBallJoint(self.pelvis, self.leftUpperLeg,
-		//	L_HIP_POS)
+	R_addBody(RagDollID, "leftlowerleg", LEFTLOWERLEG, RagDoll[RagDollID].L_KNEE_POS, RagDoll[RagDollID].L_ANKLE_POS, 0.09, density);
 
-		//self.rightLowerLeg = self.addBody(R_KNEE_POS, R_ANKLE_POS, 0.09)
-		//self.rightKnee = self.addBallJoint(self.rightUpperLeg,
-		//	self.rightLowerLeg, R_KNEE_POS)
-		//self.leftLowerLeg = self.addBody(L_KNEE_POS, L_ANKLE_POS, 0.09)
-		//self.leftKnee = self.addBallJoint(self.leftUpperLeg,
-		//	self.leftLowerLeg, L_KNEE_POS)
+	R_addBallJoint(RagDollID, LEFTKNEE, RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTLOWERLEG].body, RagDoll[RagDollID].L_KNEE_POS);
 
-		//self.rightFoot = self.addBody(R_HEEL_POS, R_TOES_POS, 0.09)
-		//self.rightAnkle = self.addBallJoint(self.rightLowerLeg,
-		//	self.rightFoot, R_ANKLE_POS)
-		//self.leftFoot = self.addBody(L_HEEL_POS, L_TOES_POS, 0.09)
-		//self.leftAnkle = self.addBallJoint(self.leftLowerLeg,
-		//	self.leftFoot, L_ANKLE_POS)
+	R_addBody(RagDollID, "rightfoot", RIGHTFOOT, RagDoll[RagDollID].R_HEEL_POS, RagDoll[RagDollID].R_TOES_POS, 0.09, density);
 
-		//self.rightUpperArm = self.addBody(R_SHOULDER_POS, R_ELBOW_POS, 0.08)
-		//self.rightShoulder = self.addBallJoint(self.chest, self.rightUpperArm,
-		//	R_SHOULDER_POS)
-		//self.leftUpperArm = self.addBody(L_SHOULDER_POS, L_ELBOW_POS, 0.08)
-		//self.leftShoulder = self.addBallJoint(self.chest, self.leftUpperArm,
-		//	L_SHOULDER_POS)
+	R_addBallJoint(RagDollID, RIGHTANKLE, RagDoll[RagDollID].RagDollObject[RIGHTLOWERLEG].body, 
+		RagDoll[RagDollID].RagDollObject[RIGHTFOOT].body, RagDoll[RagDollID].R_ANKLE_POS);
 
-		//self.rightForeArm = self.addBody(R_ELBOW_POS, R_WRIST_POS, 0.075)
-		//self.rightElbow = self.addBallJoint(self.rightUpperArm,
-		//	self.rightForeArm, R_ELBOW_POS)
-		//self.leftForeArm = self.addBody(L_ELBOW_POS, L_WRIST_POS, 0.075)
-		//self.leftElbow = self.addBallJoint(self.leftUpperArm,
-		//	self.leftForeArm, L_ELBOW_POS)
+	R_addBody(RagDollID, "leftfoot", LEFTFOOT, RagDoll[RagDollID].L_HEEL_POS, RagDoll[RagDollID].L_TOES_POS, 0.09, density);
 
-		//self.rightHand = self.addBody(R_WRIST_POS, R_FINGERS_POS, 0.075)
-		//self.rightWrist = self.addBallJoint(self.rightForeArm,
-		//	self.rightHand, R_WRIST_POS)
-		//self.leftHand = self.addBody(L_WRIST_POS, L_FINGERS_POS, 0.075)
-		//self.leftWrist = self.addBallJoint(self.leftForeArm,
-		//	self.leftHand, L_WRIST_POS)
+	R_addBallJoint(RagDollID, LEFTANKLE, RagDoll[RagDollID].RagDollObject[LEFTLOWERLEG].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTFOOT].body, RagDoll[RagDollID].L_ANKLE_POS);
 
+	R_addBody(RagDollID, "rightupperarm", RIGHTUPPERARM, RagDoll[RagDollID].R_SHOULDER_POS, RagDoll[RagDollID].R_ELBOW_POS, 0.08, density);
+
+	R_addBallJoint(RagDollID, RIGHTSHOULDER, RagDoll[RagDollID].RagDollObject[CHEST].body, 
+		RagDoll[RagDollID].RagDollObject[RIGHTUPPERARM].body, RagDoll[RagDollID].R_SHOULDER_POS);
+
+	R_addBody(RagDollID, "leftupperarm", LEFTUPPERARM, RagDoll[RagDollID].L_SHOULDER_POS, RagDoll[RagDollID].L_ELBOW_POS, 0.08, density);
+
+	R_addBallJoint(RagDollID, LEFTSHOULDER, RagDoll[RagDollID].RagDollObject[CHEST].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTUPPERARM].body, RagDoll[RagDollID].L_SHOULDER_POS);
+
+	R_addBody(RagDollID, "rightforearm", RIGHTFOREARM, RagDoll[RagDollID].R_ELBOW_POS, RagDoll[RagDollID].R_WRIST_POS, 0.08, density);
+
+	R_addBallJoint(RagDollID, RIGHTELBOW, RagDoll[RagDollID].RagDollObject[RIGHTUPPERARM].body, 
+		RagDoll[RagDollID].RagDollObject[RIGHTFOREARM].body, RagDoll[RagDollID].R_ELBOW_POS);
+
+	R_addBody(RagDollID, "leftforearm", LEFTFOREARM, RagDoll[RagDollID].L_ELBOW_POS, RagDoll[RagDollID].L_WRIST_POS, 0.08, density);
+
+	R_addBallJoint(RagDollID, LEFTELBOW, RagDoll[RagDollID].RagDollObject[LEFTUPPERARM].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body, RagDoll[RagDollID].L_ELBOW_POS);
+
+	R_addBody(RagDollID, "righthand", RIGHTHAND, RagDoll[RagDollID].R_WRIST_POS, RagDoll[RagDollID].R_FINGERS_POS, 0.075, density);
+
+	R_addBallJoint(RagDollID, RIGHTWRIST, RagDoll[RagDollID].RagDollObject[RIGHTFOREARM].body, 
+		RagDoll[RagDollID].RagDollObject[RIGHTHAND].body, RagDoll[RagDollID].R_WRIST_POS);
+
+	R_addBody(RagDollID, "leftthand", LEFTHAND, RagDoll[RagDollID].L_WRIST_POS, RagDoll[RagDollID].L_FINGERS_POS, 0.075, density);
+
+	R_addBallJoint(RagDollID, LEFTWRIST, RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTHAND].body, RagDoll[RagDollID].L_WRIST_POS);
+
+	//to do - get bone rotations, apply to ragdoll for initial position
 }
 
 /*
