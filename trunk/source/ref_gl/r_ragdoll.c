@@ -55,13 +55,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //Ragdolls will be batched and drawn just as regular entities, which also means that entities should not be drawn in their normal
 //batch once in a death animation.  When death animations begin, a ragdoll will be generated with the appropriate properties including
 //position, velocity, etc.  The ragdoll will be timestamped, and will be removed from the stack after a certain amount of time has
-//elapsed.
+//elapsed.  We also need to know some information from the entity to transfer to the ragdoll, such as the model and skin.
 
 //This tutorial is straightforward and useful, and though it's in python, it's easily translated into C code.
 
 //There are several examples at http://opende.sourceforge.net/wiki/index.php/HOWTO_rag-doll
 
 //Stage 1 - math funcs needed
+
+vec3_t rightAxis, leftAxis, upAxis, downAxis, bkwdAxis, fwdAxis;
 
 signed int sign(signed int x)
 {
@@ -369,6 +371,14 @@ void R_CreateWorldObject( void )
 	RagDollSpace = dSimpleSpaceCreate(0);
 
 	contactGroup = dJointGroupCreate(0);
+		
+	//axi used to determine constrained joint rotations
+	VectorSet(rightAxis, 1.0, 0.0, 0.0);
+	VectorSet(leftAxis, -1.0, 0.0, 0.0);
+	VectorSet(upAxis, 0.0, 1.0, 0.0);
+	VectorSet(downAxis, 0.0, -1.0, 0.0);
+	VectorSet(bkwdAxis, 0.0, 0.0, 1.0);
+	VectorSet(fwdAxis, 0.0, 0.0, -1.0);
 }
 
 void R_DestroyWorldObject( void )
@@ -458,27 +468,25 @@ void R_RagdollBody_Init( int RagDollID )
 	R_addBallJoint(RagDollID, LEFTHIP, RagDoll[RagDollID].RagDollObject[PELVIS].body, RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body,
 		RagDoll[RagDollID].L_HIP_POS);
 
-
 	R_addBody(RagDollID, "rightlowerleg", RIGHTLOWERLEG, RagDoll[RagDollID].R_KNEE_POS, RagDoll[RagDollID].R_ANKLE_POS, 0.09, density);
 
-	//note - these next few will be changed to use hinge joints 
-	R_addBallJoint(RagDollID, RIGHTKNEE, RagDoll[RagDollID].RagDollObject[RIGHTUPPERLEG].body, 
-		RagDoll[RagDollID].RagDollObject[RIGHTLOWERLEG].body, RagDoll[RagDollID].R_KNEE_POS);
+	R_addHingeJoint(RagDollID, RIGHTKNEE, RagDoll[RagDollID].RagDollObject[RIGHTUPPERLEG].body, 
+		RagDoll[RagDollID].RagDollObject[RIGHTLOWERLEG].body, RagDoll[RagDollID].R_KNEE_POS, leftAxis, 0.0, M_PI * 0.75);
 
 	R_addBody(RagDollID, "leftlowerleg", LEFTLOWERLEG, RagDoll[RagDollID].L_KNEE_POS, RagDoll[RagDollID].L_ANKLE_POS, 0.09, density);
 
-	R_addBallJoint(RagDollID, LEFTKNEE, RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body, 
-		RagDoll[RagDollID].RagDollObject[LEFTLOWERLEG].body, RagDoll[RagDollID].L_KNEE_POS);
+	R_addHingeJoint(RagDollID, LEFTKNEE, RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTLOWERLEG].body, RagDoll[RagDollID].L_KNEE_POS, leftAxis, 0.0, M_PI * 0.75);
 
 	R_addBody(RagDollID, "rightfoot", RIGHTFOOT, RagDoll[RagDollID].R_HEEL_POS, RagDoll[RagDollID].R_TOES_POS, 0.09, density);
 
-	R_addBallJoint(RagDollID, RIGHTANKLE, RagDoll[RagDollID].RagDollObject[RIGHTLOWERLEG].body, 
-		RagDoll[RagDollID].RagDollObject[RIGHTFOOT].body, RagDoll[RagDollID].R_ANKLE_POS);
+	R_addHingeJoint(RagDollID, RIGHTANKLE, RagDoll[RagDollID].RagDollObject[RIGHTLOWERLEG].body, 
+		RagDoll[RagDollID].RagDollObject[RIGHTFOOT].body, RagDoll[RagDollID].R_ANKLE_POS, rightAxis, M_PI * -0.1, M_PI * 0.05);
 
 	R_addBody(RagDollID, "leftfoot", LEFTFOOT, RagDoll[RagDollID].L_HEEL_POS, RagDoll[RagDollID].L_TOES_POS, 0.09, density);
 
-	R_addBallJoint(RagDollID, LEFTANKLE, RagDoll[RagDollID].RagDollObject[LEFTLOWERLEG].body, 
-		RagDoll[RagDollID].RagDollObject[LEFTFOOT].body, RagDoll[RagDollID].L_ANKLE_POS);
+	R_addHingeJoint(RagDollID, LEFTANKLE, RagDoll[RagDollID].RagDollObject[LEFTLOWERLEG].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTFOOT].body, RagDoll[RagDollID].L_ANKLE_POS, rightAxis, M_PI * -0.1, M_PI * 0.05);
 
 	R_addBody(RagDollID, "rightupperarm", RIGHTUPPERARM, RagDoll[RagDollID].R_SHOULDER_POS, RagDoll[RagDollID].R_ELBOW_POS, 0.08, density);
 
@@ -492,24 +500,26 @@ void R_RagdollBody_Init( int RagDollID )
 
 	R_addBody(RagDollID, "rightforearm", RIGHTFOREARM, RagDoll[RagDollID].R_ELBOW_POS, RagDoll[RagDollID].R_WRIST_POS, 0.08, density);
 
-	R_addBallJoint(RagDollID, RIGHTELBOW, RagDoll[RagDollID].RagDollObject[RIGHTUPPERARM].body, 
-		RagDoll[RagDollID].RagDollObject[RIGHTFOREARM].body, RagDoll[RagDollID].R_ELBOW_POS);
+	R_addHingeJoint(RagDollID, RIGHTELBOW, RagDoll[RagDollID].RagDollObject[RIGHTUPPERARM].body, 
+		RagDoll[RagDollID].RagDollObject[RIGHTFOREARM].body, RagDoll[RagDollID].R_ELBOW_POS, downAxis, 0.0, M_PI * 0.6);
 
 	R_addBody(RagDollID, "leftforearm", LEFTFOREARM, RagDoll[RagDollID].L_ELBOW_POS, RagDoll[RagDollID].L_WRIST_POS, 0.08, density);
 
-	R_addBallJoint(RagDollID, LEFTELBOW, RagDoll[RagDollID].RagDollObject[LEFTUPPERARM].body, 
-		RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body, RagDoll[RagDollID].L_ELBOW_POS);
+	R_addHingeJoint(RagDollID, LEFTELBOW, RagDoll[RagDollID].RagDollObject[LEFTUPPERARM].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body, RagDoll[RagDollID].L_ELBOW_POS,  upAxis, 0.0, M_PI * 0.6);
 
 	R_addBody(RagDollID, "righthand", RIGHTHAND, RagDoll[RagDollID].R_WRIST_POS, RagDoll[RagDollID].R_FINGERS_POS, 0.075, density);
 
-	R_addBallJoint(RagDollID, RIGHTWRIST, RagDoll[RagDollID].RagDollObject[RIGHTFOREARM].body, 
-		RagDoll[RagDollID].RagDollObject[RIGHTHAND].body, RagDoll[RagDollID].R_WRIST_POS);
+	R_addHingeJoint(RagDollID, RIGHTWRIST, RagDoll[RagDollID].RagDollObject[RIGHTFOREARM].body, 
+		RagDoll[RagDollID].RagDollObject[RIGHTHAND].body, RagDoll[RagDollID].R_WRIST_POS, fwdAxis, M_PI * -0.1, M_PI * 0.2);
 
 	R_addBody(RagDollID, "leftthand", LEFTHAND, RagDoll[RagDollID].L_WRIST_POS, RagDoll[RagDollID].L_FINGERS_POS, 0.075, density);
 
-	R_addBallJoint(RagDollID, LEFTWRIST, RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body, 
-		RagDoll[RagDollID].RagDollObject[LEFTHAND].body, RagDoll[RagDollID].L_WRIST_POS);
+	R_addHingeJoint(RagDollID, LEFTWRIST, RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTHAND].body, RagDoll[RagDollID].L_WRIST_POS, bkwdAxis, M_PI * -0.1, M_PI * 0.2);
 
+	//we need some information from our current entity
+	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t *)); //this should be right but double check
 	//to do - get bone rotations, apply to ragdoll for initial position
 }
 

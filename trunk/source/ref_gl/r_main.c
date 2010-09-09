@@ -483,7 +483,6 @@ void R_DrawEntitiesOnList (void)
 				currententity->script = NULL;
 		}
 
-
 		currentmodel = currententity->model;
 
 		//get distance, set lod if available
