@@ -126,6 +126,9 @@ typedef struct RagDoll_s {
 	vec3_t R_TOES_POS;
 	vec3_t L_TOES_POS;
 
+	//mesh information
+	model_t *ragDollMesh;
+
 	float spawnTime;
 
 	int destroyed;
