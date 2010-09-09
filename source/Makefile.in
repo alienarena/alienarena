@@ -348,7 +348,8 @@ am__crx_ded_SOURCES_DIST = client/anorms.h game/game.h game/q_shared.c \
 @BUILD_DARWIN_TRUE@	unix/crx_ded-q_shunix.$(OBJEXT) \
 @BUILD_DARWIN_TRUE@	unix/crx_ded-sys_unix.$(OBJEXT)
 crx_ded_OBJECTS = $(am_crx_ded_OBJECTS)
-@BUILD_UNIX_TRUE@crx_ded_DEPENDENCIES = libgame.a
+@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@crx_ded_DEPENDENCIES = libgame.a
+@BUILD_DARWIN_TRUE@crx_ded_DEPENDENCIES = libgame.a
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/config
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -491,6 +492,7 @@ top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4 
 AM_CPPFLAGS = -I $(top_srcdir)/source
 noinst_LIBRARIES = libgame.a
+@BUILD_DARWIN_TRUE@crx_ded_LDADD = libgame.a
 @BUILD_UNIX_TRUE@crx_ded_LDADD = libgame.a
 @ALTERNATE_INSTALL_FALSE@@BUILD_DARWIN_TRUE@crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY -DDATADIR='"$(pkgdatadir)"'
 @ALTERNATE_INSTALL_FALSE@@BUILD_UNIX_TRUE@crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY -DDATADIR='"$(pkgdatadir)"'
