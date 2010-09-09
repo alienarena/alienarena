@@ -30,6 +30,8 @@ nobase_dist_pkgdata_DATA = \
 	arena/motd.txt \
 	arena/server.cfg \
 	botinfo/^3Marty.cfg \
+	botinfo/^2Squirtney.cfg \
+	botinfo/^5Beavis.cfg \
 	botinfo/Astral.cfg \
 	botinfo/Beavis.cfg \
 	botinfo/Butthead.cfg \
@@ -1779,6 +1781,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/music/Divinity_lack_of_success.ogg \
 	data1/sound/music/Divinity_misunderstood.ogg \
 	data1/sound/music/Divinity_never_ending.ogg \
+	data1/sound/music/dm-annhiliation.ogg \
 	data1/sound/music/dm-deathray.ogg \
 	data1/sound/music/dm-deimos.ogg \
 	data1/sound/music/dm-dismal.ogg \
@@ -1950,10 +1953,15 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/building10_broken.tga \
 	data1/textures/arena10/building10_nm.tga \
 	data1/textures/arena10/building11.tga \
+	data1/textures/arena10/building11_nm.tga \
 	data1/textures/arena10/building12.tga \
+	data1/textures/arena10/building12_nm.tga \
 	data1/textures/arena10/building13.tga \
+	data1/textures/arena10/building13_nm.tga \
 	data1/textures/arena10/building14.tga \
+	data1/textures/arena10/building14_nm.tga \
 	data1/textures/arena10/building15.tga \
+	data1/textures/arena10/building15_nm.tga \
 	data1/textures/arena10/building1_nm.tga \
 	data1/textures/arena10/building1.tga \
 	data1/textures/arena10/building1_broken_nm.tga \
@@ -2016,7 +2024,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/heap1_nm.tga \
 	data1/textures/arena10/heap1.tga \
 	data1/textures/arena10/ivy1.tga \
+	data1/textures/arena10/ivy1_nm.tga \
 	data1/textures/arena10/ivy2.tga \
+	data1/textures/arena10/ivy2_nm.tga \
 	data1/textures/arena10/metalfence1.tga \
 	data1/textures/arena10/metalfence2.tga \
 	data1/textures/arena10/metalfloor20_hm.tga \
@@ -2091,8 +2101,10 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/vinewall1_hm.tga \
 	data1/textures/arena10/vinewall1_nm.tga \
 	data1/textures/arena10/vinewall1.tga \
-	data1/textures/arena10/wires2.tga \
 	data1/textures/arena10/wires1.tga \
+	data1/textures/arena10/wires1_nm.tga \
+	data1/textures/arena10/wires2.tga \
+	data1/textures/arena10/wires2_nm.tga \
 	data1/textures/arena1/jpad1a.tga \
 	data1/textures/arena1/jpad1a.wal \
 	data1/textures/arena1/jpad1b.tga \
@@ -2980,6 +2992,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/xempx/e8crete03ccred.tga \
 	data1/textures/xempx/full_clip.tga \
 	data1/textures/xempx/ivy3.tga \
+	data1/textures/xempx/ivy3_nm.tga \
 	data1/textures/xempx/light1.tga \
 	data1/textures/xempx/lightbeam1.tga \
 	data1/vehicles/bomber/bomb.md2 \

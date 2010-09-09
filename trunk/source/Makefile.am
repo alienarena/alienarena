@@ -47,6 +47,7 @@ endif
 
 if BUILD_DARWIN
 bin_PROGRAMS = crx-ded
+crx_ded_LDADD = libgame.a
 if ALTERNATE_INSTALL
 crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
 else
