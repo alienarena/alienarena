@@ -128,6 +128,7 @@ typedef struct RagDoll_s {
 
 	//mesh information
 	model_t *ragDollMesh;
+	vec3_t	origin;
 
 	float spawnTime;
 
@@ -141,5 +142,5 @@ RagDoll_t RagDoll[MAX_RAGDOLLS];
 extern void R_CreateWorldObject( void );
 extern void R_DestroyWorldObject( void );
 extern void R_RenderAllRagdolls ( void );
-extern void R_AddNewRagdoll( void );
+extern void R_AddNewRagdoll( vec3_t origin );
 extern void R_ClearAllRagdolls( void );
