@@ -75,7 +75,6 @@
       <StructMemberAlignment>1Byte</StructMemberAlignment>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -98,7 +97,7 @@
       <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <CompileAs>CompileAsC</CompileAs>
@@ -110,9 +109,6 @@
       <AssemblerOutput>NoListing</AssemblerOutput>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-      <OmitFramePointers>true</OmitFramePointers>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <ShowIncludes>true</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -125,8 +121,6 @@
       </EnableCOMDATFolding>
       <GenerateMapFile>true</GenerateMapFile>
       <OutputFile>$(LocalBin)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
-      <ShowProgress>LinkVerbose</ShowProgress>
-      <TurnOffAssemblyGeneration>false</TurnOffAssemblyGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
