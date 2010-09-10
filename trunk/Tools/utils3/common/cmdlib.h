@@ -34,7 +34,9 @@ typedef unsigned char byte;
 extern int myargc;
 extern char **myargv;
 
+#if !defined WIN32
 char *strupr (char *in);
+#endif
 char *strlower (char *in);
 int Q_strncasecmp (char *s1, char *s2, int n);
 int Q_strcasecmp (char *s1, char *s2);

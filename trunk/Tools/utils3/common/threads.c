@@ -78,7 +78,9 @@ WIN32
 
 ===================================================================
 */
-#ifdef WIN32
+//#ifdef WIN32
+// 2010-09 lightmap is broken with threads. with sun only?
+#if 0
 
 #define	USED
 
