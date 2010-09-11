@@ -38,10 +38,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //Once the frames are at the death stage, the ragdoll takes over.
 
-//From what I best understand from reading the tuts, we have to build a "world" in which things collide.  These would be done
-//by the existing bsp drawing routines, and simply putting some calls before the vertex arrays are built.  This will use the
-//ODE trimesh functions.  These are not completely straightforward, as there appears to be a need for the verts to be done with
-//indices so that normals are correctly built.
+//The world objects are created each time a ragdoll is spawned.  They consist of surfaces that are in proximity of the spawned
+//ragdoll.  This has to be done this way, because building a massive object out of the entire map makes ODE craw to a very 
+//slow pace.  Each ragdoll will have a space to contain it's world geometry, which will get cleared when that ragdoll expires.
+//We will use a recursive world function for this, and filter out unneeded surfaces.  
 
 //The ragdoll will need to either be hardcoded in, or read in at load time.  To begin, we will
 //hardcode one in.  Since our playermodels use roughly the same skeleton, this shouldn't be too bad for initial testing.
@@ -61,7 +61,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //There are several examples at http://opende.sourceforge.net/wiki/index.php/HOWTO_rag-doll
 
-//Stage 1 - math funcs needed
+cvar_t *r_ragdolls;
 
 vec3_t rightAxis, leftAxis, upAxis, downAxis, bkwdAxis, fwdAxis;
 
@@ -308,6 +308,8 @@ void R_CreateWorldObject( void )
 	VectorSet(bkwdAxis, 0.0, 0.0, 1.0);
 	VectorSet(fwdAxis, 0.0, 0.0, -1.0);
 
+	lastODEUpdate = Sys_Milliseconds();
+
 	r_DrawingRagDoll = false;
 }
 
@@ -321,6 +323,74 @@ void R_DestroyWorldObject( void )
 
 	if(contactGroup)
 		dJointGroupDestroy(contactGroup);
+}
+
+//For creating the surfaces for the ragdoll to collide with
+void GL_BuildODEGeoms(int RagDollID, msurface_t *surf)
+{
+	glpoly_t *p = surf->polys;
+	float	*v;
+	int		i, j, k, offset, VertexCounter;
+	int		ODEIndexCount = 0;
+	float	ODEVerts[MAX_VARRAY_VERTS]; //can, should this be done dynamically?
+	int		ODEIndices[MAX_INDICES];
+	int		ODETris = 0;
+	//winding order for ODE
+	const int indices[6] = {2,1,0,
+							3,2,0};
+
+	if(r_SurfaceCount > MAX_SURFACES - 1 )
+		return;
+
+	// reset pointer and counter
+	VertexCounter = k = 0;
+
+	for (; p; p = p->chain)
+	{
+		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
+		{
+
+			ODEVerts[VertexCounter] = v[0];
+			ODEVerts[VertexCounter+1] = v[1];
+			ODEVerts[VertexCounter+2] = v[2];
+
+			VertexCounter++;
+		}
+
+		//create indices for each tri
+		ODETris = p->numverts - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
+		ODEIndexCount += 3*ODETris; //3 indices per tri
+
+		//this next block is to create indices for the entire mesh.  I think it should work in theory, but
+		//it's only my theory, and not confirmed just yet.
+		j = offset = 0;
+		for(i = 0; i < ODETris; i++)
+		{
+			if(j > 3)
+			{
+				j = 0;
+				offset+=2;
+			}
+			ODEIndices[k+0] = indices[0+j]+offset;
+			ODEIndices[k+1] = indices[1+j]+offset;
+			ODEIndices[k+2] = indices[2+j]+offset;
+			j+=3;
+			k+=3;
+		}
+	}
+
+	//we need to build the trimesh geometry for this surface
+	//note - would it be better/faster in the collision detection to just build one huge trimesh of all surfaces?
+	triMesh[r_SurfaceCount] = dGeomTriMeshDataCreate();
+
+	//// Build the mesh from the data
+	dGeomTriMeshDataBuildSimple(triMesh[r_SurfaceCount], (dReal*)ODEVerts,
+		VertexCounter, (dTriIndex*)ODEIndices, ODEIndexCount);
+
+	RagDoll[RagDollID].WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh[r_SurfaceCount], NULL, NULL, NULL);
+	dGeomSetData(WorldGeometry[r_SurfaceCount], "surface");
+
+	r_SurfaceCount++;
 }
 
 //build and set initial position of ragdoll - note this will need to get some information from the skeleton on the first death frame
@@ -365,16 +435,16 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	VectorAdd(RagDoll[RagDollID].L_ANKLE_POS, temp, RagDoll[RagDollID].L_TOES_POS);
 
 	//build the ragdoll parts
-	density = 1; //for now
+	density = 1000; //for now
 
 	VectorSet(p1, -CHEST_W * 0.5, CHEST_H, 0.0);
 	VectorSet(p2, CHEST_W * 0.5, CHEST_H, 0.0);
 	R_addBody(RagDollID, "chest", CHEST, p1, p2, 0.13, density); 
-	return;
+
 	VectorSet(p1, 0.0, CHEST_H - 0.1, 0.0);
 	VectorSet(p2, 0.0, HIP_H + 0.1, 0.0);
 	R_addBody(RagDollID, "belly", BELLY, p1, p2, 0.125, density);
-
+	
 	R_addFixedJoint(RagDollID, MIDSPINE, RagDoll[RagDollID].RagDollObject[CHEST].body, RagDoll[RagDollID].RagDollObject[BELLY].body);
 
 	VectorSet(p1, -PELVIS_W * 0.5, HIP_H, 0.0);
@@ -399,7 +469,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 
 	R_addBallJoint(RagDollID, LEFTHIP, RagDoll[RagDollID].RagDollObject[PELVIS].body, RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body,
 		RagDoll[RagDollID].L_HIP_POS);
-
+	
 	R_addBody(RagDollID, "rightlowerleg", RIGHTLOWERLEG, RagDoll[RagDollID].R_KNEE_POS, RagDoll[RagDollID].R_ANKLE_POS, 0.09, density);
 
 	R_addHingeJoint(RagDollID, RIGHTKNEE, RagDoll[RagDollID].RagDollObject[RIGHTUPPERLEG].body, 
@@ -451,8 +521,11 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 		RagDoll[RagDollID].RagDollObject[LEFTHAND].body, RagDoll[RagDollID].L_WRIST_POS, bkwdAxis, M_PI * -0.1, M_PI * 0.2);
 
 	//we need some information from our current entity
-	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t *)); //this should be right but double check
+	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
+	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t)); //this should be right but double check
+
 	//to do - get bone rotations, apply to ragdoll for initial position
+	//note - we need to set torqe, velocity, quaternion, etc - not doing so is likely causing our internal ODE errors
 }
 
 /*
@@ -496,6 +569,33 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
     }
 }
 
+void R_DestroyRagDoll(int RagDollID)
+{
+	int i;
+
+	VectorSet(RagDoll[RagDollID].origin, 0, 0, 0);
+
+	if(RagDoll[RagDollID].ragDollMesh)
+		free(RagDoll[RagDollID].ragDollMesh);
+
+return; //next few things are causing problems
+	//destroy surfaces - better to track actual num of surfaces instead of max_surfaces!
+	for(i = 0; i < MAX_SURFACES; i++)
+	{
+		dGeomDestroy(RagDoll[RagDollID].WorldGeometry[i]);
+	}
+
+	//we also want to destroy all ragdoll bodies and joints for this ragdoll
+	for(i = CHEST; i <= LEFTHAND; i++)
+	{
+		dGeomDestroy(RagDoll[RagDollID].RagDollObject[i].geom);
+		dBodyDestroy(RagDoll[RagDollID].RagDollObject[i].body);
+	}
+
+	for(i = MIDSPINE; i <= LEFTWRIST; i++)
+		dJointDestroy(RagDoll[RagDollID].RagDollJoint[i]);
+}
+
 //This is called on every map load
 void R_ClearAllRagdolls( void )
 {
@@ -503,7 +603,7 @@ void R_ClearAllRagdolls( void )
 
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
-		//add routine to do the actual destruction
+		R_DestroyRagDoll(RagDollID);
 		RagDoll[RagDollID].destroyed = true;
 	}
 
@@ -525,7 +625,10 @@ void R_AddNewRagdoll( vec3_t origin )
 			break; //likely spawned from same ent, this may need tweaking
 		if(RagDoll[RagDollID].destroyed)
 		{
+			//need to create geometry in the vicinity of the ragdoll(not the entire map, this is painfully slow)
+			//for initial testing, let's just build a simple plane at the feet of the player
 			R_RagdollBody_Init(RagDollID, origin);
+			//to do - need to add nearby surfaces anytime a ragdoll is spawned
 			Com_Printf("Added a ragdoll\n");
 			break;
 		}
@@ -537,17 +640,25 @@ void R_RenderAllRagdolls ( void )
 	int RagDollID;
 	int numRagDolls = 0;
 
+	if(!r_ragdolls->value)
+		return;
+
 	//main physics loop
 	if(!r_DrawingRagDoll)
 		return;
 
-	//to do - this command is VERY slow, something is not quite right
-	dSpaceCollide(RagDollSpace, 0, &near_callback);
+	//note - this is called each server frame, not each render frame, and interpolated 
+	if((Sys_Milliseconds() - lastODEUpdate) > 100)
+	{
+		dSpaceCollide(RagDollSpace, 0, &near_callback);
 
-	dWorldQuickStep(RagDollWorld, 0.05);
+		dWorldQuickStep(RagDollWorld, 0.05); //this is likely wrong, check!
 
-	// Remove all temporary collision joints now that the world has been stepped
-    dJointGroupEmpty(contactGroup);
+		// Remove all temporary collision joints now that the world has been stepped
+		dJointGroupEmpty(contactGroup);
+
+		lastODEUpdate = Sys_Milliseconds();
+	}
 
 	//Iterate though the ragdoll stack, and render each one that is active.
 
@@ -561,7 +672,8 @@ void R_RenderAllRagdolls ( void )
 		{
 			if(!RagDoll[RagDollID].destroyed)
 			{
-				//add routines to destroy all ragdoll elements
+				//add routines to destroy all ragdoll elements, namely geometry that build for it collide with
+				R_DestroyRagDoll(RagDollID);
 				RagDoll[RagDollID].destroyed = true;
 				Com_Printf("Destroyed a ragdoll");
 			}

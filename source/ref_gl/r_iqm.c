@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 #include "r_iqm.h"
+#include "r_ragdoll.h"
 
 #if !defined max
 #define max(a,b)  (((a)<(b)) ? (b) : (a))
@@ -1584,12 +1585,15 @@ void R_DrawINTERQUAKEMODEL ( void )
 	image_t		*skin;
 	float		frame, time;
 
-	////Ragdolls take over at beginning of each death sequence
-	//if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
-	//	R_AddNewRagdoll();
-	////Do not render deathframes if using ragdolls
-	//if(currententity->frame > 198)
-	//	return;
+	if(r_ragdolls->value)
+	{
+		//Ragdolls take over at beginning of each death sequence
+		if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
+			R_AddNewRagdoll(currententity->origin);
+		//Do not render deathframes if using ragdolls
+		if(currententity->frame > 198)
+			return;
+	}
 
 	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return;
