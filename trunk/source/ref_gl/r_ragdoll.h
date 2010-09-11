@@ -21,9 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ode/ode.h>
 
 #define MAX_RAGDOLLS 64 
-#define MAX_RAGDOLL_OBJECTS 32
-#define MAX_RAGDOLL_JOINTS 32
-#define MAX_SURFACES 65536 //check on this, this seems extreme
+#define MAX_RAGDOLL_OBJECTS 16
+#define MAX_RAGDOLL_JOINTS 16
+#define MAX_SURFACES 128 
 #define MAX_CONTACTS 4 //this might be best set to 1, check
 #define RAGDOLL_DURATION 10000 //10 seconds
 
@@ -45,7 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define RIGHTHAND 14
 #define LEFTHAND 15
 
-//join id's
+//joint id's
 #define MIDSPINE 0
 #define LOWSPINE 1
 #define NECK 2
@@ -63,10 +63,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define LEFTWRIST 14
 
 //Hard coded definitions(if no ragdoll read in)
-//note we need to adjust this for our world, which would likely be these vals * 32
-//however, from what I have read, ODE prefers things to be done in meters, so we shall see.  How will
-//this match up to the world mesh?
-
 #define HEAD_H 0.20
 #define UPPER_ARM_LEN 0.30
 #define FORE_ARM_LEN 0.25
@@ -90,6 +86,8 @@ dWorldID RagDollWorld;
 dSpaceID RagDollSpace;
 
 dJointGroupID contactGroup;
+
+int lastODEUpdate;
 
 dGeomID WorldGeometry[MAX_SURFACES];
 dTriMeshDataID triMesh[MAX_SURFACES];
@@ -129,6 +127,9 @@ typedef struct RagDoll_s {
 	//mesh information
 	model_t *ragDollMesh;
 	vec3_t	origin;
+
+	//surface for ragdoll to collide
+	dGeomID WorldGeometry[MAX_SURFACES];
 
 	float spawnTime;
 

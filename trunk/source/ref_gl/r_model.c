@@ -1175,73 +1175,6 @@ void GL_CalcSurfaceNormals(msurface_t *surf)
 	}
 }
 
-void GL_BuildODEGeoms(msurface_t *surf)
-{
-	glpoly_t *p = surf->polys;
-	float	*v;
-	int		i, j, k, offset, VertexCounter;
-	int		ODEIndexCount = 0;
-	float	ODEVerts[MAX_VARRAY_VERTS]; //can, should this be done dynamically?
-	int		ODEIndices[MAX_INDICES];
-	int		ODETris = 0;
-	//winding order for ODE
-	const int indices[6] = {2,1,0,
-							3,2,0};
-
-	if(r_SurfaceCount > MAX_SURFACES - 1 )
-		return;
-
-	// reset pointer and counter
-	VertexCounter = k = 0;
-
-	for (; p; p = p->chain)
-	{
-		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-		{
-
-			ODEVerts[VertexCounter] = v[0];
-			ODEVerts[VertexCounter+1] = v[1];
-			ODEVerts[VertexCounter+2] = v[2];
-
-			VertexCounter++;
-		}
-
-		//create indices for each tri
-		ODETris = p->numverts - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
-		ODEIndexCount += 3*ODETris; //3 indices per tri
-
-		//this next block is to create indices for the entire mesh.  I think it should work in theory, but
-		//it's only my theory, and not confirmed just yet.
-		j = offset = 0;
-		for(i = 0; i < ODETris; i++)
-		{
-			if(j > 3)
-			{
-				j = 0;
-				offset+=2;
-			}
-			ODEIndices[k+0] = indices[0+j]+offset;
-			ODEIndices[k+1] = indices[1+j]+offset;
-			ODEIndices[k+2] = indices[2+j]+offset;
-			j+=3;
-			k+=3;
-		}
-	}
-
-	//we need to build the trimesh geometry for this surface
-	//note - would it be better/faster in the collision detection to just build one huge trimesh of all surfaces?
-	triMesh[r_SurfaceCount] = dGeomTriMeshDataCreate();
-
-	//// Build the mesh from the data
-	dGeomTriMeshDataBuildSimple(triMesh[r_SurfaceCount], (dReal*)ODEVerts,
-		VertexCounter, (dTriIndex*)ODEIndices, ODEIndexCount);
-
-	WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh[r_SurfaceCount], NULL, NULL, NULL);
-	dGeomSetData(WorldGeometry[r_SurfaceCount], "surface");
-
-	r_SurfaceCount++;
-}
-
 void GL_BuildPolygonFromSurface(msurface_t *fa);
 void GL_CreateSurfaceLightmap (msurface_t *surf);
 void GL_EndBuildingLightmaps (void);
@@ -1275,8 +1208,6 @@ void Mod_LoadFaces (lump_t *l)
 	currentmodel = loadmodel;
 
 	GL_BeginBuildingLightmaps (loadmodel);
-
-	r_SurfaceCount = 0;
 
 	for ( surfnum=0 ; surfnum<count ; surfnum++, in++, out++)
 	{
@@ -1367,7 +1298,6 @@ void Mod_LoadFaces (lump_t *l)
 			} while ( (stage = stage->next) );
 		}
 		GL_CalcSurfaceNormals(out);
-		GL_BuildODEGeoms(out);
 	}
 	GL_EndBuildingLightmaps ();
 }
@@ -1614,6 +1544,9 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	//ODE - create new world(flush out old first?)
 	R_DestroyWorldObject();
 	R_CreateWorldObject();
+
+	//ODE - clear out any ragdolls;
+	R_ClearAllRagdolls();
 
 	r_numWorldLights = 0;
 

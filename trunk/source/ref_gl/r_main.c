@@ -1045,9 +1045,9 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawVegetationSurface ();
 
-	r_DrawingRagDoll = false; //set here after R_DrawWorld because we want the ODE world built in case the ragdolls need it
-
 	R_DrawEntitiesOnList ();
+
+	R_RenderAllRagdolls();
 
 	R_CastShadow();
 
@@ -1223,6 +1223,8 @@ void R_Register( void )
 	r_minimap_zoom = Cvar_Get ("r_minimap_zoom", "1", CVAR_ARCHIVE );
 	r_minimap_style = Cvar_Get ("r_minimap_style", "1", CVAR_ARCHIVE );
 	r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE );
+
+	r_ragdolls = Cvar_Get ("r_ragdolls", "0", CVAR_ARCHIVE );
 
 	sys_priority = Cvar_Get("sys_priority", "0", CVAR_ARCHIVE);
 	sys_affinity = Cvar_Get("sys_affinity", "1", CVAR_ARCHIVE);
