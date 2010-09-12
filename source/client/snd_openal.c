@@ -33,7 +33,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include <stdio.h>
+#if defined HAVE_MALLOC_H
 #include <malloc.h>
+#elif defined HAVE_MALLOC_MALLOC_H
+#include <malloc/malloc.h>
+#endif
 #include <string.h>
 
 #if defined HAVE_AL_H
@@ -45,8 +49,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #elif defined HAVE_OPENAL_AL_H
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
-#else
-#error OpenAL header includes not defined.
+#elif defined DARWIN_SPECIAL_CASE
+#include </System/Library/Frameworks/OpenAL.framework/Headers/al.h>
+#include </System/Library/Frameworks/OpenAL.framework/Headers/alc.h>
 #endif
 
 #include "client.h"
