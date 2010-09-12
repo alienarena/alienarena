@@ -129,7 +129,7 @@ dleaf_t		*PointInLeaf (vec3_t point);
 
 
 extern	dplane_t	backplanes[MAX_MAP_PLANES];
-extern	int			fakeplanes;					// created planes for origin offset 
+extern	int			fakeplanes;					// created planes for origin offset
 
 extern	float	subdiv;
 
@@ -139,8 +139,8 @@ extern	float	entity_scale;
 extern qboolean sun;
 extern qboolean sun_alt_color;
 extern vec3_t sun_pos;
-extern int sun_main;
-extern int sun_ambient;
+extern float sun_main;
+extern float sun_ambient;
 extern vec3_t sun_color;
 
 int	PointInLeafnum (vec3_t point);

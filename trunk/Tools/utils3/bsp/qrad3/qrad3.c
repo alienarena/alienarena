@@ -25,7 +25,7 @@ dplane_t	backplanes[MAX_MAP_PLANES];
 
 char		inbase[32], outbase[32];
 
-int			fakeplanes;					// created planes for origin offset 
+int			fakeplanes;					// created planes for origin offset
 
 int		numbounce = 8;
 qboolean	extrasamples;
@@ -43,27 +43,80 @@ int TestLine (vec3_t start, vec3_t stop);
 
 int		junk;
 
-float	ambient = 0;
-float	maxlight = 196;
+/*
+ * 2010-09 Notes
+ * These variables are somewhat confusing. The floating point color values are
+ *  in the range 0..255 (floating point color should be 0.0 .. 1.0 IMO.)
+ *  The following may or may not be precisely correct.
+ *  (There are other variables, surface flags, etc., affecting lighting. What
+ *   they do, or whether they work at all is "to be determined")
+ *
+ * see lightmap.c:FinalLightFace()
+ *  sequence: ambient is added, lightscale is applied, RGB is "normalized" to
+ *  0..255 range, if set, nocolor is applied, RGB is clamped to maxlight.
+ *
+ * ambient:
+ *  set with -ambient option, 0..255 (but only small numbers are useful)
+ *  adds the same value to R, G & B
+ *  default is 0
+ *
+ * lightscale:
+ *  set with -scale option, 0.0..1.0
+ *  scales lightmap globally.
+ * nocolor:
+ *  set with -nocolor option
+ *  grayscales the lightmap
+ *
+ * direct_scale:
+ *  set with -direct option, 0.0..1.0
+ *  controls reflection from emissive surfaces, i.e. brushes with a light value
+ *  research indicates it is not the usual practice to include this in
+ *    radiosity, so the default should be 0.0. (Would be nice to have this
+ *    a per-surface option where surfaces are used like point lights.)
+ *
+ * entity_scale:
+ *  set with -entity option, 0.0..1.0
+ *  controls point lights, i.e. light entities.
+ *  default is 1.0, no attenuation of point lights
+ *
+ *
+ */
+float ambient = 0;
+float lightscale = 1.0;
+float maxlight = 255;
+qboolean nocolor = false;
+float direct_scale = 0.0;
+float entity_scale = 1.0;
 
-float	lightscale = 1.0;
-
+/*
+ * 2010-09 Notes:
+ * These are controlled by setting keys in the worldspawn entity. A light
+ * entity targeting an info_null entity is used to determine the vector for
+ * the sun directional lighting; variable name "sun_pos" is a misnomer, i think.
+ * Example:
+ * "_sun" "sun_target"  # activates sun
+ * "_sun_color" "1.0 1.0 0.0"  # for yellow, sets sun_alt_color true
+ * "_sun_light" "50" # light value, variable is sun_main
+ * "_sun_ambient" "2" # an ambient light value in the sun color. variable is sun_ambient
+ *
+ * It might or might not be the case:
+ *  if there is no info_null for the light entity with the "sun_target" to
+ *  target, then {0,0,0} is used for the target. If _sun_color is not specified
+ *  in the .map, the color of the light entity is used.
+ */
 qboolean sun = false;
 qboolean sun_alt_color = false;
 vec3_t sun_pos = {0.0f, 0.0f, 1.0f};
-int sun_main = 250.0f;
-int sun_ambient = 0.0f;
+float sun_main = 250.0f;
+float sun_ambient = 0.0f;
 vec3_t sun_color = {1, 1, 1};
 
 qboolean	glview;
-qboolean    nocolor = false;
 qboolean	nopvs;
 qboolean	save_trace = false;
 
 char		source[1024];
 
-float	direct_scale =  1.0;
-float	entity_scale =	1.0;
 
 /*
 ===================================================================
@@ -220,7 +273,7 @@ int CompressBytes (int size, byte *source, byte *dest)
             dest[0] = 0;
             return size + 1;
 		}
-		
+
 		if (source[j])
 			continue;
 
@@ -231,18 +284,18 @@ int CompressBytes (int size, byte *source, byte *dest)
 			else
 				rep++;
 		*dest_p++ = rep;
-		
+
         if ((dest_p - dest - 1) >= size)
 		{
             memcpy(dest+1, source, size);
             dest[0] = 0;
             return size + 1;
 		}
-		
+
 		j--;
 
 	}
-	
+
     dest[0] = 1;
 	return dest_p - dest;
 }
@@ -252,13 +305,13 @@ void DecompressBytes (int size, byte *in, byte *decompressed)
 {
 	int		c;
 	byte	*out;
-	
+
     if (in[0] == 0) // not compressed
 	{
         memcpy(decompressed, in + 1, size);
         return;
 	}
-	
+
 	out = decompressed;
     in++;
 
@@ -269,7 +322,7 @@ void DecompressBytes (int size, byte *in, byte *decompressed)
 			*out++ = *in++;
 			continue;
 		}
-	
+
 		c = in[1];
 		if (!c)
 			Error ("DecompressBytes: 0 repeat");
@@ -355,7 +408,7 @@ void MakeTransfers (int i)
 
         // Not calling normalize function to save function call overhead
         dist = delta[0]*delta[0] + delta[1]*delta[1] + delta[2]*delta[2];
-		
+
         if (dist == 0)
 		{
             continue;
@@ -393,7 +446,7 @@ void MakeTransfers (int i)
 
     	}
 	}
-	
+
     // copy the transfers out and normalize
 	// total should be somewhere near PI if everything went right
 	// because partial occlusion isn't accounted for, and nearby
@@ -407,48 +460,48 @@ void MakeTransfers (int i)
 			Error ("Weird numtransfers");
 		s = patch->numtransfers * sizeof(transfer_t);
 		patch->transfers = malloc (s);
-		
+
         total_mem += s;
-		
+
 		if (!patch->transfers)
 			Error ("Memory allocation failure");
-		
+
 		//
 		// normalize all transfers so all of the light
 		// is transfered to the surroundings
 		//
 		t = patch->transfers;
 		itotal = 0;
-		
+
         inv_total = 65536.0f / total;
-		
+
 		for (j=0 ; j < num_patches; j++)
 		{
 			if (transfers[j] <= 0)
 				continue;
-			
+
 			itrans = transfers[j]*inv_total;
 			itotal += itrans;
 			t->transfer = itrans;
 			t->patch = j;
 			t++;
-			
+
             if (calc_trace)
 			{
                 trace_buf[TRACE_BYTE(j)] |= TRACE_BIT(j);
 			}
 		}
 	}
-	
+
     if (calc_trace)
 	{
         j = CompressBytes(trace_buf_size, trace_buf, trace_tmp);
         patch->trace_hit = malloc(j);
         memcpy(patch->trace_hit, trace_tmp, j);
-		
+
         trace_bytes += j;
 	}
-	
+
 	// don't bother locking around this.  not that important.
 	total_transfer += patch->numtransfers;
 }
@@ -626,11 +679,11 @@ void ShootLight (int patchnum)
 	for (k=0 ; k<3 ; k++)
 		send[k] = radiosity[patchnum][k] / 0x10000;
 	patch = &patches[patchnum];
-	
+
     if(memory)
 	{
         c_progress = 10 * patchnum / num_patches;
-		
+
         if(c_progress != p_progress)
 		{
 			printf ("%i...", c_progress);
@@ -639,7 +692,7 @@ void ShootLight (int patchnum)
 
         MakeTransfers(patchnum);
 	}
-	
+
 	trans = patch->transfers;
 	num = patch->numtransfers;
 
@@ -648,7 +701,7 @@ void ShootLight (int patchnum)
 		for (l=0 ; l<3 ; l++)
 			illumination[trans->patch][l] += send[l]*trans->transfer;
 	}
-	
+
     if(memory)
 	{
 		free (patches[patchnum].transfers);
@@ -694,7 +747,7 @@ void BounceLight (void)
 		RunThreadsOnIndividual (num_patches, false, ShootLight);
 
         first_transfer = 0;
-        
+
         if(memory)
 		{
             stop = I_FloatTime();
@@ -779,7 +832,7 @@ void RadWorld (void)
             (float)(total_mem - trace_bytes) / 1048576.0f);
         printf ("    megabytes more memory then currently used\n");
 	}
-	
+
 	if (glview)
 		WriteGlView ();
 
@@ -956,7 +1009,7 @@ int main (int argc, char **argv)
                 "    -extra           -nocolor              -v\n"
                 "    -gamedir <path>  -nopvs\n"
                 );
-			
+
             exit(1);
 		}
         else
@@ -974,14 +1027,14 @@ int main (int argc, char **argv)
     if (game_path[0] != 0)
 	{
         n = strlen(game_path);
-		
-#ifdef WIN32		
+
+#ifdef WIN32
         if (n > 1 && n < 1023 && game_path[n-1] != '\\')
 		{
             game_path[n] = '\\';
             game_path[n+1] = 0;
 		}
-#endif		
+#endif
 
         strcpy(gamedir, game_path);
 	}
@@ -1019,8 +1072,8 @@ int main (int argc, char **argv)
 	{
 		printf ("No vis information, direct lighting only.\n");
 		numbounce = 0;
-		ambient = 0.1;
-	}
+		ambient = 16; // 2010-09 was 0.1, makes no sense, but 16 may not either.
+ 	}
 
 	RadWorld ();
 
