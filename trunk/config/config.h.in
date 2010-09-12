@@ -78,9 +78,6 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the <jpeg6b/include/jpeglib.h> header file. */
-#undef HAVE_JPEG6B_INCLUDE_JPEGLIB_H
-
 /* Define to 1 if you have the <jpeglib.h> header file. */
 #undef HAVE_JPEGLIB_H
 

@@ -22,11 +22,11 @@
 
 # configure.ac for
 #  GNU/Linux, Unix
-#  Windows (32-bit) using MinGW
-#  Mac OSX using X11/Darwin (incomplete)
+#  Windows (32-bit) using MinGW - Experimental
+#  Mac OSX using X11/Darwin and MacPorts.
 
 AC_PREREQ(2.61)
-AC_INIT([alienarena],[7.46.alpha],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.46.alpha2],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -57,6 +57,8 @@ AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PROG_MKDIR_P
 AM_PROG_CC_C_O
+
+PKG_PROG_PKG_CONFIG
 
 #
 # check host environment
@@ -172,9 +174,13 @@ AM_COND_IF([BUILD_CLIENT],
 dnl theory: darwin always has openal in a framework
 dnl TODO: find out how to search for the darwin openal driver
 dnl TEMPORARY BYPASS
-	AM_COND_IF([BUILD_DARWIN],,
-		[AC_SEARCH_LIBS([alGenBuffers],[openal openal32 openal-soft],,
-			[AC_MSG_ERROR(["Required openal library not found."])])])
+dnl	AM_COND_IF([BUILD_DARWIN],,
+dnl		[AC_SEARCH_LIBS([alGenBuffers],[openal openal32 openal-soft],,
+dnl			[AC_MSG_ERROR(["Required openal library not found."])])])
+
+dnl TEMPORARY: warning rather than error, for Darwin work-in-progress
+	AC_SEARCH_LIBS([alGenBuffers],[openal openal32 openal-soft],,
+			[AC_MSG_WARN(["Required openal library not found."])])
 
 	curl_xtralibs=""
 	AM_COND_IF([BUILD_WIN32],
@@ -187,6 +193,7 @@ dnl TEMPORARY BYPASS
 		[ $curl_xtralibs ])
 
 	dnl TODO: do we really have to search for X11 and DGA while building for Win32? - BlackIce
+	dnl No, but the MinGW build probably does not work anymore anyway - strat :)
 
 	AC_PATH_X
 
@@ -264,11 +271,11 @@ dnl TEMPORARY BYPASS
 		[ win32_syslibs="-lmingw32 -lwinmm -lwsock32 -lws2_32 -lgdi32 -luser32"])
 	AC_SUBST([WIN32_LIBS],[$win32_syslibs])
 
-dnl
-dnl TODO: not sure if the -framework stuff is used for dlopened libs
+dnl TODO: Is this right?
+dnl framework required for OpenAL, but not for OpenGL.
 	darwin_frameworks=""
 	AM_COND_IF([BUILD_DARWIN],
-		[ darwin_frameworks="-framework OpenGL -framework OpenAL"])
+		[ darwin_frameworks="-framework OpenAL"])
 	AC_SUBST([DARWIN_FRAMEWORKS],[$darwin_frameworks])
 
 ])	
@@ -295,11 +302,8 @@ dnl start of client-only header requirements
 dnl	
 AM_COND_IF([BUILD_CLIENT],
 [
-
-dnl for Darwin, using macports jpeg6b. TODO: is jpeg8 available?
-dnl jpeg may be available in a Framework
 	jpeglib_h_found=no
-	AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h jpeg6b/include/jpeglib.h],[ jpeglib_h_found=yes ])
+	AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h],[ jpeglib_h_found=yes ])
 	AS_IF([ test "x${jpeglib_h_found}" = xno ],
 		[AC_MSG_ERROR("Required JPEG header file not found.")])
 
@@ -321,6 +325,16 @@ dnl jpeg may be available in a Framework
 		[AC_MSG_ERROR("Required cURL header file not found.")])
 
 	AM_COND_IF([BUILD_UNIX],
+	[
+		AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
+			[AC_MSG_ERROR("Required X11 header files not found")])
+
+		AC_CHECK_HEADERS([GL/gl.h GL/glu.h GL/glx.h],,
+			[AC_MSG_ERROR("Required OpenGL header files not found.")])
+
+	])
+
+	AM_COND_IF([BUILD_DARWIN],
 	[
 		AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
 			[AC_MSG_ERROR("Required X11 header files not found")])
@@ -396,15 +410,13 @@ AM_COND_IF([BUILD_UNIX],
 AM_COND_IF([BUILD_UNIX],
 	[AC_DEFINE([OPENAL_DRIVER],["libopenal.so.1"],[OpenAL shared lib name])])
 
-dnl
-dnl TODO: Determine real file names for OSX OpenGL and OpenAL
-dnl  Note: these can be hacked into config.h file to try other names
-dnl
 AM_COND_IF([BUILD_DARWIN],
-	[AC_DEFINE([OPENGL_DRIVER],["libGL.so"],[OpenGL dynamic lib name])])
+	[AC_DEFINE([OPENGL_DRIVER],["libGL.dylib"],[OpenGL dynamic lib name])])
 
 AM_COND_IF([BUILD_DARWIN],
-	[AC_DEFINE([OPENAL_DRIVER],["libopenal.so"],[OpenAL dynamic lib name])])
+	[AC_DEFINE([OPENAL_DRIVER],
+		["/System/Library/Frameworks/OpenAL.framework/Versions/Current/OpenAL"],
+		[OpenAL dynamic lib name])])
 
 AM_COND_IF([BUILD_WIN32],
 	[AC_DEFINE([OPENGL_DRIVER],["opengl32"],[OpenGL DLL name])])
