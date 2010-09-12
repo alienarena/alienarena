@@ -3,7 +3,7 @@
 #include "mathlib.h"
 #include "bspfile.h"
 
-void main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	int			i;
 	char		source[1024];
@@ -12,7 +12,7 @@ void main (int argc, char **argv)
 
 	if (argc == 1)
 		Error ("usage: bspinfo bspfile [bspfiles]");
-		
+
 	for (i=1 ; i<argc ; i++)
 	{
 		printf ("---------------------\n");
@@ -27,9 +27,11 @@ void main (int argc, char **argv)
 		else
 			size = 0;
 		printf ("%s: %i\n", source, size);
-		
-		LoadBSPFile (source);		
+
+		LoadBSPFile (source);
 		PrintBSPFileSizes ();
 		printf ("---------------------\n");
 	}
+
+	return 0;
 }
