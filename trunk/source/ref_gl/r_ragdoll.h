@@ -62,7 +62,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define RIGHTWRIST 13
 #define LEFTWRIST 14
 
-//Hard coded definitions(if no ragdoll read in)
+//Hard coded definitions(if no ragdoll read in - note - these need to be adjusted to actual model sizes)
 #define HEAD_H 0.20
 #define UPPER_ARM_LEN 0.30
 #define FORE_ARM_LEN 0.25
@@ -90,6 +90,7 @@ dJointGroupID contactGroup;
 int lastODEUpdate;
 
 dGeomID WorldGeometry[MAX_SURFACES];
+dBodyID WorldBody;
 dTriMeshDataID triMesh[MAX_SURFACES];
 
 typedef struct RagDollObject_s {
@@ -129,6 +130,7 @@ typedef struct RagDoll_s {
 	vec3_t	origin;
 
 	//surface for ragdoll to collide
+	dBodyID WorldBody;
 	dGeomID WorldGeometry[MAX_SURFACES];
 
 	float spawnTime;
@@ -145,3 +147,4 @@ extern void R_DestroyWorldObject( void );
 extern void R_RenderAllRagdolls ( void );
 extern void R_AddNewRagdoll( vec3_t origin );
 extern void R_ClearAllRagdolls( void );
+extern void GL_BuildODEGeoms(msurface_t *surf);
