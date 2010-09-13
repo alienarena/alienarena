@@ -201,6 +201,8 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	float length;
 	vec3_t xa, ya, za, temp;
 	dMatrix3 rot;
+	const dReal* initialQ;
+	dQuaternion initialQuaternion;
 
 	VectorAdd(p1, currententity->origin, p1);
 	VectorAdd(p2, currententity->origin, p2);
@@ -251,8 +253,18 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	VectorAdd(p1, p2, temp);
 	VectorScale(temp, 0.5, temp);
 
-	dGeomSetPosition(RagDoll[RagDollID].RagDollObject[objectID].geom, temp[0], temp[1], temp[2]);
-	dGeomSetRotation(RagDoll[RagDollID].RagDollObject[objectID].geom, rot);
+	dBodySetPosition(RagDoll[RagDollID].RagDollObject[objectID].body, temp[0], temp[1], temp[2]);
+	dBodySetRotation(RagDoll[RagDollID].RagDollObject[objectID].body, rot);
+	dBodySetForce(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
+	dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
+	dBodySetAngularVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
+
+	initialQ = dBodyGetQuaternion(RagDoll[RagDollID].RagDollObject[objectID].body);
+	initialQuaternion[0] = initialQ[0];
+	initialQuaternion[1] = initialQ[1];
+	initialQuaternion[2] = initialQ[2];
+	initialQuaternion[3] = initialQ[3];
+	dBodySetQuaternion(RagDoll[RagDollID].RagDollObject[objectID].body, initialQuaternion);
 }
 
 //joint creation routines
@@ -306,7 +318,7 @@ void R_CreateWorldObject( void )
 	VectorSet(upAxis, 0.0, 1.0, 0.0);
 	VectorSet(downAxis, 0.0, -1.0, 0.0);
 	VectorSet(bkwdAxis, 0.0, 0.0, 1.0);
-	VectorSet(fwdAxis, 0.0, 0.0, -1.0);
+	VectorSet(fwdAxis, 0.0, 0.0, -1.0);	
 
 	lastODEUpdate = Sys_Milliseconds();
 
@@ -326,7 +338,7 @@ void R_DestroyWorldObject( void )
 }
 
 //For creating the surfaces for the ragdoll to collide with
-void GL_BuildODEGeoms(int RagDollID, msurface_t *surf)
+void GL_BuildODEGeoms(msurface_t *surf)
 {
 	glpoly_t *p = surf->polys;
 	float	*v;
@@ -380,15 +392,16 @@ void GL_BuildODEGeoms(int RagDollID, msurface_t *surf)
 	}
 
 	//we need to build the trimesh geometry for this surface
-	//note - would it be better/faster in the collision detection to just build one huge trimesh of all surfaces?
 	triMesh[r_SurfaceCount] = dGeomTriMeshDataCreate();
 
 	//// Build the mesh from the data
 	dGeomTriMeshDataBuildSimple(triMesh[r_SurfaceCount], (dReal*)ODEVerts,
 		VertexCounter, (dTriIndex*)ODEIndices, ODEIndexCount);
 
-	RagDoll[RagDollID].WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh[r_SurfaceCount], NULL, NULL, NULL);
+	WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh[r_SurfaceCount], NULL, NULL, NULL);
 	dGeomSetData(WorldGeometry[r_SurfaceCount], "surface");
+
+	dGeomSetBody(WorldGeometry[r_SurfaceCount], WorldBody);
 
 	r_SurfaceCount++;
 }
@@ -435,7 +448,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	VectorAdd(RagDoll[RagDollID].L_ANKLE_POS, temp, RagDoll[RagDollID].L_TOES_POS);
 
 	//build the ragdoll parts
-	density = 1000; //for now
+	density = 1.0; //for now
 
 	VectorSet(p1, -CHEST_W * 0.5, CHEST_H, 0.0);
 	VectorSet(p2, CHEST_W * 0.5, CHEST_H, 0.0);
@@ -522,10 +535,10 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 
 	//we need some information from our current entity
 	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
-	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t)); //this should be right but double check
+	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t)); 
 
-	//to do - get bone rotations, apply to ragdoll for initial position
-	//note - we need to set torqe, velocity, quaternion, etc - not doing so is likely causing our internal ODE errors
+	//to do - get bone rotations from first death frame, apply to ragdoll for initial position
+	//we will need to set the velocity based on origin vs old_origin
 }
 
 /*
@@ -569,7 +582,7 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
     }
 }
 
-void R_DestroyRagDoll(int RagDollID)
+void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 {
 	int i;
 
@@ -578,7 +591,9 @@ void R_DestroyRagDoll(int RagDollID)
 	if(RagDoll[RagDollID].ragDollMesh)
 		free(RagDoll[RagDollID].ragDollMesh);
 
-return; //next few things are causing problems
+	if(!nuke)
+		return; //next few things are causing problems if done during action
+
 	//destroy surfaces - better to track actual num of surfaces instead of max_surfaces!
 	for(i = 0; i < MAX_SURFACES; i++)
 	{
@@ -603,7 +618,7 @@ void R_ClearAllRagdolls( void )
 
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
-		R_DestroyRagDoll(RagDollID);
+		R_DestroyRagDoll(RagDollID, false);
 		RagDoll[RagDollID].destroyed = true;
 	}
 
@@ -673,7 +688,7 @@ void R_RenderAllRagdolls ( void )
 			if(!RagDoll[RagDollID].destroyed)
 			{
 				//add routines to destroy all ragdoll elements, namely geometry that build for it collide with
-				R_DestroyRagDoll(RagDollID);
+				R_DestroyRagDoll(RagDollID, false);
 				RagDoll[RagDollID].destroyed = true;
 				Com_Printf("Destroyed a ragdoll");
 			}
