@@ -395,6 +395,7 @@ void Reset_player(edict_t *ent)
 
 	memcpy (userinfo, ent->client->pers.userinfo, sizeof(userinfo));
 	s = Info_ValueForKey (userinfo, "skin");
+	ent->client->Jet_framenum = 0;
 
 	i = 0;
 	done = false;
@@ -428,11 +429,7 @@ void Reset_player(edict_t *ent)
 }
 void Leave_vehicle(edict_t *ent, gitem_t *item)
 {
-
 	Reset_player(ent);
-
-	ent->client->Jet_framenum = level.framenum;
-
 	ent->client->pers.inventory[ITEM_INDEX(item)] = 0;
 
 	gi.sound( ent, CHAN_ITEM, gi.soundindex("vehicles/got_in.wav"), 0.8, ATTN_NORM, 0 );
@@ -451,7 +448,7 @@ qboolean Get_in_vehicle (edict_t *ent, edict_t *other)
 
 	vehicle = NULL;
 
-    if(other->in_vehicle) //already in a vehicle
+	if(other->in_vehicle) //already in a vehicle
 		return false;
 
 	vehicle = FindItemByClassname(ent->classname);
