@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_RAGDOLLS 64 
 #define MAX_RAGDOLL_OBJECTS 16
 #define MAX_RAGDOLL_JOINTS 16
-#define MAX_SURFACES 128 
+#define MAX_SURFACES 128 //temporary val, just for basic testing, likely we need to do some proximity culling
 #define MAX_CONTACTS 4 //this might be best set to 1, check
 #define RAGDOLL_DURATION 10000 //10 seconds
 
@@ -89,10 +89,6 @@ dJointGroupID contactGroup;
 
 int lastODEUpdate;
 
-dGeomID WorldGeometry[MAX_SURFACES];
-dBodyID WorldBody;
-dTriMeshDataID triMesh[MAX_SURFACES];
-
 typedef struct RagDollObject_s {
 	dBodyID body;
 	dMass mass;
@@ -147,4 +143,4 @@ extern void R_DestroyWorldObject( void );
 extern void R_RenderAllRagdolls ( void );
 extern void R_AddNewRagdoll( vec3_t origin );
 extern void R_ClearAllRagdolls( void );
-extern void GL_BuildODEGeoms(msurface_t *surf);
+extern void GL_BuildODEGeoms(msurface_t *surf, int RagDollID);

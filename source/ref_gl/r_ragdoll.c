@@ -338,7 +338,7 @@ void R_DestroyWorldObject( void )
 }
 
 //For creating the surfaces for the ragdoll to collide with
-void GL_BuildODEGeoms(msurface_t *surf)
+void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 {
 	glpoly_t *p = surf->polys;
 	float	*v;
@@ -347,6 +347,10 @@ void GL_BuildODEGeoms(msurface_t *surf)
 	float	ODEVerts[MAX_VARRAY_VERTS]; //can, should this be done dynamically?
 	int		ODEIndices[MAX_INDICES];
 	int		ODETris = 0;
+	const dReal* initialQ;
+	dQuaternion initialQuaternion;
+	dTriMeshDataID triMesh;
+
 	//winding order for ODE
 	const int indices[6] = {2,1,0,
 							3,2,0};
@@ -391,17 +395,31 @@ void GL_BuildODEGeoms(msurface_t *surf)
 		}
 	}
 
+	//create body id
+	RagDoll[RagDollID].WorldBody = dBodyCreate(RagDollWorld);
+
 	//we need to build the trimesh geometry for this surface
-	triMesh[r_SurfaceCount] = dGeomTriMeshDataCreate();
+	triMesh = dGeomTriMeshDataCreate();
 
 	//// Build the mesh from the data
-	dGeomTriMeshDataBuildSimple(triMesh[r_SurfaceCount], (dReal*)ODEVerts,
+	dGeomTriMeshDataBuildSimple(triMesh, (dReal*)ODEVerts,
 		VertexCounter, (dTriIndex*)ODEIndices, ODEIndexCount);
 
-	WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh[r_SurfaceCount], NULL, NULL, NULL);
-	dGeomSetData(WorldGeometry[r_SurfaceCount], "surface");
+	RagDoll[RagDollID].WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh, NULL, NULL, NULL);
+	dGeomSetData(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], "surface");
 
-	dGeomSetBody(WorldGeometry[r_SurfaceCount], WorldBody);
+	dGeomSetBody(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], RagDoll[RagDollID].WorldBody);
+		
+	dBodySetForce(RagDoll[RagDollID].WorldBody, 0, 0, 0);
+	dBodySetLinearVel(RagDoll[RagDollID].WorldBody, 0, 0, 0);
+	dBodySetAngularVel(RagDoll[RagDollID].WorldBody, 0, 0, 0);
+
+	initialQ = dBodyGetQuaternion(RagDoll[RagDollID].WorldBody);
+	initialQuaternion[0] = initialQ[0];
+	initialQuaternion[1] = initialQ[1];
+	initialQuaternion[2] = initialQ[2];
+	initialQuaternion[3] = initialQ[3];
+	dBodySetQuaternion(RagDoll[RagDollID].WorldBody, initialQuaternion);
 
 	r_SurfaceCount++;
 }
@@ -541,6 +559,138 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	//we will need to set the velocity based on origin vs old_origin
 }
 
+static vec3_t ragdollorg;			// relative to viewpoint
+void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
+{
+	int			c, side, sidebit;
+	cplane_t	*plane;
+	msurface_t	*surf, **mark;
+	mleaf_t		*pleaf;
+	float		dot;
+
+	if (node->contents == CONTENTS_SOLID)
+		return;		// solid
+	if (node->visframe != r_visframecount)
+		return;
+	if (!r_nocull->value)
+	{
+		int i, clipped;
+		cplane_t *clipplane;
+
+		for (i=0,clipplane=frustum ; i<4 ; i++,clipplane++)
+		{
+			clipped = BoxOnPlaneSide (node->minmaxs, node->minmaxs+3, clipplane);
+
+			if (clipped == 1)
+				clipflags &= ~(1<<i);	// node is entirely on screen
+			else if (clipped == 2)
+				return;					// fully clipped
+		}
+	}
+
+	// if a leaf node, draw stuff
+	if (node->contents != -1)
+	{
+		pleaf = (mleaf_t *)node;
+
+		// check for door connected areas
+		if (r_newrefdef.areabits)
+		{
+			if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) )
+				return;		// not visible
+		}
+
+		mark = pleaf->firstmarksurface;
+		if (! (c = pleaf->nummarksurfaces) )
+			return;
+
+		do
+		{
+			(*mark++)->visframe = r_framecount;
+		} while (--c);
+
+		return;
+	}
+
+	// node is just a decision point, so go down the apropriate sides
+
+	// find which side of the node we are on
+	plane = node->plane;
+
+	switch (plane->type)
+	{
+	case PLANE_X:
+		dot = ragdollorg[0] - plane->dist;
+		break;
+	case PLANE_Y:
+		dot = ragdollorg[1] - plane->dist;
+		break;
+	case PLANE_Z:
+		dot = ragdollorg[2] - plane->dist;
+		break;
+	default:
+		dot = DotProduct (ragdollorg, plane->normal) - plane->dist;
+		break;
+	}
+
+	if (dot >= 0)
+	{
+		side = 0;
+		sidebit = 0;
+	}
+	else
+	{
+		side = 1;
+		sidebit = SURF_PLANEBACK;
+	}
+
+	// recurse down the children, front side first
+	R_RecursiveODEWorldNode (node->children[side], clipflags, RagDollID);
+
+	// draw stuff
+	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
+	{
+		if (surf->visframe != r_framecount)
+			continue;
+
+		if ( (surf->flags & SURF_PLANEBACK) != sidebit )
+			continue;		// wrong side
+
+		if (surf->texinfo->flags & SURF_SKY)
+		{	// no skies here
+			continue;
+		}
+		else
+		{
+			if (!( surf->flags & SURF_DRAWTURB ) )
+			{
+				//we need to do some proximity culling here, no need to add geometry that is far away
+				GL_BuildODEGeoms(surf, RagDollID);
+			}
+		}
+	}
+
+	// recurse down the back side
+	R_RecursiveODEWorldNode (node->children[!side], clipflags, RagDollID);
+}
+
+
+/*
+=============
+R_DrawWorld
+=============
+*/
+void R_BuildRagdollSurfaces (vec3_t origin, int RagDollID)
+{
+	r_SurfaceCount = 0;
+
+	currentmodel = r_worldmodel;
+
+	VectorCopy (origin, ragdollorg);
+
+	R_RecursiveODEWorldNode (r_worldmodel->nodes, 15, RagDollID);
+}
+
 /*
 	Callback function for the collide() method.
 
@@ -589,26 +739,34 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 	VectorSet(RagDoll[RagDollID].origin, 0, 0, 0);
 
 	if(RagDoll[RagDollID].ragDollMesh)
-		free(RagDoll[RagDollID].ragDollMesh);
+		free(RagDoll[RagDollID].ragDollMesh);	
 
 	if(!nuke)
-		return; //next few things are causing problems if done during action
+		return; 
 
-	//destroy surfaces - better to track actual num of surfaces instead of max_surfaces!
+	//destroy surfaces - to do better to track actual num of surfaces instead of max_surfaces!
 	for(i = 0; i < MAX_SURFACES; i++)
 	{
-		dGeomDestroy(RagDoll[RagDollID].WorldGeometry[i]);
+		if(RagDoll[RagDollID].WorldGeometry[i])
+			dGeomDestroy(RagDoll[RagDollID].WorldGeometry[i]);
 	}
+	if(RagDoll[RagDollID].WorldBody)
+		dBodyDestroy(RagDoll[RagDollID].WorldBody);
 
 	//we also want to destroy all ragdoll bodies and joints for this ragdoll
 	for(i = CHEST; i <= LEFTHAND; i++)
 	{
-		dGeomDestroy(RagDoll[RagDollID].RagDollObject[i].geom);
-		dBodyDestroy(RagDoll[RagDollID].RagDollObject[i].body);
+		if(RagDoll[RagDollID].RagDollObject[i].geom)
+			dGeomDestroy(RagDoll[RagDollID].RagDollObject[i].geom);
+		if(RagDoll[RagDollID].RagDollObject[i].body)
+			dBodyDestroy(RagDoll[RagDollID].RagDollObject[i].body);
 	}
 
-	for(i = MIDSPINE; i <= LEFTWRIST; i++)
-		dJointDestroy(RagDoll[RagDollID].RagDollJoint[i]);
+	for(i = MIDSPINE; i <= LEFTWRIST; i++) 
+	{
+		if(RagDoll[RagDollID].RagDollJoint[i])
+			dJointDestroy(RagDoll[RagDollID].RagDollJoint[i]);
+	}
 }
 
 //This is called on every map load
@@ -618,7 +776,7 @@ void R_ClearAllRagdolls( void )
 
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
-		R_DestroyRagDoll(RagDollID, false);
+		R_DestroyRagDoll(RagDollID, true);
 		RagDoll[RagDollID].destroyed = true;
 	}
 
@@ -643,7 +801,8 @@ void R_AddNewRagdoll( vec3_t origin )
 			//need to create geometry in the vicinity of the ragdoll(not the entire map, this is painfully slow)
 			//for initial testing, let's just build a simple plane at the feet of the player
 			R_RagdollBody_Init(RagDollID, origin);
-			//to do - need to add nearby surfaces anytime a ragdoll is spawned
+			//add nearby surfaces anytime a ragdoll is spawned
+			R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
 			Com_Printf("Added a ragdoll\n");
 			break;
 		}
@@ -658,23 +817,6 @@ void R_RenderAllRagdolls ( void )
 	if(!r_ragdolls->value)
 		return;
 
-	//main physics loop
-	if(!r_DrawingRagDoll)
-		return;
-
-	//note - this is called each server frame, not each render frame, and interpolated 
-	if((Sys_Milliseconds() - lastODEUpdate) > 100)
-	{
-		dSpaceCollide(RagDollSpace, 0, &near_callback);
-
-		dWorldQuickStep(RagDollWorld, 0.05); //this is likely wrong, check!
-
-		// Remove all temporary collision joints now that the world has been stepped
-		dJointGroupEmpty(contactGroup);
-
-		lastODEUpdate = Sys_Milliseconds();
-	}
-
 	//Iterate though the ragdoll stack, and render each one that is active.
 
 	//This function would look very similar to the iqm/alias entity routine, but will call a
@@ -685,10 +827,10 @@ void R_RenderAllRagdolls ( void )
 	{
 		if(Sys_Milliseconds() - RagDoll[RagDollID].spawnTime > RAGDOLL_DURATION)
 		{
+			//if expired, and not destroyed, destroy it
 			if(!RagDoll[RagDollID].destroyed)
-			{
-				//add routines to destroy all ragdoll elements, namely geometry that build for it collide with
-				R_DestroyRagDoll(RagDollID, false);
+			{				
+				R_DestroyRagDoll(RagDollID, true);
 				RagDoll[RagDollID].destroyed = true;
 				Com_Printf("Destroyed a ragdoll");
 			}
@@ -704,4 +846,20 @@ void R_RenderAllRagdolls ( void )
 
 	if(!numRagDolls)
 		r_DrawingRagDoll = false; //no sense in coming back in here until we add a ragdoll
+
+	if(r_DrawingRagDoll) //here we handle the physics
+	{		
+		//note - this is called each server frame, not each render frame, and interpolated 
+		if((Sys_Milliseconds() - lastODEUpdate) > 100)
+		{
+			dSpaceCollide(RagDollSpace, 0, &near_callback);
+
+			dWorldQuickStep(RagDollWorld, 0.05); //this is likely wrong, check!
+
+			// Remove all temporary collision joints now that the world has been stepped
+			dJointGroupEmpty(contactGroup);
+
+			lastODEUpdate = Sys_Milliseconds();
+		}
+	}
 }
