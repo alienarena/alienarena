@@ -487,10 +487,8 @@ void CL_Drop (void)
 {
 	if (cls.state == ca_uninitialized)
 		return;
-	if (cls.state == ca_disconnected)
-		return;
-
-	CL_Disconnect ();
+	if (cls.state != ca_disconnected)
+		CL_Disconnect ();
 
 	// drop loading plaque unless this is the initial game start
 	if (cls.disable_servercount != -1)
