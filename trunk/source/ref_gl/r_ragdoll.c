@@ -409,6 +409,10 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	dGeomSetData(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], "surface");
 
 	dGeomSetBody(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], RagDoll[RagDollID].WorldBody);
+
+	//set the mass
+	dMassSetTrimesh(&RagDoll[RagDollID].WorldMass, 1000.0, RagDoll[RagDollID].WorldGeometry[r_SurfaceCount]);
+	dBodySetMass(RagDoll[RagDollID].WorldBody, &RagDoll[RagDollID].WorldMass);
 		
 	dBodySetForce(RagDoll[RagDollID].WorldBody, 0, 0, 0);
 	dBodySetLinearVel(RagDoll[RagDollID].WorldBody, 0, 0, 0);
@@ -664,8 +668,27 @@ void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 		{
 			if (!( surf->flags & SURF_DRAWTURB ) )
 			{
+				glpoly_t *p = surf->polys;
+				float	*v;
+				int		i;
+				int		numverts = 0;
+				vec3_t	center, dist;
+
 				//we need to do some proximity culling here, no need to add geometry that is far away
-				GL_BuildODEGeoms(surf, RagDollID);
+				for (; p; p = p->chain)
+				{
+					for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
+					{
+						_VectorAdd(v, center, center);
+						numverts++;
+					}
+				}
+				VectorScale(center, (float)(1.0/numverts), center);
+				VectorSubtract(center, ragdollorg, dist);
+				if(VectorLength(dist) < 512)
+					GL_BuildODEGeoms(surf, RagDollID);
+				else
+					continue;
 			}
 		}
 	}

@@ -47,6 +47,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(LocalLib)$(Configuration)\</OutDir>
     <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -99,7 +100,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(LibodeSrc)include;$(LibodeInclude);$(LocalInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LibodeSrc)include;$(LibodeInclude);$(LocalInclude);C:\alienarena\vs2010\libsrc\ode-0.11.1\OPCODE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <Optimization>Full</Optimization>
@@ -115,6 +116,8 @@
     </ClCompile>
     <Lib>
       <OutputFile>$(LocalLib)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalLibraryDirectories>C:\alienarena\vs2010\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libopcode.lib</AdditionalDependencies>
     </Lib>
     <PostBuildEvent>
       <Command>FOR %%h IN ( $(LibodeSrc)include\ode\*.h ) DO copy %%h  $(LocalInclude)ode\</Command>
