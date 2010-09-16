@@ -603,6 +603,8 @@ REMOVE_SYMBOLS_TRUE
 LIBOBJS
 DARWIN_FRAMEWORKS
 WIN32_LIBS
+ODE_LIBS
+ODE_CFLAGS
 GLU_LIBS
 GLU_CFLAGS
 GL_LIBS
@@ -618,8 +620,6 @@ ALTERNATE_INSTALL_FALSE
 ALTERNATE_INSTALL_TRUE
 BUILD_CLIENT_FALSE
 BUILD_CLIENT_TRUE
-BUILD_DARWIN_FALSE
-BUILD_DARWIN_TRUE
 BUILD_UNIX_FALSE
 BUILD_UNIX_TRUE
 BUILD_WIN32_FALSE
@@ -734,6 +734,7 @@ enable_maintainer_mode
 enable_dependency_tracking
 enable_client
 enable_alternate_install
+with_apple_openal
 with_x
 with_xf86vm
 with_xf86dga
@@ -759,7 +760,9 @@ CPP
 PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
-XMKMF'
+XMKMF
+ODE_CFLAGS
+ODE_LIBS'
 
 
 # Initialize some variables set by options.
@@ -1410,6 +1413,9 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-apple-openal     use Apple OpenAL on OS X (default: OS X:yes,
+                          otherwise:no)
+
   --with-x                use the X Window System
   --with(out)-xf86vm      include XF86 VidMode support (default: check)
   --with(out)-xf86dga     include XF86 DGA support (default: check)
@@ -1431,6 +1437,8 @@ Some influential environment variables:
   PKG_CONFIG_LIBDIR
               path overriding pkg-config's built-in search path
   XMKMF       Path to xmkmf, Makefile generator for X Window System
+  ODE_CFLAGS  C compiler flags for ODE, overriding pkg-config
+  ODE_LIBS    linker flags for ODE, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -4751,7 +4759,6 @@ fi
 
 
 
-
 if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
 	if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
@@ -4871,12 +4878,20 @@ fi
 #
 cond_build_win32=no
 cond_build_unix=no
-cond_build_darwin=no
+unix_host=generic
 case  ${host}  in #(
    *-*-mingw* ) :
      cond_build_win32=yes  ;; #(
    *-*-darwin*) :
-     cond_build_darwin=yes  ;; #(
+
+		cond_build_unix=yes
+		unix_host=darwin
+		 ;; #(
+   *-*-linux* ) :
+
+		cond_build_unix=yes
+		unix_host=linux
+		 ;; #(
   *) :
      cond_build_unix=yes  ;;
 esac
@@ -4897,25 +4912,14 @@ else
   BUILD_UNIX_FALSE=
 fi
 
- if  test "x${cond_build_darwin}" = xyes ; then
-  BUILD_DARWIN_TRUE=
-  BUILD_DARWIN_FALSE='#'
-else
-  BUILD_DARWIN_TRUE='#'
-  BUILD_DARWIN_FALSE=
-fi
-
 
 #
 # Unix/Linux/Darwin dedicated server only build option
 #
-build_client=yes
-if  test "x${cond_build_win32}" = xyes ; then
-  :
-else
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build the client" >&5
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build the client" >&5
 $as_echo_n "checking whether to build the client... " >&6; }
+if  test "x${cond_build_unix}" = xyes ; then
+
 	# Check whether --enable-client was given.
 if test "${enable_client+set}" = set; then :
   enableval=$enable_client; build_client=${enableval}
@@ -4923,10 +4927,12 @@ else
   build_client=yes
 fi
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${build_client}" >&5
-$as_echo "${build_client}" >&6; }
 
+else
+  build_client=yes
 fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${build_client}" >&5
+$as_echo "${build_client}" >&6; }
  if  test "x${build_client}" = xyes ; then
   BUILD_CLIENT_TRUE=
   BUILD_CLIENT_FALSE='#'
@@ -4937,11 +4943,10 @@ fi
 
 
 # Alternate Install. Install in the traditional single directory way.
-# Probably required for map making tools to work. Also, good when updating
+# Might be required for map making tools to work. Also, good when updating
 # from SVN regularly. Affects how Makefile sets DATADIR and does make-install.
-# for now, win32 is always alternate install
+# for now, win32/mingw is always alternate install
 #
-alternate_install=no
 if  test "x${cond_build_win32}" = xyes ; then
   alternate_install=yes
 else
@@ -4953,7 +4958,6 @@ if test "${enable_alternate_install+set}" = set; then :
   enableval=$enable_alternate_install; alternate_install=${enableval}
 else
   alternate_install=no
-
 fi
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${alternate_install}" >&5
@@ -4970,26 +4974,56 @@ else
 fi
 
 
+
+#
+# OpenAL package options
+#
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use Apple OpenAL" >&5
+$as_echo_n "checking whether to use Apple OpenAL... " >&6; }
+
+# Check whether --with-apple-openal was given.
+if test "${with_apple_openal+set}" = set; then :
+  withval=$with_apple_openal; apple_openal=${withval}
+else
+  if  test x${unix_host} = xdarwin ; then :
+  apple_openal=yes
+else
+  apple_openal=no
+fi
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${apple_openal}" >&5
+$as_echo "${apple_openal}" >&6; }
+
+
 if  test "x${cond_build_unix}" = xyes ; then
 
+
 $as_echo "#define UNIX_VARIANT 1" >>confdefs.h
+
+
+	case  ${unix_host}  in #(
+   darwin ) :
+
+$as_echo "#define DARWIN_SPECIAL_CASE 1" >>confdefs.h
+ ;; #(
+   linux ) :
+
+$as_echo "#define LINUX_SPECIAL_CASE 1" >>confdefs.h
+ ;; #(
+  *) :
+     generic
+
+$as_echo "#define GENERIC_UNIX 1" >>confdefs.h
+ ;;
+esac
 
 fi
 
 if  test "x${cond_build_win32}" = xyes ; then
 
 $as_echo "#define WIN32_VARIANT 1" >>confdefs.h
-
-fi
-
-if  test "x${cond_build_darwin}" = xyes ; then
-
-
-$as_echo "#define DARWIN_SPECIAL_CASE 1" >>confdefs.h
-
-
-$as_echo "#define UNIX_VARIANT 1" >>confdefs.h
-
 
 fi
 
@@ -5065,6 +5099,327 @@ if test "$ac_res" != no; then :
 
 fi
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dlopen" >&5
+$as_echo_n "checking for library containing dlopen... " >&6; }
+if test "${ac_cv_search_dlopen+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dlopen ();
+int
+main ()
+{
+return dlopen ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' dl; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_dlopen=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if test "${ac_cv_search_dlopen+set}" = set; then :
+  break
+fi
+done
+if test "${ac_cv_search_dlopen+set}" = set; then :
+
+else
+  ac_cv_search_dlopen=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_dlopen" >&5
+$as_echo "$ac_cv_search_dlopen" >&6; }
+ac_res=$ac_cv_search_dlopen
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
+
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
+$as_echo_n "checking for grep that handles long lines and -e... " >&6; }
+if test "${ac_cv_path_GREP+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -z "$GREP"; then
+  ac_path_GREP_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH$PATH_SEPARATOR/usr/xpg4/bin
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_prog in grep ggrep; do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_GREP="$as_dir/$ac_prog$ac_exec_ext"
+      { test -f "$ac_path_GREP" && $as_test_x "$ac_path_GREP"; } || continue
+# Check for GNU ac_path_GREP and select it if it is found.
+  # Check for GNU $ac_path_GREP
+case `"$ac_path_GREP" --version 2>&1` in
+*GNU*)
+  ac_cv_path_GREP="$ac_path_GREP" ac_path_GREP_found=:;;
+*)
+  ac_count=0
+  $as_echo_n 0123456789 >"conftest.in"
+  while :
+  do
+    cat "conftest.in" "conftest.in" >"conftest.tmp"
+    mv "conftest.tmp" "conftest.in"
+    cp "conftest.in" "conftest.nl"
+    $as_echo 'GREP' >> "conftest.nl"
+    "$ac_path_GREP" -e 'GREP$' -e '-(cannot match)-' < "conftest.nl" >"conftest.out" 2>/dev/null || break
+    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    as_fn_arith $ac_count + 1 && ac_count=$as_val
+    if test $ac_count -gt ${ac_path_GREP_max-0}; then
+      # Best one so far, save it but keep looking for a better one
+      ac_cv_path_GREP="$ac_path_GREP"
+      ac_path_GREP_max=$ac_count
+    fi
+    # 10*(2^10) chars as input seems more than enough
+    test $ac_count -gt 10 && break
+  done
+  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
+esac
+
+      $ac_path_GREP_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_GREP"; then
+    as_fn_error "no acceptable grep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
+  fi
+else
+  ac_cv_path_GREP=$GREP
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_GREP" >&5
+$as_echo "$ac_cv_path_GREP" >&6; }
+ GREP="$ac_cv_path_GREP"
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for egrep" >&5
+$as_echo_n "checking for egrep... " >&6; }
+if test "${ac_cv_path_EGREP+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if echo a | $GREP -E '(a|b)' >/dev/null 2>&1
+   then ac_cv_path_EGREP="$GREP -E"
+   else
+     if test -z "$EGREP"; then
+  ac_path_EGREP_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH$PATH_SEPARATOR/usr/xpg4/bin
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_prog in egrep; do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_EGREP="$as_dir/$ac_prog$ac_exec_ext"
+      { test -f "$ac_path_EGREP" && $as_test_x "$ac_path_EGREP"; } || continue
+# Check for GNU ac_path_EGREP and select it if it is found.
+  # Check for GNU $ac_path_EGREP
+case `"$ac_path_EGREP" --version 2>&1` in
+*GNU*)
+  ac_cv_path_EGREP="$ac_path_EGREP" ac_path_EGREP_found=:;;
+*)
+  ac_count=0
+  $as_echo_n 0123456789 >"conftest.in"
+  while :
+  do
+    cat "conftest.in" "conftest.in" >"conftest.tmp"
+    mv "conftest.tmp" "conftest.in"
+    cp "conftest.in" "conftest.nl"
+    $as_echo 'EGREP' >> "conftest.nl"
+    "$ac_path_EGREP" 'EGREP$' < "conftest.nl" >"conftest.out" 2>/dev/null || break
+    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    as_fn_arith $ac_count + 1 && ac_count=$as_val
+    if test $ac_count -gt ${ac_path_EGREP_max-0}; then
+      # Best one so far, save it but keep looking for a better one
+      ac_cv_path_EGREP="$ac_path_EGREP"
+      ac_path_EGREP_max=$ac_count
+    fi
+    # 10*(2^10) chars as input seems more than enough
+    test $ac_count -gt 10 && break
+  done
+  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
+esac
+
+      $ac_path_EGREP_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_EGREP"; then
+    as_fn_error "no acceptable egrep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
+  fi
+else
+  ac_cv_path_EGREP=$EGREP
+fi
+
+   fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_EGREP" >&5
+$as_echo "$ac_cv_path_EGREP" >&6; }
+ EGREP="$ac_cv_path_EGREP"
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
+$as_echo_n "checking for ANSI C header files... " >&6; }
+if test "${ac_cv_header_stdc+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <float.h>
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_header_stdc=yes
+else
+  ac_cv_header_stdc=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+if test $ac_cv_header_stdc = yes; then
+  # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <string.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "memchr" >/dev/null 2>&1; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdlib.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "free" >/dev/null 2>&1; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # /bin/cc in Irix-4.0.5 gets non-ANSI ctype macros unless using -ansi.
+  if test "$cross_compiling" = yes; then :
+  :
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <ctype.h>
+#include <stdlib.h>
+#if ((' ' & 0x0FF) == 0x020)
+# define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
+# define TOUPPER(c) (ISLOWER(c) ? 'A' + ((c) - 'a') : (c))
+#else
+# define ISLOWER(c) \
+		   (('a' <= (c) && (c) <= 'i') \
+		     || ('j' <= (c) && (c) <= 'r') \
+		     || ('s' <= (c) && (c) <= 'z'))
+# define TOUPPER(c) (ISLOWER(c) ? ((c) | 0x40) : (c))
+#endif
+
+#define XOR(e, f) (((e) && !(f)) || (!(e) && (f)))
+int
+main ()
+{
+  int i;
+  for (i = 0; i < 256; i++)
+    if (XOR (islower (i), ISLOWER (i))
+	|| toupper (i) != TOUPPER (i))
+      return 2;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_header_stdc" >&5
+$as_echo "$ac_cv_header_stdc" >&6; }
+if test $ac_cv_header_stdc = yes; then
+
+$as_echo "#define STDC_HEADERS 1" >>confdefs.h
+
+fi
+
+# On IRIX 5.3, sys/types and inttypes.h are conflicting.
+for ac_header in sys/types.h sys/stat.h stdlib.h string.h memory.h strings.h \
+		  inttypes.h stdint.h unistd.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
+"
+eval as_val=\$$as_ac_Header
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+if  test "x${build_client}" = xyes ; then
 
 
 
@@ -5421,329 +5776,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-LIBS="$PTHREAD_LIBS $LIBS"
-CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-CC="$PTHREAD_CC"
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dlopen" >&5
-$as_echo_n "checking for library containing dlopen... " >&6; }
-if test "${ac_cv_search_dlopen+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dlopen ();
-int
-main ()
-{
-return dlopen ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' dl; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_dlopen=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if test "${ac_cv_search_dlopen+set}" = set; then :
-  break
-fi
-done
-if test "${ac_cv_search_dlopen+set}" = set; then :
-
-else
-  ac_cv_search_dlopen=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_dlopen" >&5
-$as_echo "$ac_cv_search_dlopen" >&6; }
-ac_res=$ac_cv_search_dlopen
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-fi
-
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
-$as_echo_n "checking for grep that handles long lines and -e... " >&6; }
-if test "${ac_cv_path_GREP+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -z "$GREP"; then
-  ac_path_GREP_found=false
-  # Loop through the user's path and test for each of PROGNAME-LIST
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH$PATH_SEPARATOR/usr/xpg4/bin
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_prog in grep ggrep; do
-    for ac_exec_ext in '' $ac_executable_extensions; do
-      ac_path_GREP="$as_dir/$ac_prog$ac_exec_ext"
-      { test -f "$ac_path_GREP" && $as_test_x "$ac_path_GREP"; } || continue
-# Check for GNU ac_path_GREP and select it if it is found.
-  # Check for GNU $ac_path_GREP
-case `"$ac_path_GREP" --version 2>&1` in
-*GNU*)
-  ac_cv_path_GREP="$ac_path_GREP" ac_path_GREP_found=:;;
-*)
-  ac_count=0
-  $as_echo_n 0123456789 >"conftest.in"
-  while :
-  do
-    cat "conftest.in" "conftest.in" >"conftest.tmp"
-    mv "conftest.tmp" "conftest.in"
-    cp "conftest.in" "conftest.nl"
-    $as_echo 'GREP' >> "conftest.nl"
-    "$ac_path_GREP" -e 'GREP$' -e '-(cannot match)-' < "conftest.nl" >"conftest.out" 2>/dev/null || break
-    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
-    as_fn_arith $ac_count + 1 && ac_count=$as_val
-    if test $ac_count -gt ${ac_path_GREP_max-0}; then
-      # Best one so far, save it but keep looking for a better one
-      ac_cv_path_GREP="$ac_path_GREP"
-      ac_path_GREP_max=$ac_count
-    fi
-    # 10*(2^10) chars as input seems more than enough
-    test $ac_count -gt 10 && break
-  done
-  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
-esac
-
-      $ac_path_GREP_found && break 3
-    done
-  done
-  done
-IFS=$as_save_IFS
-  if test -z "$ac_cv_path_GREP"; then
-    as_fn_error "no acceptable grep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
-  fi
-else
-  ac_cv_path_GREP=$GREP
-fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_GREP" >&5
-$as_echo "$ac_cv_path_GREP" >&6; }
- GREP="$ac_cv_path_GREP"
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for egrep" >&5
-$as_echo_n "checking for egrep... " >&6; }
-if test "${ac_cv_path_EGREP+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  if echo a | $GREP -E '(a|b)' >/dev/null 2>&1
-   then ac_cv_path_EGREP="$GREP -E"
-   else
-     if test -z "$EGREP"; then
-  ac_path_EGREP_found=false
-  # Loop through the user's path and test for each of PROGNAME-LIST
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH$PATH_SEPARATOR/usr/xpg4/bin
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_prog in egrep; do
-    for ac_exec_ext in '' $ac_executable_extensions; do
-      ac_path_EGREP="$as_dir/$ac_prog$ac_exec_ext"
-      { test -f "$ac_path_EGREP" && $as_test_x "$ac_path_EGREP"; } || continue
-# Check for GNU ac_path_EGREP and select it if it is found.
-  # Check for GNU $ac_path_EGREP
-case `"$ac_path_EGREP" --version 2>&1` in
-*GNU*)
-  ac_cv_path_EGREP="$ac_path_EGREP" ac_path_EGREP_found=:;;
-*)
-  ac_count=0
-  $as_echo_n 0123456789 >"conftest.in"
-  while :
-  do
-    cat "conftest.in" "conftest.in" >"conftest.tmp"
-    mv "conftest.tmp" "conftest.in"
-    cp "conftest.in" "conftest.nl"
-    $as_echo 'EGREP' >> "conftest.nl"
-    "$ac_path_EGREP" 'EGREP$' < "conftest.nl" >"conftest.out" 2>/dev/null || break
-    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
-    as_fn_arith $ac_count + 1 && ac_count=$as_val
-    if test $ac_count -gt ${ac_path_EGREP_max-0}; then
-      # Best one so far, save it but keep looking for a better one
-      ac_cv_path_EGREP="$ac_path_EGREP"
-      ac_path_EGREP_max=$ac_count
-    fi
-    # 10*(2^10) chars as input seems more than enough
-    test $ac_count -gt 10 && break
-  done
-  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
-esac
-
-      $ac_path_EGREP_found && break 3
-    done
-  done
-  done
-IFS=$as_save_IFS
-  if test -z "$ac_cv_path_EGREP"; then
-    as_fn_error "no acceptable egrep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
-  fi
-else
-  ac_cv_path_EGREP=$EGREP
-fi
-
-   fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_EGREP" >&5
-$as_echo "$ac_cv_path_EGREP" >&6; }
- EGREP="$ac_cv_path_EGREP"
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
-$as_echo_n "checking for ANSI C header files... " >&6; }
-if test "${ac_cv_header_stdc+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <float.h>
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_header_stdc=yes
-else
-  ac_cv_header_stdc=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-if test $ac_cv_header_stdc = yes; then
-  # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <string.h>
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "memchr" >/dev/null 2>&1; then :
-
-else
-  ac_cv_header_stdc=no
-fi
-rm -f conftest*
-
-fi
-
-if test $ac_cv_header_stdc = yes; then
-  # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <stdlib.h>
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "free" >/dev/null 2>&1; then :
-
-else
-  ac_cv_header_stdc=no
-fi
-rm -f conftest*
-
-fi
-
-if test $ac_cv_header_stdc = yes; then
-  # /bin/cc in Irix-4.0.5 gets non-ANSI ctype macros unless using -ansi.
-  if test "$cross_compiling" = yes; then :
-  :
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <ctype.h>
-#include <stdlib.h>
-#if ((' ' & 0x0FF) == 0x020)
-# define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
-# define TOUPPER(c) (ISLOWER(c) ? 'A' + ((c) - 'a') : (c))
-#else
-# define ISLOWER(c) \
-		   (('a' <= (c) && (c) <= 'i') \
-		     || ('j' <= (c) && (c) <= 'r') \
-		     || ('s' <= (c) && (c) <= 'z'))
-# define TOUPPER(c) (ISLOWER(c) ? ((c) | 0x40) : (c))
-#endif
-
-#define XOR(e, f) (((e) && !(f)) || (!(e) && (f)))
-int
-main ()
-{
-  int i;
-  for (i = 0; i < 256; i++)
-    if (XOR (islower (i), ISLOWER (i))
-	|| toupper (i) != TOUPPER (i))
-      return 2;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-
-else
-  ac_cv_header_stdc=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_header_stdc" >&5
-$as_echo "$ac_cv_header_stdc" >&6; }
-if test $ac_cv_header_stdc = yes; then
-
-$as_echo "#define STDC_HEADERS 1" >>confdefs.h
-
-fi
-
-# On IRIX 5.3, sys/types and inttypes.h are conflicting.
-for ac_header in sys/types.h sys/stat.h stdlib.h string.h memory.h strings.h \
-		  inttypes.h stdint.h unistd.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
-"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
-
-if  test "x${build_client}" = xyes ; then
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing zlibVersion" >&5
 $as_echo_n "checking for library containing zlibVersion... " >&6; }
@@ -6040,7 +6072,6 @@ else
 fi
 
 
-
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing alGenBuffers" >&5
 $as_echo_n "checking for library containing alGenBuffers... " >&6; }
 if test "${ac_cv_search_alGenBuffers+set}" = set; then :
@@ -6096,8 +6127,7 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: \"Required openal library not found.\"" >&5
-$as_echo "$as_me: WARNING: \"Required openal library not found.\"" >&2;}
+  as_fn_error "\"Required openal library not found.\"" "$LINENO" 5
 fi
 
 
@@ -6168,8 +6198,9 @@ $as_echo "$as_me: WARNING: \"Required curl library not found.\"" >&2;}
 fi
 
 
+	if  test "x${cond_build_unix}" = xyes ; then
 
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for X" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for X" >&5
 $as_echo_n "checking for X... " >&6; }
 
 
@@ -6371,10 +6402,10 @@ else
   with_xf86vm=check
 fi
 
-	have_Xxf86vm=no
-	if  test "x$with_xf86vm" != "xno" ; then :
+		have_Xxf86vm=no
+		if  test "x$with_xf86vm" != "xno" ; then :
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing XF86VidModeQueryVersion" >&5
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing XF86VidModeQueryVersion" >&5
 $as_echo_n "checking for library containing XF86VidModeQueryVersion... " >&6; }
 if test "${ac_cv_search_XF86VidModeQueryVersion+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -6428,10 +6459,10 @@ ac_res=$ac_cv_search_XF86VidModeQueryVersion
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
-			for ac_header in X11/extensions/xf86vmode.h
+				for ac_header in X11/extensions/xf86vmode.h
 do :
   ac_fn_c_check_header_compile "$LINENO" "X11/extensions/xf86vmode.h" "ac_cv_header_X11_extensions_xf86vmode_h" "
-				#include <X11/Xlib.h>
+					#include <X11/Xlib.h>
 
 "
 if test "x$ac_cv_header_X11_extensions_xf86vmode_h" = x""yes; then :
@@ -6447,9 +6478,9 @@ done
 fi
 
 
-		if  test "x$with_xf86vm" = "xyes" ; then :
+			if  test "x$with_xf86vm" = "xyes" ; then :
 
-			if  test "x${have_Xxf86vm}" = "xno" ; then :
+				if  test "x${have_Xxf86vm}" = "xno" ; then :
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error "--with-xf86vm specified, but the library or headers could not be found
@@ -6470,10 +6501,10 @@ else
   with_xf86dga=check
 fi
 
-	have_Xxf86dga=no
-	if  test "x$with_xf86dga" != "xno" ; then :
+		have_Xxf86dga=no
+		if  test "x$with_xf86dga" != "xno" ; then :
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing XF86DGAQueryVersion" >&5
+			{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing XF86DGAQueryVersion" >&5
 $as_echo_n "checking for library containing XF86DGAQueryVersion... " >&6; }
 if test "${ac_cv_search_XF86DGAQueryVersion+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -6527,13 +6558,13 @@ ac_res=$ac_cv_search_XF86DGAQueryVersion
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
-			for ac_header in X11/extensions/Xxf86dga.h X11/extensions/xf86dga.h
+				for ac_header in X11/extensions/Xxf86dga.h X11/extensions/xf86dga.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
-				#include <X11/Xlib.h>
-				#include <X11/Xproto.h>
-				#include <X11/Xfuncproto.h>
+					#include <X11/Xlib.h>
+					#include <X11/Xproto.h>
+					#include <X11/Xfuncproto.h>
 
 "
 eval as_val=\$$as_ac_Header
@@ -6545,7 +6576,7 @@ _ACEOF
 
 $as_echo "#define HAVE_XXF86DGA 1" >>confdefs.h
 
-				have_Xxf86dga=yes
+					have_Xxf86dga=yes
 
 fi
 
@@ -6554,9 +6585,9 @@ done
 
 fi
 
-		if  test "x$with_xf86dga" = "xyes" ; then :
+			if  test "x$with_xf86dga" = "xyes" ; then :
 
-			if  test "x${have_Xxf86dga}" = "xno" ; then :
+				if  test "x${have_Xxf86dga}" = "xno" ; then :
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
 as_fn_error "--with-xf86dga specified, but the library or headers could not be found
@@ -6568,7 +6599,8 @@ fi
 
 fi
 
-# these set GL_CFLAGS, GL_LIBS, GLU_CFLAGS, GLU_LIBS
+fi
+
 
 
 ac_ext=c
@@ -7011,11 +7043,8 @@ $as_echo "#define HAVE_VARARGS_GLU_TESSCB 1" >>confdefs.h
 fi
 fi
 
-	CFLAGS="$CFLAGS $GL_CFLAGS $GLU_CFLAGS"
-	LIBS="$GLU_LIBS $LIBS"
 
-# ODE lib for ragdoll
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dWorldCreate" >&5
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dWorldCreate" >&5
 $as_echo_n "checking for library containing dWorldCreate... " >&6; }
 if test "${ac_cv_search_dWorldCreate+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -7069,23 +7098,111 @@ ac_res=$ac_cv_search_dWorldCreate
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ODE" >&5
+$as_echo_n "checking for ODE... " >&6; }
+
+if test -n "$ODE_CFLAGS"; then
+    pkg_cv_ODE_CFLAGS="$ODE_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "ode") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ODE_CFLAGS=`$PKG_CONFIG --cflags "ode" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$ODE_LIBS"; then
+    pkg_cv_ODE_LIBS="$ODE_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "ode") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ODE_LIBS=`$PKG_CONFIG --libs "ode" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        ODE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "ode" 2>&1`
+        else
+	        ODE_PKG_ERRORS=`$PKG_CONFIG --print-errors "ode" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$ODE_PKG_ERRORS" >&5
+
+	as_fn_error "Package requirements (ode) were not met:
+
+$ODE_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables ODE_CFLAGS
+and ODE_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables ODE_CFLAGS
+and ODE_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details." "$LINENO" 5; }
+else
+	ODE_CFLAGS=$pkg_cv_ODE_CFLAGS
+	ODE_LIBS=$pkg_cv_ODE_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
 else
   as_fn_error "\"Required ode library not found.\"" "$LINENO" 5
 fi
 
 
-# Hack in the extras for Win32 and Darwin
-# TODO: this may not be the best way to do this
-	win32_syslibs=""
+			win32_syslibs=""
 	if  test "x${cond_build_win32}" = xyes ; then
    win32_syslibs="-lmingw32 -lwinmm -lwsock32 -lws2_32 -lgdi32 -luser32"
 fi
 	WIN32_LIBS=$win32_syslibs
 
 
-	darwin_frameworks=""
-	if  test "x${cond_build_darwin}" = xyes ; then
+		darwin_frameworks=""
+	if  test "x${unix_host}" = xdarwin ; then :
+  if  test "x${apple_openal}" = xyes ; then :
    darwin_frameworks="-framework OpenAL"
+fi
 fi
 	DARWIN_FRAMEWORKS=$darwin_frameworks
 
@@ -7232,45 +7349,6 @@ done
 
 
 	if  test "x${cond_build_unix}" = xyes ; then
-
-		for ac_header in X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-else
-  as_fn_error "\"Required X11 header files not found\"" "$LINENO" 5
-fi
-
-done
-
-
-		for ac_header in GL/gl.h GL/glu.h GL/glx.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-else
-  as_fn_error "\"Required OpenGL header files not found.\"" "$LINENO" 5
-fi
-
-done
-
-
-
-fi
-
-	if  test "x${cond_build_darwin}" = xyes ; then
 
 		for ac_header in X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h
 do :
@@ -8066,42 +8144,51 @@ done
 #
 
 if  test "x${cond_build_unix}" = xyes ; then
+  case  ${unix_host}  in #(
+   darwin ) :
 
-$as_echo "#define OPENGL_DRIVER \"libGL.so.1\"" >>confdefs.h
-
-fi
-
-if  test "x${cond_build_unix}" = xyes ; then
-
-$as_echo "#define OPENAL_DRIVER \"libopenal.so.1\"" >>confdefs.h
-
-fi
-
-if  test "x${cond_build_darwin}" = xyes ; then
 
 $as_echo "#define OPENGL_DRIVER \"libGL.dylib\"" >>confdefs.h
 
+
+			if  test "x${apple_openal}" = xyes ; then :
+
+$as_echo "#define OPENAL_DRIVER \"/System/Library/Frameworks/OpenAL.framework/OpenAL\"" >>confdefs.h
+
+else
+
+$as_echo "#define OPENAL_DRIVER \"libOpenAL.dylib\"" >>confdefs.h
+
 fi
+			 ;; #(
+  *) :
 
-if  test "x${cond_build_darwin}" = xyes ; then
 
-$as_echo "#define OPENAL_DRIVER \"/System/Library/Frameworks/OpenAL.framework/Versions/Current/OpenAL\"" >>confdefs.h
+$as_echo "#define OPENGL_DRIVER \"libGL.so.1\"" >>confdefs.h
+
+
+
+$as_echo "#define OPENAL_DRIVER \"libopenal.so.1\"" >>confdefs.h
+
+
+		 ;;
+esac
 
 fi
 
 if  test "x${cond_build_win32}" = xyes ; then
+
 
 $as_echo "#define OPENGL_DRIVER \"opengl32\"" >>confdefs.h
 
-fi
 
-if  test "x${cond_build_win32}" = xyes ; then
 
 $as_echo "#define OPENAL_DRIVER \"OpenAL32.dll\"" >>confdefs.h
 
+
 fi
 
-# 2 required gcc options
+# 2 required gcc options, see m4/ax_cflags_gcc_option.m4
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking CFLAGS for gcc -ffast-math" >&5
 $as_echo_n "checking CFLAGS for gcc -ffast-math... " >&6; }
 if test "${ax_cv_cflags_gcc_option__ffast_math+set}" = set; then :
@@ -8227,8 +8314,6 @@ case ".$ax_cv_cflags_gcc_option__fno_strict_aliasing" in
    fi
  ;;
 esac
-
-# TODO: consider putting -DDedicated here
 
 
 
@@ -8588,10 +8673,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_UNIX_TRUE}" && test -z "${BUILD_UNIX_FALSE}"; then
   as_fn_error "conditional \"BUILD_UNIX\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BUILD_DARWIN_TRUE}" && test -z "${BUILD_DARWIN_FALSE}"; then
-  as_fn_error "conditional \"BUILD_DARWIN\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_CLIENT_TRUE}" && test -z "${BUILD_CLIENT_FALSE}"; then

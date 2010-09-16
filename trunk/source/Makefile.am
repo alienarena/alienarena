@@ -20,61 +20,42 @@
 
 ACLOCAL_AMFLAGS= -I m4 
 
-AM_CPPFLAGS = -I $(top_srcdir)/source
-
 noinst_LIBRARIES = libgame.a
 
-# Note: indenting assignments with TABs can be bad for generated Makefiles
+AM_CPPFLAGS = -I $(top_srcdir)/source
 
-if BUILD_UNIX
-bin_PROGRAMS = crx-ded
-crx_ded_LDADD = libgame.a
-if ALTERNATE_INSTALL
-crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
-else
-crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY -DDATADIR='"$(pkgdatadir)"'
-endif
-if BUILD_CLIENT
-bin_PROGRAMS += crx
-crx_LDADD = libgame.a
-if ALTERNATE_INSTALL
-crx_CPPFLAGS = $(AM_CPPFLAGS)
-else
-crx_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR='"$(pkgdatadir)"'
-endif
-endif
+# CPP flags for standard installation
+if !ALTERNATE_INSTALL
+AM_CPPFLAGS += -DDATADIR='"$(pkgdatadir)"'
 endif
 
-if BUILD_DARWIN
-bin_PROGRAMS = crx-ded
+# Client libraries and flags
+crx_LDADD = libgame.a $(PTHREAD_LIBS) $(GL_LIBS) $(GLU_LIBS) $(DARWIN_FRAMEWORKS)
+crx_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(GL_CFLAGS) $(GLU_CFLAGS) $(ODE_CFLAGS)
+
+# Dedicated Server libraries and flags
 crx_ded_LDADD = libgame.a
-if ALTERNATE_INSTALL
 crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
-else
-crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY -DDATADIR='"$(pkgdatadir)"'
-endif
-if BUILD_CLIENT
-bin_PROGRAMS += crx
-crx_LDADD = libgame.a
-crx_LDFLAGS = $(DARWIN_FRAMEWORKS)
-if ALTERNATE_INSTALL
-crx_CPPFLAGS = $(AM_CPPFLAGS)
-else
-crx_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR='"$(pkgdatadir)"'
-endif
-endif
-endif
 
 if BUILD_WIN32
+
+# On Win32, always build the client
+# TODO: maybe fixup libs, cppflags hacks
 bin_PROGRAMS = crx
-crx_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DNDEBUG
-crx_LDADD = libgame.a
-LIBS += $(WIN32_LIBS)
+crx_LDADD += $(WIN32_LIBS)
+crx_CPPFLAGS += -DCURL_STATICLIB -DNDEBUG
+
+else
+
+# On Unix, always build the server, and the client if BUILD_CLIENT is enabled
+bin_PROGRAMS = crx-ded
+if BUILD_CLIENT
+bin_PROGRAMS += crx
 endif
 
+endif
 
 # common client sources
-if BUILD_CLIENT
 crx_SOURCES = \
 	client/anorms.h \
 	client/cl_ents.c \
@@ -168,44 +149,9 @@ crx_SOURCES = \
 	server/sv_world.c \
 	unix/glob.c \
 	unix/glob.h
-endif	
 
-# linux/unix sources
+# Unix Client sources
 if BUILD_UNIX
-crx_ded_SOURCES = \
-	client/anorms.h \
-	game/game.h \
-	game/q_shared.c \
-	game/q_shared.h \
-	null/cl_null.c \
-	qcommon/cmd.c \
-	qcommon/cmodel.c \
-	qcommon/common.c \
-	qcommon/crc.c \
-	qcommon/cvar.c \
-	qcommon/files.c \
-	qcommon/mdfour.c \
-	qcommon/net_chan.c \
-	qcommon/pmove.c \
-	qcommon/qcommon.h \
-	qcommon/qfiles.h \
-	server/server.h \
-	server/sv_ccmds.c \
-	server/sv_ents.c \
-	server/sv_game.c \
-	server/sv_init.c \
-	server/sv_main.c \
-	server/sv_send.c \
-	server/sv_user.c \
-	server/sv_world.c \
-	unix/glob.c \
-	unix/glob.h \
-	unix/glob.h \
-	unix/net_udp.c \
-	unix/q_shunix.c \
-	unix/rw_unix.h \
-	unix/sys_unix.c
-if BUILD_CLIENT
 crx_SOURCES += \
 	unix/gl_glx.c \
 	unix/glw_unix.h \
@@ -219,63 +165,9 @@ crx_SOURCES += \
 	unix/sys_unix.c \
 	unix/vid_so.c
 endif	
-endif
 
-# OSX Darwin X11 sources
-if BUILD_DARWIN
-crx_ded_SOURCES = \
-	client/anorms.h \
-	game/game.h \
-	game/q_shared.c \
-	game/q_shared.h \
-	null/cl_null.c \
-	qcommon/cmd.c \
-	qcommon/cmodel.c \
-	qcommon/common.c \
-	qcommon/crc.c \
-	qcommon/cvar.c \
-	qcommon/files.c \
-	qcommon/mdfour.c \
-	qcommon/net_chan.c \
-	qcommon/pmove.c \
-	qcommon/qcommon.h \
-	qcommon/qfiles.h \
-	server/server.h \
-	server/sv_ccmds.c \
-	server/sv_ents.c \
-	server/sv_game.c \
-	server/sv_init.c \
-	server/sv_main.c \
-	server/sv_send.c \
-	server/sv_user.c \
-	server/sv_world.c \
-	unix/glob.c \
-	unix/glob.h \
-	unix/glob.h \
-	unix/net_udp.c \
-	unix/q_shunix.c \
-	unix/rw_unix.h \
-	unix/sys_unix.c
-if BUILD_CLIENT
-crx_SOURCES += \
-	unix/gl_glx.c \
-	unix/glw_unix.h \
-	unix/net_udp.c \
-	unix/qal_unix.c \
-	unix/qasm.h \
-	unix/qgl_unix.c \
-	unix/q_shunix.c \
-	unix/rw_unix.c \
-	unix/rw_unix.h \
-	unix/sys_unix.c \
-	unix/vid_so.c
-endif
-endif
-
-# Win32 MinGW sources
-# (BUILD_CLIENT always true, but Automake needs the conditional)
+# Win32 MinGW Client sources
 if BUILD_WIN32
-if BUILD_CLIENT
 crx_SOURCES += \
 	win32/conproc.c \
 	win32/conproc.h \
@@ -291,7 +183,41 @@ crx_SOURCES += \
 	win32/winquake.h \
 	win32/resource.h
 endif	
-endif
+
+# Dedicated Server sources (Unix only)
+crx_ded_SOURCES = \
+	client/anorms.h \
+	game/game.h \
+	game/q_shared.c \
+	game/q_shared.h \
+	null/cl_null.c \
+	qcommon/cmd.c \
+	qcommon/cmodel.c \
+	qcommon/common.c \
+	qcommon/crc.c \
+	qcommon/cvar.c \
+	qcommon/files.c \
+	qcommon/mdfour.c \
+	qcommon/net_chan.c \
+	qcommon/pmove.c \
+	qcommon/qcommon.h \
+	qcommon/qfiles.h \
+	server/server.h \
+	server/sv_ccmds.c \
+	server/sv_ents.c \
+	server/sv_game.c \
+	server/sv_init.c \
+	server/sv_main.c \
+	server/sv_send.c \
+	server/sv_user.c \
+	server/sv_world.c \
+	unix/glob.c \
+	unix/glob.h \
+	unix/glob.h \
+	unix/net_udp.c \
+	unix/q_shunix.c \
+	unix/rw_unix.h \
+	unix/sys_unix.c
 
 # Game module sources
 libgame_a_SOURCES =  \
