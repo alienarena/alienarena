@@ -113,7 +113,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>libjpeg.lib;libode.lib;game.lib;libogg.lib;libvorbis.lib;libvorbisfile.lib;zlib.lib;libcurl.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libjpeg.lib;libode.lib;libopcode.lib;game.lib;libogg.lib;libvorbis.lib;libvorbisfile.lib;zlib.lib;libcurl.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LocalLib)$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <OptimizeReferences>true</OptimizeReferences>

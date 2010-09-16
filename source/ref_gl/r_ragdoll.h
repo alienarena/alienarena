@@ -128,6 +128,7 @@ typedef struct RagDoll_s {
 	//surface for ragdoll to collide
 	dBodyID WorldBody;
 	dGeomID WorldGeometry[MAX_SURFACES];
+	dMass	WorldMass;
 
 	float spawnTime;
 
