@@ -49,9 +49,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #elif defined HAVE_OPENAL_AL_H
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
-#elif defined DARWIN_SPECIAL_CASE
-#include </System/Library/Frameworks/OpenAL.framework/Headers/al.h>
-#include </System/Library/Frameworks/OpenAL.framework/Headers/alc.h>
 #endif
 
 #include "client.h"

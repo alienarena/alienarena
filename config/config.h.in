@@ -15,6 +15,9 @@
 /* Enable IRC message debugging */
 #undef DEBUG_DUMP_IRC
 
+/* non-specific unix conditional compile */
+#undef GENERIC_UNIX
+
 /* Define to 1 if you have the <alc.h> header file. */
 #undef HAVE_ALC_H
 
@@ -307,6 +310,9 @@
 
 /* Define to 1 if you have the `_unlink' function. */
 #undef HAVE__UNLINK
+
+/* linux-specific conditional compile */
+#undef LINUX_SPECIAL_CASE
 
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
 #undef NO_MINUS_C_MINUS_O

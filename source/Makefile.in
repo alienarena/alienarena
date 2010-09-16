@@ -55,57 +55,45 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_FALSE@@BUILD_WIN32_TRUE@bin_PROGRAMS = crx$(EXEEXT)
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@bin_PROGRAMS = crx-ded$(EXEEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	$(am__EXEEXT_2) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	$(am__EXEEXT_1)
-@BUILD_DARWIN_TRUE@bin_PROGRAMS = crx-ded$(EXEEXT) $(am__EXEEXT_1)
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@am__append_1 = crx
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@am__append_2 = crx
-@BUILD_WIN32_TRUE@am__append_3 = $(WIN32_LIBS)
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@am__append_4 = \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/gl_glx.c \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/glw_unix.h \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/net_udp.c \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/qal_unix.c \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/qasm.h \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/qgl_unix.c \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/q_shunix.c \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/rw_unix.c \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/rw_unix.h \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/sys_unix.c \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/vid_so.c
 
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@am__append_5 = \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/gl_glx.c \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/glw_unix.h \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/net_udp.c \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/qal_unix.c \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/qasm.h \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/qgl_unix.c \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/q_shunix.c \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/rw_unix.c \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/rw_unix.h \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/sys_unix.c \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/vid_so.c
+# CPP flags for standard installation
+@ALTERNATE_INSTALL_FALSE@am__append_1 = -DDATADIR='"$(pkgdatadir)"'
+@BUILD_WIN32_FALSE@bin_PROGRAMS = crx-ded$(EXEEXT) $(am__EXEEXT_1)
+@BUILD_WIN32_TRUE@bin_PROGRAMS = crx$(EXEEXT) $(am__EXEEXT_1)
+@BUILD_WIN32_TRUE@am__append_2 = $(WIN32_LIBS)
+@BUILD_WIN32_TRUE@am__append_3 = -DCURL_STATICLIB -DNDEBUG
+@BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@am__append_4 = crx
+
+# Unix Client sources
+@BUILD_UNIX_TRUE@am__append_5 = \
+@BUILD_UNIX_TRUE@	unix/gl_glx.c \
+@BUILD_UNIX_TRUE@	unix/glw_unix.h \
+@BUILD_UNIX_TRUE@	unix/net_udp.c \
+@BUILD_UNIX_TRUE@	unix/qal_unix.c \
+@BUILD_UNIX_TRUE@	unix/qasm.h \
+@BUILD_UNIX_TRUE@	unix/qgl_unix.c \
+@BUILD_UNIX_TRUE@	unix/q_shunix.c \
+@BUILD_UNIX_TRUE@	unix/rw_unix.c \
+@BUILD_UNIX_TRUE@	unix/rw_unix.h \
+@BUILD_UNIX_TRUE@	unix/sys_unix.c \
+@BUILD_UNIX_TRUE@	unix/vid_so.c
 
 
-# Win32 MinGW sources
-# (BUILD_CLIENT always true, but Automake needs the conditional)
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@am__append_6 = \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/conproc.c \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/conproc.h \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/glw_imp.c \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/glw_win.h \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/in_win.c \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/net_wins.c \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/qal_win.c \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/qgl_win.c \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/q_shwin.c \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/sys_win.c \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/vid_dll.c \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/winquake.h \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/resource.h
+# Win32 MinGW Client sources
+@BUILD_WIN32_TRUE@am__append_6 = \
+@BUILD_WIN32_TRUE@	win32/conproc.c \
+@BUILD_WIN32_TRUE@	win32/conproc.h \
+@BUILD_WIN32_TRUE@	win32/glw_imp.c \
+@BUILD_WIN32_TRUE@	win32/glw_win.h \
+@BUILD_WIN32_TRUE@	win32/in_win.c \
+@BUILD_WIN32_TRUE@	win32/net_wins.c \
+@BUILD_WIN32_TRUE@	win32/qal_win.c \
+@BUILD_WIN32_TRUE@	win32/qgl_win.c \
+@BUILD_WIN32_TRUE@	win32/q_shwin.c \
+@BUILD_WIN32_TRUE@	win32/sys_win.c \
+@BUILD_WIN32_TRUE@	win32/vid_dll.c \
+@BUILD_WIN32_TRUE@	win32/winquake.h \
+@BUILD_WIN32_TRUE@	win32/resource.h
 
 subdir = source
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -155,8 +143,7 @@ am_libgame_a_OBJECTS = game/acesrc/acebot_ai.$(OBJEXT) \
 	game/p_trail.$(OBJEXT) game/p_view.$(OBJEXT) \
 	game/p_weapon.$(OBJEXT) game/q_shared.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@am__EXEEXT_1 = crx$(EXEEXT)
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@am__EXEEXT_2 = crx$(EXEEXT)
+@BUILD_CLIENT_TRUE@@BUILD_WIN32_FALSE@am__EXEEXT_1 = crx$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__crx_SOURCES_DIST = client/anorms.h client/cl_ents.c client/cl_fx.c \
@@ -195,161 +182,83 @@ am__crx_SOURCES_DIST = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	win32/qal_win.c win32/qgl_win.c win32/q_shwin.c \
 	win32/sys_win.c win32/vid_dll.c win32/winquake.h \
 	win32/resource.h
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@am__objects_1 =  \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/crx-gl_glx.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/crx-net_udp.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/crx-qal_unix.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/crx-qgl_unix.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/crx-q_shunix.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/crx-rw_unix.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/crx-sys_unix.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@	unix/crx-vid_so.$(OBJEXT)
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@am__objects_2 = unix/crx-gl_glx.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/crx-net_udp.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/crx-qal_unix.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/crx-qgl_unix.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/crx-q_shunix.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/crx-rw_unix.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/crx-sys_unix.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@	unix/crx-vid_so.$(OBJEXT)
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@am__objects_3 = win32/crx-conproc.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/crx-glw_imp.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/crx-in_win.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/crx-net_wins.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/crx-qal_win.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/crx-qgl_win.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/crx-q_shwin.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/crx-sys_win.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@@BUILD_WIN32_TRUE@	win32/crx-vid_dll.$(OBJEXT)
-@BUILD_CLIENT_TRUE@am_crx_OBJECTS = client/crx-cl_ents.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_fx.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_http.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_input.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_inv.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_irc.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_main.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_parse.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_pred.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_scrn.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_stats.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_tent.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-cl_view.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-console.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-keys.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-menu.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-qal.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-qmenu.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-snd_file.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-snd_openal.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	client/crx-vid_menu.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	game/crx-q_shared.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	qcommon/crx-cmd.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	qcommon/crx-cmodel.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	qcommon/crx-common.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	qcommon/crx-crc.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	qcommon/crx-cvar.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	qcommon/crx-files.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	qcommon/crx-mdfour.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	qcommon/crx-net_chan.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	qcommon/crx-pmove.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_bloom.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_draw.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_image.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_iqm.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_light.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_main.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_math.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_mesh.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_misc.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_model.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_particle.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_postprocess.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_program.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_script.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_shadowmaps.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_shadows.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_surf.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_ragdoll.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_varray.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_vbo.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_vlights.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	ref_gl/crx-r_warp.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	server/crx-sv_ccmds.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	server/crx-sv_ents.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	server/crx-sv_game.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	server/crx-sv_init.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	server/crx-sv_main.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	server/crx-sv_send.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	server/crx-sv_user.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	server/crx-sv_world.$(OBJEXT) \
-@BUILD_CLIENT_TRUE@	unix/crx-glob.$(OBJEXT) $(am__objects_1) \
-@BUILD_CLIENT_TRUE@	$(am__objects_2) $(am__objects_3)
+@BUILD_UNIX_TRUE@am__objects_1 = unix/crx-gl_glx.$(OBJEXT) \
+@BUILD_UNIX_TRUE@	unix/crx-net_udp.$(OBJEXT) \
+@BUILD_UNIX_TRUE@	unix/crx-qal_unix.$(OBJEXT) \
+@BUILD_UNIX_TRUE@	unix/crx-qgl_unix.$(OBJEXT) \
+@BUILD_UNIX_TRUE@	unix/crx-q_shunix.$(OBJEXT) \
+@BUILD_UNIX_TRUE@	unix/crx-rw_unix.$(OBJEXT) \
+@BUILD_UNIX_TRUE@	unix/crx-sys_unix.$(OBJEXT) \
+@BUILD_UNIX_TRUE@	unix/crx-vid_so.$(OBJEXT)
+@BUILD_WIN32_TRUE@am__objects_2 = win32/crx-conproc.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-glw_imp.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-in_win.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-net_wins.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-qal_win.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-qgl_win.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-q_shwin.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-sys_win.$(OBJEXT) \
+@BUILD_WIN32_TRUE@	win32/crx-vid_dll.$(OBJEXT)
+am_crx_OBJECTS = client/crx-cl_ents.$(OBJEXT) \
+	client/crx-cl_fx.$(OBJEXT) client/crx-cl_http.$(OBJEXT) \
+	client/crx-cl_input.$(OBJEXT) client/crx-cl_inv.$(OBJEXT) \
+	client/crx-cl_irc.$(OBJEXT) client/crx-cl_main.$(OBJEXT) \
+	client/crx-cl_parse.$(OBJEXT) client/crx-cl_pred.$(OBJEXT) \
+	client/crx-cl_scrn.$(OBJEXT) client/crx-cl_stats.$(OBJEXT) \
+	client/crx-cl_tent.$(OBJEXT) client/crx-cl_view.$(OBJEXT) \
+	client/crx-console.$(OBJEXT) client/crx-keys.$(OBJEXT) \
+	client/crx-menu.$(OBJEXT) client/crx-qal.$(OBJEXT) \
+	client/crx-qmenu.$(OBJEXT) client/crx-snd_file.$(OBJEXT) \
+	client/crx-snd_openal.$(OBJEXT) client/crx-vid_menu.$(OBJEXT) \
+	game/crx-q_shared.$(OBJEXT) qcommon/crx-cmd.$(OBJEXT) \
+	qcommon/crx-cmodel.$(OBJEXT) qcommon/crx-common.$(OBJEXT) \
+	qcommon/crx-crc.$(OBJEXT) qcommon/crx-cvar.$(OBJEXT) \
+	qcommon/crx-files.$(OBJEXT) qcommon/crx-mdfour.$(OBJEXT) \
+	qcommon/crx-net_chan.$(OBJEXT) qcommon/crx-pmove.$(OBJEXT) \
+	ref_gl/crx-r_bloom.$(OBJEXT) ref_gl/crx-r_draw.$(OBJEXT) \
+	ref_gl/crx-r_image.$(OBJEXT) ref_gl/crx-r_iqm.$(OBJEXT) \
+	ref_gl/crx-r_light.$(OBJEXT) ref_gl/crx-r_main.$(OBJEXT) \
+	ref_gl/crx-r_math.$(OBJEXT) ref_gl/crx-r_mesh.$(OBJEXT) \
+	ref_gl/crx-r_misc.$(OBJEXT) ref_gl/crx-r_model.$(OBJEXT) \
+	ref_gl/crx-r_particle.$(OBJEXT) \
+	ref_gl/crx-r_postprocess.$(OBJEXT) \
+	ref_gl/crx-r_program.$(OBJEXT) ref_gl/crx-r_script.$(OBJEXT) \
+	ref_gl/crx-r_shadowmaps.$(OBJEXT) \
+	ref_gl/crx-r_shadows.$(OBJEXT) ref_gl/crx-r_surf.$(OBJEXT) \
+	ref_gl/crx-r_ragdoll.$(OBJEXT) ref_gl/crx-r_varray.$(OBJEXT) \
+	ref_gl/crx-r_vbo.$(OBJEXT) ref_gl/crx-r_vlights.$(OBJEXT) \
+	ref_gl/crx-r_warp.$(OBJEXT) server/crx-sv_ccmds.$(OBJEXT) \
+	server/crx-sv_ents.$(OBJEXT) server/crx-sv_game.$(OBJEXT) \
+	server/crx-sv_init.$(OBJEXT) server/crx-sv_main.$(OBJEXT) \
+	server/crx-sv_send.$(OBJEXT) server/crx-sv_user.$(OBJEXT) \
+	server/crx-sv_world.$(OBJEXT) unix/crx-glob.$(OBJEXT) \
+	$(am__objects_1) $(am__objects_2)
 crx_OBJECTS = $(am_crx_OBJECTS)
-@BUILD_CLIENT_FALSE@@BUILD_WIN32_TRUE@crx_DEPENDENCIES = libgame.a
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@crx_DEPENDENCIES = libgame.a
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@crx_DEPENDENCIES = libgame.a
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_FALSE@@BUILD_WIN32_TRUE@crx_DEPENDENCIES = libgame.a
-crx_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(crx_LDFLAGS) $(LDFLAGS) -o \
-	$@
-am__crx_ded_SOURCES_DIST = client/anorms.h game/game.h game/q_shared.c \
-	game/q_shared.h null/cl_null.c qcommon/cmd.c qcommon/cmodel.c \
-	qcommon/common.c qcommon/crc.c qcommon/cvar.c qcommon/files.c \
-	qcommon/mdfour.c qcommon/net_chan.c qcommon/pmove.c \
-	qcommon/qcommon.h qcommon/qfiles.h server/server.h \
-	server/sv_ccmds.c server/sv_ents.c server/sv_game.c \
-	server/sv_init.c server/sv_main.c server/sv_send.c \
-	server/sv_user.c server/sv_world.c unix/glob.c unix/glob.h \
-	unix/net_udp.c unix/q_shunix.c unix/rw_unix.h unix/sys_unix.c
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@am_crx_ded_OBJECTS = game/crx_ded-q_shared.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	null/crx_ded-cl_null.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	qcommon/crx_ded-cmd.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	qcommon/crx_ded-cmodel.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	qcommon/crx_ded-common.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	qcommon/crx_ded-crc.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	qcommon/crx_ded-cvar.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	qcommon/crx_ded-files.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	qcommon/crx_ded-mdfour.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	qcommon/crx_ded-net_chan.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	qcommon/crx_ded-pmove.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	server/crx_ded-sv_ccmds.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	server/crx_ded-sv_ents.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	server/crx_ded-sv_game.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	server/crx_ded-sv_init.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	server/crx_ded-sv_main.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	server/crx_ded-sv_send.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	server/crx_ded-sv_user.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	server/crx_ded-sv_world.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	unix/crx_ded-glob.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	unix/crx_ded-net_udp.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	unix/crx_ded-q_shunix.$(OBJEXT) \
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@	unix/crx_ded-sys_unix.$(OBJEXT)
-@BUILD_DARWIN_TRUE@am_crx_ded_OBJECTS =  \
-@BUILD_DARWIN_TRUE@	game/crx_ded-q_shared.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	null/crx_ded-cl_null.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	qcommon/crx_ded-cmd.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	qcommon/crx_ded-cmodel.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	qcommon/crx_ded-common.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	qcommon/crx_ded-crc.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	qcommon/crx_ded-cvar.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	qcommon/crx_ded-files.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	qcommon/crx_ded-mdfour.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	qcommon/crx_ded-net_chan.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	qcommon/crx_ded-pmove.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	server/crx_ded-sv_ccmds.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	server/crx_ded-sv_ents.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	server/crx_ded-sv_game.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	server/crx_ded-sv_init.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	server/crx_ded-sv_main.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	server/crx_ded-sv_send.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	server/crx_ded-sv_user.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	server/crx_ded-sv_world.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	unix/crx_ded-glob.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	unix/crx_ded-net_udp.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	unix/crx_ded-q_shunix.$(OBJEXT) \
-@BUILD_DARWIN_TRUE@	unix/crx_ded-sys_unix.$(OBJEXT)
+am__DEPENDENCIES_1 =
+@BUILD_WIN32_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
+crx_DEPENDENCIES = libgame.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+am_crx_ded_OBJECTS = game/crx_ded-q_shared.$(OBJEXT) \
+	null/crx_ded-cl_null.$(OBJEXT) qcommon/crx_ded-cmd.$(OBJEXT) \
+	qcommon/crx_ded-cmodel.$(OBJEXT) \
+	qcommon/crx_ded-common.$(OBJEXT) qcommon/crx_ded-crc.$(OBJEXT) \
+	qcommon/crx_ded-cvar.$(OBJEXT) qcommon/crx_ded-files.$(OBJEXT) \
+	qcommon/crx_ded-mdfour.$(OBJEXT) \
+	qcommon/crx_ded-net_chan.$(OBJEXT) \
+	qcommon/crx_ded-pmove.$(OBJEXT) \
+	server/crx_ded-sv_ccmds.$(OBJEXT) \
+	server/crx_ded-sv_ents.$(OBJEXT) \
+	server/crx_ded-sv_game.$(OBJEXT) \
+	server/crx_ded-sv_init.$(OBJEXT) \
+	server/crx_ded-sv_main.$(OBJEXT) \
+	server/crx_ded-sv_send.$(OBJEXT) \
+	server/crx_ded-sv_user.$(OBJEXT) \
+	server/crx_ded-sv_world.$(OBJEXT) unix/crx_ded-glob.$(OBJEXT) \
+	unix/crx_ded-net_udp.$(OBJEXT) unix/crx_ded-q_shunix.$(OBJEXT) \
+	unix/crx_ded-sys_unix.$(OBJEXT)
 crx_ded_OBJECTS = $(am_crx_ded_OBJECTS)
-@BUILD_DARWIN_FALSE@@BUILD_UNIX_TRUE@crx_ded_DEPENDENCIES = libgame.a
-@BUILD_DARWIN_TRUE@crx_ded_DEPENDENCIES = libgame.a
+crx_ded_DEPENDENCIES = libgame.a
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/config
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -372,7 +281,7 @@ am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN   " $@;
 SOURCES = $(libgame_a_SOURCES) $(crx_SOURCES) $(crx_ded_SOURCES)
 DIST_SOURCES = $(libgame_a_SOURCES) $(am__crx_SOURCES_DIST) \
-	$(am__crx_ded_SOURCES_DIST)
+	$(crx_ded_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -412,13 +321,15 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
-LIBS = @LIBS@ $(am__append_3)
+LIBS = @LIBS@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
+ODE_CFLAGS = @ODE_CFLAGS@
+ODE_LIBS = @ODE_LIBS@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -493,142 +404,84 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4 
-AM_CPPFLAGS = -I $(top_srcdir)/source
 noinst_LIBRARIES = libgame.a
-@BUILD_DARWIN_TRUE@crx_ded_LDADD = libgame.a
-@BUILD_UNIX_TRUE@crx_ded_LDADD = libgame.a
-@ALTERNATE_INSTALL_FALSE@@BUILD_DARWIN_TRUE@crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY -DDATADIR='"$(pkgdatadir)"'
-@ALTERNATE_INSTALL_FALSE@@BUILD_UNIX_TRUE@crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY -DDATADIR='"$(pkgdatadir)"'
-@ALTERNATE_INSTALL_TRUE@@BUILD_DARWIN_TRUE@crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
-@ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@crx_LDADD = libgame.a
-@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_LDADD = libgame.a
-@BUILD_WIN32_TRUE@crx_LDADD = libgame.a
-@ALTERNATE_INSTALL_FALSE@@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@crx_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR='"$(pkgdatadir)"'
-@ALTERNATE_INSTALL_FALSE@@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_CPPFLAGS = $(AM_CPPFLAGS) -DDATADIR='"$(pkgdatadir)"'
-@ALTERNATE_INSTALL_TRUE@@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@crx_CPPFLAGS = $(AM_CPPFLAGS)
-@ALTERNATE_INSTALL_TRUE@@BUILD_CLIENT_TRUE@@BUILD_UNIX_TRUE@crx_CPPFLAGS = $(AM_CPPFLAGS)
-@BUILD_WIN32_TRUE@crx_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DNDEBUG
-@BUILD_CLIENT_TRUE@@BUILD_DARWIN_TRUE@crx_LDFLAGS = $(DARWIN_FRAMEWORKS)
+AM_CPPFLAGS = -I $(top_srcdir)/source $(am__append_1)
+
+# Client libraries and flags
+crx_LDADD = libgame.a $(PTHREAD_LIBS) $(GL_LIBS) $(GLU_LIBS) \
+	$(DARWIN_FRAMEWORKS) $(am__append_2)
+crx_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(GL_CFLAGS) \
+	$(GLU_CFLAGS) $(ODE_CFLAGS) $(am__append_3)
+
+# Dedicated Server libraries and flags
+crx_ded_LDADD = libgame.a
+crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
 
 # common client sources
-@BUILD_CLIENT_TRUE@crx_SOURCES = client/anorms.h client/cl_ents.c \
-@BUILD_CLIENT_TRUE@	client/cl_fx.c client/cl_http.c \
-@BUILD_CLIENT_TRUE@	client/client.h client/cl_input.c \
-@BUILD_CLIENT_TRUE@	client/cl_inv.c client/cl_irc.c \
-@BUILD_CLIENT_TRUE@	client/cl_main.c client/cl_parse.c \
-@BUILD_CLIENT_TRUE@	client/cl_pred.c client/cl_scrn.c \
-@BUILD_CLIENT_TRUE@	client/cl_stats.c client/cl_tent.c \
-@BUILD_CLIENT_TRUE@	client/cl_view.c client/console.c \
-@BUILD_CLIENT_TRUE@	client/console.h client/input.h \
-@BUILD_CLIENT_TRUE@	client/keys.c client/keys.h client/menu.c \
-@BUILD_CLIENT_TRUE@	client/qal.c client/qal.h client/qmenu.c \
-@BUILD_CLIENT_TRUE@	client/qmenu.h client/ref.h client/screen.h \
-@BUILD_CLIENT_TRUE@	client/snd_file.c client/snd_openal.c \
-@BUILD_CLIENT_TRUE@	client/sound.h client/vid.h \
-@BUILD_CLIENT_TRUE@	client/vid_menu.c game/game.h \
-@BUILD_CLIENT_TRUE@	game/q_shared.c game/q_shared.h \
-@BUILD_CLIENT_TRUE@	qcommon/cmd.c qcommon/cmodel.c \
-@BUILD_CLIENT_TRUE@	qcommon/common.c qcommon/crc.c \
-@BUILD_CLIENT_TRUE@	qcommon/crc.h qcommon/cvar.c \
-@BUILD_CLIENT_TRUE@	qcommon/files.c qcommon/mdfour.c \
-@BUILD_CLIENT_TRUE@	qcommon/net_chan.c qcommon/pmove.c \
-@BUILD_CLIENT_TRUE@	qcommon/qcommon.h qcommon/qfiles.h \
-@BUILD_CLIENT_TRUE@	ref_gl/anorms.h ref_gl/anormtab.h \
-@BUILD_CLIENT_TRUE@	ref_gl/glext.h ref_gl/qgl.h \
-@BUILD_CLIENT_TRUE@	ref_gl/r_bloom.c ref_gl/r_draw.c \
-@BUILD_CLIENT_TRUE@	ref_gl/r_image.c ref_gl/r_image.h \
-@BUILD_CLIENT_TRUE@	ref_gl/r_iqm.h ref_gl/r_iqm.c \
-@BUILD_CLIENT_TRUE@	ref_gl/r_light.c ref_gl/r_local.h \
-@BUILD_CLIENT_TRUE@	ref_gl/r_main.c ref_gl/r_math.c \
-@BUILD_CLIENT_TRUE@	ref_gl/r_math.h ref_gl/r_mesh.c \
-@BUILD_CLIENT_TRUE@	ref_gl/r_misc.c ref_gl/r_model.c \
-@BUILD_CLIENT_TRUE@	ref_gl/r_model.h ref_gl/r_particle.c \
-@BUILD_CLIENT_TRUE@	ref_gl/r_postprocess.c ref_gl/r_program.c \
-@BUILD_CLIENT_TRUE@	ref_gl/r_script.c ref_gl/r_script.h \
-@BUILD_CLIENT_TRUE@	ref_gl/r_shadowmaps.c ref_gl/r_shadows.c \
-@BUILD_CLIENT_TRUE@	ref_gl/r_surf.c ref_gl/r_ragdoll.c \
-@BUILD_CLIENT_TRUE@	ref_gl/r_ragdoll.h ref_gl/r_varray.c \
-@BUILD_CLIENT_TRUE@	ref_gl/r_vbo.c ref_gl/r_vlights.c \
-@BUILD_CLIENT_TRUE@	ref_gl/r_warp.c ref_gl/warpsin.h \
-@BUILD_CLIENT_TRUE@	server/server.h server/sv_ccmds.c \
-@BUILD_CLIENT_TRUE@	server/sv_ents.c server/sv_game.c \
-@BUILD_CLIENT_TRUE@	server/sv_init.c server/sv_main.c \
-@BUILD_CLIENT_TRUE@	server/sv_send.c server/sv_user.c \
-@BUILD_CLIENT_TRUE@	server/sv_world.c unix/glob.c unix/glob.h \
-@BUILD_CLIENT_TRUE@	$(am__append_4) $(am__append_5) \
-@BUILD_CLIENT_TRUE@	$(am__append_6)
+crx_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
+	client/cl_http.c client/client.h client/cl_input.c \
+	client/cl_inv.c client/cl_irc.c client/cl_main.c \
+	client/cl_parse.c client/cl_pred.c client/cl_scrn.c \
+	client/cl_stats.c client/cl_tent.c client/cl_view.c \
+	client/console.c client/console.h client/input.h client/keys.c \
+	client/keys.h client/menu.c client/qal.c client/qal.h \
+	client/qmenu.c client/qmenu.h client/ref.h client/screen.h \
+	client/snd_file.c client/snd_openal.c client/sound.h \
+	client/vid.h client/vid_menu.c game/game.h game/q_shared.c \
+	game/q_shared.h qcommon/cmd.c qcommon/cmodel.c \
+	qcommon/common.c qcommon/crc.c qcommon/crc.h qcommon/cvar.c \
+	qcommon/files.c qcommon/mdfour.c qcommon/net_chan.c \
+	qcommon/pmove.c qcommon/qcommon.h qcommon/qfiles.h \
+	ref_gl/anorms.h ref_gl/anormtab.h ref_gl/glext.h ref_gl/qgl.h \
+	ref_gl/r_bloom.c ref_gl/r_draw.c ref_gl/r_image.c \
+	ref_gl/r_image.h ref_gl/r_iqm.h ref_gl/r_iqm.c \
+	ref_gl/r_light.c ref_gl/r_local.h ref_gl/r_main.c \
+	ref_gl/r_math.c ref_gl/r_math.h ref_gl/r_mesh.c \
+	ref_gl/r_misc.c ref_gl/r_model.c ref_gl/r_model.h \
+	ref_gl/r_particle.c ref_gl/r_postprocess.c ref_gl/r_program.c \
+	ref_gl/r_script.c ref_gl/r_script.h ref_gl/r_shadowmaps.c \
+	ref_gl/r_shadows.c ref_gl/r_surf.c ref_gl/r_ragdoll.c \
+	ref_gl/r_ragdoll.h ref_gl/r_varray.c ref_gl/r_vbo.c \
+	ref_gl/r_vlights.c ref_gl/r_warp.c ref_gl/warpsin.h \
+	server/server.h server/sv_ccmds.c server/sv_ents.c \
+	server/sv_game.c server/sv_init.c server/sv_main.c \
+	server/sv_send.c server/sv_user.c server/sv_world.c \
+	unix/glob.c unix/glob.h $(am__append_5) $(am__append_6)
 
-# OSX Darwin X11 sources
-@BUILD_DARWIN_TRUE@crx_ded_SOURCES = \
-@BUILD_DARWIN_TRUE@	client/anorms.h \
-@BUILD_DARWIN_TRUE@	game/game.h \
-@BUILD_DARWIN_TRUE@	game/q_shared.c \
-@BUILD_DARWIN_TRUE@	game/q_shared.h \
-@BUILD_DARWIN_TRUE@	null/cl_null.c \
-@BUILD_DARWIN_TRUE@	qcommon/cmd.c \
-@BUILD_DARWIN_TRUE@	qcommon/cmodel.c \
-@BUILD_DARWIN_TRUE@	qcommon/common.c \
-@BUILD_DARWIN_TRUE@	qcommon/crc.c \
-@BUILD_DARWIN_TRUE@	qcommon/cvar.c \
-@BUILD_DARWIN_TRUE@	qcommon/files.c \
-@BUILD_DARWIN_TRUE@	qcommon/mdfour.c \
-@BUILD_DARWIN_TRUE@	qcommon/net_chan.c \
-@BUILD_DARWIN_TRUE@	qcommon/pmove.c \
-@BUILD_DARWIN_TRUE@	qcommon/qcommon.h \
-@BUILD_DARWIN_TRUE@	qcommon/qfiles.h \
-@BUILD_DARWIN_TRUE@	server/server.h \
-@BUILD_DARWIN_TRUE@	server/sv_ccmds.c \
-@BUILD_DARWIN_TRUE@	server/sv_ents.c \
-@BUILD_DARWIN_TRUE@	server/sv_game.c \
-@BUILD_DARWIN_TRUE@	server/sv_init.c \
-@BUILD_DARWIN_TRUE@	server/sv_main.c \
-@BUILD_DARWIN_TRUE@	server/sv_send.c \
-@BUILD_DARWIN_TRUE@	server/sv_user.c \
-@BUILD_DARWIN_TRUE@	server/sv_world.c \
-@BUILD_DARWIN_TRUE@	unix/glob.c \
-@BUILD_DARWIN_TRUE@	unix/glob.h \
-@BUILD_DARWIN_TRUE@	unix/glob.h \
-@BUILD_DARWIN_TRUE@	unix/net_udp.c \
-@BUILD_DARWIN_TRUE@	unix/q_shunix.c \
-@BUILD_DARWIN_TRUE@	unix/rw_unix.h \
-@BUILD_DARWIN_TRUE@	unix/sys_unix.c
-
-
-# linux/unix sources
-@BUILD_UNIX_TRUE@crx_ded_SOURCES = \
-@BUILD_UNIX_TRUE@	client/anorms.h \
-@BUILD_UNIX_TRUE@	game/game.h \
-@BUILD_UNIX_TRUE@	game/q_shared.c \
-@BUILD_UNIX_TRUE@	game/q_shared.h \
-@BUILD_UNIX_TRUE@	null/cl_null.c \
-@BUILD_UNIX_TRUE@	qcommon/cmd.c \
-@BUILD_UNIX_TRUE@	qcommon/cmodel.c \
-@BUILD_UNIX_TRUE@	qcommon/common.c \
-@BUILD_UNIX_TRUE@	qcommon/crc.c \
-@BUILD_UNIX_TRUE@	qcommon/cvar.c \
-@BUILD_UNIX_TRUE@	qcommon/files.c \
-@BUILD_UNIX_TRUE@	qcommon/mdfour.c \
-@BUILD_UNIX_TRUE@	qcommon/net_chan.c \
-@BUILD_UNIX_TRUE@	qcommon/pmove.c \
-@BUILD_UNIX_TRUE@	qcommon/qcommon.h \
-@BUILD_UNIX_TRUE@	qcommon/qfiles.h \
-@BUILD_UNIX_TRUE@	server/server.h \
-@BUILD_UNIX_TRUE@	server/sv_ccmds.c \
-@BUILD_UNIX_TRUE@	server/sv_ents.c \
-@BUILD_UNIX_TRUE@	server/sv_game.c \
-@BUILD_UNIX_TRUE@	server/sv_init.c \
-@BUILD_UNIX_TRUE@	server/sv_main.c \
-@BUILD_UNIX_TRUE@	server/sv_send.c \
-@BUILD_UNIX_TRUE@	server/sv_user.c \
-@BUILD_UNIX_TRUE@	server/sv_world.c \
-@BUILD_UNIX_TRUE@	unix/glob.c \
-@BUILD_UNIX_TRUE@	unix/glob.h \
-@BUILD_UNIX_TRUE@	unix/glob.h \
-@BUILD_UNIX_TRUE@	unix/net_udp.c \
-@BUILD_UNIX_TRUE@	unix/q_shunix.c \
-@BUILD_UNIX_TRUE@	unix/rw_unix.h \
-@BUILD_UNIX_TRUE@	unix/sys_unix.c
+# Dedicated Server sources (Unix only)
+crx_ded_SOURCES = \
+	client/anorms.h \
+	game/game.h \
+	game/q_shared.c \
+	game/q_shared.h \
+	null/cl_null.c \
+	qcommon/cmd.c \
+	qcommon/cmodel.c \
+	qcommon/common.c \
+	qcommon/crc.c \
+	qcommon/cvar.c \
+	qcommon/files.c \
+	qcommon/mdfour.c \
+	qcommon/net_chan.c \
+	qcommon/pmove.c \
+	qcommon/qcommon.h \
+	qcommon/qfiles.h \
+	server/server.h \
+	server/sv_ccmds.c \
+	server/sv_ents.c \
+	server/sv_game.c \
+	server/sv_init.c \
+	server/sv_main.c \
+	server/sv_send.c \
+	server/sv_user.c \
+	server/sv_world.c \
+	unix/glob.c \
+	unix/glob.h \
+	unix/glob.h \
+	unix/net_udp.c \
+	unix/q_shunix.c \
+	unix/rw_unix.h \
+	unix/sys_unix.c
 
 
 # Game module sources
@@ -1040,7 +893,7 @@ win32/crx-vid_dll.$(OBJEXT): win32/$(am__dirstamp) \
 	win32/$(DEPDIR)/$(am__dirstamp)
 crx$(EXEEXT): $(crx_OBJECTS) $(crx_DEPENDENCIES) 
 	@rm -f crx$(EXEEXT)
-	$(AM_V_CCLD)$(crx_LINK) $(crx_OBJECTS) $(crx_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(crx_OBJECTS) $(crx_LDADD) $(LIBS)
 game/crx_ded-q_shared.$(OBJEXT): game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
 null/$(am__dirstamp):

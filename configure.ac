@@ -23,7 +23,7 @@
 # configure.ac for
 #  GNU/Linux, Unix
 #  Windows (32-bit) using MinGW - Experimental
-#  Mac OSX using X11/Darwin and MacPorts.
+#  Mac OS X / Darwin using X11
 
 AC_PREREQ(2.61)
 AC_INIT([alienarena],[7.46.alpha2],[alienrace@comcast.net],[alienarena])
@@ -36,7 +36,7 @@ AC_CONFIG_HEADERS([config/config.h])
 dnl 1.11 = require automake 1.11 or greater
 dnl foreign = do not apply GNU doc requirements
 dnl subdir-objects = compile objects into their sub directories
-dnl silent-rules = less output
+dnl silent-rules = less output (--disable-silent-rules for more output)
 dnl dist-zip = build .zip distribution in addition to .tar.gz 
 AM_INIT_AUTOMAKE([ 1.11 foreign subdir-objects silent-rules dist-zip ])
 AM_SILENT_RULES([yes])
@@ -57,7 +57,6 @@ AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PROG_MKDIR_P
 AM_PROG_CC_C_O
-
 PKG_PROG_PKG_CONFIG
 
 #
@@ -65,39 +64,46 @@ PKG_PROG_PKG_CONFIG
 #
 cond_build_win32=no
 cond_build_unix=no
-cond_build_darwin=no
+unix_host=generic
 AS_CASE([ ${host} ],
 	[ *-*-mingw* ],[ cond_build_win32=yes ],
-	[ *-*-darwin*],[ cond_build_darwin=yes ],
+	[ *-*-darwin*],
+		[ 
+		cond_build_unix=yes
+		unix_host=darwin 
+		],
+	[ *-*-linux* ],
+		[
+		cond_build_unix=yes
+		unix_host=linux
+		],		 
 	[ cond_build_unix=yes ])
 
 AM_CONDITIONAL([BUILD_WIN32],[ test "x${cond_build_win32}" = xyes ])
 AM_CONDITIONAL([BUILD_UNIX],[ test "x${cond_build_unix}" = xyes ])
-AM_CONDITIONAL([BUILD_DARWIN],[ test "x${cond_build_darwin}" = xyes ])
 
 #
 # Unix/Linux/Darwin dedicated server only build option
 #
-build_client=yes
-AM_COND_IF([BUILD_WIN32],,
+AC_MSG_CHECKING([whether to build the client])
+AM_COND_IF([BUILD_UNIX],
 	[
-	AC_MSG_CHECKING([whether to build the client])
 	AC_ARG_ENABLE( 
 		[client],
 		[AS_HELP_STRING([--disable-client],
 			[build dedicated server only, not the client (default:no)])],
 		[build_client=${enableval}],
 		[build_client=yes])
-	AC_MSG_RESULT([${build_client}])
-	])
+	],
+	[build_client=yes])
+AC_MSG_RESULT([${build_client}])
 AM_CONDITIONAL([BUILD_CLIENT],[ test "x${build_client}" = xyes ])
 
 # Alternate Install. Install in the traditional single directory way.
-# Probably required for map making tools to work. Also, good when updating
+# Might be required for map making tools to work. Also, good when updating
 # from SVN regularly. Affects how Makefile sets DATADIR and does make-install.
-# for now, win32 is always alternate install
+# for now, win32/mingw is always alternate install
 #
-alternate_install=no
 AM_COND_IF([BUILD_WIN32],
 	[alternate_install=yes],
 	[
@@ -107,28 +113,49 @@ AM_COND_IF([BUILD_WIN32],
 		[AS_HELP_STRING([--enable-alternate-install],
 			[traditional single directory, in-place installation (default:no)])],
 		[alternate_install=${enableval}],
-		[alternate_install=no]
-		)
+		[alternate_install=no])
 	AC_MSG_RESULT([${alternate_install}])
 ])
 
 AM_CONDITIONAL([ALTERNATE_INSTALL],[ test "x${alternate_install}" = xyes ])
 
+
+#
+# OpenAL package options
+#
+AC_MSG_CHECKING([whether to use Apple OpenAL])
+AC_ARG_WITH([apple-openal],
+	[AS_HELP_STRING(
+		[--with-apple-openal],
+		[use Apple OpenAL on OS X (default: OS X:yes, otherwise:no)])
+	],
+	[apple_openal=${withval}],
+	[AS_IF([ test x${unix_host} = xdarwin ],
+		[apple_openal=yes],
+		[apple_openal=no])
+	])
+AC_MSG_RESULT([${apple_openal}])	
+
 dnl
 dnl symbols for config.h
 dnl
+
+dnl The special case symbols may not be needed. Might be handy for debug, though.
 AM_COND_IF([BUILD_UNIX], 
-	[AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])])
+	[
+	AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])
+	
+	AS_CASE([ ${unix_host} ],
+		[ darwin ],
+			[AC_DEFINE([DARWIN_SPECIAL_CASE],1,[darwin-specific conditional compile])],
+		[ linux ],
+			[AC_DEFINE([LINUX_SPECIAL_CASE],1,[linux-specific conditional compile])],
+		[ generic ]
+			[AC_DEFINE([GENERIC_UNIX],1,[non-specific unix conditional compile])])
+	])
 
 AM_COND_IF([BUILD_WIN32],
 	[AC_DEFINE([WIN32_VARIANT],1,[win32-specific conditional compile])])
-	
-dnl for cases where darwin differs from unix/linux	
-AM_COND_IF([BUILD_DARWIN],
-	[
-	AC_DEFINE([DARWIN_SPECIAL_CASE],1,[darwin-specific conditional compile])
-	AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])
-	])
 
 AC_DEFINE_UNQUOTED(CPUSTRING, "${host_cpu}", [Canonical CPU identification])
 AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
@@ -139,22 +166,19 @@ AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
 
 AC_SEARCH_LIBS(acos,[m])
 
-dnl could be AC_SEARCH_LIBS([pthread_mutex_init],[pthread])
-dnl but this is probably more portable
-dnl TODO: figure out why it puts 3 -pthreads on the command line
-dnl
-AX_PTHREAD(,[AC_MSG_ERROR(["Required pthreads support not found."])])
-LIBS="$PTHREAD_LIBS $LIBS"
-CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-CC="$PTHREAD_CC"
-
 AC_SEARCH_LIBS([dlopen],[dl])
+
+dnl TODO: possible to have a variable here for server_CFLAGS, server_LIBS ???
 
 dnl
 dnl start of client-only library requirements
 dnl
 AM_COND_IF([BUILD_CLIENT],
 [
+	dnl could be AC_SEARCH_LIBS([pthread_mutex_init],[pthread])
+	dnl but this is probably more portable, see m4/ax_pthread.m4
+	AX_PTHREAD(,[AC_MSG_ERROR(["Required pthreads support not found."])])
+	
 	AC_SEARCH_LIBS([zlibVersion],[z zlib],,
 		[AC_MSG_ERROR(["Required zlib library not found."])])
 
@@ -171,16 +195,8 @@ AM_COND_IF([BUILD_CLIENT],
 		[AC_MSG_ERROR(["Required vorbisfile library not found."])],
 		[ -lvorbis -logg ])
 
-dnl theory: darwin always has openal in a framework
-dnl TODO: find out how to search for the darwin openal driver
-dnl TEMPORARY BYPASS
-dnl	AM_COND_IF([BUILD_DARWIN],,
-dnl		[AC_SEARCH_LIBS([alGenBuffers],[openal openal32 openal-soft],,
-dnl			[AC_MSG_ERROR(["Required openal library not found."])])])
-
-dnl TEMPORARY: warning rather than error, for Darwin work-in-progress
 	AC_SEARCH_LIBS([alGenBuffers],[openal openal32 openal-soft],,
-			[AC_MSG_WARN(["Required openal library not found."])])
+		[AC_MSG_ERROR(["Required openal library not found."])])
 
 	curl_xtralibs=""
 	AM_COND_IF([BUILD_WIN32],
@@ -192,90 +208,90 @@ dnl TEMPORARY: warning rather than error, for Darwin work-in-progress
 		[AC_MSG_WARN(["Required curl library not found."])],
 		[ $curl_xtralibs ])
 
-	dnl TODO: do we really have to search for X11 and DGA while building for Win32? - BlackIce
-	dnl No, but the MinGW build probably does not work anymore anyway - strat :)
+	AM_COND_IF([BUILD_UNIX],
+	[
+		AC_PATH_X
 
-	AC_PATH_X
-
-	dnl
-	dnl XF86 VidMode extension
-	dnl
-	dnl If no option is specified, then check for the library and act accordingly.
-	dnl If "--without-xf86vm" is specified, do not check, and disable the library.
-	dnl If "--with-xf86vm" is specified, check and bail out if it cannot be found.
-	dnl
-	AC_ARG_WITH([xf86vm],
-		[AS_HELP_STRING([--with(out)-xf86vm],[include XF86 VidMode support (default: check)])],
-		[],
-		[with_xf86vm=check])
-	have_Xxf86vm=no
-	AS_IF([ test "x$with_xf86vm" != "xno" ],[
-		AC_SEARCH_LIBS([XF86VidModeQueryVersion],[Xxf86vm],[
-			AC_CHECK_HEADERS([X11/extensions/xf86vmode.h],[have_Xxf86vm=yes],,[
-				#include <X11/Xlib.h>
+		dnl
+		dnl XF86 VidMode extension  TODO: check on pkg-config for this
+		dnl
+		dnl If no option is specified, then check for the library and act accordingly.
+		dnl If "--without-xf86vm" is specified, do not check, and disable the library.
+		dnl If "--with-xf86vm" is specified, check and bail out if it cannot be found.
+		dnl
+		AC_ARG_WITH([xf86vm],
+			[AS_HELP_STRING([--with(out)-xf86vm],[include XF86 VidMode support (default: check)])],
+			[],
+			[with_xf86vm=check])
+		have_Xxf86vm=no
+		AS_IF([ test "x$with_xf86vm" != "xno" ],[
+			AC_SEARCH_LIBS([XF86VidModeQueryVersion],[Xxf86vm],[
+				AC_CHECK_HEADERS([X11/extensions/xf86vmode.h],[have_Xxf86vm=yes],,[
+					#include <X11/Xlib.h>
+				])
+			])
+	
+			AS_IF([ test "x$with_xf86vm" = "xyes" ],[
+				AS_IF([ test "x${have_Xxf86vm}" = "xno" ],
+					[AC_MSG_FAILURE([--with-xf86vm specified, but the library or headers could not be found])
+				])
 			])
 		])
-
-		AS_IF([ test "x$with_xf86vm" = "xyes" ],[
-			AS_IF([ test "x${have_Xxf86vm}" = "xno" ],
-				[AC_MSG_FAILURE([--with-xf86vm specified, but the library or headers could not be found])
+	
+	
+		dnl
+		dnl XF86 DGA extension  TODO: check on pkg-config for this
+		dnl
+		dnl If no option is specified, then check for the library and act accordingly.
+		dnl If "--without-xf86dga" is specified, do not check, and disable the library.
+		dnl If "--with-xf86dga" is specified, check and bail out if it cannot be found.
+		dnl
+		AC_ARG_WITH([xf86dga],
+			[AS_HELP_STRING([--with(out)-xf86dga],[include XF86 DGA support (default: check)])],
+			[],
+			[with_xf86dga=check])
+		have_Xxf86dga=no
+		AS_IF([ test "x$with_xf86dga" != "xno" ],[
+			AC_SEARCH_LIBS([XF86DGAQueryVersion],[Xxf86dga xxf86dga],[
+				AC_CHECK_HEADERS([X11/extensions/Xxf86dga.h X11/extensions/xf86dga.h],[
+					AC_DEFINE([HAVE_XXF86DGA],1,[Define to 1 if you have the Xxf86dga library])
+					have_Xxf86dga=yes
+				],,[
+					#include <X11/Xlib.h>  
+					#include <X11/Xproto.h>
+					#include <X11/Xfuncproto.h>
+				])
+			])
+			AS_IF([ test "x$with_xf86dga" = "xyes" ],[
+				AS_IF([ test "x${have_Xxf86dga}" = "xno" ],
+					[AC_MSG_FAILURE([--with-xf86dga specified, but the library or headers could not be found])
+				])
 			])
 		])
 	])
 
-
-	dnl
-	dnl XF86 DGA extension
-	dnl
-	dnl If no option is specified, then check for the library and act accordingly.
-	dnl If "--without-xf86dga" is specified, do not check, and disable the library.
-	dnl If "--with-xf86dga" is specified, check and bail out if it cannot be found.
-	dnl
-	AC_ARG_WITH([xf86dga],
-		[AS_HELP_STRING([--with(out)-xf86dga],[include XF86 DGA support (default: check)])],
-		[],
-		[with_xf86dga=check])
-	have_Xxf86dga=no
-	AS_IF([ test "x$with_xf86dga" != "xno" ],[
-		AC_SEARCH_LIBS([XF86DGAQueryVersion],[Xxf86dga xxf86dga],[
-			AC_CHECK_HEADERS([X11/extensions/Xxf86dga.h X11/extensions/xf86dga.h],[
-				AC_DEFINE([HAVE_XXF86DGA],1,[Define to 1 if you have the Xxf86dga library])
-				have_Xxf86dga=yes
-			],,[
-				#include <X11/Xlib.h>  
-				#include <X11/Xproto.h>
-				#include <X11/Xfuncproto.h>
-			])
-		])
-		AS_IF([ test "x$with_xf86dga" = "xyes" ],[
-			AS_IF([ test "x${have_Xxf86dga}" = "xno" ],
-				[AC_MSG_FAILURE([--with-xf86dga specified, but the library or headers could not be found])
-			])
-		])
-	])
-
-# these set GL_CFLAGS, GL_LIBS, GLU_CFLAGS, GLU_LIBS
+	dnl these set GL_CFLAGS, GL_LIBS, GLU_CFLAGS, GLU_LIBS
+	dnl see m4/ax_check_gl.m4 and m4/ax_check_glu.m4
 	AX_CHECK_GL
 	AX_CHECK_GLU
-	CFLAGS="$CFLAGS $GL_CFLAGS $GLU_CFLAGS"
-	LIBS="$GLU_LIBS $LIBS"
 
-# ODE lib for ragdoll
-	AC_SEARCH_LIBS([dWorldCreate],[ode],,
+	dnl ODE lib for ragdoll, use pkg-config for possible -DdDOUBLE in ODE_CFLAGS
+	AC_SEARCH_LIBS([dWorldCreate],[ode],
+		[PKG_CHECK_MODULES([ODE],[ode],[AC_SUBST([ODE_CFLAGS])])],
 		[AC_MSG_ERROR(["Required ode library not found."])])
 
-# Hack in the extras for Win32 and Darwin
-# TODO: this may not be the best way to do this
+	dnl Hack in the extras for Win32
+	dnl TODO: this may not be the best way to do this
 	win32_syslibs=""
 	AM_COND_IF([BUILD_WIN32],
 		[ win32_syslibs="-lmingw32 -lwinmm -lwsock32 -lws2_32 -lgdi32 -luser32"])
 	AC_SUBST([WIN32_LIBS],[$win32_syslibs])
 
-dnl TODO: Is this right?
-dnl framework required for OpenAL, but not for OpenGL.
+	dnl darwin openal option
 	darwin_frameworks=""
-	AM_COND_IF([BUILD_DARWIN],
-		[ darwin_frameworks="-framework OpenAL"])
+	AS_IF([ test "x${unix_host}" = xdarwin ],
+		[AS_IF([ test "x${apple_openal}" = xyes ],
+			[ darwin_frameworks="-framework OpenAL"])])
 	AC_SUBST([DARWIN_FRAMEWORKS],[$darwin_frameworks])
 
 ])	
@@ -325,16 +341,6 @@ AM_COND_IF([BUILD_CLIENT],
 		[AC_MSG_ERROR("Required cURL header file not found.")])
 
 	AM_COND_IF([BUILD_UNIX],
-	[
-		AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
-			[AC_MSG_ERROR("Required X11 header files not found")])
-
-		AC_CHECK_HEADERS([GL/gl.h GL/glu.h GL/glx.h],,
-			[AC_MSG_ERROR("Required OpenGL header files not found.")])
-
-	])
-
-	AM_COND_IF([BUILD_DARWIN],
 	[
 		AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
 			[AC_MSG_ERROR("Required X11 header files not found")])
@@ -404,31 +410,44 @@ AC_CHECK_FUNCS([gettimeofday putenv _putenv select])
 # Set names of dlopened libraries for config.h
 #
 
+dnl linux_gnu and generic get the default.
+dnl TODO: darwin needs full path to libraries, does not have default search path (?)
+dnl TODO: get correct darwin .dylib name for non-apple
 AM_COND_IF([BUILD_UNIX],
-	[AC_DEFINE([OPENGL_DRIVER],["libGL.so.1"],[OpenGL shared lib name])])
+	[AS_CASE([ ${unix_host} ],
+		[ darwin ],
+			[
+			AC_DEFINE([OPENGL_DRIVER],
+				["libGL.dylib"],[OpenGL dynamic lib name])
 
-AM_COND_IF([BUILD_UNIX],
-	[AC_DEFINE([OPENAL_DRIVER],["libopenal.so.1"],[OpenAL shared lib name])])
-
-AM_COND_IF([BUILD_DARWIN],
-	[AC_DEFINE([OPENGL_DRIVER],["libGL.dylib"],[OpenGL dynamic lib name])])
-
-AM_COND_IF([BUILD_DARWIN],
-	[AC_DEFINE([OPENAL_DRIVER],
-		["/System/Library/Frameworks/OpenAL.framework/Versions/Current/OpenAL"],
-		[OpenAL dynamic lib name])])
+			AS_IF([ test "x${apple_openal}" = xyes ],
+				[AC_DEFINE([OPENAL_DRIVER],
+					["/System/Library/Frameworks/OpenAL.framework/OpenAL"],
+					[OpenAL dynamic lib name])],
+				[AC_DEFINE([OPENAL_DRIVER],
+					["libOpenAL.dylib"],
+					[OpenAL dynamic lib name])])
+			],								
+		[
+		AC_DEFINE([OPENGL_DRIVER],
+			["libGL.so.1"],[OpenGL shared lib name])
+		
+		AC_DEFINE([OPENAL_DRIVER],
+			["libopenal.so.1"],[OpenAL shared lib name])
+			
+		])
+	])
 
 AM_COND_IF([BUILD_WIN32],
-	[AC_DEFINE([OPENGL_DRIVER],["opengl32"],[OpenGL DLL name])])
+	[
+	AC_DEFINE([OPENGL_DRIVER],["opengl32"],[OpenGL DLL name])
+	
+	AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])
+	])
 
-AM_COND_IF([BUILD_WIN32],
-	[AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])])
-
-# 2 required gcc options
+# 2 required gcc options, see m4/ax_cflags_gcc_option.m4
 AX_CFLAGS_GCC_OPTION([-ffast-math])
 AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
-# TODO: consider putting -DDedicated here
-
 
 
 #########################################################################################################
