@@ -71,6 +71,7 @@
       <WarningLevel>Level3</WarningLevel>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <StructMemberAlignment>1Byte</StructMemberAlignment>
     </ClCompile>
     <Lib>
       <OutputFile>$(LocalLibDir)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>

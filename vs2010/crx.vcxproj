@@ -61,7 +61,6 @@
       <BrowseInformation>true</BrowseInformation>
       <DisableSpecificWarnings>4996;4244;4018</DisableSpecificWarnings>
       <CompileAs>CompileAsC</CompileAs>
-      <StructMemberAlignment>1Byte</StructMemberAlignment>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
