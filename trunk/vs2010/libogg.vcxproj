@@ -40,103 +40,59 @@
     <Import Project="$(SolutionDir)alienarena_w32.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(LocalLib)$(Configuration)\</OutDir>
-    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(LocalLib)$(Configuration)\</OutDir>
-    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(LiboggSrc)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <FloatingPointModel>Fast</FloatingPointModel>
-      <BrowseInformation>true</BrowseInformation>
-      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <AdditionalIncludeDirectories>$(LiboggSrcDir)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
-      <StructMemberAlignment>1Byte</StructMemberAlignment>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>FOR %%h IN ( $(LiboggSrc)include\ogg\ogg.h  $(LiboggSrc)include\ogg\os_types.h ) DO copy %%h  $(LocalInclude)ogg\</Command>
+      <Command>FOR %%h IN (
+ $(LiboggSrcDir)include\ogg\ogg.h
+ $(LiboggSrcDir)include\ogg\os_types.h
+ ) DO copy %%h  $(LocalIncludeDir)ogg\</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy header files to common local include directory</Message>
     </PostBuildEvent>
-    <Lib>
-      <OutputFile>$(LocalLib)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
-    </Lib>
+    <Lib />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>Full</Optimization>
-      <FunctionLevelLinking>
-      </FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(LiboggSrc)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <FloatingPointModel>Fast</FloatingPointModel>
-      <BrowseInformation>true</BrowseInformation>
-      <ExceptionHandling>
-      </ExceptionHandling>
-      <BasicRuntimeChecks>
-      </BasicRuntimeChecks>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FloatingPointExceptions>
-      </FloatingPointExceptions>
-      <StringPooling>true</StringPooling>
-      <OmitFramePointers>true</OmitFramePointers>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <RuntimeTypeInfo>
-      </RuntimeTypeInfo>
-      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <MinimalRebuild>
-      </MinimalRebuild>
-      <SmallerTypeCheck>
-      </SmallerTypeCheck>
-      <StructMemberAlignment>1Byte</StructMemberAlignment>
-      <EnableEnhancedInstructionSet>
-      </EnableEnhancedInstructionSet>
+      <AdditionalIncludeDirectories>$(LiboggSrcDir)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <Lib>
-      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
-      <OutputFile>$(LocalLib)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
-    </Lib>
+    <Lib />
     <PostBuildEvent>
-      <Command>FOR %%h IN ( $(LiboggSrc)include\ogg\ogg.h  $(LiboggSrc)include\ogg\os_types.h ) DO copy %%h  $(LocalInclude)ogg\</Command>
+      <Command>FOR %%h IN (
+ $(LiboggSrcDir)include\ogg\ogg.h
+ $(LiboggSrcDir)include\ogg\os_types.h
+ ) DO copy %%h  $(LocalIncludeDir)ogg\</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy header files to common local include directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="$(LiboggSrc)src\bitwise.c" />
-    <ClCompile Include="$(LiboggSrc)src\framing.c" />
+    <ClCompile Include="$(LiboggSrcDir)src\bitwise.c" />
+    <ClCompile Include="$(LiboggSrcDir)src\framing.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(LiboggSrc)include\ogg\ogg.h" />
-    <ClInclude Include="$(LiboggSrc)include\ogg\os_types.h" />
+    <ClInclude Include="$(LiboggSrcDir)include\ogg\ogg.h" />
+    <ClInclude Include="$(LiboggSrcDir)include\ogg\os_types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

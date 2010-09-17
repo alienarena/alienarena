@@ -40,25 +40,13 @@
     <Import Project="$(SolutionDir)alienarena_w32.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(LocalLib)$(Configuration)\</OutDir>
-    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(LocalLib)$(Configuration)\</OutDir>
-    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
-    <IncludePath>$(IncludePath)</IncludePath>
-  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(LibodeSrc)include;$(LibodeInclude);$(LocalInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;dSINGLE;WIN32;_CRT_SECURE_NO_WARNINGS;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <FloatingPointModel>Fast</FloatingPointModel>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <PreprocessorDefinitions>_DEBUG;dDOUBLE;WIN32;_CRT_SECURE_NO_WARNINGS;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(LibodeSrcDir)include\;$(LibodeSrcDir)ode\src;$(LibodeSrcDir)ode\src\joints;$(LibodeSrcDir)OPCODE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -66,183 +54,260 @@
       <ProgramDataBaseFileName>$(OutDir)libode.pdb</ProgramDataBaseFileName>
     </Link>
     <PostBuildEvent>
-      <Command>FOR %%h IN ( $(LibodeSrc)include\ode\*.h ) DO copy %%h  $(LocalInclude)ode\</Command>
+      <Command>FOR %%h IN (
+ $(LibodeSrcDir)include\ode\*.h
+ ) DO copy %%h  $(LocalIncludeDir)ode\</Command>
       <Message>Copy header files to common local include directory</Message>
     </PostBuildEvent>
-    <Lib>
-      <OutputFile>$(LocalLib)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
-    </Lib>
+    <Lib />
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSingleLib|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <Optimization>Full</Optimization>
-      <AdditionalIncludeDirectories>$(LibodeInclude);$(LocalInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>dSINGLE;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>
-      </DebugInformationFormat>
+      <AdditionalIncludeDirectories>$(LibodeSrcDir)include\;$(LibodeSrcDir)ode\src;$(LibodeSrcDir)ode\src\joints;$(LibodeSrcDir)OPCODE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>dDOUBLE;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <OptimizeReferences>true</OptimizeReferences>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <ProgramDataBaseFileName>$(OutDir)libode.pdb</ProgramDataBaseFileName>
     </Link>
     <PostBuildEvent>
-      <Command>FOR %%h IN ( $(LibodeSrc)include\ode\ode.h  ) DO copy %%h  $(LocalInclude)ode\</Command>
+      <Command>FOR %%h IN ( $(LibodeSrcDir)include\ode\ode.h  ) DO copy %%h  $(LocalIncludeDir)ode\</Command>
       <Message>Copy header files to common local include directory</Message>
     </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <AdditionalIncludeDirectories>$(LibodeSrc)include;$(LibodeInclude);$(LocalInclude);C:\alienarena\vs2010\libsrc\ode-0.11.1\OPCODE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>Level3</WarningLevel>
-      <BufferSecurityCheck>true</BufferSecurityCheck>
-      <Optimization>Full</Optimization>
-      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-      <IntrinsicFunctions>false</IntrinsicFunctions>
-      <OmitFramePointers>true</OmitFramePointers>
-      <PreprocessorDefinitions>dSINGLE;WIN32;_CRT_SECURE_NO_WARNINGS;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <FloatingPointModel>Precise</FloatingPointModel>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-    </ClCompile>
     <Lib>
-      <OutputFile>$(LocalLib)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
-      <AdditionalLibraryDirectories>C:\alienarena\vs2010\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libopcode.lib</AdditionalDependencies>
+      <OutputFile>$(LocalLibDir)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
     <PostBuildEvent>
-      <Command>FOR %%h IN ( $(LibodeSrc)include\ode\*.h ) DO copy %%h  $(LocalInclude)ode\</Command>
+      <Command>FOR %%h IN (
+ $(LibodeSrcDir)include\*.h
+ ) DO copy %%h  $(LocalIncludeDir)ode\</Command>
       <Message>Copy header files to common local include directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="$(LibodeSrc)include\ode\collision.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\collision_space.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\collision_trimesh.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\common.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\compatibility.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\contact.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\error.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\export-dif.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\mass.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\matrix.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\memory.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\misc.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\objects.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\ode.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\odeconfig.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\odecpp.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\odecpp_collision.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\odeinit.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\odemath.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\rotation.h" />
-    <ClInclude Include="$(LibodeSrc)include\ode\timer.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\amotor.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\ball.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\contact.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\fixed.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\hinge.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\hinge2.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\joint.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\joints.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\joint_internal.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\lmotor.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\null.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\piston.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\plane2d.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\pr.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\pu.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\slider.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\joints\universal.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\array.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\collision_kernel.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\collision_space_internal.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\collision_std.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\collision_transform.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\collision_util.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\config.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\heightfield.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\lcp.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\mat.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\objects.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\obstack.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\odeou.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\odetls.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\quickstep.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\step.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\testing.h" />
-    <ClInclude Include="$(LibodeSrc)ode\src\util.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\collision.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\collision_space.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\collision_trimesh.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\common.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\compatibility.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\contact.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\error.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\export-dif.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\mass.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\matrix.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\memory.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\misc.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\objects.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\ode.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\odeconfig.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\odecpp.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\odecpp_collision.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\odeinit.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\odemath.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\rotation.h" />
+    <ClInclude Include="$(LibodeSrcDir)include\ode\timer.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\amotor.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\ball.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\contact.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\fixed.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\hinge.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\hinge2.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\joint.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\joints.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\joint_internal.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\lmotor.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\null.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\piston.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\plane2d.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\pr.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\pu.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\slider.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\joints\universal.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\array.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\collision_kernel.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\collision_space_internal.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\collision_std.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\collision_transform.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\collision_trimesh_colliders.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\collision_trimesh_internal.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\collision_util.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\config.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\heightfield.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\lcp.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\mat.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\objects.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\obstack.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\odeou.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\odetls.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\quickstep.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\step.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\testing.h" />
+    <ClInclude Include="$(LibodeSrcDir)ode\src\util.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Opcode.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_AABBCollider.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_AABBTree.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_BaseModel.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_BoxBoxOverlap.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_Collider.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_Common.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_HybridModel.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_IceHook.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_LSSAABBOverlap.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_LSSCollider.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_LSSTriOverlap.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_MeshInterface.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_Model.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_OBBCollider.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_OptimizedTree.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_Picking.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_PlanesAABBOverlap.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_PlanesCollider.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_PlanesTriOverlap.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_RayAABBOverlap.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_RayCollider.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_RayTriOverlap.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_Settings.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_SphereAABBOverlap.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_SphereCollider.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_SphereTriOverlap.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_TreeBuilders.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_TreeCollider.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_TriBoxOverlap.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_TriTriOverlap.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\OPC_VolumeCollider.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Stdafx.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceAABB.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceAxes.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceBoundingSphere.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceContainer.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceFPU.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceHPoint.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceIndexedTriangle.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceLSS.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceMatrix3x3.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceMatrix4x4.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceMemoryMacros.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceOBB.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IcePairs.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IcePlane.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IcePoint.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IcePreprocessor.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceRandom.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceRay.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceRevisitedRadix.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceSegment.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceTriangle.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceTriList.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceTypes.h" />
+    <ClInclude Include="$(LibodeSrcDir)OPCODE\Ice\IceUtils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\amotor.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\ball.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\contact.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\fixed.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\hinge.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\hinge2.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\joint.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\lmotor.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\null.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\piston.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\plane2d.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\pr.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\pu.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\slider.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\joints\universal.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\fastdot.c" />
-    <ClCompile Include="$(LibodeSrc)ode\src\fastldlt.c" />
-    <ClCompile Include="$(LibodeSrc)ode\src\fastlsolve.c" />
-    <ClCompile Include="$(LibodeSrc)ode\src\fastltsolve.c" />
-    <ClCompile Include="$(LibodeSrc)ode\src\array.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\box.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\capsule.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\collision_cylinder_box.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\collision_cylinder_plane.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\collision_cylinder_sphere.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\collision_kernel.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\collision_quadtreespace.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\collision_sapspace.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\collision_space.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\collision_transform.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\collision_trimesh_disabled.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\collision_trimesh_trimesh_new.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\collision_util.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\convex.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\cylinder.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\error.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\export-dif.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\heightfield.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\lcp.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\mass.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\mat.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\matrix.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\memory.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\misc.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\obstack.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\ode.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\odeinit.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\odemath.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\odeou.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\odetls.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\plane.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\quickstep.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\ray.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\rotation.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\sphere.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\step.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\stepfast.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\testing.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\timer.cpp" />
-    <ClCompile Include="$(LibodeSrc)ode\src\util.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\amotor.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\ball.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\contact.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\fixed.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\hinge.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\hinge2.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\joint.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\lmotor.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\null.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\piston.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\plane2d.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\pr.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\pu.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\slider.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\joints\universal.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\fastdot.c" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\fastldlt.c" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\fastlsolve.c" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\fastltsolve.c" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\array.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\box.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\capsule.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_cylinder_box.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_cylinder_plane.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_cylinder_sphere.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_cylinder_trimesh.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_kernel.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_quadtreespace.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_sapspace.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_space.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_transform.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_trimesh_box.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_trimesh_ccylinder.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_trimesh_disabled.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_trimesh_distance.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_trimesh_gimpact.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_trimesh_opcode.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_trimesh_plane.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_trimesh_ray.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_trimesh_sphere.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_trimesh_trimesh.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_trimesh_trimesh_new.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\collision_util.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\convex.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\cylinder.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\error.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\export-dif.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\heightfield.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\lcp.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\mass.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\mat.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\matrix.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\memory.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\misc.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\obstack.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\ode.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\odeinit.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\odemath.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\odeou.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\odetls.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\plane.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\quickstep.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\ray.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\rotation.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\sphere.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\step.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\stepfast.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\testing.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\timer.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)ode\src\util.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Opcode.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_AABBCollider.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_AABBTree.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_BaseModel.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_Collider.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_Common.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_HybridModel.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_LSSCollider.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_MeshInterface.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_Model.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_OBBCollider.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_OptimizedTree.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_Picking.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_PlanesCollider.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_RayCollider.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_SphereCollider.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_TreeBuilders.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_TreeCollider.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\OPC_VolumeCollider.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceAABB.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceContainer.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceHPoint.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceIndexedTriangle.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceMatrix3x3.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceMatrix4x4.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceOBB.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IcePlane.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IcePoint.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceRandom.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceRay.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceRevisitedRadix.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceSegment.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceTriangle.cpp" />
+    <ClCompile Include="$(LibodeSrcDir)OPCODE\Ice\IceUtils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
