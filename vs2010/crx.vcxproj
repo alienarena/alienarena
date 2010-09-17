@@ -45,82 +45,45 @@
     </LinkIncremental>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
     <GenerateManifest>false</GenerateManifest>
-    <OutDir>$(LocalBin)$(Configuration)\</OutDir>
-    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(LocalBinDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
-    <OutDir>$(LocalBin)$(Configuration)\</OutDir>
-    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(LocalBinDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalIncludeDirectories>$(SrcDir);$(OpenALIncludeDir);$(LocalInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;dDOUBLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SrcDir);$(OpenALIncludeDir);$(LocalIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BrowseInformation>true</BrowseInformation>
       <DisableSpecificWarnings>4996;4244;4018</DisableSpecificWarnings>
-      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
-      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <FloatingPointExceptions>
-      </FloatingPointExceptions>
       <CompileAs>CompileAsC</CompileAs>
       <StructMemberAlignment>1Byte</StructMemberAlignment>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ShowProgress>LinkVerboseLib</ShowProgress>
       <AdditionalDependencies>game.lib;libode.lib;libjpeg.lib;libogg.lib;libvorbis.lib;libvorbisfile.lib;zlib.lib;libcurl.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(LocalLib)$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <GenerateMapFile>true</GenerateMapFile>
+      <AdditionalLibraryDirectories>$(LocalLibDir)$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
       <Optimization>Full</Optimization>
-      <PreprocessorDefinitions>HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalIncludeDirectories>$(SrcDir);$(OpenALIncludeDir);$(LocalInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;dDOUBLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SrcDir);$(OpenALIncludeDir);$(LocalIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BrowseInformation>true</BrowseInformation>
       <DisableSpecificWarnings>4996;4244;4018</DisableSpecificWarnings>
-      <ProgramDataBaseFileName>$(IntDir)$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
-      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-      <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
       <CompileAs>CompileAsC</CompileAs>
       <StructMemberAlignment>1Byte</StructMemberAlignment>
-      <ExceptionHandling>false</ExceptionHandling>
-      <StringPooling>true</StringPooling>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AssemblerOutput>NoListing</AssemblerOutput>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>libjpeg.lib;libode.lib;libopcode.lib;game.lib;libogg.lib;libvorbis.lib;libvorbisfile.lib;zlib.lib;libcurl.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(LocalLib)$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <OptimizeReferences>true</OptimizeReferences>
-      <EnableCOMDATFolding>
-      </EnableCOMDATFolding>
-      <GenerateMapFile>true</GenerateMapFile>
-      <OutputFile>$(LocalBin)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
+      <AdditionalDependencies>game.lib;libode.lib;libjpeg.lib;libogg.lib;libvorbis.lib;libvorbisfile.lib;zlib.lib;libcurl.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(LocalLibDir)$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <OutputFile>$(LocalBinDir)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -198,7 +161,7 @@
     <ClCompile Include="$(SrcDir)win32\vid_dll.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(LocalInclude)config.h" />
+    <ClInclude Include="$(LocalIncludeDir)config.h" />
     <ClInclude Include="$(SrcDir)client\client.h" />
     <ClInclude Include="$(SrcDir)client\console.h" />
     <ClInclude Include="$(SrcDir)client\input.h" />
@@ -228,10 +191,10 @@
     <ClInclude Include="$(SrcDir)client\qal.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\source\win32\Q2.ico" />
+    <None Include="$(SrcDir)win32\Q2.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\source\win32\q2.rc" />
+    <ResourceCompile Include="$(SrcDir)win32\q2.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

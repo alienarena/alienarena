@@ -4,64 +4,80 @@
   <PropertyGroup Label="UserMacros">
     <SrcDir>$(SolutionDir)source\</SrcDir>
     <BuildDir>$(SolutionDir)vs2010\</BuildDir>
-    <LocalLib>$(BuildDir)lib\</LocalLib>
-    <LocalInclude>$(BuildDir)include\</LocalInclude>
-    <LocalBin>$(BuildDir)bin\</LocalBin>
-    <LibSrc>$(BuildDir)libsrc\</LibSrc>
-    <LibzlibSrc>$(LibSrc)zlib-1.2.5\</LibzlibSrc>
-    <LibcurlSrc>$(LibSrc)curl-7.20.1\</LibcurlSrc>
-    <LiboggSrc>$(LibSrc)libogg-1.2.0\</LiboggSrc>
-    <LibvorbisSrc>$(LibSrc)libvorbis-1.3.1\</LibvorbisSrc>
-    <LibjpegSrc>$(LibSrc)jpeg-8b\</LibjpegSrc>
+    <LocalLibDir>$(BuildDir)lib\</LocalLibDir>
+    <LocalIncludeDir>$(BuildDir)include\</LocalIncludeDir>
+    <LocalBinDir>$(BuildDir)bin\</LocalBinDir>
+    <LibSrcDir>$(BuildDir)libsrc\</LibSrcDir>
+    <LibzlibSrcDir>$(LibSrcDir)zlib-1.2.5\</LibzlibSrcDir>
+    <LibcurlSrcDir>$(LibSrcDir)curl-7.20.1\</LibcurlSrcDir>
+    <LiboggSrcDir>$(LibSrcDir)libogg-1.2.0\</LiboggSrcDir>
+    <LibvorbisSrcDir>$(LibSrcDir)libvorbis-1.3.1\</LibvorbisSrcDir>
+    <LibjpegSrcDir>$(LibSrcDir)jpeg-8b\</LibjpegSrcDir>
+    <LibodeSrcDir>$(LibSrcDir)ode-0.11.1\</LibodeSrcDir>
     <OpenALIncludeDir>C:\Program Files (x86)\OpenAL 1.1 SDK\include\</OpenALIncludeDir>
-    <LibodeSrc>$(LibSrc)ode-0.11.1\</LibodeSrc>
   </PropertyGroup>
   <PropertyGroup>
     <_PropertySheetDisplayName>alienarena_w32</_PropertySheetDisplayName>
+    <OutDir>$(LocalLibDir)$(Configuration)\</OutDir>
+    <IntDir>$(BuildDir)$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
-  <ItemDefinitionGroup />
   <ItemGroup>
     <BuildMacro Include="SrcDir">
-      <Value>$(SrcDir)</Value>
+      <Value>$(SolutionDir)</Value>
     </BuildMacro>
-    <BuildMacro Include="BuildDir">
-      <Value>$(BuildDir)</Value>
+    <BuildMacro Include="LocalLibDir">
+      <Value>$(BuildDir)lib\</Value>
     </BuildMacro>
-    <BuildMacro Include="LocalLib">
-      <Value>$(LocalLib)</Value>
-      <EnvironmentVariable>true</EnvironmentVariable>
+    <BuildMacro Include="LocalIncludeDir">
+      <Value>$(BuildDir)include\</Value>
     </BuildMacro>
-    <BuildMacro Include="LocalInclude">
-      <Value>$(LocalInclude)</Value>
-      <EnvironmentVariable>true</EnvironmentVariable>
+    <BuildMacro Include="LocalBinDir">
+      <Value>$(BuildDir)bin\</Value>
     </BuildMacro>
-    <BuildMacro Include="LocalBin">
-      <Value>$(LocalBin)</Value>
-      <EnvironmentVariable>true</EnvironmentVariable>
+    <BuildMacro Include="LibSrcDir">
+      <Value>$(BuildDir)libsrc\</Value>
     </BuildMacro>
-    <BuildMacro Include="LibSrc">
-      <Value>$(LibSrc)</Value>
+    <BuildMacro Include="LibzlibSrcDir">
+      <Value>$(LibSrcDir)zlib-1.2.5\</Value>
     </BuildMacro>
-    <BuildMacro Include="LibzlibSrc">
-      <Value>$(LibzlibSrc)</Value>
+    <BuildMacro Include="LibcurlSrcDir">
+      <Value>$(LibSrcDir)curl-7.20.1\</Value>
     </BuildMacro>
-    <BuildMacro Include="LibcurlSrc">
-      <Value>$(LibcurlSrc)</Value>
+    <BuildMacro Include="LiboggSrcDir">
+      <Value>$(LibSrcDir)libogg-1.2.0\</Value>
     </BuildMacro>
-    <BuildMacro Include="LiboggSrc">
-      <Value>$(LiboggSrc)</Value>
+    <BuildMacro Include="LibvorbisSrcDir">
+      <Value>$(LibSrcDir)libvorbis-1.3.1\</Value>
     </BuildMacro>
-    <BuildMacro Include="LibvorbisSrc">
-      <Value>$(LibvorbisSrc)</Value>
+    <BuildMacro Include="LibjpegSrcDir">
+      <Value>$(LibSrcDir)jpeg-8b\</Value>
     </BuildMacro>
-    <BuildMacro Include="LibjpegSrc">
-      <Value>$(LibjpegSrc)</Value>
+    <BuildMacro Include="LibodeSrcDir">
+      <Value>$(LibodeSrcDir)</Value>
     </BuildMacro>
     <BuildMacro Include="OpenALIncludeDir">
-      <Value>$(OpenALIncludeDir)</Value>
-    </BuildMacro>
-    <BuildMacro Include="LibodeSrc">
-      <Value>$(LibodeSrc)</Value>
+      <Value>C:\Program Files (x86)\OpenAL 1.1 SDK\include\</Value>
     </BuildMacro>
   </ItemGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <StringPooling>true</StringPooling>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <CreateHotpatchableImage>false</CreateHotpatchableImage>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <WarningLevel>Level3</WarningLevel>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(LocalLibDir)$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
+    <Link />
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
 </Project>

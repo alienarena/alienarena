@@ -48,8 +48,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libjpeg", "vs2010\libjpeg.v
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libode", "vs2010\libode.vcxproj", "{FFB5B720-9A89-EF4F-8E25-3A715FB62AD9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopcode", "vs2010\libopcode.vcxproj", "{7D07D881-F41E-4146-B666-5131DF07E548}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -92,10 +90,6 @@ Global
 		{FFB5B720-9A89-EF4F-8E25-3A715FB62AD9}.Debug|Win32.Build.0 = Debug|Win32
 		{FFB5B720-9A89-EF4F-8E25-3A715FB62AD9}.Release|Win32.ActiveCfg = Release|Win32
 		{FFB5B720-9A89-EF4F-8E25-3A715FB62AD9}.Release|Win32.Build.0 = Release|Win32
-		{7D07D881-F41E-4146-B666-5131DF07E548}.Debug|Win32.ActiveCfg = Debug|Win32
-		{7D07D881-F41E-4146-B666-5131DF07E548}.Debug|Win32.Build.0 = Debug|Win32
-		{7D07D881-F41E-4146-B666-5131DF07E548}.Release|Win32.ActiveCfg = Release|Win32
-		{7D07D881-F41E-4146-B666-5131DF07E548}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
