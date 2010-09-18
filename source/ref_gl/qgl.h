@@ -29,7 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include <GL/gl.h>
-#include <GL/glx.h>
 
 qboolean QGL_Init( const char *dllname );
 void     QGL_Shutdown( void );
@@ -552,6 +551,8 @@ extern BOOL ( WINAPI * qwglSetDeviceGammaRampEXT ) ( const unsigned char *pRed, 
 #endif
 
 #if defined UNIX_VARIANT
+
+#include <GL/glx.h>
 
 // local function in dll
 extern void * (*qwglGetProcAddress) (const char*);
