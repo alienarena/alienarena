@@ -28,11 +28,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 // TODO: either implement stubs like cl_http.c, or require curl here and there
-#if defined HAVE_CURL_CURL_H
 #include "curl/curl.h"
 CURLM *curlm;
 CURL *curl;
-#endif
 
 extern cvar_t  *cl_stats_server;
 

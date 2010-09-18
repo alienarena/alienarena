@@ -411,6 +411,7 @@ void ( APIENTRY * qglMTexCoord3fSGIS)( GLenum, GLfloat, GLfloat, GLfloat );
 void ( APIENTRY * qglActiveTextureARB) ( GLenum );
 void ( APIENTRY * qglClientActiveTextureARB) ( GLenum );
 void (APIENTRY * qglMultiTexCoord3fvARB) (GLenum, GLfloat *);
+void * (*qwglGetProcAddress) (const char*);
 
 static void ( APIENTRY * dllAccum )(GLenum op, GLfloat value);
 static void ( APIENTRY * dllAlphaFunc )(GLenum func, GLclampf ref);
@@ -3407,6 +3408,7 @@ qboolean QGL_Init( const char *dllname )
 	qglXMakeCurrent              =  GPA("glXMakeCurrent");
 	qglXCopyContext              =  GPA("glXCopyContext");
 	qglXSwapBuffers              =  GPA("glXSwapBuffers");
+	qwglGetProcAddress           =  GPA("glXGetProcAddress");
 
 	qglLockArraysEXT = 0;
 	qglUnlockArraysEXT = 0;

@@ -30,8 +30,19 @@ AM_CPPFLAGS += -DDATADIR='"$(pkgdatadir)"'
 endif
 
 # Client libraries and flags
-crx_LDADD = libgame.a $(PTHREAD_LIBS) $(GL_LIBS) $(GLU_LIBS) $(DARWIN_FRAMEWORKS)
-crx_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(GL_CFLAGS) $(GLU_CFLAGS) $(ODE_CFLAGS)
+crx_LDADD = libgame.a \
+	$(PTHREAD_LIBS) \
+	$(X11_LIBS) \
+	$(DEPS_LIBS) \
+	$(DARWIN_FRAMEWORKS) \
+	$(XXF86VM_LIBS) \
+	$(XXF86DGA_LIBS)
+crx_CPPFLAGS = $(AM_CPPFLAGS) \
+	$(PTHREAD_CFLAGS) \
+	$(X11_CLAGS) \
+	$(DEPS_CFLAGS) \
+	$(XXF86VM_CFLAGS) \
+	$(XXF86DGA_CFLAGS)
 
 # Dedicated Server libraries and flags
 crx_ded_LDADD = libgame.a
