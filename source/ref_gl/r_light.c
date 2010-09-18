@@ -772,10 +772,10 @@ qboolean gluProject2(float objx, float objy, float objz, const float model[16], 
 																																						// float
 																																						// *winz)
 {
-	/* matrice de transformation */
+	/* transformation matrix */
 	float in[4], out[4], temp;
 
-	/* initilise la matrice et le vecteur a transformer */
+	/* initialise the matrix and the vector to transform */
 	in[0] = objx;
 	in[1] = objy;
 	in[2] = objz;
@@ -783,7 +783,7 @@ qboolean gluProject2(float objx, float objy, float objz, const float model[16], 
 	transform_point(out, model, in);
 	transform_point(in, proj, out);
 
-	/* d'ou le resultat normalise entre -1 et 1 */
+	/* normalise result to [-1;1] */
 	if (in[3] == 0.0)
 		return false;
 
@@ -792,11 +792,9 @@ qboolean gluProject2(float objx, float objy, float objz, const float model[16], 
 	in[1] *= temp;
 	in[2] *= temp;
 
-	/* en coordonnees ecran */
+	/* display coordinates */
 	*winx = viewport[0] + (1 + in[0]) * (float) viewport[2] * 0.5;
 	*winy = viewport[1] + (1 + in[1]) * (float) viewport[3] * 0.5;
-///   /* entre 0 et 1 suivant z */
-///   *winz = (1 + in[2]) * 0.5;
 	return true;
 }
 
