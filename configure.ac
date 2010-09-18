@@ -164,8 +164,7 @@ AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
 # Checks for libraries.
 #
 
-AC_SEARCH_LIBS(acos,[m])
-
+AC_SEARCH_LIBS([acos],[m])
 AC_SEARCH_LIBS([dlopen],[dl])
 
 dnl TODO: possible to have a variable here for server_CFLAGS, server_LIBS ???
@@ -179,41 +178,19 @@ AM_COND_IF([BUILD_CLIENT],
 	dnl but this is probably more portable, see m4/ax_pthread.m4
 	AX_PTHREAD(,[AC_MSG_ERROR(["Required pthreads support not found."])])
 	
-	AC_SEARCH_LIBS([zlibVersion],[z zlib],,
-		[AC_MSG_ERROR(["Required zlib library not found."])])
-
 	AC_SEARCH_LIBS([jpeg_read_header],[jpeg],,
 		[AC_MSG_ERROR(["Required jpeg library not found."])])
 
-	AC_SEARCH_LIBS([ogg_stream_init],[ogg],,
-		[AC_MSG_ERROR(["Required ogg library not found."])])
-
-	AC_SEARCH_LIBS([vorbis_block_init],[vorbis],,
-		[AC_MSG_ERROR(["Required vorbis library not found."])])
-
-	AC_SEARCH_LIBS([ov_open_callbacks],[vorbisfile],,
-		[AC_MSG_ERROR(["Required vorbisfile library not found."])],
-		[ -lvorbis -logg ])
-
-	AC_SEARCH_LIBS([alGenBuffers],[openal openal32 openal-soft],,
-		[AC_MSG_ERROR(["Required openal library not found."])])
-
-	curl_xtralibs=""
-	AM_COND_IF([BUILD_WIN32],
-		[
-		curl_xtralibs=" -lz -lwsock32"
-		])
-
-	AC_SEARCH_LIBS([curl_easy_reset],[curl],,
-		[AC_MSG_WARN(["Required curl library not found."])],
-		[ $curl_xtralibs ])
-
 	AM_COND_IF([BUILD_UNIX],
 	[
-		AC_PATH_X
+		dnl
+		dnl XF86
+		dnl
+		PKG_CHECK_MODULES([X11],[x11])
+
 
 		dnl
-		dnl XF86 VidMode extension  TODO: check on pkg-config for this
+		dnl XF86 VidMode extension
 		dnl
 		dnl If no option is specified, then check for the library and act accordingly.
 		dnl If "--without-xf86vm" is specified, do not check, and disable the library.
@@ -225,22 +202,20 @@ AM_COND_IF([BUILD_CLIENT],
 			[with_xf86vm=check])
 		have_Xxf86vm=no
 		AS_IF([ test "x$with_xf86vm" != "xno" ],[
-			AC_SEARCH_LIBS([XF86VidModeQueryVersion],[Xxf86vm],[
-				AC_CHECK_HEADERS([X11/extensions/xf86vmode.h],[have_Xxf86vm=yes],,[
-					#include <X11/Xlib.h>
-				])
-			])
-	
-			AS_IF([ test "x$with_xf86vm" = "xyes" ],[
-				AS_IF([ test "x${have_Xxf86vm}" = "xno" ],
-					[AC_MSG_FAILURE([--with-xf86vm specified, but the library or headers could not be found])
+			PKG_CHECK_MODULES([XXF86VM],[xxf86vm],[
+				have_Xxf86vm=yes
+				AC_DEFINE([HAVE_XXF86VM],1,[Enable X86 VidMode support])
+			],[
+				have_Xxf86vm=no
+				AS_IF([ test "x$with_xf86vm" = "xyes" ],[
+					AC_MSG_FAILURE([--with-xf86vm specified, but the library or headers could not be found])
 				])
 			])
 		])
 	
 	
 		dnl
-		dnl XF86 DGA extension  TODO: check on pkg-config for this
+		dnl XF86 DGA extension
 		dnl
 		dnl If no option is specified, then check for the library and act accordingly.
 		dnl If "--without-xf86dga" is specified, do not check, and disable the library.
@@ -252,33 +227,23 @@ AM_COND_IF([BUILD_CLIENT],
 			[with_xf86dga=check])
 		have_Xxf86dga=no
 		AS_IF([ test "x$with_xf86dga" != "xno" ],[
-			AC_SEARCH_LIBS([XF86DGAQueryVersion],[Xxf86dga xxf86dga],[
-				AC_CHECK_HEADERS([X11/extensions/Xxf86dga.h X11/extensions/xf86dga.h],[
-					AC_DEFINE([HAVE_XXF86DGA],1,[Define to 1 if you have the Xxf86dga library])
-					have_Xxf86dga=yes
-				],,[
-					#include <X11/Xlib.h>  
-					#include <X11/Xproto.h>
-					#include <X11/Xfuncproto.h>
-				])
-			])
-			AS_IF([ test "x$with_xf86dga" = "xyes" ],[
-				AS_IF([ test "x${have_Xxf86dga}" = "xno" ],
-					[AC_MSG_FAILURE([--with-xf86dga specified, but the library or headers could not be found])
+			PKG_CHECK_MODULES([XXF86DGA],[xxf86dga],[
+				have_Xxf86dga=yes
+				AC_DEFINE([HAVE_XXF86DGA],1,[Enable X86 DGA support])
+			],[
+				have_Xxf86dga=no
+				AS_IF([ test "x$with_xf86dga" = "xyes" ],[
+					AC_MSG_FAILURE([--with-xf86dga specified, but the library or headers could not be found])
 				])
 			])
 		])
 	])
 
-	dnl these set GL_CFLAGS, GL_LIBS, GLU_CFLAGS, GLU_LIBS
-	dnl see m4/ax_check_gl.m4 and m4/ax_check_glu.m4
-	AX_CHECK_GL
-	AX_CHECK_GLU
-
-	dnl ODE lib for ragdoll, use pkg-config for possible -DdDOUBLE in ODE_CFLAGS
-	AC_SEARCH_LIBS([dWorldCreate],[ode],
-		[PKG_CHECK_MODULES([ODE],[ode],[AC_SUBST([ODE_CFLAGS])])],
-		[AC_MSG_ERROR(["Required ode library not found."])])
+	dnl
+	dnl Check common client dependencies:
+	dnl ODE, Curl, Ogg/Vorbis and vorbisfile
+	dnl
+	PKG_CHECK_MODULES([DEPS],[glu ode libcurl ogg vorbis vorbisfile])
 
 	dnl Hack in the extras for Win32
 	dnl TODO: this may not be the best way to do this
@@ -294,7 +259,7 @@ AM_COND_IF([BUILD_CLIENT],
 			[ darwin_frameworks="-framework OpenAL"])])
 	AC_SUBST([DARWIN_FRAMEWORKS],[$darwin_frameworks])
 
-])	
+])
 dnl 
 dnl end of client-only library requirements
 dnl
@@ -323,9 +288,6 @@ AM_COND_IF([BUILD_CLIENT],
 	AS_IF([ test "x${jpeglib_h_found}" = xno ],
 		[AC_MSG_ERROR("Required JPEG header file not found.")])
 
-	AC_CHECK_HEADERS([vorbis/vorbisfile.h],,
-		[AC_MSG_ERROR("Required Ogg-Vorbis header file not found.")])
-
 	openal_h_found=no
 	AC_CHECK_HEADERS([AL/al.h al.h OpenAL/al.h],[ openal_h_found=yes ])
 	AS_IF([ test "x${openal_h_found}" = xno ],
@@ -336,29 +298,6 @@ AM_COND_IF([BUILD_CLIENT],
 	AS_IF([ test "x${openalc_h_found}" = xno ],
 		[AC_MSG_ERROR("Required OpenAL header file not found.")])
 
-	AC_CHECK_HEADERS(
-		[curl/curl.h],,
-		[AC_MSG_ERROR("Required cURL header file not found.")])
-
-	AM_COND_IF([BUILD_UNIX],
-	[
-		AC_CHECK_HEADERS([X11/Xlib.h X11/Xatom.h X11/keysym.h X11/cursorfont.h],,
-			[AC_MSG_ERROR("Required X11 header files not found")])
-
-		AC_CHECK_HEADERS([GL/gl.h GL/glu.h GL/glx.h],,
-			[AC_MSG_ERROR("Required OpenGL header files not found.")])
-
-	])
-
-	AC_CHECK_HEADERS([ode/ode.h],,
-		[AC_MSG_ERROR("Required Open Dynamic Engine header file not found.")])
-
-dnl MinGW supplies these (also GL/glx.h)	
-	AM_COND_IF([BUILD_WIN32],
-	[
-		AC_CHECK_HEADERS([GL/gl.h GL/glu.h],,
-		[AC_MSG_ERROR("Required OpenGL header files not found.")])
-	])
 ])
 dnl 
 dnl end of client-only header requirements

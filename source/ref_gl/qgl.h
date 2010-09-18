@@ -28,13 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #  include <windows.h>
 #endif
 
-#if defined HAVE_GL_GL_H
 #include <GL/gl.h>
-#endif
-
-#if defined HAVE_GL_GLX_H
 #include <GL/glx.h>
-#endif
 
 qboolean QGL_Init( const char *dllname );
 void     QGL_Shutdown( void );
@@ -559,7 +554,7 @@ extern BOOL ( WINAPI * qwglSetDeviceGammaRampEXT ) ( const unsigned char *pRed, 
 #if defined UNIX_VARIANT
 
 // local function in dll
-#define qwglGetProcAddress(s) glXGetProcAddress((const GLubyte*)(s))
+extern void * (*qwglGetProcAddress) (const char*);
 
 extern void (*qgl3DfxSetPaletteEXT)(GLuint *);
 
