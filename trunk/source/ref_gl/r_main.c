@@ -1935,13 +1935,13 @@ void R_Shutdown (void)
 	/*
 	** shutdown our QGL subsystem
 	*/
-	QGL_Shutdown();
-
 	if(gl_state.glsl_shaders) {
 		glDeleteObjectARB( g_vertexShader );
 		glDeleteObjectARB( g_fragmentShader );
 		glDeleteObjectARB( g_programObj );
 	}
+
+	QGL_Shutdown();
 
 	//Shutdown ODE
 	dCloseODE();
