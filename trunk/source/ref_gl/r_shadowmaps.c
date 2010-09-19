@@ -24,7 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 #include <GL/gl.h>
-#include <GL/glu.h>
 
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 
@@ -176,6 +175,61 @@ void generateShadowFBO()
 #define M3D_INV_PI_DIV_180 (57.2957795130823229)
 #define m3dRadToDeg(x)	((x)*M3D_INV_PI_DIV_180)
 
+
+static void normalize( float vec[3] )
+{
+	float len;
+	len = sqrt( vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2] );
+	if ( len > 0 ) {
+		vec[0] /= len;
+		vec[1] /= len;
+		vec[2] /= len;
+	}
+}
+
+static void cross( float result[3] , float v1[3] , float v2[3] )
+{
+	result[0] = v1[1] * v2[2] - v1[2] * v2[1];
+	result[1] = v1[2] * v2[0] - v1[0] * v2[2];
+	result[2] = v1[0] * v2[1] - v1[1] * v2[0];
+}
+
+
+static void lookAt( float position_x , float position_y , float position_z , float lookAt_x , float lookAt_y , float lookAt_z )
+{
+	float forward[3] , side[3] , up[3];
+	float matrix[4][4];
+	int i;
+
+	// forward = normalized( lookAt - position )
+	forward[0] = lookAt_x - position_x;
+	forward[1] = lookAt_y - position_y;
+	forward[2] = lookAt_z - position_z;
+	normalize( forward );
+
+	// side = normalized( forward x [0;1;0] )
+	side[0] = -forward[2];
+	side[1] = 0;
+	side[2] = forward[0];
+	normalize( side );
+
+	// up = side x forward
+	cross( up , side , forward );
+
+	// Build matrix
+	for ( i = 0 ; i < 3 ; i ++ ) {
+		matrix[i][0] = side[i];
+		matrix[i][1] = up[i];
+		matrix[i][2] = - forward[i];
+	}
+	for ( i = 0 ; i < 3 ; i ++ )
+		matrix[i][3] = matrix[3][i] = 0;
+	matrix[3][3] = 1;
+
+	qglMultMatrixf( (const GLfloat *) &matrix[0][0] );
+	qglTranslated( -position_x , -position_y , -position_z );
+}
+
 void setupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
 {
 
@@ -184,7 +238,7 @@ void setupMatrices(float position_x,float position_y,float position_z,float look
 	MYgluPerspective(120.0f, vid.width/vid.height, 10.0f, 4096.0f);
 	qglMatrixMode(GL_MODELVIEW);
 	qglLoadIdentity();
-	gluLookAt(position_x,position_y,position_z,lookAt_x,lookAt_y,lookAt_z,0,1,0);
+	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
 }
 
 void setTextureMatrix( void )

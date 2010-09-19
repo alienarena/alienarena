@@ -37,7 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #error jpeglib.h include not defined
 #endif
 
-#include <GL/glu.h>
 
 image_t		gltextures[MAX_GLTEXTURES];
 image_t		*r_mirrortexture;
@@ -1135,11 +1134,14 @@ void R_FilterTexture(unsigned *in, int width, int height)
 
 }
 
+static int	powers_of_two[] = {16,32,64,128,256,512,1024,2048,4096};
 int		upload_width, upload_height;
-qboolean uploaded_paletted;
+qboolean	uploaded_paletted;
+
 
 qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, qboolean is_normalmap)
-{	int		samples;
+{
+	int		samples;
 	unsigned 	*scaled;
 	int		scaled_width, scaled_height;
 	int		i, c;
@@ -1149,94 +1151,83 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, q
 	if(mipmap && !is_normalmap)
 		R_FilterTexture(data, width, height);
 
-    uploaded_paletted = false;    // scan the texture for any non-255 alpha
-    c = width*height;
-    scan = ((byte *)data) + 3;
-    samples = gl_solid_format;
-    for (i=0 ; i<c ; i++, scan += 4)
-    {
-        if ( *scan != 255 )
-        {
-            samples = gl_alpha_format;
-            break;
-        }
-    }
-    comp = (samples == gl_solid_format) ? gl_tex_solid_format : gl_tex_alpha_format;
+	uploaded_paletted = false;    // scan the texture for any non-255 alpha
+	c = width*height;
+	scan = ((byte *)data) + 3;
+	samples = gl_solid_format;
+	for (i=0 ; i<c ; i++, scan += 4)
+	{
+		if ( *scan != 255 )
+		{
+			samples = gl_alpha_format;
+			break;
+		}
+	}
+	comp = (samples == gl_solid_format) ? gl_tex_solid_format : gl_tex_alpha_format;
 
-    {
-        int powers_of_two[] = {16,32,64,128,256,512,1024,2048,4096};
-        int max_size;
-        int i;
-        qglGetIntegerv(GL_MAX_TEXTURE_SIZE,&max_size);
-        scaled_width = scaled_height = 0;
+	{
+		int max_size;
+		int i;
+		qglGetIntegerv(GL_MAX_TEXTURE_SIZE,&max_size);
+		scaled_width = scaled_height = 0;
 
-        for (i=0; i<8; i++)
-        {
-            if (width >= powers_of_two[i] && width < powers_of_two[i+1]) {
-                if (width > ((powers_of_two[i] + powers_of_two[i+1])/2))
-                    scaled_width = powers_of_two[i+1];
-                else
-                    scaled_width = powers_of_two[i];
-            } else if (width == powers_of_two[i+1]) {
-                scaled_width = powers_of_two[i+1];
-            }
-            if (scaled_width && scaled_height)
-                break;
-            if (height >= powers_of_two[i] && height < powers_of_two[i+1]) {
-                if (height > ((powers_of_two[i] + powers_of_two[i+1])/2))
-                    scaled_height = powers_of_two[i+1];
-                else
-                    scaled_height = powers_of_two[i];
-            } else if (height == powers_of_two[i+1]) {
-                scaled_height = powers_of_two[i+1];
-            }            if (scaled_width && scaled_height)
-                break;
-        }
+		for (i=0; i<8; i++)
+		{
+			if (width >= powers_of_two[i] && width < powers_of_two[i+1]) {
+				if (width > ((powers_of_two[i] + powers_of_two[i+1])/2))
+					scaled_width = powers_of_two[i+1];
+				else
+					scaled_width = powers_of_two[i];
+			} else if (width == powers_of_two[i+1]) {
+				scaled_width = powers_of_two[i+1];
+			}
+
+			if (scaled_width && scaled_height)
+				break;
+			if (height >= powers_of_two[i] && height < powers_of_two[i+1]) {
+				if (height > ((powers_of_two[i] + powers_of_two[i+1])/2))
+					scaled_height = powers_of_two[i+1];
+				else
+					scaled_height = powers_of_two[i];
+			} else if (height == powers_of_two[i+1]) {
+				scaled_height = powers_of_two[i+1];
+			}      
+			if (scaled_width && scaled_height)
+				break;
+		}
 		// let people sample down the world textures for speed
 		if (mipmap)
 		{
 			scaled_width >>= gl_picmip->integer;
 			scaled_height >>= gl_picmip->integer;
 		}
-        if (scaled_width > max_size)
-            scaled_width = max_size;
-        if (scaled_height > max_size)
-            scaled_height = max_size;
-    }
+		if (scaled_width > max_size)
+			scaled_width = max_size;
+		if (scaled_height > max_size)
+			scaled_height = max_size;
+	}
 
-    if (scaled_width != width || scaled_height != height) {
-        scaled=malloc((scaled_width * scaled_height) * 4);
-        GL_ResampleTexture(data,width,height,scaled,scaled_width,scaled_height);
-    } else {
-        scaled_width=width;
-        scaled_height=height;
-        scaled=data;
-    }
+	if (scaled_width != width || scaled_height != height) {
+		scaled=malloc((scaled_width * scaled_height) * 4);
+		GL_ResampleTexture(data,width,height,scaled,scaled_width,scaled_height);
+	} else {
+		scaled=data;
+	}
 
 	if (mipmap)
-        gluBuild2DMipmaps (GL_TEXTURE_2D, samples, scaled_width, scaled_height, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
-    else
-        qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
+		qglTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE );
+	qglTexImage2D (GL_TEXTURE_2D, 0, comp, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
 
-    if (scaled_width != width || scaled_height != height)
-        free(scaled);
+	if (scaled_width != width || scaled_height != height)
+		free(scaled);
 
-    upload_width =scaled_width;
+	upload_width = scaled_width;
 	upload_height = scaled_height;
-    if (mipmap)
-    {
-        qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
-        qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
-    }
-    else
-    {
-        qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
-        qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
-    }
-
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_anisotropic->value);
 
-    return (samples == gl_alpha_format);
+	return (samples == gl_alpha_format);
 }
 
 /*

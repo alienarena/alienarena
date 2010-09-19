@@ -230,6 +230,10 @@ AM_COND_IF([BUILD_CLIENT],
 			PKG_CHECK_MODULES([XXF86DGA],[xxf86dga],[
 				have_Xxf86dga=yes
 				AC_DEFINE([HAVE_XXF86DGA],1,[Enable X86 DGA support])
+				AC_CHECK_HEADERS([X11/extensions/Xxf86dga.h],[],[],[
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+])
 			],[
 				have_Xxf86dga=no
 				AS_IF([ test "x$with_xf86dga" = "xyes" ],[
@@ -243,7 +247,7 @@ AM_COND_IF([BUILD_CLIENT],
 	dnl Check common client dependencies:
 	dnl ODE, Curl, Ogg/Vorbis and vorbisfile
 	dnl
-	PKG_CHECK_MODULES([DEPS],[glu ode libcurl ogg vorbis vorbisfile])
+	PKG_CHECK_MODULES([DEPS],[ode libcurl ogg vorbis vorbisfile])
 
 	dnl Hack in the extras for Win32
 	dnl TODO: this may not be the best way to do this

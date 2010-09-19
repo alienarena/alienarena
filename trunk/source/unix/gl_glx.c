@@ -48,7 +48,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <X11/extensions/xf86vmode.h>
 #endif // defined HAVE_XXF86VM
 #if defined HAVE_XXF86DGA
+# if defined HAVE_X11_EXTENSIONS_XXF86DGA_H
 #include <X11/extensions/Xxf86dga.h>
+# else // defined HAVE_X11_EXTENSIONS_XXF86DGA_H
+#include <X11/extensions/xf86dga.h>
+# endif // defined HAVE_X11_EXTENSIONS_XXF86DGA_H
 #endif
 
 #include <GL/glx.h>

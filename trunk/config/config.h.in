@@ -233,6 +233,9 @@
 /* Define to 1 if you have the <winsock.h> header file. */
 #undef HAVE_WINSOCK_H
 
+/* Define to 1 if you have the <X11/extensions/Xxf86dga.h> header file. */
+#undef HAVE_X11_EXTENSIONS_XXF86DGA_H
+
 /* Enable X86 DGA support */
 #undef HAVE_XXF86DGA
 
