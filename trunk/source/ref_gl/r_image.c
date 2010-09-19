@@ -29,14 +29,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #if defined HAVE_JPEG_JPEGLIB_H
 #include "jpeg/jpeglib.h"
-#elif defined HAVE_JPEGLIB_H
-#include "jpeglib.h"
-#elif defined HAVE_JPEG6B_INCLUDE_JPEGLIB_H
-#include "jpeg6b/include/jpeglib.h"
 #else
-#error jpeglib.h include not defined
+#include "jpeglib.h"
 #endif
-
 
 image_t		gltextures[MAX_GLTEXTURES];
 image_t		*r_mirrortexture;
@@ -1191,7 +1186,7 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, q
 					scaled_height = powers_of_two[i];
 			} else if (height == powers_of_two[i+1]) {
 				scaled_height = powers_of_two[i+1];
-			}      
+			}
 			if (scaled_width && scaled_height)
 				break;
 		}
@@ -1223,7 +1218,10 @@ qboolean GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, q
 
 	upload_width = scaled_width;
 	upload_height = scaled_height;
-	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
+	if ( mipmap )
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
+	else
+		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, r_anisotropic->value);
 

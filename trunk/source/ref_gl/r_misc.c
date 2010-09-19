@@ -28,12 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //For screenshots
 #if defined HAVE_JPEG_JPEGLIB_H
 #include "jpeg/jpeglib.h"
-#elif defined HAVE_JPEGLIB_H
-#include "jpeglib.h"
-#elif defined HAVE_JPEG6B_INCLUDE_JPEGLIB_H
-#include "jpeg6b/include/jpeglib.h"
 #else
-#error jpeglib.h include not defined.
+#include "jpeglib.h"
 #endif
 
 image_t		*r_notexture;		// use for bad textures
