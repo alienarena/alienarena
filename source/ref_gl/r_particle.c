@@ -36,8 +36,8 @@ GL_DrawParticles
 static float yawOrRoll;
 void GL_DrawParticles( int num_particles, particle_t **particles, const unsigned colortable[768])
 {
-	const particle_t **p1;
-	const particle_t *p;
+	particle_t **p1;
+	particle_t *p;
 	int				i, k;
 	vec3_t			corner[4], up, right, pup, pright, dir;
 	float			scale, oldscale=0.0f;
