@@ -29,6 +29,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include <GL/gl.h>
+#if defined WIN32_VARIANT
+# include "glext.h"
+#endif
 
 qboolean QGL_Init( const char *dllname );
 void     QGL_Shutdown( void );
@@ -444,6 +447,7 @@ extern GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offs
 #endif
 //END VBO
 
+#if 0
 #if !defined UNIX_VARIANT
 // jitwater - fragment programs (pixel shaders)
 typedef void (APIENTRY * PFNGLPROGRAMSTRINGARBPROC) (GLenum target, GLenum format, GLsizei len, const GLvoid *string);
@@ -487,6 +491,7 @@ typedef void (APIENTRY * PFNGLUNIFORMMATRIX3FVARBPROC) (GLint location, GLsizei 
 typedef void (APIENTRY * PFNGLVERTEXATTRIBPOINTERARBPROC) (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid *);
 typedef void (APIENTRY * PFNGLENABLEVERTEXATTRIBARRAYARBPROC) (GLuint);
 typedef void (APIENTRY * PFNGLBINDATTRIBLOCATIONARBPROC) (GLhandleARB programObj, GLuint index, const GLcharARB *name);
+#endif
 
 //Framebuffer objects
 typedef GLboolean (APIENTRY * PFNGLISRENDERBUFFEREXTPROC) (GLuint renderbuffer);
@@ -603,7 +608,6 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
 #define GL_TEXTURE0_ARB						0x84C0
 #define GL_TEXTURE1_ARB						0x84C1
 
-#ifdef __unix__
 #ifdef GL_TEXTURE0
 #undef GL_TEXTURE0
 #endif
@@ -627,7 +631,6 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
 #endif
 #ifdef GL_TEXTURE7
 #undef GL_TEXTURE7
-#endif
 #endif
 
 extern int GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3, GL_TEXTURE4, GL_TEXTURE5, GL_TEXTURE6, GL_TEXTURE7;
