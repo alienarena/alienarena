@@ -115,7 +115,7 @@ static cvar_t * _ttf_autohint;
 
 
 /* Blending: additional colour extension */
-static void (*_glBlendColorEXT)( float , float , float , float );
+static PFNGLBLENDCOLOREXTPROC _glBlendColorEXT;
 
 
 
@@ -172,7 +172,7 @@ qboolean TTF_Init( )
 	_ttf_autohint->modified = false;
 
 	// Access blending function, if available
-	_glBlendColorEXT = qwglGetProcAddress( "glBlendColorEXT" );
+	_glBlendColorEXT = (PFNGLBLENDCOLOREXTPROC) qwglGetProcAddress( "glBlendColorEXT" );
 
 #if !defined NDEBUG
 	Com_Printf( "...initialised TTF engine\n" );
