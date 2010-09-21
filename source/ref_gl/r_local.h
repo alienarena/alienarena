@@ -350,6 +350,12 @@ void	R_BeginFrame( float camera_separation );
 void	R_SwapBuffers( int );
 void	R_SetPalette ( const unsigned char *palette);
 
+
+// TrueType fonts
+qboolean TTF_Init( void );
+void TTF_Shutdown( void );
+
+
 int		Draw_GetPalette (void);
 
 void	GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight);
@@ -361,7 +367,9 @@ image_t *R_RegisterGfxPic(char *name);
 
 void	LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
 image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits);
+image_t *GL_GetImage( const char * name );
 image_t	*GL_FindImage (char *name, imagetype_t type);
+void	GL_FreeImage( image_t * image );
 void	GL_TextureMode( char *string );
 void	GL_ImageList_f (void);
 

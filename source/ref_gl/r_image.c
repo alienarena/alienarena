@@ -1367,9 +1367,9 @@ nonscrap:
 		image->scrap = false;
 		image->texnum = TEXNUM_IMAGES + (image - gltextures);
 		GL_Bind(image->texnum);
-		if (bits == 8)
+		if (bits == 8) {
 			image->has_alpha = GL_Upload8 (pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_sky );
-		else {
+		} else {
 			image->has_alpha = GL_Upload32 ((unsigned *)pic, width, height, (image->type != it_pic && image->type != it_sky), image->type == it_bump );
 		}
 		image->upload_width = upload_width;		// after power of 2 and scales
@@ -1414,6 +1414,50 @@ image_t *GL_LoadWal (char *name)
 	return image;
 }
 
+
+/*
+===============
+GL_GetImage
+
+Finds an image, do not attempt to load it
+===============
+*/
+image_t *GL_GetImage( const char * name )
+{
+	image_t *	image = NULL;
+	unsigned int	hash_key;
+	int		i;
+
+	COMPUTE_HASH_KEY( hash_key, name, i );
+	for ( i = 0, image=gltextures ; i<numgltextures ; i++,image++)
+	{
+		if (hash_key == image->hash_key && !strcmp(name, image->name))
+		{
+			image->registration_sequence = registration_sequence;
+			return image;
+		}
+	}
+
+	return NULL;
+}
+
+
+/*
+===============
+GL_FreeImage
+
+Frees an image slot and deletes the texture
+===============
+*/
+void GL_FreeImage( image_t * image )
+{
+	if ( ! image->texnum )
+		return;
+	qglDeleteTextures (1, (unsigned *)&image->texnum );
+	memset (image, 0, sizeof(*image));
+}
+
+
 /*
 ===============
 GL_FindImage
@@ -1424,11 +1468,10 @@ Finds or loads the given image
 image_t	*GL_FindImage (char *name, imagetype_t type)
 {
 	image_t		*image = NULL;
-	int		i, len;
+	int		len;
 	byte		*pic, *palette;
 	int		width, height;
 	char		shortname[MAX_QPATH];
-	unsigned int	hash_key;
 
 	if (!name)
 		goto ret_image;	//	Com_Error (ERR_DROP, "GL_FindImage: NULL name");
@@ -1443,15 +1486,9 @@ image_t	*GL_FindImage (char *name, imagetype_t type)
 			strcpy(name, cl_hudimage2->string);
 
 	// look for it
-	COMPUTE_HASH_KEY( hash_key, name, i );
-	for (i=0, image=gltextures ; i<numgltextures ; i++,image++)
-	{
-		if (hash_key == image->hash_key && !strcmp(name, image->name))
-		{
-			image->registration_sequence = registration_sequence;
-			goto ret_image;
-		}
-	}
+	image = GL_GetImage( name );
+	if ( image != NULL )
+		return image;
 
 	// strip off .pcx, .tga, etc...
 	COM_StripExtension ( name, shortname );
@@ -1459,7 +1496,6 @@ image_t	*GL_FindImage (char *name, imagetype_t type)
 	//
 	// load the pic from disk
 	//
-	image = NULL;
 	pic = NULL;
 	palette = NULL;
 
