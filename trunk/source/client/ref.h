@@ -379,6 +379,14 @@ void	R_Shutdown (void);
 
 void	R_AppActivate( qboolean active );
 
+// TrueType
+struct ttf_font_s;
+typedef struct ttf_font_s * ttf_font_t;
+
+ttf_font_t TTF_GetFont( const char * name , unsigned int size );
+void TTF_GetSize( ttf_font_t font , const char * text , unsigned int * width , unsigned int * height );
+void TTF_RawPrint( ttf_font_t font , const char * text , float x , float y , const float color[4] );
+
 #define MAX_RADAR_ENTS 512
 typedef struct RadarEnt_s{
   float color[4];
