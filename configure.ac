@@ -247,7 +247,7 @@ AM_COND_IF([BUILD_CLIENT],
 	dnl Check common client dependencies:
 	dnl ODE, Curl, Ogg/Vorbis and vorbisfile
 	dnl
-	PKG_CHECK_MODULES([DEPS],[ode libcurl ogg vorbis vorbisfile])
+	PKG_CHECK_MODULES([DEPS],[ode libcurl ogg vorbis vorbisfile freetype2])
 
 	dnl Hack in the extras for Win32
 	dnl TODO: this may not be the best way to do this

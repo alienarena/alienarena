@@ -137,13 +137,14 @@ crx_SOURCES = \
 	ref_gl/r_particle.c \
 	ref_gl/r_postprocess.c \
 	ref_gl/r_program.c \
+	ref_gl/r_ragdoll.c \
+	ref_gl/r_ragdoll.h \
 	ref_gl/r_script.c \
 	ref_gl/r_script.h \
 	ref_gl/r_shadowmaps.c \
 	ref_gl/r_shadows.c \
 	ref_gl/r_surf.c \
-	ref_gl/r_ragdoll.c \
-	ref_gl/r_ragdoll.h \
+	ref_gl/r_ttf.c \
 	ref_gl/r_varray.c \
 	ref_gl/r_vbo.c \
 	ref_gl/r_vlights.c \
