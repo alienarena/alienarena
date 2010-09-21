@@ -310,7 +310,7 @@ void R_CreateWorldObject( void )
 
 	contactGroup = dJointGroupCreate(0);
 
-	dWorldSetAutoDisableFlag(RagDollWorld, 1);
+	//dWorldSetAutoDisableFlag(RagDollWorld, 1); //probably *don't* want this
 		
 	//axi used to determine constrained joint rotations
 	VectorSet(rightAxis, 1.0, 0.0, 0.0);
@@ -338,19 +338,19 @@ void R_DestroyWorldObject( void )
 }
 
 //For creating the surfaces for the ragdoll to collide with
-void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
+//Notes - right now this is building a geometry for each convex poly, this might the cleanest and easiest way, but it 
+//may be nicer and more efficient to build a geometry for the entire surface.  r_surfacecount need to be renamed if we keep 
+//things this way.
+void GL_BuildODEGeoms(msurface_t *surf, vec3_t origin, int RagDollID)
 {
 	glpoly_t *p = surf->polys;
 	float	*v;
 	int		i, j, k, offset, VertexCounter;
 	int		ODEIndexCount = 0;
-	float	ODEVerts[MAX_VARRAY_VERTS]; //can, should this be done dynamically?
-	int		ODEIndices[MAX_INDICES];
+	float	ODEVerts[MAX_VERTS];
+	int		ODEIndices[MAX_VERTS*4];
 	int		ODETris = 0;
-	const dReal* initialQ;
-	dQuaternion initialQuaternion;
 	dTriMeshDataID triMesh;
-
 	//winding order for ODE
 	const int indices[6] = {2,1,0,
 							3,2,0};
@@ -363,12 +363,15 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 
 	for (; p; p = p->chain)
 	{
+		if(r_SurfaceCount > MAX_SURFACES - 1 )
+			break;
+
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
 
-			ODEVerts[VertexCounter] = v[0];
-			ODEVerts[VertexCounter+1] = v[1];
-			ODEVerts[VertexCounter+2] = v[2];
+			ODEVerts[3*VertexCounter] = v[0];
+			ODEVerts[3*VertexCounter+1] = v[1];
+			ODEVerts[3*VertexCounter+2] = v[2];
 
 			VertexCounter++;
 		}
@@ -393,39 +396,19 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 			j+=3;
 			k+=3;
 		}
-	}
 
-	//create body id
-	RagDoll[RagDollID].WorldBody = dBodyCreate(RagDollWorld);
+		//we need to build the trimesh geometry for this poly
+		triMesh = dGeomTriMeshDataCreate();
 
-	//we need to build the trimesh geometry for this surface
-	triMesh = dGeomTriMeshDataCreate();
+		// Build the mesh from the data
+		dGeomTriMeshDataBuildSimple(triMesh, (dReal*)ODEVerts,
+			VertexCounter, (dTriIndex*)ODEIndices, ODEIndexCount);
 
-	//// Build the mesh from the data
-	dGeomTriMeshDataBuildSimple(triMesh, (dReal*)ODEVerts,
-		VertexCounter, (dTriIndex*)ODEIndices, ODEIndexCount);
-
-	RagDoll[RagDollID].WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh, NULL, NULL, NULL);
-	dGeomSetData(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], "surface");
-
-	dGeomSetBody(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], RagDoll[RagDollID].WorldBody);
-
-	//set the mass
-	dMassSetTrimesh(&RagDoll[RagDollID].WorldMass, 1000.0, RagDoll[RagDollID].WorldGeometry[r_SurfaceCount]);
-	dBodySetMass(RagDoll[RagDollID].WorldBody, &RagDoll[RagDollID].WorldMass);
+		RagDoll[RagDollID].WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh, NULL, NULL, NULL);
+		dGeomSetData(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], "surface");
 		
-	dBodySetForce(RagDoll[RagDollID].WorldBody, 0, 0, 0);
-	dBodySetLinearVel(RagDoll[RagDollID].WorldBody, 0, 0, 0);
-	dBodySetAngularVel(RagDoll[RagDollID].WorldBody, 0, 0, 0);
-
-	initialQ = dBodyGetQuaternion(RagDoll[RagDollID].WorldBody);
-	initialQuaternion[0] = initialQ[0];
-	initialQuaternion[1] = initialQ[1];
-	initialQuaternion[2] = initialQ[2];
-	initialQuaternion[3] = initialQ[3];
-	dBodySetQuaternion(RagDoll[RagDollID].WorldBody, initialQuaternion);
-
-	r_SurfaceCount++;
+		r_SurfaceCount++;
+	}	
 }
 
 //build and set initial position of ragdoll - note this will need to get some information from the skeleton on the first death frame
@@ -686,7 +669,7 @@ void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 				VectorScale(center, (float)(1.0/numverts), center);
 				VectorSubtract(center, ragdollorg, dist);
 				if(VectorLength(dist) < 512)
-					GL_BuildODEGeoms(surf, RagDollID);
+					GL_BuildODEGeoms(surf, center, RagDollID);
 				else
 					continue;
 			}
@@ -720,6 +703,9 @@ void R_BuildRagdollSurfaces (vec3_t origin, int RagDollID)
 	This function checks if the given geoms do collide and creates contact
 	joints if they do.
 */
+
+//note - since bsp geometries don't have bodies, we need to check on some demos to make sure we are getting proper
+//collision information returned in those cases of ragdoll body colliding with bsp geometries.
 static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 {
 	dContact contact[MAX_CONTACTS];
@@ -728,11 +714,16 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 	dBodyID body1 = dGeomGetBody(geom1);
 	dBodyID body2 = dGeomGetBody(geom2);
 
-	if (dAreConnected(body1, body2))
+	if(body1 && body2)
+	{
+		if (dAreConnected(body1, body2))
+			return;
+	}
+	else
 		return;
 
-	// create contact joints
-	for (i = 0; i < MAX_CONTACTS; i++) {
+	for(i = 0; i < MAX_CONTACTS; i++)
+	{
 		contact[i].surface.mode = dContactBounce; // Bouncy surface
 		contact[i].surface.bounce = 0.2;
 		contact[i].surface.mu = 500.0; // Friction
@@ -767,15 +758,13 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 	if(!nuke)
 		return; 
 
-	//destroy surfaces - to do better to track actual num of surfaces instead of max_surfaces!
+	//destroy surfaces - to do better to track actual num of surfaces instead of max_surfaces, so remember to fix!
 	for(i = 0; i < MAX_SURFACES; i++)
 	{
 		if(RagDoll[RagDollID].WorldGeometry[i])
 			dGeomDestroy(RagDoll[RagDollID].WorldGeometry[i]);
 	}
-	if(RagDoll[RagDollID].WorldBody)
-		dBodyDestroy(RagDoll[RagDollID].WorldBody);
-
+	
 	//we also want to destroy all ragdoll bodies and joints for this ragdoll
 	for(i = CHEST; i <= LEFTHAND; i++)
 	{

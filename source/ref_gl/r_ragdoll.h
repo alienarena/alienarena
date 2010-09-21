@@ -126,9 +126,7 @@ typedef struct RagDoll_s {
 	vec3_t	origin;
 
 	//surface for ragdoll to collide
-	dBodyID WorldBody;
 	dGeomID WorldGeometry[MAX_SURFACES];
-	dMass	WorldMass;
 
 	float spawnTime;
 
@@ -144,4 +142,3 @@ extern void R_DestroyWorldObject( void );
 extern void R_RenderAllRagdolls ( void );
 extern void R_AddNewRagdoll( vec3_t origin );
 extern void R_ClearAllRagdolls( void );
-extern void GL_BuildODEGeoms(msurface_t *surf, int RagDollID);
