@@ -60,7 +60,7 @@
       <Command>FOR %%h IN ( $(BuildDir)freetype-config\*.h ) DO copy %%h $(FreeTypeSrcDir)include\freetype\config\</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /E $(FreeTypeSrcDir)include $(LocalIncludeDir)freetype</Command>
+      <Command>xcopy /E /I /Y $(FreeTypeSrcDir)include\*.* $(LocalIncludeDir)</Command>
       <Message>Copy header files to common local include directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
