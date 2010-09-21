@@ -64,7 +64,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>game.lib;libode.lib;libjpeg.lib;libogg.lib;libvorbis.lib;libvorbisfile.lib;zlib.lib;libcurl.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>game.lib;libode.lib;libjpeg.lib;libogg.lib;libvorbis.lib;libvorbisfile.lib;zlib.lib;libcurl.lib;freetype.lib;winmm.lib;wsock32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(LocalLibDir)$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -131,11 +131,12 @@
     <ClCompile Include="$(SrcDir)ref_gl\r_particle.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_postprocess.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_program.c" />
+    <ClCompile Include="$(SrcDir)ref_gl\r_ragdoll.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_script.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_shadowmaps.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_shadows.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_surf.c" />
-    <ClCompile Include="$(SrcDir)ref_gl\r_ragdoll.c" />
+    <ClCompile Include="$(SrcDir)ref_gl\r_ttf.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_varray.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_vbo.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_vlights.c" />
