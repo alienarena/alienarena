@@ -5920,12 +5920,12 @@ if test -n "$DEPS_CFLAGS"; then
     pkg_cv_DEPS_CFLAGS="$DEPS_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode libcurl ogg vorbis vorbisfile\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "ode libcurl ogg vorbis vorbisfile") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode libcurl ogg vorbis vorbisfile freetype2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "ode libcurl ogg vorbis vorbisfile freetype2") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_DEPS_CFLAGS=`$PKG_CONFIG --cflags "ode libcurl ogg vorbis vorbisfile" 2>/dev/null`
+  pkg_cv_DEPS_CFLAGS=`$PKG_CONFIG --cflags "ode libcurl ogg vorbis vorbisfile freetype2" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -5936,12 +5936,12 @@ if test -n "$DEPS_LIBS"; then
     pkg_cv_DEPS_LIBS="$DEPS_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode libcurl ogg vorbis vorbisfile\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "ode libcurl ogg vorbis vorbisfile") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode libcurl ogg vorbis vorbisfile freetype2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "ode libcurl ogg vorbis vorbisfile freetype2") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_DEPS_LIBS=`$PKG_CONFIG --libs "ode libcurl ogg vorbis vorbisfile" 2>/dev/null`
+  pkg_cv_DEPS_LIBS=`$PKG_CONFIG --libs "ode libcurl ogg vorbis vorbisfile freetype2" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -5961,14 +5961,14 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        DEPS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "ode libcurl ogg vorbis vorbisfile" 2>&1`
+	        DEPS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "ode libcurl ogg vorbis vorbisfile freetype2" 2>&1`
         else
-	        DEPS_PKG_ERRORS=`$PKG_CONFIG --print-errors "ode libcurl ogg vorbis vorbisfile" 2>&1`
+	        DEPS_PKG_ERRORS=`$PKG_CONFIG --print-errors "ode libcurl ogg vorbis vorbisfile freetype2" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$DEPS_PKG_ERRORS" >&5
 
-	as_fn_error "Package requirements (ode libcurl ogg vorbis vorbisfile) were not met:
+	as_fn_error "Package requirements (ode libcurl ogg vorbis vorbisfile freetype2) were not met:
 
 $DEPS_PKG_ERRORS
 

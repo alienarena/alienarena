@@ -167,21 +167,21 @@ am__crx_SOURCES_DIST = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	ref_gl/r_math.c ref_gl/r_math.h ref_gl/r_mesh.c \
 	ref_gl/r_misc.c ref_gl/r_model.c ref_gl/r_model.h \
 	ref_gl/r_particle.c ref_gl/r_postprocess.c ref_gl/r_program.c \
-	ref_gl/r_script.c ref_gl/r_script.h ref_gl/r_shadowmaps.c \
-	ref_gl/r_shadows.c ref_gl/r_surf.c ref_gl/r_ragdoll.c \
-	ref_gl/r_ragdoll.h ref_gl/r_varray.c ref_gl/r_vbo.c \
-	ref_gl/r_vlights.c ref_gl/r_warp.c ref_gl/warpsin.h \
-	server/server.h server/sv_ccmds.c server/sv_ents.c \
-	server/sv_game.c server/sv_init.c server/sv_main.c \
-	server/sv_send.c server/sv_user.c server/sv_world.c \
-	unix/glob.c unix/glob.h unix/gl_glx.c unix/glw_unix.h \
-	unix/net_udp.c unix/qal_unix.c unix/qasm.h unix/qgl_unix.c \
-	unix/q_shunix.c unix/rw_unix.c unix/rw_unix.h unix/sys_unix.c \
-	unix/vid_so.c win32/conproc.c win32/conproc.h win32/glw_imp.c \
-	win32/glw_win.h win32/in_win.c win32/net_wins.c \
-	win32/qal_win.c win32/qgl_win.c win32/q_shwin.c \
-	win32/sys_win.c win32/vid_dll.c win32/winquake.h \
-	win32/resource.h
+	ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h ref_gl/r_script.c \
+	ref_gl/r_script.h ref_gl/r_shadowmaps.c ref_gl/r_shadows.c \
+	ref_gl/r_surf.c ref_gl/r_ttf.c ref_gl/r_varray.c \
+	ref_gl/r_vbo.c ref_gl/r_vlights.c ref_gl/r_warp.c \
+	ref_gl/warpsin.h server/server.h server/sv_ccmds.c \
+	server/sv_ents.c server/sv_game.c server/sv_init.c \
+	server/sv_main.c server/sv_send.c server/sv_user.c \
+	server/sv_world.c unix/glob.c unix/glob.h unix/gl_glx.c \
+	unix/glw_unix.h unix/net_udp.c unix/qal_unix.c unix/qasm.h \
+	unix/qgl_unix.c unix/q_shunix.c unix/rw_unix.c unix/rw_unix.h \
+	unix/sys_unix.c unix/vid_so.c win32/conproc.c win32/conproc.h \
+	win32/glw_imp.c win32/glw_win.h win32/in_win.c \
+	win32/net_wins.c win32/qal_win.c win32/qgl_win.c \
+	win32/q_shwin.c win32/sys_win.c win32/vid_dll.c \
+	win32/winquake.h win32/resource.h
 @BUILD_UNIX_TRUE@am__objects_1 = unix/crx-gl_glx.$(OBJEXT) \
 @BUILD_UNIX_TRUE@	unix/crx-net_udp.$(OBJEXT) \
 @BUILD_UNIX_TRUE@	unix/crx-qal_unix.$(OBJEXT) \
@@ -222,10 +222,11 @@ am_crx_OBJECTS = client/crx-cl_ents.$(OBJEXT) \
 	ref_gl/crx-r_misc.$(OBJEXT) ref_gl/crx-r_model.$(OBJEXT) \
 	ref_gl/crx-r_particle.$(OBJEXT) \
 	ref_gl/crx-r_postprocess.$(OBJEXT) \
-	ref_gl/crx-r_program.$(OBJEXT) ref_gl/crx-r_script.$(OBJEXT) \
+	ref_gl/crx-r_program.$(OBJEXT) ref_gl/crx-r_ragdoll.$(OBJEXT) \
+	ref_gl/crx-r_script.$(OBJEXT) \
 	ref_gl/crx-r_shadowmaps.$(OBJEXT) \
 	ref_gl/crx-r_shadows.$(OBJEXT) ref_gl/crx-r_surf.$(OBJEXT) \
-	ref_gl/crx-r_ragdoll.$(OBJEXT) ref_gl/crx-r_varray.$(OBJEXT) \
+	ref_gl/crx-r_ttf.$(OBJEXT) ref_gl/crx-r_varray.$(OBJEXT) \
 	ref_gl/crx-r_vbo.$(OBJEXT) ref_gl/crx-r_vlights.$(OBJEXT) \
 	ref_gl/crx-r_warp.$(OBJEXT) server/crx-sv_ccmds.$(OBJEXT) \
 	server/crx-sv_ents.$(OBJEXT) server/crx-sv_game.$(OBJEXT) \
@@ -443,14 +444,15 @@ crx_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	ref_gl/r_math.c ref_gl/r_math.h ref_gl/r_mesh.c \
 	ref_gl/r_misc.c ref_gl/r_model.c ref_gl/r_model.h \
 	ref_gl/r_particle.c ref_gl/r_postprocess.c ref_gl/r_program.c \
-	ref_gl/r_script.c ref_gl/r_script.h ref_gl/r_shadowmaps.c \
-	ref_gl/r_shadows.c ref_gl/r_surf.c ref_gl/r_ragdoll.c \
-	ref_gl/r_ragdoll.h ref_gl/r_varray.c ref_gl/r_vbo.c \
-	ref_gl/r_vlights.c ref_gl/r_warp.c ref_gl/warpsin.h \
-	server/server.h server/sv_ccmds.c server/sv_ents.c \
-	server/sv_game.c server/sv_init.c server/sv_main.c \
-	server/sv_send.c server/sv_user.c server/sv_world.c \
-	unix/glob.c unix/glob.h $(am__append_5) $(am__append_6)
+	ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h ref_gl/r_script.c \
+	ref_gl/r_script.h ref_gl/r_shadowmaps.c ref_gl/r_shadows.c \
+	ref_gl/r_surf.c ref_gl/r_ttf.c ref_gl/r_varray.c \
+	ref_gl/r_vbo.c ref_gl/r_vlights.c ref_gl/r_warp.c \
+	ref_gl/warpsin.h server/server.h server/sv_ccmds.c \
+	server/sv_ents.c server/sv_game.c server/sv_init.c \
+	server/sv_main.c server/sv_send.c server/sv_user.c \
+	server/sv_world.c unix/glob.c unix/glob.h $(am__append_5) \
+	$(am__append_6)
 
 # Dedicated Server sources (Unix only)
 crx_ded_SOURCES = \
@@ -807,6 +809,8 @@ ref_gl/crx-r_postprocess.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_program.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
+ref_gl/crx-r_ragdoll.$(OBJEXT): ref_gl/$(am__dirstamp) \
+	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_script.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_shadowmaps.$(OBJEXT): ref_gl/$(am__dirstamp) \
@@ -815,7 +819,7 @@ ref_gl/crx-r_shadows.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_surf.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
-ref_gl/crx-r_ragdoll.$(OBJEXT): ref_gl/$(am__dirstamp) \
+ref_gl/crx-r_ttf.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_varray.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
@@ -1053,6 +1057,7 @@ mostlyclean-compile:
 	-rm -f ref_gl/crx-r_shadowmaps.$(OBJEXT)
 	-rm -f ref_gl/crx-r_shadows.$(OBJEXT)
 	-rm -f ref_gl/crx-r_surf.$(OBJEXT)
+	-rm -f ref_gl/crx-r_ttf.$(OBJEXT)
 	-rm -f ref_gl/crx-r_varray.$(OBJEXT)
 	-rm -f ref_gl/crx-r_vbo.$(OBJEXT)
 	-rm -f ref_gl/crx-r_vlights.$(OBJEXT)
@@ -1196,6 +1201,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_shadowmaps.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_shadows.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_surf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_ttf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_varray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_vbo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_vlights.Po@am__quote@
@@ -1961,6 +1967,22 @@ ref_gl/crx-r_program.obj: ref_gl/r_program.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_program.obj `if test -f 'ref_gl/r_program.c'; then $(CYGPATH_W) 'ref_gl/r_program.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_program.c'; fi`
 
+ref_gl/crx-r_ragdoll.o: ref_gl/r_ragdoll.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_ragdoll.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_ragdoll.Tpo -c -o ref_gl/crx-r_ragdoll.o `test -f 'ref_gl/r_ragdoll.c' || echo '$(srcdir)/'`ref_gl/r_ragdoll.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/crx-r_ragdoll.Tpo ref_gl/$(DEPDIR)/crx-r_ragdoll.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_ragdoll.c' object='ref_gl/crx-r_ragdoll.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_ragdoll.o `test -f 'ref_gl/r_ragdoll.c' || echo '$(srcdir)/'`ref_gl/r_ragdoll.c
+
+ref_gl/crx-r_ragdoll.obj: ref_gl/r_ragdoll.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_ragdoll.obj -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_ragdoll.Tpo -c -o ref_gl/crx-r_ragdoll.obj `if test -f 'ref_gl/r_ragdoll.c'; then $(CYGPATH_W) 'ref_gl/r_ragdoll.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_ragdoll.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/crx-r_ragdoll.Tpo ref_gl/$(DEPDIR)/crx-r_ragdoll.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_ragdoll.c' object='ref_gl/crx-r_ragdoll.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_ragdoll.obj `if test -f 'ref_gl/r_ragdoll.c'; then $(CYGPATH_W) 'ref_gl/r_ragdoll.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_ragdoll.c'; fi`
+
 ref_gl/crx-r_script.o: ref_gl/r_script.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_script.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_script.Tpo -c -o ref_gl/crx-r_script.o `test -f 'ref_gl/r_script.c' || echo '$(srcdir)/'`ref_gl/r_script.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/crx-r_script.Tpo ref_gl/$(DEPDIR)/crx-r_script.Po
@@ -2025,21 +2047,21 @@ ref_gl/crx-r_surf.obj: ref_gl/r_surf.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_surf.obj `if test -f 'ref_gl/r_surf.c'; then $(CYGPATH_W) 'ref_gl/r_surf.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_surf.c'; fi`
 
-ref_gl/crx-r_ragdoll.o: ref_gl/r_ragdoll.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_ragdoll.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_ragdoll.Tpo -c -o ref_gl/crx-r_ragdoll.o `test -f 'ref_gl/r_ragdoll.c' || echo '$(srcdir)/'`ref_gl/r_ragdoll.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/crx-r_ragdoll.Tpo ref_gl/$(DEPDIR)/crx-r_ragdoll.Po
+ref_gl/crx-r_ttf.o: ref_gl/r_ttf.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_ttf.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_ttf.Tpo -c -o ref_gl/crx-r_ttf.o `test -f 'ref_gl/r_ttf.c' || echo '$(srcdir)/'`ref_gl/r_ttf.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/crx-r_ttf.Tpo ref_gl/$(DEPDIR)/crx-r_ttf.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_ragdoll.c' object='ref_gl/crx-r_ragdoll.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_ttf.c' object='ref_gl/crx-r_ttf.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_ragdoll.o `test -f 'ref_gl/r_ragdoll.c' || echo '$(srcdir)/'`ref_gl/r_ragdoll.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_ttf.o `test -f 'ref_gl/r_ttf.c' || echo '$(srcdir)/'`ref_gl/r_ttf.c
 
-ref_gl/crx-r_ragdoll.obj: ref_gl/r_ragdoll.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_ragdoll.obj -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_ragdoll.Tpo -c -o ref_gl/crx-r_ragdoll.obj `if test -f 'ref_gl/r_ragdoll.c'; then $(CYGPATH_W) 'ref_gl/r_ragdoll.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_ragdoll.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/crx-r_ragdoll.Tpo ref_gl/$(DEPDIR)/crx-r_ragdoll.Po
+ref_gl/crx-r_ttf.obj: ref_gl/r_ttf.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_ttf.obj -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_ttf.Tpo -c -o ref_gl/crx-r_ttf.obj `if test -f 'ref_gl/r_ttf.c'; then $(CYGPATH_W) 'ref_gl/r_ttf.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_ttf.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/crx-r_ttf.Tpo ref_gl/$(DEPDIR)/crx-r_ttf.Po
 @am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_ragdoll.c' object='ref_gl/crx-r_ragdoll.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_ttf.c' object='ref_gl/crx-r_ttf.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_ragdoll.obj `if test -f 'ref_gl/r_ragdoll.c'; then $(CYGPATH_W) 'ref_gl/r_ragdoll.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_ragdoll.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_ttf.obj `if test -f 'ref_gl/r_ttf.c'; then $(CYGPATH_W) 'ref_gl/r_ttf.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_ttf.c'; fi`
 
 ref_gl/crx-r_varray.o: ref_gl/r_varray.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_varray.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_varray.Tpo -c -o ref_gl/crx-r_varray.o `test -f 'ref_gl/r_varray.c' || echo '$(srcdir)/'`ref_gl/r_varray.c
