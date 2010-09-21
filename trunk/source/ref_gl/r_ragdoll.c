@@ -221,8 +221,8 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	dGeomSetBody(RagDoll[RagDollID].RagDollObject[objectID].geom, RagDoll[RagDollID].RagDollObject[objectID].body);
 
 	//set it's mass
-	dMassSetCapsule (&RagDoll[RagDollID].RagDollObject[objectID].mass, density, 3, radius, length);
-	dBodySetMass(RagDoll[RagDollID].RagDollObject[objectID].body, &RagDoll[RagDollID].RagDollObject[objectID].mass);
+	//dMassSetCapsule (&RagDoll[RagDollID].RagDollObject[objectID].mass, density, 3, radius, length);
+	//dBodySetMass(RagDoll[RagDollID].RagDollObject[objectID].body, &RagDoll[RagDollID].RagDollObject[objectID].mass);
 
 	//define body rotation automatically from body axis
 	VectorSubtract(p2, p1, za);
@@ -839,7 +839,7 @@ void R_AddNewRagdoll( vec3_t origin )
 			//for initial testing, let's just build a simple plane at the feet of the player
 			R_RagdollBody_Init(RagDollID, origin);
 			//add nearby surfaces anytime a ragdoll is spawned
-			R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
+			//R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
 			Com_Printf("Added a ragdoll\n");
 			break;
 		}
@@ -892,7 +892,7 @@ void R_RenderAllRagdolls ( void )
 		{
 			dSpaceCollide(RagDollSpace, 0, &near_callback);
 
-			dWorldQuickStep(RagDollWorld, 0.05); 
+			dWorldStepFast1(RagDollWorld, (Sys_Milliseconds() - lastODEUpdate)/1000.0f, 1);
 
 			// Remove all temporary collision joints now that the world has been stepped
 			dJointGroupEmpty(contactGroup);
