@@ -304,7 +304,7 @@ void R_CreateWorldObject( void )
 	// Initialize the world
 	RagDollWorld = dWorldCreate();
 
-	dWorldSetGravity(RagDollWorld, 0.0, -4.0, 0.0);
+	dWorldSetGravity(RagDollWorld, 0.0, 0.0, -4.0);
 
 	RagDollSpace = dSimpleSpaceCreate(0);
 
@@ -341,7 +341,7 @@ void R_DestroyWorldObject( void )
 //Notes - right now this is building a geometry for each convex poly, this might the cleanest and easiest way, but it 
 //may be nicer and more efficient to build a geometry for the entire surface.  r_surfacecount need to be renamed if we keep 
 //things this way.
-void GL_BuildODEGeoms(msurface_t *surf, vec3_t origin, int RagDollID)
+void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 {
 	glpoly_t *p = surf->polys;
 	float	*v;
@@ -406,6 +406,11 @@ void GL_BuildODEGeoms(msurface_t *surf, vec3_t origin, int RagDollID)
 
 		RagDoll[RagDollID].WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh, NULL, NULL, NULL);
 		dGeomSetData(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], "surface");
+
+		// this geom has no body
+		dGeomSetBody(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], 0);
+
+		//we should not need to call dGeomSetPosition because the vertices are not relative to a position.
 		
 		r_SurfaceCount++;
 	}	
@@ -669,7 +674,7 @@ void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 				VectorScale(center, (float)(1.0/numverts), center);
 				VectorSubtract(center, ragdollorg, dist);
 				if(VectorLength(dist) < 512)
-					GL_BuildODEGeoms(surf, center, RagDollID);
+					GL_BuildODEGeoms(surf, RagDollID);
 				else
 					continue;
 			}
@@ -714,36 +719,56 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 	dBodyID body1 = dGeomGetBody(geom1);
 	dBodyID body2 = dGeomGetBody(geom2);
 
-	if(body1 && body2)
+	if (dGeomIsSpace(geom1) || dGeomIsSpace(geom2))
+	{   // colliding a space with something
+		dSpaceCollide2(geom1, geom2, data, &near_callback);
+		
+		// now colliding all geoms internal to the space(s)
+		if (dGeomIsSpace(geom1))
+		{
+			dSpaceID o1_spaceID = (dSpaceID)geom1; 
+			dSpaceCollide(o1_spaceID, data, &near_callback);
+		}
+		if (dGeomIsSpace(geom2))
+		{
+			dSpaceID o2_spaceID = (dSpaceID)geom2; 
+			dSpaceCollide(o2_spaceID, data, &near_callback);
+		}
+	}
+	else 
 	{
-		if (dAreConnected(body1, body2))
+
+		if(body1 && body2)
+		{
+			if (dAreConnected(body1, body2))
+				return;
+		}
+		else
 			return;
-	}
-	else
-		return;
 
-	for(i = 0; i < MAX_CONTACTS; i++)
-	{
-		contact[i].surface.mode = dContactBounce; // Bouncy surface
-		contact[i].surface.bounce = 0.2;
-		contact[i].surface.mu = 500.0; // Friction
-		contact[i].surface.mu2 = 0;
-		contact[i].surface.bounce_vel = 0.1;
-	}
+		for(i = 0; i < MAX_CONTACTS; i++)
+		{
+			contact[i].surface.mode = dContactBounce; // Bouncy surface
+			contact[i].surface.bounce = 0.2;
+			contact[i].surface.mu = 500.0; // Friction
+			contact[i].surface.mu2 = 0;
+			contact[i].surface.bounce_vel = 0.1;
+		}
 
-	if (numc = dCollide(geom1, geom2, MAX_CONTACTS, &contact[0].geom, sizeof(dContact)))
-    {
-        // To add each contact point found to our joint group we call dJointCreateContact which is just one of the many
-        // different joint types available.  
-        for (i = 0; i < numc; i++)
-        {
-            // dJointCreateContact needs to know which world and joint group to work with as well as the dContact
-            // object itself. It returns a new dJointID which we then use with dJointAttach to finally create the
-            // temporary contact joint between the two geom bodies.
-            j = dJointCreateContact(RagDollWorld, contactGroup, &contact[i]);
-			dJointAttach(j, body1, body2);
-        }
-    }
+		if (numc = dCollide(geom1, geom2, MAX_CONTACTS, &contact[0].geom, sizeof(dContact)))
+		{
+			// To add each contact point found to our joint group we call dJointCreateContact which is just one of the many
+			// different joint types available.  
+			for (i = 0; i < numc; i++)
+			{
+				// dJointCreateContact needs to know which world and joint group to work with as well as the dContact
+				// object itself. It returns a new dJointID which we then use with dJointAttach to finally create the
+				// temporary contact joint between the two geom bodies.
+				j = dJointCreateContact(RagDollWorld, contactGroup, &contact[i]);
+				dJointAttach(j, body1, body2);
+			}
+		}
+	}
 }
 
 void R_DestroyRagDoll(int RagDollID, qboolean nuke)
@@ -861,12 +886,13 @@ void R_RenderAllRagdolls ( void )
 
 	if(r_DrawingRagDoll) //here we handle the physics
 	{		
-		//note - this is called each server frame, not each render frame, and interpolated 
-		if((Sys_Milliseconds() - lastODEUpdate) > 100)
+		//note - this is can be called each server frame, not each render frame, and interpolated 
+		//or we can more simply just have a higher resolution of calls to the ODE loop
+		if((Sys_Milliseconds() - lastODEUpdate) > 1) //100 ms is server framerate
 		{
 			dSpaceCollide(RagDollSpace, 0, &near_callback);
 
-			dWorldQuickStep(RagDollWorld, 0.05); //this is likely wrong, check!
+			dWorldQuickStep(RagDollWorld, 0.05); 
 
 			// Remove all temporary collision joints now that the world has been stepped
 			dJointGroupEmpty(contactGroup);
