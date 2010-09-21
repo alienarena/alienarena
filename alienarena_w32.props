@@ -14,6 +14,7 @@
     <LibvorbisSrcDir>$(LibSrcDir)libvorbis-1.3.1\</LibvorbisSrcDir>
     <LibjpegSrcDir>$(LibSrcDir)jpeg-8b\</LibjpegSrcDir>
     <LibodeSrcDir>$(LibSrcDir)ode-0.11.1\</LibodeSrcDir>
+    <FreeTypeSrcDir>$(LibSrcDir)freetype-2.4.2\</FreeTypeSrcDir>
     <OpenALIncludeDir>C:\Program Files (x86)\OpenAL 1.1 SDK\include\</OpenALIncludeDir>
   </PropertyGroup>
   <PropertyGroup>
@@ -54,6 +55,9 @@
     </BuildMacro>
     <BuildMacro Include="LibodeSrcDir">
       <Value>$(LibodeSrcDir)</Value>
+    </BuildMacro>
+    <BuildMacro Include="FreeTypeSrcDir">
+      <Value>$(FreeTypeSrcDir)</Value>
     </BuildMacro>
     <BuildMacro Include="OpenALIncludeDir">
       <Value>C:\Program Files (x86)\OpenAL 1.1 SDK\include\</Value>
