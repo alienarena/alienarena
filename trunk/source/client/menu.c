@@ -41,14 +41,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "client.h"
 #include "client/qmenu.h"
 
-#if !defined HAVE__STRICMP
-#if defined HAVE_STRICMP
-#define _stricmp stricmp
-#elif defined HAVE_STRCASECMP
-#define _stricmp strcasecmp
-#endif
-#endif
-
 #if !defined HAVE__STRDUP
 #if defined HAVE_STRDUP
 #define _strdup strdup
@@ -3371,21 +3363,21 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	token = strtok( rLine, seps );
 	while( token != NULL ) {
 		/* While there are tokens in "string" */
-		if (!_stricmp (lasttoken, "admin"))
+		if (!Q_strcasecmp (lasttoken, "admin"))
 			Com_sprintf(mservers[m_num_servers].szAdmin, sizeof(mservers[m_num_servers].szAdmin), "Admin: %s", token);
-		else if (!_stricmp (lasttoken, "website"))
+		else if (!Q_strcasecmp (lasttoken, "website"))
 			Com_sprintf(mservers[m_num_servers].szWebsite, sizeof(mservers[m_num_servers].szWebsite), "%s", token);
-		else if (!_stricmp (lasttoken, "fraglimit"))
+		else if (!Q_strcasecmp (lasttoken, "fraglimit"))
 			Com_sprintf(mservers[m_num_servers].fraglimit, sizeof(mservers[m_num_servers].fraglimit), "Fraglimit: %s", token);
-		else if (!_stricmp (lasttoken, "timelimit"))
+		else if (!Q_strcasecmp (lasttoken, "timelimit"))
 			Com_sprintf(mservers[m_num_servers].timelimit, sizeof(mservers[m_num_servers].timelimit), "Timelimit: %s", token);
-		else if (!_stricmp (lasttoken, "version"))
+		else if (!Q_strcasecmp (lasttoken, "version"))
 			Com_sprintf(mservers[m_num_servers].szVersion, sizeof(mservers[m_num_servers].szVersion), "%s", token);
-		else if (!_stricmp (lasttoken, "mapname"))
+		else if (!Q_strcasecmp (lasttoken, "mapname"))
 			Com_sprintf(mservers[m_num_servers].szMapName, sizeof(mservers[m_num_servers].szMapName), "%s", token);
-		else if (!_stricmp (lasttoken, "hostname"))
+		else if (!Q_strcasecmp (lasttoken, "hostname"))
 			Com_sprintf(mservers[m_num_servers].szHostName, sizeof(mservers[m_num_servers].szHostName), "%s", token);
-		else if (!_stricmp (lasttoken, "maxclients"))
+		else if (!Q_strcasecmp (lasttoken, "maxclients"))
 			Com_sprintf(mservers[m_num_servers].maxClients, sizeof(mservers[m_num_servers].maxClients), "%s", token);
 
 		/* Get next token: */
@@ -3541,7 +3533,7 @@ void JoinServerFunc( void *self )
 
 	playeridx = s_playerlist_scrollbar.curvalue = 0;
 
-	if ( Q_stricmp( mservers[index+svridx].szHostName, NO_SERVER_STRING ) == 0 )
+	if ( Q_strcasecmp( mservers[index+svridx].szHostName, NO_SERVER_STRING ) == 0 )
 		return;
 
 	if (index >= m_num_servers)
@@ -4816,34 +4808,34 @@ void StartServerActionFunc( void *self )
 	spot = NULL;
 	if (s_rules_box.curvalue == 0)		// PGM
 	{
- 		if(Q_stricmp(startmap, "dm-dynamo") == 0)
+ 		if(Q_strcasecmp(startmap, "dm-dynamo") == 0)
   			spot = "start";
 
 	}
 	if (s_rules_box.curvalue == 1)		// PGM
 	{
- 		if(Q_stricmp(startmap, "ctf-chromium") == 0)
+ 		if(Q_strcasecmp(startmap, "ctf-chromium") == 0)
   			spot = "start";
 
 	}
 	if (s_rules_box.curvalue == 2)
 	{
-		if(Q_stricmp(startmap, "aoa-morpheus") == 0)
+		if(Q_strcasecmp(startmap, "aoa-morpheus") == 0)
 			spot = "start";
 	}
 	if (s_rules_box.curvalue == 3)
 	{
-		if(Q_stricmp(startmap, "db-chromium") == 0)
+		if(Q_strcasecmp(startmap, "db-chromium") == 0)
 			spot = "start";
 	}
 	if (s_rules_box.curvalue == 4)
 	{
-		if(Q_stricmp(startmap, "tca-europa") == 0)
+		if(Q_strcasecmp(startmap, "tca-europa") == 0)
 			spot = "start";
 	}
 	if (s_rules_box.curvalue == 5)
 	{
-		if(Q_stricmp(startmap, "cp-grindery") == 0)
+		if(Q_strcasecmp(startmap, "cp-grindery") == 0)
 			spot = "start";
 	}
 	if (spot)
@@ -6297,7 +6289,7 @@ qboolean PlayerConfig_MenuInit( void )
 	for ( i = 0; i < s_numplayermodels; i++ )
 	{
 		s_pmnames[i] = s_pmi[i].displayname;
-		if ( Q_stricmp( s_pmi[i].directory, currentdirectory ) == 0 )
+		if ( Q_strcasecmp( s_pmi[i].directory, currentdirectory ) == 0 )
 		{
 			int j;
 
@@ -6305,7 +6297,7 @@ qboolean PlayerConfig_MenuInit( void )
 
 			for ( j = 0; j < s_pmi[i].nskins; j++ )
 			{
-				if ( Q_stricmp( s_pmi[i].skindisplaynames[j], currentskin ) == 0 )
+				if ( Q_strcasecmp( s_pmi[i].skindisplaynames[j], currentskin ) == 0 )
 				{
 					currentskinindex = j;
 					break;

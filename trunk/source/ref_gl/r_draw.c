@@ -105,8 +105,6 @@ Draw_InitLocal
 */
 void Draw_InitLocal (void)
 {
-	image_t	*Draw_FindPic (char *name);
-
 	RefreshFont();
 }
 

@@ -231,7 +231,7 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 		scroll = 0.0f;
 
 	//special case - note one day we should find a way to check for contents such as mist to do this.
-	if(!Q_stricmp(fa->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_stricmp(fa->texinfo->image->name, "textures/arena5/fod.wal"))
+	if(!Q_strcasecmp(fa->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_strcasecmp(fa->texinfo->image->name, "textures/arena5/fod.wal"))
 		fod = true;
 	else
 		fod = false;

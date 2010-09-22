@@ -36,9 +36,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/uio.h>
 #include <errno.h>
 
-#if defined HAVE_STRCASECMP && !defined HAVE_STRICMP
-#define stricmp strcasecmp
-#endif
 
 int			server_port;
 netadr_t	net_local_adr;
@@ -495,7 +492,7 @@ int NET_Socket (char *net_interface, int port)
 		return 0;
 	}
 
-	if (!net_interface || !net_interface[0] || !stricmp(net_interface, "localhost"))
+	if (!net_interface || !net_interface[0] || !Q_strcasecmp(net_interface, "localhost"))
 		address.sin_addr.s_addr = INADDR_ANY;
 	else
 		NET_StringToSockaddr (net_interface, (struct sockaddr *)&address);

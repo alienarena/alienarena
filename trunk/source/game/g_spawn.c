@@ -22,14 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 #endif
 
-#if !defined HAVE__STRICMP
-#if defined HAVE_STRICMP
-#define _stricmp stricmp
-#elif defined HAVE_STRCASECMP
-#define _stricmp strcasecmp
-#endif
-#endif
-
 #include "g_local.h"
 
 typedef struct
@@ -229,9 +221,9 @@ void ED_CallSpawn (edict_t *ent)
 			continue;
 
 		//-JD - removing old weapons, and in the case of the vaporizer, duplicates.
-		if(!Q_stricmp(ent->classname, "weapon_grenadelauncher"))
+		if(!Q_strcasecmp(ent->classname, "weapon_grenadelauncher"))
 			ent->classname = "weapon_rocketlauncher"; //hack to remove old weapons
-		if(!Q_stricmp(ent->classname, "weapon_machinegun"))
+		if(!Q_strcasecmp(ent->classname, "weapon_machinegun"))
 			ent->classname = "weapon_bfg"; //hack to remove old weapons
 
 		if (!strcmp(item->classname, ent->classname))
@@ -312,7 +304,7 @@ void ED_ParseField (char *key, char *value, edict_t *ent)
 
 	for (f=fields ; f->name ; f++)
 	{
-		if (!Q_stricmp(f->name, key))
+		if (!Q_strcasecmp(f->name, key))
 		{	// found it
 			if (f->flags & FFL_SPAWNTEMP)
 				b = (byte *)&st;
@@ -515,7 +507,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 		entities = ED_ParseEdict (entities, ent);
 
 		// yet another map hack
-		if (!_stricmp(level.mapname, "command") && !_stricmp(ent->classname, "trigger_once") && !_stricmp(ent->model, "*27"))
+		if (!Q_strcasecmp(level.mapname, "command") && !Q_strcasecmp(ent->classname, "trigger_once") && !Q_strcasecmp(ent->model, "*27"))
 			ent->spawnflags &= ~SPAWNFLAG_NOT_HARD;
 
 		// remove things (except the world) from different skill levels or deathmatch

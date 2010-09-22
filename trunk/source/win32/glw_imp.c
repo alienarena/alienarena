@@ -425,7 +425,7 @@ NoExtFunction:
 	family = (stdBits >> 8) & 15;
 	model = (stdBits >> 4) & 15;
 
-	if (!Q_stricmp(vendor, "AuthenticAMD")){
+	if (!Q_strcasecmp(vendor, "AuthenticAMD")){
 		Q_strncpyz(cpuString, "AMD", maxSize);
 
 		switch (family){
@@ -479,7 +479,7 @@ NoExtFunction:
 			break;
 		}
 	}
-	else if (!Q_stricmp(vendor, "GenuineIntel")){
+	else if (!Q_strcasecmp(vendor, "GenuineIntel")){
 		Q_strncpyz(cpuString, "Intel", maxSize);
 
 		switch (family){
@@ -872,7 +872,7 @@ void GLimp_EndFrame (void)
 	err = qglGetError();
 	assert( err == GL_NO_ERROR ); // 2010-08 This assert is happening
 
-	if ( _stricmp( gl_drawbuffer->string, "GL_BACK" ) == 0 )
+	if ( Q_strcasecmp( gl_drawbuffer->string, "GL_BACK" ) == 0 )
 	{
 		if ( !qwglSwapBuffers( glw_state.hDC ) )
 			Com_Error( ERR_FATAL, "GLimp_EndFrame() - SwapBuffers() failed!\n" );

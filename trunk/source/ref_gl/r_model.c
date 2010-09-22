@@ -168,14 +168,14 @@ static void R_ParseLightEntities (void)
 		if (!tok[0])
 			break;			// End of data
 
-		if (Q_stricmp(tok, "{"))
+		if (Q_strcasecmp(tok, "{"))
 			continue;		// Should never happen!
 
 		// Parse the text inside brackets
 		block[0] = 0;
 		do {
 			tok = Com_ParseExt(&buf, false);
-			if (!Q_stricmp(tok, "}"))
+			if (!Q_strcasecmp(tok, "}"))
 				break;		// Done
 
 			if (!tok[0])	// Newline
@@ -210,13 +210,13 @@ static void R_ParseLightEntities (void)
 			if (!tok[0])
 				break;		// End of data
 
-			if (!Q_stricmp("origin", tok)){
+			if (!Q_strcasecmp("origin", tok)){
 				for (i = 0; i < 3; i++){
 					tok = Com_ParseExt(&bl, false);
 					origin[i] = atof(tok);
 				}
 			}
-			else if (!Q_stricmp("light", tok) || !Q_stricmp("_light", tok)){
+			else if (!Q_strcasecmp("light", tok) || !Q_strcasecmp("_light", tok)){
 				tok = Com_ParseExt(&bl, false);
 				intensity = atof(tok);
 			}
@@ -1242,7 +1242,7 @@ void Mod_LoadFaces (lump_t *l)
 			out->samples = loadmodel->lightdata + i;
 
 		//special case - note one day we should find a way to check for contents such as mist to do this.
-		if(!Q_stricmp(out->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_stricmp(out->texinfo->image->name, "textures/arena5/fod.wal"))
+		if(!Q_strcasecmp(out->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_strcasecmp(out->texinfo->image->name, "textures/arena5/fod.wal"))
 			fod = true;
 		else
 			fod = false;

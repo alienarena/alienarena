@@ -1525,6 +1525,13 @@ int R_Init( void *hinstance, void *hWnd )
 		return -1;
 	}
 
+	// Initialise TrueType fonts
+	if ( ! TTF_Init( ) ) {
+		QGL_Shutdown( );
+		Com_Printf( "ref_gl::R_Init() - could not initialise TTF engine\n" );
+		return -1;
+	}
+
 	VID_MenuInit();
 
 	/*
@@ -1925,6 +1932,7 @@ void R_Shutdown (void)
 
 	Mod_FreeAll ();
 
+	TTF_Shutdown( );
 	GL_ShutdownImages ();
 
 	/*
@@ -2000,7 +2008,7 @@ void R_BeginFrame( float camera_separation )
 
 		if ( gl_state.camera_separation == 0 || !gl_state.stereo_enabled )
 		{
-			if ( Q_stricmp( gl_drawbuffer->string, "GL_FRONT" ) == 0 )
+			if ( Q_strcasecmp( gl_drawbuffer->string, "GL_FRONT" ) == 0 )
 				qglDrawBuffer( GL_FRONT );
 			else
 				qglDrawBuffer( GL_BACK );

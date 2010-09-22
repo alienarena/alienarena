@@ -30,13 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <io.h>
 #endif
 
-#if !defined HAVE__STRICMP
-#if defined HAVE_STRICMP
-#define _stricmp stricmp
-#elif defined HAVE_STRCASECMP
-#define _stricmp strcasecmp
-#endif
-#endif
 
 
 void CIN_FreeCin (int texnum);
@@ -406,7 +399,7 @@ rscript_t *RS_FindScript(char *name)
 
 	while (rs != NULL)
 	{
-		if (rs->hash_key == hash_key && !_stricmp(rs->name, name))
+		if (rs->hash_key == hash_key && !Q_strcasecmp(rs->name, name))
 		{
 			if (! rs->stage)
 				rs = NULL;
@@ -486,27 +479,27 @@ int RS_BlendID (char *blend)
 {
 	if (!blend[0])
 		return 0;
-	if (!_stricmp (blend, "GL_ZERO"))
+	if (!Q_strcasecmp (blend, "GL_ZERO"))
 		return GL_ZERO;
-	if (!_stricmp (blend, "GL_ONE"))
+	if (!Q_strcasecmp (blend, "GL_ONE"))
 		return GL_ONE;
-	if (!_stricmp (blend, "GL_DST_COLOR"))
+	if (!Q_strcasecmp (blend, "GL_DST_COLOR"))
 		return GL_DST_COLOR;
-	if (!_stricmp (blend, "GL_ONE_MINUS_DST_COLOR"))
+	if (!Q_strcasecmp (blend, "GL_ONE_MINUS_DST_COLOR"))
 		return GL_ONE_MINUS_DST_COLOR;
-	if (!_stricmp (blend, "GL_SRC_ALPHA"))
+	if (!Q_strcasecmp (blend, "GL_SRC_ALPHA"))
 		return GL_SRC_ALPHA;
-	if (!_stricmp (blend, "GL_ONE_MINUS_SRC_ALPHA"))
+	if (!Q_strcasecmp (blend, "GL_ONE_MINUS_SRC_ALPHA"))
 		return GL_ONE_MINUS_SRC_ALPHA;
-	if (!_stricmp (blend, "GL_DST_ALPHA"))
+	if (!Q_strcasecmp (blend, "GL_DST_ALPHA"))
 		return GL_DST_ALPHA;
-	if (!_stricmp (blend, "GL_ONE_MINUS_DST_ALPHA"))
+	if (!Q_strcasecmp (blend, "GL_ONE_MINUS_DST_ALPHA"))
 		return GL_ONE_MINUS_DST_ALPHA;
-	if (!_stricmp (blend, "GL_SRC_ALPHA_SATURATE"))
+	if (!Q_strcasecmp (blend, "GL_SRC_ALPHA_SATURATE"))
 		return GL_SRC_ALPHA_SATURATE;
-	if (!_stricmp (blend, "GL_SRC_COLOR"))
+	if (!Q_strcasecmp (blend, "GL_SRC_COLOR"))
 		return GL_SRC_COLOR;
-	if (!_stricmp (blend, "GL_ONE_MINUS_SRC_COLOR"))
+	if (!Q_strcasecmp (blend, "GL_ONE_MINUS_SRC_COLOR"))
 		return GL_ONE_MINUS_SRC_COLOR;
 
 	return 0;
@@ -514,11 +507,11 @@ int RS_BlendID (char *blend)
 
 int RS_FuncName (char *text)
 {
-	if (!_stricmp (text, "static"))			// static
+	if (!Q_strcasecmp (text, "static"))			// static
 		return 0;
-	else if (!_stricmp (text, "sine"))		// sine wave
+	else if (!Q_strcasecmp (text, "sine"))		// sine wave
 		return 1;
-	else if (!_stricmp (text, "cosine"))	// cosine wave
+	else if (!Q_strcasecmp (text, "cosine"))	// cosine wave
 		return 2;
 
 	return 0;
@@ -621,17 +614,17 @@ void rs_stage_blendfunc (rs_stage_t *stage, char **token)
 
 	*token = strtok (NULL, TOK_DELIMINATORS);
 
-	if (!Q_stricmp (*token, "add"))
+	if (!Q_strcasecmp (*token, "add"))
 	{
 		stage->blendfunc.source = GL_ONE;
 		stage->blendfunc.dest = GL_ONE;
 	}
-	else if (!Q_stricmp (*token, "blend"))
+	else if (!Q_strcasecmp (*token, "blend"))
 	{
 		stage->blendfunc.source = GL_SRC_ALPHA;
 		stage->blendfunc.dest = GL_ONE_MINUS_SRC_ALPHA;
 	}
-	else if (!Q_stricmp (*token, "filter"))
+	else if (!Q_strcasecmp (*token, "filter"))
 	{
 		stage->blendfunc.source = GL_ZERO;
 		stage->blendfunc.dest = GL_SRC_COLOR;
@@ -666,7 +659,7 @@ void rs_stage_random (rs_stage_t *stage, char **token)
 
 	*token = strtok(NULL, TOK_DELIMINATORS);
 
-	while (_stricmp (*token, "end"))
+	while (Q_strcasecmp (*token, "end"))
 	{
 		stage->rand_count++;
 
@@ -676,7 +669,7 @@ void rs_stage_random (rs_stage_t *stage, char **token)
 
 		*token = strtok(NULL, TOK_DELIMINATORS);
 
-		if (!_stricmp (*token, "end"))
+		if (!Q_strcasecmp (*token, "end"))
 		{
 			rand->next = NULL;
 			break;
@@ -699,7 +692,7 @@ void rs_stage_anim (rs_stage_t *stage, char **token)
 
 	*token = strtok(NULL, TOK_DELIMINATORS);
 
-	while (_stricmp (*token, "end"))
+	while (Q_strcasecmp (*token, "end"))
 	{
 		stage->anim_count++;
 
@@ -709,7 +702,7 @@ void rs_stage_anim (rs_stage_t *stage, char **token)
 
 		*token = strtok(NULL, TOK_DELIMINATORS);
 
-		if (!_stricmp (*token, "end"))
+		if (!Q_strcasecmp (*token, "end"))
 		{
 			anim->next = NULL;
 			break;
@@ -793,17 +786,17 @@ void rs_stage_alphafunc (rs_stage_t *stage, char **token)
 {
 	*token = strtok (NULL, TOK_DELIMINATORS);
 
-	if (!_stricmp (*token, "normal"))
+	if (!Q_strcasecmp (*token, "normal"))
 		stage->alphafunc = ALPHAFUNC_NORMAL;
-	else if (!_stricmp (*token, "-normal"))
+	else if (!Q_strcasecmp (*token, "-normal"))
 		stage->alphafunc = -ALPHAFUNC_NORMAL;
-	else if (!_stricmp (*token, "gloss"))
+	else if (!Q_strcasecmp (*token, "gloss"))
 		stage->alphafunc = ALPHAFUNC_GLOSS;
-	else if (!_stricmp (*token, "-gloss"))
+	else if (!Q_strcasecmp (*token, "-gloss"))
 		stage->alphafunc = -ALPHAFUNC_GLOSS;
-	else if (!_stricmp (*token, "basic"))
+	else if (!Q_strcasecmp (*token, "basic"))
 		stage->alphafunc = ALPHAFUNC_BASIC;
-	else if (!_stricmp (*token, "-basic"))
+	else if (!Q_strcasecmp (*token, "-basic"))
 		stage->alphafunc = -ALPHAFUNC_BASIC;
 }
 void rs_stage_lensflare (rs_stage_t *stage, char **token)
@@ -989,18 +982,18 @@ void RS_LoadScript(char *script)
 
 	while (token != NULL)
 	{
-		if (!_stricmp (token, "/*") || !_stricmp (token, "["))
+		if (!Q_strcasecmp (token, "/*") || !Q_strcasecmp (token, "["))
 			ignored++;
-		else if (!_stricmp (token, "*/") || !_stricmp (token, "]"))
+		else if (!Q_strcasecmp (token, "*/") || !Q_strcasecmp (token, "]"))
 			ignored--;
 
-		if (!_stricmp (token, "//"))
+		if (!Q_strcasecmp (token, "//"))
 		{
 			//IGNORE
 		}
 		else if (!inscript && !ignored)
 		{
-			if (!_stricmp (token, "{"))
+			if (!Q_strcasecmp (token, "{"))
 			{
 				inscript = true;
 			}
@@ -1016,7 +1009,7 @@ void RS_LoadScript(char *script)
 		}
 		else if (inscript && !ignored)
 		{
-			if (!_stricmp(token, "}"))
+			if (!Q_strcasecmp(token, "}"))
 			{
 				if (instage)
 				{
@@ -1027,7 +1020,7 @@ void RS_LoadScript(char *script)
 					inscript = false;
 				}
 			}
-			else if (!_stricmp(token, "{"))
+			else if (!Q_strcasecmp(token, "{"))
 			{
 				if (!instage) {
 					instage = true;
@@ -1039,7 +1032,7 @@ void RS_LoadScript(char *script)
 				if (instage && !ignored)
 				{
 					for (i = 0; i < num_stagekeys; i++) {
-						if (!_stricmp (rs_stagekeys[i].stage, token))
+						if (!Q_strcasecmp (rs_stagekeys[i].stage, token))
 						{
 							rs_stagekeys[i].func (stage, &token);
 							break;
@@ -1050,7 +1043,7 @@ void RS_LoadScript(char *script)
 				{
 					for (i = 0; i < num_scriptkeys; i++)
 					{
-						if (!_stricmp (rs_scriptkeys[i].script, token))
+						if (!Q_strcasecmp (rs_scriptkeys[i].script, token))
 						{
 							rs_scriptkeys[i].func (rs, &token);
 							break;

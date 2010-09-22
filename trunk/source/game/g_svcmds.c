@@ -277,19 +277,19 @@ void	ServerCommand (void)
 	char	*cmd;
 
 	cmd = gi.argv(1);
-	if (Q_stricmp (cmd, "test") == 0)
+	if (Q_strcasecmp (cmd, "test") == 0)
 		Svcmd_Test_f ();
-	else if (Q_stricmp (cmd, "addip") == 0)
+	else if (Q_strcasecmp (cmd, "addip") == 0)
 		SVCmd_AddIP_f ();
-	else if (Q_stricmp (cmd, "removeip") == 0)
+	else if (Q_strcasecmp (cmd, "removeip") == 0)
 		SVCmd_RemoveIP_f ();
-	else if (Q_stricmp (cmd, "listip") == 0)
+	else if (Q_strcasecmp (cmd, "listip") == 0)
 		SVCmd_ListIP_f ();
-	else if (Q_stricmp (cmd, "writeip") == 0)
+	else if (Q_strcasecmp (cmd, "writeip") == 0)
 		SVCmd_WriteIP_f ();
 // ACEBOT_ADD
 
-	else if(Q_stricmp (cmd, "acedebug") == 0)
+	else if(Q_strcasecmp (cmd, "acedebug") == 0)
  		if (strcmp(gi.argv(2),"on")==0)
 		{
 			safe_bprintf (PRINT_MEDIUM, "ACE: Debug Mode On\n");
@@ -301,18 +301,18 @@ void	ServerCommand (void)
 			debug_mode = false;
 		}
 
-	else if (Q_stricmp (cmd, "addbot") == 0)
+	else if (Q_strcasecmp (cmd, "addbot") == 0)
 	{
 
 		ACESP_SpawnBot (gi.argv(2), gi.argv(3), NULL);
 	}
 
 	// removebot
-    else if(Q_stricmp (cmd, "removebot") == 0)
+    else if(Q_strcasecmp (cmd, "removebot") == 0)
     	ACESP_RemoveBot(gi.argv(2));
 
 	// Node saving
-	else if(Q_stricmp (cmd, "savenodes") == 0)
+	else if(Q_strcasecmp (cmd, "savenodes") == 0)
     	ACEND_SaveNodes();
 
 // ACEBOT_END
