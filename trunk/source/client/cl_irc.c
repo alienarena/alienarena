@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "client.h"
+#include "qcommon/htable.h"
 
 #if defined WIN32_VARIANT
 # include <winsock.h>
@@ -196,7 +197,6 @@ struct irc_message_t {
 
 	// Command
 	irc_string_t(32) cmd_string;
-	int cmd_hashkey;
 
 	// Arguments
 	irc_string_t(IRC_MAX_ARG_LEN) arg_values[IRC_MAX_PARAMS];
@@ -213,22 +213,19 @@ static struct irc_message_t IRC_ReceivedMessage;
 
 /*
  * IRC command handlers are called when some command is received;
- * they are stored in a list that includes hash keys (similar to how
- * Cvar's work).
+ * they are stored in hash tables.
  */
 
 typedef int (*irc_handler_func_t)( );
 typedef int (*ctcp_handler_func_t)( qboolean is_channel , const char * message );
 
 struct irc_handler_t {
-	char cmd_string[32];		// Command string
-	int cmd_hashkey;		// Command hash key
-	qboolean is_ctcp;		// Whether this is a CTCP handler
-	void * handler;			// Handler function
-	struct irc_handler_t * next;	// Next handler in list
+	char cmd_string[33];
+	void * handler;
 };
 
-static struct irc_handler_t * IRC_Handlers = NULL;
+static hashtable_t IRC_Handlers;
+static hashtable_t IRC_CTCPHandlers;
 
 
 /*
@@ -297,52 +294,18 @@ static unsigned int IRC_RateLimiter[ 3 ];
 
 
 /*
- * Registers a command handler (generic for both IRC and CTCP)
+ * Initialises the handler tables
  */
-static void IRC_PutHandler( const char * command , void * handler , qboolean is_ctcp )
+static inline void IRC_InitHandlers( )
 {
-	struct irc_handler_t * next , ** prev , * new_handler;
-	int hash_key , i;
-
-	assert( command != NULL && strlen(command) > 0 && strlen(command) < 32 );
-	assert( handler != NULL );
-
-	// Find out where the new handler should be added
-	COMPUTE_HASH_KEY( hash_key , command , i);
-	prev = &IRC_Handlers;
-	next = IRC_Handlers;
-	while ( next && next->cmd_hashkey <= hash_key ) {
-		assert( !( next->cmd_hashkey == hash_key && !strcmp( command, next->cmd_string ) && next->is_ctcp == is_ctcp ) );
-		prev = &( next->next );
-		next = next->next;
-	}
-
-	// Create the new handler's record
-	new_handler = (struct irc_handler_t *) malloc( sizeof( struct irc_handler_t ) );
-	strcpy( new_handler->cmd_string , command );
-	new_handler->cmd_hashkey = hash_key;
-	new_handler->handler = handler;
-	new_handler->is_ctcp = is_ctcp;
-	new_handler->next = next;
-	*prev = new_handler;
-}
-
-
-/*
- * Registers a new IRC command handler.
- */
-static inline void IRC_AddHandler( const char * command , irc_handler_func_t handler )
-{
-	IRC_PutHandler( command , handler , false );
-}
-
-
-/*
- * Registers a new CTCP command handler.
- */
-static void IRC_AddCTCPHandler( const char * command , ctcp_handler_func_t handler )
-{
-	IRC_PutHandler( command , handler , true );
+	IRC_Handlers = HT_Create( 100 , HT_FLAG_INTABLE | HT_FLAG_CASE ,
+				  sizeof( struct irc_handler_t ) ,
+				  HT_OffsetOfField( struct irc_handler_t , cmd_string ) ,
+				  32 );
+	IRC_CTCPHandlers = HT_Create( 100 , HT_FLAG_INTABLE | HT_FLAG_CASE ,
+				      sizeof( struct irc_handler_t ) ,
+				      HT_OffsetOfField( struct irc_handler_t , cmd_string ) ,
+				      32 );
 }
 
 
@@ -351,15 +314,34 @@ static void IRC_AddCTCPHandler( const char * command , ctcp_handler_func_t handl
  */
 static void IRC_FreeHandlers( )
 {
-	struct irc_handler_t * cur , * next;
+	HT_Destroy( IRC_Handlers );
+	HT_Destroy( IRC_CTCPHandlers );
+}
 
-	cur = IRC_Handlers;
-	while ( cur ) {
-		next = cur->next;
-		free( cur );
-		cur = next;
-	}
-	IRC_Handlers = NULL;
+
+/*
+ * Registers a new IRC command handler.
+ */
+static inline void IRC_AddHandler( const char * command , irc_handler_func_t handler )
+{
+	qboolean created;
+	struct irc_handler_t * rv;
+	rv = HT_GetItem( IRC_Handlers , command , &created );
+	assert( created );
+	rv->handler = handler;
+}
+
+
+/*
+ * Registers a new CTCP command handler.
+ */
+static void IRC_AddCTCPHandler( const char * command , ctcp_handler_func_t handler )
+{
+	qboolean created;
+	struct irc_handler_t * rv;
+	rv = HT_GetItem( IRC_CTCPHandlers , command , &created );
+	assert( created );
+	rv->handler = handler;
 }
 
 
@@ -370,21 +352,8 @@ static void IRC_FreeHandlers( )
 static int IRC_ExecuteHandler( )
 {
 	struct irc_handler_t * handler;
-	qboolean found;
-
-	handler = IRC_Handlers;
-	found = false;
-
-	while ( handler && handler->cmd_hashkey <= IRC_ReceivedMessage.cmd_hashkey ) {
-		if ( handler->cmd_hashkey == IRC_ReceivedMessage.cmd_hashkey && !handler->is_ctcp
-				&& !strcmp( IRC_String(cmd_string) , handler->cmd_string ) ) {
-			found = true;
-			break;
-		}
-		handler = handler->next;
-	}
-
-	if ( !found )
+	handler = HT_GetItem( IRC_Handlers , IRC_String(cmd_string) , NULL );
+	if ( handler == NULL )
 		return IRC_CMD_SUCCESS;
 	return ((irc_handler_func_t)(handler->handler))( );
 }
@@ -396,25 +365,9 @@ static int IRC_ExecuteHandler( )
 static int IRC_ExecuteCTCPHandler( const char * command , qboolean is_channel , const char *argument )
 {
 	struct irc_handler_t * handler;
-	qboolean found;
-	int hashkey , i;
-
-	COMPUTE_HASH_KEY( hashkey , command , i );
-	handler = IRC_Handlers;
-	found = false;
-
-	while ( handler && handler->cmd_hashkey <= hashkey ) {
-		if ( handler->cmd_hashkey == hashkey && handler->is_ctcp
-				&& !strcmp( command , handler->cmd_string ) ) {
-			found = true;
-			break;
-		}
-		handler = handler->next;
-	}
-
-	if ( !found ) {
+	handler = HT_GetItem( IRC_CTCPHandlers , command , NULL );
+	if ( handler == NULL )
 		return IRC_CMD_SUCCESS;
-	}
 	return ((ctcp_handler_func_t)(handler->handler))( is_channel , argument );
 }
 
@@ -568,14 +521,6 @@ static int IRC_ProcessDEQueue( )
 		IRC_ReceivedMessage.S.string[IRC_ReceivedMessage.S.length ++] = next; \
 	} \
 }
-#define P_INIT_COMMAND { \
-	P_INIT_STRING(cmd_string); \
-	COMPUTE_HASH_KEY_CHAR(IRC_ReceivedMessage.cmd_hashkey, next); \
-}
-#define P_ADD_COMMAND { \
-	P_ADD_STRING(cmd_string); \
-	COMPUTE_HASH_KEY_CHAR(IRC_ReceivedMessage.cmd_hashkey, next); \
-}
 #define P_NEXT_PARAM { \
 	if ( ( ++ IRC_ReceivedMessage.arg_count ) == IRC_MAX_PARAMS ) { \
 		P_ERROR(RECOVERY); \
@@ -617,10 +562,10 @@ static qboolean IRC_Parser( char next )
 				P_SET_STATE(LF);
 			} else if ( IS_DIGIT( next ) ) {
 				P_INIT_MESSAGE(NUM_COMMAND_2);
-				P_INIT_COMMAND;
+				P_INIT_STRING(cmd_string);
 			} else if ( IS_UPPER( next ) ) {
 				P_INIT_MESSAGE(STR_COMMAND);
-				P_INIT_COMMAND;
+				P_INIT_STRING(cmd_string);
 			} else {
 				P_ERROR(RECOVERY);
 			}
@@ -718,10 +663,10 @@ static qboolean IRC_Parser( char next )
 		case IRC_PARSER_COMMAND_START:
 			if ( IS_DIGIT( next ) ) {
 				P_SET_STATE(NUM_COMMAND_2);
-				P_INIT_COMMAND;
+				P_INIT_STRING(cmd_string);
 			} else if ( IS_UPPER( next ) ) {
 				P_SET_STATE(STR_COMMAND);
-				P_INIT_COMMAND;
+				P_INIT_STRING(cmd_string);
 			} else {
 				P_AUTO_ERROR;
 			}
@@ -739,7 +684,7 @@ static qboolean IRC_Parser( char next )
 			} else if ( next == '\r' ) {
 				P_SET_STATE(LF);
 			} else if ( IS_UPPER( next ) ) {
-				P_ADD_COMMAND;
+				P_ADD_STRING(cmd_string);
 			} else {
 				P_ERROR(RECOVERY);
 			}
@@ -753,7 +698,7 @@ static qboolean IRC_Parser( char next )
 		case IRC_PARSER_NUM_COMMAND_3:
 			if ( IS_DIGIT( next ) ) {
 				IRC_ParserState ++;
-				P_ADD_COMMAND;
+				P_ADD_STRING(cmd_string);
 			} else {
 				P_AUTO_ERROR;
 			}
@@ -2023,6 +1968,7 @@ static void IRC_Thread( )
 	// Init. send queue & rate limiter
 	IRC_InitSendQueue( );
 	IRC_InitRateLimiter( );
+	IRC_InitHandlers( );
 
 	// Init. IRC handlers
 	IRC_AddHandler( "PING" , &IRCH_Ping );		// Ping request
