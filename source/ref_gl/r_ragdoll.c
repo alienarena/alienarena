@@ -91,84 +91,6 @@ void norm3(vec3_t v, vec3_t out)
 	}
 }
 
-//vec_t* project3(vec3_t v, vec3_t d)
-//{
-//	return mul3(v, DotProduct(norm3(v), d));
-//}
-
-double acosdot3(vec3_t a, vec3_t b)
-{
-	double x;
-
-	x = DotProduct(a, b);
-	if(x < -1.0)
-		return pi;
-	else if(x > 1.0)
-		return 0.0;
-	else
-		return acos(x);
-}
-
-vec_t* rotate3(matrix3x3_t m, vec3_t v)
-{
-	vec_t *rv = NULL;
-
-	rv[0] = v[0] * m.a[0] + v[1] * m.a[1] + v[2] * m.a[2];
-	rv[1] = v[0] * m.b[0] + v[1] * m.b[1] + v[2] * m.b[2];
-	rv[2] = v[0] * m.c[0] + v[1] * m.c[1] + v[2] * m.c[2];
-
-	return rv;
-}
-
-matrix3x3_t* invert3x3(matrix3x3_t m)
-{
-	matrix3x3_t *rm = NULL;
-
-	rm->a[0] = m.a[0];
-	rm->a[1] = m.b[0];
-	rm->a[2] = m.c[0];
-	rm->b[0] = m.a[1];
-	rm->b[1] = m.b[1];
-	rm->b[2] = m.c[1];
-	rm->c[0] = m.a[2];
-	rm->c[1] = m.b[2];
-	rm->c[2] = m.c[2];
-
-	return rm;
-}
-
-vec_t* zaxis(matrix3x3_t m)
-{
-	vec_t *rm = NULL;
-
-	rm[0] = m.a[2];
-	rm[1] = m.b[2];
-	rm[2] = m.c[2];
-
-	return rm;
-}
-
-matrix3x3_t* calcRotMatrix(vec3_t axis, float angle)
-{
-	float cosTheta = cosf(angle);
-	float sinTheta = sinf(angle);
-	float t = 1.0 - cosTheta;
-
-	matrix3x3_t *rm = NULL;
-
-	rm->a[0] = t * pow(axis[0],2) + cosTheta;
-	rm->a[1] = t * axis[0] * axis[1] - sinTheta * axis[2];
-	rm->a[2] = t * axis[0] * axis[2] + sinTheta * axis[1];
-	rm->b[0] = t * axis[0] * axis[1] + sinTheta * axis[2];
-	rm->b[1] = t * pow(axis[1], 2) + cosTheta;
-	rm->b[2] = t * axis[1] * axis[2] - sinTheta * axis[0];
-	rm->c[0] = t * axis[0] * axis[2] - sinTheta * axis[1];
-	rm->c[1] = t * axis[1] * axis[2] + sinTheta * axis[0];
-	rm->c[2] = t * pow(axis[2], 2) + cosTheta;
-
-	return rm;
-}
-
 matrix4x4_t* makeOpenGLMatrix(matrix3x3_t r, vec3_t p)
 {
 	matrix4x4_t *rm = NULL;
@@ -201,6 +123,7 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	float length;
 	vec3_t xa, ya, za, temp;
 	dMatrix3 rot;
+	dReal test;
 	const dReal* initialQ;
 	dQuaternion initialQuaternion;
 
@@ -221,8 +144,8 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	dGeomSetBody(RagDoll[RagDollID].RagDollObject[objectID].geom, RagDoll[RagDollID].RagDollObject[objectID].body);
 
 	//set it's mass
-	//dMassSetCapsule (&RagDoll[RagDollID].RagDollObject[objectID].mass, density, 3, radius, length);
-	//dBodySetMass(RagDoll[RagDollID].RagDollObject[objectID].body, &RagDoll[RagDollID].RagDollObject[objectID].mass);
+	dMassSetCapsule (&RagDoll[RagDollID].RagDollObject[objectID].mass, density, 3, radius, length);
+	dBodySetMass(RagDoll[RagDollID].RagDollObject[objectID].body, &RagDoll[RagDollID].RagDollObject[objectID].mass);
 
 	//define body rotation automatically from body axis
 	VectorSubtract(p2, p1, za);
@@ -240,18 +163,49 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	norm3(xa, xa);
 	CrossProduct(za, xa, ya);
 
-	rot[0] = xa[0];
-	rot[1] = ya[0];
-	rot[2] = za[0];
-	rot[3] = xa[1];
-	rot[4] = ya[1];
-	rot[5] = za[1];
-	rot[6] = xa[2];
-	rot[7] = ya[2];
-	rot[8] = za[2];
+	if(!IS_NAN(xa[0]))
+		rot[0] = xa[0];
+	else
+		rot[0] = 0;
+	if(!IS_NAN(ya[0]))
+		rot[1] = ya[0];
+	else
+		ya[0] = 0;
+	if(!IS_NAN(za[0]))
+		rot[2] = za[0];
+	else 
+		rot[2] = 0;
+	if(!IS_NAN(xa[1]))
+		rot[3] = xa[1];
+	else
+		rot[3] = 0;
+	if(!IS_NAN(ya[1]))
+		rot[4] = ya[1];
+	else
+		rot[4] = 0;
+	if(!IS_NAN(za[1]))
+		rot[5] = za[1];
+	else
+		rot[5] = 0;
+	if(!IS_NAN(xa[2]))
+		rot[6] = xa[2];
+	else
+		rot[6] = 0;
+	if(!IS_NAN(ya[2]))
+		rot[7] = ya[2];
+	else
+		rot[7] = 0;
+	if(!IS_NAN(za[2]))
+		rot[8] = za[2];
+	else
+		rot[8] = 0;
 
 	VectorAdd(p1, p2, temp);
 	VectorScale(temp, 0.5, temp);
+
+	test = VectorLength(temp);
+	if(IS_NAN(test))
+		VectorClear(temp);
 
 	dBodySetPosition(RagDoll[RagDollID].RagDollObject[objectID].body, temp[0], temp[1], temp[2]);
 	dBodySetRotation(RagDoll[RagDollID].RagDollObject[objectID].body, rot);
@@ -260,10 +214,22 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	dBodySetAngularVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
 
 	initialQ = dBodyGetQuaternion(RagDoll[RagDollID].RagDollObject[objectID].body);
-	initialQuaternion[0] = initialQ[0];
-	initialQuaternion[1] = initialQ[1];
-	initialQuaternion[2] = initialQ[2];
-	initialQuaternion[3] = initialQ[3];
+	if(!IS_NAN(initialQ[0]))
+		initialQuaternion[0] = initialQ[0];
+	else
+		initialQuaternion[0] = 0;
+	if(!IS_NAN(initialQ[1]))
+		initialQuaternion[1] = initialQ[1];
+	else
+		initialQuaternion[1] = 0;
+	if(!IS_NAN(initialQ[2]))
+		initialQuaternion[2] = initialQ[2];
+	else
+		initialQuaternion[2] = 0;
+	if(!IS_NAN(initialQ[3]))
+		initialQuaternion[3] = initialQ[3];
+	else
+		initialQuaternion[3] = 0;
 	dBodySetQuaternion(RagDoll[RagDollID].RagDollObject[objectID].body, initialQuaternion);
 }
 
@@ -303,6 +269,8 @@ void R_CreateWorldObject( void )
 {
 	// Initialize the world
 	RagDollWorld = dWorldCreate();
+
+	//dWorldSetERP(RagDollWorld, 0.1); //default 0.2
 
 	dWorldSetGravity(RagDollWorld, 0.0, 0.0, -4.0);
 
@@ -380,8 +348,6 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 		ODETris = p->numverts - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
 		ODEIndexCount += 3*ODETris; //3 indices per tri
 
-		//this next block is to create indices for the entire mesh.  I think it should work in theory, but
-		//it's only my theory, and not confirmed just yet.
 		j = offset = 0;
 		for(i = 0; i < ODETris; i++)
 		{
@@ -411,6 +377,7 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 		dGeomSetBody(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], 0);
 
 		//we should not need to call dGeomSetPosition because the vertices are not relative to a position.
+		dGeomSetPosition(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], 0, 0, 0);
 		
 		r_SurfaceCount++;
 	}	
@@ -886,13 +853,12 @@ void R_RenderAllRagdolls ( void )
 
 	if(r_DrawingRagDoll) //here we handle the physics
 	{		
-		//note - this is can be called each server frame, not each render frame, and interpolated 
-		//or we can more simply just have a higher resolution of calls to the ODE loop
-		if((Sys_Milliseconds() - lastODEUpdate) > 1) //100 ms is server framerate
+		if((Sys_Milliseconds() - lastODEUpdate) > 1) //this may not be needed but it's safe to use to throttle things if needed
 		{
 			dSpaceCollide(RagDollSpace, 0, &near_callback);
 
-			dWorldStepFast1(RagDollWorld, (Sys_Milliseconds() - lastODEUpdate)/1000.0f, 1);
+			//20 can be adjusted for smoothness vs speed
+			dWorldStepFast1(RagDollWorld, (Sys_Milliseconds() - lastODEUpdate)/1000.0f, 20);
 
 			// Remove all temporary collision joints now that the world has been stepped
 			dJointGroupEmpty(contactGroup);

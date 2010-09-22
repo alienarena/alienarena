@@ -39,3 +39,6 @@ void Matrix4_Multiply2D( const mat4x4_t m1, const mat4x4_t m2, mat4x4_t out );
 void Matrix4_Scale2D( mat4x4_t m, vec_t x, vec_t y );
 void Matrix4_Translate2D( mat4x4_t m, vec_t x, vec_t y );
 void Matrix4_Stretch2D( mat4x4_t m, vec_t s, vec_t t );
+
+#define nanmask (255<<23)
+#define	IS_NAN(x) (((*(int *)&x)&nanmask)==nanmask)
