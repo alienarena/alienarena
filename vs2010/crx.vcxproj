@@ -115,6 +115,7 @@
     <ClCompile Include="$(SrcDir)qcommon\crc.c" />
     <ClCompile Include="$(SrcDir)qcommon\cvar.c" />
     <ClCompile Include="$(SrcDir)qcommon\files.c" />
+    <ClCompile Include="$(SrcDir)qcommon\htable.c" />
     <ClCompile Include="$(SrcDir)qcommon\mdfour.c" />
     <ClCompile Include="$(SrcDir)qcommon\net_chan.c" />
     <ClCompile Include="$(SrcDir)qcommon\pmove.c" />
@@ -175,6 +176,7 @@
     <ClInclude Include="$(SrcDir)game\q_shared.h" />
     <ClInclude Include="$(SrcDir)qcommon\qcommon.h" />
     <ClInclude Include="$(SrcDir)qcommon\qfiles.h" />
+    <ClCompile Include="$(SrcDir)qcommon\htable.h" />
     <ClInclude Include="$(SrcDir)ref_gl\anorms.h" />
     <ClInclude Include="$(SrcDir)ref_gl\anormtab.h" />
     <ClInclude Include="$(SrcDir)ref_gl\qgl.h" />

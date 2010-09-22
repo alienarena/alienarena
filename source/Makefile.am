@@ -110,6 +110,8 @@ crx_SOURCES = \
 	qcommon/crc.h \
 	qcommon/cvar.c \
 	qcommon/files.c \
+	qcommon/htable.c \
+	qcommon/htable.h \
 	qcommon/mdfour.c \
 	qcommon/net_chan.c \
 	qcommon/pmove.c \
@@ -209,6 +211,8 @@ crx_ded_SOURCES = \
 	qcommon/crc.c \
 	qcommon/cvar.c \
 	qcommon/files.c \
+	qcommon/htable.c \
+	qcommon/htable.h \
 	qcommon/mdfour.c \
 	qcommon/net_chan.c \
 	qcommon/pmove.c \
