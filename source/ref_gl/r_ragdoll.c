@@ -839,7 +839,7 @@ void R_AddNewRagdoll( vec3_t origin )
 			//for initial testing, let's just build a simple plane at the feet of the player
 			R_RagdollBody_Init(RagDollID, origin);
 			//add nearby surfaces anytime a ragdoll is spawned
-			//R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
+			R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
 			Com_Printf("Added a ragdoll\n");
 			break;
 		}
