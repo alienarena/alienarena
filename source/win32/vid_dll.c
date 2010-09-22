@@ -646,7 +646,7 @@ void VID_Init (void)
 		cvar_t *gl_driver = Cvar_Get( "gl_driver", "opengl32", 0 );
 		cvar_t *gl_mode = Cvar_Get( "gl_mode", "3", 0 );
 
-		if ( stricmp( gl_driver->string, "3dfxgl" ) == 0 )
+		if ( Q_strcasecmp( gl_driver->string, "3dfxgl" ) == 0 )
 		{
 			Cvar_SetValue( "gl_mode", 3 );
 			viddef.width  = 640;

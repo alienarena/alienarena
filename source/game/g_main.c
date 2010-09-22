@@ -381,7 +381,7 @@ void EndDMLevel (void)
 			t = strtok( s, seps );
 			do {
 				// if using the same map is disallowed, skip it
-				if ( !Q_stricmp(t, level.mapname) )
+				if ( !Q_strcasecmp(t, level.mapname) )
 				{
 					if ( same_index == -1 )
 						same_index = n_maps;
@@ -392,7 +392,7 @@ void EndDMLevel (void)
 				// avoid duplicates
 				for ( i = 0 ; i < n_maps ; i ++ )
 				{
-					if ( ! Q_stricmp( t , names[i] ) )
+					if ( ! Q_strcasecmp( t , names[i] ) )
 						break;
 				}
 				if ( i < n_maps )
@@ -457,7 +457,7 @@ void EndDMLevel (void)
 		f = NULL;
 		t = strtok(s, seps);
 		while (t != NULL) {
-			if (Q_stricmp(t, level.mapname) == 0) {
+			if (Q_strcasecmp(t, level.mapname) == 0) {
 				// it's in the list, go to the next one
 				t = strtok(NULL, seps);
 				if (t == NULL) { // end of list, go to first one
@@ -551,7 +551,7 @@ void EndDMLevel (void)
 	//find map, goto next map - if one doesn't exist, repeat list
 	//stick something in here to filter out CTF, and just make it loop back
 	for (i = 0; i < nummaps; i++) {
-		if (Q_stricmp(mapnames[i], level.mapname) == 0) {
+		if (Q_strcasecmp(mapnames[i], level.mapname) == 0) {
 			if(mapnames[i+1][0])
 				BeginIntermission (CreateTargetChangeLevel (mapnames[i+1]) );
 			else if(mapnames[0][0]) //no more maps, repeat list
@@ -591,9 +591,9 @@ void CheckNeedPass (void)
 
 		need = 0;
 
-		if (*password->string && Q_stricmp(password->string, "none"))
+		if (*password->string && Q_strcasecmp(password->string, "none"))
 			need |= 1;
-		if (*spectator_password->string && Q_stricmp(spectator_password->string, "none"))
+		if (*spectator_password->string && Q_strcasecmp(spectator_password->string, "none"))
 			need |= 2;
 
 		gi.cvar_set("needpass", va("%d", need));

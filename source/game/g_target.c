@@ -22,13 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-#if !defined HAVE__STRICMP
-#if defined HAVE_STRICMP
-#define _stricmp stricmp
-#elif defined HAVE_STRCASECMP
-#define _stricmp strcasecmp
-#endif
-#endif
 
 #include "g_local.h"
 
@@ -167,7 +160,7 @@ void SP_target_secret (edict_t *ent)
 	ent->svflags = SVF_NOCLIENT;
 	level.total_secrets++;
 	// map bug hack
-	if (!Q_stricmp(level.mapname, "mine3") && ent->s.origin[0] == 280 && ent->s.origin[1] == -2048 && ent->s.origin[2] == -624)
+	if (!Q_strcasecmp(level.mapname, "mine3") && ent->s.origin[0] == 280 && ent->s.origin[1] == -2048 && ent->s.origin[2] == -624)
 		ent->message = "You have found a secret area.";
 }
 

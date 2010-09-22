@@ -25,13 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "qcommon.h"
 
-#if !defined HAVE__STRICMP
-#if defined HAVE_STRICMP
-#define _stricmp stricmp
-#elif defined HAVE_STRCASECMP
-#define _stricmp strcasecmp
-#endif
-#endif
 
 
 #define	MAX_ALIAS_NAME	32
@@ -284,7 +277,7 @@ void Cbuf_AddEarlyCommands (qboolean clear)
 	for (i=0 ; i<COM_Argc() ; i++)
 	{
 		s = COM_Argv(i);
-		if (_stricmp (s, "+set"))
+		if (Q_strcasecmp (s, "+set"))
 			continue;
 		Cbuf_AddText (va("set %s %s\n", COM_Argv(i+1), COM_Argv(i+2)));
 		if (clear)

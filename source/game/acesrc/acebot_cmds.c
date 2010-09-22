@@ -75,25 +75,25 @@ qboolean ACECM_Commands(edict_t *ent)
 
 	cmd = gi.argv(0);
 
-	if(Q_stricmp (cmd, "addnode") == 0 && debug_mode)
+	if(Q_strcasecmp (cmd, "addnode") == 0 && debug_mode)
 		ent->last_node = ACEND_AddNode(ent,atoi(gi.argv(1)));
 
-	else if(Q_stricmp (cmd, "removelink") == 0 && debug_mode)
+	else if(Q_strcasecmp (cmd, "removelink") == 0 && debug_mode)
 		ACEND_RemoveNodeEdge(ent,atoi(gi.argv(1)), atoi(gi.argv(2)));
 
-	else if(Q_stricmp (cmd, "addlink") == 0 && debug_mode)
+	else if(Q_strcasecmp (cmd, "addlink") == 0 && debug_mode)
 		ACEND_UpdateNodeEdge(atoi(gi.argv(1)), atoi(gi.argv(2)));
 
-	else if(Q_stricmp (cmd, "showpath") == 0 && debug_mode)
+	else if(Q_strcasecmp (cmd, "showpath") == 0 && debug_mode)
     	ACEND_ShowPath(ent,atoi(gi.argv(1)));
 
-	else if(Q_stricmp (cmd, "findnode") == 0 && debug_mode)
+	else if(Q_strcasecmp (cmd, "findnode") == 0 && debug_mode)
 	{
 		node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY, NODE_ALL);
 		safe_bprintf(PRINT_MEDIUM,"node: %d type: %d x: %f y: %f z %f\n",node,nodes[node].type,nodes[node].origin[0],nodes[node].origin[1],nodes[node].origin[2]);
 	}
 
-	else if(Q_stricmp (cmd, "movenode") == 0 && debug_mode)
+	else if(Q_strcasecmp (cmd, "movenode") == 0 && debug_mode)
 	{
 		node = atoi(gi.argv(1));
 		nodes[node].origin[0] = atof(gi.argv(2));
