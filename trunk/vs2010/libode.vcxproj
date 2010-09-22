@@ -45,8 +45,9 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;dDOUBLE;WIN32;_CRT_SECURE_NO_WARNINGS;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;dDOUBLE; WIN32;_CRT_SECURE_NO_WARNINGS;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(LibodeSrcDir)include\;$(LibodeSrcDir)ode\src;$(LibodeSrcDir)ode\src\joints;$(LibodeSrcDir)OPCODE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FloatingPointModel>Precise</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -66,6 +67,7 @@
       <Optimization>Full</Optimization>
       <AdditionalIncludeDirectories>$(LibodeSrcDir)include\;$(LibodeSrcDir)ode\src;$(LibodeSrcDir)ode\src\joints;$(LibodeSrcDir)OPCODE;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>dDOUBLE;WIN32;_CRT_SECURE_NO_DEPRECATE;ODE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FloatingPointModel>Precise</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
