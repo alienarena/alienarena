@@ -176,7 +176,6 @@
     <ClInclude Include="$(SrcDir)game\q_shared.h" />
     <ClInclude Include="$(SrcDir)qcommon\qcommon.h" />
     <ClInclude Include="$(SrcDir)qcommon\qfiles.h" />
-    <ClCompile Include="$(SrcDir)qcommon\htable.h" />
     <ClInclude Include="$(SrcDir)ref_gl\anorms.h" />
     <ClInclude Include="$(SrcDir)ref_gl\anormtab.h" />
     <ClInclude Include="$(SrcDir)ref_gl\qgl.h" />
