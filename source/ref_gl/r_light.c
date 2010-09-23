@@ -860,10 +860,11 @@ void R_RenderSunFlare(image_t * tex, float offset, float size, float r,
 	qglEnd();
 }
 
-float sun_time = 0;
-float sun_alpha = 0;
 void R_RenderSun()
 {
+	static float sun_time = 0.0f;
+	static float sun_alpha = 0.0f;
+
 	float l, hx, hy;
 	float vec[2];
 	float size;
@@ -874,15 +875,18 @@ void R_RenderSun()
 	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
 
-	qglReadPixels(sun_x, r_newrefdef.height - sun_y, 1, 1,
-				  GL_DEPTH_COMPONENT, GL_FLOAT, &l);
-
 	// periodically test visibility to ramp alpha
-	if(rs_realtime - sun_time > 0.02) {
+	if(rs_realtime - sun_time > 0.035f) {
 
-		sun_alpha += (l == 1.0 ? 0.15 : -0.15);  // ramp
-
-		if(sun_alpha > 1.0)  // clamp
+		// read depth buffer at sun flare window coordinates
+		//  to determine visibility. 
+		qglReadPixels(
+			sun_x, r_newrefdef.height - sun_y,
+			1, 1,
+			GL_DEPTH_COMPONENT, GL_FLOAT, &l);
+		// ramp and clamp opacity depending on visibility
+		sun_alpha += (l == 1.0 ? 0.20 : -0.25);
+		if(sun_alpha > 1.0)
 			sun_alpha = 1.0;
 		else if(sun_alpha < 0)
 			sun_alpha = 0.0;
@@ -891,13 +895,12 @@ void R_RenderSun()
 	}
 
 	if (sun_alpha > 0)
-	{
-
+	{ // sun flare is visible
 		hx = r_newrefdef.width / 2;
 		hy = r_newrefdef.height / 2;
 		vec[0] = 1 - fabs(sun_x - hx) / hx;
 		vec[1] = 1 - fabs(sun_y - hy) / hy;
-		l = 3 * vec[0] * vec[1] + 0.25;
+		// l = 3 * vec[0] * vec[1] + 0.25; // result not used
 
 		// set 2d
 		qglMatrixMode(GL_PROJECTION);
