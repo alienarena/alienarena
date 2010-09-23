@@ -124,8 +124,6 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	vec3_t xa, ya, za, temp;
 	dMatrix3 rot;
 	dReal test;
-	const dReal* initialQ;
-	dQuaternion initialQuaternion;
 
 	VectorAdd(p1, currententity->origin, p1);
 	VectorAdd(p2, currententity->origin, p2);
@@ -134,6 +132,8 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	//radius at joints
 	VectorSubtract(p1, p2, temp);
 	length = VectorLength(temp) - radius;
+	if(length <= 0)
+		length = 0.1f;
 
 	//create body id
 	RagDoll[RagDollID].RagDollObject[objectID].body = dBodyCreate(RagDollWorld);	
@@ -212,24 +212,8 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	dBodySetForce(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
 	dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
 	dBodySetAngularVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
-
-	initialQ = dBodyGetQuaternion(RagDoll[RagDollID].RagDollObject[objectID].body);
-	if(!IS_NAN(initialQ[0]))
-		initialQuaternion[0] = initialQ[0];
-	else
-		initialQuaternion[0] = 0;
-	if(!IS_NAN(initialQ[1]))
-		initialQuaternion[1] = initialQ[1];
-	else
-		initialQuaternion[1] = 0;
-	if(!IS_NAN(initialQ[2]))
-		initialQuaternion[2] = initialQ[2];
-	else
-		initialQuaternion[2] = 0;
-	if(!IS_NAN(initialQ[3]))
-		initialQuaternion[3] = initialQ[3];
-	else
-		initialQuaternion[3] = 0;
+		
+	dQFromAxisAndAngle (initialQuaternion, 1,1,1,.5); //test this more
 	dBodySetQuaternion(RagDoll[RagDollID].RagDollObject[objectID].body, initialQuaternion);
 }
 
@@ -755,6 +739,7 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 	{
 		if(RagDoll[RagDollID].WorldGeometry[i])
 			dGeomDestroy(RagDoll[RagDollID].WorldGeometry[i]);
+		RagDoll[RagDollID].WorldGeometry[i] = NULL;
 	}
 	
 	//we also want to destroy all ragdoll bodies and joints for this ragdoll
@@ -762,14 +747,17 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 	{
 		if(RagDoll[RagDollID].RagDollObject[i].geom)
 			dGeomDestroy(RagDoll[RagDollID].RagDollObject[i].geom);
+		RagDoll[RagDollID].RagDollObject[i].geom = NULL;
 		if(RagDoll[RagDollID].RagDollObject[i].body)
 			dBodyDestroy(RagDoll[RagDollID].RagDollObject[i].body);
+		RagDoll[RagDollID].RagDollObject[i].body = NULL;
 	}
 
 	for(i = MIDSPINE; i <= LEFTWRIST; i++) 
 	{
 		if(RagDoll[RagDollID].RagDollJoint[i])
 			dJointDestroy(RagDoll[RagDollID].RagDollJoint[i]);
+		RagDoll[RagDollID].RagDollJoint[i] = NULL;
 	}
 }
 
@@ -800,6 +788,7 @@ void R_AddNewRagdoll( vec3_t origin )
 		VectorSubtract(origin, RagDoll[RagDollID].origin, dist);
 		if(VectorLength(dist) < 16)
 			break; //likely spawned from same ent, this may need tweaking
+		
 		if(RagDoll[RagDollID].destroyed)
 		{
 			//need to create geometry in the vicinity of the ragdoll(not the entire map, this is painfully slow)
@@ -844,6 +833,9 @@ void R_RenderAllRagdolls ( void )
 		{
 			//we handle the ragdoll's physics, then render the mesh with skeleton adjusted by ragdoll
 			//body object positions
+			//Note - I am not sure yet how we should handle helmets for martians.  My gut tells me that 
+			//we are going to have to have the helmet share the ragdoll of it's host body, but that is tricky.
+			//One one hand, if a mesh 
 			numRagDolls++;
 		}
 	}

@@ -1583,17 +1583,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 {
 	int			i;
 	image_t		*skin;
-	float		frame, time;
-
-	if(r_ragdolls->value)
-	{
-		//Ragdolls take over at beginning of each death sequence
-		if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
-			R_AddNewRagdoll(currententity->origin);
-		//Do not render deathframes if using ragdolls
-		if(currententity->frame > 198)
-			return;
-	}
+	float		frame, time;	
 
 	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return;
@@ -1601,6 +1591,19 @@ void R_DrawINTERQUAKEMODEL ( void )
 	//do culling
 	if ( R_CullIQMModel() )
 		return;
+
+	if(r_ragdolls->value)
+	{
+		//Ragdolls take over at beginning of each death sequence(don't bother with helmets just yet, we have to figure things out first)
+		if(!(currententity->flags & RF_TRANSLUCENT)) 
+		{
+			if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
+				R_AddNewRagdoll(currententity->origin);
+		}
+		//Do not render deathframes if using ragdolls
+		if(currententity->frame > 198)
+			return;
+	}
 
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{

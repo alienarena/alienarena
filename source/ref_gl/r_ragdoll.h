@@ -89,6 +89,8 @@ dJointGroupID contactGroup;
 
 int lastODEUpdate;
 
+dQuaternion initialQuaternion;
+
 typedef struct RagDollObject_s {
 	dBodyID body;
 	dMass mass;
