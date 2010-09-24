@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "r_local.h"
+#include "r_ragdoll.h"
 
 /*
 =============================================================
@@ -213,6 +214,83 @@ void GL_GetLightVals(qboolean dynamic)
 					numlights+=100*dl->intensity;
 
 					VectorSubtract (dl->origin, currententity->origin, temp);
+					dynFactor += (dl->intensity/20.0)/VectorLength(temp);
+				}
+			}
+		}
+	}
+
+	if(numlights > 0.0) {
+		for(i = 0; i < 3; i++)
+			lightPosition[i] = lightAdd[i]/numlights;
+	}
+}
+
+void GL_GetLightValsForRagDoll(int RagDollID, qboolean dynamic)
+{
+	int i, j, lnum;
+	dlight_t	*dl;
+	float dist;
+	vec3_t	temp, tempOrg, lightAdd;
+	trace_t r_trace;
+	vec3_t mins, maxs;
+	float numlights, weight;
+
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs, 0, 0, 0);
+
+	//light shining down if there are no lights at all
+	VectorCopy(RagDoll[RagDollID].curPos, lightPosition);
+	lightPosition[2] += 128;
+
+	VectorCopy(RagDoll[RagDollID].curPos, tempOrg);
+		tempOrg[2] += 24; //generates more consistent tracing
+
+	numlights = 0;
+	VectorClear(lightAdd);
+	for (i=0; i<r_lightgroups; i++)
+	{
+		r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+
+		if(r_trace.fraction == 1.0)
+		{
+			VectorSubtract(RagDoll[RagDollID].curPos, LightGroups[i].group_origin, temp);
+			dist = VectorLength(temp);
+			if(dist == 0)
+				dist = 1;
+			dist = dist*dist;
+			weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
+			for(j = 0; j < 3; j++)
+				lightAdd[j] += LightGroups[i].group_origin[j]*weight;
+			numlights+=weight;
+		}
+	}
+
+	dynFactor = 0;
+	if(dynamic)
+	{
+		dl = r_newrefdef.dlights;
+		//limit to five lights(maybe less)?
+		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++)
+		{
+			VectorSubtract(RagDoll[RagDollID].curPos, dl->origin, temp);
+			dist = VectorLength(temp);
+
+			VectorCopy(RagDoll[RagDollID].curPos, temp);
+			temp[2] += 24; //generates more consistent tracing
+
+			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+
+			if(r_trace.fraction == 1.0)
+			{
+				if(dist < dl->intensity)
+				{
+					//make dynamic lights more influential than world
+					for(j = 0; j < 3; j++)
+						lightAdd[j] += dl->origin[j]*100*dl->intensity;
+					numlights+=100*dl->intensity;
+
+					VectorSubtract (dl->origin, RagDoll[RagDollID].curPos, temp);
 					dynFactor += (dl->intensity/20.0)/VectorLength(temp);
 				}
 			}

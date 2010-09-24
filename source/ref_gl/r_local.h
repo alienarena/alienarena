@@ -324,6 +324,7 @@ extern cvar_t	*cl_gun;
 extern vec3_t	lightPosition;
 extern float	dynFactor;
 extern void		GL_GetLightVals(qboolean dynamic);
+extern void GL_GetLightValsForRagDoll(int RagDollID, qboolean dynamic);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 
@@ -647,10 +648,13 @@ extern GLuint		g_location_source;
 #define pi 3.14159265
 
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
-extern void R_DrawINTERQUAKEMODEL (void);
+extern void R_DrawINTERQUAKEMODEL(void);
 extern void GL_AnimateIQMFrame(float curframe, int nextframe);
 extern qboolean inAnimGroup(int frame, int oldframe);
 extern int NextFrame(int frame);
+extern void GL_DrawIQMFrame(int skinnum);
+extern void GL_AnimateIQMRagdoll(int RagDollID);
+extern void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum);
 
 //Ragdoll
 int r_DrawingRagDoll;

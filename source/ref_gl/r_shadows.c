@@ -754,6 +754,13 @@ void R_DrawShadowVolume()
     int i;
 	qboolean lerped=false;
 
+	if(r_ragdolls->value)
+	{		
+		//Do not render deathframe shadows if using ragdolls, this is handled elsewhere
+		if(currententity->frame > 198)
+			return;
+	}
+
 	if(currentmodel->type == mod_alias)
 	{
 		daliasframe_t *frame, *oldframe;

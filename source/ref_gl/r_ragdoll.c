@@ -166,51 +166,51 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	if(!IS_NAN(xa[0]))
 		rot[0] = xa[0];
 	else
-		rot[0] = 0;
+		rot[0] = 1;
 	if(!IS_NAN(ya[0]))
 		rot[1] = ya[0];
 	else
-		ya[0] = 0;
+		ya[0] = 1;
 	if(!IS_NAN(za[0]))
 		rot[2] = za[0];
 	else 
-		rot[2] = 0;
+		rot[2] = 1;
 	if(!IS_NAN(xa[1]))
 		rot[3] = xa[1];
 	else
-		rot[3] = 0;
+		rot[3] = 1;
 	if(!IS_NAN(ya[1]))
 		rot[4] = ya[1];
 	else
-		rot[4] = 0;
+		rot[4] = 1;
 	if(!IS_NAN(za[1]))
 		rot[5] = za[1];
 	else
-		rot[5] = 0;
+		rot[5] = 1;
 	if(!IS_NAN(xa[2]))
 		rot[6] = xa[2];
 	else
-		rot[6] = 0;
+		rot[6] = 1;
 	if(!IS_NAN(ya[2]))
 		rot[7] = ya[2];
 	else
-		rot[7] = 0;
+		rot[7] = 1;
 	if(!IS_NAN(za[2]))
 		rot[8] = za[2];
 	else
-		rot[8] = 0;
+		rot[8] = 1;
 
 	VectorAdd(p1, p2, temp);
 	VectorScale(temp, 0.5, temp);
 
 	test = VectorLength(temp);
 	if(IS_NAN(test))
-		VectorClear(temp);
+		VectorCopy(RagDoll[RagDollID].origin, temp);
 
 	dBodySetPosition(RagDoll[RagDollID].RagDollObject[objectID].body, temp[0], temp[1], temp[2]);
-	dBodySetRotation(RagDoll[RagDollID].RagDollObject[objectID].body, rot);
+	dBodySetRotation(RagDoll[RagDollID].RagDollObject[objectID].body, rot); //this may not be needed here, check
 	dBodySetForce(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
-	dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
+	dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 20); //20 for testing
 	dBodySetAngularVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
 		
 	dQFromAxisAndAngle (initialQuaternion, 1,1,1,.5); //test this more
@@ -254,9 +254,9 @@ void R_CreateWorldObject( void )
 	// Initialize the world
 	RagDollWorld = dWorldCreate();
 
-	//dWorldSetERP(RagDollWorld, 0.1); //default 0.2
+	dWorldSetERP(RagDollWorld, 0.1); //default 0.2
 
-	dWorldSetGravity(RagDollWorld, 0.0, 0.0, -4.0);
+	dWorldSetGravity(RagDollWorld, 0.0, 0.0, -20.0); //-512 is what we eventually will use
 
 	RagDollSpace = dSimpleSpaceCreate(0);
 
@@ -305,8 +305,8 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	dTriMeshDataID triMesh;
 	//winding order for ODE
 	const int indices[6] = {2,1,0,
-							3,2,0};
-
+							3,2,0}; 
+	
 	if(r_SurfaceCount > MAX_SURFACES - 1 )
 		return;
 
@@ -373,6 +373,16 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	vec3_t temp, p1, p2;
 	float density;
 
+	//we need some information from the current entity
+	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
+	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t)); 
+
+	RagDoll[RagDollID].script = (rscript_t *)malloc (sizeof(rscript_t));
+	memcpy(RagDoll[RagDollID].script, currententity->script, sizeof(rscript_t));
+
+	RagDoll[RagDollID].texnum = currententity->skin->texnum;
+	RagDoll[RagDollID].flags = currententity->flags;
+	_VectorCopy(currententity->angles, RagDoll[RagDollID].angles); 
 	VectorCopy(origin, RagDoll[RagDollID].origin);
 	RagDoll[RagDollID].spawnTime = Sys_Milliseconds();
 	RagDoll[RagDollID].destroyed = false;
@@ -493,11 +503,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 
 	R_addHingeJoint(RagDollID, LEFTWRIST, RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body, 
 		RagDoll[RagDollID].RagDollObject[LEFTHAND].body, RagDoll[RagDollID].L_WRIST_POS, bkwdAxis, M_PI * -0.1, M_PI * 0.2);
-
-	//we need some information from our current entity
-	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
-	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t)); 
-
+	
 	//to do - get bone rotations from first death frame, apply to ragdoll for initial position
 	//we will need to set the velocity based on origin vs old_origin
 }
@@ -728,13 +734,17 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 
 	VectorSet(RagDoll[RagDollID].origin, 0, 0, 0);
 
+	//clear any allocated mem
 	if(RagDoll[RagDollID].ragDollMesh)
 		free(RagDoll[RagDollID].ragDollMesh);	
+
+	if(RagDoll[RagDollID].script)
+		free(RagDoll[RagDollID].script);
 
 	if(!nuke)
 		return; 
 
-	//destroy surfaces - to do better to track actual num of surfaces instead of max_surfaces, so remember to fix!
+	//destroy surfaces - to do: faster to track actual num of surfaces instead of max_surfaces, so remember to fix!
 	for(i = 0; i < MAX_SURFACES; i++)
 	{
 		if(RagDoll[RagDollID].WorldGeometry[i])
@@ -796,11 +806,14 @@ void R_AddNewRagdoll( vec3_t origin )
 			R_RagdollBody_Init(RagDollID, origin);
 			//add nearby surfaces anytime a ragdoll is spawned
 			R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
-			Com_Printf("Added a ragdoll\n");
+			Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1], 
+				RagDoll[RagDollID].origin[2]);
 			break;
 		}
 	}
 }
+
+//Ragdoll rendering routines
 
 void R_RenderAllRagdolls ( void )
 {
@@ -835,7 +848,27 @@ void R_RenderAllRagdolls ( void )
 			//body object positions
 			//Note - I am not sure yet how we should handle helmets for martians.  My gut tells me that 
 			//we are going to have to have the helmet share the ragdoll of it's host body, but that is tricky.
-			//One one hand, if a mesh 
+			//One one hand, if a mesh ragdoll is translucent and spawned in close proximity to a solid one, 
+			//maybe we can somehow assign that mesh to use the solid mesh's ragdoll.  
+
+			//render the meshes
+			qglShadeModel (GL_SMOOTH);
+			GL_TexEnv( GL_MODULATE );
+
+			R_LightPoint (RagDoll[RagDollID].origin, shadelight, true);
+
+			qglPushMatrix ();
+
+			GL_AnimateIQMRagdoll(RagDollID);
+
+			GL_DrawIQMRagDollFrame(RagDollID, RagDoll[RagDollID].texnum);
+
+			GL_TexEnv( GL_REPLACE );
+			qglShadeModel (GL_FLAT);
+
+			qglPopMatrix ();
+			qglColor4f (1,1,1,1);
+			
 			numRagDolls++;
 		}
 	}

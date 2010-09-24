@@ -762,16 +762,121 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 	}
 }
 
-void GL_AnimateIQMRagdoll(void)
+void GL_AnimateIQMRagdoll(int RagDollID)
 {
-	r_DrawingRagDoll = true;
+	//we only deal with one frame
 
 	//animate using the rotations from our corresponding ODE objects.  These will probably have to have their vectors translated
 	//into model space.
 
 	//If the object vectors are relative, then this will be much easier, if not, then we have a more complex operation to do.
+	int i, j;
+
+    int frame1 = 1; //just use frame 1 for now, we will likely use a base frame at some point(0?)
+
+	frame1 %= RagDoll[RagDollID].ragDollMesh->num_poses;
+
+	{
+		matrix3x4_t *mat1 = &RagDoll[RagDollID].ragDollMesh->frames[frame1 * RagDoll[RagDollID].ragDollMesh->num_joints];
+
+		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->num_joints; i++)
+		{
+			matrix3x4_t mat, rmat, temp;
+			vec3_t rot, trans;
+			Matrix3x4_Scale(&mat, mat1[i], 1);
+
+			if(RagDoll[RagDollID].ragDollMesh->joints[i].parent >= 0)
+			{
+				Matrix3x4_Multiply(&RagDoll[RagDollID].ragDollMesh->outframe[i], 
+				RagDoll[RagDollID].ragDollMesh->outframe[RagDoll[RagDollID].ragDollMesh->joints[i].parent], mat);
+			}
+			else
+				Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], mat);
+
+			//spine rotation(each bone will get rotated for a body's rotation)
+			//to do - we are also going to need to set it's position, position the spine will position all others, just need rots for others
+			
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "Spine")||
+				!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "Spine.001"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[BELLY].body);
+
+				//note - we need to rotate for all 3 axis, and this stuff will probably be a bit different
+				VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
+				VectorSet(trans, 0, 0, 0); //position
+				Maxtrix3x4GenJointRotate(&rmat, 0, rot, trans);
+
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+		}
+	}
+
+	{
+		const mvertex_t *srcpos = (const mvertex_t *)RagDoll[RagDollID].ragDollMesh->vertexes;
+		const mnormal_t *srcnorm = (const mnormal_t *)RagDoll[RagDollID].ragDollMesh->normal;
+		const mtangent_t *srctan = (const mtangent_t *)RagDoll[RagDollID].ragDollMesh->tangent;
+
+		mvertex_t *dstpos = (mvertex_t *)RagDoll[RagDollID].ragDollMesh->animatevertexes;
+		mnormal_t *dstnorm = (mnormal_t *)RagDoll[RagDollID].ragDollMesh->animatenormal;
+		mtangent_t *dsttan = (mtangent_t *)RagDoll[RagDollID].ragDollMesh->animatetangent;
+
+		const unsigned char *index = RagDoll[RagDollID].ragDollMesh->blendindexes, *weight = RagDoll[RagDollID].ragDollMesh->blendweights;
+
+		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->numvertexes; i++)
+		{
+			matrix3x4_t mat, temp;
+
+			Matrix3x4_Scale(&mat, RagDoll[RagDollID].ragDollMesh->outframe[index[0]], weight[0]/255.0f);
+
+			for(j = 1; j < 4 && weight[j]; j++) {
+				Matrix3x4_Scale(&temp, RagDoll[RagDollID].ragDollMesh->outframe[index[j]], weight[j]/255.0f);
+				Matrix3x4_Add(&mat, mat, temp);
+			}
+
+			Matrix3x4_Transform(dstpos, mat, *srcpos);
+
+			Matrix3x4_TransformNormal(dstnorm, mat, *srcnorm);
+
+			Matrix3x4_TransformTangent(dsttan, mat, *srctan);
+
+			srcpos++;
+			srcnorm++;
+			srctan++;
+			dstpos++;
+			dstnorm++;
+			dsttan++;
+
+			index += 4;
+			weight += 4;
+		}
+	}
 }
 
+//to do - combine these two
 void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
 {
 	float l;
@@ -785,6 +890,23 @@ void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
 	lscale = 3.0;
 
     l = lscale * VLight_GetLightValue (normal->dir, lightPosition, currententity->angles[PITCH], currententity->angles[YAW]);
+
+    VectorScale(baselight, l, lightOut);
+}
+
+void GL_VlightIQMRagDoll (int RagDollID, vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
+{
+	float l;
+	float lscale;
+
+	VectorScale(baselight, gl_modulate->value, lightOut);
+
+	if(!gl_vlights->value)
+		return;
+
+	lscale = 3.0;
+
+    l = lscale * VLight_GetLightValue (normal->dir, lightPosition, RagDoll[RagDollID].angles[PITCH], RagDoll[RagDollID].angles[YAW]);
 
     VectorScale(baselight, l, lightOut);
 }
@@ -827,9 +949,6 @@ void GL_DrawIQMFrame(int skinnum)
 	}
 	else
 		alpha = basealpha = 1.0;
-
-	if (r_shaders->value)
-		rs = currententity->script;
 
 	VectorSubtract (currententity->oldorigin, currententity->origin, delta);
 
@@ -1348,6 +1467,376 @@ done:
 		qglEnable( GL_TEXTURE_2D );
 }
 
+//Similar to above, but geared more specifically toward ragdoll player models
+//Note - we may want to add shells back in, but for now, no
+void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
+{
+	int		i, j;
+	vec3_t	vectors[3];
+	rscript_t *rs = NULL;
+	rs_stage_t *stage = NULL;
+	float	alpha, basealpha;
+	vec3_t	lightcolor;
+	int		index_xyz, index_st;
+	int		va = 0;
+	const	dReal *odePos;
+	qboolean mirror = false;
+	qboolean glass = false;
+	qboolean depthmaskrscipt = false;
+
+	if (r_shaders->value)
+		rs = RagDoll[RagDollID].script;
+
+	VectorCopy(shadelight, lightcolor);
+	for (i=0;i<model_dlights_num;i++)
+		VectorAdd(lightcolor, model_dlights[i].color, lightcolor);
+	VectorNormalize(lightcolor);
+
+	if (RagDoll[RagDollID].flags & RF_TRANSLUCENT)
+	{
+		alpha = 0.33;
+		if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
+		{
+			if(gl_mirror->value)
+				mirror = true;
+			else
+				glass = true;
+		}
+		else
+			glass = true;
+	}
+	else
+		alpha = basealpha = 1.0;
+
+	AngleVectors (RagDoll[RagDollID].angles, vectors[0], vectors[1], vectors[2]);
+
+	odePos = dBodyGetPosition (RagDoll[RagDollID].RagDollObject[BELLY].body);
+	VectorSet(RagDoll[RagDollID].curPos, odePos[0], odePos[1], odePos[2]);
+
+	//render the model
+
+	if(!rs || mirror || glass)
+	{	//base render no shaders
+		va=0;
+		VArray = &VArrayVerts[0];
+
+		R_InitVArrays (VERT_COLOURED_TEXTURED);
+
+		if(mirror)
+		{
+			qglDepthMask(false);
+
+			GL_SelectTexture( GL_TEXTURE0);
+			qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
+		}
+		else if(glass)
+		{
+			qglDepthMask(false);
+
+			GL_SelectTexture( GL_TEXTURE0);
+			qglBindTexture (GL_TEXTURE_2D, r_reflecttexture->texnum);
+		}
+		else
+		{
+			GL_SelectTexture( GL_TEXTURE0);
+			qglBindTexture (GL_TEXTURE_2D, skinnum);
+
+			GL_GetLightValsForRagDoll(RagDollID, false);
+		}
+
+		for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
+		{
+			for (j=0; j<3; j++)
+			{
+				index_xyz = index_st = RagDoll[RagDollID].ragDollMesh->tris[i].vertex[j];
+
+				VArray[0] = RagDoll[RagDollID].curPos[0] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0];
+				VArray[1] = RagDoll[RagDollID].curPos[1] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1];
+				VArray[2] = RagDoll[RagDollID].curPos[2] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2];
+
+				if(mirror)
+				{
+					VArray[5] = VArray[3] = -(RagDoll[RagDollID].ragDollMesh->st[index_st].s - DotProduct (RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, vectors[1]));
+					VArray[6] = VArray[4] = RagDoll[RagDollID].ragDollMesh->st[index_st].t + DotProduct (RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, vectors[2]);
+				}
+				else if(glass)
+				{
+					VArray[3] = -(RagDoll[RagDollID].ragDollMesh->st[index_st].s - DotProduct (RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, vectors[1]));
+					VArray[4] = RagDoll[RagDollID].ragDollMesh->st[index_st].t + DotProduct (RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, vectors[2]);
+				}
+				else
+				{
+					VArray[3] = RagDoll[RagDollID].ragDollMesh->st[index_st].s;
+					VArray[4] = RagDoll[RagDollID].ragDollMesh->st[index_st].t;
+				}
+
+				GL_VlightIQMRagDoll (RagDollID, shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], lightcolor);
+
+				VArray[5] = lightcolor[0];
+				VArray[6] = lightcolor[1];
+				VArray[7] = lightcolor[2];
+				VArray[8] = alpha;
+				
+				// increment pointer and counter
+				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+				va++;
+			}
+		}
+
+		if(qglLockArraysEXT)
+			qglLockArraysEXT(0, va);
+
+		qglDrawArrays(GL_TRIANGLES,0,va);
+		
+		if(qglUnlockArraysEXT)
+			qglUnlockArraysEXT();
+		
+		if(mirror)
+			GL_EnableMultitexture( false );
+
+		if(mirror || glass)
+			qglDepthMask(true);
+	}
+	else if(rs)
+	{	//render with shaders
+
+		if (rs->stage && rs->stage->has_alpha)
+			depthmaskrscipt = true;
+
+		if (depthmaskrscipt)
+			qglDepthMask(false);
+
+		stage=rs->stage;
+
+		while (stage)
+		{
+			va=0;
+			VArray = &VArrayVerts[0];
+			GLSTATE_ENABLE_ALPHATEST
+
+			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders))
+			{
+				if(stage->next)
+				{
+					stage = stage->next;
+					continue;
+				}
+				else
+					goto done;
+			}
+
+			if(!stage->normalmap)
+			{
+				R_InitVArrays (VERT_COLOURED_TEXTURED);
+
+				GL_Bind (stage->texture->texnum);
+
+				if (stage->blendfunc.blend)
+				{
+					GL_BlendFunction(stage->blendfunc.source,stage->blendfunc.dest);
+					GLSTATE_ENABLE_BLEND
+				}
+				else if (basealpha==1.0f)
+				{
+					GLSTATE_DISABLE_BLEND
+				}
+				else
+				{
+					GLSTATE_ENABLE_BLEND
+					GL_BlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					alpha = basealpha;
+				}
+
+				if (stage->alphashift.min || stage->alphashift.speed)
+				{
+					if (!stage->alphashift.speed && stage->alphashift.min > 0)
+					{
+						alpha=basealpha*stage->alphashift.min;
+					}
+					else if (stage->alphashift.speed)
+					{
+						alpha=basealpha*sin(rs_realtime * stage->alphashift.speed);
+						if (alpha < 0) alpha=-alpha*basealpha;
+						if (alpha > stage->alphashift.max) alpha=basealpha*stage->alphashift.max;
+						if (alpha < stage->alphashift.min) alpha=basealpha*stage->alphashift.min;
+					}
+				}
+				else
+					alpha=basealpha;
+
+				if (!stage->alphamask)
+					GLSTATE_DISABLE_ALPHATEST
+
+				if(stage->lightmap)
+					GL_GetLightVals(false);
+			}
+
+			if(stage->normalmap)
+			{
+				vec3_t lightVec, lightVal;
+
+				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+				glEnableVertexAttribArrayARB (1);
+				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+
+				GL_GetLightValsForRagDoll(RagDollID, true);
+
+				//send light level and color to shader, ramp up a bit
+				VectorCopy(lightcolor, lightVal);
+				for(i = 0; i < 3; i++)
+				{
+					if(lightVal[i] < shadelight[i]/2)
+						lightVal[i] = shadelight[i]/2; //never go completely black
+					lightVal[i] *= 5;
+					lightVal[i] += dynFactor;
+					if(lightVal[i] > 1.0+dynFactor)
+						lightVal[i] = 1.0+dynFactor;
+				}
+
+				//simple directional(relative light position)
+				VectorSubtract(lightPosition, RagDoll[RagDollID].curPos, lightVec);
+				VectorMA(lightPosition, 5.0, lightVec, lightPosition);
+				R_ModelViewTransform(lightPosition, lightVec);
+
+				//brighten things slightly
+				for (i = 0; i < 3; i++ )
+				{
+					lightVal[i] *= 1.05;
+				}
+				
+				GL_EnableMultitexture( true );
+
+				glUseProgramObjectARB( g_meshprogramObj );
+
+				glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
+
+				GL_SelectTexture( GL_TEXTURE1);
+				qglBindTexture (GL_TEXTURE_2D, skinnum);
+				glUniform1iARB( g_location_baseTex, 1);
+
+				GL_SelectTexture( GL_TEXTURE0);
+				qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
+				glUniform1iARB( g_location_normTex, 0);
+
+				GL_SelectTexture( GL_TEXTURE2);
+				qglBindTexture (GL_TEXTURE_2D, stage->texture2->texnum);
+				glUniform1iARB( g_location_fxTex, 2);
+
+				GL_SelectTexture( GL_TEXTURE0);
+
+				if(stage->fx)
+					glUniform1iARB( g_location_useFX, 1);
+				else
+					glUniform1iARB( g_location_useFX, 0);
+
+				if(stage->glow)
+					glUniform1iARB( g_location_useGlow, 1);
+				else
+					glUniform1iARB( g_location_useGlow, 0);
+
+				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
+
+				//if using shadowmaps, offset self shadowed areas a bit so not to get too dark
+				if(gl_shadowmaps->value)
+					glUniform1fARB( g_location_minLight, 0.20);
+				else
+					glUniform1fARB( g_location_minLight, 0.15);
+
+				glUniform1fARB( g_location_meshTime, rs_realtime);
+
+				glUniform1iARB( g_location_meshFog, map_fog);
+			}
+
+			for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
+			{
+				for (j=0; j<3; j++)
+				{
+					index_xyz = index_st = RagDoll[RagDollID].ragDollMesh->tris[i].vertex[j];
+
+					VArray[0] = RagDoll[RagDollID].curPos[0] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0];
+					VArray[1] = RagDoll[RagDollID].curPos[1] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1];
+					VArray[2] = RagDoll[RagDollID].curPos[2] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2];
+
+					VArray[3] = RagDoll[RagDollID].ragDollMesh->st[index_st].s;
+					VArray[4] = RagDoll[RagDollID].ragDollMesh->st[index_st].t;
+
+					if(stage->normalmap) { //send normals and tangents to shader
+						VectorCopy(RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, NormalsArray[va]);
+						Vector4Copy(RagDoll[RagDollID].ragDollMesh->animatetangent[index_xyz].dir, TangentsArray[va]);
+					}
+
+					if(!stage->normalmap)
+					{
+						float red = 1, green = 1, blue = 1;
+
+						if (stage->lightmap)
+						{
+							GL_VlightIQMRagDoll (RagDollID, shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], lightcolor);
+							red = lightcolor[0];
+							green = lightcolor[1];
+							blue = lightcolor[2];
+						}
+						if(mirror)
+						{
+							VArray[7] = red;
+							VArray[8] = green;
+							VArray[9] = blue;
+							VArray[10] = alpha;
+						}
+						else
+						{
+							VArray[5] = red;
+							VArray[6] = green;
+							VArray[7] = blue;
+							VArray[8] = alpha;
+						}
+					}
+
+					// increment pointer and counter
+					if(stage->normalmap)
+						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
+					else
+						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+					va++;
+				}
+			}
+
+			if(qglLockArraysEXT)
+				qglLockArraysEXT(0, va);
+
+			qglDrawArrays(GL_TRIANGLES,0,va);
+
+			if(qglUnlockArraysEXT)
+				qglUnlockArraysEXT();
+			
+			qglColor4f(1,1,1,1);
+
+			if(stage->normalmap)
+			{
+				glUseProgramObjectARB( 0 );
+				GL_EnableMultitexture( false );
+			}
+
+			stage=stage->next;
+		}
+	}
+
+done:
+	if (depthmaskrscipt)
+		qglDepthMask(true);
+
+	GLSTATE_DISABLE_ALPHATEST
+	GLSTATE_DISABLE_BLEND
+	GLSTATE_DISABLE_TEXGEN
+
+	qglDisableClientState( GL_NORMAL_ARRAY);
+	qglDisableClientState( GL_COLOR_ARRAY );
+	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+
+	R_KillVArrays ();
+}
+
 extern qboolean have_stencil;
 extern	vec3_t			lightspot;
 
@@ -1583,15 +2072,12 @@ void R_DrawINTERQUAKEMODEL ( void )
 {
 	int			i;
 	image_t		*skin;
-	float		frame, time;	
+	float		frame, time;
 
 	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return;
 
-	//do culling
-	if ( R_CullIQMModel() )
-		return;
-
+	//note - we may want cull ragdolls elswhere
 	if(r_ragdolls->value)
 	{
 		//Ragdolls take over at beginning of each death sequence(don't bother with helmets just yet, we have to figure things out first)
@@ -1605,6 +2091,10 @@ void R_DrawINTERQUAKEMODEL ( void )
 			return;
 	}
 
+	//do culling
+	if ( R_CullIQMModel() )
+		return;
+	
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{
 
@@ -1685,8 +2175,7 @@ void R_DrawINTERQUAKEMODEL ( void )
     qglPushMatrix ();
 	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
 	R_RotateForEntity (currententity);
-
-
+	
 	// select skin
 	if (currententity->skin) {
 		skin = currententity->skin;
