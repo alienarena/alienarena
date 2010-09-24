@@ -1906,6 +1906,8 @@ cpuinfo_exit:
 
 	//Initialize ODE
 	dInitODE2(0);
+	//ODE - clear out any ragdolls;
+	R_ClearAllRagdolls();
 
 	scr_playericonalpha = 0.0;
 

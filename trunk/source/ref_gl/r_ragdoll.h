@@ -125,7 +125,12 @@ typedef struct RagDoll_s {
 
 	//mesh information
 	model_t *ragDollMesh;
+	int		texnum;
+	int		flags;
+	struct	rscript_s *script;
+	float	angles[3];
 	vec3_t	origin;
+	vec3_t	curPos;
 
 	//surface for ragdoll to collide
 	dGeomID WorldGeometry[MAX_SURFACES];
