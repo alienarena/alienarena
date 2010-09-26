@@ -1922,7 +1922,7 @@ void CL_WriteConfiguration (void)
 	if (cls.state == ca_uninitialized)
 		return;
 
-	Com_sprintf (path, sizeof(path),"%s/config.cfg",FS_Gamedir());
+	FS_FullWritePath( path, sizeof(path), "config.cfg");
 	f = fopen (path, "w");
 	if (!f)
 	{
@@ -1991,6 +1991,13 @@ void CL_FixCvarCheats (void)
 	// make sure they are all set to the proper values
 	for (i=0, var = cheatvars ; i<numcheatvars ; i++, var++)
 	{
+		if ( cl.attractloop &&
+			(!strcmp( var->name, "timedemo" )
+			||
+			!strcmp( var->name, "timescale"))
+			)
+			continue; // allow these when running a .dm2 demo
+
 		if ( strcmp (var->var->string, var->value) )
 		{
 			Cvar_Set (var->name, var->value);
