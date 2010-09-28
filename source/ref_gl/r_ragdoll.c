@@ -125,8 +125,12 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	dMatrix3 rot;
 	dReal test;
 
-	VectorAdd(p1, currententity->origin, p1);
-	VectorAdd(p2, currententity->origin, p2);
+	VectorAdd(p1, RagDoll[RagDollID].origin, p1);
+	VectorAdd(p2, RagDoll[RagDollID].origin, p2);
+
+	//remember, players are offset 24 units from ground
+	p1[2] -= 24;
+	p2[2] -= 24; 
 
 	//cylinder length not including endcaps, make capsules overlap by half
 	//radius at joints
@@ -166,54 +170,57 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	if(!IS_NAN(xa[0]))
 		rot[0] = xa[0];
 	else
-		rot[0] = 1;
+		rot[0] = 0;
 	if(!IS_NAN(ya[0]))
 		rot[1] = ya[0];
 	else
-		ya[0] = 1;
+		ya[0] = 0;
 	if(!IS_NAN(za[0]))
 		rot[2] = za[0];
 	else 
-		rot[2] = 1;
+		rot[2] = 0;
 	if(!IS_NAN(xa[1]))
 		rot[3] = xa[1];
 	else
-		rot[3] = 1;
+		rot[3] = 0;
 	if(!IS_NAN(ya[1]))
 		rot[4] = ya[1];
 	else
-		rot[4] = 1;
+		rot[4] = 0;
 	if(!IS_NAN(za[1]))
 		rot[5] = za[1];
 	else
-		rot[5] = 1;
+		rot[5] = 0;
 	if(!IS_NAN(xa[2]))
 		rot[6] = xa[2];
 	else
-		rot[6] = 1;
+		rot[6] = 0;
 	if(!IS_NAN(ya[2]))
 		rot[7] = ya[2];
 	else
-		rot[7] = 1;
+		rot[7] = 0;
 	if(!IS_NAN(za[2]))
 		rot[8] = za[2];
 	else
-		rot[8] = 1;
+		rot[8] = 0;
 
 	VectorAdd(p1, p2, temp);
 	VectorScale(temp, 0.5, temp);
 
 	test = VectorLength(temp);
 	if(IS_NAN(test))
+	{
+		Com_Printf("There was a NaN in creating body %i\n", objectID);
 		VectorCopy(RagDoll[RagDollID].origin, temp);
+	}
 
 	dBodySetPosition(RagDoll[RagDollID].RagDollObject[objectID].body, temp[0], temp[1], temp[2]);
 	dBodySetRotation(RagDoll[RagDollID].RagDollObject[objectID].body, rot); //this may not be needed here, check
 	dBodySetForce(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
-	dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 20); //20 for testing
+	dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 40, 150); //for testing, a little upward velocity
 	dBodySetAngularVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
 		
-	dQFromAxisAndAngle (initialQuaternion, 1,1,1,.5); //test this more
+	dQFromAxisAndAngle (initialQuaternion, 1,1,1,1); //test this more
 	dBodySetQuaternion(RagDoll[RagDollID].RagDollObject[objectID].body, initialQuaternion);
 }
 
@@ -222,6 +229,7 @@ void R_addFixedJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2)
 {
 		RagDoll[RagDollID].RagDollJoint[jointID] = dJointCreateFixed(RagDollWorld, 0);
 		dJointAttach(RagDoll[RagDollID].RagDollJoint[jointID], body1, body2);
+		dJointSetFixed(RagDoll[RagDollID].RagDollJoint[jointID]);
 }
 
 void R_addHingeJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2, vec3_t anchor, vec3_t axis, float loStop, float hiStop)
@@ -254,9 +262,7 @@ void R_CreateWorldObject( void )
 	// Initialize the world
 	RagDollWorld = dWorldCreate();
 
-	dWorldSetERP(RagDollWorld, 0.1); //default 0.2
-
-	dWorldSetGravity(RagDollWorld, 0.0, 0.0, -20.0); //-512 is what we eventually will use
+	dWorldSetGravity(RagDollWorld, 0.0, 0.0, -256.0); 
 
 	RagDollSpace = dSimpleSpaceCreate(0);
 
@@ -295,7 +301,8 @@ void R_DestroyWorldObject( void )
 //things this way.
 void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 {
-	glpoly_t *p = surf->polys;
+	glpoly_t *p;
+	vec3_t dist, center, mins, maxs;
 	float	*v;
 	int		i, j, k, offset, VertexCounter;
 	int		ODEIndexCount = 0;
@@ -311,13 +318,16 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 		return;
 
 	// reset pointer and counter
-	VertexCounter = k = 0;
+	VertexCounter = k = 0;	
 
-	for (; p; p = p->chain)
+	for ( p = surf->polys; p; p = p->chain ) 
 	{
 		if(r_SurfaceCount > MAX_SURFACES - 1 )
 			break;
-
+		
+		VectorSet(mins, 999999, 999999, 999999);
+		VectorSet(maxs, -999999, -999999, -999999);
+		
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
 
@@ -325,9 +335,27 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 			ODEVerts[3*VertexCounter+1] = v[1];
 			ODEVerts[3*VertexCounter+2] = v[2];
 
+			if(v[0] > maxs[0])   maxs[0] = v[0];
+            if(v[1] > maxs[1])   maxs[1] = v[1];
+            if(v[2] > maxs[2])   maxs[2] = v[2];
+
+            if(v[0] < mins[0])   mins[0] = v[0];
+            if(v[1] < mins[1])   mins[1] = v[1];
+            if(v[2] < mins[2])   mins[2] = v[2];
+
 			VertexCounter++;
 		}
 
+		//find poly center
+		center[0] = (mins[0] + maxs[0]) /2;
+		center[1] = (mins[1] + maxs[1]) /2;
+		center[2] = (mins[2] + maxs[2]) /2;
+
+		//cull distant polys - we may need to adjust the distance based on velocities and other factors
+		VectorSubtract(RagDoll[RagDollID].origin, center, dist);
+		if(VectorLength(dist) > 512)
+			continue;
+		
 		//create indices for each tri
 		ODETris = p->numverts - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
 		ODEIndexCount += 3*ODETris; //3 indices per tri
@@ -362,7 +390,10 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 
 		//we should not need to call dGeomSetPosition because the vertices are not relative to a position.
 		dGeomSetPosition(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], 0, 0, 0);
-		
+				
+		//debug stuff
+		VectorCopy(center, RagDoll[RagDollID].surforigins[r_SurfaceCount]);
+
 		r_SurfaceCount++;
 	}	
 }
@@ -370,7 +401,28 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 //build and set initial position of ragdoll - note this will need to get some information from the skeleton on the first death frame
 void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 {
-	vec3_t temp, p1, p2;
+	//Ragdoll  positions
+	vec3_t R_SHOULDER_POS; 
+	vec3_t L_SHOULDER_POS;
+	vec3_t R_ELBOW_POS;
+	vec3_t L_ELBOW_POS;
+	vec3_t R_WRIST_POS;
+	vec3_t L_WRIST_POS;
+	vec3_t R_FINGERS_POS;
+	vec3_t L_FINGERS_POS;
+
+	vec3_t R_HIP_POS; 
+	vec3_t L_HIP_POS;
+	vec3_t R_KNEE_POS; 
+	vec3_t L_KNEE_POS; 
+	vec3_t R_ANKLE_POS; 
+	vec3_t L_ANKLE_POS;
+	vec3_t R_HEEL_POS;
+	vec3_t L_HEEL_POS;
+	vec3_t R_TOES_POS;
+	vec3_t L_TOES_POS;
+
+	vec3_t p1, p2;
 	float density;
 
 	//we need some information from the current entity
@@ -384,130 +436,192 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	RagDoll[RagDollID].flags = currententity->flags;
 	_VectorCopy(currententity->angles, RagDoll[RagDollID].angles); 
 	VectorCopy(origin, RagDoll[RagDollID].origin);
+	VectorCopy(origin, RagDoll[RagDollID].curPos);
 	RagDoll[RagDollID].spawnTime = Sys_Milliseconds();
 	RagDoll[RagDollID].destroyed = false;
 
 	//set upper body
-	VectorSet(RagDoll[RagDollID].R_SHOULDER_POS, -SHOULDER_W * 0.5, SHOULDER_H, 0.0);
-	VectorSet(RagDoll[RagDollID].L_SHOULDER_POS, SHOULDER_W * 0.5, SHOULDER_H, 0.0);
+	VectorSet(R_SHOULDER_POS, -SHOULDER_W * 0.5, 0.0, SHOULDER_H);
+	VectorSet(L_SHOULDER_POS, SHOULDER_W * 0.5, 0.0, SHOULDER_H);
 
-	VectorSet(temp, UPPER_ARM_LEN, 0.0, 0.0);
-	VectorSubtract(RagDoll[RagDollID].R_SHOULDER_POS, temp, RagDoll[RagDollID].R_ELBOW_POS);
-	VectorAdd(RagDoll[RagDollID].L_SHOULDER_POS, temp, RagDoll[RagDollID].L_ELBOW_POS);
+	VectorSet(R_ELBOW_POS, R_SHOULDER_POS[0] - 0.01*RAGDOLLSCALE, R_SHOULDER_POS[1], R_SHOULDER_POS[2] - UPPER_ARM_LEN);
+	VectorSet(L_ELBOW_POS, L_SHOULDER_POS[0] + 0.01*RAGDOLLSCALE, L_SHOULDER_POS[1], L_SHOULDER_POS[2] - UPPER_ARM_LEN);
 
-	VectorSet(temp, FORE_ARM_LEN, 0.0, 0.0);
-	VectorSubtract(RagDoll[RagDollID].R_ELBOW_POS, temp, RagDoll[RagDollID].R_WRIST_POS);
-	VectorAdd(RagDoll[RagDollID].L_ELBOW_POS, temp, RagDoll[RagDollID].L_WRIST_POS);
+	VectorSet(R_WRIST_POS, R_ELBOW_POS[0], R_ELBOW_POS[1], R_ELBOW_POS[2] - FORE_ARM_LEN);
+	VectorSet(L_WRIST_POS, L_ELBOW_POS[0], L_ELBOW_POS[1], L_ELBOW_POS[2] - FORE_ARM_LEN);
 
-	VectorSet(temp, HAND_LEN, 0.0, 0.0);
-	VectorSubtract(RagDoll[RagDollID].R_WRIST_POS, temp,RagDoll[RagDollID].R_FINGERS_POS);
-	VectorAdd(RagDoll[RagDollID].L_WRIST_POS, temp, RagDoll[RagDollID].L_FINGERS_POS);
+	VectorSet(R_FINGERS_POS, R_WRIST_POS[0], R_WRIST_POS[1], R_WRIST_POS[2] - HAND_LEN);
+	VectorSet(L_FINGERS_POS, L_WRIST_POS[0], L_WRIST_POS[1], L_WRIST_POS[2] - HAND_LEN);
 
 	//set lower body
-	VectorSet(RagDoll[RagDollID].R_HIP_POS, -LEG_W * 0.5, HIP_H, 0.0);
-	VectorSet(RagDoll[RagDollID].L_HIP_POS, LEG_W * 0.5, HIP_H, 0.0);
-	VectorSet(RagDoll[RagDollID].R_KNEE_POS, -LEG_W * 0.5, KNEE_H, 0.0);
-	VectorSet(RagDoll[RagDollID].L_KNEE_POS, LEG_W * 0.5, KNEE_H, 0.0);
-	VectorSet(RagDoll[RagDollID].R_ANKLE_POS, -LEG_W * 0.5, ANKLE_H, 0.0);
-	VectorSet(RagDoll[RagDollID].L_ANKLE_POS, LEG_W * 0.5, ANKLE_H, 0.0);
+	VectorSet(R_HIP_POS, -LEG_W * 0.5,  0.0, HIP_H);
+	VectorSet(L_HIP_POS, LEG_W * 0.5, 0.0, HIP_H);
+	VectorSet(R_KNEE_POS, -LEG_W * 0.5, 0.0, KNEE_H);
+	VectorSet(L_KNEE_POS, LEG_W * 0.5, 0.0, KNEE_H);
+	VectorSet(R_ANKLE_POS, -LEG_W * 0.5, 0.0, ANKLE_H);
+	VectorSet(L_ANKLE_POS, LEG_W * 0.5, 0.0, ANKLE_H);
 
-	VectorSet(temp, 0.0, 0.0, HEEL_LEN);
-	VectorSubtract(RagDoll[RagDollID].R_ANKLE_POS, temp, RagDoll[RagDollID].R_HEEL_POS);
-	VectorSubtract(RagDoll[RagDollID].L_ANKLE_POS, temp, RagDoll[RagDollID].L_HEEL_POS);
-	VectorSet(temp, 0.0, 0.0, FOOT_LEN);
-	VectorAdd(RagDoll[RagDollID].R_ANKLE_POS, temp, RagDoll[RagDollID].R_TOES_POS);
-	VectorAdd(RagDoll[RagDollID].L_ANKLE_POS, temp, RagDoll[RagDollID].L_TOES_POS);
+	VectorSet(R_HEEL_POS, R_ANKLE_POS[0], R_ANKLE_POS[1] - HEEL_LEN, R_ANKLE_POS[2]);
+	VectorSet(L_HEEL_POS, L_ANKLE_POS[0], L_ANKLE_POS[1] - HEEL_LEN, L_ANKLE_POS[2]);
+
+	VectorSet(R_TOES_POS, R_ANKLE_POS[0], R_ANKLE_POS[1] + FOOT_LEN, R_ANKLE_POS[2]);
+	VectorSet(L_TOES_POS, L_ANKLE_POS[0], L_ANKLE_POS[1] + FOOT_LEN, L_ANKLE_POS[2]);
 
 	//build the ragdoll parts
 	density = 1.0; //for now
 
-	VectorSet(p1, -CHEST_W * 0.5, CHEST_H, 0.0);
-	VectorSet(p2, CHEST_W * 0.5, CHEST_H, 0.0);
-	R_addBody(RagDollID, "chest", CHEST, p1, p2, 0.13, density); 
+	VectorSet(p1, -CHEST_W * 0.5, 0.0, CHEST_H);
+	VectorSet(p2, CHEST_W * 0.5, 0.0, CHEST_H);
+	R_addBody(RagDollID, "chest", CHEST, p1, p2, 0.13*RAGDOLLSCALE, density); 
 
-	VectorSet(p1, 0.0, CHEST_H - 0.1, 0.0);
-	VectorSet(p2, 0.0, HIP_H + 0.1, 0.0);
-	R_addBody(RagDollID, "belly", BELLY, p1, p2, 0.125, density);
+	VectorSet(p1, 0.0, 0.0, CHEST_H - 0.01*RAGDOLLSCALE);
+	VectorSet(p2, 0.0, 0.0, HIP_H + 0.01*RAGDOLLSCALE);
+	R_addBody(RagDollID, "belly", BELLY, p1, p2, 0.125*RAGDOLLSCALE, density);
 	
-	R_addFixedJoint(RagDollID, MIDSPINE, RagDoll[RagDollID].RagDollObject[CHEST].body, RagDoll[RagDollID].RagDollObject[BELLY].body);
+	VectorSet(p1, 0.0, 0.0, HIP_H);
+	R_addBallJoint(RagDollID, MIDSPINE, RagDoll[RagDollID].RagDollObject[CHEST].body, RagDoll[RagDollID].RagDollObject[BELLY].body, p1);
 
-	VectorSet(p1, -PELVIS_W * 0.5, HIP_H, 0.0);
-	VectorSet(p2, PELVIS_W * 0.5, HIP_H, 0.0);
-	R_addBody(RagDollID, "pelvis", PELVIS, p1, p2, 0.125, density);
+	VectorSet(p1, -(PELVIS_W * 0.5 + 0.01*RAGDOLLSCALE), 0.0, HIP_H);
+	VectorSet(p2, PELVIS_W * 0.5 + 0.01*RAGDOLLSCALE, 0.0, HIP_H);
+	R_addBody(RagDollID, "pelvis", PELVIS, p1, p2, 0.125*RAGDOLLSCALE, density);
 
 	R_addFixedJoint(RagDollID, LOWSPINE, RagDoll[RagDollID].RagDollObject[BELLY].body, RagDoll[RagDollID].RagDollObject[PELVIS].body);
 
-	VectorSet(p1, 0.0, HEAD_H, 0.0);
-	VectorSet(p2, 0.0, -HEAD_H, 0.0);
-	R_addBody(RagDollID, "head", HEAD, p1, p2, 0.11, density);
+	VectorSet(p1, 0.0, 0.0, HEAD_H);
+	VectorSet(p2, 0.0, 0.0, NECK_H);
+	R_addBody(RagDollID, "head", HEAD, p1, p2, 0.11*RAGDOLLSCALE, density);
 
-	VectorSet(p1, 0.0, NECK_H, 0.0);
+	VectorSet(p1, 0.0, 0.0, NECK_H);
 	R_addBallJoint(RagDollID, NECK, RagDoll[RagDollID].RagDollObject[CHEST].body, RagDoll[RagDollID].RagDollObject[HEAD].body, p1);
-
-	R_addBody(RagDollID, "rightupperleg", RIGHTUPPERLEG, RagDoll[RagDollID].R_HIP_POS, RagDoll[RagDollID].R_KNEE_POS, 0.11, density);
+	
+	//right leg
+	VectorSet(p1, R_HIP_POS[0] - 0.01*RAGDOLLSCALE, R_HIP_POS[1], R_HIP_POS[2]);
+	VectorSet(p2, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] + 0.01*RAGDOLLSCALE);
+	R_addBody(RagDollID, "rightupperleg", RIGHTUPPERLEG, p1, p2, 0.11*RAGDOLLSCALE, density);
 
 	R_addBallJoint(RagDollID, RIGHTHIP, RagDoll[RagDollID].RagDollObject[PELVIS].body, RagDoll[RagDollID].RagDollObject[RIGHTUPPERLEG].body,
-		RagDoll[RagDollID].R_HIP_POS);
+		R_HIP_POS);
 
-	R_addBody(RagDollID, "leftupperleg", LEFTUPPERLEG, RagDoll[RagDollID].L_HIP_POS, RagDoll[RagDollID].L_KNEE_POS, 0.11, density);
-
-	R_addBallJoint(RagDollID, LEFTHIP, RagDoll[RagDollID].RagDollObject[PELVIS].body, RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body,
-		RagDoll[RagDollID].L_HIP_POS);
-	
-	R_addBody(RagDollID, "rightlowerleg", RIGHTLOWERLEG, RagDoll[RagDollID].R_KNEE_POS, RagDoll[RagDollID].R_ANKLE_POS, 0.09, density);
+	VectorSet(p1, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] - 0.01*RAGDOLLSCALE);
+	VectorSet(p2, R_ANKLE_POS[0], R_ANKLE_POS[1], R_ANKLE_POS[2]);
+	R_addBody(RagDollID, "rightlowerleg", RIGHTLOWERLEG, p1, p2, 0.09*RAGDOLLSCALE, density);
 
 	R_addHingeJoint(RagDollID, RIGHTKNEE, RagDoll[RagDollID].RagDollObject[RIGHTUPPERLEG].body, 
-		RagDoll[RagDollID].RagDollObject[RIGHTLOWERLEG].body, RagDoll[RagDollID].R_KNEE_POS, leftAxis, 0.0, M_PI * 0.75);
+		RagDoll[RagDollID].RagDollObject[RIGHTLOWERLEG].body, R_KNEE_POS, leftAxis, 0.0, M_PI * 0.75);
 
-	R_addBody(RagDollID, "leftlowerleg", LEFTLOWERLEG, RagDoll[RagDollID].L_KNEE_POS, RagDoll[RagDollID].L_ANKLE_POS, 0.09, density);
-
-	R_addHingeJoint(RagDollID, LEFTKNEE, RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body, 
-		RagDoll[RagDollID].RagDollObject[LEFTLOWERLEG].body, RagDoll[RagDollID].L_KNEE_POS, leftAxis, 0.0, M_PI * 0.75);
-
-	R_addBody(RagDollID, "rightfoot", RIGHTFOOT, RagDoll[RagDollID].R_HEEL_POS, RagDoll[RagDollID].R_TOES_POS, 0.09, density);
+	R_addBody(RagDollID, "rightfoot", RIGHTFOOT, R_TOES_POS, R_HEEL_POS, 0.09*RAGDOLLSCALE, density);
 
 	R_addHingeJoint(RagDollID, RIGHTANKLE, RagDoll[RagDollID].RagDollObject[RIGHTLOWERLEG].body, 
-		RagDoll[RagDollID].RagDollObject[RIGHTFOOT].body, RagDoll[RagDollID].R_ANKLE_POS, rightAxis, M_PI * -0.1, M_PI * 0.05);
+		RagDoll[RagDollID].RagDollObject[RIGHTFOOT].body, R_ANKLE_POS, rightAxis, M_PI * -0.1, M_PI * 0.05);
 
-	R_addBody(RagDollID, "leftfoot", LEFTFOOT, RagDoll[RagDollID].L_HEEL_POS, RagDoll[RagDollID].L_TOES_POS, 0.09, density);
+	//left leg
+	VectorSet(p1, L_HIP_POS[0] + 0.01*RAGDOLLSCALE, L_HIP_POS[1], L_HIP_POS[2]);
+	VectorSet(p2, L_KNEE_POS[0], L_KNEE_POS[1], L_KNEE_POS[2] + 0.01*RAGDOLLSCALE);
+	R_addBody(RagDollID, "leftupperleg", LEFTUPPERLEG, p1, p2, 0.11*RAGDOLLSCALE, density);
+
+	R_addBallJoint(RagDollID, LEFTHIP, RagDoll[RagDollID].RagDollObject[PELVIS].body, RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body,
+		L_HIP_POS);	
+
+	VectorSet(p1, L_KNEE_POS[0], L_KNEE_POS[1], L_KNEE_POS[2] - 0.01*RAGDOLLSCALE);
+	VectorSet(p2, L_ANKLE_POS[0], L_ANKLE_POS[1], L_ANKLE_POS[2]);
+	R_addBody(RagDollID, "leftlowerleg", LEFTLOWERLEG, p1, p2, 0.09*RAGDOLLSCALE, density);
+
+	R_addHingeJoint(RagDollID, LEFTKNEE, RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTLOWERLEG].body, L_KNEE_POS, leftAxis, 0.0, M_PI * 0.75);
+	
+	R_addBody(RagDollID, "leftfoot", LEFTFOOT, L_TOES_POS, L_HEEL_POS, 0.09*RAGDOLLSCALE, density);
 
 	R_addHingeJoint(RagDollID, LEFTANKLE, RagDoll[RagDollID].RagDollObject[LEFTLOWERLEG].body, 
-		RagDoll[RagDollID].RagDollObject[LEFTFOOT].body, RagDoll[RagDollID].L_ANKLE_POS, rightAxis, M_PI * -0.1, M_PI * 0.05);
+		RagDoll[RagDollID].RagDollObject[LEFTFOOT].body, L_ANKLE_POS, rightAxis, M_PI * -0.1, M_PI * 0.05);
 
-	R_addBody(RagDollID, "rightupperarm", RIGHTUPPERARM, RagDoll[RagDollID].R_SHOULDER_POS, RagDoll[RagDollID].R_ELBOW_POS, 0.08, density);
+	//right arm
+	VectorSet(p1, R_SHOULDER_POS[0] - 0.01*RAGDOLLSCALE, R_SHOULDER_POS[1], R_SHOULDER_POS[2]);
+	VectorSet(p2, R_ELBOW_POS[0], R_ELBOW_POS[1], R_ELBOW_POS[2] + 0.01*RAGDOLLSCALE);
+	R_addBody(RagDollID, "rightupperarm", RIGHTUPPERARM, p1, p2, 0.08*RAGDOLLSCALE, density);
 
 	R_addBallJoint(RagDollID, RIGHTSHOULDER, RagDoll[RagDollID].RagDollObject[CHEST].body, 
-		RagDoll[RagDollID].RagDollObject[RIGHTUPPERARM].body, RagDoll[RagDollID].R_SHOULDER_POS);
+		RagDoll[RagDollID].RagDollObject[RIGHTUPPERARM].body, R_SHOULDER_POS);
 
-	R_addBody(RagDollID, "leftupperarm", LEFTUPPERARM, RagDoll[RagDollID].L_SHOULDER_POS, RagDoll[RagDollID].L_ELBOW_POS, 0.08, density);
-
-	R_addBallJoint(RagDollID, LEFTSHOULDER, RagDoll[RagDollID].RagDollObject[CHEST].body, 
-		RagDoll[RagDollID].RagDollObject[LEFTUPPERARM].body, RagDoll[RagDollID].L_SHOULDER_POS);
-
-	R_addBody(RagDollID, "rightforearm", RIGHTFOREARM, RagDoll[RagDollID].R_ELBOW_POS, RagDoll[RagDollID].R_WRIST_POS, 0.08, density);
+	VectorSet(p1, R_ELBOW_POS[0], R_ELBOW_POS[1], R_ELBOW_POS[2] - 0.01*RAGDOLLSCALE);
+	VectorSet(p2, R_WRIST_POS[0], R_WRIST_POS[1], R_WRIST_POS[2] + 0.01*RAGDOLLSCALE);
+	R_addBody(RagDollID, "rightforearm", RIGHTFOREARM, p1, p2, 0.08*RAGDOLLSCALE, density);
 
 	R_addHingeJoint(RagDollID, RIGHTELBOW, RagDoll[RagDollID].RagDollObject[RIGHTUPPERARM].body, 
-		RagDoll[RagDollID].RagDollObject[RIGHTFOREARM].body, RagDoll[RagDollID].R_ELBOW_POS, downAxis, 0.0, M_PI * 0.6);
+		RagDoll[RagDollID].RagDollObject[RIGHTFOREARM].body, R_ELBOW_POS, downAxis, 0.0, M_PI * 0.6);	
 
-	R_addBody(RagDollID, "leftforearm", LEFTFOREARM, RagDoll[RagDollID].L_ELBOW_POS, RagDoll[RagDollID].L_WRIST_POS, 0.08, density);
-
-	R_addHingeJoint(RagDollID, LEFTELBOW, RagDoll[RagDollID].RagDollObject[LEFTUPPERARM].body, 
-		RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body, RagDoll[RagDollID].L_ELBOW_POS,  upAxis, 0.0, M_PI * 0.6);
-
-	R_addBody(RagDollID, "righthand", RIGHTHAND, RagDoll[RagDollID].R_WRIST_POS, RagDoll[RagDollID].R_FINGERS_POS, 0.075, density);
+	VectorSet(p1, R_WRIST_POS[0], R_WRIST_POS[1], R_WRIST_POS[2] - 0.01*RAGDOLLSCALE);
+	VectorSet(p2, R_FINGERS_POS[0], R_FINGERS_POS[1], R_FINGERS_POS[2]);
+	R_addBody(RagDollID, "righthand", RIGHTHAND, p1, p2, 0.075*RAGDOLLSCALE, density);
 
 	R_addHingeJoint(RagDollID, RIGHTWRIST, RagDoll[RagDollID].RagDollObject[RIGHTFOREARM].body, 
-		RagDoll[RagDollID].RagDollObject[RIGHTHAND].body, RagDoll[RagDollID].R_WRIST_POS, fwdAxis, M_PI * -0.1, M_PI * 0.2);
+		RagDoll[RagDollID].RagDollObject[RIGHTHAND].body, R_WRIST_POS, fwdAxis, M_PI * -0.1, M_PI * 0.2);
 
-	R_addBody(RagDollID, "leftthand", LEFTHAND, RagDoll[RagDollID].L_WRIST_POS, RagDoll[RagDollID].L_FINGERS_POS, 0.075, density);
+	//left arm
+	VectorSet(p1, L_SHOULDER_POS[0] + 0.01*RAGDOLLSCALE, L_SHOULDER_POS[1], L_SHOULDER_POS[2]);
+	VectorSet(p2, L_ELBOW_POS[0], L_ELBOW_POS[1], L_ELBOW_POS[2] + 0.01*RAGDOLLSCALE);
+	R_addBody(RagDollID, "leftupperarm", LEFTUPPERARM, p1, p2, 0.08*RAGDOLLSCALE, density);
+
+	R_addBallJoint(RagDollID, LEFTSHOULDER, RagDoll[RagDollID].RagDollObject[CHEST].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTUPPERARM].body, L_SHOULDER_POS);
+	
+	VectorSet(p1, L_ELBOW_POS[0], L_ELBOW_POS[1], L_ELBOW_POS[2] - 0.01*RAGDOLLSCALE);
+	VectorSet(p2, L_WRIST_POS[0], L_WRIST_POS[1], L_WRIST_POS[2] + 0.01*RAGDOLLSCALE);
+	R_addBody(RagDollID, "leftforearm", LEFTFOREARM, p1, p2, 0.08*RAGDOLLSCALE, density);
+
+	R_addHingeJoint(RagDollID, LEFTELBOW, RagDoll[RagDollID].RagDollObject[LEFTUPPERARM].body, 
+		RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body, L_ELBOW_POS,  upAxis, 0.0, M_PI * 0.6);
+		
+	VectorSet(p1, L_WRIST_POS[0], L_WRIST_POS[1], L_WRIST_POS[2] - 0.01*RAGDOLLSCALE);
+	VectorSet(p2, L_FINGERS_POS[0], L_FINGERS_POS[1], L_FINGERS_POS[2]);
+	R_addBody(RagDollID, "leftthand", LEFTHAND, p1, p2, 0.075*RAGDOLLSCALE, density);
 
 	R_addHingeJoint(RagDollID, LEFTWRIST, RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body, 
-		RagDoll[RagDollID].RagDollObject[LEFTHAND].body, RagDoll[RagDollID].L_WRIST_POS, bkwdAxis, M_PI * -0.1, M_PI * 0.2);
+		RagDoll[RagDollID].RagDollObject[LEFTHAND].body, L_WRIST_POS, bkwdAxis, M_PI * -0.1, M_PI * 0.2);
 	
 	//to do - get bone rotations from first death frame, apply to ragdoll for initial position
 	//we will need to set the velocity based on origin vs old_origin
 }
 
+void R_DrawMark (vec3_t origin, int type)
+{
+
+	int		i;
+	float scale;
+
+	if(type)
+		scale = 0.25;
+	else
+		scale = 1.0;
+
+    qglPushMatrix ();
+	qglTranslatef (origin[0],  origin[1],  origin[2]);
+
+	qglDisable (GL_TEXTURE_2D);
+	if(type == 1)
+		qglColor3f (1,0,0);
+	else if(type == 2)
+		qglColor3f (0,1,0);
+	else if(type == 3)
+		qglColor3f (0,0,1);
+	else
+		qglColor3f(1,1,1);
+
+	qglBegin (GL_TRIANGLE_FAN);
+	qglVertex3f (0, 0, -scale*16);
+	for (i=0 ; i<=4 ; i++)
+		qglVertex3f (scale*16*cos(i*M_PI/2), scale*16*sin(i*M_PI/2), 0);
+	qglEnd ();
+
+	qglBegin (GL_TRIANGLE_FAN);
+	qglVertex3f (0, 0, scale*16);
+	for (i=4 ; i>=0 ; i--)
+		qglVertex3f (scale*16*cos(i*M_PI/2), scale*16*sin(i*M_PI/2), 0);
+	qglEnd ();
+
+	qglColor3f (1,1,1);
+	qglPopMatrix ();
+	qglEnable (GL_TEXTURE_2D);
+}
 static vec3_t ragdollorg;			// relative to viewpoint
 void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 {
@@ -612,29 +726,7 @@ void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 		else
 		{
 			if (!( surf->flags & SURF_DRAWTURB ) )
-			{
-				glpoly_t *p = surf->polys;
-				float	*v;
-				int		i;
-				int		numverts = 0;
-				vec3_t	center, dist;
-
-				//we need to do some proximity culling here, no need to add geometry that is far away
-				for (; p; p = p->chain)
-				{
-					for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-					{
-						_VectorAdd(v, center, center);
-						numverts++;
-					}
-				}
-				VectorScale(center, (float)(1.0/numverts), center);
-				VectorSubtract(center, ragdollorg, dist);
-				if(VectorLength(dist) < 512)
-					GL_BuildODEGeoms(surf, RagDollID);
-				else
-					continue;
-			}
+				GL_BuildODEGeoms(surf, RagDollID);
 		}
 	}
 
@@ -657,6 +749,8 @@ void R_BuildRagdollSurfaces (vec3_t origin, int RagDollID)
 	VectorCopy (origin, ragdollorg);
 
 	R_RecursiveODEWorldNode (r_worldmodel->nodes, 15, RagDollID);
+
+	RagDoll[RagDollID].numsurfaces = r_SurfaceCount;
 }
 
 /*
@@ -675,7 +769,7 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 	dJointID j;
 	dBodyID body1 = dGeomGetBody(geom1);
 	dBodyID body2 = dGeomGetBody(geom2);
-
+	return;
 	if (dGeomIsSpace(geom1) || dGeomIsSpace(geom2))
 	{   // colliding a space with something
 		dSpaceCollide2(geom1, geom2, data, &near_callback);
@@ -694,7 +788,6 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 	}
 	else 
 	{
-
 		if(body1 && body2)
 		{
 			if (dAreConnected(body1, body2))
@@ -745,12 +838,13 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 		return; 
 
 	//destroy surfaces - to do: faster to track actual num of surfaces instead of max_surfaces, so remember to fix!
-	for(i = 0; i < MAX_SURFACES; i++)
+	for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
 	{
 		if(RagDoll[RagDollID].WorldGeometry[i])
 			dGeomDestroy(RagDoll[RagDollID].WorldGeometry[i]);
 		RagDoll[RagDollID].WorldGeometry[i] = NULL;
 	}
+	RagDoll[RagDollID].numsurfaces = 0;
 	
 	//we also want to destroy all ragdoll bodies and joints for this ragdoll
 	for(i = CHEST; i <= LEFTHAND; i++)
@@ -796,8 +890,8 @@ void R_AddNewRagdoll( vec3_t origin )
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
 		VectorSubtract(origin, RagDoll[RagDollID].origin, dist);
-		if(VectorLength(dist) < 16)
-			break; //likely spawned from same ent, this may need tweaking
+		if(VectorLength(dist) < 32)
+			break; //likely spawned from same ent, this may need tweaking or better tracking method, for now it'll do
 		
 		if(RagDoll[RagDollID].destroyed)
 		{
@@ -814,11 +908,79 @@ void R_AddNewRagdoll( vec3_t origin )
 }
 
 //Ragdoll rendering routines
+static qboolean R_CullRagDolls( int RagDollID )
+{
+	int i;
+	vec3_t	vectors[3];
+	vec3_t  angles;
+	trace_t r_trace;
+	vec3_t	dist;
+	vec3_t bbox[8];
+
+	if (r_worldmodel )
+	{
+		//occulusion culling - why draw entities we cannot see?
+
+		r_trace = CM_BoxTrace(r_origin, RagDoll[RagDollID].curPos, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+		if(r_trace.fraction != 1.0)
+			return true;
+	}
+
+	VectorSubtract(r_origin, RagDoll[RagDollID].curPos, dist);
+
+	/*
+	** rotate the bounding box
+	*/
+	VectorCopy( RagDoll[RagDollID].angles, angles );
+	angles[YAW] = -angles[YAW];
+	AngleVectors( angles, vectors[0], vectors[1], vectors[2] );
+
+	for ( i = 0; i < 8; i++ )
+	{
+		vec3_t tmp;
+
+		VectorCopy( RagDoll[RagDollID].ragDollMesh->bbox[i], tmp );
+
+		bbox[i][0] = DotProduct( vectors[0], tmp );
+		bbox[i][1] = -DotProduct( vectors[1], tmp );
+		bbox[i][2] = DotProduct( vectors[2], tmp );
+
+		VectorAdd( RagDoll[RagDollID].curPos, bbox[i], bbox[i] );
+	}
+
+	{
+		int p, f, aggregatemask = ~0;
+
+		for ( p = 0; p < 8; p++ )
+		{
+			int mask = 0;
+
+			for ( f = 0; f < 4; f++ )
+			{
+				float dp = DotProduct( frustum[f].normal, bbox[p] );
+
+				if ( ( dp - frustum[f].dist ) < 0 )
+				{
+					mask |= ( 1 << f );
+				}
+			}
+			aggregatemask &= mask;
+		}
+
+		if ( aggregatemask && (VectorLength(dist) > 150)) //so shadows don't blatantly disappear when out of frustom
+		{
+			return true;
+		}
+
+		return false;
+	}
+}
 
 void R_RenderAllRagdolls ( void )
 {
 	int RagDollID;
 	int numRagDolls = 0;
+	int i;
 
 	if(!r_ragdolls->value)
 		return;
@@ -859,15 +1021,38 @@ void R_RenderAllRagdolls ( void )
 
 			qglPushMatrix ();
 
-			GL_AnimateIQMRagdoll(RagDollID);
+			//GL_AnimateIQMRagdoll(RagDollID);
 
-			GL_DrawIQMRagDollFrame(RagDollID, RagDoll[RagDollID].texnum);
+			//GL_DrawIQMRagDollFrame(RagDollID, RagDoll[RagDollID].texnum);
 
 			GL_TexEnv( GL_REPLACE );
 			qglShadeModel (GL_FLAT);
 
 			qglPopMatrix ();
 			qglColor4f (1,1,1,1);
+
+			//debug - mark surface centers
+			for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
+			{
+				R_DrawMark(RagDoll[RagDollID].surforigins[i], 0);
+			}
+			for(i = CHEST; i <= LEFTHAND; i++)
+			{
+				vec3_t org;
+				const dReal *odePos;
+
+				if(!RagDoll[RagDollID].RagDollObject[i].body)
+					continue;
+
+				odePos = dBodyGetPosition (RagDoll[RagDollID].RagDollObject[i].body);
+				VectorSet(org, odePos[0], odePos[1], odePos[2]);
+				if(i == HEAD)
+					R_DrawMark(org, 2);
+				else if (i > LEFTFOOT)
+					R_DrawMark(org, 3);
+				else
+					R_DrawMark(org, 1); 
+			}
 			
 			numRagDolls++;
 		}

@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_RAGDOLL_OBJECTS 16
 #define MAX_RAGDOLL_JOINTS 16
 #define MAX_SURFACES 128 //temporary val, just for basic testing, likely we need to do some proximity culling
-#define MAX_CONTACTS 4 //this might be best set to 1, check
+#define MAX_CONTACTS 32 
 #define RAGDOLL_DURATION 10000 //10 seconds
 
 //body id's
@@ -63,24 +63,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define LEFTWRIST 14
 
 //Hard coded definitions(if no ragdoll read in - note - these need to be adjusted to actual model sizes)
-#define HEAD_H 0.20
-#define UPPER_ARM_LEN 0.30
-#define FORE_ARM_LEN 0.25
-#define HAND_LEN 0.13 // wrist to mid-fingers only
-#define FOOT_LEN 0.18 // ankles to base of ball of foot only
-#define HEEL_LEN 0.05 
+#define RAGDOLLSCALE 32
 
-#define NECK_H 1.50
-#define SHOULDER_H 1.37
-#define CHEST_H 1.35
-#define HIP_H 0.86
-#define KNEE_H 0.48
-#define ANKLE_H 0.08
+#define UPPER_ARM_LEN 0.30*RAGDOLLSCALE
+#define FORE_ARM_LEN 0.25*RAGDOLLSCALE
+#define HAND_LEN 0.13*RAGDOLLSCALE // wrist to mid-fingers only
+#define FOOT_LEN 0.18*RAGDOLLSCALE // ankles to base of ball of foot only
+#define HEEL_LEN 0.05*RAGDOLLSCALE 
 
-#define SHOULDER_W 0.41
-#define CHEST_W 0.36 // actually wider, but we want narrower than shoulders (esp. with large radius)
-#define LEG_W 0.28 // between middles of upper legs
-#define PELVIS_W 0.25 // actually wider, but we want smaller than hip width
+#define HEAD_H 1.70*RAGDOLLSCALE
+#define NECK_H 1.50*RAGDOLLSCALE
+#define SHOULDER_H 1.37*RAGDOLLSCALE
+#define CHEST_H 1.35*RAGDOLLSCALE
+#define HIP_H 0.86*RAGDOLLSCALE
+#define KNEE_H 0.58*RAGDOLLSCALE //this was .48 but seemed a bit too low IMO
+#define ANKLE_H 0.08*RAGDOLLSCALE
+
+#define SHOULDER_W 0.41*RAGDOLLSCALE
+#define CHEST_W 0.36*RAGDOLLSCALE // actually wider, but we want narrower than shoulders (esp. with large radius)
+#define LEG_W 0.28*RAGDOLLSCALE // between middles of upper legs
+#define PELVIS_W 0.25*RAGDOLLSCALE // actually wider, but we want smaller than hip width
 
 dWorldID RagDollWorld;
 dSpaceID RagDollSpace;
@@ -101,28 +103,7 @@ typedef struct RagDoll_s {
 
 	RagDollObject_t RagDollObject[MAX_RAGDOLL_OBJECTS];
 	dJointID RagDollJoint[MAX_RAGDOLL_JOINTS];
-
-	//Ragdoll  positions
-	vec3_t R_SHOULDER_POS; 
-	vec3_t L_SHOULDER_POS;
-	vec3_t R_ELBOW_POS;
-	vec3_t L_ELBOW_POS;
-	vec3_t R_WRIST_POS;
-	vec3_t L_WRIST_POS;
-	vec3_t R_FINGERS_POS;
-	vec3_t L_FINGERS_POS;
-
-	vec3_t R_HIP_POS; 
-	vec3_t L_HIP_POS;
-	vec3_t R_KNEE_POS; 
-	vec3_t L_KNEE_POS; 
-	vec3_t R_ANKLE_POS; 
-	vec3_t L_ANKLE_POS;
-	vec3_t R_HEEL_POS;
-	vec3_t L_HEEL_POS;
-	vec3_t R_TOES_POS;
-	vec3_t L_TOES_POS;
-
+	
 	//mesh information
 	model_t *ragDollMesh;
 	int		texnum;
@@ -134,6 +115,8 @@ typedef struct RagDoll_s {
 
 	//surface for ragdoll to collide
 	dGeomID WorldGeometry[MAX_SURFACES];
+	int numsurfaces;
+	vec3_t	surforigins[MAX_SURFACES];
 
 	float spawnTime;
 
