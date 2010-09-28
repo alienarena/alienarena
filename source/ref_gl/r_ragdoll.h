@@ -114,6 +114,7 @@ typedef struct RagDoll_s {
 	vec3_t	curPos;
 
 	//surface for ragdoll to collide
+	dBodyID WorldBody[MAX_SURFACES];
 	dGeomID WorldGeometry[MAX_SURFACES];
 	int numsurfaces;
 	vec3_t	surforigins[MAX_SURFACES];

@@ -387,9 +387,6 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 
 		// this geom has no body
 		dGeomSetBody(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], 0);
-
-		//we should not need to call dGeomSetPosition because the vertices are not relative to a position.
-		dGeomSetPosition(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], 0, 0, 0);
 				
 		//debug stuff
 		VectorCopy(center, RagDoll[RagDollID].surforigins[r_SurfaceCount]);
@@ -769,7 +766,7 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 	dJointID j;
 	dBodyID body1 = dGeomGetBody(geom1);
 	dBodyID body2 = dGeomGetBody(geom2);
-	return;
+
 	if (dGeomIsSpace(geom1) || dGeomIsSpace(geom2))
 	{   // colliding a space with something
 		dSpaceCollide2(geom1, geom2, data, &near_callback);
@@ -815,7 +812,8 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 				// object itself. It returns a new dJointID which we then use with dJointAttach to finally create the
 				// temporary contact joint between the two geom bodies.
 				j = dJointCreateContact(RagDollWorld, contactGroup, &contact[i]);
-				dJointAttach(j, body1, body2);
+				if(body1 && body2)
+					dJointAttach(j, body1, body2);
 			}
 		}
 	}
