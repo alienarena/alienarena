@@ -128,9 +128,9 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	VectorAdd(p1, RagDoll[RagDollID].origin, p1);
 	VectorAdd(p2, RagDoll[RagDollID].origin, p2);
 
-	//remember, players are offset 24 units from ground
-	p1[2] -= 24;
-	p2[2] -= 24; 
+	//players are 24 units offset
+	p1[2] -=24;
+	p2[2] -=24;
 
 	//cylinder length not including endcaps, make capsules overlap by half
 	//radius at joints
@@ -224,6 +224,41 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	dBodySetQuaternion(RagDoll[RagDollID].RagDollObject[objectID].body, initialQuaternion);
 }
 
+//this is just for testing only
+void R_addBox(int RagDollID, vec3_t origin)
+{
+	dReal test;
+	dMass mass;
+
+	origin[2] -= 30;
+
+	//create body id
+	RagDoll[RagDollID].WorldBody[0] = dBodyCreate(RagDollWorld);	
+
+	//creat the geometry and give it a name
+	RagDoll[RagDollID].WorldGeometry[0] = dCreateBox (RagDollSpace, 512, 512, 4);
+	dGeomSetData(RagDoll[RagDollID].WorldGeometry[0], "floor");
+	dGeomSetBody(RagDoll[RagDollID].WorldGeometry[0], RagDoll[RagDollID].WorldBody[0]);
+
+	dMassSetBoxTotal(&mass, 2, 1.0, 1.0, 1.0);
+	// Apply the mass to the cube
+	dBodySetMass( RagDoll[RagDollID].WorldBody[0], &mass);
+
+	test = VectorLength(origin);
+	if(IS_NAN(test))
+	{
+		Com_Printf("There was a NaN in creating body %i\n", 0);
+		VectorCopy(RagDoll[RagDollID].origin, origin);
+	}
+
+	dBodySetPosition(RagDoll[RagDollID].WorldBody[0], origin[0], origin[1], origin[2]);
+	dBodySetLinearVel(RagDoll[RagDollID].WorldBody[0], 0, 0, 0); 
+	dBodySetAngularVel(RagDoll[RagDollID].WorldBody[0], 0, 0, 0);
+
+	RagDoll[RagDollID].numsurfaces = 1;
+}
+
+
 //joint creation routines
 void R_addFixedJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2)
 {
@@ -234,7 +269,9 @@ void R_addFixedJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2)
 
 void R_addHingeJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2, vec3_t anchor, vec3_t axis, float loStop, float hiStop)
 {
-	VectorAdd(anchor, currententity->origin, anchor);
+	VectorAdd(anchor, RagDoll[RagDollID].origin, anchor);
+
+	anchor[2] -= 24;
 
 	RagDoll[RagDollID].RagDollJoint[jointID] = dJointCreateHinge(RagDollWorld, 0);
 
@@ -248,7 +285,9 @@ void R_addHingeJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2, v
 
 void R_addBallJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2, vec3_t anchor)
 {
-	VectorAdd(anchor, currententity->origin, anchor);
+	VectorAdd(anchor, RagDoll[RagDollID].origin, anchor);
+
+	anchor[2] -= 24;
 
 	RagDoll[RagDollID].RagDollJoint[jointID] = dJointCreateBall(RagDollWorld, 0);
 
@@ -757,8 +796,6 @@ void R_BuildRagdollSurfaces (vec3_t origin, int RagDollID)
 	joints if they do.
 */
 
-//note - since bsp geometries don't have bodies, we need to check on some demos to make sure we are getting proper
-//collision information returned in those cases of ragdoll body colliding with bsp geometries.
 static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 {
 	dContact contact[MAX_CONTACTS];
@@ -791,7 +828,7 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 				return;
 		}
 		else
-			return;
+			return; 
 
 		for(i = 0; i < MAX_CONTACTS; i++)
 		{
@@ -811,9 +848,8 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 				// dJointCreateContact needs to know which world and joint group to work with as well as the dContact
 				// object itself. It returns a new dJointID which we then use with dJointAttach to finally create the
 				// temporary contact joint between the two geom bodies.
-				j = dJointCreateContact(RagDollWorld, contactGroup, &contact[i]);
-				if(body1 && body2)
-					dJointAttach(j, body1, body2);
+				j = dJointCreateContact(RagDollWorld, contactGroup, contact + i);
+				dJointAttach(j, body1, body2);
 			}
 		}
 	}
@@ -898,6 +934,7 @@ void R_AddNewRagdoll( vec3_t origin )
 			R_RagdollBody_Init(RagDollID, origin);
 			//add nearby surfaces anytime a ragdoll is spawned
 			R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
+			//R_addBox(RagDollID, origin);
 			Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1], 
 				RagDoll[RagDollID].origin[2]);
 			break;
@@ -1032,7 +1069,16 @@ void R_RenderAllRagdolls ( void )
 			//debug - mark surface centers
 			for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
 			{
-				R_DrawMark(RagDoll[RagDollID].surforigins[i], 0);
+				vec3_t org;
+				const dReal *odePos;
+
+				if(!RagDoll[RagDollID].WorldBody[0])
+					continue;
+				odePos = dBodyGetPosition (RagDoll[RagDollID].WorldBody[0]);
+				VectorSet(org, odePos[0], odePos[1], odePos[2]);
+				R_DrawMark(org, 0);
+				//R_DrawMark(RagDoll[RagDollID].surforigins[i], 0);
+
 			}
 			for(i = CHEST; i <= LEFTHAND; i++)
 			{
