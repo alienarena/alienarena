@@ -224,41 +224,6 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	dBodySetQuaternion(RagDoll[RagDollID].RagDollObject[objectID].body, initialQuaternion);
 }
 
-//this is just for testing only
-void R_addBox(int RagDollID, vec3_t origin)
-{
-	dReal test;
-	dMass mass;
-
-	origin[2] -= 30;
-
-	//create body id
-	RagDoll[RagDollID].WorldBody[0] = dBodyCreate(RagDollWorld);	
-
-	//creat the geometry and give it a name
-	RagDoll[RagDollID].WorldGeometry[0] = dCreateBox (RagDollSpace, 512, 512, 4);
-	dGeomSetData(RagDoll[RagDollID].WorldGeometry[0], "floor");
-	dGeomSetBody(RagDoll[RagDollID].WorldGeometry[0], RagDoll[RagDollID].WorldBody[0]);
-
-	dMassSetBoxTotal(&mass, 2, 1.0, 1.0, 1.0);
-	// Apply the mass to the cube
-	dBodySetMass( RagDoll[RagDollID].WorldBody[0], &mass);
-
-	test = VectorLength(origin);
-	if(IS_NAN(test))
-	{
-		Com_Printf("There was a NaN in creating body %i\n", 0);
-		VectorCopy(RagDoll[RagDollID].origin, origin);
-	}
-
-	dBodySetPosition(RagDoll[RagDollID].WorldBody[0], origin[0], origin[1], origin[2]);
-	dBodySetLinearVel(RagDoll[RagDollID].WorldBody[0], 0, 0, 0); 
-	dBodySetAngularVel(RagDoll[RagDollID].WorldBody[0], 0, 0, 0);
-
-	RagDoll[RagDollID].numsurfaces = 1;
-}
-
-
 //joint creation routines
 void R_addFixedJoint(int RagDollID, int jointID, dBodyID body1, dBodyID body2)
 {
@@ -343,36 +308,35 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	glpoly_t *p;
 	vec3_t dist, center, mins, maxs;
 	float	*v;
-	int		i, j, k, offset, VertexCounter;
-	int		ODEIndexCount = 0;
-	float	ODEVerts[MAX_VERTS];
-	int		ODEIndices[MAX_VERTS*4];
-	int		ODETris = 0;
-	dTriMeshDataID triMesh;
+	int		i, j, k, offset;	
+	char	name[32];
 	//winding order for ODE
 	const int indices[6] = {2,1,0,
 							3,2,0}; 
 	
 	if(r_SurfaceCount > MAX_SURFACES - 1 )
 		return;
-
-	// reset pointer and counter
-	VertexCounter = k = 0;	
-
+	
 	for ( p = surf->polys; p; p = p->chain ) 
 	{
+
 		if(r_SurfaceCount > MAX_SURFACES - 1 )
 			break;
-		
+
+		sprintf(name, "surface%i", r_SurfaceCount);		
+
+		// reset pointer and counter
+		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].VertexCounter = RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndexCount = k = 0;	
+				
 		VectorSet(mins, 999999, 999999, 999999);
 		VectorSet(maxs, -999999, -999999, -999999);
 		
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
 
-			ODEVerts[3*VertexCounter] = v[0];
-			ODEVerts[3*VertexCounter+1] = v[1];
-			ODEVerts[3*VertexCounter+2] = v[2];
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[i][0] = v[0];
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[i][1] = v[1];
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[i][2] = v[2];
 
 			if(v[0] > maxs[0])   maxs[0] = v[0];
             if(v[1] > maxs[1])   maxs[1] = v[1];
@@ -382,7 +346,7 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
             if(v[1] < mins[1])   mins[1] = v[1];
             if(v[2] < mins[2])   mins[2] = v[2];
 
-			VertexCounter++;
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].VertexCounter++;
 		}
 
 		//find poly center
@@ -394,39 +358,63 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 		VectorSubtract(RagDoll[RagDollID].origin, center, dist);
 		if(VectorLength(dist) > 512)
 			continue;
-		
+
+		//cull polys that are too high to collide(this is maybe temporary)
+		if(center[2] > RagDoll[RagDollID].origin[2]+128)
+			continue;
+
+		if(p->numverts < 3)
+			continue;
+
+		//we always need at least two tris per geom
+		if(p->numverts < 4)
+		{
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[3][0] = center[0];
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[3][1] = center[1];
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[3][2] = center[2];
+
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].VertexCounter++;
+		}
+								
 		//create indices for each tri
-		ODETris = p->numverts - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
-		ODEIndexCount += 3*ODETris; //3 indices per tri
+		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODETris = RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].VertexCounter - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
+		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndexCount = 3*RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODETris; //3 indices per tri
 
 		j = offset = 0;
-		for(i = 0; i < ODETris; i++)
+		for(i = 0; i < RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODETris; i++)
 		{
 			if(j > 3)
 			{
 				j = 0;
 				offset+=2;
 			}
-			ODEIndices[k+0] = indices[0+j]+offset;
-			ODEIndices[k+1] = indices[1+j]+offset;
-			ODEIndices[k+2] = indices[2+j]+offset;
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndices[k+0] = indices[0+j]+offset;
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndices[k+1] = indices[1+j]+offset;
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndices[k+2] = indices[2+j]+offset;
 			j+=3;
 			k+=3;
 		}
-
+				
 		//we need to build the trimesh geometry for this poly
-		triMesh = dGeomTriMeshDataCreate();
+		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].triMesh = dGeomTriMeshDataCreate();
 
 		// Build the mesh from the data
-		dGeomTriMeshDataBuildSimple(triMesh, (dReal*)ODEVerts,
-			VertexCounter, (dTriIndex*)ODEIndices, ODEIndexCount);
-
-		RagDoll[RagDollID].WorldGeometry[r_SurfaceCount] = dCreateTriMesh(RagDollSpace, triMesh, NULL, NULL, NULL);
-		dGeomSetData(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], "surface");
+		dGeomTriMeshDataBuildSimple(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].triMesh, 
+		(dReal*)RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts, RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].VertexCounter, 
+		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndices, 
+		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndexCount);
+		
+		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom = dCreateTriMesh(RagDollSpace, RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].triMesh, NULL, NULL, NULL);
+		dGeomSetData(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, name);
 
 		// this geom has no body
-		dGeomSetBody(RagDoll[RagDollID].WorldGeometry[r_SurfaceCount], 0);
-				
+		dGeomSetBody(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, 0);
+
+		dGeomSetPosition(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, 0, 0, 0);
+
+		dQFromAxisAndAngle (initialQuaternion, 1,1,1,0); 
+		dGeomSetQuaternion(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, initialQuaternion);
+
 		//debug stuff
 		VectorCopy(center, RagDoll[RagDollID].surforigins[r_SurfaceCount]);
 
@@ -658,7 +646,7 @@ void R_DrawMark (vec3_t origin, int type)
 	qglPopMatrix ();
 	qglEnable (GL_TEXTURE_2D);
 }
-static vec3_t ragdollorg;			// relative to viewpoint
+
 void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 {
 	int			c, side, sidebit;
@@ -719,16 +707,16 @@ void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 	switch (plane->type)
 	{
 	case PLANE_X:
-		dot = ragdollorg[0] - plane->dist;
+		dot = RagDoll[RagDollID].origin[0] - plane->dist;
 		break;
 	case PLANE_Y:
-		dot = ragdollorg[1] - plane->dist;
+		dot = RagDoll[RagDollID].origin[1] - plane->dist;
 		break;
 	case PLANE_Z:
-		dot = ragdollorg[2] - plane->dist;
+		dot = RagDoll[RagDollID].origin[2] - plane->dist;
 		break;
 	default:
-		dot = DotProduct (ragdollorg, plane->normal) - plane->dist;
+		dot = DotProduct (RagDoll[RagDollID].origin, plane->normal) - plane->dist;
 		break;
 	}
 
@@ -782,11 +770,11 @@ void R_BuildRagdollSurfaces (vec3_t origin, int RagDollID)
 
 	currentmodel = r_worldmodel;
 
-	VectorCopy (origin, ragdollorg);
-
 	R_RecursiveODEWorldNode (r_worldmodel->nodes, 15, RagDollID);
 
 	RagDoll[RagDollID].numsurfaces = r_SurfaceCount;
+
+	Com_Printf("%i surfaces added\n", r_SurfaceCount);
 }
 
 /*
@@ -827,8 +815,6 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 			if (dAreConnected(body1, body2))
 				return;
 		}
-		else
-			return; 
 
 		for(i = 0; i < MAX_CONTACTS; i++)
 		{
@@ -874,9 +860,9 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 	//destroy surfaces - to do: faster to track actual num of surfaces instead of max_surfaces, so remember to fix!
 	for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
 	{
-		if(RagDoll[RagDollID].WorldGeometry[i])
-			dGeomDestroy(RagDoll[RagDollID].WorldGeometry[i]);
-		RagDoll[RagDollID].WorldGeometry[i] = NULL;
+		if(RagDoll[RagDollID].RagDollWorld[i].geom)
+			dGeomDestroy(RagDoll[RagDollID].RagDollWorld[i].geom);
+		RagDoll[RagDollID].RagDollWorld[i].geom = NULL;
 	}
 	RagDoll[RagDollID].numsurfaces = 0;
 	
@@ -934,7 +920,8 @@ void R_AddNewRagdoll( vec3_t origin )
 			R_RagdollBody_Init(RagDollID, origin);
 			//add nearby surfaces anytime a ragdoll is spawned
 			R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
-			//R_addBox(RagDollID, origin);
+			//R_addBox(RagDollID, RagDoll[RagDollID].origin);
+			//R_addPlane(RagDollID, RagDoll[RagDollID].origin);
 			Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1], 
 				RagDoll[RagDollID].origin[2]);
 			break;
@@ -1068,18 +1055,10 @@ void R_RenderAllRagdolls ( void )
 
 			//debug - mark surface centers
 			for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
-			{
-				vec3_t org;
-				const dReal *odePos;
-
-				if(!RagDoll[RagDollID].WorldBody[0])
-					continue;
-				odePos = dBodyGetPosition (RagDoll[RagDollID].WorldBody[0]);
-				VectorSet(org, odePos[0], odePos[1], odePos[2]);
-				R_DrawMark(org, 0);
-				//R_DrawMark(RagDoll[RagDollID].surforigins[i], 0);
-
+			{				
+				R_DrawMark(RagDoll[RagDollID].surforigins[i], 0);
 			}
+			//debug - draw ragdoll bodies
 			for(i = CHEST; i <= LEFTHAND; i++)
 			{
 				vec3_t org;

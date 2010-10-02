@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_RAGDOLLS 64 
 #define MAX_RAGDOLL_OBJECTS 16
 #define MAX_RAGDOLL_JOINTS 16
-#define MAX_SURFACES 128 //temporary val, just for basic testing, likely we need to do some proximity culling
+#define MAX_SURFACES 128
 #define MAX_CONTACTS 32 
 #define RAGDOLL_DURATION 10000 //10 seconds
 
@@ -99,6 +99,17 @@ typedef struct RagDollObject_s {
 	dGeomID geom;
 } RagDollObject_t;
 
+typedef struct RagDollWorld_s {
+	int		VertexCounter;
+	int		ODEIndexCount;
+	dVector3	ODEVerts[MAX_VERTS];
+	dTriIndex	ODEIndices[MAX_VERTS*4];
+	int		ODETris;
+	dTriMeshDataID triMesh;
+
+	dGeomID geom;
+} RagDollWorld_t;
+
 typedef struct RagDoll_s {
 
 	RagDollObject_t RagDollObject[MAX_RAGDOLL_OBJECTS];
@@ -114,8 +125,8 @@ typedef struct RagDoll_s {
 	vec3_t	curPos;
 
 	//surface for ragdoll to collide
-	dBodyID WorldBody[MAX_SURFACES];
-	dGeomID WorldGeometry[MAX_SURFACES];
+	RagDollWorld_t RagDollWorld[MAX_SURFACES];
+	dBodyID WorldBody[MAX_SURFACES]; //testing only
 	int numsurfaces;
 	vec3_t	surforigins[MAX_SURFACES];
 
