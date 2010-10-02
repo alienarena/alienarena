@@ -820,7 +820,7 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 		{
 			contact[i].surface.mode = dContactBounce; // Bouncy surface
 			contact[i].surface.bounce = 0.2;
-			contact[i].surface.mu = 500.0; // Friction
+			contact[i].surface.mu = dInfinity;//500.0; // Friction
 			contact[i].surface.mu2 = 0;
 			contact[i].surface.bounce_vel = 0.1;
 		}
@@ -920,8 +920,6 @@ void R_AddNewRagdoll( vec3_t origin )
 			R_RagdollBody_Init(RagDollID, origin);
 			//add nearby surfaces anytime a ragdoll is spawned
 			R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
-			//R_addBox(RagDollID, RagDoll[RagDollID].origin);
-			//R_addPlane(RagDollID, RagDoll[RagDollID].origin);
 			Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1], 
 				RagDoll[RagDollID].origin[2]);
 			break;
@@ -989,7 +987,7 @@ static qboolean R_CullRagDolls( int RagDollID )
 			aggregatemask &= mask;
 		}
 
-		if ( aggregatemask && (VectorLength(dist) > 150)) //so shadows don't blatantly disappear when out of frustom
+		if ( aggregatemask && (VectorLength(dist) > 150)) 
 		{
 			return true;
 		}
@@ -1056,7 +1054,7 @@ void R_RenderAllRagdolls ( void )
 			//debug - mark surface centers
 			for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
 			{				
-				R_DrawMark(RagDoll[RagDollID].surforigins[i], 0);
+				R_DrawMark(RagDoll[RagDollID].surforigins[i], 0); //note - change this for surfaces to draw the vert array
 			}
 			//debug - draw ragdoll bodies
 			for(i = CHEST; i <= LEFTHAND; i++)
