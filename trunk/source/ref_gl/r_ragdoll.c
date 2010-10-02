@@ -271,8 +271,6 @@ void R_CreateWorldObject( void )
 	RagDollSpace = dSimpleSpaceCreate(0);
 
 	contactGroup = dJointGroupCreate(0);
-
-	//dWorldSetAutoDisableFlag(RagDollWorld, 1); //probably *don't* want this
 		
 	//axi used to determine constrained joint rotations
 	VectorSet(rightAxis, 1.0, 0.0, 0.0);
@@ -310,6 +308,9 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	float	*v;
 	int		i, j, k, offset;	
 	char	name[32];
+	int		VertexCounter;
+	int		ODEIndexCount;
+	int		ODETris;
 	//winding order for ODE
 	const int indices[6] = {2,1,0,
 							3,2,0}; 
@@ -326,7 +327,7 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 		sprintf(name, "surface%i", r_SurfaceCount);		
 
 		// reset pointer and counter
-		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].VertexCounter = RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndexCount = k = 0;	
+		VertexCounter = ODEIndexCount = k = 0;	
 				
 		VectorSet(mins, 999999, 999999, 999999);
 		VectorSet(maxs, -999999, -999999, -999999);
@@ -346,7 +347,7 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
             if(v[1] < mins[1])   mins[1] = v[1];
             if(v[2] < mins[2])   mins[2] = v[2];
 
-			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].VertexCounter++;
+			VertexCounter++;
 		}
 
 		//find poly center
@@ -373,15 +374,15 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[3][1] = center[1];
 			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[3][2] = center[2];
 
-			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].VertexCounter++;
+			VertexCounter++;
 		}
 								
 		//create indices for each tri
-		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODETris = RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].VertexCounter - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
-		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndexCount = 3*RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODETris; //3 indices per tri
+		ODETris = VertexCounter - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
+		ODEIndexCount = 3*ODETris; //3 indices per tri
 
 		j = offset = 0;
-		for(i = 0; i < RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODETris; i++)
+		for(i = 0; i < ODETris; i++)
 		{
 			if(j > 3)
 			{
@@ -400,9 +401,8 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 
 		// Build the mesh from the data
 		dGeomTriMeshDataBuildSimple(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].triMesh, 
-		(dReal*)RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts, RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].VertexCounter, 
-		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndices, 
-		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndexCount);
+		(dReal*)RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts, VertexCounter, 
+		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndices, ODEIndexCount);
 		
 		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom = dCreateTriMesh(RagDollSpace, RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].triMesh, NULL, NULL, NULL);
 		dGeomSetData(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, name);
@@ -820,7 +820,7 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 		{
 			contact[i].surface.mode = dContactBounce; // Bouncy surface
 			contact[i].surface.bounce = 0.2;
-			contact[i].surface.mu = dInfinity;//500.0; // Friction
+			contact[i].surface.mu = dInfinity; // Friction
 			contact[i].surface.mu2 = 0;
 			contact[i].surface.bounce_vel = 0.1;
 		}
