@@ -1082,17 +1082,13 @@ void R_RenderAllRagdolls ( void )
 
 	if(r_DrawingRagDoll) //here we handle the physics
 	{		
-		if((Sys_Milliseconds() - lastODEUpdate) > 1) //this may not be needed but it's safe to use to throttle things if needed
-		{
-			dSpaceCollide(RagDollSpace, 0, &near_callback);
+		dSpaceCollide(RagDollSpace, 0, &near_callback);
 
-			//20 can be adjusted for smoothness vs speed
-			dWorldStepFast1(RagDollWorld, (Sys_Milliseconds() - lastODEUpdate)/1000.0f, 10);
+		//20 can be adjusted for smoothness vs speed
+		dWorldStepFast1(RagDollWorld, (Sys_Milliseconds() - lastODEUpdate)/1000.0f, 20);
 
-			// Remove all temporary collision joints now that the world has been stepped
-			dJointGroupEmpty(contactGroup);
-
-			lastODEUpdate = Sys_Milliseconds();
-		}
+		// Remove all temporary collision joints now that the world has been stepped
+		dJointGroupEmpty(contactGroup);
 	}
+	lastODEUpdate = Sys_Milliseconds();
 }
