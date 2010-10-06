@@ -316,10 +316,6 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	const int indices[6] = {2,1,0,
 							3,2,0}; 
 	
-	if(r_SurfaceCount > MAX_SURFACES - 1 )
-		return;
-	sprintf(name, "surface%i", r_SurfaceCount);		
-
 	// reset pointer and counter
 	VertexCounter =  0;	
 				
@@ -367,7 +363,7 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	
 	//we have to figure out a method to deal with odd triangle counts, likely create a dummy vert on the plane
 	if(VertexCounter % 2)
-		VertexCounter -=1;
+		VertexCounter -= 1;
 								
 	//create indices for each tri - to do - we really really need to make sure this is right!
 	ODETris = VertexCounter - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
@@ -375,12 +371,16 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	//now we have to break this down into triangle pairs, and create a geom for each one of these	
 	for(i = 0; i < ODETris; i+=2)
 	{
-		for(j = i; j < i+4; j++)
+		if(r_SurfaceCount > MAX_SURFACES - 1 )
+			return;
+		sprintf(name, "surface%i", r_SurfaceCount);	
+
+		for(j = 0; j < 4; j++)
 		{
 			//each triangle pair has 4 verts and 6 indices
-			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[j][0] = ODEVerts[j][0];
-			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[j][1] = ODEVerts[j][1];
-			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[j][2] = ODEVerts[j][2];
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[j][0] = ODEVerts[j+i][0] - center[0];
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[j][1] = ODEVerts[j+i][1] - center[1];
+			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[j][2] = ODEVerts[j+i][2] - center[2];
 		}
 		
 		for(j = 0; j < 6; j++)
@@ -391,18 +391,18 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 		//we need to build the trimesh geometry for this poly
 		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].triMesh = dGeomTriMeshDataCreate();
 
-		// Build the mesh from the data - note we may opt to use dGeomTriMeshBuildSimple1, providing normals.  This should stop the errors.
+		// Build the mesh from the data - note we may opt to use dGeomTriMeshBuildSingle1, providing normals.  This should stop the errors.
 		dGeomTriMeshDataBuildSimple(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].triMesh, 
 		(dReal*)RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts, 4, 
 		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndices, 6);
-
+	
 		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom = dCreateTriMesh(RagDollSpace, RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].triMesh, NULL, NULL, NULL);
 		dGeomSetData(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, name);
 
 		// this geom has no body
 		dGeomSetBody(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, 0);
 
-		dGeomSetPosition(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, 0, 0, 0);
+		dGeomSetPosition(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, center[0], center[1], center[2]);
 		dGeomSetRotation(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, rot);
 
 		dQFromAxisAndAngle (initialQuaternion, 1,1,1,0); 
@@ -1046,8 +1046,13 @@ void R_RenderAllRagdolls ( void )
 
 			//debug - mark surface centers
 			for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
-			{				
-				R_DrawMark(RagDoll[RagDollID].surforigins[i], 0); //note - change this for surfaces to draw the vert array
+			{			
+				const	dReal *odePos;
+				vec3_t  org;
+
+				odePos = dGeomGetPosition (RagDoll[RagDollID].RagDollWorld[i].geom);
+				VectorSet(org, odePos[0], odePos[1], odePos[2]);
+				R_DrawMark(org, 0); //note - change this for surfaces to draw the vert array
 			}
 			//debug - draw ragdoll bodies
 			for(i = CHEST; i <= LEFTHAND; i++)
@@ -1082,7 +1087,7 @@ void R_RenderAllRagdolls ( void )
 			dSpaceCollide(RagDollSpace, 0, &near_callback);
 
 			//20 can be adjusted for smoothness vs speed
-			dWorldStepFast1(RagDollWorld, (Sys_Milliseconds() - lastODEUpdate)/1000.0f, 20);
+			dWorldStepFast1(RagDollWorld, (Sys_Milliseconds() - lastODEUpdate)/1000.0f, 10);
 
 			// Remove all temporary collision joints now that the world has been stepped
 			dJointGroupEmpty(contactGroup);
