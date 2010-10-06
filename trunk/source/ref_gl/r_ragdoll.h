@@ -100,8 +100,8 @@ typedef struct RagDollObject_s {
 } RagDollObject_t;
 
 typedef struct RagDollWorld_s {
-	dVector3	ODEVerts[MAX_VERTS];
-	dTriIndex	ODEIndices[MAX_VERTS*4];
+	dVector3	ODEVerts[4];
+	dTriIndex	ODEIndices[6];
 	dTriMeshDataID triMesh;
 	dGeomID geom;
 } RagDollWorld_t;
