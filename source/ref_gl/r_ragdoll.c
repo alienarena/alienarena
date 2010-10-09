@@ -411,9 +411,6 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 		dGeomSetPosition(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, center[0], center[1], center[2]);
 		dGeomSetRotation(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, rot);
 
-		//debug stuff
-		VectorCopy(center, RagDoll[RagDollID].surforigins[r_SurfaceCount]);
-
 		r_SurfaceCount++;			
 	}
 }
@@ -433,12 +430,16 @@ RagDollBind_t RagDollBinds[] =
     { "forearm.l", LEFTFOREARM },
     { "hand01.r", RIGHTHAND },
     { "hand01.l", LEFTHAND },
+	{ "hand02.r", RIGHTHAND },
+    { "hand02.l", LEFTHAND },
+	{ "hand03.r", RIGHTHAND },
+    { "hand03.l", LEFTHAND },
     { "foot.r", RIGHTFOOT },
     { "foot.l", LEFTFOOT }
 };
 int RagDollBindsCount = (int)(sizeof(RagDollBinds)/sizeof(RagDollBinds[0]));
 
-//build and set initial position of ragdoll - note this will need to get some information from the skeleton on the first death frame
+//build and set initial position of ragdoll
 void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 {
 	//Ragdoll  positions
@@ -560,8 +561,6 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	R_addBody(RagDollID, bindmat, "belly", BELLY, p1, p2, 0.125*RAGDOLLSCALE, density);
 	
 	VectorSet(p1, 0.0, 0.0, HIP_H);
-	//if it's a martian, we used fixed joint, otherwise ball - need a good way to determine such a thing
-	//R_addBallJoint(RagDollID, MIDSPINE, CHEST, BELLY, p1);
 	R_addFixedJoint(RagDollID, bindmat, MIDSPINE, CHEST, BELLY);
 
 	VectorSet(p1, -(PELVIS_W * 0.5 + 0.01*RAGDOLLSCALE), 0.0, HIP_H);
@@ -577,7 +576,6 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	VectorSet(p1, 0.0, 0.0, NECK_H);
 	R_addBallJoint(RagDollID, bindmat, NECK, CHEST, HEAD, p1);
 	//to do - add constraints to ball joints
-	//self.addBallJoint(self.chest, self.head,
 	//		(0.0, NECK_H, 0.0), (0.0, -1.0, 0.0), (0.0, 0.0, 1.0), pi * 0.25,
 	//		pi * 0.5, 50.0, 35.0)
 
@@ -980,8 +978,6 @@ void R_AddNewRagdoll( vec3_t origin )
 		
 		if(RagDoll[RagDollID].destroyed)
 		{
-			//need to create geometry in the vicinity of the ragdoll(not the entire map, this is painfully slow)
-			//for initial testing, let's just build a simple plane at the feet of the player
 			R_RagdollBody_Init(RagDollID, origin);
 			//add nearby surfaces anytime a ragdoll is spawned
 			R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
@@ -1073,7 +1069,7 @@ void R_RenderAllRagdolls ( void )
 
 	//Iterate though the ragdoll stack, and render each one that is active.
 
-	//This function would look very similar to the iqm/alias entity routine, but will call a
+	//This function is very similar to the iqm/alias entity routine, but will call a
 	//different animation function.  This function will keep track of the time as well, and
 	//remove any expired ragdolls off of the stack.
 
