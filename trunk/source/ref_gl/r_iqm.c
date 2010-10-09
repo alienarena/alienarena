@@ -808,13 +808,8 @@ void GL_AnimateIQMRagdoll(int RagDollID)
 {
 	//we only deal with one frame
 
-	//animate using the rotations from our corresponding ODE objects.  
+	//animate using the rotations from our corresponding ODE objects.
 	int i, j;
-
-    int frame1 = 258; //ragdoll initial pose
-
-	frame1 %= RagDoll[RagDollID].ragDollMesh->num_poses;
-
 	{
 		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->num_joints; i++)
 		{
