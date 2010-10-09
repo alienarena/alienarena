@@ -93,12 +93,19 @@ int lastODEUpdate;
 
 dQuaternion initialQuaternion;
 
+typedef struct RagDollBind_s {
+    const char *name;
+    int object;
+} RagDollBind_t;
+
+extern RagDollBind_t RagDollBinds[];
+extern int RagDollBindsCount;
+
 typedef struct RagDollObject_s {
 	dBodyID body;
 	dMass mass;
 	dGeomID geom;
-	vec3_t		pos;
-	dMatrix3	rot;
+    matrix3x4_t initmat;
 } RagDollObject_t;
 
 typedef struct RagDollWorld_s {
@@ -115,6 +122,7 @@ typedef struct RagDoll_s {
 	
 	//mesh information
 	model_t *ragDollMesh;
+    matrix3x4_t *initframe;
 	int		texnum;
 	int		flags;
 	struct	rscript_s *script;
