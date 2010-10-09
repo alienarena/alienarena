@@ -193,6 +193,7 @@ extern	cvar_t	*r_lensflare_intens;
 extern	cvar_t	*r_drawsun;
 
 extern  cvar_t	*r_ragdolls;
+extern  cvar_t  *r_ragdoll_debug;
 
 extern	qboolean	map_fog;
 extern	char		map_music[128];

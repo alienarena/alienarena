@@ -754,13 +754,6 @@ void R_DrawShadowVolume()
     int i;
 	qboolean lerped=false;
 
-	if(r_ragdolls->value)
-	{		
-		//Do not render deathframe shadows if using ragdolls, this is handled elsewhere
-		if(currententity->frame > 198)
-			return;
-	}
-
 	if(currentmodel->type == mod_alias)
 	{
 		daliasframe_t *frame, *oldframe;
@@ -906,6 +899,13 @@ void R_CastShadow(void)
 	for (i = 0; i < r_newrefdef.num_entities; i++)
 	{
 		currententity = &r_newrefdef.entities[i];
+
+		if(r_ragdolls->value)
+		{		
+			//Do not render deathframe shadows if using ragdolls, this is handled elsewhere
+			if(currententity->frame > 198)
+				continue;
+		}
 
 		if (currententity->
 		flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED |

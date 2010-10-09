@@ -131,6 +131,13 @@ void Matrix3x4_Add(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
 	Vector4Add(mat1.c, mat2.c, out->c);
 }
 
+void Matrix3x4_Subtract(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
+{
+	Vector4Sub(mat1.a, mat2.a, out->a);
+	Vector4Sub(mat1.b, mat2.b, out->b);
+	Vector4Sub(mat1.c, mat2.c, out->c);
+}
+
 void Matrix3x4_Copy(matrix3x4_t *out, matrix3x4_t in)
 {
 	Vector4Copy(in.a, out->a);
@@ -152,6 +159,13 @@ void Maxtrix3x4GenJointRotate(matrix3x4_t *out, float angle, const vec3_t axis, 
 	Vector4Set(out->a, axis[0]*axis[0]*(1-ck)+ck, axis[0]*axis[1]*(1-ck)-axis[2]*sk, axis[0]*axis[2]*(1-ck)+axis[1]*sk, trans[0]);
 	Vector4Set(out->b, axis[1]*axis[0]*(1-ck)+axis[2]*sk, axis[1]*axis[1]*(1-ck)+ck, axis[1]*axis[2]*(1-ck)-axis[0]*sk, trans[1]);
 	Vector4Set(out->c, axis[0]*axis[2]*(1-ck)-axis[1]*sk, axis[1]*axis[2]*(1-ck)+axis[0]*sk, axis[2]*axis[2]*(1-ck)+ck, trans[2]);
+}
+
+void Matrix3x4GenFromODE(matrix3x4_t *out, const dReal in[12])
+{
+	Vector4Set(out->a, in[0], in[1], in[2], 0);
+	Vector4Set(out->b, in[4], in[5], in[6], 0);
+	Vector4Set(out->c, in[8], in[9], in[10], 0);
 }
 
 double degreeToRadian(double degree)
@@ -772,17 +786,17 @@ void GL_AnimateIQMRagdoll(int RagDollID)
 	//If the object vectors are relative, then this will be much easier, if not, then we have a more complex operation to do.
 	int i, j;
 
-    int frame1 = 1; //just use frame 1 for now, we will likely use a base frame at some point(0?)
+    int frame1 = 258; //ragdoll initial pose
 
 	frame1 %= RagDoll[RagDollID].ragDollMesh->num_poses;
 
 	{
+		matrix3x4_t baseRot;
 		matrix3x4_t *mat1 = &RagDoll[RagDollID].ragDollMesh->frames[frame1 * RagDoll[RagDollID].ragDollMesh->num_joints];
 
 		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->num_joints; i++)
 		{
-			matrix3x4_t mat, rmat, temp;
-			vec3_t rot, trans;
+			matrix3x4_t mat, rmat, rdmat, temp;
 			Matrix3x4_Scale(&mat, mat1[i], 1);
 
 			if(RagDoll[RagDollID].ragDollMesh->joints[i].parent >= 0)
@@ -793,21 +807,540 @@ void GL_AnimateIQMRagdoll(int RagDollID)
 			else
 				Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], mat);
 
-			//spine rotation(each bone will get rotated for a body's rotation)
-			//to do - we are also going to need to set it's position, position the spine will position all others, just need rots for others
-			
+			//each bone will get rotated for a body's rotation - this next block of code could probably be combined some?
 			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "Spine")||
 				!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "Spine.001"))
 			{
 				vec3_t basePosition, oldPosition, newPosition;
 				const dReal *odeRot;
+				const dReal *odePos;
 
-				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[BELLY].body);
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[CHEST].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
 
-				//note - we need to rotate for all 3 axis, and this stuff will probably be a bit different
-				VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
-				VectorSet(trans, 0, 0, 0); //position
-				Maxtrix3x4GenJointRotate(&rmat, 0, rot, trans);
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[CHEST].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				Matrix3x4GenFromODE(&rdmat, RagDoll[RagDollID].RagDollObject[CHEST].rot);							
+
+				Matrix3x4_Invert(&rdmat, rdmat); //initial ragdoll mat
+				Matrix3x4_Multiply(&mat, rmat, rdmat);
+
+				Matrix3x4_Multiply(&mat, rmat, mat);
+	
+				Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], mat);
+
+			}
+			//work way down model extremeties, first head
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "Head"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[HEAD].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[HEAD].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				Matrix3x4GenFromODE(&rdmat, RagDoll[RagDollID].RagDollObject[HEAD].rot);							
+
+				Matrix3x4_Invert(&rdmat, rdmat); //initial ragdoll mat
+				Matrix3x4_Multiply(&mat, rmat, rdmat);
+	
+				Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], mat);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "thigh.r"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[RIGHTUPPERLEG].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[RIGHTUPPERLEG].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				//Matrix3x4_Multiply(&rmat, baseRot, rmat);
+				//Matrix3x4_Invert(&rmat, rmat);
+
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "thigh.l"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[LEFTUPPERLEG].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				//Matrix3x4_Multiply(&rmat, baseRot, rmat);
+				//Matrix3x4_Invert(&rmat, rmat);
+						
+				//save off for shins
+				Matrix3x4_Copy(&baseRot, rmat);
+				Matrix3x4_Invert(&baseRot, baseRot);
+
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "shin.r"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[RIGHTLOWERLEG].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[RIGHTLOWERLEG].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				//Matrix3x4_Multiply(&rmat, baseRot, rmat);
+				//Matrix3x4_Invert(&rmat, rmat);
+
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "shin.l"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[LEFTLOWERLEG].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[LEFTLOWERLEG].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				//Matrix3x4_Multiply(&rmat, baseRot, rmat);
+				//Matrix3x4_Invert(&rmat, rmat);
+
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "bicep.r"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				//get spine rotation
+				odePos = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[CHEST].body);
+				Matrix3x4GenFromODE(&baseRot, odePos);
+				Matrix3x4_Invert(&baseRot, baseRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[CHEST].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				//Matrix3x4_Multiply(&rmat, baseRot, rmat);
+
+				//save off for children
+				Matrix3x4_Copy(&baseRot, rmat);
+				
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[RIGHTUPPERARM].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[RIGHTUPPERARM].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+				
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "bicep.l"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[LEFTUPPERARM].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[LEFTUPPERARM].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				//Matrix3x4_Multiply(&rmat, baseRot, rmat);
+
+				//save off for forearms
+				Matrix3x4_Copy(&baseRot, rmat);
+				Matrix3x4_Invert(&baseRot, baseRot);
+
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "forearm.r"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[RIGHTFOREARM].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[RIGHTFOREARM].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				//Matrix3x4_Multiply(&rmat, baseRot, rmat);
+
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "forearm.l"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				//Matrix3x4_Multiply(&rmat, baseRot, rmat);
+
+				//save off for hands
+				Matrix3x4_Copy(&baseRot, rmat);
+				Matrix3x4_Invert(&baseRot, baseRot);
+
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "hand01.r"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[RIGHTHAND].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[RIGHTHAND].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				//Matrix3x4_Multiply(&rmat, baseRot, rmat);
+
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "hand01.l"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[LEFTHAND].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[LEFTHAND].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				//Matrix3x4_Multiply(&rmat, baseRot, rmat);
+				
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "foot.r"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[RIGHTFOOT].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				//feet are going to need to position
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[RIGHTFOOT].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
+
+				// concatenate the rotation with the bone
+				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
+
+				// get the position of the bone in the base frame
+				VectorSet(basePosition, RagDoll[RagDollID].ragDollMesh->baseframe[i].a[3], RagDoll[RagDollID].ragDollMesh->baseframe[i].b[3], 
+					RagDoll[RagDollID].ragDollMesh->baseframe[i].c[3]);
+
+				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+			    VectorSet(oldPosition,  DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].a) + RagDoll[RagDollID].ragDollMesh->outframe[i].a[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].b) + RagDoll[RagDollID].ragDollMesh->outframe[i].b[3],
+					 DotProduct(basePosition, RagDoll[RagDollID].ragDollMesh->outframe[i].c) + RagDoll[RagDollID].ragDollMesh->outframe[i].c[3]);
+
+			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   				 DotProduct(basePosition, temp.b) + temp.b[3],
+					 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+			    temp.a[3] += oldPosition[0] - newPosition[0];
+			    temp.b[3] += oldPosition[1] - newPosition[1];
+			    temp.c[3] += oldPosition[2] - newPosition[2];
+
+			    // replace the old matrix with the rotated one
+			    Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], temp);
+			}
+			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], "foot.l"))
+			{
+				vec3_t basePosition, oldPosition, newPosition;
+				const dReal *odeRot;
+				const dReal *odePos;
+
+				odeRot = dBodyGetRotation (RagDoll[RagDollID].RagDollObject[LEFTFOOT].body);
+				Matrix3x4GenFromODE(&rmat, odeRot);
+
+				//feet are going to need the position
+				odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[LEFTFOOT].body);
+
+				rmat.a[3] = odePos[0];
+				rmat.b[3] = odePos[1];
+				rmat.c[3] = odePos[2];
 
 				// concatenate the rotation with the bone
 				Matrix3x4_Multiply(&temp, rmat, RagDoll[RagDollID].ragDollMesh->outframe[i]);
@@ -1511,7 +2044,8 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 	AngleVectors (RagDoll[RagDollID].angles, vectors[0], vectors[1], vectors[2]);
 
 	odePos = dBodyGetPosition (RagDoll[RagDollID].RagDollObject[BELLY].body);
-	VectorSet(RagDoll[RagDollID].curPos, odePos[0], odePos[1], odePos[2]);
+	//VectorSet(RagDoll[RagDollID].curPos, odePos[0], odePos[1], odePos[2]);
+	VectorSet(RagDoll[RagDollID].curPos, 0, 0, 0);
 
 	//render the model
 
@@ -2077,7 +2611,10 @@ void R_DrawINTERQUAKEMODEL ( void )
 	if((r_newrefdef.rdflags & RDF_NOWORLDMODEL ) && !(currententity->flags & RF_MENUMODEL))
 		return;
 
-	//note - we may want cull ragdolls elswhere
+	//do culling
+	if ( R_CullIQMModel() )
+		return;
+
 	if(r_ragdolls->value)
 	{
 		//Ragdolls take over at beginning of each death sequence(don't bother with helmets just yet, we have to figure things out first)
@@ -2090,10 +2627,6 @@ void R_DrawINTERQUAKEMODEL ( void )
 		if(currententity->frame > 198)
 			return;
 	}
-
-	//do culling
-	if ( R_CullIQMModel() )
-		return;
 	
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{
