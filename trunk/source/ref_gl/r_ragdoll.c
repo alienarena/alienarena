@@ -512,6 +512,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	int i, j;
 	
 	//we need some information from the current entity
+	//to do - check for presence of helmet, if so we are going to want to copy off a precached helmet to be rendered using this same ragdoll
 	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
 	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t)); 
 
@@ -565,17 +566,11 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	VectorSet(R_SHOULDER_POS, -SHOULDER_W * 0.5, 0.0, SHOULDER_H);
 	VectorSet(L_SHOULDER_POS, SHOULDER_W * 0.5, 0.0, SHOULDER_H);
 
-	VectorSet(R_ELBOW_POS, R_SHOULDER_POS[0] - UPPER_ARM_LEN, R_SHOULDER_POS[1], R_SHOULDER_POS[2]);
-	VectorSet(L_ELBOW_POS, L_SHOULDER_POS[0] + UPPER_ARM_LEN, L_SHOULDER_POS[1], L_SHOULDER_POS[2]);
-
 	VectorSet(R_ELBOW_POS, -ELBOW_X_OFF, ELBOW_Y_OFF, ELBOW_Z_OFF);
 	VectorSet(L_ELBOW_POS, ELBOW_X_OFF, ELBOW_Y_OFF, ELBOW_Z_OFF);
 
 	VectorSet(R_WRIST_POS, -WRIST_X_OFF, WRIST_Y_OFF, WRIST_Z_OFF);
 	VectorSet(L_WRIST_POS, WRIST_X_OFF, WRIST_Y_OFF, WRIST_Z_OFF);
-
-	VectorSet(R_WRIST_POS, R_ELBOW_POS[0] - FORE_ARM_LEN, R_ELBOW_POS[1], R_ELBOW_POS[2]);
-	VectorSet(L_WRIST_POS, L_ELBOW_POS[0] + FORE_ARM_LEN, L_ELBOW_POS[1], L_ELBOW_POS[2]);
 
 	VectorSet(R_FINGERS_POS, R_WRIST_POS[0] - HAND_LEN, R_WRIST_POS[1], R_WRIST_POS[2]);
 	VectorSet(L_FINGERS_POS, L_WRIST_POS[0] + HAND_LEN, L_WRIST_POS[1], L_WRIST_POS[2]);
