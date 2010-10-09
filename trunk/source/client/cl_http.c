@@ -26,8 +26,6 @@
 
 #include "client.h"
 
-#if defined HAVE_CURL_CURL_H || defined WIN32_VARIANT
-
 #if defined HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -48,7 +46,7 @@ typedef struct response_s {
 
 response_t responses[] = {
         {400, "Bad request"}, {401, "Unauthorized"}, {403, "Forbidden"},
- {404, "Not found"}, {500, "Internal server error"}, {0, NULL}
+	{404, "Not found"}, {500, "Internal server error"}, {0, NULL}
 };
 
 char curlerr[MAX_STRING_CHARS];  // curl's error buffer
@@ -259,14 +257,3 @@ void CL_ShutdownHttpDownload(void){
         curl_multi_cleanup(curlm);
         curlm = NULL;
 }
-
-#else
-// !defined HAVE_CURL_CURL_H
-
-void CL_InitHttpDownload(void){}
-void CL_HttpDownloadCleanup(void){}
-qboolean CL_HttpDownload(void){ return false; }
-void CL_HttpDownloadThink(void){}
-void CL_ShutdownHttpDownload(void){}
-
-#endif
