@@ -174,7 +174,7 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	if(!IS_NAN(ya[0]))
 		RagDoll[RagDollID].RagDollObject[objectID].rot[1] = ya[0];
 	else
-		ya[0] = 0;
+		RagDoll[RagDollID].RagDollObject[objectID].rot[1] = 0;
 	if(!IS_NAN(za[0]))
 		RagDoll[RagDollID].RagDollObject[objectID].rot[2] = za[0];
 	else 

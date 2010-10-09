@@ -831,8 +831,6 @@ void GL_AnimateIQMRagdoll(int RagDollID)
 
 				Matrix3x4_Invert(&rdmat, rdmat); //initial ragdoll mat
 				Matrix3x4_Multiply(&mat, rmat, rdmat);
-
-				Matrix3x4_Multiply(&mat, rmat, mat);
 	
 				Matrix3x4_Copy(&RagDoll[RagDollID].ragDollMesh->outframe[i], mat);
 
