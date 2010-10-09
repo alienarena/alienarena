@@ -179,30 +179,33 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 		RagDoll[RagDollID].RagDollObject[objectID].rot[2] = za[0];
 	else 
 		RagDoll[RagDollID].RagDollObject[objectID].rot[2] = 0;
+	RagDoll[RagDollID].RagDollObject[objectID].rot[3] = 0;
 	if(!IS_NAN(xa[1]))
-		RagDoll[RagDollID].RagDollObject[objectID].rot[3] = xa[1];
-	else
-		RagDoll[RagDollID].RagDollObject[objectID].rot[3] = 0;
-	if(!IS_NAN(ya[1]))
-		RagDoll[RagDollID].RagDollObject[objectID].rot[4] = ya[1];
+		RagDoll[RagDollID].RagDollObject[objectID].rot[4] = xa[1];
 	else
 		RagDoll[RagDollID].RagDollObject[objectID].rot[4] = 0;
-	if(!IS_NAN(za[1]))
-		RagDoll[RagDollID].RagDollObject[objectID].rot[5] = za[1];
+	if(!IS_NAN(ya[1]))
+		RagDoll[RagDollID].RagDollObject[objectID].rot[5] = ya[1];
 	else
 		RagDoll[RagDollID].RagDollObject[objectID].rot[5] = 0;
-	if(!IS_NAN(xa[2]))
-		RagDoll[RagDollID].RagDollObject[objectID].rot[6] = xa[2];
+	if(!IS_NAN(za[1]))
+		RagDoll[RagDollID].RagDollObject[objectID].rot[6] = za[1];
 	else
 		RagDoll[RagDollID].RagDollObject[objectID].rot[6] = 0;
-	if(!IS_NAN(ya[2]))
-		RagDoll[RagDollID].RagDollObject[objectID].rot[7] = ya[2];
-	else
-		RagDoll[RagDollID].RagDollObject[objectID].rot[7] = 0;
-	if(!IS_NAN(za[2]))
-		RagDoll[RagDollID].RagDollObject[objectID].rot[8] = za[2];
+	RagDoll[RagDollID].RagDollObject[objectID].rot[7] = 0;
+	if(!IS_NAN(xa[2]))
+		RagDoll[RagDollID].RagDollObject[objectID].rot[8] = xa[2];
 	else
 		RagDoll[RagDollID].RagDollObject[objectID].rot[8] = 0;
+	if(!IS_NAN(ya[2]))
+		RagDoll[RagDollID].RagDollObject[objectID].rot[9] = ya[2];
+	else
+		RagDoll[RagDollID].RagDollObject[objectID].rot[9] = 0;
+	if(!IS_NAN(za[2]))
+		RagDoll[RagDollID].RagDollObject[objectID].rot[10] = za[2];
+	else
+		RagDoll[RagDollID].RagDollObject[objectID].rot[10] = 0;
+	RagDoll[RagDollID].RagDollObject[objectID].rot[11] = 0;
 
 	VectorAdd(p1, p2, RagDoll[RagDollID].RagDollObject[objectID].pos);
 	VectorScale(RagDoll[RagDollID].RagDollObject[objectID].pos, 0.5, RagDoll[RagDollID].RagDollObject[objectID].pos);
@@ -221,9 +224,6 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	dBodySetForce(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
 	dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 40, 150); //for testing, a little upward velocity
 	dBodySetAngularVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
-		
-	dQFromAxisAndAngle (initialQuaternion, 1,1,1,1); //test this more
-	dBodySetQuaternion(RagDoll[RagDollID].RagDollObject[objectID].body, initialQuaternion);
 
 	//subtract off origin
 	VectorSubtract(RagDoll[RagDollID].RagDollObject[CHEST].pos, RagDoll[RagDollID].origin, RagDoll[RagDollID].RagDollObject[CHEST].pos);
