@@ -73,7 +73,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define FOOT_LEN 5.00 // ankles to base of ball of foot only
 #define HEEL_LEN 4.00 
 
-#define HEAD_H 46.5
+#define HEAD_H 46.0
 #define NECK_H 42.50
 #define SHOULDER_H 40.00
 #define CHEST_H 42.50

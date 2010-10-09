@@ -262,6 +262,45 @@ void R_addBallJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object
 	dJointSetBallAnchor(RagDoll[RagDollID].RagDollJoint[jointID], wanchor[0], wanchor[1], wanchor[2]);
 }
 
+void R_addUniversalJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis1, vec3_t axis2, 
+	float loStop1, float hiStop1, float loStop2, float hiStop2)
+{
+	vec3_t wanchor, waxis1, waxis2;
+
+	dBodyID body1 = RagDoll[RagDollID].RagDollObject[object1].body;
+    dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
+
+	anchor[1] += 12;
+	anchor[2] -= 12;
+    wanchor[0] = 0.5*(DotProduct(bindmat[object1].a, anchor) + bindmat[object1].a[3] + DotProduct(bindmat[object2].a, anchor) + bindmat[object2].a[3]);
+    wanchor[1] = 0.5*(DotProduct(bindmat[object1].b, anchor) + bindmat[object1].b[3] + DotProduct(bindmat[object2].b, anchor) + bindmat[object2].b[3]);
+    wanchor[2] = 0.5*(DotProduct(bindmat[object1].c, anchor) + bindmat[object1].c[3] + DotProduct(bindmat[object2].c, anchor) + bindmat[object2].c[3]);
+
+	waxis1[0] = DotProduct(bindmat[object1].a, axis1) + DotProduct(bindmat[object2].a, axis1);
+    waxis1[1] = DotProduct(bindmat[object1].b, axis1) + DotProduct(bindmat[object2].b, axis1);
+    waxis1[2] = DotProduct(bindmat[object1].c, axis1) + DotProduct(bindmat[object2].c, axis1);
+	VectorNormalize(waxis1);
+
+	waxis2[0] = DotProduct(bindmat[object1].a, axis2) + DotProduct(bindmat[object2].a, axis2);
+    waxis2[1] = DotProduct(bindmat[object1].b, axis2) + DotProduct(bindmat[object2].b, axis2);
+    waxis2[2] = DotProduct(bindmat[object1].c, axis2) + DotProduct(bindmat[object2].c, axis2);
+	VectorNormalize(waxis2);
+
+	RagDoll[RagDollID].RagDollJoint[jointID] = dJointCreateUniversal(RagDollWorld, 0);
+
+	dJointAttach(RagDoll[RagDollID].RagDollJoint[jointID], body1, body2);
+
+	dJointSetUniversalAnchor(RagDoll[RagDollID].RagDollJoint[jointID], wanchor[0], wanchor[1], wanchor[2]);
+	dJointSetUniversalAxis1(RagDoll[RagDollID].RagDollJoint[jointID], waxis1[0], waxis1[1], waxis1[2]);
+	dJointSetUniversalAxis2(RagDoll[RagDollID].RagDollJoint[jointID], waxis2[0], waxis2[1], waxis2[2]);
+	dJointSetUniversalParam(RagDoll[RagDollID].RagDollJoint[jointID], dParamHiStop1,  hiStop1);
+	dJointSetUniversalParam(RagDoll[RagDollID].RagDollJoint[jointID], dParamLoStop1,  loStop1);
+	dJointSetUniversalParam(RagDoll[RagDollID].RagDollJoint[jointID], dParamHiStop2,  hiStop2);
+	dJointSetUniversalParam(RagDoll[RagDollID].RagDollJoint[jointID], dParamLoStop2,  loStop2);
+
+}
+
+
 void R_CreateWorldObject( void )
 {
 	// Initialize the world
@@ -574,18 +613,16 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	R_addBody(RagDollID, bindmat, "head", HEAD, p1, p2, 0.11*RAGDOLLSCALE, density);
 
 	VectorSet(p1, 0.0, 0.0, NECK_H);
-	R_addBallJoint(RagDollID, bindmat, NECK, CHEST, HEAD, p1);
-	//to do - add constraints to ball joints
-	//		(0.0, NECK_H, 0.0), (0.0, -1.0, 0.0), (0.0, 0.0, 1.0), pi * 0.25,
-	//		pi * 0.5, 50.0, 35.0)
+	R_addUniversalJoint(RagDollID, bindmat, NECK, CHEST, HEAD, p1, upAxis, rightAxis, -0.2 * M_PI, 0.2 * M_PI, -0.2 * M_PI,
+			0.2 * M_PI);
 
 	//right leg
 	VectorSet(p1, R_HIP_POS[0] - 0.01*RAGDOLLSCALE, R_HIP_POS[1], R_HIP_POS[2]);
 	VectorSet(p2, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] + 0.01*RAGDOLLSCALE);
 	R_addBody(RagDollID, bindmat, "rightupperleg", RIGHTUPPERLEG, p1, p2, 0.11*RAGDOLLSCALE, density);
-
-	R_addBallJoint(RagDollID, bindmat, RIGHTHIP, PELVIS, RIGHTUPPERLEG,
-		R_HIP_POS);
+	
+	R_addUniversalJoint(RagDollID, bindmat, RIGHTHIP, PELVIS, RIGHTUPPERLEG, R_HIP_POS, bkwdAxis, rightAxis, -0.1 * M_PI, 0.3 * M_PI, -0.15 * M_PI,
+			0.75 * M_PI);
 
 	VectorSet(p1, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] - 0.01*RAGDOLLSCALE);
 	VectorSet(p2, R_ANKLE_POS[0], R_ANKLE_POS[1], R_ANKLE_POS[2]);
@@ -604,8 +641,8 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	VectorSet(p2, L_KNEE_POS[0], L_KNEE_POS[1], L_KNEE_POS[2] + 0.01*RAGDOLLSCALE);
 	R_addBody(RagDollID, bindmat, "leftupperleg", LEFTUPPERLEG, p1, p2, 0.11*RAGDOLLSCALE, density);
 
-	R_addBallJoint(RagDollID, bindmat, LEFTHIP, PELVIS, LEFTUPPERLEG,
-		L_HIP_POS);	
+	R_addUniversalJoint(RagDollID, bindmat, LEFTHIP, PELVIS,LEFTUPPERLEG, L_HIP_POS, fwdAxis, rightAxis, -0.1 * M_PI, 0.3 * M_PI, -0.15 * M_PI,
+			0.75 * M_PI);
 
 	VectorSet(p1, L_KNEE_POS[0], L_KNEE_POS[1], L_KNEE_POS[2] - 0.01*RAGDOLLSCALE);
 	VectorSet(p2, L_ANKLE_POS[0], L_ANKLE_POS[1], L_ANKLE_POS[2]);
@@ -624,8 +661,8 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	VectorSet(p2, R_ELBOW_POS[0], R_ELBOW_POS[1], R_ELBOW_POS[2] + 0.01*RAGDOLLSCALE);
 	R_addBody(RagDollID, bindmat, "rightupperarm", RIGHTUPPERARM, p1, p2, 0.08*RAGDOLLSCALE, density);
 
-	R_addBallJoint(RagDollID, bindmat, RIGHTSHOULDER, CHEST, 
-		RIGHTUPPERARM, R_SHOULDER_POS);
+	R_addUniversalJoint(RagDollID, bindmat, RIGHTSHOULDER, CHEST, RIGHTUPPERARM, R_SHOULDER_POS, bkwdAxis, rightAxis, -0.1 * M_PI, 0.3 * M_PI, -0.15 * M_PI,
+			0.75 * M_PI);
 
 	VectorSet(p1, R_ELBOW_POS[0], R_ELBOW_POS[1], R_ELBOW_POS[2] - 0.01*RAGDOLLSCALE);
 	VectorSet(p2, R_WRIST_POS[0], R_WRIST_POS[1], R_WRIST_POS[2] + 0.01*RAGDOLLSCALE);
@@ -646,8 +683,8 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	VectorSet(p2, L_ELBOW_POS[0], L_ELBOW_POS[1], L_ELBOW_POS[2] + 0.01*RAGDOLLSCALE);
 	R_addBody(RagDollID, bindmat, "leftupperarm", LEFTUPPERARM, p1, p2, 0.08*RAGDOLLSCALE, density);
 
-	R_addBallJoint(RagDollID, bindmat, LEFTSHOULDER, CHEST, 
-		LEFTUPPERARM, L_SHOULDER_POS);
+	R_addUniversalJoint(RagDollID, bindmat, LEFTSHOULDER, CHEST, LEFTUPPERARM, L_SHOULDER_POS, fwdAxis, rightAxis, -0.1 * M_PI, 0.3 * M_PI, -0.15 * M_PI,
+			0.75 * M_PI);
 	
 	VectorSet(p1, L_ELBOW_POS[0], L_ELBOW_POS[1], L_ELBOW_POS[2] - 0.01*RAGDOLLSCALE);
 	VectorSet(p2, L_WRIST_POS[0], L_WRIST_POS[1], L_WRIST_POS[2] + 0.01*RAGDOLLSCALE);
