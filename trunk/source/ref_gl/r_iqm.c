@@ -661,7 +661,7 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 		for(i = 0; i < currentmodel->num_joints; i++)
 		{
 			matrix3x4_t mat, rmat, temp;
-			vec3_t rot, trans;
+			vec3_t rot;
 			Matrix3x4_Scale(&mat, mat1[i], 1-frameoffset);
 			Matrix3x4_Scale(&temp, mat2[i], frameoffset);
 
@@ -808,10 +808,7 @@ void GL_AnimateIQMRagdoll(int RagDollID)
 {
 	//we only deal with one frame
 
-	//animate using the rotations from our corresponding ODE objects.  These will probably have to have their vectors translated
-	//into model space.
-
-	//If the object vectors are relative, then this will be much easier, if not, then we have a more complex operation to do.
+	//animate using the rotations from our corresponding ODE objects.  
 	int i, j;
 
     int frame1 = 258; //ragdoll initial pose
@@ -821,7 +818,7 @@ void GL_AnimateIQMRagdoll(int RagDollID)
 	{
 		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->num_joints; i++)
 		{
-			matrix3x4_t mat, rmat, rdmat;
+			matrix3x4_t mat, rmat;
             int parent;
 
             for(j = 0; j < RagDollBindsCount; j++)
