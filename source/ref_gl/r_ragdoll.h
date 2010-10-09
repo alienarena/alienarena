@@ -67,8 +67,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //time for each mesh
 #define RAGDOLLSCALE 32
 
-#define UPPER_ARM_LEN 8.50
-#define FORE_ARM_LEN 8.50
 #define ELBOW_X_OFF 15.50 //note - we likely want to do something similar for knees and ankles
 #define ELBOW_Y_OFF 0.00
 #define ELBOW_Z_OFF 37.75
