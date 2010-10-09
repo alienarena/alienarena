@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_RAGDOLLS 64 
 #define MAX_RAGDOLL_OBJECTS 16
 #define MAX_RAGDOLL_JOINTS 16
-#define MAX_SURFACES 128
+#define MAX_SURFACES 256
 #define MAX_CONTACTS 4 
 #define RAGDOLL_DURATION 10000 //10 seconds
 
@@ -97,6 +97,8 @@ typedef struct RagDollObject_s {
 	dBodyID body;
 	dMass mass;
 	dGeomID geom;
+	vec3_t		pos;
+	dMatrix3	rot;
 } RagDollObject_t;
 
 typedef struct RagDollWorld_s {

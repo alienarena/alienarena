@@ -62,6 +62,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //There are several examples at http://opende.sourceforge.net/wiki/index.php/HOWTO_rag-doll
 
 cvar_t *r_ragdolls;
+cvar_t *r_ragdoll_debug;
 
 vec3_t rightAxis, leftAxis, upAxis, downAxis, bkwdAxis, fwdAxis;
 
@@ -122,7 +123,6 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	//radius to the ragdoll.
 	float length;
 	vec3_t xa, ya, za, temp;
-	dMatrix3 rot;
 	dReal test;
 
 	VectorAdd(p1, RagDoll[RagDollID].origin, p1);
@@ -168,60 +168,65 @@ void R_addBody(int RagDollID, char *name, int objectID, vec3_t p1, vec3_t p2, fl
 	CrossProduct(za, xa, ya);
 
 	if(!IS_NAN(xa[0]))
-		rot[0] = xa[0];
+		RagDoll[RagDollID].RagDollObject[objectID].rot[0] = xa[0];
 	else
-		rot[0] = 0;
+		RagDoll[RagDollID].RagDollObject[objectID].rot[0] = 0;
 	if(!IS_NAN(ya[0]))
-		rot[1] = ya[0];
+		RagDoll[RagDollID].RagDollObject[objectID].rot[1] = ya[0];
 	else
 		ya[0] = 0;
 	if(!IS_NAN(za[0]))
-		rot[2] = za[0];
+		RagDoll[RagDollID].RagDollObject[objectID].rot[2] = za[0];
 	else 
-		rot[2] = 0;
+		RagDoll[RagDollID].RagDollObject[objectID].rot[2] = 0;
 	if(!IS_NAN(xa[1]))
-		rot[3] = xa[1];
+		RagDoll[RagDollID].RagDollObject[objectID].rot[3] = xa[1];
 	else
-		rot[3] = 0;
+		RagDoll[RagDollID].RagDollObject[objectID].rot[3] = 0;
 	if(!IS_NAN(ya[1]))
-		rot[4] = ya[1];
+		RagDoll[RagDollID].RagDollObject[objectID].rot[4] = ya[1];
 	else
-		rot[4] = 0;
+		RagDoll[RagDollID].RagDollObject[objectID].rot[4] = 0;
 	if(!IS_NAN(za[1]))
-		rot[5] = za[1];
+		RagDoll[RagDollID].RagDollObject[objectID].rot[5] = za[1];
 	else
-		rot[5] = 0;
+		RagDoll[RagDollID].RagDollObject[objectID].rot[5] = 0;
 	if(!IS_NAN(xa[2]))
-		rot[6] = xa[2];
+		RagDoll[RagDollID].RagDollObject[objectID].rot[6] = xa[2];
 	else
-		rot[6] = 0;
+		RagDoll[RagDollID].RagDollObject[objectID].rot[6] = 0;
 	if(!IS_NAN(ya[2]))
-		rot[7] = ya[2];
+		RagDoll[RagDollID].RagDollObject[objectID].rot[7] = ya[2];
 	else
-		rot[7] = 0;
+		RagDoll[RagDollID].RagDollObject[objectID].rot[7] = 0;
 	if(!IS_NAN(za[2]))
-		rot[8] = za[2];
+		RagDoll[RagDollID].RagDollObject[objectID].rot[8] = za[2];
 	else
-		rot[8] = 0;
+		RagDoll[RagDollID].RagDollObject[objectID].rot[8] = 0;
 
-	VectorAdd(p1, p2, temp);
-	VectorScale(temp, 0.5, temp);
+	VectorAdd(p1, p2, RagDoll[RagDollID].RagDollObject[objectID].pos);
+	VectorScale(RagDoll[RagDollID].RagDollObject[objectID].pos, 0.5, RagDoll[RagDollID].RagDollObject[objectID].pos);
 
-	test = VectorLength(temp);
+	test = VectorLength(RagDoll[RagDollID].RagDollObject[objectID].pos);
 	if(IS_NAN(test))
 	{
-		Com_Printf("There was a NaN in creating body %i\n", objectID);
-		VectorCopy(RagDoll[RagDollID].origin, temp);
+		if(r_ragdoll_debug->value)
+			Com_Printf("There was a NaN in creating body %i\n", objectID);
+		VectorCopy(RagDoll[RagDollID].origin, RagDoll[RagDollID].RagDollObject[objectID].pos);
 	}
 
-	dBodySetPosition(RagDoll[RagDollID].RagDollObject[objectID].body, temp[0], temp[1], temp[2]);
-	dBodySetRotation(RagDoll[RagDollID].RagDollObject[objectID].body, rot); //this may not be needed here, check
+	dBodySetPosition(RagDoll[RagDollID].RagDollObject[objectID].body, RagDoll[RagDollID].RagDollObject[objectID].pos[0], 
+		RagDoll[RagDollID].RagDollObject[objectID].pos[1], RagDoll[RagDollID].RagDollObject[objectID].pos[2]);
+	dBodySetRotation(RagDoll[RagDollID].RagDollObject[objectID].body, RagDoll[RagDollID].RagDollObject[objectID].rot); 
 	dBodySetForce(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
 	dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 40, 150); //for testing, a little upward velocity
 	dBodySetAngularVel(RagDoll[RagDollID].RagDollObject[objectID].body, 0, 0, 0);
 		
 	dQFromAxisAndAngle (initialQuaternion, 1,1,1,1); //test this more
 	dBodySetQuaternion(RagDoll[RagDollID].RagDollObject[objectID].body, initialQuaternion);
+
+	//subtract off origin
+	VectorSubtract(RagDoll[RagDollID].RagDollObject[CHEST].pos, RagDoll[RagDollID].origin, RagDoll[RagDollID].RagDollObject[CHEST].pos);
 }
 
 //joint creation routines
@@ -351,7 +356,7 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	}
 
 	//temporary situation till will figure out how to deal with single tris
-	if(VertexCounter < 4)
+	if(VertexCounter < 3)
 		return;
 
 	//cull surfaces that are not going to collide generally
@@ -362,8 +367,13 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 		return;
 	
 	//we have to figure out a method to deal with odd triangle counts, likely create a dummy vert on the plane
-	if(VertexCounter % 2)
-		VertexCounter -= 1;
+	if(VertexCounter % 2) 
+	{
+		ODEVerts[VertexCounter][0] = ODEVerts[VertexCounter-1][0];
+		ODEVerts[VertexCounter][1] = ODEVerts[VertexCounter-1][2];
+		ODEVerts[VertexCounter][2] = ODEVerts[VertexCounter-1][2];
+		VertexCounter++;
+	}
 								
 	//create indices for each tri - to do - we really really need to make sure this is right!
 	ODETris = VertexCounter - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
@@ -419,6 +429,7 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 {
 	//Ragdoll  positions
+	vec3_t NECKBASE_POS;
 	vec3_t R_SHOULDER_POS; 
 	vec3_t L_SHOULDER_POS;
 	vec3_t R_ELBOW_POS;
@@ -456,6 +467,9 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	VectorCopy(origin, RagDoll[RagDollID].curPos);
 	RagDoll[RagDollID].spawnTime = Sys_Milliseconds();
 	RagDoll[RagDollID].destroyed = false;
+
+	//set head
+	VectorSet(NECKBASE_POS, 0.0, 0.0, NECK_H);
 
 	//set upper body
 	VectorSet(R_SHOULDER_POS, -SHOULDER_W * 0.5, 0.0, SHOULDER_H);
@@ -496,7 +510,9 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	R_addBody(RagDollID, "belly", BELLY, p1, p2, 0.125*RAGDOLLSCALE, density);
 	
 	VectorSet(p1, 0.0, 0.0, HIP_H);
-	R_addBallJoint(RagDollID, MIDSPINE, RagDoll[RagDollID].RagDollObject[CHEST].body, RagDoll[RagDollID].RagDollObject[BELLY].body, p1);
+	//if it's a martian, we used fixed joint, otherwise ball - need a good way to determine such a thing
+	//R_addBallJoint(RagDollID, MIDSPINE, RagDoll[RagDollID].RagDollObject[CHEST].body, RagDoll[RagDollID].RagDollObject[BELLY].body, p1);
+	R_addFixedJoint(RagDollID, MIDSPINE, RagDoll[RagDollID].RagDollObject[CHEST].body, RagDoll[RagDollID].RagDollObject[BELLY].body);
 
 	VectorSet(p1, -(PELVIS_W * 0.5 + 0.01*RAGDOLLSCALE), 0.0, HIP_H);
 	VectorSet(p2, PELVIS_W * 0.5 + 0.01*RAGDOLLSCALE, 0.0, HIP_H);
@@ -510,7 +526,11 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 
 	VectorSet(p1, 0.0, 0.0, NECK_H);
 	R_addBallJoint(RagDollID, NECK, RagDoll[RagDollID].RagDollObject[CHEST].body, RagDoll[RagDollID].RagDollObject[HEAD].body, p1);
-	
+	//to do - add constraints to ball joints
+	//self.addBallJoint(self.chest, self.head,
+	//		(0.0, NECK_H, 0.0), (0.0, -1.0, 0.0), (0.0, 0.0, 1.0), pi * 0.25,
+	//		pi * 0.5, 50.0, 35.0)
+
 	//right leg
 	VectorSet(p1, R_HIP_POS[0] - 0.01*RAGDOLLSCALE, R_HIP_POS[1], R_HIP_POS[2]);
 	VectorSet(p2, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] + 0.01*RAGDOLLSCALE);
@@ -594,8 +614,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 
 	R_addHingeJoint(RagDollID, LEFTWRIST, RagDoll[RagDollID].RagDollObject[LEFTFOREARM].body, 
 		RagDoll[RagDollID].RagDollObject[LEFTHAND].body, L_WRIST_POS, bkwdAxis, M_PI * -0.1, M_PI * 0.2);
-	
-	//to do - get bone rotations from first death frame, apply to ragdoll for initial position
+
 	//we will need to set the velocity based on origin vs old_origin
 }
 
@@ -767,7 +786,8 @@ void R_BuildRagdollSurfaces (vec3_t origin, int RagDollID)
 
 	RagDoll[RagDollID].numsurfaces = r_SurfaceCount;
 
-	Com_Printf("%i surfaces added\n", r_SurfaceCount);
+	if(r_ragdoll_debug->value)
+		Com_Printf("%i surfaces added\n", r_SurfaceCount);
 }
 
 /*
@@ -850,7 +870,6 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 	if(!nuke)
 		return; 
 
-	//destroy surfaces - to do: faster to track actual num of surfaces instead of max_surfaces, so remember to fix!
 	for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
 	{
 		if(RagDoll[RagDollID].RagDollWorld[i].geom)
@@ -903,7 +922,7 @@ void R_AddNewRagdoll( vec3_t origin )
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
 		VectorSubtract(origin, RagDoll[RagDollID].origin, dist);
-		if(VectorLength(dist) < 32)
+		if(VectorLength(dist) < 64)
 			break; //likely spawned from same ent, this may need tweaking or better tracking method, for now it'll do
 		
 		if(RagDoll[RagDollID].destroyed)
@@ -913,8 +932,9 @@ void R_AddNewRagdoll( vec3_t origin )
 			R_RagdollBody_Init(RagDollID, origin);
 			//add nearby surfaces anytime a ragdoll is spawned
 			R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
-			Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1], 
-				RagDoll[RagDollID].origin[2]);
+			if(r_ragdoll_debug->value)
+				Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1], 
+					RagDoll[RagDollID].origin[2]);
 			break;
 		}
 	}
@@ -1013,7 +1033,8 @@ void R_RenderAllRagdolls ( void )
 			{				
 				R_DestroyRagDoll(RagDollID, true);
 				RagDoll[RagDollID].destroyed = true;
-				Com_Printf("Destroyed a ragdoll");
+				if(r_ragdoll_debug->value)
+					Com_Printf("Destroyed a ragdoll");
 			}
 			continue;
 		}
@@ -1033,10 +1054,10 @@ void R_RenderAllRagdolls ( void )
 			R_LightPoint (RagDoll[RagDollID].origin, shadelight, true);
 
 			qglPushMatrix ();
+	
+			GL_AnimateIQMRagdoll(RagDollID);
 
-			//GL_AnimateIQMRagdoll(RagDollID);
-
-			//GL_DrawIQMRagDollFrame(RagDollID, RagDoll[RagDollID].texnum);
+			GL_DrawIQMRagDollFrame(RagDollID, RagDoll[RagDollID].texnum);
 
 			GL_TexEnv( GL_REPLACE );
 			qglShadeModel (GL_FLAT);
@@ -1044,33 +1065,36 @@ void R_RenderAllRagdolls ( void )
 			qglPopMatrix ();
 			qglColor4f (1,1,1,1);
 
-			//debug - mark surface centers
-			for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
-			{			
-				const	dReal *odePos;
-				vec3_t  org;
-
-				odePos = dGeomGetPosition (RagDoll[RagDollID].RagDollWorld[i].geom);
-				VectorSet(org, odePos[0], odePos[1], odePos[2]);
-				R_DrawMark(org, 0); //note - change this for surfaces to draw the vert array
-			}
-			//debug - draw ragdoll bodies
-			for(i = CHEST; i <= LEFTHAND; i++)
+			if(r_ragdoll_debug->value)
 			{
-				vec3_t org;
-				const dReal *odePos;
+				//debug - mark surface centers
+				for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
+				{			
+					const	dReal *odePos;
+					vec3_t  org;
 
-				if(!RagDoll[RagDollID].RagDollObject[i].body)
-					continue;
+					odePos = dGeomGetPosition (RagDoll[RagDollID].RagDollWorld[i].geom);
+					VectorSet(org, odePos[0], odePos[1], odePos[2]);
+					R_DrawMark(org, 0); //note - change this for surfaces to draw the vert array
+				}
+				//debug - draw ragdoll bodies
+				for(i = CHEST; i <= LEFTHAND; i++)
+				{
+					vec3_t org;
+					const dReal *odePos;
 
-				odePos = dBodyGetPosition (RagDoll[RagDollID].RagDollObject[i].body);
-				VectorSet(org, odePos[0], odePos[1], odePos[2]);
-				if(i == HEAD)
-					R_DrawMark(org, 2);
-				else if (i > LEFTFOOT)
-					R_DrawMark(org, 3);
-				else
-					R_DrawMark(org, 1); 
+					if(!RagDoll[RagDollID].RagDollObject[i].body)
+						continue;
+
+					odePos = dBodyGetPosition (RagDoll[RagDollID].RagDollObject[i].body);
+					VectorSet(org, odePos[0], odePos[1], odePos[2]);
+					if(i == HEAD)
+						R_DrawMark(org, 2);
+					else if (i > LEFTFOOT)
+						R_DrawMark(org, 3);
+					else
+						R_DrawMark(org, 1); 
+				}
 			}
 			
 			numRagDolls++;
