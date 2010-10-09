@@ -824,7 +824,10 @@ void GL_AnimateIQMRagdoll(int RagDollID)
 				rmat.b[3] = odePos[1];
 				rmat.c[3] = odePos[2];
 
-				Matrix3x4GenFromODE(&rdmat, RagDoll[RagDollID].RagDollObject[CHEST].rot);							
+				Matrix3x4GenFromODE(&rdmat, RagDoll[RagDollID].RagDollObject[CHEST].rot);	
+				rdmat.a[3] = RagDoll[RagDollID].RagDollObject[CHEST].pos[0];
+                rdmat.b[3] = RagDoll[RagDollID].RagDollObject[CHEST].pos[1];
+                rdmat.c[3] = RagDoll[RagDollID].RagDollObject[CHEST].pos[2];
 
 				Matrix3x4_Invert(&rdmat, rdmat); //initial ragdoll mat
 				Matrix3x4_Multiply(&mat, rmat, rdmat);
@@ -850,7 +853,10 @@ void GL_AnimateIQMRagdoll(int RagDollID)
 				rmat.b[3] = odePos[1];
 				rmat.c[3] = odePos[2];
 
-				Matrix3x4GenFromODE(&rdmat, RagDoll[RagDollID].RagDollObject[HEAD].rot);							
+				Matrix3x4GenFromODE(&rdmat, RagDoll[RagDollID].RagDollObject[HEAD].rot);	
+				rdmat.a[3] = RagDoll[RagDollID].RagDollObject[HEAD].pos[0];
+                rdmat.b[3] = RagDoll[RagDollID].RagDollObject[HEAD].pos[1];
+                rdmat.c[3] = RagDoll[RagDollID].RagDollObject[HEAD].pos[2];
 
 				Matrix3x4_Invert(&rdmat, rdmat); //initial ragdoll mat
 				Matrix3x4_Multiply(&mat, rmat, rdmat);
