@@ -618,15 +618,20 @@ void ResetLevel (void) //for resetting players and items after warmup
 		// locate ent at a spawn point and reset everything
 		InitClientResp (ent->client);
 		if(ent->is_bot)
-			ACESP_PutClientInServer (ent,true,0);
+		{
+			// respawn bots after warmup
+			ACESP_PutClientInServer( ent, true );
+		}
 		else {
 			if(ent->deadflag)
 				DeathcamRemove (ent, "off");
 			PutClientInServer (ent);
-			ACESP_LoadBots(ent, 0);
 		}
 		ent->client->homing_shots = 0;
 	}
+
+	ACESP_SaveBots(); // update bots.tmp and client bot information
+
 	blue_team_score = 0;
 	red_team_score = 0;
 
@@ -904,9 +909,10 @@ void ExitLevel (void)
 			ent->takedamage = DAMAGE_AIM;
 			ent->solid = SOLID_BBOX;
 			ent->deadflag = DEAD_NO;
-			if(ent->is_bot) { //players
-				ACESP_PutClientInServer (ent,true,0);
-			} else { //reset various bot junk
+			if(ent->is_bot) {
+				// when staying on same level, respawn current bots
+				ACESP_PutClientInServer( ent, true );
+			} else {
 				PutClientInServer (ent);
 			}
 			if(g_duel->value) {
@@ -935,11 +941,8 @@ void ExitLevel (void)
 		red_team_score = 0;
 		blue_team_score = 0;
 	}
-	blue_team_cnt = 0;
-	red_team_cnt = 0; //reset everything now that we are done
 	print1 = print2 = print3 = false;
-	if(!stayed)
-		game.num_bots = 0; //do this *just* incase something got whacked or isn't getting set.
+
 }
 
 /*
@@ -1000,6 +1003,70 @@ void G_Ban (char *ip)
 		ipfilters[i].compare = 0xffffffff;
 }
 
+/*
+================
+G_NameMatch
+
+ A name entered in the console may (unlikely) or may not have color codes.
+ This is a case-sensitive match, because a case-insensitive match would
+   complicate matters.
+
+ Used by sv removebot <name> and callvote kicks
+
+================
+*/
+qboolean G_NameMatch( const char* netname, const char *kickname )
+{
+	const char* p_netname = netname;
+	const char* p_kickname = kickname;
+	int char_count = 16;
+	int len_count = 49; // maximum length of 16 char color name (16 * 3 + nul)
+	qboolean matched = false;
+
+	while ( len_count > 0 && char_count > 0)
+	{
+		if ( *p_netname != *p_kickname )
+		{
+			if ( Q_IsColorString( p_netname ) )
+			{ // netname has color code, kickname does not, match still possible
+				p_netname += 2;
+				len_count -= 2;
+			}
+			else if ( Q_IsColorString( p_kickname ))
+			{ // kickname has color code, netname does not, match still possible
+				p_kickname += 2;
+				len_count -= 2;
+			}
+			else
+			{ // no match. mismatched chars, or end of one or the other
+				break;
+			}
+		}
+		else if ( !*p_netname && !*p_kickname )
+		{ // end of both strings,
+			matched = true;
+			break;
+		}
+		else
+		{ // chars matched
+			if ( Q_IsColorString( p_netname ) && Q_IsColorString( p_kickname ) )
+			{ // color does not have to match
+				p_netname += 2;
+				p_kickname += 2;
+				len_count -= 2;
+			}
+			else
+			{
+				++p_netname;
+				++p_kickname;
+				--len_count;
+				--char_count;
+			}
+		}
+	}
+
+	return matched;
+}
 
 /*
 ================
@@ -1008,6 +1075,31 @@ G_ParseVoteCommand
 Parse and execute command
 ================
 */
+// helper function
+static edict_t* find_kick_target( const char *name )
+{
+	edict_t* kick_target = NULL;
+	edict_t* ent;
+	int i;
+
+	for ( i = 1 ; i <= maxclients->integer ; i++ )
+	{
+		ent = &g_edicts[i];
+		if ( !ent->inuse )
+			continue;
+		if ( ent->client )
+		{
+			if ( G_NameMatch( ent->client->pers.netname, name ) )
+			{
+				kick_target = ent;
+				break;
+			}
+		}
+	}
+
+	return kick_target;
+}
+
 void G_ParseVoteCommand (void)
 {
 	int i, j;
@@ -1036,52 +1128,58 @@ void G_ParseVoteCommand (void)
 		i++;
 	}
 
-	if(!strcmp(command, "kick")) { //kick player
-
-		//get the correct client
-		for (i=0 ; i<maxclients->value ; i++)
+	if ( !strcmp(command, "kick") )
+	{ // kick player or bot
+		ent = find_kick_target( args );
+		if ( ent )
 		{
-			ent = g_edicts + 1 + i;
-			if (!ent->inuse)
-				continue;
-
-			if(ent->client) {
-				if(!strcmp(ent->client->pers.netname, args)) {
-					if(ent->is_bot)
-						ACESP_KickBot(args);
-					else {
-						safe_bprintf(PRINT_HIGH, "%s was kicked\n", args);
-						ClientDisconnect (ent);
-					}
+			if ( ent->is_bot )
+			{
+				if ( sv_botkickthreshold && sv_botkickthreshold->integer )
+				{
+					safe_bprintf(PRINT_HIGH,
+						"Auto bot kick enabled, callvote kick <bot> disabled.\n%s not kicked.\n",
+						 ent->client->pers.netname);
 				}
-
-			}
-		}
-	}
-	else if(!strcmp(command, "kickban")) { //kick and ban player from server
-	//get the correct client
-		for (i=0 ; i<maxclients->value ; i++)
-		{
-			ent = g_edicts + 1 + i;
-			if (!ent->inuse)
-				continue;
-
-			if(ent->client) {
-				if(!strcmp(ent->client->pers.netname, args)) {
-					if(ent->is_bot)
-						ACESP_KickBot(args);
-					else {
-						safe_bprintf(PRINT_HIGH, "%s was kickbanned\n", args);
-						ClientDisconnect (ent);
-					}
-					//now ban them
-					value = Info_ValueForKey (ent->client->pers.userinfo, "ip");
-					G_Ban(value);
+				else
+				{
+					ACESP_KickBot( ent );
 				}
 			}
+			else
+			{
+				safe_bprintf(PRINT_HIGH, "%s was kicked\n", args);
+				ClientDisconnect (ent);
+			}
+		}
+		else
+		{
+			safe_bprintf( PRINT_HIGH, "Did not find %s here.\n", args );
 		}
 	}
-
+	else if ( !strcmp( command, "kickban") )
+	{ // kickban player
+		ent = find_kick_target( args );
+		if ( ent )
+		{
+			if ( ent->is_bot )
+			{ //
+				safe_bprintf(PRINT_HIGH,
+					"%s is a bot, use \"kick\", not \"kickban.\"\n", ent->client->pers.netname);
+			}
+			else
+			{
+				safe_bprintf(PRINT_HIGH, "%s was kickbanned\n", args);
+				ClientDisconnect (ent);
+				value = Info_ValueForKey (ent->client->pers.userinfo, "ip");
+				G_Ban(value);
+			}
+		}
+		else
+		{
+			safe_bprintf( PRINT_HIGH, "Did not find %s here.\n", args );
+		}
+	}
 	else if(!strcmp(command, "fraglimit")) { //change fraglimit
 		gi.cvar_set("fraglimit", args);
 		safe_bprintf(PRINT_HIGH, "Fraglimit changed to %s\n", args);

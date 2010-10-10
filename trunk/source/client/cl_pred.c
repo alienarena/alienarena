@@ -55,8 +55,10 @@ void CL_CheckPredictionError (void)
 	else
 	{
 		if (cl_showmiss->value && (delta[0] || delta[1] || delta[2]) )
-			Com_Printf ("prediction miss on %i: %i\n", cl.frame.serverframe,
-			delta[0] + delta[1] + delta[2]);
+		{ // use sum of absolute differences from above, scaled to quake units
+			Com_Printf("prediction miss: frame %i: %0.3f\n",
+					cl.frame.serverframe, ((float)len)/8.0f );
+		}
 
 		VectorCopy (cl.frame.playerstate.pmove.origin, cl.predicted_origins[frame]);
 

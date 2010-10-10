@@ -11,9 +11,9 @@
 //
 //	Please see liscense.txt in the source directory for the copyright
 //	information regarding those files belonging to Id Software, Inc.
-//	
+//
 //	Should you decide to release a modified version of ACE, you MUST
-//	include the following text (minus the BEGIN and END lines) in the 
+//	include the following text (minus the BEGIN and END lines) in the
 //	documentation for your modification.
 //
 //	--- BEGIN ---
@@ -24,7 +24,7 @@
 //	This program is a modification of the ACE Bot, and is therefore
 //	in NO WAY supported by Steve Yeager.
 
-//	This program MUST NOT be sold in ANY form. If you have paid for 
+//	This program MUST NOT be sold in ANY form. If you have paid for
 //	this product, you should contact Steve Yeager immediately, via
 //	the ACE Bot homepage.
 //
@@ -44,17 +44,17 @@
 //  Telefragged.com - For giving ACE a home.
 //  Microsoft       - For giving us such a wonderful crash free OS.
 //  id              - Need I say more.
-//  
+//
 //  And to all the other testers, pathers, and players and people
 //  who I can't remember who the heck they were, but helped out.
 //
 ///////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////	
+///////////////////////////////////////////////////////////////////////
 //
 //  acebot.h - Main header file for ACEBOT
-// 
-// 
+//
+//
 ///////////////////////////////////////////////////////////////////////
 
 #ifndef _ACEBOT_H
@@ -195,7 +195,7 @@ struct botvals_s
 extern edict_t *players[MAX_CLIENTS];		// pointers to all players in the game
 
 // extern decs
-extern node_t nodes[MAX_NODES]; 
+extern node_t nodes[MAX_NODES];
 extern item_table_t item_table[MAX_EDICTS];
 extern qboolean debug_mode;
 extern int numnodes;
@@ -264,16 +264,16 @@ void     ACEND_LoadNodes();
 
 // acebot_spawn.c protos
 void	 ACESP_SaveBots();
-void	 ACESP_LoadBots(edict_t *ent, int playerleft); 
+void	 ACESP_LoadBots(edict_t *ent);
 int		 ACESP_FindBotNum(void);
-int		 ACESP_FindBot(char *name);
-void	 ACESP_KickBot(char *name);
+edict_t *ACESP_FindBot(const char *name);
+void	 ACESP_KickBot(edict_t *bot);
 void     ACESP_HoldSpawn(edict_t *self);
-void     ACESP_PutClientInServer (edict_t *bot, qboolean respawn, int team);
+void     ACESP_PutClientInServer (edict_t *bot, qboolean respawn);
 void     ACESP_Respawn (edict_t *self);
 edict_t *ACESP_FindFreeClient (void);
-void     ACESP_SetName(edict_t *bot, char *name, char *skin);
-void     ACESP_SpawnBot (char *name, char *skin, char *userinfo);
+void     ACESP_SetName(edict_t *bot, char *name, char *skin, char *userinfo );
+qboolean ACESP_SpawnBot (char *name, char *skin, char *userinfo);
 void     ACESP_ReAddBots();
 void     ACESP_RemoveBot(char *name);
 void	 safe_cprintf (edict_t *ent, int printlevel, char *fmt, ...);

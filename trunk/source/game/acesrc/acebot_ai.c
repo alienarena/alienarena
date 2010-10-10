@@ -1,3 +1,26 @@
+/*
+Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 1998 Steve Yeager
+Copyright (C) 2010 COR Entertainment, LLC.
+
+See below for Steve Yeager's original copyright notice.
+Modified to GPL in 2002.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
 ///////////////////////////////////////////////////////////////////////
 //
 //  ACE - Quake II Bot Base Code
@@ -77,8 +100,11 @@ void ACEAI_Think (edict_t *self)
 {
 	usercmd_t	ucmd;
 
-	if(!game.num_bots)
-		return; //no bots, no need to go here
+	if ( !self->inuse || !self->is_bot )
+	{
+		gi.dprintf("ACEAI_Think: bad call program error\n");
+		return;
+	}
 
 	// Set up client movement
 	VectorCopy(self->client->ps.viewangles,self->s.angles);

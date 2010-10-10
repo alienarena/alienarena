@@ -774,6 +774,8 @@ packet <destination> <contents>
 Contents allows \n escape character
 ====================
 */
+#if 0
+// disabled, not used
 void CL_Packet_f (void)
 {
 	char	send[2048];
@@ -816,6 +818,7 @@ void CL_Packet_f (void)
 
 	NET_SendPacket (NS_CLIENT, out-send, send, adr);
 }
+#endif
 
 /*
 =================
