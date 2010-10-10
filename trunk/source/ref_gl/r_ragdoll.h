@@ -70,7 +70,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ELBOW_X_OFF 15.50 //note - we likely want to do something similar for knees and ankles
 #define ELBOW_Y_OFF 0.00
 #define ELBOW_Z_OFF 37.75
-#define HAND_LEN 4.00 // wrist to mid-fingers only
+#define HAND_LEN 1.50 // wrist to mid-fingers only
 #define WRIST_X_OFF 33.50
 #define WRIST_Y_OFF 4.50
 #define WRIST_Z_OFF 27.00

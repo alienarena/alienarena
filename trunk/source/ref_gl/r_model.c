@@ -1545,9 +1545,6 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	R_DestroyWorldObject();
 	R_CreateWorldObject();
 
-	//ODE - clear out any ragdolls;
-	R_ClearAllRagdolls();
-
 	r_numWorldLights = 0;
 
 	loadmodel->type = mod_brush;

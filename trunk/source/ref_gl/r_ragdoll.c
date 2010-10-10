@@ -328,13 +328,22 @@ void R_CreateWorldObject( void )
 void R_DestroyWorldObject( void )
 {
 	if(RagDollWorld)
+	{
 		dWorldDestroy(RagDollWorld);
+		RagDollWorld = NULL;
+	}
 
 	if(RagDollSpace)
+	{
 		dSpaceDestroy (RagDollSpace);
+		RagDollSpace = NULL;
+	}
 
-	if(contactGroup)
+	if(contactGroup) 
+	{
 		dJointGroupDestroy(contactGroup);
+		contactGroup = NULL;
+	}
 }
 
 //For creating the surfaces for the ragdoll to collide with
@@ -481,6 +490,8 @@ int RagDollBindsCount = (int)(sizeof(RagDollBinds)/sizeof(RagDollBinds[0]));
 //build and set initial position of ragdoll
 void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 {
+	//to do - read ragdoll file(.rgd) to get parameters
+
 	//Ragdoll  positions
 	vec3_t NECKBASE_POS;
 	vec3_t R_SHOULDER_POS; 
@@ -512,7 +523,6 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	int i, j;
 	
 	//we need some information from the current entity
-	//to do - check for presence of helmet, if so we are going to want to copy off a precached helmet to be rendered using this same ragdoll
 	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
 	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t)); 
 
@@ -677,7 +687,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	R_addBody(RagDollID, bindmat, "righthand", RIGHTHAND, p1, p2, 0.075*RAGDOLLSCALE, density);
 
 	R_addHingeJoint(RagDollID, bindmat, RIGHTWRIST, RIGHTFOREARM, 
-		RIGHTHAND, R_WRIST_POS, fwdAxis, M_PI * -0.1, M_PI * 0.2);
+		RIGHTHAND, R_WRIST_POS, fwdAxis, M_PI * -0.1, M_PI * 0.1);
 
 	//left arm
 	VectorSet(p1, L_SHOULDER_POS[0] + 0.01*RAGDOLLSCALE, L_SHOULDER_POS[1], L_SHOULDER_POS[2]);
@@ -699,7 +709,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	R_addBody(RagDollID, bindmat, "leftthand", LEFTHAND, p1, p2, 0.075*RAGDOLLSCALE, density);
 
 	R_addHingeJoint(RagDollID, bindmat, LEFTWRIST, LEFTFOREARM, 
-		LEFTHAND, L_WRIST_POS, bkwdAxis, M_PI * -0.1, M_PI * 0.2);
+		LEFTHAND, L_WRIST_POS, bkwdAxis, M_PI * -0.1, M_PI * 0.1);
 
 	//we will need to set the velocity based on origin vs old_origin
 }
@@ -948,13 +958,22 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 
 	//clear any allocated mem
 	if(RagDoll[RagDollID].ragDollMesh)
+	{
 		free(RagDoll[RagDollID].ragDollMesh);	
+		RagDoll[RagDollID].ragDollMesh = NULL;
+	}
 
     if(RagDoll[RagDollID].initframe)
+	{
         free(RagDoll[RagDollID].initframe);
+		RagDoll[RagDollID].initframe = NULL;
+	}
 
 	if(RagDoll[RagDollID].script)
+	{
 		free(RagDoll[RagDollID].script);
+		RagDoll[RagDollID].script = NULL;
+	}
 
 	if(!nuke)
 		return; 
@@ -1113,17 +1132,15 @@ void R_RenderAllRagdolls ( void )
 
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
+		if(RagDoll[RagDollID].destroyed)
+	        continue;
+
 		if(Sys_Milliseconds() - RagDoll[RagDollID].spawnTime > RAGDOLL_DURATION)
 		{
-			//if expired, and not destroyed, destroy it
-			if(!RagDoll[RagDollID].destroyed)
-			{				
-				R_DestroyRagDoll(RagDollID, true);
-				RagDoll[RagDollID].destroyed = true;
-				if(r_ragdoll_debug->value)
-					Com_Printf("Destroyed a ragdoll");
-			}
-			continue;
+			R_DestroyRagDoll(RagDollID, true);
+            RagDoll[RagDollID].destroyed = true;
+            if(r_ragdoll_debug->value)
+				Com_Printf("Destroyed a ragdoll");
 		}
 		else 
 		{
