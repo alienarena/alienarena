@@ -26,8 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define Function(f) {#f, f}
 
-int red_team_cnt;
-int blue_team_cnt;
 int red_team_score;
 int blue_team_score;
 int reddiff;
@@ -318,8 +316,6 @@ void InitGame (void)
 		red_team_score = 0;
 		blue_team_score = 0;
 	}
-	blue_team_cnt = 0;
-	red_team_cnt = 0;
 	print1 = print2 = print3 = false;
 
 }

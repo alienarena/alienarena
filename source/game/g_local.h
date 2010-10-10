@@ -111,6 +111,24 @@ typedef enum
 } ammo_t;
 
 //teams
+typedef struct teamcensus_s
+{ // see p_client.c::TeamCensus()
+	int total;
+	int real;
+	int bots;
+	int red;
+	int blue;
+	int real_red;
+	int real_blue;
+	int bots_red;
+	int bots_blue;
+	int team_for_real;
+	int team_for_bot;
+} teamcensus_t;
+
+#define TEAM_GAME ( (dmflags->integer & (DF_SKINTEAMS)) \
+		|| ctf->integer || tca->integer || cp->integer )
+
 #define RED_TEAM				0
 #define BLUE_TEAM				1
 #define NO_TEAM					2
@@ -307,9 +325,6 @@ typedef struct
 	// items
 	int			num_items;
 
-	//bots
-	int			num_bots;
-
 	qboolean	autosaved;
 } game_locals_t;
 
@@ -481,8 +496,6 @@ extern	g_vote_t		playervote;
 
 extern	int	sm_meat_index;
 
-extern	int red_team_cnt;
-extern  int blue_team_cnt;
 extern  int red_team_score;
 extern  int blue_team_score;
 extern  int reddiff;
@@ -912,6 +925,9 @@ void Q2_FindFile (char *filename, FILE **file);
 void ClientPlaceInQueue(edict_t *ent);
 void ClientCheckQueue(edict_t *ent);
 void MoveClientsDownQueue(edict_t *ent);
+void SaveClientData (void);
+void FetchClientEntData (edict_t *ent);
+void TeamCensus( teamcensus_t* team_census );
 
 //unlagged - g_unlagged.c
 void G_ResetHistory( edict_t *ent );
@@ -956,10 +972,6 @@ void DeathmatchScoreboardMessage (edict_t *client, edict_t *killer, int mapvote)
 //
 void P_ProjectSource (gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result);
 void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST, int FRAME_IDLE_LAST, int FRAME_DEACTIVATE_LAST, int *pause_frames, int *fire_frames, void (*fire)(edict_t *ent));
-
-//
-// g_pweapon.c
-//
 void PlayerNoise(edict_t *who, vec3_t where, int type);
 
 //
@@ -975,11 +987,6 @@ void M_ChangeYaw (edict_t *ent);
 //
 void G_RunEntity (edict_t *ent);
 
-//
-// g_main.c
-//
-void SaveClientData (void);
-void FetchClientEntData (edict_t *ent);
 
 //
 // g_chase.c
@@ -988,6 +995,12 @@ void UpdateChaseCam(edict_t *ent);
 void ChaseNext(edict_t *ent);
 void ChasePrev(edict_t *ent);
 void GetChaseTarget(edict_t *ent);
+
+//
+// g_main.c
+//
+qboolean G_NameMatch( const char* netname, const char *kickname );
+
 
 //============================================================================
 

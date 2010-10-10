@@ -303,13 +303,42 @@ void	ServerCommand (void)
 
 	else if (Q_strcasecmp (cmd, "addbot") == 0)
 	{
-
-		ACESP_SpawnBot (gi.argv(2), gi.argv(3), NULL);
+		if ( dmflags->integer & DF_BOTS )
+		{
+			safe_cprintf( NULL, PRINT_HIGH,
+					"Bots disabled in dmflags, sv addbot disabled.\n");
+		}
+		else if ( (sv_botkickthreshold && sv_botkickthreshold->integer)
+				|| (g_duel && g_duel-> integer) )
+		{ // duel mode forces bot kick threshold
+			safe_cprintf( NULL, PRINT_HIGH,
+					"Auto bot kick enabled, sv addbot disabled.\n");
+		}
+		else
+		{ // can become a team bot with assigned skin color
+			ACESP_SpawnBot (gi.argv(2), gi.argv(3), NULL);
+		}
 	}
 
 	// removebot
     else if(Q_strcasecmp (cmd, "removebot") == 0)
-    	ACESP_RemoveBot(gi.argv(2));
+    {
+		if ( dmflags->integer & DF_BOTS )
+		{
+			safe_cprintf( NULL, PRINT_HIGH,
+					"Bots disabled in dmflags, sv removebot disabled.\n");
+		}
+		else if ( (sv_botkickthreshold && sv_botkickthreshold->integer)
+				|| ( g_duel && g_duel->integer ) )
+		{ // duel mode forces bot kick threshold
+			safe_cprintf( NULL, PRINT_HIGH,
+					"Auto bot kick enabled, sv removebot disabled.\n");
+		}
+		else
+		{
+			ACESP_RemoveBot(gi.argv(2));
+		}
+    }
 
 	// Node saving
 	else if(Q_strcasecmp (cmd, "savenodes") == 0)

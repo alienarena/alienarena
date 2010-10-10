@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2010 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -12,10 +13,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 // cvar.c -- dynamic variable tracking
 
@@ -303,7 +303,8 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 
 			if (Com_ServerState())
 			{
-				Com_Printf ("(cvar) %s will be changed for next game.\n", var_name);
+				Com_Printf ("%s cvar will be changed for next game.\n", var_name);
+				Com_Printf( " startmap <mapname> will start next game.\n");
 				var->latched_string = CopyString(value);
 			}
 			else
@@ -425,6 +426,11 @@ void Cvar_GetLatchedVars (void)
 	{
 		if (!var->latched_string)
 			continue;
+
+		// observe when latched cvars are updated
+		Com_Printf("Updating latched cvar %s from %s to %s\n",
+				var->name, var->string, var->latched_string );
+
 		Z_Free (var->string);
 		var->string = var->latched_string;
 		var->latched_string = NULL;
@@ -543,8 +549,6 @@ void Cvar_List_f (void)
 	i = 0;
 	for (var = cvar_vars ; var ; var = var->next, i++)
 	{
-		if ( developer && developer->integer )
-			Com_Printf ("[0x%8x] : ", var->hash_key );
 
 		if (var->flags & CVAR_ARCHIVE)
 			Com_Printf ("*");
@@ -583,7 +587,9 @@ char	*Cvar_BitInfo (int bit)
 	for (var = cvar_vars ; var ; var = var->next)
 	{
 		if (var->flags & bit)
+		{
 			Info_SetValueForKey (info, var->name, var->string);
+		}
 	}
 	return info;
 }

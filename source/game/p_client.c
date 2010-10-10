@@ -1,6 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
-Copyright (C) 20?? COR Entertainment, LLC.
+Copyright (C) 2010 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -1587,12 +1587,12 @@ void spectator_respawn (edict_t *ent)
 	// exceed max_spectators
 
 	if (ent->client->pers.spectator) {
-		char *value = Info_ValueForKey (ent->client->pers.userinfo, "spectator");
+		char *value = Info_ValueForKey (ent->client->pers.userinfo, "spectator_password");
 		if (*spectator_password->string &&
 			strcmp(spectator_password->string, "none") &&
 			strcmp(spectator_password->string, value)) {
 			gi.cprintf(ent, PRINT_HIGH, "%s", "Spectator password incorrect.\n");
-			ent->client->pers.spectator = false;
+			ent->client->pers.spectator = 0;
 			gi.WriteByte (svc_stufftext);
 			gi.WriteString ("spectator 0\n");
 			gi.unicast(ent, true);
@@ -1606,7 +1606,7 @@ void spectator_respawn (edict_t *ent)
 
 		if (numspec >= maxspectators->value) {
 			gi.cprintf(ent, PRINT_HIGH, "%s", "Server spectator limit is full.");
-			ent->client->pers.spectator = false;
+			ent->client->pers.spectator = 0;
 			// reset his spectator var
 			gi.WriteByte (svc_stufftext);
 			gi.WriteString ("spectator 0\n");
@@ -1618,9 +1618,10 @@ void spectator_respawn (edict_t *ent)
 		// he must have the right password
 		char *value = Info_ValueForKey (ent->client->pers.userinfo, "password");
 		if (*password->string && strcmp(password->string, "none") &&
-			strcmp(password->string, value)) {
+			strcmp(password->string, value))
+		{
 			gi.cprintf(ent, PRINT_HIGH, "%s", "Password incorrect.\n");
-			ent->client->pers.spectator = true;
+			ent->client->pers.spectator = 1;
 			gi.WriteByte (svc_stufftext);
 			gi.WriteString ("spectator 1\n");
 			gi.unicast(ent, true);
@@ -1654,9 +1655,19 @@ void spectator_respawn (edict_t *ent)
 	ent->client->respawn_time = level.time;
 
 	if (ent->client->pers.spectator)
-		gi.bprintf (PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->pers.netname);
+	{ // pers.spectator > 0, entering spectator mode
+		safe_bprintf (PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->pers.netname);
+	}
 	else
-		gi.bprintf (PRINT_HIGH, "%s joined the game\n", ent->client->pers.netname);
+	{ // pers.spectator==0, leaving spectator mode
+		safe_bprintf (PRINT_HIGH, "%s joined the game\n", ent->client->pers.netname);
+	}
+	if ( sv_botkickthreshold && sv_botkickthreshold->integer )
+	{ // player entered or left playing field, update for auto botkick
+		ACESP_LoadBots( ent );
+	}
+
+
 }
 //end spectator mode
 
@@ -1879,8 +1890,8 @@ void PutClientInServer (edict_t *ent)
 
 	//spectator mode
 	// spawn a spectator
-	if (client->pers.spectator) {
-
+	if ( client->pers.spectator != 0 )
+	{
 		client->chase_target = NULL;
 		client->resp.spectator = client->pers.spectator;
 		ent->movetype = MOVETYPE_NOCLIP;
@@ -1889,8 +1900,9 @@ void PutClientInServer (edict_t *ent)
 		ent->client->ps.gunindex = 0;
 		gi.linkentity (ent);
 		return;
-	} else if(!g_duel->value)
-		client->resp.spectator = false;
+	}
+	else if ( !g_duel->integer )
+		client->resp.spectator = 0;
 	//end spectator mode
 
 	if (!KillBox (ent))
@@ -1946,7 +1958,7 @@ void ClientCheckQueue(edict_t *ent)
 	int		numplayers = 0;
 
 	if(ent->client->pers.queue > 2) { //everyone in line remains a spectator
-		ent->client->pers.spectator = ent->client->resp.spectator = true;
+		ent->client->pers.spectator = ent->client->resp.spectator = 1;
 		ent->client->chase_target = NULL;
 		ent->movetype = MOVETYPE_NOCLIP;
 		ent->solid = SOLID_NOT;
@@ -1962,7 +1974,7 @@ void ClientCheckQueue(edict_t *ent)
 			}
 		}
 		if(numplayers < 3) //only put him in if there are less than two
-			ent->client->pers.spectator = ent->client->resp.spectator = false;
+			ent->client->pers.spectator = ent->client->resp.spectator = 0;
 	}
 }
 void MoveClientsDownQueue(edict_t *ent)
@@ -1983,7 +1995,7 @@ void MoveClientsDownQueue(edict_t *ent)
 				if(!g_edicts[i+1].is_bot)
 					PutClientInServer(g_edicts+i+1);
 				else
-					ACESP_PutClientInServer (g_edicts+i+1,true,0);
+					ACESP_PutClientInServer( g_edicts+i+1, true ); // respawn
 				safe_bprintf(PRINT_HIGH, "%s has entered the duel!\n", g_edicts[i+1].client->pers.netname);
 				putonein = true;
 			}
@@ -2022,27 +2034,23 @@ void ClientBeginDeathmatch (edict_t *ent)
 	PutClientInServer (ent);
 
 	//in ctf, initially start in chase mode, and allow them to choose a team
-	if((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
-
-		ent->client->pers.spectator = true;
+	if( TEAM_GAME ) {
+		ent->client->pers.spectator = 1;
 		ent->client->chase_target = NULL;
-		ent->client->resp.spectator = true;
+		ent->client->resp.spectator = 1;
 		ent->movetype = MOVETYPE_NOCLIP;
 		ent->solid = SOLID_NOT;
 		ent->svflags |= SVF_NOCLIENT;
 		ent->client->ps.gunindex = 0;
 		gi.linkentity (ent);
 		//bring up scoreboard if not on a team
-		if(ent->dmteam == NO_TEAM) {
+		if(ent->dmteam == NO_TEAM)
+		{
 			ent->client->showscores = true;
-			if((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)
-				CTFScoreboardMessage (ent, NULL, false);
-			else
-				DeathmatchScoreboardMessage (ent, NULL, false);
+			CTFScoreboardMessage (ent, NULL, false);
 			gi.unicast (ent, true);
-			ent->teamset = true;
+			ent->teamset = true; // used to error check team skin
 		}
-
 	}
 
 	//if duel mode, then check number of existing players.  If more there are already two in the game, force
@@ -2099,7 +2107,7 @@ void ClientBeginDeathmatch (edict_t *ent)
 		safe_cprintf(ent, PRINT_HIGH, "Antilag is ^1DISABLED\n");
 
 	//check bots with each player connect
-	ACESP_LoadBots(ent, 0);
+	ACESP_LoadBots( ent );
 
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
@@ -2155,6 +2163,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	char slot[2];
 	char colorName[32];
 	FILE *file;
+	teamcensus_t teamcensus;
 
 	// check for malformed or illegal info strings
 	if (!Info_Validate(userinfo))
@@ -2175,11 +2184,8 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	if(playervote.called && whereFrom == INGAME)
 		return; //do not allow people to change info during votes
 
-	if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM))
-		ent->client->pers.spectator = false; //cannot spectate if you've joined a team
-
 	if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
-		safe_bprintf (PRINT_MEDIUM, "Illegal to change teams after CTF match has started!\n");
+		safe_bprintf (PRINT_MEDIUM, "Changing settings not allowed during a team game\n");
 		return;
 	}
 
@@ -2187,8 +2193,8 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	s = Info_ValueForKey (userinfo, "name");
 	strcpy(colorName, s);
 	i = j = k = 0;
-	while ( s && *s && i < 47 && j < 15 )
-	{
+	while ( s && s[i] && i < 47 && j < 15 )
+	{ // validate name
 		ent->client->pers.netname[i] = s[i];
 		if ( k == 0 )
 		{
@@ -2204,7 +2210,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 				j += 2;
 				if ( j == 16 )
 				{
-					i --;
+					i--;
 					break;
 				}
 			}
@@ -2215,85 +2221,80 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	ent->client->pers.netname[i] = 0;
 
 	//spectator mode
-	// set spectator
-	if(!g_duel->value) { //never fool with spectating in duel mode
+	if ( !g_duel->value )
+	{ // never fool with spectating in duel mode
+		// set spectator
 		s = Info_ValueForKey (userinfo, "spectator");
-		// spectators need to be reset in CTF
-		if (deathmatch->value && *s && strcmp(s, "0"))
-			ent->client->pers.spectator = atoi(s);
+		if ( TEAM_GAME )
+		{ //
+			if ( strcmp( s, "2" ) )
+			{ // not special team game spectate
+				// so make sure it stays 0
+				Info_SetValueForKey( userinfo, "spectator", "0");
+			}
+			else
+			{
+				ent->client->pers.spectator = 2;
+			}
+		}
 		else
-			ent->client->pers.spectator = false;
+		{
+			if ( deathmatch->value && *s && strcmp(s, "0") )
+				ent->client->pers.spectator = atoi(s);
+			else
+				ent->client->pers.spectator = 0;
+		}
 	}
 	//end spectator mode
 
 	// set skin
 	s = Info_ValueForKey (userinfo, "skin");
 
-	//do the team skin check
-	if(true) {
-		if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //only do this for skin teams, red, blue
+	// do the team skin check
+	if ( TEAM_GAME
+			&& ent->client->pers.spectator != 2 && ent->client->resp.spectator != 2 )
+	{
+		copychar = false;
+		strcpy( playerskin, " " );
+		strcpy( playermodel, " " );
+		j = k = 0;
+		for ( i = 0; i <= strlen( s ) && i < MAX_OSPATH; i++ )
 		{
-			copychar = false;
-			strcpy(playerskin, " ");
-			strcpy(playermodel, " ");
-			j = k = 0;
-			for(i = 0; i <= strlen(s) && i < MAX_OSPATH; i++)
-			{
 				if(copychar){
-					playerskin[k] = s[i];
-					k++;
-				}
+				playerskin[k] = s[i];
+				k++;
+			}
 				else {
-					playermodel[j] = s[i];
-					j++;
-				}
-				if(s[i] == '/')
-					copychar = true;
-
-
+				playermodel[j] = s[i];
+				j++;
 			}
-			playermodel[j] = 0;
-
-			if(ent->is_bot && ((!strcmp(playerskin, "red"))	|| (!strcmp(playerskin, "blue")))) //was valid teamskin
-			{
-				if(!strcmp(playerskin, "red"))
-				{
-					ent->dmteam = RED_TEAM;
-					if(whereFrom == CONNECT)
-						red_team_cnt++;
-				}
-				else
-				{
-					ent->dmteam = BLUE_TEAM;
-					if(whereFrom == CONNECT)
-						blue_team_cnt++;
-				}
-
-			}
-			else if(whereFrom != SPAWN && whereFrom != CONNECT && ent->teamset)//assign to team with fewest players(we need to remove from teams too)
-			{
-				if(blue_team_cnt < red_team_cnt)
-				{
-					safe_bprintf (PRINT_MEDIUM, "Invalid Team Skin!  Assigning to Blue Team...\n");
-					strcpy(playerskin, "blue");
-					blue_team_cnt++;
-					ent->dmteam = BLUE_TEAM;
-				}
-				else
-				{
-					safe_bprintf (PRINT_MEDIUM, "Invalid Team Skin!  Assigning to Red Team...\n");
-					strcpy(playerskin, "red");
-					red_team_cnt++;
-					ent->dmteam = RED_TEAM;
-				}
-			}
-			if(strlen(playermodel) > 32) //something went wrong, or somebody is being malicious
-				strcpy(playermodel, "martianenforcer/");
-			strcpy(s, playermodel);
-			strcat(s, playerskin);
-			Info_SetValueForKey (userinfo, "skin", s);
+			if ( s[i] == '/' )
+				copychar = true;
 		}
+		playermodel[j] = 0;
+
+		if ( whereFrom != SPAWN && whereFrom != CONNECT && ent->teamset )
+		{ // ingame and team is supposed to be set, error check skin
+			if ( strcmp( playerskin, "red" ) && strcmp( playerskin, "blue" ) )
+			{ // skin error, fix team assignment
+				ent->dmteam = NO_TEAM;
+				TeamCensus( &teamcensus ); // apply team balancing rules
+				ent->dmteam = teamcensus.team_for_real;
+				safe_bprintf( PRINT_MEDIUM,
+						"Invalid Team Skin!  Assigning to %s Team...\n",
+						(ent->dmteam == RED_TEAM ? "Red" : "Blue") );
+				ClientBegin( ent ); // this might work
+			}
+		}
+		strcpy( playerskin, (ent->dmteam == RED_TEAM ? "red" : "blue") );
+
+		if(strlen(playermodel) > 32) //something went wrong, or somebody is being malicious
+			strcpy(playermodel, "martianenforcer/");
+		strcpy(s, playermodel);
+		strcat(s, playerskin);
+		Info_SetValueForKey (userinfo, "skin", s);
 	}
+
 	playernum = ent-g_edicts-1;
 
 	//check for duplicates(but not on respawns)
@@ -2401,17 +2402,16 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	// save off the userinfo in case we want to check something later
 	strncpy (ent->client->pers.userinfo, userinfo, sizeof(ent->client->pers.userinfo)-1);
 
-
 }
+
 void ClientChangeSkin (edict_t *ent)
 {
-	char	*s;
-	int		playernum;
-	int		i, j, k, copychar;
+	char *s;
+	int  playernum;
+	int  i, j, k, copychar;
 	char playermodel[MAX_OSPATH] = " ";
 	char playerskin[MAX_INFO_STRING] = " ";
-	// char modelpath[MAX_OSPATH] = " "; // unused
-	char		userinfo[MAX_INFO_STRING];
+	char userinfo[MAX_INFO_STRING];
 
 	//get the userinfo
 	memcpy (userinfo, ent->client->pers.userinfo, sizeof(userinfo));
@@ -2431,9 +2431,31 @@ void ClientChangeSkin (edict_t *ent)
 
 	// set name
 	s = Info_ValueForKey (userinfo, "name");
-	//fix player name if corrupted
-	if(s != NULL && strlen(s) > 16)
-		s[16] = 0;
+
+	// fix player name if corrupted
+	if ( s != NULL )
+	{
+		i = j = 0;
+		while ( s[i] )
+		{
+			if ( Q_IsColorString( &s[i] ) )
+			{ // 2 char color escape sequence
+				i += 2;
+				if ( i > 47 )
+					break;
+			}
+			else
+			{ // printable chars
+				if ( s[i] < 32 || s[i] > 126 )
+					s[i] = 32;
+				++i;
+				++j;
+				if ( i > 47 || j > 15 )
+					break;
+			}
+		}
+		s[i] = 0;
+	}
 
 	strncpy (ent->client->pers.netname, s, sizeof(ent->client->pers.netname)-1);
 
@@ -2460,17 +2482,18 @@ void ClientChangeSkin (edict_t *ent)
 	}
 	playermodel[j] = 0;
 
-	if(ent->dmteam == BLUE_TEAM)
+
+	if( ent->dmteam == BLUE_TEAM)
 	{
-		safe_bprintf (PRINT_MEDIUM, "Joined Blue Team...\n");
+		if ( !ent->is_bot )
+			safe_bprintf (PRINT_MEDIUM, "Joined Blue Team...\n");
 		strcpy(playerskin, "blue");
-		blue_team_cnt++;
 	}
 	else
 	{
-		safe_bprintf (PRINT_MEDIUM, "Joined Red Team...\n");
+		if ( !ent->is_bot )
+			safe_bprintf (PRINT_MEDIUM, "Joined Red Team...\n");
 		strcpy(playerskin, "red");
-		red_team_cnt++;
 	}
 	if(strlen(playermodel) > 32) //something went wrong, or somebody is being malicious
 		strcpy(playermodel, "martianenforcer/");
@@ -2506,6 +2529,7 @@ void ClientChangeSkin (edict_t *ent)
 
 	// save off the userinfo in case we want to check something later
 	strncpy (ent->client->pers.userinfo, userinfo, sizeof(ent->client->pers.userinfo)-1);
+
 }
 
 /*
@@ -2535,8 +2559,18 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 
 	//spectator mode
 	// check for a spectator
+
 	value = Info_ValueForKey (userinfo, "spectator");
+
+	if ( TEAM_GAME  && strcmp(value, "0") )
+	{ // for team game, force spectator off
+		Info_SetValueForKey( userinfo, "spectator", "0" );
+		ent->client->pers.spectator = 0;
+	}
+
 	if (deathmatch->value && *value && strcmp(value, "0")) {
+
+		value = Info_ValueForKey( userinfo, "spectator_password" );
 
 		if (*spectator_password->string &&
 			strcmp(spectator_password->string, "none") &&
@@ -2578,10 +2612,9 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 			InitClientPersistant (ent->client);
 	}
 
-	if((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) {
-		ent->dmteam = NO_TEAM;
-		ent->teamset = false;
-	}
+	// for real players in team games, team is to be selected
+	ent->dmteam = NO_TEAM;
+	ent->teamset = false;
 
 	ClientUserinfoChanged (ent, userinfo, CONNECT);
 
@@ -2618,19 +2651,6 @@ void ClientDisconnect (edict_t *ent)
 	if(ent->deadflag && ent->client->chasetoggle == 1)
 		DeathcamRemove(ent, "off");
 
-	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value)  //adjust teams and scores
-	{
-		if(ent->dmteam == BLUE_TEAM)
-			blue_team_cnt-=1;
-		else
-			red_team_cnt-=1;
-	//		safe_bprintf(PRINT_HIGH, "disconnected - red: %i blue: %i\n", red_team_cnt, blue_team_cnt);
-	}
-
-	//if using bot thresholds, put the bot back in(duel always uses them)
-	if(sv_botkickthreshold->integer || g_duel->value)
-		ACESP_LoadBots(ent, 1);
-
 	//if in duel mode, we need to bump people down the queue if its the player in game leaving
 	if(g_duel->value) {
 		MoveClientsDownQueue(ent);
@@ -2656,6 +2676,11 @@ void ClientDisconnect (edict_t *ent)
 	playernum = ent-g_edicts-1;
 	gi.configstring (CS_PLAYERSKINS+playernum, "");
 
+	// if using bot thresholds, put the bot back in(duel always uses them)
+	if ( sv_botkickthreshold->integer || g_duel->integer )
+	{
+		ACESP_LoadBots( ent );
+	}
 
 }
 
@@ -2692,6 +2717,168 @@ void PrintPmove (pmove_t *pm)
 }
 
 /*
+======
+ TeamCensus
+
+ tallies up players and bots in game
+ used by auto bot kick, and auto team selection
+ implements team balancing rules
+======
+ */
+void TeamCensus( teamcensus_t *teamcensus )
+{
+	int i;
+	int diff;
+	int dmteam;
+	int red_sum;
+	int blue_sum;
+
+	int real_red = 0;
+	int real_blue = 0;
+	int bots_red = 0;
+	int bots_blue = 0;
+	int team_for_real = NO_TEAM;
+	int team_for_bot = NO_TEAM;
+
+	for ( i = 1; i <= game.maxclients; i++ )
+	{ // count only clients that have joined teams
+		if ( g_edicts[i].inuse )
+		{
+			dmteam = g_edicts[i].dmteam;
+			if ( g_edicts[i].is_bot )
+			{
+				if ( dmteam == RED_TEAM )
+				{
+					++bots_red;
+				}
+				else if ( dmteam == BLUE_TEAM )
+				{
+					++bots_blue;
+				}
+			}
+			else
+			{
+				if ( dmteam == RED_TEAM )
+				{
+					++real_red;
+				}
+				else if ( dmteam == BLUE_TEAM )
+				{
+					++real_blue;
+				}
+			}
+		}
+	}
+	red_sum = real_red + bots_red;
+	blue_sum = real_blue + bots_blue;
+
+	// team balancing rules
+	if ( red_sum == blue_sum )
+	{ // teams are of equal size
+		if ( bots_blue == bots_red )
+		{ // with equal number of both real players and bots
+			// assign by scoring or random selection
+			if ( red_team_score > blue_team_score )
+			{ // leader gets the bot
+				// real player being a good sport joins the team that is behind
+				if ( tca->integer )
+				{
+					team_for_bot = BLUE_TEAM;
+					team_for_real = RED_TEAM;
+				}
+				else
+				{
+					team_for_bot = RED_TEAM;
+					team_for_real = BLUE_TEAM;
+				}
+			}
+			else if ( blue_team_score > red_team_score )
+			{
+				if ( tca->integer )
+				{
+					team_for_bot = RED_TEAM;
+					team_for_real = BLUE_TEAM;
+				}
+				else
+				{
+					team_for_bot = BLUE_TEAM;
+					team_for_real = RED_TEAM;
+				}
+			}
+			else if ( rand() & 1 )
+			{
+				team_for_real = team_for_bot = RED_TEAM;
+			}
+			else
+			{
+				team_for_real = team_for_bot = BLUE_TEAM;
+			}
+		}
+		else if ( bots_blue > bots_red )
+		{ // with more blue bots than red
+			// put bot on team with fewer bots (red)
+			// real player on team with fewer real players (blue)
+			team_for_bot = RED_TEAM;
+			team_for_real = BLUE_TEAM;
+		}
+		else
+		{ // with more red bots than blue
+			// put bot on team with fewer bots (blue)
+			// real player on team with fewer real players (red)
+			team_for_bot = BLUE_TEAM;
+			team_for_real = RED_TEAM;
+		}
+	}
+	else
+	{ // teams are of unequal size
+		diff = red_sum - blue_sum;
+		if ( diff > 1 )
+		{ // red is 2 or more larger
+			team_for_real = team_for_bot = BLUE_TEAM;
+		}
+		else if ( diff < -1 )
+		{ // blue is 2 or more larger
+			team_for_real = team_for_bot = RED_TEAM;
+		}
+		else if ( real_blue == real_red )
+		{ // with equal numbers of real players
+			if ( bots_blue > bots_red )
+			{ // blue team is larger by 1 bot
+				team_for_real = team_for_bot = RED_TEAM;
+			}
+			else
+			{ // red_team is larger by 1 bot
+				team_for_real = team_for_bot = BLUE_TEAM;
+			}
+		}
+		else
+		{ // with equal numbers of bots
+			if ( real_blue > real_red )
+			{ // blue team is larger by 1 real player
+				team_for_real = team_for_bot = RED_TEAM;
+			}
+			else
+			{ // red team is larger by 1 real player
+				team_for_real = team_for_bot = BLUE_TEAM;
+			}
+		}
+	}
+
+	teamcensus->total = red_sum + blue_sum; //   sum of all
+	teamcensus->real = real_red + real_blue; //  sum of real players
+	teamcensus->bots = bots_red + bots_blue; //  sum of bots
+	teamcensus->red = real_red + bots_red; //    sum of red team members
+	teamcensus->blue = real_blue + bots_blue; // sum of blue team members
+	teamcensus->real_red = real_red; //   red team players in game
+	teamcensus->real_blue = real_blue; // blue team players in game
+	teamcensus->bots_red = bots_red; //   red team bots in game
+	teamcensus->bots_blue = bots_blue; // blue team bots in game
+	teamcensus->team_for_real = team_for_real; // team for real player to join
+	teamcensus->team_for_bot = team_for_bot; //   team for bot to join
+}
+
+
+/*
 ==============
 ClientThink
 
@@ -2708,6 +2895,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	pmove_t	pm;
 	qboolean sproing, haste;
 	vec3_t addspeed, forward, up, right;
+	teamcensus_t teamcensus;
 
 	level.current_entity = ent;
 	client = ent->client;
@@ -2991,75 +3179,118 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	// monster sighting AI
 	ent->light_level = ucmd->lightlevel;
 
-	//spectator mode
-	if (client->latched_buttons & BUTTON_ATTACK)
-	{
-		if (client->resp.spectator) {
-
-			client->latched_buttons = 0;
-
-			if(client->resp.spectator < 2) {
-				if((ctf->value || tca->value || cp->value) && (ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM)) {
-					client->pers.spectator = false; //we have a team, join
-				}
-				else if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM && client->resp.spectator < 3) {
-					if(red_team_cnt < blue_team_cnt)
-						ent->dmteam = RED_TEAM; //gonna put the autojoin here
-					else
-						ent->dmteam = BLUE_TEAM;
-					client->pers.spectator = false;
-					ClientChangeSkin(ent);
-				}
+	if ( client->resp.spectator == 0 )
+	{ // regular (non-spectator) mode
+		if (client->latched_buttons & BUTTON_ATTACK)
+		{
+			if (!client->weapon_thunk)
+			{
+				client->weapon_thunk = true;
+				Think_Weapon (ent);
 			}
-
-			if (client->chase_target) {
-				client->chase_target = NULL;
-				client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
-			} else
-				GetChaseTarget(ent);
-
-		} else if (!client->weapon_thunk) {
-			client->weapon_thunk = true;
-			Think_Weapon (ent);
 		}
 	}
+	else
+	{ // spectator mode
 
-	if (client->resp.spectator) {
-		if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && client->resp.spectator < 2) {
-			if(ent->dmteam == NO_TEAM && (level.time/2 == ceil(level.time/2))) {
-				if(g_autobalance->value)
-					safe_centerprintf(ent, "\n\n\nPress <fire> to join\nautobalanced team\n");
-				else
-					safe_centerprintf(ent, "\n\n\nPress <fire> to autojoin\nor <jump> to join BLUE\nor <crouch> to join RED\n");
+		if ( TEAM_GAME && client->resp.spectator < 2 )
+		{ // team selection state
+
+			if ( client->pers.spectator == 2 )
+			{ // entered with special team spectator mode on
+				// force it off, does not appear to help much. (?)
+				ent->dmteam = NO_TEAM;
+				client->pers.spectator = 0;
 			}
-		}
-		if (ucmd->upmove >= 10) {
-			if(!(g_autobalance->value)) {
-				if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM && client->resp.spectator < 2) {
-					ent->dmteam = BLUE_TEAM; //join BLUE
-					client->pers.spectator = false;
-					ClientChangeSkin(ent);
+
+			if ( ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM )
+			{
+				client->pers.spectator = 0;
+			}
+
+			if ( client->pers.spectator == 1 && ent->dmteam == NO_TEAM
+					&& (level.time / 2 == ceil( level.time / 2 )) )
+			{ // send "how to join" message
+				if ( g_autobalance->integer )
+				{
+					safe_centerprintf( ent, "\n\n\nPress <fire> to join\n"
+						"autobalanced team\n" );
+				}
+				else
+				{
+					safe_centerprintf( ent, "\n\n\nPress <fire> to autojoin\n"
+						"or <jump> to join BLUE\n"
+						"or <crouch> to join RED\n" );
 				}
 			}
-			if (!(client->ps.pmove.pm_flags & PMF_JUMP_HELD)) {
-				client->ps.pmove.pm_flags |= PMF_JUMP_HELD;
-				if (client->chase_target)
-					ChaseNext(ent);
-				else
-					GetChaseTarget(ent);
-			}
-		}
-		else if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && ent->dmteam == NO_TEAM &&
-			ucmd->upmove < 0 && client->resp.spectator < 2 && !g_autobalance->integer ){
 
-			ent->dmteam = RED_TEAM; //join RED
-			client->pers.spectator = false;
-			ClientChangeSkin(ent);
-		}
+			if ( client->latched_buttons & BUTTON_ATTACK )
+			{ // <fire> to auto join
+				client->latched_buttons = 0;
+				if ( client->pers.spectator == 1 && ent->dmteam == NO_TEAM)
+				{
+					TeamCensus( &teamcensus ); // apply team balance rules
+					ent->dmteam = teamcensus.team_for_real;
+					client->pers.spectator = 0;
+					ClientChangeSkin( ent );
+				}
+			}
+
+			if ( ucmd->upmove >= 10 && ent->dmteam == NO_TEAM )
+			{
+				if ( !g_autobalance->integer )
+				{ // jump to join blue
+					ent->dmteam = BLUE_TEAM;
+					client->pers.spectator = 0;
+					ClientChangeSkin( ent );
+				}
+			}
+			else if ( ucmd->upmove < 0 && ent->dmteam == NO_TEAM )
+			{
+				if ( !g_autobalance->integer )
+				{ // crouch to join red
+					ent->dmteam = RED_TEAM;
+					client->pers.spectator = 0;
+					ClientChangeSkin( ent );
+				}
+			}
+			else
+			{
+				client->ps.pmove.pm_flags &= ~PMF_JUMP_HELD;
+			}
+		} /* team selection state */
 		else
-			client->ps.pmove.pm_flags &= ~PMF_JUMP_HELD;
-
-	}
+		{ // regular spectator
+			if ( client->latched_buttons & BUTTON_ATTACK )
+			{
+				client->latched_buttons = 0;
+				if ( client->chase_target )
+				{
+					client->chase_target = NULL;
+					client->ps.pmove.pm_flags &= ~PMF_NO_PREDICTION;
+				}
+				else
+				{
+					GetChaseTarget( ent );
+				}
+			}
+			if ( ucmd->upmove >= 10 )
+			{
+				if ( !(client->ps.pmove.pm_flags & PMF_JUMP_HELD) )
+				{
+					client->ps.pmove.pm_flags |= PMF_JUMP_HELD;
+					if ( client->chase_target )
+						ChaseNext( ent );
+					else
+						GetChaseTarget( ent );
+				}
+			}
+			else
+			{
+				client->ps.pmove.pm_flags &= ~PMF_JUMP_HELD;
+			}
+		} /* regular spectator */
+	} /* spectator mode */
 
 	// update chase cam if being followed
 	for (i = 1; i <= maxclients->value; i++) {
@@ -3111,10 +3342,25 @@ void ClientBeginServerFrame (edict_t *ent)
 	client = ent->client;
 
 	//spectator mode
-	if (deathmatch->value &&
-		client->pers.spectator != client->resp.spectator &&
-		(level.time - client->respawn_time) >= 5) {
-		spectator_respawn(ent);
+	if ( deathmatch->value && client->pers.spectator != client->resp.spectator
+			&& (level.time - client->respawn_time) >= 5 )
+	{
+		if ( TEAM_GAME && client->pers.spectator == 2 )
+		{ // special team game spectator mode (has problems)
+			if ( client->resp.spectator == 1 )
+			{ // special team spectator mode
+				spectator_respawn( ent );
+				client->resp.spectator = 2;
+			}
+		}
+		else if ( TEAM_GAME && client->resp.spectator == 2 )
+		{ // pers != resp, exit spectator mode not allowed
+			client->pers.spectator = 2;
+		}
+		else
+		{ // enter or exit spectator mode
+			spectator_respawn( ent );
+		}
 		return;
 	}
 	//end spectator mode
