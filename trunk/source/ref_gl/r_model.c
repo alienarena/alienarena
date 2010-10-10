@@ -1541,6 +1541,9 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	RS_LoadSpecialScripts();
 	Cvar_SetValue("scriptsloaded", 1);
 
+	//ODE - clear out any ragdolls;
+	R_ClearAllRagdolls();
+
 	//ODE - create new world(flush out old first?)
 	R_DestroyWorldObject();
 	R_CreateWorldObject();
