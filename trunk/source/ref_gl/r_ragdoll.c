@@ -440,8 +440,6 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	RagDoll[RagDollID].texnum = currententity->skin->texnum;
 	RagDoll[RagDollID].flags = currententity->flags;
 	_VectorCopy(currententity->angles, RagDoll[RagDollID].angles); 
-	VectorCopy(currentmodel->mins, RagDoll[RagDollID].mins);
-	VectorCopy(currentmodel->maxs, RagDoll[RagDollID].maxs);
 	VectorCopy(origin, RagDoll[RagDollID].origin);
 	VectorCopy(origin, RagDoll[RagDollID].curPos);
 	RagDoll[RagDollID].spawnTime = Sys_Milliseconds();
@@ -1001,7 +999,7 @@ static qboolean R_CullRagDolls( int RagDollID )
 	{
 		//occulusion culling - why draw entities we cannot see?
 
-		r_trace = CM_BoxTrace(r_origin, RagDoll[RagDollID].curPos, RagDoll[RagDollID].maxs, RagDoll[RagDollID].mins, r_worldmodel->firstnode, MASK_OPAQUE);
+		r_trace = CM_BoxTrace(r_origin, RagDoll[RagDollID].curPos, RagDoll[RagDollID].ragDollMesh->maxs, RagDoll[RagDollID].ragDollMesh->mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			return true;
 	}
