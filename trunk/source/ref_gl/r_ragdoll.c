@@ -641,17 +641,19 @@ void R_DrawMark (vec3_t origin, int type)
 //For creating the surfaces for the ragdoll to collide with
 int TRIMESHVertexCounter;
 int ODETris;
+int ODESurfs;
 void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 {
 	glpoly_t *p;
 	float	*v;
-	int		i, j, tog;	
+	int		i, j, k;	
 	int ODESurfTris;
+	int ODETriTog;
 	//winding order for ODE
 	const int indices[6] = {2,1,0,
 							3,2,0}; 
 	
-	ODESurfTris = 0; //tris for this surface
+	ODESurfTris = ODETriTog = 0; //tris for this surface
 	for ( p = surf->polys; p; p = p->chain ) 
 	{		
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
@@ -671,16 +673,20 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	//First 3 verts = 1 tri, each vert after the third creates a new triangle
 	ODESurfTris -= 2;
 	
-	for(i = ODETris, tog = 0; i < ODETris+ODESurfTris; i++)
+	for(i = ODETris+ODESurfs, k = 0; i < ODETris+ODESurfs+ODESurfTris; i++, k++)
 	{			
 		for(j = 0; j < 3; j++)
-			RagDollTriWorld.ODEIndices[j+i*3] = indices[j+tog]+i;
+		{
+			if( k == 1 && j == 1)
+				RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i-1;
+			else
+				RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i;
+		}
 
-		tog = !tog;
+		ODETriTog = !ODETriTog;
 	}
-
-	//bump the tri count - this disconnects the next surface from the current one
-	ODETris += (ODESurfTris + 1);
+	ODESurfs += 2;
+	ODETris += ODESurfTris;
 }
 
 void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
@@ -804,7 +810,7 @@ void R_BuildWorldTrimesh (vec3_t origin, int RagDollID)
 {
 	dMatrix3 rot;
 	
-	TRIMESHVertexCounter = ODETris = 0;	
+	TRIMESHVertexCounter = ODETris = ODESurfs = 0;	
 
 	currentmodel = r_worldmodel;
 
