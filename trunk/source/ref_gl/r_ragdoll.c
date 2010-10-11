@@ -346,28 +346,6 @@ void R_DestroyWorldObject( void )
 	}
 }
 
-//For creating the surfaces for the ragdoll to collide with
-int TRIMESHVertexCounter;
-void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
-{
-	glpoly_t *p;
-	float	*v;
-	int		i;	
-	
-	for ( p = surf->polys; p; p = p->chain ) 
-	{		
-		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-		{
-
-			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][0] = v[0];
-			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][1] = v[1];
-			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][2] = v[2];
-
-			TRIMESHVertexCounter++;
-		}
-	}
-}
-
 RagDollBind_t RagDollBinds[] =
 {
 	{ "hip.l", PELVIS }, { "hip.r", PELVIS },
@@ -509,109 +487,109 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 
 	VectorSet(p1, -CHEST_W * 0.5, 0.0, CHEST_H);
 	VectorSet(p2, CHEST_W * 0.5, 0.0, CHEST_H);
-	R_addBody(RagDollID, bindmat, "chest", CHEST, p1, p2, 0.13*RAGDOLLSCALE, density); 
+	R_addBody(RagDollID, bindmat, "chest", CHEST, p1, p2, CHEST_W/2.0, density); 
 
-	VectorSet(p1, 0.0, 0.0, CHEST_H - 0.01*RAGDOLLSCALE);
-	VectorSet(p2, 0.0, 0.0, HIP_H + 0.01*RAGDOLLSCALE);
-	R_addBody(RagDollID, bindmat, "belly", BELLY, p1, p2, 0.125*RAGDOLLSCALE, density);
+	VectorSet(p1, 0.0, 0.0, CHEST_H - 0.1);
+	VectorSet(p2, 0.0, 0.0, HIP_H + 0.1);
+	R_addBody(RagDollID, bindmat, "belly", BELLY, p1, p2, CHEST_W/2.5, density);
 	
 	VectorSet(p1, 0.0, 0.0, HIP_H);
 	R_addFixedJoint(RagDollID, bindmat, MIDSPINE, CHEST, BELLY);
 
-	VectorSet(p1, -(PELVIS_W * 0.5 + 0.01*RAGDOLLSCALE), 0.0, HIP_H);
-	VectorSet(p2, PELVIS_W * 0.5 + 0.01*RAGDOLLSCALE, 0.0, HIP_H);
-	R_addBody(RagDollID, bindmat, "pelvis", PELVIS, p1, p2, 0.125*RAGDOLLSCALE, density);
+	VectorSet(p1, -(PELVIS_W * 0.5 + 0.1), 0.0, HIP_H);
+	VectorSet(p2, PELVIS_W * 0.5 + 0.1, 0.0, HIP_H);
+	R_addBody(RagDollID, bindmat, "pelvis", PELVIS, p1, p2, PELVIS_W/2.0, density);
 
 	R_addFixedJoint(RagDollID, bindmat, LOWSPINE, BELLY, PELVIS);
 
 	VectorSet(p1, 0.0, 0.0, HEAD_H);
 	VectorSet(p2, 0.0, 0.0, NECK_H);
-	R_addBody(RagDollID, bindmat, "head", HEAD, p1, p2, 0.11*RAGDOLLSCALE, density);
+	R_addBody(RagDollID, bindmat, "head", HEAD, p1, p2, HEAD_W/2.0, density);
 
 	VectorSet(p1, 0.0, 0.0, NECK_H);
 	R_addUniversalJoint(RagDollID, bindmat, NECK, CHEST, HEAD, p1, upAxis, rightAxis, -0.2 * M_PI, 0.2 * M_PI, -0.2 * M_PI,
 			0.2 * M_PI);
 
 	//right leg
-	VectorSet(p1, R_HIP_POS[0] - 0.01*RAGDOLLSCALE, R_HIP_POS[1], R_HIP_POS[2]);
-	VectorSet(p2, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] + 0.01*RAGDOLLSCALE);
-	R_addBody(RagDollID, bindmat, "rightupperleg", RIGHTUPPERLEG, p1, p2, 0.11*RAGDOLLSCALE, density);
+	VectorSet(p1, R_HIP_POS[0] - 0.1, R_HIP_POS[1], R_HIP_POS[2]);
+	VectorSet(p2, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] + 0.1);
+	R_addBody(RagDollID, bindmat, "rightupperleg", RIGHTUPPERLEG, p1, p2, THIGH_W/2.0, density);
 	
 	R_addUniversalJoint(RagDollID, bindmat, RIGHTHIP, PELVIS, RIGHTUPPERLEG, R_HIP_POS, bkwdAxis, rightAxis, -0.1 * M_PI, 0.3 * M_PI, -0.15 * M_PI,
 			0.75 * M_PI);
 
-	VectorSet(p1, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] - 0.01*RAGDOLLSCALE);
+	VectorSet(p1, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] - 0.1);
 	VectorSet(p2, R_ANKLE_POS[0], R_ANKLE_POS[1], R_ANKLE_POS[2]);
-	R_addBody(RagDollID, bindmat, "rightlowerleg", RIGHTLOWERLEG, p1, p2, 0.09*RAGDOLLSCALE, density);
+	R_addBody(RagDollID, bindmat, "rightlowerleg", RIGHTLOWERLEG, p1, p2, SHIN_W/2.0, density);
 
 	R_addHingeJoint(RagDollID, bindmat, RIGHTKNEE, RIGHTUPPERLEG, 
 		RIGHTLOWERLEG, R_KNEE_POS, leftAxis, 0.0, M_PI * 0.75);
 
-	R_addBody(RagDollID, bindmat, "rightfoot", RIGHTFOOT, R_TOES_POS, R_HEEL_POS, 0.09*RAGDOLLSCALE, density);
+	R_addBody(RagDollID, bindmat, "rightfoot", RIGHTFOOT, R_TOES_POS, R_HEEL_POS, FOOT_W/2.0, density);
 
 	R_addHingeJoint(RagDollID, bindmat, RIGHTANKLE, RIGHTLOWERLEG, 
 		RIGHTFOOT, R_ANKLE_POS, rightAxis, M_PI * -0.1, M_PI * 0.05);
 
 	//left leg
-	VectorSet(p1, L_HIP_POS[0] + 0.01*RAGDOLLSCALE, L_HIP_POS[1], L_HIP_POS[2]);
-	VectorSet(p2, L_KNEE_POS[0], L_KNEE_POS[1], L_KNEE_POS[2] + 0.01*RAGDOLLSCALE);
-	R_addBody(RagDollID, bindmat, "leftupperleg", LEFTUPPERLEG, p1, p2, 0.11*RAGDOLLSCALE, density);
+	VectorSet(p1, L_HIP_POS[0] + 0.1, L_HIP_POS[1], L_HIP_POS[2]);
+	VectorSet(p2, L_KNEE_POS[0], L_KNEE_POS[1], L_KNEE_POS[2] + 0.1);
+	R_addBody(RagDollID, bindmat, "leftupperleg", LEFTUPPERLEG, p1, p2, THIGH_W/2.0, density);
 
 	R_addUniversalJoint(RagDollID, bindmat, LEFTHIP, PELVIS,LEFTUPPERLEG, L_HIP_POS, fwdAxis, rightAxis, -0.1 * M_PI, 0.3 * M_PI, -0.15 * M_PI,
 			0.75 * M_PI);
 
-	VectorSet(p1, L_KNEE_POS[0], L_KNEE_POS[1], L_KNEE_POS[2] - 0.01*RAGDOLLSCALE);
+	VectorSet(p1, L_KNEE_POS[0], L_KNEE_POS[1], L_KNEE_POS[2] - 0.1);
 	VectorSet(p2, L_ANKLE_POS[0], L_ANKLE_POS[1], L_ANKLE_POS[2]);
-	R_addBody(RagDollID, bindmat, "leftlowerleg", LEFTLOWERLEG, p1, p2, 0.09*RAGDOLLSCALE, density);
+	R_addBody(RagDollID, bindmat, "leftlowerleg", LEFTLOWERLEG, p1, p2, SHIN_W/2.0, density);
 
 	R_addHingeJoint(RagDollID, bindmat, LEFTKNEE, LEFTUPPERLEG, 
 		LEFTLOWERLEG, L_KNEE_POS, leftAxis, 0.0, M_PI * 0.75);
 	
-	R_addBody(RagDollID, bindmat, "leftfoot", LEFTFOOT, L_TOES_POS, L_HEEL_POS, 0.09*RAGDOLLSCALE, density);
+	R_addBody(RagDollID, bindmat, "leftfoot", LEFTFOOT, L_TOES_POS, L_HEEL_POS, FOOT_W/2.0, density);
 
 	R_addHingeJoint(RagDollID, bindmat, LEFTANKLE, LEFTLOWERLEG, 
 		LEFTFOOT, L_ANKLE_POS, rightAxis, M_PI * -0.1, M_PI * 0.05);
 
 	//right arm
-	VectorSet(p1, R_SHOULDER_POS[0] - 0.01*RAGDOLLSCALE, R_SHOULDER_POS[1], R_SHOULDER_POS[2]);
-	VectorSet(p2, R_ELBOW_POS[0], R_ELBOW_POS[1], R_ELBOW_POS[2] + 0.01*RAGDOLLSCALE);
-	R_addBody(RagDollID, bindmat, "rightupperarm", RIGHTUPPERARM, p1, p2, 0.08*RAGDOLLSCALE, density);
+	VectorSet(p1, R_SHOULDER_POS[0] - 0.1, R_SHOULDER_POS[1], R_SHOULDER_POS[2]);
+	VectorSet(p2, R_ELBOW_POS[0], R_ELBOW_POS[1], R_ELBOW_POS[2] + 0.1);
+	R_addBody(RagDollID, bindmat, "rightupperarm", RIGHTUPPERARM, p1, p2, BICEP_W/2.0, density);
 
 	R_addUniversalJoint(RagDollID, bindmat, RIGHTSHOULDER, CHEST, RIGHTUPPERARM, R_SHOULDER_POS, bkwdAxis, rightAxis, -0.1 * M_PI, 0.3 * M_PI, -0.15 * M_PI,
 			0.75 * M_PI);
 
-	VectorSet(p1, R_ELBOW_POS[0], R_ELBOW_POS[1], R_ELBOW_POS[2] - 0.01*RAGDOLLSCALE);
-	VectorSet(p2, R_WRIST_POS[0], R_WRIST_POS[1], R_WRIST_POS[2] + 0.01*RAGDOLLSCALE);
-	R_addBody(RagDollID, bindmat, "rightforearm", RIGHTFOREARM, p1, p2, 0.08*RAGDOLLSCALE, density);
+	VectorSet(p1, R_ELBOW_POS[0], R_ELBOW_POS[1], R_ELBOW_POS[2] - 0.1);
+	VectorSet(p2, R_WRIST_POS[0], R_WRIST_POS[1], R_WRIST_POS[2] + 0.1);
+	R_addBody(RagDollID, bindmat, "rightforearm", RIGHTFOREARM, p1, p2, FOREARM_W/2.0, density);
 
 	R_addHingeJoint(RagDollID, bindmat, RIGHTELBOW, RIGHTUPPERARM, 
 		RIGHTFOREARM, R_ELBOW_POS, downAxis, 0.0, M_PI * 0.6);	
 
-	VectorSet(p1, R_WRIST_POS[0], R_WRIST_POS[1], R_WRIST_POS[2] - 0.01*RAGDOLLSCALE);
+	VectorSet(p1, R_WRIST_POS[0], R_WRIST_POS[1], R_WRIST_POS[2] - 0.1);
 	VectorSet(p2, R_FINGERS_POS[0], R_FINGERS_POS[1], R_FINGERS_POS[2]);
-	R_addBody(RagDollID, bindmat, "righthand", RIGHTHAND, p1, p2, 0.075*RAGDOLLSCALE, density);
+	R_addBody(RagDollID, bindmat, "righthand", RIGHTHAND, p1, p2, HAND_W/2.0, density);
 
 	R_addHingeJoint(RagDollID, bindmat, RIGHTWRIST, RIGHTFOREARM, 
 		RIGHTHAND, R_WRIST_POS, fwdAxis, M_PI * -0.1, M_PI * 0.1);
 
 	//left arm
-	VectorSet(p1, L_SHOULDER_POS[0] + 0.01*RAGDOLLSCALE, L_SHOULDER_POS[1], L_SHOULDER_POS[2]);
-	VectorSet(p2, L_ELBOW_POS[0], L_ELBOW_POS[1], L_ELBOW_POS[2] + 0.01*RAGDOLLSCALE);
-	R_addBody(RagDollID, bindmat, "leftupperarm", LEFTUPPERARM, p1, p2, 0.08*RAGDOLLSCALE, density);
+	VectorSet(p1, L_SHOULDER_POS[0] + 0.1, L_SHOULDER_POS[1], L_SHOULDER_POS[2]);
+	VectorSet(p2, L_ELBOW_POS[0], L_ELBOW_POS[1], L_ELBOW_POS[2] + 0.1);
+	R_addBody(RagDollID, bindmat, "leftupperarm", LEFTUPPERARM, p1, p2, BICEP_W/2.0, density);
 
 	R_addUniversalJoint(RagDollID, bindmat, LEFTSHOULDER, CHEST, LEFTUPPERARM, L_SHOULDER_POS, fwdAxis, rightAxis, -0.1 * M_PI, 0.3 * M_PI, -0.15 * M_PI,
 			0.75 * M_PI);
 	
-	VectorSet(p1, L_ELBOW_POS[0], L_ELBOW_POS[1], L_ELBOW_POS[2] - 0.01*RAGDOLLSCALE);
-	VectorSet(p2, L_WRIST_POS[0], L_WRIST_POS[1], L_WRIST_POS[2] + 0.01*RAGDOLLSCALE);
-	R_addBody(RagDollID, bindmat, "leftforearm", LEFTFOREARM, p1, p2, 0.08*RAGDOLLSCALE, density);
+	VectorSet(p1, L_ELBOW_POS[0], L_ELBOW_POS[1], L_ELBOW_POS[2] - 0.1);
+	VectorSet(p2, L_WRIST_POS[0], L_WRIST_POS[1], L_WRIST_POS[2] + 0.1);
+	R_addBody(RagDollID, bindmat, "leftforearm", LEFTFOREARM, p1, p2, FOREARM_W/2.0, density);
 
 	R_addHingeJoint(RagDollID, bindmat, LEFTELBOW, LEFTUPPERARM, 
 		LEFTFOREARM, L_ELBOW_POS,  upAxis, 0.0, M_PI * 0.6);
 		
-	VectorSet(p1, L_WRIST_POS[0], L_WRIST_POS[1], L_WRIST_POS[2] - 0.01*RAGDOLLSCALE);
+	VectorSet(p1, L_WRIST_POS[0], L_WRIST_POS[1], L_WRIST_POS[2] - 0.1);
 	VectorSet(p2, L_FINGERS_POS[0], L_FINGERS_POS[1], L_FINGERS_POS[2]);
-	R_addBody(RagDollID, bindmat, "leftthand", LEFTHAND, p1, p2, 0.075*RAGDOLLSCALE, density);
+	R_addBody(RagDollID, bindmat, "leftthand", LEFTHAND, p1, p2, HAND_W/2.0, density);
 
 	R_addHingeJoint(RagDollID, bindmat, LEFTWRIST, LEFTFOREARM, 
 		LEFTHAND, L_WRIST_POS, bkwdAxis, M_PI * -0.1, M_PI * 0.1);
@@ -658,6 +636,51 @@ void R_DrawMark (vec3_t origin, int type)
 	qglColor3f (1,1,1);
 	qglPopMatrix ();
 	qglEnable (GL_TEXTURE_2D);
+}
+
+//For creating the surfaces for the ragdoll to collide with
+int TRIMESHVertexCounter;
+int ODETris;
+void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
+{
+	glpoly_t *p;
+	float	*v;
+	int		i, j, tog;	
+	int ODESurfTris;
+	//winding order for ODE
+	const int indices[6] = {2,1,0,
+							3,2,0}; 
+	
+	ODESurfTris = 0; //tris for this surface
+	for ( p = surf->polys; p; p = p->chain ) 
+	{		
+		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
+		{
+
+			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][0] = v[0];
+			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][1] = v[1];
+			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][2] = v[2];
+
+			TRIMESHVertexCounter++;
+			ODESurfTris++;
+		}
+	}
+
+	//build the indices here for this surface
+	
+	//First 3 verts = 1 tri, each vert after the third creates a new triangle
+	ODESurfTris -= 2;
+	
+	for(i = ODETris, tog = 0; i < ODETris+ODESurfTris; i++)
+	{			
+		for(j = 0; j < 3; j++)
+			RagDollTriWorld.ODEIndices[j+i*3] = indices[j+tog]+i;
+
+		tog = !tog;
+	}
+
+	//bump the tri count - this disconnects the next surface from the current one
+	ODETris += (ODESurfTris + 1);
 }
 
 void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
@@ -779,32 +802,15 @@ R_DrawWorld
 */
 void R_BuildWorldTrimesh (vec3_t origin, int RagDollID)
 {
-	int i, j;
 	dMatrix3 rot;
-	int		ODETris;
-	//winding order for ODE
-	const int indices[6] = {2,1,0,
-							3,2,0}; 
-
-	TRIMESHVertexCounter =  0;	
+	
+	TRIMESHVertexCounter = ODETris = 0;	
 
 	currentmodel = r_worldmodel;
 
 	R_RecursiveODEWorldNode (r_worldmodel->nodes, 15, RagDollID);
 		
 	dRSetIdentity(rot);	
-								
-	//create indices for each tri - to do - we really really need to make sure this is right!
-	ODETris = TRIMESHVertexCounter - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
-	if(ODETris % 2)
-		ODETris +=1;
-
-	//now we have to break this down into triangle pairs, and create a geom for each one of these	
-	for(i = 0; i < ODETris; i+=2)
-	{			
-		for(j = 0; j < 6; j++)
-			RagDollTriWorld.ODEIndices[j+i] = indices[j]+i;
-	}
 	
 	//we need to build the trimesh geometry
 	RagDollTriWorld.triMesh = dGeomTriMeshDataCreate();
