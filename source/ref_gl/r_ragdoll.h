@@ -136,10 +136,6 @@ typedef struct RagDoll_s {
 	vec3_t	origin;
 	vec3_t	curPos;
 
-	//surface for ragdoll to collide
-	RagDollWorld_t RagDollWorld[MAX_SURFACES];
-	int numsurfaces;
-
 	float spawnTime;
 
 	int destroyed;
@@ -147,6 +143,9 @@ typedef struct RagDoll_s {
 } RagDoll_t;
 
 RagDoll_t RagDoll[MAX_RAGDOLLS]; 
+
+//surface for ragdoll to collide
+RagDollWorld_t RagDollTriWorld[MAX_SURFACES];
 
 //Funcs
 extern void R_CreateWorldObject( void );
