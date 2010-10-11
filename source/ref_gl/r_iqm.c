@@ -1518,10 +1518,6 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 
 	AngleVectors (RagDoll[RagDollID].angles, vectors[0], vectors[1], vectors[2]);
 
-	odePos = dBodyGetPosition (RagDoll[RagDollID].RagDollObject[BELLY].body);
-	//VectorSet(RagDoll[RagDollID].curPos, odePos[0], odePos[1], odePos[2]);
-	VectorSet(RagDoll[RagDollID].curPos, 0, 0, 0);
-
 	//render the model
 
 	if(!rs || mirror || glass)
@@ -1559,9 +1555,9 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 			{
 				index_xyz = index_st = RagDoll[RagDollID].ragDollMesh->tris[i].vertex[j];
 
-				VArray[0] = RagDoll[RagDollID].curPos[0] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0];
-				VArray[1] = RagDoll[RagDollID].curPos[1] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1];
-				VArray[2] = RagDoll[RagDollID].curPos[2] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2];
+				VArray[0] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0];
+				VArray[1] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1];
+				VArray[2] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2];
 
 				if(mirror)
 				{
@@ -1763,9 +1759,9 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 				{
 					index_xyz = index_st = RagDoll[RagDollID].ragDollMesh->tris[i].vertex[j];
 
-					VArray[0] = RagDoll[RagDollID].curPos[0] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0];
-					VArray[1] = RagDoll[RagDollID].curPos[1] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1];
-					VArray[2] = RagDoll[RagDollID].curPos[2] + RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2];
+					VArray[0] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0];
+					VArray[1] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1];
+					VArray[2] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2];
 
 					VArray[3] = RagDoll[RagDollID].ragDollMesh->st[index_st].s;
 					VArray[4] = RagDoll[RagDollID].ragDollMesh->st[index_st].t;
