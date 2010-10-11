@@ -133,8 +133,6 @@ typedef struct RagDoll_s {
 	int		flags;
 	struct	rscript_s *script;
 	float	angles[3];
-	vec3_t  mins;
-	vec3_t  maxs;
 	vec3_t	origin;
 	vec3_t	curPos;
 
