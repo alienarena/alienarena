@@ -347,119 +347,24 @@ void R_DestroyWorldObject( void )
 }
 
 //For creating the surfaces for the ragdoll to collide with
-//Notes - right now this is building a geometry for each convex poly, this might the cleanest and easiest way, but it 
-//may be nicer and more efficient to build a geometry for the entire surface.  r_surfacecount need to be renamed if we keep 
-//things this way.
+int TRIMESHVertexCounter;
 void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 {
 	glpoly_t *p;
-	vec3_t dist, center, mins, maxs, size;
-	dMatrix3 rot;
-	vec3_t ODEVerts[MAX_VERTS];
 	float	*v;
-	int		i, j;	
-	char	name[32];
-	int		VertexCounter;
-	int		ODETris;
-	//winding order for ODE
-	const int indices[6] = {2,1,0,
-							3,2,0}; 
+	int		i;	
 	
-	// reset pointer and counter
-	VertexCounter =  0;	
-				
-	VectorSet(mins, 999999, 999999, 999999);
-	VectorSet(maxs, -999999, -999999, -999999);
-
-	dRSetIdentity(rot);
-
 	for ( p = surf->polys; p; p = p->chain ) 
 	{		
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
 
-			ODEVerts[VertexCounter][0] = v[0];
-			ODEVerts[VertexCounter][1] = v[1];
-			ODEVerts[VertexCounter][2] = v[2];
+			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][0] = v[0];
+			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][1] = v[1];
+			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][2] = v[2];
 
-			if(v[0] > maxs[0])   maxs[0] = v[0];
-            if(v[1] > maxs[1])   maxs[1] = v[1];
-            if(v[2] > maxs[2])   maxs[2] = v[2];
-
-            if(v[0] < mins[0])   mins[0] = v[0];
-            if(v[1] < mins[1])   mins[1] = v[1];
-            if(v[2] < mins[2])   mins[2] = v[2];
-
-			VertexCounter++;
+			TRIMESHVertexCounter++;
 		}
-
-		//find poly center
-		center[0] = (mins[0] + maxs[0]) /2;
-		center[1] = (mins[1] + maxs[1]) /2;
-		center[2] = (mins[2] + maxs[2]) /2;
-	}
-
-	//incomplete tri
-	if(VertexCounter < 2)
-		return;
-
-	//cull surfaces that are not going to collide generally
-	VectorSubtract(maxs, mins, size);
-	VectorSubtract(RagDoll[RagDollID].origin, center, dist);
-
-	if((VectorLength(size)/2.0 + 256.0) < VectorLength(dist))
-		return;
-	
-	if(VertexCounter % 2) 
-	{
-		ODEVerts[VertexCounter][0] = ODEVerts[VertexCounter-1][0];
-		ODEVerts[VertexCounter][1] = ODEVerts[VertexCounter-1][2];
-		ODEVerts[VertexCounter][2] = ODEVerts[VertexCounter-1][2];
-		VertexCounter++;
-	}
-								
-	//create indices for each tri - to do - we really really need to make sure this is right!
-	ODETris = VertexCounter - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
-
-	//now we have to break this down into triangle pairs, and create a geom for each one of these	
-	for(i = 0; i < ODETris; i+=2)
-	{
-		if(r_SurfaceCount > MAX_SURFACES - 1 )
-			return;
-
-		sprintf(name, "surface%i", r_SurfaceCount);	
-
-		for(j = 0; j < 4; j++)
-		{
-			//each triangle pair has 4 verts and 6 indices
-			RagDollTriWorld[r_SurfaceCount].ODEVerts[j][0] = ODEVerts[j+i][0] - center[0];
-			RagDollTriWorld[r_SurfaceCount].ODEVerts[j][1] = ODEVerts[j+i][1] - center[1];
-			RagDollTriWorld[r_SurfaceCount].ODEVerts[j][2] = ODEVerts[j+i][2] - center[2];
-		}
-		
-		for(j = 0; j < 6; j++)
-		{
-			RagDollTriWorld[r_SurfaceCount].ODEIndices[j] = indices[j];
-		}		
-
-		//we need to build the trimesh geometry for this poly
-		RagDollTriWorld[r_SurfaceCount].triMesh = dGeomTriMeshDataCreate();
-
-		// Build the mesh from the data - note we may opt to use dGeomTriMeshBuildSingle1, providing normals.  This should stop the errors.
-		dGeomTriMeshDataBuildSimple(RagDollTriWorld[r_SurfaceCount].triMesh, 
-		(dReal*)RagDollTriWorld[r_SurfaceCount].ODEVerts, 4, 
-		RagDollTriWorld[r_SurfaceCount].ODEIndices, 6);
-	
-		RagDollTriWorld[r_SurfaceCount].geom = dCreateTriMesh(RagDollSpace, RagDollTriWorld[r_SurfaceCount].triMesh, NULL, NULL, NULL);
-		dGeomSetData(RagDollTriWorld[r_SurfaceCount].geom, name);
-
-		// this geom has no body
-		dGeomSetBody(RagDollTriWorld[r_SurfaceCount].geom, 0);
-
-		dGeomSetPosition(RagDollTriWorld[r_SurfaceCount].geom, center[0], center[1], center[2]);
-		dGeomSetRotation(RagDollTriWorld[r_SurfaceCount].geom, rot);
-
-		r_SurfaceCount++;			
 	}
 }
 
@@ -874,14 +779,48 @@ R_DrawWorld
 */
 void R_BuildWorldTrimesh (vec3_t origin, int RagDollID)
 {
-	r_SurfaceCount = 0;
+	int i, j;
+	dMatrix3 rot;
+	int		ODETris;
+	//winding order for ODE
+	const int indices[6] = {2,1,0,
+							3,2,0}; 
+
+	TRIMESHVertexCounter =  0;	
 
 	currentmodel = r_worldmodel;
 
 	R_RecursiveODEWorldNode (r_worldmodel->nodes, 15, RagDollID);
+		
+	dRSetIdentity(rot);	
+								
+	//create indices for each tri - to do - we really really need to make sure this is right!
+	ODETris = TRIMESHVertexCounter - 2; //First 3 verts = 1 tri, each vert after the third creates a new triangle
+	if(ODETris % 2)
+		ODETris +=1;
 
-	if(r_ragdoll_debug->value)
-		Com_Printf("%i surfaces added\n", r_SurfaceCount);
+	//now we have to break this down into triangle pairs, and create a geom for each one of these	
+	for(i = 0; i < ODETris; i+=2)
+	{			
+		for(j = 0; j < 6; j++)
+			RagDollTriWorld.ODEIndices[j+i] = indices[j]+i;
+	}
+	
+	//we need to build the trimesh geometry
+	RagDollTriWorld.triMesh = dGeomTriMeshDataCreate();
+
+	// Build the mesh from the data
+	dGeomTriMeshDataBuildSimple(RagDollTriWorld.triMesh, (dReal*)RagDollTriWorld.ODEVerts, TRIMESHVertexCounter, 
+		RagDollTriWorld.ODEIndices, ODETris * 3);
+	
+	RagDollTriWorld.geom = dCreateTriMesh(RagDollSpace, RagDollTriWorld.triMesh, NULL, NULL, NULL);
+	dGeomSetData(RagDollTriWorld.geom, "surface");
+
+	// this geom has no body
+	dGeomSetBody(RagDollTriWorld.geom, 0);
+
+	dGeomSetPosition(RagDollTriWorld.geom, 0, 0, 0);
+	dGeomSetRotation(RagDollTriWorld.geom, rot);
 }
 
 /*
@@ -997,14 +936,9 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 
 void R_DestroyWorldTrimesh( void )
 {
-	int i;
-
-	for(i = 0; i < r_SurfaceCount; i++)
-	{
-		if(RagDollTriWorld[i].geom)
-			dGeomDestroy(RagDollTriWorld[i].geom);
-		RagDollTriWorld[i].geom = NULL;
-	}
+	if(RagDollTriWorld.geom)
+		dGeomDestroy(RagDollTriWorld.geom);
+	RagDollTriWorld.geom = NULL;
 }
 
 //This is called on every map load
@@ -1175,17 +1109,7 @@ void R_RenderAllRagdolls ( void )
 			qglColor4f (1,1,1,1);
 
 			if(r_ragdoll_debug->value)
-			{
-				//debug - mark surface centers
-				for(i = 0; i < r_SurfaceCount; i++)
-				{			
-					const	dReal *odePos;
-					vec3_t  org;
-
-					odePos = dGeomGetPosition (RagDollTriWorld[i].geom);
-					VectorSet(org, odePos[0], odePos[1], odePos[2]);
-					R_DrawMark(org, 0); //note - change this for surfaces to draw the vert array
-				}
+			{				
 				//debug - draw ragdoll bodies
 				for(i = CHEST; i <= LEFTHAND; i++)
 				{

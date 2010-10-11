@@ -115,8 +115,8 @@ typedef struct RagDollObject_s {
 } RagDollObject_t;
 
 typedef struct RagDollWorld_s {
-	dVector3	ODEVerts[4];
-	dTriIndex	ODEIndices[6];
+	dVector3	ODEVerts[MAX_VERTICES];
+	dTriIndex	ODEIndices[MAX_VERTICES*3];
 	dTriMeshDataID triMesh;
 	dGeomID geom;
 } RagDollWorld_t;
@@ -145,7 +145,7 @@ typedef struct RagDoll_s {
 RagDoll_t RagDoll[MAX_RAGDOLLS]; 
 
 //surface for ragdoll to collide
-RagDollWorld_t RagDollTriWorld[MAX_SURFACES];
+RagDollWorld_t RagDollTriWorld;
 
 //Funcs
 extern void R_CreateWorldObject( void );
