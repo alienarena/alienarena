@@ -23,9 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_RAGDOLLS 64 
 #define MAX_RAGDOLL_OBJECTS 16
 #define MAX_RAGDOLL_JOINTS 16
-#define MAX_SURFACES 256
-#define MAX_CONTACTS 4 
+#define MAX_CONTACTS 32 
 #define RAGDOLL_DURATION 10000 //10 seconds
+#define STEP_TIME 15
 
 //body id's
 #define CHEST 0
@@ -65,7 +65,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //Hard coded definitions(if no ragdoll read in - note - these need to be adjusted to actual model sizes)
 //these defaults are the values for the martian enforcer.  We will read these values from a file at spawn
 //time for each mesh
-#define RAGDOLLSCALE 32
 
 #define ELBOW_X_OFF 15.50 //note - we likely want to do something similar for knees and ankles
 #define ELBOW_Y_OFF 0.00
@@ -85,10 +84,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define KNEE_H 16.00 
 #define ANKLE_H 2.50
 
+#define HEAD_W 8.00
 #define SHOULDER_W 16.00
 #define CHEST_W 12.00 // actually wider, but we want narrower than shoulders (esp. with large radius)
+#define BICEP_W 4.00 //thickness of bicep
+#define FOREARM_W 4.00 //thickness of forearm
+#define HAND_W 1.00 //width of hand
 #define LEG_W 8.50 // between middles of upper legs
 #define PELVIS_W 8.00 // actually wider, but we want smaller than hip width
+#define THIGH_W 5.00 //thickness of thigh
+#define SHIN_W 5.00 //thickness of shin
+#define FOOT_W 5.00 //width of foot
 
 dWorldID RagDollWorld;
 dSpaceID RagDollSpace;
