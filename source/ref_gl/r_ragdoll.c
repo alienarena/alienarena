@@ -440,6 +440,8 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	RagDoll[RagDollID].texnum = currententity->skin->texnum;
 	RagDoll[RagDollID].flags = currententity->flags;
 	_VectorCopy(currententity->angles, RagDoll[RagDollID].angles); 
+	VectorCopy(currentmodel->mins, RagDoll[RagDollID].mins);
+	VectorCopy(currentmodel->maxs, RagDoll[RagDollID].maxs);
 	VectorCopy(origin, RagDoll[RagDollID].origin);
 	VectorCopy(origin, RagDoll[RagDollID].curPos);
 	RagDoll[RagDollID].spawnTime = Sys_Milliseconds();
@@ -999,7 +1001,7 @@ static qboolean R_CullRagDolls( int RagDollID )
 	{
 		//occulusion culling - why draw entities we cannot see?
 
-		r_trace = CM_BoxTrace(r_origin, RagDoll[RagDollID].curPos, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+		r_trace = CM_BoxTrace(r_origin, RagDoll[RagDollID].curPos, RagDoll[RagDollID].maxs, RagDoll[RagDollID].mins, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			return true;
 	}
@@ -1089,7 +1091,13 @@ void R_RenderAllRagdolls ( void )
 			//we are going to have to have the helmet share the ragdoll of it's host body, but that is tricky.
 			//One one hand, if a mesh ragdoll is translucent and spawned in close proximity to a solid one, 
 			//maybe we can somehow assign that mesh to use the solid mesh's ragdoll.  
+			const dReal *odePos;
 
+			odePos = dBodyGetPosition (RagDoll[RagDollID].RagDollObject[CHEST].body);
+			VectorSet(RagDoll[RagDollID].curPos, odePos[0], odePos[1], odePos[2]);
+
+			R_CullRagDolls( RagDollID );
+				
 			//render the meshes
 			qglShadeModel (GL_SMOOTH);
 			GL_TexEnv( GL_MODULATE );
