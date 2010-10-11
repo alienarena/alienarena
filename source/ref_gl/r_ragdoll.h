@@ -87,12 +87,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define HEAD_W 8.00
 #define SHOULDER_W 16.00
 #define CHEST_W 12.00 // actually wider, but we want narrower than shoulders (esp. with large radius)
-#define BICEP_W 4.00 //thickness of bicep
-#define FOREARM_W 4.00 //thickness of forearm
-#define HAND_W 1.00 //width of hand
+#define BICEP_W 3.00 //thickness of bicep
+#define FOREARM_W 3.00 //thickness of forearm
+#define HAND_W 1.50 //width of hand
 #define LEG_W 8.50 // between middles of upper legs
 #define PELVIS_W 8.00 // actually wider, but we want smaller than hip width
-#define THIGH_W 5.00 //thickness of thigh
+#define THIGH_W 4.00 //thickness of thigh
 #define SHIN_W 5.00 //thickness of shin
 #define FOOT_W 5.00 //width of foot
 

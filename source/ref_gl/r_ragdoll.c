@@ -642,7 +642,7 @@ void R_DrawMark (vec3_t origin, int type)
 int TRIMESHVertexCounter;
 int ODETris;
 int ODESurfs;
-void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
+void GL_BuildODEGeoms(msurface_t *surf)
 {
 	glpoly_t *p;
 	float	*v;
@@ -689,7 +689,7 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	ODETris += ODESurfTris;
 }
 
-void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
+void R_RecursiveODEWorldNode (mnode_t *node, int clipflags)
 {
 	int			c, side, sidebit;
 	cplane_t	*plane;
@@ -749,16 +749,16 @@ void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 	switch (plane->type)
 	{
 	case PLANE_X:
-		dot = RagDoll[RagDollID].origin[0] - plane->dist;
+		dot = r_newrefdef.vieworg[0] - plane->dist;
 		break;
 	case PLANE_Y:
-		dot = RagDoll[RagDollID].origin[1] - plane->dist;
+		dot = r_newrefdef.vieworg[1] - plane->dist;
 		break;
 	case PLANE_Z:
-		dot = RagDoll[RagDollID].origin[2] - plane->dist;
+		dot = r_newrefdef.vieworg[2] - plane->dist;
 		break;
 	default:
-		dot = DotProduct (RagDoll[RagDollID].origin, plane->normal) - plane->dist;
+		dot = DotProduct (r_newrefdef.vieworg, plane->normal) - plane->dist;
 		break;
 	}
 
@@ -774,7 +774,7 @@ void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 	}
 
 	// recurse down the children, front side first
-	R_RecursiveODEWorldNode (node->children[side], clipflags, RagDollID);
+	R_RecursiveODEWorldNode (node->children[side], clipflags);
 
 	// draw stuff
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
@@ -792,12 +792,15 @@ void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 		else
 		{
 			if (!( surf->flags & SURF_DRAWTURB ) )
-				GL_BuildODEGeoms(surf, RagDollID);
+			{
+				if(!SurfaceIsTranslucent(surf))
+					GL_BuildODEGeoms(surf);
+			}
 		}
 	}
 
 	// recurse down the back side
-	R_RecursiveODEWorldNode (node->children[!side], clipflags, RagDollID);
+	R_RecursiveODEWorldNode (node->children[!side], clipflags);
 }
 
 
@@ -806,7 +809,7 @@ void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 R_DrawWorld
 =============
 */
-void R_BuildWorldTrimesh (vec3_t origin, int RagDollID)
+void R_BuildWorldTrimesh ( void )
 {
 	dMatrix3 rot;
 	
@@ -814,7 +817,7 @@ void R_BuildWorldTrimesh (vec3_t origin, int RagDollID)
 
 	currentmodel = r_worldmodel;
 
-	R_RecursiveODEWorldNode (r_worldmodel->nodes, 15, RagDollID);
+	R_RecursiveODEWorldNode (r_worldmodel->nodes, 15);
 		
 	dRSetIdentity(rot);	
 	
@@ -988,7 +991,7 @@ void R_AddNewRagdoll( vec3_t origin )
 			R_RagdollBody_Init(RagDollID, origin);
 			//add nearby surfaces anytime a ragdoll is spawned
 			R_DestroyWorldTrimesh();
-			R_BuildWorldTrimesh (RagDoll[RagDollID].origin, RagDollID);
+			R_BuildWorldTrimesh ();
 			if(r_ragdoll_debug->value)
 				Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1], 
 					RagDoll[RagDollID].origin[2]);
