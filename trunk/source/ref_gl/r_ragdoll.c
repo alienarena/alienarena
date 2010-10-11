@@ -399,8 +399,8 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 		center[2] = (mins[2] + maxs[2]) /2;
 	}
 
-	//temporary situation till will figure out how to deal with single tris
-	if(VertexCounter < 3)
+	//incomplete tri
+	if(VertexCounter < 2)
 		return;
 
 	//cull surfaces that are not going to collide generally
@@ -410,7 +410,6 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	if((VectorLength(size)/2.0 + 256.0) < VectorLength(dist))
 		return;
 	
-	//we have to figure out a method to deal with odd triangle counts, likely create a dummy vert on the plane
 	if(VertexCounter % 2) 
 	{
 		ODEVerts[VertexCounter][0] = ODEVerts[VertexCounter-1][0];
@@ -427,37 +426,38 @@ void GL_BuildODEGeoms(msurface_t *surf, int RagDollID)
 	{
 		if(r_SurfaceCount > MAX_SURFACES - 1 )
 			return;
+
 		sprintf(name, "surface%i", r_SurfaceCount);	
 
 		for(j = 0; j < 4; j++)
 		{
 			//each triangle pair has 4 verts and 6 indices
-			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[j][0] = ODEVerts[j+i][0] - center[0];
-			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[j][1] = ODEVerts[j+i][1] - center[1];
-			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts[j][2] = ODEVerts[j+i][2] - center[2];
+			RagDollTriWorld[r_SurfaceCount].ODEVerts[j][0] = ODEVerts[j+i][0] - center[0];
+			RagDollTriWorld[r_SurfaceCount].ODEVerts[j][1] = ODEVerts[j+i][1] - center[1];
+			RagDollTriWorld[r_SurfaceCount].ODEVerts[j][2] = ODEVerts[j+i][2] - center[2];
 		}
 		
 		for(j = 0; j < 6; j++)
 		{
-			RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndices[j] = indices[j];
+			RagDollTriWorld[r_SurfaceCount].ODEIndices[j] = indices[j];
 		}		
 
 		//we need to build the trimesh geometry for this poly
-		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].triMesh = dGeomTriMeshDataCreate();
+		RagDollTriWorld[r_SurfaceCount].triMesh = dGeomTriMeshDataCreate();
 
 		// Build the mesh from the data - note we may opt to use dGeomTriMeshBuildSingle1, providing normals.  This should stop the errors.
-		dGeomTriMeshDataBuildSimple(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].triMesh, 
-		(dReal*)RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEVerts, 4, 
-		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].ODEIndices, 6);
+		dGeomTriMeshDataBuildSimple(RagDollTriWorld[r_SurfaceCount].triMesh, 
+		(dReal*)RagDollTriWorld[r_SurfaceCount].ODEVerts, 4, 
+		RagDollTriWorld[r_SurfaceCount].ODEIndices, 6);
 	
-		RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom = dCreateTriMesh(RagDollSpace, RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].triMesh, NULL, NULL, NULL);
-		dGeomSetData(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, name);
+		RagDollTriWorld[r_SurfaceCount].geom = dCreateTriMesh(RagDollSpace, RagDollTriWorld[r_SurfaceCount].triMesh, NULL, NULL, NULL);
+		dGeomSetData(RagDollTriWorld[r_SurfaceCount].geom, name);
 
 		// this geom has no body
-		dGeomSetBody(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, 0);
+		dGeomSetBody(RagDollTriWorld[r_SurfaceCount].geom, 0);
 
-		dGeomSetPosition(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, center[0], center[1], center[2]);
-		dGeomSetRotation(RagDoll[RagDollID].RagDollWorld[r_SurfaceCount].geom, rot);
+		dGeomSetPosition(RagDollTriWorld[r_SurfaceCount].geom, center[0], center[1], center[2]);
+		dGeomSetRotation(RagDollTriWorld[r_SurfaceCount].geom, rot);
 
 		r_SurfaceCount++;			
 	}
@@ -872,15 +872,13 @@ void R_RecursiveODEWorldNode (mnode_t *node, int clipflags, int RagDollID)
 R_DrawWorld
 =============
 */
-void R_BuildRagdollSurfaces (vec3_t origin, int RagDollID)
+void R_BuildWorldTrimesh (vec3_t origin, int RagDollID)
 {
 	r_SurfaceCount = 0;
 
 	currentmodel = r_worldmodel;
 
 	R_RecursiveODEWorldNode (r_worldmodel->nodes, 15, RagDollID);
-
-	RagDoll[RagDollID].numsurfaces = r_SurfaceCount;
 
 	if(r_ragdoll_debug->value)
 		Com_Printf("%i surfaces added\n", r_SurfaceCount);
@@ -977,15 +975,7 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 
 	if(!nuke)
 		return; 
-
-	for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
-	{
-		if(RagDoll[RagDollID].RagDollWorld[i].geom)
-			dGeomDestroy(RagDoll[RagDollID].RagDollWorld[i].geom);
-		RagDoll[RagDollID].RagDollWorld[i].geom = NULL;
-	}
-	RagDoll[RagDollID].numsurfaces = 0;
-	
+		
 	//we also want to destroy all ragdoll bodies and joints for this ragdoll
 	for(i = CHEST; i <= LEFTHAND; i++)
 	{
@@ -1005,6 +995,18 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 	}
 }
 
+void R_DestroyWorldTrimesh( void )
+{
+	int i;
+
+	for(i = 0; i < r_SurfaceCount; i++)
+	{
+		if(RagDollTriWorld[i].geom)
+			dGeomDestroy(RagDollTriWorld[i].geom);
+		RagDollTriWorld[i].geom = NULL;
+	}
+}
+
 //This is called on every map load
 void R_ClearAllRagdolls( void )
 {
@@ -1016,6 +1018,8 @@ void R_ClearAllRagdolls( void )
 		RagDoll[RagDollID].destroyed = true;
 	}
 
+	R_DestroyWorldTrimesh();
+	
 	r_DrawingRagDoll = false;
 }
 
@@ -1037,7 +1041,8 @@ void R_AddNewRagdoll( vec3_t origin )
 		{
 			R_RagdollBody_Init(RagDollID, origin);
 			//add nearby surfaces anytime a ragdoll is spawned
-			R_BuildRagdollSurfaces (RagDoll[RagDollID].origin, RagDollID);
+			R_DestroyWorldTrimesh();
+			R_BuildWorldTrimesh (RagDoll[RagDollID].origin, RagDollID);
 			if(r_ragdoll_debug->value)
 				Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1], 
 					RagDoll[RagDollID].origin[2]);
@@ -1172,12 +1177,12 @@ void R_RenderAllRagdolls ( void )
 			if(r_ragdoll_debug->value)
 			{
 				//debug - mark surface centers
-				for(i = 0; i < RagDoll[RagDollID].numsurfaces; i++)
+				for(i = 0; i < r_SurfaceCount; i++)
 				{			
 					const	dReal *odePos;
 					vec3_t  org;
 
-					odePos = dGeomGetPosition (RagDoll[RagDollID].RagDollWorld[i].geom);
+					odePos = dGeomGetPosition (RagDollTriWorld[i].geom);
 					VectorSet(org, odePos[0], odePos[1], odePos[2]);
 					R_DrawMark(org, 0); //note - change this for surfaces to draw the vert array
 				}
@@ -1205,8 +1210,10 @@ void R_RenderAllRagdolls ( void )
 		}
 	}
 
-	if(!numRagDolls)
+	if(!numRagDolls) {
+		R_DestroyWorldTrimesh();
 		r_DrawingRagDoll = false; //no sense in coming back in here until we add a ragdoll
+	}
 
 	if(r_DrawingRagDoll) //here we handle the physics
 	{		
