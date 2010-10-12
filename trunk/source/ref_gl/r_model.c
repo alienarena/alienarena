@@ -1376,7 +1376,6 @@ void Mod_LoadLeafs (lump_t *l)
 	dleaf_t 	*in;
 	mleaf_t 	*out;
 	int			i, j, count, p;
-	glpoly_t	*poly;
 
 	in = (void *)(mod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
@@ -1411,8 +1410,6 @@ void Mod_LoadLeafs (lump_t *l)
 			for (j=0 ; j<out->nummarksurfaces ; j++)
 			{
 				out->firstmarksurface[j]->flags |= SURF_UNDERWATER;
-				for (poly = out->firstmarksurface[j]->polys ; poly ; poly=poly->next)
-					poly->flags |= SURF_UNDERWATER;
 			}
 		}
 	}
