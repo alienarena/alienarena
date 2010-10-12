@@ -174,9 +174,6 @@ typedef struct glpoly_s
 	struct	glpoly_s	*chain;
 	int		numverts;
 	float	verts[4][VERTEXSIZE];	// variable sized (xyz s1t1 s2t2)
-	int		flags;			// for SURF_UNDERWATER
-
-	vec3_t		center;
 
 } glpoly_t;
 

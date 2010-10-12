@@ -44,21 +44,6 @@ rscript_t	*rs_rootscript = NULL;
 int r_numgrasses;
 int r_numbeams;
 
-int	RS_Random(rs_stage_t *stage, msurface_t *surf)
-{
-	random_stage_t	*randStage = stage->rand_stage;
-	int number = 0, i;
-	glpoly_t *poly;
-
-	for (poly=surf->polys ; poly ; poly=poly->next)
-		number += poly->center[0] + poly->center[1] + poly->center[2];
-
-	for (i=0; i<(number%stage->rand_count) && randStage; randStage = randStage->next)
-		;
-
-	return  randStage->texture->texnum;
-}
-
 int RS_Animate (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->last_anim;
@@ -1673,9 +1658,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 
 		if (stage->colormap.enabled)
 			qglDisable (GL_TEXTURE_2D);
-		else if (stage->rand_count) {
-			GL_Bind (RS_Random(stage, surf));
-		}
 		else if (stage->anim_count){
 			GL_Bind (RS_Animate(stage));
 		}
