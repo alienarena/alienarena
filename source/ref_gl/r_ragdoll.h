@@ -72,7 +72,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define HAND_LEN 1.50 // wrist to mid-fingers only
 #define WRIST_X_OFF 23.50
 #define WRIST_Y_OFF 4.50
-#define WRIST_Z_OFF 27.00
+#define WRIST_Z_OFF 37.00
 #define FOOT_LEN 5.00 // ankles to base of ball of foot only
 #define HEEL_LEN 4.00 
 
@@ -85,7 +85,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ANKLE_H 2.50
 
 #define HEAD_W 8.00
-#define SHOULDER_W 16.00
+#define SHOULDER_W 15.00
 #define CHEST_W 12.00 // actually wider, but we want narrower than shoulders (esp. with large radius)
 #define BICEP_W 3.00 //thickness of bicep
 #define FOREARM_W 3.00 //thickness of forearm
