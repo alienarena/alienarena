@@ -673,14 +673,14 @@ void GL_BuildODEGeoms(msurface_t *surf)
 	//First 3 verts = 1 tri, each vert after the third creates a new triangle
 	ODESurfTris -= 2;
 	
-	for(i = ODETris+ODESurfs, k = 0; i < ODETris+ODESurfs+ODESurfTris; i++, k++)
+	for(i = ODETris, k = 0; i < ODETris+ODESurfTris; i++, k++)
 	{			
 		for(j = 0; j < 3; j++)
 		{
-			if( k == 1 && j == 1)
-				RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i-1;
+			if(ODETriTog)
+				RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i+ODESurfs-ODETriTog;
 			else
-				RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i;
+				RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i+ODESurfs;
 		}
 
 		ODETriTog = !ODETriTog;
