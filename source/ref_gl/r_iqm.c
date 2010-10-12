@@ -1487,7 +1487,6 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 	vec3_t	lightcolor;
 	int		index_xyz, index_st;
 	int		va = 0;
-	const	dReal *odePos;
 	qboolean mirror = false;
 	qboolean glass = false;
 	qboolean depthmaskrscipt = false;
