@@ -1491,7 +1491,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 	qboolean glass = false;
 	qboolean depthmaskrscipt = false;
 
-	if (r_shaders->value)
+	if (r_shaders->value && RagDoll[RagDollID].script)
 		rs = RagDoll[RagDollID].script;
 
 	VectorCopy(shadelight, lightcolor);

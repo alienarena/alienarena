@@ -404,6 +404,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
  	int bindweight[MAX_RAGDOLL_OBJECTS];
 
 	int i, j;
+	rs_stage_t *stage;
 	
 	//we need some information from the current entity
 	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
@@ -414,7 +415,18 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
     
 	RagDoll[RagDollID].script = (rscript_t *)malloc (sizeof(rscript_t));
 	if(r_shaders->value && currententity->script)
+	{
 		memcpy(RagDoll[RagDollID].script, currententity->script, sizeof(rscript_t));
+
+		stage = currententity->script->stage;
+
+		while (stage)
+		{
+			RagDoll[RagDollID].script->stage = (rs_stage_t *)malloc (sizeof(rs_stage_t));
+			memcpy(RagDoll[RagDollID].script->stage, stage, sizeof(rs_stage_t));
+			stage = stage->next;
+		}
+	}
 
 	RagDoll[RagDollID].texnum = currententity->skin->texnum;
 	RagDoll[RagDollID].flags = currententity->flags;
