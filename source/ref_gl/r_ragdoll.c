@@ -413,7 +413,8 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
     memcpy(RagDoll[RagDollID].initframe, currententity->model->outframe, currententity->model->num_joints*sizeof(matrix3x4_t));
     
 	RagDoll[RagDollID].script = (rscript_t *)malloc (sizeof(rscript_t));
-	memcpy(RagDoll[RagDollID].script, currententity->script, sizeof(rscript_t));
+	if(r_shaders->value && currententity->script)
+		memcpy(RagDoll[RagDollID].script, currententity->script, sizeof(rscript_t));
 
 	RagDoll[RagDollID].texnum = currententity->skin->texnum;
 	RagDoll[RagDollID].flags = currententity->flags;
@@ -639,173 +640,58 @@ void R_DrawMark (vec3_t origin, int type)
 }
 
 //For creating the surfaces for the ragdoll to collide with
-int TRIMESHVertexCounter;
-int ODETris;
-int ODESurfs;
 void GL_BuildODEGeoms(msurface_t *surf)
 {
 	glpoly_t *p;
 	float	*v;
-	int		i, j, k;	
-	int ODESurfTris;
-	int ODETriTog;
-	//winding order for ODE
-	const int indices[6] = {2,1,0,
-							3,2,0}; 
-	
-	
+	int		i;
+    int polyStart;
 	for ( p = surf->polys; p; p = p->chain ) 
 	{		
-		
-		ODESurfTris = ODETriTog = 0; //tris for this poly
+        if(RagDollTriWorld.numODEVerts + p->numverts > RagDollTriWorld.maxODEVerts)
+        {
+            int growVerts = RagDollTriWorld.maxODEVerts;
+            dVector3 *newVerts;
+            while(RagDollTriWorld.numODEVerts + p->numverts > growVerts)
+                growVerts += GROW_ODE_VERTS;
+            newVerts = (dVector3 *)realloc(RagDollTriWorld.ODEVerts, growVerts*sizeof(dVector3));
+            if(!newVerts) break;
+            RagDollTriWorld.maxODEVerts = growVerts;
+            RagDollTriWorld.ODEVerts = newVerts;
+        }
 
-		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
+        polyStart = RagDollTriWorld.numODEVerts;
+
+		for (v = p->verts[0]; v < p->verts[p->numverts]; v += VERTEXSIZE)
 		{
 
-			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][0] = v[0];
-			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][1] = v[1];
-			RagDollTriWorld.ODEVerts[TRIMESHVertexCounter][2] = v[2];
-
-			TRIMESHVertexCounter++;
-			ODESurfTris++;
+			RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][0] = v[0];
+			RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][1] = v[1];
+			RagDollTriWorld.ODEVerts[RagDollTriWorld.numODEVerts][2] = v[2];
+			RagDollTriWorld.numODEVerts++;
 		}
 
-		//build the indices here for this surface
-	
-		//First 3 verts = 1 tri, each vert after the third creates a new triangle
-		ODESurfTris -= 2;
-	
-		for(i = ODETris, k = 0; i < ODETris+ODESurfTris; i++, k++)
-		{			
-			for(j = 0; j < 3; j++)
-			{
-				if(ODETriTog)
-					RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i+ODESurfs-ODETriTog;
-				else
-					RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i+ODESurfs;
-			}
+        if(RagDollTriWorld.numODETris + p->numverts-2 > RagDollTriWorld.maxODETris)
+        {
+            int growTris = RagDollTriWorld.maxODETris;
+            dTriIndex *newTris;
+            while(RagDollTriWorld.numODETris + p->numverts-2 > growTris)
+                growTris += GROW_ODE_TRIS;
+            newTris = (dTriIndex *)realloc(RagDollTriWorld.ODETris, growTris*sizeof(dTriIndex[3]));
+            if(!newTris) break;
+            RagDollTriWorld.maxODETris = growTris;
+            RagDollTriWorld.ODETris = newTris;
+        }
 
-			ODETriTog = !ODETriTog;
-		}
-		ODESurfs += 2;
-		ODETris += ODESurfTris;
+        for (i = 2; i < p->numverts; i++)
+        {
+            RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+0] = polyStart + i;
+            RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+1] = polyStart + i - 1;
+            RagDollTriWorld.ODETris[RagDollTriWorld.numODETris*3+2] = polyStart;
+            RagDollTriWorld.numODETris++;
+        }
 	}
 }
-
-void R_RecursiveODEWorldNode (mnode_t *node, int clipflags)
-{
-	int			c, side, sidebit;
-	cplane_t	*plane;
-	msurface_t	*surf, **mark;
-	mleaf_t		*pleaf;
-	float		dot;
-
-	if (node->contents == CONTENTS_SOLID)
-		return;		// solid
-	if (node->visframe != r_visframecount)
-		return;
-	if (!r_nocull->value)
-	{
-		int i, clipped;
-		cplane_t *clipplane;
-
-		for (i=0,clipplane=frustum ; i<4 ; i++,clipplane++)
-		{
-			clipped = BoxOnPlaneSide (node->minmaxs, node->minmaxs+3, clipplane);
-
-			if (clipped == 1)
-				clipflags &= ~(1<<i);	// node is entirely on screen
-			else if (clipped == 2)
-				return;					// fully clipped
-		}
-	}
-
-	// if a leaf node, draw stuff
-	if (node->contents != -1)
-	{
-		pleaf = (mleaf_t *)node;
-
-		// check for door connected areas
-		if (r_newrefdef.areabits)
-		{
-			if (! (r_newrefdef.areabits[pleaf->area>>3] & (1<<(pleaf->area&7)) ) )
-				return;		// not visible
-		}
-
-		mark = pleaf->firstmarksurface;
-		if (! (c = pleaf->nummarksurfaces) )
-			return;
-
-		do
-		{
-			(*mark++)->visframe = r_framecount;
-		} while (--c);
-
-		return;
-	}
-
-	// node is just a decision point, so go down the apropriate sides
-
-	// find which side of the node we are on
-	plane = node->plane;
-
-	switch (plane->type)
-	{
-	case PLANE_X:
-		dot = r_newrefdef.vieworg[0] - plane->dist;
-		break;
-	case PLANE_Y:
-		dot = r_newrefdef.vieworg[1] - plane->dist;
-		break;
-	case PLANE_Z:
-		dot = r_newrefdef.vieworg[2] - plane->dist;
-		break;
-	default:
-		dot = DotProduct (r_newrefdef.vieworg, plane->normal) - plane->dist;
-		break;
-	}
-
-	if (dot >= 0)
-	{
-		side = 0;
-		sidebit = 0;
-	}
-	else
-	{
-		side = 1;
-		sidebit = SURF_PLANEBACK;
-	}
-
-	// recurse down the children, front side first
-	R_RecursiveODEWorldNode (node->children[side], clipflags);
-
-	// draw stuff
-	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
-	{
-		if (surf->visframe != r_framecount)
-			continue;
-
-		if ( (surf->flags & SURF_PLANEBACK) != sidebit )
-			continue;		// wrong side
-
-		if (surf->texinfo->flags & SURF_SKY)
-		{	// no skies here
-			continue;
-		}
-		else
-		{
-			if (!( surf->flags & SURF_DRAWTURB ) )
-			{
-				if(!SurfaceIsTranslucent(surf))
-					GL_BuildODEGeoms(surf);
-			}
-		}
-	}
-
-	// recurse down the back side
-	R_RecursiveODEWorldNode (node->children[!side], clipflags);
-}
-
 
 /*
 =============
@@ -814,13 +700,25 @@ R_DrawWorld
 */
 void R_BuildWorldTrimesh ( void )
 {
+    msurface_t *surf;
 	dMatrix3 rot;
 	
-	TRIMESHVertexCounter = ODETris = ODESurfs = 0;	
+    RagDollTriWorld.numODEVerts = RagDollTriWorld.numODETris = 0;
 
-	currentmodel = r_worldmodel;
-
-	R_RecursiveODEWorldNode (r_worldmodel->nodes, 15);
+    for (surf = r_worldmodel->surfaces; surf < &r_worldmodel->surfaces[r_worldmodel->numsurfaces] ; surf++)
+    {
+        if (surf->texinfo->flags & SURF_SKY)
+        {   // no skies here
+            continue;
+        }
+        else
+        {
+            if (!( surf->flags & SURF_DRAWTURB ) )
+            {
+                GL_BuildODEGeoms(surf);
+            }
+        }
+    }
 		
 	dRSetIdentity(rot);	
 	
@@ -828,8 +726,8 @@ void R_BuildWorldTrimesh ( void )
 	RagDollTriWorld.triMesh = dGeomTriMeshDataCreate();
 
 	// Build the mesh from the data
-	dGeomTriMeshDataBuildSimple(RagDollTriWorld.triMesh, (dReal*)RagDollTriWorld.ODEVerts, TRIMESHVertexCounter, 
-		RagDollTriWorld.ODEIndices, ODETris * 3);
+	dGeomTriMeshDataBuildSimple(RagDollTriWorld.triMesh, (dReal*)RagDollTriWorld.ODEVerts, RagDollTriWorld.numODEVerts, 
+		RagDollTriWorld.ODETris, RagDollTriWorld.numODETris*3);
 	
 	RagDollTriWorld.geom = dCreateTriMesh(RagDollSpace, RagDollTriWorld.triMesh, NULL, NULL, NULL);
 	dGeomSetData(RagDollTriWorld.geom, "surface");
@@ -957,6 +855,14 @@ void R_DestroyWorldTrimesh( void )
 	if(RagDollTriWorld.geom)
 		dGeomDestroy(RagDollTriWorld.geom);
 	RagDollTriWorld.geom = NULL;
+    if(RagDollTriWorld.ODEVerts)
+        free(RagDollTriWorld.ODEVerts);
+    RagDollTriWorld.ODEVerts = NULL;
+    RagDollTriWorld.maxODEVerts = 0;
+    if(RagDollTriWorld.ODETris)
+        free(RagDollTriWorld.ODETris);
+    RagDollTriWorld.ODETris = NULL;
+    RagDollTriWorld.maxODETris = 0;
 }
 
 //This is called on every map load
@@ -969,9 +875,7 @@ void R_ClearAllRagdolls( void )
 		R_DestroyRagDoll(RagDollID, true);
 		RagDoll[RagDollID].destroyed = true;
 	}
-
 	R_DestroyWorldTrimesh();
-	
 	r_DrawingRagDoll = false;
 }
 
@@ -992,9 +896,7 @@ void R_AddNewRagdoll( vec3_t origin )
 		if(RagDoll[RagDollID].destroyed)
 		{
 			R_RagdollBody_Init(RagDollID, origin);
-			//add nearby surfaces anytime a ragdoll is spawned
-			R_DestroyWorldTrimesh();
-			R_BuildWorldTrimesh ();
+			
 			if(r_ragdoll_debug->value)
 				Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1], 
 					RagDoll[RagDollID].origin[2]);
@@ -1159,7 +1061,6 @@ void R_RenderAllRagdolls ( void )
 	}
 
 	if(!numRagDolls) {
-		R_DestroyWorldTrimesh();
 		r_DrawingRagDoll = false; //no sense in coming back in here until we add a ragdoll
 	}
 

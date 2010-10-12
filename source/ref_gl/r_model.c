@@ -2204,6 +2204,9 @@ void R_BeginRegistration (char *model)
 	r_teamColor = 0;
 
 	R_RegisterLightGroups();
+
+	//ODE
+	R_BuildWorldTrimesh ();
 }
 
 /*

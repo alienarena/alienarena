@@ -120,9 +120,13 @@ typedef struct RagDollObject_s {
     matrix3x4_t initmat;
 } RagDollObject_t;
 
+#define GROW_ODE_VERTS 16384
+#define GROW_ODE_TRIS 16384
 typedef struct RagDollWorld_s {
-	dVector3	ODEVerts[MAX_VERTICES];
-	dTriIndex	ODEIndices[MAX_VERTICES*3];
+	dVector3	*ODEVerts;
+	dTriIndex	*ODETris;
+    int numODEVerts, maxODEVerts;
+    int numODETris, maxODETris;
 	dTriMeshDataID triMesh;
 	dGeomID geom;
 } RagDollWorld_t;
@@ -159,3 +163,5 @@ extern void R_DestroyWorldObject( void );
 extern void R_RenderAllRagdolls ( void );
 extern void R_AddNewRagdoll( vec3_t origin );
 extern void R_ClearAllRagdolls( void );
+extern void R_DestroyWorldTrimesh();
+extern void R_BuildWorldTrimesh ();
