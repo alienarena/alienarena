@@ -1787,21 +1787,10 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 						if (surf->texinfo->flags & SURF_FLOWING)
 							txm = tym = 0;
 					}
-					else if (fabs(stage->depthhack))
-					{
-						vec3_t vec;
-
-						VectorSubtract(p->center, r_newrefdef.vieworg, vec);
-						VectorNormalize(vec);
-
-						os = v[3] + cutDot(vec, surf->texinfo->vecs[0])*stage->depthhack*0.01;
-						ot = v[4] + cutDot(vec, surf->texinfo->vecs[1])*stage->depthhack*0.01;
-					}
-					else
-					{
-						os = v[3];
-						ot = v[4];
-					}
+					
+					os = v[3];
+					ot = v[4];
+					
 					RS_SetTexcoords (stage, &os, &ot, surf);
 					{
 						float red=255, green=255, blue=255;
@@ -1856,22 +1845,10 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 						if (surf->texinfo->flags & SURF_FLOWING)
 							txm = tym = 0;
 					}
-					else if (fabs(stage->depthhack))
-					{
-						vec3_t vec;
-
-						VectorSubtract(p->center, r_newrefdef.vieworg, vec);
-						VectorNormalize(vec);
-
-						os = v[3] + cutDot(vec, surf->texinfo->vecs[0])*stage->depthhack*0.01;
-						ot = v[4] + cutDot(vec, surf->texinfo->vecs[1])*stage->depthhack*0.01;
-					}
-					else
-					{
-						os = v[3];
-						ot = v[4];
-					}
-
+					
+					os = v[3];
+					ot = v[4];
+					
 					RS_SetTexcoords (stage, &os, &ot, surf);
 
 					{

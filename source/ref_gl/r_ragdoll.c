@@ -653,9 +653,12 @@ void GL_BuildODEGeoms(msurface_t *surf)
 	const int indices[6] = {2,1,0,
 							3,2,0}; 
 	
-	ODESurfTris = ODETriTog = 0; //tris for this surface
+	
 	for ( p = surf->polys; p; p = p->chain ) 
 	{		
+		
+		ODESurfTris = ODETriTog = 0; //tris for this poly
+
 		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 		{
 
@@ -666,27 +669,27 @@ void GL_BuildODEGeoms(msurface_t *surf)
 			TRIMESHVertexCounter++;
 			ODESurfTris++;
 		}
-	}
 
-	//build the indices here for this surface
+		//build the indices here for this surface
 	
-	//First 3 verts = 1 tri, each vert after the third creates a new triangle
-	ODESurfTris -= 2;
+		//First 3 verts = 1 tri, each vert after the third creates a new triangle
+		ODESurfTris -= 2;
 	
-	for(i = ODETris, k = 0; i < ODETris+ODESurfTris; i++, k++)
-	{			
-		for(j = 0; j < 3; j++)
-		{
-			if(ODETriTog)
-				RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i+ODESurfs-ODETriTog;
-			else
-				RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i+ODESurfs;
+		for(i = ODETris, k = 0; i < ODETris+ODESurfTris; i++, k++)
+		{			
+			for(j = 0; j < 3; j++)
+			{
+				if(ODETriTog)
+					RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i+ODESurfs-ODETriTog;
+				else
+					RagDollTriWorld.ODEIndices[j+i*3] = indices[j+ODETriTog]+i+ODESurfs;
+			}
+
+			ODETriTog = !ODETriTog;
 		}
-
-		ODETriTog = !ODETriTog;
+		ODESurfs += 2;
+		ODETris += ODESurfTris;
 	}
-	ODESurfs += 2;
-	ODETris += ODESurfTris;
 }
 
 void R_RecursiveODEWorldNode (mnode_t *node, int clipflags)
