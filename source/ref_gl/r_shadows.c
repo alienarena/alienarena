@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "r_local.h"
+#include "r_ragdoll.h"
 
 /*
 ===============
@@ -632,7 +633,7 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 	GL_RenderVolumes(paliashdr, light, project, lerp);
 }
 
-void GL_DrawIQMShadowVolume( void )
+void GL_DrawIQMShadowVolume( vec3_t meshOrigin, vec3_t meshAngles, qboolean RagDoll )
 {
 	vec3_t light, temp, tempOrg;
 	int i, j, o;
@@ -647,24 +648,24 @@ void GL_DrawIQMShadowVolume( void )
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
 
-	if(currententity->flags & RF_BOBBING)
+	if((currententity->flags & RF_BOBBING) && !RagDoll)
 		bob = currententity->bob;
 	else
 		bob = 0;
 
-	VectorCopy(currententity->origin, tempOrg);
+	VectorCopy(meshOrigin, tempOrg);
 	tempOrg[2] -= bob;
 
 	VectorClear(light);
 
-	cost =  cos(-currententity->angles[1] / 180 * M_PI),
-    sint =  sin(-currententity->angles[1] / 180 * M_PI);
+	cost =  cos(-meshAngles[1] / 180 * M_PI),
+    sint =  sin(-meshAngles[1] / 180 * M_PI);
 
 	numlights = 0;
 	VectorClear(lightAdd);
 	for (i=0; i<r_lightgroups; i++)
 	{
-		if(LightGroups[i].group_origin[2] < currententity->origin[2] - bob)
+		if(LightGroups[i].group_origin[2] < meshOrigin[2] - bob)
 			continue; //don't bother with world lights below the ent, creates undesirable shadows
 
 		//need a trace(not for self model, too jerky when lights are blocked and reappear)
@@ -675,7 +676,7 @@ void GL_DrawIQMShadowVolume( void )
 				continue;
 		}
 
-		VectorSubtract(LightGroups[i].group_origin, currententity->origin, temp);
+		VectorSubtract(LightGroups[i].group_origin, meshOrigin, temp);
 
 		dist = VectorLength(temp);
 
@@ -688,12 +689,12 @@ void GL_DrawIQMShadowVolume( void )
 		if(numlights > 0.0)
 		{
 			for(o = 0; o < 3; o++)
-				light[o] = -currententity->origin[o] + lightAdd[o]/numlights;
+				light[o] = -meshOrigin[o] + lightAdd[o]/numlights;
 
 			is = light[0], it = light[1];
 			light[0] = (cost * (is - 0) + sint * (0 - it) + 0);
 			light[1] = (cost * (it - 0) + sint * (is - 0) + 0);
-			light[2] += currententity->model->maxs[2] + 56;
+			light[2] += currentmodel->maxs[2] + 56;
 		}
 
 		worldlight++;
@@ -836,7 +837,7 @@ void R_DrawShadowVolume()
 	else
 	{
 		float time, frame;
-
+				
 		modelpitch = degreeToRadian(currententity->angles[PITCH]);
 
 		//frame interpolation
@@ -855,17 +856,29 @@ void R_DrawShadowVolume()
 
 		GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
 
-		GL_DrawIQMShadowVolume();
+		GL_DrawIQMShadowVolume(currententity->origin, currententity->angles, false);
 	}
 
 	qglEnable(GL_TEXTURE_2D);
 	qglPopMatrix();
 }
 
+void R_DrawRagDollShadowVolume(int RagDollID)
+{
+	qglPushMatrix();
+	qglDisable(GL_TEXTURE_2D);
+
+	GL_AnimateIQMRagdoll(RagDollID);
+
+	GL_DrawIQMShadowVolume(RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, true);
+	
+	qglEnable(GL_TEXTURE_2D);
+	qglPopMatrix();
+}
 
 void R_CastShadow(void)
 {
-	int i;
+	int i, RagDollID;
 	vec3_t dist, tmp;
 	float rad;
     trace_t r_trace;
@@ -900,13 +913,6 @@ void R_CastShadow(void)
 	{
 		currententity = &r_newrefdef.entities[i];
 
-		if(r_ragdolls->value)
-		{		
-			//Do not render deathframe shadows if using ragdolls, this is handled elsewhere
-			if(currententity->frame > 198)
-				continue;
-		}
-
 		if (currententity->
 		flags & (RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED |
 				 RF_SHELL_BLUE | RF_SHELL_DOUBLE |
@@ -920,6 +926,13 @@ void R_CastShadow(void)
 
 		if (currentmodel->type != mod_alias && currentmodel->type != mod_iqm)
 			continue;
+
+		if(r_ragdolls->value && (currentmodel->type == mod_iqm))
+		{			
+			//Do not render deathframes if using ragdolls
+			if(currententity->frame > 198) 
+				continue;
+		}
 
 		if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 10))
 			continue;
@@ -956,6 +969,45 @@ void R_CastShadow(void)
 
 		R_DrawShadowVolume();
 	}
+
+	//render volumes for ragdolls
+	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
+	{
+		if(RagDoll[RagDollID].destroyed)
+	        continue;
+
+		currentmodel = RagDoll[RagDollID].ragDollMesh;
+
+		if (!currentmodel)
+			continue;
+		
+		if (r_newrefdef.vieworg[2] < (RagDoll[RagDollID].curPos[2] - 10))
+			continue;
+
+		VectorSubtract(currentmodel->maxs, currentmodel->mins, tmp);
+		VectorScale (tmp, 1.666, tmp);
+		rad = VectorLength (tmp);
+
+		if( R_CullSphere( RagDoll[RagDollID].curPos, rad, 15 ) )
+			continue;
+
+		if (r_worldmodel ) {
+			//occulusion culling - why draw shadows of entities we cannot see?
+			r_trace = CM_BoxTrace(r_origin, RagDoll[RagDollID].curPos, currentmodel->maxs, currentmodel->mins, r_worldmodel->firstnode, MASK_OPAQUE);
+			if(r_trace.fraction != 1.0)
+				continue;
+		}
+
+		//get distance, set lod if available
+		VectorSubtract(r_origin, RagDoll[RagDollID].origin, dist);
+
+		//cull by distance if soft shadows(to do - test/tweak this)
+		if(VectorLength(dist) > 1024 && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
+			continue;
+
+		R_DrawRagDollShadowVolume(RagDollID);
+	}
+
 
 	qglDisableClientState(GL_VERTEX_ARRAY);
 	qglColorMask(1,1,1,1);

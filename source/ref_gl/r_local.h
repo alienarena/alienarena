@@ -324,8 +324,7 @@ extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
 extern vec3_t	lightPosition;
 extern float	dynFactor;
-extern void		GL_GetLightVals(qboolean dynamic);
-extern void GL_GetLightValsForRagDoll(int RagDollID, qboolean dynamic);
+extern void		GL_GetLightVals(vec3_t origin, qboolean RagDoll, qboolean dynamic);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 

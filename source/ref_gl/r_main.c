@@ -1045,11 +1045,11 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawVegetationSurface ();
 
-	R_DrawEntitiesOnList ();
-
-	R_RenderAllRagdolls();
+	R_DrawEntitiesOnList ();	
 
 	R_CastShadow();
+
+	R_RenderAllRagdolls(); //move back ahead of r_castshadow when we figure out shadow jitter bug
 
 	R_DrawViewEntitiesOnList ();
 

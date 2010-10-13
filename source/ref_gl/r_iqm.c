@@ -885,7 +885,7 @@ void GL_AnimateIQMRagdoll(int RagDollID)
 }
 
 //to do - combine these two
-void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
+void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t lightOut)
 {
 	float l;
 	float lscale;
@@ -897,24 +897,7 @@ void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
 
 	lscale = 3.0;
 
-    l = lscale * VLight_GetLightValue (normal->dir, lightPosition, currententity->angles[PITCH], currententity->angles[YAW]);
-
-    VectorScale(baselight, l, lightOut);
-}
-
-void GL_VlightIQMRagDoll (int RagDollID, vec3_t baselight, mnormal_t *normal, vec3_t lightOut)
-{
-	float l;
-	float lscale;
-
-	VectorScale(baselight, gl_modulate->value, lightOut);
-
-	if(!gl_vlights->value)
-		return;
-
-	lscale = 3.0;
-
-    l = lscale * VLight_GetLightValue (normal->dir, lightPosition, RagDoll[RagDollID].angles[PITCH], RagDoll[RagDollID].angles[YAW]);
+    l = lscale * VLight_GetLightValue (normal->dir, lightPosition, angles[PITCH], angles[YAW]);
 
     VectorScale(baselight, l, lightOut);
 }
@@ -983,7 +966,7 @@ void GL_DrawIQMFrame(int skinnum)
 			glEnableVertexAttribArrayARB (1);
             glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
-            GL_GetLightVals(false);
+            GL_GetLightVals(currententity->origin, false, false);
 
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
@@ -1139,7 +1122,7 @@ void GL_DrawIQMFrame(int skinnum)
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, skinnum);
 
- 			GL_GetLightVals(false);
+ 			GL_GetLightVals(currententity->origin, false, false);
 		}
 
 		for (i=0; i<currentmodel->num_triangles; i++)
@@ -1168,7 +1151,7 @@ void GL_DrawIQMFrame(int skinnum)
 					VArray[4] = currentmodel->st[index_st].t;
 				}
 
-				GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], lightcolor);
+				GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);
 
 				if(mirror && !(currententity->flags & RF_WEAPONMODEL) )
 				{
@@ -1282,7 +1265,7 @@ void GL_DrawIQMFrame(int skinnum)
 					GLSTATE_DISABLE_ALPHATEST
 
 				if(stage->lightmap)
-					GL_GetLightVals(false);
+					GL_GetLightVals(currententity->origin, false, false);
 			}
 
 			if(stage->normalmap)
@@ -1294,7 +1277,7 @@ void GL_DrawIQMFrame(int skinnum)
 				glEnableVertexAttribArrayARB (1);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
-				GL_GetLightVals(true);
+				GL_GetLightVals(currententity->origin, false, true);
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
@@ -1404,7 +1387,7 @@ void GL_DrawIQMFrame(int skinnum)
 
 						if (stage->lightmap)
 						{
-							GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], lightcolor);
+							GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
 							blue = lightcolor[2];
@@ -1476,7 +1459,6 @@ done:
 }
 
 //Similar to above, but geared more specifically toward ragdoll player models
-//Note - we may want to add shells back in, but for now, no
 void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 {
 	int		i, j;
@@ -1545,7 +1527,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, skinnum);
 
-			GL_GetLightValsForRagDoll(RagDollID, false);
+			GL_GetLightVals(RagDoll[RagDollID].curPos, true, false);
 		}
 
 		for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
@@ -1574,7 +1556,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 					VArray[4] = RagDoll[RagDollID].ragDollMesh->st[index_st].t;
 				}
 
-				GL_VlightIQMRagDoll (RagDollID, shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], lightcolor);
+				GL_VlightIQM (shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], RagDoll[RagDollID].angles, lightcolor);
 
 				VArray[5] = lightcolor[0];
 				VArray[6] = lightcolor[1];
@@ -1672,7 +1654,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 					GLSTATE_DISABLE_ALPHATEST
 
 				if(stage->lightmap)
-					GL_GetLightVals(false);
+					GL_GetLightVals(RagDoll[RagDollID].curPos, true, false);
 			}
 
 			if(stage->normalmap)
@@ -1684,7 +1666,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 				glEnableVertexAttribArrayARB (1);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
-				GL_GetLightValsForRagDoll(RagDollID, true);
+				GL_GetLightVals(RagDoll[RagDollID].curPos, true, true);
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
@@ -1776,7 +1758,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 
 						if (stage->lightmap)
 						{
-							GL_VlightIQMRagDoll (RagDollID, shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], lightcolor);
+							GL_VlightIQM (shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], RagDoll[RagDollID].angles, lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
 							blue = lightcolor[2];
