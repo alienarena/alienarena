@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "r_local.h"
+#include "r_ragdoll.h"
 #include <GL/gl.h>
 
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
@@ -446,6 +447,7 @@ void R_DrawDynamicCaster(void)
 	dlight_t	*dl;
 	float		add, brightest = 0;
 	trace_t		r_trace;
+	int			RagDollID;
 
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
@@ -513,6 +515,12 @@ void R_DrawDynamicCaster(void)
 			continue;
 		}
 
+		if(r_ragdolls->value && currententity->model->type == mod_iqm)
+		{
+			if(currententity->frame > 198)
+				continue;
+		}
+
 		//distance from light, if too far, don't render(to do - check against brightness for dist!)
 		VectorSubtract(dl->origin, currententity->origin, dist);
 		if(VectorLength(dist) > 256.0f)
@@ -540,6 +548,29 @@ void R_DrawDynamicCaster(void)
 			R_DrawIQMCaster ();
 		else
 			R_DrawAliasModelCaster ();
+	}
+
+	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
+	{
+		if(RagDoll[RagDollID].destroyed)
+	        continue;
+
+		currentmodel = RagDoll[RagDollID].ragDollMesh;
+
+		if (!currentmodel)
+			continue;
+		
+		//distance from light, if too far, don't render(to do - check against brightness for dist!)
+		VectorSubtract(dl->origin, RagDoll[RagDollID].curPos, dist);
+		if(VectorLength(dist) > 256.0f)
+			continue;
+
+		//trace visibility from light - we don't render objects the light doesn't hit!
+		r_trace = CM_BoxTrace(dl->origin, RagDoll[RagDollID].curPos, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+		if(r_trace.fraction != 1.0)
+			continue;
+
+		R_DrawIQMRagDollCaster (RagDollID);
 	}
 
 	setTextureMatrix();

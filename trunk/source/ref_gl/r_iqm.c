@@ -2396,3 +2396,19 @@ void R_DrawIQMCaster ( void )
 
 	qglPopMatrix();
 }
+
+void R_DrawIQMRagDollCaster ( int RagDollID )
+{
+	if ( R_CullRagDolls( RagDollID ) )
+		return;
+	
+    qglPushMatrix ();
+	
+	GL_AnimateIQMRagdoll(RagDollID);
+
+	currentmodel = RagDoll[RagDollID].ragDollMesh;
+
+	GL_DrawIQMCasterFrame();
+
+	qglPopMatrix();
+}
