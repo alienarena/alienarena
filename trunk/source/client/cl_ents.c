@@ -1085,6 +1085,44 @@ void CL_BrassShells(vec3_t org, vec3_t dir, int count)
 	}
 }
 
+void CL_GlassShards(vec3_t org, vec3_t dir, int count)
+{
+	int i, j;
+	clentity_t *le;
+	float d;
+
+	if (!count)
+		return;
+
+	for (i = 0; i < count; i++) {
+
+		if (!free_clentities)
+			return;
+
+		le = free_clentities;
+		free_clentities = le->next;
+		le->next = active_clentities;
+		active_clentities = le;
+		le->time = cl.time;
+		d = (192 + rand()) & 13;
+		VectorClear(le->accel);
+		VectorClear(le->vel);
+		le->accel[0] = le->accel[1] = 0;
+		le->accel[2] = -3 * PARTICLE_GRAVITY;
+		le->alpha = 1.0;
+		le->alphavel = -0.01;
+		le->flags = CLM_BOUNCE | CLM_FRICTION | CLM_ROTATE | CLM_NOSHADOW | CLM_GLASS;
+		le->model = R_RegisterModel("models/objects/debris1/tris.md2");
+		le->ang = crand() * 360;
+		le->avel = crand() * 500;
+
+		for (j = 0; j < 3; j++) {
+			le->lastOrg[j] = le->org[j] = org[j];
+			le->vel[j] = crand() * 12 + d * dir[j];
+		}
+	}
+}
+
 /*
 ==============
 CL_AddViewWeapon
@@ -1609,6 +1647,12 @@ void CL_AddClEntities()
 					Com_sprintf(soundname, sizeof(soundname), "weapons/clink0%i.wav", (rand() % 2) + 1);
 					S_StartSound (le->org, 0, CHAN_WEAPON, S_RegisterSound(soundname), 1.0, ATTN_NORM, 0);
 				}
+
+				//play a sound if glass
+				if ( (le->flags & (CLM_GLASS))  &&  (le->flags & (CLM_BOUNCE)) ) {
+					Com_sprintf(soundname, sizeof(soundname), "weapons/clink0%i.wav", (rand() % 2) + 1); //to do - get glass sound
+					S_StartSound (le->org, 0, CHAN_WEAPON, S_RegisterSound(soundname), 1.0, ATTN_NORM, 0);
+				}
 			}
 		}
 		// Save current origin if needed
@@ -1640,6 +1684,9 @@ void CL_AddClEntities()
 			((le->flags & CLM_ROTATE) ? (time * le->avel) : 0);
 
 		ent.frame = ent.oldframe = 0;
+
+		if(le->flags & CLM_GLASS)
+			ent.flags |= RF_TRANSLUCENT;
 			
 		V_AddEntity(&ent);
 		

@@ -515,7 +515,7 @@ void R_DrawDynamicCaster(void)
 			continue;
 		}
 
-		if(r_ragdolls->value && currententity->model->type == mod_iqm)
+		if(r_ragdolls->value && currententity->model->type == mod_iqm && currentmodel->hasRagDoll)
 		{
 			if(currententity->frame > 198)
 				continue;

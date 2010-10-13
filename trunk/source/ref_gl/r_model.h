@@ -266,6 +266,14 @@ typedef struct {
 	int n[3];
 } neighbors_t;
 
+typedef struct {
+
+	int hasHelmet;
+
+	float RagDollDims[27];
+
+} mragdoll_t;
+
 typedef enum {mod_bad, mod_brush, mod_sprite, mod_alias, mod_iqm } modtype_t;
 
 typedef struct model_s
@@ -355,7 +363,7 @@ typedef struct model_s
 	char			*jointname;
 	//end iqm
 
-	//temporary md2 - will use .iqm struct instead
+	//md2 only
 	byte		*tangents;
 
 	fstvert_t	*st;
@@ -366,6 +374,10 @@ typedef struct model_s
 	//vertCache_t	*vbo_xyz;
 	//vertCache_t	*vbo_color;
 	//vertCache_t	*vbo_normals;
+
+	//ragdoll info
+	int hasRagDoll;
+	mragdoll_t ragdoll;
 
 } model_t;
 

@@ -920,6 +920,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	gi.sound (self, CHAN_VOICE, gi.soundindex("misc/death.wav"), 1, ATTN_STATIC, 0);
 
 	self->deadflag = DEAD_DEAD;
+	self->takedamage	= DAMAGE_NO;
 
 	gi.linkentity (self);
 }
@@ -1426,53 +1427,6 @@ void InitBodyQue (void)
 	}
 }
 
-void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
-{
-	int	n;
-	int gib_effect = EF_GREENGIB;
-	self->s.modelindex3 = 0;    //remove helmet, if a martian
-	self->s.modelindex4 = 0;
-	if (self->health < -40)
-	{
-		if(self->ctype == 0) { //alien
-
-			for (n= 0; n < 4; n++)
-				ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_METALLIC, EF_GREENGIB);
-		}
-		else if(self->ctype == 2) { //robot
-			gib_effect = 0;
-			for (n= 0; n < 4; n++)
-				ThrowGib (self, "models/objects/debris3/tris.md2", damage, GIB_METALLIC, 0);
-			for (n= 0; n < 4; n++)
-				ThrowGib (self, "models/objects/debris1/tris.md2", damage, GIB_METALLIC, 0);
-			//blow up too :)
-			gi.WriteByte (svc_temp_entity);
-			gi.WriteByte (TE_ROCKET_EXPLOSION);
-			gi.WritePosition (self->s.origin);
-			gi.multicast (self->s.origin, MULTICAST_PHS);
-
-		}
-		else { //human
-			gib_effect = EF_GIB;
-			for (n= 0; n < 4; n++)
-				ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_GIB);
-		}
-
-		if(self->usegibs) {
-			ThrowGib (self, self->head, damage, GIB_ORGANIC, gib_effect);
-			ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);
-			ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);
-			ThrowGib (self, self->body, damage, GIB_ORGANIC, gib_effect);
-			ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
-			ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
-		}
-
-		self->s.origin[2] -= 48;
-		ThrowClientHead (self, damage);
-		self->takedamage = DAMAGE_NO;
-	}
-}
-
 /*
 =============
 BodySink
@@ -1518,12 +1472,12 @@ void CopyToBodyQue (edict_t *ent)
 	VectorCopy (ent->absmin, body->absmin);
 	VectorCopy (ent->absmax, body->absmax);
 	VectorCopy (ent->size, body->size);
-	body->solid = ent->solid;
+	body->solid = SOLID_NOT;
 	body->clipmask = ent->clipmask;
 	body->owner = ent->owner;
 	body->movetype = ent->movetype;
-	body->die = body_die;
-	body->takedamage = DAMAGE_YES;
+	body->die = NULL;
+	body->takedamage = DAMAGE_NO;
 	body->ctype = ent->ctype;
 	body->usegibs = ent->usegibs;
 	body->timestamp = level.time;
