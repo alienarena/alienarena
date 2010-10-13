@@ -938,7 +938,7 @@ void R_AddNewRagdoll( vec3_t origin )
 }
 
 //Ragdoll rendering routines
-static qboolean R_CullRagDolls( int RagDollID )
+qboolean R_CullRagDolls( int RagDollID )
 {
 	int i;
 	vec3_t	vectors[3];
@@ -1046,7 +1046,8 @@ void R_RenderAllRagdolls ( void )
 			odePos = dBodyGetPosition (RagDoll[RagDollID].RagDollObject[CHEST].body);
 			VectorSet(RagDoll[RagDollID].curPos, odePos[0], odePos[1], odePos[2]);
 
-			R_CullRagDolls( RagDollID );
+			if ( R_CullRagDolls( RagDollID ) )
+				continue;
 				
 			//render the meshes
 			qglShadeModel (GL_SMOOTH);

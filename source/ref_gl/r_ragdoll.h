@@ -165,3 +165,4 @@ extern void R_AddNewRagdoll( vec3_t origin );
 extern void R_ClearAllRagdolls( void );
 extern void R_DestroyWorldTrimesh();
 extern void R_BuildWorldTrimesh ();
+extern qboolean R_CullRagDolls( int RagDollID );

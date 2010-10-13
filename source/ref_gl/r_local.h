@@ -567,6 +567,7 @@ typedef struct	LightGroup {
 extern			LightGroup_t LightGroups[MAX_LIGHTS];
 extern void		R_DrawAliasModelCaster (void);
 extern void		R_DrawIQMCaster (void);
+extern void		R_DrawIQMRagDollCaster (int);
 extern void		R_DrawDynamicCaster(void);
 extern void		R_CastShadow(void);
 int				FB_texture_width, FB_texture_height;
