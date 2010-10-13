@@ -927,7 +927,7 @@ void R_CastShadow(void)
 		if (currentmodel->type != mod_alias && currentmodel->type != mod_iqm)
 			continue;
 
-		if(r_ragdolls->value && (currentmodel->type == mod_iqm))
+		if(r_ragdolls->value && currentmodel->type == mod_iqm && currentmodel->hasRagDoll)
 		{			
 			//Do not render deathframes if using ragdolls
 			if(currententity->frame > 198) 

@@ -62,39 +62,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define RIGHTWRIST 13
 #define LEFTWRIST 14
 
-//Hard coded definitions(if no ragdoll read in - note - these need to be adjusted to actual model sizes)
-//these defaults are the values for the martian enforcer.  We will read these values from a file at spawn
-//time for each mesh
+//ragdoll dimensions
+#define ELBOW_X_OFF 0 //note - we likely want to do something similar for knees and ankles
+#define ELBOW_Y_OFF 1
+#define ELBOW_Z_OFF 2
+#define HAND_LEN 3 // wrist to mid-fingers only
+#define WRIST_X_OFF 4
+#define WRIST_Y_OFF 5
+#define WRIST_Z_OFF 6
+#define FOOT_LEN 7 // ankles to base of ball of foot only
+#define HEEL_LEN 8 
 
-#define ELBOW_X_OFF 15.50 //note - we likely want to do something similar for knees and ankles
-#define ELBOW_Y_OFF 0.00
-#define ELBOW_Z_OFF 37.75
-#define HAND_LEN 1.50 // wrist to mid-fingers only
-#define WRIST_X_OFF 23.50
-#define WRIST_Y_OFF 4.50
-#define WRIST_Z_OFF 37.00
-#define FOOT_LEN 5.00 // ankles to base of ball of foot only
-#define HEEL_LEN 4.00 
+#define HEAD_H 9
+#define NECK_H 10
+#define SHOULDER_H 11
+#define CHEST_H 12
+#define HIP_H 13
+#define KNEE_H 14 
+#define ANKLE_H 15
 
-#define HEAD_H 46.0
-#define NECK_H 42.50
-#define SHOULDER_H 40.00
-#define CHEST_H 42.50
-#define HIP_H 27.00
-#define KNEE_H 16.00 
-#define ANKLE_H 2.50
-
-#define HEAD_W 8.00
-#define SHOULDER_W 15.00
-#define CHEST_W 12.00 // actually wider, but we want narrower than shoulders (esp. with large radius)
-#define BICEP_W 3.00 //thickness of bicep
-#define FOREARM_W 3.00 //thickness of forearm
-#define HAND_W 1.50 //width of hand
-#define LEG_W 8.50 // between middles of upper legs
-#define PELVIS_W 8.00 // actually wider, but we want smaller than hip width
-#define THIGH_W 4.00 //thickness of thigh
-#define SHIN_W 5.00 //thickness of shin
-#define FOOT_W 5.00 //width of foot
+#define HEAD_W 16
+#define SHOULDER_W 17
+#define CHEST_W 18 // actually wider, but we want narrower than shoulders (esp. with large radius)
+#define BICEP_W 19 //thickness of bicep
+#define FOREARM_W 20 //thickness of forearm
+#define HAND_W 21 //width of hand
+#define LEG_W 22 // between middles of upper legs
+#define PELVIS_W 23 // actually wider, but we want smaller than hip width
+#define THIGH_W 24 //thickness of thigh
+#define SHIN_W 25 //thickness of shin
+#define FOOT_W 26 //width of foot
 
 dWorldID RagDollWorld;
 dSpaceID RagDollSpace;

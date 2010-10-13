@@ -283,6 +283,53 @@ qboolean Mod_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath)
 	return true;
 }
 
+qboolean Mod_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
+{
+	FILE *fp;
+	int length;
+	char *buffer;
+	char *s;
+	int result;
+	char a_string[128];
+	int i;
+
+	if((fp = fopen(ragdoll_file, "rb" )) == NULL)
+	{
+		return false;
+	}
+	else
+	{
+		length = FS_filelength( fp );
+
+		buffer = malloc( length + 1 );
+		if ( buffer != NULL )
+		{
+			buffer[length] = 0;
+			result = fread( buffer, length, 1, fp );
+			if ( result == 1 )
+			{
+				s = buffer;
+
+				for(i = 0; i < 27; i++)
+				{
+					strcpy( a_string, COM_Parse( &s ) );
+					mod->ragdoll.RagDollDims[i] = atof(a_string);
+				}
+				strcpy( a_string, COM_Parse( &s ) );
+				mod->ragdoll.hasHelmet = atoi(a_string);
+			}
+			else 
+			{
+				Com_Printf("Mod_ReadRagDollFile: read fail\n");
+			}
+			free( buffer );
+		}
+		fclose( fp );
+	}
+	
+	return true;
+}
+
 qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 {
 	iqmheader_t *header;
@@ -632,6 +679,30 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		}
 	}
 
+	//load ragdoll info from ragdoll file
+	COM_StripExtension(mod->name, shortname);
+	i = 0;
+	do
+		shortname[i] = tolower(shortname[i]);
+	while (shortname[i++]);
+	strcat(shortname, ".rgd");
+	path = NULL;
+	for(;;)
+	{
+		path = FS_NextPath( path );
+		if( !path )
+		{
+			break;
+		}
+		if(path)
+			Com_sprintf(fullname, sizeof(fullname), "%s/%s", path, shortname);
+
+		if (Mod_ReadRagDollFile(fullname, mod))
+			mod->hasRagDoll = true;
+		else 
+			mod->hasRagDoll = false;
+	}
+	
 	//free temp non hunk mem
 	if(inversebaseframe)
 		free(inversebaseframe);
@@ -2069,14 +2140,15 @@ void R_DrawINTERQUAKEMODEL ( void )
 
 	if(r_ragdolls->value)
 	{
-		//Ragdolls take over at beginning of each death sequence(don't bother with helmets just yet, we have to figure things out first)
+		//Ragdolls take over at beginning of each death sequence
 		if(!(currententity->flags & RF_TRANSLUCENT)) 
 		{
 			if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
-				R_AddNewRagdoll(currententity->origin);
+				if(currentmodel->hasRagDoll)
+					R_AddNewRagdoll(currententity->origin);
 		}
-		//Do not render deathframes if using ragdolls
-		if(currententity->frame > 198)
+		//Do not render deathframes if using ragdolls - do not render translucent helmets
+		if((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
 			return;
 	}
 	
