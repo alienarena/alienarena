@@ -140,7 +140,7 @@ float calcEntAlpha (float alpha, vec3_t point)
 
 vec3_t	lightPosition;
 float	dynFactor;
-void GL_GetLightVals(qboolean dynamic)
+void GL_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
 {
 	int i, j, lnum;
 	dlight_t	*dl;
@@ -155,29 +155,29 @@ void GL_GetLightVals(qboolean dynamic)
 	VectorSet(maxs, 0, 0, 0);
 
 	//light shining down if there are no lights at all
-	VectorCopy(currententity->origin, lightPosition);
+	VectorCopy(meshOrigin, lightPosition);
 	lightPosition[2] += 128;
 
-	if(currententity->flags & RF_BOBBING)
+	if((currententity->flags & RF_BOBBING) && !RagDoll)
 		bob = currententity->bob;
 	else
 		bob = 0;
 
-	VectorCopy(currententity->origin, tempOrg);
+	VectorCopy(meshOrigin, tempOrg);
 		tempOrg[2] += 24 - bob; //generates more consistent tracing
 
 	numlights = 0;
 	VectorClear(lightAdd);
 	for (i=0; i<r_lightgroups; i++)
 	{
-		if((currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > currententity->origin[2]))
+		if(!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > currententity->origin[2]))
 			r_trace.fraction = 1.0; //don't do traces for lights above weapon models, not smooth enough
 		else
 			r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 
 		if(r_trace.fraction == 1.0)
 		{
-			VectorSubtract(currententity->origin, LightGroups[i].group_origin, temp);
+			VectorSubtract(meshOrigin, LightGroups[i].group_origin, temp);
 			dist = VectorLength(temp);
 			if(dist == 0)
 				dist = 1;
@@ -196,10 +196,10 @@ void GL_GetLightVals(qboolean dynamic)
 		//limit to five lights(maybe less)?
 		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++)
 		{
-			VectorSubtract(currententity->origin, dl->origin, temp);
+			VectorSubtract(meshOrigin, dl->origin, temp);
 			dist = VectorLength(temp);
 
-			VectorCopy(currententity->origin, temp);
+			VectorCopy(meshOrigin, temp);
 			temp[2] += 24; //generates more consistent tracing
 
 			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
@@ -213,84 +213,7 @@ void GL_GetLightVals(qboolean dynamic)
 						lightAdd[j] += dl->origin[j]*100*dl->intensity;
 					numlights+=100*dl->intensity;
 
-					VectorSubtract (dl->origin, currententity->origin, temp);
-					dynFactor += (dl->intensity/20.0)/VectorLength(temp);
-				}
-			}
-		}
-	}
-
-	if(numlights > 0.0) {
-		for(i = 0; i < 3; i++)
-			lightPosition[i] = lightAdd[i]/numlights;
-	}
-}
-
-void GL_GetLightValsForRagDoll(int RagDollID, qboolean dynamic)
-{
-	int i, j, lnum;
-	dlight_t	*dl;
-	float dist;
-	vec3_t	temp, tempOrg, lightAdd;
-	trace_t r_trace;
-	vec3_t mins, maxs;
-	float numlights, weight;
-
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs, 0, 0, 0);
-
-	//light shining down if there are no lights at all
-	VectorCopy(RagDoll[RagDollID].curPos, lightPosition);
-	lightPosition[2] += 128;
-
-	VectorCopy(RagDoll[RagDollID].curPos, tempOrg);
-		tempOrg[2] += 24; //generates more consistent tracing
-
-	numlights = 0;
-	VectorClear(lightAdd);
-	for (i=0; i<r_lightgroups; i++)
-	{
-		r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-
-		if(r_trace.fraction == 1.0)
-		{
-			VectorSubtract(RagDoll[RagDollID].curPos, LightGroups[i].group_origin, temp);
-			dist = VectorLength(temp);
-			if(dist == 0)
-				dist = 1;
-			dist = dist*dist;
-			weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
-			for(j = 0; j < 3; j++)
-				lightAdd[j] += LightGroups[i].group_origin[j]*weight;
-			numlights+=weight;
-		}
-	}
-
-	dynFactor = 0;
-	if(dynamic)
-	{
-		dl = r_newrefdef.dlights;
-		//limit to five lights(maybe less)?
-		for (lnum=0; lnum<(r_newrefdef.num_dlights > 5 ? 5: r_newrefdef.num_dlights); lnum++, dl++)
-		{
-			VectorSubtract(RagDoll[RagDollID].curPos, dl->origin, temp);
-			dist = VectorLength(temp);
-
-			VectorCopy(RagDoll[RagDollID].curPos, temp);
-			temp[2] += 24; //generates more consistent tracing
-
-			r_trace = CM_BoxTrace(temp, dl->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
-
-			if(r_trace.fraction == 1.0)
-			{
-				if(dist < dl->intensity)
-				{
-					//make dynamic lights more influential than world
-					for(j = 0; j < 3; j++)
-						lightAdd[j] += dl->origin[j]*100*dl->intensity;
-					numlights+=100*dl->intensity;
-
-					VectorSubtract (dl->origin, RagDoll[RagDollID].curPos, temp);
+					VectorSubtract (dl->origin, meshOrigin, temp);
 					dynFactor += (dl->intensity/20.0)/VectorLength(temp);
 				}
 			}
@@ -1033,7 +956,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			glEnableVertexAttribArrayARB (1);
 			glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
-            GL_GetLightVals(true);
+            GL_GetLightVals(currententity->origin, false, true);
 
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
@@ -1370,7 +1293,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				glEnableVertexAttribArrayARB (1);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
-				GL_GetLightVals(true);
+				GL_GetLightVals(currententity->origin, false, true);
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
