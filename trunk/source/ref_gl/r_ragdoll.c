@@ -404,7 +404,6 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
  	int bindweight[MAX_RAGDOLL_OBJECTS];
 
 	int i, j;
-	rs_stage_t *stage;
 	
 	//we need some information from the current entity
 	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
@@ -412,21 +411,26 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 
     RagDoll[RagDollID].initframe = (matrix3x4_t *)malloc (currententity->model->num_joints*sizeof(matrix3x4_t));
     memcpy(RagDoll[RagDollID].initframe, currententity->model->outframe, currententity->model->num_joints*sizeof(matrix3x4_t));
-    
-	RagDoll[RagDollID].script = (rscript_t *)malloc (sizeof(rscript_t));
+    	
 	if(r_shaders->value && currententity->script)
 	{
+		RagDoll[RagDollID].script = (rscript_t *)malloc (sizeof(rscript_t));
 		memcpy(RagDoll[RagDollID].script, currententity->script, sizeof(rscript_t));
 
-		stage = currententity->script->stage;
+		if(currententity->script->stage)
+		{	
+			RagDoll[RagDollID].script->stage = (rs_stage_t *)malloc ( sizeof(rs_stage_t));
+			memcpy(RagDoll[RagDollID].script->stage, currententity->script->stage, sizeof(rs_stage_t));
 
-		while (stage)
-		{
-			RagDoll[RagDollID].script->stage = (rs_stage_t *)malloc (sizeof(rs_stage_t));
-			memcpy(RagDoll[RagDollID].script->stage, stage, sizeof(rs_stage_t));
-			stage = stage->next;
+			if(currententity->script->stage->next)
+			{
+				RagDoll[RagDollID].script->stage->next = (rs_stage_t *)malloc ( sizeof(rs_stage_t));
+				memcpy(RagDoll[RagDollID].script->stage->next, currententity->script->stage->next, sizeof(rs_stage_t));
+			}
 		}
 	}
+	else
+		RagDoll[RagDollID].script = NULL;
 
 	RagDoll[RagDollID].texnum = currententity->skin->texnum;
 	RagDoll[RagDollID].flags = currententity->flags;
@@ -836,6 +840,17 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 
 	if(RagDoll[RagDollID].script)
 	{
+		if(RagDoll[RagDollID].script->stage)
+		{			
+			if(RagDoll[RagDollID].script->stage->next)
+			{		
+				free(RagDoll[RagDollID].script->stage->next);
+				RagDoll[RagDollID].script->stage->next = NULL;
+			}
+			free(RagDoll[RagDollID].script->stage);
+			RagDoll[RagDollID].script->stage = NULL;
+		}
+		
 		free(RagDoll[RagDollID].script);
 		RagDoll[RagDollID].script = NULL;
 	}
