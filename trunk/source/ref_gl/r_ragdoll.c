@@ -426,8 +426,13 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 			{
 				RagDoll[RagDollID].script->stage->next = (rs_stage_t *)malloc ( sizeof(rs_stage_t));
 				memcpy(RagDoll[RagDollID].script->stage->next, currententity->script->stage->next, sizeof(rs_stage_t));
+				RagDoll[RagDollID].script->stage->next->next = NULL;
 			}
+			else
+				RagDoll[RagDollID].script->stage->next = NULL;
 		}
+		else
+			RagDoll[RagDollID].script->stage = NULL;
 	}
 	else
 		RagDoll[RagDollID].script = NULL;
