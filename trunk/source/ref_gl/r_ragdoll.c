@@ -371,7 +371,7 @@ RagDollBind_t RagDollBinds[] =
 int RagDollBindsCount = (int)(sizeof(RagDollBinds)/sizeof(RagDollBinds[0]));
 
 //build and set initial position of ragdoll
-void R_RagdollBody_Init( int RagDollID, vec3_t origin )
+void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 {
 	//to do - read ragdoll file(.rgd) to get parameters
 
@@ -407,7 +407,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	
 	//we need some information from the current entity
 
-	strcpy(RagDoll[RagDollID].name, currententity->name);
+	strcpy(RagDoll[RagDollID].name, name);
 
 	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
 	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t)); 
@@ -447,6 +447,12 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	VectorCopy(origin, RagDoll[RagDollID].curPos);
 	RagDoll[RagDollID].spawnTime = Sys_Milliseconds();
 	RagDoll[RagDollID].destroyed = false;
+
+	if(r_ragdoll_debug->value) 
+	{
+		for(i = 0; i < 27; i++)
+			Com_Printf("ragdoll val %i: %4.2f\n", i, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[i]);
+	}
 
 	memset(bindmat, 0, sizeof(bindmat));
 	memset(bindweight, 0, sizeof(bindweight));
@@ -940,7 +946,18 @@ void R_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
 {
 	int RagDollID;
 	vec3_t dist;
-	vec3_t dir; //temp
+	vec3_t dir; 
+
+	//check to see if we already have spawned a ragdoll for this entity
+	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
+	{
+		if(!RagDoll[RagDollID].destroyed)
+		{
+			VectorSubtract(origin, RagDoll[RagDollID].origin, dist);
+			if(VectorLength(dist) < 64 && !strcmp(RagDoll[RagDollID].name, name))
+				return;
+		}
+	}
 
 	VectorSet(dir, 6, 6, 20); //note this is temporary hardcoded value(we should use the velocity of the ragdoll to influence this)
 
@@ -949,13 +966,12 @@ void R_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
 	//add a ragdoll, look for first open slot
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
-		VectorSubtract(origin, RagDoll[RagDollID].origin, dist);
-		if(VectorLength(dist) < 64 && !strcmp(RagDoll[RagDollID].name, name))
-			break; //likely spawned from same ent
+		if(r_ragdoll_debug->value)
+			Com_Printf("RagDoll name: %s Ent name: %s \n", RagDoll[RagDollID].name, name);
 		
 		if(RagDoll[RagDollID].destroyed)
 		{
-			R_RagdollBody_Init(RagDollID, origin);
+			R_RagdollBody_Init(RagDollID, origin, name);
 			
 			if(r_ragdoll_debug->value)
 				Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1], 
@@ -1041,7 +1057,6 @@ qboolean R_CullRagDolls( int RagDollID )
 void R_RenderAllRagdolls ( void )
 {
 	int RagDollID;
-	int numRagDolls = 0;
 	int i;
 
 	if(!r_ragdolls->value)
@@ -1121,12 +1136,8 @@ void R_RenderAllRagdolls ( void )
 				}
 			}
 			
-			numRagDolls++;
+			r_DrawingRagDoll = true;
 		}
-	}
-
-	if(!numRagDolls) {
-		r_DrawingRagDoll = false; //no sense in coming back in here until we add a ragdoll
 	}
 
 	if(r_DrawingRagDoll) //here we handle the physics
@@ -1140,4 +1151,5 @@ void R_RenderAllRagdolls ( void )
 		dJointGroupEmpty(contactGroup);
 	}
 	lastODEUpdate = Sys_Milliseconds();
+	r_DrawingRagDoll = false;
 }
