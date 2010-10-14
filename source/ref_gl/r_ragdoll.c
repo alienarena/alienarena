@@ -739,18 +739,17 @@ void GL_BuildODEGeoms(msurface_t *surf)
 
 /*
 =============
-R_DrawWorld
+R_DrawWorldTrimesh
 =============
 */
 void R_BuildWorldTrimesh ( void )
 {
     msurface_t *surf;
-	dMatrix3 rot;
-	
+    dMatrix3 rot;
+
     RagDollTriWorld.numODEVerts = RagDollTriWorld.numODETris = 0;
 
-	//note - to do - we need to filter out any trigger surfaces
-    for (surf = r_worldmodel->surfaces; surf < &r_worldmodel->surfaces[r_worldmodel->numsurfaces] ; surf++)
+    for (surf = &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface]; surf < &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface + r_worldmodel->nummodelsurfaces] ; surf++)
     {
         if (surf->texinfo->flags & SURF_SKY)
         {   // no skies here
@@ -764,24 +763,24 @@ void R_BuildWorldTrimesh ( void )
             }
         }
     }
-		
-	dRSetIdentity(rot);	
-	
-	//we need to build the trimesh geometry
-	RagDollTriWorld.triMesh = dGeomTriMeshDataCreate();
 
-	// Build the mesh from the data
-	dGeomTriMeshDataBuildSimple(RagDollTriWorld.triMesh, (dReal*)RagDollTriWorld.ODEVerts, RagDollTriWorld.numODEVerts, 
-		RagDollTriWorld.ODETris, RagDollTriWorld.numODETris*3);
-	
-	RagDollTriWorld.geom = dCreateTriMesh(RagDollSpace, RagDollTriWorld.triMesh, NULL, NULL, NULL);
-	dGeomSetData(RagDollTriWorld.geom, "surface");
+    dRSetIdentity(rot);
 
-	// this geom has no body
-	dGeomSetBody(RagDollTriWorld.geom, 0);
+    //we need to build the trimesh geometry
+    RagDollTriWorld.triMesh = dGeomTriMeshDataCreate();
 
-	dGeomSetPosition(RagDollTriWorld.geom, 0, 0, 0);
-	dGeomSetRotation(RagDollTriWorld.geom, rot);
+    // Build the mesh from the data
+    dGeomTriMeshDataBuildSimple(RagDollTriWorld.triMesh, (dReal*)RagDollTriWorld.ODEVerts, RagDollTriWorld.numODEVerts,
+        RagDollTriWorld.ODETris, RagDollTriWorld.numODETris*3);
+
+    RagDollTriWorld.geom = dCreateTriMesh(RagDollSpace, RagDollTriWorld.triMesh, NULL, NULL, NULL);
+    dGeomSetData(RagDollTriWorld.geom, "surface");
+
+    // this geom has no body
+    dGeomSetBody(RagDollTriWorld.geom, 0);
+
+    dGeomSetPosition(RagDollTriWorld.geom, 0, 0, 0);
+    dGeomSetRotation(RagDollTriWorld.geom, rot);
 }
 
 /*
