@@ -1045,7 +1045,7 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawVegetationSurface ();
 
-	R_DrawEntitiesOnList ();	
+	R_DrawEntitiesOnList ();
 
 	R_CastShadow();
 
@@ -1818,6 +1818,23 @@ int R_Init( void *hinstance, void *hWnd )
 		gl_state.vbo = false;
 	}
 
+#if defined DARWIN_SPECIAL_CASE
+	/*
+	 * development workaround for Mac OS X / Darwin using X11
+	 *  problems seen with 2.1 NVIDIA-1.6.18 when calling
+	 *  glCreateProgramObjectARB()
+	 * For now, just go with low settings.
+	 */
+	gl_state.fragment_program = false;
+	gl_arb_fragment_program = Cvar_Get("gl_arb_fragment_program", "0", CVAR_ARCHIVE);
+	gl_state.glsl_shaders = false;
+	gl_glsl_shaders = Cvar_Get("gl_glsl_shaders", "0", CVAR_ARCHIVE);
+	gl_dynamic = Cvar_Get ("gl_dynamic", "0", CVAR_ARCHIVE);
+	Cvar_SetValue("r_firstrun", 1);
+	R_SetLow();
+	Com_Printf("...Development Workaround. Low game settings forced.\n");
+#else
+
 	//load shader programs
 	R_LoadARBPrograms();
 
@@ -1903,6 +1920,7 @@ cpuinfo_exit:
 		//never run again
 		Cvar_SetValue("r_firstrun", 1);
 	}
+#endif
 
 	GL_SetDefaultState();
 
