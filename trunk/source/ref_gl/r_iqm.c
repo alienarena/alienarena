@@ -2145,7 +2145,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 		{
 			if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
 				if(currentmodel->hasRagDoll)
-					R_AddNewRagdoll(currententity->origin);
+					R_AddNewRagdoll(currententity->origin, currententity->name);
 		}
 		//Do not render deathframes if using ragdolls - do not render translucent helmets
 		if((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)

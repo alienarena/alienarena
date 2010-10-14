@@ -148,6 +148,8 @@ vec3_t	vbo_shadow[MAX_VBO_XYZs];
 
 typedef struct entity_s
 {
+	char	name[MAX_QPATH];
+
 	struct model_s		*model;			// opaque type outside refresh
 	struct model_s		*lod1;
 	struct model_s		*lod2;

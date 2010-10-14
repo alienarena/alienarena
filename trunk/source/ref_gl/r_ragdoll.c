@@ -406,6 +406,9 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin )
 	int i, j;
 	
 	//we need some information from the current entity
+
+	strcpy(RagDoll[RagDollID].name, currententity->name);
+
 	RagDoll[RagDollID].ragDollMesh = (model_t *)malloc (sizeof(model_t));
 	memcpy(RagDoll[RagDollID].ragDollMesh, currententity->model, sizeof(model_t)); 
 
@@ -933,7 +936,7 @@ void R_ClearAllRagdolls( void )
 	r_DrawingRagDoll = false;
 }
 
-void R_AddNewRagdoll( vec3_t origin )
+void R_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
 {
 	int RagDollID;
 	vec3_t dist;
@@ -947,8 +950,8 @@ void R_AddNewRagdoll( vec3_t origin )
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
 		VectorSubtract(origin, RagDoll[RagDollID].origin, dist);
-		if(VectorLength(dist) < 64)
-			break; //likely spawned from same ent, this may need tweaking or better tracking method, for now it'll do
+		if(VectorLength(dist) < 64 && !strcmp(RagDoll[RagDollID].name, name))
+			break; //likely spawned from same ent
 		
 		if(RagDoll[RagDollID].destroyed)
 		{
