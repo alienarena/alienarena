@@ -720,6 +720,8 @@ void CL_AddPacketEntities (frame_t *frame)
 			}
 			playermodel = true;
 
+			strcpy(ent.name, ci->name);
+
 		}
 		else
 		{

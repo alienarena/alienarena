@@ -130,6 +130,8 @@ typedef struct RagDollWorld_s {
 
 typedef struct RagDoll_s {
 
+	char	name[MAX_QPATH];
+
 	RagDollObject_t RagDollObject[MAX_RAGDOLL_OBJECTS];
 	dJointID RagDollJoint[MAX_RAGDOLL_JOINTS];
 	
@@ -158,7 +160,7 @@ RagDollWorld_t RagDollTriWorld;
 extern void R_CreateWorldObject( void );
 extern void R_DestroyWorldObject( void );
 extern void R_RenderAllRagdolls ( void );
-extern void R_AddNewRagdoll( vec3_t origin );
+extern void R_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] );
 extern void R_ClearAllRagdolls( void );
 extern void R_DestroyWorldTrimesh();
 extern void R_BuildWorldTrimesh ();
