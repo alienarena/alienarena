@@ -99,9 +99,6 @@ subdir = source
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_cflags_gcc_option.m4 \
-	$(top_srcdir)/m4/ax_check_gl.m4 \
-	$(top_srcdir)/m4/ax_check_glu.m4 \
-	$(top_srcdir)/m4/ax_lang_compiler_ms.m4 \
 	$(top_srcdir)/m4/ax_pthread.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -241,7 +238,7 @@ am__DEPENDENCIES_1 =
 crx_DEPENDENCIES = libgame.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_2)
 am_crx_ded_OBJECTS = game/crx_ded-q_shared.$(OBJEXT) \
 	null/crx_ded-cl_null.$(OBJEXT) qcommon/crx_ded-cmd.$(OBJEXT) \
 	qcommon/crx_ded-cmodel.$(OBJEXT) \
@@ -305,7 +302,6 @@ CXX = @CXX@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
-DARWIN_FRAMEWORKS = @DARWIN_FRAMEWORKS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPS_CFLAGS = @DEPS_CFLAGS@
@@ -315,6 +311,7 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+GL_LIBDIR = @GL_LIBDIR@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -414,8 +411,7 @@ AM_CPPFLAGS = -I $(top_srcdir)/source $(am__append_1)
 
 # Client libraries and flags
 crx_LDADD = libgame.a $(PTHREAD_LIBS) $(X11_LIBS) $(DEPS_LIBS) \
-	$(DARWIN_FRAMEWORKS) $(XXF86VM_LIBS) $(XXF86DGA_LIBS) \
-	$(am__append_2)
+	$(XXF86VM_LIBS) $(XXF86DGA_LIBS) $(am__append_2)
 crx_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(X11_CLAGS) \
 	$(DEPS_CFLAGS) $(XXF86VM_CFLAGS) $(XXF86DGA_CFLAGS) \
 	$(am__append_3)

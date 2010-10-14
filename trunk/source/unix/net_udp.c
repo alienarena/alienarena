@@ -25,9 +25,34 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "qcommon/qcommon.h"
 
+/*
+ * Notes on select() function used in Net_Sleep()
+ *
+ * per Linux man page and Mac OS X man page for select()
+ *  <sys/select.h> is POSIX, <sys/types.h>,<sys/time.h>,(with <unistd.h>) are legacy
+ *
+ * For Darwin, select() can return this error, and may require the preprocessor def.
+ *  [EINVAL] ndfs is greater than FD_SETSIZE and _DARWIN_UNLIMITED_SELECT is not defined.
+ *  Error check added to Net_Sleep, to see if that is a problem.
+ *  If select() returns an error, then dedicated server will run at 100% cpu.
+ *  _DARWIN_UNLIMITED_SELECT put in config.h. TODO: determine if that is needed.
+ */
+#if defined HAVE_SYS_SELECT_H
+# include <sys/select.h>
+#else
+# if defined HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+# endif
+# if defined HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# endif
+#endif
+
+#if defined HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
 #include <sys/socket.h>
-#include <sys/time.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -547,6 +572,7 @@ void NET_Sleep(int msec)
 	fd_set	fdset;
 	extern cvar_t *dedicated;
 	extern qboolean stdin_active;
+	int result;
 
 	if (!ip_sockets[NS_SERVER] || (dedicated && !dedicated->value))
 		return; // we're not a server, just run full speed
@@ -557,7 +583,10 @@ void NET_Sleep(int msec)
 	FD_SET(ip_sockets[NS_SERVER], &fdset); // network socket
 	timeout.tv_sec = msec/1000;
 	timeout.tv_usec = (msec%1000)*1000;
-	select(ip_sockets[NS_SERVER]+1, &fdset, NULL, NULL, &timeout);
-
+	result = select(ip_sockets[NS_SERVER]+1, &fdset, NULL, NULL, &timeout);
+	if ( result == -1 )
+	{
+		Com_Printf("ERROR: Net_Sleep( msec:%i ): select() error: %s\n", msec, strerror( errno ) );
+	}
 }
 

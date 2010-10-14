@@ -34,7 +34,6 @@ crx_LDADD = libgame.a \
 	$(PTHREAD_LIBS) \
 	$(X11_LIBS) \
 	$(DEPS_LIBS) \
-	$(DARWIN_FRAMEWORKS) \
 	$(XXF86VM_LIBS) \
 	$(XXF86DGA_LIBS)
 crx_CPPFLAGS = $(AM_CPPFLAGS) \
