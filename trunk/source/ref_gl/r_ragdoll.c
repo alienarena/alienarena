@@ -447,13 +447,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 	VectorCopy(origin, RagDoll[RagDollID].curPos);
 	RagDoll[RagDollID].spawnTime = Sys_Milliseconds();
 	RagDoll[RagDollID].destroyed = false;
-
-	if(r_ragdoll_debug->value) 
-	{
-		for(i = 0; i < 27; i++)
-			Com_Printf("ragdoll val %i: %4.2f\n", i, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[i]);
-	}
-
+	
 	memset(bindmat, 0, sizeof(bindmat));
 	memset(bindweight, 0, sizeof(bindweight));
 	for(i = 0; i < RagDoll[RagDollID].ragDollMesh->num_joints; i++)
@@ -646,8 +640,6 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 
 	R_addHingeJoint(RagDollID, bindmat, LEFTWRIST, LEFTFOREARM, 
 		LEFTHAND, L_WRIST_POS, bkwdAxis, M_PI * -0.1, M_PI * 0.1);
-
-	//we will need to set the velocity based on origin vs old_origin
 }
 
 void R_DrawMark (vec3_t origin, int type)
@@ -757,6 +749,7 @@ void R_BuildWorldTrimesh ( void )
 	
     RagDollTriWorld.numODEVerts = RagDollTriWorld.numODETris = 0;
 
+	//note - to do - we need to filter out any trigger surfaces
     for (surf = r_worldmodel->surfaces; surf < &r_worldmodel->surfaces[r_worldmodel->numsurfaces] ; surf++)
     {
         if (surf->texinfo->flags & SURF_SKY)
@@ -944,7 +937,7 @@ void R_ClearAllRagdolls( void )
 
 void R_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
 {
-	int RagDollID;
+	int RagDollID, i;
 	vec3_t dist;
 	vec3_t dir; 
 
@@ -965,13 +958,19 @@ void R_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
 
 	//add a ragdoll, look for first open slot
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
-	{
-		if(r_ragdoll_debug->value)
-			Com_Printf("RagDoll name: %s Ent name: %s \n", RagDoll[RagDollID].name, name);
-		
+	{		
 		if(RagDoll[RagDollID].destroyed)
 		{
 			R_RagdollBody_Init(RagDollID, origin, name);
+
+			if(r_ragdoll_debug->value == 2)
+			{
+				Com_Printf("RagDoll name: %s Ent name: %s Mesh: %s Ent Mesh: %s\n", RagDoll[RagDollID].name, name, 
+					RagDoll[RagDollID].ragDollMesh->name, currentmodel->name);
+			
+				for(i = 0; i < 27; i++)
+					Com_Printf("ragdoll val %i: %4.2f\n", i, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[i]);
+			}
 			
 			if(r_ragdoll_debug->value)
 				Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1], 
@@ -1084,10 +1083,6 @@ void R_RenderAllRagdolls ( void )
 		{
 			//we handle the ragdoll's physics, then render the mesh with skeleton adjusted by ragdoll
 			//body object positions
-			//Note - I am not sure yet how we should handle helmets for martians.  My gut tells me that 
-			//we are going to have to have the helmet share the ragdoll of it's host body, but that is tricky.
-			//One one hand, if a mesh ragdoll is translucent and spawned in close proximity to a solid one, 
-			//maybe we can somehow assign that mesh to use the solid mesh's ragdoll.  
 			const dReal *odePos;
 
 			odePos = dBodyGetPosition (RagDoll[RagDollID].RagDollObject[CHEST].body);
