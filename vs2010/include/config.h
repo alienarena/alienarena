@@ -52,7 +52,7 @@ where the location of header files differs between systems.
 #endif
 
 /* Version number of package. UPDATE ON VERSION CHANGE */
-#define VERSION "7.46.alpha2"
+#define VERSION "7.46.alpha3"
 
 /* OpenAL dll name */
 #define OPENAL_DRIVER "OpenAL32.dll"
@@ -104,6 +104,13 @@ where the location of header files differs between systems.
 
 /* Define to 1 if you have the `strnicmp' function. */
 #define HAVE_STRNICMP 1
+
+/* Define to 1 if your system has a GNU libc compatible `malloc' function, and
+   to 0 otherwise. */
+#define HAVE_MALLOC 1
+
+/* Define to 1 if you have the <malloc.h> header file. */
+#define HAVE_MALLOC_H 1
 
 /*
   Handling deprecated function names for Posix functions:
@@ -183,12 +190,6 @@ where the location of header files differs between systems.
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
 
-/* Define to 1 if your system has a GNU libc compatible `malloc' function, and
-   to 0 otherwise. */
-#define HAVE_MALLOC 1
-
-/* Define to 1 if you have the <malloc.h> header file. */
-#define HAVE_MALLOC_H 1
 
 /* Define to 1 if you have the `memmove' function. */
 #define HAVE_MEMMOVE 1

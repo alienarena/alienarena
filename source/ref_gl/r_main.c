@@ -263,7 +263,7 @@ void R_ReadFogScript( char *config_file )
 				map_fog = true;
 
 		}
-		else 
+		else
 		{
 			Com_DPrintf("R_ReadFogScript: read fail: %s\n", config_file);
 		}
@@ -305,8 +305,8 @@ void R_ReadMusicScript( char *config_file )
 			s = buffer;
 			strcpy( map_music, COM_Parse( &s ) );
 			map_music[length] = 0; //clear any possible garbage
-		} 
-		else 
+		}
+		else
 		{
 			Com_DPrintf("R_ReadMusicScript: read fail: %s\n", config_file);
 		}
@@ -1176,7 +1176,16 @@ void R_Register( void )
 	gl_playermip = Cvar_Get ("gl_playermip", "0", 0);
 
 // OPENGL_DRIVER defined by in config.h
+#if defined DARWIN_SPECIAL_CASE
+	// archiving gl_driver means the lib specified in config.h may be
+	//  overridden by what is in config.cfg. This defeats any attempt
+	//  by configure to specify a different location for the libGL.dylib
+	// for now make it a special case, but questionable whether it should
+	// be archived for others.
+	gl_driver = Cvar_Get( "gl_driver", OPENGL_DRIVER, 0 );
+#else
 	gl_driver = Cvar_Get( "gl_driver", OPENGL_DRIVER, CVAR_ARCHIVE );
+#endif
 
 	gl_texturemode = Cvar_Get( "gl_texturemode", "GL_LINEAR_MIPMAP_LINEAR", CVAR_ARCHIVE );
 	gl_texturealphamode = Cvar_Get( "gl_texturealphamode", "default", CVAR_ARCHIVE );

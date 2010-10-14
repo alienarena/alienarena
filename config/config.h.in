@@ -203,6 +203,9 @@
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
 
+/* Define to 1 if you have the <sys/select.h> header file. */
+#undef HAVE_SYS_SELECT_H
+
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #undef HAVE_SYS_SOCKET_H
 
@@ -320,6 +323,9 @@
 
 /* win32-specific conditional compile */
 #undef WIN32_VARIANT
+
+/* see select (2) man page for Mac OS X */
+#undef _DARWIN_UNLIMITED_SELECT
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #undef gid_t

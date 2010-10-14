@@ -63,9 +63,6 @@ DIST_COMMON = $(am__configure_deps) $(dist_doc_DATA) \
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_cflags_gcc_option.m4 \
-	$(top_srcdir)/m4/ax_check_gl.m4 \
-	$(top_srcdir)/m4/ax_check_glu.m4 \
-	$(top_srcdir)/m4/ax_lang_compiler_ms.m4 \
 	$(top_srcdir)/m4/ax_pthread.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -173,7 +170,6 @@ CXX = @CXX@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
-DARWIN_FRAMEWORKS = @DARWIN_FRAMEWORKS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPS_CFLAGS = @DEPS_CFLAGS@
@@ -183,6 +179,7 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+GL_LIBDIR = @GL_LIBDIR@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -1802,8 +1799,10 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martianenforcer/leg.md2 \
 	data1/players/martianenforcer/lod1.iqm \
 	data1/players/martianenforcer/lod1.md2 \
+	data1/players/martianenforcer/lod1.rgd \
 	data1/players/martianenforcer/lod2.iqm \
 	data1/players/martianenforcer/lod2.md2 \
+	data1/players/martianenforcer/lod2.rgd \
 	data1/players/martianenforcer/pain100_1.wav \
 	data1/players/martianenforcer/pain100_2.wav \
 	data1/players/martianenforcer/pain25_1.wav \
@@ -1816,6 +1815,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martianenforcer/red.jpg \
 	data1/players/martianenforcer/tris.iqm \
 	data1/players/martianenforcer/tris.md2 \
+	data1/players/martianenforcer/tris.rgd \
 	data1/players/martianenforcer/usegibs \
 	data1/players/martianenforcer/w_bfg.iqm \
 	data1/players/martianenforcer/w_bfg.md2 \

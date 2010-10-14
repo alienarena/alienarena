@@ -1514,8 +1514,10 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martianenforcer/leg.md2 \
 	data1/players/martianenforcer/lod1.iqm \
 	data1/players/martianenforcer/lod1.md2 \
+	data1/players/martianenforcer/lod1.rgd \
 	data1/players/martianenforcer/lod2.iqm \
 	data1/players/martianenforcer/lod2.md2 \
+	data1/players/martianenforcer/lod2.rgd \
 	data1/players/martianenforcer/pain100_1.wav \
 	data1/players/martianenforcer/pain100_2.wav \
 	data1/players/martianenforcer/pain25_1.wav \
@@ -1528,6 +1530,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martianenforcer/red.jpg \
 	data1/players/martianenforcer/tris.iqm \
 	data1/players/martianenforcer/tris.md2 \
+	data1/players/martianenforcer/tris.rgd \
 	data1/players/martianenforcer/usegibs \
 	data1/players/martianenforcer/w_bfg.iqm \
 	data1/players/martianenforcer/w_bfg.md2 \

@@ -26,7 +26,7 @@
 #  Mac OS X / Darwin using X11
 
 AC_PREREQ(2.61)
-AC_INIT([alienarena],[7.46.alpha2],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.46.alpha3],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -83,6 +83,20 @@ AM_CONDITIONAL([BUILD_WIN32],[ test "x${cond_build_win32}" = xyes ])
 AM_CONDITIONAL([BUILD_UNIX],[ test "x${cond_build_unix}" = xyes ])
 
 #
+# Environment variable for specifying libGL.dylib path for Darwin when it
+# is not in the dlopen() search path. see dlopen (3) for Mac OS X.
+# Either export or in command line: GL_LIBDIR=/usr/Xll/lib, for example.
+#
+gl_dlopen_path=default
+AS_IF([ test x"${unix_host}" = xdarwin ],
+	[
+	AC_MSG_CHECKING([for GL_LIBDIR (location of libGL.dylib)])
+	AC_ARG_VAR( GL_LIBDIR, [directory containing libGL.dylib])
+	AC_MSG_RESULT([${GL_LIBDIR}])
+	AS_IF([ test x"${GL_LIBDIR}" = x ],,[gl_dlopen_path=${GL_LIBDIR}])
+])
+
+#
 # Unix/Linux/Darwin dedicated server only build option
 #
 AC_MSG_CHECKING([whether to build the client])
@@ -119,35 +133,24 @@ AM_COND_IF([BUILD_WIN32],
 
 AM_CONDITIONAL([ALTERNATE_INSTALL],[ test "x${alternate_install}" = xyes ])
 
-
-#
-# OpenAL package options
-#
-AC_MSG_CHECKING([whether to use Apple OpenAL])
-AC_ARG_WITH([apple-openal],
-	[AS_HELP_STRING(
-		[--with-apple-openal],
-		[use Apple OpenAL on OS X (default: OS X:yes, otherwise:no)])
-	],
-	[apple_openal=${withval}],
-	[AS_IF([ test x${unix_host} = xdarwin ],
-		[apple_openal=yes],
-		[apple_openal=no])
-	])
-AC_MSG_RESULT([${apple_openal}])	
-
 dnl
 dnl symbols for config.h
 dnl
 
-dnl The special case symbols may not be needed. Might be handy for debug, though.
 AM_COND_IF([BUILD_UNIX], 
 	[
+	
 	AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])
 	
 	AS_CASE([ ${unix_host} ],
 		[ darwin ],
-			[AC_DEFINE([DARWIN_SPECIAL_CASE],1,[darwin-specific conditional compile])],
+			[
+			AC_DEFINE([DARWIN_SPECIAL_CASE],1,[darwin-specific conditional compile])
+			dnl
+			dnl possible error from select() in unix/net_udp.c::Net_Sleep()
+			dnl
+			AC_DEFINE([_DARWIN_UNLIMITED_SELECT],1,[see select (2) man page for Mac OS X])
+			],
 		[ linux ],
 			[AC_DEFINE([LINUX_SPECIAL_CASE],1,[linux-specific conditional compile])],
 		[ generic ]
@@ -167,8 +170,6 @@ AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
 AC_SEARCH_LIBS([acos],[m])
 AC_SEARCH_LIBS([dlopen],[dl])
 
-dnl TODO: possible to have a variable here for server_CFLAGS, server_LIBS ???
-
 dnl
 dnl start of client-only library requirements
 dnl
@@ -187,7 +188,6 @@ AM_COND_IF([BUILD_CLIENT],
 		dnl XF86
 		dnl
 		PKG_CHECK_MODULES([X11],[x11])
-
 
 		dnl
 		dnl XF86 VidMode extension
@@ -212,7 +212,6 @@ AM_COND_IF([BUILD_CLIENT],
 				])
 			])
 		])
-	
 	
 		dnl
 		dnl XF86 DGA extension
@@ -256,13 +255,6 @@ AM_COND_IF([BUILD_CLIENT],
 		[ win32_syslibs="-lmingw32 -lwinmm -lwsock32 -lws2_32 -lgdi32 -luser32"])
 	AC_SUBST([WIN32_LIBS],[$win32_syslibs])
 
-	dnl darwin openal option
-	darwin_frameworks=""
-	AS_IF([ test "x${unix_host}" = xdarwin ],
-		[AS_IF([ test "x${apple_openal}" = xyes ],
-			[ darwin_frameworks="-framework OpenAL"])])
-	AC_SUBST([DARWIN_FRAMEWORKS],[$darwin_frameworks])
-
 ])
 dnl 
 dnl end of client-only library requirements
@@ -272,14 +264,12 @@ dnl
 # Checks for header files
 #
 
-dnl TODO: verify these are used and needed
 AC_CHECK_HEADERS(
-	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h unistd.h netdb.h termios.h])
+	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h unistd.h netdb.h termios.h sys/select.h])
 
 AC_CHECK_HEADERS(
-	[ dlfcn.h fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h sys/time.h unistd.h sys/stat.h ])
-	
-dnl for config.h generation, maybe others?	
+	[ dlfcn.h fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h sys/time.h sys/stat.h ])
+
 AC_CHECK_HEADERS([ windows.h winsock.h winsock2.h ])	
 
 dnl	
@@ -352,41 +342,39 @@ AC_CHECK_FUNCS([gettimeofday putenv _putenv select])
 #
 # Set names of dlopened libraries for config.h
 #
-
-dnl linux_gnu and generic get the default.
-dnl TODO: darwin needs full path to libraries, does not have default search path (?)
-dnl TODO: get correct darwin .dylib name for non-apple
 AM_COND_IF([BUILD_UNIX],
 	[AS_CASE([ ${unix_host} ],
 		[ darwin ],
-			[
-			AC_DEFINE([OPENGL_DRIVER],
-				["libGL.dylib"],[OpenGL dynamic lib name])
+			[AS_IF([ test x"${gl_dlopen_path}" = xdefault ],
+				[AC_DEFINE([OPENGL_DRIVER],
+					["libGL.dylib"],
+					[OpenAL dynamic lib name])
+				],
+				[AC_DEFINE_UNQUOTED([OPENGL_DRIVER],
+					["${gl_dlopen_path}/libGL.dylib"],
+					[OpenGL dynamic lib path])
+			])
+					
+			AC_DEFINE([OPENAL_DRIVER],
+				["/System/Library/Frameworks/OpenAL.framework/OpenAL"],
+				[OpenAl dynamic lib path])
+			],
 
-			AS_IF([ test "x${apple_openal}" = xyes ],
-				[AC_DEFINE([OPENAL_DRIVER],
-					["/System/Library/Frameworks/OpenAL.framework/OpenAL"],
-					[OpenAL dynamic lib name])],
-				[AC_DEFINE([OPENAL_DRIVER],
-					["libOpenAL.dylib"],
-					[OpenAL dynamic lib name])])
-			],								
 		[
 		AC_DEFINE([OPENGL_DRIVER],
 			["libGL.so.1"],[OpenGL shared lib name])
 		
 		AC_DEFINE([OPENAL_DRIVER],
 			["libopenal.so.1"],[OpenAL shared lib name])
-			
-		])
 	])
+])
 
 AM_COND_IF([BUILD_WIN32],
 	[
 	AC_DEFINE([OPENGL_DRIVER],["opengl32"],[OpenGL DLL name])
 	
 	AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])
-	])
+])
 
 # 2 required gcc options, see m4/ax_cflags_gcc_option.m4
 AX_CFLAGS_GCC_OPTION([-ffast-math])
@@ -470,6 +458,9 @@ AS_IF([test "x$hide_status" = "xno"],[
 	AM_COND_IF([BUILD_WIN32],,[
 		AS_IF([ test "x$build_client" = "xyes" ],[dedicated_only=no],[dedicated_only=yes])
 		AS_ECHO([" Dedicated Only: ........ ${dedicated_only}"])
+	])
+	AS_IF([ test x"${unix_host}" = xdarwin ],[	
+		AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
 	])
 	AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
 	AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
