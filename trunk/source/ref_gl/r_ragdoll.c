@@ -1136,10 +1136,14 @@ void R_RenderAllRagdolls ( void )
 
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
 	{
+		float dur;
+
 		if(RagDoll[RagDollID].destroyed)
 	        continue;
 
-		if(Sys_Milliseconds() - RagDoll[RagDollID].spawnTime > RAGDOLL_DURATION)
+		dur = Sys_Milliseconds() - RagDoll[RagDollID].spawnTime;
+
+		if(dur > RAGDOLL_DURATION)
 		{
 			R_DestroyRagDoll(RagDollID, true);
             RagDoll[RagDollID].destroyed = true;
@@ -1150,23 +1154,37 @@ void R_RenderAllRagdolls ( void )
 		{
 			//we handle the ragdoll's physics, then render the mesh with skeleton adjusted by ragdoll
 			//body object positions
-			const dReal *odePos;
+			const	dReal *odePos;
+			int		shellEffect = false;
+			float	shellAlpha;
 
 			odePos = dBodyGetPosition (RagDoll[RagDollID].RagDollObject[CHEST].body);
 			VectorSet(RagDoll[RagDollID].curPos, odePos[0], odePos[1], odePos[2]);
 
 			if ( R_CullRagDolls( RagDollID ) )
 				continue;
-				
+
 			//render the meshes
 			qglShadeModel (GL_SMOOTH);
 			GL_TexEnv( GL_MODULATE );
 
-			R_LightPoint (RagDoll[RagDollID].curPos, shadelight, true);
+			R_LightPoint (RagDoll[RagDollID].curPos, shadelight, true);			
+
+			if(dur > (RAGDOLL_DURATION - 2500))
+			{
+				VectorClear (shadelight);
+				shadelight[1] = 1.0;
+				shadelight[2] = 0.6;
+		
+				dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[CHEST].body, 0, 0, 50); //lift into space
+
+				shellAlpha = (1 - dur/RAGDOLL_DURATION);
+				shellEffect = true;
+			}		
 	
 			GL_AnimateIQMRagdoll(RagDollID);
 
-			GL_DrawIQMRagDollFrame(RagDollID, RagDoll[RagDollID].texnum);
+			GL_DrawIQMRagDollFrame(RagDollID, RagDoll[RagDollID].texnum, shellAlpha, shellEffect);
 
 			GL_TexEnv( GL_REPLACE );
 			qglShadeModel (GL_FLAT);

@@ -1530,7 +1530,7 @@ done:
 }
 
 //Similar to above, but geared more specifically toward ragdoll player models
-void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
+void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect)
 {
 	int		i, j;
 	vec3_t	vectors[3];
@@ -1571,8 +1571,57 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum)
 	AngleVectors (RagDoll[RagDollID].angles, vectors[0], vectors[1], vectors[2]);
 
 	//render the model
+	if(shellEffect)
+	{
+		//shell render
+		float shellscale = 1.6;
+		va=0;
+		VArray = &VArrayVerts[0];
 
-	if(!rs || mirror || glass)
+		qglEnable (GL_BLEND);
+		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		GL_Bind(r_shelltexture2->texnum);
+		R_InitVArrays (VERT_COLOURED_TEXTURED);
+		
+		for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
+        {
+            for (j=0; j<3; j++)
+            {
+                index_xyz = index_st = RagDoll[RagDollID].ragDollMesh->tris[i].vertex[j];
+
+				VArray[0] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0] + 
+					RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[0]*shellscale;
+                VArray[1] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1] + 
+					RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[1]*shellscale;
+                VArray[2] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] + 
+					RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[2]*shellscale;
+
+				VArray[3] = (RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1] + 
+					RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
+                VArray[4] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
+
+				VArray[5] = shadelight[0];
+				VArray[6] = shadelight[1];
+				VArray[7] = shadelight[2];
+				VArray[8] = shellAlpha; //decrease over time
+
+                // increment pointer and counter
+                VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+                va++;
+            }
+        }
+
+		if(qglLockArraysEXT)
+			qglLockArraysEXT(0, va);
+
+		qglDrawArrays(GL_TRIANGLES,0,va);
+
+		if(qglUnlockArraysEXT)
+			qglUnlockArraysEXT();
+		
+	}
+	else if(!rs || mirror || glass)
 	{	//base render no shaders
 		va=0;
 		VArray = &VArrayVerts[0];
@@ -1892,6 +1941,9 @@ done:
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
 	R_KillVArrays ();
+
+	if ( shellEffect )
+		qglEnable( GL_TEXTURE_2D );
 }
 
 extern qboolean have_stencil;

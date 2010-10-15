@@ -653,7 +653,7 @@ extern qboolean inAnimGroup(int frame, int oldframe);
 extern int NextFrame(int frame);
 extern void GL_DrawIQMFrame(int skinnum);
 extern void GL_AnimateIQMRagdoll(int RagDollID);
-extern void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum);
+extern void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect);
 extern void R_DrawIQMShadow(vec3_t origin);
 
 //Ragdoll
