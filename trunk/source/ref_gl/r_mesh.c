@@ -1952,7 +1952,7 @@ void R_DrawAliasModel ( void )
 		case 0:
 			break;
 		case 1: //dynamic only - always cast something
-			casted = R_ShadowLight (currententity->origin, shadevector, 0);
+			casted = R_ShadowLight (currententity->origin, currententity->angles, shadevector, 0);
 			qglPushMatrix ();
 			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
 			qglRotatef (currententity->angles[1], 0, 0, 1);
@@ -1976,7 +1976,7 @@ void R_DrawAliasModel ( void )
 			break;
 		case 2: //dynamic and world
 			//world
-			casted = R_ShadowLight (currententity->origin, shadevector, 1);
+			casted = R_ShadowLight (currententity->origin, currententity->angles, shadevector, 1);
 			qglPushMatrix ();
 			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
 			qglRotatef (currententity->angles[1], 0, 0, 1);
@@ -1998,7 +1998,7 @@ void R_DrawAliasModel ( void )
 			qglPopMatrix ();
 			//dynamic
 			casted = 0;
-		 	casted = R_ShadowLight (currententity->origin, shadevector, 0);
+		 	casted = R_ShadowLight (currententity->origin, currententity->angles, shadevector, 0);
 			if (casted > 0) { //only draw if there's a dynamic light there
 				qglPushMatrix ();
 				qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);

@@ -283,7 +283,7 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
-float R_ShadowLight (vec3_t pos, vec3_t lightAdd, int type);
+float R_ShadowLight (vec3_t pos, vec3_t angles, vec3_t lightAdd, int type);
 void  VLight_Init (void);
 float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );
 void R_ReadFogScript(char config_file[128]);
@@ -351,11 +351,9 @@ void	R_BeginFrame( float camera_separation );
 void	R_SwapBuffers( int );
 void	R_SetPalette ( const unsigned char *palette);
 
-
 // TrueType fonts
 qboolean TTF_Init( void );
 void TTF_Shutdown( void );
-
 
 int		Draw_GetPalette (void);
 
@@ -656,6 +654,7 @@ extern int NextFrame(int frame);
 extern void GL_DrawIQMFrame(int skinnum);
 extern void GL_AnimateIQMRagdoll(int RagDollID);
 extern void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum);
+extern void R_DrawIQMShadow(vec3_t origin);
 
 //Ragdoll
 int r_DrawingRagDoll;

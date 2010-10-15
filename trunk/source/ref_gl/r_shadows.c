@@ -1027,9 +1027,7 @@ R_ShadowLight - Planar stencil shadows
 ===============
 */
 
-// vectoangles moved to game/q_shared.c (2010-08)
-
-float R_ShadowLight (vec3_t entPos, vec3_t lightAdd, int type)
+float R_ShadowLight (vec3_t entPos, vec3_t angles, vec3_t lightAdd, int type)
 {
 	int			lnum, i;
 	dlight_t	*dl;
@@ -1082,7 +1080,7 @@ float R_ShadowLight (vec3_t entPos, vec3_t lightAdd, int type)
 
 		for (i=0; i<r_lightgroups; i++) {
 
-			if(LightGroups[i].group_origin[2] < currententity->origin[2] - bob)
+			if(LightGroups[i].group_origin[2] < entPos[2] - bob)
 				continue; //don't bother with world lights below the ent, creates undesirable shadows
 
 			//need a trace(not for self model, too jerky when lights are blocked and reappear)
@@ -1115,15 +1113,15 @@ float R_ShadowLight (vec3_t entPos, vec3_t lightAdd, int type)
 	if (shadowdist > 4) shadowdist = 4;
 	if (shadowdist <= 0) // old style static shadow
 	{
-		angle[PITCH] = currententity->angles[PITCH];
-		angle[YAW] =   -currententity->angles[YAW];
-		angle[ROLL] =   currententity->angles[ROLL];
+		angle[PITCH] = angles[PITCH];
+		angle[YAW] = -angles[YAW];
+		angle[ROLL] = angles[ROLL];
 		shadowdist = 1;
 	}
 	else // shadow from dynamic lights
 	{
 		vectoangles (lightAdd, angle);
-		angle[YAW] -= currententity->angles[YAW];
+		angle[YAW] -= angles[YAW];
 	}
 	AngleVectors (angle, dist, NULL, NULL);
 	VectorScale (dist, shadowdist, lightAdd);

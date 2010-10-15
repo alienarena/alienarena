@@ -1902,7 +1902,7 @@ extern	vec3_t			lightspot;
 R_DrawIqmShadow
 =============
 */
-void R_DrawIQMShadow()
+void R_DrawIQMShadow(vec3_t origin)
 {
 	vec3_t	point;
 	float	height, lheight;
@@ -1910,17 +1910,15 @@ void R_DrawIQMShadow()
 	int		index_xyz, index_st;
 	int		va = 0;
 
-	lheight = currententity->origin[2] - lightspot[2];
-
-	height = 0;
+	lheight = origin[2] - lightspot[2];
 
 	height = -lheight + 0.1f;
 
 	// if above entity's origin, skip
-	if ((currententity->origin[2]+height) > currententity->origin[2])
+	if ((origin[2]+height) > origin[2])
 		return;
 
-	if (r_newrefdef.vieworg[2] < (currententity->origin[2] + height))
+	if (r_newrefdef.vieworg[2] < (origin[2] + height))
 		return;
 
 	if (have_stencil)
@@ -2302,7 +2300,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 		case 0:
 			break;
 		case 1: //dynamic only - always cast something
-			casted = R_ShadowLight (currententity->origin, shadevector, 0);
+			casted = R_ShadowLight (currententity->origin, currententity->angles, shadevector, 0);
 			qglPushMatrix ();
 			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
 			qglRotatef (currententity->angles[1], 0, 0, 1);
@@ -2314,7 +2312,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 			else
 				qglColor4f (0,0,0,0.3);
 
-			R_DrawIQMShadow ();
+			R_DrawIQMShadow (currententity->origin);
 
 			qglEnable (GL_TEXTURE_2D);
 			qglDisable (GL_BLEND);
@@ -2323,7 +2321,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 			break;
 		case 2: //dynamic and world
 			//world
-			casted = R_ShadowLight (currententity->origin, shadevector, 1);
+			casted = R_ShadowLight (currententity->origin, currententity->angles, shadevector, 1);
 			qglPushMatrix ();
 			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
 			qglRotatef (currententity->angles[1], 0, 0, 1);
@@ -2335,14 +2333,14 @@ void R_DrawINTERQUAKEMODEL ( void )
 			else
 				qglColor4f (0,0,0,casted);
 
-			R_DrawIQMShadow ();
+			R_DrawIQMShadow (currententity->origin);
 
 			qglEnable (GL_TEXTURE_2D);
 			qglDisable (GL_BLEND);
 			qglPopMatrix ();
 			//dynamic
 			casted = 0;
-		 	casted = R_ShadowLight (currententity->origin, shadevector, 0);
+		 	casted = R_ShadowLight (currententity->origin, currententity->angles, shadevector, 0);
 			if (casted > 0)
 			{ //only draw if there's a dynamic light there
 				qglPushMatrix ();
@@ -2356,7 +2354,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 				else
 					qglColor4f (0,0,0,casted);
 
-				R_DrawIQMShadow ();
+				R_DrawIQMShadow (currententity->origin);
 
 				qglEnable (GL_TEXTURE_2D);
 				qglDisable (GL_BLEND);
