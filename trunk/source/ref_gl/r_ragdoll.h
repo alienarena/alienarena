@@ -24,8 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_RAGDOLL_OBJECTS 16
 #define MAX_RAGDOLL_JOINTS 16
 #define MAX_CONTACTS 32 
+#define MAX_FORCES 4
 #define RAGDOLL_DURATION 10000 //10 seconds
-#define STEP_TIME 10
 
 //body id's
 #define CHEST 0
@@ -103,29 +103,47 @@ int lastODEUpdate;
 dQuaternion initialQuaternion;
 
 typedef struct RagDollBind_s {
+
     const char *name;
     int object;
+
 } RagDollBind_t;
 
 extern RagDollBind_t RagDollBinds[];
 extern int RagDollBindsCount;
 
 typedef struct RagDollObject_s {
+
 	dBodyID body;
 	dMass mass;
 	dGeomID geom;
     matrix3x4_t initmat;
+
 } RagDollObject_t;
+
+typedef struct RagDollForce_s {
+
+	vec3_t org;
+	vec3_t dir;
+	float force;
+	
+	int spawnTime;
+
+	int destroyed;
+
+} RagDollForce_t;
 
 #define GROW_ODE_VERTS 16384
 #define GROW_ODE_TRIS 16384
 typedef struct RagDollWorld_s {
+
 	dVector3	*ODEVerts;
 	dTriIndex	*ODETris;
     int numODEVerts, maxODEVerts;
     int numODETris, maxODETris;
 	dTriMeshDataID triMesh;
 	dGeomID geom;
+
 } RagDollWorld_t;
 
 typedef struct RagDoll_s {
@@ -134,6 +152,8 @@ typedef struct RagDoll_s {
 
 	RagDollObject_t RagDollObject[MAX_RAGDOLL_OBJECTS];
 	dJointID RagDollJoint[MAX_RAGDOLL_JOINTS];
+
+	RagDollForce_t RagDollForces[MAX_FORCES];
 	
 	//mesh information
 	model_t *ragDollMesh;
@@ -145,7 +165,7 @@ typedef struct RagDoll_s {
 	vec3_t	origin;
 	vec3_t	curPos;
 
-	float spawnTime;
+	int spawnTime;
 
 	int destroyed;
 
