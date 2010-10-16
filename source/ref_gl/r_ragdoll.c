@@ -853,6 +853,12 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 
 	VectorSet(RagDoll[RagDollID].origin, 0, 0, 0);
 
+	//destroy forces
+	for( i = 0; i < MAX_FORCES; i++)
+	{
+		RagDoll[RagDollID].RagDollForces[i].destroyed = true;
+	}
+
 	//clear any allocated mem
 	if(RagDoll[RagDollID].ragDollMesh)
 	{
@@ -1250,6 +1256,36 @@ void R_RenderAllRagdolls ( void )
 			}
 			qglColor4f (1,1,1,1);
 
+			//apply forces from explosions
+			for(i = 0; i < MAX_FORCES; i++)
+			{
+				if(!RagDoll[RagDollID].RagDollForces[i].destroyed)
+				{
+					if(Sys_Milliseconds() - RagDoll[RagDollID].RagDollForces[i].spawnTime < 2000)
+					{			
+						VectorSubtract(RagDoll[RagDollID].RagDollForces[i].org, RagDoll[RagDollID].curPos, RagDoll[RagDollID].RagDollForces[i].dir);
+						RagDoll[RagDollID].RagDollForces[i].force /= VectorLength(RagDoll[RagDollID].RagDollForces[i].dir);
+						VectorNormalize(RagDoll[RagDollID].RagDollForces[i].dir);
+						RagDoll[RagDollID].RagDollForces[i].force *= 500;
+						if(RagDoll[RagDollID].RagDollForces[i].force > 10000)
+							RagDoll[RagDollID].RagDollForces[i].force = 10000;
+
+						//add a force if it's sufficient enough to do anything
+						if(RagDoll[RagDollID].RagDollForces[i].force > 20) 
+						{					
+							dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[CHEST].body, -RagDoll[RagDollID].RagDollForces[i].dir[0] *
+							RagDoll[RagDollID].RagDollForces[i].force, -RagDoll[RagDollID].RagDollForces[i].dir[1] * 
+							RagDoll[RagDollID].RagDollForces[i].force, -RagDoll[RagDollID].RagDollForces[i].dir[2] *
+							RagDoll[RagDollID].RagDollForces[i].force);
+						}
+						RagDoll[RagDollID].RagDollForces[i].destroyed = true; //destroy if used
+					}
+					else
+						RagDoll[RagDollID].RagDollForces[i].destroyed = true; //destroy if expired
+				}
+			}
+
+
 			if(r_ragdoll_debug->value)
 			{				
 				//debug - draw ragdoll bodies
@@ -1288,4 +1324,27 @@ void R_RenderAllRagdolls ( void )
 	}
 	lastODEUpdate = Sys_Milliseconds();
 	r_DrawingRagDoll = false;
+}
+
+void R_ApplyForceToRagdolls(vec3_t origin, float force)
+{
+	int RagDollID, i;
+
+	if(!r_ragdolls->value)
+		return;
+
+	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
+	{
+		for(i = 0; i < MAX_FORCES; i++)
+		{
+			if(RagDoll[RagDollID].RagDollForces[i].destroyed)
+			{
+				VectorCopy(origin, RagDoll[RagDollID].RagDollForces[i].org);
+				RagDoll[RagDollID].RagDollForces[i].force = force;
+				RagDoll[RagDollID].RagDollForces[i].spawnTime = Sys_Milliseconds();
+				RagDoll[RagDollID].RagDollForces[i].destroyed = false;
+				break;
+			}
+		}
+	}
 }

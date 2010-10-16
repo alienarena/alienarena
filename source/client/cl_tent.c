@@ -280,7 +280,7 @@ CL_ParseTEnt
 =================
 */
 static byte splash_color[] = {0x00, 0xe0, 0xb0, 0x50, 0xd0, 0xe0, 0xe8};
-
+extern void R_ApplyForceToRagdolls(vec3_t origin, float force);
 void CL_ParseTEnt (void)
 {
 	int		type;
@@ -342,8 +342,10 @@ void CL_ParseTEnt (void)
 		MSG_ReadDir (&net_message, dir);
 		if (type == TE_SCREEN_SPARKS) {
 			trace = CL_Trace ( pos, mins, maxs, pos, -1, MASK_SOLID, true, NULL);
-			if(trace.contents)
+			if(trace.contents) {
 				CL_BeamgunMark(pos, dir, 0.8, false);
+				R_ApplyForceToRagdolls(pos, 40);
+			}
 			CL_LaserSparks (pos, dir, 0xd0, 20);
 		}
 		else
@@ -393,6 +395,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
 		CL_BlasterParticles (pos, dir);
+		R_ApplyForceToRagdolls(pos, 100);
 
 		break;
 
@@ -401,8 +404,10 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos2);
 		CL_DisruptorBeam (pos, pos2);
 		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL);
-		if(trace.contents)
+		if(trace.contents) {
 			CL_BeamgunMark(pos2, trace.plane.normal, 0.4, true);
+			R_ApplyForceToRagdolls(pos2, 100);
+		}
 		S_StartSound (pos, 0, 0, cl_sfx_railg, 1, ATTN_NORM, 0);
 		CL_PlasmaFlashParticle(pos, cl.refdef.viewangles, false);
 		break;
@@ -425,12 +430,14 @@ void CL_ParseTEnt (void)
 			S_StartSound (pos, 0, 0, cl_sfx_watrexp, 1, ATTN_NORM, 0);
 		else
 			S_StartSound (pos, 0, 0, cl_sfx_rockexp, 1, ATTN_NORM, 0);
+		R_ApplyForceToRagdolls(pos, 100);
 
 		break;
 
 	case TE_BFG_BIGEXPLOSION:
 		MSG_ReadPos (&net_message, pos);
 		CL_BFGExplosionParticles (pos);
+		R_ApplyForceToRagdolls(pos, 200);
 		break;
 
 	case TE_BUBBLETRAIL:
@@ -526,8 +533,10 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos2);
 		CL_BlasterBeam (pos, pos2);
 		trace = CL_Trace ( pos, mins, maxs, pos2, -1, MASK_SOLID, true, NULL);
-		if(trace.contents)
+		if(trace.contents) {
 			CL_BlasterMark(pos2, trace.plane.normal);
+			R_ApplyForceToRagdolls(pos2, 100);
+		}
 		break;
 
 	default:
