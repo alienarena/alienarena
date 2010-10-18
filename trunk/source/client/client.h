@@ -314,6 +314,7 @@ extern	cvar_t	*cl_paused;
 extern	cvar_t	*cl_timedemo;
 
 extern	cvar_t	*cl_vwep;
+extern  cvar_t  *cl_vehicle_huds;
 
 extern  cvar_t  *background_music;
 
@@ -618,6 +619,8 @@ int adren_drawn;
 int sproing;
 int sproing_drawn;
 int numitemicons;
+
+int vehicle_hud;
 
 void V_Init (void);
 void V_RenderView( float stereo_separation );

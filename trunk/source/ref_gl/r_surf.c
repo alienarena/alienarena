@@ -2049,7 +2049,7 @@ void R_RecursiveRadarNode (mnode_t *node)
 int			numRadarEnts=0;
 RadarEnt_t	RadarEnts[MAX_RADAR_ENTS];
 
-void GL_DrawRadar(void)
+void R_DrawRadar(void)
 {
 	int		i;
 	float	fS[4]={0,0,-1.0/512.0,0};

@@ -117,6 +117,7 @@ cvar_t	*gender;
 cvar_t	*gender_auto;
 
 cvar_t	*cl_vwep;
+cvar_t	*cl_vehicle_huds;
 
 cvar_t  *background_music;
 cvar_t	*background_music_vol;
@@ -1793,6 +1794,7 @@ void CL_InitLocal (void)
 	gender->modified = false; // clear this so we know when user sets it manually
 
 	cl_vwep = Cvar_Get ("cl_vwep", "1", CVAR_ARCHIVE);
+	cl_vehicle_huds = Cvar_Get ("cl_vehicle_huds", "1", CVAR_ARCHIVE);
 
 	cl_master = Cvar_Get ("cl_master", "master.corservers.com", CVAR_ARCHIVE);
 	cl_master2 = Cvar_Get ("cl_master2", "master2.corservers.com", CVAR_ARCHIVE);
@@ -1906,6 +1908,9 @@ void CL_InitLocal (void)
 	R_RegisterPic("m_main_mont3");
 	R_RegisterPic("m_main_mont4");
 	R_RegisterPic("m_main_mont5");
+	R_RegisterPic("hud_bomber");
+	R_RegisterPic("hud_strafer");
+	R_RegisterPic("hud_hover");
 }
 
 
