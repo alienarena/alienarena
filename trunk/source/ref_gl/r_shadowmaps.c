@@ -515,7 +515,7 @@ void R_DrawDynamicCaster(void)
 			continue;
 		}
 
-		if(r_ragdolls->value && currententity->model->type == mod_iqm && currentmodel->hasRagDoll)
+		if(r_ragdolls->value && currententity->model->type == mod_iqm && currententity->model->hasRagDoll)
 		{
 			if(currententity->frame > 198)
 				continue;
@@ -554,11 +554,6 @@ void R_DrawDynamicCaster(void)
 	{
 		if(RagDoll[RagDollID].destroyed)
 	        continue;
-
-		currentmodel = RagDoll[RagDollID].ragDollMesh;
-
-		if (!currentmodel)
-			continue;
 		
 		//distance from light, if too far, don't render(to do - check against brightness for dist!)
 		VectorSubtract(dl->origin, RagDoll[RagDollID].curPos, dist);

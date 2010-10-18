@@ -680,6 +680,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	}
 
 	//load ragdoll info from ragdoll file
+	mod->hasRagDoll = false;
 	COM_StripExtension(mod->name, shortname);
 	i = 0;
 	do
@@ -697,10 +698,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		if(path)
 			Com_sprintf(fullname, sizeof(fullname), "%s/%s", path, shortname);
 
-		if (Mod_ReadRagDollFile(fullname, mod))
-			mod->hasRagDoll = true;
-		else 
-			mod->hasRagDoll = false;
+		mod->hasRagDoll = Mod_ReadRagDollFile(fullname, mod);
 	}
 	
 	//free temp non hunk mem
