@@ -35,7 +35,10 @@ int	GetThreadWork (void)
 	{
 		oldf = f;
 		if (pacifier)
+		{
 			printf ("%i...", f);
+			fflush( stdout );
+		}
 	}
 
 	r = dispatch;
@@ -422,7 +425,10 @@ void RunThreadsOn (int workcnt, qboolean showpacifier, void(*func)(int))
 
 	end = I_FloatTime ();
 	if (pacifier)
+	{
 		printf (" (%i)\n", end-start);
+		fflush( stdout );
+	}
 }
 
 #endif

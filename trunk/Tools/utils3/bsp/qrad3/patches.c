@@ -3,6 +3,8 @@
 
 vec3_t	texture_reflectivity[MAX_MAP_TEXINFO];
 
+int cluster_neg_one = 0;
+
 /*
 ===================================================================
 
@@ -23,7 +25,7 @@ void CalcTextureReflectivity (void)
 	int texels;
 	float color[3];
 	char path[1024];
-	float r;
+	float r, c;
 	byte* pbuffer;
 	byte* ptexel;
 	int width, height;
@@ -50,8 +52,8 @@ void CalcTextureReflectivity (void)
 			continue;
 
 		// buffer is RGBA  (A  set to 255 for 24 bit format)
-		// looks in arena/textures and then data1/textures 
-		sprintf( path, "%s/arena/textures/%s.tga", gamedir, texinfo[i].texture );
+		// looks in arena/textures and then data1/textures
+		sprintf( path, "%sarena/textures/%s.tga", gamedir, texinfo[i].texture );
 		if ( FileExists( path ) ) // LoadTGA expects file to exist
 		{
 			LoadTGA( path, &pbuffer, &width, &height ); // load rgba data
@@ -59,7 +61,7 @@ void CalcTextureReflectivity (void)
 		}
 		else
 		{
-			sprintf( path, "%s/data1/textures/%s.tga", gamedir, texinfo[i].texture );
+			sprintf( path, "%sdata1/textures/%s.tga", gamedir, texinfo[i].texture );
 			if ( FileExists( path ) )
 			{
 				LoadTGA( path, &pbuffer, &width, &height ); // load rgba data
@@ -98,6 +100,15 @@ void CalcTextureReflectivity (void)
 			r = color[j] / (float)texels / 255.0f;
 			texture_reflectivity[i][j] = r;
 		}
+
+		// desaturate reflectivity here (TODO: check that avg. rgb makes sense)
+		r = 1.0f - desaturate;
+		c = ((texture_reflectivity[i][0]
+			+ texture_reflectivity[i][1]
+			+ texture_reflectivity[i][2]) / 3.0f) * desaturate;
+		texture_reflectivity[i][0] = (texture_reflectivity[i][0] * r) + c;
+		texture_reflectivity[i][1] = (texture_reflectivity[i][1] * r) + c;
+		texture_reflectivity[i][2] = (texture_reflectivity[i][2] * r) + c;
 
 		qprintf("tex %i (%s) avg rgb [ %f, %f, %f ]\n",
 			i, path, texture_reflectivity[i][0],
@@ -198,7 +209,7 @@ void MakePatchForFace (int fn, winding_t *w)
 	patch_t		*patch;
 	dplane_t	*pl;
 	int			i;
-	vec3_t		color;
+	vec3_t		color = {1.0f,1.0f,1.0f};
 	dleaf_t		*leaf;
 
 	f = &dfaces[fn];
@@ -235,7 +246,10 @@ void MakePatchForFace (int fn, winding_t *w)
 	leaf = PointInLeaf(patch->origin);
 	patch->cluster = leaf->cluster;
 	if (patch->cluster == -1)
-		qprintf ("patch->cluster == -1\n");
+	{
+		// qprintf ("patch->cluster == -1\n");
+		++cluster_neg_one;
+	}
 
 	patch->area = area;
 	if (patch->area <= 1)
@@ -319,7 +333,7 @@ void MakePatches (void)
 		}
 	}
 
-	qprintf ("%i sqaure feet\n", (int)(totalarea/64));
+	qprintf ("area = %u (%i square feet)\n", (unsigned int)totalarea, (int)(totalarea/64));
 }
 
 /*
@@ -329,6 +343,7 @@ SUBDIVIDE
 
 =======================================================================
 */
+
 
 void FinishSplit (patch_t *patch, patch_t *newp)
 {
@@ -352,15 +367,23 @@ void FinishSplit (patch_t *patch, patch_t *newp)
 	VectorAdd (patch->origin, patch->plane->normal, patch->origin);
 	leaf = PointInLeaf(patch->origin);
 	patch->cluster = leaf->cluster;
+
 	if (patch->cluster == -1)
-		qprintf ("patch->cluster == -1\n");
+	{ // in solid leaf ???
+		// qprintf ("patch->cluster == -1\n");
+		++cluster_neg_one;
+	}
 
 	WindingCenter (newp->winding, newp->origin);
 	VectorAdd (newp->origin, newp->plane->normal, newp->origin);
 	leaf = PointInLeaf(newp->origin);
 	newp->cluster = leaf->cluster;
+
 	if (newp->cluster == -1)
-		qprintf ("patch->cluster == -1\n");
+	{ // in solid leaf ???
+		// qprintf ("patch->cluster == -1\n");
+		++cluster_neg_one;
+	}
 }
 
 /*
@@ -401,7 +424,7 @@ void	SubdividePatch (patch_t *patch)
 	if (i == 3)
 	{
 		// no splitting needed
-		return;		
+		return;
 	}
 
 	//
@@ -450,14 +473,17 @@ void	DicePatch (patch_t *patch)
 	patch_t	*newp;
 
 	w = patch->winding;
-	WindingBounds (w, mins, maxs);
+	WindingBounds (w, mins, maxs); // 3D AABB for polygon
+
 	for (i=0 ; i<3 ; i++)
+	{ // if an AABB dimension > subdiv then split (?)
 		if (floor((mins[i]+1)/subdiv) < floor((maxs[i]-1)/subdiv))
 			break;
+	}
+
 	if (i == 3)
-	{
-		// no splitting needed
-		return;		
+	{ // no splitting needed
+		return;
 	}
 
 	//
@@ -465,7 +491,8 @@ void	DicePatch (patch_t *patch)
 	//
 	VectorCopy (vec3_origin, split);
 	split[i] = 1;
-	dist = subdiv*(1+floor((mins[i]+1)/subdiv));
+	dist = subdiv * ( 1 + floor( (mins[i]+1) / subdiv) );
+	// {split,dist} is the dividing plane (?)
 	ClipWindingEpsilon (w, split, dist, ON_EPSILON, &o1, &o2);
 
 	//
@@ -508,6 +535,7 @@ void SubdividePatches (void)
 		DicePatch (&patches[i]);
 	}
 	qprintf ("%i patches after subdivision\n", num_patches);
+	qprintf( "[? patch->cluster=-1 count is %i  ?in solid leaf?]\n", cluster_neg_one );
 }
 
 //=====================================================================

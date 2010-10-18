@@ -16,12 +16,12 @@ AllocPortal
 portal_t *AllocPortal (void)
 {
 	portal_t	*p;
-	
+
 	if (numthreads == 1)
 		c_active_portals++;
 	if (c_active_portals > c_peak_portals)
 		c_peak_portals = c_active_portals;
-	
+
 	p = malloc (sizeof(portal_t));
 	memset (p, 0, sizeof(portal_t));
 
@@ -138,7 +138,7 @@ qboolean Portal_EntityFlood (portal_t *p, int s)
 		|| p->nodes[1]->planenum != PLANENUM_LEAF)
 		Error ("Portal_EntityFlood: not a leaf");
 
-	// can never cross to a solid 
+	// can never cross to a solid
 	if ( (p->nodes[0]->contents & CONTENTS_SOLID)
 	|| (p->nodes[1]->contents & CONTENTS_SOLID) )
 		return false;
@@ -165,7 +165,7 @@ void AddPortalToNodes (portal_t *p, node_t *front, node_t *back)
 	p->nodes[0] = front;
 	p->next[0] = front->portals;
 	front->portals = p;
-	
+
 	p->nodes[1] = back;
 	p->next[1] = back->portals;
 	back->portals = p;
@@ -180,14 +180,14 @@ RemovePortalFromNode
 void RemovePortalFromNode (portal_t *portal, node_t *l)
 {
 	portal_t	**pp, *t;
-	
+
 // remove reference to the current portal
 	pp = &l->portals;
 	while (1)
 	{
 		t = *pp;
 		if (!t)
-			Error ("RemovePortalFromNode: portal not in leaf");	
+			Error ("RemovePortalFromNode: portal not in leaf");
 
 		if ( t == portal )
 			break;
@@ -199,7 +199,7 @@ void RemovePortalFromNode (portal_t *portal, node_t *l)
 		else
 			Error ("RemovePortalFromNode: portal not bounding leaf");
 	}
-	
+
 	if (portal->nodes[0] == l)
 	{
 		*pp = portal->next[0];
@@ -207,7 +207,7 @@ void RemovePortalFromNode (portal_t *portal, node_t *l)
 	}
 	else if (portal->nodes[1] == l)
 	{
-		*pp = portal->next[1];	
+		*pp = portal->next[1];
 		portal->nodes[1] = NULL;
 	}
 }
@@ -218,7 +218,7 @@ void PrintPortal (portal_t *p)
 {
 	int			i;
 	winding_t	*w;
-	
+
 	w = p->winding;
 	for (i=0 ; i<w->numpoints ; i++)
 		printf ("(%5.0f,%5.0f,%5.0f)\n",w->p[i][0]
@@ -249,7 +249,7 @@ void MakeHeadnodePortals (tree_t *tree)
 		bounds[0][i] = tree->mins[i] - SIDESPACE;
 		bounds[1][i] = tree->maxs[i] + SIDESPACE;
 	}
-	
+
 	tree->outside_node.planenum = PLANENUM_LEAF;
 	tree->outside_node.brushlist = NULL;
 	tree->outside_node.portals = NULL;
@@ -262,7 +262,7 @@ void MakeHeadnodePortals (tree_t *tree)
 
 			p = AllocPortal ();
 			portals[n] = p;
-			
+
 			pl = &bplanes[n];
 			memset (pl, 0, sizeof(*pl));
 			if (j)
@@ -279,7 +279,7 @@ void MakeHeadnodePortals (tree_t *tree)
 			p->winding = BaseWindingForPlane (pl->normal, pl->dist);
 			AddPortalToNodes (p, node, &tree->outside_node);
 		}
-		
+
 // clip the basewindings by all the other planes
 	for (i=0 ; i<6 ; i++)
 	{
@@ -353,13 +353,13 @@ void MakeNodePortal (node_t *node)
 	portal_t	*new_portal, *p;
 	winding_t	*w;
 	vec3_t		normal;
-	float		dist;
-	int			side;
+	float		dist = 0.0f;
+	int			side = -1;
 
 	w = BaseWindingForNode (node);
 
 	// clip the portal by all the other portals in the node
-	for (p = node->portals ; p && w; p = p->next[side])	
+	for (p = node->portals ; p && w; p = p->next[side])
 	{
 		if (p->nodes[0] == node)
 		{
@@ -395,7 +395,7 @@ void MakeNodePortal (node_t *node)
 	new_portal = AllocPortal ();
 	new_portal->plane = mapplanes[node->planenum];
 	new_portal->onnode = node;
-	new_portal->winding = w;	
+	new_portal->winding = w;
 	AddPortalToNodes (new_portal, node->children[0], node->children[1]);
 }
 
@@ -412,7 +412,7 @@ void SplitNodePortals (node_t *node)
 {
 	portal_t	*p, *next_portal, *new_portal;
 	node_t		*f, *b, *other_node;
-	int			side;
+	int			side = -1;
 	plane_t		*plane;
 	winding_t	*frontwinding, *backwinding;
 
@@ -420,7 +420,7 @@ void SplitNodePortals (node_t *node)
 	f = node->children[0];
 	b = node->children[1];
 
-	for (p = node->portals ; p ; p = next_portal)	
+	for (p = node->portals ; p ; p = next_portal)
 	{
 		if (p->nodes[0] == node)
 			side = 0;
@@ -477,7 +477,7 @@ void SplitNodePortals (node_t *node)
 				AddPortalToNodes (p, other_node, f);
 			continue;
 		}
-		
+
 	// the winding is split
 		new_portal = AllocPortal ();
 		*new_portal = *p;
@@ -514,7 +514,7 @@ void CalcNodeBounds (node_t *node)
 
 	// calc mins/maxs for both leafs and nodes
 	ClearBounds (node->mins, node->maxs);
-	for (p = node->portals ; p ; p = p->next[s])	
+	for (p = node->portals ; p ; p = p->next[s])
 	{
 		s = (p->nodes[1] == node);
 		for (i=0 ; i<p->winding->numpoints ; i++)
