@@ -1,28 +1,29 @@
 #
 # Codered Makefile for Alien Arena Map Building Tools for Linux 
 #
-#  bspinfo3
 #  qbsp3
 #  qvis3
 #  qrad3
+#
+#  2010-09 bspinfo3 build disabled
 #
 
 # BUILD = RELEASE or DEBUG
 BUILD ?= RELEASE
 
 # Where programs will be installed on 'make install'
-INSTALL_DIR ?= ../../arena/maps
+INSTALL_DIR ?= /usr/local/bin
 
 # Compiler
-CC = gcc
+CC ?= gcc
 
 # Compile Options
-BASE_CFLAGS = -Wall -march=i686 -DMATH_INLINE
-RELEASE_CFLAGS = $(BASE_CFLAGS) -O2 -fomit-frame-pointer -fexpensive-optimizations
-DEBUG_CFLAGS = $(BASE_CFLAGS) -g -ggdb
+BASE_CFLAGS ?= -Wall
+RELEASE_CFLAGS ?= $(BASE_CFLAGS) -O3 
+DEBUG_CFLAGS ?= $(BASE_CFLAGS) -O0 -g
 
 # Link Options
-LDFLAGS = -lm
+LDFLAGS ?= -lm
 
 #
 srcdir = .
@@ -43,11 +44,11 @@ vpath %.h common
 vpath %.c common
 
 ifeq ($(BUILD),DEBUG)
-CFLAGS = $(DEBUG_CFLAGS)
+CFLAGS ?= $(DEBUG_CFLAGS)
 builddir = debug
 vpath %.o debug
 else
-CFLAGS = $(RELEASE_CFLAGS)
+CFLAGS ?= $(RELEASE_CFLAGS)
 builddir = release
 vpath %.o release
 endif
@@ -159,12 +160,13 @@ qrad3_dep = $(addprefix $(depdir)/, $(qrad3_srcs:.c=.d) )
 #
 # --- targets ---
 #
+# note: bspinfo3 not included in build
 
-all: subdirectories $(builddir)/bspinfo3 $(builddir)/qbsp3 $(builddir)/qvis3 $(builddir)/qrad3
+all: subdirectories $(builddir)/qbsp3 $(builddir)/qvis3 $(builddir)/qrad3
 
 # dependency (.d) files
 include $(cmn_dep)
-include $(bspinfo3_dep)
+## include $(bspinfo3_dep)
 include $(qbsp3_dep)
 include $(qvis3_dep)
 include $(qrad3_dep)
@@ -174,12 +176,12 @@ $(cmn_objs): %o : %c
 	$(CC) -c $(includedirs) $(CFLAGS) $< -o $(builddir)/$@
 
 # link bspinfo3
-$(builddir)/bspinfo3: $(bspinfo3_objs_all)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(addprefix $(builddir)/, $(bspinfo3_objs_all)) -o $(builddir)/bspinfo3
+## $(builddir)/bspinfo3: $(bspinfo3_objs_all)
+##	$(CC) $(CFLAGS) $(LDFLAGS) $(addprefix $(builddir)/, $(bspinfo3_objs_all)) -o $(builddir)/bspinfo3
 
 # compile bspinfo3 sources
-$(bspinfo3_objs): %o : %c
-	$(CC) -c $(includedirs) $(CFLAGS) $< -o $(builddir)/$@
+## $(bspinfo3_objs): %o : %c
+##	$(CC) -c $(includedirs) $(CFLAGS) $< -o $(builddir)/$@
 
 # link qbsp3
 $(builddir)/qbsp3: $(qbsp3_objs_all)
@@ -206,34 +208,36 @@ $(qrad3_objs): %o : %c
 	$(CC) -c $(includedirs) $(CFLAGS) $< -o $(builddir)/$@
 
 subdirectories:
-	@mkdir -p $(depdir)
-	@mkdir -p $(builddir)
+	mkdir -p $(depdir)
+	mkdir -p $(builddir)
 
 clean:
-	@rm -f $(builddir)/*.o
-	@rm -f $(builddir)/qbsp3
-	@rm -f $(builddir)/qvis3
-	@rm -f $(builddir)/qrad3
-	@rm -f $(builddir)/bspinfo
+	rm -f $(builddir)/*.o
+	rm -f $(builddir)/qbsp3
+	rm -f $(builddir)/qvis3
+	rm -f $(builddir)/qrad3
+
+##	rm -f $(builddir)/bspinfo
 
 install:
-	@cp $(builddir)/qbsp3   $(INSTALL_DIR)
-	@cp $(builddir)/qvis3   $(INSTALL_DIR)
-	@cp $(builddir)/qrad3   $(INSTALL_DIR)
-	@cp $(builddir)/bspinfo3 $(INSTALL_DIR)
+	cp $(builddir)/qbsp3   $(INSTALL_DIR)
+	cp $(builddir)/qvis3   $(INSTALL_DIR)
+	cp $(builddir)/qrad3   $(INSTALL_DIR)
+	
+##	cp $(builddir)/bspinfo3 $(INSTALL_DIR)
 
-dependents: $(cmn_dep) $(bspinfo3_dep) $(qbsp3_dep) $(qvis3_dep) $(qrad3_dep)
+dependents: $(cmn_dep) $(qbsp3_dep) $(qvis3_dep) $(qrad3_dep)
 
 clean_dependents:
-	@rm -f $(depdir)/*.d
+	rm -f $(depdir)/*.d
 
 .PHONY:	clean install dependents subdirectories clean_dependents
 
 # rule to generate dependency include files (.d files)
 #  using compiler -MM option
 $(depdir)/%.d : %.c
-	@mkdir -p $(depdir)
-	@set -e ;	\
+	mkdir -p $(depdir)
+	set -e ;	\
 	rm -f $@ ;	\
 	$(CC) $(includedirs) -MM $(CFLAGS) $<  > $@.$$$$ ;	\
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@ ;	\

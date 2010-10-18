@@ -200,7 +200,7 @@ TriEdge_r
 */
 void TriEdge_r (triangulation_t *trian, triedge_t *e)
 {
-	int		i, bestp;
+	int		i, bestp = 0;
 	vec3_t	v1, v2;
 	vec_t	*p0, *p1, *p;
 	vec_t	best, ang;
@@ -255,7 +255,7 @@ void TriangulatePoints (triangulation_t *trian)
 {
 	vec_t	d, bestd;
 	vec3_t	v1;
-	int		bp1, bp2, i, j;
+	int		bp1=0, bp2=0, i, j;
 	vec_t	*p1, *p2;
 	triedge_t	*e, *e2;
 
@@ -803,7 +803,7 @@ void CreateDirectLights (void)
 	vec3_t	dest;
 	char	*_color;
 	float	intensity;
-    char    *sun_target;
+    char    *sun_target = NULL;
     char    *proc_num;
     qboolean sun_light;
 
@@ -1111,7 +1111,7 @@ void LightContributionToPoint (directlight_t *l, vec3_t pos, vec3_t normal, vec3
 	vec3_t			delta, target;
 	float			dot, dot2;
 	float			dist;
-	float			scale;
+	float			scale = 0.0f;
 	float			inv;
     float           main_val;
 	qboolean		set_main;
@@ -1330,8 +1330,8 @@ float	sampleofs[5][2] =
 
 void BuildFacelights (int facenum)
 {
-	dface_t	*f;
-	lightinfo_t	l[5];
+	dface_t	*this_face;
+	lightinfo_t	liteinfo[5];
 	float		*styletable[MAX_LSTYLES];
 	int			i, j;
 	float		*spot;
@@ -1340,48 +1340,48 @@ void BuildFacelights (int facenum)
 	int			tablesize;
 	facelight_t		*fl;
 
-	f = &dfaces[facenum];
+	this_face = &dfaces[facenum];
 
-	if ( texinfo[f->texinfo].flags & (SURF_WARP|SURF_SKY) )
+	if ( texinfo[this_face->texinfo].flags & (SURF_WARP|SURF_SKY) )
 		return;		// non-lit texture
 
 	memset (styletable,0, sizeof(styletable));
 
-	if (extrasamples)
+	if (extrasamples) // set with -extra option
 		numsamples = 5;
 	else
 		numsamples = 1;
 	for (i=0 ; i<numsamples ; i++)
 	{
-		memset (&l[i], 0, sizeof(l[i]));
-		l[i].surfnum = facenum;
-		l[i].face = f;
-		VectorCopy (dplanes[f->planenum].normal, l[i].facenormal);
-		l[i].facedist = dplanes[f->planenum].dist;
-		if (f->side)
+		memset (&liteinfo[i], 0, sizeof(liteinfo[i]));
+		liteinfo[i].surfnum = facenum;
+		liteinfo[i].face = this_face;
+		VectorCopy (dplanes[this_face->planenum].normal, liteinfo[i].facenormal);
+		liteinfo[i].facedist = dplanes[this_face->planenum].dist;
+		if (this_face->side)
 		{
-			VectorSubtract (vec3_origin, l[i].facenormal, l[i].facenormal);
-			l[i].facedist = -l[i].facedist;
+			VectorSubtract (vec3_origin, liteinfo[i].facenormal, liteinfo[i].facenormal);
+			liteinfo[i].facedist = -liteinfo[i].facedist;
 		}
 
 		// get the origin offset for rotating bmodels
-		VectorCopy (face_offset[facenum], l[i].modelorg);
+		VectorCopy (face_offset[facenum], liteinfo[i].modelorg);
 
-		CalcFaceVectors (&l[i]);
-		CalcFaceExtents (&l[i]);
-		CalcPoints (&l[i], sampleofs[i][0], sampleofs[i][1]);
+		CalcFaceVectors (&liteinfo[i]);
+		CalcFaceExtents (&liteinfo[i]);
+		CalcPoints (&liteinfo[i], sampleofs[i][0], sampleofs[i][1]);
 	}
 
-	tablesize = l[0].numsurfpt * sizeof(vec3_t);
+	tablesize = liteinfo[0].numsurfpt * sizeof(vec3_t);
 	styletable[0] = malloc(tablesize);
 	memset (styletable[0], 0, tablesize);
 
 	fl = &facelight[facenum];
-	fl->numsamples = l[0].numsurfpt;
+	fl->numsamples = liteinfo[0].numsurfpt;
 	fl->origins = malloc (tablesize);
-	memcpy (fl->origins, l[0].surfpt, tablesize);
+	memcpy (fl->origins, liteinfo[0].surfpt, tablesize);
 
-	for (i=0 ; i<l[0].numsurfpt ; i++)
+	for (i=0 ; i<liteinfo[0].numsurfpt ; i++)
 	{
         sun_ambient_once = false;
         sun_main_once = false;
@@ -1389,12 +1389,12 @@ void BuildFacelights (int facenum)
 
 		for (j=0 ; j<numsamples ; j++)
 		{
-			GatherSampleLight (l[j].surfpt[i], l[0].facenormal, styletable,
+			GatherSampleLight (liteinfo[j].surfpt[i], liteinfo[0].facenormal, styletable,
 				i*3, tablesize, 1.0/numsamples);
 		}
 
 		// contribute the sample to one or more patches
-		AddSampleToPatch (l[0].surfpt[i], styletable[0]+i*3, facenum);
+		AddSampleToPatch (liteinfo[0].surfpt[i], styletable[0]+i*3, facenum);
 	}
 
 	// average up the direct light on each patch for radiosity
@@ -1404,10 +1404,10 @@ void BuildFacelights (int facenum)
 		{
 			VectorScale (patch->samplelight, 1.0/patch->samples, patch->samplelight);
 		}
-		else
-		{
+//		else
+//		{
 //			printf ("patch with no samples\n");
-		}
+//		}
 	}
 
 	for (i=0 ; i<MAX_LSTYLES ; i++)
@@ -1423,14 +1423,13 @@ void BuildFacelights (int facenum)
 
 	// the light from DIRECT_LIGHTS is sent out, but the
 	// texture itself should still be full bright
-
 	if (face_patches[facenum]->baselight[0] >= DIRECT_LIGHT ||
 		face_patches[facenum]->baselight[1] >= DIRECT_LIGHT ||
 		face_patches[facenum]->baselight[2] >= DIRECT_LIGHT
 		)
 	{
 		spot = fl->samples[0];
-		for (i=0 ; i<l[0].numsurfpt ; i++, spot+=3)
+		for (i=0 ; i<liteinfo[0].numsurfpt ; i++, spot+=3)
 		{
 			VectorAdd (spot, face_patches[facenum]->baselight, spot);
 		}
@@ -1449,13 +1448,14 @@ lighting and save into final map format
 void FinalLightFace (int facenum)
 {
 	dface_t		*f;
-	int			i, j, k, st;
+	int			i, j, /*k,*/ st;
 	vec3_t		lb;
 	patch_t		*patch;
-	triangulation_t	*trian;
+	triangulation_t	*trian = NULL;
 	facelight_t	*fl;
-	float		minlight;
-	float		max, newmax;
+	// float		minlight;
+	float		max;
+	float newmax;
 	byte		*dest;
 	triangle_t	*last_valid;
 	int			pfacenum;
@@ -1527,11 +1527,14 @@ void FinalLightFace (int facenum)
 	// sample the triangulation
 	//
 
+
 	// _minlight allows models that have faces that would not be
 	// illuminated to receive a mottled light pattern instead of
 	// black
-	minlight = FloatForKey (face_entity[facenum], "_minlight") * 128;
-
+/*
+	// 2010-09 - probably not used, too crude
+ 	minlight = FloatForKey (face_entity[facenum], "_minlight") * 128;
+*/
 	dest = &dlightdata[f->lightofs];
 
 	if (fl->numstyles > MAXLIGHTMAPS)
@@ -1544,10 +1547,14 @@ void FinalLightFace (int facenum)
 			);
 	}
 
+//	qprintf("Lightmap output: Styles: %d : Samples/Style: %d\n",
+//			fl->numstyles, fl->numsamples );
+
 	for (st=0 ; st<fl->numstyles ; st++)
 	{
 		last_valid = NULL;
 		f->styles[st] = fl->stylenums[st];
+
 		for (j=0 ; j<fl->numsamples ; j++)
 		{
 			VectorCopy ( (fl->samples[st]+j*3), lb);
@@ -1558,47 +1565,67 @@ void FinalLightFace (int facenum)
 				SampleTriangulation (fl->origins + j*3, trian, &last_valid, add);
 				VectorAdd (lb, add, lb);
 			}
-			// add an ambient term if desired
-			lb[0] += ambient;
-			lb[1] += ambient;
-			lb[2] += ambient;
 
-			VectorScale (lb, lightscale, lb);
 
-			// we need to clamp without allowing hue to change
-			for (k=0 ; k<3 ; k++)
-				if (lb[k] < 1)
-					lb[k] = 1;
-			max = lb[0];
-			if (lb[1] > max)
-				max = lb[1];
-			if (lb[2] > max)
-				max = lb[2];
-			newmax = max;
+			/*
+			 * to allow experimenting, ambient and lightscale are not limited
+			 *  to reasonable ranges.
+			 */
+			if ( ambient >= -255.0f && ambient <= 255.0f )
+			{ // add fixed white ambient.
+				lb[0] += ambient;
+				lb[1] += ambient;
+				lb[2] += ambient;
+			}
+			if ( lightscale > 0.0f  )
+			{ // apply lightscale, scale down or up
+				lb[0] *= lightscale;
+				lb[1] *= lightscale;
+				lb[2] *= lightscale;
+			}
+			// negative values not allowed
+			lb[0] = (lb[0] < 0.0f) ? 0.0f : lb[0];
+			lb[1] = (lb[1] < 0.0f) ? 0.0f : lb[1];
+			lb[2] = (lb[2] < 0.0f) ? 0.0f : lb[2];
 
-            if(nocolor)  // Tramsform according via NTSC model
-                {
+
+/*			qprintf("{%f %f %f}:",lb[0],lb[1],lb[2]);*/
+
+			// determine max of R,G,B
+			max = lb[0] > lb[1] ? lb[0] : lb[1];
+			max = max > lb[2] ? max : lb[2];
+
+			if( grayscale > 0.0f && grayscale <= 1.0f  )
+            { // reduce color per NTSC model
                 max = (0.299f * lb[0]) + (0.587f * lb[1]) * (0.144f * lb[2]);
-                lb[0] = max;
-                lb[1] = max;
-                lb[2] = max;
-                }
+                lb[0] = (lb[0] * (1.0f - grayscale)) + (max * grayscale);
+                lb[1] = (lb[1] * (1.0f - grayscale)) + (max * grayscale);
+                lb[2] = (lb[2] * (1.0f - grayscale)) + (max * grayscale);
+            }
+			if ( max < 1.0f )
+				max = 1.0f;
 
-			if (newmax < 0)
-				newmax = 0;		// roundoff problems
-			if (newmax < minlight)
-			{
-				newmax = minlight + (rand()%48);
-			}
-			if (newmax > maxlight)
+			// note that maxlight based scaling is per-sample based on
+			//  highest value of R, G, and B
+			// adjust for -maxlight option
+			newmax = max;
+			if ( max > maxlight ) {
 				newmax = maxlight;
-
-			newmax /= max;
-
-			for (k=0 ; k<3 ; k++)
-			{
-				*dest++ = lb[k]*newmax;
+				newmax /= max; // scaling factor 0.0..1.0
+				// scale into 0.0..maxlight range
+				lb[0] *= newmax;
+				lb[1] *= newmax;
+				lb[2] *= newmax;
 			}
+
+/*
+			qprintf("{%x %x %x}\n",
+					(byte)(lb[0]+0.5), (byte)(lb[1]+0.5), (byte)(lb[2]+0.5) );
+*/
+			// and output to 8:8:8 RGB
+			*dest++ = (byte)(lb[0] + 0.5);
+			*dest++ = (byte)(lb[1] + 0.5);
+			*dest++ = (byte)(lb[2] + 0.5);
 		}
 	}
 

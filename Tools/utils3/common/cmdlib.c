@@ -27,12 +27,6 @@ static char THIS_FILE[] = __FILE__;
 #include <unistd.h>
 #endif
 
-#ifdef __unix__
-#define BASEDIRNAME "alienarena"
-#else
-#define	BASEDIRNAME	"Alien Arena 2008"
-#endif
-
 #define PATHSEPERATOR   '/'
 
 // set these before calling CheckParm
@@ -164,60 +158,49 @@ void qprintf (char *format, ...)
 	va_start (argptr,format);
 	vprintf (format,argptr);
 	va_end (argptr);
+	fflush( stdout );
 }
 
-
 /*
+ * Simplified (and simple minded) path determination
+ *
+ * assumes
+ *   .map/.bsp is in current working directory
+ *   moddir is parent of cwd
+ *   gamedir is parent of moddir
+ *   qdir is parent of gamedir
+ */
+char qdir[1024] = "";
+char gamedir[1024] = "" ;
+char moddir[1024] = "";
 
-qdir will hold the path up to the quake directory, including the slash
-
-  f:\quake\
-  /raid/quake/
-
-gamedir will hold qdir + the game directory (id1, id2, etc)
-
-  */
-
-char		qdir[1024];
-char		gamedir[1024];
-char		moddir[1024] = "";
-
-void SetQdirFromPath (char *path)
+void SetQdirFromPath( char *path )
 {
-	char	temp[1024];
-	char	*c;
-	int		len;
+	char cwd_map[258];
 
-	if (!(path[0] == '/' || path[0] == '\\' || path[1] == ':'))
-	{	// path is partial
-		Q_getwd (temp);
-		strcat (temp, path);
-		path = temp;
-	}
-    
-    // search for "quake2" in path
+	Q_getwd( cwd_map ); // appends path separator
 
-	len = strlen(BASEDIRNAME);
-	for (c=path+strlen(path)-1 ; c != path ; c--)
-		if (!Q_strncasecmp (c, BASEDIRNAME, len))
-		{
-			strncpy (qdir, path, c+len+1-path);
-			qprintf ("qdir: %s\n", qdir);
-			c += len+1;
-			while (*c)
-			{
-				if (*c == '/' || *c == '\\')
-				{
-					strncpy (gamedir, path, c+1-path);
-					qprintf ("gamedir: %s\n", gamedir);
-					return;
-				}
-				c++;
-			}
-			Error ("No gamedir in %s", path);
-			return;
-		}
-	Error ("SetQdirFromPath: no '%s' in %s", BASEDIRNAME, path);
+	strcpy( moddir, cwd_map );
+#ifdef WIN32
+	strcat( moddir, "..\\");
+#else
+	strcat( moddir, "../");
+#endif
+
+	strcpy( gamedir, moddir );
+#ifdef WIN32
+	strcat( gamedir, "..\\");
+#else
+	strcat( gamedir, "../");
+#endif
+
+	strcpy( qdir, gamedir );
+#ifdef WIN32
+	strcat( qdir, "..\\");
+#else
+	strcat( qdir, "../");
+#endif
+
 }
 
 char *ExpandArg (char *path)
@@ -237,7 +220,7 @@ char *ExpandArg (char *path)
 char *ExpandPath (char *path)
 {
 	static char full[1024];
-	if (!qdir)
+	if (!qdir[0])
 		Error ("ExpandPath called without qdir set");
 	if (path[0] == '/' || path[0] == '\\' || path[1] == ':')
 		return path;
@@ -279,9 +262,9 @@ I_FloatTime
 double I_FloatTime (void)
 {
 	time_t	t;
-	
+
 	time (&t);
-	
+
 	return t;
 #if 0
 // more precise, less portable
@@ -290,24 +273,25 @@ double I_FloatTime (void)
 	static int		secbase;
 
 	gettimeofday(&tp, &tzp);
-	
+
 	if (!secbase)
 	{
 		secbase = tp.tv_sec;
 		return tp.tv_usec/1000000.0;
 	}
-	
+
 	return (tp.tv_sec - secbase) + tp.tv_usec/1000000.0;
 #endif
 }
 
+static char *rslt;
 void Q_getwd (char *out)
 {
 #ifdef WIN32
    _getcwd (out, 256);
    strcat (out, "\\");
 #else
-   getcwd (out, 256);
+   rslt = getcwd (out, 256);
    strcat (out, "/");
 #endif
 }
@@ -336,10 +320,10 @@ returns -1 if not present
 int	FileTime (char *path)
 {
 	struct	stat	buf;
-	
+
 	if (stat (path,&buf) == -1)
 		return -1;
-	
+
 	return buf.st_mtime;
 }
 
@@ -356,13 +340,13 @@ char *COM_Parse (char *data)
 {
 	int		c;
 	int		len;
-	
+
 	len = 0;
 	com_token[0] = 0;
-	
+
 	if (!data)
 		return NULL;
-		
+
 // skip whitespace
 skipwhite:
 	while ( (c = *data) <= ' ')
@@ -374,7 +358,7 @@ skipwhite:
 		}
 		data++;
 	}
-	
+
 // skip // comments
 	if (c=='/' && data[1] == '/')
 	{
@@ -382,7 +366,7 @@ skipwhite:
 			data++;
 		goto skipwhite;
 	}
-	
+
 
 // handle quoted strings specially
 	if (c == '\"')
@@ -420,7 +404,7 @@ skipwhite:
 	if (c=='{' || c=='}'|| c==')'|| c=='(' || c=='\'' || c==':')
 			break;
 	} while (c>32);
-	
+
 	com_token[len] = 0;
 	return data;
 }
@@ -429,7 +413,7 @@ skipwhite:
 int Q_strncasecmp (char *s1, char *s2, int n)
 {
 	int		c1, c2;
-	
+
 	do
 	{
 		c1 = *s1++;
@@ -437,7 +421,7 @@ int Q_strncasecmp (char *s1, char *s2, int n)
 
 		if (!n--)
 			return 0;		// strings are equal until end point
-		
+
 		if (c1 != c2)
 		{
 			if (c1 >= 'a' && c1 <= 'z')
@@ -448,7 +432,7 @@ int Q_strncasecmp (char *s1, char *s2, int n)
 				return -1;		// strings not equal
 		}
 	} while (c1);
-	
+
 	return 0;		// strings are equal
 }
 
@@ -477,7 +461,7 @@ char *strlower (char *start)
 	in = start;
 	while (*in)
 	{
-		*in = tolower(*in); 
+		*in = tolower(*in);
 		in++;
 	}
 	return start;
@@ -657,8 +641,8 @@ TryLoadFileFromPak
 Allows failure
 ==============
 */
-typedef struct 
-{ 
+typedef struct
+{
   unsigned char magic[4];      // Name of the new WAD format
   long diroffset;               // Position of WAD directory from start of file
   long dirsize;                 // Number of entries * 0x40 (64 char)
@@ -666,9 +650,9 @@ typedef struct
   unsigned char bogus[50];
 } pakheader_t;
 
-typedef struct 
-{ 
-  unsigned char filename[0x38];        // Name of the file, Unix style, with extension, 
+typedef struct
+{
+  unsigned char filename[0x38];        // Name of the file, Unix style, with extension,
                                 // 56 chars, padded with '\0'.
   long offset;                  // Position of the entry in PACK file
   long size;                    // Size of the entry in PACK file
@@ -689,7 +673,7 @@ int    TryLoadFileFromPak (char *filename, void **bufferptr, char *gd)
         if(filename[n] == '\\')
             filename[n] = '/';
         }
-	
+
 	*bufferptr = NULL;
 
     ret_len = -1;
@@ -733,7 +717,7 @@ int    TryLoadFileFromPak (char *filename, void **bufferptr, char *gd)
                             pak_entry[i].filename[n] = '/';
                         }
 
-                    if(!Q_strncasecmp(pak_entry[i].filename, filename, 56))
+                    if(!Q_strncasecmp((char*)pak_entry[i].filename, filename, 56))
                         {
                         if(!fseek(f, pak_entry[i].offset, SEEK_SET))
                             {
@@ -741,10 +725,10 @@ int    TryLoadFileFromPak (char *filename, void **bufferptr, char *gd)
 	                        ((char *)buffer)[pak_entry[i].size] = 0;
 	                        SafeRead (f, buffer, pak_entry[i].size);
 	                        *bufferptr = buffer;
-	                        
+
                             ret_len = pak_entry[i].size;
                             }
-                        
+
                         break;
                         }
                     }
@@ -991,13 +975,13 @@ int    BigLong (int l)
 float	LittleFloat (float l)
 {
 	union {byte b[4]; float f;} in, out;
-	
+
 	in.f = l;
 	out.b[0] = in.b[3];
 	out.b[1] = in.b[2];
 	out.b[2] = in.b[1];
 	out.b[3] = in.b[0];
-	
+
 	return out.f;
 }
 
@@ -1046,13 +1030,13 @@ int    LittleLong (int l)
 float	BigFloat (float l)
 {
 	union {byte b[4]; float f;} in, out;
-	
+
 	in.f = l;
 	out.b[0] = in.b[3];
 	out.b[1] = in.b[2];
 	out.b[2] = in.b[1];
 	out.b[3] = in.b[0];
-	
+
 	return out.f;
 }
 

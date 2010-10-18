@@ -62,14 +62,14 @@ winding_t *NewWinding (int points)
 {
 	winding_t	*w;
 	int			size;
-	
+
 	if (points > MAX_POINTS_ON_WINDING)
 		Error ("NewWinding: %i points", points);
-	
+
 	size = (int)((winding_t *)0)->points[points];
 	w = malloc (size);
 	memset (w, 0, size);
-	
+
 	return w;
 }
 
@@ -87,7 +87,7 @@ void prl(leaf_t *l)
 	int			i;
 	portal_t	*p;
 	plane_t		pl;
-	
+
 	for (i=0 ; i<l->numportals ; i++)
 	{
 		p = l->portals[i];
@@ -119,7 +119,7 @@ int PComp (const void *a, const void *b)
 void SortPortals (void)
 {
 	int		i;
-	
+
 	for (i=0 ; i<numportals*2 ; i++)
 		sorted_portals[i] = &portals[i];
 
@@ -197,7 +197,7 @@ void ClusterMerge (int leafnum)
 
 	if (uncompressed[leafnum>>3] & (1<<(leafnum&7)))
 		printf ("WARNING: Leaf portals saw into leaf (%d)\n", leafnum);
-		
+
 	uncompressed[leafnum>>3] |= (1<<(leafnum&7));
 	numvis++;		// count the leaf itself
 
@@ -214,13 +214,13 @@ void ClusterMerge (int leafnum)
 
 	dest = vismap_p;
 	vismap_p += i;
-	
+
 	if (vismap_p > vismap_end)
 		Error ("Vismap expansion overflow");
 
 	dvis->bitofs[leafnum][DVIS_PVS] = dest-vismap;
 
-	memcpy (dest, compressed, i);	
+	memcpy (dest, compressed, i);
 }
 
 
@@ -243,7 +243,7 @@ void CalcPortalVis (void)
 		}
 		return;
 	}
-	
+
 	RunThreadsOnIndividual (numportals*2, true, PortalFlow);
 
 }
@@ -263,7 +263,7 @@ void CalcVis (void)
 //	RunThreadsOnIndividual (numportals*2, true, BetterPortalVis);
 
 	SortPortals ();
-	
+
 	CalcPortalVis ();
 
 //
@@ -271,7 +271,7 @@ void CalcVis (void)
 //
 	for (i=0 ; i<portalclusters ; i++)
 		ClusterMerge (i);
-		
+
 	printf ("Average clusters visible: %i\n", totalvis / portalclusters);
 }
 
@@ -289,11 +289,11 @@ void SetPortalSphere (portal_t *p)
 	{
 		VectorAdd (total, w->points[i], total);
 	}
-	
+
 	for (i=0 ; i<3 ; i++)
 		total[i] /= w->numpoints;
 
-	bestr = 0;		
+	bestr = 0;
 	for (i=0 ; i<w->numpoints ; i++)
 	{
 		VectorSubtract (w->points[i], total, dist);
@@ -310,6 +310,7 @@ void SetPortalSphere (portal_t *p)
 LoadPortals
 ============
 */
+static int rslt;
 void LoadPortals (char *name)
 {
 	int			i, j;
@@ -321,7 +322,7 @@ void LoadPortals (char *name)
 	winding_t	*w;
 	int			leafnums[2];
 	plane_t		plane;
-	
+
 	if (!strcmp(name,"-"))
 		f = stdin;
 	else
@@ -342,14 +343,14 @@ void LoadPortals (char *name)
 	// these counts should take advantage of 64 bit systems automatically
 	leafbytes = ((portalclusters+63)&~63)>>3;
 	leaflongs = leafbytes/sizeof(long);
-	
+
 	portalbytes = ((numportals*2+63)&~63)>>3;
 	portallongs = portalbytes/sizeof(long);
 
 // each file portal is split into two memory portals
 	portals = malloc(2*numportals*sizeof(portal_t));
 	memset (portals, 0, 2*numportals*sizeof(portal_t));
-	
+
 	leafs = malloc(portalclusters*sizeof(leaf_t));
 	memset (leafs, 0, portalclusters*sizeof(leaf_t));
 
@@ -361,7 +362,7 @@ void LoadPortals (char *name)
 	vismap_p = (byte *)&dvis->bitofs[portalclusters];
 
 	vismap_end = vismap + MAX_MAP_VISIBILITY;
-		
+
 	for (i=0, p=portals ; i<numportals ; i++)
 	{
 		if (fscanf (f, "%i %i %i ", &numpoints, &leafnums[0], &leafnums[1])
@@ -372,11 +373,11 @@ void LoadPortals (char *name)
 		if ( (unsigned)leafnums[0] > portalclusters
 		|| (unsigned)leafnums[1] > portalclusters)
 			Error ("LoadPortals: reading portal %i", i);
-		
+
 		w = p->winding = NewWinding (numpoints);
 		w->original = true;
 		w->numpoints = numpoints;
-		
+
 		for (j=0 ; j<numpoints ; j++)
 		{
 			double	v[3];
@@ -390,8 +391,8 @@ void LoadPortals (char *name)
 			for (k=0 ; k<3 ; k++)
 				w->points[j][k] = v[k];
 		}
-		fscanf (f, "\n");
-		
+		rslt = fscanf (f, "\n");
+
 	// calc plane
 		PlaneFromWinding (w, &plane);
 
@@ -401,7 +402,7 @@ void LoadPortals (char *name)
 			Error ("Leaf with too many portals");
 		l->portals[l->numportals] = p;
 		l->numportals++;
-		
+
 		p->winding = w;
 		VectorSubtract (vec3_origin, plane.normal, p->plane.normal);
 		p->plane.dist = -plane.dist;
@@ -409,14 +410,14 @@ void LoadPortals (char *name)
 		p->owner_leaf = leafnums[0];
 		SetPortalSphere (p);
 		p++;
-		
+
 	// create backwards portal
 		l = &leafs[leafnums[1]];
 		if (l->numportals == MAX_PORTALS_ON_LEAF)
 			Error ("Leaf with too many portals");
 		l->portals[l->numportals] = p;
 		l->numportals++;
-		
+
 		p->winding = NewWinding(w->numpoints);
 		p->winding->numpoints = w->numpoints;
 		for (j=0 ; j<w->numpoints ; j++)
@@ -431,7 +432,7 @@ void LoadPortals (char *name)
 		p++;
 
 	}
-	
+
 	fclose (f);
 }
 
@@ -491,13 +492,13 @@ void CalcPHS (void)
 
 		dest = (long *)vismap_p;
 		vismap_p += j;
-		
+
 		if (vismap_p > vismap_end)
 			Error ("Vismap expansion overflow");
 
 		dvis->bitofs[i][DVIS_PHS] = (byte *)dest-vismap;
 
-		memcpy (dest, compressed, j);	
+		memcpy (dest, compressed, j);
 	}
 
 	printf ("Average clusters hearable: %i\n", count/portalclusters);
@@ -513,16 +514,16 @@ int main (int argc, char **argv)
 	char	portalfile[1024];
 	char		source[1024];
 	char		name[1024];
-    char *param, *param2;
+    char *param, *param2=NULL;
 	double		start, end;
-		
+
 	printf ("--- Alien Arena QVIS3 ---\n");
 
     LoadConfigurationFile("qvis3", 0);
     LoadConfiguration(argc-1, argv+1);
 
 	verbose = false;
-	
+
     while((param = WalkConfiguration()) != NULL)
 	{
 		if (!strcmp(param,"-threads"))
@@ -598,11 +599,11 @@ int main (int argc, char **argv)
         param2 = WalkConfiguration();
 
 	start = I_FloatTime ();
-	
+
 	ThreadSetDefault ();
 
 //    if(!IsFullPath(param))
-//	    SetQdirFromPath (param);	
+//	    SetQdirFromPath (param);
 
 	strcpy (source, ExpandArg(param));
 	StripExtension (source);
@@ -617,21 +618,21 @@ int main (int argc, char **argv)
 	sprintf (portalfile, "%s%s", inbase, ExpandArg(param));
 	StripExtension (portalfile);
 	strcat (portalfile, ".prt");
-	
+
 	printf ("reading %s\n", portalfile);
 	LoadPortals (portalfile);
-	
+
 	CalcVis ();
 
 	CalcPHS ();
 
-	visdatasize = vismap_p - dvisdata;	
+	visdatasize = vismap_p - dvisdata;
 	printf ("visdatasize:%i  compressed from %i\n", visdatasize, originalvismapsize*2);
 
 	sprintf (name, "%s%s", outbase, source);
 	printf ("writing %s\n", name);
-	WriteBSPFile (name);	
-	
+	WriteBSPFile (name);
+
 	end = I_FloatTime ();
 	printf ("%5.1f seconds elapsed\n", end-start);
 

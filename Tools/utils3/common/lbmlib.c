@@ -428,7 +428,7 @@ void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *heigh
 		|| pcx->xmax >= 640
 		|| pcx->ymax >= 480)
 		Error ("Bad pcx file %s", filename);
-	
+
 	if (palette)
 	{
 		*palette = malloc(768);
@@ -477,18 +477,18 @@ void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *heigh
 	free (pcx);
 }
 
-/* 
-============== 
-WritePCXfile 
-============== 
-*/ 
-void WritePCXfile (char *filename, byte *data, 
-				   int width, int height, byte *palette) 
+/*
+==============
+WritePCXfile
+==============
+*/
+void WritePCXfile (char *filename, byte *data,
+				   int width, int height, byte *palette)
 {
 	int		i, j, length;
 	pcx_t	*pcx;
 	byte		*pack;
-	  
+
 	pcx = malloc (width*height*2+1000);
 	memset (pcx, 0, sizeof(*pcx));
 
@@ -508,7 +508,7 @@ void WritePCXfile (char *filename, byte *data,
 
 	// pack the image
 	pack = &pcx->data;
-	
+
 	for (i=0 ; i<height ; i++)
 	{
 		for (j=0 ; j<width ; j++)
@@ -522,19 +522,19 @@ void WritePCXfile (char *filename, byte *data,
 			}
 		}
 	}
-			
+
 	// write the palette
 	*pack++ = 0x0c;	// palette ID byte
 	for (i=0 ; i<768 ; i++)
 		*pack++ = *palette++;
-		
-// write output file 
+
+// write output file
 	length = pack - (byte *)pcx;
 	SaveFile (filename, pcx, length);
 
 	free (pcx);
-} 
- 
+}
+
 
 /*
 ============================================================================
@@ -663,7 +663,7 @@ void LoadTGA (char *name, byte **pixels, int *width, int *height)
 	targa_header.id_length = fgetc(fin);
 	targa_header.colormap_type = fgetc(fin);
 	targa_header.image_type = fgetc(fin);
-	
+
 	targa_header.colormap_index = fgetLittleShort(fin);
 	targa_header.colormap_length = fgetLittleShort(fin);
 	targa_header.colormap_size = fgetc(fin);
@@ -674,11 +674,11 @@ void LoadTGA (char *name, byte **pixels, int *width, int *height)
 	targa_header.pixel_size = fgetc(fin);
 	targa_header.attributes = fgetc(fin);
 
-	if (targa_header.image_type!=2 
-		&& targa_header.image_type!=10) 
+	if (targa_header.image_type!=2
+		&& targa_header.image_type!=10)
 		Error ("LoadTGA: Only type 2 and 10 targa RGB images supported\n");
 
-	if (targa_header.colormap_type !=0 
+	if (targa_header.colormap_type !=0
 		|| (targa_header.pixel_size!=32 && targa_header.pixel_size!=24))
 		Error ("Texture_LoadTGA: Only 32 or 24 bit images supported (no colormaps)\n");
 
@@ -695,7 +695,7 @@ void LoadTGA (char *name, byte **pixels, int *width, int *height)
 
 	if (targa_header.id_length != 0)
 		fseek(fin, targa_header.id_length, SEEK_CUR);  // skip TARGA image comment
-	
+
 	if (targa_header.image_type==2) {  // Uncompressed, RGB images
 		for(row=rows-1; row>=0; row--) {
 			pixbuf = targa_rgba + row*columns*4;
@@ -703,7 +703,7 @@ void LoadTGA (char *name, byte **pixels, int *width, int *height)
 				unsigned char red,green,blue,alphabyte;
 				switch (targa_header.pixel_size) {
 					case 24:
-							
+
 							blue = getc(fin);
 							green = getc(fin);
 							red = getc(fin);
@@ -727,7 +727,7 @@ void LoadTGA (char *name, byte **pixels, int *width, int *height)
 		}
 	}
 	else if (targa_header.image_type==10) {   // Runlength encoded RGB images
-		unsigned char red,green,blue,alphabyte,packetHeader,packetSize,j;
+		unsigned char red=255,green=255,blue=255,alphabyte=255,packetHeader,packetSize,j;
 		for(row=rows-1; row>=0; row--) {
 			pixbuf = targa_rgba + row*columns*4;
 			for(column=0; column<columns; ) {
@@ -748,7 +748,7 @@ void LoadTGA (char *name, byte **pixels, int *width, int *height)
 								alphabyte = getc(fin);
 								break;
 					}
-	
+
 					for(j=0;j<packetSize;j++) {
 						*pixbuf++=red;
 						*pixbuf++=green;
@@ -796,13 +796,13 @@ void LoadTGA (char *name, byte **pixels, int *width, int *height)
 							else
 								goto breakOut;
 							pixbuf = targa_rgba + row*columns*4;
-						}						
+						}
 					}
 				}
 			}
 			breakOut:;
 		}
 	}
-	
+
 	fclose(fin);
 }

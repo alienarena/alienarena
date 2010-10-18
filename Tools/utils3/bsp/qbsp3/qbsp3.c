@@ -324,11 +324,11 @@ main
 */
 int main (int argc, char **argv)
 {
-	int		n, full_help;
+	int full_help;
 	double		start, end;
 	char		path[1024];
     char		game_path[1024] = "";
-    char *param, *param2;
+    char *param, *param2 = NULL;
 
 
 	printf ("--- Alien Arena QBSP3 ---\n");
@@ -337,7 +337,7 @@ int main (int argc, char **argv)
 
     LoadConfigurationFile("qbsp3", 0);
     LoadConfiguration(argc-1, argv+1);
-	
+
     while((param = WalkConfiguration()) != NULL)
 	{
 		if (!strcmp(param,"-threads"))
@@ -368,11 +368,11 @@ int main (int argc, char **argv)
             param2 = WalkConfiguration();
 			strncpy(game_path, param2, 1024);
 		}
-		else if (!strcmp(param,"-moddir"))
-		{
-            param2 = WalkConfiguration();
-			strncpy(moddir, param2, 1024);
-		}
+//		else if (!strcmp(param,"-moddir"))
+//		{
+//            param2 = WalkConfiguration();
+//			strncpy(moddir, param2, 1024);
+//		}
 		else if (!strcmp(param,"-help"))
 		{
 			full_help = true;
@@ -382,11 +382,11 @@ int main (int argc, char **argv)
 			printf ("verbose = true\n");
 			verbose = true;
 		}
-		else if (!strcmp(param, "-draw"))
-		{
+//		else if (!strcmp(param, "-draw"))
+//		{
 //			printf ("drawflag = true\n");
 //			drawflag = true;
-		}
+//		}
 		else if (!strcmp(param, "-noweld"))
 		{
 			printf ("noweld = true\n");
@@ -493,7 +493,7 @@ int main (int argc, char **argv)
             param2 = WalkConfiguration();
 			block_yh = atoi (param2);
 
-			printf ("blocks: %i,%i to %i,%i\n", 
+			printf ("blocks: %i,%i to %i,%i\n",
 				block_xl, block_yl, block_xh, block_yh);
 		}
 		else if (!strcmp (param,"-tmpout"))
@@ -517,11 +517,11 @@ int main (int argc, char **argv)
             {
             printf ("usage: qbsp3 [options] mapfile\n\n"
                 "    -badnormal #          -micro #           -noprune\n"
-                "    -block # #            -moddir <path>     -notjunc\n"
+                "    -block # #                               -notjunc\n"
                 "    -blocks # # # #       -nocsg             -nowater\n"
                 "    -chop #               -nodetail          -noweld\n"
-                "    (-draw removed)       -nofill            -onlyents\n"
-                "    -gamedir <path>       -nomerge           (-threads disabled)\n"
+                "                          -nofill            -onlyents\n"
+                "    -gamedir <path>       -nomerge\n"
                 "    -help                 -noshare           -tmpout\n"
                 "    -fulldetail           -nosubdiv          -v\n"
                 "    -glview               -noopt             -verboseentities\n"
@@ -533,7 +533,7 @@ int main (int argc, char **argv)
         else
             {
 		    Error ("usage: qbsp3 [options] mapfile\n\n"
-                "    qbsp3 -help for full help\n");
+                "    qbsp3 -help for option list\n");
             }
         }
 
@@ -545,40 +545,13 @@ int main (int argc, char **argv)
 	ThreadSetDefault ();
     numthreads = 1;		// multiple threads aren't helping...
 
-    if(game_path[0] != 0)
-        {
-        n = strlen(game_path);
+    /*
+     * param is the map file
+     */
+    SetQdirFromPath( param );
+    printf("qdir = %s\n", qdir );
+    printf("gamedir = %s\n", gamedir );
 
-#ifdef WIN32
-        if(n > 1 && n < 1023 && game_path[n-1] != '\\')
-            {
-            game_path[n] = '\\';
-            game_path[n+1] = 0;
-            }
-#endif    
-
-        strcpy(gamedir, game_path);
-        }
-    else
-        SetQdirFromPath (param);
-    
-    printf("gamedir set to %s\n", gamedir);
-    
-    if(moddir[0] != 0)
-        {
-        n = strlen(moddir);
-
-#ifdef WIN32
-        if(n > 1 && n < 1023 && moddir[n-1] != '\\')
-            {
-            moddir[n] = '\\';
-            moddir[n+1] = 0;
-            }
-#endif      
-
-        printf("moddir set to %s\n", moddir);
-        }
-    
 	strcpy (source, ExpandArg (param));
 	StripExtension (source);
 
@@ -588,7 +561,7 @@ int main (int argc, char **argv)
 	sprintf (path, "%s.lin", source);
 	remove (path);
 
-	strcpy (name, ExpandArg (param));	
+	strcpy (name, ExpandArg (param));
 	DefaultExtension (name, ".map");	// might be .reg
 
 	//

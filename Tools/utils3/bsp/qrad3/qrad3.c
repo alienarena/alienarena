@@ -27,13 +27,14 @@ char		inbase[32], outbase[32];
 
 int			fakeplanes;					// created planes for origin offset
 
-int		numbounce = 8;
+int		numbounce = 4; // 2010-09 default from 8 to 4
 qboolean	extrasamples;
 
-int noblock = false;
+int noblock = false; // when true, disables occlusion testing on light rays (?)
+
 int memory = false;
 
-float patch_cutoff = 0.0f;
+float patch_cutoff = 0.0f; // set with -radmin 0.0..1.0, see MakeTransfers()
 
 float	subdiv = 64;
 qboolean	dumppatches;
@@ -53,7 +54,7 @@ int		junk;
  *
  * see lightmap.c:FinalLightFace()
  *  sequence: ambient is added, lightscale is applied, RGB is "normalized" to
- *  0..255 range, if set, nocolor is applied, RGB is clamped to maxlight.
+ *  0..255 range, grayscale is applied, RGB is clamped to maxlight.
  *
  * ambient:
  *  set with -ambient option, 0..255 (but only small numbers are useful)
@@ -63,9 +64,14 @@ int		junk;
  * lightscale:
  *  set with -scale option, 0.0..1.0
  *  scales lightmap globally.
- * nocolor:
- *  set with -nocolor option
- *  grayscales the lightmap
+ *
+ * grayscale:
+ *  set with -grayscale .or. -greyscale option option, 0.0..1.0
+ *  proportionally grayscales the lightmap, 1.0 for completely grayscaled
+ *
+ * desaturate:
+ *  set with -desaturate, 0.0..1.0
+ *  proportionally desaturate texture reflectivity
  *
  * direct_scale:
  *  set with -direct option, 0.0..1.0
@@ -76,17 +82,19 @@ int		junk;
  *
  * entity_scale:
  *  set with -entity option, 0.0..1.0
- *  controls point lights, i.e. light entities.
+ *  controls point light radiosity, i.e. light entities.
  *  default is 1.0, no attenuation of point lights
  *
  *
  */
-float ambient = 0;
-float lightscale = 1.0;
-float maxlight = 255;
-qboolean nocolor = false;
-float direct_scale = 0.0;
-float entity_scale = 1.0;
+float ambient = 0.0f;
+float lightscale = 1.0f;
+float maxlight = 255.0f;
+// qboolean nocolor = false;
+float grayscale = 0.0f;
+float desaturate = 0.0f;
+float direct_scale = 0.0f;
+float entity_scale = 1.0f;
 
 /*
  * 2010-09 Notes:
@@ -716,7 +724,7 @@ BounceLight
 */
 void BounceLight (void)
 {
-	int		i, j, start, stop;
+	int		i, j, start=0, stop;
 	float	added;
 	char	name[64];
 	patch_t	*p;
@@ -854,11 +862,11 @@ light modelfile
 */
 int main (int argc, char **argv)
 {
-	int		n, full_help;
+	int		/*n,*/ full_help;
 	double	start, end;
 	char	name[1024];
     char	game_path[1024] = "";
-    char	*param, *param2;
+    char	*param, *param2 = NULL;
 
 	printf ("--- Alien Arena QRAD3 ---\n");
 
@@ -877,11 +885,11 @@ int main (int argc, char **argv)
             param2 = WalkConfiguration();
 			strncpy(game_path, param2, 1024);
 		}
-		else if (!strcmp(param,"-moddir"))
-		{
-            param2 = WalkConfiguration();
-			strncpy(moddir, param2, 1024);
-		}
+//		else if (!strcmp(param,"-moddir"))
+//		{
+//            param2 = WalkConfiguration();
+//			strncpy(moddir, param2, 1024);
+//		}
 		else if (!strcmp(param,"-help"))
 		{
 			full_help = true;
@@ -890,6 +898,7 @@ int main (int argc, char **argv)
 		{
             param2 = WalkConfiguration();
 			numbounce = atoi (param2);
+			// qprintf("number of bounces set to %d", numbounce );
 		}
 		else if (!strcmp(param,"-v"))
 		{
@@ -898,45 +907,53 @@ int main (int argc, char **argv)
 		else if (!strcmp(param,"-extra"))
 		{
 			extrasamples = true;
-			printf ("extrasamples = true\n");
+			// qprintf ("extrasamples set to true\n");
 		}
-		else if (!strcmp(param,"-nocolor"))
-		{
-			nocolor = true;
-			printf ("nocolor = true\n");
-		}
-		else if (!strcmp(param,"-threads"))
-		{
-            param2 = WalkConfiguration();
-			numthreads = atoi (param2);
-		}
-		else if (!strcmp(param,"-chop"))
+//		else if (!strcmp(param,"-threads"))
+//		{
+//            param2 = WalkConfiguration();
+//			numthreads = atoi (param2);
+//		}
+		else if (!strcmp(param,"-subdiv"))
 		{
             param2 = WalkConfiguration();
-			subdiv = atoi (param2);
+			subdiv = atof (param2);
 		}
 		else if (!strcmp(param,"-radmin"))
 		{
             param2 = WalkConfiguration();
 			patch_cutoff = atof (param2);
-			printf("radiosity minimum set to %f\n", patch_cutoff);
+			// qprintf("radiosity minimum set to %f\n", patch_cutoff);
 		}
 		else if (!strcmp(param,"-scale"))
 		{
             param2 = WalkConfiguration();
-			lightscale = atoi (param2);
+			lightscale = atof (param2);
+			// qprintf ("light scaling set to %f\n", lightscale);
 		}
 		else if (!strcmp(param,"-direct"))
 		{
             param2 = WalkConfiguration();
 			direct_scale = atof (param2);
-			printf ("direct light scaling at %f\n", direct_scale);
+			// qprintf ("direct light scaling set to %f\n", direct_scale);
 		}
 		else if (!strcmp(param,"-entity"))
 		{
             param2 = WalkConfiguration();
 			entity_scale = atof(param2);
-			printf ("entity light scaling at %f\n", entity_scale);
+			// qprintf ("entity light scaling set to %f\n", entity_scale);
+		}
+		else if (!strcmp(param, "-grayscale") || !strcmp(param, "-greyscale") )
+		{
+			param2 = WalkConfiguration();
+			grayscale = atof( param2 );
+			// qprintf("grayscale set to %f\n", grayscale );
+		}
+		else if (!strcmp(param, "-desaturate"))
+		{
+			param2 = WalkConfiguration();
+			desaturate = atof( param2 );
+			// qprintf("desaturate set to %f\n", desaturate );
 		}
 		else if (!strcmp(param,"-glview"))
 		{
@@ -948,16 +965,16 @@ int main (int argc, char **argv)
 			noblock = true;
 			printf ("noblock = true\n");
 		}
-		else if (!strcmp(param,"-memory"))
-		{
-			memory = true;
-			printf ("memory = true (threads forced to 1)\n");
-		}
+//		else if (!strcmp(param,"-memory"))
+//		{
+//			memory = true;
+//			printf ("memory = true\n");
+//		}
 		else if (!strcmp(param,"-savetrace"))
 		{
-			memory = true;
+//			memory = true;
 			save_trace = true;
-			printf ("savetrace = true (memory set to true, threads forced to 1)\n");
+			printf ("savetrace = true (memory set to true)\n");
 		}
 		else if (!strcmp(param,"-nopvs"))
 		{
@@ -972,7 +989,7 @@ int main (int argc, char **argv)
 		else if (!strcmp(param,"-maxlight"))
 		{
             param2 = WalkConfiguration();
-			maxlight = atof (param2) * 128.0f;
+			maxlight = atof (param2);
 		}
 		else if (!strcmp (param,"-tmpin"))
 			strcpy (inbase, "/tmp");
@@ -984,13 +1001,30 @@ int main (int argc, char **argv)
 			break;
 	}
 
-    if (memory)
-        numthreads = 1;
+    printf("-------------------------\n");
+	printf("ambient   : %f\n", ambient );
+	printf("scale     : %f\n", lightscale );
+	printf("maxlight  : %f\n", maxlight );
+	printf("entity    : %f\n", entity_scale );
+	printf("direct    : %f\n", direct_scale );
+	printf("grayscale : %f\n", grayscale );
+	printf("desaturate: %f\n", desaturate );
+	printf("bounce    : %d\n", numbounce );
+	printf("radmin    : %f\n", patch_cutoff );
+	printf("subdiv    : %f\n", subdiv );
+	if ( extrasamples )
+		printf("with extra samples\n");
+    printf("-------------------------\n");
 
-	ThreadSetDefault ();
+//    if (memory)
+//        numthreads = 1;
 
-	if (maxlight > 255)
-		maxlight = 255;
+//	ThreadSetDefault ();
+
+    numthreads = 1;
+
+	if (maxlight > 255.0f)
+		maxlight = 255.0f;
 
     if (param != NULL)
         param2 = WalkConfiguration();
@@ -1002,11 +1036,11 @@ int main (int argc, char **argv)
             printf ("usage: qrad3 [options] bspfile\n\n"
 				"    -ambient #       -glview               -radmin #\n"
                 "    -bounce #        -help                 -savetrace\n"
-                "    -chop #          -maxlight #           -scale #\n"
-                "    -direct #        -memory               -threads #\n"
+                "    -subdiv #        -maxlight #           -scale #\n"
+                "    -direct #\n"
                 "    -dump            -moddir <path>        -tmpin\n"
                 "    -entity #        -noblock              -tmpout\n"
-                "    -extra           -nocolor              -v\n"
+                "    -extra           -grayscale #          -v\n"
                 "    -gamedir <path>  -nopvs\n"
                 );
 
@@ -1024,38 +1058,14 @@ int main (int argc, char **argv)
 
 	start = I_FloatTime ();
 
-    if (game_path[0] != 0)
-	{
-        n = strlen(game_path);
+    /*
+     * param is the map/bsp file
+     */
+    SetQdirFromPath( param );
+    printf("qdir = %s\n", qdir );
+    printf("gamedir = %s\n", gamedir );
 
-#ifdef WIN32
-        if (n > 1 && n < 1023 && game_path[n-1] != '\\')
-		{
-            game_path[n] = '\\';
-            game_path[n+1] = 0;
-		}
-#endif
-
-        strcpy(gamedir, game_path);
-	}
-    else
-        SetQdirFromPath (param);
-
-    printf("gamedir set to %s\n", gamedir);
-
-    if(moddir[0] != 0)
-	{
-        n = strlen(moddir);
-
-        if(n > 1 && n < 1023 && moddir[n-1] != '\\')
-		{
-            moddir[n] = '\\';
-            moddir[n+1] = 0;
-		}
-
-        printf("moddir set to %s\n", moddir);
-	}
-
+    // param is map/bsp file name
 	strcpy (source, ExpandArg(param));
 	StripExtension (source);
 	DefaultExtension (source, ".bsp");
