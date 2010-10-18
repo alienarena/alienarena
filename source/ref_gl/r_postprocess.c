@@ -452,8 +452,26 @@ void R_FB_InitTextures( void )
 	}
 }
 
-
-
+extern int vehicle_hud;
+void R_DrawVehicleHUD (void)
+{	
+	//draw image over screen
+	switch(vehicle_hud)
+	{
+		case 1:
+			Draw_AlphaStretchPic (0, 0, viddef.width, viddef.height, "hud_bomber", 1);
+			break;
+		case 2:
+			Draw_AlphaStretchPic (0, 0, viddef.width, viddef.height, "hud_strafer", 1);
+			break;
+		case 3:
+			Draw_AlphaStretchPic (0, 0, viddef.width, viddef.height, "hud_hover", 1);
+			break;
+		case 0:
+		default:
+			break;
+	}
+}
 
 
 

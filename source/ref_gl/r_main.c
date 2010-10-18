@@ -1096,7 +1096,9 @@ void R_RenderView (refdef_t *fd)
 	if(map_fog)
 		qglDisable(GL_FOG);
 
-	GL_DrawRadar();
+	R_DrawVehicleHUD();
+
+	R_DrawRadar();
 }
 
 void	R_SetGL2D (void)
