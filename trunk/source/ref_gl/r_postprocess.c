@@ -453,24 +453,66 @@ void R_FB_InitTextures( void )
 }
 
 extern int vehicle_hud;
+extern cvar_t *cl_vehicle_huds;
 void R_DrawVehicleHUD (void)
 {	
+	image_t *gl = NULL;
+	
 	//draw image over screen
+	if(!cl_vehicle_huds->value)
+		return;
+
 	switch(vehicle_hud)
 	{
 		case 1:
-			Draw_AlphaStretchPic (0, 0, viddef.width, viddef.height, "hud_bomber", 1);
+			gl = R_RegisterPic ("hud_bomber");
 			break;
 		case 2:
-			Draw_AlphaStretchPic (0, 0, viddef.width, viddef.height, "hud_strafer", 1);
+			gl = R_RegisterPic ("hud_strafer");
 			break;
 		case 3:
-			Draw_AlphaStretchPic (0, 0, viddef.width, viddef.height, "hud_hover", 1);
+			gl = R_RegisterPic ("hud_hover");
 			break;
 		case 0:
 		default:
 			break;
 	}
+
+	
+	if (!gl)
+	{
+		return;
+	}
+
+	qglEnable (GL_BLEND);
+
+	qglActiveTextureARB(GL_TEXTURE0);
+	qglBindTexture(GL_TEXTURE_2D, gl->texnum);
+		
+	qglEnableClientState (GL_VERTEX_ARRAY);
+	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
+	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+
+	VA_SetElem2(twodvert_array[0],0, 0);
+	VA_SetElem2(twodvert_array[1],vid.width, 0);
+	VA_SetElem2(twodvert_array[2],vid.width, vid.height);
+	VA_SetElem2(twodvert_array[3],0, vid.height);
+
+	VA_SetElem2(tex_array[0],gl->sl, gl->tl);
+	VA_SetElem2(tex_array[1],gl->sh, gl->tl);
+	VA_SetElem2(tex_array[2],gl->sh, gl->th);
+	VA_SetElem2(tex_array[3],gl->sl, gl->th);
+
+	qglDrawArrays (GL_QUADS, 0, 4);
+
+	qglDisable (GL_BLEND);
+
+	R_KillVArrays();	
+
+	//to do - add radar line effect
 }
 
 

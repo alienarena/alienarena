@@ -1070,9 +1070,11 @@ void R_RenderView (refdef_t *fd)
 
 	R_BloomBlend( fd );//BLOOMS
 
-	R_RenderSun();
+	R_RenderSun();	
 
 	R_GLSLPostProcess();
+
+	R_DrawVehicleHUD();
 
 	R_Flash();
 
@@ -1095,9 +1097,7 @@ void R_RenderView (refdef_t *fd)
 
 	if(map_fog)
 		qglDisable(GL_FOG);
-
-	R_DrawVehicleHUD();
-
+	
 	R_DrawRadar();
 }
 
