@@ -1353,6 +1353,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/grapple.tga \
 	data1/pics/help.tga \
 	data1/pics/hover.tga \
+	data1/pics/hud_bomber.tga \
+	data1/pics/hud_hover.tga \
+	data1/pics/hud_strafer.tga \
 	data1/pics/huds/20061.tga \
 	data1/pics/huds/20062.tga \
 	data1/pics/huds/20071.tga \
