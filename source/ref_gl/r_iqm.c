@@ -310,7 +310,7 @@ qboolean Mod_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 			{
 				s = buffer;
 
-				for(i = 0; i < 27; i++)
+				for(i = 0; i < RAGDOLL_DIMS; i++)
 				{
 					strcpy( a_string, COM_Parse( &s ) );
 					mod->ragdoll.RagDollDims[i] = atof(a_string);
