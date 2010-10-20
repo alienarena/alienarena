@@ -63,23 +63,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define LEFTWRIST 14
 
 //ragdoll dimensions
+#define RAGDOLL_DIMS 36
 #define ELBOW_X_OFF 0 //note - we likely want to do something similar for knees and ankles
 #define ELBOW_Y_OFF 1
 #define ELBOW_Z_OFF 2
-#define HAND_LEN 3 // wrist to mid-fingers only
-#define WRIST_X_OFF 4
-#define WRIST_Y_OFF 5
-#define WRIST_Z_OFF 6
-#define FOOT_LEN 7 // ankles to base of ball of foot only
-#define HEEL_LEN 8 
+#define WRIST_X_OFF 3
+#define WRIST_Y_OFF 4
+#define WRIST_Z_OFF 5
+#define FINGERS_X_OFF 6
+#define FINGERS_Y_OFF 7
+#define FINGERS_Z_OFF 8
+#define FOOT_LEN 9 // ankles to base of ball of foot only
+#define HEEL_LEN 10 
 
-#define HEAD_H 9
-#define NECK_H 10
-#define SHOULDER_H 11
-#define CHEST_H 12
-#define HIP_H 13
-#define KNEE_H 14 
-#define ANKLE_H 15
+#define HEAD_H 11
+#define NECK_H 12
+#define SHOULDER_H 13
+#define CHEST_H 14
+#define HIP_H 15
 
 #define HEAD_W 16
 #define SHOULDER_W 17
@@ -92,6 +93,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define THIGH_W 24 //thickness of thigh
 #define SHIN_W 25 //thickness of shin
 #define FOOT_W 26 //width of foot
+
+#define KNEE_X_OFF 27
+#define KNEE_Y_OFF 28
+#define KNEE_Z_OFF 29
+#define ANKLE_X_OFF 30
+#define ANKLE_Y_OFF 31
+#define ANKLE_Z_OFF 32
+
+#define GLOBAL_X_OFF 33
+#define GLOBAL_Y_OFF 34
+#define GLOBAL_Z_OFF 35
+
+//to do - we eventually want to add contraints for hips, knees, shoulders, elbows, wrists, and head(hi, lo stops)
 
 dWorldID RagDollWorld;
 dSpaceID RagDollSpace;
