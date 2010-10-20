@@ -270,7 +270,7 @@ typedef struct {
 
 	int hasHelmet;
 
-	float RagDollDims[36];
+	float RagDollDims[56];
 
 } mragdoll_t;
 
