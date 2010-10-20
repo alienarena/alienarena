@@ -63,7 +63,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define LEFTWRIST 14
 
 //ragdoll dimensions
-#define RAGDOLL_DIMS 36
+#define RAGDOLL_DIMS 56
 #define ELBOW_X_OFF 0 //note - we likely want to do something similar for knees and ankles
 #define ELBOW_Y_OFF 1
 #define ELBOW_Z_OFF 2
@@ -104,6 +104,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define GLOBAL_X_OFF 33
 #define GLOBAL_Y_OFF 34
 #define GLOBAL_Z_OFF 35
+
+//contraint section
+#define HIP_LOSTOP1 36
+#define HIP_HISTOP1 37
+#define HIP_LOSTOP2 38
+#define HIP_HISTOP2 39
+#define KNEE_LOSTOP 40
+#define KNEE_HISTOP 41
+#define ANKLE_LOSTOP 42
+#define ANKLE_HISTOP 43
+#define SHOULDER_LOSTOP1 44
+#define SHOULDER_HISTOP1 45
+#define SHOULDER_LOSTOP2 46
+#define SHOULDER_HISTOP2 47
+#define ELBOW_LOSTOP 48
+#define ELBOW_HISTOP 49
+#define WRIST_LOSTOP 50
+#define WRIST_HISTOP 51
+#define HEAD_LOSTOP1 52
+#define HEAD_HISTOP1 53
+#define HEAD_LOSTOP2 54
+#define HEAD_HISTOP2 55
 
 //to do - we eventually want to add contraints for hips, knees, shoulders, elbows, wrists, and head(hi, lo stops)
 
