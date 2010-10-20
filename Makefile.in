@@ -1523,6 +1523,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/commander/jump1.wav \
 	data1/players/commander/lod1.iqm \
 	data1/players/commander/lod2.iqm \
+	data1/players/commander/lod1.rgd \
+	data1/players/commander/lod2.rgd \
 	data1/players/commander/pain100_1.wav \
 	data1/players/commander/pain100_2.wav \
 	data1/players/commander/pain25_1.wav \
@@ -1535,6 +1537,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/commander/red.jpg \
 	data1/players/commander/tris.iqm \
 	data1/players/commander/tris.md2 \
+	data1/players/commander/tris.rgd \
 	data1/players/commander/w_bfg.iqm \
 	data1/players/commander/w_bfg.md2 \
 	data1/players/commander/w_bfg.skin \
@@ -1869,6 +1872,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/slashbot/jump1.wav \
 	data1/players/slashbot/lod1.iqm \
 	data1/players/slashbot/lod2.iqm \
+	data1/players/slashbot/lod1.rgd \
+	data1/players/slashbot/lod2.rgd \
 	data1/players/slashbot/pain100_1.wav \
 	data1/players/slashbot/pain100_2.wav \
 	data1/players/slashbot/pain25_1.wav \
@@ -1882,6 +1887,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/slashbot/robot \
 	data1/players/slashbot/tris.iqm \
 	data1/players/slashbot/tris.md2 \
+	data1/players/slashbot/tris.rgd \
 	data1/players/slashbot/w_bfg.iqm \
 	data1/players/slashbot/w_bfg.md2 \
 	data1/players/slashbot/w_bfg.skin \
