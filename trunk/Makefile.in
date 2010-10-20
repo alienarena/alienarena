@@ -1594,8 +1594,10 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/enforcer/leg.md2 \
 	data1/players/enforcer/lod1.iqm \
 	data1/players/enforcer/lod1.md2 \
+	data1/players/enforcer/lod1.rgd \
 	data1/players/enforcer/lod2.iqm \
 	data1/players/enforcer/lod2.md2 \
+	data1/players/enforcer/lod2.rgd \
 	data1/players/enforcer/pain100_1.wav \
 	data1/players/enforcer/pain100_2.wav \
 	data1/players/enforcer/pain25_1.wav \
@@ -1610,6 +1612,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/enforcer/stryker.jpg \
 	data1/players/enforcer/tris.iqm \
 	data1/players/enforcer/tris.md2 \
+	data1/players/enforcer/tris.rgd \
 	data1/players/enforcer/usegibs \
 	data1/players/enforcer/w_bfg.iqm \
 	data1/players/enforcer/w_bfg.md2 \
