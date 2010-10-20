@@ -372,8 +372,8 @@ RagDollBind_t RagDollBinds[] =
     { "hand03.l", LEFTHAND },
 	{ "wrist.l", LEFTHAND },
 	{ "wrist.r", RIGHTHAND },
-    { "foot.r", RIGHTFOOT },
-    { "foot.l", LEFTFOOT }
+    { "foot.r", RIGHTFOOT }, { "toe.r", RIGHTFOOT },
+    { "foot.l", LEFTFOOT }, { "toe.l", LEFTFOOT }
 };
 int RagDollBindsCount = (int)(sizeof(RagDollBinds)/sizeof(RagDollBinds[0]));
 
