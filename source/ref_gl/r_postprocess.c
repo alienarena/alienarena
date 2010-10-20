@@ -506,6 +506,12 @@ void R_DrawVehicleHUD (void)
 	VA_SetElem2(tex_array[2],gl->sh, gl->th);
 	VA_SetElem2(tex_array[3],gl->sl, gl->th);
 
+	qglMatrixMode( GL_PROJECTION );
+    qglLoadIdentity ();
+	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
+	qglMatrixMode( GL_MODELVIEW );
+    qglLoadIdentity ();
+	
 	qglDrawArrays (GL_QUADS, 0, 4);
 
 	qglDisable (GL_BLEND);
