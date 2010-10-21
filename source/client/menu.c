@@ -2695,11 +2695,18 @@ static menuseparator_s	s_blankline;
 
 static void StartGame( void )
 {
+	extern cvar_t *name;
+	char pw[64];
+
 	// disable updates
 	cl.servercount = -1;
 	M_ForceMenuOff ();
 	Cvar_SetValue( "deathmatch", 1 );
 	Cvar_SetValue( "ctf", 0 );
+
+	//listen servers are passworded
+	sprintf(pw, "%s%4.2f", name->string, crand());
+	Cvar_Set ("password", pw);
 
 	Cvar_SetValue( "gamerules", 0 );		//PGM
 
