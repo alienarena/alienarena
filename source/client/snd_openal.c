@@ -1404,7 +1404,7 @@ void calEnumerateDevices( void )
 	{
 		oalDeviceList = qalcGetString( NULL, ALC_DEVICE_SPECIFIER );
 		pDeviceName = (ALCchar*)oalDeviceList;
-		while( (len = strlen( pDeviceName )) )
+		while( pDeviceName && (len = strlen( pDeviceName )) )
 		{
 			pDevice = qalcOpenDevice( pDeviceName );
 			calErrorCheckALC( pDevice, __LINE__ );  // clear any device error
