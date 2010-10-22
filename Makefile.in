@@ -1667,7 +1667,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/lauren/jump1.wav \
 	data1/players/lauren/leg.md2 \
 	data1/players/lauren/lod1.iqm \
+	data1/players/lauren/lod1.rgd \
 	data1/players/lauren/lod2.iqm \
+	data1/players/lauren/lod2.rgd \
 	data1/players/lauren/pain100_1.wav \
 	data1/players/lauren/pain100_2.wav \
 	data1/players/lauren/pain25_1.wav \
@@ -1680,6 +1682,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/lauren/red.jpg \
 	data1/players/lauren/tris.iqm \
 	data1/players/lauren/tris.md2 \
+	data1/players/lauren/tris.rgd \
 	data1/players/lauren/usegibs \
 	data1/players/lauren/w_bfg.iqm \
 	data1/players/lauren/w_bfg.md2 \
