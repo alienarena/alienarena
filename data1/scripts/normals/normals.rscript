@@ -841,3 +841,24 @@ maps/meshes/railcar
 		normalmap
 	}
 }
+maps/meshes/gothic/column1
+{
+	{
+		map maps/meshes/gothic/column1_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/gothic/neptune
+{
+	{
+		map maps/meshes/gothic/neptune_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/gothic/throne
+{
+	{
+		map maps/meshes/gothic/throne_normal.jpg
+		normalmap
+	}
+}
