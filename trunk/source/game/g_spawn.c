@@ -1003,6 +1003,7 @@ void SP_worldspawn (edict_t *ent)
 	gi.modelindex ("#w_sshotgun.md2");
 	gi.modelindex ("#w_machinegun.md2");
 	gi.modelindex ("#w_chaingun.md2");
+	gi.modelindex ("#a_grenades.md2");
 	gi.modelindex ("#w_glauncher.md2");
 	gi.modelindex ("#w_rlauncher.md2");
 	gi.modelindex ("#w_hyperblaster.md2");
