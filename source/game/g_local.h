@@ -257,6 +257,7 @@ typedef struct
 #define WEAP_BLASTER			1
 #define WEAP_SMARTGUN			2
 #define WEAP_CHAINGUN			3
+#define WEAP_GRAPPLE			4
 #define WEAP_FLAMETHROWER		5
 #define WEAP_ROCKETLAUNCHER		8
 #define WEAP_DISRUPTOR			9
@@ -267,7 +268,7 @@ typedef struct
 #define WEAP_STRAFER			14
 #define WEAP_DEATHBALL			15
 #define WEAP_HOVER				16
-#define WEAP_GRAPPLE			16
+
 
 
 typedef struct gitem_s
