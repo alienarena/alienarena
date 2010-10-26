@@ -455,7 +455,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 
 	if(!buf) //could not find iqm
 	{
-	modfilelen = FS_LoadFile (mod->name, (void*)&buf);
+		modfilelen = FS_LoadFile (mod->name, (void*)&buf);
 		if (!buf)
 		{
 			if (crash)
@@ -2131,6 +2131,60 @@ int R_FindFile (char *filename, FILE **file)
 
 }
 
+//code to precache all base player models and their w_weapons(note - these are specific to Alien Arena and can be changed for other games)
+PModelList_t BasePModels[] =
+{
+	{ "martianenforcer" }, 
+	{ "martiancyborg" },
+    { "enforcer" },
+	{ "commander" },
+	{ "lauren" },
+	{ "slashbot" }
+
+};
+int PModelsCount = (int)(sizeof(BasePModels)/sizeof(BasePModels[0]));
+
+WModelList_t BaseWModels[] =
+{
+	{ "w_blaster.md2" }, 
+	{ "w_shotgun.md2" },
+    { "w_sshotgun.md2" },
+	{ "w_machinegun.md2" },
+	{ "w_chaingun.md2" },
+	{ "w_glauncher.md2" },
+	{ "w_rlauncher.md2" },
+    { "w_hyperblaster.md2" },
+	{ "w_railgun.md2" },
+	{ "w_bfg.md2" },
+	{ "w_violator.md2" },
+	{ "weapon.md2" }
+};
+int WModelsCount = (int)(sizeof(BaseWModels)/sizeof(BaseWModels[0]));
+
+void R_RegisterBasePlayerModels( void )
+{
+	char	mod_filename[MAX_QPATH];
+	int i, j;
+
+	//precache all player and weapon models(base only, otherwise could take very long loading a map!)
+	for (i = 0; i < PModelsCount; i++)
+	{		
+		Com_Printf("Registering models for: %s\n", BasePModels[i].name);
+		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/tris.md2", BasePModels[i].name);
+		R_RegisterModel(mod_filename);
+		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/lod1.md2", BasePModels[i].name);
+		R_RegisterModel(mod_filename);
+		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/lod2.md2", BasePModels[i].name);
+		R_RegisterModel(mod_filename);
+
+		for (j = 0; j < WModelsCount; j++) 
+		{
+			Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/%s", BasePModels[i].name, BaseWModels[j]);
+			R_RegisterModel(mod_filename);
+		}
+	}
+}
+
 void R_BeginRegistration (char *model)
 {
 	char	fullname[MAX_OSPATH];
@@ -2184,7 +2238,7 @@ void R_BeginRegistration (char *model)
 			R_ReadMusicScript( fullname );
 			break;
 		}
-	}
+	}	
 
 	Com_sprintf (fullname, sizeof(fullname), "maps/%s.bsp", model);
 

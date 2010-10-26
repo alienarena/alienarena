@@ -456,9 +456,14 @@ void CL_PrepRefresh ()
 
 		loadingPercent += 60.0f/(float)max;
 	}
+
+	Com_sprintf (loadingMessages[1], sizeof(loadingMessages[1]), "loading models...precaching");
+
+	SCR_UpdateScreen ();
+
+	R_RegisterBasePlayerModels();
+
 	Com_sprintf (loadingMessages[1], sizeof(loadingMessages[1]), "loading models...done");
-
-
 
 	Com_Printf ("images\r", i);
 	SCR_UpdateScreen ();

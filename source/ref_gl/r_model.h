@@ -89,6 +89,25 @@ typedef struct
 	maliasframe_t	*frames;
 } maliasmdl_t;
 
+//base player models and weapons for prechache
+typedef struct PModelList_s {
+
+    const char *name;
+
+} PModelList_t;
+
+extern PModelList_t BasePModels[];
+extern int PModelsCount;
+
+typedef struct WModelList_s {
+
+    const char *name;
+
+} WModelList_t;
+
+extern WModelList_t BaseWModels[];
+extern int WModelsCount;
+
 /*
 ==============================================================================
 
