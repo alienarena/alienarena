@@ -267,7 +267,7 @@ typedef struct
 #define WEAP_STRAFER			14
 #define WEAP_DEATHBALL			15
 #define WEAP_HOVER				16
-#define WEAP_GRAPPLE			17
+#define WEAP_GRAPPLE			16
 
 
 typedef struct gitem_s
