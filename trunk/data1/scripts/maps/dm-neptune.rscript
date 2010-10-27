@@ -16,16 +16,11 @@ textures/arena7/light11
 		lensflare
 	}
 }
-textures/arena7/light3
-{
-	{
-		lensflare
-	}
-}
 textures/arena7/light9
 {
 	{
 		lensflare
+		flaretype 1
 	}
 }
 textures/arena9/lightwhite
