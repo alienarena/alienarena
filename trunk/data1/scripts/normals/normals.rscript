@@ -862,3 +862,10 @@ maps/meshes/gothic/throne
 		normalmap
 	}
 }
+maps/meshes/gothic/dragon
+{
+	{
+		map maps/meshes/gothic/dragon_normal.jpg
+		normalmap
+	}
+}
