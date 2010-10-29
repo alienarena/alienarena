@@ -304,7 +304,7 @@ Call before entering a new level, or after changing dlls
 */
 qboolean needLoadingPlaque (void);
 extern int	seconds, minutes;
-void CL_PrepRefresh ()
+void CL_PrepRefresh ( void )
 {
 	char		mapname[32];
 	int			i, max;
@@ -367,7 +367,12 @@ void CL_PrepRefresh ()
 
 	//this was moved here, to prevent having a pic loaded over and over again, which was
 	//totally killing performance after a dozen or so maps.
-	map_pic_loaded = (ptrdiff_t)(R_RegisterPic(va("/levelshots/%s.pcx", mapname)));
+	// 2010-10 modified on suspicion of affecting possible compiler bug. see R_RegisterPic()
+	map_pic_loaded = false;
+	if ( R_RegisterPic( va("/levelshots/%s.pcx", mapname)) != NULL )
+	{
+		map_pic_loaded = true;
+	}
 
 	Com_Printf ("Map: %s\r", mapname);
 	SCR_UpdateScreen ();
@@ -387,10 +392,12 @@ void CL_PrepRefresh ()
 
 	for (i=1, max=0 ; i<MAX_MODELS && cl.configstrings[CS_MODELS+i][0] ; i++)
 		max++;
+
 	for (i=1 ; i<MAX_MODELS && cl.configstrings[CS_MODELS+i][0] ; i++)
 	{
 		strcpy (name, cl.configstrings[CS_MODELS+i]);
-		name[37] = 0;	// never go beyond one line
+		// name[37] = 0; 2010-10 archaic line length truncates log lines
+
 		if (name[0] != '*')
 		{
 			Com_Printf ("%s\r", name);
@@ -441,6 +448,7 @@ void CL_PrepRefresh ()
 				strncpy(cl_weaponmodels[num_cl_weaponmodels], cl.configstrings[CS_MODELS+i]+1,
 					sizeof(cl_weaponmodels[num_cl_weaponmodels]) - 1);
 				num_cl_weaponmodels++;
+
 			}
 		}
 		else
@@ -450,7 +458,7 @@ void CL_PrepRefresh ()
 				cl.model_clip[i] = CM_InlineModel (cl.configstrings[CS_MODELS+i]);
 			else
 				cl.model_clip[i] = NULL;
-		}
+			}
 		if (name[0] != '*')
 			Com_Printf ("                                     \r");
 
@@ -470,6 +478,7 @@ void CL_PrepRefresh ()
 
 	for (i=1, max=0 ; i<MAX_IMAGES && cl.configstrings[CS_IMAGES+i][0] ; i++)
 		max++;
+
 	for (i=1 ; i<MAX_IMAGES && cl.configstrings[CS_IMAGES+i][0] ; i++)
 	{
 		cl.image_precache[i] = R_RegisterPic (cl.configstrings[CS_IMAGES+i]);
@@ -486,6 +495,7 @@ void CL_PrepRefresh ()
 	for (i=1, max=0 ; i<MAX_CLIENTS ; i++)
 		if (cl.configstrings[CS_PLAYERSKINS+i][0])
 			max++;
+
 	for (i=0 ; i<MAX_CLIENTS ; i++)
 	{
 		if (!cl.configstrings[CS_PLAYERSKINS+i][0])
@@ -495,6 +505,7 @@ void CL_PrepRefresh ()
 		Com_Printf ("client %i\r", i);
 		SCR_UpdateScreen ();
 		Sys_SendKeyEvents ();	// pump message loop
+
 		CL_ParseClientinfo (i);
 		Com_Printf ("                                     \r");
 		loadingPercent += 10.0f/(float)max;
@@ -508,9 +519,9 @@ void CL_PrepRefresh ()
 	Com_Printf ("sky\r", i);
 	SCR_UpdateScreen ();
 	rotate = atof (cl.configstrings[CS_SKYROTATE]);
-	sscanf (cl.configstrings[CS_SKYAXIS], "%f %f %f",
+	sscanf(	cl.configstrings[CS_SKYAXIS], "%f %f %f",
 		&axis[0], &axis[1], &axis[2]);
-	R_SetSky (cl.configstrings[CS_SKY], rotate, axis);
+	R_SetSky( cl.configstrings[CS_SKY], rotate, axis );
 	Com_Printf ("                                     \r");
 
 	// the renderer can now free unneeded stuff
@@ -903,7 +914,7 @@ void V_RenderView( float stereo_separation )
 
 		SCR_DrawBases();
 	}
-	
+
 }
 
 
