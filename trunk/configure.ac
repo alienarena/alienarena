@@ -170,6 +170,9 @@ AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
 AC_SEARCH_LIBS([acos],[m])
 AC_SEARCH_LIBS([dlopen],[dl])
 
+dnl modernize Sys_Milliseconds()
+AC_SEARCH_LIBS([clock_gettime],[rt])
+
 dnl
 dnl start of client-only library requirements
 dnl
@@ -270,7 +273,10 @@ AC_CHECK_HEADERS(
 AC_CHECK_HEADERS(
 	[ dlfcn.h fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h sys/time.h sys/stat.h ])
 
-AC_CHECK_HEADERS([ windows.h winsock.h winsock2.h ])	
+AC_CHECK_HEADERS([ windows.h winsock.h winsock2.h ])
+
+dnl for time function modernize
+AC_CHECK_HEADERS([ time.h ])	
 
 dnl	
 dnl start of client-only header requirements
@@ -338,6 +344,10 @@ AC_CHECK_FUNCS([memmove memset munmap mremap])
 
 # other functions
 AC_CHECK_FUNCS([gettimeofday putenv _putenv select])
+
+# time functions
+dnl time function modernize
+AC_CHECK_FUNCS([clock_gettime])
 
 #
 # Set names of dlopened libraries for config.h
