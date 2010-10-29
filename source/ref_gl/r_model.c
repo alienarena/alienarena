@@ -1988,11 +1988,12 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	dtrivertx_t			*verts;
 	byte				*tangents;
 	vec3_t				tangents_[MAX_VERTS];
-	pinmodel = (dmdl_t *)buffer;
 	char *pstring;
 	int count;
 	image_t *image;
-
+	
+	pinmodel = (dmdl_t *)buffer;
+	
 	version = LittleLong (pinmodel->version);
 	if (version != ALIAS_VERSION)
 		Com_Printf("%s has wrong version number (%i should be %i)",
