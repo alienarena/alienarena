@@ -323,7 +323,7 @@ void MSG_WriteChar (sizebuf_t *sb, int c)
 	byte	*buf;
 
 #ifdef PARANOID
-	if (c < -128 || c > 127) 
+	if (c < -128 || c > 127)
 	{
 		// Com_Printf( "MSG_WriteChar: range error: %i\n", c);
 		Com_Error (ERR_FATAL, "MSG_WriteChar: range error");
@@ -524,7 +524,7 @@ void MSG_WriteDir (sizebuf_t *sb, vec3_t dir)
 		for ( i = 0 ; i < NUMVERTEXNORMALS ; i++ )
 		{ // search for closest match
 			d = (x*bytedirs[i][0]) + (y*bytedirs[i][1]) + (z*bytedirs[i][2]);
-			if ( d > 0.985f )
+			if ( d > 0.998f )
 			{ // no other entry could be a closer match
 				//  0.9679495 is max dot product between anorm.h entries
 				best = i;

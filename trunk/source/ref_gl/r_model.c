@@ -1786,7 +1786,7 @@ byte Normal2Index(const vec3_t vec)
 			d =	  (x*r_avertexnormals[i][0])
 				+ (y*r_avertexnormals[i][1])
 				+ (z*r_avertexnormals[i][2]);
-			if ( d > 0.985f )
+			if ( d > 0.998f )
 			{ // no other entry could be a closer match
 				//  0.9679495 is max dot product between anorm.h entries
 				best = i;
@@ -1910,49 +1910,49 @@ static void VecsForTris(
 		vec3_t Tangent
 		)
 {
-	vec3_t	vec1, vec2;
-	vec3_t	planes[3];
-	float	tmp, vec1tmp, vec2tmp, cptmp ;
-	int		i;
+	vec3_t vec1, vec2;
+	vec3_t planes[3];
+	float tmp;
+	float vec1_y, vec1_z, vec1_nrml;
+	float vec2_y, vec2_z, vec2_nrml;
+	int i;
 
-	vec1[1] = st1[0]-st0[0];
-	vec1[2] = st1[1]-st0[1];
-	vec1tmp = (vec1[1]*vec1[1]) + (vec1[2]*vec1[2]); // partial for normalize
+	vec1_y = st1[0]-st0[0];
+	vec1_z = st1[1]-st0[1];
+	vec1_nrml = (vec1_y*vec1_y) + (vec1_z*vec1_z); // partial for normalize
 
-	vec2[1] = st2[0]-st0[0];
-	vec2[2] = st2[1]-st0[1];
-	vec2tmp = (vec2[1]*vec2[1]) + (vec2[2]*vec2[2]); // partial for normalize
-
-	cptmp = vec1[1]*vec2[2] - vec1[2]*vec2[1]; // partial for cross product
+	vec2_y = st2[0]-st0[0];
+	vec2_z = st2[1]-st0[1];
+	vec2_nrml = (vec2_y*vec2_y) + (vec2_z*vec2_z); // partial for normalize
 
 	for (i=0; i<3; i++)
 	{
 		vec1[0] = v1[i]-v0[i];
 		// VectorNormalize(vec1);
-		tmp = (vec1[i] * vec1[i]) + vec1tmp;
+		tmp = (vec1[0] * vec1[0]) + vec1_nrml;
 		tmp = sqrt(tmp);
 		if ( tmp > 0.0 )
 		{
 			tmp = 1.0 / tmp;
 			vec1[0] *= tmp;
-			vec1[1] *= tmp;
-			vec1[2] *= tmp;
+			vec1[1] = vec1_y * tmp;
+			vec1[2] = vec1_z * tmp;
 		}
 
 		vec2[0] = v2[i]-v0[i];
 		// --- VectorNormalize(vec2);
-		tmp = (vec2[i] * vec2[i]) + vec2tmp;
+		tmp = (vec2[0] * vec2[0]) + vec2_nrml;
 		tmp = sqrt(tmp);
 		if ( tmp > 0.0 )
 		{
 			tmp = 1.0 / tmp;
 			vec2[0] *= tmp;
-			vec2[1] *= tmp;
-			vec2[2] *= tmp;
+			vec2[1] = vec2_y * tmp;
+			vec2[2] = vec2_z * tmp;
 		}
 
 		// --- CrossProduct(vec1,vec2,planes[i]);
-		planes[i][0] = cptmp;
+		planes[i][0] = vec1[1]*vec2[2] - vec1[2]*vec2[1];
 		planes[i][1] = vec1[2]*vec2[0] - vec1[0]*vec2[2];
 		planes[i][2] = vec1[0]*vec2[1] - vec1[1]*vec2[0];
 		// ---
@@ -1991,9 +1991,9 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	char *pstring;
 	int count;
 	image_t *image;
-	
+
 	pinmodel = (dmdl_t *)buffer;
-	
+
 	version = LittleLong (pinmodel->version);
 	if (version != ALIAS_VERSION)
 		Com_Printf("%s has wrong version number (%i should be %i)",
