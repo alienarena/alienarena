@@ -1133,7 +1133,6 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
     if(!respawn)
 	{
 		bot->think = ACESP_HoldSpawn;
-		bot->nextthink = level.time + 0.1;
 		bot->nextthink = level.time + random()*3.0; // up to three seconds
 	}
 	else

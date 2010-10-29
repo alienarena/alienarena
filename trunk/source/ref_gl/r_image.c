@@ -1325,7 +1325,13 @@ image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t t
 
 	if (strlen(name) >= sizeof(image->name))
 		Com_Error (ERR_DROP, "Draw_LoadPic: \"%s\" is too long", name);
+
 	strcpy (image->name, name);
+	if ( name[0] != '*' )
+	{ // not a special name, remove the path part
+		strcpy( image->bare_name, COM_SkipPath( name ) );
+	}
+
 	image->registration_sequence = registration_sequence;
 
 	image->width = width;

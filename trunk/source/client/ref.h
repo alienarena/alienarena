@@ -8,7 +8,7 @@ of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
@@ -159,13 +159,13 @@ typedef struct entity_s
 	/*
 	** most recent data
 	*/
-	float				origin[3];	
-	int					frame;		
+	float				origin[3];
+	int					frame;
 
 	/*
 	** previous data for lerping
 	*/
-	float				oldorigin[3];	
+	float				oldorigin[3];
 	int					oldframe;
 
 	/*
@@ -178,7 +178,7 @@ typedef struct entity_s
 	** misc
 	*/
 	float	backlerp;				// 0.0 = current, 1.0 = old
-	int		skinnum;				
+	int		skinnum;
 
 	int		lightstyle;				// for flashing entities
 	float	alpha;					// ignore if RF_TRANSLUCENT isn't set
@@ -249,9 +249,9 @@ typedef struct particle_s
 	float		scalevel;
 	qboolean	fromsustainedeffect;
 	float       dist;
-	
-	// These are computed from the foo and foovel values-- for example, 
-	// current_color is computed from color and colorvel and its value 
+
+	// These are computed from the foo and foovel values-- for example,
+	// current_color is computed from color and colorvel and its value
 	// changes every frame.
 	vec3_t	current_origin;
 	int		current_color;
@@ -366,7 +366,7 @@ void	R_SetPalette ( const unsigned char *palette);
 
 struct model_s	*R_RegisterModel (char *name);
 struct image_s	*R_RegisterSkin (char *name);
-struct image_s	*R_RegisterPic (char *name);
+struct image_s	*R_RegisterPic (const char *name);
 
 void	R_SetSky (char *name, float rotate, vec3_t axis);
 
@@ -393,7 +393,7 @@ void TTF_RawPrint( ttf_font_t font , const char * text , float x , float y , con
 #define MAX_RADAR_ENTS 512
 typedef struct RadarEnt_s{
   float color[4];
-  vec3_t org;  
+  vec3_t org;
 }RadarEnt_t;
 
 

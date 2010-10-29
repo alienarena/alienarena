@@ -550,6 +550,7 @@ void SV_BuildClientFrame (client_t *client)
 		state = &svs.client_entities[svs.next_client_entities%svs.num_client_entities];
 		if (ent->s.number != e)
 		{
+			// TODO: fix this error message so it gives some information
 			Com_DPrintf ("FIXING ENT->S.NUMBER!!!\n");
 			ent->s.number = e;
 		}

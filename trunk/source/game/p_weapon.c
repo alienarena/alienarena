@@ -194,6 +194,12 @@ void Q2_FindFile (char *filename, FILE **file)
 
 	*file = NULL;
 
+	cvar_t *dbg_developer = gi.cvar("developer", "0", 0 );
+	if ( dbg_developer && dbg_developer->integer == 2 )
+	{ // A prefix for FS_FullPath Com_DPrintf() tracing to show a call from game.
+		gi.dprintf("G: ");
+	}
+
 	if ( gi.FullPath( full_path, sizeof(full_path), filename ) )
 	{
 		*file = fopen( full_path, "rb" );
@@ -203,10 +209,13 @@ void Q2_FindFile (char *filename, FILE **file)
 			gi.dprintf("Q2_FindFile: failed fopen for read: %s", full_path );
 		}
 	}
-	// else
-	//   gi.dprintf("Q2_FindFile: not found: %s\n", filename );
 
 }
+
+
+
+
+
 
 /*
 ===============

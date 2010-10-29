@@ -48,6 +48,8 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/Stryker.cfg \
 	botinfo/Yoz.cfg \
 	botinfo/sample.cfg \
+	botinfo/allbots.tmp \
+	botinfo/team.tmp \
 	botinfo/aoa-atlantis.tmp \
 	botinfo/aoa-corrosion.tmp \
 	botinfo/aoa-frost2k9.tmp \
@@ -325,6 +327,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/smartgunmask.tga \
 	data1/gfx/stepside_mtl4light_fx1.tga \
 	data1/gfx/sun1.jpg \
+	data1/gfx/sun2.jpg \
 	data1/gfx/sun.jpg \
 	data1/gfx/tekwallmask.tga \
 	data1/gfx/trim2mask.tga \
@@ -580,6 +583,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/generator.jpg \
 	data1/maps/meshes/generator.md2 \
 	data1/maps/meshes/generator_normal.jpg \
+ 	data1/maps/meshes/gothic/column1.jpg \
+ 	data1/maps/meshes/gothic/column1.md2 \
+ 	data1/maps/meshes/gothic/column1_normal.jpg \
+	data1/maps/meshes/gothic/dragon.jpg \
+	data1/maps/meshes/gothic/dragon.md2 \
+	data1/maps/meshes/gothic/dragon_normal.jpg \
 	data1/maps/meshes/gothic/fdstatue_green.md2 \
 	data1/maps/meshes/gothic/fd_statue_normal.jpg \
 	data1/maps/meshes/gothic/freedom_statue_green.jpg \
@@ -595,6 +604,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/gothic/lamp.md2 \
 	data1/maps/meshes/gothic/lamp_normal.tga \
 	data1/maps/meshes/gothic/lamp.tga \
+ 	data1/maps/meshes/gothic/neptune.jpg \
+ 	data1/maps/meshes/gothic/neptune.md2 \
+ 	data1/maps/meshes/gothic/neptune_normal.jpg \
 	data1/maps/meshes/gothic/root.jpg \
 	data1/maps/meshes/gothic/root.md2 \
 	data1/maps/meshes/gothic/root_normal.jpg \
@@ -603,6 +615,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/gothic/skeleton3.md2 \
 	data1/maps/meshes/gothic/skeleton.jpg \
 	data1/maps/meshes/gothic/skeleton_normal.jpg \
+ 	data1/maps/meshes/gothic/throne.jpg \
+ 	data1/maps/meshes/gothic/throne.md2 \
+ 	data1/maps/meshes/gothic/throne_normal.jpg \
 	data1/maps/meshes/hanger.md2 \
 	data1/maps/meshes/hanger_normal.jpg \
 	data1/maps/meshes/hanger.tga \
@@ -1062,6 +1077,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/crosshairs/tech.tga \
 	data1/pics/crosshairs/transcircle.tga \
 	data1/pics/crosshairs/vista.tga \
+	data1/pics/ctf1.tga \
+	data1/pics/ctf2.tga \
 	data1/pics/disruptor.tga \
 	data1/pics/dnarrow.tga \
 	data1/pics/flamethrower.tga \
@@ -1692,6 +1709,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-leviathan2k8.rscript \
 	data1/scripts/maps/dm-leviathan.rscript \
 	data1/scripts/maps/dm-liberation.rscript \
+ 	data1/scripts/maps/dm-neptune.rscript \
 	data1/scripts/maps/dm-oblivion.rscript \
 	data1/scripts/maps/dm-omega2k8.rscript \
 	data1/scripts/maps/dm-purgatory.rscript \
@@ -3044,6 +3062,5 @@ nobase_dist_pkgdata_DATA = \
 	data1/vehicles/strafer/tris.md2 \
 	data1/vehicles/strafer/v_wep.md2 \
 	data1/vehicles/strafer/window.md2
-	
-	
+
 	
