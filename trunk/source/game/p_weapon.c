@@ -191,10 +191,11 @@ Given a relative path, returns an open FILE* for reading
 void Q2_FindFile (char *filename, FILE **file)
 {
 	char full_path[MAX_OSPATH];
+	cvar_t *dbg_developer;
 
 	*file = NULL;
 
-	cvar_t *dbg_developer = gi.cvar("developer", "0", 0 );
+	dbg_developer = gi.cvar("developer", "0", 0 );
 	if ( dbg_developer && dbg_developer->integer == 2 )
 	{ // A prefix for FS_FullPath Com_DPrintf() tracing to show a call from game.
 		gi.dprintf("G: ");
