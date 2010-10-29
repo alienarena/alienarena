@@ -783,7 +783,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-bloodfactory.mus \
 	data1/maps/scripts/dm-chasmatic2k9.fog \
 	data1/maps/scripts/dm-chasmatic2k9.mus \
-	data1/maps/scripts/dm-chasmatic.mus \
 	data1/maps/scripts/dm-command2k9.fog \
 	data1/maps/scripts/dm-command2k9.mus \
 	data1/maps/scripts/dm-corrosion.fog \
@@ -1826,6 +1825,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/music/dm-frontier.ogg \
 	data1/sound/music/dm-horus.ogg \
 	data1/sound/music/dm-inferno.ogg \
+	data1/sound/music/dm-oblivion.ogg \
 	data1/sound/music/dm-redred.ogg \
 	data1/sound/music/dm-saucer.ogg \
 	data1/sound/music/dm-turbo.ogg \
