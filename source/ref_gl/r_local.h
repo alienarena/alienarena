@@ -206,7 +206,7 @@ extern  cvar_t		*r_minimap_style;
 
 extern	cvar_t	*gl_mirror;
 
-extern	cvar_t	*gl_arb_fragment_program; 
+extern	cvar_t	*gl_arb_fragment_program;
 extern	cvar_t	*gl_glsl_shaders;
 
 
@@ -361,9 +361,9 @@ int		Draw_GetPalette (void);
 void	GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight);
 
 image_t *R_RegisterSkin (char *name);
-image_t *R_RegisterParticlePic(char *name);
-image_t *R_RegisterParticleNormal(char *name);
-image_t *R_RegisterGfxPic(char *name);
+image_t *R_RegisterParticlePic(const char *name);
+image_t *R_RegisterParticleNormal(const char *name);
+image_t *R_RegisterGfxPic(const char *name);
 
 void	LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
 image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits);
@@ -469,7 +469,7 @@ typedef struct
 	qboolean	alpha_test;
 	qboolean	blend;
 	qboolean	texgen;
-	qboolean	fragment_program; 
+	qboolean	fragment_program;
 	qboolean	glsl_shaders;
 	qboolean	separateStencil;
 	qboolean	stencil_wrap;
@@ -639,7 +639,7 @@ extern GLuint		g_location_fxPos;
 extern GLuint		g_location_fxColor;
 extern GLuint		g_location_fbSampleSize;
 
-//blur 
+//blur
 extern GLuint		g_location_scale;
 extern GLuint		g_location_source;
 
@@ -661,7 +661,7 @@ extern void R_DrawIQMShadow(vec3_t origin);
 int r_DrawingRagDoll;
 int r_SurfaceCount;
 
-#define TURBSCALE2 (256.0 / (2 * M_PI)) 
+#define TURBSCALE2 (256.0 / (2 * M_PI))
 
 // reduce runtime calcs
 #define TURBSCALE 40.743665431525205956834243423364

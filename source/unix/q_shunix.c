@@ -13,10 +13,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -34,7 +33,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/mman.h>
-#include <sys/time.h>
+
+#if defined HAVE_TIME_H
+# include <time.h>
+#elif defined HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 
 #include "unix/glob.h"
 #include "qcommon/qcommon.h"
@@ -99,8 +103,8 @@ void *Hunk_Alloc (int size)
 	user_hunk_bfr = user_hunk_base + user_hunk_size; // set base of new block
 	user_hunk_size = new_user_hunk_size; // then update user hunk size
 
-	Com_DPrintf("Hunk_Alloc:%u @ %p:\n",
-			user_hunk_block_size, user_hunk_bfr );
+	// This will dump each allocate call. Too much info for regular use.
+	//Com_DPrintf("Hunk_Alloc:%u @ %p:\n", user_hunk_block_size, user_hunk_bfr );
 
 	return (void *)user_hunk_bfr;
 }
@@ -210,15 +214,52 @@ void Hunk_Free (void *base)
 Sys_Milliseconds
 ================
 */
-int curtime;
+
+int curtime; // curtime set at beginning of the main loop
+
+#if defined HAVE_CLOCK_GETTIME
+// version with more modern system time function
+int Sys_Milliseconds( void )
+{
+	static qboolean first_time = true;
+	static time_t start_secs = 0;
+	int errorflag;
+	struct timespec tp;
+	long timeofday;
+
+	errorflag = clock_gettime( CLOCK_REALTIME, &tp );
+	if ( errorflag )
+	{
+		Com_Printf("Sys_Milliseconds: clock_gettime() error\n");
+		timeofday = 0L;
+		// fail
+	}
+	else if ( first_time )
+	{
+		start_secs = tp.tv_sec;
+		timeofday = tp.tv_nsec / 1000000L;
+		first_time = false;
+	}
+	else
+	{
+		timeofday = ( tp.tv_sec - start_secs ) * 1000L;
+		timeofday += tp.tv_nsec / 1000000L;
+	}
+
+	return (int)timeofday;
+}
+
+#else
+// version with old time function
 int Sys_Milliseconds (void)
 {
 	struct timeval tp;
-	struct timezone tzp;
-	static int		secbase;
-	int timeofday;
+	static long secbase;
+	long timeofday;
 
-	gettimeofday(&tp, &tzp);
+	// per documentation TZ arg is obsolete, never used, should be NULL.
+	// POSIX.1-2008 recommends clock_gettime()
+	gettimeofday( &tp, NULL );
 
 	if (!secbase)
 	{
@@ -228,8 +269,9 @@ int Sys_Milliseconds (void)
 
 	timeofday = (tp.tv_sec - secbase)*1000 + tp.tv_usec/1000;
 
-	return timeofday;
+	return (int)timeofday;
 }
+#endif
 
 void Sys_Mkdir (char *path)
 {

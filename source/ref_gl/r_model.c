@@ -500,6 +500,11 @@ model_t *Mod_ForName (char *name, qboolean crash)
 
 	loadmodel = mod;
 
+	if ( developer && developer->integer == 2 )
+	{ // tracing for model loading
+		Com_DPrintf("Mod_ForName: load: %s\n", loadmodel->name );
+	}
+
 	//
 	// fill it in
 	//
@@ -1728,6 +1733,7 @@ void R_LoadMd2VertexArrays(model_t *md2model){
 
 }
 
+#if 0
 byte Normal2Index(const vec3_t vec)
 {
 	int i, best;
@@ -1746,6 +1752,57 @@ byte Normal2Index(const vec3_t vec)
 
 	return best;
 }
+#else
+// for MD2 load speedup. Adapted from common.c::MSG_WriteDir()
+byte Normal2Index(const vec3_t vec)
+{
+	int i, best;
+	float d, bestd;
+	float x,y,z;
+
+	x = vec[0];
+	y = vec[1];
+	z = vec[2];
+
+	best = 0;
+	// frequently occurring axial cases, use known best index
+	if ( x == 0.0f && y == 0.0f )
+	{
+		best = ( z >= 0.999f ) ? 5  : 84;
+	}
+	else if ( x == 0.0f && z == 0.0f )
+	{
+		best = ( y >= 0.999f ) ? 32 : 104;
+	}
+	else if ( y == 0.0f && z == 0.0f )
+	{
+		best = ( x >= 0.999f ) ? 52 : 143;
+	}
+	else
+	{ // general case
+		bestd = 0.0f;
+		for ( i = 0 ; i < NUMVERTEXNORMALS ; i++ )
+		{ // search for closest match
+			d =	  (x*r_avertexnormals[i][0])
+				+ (y*r_avertexnormals[i][1])
+				+ (z*r_avertexnormals[i][2]);
+			if ( d > 0.985f )
+			{ // no other entry could be a closer match
+				//  0.9679495 is max dot product between anorm.h entries
+				best = i;
+				break;
+			}
+			if ( d > bestd )
+			{
+				bestd = d;
+				best = i;
+			}
+		}
+	}
+
+	return best;
+}
+#endif
 
 void RecalcVertsLightNormalIdx (dmdl_t *pheader)
 {
@@ -1813,6 +1870,7 @@ void RecalcVertsLightNormalIdx (dmdl_t *pheader)
 
 }
 
+#if 0
 void VecsForTris(float *v0, float *v1, float *v2, float *st0, float *st1, float *st2, vec3_t Tangent)
 {
 	vec3_t	vec1, vec2;
@@ -1840,6 +1898,73 @@ void VecsForTris(float *v0, float *v1, float *v2, float *st0, float *st1, float 
 	}
 	VectorNormalize(Tangent);
 }
+#else
+// Math rearrangement for MD2 load speedup
+static void VecsForTris(
+		const float *v0,
+		const float *v1,
+		const float *v2,
+		const float *st0,
+		const float *st1,
+		const float *st2,
+		vec3_t Tangent
+		)
+{
+	vec3_t	vec1, vec2;
+	vec3_t	planes[3];
+	float	tmp, vec1tmp, vec2tmp, cptmp ;
+	int		i;
+
+	vec1[1] = st1[0]-st0[0];
+	vec1[2] = st1[1]-st0[1];
+	vec1tmp = (vec1[1]*vec1[1]) + (vec1[2]*vec1[2]); // partial for normalize
+
+	vec2[1] = st2[0]-st0[0];
+	vec2[2] = st2[1]-st0[1];
+	vec2tmp = (vec2[1]*vec2[1]) + (vec2[2]*vec2[2]); // partial for normalize
+
+	cptmp = vec1[1]*vec2[2] - vec1[2]*vec2[1]; // partial for cross product
+
+	for (i=0; i<3; i++)
+	{
+		vec1[0] = v1[i]-v0[i];
+		// VectorNormalize(vec1);
+		tmp = (vec1[i] * vec1[i]) + vec1tmp;
+		tmp = sqrt(tmp);
+		if ( tmp > 0.0 )
+		{
+			tmp = 1.0 / tmp;
+			vec1[0] *= tmp;
+			vec1[1] *= tmp;
+			vec1[2] *= tmp;
+		}
+
+		vec2[0] = v2[i]-v0[i];
+		// --- VectorNormalize(vec2);
+		tmp = (vec2[i] * vec2[i]) + vec2tmp;
+		tmp = sqrt(tmp);
+		if ( tmp > 0.0 )
+		{
+			tmp = 1.0 / tmp;
+			vec2[0] *= tmp;
+			vec2[1] *= tmp;
+			vec2[2] *= tmp;
+		}
+
+		// --- CrossProduct(vec1,vec2,planes[i]);
+		planes[i][0] = cptmp;
+		planes[i][1] = vec1[2]*vec2[0] - vec1[0]*vec2[2];
+		planes[i][2] = vec1[0]*vec2[1] - vec1[1]*vec2[0];
+		// ---
+
+		tmp = 1.0 / planes[i][0];
+		Tangent[i] = -planes[i][1]*tmp;
+	}
+
+	VectorNormalize(Tangent);
+}
+#endif
+
 
 /*
 =================
@@ -1861,10 +1986,12 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	fstvert_t			*st;
 	daliasframe_t		*frame;
 	dtrivertx_t			*verts;
-	//byte				*norms = NULL; // unused
 	byte				*tangents;
 	vec3_t				tangents_[MAX_VERTS];
 	pinmodel = (dmdl_t *)buffer;
+	char *pstring;
+	int count;
+	image_t *image;
 
 	version = LittleLong (pinmodel->version);
 	if (version != ALIAS_VERSION)
@@ -1962,12 +2089,34 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	for (i=0 ; i<pheader->num_glcmds ; i++)
 		poutcmd[i] = LittleLong (pincmd[i]);
 
-
+#if 0
 	// register all skins
 	memcpy ((char *)pheader + pheader->ofs_skins, (char *)pinmodel + pheader->ofs_skins,
 		pheader->num_skins*MAX_SKINNAME);
 	for (i=0 ; i<pheader->num_skins ; i++)
 		mod->skins[i] = GL_FindImage ((char *)pheader + pheader->ofs_skins + i*MAX_SKINNAME, it_skin);
+#else
+	// skin names are not always valid or file may not exist
+	// do not register skins that cannot be found to eliminate extraneous
+	//  file system searching.
+	pstring = &((char*)pheader)[ pheader->ofs_skins ];
+	count = pheader->num_skins;
+	if ( count )
+	{ // someday .md2's that do not have skins may have zero for num_skins
+		memcpy( pstring, (char *)pinmodel + pheader->ofs_skins, count*MAX_SKINNAME );
+		i = 0;
+		while ( count-- )
+		{
+			pstring[MAX_SKINNAME-1] = '\0'; // paranoid
+			image = GL_FindImage( pstring, it_skin);
+			if ( image != NULL )
+				mod->skins[i++] = image;
+			else
+				pheader->num_skins--; // the important part: adjust skin count
+			pstring += MAX_SKINNAME;
+		}
+	}
+#endif
 
 	// load script
 	if(pheader->num_skins)
@@ -2053,7 +2202,8 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 				{
 					float *jnormal = r_avertexnormals[verts[j].lightnormalindex];
 					float *knormal = r_avertexnormals[verts[k].lightnormalindex];
-					if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))
+					// if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))
+					if( DotProduct(jnormal, knormal) >= 0.707106781187 ) // cos of 45 degrees.
 					{
 						VectorAdd(tangents_[j], tangents_[k], tangents_[j]);
 						VectorCopy(tangents_[j], tangents_[k]);
@@ -2134,7 +2284,7 @@ int R_FindFile (char *filename, FILE **file)
 //code to precache all base player models and their w_weapons(note - these are specific to Alien Arena and can be changed for other games)
 PModelList_t BasePModels[] =
 {
-	{ "martianenforcer" }, 
+	{ "martianenforcer" },
 	{ "martiancyborg" },
     { "enforcer" },
 	{ "commander" },
@@ -2146,7 +2296,7 @@ int PModelsCount = (int)(sizeof(BasePModels)/sizeof(BasePModels[0]));
 
 WModelList_t BaseWModels[] =
 {
-	{ "w_blaster.md2" }, 
+	{ "w_blaster.md2" },
 	{ "w_shotgun.md2" },
     { "w_sshotgun.md2" },
 	{ "w_machinegun.md2" },
@@ -2168,7 +2318,7 @@ void R_RegisterBasePlayerModels( void )
 
 	//precache all player and weapon models(base only, otherwise could take very long loading a map!)
 	for (i = 0; i < PModelsCount; i++)
-	{		
+	{
 		Com_Printf("Registering models for: %s\n", BasePModels[i].name);
 		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/tris.md2", BasePModels[i].name);
 		R_RegisterModel(mod_filename);
@@ -2177,7 +2327,7 @@ void R_RegisterBasePlayerModels( void )
 		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/lod2.md2", BasePModels[i].name);
 		R_RegisterModel(mod_filename);
 
-		for (j = 0; j < WModelsCount; j++) 
+		for (j = 0; j < WModelsCount; j++)
 		{
 			Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/%s", BasePModels[i].name, BaseWModels[j]);
 			R_RegisterModel(mod_filename);
@@ -2238,7 +2388,7 @@ void R_BeginRegistration (char *model)
 			R_ReadMusicScript( fullname );
 			break;
 		}
-	}	
+	}
 
 	Com_sprintf (fullname, sizeof(fullname), "maps/%s.bsp", model);
 

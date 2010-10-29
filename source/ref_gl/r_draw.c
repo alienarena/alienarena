@@ -298,7 +298,7 @@ void Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale,
 R_RegisterPic
 =============
 */
-image_t	*R_RegisterPic (char *name)
+image_t	*R_RegisterPic (const char *name)
 {
 	image_t *gl;
 	char	fullname[MAX_QPATH];
@@ -309,12 +309,17 @@ image_t	*R_RegisterPic (char *name)
 		gl = GL_FindImage (fullname, it_pic);
 	}
 	else
-		gl = GL_FindImage (name+1, it_pic);
+	{ // note: levelshot graphic is loaded here
+		strcpy( fullname, &name[1] );
+		gl = GL_FindImage( fullname, it_pic );
+		// gl = GL_FindImage (name+1, it_pic);
+		// sometimes gets "evelshot" instead of "levelshot", compiler bug???
+	}
 
 	return gl;
 }
 
-image_t	*R_RegisterParticlePic (char *name)
+image_t	*R_RegisterParticlePic (const char *name)
 {
 	image_t *gl;
 	char	fullname[MAX_QPATH];
@@ -325,12 +330,15 @@ image_t	*R_RegisterParticlePic (char *name)
 		gl = GL_FindImage (fullname, it_pic);
 	}
 	else
-		gl = GL_FindImage (name+1, it_pic);
+	{ // 2010-10 match above workaround (paranoid)
+		strcpy( fullname, &name[1] );
+		gl = GL_FindImage( fullname, it_pic );
+	}
 
 	return gl;
 }
 
-image_t	*R_RegisterParticleNormal (char *name)
+image_t	*R_RegisterParticleNormal (const char *name)
 {
 	image_t *gl;
 	char	fullname[MAX_QPATH];
@@ -341,12 +349,15 @@ image_t	*R_RegisterParticleNormal (char *name)
 		gl = GL_FindImage (fullname, it_bump);
 	}
 	else
-		gl = GL_FindImage (name+1, it_bump);
+	{ // 2010-10 match above workaround (paranoid)
+		strcpy( fullname, &name[1] );
+		gl = GL_FindImage( fullname, it_bump );
+	}
 
 	return gl;
 }
 
-image_t	*R_RegisterGfxPic (char *name)
+image_t	*R_RegisterGfxPic (const char *name)
 {
 	image_t *gl;
 	char	fullname[MAX_QPATH];
@@ -357,12 +368,16 @@ image_t	*R_RegisterGfxPic (char *name)
 		gl = GL_FindImage (fullname, it_pic);
 	}
 	else
-		gl = GL_FindImage (name+1, it_pic);
+	{ // 2010-10 match above workaround (paranoid)
+		strcpy( fullname, &name[1] );
+		gl = GL_FindImage( fullname, it_pic );
+	}
+
 
 	return gl;
 }
 
-image_t	*R_RegisterPlayerIcon (char *name)
+image_t	*R_RegisterPlayerIcon (const char *name)
 {
 	image_t *gl;
 	char	fullname[MAX_QPATH];
@@ -373,7 +388,10 @@ image_t	*R_RegisterPlayerIcon (char *name)
 		gl = GL_FindImage (fullname, it_pic);
 	}
 	else
-		gl = GL_FindImage (name+1, it_pic);
+	{ // 2010-10 match above workaround (paranoid)
+		strcpy( fullname, &name[1] );
+		gl = GL_FindImage( fullname, it_pic );
+	}
 
 	return gl;
 }

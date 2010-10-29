@@ -13,9 +13,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
 
@@ -149,9 +149,6 @@ they shouldn't.
 
 char fs_gamedir[MAX_OSPATH];
 cvar_t *fs_gamedirvar; // for the "game" cvar, default is "arena"
-
-// probably not useful, and complicates filesystem search
-//cvar_t	*fs_basedir; // for redirecting data tree from CWD to somewhere else
 
 /* --- Search Paths ---
  *
@@ -462,12 +459,6 @@ Given a relative path to a file
   if found, return true, with the constructed full path
   otherwise, return false, with a constructed writeable full path
 
-if ext_list is not NULL, it points to an array of file path suffix strings
-(including the dot if required), in priority search order. The array is
-terminated with an empty string.
-
-Each is appended and searched for in each path in the filesystem hierarchy
-
 ===
  */
 qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_path )
@@ -504,6 +495,10 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 		if ( strlen( search_path ) < pathsize )
 		{
 			Q_strncpyz2( full_path, search_path, pathsize );
+			if ( developer && developer->integer == 2 )
+			{ // tracing for found files, not an error.
+				Com_DPrintf("FS_FullPath: found : %s\n", full_path );
+			}
 		}
 		else
 		{
@@ -511,11 +506,9 @@ qboolean FS_FullPath( char *full_path, size_t pathsize, const char *relative_pat
 			found = false;
 		}
 	}
-	else if ( developer && developer->value == 2 )
-	{
-		// This is not necessarily an error and can produce a flood of messages.
-		// Don't show unless developer set to 2
-		Com_DPrintf("FS_FullPath: file not found: %s\n", relative_path );
+	else if ( developer && developer->integer == 2 )
+	{ // tracing for not found files, not necessarily an error.
+		Com_DPrintf("FS_FullPath: not found : %s\n", relative_path );
 	}
 
 	return found;
@@ -695,6 +688,7 @@ Given relative path
 */
 int FS_LoadFile (char *path, void **buffer)
 {
+	char *lc_path;
 	FILE	*h;
 	byte	*buf = NULL;
 	int		len;
@@ -704,8 +698,11 @@ int FS_LoadFile (char *path, void **buffer)
 	//-JR
 	if (!h)
 	{
-		path = FS_TolowerPath (path);
-		len = FS_FOpenFile (path, &h);
+		lc_path = FS_TolowerPath (path);
+		if ( strcmp( path, lc_path ) )
+		{ // lowercase conversion changed something
+			len = FS_FOpenFile (path, &h);
+		}
 	}
 
 	if (!h)
@@ -745,20 +742,18 @@ void FS_FreeFile (void *buffer)
 /*
 =========
 FS_FileExists
+
+ Given relative path, search for a file
+  if found, return true
+  if not found, return false
+
 ========
  */
-qboolean
-FS_FileExists(char *path)
+qboolean FS_FileExists(char *path)
 {
-	FILE*	f;
+	char fullpath[MAX_OSPATH];
 
-	FS_FOpenFile(path, &f);
-
-	if (f != 0) {
-		FS_FCloseFile(f);
-		return (true);
-	}
-	return (false);
+	return ( FS_FullPath( fullpath, sizeof(fullpath), path ) );
 }
 
 /*

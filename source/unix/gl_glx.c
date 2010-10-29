@@ -160,10 +160,11 @@ void install_grabs(void)
 			XF86DGADirectVideo(dpy, DefaultScreen(dpy), XF86DGADirectMouse);
 			dgamouse = true;
 		} else {
-			// unable to query, probalby not supported
+			// unable to query, probably not supported
 			Com_Printf ( "Failed to detect XF86DGA Mouse\n" );
 			Cvar_Set( "in_dgamouse", "0" );
 			dgamouse = false;
+			XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
 		}
 	} else {
 		XWarpPointer(dpy, None, win, 0, 0, 0, 0, vid.width / 2, vid.height / 2);
@@ -229,241 +230,434 @@ void IN_Activate(qboolean active)
 /* KEYBOARD                                                                  */
 /*****************************************************************************/
 
-static int XLateKey(XKeyEvent *ev)
+static int XLateKey( XKeyEvent *ev )
 {
 
 	int key;
 	char buf[64];
+	int buflen;
 	KeySym keysym;
 
 	key = 0;
+	buflen = XLookupString( ev, buf, sizeof buf, &keysym, 0 );
 
-	XLookupString(ev, buf, sizeof buf, &keysym, 0);
-
-	switch(keysym)
+	switch ( keysym )
 	{
-		case XK_KP_Page_Up:	 key = K_KP_PGUP; break;
-		case XK_Page_Up:	 key = K_PGUP; break;
 
-		case XK_KP_Page_Down: key = K_KP_PGDN; break;
-		case XK_Page_Down:	 key = K_PGDN; break;
+	case XK_KP_Page_Up:
+		key = K_KP_PGUP;
+		break;
 
-		case XK_KP_Home: key = K_KP_HOME; break;
-		case XK_Home:	 key = K_HOME; break;
+	case XK_Page_Up:
+		key = K_PGUP;
+		break;
 
-		case XK_KP_End:  key = K_KP_END; break;
-		case XK_End:	 key = K_END; break;
+	case XK_KP_Page_Down:
+		key = K_KP_PGDN;
+		break;
 
-		case XK_KP_Left: key = K_KP_LEFTARROW; break;
-		case XK_Left:	 key = K_LEFTARROW; break;
+	case XK_Page_Down:
+		key = K_PGDN;
+		break;
 
-		case XK_KP_Right: key = K_KP_RIGHTARROW; break;
-		case XK_Right:	key = K_RIGHTARROW;		break;
+	case XK_KP_Home:
+		key = K_KP_HOME;
+		break;
 
-		case XK_KP_Down: key = K_KP_DOWNARROW; break;
-		case XK_Down:	 key = K_DOWNARROW; break;
+	case XK_Home:
+		key = K_HOME;
+		break;
 
-		case XK_KP_Up:   key = K_KP_UPARROW; break;
-		case XK_Up:		 key = K_UPARROW;	 break;
+	case XK_KP_End:
+		key = K_KP_END;
+		break;
 
-		case XK_Escape: key = K_ESCAPE;		break;
+	case XK_End:
+		key = K_END;
+		break;
 
-		case XK_KP_Enter: key = K_KP_ENTER;	break;
-		case XK_Return: key = K_ENTER;		 break;
+	case XK_KP_Left:
+		key = K_KP_LEFTARROW;
+		break;
 
-		case XK_Tab:		key = K_TAB;			 break;
+	case XK_Left:
+		key = K_LEFTARROW;
+		break;
 
-		case XK_F1:		 key = K_F1;				break;
+	case XK_KP_Right:
+		key = K_KP_RIGHTARROW;
+		break;
 
-		case XK_F2:		 key = K_F2;				break;
+	case XK_Right:
+		key = K_RIGHTARROW;
+		break;
 
-		case XK_F3:		 key = K_F3;				break;
+	case XK_KP_Down:
+		key = K_KP_DOWNARROW;
+		break;
 
-		case XK_F4:		 key = K_F4;				break;
+	case XK_Down:
+		key = K_DOWNARROW;
+		break;
 
-		case XK_F5:		 key = K_F5;				break;
+	case XK_KP_Up:
+		key = K_KP_UPARROW;
+		break;
 
-		case XK_F6:		 key = K_F6;				break;
+	case XK_Up:
+		key = K_UPARROW;
+		break;
 
-		case XK_F7:		 key = K_F7;				break;
+	case XK_Escape:
+		key = K_ESCAPE;
+		break;
 
-		case XK_F8:		 key = K_F8;				break;
+	case XK_KP_Enter:
+		key = K_KP_ENTER;
+		break;
 
-		case XK_F9:		 key = K_F9;				break;
+	case XK_Return:
+		key = K_ENTER;
+		break;
 
-		case XK_F10:		key = K_F10;			 break;
+	case XK_Tab:
+		key = K_TAB;
+		break;
 
-		case XK_F11:		key = K_F11;			 break;
+	case XK_F1:
+		key = K_F1;
+		break;
 
-		case XK_F12:		key = K_F12;			 break;
+	case XK_F2:
+		key = K_F2;
+		break;
 
-		case XK_BackSpace: key = K_BACKSPACE; break;
+	case XK_F3:
+		key = K_F3;
+		break;
 
-		case XK_KP_Delete: key = K_KP_DEL; break;
-		case XK_Delete: key = K_DEL; break;
+	case XK_F4:
+		key = K_F4;
+		break;
 
-		case XK_Pause:	key = K_PAUSE;		 break;
+	case XK_F5:
+		key = K_F5;
+		break;
 
-		case XK_Shift_L:
-		case XK_Shift_R:	key = K_SHIFT;		break;
+	case XK_F6:
+		key = K_F6;
+		break;
 
-		case XK_Execute:
-		case XK_Control_L:
-		case XK_Control_R:	key = K_CTRL;		 break;
+	case XK_F7:
+		key = K_F7;
+		break;
 
-		case XK_Alt_L:
-		case XK_Meta_L:
-		case XK_Alt_R:
-		case XK_Meta_R: key = K_ALT;			break;
+	case XK_F8:
+		key = K_F8;
+		break;
 
-		case XK_KP_Begin: key = K_KP_5;	break;
+	case XK_F9:
+		key = K_F9;
+		break;
 
-		case XK_Insert:key = K_INS; break;
-		case XK_KP_Insert: key = K_KP_INS; break;
+	case XK_F10:
+		key = K_F10;
+		break;
 
-		case XK_KP_Multiply: key = '*'; break;
-		case XK_KP_Add:  key = K_KP_PLUS; break;
-		case XK_KP_Subtract: key = K_KP_MINUS; break;
-		case XK_KP_Divide: key = K_KP_SLASH; break;
+	case XK_F11:
+		key = K_F11;
+		break;
 
-		default:
+	case XK_F12:
+		key = K_F12;
+		break;
+
+	case XK_BackSpace:
+		key = K_BACKSPACE;
+		break;
+
+	case XK_KP_Delete:
+		key = K_KP_DEL;
+		break;
+
+	case XK_Delete:
+		key = K_DEL;
+		break;
+
+	case XK_Pause:
+		key = K_PAUSE;
+		break;
+
+	case XK_Shift_L:
+	case XK_Shift_R:
+		key = K_SHIFT;
+		break;
+
+	case XK_Execute:
+	case XK_Control_L:
+	case XK_Control_R:
+		key = K_CTRL;
+		break;
+
+	case XK_Alt_L:
+	case XK_Meta_L:
+	case XK_Alt_R:
+	case XK_Meta_R:
+		key = K_ALT;
+		break;
+
+	case XK_KP_Begin:
+		key = K_KP_5;
+		break;
+
+	case XK_Insert:
+		key = K_INS;
+		break;
+
+	case XK_KP_Insert:
+		key = K_KP_INS;
+		break;
+
+	case XK_KP_Multiply:
+		key = '*';
+		break;
+
+	case XK_KP_Add:
+		key = K_KP_PLUS;
+		break;
+
+	case XK_KP_Subtract:
+		key = K_KP_MINUS;
+		break;
+
+	case XK_KP_Divide:
+		key = K_KP_SLASH;
+		break;
+
+	default:
+		if ( buflen == 1 )
+		{
 			key = *(unsigned char*)buf;
-			if (key >= 'A' && key <= 'Z')
+
+			if ( key >= 'A' && key <= 'Z' )
 				key = key - 'A' + 'a';
-			if (key >= 1 && key <= 26) /* ctrl+alpha */
+
+			if ( key >= 1 && key <= 26 ) /* ctrl+alpha */
 				key = key + 'a' - 1;
-			break;
+		}
+		break;
 	}
 
 	return key;
 }
 
-
-void HandleEvents(void)
+void HandleEvents( void )
 {
 	XEvent event;
 	qboolean dowarp = false;
-	int mwx = vid.width/2;
-	int mwy = vid.height/2;
+	int mwx = vid.width / 2;
+	int mwy = vid.height / 2;
 	int multiclicktime = 750;
 	int mouse_button;
 
-	if (!dpy)
+	float f_sys_msecs;
+	unsigned u_sys_msecs;
+
+	if ( !dpy )
 		return;
 
-	while (XPending(dpy)) {
+	// do one read of time for consistency
+	// theory is that all pending events occurring before this point in time
+	// should be considered occurring at this single point in time.
+	u_sys_msecs = (unsigned)Sys_Milliseconds();
+	f_sys_msecs = (float)u_sys_msecs;
 
-		XNextEvent(dpy, &event);
+	while ( XPending( dpy ) )
+	{
+		XNextEvent( dpy, &event );
 
-		if(event.xbutton.button == 2)
-			mouse_button = 2;
-		else if(event.xbutton.button == 3)
-			mouse_button = 1;
-		else
-			mouse_button = event.xbutton.button - 1;
+		// TODO: check for errors here, maybe
 
-		switch(event.type) {
+		switch ( event.type )
+		{
+
 		case KeyPress:
+			Key_Event( XLateKey( &event.xkey ), true, u_sys_msecs );
+			break;
+
 		case KeyRelease:
-			Key_Event (XLateKey(&event.xkey), event.type == KeyPress, Sys_Milliseconds());
+			Key_Event( XLateKey( &event.xkey ), false, u_sys_msecs );
 			break;
 
 		case MotionNotify:
-			if (mouse_active) {
-				if (dgamouse) {
+			if ( mouse_active )
+			{
+				if ( dgamouse )
+				{ // TODO: find documentation for DGA mouse, explain this
 					mx += (event.xmotion.x + (vidmode_active ? 0 : win_x)) * 2;
 					my += (event.xmotion.y + (vidmode_active ? 0 : win_y)) * 2;
 				}
 				else
-				{
+				{ // add the delta from the current position to the center
+					//  to the pointer motion accumulator
 					mx += ((int)event.xmotion.x - mwx);
 					my += ((int)event.xmotion.y - mwy);
 
-					if (mx || my)
-						dowarp = true;
+					// flag to recenter pointer
+					dowarp = (mx != 0 || my != 0 );
 				}
 			}
 			else
-			{
-				// allow mouse movement on menus in windowed mode
+			{ // allow mouse movement on menus in windowed mode
 				mx = event.xmotion.x;
 				my = event.xmotion.y;
 			}
 			break;
 
-
 		case ButtonPress:
+			if ( event.xbutton.button )
+			{
+				mouse_button = event.xbutton.button - 1;
+				switch ( mouse_button )
+				{ // index swap, buttons 2 & 3
+				case 1:
+					mouse_button = 2;
+					break;
+				case 2:
+					mouse_button = 1;
+					break;
+				}
 
-			if (event.xbutton.button) {
-				if (Sys_Milliseconds()-cursor.buttontime[mouse_button] < multiclicktime)
+				if ( (f_sys_msecs - cursor.buttontime[mouse_button])
+						< multiclicktime )
 					cursor.buttonclicks[mouse_button] += 1;
 				else
 					cursor.buttonclicks[mouse_button] = 1;
 
-				if (cursor.buttonclicks[mouse_button]>3)
+				if ( cursor.buttonclicks[mouse_button] > 3 )
 					cursor.buttonclicks[mouse_button] = 3;
 
-				cursor.buttontime[mouse_button] = Sys_Milliseconds();
+				cursor.buttontime[mouse_button] = f_sys_msecs;
 
 				cursor.buttondown[mouse_button] = true;
 				cursor.buttonused[mouse_button] = false;
 				cursor.mouseaction = true;
-			}
 
-			if (event.xbutton.button == 1) Key_Event(K_MOUSE1, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 2) Key_Event(K_MOUSE3, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 3) Key_Event(K_MOUSE2, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 4) Key_Event(K_MWHEELUP, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 5) Key_Event(K_MWHEELDOWN, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 6) Key_Event(K_MOUSE4, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 7) Key_Event(K_MOUSE5, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 8) Key_Event(K_MOUSE6, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 9) Key_Event(K_MOUSE7, event.type == ButtonPress, Sys_Milliseconds());
+				switch ( event.xbutton.button )
+				{
+				case 1:
+					Key_Event( K_MOUSE1, true, u_sys_msecs );
+					break;
+				case 2:
+					Key_Event( K_MOUSE3, true, u_sys_msecs );
+					break;
+				case 3:
+					Key_Event( K_MOUSE2, true, u_sys_msecs );
+					break;
+				case 4:
+					Key_Event( K_MWHEELUP, true, u_sys_msecs );
+					break;
+				case 5:
+					Key_Event( K_MWHEELDOWN, true, u_sys_msecs );
+					break;
+				case 6:
+					Key_Event( K_MOUSE4, true, u_sys_msecs );
+					break;
+				case 7:
+					Key_Event( K_MOUSE5, true, u_sys_msecs );
+					break;
+				case 8:
+					Key_Event( K_MOUSE6, true, u_sys_msecs );
+					break;
+				case 9:
+					Key_Event( K_MOUSE7, true, u_sys_msecs );
+					break;
+				// TODO: More mouse buttons?
+				}
+			}
 			break;
 
 		case ButtonRelease:
-			if (event.xbutton.button) {
+			if ( event.xbutton.button )
+			{
+				mouse_button = event.xbutton.button - 1;
+				switch ( mouse_button )
+				{ // index swap, buttons 2 & 3
+				case 1:
+					mouse_button = 2;
+					break;
+				case 2:
+					mouse_button = 1;
+					break;
+				}
+
 				cursor.buttondown[mouse_button] = false;
 				cursor.buttonused[mouse_button] = false;
 				cursor.mouseaction = true;
+
+				switch ( event.xbutton.button )
+				{
+				case 1:
+					Key_Event( K_MOUSE1, false, u_sys_msecs );
+					break;
+				case 2:
+					Key_Event( K_MOUSE3, false, u_sys_msecs );
+					break;
+				case 3:
+					Key_Event( K_MOUSE2, false, u_sys_msecs );
+					break;
+				case 4:
+					Key_Event( K_MWHEELUP, false, u_sys_msecs );
+					break;
+				case 5:
+					Key_Event( K_MWHEELDOWN, false, u_sys_msecs );
+					break;
+				case 6:
+					Key_Event( K_MOUSE4, false, u_sys_msecs );
+					break;
+				case 7:
+					Key_Event( K_MOUSE5, false, u_sys_msecs );
+					break;
+				case 8:
+					Key_Event( K_MOUSE6, false, u_sys_msecs );
+					break;
+				case 9:
+					Key_Event( K_MOUSE7, false, u_sys_msecs );
+					break;
+				// TODO: More mouse buttons?
+				}
 			}
-			if (event.xbutton.button == 1) Key_Event(K_MOUSE1, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 2) Key_Event(K_MOUSE3, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 3) Key_Event(K_MOUSE2, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 4) Key_Event(K_MWHEELUP, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 5) Key_Event(K_MWHEELDOWN, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 6) Key_Event(K_MOUSE4, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 7) Key_Event(K_MOUSE5, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 8) Key_Event(K_MOUSE6, event.type == ButtonPress, Sys_Milliseconds());
-			else if (event.xbutton.button == 9) Key_Event(K_MOUSE7, event.type == ButtonPress, Sys_Milliseconds());
 			break;
 
-		case CreateNotify :
+		case CreateNotify:
 			win_x = event.xcreatewindow.x;
 			win_y = event.xcreatewindow.y;
 			break;
 
-		case ConfigureNotify :
+		case ConfigureNotify:
 			win_x = event.xconfigure.x;
 			win_y = event.xconfigure.y;
 			break;
 
 		case ClientMessage:
-			if (event.xclient.data.l[0] == wmDeleteWindow)
-				Cbuf_ExecuteText(EXEC_NOW, "quit");
+			if ( event.xclient.data.l[0] == wmDeleteWindow )
+				Cbuf_ExecuteText( EXEC_NOW, "quit" );
 			break;
 		}
 	}
 
-	if (dowarp) {
-		/* move the mouse to the window center again */
-		XWarpPointer(dpy,None,win,0,0,0,0, vid.width/2,vid.height/2);
+	if ( dowarp )
+	{ /* move the pointer back to the window center */
+		XWarpPointer( dpy, None, win, 0, 0, 0, 0, mwx, mwy );
 	}
+
 }
 
 /*****************************************************************************/
 
 qboolean GLimp_InitGL (void);
+
+// TODO: modernize signal handler
 
 static void signal_handler(int sig)
 {
@@ -757,7 +951,7 @@ void GLimp_EndFrame (void)
 	qglXSwapBuffers(dpy, win); // does glFlush()
 
 	// rscript - MrG
-	rs_realtime=Sys_Milliseconds() * 0.0005f;
+	rs_realtime = (float)Sys_Milliseconds() * 0.0005f;
 }
 
 /*
