@@ -1290,7 +1290,7 @@ void Mod_LoadFaces (lump_t *l)
 						color[1] = stage->colormap.green;
 						color[2] = stage->colormap.blue;
 					}
-					GL_AddVegetationSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->grasstype);
+					GL_AddVegetationSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->name, stage->grasstype);
 				}
 				if (stage->beam && stage->texture) {
 					if(stage->colormap.enabled) {
@@ -1298,7 +1298,7 @@ void Mod_LoadFaces (lump_t *l)
 						color[1] = stage->colormap.green;
 						color[2] = stage->colormap.blue;
 					}
-					GL_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->beamtype);
+					GL_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->name, stage->beamtype);
 				}
 			} while ( (stage = stage->next) );
 		}
