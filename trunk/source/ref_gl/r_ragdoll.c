@@ -313,7 +313,7 @@ void R_CreateWorldObject( void )
 
 	dWorldSetGravity(RagDollWorld, 0.0, 0.0, -512.0); 
 
-	dWorldSetERP(RagDollWorld, 0.6);
+	//dWorldSetERP(RagDollWorld, 0.6);
 
 	RagDollSpace = dSimpleSpaceCreate(0);
 
