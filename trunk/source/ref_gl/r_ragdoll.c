@@ -382,10 +382,8 @@ int RagDollBindsCount = (int)(sizeof(RagDollBinds)/sizeof(RagDollBinds[0]));
 //build and set initial position of ragdoll
 void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 {
-	//to do - read ragdoll file(.rgd) to get parameters
 
 	//Ragdoll  positions
-	vec3_t NECKBASE_POS;
 	vec3_t R_SHOULDER_POS; 
 	vec3_t L_SHOULDER_POS;
 	vec3_t R_ELBOW_POS;
@@ -486,9 +484,6 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 		else bindmat[i] = entmat;
 	}
 
-	//set head
-	VectorSet(NECKBASE_POS, 0.0, 0.0, NECK_H);
-
 	//set upper body
 	VectorSet(R_SHOULDER_POS, -RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHOULDER_W] * 0.5, 0.0, 
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHOULDER_H]);
@@ -559,15 +554,15 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 	R_addFixedJoint(RagDollID, bindmat, MIDSPINE, CHEST, BELLY);
 
 	VectorSet(p1, -(RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[PELVIS_W] * 0.5 + 0.1), 0.0,
-		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HIP_H]);
+		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HIP_H] - 0.1);
 	VectorSet(p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[PELVIS_W] * 0.5 + 0.1, 0.0,
-		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HIP_H]);
+		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HIP_H] - 0.1);
 	R_addBody(RagDollID, bindmat, "pelvis", PELVIS, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[PELVIS_W]/2.0, density);
 
 	R_addFixedJoint(RagDollID, bindmat, LOWSPINE, BELLY, PELVIS);
 
 	VectorSet(p1, 0.0, 0.0, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HEAD_H]);
-	VectorSet(p2, 0.0, 0.0, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[NECK_H]);
+	VectorSet(p2, 0.0, 0.0, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[NECK_H] + 0.01);
 	R_addBody(RagDollID, bindmat, "head", HEAD, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HEAD_W]/2.0, density);
 
 	VectorSet(p1, 0.0, 0.0, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[NECK_H]);
@@ -578,7 +573,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HEAD_HISTOP2] * M_PI);
 
 	//right leg
-	VectorSet(p1, R_HIP_POS[0] - 0.1, R_HIP_POS[1], R_HIP_POS[2]);
+	VectorSet(p1, R_HIP_POS[0] - 0.1, R_HIP_POS[1], R_HIP_POS[2] - 0.1);
 	VectorSet(p2, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] + 0.1);
 	R_addBody(RagDollID, bindmat, "rightupperleg", RIGHTUPPERLEG, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[THIGH_W]/2.0, density);
 	
@@ -604,7 +599,7 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[ANKLE_HISTOP] * M_PI);
 
 	//left leg
-	VectorSet(p1, L_HIP_POS[0] + 0.1, L_HIP_POS[1], L_HIP_POS[2]);
+	VectorSet(p1, L_HIP_POS[0] + 0.1, L_HIP_POS[1], L_HIP_POS[2] - 0.1);
 	VectorSet(p2, L_KNEE_POS[0], L_KNEE_POS[1], L_KNEE_POS[2] + 0.1);
 	R_addBody(RagDollID, bindmat, "leftupperleg", LEFTUPPERLEG, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[THIGH_W]/2.0, density);
 
