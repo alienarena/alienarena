@@ -23,6 +23,12 @@ textures/arena7/light9
 		flaretype 1
 	}
 }
+textures/evil/e8tinylightblue
+{
+	{
+		lensflare
+	}
+}
 textures/arena9/lightwhite
 {
 	{
