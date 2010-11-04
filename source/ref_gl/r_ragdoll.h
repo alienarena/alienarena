@@ -21,29 +21,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ode/ode.h>
 
 #define MAX_RAGDOLLS 64 
-#define MAX_RAGDOLL_OBJECTS 16
-#define MAX_RAGDOLL_JOINTS 16
+#define MAX_RAGDOLL_OBJECTS 15
+#define MAX_RAGDOLL_JOINTS 15
 #define MAX_CONTACTS 32 
 #define MAX_FORCES 4
 #define RAGDOLL_DURATION 10000 //10 seconds
 
 //body id's
 #define CHEST 0
-#define BELLY 1
-#define PELVIS 2
-#define HEAD 3
-#define RIGHTUPPERLEG 4
-#define LEFTUPPERLEG 5
-#define RIGHTLOWERLEG 6
-#define LEFTLOWERLEG 7
-#define RIGHTFOOT 8
-#define LEFTFOOT 9
-#define RIGHTUPPERARM 10
-#define LEFTUPPERARM 11
-#define RIGHTFOREARM 12
-#define LEFTFOREARM 13
-#define RIGHTHAND 14
-#define LEFTHAND 15
+#define PELVIS 1
+#define HEAD 2
+#define RIGHTUPPERLEG 3
+#define LEFTUPPERLEG 4
+#define RIGHTLOWERLEG 5
+#define LEFTLOWERLEG 6
+#define RIGHTFOOT 7
+#define LEFTFOOT 8
+#define RIGHTUPPERARM 9
+#define LEFTUPPERARM 10
+#define RIGHTFOREARM 11
+#define LEFTFOREARM 12
+#define RIGHTHAND 13
+#define LEFTHAND 14
 
 //joint id's
 #define MIDSPINE 0
