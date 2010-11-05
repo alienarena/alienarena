@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2010 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -12,9 +13,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
 
@@ -1388,8 +1389,15 @@ void R_DrawVegetationSurface ( void )
 		VectorScale(up, scale, up);
 		VectorCopy(grass->origin, origin);
 
-		origin[2] += (grass->texsize/16)*(scale/10); //dynamically get image size and adjust? 4 pixels correlated to a 64x64 image
-								   //so image size/16 would work.
+		// adjust vertical position, scaled
+		origin[2] += 4.0 * grass->size;
+/*
+was:
+ origin[2] += (grass->texsize/16)*(scale/10);
+ //dynamically get image size and adjust? 4 pixels correlated to a 64x64 image
+ //so image size/16 would work.
+
+*/
 
 		if(!grass->type) {
 			r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
@@ -1769,10 +1777,10 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 						if (surf->texinfo->flags & SURF_FLOWING)
 							txm = tym = 0;
 					}
-					
+
 					os = v[3];
 					ot = v[4];
-					
+
 					RS_SetTexcoords (stage, &os, &ot, surf);
 					{
 						float red=255, green=255, blue=255;
@@ -1827,10 +1835,10 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 						if (surf->texinfo->flags & SURF_FLOWING)
 							txm = tym = 0;
 					}
-					
+
 					os = v[3];
 					ot = v[4];
-					
+
 					RS_SetTexcoords (stage, &os, &ot, surf);
 
 					{

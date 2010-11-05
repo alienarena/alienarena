@@ -283,6 +283,10 @@ dnl start of client-only header requirements
 dnl	
 AM_COND_IF([BUILD_CLIENT],
 [
+
+dnl autoscan says glext.h needs this
+	AM_COND_IF([BUILD_UNIX],[AC_PATH_X])
+
 	jpeglib_h_found=no
 	AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h],[ jpeglib_h_found=yes ])
 	AS_IF([ test "x${jpeglib_h_found}" = xno ],
@@ -312,6 +316,11 @@ AC_TYPE_SIZE_T
 #  note: defines a suitable type uid_t and gid_t if system headers do not 
 AC_TYPE_UID_T
 AC_CHECK_TYPES([ptrdiff_t])
+
+dnl autoscan says that glext.h needs these
+AC_TYPE_INT32_T
+AC_TYPE_INT64_T
+AC_TYPE_UINT64_T
 
 #
 # Checks for library functions.

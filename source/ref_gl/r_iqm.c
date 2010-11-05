@@ -12,10 +12,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -344,7 +343,10 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	iqmvertexarray_t *va;
 	unsigned short *framedata;
 	char *text;
-	char skinname[MAX_QPATH], shortname[MAX_QPATH], fullname[MAX_OSPATH], *path;
+	char skinname[MAX_QPATH], shortname[MAX_QPATH], fullname[MAX_OSPATH];
+	char *pskinpath_buffer;
+	int skinpath_buffer_length;
+	char *parse_string;
 
 	pbase = (unsigned char *)buffer;
 	header = (iqmheader_t *)buffer;
@@ -648,59 +650,49 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		vtexcoord+=2;
 	}
 
-	//load skin from skin file
-	COM_StripExtension(mod->name, shortname);
-	i = 0;
-	do
-		shortname[i] = tolower(shortname[i]);
-	while (shortname[i++]);
-	strcat(shortname, ".skin");
-	path = NULL;
-	for(;;)
-	{
-		path = FS_NextPath( path );
-		if( !path )
-		{
-			break;
-		}
-		if(path)
-			Com_sprintf(fullname, sizeof(fullname), "%s/%s", path, shortname);
+	/*
+	 * get skin pathname from <model>.skin file and initialize skin
+	 */
+	COM_StripExtension( mod->name, shortname );
+	strcat( shortname, ".skin" );
+	skinpath_buffer_length = FS_LoadFile( shortname, (void**)&pskinpath_buffer );
+		// note: FS_LoadFile handles upper/lowercase, nul-termination,
+		//  and path search sequence
 
-		if (Mod_ReadSkinFile(fullname, skinname))
-		{
-			mod->skins[0] = GL_FindImage (skinname, it_skin);
-			strcpy(mod->skinname, skinname);
+	if ( skinpath_buffer_length > 0 )
+	{ // <model>.skin file found and read,
+		// data is in Z_Malloc'd buffer pointed to by pskin_buffer
+
+		// get relative image pathname for model's skin from .skin file data
+		parse_string = pskinpath_buffer;
+		strcpy( skinname, COM_Parse( &parse_string ) );
+		Z_Free( pskinpath_buffer ); // free Z_Malloc'd read buffer
+
+		// get image file for skin
+		mod->skins[0] = GL_FindImage( skinname, it_skin );
+		if ( mod->skins[0] != NULL )
+		{ // image file for skin exists
+			strcpy( mod->skinname, skinname );
 
 			//load shader for skin
-			COM_StripExtension ( skinname, shortname );
-			mod->script = RS_FindScript(shortname);
-			if (mod->script)
-				RS_ReadyScript((rscript_t *)mod->script);
+			COM_StripExtension( skinname, shortname );
+			mod->script = RS_FindScript( shortname );
+			if ( mod->script )
+				RS_ReadyScript( (rscript_t *)mod->script );
 		}
 	}
 
-	//load ragdoll info from ragdoll file
+	/*
+	 * get ragdoll info from <model>.rgd file
+	 */
 	mod->hasRagDoll = false;
-	COM_StripExtension(mod->name, shortname);
-	i = 0;
-	do
-		shortname[i] = tolower(shortname[i]);
-	while (shortname[i++]);
-	strcat(shortname, ".rgd");
-	path = NULL;
-	for(;;)
+	COM_StripExtension( mod->name, shortname );
+	strcat( shortname, ".rgd" );
+	if ( FS_FullPath( fullname, sizeof(fullname), shortname ) )
 	{
-		path = FS_NextPath( path );
-		if( !path )
-		{
-			break;
-		}
-		if(path)
-			Com_sprintf(fullname, sizeof(fullname), "%s/%s", path, shortname);
-
-		mod->hasRagDoll = Mod_ReadRagDollFile(fullname, mod);
+		mod->hasRagDoll = Mod_ReadRagDollFile( fullname, mod );
 	}
-	
+
 	//free temp non hunk mem
 	if(inversebaseframe)
 		free(inversebaseframe);
@@ -897,7 +889,7 @@ void GL_AnimateIQMRagdoll(int RagDollID)
                     goto nextjoint;
 			    }
 			}
-       
+
             parent = RagDoll[RagDollID].ragDollMesh->joints[i].parent;
             if(parent >= 0)
             {
@@ -907,7 +899,7 @@ void GL_AnimateIQMRagdoll(int RagDollID)
             }
             else
                 memset(&RagDoll[RagDollID].ragDollMesh->outframe[i], 0, sizeof(matrix3x4_t));
- 
+
         nextjoint:;
 		}
 	}
@@ -1581,21 +1573,21 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int sh
 
 		GL_Bind(r_shelltexture2->texnum);
 		R_InitVArrays (VERT_COLOURED_TEXTURED);
-		
+
 		for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
         {
             for (j=0; j<3; j++)
             {
                 index_xyz = index_st = RagDoll[RagDollID].ragDollMesh->tris[i].vertex[j];
 
-				VArray[0] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0] + 
+				VArray[0] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0] +
 					RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[0]*shellscale;
-                VArray[1] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1] + 
+                VArray[1] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1] +
 					RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[1]*shellscale;
-                VArray[2] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] + 
+                VArray[2] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] +
 					RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir[2]*shellscale;
 
-				VArray[3] = (RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1] + 
+				VArray[3] = (RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[1] +
 					RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
                 VArray[4] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
 
@@ -1617,7 +1609,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int sh
 
 		if(qglUnlockArraysEXT)
 			qglUnlockArraysEXT();
-		
+
 	}
 	else if(!rs || mirror || glass)
 	{	//base render no shaders
@@ -1680,7 +1672,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int sh
 				VArray[6] = lightcolor[1];
 				VArray[7] = lightcolor[2];
 				VArray[8] = alpha;
-				
+
 				// increment pointer and counter
 				VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 				va++;
@@ -1691,10 +1683,10 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int sh
 			qglLockArraysEXT(0, va);
 
 		qglDrawArrays(GL_TRIANGLES,0,va);
-		
+
 		if(qglUnlockArraysEXT)
 			qglUnlockArraysEXT();
-		
+
 		if(mirror)
 			GL_EnableMultitexture( false );
 
@@ -1808,7 +1800,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int sh
 				{
 					lightVal[i] *= 1.05;
 				}
-				
+
 				GL_EnableMultitexture( true );
 
 				glUseProgramObjectARB( g_meshprogramObj );
@@ -1913,7 +1905,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int sh
 
 			if(qglUnlockArraysEXT)
 				qglUnlockArraysEXT();
-			
+
 			qglColor4f(1,1,1,1);
 
 			if(stage->normalmap)
@@ -2189,7 +2181,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 	if(r_ragdolls->value)
 	{
 		//Ragdolls take over at beginning of each death sequence
-		if(!(currententity->flags & RF_TRANSLUCENT)) 
+		if(!(currententity->flags & RF_TRANSLUCENT))
 		{
 			if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
 				if(currentmodel->hasRagDoll)
@@ -2199,7 +2191,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 		if((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
 			return;
 	}
-	
+
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{
 
@@ -2280,7 +2272,7 @@ void R_DrawINTERQUAKEMODEL ( void )
     qglPushMatrix ();
 	currententity->angles[PITCH] = currententity->angles[ROLL] = 0;
 	R_RotateForEntity (currententity);
-	
+
 	// select skin
 	if (currententity->skin) {
 		skin = currententity->skin;
@@ -2521,9 +2513,9 @@ void R_DrawIQMRagDollCaster ( int RagDollID )
 {
 	if ( R_CullRagDolls( RagDollID ) )
 		return;
-	
+
     qglPushMatrix ();
-	
+
 	GL_AnimateIQMRagdoll(RagDollID);
 
 	currentmodel = RagDoll[RagDollID].ragDollMesh;
