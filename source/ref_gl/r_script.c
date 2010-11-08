@@ -1390,14 +1390,7 @@ void R_DrawVegetationSurface ( void )
 		VectorCopy(grass->origin, origin);
 
 		// adjust vertical position, scaled
-		origin[2] += 4.0 * grass->size;
-/*
-was:
- origin[2] += (grass->texsize/16)*(scale/10);
- //dynamically get image size and adjust? 4 pixels correlated to a 64x64 image
- //so image size/16 would work.
-
-*/
+		origin[2] += (grass->texsize/32) * grass->size;
 
 		if(!grass->type) {
 			r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
