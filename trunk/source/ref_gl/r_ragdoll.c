@@ -133,10 +133,10 @@ void R_addBody(int RagDollID, matrix3x4_t *bindmat, char *name, int objectID, ve
 	matrix3x4_t initmat;
 	dMatrix3 rot;
 
-	p1[1] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
-    p1[2] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
-	p2[1] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
-    p2[2] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
+	p1[1] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
+    p1[2] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
+	p2[1] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
+    p2[2] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
 
 	//cylinder length not including endcaps, make capsules overlap by half
 	//radius at joints
@@ -223,8 +223,8 @@ void R_addHingeJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int objec
 	dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
 	vec3_t wanchor, waxis;
 
-	anchor[1] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
-	anchor[2] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
+	anchor[1] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
+	anchor[2] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
 
 	wanchor[0] = 0.5*(DotProduct(bindmat[object1].a, anchor) + bindmat[object1].a[3] + DotProduct(bindmat[object2].a, anchor) + bindmat[object2].a[3]);
     wanchor[1] = 0.5*(DotProduct(bindmat[object1].b, anchor) + bindmat[object1].b[3] + DotProduct(bindmat[object2].b, anchor) + bindmat[object2].b[3]);
@@ -252,8 +252,8 @@ void R_addBallJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object
     dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
     vec3_t wanchor;
 
-	anchor[1] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
-	anchor[2] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
+	anchor[1] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
+	anchor[2] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
 
     wanchor[0] = 0.5*(DotProduct(bindmat[object1].a, anchor) + bindmat[object1].a[3] + DotProduct(bindmat[object2].a, anchor) + bindmat[object2].a[3]);
     wanchor[1] = 0.5*(DotProduct(bindmat[object1].b, anchor) + bindmat[object1].b[3] + DotProduct(bindmat[object2].b, anchor) + bindmat[object2].b[3]);
@@ -274,8 +274,8 @@ void R_addUniversalJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int o
 	dBodyID body1 = RagDoll[RagDollID].RagDollObject[object1].body;
     dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
 
-	anchor[1] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
-	anchor[2] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
+	anchor[1] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
+	anchor[2] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
 
     wanchor[0] = 0.5*(DotProduct(bindmat[object1].a, anchor) + bindmat[object1].a[3] + DotProduct(bindmat[object2].a, anchor) + bindmat[object2].a[3]);
     wanchor[1] = 0.5*(DotProduct(bindmat[object1].b, anchor) + bindmat[object1].b[3] + DotProduct(bindmat[object2].b, anchor) + bindmat[object2].b[3]);
