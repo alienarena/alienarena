@@ -869,3 +869,10 @@ maps/meshes/gothic/dragon
 		normalmap
 	}
 }
+maps/meshes/barrel
+{
+	{
+		map maps/meshes/barrel_normal.jpg
+		normalmap
+	}
+}
