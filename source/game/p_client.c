@@ -482,7 +482,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						attacker->client->kill_streak++;
 						switch(attacker->client->kill_streak) {
 							case 3:
-								for (i=0 ; i<maxclients->value ; i++)
+								for (i=0 ; i<g_maxclients->value ; i++)
 								{
 									cl_ent = g_edicts + 1 + i;
 									if (!cl_ent->inuse || cl_ent->is_bot)
@@ -491,7 +491,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 								}
 								break;
 							case 5:
-								for (i=0 ; i<maxclients->value ; i++)
+								for (i=0 ; i<g_maxclients->value ; i++)
 								{
 									cl_ent = g_edicts + 1 + i;
 									if (!cl_ent->inuse || cl_ent->is_bot)
@@ -502,7 +502,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 								attacker->client->resp.reward_pts+=10;
 								break;
 							case 8:
-								for (i=0 ; i<maxclients->value ; i++)
+								for (i=0 ; i<g_maxclients->value ; i++)
 								{
 									cl_ent = g_edicts + 1 + i;
 									if (!cl_ent->inuse || cl_ent->is_bot)
@@ -511,7 +511,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 								}
 								break;
 							case 10:
-								for (i=0 ; i<maxclients->value ; i++)
+								for (i=0 ; i<g_maxclients->value ; i++)
 								{
 									cl_ent = g_edicts + 1 + i;
 									if (!cl_ent->inuse || cl_ent->is_bot)
@@ -525,7 +525,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 								break;
 						}
 						if(self->client->kill_streak >=3) {
-							for (i=0 ; i<maxclients->value ; i++)
+							for (i=0 ; i<g_maxclients->value ; i++)
 								{
 									cl_ent = g_edicts + 1 + i;
 									if (!cl_ent->inuse || cl_ent->is_bot)
@@ -561,7 +561,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 		safe_bprintf(PRINT_MEDIUM, "%s killed by Deathray!\n", self->client->pers.netname);
 
 		//immune player (activator) gets score increase
-		for (i=0 ; i<maxclients->value ; i++)
+		for (i=0 ; i<g_maxclients->value ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;
 			if (!cl_ent->inuse || cl_ent->is_bot)
@@ -1100,7 +1100,7 @@ float	PlayersRangeFromSpot (edict_t *spot)
 
 	bestplayerdistance = 9999999;
 
-	for (n = 1; n <= maxclients->value; n++)
+	for (n = 1; n <= g_maxclients->value; n++)
 	{
 		player = &g_edicts[n];
 
@@ -1456,7 +1456,7 @@ void CopyToBodyQue (edict_t *ent)
 	edict_t		*body;
 
 	// grab a body que and cycle to the next one
-	body = &g_edicts[maxclients->integer + level.body_que + 1];
+	body = &g_edicts[g_maxclients->integer + level.body_que + 1];
 	level.body_que = (level.body_que + 1) % BODY_QUEUE_SIZE;
 
 	gi.unlinkentity (ent);
@@ -1554,7 +1554,7 @@ void spectator_respawn (edict_t *ent)
 		}
 
 		// count spectators
-		for (i = 1, numspec = 0; i <= maxclients->value; i++)
+		for (i = 1, numspec = 0; i <= g_maxclients->value; i++)
 			if (g_edicts[i].inuse && g_edicts[i].client->pers.spectator)
 				numspec++;
 
@@ -1886,7 +1886,7 @@ void ClientPlaceInQueue(edict_t *ent)
 
 	highestpos = induel = numplayers = 0;
 
-	for (i = 0; i < maxclients->value; i++) {
+	for (i = 0; i < g_maxclients->value; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			if(g_edicts[i+1].client->pers.queue > highestpos) //only count players that are actually in
 				highestpos = g_edicts[i+1].client->pers.queue;
@@ -1921,7 +1921,7 @@ void ClientCheckQueue(edict_t *ent)
 		gi.linkentity (ent);
 	}
 	else {
-		for (i = 0; i < maxclients->value; i++) {
+		for (i = 0; i < g_maxclients->value; i++) {
 			if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 				if(!g_edicts[i+1].client->pers.spectator && g_edicts[i+1].client->pers.queue)
 					numplayers++;
@@ -1936,7 +1936,7 @@ void MoveClientsDownQueue(edict_t *ent)
 	int		i;
 	qboolean putonein = false;
 
-	for (i = 0; i < maxclients->value; i++) { //move everyone down
+	for (i = 0; i < g_maxclients->value; i++) { //move everyone down
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			if(g_edicts[i+1].client->pers.queue > ent->client->pers.queue)
 				g_edicts[i+1].client->pers.queue--;
@@ -2260,7 +2260,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	duplicate = false;
 	if(whereFrom != SPAWN) {
 
-		for (j=0; j<maxclients->value ; j++) {
+		for (j=0; j<g_maxclients->value ; j++) {
 
 			cl_ent = g_edicts + 1 + j;
 			if (!cl_ent->inuse)
@@ -2539,7 +2539,7 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 		}
 
 		// count spectators
-		for (i = numspec = 0; i < maxclients->value; i++)
+		for (i = numspec = 0; i < g_maxclients->value; i++)
 			if (g_edicts[i+1].inuse && g_edicts[i+1].client->pers.spectator)
 				numspec++;
 
@@ -2614,7 +2614,7 @@ void ClientDisconnect (edict_t *ent)
 	if(g_duel->value) {
 		MoveClientsDownQueue(ent);
 		if(!ent->client->resp.spectator) {
-			for (i = 0; i < maxclients->value; i++)  //clear scores if player was in duel
+			for (i = 0; i < g_maxclients->value; i++)  //clear scores if player was in duel
 				if(g_edicts[i+1].inuse && g_edicts[i+1].client && !g_edicts[i+1].is_bot)
 					g_edicts[i+1].client->resp.score = 0;
 		}
@@ -3252,7 +3252,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	} /* spectator mode */
 
 	// update chase cam if being followed
-	for (i = 1; i <= maxclients->value; i++) {
+	for (i = 1; i <= g_maxclients->value; i++) {
 		other = g_edicts + i;
 		if (other->inuse && other->client->chase_target == ent)
 			UpdateChaseCam(other);

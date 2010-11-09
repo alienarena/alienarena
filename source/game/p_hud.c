@@ -265,7 +265,7 @@ void BeginIntermission (edict_t *targ)
 	game.autosaved = false;
 
 	// respawn any dead clients
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		client = g_edicts + 1 + i;
 		if (!client->inuse)
@@ -368,7 +368,7 @@ void BeginIntermission (edict_t *targ)
 		secondrunnerup = g_edicts;
 
 	// move all clients but the winners to the intermission point
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		client = g_edicts + 1 + i;
 		if (!client->inuse)
@@ -416,7 +416,7 @@ int highestpos, numplayers;
 void MoveEveryoneDownQueue(void) {
 	int i, induel = 0;
 
-	for (i = 0; i < maxclients->value; i++) {
+	for (i = 0; i < g_maxclients->value; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			//move everyone else down a notch(never less than 0)
 			if(induel > 1 && g_edicts[i+1].client->pers.queue <= 3) //houston, we have a problem
@@ -437,7 +437,7 @@ void CheckDuelWinner(void) {
 	highestpos = 0;
 	induel = 0;
 
-	for (i = 0; i < maxclients->value; i++) {
+	for (i = 0; i < g_maxclients->value; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			if(g_edicts[i+1].client->resp.score > highscore)
 				highscore = g_edicts[i+1].client->resp.score;
@@ -449,7 +449,7 @@ void CheckDuelWinner(void) {
 	if(highestpos < numplayers)
 		highestpos = numplayers;
 
-	for (i = 0; i < maxclients->value; i++) {
+	for (i = 0; i < g_maxclients->value; i++) {
 		if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 			if((g_edicts[i+1].client->resp.score < highscore) && g_edicts[i+1].client->pers.queue < 3) {
 				g_edicts[i+1].client->pers.queue = highestpos+1; //loser, kicked to the back of the line
@@ -464,7 +464,7 @@ void CheckDuelWinner(void) {
 	//check for any screwups and correct the queue
 	while(induel < 2 && numplayers > 1) {
 		induel = 0;
-		for (i = 0; i < maxclients->value; i++) {
+		for (i = 0; i < g_maxclients->value; i++) {
 			if(g_edicts[i+1].inuse && g_edicts[i+1].client) {
 				if(g_edicts[i+1].client->pers.queue < 3 && g_edicts[i+1].client->pers.queue)
 					induel++;
@@ -483,7 +483,7 @@ void EndIntermission(void)
 	if(g_duel->value)
 		CheckDuelWinner();
 
-	for (i=0 ; i<maxclients->value; i++)
+	for (i=0 ; i<g_maxclients->value; i++)
 	{
 		ent = g_edicts + 1 + i;
         if (!ent->inuse || ent->client->resp.spectator)
@@ -966,7 +966,7 @@ void G_SetStats (edict_t *ent)
 	ent->client->ps.stats[STAT_DEATHS] = ent->client->resp.deaths;
 
 	// highest scorer
-	for (i = 0, e2 = g_edicts + 1; i < maxclients->value; i++, e2++) {
+	for (i = 0, e2 = g_edicts + 1; i < g_maxclients->value; i++, e2++) {
 		if (!e2->inuse)
 			continue;
 
@@ -981,7 +981,7 @@ void G_SetStats (edict_t *ent)
 		for(i = 0; i < ent->client->resp.botnum; i++) {
 			strcpy(ent->client->ps.bots[i].name, ent->client->resp.bots[i].name);
 			//tally bot scores
-			for(j = 0, e2 = g_edicts + 1; j < maxclients->value; j++, e2++) {
+			for(j = 0, e2 = g_edicts + 1; j < g_maxclients->value; j++, e2++) {
 				if(!strcmp(ent->client->resp.bots[i].name, e2->client->pers.netname))
 					ent->client->ps.bots[i].score = e2->client->resp.score;
 			}
@@ -1058,7 +1058,7 @@ void G_CheckChaseStats (edict_t *ent)
 	int i;
 	gclient_t *cl;
 
-	for (i = 1; i <= maxclients->value; i++) {
+	for (i = 1; i <= g_maxclients->value; i++) {
 		cl = g_edicts[i].client;
 		if (!g_edicts[i].inuse || cl->chase_target != ent)
 			continue;

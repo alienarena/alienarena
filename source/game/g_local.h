@@ -567,7 +567,7 @@ extern	cvar_t	*password;
 extern	cvar_t	*spectator_password;
 extern	cvar_t	*needpass;
 extern	cvar_t	*g_select_empty;
-extern	cvar_t	*dedicated;
+extern	cvar_t	*g_dedicated;
 extern	cvar_t	*motdfile;
 
 extern	cvar_t	*filterban;
@@ -586,7 +586,7 @@ extern	cvar_t	*bob_pitch;
 extern	cvar_t	*bob_roll;
 
 extern	cvar_t	*sv_cheats;
-extern	cvar_t	*maxclients;
+extern	cvar_t	*g_maxclients;
 extern	cvar_t	*maxspectators;
 
 extern	cvar_t	*flood_msgs;
@@ -595,7 +595,7 @@ extern	cvar_t	*flood_waitdelay;
 
 extern	cvar_t	*sv_maplist;
 
-extern  cvar_t  *background_music;
+extern  cvar_t  *g_background_music;
 
 extern  cvar_t  *sv_botkickthreshold;
 extern  cvar_t	*sv_custombots;

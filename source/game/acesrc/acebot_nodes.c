@@ -71,7 +71,7 @@ qboolean newmap=true;
 int numitemnodes;
 
 // Total number of nodes
-int numnodes;
+int bot_numnodes;
 
 // For debugging paths
 int show_path_from = -1;
@@ -140,7 +140,7 @@ int ACEND_FindCloseReachableNode(edict_t *self, int range, int type)
 
 	range *= range;
 
-	for(i=0;i<numnodes;i++)
+	for(i=0;i<bot_numnodes;i++)
 	{
 		if(type == NODE_ALL || type == nodes[i].type) // check node type
 		{
@@ -192,7 +192,7 @@ int ACEND_FindClosestReachableNode(edict_t *self, int range, int type)
 
 	rng = (float)(range * range); // square range for distance comparison (eliminate sqrt)
 
-	for(i=0;i<numnodes;i++)
+	for(i=0;i<bot_numnodes;i++)
 	{
 		if(type == NODE_ALL || type == nodes[i].type) // check node type
 		{
@@ -456,7 +456,7 @@ void ACEND_PathMap(edict_t *self)
 ///////////////////////////////////////////////////////////////////////
 void ACEND_InitNodes(void)
 {
-	numnodes = 1;
+	bot_numnodes = 1;
 	numitemnodes = 1;
 	memset(nodes,0,sizeof(node_t) * MAX_NODES);
 	memset(path_table,INVALID,sizeof(short int)*MAX_NODES*MAX_NODES);
@@ -539,21 +539,21 @@ int ACEND_AddNode(edict_t *self, int type)
 	vec3_t v1,v2;
 
 	// Block if we exceed maximum
-	if (numnodes + 1 > MAX_NODES)
+	if (bot_numnodes + 1 > MAX_NODES)
 		return false;
 
 	// Set location
-	VectorCopy(self->s.origin,nodes[numnodes].origin);
+	VectorCopy(self->s.origin,nodes[bot_numnodes].origin);
 
 	// Set type
-	nodes[numnodes].type = type;
+	nodes[bot_numnodes].type = type;
 
 	/////////////////////////////////////////////////////
 	// ITEMS
 	// Move the z location up just a bit.
 	if(type == NODE_ITEM)
 	{
-		nodes[numnodes].origin[2] += 16;
+		nodes[bot_numnodes].origin[2] += 16;
 		numitemnodes++;
 	}
 
@@ -561,21 +561,21 @@ int ACEND_AddNode(edict_t *self, int type)
 	if(type == NODE_TELEPORTER)
 	{
 		// Up 32
-		nodes[numnodes].origin[2] += 32;
+		nodes[bot_numnodes].origin[2] += 32;
 	}
 
 	if(type == NODE_LADDER)
 	{
-		nodes[numnodes].type = NODE_LADDER;
+		nodes[bot_numnodes].type = NODE_LADDER;
 
 		if(debug_mode)
 		{
-			debug_printf("Node added %d type: Ladder\n",numnodes);
-			ACEND_ShowNode(numnodes);
+			debug_printf("Node added %d type: Ladder\n",bot_numnodes);
+			ACEND_ShowNode(bot_numnodes);
 		}
 
-		numnodes++;
-		return numnodes-1; // return the node added
+		bot_numnodes++;
+		return bot_numnodes-1; // return the node added
 
 	}
 
@@ -586,54 +586,54 @@ int ACEND_AddNode(edict_t *self, int type)
 		VectorCopy(self->mins,v2);
 
 		// To get the center
-		nodes[numnodes].origin[0] = (v1[0] - v2[0]) / 2 + v2[0];
-		nodes[numnodes].origin[1] = (v1[1] - v2[1]) / 2 + v2[1];
-		nodes[numnodes].origin[2] = self->maxs[2];
+		nodes[bot_numnodes].origin[0] = (v1[0] - v2[0]) / 2 + v2[0];
+		nodes[bot_numnodes].origin[1] = (v1[1] - v2[1]) / 2 + v2[1];
+		nodes[bot_numnodes].origin[2] = self->maxs[2];
 
 		if(debug_mode)
-			ACEND_ShowNode(numnodes);
+			ACEND_ShowNode(bot_numnodes);
 
-		numnodes++;
+		bot_numnodes++;
 
-		nodes[numnodes].origin[0] = nodes[numnodes-1].origin[0];
-		nodes[numnodes].origin[1] = nodes[numnodes-1].origin[1];
-		nodes[numnodes].origin[2] = self->mins[2]+64;
+		nodes[bot_numnodes].origin[0] = nodes[bot_numnodes-1].origin[0];
+		nodes[bot_numnodes].origin[1] = nodes[bot_numnodes-1].origin[1];
+		nodes[bot_numnodes].origin[2] = self->mins[2]+64;
 
-		nodes[numnodes].type = NODE_PLATFORM;
+		nodes[bot_numnodes].type = NODE_PLATFORM;
 
 		// Add a link
-		ACEND_UpdateNodeEdge(numnodes,numnodes-1);
+		ACEND_UpdateNodeEdge(bot_numnodes,bot_numnodes-1);
 
 		if(debug_mode)
 		{
-			debug_printf("Node added %d type: Platform\n",numnodes);
-			ACEND_ShowNode(numnodes);
+			debug_printf("Node added %d type: Platform\n",bot_numnodes);
+			ACEND_ShowNode(bot_numnodes);
 		}
 
-		numnodes++;
+		bot_numnodes++;
 
-		return numnodes -1;
+		return bot_numnodes -1;
 	}
 
 	if(debug_mode)
 	{
-		if(nodes[numnodes].type == NODE_MOVE)
-			debug_printf("Node added %d type: Move\n",numnodes);
-		else if(nodes[numnodes].type == NODE_TELEPORTER)
-			debug_printf("Node added %d type: Teleporter\n",numnodes);
-		else if(nodes[numnodes].type == NODE_ITEM)
-			debug_printf("Node added %d type: Item\n",numnodes);
-		else if(nodes[numnodes].type == NODE_WATER)
-			debug_printf("Node added %d type: Water\n",numnodes);
-		else if(nodes[numnodes].type == NODE_GRAPPLE)
-			debug_printf("Node added %d type: Grapple\n",numnodes);
+		if(nodes[bot_numnodes].type == NODE_MOVE)
+			debug_printf("Node added %d type: Move\n",bot_numnodes);
+		else if(nodes[bot_numnodes].type == NODE_TELEPORTER)
+			debug_printf("Node added %d type: Teleporter\n",bot_numnodes);
+		else if(nodes[bot_numnodes].type == NODE_ITEM)
+			debug_printf("Node added %d type: Item\n",bot_numnodes);
+		else if(nodes[bot_numnodes].type == NODE_WATER)
+			debug_printf("Node added %d type: Water\n",bot_numnodes);
+		else if(nodes[bot_numnodes].type == NODE_GRAPPLE)
+			debug_printf("Node added %d type: Grapple\n",bot_numnodes);
 
-		ACEND_ShowNode(numnodes);
+		ACEND_ShowNode(bot_numnodes);
 	}
 
-	numnodes++;
+	bot_numnodes++;
 
-	return numnodes-1; // return the node added
+	return bot_numnodes-1; // return the node added
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -650,7 +650,7 @@ void ACEND_UpdateNodeEdge(int from, int to)
 	path_table[from][to] = to;
 
 	// Now for the self-referencing part, linear time for each link added
-	for(i=0;i<numnodes;i++)
+	for(i=0;i<bot_numnodes;i++)
 		if(path_table[i][from] != INVALID)
 		{
 			if(i == to)
@@ -676,7 +676,7 @@ void ACEND_RemoveNodeEdge(edict_t *self, int from, int to)
 	path_table[from][to] = INVALID; // set to invalid
 
 	// Make sure this gets updated in our path array
-	for(i=0;i<numnodes;i++)
+	for(i=0;i<bot_numnodes;i++)
 		if(path_table[from][i] == to)
 			path_table[from][i] = INVALID;
 }
@@ -692,8 +692,8 @@ void ACEND_ResolveAllPaths()
 
 	safe_bprintf(PRINT_HIGH,"Resolving all paths...");
 
-	for(from=0;from<numnodes;from++)
-	for(to=0;to<numnodes;to++)
+	for(from=0;from<bot_numnodes;from++)
+	for(to=0;to<bot_numnodes;to++)
 	{
 		// update unresolved paths
 		// Not equal to itself, not equal to -1 and equal to the last link
@@ -702,7 +702,7 @@ void ACEND_ResolveAllPaths()
 			num++;
 
 			// Now for the self-referencing part linear time for each link added
-			for(i=0;i<numnodes;i++)
+			for(i=0;i<bot_numnodes;i++)
 				if(path_table[i][from] != -1)
 				{
 					if(i == to)
@@ -751,13 +751,13 @@ void ACEND_SaveNodes()
 	}
 
 	sz = fwrite(&version,sizeof(int),1,pOut); // write version
-	sz = fwrite(&numnodes,sizeof(int),1,pOut); // write count
+	sz = fwrite(&bot_numnodes,sizeof(int),1,pOut); // write count
 	sz = fwrite(&num_items,sizeof(int),1,pOut); // write facts count
 
-	sz = fwrite(nodes,sizeof(node_t),numnodes,pOut); // write nodes
+	sz = fwrite(nodes,sizeof(node_t),bot_numnodes,pOut); // write nodes
 
-	for(i=0;i<numnodes;i++)
-		for(j=0;j<numnodes;j++)
+	for(i=0;i<bot_numnodes;i++)
+		for(j=0;j<bot_numnodes;j++)
 			sz = fwrite(&path_table[i][j],sizeof(short int),1,pOut); // write count
 
 	sz = fwrite(item_table,sizeof(item_table_t),num_items,pOut); 		// write out the fact table
@@ -804,12 +804,12 @@ void ACEND_LoadNodes(void)
 	{
 		gi.dprintf("ACE: Loading node table...");
 
-		sz = fread(&numnodes,sizeof(int),1,pIn); // read count
+		sz = fread(&bot_numnodes,sizeof(int),1,pIn); // read count
 		sz = fread(&num_items,sizeof(int),1,pIn); // read facts count
-		sz = fread(nodes,sizeof(node_t),numnodes,pIn);
+		sz = fread(nodes,sizeof(node_t),bot_numnodes,pIn);
 
-		for(i=0;i<numnodes;i++)
-			for(j=0;j<numnodes;j++)
+		for(i=0;i<bot_numnodes;i++)
+			for(j=0;j<bot_numnodes;j++)
 				sz = fread(&path_table[i][j],sizeof(short int),1,pIn); // write count
 
 	    for(i=0;i<num_items;i++)

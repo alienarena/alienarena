@@ -189,7 +189,7 @@ qboolean Pickup_deathball (edict_t *ent, edict_t *other)
 		j++;
 	}
 	if(dmflags->integer & DF_SKINTEAMS) {
-		for (i=0 ; i<maxclients->value ; i++)
+		for (i=0 ; i<g_maxclients->value ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;
 			if (!cl_ent->inuse || cl_ent->is_bot)
@@ -200,7 +200,7 @@ qboolean Pickup_deathball (edict_t *ent, edict_t *other)
 	}
 	else
 	{
-		for (i=0 ; i<maxclients->value ; i++)
+		for (i=0 ; i<g_maxclients->value ; i++)
 		{
 			cl_ent = g_edicts + 1 + i;
 			if (!cl_ent->inuse || cl_ent->is_bot)

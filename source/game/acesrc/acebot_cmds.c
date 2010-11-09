@@ -145,10 +145,10 @@ void debug_printf(char *fmt, ...)
 	len = vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
 	va_end (argptr);
 
-	if (dedicated->value)
+	if (g_dedicated->value)
 		gi.cprintf(NULL, PRINT_MEDIUM, "%s", bigbuffer);
 
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
 		if (!cl_ent->inuse || cl_ent->is_bot)
@@ -214,10 +214,10 @@ void safe_bprintf (int printlevel, char *fmt, ...)
 	len = vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
 	va_end (argptr);
 
-	if (dedicated->value)
+	if (g_dedicated->value)
 		gi.cprintf(NULL, printlevel, "%s", bigbuffer);
 
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
 		if (!cl_ent->inuse || cl_ent->is_bot)

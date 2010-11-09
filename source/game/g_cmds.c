@@ -707,7 +707,7 @@ void Cmd_Players_f (edict_t *ent)
 	int		index[256];
 
 	count = 0;
-	for (i = 0 ; i < maxclients->value ; i++)
+	for (i = 0 ; i < g_maxclients->value ; i++)
 		if (game.clients[i].pers.connected)
 		{
 			index[count] = i;
@@ -866,7 +866,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 		cl->flood_when[cl->flood_whenhead] = level.time;
 	}
 
-	if (dedicated->value)
+	if (g_dedicated->value)
 		safe_cprintf(NULL, PRINT_CHAT, "%s", text);
 
 	for (j = 1; j <= game.maxclients; j++)
@@ -899,7 +899,7 @@ void Cmd_PlayerList_f(edict_t *ent)
 
 	// connect time, ping, score, name
 	*text = 0;
-	for (i = 0, e2 = g_edicts + 1; i < maxclients->value; i++, e2++) {
+	for (i = 0, e2 = g_edicts + 1; i < g_maxclients->value; i++, e2++) {
 		if (!e2->inuse)
 			continue;
 
@@ -996,7 +996,7 @@ void Cmd_Vote_f (edict_t *ent)
 	winner = 1; //next map in line
 	for(i = 0; i < 4; i++)
 		votedmap[i].tally = 0;
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
 		if (!cl_ent->inuse || cl_ent->is_bot)
@@ -1056,7 +1056,7 @@ void Cmd_Vote_f (edict_t *ent)
 		sprintf( buffer, "Map %s leads with %i vote%s!", votedmap[winner].mapname, votedmap[winner].tally, (mostvotes > 1) ? "s" : "" );
 	}
 
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		cl_ent = g_edicts + 1 + i;
 		if (!cl_ent->inuse || cl_ent->is_bot)
