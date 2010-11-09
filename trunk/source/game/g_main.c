@@ -126,11 +126,11 @@ cvar_t	*timelimit;
 cvar_t	*password;
 cvar_t	*spectator_password;
 cvar_t	*needpass;
-cvar_t	*maxclients;
+cvar_t	*g_maxclients;
 cvar_t	*maxspectators;
 cvar_t	*maxentities;
 cvar_t	*g_select_empty;
-cvar_t	*dedicated;
+cvar_t	*g_dedicated;
 cvar_t	*motdfile;
 
 cvar_t	*filterban;
@@ -158,7 +158,7 @@ cvar_t	*flood_waitdelay;
 
 cvar_t	*sv_maplist;
 
-cvar_t  *background_music;
+cvar_t  *g_background_music;
 
 cvar_t  *sv_botkickthreshold;
 cvar_t  *sv_custombots;
@@ -289,7 +289,7 @@ void ClientEndServerFrames (void)
 
 	// calc the player views now that all pushing
 	// and damage has been added
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse || !ent->client)
@@ -338,7 +338,7 @@ void EndDMLevel (void)
 	FILE *fp;
 
 	/* Search for dead players in order to remove DeathCam and free mem */
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		ent = g_edicts + i + 1;
 		if (!ent->inuse || ent->client->resp.spectator)
@@ -446,7 +446,7 @@ void EndDMLevel (void)
 		return;
 	}
 
-	if( ( ctf->integer || cp->integer ) && ! dedicated->integer )
+	if( ( ctf->integer || cp->integer ) && ! g_dedicated->integer )
 	{ //ctf will just stay on same level unless specified by dedicated list
 		BeginIntermission (CreateTargetChangeLevel (level.mapname));
 		return;
@@ -610,7 +610,7 @@ void ResetLevel (void) //for resetting players and items after warmup
 	edict_t	*ent;
 	gitem_t *item;
 
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		ent = g_edicts + i + 1;
 		if (!ent->inuse || ent->client->resp.spectator)
@@ -708,7 +708,7 @@ void CheckDMRules (void)
 				ResetLevel();
 			}
 			else if(level.time == ceil(level.time)){ //do only on the whole numer to avoid overflowing
-				for (i=0 ; i<maxclients->value ; i++)
+				for (i=0 ; i<g_maxclients->value ; i++)
 				{
 					cl_ent = g_edicts + 1 + i;
 					if (!cl_ent->inuse || cl_ent->is_bot)
@@ -769,7 +769,7 @@ void CheckDMRules (void)
 		}
 		else {
 			top_score = 0;
-			for (i=0 ; i<maxclients->value ; i++)
+			for (i=0 ; i<g_maxclients->value ; i++)
 			{
 				cl = game.clients + i;
 				if (!g_edicts[i+1].inuse)
@@ -799,7 +799,7 @@ void CheckDMRules (void)
 				switch(i) {
 					case 3:
 						if(!print3){
-							for (i=0 ; i<maxclients->value ; i++)
+							for (i=0 ; i<g_maxclients->value ; i++)
 							{
 								cl_ent = g_edicts + 1 + i;
 								if (!cl_ent->inuse || cl_ent->is_bot)
@@ -813,7 +813,7 @@ void CheckDMRules (void)
 						break;
 					case 2:
 						if(!print2) {
-							for (i=0 ; i<maxclients->value ; i++)
+							for (i=0 ; i<g_maxclients->value ; i++)
 							{
 								cl_ent = g_edicts + 1 + i;
 								if (!cl_ent->inuse || cl_ent->is_bot)
@@ -827,7 +827,7 @@ void CheckDMRules (void)
 						break;
 					case 1:
 						if(!print1) {
-							for (i=0 ; i<maxclients->value ; i++)
+							for (i=0 ; i<g_maxclients->value ; i++)
 							{
 								cl_ent = g_edicts + 1 + i;
 								if (!cl_ent->inuse || cl_ent->is_bot)
@@ -893,7 +893,7 @@ void ExitLevel (void)
 	EndIntermission();
 
 	// clear some things before going to next level
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse)
@@ -1082,7 +1082,7 @@ static edict_t* find_kick_target( const char *name )
 	edict_t* ent;
 	int i;
 
-	for ( i = 1 ; i <= maxclients->integer ; i++ )
+	for ( i = 1 ; i <= g_maxclients->integer ; i++ )
 	{
 		ent = &g_edicts[i];
 		if ( !ent->inuse )
@@ -1251,14 +1251,14 @@ void G_RunFrame (void)
 			}
 		}
 
-		if (i > 0 && i <= maxclients->value)
+		if (i > 0 && i <= g_maxclients->value)
 		{
 			ClientBeginServerFrame (ent);
 		}
 
 		if(ent->inuse && ent->client && !ent->is_bot)
 		{
-			if ( ent->s.number <= maxclients->value )
+			if ( ent->s.number <= g_maxclients->value )
 			{ // count actual players, not deathcam entities
 				numActiveClients++;
 			}
@@ -1322,7 +1322,7 @@ void G_RunFrame (void)
 			playervote.command[0] = 0;
 
 			//do each ent
-			for (i=0 ; i<maxclients->value ; i++)
+			for (i=0 ; i<g_maxclients->value ; i++)
 			{
 				ent = g_edicts + 1 + i;
 				if (!ent->inuse || ent->is_bot)

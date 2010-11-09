@@ -201,7 +201,7 @@ void G_TimeShiftAllClients( int time, edict_t *skip ) {
 	int			i;
 	edict_t	*ent;
 
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse || !ent->client)
@@ -272,7 +272,7 @@ void G_UnTimeShiftAllClients( edict_t *skip ) {
 	int			i;
 	edict_t	*ent;
 
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=0 ; i<g_maxclients->value ; i++)
 	{
 		ent = g_edicts + 1 + i;
 		if (!ent->inuse || !ent->client)

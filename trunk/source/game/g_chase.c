@@ -123,7 +123,7 @@ void ChaseNext(edict_t *ent)
 	i = ent->client->chase_target - g_edicts;
 	do {
 		i++;
-		if (i > maxclients->value)
+		if (i > g_maxclients->value)
 			i = 1;
 		e = g_edicts + i;
 		if (!e->inuse)
@@ -151,7 +151,7 @@ void ChasePrev(edict_t *ent)
 	do {
 		i--;
 		if (i < 1)
-			i = maxclients->value;
+			i = g_maxclients->value;
 		e = g_edicts + i;
 		if (!e->inuse)
 			continue;
@@ -171,7 +171,7 @@ void GetChaseTarget(edict_t *ent)
 	char clean_name[16];
 	edict_t *other;
 
-	for (i = 1; i <= maxclients->value; i++) {
+	for (i = 1; i <= g_maxclients->value; i++) {
 		other = g_edicts + i;
 		if (other->inuse && !other->client->resp.spectator) {
 			ent->client->chase_target = other;

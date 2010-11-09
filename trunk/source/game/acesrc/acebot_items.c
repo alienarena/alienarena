@@ -569,7 +569,7 @@ void ACEIT_BuildItemNodeTable (qboolean rebuild)
 		else // Now if rebuilding, just relink ent structures
 		{
 			// Find stored location
-			for(i=0;i<numnodes;i++)
+			for(i=0;i<bot_numnodes;i++)
 			{
 				if(nodes[i].type == NODE_ITEM ||
 				   nodes[i].type == NODE_PLATFORM ||

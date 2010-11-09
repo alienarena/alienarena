@@ -989,13 +989,17 @@ void COM_StripExtension (char *in, char *out)
 	*out = 0;
 }
 
+
 /*
 ============
 COM_FileExtension
 ============
 */
+#if 0
+// not used
 char *COM_FileExtension (char *in)
 {
+
 	static char exten[8];
 	int		i;
 
@@ -1009,6 +1013,7 @@ char *COM_FileExtension (char *in)
 	exten[i] = 0;
 	return exten;
 }
+#endif
 
 /*
 ============
@@ -1206,16 +1211,22 @@ varargs versions of all text functions.
 FIXME: make this buffer size safe someday
 ============
 */
+/*
+ * 2010-11 Use multiple static buffers to avoid collisions.
+ *  Like g_utils::tv(),vtos()
+ */
 char	*va(char *format, ...)
 {
 	va_list		argptr;
-	static char		string[1024];
+	static int index = 0;
+	static char string[8][1024];
 
+	index = (index + 1) & 0x07;
 	va_start (argptr, format);
-	vsnprintf(string, sizeof(string), format, argptr);
+	vsnprintf(string[index], sizeof(string[0]), format, argptr);
 	va_end (argptr);
 
-	return string;
+	return string[index];
 }
 
 
@@ -1677,13 +1688,16 @@ key and returns the associated value, or an empty string.
 */
 char *Info_ValueForKey (char *s, char *key)
 {
+	/*
+	 * 2010-11 Increase static buffers from 2 to 8 to avoid collisions
+	 *  Like g_utils.c::tv(),vtos()
+	 */
 	char	pkey[512];
-	static	char value[2][512];	// use two buffers so compares
-								// work without stomping on each other
-	static	int	valueindex;
+	static	char value[8][512];
+	static	int	valueindex = 0;
 	char	*o;
 
-	valueindex ^= 1;
+	valueindex = (valueindex + 1) & 0x07;
 	if (*s == '\\')
 		s++;
 	while (1)

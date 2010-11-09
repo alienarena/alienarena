@@ -198,7 +198,7 @@ extern edict_t *players[MAX_CLIENTS];		// pointers to all players in the game
 extern node_t nodes[MAX_NODES];
 extern item_table_t item_table[MAX_EDICTS];
 extern qboolean debug_mode;
-extern int numnodes;
+extern int bot_numnodes;
 extern int num_items;
 extern int num_bots;
 
