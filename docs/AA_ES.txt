@@ -1,4 +1,4 @@
-ALIEN ARENA 2007 (ARENA DE EXTRATERRESTRES 2007)
+﻿ALIEN ARENA 2007 (ARENA DE EXTRATERRESTRES 2007)
 
 1. Introducción
 2. Requisitos Para la Sistema
@@ -100,12 +100,12 @@ Los bots del nivel de habilidad 0 son absolutamente fáciles de ganar. Los bots 
 Hay una lista larga de créditos - ALIEN ARENA 2007 es grandemente endeudada al siguiente para la creación y la terminación de este juego:
 
 Diseño:  John Diamond con ayuda de la comunidad en grande.
-Programación:  John Diamond, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia.
+Programación:  John Diamond, Jim Bower, Emanuel Benoit, Lee Salzman, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia.
 Modelos y Skins:  John Diamond, Alex Perez, Shawn Keeth.
 Mapas:  John Diamond
 Texturas y Ilustraciones:  John Diamond, Enki, Adam Saizlai
 Sonidos:  John Diamond, Sound Rangers
-Música:  John Diamond, WhiteLipper, Wooden Productions, and SoundRangers
+Música:  Paul Joyce, WhiteLipper, Wooden Productions, and SoundRangers
 Compatibilidad para Linux: Shane Bayer
 Compatibilidad para FreeBSD: "Ale"
 Gentoo portage: Paul Bredbury
