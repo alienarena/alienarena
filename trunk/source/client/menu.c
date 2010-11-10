@@ -1386,7 +1386,7 @@ OPTIONS MENU
 static cvar_t *win_noalttab;
 extern cvar_t *in_joystick;
 extern cvar_t *cl_showPlayerNames;
-extern cvar_t *cl_healthaura;
+extern cvar_t *r_ragdolls;
 extern cvar_t *cl_noblood;
 extern cvar_t *cl_noskins;
 extern cvar_t *gl_dynamic;
@@ -1415,7 +1415,7 @@ static menulist_s		s_options_doppler_effect_list;
 static menulist_s		s_options_console_action;
 static menulist_s		s_options_bgmusic_box;
 static menulist_s		s_options_target_box;
-static menulist_s		s_options_healthaura_box;
+static menulist_s		s_options_ragdoll_box;
 static menulist_s		s_options_noblood_box;
 static menulist_s		s_options_noskins_box;
 static menulist_s		s_options_taunts_box;
@@ -1431,9 +1431,9 @@ static void TargetFunc( void *unused )
 	Cvar_SetValue( "cl_showplayernames", s_options_target_box.curvalue);
 }
 
-static void HealthauraFunc( void *unused )
+static void RagDollFunc( void *unused )
 {
-	Cvar_SetValue( "cl_healthaura", s_options_healthaura_box.curvalue);
+	Cvar_SetValue( "r_ragdolls", s_options_ragdoll_box.curvalue);
 }
 
 static void NoBloodFunc( void *unused )
@@ -1984,8 +1984,8 @@ static void ControlsSetMenuItemValues( void )
 	Cvar_SetValue("cl_explosiondist", ClampCvar(0, 1, cl_explosiondist->value ) );
 	s_options_explosiondist_box.curvalue		= cl_explosiondist->value;
 
-	Cvar_SetValue("cl_healthaura", ClampCvar(0, 1, cl_healthaura->value ) );
-	s_options_healthaura_box.curvalue		= cl_healthaura->value;
+	Cvar_SetValue("r_ragdolls", ClampCvar(0, 1, r_ragdolls->value ) );
+	s_options_ragdoll_box.curvalue		= r_ragdolls->value;
 
 	Cvar_SetValue("cl_noblood", ClampCvar(0, 1, cl_noblood->value ) );
 	s_options_noblood_box.curvalue		= cl_noblood->value;
@@ -2194,17 +2194,17 @@ void Options_MenuInit( void )
 	s_options_target_box.generic.callback = TargetFunc;
 	s_options_target_box.itemnames = playerid_names;
 
-	s_options_healthaura_box.generic.type = MTYPE_SPINCONTROL;
-	s_options_healthaura_box.generic.x	= 0;
-	s_options_healthaura_box.generic.y	= FONTSCALE*70*scale;
-	s_options_healthaura_box.generic.name	= "health auras";
-	s_options_healthaura_box.generic.callback = HealthauraFunc;
-	s_options_healthaura_box.itemnames = onoff_names;
+	s_options_ragdoll_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_ragdoll_box.generic.x	= 0;
+	s_options_ragdoll_box.generic.y	= FONTSCALE*70*scale;
+	s_options_ragdoll_box.generic.name	= "ragdolls";
+	s_options_ragdoll_box.generic.callback = RagDollFunc;
+	s_options_ragdoll_box.itemnames = onoff_names;
 
 	s_options_noblood_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_noblood_box.generic.x	= 0;
 	s_options_noblood_box.generic.y	= FONTSCALE*80*scale;
-	s_options_noblood_box.generic.name	= "No Blood";
+	s_options_noblood_box.generic.name	= "no blood";
 	s_options_noblood_box.generic.callback = NoBloodFunc;
 	s_options_noblood_box.itemnames = onoff_names;
 
@@ -2388,7 +2388,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_paindist_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_explosiondist_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_target_box );
-	Menu_AddItem( &s_options_menu, ( void * ) &s_options_healthaura_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_ragdoll_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_noblood_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_noskins_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_taunts_box );
@@ -2475,13 +2475,14 @@ static const char *idcredits[] =
 	"",
 	"+PROGRAMMING",
 	"John Diamond",
+	"Jim Bower",
+	"Emmanuel Benoit",
+	"Lee Salzman",
+	"Dave Carter",
 	"Victor Luchits",
 	"Jan Rafaj",
 	"Shane Bayer",
-	"Tony Jackson",
-	"Jim Bower",
-	"Emmanuel Benoit",
-	"Dave Carter",
+	"Tony Jackson",	
 	"Stephan Stahl",
 	"Kyle Hunter",
 	"Andres Mejia",
@@ -2492,7 +2493,7 @@ static const char *idcredits[] =
 	"Shawn Keeth",
 	"Enki",
 	"",
-	"+FONT",
+	"+FONTS",
 	"John Diamond",
 	"the-interceptor from http://www.quakeworld.nu/",
 	"",
@@ -2506,7 +2507,7 @@ static const char *idcredits[] =
 	"",
 	"+SOUND EFFECTS AND MUSIC",
 	"Music/FX Composed and Produced by",
-	"John Diamond, Whitelipper, Divinity",
+	"Paul Joyce, Whitelipper, Divinity",
 	"Arteria Games, Wooden Productions",
 	"and Soundrangers.com",
 	"",
@@ -2928,38 +2929,35 @@ void IRC_MenuInit( void )
 	s_irc_title.generic.name	= "^3IRC ^1Chat ^1Utilities";
 
 	s_irc_join.generic.type	= MTYPE_ACTION;
-	s_irc_join.generic.x		= 24*scale;
-	s_irc_join.generic.y		= FONTSCALE*50*scale;
-	s_irc_join.generic.cursor_offset = -24*scale;
+	s_irc_join.generic.x		= 128*scale;
+	s_irc_join.generic.y		= FONTSCALE*60*scale;
 	s_irc_join.generic.name	= "Join IRC Chat";
 	s_irc_join.generic.callback = JoinIRCFunc;
 
 	s_irc_joinatstartup.generic.type	= MTYPE_SPINCONTROL;
-	s_irc_joinatstartup.generic.x		= 118*scale;
+	s_irc_joinatstartup.generic.x		= 128*scale;
 	s_irc_joinatstartup.generic.y		= FONTSCALE*80*scale;
-	s_irc_joinatstartup.generic.cursor_offset = -24*scale;
 	s_irc_joinatstartup.generic.name	= "Autojoin At Startup";
 	s_irc_joinatstartup.itemnames = yes_no_names;
 	s_irc_joinatstartup.curvalue = cl_IRC_connect_at_startup->value;
 	s_irc_joinatstartup.generic.callback = AutoIRCFunc;
 
-	s_irc_key.generic.type	= MTYPE_COLORTXT;
-	s_irc_key.generic.x		= - (int)strlen( IRC_key ) * 8 * scale;
-	s_irc_key.generic.y		= FONTSCALE*100*scale;
-	s_irc_key.generic.name	= IRC_key;
-
 	s_irc_editsettings.generic.type = MTYPE_ACTION;
-	s_irc_editsettings.generic.x	= 24*scale;
-	s_irc_editsettings.generic.y	= FONTSCALE*140*scale;
-	s_irc_editsettings.generic.cursor_offset = -24 * scale;
+	s_irc_editsettings.generic.x	= 128*scale;
+	s_irc_editsettings.generic.y	= FONTSCALE*100*scale;
 	s_irc_editsettings.generic.name	= "IRC settings";
 	s_irc_editsettings.generic.callback = IRCSettingsFunc;
+
+	s_irc_key.generic.type	= MTYPE_COLORTXT;
+	s_irc_key.generic.x		= -128*scale;
+	s_irc_key.generic.y		= FONTSCALE*140*scale;
+	s_irc_key.generic.name	= IRC_key;
 
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_title );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_join );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_joinatstartup );
+	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_editsettings );	
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_key );
-	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_editsettings );
 
 	Menu_Center( &s_irc_menu );
 }
@@ -3080,7 +3078,7 @@ static void IRC_SettingsMenuInit( )
 	s_irc_settings_menu.nitems		= 0;
 
 	s_irc_settings_title.generic.type	= MTYPE_COLORTXT;
-	s_irc_settings_title.generic.x		= -224*scale;
+	s_irc_settings_title.generic.x		= -124*scale;
 	s_irc_settings_title.generic.y		= FONTSCALE*30*scale;
 	s_irc_settings_title.generic.name	= "IRC Chat Settings";
 
@@ -3118,9 +3116,9 @@ static void IRC_SettingsMenuInit( )
 	strcpy( s_irc_port.buffer, Cvar_VariableString("cl_IRC_port") );
 
 	s_irc_ovnickname.generic.type		= MTYPE_SPINCONTROL;
-	s_irc_ovnickname.generic.x		= 118*scale;
+	s_irc_ovnickname.generic.x		= 90*scale;
 	s_irc_ovnickname.generic.y		= FONTSCALE*96*scale;
-	s_irc_ovnickname.generic.cursor_offset	= -24*scale;
+	//s_irc_ovnickname.generic.cursor_offset	= -24*scale;
 	s_irc_ovnickname.generic.name		= "Override nick";
 	s_irc_ovnickname.generic.callback	= 0;
 	s_irc_ovnickname.generic.statusbar	= "Enable this to override the default, player-based nick";
@@ -3161,8 +3159,8 @@ static void IRC_SettingsMenuInit( )
 	strcpy( s_irc_reconnectdelay.buffer, Cvar_VariableString("cl_IRC_reconnect_delay") );
 
 	s_irc_settings_apply.generic.type	= MTYPE_ACTION;
-	s_irc_settings_apply.generic.x		= 24*scale;
-	s_irc_settings_apply.generic.y		= FONTSCALE*160*scale;
+	s_irc_settings_apply.generic.x		= 124*scale;
+	s_irc_settings_apply.generic.y		= FONTSCALE*170*scale;
 	s_irc_settings_apply.generic.cursor_offset = -24 * scale;
 	s_irc_settings_apply.generic.name	= "Apply settings";
 	s_irc_settings_apply.generic.callback	= ApplyIRCSettings;
