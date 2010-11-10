@@ -139,7 +139,7 @@ Models and skins:  John Diamond, Alex Perez, Shawn Keeth.
 Maps:  John Diamond, Dennis "xEMPx" Zedlach
 Textures and Artwork:  John Diamond, Dennis "xEMPx" Zedlach, Enki, Adam Saizlai, Yves Allaire
 Sounds:  John Diamond, Sound Rangers, Jon Ward, Jim Bower
-Music:  Arteria Games, Divinity, Whitelipper, and SoundRangers
+Music:  Paul Joyce, Arteria Games, Divinity, Whitelipper, and SoundRangers
 Fonts: John Diamond, the-interceptor from http://www.quakeworld.nu/
 
 Linux Port: Shane Bayer, John Diamond, Jim Bower

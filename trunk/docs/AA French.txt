@@ -148,7 +148,7 @@ Modèles et skins: John Diamond, Alex Perez, Shawn Keeth.
 Niveaux: John Diamond, Dennis "xEMPx" Zedlach
 Textures et graphisme: John Diamond, Dennis "xEMPx" Zedlach, Enki, Adam Saizlai, Yves Allaire
 Sons: John Diamond, Sound Rangers, Jon Ward, Jim Bower
-Musique: Arteria Games, Divinity, Whitelipper, and SoundRangers
+Musique: Paul Joyce, Arteria Games, Divinity, Whitelipper, and SoundRangers
 Polices de caractères: John Diamond, the-interceptor de http://www.quakeworld.nu/
 
 Version Linux: Shane Bayer, John Diamond, Jim Bower
