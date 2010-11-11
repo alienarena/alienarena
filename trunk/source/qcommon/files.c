@@ -688,20 +688,20 @@ Given relative path
 */
 int FS_LoadFile (char *path, void **buffer)
 {
-	char *lc_path;
 	FILE	*h;
 	byte	*buf = NULL;
 	int		len;
+	char lc_path[MAX_OSPATH];
 
 	len = FS_FOpenFile (path, &h);
 
 	//-JR
 	if (!h)
 	{
-		lc_path = FS_TolowerPath (path);
+		Q_strncpyz2( lc_path, FS_TolowerPath( path ), sizeof(lc_path) );
 		if ( strcmp( path, lc_path ) )
 		{ // lowercase conversion changed something
-			len = FS_FOpenFile (path, &h);
+			len = FS_FOpenFile( lc_path, &h);
 		}
 	}
 
