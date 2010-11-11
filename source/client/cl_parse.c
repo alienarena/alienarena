@@ -76,9 +76,7 @@ void Q_strncpyz( char *dest, const char *src, size_t size )
 
 void CL_DownloadFileName(char *dest, int destlen, char *fn)
 {
-	// 2010-08 note: originally this directed "players" to "data1/"
-	//   does not appear to be any reason for that in Alien Arena
-		Com_sprintf (dest, destlen, "%s/%s", FS_Gamedir(), fn);
+	Com_sprintf (dest, destlen, "%s/%s", FS_Gamedir(), fn);
 }
 
 /*
@@ -94,7 +92,6 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	FILE *fp;
 	char	name[MAX_OSPATH];
 	char	shortname[MAX_OSPATH];
-	qboolean	modelskin = false;
 	qboolean	jpg = false;
 
 	if (strstr (filename, ".."))
@@ -103,18 +100,19 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		return true;
 	}
 
-    //if pcx, strip extension and change to .tga, we never dl .pcx anymore
+    //if pcx, strip extension and change to .jpg, we do not use .pcx anymore
     if(filename[strlen(filename)-1] == 'x') 
 	{
-		modelskin = true;
-		//if this is coming from a player model don't bother
-		if(filename[0] != 'm' && filename[0] != 'v')
+		//Filter out any potentially screwed up texture paths(meshes only reside in these folders)
+		if (strncmp(filename, "models", 6) || strncmp(filename, "vehicles", 8)
+			|| strncmp(filename, "maps", 4))
 			return true;
+
 		COM_StripExtension ( filename, shortname );
-		sprintf(filename, "%s.tga", shortname);
+		sprintf(filename, "%s.jpg", shortname);
 	}
 
-	//if jpg, be sure to also try tga (player skin situation)
+	//if jpg, be sure to also try tga
     if(filename[strlen(filename)-2] == 'p' && filename[strlen(filename)-1] == 'g')
 		jpg = true;
 
@@ -124,21 +122,11 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		return true;
 	}
 
-	if(modelskin)
-	{
-		//try for .jpg
-		COM_StripExtension ( filename, shortname );
-		sprintf(filename, "%s.jpg", shortname);
-		if (FS_LoadFile (filename, NULL) != -1)	
-		{
-			// it exists, no need to download
-			return true;
-		}
-	}
-	else if(jpg) 
+	if(jpg) 
 	{	
 		//didn't find .jpg skin, try for .tga skin
-		//try for .tga(but leave filename as original extension)
+		//check for presence of a local .tga(but leave filename as original extension)
+		//if we find a .tga, don't try to download anything
 		COM_StripExtension ( filename, shortname );
 		sprintf(shortname, "%s.tga", shortname);
 		if (FS_LoadFile (shortname, NULL) != -1)	
