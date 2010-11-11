@@ -149,6 +149,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-leviathan2k8.nod \
 	botinfo/nav/dm-leviathan.nod \
 	botinfo/nav/dm-liberation.nod \
+	botinfo/nav/dm-neptune.nod \
 	botinfo/nav/dm-oblivion.nod \
 	botinfo/nav/dm-obsidian2.nod \
 	botinfo/nav/dm-omega2k8.nod \
@@ -534,6 +535,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/arch.tga \
 	data1/maps/meshes/barrel.jpg \
 	data1/maps/meshes/barrel.md2 \
+	data1/maps/meshes/barrel_normal.jpg \
 	data1/maps/meshes/bentconduit.md2 \
 	data1/maps/meshes/bignode_fx.tga \
 	data1/maps/meshes/bignode.jpg \
@@ -650,7 +652,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/monitormask.tga \
 	data1/maps/meshes/monitor.md2 \
 	data1/maps/meshes/mpa1.jpg \
+	data1/maps/meshes/mpa1_normal.jpg \
 	data1/maps/meshes/mpa2.jpg \
+	data1/maps/meshes/mpa2_normal.jpg \
 	data1/maps/meshes/pipes1.jpg \
 	data1/maps/meshes/pipes1_normal.jpg \
 	data1/maps/meshes/pipes.md2 \
@@ -1834,11 +1838,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/music/dm-frontier.ogg \
 	data1/sound/music/dm-horus.ogg \
 	data1/sound/music/dm-inferno.ogg \
-	data1/sound/music/dm-oblivion.ogg \
 	data1/sound/music/dm-redred.ogg \
 	data1/sound/music/dm-saucer.ogg \
 	data1/sound/music/dm-turbo.ogg \
 	data1/sound/music/dm-warmachine.ogg \
+	data1/sound/music/joyce1.ogg \
+	data1/sound/music/joyce2.ogg \
 	data1/sound/music/menumusic.ogg \
 	data1/sound/player/burn1.wav \
 	data1/sound/player/burn2.wav \
