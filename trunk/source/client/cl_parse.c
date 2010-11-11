@@ -104,8 +104,8 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
     if(filename[strlen(filename)-1] == 'x') 
 	{
 		//Filter out any potentially screwed up texture paths(meshes only reside in these folders)
-		if (strncmp(filename, "models", 6) || strncmp(filename, "vehicles", 8)
-			|| strncmp(filename, "maps", 4))
+		if (strncmp(filename, "models", 6) && strncmp(filename, "vehicles", 8)
+			&& strncmp(filename, "maps", 4))
 			return true;
 
 		COM_StripExtension ( filename, shortname );
