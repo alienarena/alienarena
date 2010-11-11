@@ -315,8 +315,10 @@ void CL_ParseTEnt (void)
 		if (type == TE_GUNSHOT) {
 			CL_ParticleEffect (pos, dir, 425, 10);
 			trace = CL_Trace ( pos, mins, maxs, pos, -1, MASK_SOLID, true, NULL);
-			if(trace.contents)
+			if(trace.contents) {
 				CL_BulletMarks(pos, dir);
+				R_ApplyForceToRagdolls(pos, 40);
+			}
 		}
 		else
 			CL_ParticleEffect (pos, dir, 425, 2);	// bullets, color is 0xe0
