@@ -1497,7 +1497,7 @@ redoSkins:;
 					/*FALL THROUGH*/
 
 				case 2: // weapon skin
-					Com_sprintf(fn, sizeof(fn), "players/%s/weapon.tga", model);
+					Com_sprintf(fn, sizeof(fn), "players/%s/weapon.jpg", model);
 					if (!CL_CheckOrDownloadFile(fn)) {
 						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 3;
 						return; // started a download
