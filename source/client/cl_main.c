@@ -1346,7 +1346,7 @@ void CL_RequestNextDownload (void)
 				return; // started a download
 	}
 
-redoSkins:;
+redoSkins:
 	if (precache_check >= CS_MODELS && precache_check < CS_MODELS+MAX_MODELS) {
 		if (allow_download_models->value) {
 			while (precache_check < CS_MODELS+MAX_MODELS &&
