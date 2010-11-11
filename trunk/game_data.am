@@ -599,7 +599,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/gothic/fdstatue_green.md2 \
 	data1/maps/meshes/gothic/fd_statue_normal.jpg \
 	data1/maps/meshes/gothic/freedom_statue_green.jpg \
-	data1/maps/meshes/gothic/freedom_statue_green.pcx \
 	data1/maps/meshes/gothic/lamp2b_fx.tga \
 	data1/maps/meshes/gothic/lamp2b.md2 \
 	data1/maps/meshes/gothic/lamp2b.tga \
