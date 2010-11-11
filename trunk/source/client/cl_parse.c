@@ -64,7 +64,8 @@ void Q_strncpyz( char *dest, const char *src, size_t size )
 #if defined HAVE_STRLCPY
 	strlcpy( dest, src, size );
 #else
-	if( size ) {
+	if( size ) 
+	{
 		while( --size && (*dest++ = *src++) );
 		*dest = '\0';
 	}
@@ -103,7 +104,8 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	}
 
     //if pcx, strip extension and change to .tga, we never dl .pcx anymore
-    if(filename[strlen(filename)-1] == 'x') {
+    if(filename[strlen(filename)-1] == 'x') 
+	{
 		modelskin = true;
 		//if this is coming from a player model don't bother
 		if(filename[0] != 'm' && filename[0] != 'v')
@@ -116,25 +118,31 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
     if(filename[strlen(filename)-2] == 'p' && filename[strlen(filename)-1] == 'g')
 		jpg = true;
 
-	if (FS_LoadFile (filename, NULL) != -1)	{
+	if (FS_LoadFile (filename, NULL) != -1)	
+	{
 		// it exists, no need to download
 		return true;
 	}
 
-	if(modelskin){
+	if(modelskin)
+	{
 		//try for .jpg
 		COM_StripExtension ( filename, shortname );
 		sprintf(filename, "%s.jpg", shortname);
-		if (FS_LoadFile (filename, NULL) != -1)	{
+		if (FS_LoadFile (filename, NULL) != -1)	
+		{
 			// it exists, no need to download
 			return true;
 		}
 	}
-	else if(jpg) { //didn't find .jpg skin, try for .tga skin, convoluted, yes indeed.
-		//try for .tga
+	else if(jpg) 
+	{	
+		//didn't find .jpg skin, try for .tga skin
+		//try for .tga(but leave filename as original extension)
 		COM_StripExtension ( filename, shortname );
-		sprintf(filename, "%s.tga", shortname);
-		if (FS_LoadFile (filename, NULL) != -1)	{
+		sprintf(shortname, "%s.tga", shortname);
+		if (FS_LoadFile (shortname, NULL) != -1)	
+		{
 			// it exists, no need to download
 			return true;
 		}
@@ -152,7 +160,6 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	if(cls.downloadurl[0] && CL_HttpDownload())
 			return false;
 
-
 //ZOID
 	// check to see if we already have a tmp for this file, if so, try to resume
 	// open the file if not opened yet
@@ -161,7 +168,8 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 //	FS_CreatePath (name);
 
 	fp = fopen (name, "r+b");
-	if (fp) { // it exists
+	if (fp) 
+	{ // it exists
 		int len;
 
 		len = FS_filelength( fp );
@@ -172,7 +180,8 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message,
 			va("download %s %i", cls.downloadname, len));
-	} else {
+	} else 
+	{
 		Com_Printf ("Downloading %s\n", cls.downloadname);
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message,
@@ -196,7 +205,8 @@ void	CL_Download_f (void)
 {
 	char filename[MAX_OSPATH];
 
-	if (Cmd_Argc() != 2) {
+	if (Cmd_Argc() != 2) 
+	{
 		Com_Printf("Usage: download <filename>\n");
 		return;
 	}
@@ -476,7 +486,8 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		ci->model = R_RegisterModel (model_filename);
 		ci->helmet = R_RegisterModel("players/martianenforcer/helmet.md2");
 		// weapon file
-		for (i = 0; i < num_cl_weaponmodels; i++) {
+		for (i = 0; i < num_cl_weaponmodels; i++) 
+		{
 			Com_sprintf (weapon_filename, sizeof(weapon_filename), "players/martianenforcer/%s", cl_weaponmodels[i]);
 			ci->weaponmodel[i] = R_RegisterModel(weapon_filename);
 			if (!cl_vwep->value)
@@ -507,14 +518,16 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 
 		// if don't have a skin, it means that the model didn't have
 		// it, so default
-		if (!ci->skin) {
+		if (!ci->skin) 
+		{
 			Com_sprintf (skin_filename, sizeof(skin_filename), "players/%s/default.pcx", model_name, skin_name);
 			ci->skin = R_RegisterSkin (skin_filename);
 			strcpy(skin_name, "default");
 		}
 
 		// weapon file
-		for (i = 0; i < num_cl_weaponmodels; i++) {
+		for (i = 0; i < num_cl_weaponmodels; i++) 
+		{
 			Com_sprintf (weapon_filename, sizeof(weapon_filename), "players/%s/%s", model_name, cl_weaponmodels[i]);
 			ci->weaponmodel[i] = R_RegisterModel(weapon_filename);
 			if (!ci->weaponmodel[i] == 0) {
@@ -541,7 +554,8 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 	while (model_filename[i++]);
 
 	FS_FOpenFile (model_filename, &file);
-	if(file) {
+	if(file) 
+	{
 		//exists
 		fclose(file);
 		ci->lod1 = R_RegisterModel(model_filename);
@@ -556,7 +570,8 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 	while (model_filename[i++]);
 
 	FS_FOpenFile (model_filename, &file);
-	if(file) {
+	if(file) 
+	{
 		//exists
 		fclose(file);
 		ci->lod2 = R_RegisterModel(model_filename);
@@ -613,7 +628,8 @@ void CL_ParseTaunt( char *s)
 
 	strcpy( scr_playername, COM_Parse( &s ) ); //fix
 
-	if(cl_playtaunts->value) {
+	if(cl_playtaunts->value) 
+	{
 		S_StartSound (NULL, 0, 0, S_RegisterSound (tauntsound), 1, ATTN_NONE, 0);
 		scr_playericonalpha = 2.0;
 	}
@@ -844,7 +860,8 @@ void CL_ParseServerMessage (void)
 		case svc_reconnect:
 			Com_Printf ("Server disconnected, reconnecting\n");
 			// stop download
-				if(cls.download){
+				if(cls.download)
+				{
 					if(cls.downloadhttp)  // clean up http downloads
 						CL_HttpDownloadCleanup();
 					else  // or just stop legacy ones
