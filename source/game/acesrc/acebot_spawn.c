@@ -738,12 +738,15 @@ void ACESP_HoldSpawn(edict_t *self)
 	self->think = ACEAI_Think;
 	self->nextthink = level.time + FRAMETIME;
 
+/*
+    // 2010-11 : possibly causing comm buffer errors, and server failures.
 	// send effect
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (self-g_edicts);
 	gi.WriteByte (MZ_LOGIN);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
 
+*/
 
 	safe_bprintf (PRINT_MEDIUM, "%s entered the game\n", self->client->pers.netname);
 
