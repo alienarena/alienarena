@@ -1615,8 +1615,6 @@ void R_DrawAliasShadow(dmdl_t *paliashdr, qboolean lerped)
 
 	st = currentmodel->st;
 
-	height = 0;
-
 	height = -lheight + 0.1f;
 
 	// if above entity's origin, skip

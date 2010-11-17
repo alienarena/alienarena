@@ -1082,26 +1082,37 @@ qboolean R_CullRagDolls( int RagDollID )
 	}
 }
 
+extern qboolean have_stencil;
 extern vec3_t lightspot;
 void R_DrawRagDollShadow(int RagDollID)
 {
-	vec3_t	point;
-	float	height, lheight;
+	vec3_t	point, point2, mins, maxs;
+	float	height;
 	int		i, j;
 	int		index_xyz, index_st;
 	int		va = 0;
+	trace_t r_trace;
 
-	lheight = lightspot[2];
-	height = lheight + 0.1f;
+	//trace to get ground
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs, 0, 0, 0);
 
-	// if above entity's origin, skip
-	if ((height) > RagDoll[RagDollID].curPos[2])
+	VectorCopy(RagDoll[RagDollID].curPos, point);
+	point[2] += 24;
+	VectorCopy(RagDoll[RagDollID].curPos, point2);
+	point2[2] -= 1024;
+
+	r_trace = CM_BoxTrace(point, point2, mins, maxs, r_worldmodel->firstnode, MASK_SOLID);
+
+	if(r_trace.fraction == 1.0)
 		return;
 
+	height = r_trace.endpos[2] + 0.1f;
+		
 	if (r_newrefdef.vieworg[2] < height)
 		return;
 
-	if (1)
+	if (have_stencil)
 	{
 		qglDepthMask(0);
 		qglEnable(GL_STENCIL_TEST);
@@ -1121,8 +1132,8 @@ void R_DrawRagDollShadow(int RagDollID)
 
 			memcpy( point, RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position, sizeof( point )  );
 
-			point[0] -= shadevector[0]*(point[2]+lheight);
-			point[1] -= shadevector[1]*(point[2]+lheight);
+			point[0] -= shadevector[0];
+			point[1] -= shadevector[1];
 			point[2] = height;
 
 			VArray[0] = point[0];
@@ -1220,7 +1231,7 @@ void R_RenderAllRagdolls ( void )
 			qglShadeModel (GL_FLAT);
 						
 			//simple stencil shadows
-			if (gl_shadows->integer && !gl_shadowmaps->integer)
+			if (gl_shadows->integer && !shellEffect && !gl_shadowmaps->integer)
 			{
 				float casted;
 				float an = RagDoll[RagDollID].angles[1]/180*M_PI;
@@ -1233,38 +1244,24 @@ void R_RenderAllRagdolls ( void )
 
 				switch (gl_shadows->integer)
 				{
-				case 0:
-					break;
-				case 1: //dynamic only - always cast something
-					casted = R_ShadowLight (RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, shadevector, 0);
-					qglDisable (GL_TEXTURE_2D);
-					qglEnable (GL_BLEND);
+					case 0:
+						break;
+					case 1: //dynamic only - always cast something
+						casted = R_ShadowLight (RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, shadevector, 0);
+						qglDisable (GL_TEXTURE_2D);
+						qglEnable (GL_BLEND);
 
-					qglColor4f (0,0,0,0.3);
+						qglColor4f (0,0,0,0.3);
 
-					R_DrawRagDollShadow (RagDollID);
+						R_DrawRagDollShadow (RagDollID);
 
-					qglEnable (GL_TEXTURE_2D);
-					qglDisable (GL_BLEND);
-					break;
-				case 2: //dynamic and world
-					//world
-					casted = R_ShadowLight (RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, shadevector, 1);
+						qglEnable (GL_TEXTURE_2D);
+						qglDisable (GL_BLEND);
+						break;
+					case 2: //dynamic and world
+						//world
+						casted = R_ShadowLight (RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, shadevector, 1);
 					
-					qglDisable (GL_TEXTURE_2D);
-					qglEnable (GL_BLEND);
-
-					qglColor4f (0,0,0,casted);
-
-					R_DrawRagDollShadow (RagDollID);
-
-					qglEnable (GL_TEXTURE_2D);
-					qglDisable (GL_BLEND);
-					//dynamic
-					casted = 0;
-					casted = R_ShadowLight (RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, shadevector, 0);
-					if (casted > 0)
-					{ //only draw if there's a dynamic light there
 						qglDisable (GL_TEXTURE_2D);
 						qglEnable (GL_BLEND);
 
@@ -1274,8 +1271,22 @@ void R_RenderAllRagdolls ( void )
 
 						qglEnable (GL_TEXTURE_2D);
 						qglDisable (GL_BLEND);
-					}
-					break;
+						//dynamic
+						casted = 0;
+						casted = R_ShadowLight (RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, shadevector, 0);
+						if (casted > 0)
+						{ //only draw if there's a dynamic light there
+							qglDisable (GL_TEXTURE_2D);
+							qglEnable (GL_BLEND);
+
+							qglColor4f (0,0,0,casted);
+
+							R_DrawRagDollShadow (RagDollID);
+
+							qglEnable (GL_TEXTURE_2D);
+							qglDisable (GL_BLEND);
+						}
+						break;
 				}
 			}
 			qglColor4f (1,1,1,1);
