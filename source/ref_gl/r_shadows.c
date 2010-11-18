@@ -976,6 +976,9 @@ void R_CastShadow(void)
 		if(RagDoll[RagDollID].destroyed)
 	        continue;
 
+		if(Sys_Milliseconds() - RagDoll[RagDollID].spawnTime > RAGDOLL_DURATION - 2500)
+			continue;
+
 		currentmodel = RagDoll[RagDollID].ragDollMesh;
 
 		if (!currentmodel)
