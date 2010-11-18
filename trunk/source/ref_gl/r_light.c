@@ -800,146 +800,144 @@ qboolean gluProject2(float objx, float objy, float objz, const float model[16], 
 
 void R_InitSun()
 {
-	draw_sun = false;
+    draw_sun = false;
 
-	if (!sun_size)
-		return;
+    if (!sun_size)
+        return;
 
-	if (!r_drawsun->value)
-		return;
+    if (!r_drawsun->value)
+        return;
 
-	if (spacebox)
-		sun_size = 0.1f;
-	else
-		sun_size = 0.2f;
+    if (spacebox)
+        sun_size = 0.1f;
+    else
+        sun_size = 0.2f;
 
-	if (R_CullOrigin(sun_origin))
-		return;
+    if (R_CullOrigin(sun_origin))
+        return;
 
-	draw_sun = true;
+    draw_sun = true;
 
-	gluProject2(sun_origin[0], sun_origin[1], sun_origin[2], r_world_matrix, r_project_matrix, (int *) r_viewport, &sun_x, &sun_y);	// /,
-																																	// &sun_z);
-	sun_y = r_newrefdef.height - sun_y;
+    gluProject2(sun_origin[0], sun_origin[1], sun_origin[2], r_world_matrix, r_project_matrix, (int *) r_viewport, &sun_x, &sun_y); // /,
+                                                                                                                                    // &sun_z);
+    sun_y = r_newrefdef.height - sun_y;
 }
 
 
 void R_RenderSunFlare(image_t * tex, float offset, float size, float r,
-					  float g, float b, float alpha)
+                      float g, float b, float alpha)
 {
-	float minx, miny, maxx, maxy;
-	float new_x, new_y, corr;
+    float minx, miny, maxx, maxy;
+    float new_x, new_y, corr;
 
-	qglColor4f(r, g, b, alpha);
-	GL_Bind(tex->texnum);
+    qglColor4f(r, g, b, alpha);
+    GL_Bind(tex->texnum);
 
-	if (offset) {
-		new_x = offset * (r_newrefdef.width / 2 - sun_x) + sun_x;
-		new_y = offset * (r_newrefdef.height / 2 - sun_y) + sun_y;
-	} else {
-		new_x = sun_x;
-		new_y = sun_y;
-	}
+    if (offset) {
+        new_x = offset * (r_newrefdef.width / 2 - sun_x) + sun_x;
+        new_y = offset * (r_newrefdef.height / 2 - sun_y) + sun_y;
+    } else {
+        new_x = sun_x;
+        new_y = sun_y;
+    }
 
-	corr = 1;
+    corr = 1;
 
-	minx = new_x - size * corr;
-	miny = new_y - size;
-	maxx = new_x + size * corr;
-	maxy = new_y + size;
+    minx = new_x - size * corr;
+    miny = new_y - size;
+    maxx = new_x + size * corr;
+    maxy = new_y + size;
 
-	qglBegin(GL_QUADS);
-	qglTexCoord2f(0, 0);
-	qglVertex2f(minx, miny);
-	qglTexCoord2f(1, 0);
-	qglVertex2f(maxx, miny);
-	qglTexCoord2f(1, 1);
-	qglVertex2f(maxx, maxy);
-	qglTexCoord2f(0, 1);
-	qglVertex2f(minx, maxy);
-	qglEnd();
+    qglBegin(GL_QUADS);
+    qglTexCoord2f(0, 0);
+    qglVertex2f(minx, miny);
+    qglTexCoord2f(1, 0);
+    qglVertex2f(maxx, miny);
+    qglTexCoord2f(1, 1);
+    qglVertex2f(maxx, maxy);
+    qglTexCoord2f(0, 1);
+    qglVertex2f(minx, maxy);
+    qglEnd();
 }
 
+float sun_time = 0;
+float sun_alpha = 0;
 void R_RenderSun()
 {
-	static float sun_time = 0.0f;
-	static float sun_alpha = 0.0f;
+    float l, hx, hy;
+    float vec[2];
+    float size;
 
-	float l, hx, hy;
-	float vec[2];
-	float size;
+    if (!draw_sun)
+        return;
 
-	if (!draw_sun)
-		return;
+    if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+        return;
 
-	if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
+    qglReadPixels(sun_x, r_newrefdef.height - sun_y, 1, 1,
+                  GL_DEPTH_COMPONENT, GL_FLOAT, &l);
 
-	// periodically test visibility to ramp alpha
-	if(rs_realtime - sun_time > 0.035f) {
+    // periodically test visibility to ramp alpha
+    if(rs_realtime - sun_time > 0.02) {
 
-		// read depth buffer at sun flare window coordinates
-		//  to determine visibility. 
-		qglReadPixels(
-			sun_x, r_newrefdef.height - sun_y,
-			1, 1,
-			GL_DEPTH_COMPONENT, GL_FLOAT, &l);
-		// ramp and clamp opacity depending on visibility
-		sun_alpha += (l == 1.0 ? 0.20 : -0.25);
-		if(sun_alpha > 1.0)
-			sun_alpha = 1.0;
-		else if(sun_alpha < 0)
-			sun_alpha = 0.0;
+        sun_alpha += (l == 1.0 ? 0.15 : -0.15);  // ramp
 
-		sun_time = rs_realtime;
-	}
+        if(sun_alpha > 1.0)  // clamp
+            sun_alpha = 1.0;
+        else if(sun_alpha < 0)
+            sun_alpha = 0.0;
 
-	if (sun_alpha > 0)
-	{ // sun flare is visible
-		hx = r_newrefdef.width / 2;
-		hy = r_newrefdef.height / 2;
-		vec[0] = 1 - fabs(sun_x - hx) / hx;
-		vec[1] = 1 - fabs(sun_y - hy) / hy;
-		// l = 3 * vec[0] * vec[1] + 0.25; // result not used
+        sun_time = rs_realtime;
+    }
 
-		// set 2d
-		qglMatrixMode(GL_PROJECTION);
-		qglPushMatrix();
-		qglLoadIdentity();
-		qglOrtho(0, r_newrefdef.width, r_newrefdef.height, 0, -99999,
-				 99999);
-		qglMatrixMode(GL_MODELVIEW);
-		qglPushMatrix();
-		qglLoadIdentity();
-		qglEnable(GL_BLEND);
-		qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		GL_TexEnv(GL_MODULATE);
-		qglDepthRange(0, 0.3);
+    if (sun_alpha > 0)
+    {
 
-		size = r_newrefdef.width * sun_size;
-		R_RenderSunFlare(sun_object, 0, size, .75, .75, .75, sun_alpha);
-		if (r_drawsun->value == 2) {
+        hx = r_newrefdef.width / 2;
+        hy = r_newrefdef.height / 2;
+        vec[0] = 1 - fabs(sun_x - hx) / hx;
+        vec[1] = 1 - fabs(sun_y - hy) / hy;
+        l = 3 * vec[0] * vec[1] + 0.25;
 
-			R_RenderSunFlare(sun2_object, -0.9, size * 0.07, 0.1, 0.1, 0, sun_alpha);
-			R_RenderSunFlare(sun2_object, -0.7, size * 0.15, 0, 0, 0.1, sun_alpha);
-			R_RenderSunFlare(sun2_object, -0.5, size * 0.085, 0.1, 0, 0, sun_alpha);
-			R_RenderSunFlare(sun1_object, 0.3, size * 0.25, 0.1, 0.1, 0.1, sun_alpha);
-			R_RenderSunFlare(sun2_object, 0.5, size * 0.05, 0.1, 0, 0, sun_alpha);
-			R_RenderSunFlare(sun2_object, 0.64, size * 0.05, 0, 0.1, 0, sun_alpha);
-			R_RenderSunFlare(sun2_object, 0.7, size * 0.25, 0.1, 0.1, 0, sun_alpha);
-			R_RenderSunFlare(sun1_object, 0.85, size * 0.5, 0.1, 0.1, 0.1, sun_alpha);
-			R_RenderSunFlare(sun2_object, 1.1, size * 0.125, 0.1, 0, 0, sun_alpha);
-			R_RenderSunFlare(sun2_object, 1.25, size * 0.08, 0.1, 0.1, 0, sun_alpha);
-		}
+        // set 2d
+        qglMatrixMode(GL_PROJECTION);
+        qglPushMatrix();
+        qglLoadIdentity();
+        qglOrtho(0, r_newrefdef.width, r_newrefdef.height, 0, -99999,
+                 99999);
+        qglMatrixMode(GL_MODELVIEW);
+        qglPushMatrix();
+        qglLoadIdentity();
+        qglEnable(GL_BLEND);
+        qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        GL_TexEnv(GL_MODULATE);
+        qglDepthRange(0, 0.3);
 
-		qglDepthRange(0, 1);
-		qglColor4f(1, 1, 1, 1);
-		qglDisable(GL_BLEND);
-		qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		// set 3d
-		qglPopMatrix();
-		qglMatrixMode(GL_PROJECTION);
-		qglPopMatrix();
-		qglMatrixMode(GL_MODELVIEW);
-	}
+        size = r_newrefdef.width * sun_size;
+        R_RenderSunFlare(sun_object, 0, size, .75, .75, .75, sun_alpha);
+        if (r_drawsun->value == 2) {
+
+            R_RenderSunFlare(sun2_object, -0.9, size * 0.07, 0.1, 0.1, 0, sun_alpha);
+            R_RenderSunFlare(sun2_object, -0.7, size * 0.15, 0, 0, 0.1, sun_alpha);
+            R_RenderSunFlare(sun2_object, -0.5, size * 0.085, 0.1, 0, 0, sun_alpha);
+            R_RenderSunFlare(sun1_object, 0.3, size * 0.25, 0.1, 0.1, 0.1, sun_alpha);
+            R_RenderSunFlare(sun2_object, 0.5, size * 0.05, 0.1, 0, 0, sun_alpha);
+            R_RenderSunFlare(sun2_object, 0.64, size * 0.05, 0, 0.1, 0, sun_alpha);
+            R_RenderSunFlare(sun2_object, 0.7, size * 0.25, 0.1, 0.1, 0, sun_alpha);
+            R_RenderSunFlare(sun1_object, 0.85, size * 0.5, 0.1, 0.1, 0.1, sun_alpha);
+            R_RenderSunFlare(sun2_object, 1.1, size * 0.125, 0.1, 0, 0, sun_alpha);
+            R_RenderSunFlare(sun2_object, 1.25, size * 0.08, 0.1, 0.1, 0, sun_alpha);
+        }
+
+        qglDepthRange(0, 1);
+        qglColor4f(1, 1, 1, 1);
+        qglDisable(GL_BLEND);
+        qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // set 3d
+        qglPopMatrix();
+        qglMatrixMode(GL_PROJECTION);
+        qglPopMatrix();
+        qglMatrixMode(GL_MODELVIEW);
+    }
 }
+
