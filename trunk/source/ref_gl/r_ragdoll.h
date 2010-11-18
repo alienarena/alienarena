@@ -25,6 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_RAGDOLL_JOINTS 15
 #define MAX_CONTACTS 32 
 #define MAX_FORCES 4
+#define MAX_ODESTEPS 120
+#define MIN_ODESTEPS 20
 #define RAGDOLL_DURATION 10000 //10 seconds
 
 //body id's

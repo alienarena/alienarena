@@ -1348,15 +1348,23 @@ void R_RenderAllRagdolls ( void )
 	}
 
 	if(r_DrawingRagDoll) //here we handle the physics
-	{		
+	{	
+		int ODEIterationsPerFrame;
+		int frametime = Sys_Milliseconds() - lastODEUpdate;
+
+		//iterations need to be adjusted for framerate.  
+		ODEIterationsPerFrame = frametime;
+	
+		//clamp it
+		if(ODEIterationsPerFrame > MAX_ODESTEPS/1.5)
+			ODEIterationsPerFrame = MAX_ODESTEPS;
+		if(ODEIterationsPerFrame < MIN_ODESTEPS*1.5)
+			ODEIterationsPerFrame = MIN_ODESTEPS;
+
 		dSpaceCollide(RagDollSpace, 0, &near_callback);
-
-		//interations per frame can be adjusted for smoothness vs speed
-		//20 is default, and is fine, until framerates get too low.  
-		//Setting this to 80 seems to work well at low framerates, and is 
-		//no detectable performance hit.
-		dWorldStepFast1(RagDollWorld, (Sys_Milliseconds() - lastODEUpdate)/1000.0f, 80);
-
+	
+		dWorldStepFast1(RagDollWorld, (float)(frametime/1000.0f), ODEIterationsPerFrame);
+		
 		// Remove all temporary collision joints now that the world has been stepped
 		dJointGroupEmpty(contactGroup);
 	}
