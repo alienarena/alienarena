@@ -1351,8 +1351,11 @@ void R_RenderAllRagdolls ( void )
 	{		
 		dSpaceCollide(RagDollSpace, 0, &near_callback);
 
-		//20 can be adjusted for smoothness vs speed
-		dWorldStepFast1(RagDollWorld, (Sys_Milliseconds() - lastODEUpdate)/1000.0f, 20);
+		//interations per frame can be adjusted for smoothness vs speed
+		//20 is default, and is fine, until framerates get too low.  
+		//Setting this to 80 seems to work well at low framerates, and is 
+		//no detectable performance hit.
+		dWorldStepFast1(RagDollWorld, (Sys_Milliseconds() - lastODEUpdate)/1000.0f, 80);
 
 		// Remove all temporary collision joints now that the world has been stepped
 		dJointGroupEmpty(contactGroup);
