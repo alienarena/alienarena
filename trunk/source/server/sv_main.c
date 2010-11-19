@@ -196,8 +196,7 @@ char	*SV_StatusString (void)
 			nametxt[k]=0;
 #else
 			//allow color chars to be sent
-			strcpy(nametxt, name);
-			nametxt[31] = '\0'; //failsafe
+			Q_strncpyz2( nametxt, name, sizeof(nametxt) );
 #endif
 			//s = NET_AdrToString ( cl->netchan.remote_address); //fuck you Luigi
 			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"127.0.0.1\"\n",
@@ -235,8 +234,7 @@ char	*SV_StatusString (void)
 			nametxt[k]=0;
 #else
 			//allow color chars to be sent
-			strcpy(nametxt, name);
-			nametxt[31] = '\0'; //failsafe
+			Q_strncpyz2( nametxt, name, sizeof(nametxt) );
 #endif
 
 			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"127.0.0.1\"\n",
@@ -696,7 +694,7 @@ gotnewcl:
 	}
 
 	// parse some info from the info strings
-	strncpy (newcl->userinfo, userinfo, sizeof(newcl->userinfo)-1);
+	Q_strncpyz2( newcl->userinfo, userinfo, sizeof(newcl->userinfo) );
 	SV_UserinfoChanged (newcl);
 	SV_LogEvent( adr , "UUS" , newcl->name );
 
@@ -1307,7 +1305,7 @@ void SV_UserinfoChanged (client_t *cl)
 	ge->ClientUserinfoChanged (cl->edict, cl->userinfo, 0);
 
 	// name for C code
-	strncpy (cl->name, Info_ValueForKey (cl->userinfo, "name"), sizeof(cl->name)-1);
+	Q_strncpyz2( cl->name, Info_ValueForKey (cl->userinfo, "name"), sizeof(cl->name) );
 	// mask off high bit
 	for (i=0 ; i<sizeof(cl->name) ; i++)
 		cl->name[i] &= 127;

@@ -88,7 +88,7 @@ extern char cl_weaponmodels[MAX_CLIENTWEAPONMODELS][MAX_QPATH];
 extern int num_cl_weaponmodels;
 
 extern char		scr_playericon[MAX_OSPATH];
-extern char		scr_playername[32];
+extern char		scr_playername[PLAYERNAME_SIZE];
 extern float	scr_playericonalpha;
 
 #define	CMD_BACKUP		64	// allow a lot of command backups for very fast systems
@@ -567,7 +567,7 @@ void SCR_IRCPrintf (char *fmt, ...);
 //
 
 typedef struct _PLAYERSTATS {
-	char playername[32];
+	char playername[PLAYERNAME_SIZE];
 	int totalfrags;
 	double totaltime;
 	int ranking;

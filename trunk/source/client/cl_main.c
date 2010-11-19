@@ -162,7 +162,7 @@ extern	char map_music[128];
 extern void RS_FreeAllScripts(void);
 
 typedef struct _PLAYERINFO {
-	char playername[16];
+	char playername[PLAYERNAME_SIZE]; // TODO: verify 2010-11 was 16
 	int ping;
 	int score;
 } PLAYERINFO;
@@ -1784,6 +1784,9 @@ void CL_InitLocal (void)
 	info_password = Cvar_Get ("password", "", CVAR_USERINFO);
 	info_spectator = Cvar_Get ("spectator", "0", CVAR_USERINFO);
 	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
+	/* */
+	ValidatePlayerName( name->string, strlen( name->string ) );
+	/* */
 	skin = Cvar_Get ("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
 	rate = Cvar_Get ("rate", "25000", CVAR_USERINFO | CVAR_ARCHIVE);	// FIXME
 	msg = Cvar_Get ("msg", "1", CVAR_USERINFO | CVAR_ARCHIVE);
@@ -2181,6 +2184,11 @@ void CL_Init (void)
 
 	FS_ExecAutoexec (); // add commands from autoexec.cfg
 	Cbuf_Execute ();
+
+	if ( name && name->string[0] )
+	{
+		ValidatePlayerName( name->string, strlen(name->string ) );
+	}
 
 }
 

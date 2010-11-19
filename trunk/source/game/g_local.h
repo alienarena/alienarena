@@ -1027,7 +1027,9 @@ typedef struct
 {
 	char		userinfo[MAX_INFO_STRING];
 
-	char		netname[50]; // considering 1 colour change/character + nul, that's 16
+	char netname[(PLAYERNAME_GLYPHS*3)+1]; // name from cvar
+			// room for "rainbow" name, but is truncated to PLAYERNAME_SIZE
+
 	int			hand;
 
 	qboolean	connected;			// a loadgame will leave valid entities that

@@ -1884,4 +1884,72 @@ qboolean Info_KeyExists (const char *s, const char *key)
 }
 //====================================================================
 
+/*
+ * ValidatePlayerName()
+ *
+ * checks validity of a player name string.
+ * may modify the string:
+ *   - player_name must NOT be const.
+ *   - player_name_size passes size of caller's char array
+ *
+ * returns: the number of glyphs (visible chars) in the player's name
+ */
+size_t ValidatePlayerName( char *player_name, size_t player_name_size )
+{
+	char *pch;
+	size_t count;
+	size_t char_count;
+	size_t glyph_count;
+	size_t char_count_limit;
 
+	assert( player_name != NULL );
+	assert( player_name_size > 0);
+	assert( strlen( player_name ) < 127 );
+
+	for ( pch = player_name, count = strlen( player_name); count--; pch++ )
+	{ // translate bad chars to space
+		if ( !isascii( *pch ) || !isgraph( *pch ) )
+			*pch = ' ';
+	}
+
+	if ( player_name_size < PLAYERNAME_SIZE )
+	{
+		char_count_limit = player_name_size - 1;
+	}
+	else
+	{
+		char_count_limit = PLAYERNAME_SIZE - 1;
+	}
+	char_count = glyph_count = 0;
+	pch = player_name;
+	while ( *pch
+			&& glyph_count < PLAYERNAME_GLYPHS
+			&& char_count < char_count_limit
+			)
+	{ // while chars and 1+ glyphs possible and 1+ chars possible.
+		if ( Q_IsColorString( pch ) )
+		{
+			if ( char_count < (char_count_limit-4) )
+			{ // room for 3 chars is available
+				char_count += 2;
+				pch += 2;
+			}
+			else
+			{ // no room for color escape and glyph, done
+				break;
+			}
+		}
+		else
+		{
+			++char_count;
+			++glyph_count;
+			++pch;
+		}
+	}
+	assert( char_count <= char_count_limit );
+	assert( glyph_count <= PLAYERNAME_GLYPHS );
+
+	player_name[ char_count ] = '\0'; // possible truncation
+
+	return glyph_count;
+}

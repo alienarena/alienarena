@@ -2482,7 +2482,7 @@ static const char *idcredits[] =
 	"Victor Luchits",
 	"Jan Rafaj",
 	"Shane Bayer",
-	"Tony Jackson",	
+	"Tony Jackson",
 	"Stephan Stahl",
 	"Kyle Hunter",
 	"Andres Mejia",
@@ -2956,7 +2956,7 @@ void IRC_MenuInit( void )
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_title );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_join );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_joinatstartup );
-	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_editsettings );	
+	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_editsettings );
 	Menu_AddItem( &s_irc_menu, ( void * ) &s_irc_key );
 
 	Menu_Center( &s_irc_menu );
@@ -3257,18 +3257,22 @@ unsigned int starttime;
 
 int GetColorTokens( char *string)
 {
-	int i, x;
+	int count;
+	char *pch;
 
-	x = 0;
-
-	for(i=0; i<32; i++) {
-		if(string[i] == '^')
-			x++;
-		if(string[i] == 0)
-			break;
+	count = 0;
+	pch=string;
+	while ( *pch )
+	{
+		if ( Q_IsColorString( pch ) )
+		{
+			++count;
+			++pch;
+		}
+		++pch;
 	}
 
-	return x;
+	return count;
 }
 
 char *GetLine (char **contents, int *len)
@@ -3336,7 +3340,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	char seps[]   = "\\";
 	int players = 0;
 	int result;
-	char playername[32];
+	char playername[PLAYERNAME_SIZE];
 	int score, ping, rankTotal, i, x;
 	PLAYERSTATS	player;
 
@@ -3412,26 +3416,19 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 
 		free (rLine);
 
-		playername[31] = '\0';
+		playername[sizeof(playername)-1] = '\0';
 
 		//get ranking
-		strcpy(player.playername, playername);
+		Q_strncpyz2( player.playername, playername, sizeof(player.playername));
 		player.totalfrags = player.totaltime = player.ranking = 0;
 		player = getPlayerRanking ( player );
 
-		//trim playername string
-		x = 0;
-		for(i=0; i<32; i++) {
-			if(!playername[i])
-				playername[i] = 32;
-			else if(playername[i] == '^' && i < strlen(playername)-1) {
-				if(playername[i+1] != '^')
-					x += 2;
-			}
-		}
-		if(x > 15)
-			x = 15;
-		playername[16+x] = 0;
+		// trim playername string
+		x = ValidatePlayerName( playername, sizeof(playername) );
+		x = 15 - x; // calc space padding from visible glyph count
+		assert( x >= 0 );
+		if ( x > 0 && ( (x + strlen(playername)) < sizeof(playername) ) )
+			strncat( playername, "               ", x );
 
 		Com_sprintf(mservers[m_num_servers].playerInfo[players], sizeof(mservers[m_num_servers].playerInfo[players]),
 			"%s    %4i    %4i", playername, score, ping);
@@ -3650,7 +3647,8 @@ void JoinServer_MenuInit( void )
 
 	getStatsDB();
 
-	strcpy(thisPlayer.playername, name->string);
+	ValidatePlayerName( name->string, strlen(name->string) );
+	Q_strncpyz2( thisPlayer.playername, name->string, sizeof(thisPlayer.playername) );
 	thisPlayer.totalfrags = thisPlayer.totaltime = thisPlayer.ranking = 0;
 	thisPlayer = getPlayerRanking ( thisPlayer );
 
@@ -5842,7 +5840,7 @@ static menuaction_s		s_playerranking_ttheader;
 static menuaction_s		s_playerranking_topten[10];
 char rank[32];
 char fragrate[32];
-char playername[64];
+char playername[64]; // a print field, not just name
 char totaltime[32];
 char totalfrags[32];
 char topTenList[10][64];
@@ -5864,7 +5862,8 @@ void PlayerRanking_MenuInit( void )
 	s_playerranking_menu.y = viddef.height / 2 - 160*scale;
 	s_playerranking_menu.nitems = 0;
 
-	strcpy(player.playername, name->string);
+	Q_strncpyz2( player.playername, name->string, sizeof(player.playername) );
+
 	player.totalfrags = player.totaltime = player.ranking = 0;
 	player = getPlayerRanking ( player );
 
@@ -6322,9 +6321,8 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_name_field.generic.y		= 0;
 	s_player_name_field.length	= 20;
 	s_player_name_field.visible_length = 20;
-	strcpy( s_player_name_field.buffer, name->string );
-	s_player_name_field.cursor = strlen( name->string );
-
+	Q_strncpyz2( s_player_name_field.buffer, name->string, sizeof(s_player_name_field.buffer) );
+	s_player_name_field.cursor = strlen( s_player_name_field.buffer );
 
 	s_player_model_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_model_box.generic.name = "model";
@@ -6599,6 +6597,7 @@ void PConfigAccept (void)
 	int i;
 	char scratch[1024];
 
+	ValidatePlayerName( s_player_name_field.buffer, sizeof(s_player_name_field.buffer) );
 	Cvar_Set( "name", s_player_name_field.buffer );
 
 	if(!strcmp(s_player_name_field.buffer, "Player"))

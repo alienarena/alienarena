@@ -1451,52 +1451,52 @@ void BodySink( edict_t *ent ) {
 	ent->solid = SOLID_NOT; //don't gib sinking bodies
 }
 
-void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)   
-  {   
-          int     n;   
-          int gib_effect = EF_GREENGIB;   
-          self->s.modelindex3 = 0;    //remove helmet, if a martian   
-          self->s.modelindex4 = 0;   
-          if (self->health < -40)   
-          {   
-                  if(self->ctype == 0) { //alien   
-     
-                          for (n= 0; n < 4; n++)   
-                                  ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_METALLIC, EF_GREENGIB);   
-                  }   
-                  else if(self->ctype == 2) { //robot   
-                          gib_effect = 0;   
-                          for (n= 0; n < 4; n++)   
-                                  ThrowGib (self, "models/objects/debris3/tris.md2", damage, GIB_METALLIC, 0);   
-                          for (n= 0; n < 4; n++)   
-                                  ThrowGib (self, "models/objects/debris1/tris.md2", damage, GIB_METALLIC, 0);   
-                          //blow up too :)   
-                          gi.WriteByte (svc_temp_entity);   
-                          gi.WriteByte (TE_ROCKET_EXPLOSION);   
-                          gi.WritePosition (self->s.origin);   
-                          gi.multicast (self->s.origin, MULTICAST_PHS);   
-     
-                  }   
-                  else { //human   
-                          gib_effect = EF_GIB;   
-                          for (n= 0; n < 4; n++)   
-                                  ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_GIB);   
-                  }   
-     
-                  if(self->usegibs) {   
-                          ThrowGib (self, self->head, damage, GIB_ORGANIC, gib_effect);   
-                          ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);   
-                          ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);   
-                          ThrowGib (self, self->body, damage, GIB_ORGANIC, gib_effect);   
-                          ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);   
-                          ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);   
-                  }   
-     
-                  self->s.origin[2] -= 48;   
-                  ThrowClientHead (self, damage);   
-                  self->takedamage = DAMAGE_NO;   
-          }   
-  } 
+void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+  {
+          int     n;
+          int gib_effect = EF_GREENGIB;
+          self->s.modelindex3 = 0;    //remove helmet, if a martian
+          self->s.modelindex4 = 0;
+          if (self->health < -40)
+          {
+                  if(self->ctype == 0) { //alien
+
+                          for (n= 0; n < 4; n++)
+                                  ThrowGib (self, "models/objects/gibs/mart_gut/tris.md2", damage, GIB_METALLIC, EF_GREENGIB);
+                  }
+                  else if(self->ctype == 2) { //robot
+                          gib_effect = 0;
+                          for (n= 0; n < 4; n++)
+                                  ThrowGib (self, "models/objects/debris3/tris.md2", damage, GIB_METALLIC, 0);
+                          for (n= 0; n < 4; n++)
+                                  ThrowGib (self, "models/objects/debris1/tris.md2", damage, GIB_METALLIC, 0);
+                          //blow up too :)
+                          gi.WriteByte (svc_temp_entity);
+                          gi.WriteByte (TE_ROCKET_EXPLOSION);
+                          gi.WritePosition (self->s.origin);
+                          gi.multicast (self->s.origin, MULTICAST_PHS);
+
+                  }
+                  else { //human
+                          gib_effect = EF_GIB;
+                          for (n= 0; n < 4; n++)
+                                  ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_GIB);
+                  }
+
+                  if(self->usegibs) {
+                          ThrowGib (self, self->head, damage, GIB_ORGANIC, gib_effect);
+                          ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);
+                          ThrowGib (self, self->leg, damage, GIB_ORGANIC, gib_effect);
+                          ThrowGib (self, self->body, damage, GIB_ORGANIC, gib_effect);
+                          ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
+                          ThrowGib (self, self->arm, damage, GIB_ORGANIC, gib_effect);
+                  }
+
+                  self->s.origin[2] -= 48;
+                  ThrowClientHead (self, damage);
+                  self->takedamage = DAMAGE_NO;
+          }
+  }
 
 
 void CopyToBodyQue (edict_t *ent)
@@ -2167,8 +2167,8 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	char playermodel[MAX_OSPATH] = " ";
 	char playerskin[MAX_INFO_STRING] = " ";
 	char modelpath[MAX_OSPATH] = " ";
-	char slot[2];
-	char colorName[32];
+	char slot[4];
+	char tmp_playername[PLAYERNAME_SIZE];
 	FILE *file;
 	teamcensus_t teamcensus;
 
@@ -2196,36 +2196,15 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		return;
 	}
 
-	// set name
+	// validate and set name
 	s = Info_ValueForKey (userinfo, "name");
-	strcpy(colorName, s);
-	i = j = k = 0;
-	while ( s && s[i] && i < 47 && j < 15 )
-	{ // validate name
-		ent->client->pers.netname[i] = s[i];
-		if ( k == 0 )
-		{
-			if ( s[i] == Q_COLOR_ESCAPE )
-				k = 1;
-			else
-				j ++;
-		}
-		else if ( k == 1 )
-		{
-			if ( s[i] == Q_COLOR_ESCAPE )
-			{
-				j += 2;
-				if ( j == 16 )
-				{
-					i--;
-					break;
-				}
-			}
-			k = 0;
-		}
-		i ++;
-	}
-	ent->client->pers.netname[i] = 0;
+	if ( s == NULL || *s == 0 )
+		s = "Player";
+	Q_strncpyz2( tmp_playername, s , sizeof(tmp_playername) );
+	ValidatePlayerName( tmp_playername, sizeof(tmp_playername) );
+	Q_strncpyz2( ent->client->pers.netname, tmp_playername,
+			sizeof(ent->client->pers.netname));
+	// end name validate
 
 	//spectator mode
 	if ( !g_duel->value )
@@ -2301,6 +2280,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 		strcat(s, playerskin);
 		Info_SetValueForKey (userinfo, "skin", s);
 	}
+	// end skin check
 
 	playernum = ent-g_edicts-1;
 
@@ -2323,15 +2303,15 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 		if(duplicate && playernum < 100) { //just paranoia, should never be more than 64
 
-			sprintf(slot, "%i", playernum);
+			i = snprintf(slot, sizeof(slot), "%i", playernum);
 
-			if(strlen(ent->client->pers.netname) < 31) { //small enough, just add to end
-
+			if ( strlen(ent->client->pers.netname) < (PLAYERNAME_SIZE - i) )
+			{ //small enough, just add to end
 				strcat(ent->client->pers.netname, slot);
 			}
-			else { //need to lop off end first
-
-				ent->client->pers.netname[30] = 0;
+			else
+			{ //need to lop off end first  TODO: technically, should look for color escapes
+				ent->client->pers.netname[ (PLAYERNAME_SIZE-1) - i ] = 0;
 				strcat(ent->client->pers.netname, slot);
 			}
 
@@ -2339,6 +2319,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 			safe_bprintf(PRINT_HIGH, "Was a duplicate, changing name to %s\n", ent->client->pers.netname);
 		}
 	}
+	// end duplicate check
 
 	// combine name and skin into a configstring
 	gi.configstring (CS_PLAYERSKINS+playernum, va("%s\\%s", ent->client->pers.netname, s) );
@@ -2407,7 +2388,7 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	}
 
 	// save off the userinfo in case we want to check something later
-	strncpy (ent->client->pers.userinfo, userinfo, sizeof(ent->client->pers.userinfo)-1);
+	Q_strncpyz2( ent->client->pers.userinfo, userinfo, sizeof(ent->client->pers.userinfo) );
 
 }
 
@@ -2419,6 +2400,7 @@ void ClientChangeSkin (edict_t *ent)
 	char playermodel[MAX_OSPATH] = " ";
 	char playerskin[MAX_INFO_STRING] = " ";
 	char userinfo[MAX_INFO_STRING];
+	char tmp_playername[PLAYERNAME_SIZE];
 
 	//get the userinfo
 	memcpy (userinfo, ent->client->pers.userinfo, sizeof(userinfo));
@@ -2440,31 +2422,13 @@ void ClientChangeSkin (edict_t *ent)
 	s = Info_ValueForKey (userinfo, "name");
 
 	// fix player name if corrupted
-	if ( s != NULL )
+	if ( s != NULL && s[0] )
 	{
-		i = j = 0;
-		while ( s[i] )
-		{
-			if ( Q_IsColorString( &s[i] ) )
-			{ // 2 char color escape sequence
-				i += 2;
-				if ( i > 47 )
-					break;
-			}
-			else
-			{ // printable chars
-				if ( s[i] < 32 || s[i] > 126 )
-					s[i] = 32;
-				++i;
-				++j;
-				if ( i > 47 || j > 15 )
-					break;
-			}
-		}
-		s[i] = 0;
+		Q_strncpyz2( tmp_playername, s, sizeof(tmp_playername ) );
+		ValidatePlayerName( tmp_playername, sizeof(tmp_playername ) );
+		Q_strncpyz2(ent->client->pers.netname, tmp_playername,
+				sizeof(ent->client->pers.netname) );
 	}
-
-	strncpy (ent->client->pers.netname, s, sizeof(ent->client->pers.netname)-1);
 
 	// set skin
 	s = Info_ValueForKey (userinfo, "skin");
