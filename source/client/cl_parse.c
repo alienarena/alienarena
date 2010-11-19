@@ -64,7 +64,7 @@ void Q_strncpyz( char *dest, const char *src, size_t size )
 #if defined HAVE_STRLCPY
 	strlcpy( dest, src, size );
 #else
-	if( size ) 
+	if( size )
 	{
 		while( --size && (*dest++ = *src++) );
 		*dest = '\0';
@@ -92,6 +92,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	FILE *fp;
 	char	name[MAX_OSPATH];
 	char	shortname[MAX_OSPATH];
+	char    shortname2[MAX_OSPATH];
 	qboolean	jpg = false;
 
 	if (strstr (filename, ".."))
@@ -101,7 +102,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 	}
 
     //if pcx, strip extension and change to .jpg, we do not use .pcx anymore
-    if(filename[strlen(filename)-1] == 'x') 
+    if(filename[strlen(filename)-1] == 'x')
 	{
 		//Filter out any potentially screwed up texture paths(meshes only reside in these folders)
 		if (strncmp(filename, "models", 6) && strncmp(filename, "vehicles", 8)
@@ -116,20 +117,20 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
     if(filename[strlen(filename)-2] == 'p' && filename[strlen(filename)-1] == 'g')
 		jpg = true;
 
-	if (FS_LoadFile (filename, NULL) != -1)	
+	if (FS_LoadFile (filename, NULL) != -1)
 	{
 		// it exists, no need to download
 		return true;
 	}
 
-	if(jpg) 
-	{	
+	if(jpg)
+	{
 		//didn't find .jpg skin, try for .tga skin
 		//check for presence of a local .tga(but leave filename as original extension)
 		//if we find a .tga, don't try to download anything
 		COM_StripExtension ( filename, shortname );
-		sprintf(shortname, "%s.tga", shortname);
-		if (FS_LoadFile (shortname, NULL) != -1)	
+		sprintf(shortname2, "%s.tga", shortname);
+		if (FS_LoadFile (shortname2, NULL) != -1)
 		{
 			// it exists, no need to download
 			return true;
@@ -156,7 +157,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 //	FS_CreatePath (name);
 
 	fp = fopen (name, "r+b");
-	if (fp) 
+	if (fp)
 	{ // it exists
 		int len;
 
@@ -168,7 +169,7 @@ qboolean	CL_CheckOrDownloadFile (char *filename)
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 		MSG_WriteString (&cls.netchan.message,
 			va("download %s %i", cls.downloadname, len));
-	} else 
+	} else
 	{
 		Com_Printf ("Downloading %s\n", cls.downloadname);
 		MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
@@ -193,7 +194,7 @@ void	CL_Download_f (void)
 {
 	char filename[MAX_OSPATH];
 
-	if (Cmd_Argc() != 2) 
+	if (Cmd_Argc() != 2)
 	{
 		Com_Printf("Usage: download <filename>\n");
 		return;
@@ -355,7 +356,7 @@ CL_ParseServerData
 */
 void CL_ParseServerData (void)
 {
-	extern cvar_t	*fs_gamedirvar;
+	// extern cvar_t	*fs_gamedirvar;
 	char	*str;
 	int		i;
 
@@ -384,9 +385,16 @@ void CL_ParseServerData (void)
 	str = MSG_ReadString (&net_message);
 	strncpy (cl.gamedir, str, sizeof(cl.gamedir)-1);
 
+#if 0
+	// 2010-11 TODO: make sense of this.
+	//  changing game from server will require updating file system search paths
+	//    and other things.
+	//  removed for now. can cause a bogus latched cvar message.
+
 	// set gamedir
 	if ((*str && (!fs_gamedirvar->string || !*fs_gamedirvar->string || strcmp(fs_gamedirvar->string, str))) || (!*str && (fs_gamedirvar->string || *fs_gamedirvar->string)))
 		Cvar_Set("game", str);
+#endif
 
 	// parse player entity number
 	cl.playernum = MSG_ReadShort (&net_message);
@@ -474,7 +482,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		ci->model = R_RegisterModel (model_filename);
 		ci->helmet = R_RegisterModel("players/martianenforcer/helmet.md2");
 		// weapon file
-		for (i = 0; i < num_cl_weaponmodels; i++) 
+		for (i = 0; i < num_cl_weaponmodels; i++)
 		{
 			Com_sprintf (weapon_filename, sizeof(weapon_filename), "players/martianenforcer/%s", cl_weaponmodels[i]);
 			ci->weaponmodel[i] = R_RegisterModel(weapon_filename);
@@ -506,7 +514,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 
 		// if don't have a skin, it means that the model didn't have
 		// it, so default
-		if (!ci->skin) 
+		if (!ci->skin)
 		{
 			Com_sprintf (skin_filename, sizeof(skin_filename), "players/%s/default.pcx", model_name, skin_name);
 			ci->skin = R_RegisterSkin (skin_filename);
@@ -514,7 +522,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		}
 
 		// weapon file
-		for (i = 0; i < num_cl_weaponmodels; i++) 
+		for (i = 0; i < num_cl_weaponmodels; i++)
 		{
 			Com_sprintf (weapon_filename, sizeof(weapon_filename), "players/%s/%s", model_name, cl_weaponmodels[i]);
 			ci->weaponmodel[i] = R_RegisterModel(weapon_filename);
@@ -542,7 +550,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 	while (model_filename[i++]);
 
 	FS_FOpenFile (model_filename, &file);
-	if(file) 
+	if(file)
 	{
 		//exists
 		fclose(file);
@@ -558,7 +566,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 	while (model_filename[i++]);
 
 	FS_FOpenFile (model_filename, &file);
-	if(file) 
+	if(file)
 	{
 		//exists
 		fclose(file);
@@ -614,9 +622,9 @@ void CL_ParseTaunt( char *s)
 
 	strcpy( tauntsound, COM_Parse( &s ) );
 
-	strcpy( scr_playername, COM_Parse( &s ) ); //fix
+	Q_strncpyz2( scr_playername, COM_Parse( &s ), sizeof(scr_playername) );
 
-	if(cl_playtaunts->value) 
+	if(cl_playtaunts->value)
 	{
 		S_StartSound (NULL, 0, 0, S_RegisterSound (tauntsound), 1, ATTN_NONE, 0);
 		scr_playericonalpha = 2.0;

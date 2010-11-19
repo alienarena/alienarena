@@ -66,6 +66,9 @@ typedef int qboolean;
 #define	MAX_OSPATH			128		// max length of a filesystem pathname
 #endif
 
+#define PLAYERNAME_GLYPHS  15  // maximum visible characters in a player name
+#define PLAYERNAME_SIZE    32  // maximum bytes in player name string including color escapes
+
 //
 // per-level limits
 //
@@ -299,6 +302,8 @@ qboolean Info_KeyExists (const char *s, const char *key);
 void Info_RemoveKey (char *s, char *key);
 void Info_SetValueForKey (char *s, char *key, char *value);
 qboolean Info_Validate (char *s);
+
+size_t ValidatePlayerName( char *player_name, size_t player_name_size );
 
 /*
 ==============================================================

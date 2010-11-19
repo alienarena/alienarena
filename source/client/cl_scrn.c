@@ -1779,7 +1779,7 @@ SCR_DrawPlayerIcon
 =================
 */
 char		scr_playericon[MAX_OSPATH];
-char		scr_playername[32];
+char		scr_playername[PLAYERNAME_SIZE];
 float		scr_playericonalpha;
 void SCR_DrawPlayerIcon(void) {
 
@@ -1972,6 +1972,7 @@ void SCR_UpdateScreen (void)
 		}
 		scr_draw_loading = 2;
 	}
+
 
 	if (!scr_initialized || !con.initialized)
 		return;				// not initialized yet
