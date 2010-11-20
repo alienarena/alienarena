@@ -1785,7 +1785,7 @@ void CL_InitLocal (void)
 	info_spectator = Cvar_Get ("spectator", "0", CVAR_USERINFO);
 	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
 	/* */
-	ValidatePlayerName( name->string, strlen( name->string ) );
+	ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	/* */
 	skin = Cvar_Get ("skin", "male/grunt", CVAR_USERINFO | CVAR_ARCHIVE);
 	rate = Cvar_Get ("rate", "25000", CVAR_USERINFO | CVAR_ARCHIVE);	// FIXME
@@ -2187,7 +2187,7 @@ void CL_Init (void)
 
 	if ( name && name->string[0] )
 	{
-		ValidatePlayerName( name->string, strlen(name->string ) );
+		ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	}
 
 }
