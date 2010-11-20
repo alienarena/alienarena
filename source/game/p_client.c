@@ -2303,8 +2303,11 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 
 		if(duplicate && playernum < 100) { //just paranoia, should never be more than 64
 
+#if defined WIN32_VARIANT
+			i = sprintf_s(slot, sizeof(slot), "%i", playernum);
+#else
 			i = snprintf(slot, sizeof(slot), "%i", playernum);
-
+#endif
 			if ( strlen(ent->client->pers.netname) < (PLAYERNAME_SIZE - i) )
 			{ //small enough, just add to end
 				strcat(ent->client->pers.netname, slot);
