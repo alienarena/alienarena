@@ -3647,7 +3647,7 @@ void JoinServer_MenuInit( void )
 
 	getStatsDB();
 
-	ValidatePlayerName( name->string, strlen(name->string) );
+	ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	Q_strncpyz2( thisPlayer.playername, name->string, sizeof(thisPlayer.playername) );
 	thisPlayer.totalfrags = thisPlayer.totaltime = thisPlayer.ranking = 0;
 	thisPlayer = getPlayerRanking ( thisPlayer );
