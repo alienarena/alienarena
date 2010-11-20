@@ -356,7 +356,7 @@ CL_ParseServerData
 */
 void CL_ParseServerData (void)
 {
-	// extern cvar_t	*fs_gamedirvar;
+	 extern cvar_t	*fs_gamedirvar;
 	char	*str;
 	int		i;
 
@@ -385,16 +385,13 @@ void CL_ParseServerData (void)
 	str = MSG_ReadString (&net_message);
 	strncpy (cl.gamedir, str, sizeof(cl.gamedir)-1);
 
-#if 0
 	// 2010-11 TODO: make sense of this.
 	//  changing game from server will require updating file system search paths
 	//    and other things.
-	//  removed for now. can cause a bogus latched cvar message.
 
 	// set gamedir
 	if ((*str && (!fs_gamedirvar->string || !*fs_gamedirvar->string || strcmp(fs_gamedirvar->string, str))) || (!*str && (fs_gamedirvar->string || *fs_gamedirvar->string)))
 		Cvar_Set("game", str);
-#endif
 
 	// parse player entity number
 	cl.playernum = MSG_ReadShort (&net_message);
