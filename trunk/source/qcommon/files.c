@@ -245,32 +245,40 @@ static void FS_init_paths( void )
 	}
 #endif
 
-	 // set path for "data1"
-    memset( base_gamedata, 0, sizeof(base_gamedata) );
-    Com_sprintf( base_gamedata, sizeof(base_gamedata), "%s/%s",
-            fs_datadir, BASE_GAMEDATA );
+	// set path for "data1"
+	memset( base_gamedata, 0, sizeof(base_gamedata) );
+	Com_sprintf( base_gamedata, sizeof(base_gamedata), "%s/%s",
+			fs_datadir, BASE_GAMEDATA );
 
-    // set path for "arena" or mod
-    memset( game_gamedata, 0, sizeof(game_gamedata) );
-    fs_gamedirvar = Cvar_Get( "game", "", CVAR_LATCH|CVAR_SERVERINFO);
-    if ( *fs_gamedirvar->string
-        && Q_strncasecmp( fs_gamedirvar->string, BASE_GAMEDATA, MAX_OSPATH )
-        && Q_strncasecmp( fs_gamedirvar->string, GAME_GAMEDATA, MAX_OSPATH ))
-    { // not empty, "data1" nor "arena". expect a mod data directory
-        Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
-                fs_datadir, fs_gamedirvar->value );
-    }
-    else
-    { // "arena"
-        Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
-                fs_datadir, GAME_GAMEDATA );
-    }
+	// set path for "arena" or mod
+	memset( game_gamedata, 0, sizeof(game_gamedata) );
+	fs_gamedirvar = Cvar_Get( "game", "", CVAR_LATCH|CVAR_SERVERINFO);
+	if ( *fs_gamedirvar->string  && fs_gamedirvar->string[0] )
+	{ // not empty
+		if (  Q_strncasecmp( fs_gamedirvar->string, BASE_GAMEDATA, MAX_OSPATH )
+				&& Q_strncasecmp( fs_gamedirvar->string, GAME_GAMEDATA, MAX_OSPATH ))
+		{ // not "data1" nor "arena".  expect a mod data directory.
+			Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
+					fs_datadir, fs_gamedirvar->string );
+		}
+		else
+		{ // was "data1" or "arena", use "arena"
+			Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
+					fs_datadir, GAME_GAMEDATA );
+		}
+	}
+	else
+	{ // was empty, set to "arena"
+		fs_gamedirvar = Cvar_ForceSet("game", GAME_GAMEDATA );
+		Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
+				fs_datadir, GAME_GAMEDATA );
+	}
 
-    // set path for "botinfo"
-    // note: the "botinfo" part of the path, will be in the relative path
-    //  so do not include it here
-    memset( bot_gamedata, 0, sizeof(bot_gamedata) );
-    Com_sprintf( bot_gamedata, sizeof(bot_gamedata), "%s", fs_datadir );
+	// set path for "botinfo"
+	// note: the "botinfo" part of the path, will be in the relative path
+	//  so do not include it here
+	memset( bot_gamedata, 0, sizeof(bot_gamedata) );
+	Com_sprintf( bot_gamedata, sizeof(bot_gamedata), "%s", fs_datadir );
 
 #if defined UNIX_VARIANT
 	if ( fs_homedir[0] )

@@ -114,7 +114,7 @@ void UpdateChaseCam(edict_t *ent)
 void ChaseNext(edict_t *ent)
 {
 	int i;
-	char clean_name[16];
+	char clean_name[PLAYERNAME_SIZE];
 	edict_t *e;
 
 	if (!ent->client->chase_target)
@@ -141,7 +141,7 @@ void ChaseNext(edict_t *ent)
 void ChasePrev(edict_t *ent)
 {
 	int i;
-	char clean_name[16];
+	char clean_name[PLAYERNAME_SIZE];
 	edict_t *e;
 
 	if (!ent->client->chase_target)
@@ -168,7 +168,7 @@ void ChasePrev(edict_t *ent)
 void GetChaseTarget(edict_t *ent)
 {
 	int i;
-	char clean_name[16];
+	char clean_name[PLAYERNAME_SIZE];
 	edict_t *other;
 
 	for (i = 1; i <= g_maxclients->value; i++) {

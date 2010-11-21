@@ -275,6 +275,7 @@ of the parameters
 void	ServerCommand (void)
 {
 	char	*cmd;
+	char botname[PLAYERNAME_SIZE];
 
 	cmd = gi.argv(1);
 	if (Q_strcasecmp (cmd, "test") == 0)
@@ -316,7 +317,9 @@ void	ServerCommand (void)
 		}
 		else
 		{ // can become a team bot with assigned skin color
-			ACESP_SpawnBot (gi.argv(2), gi.argv(3), NULL);
+			Q_strncpyz2( botname, gi.argv(2), sizeof(botname) );
+			ValidatePlayerName( botname, sizeof(botname) );
+			ACESP_SpawnBot( botname, gi.argv(3), NULL );
 		}
 	}
 

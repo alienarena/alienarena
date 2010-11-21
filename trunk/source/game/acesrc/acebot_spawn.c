@@ -170,6 +170,7 @@ static void loadbots_closefile( void )
 static size_t loadbots_readnext( char *p_userinfo_bfr )
 {
 	size_t result;
+	char botname[PLAYERNAME_SIZE];
 
 	if ( loadbots_file.pfile == NULL || loadbots_file.record_count == 0 )
 	{
@@ -178,6 +179,12 @@ static size_t loadbots_readnext( char *p_userinfo_bfr )
 	else
 	{
 		result = fread( p_userinfo_bfr, sizeof(char) * MAX_INFO_STRING, 1, loadbots_file.pfile );
+		if ( result )
+		{ // make sure name from file is valid
+			Q_strncpyz2( botname, Info_ValueForKey( p_userinfo_bfr, "name" ), sizeof(botname) );
+			ValidatePlayerName( botname, sizeof(botname) );
+			Info_SetValueForKey( p_userinfo_bfr, "name", botname );
+		}
 	}
 
 	return result;  // 1 if ok, 0 if not
@@ -743,7 +750,7 @@ void ACESP_HoldSpawn(edict_t *self)
 	gi.WriteShort (self-g_edicts);
 	gi.WriteByte (MZ_LOGIN);
 	gi.multicast (self->s.origin, MULTICAST_PVS);
-	
+
 	safe_bprintf (PRINT_MEDIUM, "%s entered the game\n", self->client->pers.netname);
 }
 
