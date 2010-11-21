@@ -146,7 +146,7 @@ qboolean Pickup_deathball (edict_t *ent, edict_t *other)
 	gitem_t *hover;
 	gitem_t *deathball;
 	char	cleanname[PLAYERNAME_SIZE];
-	int i, j;
+	int i;
 	edict_t	*cl_ent;
 
     //check for any vehicles, if we have one, don't get in a deathball!

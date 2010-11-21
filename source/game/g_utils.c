@@ -551,7 +551,7 @@ to be displayed in green through safe_centerprintf.
 */
 void G_CleanPlayerName ( const char *source, char *dest )
 {
-	char *pch_src = source;
+	const char *pch_src = source;
 	char *pch_dst = dest;
 	int count = strlen( pch_src );
 

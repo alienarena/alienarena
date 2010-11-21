@@ -855,7 +855,7 @@ static void near_callback(void *data, dGeomID geom1, dGeomID geom2)
 			contact[i].surface.bounce_vel = 0.1;
 		}
 
-		if (numc = dCollide(geom1, geom2, MAX_CONTACTS, &contact[0].geom, sizeof(dContact)))
+		if (( numc = dCollide(geom1, geom2, MAX_CONTACTS, &contact[0].geom, sizeof(dContact))) != 0)
 		{
 			// To add each contact point found to our joint group we call dJointCreateContact which is just one of the many
 			// different joint types available.  
