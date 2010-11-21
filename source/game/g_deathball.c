@@ -145,7 +145,7 @@ qboolean Pickup_deathball (edict_t *ent, edict_t *other)
 	gitem_t *strafer;
 	gitem_t *hover;
 	gitem_t *deathball;
-	char	cleanname[16];
+	char	cleanname[PLAYERNAME_SIZE];
 	int i, j;
 	edict_t	*cl_ent;
 
@@ -176,18 +176,9 @@ qboolean Pickup_deathball (edict_t *ent, edict_t *other)
 		ent->svflags |= SVF_NOCLIENT;
 		ent->solid = SOLID_NOT;
 	}
-	//clean up name, get rid of escape chars
-	j = 0;
-	for (i = 0; i < 16; i++)
-		cleanname[i] = 0;
-		for (i = 0; i < strlen(other->client->pers.netname) && i < 16; i++) {
-			if ( other->client->pers.netname[i] == '^' ) {
-				i += 1;
-				continue;
-			}
-		cleanname[j] = other->client->pers.netname[i]+128;
-		j++;
-	}
+
+	G_CleanPlayerName( other->client->pers.netname, cleanname );
+
 	if(dmflags->integer & DF_SKINTEAMS) {
 		for (i=0 ; i<g_maxclients->value ; i++)
 		{

@@ -544,32 +544,31 @@ G_CleanPlayerName
 
 Removes escape characters from a player's name and prepares it
 to be displayed in green through safe_centerprintf.
+
+!Note!: dest must be at least PLAYERNAME_SIZE  bytes long.
+  (could be PLAYERNAME_GLYPHS + 1 long, but safer to use max. string length)
 =============
 */
 void G_CleanPlayerName ( const char *source, char *dest )
 {
-	int i, j, k;
+	char *pch_src = source;
+	char *pch_dst = dest;
+	int count = strlen( pch_src );
 
-	memset( dest, 0, 16 );
-	for (i = j = k = 0; i < strlen(source) && j < 16; i ++)
+	memset( pch_dst, 0, PLAYERNAME_SIZE );
+	while ( count > 0 )
 	{
-		if ( !k && source[i] == '^' )
+		if ( Q_IsColorString( pch_src ) )
 		{
-			if ( source[i + 1] != '^' )
-			{
-				i += 1;
-				continue;
-			}
-			else
-			{
-				k = 1;
-			}
+			pch_src += 2;
+			count -= 2;
 		}
-		else if ( k )
+		else
 		{
-			k = 0;
+			*pch_dst++ = *pch_src | 0x80;
+			++pch_src;
+			--count;
 		}
-		dest[j ++] = source[i] + 128;
 	}
 }
 
