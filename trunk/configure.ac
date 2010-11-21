@@ -26,7 +26,7 @@
 #  Mac OS X / Darwin using X11
 
 AC_PREREQ(2.61)
-AC_INIT([alienarena],[7.46.alpha3],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.50],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -37,8 +37,8 @@ dnl 1.11 = require automake 1.11 or greater
 dnl foreign = do not apply GNU doc requirements
 dnl subdir-objects = compile objects into their sub directories
 dnl silent-rules = less output (--disable-silent-rules for more output)
-dnl dist-zip = build .zip distribution in addition to .tar.gz 
-AM_INIT_AUTOMAKE([ 1.11 foreign subdir-objects silent-rules dist-zip ])
+dnl add dist-zip, dist-bzip2 for other distributions besides tar.gz  
+AM_INIT_AUTOMAKE([ 1.11 foreign subdir-objects silent-rules ])
 AM_SILENT_RULES([yes])
 
 dnl use --enable-maintainer-mode to get full set of make targets
@@ -86,14 +86,19 @@ AM_CONDITIONAL([BUILD_UNIX],[ test "x${cond_build_unix}" = xyes ])
 # Environment variable for specifying libGL.dylib path for Darwin when it
 # is not in the dlopen() search path. see dlopen (3) for Mac OS X.
 # Either export or in command line: GL_LIBDIR=/usr/Xll/lib, for example.
+# If this GL_LIBDIR is not given, use the shell variable x_libraries from
+# the AC_PATH_X macro (which may be empty)
 #
 gl_dlopen_path=default
 AS_IF([ test x"${unix_host}" = xdarwin ],
 	[
+	AC_PATH_X
 	AC_MSG_CHECKING([for GL_LIBDIR (location of libGL.dylib)])
 	AC_ARG_VAR( GL_LIBDIR, [directory containing libGL.dylib])
 	AC_MSG_RESULT([${GL_LIBDIR}])
-	AS_IF([ test x"${GL_LIBDIR}" = x ],,[gl_dlopen_path=${GL_LIBDIR}])
+	AS_IF([ test x"${GL_LIBDIR}" = x ],
+		[gl_dlopen_path=${x_libraries}],
+		[gl_dlopen_path=${GL_LIBDIR}])
 ])
 
 #
@@ -284,9 +289,6 @@ dnl
 AM_COND_IF([BUILD_CLIENT],
 [
 
-dnl autoscan says glext.h needs this
-	AM_COND_IF([BUILD_UNIX],[AC_PATH_X])
-
 	jpeglib_h_found=no
 	AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h],[ jpeglib_h_found=yes ])
 	AS_IF([ test "x${jpeglib_h_found}" = xno ],
@@ -453,11 +455,19 @@ AS_IF([ test "x$paranoid_io" = "xyes" ],[
 	debug=yes
 ])
 
+# Enable assert statements
+AC_ARG_ENABLE([assert-statements],
+	[AS_HELP_STRING([--enable-assert-statements],
+		[Enable debug assert() statements (default: no)])
+	],[assert_stmts=${enableval}],[assert_stmts=no])
+AS_IF([ test "x$assert_stmts" = "xyes" ],
+	[debug=yes],
+	[AX_CFLAGS_GCC_OPTION([-DNDEBUG])
+])
+
 #########################################################################################################
 # END OF DEBUGGING OPTIONS
 #########################################################################################################
-
-
 
 # outputs
 AC_CONFIG_FILES([ Makefile 	source/Makefile ])
@@ -495,6 +505,7 @@ AS_IF([test "x$hide_status" = "xno"],[
 		AS_ECHO(["   IRC protocol dump: ........ ${irc_debug}"])
 		AS_ECHO(["   Buffer debugging: ......... ${buffer_debug}"])
 		AS_ECHO(["   Paranoid message checks: .. ${buffer_debug}"])
+		AS_ECHO(["   Assert statements: ........ ${assert_stmts}"])
 	])
 
 	AM_COND_IF([ALTERNATE_INSTALL],
