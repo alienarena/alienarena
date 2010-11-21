@@ -1770,7 +1770,13 @@ void Info_RemoveKey (char *s, char *key)
 
 		if (!strcmp (key, pkey) )
 		{
-			strcpy (start, s);	// remove this part
+			/* Two strcpy's instead of one - this was messing up
+			 * on modern, 64-bit Linux system due to "s" being modified
+			 * while it is being copied.
+			 * - E.B.
+			 */
+			strcpy( value , s );
+			strcpy( start , value );
 			return;
 		}
 
