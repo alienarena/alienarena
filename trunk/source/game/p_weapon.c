@@ -1373,9 +1373,9 @@ void Weapon_Beamgun_Fire (edict_t *ent)
 				effect = 0;
 
 			if(excessive->value)
-				damage = 25;
+				damage = 20;
 			else
-				damage = 10;
+				damage = 7;
 
 			Blaster_Fire (ent, offset, damage, true, effect);
 			if (! ( dmflags->integer & DF_INFINITE_AMMO ) )
