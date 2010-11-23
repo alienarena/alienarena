@@ -1189,12 +1189,17 @@ void floater_think (edict_t *self)
 		ignore = self;
 		VectorCopy (self->s.origin, start);
 		VectorMA (start, 2048, dir, end);
-		while(1)
+		while(ignore)
 		{
 			tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
 
 			if (!tr.ent)
 				break;
+
+			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
+				ignore = tr.ent;
+			else
+				ignore = NULL;
 
 			// hurt it if we can
 			if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER) && (tr.ent != self->owner)) {
@@ -1216,7 +1221,6 @@ void floater_think (edict_t *self)
 				break;
 			}
 
-			ignore = tr.ent;
 			VectorCopy (tr.endpos, start);
 		}
 
