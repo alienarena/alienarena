@@ -365,31 +365,24 @@ int speed, int effect, qboolean hyper)
 	ignore = self;
 	water = false;
 	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
-	while (ignore)
+	
+	tr = gi.trace (from, NULL, NULL, end, ignore, mask);
+
+	if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
 	{
-		tr = gi.trace (from, NULL, NULL, end, ignore, mask);
-
-		if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
-		{
-			mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
-			water = true;
-		}
-		else
-		{
-			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
-				ignore = tr.ent;
-			else
-				ignore = NULL;
-
-			if ((tr.ent != self) && (tr.ent->takedamage)) {
-				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BLASTER);
-				self->client->resp.weapon_hits[6]++;
-				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-			}
-		}
-		VectorCopy (tr.endpos, from);
+		mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
+		water = true;
 	}
-
+	else
+	{
+		if ((tr.ent != self) && (tr.ent->takedamage)) {
+			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, 0, 0, MOD_BLASTER);
+			self->client->resp.weapon_hits[6]++;
+			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
+	}
+	VectorCopy (tr.endpos, from);
+	
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
@@ -580,32 +573,26 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	ignore = self;
 	water = false;
 	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
-	while (ignore)
+	
+	tr = gi.trace (from, NULL, NULL, end, ignore, mask);
+
+	if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
 	{
-		tr = gi.trace (from, NULL, NULL, end, ignore, mask);
-
-		if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
-		{
-			mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
-			water = true;
-		}
-		else
-		{
-			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
-				ignore = tr.ent;
-			else
-				ignore = NULL;
-
-			if ((tr.ent != self) && (tr.ent->takedamage)) {
-				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
-				self->client->resp.weapon_hits[0]++;
-				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-			}
-		}
-
-		VectorCopy (tr.endpos, from);
+		mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
+		water = true;
 	}
-
+	else
+	{
+	
+		if ((tr.ent != self) && (tr.ent->takedamage)) {
+			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
+			self->client->resp.weapon_hits[0]++;
+			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
+	}
+	
+	VectorCopy (tr.endpos, from);
+	
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
@@ -736,32 +723,25 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	ignore = self;
 	water = false;
 	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
-	while (ignore)
+	
+	tr = gi.trace (from, NULL, NULL, end, ignore, mask);
+
+	if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
 	{
-		tr = gi.trace (from, NULL, NULL, end, ignore, mask);
-
-		if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
-		{
-			mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
-			water = true;
-		}
-		else
-		{
-			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
-				ignore = tr.ent;
-			else
-				ignore = NULL;
-
-			if ((tr.ent != self) && (tr.ent->takedamage))
-				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
-				if (tr.ent->health > 0)
-				{
-					gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-				}
-			}
-		VectorCopy (tr.endpos, from);
+		mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
+		water = true;
 	}
-
+	else
+	{	
+		if ((tr.ent != self) && (tr.ent->takedamage))
+			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
+			if (tr.ent->health > 0)
+			{
+				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+			}
+		}
+	VectorCopy (tr.endpos, from);
+	
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
@@ -896,31 +876,25 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 	ignore = self;
 	water = false;
 	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
-	while (ignore)
+	
+	tr = gi.trace (from, NULL, NULL, end, ignore, mask);
+
+	if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
 	{
-		tr = gi.trace (from, NULL, NULL, end, ignore, mask);
-
-		if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
-		{
-			mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
-			water = true;
-		}
-		else
-		{
-			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
-				ignore = tr.ent;
-			else
-				ignore = NULL;
-
-			if ((tr.ent != self) && (tr.ent->takedamage)) {
-				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_DISRUPTOR);
-				self->client->resp.weapon_hits[1]++;
-				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-			}
-		}
-		VectorCopy (tr.endpos, from);
+		mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
+		water = true;
 	}
-
+	else
+	{
+	
+		if ((tr.ent != self) && (tr.ent->takedamage)) {
+			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_DISRUPTOR);
+			self->client->resp.weapon_hits[1]++;
+			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
+	}
+	VectorCopy (tr.endpos, from);
+	
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
@@ -979,33 +953,26 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	ignore = self;
 	water = false;
 	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
-	while (ignore)
+	
+	tr = gi.trace (from, NULL, NULL, end, ignore, mask);
+
+	if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
 	{
-		tr = gi.trace (from, NULL, NULL, end, ignore, mask);
-
-		if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
-		{
-			mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
-			water = true;
-		}
-		else
-		{
-			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
-				ignore = tr.ent;
-			else
-				ignore = NULL;
-
-			if ((tr.ent != self) && (tr.ent->takedamage)) {
-				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_VAPORIZER);
-				self->client->resp.weapon_hits[7]++;
+		mask &= ~(CONTENTS_SLIME|CONTENTS_LAVA);
+		water = true;
+	}
+	else
+	{	
+		if ((tr.ent != self) && (tr.ent->takedamage)) {
+			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_VAPORIZER);
+			self->client->resp.weapon_hits[7]++;
 				gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-			}
+
 			T_RadiusDamage(tr.ent, self, damage, NULL, 120, MOD_VAPORIZER, -1);
 		}
-
-		VectorCopy (tr.endpos, from);
 	}
-
+	VectorCopy (tr.endpos, from);
+	
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
@@ -1189,41 +1156,32 @@ void floater_think (edict_t *self)
 		ignore = self;
 		VectorCopy (self->s.origin, start);
 		VectorMA (start, 2048, dir, end);
-		while(ignore)
+		
+		tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
+
+		
+		// hurt it if we can
+		if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER) && (tr.ent != self->owner)) {
+			T_Damage (tr.ent, self, self->owner, dir, tr.endpos, vec3_origin, dmg, 1, DAMAGE_ENERGY, MOD_SMARTGUN);
+			self->owner->client->resp.weapon_shots[2]++;
+			self->owner->client->resp.weapon_hits[2]++;
+			gi.sound (self->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		}
+		
+		// if we hit something that's not a monster or player we're done
+		if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
 		{
-			tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
-
-			if (!tr.ent)
-				break;
-
-			if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
-				ignore = tr.ent;
-			else
-				ignore = NULL;
-
-			// hurt it if we can
-			if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER) && (tr.ent != self->owner)) {
-				T_Damage (tr.ent, self, self->owner, dir, tr.endpos, vec3_origin, dmg, 1, DAMAGE_ENERGY, MOD_SMARTGUN);
-				self->owner->client->resp.weapon_shots[2]++;
-				self->owner->client->resp.weapon_hits[2]++;
-				gi.sound (self->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-			}
-			// if we hit something that's not a monster or player we're done
-			if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
-			{
-				gi.WriteByte (svc_temp_entity);
-				gi.WriteByte (TE_LASER_SPARKS);
-				gi.WriteByte (4);
-				gi.WritePosition (tr.endpos);
-				gi.WriteDir (tr.plane.normal);
-				gi.WriteByte (self->s.skinnum);
-				gi.multicast (tr.endpos, MULTICAST_PVS);
-				break;
-			}
-
-			VectorCopy (tr.endpos, start);
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_LASER_SPARKS);
+			gi.WriteByte (4);
+			gi.WritePosition (tr.endpos);
+			gi.WriteDir (tr.plane.normal);
+			gi.WriteByte (self->s.skinnum);
+			gi.multicast (tr.endpos, MULTICAST_PVS);
 		}
 
+		VectorCopy (tr.endpos, start);
+		
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_LIGHTNING);
 		gi.WritePosition (self->s.origin);
@@ -1803,32 +1761,25 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 	VectorCopy (start, from);
 	ignore = self;
 
-	while (ignore)
-	{
-		tr = gi.trace (from, NULL, NULL, end, ignore, MASK_PLAYERSOLID);
+	tr = gi.trace (from, NULL, NULL, end, ignore, MASK_PLAYERSOLID);
 
-		if ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client))
-			ignore = tr.ent;
-		else
-			ignore = NULL;
+	
+	if ((tr.ent != self) && (tr.ent->takedamage)) {
+		T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_VIOLATOR);
+		self->client->resp.weapon_hits[8]++;
+		gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_LASER_SPARKS);
+		gi.WriteByte (4);
+		gi.WritePosition (tr.endpos);
+		gi.WriteDir (tr.plane.normal);
+		// skinnum is sometimes larger, why?, but does it matter?
+		gi.WriteByte( ((self->s.skinnum > 255) ? 0 : self->s.skinnum) );
+		gi.multicast (tr.endpos, MULTICAST_PVS);
 
-		if ((tr.ent != self) && (tr.ent->takedamage)) {
-			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_VIOLATOR);
-			self->client->resp.weapon_hits[8]++;
-			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
-			gi.WriteByte (svc_temp_entity);
-			gi.WriteByte (TE_LASER_SPARKS);
-			gi.WriteByte (4);
-			gi.WritePosition (tr.endpos);
-			gi.WriteDir (tr.plane.normal);
-			// skinnum is sometimes larger, why?, but does it matter?
-			gi.WriteByte( ((self->s.skinnum > 255) ? 0 : self->s.skinnum) );
-			gi.multicast (tr.endpos, MULTICAST_PVS);
-
-		}
-		VectorCopy (tr.endpos, from);
 	}
-
+	VectorCopy (tr.endpos, from);
+	
 	if ( g_antilag->integer)
 		G_UndoTimeShiftFor( self );
 }
