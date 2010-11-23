@@ -6582,7 +6582,7 @@ void PlayerConfig_MenuDraw( void )
 
 		refdef.height += 4;
 
-		R_RenderFrame( &refdef );
+		R_RenderFramePlayerSetup( &refdef );
 
 		Com_sprintf( scratch, sizeof( scratch ), "/players/%s/%s_i.tga",
 			s_pmi[s_player_model_box.curvalue].directory,

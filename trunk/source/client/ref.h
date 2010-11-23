@@ -375,6 +375,7 @@ void	R_BeginRegistration (char *map);
 void	R_EndRegistration (void);
 
 void	R_RenderFrame (refdef_t *fd);
+void	R_RenderFramePlayerSetup (refdef_t *fd);
 void	R_EndFrame (void);
 
 int		R_Init( void *hinstance, void *hWnd );
