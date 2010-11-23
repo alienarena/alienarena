@@ -1131,6 +1131,21 @@ void R_RenderFrame (refdef_t *fd)
 	R_SetGL2D ();
 }
 
+void R_RenderFramePlayerSetup( refdef_t *rfdf )
+{
+
+	numRadarEnts = 0;
+
+	r_newrefdef = *rfdf;
+
+	R_SetupFrame();
+	R_SetFrustum();
+	R_SetupGL();
+	R_DrawEntitiesOnList();
+
+	R_SetGL2D();
+
+}
 
 void R_Register( void )
 {
