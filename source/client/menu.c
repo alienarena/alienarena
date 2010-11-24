@@ -1389,7 +1389,7 @@ extern cvar_t *cl_showPlayerNames;
 extern cvar_t *r_ragdolls;
 extern cvar_t *cl_noblood;
 extern cvar_t *cl_noskins;
-extern cvar_t *gl_dynamic;
+extern cvar_t *cl_precachecustom;
 extern cvar_t *r_minimap;
 extern cvar_t *r_minimap_style;
 
@@ -1419,7 +1419,7 @@ static menulist_s		s_options_ragdoll_box;
 static menulist_s		s_options_noblood_box;
 static menulist_s		s_options_noskins_box;
 static menulist_s		s_options_taunts_box;
-static menulist_s		s_options_dynamic_box;
+static menulist_s		s_options_precachecustom_box;
 static menulist_s		s_options_minimap_box;
 static menulist_s		s_options_showfps_box;
 static menulist_s		s_options_showtime_box;
@@ -1451,9 +1451,9 @@ static void TauntsFunc( void *unused )
 	Cvar_SetValue( "cl_playtaunts", s_options_taunts_box.curvalue);
 }
 
-static void DynamicFunc( void *unused )
+static void PrecacheFunc( void *unused )
 {
-	Cvar_SetValue( "gl_dynamic", s_options_dynamic_box.curvalue);
+	Cvar_SetValue( "cl_precachecustom", s_options_precachecustom_box.curvalue);
 }
 
 static void PainDistFunc( void *unused )
@@ -1975,8 +1975,8 @@ static void ControlsSetMenuItemValues( void )
 	Cvar_SetValue("cl_drawtimer", ClampCvar(0, 1, cl_drawtimer->value ) );
 	s_options_showtime_box.curvalue		= cl_drawtimer->value;
 
-	Cvar_SetValue("gl_dynamic", ClampCvar(0, 2, gl_dynamic->value ) );
-	s_options_dynamic_box.curvalue		= gl_dynamic->value;
+	Cvar_SetValue("cl_precachecustom", ClampCvar(0, 2, cl_precachecustom->value ) );
+	s_options_precachecustom_box.curvalue		= cl_precachecustom->value;
 
 	Cvar_SetValue("cl_paindist", ClampCvar(0, 1, cl_paindist->value ) );
 	s_options_paindist_box.curvalue		= cl_paindist->value;
@@ -2164,12 +2164,13 @@ void Options_MenuInit( void )
 	s_options_customize_options_action.generic.name	= "customize controls";
 	s_options_customize_options_action.generic.callback = CustomizeControlsFunc;
 
-	s_options_dynamic_box.generic.type = MTYPE_SPINCONTROL;
-	s_options_dynamic_box.generic.x	= 0;
-	s_options_dynamic_box.generic.y	= FONTSCALE*30*scale;
-	s_options_dynamic_box.generic.name	= "dynamic lights";
-	s_options_dynamic_box.generic.callback = DynamicFunc;
-	s_options_dynamic_box.itemnames = onoff_names;
+	s_options_precachecustom_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_precachecustom_box.generic.x	= 0;
+	s_options_precachecustom_box.generic.y	= FONTSCALE*30*scale;
+	s_options_precachecustom_box.generic.name	= "precache custom models";
+	s_options_precachecustom_box.generic.callback = PrecacheFunc;
+	s_options_precachecustom_box.itemnames = onoff_names;
+	s_options_precachecustom_box.generic.statusbar = "Enabling this can result in slow map loading times";
 
 	s_options_paindist_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_paindist_box.generic.x	= 0;
@@ -2384,7 +2385,7 @@ void Options_MenuInit( void )
 	ControlsSetMenuItemValues();
 
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_customize_options_action );
-	Menu_AddItem( &s_options_menu, ( void * ) &s_options_dynamic_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_precachecustom_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_paindist_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_explosiondist_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_target_box );
@@ -5990,10 +5991,6 @@ static menulist_s		s_player_model_box;
 static menulist_s		s_player_skin_box;
 static menulist_s		s_player_handedness_box;
 static menulist_s		s_player_rate_box;
-// static menuseparator_s	s_player_skin_title; // unused
-// static menuseparator_s	s_player_model_title; // unused
-// static menuseparator_s	s_player_hand_title; // unused
-// static menuseparator_s	s_player_rate_title; // unused
 static menufield_s		s_player_fov_field;
 
 #define MAX_DISPLAYNAME 16

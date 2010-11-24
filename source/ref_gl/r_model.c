@@ -2316,7 +2316,11 @@ int WModelsCount = (int)(sizeof(BaseWModels)/sizeof(BaseWModels[0]));
 void R_RegisterBasePlayerModels( void )
 {
 	char	mod_filename[MAX_QPATH];
+	char	scratch[MAX_QPATH];
 	int i, j;
+	int npms = 0;
+	int nskins = 0;
+	char **skinnames;
 
 	//precache all player and weapon models(base only, otherwise could take very long loading a map!)
 	for (i = 0; i < PModelsCount; i++)
@@ -2329,12 +2333,99 @@ void R_RegisterBasePlayerModels( void )
 		Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/lod2.md2", BasePModels[i].name);
 		R_RegisterModel(mod_filename);
 
+		//register weapon models
 		for (j = 0; j < WModelsCount; j++)
 		{
 			Com_sprintf( mod_filename, sizeof(mod_filename), "players/%s/%s", BasePModels[i].name, BaseWModels[j]);
 			R_RegisterModel(mod_filename);
 		}
+
+		//register all skins
+		Com_sprintf( scratch, sizeof(scratch), "players/%s/*.jpg", BasePModels[i].name);
+		skinnames = FS_ListFilesInFS( scratch, &nskins, 0,
+		    SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+		if(!skinnames)
+			continue;
+		
+		for(j = 0; j < nskins; j++)
+			R_RegisterSkin (skinnames[j]);
+		
+		if(skinnames)
+			free(skinnames);	
 	}
+}
+
+void R_RegisterCustomPlayerModels( void )
+{
+	char	mod_filename[MAX_QPATH];
+	char	scratch[MAX_QPATH];
+	int i, j;
+	int npms = 0;
+	int nskins = 0;
+	char **dirnames;
+	char **skinnames;
+
+	dirnames = FS_ListFilesInFS( "players/*.*", &npms, SFF_SUBDIR, 0 );
+
+	if ( !dirnames )
+		return;
+
+	if ( npms > 1024 )
+		npms = 1024;
+
+	for(i = 0; i < npms; i++)
+	{
+		if ( dirnames[i] == 0 )
+			continue;
+
+		Com_Printf("Registering custom player model: %s\n", dirnames[i]);
+		Com_sprintf( mod_filename, sizeof(mod_filename), "%s/tris.md2", dirnames[i]);
+		if(FS_FileExists(mod_filename))
+			R_RegisterModel(mod_filename);
+		else
+			continue; //invalid player model
+		Com_sprintf( mod_filename, sizeof(mod_filename), "%s/lod1.md2", dirnames[i]);
+		if(FS_FileExists(mod_filename))
+			R_RegisterModel(mod_filename);
+		Com_sprintf( mod_filename, sizeof(mod_filename), "%s/lod2.md2", dirnames[i]);
+		if(FS_FileExists(mod_filename))
+			R_RegisterModel(mod_filename);
+
+		//register weapon models
+		for (j = 0; j < WModelsCount; j++)
+		{
+			Com_sprintf( mod_filename, sizeof(mod_filename), "%s/%s", dirnames[i], BaseWModels[j]);
+			if(FS_FileExists(mod_filename))
+				R_RegisterModel(mod_filename);
+		}
+
+		//register all skins
+		strcpy( scratch, dirnames[i] );
+		strcat( scratch, "/*.jpg" );
+		skinnames = FS_ListFilesInFS( scratch, &nskins, 0,
+		    SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+
+		if(!skinnames) {
+			// check for .tga, though this is no longer used for current models
+			strcpy( scratch, dirnames[i] );
+			strcat( scratch, "/*.tga" );
+			skinnames = FS_ListFilesInFS( scratch, &nskins, 0,
+				SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
+		}
+
+		if(!skinnames)
+			continue;
+		
+		for(j = 0; j < nskins; j++)
+			R_RegisterSkin (skinnames[j]);
+
+		if(skinnames)
+			free(skinnames);		
+
+	}
+	if(dirnames)
+		free(dirnames);
 }
 
 void R_BeginRegistration (char *model)
