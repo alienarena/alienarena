@@ -2318,7 +2318,7 @@ void R_RegisterBasePlayerModels( void )
 	char	mod_filename[MAX_QPATH];
 	char	scratch[MAX_QPATH];
 	int i, j;
-	int npms = 0;
+	// int npms = 0; // unused
 	int nskins = 0;
 	char **skinnames;
 
@@ -2347,12 +2347,12 @@ void R_RegisterBasePlayerModels( void )
 
 		if(!skinnames)
 			continue;
-		
+
 		for(j = 0; j < nskins; j++)
 			R_RegisterSkin (skinnames[j]);
-		
+
 		if(skinnames)
-			free(skinnames);	
+			free(skinnames);
 	}
 }
 
@@ -2416,12 +2416,12 @@ void R_RegisterCustomPlayerModels( void )
 
 		if(!skinnames)
 			continue;
-		
+
 		for(j = 0; j < nskins; j++)
 			R_RegisterSkin (skinnames[j]);
 
 		if(skinnames)
-			free(skinnames);		
+			free(skinnames);
 
 	}
 	if(dirnames)
