@@ -513,9 +513,9 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		// it, so default
 		if (!ci->skin)
 		{
-			Com_sprintf (skin_filename, sizeof(skin_filename), "players/%s/default.pcx", model_name, skin_name);
-			ci->skin = R_RegisterSkin (skin_filename);
 			strcpy(skin_name, "default");
+			Com_sprintf (skin_filename, sizeof(skin_filename), "players/%s/default.pcx", model_name);
+			ci->skin = R_RegisterSkin (skin_filename);			
 		}
 
 		// weapon file

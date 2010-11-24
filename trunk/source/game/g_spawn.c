@@ -851,6 +851,8 @@ void SP_worldspawn (edict_t *ent)
 	else
 		gi.cvar_set("sv_gravity", st.gravity);
 
+	//prechaches
+
 	PrecacheItem (FindItem ("Blaster"));
 	PrecacheItem (FindItem ("Violator"));
 
@@ -860,7 +862,6 @@ void SP_worldspawn (edict_t *ent)
 	gi.soundindex ("misc/pc_up.wav");
 	gi.soundindex ("misc/talk1.wav");
 
-	// gibs
 	gi.soundindex ("items/respawn1.wav");
 
 	// sexed sounds
@@ -908,6 +909,49 @@ void SP_worldspawn (edict_t *ent)
 	gi.soundindex ("misc/godlike.wav");
 	gi.soundindex ("misc/rampage.wav");
 	gi.soundindex ("misc/fight.wav");
+
+	//precache all base player taunts
+	gi.soundindex ("taunts/martianenforcer/taunt1.wav");
+	gi.soundindex ("taunts/martianenforcer/taunt2.wav");
+	gi.soundindex ("taunts/martianenforcer/taunt3.wav");
+	gi.soundindex ("taunts/martianenforcer/taunt4.wav");
+	gi.soundindex ("taunts/martianenforcer/taunt5.wav");
+
+	gi.soundindex ("taunts/martiancyborg/taunt1.wav");
+	gi.soundindex ("taunts/martiancyborg/taunt2.wav");
+	gi.soundindex ("taunts/martiancyborg/taunt3.wav");
+	gi.soundindex ("taunts/martiancyborg/taunt4.wav");
+	gi.soundindex ("taunts/martiancyborg/taunt5.wav");
+
+	gi.soundindex ("taunts/commander/taunt1.wav");
+	gi.soundindex ("taunts/commander/taunt2.wav");
+	gi.soundindex ("taunts/commander/taunt3.wav");
+	gi.soundindex ("taunts/commander/taunt4.wav");
+	gi.soundindex ("taunts/commander/taunt5.wav");
+
+	gi.soundindex ("taunts/enforcer/taunt1.wav");
+	gi.soundindex ("taunts/enforcer/taunt2.wav");
+	gi.soundindex ("taunts/enforcer/taunt3.wav");
+	gi.soundindex ("taunts/enforcer/taunt4.wav");
+	gi.soundindex ("taunts/enforcer/taunt5.wav");
+
+	gi.soundindex ("taunts/slashbot/taunt1.wav");
+	gi.soundindex ("taunts/slashbot/taunt2.wav");
+	gi.soundindex ("taunts/slashbot/taunt3.wav");
+	gi.soundindex ("taunts/slashbot/taunt4.wav");
+	gi.soundindex ("taunts/slashbot/taunt5.wav");
+
+	gi.soundindex ("taunts/lauren/taunt1.wav");
+	gi.soundindex ("taunts/lauren/taunt2.wav");
+	gi.soundindex ("taunts/lauren/taunt3.wav");
+	gi.soundindex ("taunts/lauren/taunt4.wav");
+	gi.soundindex ("taunts/lauren/taunt5.wav");
+
+	gi.soundindex ("taunts/martiancyborg/taunt1.wav");
+	gi.soundindex ("taunts/martiancyborg/taunt2.wav");
+	gi.soundindex ("taunts/martiancyborg/taunt3.wav");
+	gi.soundindex ("taunts/martiancyborg/taunt4.wav");
+	gi.soundindex ("taunts/martiancyborg/taunt5.wav");
 
 	//precache any gibs
 	sm_meat_index = gi.modelindex ("models/objects/gibs/sm_meat/tris.md2");

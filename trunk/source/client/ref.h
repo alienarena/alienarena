@@ -371,6 +371,7 @@ struct image_s	*R_RegisterPic (const char *name);
 void	R_SetSky (char *name, float rotate, vec3_t axis);
 
 void	R_RegisterBasePlayerModels(void);
+void	R_RegisterCustomPlayerModels(void);
 void	R_BeginRegistration (char *map);
 void	R_EndRegistration (void);
 

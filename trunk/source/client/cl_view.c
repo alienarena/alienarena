@@ -470,6 +470,8 @@ void CL_PrepRefresh ( void )
 	SCR_UpdateScreen ();
 
 	R_RegisterBasePlayerModels();
+	if(cl_precachecustom->value)
+		R_RegisterCustomPlayerModels();
 
 	Com_sprintf (loadingMessages[1], sizeof(loadingMessages[1]), "loading models...done");
 
