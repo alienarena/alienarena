@@ -25,7 +25,6 @@
 # Game data for distribution package
 #
 nobase_dist_pkgdata_DATA = \
-	Aa1.ico \
 	aa.png \
 	arena/motd.txt \
 	arena/server.cfg \
@@ -92,12 +91,10 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-violator.tmp \
 	botinfo/dm-warmachine2k10.tmp \
 	botinfo/dm-zion2k9.tmp \
-	botinfo/dm-zion.tmp \
 	botinfo/dm-zorn.tmp \
 	botinfo/nav/aoa-atlantis.nod \
 	botinfo/nav/aoa-corrosion.nod \
 	botinfo/nav/aoa-frost2k9.nod \
-	botinfo/nav/aoa-frost.nod \
 	botinfo/nav/aoa-morpheus.nod \
 	botinfo/nav/aoa-zorn.nod \
 	botinfo/nav/cp-grindery.nod \
@@ -108,7 +105,6 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/ctf-cryogenic.nod \
 	botinfo/nav/ctf-europa2k8.nod \
 	botinfo/nav/ctf-frostbyte.nod \
-	botinfo/nav/ctf-frost.nod \
 	botinfo/nav/ctf-icarus2.nod \
 	botinfo/nav/ctf-invasion.nod \
 	botinfo/nav/ctf-oblivion.nod \
@@ -124,40 +120,29 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-babel.nod \
 	botinfo/nav/dm-beyond.nod \
 	botinfo/nav/dm-bloodfactory.nod \
-	botinfo/nav/dm-blood.nod \
 	botinfo/nav/dm-chasmatic2k9.nod \
-	botinfo/nav/dm-chasmatic.nod \
 	botinfo/nav/dm-command2k9.nod \
 	botinfo/nav/dm-corrosion.nod \
 	botinfo/nav/dm-crucible2k8.nod \
 	botinfo/nav/dm-deathray.nod \
 	botinfo/nav/dm-deimos2k9.nod \
-	botinfo/nav/dm-deimos.nod \
 	botinfo/nav/dm-dismal2k8.nod \
-	botinfo/nav/dm-dismal.nod \
 	botinfo/nav/dm-downfall.nod \
 	botinfo/nav/dm-dread.nod \
 	botinfo/nav/dm-dynamo2k8.nod \
-	botinfo/nav/dm-dynamo2.nod \
 	botinfo/nav/dm-eternal.nod \
 	botinfo/nav/dm-europa2k8.nod \
-	botinfo/nav/dm-frontier2.nod \
 	botinfo/nav/dm-furious2k8.nod \
-	botinfo/nav/dm-grindery.nod \
 	botinfo/nav/dm-horus.nod \
 	botinfo/nav/dm-invasion.nod \
 	botinfo/nav/dm-leviathan2k8.nod \
-	botinfo/nav/dm-leviathan.nod \
 	botinfo/nav/dm-liberation.nod \
 	botinfo/nav/dm-neptune.nod \
 	botinfo/nav/dm-oblivion.nod \
-	botinfo/nav/dm-obsidian2.nod \
 	botinfo/nav/dm-omega2k8.nod \
-	botinfo/nav/dm-omega.nod \
 	botinfo/nav/dm-purgatory.nod \
 	botinfo/nav/dm-saucer2k9.nod \
 	botinfo/nav/dm-titan2k8.nod \
-	botinfo/nav/dm-titan.nod \
 	botinfo/nav/dm-turbo2k8.nod \
 	botinfo/nav/dm-vesuvius.nod \
 	botinfo/nav/dm-violator.nod \
@@ -349,8 +334,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/aoa-corrosion.txt \
 	data1/levelshots/aoa-frost2k9.jpg \
 	data1/levelshots/aoa-frost2k9.txt \
-	data1/levelshots/aoa-frost.jpg \
-	data1/levelshots/aoa-frost.txt \
 	data1/levelshots/aoa-morpheus.jpg \
 	data1/levelshots/aoa-morpheus.txt \
 	data1/levelshots/aoa-zorn.jpg \
@@ -364,13 +347,13 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/ctf-chromium.jpg \
 	data1/levelshots/ctf-chromium.txt \
 	data1/levelshots/ctf-corrosion.jpg \
+	data1/levelshots/ctf-corrosion.txt \
 	data1/levelshots/ctf-cryogenic.jpg \
 	data1/levelshots/ctf-cryogenic.txt \
 	data1/levelshots/ctf-europa2k8.jpg \
+	data1/levelshots/ctf-europa2k8.txt \
 	data1/levelshots/ctf-frostbyte.jpg \
 	data1/levelshots/ctf-frostbyte.txt \
-	data1/levelshots/ctf-frost.jpg \
-	data1/levelshots/ctf-frost.txt \
 	data1/levelshots/ctf-icarus2.jpg \
 	data1/levelshots/ctf-icarus2.txt \
 	data1/levelshots/ctf-invasion.jpg \
@@ -378,6 +361,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/ctf-oblivion.jpg \
 	data1/levelshots/ctf-oblivion.txt \
 	data1/levelshots/ctf-titan2k8.jpg \
+	data1/levelshots/ctf-titan2k8.txt \
 	data1/levelshots/ctf-vesuvius.jpg \
 	data1/levelshots/ctf-vesuvius.txt \
 	data1/levelshots/ctf-zorn.jpg \
@@ -407,8 +391,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-corrosion.jpg \
 	data1/levelshots/dm-corrosion.txt \
 	data1/levelshots/dm-crucible2k8.jpg \
-	data1/levelshots/dm-crucible.jpg \
-	data1/levelshots/dm-crucible.txt \
+	data1/levelshots/dm-crucible2k8.txt \
 	data1/levelshots/dm-deathray.jpg \
 	data1/levelshots/dm-deathray.txt \
 	data1/levelshots/dm-deimos2k9.jpg \
@@ -441,12 +424,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-oblivion.txt \
 	data1/levelshots/dm-omega2k8.jpg \
 	data1/levelshots/dm-omega2k8.txt \
-	data1/levelshots/dm-omega.jpg \
 	data1/levelshots/dm-purgatory.jpg \
 	data1/levelshots/dm-purgatory.txt \
 	data1/levelshots/dm-saucer2k9.jpg \
 	data1/levelshots/dm-saucer2k9.txt \
 	data1/levelshots/dm-titan2k8.jpg \
+	data1/levelshots/dm-titan2k8.txt \
 	data1/levelshots/dm-turbo2k8.jpg \
 	data1/levelshots/dm-turbo2k8.txt \
 	data1/levelshots/dm-vesuvius.jpg \
@@ -457,8 +440,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-warmachine2k10.txt \
 	data1/levelshots/dm-zion2k9.jpg \
 	data1/levelshots/dm-zion2k9.txt \
-	data1/levelshots/dm-zion.jpg \
-	data1/levelshots/dm-zion.txt \
 	data1/levelshots/dm-zorn.jpg \
 	data1/levelshots/dm-zorn.txt \
 	data1/levelshots/tca-corrosion.jpg \
@@ -466,9 +447,11 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/tca-cryogenic.jpg \
 	data1/levelshots/tca-cryogenic.txt \
 	data1/levelshots/tca-europa2k8.jpg \
+	data1/levelshots/tca-europa2k8.txt \
 	data1/levelshots/tca-frost.jpg \
 	data1/levelshots/tca-frost.txt \
 	data1/levelshots/tca-titan2k8.jpg \
+	data1/levelshots/tca-titan2k8.txt \
 	data1/levelshots/tca-zion.jpg \
 	data1/levelshots/tca-zion.txt \
 	data1/maps/aoa-atlantis.bsp \
@@ -527,7 +510,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-violator.bsp \
 	data1/maps/dm-warmachine2k10.bsp \
 	data1/maps/dm-zion2k9.bsp \
-	data1/maps/dm-zion.bsp \
 	data1/maps/dm-zorn.bsp \
 	data1/maps/meshes/arch_fx.tga \
 	data1/maps/meshes/arch.md2 \
@@ -1703,14 +1685,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-command2k9.rscript \
 	data1/scripts/maps/dm-corrosion.rscript \
 	data1/scripts/maps/dm-crucible2k8.rscript \
-	data1/scripts/maps/dm-crucible.rscript \
 	data1/scripts/maps/dm-deathray.rscript \
 	data1/scripts/maps/dm-deimos2k9.rscript \
 	data1/scripts/maps/dm-dismal2k8.rscript \
 	data1/scripts/maps/dm-downfall.rscript \
 	data1/scripts/maps/dm-dread.rscript \
 	data1/scripts/maps/dm-dynamo2k8.rscript \
-	data1/scripts/maps/dm-dynamo2.rscript \
 	data1/scripts/maps/dm-eternal.rscript \
 	data1/scripts/maps/dm-europa2k8.rscript \
 	data1/scripts/maps/dm-furious2k8.rscript \
@@ -1718,14 +1698,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-horus.rscript \
 	data1/scripts/maps/dm-invasion.rscript \
 	data1/scripts/maps/dm-leviathan2k8.rscript \
-	data1/scripts/maps/dm-leviathan.rscript \
 	data1/scripts/maps/dm-liberation.rscript \
  	data1/scripts/maps/dm-neptune.rscript \
 	data1/scripts/maps/dm-oblivion.rscript \
 	data1/scripts/maps/dm-omega2k8.rscript \
 	data1/scripts/maps/dm-purgatory.rscript \
 	data1/scripts/maps/dm-saucer2k9.rscript \
-	data1/scripts/maps/dm-saucer.rscript \
 	data1/scripts/maps/dm-titan2k8.rscript \
 	data1/scripts/maps/dm-turbo2k8.rscript \
 	data1/scripts/maps/dm-vesuvius.rscript \
@@ -1826,8 +1804,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/misc/w_pkup.wav \
 	data1/sound/music/cp-ribeye.ogg \
 	data1/sound/music/Divinity_lack_of_success.ogg \
-	data1/sound/music/Divinity_misunderstood.ogg \
-	data1/sound/music/Divinity_never_ending.ogg \
 	data1/sound/music/dm-annihilation.ogg \
 	data1/sound/music/dm-deathray.ogg \
 	data1/sound/music/dm-deimos.ogg \
@@ -1843,6 +1819,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/music/dm-warmachine.ogg \
 	data1/sound/music/joyce1.ogg \
 	data1/sound/music/joyce2.ogg \
+	data1/sound/music/joyce3.ogg \
 	data1/sound/music/menumusic.ogg \
 	data1/sound/player/burn1.wav \
 	data1/sound/player/burn2.wav \
@@ -2361,6 +2338,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena6/plate4.tga \
 	data1/textures/arena6/plate5_nm.tga \
 	data1/textures/arena6/plate5_hm.tga \
+	data1/textures/arena6/plate5_sm.tga \
 	data1/textures/arena6/plate5.tga \
 	data1/textures/arena6/rimlight2.tga \
 	data1/textures/arena6/rimlight.tga \
@@ -2590,6 +2568,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena9/hexfloor2_hm.tga \
 	data1/textures/arena9/hexfloor2_nm.tga \
 	data1/textures/arena9/hexfloor2.tga \
+	data1/textures/arena9/hexfloor3_hm.tga \
+	data1/textures/arena9/hexfloor3_nm.tga \
+	data1/textures/arena9/hexfloor3.tga \
 	data1/textures/arena9/hexglass.tga \
 	data1/textures/arena9/hexgratefloor_hm.tga \
 	data1/textures/arena9/hexgratefloor_nm.tga \
