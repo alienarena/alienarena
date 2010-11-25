@@ -26,28 +26,26 @@ players/rustbot/atlas
 players/martianenforcer/weapon
 {
 	{
-		map models/weapons/v_hyperb/disruptor.jpg
+		map models/weapons/v_rail/beamgun.jpg
 	}
 	{
-		map gfx/disruptorfx.tga
+		map gfx/beamgunfx.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 .8
 		nolightmap
-	}
-		
+	}		
 }
 players/martiancyborg/weapon
 {
 	{
-		map models/weapons/v_hyperb/disruptor.jpg
+		map models/weapons/v_rail/beamgun.jpg
 	}
 	{
-		map gfx/disruptorfx.tga
+		map gfx/beamgunfx.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 0.8 .8
 		nolightmap
-	}
-		
+	}		
 }
 players/lauren/weapon
 {
