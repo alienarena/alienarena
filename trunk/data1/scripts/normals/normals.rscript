@@ -460,18 +460,18 @@ players/martianenforcer/gamara
 players/martianenforcer/weapon
 {
 	{	
-		map models/weapons/v_hyperb/disruptor_normal.tga
+		map models/weapons/v_rail/beamgun_normal.tga
 		normalmap
-		map2 gfx/disruptorfx.tga
+		map2 gfx/beamgunfx.tga
 		glow
 	}		
 }
 players/martiancyborg/weapon
 {
 	{	
-		map models/weapons/v_hyperb/disruptor_normal.tga
+		map models/weapons/v_rail/beamgun_normal.tga
 		normalmap
-		map2 gfx/disruptorfx.tga
+		map2 gfx/beamgunfx.tga
 		glow
 	}		
 }
