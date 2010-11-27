@@ -356,9 +356,6 @@ void CL_PrepRefresh ( void )
 	Com_sprintf (loadingMessages[2], sizeof(loadingMessages[2]), "loading pics...");
 	Com_sprintf (loadingMessages[3], sizeof(loadingMessages[3]), "loading clients...");
 
-	SCR_AddDirtyPoint (0, 0);
-	SCR_AddDirtyPoint (viddef.width-1, viddef.height-1);
-
 	// let the render dll load the map
 	strcpy (mapname, cl.configstrings[CS_MODELS+1] + 5);	// skip "maps/"
 	mapname[strlen(mapname)-4] = 0;		// cut off ".bsp"
@@ -901,10 +898,6 @@ void V_RenderView( float stereo_separation )
 	if ( log_stats->value && ( log_stats_file != 0 ) )
 		fprintf( log_stats_file, "%i,%i,%i,",r_numentities, r_numdlights, r_numparticles);
 
-
-	SCR_AddDirtyPoint (scr_vrect.x, scr_vrect.y);
-	SCR_AddDirtyPoint (scr_vrect.x+scr_vrect.width-1,
-		scr_vrect.y+scr_vrect.height-1);
 
 	SCR_DrawCrosshair ();
 

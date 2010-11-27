@@ -698,12 +698,6 @@ void Con_DrawNotify (void)
 		Draw_ScaledChar ( (x+skip)*charscale, v, 10+((cls.realtime>>charscale)&1), charscale, false);
 		v += charscale;
 	}
-
-	if (v)
-	{
-		SCR_AddDirtyPoint (0,0);
-		SCR_AddDirtyPoint (viddef.width-1, v);
-	}
 }
 
 /*
@@ -743,8 +737,6 @@ void Con_DrawConsole (float frac)
 
 // draw the background
 	Draw_StretchPic (0, lines-viddef.height, viddef.width, viddef.height, "conback");
-	SCR_AddDirtyPoint (0,0);
-	SCR_AddDirtyPoint (viddef.width-1,lines-1);
 
 	DrawString(viddef.width-charscale*(strlen(VERSION)+1), lines-charscale-1, VERSION);
 

@@ -7042,9 +7042,6 @@ void M_Draw (void)
 	if (cls.key_dest != key_menu)
 		return;
 
-	// repaint everything next frame
-	SCR_DirtyScreen ();
-
 	// dim everything behind it down
 	Draw_FadeScreen ();
 
