@@ -105,8 +105,6 @@ void CL_DrawInventory (void)
 	y = (viddef.height-240)/2;
 
 	// repaint everything next frame
-	SCR_DirtyScreen ();
-
 	Draw_Pic (x, y+8, "inventory");
 
 	y += 24;

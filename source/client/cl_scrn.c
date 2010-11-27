@@ -67,15 +67,8 @@ cvar_t		*cl_drawtimer;
 
 cvar_t		*cl_drawtime;
 
-typedef struct
-{
-	int		x1, y1, x2, y2;
-} dirty_t;
-
-dirty_t		scr_dirty, scr_old_dirty[2];
-
 char		crosshair_pic[MAX_QPATH];
-int			crosshair_width, crosshair_height;
+int		crosshair_width, crosshair_height;
 
 void SCR_TimeRefresh_f (void);
 void SCR_Loading_f (void);
@@ -256,14 +249,12 @@ void SCR_DrawCenterString (void)
 			if (start[l] == '\n' || !start[l])
 				break;
 		x = (viddef.width - l*charscale)/2;
-		SCR_AddDirtyPoint (x, y);
 		for (j=0 ; j<l ; j++, x+=charscale)
 		{
 			Draw_ScaledChar (x, y, start[j], charscale, false);
 			if (!remaining--)
 				return;
 		}
-		SCR_AddDirtyPoint (x, y+charscale);
 
 		y += charscale;
 
@@ -476,9 +467,7 @@ void SCR_CheckDrawIRCString (void)
 
 	for ( i = 0 ; i <= last_line ; i ++ ) {
 		for ( j = 0 ; j < scr_IRCstring[ i ]->n_lines ; j ++ , y += charscale ) {
-			SCR_AddDirtyPoint (0, y);
 			ccolor = SCR_DrawColorString (0, y, scr_IRCstring[ i ]->lines[ j ] , false , ccolor);
-			SCR_AddDirtyPoint (0, y+charscale);
 		}
 	}
 }
@@ -1106,28 +1095,6 @@ void SCR_TimeRefresh_f (void)
 	Com_Printf ("%f seconds (%f fps)\n", time, 128/time);
 }
 
-/*
-=================
-SCR_AddDirtyPoint
-=================
-*/
-void SCR_AddDirtyPoint (int x, int y)
-{
-	if (x < scr_dirty.x1)
-		scr_dirty.x1 = x;
-	if (x > scr_dirty.x2)
-		scr_dirty.x2 = x;
-	if (y < scr_dirty.y1)
-		scr_dirty.y1 = y;
-	if (y > scr_dirty.y2)
-		scr_dirty.y2 = y;
-}
-
-void SCR_DirtyScreen (void)
-{
-	SCR_AddDirtyPoint (0, 0);
-	SCR_AddDirtyPoint (viddef.width-1, viddef.height-1);
-}
 
 //===============================================================
 
@@ -1246,9 +1213,6 @@ void SCR_DrawField (int x, int y, int color, int width, int value, float scale)
 	// draw number string
 	if (width > 5)
 		width = 5;
-
-	SCR_AddDirtyPoint (x, y);
-	SCR_AddDirtyPoint (x+width*CHAR_WIDTH+2, y+23);
 
 	Com_sprintf (num, sizeof(num), "%i", value);
 	l = strlen(num);
@@ -1385,8 +1349,6 @@ void SCR_ExecuteLayoutString (char *s)
 					Com_Error (ERR_DROP, "Pic >= MAX_IMAGES");
 				if( cl.configstrings[CS_IMAGES+value][0] )
 				{
-					SCR_AddDirtyPoint (x, y);
-					SCR_AddDirtyPoint (x+23*scale, y+23*scale);
 					Draw_ScaledPic (x, y, scale, cl.configstrings[CS_IMAGES+value]);
 				}
 			}
@@ -1442,8 +1404,6 @@ void SCR_ExecuteLayoutString (char *s)
 				y = viddef.height/2 - 100*scale + atoi(token)*scale/2;
 			else
 				y = viddef.height/2 - 100*scale + atoi(token)*scale;
-			SCR_AddDirtyPoint (x, y);
-			SCR_AddDirtyPoint (x+159*scale, y+31*scale);
 
 			token = COM_Parse (&s);
 			value = atoi(token);
@@ -1493,8 +1453,6 @@ void SCR_ExecuteLayoutString (char *s)
 				y = viddef.height/2 - 100*scale + atoi(token)*scale/2;
 			else
 				y = viddef.height/2 - 100*scale + atoi(token)*scale;
-			SCR_AddDirtyPoint (x, y);
-			SCR_AddDirtyPoint (x+159*scale, y+31*scale);
 
 			token = COM_Parse (&s);
 			value = atoi(token);
@@ -1550,8 +1508,6 @@ void SCR_ExecuteLayoutString (char *s)
 				team = 1;
 			token = COM_Parse (&s);
 			y = viddef.height/2 - 100*scale + atoi(token)*scale;
-			SCR_AddDirtyPoint (x, y);
-			SCR_AddDirtyPoint (x+159*scale, y+31*scale);
 
 			token = COM_Parse (&s);
 			value = atoi(token);
@@ -1590,13 +1546,9 @@ void SCR_ExecuteLayoutString (char *s)
 		{	// draw a pic from a name
 			token = COM_Parse (&s);
 			if(newSBlayout && !strcmp(token, "playerbox")) { //cannot simply fill y = ny here
-				SCR_AddDirtyPoint (x, ny+32*scale);
-				SCR_AddDirtyPoint (x+23*scale, ny+55*scale);
 				Draw_ScaledPic (x, ny+32*scale, scale, token);
 			}
 			else {
-				SCR_AddDirtyPoint (x, y);
-				SCR_AddDirtyPoint (x+23*scale, y+23*scale);
 				Draw_ScaledPic (x, y, scale, token);
 			}
 			continue;
