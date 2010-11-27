@@ -287,8 +287,7 @@ LONG WINAPI MainWndProc (
         return DefWindowProc (hWnd, uMsg, wParam, lParam);
 
 	case WM_PAINT:
-		SCR_DirtyScreen ();	// force entire screen to update next frame
-        return DefWindowProc (hWnd, uMsg, wParam, lParam);
+		return DefWindowProc (hWnd, uMsg, wParam, lParam);
 
 	case WM_DESTROY:
 		// let sound and input know about this?
