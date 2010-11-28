@@ -1461,6 +1461,9 @@ void GL_FreeImage( image_t * image )
 	if ( ! image->texnum )
 		return;
 	qglDeleteTextures (1, (unsigned *)&image->texnum );
+	if ( gl_state.currenttextures[gl_state.currenttmu] == image->texnum ) {
+		gl_state.currenttextures[ gl_state.currenttmu ] = 0;
+	}
 	memset (image, 0, sizeof(*image));
 }
 
