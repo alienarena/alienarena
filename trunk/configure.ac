@@ -25,7 +25,7 @@
 #  Windows (32-bit) using MinGW - Experimental
 #  Mac OS X / Darwin using X11
 
-AC_PREREQ(2.61)
+AC_PREREQ(2.65)
 AC_INIT([alienarena],[7.50],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
@@ -42,6 +42,7 @@ AM_INIT_AUTOMAKE([ 1.11 foreign subdir-objects silent-rules ])
 AM_SILENT_RULES([yes])
 
 dnl use --enable-maintainer-mode to get full set of make targets
+dnl debated issue, but this is better for non-developers updating from svn.    
 AM_MAINTAINER_MODE
 
 AC_CANONICAL_HOST
