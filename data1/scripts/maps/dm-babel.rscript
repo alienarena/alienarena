@@ -8,18 +8,6 @@ textures/arena6/flamejet
 	}
 
 }
-textures/arena8/blackbrick2
-{
-	{
-		map textures/arena2/lava.tga
-		scroll static 0 static 1
-		nolightmap
-	}
-	{
-		map textures/arena8/blackbrick3.tga
-		alphamask
-	}
-}
 textures/arena7/light3
 {
 	{
