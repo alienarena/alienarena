@@ -58,11 +58,7 @@ Once finished, you can click on the Alien Arena icon that has been placed on you
 
 (Linux)
 
-Simply unzip the archive in your HOME directory.  It is recommended to always do this.  
-
-Type ./crx in the shell to run the game, or ./crded to start a dedicated server or use the shortcuts installed in the menu.  OpenGL for graphics and OpenAL 1.1 for sound, are required.
-
-Source files are included, so you may compile the binaries yourself if necessary.  Please visit the forum if you have any questions regarding this.
+See the README and INSTALL documentation files.
 
 * BASIC COMMANDS
 
@@ -127,7 +123,7 @@ In Alien Arena, you are given points for getting kills (one point for kill), two
 
 To uninstall Alien Arena, simply go to your start programs menu, select your Alien Arena folder, and click on "Uninstall".  You can also go into your control panel, and uninstall Alien Arena in the programs and software section.
 
-For Linux users, you simply just need to delete your Alien Arena folder.
+For Linux users, see the README documentation file. 
 
 7.	CREDITS
 

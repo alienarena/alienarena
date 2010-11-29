@@ -22,19 +22,22 @@ SUBDIRS = source
 
 ACLOCAL_AMFLAGS = -I m4
 
+# COPYING and INSTALL are GNU/FSF-supplied documents. 
+# Others are Alien Arena documents.
+dist_doc_DATA = \
+	docs/license.txt \
+	docs/README.txt \
+	README \
+	COPYING \
+	INSTALL
+
 # TODO: Add additional release package content from Tools
-
-EXTRA_DIST = m4
-
-# TODO: create "official" INSTALL, README, etc.
-# (the README, and maybe some others should be in top dir in dist. tarball)
-dist_doc_DATA = docs/license.txt docs/README.txt
 
 # remove svn directories from distribution staging area after creating
 #  distribution in staging area and before running archiver
-#  needed for EXTRA_DIST
-dist-hook:
-	rm -rf `find $(distdir) -name .svn`
+#  not needed unless a directory copy is done
+#dist-hook:
+#	rm -rf `find $(distdir) -name .svn`
 
 #
 # Alternate Install
@@ -46,10 +49,11 @@ dist-hook:
 # Use: 
 #  ./configure --enable-alternate-install && make && make install-alternate
 #
-# TODO: this does not support program name translation and other fancy stuff
-#   (can install-sh be used here?)
+# Note: this does not support program name translation and other autoconf
+#   features.
 #
 # 2010-08-22  Temporary fixes for Escaped Turkey SVN script
+#  To be removed before 7.50 release package is generated
 #
 install-alternate:
 if ALTERNATE_INSTALL
@@ -68,27 +72,19 @@ if REMOVE_SYMBOLS
 endif
 	rm -f $(srcdir)/arena/game.so
 	rm -f $(srcdir)/data1/game.so
-endif	
+endif
 else
 	@echo "make install-alternate requires configuring with --enable-alternate-install"
 endif		
 
 #
-# install/uninstall added rules for the game read-only data
-# - Normally requires root privileges.
+# install/uninstall added rules for alternate-install to prevent "undefined" behaviour. 
 #
 install-data-local:
 if ALTERNATE_INSTALL
 	@echo "Alternate install: Use "make install-alternate"!!!
 	exit 1
 endif
-
-#
-#install-exec-hook:
-#  TODO: may want to check for game.so files in data1 and arena here
-#
-#install-exec-hook:
-#
 
 uninstall-local:
 if ALTERNATE_INSTALL
