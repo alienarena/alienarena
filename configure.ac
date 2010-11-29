@@ -23,7 +23,7 @@
 # configure.ac for
 #  GNU/Linux, Unix
 #  Windows (32-bit) using MinGW - Experimental
-#  Mac OS X / Darwin using X11
+#  Mac OS X / Darwin using X11 - Experimental
 
 AC_PREREQ(2.65)
 AC_INIT([alienarena],[7.50],[alienrace@comcast.net],[alienarena])

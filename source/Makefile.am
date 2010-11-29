@@ -18,8 +18,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-ACLOCAL_AMFLAGS= -I m4 
-
 noinst_LIBRARIES = libgame.a
 
 AM_CPPFLAGS = -I $(top_srcdir)/source
