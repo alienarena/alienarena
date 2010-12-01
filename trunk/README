@@ -1,1 +1,170 @@
-PLACEHOLDER for Alien Arena specific information
+
+                         Alien Arena 2011
+                           Version 7.50
+
+1. Scope
+
+This document includes information about the GNU-Linux/Unix
+version of Alien Arena 2011.  Custom options and other
+information specific to Alien Arena are included here.
+
+For general information, licensing, and contributers and see the
+README.txt and license.txt documents (in the docs/ subdirectory
+in the distribution archive).
+
+For generic information about installation, see the GNU INSTALL
+document.
+
+
+2. Changes from Previous Versions
+
+This information is for packagers and those who have a previous
+installation of Alien Arena.  (If this does not apply to you, it
+is safe to skip to the next topic: Installation.)
+
+Briefly, important differences are:
+
+  * Alien Arena 2011 uses a GNU Autotools build and install.
+  * The game.so shared library no longer exists.
+  * All file writes go to the user's home directory.
+  * The dedicated server has been renamed to crx-ded.
+  * There is an dedicated-server-only build option.
+  * There is an "alternate" single directory install option.
+
+Warning: The game.so library is no longer a separate module.  If
+a game.so file exists in an arena/ or data1/ directory, the
+results are "undefined".
+
+Attempts to write into read-only space when data is installed in
+a shared/ directory have been corrected.  There is now a botinfo/
+directory in the user's home directory.  The default home
+directory is .codered/.  That can be changed using an environment
+variable, COR_GAME.
+
+The dedicated server was renamed to simplify program name
+translation using the standard configure option.  Also, the
+dedicated server is intended to be an integral part of the
+package.  We would prefer it not be distributed separately and
+there is no particular reason to do so.  There is a configure
+option, provided mostly for Game Server Providers, to disable
+building the client program.
+
+The standard installation now uses the GNU Autotools methods and
+defaults.  In some cases, the "traditional" single directory
+install in the user's home directory may be preferred.  See the
+Alternate Install topic below for details.
+
+
+3. Installation
+
+If you are installing Alien Arena using your distribution's
+package manager, follow those instructions.
+
+If you are reading this, you may have already unpacked the
+distribution archive into a directory in your HOME directory.
+(otherwise, hint: $ tar -xzf alienarena-<version>.tar.gz ).
+
+To build and install (takes some minutes):
+  $ ./configure
+  $ make
+  $ sudo make install
+
+To run:
+  $ crx
+
+By default, this will install the game programs and data like
+this:
+
+  /usr/local/
+    bin/
+      crx
+      crx-ded  (dedicated server)
+    share/
+      alienarena/
+        aa.png  (icon)
+        arena/
+        botinfo/
+        data1/
+      doc/
+        alienarena/
+          <various documents>
+
+When the program is run, a directory is created in the user HOME
+directory.  Various kinds of data (config files, downloaded data,
+custom bot setups) are written there.  The default directory name
+is .codered.  That can be changed using an environment variable,
+COR_GAME.
+
+For example:
+  $ export COR_GAME=/home/user/.alienarena
+
+Current settings are stored in .codered/arena/config.cfg.  For
+custom settings, create a file, .codered/arena/autoexec.cfg.
+Details about settings are beyond the scope of this document.  Go
+to the websites, the forum and the IRC channel for more
+information.
+
+
+4. Custom Configure Options
+
+Run '$ ./configure --help' for a list of options.  Note that many
+of the options are built-in and some are not meaningful or useful
+for Alien Arena.  Options are entered on the command line in the
+usual way; the help output has the details.  Refer to the GNU
+INSTALL document for general details.
+
+To build the dedicated server only, use the following configure
+option:
+  --disable-client
+
+By default, configure produces a status message giving
+information on the configuration.  To hide that message, use:
+  --disable-build-status
+
+To rename the programs, use the standard configure option. For
+example:
+  --program-transform-name='s/crx/alienarena/'
+
+To install to a different locaton, use the standard configure
+option. For example:
+  --prefix=/usr/local/games
+
+Other Alien Arena custom options are intended mostly for
+developer use.  If you use them, it is assumed that you know what
+you are doing.
+
+
+5. Tools
+
+TO BE DETERMINED
+
+
+6. Alternate Install
+
+This configures the installation to use the "traditional", single
+directory, in-place install.  It does not define DATADIR, and the
+executables need to be in the top game directory.  Normally, this
+install would be done somewhere in your HOME directory.  Root
+privileges would not be required to write the game data.
+Currently, the configure option for renaming of the executables
+is not supported.
+
+If you are a map-builder, you should use this option.  Some
+mapping tools may not work with the "standard" install.
+
+If you regularly update to the latest development code from the
+Subversion Repository, you may prefer this option.
+
+The two install methods are not mutually exclusive.  With some
+care, it is possible to use both.
+
+The configure option is:
+  --enable-alternate-install
+
+Following the usual 'make', it requires
+
+  $ make --install-alternate
+
+This just copies the executables to the top game directory.  The
+effect of using any other 'install' make target is "undefined".
+
