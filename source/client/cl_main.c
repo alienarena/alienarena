@@ -2178,19 +2178,19 @@ void CL_Init (void)
 
 	// Initialise fonts
 	CL_gameFont = &_CL_gameFont;
-	FNT_AutoInit( CL_gameFont , "default" , 0 , 75 , 8 );
+	FNT_AutoInit( CL_gameFont , "default" , 0 , 65 , 8 );
 	CL_gameFont->faceVar = Cvar_Get( "fnt_game" , "freesans" , CVAR_ARCHIVE );
 	CL_gameFont->sizeVar = Cvar_Get( "fnt_game_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_gameFont );
 
 	CL_centerFont = &_CL_centerFont;
-	FNT_AutoInit( CL_centerFont , "default" , 0 , 50 , 16 );
+	FNT_AutoInit( CL_centerFont , "default" , 0 , 45 , 16 );
 	CL_centerFont->faceVar = CL_gameFont->faceVar;
 	CL_centerFont->sizeVar = Cvar_Get( "fnt_center_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_centerFont );
 
 	CL_consoleFont = &_CL_consoleFont;
-	FNT_AutoInit( CL_consoleFont , "default" , 0 , 70 , 8 );
+	FNT_AutoInit( CL_consoleFont , "default" , 0 , 65 , 8 );
 	CL_consoleFont->faceVar = Cvar_Get( "fnt_console" , "freemono" , CVAR_ARCHIVE );
 	CL_consoleFont->sizeVar = Cvar_Get( "fnt_console_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_consoleFont );
