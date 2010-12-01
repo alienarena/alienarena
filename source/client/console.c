@@ -24,117 +24,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 #include "client.h"
-
-console_t	con;
-
-cvar_t		*con_notifytime;
+#include "ref_gl/qgl.h"
 
 
-#define		MAXCMDLINE	256
+/* The console's main structure */
+struct CON_console_s	CON_console;
 
-vec4_t	color_table[8] =
-{
-	{0.0, 0.0, 0.0, 1.0},
-	{1.0, 0.0, 0.0, 1.0},
-	{0.0, 1.0, 0.0, 1.0},
-	{1.0, 1.0, 0.0, 1.0},
-	{0.0, 0.0, 1.0, 1.0},
-	{0.0, 1.0, 1.0, 1.0},
-	{1.0, 0.0, 1.0, 1.0},
-	{1.0, 1.0, 1.0, 1.0},
-};
-
-void DrawString (int x, int y, char *s)
-{
-	int charscale;
-	charscale = (float)(viddef.height)*8/600;
-	if(charscale < 8)
-		charscale = 8;
-	while (*s)
-	{
-		Draw_ScaledChar (x, y, *s, charscale, false);
-		x+=charscale;
-		s++;
-	}
-}
-/*
-=============
-Draw_ColorString
-=============
-*/
-void Draw_ColorString ( int x, int y, char *str, float scale)
-{
-	int		num;
-	vec4_t	scolor;
-	int		charscale;
-
-	charscale = (float)(viddef.height)*8*scale/600;
-	if(charscale < 8)
-		charscale = 8;
-
-	scolor[0] = 0;
-	scolor[1] = 1;
-	scolor[2] = 0;
-	scolor[3] = 1;
-
-	while (*str) {
-		if ( Q_IsColorString( str ) ) {
-			VectorCopy ( color_table[ColorIndex(str[1])], scolor );
-			str += 2;
-			continue;
-		}
-
-		Draw_ScaledColorChar (x, y, *str, scolor, charscale, false); //this is only ever used for names.
-
-		num = *str++;
-		num &= 255;
-
-		if ( (num&127) == 32 ) { //spaces reset colors
-			scolor[0] = 0;
-			scolor[1] = 1;
-			scolor[2] = 0;
-			scolor[3] = 1;
-		}
-
-		x += charscale;
-	}
-}
+/* CVar for notifications display time */
+cvar_t *		con_notifytime;
 
 
-void DrawAltString (int x, int y, char *s)
-{
-	float	charscale;
 
-	charscale = (float)(viddef.height)*8/600;
-	if(charscale < 8)
-		charscale = 8;
-
-	while (*s)
-	{
-		Draw_ScaledChar (x, y, *s ^ 0x80, charscale, false);
-		x+=charscale;
-		s++;
-	}
-}
-
-
-void Key_ClearTyping (void)
-{
-	key_lines[edit_line][1] = 0;	// clear any typing
-	key_linelen = key_linepos = 1;
-}
+/**************************************************************************/
+/* VARIOUS COMMANDS                                                       */
+/**************************************************************************/
 
 /*
-================
-Con_ToggleConsole_f
-================
-*/
-void Con_ToggleConsole_f (void)
+ * Show or hide the console.
+ */
+void CON_ToggleConsole( )
 {
 	SCR_EndLoadingPlaque ();	// get rid of loading plaque
 
 	Key_ClearTyping ();
-	Con_ClearNotify ();
+	CON_ClearNotify( );
 
 	if (cls.key_dest == key_console)
 	{
@@ -152,126 +65,31 @@ void Con_ToggleConsole_f (void)
 	}
 }
 
-/*
-================
-Con_ToggleChat_f
-================
-*/
-void Con_ToggleChat_f (void)
-{
-	Key_ClearTyping ();
 
-	if (cls.key_dest == key_console)
-	{
-		if (cls.state == ca_active)
-		{
-			M_ForceMenuOff ();
+/*
+ * Clear the chat area
+ */
+static void _CON_ToggleChat( )
+{
+	Key_ClearTyping( );
+
+	if ( cls.key_dest == key_console ) {
+		if ( cls.state == ca_active ) {
+			M_ForceMenuOff( );
 			cls.key_dest = key_game;
 		}
-	}
-	else
+	} else {
 		cls.key_dest = key_console;
+	}
 
-	Con_ClearNotify ();
-}
-
-/*
-================
-Con_Clear_f
-================
-*/
-void Con_Clear_f (void)
-{
-	memset (con.text, ' ', CON_TEXTSIZE);
+	CON_ClearNotify( );
 }
 
 
 /*
-================
-Con_Dump_f
-
-Save the console contents out to a file
-================
-*/
-void Con_Dump_f (void)
-{
-	int		l, x;
-	char	*line;
-	FILE	*f;
-	char	buffer[1024];
-	char	name[MAX_OSPATH];
-
-	if (Cmd_Argc() != 2)
-	{
-		Com_Printf ("usage: condump <filename>\n");
-		return;
-	}
-
-	Com_sprintf (name, sizeof(name), "%s/%s.txt", FS_Gamedir(), Cmd_Argv(1));
-
-	Com_Printf ("Dumped console text to %s.\n", name);
-	FS_CreatePath (name);
-	f = fopen (name, "w");
-	if (!f)
-	{
-		Com_Printf ("ERROR: couldn't open.\n");
-		return;
-	}
-
-	// skip empty lines
-	for (l = con.current - con.totallines + 1 ; l <= con.current ; l++)
-	{
-		line = con.text + (l%con.totallines)*con.linewidth;
-		for (x=0 ; x<con.linewidth ; x++)
-			if (line[x] != ' ')
-				break;
-		if (x != con.linewidth)
-			break;
-	}
-
-	// write the remaining lines
-	buffer[con.linewidth] = 0;
-	for ( ; l <= con.current ; l++)
-	{
-		line = con.text + (l%con.totallines)*con.linewidth;
-		strncpy (buffer, line, con.linewidth);
-		for (x=con.linewidth-1 ; x>=0 ; x--)
-		{
-			if (buffer[x] == ' ')
-				buffer[x] = 0;
-			else
-				break;
-		}
-		for (x=0; buffer[x]; x++)
-			buffer[x] &= 0x7f;
-
-		fprintf (f, "%s\n", buffer);
-	}
-
-	fclose (f);
-}
-
-
-/*
-================
-Con_ClearNotify
-================
-*/
-void Con_ClearNotify (void)
-{
-	int		i;
-
-	for (i=0 ; i<NUM_CON_TIMES ; i++)
-		con.times[i] = 0;
-}
-
-
-/*
-================
-Con_MessageMode_f
-================
-*/
-void Con_MessageMode_f (void)
+ * Toggle the general chat input
+ */
+static void _CON_GeneralChatInput( )
 {
 	chat_team = false;
 	chat_irc = false;
@@ -280,12 +98,11 @@ void Con_MessageMode_f (void)
 	Cbuf_Execute ();
 }
 
+
 /*
-================
-Con_MessageMode2_f
-================
-*/
-void Con_MessageMode2_f (void)
+ * Toggle the team chat input
+ */
+static void _CON_TeamChatInput( )
 {
 	chat_team = true;
 	chat_irc = false;
@@ -294,502 +111,704 @@ void Con_MessageMode2_f (void)
 	Cbuf_Execute ();
 }
 
+
 /*
-================
-Con_MessageMode3_f
-================
-*/
-void Con_MessageMode3_f (void)
+ * Toggle the IRC input
+ */
+static void _CON_IRCInput( )
 {
 	chat_team = false;
 	chat_irc = true;
 	cls.key_dest = key_message;
-	//Cbuf_AddText("chatbubble\n");
 }
 
+
+
+/**************************************************************************/
+/* CONSOLE BUFFER ACCESS                                                  */
+/**************************************************************************/
+
 /*
-================
-Con_CheckResize
-
-If the line width has changed, reformat the buffer.
-================
-*/
-void Con_CheckResize (void)
+ * Find the start of the current line
+ *
+ * Parameters:
+ *	line	the initial line to look from
+ *
+ * Returns:
+ *	the identifier of the current line in the buffer
+ */
+static int _CON_FindLineStart( int line )
 {
-	int		i, j, width, oldwidth, oldtotallines, numlines, numchars, charscale;
-	char	tbuf[CON_TEXTSIZE];
-
-	// find out the character's scale and use it to compute the width
-	charscale = (float)(viddef.height)*8/600;
-	if(charscale < 8)
-		charscale = 8;
-	width = (viddef.width / charscale) - 2;
-
-	if (width == con.linewidth)
-		return;
-
-	if (width < 1)			// video hasn't been initialized yet
-	{
-		width = 38;
-		con.linewidth = width;
-		con.totallines = CON_TEXTSIZE / con.linewidth;
-		memset (con.text, ' ', CON_TEXTSIZE);
+	line = ( line + CON_MAX_LINES ) % CON_MAX_LINES;
+	while ( CON_console.lCount[ line ] == 0 ) {
+		line = ( line - 1 + CON_MAX_LINES ) % CON_MAX_LINES;
 	}
-	else
-	{
-		oldwidth = con.linewidth;
-		con.linewidth = width;
-		oldtotallines = con.totallines;
-		con.totallines = CON_TEXTSIZE / con.linewidth;
-		numlines = oldtotallines;
+	return line;
+}
 
-		if (con.totallines < numlines)
-			numlines = con.totallines;
 
-		numchars = oldwidth;
-
-		if (con.linewidth < numchars)
-			numchars = con.linewidth;
-
-		memcpy (tbuf, con.text, CON_TEXTSIZE);
-		memset (con.text, ' ', CON_TEXTSIZE);
-
-		for (i=0 ; i<numlines ; i++)
-		{
-			for (j=0 ; j<numchars ; j++)
-			{
-				con.text[(con.totallines - 1 - i) * con.linewidth + j] =
-						tbuf[((con.current - i + oldtotallines) %
-							  oldtotallines) * oldwidth + j];
-			}
+/*
+ * Find the start of the next line
+ *
+ * Parameters:
+ *	line	the current location
+ *
+ * Returns:
+ *	the identifier of the next line in the buffer
+ */
+static int _CON_FindNextLine( int line )
+{
+	line = ( line + CON_MAX_LINES ) % CON_MAX_LINES;
+	if ( CON_console.lCount[ line ] == 0 ) {
+		while ( CON_console.lCount[ line ] == 0 ) {
+			line = ( line + 1 ) % CON_MAX_LINES;
 		}
-
-		Con_ClearNotify ();
+	} else {
+		line = ( line + CON_console.lCount[ line ] ) % CON_MAX_LINES;
 	}
-
-	con.current = con.totallines - 1;
-	con.display = con.current;
+	return line;
 }
 
 
 /*
-================
-Con_Init
-================
-*/
-void Con_Init (void)
+ * Find the start of the previous line
+ *
+ * Parameters:
+ *	line	the current location
+ *
+ * Returns:
+ *	the identifier of the previous line in the buffer
+ */
+static int _CON_FindPreviousLine( int line )
 {
-	con.linewidth = -1;
-
-	Con_CheckResize ();
-
-	Com_Printf ("Console initialized.\n");
-
-//
-// register our commands
-//
-	con_notifytime = Cvar_Get ("con_notifytime", "3", 0);
-
-	Cmd_AddCommand ("toggleconsole", Con_ToggleConsole_f);
-	Cmd_AddCommand ("togglechat", Con_ToggleChat_f);
-	Cmd_AddCommand ("messagemode", Con_MessageMode_f);
-	Cmd_AddCommand ("messagemode2", Con_MessageMode2_f);
-	Cmd_AddCommand ("messagemode3", Con_MessageMode3_f);
-	Cmd_AddCommand ("clear", Con_Clear_f);
-	Cmd_AddCommand ("condump", Con_Dump_f);
-	con.initialized = true;
+	return _CON_FindLineStart( _CON_FindLineStart( line ) - 1 );
 }
 
 
 /*
-===============
-Con_Linefeed
-===============
-*/
-void Con_Linefeed (void)
+ * End the current line and start a new one
+ */
+static void _CON_NewLine( )
 {
-	con.x = 0;
-	if (con.display == con.current)
-		con.display++;
-	con.current++;
-	memset (&con.text[(con.current%con.totallines)*con.linewidth]
-	, ' ', con.linewidth);
+	CON_console.times[ CON_console.curTime ] = cls.realtime;
+	CON_console.curTime = ( CON_console.curTime + 1 ) % CON_MAX_NOTIFY;
+
+	CON_console.curLine = ( CON_console.curLine + 1 ) % CON_MAX_LINES;
+	CON_console.lines += 1 - CON_console.lCount[ CON_console.curLine ];
+	CON_console.lCount[ CON_console.curLine ] = 1;
+
+	CON_console.offset = 0;
+	memset( CON_console.text[ CON_console.curLine ] , 0 , CON_LINE_LENGTH );
+
+	CON_console.heights[ CON_console.curLine ] = 0;
 }
 
+
 /*
-================
-Con_Print
-
-Handles cursor positioning, line wrapping, etc
-All console printing must go through this in order to be logged to disk
-If no console is visible, the text will appear at the top of the game window
-================
-*/
-void Con_Print (char *txt)
+ * Go back to the start of the current line
+ */
+static void _CON_RestartLine( )
 {
-	int		y;
-	int		c, l;
-	static int	cr;
-	int		mask;
-	qboolean mask_skip;
-
-	if (!con.initialized)
-		return;
-
-	if (txt[0] == 1 || txt[0] == 2)
-	{
-		mask = 128;		// go to colored text
-		txt++;
-	}
-	else
-		mask = 0;
-
-	mask_skip = false;
-
-	while ( (c = *txt) )
-	{
-	// count word length
-		for (l=0 ; l< con.linewidth ; l++)
-			if ( txt[l] <= ' ')
-				break;
-
-	// word wrap
-		if (l != con.linewidth && (con.x + l > con.linewidth) )
-			con.x = 0;
-
-		txt++;
-
-		if (cr)
-		{
-			con.current--;
-			cr = false;
-		}
+	CON_console.curLine = _CON_FindLineStart( CON_console.curLine );
+	CON_console.offset = 0;
+}
 
 
-		if (!con.x)
-		{
-			Con_Linefeed ();
-		// mark time for transparent overlay
-			if (con.current >= 0)
-				con.times[con.current % NUM_CON_TIMES] = cls.realtime;
-		}
+/*
+ * Append a character to the console buffer
+ *
+ * Parameters:
+ *	new_char	the character to append
+ */
+static void _CON_AppendChar( char new_char )
+{
+	int lStart = _CON_FindLineStart( CON_console.curLine );
 
-		switch (c)
-		{
-		case '\n':
-			con.x = 0;
-			break;
+	CON_console.text[ CON_console.curLine ][ CON_console.offset ] = new_char;
+	CON_console.offset = ( CON_console.offset + 1 ) % CON_LINE_LENGTH;
+	CON_console.heights[ lStart ] = 0;
 
-		case '\r':
-			con.x = 0;
-			cr = 1;
-			break;
-
-		default:	// display character and advance
-			y = con.current % con.totallines;
-			if(c == '^' || mask_skip) {
-				con.text[y*con.linewidth+con.x] = c; //don't use masks in strings with color esc
-				mask_skip = true;
-			}
-			else
-				con.text[y*con.linewidth+con.x] = c | mask | con.ormask;
-			con.x++;
-			if (con.x >= con.linewidth)
-				con.x = 0;
-			break;
-		}
-
+	if ( CON_console.offset == 0 ) {
+		// Start a new buffer line that is part of the current logical line
+		CON_console.lCount[ lStart ] ++;
+		CON_console.curLine = ( CON_console.curLine + 1 ) % CON_MAX_LINES;
+		CON_console.lines += 1 - CON_console.lCount[ CON_console.curLine ];
+		memset( CON_console.text[ CON_console.curLine ] , 0 , CON_LINE_LENGTH );
 	}
 }
 
 
 /*
-==============
-Con_CenteredPrint
-==============
-*/
-void Con_CenteredPrint (char *text)
+ * Copy the specified logical line into a buffer
+ *
+ * If the current buffer line is full, the logical line will be extended to
+ * include the next buffer line.
+ *
+ * Parameters:
+ *	buffer		the buffer to copy to
+ *	line		the first buffer line of the logical line
+ *
+ * Notes:
+ *	The buffer should have a sufficient size, which can be computed
+ *		using lCount[ line ] * CON_LINE_LENGTH.
+ */
+static void _CON_CopyLine( char * buffer , int line )
 {
-	int		l;
-	char	buffer[1024];
-
-	l = strlen(text);
-	l = (con.linewidth-l)/2;
-	if (l < 0)
-		l = 0;
-	memset (buffer, ' ', l);
-	strcpy (buffer+l, text);
-	strcat (buffer, "\n");
-	Con_Print (buffer);
+	int len = CON_console.lCount[ line ];
+	int i;
+	for ( i = 0 ; i < len ; i ++ ) {
+		memcpy( buffer , CON_console.text[ line ] , CON_LINE_LENGTH );
+		buffer += CON_LINE_LENGTH;
+		line = ( line + 1 ) % CON_MAX_LINES;
+	}
 }
 
-/*
-==============================================================================
-
-DRAWING
-
-==============================================================================
-*/
 
 
-/*
-================
-Con_DrawInput
+/**************************************************************************/
+/* NOTIFICATIONS                                                          */
+/**************************************************************************/
 
-The input line scrolls horizontally if typing goes beyond the right edge
-================
-*/
-void Con_DrawInput (void)
+/* Clear all notifications */
+void CON_ClearNotify( )
 {
 	int		i;
-	char		text[2048];
-	char		*output;
-	int		charscale;
-
-	charscale = (float)(viddef.height)*8/600;
-	if(charscale < 8)
-		charscale = 8;
-
-	if (cls.key_dest == key_menu)
-		return;
-	if (cls.key_dest != key_console && cls.state == ca_active)
-		return;		// don't draw anything (always draw if not active)
-
-// copy the text into the temporary buffer and add the cursor frame
-	memcpy (text, key_lines[edit_line], key_linepos);
-	text[key_linepos] = 10+((int)(cls.realtime>>8)&1);
-	if ( key_linelen > key_linepos )
-		memcpy (text + key_linepos + 1, key_lines[edit_line] + key_linepos, key_linelen - key_linepos);
-
-// fill out remainder with spaces
-	for (i = key_linelen + 1 ; i < con.linewidth ; i++)
-		text[i] = ' ';
-	text[i] = 0;
-
-// prestep if horizontally scrolling
-	output = text;
-	if (key_linepos >= con.linewidth)
-		output += 1 + key_linepos - con.linewidth;
-
-
-// draw it
-	Draw_ColorString ( charscale, (int)(con.vislines - 2.75*charscale), output, 1);
-}
-
-
-/*
-================
-Con_DrawNotify
-
-Draws the last few lines of output transparently over the game top
-================
-*/
-void Con_DrawNotify (void)
-{
-	int		x, v;
-	char	*text;
-	int		i;
-	int		time;
-	char	*s;
-	int		skip;
-	int num;
-	int spacer;
-	vec4_t	scolor;
-	int		charscale;
-
-	charscale = (float)(viddef.height)*8/600;
-	if(charscale < 8)
-		charscale = 8;
-
-	scolor[0] = 1;
-	scolor[1] = 1;
-	scolor[2] = 1;
-	scolor[3] = 1;
-
-	v = 0;
-	for (i= con.current-NUM_CON_TIMES+1 ; i<=con.current ; i++)
-	{
-		if (i < 0)
-			continue;
-		time = con.times[i % NUM_CON_TIMES];
-		if (time == 0)
-			continue;
-		time = cls.realtime - time;
-		if (time > con_notifytime->value*1000)
-			continue;
-		text = con.text + (i % con.totallines)*con.linewidth;
-
-	    x = 0;
-		spacer = 0;
-		while (*text && x < con.linewidth-spacer) {
-			if ( Q_IsColorString( text ) ) {
-				VectorCopy ( color_table[ColorIndex(text[1])], scolor );
-				text += 2;
-				spacer +=2;
-				continue;
-			}
-
-			Draw_ScaledColorChar ((x+1)*charscale, v, *text, scolor, charscale, false);
-
-			num = *text++;
-			num &= 255;
-
-			if ( (num&127) == 32 ) { //spaces reset colors
-				scolor[0] = 1;
-				scolor[1] = 1;
-				scolor[2] = 1;
-				scolor[3] = 1;
-			}
-
-			x++;
-
-		}
-
-		v += charscale;
-	}
-
-
-	if (cls.key_dest == key_message)
-	{
-
-		if (chat_team)
-		{
-			DrawString (charscale, v, "say_team:");
-			skip = 11;
-		}
-		else if (chat_irc)
-		{
-			DrawString (charscale, v, "say_IRC:");
-			skip = 10;
-		}
-		else
-		{
-			DrawString (charscale, v, "say:");
-			skip = 5;
-		}
-
-		s = chat_buffer;
-		if (chat_bufferlen > (viddef.width/charscale)-(skip+1))
-			s += chat_bufferlen - ((viddef.width/charscale)-(skip+1));
-
-		x = 0;
-		while (*s) {
-			if ( Q_IsColorString( s ) ) {
-				VectorCopy ( color_table[ColorIndex(s[1])], scolor );
-				s += 2;
-				continue;
-			}
-
-			Draw_ScaledColorChar ( (x+skip)*charscale, v, *s, scolor, charscale, false);
-
-			num = *s++;
-			num &= 255;
-
-			if ( (num&127) == 32 ) { //spaces reset colors
-				scolor[0] = 1;
-				scolor[1] = 1;
-				scolor[2] = 1;
-				scolor[3] = 1;
-			}
-
-			x++;
-
-		}
-		Draw_ScaledChar ( (x+skip)*charscale, v, 10+((cls.realtime>>charscale)&1), charscale, false);
-		v += charscale;
+	for ( i = 0 ; i < CON_MAX_NOTIFY ; i ++ ) {
+		CON_console.times[ i ] = 0;
 	}
 }
 
-/*
-================
-Con_DrawConsole
 
-Draws the console with the solid background
-================
-*/
-void Con_DrawConsole (float frac)
+/* Draw the few last lines of the console transparently over the game */
+void CON_DrawNotify( )
 {
-	int				i, x, y;
-	int				rows;
-	char			*text, dl[MAX_STRING_CHARS], output[1024];
-	int				row;
-	int				lines;
-	//char			version[64];
-	int kb;
-	vec4_t	scolor;
-	int		charscale;
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	int			line;
+	int			bLines;
+	int			count;
+	int			timeIndex;
 
-	charscale = (float)(viddef.height)*8/600;
-	if(charscale < 8)
-		charscale = 8;
+	font = FNT_AutoGet( CL_gameFont );
+	box.x = 0;
+	box.y = 0;
 
-	scolor[0] = 1;
-	scolor[1] = 1;
-	scolor[2] = 1;
-	scolor[3] = 1;
+	if (cls.key_dest == key_message) {
+		const char *	to_draw;
+		int		height;
 
-	lines = viddef.height * frac;
-	if (lines <= 0)
-		return;
+		if (chat_team) {
+			to_draw = "say_team: ";
+		} else if (chat_irc) {
+			to_draw = "say_IRC: ";
+		} else {
+			to_draw = "say: ";
+		}
+		box.width = viddef.width;
+		box.height = 0;
+		FNT_BoundedPrint( font , to_draw , FNT_CMODE_NONE , FNT_ALIGN_LEFT , &box , FNT_colors[ 7 ] );
+		height = box.height;
 
-	if (lines > viddef.height)
-		lines = viddef.height;
+		box.x = box.width + 1;
+		box.width = viddef.width - box.width;
+		box.height = 0;
+		FNT_WrappedPrint( font , chat_buffer , FNT_CMODE_NONE , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
 
-// draw the background
-	Draw_StretchPic (0, lines-viddef.height, viddef.width, viddef.height, "conback");
-
-	DrawString(viddef.width-charscale*(strlen(VERSION)+1), lines-charscale-1, VERSION);
-
-// draw the text
-	con.vislines = lines;
-
-	rows = (lines-22)/charscale;		// rows of text to draw
-
-	y = lines - 3.75*charscale;
-
-
-// draw from the bottom up
-	if (con.display != con.current)
-	{
-	// draw arrows to show the buffer is backscrolled
-		for (x=0 ; x<con.linewidth ; x+=charscale*2)
-			Draw_ScaledChar ( (x+1)*charscale, y, '^', charscale, false);
-
-		y -= charscale;
-		rows--;
+		box.x = 0;
+		box.y = ( height > box.height ) ? height : box.height;
 	}
 
-	row = con.display;
-	for (i=0 ; i<rows ; i++, y-=charscale, row--)
-	{
-		if (row < 0)
+	// Find the first logical line to display
+	line = _CON_FindLineStart( CON_console.curLine );
+	bLines = CON_console.lines - CON_console.lCount[ line ];
+	timeIndex = ( CON_console.curTime - 1 + CON_MAX_NOTIFY ) % CON_MAX_NOTIFY;
+	for ( count = 0 ; count < CON_MAX_NOTIFY && bLines > 0 ; count ++ ) {
+		int time = CON_console.times[ timeIndex ];
+		if ( time == 0 || cls.realtime - time > con_notifytime->value * 1000 ) {
 			break;
-		if (con.current - row >= con.totallines)
-			break;		// past scrollback wrap point
+		}
+		timeIndex = ( timeIndex - 1 + CON_MAX_NOTIFY ) % CON_MAX_NOTIFY;
 
-		text = con.text + (row % con.totallines)*con.linewidth;
-
-		Com_sprintf (output, sizeof(output), "");
-		for (x=0 ; x<con.linewidth ; x++)
-			Com_sprintf (output, sizeof(output), "%s%c", output, text[x]);
-
-		Draw_ColorString ( 4, y, output, 1);
+		line = _CON_FindPreviousLine( line );
+		bLines -= CON_console.lCount[ line ];
 	}
 
-//ZOID
-
-	if(cls.download && (kb = (int)ftell(cls.download) / 1024)){  // draw progress
-
-		Com_sprintf(dl, sizeof(dl), "%s [%s] %dKB ", cls.downloadname,
-				(cls.downloadhttp ? "HTTP" : "UDP"), kb);
-
-		for(i = 0; i < strlen(dl); i++)
-			Draw_ScaledChar(i * charscale, con.vislines - charscale, dl[i], charscale, false);
+	// No lines to display
+	if ( count == 0 ) {
+		return;
 	}
-//ZOID
 
-// draw the input prompt, user text, and cursor if desired
-	Con_DrawInput ();
+	// Display lines
+	while ( count > 0 ) {
+		box.width = viddef.width;
+		box.height = 0;
+		if ( CON_console.lCount[ line ] == 1 ) {
+			FNT_WrappedPrint( font , CON_console.text[ line ] , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
+		} else {
+			char buffer[ CON_LINE_LENGTH * CON_console.lCount[ line ] ];
+			_CON_CopyLine( buffer , line );
+			FNT_WrappedPrint( font , buffer , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
+		}
+		box.y += box.height;
+
+		line = _CON_FindNextLine( line );
+		timeIndex = ( timeIndex + 1 ) % CON_MAX_NOTIFY;
+		count --;
+	}
 }
 
 
+
+/**************************************************************************/
+/* CONSOLE ACCESS FUNCTIONS                                               */
+/**************************************************************************/
+
+/* Save the console contents out to a file. */
+static void _CON_Dump( )
+{
+	char	name[MAX_OSPATH];
+	int	line , lastLine;
+	FILE *	f;
+
+	if ( Cmd_Argc( ) != 2 ) {
+		Com_Printf ("usage: condump <filename>\n");
+		return;
+	}
+	Com_sprintf( name , sizeof( name ) , "%s/%s.txt" , FS_Gamedir( ) , Cmd_Argv( 1 ) );
+
+	Com_Printf( "Dumping console text to %s.\n" , name );
+	FS_CreatePath( name );
+	f = fopen( name, "w" );
+	if (!f) {
+		Com_Printf( "ERROR: couldn't open %s.\n" , name );
+		return;
+	}
+
+	lastLine = _CON_FindLineStart( CON_console.curLine );
+	line = ( CON_console.curLine + 1 + CON_MAX_LINES - CON_console.lines ) % CON_MAX_LINES;
+	while ( line != lastLine ) {
+		if ( CON_console.text[ line ][ 0 ] != 0 ) {
+			if ( CON_console.lCount[ line ] == 1 ) {
+				fprintf( f , "%s\n" , CON_console.text[ line ] );
+			} else {
+				char buffer[ CON_LINE_LENGTH * CON_console.lCount[ line ] ];
+				_CON_CopyLine( buffer , line );
+				fprintf( f , "%s\n" , buffer );
+			}
+		}
+		line = _CON_FindNextLine( line );
+	}
+
+	fclose( f );
+}
+
+/* Clears the console */
+void CON_Clear( )
+{
+	memset( &CON_console , 0 , sizeof( CON_console ) );
+	CON_console.lines = 1;
+	CON_console.lCount[ 0 ] = 1;
+	CON_console.curLine = 0;
+	CON_console.offset = 0;
+	CON_console.initialised = true;
+}
+
+
+/* Initialise the console. */
+void CON_Initialise( )
+{
+	CON_Clear( );
+	Com_Printf( "Console initialized.\n" );
+
+	// Register CVars
+	con_notifytime = Cvar_Get( "con_notifytime" , "3" , 0 );
+
+	// Register commands
+	Cmd_AddCommand( "toggleconsole", CON_ToggleConsole );
+	Cmd_AddCommand( "togglechat", _CON_ToggleChat );
+	Cmd_AddCommand( "messagemode", _CON_GeneralChatInput );
+	Cmd_AddCommand( "messagemode2", _CON_TeamChatInput );
+	Cmd_AddCommand( "messagemode3", _CON_IRCInput );
+	Cmd_AddCommand( "clear" , CON_Clear );
+	Cmd_AddCommand( "condump" , _CON_Dump );
+}
+
+
+/* Add text to the console. */
+void CON_Print( const char * text )
+{
+	char curChar;
+
+	if ( ! CON_console.initialised ) {
+		return;
+	}
+
+	while ( ( curChar = *text ) != 0 ) {
+		if ( curChar == '\r' ) {
+			_CON_RestartLine( );
+		} else if ( curChar == '\n' ) {
+			_CON_NewLine( );
+		} else {
+			_CON_AppendChar( curChar );
+		}
+		text ++;
+	}
+}
+
+
+
+/**************************************************************************/
+/* CONSOLE DISPLAY FUNCTIONS                                              */
+/**************************************************************************/
+
+/*
+ * Compute the height of a logical console line and update the console's
+ * data structure accordingly.
+ *
+ * Parameters:
+ *	font	the current console font
+ *	line	the start of the logical line for which the computation will
+ *		be performed
+ */
+static void _CON_ComputeLineHeight( FNT_font_t font , int line )
+{
+	if ( CON_console.text[ line ][ 0 ] == 0 ) {
+		// Empty lines are a special case, as we don't need to draw them
+		CON_console.heights[ line ] = font->size;
+	} else {
+		// "Print" the line outside of the screen
+		struct FNT_window_s box;
+		box.x = 0 , box.y = viddef.height;
+		box.width = viddef.width - font->size * 3 , box.height = 0;
+
+		if ( CON_console.lCount[ line ] == 1 ) {
+			FNT_WrappedPrint( font , CON_console.text[ line ] , FNT_CMODE_QUAKE_SRS ,
+				FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 0 ] );
+		} else {
+			char buffer[ CON_console.lCount[ line ] * CON_LINE_LENGTH ];
+			_CON_CopyLine( buffer , line );
+			FNT_WrappedPrint( font , buffer , FNT_CMODE_QUAKE_SRS ,
+				FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 0 ] );
+		}
+
+		if ( box.height == 0 ) {
+			CON_console.heights[ line ] = font->size;
+		} else {
+			CON_console.heights[ line ] = box.height;
+		}
+	}
+}
+
+
+/*
+ * Compute the height of all active lines in the console.
+ *
+ * Parameters:
+ *	font	the console's current font
+ *
+ * Returns:
+ *	the total height of the console
+ */
+static unsigned int _CON_ComputeHeight( FNT_font_t font )
+{
+	int			line , lastLine;
+	unsigned int		total = 0;
+
+	lastLine = _CON_FindLineStart( CON_console.curLine );
+	line = ( CON_console.curLine + 1 + CON_MAX_LINES - CON_console.lines ) % CON_MAX_LINES;
+	while ( 1 ) {
+		if ( ! CON_console.heights[ line ] ) {
+			_CON_ComputeLineHeight( font , line );
+		}
+
+		total += CON_console.heights[ line ];
+		if ( line == lastLine ) {
+			break;
+		}
+		line = _CON_FindNextLine( line );
+	}
+
+	return total;
+}
+
+
+/*
+ * Check for font or resolution changes.
+ *
+ * Parameters:
+ *	font	the console's current font
+ *
+ * Returns:
+ *	true if the resolution or fonts have changed, false otherwise
+ */
+static qboolean _CON_CheckResize( FNT_font_t font )
+{
+	return ( viddef.width != CON_console.pWidth || font->size != CON_console.pSize
+		|| strcmp( font->face->name , CON_console.pFace ) );
+}
+
+
+/*
+ * Draw the console's text.
+ *
+ * Parameters:
+ *	font	the current console font
+ *	start	the vertical offset relative to the top of the console's
+ *		contents at which drawing is to begin
+ *	dHeight	the height of the display area
+ */
+static void _CON_DrawConsoleText(
+		FNT_font_t		font ,
+		int			start ,
+		int			dHeight
+	)
+{
+	struct FNT_window_s	box;
+	int			line , lastLine , total;
+
+	qglScissor( 0 , viddef.height - dHeight , viddef.width , dHeight );
+	qglEnable( GL_SCISSOR_TEST );
+
+	total = 0;
+	lastLine = _CON_FindLineStart( CON_console.curLine );
+	line = ( CON_console.curLine + 1 + CON_MAX_LINES - CON_console.lines ) % CON_MAX_LINES;
+
+	do {
+		if ( total + CON_console.heights[ line ] >= start && CON_console.text[ line ][ 0 ] ) {
+			box.x = font->size;
+			box.y = total - start;
+			box.width = viddef.width - font->size * 3;
+			box.height = 0;
+
+			if ( CON_console.lCount[ line ] == 1 ) {
+				FNT_WrappedPrint( font , CON_console.text[ line ] , FNT_CMODE_QUAKE_SRS ,
+					FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 2 ] );
+			} else {
+				char buffer[ CON_console.lCount[ line ] * CON_LINE_LENGTH ];
+				_CON_CopyLine( buffer , line );
+				FNT_WrappedPrint( font , buffer , FNT_CMODE_QUAKE_SRS ,
+					FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 2 ] );
+			}
+		}
+
+		total += CON_console.heights[ line ];
+		if ( line == lastLine ) {
+			break;
+		}
+		line = _CON_FindNextLine( line );
+	} while ( total - start < dHeight );
+
+	qglDisable( GL_SCISSOR_TEST );
+}
+
+
+/*
+ * Draw the scroller on the right of the console.
+ *
+ * For now this is not interactive, it only exists to indicate where in the
+ * console's contents the current view is located.
+ *
+ * This function uses Draw_Fill to generate the scroller's graphics. It uses
+ * the following fill colours: 15 (white, outside of the box), 201 (dark
+ * green, inside of the box) and 208 (bright green, selected area).
+ *
+ * Parameters:
+ *	font_size	The size of the font (used as the vertical offset and
+ *			the scroller's width)
+ *	text_height	Total height of the console's text contents.
+ *	display_height	Height of the viewing area.
+ */
+static void _CON_DrawScroller(
+		int	font_size ,
+		int	text_height ,
+		int	display_height )
+{ 
+	int hStart = viddef.width - 3 * font_size / 2;
+	int vStart = font_size / 2;
+	int tHeight = display_height - font_size;
+	int bHeight , bStart;
+
+	Draw_Fill( hStart - 1 , vStart - 1 , font_size + 2 , tHeight + 2 , 15 );
+
+	if ( display_height > text_height ) {
+		// Fill whole bar
+		Draw_Fill( hStart , vStart , font_size , tHeight , 208 );
+		return;
+	}
+
+	bHeight = tHeight * display_height / text_height;
+	if ( bHeight < font_size / 2 ) {
+		bHeight = font_size / 2;
+	}
+
+	// "Top" offset is height - dHeight, "bottom" offset is 0
+	// "Top" bar location is vStart, bottom location is vStart + tHeight - bHeight.
+	bStart = vStart + ( tHeight - bHeight )
+		* ( CON_console.displayOffset - text_height + display_height )
+		/ ( display_height - text_height );
+
+	Draw_Fill( hStart , vStart , font_size , tHeight , 201 );
+	Draw_Fill( hStart , bStart , font_size , bHeight , 208 );
+}
+
+
+/*
+ * Draw the console's input line.
+ *
+ * Parameters:
+ *	font	the current console font
+ *	inputY	the height at which the input line is located
+ */
+static void _CON_DrawInputLine(
+		FNT_font_t		font ,
+		int			inputY )
+{
+	struct FNT_window_s	box;
+	char			text[ MAXCMDLINE + 1 ];
+	unsigned int		wToCursor;
+	unsigned int		wAfterCursor;
+	unsigned int		align;
+	char			old;
+
+	if ( cls.key_dest == key_menu || ( cls.key_dest != key_console && cls.state == ca_active ) )
+		return;
+
+	// Copy current line
+	memcpy( text , key_lines[ edit_line ] , key_linelen );
+	text[ key_linelen ] = 0;
+
+	// Determine width of text before the cursor ...
+	old = text[ key_linepos ];
+	text[ key_linepos ] = 0;
+	box.x = 0;
+	box.y = viddef.height;
+	box.width = box.height = 0;
+	FNT_BoundedPrint( font , text , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
+	wToCursor = box.width;
+	text[ key_linepos ] = old;
+
+	// ... and after the cursor
+	if ( key_linelen > key_linepos ) {
+		box.width = box.height = 0;
+		FNT_BoundedPrint( font , text + key_linepos , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
+		wAfterCursor = box.width;
+	} else {
+		wAfterCursor = 0;
+	}
+
+	box.x = font->size;
+	box.y = inputY;
+	box.height = 0;
+	text[ key_linepos ] = 0;
+	if ( wToCursor + font->size * 3 < viddef.width ) {
+		// There is enough space for the start of the line
+		align = FNT_ALIGN_LEFT;
+	} else {
+		// Not enough space, print with right alignment
+		wToCursor = viddef.width * 0.9;
+		align = FNT_ALIGN_RIGHT;
+	}
+	box.width = wToCursor;
+	FNT_BoundedPrint( font , text , FNT_CMODE_QUAKE_SRS , align , &box , FNT_colors[ 2 ] );
+
+	// Draw cursor
+	if ( ( (int)( cls.realtime >> 8 ) & 1) != 0 ) {
+		Draw_Fill( box.x + box.width + 1 , box.y + 1 , font->size - 2 , font->size - 2 , 208 );
+	}
+
+	// Draw whatever is after the cursor
+	if ( wAfterCursor ) {
+		text[ key_linepos ] = old;
+		box.x += box.width + font->size;
+		box.width = viddef.width - ( box.width + font->size * 3 );
+		box.height = 0;
+		FNT_BoundedPrint( font , text + key_linepos , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
+	}
+}
+
+
+/*
+ * Draw the line at the bottom of the console.
+ *
+ * This line includes the version string and the current download status.
+ *
+ * Parameters:
+ *	y	vertical offset of the bottom of the console
+ *
+ * Returns:
+ *	vertical offset above the line at the bottom of the console
+ *
+ */
+static int _CON_DrawConsoleBottom( int y )
+{
+	FNT_font_t	font;
+	char		buffer[ MAX_STRING_CHARS ];
+	int		kb , sz;
+
+	font = FNT_AutoGet( CL_gameFont );
+	y -= font->size;
+	
+	// Draw version string
+	sz = sizeof( VERSION );
+	FNT_RawPrint( font , VERSION , sz , false ,
+		viddef.width - font->size * 3 * sz / 2 , y , FNT_colors[ 7 ] );
+
+	// Draw download status if needed
+	if ( ! ( cls.download && ( kb = (int)ftell( cls.download ) / 1024 ) ) ) {
+		return y;
+	}
+
+	Com_sprintf( buffer , MAX_STRING_CHARS , "Downloading %s [%s] ... %dKB" ,
+		cls.downloadname , ( cls.downloadhttp ? "HTTP" : "UDP" ), kb );
+	FNT_RawPrint( font , buffer , strlen( buffer ) , false ,
+		font->size * 3 , y , FNT_colors[ 3 ] );
+
+	return y;
+}
+
+
+/* Draw the console. */
+void CON_DrawConsole( float relSize )
+{
+	FNT_font_t		font;
+	int			dHeight;
+	int			height;
+	int			start;
+	int			fontSize;
+
+	// Don't draw if there's no video
+	if ( viddef.width < 1 ) {
+		return;
+	}
+
+	// Check for changes and act accordingly
+	font = FNT_AutoGet( CL_consoleFont );
+	if ( _CON_CheckResize( font ) ) {
+		CON_console.pWidth = viddef.width;
+		CON_console.pSize = font->size;
+		strcpy( CON_console.pFace , font->face->name );
+		memset( CON_console.heights , 0 , sizeof( CON_console.heights ) );
+	}
+	fontSize = font->size;
+
+	// Compute display height and draw background
+	dHeight = viddef.height * relSize;
+	Draw_StretchPic( 0 , dHeight - viddef.height , viddef.width , viddef.height , "conback" );
+
+	// Draw version string and download status
+	dHeight = _CON_DrawConsoleBottom( dHeight ) - fontSize;
+
+	// Compute heights
+	height = _CON_ComputeHeight( font );
+	if ( height < dHeight ) {
+		CON_console.displayOffset = 0;
+	} else if ( CON_console.displayOffset > height - dHeight ) {
+		CON_console.displayOffset = height - dHeight;
+	}
+	start = height - dHeight - CON_console.displayOffset;
+
+	// Draw console contents & input line
+	_CON_DrawConsoleText( font , start , dHeight );
+	_CON_DrawScroller( font->size , height , dHeight );
+	_CON_DrawInputLine( font , dHeight );
+}

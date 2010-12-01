@@ -18,50 +18,159 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#ifndef __CL_CONSOLE_H
+#define __CL_CONSOLE_H
+
 //
 // console
 //
 
-#define	NUM_CON_TIMES 4
 
-#define		CON_TEXTSIZE	32768
-#define		MAXCMDLINE	256
-typedef struct
+/**************************************************************************/
+/* CONSTANTS                                                              */
+/**************************************************************************/
+
+/* Maximal length of a command line */
+#define MAXCMDLINE		256
+
+/* Maximal amount of lines in the console's buffer */
+#define	CON_MAX_LINES		4096
+
+/* Length of a line in the console's buffer */
+#define	CON_LINE_LENGTH		128
+
+/* Maximal amount of in-game notifications */
+#define CON_MAX_NOTIFY		4
+
+
+
+/**************************************************************************/
+/* DATA STRUCTURES                                                        */
+/**************************************************************************/
+
+/*
+ * The console's main data structure.
+ *
+ * It includes the console's buffers, notification timestamps, and display
+ * status.
+ */
+struct CON_console_s
 {
-	qboolean	initialized;
+	/* Indicates that the console has been initialised */
+	qboolean	initialised;
 
-	char	text[CON_TEXTSIZE];
-	int		current;		// line where next message will be printed
-	int		x;				// offset in current line for next print
-	int		display;		// bottom of console displays this line
+	/* Text in the console buffer */
+	char		text[ CON_MAX_LINES ][ CON_LINE_LENGTH ];
+	int		lCount[ CON_MAX_LINES ];
 
-	int		ormask;			// high bit mask for colored characters
+	/* Height of the various lines */
+	int		heights[ CON_MAX_LINES ];
 
-	int 	linewidth;		// characters across screen
-	int		totallines;		// total lines in console scrollback
+	/* Amount of lines in the console buffer */
+	int		lines;
 
-	float	cursorspeed;
+	/* Current line */
+	int		curLine;
 
-	int		vislines;
+	/* Offset in the current line */
+	int		offset;
 
-	float	times[NUM_CON_TIMES];	// cls.realtime time the line was generated
-								// for transparent notify lines
-} console_t;
+	/* Time at which the last lines were generated - used for notifications */
+	float		times[ CON_MAX_NOTIFY ];
+	int		curTime;
 
-extern	console_t	con;
-extern	char		key_lines[32][MAXCMDLINE];
-extern	int		edit_line;
-extern	int		key_linepos;
-extern	int		key_linelen;
+	/* Previous display parameters, if any */
+	int		pWidth;
+	char		pFace[ FNT_FACE_NAME_MAX ];
+	unsigned int	pSize;
 
-void Con_DrawCharacter (int cx, int line, int num);
+	/* Offset from which the console is being displayed */
+	int		displayOffset;
+};
 
-void Con_CheckResize (void);
-void Con_Init (void);
-void Con_DrawConsole (float frac);
-void Con_Print (char *txt);
-void Con_CenteredPrint (char *text);
-void Con_Clear_f (void);
-void Con_DrawNotify (void);
-void Con_ClearNotify (void);
-void Con_ToggleConsole_f (void);
+/* The console's main structure */
+extern struct CON_console_s	CON_console;
+
+
+
+/**************************************************************************/
+/* CONSOLE FUNCTIONS                                                      */
+/**************************************************************************/
+
+/*
+ * Initialise the console.
+ *
+ * This function prepares the console for text storage, and registers CVars
+ * and commands associated with both the console and the in-game chat line.
+ */
+void CON_Initialise( );
+
+
+/*
+ * Add text to the console.
+ *
+ * This function prints text to the console's buffer. Notification timestamps
+ * are updated, and line heights are set to 0 for modified lines.
+ *
+ * Parameters:
+ *	text	the text to add
+ */
+void CON_Print( const char * text );
+
+
+/*
+ * Clear the console.
+ *
+ * This function resets the console's buffer as well as notification
+ * timestamps.
+ */
+void CON_Clear( );
+
+
+/*
+ * Draw the console.
+ *
+ * Parameters:
+ *	relSize		vertical size of the console relative to the screen's
+ *			size
+ */
+void CON_DrawConsole( float relSize );
+
+
+/*
+ * Show or hide the console
+ */
+void CON_ToggleConsole( );
+
+
+
+/**************************************************************************/
+/* NOTIFICATION FUNCTIONS                                                 */
+/**************************************************************************/
+
+/*
+ * Clear notification timestamps.
+ *
+ * This function resets the console's notification timestamps without
+ * affecting the rest of the console's data.
+ */
+void CON_ClearNotify( );
+
+/*
+ * Draw the few last lines of the console transparently over the game.
+ */
+void CON_DrawNotify( );
+
+
+
+/**************************************************************************/
+/* CONSOLE LINE EDITION DATA                                              */
+/**************************************************************************/
+
+extern	char			key_lines[32][MAXCMDLINE];
+extern	int			edit_line;
+extern	int			key_linepos;
+extern	int			key_linelen;
+
+
+#endif // __CL_CONSOLE_H

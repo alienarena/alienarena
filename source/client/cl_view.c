@@ -351,10 +351,11 @@ void CL_PrepRefresh ( void )
 		SCR_BeginLoadingPlaque();
 
 	loadingMessage = true;
-	Com_sprintf (loadingMessages[0], sizeof(loadingMessages[0]), "loading map...");
-	Com_sprintf (loadingMessages[1], sizeof(loadingMessages[1]), "loading models...");
-	Com_sprintf (loadingMessages[2], sizeof(loadingMessages[2]), "loading pics...");
-	Com_sprintf (loadingMessages[3], sizeof(loadingMessages[3]), "loading clients...");
+	memset( loadingMessages , 0 , sizeof( loadingMessages ) );
+	Com_sprintf (loadingMessages[0][0], CL_LOADMSG_LENGTH, "Loading map...");
+	Com_sprintf (loadingMessages[1][0], CL_LOADMSG_LENGTH, "Loading models...");
+	Com_sprintf (loadingMessages[2][0], CL_LOADMSG_LENGTH, "Loading pics...");
+	Com_sprintf (loadingMessages[3][0], CL_LOADMSG_LENGTH, "Loading clients...");
 
 	// let the render dll load the map
 	strcpy (mapname, cl.configstrings[CS_MODELS+1] + 5);	// skip "maps/"
@@ -372,10 +373,11 @@ void CL_PrepRefresh ( void )
 	}
 
 	Com_Printf ("Map: %s\r", mapname);
+	Com_sprintf( loadingMessages[0][1] , CL_LOADMSG_LENGTH , "^3in progress" );
 	SCR_UpdateScreen ();
 	R_BeginRegistration (mapname);
 	Com_Printf ("                                     \r");
-	Com_sprintf (loadingMessages[0], sizeof(loadingMessages[0]), "loading map...done");
+	Com_sprintf (loadingMessages[0][1], CL_LOADMSG_LENGTH, "^2done");
 	loadingPercent += 20;
 
 	// precache status bar pics
@@ -400,8 +402,7 @@ void CL_PrepRefresh ( void )
 			Com_Printf ("%s\r", name);
 
 			//only make max of 20 chars long
-			Com_sprintf (loadingMessages[1], sizeof(loadingMessages[1]), "loading models...%s",
-				(strlen(name)>20)? &name[strlen(name)-20]: name);
+			Com_sprintf( loadingMessages[1][1] , CL_LOADMSG_LENGTH , "^1%s" , name );
 
 			//check for types
 			if(!strcmp(name, "models/weapons/g_rocket/tris.md2"))
@@ -462,7 +463,7 @@ void CL_PrepRefresh ( void )
 		loadingPercent += 60.0f/(float)max;
 	}
 
-	Com_sprintf (loadingMessages[1], sizeof(loadingMessages[1]), "loading models...precaching");
+	Com_sprintf (loadingMessages[1][1], CL_LOADMSG_LENGTH, "^3precaching");
 
 	SCR_UpdateScreen ();
 
@@ -470,7 +471,7 @@ void CL_PrepRefresh ( void )
 	if(cl_precachecustom->value)
 		R_RegisterCustomPlayerModels();
 
-	Com_sprintf (loadingMessages[1], sizeof(loadingMessages[1]), "loading models...done");
+	Com_sprintf (loadingMessages[1][1], CL_LOADMSG_LENGTH, "^2done");
 
 	Com_Printf ("images\r", i);
 	SCR_UpdateScreen ();
@@ -484,7 +485,7 @@ void CL_PrepRefresh ( void )
 		Sys_SendKeyEvents ();	// pump message loop
 		loadingPercent += 10.0f/(float)max;
 	}
-	Com_sprintf (loadingMessages[2], sizeof(loadingMessages[2]), "loading pics...done");
+	Com_sprintf (loadingMessages[2][1], CL_LOADMSG_LENGTH, "^2done");
 
 	Com_Printf ("                                     \r");
 
@@ -500,7 +501,7 @@ void CL_PrepRefresh ( void )
 		if (!cl.configstrings[CS_PLAYERSKINS+i][0])
 			continue;
 
-		Com_sprintf (loadingMessages[3], sizeof(loadingMessages[3]), "loading clients...%i", i);
+		Com_sprintf (loadingMessages[3][1], CL_LOADMSG_LENGTH, "^3%i" , i);
 		Com_Printf ("client %i\r", i);
 		SCR_UpdateScreen ();
 		Sys_SendKeyEvents ();	// pump message loop
@@ -509,7 +510,7 @@ void CL_PrepRefresh ( void )
 		Com_Printf ("                                     \r");
 		loadingPercent += 10.0f/(float)max;
 	}
-	Com_sprintf (loadingMessages[3], sizeof(loadingMessages[3]), "loading clients...done");
+	Com_sprintf (loadingMessages[3][1], CL_LOADMSG_LENGTH, "^2done");
 
 	//hack hack hack - psychospaz
 	loadingPercent = 100;
@@ -527,7 +528,7 @@ void CL_PrepRefresh ( void )
 	R_EndRegistration ();
 
 	// clear any lines of console text
-	Con_ClearNotify ();
+	CON_ClearNotify( );
 
 	SCR_UpdateScreen ();
 	cl.refresh_prepped = true;
@@ -634,60 +635,70 @@ qboolean InFront (vec3_t target)
 //==============
 void SCR_DrawPlayerNamesCenter( void )
 {
-   int         i;
-   centity_t   *cent;
-   float      dist, mindist;
-   trace_t   trace;
-   vec3_t vecdist;
-   vec3_t temp;
-   vec3_t axis[3];
-   static vec3_t mins = { -8, -8, -8 };
-   static vec3_t maxs = { 8, 8, 8 };
-   int closest;
+	static vec3_t		mins = { -8, -8, -8 };
+	static vec3_t		maxs = { 8, 8, 8 };
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	int			i;
+	centity_t *		cent;
+	float			dist, mindist;
+	trace_t			trace;
+	vec3_t			vecdist;
+	vec3_t			temp;
+	vec3_t			axis[3];
+	int			closest;
 
-   if( !cl_showPlayerNames->integer )
-      return;
+	if( !cl_showPlayerNames->integer )
+	return;
 
-   mindist = 1000;
-   closest = 0;
+	mindist = 1000;
+	closest = 0;
 
-   for( i = 0; i < MAX_CLIENTS; i++ )
-   {
+	for( i = 0; i < MAX_CLIENTS; i++ )
+	{
+		cent = cl_entities + i + 1;
 
-	  cent = cl_entities + i + 1;
+		if( !cent->current.modelindex )
+			continue;
 
-	  if( !cent->current.modelindex )
-		 continue;
+		if(!strcmp(cl.clientinfo[i].name, name->string))
+			continue;
 
-	  if(!strcmp(cl.clientinfo[i].name, name->string))
-		  continue;
+		trace = CL_Trace ( cl.refdef.vieworg, mins, maxs, cent->current.origin, -1, MASK_PLAYERSOLID, true, NULL);
+		if (trace.fraction != 1.0)
+			continue;
 
-	  trace = CL_Trace ( cl.refdef.vieworg, mins, maxs, cent->current.origin, -1, MASK_PLAYERSOLID, true, NULL);
-	  if (trace.fraction != 1.0)
-		  continue;
+		VectorSubtract(cent->current.origin, cl.refdef.vieworg, vecdist);
+		dist = VectorLength(vecdist);
 
-	  VectorSubtract(cent->current.origin, cl.refdef.vieworg, vecdist);
-	  dist = VectorLength(vecdist);
+		if (dist >= 1000)
+			continue;
 
-	  if (dist >= 1000)
-		  continue;
+		if(dist < mindist && (strlen(cl.clientinfo[i].name) > 1) && InFront(cent->current.origin) ) {
+			mindist = dist;
+			closest = i;
+		}
 
-	  if(dist < mindist && (strlen(cl.clientinfo[i].name) > 1) && InFront(cent->current.origin) ) {
-		  mindist = dist;
-		  closest = i;
-	  }
+		VectorSubtract (cent->current.origin, cl.refdef.vieworg, temp);
+		VectorNormalize (temp);
 
-	  VectorSubtract (cent->current.origin, cl.refdef.vieworg, temp);
-	  VectorNormalize (temp);
+		AngleVectors(cl.refdef.viewangles, axis[0], axis[1], axis[2]);
 
-	  AngleVectors(cl.refdef.viewangles, axis[0], axis[1], axis[2]);
+		if (DotProduct (temp, axis[0]) < 0)
+			continue;
+	}
+	
+	if (!closest) {
+		return;
+	}
 
-	  if (DotProduct (temp, axis[0]) < 0)
-	      continue;
-
-	  }
-	  if(closest)
-		  Draw_ColorString( (int)(cl.refdef.width/2 - strlen(cl.clientinfo[closest].name)*3), (int)(cl.refdef.height/1.8), cl.clientinfo[closest].name, 1);
+	font = FNT_AutoGet( CL_gameFont );
+	box.x = (int)( ( cl.refdef.width - 200 ) / 2 );
+	box.y = (int)( cl.refdef.height / 1.8 );
+	box.width = 400;
+	box.height = 0;
+	FNT_BoundedPrint( font , cl.clientinfo[i].name , FNT_CMODE_QUAKE_SRS ,
+		FNT_ALIGN_CENTER , &box , FNT_colors[ 2 ] );
 
 }
 
@@ -698,82 +709,89 @@ void SCR_DrawPlayerNamesCenter( void )
 extern void R_TransformVectorToScreen( refdef_t *rd, vec3_t in, vec2_t out );
 void SCR_DrawPlayerNames( void )
 {
-   // static vec4_t   whiteTransparent = { 1.0f, 1.0f, 1.0f, 0.5f };
-   int         i;
-   centity_t   *cent;
-   float      dist;
-   trace_t   trace;
-   vec2_t screen_pos;
-   vec3_t vecdist;
-   vec3_t temp;
-   vec3_t axis[3];
-   int y;
-   static vec3_t mins = { -4, -4, -4 };
-   static vec3_t maxs = { 4, 4, 4 };
+	// static vec4_t   whiteTransparent = { 1.0f, 1.0f, 1.0f, 0.5f };
+	FNT_font_t	font;
+	int		i;
+	centity_t *	cent;
+	float		dist;
+	trace_t		trace;
+	vec2_t		screen_pos;
+	vec3_t		vecdist;
+	vec3_t		temp;
+	vec3_t		axis[3];
+	static vec3_t mins = { -4, -4, -4 };
+	static vec3_t maxs = { 4, 4, 4 };
 
-   if( !cl_showPlayerNames->integer )
-      return;
+	font = FNT_AutoGet( CL_gameFont );
+	for( i = 0; i < MAX_CLIENTS; i++ )
+	{
+		struct FNT_window_s	box;
 
-   for( i = 0; i < MAX_CLIENTS; i++ )
-   {
+		cent = cl_entities + i + 1;
 
-	  cent = cl_entities + i + 1;
+		if( !cent->current.modelindex )
+			continue;
 
-	  if( !cent->current.modelindex )
-		 continue;
+		if(!strcmp(cl.clientinfo[i].name, name->string))
+			continue;
 
-	  if(!strcmp(cl.clientinfo[i].name, name->string))
-		  continue;
+		trace = CL_Trace ( cl.refdef.vieworg, mins, maxs, cent->current.origin, -1, MASK_PLAYERSOLID, true, NULL);
+		if (trace.fraction != 1.0)
+			continue;
 
-	  trace = CL_Trace ( cl.refdef.vieworg, mins, maxs, cent->current.origin, -1, MASK_PLAYERSOLID, true, NULL);
-	  if (trace.fraction != 1.0)
-		  continue;
+		VectorSubtract(cent->current.origin, cl.refdef.vieworg, vecdist);
+		dist = VectorLength(vecdist);
 
-	  VectorSubtract(cent->current.origin, cl.refdef.vieworg, vecdist);
-	  dist = VectorLength(vecdist);
+		if (dist >= 1000 || !InFront(cent->current.origin))
+			continue;
 
-	  if (dist >= 1000 || !InFront(cent->current.origin))
-		  continue;
+		VectorSubtract (cent->current.origin, cl.refdef.vieworg, temp);
+		VectorNormalize (temp);
 
-	  VectorSubtract (cent->current.origin, cl.refdef.vieworg, temp);
-	  VectorNormalize (temp);
+		AngleVectors(cl.refdef.viewangles, axis[0], axis[1], axis[2]);
 
-	  AngleVectors(cl.refdef.viewangles, axis[0], axis[1], axis[2]);
+		if (DotProduct (temp, axis[0]) < 0)
+			continue;
 
-	  if (DotProduct (temp, axis[0]) < 0)
-	      continue;
+		R_TransformVectorToScreen(&cl.refdef, cent->current.origin, screen_pos);
+		box.x = (int)screen_pos[0];
+		box.y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6;
+		box.width = box.height = 0;
+		FNT_BoundedPrint( font , cl.clientinfo[i].name , FNT_CMODE_QUAKE_SRS ,
+			FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
 
-	  R_TransformVectorToScreen(&cl.refdef, cent->current.origin, screen_pos);
-	  y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6;
-	  Draw_ColorString ( (int)screen_pos[0], y, cl.clientinfo[i].name, 1 );
-
-   }
+	}
 }
 
 void SCR_DrawBases (void)
 {
-	int			i;
-	entity_t	*ent;
-    vec2_t screen_pos;
-    int y;
+	FNT_font_t	font;
+	int		i;
+	entity_t *	ent;
+	vec2_t		screen_pos;
 
+	font = FNT_AutoGet( CL_gameFont );
 	for (i=0 ; i<cl.refdef.num_entities; i++)
 	{
-		ent = &r_entities[i];
+		struct FNT_window_s	box;
+		const char *		str;
 
+		ent = &r_entities[i];
 		if(!ent->team)
 			continue;
-
 		if (!InFront(ent->origin))
 			continue;
 
 		R_TransformVectorToScreen(&cl.refdef, ent->origin, screen_pos);
-		y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6;
-		if(ent->team == 2)
-			Draw_ColorString ( (int)screen_pos[0], y, "^4Blue Flag", 1 );
-		else if(ent->team == 1)
-			Draw_ColorString ( (int)screen_pos[0], y, "^1Red Flag", 1 );
+		box.x = (int)screen_pos[0];
+		box.y = cl.refdef.height-(int)screen_pos[1]-cl.refdef.height/6;
+		box.width = box.height = 0;
 
+		if(ent->team == 2)
+			str = "^4Blue Flag";
+		else if(ent->team == 1)
+			str = "^1Red Flag";
+		FNT_BoundedPrint( font , str , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
 	}
 }
 

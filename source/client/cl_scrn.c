@@ -220,51 +220,25 @@ void SCR_CenterPrint (char *str)
 
 void SCR_DrawCenterString (void)
 {
-	char	*start;
-	int		l;
-	int		j;
-	int		x, y;
-	int		remaining;
-	int		charscale;
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	float			colors[ 8 ] = { 1, 1, 1, 1, 0.25, 1, 0.25, 1 };
 
-// the finale prints the characters one at a time
-	remaining = 9999;
+	if ( scr_centertime_off <= scr_centertime->value / 5.0 ) {
+		colors[ 3 ] = colors[ 7 ] = scr_centertime_off * 5.0 / scr_centertime->value;
+	}
 
-	scr_erase_center = 0;
-	start = scr_centerstring;
+	box.x = 0;
+	if ( scr_center_lines <= 4 ) {
+		box.y = viddef.height * 0.35;
+	} else {
+		box.y = 48;
+	}
+	box.height = viddef.height - box.y;
+	box.width = viddef.width;
 
-	charscale = (float)(viddef.height)*8/400;; //make these a litter larger
-	if(charscale < 8)
-		charscale = 8;
-
-	if (scr_center_lines <= 4)
-		y = viddef.height*0.35;
-	else
-		y = 48;
-
-	do
-	{
-	// scan the width of the line
-		for (l=0 ; l<40 ; l++)
-			if (start[l] == '\n' || !start[l])
-				break;
-		x = (viddef.width - l*charscale)/2;
-		for (j=0 ; j<l ; j++, x+=charscale)
-		{
-			Draw_ScaledChar (x, y, start[j], charscale, false);
-			if (!remaining--)
-				return;
-		}
-
-		y += charscale;
-
-		while (*start && *start != '\n')
-			start++;
-
-		if (!*start)
-			break;
-		start++;		// skip the \n
-	} while (1);
+	font = FNT_AutoGet( CL_centerFont );
+	FNT_BoundedPrint( font , scr_centerstring , FNT_CMODE_TWO , FNT_ALIGN_CENTER , &box , colors );
 }
 
 void SCR_CheckDrawCenterString (void)
@@ -289,23 +263,17 @@ IRC PRINTING
 */
 
 extern vec4_t		Color_Table[8];
-extern console_t	con;
 
 #define SCR_IRC_LINES	5
-#define SCR_IRC_DLINES	2
+#define SCR_IRC_LENGTH	1024
 #define SCR_IRC_INDENT	8
 
 #define SCR_IRC_DISPLAY_HIDE 0		// During line bumping
 #define SCR_IRC_DISPLAY_PARTIAL 1	// When a new line is being added
 #define SCR_IRC_DISPLAY_FULL 2		// No problemo
 
-struct scr_ircstring_t {
-	int n_lines;
-	char lines[SCR_IRC_DLINES][512];
-};
-
-struct scr_ircstring_t	scr_IRCstring_contents[SCR_IRC_LINES];
-struct scr_ircstring_t *scr_IRCstring[SCR_IRC_LINES];
+char			scr_IRCstring_contents[ SCR_IRC_LINES ][ SCR_IRC_LENGTH ];
+char *			scr_IRCstring[ SCR_IRC_LINES ];
 float			scr_IRCtime_start;	// for slow victory printing
 float			scr_IRCtime_off;
 int			scr_IRC_lines = -1;
@@ -322,15 +290,14 @@ Called for IRC messages
 
 void IRC_SetNextLine( int len , const char *buffer )
 {
-	struct scr_ircstring_t * to_set;
-	int i , next_space , cur_len;
-	qboolean new_line;
+	char * to_set;
+	int i;
 
 	// Access the correct line buffer
 	scr_IRC_display = SCR_IRC_DISPLAY_HIDE;
 	if ( scr_IRC_lines < SCR_IRC_LINES - 1 ) {
 		scr_IRC_lines ++;
-		to_set = scr_IRCstring_contents + scr_IRC_lines;
+		to_set = scr_IRCstring_contents[ scr_IRC_lines ];
 	} else {
 		to_set = scr_IRCstring[ 0 ];
 		for ( i = 0 ; i < SCR_IRC_LINES - 1 ; i ++ )
@@ -339,50 +306,8 @@ void IRC_SetNextLine( int len , const char *buffer )
 	scr_IRCstring[ scr_IRC_lines ] = to_set;
 	scr_IRC_display = SCR_IRC_DISPLAY_PARTIAL;
 
-	// Handle wrapping
-	memset( to_set , 0 , sizeof( struct scr_ircstring_t ) );
-	i = cur_len = 0;
-	new_line = true;
-	while ( i < len ) {
-		while ( i < len && buffer[ i ] == ' ' )
-			i ++;
-		if ( i == len )
-			break;
-
-		if ( new_line ) {
-			if ( to_set->n_lines == SCR_IRC_DLINES )
-				break;
-
-			if ( to_set->n_lines ++ ) {
-				memset( to_set->lines[ to_set->n_lines - 1 ] , ' ' , SCR_IRC_INDENT );
-				cur_len = SCR_IRC_INDENT;
-			} else {
-				cur_len = 0;
-			}
-			new_line = false;
-		}
-
-		// Find next space
-		next_space = i;
-		while ( next_space < len && buffer[ next_space ] != ' ' )
-			next_space ++;
-		if ( next_space == len )
-			next_space --;
-
-		if ( cur_len + next_space - i < con.linewidth ) {
-			// The word fits.
-			memcpy( to_set->lines[ to_set->n_lines - 1 ] + cur_len , buffer + i , next_space - i + 1 );
-			cur_len += next_space - i + 1;
-			i = next_space + 1;
-		} else {
-			if ( next_space - i + 1 >= con.linewidth - SCR_IRC_INDENT ) {
-				// Long "word" that would not fit in any case, break it
-				memcpy( to_set->lines[ to_set->n_lines - 1 ] + cur_len , buffer + i , con.linewidth - cur_len );
-				i += con.linewidth - cur_len;
-			}
-			new_line = true;
-		}
-	}
+	// Copy string
+	Q_strncpyz2( to_set , buffer , SCR_IRC_LENGTH );
 
 	// Restore IRC display and update time-related variables
 	scr_IRCtime_off = 15;
@@ -408,48 +333,12 @@ void SCR_IRCPrintf (char *fmt, ...)
 }
 
 
-int SCR_DrawColorString ( int x, int y, const char *str , qboolean reset_color , int color )
-{
-	int	num;
-	vec4_t	scolor;
-	int	charscale;
-	int	ccolor;
-
-	charscale = (float)(viddef.height)*8/600;
-	if(charscale < 8)
-		charscale = 8;
-
-	VectorCopy ( Color_Table[ccolor = color], scolor );
-	scolor[3] = 1;
-
-	while (*str) {
-		if ( Q_IsColorString( str ) ) {
-			VectorCopy ( Color_Table[ccolor = ColorIndex(str[1])], scolor );
-			str += 2;
-			continue;
-		}
-
-		Draw_ScaledColorChar (x, y, *str, scolor, charscale, false); //this is only ever used for names.
-
-		num = *str++;
-		num &= 255;
-
-		if ( reset_color && (num&127) == 32 ) { //spaces reset colors
-			VectorCopy ( Color_Table[ccolor = color], scolor );
-		}
-
-		x += charscale;
-	}
-	return ccolor;
-}
-
-
 void SCR_CheckDrawIRCString (void)
 {
-	int		i , j , last_line;
-	int		ccolor;
-	int		charscale;
-	int		y;
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	int			i , last_line;
+	static float		color[ 4 ] = { 1 , 1 , 1 , 1 };
 
 	scr_IRCtime_off -= cls.frametime;
 	if (scr_IRCtime_off <= 0 || scr_IRC_display == SCR_IRC_DISPLAY_HIDE)
@@ -459,15 +348,20 @@ void SCR_CheckDrawIRCString (void)
 	if ( last_line == -1 )
 		return;
 
-	charscale = (float)(viddef.height)*8/600;
-	if (charscale < 8)
-		charscale = 8;
-	y = charscale * 5;
-	ccolor = 2;
+	font = FNT_AutoGet( CL_gameFont );
 
-	for ( i = 0 ; i <= last_line ; i ++ ) {
-		for ( j = 0 ; j < scr_IRCstring[ i ]->n_lines ; j ++ , y += charscale ) {
-			ccolor = SCR_DrawColorString (0, y, scr_IRCstring[ i ]->lines[ j ] , false , ccolor);
+	box.x = 0;
+	box.y = font->size * 5;
+	for ( i = 0 ; i <= last_line ; i++ ) {
+		box.width = viddef.width;
+		box.height = font->size * 15 - box.y;
+
+		FNT_WrappedPrint( font , scr_IRCstring[ i ] , FNT_CMODE_QUAKE , FNT_ALIGN_LEFT ,
+			SCR_IRC_INDENT , &box , color );
+
+		box.y += box.height;
+		if ( box.y >= font->size * 15 ) {
+			break;
 		}
 	}
 }
@@ -695,11 +589,11 @@ void SCR_DrawLoadingBar (int percent, int scale)
 	if (R_RegisterPic("bar_background") && R_RegisterPic("bar_loading"))
 	{
 		Draw_StretchPic (
-			viddef.width/2-scale*15 + 1*hudscale,viddef.height/2 + scale*5+1*hudscale,
-			scale*30-2*hudscale, scale*10-2*hudscale, "bar_background");
+			viddef.width/2-scale*15 + 1*hudscale,viddef.height/2 + scale*5.4,
+			scale*30-2*hudscale, scale*10, "bar_background");
 		Draw_StretchPic (
-			viddef.width/2-scale*15 + 1*hudscale,viddef.height/2 + scale*5+8*hudscale,
-			(scale*30-2*hudscale)*percent/100, scale*2-2*hudscale, "bar_loading");
+			viddef.width/2-scale*15 + 1*hudscale,viddef.height/2 + scale*6.2,
+			(scale*30-2*hudscale)*percent/100, scale*2, "bar_loading");
 	}
 	else
 	{
@@ -711,25 +605,21 @@ void SCR_DrawLoadingBar (int percent, int scale)
 			(scale*30-2)*percent/100, scale*2-2, 7);
 	}
 }
-extern void Menu_DrawString( int x, int y, const char *string);
-int stringLen (char *string)
-{
-	return strlen(string);
-}
+
+
+
 void SCR_DrawLoading (void)
 {
-	char	mapfile[32];
-	qboolean isMap = false;
-	int		font_size, kb;
-	float	hudscale;
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	char			mapfile[32];
+	qboolean		isMap = false;
+	float			hudscale;
 
 	if (!scr_draw_loading)
 		return;
 	scr_draw_loading = false;
-
-	font_size = (float)(viddef.height)*8/600;
-	if(font_size < 8)
-		font_size = 8;
+	font = FNT_AutoGet( CL_gameFont );
 
 	hudscale = (float)(viddef.height)/600;
 	if(hudscale < 1)
@@ -760,40 +650,30 @@ void SCR_DrawLoading (void)
 	//loading message stuff...
 	if (isMap)
 	{
-		char *mapmsg;
+		char loadMessage[ strlen( mapfile ) + strlen( cl.configstrings[CS_NAME] ) + 128 ];
+		int i;
 
-		mapmsg = va("Loading Map [%s]", mapfile);
-		DrawString(
-			viddef.width/2 - font_size/2*stringLen(mapmsg),
-			viddef.height/2 - font_size*5,
-			mapmsg);
+		Com_sprintf( loadMessage , sizeof( loadMessage ) , "Loading Map [%s]\n^3%s" , mapfile , cl.configstrings[CS_NAME] );
 
-		mapmsg = va("[%s]", cl.configstrings[CS_NAME]);
-		DrawString(
-			viddef.width/2 - font_size/2*stringLen(mapmsg),
-			viddef.height/2 - font_size*4,
-			mapmsg);
+		box.x = 0;
+		box.y = viddef.height / 2 - font->size * 5;
+		box.width = viddef.width;
+		box.height = 0;
+		FNT_BoundedPrint( font , loadMessage , FNT_CMODE_QUAKE , FNT_ALIGN_CENTER , &box , FNT_colors[ 7 ] );
 
-		DrawString(
-			viddef.width/2 - font_size*15,
-			viddef.height/2 - font_size*1,
-			loadingMessages[0]);
-		DrawString(
-			viddef.width/2 - font_size*15,
-			viddef.height/2 - font_size*0,
-			loadingMessages[1]);
-		DrawString(
-			viddef.width/2 - font_size*15,
-			viddef.height/2 + font_size*1,
-			loadingMessages[2]);
-		DrawString(
-			viddef.width/2 - font_size*15,
-			viddef.height/2 + font_size*2,
-			loadingMessages[3]);
-		DrawString(
-			viddef.width/2 - font_size*15,
-			viddef.height/2 + font_size*3,
-			loadingMessages[4]);
+		box.y += font->size * 4;
+		for ( i = 0 ; i < 5 ; i ++ ) {
+			box.x = viddef.width / 2 - font->size * 15;
+			box.width = box.height = 0;
+			FNT_BoundedPrint( font , loadingMessages[i][0] , FNT_CMODE_QUAKE , FNT_ALIGN_LEFT , &box , FNT_colors[ 7 ] );
+
+			box.x += box.width + font->size;
+			box.width = viddef.width / 2 + font->size * 15 - box.x;
+			box.height = 0;
+			FNT_BoundedPrint( font , loadingMessages[i][1] , FNT_CMODE_QUAKE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
+
+			box.y += font->size;
+		}
 
 		//check for instance of icons we would like to show in loading process, ala q3
 		if(rocketlauncher) {
@@ -876,22 +756,20 @@ void SCR_DrawLoading (void)
 	}
 	else
 	{
-		char *msg = va("Awaiting Connection...");
+		box.x = 0;
+		box.y = ( viddef.height - font->size ) / 2;
+		box.width = viddef.width;
+		box.height = 0;
 
-		//draw centered
-		DrawString(
-				viddef.width/2 - font_size/2*stringLen(msg),
-				viddef.height/2 - font_size/2,
-				msg);
-
+		FNT_BoundedPrint( font , "Awaiting Connection ..." , FNT_CMODE_NONE , FNT_ALIGN_CENTER , &box , FNT_colors[ 7 ] );
 	}
 
 	// Add Download info stuff...
-	if (cls.download && (kb = (int)ftell(cls.download)))
+	if (cls.download && ( (int)ftell( cls.download ) / 1024 ) != 0 )
 	{
 		if ( cls.key_dest != key_console ) //drop the console because of CURL's readout
 		{
-			Con_ToggleConsole_f();
+			CON_ToggleConsole();
 		}
 	}
 	else if (isMap) //loading bar...
@@ -899,12 +777,14 @@ void SCR_DrawLoading (void)
 		//to do - fix
 		//SCR_DrawRotatingIcon();
 
-		SCR_DrawLoadingBar(loadingPercent, font_size);
+		SCR_DrawLoadingBar(loadingPercent, font->size);
 
-		DrawString(
-			viddef.width/2 - font_size*3,
-			viddef.height/2 + (int)(font_size*6.3),
-			va("%3d%%", (int)loadingPercent));
+		box.x = 0;
+		box.y = 2 + viddef.height / 2 + font->size * 6.3;
+		box.width = viddef.width;
+		box.height = 0;
+
+		FNT_BoundedPrint( font , va("%3d%%", (int)loadingPercent) , FNT_CMODE_NONE , FNT_ALIGN_CENTER , &box , FNT_colors[ 7 ] );
 	}
 }
 
@@ -949,29 +829,27 @@ SCR_DrawConsole
 float sendBubbleNow;
 void SCR_DrawConsole (void)
 {
-	Con_CheckResize ();
-
 	if (cls.state == ca_disconnected || cls.state == ca_connecting)
 	{	// forced full screen console
-		Con_DrawConsole (scr_consize->value);
+		CON_DrawConsole( scr_consize->value );
 		return;
 	}
 
 	if (cls.state != ca_active || !cl.refresh_prepped)
 	{	// connected, but can't render
-		Con_DrawConsole (scr_consize->value);
+		CON_DrawConsole( scr_consize->value );
 		Draw_Fill (0, viddef.height/2, viddef.width, viddef.height/2, 0);
 		return;
 	}
 
 	if (scr_con_current)
 	{
-		Con_DrawConsole (scr_con_current);
+		CON_DrawConsole( scr_con_current );
 	}
 	else
 	{
 		if (cls.key_dest == key_game || cls.key_dest == key_message)
-			Con_DrawNotify ();	// only draw notify in game
+			CON_DrawNotify ();	// only draw notify in game
 	}
 
 	//draw chat bubble
@@ -1021,7 +899,7 @@ void SCR_EndLoadingPlaque (void)
 {
 	cls.disable_screen = 0;
 	scr_draw_loading = 0;
-	Con_ClearNotify ();
+	CON_ClearNotify( );
 
 	Cvar_Set ("paused", "0");
 }
@@ -1269,15 +1147,17 @@ SCR_ExecuteLayoutString
 */
 void SCR_ExecuteLayoutString (char *s)
 {
-	int		x, y, ny=0; //ny is coordinates used for new sb layout client tags only
-	int		value;
-	char	*token;
-	int		width;
-	int		index;
-	clientinfo_t	*ci;
-	int		charscale;
-	float	scale;
-	qboolean newSBlayout = false;
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	int			x, y, ny=0; //ny is coordinates used for new sb layout client tags only
+	int			value;
+	char *			token;
+	int			width;
+	int			index;
+	clientinfo_t *		ci;
+	int			charscale;
+	float			scale;
+	qboolean		newSBlayout = false;
 
 	if (cls.state != ca_active || !cl.refresh_prepped)
 		return;
@@ -1288,15 +1168,9 @@ void SCR_ExecuteLayoutString (char *s)
 	x = 0;
 	y = 0;
 	width = 3;
-	scale = (float)(viddef.height)/600;
-
-	if(scale < 1)
-		scale = 1;
-
-	charscale = (float)(viddef.height)*8/600;
-
-	if(charscale < 8)
-		charscale = 8;
+	font = FNT_AutoGet( CL_gameFont );
+	charscale = font->size;
+	scale = charscale * 0.125;
 
 	while (s)
 	{
@@ -1362,10 +1236,14 @@ void SCR_ExecuteLayoutString (char *s)
 			x = viddef.width/2 - 160*scale;
 			y = viddef.height/2 - 64*scale;
 
-			DrawString (x+2*scale, y, va("Player"));
-			DrawString (x+176*scale, y, va("Score"));
-			DrawString (x+232*scale, y, va("Ping"));
-			DrawString (x+280*scale, y, va("time"));
+			box.x = x + 4 * scale , box.y = y;
+			FNT_RawPrint( font , "Player" , 6 , false , box.x , box.y , FNT_colors[ 7 ] );
+			box.x += 160 * scale , box.width = 56 * scale , box.height = 0;
+			FNT_BoundedPrint( font , "Score" , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
+			box.x += 56 * scale , box.width = 48 * scale , box.height = 0;
+			FNT_BoundedPrint( font , "Ping" , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
+			box.x += 48 * scale , box.width = 48 * scale , box.height = 0;
+			FNT_BoundedPrint( font , "Time" , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
 
 			newSBlayout = true;
 			continue;
@@ -1374,28 +1252,29 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "newctfsb"))
 		{
 			//print header here
-			x = viddef.width/2 - 160*scale;
+			x = viddef.width/2 - 256*scale;
 			y = viddef.height/2 - 72*scale;
 
-			//team 1
-			DrawString (x-82*scale, y, va("Player"));
-			DrawString (x+76*scale, y, va("Score"));
-			DrawString (x+124*scale, y, va("Ping"));
-
-			x += 190*scale;
-
-			//team 2
-			DrawString (x-16*scale, y, va("Player"));
-			DrawString (x+142*scale, y, va("Score"));
-			DrawString (x+190*scale, y, va("Ping"));
+			while ( x <= viddef.width/2 ) {
+				box.x = x + 14 * scale , box.y = y;
+				FNT_RawPrint( font , "Player" , 6 , false , box.x , box.y , FNT_colors[ 7 ] );
+				box.x += 118 * scale , box.width = 56 * scale , box.height = 0;
+				FNT_BoundedPrint( font , "Score" , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
+				box.x += 56 * scale , box.width = 48 * scale , box.height = 0;
+				FNT_BoundedPrint( font , "Ping" , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
+				x += 256 * scale;
+			}
 
 			newSBlayout = true;
 			continue;
 		}
 
-		if (!strcmp(token, "client"))
+		if (!strcmp(token, "client") || !strcmp(token, "queued"))
 		{	// draw a deathmatch client block
+			qboolean	isQueued = ( token[ 0 ] == 'q' );
 			int		score, ping, time;
+			const char *	timeMessage;
+			int		timeColor;
 
 			token = COM_Parse (&s);
 			x = viddef.width/2 - 160*scale + atoi(token)*scale;
@@ -1420,72 +1299,53 @@ void SCR_ExecuteLayoutString (char *s)
 			token = COM_Parse (&s);
 			time = atoi(token);
 
+			if ( isQueued ) {
+				COM_Parse (&s);
+				timeMessage = "Queue:";
+				timeColor = 1;
+			} else {
+				timeMessage = "Time:";
+				timeColor = 7;
+			}
+
 			if(newSBlayout) { //new scoreboard layout
 
-				Draw_ColorString (x+2*scale, y+34*scale, ci->name, 1.2);
-				DrawAltString (x+176*scale, y+34*scale, va("%i", score));
-				DrawString (x+232*scale, y+34*scale, va("%i", ping));
-				DrawString (x+280*scale, y+34*scale, va("%i", time));
+				box.x = x + 4 * scale , box.y = y + 34 * scale;
+				box.width = 160 * scale , box.height = 0;
+				FNT_BoundedPrint( font , ci->name , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
+				box.x += 160 * scale , box.width = 56 * scale , box.height = 0;
+				FNT_BoundedPrint( font , va( "%i" , score ) , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 2 ] );
+				box.x += 56 * scale , box.width = 48 * scale , box.height = 0;
+				FNT_BoundedPrint( font , va( "%i" , ping ) , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
+				box.x += 48 * scale , box.width = 48 * scale , box.height = 0;
+				FNT_BoundedPrint( font , va( "%i" , time ) , FNT_CMODE_QUAKE , FNT_ALIGN_RIGHT , &box , FNT_colors[ timeColor ] );
 			}
 			else
 			{
-				Draw_ColorString (x+32*scale, y, ci->name, 1);
-				DrawString (x+32*scale, y+8*scale,  "Score: ");
-				DrawAltString (x+32*scale+7*charscale, y+8*scale,  va("%i", score));
-				DrawString (x+32*scale, y+16*scale, va("Ping:  %i", ping));
-				DrawString (x+32*scale, y+24*scale, va("Time:  %i", time));
+				box.x = x + 32 * scale , box.y = y;
+				box.width = 288 * scale , box.height = 0;
+				FNT_BoundedPrint( font , ci->name , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
 
-				if (!ci->icon)
-					ci = &cl.baseclientinfo;
-				Draw_ScaledPic (x, y, scale/2, ci->iconname);
-			}
+				box.y += 8 * scale;
+				box.width = 100 * scale , box.height = 0;
+				FNT_BoundedPrint( font , "Score:" , FNT_CMODE_NONE , FNT_ALIGN_LEFT , &box , FNT_colors[ 7 ] );
+				box.x += box.width;
+				box.width = 100 * scale - box.width , box.height = 0;
+				FNT_BoundedPrint( font , va( "%i" , score ) , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 2 ] );
 
-			continue;
-		}
-		if (!strcmp(token, "queued"))
-		{	// draw a deathmatch client block
-			int		score, ping, time;
+				box.y += 8 * scale , box.x = x + 32 * scale;
+				box.width = 100 * scale , box.height = 0;
+				FNT_BoundedPrint( font , "Ping:" , FNT_CMODE_NONE , FNT_ALIGN_LEFT , &box , FNT_colors[ 7 ] );
+				box.x += box.width;
+				box.width = 100 * scale - box.width , box.height = 0;
+				FNT_BoundedPrint( font , va( "%i" , ping ) , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
 
-			token = COM_Parse (&s);
-			x = viddef.width/2 - 160*scale + atoi(token)*scale;
-			token = COM_Parse (&s);
-			if(newSBlayout)
-				y = viddef.height/2 - 100*scale + atoi(token)*scale/2;
-			else
-				y = viddef.height/2 - 100*scale + atoi(token)*scale;
-
-			token = COM_Parse (&s);
-			value = atoi(token);
-			if (value >= MAX_CLIENTS || value < 0)
-				Com_Error (ERR_DROP, "client >= MAX_CLIENTS");
-			ci = &cl.clientinfo[value];
-
-			token = COM_Parse (&s);
-			score = atoi(token);
-
-			token = COM_Parse (&s);
-			ping = atoi(token);
-
-			token = COM_Parse (&s);
-			time = atoi(token);
-
-			token = COM_Parse (&s);
-
-			if(newSBlayout) { //new scoreboard layout
-
-				Draw_ColorString (x+2*scale, y+34*scale, ci->name, 1.2);
-				DrawAltString (x+176*scale, y+34*scale, va("%i", score));
-				DrawString (x+232*scale, y+34*scale, va("%i", ping));
-				Draw_ColorString (x+280*scale, y+34*scale, va("^1%i", time), 1.2);
-
-			}
-			else {
-
-				Draw_ColorString (x+32*scale, y, ci->name, 1);
-				DrawString (x+32*scale, y+8*scale,  "Score: ");
-				DrawAltString (x+32*scale+7*charscale, y+8*scale,  va("%i", score));
-				DrawString (x+32*scale, y+16*scale, va("Ping:  %i", ping));
-				Draw_ColorString (x+32*scale, y+24*scale, va("^1Queue:  ^1%i", time), 1);
+				box.y += 8 * scale , box.x = x + 32 * scale;
+				box.width = 100 * scale , box.height = 0;
+				FNT_BoundedPrint( font , timeMessage , FNT_CMODE_NONE , FNT_ALIGN_LEFT , &box , FNT_colors[ timeColor ] );
+				box.x += box.width;
+				box.width = 100 * scale - box.width , box.height = 0;
+				FNT_BoundedPrint( font , va( "%i" , time ) , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ timeColor ] );
 
 				if (!ci->icon)
 					ci = &cl.baseclientinfo;
@@ -1524,9 +1384,13 @@ void SCR_ExecuteLayoutString (char *s)
 				ping = 999;
 
 			if(newSBlayout) {
-				Draw_ColorString (x+16, y, ci->name, 1.2);
-				DrawAltString (x+172*scale, y+1*scale, va("%i", score));
-				DrawString (x+220*scale, y+1*scale, va("%i", ping));
+				box.x = x + 14 * scale , box.y = y + 2 * scale;
+				box.width = 118 * scale , box.height = 0;
+				FNT_BoundedPrint( font , ci->name , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
+				box.x += 120 * scale , box.width = 56 * scale , box.height = 0;
+				FNT_BoundedPrint( font , va( "%i" , score ) , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 2 ] );
+				box.x += 56 * scale , box.width = 48 * scale , box.height = 0;
+				FNT_BoundedPrint( font , va( "%i" , ping ) , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
 
 				if(team) { //draw pic on left side(done client side to save packetsize
 					Draw_ScaledPic (x, y-2*scale, scale, "/pics/blueplayerbox");
@@ -1536,7 +1400,8 @@ void SCR_ExecuteLayoutString (char *s)
 			}
 			else {
 				sprintf(block, "%3d %3d %s", score, ping, ci->name);
-				Draw_ColorString (x, y, block, 1);
+				box.x = x , box.y = y , box.width = 256 , box.height = 0;
+				FNT_BoundedPrint( font , block , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
 			}
 
 			continue;
@@ -1643,7 +1508,9 @@ void SCR_ExecuteLayoutString (char *s)
 			index = cl.frame.playerstate.stats[index];
 			if (index < 0 || index >= MAX_CONFIGSTRINGS)
 				Com_Error (ERR_DROP, "Bad stat_string index");
-			DrawString (x, y, cl.configstrings[index]);
+
+			FNT_RawPrint( font , cl.configstrings[index] , strlen( cl.configstrings[index] ) ,
+				false , x , y , FNT_colors[ 7 ] );
 			continue;
 		}
 
@@ -1660,7 +1527,7 @@ void SCR_ExecuteLayoutString (char *s)
 			//this line is an Alien Arena specific hack of sorts, remove if needed
 			if(!strcmp(token, "Vote"))
 				Draw_ScaledPic (viddef.width/2 - 85*scale, y-8*scale, scale, "votebox");
-			DrawString (x, y, token);
+			FNT_RawPrint( font , token , strlen( token ) , false , x , y , FNT_colors[ 7 ] );
 			continue;
 		}
 
@@ -1674,7 +1541,7 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "string2"))
 		{
 			token = COM_Parse (&s);
-			DrawString (x, y, token);
+			FNT_RawPrint( font , token , strlen( token ) , false , x , y , FNT_colors[ 7 ] );
 			continue;
 		}
 
@@ -1734,9 +1601,10 @@ char		scr_playericon[MAX_OSPATH];
 char		scr_playername[PLAYERNAME_SIZE];
 float		scr_playericonalpha;
 void SCR_DrawPlayerIcon(void) {
-
-	int w, h;
-	float scale, iconPos;
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	int			w, h;
+	float			scale, iconPos;
 
 	if (cls.key_dest == key_menu || cls.key_dest == key_console)
 		return;
@@ -1761,7 +1629,13 @@ void SCR_DrawPlayerIcon(void) {
 	h*=scale;
 
 	Draw_AlphaStretchPlayerIcon( -w+(w*iconPos), viddef.height/2 + h/2, w, h, scr_playericon, scr_playericonalpha);
-	SCR_DrawColorString ( -w+(w*iconPos), viddef.height/2 + h + 32*scale, scr_playername , true , 2);
+
+	font = FNT_AutoGet( CL_gameFont );
+	box.x = -w+(w*iconPos);
+	box.y = viddef.height/2 + h + 32*scale;
+	box.width = viddef.width - box.x;
+	box.height = 0;
+	FNT_BoundedPrint( font , scr_playername , FNT_CMODE_QUAKE , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
 }
 
 /*
@@ -1771,19 +1645,15 @@ SCR_showTimer
 
 ================
 */
-char		temptime[32];
-int		timecounter;
-int		seconds, minutes;
+int	seconds, minutes;
 void SCR_showTimer(void)
 {
-	float scale;
+	static char		temptime[ 32 ];
+	static int		timecounter;
+	FNT_font_t		font;
 
 	if (cls.key_dest == key_menu || cls.key_dest == key_console)
 		return;
-
-	scale = (float)(viddef.height)/600;
-	if(scale < 1)
-		scale = 1;
 
 	if ((cls.realtime + 2000) < timecounter)
 		timecounter = cl.time + 1000;
@@ -1795,13 +1665,14 @@ void SCR_showTimer(void)
 			minutes++;
 			seconds = 0;
 		}
-		Com_sprintf(temptime, sizeof(temptime),"%i:%2i", minutes, seconds);
+		Com_sprintf(temptime, sizeof(temptime),"%i:%2.2i", minutes, seconds);
 		timecounter = cls.realtime + 1000;
 	}
 
-	Draw_StretchPic (viddef.width - 104*scale, viddef.height -42*scale, 32*scale, 32*scale, "timer");
-
-	DrawString(viddef.width - 64*scale, viddef.height - 32*scale, temptime);
+	font = FNT_AutoGet( CL_gameFont );
+	Draw_StretchPic( viddef.width - 13 * font->size , viddef.height - 5.25 * font->size , 4 * font->size , 4 * font->size , "timer");
+	FNT_RawPrint( font , temptime , strlen( temptime ) , false ,
+		viddef.width - 8 * font->size , viddef.height - 3.75 * font->size , FNT_colors[ 7 ] );
 }
 
 /*
@@ -1813,66 +1684,64 @@ SCR_showFPS
 */
 
 int		fpscounter;
-char		temp[32];
 
 void SCR_showFPS(void)
 {
-	float scale;
-	static qboolean restart = true;
-	static float update_trigger = 0.0f;
-	static float framecounter = 0.0f;
-	static int start_msec;
-	int end_msec;
-	float time_sec;
-	float framerate;
+	static qboolean		restart		= true;
+	static float		update_trigger	= 0.0f;
+	static float		framecounter	= 0.0f;
+	static int		start_msec;
+	static char		fps_text[32];
 
-	if (cls.key_dest == key_menu || cls.key_dest == key_console)
-	{
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	int			end_msec;
+	float			time_sec;
+	float			framerate;
+
+	if (cls.key_dest == key_menu || cls.key_dest == key_console) {
 		restart = true;
 		return;
 	}
 
-	if( restart )
-	{
+	if( restart ) {
 		start_msec = Sys_Milliseconds();
 		framecounter = 0.0f;
 		update_trigger = 10.0f; // initial delay to update
-		temp[0] = 0; // blank the text buffer
+		fps_text[0] = 0; // blank the text buffer
 		restart = false;
+		return;
 	}
-	else
-	{
-		framecounter += 1.0f;
-		if( framecounter >= update_trigger )
-		{
-			// calculate frames-per-second
-			end_msec = Sys_Milliseconds();
-			time_sec = ((float)(end_msec - start_msec)) / 1000.0f;
-			framerate = framecounter / time_sec ;
 
-			// update text buffer for display
-			if ( cl_drawfps->integer == 2 )
-			{ // for developers
-				Com_sprintf( temp, sizeof(temp), "%3.1ffps", framerate );
-			}
-			else
-			{
-				Com_sprintf( temp, sizeof(temp), "%3.0ffps", framerate );
-			}
+	framecounter += 1.0f;
+	if( framecounter >= update_trigger ) {
+		// calculate frames-per-second
+		end_msec = Sys_Milliseconds();
+		time_sec = ((float)(end_msec - start_msec)) / 1000.0f;
+		framerate = framecounter / time_sec ;
 
-			// setup for next update
-			framecounter = 0.0f;
-			start_msec = end_msec;
-			update_trigger = framerate / 2.0 ; // for .5 sec update interval
+		// update text buffer for display
+		if ( cl_drawfps->integer == 2 )
+		{ // for developers
+			Com_sprintf( fps_text, sizeof(fps_text), "%3.1ffps", framerate );
 		}
+		else
+		{
+			Com_sprintf( fps_text, sizeof(fps_text), "%3.0ffps", framerate );
+		}
+
+		// setup for next update
+		framecounter = 0.0f;
+		start_msec = end_msec;
+		update_trigger = framerate / 2.0 ; // for .5 sec update interval
 	}
 
-	scale = (float)(viddef.height)/600;
-	if(scale < 1)
-		scale = 1;
-
-	DrawString(viddef.width - 64*scale, viddef.height - 24*scale, temp);
-
+	font = FNT_AutoGet( CL_consoleFont );
+	box.x = viddef.width - 8 * font->size;
+	box.y = viddef.height - 3 * font->size;
+	box.width = 7 * font->size;
+	box.height = 0;
+	FNT_BoundedPrint( font , fps_text , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
 }
 
 /*
@@ -1881,10 +1750,13 @@ void SCR_showFPS(void)
  */
 void SCR_showRSpeeds( void )
 {
-	char prtstring[32];
- 	float scale;
- 	extern int c_brush_polys;
- 	extern int c_alias_polys;
+ 	extern int		c_brush_polys;
+ 	extern int		c_alias_polys;
+
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	char			prtstring[32];
+ 	float			scale;
 
  	if (cls.key_dest == key_menu || cls.key_dest == key_console)
  		return;
@@ -1895,7 +1767,13 @@ void SCR_showRSpeeds( void )
 
  	Com_sprintf( prtstring, sizeof( prtstring ),
  		"%5.5i wpoly %5.5i epoly",  c_brush_polys, c_alias_polys );
- 	DrawString(	viddef.width/2, viddef.height - 48*scale,	prtstring );
+
+	font = FNT_AutoGet( CL_consoleFont );
+	box.x = 0;
+	box.y = viddef.height - 6 * font->size;
+	box.width = viddef.width;
+	box.height = 0;
+	FNT_BoundedPrint( font , prtstring , FNT_CMODE_NONE , FNT_ALIGN_CENTER , &box , FNT_colors[ 7 ] );
 }
 
 /*
@@ -1926,7 +1804,7 @@ void SCR_UpdateScreen (void)
 	}
 
 
-	if (!scr_initialized || !con.initialized)
+	if (!scr_initialized)
 		return;				// not initialized yet
 
 	/*

@@ -69,30 +69,35 @@ CL_DrawInventory
 
 void CL_DrawInventory (void)
 {
-	int		i, j;
-	int		num, selected_num, item;
-	int		index[MAX_ITEMS];
-	char	string[1024];
-	int		x, y;
-	char	binding[1024];
-	char	*bind;
-	int		selected;
-	int		top;
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	int			i, j;
+	int			num;
+	int			selected_num;
+	int			selected;
+	int			top;
+	int			index[ MAX_ITEMS ];
+	float			scale;
+	int			colWidth[ 3 ];
+	int			colPos[ 3 ];
 
-	selected = cl.frame.playerstate.stats[STAT_SELECTED_ITEM];
-
+	// Find selected item
 	num = 0;
+	selected = cl.frame.playerstate.stats[ STAT_SELECTED_ITEM ];
 	selected_num = 0;
-	for (i=0 ; i<MAX_ITEMS ; i++)
-	{
-		if (i==selected)
+	for ( i = 0 ; i < MAX_ITEMS ; i++ ) {
+		if ( i == selected) {
 			selected_num = num;
-		if (cl.inventory[i])
-		{
+		}
+		if (cl.inventory[i]) {
 			index[num] = i;
 			num++;
 		}
 	}
+
+	// Load font and compute scaled size
+	font = FNT_AutoGet( CL_gameFont );
+	scale = font->size / 8.0;
 
 	// determine scroll point
 	top = selected_num - DISPLAY_ITEMS/2;
@@ -101,44 +106,54 @@ void CL_DrawInventory (void)
 	if (top < 0)
 		top = 0;
 
-	x = (viddef.width-256)/2;
-	y = (viddef.height-240)/2;
+	// Draw frame and headers
+	box.x = (int)( ( viddef.width - 416 * scale ) / 2 );
+	box.y = (int)( ( viddef.height - 256 * scale ) / 2 );
+	Draw_StretchPic( box.x , box.y , 416 * scale , 256 * scale , "inventory" );
 
-	// repaint everything next frame
-	Draw_Pic (x, y+8, "inventory");
+	colPos[ 0 ] = ( box.x += 56 * scale ) , box.y += 32 * scale;
+	colWidth[ 0 ] = box.width = 55 * scale , box.height = 0;
+	FNT_BoundedPrint( font , "Hotkey" , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
 
-	y += 24;
-	x += 24;
-	Inv_DrawString (x, y, "hotkey ### item");
-	Inv_DrawString (x, y+8, "------ --- ----");
-	y += 16;
-	for (i=top ; i<num && i < top+DISPLAY_ITEMS ; i++)
-	{
-		item = index[i];
+	colPos[ 1 ] = ( box.x += 60 * scale );
+	colWidth[ 1 ] = box.width = 43 * scale , box.height = 0;
+	FNT_BoundedPrint( font , "###" , FNT_CMODE_NONE , FNT_ALIGN_CENTER , &box , FNT_colors[ 7 ] );
+
+	colPos[ 2 ] = ( box.x += 48 * scale );
+	colWidth[ 2 ] = box.width = 100 * scale , box.height = 0;
+	FNT_BoundedPrint( font , "Item" , FNT_CMODE_NONE , FNT_ALIGN_LEFT , &box , FNT_colors[ 7 ] );
+
+	Draw_Fill( colPos[ 0 ] + scale , box.y + 11 * scale , 302 * scale , 2 * scale , 15 );
+
+	// Draw inventory contents
+	box.y += 16 * scale;
+	for ( i = top ; i < num && i < top + DISPLAY_ITEMS ; i++ ) {
+		int		item = index[ i ];
+		char		binding[ MAX_QPATH + 5 ];
+		const char *	bind;
+		const float *	color = FNT_colors[ index[ i ] == selected ? 7 : 2 ];
+		char		count[ 5 ];
+
 		// search for a binding
 		Com_sprintf (binding, sizeof(binding), "use %s", cl.configstrings[CS_ITEMS+item]);
 		bind = "";
-		for (j=0 ; j<256 ; j++)
+		for (j=0 ; j<256 ; j++) {
 			if (keybindings[j] && !Q_strcasecmp (keybindings[j], binding))
 			{
 				bind = Key_KeynumToString(j);
 				break;
 			}
-
-		Com_sprintf (string, sizeof(string), "%6s %3i %s", bind, cl.inventory[item],
-			cl.configstrings[CS_ITEMS+item] );
-		if (item != selected)
-			SetStringHighBit (string);
-		else	// draw a blinky cursor by the selected item
-		{
-			if ( (int)(cls.realtime*10) & 1)
-				Draw_Char (x-8, y, 15);
 		}
-		Inv_DrawString (x, y, string);
-		y += 8;
+
+		// Draw inventory line
+		Com_sprintf( count , sizeof( count ) , "%i" , cl.inventory[item] );
+		box.x = colPos[ 0 ] , box.width = colWidth[ 0 ] , box.height = 0;
+		FNT_BoundedPrint( font , bind , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , color );
+		box.x = colPos[ 1 ] , box.width = colWidth[ 1 ] , box.height = 0;
+		FNT_BoundedPrint( font , count , FNT_CMODE_NONE , FNT_ALIGN_CENTER , &box , color );
+		box.x = colPos[ 2 ] , box.width = colWidth[ 2 ] , box.height = 0;
+		FNT_BoundedPrint( font , cl.configstrings[ CS_ITEMS + item ] , FNT_CMODE_NONE , FNT_ALIGN_LEFT , &box , color );
+
+		box.y += 8 * scale;
 	}
-
-
 }
-
-

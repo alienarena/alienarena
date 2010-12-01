@@ -119,6 +119,8 @@ crx_SOURCES = \
 	ref_gl/glext.h \
 	ref_gl/qgl.h \
 	ref_gl/r_bloom.c \
+	ref_gl/r_bmfont.c \
+	ref_gl/r_bmfont.h \
 	ref_gl/r_draw.c \
 	ref_gl/r_image.c \
 	ref_gl/r_image.h \
@@ -143,7 +145,10 @@ crx_SOURCES = \
 	ref_gl/r_shadowmaps.c \
 	ref_gl/r_shadows.c \
 	ref_gl/r_surf.c \
+	ref_gl/r_text.c \
+	ref_gl/r_text.h \
 	ref_gl/r_ttf.c \
+	ref_gl/r_ttf.h \
 	ref_gl/r_varray.c \
 	ref_gl/r_vbo.c \
 	ref_gl/r_vlights.c \

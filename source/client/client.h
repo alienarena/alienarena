@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 
 #include "ref.h"
+#include "ref_gl/r_text.h"
 
 #include "vid.h"
 #include "screen.h"
@@ -345,9 +346,6 @@ extern	entity_state_t	cl_parse_entities[MAX_PARSE_ENTITIES];
 extern	netadr_t	net_from;
 extern	sizebuf_t	net_message;
 
-void DrawString (int x, int y, char *s);
-void DrawAltString (int x, int y, char *s);	// toggle high bit
-void Draw_ColorString ( int x, int y, char *str, float scale);
 qboolean	CL_CheckOrDownloadFile (char *filename);
 
 void CL_AddNetgraph (void);
@@ -584,8 +582,10 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player );
 
 extern qboolean need_free_vbo;
 
+#define CL_LOADMSG_LENGTH 96
+
 qboolean loadingMessage;
-char loadingMessages[5][96];
+char loadingMessages[5][2][CL_LOADMSG_LENGTH];
 float loadingPercent;
 int rocketlauncher;
 int rocketlauncher_drawn;
@@ -707,3 +707,10 @@ void CL_HttpDownloadThink(void);
 void CL_ShutdownHttpDownload(void);
 
 
+//
+// Fonts used by various elements
+//
+
+extern FNT_auto_t	CL_gameFont;
+extern FNT_auto_t	CL_centerFont;
+extern FNT_auto_t	CL_consoleFont;

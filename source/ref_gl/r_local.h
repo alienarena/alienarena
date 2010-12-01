@@ -352,10 +352,6 @@ void	R_BeginFrame( float camera_separation );
 void	R_SwapBuffers( int );
 void	R_SetPalette ( const unsigned char *palette);
 
-// TrueType fonts
-qboolean TTF_Init( void );
-void TTF_Shutdown( void );
-
 int		Draw_GetPalette (void);
 
 void	GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight);
