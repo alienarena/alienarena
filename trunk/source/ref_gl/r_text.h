@@ -313,6 +313,10 @@ struct FNT_auto_s
 	 * or through the variable. */
 	unsigned int		minSize;
 
+	/* The maximal size that can be selected, either automatically
+	 * or through the variable. */
+	unsigned int		maxSize;
+
 	/* The current font used. May be NULL if unregistered, or may be
 	 * the Null Font. */
 	FNT_font_t		font;
@@ -427,13 +431,15 @@ void FNT_ReleaseFont( FNT_font_t font );
  *	auto_lines	amount of lines of text on the screen in automatic
  *			size mode
  *	min_size	minimal font size
+ *	max_size	maximal font size
  */
 void FNT_AutoInit( 
 		FNT_auto_t	auto_font ,
 		const char *	default_face ,
 		int		default_size ,
 		unsigned int	auto_lines ,
-		unsigned int	min_size
+		unsigned int	min_size ,
+		unsigned int	max_size
 	);
 
 

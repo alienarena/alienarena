@@ -129,12 +129,14 @@ void FNT_AutoInit(
 		const char *	default_face ,
 		int		default_size ,
 		unsigned int	auto_lines ,
-		unsigned int	min_size )
+		unsigned int	min_size ,
+		unsigned int	max_size )
 {
 	assert( auto_font != NULL );
 	assert( default_face != NULL );
 	assert( auto_lines > 8 );
 	assert( min_size != 0 );
+	assert( max_size > min_size );
 	assert( default_size == 0 || default_size > min_size );
 
 	auto_font->next = auto_font->previous = auto_font;
@@ -146,6 +148,7 @@ void FNT_AutoInit(
 	auto_font->sizeVar = NULL;
 	auto_font->lines = auto_lines;
 	auto_font->minSize = min_size;
+	auto_font->maxSize = max_size;
 }
 
 
@@ -233,6 +236,8 @@ FNT_font_t FNT_AutoGet(
 	}
 	if ( size < auto_font->minSize ) {
 		size = auto_font->minSize;
+	} else if ( size > auto_font->maxSize ) {
+		size = auto_font->maxSize;
 	}
 
 	return ( auto_font->font = FNT_GetFont( face , size ) );
