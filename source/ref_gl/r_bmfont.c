@@ -25,6 +25,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * parts of the code that use them.
  */
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #include "r_local.h"
 #include "r_text.h"
 #include "r_bmfont.h"
@@ -571,9 +575,10 @@ static void _BMF_WrappedPrint(
 	unsigned int			maxWidth	= 0;
 	qboolean			mustQuit	= false;
 
-	struct _FNT_render_info_s	renderInfo[ strlen( text ) ];
+	_FNT_render_info_t	renderInfo;
 	unsigned int			riLength;
 
+	renderInfo = Z_Malloc( strlen( text ) * sizeof( struct _FNT_render_info_s ) );
 	_BMF_PrepareToDraw( font->face );
 
 	while ( !mustQuit && ( box->height == 0 || font->size + cHeight + nHeight < box->height ) ) {
@@ -603,6 +608,7 @@ static void _BMF_WrappedPrint(
 	}
 
 	_BMF_RestoreEnvironment( );
+	Z_Free( renderInfo );
 
 	box->width = maxWidth;
 	box->height = cHeight;

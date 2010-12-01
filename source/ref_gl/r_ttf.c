@@ -789,7 +789,7 @@ static void _TTF_PrintUntilEOL(
 	int		txTotal		= 0;
 
 	while ( *ptr ) {
-		int		current;
+		int		current , charWidth , tx;
 
 		// Handle color codes
 		if ( ! _FNT_HandleColor( &ptr , cmode , color , &expectColor , &colorChanged , curColor ) ) {
@@ -809,8 +809,8 @@ static void _TTF_PrintUntilEOL(
 		}
 
 		// Other character; draw it and update width
-		int charWidth = font->widths[ current ];
-		int tx = 0;
+		charWidth = font->widths[ current ];
+		tx = 0;
 		if ( previous != -1 ) {
 			tx = font->kerning[ previous ][ current ];
 			charWidth += tx;
@@ -980,7 +980,9 @@ static void _TTF_BoundedPrintInternal(
 	unsigned int			cHeight		= 0;
 	unsigned int			nHeight		= 0;
 	unsigned int			maxWidth	= 0;
-	struct _FNT_render_info_s	renderInfo[ strlen( text ) ];
+	_FNT_render_info_t	renderInfo;
+
+	renderInfo = Z_Malloc( strlen( text ) * sizeof( struct _FNT_render_info_s ) );
 
 	while ( ! mustQuit && ( box->height == 0 || cHeight + font->height < box->height ) ) {
 		unsigned int	riLength , riIndex;
@@ -1055,6 +1057,7 @@ static void _TTF_BoundedPrintInternal(
 
 	box->width = maxWidth;
 	box->height = cHeight;
+	Z_Free( renderInfo );
 }
 
 
@@ -1172,7 +1175,9 @@ static void _TTF_WrappedPrintInternal(
 	unsigned int			curHeight	= 0;
 	unsigned int			nextHeight	= 0;
 	unsigned int			maxWidth	= 0;
-	struct _FNT_render_info_s	renderInfo[ strlen( text ) ];
+	_FNT_render_info_t	renderInfo;
+
+	renderInfo = Z_Malloc( strlen( text ) * sizeof( struct _FNT_render_info_s ) );
 
 	assert( box->width > indent );
 	while ( !mustQuit && ( box->height == 0 || curHeight + font->height < box->height ) ) {
@@ -1196,6 +1201,7 @@ static void _TTF_WrappedPrintInternal(
 	// Update box
 	box->height = curHeight;
 	box->width = maxWidth;
+	Z_Free( renderInfo );
 }
 
 

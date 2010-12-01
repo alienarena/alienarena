@@ -650,7 +650,7 @@ void SCR_DrawLoading (void)
 	//loading message stuff...
 	if (isMap)
 	{
-		char loadMessage[ strlen( mapfile ) + strlen( cl.configstrings[CS_NAME] ) + 128 ];
+		char loadMessage[ MAX_QPATH * 6 ];
 		int i;
 
 		Com_sprintf( loadMessage , sizeof( loadMessage ) , "Loading Map [%s]\n^3%s" , mapfile , cl.configstrings[CS_NAME] );

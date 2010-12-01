@@ -42,7 +42,7 @@ cvar_t *		con_notifytime;
 /*
  * Show or hide the console.
  */
-void CON_ToggleConsole( )
+void CON_ToggleConsole( void )
 {
 	SCR_EndLoadingPlaque ();	// get rid of loading plaque
 
@@ -69,7 +69,7 @@ void CON_ToggleConsole( )
 /*
  * Clear the chat area
  */
-static void _CON_ToggleChat( )
+static void _CON_ToggleChat( void )
 {
 	Key_ClearTyping( );
 
@@ -89,7 +89,7 @@ static void _CON_ToggleChat( )
 /*
  * Toggle the general chat input
  */
-static void _CON_GeneralChatInput( )
+static void _CON_GeneralChatInput( void )
 {
 	chat_team = false;
 	chat_irc = false;
@@ -102,7 +102,7 @@ static void _CON_GeneralChatInput( )
 /*
  * Toggle the team chat input
  */
-static void _CON_TeamChatInput( )
+static void _CON_TeamChatInput( void )
 {
 	chat_team = true;
 	chat_irc = false;
@@ -115,7 +115,7 @@ static void _CON_TeamChatInput( )
 /*
  * Toggle the IRC input
  */
-static void _CON_IRCInput( )
+static void _CON_IRCInput( void )
 {
 	chat_team = false;
 	chat_irc = true;
@@ -345,9 +345,10 @@ void CON_DrawNotify( )
 		if ( CON_console.lCount[ line ] == 1 ) {
 			FNT_WrappedPrint( font , CON_console.text[ line ] , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
 		} else {
-			char buffer[ CON_LINE_LENGTH * CON_console.lCount[ line ] ];
+			char * buffer = Z_Malloc( CON_LINE_LENGTH * CON_console.lCount[ line ] );
 			_CON_CopyLine( buffer , line );
 			FNT_WrappedPrint( font , buffer , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , 30 , &box , FNT_colors[ 7 ] );
+			Z_Free( buffer );
 		}
 		box.y += box.height;
 
@@ -364,7 +365,7 @@ void CON_DrawNotify( )
 /**************************************************************************/
 
 /* Save the console contents out to a file. */
-static void _CON_Dump( )
+static void _CON_Dump( void )
 {
 	char	name[MAX_OSPATH];
 	int	line , lastLine;
@@ -391,9 +392,10 @@ static void _CON_Dump( )
 			if ( CON_console.lCount[ line ] == 1 ) {
 				fprintf( f , "%s\n" , CON_console.text[ line ] );
 			} else {
-				char buffer[ CON_LINE_LENGTH * CON_console.lCount[ line ] ];
+				char * buffer = Z_Malloc( CON_LINE_LENGTH * CON_console.lCount[ line ] );
 				_CON_CopyLine( buffer , line );
 				fprintf( f , "%s\n" , buffer );
+				Z_Free( buffer );
 			}
 		}
 		line = _CON_FindNextLine( line );
@@ -403,7 +405,7 @@ static void _CON_Dump( )
 }
 
 /* Clears the console */
-void CON_Clear( )
+void CON_Clear( void )
 {
 	memset( &CON_console , 0 , sizeof( CON_console ) );
 	CON_console.lines = 1;
@@ -485,10 +487,11 @@ static void _CON_ComputeLineHeight( FNT_font_t font , int line )
 			FNT_WrappedPrint( font , CON_console.text[ line ] , FNT_CMODE_QUAKE_SRS ,
 				FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 0 ] );
 		} else {
-			char buffer[ CON_console.lCount[ line ] * CON_LINE_LENGTH ];
+			char * buffer = Z_Malloc( CON_console.lCount[ line ] * CON_LINE_LENGTH );
 			_CON_CopyLine( buffer , line );
 			FNT_WrappedPrint( font , buffer , FNT_CMODE_QUAKE_SRS ,
 				FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 0 ] );
+			Z_Free( buffer );
 		}
 
 		if ( box.height == 0 ) {
@@ -584,10 +587,11 @@ static void _CON_DrawConsoleText(
 				FNT_WrappedPrint( font , CON_console.text[ line ] , FNT_CMODE_QUAKE_SRS ,
 					FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 2 ] );
 			} else {
-				char buffer[ CON_console.lCount[ line ] * CON_LINE_LENGTH ];
+				char * buffer = Z_Malloc( CON_console.lCount[ line ] * CON_LINE_LENGTH );
 				_CON_CopyLine( buffer , line );
 				FNT_WrappedPrint( font , buffer , FNT_CMODE_QUAKE_SRS ,
 					FNT_ALIGN_LEFT , 0 , &box , FNT_colors[ 2 ] );
+				Z_Free( buffer );
 			}
 		}
 
