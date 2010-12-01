@@ -596,7 +596,7 @@ void VID_CheckChanges (void)
 			*/
 			if ( cls.key_dest != key_console )
 			{
-				Con_ToggleConsole_f();
+				CON_ToggleConsole();
 			}
 		}
 		cls.disable_screen = false;
