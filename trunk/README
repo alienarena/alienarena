@@ -163,7 +163,7 @@ The configure option is:
 
 Following the usual 'make', it requires
 
-  $ make --install-alternate
+  $ make install-alternate
 
 This just copies the executables to the top game directory.  The
 effect of using any other 'install' make target is "undefined".

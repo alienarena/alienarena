@@ -120,6 +120,7 @@
     <ClCompile Include="$(SrcDir)qcommon\net_chan.c" />
     <ClCompile Include="$(SrcDir)qcommon\pmove.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_bloom.c" />
+    <ClCompile Include="$(SrcDir)ref_gl\r_bmfont.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_draw.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_image.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_iqm.c" />
@@ -137,6 +138,7 @@
     <ClCompile Include="$(SrcDir)ref_gl\r_shadowmaps.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_shadows.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_surf.c" />
+    <ClCompile Include="$(SrcDir)ref_gl\r_text.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_ttf.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_varray.c" />
     <ClCompile Include="$(SrcDir)ref_gl\r_vbo.c" />
@@ -179,11 +181,14 @@
     <ClInclude Include="$(SrcDir)ref_gl\anorms.h" />
     <ClInclude Include="$(SrcDir)ref_gl\anormtab.h" />
     <ClInclude Include="$(SrcDir)ref_gl\qgl.h" />
+    <ClInclude Include="$(SrcDir)ref_gl\r_bmfont.h" />
     <ClInclude Include="$(SrcDir)ref_gl\r_image.h" />
     <ClInclude Include="$(SrcDir)ref_gl\r_iqm.h" />
     <ClInclude Include="$(SrcDir)ref_gl\r_local.h" />
     <ClInclude Include="$(SrcDir)ref_gl\r_model.h" />
     <ClInclude Include="$(SrcDir)ref_gl\r_script.h" />
+    <ClInclude Include="$(SrcDir)ref_gl\r_text.h" />
+    <ClInclude Include="$(SrcDir)ref_gl\r_ttf.h" />
     <ClInclude Include="$(SrcDir)ref_gl\r_ragdoll.h" />
     <ClInclude Include="$(SrcDir)ref_gl\warpsin.h" />
     <ClInclude Include="$(SrcDir)server\server.h" />

@@ -169,6 +169,13 @@ keyname_t keynames[] =
 ==============================================================================
 */
 
+
+void Key_ClearTyping (void)
+{
+	key_lines[edit_line][1] = 0;	// clear any typing
+	key_linelen = key_linepos = 1;
+}
+
 qboolean        Cmd_IsComplete(char *cmd);
 extern void		Q_strncpyz( char *dest, const char *src, size_t size );
 void CompleteCommand (void)
@@ -427,22 +434,24 @@ void Key_Console (int key)
 
 	if (key == K_PGUP || key == K_KP_PGUP || key == K_MWHEELUP )
 	{
-		con.display -= 2;
+		CON_console.displayOffset += 64;
 		return;
 	}
 
 	if (key == K_PGDN || key == K_KP_PGDN || key == K_MWHEELDOWN )
 	{
-		con.display += 2;
-		if (con.display > con.current)
-			con.display = con.current;
+		if ( CON_console.displayOffset >= 64 ) {
+			CON_console.displayOffset -= 64;
+		} else {
+			CON_console.displayOffset = 0;
+		}
 		return;
 	}
 
 	if (key == K_HOME || key == K_KP_HOME )
 	{
 		if ( keydown[K_CTRL] )
-			con.display = con.current - con.totallines + 10;
+			CON_console.displayOffset = 0x7fffffff;
 		else
 			key_linepos = 1;
 		return;
@@ -451,7 +460,7 @@ void Key_Console (int key)
 	if (key == K_END || key == K_KP_END )
 	{
 		if ( keydown[K_CTRL] )
-			con.display = con.current;
+			CON_console.displayOffset = 0;
 		else
 			key_linepos = key_linelen;
 		return;
@@ -915,7 +924,7 @@ void Key_Event (int key, qboolean down, unsigned time)
 			return;
 		}
 
-		Con_ToggleConsole_f ();
+		CON_ToggleConsole( );
 		return;
 	}
 

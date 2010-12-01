@@ -152,7 +152,9 @@ ALIEN ARENA and it's original content are a copyright of COR Entertainment, LLC.
 
 The source code of Alien Arena is Free Software. You can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 
-It is only permissible to distrubute the game data (models, maps, textures, sound, etc) as a whole, and with the intention of being used with Alien Arena.  It is not permissible to distribute individual portions or items of the game data without express consent from COR Entertainment.
+The included TrueType fonts (FreeSans and FreeMono) are from the GNU FreeFont package (http://www.gnu.org/software/freefont/); they are free software distributed under the terms of the GNU General Public License version 3 (http://www.gnu.org/licenses/gpl.html).
+
+It is only permissible to distribute the game data (models, maps, textures, sound, etc) as a whole, and with the intention of being used with Alien Arena.  It is not permissible to distribute individual portions or items of the game data without express consent from COR Entertainment.
 
 'rcon' and 'svstat' ruby scripts are Copyright (C) 2009 Tony Jackson and Licensed under the GNU Lesser General Public License
 

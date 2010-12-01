@@ -2056,7 +2056,7 @@ static void ConsoleFunc( void *unused )
 // 	}
 
 	Key_ClearTyping ();
-	Con_ClearNotify ();
+	CON_ClearNotify ();
 
 	M_ForceMenuOff ();
 	cls.key_dest = key_console;
@@ -3481,7 +3481,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	Com_sprintf(mservers[m_num_servers].serverInfo, sizeof(mservers[m_num_servers].serverInfo), "%s  %12s  %2i/%2s  %4i", mservers[m_num_servers].szHostName,
 		mservers[m_num_servers].szMapName, players, mservers[m_num_servers].maxClients, mservers[m_num_servers].ping);
 
-	Con_Clear_f();
+	CON_Clear();
 	m_num_servers++;
 }
 void MoveUp ( void *self)
@@ -3615,7 +3615,7 @@ void SearchLocalGames( void )
 	Sleep(1000); //time to recieve packets
 #endif
 
-	Con_Clear_f();
+	CON_Clear();
 }
 
 void SearchLocalGamesFunc( void *self )

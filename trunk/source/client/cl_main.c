@@ -46,6 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _putenv putenv
 #endif
 
+
 cvar_t	*freelook;
 
 cvar_t	*adr0;
@@ -185,6 +186,17 @@ int numServers = 0;
 extern unsigned int starttime;
 
 static size_t szr; // just for unused result warnings
+
+//
+// Fonts
+//
+FNT_auto_t			CL_gameFont;
+static struct FNT_auto_s	_CL_gameFont;
+FNT_auto_t			CL_centerFont;
+static struct FNT_auto_s	_CL_centerFont;
+FNT_auto_t			CL_consoleFont;
+static struct FNT_auto_s	_CL_consoleFont;
+
 
 //======================================================================
 
@@ -2164,9 +2176,28 @@ void CL_Init (void)
 	if (dedicated->value)
 		return;		// nothing running on the client
 
+	// Initialise fonts
+	CL_gameFont = &_CL_gameFont;
+	FNT_AutoInit( CL_gameFont , "default" , 0 , 75 , 8 );
+	CL_gameFont->faceVar = Cvar_Get( "fnt_game" , "freesans" , CVAR_ARCHIVE );
+	CL_gameFont->sizeVar = Cvar_Get( "fnt_game_size" , "0" , CVAR_ARCHIVE );
+	FNT_AutoRegister( CL_gameFont );
+
+	CL_centerFont = &_CL_centerFont;
+	FNT_AutoInit( CL_centerFont , "default" , 0 , 50 , 16 );
+	CL_centerFont->faceVar = CL_gameFont->faceVar;
+	CL_centerFont->sizeVar = Cvar_Get( "fnt_center_size" , "0" , CVAR_ARCHIVE );
+	FNT_AutoRegister( CL_centerFont );
+
+	CL_consoleFont = &_CL_consoleFont;
+	FNT_AutoInit( CL_consoleFont , "freemono" , 0 , 70 , 8 );
+	CL_consoleFont->faceVar = Cvar_Get( "fnt_console" , "default" , CVAR_ARCHIVE );
+	CL_consoleFont->sizeVar = Cvar_Get( "fnt_console_size" , "0" , CVAR_ARCHIVE );
+	FNT_AutoRegister( CL_consoleFont );
+
 	// all archived variables will now be loaded
 
-	Con_Init ();
+	CON_Initialise( );
 
 	VID_Init ();
 	S_Init ();

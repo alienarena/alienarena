@@ -132,7 +132,7 @@ void Com_Printf (char *fmt, ...)
 		return;
 	}
 
-	Con_Print (msg);
+	CON_Print( msg );
 
 	// also echo to debugging console
 	Sys_ConsoleOutput (msg);
