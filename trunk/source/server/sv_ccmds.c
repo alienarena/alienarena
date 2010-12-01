@@ -236,10 +236,12 @@ SV_Status_f
 */
 void SV_Status_f (void)
 {
-	int			i, j, l;
+	int		i, j, k , l;
 	client_t	*cl;
 	char		*s;
-	int			ping;
+	int		ping;
+	qboolean	expectColor;
+
 	if (!svs.clients)
 	{
 		Com_Printf ("No server running.\n");
@@ -267,7 +269,24 @@ void SV_Status_f (void)
 		}
 
 		Com_Printf ("%s", cl->name);
-		l = 16 - strlen(cl->name);
+		l = strlen( cl->name );
+		expectColor = false;
+		for ( j = k = 0 ; j < l ; j ++ ) {
+			if ( expectColor ) {
+				if ( cl->name[ j ] == '^' ) {
+					k ++;
+				}
+				expectColor = false;
+			} else if ( cl->name[ j ] == '^' ) {
+				expectColor = true;
+			} else {
+				k ++;
+			}
+		}
+		if ( expectColor ) {
+			k ++;
+		}
+		l = 16 - k;
 		for (j=0 ; j<l ; j++)
 			Com_Printf (" ");
 
