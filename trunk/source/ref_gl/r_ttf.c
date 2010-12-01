@@ -989,7 +989,7 @@ static void _TTF_BoundedPrintInternal(
 		int		lWidth , sWidth , eWidth;
 		int		sIndex , eIndex;
 
-		mustQuit = ! _FNT_NextWrappedUnit( &ptr , renderInfo , &riLength , cmode , color , false );
+		mustQuit = ! _FNT_NextWrappedUnit( &ptr , renderInfo , &riLength , cmode , color );
 		_TTF_FixWrappedUnit( font , renderInfo , &riLength );
 
 		// Skip empty lines
@@ -1183,7 +1183,7 @@ static void _TTF_WrappedPrintInternal(
 	while ( !mustQuit && ( box->height == 0 || curHeight + font->height < box->height ) ) {
 		unsigned int			riLength;
 
-		mustQuit = ! _FNT_NextWrappedUnit( &curText , renderInfo , &riLength , cmode , color , true );
+		mustQuit = ! _FNT_NextWrappedUnit( &curText , renderInfo , &riLength , cmode , color );
 		_TTF_FixWrappedUnit( font , renderInfo , &riLength );
 
 		// Skip empty lines

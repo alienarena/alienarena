@@ -585,7 +585,7 @@ static void _BMF_WrappedPrint(
 		unsigned int	riIndex = 0;
 
 		// Get next line
-		mustQuit = ! _FNT_NextWrappedUnit( &curText , renderInfo , &riLength , cmode , color , true );
+		mustQuit = ! _FNT_NextWrappedUnit( &curText , renderInfo , &riLength , cmode , color );
 
 		// Empty line, skip space vertically
 		if ( riLength == 0 ) {

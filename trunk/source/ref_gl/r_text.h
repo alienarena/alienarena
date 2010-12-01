@@ -522,10 +522,6 @@ qboolean _FNT_HandleColor(
  *			amount of items in the rendering information array
  *	cmode		color mode
  *	color		default color vector(s)
- *	removeSpaces	whether extra spaces should be removed from the
- *			string (that includes initial and ending spaces,
- *			which will be removed completely, and sequences of
- *			spaces which will be turned into a single space)
  *
  * Returns:
  *	false if the end of the string has been reached, false otherwise
@@ -535,8 +531,7 @@ qboolean _FNT_NextWrappedUnit(
 		_FNT_render_info_t	renderInfo ,
 		unsigned int *		unitLength ,
 		unsigned int		cmode ,
-		const float *		color ,
-		qboolean		removeSpaces
+		const float *		color
 	);
 
 

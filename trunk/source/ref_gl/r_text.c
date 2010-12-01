@@ -535,8 +535,7 @@ qboolean _FNT_NextWrappedUnit(
 		_FNT_render_info_t	renderInfo ,
 		unsigned int *		unitLength ,
 		unsigned int		cmode ,
-		const float *		color ,
-		qboolean		removeSpaces )
+		const float *		color )
 {
 	const float *		curColor = color;
 	qboolean		expectColor = false;
@@ -554,9 +553,6 @@ qboolean _FNT_NextWrappedUnit(
 
 		// Skip extra spaces
 		curChar = *(*pptr) ++;
-		if ( removeSpaces && previous == ' ' && curChar == ' ' ) {
-			continue;
-		}
 
 		// Add character to info array
 		renderInfo[ index ].toDraw = curChar;
@@ -564,10 +560,6 @@ qboolean _FNT_NextWrappedUnit(
 		index ++;
 
 		previous = curChar;
-	}
-
-	if ( removeSpaces && index > 0 && previous == ' ' ) {
-		index --;
 	}
 
 	if ( **pptr ) {
