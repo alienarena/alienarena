@@ -99,16 +99,6 @@ struct _TTF_font_s
 typedef struct _TTF_font_s * _TTF_font_t;
 
 
-/* Structure used when rendering text with word wrapping */
-struct _TTF_text_render_s
-{
-	int			toDraw;
-	int			width;
-	int			kerning;
-	const float *		color;
-};
-
-
 
 /*****************************************************************************
  * LOCAL FUNCTIONS ENCAPSULATED BY FONT/FACE STRUCTURES                      *
