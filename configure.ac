@@ -410,6 +410,8 @@ AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
 debug=no
 
 # Debugging support + symbols removal
+# Note: removing symbols applies to alternate install only
+#   use 'make install-strip', or custom CFLAGS for standard install
 AC_ARG_ENABLE([debugging-symbols],
 	[AS_HELP_STRING([--enable-debugging-symbols],[Compile Alien Arena with full debugging information (default:no)])],
 	[debug_syms=${enableval}],[debug_syms=no])

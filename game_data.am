@@ -208,6 +208,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/fonts/default.tga \
 	data1/fonts/digital.tga \
 	data1/fonts/fat.tga \
+	data1/fonts/freemono.ttf \
+	data1/fonts/freesans.ttf \
 	data1/fonts/menu.tga \
 	data1/gfx/aaglow.tga \
 	data1/gfx/adrenalbase.tga \
