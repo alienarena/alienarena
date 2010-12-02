@@ -31,13 +31,15 @@ dist_doc_DATA = \
 	COPYING \
 	INSTALL
 
-# TODO: Add additional release package content from Tools
+# FUSE game server browser and Server managment scripts
+EXTRA_DIST = \
+	Tools/FUSE \
+	Tools/LinuxScripts
 
 # remove svn directories from distribution staging area after creating
 #  distribution in staging area and before running archiver
-#  not needed unless a directory copy is done
-#dist-hook:
-#	rm -rf `find $(distdir) -name .svn`
+dist-hook:
+	rm -rf `find $(distdir) -name .svn`
 
 #
 # Alternate Install
@@ -52,9 +54,6 @@ dist_doc_DATA = \
 # Note: this does not support program name translation and other autoconf
 #   features.
 #
-# 2010-08-22  Temporary fixes for Escaped Turkey SVN script
-#  To be removed before 7.50 release package is generated
-#
 install-alternate:
 if ALTERNATE_INSTALL
 if BUILD_CLIENT
@@ -65,13 +64,9 @@ endif
 endif	
 if BUILD_UNIX	
 	cp $(top_builddir)/source/crx-ded $(srcdir)/crx-ded
-	cp $(top_builddir)/source/crx-ded $(srcdir)/crded
 if REMOVE_SYMBOLS
 	strip $(srcdir)/crx-ded
-	strip $(srcdir)/crded
 endif
-	rm -f $(srcdir)/arena/game.so
-	rm -f $(srcdir)/data1/game.so
 endif
 else
 	@echo "make install-alternate requires configuring with --enable-alternate-install"

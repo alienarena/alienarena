@@ -289,6 +289,12 @@ dist_doc_DATA = \
 	INSTALL
 
 
+# FUSE game server browser and Server managment scripts
+EXTRA_DIST = \
+	Tools/FUSE \
+	Tools/LinuxScripts
+
+
 # include this file in the top level Makefile.am
 #
 # Copyright (C) 2010 COR Entertainment, LLC
@@ -499,6 +505,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/fonts/default.tga \
 	data1/fonts/digital.tga \
 	data1/fonts/fat.tga \
+	data1/fonts/freemono.ttf \
+	data1/fonts/freesans.ttf \
 	data1/fonts/menu.tga \
 	data1/gfx/aaglow.tga \
 	data1/gfx/adrenalbase.tga \
@@ -3647,6 +3655,9 @@ distdir: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
+	$(MAKE) $(AM_MAKEFLAGS) \
+	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
+	  dist-hook
 	-test -n "$(am__skip_mode_fix)" \
 	|| find "$(distdir)" -type d ! -perm -755 \
 		-exec chmod u+rwx,go+rx {} \; -o \
@@ -3872,29 +3883,26 @@ uninstall-am: uninstall-dist_docDATA uninstall-local \
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-am clean clean-generic \
 	ctags ctags-recursive dist dist-all dist-bzip2 dist-gzip \
-	dist-lzma dist-shar dist-tarZ dist-xz dist-zip distcheck \
-	distclean distclean-generic distclean-hdr distclean-tags \
-	distcleancheck distdir distuninstallcheck dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-data-local install-dist_docDATA \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-html install-html-am install-info install-info-am \
-	install-man install-nobase_dist_pkgdataDATA install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-dist_docDATA uninstall-local \
-	uninstall-nobase_dist_pkgdataDATA
+	dist-hook dist-lzma dist-shar dist-tarZ dist-xz dist-zip \
+	distcheck distclean distclean-generic distclean-hdr \
+	distclean-tags distcleancheck distdir distuninstallcheck dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-data-local \
+	install-dist_docDATA install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-nobase_dist_pkgdataDATA \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags \
+	tags-recursive uninstall uninstall-am uninstall-dist_docDATA \
+	uninstall-local uninstall-nobase_dist_pkgdataDATA
 
-
-# TODO: Add additional release package content from Tools
 
 # remove svn directories from distribution staging area after creating
 #  distribution in staging area and before running archiver
-#  not needed unless a directory copy is done
-#dist-hook:
-#	rm -rf `find $(distdir) -name .svn`
+dist-hook:
+	rm -rf `find $(distdir) -name .svn`
 
 #
 # Alternate Install
@@ -3909,18 +3917,11 @@ uninstall-am: uninstall-dist_docDATA uninstall-local \
 # Note: this does not support program name translation and other autoconf
 #   features.
 #
-# 2010-08-22  Temporary fixes for Escaped Turkey SVN script
-#  To be removed before 7.50 release package is generated
-#
 install-alternate:
 @ALTERNATE_INSTALL_TRUE@@BUILD_CLIENT_TRUE@	cp $(top_builddir)/source/crx@EXEEXT@ $(srcdir)/crx@EXEEXT@
 @ALTERNATE_INSTALL_TRUE@@BUILD_CLIENT_TRUE@@REMOVE_SYMBOLS_TRUE@	strip $(srcdir)/crx@EXEEXT@
 @ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@	cp $(top_builddir)/source/crx-ded $(srcdir)/crx-ded
-@ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@	cp $(top_builddir)/source/crx-ded $(srcdir)/crded
 @ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@@REMOVE_SYMBOLS_TRUE@	strip $(srcdir)/crx-ded
-@ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@@REMOVE_SYMBOLS_TRUE@	strip $(srcdir)/crded
-@ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@	rm -f $(srcdir)/arena/game.so
-@ALTERNATE_INSTALL_TRUE@@BUILD_UNIX_TRUE@	rm -f $(srcdir)/data1/game.so
 @ALTERNATE_INSTALL_FALSE@	@echo "make install-alternate requires configuring with --enable-alternate-install"
 
 #

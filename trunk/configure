@@ -7743,6 +7743,8 @@ esac
 debug=no
 
 # Debugging support + symbols removal
+# Note: removing symbols applies to alternate install only
+#   use 'make install-strip', or custom CFLAGS for standard install
 # Check whether --enable-debugging-symbols was given.
 if test "${enable_debugging_symbols+set}" = set; then :
   enableval=$enable_debugging_symbols; debug_syms=${enableval}
