@@ -152,7 +152,7 @@ static void M_CrosshairPic( char *name )
 	scale = (float)(viddef.height)/600;
 
 	w = h = 64*scale;
-	Draw_StretchPic (viddef.width / 2 - w/2 - 120*scale, viddef.height / 2 + 64*scale, w, h, name);
+	Draw_StretchPic (viddef.width / 2 - w/2 - 120*scale, viddef.height / 2 + 74*scale, w, h, name);
 }
 static void M_Background( char *name)
 {
@@ -1404,7 +1404,8 @@ static menulist_s		s_options_freelook_box;
 static menulist_s		s_options_noalttab_box;
 static menulist_s		s_options_alwaysrun_box;
 static menulist_s		s_options_invertmouse_box;
-static menulist_s		s_options_font_box;
+static menulist_s		s_options_cfont_box;
+static menulist_s		s_options_gfont_box;
 static menulist_s		s_options_crosshair_box;
 static menulist_s		s_options_hud_box;
 static menulist_s		s_options_discolor_box;
@@ -1556,28 +1557,41 @@ extern cvar_t *con_font;
 char **font_names = NULL;
 int	numfonts;
 
-static void FontFunc( void *unused )
+static void ConsoleFontFunc( void *unused )
 {
-	Cvar_Set( "con_font", font_names[s_options_font_box.curvalue] );
+	Cvar_Set( "fnt_console", font_names[s_options_cfont_box.curvalue] );
+}
+
+static void GameFontFunc( void *unused )
+{
+	Cvar_Set( "fnt_game", font_names[s_options_gfont_box.curvalue] );
 }
 
 void SetFontCursor (void)
 {
 	int i;
-	s_options_font_box.curvalue = 0;
+	int set = 0;
+	s_options_cfont_box.curvalue = 0;
+	s_options_gfont_box.curvalue = 0;
 
-	if (!con_font)
-		con_font = Cvar_Get ("con_font", "default", CVAR_ARCHIVE);
-
-	if (numfonts>1)
+	if (numfonts>1) {
 		for (i=0; font_names[i]; i++)
 		{
-			if (!Q_strcasecmp(con_font->string, font_names[i]))
+			if (!Q_strcasecmp(CL_consoleFont->faceVar->string, font_names[i]))
 			{
-				s_options_font_box.curvalue = i;
-				return;
+				s_options_cfont_box.curvalue = i;
+				set ++;
+			}
+			if (!Q_strcasecmp(CL_gameFont->faceVar->string, font_names[i]))
+			{
+				s_options_gfont_box.curvalue = i;
+				set ++;
+			}
+			if ( set == 2 ) {
+				break;
 			}
 		}
+	}
 }
 
 qboolean fontInList (char *check, int num, char **list)
@@ -1613,43 +1627,33 @@ void insertFont (char ** list, char *insert, int len )
 	list[len] = _strdup(insert);
 }
 
-char **SetFontNames (void)
+static void AddFontNames( char * path , int * nfontnames , char ** list )
 {
-	char *curFont;
-	char **list = 0, *p;
-	int nfonts = 0, nfontnames;
-	char **fontfiles;
+	char ** fontfiles;
+	int nfonts = 0;
 	int i;
-
-	list = malloc( sizeof( char * ) * MAX_FONTS );
-	memset( list, 0, sizeof( char * ) * MAX_FONTS );
-
-	list[0] = _strdup("default");
-
-	nfontnames = 1;
-
-	fontfiles = FS_ListFilesInFS( "fonts/*.tga", &nfonts, 0,
+	
+	fontfiles = FS_ListFilesInFS( path , &nfonts, 0,
 	    SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
 
-	for (i=0;i<nfonts && nfontnames<MAX_FONTS;i++)
+	for (i=0;i<nfonts && *nfontnames<MAX_FONTS;i++)
 	{
 		int num;
+		char * p;
 
 		p = strstr(fontfiles[i], "fonts/"); p++;
 		p = strstr(p, "/"); p++;
 
-		if (!strstr(p, ".tga") && !strstr(p, ".pcx"))
+		if (!strstr(p, ".tga") && !strstr( p , ".ttf" ) )
 			continue;
 
 		num = strlen(p)-4;
 		p[num] = 0;
 
-		curFont = p;
-
-		if (!fontInList(curFont, nfontnames, list))
+		if (!fontInList(p, i, list))
 		{
-			insertFont(list, _strdup(curFont),nfontnames);
-			nfontnames++;
+			insertFont(list, _strdup(p), i);
+			(*nfontnames)++;
 		}
 
 		//set back so whole string get deleted.
@@ -1658,6 +1662,19 @@ char **SetFontNames (void)
 
 	if (fontfiles)
 		FS_FreeFileList(fontfiles, nfonts);
+}
+
+char **SetFontNames (void)
+{
+	char **list = 0;
+	int nfontnames;
+
+	list = malloc( sizeof( char * ) * MAX_FONTS );
+	memset( list, 0, sizeof( char * ) * MAX_FONTS );
+
+	nfontnames = 0;
+	AddFontNames( "fonts/*.ttf" , &nfontnames , list );
+	AddFontNames( "fonts/*.tga" , &nfontnames , list + nfontnames );
 
 	numfonts = nfontnames;
 
@@ -2166,7 +2183,7 @@ void Options_MenuInit( void )
 
 	s_options_precachecustom_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_precachecustom_box.generic.x	= 0;
-	s_options_precachecustom_box.generic.y	= FONTSCALE*30*scale;
+	s_options_precachecustom_box.generic.y	= FONTSCALE*26*scale;
 	s_options_precachecustom_box.generic.name	= "precache custom models";
 	s_options_precachecustom_box.generic.callback = PrecacheFunc;
 	s_options_precachecustom_box.itemnames = onoff_names;
@@ -2174,7 +2191,7 @@ void Options_MenuInit( void )
 
 	s_options_paindist_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_paindist_box.generic.x	= 0;
-	s_options_paindist_box.generic.y	= FONTSCALE*40*scale;
+	s_options_paindist_box.generic.y	= FONTSCALE*36*scale;
 	s_options_paindist_box.generic.name	= "pain distortion fx";
 	s_options_paindist_box.generic.callback = PainDistFunc;
 	s_options_paindist_box.itemnames = onoff_names;
@@ -2182,7 +2199,7 @@ void Options_MenuInit( void )
 
 	s_options_explosiondist_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_explosiondist_box.generic.x	= 0;
-	s_options_explosiondist_box.generic.y	= FONTSCALE*50*scale;
+	s_options_explosiondist_box.generic.y	= FONTSCALE*46*scale;
 	s_options_explosiondist_box.generic.name	= "explosion distortion fx";
 	s_options_explosiondist_box.generic.callback = ExplosionDistFunc;
 	s_options_explosiondist_box.itemnames = onoff_names;
@@ -2190,42 +2207,42 @@ void Options_MenuInit( void )
 
 	s_options_target_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_target_box.generic.x	= 0;
-	s_options_target_box.generic.y	= FONTSCALE*60*scale;
+	s_options_target_box.generic.y	= FONTSCALE*56*scale;
 	s_options_target_box.generic.name	= "identify target";
 	s_options_target_box.generic.callback = TargetFunc;
 	s_options_target_box.itemnames = playerid_names;
 
 	s_options_ragdoll_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_ragdoll_box.generic.x	= 0;
-	s_options_ragdoll_box.generic.y	= FONTSCALE*70*scale;
+	s_options_ragdoll_box.generic.y	= FONTSCALE*66*scale;
 	s_options_ragdoll_box.generic.name	= "ragdolls";
 	s_options_ragdoll_box.generic.callback = RagDollFunc;
 	s_options_ragdoll_box.itemnames = onoff_names;
 
 	s_options_noblood_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_noblood_box.generic.x	= 0;
-	s_options_noblood_box.generic.y	= FONTSCALE*80*scale;
+	s_options_noblood_box.generic.y	= FONTSCALE*76*scale;
 	s_options_noblood_box.generic.name	= "no blood";
 	s_options_noblood_box.generic.callback = NoBloodFunc;
 	s_options_noblood_box.itemnames = onoff_names;
 
 	s_options_noskins_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_noskins_box.generic.x	= 0;
-	s_options_noskins_box.generic.y	= FONTSCALE*90*scale;
+	s_options_noskins_box.generic.y	= FONTSCALE*86*scale;
 	s_options_noskins_box.generic.name	= "force martian models";
 	s_options_noskins_box.generic.callback = NoskinsFunc;
 	s_options_noskins_box.itemnames = onoff_names;
 
 	s_options_taunts_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_taunts_box.generic.x	= 0;
-	s_options_taunts_box.generic.y	= FONTSCALE*100*scale;
+	s_options_taunts_box.generic.y	= FONTSCALE*96*scale;
 	s_options_taunts_box.generic.name	= "player taunts";
 	s_options_taunts_box.generic.callback = TauntsFunc;
 	s_options_taunts_box.itemnames = onoff_names;
 
 	s_options_sfxvolume_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sfxvolume_slider.generic.x	= 0;
-	s_options_sfxvolume_slider.generic.y	= FONTSCALE*110*scale;
+	s_options_sfxvolume_slider.generic.y	= FONTSCALE*106*scale;
 	s_options_sfxvolume_slider.generic.name	= "global volume";
 	s_options_sfxvolume_slider.generic.callback	= UpdateVolumeFunc;
 	s_options_sfxvolume_slider.minvalue		= 0;
@@ -2234,7 +2251,7 @@ void Options_MenuInit( void )
 
 	s_options_bgvolume_slider.generic.type	= MTYPE_SLIDER;
 	s_options_bgvolume_slider.generic.x	= 0;
-	s_options_bgvolume_slider.generic.y	= FONTSCALE*120*scale;
+	s_options_bgvolume_slider.generic.y	= FONTSCALE*116*scale;
 	s_options_bgvolume_slider.generic.name	= "music volume";
 	s_options_bgvolume_slider.generic.callback	= UpdateBGVolumeFunc;
 	s_options_bgvolume_slider.minvalue		= 0;
@@ -2243,7 +2260,7 @@ void Options_MenuInit( void )
 
 	s_options_bgmusic_box.generic.type	= MTYPE_SPINCONTROL;
 	s_options_bgmusic_box.generic.x		= 0;
-	s_options_bgmusic_box.generic.y		= FONTSCALE*130*scale;
+	s_options_bgmusic_box.generic.y		= FONTSCALE*126*scale;
 	s_options_bgmusic_box.generic.name	= "Background music";
 	s_options_bgmusic_box.generic.callback	= UpdateBGMusicFunc;
 	s_options_bgmusic_box.itemnames		= background_music_items;
@@ -2251,7 +2268,7 @@ void Options_MenuInit( void )
 
 	s_options_doppler_effect_list.generic.type	= MTYPE_SPINCONTROL;
 	s_options_doppler_effect_list.generic.x		= 0;
-	s_options_doppler_effect_list.generic.y		= FONTSCALE*140*scale;
+	s_options_doppler_effect_list.generic.y		= FONTSCALE*136*scale;
 	s_options_doppler_effect_list.generic.name	= "doppler sound effect";
 	s_options_doppler_effect_list.generic.callback = UpdateDopplerEffectFunc;
 	s_options_doppler_effect_list.itemnames		= doppler_effect_items;
@@ -2259,7 +2276,7 @@ void Options_MenuInit( void )
 
 	s_options_mouse_accel_box.generic.type	= MTYPE_SPINCONTROL;
 	s_options_mouse_accel_box.generic.x		= 0;
-	s_options_mouse_accel_box.generic.y		= FONTSCALE*150*scale;
+	s_options_mouse_accel_box.generic.y		= FONTSCALE*146*scale;
 	s_options_mouse_accel_box.generic.name	= "mouse acceleration";
 	s_options_mouse_accel_box.generic.callback = MouseAccelFunc;
 	s_options_mouse_accel_box.itemnames		= yesno_names;
@@ -2267,7 +2284,7 @@ void Options_MenuInit( void )
 
 	s_options_sensitivity_slider.generic.type	= MTYPE_SLIDER;
 	s_options_sensitivity_slider.generic.x		= 0;
-	s_options_sensitivity_slider.generic.y		= FONTSCALE*160*scale;
+	s_options_sensitivity_slider.generic.y		= FONTSCALE*156*scale;
 	s_options_sensitivity_slider.generic.name	= "mouse speed";
 	s_options_sensitivity_slider.generic.callback = MouseSpeedFunc;
 	s_options_sensitivity_slider.minvalue		= 2;
@@ -2275,7 +2292,7 @@ void Options_MenuInit( void )
 
 	s_options_menu_sensitivity_slider.generic.type	= MTYPE_SLIDER;
 	s_options_menu_sensitivity_slider.generic.x		= 0;
-	s_options_menu_sensitivity_slider.generic.y		= FONTSCALE*170*scale;
+	s_options_menu_sensitivity_slider.generic.y		= FONTSCALE*166*scale;
 	s_options_menu_sensitivity_slider.generic.name	= "menu mouse speed";
 	s_options_menu_sensitivity_slider.generic.callback = MenuMouseSpeedFunc;
 	s_options_menu_sensitivity_slider.minvalue		= 2;
@@ -2283,21 +2300,21 @@ void Options_MenuInit( void )
 
 	s_options_smoothing_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_smoothing_box.generic.x	= 0;
-	s_options_smoothing_box.generic.y	= FONTSCALE*180*scale;
+	s_options_smoothing_box.generic.y	= FONTSCALE*176*scale;
 	s_options_smoothing_box.generic.name	= "mouse smoothing";
 	s_options_smoothing_box.generic.callback = MouseSmoothingFunc;
 	s_options_smoothing_box.itemnames = yesno_names;
 
 	s_options_alwaysrun_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_alwaysrun_box.generic.x	= 0;
-	s_options_alwaysrun_box.generic.y	= FONTSCALE*190*scale;
+	s_options_alwaysrun_box.generic.y	= FONTSCALE*186*scale;
 	s_options_alwaysrun_box.generic.name	= "always run";
 	s_options_alwaysrun_box.generic.callback = AlwaysRunFunc;
 	s_options_alwaysrun_box.itemnames = yesno_names;
 
 	s_options_invertmouse_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_invertmouse_box.generic.x	= 0;
-	s_options_invertmouse_box.generic.y	= FONTSCALE*200*scale;
+	s_options_invertmouse_box.generic.y	= FONTSCALE*196*scale;
 	s_options_invertmouse_box.generic.name	= "invert mouse";
 	s_options_invertmouse_box.generic.callback = InvertMouseFunc;
 	s_options_invertmouse_box.itemnames = yesno_names;
@@ -2306,19 +2323,27 @@ void Options_MenuInit( void )
 	// displayed - BlackIce
 	if ( font_names == NULL )
 		font_names = SetFontNames ();
-	s_options_font_box.generic.type = MTYPE_SPINCONTROL;
-	s_options_font_box.generic.x	= 0;
-	s_options_font_box.generic.y	= FONTSCALE*210*scale;
-	s_options_font_box.generic.name	= "font";
-	s_options_font_box.generic.callback = FontFunc;
-	s_options_font_box.itemnames = (const char **) font_names;
-	s_options_font_box.generic.statusbar	= "select your font";
+	s_options_cfont_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_cfont_box.generic.x	= 0;
+	s_options_cfont_box.generic.y	= FONTSCALE*206*scale;
+	s_options_cfont_box.generic.name	= "console font";
+	s_options_cfont_box.generic.callback = ConsoleFontFunc;
+	s_options_cfont_box.itemnames = (const char **) font_names;
+	s_options_cfont_box.generic.statusbar	= "select the font used to display the console";
+
+	s_options_gfont_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_gfont_box.generic.x	= 0;
+	s_options_gfont_box.generic.y	= FONTSCALE*216*scale;
+	s_options_gfont_box.generic.name	= "game font";
+	s_options_gfont_box.generic.callback = GameFontFunc;
+	s_options_gfont_box.itemnames = (const char **) font_names;
+	s_options_gfont_box.generic.statusbar	= "select the font used in the game";
 
 	if ( crosshair_names == NULL )
 		crosshair_names = SetCrosshairNames ();
 	s_options_crosshair_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_crosshair_box.generic.x	= 0;
-	s_options_crosshair_box.generic.y	= FONTSCALE*220*scale;
+	s_options_crosshair_box.generic.y	= FONTSCALE*226*scale;
 	s_options_crosshair_box.generic.name	= "crosshair";
 	s_options_crosshair_box.generic.callback = CrosshairFunc;
 	s_options_crosshair_box.itemnames = (const char **) crosshair_names;
@@ -2328,7 +2353,7 @@ void Options_MenuInit( void )
 		hud_names = SetHudNames ();
 	s_options_hud_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_hud_box.generic.x	= 0;
-	s_options_hud_box.generic.y	= FONTSCALE*230*scale;
+	s_options_hud_box.generic.y	= FONTSCALE*236*scale;
 	s_options_hud_box.generic.name	= "hud";
 	s_options_hud_box.generic.callback = HudFunc;
 	s_options_hud_box.itemnames = (const char **) hud_names;
@@ -2336,7 +2361,7 @@ void Options_MenuInit( void )
 
 	s_options_discolor_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_discolor_box.generic.x = 0;
-	s_options_discolor_box.generic.y = FONTSCALE*240*scale;
+	s_options_discolor_box.generic.y = FONTSCALE*246*scale;
 	s_options_discolor_box.generic.name = "disruptor color";
 	s_options_discolor_box.generic.callback = DisColorFunc;
 	s_options_discolor_box.itemnames = color_names;
@@ -2344,41 +2369,41 @@ void Options_MenuInit( void )
 
 	s_options_minimap_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_minimap_box.generic.x		= 0;
-	s_options_minimap_box.generic.y		= FONTSCALE*250*scale;
+	s_options_minimap_box.generic.y		= FONTSCALE*256*scale;
 	s_options_minimap_box.generic.name  = "minimap";
 	s_options_minimap_box.generic.callback = MinimapFunc;
 	s_options_minimap_box.itemnames = minimap_names;
 
 	s_options_joystick_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_joystick_box.generic.x	= 0;
-	s_options_joystick_box.generic.y	= FONTSCALE*260*scale;
+	s_options_joystick_box.generic.y	= FONTSCALE*266*scale;
 	s_options_joystick_box.generic.name	= "use joystick";
 	s_options_joystick_box.generic.callback = JoystickFunc;
 	s_options_joystick_box.itemnames = yesno_names;
 
 	s_options_showfps_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_showfps_box.generic.x	= 0;
-	s_options_showfps_box.generic.y	= FONTSCALE*270*scale;
+	s_options_showfps_box.generic.y	= FONTSCALE*276*scale;
 	s_options_showfps_box.generic.name	= "display fps";
 	s_options_showfps_box.generic.callback = ShowfpsFunc;
 	s_options_showfps_box.itemnames = yesno_names;
 
 	s_options_showtime_box.generic.type = MTYPE_SPINCONTROL;
 	s_options_showtime_box.generic.x	= 0;
-	s_options_showtime_box.generic.y	= FONTSCALE*280*scale;
+	s_options_showtime_box.generic.y	= FONTSCALE*286*scale;
 	s_options_showtime_box.generic.name	= "display time";
 	s_options_showtime_box.generic.callback = ShowtimeFunc;
 	s_options_showtime_box.itemnames = yesno_names;
 
 	s_options_defaults_action.generic.type	= MTYPE_ACTION;
 	s_options_defaults_action.generic.x		= 0;
-	s_options_defaults_action.generic.y		= FONTSCALE*300*scale;
+	s_options_defaults_action.generic.y		= FONTSCALE*302*scale;
 	s_options_defaults_action.generic.name	= "reset defaults";
 	s_options_defaults_action.generic.callback = ControlsResetDefaultsFunc;
 
 	s_options_console_action.generic.type	= MTYPE_ACTION;
 	s_options_console_action.generic.x		= 0;
-	s_options_console_action.generic.y		= FONTSCALE*310*scale;
+	s_options_console_action.generic.y		= FONTSCALE*312*scale;
 	s_options_console_action.generic.name	= "go to console";
 	s_options_console_action.generic.callback = ConsoleFunc;
 
@@ -2403,7 +2428,8 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_smoothing_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_alwaysrun_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_invertmouse_box );
-	Menu_AddItem( &s_options_menu, ( void * ) &s_options_font_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_cfont_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_gfont_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_crosshair_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_hud_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_discolor_box );
