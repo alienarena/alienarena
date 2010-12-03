@@ -527,8 +527,11 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 	int		x, y;
 	gclient_t	*cl;
 	edict_t		*cl_ent;
-	char    acc[16];
+#if 0
+	// 2010-12 unused. see below
+	char	acc[16];
 	char	weapname[16];
+#endif
 
 	if (ent->is_bot)
 		return;
@@ -610,6 +613,11 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 		stringlength += j;
 	}
 
+#if 0
+	/*
+	 * 2010-12 Def'd out. Probable major contributer to net comm
+	 * server->client overflow and dropped message errors.
+	 */
 	//weapon accuracy(don't do if map voting)
 	if(!mapvote) {
 		//add a background
@@ -681,6 +689,8 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer, int mapvote)
 			}
 		}
 	}
+#endif
+
 	//map voting
 	if(mapvote) {
 		y = 64;
