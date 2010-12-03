@@ -649,7 +649,7 @@ void SCR_DrawPlayerNamesCenter( void )
 	int			closest;
 
 	if( !cl_showPlayerNames->integer )
-	return;
+		return;
 
 	mindist = 1000;
 	closest = 0;
@@ -697,7 +697,7 @@ void SCR_DrawPlayerNamesCenter( void )
 	box.y = (int)( cl.refdef.height / 1.8 );
 	box.width = 400;
 	box.height = 0;
-	FNT_BoundedPrint( font , cl.clientinfo[i].name , FNT_CMODE_QUAKE_SRS ,
+	FNT_BoundedPrint( font , cl.clientinfo[closest].name , FNT_CMODE_QUAKE_SRS ,
 		FNT_ALIGN_CENTER , &box , FNT_colors[ 2 ] );
 
 }
