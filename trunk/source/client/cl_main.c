@@ -2179,7 +2179,7 @@ void CL_Init (void)
 	// Initialise fonts
 	CL_gameFont = &_CL_gameFont;
 	FNT_AutoInit( CL_gameFont , "default" , 0 , 65 , 8 , 48 );
-	CL_gameFont->faceVar = Cvar_Get( "fnt_game" , "freesans" , CVAR_ARCHIVE );
+	CL_gameFont->faceVar = Cvar_Get( "fnt_game" , "creativeblock" , CVAR_ARCHIVE );
 	CL_gameFont->sizeVar = Cvar_Get( "fnt_game_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_gameFont );
 
@@ -2191,7 +2191,7 @@ void CL_Init (void)
 
 	CL_consoleFont = &_CL_consoleFont;
 	FNT_AutoInit( CL_consoleFont , "default" , 0 , 65 , 8 , 48 );
-	CL_consoleFont->faceVar = Cvar_Get( "fnt_console" , "freemono" , CVAR_ARCHIVE );
+	CL_consoleFont->faceVar = Cvar_Get( "fnt_console" , "creativeblock" , CVAR_ARCHIVE );
 	CL_consoleFont->sizeVar = Cvar_Get( "fnt_console_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_consoleFont );
 
