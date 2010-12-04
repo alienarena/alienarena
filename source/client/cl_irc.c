@@ -113,6 +113,13 @@ cvar_t * cl_IRC_reconnect_delay;
 					// receive messages
 #define IRC_THREAD_QUITTING	6	// The thread is being killed
 
+
+/* Function that sets the thread status when the thread dies. Since that is
+ * system-dependent, it can't be done in the thread's main code.
+ */
+static void IRC_SetThreadDead( );
+
+
 /* Status of the IRC thread */
 static int IRC_ThreadStatus = IRC_THREAD_DEAD;
 
@@ -726,9 +733,11 @@ static qboolean IRC_Parser( char next )
 			if ( next == ':' ) {
 				P_SET_STATE(TRAILING_PARAM);
 				P_NEXT_PARAM;
-			} else if ( next == ' ' || IS_CNTRL( next ) ) {
+			} else if ( next == '\r' ) {
+				P_SET_STATE(LF);
+			} else if ( IS_CNTRL( next ) ) {
 				P_AUTO_ERROR;
-			} else {
+			} else if ( next != ' ' ) {
 				if ( next & 0x80 )
 					next = '?';
 				P_SET_STATE(MID_PARAM);
@@ -1997,7 +2006,7 @@ static void IRC_Thread( )
 	Com_Printf( "...IRC: disconnected from server\n" );
 	IRC_FlushDEQueue( );
 	IRC_FreeHandlers( );
-	IRC_ThreadStatus = IRC_THREAD_DEAD;
+	IRC_SetThreadDead( );
 }
 
 
@@ -2026,6 +2035,13 @@ static void IRC_StartThread()
 {
 	if ( IRC_ThreadHandle == NULL )
 		IRC_ThreadHandle = CreateThread( NULL , 0 , IRC_SystemThreadProc , NULL , 0 , NULL );
+}
+
+
+static void IRC_SetThreadDead( )
+{
+	IRC_ThreadStatus = IRC_THREAD_DEAD;
+	IRC_ThreadHandle = NULL;
 }
 
 
@@ -2058,6 +2074,13 @@ static void IRC_StartThread(void)
 {
 	if ( IRC_ThreadHandle == (pthread_t) NULL )
 		pthread_create( &IRC_ThreadHandle , NULL , IRC_SystemThreadProc , NULL );
+}
+
+
+static void IRC_SetThreadDead( )
+{
+	IRC_ThreadStatus = IRC_THREAD_DEAD;
+	IRC_ThreadHandle = (pthread_t) NULL;
 }
 
 
