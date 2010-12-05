@@ -1,10 +1,10 @@
-'kill-runaway-crded' and 'launch-server' are shell scripts designed to emulate
-running crded as a persisant service under linux.   
+'kill-runaway-crx-ded' and 'launch-server' are shell scripts designed to emulate
+running crx-ded as a persisant service under linux.   
 
 An example crontab that would check each server is running every ten minutes
 would look like this:
 
-*/10 * * * * /home/aa/cron/kill-runaway-crded
+*/10 * * * * /home/aa/cron/kill-runaway-crx-ded
 */10 * * * * /home/aa/cron/launch-server ctf.cfg     >/dev/null 2>&1
 */10 * * * * /home/aa/cron/launch-server teamdm.cfg  >/dev/null 2>&1
 

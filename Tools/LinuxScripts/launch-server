@@ -9,6 +9,8 @@
 # E-Mail: Chris@darkstarllc.com
 # Modified by: Fafa Paku
 # Modified by: Tony Jackson
+# Updated for Alien Arena 2011
+# 2010-12-04 FIXME: could benefit from some documentation.
 #
 # Set the port number in the .cfg if running multiple servers.
 # Script checks the existance of the cfg file before launching.
@@ -17,11 +19,15 @@
 #ulimit -c unlimited
 
 ### Set your default AA Root Directory
-aadir="/home/aa/alienarena2007"
+if [ $COR_GAME ] ; then
+aadir=$COR_GAME
+else
+aadir=~/.codered
+fi
 
 ### Set your AA Binary Name or command string ($1 is the argument
 ### passed to the script)
-aabin="crded +set game arena +exec $1"
+aabin="crx-ded +set game arena +exec $1"
 
 ########## you probably don't need to change anything below here 
 ##########
@@ -59,10 +65,10 @@ echo ""
 echo "Stale $aapid file, erasing..."
 echo "Attempting to Restart Alien Arena"
 rm -f $aapid
-./$aabin &
+$aabin &
 ps aux | grep "$aabin" | grep -v grep | awk '{print $2}' > $aapid
 else
 echo "$aapid appears to be missing. Attempting to Restart Alien Arena"
-./$aabin &
+$aabin &
 ps aux | grep "$aabin" | grep -v grep | awk '{print $2}' > $aapid
 fi

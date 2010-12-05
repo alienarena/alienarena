@@ -8,7 +8,7 @@ This document includes information about the GNU-Linux/Unix
 version of Alien Arena 2011.  Custom options and other
 information specific to Alien Arena are included here.
 
-For general information, licensing, and contributers and see the
+For general information, licensing, and contributers, see the
 README.txt and license.txt documents (in the docs/ subdirectory
 in the distribution archive).
 
@@ -26,7 +26,7 @@ Briefly, important differences are:
 
   * Alien Arena 2011 uses a GNU Autotools build and install.
   * The game.so shared library no longer exists.
-  * All file writes go to the user's home directory.
+  * All file writes go to the user's HOME directory.
   * The dedicated server has been renamed to crx-ded.
   * There is an dedicated-server-only build option.
   * There is an "alternate" single directory install option.
@@ -38,10 +38,12 @@ a game.so file exists in an arena/ or data1/ directory, the
 results are "undefined".
 
 Attempts to write into read-only space when data is installed in
-a shared/ directory have been corrected.  There is now a botinfo/
-directory in the user's home directory.  The default home
-directory is .codered/.  That can be changed using an environment
-variable, COR_GAME.
+a shared/ directory have been corrected.  Data file access using
+a configurable DATADIR is now fully supported.  There is now a
+botinfo/ directory in the user's HOME directory.  The default
+directory name for Alien Arena data in the HOME directory is
+.codered/.  That can be changed using an environment variable,
+COR_GAME.
 
 The dedicated server was renamed to simplify program name
 translation using the standard configure option.  Also, the
@@ -53,14 +55,14 @@ building the client program.
 
 The standard installation now uses the GNU Autotools methods and
 defaults.  In some cases, the "traditional" single directory
-install in the user's home directory may be preferred.  See the
+install in the user's HOME directory may be preferred.  See the
 Alternate Install topic below for details.
 
 
 3. Installation
 
 If you are installing Alien Arena using your distribution's
-package manager, follow those instructions.
+package manager, follow their instructions.
 
 If you are reading this, you may have already unpacked the
 distribution archive into a directory in your HOME directory.
@@ -74,8 +76,15 @@ To build and install (takes some minutes):
 To run:
   $ crx
 
-By default, this will install the game programs and data like
-this:
+Command line options to crx are NOT standard.  There is NO
+"--help".  They follow a format inherited from Alien Arena's
+Quake 2 roots.  Command line options are the same as console
+commands using a '+' character prefix.  The details are beyond
+the scope of this document; but a simple example is: 'crx +set
+maxclients 10'.
+
+By default, 'sudo make install' will install the game programs
+and data like this:
 
   /usr/local/
     bin/
@@ -94,7 +103,7 @@ this:
 When the program is run, a directory is created in the user HOME
 directory.  Various kinds of data (config files, downloaded data,
 custom bot setups) are written there.  The default directory name
-is .codered.  That can be changed using an environment variable,
+is .codered/.  That can be changed using an environment variable,
 COR_GAME.
 
 For example:

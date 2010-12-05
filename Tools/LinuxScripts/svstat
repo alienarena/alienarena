@@ -5,7 +5,7 @@
 
 # used when called with the -p option (display pids) - requires admin perms
 
-	$lsof_string = 'lsof -i udp -l | grep crded | grep 279..'
+	$lsof_string = 'lsof -i udp -l | grep crx-ded | grep 279..'
 
 # used when called without the -p option (no pids) - can be run by any user
 
@@ -97,7 +97,7 @@ class ServerLink
 		if @protocol == 'master'
 			query = "query"
 		elsif @protocol == 'game'
-			query = "ÿÿÿÿstatus\n"
+			query = "ï¿½ï¿½ï¿½ï¿½status\n"
 		else
 			return []
 		end
@@ -199,7 +199,7 @@ class ServerLink
 		####################################
 		#	Buffer is 0xFFFF long in game (65536)
 		#	Data is this format:
-		#	Ignore first 12 bytes 'ÿÿÿÿservers '
+		#	Ignore first 12 bytes 'ï¿½ï¿½ï¿½ï¿½servers '
 		#	Four byte address
 		#	Two byte port
 		#	Four byte address
@@ -229,8 +229,8 @@ class ServerLink
 		end
 		
 		#example server strings
-		#buffer = "ÿÿÿÿprint\n\\mapname\\ctf-killbox\\needpass\\0\\gamedate\\Jan 31 2007\\gamename\\data1\\maxspectators\\4\\Admin\\Forsaken\\website\\http://www.alienarena.info\\sv_joustmode\\0\\maxclients\\16\\protocol\\34\\cheats\\0\\timelimit\\0\\fraglimit\\10\\dmflags\\2641944\\deathmatch\\1\\version\\6.03 x86 Jan  7 2007 Win32 RELEASE\\hostname\\Alienarena.info - CTF\\gamedir\\arena\\game\\arena\n"
-		#buffer = "ÿÿÿÿprint\n\\mapname\\DM-OMEGA\\needpass\\0\\maxspectators\\4\\gamedate\\Jan  9 2007\\gamename\\data1\\sv_joustmode\\0\\maxclients\\8\\protocol\\34\\cheats\\0\\timelimit\\0\\fraglimit\\10\\dmflags\\16\\version\\6.03 x86 Jan  7 2007 Win32 RELEASE\\hostname\\pufdogs hell\\gamedir\\arena\\game\\arena\n3 17 \"test chap\" \"loopback\"\n0 0 \"Cyborg\" \"127.0.0.1\"\n3 0 \"Squirtney\" \"127.0.0.1\"\n0 0 \"Butthead\" \"127.0.0.1\"\n"
+		#buffer = "ï¿½ï¿½ï¿½ï¿½print\n\\mapname\\ctf-killbox\\needpass\\0\\gamedate\\Jan 31 2007\\gamename\\data1\\maxspectators\\4\\Admin\\Forsaken\\website\\http://www.alienarena.info\\sv_joustmode\\0\\maxclients\\16\\protocol\\34\\cheats\\0\\timelimit\\0\\fraglimit\\10\\dmflags\\2641944\\deathmatch\\1\\version\\6.03 x86 Jan  7 2007 Win32 RELEASE\\hostname\\Alienarena.info - CTF\\gamedir\\arena\\game\\arena\n"
+		#buffer = "ï¿½ï¿½ï¿½ï¿½print\n\\mapname\\DM-OMEGA\\needpass\\0\\maxspectators\\4\\gamedate\\Jan  9 2007\\gamename\\data1\\sv_joustmode\\0\\maxclients\\8\\protocol\\34\\cheats\\0\\timelimit\\0\\fraglimit\\10\\dmflags\\16\\version\\6.03 x86 Jan  7 2007 Win32 RELEASE\\hostname\\pufdogs hell\\gamedir\\arena\\game\\arena\n3 17 \"test chap\" \"loopback\"\n0 0 \"Cyborg\" \"127.0.0.1\"\n3 0 \"Squirtney\" \"127.0.0.1\"\n0 0 \"Butthead\" \"127.0.0.1\"\n"
 		buffer = @buffers[server]
 		buffer = buffer.split("\n")
 		serverinfo = buffer[1].split('\\')[1..-1]
@@ -253,8 +253,8 @@ class ServerLink
 		end
 		
 		#example server strings
-		#buffer = "ÿÿÿÿprint\n\\mapname\\ctf-killbox\\needpass\\0\\gamedate\\Jan 31 2007\\gamename\\data1\\maxspectators\\4\\Admin\\Forsaken\\website\\http://www.alienarena.info\\sv_joustmode\\0\\maxclients\\16\\protocol\\34\\cheats\\0\\timelimit\\0\\fraglimit\\10\\dmflags\\2641944\\deathmatch\\1\\version\\6.03 x86 Jan  7 2007 Win32 RELEASE\\hostname\\Alienarena.info - CTF\\gamedir\\arena\\game\\arena\n"
-		#buffer = "ÿÿÿÿprint\n\\mapname\\DM-OMEGA\\needpass\\0\\maxspectators\\4\\gamedate\\Jan  9 2007\\gamename\\data1\\sv_joustmode\\0\\maxclients\\8\\protocol\\34\\cheats\\0\\timelimit\\0\\fraglimit\\10\\dmflags\\16\\version\\6.03 x86 Jan  7 2007 Win32 RELEASE\\hostname\\pufdogs hell\\gamedir\\arena\\game\\arena\n3 17 \"test chap\" \"loopback\"\n0 0 \"Cyborg\" \"127.0.0.1\"\n3 0 \"Squirtney\" \"127.0.0.1\"\n0 0 \"Butthead\" \"127.0.0.1\"\n"
+		#buffer = "ï¿½ï¿½ï¿½ï¿½print\n\\mapname\\ctf-killbox\\needpass\\0\\gamedate\\Jan 31 2007\\gamename\\data1\\maxspectators\\4\\Admin\\Forsaken\\website\\http://www.alienarena.info\\sv_joustmode\\0\\maxclients\\16\\protocol\\34\\cheats\\0\\timelimit\\0\\fraglimit\\10\\dmflags\\2641944\\deathmatch\\1\\version\\6.03 x86 Jan  7 2007 Win32 RELEASE\\hostname\\Alienarena.info - CTF\\gamedir\\arena\\game\\arena\n"
+		#buffer = "ï¿½ï¿½ï¿½ï¿½print\n\\mapname\\DM-OMEGA\\needpass\\0\\maxspectators\\4\\gamedate\\Jan  9 2007\\gamename\\data1\\sv_joustmode\\0\\maxclients\\8\\protocol\\34\\cheats\\0\\timelimit\\0\\fraglimit\\10\\dmflags\\16\\version\\6.03 x86 Jan  7 2007 Win32 RELEASE\\hostname\\pufdogs hell\\gamedir\\arena\\game\\arena\n3 17 \"test chap\" \"loopback\"\n0 0 \"Cyborg\" \"127.0.0.1\"\n3 0 \"Squirtney\" \"127.0.0.1\"\n0 0 \"Butthead\" \"127.0.0.1\"\n"
 		buffer = @buffers[server]
 		buffer = buffer.split("\n")
 		playerbuff = buffer[2..-1]
