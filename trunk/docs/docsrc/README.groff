@@ -1,5 +1,5 @@
 .\" GNU/Linux/Unix README for Alien Arena 2011
-.\" 2010-11-30. Revised: 2010-12-03
+.\" 2010-11-30. Revised: 2010-12-04
 .\" Author: Jim Bower
 .\" using groff for paragraph formatting.
 .\" $ groff -T ascii README.groff >README
@@ -22,6 +22,11 @@ For general information, licensing, and contributers, see the README.txt and lic
 
 For generic information about installation, see the GNU INSTALL document.
 
+The Alien Arena HomePage URL is:
+.in +2m 
+http://red.planetarena.org/
+.in
+There are links there to the Alien Arena Forum and other helpful Internet resources.
 
 \n+[topic]. Changes from Previous Versions
 
@@ -69,7 +74,14 @@ If you are installing Alien Arena using your distribution's package manager, fol
 If you are reading this, you may have already unpacked the distribution archive into a directory in your HOME directory.
 (otherwise, hint: $ tar -xzf alienarena-<version>.tar.gz ).
 
-To build and install (takes some minutes):
+Alien Arena uses OpenGL for 3D graphics rendering.
+Alien Arena can be played on many computers. 
+However, not all computers have 3D acceleration hardware and drivers with adequate performance for 3D game play.
+
+If the installation fails, check the error message for required software packages that may be missing.
+Alien Arena uses: X11, OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, ODE (Open Dynamics Engine), and JPEG.
+
+To build and install (takes several minutes): 
 .nf
 .in +2m
 $ ./configure
@@ -88,7 +100,12 @@ There is NO "--help".
 They follow a format inherited from Alien Arena's Quake 2 roots.
 Command line options are the same as console commands using a '+' character prefix.
 The details are beyond the scope of this document;
-but a simple example is: 'crx +set maxclients 10'.
+but a simple example is:
+.nf
+.in +2m
+$ crx +set game arena +set maxclients 10
+.in
+.fi
 
 By default, 'sudo make install' will install the game programs and data like this:
 
