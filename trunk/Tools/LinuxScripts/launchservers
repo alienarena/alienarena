@@ -5,9 +5,13 @@
 #####################################
 
 name='Alien Arena'
-execpath=~/alienarena2008
-execname=crded
-cfgpath=~/alienarena2008/arena
+execpath=/usr/local/bin
+execname=crx-ded
+if [ ${COR_GAME} ]; then
+cfgpath=${COR_GAME}/arena
+else
+cfgpath=~/.codered/arena
+fi
 
 # use to generate core dumps after crashs
 ulimit -c unlimited
@@ -18,6 +22,9 @@ ulimit -c unlimited
 #####################################
 
 # Written by Tony Jackson 14/07/2008
+# Updated for Alien Arena 2011
+# 2010-12-04 FIXME: needs documentation about screen program and 
+#  config file names. 
 
 cd $execpath
 # remove spaces in name
