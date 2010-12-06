@@ -2190,9 +2190,9 @@ void CL_Init (void)
 	FNT_AutoRegister( CL_centerFont );
 
 	CL_consoleFont = &_CL_consoleFont;
-	FNT_AutoInit( CL_consoleFont , "default" , 0 , 65 , 8 , 48 );
-	CL_consoleFont->faceVar = Cvar_Get( "fnt_console" , "freesans" , CVAR_ARCHIVE );
-	CL_consoleFont->sizeVar = Cvar_Get( "fnt_console_size" , "14" , CVAR_ARCHIVE );
+	FNT_AutoInit( CL_consoleFont , "default" , 0 , 52 , 8 , 48 );
+	CL_consoleFont->faceVar = Cvar_Get( "fnt_console" , "freemono" , CVAR_ARCHIVE );
+	CL_consoleFont->sizeVar = Cvar_Get( "fnt_console_size" , "0" , CVAR_ARCHIVE );
 	FNT_AutoRegister( CL_consoleFont );
 
 	// all archived variables will now be loaded
