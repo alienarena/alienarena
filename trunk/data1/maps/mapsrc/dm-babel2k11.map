@@ -4,7 +4,7 @@
 "message" "The Tower of Babel"
 "_sun" "moonspot"
 "_sun_ambient" "0"
-"_sun_light" "25"
+"_sun_light" "65"
 "_sun_color" "0.6 0.3 0.3"
 // brush 0
 {
