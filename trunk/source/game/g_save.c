@@ -234,7 +234,7 @@ void InitGame (void)
 	g_randomquad = gi.cvar("g_randomquad", "0", CVAR_LATCH);
 
 	//warmup time
-	warmuptime = gi.cvar("warmuptime", "15", CVAR_LATCH);
+	warmuptime = gi.cvar("warmuptime", "30", CVAR_LATCH);
 
 	//spawn protection
 	g_spawnprotect = gi.cvar("g_spawnprotect", "2", CVAR_SERVERINFO);
