@@ -31,9 +31,9 @@ dist_doc_DATA = \
 	COPYING \
 	INSTALL
 
-# FUSE game server browser and Server managment scripts
+# FUSE game server browser and Server management scripts
 EXTRA_DIST = \
-	Tools/FUSE \
+	Tools/fuse.tar.gz \
 	Tools/LinuxScripts
 
 # remove svn directories from distribution staging area after creating

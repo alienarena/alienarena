@@ -174,8 +174,8 @@ you are doing.
 
 5. Tools
 
-Tools/FUSE contains a game server browser.  See documents in that
-subdirectory for details.
+Tools/fuse.tar.gz contains a game server browser.  See documents
+in that package for details.
 
 Tools/LinuxScripts contains tools for server management.  See the
 README there for details.
