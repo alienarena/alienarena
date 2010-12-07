@@ -895,7 +895,8 @@ static void _TTF_DrawFromInfo(
 		unsigned int				indent )
 {
 	const float *		curColor = NULL;
-	int			x , cx;
+	int			x = 0;
+	int			cx;
 
 	// Do not draw stuff outside of the screen
 	if ( y + font->height < 0 || y >= viddef.height ) {

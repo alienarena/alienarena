@@ -438,7 +438,9 @@ static void _BMF_BoundedPrint(
 		const char *	lineStart	= ptr;
 		unsigned int	lineWidth	= 0;
 		const float *	curColor	= color;
-		unsigned int	nDisplay , nSkip , sx;
+		unsigned int	nSkip		= 0;
+		unsigned int	sx		= 0;
+		unsigned int	nDisplay;
 
 		while ( *ptr && *ptr != '\n' ) {
 			// Skip color codes
