@@ -29,6 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static vec3_t	modelorg;		// relative to viewpoint
 
+vec3_t	r_worldLightVec;
+
 msurface_t	*r_alpha_surfaces;
 msurface_t	*r_special_surfaces;
 msurface_t *r_normalsurfaces;
@@ -804,15 +806,16 @@ dynamic:
 			scroll = -64.0;
 	}
 
-	if(gl_glsl_shaders->value && gl_state.glsl_shaders) {
+	if(gl_glsl_shaders->value && gl_state.glsl_shaders) 
+	{
 		dlight_t	*dl = NULL;
 		int			lnum, sv_lnum = 0;
 		float		add, brightest = 0;
 		vec3_t		lightVec;
 		float		lightCutoffSquared = 0.0f;
 
-		if(is_dynamic) {
-
+		if(is_dynamic) 
+		{
 			dl = r_newrefdef.dlights;
 			for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
 			{
@@ -824,7 +827,9 @@ dynamic:
 					sv_lnum = lnum; //remember the position of most influencial light
 				}
 			}
-			if(brightest > 0) { //we have a light
+			if(brightest > 0) 
+			{ 
+				//we have a light
 				dl = r_newrefdef.dlights;
 				dl += sv_lnum; //our most influential light
 
@@ -840,8 +845,8 @@ dynamic:
 
 		//parallax maps
 		if(gl_parallaxmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)
-			&& strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
-
+			&& strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) 
+		{
 			R_InitVArrays (VERT_MULTI_TEXTURED);
 
 			glUseProgramObjectARB( g_programObj );
@@ -864,10 +869,10 @@ dynamic:
 
 			glUniform1iARB( g_location_shadowmap, 0); //static light shadow handled by stencil volumes
 
-			if(is_dynamic) {
-
-				if(brightest > 0) {
-
+			if(is_dynamic) 
+			{
+				if(brightest > 0) 
+				{
 					glUniform3fARB( g_location_lightPosition, dl->origin[0], dl->origin[1], dl->origin[2]);
 					glUniform3fARB( g_location_lightColour, dl->color[0], dl->color[1], dl->color[2]);
 
@@ -875,8 +880,8 @@ dynamic:
 
 					glUniform1iARB( g_location_dynamic, 1);
 
-					if(gl_shadowmaps->value) {
-
+					if(gl_shadowmaps->value) 
+					{
 						//dynamic shadow
 						glUniform1iARB( g_location_bspShadowmapTexture, 7);
 						qglActiveTextureARB(GL_TEXTURE7);
@@ -887,23 +892,28 @@ dynamic:
 					else
 						glUniform1iARB( g_location_shadowmap, 0);
 				}
-				else {
+				else
 					glUniform1iARB( g_location_dynamic, 0);
-				}
 			}
 			else
 				glUniform1iARB( g_location_dynamic, 0);
 
 			glUniform1iARB( g_location_parallax, 1);
 
-			R_AddGLSLShadedSurfToVArray (surf, scroll);
+			glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
+			glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
+			glUniform1iARB( g_location_fog, map_fog);	
+
+			glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
+
+			R_AddLightMappedSurfToVArray (surf, scroll);
 
 			glUseProgramObjectARB( 0 );
 
 		}
 		//normal mapped surface for dynamic lights
-		else if(is_dynamic && brightest > 0 && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) {
-
+		else if(is_dynamic && brightest > 0 && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) 
+		{
 			R_InitVArrays (VERT_MULTI_TEXTURED);
 
 			glUseProgramObjectARB( g_programObj );
@@ -924,8 +934,8 @@ dynamic:
 			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
 			KillFlags |= KILL_TMU3_POINTER;
 
-			if(gl_shadowmaps->value) {
-
+			if(gl_shadowmaps->value) 
+			{
 				//dynamic shadow
 				glUniform1iARB( g_location_bspShadowmapTexture, 7);
 				qglActiveTextureARB(GL_TEXTURE7);
@@ -942,14 +952,20 @@ dynamic:
 			glUniform1iARB( g_location_dynamic, 1);
 			glUniform1iARB( g_location_parallax, 0);
 
-			R_AddGLSLShadedSurfToVArray (surf, scroll);
+			glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
+			glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
+			glUniform1iARB( g_location_fog, map_fog);	
+
+			glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
+
+			R_AddLightMappedSurfToVArray (surf, scroll);
 
 			glUseProgramObjectARB( 0 );
 
 		}
 		//surface has no normalmap
-		else {
-
+		else 
+		{
 			GL_MBind( GL_TEXTURE0, image->texnum );
 			GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );
 
@@ -958,8 +974,9 @@ dynamic:
 			R_AddLightMappedSurfToVArray (surf, scroll);
 		}
 	}
-	else {	//no glsl, standard render
-
+	//no glsl, standard render
+	else 
+	{
 		GL_MBind( GL_TEXTURE0, image->texnum );
 		GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );
 
@@ -1094,7 +1111,7 @@ void R_DrawInlineBModel ( void )
 	cplane_t	*pplane;
 	float		dot;
 	msurface_t	*psurf;
-
+	
 	R_PushDlightsForBModel ( currententity );
 
 	if ( currententity->flags & RF_TRANSLUCENT )
@@ -1438,6 +1455,10 @@ R_DrawWorld
 void R_DrawWorld (void)
 {
 	entity_t	ent;
+	int		i, j;
+	vec3_t	lightAdd, temp;
+	float	dist, weight;
+	int		numlights;
 
 	if (!r_drawworld->value)
 		return;
@@ -1460,6 +1481,30 @@ void R_DrawWorld (void)
 	memset (gl_lms.lightmap_surfaces, 0, sizeof(gl_lms.lightmap_surfaces));
 
 	r_normalsurfaces = NULL;
+
+	//note - this is the fallback for non deluxmapped bsp's
+	if(gl_glsl_shaders->value && gl_state.glsl_shaders)
+	{
+		//get light position relative to player's position
+		numlights = 0;
+		VectorClear(lightAdd);
+		for (i = 0; i < r_lightgroups; i++) {
+			VectorSubtract(r_origin, LightGroups[i].group_origin, temp);
+			dist = VectorLength(temp);
+			if(dist == 0)
+				dist = 1;
+			dist = dist*dist;
+			weight = (int)250000/(dist/(LightGroups[i].avg_intensity+1.0f));
+			for(j = 0; j < 3; j++)
+				lightAdd[j] += LightGroups[i].group_origin[j]*weight;
+			numlights+=weight;
+		}
+
+		if(numlights > 0.0) {
+			for(i = 0; i < 3; i++)
+				r_worldLightVec[i] = (lightAdd[i]/numlights + r_origin[i])/2.0;
+		}
+	}
 
 	R_ClearSkyBox ();
 

@@ -540,7 +540,6 @@ void R_InitQuadVarrays(void);
 void R_AddSurfToVArray (msurface_t *surf);
 void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
-void R_AddGLSLShadedSurfToVArray (msurface_t *surf, float scroll);
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
 void R_KillNormalTMUs(void);
 
@@ -553,6 +552,7 @@ extern  image_t		*r_shadowbuffer;
 extern	image_t		*r_shadowbufferBlur;
 extern GLuint   fboId[2];
 extern GLuint	rboId;
+extern vec3_t	r_worldLightVec;
 typedef struct	LightGroup {
 	vec3_t	group_origin;
 	vec3_t	accum_origin;
