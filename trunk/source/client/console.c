@@ -634,7 +634,7 @@ static void _CON_DrawScroller(
 
 	Draw_Fill( hStart - 1 , vStart - 1 , font_size + 2 , tHeight + 2 , 15 );
 
-	if ( display_height > text_height ) {
+	if ( display_height >= text_height ) {
 		// Fill whole bar
 		Draw_Fill( hStart , vStart , font_size , tHeight , 208 );
 		return;
