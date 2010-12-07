@@ -222,7 +222,7 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 	float		s, t, os, ot;
 	float		scroll;
 	float		rdt = r_newrefdef.time;
-	vec3_t		nv;
+	vec3_t		nv, tangent;
 	qboolean	fod;
 
 	if (fa->texinfo->flags & SURF_FLOWING)
@@ -271,6 +271,14 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 		}
 		else
 			glUniform1iARB( g_location_reflect, 0);
+			
+		AngleVectors(fa->plane->normal, NULL, tangent, NULL);
+
+		//send these to the shader program	
+		glUniform3fARB( g_location_tangent, tangent[0], tangent[1], tangent[2]);
+		glUniform3fARB( g_location_lightPos, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
+		glUniform1iARB( g_location_fogamount, map_fog);
+		glUniform1fARB( g_location_time, rs_realtime);
 
 		R_AddGLSLShadedWarpSurfToVArray (fa, scroll);
 
