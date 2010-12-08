@@ -39,7 +39,8 @@ Briefly, important differences are:
 
 Warning: The game.so library is no longer a separate module.  If
 a game.so file exists in an arena/ or data1/ directory, the
-results are "undefined".
+results are "undefined".  Configurable LIBDIR is no longer needed
+and is eliminated.
 
 Attempts to write into read-only space when data is installed in
 a shared/ directory have been corrected.  Data file access using
@@ -65,27 +66,36 @@ Alternate Install topic below for details.
 
 3. Installation
 
-If you are installing Alien Arena using your distribution's
-package manager, follow their instructions.
-
-If you are reading this, you may have already unpacked the
-distribution archive into a directory in your HOME directory.
-(otherwise, hint: $ tar -xzf alienarena-<version>.tar.gz ).
-
 Alien Arena uses OpenGL for 3D graphics rendering.  Alien Arena
 can be played on many computers.  However, not all computers have
 3D acceleration hardware and drivers with adequate performance
 for 3D game play.
 
+If you are installing Alien Arena using your distribution's
+package manager, follow their instructions.
+
+If you are reading this, you may have already unpacked the
+distribution archive (aka, "tarball") into your HOME directory.
+Otherwise, the terminal command line for unpacking the archive
+is:
+  $ tar -xzf alienarena-<some version numbers>.tar.gz
+Or, using the graphical file browser, right click on the file
+name, and left click on "Extract Here."
+
 If the installation fails, check the error message for required
 software packages that may be missing.  Alien Arena uses: X11,
 OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, ODE (Open
-Dynamics Engine), and JPEG.
+Dynamics Engine), and JPEG.  For Ubuntu and similar systems, see
+the topic, "Getting Required Packages with Synaptic", below.
 
-To build and install (takes several minutes):
+Using the terminal, change to the alienarena-7.50 directory and
+enter these commands:
   $ ./configure
   $ make
   $ sudo make install
+
+For advanced configure options, see the topic, "Custom Configure
+Options", below.
 
 To run:
   $ crx
@@ -143,7 +153,50 @@ The uninstall procedure may not remove all files and directories.
 Some manual removal may be required.
 
 
-4. Custom Configure Options
+4. Getting Required Packages with Synaptic
+
+Tools and packages required to build Alien Arena may not be
+installed.  For Ubuntu and similar systems, installing them is
+easy with the graphical Synaptic Package Manager.  Select the
+following packages.  Other packages that these depend on will be
+automatically selected for installation.  This list is based on
+Ubuntu 10.10.
+
+  build-essential
+  libx11-dev
+  libgl1-mesa-dev
+  libxxf86vm-dev
+  libxxf86dga-dev
+  libopenal-dev
+  libjpeg8-dev (or libjpeg62-dev)
+  libvorbis-dev
+  libcurl4-gnutls-dev
+  libode-dev
+  libfreetype6-dev
+
+
+5. Troubleshooting Tips
+
+When the game exits, it stores settings in config.cfg.  This file
+is /home/<user>/.codered/arena/.  Sometimes it helps to delete
+config.cfg, and then re-enter menu settings.  For persistent
+storage of custom settings, create a file named autoexec.cfg in
+the same directory as config.cfg.  Settings in autoexec.cfg will
+override settings in config.cfg.
+
+There are known sound problems related to PulseAudio and OpenAL
+on some systems.  Check
+/usr/share/doc/libopenal1/examples/alsoftrc.sample.gz
+for information on OpenAL configuration.  See the Alien Arena
+forum and other support forums for solutions.
+
+The mouse may behave badly (always pointing up, for instance).
+This can usually be fixed by setting the console variable (cvar),
+in_dgamouse, to zero.  Put this line into the autoexec.cfg file:
+  set in_dgamouse "0"
+
+
+6. Custom Configure Options
 
 Run '$ ./configure --help' for a list of options.  Note that many
 of the options are built-in and some are not meaningful or useful
@@ -172,7 +225,7 @@ developer use.  If you use them, it is assumed that you know what
 you are doing.
 
 
-5. Tools
+7. Tools
 
 Tools/fuse.tar.gz contains a game server browser.  See documents
 in that package for details.
@@ -181,7 +234,7 @@ Tools/LinuxScripts contains tools for server management.  See the
 README there for details.
 
 
-6. Alternate Install
+8. Alternate Install
 
 This configures the installation to use the "traditional", single
 directory, in-place install.  It does not define DATADIR, and the

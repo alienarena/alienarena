@@ -687,7 +687,7 @@ void SCR_DrawPlayerNamesCenter( void )
 		if (DotProduct (temp, axis[0]) < 0)
 			continue;
 	}
-	
+
 	if (!closest) {
 		return;
 	}
@@ -791,6 +791,8 @@ void SCR_DrawBases (void)
 			str = "^4Blue Flag";
 		else if(ent->team == 1)
 			str = "^1Red Flag";
+		else
+			str = "Flag";
 		FNT_BoundedPrint( font , str , FNT_CMODE_QUAKE_SRS , FNT_ALIGN_LEFT , &box , FNT_colors[ 2 ] );
 	}
 }
