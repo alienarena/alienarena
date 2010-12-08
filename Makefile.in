@@ -2371,7 +2371,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/metalwall20_hm.tga \
 	data1/textures/arena10/metalwall20_nm.tga \
 	data1/textures/arena10/metalwall20.tga \
-	data1/textures/arena10/moltenrock_hm.tga \
 	data1/textures/arena10/moltenrock_nm.tga \
 	data1/textures/arena10/moltenrock.tga \
 	data1/textures/arena10/neonsign10r.tga \
@@ -2734,7 +2733,10 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena8/barnwood2.tga \
 	data1/textures/arena8/barnwood_nm.tga \
 	data1/textures/arena8/barnwood.tga \
+	data1/textures/arena8/blackbrick1_nm.tga \
 	data1/textures/arena8/blackbrick1.tga \
+	data1/textures/arena8/blackbrick2_hm.tga \
+	data1/textures/arena8/blackbrick2_nm.tga \
 	data1/textures/arena8/blackbrick2.tga \
 	data1/textures/arena8/blackbrick3.tga \
 	data1/textures/arena8/brickwall1_hm.tga \
