@@ -305,6 +305,13 @@ AM_COND_IF([BUILD_CLIENT],
 	AS_IF([ test "x${openalc_h_found}" = xno ],
 		[AC_MSG_ERROR("Required OpenAL header file not found.")])
 
+	AC_CHECK_HEADERS([GL/gl.h],,
+	      [AC_MSG_ERROR("Required OpenGL header files not found.")])
+	AM_COND_IF([BUILD_UNIX],
+		[AC_CHECK_HEADERS([GL/glx.h],,
+			[AC_MSG_ERROR("Required OpenGL header files not found.")
+		])
+	])
 ])
 dnl 
 dnl end of client-only header requirements
