@@ -1694,7 +1694,6 @@ void SCR_showFPS(void)
 	static char		fps_text[32];
 
 	FNT_font_t		font;
-	struct FNT_window_s	box;
 	int			end_msec;
 	float			time_sec;
 	float			framerate;
@@ -1736,12 +1735,10 @@ void SCR_showFPS(void)
 		update_trigger = framerate / 2.0 ; // for .5 sec update interval
 	}
 
-	font = FNT_AutoGet( CL_consoleFont );
-	box.x = viddef.width - 8 * font->size;
-	box.y = viddef.height - 3 * font->size;
-	box.width = 7 * font->size;
-	box.height = 0;
-	FNT_BoundedPrint( font , fps_text , FNT_CMODE_NONE , FNT_ALIGN_RIGHT , &box , FNT_colors[ 7 ] );
+	font = FNT_AutoGet( CL_gameFont );
+	
+	FNT_RawPrint( font , fps_text , strlen( fps_text ) , false ,
+		viddef.width - 8 * font->size , viddef.height - 2.0 * font->size , FNT_colors[ 2 ] );
 }
 
 /*
