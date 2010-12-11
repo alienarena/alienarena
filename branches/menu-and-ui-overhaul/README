@@ -1,0 +1,265 @@
+
+                         Alien Arena 2011
+                           Version 7.50
+
+1. Scope
+
+This document includes information about the GNU-Linux/Unix
+version of Alien Arena 2011.  Custom options and other
+information specific to Alien Arena are included here.
+
+For general information, licensing, and contributers, see the
+README.txt and license.txt documents (in the docs/ subdirectory
+in the distribution archive).
+
+For generic information about installation, see the GNU INSTALL
+document.
+
+The Alien Arena HomePage URL is:
+  http://red.planetarena.org/
+There are links there to the Alien Arena Forum and other helpful
+Internet resources.
+
+2. Changes from Previous Versions
+
+This information is for packagers and those who have a previous
+installation of Alien Arena.  (If this does not apply to you, it
+is safe to skip to the next topic: Installation.)
+
+Briefly, important differences are:
+
+  * Alien Arena 2011 uses a GNU Autotools build and install.
+  * The game.so shared library no longer exists.
+  * All file writes go to the user's HOME directory.
+  * The dedicated server has been renamed to crx-ded.
+  * There is an dedicated-server-only build option.
+  * There is an "alternate" single directory install option.
+  * Additional dependency: Open Dynamics Engine (libode).
+  * Additional dependency: FreeType 2 (libfreetype).
+
+Warning: The game.so library is no longer a separate module.  If
+a game.so file exists in an arena/ or data1/ directory, the
+results are "undefined".  Configurable LIBDIR is no longer needed
+and is eliminated.
+
+Attempts to write into read-only space when data is installed in
+a shared/ directory have been corrected.  Data file access using
+a configurable DATADIR is now fully supported.  There is now a
+botinfo/ directory in the user's HOME directory.  The default
+directory name for Alien Arena data in the HOME directory is
+.codered/.  That can be changed using an environment variable,
+COR_GAME.
+
+The dedicated server was renamed to simplify program name
+translation using the standard configure option.  Also, the
+dedicated server is intended to be an integral part of the
+package.  We would prefer it not be distributed separately and
+there is no particular reason to do so.  There is a configure
+option, provided mostly for Game Server Providers, to disable
+building the client program.
+
+The standard installation now uses the GNU Autotools methods and
+defaults.  In some cases, the "traditional" single directory
+install in the user's HOME directory may be preferred.  See the
+Alternate Install topic below for details.
+
+
+3. Installation
+
+Alien Arena uses OpenGL for 3D graphics rendering.  Alien Arena
+can be played on many computers.  However, not all computers have
+3D acceleration hardware and drivers with adequate performance
+for 3D game play.
+
+If you are installing Alien Arena using your distribution's
+package manager, follow their instructions.
+
+If you are reading this, you may have already unpacked the
+distribution archive (aka, "tarball") into your HOME directory.
+Otherwise, the terminal command line for unpacking the archive
+is:
+  $ tar -xzf alienarena-<some version numbers>.tar.gz
+Or, using the graphical file browser, right click on the file
+name, and left click on "Extract Here."
+
+If the installation fails, check the error message for required
+software packages that may be missing.  Alien Arena uses: X11,
+OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, ODE (Open
+Dynamics Engine), and JPEG.  For Ubuntu and similar systems, see
+the topic, "Getting Required Packages with Synaptic", below.
+
+Using the terminal, change to the alienarena-7.50 directory and
+enter these commands:
+  $ ./configure
+  $ make
+  $ sudo make install
+
+For advanced configure options, see the topic, "Custom Configure
+Options", below.
+
+To run:
+  $ crx
+
+Command line options to crx are NOT standard.  There is NO
+"--help".  They follow a format inherited from Alien Arena's
+Quake 2 roots.  Command line options are the same as console
+commands using a '+' character prefix.  The details are beyond
+the scope of this document; but a simple example is:
+  $ crx +set game arena +set maxclients 10
+
+By default, 'sudo make install' will install the game programs
+and data like this:
+
+  /usr/local/
+    bin/
+      crx
+      crx-ded  (dedicated server)
+    share/
+      alienarena/
+        aa.png  (icon)
+        arena/
+        botinfo/
+        data1/
+      doc/
+        alienarena/
+          <various documents>
+
+When the program is run, a directory is created in the user HOME
+directory.  Various kinds of data (config files, downloaded data,
+custom bot setups) are written there.  The default directory name
+is .codered/.  That can be changed using an environment variable,
+COR_GAME.
+
+For example:
+  $ export COR_GAME=/home/user/.alienarena
+
+Current settings are stored in .codered/arena/config.cfg.  For
+custom settings, create a file, .codered/arena/autoexec.cfg.
+Details about settings are beyond the scope of this document.  Go
+to the websites, the forum and the IRC channel for more
+information.
+
+Following installation, intermediate files generated by the build
+may be removed using:
+
+  $ make clean
+
+To uninstall the program and data that 'sudo make install'
+installed, run:
+
+  $ sudo make uninstall
+
+The uninstall procedure may not remove all files and directories.
+Some manual removal may be required.
+
+
+4. Getting Required Packages with Synaptic
+
+Tools and packages required to build Alien Arena may not be
+installed.  For Ubuntu and similar systems, installing them is
+easy with the graphical Synaptic Package Manager.  Select the
+following packages.  Other packages that these depend on will be
+automatically selected for installation.  This list is based on
+Ubuntu 10.10.
+
+  build-essential
+  libx11-dev
+  libgl1-mesa-dev
+  libxxf86vm-dev
+  libxxf86dga-dev
+  libopenal-dev
+  libjpeg8-dev (or libjpeg62-dev)
+  libvorbis-dev
+  libcurl4-gnutls-dev
+  libode-dev
+  libfreetype6-dev
+
+
+5. Troubleshooting Tips
+
+When the game exits, it stores settings in config.cfg.  This file
+is /home/<user>/.codered/arena/.  Sometimes it helps to delete
+config.cfg, and then re-enter menu settings.  For persistent
+storage of custom settings, create a file named autoexec.cfg in
+the same directory as config.cfg.  Settings in autoexec.cfg will
+override settings in config.cfg.
+
+There are known sound problems related to PulseAudio and OpenAL
+on some systems.  Check
+/usr/share/doc/libopenal1/examples/alsoftrc.sample.gz
+for information on OpenAL configuration.  See the Alien Arena
+forum and other support forums for solutions.
+
+The mouse may behave badly (always pointing up, for instance).
+This can usually be fixed by setting the console variable (cvar),
+in_dgamouse, to zero.  Put this line into the autoexec.cfg file:
+  set in_dgamouse "0"
+
+
+6. Custom Configure Options
+
+Run '$ ./configure --help' for a list of options.  Note that many
+of the options are built-in and some are not meaningful or useful
+for Alien Arena.  Options are entered on the command line in the
+usual way; the help output has the details.  Refer to the GNU
+INSTALL document for general details.
+
+To build the dedicated server only, use the following configure
+option:
+  --disable-client
+
+By default, configure produces a status message giving
+information on the configuration.  To hide that message, use:
+  --disable-build-status
+
+To rename the programs, use the standard configure option. For
+example:
+  --program-transform-name='s/crx/alienarena/'
+
+To install to a different location, use the standard configure
+option. For example:
+  --prefix=/usr/local/games
+
+Other Alien Arena custom options are intended mostly for
+developer use.  If you use them, it is assumed that you know what
+you are doing.
+
+
+7. Tools
+
+Tools/fuse.tar.gz contains a game server browser.  See documents
+in that package for details.
+
+Tools/LinuxScripts contains tools for server management.  See the
+README there for details.
+
+
+8. Alternate Install
+
+This configures the installation to use the "traditional", single
+directory, in-place install.  It does not define DATADIR, and the
+executables need to be in the top game directory.  Normally, this
+install would be done somewhere in your HOME directory.  Root
+privileges would not be required to write the game data.
+Currently, the configure option for renaming of the executables
+is not supported.
+
+If you are a map-builder, you should use this option.  Some
+mapping tools may not work with the "standard" install.
+
+If you regularly update to the latest development code from the
+Subversion Repository, you may prefer this option.
+
+The two install methods are not mutually exclusive.  With some
+care, it is possible to use both.
+
+The configure option is:
+  --enable-alternate-install
+
+Following the usual 'make', it requires
+
+  $ make install-alternate
+
+This just copies the executables to the top game directory.  The
+effect of using any other 'install' make target is "undefined".
+
