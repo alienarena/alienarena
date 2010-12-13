@@ -111,6 +111,8 @@ crx_SOURCES = \
 	qcommon/htable.h \
 	qcommon/mdfour.c \
 	qcommon/net_chan.c \
+	qcommon/objects.c \
+	qcommon/objects.h \
 	qcommon/pmove.c \
 	qcommon/qcommon.h \
 	qcommon/qfiles.h \
