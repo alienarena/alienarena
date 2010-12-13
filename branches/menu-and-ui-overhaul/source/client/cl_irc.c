@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "client.h"
 #include "qcommon/htable.h"
+#include "qcommon/ptrtools.h"
 
 #if defined WIN32_VARIANT
 # include <winsock.h>
@@ -307,11 +308,11 @@ static inline void IRC_InitHandlers( )
 {
 	IRC_Handlers = HT_Create( 100 , HT_FLAG_INTABLE | HT_FLAG_CASE ,
 				  sizeof( struct irc_handler_t ) ,
-				  HT_OffsetOfField( struct irc_handler_t , cmd_string ) ,
+				  PTR_FieldOffset( struct irc_handler_t , cmd_string ) ,
 				  32 );
 	IRC_CTCPHandlers = HT_Create( 100 , HT_FLAG_INTABLE | HT_FLAG_CASE ,
 				      sizeof( struct irc_handler_t ) ,
-				      HT_OffsetOfField( struct irc_handler_t , cmd_string ) ,
+				      PTR_FieldOffset( struct irc_handler_t , cmd_string ) ,
 				      32 );
 }
 

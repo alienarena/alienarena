@@ -77,12 +77,6 @@ hashtable_t HT_Create(
 	);
 
 
-/*
- * Macro that determines the offset of a field in a structure
- */
-#define HT_OffsetOfField(TYPE,FIELD) \
-	( (char *)( &( ( (TYPE *) NULL )->FIELD ) ) - (char *) NULL )
-
 
 /*
  * Hash table destruction

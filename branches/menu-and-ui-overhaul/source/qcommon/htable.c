@@ -18,8 +18,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 
-#include "qcommon.h"
-#include "htable.h"
+#include "qcommon/qcommon.h"
+#include "qcommon/htable.h"
+#include "qcommon/ptrtools.h"
 
 
 /*=============================================*
@@ -105,7 +106,7 @@ struct hashtable_s
  * Macro that finds the first list head after a table's main structure
  */
 #define TABLE_START(TABLE) \
-	( (struct listhead_t *)( ((char*)(TABLE)) + sizeof( struct hashtable_s ) ) )
+	( (struct listhead_t *)PTR_OffsetAddr( TABLE , sizeof(struct hashtable_s) ) )
 
 
 /*=============================================*
@@ -206,7 +207,7 @@ void HT_Destroy(
 	list_head = &( table->all_items );
 	list_entry = list_head->next;
 	while ( list_entry != list_head ) {
-		t_entry = (struct tentry_t *)( ( (char *) list_entry ) - HT_OffsetOfField( struct tentry_t , full_list )  );
+		t_entry = (struct tentry_t *)( ( (char *) list_entry ) - PTR_FieldOffset( struct tentry_t , full_list )  );
 		list_entry = list_entry->next;
 
 		if ( del_key )
@@ -452,7 +453,7 @@ void HT_Apply(
 	list_entry = list_head->next;
 	while ( list_entry != list_head ) {
 		void * item;
-		item = ( (char *) list_entry ) - HT_OffsetOfField( struct tentry_t , full_list ) + sizeof( struct tentry_t );
+		item = ( (char *) list_entry ) - PTR_FieldOffset( struct tentry_t , full_list ) + sizeof( struct tentry_t );
 		list_entry = list_entry->next;
 
 		if ( ( table->flags & HT_FLAG_INTABLE ) == 0 )
@@ -622,7 +623,7 @@ static void _HT_InsertInGlobalList( hashtable_t table , struct tentry_t * t_entr
 			const char * ai_key;
 			int cres;
 
-			ai_entry = (struct tentry_t *)( ( (char *) list_entry ) - HT_OffsetOfField( struct tentry_t , full_list )  );
+			ai_entry = (struct tentry_t *)( ( (char *) list_entry ) - PTR_FieldOffset( struct tentry_t , full_list )  );
 			ai_key = table->KeyFromEntry( ai_entry , table->key_offset );
 			cres = table->CompareKey( ai_key , key );
 
