@@ -134,9 +134,9 @@ void R_addBody(int RagDollID, matrix3x4_t *bindmat, char *name, int objectID, ve
 	dMatrix3 rot;
 
 	p1[1] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
-    p1[2] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
+	p1[2] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
 	p2[1] -= RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Y_OFF];
-    p2[2] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
+	p2[2] += RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[GLOBAL_Z_OFF];
 
 	//cylinder length not including endcaps, make capsules overlap by half
 	//radius at joints
@@ -174,8 +174,8 @@ void R_addBody(int RagDollID, matrix3x4_t *bindmat, char *name, int objectID, ve
 	CrossProduct(za, xa, ya);
 
 	Vector4Set(initmat.a, xa[0], ya[0], za[0], 0.5*(p1[0] + p2[0]));
-    Vector4Set(initmat.b, xa[1], ya[1], za[1], 0.5*(p1[1] + p2[1]));
-    Vector4Set(initmat.c, xa[2], ya[2], za[2], 0.5*(p1[2] + p2[2]));
+	Vector4Set(initmat.b, xa[1], ya[1], za[1], 0.5*(p1[1] + p2[1]));
+	Vector4Set(initmat.c, xa[2], ya[2], za[2], 0.5*(p1[2] + p2[2]));
 
 	nans = 0;
 	for(i = 0; i < 4; i++)
@@ -462,7 +462,9 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 			if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], RagDollBinds[j].name))
 			{
 				int object = RagDollBinds[j].object;
-				Matrix3x4_Add(&bindmat[object], bindmat[object], RagDoll[RagDollID].initframe[i]);
+				if ( ! IS_NAN( RagDoll[RagDollID].initframe[i].a[0] ) ) {
+					Matrix3x4_Add(&bindmat[object], bindmat[object], RagDoll[RagDollID].initframe[i]);
+				}
 				bindweight[object]++;
 				break;
 			}
