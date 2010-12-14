@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * The object-oriented layer provides a foundation for using some of the OO
  * concepts from AlienArena's C code:
- * - encapsulation, to a limited degree (there no private class members),
+ * - encapsulation, to a limited degree (there are no private class members),
  * - inheritance,
  * - polymorphism,
  * - limited reflection (only usable to set properties).
@@ -533,7 +533,7 @@ struct OOL_Object_cs
 	 * \note If the requested property does not exist, this will either
 	 * cause an assertion failure (if compiled with assertions enabled)
 	 * or a plain old crash. In addition, the type of the property is
-	 * excepted to match that of the parameter; if not, there's a high
+	 * expected to match that of the parameter; if not, there's a high
 	 * probability of crashing.
 	 *
 	 * \param object the object on which the property is to be changed
