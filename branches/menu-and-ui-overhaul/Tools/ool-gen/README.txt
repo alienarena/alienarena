@@ -63,6 +63,12 @@ will always be considered as being public.
 !staticfield!	::=	static !field! = <initial value>
 
 !field!		::=	<type> <name>
+		|	<type> <name> !arraydecl!
+
+!arraydecl!	::=	!arraydim! !arraydecl!
+		|	!arraydim!
+
+!arraydim	::=	[ <anything> ]
 
 !proptype!	::=	| type <proptype> !propopts! |
 		::=	| custom !propopts! |
@@ -146,6 +152,8 @@ II. Known issues
 
  * Fields / static fields / properties containing function pointers are not
 supported.
+
+ * Arrays are not supported.
 
  * Any header inclusion that does not correspond to an OOL class needs to be
 added manually.

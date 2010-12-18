@@ -200,9 +200,19 @@ sub parseClassMember
 
 	# Expect end of member, assignment, property stuff, or parameters
 	my ( $mType , $mData );
-	syntaxError( "$bName.cdf" , "expecting ';', '|' , '=' or '(' after member name $mName" )
-		unless $contents =~ s/\s*([;\(\|=])//s;
+	syntaxError( "$bName.cdf" , "expecting ';', '|' , '=' , '[' or '(' after member name $mName" )
+		unless $contents =~ s/\s*([;\(\|=\[])//s;
 	my $found = $1;
+
+	my $arrayDims = [];
+	while ( $found eq '[' ) {
+		syntaxError( "$bName.cdf" , "expected array dimension for $mName" )
+			unless $contents =~ s/([^\]]+)\]//;
+		push @$arrayDims , $1;
+		syntaxError( "$bName.cdf" , "expecting ';', '|' , '=' or '[' after array dimension of $mName" )
+			unless $contents =~ s/\s*([;\|=\[])//s;
+		$found = $1;
+	}
 
 	syntaxError( "$bName.cfg" , "only methods can be declared 'inline'" )
 		if ( $inline && $found ne '(' );
@@ -296,6 +306,10 @@ sub parseClassMember
 	# cannot be private
 	$mData->{public} = ( $scope ne 'private' && $mType ne 'props' );
 
+	# Set array dimensions
+	$mData->{arrayDims} = $arrayDims
+		unless $mType eq 'methods';
+
 	# Now we need to take a look at parent classes...
 	# * Private methods and fields may share the name of a parent class'
 	# private field or method.
@@ -361,6 +375,7 @@ sub parseClassMember
 	# Add member to class
 	$fData->{members}{$mName} = $mType;
 	$fData->{$mType}{$mName} = $mData;
+	push @{$fData->{order}{$mType}} , $mName;
 
 	return $contents;
 }
@@ -468,6 +483,12 @@ sub parseDefinitionFile
 		props	=> { } ,
 		fields	=> { } ,
 		cfields	=> { } ,
+		order	=> {
+			methods	=> [] ,
+			props	=> [] ,
+			fields	=> [] ,
+			cfields	=> [] ,
+		} ,
 	};
 
 	while ( $contents ) {
@@ -592,7 +613,7 @@ struct $fData->{class}_cs
 EOL
 
 	# Static fields
-	foreach my $cFieldName ( keys %{ $fData->{cfields} } ) {
+	foreach my $cFieldName ( @{ $fData->{order}{cfields} } ) {
 		my $cField = $fData->{cfields}{$cFieldName};
 		next unless $cField->{public};
 		if ( defined $cField->{comment} ) {
@@ -600,11 +621,15 @@ EOL
 			$comment =~ s/\n\t+/\n\t/gs;
 			print $fh "\n\t$comment";
 		}
-		print $fh "\n\t" . $cField->{type} . " " . $cFieldName . ";\n";
+		print $fh "\n\t" . $cField->{type} . " " . $cFieldName;
+		if ( @{$cField->{arrayDims}} ) {
+			print $fh '[' . join('][' , @{$cField->{arrayDims}} ) . ']';
+		}
+		print $fh ";\n";
 	}
 
 	# Methods
-	foreach my $methName ( keys %{ $fData->{methods} } ) {
+	foreach my $methName ( @{ $fData->{order}{methods} } ) {
 		my $method = $fData->{methods}{$methName};
 		next unless $method->{virtual};
 		next unless $method->{onClass} eq $fData->{class};
@@ -639,7 +664,7 @@ struct $fData->{class}_s
 EOL
 
 	# Properties
-	foreach my $propName ( keys %{ $fData->{props} } ) {
+	foreach my $propName ( @{ $fData->{order}{props} } ) {
 		my $prop = $fData->{props}{$propName};
 
 		if ( defined $prop->{comment} ) {
@@ -647,11 +672,15 @@ EOL
 			$comment =~ s/\n\t+/\n\t/gs;
 			print $fh "\n\t$comment";
 		}
-		print $fh "\n\t" . $prop->{type} . " " . $propName . ";\n";
+		print $fh "\n\t" . $prop->{type} . " " . $propName;
+		if ( @{$prop->{arrayDims}} ) {
+			print $fh '[' . join('][' , @{$prop->{arrayDims}} ) . ']';
+		}
+		print $fh ";\n";
 	}
 
 	# Fields
-	foreach my $fieldName ( keys %{ $fData->{fields} } ) {
+	foreach my $fieldName ( @{ $fData->{order}{fields} } ) {
 		my $field = $fData->{fields}{$fieldName};
 
 		if ( defined $field->{comment} ) {
@@ -660,7 +689,11 @@ EOL
 			print $fh "\n\t$comment";
 		}
 		$fieldName = "_$fieldName" unless $field->{public};
-		print $fh "\n\t" . $field->{type} . " " . $fieldName . ";\n";
+		print $fh "\n\t" . $field->{type} . " " . $fieldName;
+		if ( @{$field->{arrayDims}} ) {
+			print $fh '[' . join('][' , @{$field->{arrayDims}} ) . ']';
+		}
+		print $fh ";\n";
 	}
 
 	# End of instance structure & class-defining function
@@ -679,7 +712,7 @@ OOL_Class $fData->{class}__Class( );
 EOL
 
 	# Public static method declarations
-	foreach my $methName ( keys %{ $fData->{methods} } ) {
+	foreach my $methName ( @{ $fData->{order}{methods} } ) {
 		my $method = $fData->{methods}{$methName};
 		next unless $method->{static} && $method->{public};
 
@@ -709,7 +742,7 @@ EOL
 	}
 
 	# Public method wrappers
-	foreach my $methName ( keys %{ $fData->{methods} } ) {
+	foreach my $methName ( @{ $fData->{order}{methods} } ) {
 		my $method = $fData->{methods}{$methName};
 		next if $method->{static};
 		next unless $method->{onClass} eq $fData->{class};
@@ -811,7 +844,7 @@ EOL
 
 	# Method declarations - only virtual and private methods
 	my $hasOne = 0;
-	foreach my $methName ( keys %{ $fData->{methods} } ) {
+	foreach my $methName ( @{ $fData->{order}{methods} } ) {
 		my $method = $fData->{methods}{$methName};
 		next if ( $method->{inline} || $method->{abstract} );
 		next unless ( $method->{virtual} || !$method->{public} );
@@ -839,7 +872,7 @@ EOL
 	# Declare functions for property validation / onChange / free / copy
 	$hasOne = 0;
 	my %propHandlers = ( );
-	foreach my $propName ( keys %{ $fData->{props} } ) {
+	foreach my $propName ( @{ $fData->{order}{props} } ) {
 		my $prop = $fData->{props}{$propName};
 		next unless ( $prop->{pType} eq 'OOL_PTYPE_CUSTOM' || $prop->{validator} || $prop->{change} );
 
@@ -868,7 +901,7 @@ EOL
 
 	# Define static private fields
 	$hasOne = 0;
-	foreach my $fieldName ( keys %{ $fData->{cfields} } ) {
+	foreach my $fieldName ( @{ $fData->{order}{cfields} } ) {
 		my $field = $fData->{cfields}{$fieldName};
 		next if $field->{public};
 
@@ -877,7 +910,11 @@ EOL
 			$hasOne = 1;
 		}
 
-		print $fh "static $field->{type} _$fData->{class}_$fieldName;\n";
+		print $fh "static $field->{type} _$fData->{class}_$fieldName";
+		if ( @{$field->{arrayDims}} ) {
+			print $fh '[' . join('][' , @{$field->{arrayDims}} ) . ']';
+		}
+		print $fh ";\n";
 	}
 
 	# Class structure variables and class-defining function
@@ -903,7 +940,7 @@ EOL
 
 	# Set method function pointers
 	$hasOne = 0;
-	foreach my $methName ( keys %{ $fData->{methods} } ) {
+	foreach my $methName ( @{ $fData->{order}{methods} } ) {
 		my $method = $fData->{methods}{$methName};
 		next unless $method->{virtual};
 
@@ -921,7 +958,7 @@ EOL
 
 	# Initialise properties
 	$hasOne = 0;
-	foreach my $propName ( keys %{ $fData->{props} } ) {
+	foreach my $propName ( @{ $fData->{order}{props} } ) {
 		my $prop = $fData->{props}{$propName};
 
 		if ( ! $hasOne ) {
@@ -946,7 +983,7 @@ EOL
 
 	# Initiallise class fields
 	$hasOne = 0;
-	foreach my $fieldName ( keys %{ $fData->{cfields} } ) {
+	foreach my $fieldName ( @{ $fData->{order}{cfields} } ) {
 		my $field = $fData->{cfields}{$fieldName};
 
 		if ( !$hasOne ) {
@@ -961,7 +998,7 @@ EOL
 	print $fh "\n\treturn _$fData->{class}_cptr;\n}\n";
 
 	# Method bodies
-	foreach my $methName ( keys %{ $fData->{methods} } ) {
+	foreach my $methName ( @{ $fData->{order}{methods} } ) {
 		my $method = $fData->{methods}{$methName};
 		next if ( $method->{inline} || $method->{abstract} );
 
