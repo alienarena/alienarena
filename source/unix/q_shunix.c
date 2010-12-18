@@ -149,14 +149,14 @@ int Hunk_End()
 	sys_pagesize = (size_t)sysconf( _SC_PAGESIZE );
 
 	// calculate page-aligned size that was reserved
-	rsvd_pages = ( rsvd_hunk_size / sys_pagesize );
+	rsvd_pages = (rsvd_hunk_size / sys_pagesize);
 	if ( (rsvd_hunk_size % sys_pagesize) != 0 )
 		rsvd_pages += 1;
 	rsvd_size = rsvd_pages * sys_pagesize;
 
 	// calculate page-aligned size that was used
 	used_pages = total_hunk_used_size / sys_pagesize;
-	if ( ( total_hunk_used_size % sys_pagesize ) != 0 )
+	if ( (total_hunk_used_size % sys_pagesize) != 0 )
 		used_pages += 1;
 	used_size = used_pages * sys_pagesize;
 
@@ -171,7 +171,7 @@ int Hunk_End()
 			// Sys_Error("Program Error: Hunk_End: munmap failed");
 		}
 		else
-	{
+		{
 			// update size reserved for Hunk_Free
 			rsvd_hunk_size = used_size;
 			*phunk_size_store = rsvd_hunk_size;
@@ -179,12 +179,13 @@ int Hunk_End()
 
 	}
 
-	Com_DPrintf("Hunk_End:0x%X @ %p:\n", rsvd_hunk_size, hunk_base );
+	Com_DPrintf( "Hunk_End:0x%X @ %p:\n", rsvd_hunk_size, hunk_base );
 
 	hunk_base = user_hunk_base = NULL;
 	phunk_size_store = NULL;
 
-	}
+	return user_hunk_size;
+}
 #endif
 
 

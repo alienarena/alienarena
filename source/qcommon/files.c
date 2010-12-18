@@ -204,7 +204,7 @@ static void FS_init_paths( void )
 	{
 		if ( strlen( homestr) >= sizeof(fs_homedir) || !strlen( homestr ) )
 		{
-			Sys_Error( "path initialization (getenv COR_GAME is %s", homestr );
+			Sys_Error( "path initialization (getenv COR_GAME is %s)", homestr );
 		}
 		Q_strncpyz2( fs_homedir, homestr, sizeof( fs_homedir) );
 	}
@@ -302,6 +302,11 @@ static void FS_init_paths( void )
 		memset( user_bot_gamedata, 0, sizeof(user_bot_gamedata) );
 		Com_sprintf( user_bot_gamedata, sizeof(user_bot_gamedata),
 				"%s", fs_homedir );
+	}
+	else
+	{
+		// unexpected missing $HOME directory
+		Sys_Error("set environment variable HOME (or COR_GAME) to a writeable directory.");
 	}
 #endif
 
