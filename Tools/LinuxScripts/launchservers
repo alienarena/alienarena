@@ -23,8 +23,28 @@ ulimit -c unlimited
 
 # Written by Tony Jackson 14/07/2008
 # Updated for Alien Arena 2011
-# 2010-12-04 FIXME: needs documentation about screen program and 
-#  config file names. 
+# 
+# This script expects you to have screen installed, and soft links in the arena/
+# directory to config files.  The soft links must be named portXXXXX where XXXXX
+# represents the port number that config should be served against.  An example
+# setup might look like this:
+# 
+# lrwxrwxrwx 1 aa aa    7 Oct 13  2009 port27910 -> ffa.cfg
+# lrwxrwxrwx 1 aa aa    7 Oct 13  2009 port27920 -> aoa.cfg
+# lrwxrwxrwx 1 aa aa    9 Oct 13  2009 port27930 -> insta.cfg
+# lrwxrwxrwx 1 aa aa   11 Apr  8  2010 port27940 -> emps1v1.cfg
+# lrwxrwxrwx 1 aa aa    7 Oct 13  2009 port27950 -> ctf.cfg
+# lrwxrwxrwx 1 aa aa   16 May 13  2010 port27960 -> empsinsta1v1.cfg
+# lrwxrwxrwx 1 aa aa   18 Aug 24 00:54 port27970 -> empsrockets1v1.cfg
+# lrwxrwxrwx 1 aa aa    8 Oct 25  2009 port27990 -> ictf.cfg
+#
+# A soft link is created by running 'ln -s ffa.cfg port27910'
+#
+# Running the script will launch each server in turn.
+# If you run 'screen -ls' you will be shown a list of active screen sessions,
+# which should include one called 'Alien_Arena'.  This can be viewed by running
+# 'screen -r Alien_Arena'.  You can then switch between the console of each
+# game as desired - see the screen documentation for how to do this.
 
 cd $execpath
 # remove spaces in name
