@@ -124,6 +124,8 @@ crx_SOURCES = \
 	ref_gl/r_bmfont.c \
 	ref_gl/r_bmfont.h \
 	ref_gl/r_draw.c \
+	ref_gl/r_engineaware.c \
+	ref_gl/r_engineaware.h \
 	ref_gl/r_image.c \
 	ref_gl/r_image.h \
 	ref_gl/r_iqm.h \
