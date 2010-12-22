@@ -35,6 +35,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*@{*/
 
 
+/** \brief Compute the difference between two pointers
+ *
+ * Compute the difference between two pointers and return the offset in bytes.
+ *
+ * \param P1 the first pointer
+ * \param P2 the second pointer
+ * \return the amount of bytes corresponding to P1 - P2
+ */
+#define PTR_Difference(P1,P2) \
+	( ( (char *)( P1 ) ) - ( (char *)( P2 ) ) )
+
+
 /** \brief Determine the offset of a field inside a structure
  *
  * Determine the offset of a field inside a structure by using the NULL
@@ -46,7 +58,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * \param the offset of the field relative to the start of the structure.
  */
 #define PTR_FieldOffset(TYPE,FIELD) \
-	( (char *)( &( ( (TYPE *) NULL )->FIELD ) ) - (char *) NULL )
+	PTR_Difference( &( ( (TYPE *) NULL )->FIELD ) , NULL )
 
 
 /** \brief Determine the size of a field inside a structure

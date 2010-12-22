@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "qcommon/qcommon.h"
 #include "qcommon/htable.h"
 #include "qcommon/ptrtools.h"
+#include "qcommon/lists.h"
 
 
 /*=============================================*
@@ -28,22 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *=============================================*/
 
 
-/*
- * "List heads" - used to store various lists
- */
-
-struct listhead_t
-{
-	struct listhead_t *	previous;
-	struct listhead_t *	next;
-};
-
-
-/*
- * Resets a list head
- */
-#define RESET_LIST(LPTR) \
-	( (LPTR)->previous = (LPTR)->next = (LPTR) )
 
 
 /*
@@ -53,10 +38,10 @@ struct listhead_t
 struct tentry_t
 {
 	/* Entry in one of the table's sub-lists */
-	struct listhead_t	loc_list;
+	struct LST_item_s	loc_list;
 
 	/* Entry in the table's main list */
-	struct listhead_t	full_list;
+	struct LST_item_s	full_list;
 
 	/* Cached hash value */
 	unsigned int		hash;
@@ -98,7 +83,7 @@ struct hashtable_s
 	comparekey_t		CompareKey;
 
 	/* List of all items */
-	struct listhead_t	all_items;
+	struct LST_item_s	all_items;
 };
 
 
@@ -106,7 +91,7 @@ struct hashtable_s
  * Macro that finds the first list head after a table's main structure
  */
 #define TABLE_START(TABLE) \
-	( (struct listhead_t *)PTR_OffsetAddr( TABLE , sizeof(struct hashtable_s) ) )
+	( (struct LST_item_s *)PTR_OffsetAddr( TABLE , sizeof(struct hashtable_s) ) )
 
 
 /*=============================================*
@@ -138,7 +123,7 @@ static char * _HT_KeyFromEntryPI( struct tentry_t * entry , size_t key_offset );
 static char * _HT_KeyFromEntryPP( struct tentry_t * entry , size_t key_offset );
 
 /* Allocate and initialise a table entry. */
-static struct tentry_t * _HT_CreateEntry( hashtable_t table , unsigned int hash , struct listhead_t * list_entry , const char * key );
+static struct tentry_t * _HT_CreateEntry( hashtable_t table , unsigned int hash , struct LST_item_s * list_entry , const char * key );
 
 /* Insert a table entry into a table's global list */
 static void _HT_InsertInGlobalList( hashtable_t table , struct tentry_t * t_entry , const char * key );
@@ -159,11 +144,11 @@ hashtable_t HT_Create(
 {
 	hashtable_t		table;
 	size_t			real_size;
-	struct listhead_t *	t_item;
+	struct LST_item_s *	t_item;
 
 	// Allocate table
 	real_size = _HT_NextPrime( size );
-	table = Z_Malloc( sizeof( struct hashtable_s ) + real_size * sizeof( struct listhead_t ) );
+	table = Z_Malloc( sizeof( struct hashtable_s ) + real_size * sizeof( struct LST_item_s ) );
 	assert( table );
 
 	// Initialise main table fields
@@ -172,7 +157,7 @@ hashtable_t HT_Create(
 	table->item_size = item_size;
 	table->key_offset = key_offset;
 	table->key_length = key_length;
-	RESET_LIST( &table->all_items );
+	LST_Init( &table->all_items );
 
 	// Set functions
 	table->GetKey = ( flags & HT_FLAG_CASE ) ? _HT_GetKey : _HT_GetCIKey;
@@ -186,7 +171,7 @@ hashtable_t HT_Create(
 	// Initialise table entries
 	t_item = TABLE_START( table );
 	while ( real_size > 0 ) {
-		RESET_LIST( t_item );
+		LST_Init( t_item );
 		t_item ++, real_size --;
 	}
 
@@ -199,23 +184,17 @@ void HT_Destroy(
 	)
 {
 	qboolean		del_key;
-	struct listhead_t *	list_head;
-	struct listhead_t *	list_entry;
+	struct LST_item_s *	list_entry;
 	struct tentry_t *	t_entry;
 
 	del_key =  ( table->key_length == 0 && ( table->flags & ( HT_FLAG_INTABLE | HT_FLAG_FREE ) ) != 0 );
-	list_head = &( table->all_items );
-	list_entry = list_head->next;
-	while ( list_entry != list_head ) {
-		t_entry = (struct tentry_t *)( ( (char *) list_entry ) - PTR_FieldOffset( struct tentry_t , full_list )  );
-		list_entry = list_entry->next;
+	LST_Foreach( table->all_items , list_entry ) {
+		t_entry = PTR_OffsetAddr( list_entry , - PTR_FieldOffset( struct tentry_t , full_list ) );
 
 		if ( del_key )
 			Z_Free( table->KeyFromEntry( t_entry , table->key_offset ) );
-		if ( ( table->flags & ( HT_FLAG_INTABLE | HT_FLAG_FREE ) ) == HT_FLAG_FREE ) {
-			void ** data = (void **)( ( (char *) t_entry ) + sizeof( struct tentry_t ) );
-			Z_Free( *data );
-		}
+		if ( ( table->flags & ( HT_FLAG_INTABLE | HT_FLAG_FREE ) ) == HT_FLAG_FREE )
+			Z_Free( *(void **)PTR_OffsetAddr( t_entry , sizeof( struct tentry_t ) ) );
 		Z_Free( t_entry );
 	}
 	Z_Free( table );
@@ -229,8 +208,8 @@ void * HT_GetItem(
 	)
 {
 	unsigned int		hash;
-	struct listhead_t *	list_head;
-	struct listhead_t *	list_entry;
+	struct LST_item_s *	list_head;
+	struct LST_item_s *	list_entry;
 	struct tentry_t *	t_entry;
 	void *			data;
 
@@ -239,24 +218,20 @@ void * HT_GetItem(
 	// Try finding the item
 	hash = table->GetKey( key );
 	list_head = ( TABLE_START( table ) + ( hash % table->size ) );
-	list_entry = list_head->next;
-	while ( list_entry != list_head ) {
+	LST_Foreach( *list_head , list_entry ) {
 		t_entry = ( struct tentry_t * ) list_entry;
-
 		if ( t_entry->hash > hash )
 			break;
 
 		if ( t_entry->hash == hash ) {
 			char * item_key = table->KeyFromEntry( t_entry , table->key_offset );
 			if ( ! table->CompareKey( key , item_key ) ) {
-				data = (void *)( ( (char *)t_entry ) + sizeof( struct tentry_t ) );
+				data = PTR_OffsetAddr( t_entry , sizeof( struct tentry_t ) );
 				if ( created != NULL )
 					*created = false;
 				return ( table->flags & HT_FLAG_INTABLE ) ? data : ( *(void**)data );
 			}
 		}
-
-		list_entry = list_entry->next;
 	}
 
 	// Check if we can create the entry
@@ -268,7 +243,7 @@ void * HT_GetItem(
 	t_entry = _HT_CreateEntry( table , hash , list_entry , key );
 
 	// Initialise data
-	data = (void *)( ( (char *)t_entry ) + sizeof( struct tentry_t ) );
+	data = PTR_OffsetAddr( t_entry , sizeof( struct tentry_t ) );
 	if ( ( table->flags & HT_FLAG_INTABLE ) == 0 ) {
 		*(void **) data = Z_Malloc( table->item_size );
 		data = *(void **) data;
@@ -277,12 +252,11 @@ void * HT_GetItem(
 
 	// Copy key
 	if ( table->key_length == 0 ) {
-		char ** key_ptr = (char **)( ( (char*) data ) + table->key_offset );
+		char ** key_ptr = PTR_OffsetAddr( data , table->key_offset );
 		*key_ptr = Z_Malloc( strlen( key ) + 1 );
 		strcpy( *key_ptr , key );
 	} else {
-		char * key_ptr = ( (char*) data ) + table->key_offset;
-		strcpy( key_ptr , key );
+		strcpy( PTR_OffsetAddr( data , table->key_offset ) , key );
 	}
 
 	return data;
@@ -299,22 +273,21 @@ void * HT_PutItem(
 	void *			prev_entry = NULL;
 	const char *		insert_key;
 	unsigned int		hash;
-	struct listhead_t *	list_head;
-	struct listhead_t *	list_entry;
+	struct LST_item_s *	list_head;
+	struct LST_item_s *	list_entry;
 	struct tentry_t *	t_entry;
 
 	// Extract item key
 	if ( table->key_length ) {
-		insert_key = ( (const char *) item ) + table->key_offset;
+		insert_key = PTR_OffsetAddr( item , table->key_offset );
 	} else {
-		insert_key = *(const char **)( ( (char *) item ) + table->key_offset );
+		insert_key = *(const char **)PTR_OffsetAddr( item , table->key_offset );
 	}
 
 	// Try finding an item with that key, or the new item's location
 	hash = table->GetKey( insert_key );
 	list_head = ( TABLE_START( table ) + ( hash % table->size ) );
-	list_entry = list_head->next;
-	while ( list_entry != list_head ) {
+	LST_Foreach( *list_head , list_entry ) {
 		t_entry = ( struct tentry_t * ) list_entry;
 
 		if ( t_entry->hash > hash )
@@ -324,7 +297,7 @@ void * HT_PutItem(
 			const char * item_key = table->KeyFromEntry( t_entry , table->key_offset );
 			int cres = table->CompareKey( insert_key , item_key );
 			if ( ! cres ) {
-				prev_entry = ( ( (char *)t_entry ) + sizeof( struct tentry_t ) );
+				prev_entry = PTR_OffsetAddr( t_entry , sizeof( struct tentry_t ) );
 				ret_val = ( table->flags & HT_FLAG_INTABLE ) ? prev_entry : ( *(void**)prev_entry );
 				if ( ! allow_replacement )
 					return ret_val;
@@ -333,8 +306,6 @@ void * HT_PutItem(
 				break;
 			}
 		}
-
-		list_entry = list_entry->next;
 	}
 
 	if ( ret_val != NULL ) {
@@ -359,7 +330,7 @@ void * HT_PutItem(
 		void * data;
 
 		t_entry = _HT_CreateEntry( table , hash , list_entry , insert_key );
-		data = (void *)( ( (char *)t_entry ) + sizeof( struct tentry_t ) );
+		data = PTR_OffsetAddr( t_entry , sizeof( struct tentry_t ) );
 		if ( ( table->flags & HT_FLAG_INTABLE ) != 0 ) {
 			memcpy( data , item , table->item_size );
 		} else {
@@ -378,16 +349,15 @@ qboolean HT_DeleteItem(
 	)
 {
 	unsigned int		hash;
-	struct listhead_t *	list_head;
-	struct listhead_t *	list_entry;
+	struct LST_item_s *	list_head;
+	struct LST_item_s *	list_entry;
 	struct tentry_t *	t_entry;
 	void *			data = NULL;
 
 	// Try finding the item
 	hash = table->GetKey( key );
 	list_head = ( TABLE_START( table ) + ( hash % table->size ) );
-	list_entry = list_head->next;
-	while ( list_entry != list_head ) {
+	LST_Foreach( *list_head , list_entry ) {
 		t_entry = ( struct tentry_t * ) list_entry;
 
 		if ( t_entry->hash > hash )
@@ -396,13 +366,11 @@ qboolean HT_DeleteItem(
 		if ( t_entry->hash == hash ) {
 			char * item_key = table->KeyFromEntry( t_entry , table->key_offset );
 			if ( ! table->CompareKey( key , item_key ) ) {
-				data = (void *)( ( (char *)t_entry ) + sizeof( struct tentry_t ) );
+				data = PTR_OffsetAddr( t_entry , sizeof( struct tentry_t ) );
 				data = ( table->flags & HT_FLAG_INTABLE ) ? data : ( *(void**)data );
 				break;
 			}
 		}
-
-		list_entry = list_entry->next;
 	}
 
 	// Did we find it?
@@ -413,10 +381,8 @@ qboolean HT_DeleteItem(
 	}
 
 	// Detach it from its lists
-	t_entry->loc_list.previous->next = t_entry->loc_list.next;
-	t_entry->loc_list.next->previous = t_entry->loc_list.previous;
-	t_entry->full_list.previous->next = t_entry->full_list.next;
-	t_entry->full_list.next->previous = t_entry->full_list.previous;
+	LST_Remove( &( t_entry->loc_list ) );
+	LST_Remove( &( t_entry->full_list ) );
 
 	// Delete key
 	if ( table->key_length == 0 && ( table->flags & ( HT_FLAG_INTABLE | HT_FLAG_FREE ) ) != 0 )
@@ -446,15 +412,11 @@ void HT_Apply(
 		void *		data
 	)
 {
-	struct listhead_t *	list_head;
-	struct listhead_t *	list_entry;
+	struct LST_item_s *	list_entry;
 
-	list_head = &( table->all_items );
-	list_entry = list_head->next;
-	while ( list_entry != list_head ) {
+	LST_Foreach( table->all_items , list_entry ) {
 		void * item;
-		item = ( (char *) list_entry ) - PTR_FieldOffset( struct tentry_t , full_list ) + sizeof( struct tentry_t );
-		list_entry = list_entry->next;
+		item = PTR_OffsetAddr( list_entry , sizeof( struct tentry_t ) - PTR_FieldOffset( struct tentry_t , full_list ) );
 
 		if ( ( table->flags & HT_FLAG_INTABLE ) == 0 )
 			item = *(void**) item;
@@ -551,30 +513,24 @@ static unsigned int _HT_GetKey( const char * key )
 
 static char * _HT_KeyFromEntryII( struct tentry_t * entry , size_t key_offset )
 {
-	void * item_addr;
-	item_addr = (void*)( ( (char*)entry ) + sizeof( struct tentry_t ) );
-	return (char *)( ( (char*)item_addr ) + key_offset );
+	return PTR_OffsetAddr( entry , sizeof( struct tentry_t ) + key_offset );
 }
 
 static char * _HT_KeyFromEntryIP( struct tentry_t * entry , size_t key_offset )
 {
-	void * item_addr;
-	item_addr = (void*)( ( (char*)entry ) + sizeof( struct tentry_t ) );
-	return *(char **)( ( (char*)item_addr ) + key_offset );
+	return *(char **) PTR_OffsetAddr( entry , sizeof( struct tentry_t ) + key_offset );
 }
 
 static char * _HT_KeyFromEntryPI( struct tentry_t * entry , size_t key_offset )
 {
-	void * item_addr;
-	item_addr = *(void**)( ( (char*)entry ) + sizeof( struct tentry_t ) );
-	return (char *)( ( (char*)item_addr ) + key_offset );
+	void * item_addr = *(void**)PTR_OffsetAddr( entry , sizeof( struct tentry_t ) );
+	return PTR_OffsetAddr( item_addr , key_offset );
 }
 
 static char * _HT_KeyFromEntryPP( struct tentry_t * entry , size_t key_offset )
 {
-	void * item_addr;
-	item_addr = *(void**)( ( (char*)entry ) + sizeof( struct tentry_t ) );
-	return *(char **)( ( (char*)item_addr ) + key_offset );
+	void * item_addr = *(void**)PTR_OffsetAddr( entry , sizeof( struct tentry_t ) );
+	return *(char **) PTR_OffsetAddr( item_addr , key_offset );
 }
 
 
@@ -587,7 +543,7 @@ static char * _HT_KeyFromEntryPP( struct tentry_t * entry , size_t key_offset )
 static struct tentry_t * _HT_CreateEntry(
 	hashtable_t		table ,
 	unsigned int		hash ,
-	struct listhead_t *	list_entry ,
+	struct LST_item_s *	list_entry ,
 	const char *		key )
 {
 	// Allocate new entry
@@ -597,11 +553,8 @@ static struct tentry_t * _HT_CreateEntry(
 	t_entry = Z_Malloc( entry_size );
 	t_entry->hash = hash;
 
-	// Add entry to local list
-	t_entry->loc_list.previous = list_entry->previous;
-	t_entry->loc_list.next = list_entry;
-	list_entry->previous = t_entry->loc_list.previous->next = &( t_entry->loc_list );
-
+	// Add entry to lists
+	LST_Append( list_entry , &( t_entry->loc_list ) );
 	_HT_InsertInGlobalList( table , t_entry , key );
 
 	return t_entry;
@@ -612,28 +565,23 @@ static void _HT_InsertInGlobalList( hashtable_t table , struct tentry_t * t_entr
 {
 	if ( ( table->flags & HT_FLAG_SORTED ) == 0 ) {
 		// Append to global list
-		t_entry->full_list.previous = table->all_items.previous;
-		t_entry->full_list.next = &( table->all_items );
-		table->all_items.previous = t_entry->full_list.previous->next = &( t_entry->full_list );
+		LST_Append( &( table->all_items ) , &( t_entry->full_list ) );
 	} else {
 		// Global list must be kept sorted, find insert location
-		struct listhead_t * list_entry = table->all_items.next;
-		while ( list_entry != &( table->all_items ) ) {
+		struct LST_item_s * list_entry;
+		LST_Foreach( table->all_items , list_entry ) {
 			struct tentry_t * ai_entry;
 			const char * ai_key;
 			int cres;
 
-			ai_entry = (struct tentry_t *)( ( (char *) list_entry ) - PTR_FieldOffset( struct tentry_t , full_list )  );
+			ai_entry = PTR_OffsetAddr( list_entry , - PTR_FieldOffset( struct tentry_t , full_list ) );
 			ai_key = table->KeyFromEntry( ai_entry , table->key_offset );
 			cres = table->CompareKey( ai_key , key );
 
 			assert( cres != 0 );
 			if ( cres > 0 )
 				break;
-			list_entry = list_entry->next;
 		}
-		t_entry->full_list.previous = list_entry->previous;
-		t_entry->full_list.next = list_entry;
-		list_entry->previous = t_entry->full_list.previous->next = &( t_entry->full_list );
+		LST_Append( list_entry , &( t_entry->full_list ) );
 	}
 }
