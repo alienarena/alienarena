@@ -452,6 +452,54 @@ sub parseClassBlock
 
 
 ###
+# parseConstantsBlock( $data , $baseName , $contents , $prefix )
+#
+# Parses a set of constant definitions
+###
+sub parseConstantsBlock
+{
+	my ( $data , $bName , $contents , $prefix ) = @_;
+
+	while ( $contents ) {
+		$contents =~ s/^\s+//s;
+
+		# '};' -> end of class block
+		last if ( $contents =~ s/^}\s*;//s );
+
+		# Ignore // comments
+		next if ( $contents =~ s/^\/\/.*?\n// );
+
+		# Store /* */ comments in work area
+		if ( $contents =~ /^\/\*/ ) {
+			syntaxError( "$bName.cdf" , "expected '*/' before end of file" )
+				unless $contents =~ s/^(\/\*.*?\*\/)//s;
+			push @{ $data->{$bName}{__WORK__}{curcomments} } , $1;
+			next;
+		}
+
+		# Get next constant definition
+		syntaxError( "$bName.cdf" , "invalid constant definition" )
+			unless $contents =~ s/(\w+)\s*=\s*([^;]+);//s;
+		my ( $cName , $cValue ) = ( $1 , $2 );
+		$cName = $prefix.$cName;
+		syntaxError( "$bName.cdf" , "duplicate constant definition '$cName'" )
+			if defined $data->{$bName}{consts}{$cName};
+
+		my $cData = { value => $cValue };
+		if ( @{ $data->{$bName}{__WORK__}{curcomments} } ) {
+			$cData->{comments} = join( "\n" , @{ $data->{$bName}{__WORK__}{curcomments} } );
+			$data->{$bName}{__WORK__}{curcomments} = [ ];
+		}
+
+		$data->{$bName}{consts}{$cName} = $cData;
+		push @{ $data->{$bName}{order}{consts} } , $cName;
+	}
+
+	return $contents;
+}
+
+
+###
 # parseDefinitionFile( $data , $file , $root )
 #
 # Parse a definition file, using the specified root directory when handling
@@ -478,12 +526,14 @@ sub parseDefinitionFile
 			curcomments	=> []
 		},
 		include	=> [ ] ,
+		consts	=> { } ,
 		members	=> { } ,
 		methods	=> { } ,
 		props	=> { } ,
 		fields	=> { } ,
 		cfields	=> { } ,
 		order	=> {
+			consts	=> [] ,
 			methods	=> [] ,
 			props	=> [] ,
 			fields	=> [] ,
@@ -533,6 +583,12 @@ sub parseDefinitionFile
 			$data->{$bName}{class} = $cName;
 
 			$contents = parseClassBlock( $data , $bName , $contents );
+			next;
+		}
+
+		# Constants definition block
+		if ( $contents =~ s/^constants(\s+(\w+))\s*{//s ) {
+			$contents = parseConstantsBlock( $data , $bName , $contents , $2 );
 			next;
 		}
 
@@ -595,6 +651,15 @@ EOL
 	# Add "class comment" (should be a \defgroup)
 	print $fh ( "\n\n" . $fData->{classComment} . "\n/*@\{*/\n" )
 		if defined $fData->{classComment};
+
+	# Constants
+	foreach my $constName ( @{ $fData->{order}{consts} } ) {
+		my $const = $fData->{consts}{$constName};
+		print $fh "\n";
+		print $fh ( $const->{comments} . "\n" )
+			if defined $const->{comments};
+		print $fh "#define $constName $const->{value}\n";
+	}
 
 	# Forward declaration & beginning of class structure
 	print $fh <<"EOL";
@@ -905,9 +970,10 @@ EOL
 		my $field = $fData->{cfields}{$fieldName};
 		next if $field->{public};
 
-		if ( ! $hasOne ) {
-			print $fh "\n/* Static private fields */\n";
-			$hasOne = 1;
+		if ( $field->{comment} ne '' ) {
+			my $comment = $field->{comment};
+			$comment =~ s/\n\t+/\n/gs;
+			print $fh "\n$comment\n";
 		}
 
 		print $fh "static $field->{type} _$fData->{class}_$fieldName";
@@ -1007,10 +1073,15 @@ EOL
 		$mType .= $method->{virtual} ? " polymorphic" : "";
 		$mType .= " method";
 		if ( $method->{virtual} && $method->{onClass} ne $fData->{class} ) {
-			$mType .= " overriding <b>$fData->{onClass}\:\:$methName</b>";
+			$mType .= " overriding <b>$method->{onClass}\:\:$methName</b>";
 		}
 
-		print $fh <<"EOL";
+		if ( ( ! $method->{public} || ( $method->{virtual} && $method->{onClass} ne $fData->{class} ) ) && $method->{comment} ne '' ) {
+			my $comment = $method->{comment};
+			$comment =~ s/\n\t+/\n/gs;
+			print $fh "\n\n$comment\n";
+		} elsif ( ! ( $method->{public} && $method->{static} ) ) {
+			print $fh <<"EOL";
 
 
 /** \\brief <b>$fData->{class}\:\:$methName</b> method implementation
@@ -1019,7 +1090,9 @@ EOL
  * XXX: write implementation documentation here
  */
 EOL
-
+		} else {
+			print $fh "\n\n/* Documentation in $bName.h */\n";
+		}
 
 		my ( $prefix , $mPrefix );
 		if ( $method->{public} && !$method->{virtual} ) {

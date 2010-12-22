@@ -10,7 +10,7 @@ from a bastardised form of C++ class declaration.
 
 
 I. Declaration syntax
-----------------------
+======================
 
 Class declarations are read from files with the .cdf extension. Each file
 is expected to contain one (and only one) class declaration.
@@ -22,6 +22,9 @@ It is possible to include other class declarations (e.g. for inheritance)
 using #include "path/to/cdf". Of course, the class declaration files must be
 kept around for this to work. The only exception is "qcommon/objects" which
 is defined internally by the script (for the OOL_Object base class).
+
+ 1. Class declaration
+ ---------------------
 
 A class declaration follows the syntax below:
 
@@ -111,8 +114,8 @@ The "free" option is only available for custom properties.
 The name of an argument must never be "object", as this is reserved for the
 object being manipulated in non-static methods.
 
-
-Regarding inheritance...
+ 2. Inheritance semantics
+ -------------------------
 
  * It is possible (albeit not recommended) to create private fields or
 methods with the same name in a class' hierarchy.
@@ -134,8 +137,27 @@ child classes.
  * An abstract method can only be declared in the method's initial
 declaration class, not when overriding.
 
+ 3. Constants
+ -------------
 
-Regarding code generation...
+It is possible to declare constants (which will be translated into sets of
+preprocessor definitions) using "constants" blocks. The syntax of a constants
+block is described below:
+
+!constblock!	::=	constants !constpfx! { !constants! };
+!constpfx!	::=	<word>
+		|
+
+The optional prefix for a constants block will be prepended to all constant
+names defined in the block.
+
+!constants!	::=	!constant! !constants!
+		|	!constant!
+
+!constant!	::=	<name> = <value> ;
+
+ 4. Code generation
+ -------------------
 
  * The generated header includes both the class and instance structures, as
 well as the class-defining function declaration. It will also contain
@@ -149,11 +171,10 @@ as the full code for the class-defining function.
 
 
 II. Known issues
+=================
 
  * Fields / static fields / properties containing function pointers are not
 supported.
-
- * Arrays are not supported.
 
  * Any header inclusion that does not correspond to an OOL class needs to be
 added manually.
