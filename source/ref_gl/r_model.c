@@ -1030,7 +1030,8 @@ static void R_ClearBeams(void)
 	r_numbeams = 0;
 }
 
-void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type)
+void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type, float xang, float yang,
+	qboolean rotating)
 {
     glpoly_t *poly;
     beam_t  *beam;
@@ -1099,7 +1100,9 @@ void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, 
 	beam->size = size;
 	strcpy(beam->name, name);
 	beam->type = type;
-
+	beam->xang = xang;
+	beam->yang = yang;
+	beam->rotating = rotating;
 }
 
 void GL_CalcSurfaceNormals(msurface_t *surf)
@@ -1299,7 +1302,8 @@ void Mod_LoadFaces (lump_t *l)
 						color[1] = stage->colormap.green;
 						color[2] = stage->colormap.blue;
 					}
-					GL_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->beamtype);
+					GL_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->beamtype, 
+						stage->xang, stage->yang, stage->rotating);
 				}
 			} while ( (stage = stage->next) );
 		}
