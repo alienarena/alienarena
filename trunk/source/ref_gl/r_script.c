@@ -233,6 +233,9 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->grasstype = 0;
 	stage->beam = false;
 	stage->beamtype = 0;
+	stage->xang = 0;
+	stage->yang = 0;
+	stage->rotating = false;
 	stage->fx = false;
 	stage->glow = false;
 
@@ -526,6 +529,9 @@ scriptname
 		grasstype
 		beam
 		beamtype
+		xang
+		yang
+		rotating
 		fx
 		glow
 	}
@@ -816,6 +822,21 @@ void rs_stage_beamtype (rs_stage_t *stage, char **token)
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->beamtype = atoi(*token);
 }
+void rs_stage_xang (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->xang = atof(*token);
+}
+void rs_stage_yang (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->yang = atof(*token);
+}
+void rs_stage_rotating (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->rotating = atoi(*token);
+}
 void rs_stage_fx (rs_stage_t *stage, char **token)
 {
 	stage->fx = true;
@@ -853,6 +874,9 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"grasstype",	&rs_stage_grasstype		},
 	{	"beam",			&rs_stage_beam			},
 	{	"beamtype",		&rs_stage_beamtype		},
+	{	"xang",			&rs_stage_xang			},
+	{	"yang",			&rs_stage_yang			},
+	{	"rotating",		&rs_stage_rotating		},
 	{	"fx",			&rs_stage_fx			},
 	{	"glow",			&rs_stage_glow			},
 
@@ -1503,8 +1527,8 @@ void R_DrawBeamSurface ( void )
 {
     int		i, k;
 	beam_t *beam;
-    float   scale;
-	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
+    float   scale, maxang;
+	vec3_t	start, end, mins, maxs, angle, right, up, move, delta, vec, corner[4];
 	float	*corner0 = corner[0];
 	qboolean visible;
 	trace_t r_trace;
@@ -1523,21 +1547,54 @@ void R_DrawBeamSurface ( void )
 
 		scale = 10.0*beam->size;
 
-		VectorCopy(r_newrefdef.viewangles, angle);
+		if(beam->xang > beam->yang)
+			maxang = beam->xang;
+		else
+			maxang = beam->yang;
+		
+		VectorCopy(beam->origin, start);
+		if(!beam->type)
+			start[2] -= (2.5 - (10.0*maxang))*beam->size;
+		else
+			start[2] += (2.5 - (10.0*maxang))*beam->size;
 
-		angle[0] = 0;  // keep vertical by removing pitch
+		VectorCopy(start, end);
+		if(!beam->type)
+			end[2] -= 2.5*beam->size;
+		else
+			end[2] += 2.5*beam->size;
 
-		AngleVectors(angle, NULL, right, up);
+		if(beam->rotating)
+		{
+			end[0] += sin(rs_realtime)*(10*beam->xang)*beam->size; //angle in rads
+			end[1] += cos(rs_realtime)*(10*beam->yang)*beam->size;
+		}
+		else
+		{
+			end[0] += (10*beam->xang)*beam->size; //angle in rads
+			end[1] += (10*beam->yang)*beam->size;
+		}
+
+		VectorSubtract(end, start, vec);
+		if(!beam->type)
+			VectorScale(vec, beam->size, vec);
+		else
+			VectorScale(vec, -beam->size, vec);
+
+		VectorAdd(start, vec, angle);
+
+		VectorSubtract(start, angle, move);
+		VectorNormalize(move);
+
+		VectorCopy(move, up);
+		VectorSubtract(r_newrefdef.vieworg, angle, delta);
+		CrossProduct(up, delta, right);
+		VectorNormalize(right);
+
 		VectorScale(right, scale, right);
 		VectorScale(up, scale, up);
-		VectorCopy(beam->origin, origin);
-
-		if(!beam->type)
-			origin[2] -= up[2]/2; //contingent on direction of beam
-		else
-			origin[2] += up[2]/2;
-
-		r_trace = CM_BoxTrace(r_origin, origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
+		
+		r_trace = CM_BoxTrace(r_origin, beam->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
 		visible = r_trace.fraction == 1.0;
 
 		if(visible) {
@@ -1553,9 +1610,9 @@ void R_DrawBeamSurface ( void )
 			GL_Bind(beam->texnum);
 
 			VectorSet (corner[0],
-				origin[0] + (up[0] + right[0])*(-0.5),
-				origin[1] + (up[1] + right[1])*(-0.5),
-				origin[2] + (up[2] + right[2])*(-0.5));
+				end[0] + (up[0] + right[0])*(-0.5),
+				end[1] + (up[1] + right[1])*(-0.5),
+				end[2] + (up[2] + right[2])*(-0.5));
 
 			VectorSet ( corner[1],
 				corner0[0] + up[0],
@@ -1572,7 +1629,7 @@ void R_DrawBeamSurface ( void )
 				corner0[1] + right[1],
 				corner0[2] + right[2]);
 
-				VArray = &VArrayVerts[0];
+			VArray = &VArrayVerts[0];
 
 			for(k = 0; k < 4; k++) {
 

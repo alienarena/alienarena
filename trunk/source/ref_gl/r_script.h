@@ -117,6 +117,9 @@ typedef struct rs_stage_s
 	
 	qboolean				beam;			// for adding light beams
 	int						beamtype;		// the type of beam(up vs down)
+	float					xang;			// beam pitch
+	float					yang;			// beam roll
+	qboolean				rotating;		//rotating beams(moving spotlights, etc).
 	
 	qboolean				fx;				// for glsl effect layer
 	qboolean				glow;			// for glsl effect layer

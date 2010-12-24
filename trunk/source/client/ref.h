@@ -63,6 +63,9 @@ typedef struct
 	vec3_t origin;
 	vec3_t color;
 	float size;
+	float xang;
+	float yang;
+	qboolean rotating;
 	int texsize;
 	int texnum;
 	char name[MAX_QPATH];
