@@ -1527,7 +1527,7 @@ void R_DrawBeamSurface ( void )
 {
     int		i, k;
 	beam_t *beam;
-    float   scale, maxang;
+    double   scale, maxang;
 	vec3_t	start, end, mins, maxs, angle, right, up, move, delta, vec, corner[4];
 	float	*corner0 = corner[0];
 	qboolean visible;
@@ -1544,35 +1544,43 @@ void R_DrawBeamSurface ( void )
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
 
     for (i=0; i<r_numbeams; i++, beam++) {
+		float movdir;
 
 		scale = 10.0*beam->size;
 
-		if(beam->xang > beam->yang)
+		if(fabs(beam->xang) > fabs(beam->yang))
 			maxang = beam->xang;
 		else
 			maxang = beam->yang;
+
+		if(maxang >= 0.0)
+			movdir = 1.0;
+		else
+			movdir = 0;
 		
+		//to do - this is rather hacky, and really only works for 0 degrees and 45 degree angles(0.25 rads).  
+		//will revisit this as needed, for now it works for what I need it for.
 		VectorCopy(beam->origin, start);
 		if(!beam->type)
-			start[2] -= (2.5 - (10.0*maxang))*beam->size;
+			start[2] -= (2.5 - (10.0*maxang))*beam->size*movdir;
 		else
-			start[2] += (2.5 - (10.0*maxang))*beam->size;
-
+			start[2] += (2.5 - (10.0*maxang))*beam->size*movdir;
+		
 		VectorCopy(start, end);
 		if(!beam->type)
-			end[2] -= 2.5*beam->size;
+			end[2] -= (2.5 + pow(fabs(maxang),2)*10)*beam->size;
 		else
-			end[2] += 2.5*beam->size;
+			end[2] += (2.5 + pow(fabs(maxang),2)*10)*beam->size;
 
 		if(beam->rotating)
 		{
-			end[0] += sin(rs_realtime)*(10*beam->xang)*beam->size; //angle in rads
-			end[1] += cos(rs_realtime)*(10*beam->yang)*beam->size;
+			end[0] += sin(rs_realtime)*(pow(fabs(maxang*10), 3)*beam->xang)*beam->size; //angle in rads
+			end[1] += cos(rs_realtime)*(pow(fabs(maxang*10), 3)*beam->yang)*beam->size;
 		}
 		else
 		{
-			end[0] += (10*beam->xang)*beam->size; //angle in rads
-			end[1] += (10*beam->yang)*beam->size;
+			end[0] += (pow(fabs(maxang*10), 3)*beam->xang)*beam->size; //angle in rads
+			end[1] += (pow(fabs(maxang*10), 3)*beam->yang)*beam->size;
 		}
 
 		VectorSubtract(end, start, vec);
