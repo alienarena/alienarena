@@ -1106,22 +1106,38 @@ void UploadStats(void) { //put all updated files on the server
     fceSetInteger(0, FCE_SET_MAX_RESPONSE_WAIT, 1000);
 	
 	// Connect to FTP server
-	error = fceConnect(0,"217.168.144.141","alienarena","password");
+	error = fceConnect(0,"ftp.martianbackup.com","user","password");
 	if(error < 0) {
 		printf("Error connecting to host!\n");
 		return;
 	}
+	else 
+		printf("Connected Succesfully!\n");
 
-	//change to correct dir
-	error = fceSetServerDir (0, "/public_html");
+	//change to correct dir if needed
+	/*error = fceSetServerDir (0, "/public_html");
+	if(error < 0) {
+		printf("Error changing directory!\n");
+		fceClose(0);
+		return;
+	}*/	
+
+	error = fcePutFile(0, "playerrank.db");
+	if(error < 0) {
+		printf("Error uploading player database file!\n", i);
+		fceClose(0);
+		return;
+	}
+	else
+		printf("Player database successfully uploaded!\n");
+	
+	error = fceSetServerDir (0, "aastats");
 	if(error < 0) {
 		printf("Error changing directory!\n");
 		fceClose(0);
 		return;
 	}
-	else 
-		printf("Connected Succesfully!\n");
-	
+
 	for(i = 1; i < 11; i++) {
 		sprintf(a_string, "stats%i.html", i);
 		error = fcePutFile(0, a_string);
@@ -1160,16 +1176,6 @@ void UploadStats(void) { //put all updated files on the server
 		fclose(filename);
 	}
 	printf("Clan stats successfully uploaded!\n");
-
-	error = fcePutFile(0, "playerrank.db");
-	if(error < 0) {
-		printf("Error uploading player database file!\n", i);
-		fceClose(0);
-		return;
-	}
-	else
-		printf("Player database successfully uploaded!\n");
-
 
 	fceClose(0);
 
