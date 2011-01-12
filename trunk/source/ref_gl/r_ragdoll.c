@@ -305,7 +305,6 @@ void R_addUniversalJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int o
 
 }
 
-
 void R_CreateWorldObject( void )
 {
 	// Initialize the world

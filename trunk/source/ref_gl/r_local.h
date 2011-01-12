@@ -294,9 +294,7 @@ void R_FB_InitTextures(void);
 
 //VBO
 void R_VCInit(void);
-void GL_BindVBO(vertCache_t *cache);
-vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent);
-vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent);
+void GL_BuildSurfaceVBO(msurface_t *surf);
 void R_VCShutdown(void);
 
 //BLOOMS[start]

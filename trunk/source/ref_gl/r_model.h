@@ -234,6 +234,13 @@ typedef struct msurface_s
 
 	float	tangentSpaceTransform[3][3];
 
+	//vbo
+	unsigned vbo_id;
+	int	xyz_size;
+	int st_size;
+	int lm_size;
+	int has_vbo;
+
 } msurface_t;
 
 typedef struct mnode_s
@@ -386,13 +393,7 @@ typedef struct model_s
 	byte		*tangents;
 
 	fstvert_t	*st;
-	neighbors_t *neighbors;
-
-	//vbo
-	//vertCache_t	*vbo_st;
-	//vertCache_t	*vbo_xyz;
-	//vertCache_t	*vbo_color;
-	//vertCache_t	*vbo_normals;
+	neighbors_t *neighbors;	
 
 	//ragdoll info
 	int hasRagDoll;

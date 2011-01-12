@@ -748,6 +748,7 @@ static void GL_RenderLightmappedPoly( msurface_t *surf )
 	image_t *image = R_TextureAnimation( surf->texinfo );
 	qboolean is_dynamic = false;
 	unsigned lmtex = surf->lightmaptexturenum;
+	glpoly_t *p = surf->polys;
 
 	surf->normalchain = r_normalsurfaces;
 	r_normalsurfaces = surf;
@@ -846,9 +847,7 @@ dynamic:
 		//parallax maps
 		if(gl_parallaxmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)
 			&& strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) 
-		{
-			R_InitVArrays (VERT_MULTI_TEXTURED);
-
+		{			
 			glUseProgramObjectARB( g_programObj );
 
 			GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
@@ -906,16 +905,35 @@ dynamic:
 
 			glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 
-			R_AddLightMappedSurfToVArray (surf, scroll);
+			if(gl_state.vbo) 
+			{
+				qglBindBufferARB(GL_ARRAY_BUFFER_ARB, surf->vbo_id);
+				qglEnableClientState( GL_VERTEX_ARRAY );
+ 				
+				qglVertexPointer(3, GL_FLOAT, 0, 0);
+
+				qglClientActiveTextureARB (GL_TEXTURE0);
+				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				qglTexCoordPointer(2, GL_FLOAT, 0, (void*)surf->xyz_size);
+
+				qglClientActiveTextureARB (GL_TEXTURE1);
+				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->xyz_size + surf->st_size));
+				
+				qglDrawArrays (GL_POLYGON, 0, p->numverts);
+			}
+			else
+			{
+				R_InitVArrays (VERT_MULTI_TEXTURED);
+				R_AddLightMappedSurfToVArray (surf, scroll);
+			}
 
 			glUseProgramObjectARB( 0 );
 
 		}
 		//normal mapped surface for dynamic lights
 		else if(is_dynamic && brightest > 0 && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) 
-		{
-			R_InitVArrays (VERT_MULTI_TEXTURED);
-
+		{			
 			glUseProgramObjectARB( g_programObj );
 
 			GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
@@ -958,7 +976,28 @@ dynamic:
 
 			glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 
-			R_AddLightMappedSurfToVArray (surf, scroll);
+			if(gl_state.vbo) 
+			{
+				qglBindBufferARB(GL_ARRAY_BUFFER_ARB, surf->vbo_id);
+				qglEnableClientState( GL_VERTEX_ARRAY );
+ 				
+				qglVertexPointer(3, GL_FLOAT, 0, 0);
+
+				qglClientActiveTextureARB (GL_TEXTURE0);
+				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				qglTexCoordPointer(2, GL_FLOAT, 0, (void*)surf->xyz_size);
+
+				qglClientActiveTextureARB (GL_TEXTURE1);
+				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->xyz_size + surf->st_size));
+				
+				qglDrawArrays (GL_POLYGON, 0, p->numverts);
+			}
+			else
+			{
+				R_InitVArrays (VERT_MULTI_TEXTURED);
+				R_AddLightMappedSurfToVArray (surf, scroll);
+			}
 
 			glUseProgramObjectARB( 0 );
 
@@ -968,10 +1007,30 @@ dynamic:
 		{
 			GL_MBind( GL_TEXTURE0, image->texnum );
 			GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );
+						
+			if(gl_state.vbo) 
+			{
+				qglBindBufferARB(GL_ARRAY_BUFFER_ARB, surf->vbo_id);
+				qglEnableClientState( GL_VERTEX_ARRAY );
+ 				
+				qglVertexPointer(3, GL_FLOAT, 0, 0);
 
-			R_InitVArrays (VERT_MULTI_TEXTURED);
+				qglClientActiveTextureARB (GL_TEXTURE0);
+				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				qglTexCoordPointer(2, GL_FLOAT, 0, (void*)surf->xyz_size);
 
-			R_AddLightMappedSurfToVArray (surf, scroll);
+				qglClientActiveTextureARB (GL_TEXTURE1);
+				qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->xyz_size + surf->st_size));
+				
+				qglDrawArrays (GL_POLYGON, 0, p->numverts);
+			}
+			else
+			{
+				R_InitVArrays (VERT_MULTI_TEXTURED);
+				R_AddLightMappedSurfToVArray (surf, scroll);
+			}
+			
 		}
 	}
 	//no glsl, standard render
@@ -986,6 +1045,8 @@ dynamic:
 	}
 
 	R_KillVArrays ();
+	if (gl_state.vbo)
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
 	if (SurfaceIsAlphaBlended(surf))
 		qglDisable( GL_ALPHA_TEST);

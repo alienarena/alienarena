@@ -1816,7 +1816,7 @@ int R_Init( void *hinstance, void *hWnd )
 
 	gl_state.vbo = false;
 
-	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
+	/*if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
 	{
 		qglBindBufferARB = (void *)qwglGetProcAddress("glBindBufferARB");
 		qglDeleteBuffersARB = (void *)qwglGetProcAddress("glDeleteBuffersARB");
@@ -1828,13 +1828,12 @@ int R_Init( void *hinstance, void *hWnd )
 		{
 			Com_Printf("...using GL_ARB_vertex_buffer_object\n");
 			gl_state.vbo = true;
-			R_VCInit();
 		}
 	} else
 	{
 		Com_Printf(S_COLOR_RED "...GL_ARB_vertex_buffer_object not found\n");
 		gl_state.vbo = false;
-	}
+	}*/
 
 #if defined DARWIN_SPECIAL_CASE
 	/*
