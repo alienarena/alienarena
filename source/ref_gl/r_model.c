@@ -1308,6 +1308,9 @@ void Mod_LoadFaces (lump_t *l)
 			} while ( (stage = stage->next) );
 		}
 		GL_CalcSurfaceNormals(out);
+
+		GL_BuildSurfaceVBO(out);
+
 	}
 	GL_EndBuildingLightmaps ();
 }
@@ -1664,14 +1667,12 @@ static int Mod_FindTriangleWithEdge(neighbors_t * neighbors, dtriangle_t * tris,
 		}
 	}
 
-	// normal edge, setup neighbour pointers
-	if (!dup && found != -1) {	// / FIXED by BERSERKER: � Tenebrae ��
-								// ����������� ������, ����� found == -1
-								// -> ������ ������ ������!
+	// normal edge, setup neighbor pointers
+	if (!dup && found != -1) {	
 		neighbors[found].n[foundj] = triIndex;
 		return found;
 	}
-	// naughty egde let no-one have the neighbour
+	// naughty edge let no-one have the neighbor
 	return -1;
 }
 
@@ -1686,7 +1687,7 @@ static void Mod_BuildTriangleNeighbors(neighbors_t * neighbors,
 {
 	int i, j;
 
-	// set neighbours to -1
+	// set neighbors to -1
 	for (i = 0; i < numtris; i++) {
 		for (j = 0; j < 3; j++)
 			neighbors[i].n[j] = -1;

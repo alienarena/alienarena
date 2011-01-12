@@ -103,7 +103,7 @@ typedef struct
 #define RDF_BLOOM         4      //BLOOMS
 
 
-#define	MAX_VERTEX_CACHES	4096
+#define	MAX_VERTEX_CACHES	65536
 #define MAX_VBO_XYZs		65536
 
 typedef enum {
@@ -120,22 +120,9 @@ typedef enum {
 } vertStoreMode_t;
 
 typedef struct vertCache_s
-{
-	struct vertCache_s	*prev;
-	struct vertCache_s	*next;
-
-	vertCacheMode_t		mode;
-
+{	
 	int					size;
-
 	void				*pointer;
-
-	vertStoreMode_t		store;
-	struct model_s		*mod;
-	int					frame;
-	float				backlerp;
-	float				angles[3];
-	float				origin[3];
 	unsigned			id;
 } vertCache_t;
 
@@ -148,6 +135,8 @@ typedef struct {
 vertCacheManager_t	vcm;
 
 vec3_t	vbo_shadow[MAX_VBO_XYZs];
+vec3_t	vbo_shadow2[MAX_VBO_XYZs];
+vec3_t	vbo_shadow3[MAX_VBO_XYZs];
 
 typedef struct entity_s
 {

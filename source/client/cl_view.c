@@ -909,9 +909,6 @@ void V_RenderView( float stereo_separation )
 
 	cl.refdef.rdflags |= RDF_BLOOM;   //BLOOMS
 
-//	R_VCFreeFrame();
-//	need_free_vbo = false;
-
 	R_RenderFrame (&cl.refdef);
 	if (cl_stats->value)
 		Com_Printf ("ent:%i  lt:%i  part:%i\n", r_numentities, r_numdlights, r_numparticles);

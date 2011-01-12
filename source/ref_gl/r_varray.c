@@ -58,6 +58,7 @@ float	tex_array[MAX_ARRAY][2];
 float	vert_array[MAX_ARRAY][3];
 float	col_array[MAX_ARRAY][4];
 float	norm_array[MAX_ARRAY][3];
+float	tan_array[MAX_ARRAY][4];
 
 // sizes of our vertexes.  the vertex type can be used as an index into this array
 int VertexSizes[] = {5, 5, 7, 7, 9, 11, 5, 3, 12, 5};
@@ -159,7 +160,7 @@ void R_InitVArrays (int varraytype)
 		return;
 	}
 
-	// a standard 2 tmu multitexture needs 2 texcoord pointers.
+	// a standard 2 tmu multitexture needs 2 texcoord pointers. to do - for bsp surface VBO, we will have some changes here
 	if (varraytype == VERT_MULTI_TEXTURED)
 	{
 		// uses array indices 3, 4
@@ -388,60 +389,61 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 	float	*v;
 	int		i;
 
-	for (; p; p = p->chain)
+	//to do - this portion will get skipped if using VBO
+	
+	// reset pointer and counter
+	VArray = &VArrayVerts[0];
+	VertexCounter = 0;
+
+	//non warped surfaces only have one poly
+	for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
 	{
-		// reset pointer and counter
-		VArray = &VArrayVerts[0];
-		VertexCounter = 0;
+		// copy in vertex data
+		VArray[0] = v[0];
+		VArray[1] = v[1];
+		VArray[2] = v[2];
 
-		for (v = p->verts[0], i = 0 ; i < p->numverts; i++, v += VERTEXSIZE)
-		{
-			// copy in vertex data
-			VArray[0] = v[0];
-			VArray[1] = v[1];
-			VArray[2] = v[2];
+		// world texture coords
+		VArray[3] = v[3] + scroll;
+		VArray[4] = v[4];
 
-			// world texture coords
-			VArray[3] = v[3] + scroll;
-			VArray[4] = v[4];
+		// lightmap texture coords
+		VArray[5] = v[5];
+		VArray[6] = v[6];
 
-			// lightmap texture coords
-			VArray[5] = v[5];
-			VArray[6] = v[6];
-
-			// nothing else is needed
-			// increment pointer and counter
-			VArray += VertexSizes[VERT_MULTI_TEXTURED];
-			VertexCounter++;
-		}
-
-		/*
-		 * Mapping tool. Outline the light-mapped polygons.
-		 *  gl_showpolys == 1 : perform depth test.
-		 *  gl_showpolys == 2 : disable depth test. everything in "visible set"
-		 */
-		if (gl_showpolys->value) // restricted cvar, maxclients = 1
-		{
-			qglDisable (GL_TEXTURE_2D);
-			if (gl_showpolys->value > 1.9f)
-			{ // lots of lines so make them narrower
-				qglDisable(GL_DEPTH_TEST);
-				qglLineWidth (2.0f);
-			}
-			else
-			{ // less busy, wider line
-				qglLineWidth (3.0f);
-			}
-			qglColor4f (1.0f, 1.0f, 1.0f, 1.0f);
-			qglBegin (GL_LINE_LOOP);
-			for (v = p->verts[0], i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
-				qglVertex3fv(p->verts[i]);
-			}
-			qglEnd();
-			qglEnable (GL_DEPTH_TEST);
-			qglEnable (GL_TEXTURE_2D);
-		}
+		// nothing else is needed
+		// increment pointer and counter
+		VArray += VertexSizes[VERT_MULTI_TEXTURED];
+		VertexCounter++;
 	}
+
+	/*
+	 * Mapping tool. Outline the light-mapped polygons.
+	 *  gl_showpolys == 1 : perform depth test.
+	 *  gl_showpolys == 2 : disable depth test. everything in "visible set"
+	 */
+	if (gl_showpolys->value) // restricted cvar, maxclients = 1
+	{
+		qglDisable (GL_TEXTURE_2D);
+		if (gl_showpolys->value > 1.9f)
+		{ // lots of lines so make them narrower
+			qglDisable(GL_DEPTH_TEST);
+			qglLineWidth (2.0f);
+		}
+		else
+		{ // less busy, wider line
+			qglLineWidth (3.0f);
+		}
+		qglColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+		qglBegin (GL_LINE_LOOP);
+		for (v = p->verts[0], i = 0; i < p->numverts; i++, v += VERTEXSIZE) {
+			qglVertex3fv(p->verts[i]);
+		}
+		qglEnd();
+		qglEnable (GL_DEPTH_TEST);
+		qglEnable (GL_TEXTURE_2D);
+	}
+	
 	// draw the polys
 	qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 }
