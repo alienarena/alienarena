@@ -160,7 +160,6 @@ extern	cvar_t	*gl_lightmaptype;
 extern	cvar_t	*gl_modulate;
 extern	cvar_t	*gl_playermip;
 extern	cvar_t	*gl_drawbuffer;
-extern	cvar_t	*gl_3dlabs_broken;
 extern	cvar_t	*gl_driver;
 extern	cvar_t	*gl_swapinterval;
 extern	cvar_t	*gl_texturemode;
@@ -168,6 +167,7 @@ extern	cvar_t	*gl_texturealphamode;
 extern	cvar_t	*gl_texturesolidmode;
 extern	cvar_t	*gl_lockpvs;
 extern	cvar_t	*gl_vlights;
+extern  cvar_t	*gl_usevbo;
 
 extern	cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
@@ -179,7 +179,6 @@ extern cvar_t *r_anisotropic;
 extern cvar_t *r_ext_max_anisotropy;
 
 extern cvar_t	*r_overbrightbits;
-extern cvar_t	*gl_ext_mtexcombine;
 
 extern cvar_t	*gl_normalmaps;
 extern cvar_t	*gl_shadowmaps;
@@ -293,8 +292,11 @@ void R_GLSLPostProcess(void);
 void R_FB_InitTextures(void);
 
 //VBO
+extern GLuint vboId;
+void R_LoadVBOSubsystem(void);
 void R_VCInit(void);
-void GL_BuildSurfaceVBO(msurface_t *surf);
+void GL_BuildVBOBufferSize(msurface_t *surf);
+void GL_BuildWorldVBO(void);
 void R_VCShutdown(void);
 
 //BLOOMS[start]

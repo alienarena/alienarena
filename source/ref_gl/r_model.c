@@ -1194,6 +1194,7 @@ void GL_BeginBuildingLightmaps (model_t *m);
 Mod_LoadFaces
 =================
 */
+extern int totalVBOsize;
 void Mod_LoadFaces (lump_t *l)
 {
 	dface_t		*in;
@@ -1217,6 +1218,8 @@ void Mod_LoadFaces (lump_t *l)
 	currentmodel = loadmodel;
 
 	GL_BeginBuildingLightmaps (loadmodel);
+
+	R_VCInit();
 
 	for ( surfnum=0 ; surfnum<count ; surfnum++, in++, out++)
 	{
@@ -1308,11 +1311,13 @@ void Mod_LoadFaces (lump_t *l)
 			} while ( (stage = stage->next) );
 		}
 		GL_CalcSurfaceNormals(out);
-
-		GL_BuildSurfaceVBO(out);
-
+		
+		if(gl_state.vbo) {
+			GL_BuildVBOBufferSize(out);
+			out->has_vbo = false;
+		}
 	}
-	GL_EndBuildingLightmaps ();
+	GL_EndBuildingLightmaps ();	
 }
 
 
@@ -2509,6 +2514,10 @@ void R_BeginRegistration (char *model)
 
 	//ODE
 	R_BuildWorldTrimesh ();
+
+	//VBO
+	if(gl_state.vbo)
+		GL_BuildWorldVBO();
 }
 
 /*

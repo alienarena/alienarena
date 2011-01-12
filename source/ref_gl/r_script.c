@@ -1337,7 +1337,7 @@ rscript_t	*surfaceScript(msurface_t *surf)
 }
 void SetVertexOverbrights (qboolean toggle)
 {
-	if (!r_overbrightbits->value || !gl_ext_mtexcombine->value)
+	if (!r_overbrightbits->value)
 		return;
 
 	if (toggle)//turn on

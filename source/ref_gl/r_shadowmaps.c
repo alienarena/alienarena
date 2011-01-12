@@ -387,7 +387,7 @@ void R_RecursiveShadowMapWorldNode (mnode_t *node, int clipflags)
 		}
 		else
 		{
-			if ( qglMTexCoord2fSGIS && !( surf->flags & SURF_DRAWTURB ) )
+			if (!( surf->flags & SURF_DRAWTURB ) )
 			{
 				DrawGLTexturelessPoly (surf);
 			}

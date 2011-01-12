@@ -49,7 +49,6 @@ static cvar_t *gl_finish;
 static cvar_t *gl_swapinterval;
 static cvar_t *r_bloom;
 static cvar_t *r_overbrightbits;
-static cvar_t *gl_ext_mtexcombine;
 
 static cvar_t *_windowed_mouse;
 
@@ -91,7 +90,6 @@ static menuaction_s		s_high_action;
 static menuaction_s		s_highest_action;
 static menulist_s		s_bloom_box;
 static menuslider_s		s_bloom_slider;
-static menulist_s		s_texcombine_box;
 static menuslider_s		s_overbright_slider;
 static menuslider_s		s_modulate_slider;
 static menufield_s		s_height_field;
@@ -134,11 +132,6 @@ static void BloomCallback( void *s )
 static void BloomSetCallback( void *s)
 {
 	Cvar_SetValue("r_bloom", s_bloom_box.curvalue);
-}
-
-static void MtexCallback( void *s)
-{
-	Cvar_SetValue("gl_ext_mtexcombine", s_texcombine_box.curvalue);
 }
 
 static void ModulateCallback( void *s )
@@ -201,7 +194,6 @@ static void SetLowest( void *unused )
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -227,7 +219,6 @@ static void SetLow( void *unused )
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -254,7 +245,6 @@ static void SetMedium( void *unused )
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -281,7 +271,6 @@ static void SetHigh( void *unused )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -308,7 +297,6 @@ static void SetHighest( void *unused )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -384,7 +372,6 @@ static void ApplyChanges( void *unused )
 
 	Cvar_SetValue( "r_bloom", s_bloom_box.curvalue);
 	Cvar_SetValue( "r_bloom_intensity", s_bloom_slider.curvalue/10);
-	Cvar_SetValue( "gl_ext_mtexcombine", s_texcombine_box.curvalue);
 	Cvar_SetValue( "r_overbrightbits",
 			(s_overbright_slider.curvalue == 3.0f ? 4.0f : s_overbright_slider.curvalue) );
 	Cvar_SetValue( "_windowed_mouse", s_windowed_mouse.curvalue);
@@ -465,9 +452,7 @@ void VID_MenuInit( void )
 	if ( !r_bloom )
 		r_bloom = Cvar_Get( "r_bloom", "0", CVAR_ARCHIVE );
 	if ( !r_bloom_intensity )
-		r_bloom_intensity = Cvar_Get( "r_bloom_intensity", "0.5", CVAR_ARCHIVE);
-	if ( !gl_ext_mtexcombine )
-		gl_ext_mtexcombine = Cvar_Get( "gl_ext_mtexcombine", "1", CVAR_ARCHIVE);
+		r_bloom_intensity = Cvar_Get( "r_bloom_intensity", "0.5", CVAR_ARCHIVE);	
 	if ( !r_overbrightbits )
 		r_overbrightbits = Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE);
 	if ( !gl_modulate )
@@ -578,14 +563,6 @@ void VID_MenuInit( void )
 	s_bloom_slider.minvalue = 0;
 	s_bloom_slider.maxvalue = 20;
 	s_bloom_slider.generic.callback = BloomCallback;
-
-	s_texcombine_box.generic.type = MTYPE_SPINCONTROL;
-	s_texcombine_box.generic.x	= 24*scale;
-	s_texcombine_box.generic.y	= FONTSCALE*130*scale;
-	s_texcombine_box.generic.name	= "multitexture combine";
-	s_texcombine_box.itemnames = onoff_names;
-	s_texcombine_box.generic.callback = MtexCallback;
-	s_texcombine_box.curvalue = gl_ext_mtexcombine->value;
 
 	s_overbright_slider.generic.type	= MTYPE_SLIDER;
 	s_overbright_slider.generic.x		= 24*scale;
@@ -716,7 +693,6 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_fs_box);
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_bloom_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_bloom_slider);
-	Menu_AddItem( &s_opengl_menu, ( void * ) &s_texcombine_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_overbright_slider );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_tq_slider );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_normalmaps_box );

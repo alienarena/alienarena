@@ -336,8 +336,8 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 
 				if (gl_state.fragment_program && !fod)
 				{
-					qglMTexCoord2fSGIS(GL_TEXTURE0, s, t);
-					qglMTexCoord2fSGIS(GL_TEXTURE1, 20*s, 20*t);
+					qglMTexCoord2fARB(GL_TEXTURE0, s, t);
+					qglMTexCoord2fARB(GL_TEXTURE1, 20*s, 20*t);
 				}
 				else
 					qglTexCoord2f (s, t);
@@ -345,21 +345,13 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 				if (!(fa->texinfo->flags & SURF_FLOWING))
 
 				{
-
 					nv[0] =v[0];
 					nv[1] =v[1];
 
-//					#if !id386
 					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
 
 							+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
-/*
-					#else
-					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+r_newrefdef.time)
 
-							+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
-					#endif
-*/
 					qglVertex3fv (nv);
 				}
 				else
@@ -397,13 +389,8 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 				nv[0] =v[0];
 				nv[1] =v[1];
 
-//				#if !id386
 				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
 						+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
-//				#else
-//				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+r_newrefdef.time)
-//						+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
-//				#endif
 
 				qglVertex3fv (nv);
 			}
