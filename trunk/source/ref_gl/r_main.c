@@ -116,11 +116,12 @@ cvar_t  *r_wave; // Water waves
 cvar_t	*r_shadowmapratio;
 
 cvar_t	*r_overbrightbits;
-cvar_t	*gl_ext_mtexcombine;
 
 cvar_t	*gl_vlights;
 
 cvar_t	*gl_nosubimage;
+
+cvar_t	*gl_usevbo;
 
 cvar_t	*gl_particle_min_size;
 cvar_t	*gl_particle_max_size;
@@ -161,8 +162,6 @@ cvar_t	*gl_texturemode;
 cvar_t	*gl_texturealphamode;
 cvar_t	*gl_texturesolidmode;
 cvar_t	*gl_lockpvs;
-
-cvar_t	*gl_3dlabs_broken;
 
 cvar_t	*vid_fullscreen;
 cvar_t	*vid_gamma;
@@ -1219,12 +1218,11 @@ void R_Register( void )
 	gl_drawbuffer = Cvar_Get( "gl_drawbuffer", "GL_BACK", 0 );
 	gl_swapinterval = Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE );
 
-	gl_3dlabs_broken = Cvar_Get( "gl_3dlabs_broken", "1", CVAR_ARCHIVE );
-
 	r_shaders = Cvar_Get ("r_shaders", "1", CVAR_ARCHIVE);
 
 	r_overbrightbits = Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE );
-	gl_ext_mtexcombine = Cvar_Get( "gl_ext_mtexcombine", "1", CVAR_ARCHIVE );
+
+	gl_usevbo = Cvar_Get("gl_usevbo", "0", CVAR_ARCHIVE );
 
 	gl_mirror = Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE);
 
@@ -1336,7 +1334,6 @@ void R_SetLowest(void)
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -1367,7 +1364,6 @@ void R_SetLow( void )
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -1398,7 +1394,6 @@ void R_SetMedium( void )
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -1429,7 +1424,6 @@ void R_SetHigh( void )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -1460,7 +1454,6 @@ void R_SetHighest( void )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -1665,8 +1658,8 @@ int R_Init( void *hinstance, void *hWnd )
 		if ( gl_ext_multitexture->value )
 		{
 			Com_Printf ("...using GL_ARB_multitexture\n" );
-			qglMTexCoord2fSGIS = ( void * ) qwglGetProcAddress( "glMultiTexCoord2fARB" );
-			qglMTexCoord3fSGIS = ( void * ) qwglGetProcAddress( "glMultiTexCoord3fARB" );
+			qglMTexCoord2fARB = ( void * ) qwglGetProcAddress( "glMultiTexCoord2fARB" );
+			qglMTexCoord3fARB = ( void * ) qwglGetProcAddress( "glMultiTexCoord3fARB" );
 			qglMultiTexCoord3fvARB = (void*)qwglGetProcAddress("glMultiTexCoord3fvARB");
 			qglActiveTextureARB = ( void * ) qwglGetProcAddress( "glActiveTextureARB" );
 			qglClientActiveTextureARB = ( void * ) qwglGetProcAddress( "glClientActiveTextureARB" );
@@ -1688,44 +1681,12 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		Com_Printf ("...GL_ARB_multitexture not found\n" );
 	}
-
-	if ( strstr( gl_config.extensions_string, "GL_SGIS_multitexture" ) )
-	{
-		if ( qglActiveTextureARB )
-		{
-			Com_Printf ("...GL_SGIS_multitexture deprecated in favor of ARB_multitexture\n" );
-		}
-		else if ( gl_ext_multitexture->value )
-		{
-			Com_Printf ("...using GL_SGIS_multitexture\n" );
-			qglMTexCoord2fSGIS = ( void * ) qwglGetProcAddress( "glMTexCoord2fSGIS" );
-			qglMTexCoord3fSGIS = ( void * ) qwglGetProcAddress( "glMTexCoord3fSGIS" );
-			qglSelectTextureSGIS = ( void * ) qwglGetProcAddress( "glSelectTextureSGIS" );
-			GL_TEXTURE0 = GL_TEXTURE0_SGIS;
-			GL_TEXTURE1 = GL_TEXTURE1_SGIS;
-		}
-		else
-		{
-			Com_Printf ("...ignoring GL_SGIS_multitexture\n" );
-		}
-	}
-	else
-	{
-		Com_Printf ("...GL_SGIS_multitexture not found\n" );
-	}
-
+	
 	gl_config.mtexcombine = false;
 	if ( strstr( gl_config.extensions_string, "GL_ARB_texture_env_combine" ) )
 	{
-		if ( gl_ext_mtexcombine->value )
-		{
-			Com_Printf( "...using GL_ARB_texture_env_combine\n" );
-			gl_config.mtexcombine = true;
-		}
-		else
-		{
-			Com_Printf( "...ignoring GL_ARB_texture_env_combine\n" );
-		}
+		Com_Printf( "...using GL_ARB_texture_env_combine\n" );
+		gl_config.mtexcombine = true;
 	}
 	else
 	{
@@ -1735,15 +1696,8 @@ int R_Init( void *hinstance, void *hWnd )
 	{
 		if ( strstr( gl_config.extensions_string, "GL_EXT_texture_env_combine" ) )
 		{
-			if ( gl_ext_mtexcombine->value )
-			{
-				Com_Printf( "...using GL_EXT_texture_env_combine\n" );
-				gl_config.mtexcombine = true;
-			}
-			else
-			{
-				Com_Printf( "...ignoring GL_EXT_texture_env_combine\n" );
-			}
+			Com_Printf( "...using GL_EXT_texture_env_combine\n" );
+			gl_config.mtexcombine = true;
 		}
 		else
 		{
@@ -1814,26 +1768,7 @@ int R_Init( void *hinstance, void *hWnd )
 	else
 		Com_Printf("...GL_EXT_stencil_two_side not found\n");
 
-	gl_state.vbo = false;
-
-	/*if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
-	{
-		qglBindBufferARB = (void *)qwglGetProcAddress("glBindBufferARB");
-		qglDeleteBuffersARB = (void *)qwglGetProcAddress("glDeleteBuffersARB");
-		qglGenBuffersARB = (void *)qwglGetProcAddress("glGenBuffersARB");
-		qglBufferDataARB = (void *)qwglGetProcAddress("glBufferDataARB");
-		qglBufferSubDataARB = (void *)qwglGetProcAddress("glBufferSubDataARB");
-
-		if (qglGenBuffersARB && qglBindBufferARB && qglBufferDataARB && qglDeleteBuffersARB)
-		{
-			Com_Printf("...using GL_ARB_vertex_buffer_object\n");
-			gl_state.vbo = true;
-		}
-	} else
-	{
-		Com_Printf(S_COLOR_RED "...GL_ARB_vertex_buffer_object not found\n");
-		gl_state.vbo = false;
-	}*/
+	R_LoadVBOSubsystem();
 
 #if defined DARWIN_SPECIAL_CASE
 	/*

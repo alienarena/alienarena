@@ -411,9 +411,9 @@ BOOL ( WINAPI * qwglSetDeviceGammaRampEXT)( const unsigned char *, const unsigne
 void ( APIENTRY * qglPointParameterfEXT)( GLenum param, GLfloat value );
 void ( APIENTRY * qglPointParameterfvEXT)( GLenum param, const GLfloat *value );
 void ( APIENTRY * qglColorTableEXT)( int, int, int, int, int, const void * );
-void ( APIENTRY * qglSelectTextureSGIS)( GLenum );
-void ( APIENTRY * qglMTexCoord2fSGIS)( GLenum, GLfloat, GLfloat );
-void ( APIENTRY * qglMTexCoord3fSGIS)( GLenum, GLfloat, GLfloat, GLfloat );
+void ( APIENTRY * qglSelectTextureARB)( GLenum );
+void ( APIENTRY * qglMTexCoord2fARB)( GLenum, GLfloat, GLfloat );
+void ( APIENTRY * qglMTexCoord3fARB)( GLenum, GLfloat, GLfloat, GLfloat );
 void ( APIENTRY * qglActiveTextureARB) ( GLenum );
 void ( APIENTRY * qglClientActiveTextureARB) ( GLenum );
 void ( APIENTRY * qglMultiTexCoord3fvARB)( GLenum, GLfloat * );
@@ -3431,9 +3431,9 @@ qboolean QGL_Init( const char *dllname )
 	qglPointParameterfEXT = 0;
 	qglPointParameterfvEXT = 0;
 	qglColorTableEXT = 0;
-	qglSelectTextureSGIS = 0;
-	qglMTexCoord2fSGIS = 0;
-	qglMTexCoord3fSGIS = 0;
+	qglSelectTextureARB = 0;
+	qglMTexCoord2fARB = 0;
+	qglMTexCoord3fARB = 0;
 	qglMultiTexCoord3fvARB = 0;
 
 	return true;

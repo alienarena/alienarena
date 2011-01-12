@@ -235,7 +235,7 @@ typedef struct msurface_s
 	float	tangentSpaceTransform[3][3];
 
 	//vbo
-	unsigned vbo_id;
+	int vbo_pos;
 	int	xyz_size;
 	int st_size;
 	int lm_size;

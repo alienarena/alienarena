@@ -25,11 +25,42 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "r_local.h"
 
+GLuint vboId = 0;
+int	vboPosition;
+int	totalVBObufferSize;
+
 GLvoid			(APIENTRY * qglBindBufferARB)(GLenum target, GLuint buffer);
 GLvoid			(APIENTRY * qglDeleteBuffersARB)(GLsizei n, const GLuint *buffers);
 GLvoid			(APIENTRY * qglGenBuffersARB)(GLsizei n, GLuint *buffers);
 GLvoid			(APIENTRY * qglBufferDataARB)(GLenum target, GLsizeiptrARB size, const GLvoid *data, GLenum usage);
 GLvoid			(APIENTRY * qglBufferSubDataARB)(GLenum target, GLintptrARB offset, GLsizeiptrARB size, const GLvoid *data);
+
+void R_LoadVBOSubsystem(void)
+{
+	gl_state.vbo = false;
+
+	if(!gl_usevbo->value)
+		return;
+
+	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
+	{
+		qglBindBufferARB = (void *)qwglGetProcAddress("glBindBufferARB");
+		qglDeleteBuffersARB = (void *)qwglGetProcAddress("glDeleteBuffersARB");
+		qglGenBuffersARB = (void *)qwglGetProcAddress("glGenBuffersARB");
+		qglBufferDataARB = (void *)qwglGetProcAddress("glBufferDataARB");
+		qglBufferSubDataARB = (void *)qwglGetProcAddress("glBufferSubDataARB");
+
+		if (qglGenBuffersARB && qglBindBufferARB && qglBufferDataARB && qglDeleteBuffersARB)
+		{
+			Com_Printf("...using GL_ARB_vertex_buffer_object\n");
+			gl_state.vbo = true;
+		}
+	} else
+	{
+		Com_Printf(S_COLOR_RED "...GL_ARB_vertex_buffer_object not found\n");
+		gl_state.vbo = false;
+	}
+}
 
 void GL_BuildSurfaceVBO(msurface_t *surf)
 {
@@ -40,8 +71,6 @@ void GL_BuildSurfaceVBO(msurface_t *surf)
 	float	*map2;
 	float	*map3;
 	int		l, m, n;
-
-	//to do - store all id's and vbo total so we can easily delete them before loading new ones here
 
 	if (gl_state.vbo)
 	{
@@ -65,27 +94,69 @@ void GL_BuildSurfaceVBO(msurface_t *surf)
 			map2[m++] = v[6];
 		}
 
+		surf->vbo_pos = vboPosition;
+
 		surf->xyz_size = n*sizeof(float);
 		surf->st_size = l*sizeof(float);
 		surf->lm_size = m*sizeof(float);
 
-		qglGenBuffersARB(1, &surf->vbo_id);
+		surf->has_vbo = true;
 		
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, surf->vbo_id);
-		qglBufferDataARB(GL_ARRAY_BUFFER_ARB, surf->xyz_size + surf->st_size + surf->lm_size, 0, GL_STATIC_DRAW_ARB);
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition, surf->xyz_size, &vbo_shadow3);                             
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size, surf->st_size, &vbo_shadow);                
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size + surf->st_size, surf->lm_size, &vbo_shadow2);  
 
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, 0, surf->xyz_size, &vbo_shadow3);                             
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, surf->xyz_size, surf->st_size, &vbo_shadow);                
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, surf->xyz_size + surf->st_size, surf->lm_size, &vbo_shadow2);  
-
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+		vboPosition += (surf->xyz_size + surf->st_size + surf->lm_size);
 	}
 }
 
+void GL_BuildWorldVBO(void)
+{
+	msurface_t *surf;
+
+	qglGenBuffersARB(1, &vboId);
+		
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+	qglBufferDataARB(GL_ARRAY_BUFFER_ARB, totalVBObufferSize*sizeof(float), 0, GL_STATIC_DRAW_ARB);
+
+	for (surf = &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface]; surf < &r_worldmodel->surfaces[r_worldmodel->firstmodelsurface + r_worldmodel->nummodelsurfaces] ; surf++)
+	{
+		if (surf->texinfo->flags & SURF_SKY)
+		{   // no skies here
+			continue;
+		}
+		else
+		{
+			if (!( surf->flags & SURF_DRAWTURB ) )
+			{
+				GL_BuildSurfaceVBO(surf);
+			}
+		}
+	}
+
+	if(gl_state.vbo)
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+}
+
+void GL_BuildVBOBufferSize(msurface_t *surf)
+{
+	glpoly_t *p = surf->polys;
+
+	if (!( surf->flags & SURF_DRAWTURB ) )
+	{
+		totalVBObufferSize += 7*p->numverts;
+	}
+}
 void R_VCInit()
 {
 	if (!gl_state.vbo)
 		return;
+
+	//clear out previous buffer
+	qglDeleteBuffersARB(1, &vboId);
+
+	vboPosition = 0;
+	totalVBObufferSize = 0;	
 }
 
 
@@ -94,4 +165,7 @@ void R_VCShutdown()
 
 	if (!gl_state.vbo)
 		return;
+
+	//delete buffers
+	qglDeleteBuffersARB(1, &vboId);
 }
