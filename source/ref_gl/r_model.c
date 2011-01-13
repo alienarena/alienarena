@@ -1313,7 +1313,7 @@ void Mod_LoadFaces (lump_t *l)
 		GL_CalcSurfaceNormals(out);
 		
 		if(gl_state.vbo) {
-			GL_BuildVBOBufferSize(out);
+			R_BuildVBOBufferSize(out);
 			out->has_vbo = false;
 		}
 	}
@@ -1560,8 +1560,8 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	R_ClearAllRagdolls();
 
 	//ODE - create new world(flush out old first?)
-	R_DestroyWorldObject();
-	R_CreateWorldObject();
+	ODE_DestroyWorldObject();
+	ODE_CreateWorldObject();
 
 	r_numWorldLights = 0;
 
@@ -2513,11 +2513,11 @@ void R_BeginRegistration (char *model)
 	R_RegisterLightGroups();
 
 	//ODE
-	R_BuildWorldTrimesh ();
+	ODE_BuildWorldTrimesh ();
 
 	//VBO
 	if(gl_state.vbo)
-		GL_BuildWorldVBO();
+		R_BuildWorldVBO();
 }
 
 /*

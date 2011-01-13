@@ -28,11 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_ragdoll.h"
 #include "r_text.h"
 
-// stencil volumes
-glStencilFuncSeparatePROC			qglStencilFuncSeparate		= NULL;
-glStencilOpSeparatePROC				qglStencilOpSeparate		= NULL;
-glStencilMaskSeparatePROC			qglStencilMaskSeparate		= NULL;
-
 void R_Clear (void);
 
 viddef_t	vid;
@@ -131,8 +126,6 @@ cvar_t	*gl_particle_att_b;
 cvar_t	*gl_particle_att_c;
 
 cvar_t	*gl_ext_swapinterval;
-cvar_t	*gl_ext_palettedtexture;
-cvar_t	*gl_ext_multitexture;
 cvar_t	*gl_ext_pointparameters;
 cvar_t	*gl_ext_compiled_vertex_array;
 
@@ -146,7 +139,6 @@ cvar_t	*gl_mode;
 cvar_t	*gl_dynamic;
 cvar_t	*gl_modulate;
 cvar_t	*gl_nobind;
-cvar_t	*gl_round_down;
 cvar_t	*gl_picmip;
 cvar_t	*gl_skymip;
 cvar_t	*gl_showtris;
@@ -155,8 +147,6 @@ cvar_t	*gl_finish;
 cvar_t	*gl_clear;
 cvar_t	*gl_cull;
 cvar_t	*gl_polyblend;
-cvar_t	*gl_flashblend;
-cvar_t	*gl_playermip;
 cvar_t	*gl_swapinterval;
 cvar_t	*gl_texturemode;
 cvar_t	*gl_texturealphamode;
@@ -1180,7 +1170,6 @@ void R_Register( void )
 	gl_lightmap = Cvar_Get ("gl_lightmap", "0", 0);
 	gl_shadows = Cvar_Get ("gl_shadows", "2", CVAR_ARCHIVE );
 	gl_nobind = Cvar_Get ("gl_nobind", "0", 0);
-	gl_round_down = Cvar_Get ("gl_round_down", "1", 0);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", 0);
 	gl_skymip = Cvar_Get ("gl_skymip", "0", 0);
 	gl_showtris = Cvar_Get ("gl_showtris", "0", 0);
@@ -1189,8 +1178,6 @@ void R_Register( void )
 	gl_clear = Cvar_Get ("gl_clear", "0", 0);
 	gl_cull = Cvar_Get ("gl_cull", "1", 0);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", 0);
-	gl_flashblend = Cvar_Get ("gl_flashblend", "0", CVAR_ARCHIVE);
-	gl_playermip = Cvar_Get ("gl_playermip", "0", 0);
 
 // OPENGL_DRIVER defined by in config.h
 #if defined DARWIN_SPECIAL_CASE
@@ -1210,8 +1197,6 @@ void R_Register( void )
 	gl_lockpvs = Cvar_Get( "gl_lockpvs", "0", 0 );
 
 	gl_ext_swapinterval = Cvar_Get( "gl_ext_swapinterval", "1", CVAR_ARCHIVE );
-	gl_ext_palettedtexture = Cvar_Get( "gl_ext_palettedtexture", "0", CVAR_ARCHIVE );
-	gl_ext_multitexture = Cvar_Get( "gl_ext_multitexture", "1", CVAR_ARCHIVE );
 	gl_ext_pointparameters = Cvar_Get( "gl_ext_pointparameters", "0", CVAR_ARCHIVE );
 	gl_ext_compiled_vertex_array = Cvar_Get( "gl_ext_compiled_vertex_array", "1", CVAR_ARCHIVE );
 
@@ -1509,7 +1494,6 @@ int R_Init( void *hinstance, void *hWnd )
 	int		err;
 	int		j;
 	extern float r_turbsin[256];
-	int		aniso_level, max_aniso;
 
 	for ( j = 0; j < 256; j++ )
 	{
@@ -1614,159 +1598,9 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...GL_EXT_point_parameters not found\n" );
 	}
 
-#if defined UNIX_VARIANT
-	if ( strstr( gl_config.extensions_string, "3DFX_set_global_palette" ))
-	{
-		if ( gl_ext_palettedtexture->value )
-		{
-			Com_Printf ("...using 3DFX_set_global_palette\n" );
-			qgl3DfxSetPaletteEXT = ( void ( APIENTRY * ) (GLuint *) )qwglGetProcAddress( "gl3DfxSetPaletteEXT" );
-			qglColorTableEXT = (void*)Fake_glColorTableEXT;
-		}
-		else
-		{
-			Com_Printf ("...ignoring 3DFX_set_global_palette\n" );
-		}
-	}
-	else
-	{
-		Com_Printf ("...3DFX_set_global_palette not found\n" );
-	}
-#endif
-
-	if ( !qglColorTableEXT &&
-		strstr( gl_config.extensions_string, "GL_EXT_paletted_texture" ) &&
-		strstr( gl_config.extensions_string, "GL_EXT_shared_texture_palette" ) )
-	{
-		if ( gl_ext_palettedtexture->value )
-		{
-			Com_Printf ("...using GL_EXT_shared_texture_palette\n" );
-			qglColorTableEXT = ( void ( APIENTRY * ) ( int, int, int, int, int, const void * ) ) qwglGetProcAddress( "glColorTableEXT" );
-		}
-		else
-		{
-			Com_Printf ("...ignoring GL_EXT_shared_texture_palette\n" );
-		}
-	}
-	else
-	{
-		Com_Printf ("...GL_EXT_shared_texture_palette not found\n" );
-	}
-
-	if ( strstr( gl_config.extensions_string, "GL_ARB_multitexture" ) )
-	{
-		if ( gl_ext_multitexture->value )
-		{
-			Com_Printf ("...using GL_ARB_multitexture\n" );
-			qglMTexCoord2fARB = ( void * ) qwglGetProcAddress( "glMultiTexCoord2fARB" );
-			qglMTexCoord3fARB = ( void * ) qwglGetProcAddress( "glMultiTexCoord3fARB" );
-			qglMultiTexCoord3fvARB = (void*)qwglGetProcAddress("glMultiTexCoord3fvARB");
-			qglActiveTextureARB = ( void * ) qwglGetProcAddress( "glActiveTextureARB" );
-			qglClientActiveTextureARB = ( void * ) qwglGetProcAddress( "glClientActiveTextureARB" );
-			GL_TEXTURE0 = GL_TEXTURE0_ARB;
-			GL_TEXTURE1 = GL_TEXTURE1_ARB;
-			GL_TEXTURE2 = GL_TEXTURE2_ARB;
-			GL_TEXTURE3 = GL_TEXTURE3_ARB;
-			GL_TEXTURE4 = GL_TEXTURE4_ARB;
-			GL_TEXTURE5 = GL_TEXTURE5_ARB;
-			GL_TEXTURE6 = GL_TEXTURE6_ARB;
-			GL_TEXTURE7 = GL_TEXTURE7_ARB;
-		}
-		else
-		{
-			Com_Printf ("...ignoring GL_ARB_multitexture\n" );
-		}
-	}
-	else
-	{
-		Com_Printf ("...GL_ARB_multitexture not found\n" );
-	}
+	R_InitImageSubsystem();	
 	
-	gl_config.mtexcombine = false;
-	if ( strstr( gl_config.extensions_string, "GL_ARB_texture_env_combine" ) )
-	{
-		Com_Printf( "...using GL_ARB_texture_env_combine\n" );
-		gl_config.mtexcombine = true;
-	}
-	else
-	{
-		Com_Printf( "...GL_ARB_texture_env_combine not found\n" );
-	}
-	if ( !gl_config.mtexcombine )
-	{
-		if ( strstr( gl_config.extensions_string, "GL_EXT_texture_env_combine" ) )
-		{
-			Com_Printf( "...using GL_EXT_texture_env_combine\n" );
-			gl_config.mtexcombine = true;
-		}
-		else
-		{
-			Com_Printf( "...GL_EXT_texture_env_combine not found\n" );
-		}
-	}
-
-	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic"))
-	{
-		qglGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
-
-		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE );
-		Cvar_SetValue("r_ext_max_anisotropy", max_aniso);
-
-		r_anisotropic = Cvar_Get("r_anisotropic", "16", CVAR_ARCHIVE);
-		if (r_anisotropic->value >= r_ext_max_anisotropy->value)
-			Cvar_SetValue("r_anisotropic", r_ext_max_anisotropy->value);
-
-		aniso_level = r_anisotropic->value;
-
-		if (r_anisotropic->value == 1)
-			Com_Printf("...ignoring GL_EXT_texture_filter_anisotropic\n");
-		else
-			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n");
-	}
-	else
-	{
-		Com_Printf("...GL_EXT_texture_filter_anisotropic not found\n");
-		r_anisotropic = Cvar_Get("r_anisotropic", "0", CVAR_ARCHIVE);
-		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE);
-	}
-
-	// openGL 2.0 Unified Separate Stencil
-	gl_state.stencil_wrap = false;
-	if (strstr(gl_config.extensions_string, "GL_EXT_stencil_wrap"))
-	{
-		Com_Printf("...using GL_EXT_stencil_wrap\n");
-		gl_state.stencil_wrap = true;
-	} else
-	{
-		Com_Printf("...GL_EXT_stencil_wrap not found\n");
-		gl_state.stencil_wrap = false;
-	}
-
-	// Framebuffer object blit
-	gl_state.hasFBOblit = false;
-	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit"))
-	{
-		Com_Printf("...using GL_EXT_framebuffer_blit\n");
-		gl_state.hasFBOblit = true;
-	} else
-	{
-		Com_Printf("...GL_EXT_framebuffer_blit not found\n");
-		gl_state.hasFBOblit = false;
-	}
-
-	qglStencilFuncSeparate		= (void *)qwglGetProcAddress("glStencilFuncSeparate");
-	qglStencilOpSeparate		= (void *)qwglGetProcAddress("glStencilOpSeparate");
-	qglStencilMaskSeparate		= (void *)qwglGetProcAddress("glStencilMaskSeparate");
-
-	gl_state.separateStencil = false;
-	if(qglStencilFuncSeparate && qglStencilOpSeparate && qglStencilMaskSeparate)
-	{
-			Com_Printf("...using GL_EXT_stencil_two_side\n");
-			gl_state.separateStencil = true;
-
-	}
-	else
-		Com_Printf("...GL_EXT_stencil_two_side not found\n");
+	R_InitShadowSubsystem();
 
 	R_LoadVBOSubsystem();
 
@@ -1793,7 +1627,6 @@ int R_Init( void *hinstance, void *hWnd )
 	R_LoadGLSLPrograms();
 
 	//if running for the very first time, automatically set video settings
-	//disabled for now
 	if(!r_firstrun->value)
 	{
 		qboolean ati_nvidia = false;
@@ -2082,7 +1915,6 @@ void R_SetPalette ( const unsigned char *palette)
 			rp[i*4+3] = 0xff;
 		}
 	}
-	GL_SetTexturePalette( r_rawpalette );
 
 	if ( qglClear && qglClearColor)
 	{

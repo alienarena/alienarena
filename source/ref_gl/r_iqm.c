@@ -701,7 +701,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 }
 
 float modelpitch;
-void GL_AnimateIQMFrame(float curframe, int nextframe)
+void R_AnimateIQMFrame(float curframe, int nextframe)
 {
 	int i, j;
 
@@ -865,7 +865,7 @@ void GL_AnimateIQMFrame(float curframe, int nextframe)
 	}
 }
 
-void GL_AnimateIQMRagdoll(int RagDollID)
+void R_AnimateIQMRagdoll(int RagDollID)
 {
 	//we only deal with one frame
 
@@ -963,7 +963,7 @@ void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t li
     VectorScale(baselight, l, lightOut);
 }
 
-void GL_DrawIQMFrame(int skinnum)
+void R_DrawIQMFrame(int skinnum)
 {
 	int		i, j;
 	vec3_t	move, delta, vectors[3];
@@ -1027,7 +1027,7 @@ void GL_DrawIQMFrame(int skinnum)
 			glEnableVertexAttribArrayARB (1);
             glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
-            GL_GetLightVals(currententity->origin, false, false);
+            R_GetLightVals(currententity->origin, false, false);
 
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
@@ -1183,7 +1183,7 @@ void GL_DrawIQMFrame(int skinnum)
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, skinnum);
 
- 			GL_GetLightVals(currententity->origin, false, false);
+ 			R_GetLightVals(currententity->origin, false, false);
 		}
 
 		for (i=0; i<currentmodel->num_triangles; i++)
@@ -1326,7 +1326,7 @@ void GL_DrawIQMFrame(int skinnum)
 					GLSTATE_DISABLE_ALPHATEST
 
 				if(stage->lightmap)
-					GL_GetLightVals(currententity->origin, false, false);
+					R_GetLightVals(currententity->origin, false, false);
 			}
 
 			if(stage->normalmap)
@@ -1338,7 +1338,7 @@ void GL_DrawIQMFrame(int skinnum)
 				glEnableVertexAttribArrayARB (1);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
-				GL_GetLightVals(currententity->origin, false, true);
+				R_GetLightVals(currententity->origin, false, true);
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
@@ -1520,7 +1520,7 @@ done:
 }
 
 //Similar to above, but geared more specifically toward ragdoll player models
-void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect)
+void R_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect)
 {
 	int		i, j;
 	vec3_t	vectors[3];
@@ -1637,7 +1637,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int sh
 			GL_SelectTexture( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, skinnum);
 
-			GL_GetLightVals(RagDoll[RagDollID].curPos, true, false);
+			R_GetLightVals(RagDoll[RagDollID].curPos, true, false);
 		}
 
 		for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
@@ -1764,7 +1764,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int sh
 					GLSTATE_DISABLE_ALPHATEST
 
 				if(stage->lightmap)
-					GL_GetLightVals(RagDoll[RagDollID].curPos, true, false);
+					R_GetLightVals(RagDoll[RagDollID].curPos, true, false);
 			}
 
 			if(stage->normalmap)
@@ -1776,7 +1776,7 @@ void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int sh
 				glEnableVertexAttribArrayARB (1);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
-				GL_GetLightVals(RagDoll[RagDollID].curPos, true, true);
+				R_GetLightVals(RagDoll[RagDollID].curPos, true, true);
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);
@@ -2311,10 +2311,10 @@ void R_DrawINTERQUAKEMODEL ( void )
 
 	frame = currententity->frame + time;
 
-	GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
+	R_AnimateIQMFrame(frame, NextFrame(currententity->frame));
 
 	if(!(currententity->flags & RF_VIEWERMODEL))
-		GL_DrawIQMFrame(skin->texnum);
+		R_DrawIQMFrame(skin->texnum);
 
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);
@@ -2502,7 +2502,7 @@ void R_DrawIQMCaster ( void )
 
 	frame = currententity->frame + time;
 
-	GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
+	R_AnimateIQMFrame(frame, NextFrame(currententity->frame));
 
 	GL_DrawIQMCasterFrame();
 
@@ -2516,7 +2516,7 @@ void R_DrawIQMRagDollCaster ( int RagDollID )
 
     qglPushMatrix ();
 
-	GL_AnimateIQMRagdoll(RagDollID);
+	R_AnimateIQMRagdoll(RagDollID);
 
 	currentmodel = RagDoll[RagDollID].ragDollMesh;
 
