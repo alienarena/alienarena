@@ -521,7 +521,7 @@ void R_DrawSpecialSurfaces (void)
 	r_special_surfaces = NULL;
 }
 
-static void GL_RenderLightmappedPoly( msurface_t *surf )
+static void R_RenderLightmappedPoly( msurface_t *surf )
 {
 	// int		nv = surf->polys->numverts; // unused
 	int		map;
@@ -917,7 +917,7 @@ void R_DrawInlineBModel ( void )
 			}
 			else if ( !( psurf->flags & SURF_DRAWTURB ) )
 			{
-				GL_RenderLightmappedPoly( psurf );
+				R_RenderLightmappedPoly( psurf );
 			}
 			else
 			{
@@ -1178,7 +1178,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 		{
 			if ( !( surf->flags & SURF_DRAWTURB ) )
 			{
-				GL_RenderLightmappedPoly( surf );
+				R_RenderLightmappedPoly( surf );
 
 				if(r_shaders->value) { //only add to the chain if there is actually a shader
 					rs_shader = (rscript_t *)surf->texinfo->image->script;

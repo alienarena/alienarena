@@ -846,7 +846,7 @@ static void R_ClearFlares(void)
 	r_numflares = 0;
 }
 
-void GL_AddFlareSurface (msurface_t *surf, int type )
+void Mod_AddFlareSurface (msurface_t *surf, int type )
 {
      int i, width, height, intens;
      glpoly_t *poly;
@@ -975,7 +975,7 @@ static void R_ClearGrasses(void)
 	r_numgrasses = 0;
 }
 
-void GL_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type)
+void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type)
 {
     glpoly_t *poly;
     grass_t  *grass;
@@ -1030,7 +1030,7 @@ static void R_ClearBeams(void)
 	r_numbeams = 0;
 }
 
-void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type, float xang, float yang,
+void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type, float xang, float yang,
 	qboolean rotating)
 {
     glpoly_t *poly;
@@ -1105,7 +1105,7 @@ void GL_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, 
 	beam->rotating = rotating;
 }
 
-void GL_CalcSurfaceNormals(msurface_t *surf)
+void Mod_CalcSurfaceNormals(msurface_t *surf)
 {
 
 	glpoly_t *p = surf->polys;
@@ -1194,7 +1194,7 @@ void GL_BeginBuildingLightmaps (model_t *m);
 Mod_LoadFaces
 =================
 */
-extern int totalVBOsize;
+
 void Mod_LoadFaces (lump_t *l)
 {
 	dface_t		*in;
@@ -1289,7 +1289,7 @@ void Mod_LoadFaces (lump_t *l)
 			do {
 				if (stage->lensflare) {
 					if(r_lensflare->value)
-						GL_AddFlareSurface(out, stage->flaretype);
+						Mod_AddFlareSurface(out, stage->flaretype);
 				}
 				if (stage->grass && stage->texture) {
 					if(stage->colormap.enabled) {
@@ -1297,7 +1297,7 @@ void Mod_LoadFaces (lump_t *l)
 						color[1] = stage->colormap.green;
 						color[2] = stage->colormap.blue;
 					}
-					GL_AddVegetationSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->grasstype);
+					Mod_AddVegetationSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->grasstype);
 				}
 				if (stage->beam && stage->texture) {
 					if(stage->colormap.enabled) {
@@ -1305,12 +1305,12 @@ void Mod_LoadFaces (lump_t *l)
 						color[1] = stage->colormap.green;
 						color[2] = stage->colormap.blue;
 					}
-					GL_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->beamtype, 
+					Mod_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->beamtype, 
 						stage->xang, stage->yang, stage->rotating);
 				}
 			} while ( (stage = stage->next) );
 		}
-		GL_CalcSurfaceNormals(out);
+		Mod_CalcSurfaceNormals(out);
 		
 		if(gl_state.vbo) {
 			R_BuildVBOBufferSize(out);
@@ -1713,10 +1713,10 @@ static void Mod_BuildTriangleNeighbors(neighbors_t * neighbors,
 }
 
 /*
-R_LoadMd2VertexArrays
+Mod_LoadMd2VertexArrays
 */
 extern
-void R_LoadMd2VertexArrays(model_t *md2model){
+void Mod_LoadMd2VertexArrays(model_t *md2model){
 
 	dmdl_t *md2;
 	daliasframe_t *md2frame;
@@ -2159,7 +2159,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
         st[i].t = (t + 1.0) * ih;
     }
 
-	R_LoadMd2VertexArrays(mod);
+	Mod_LoadMd2VertexArrays(mod);
 
 	RecalcVertsLightNormalIdx(pheader);
 
