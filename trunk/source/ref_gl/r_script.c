@@ -1720,7 +1720,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	{
 
 		if (stage->lensflare || stage->grass || stage->beam)
-			break;
+			break; //handled elsewhere
 
 		if (stage->colormap.enabled)
 			qglDisable (GL_TEXTURE_2D);
@@ -1835,9 +1835,11 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 						if (surf->texinfo->flags & SURF_FLOWING)
 							txm = tym = 0;
 					}
-
-					os = v[3];
-					ot = v[4];
+					else 
+					{
+						os = v[3];
+						ot = v[4];
+					}
 
 					RS_SetTexcoords (stage, &os, &ot, surf);
 					{
@@ -1875,14 +1877,12 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		}
 		else
 		{
-
 			for (p = surf->polys; p; p = p->chain)
 			{
 				qglBegin (GL_TRIANGLE_FAN);
 
 				for (i = 0, v = p->verts[0]; i < nv; i++, v += VERTEXSIZE)
 				{
-
 					if (stage->envmap)
 					{
 						RS_SetEnvmap (v, &os, &ot);
@@ -1893,9 +1893,11 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 						if (surf->texinfo->flags & SURF_FLOWING)
 							txm = tym = 0;
 					}
-
-					os = v[3];
-					ot = v[4];
+					else 
+					{
+						os = v[3];
+						ot = v[4];
+					}
 
 					RS_SetTexcoords (stage, &os, &ot, surf);
 
@@ -1930,11 +1932,8 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 					}
 
 				}
-
 				qglEnd ();
-
 			}
-
 		}
 
 		qglColor4f(1,1,1,1);

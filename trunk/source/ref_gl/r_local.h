@@ -280,6 +280,7 @@ void R_FB_InitTextures(void);
 
 //VBO
 extern GLuint vboId;
+extern int totalVBOsize;
 void R_LoadVBOSubsystem(void);
 void R_VCInit(void);
 void R_BuildVBOBufferSize(msurface_t *surf);
