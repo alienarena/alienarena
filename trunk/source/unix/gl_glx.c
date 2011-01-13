@@ -572,7 +572,12 @@ void HandleEvents( void )
 				case 9:
 					Key_Event( K_MOUSE7, true, u_sys_msecs );
 					break;
-				// TODO: More mouse buttons?
+				case 10:
+					Key_Event( K_MOUSE8, true, u_sys_msecs );
+					break;
+				case 11:
+					Key_Event( K_MOUSE9, true, u_sys_msecs );
+					break;
 				}
 			}
 			break;
@@ -624,7 +629,12 @@ void HandleEvents( void )
 				case 9:
 					Key_Event( K_MOUSE7, false, u_sys_msecs );
 					break;
-				// TODO: More mouse buttons?
+				case 10:
+					Key_Event( K_MOUSE8, false, u_sys_msecs );
+					break;
+				case 11:
+					Key_Event( K_MOUSE9, false, u_sys_msecs );
+					break;
 				}
 			}
 			break;
@@ -977,7 +987,6 @@ void Fake_glColorTableEXT( GLenum target, GLenum internalformat,
 	}
 	qgl3DfxSetPaletteEXT((GLuint *)temptable);
 }
-
 
 /*------------------------------------------------*/
 /* X11 Input Stuff				  */

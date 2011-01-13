@@ -252,7 +252,7 @@ void IN_StartupMouse (void)
 
 	mouseinitialized = true;
 	mouseparmsvalid = SystemParametersInfo (SPI_GETMOUSE, 0, originalmouseparms, 0);
-	mouse_buttons = 7;
+	mouse_buttons = 7; /* TODO: Are 9 possible? Do 7 work now? */
 }
 
 /*
