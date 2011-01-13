@@ -137,10 +137,7 @@ float calcEntAlpha (float alpha, vec3_t point)
 
 //This routine bascially finds the average light position, by factoring in all lights and
 //accounting for their distance, visiblity, and intensity.
-
-vec3_t	lightPosition;
-float	dynFactor;
-void GL_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
+void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
 {
 	int i, j, lnum;
 	dlight_t	*dl;
@@ -956,7 +953,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 			glEnableVertexAttribArrayARB (1);
 			glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
-            GL_GetLightVals(currententity->origin, false, true);
+            R_GetLightVals(currententity->origin, false, true);
 
             //send light level and color to shader, ramp up a bit
             VectorCopy(lightcolor, lightVal);
@@ -1293,7 +1290,7 @@ void GL_DrawAliasFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int 
 				glEnableVertexAttribArrayARB (1);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
 
-				GL_GetLightVals(currententity->origin, false, true);
+				R_GetLightVals(currententity->origin, false, true);
 
 				//send light level and color to shader, ramp up a bit
 				VectorCopy(lightcolor, lightVal);

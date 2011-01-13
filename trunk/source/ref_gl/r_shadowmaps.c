@@ -93,6 +93,18 @@ void generateShadowFBO()
 		return;
 	}
 
+	// Framebuffer object blit
+	gl_state.hasFBOblit = false;
+	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit"))
+	{
+		Com_Printf("...using GL_EXT_framebuffer_blit\n");
+		gl_state.hasFBOblit = true;
+	} else
+	{
+		Com_Printf("...GL_EXT_framebuffer_blit not found\n");
+		gl_state.hasFBOblit = false;
+	}
+
 	//FBO for shadowmapping
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 

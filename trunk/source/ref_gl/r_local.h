@@ -98,14 +98,6 @@ extern	int c_beams;
 extern	int			gl_filter_min, gl_filter_max;
 
 //
-// view origin moved to ref.h. -M.
-//
-//extern	vec3_t	vup;
-//extern	vec3_t	vpn;
-//extern	vec3_t	vright;
-//extern	vec3_t	r_origin;
-
-//
 // screen size info
 //
 extern	refdef_t	r_newrefdef;
@@ -125,8 +117,6 @@ extern	cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light 
 extern  cvar_t  *r_wave; //water waves
 
 extern cvar_t	*gl_ext_swapinterval;
-extern cvar_t	*gl_ext_palettedtexture;
-extern cvar_t	*gl_ext_multitexture;
 extern cvar_t	*gl_ext_pointparameters;
 extern cvar_t	*gl_ext_compiled_vertex_array;
 
@@ -144,7 +134,6 @@ extern	cvar_t	*gl_lightmap;
 extern	cvar_t	*gl_shadows;
 extern	cvar_t	*gl_dynamic;
 extern	cvar_t	*gl_nobind;
-extern	cvar_t	*gl_round_down;
 extern	cvar_t	*gl_picmip;
 extern	cvar_t	*gl_skymip;
 extern	cvar_t	*gl_showtris;
@@ -153,12 +142,8 @@ extern	cvar_t	*gl_finish;
 extern	cvar_t	*gl_clear;
 extern	cvar_t	*gl_cull;
 extern	cvar_t	*gl_poly;
-extern	cvar_t	*gl_texsort;
 extern	cvar_t	*gl_polyblend;
-extern	cvar_t	*gl_flashblend;
-extern	cvar_t	*gl_lightmaptype;
 extern	cvar_t	*gl_modulate;
-extern	cvar_t	*gl_playermip;
 extern	cvar_t	*gl_drawbuffer;
 extern	cvar_t	*gl_driver;
 extern	cvar_t	*gl_swapinterval;
@@ -172,8 +157,6 @@ extern  cvar_t	*gl_usevbo;
 extern	cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
 extern  cvar_t	*vid_contrast;
-
-extern	cvar_t	*intensity;
 
 extern cvar_t *r_anisotropic;
 extern cvar_t *r_ext_max_anisotropy;
@@ -208,13 +191,13 @@ extern	cvar_t	*gl_mirror;
 extern	cvar_t	*gl_arb_fragment_program;
 extern	cvar_t	*gl_glsl_shaders;
 
-
 extern	cvar_t	*sys_affinity;
 extern	cvar_t	*sys_priority;
 
 extern	cvar_t	*gl_screenshot_type;
 extern	cvar_t	*gl_screenshot_jpeg_quality;
 
+//legacy items
 extern	cvar_t	*r_legacy;
 extern  cvar_t	*r_usemd2;
 
@@ -230,9 +213,12 @@ extern	int		c_visible_lightmaps;
 extern	int		c_visible_textures;
 
 extern	float	r_world_matrix[16];
-extern float r_project_matrix[16];
-extern int	r_viewport[4];
-extern	float		r_farclip, r_farclip_min, r_farclip_bias;
+extern	float	r_project_matrix[16];
+extern	int		r_viewport[4];
+extern	float	r_farclip, r_farclip_min, r_farclip_bias;
+
+//Image
+void R_InitImageSubsystem(void);
 void GL_Bind (int texnum);
 void GL_MBind( GLenum target, int texnum );
 void GL_TexEnv( GLenum value );
@@ -251,7 +237,6 @@ extern	model_t	*r_worldmodel;
 extern	unsigned	d_8to24table[256];
 
 extern	int		registration_sequence;
-
 
 void V_AddBlend (float r, float g, float b, float a, float *v_blend);
 
@@ -279,7 +264,7 @@ qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipfl
 void R_RotateForEntity (entity_t *e);
 void R_MarkLeaves (void);
 void R_AddSkySurface (msurface_t *fa);
-void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY);
+void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY);
 void R_ClearSkyBox (void);
 void R_DrawSkyBox (void);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
@@ -288,6 +273,8 @@ void  VLight_Init (void);
 float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );
 void R_ReadFogScript(char config_file[128]);
 void R_ReadMusicScript(char config_file[128]);
+
+//Postprocess
 void R_GLSLPostProcess(void);
 void R_FB_InitTextures(void);
 
@@ -295,8 +282,8 @@ void R_FB_InitTextures(void);
 extern GLuint vboId;
 void R_LoadVBOSubsystem(void);
 void R_VCInit(void);
-void GL_BuildVBOBufferSize(msurface_t *surf);
-void GL_BuildWorldVBO(void);
+void R_BuildVBOBufferSize(msurface_t *surf);
+void R_BuildWorldVBO(void);
 void R_VCShutdown(void);
 
 //BLOOMS[start]
@@ -323,9 +310,9 @@ extern int		model_dlights_num;
 extern m_dlight_t model_dlights[128];
 extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
-extern vec3_t	lightPosition;
-extern float	dynFactor;
-extern void		GL_GetLightVals(vec3_t origin, qboolean RagDoll, qboolean dynamic);
+vec3_t lightPosition;
+float  dynFactor;
+extern void		R_GetLightVals(vec3_t origin, qboolean RagDoll, qboolean dynamic);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
 
@@ -346,7 +333,6 @@ void	Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale,
 void	Draw_TileClear (int x, int y, int w, int h, char *name);
 void	Draw_Fill (int x, int y, int w, int h, int c);
 void	Draw_FadeScreen (void);
-void	Draw_StretchRaw (int x, int y, int w, int h, int cols, int rows, byte *data);
 
 void	R_BeginFrame( float camera_separation );
 void	R_SwapBuffers( int );
@@ -368,8 +354,6 @@ image_t	*GL_FindImage (char *name, imagetype_t type);
 void	GL_FreeImage( image_t * image );
 void	GL_TextureMode( char *string );
 void	GL_ImageList_f (void);
-
-void	GL_SetTexturePalette( unsigned palette[256] );
 
 void	GL_InitImages (void);
 void	GL_ShutdownImages (void);
@@ -479,6 +463,7 @@ extern glconfig_t  gl_config;
 extern glstate_t   gl_state;
 
 // vertex arrays
+extern int KillFlags;
 
 #define MAX_ARRAY (MAX_PARTICLES*4)
 
@@ -560,6 +545,7 @@ typedef struct	LightGroup {
 	float	dist;
 } LightGroup_t;
 extern			LightGroup_t LightGroups[MAX_LIGHTS];
+extern void		R_InitShadowSubsystem(void);
 extern void		R_DrawAliasModelCaster (void);
 extern void		R_DrawIQMCaster (void);
 extern void		R_DrawIQMRagDollCaster (int);
@@ -645,12 +631,12 @@ extern GLuint		g_location_source;
 
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
 extern void R_DrawINTERQUAKEMODEL(void);
-extern void GL_AnimateIQMFrame(float curframe, int nextframe);
+extern void R_AnimateIQMFrame(float curframe, int nextframe);
 extern qboolean inAnimGroup(int frame, int oldframe);
 extern int NextFrame(int frame);
-extern void GL_DrawIQMFrame(int skinnum);
-extern void GL_AnimateIQMRagdoll(int RagDollID);
-extern void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect);
+extern void R_DrawIQMFrame(int skinnum);
+extern void R_AnimateIQMRagdoll(int RagDollID);
+extern void R_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect);
 extern void R_DrawIQMShadow(vec3_t origin);
 
 //Ragdoll

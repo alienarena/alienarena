@@ -31,6 +31,10 @@ SHADOW VOLUMES
 ===============
 */
 
+glStencilFuncSeparatePROC			qglStencilFuncSeparate		= NULL;
+glStencilOpSeparatePROC				qglStencilOpSeparate		= NULL;
+glStencilMaskSeparatePROC			qglStencilMaskSeparate		= NULL;
+
 extern glStencilFuncSeparatePROC	qglStencilFuncSeparate;
 extern glStencilOpSeparatePROC		qglStencilOpSeparate;
 extern glStencilMaskSeparatePROC	qglStencilMaskSeparate;
@@ -41,6 +45,35 @@ vec3_t ShadowArray[MAX_SHADOW_VERTS];
 static qboolean	triangleFacingLight	[MAX_INDICES / 3];
 
 static vec4_t shadow_lerped[MAX_VERTS];
+
+void R_InitShadowSubsystem(void)
+{	
+	// openGL 2.0 Unified Separate Stencil
+	gl_state.stencil_wrap = false;
+	if (strstr(gl_config.extensions_string, "GL_EXT_stencil_wrap"))
+	{
+		Com_Printf("...using GL_EXT_stencil_wrap\n");
+		gl_state.stencil_wrap = true;
+	} else
+	{
+		Com_Printf("...GL_EXT_stencil_wrap not found\n");
+		gl_state.stencil_wrap = false;
+	}
+
+	qglStencilFuncSeparate		= (void *)qwglGetProcAddress("glStencilFuncSeparate");
+	qglStencilOpSeparate		= (void *)qwglGetProcAddress("glStencilOpSeparate");
+	qglStencilMaskSeparate		= (void *)qwglGetProcAddress("glStencilMaskSeparate");
+
+	gl_state.separateStencil = false;
+	if(qglStencilFuncSeparate && qglStencilOpSeparate && qglStencilMaskSeparate)
+	{
+			Com_Printf("...using GL_EXT_stencil_two_side\n");
+			gl_state.separateStencil = true;
+
+	}
+	else
+		Com_Printf("...GL_EXT_stencil_two_side not found\n");
+}
 
 void GL_LerpVerts(int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, float move[3], float frontv[3], float backv[3])
 {
@@ -633,7 +666,7 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 	GL_RenderVolumes(paliashdr, light, project, lerp);
 }
 
-void GL_DrawIQMShadowVolume( vec3_t meshOrigin, vec3_t meshAngles, qboolean RagDoll )
+void R_DrawIQMShadowVolume( vec3_t meshOrigin, vec3_t meshAngles, qboolean RagDoll )
 {
 	vec3_t light, temp, tempOrg;
 	int i, j, o;
@@ -854,9 +887,9 @@ void R_DrawShadowVolume()
 
 		frame = currententity->frame + time;
 
-		GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
+		R_AnimateIQMFrame(frame, NextFrame(currententity->frame));
 
-		GL_DrawIQMShadowVolume(currententity->origin, currententity->angles, false);
+		R_DrawIQMShadowVolume(currententity->origin, currententity->angles, false);
 	}
 
 	qglEnable(GL_TEXTURE_2D);
@@ -868,9 +901,9 @@ void R_DrawRagDollShadowVolume(int RagDollID)
 	qglPushMatrix();
 	qglDisable(GL_TEXTURE_2D);
 
-	GL_AnimateIQMRagdoll(RagDollID);
+	R_AnimateIQMRagdoll(RagDollID);
 
-	GL_DrawIQMShadowVolume(RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, true);
+	R_DrawIQMShadowVolume(RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, true);
 	
 	qglEnable(GL_TEXTURE_2D);
 	qglPopMatrix();

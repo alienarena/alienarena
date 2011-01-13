@@ -214,11 +214,11 @@ RagDoll_t RagDoll[MAX_RAGDOLLS];
 RagDollWorld_t RagDollTriWorld;
 
 //Funcs
-extern void R_CreateWorldObject( void );
-extern void R_DestroyWorldObject( void );
+extern void ODE_CreateWorldObject( void );
+extern void ODE_DestroyWorldObject( void );
 extern void R_RenderAllRagdolls ( void );
 extern void R_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] );
 extern void R_ClearAllRagdolls( void );
-extern void R_DestroyWorldTrimesh();
-extern void R_BuildWorldTrimesh ();
+extern void ODE_DestroyWorldTrimesh();
+extern void ODE_BuildWorldTrimesh ();
 extern qboolean R_CullRagDolls( int RagDollID );

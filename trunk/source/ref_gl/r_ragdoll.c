@@ -123,7 +123,7 @@ extern void Matrix3x4_Add(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2);
 extern void Matrix3x4_Scale(matrix3x4_t *out, matrix3x4_t in, float scale);
 
 //routine to create ragdoll body parts between two joints
-void R_addBody(int RagDollID, matrix3x4_t *bindmat, char *name, int objectID, vec3_t p1, vec3_t p2, float radius, float density)
+void ODE_addBody(int RagDollID, matrix3x4_t *bindmat, char *name, int objectID, vec3_t p1, vec3_t p2, float radius, float density)
 {
 	//Adds a capsule body between joint positions p1 and p2 and with given
 	//radius to the ragdoll.
@@ -207,7 +207,7 @@ void R_addBody(int RagDollID, matrix3x4_t *bindmat, char *name, int objectID, ve
 }
 
 //joint creation routines
-void R_addFixedJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2)
+void ODE_addFixedJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2)
 {
     dBodyID body1 = RagDoll[RagDollID].RagDollObject[object1].body;
     dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
@@ -217,7 +217,7 @@ void R_addFixedJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int objec
 	dJointSetFixed(RagDoll[RagDollID].RagDollJoint[jointID]);
 }
 
-void R_addHingeJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis, float loStop, float hiStop)
+void ODE_addHingeJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis, float loStop, float hiStop)
 {
 	dBodyID body1 = RagDoll[RagDollID].RagDollObject[object1].body;
 	dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
@@ -246,7 +246,7 @@ void R_addHingeJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int objec
     dJointSetHingeParam(RagDoll[RagDollID].RagDollJoint[jointID], dParamHiStop,  hiStop);
 }
 
-void R_addBallJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor)
+void ODE_addBallJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor)
 {
     dBodyID body1 = RagDoll[RagDollID].RagDollObject[object1].body;
     dBodyID body2 = RagDoll[RagDollID].RagDollObject[object2].body;
@@ -266,7 +266,7 @@ void R_addBallJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object
 	dJointSetBallAnchor(RagDoll[RagDollID].RagDollJoint[jointID], wanchor[0], wanchor[1], wanchor[2]);
 }
 
-void R_addUniversalJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis1, vec3_t axis2,
+void ODE_addUniversalJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int object1, int object2, vec3_t anchor, vec3_t axis1, vec3_t axis2,
 	float loStop1, float hiStop1, float loStop2, float hiStop2)
 {
 	vec3_t wanchor, waxis1, waxis2;
@@ -305,7 +305,7 @@ void R_addUniversalJoint(int RagDollID, matrix3x4_t *bindmat, int jointID, int o
 
 }
 
-void R_CreateWorldObject( void )
+void ODE_CreateWorldObject( void )
 {
 	// Initialize the world
 	RagDollWorld = dWorldCreate();
@@ -329,7 +329,7 @@ void R_CreateWorldObject( void )
 	r_DrawingRagDoll = false;
 }
 
-void R_DestroyWorldObject( void )
+void ODE_DestroyWorldObject( void )
 {
 	if(RagDollWorld)
 	{
@@ -541,20 +541,20 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 
 	VectorSet(p1, 0.0, 0.0,	RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[NECK_H] - 0.1);
 	VectorSet(p2, 0.0, 0.0,	RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HIP_H] + 0.1);
-	R_addBody(RagDollID, bindmat, "chest", CHEST, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[CHEST_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "chest", CHEST, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[CHEST_W]/2.0, density);
 
 	VectorSet(p1, R_HIP_POS[0] + 0.1, R_HIP_POS[1], R_HIP_POS[2] - 0.1);
 	VectorSet(p2, L_HIP_POS[0] - 0.1, L_HIP_POS[1], L_HIP_POS[2] - 0.1);
-	R_addBody(RagDollID, bindmat, "pelvis", PELVIS, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[PELVIS_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "pelvis", PELVIS, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[PELVIS_W]/2.0, density);
 
-	R_addFixedJoint(RagDollID, bindmat, LOWSPINE, CHEST, PELVIS);
+	ODE_addFixedJoint(RagDollID, bindmat, LOWSPINE, CHEST, PELVIS);
 
 	VectorSet(p1, 0.0, 0.0, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HEAD_H]);
 	VectorSet(p2, 0.0, 0.0, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[NECK_H] + 0.1);
-	R_addBody(RagDollID, bindmat, "head", HEAD, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HEAD_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "head", HEAD, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HEAD_W]/2.0, density);
 
 	VectorSet(p1, 0.0, 0.0, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[NECK_H]);
-	R_addUniversalJoint(RagDollID, bindmat, NECK, CHEST, HEAD, p1, upAxis, rightAxis,
+	ODE_addUniversalJoint(RagDollID, bindmat, NECK, CHEST, HEAD, p1, upAxis, rightAxis,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HEAD_LOSTOP1] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HEAD_HISTOP1] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HEAD_LOSTOP2] * M_PI,
@@ -563,9 +563,9 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 	//right leg
 	VectorSet(p1, R_HIP_POS[0] - 0.1, R_HIP_POS[1], R_HIP_POS[2] - 0.1);
 	VectorSet(p2, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] + 0.1);
-	R_addBody(RagDollID, bindmat, "rightupperleg", RIGHTUPPERLEG, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[THIGH_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "rightupperleg", RIGHTUPPERLEG, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[THIGH_W]/2.0, density);
 
-	R_addUniversalJoint(RagDollID, bindmat, RIGHTHIP, PELVIS, RIGHTUPPERLEG, R_HIP_POS,	bkwdAxis, rightAxis,
+	ODE_addUniversalJoint(RagDollID, bindmat, RIGHTHIP, PELVIS, RIGHTUPPERLEG, R_HIP_POS,	bkwdAxis, rightAxis,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HIP_LOSTOP1] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HIP_HISTOP1] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HIP_LOSTOP2] * M_PI,
@@ -573,25 +573,25 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 
 	VectorSet(p1, R_KNEE_POS[0], R_KNEE_POS[1], R_KNEE_POS[2] - 0.1);
 	VectorSet(p2, R_ANKLE_POS[0], R_ANKLE_POS[1], R_ANKLE_POS[2]);
-	R_addBody(RagDollID, bindmat, "rightlowerleg", RIGHTLOWERLEG, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHIN_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "rightlowerleg", RIGHTLOWERLEG, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHIN_W]/2.0, density);
 
-	R_addHingeJoint(RagDollID, bindmat, RIGHTKNEE, RIGHTUPPERLEG,
+	ODE_addHingeJoint(RagDollID, bindmat, RIGHTKNEE, RIGHTUPPERLEG,
 		RIGHTLOWERLEG, R_KNEE_POS, leftAxis, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[KNEE_LOSTOP] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[KNEE_HISTOP] * M_PI);
 
-	R_addBody(RagDollID, bindmat, "rightfoot", RIGHTFOOT, R_TOES_POS, R_HEEL_POS,
+	ODE_addBody(RagDollID, bindmat, "rightfoot", RIGHTFOOT, R_TOES_POS, R_HEEL_POS,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[FOOT_W]/2.0, density);
 
-	R_addHingeJoint(RagDollID, bindmat, RIGHTANKLE, RIGHTLOWERLEG,
+	ODE_addHingeJoint(RagDollID, bindmat, RIGHTANKLE, RIGHTLOWERLEG,
 		RIGHTFOOT, R_ANKLE_POS, rightAxis, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[ANKLE_LOSTOP] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[ANKLE_HISTOP] * M_PI);
 
 	//left leg
 	VectorSet(p1, L_HIP_POS[0] + 0.1, L_HIP_POS[1], L_HIP_POS[2] - 0.1);
 	VectorSet(p2, L_KNEE_POS[0], L_KNEE_POS[1], L_KNEE_POS[2] + 0.1);
-	R_addBody(RagDollID, bindmat, "leftupperleg", LEFTUPPERLEG, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[THIGH_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "leftupperleg", LEFTUPPERLEG, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[THIGH_W]/2.0, density);
 
-	R_addUniversalJoint(RagDollID, bindmat, LEFTHIP, PELVIS,LEFTUPPERLEG, L_HIP_POS, fwdAxis, rightAxis,
+	ODE_addUniversalJoint(RagDollID, bindmat, LEFTHIP, PELVIS,LEFTUPPERLEG, L_HIP_POS, fwdAxis, rightAxis,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HIP_LOSTOP1] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HIP_HISTOP1] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HIP_LOSTOP2] * M_PI,
@@ -599,25 +599,25 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 
 	VectorSet(p1, L_KNEE_POS[0], L_KNEE_POS[1], L_KNEE_POS[2] - 0.1);
 	VectorSet(p2, L_ANKLE_POS[0], L_ANKLE_POS[1], L_ANKLE_POS[2]);
-	R_addBody(RagDollID, bindmat, "leftlowerleg", LEFTLOWERLEG, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHIN_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "leftlowerleg", LEFTLOWERLEG, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHIN_W]/2.0, density);
 
-	R_addHingeJoint(RagDollID, bindmat, LEFTKNEE, LEFTUPPERLEG,
+	ODE_addHingeJoint(RagDollID, bindmat, LEFTKNEE, LEFTUPPERLEG,
 		LEFTLOWERLEG, L_KNEE_POS, leftAxis, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[KNEE_LOSTOP] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[KNEE_HISTOP] * M_PI);
 
-	R_addBody(RagDollID, bindmat, "leftfoot", LEFTFOOT, L_TOES_POS, L_HEEL_POS,
+	ODE_addBody(RagDollID, bindmat, "leftfoot", LEFTFOOT, L_TOES_POS, L_HEEL_POS,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[FOOT_W]/2.0, density);
 
-	R_addHingeJoint(RagDollID, bindmat, LEFTANKLE, LEFTLOWERLEG,
+	ODE_addHingeJoint(RagDollID, bindmat, LEFTANKLE, LEFTLOWERLEG,
 		LEFTFOOT, L_ANKLE_POS, rightAxis, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[ANKLE_LOSTOP] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[ANKLE_HISTOP] * M_PI);
 
 	//right arm
 	VectorSet(p1, R_SHOULDER_POS[0] - 0.1, R_SHOULDER_POS[1], R_SHOULDER_POS[2]);
 	VectorSet(p2, R_ELBOW_POS[0], R_ELBOW_POS[1], R_ELBOW_POS[2] + 0.1);
-	R_addBody(RagDollID, bindmat, "rightupperarm", RIGHTUPPERARM, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[BICEP_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "rightupperarm", RIGHTUPPERARM, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[BICEP_W]/2.0, density);
 
-	R_addUniversalJoint(RagDollID, bindmat, RIGHTSHOULDER, CHEST, RIGHTUPPERARM, R_SHOULDER_POS, bkwdAxis, rightAxis,
+	ODE_addUniversalJoint(RagDollID, bindmat, RIGHTSHOULDER, CHEST, RIGHTUPPERARM, R_SHOULDER_POS, bkwdAxis, rightAxis,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHOULDER_LOSTOP1] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHOULDER_HISTOP1] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHOULDER_LOSTOP2] * M_PI,
@@ -625,26 +625,26 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 
 	VectorSet(p1, R_ELBOW_POS[0], R_ELBOW_POS[1], R_ELBOW_POS[2] - 0.1);
 	VectorSet(p2, R_WRIST_POS[0], R_WRIST_POS[1], R_WRIST_POS[2] + 0.1);
-	R_addBody(RagDollID, bindmat, "rightforearm", RIGHTFOREARM, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[FOREARM_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "rightforearm", RIGHTFOREARM, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[FOREARM_W]/2.0, density);
 
-	R_addHingeJoint(RagDollID, bindmat, RIGHTELBOW, RIGHTUPPERARM,
+	ODE_addHingeJoint(RagDollID, bindmat, RIGHTELBOW, RIGHTUPPERARM,
 		RIGHTFOREARM, R_ELBOW_POS, downAxis, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[ELBOW_LOSTOP] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[ELBOW_HISTOP] * M_PI);
 
 	VectorSet(p1, R_WRIST_POS[0], R_WRIST_POS[1], R_WRIST_POS[2] - 0.1);
 	VectorSet(p2, R_FINGERS_POS[0], R_FINGERS_POS[1], R_FINGERS_POS[2]);
-	R_addBody(RagDollID, bindmat, "righthand", RIGHTHAND, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HAND_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "righthand", RIGHTHAND, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HAND_W]/2.0, density);
 
-	R_addHingeJoint(RagDollID, bindmat, RIGHTWRIST, RIGHTFOREARM,
+	ODE_addHingeJoint(RagDollID, bindmat, RIGHTWRIST, RIGHTFOREARM,
 		RIGHTHAND, R_WRIST_POS, fwdAxis, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[WRIST_LOSTOP] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[WRIST_HISTOP] * M_PI);
 
 	//left arm
 	VectorSet(p1, L_SHOULDER_POS[0] + 0.1, L_SHOULDER_POS[1], L_SHOULDER_POS[2]);
 	VectorSet(p2, L_ELBOW_POS[0], L_ELBOW_POS[1], L_ELBOW_POS[2] + 0.1);
-	R_addBody(RagDollID, bindmat, "leftupperarm", LEFTUPPERARM, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[BICEP_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "leftupperarm", LEFTUPPERARM, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[BICEP_W]/2.0, density);
 
-	R_addUniversalJoint(RagDollID, bindmat, LEFTSHOULDER, CHEST, LEFTUPPERARM, L_SHOULDER_POS, fwdAxis, rightAxis,
+	ODE_addUniversalJoint(RagDollID, bindmat, LEFTSHOULDER, CHEST, LEFTUPPERARM, L_SHOULDER_POS, fwdAxis, rightAxis,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHOULDER_LOSTOP1] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHOULDER_HISTOP1] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[SHOULDER_LOSTOP2] * M_PI,
@@ -652,17 +652,17 @@ void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 
 	VectorSet(p1, L_ELBOW_POS[0], L_ELBOW_POS[1], L_ELBOW_POS[2] - 0.1);
 	VectorSet(p2, L_WRIST_POS[0], L_WRIST_POS[1], L_WRIST_POS[2] + 0.1);
-	R_addBody(RagDollID, bindmat, "leftforearm", LEFTFOREARM, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[FOREARM_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "leftforearm", LEFTFOREARM, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[FOREARM_W]/2.0, density);
 
-	R_addHingeJoint(RagDollID, bindmat, LEFTELBOW, LEFTUPPERARM,
+	ODE_addHingeJoint(RagDollID, bindmat, LEFTELBOW, LEFTUPPERARM,
 		LEFTFOREARM, L_ELBOW_POS,  upAxis, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[ELBOW_LOSTOP] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[ELBOW_HISTOP] * M_PI);
 
 	VectorSet(p1, L_WRIST_POS[0], L_WRIST_POS[1], L_WRIST_POS[2] - 0.1);
 	VectorSet(p2, L_FINGERS_POS[0], L_FINGERS_POS[1], L_FINGERS_POS[2]);
-	R_addBody(RagDollID, bindmat, "leftthand", LEFTHAND, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HAND_W]/2.0, density);
+	ODE_addBody(RagDollID, bindmat, "leftthand", LEFTHAND, p1, p2, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[HAND_W]/2.0, density);
 
-	R_addHingeJoint(RagDollID, bindmat, LEFTWRIST, LEFTFOREARM,
+	ODE_addHingeJoint(RagDollID, bindmat, LEFTWRIST, LEFTFOREARM,
 		LEFTHAND, L_WRIST_POS, bkwdAxis, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[WRIST_LOSTOP] * M_PI,
 		RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[WRIST_HISTOP] * M_PI);
 }
@@ -709,7 +709,7 @@ void R_DrawMark (vec3_t origin, int type)
 }
 
 //For creating the surfaces for the ragdoll to collide with
-void GL_BuildODEGeoms(msurface_t *surf)
+void ODE_BuildODEGeoms(msurface_t *surf)
 {
 	glpoly_t *p;
 	float	*v;
@@ -767,7 +767,7 @@ void GL_BuildODEGeoms(msurface_t *surf)
 R_DrawWorldTrimesh
 =============
 */
-void R_BuildWorldTrimesh ( void )
+void ODE_BuildWorldTrimesh ( void )
 {
     msurface_t *surf;
     dMatrix3 rot;
@@ -784,7 +784,7 @@ void R_BuildWorldTrimesh ( void )
         {
             if (!( surf->flags & SURF_DRAWTURB ) )
             {
-                GL_BuildODEGeoms(surf);
+                ODE_BuildODEGeoms(surf);
             }
         }
     }
@@ -936,7 +936,7 @@ void R_DestroyRagDoll(int RagDollID, qboolean nuke)
 	}
 }
 
-void R_DestroyWorldTrimesh( void )
+void ODE_DestroyWorldTrimesh( void )
 {
 	if(RagDollTriWorld.geom)
 		dGeomDestroy(RagDollTriWorld.geom);
@@ -961,7 +961,7 @@ void R_ClearAllRagdolls( void )
 		R_DestroyRagDoll(RagDollID, true);
 		RagDoll[RagDollID].destroyed = true;
 	}
-	R_DestroyWorldTrimesh();
+	ODE_DestroyWorldTrimesh();
 	r_DrawingRagDoll = false;
 }
 
@@ -1224,9 +1224,9 @@ void R_RenderAllRagdolls ( void )
 				shellEffect = true;
 			}
 
-			GL_AnimateIQMRagdoll(RagDollID);
+			R_AnimateIQMRagdoll(RagDollID);
 
-			GL_DrawIQMRagDollFrame(RagDollID, RagDoll[RagDollID].texnum, shellAlpha, shellEffect);
+			R_DrawIQMRagDollFrame(RagDollID, RagDoll[RagDollID].texnum, shellAlpha, shellEffect);
 
 			GL_TexEnv( GL_REPLACE );
 			qglShadeModel (GL_FLAT);

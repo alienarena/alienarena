@@ -56,6 +56,81 @@ int		gl_tex_alpha_format = 4;
 int		gl_filter_min = GL_LINEAR_MIPMAP_LINEAR;
 int		gl_filter_max = GL_LINEAR;
 
+void R_InitImageSubsystem(void)
+{
+	int		aniso_level, max_aniso;
+
+	if ( strstr( gl_config.extensions_string, "GL_ARB_multitexture" ) )
+	{
+		Com_Printf ("...using GL_ARB_multitexture\n" );
+		qglMTexCoord2fARB = ( void * ) qwglGetProcAddress( "glMultiTexCoord2fARB" );
+		qglMTexCoord3fARB = ( void * ) qwglGetProcAddress( "glMultiTexCoord3fARB" );
+		qglMultiTexCoord3fvARB = (void*)qwglGetProcAddress("glMultiTexCoord3fvARB");
+		qglActiveTextureARB = ( void * ) qwglGetProcAddress( "glActiveTextureARB" );
+		qglClientActiveTextureARB = ( void * ) qwglGetProcAddress( "glClientActiveTextureARB" );
+		GL_TEXTURE0 = GL_TEXTURE0_ARB;
+		GL_TEXTURE1 = GL_TEXTURE1_ARB;
+		GL_TEXTURE2 = GL_TEXTURE2_ARB;
+		GL_TEXTURE3 = GL_TEXTURE3_ARB;
+		GL_TEXTURE4 = GL_TEXTURE4_ARB;
+		GL_TEXTURE5 = GL_TEXTURE5_ARB;
+		GL_TEXTURE6 = GL_TEXTURE6_ARB;
+		GL_TEXTURE7 = GL_TEXTURE7_ARB;
+	}
+	else
+	{
+		Com_Printf ("...GL_ARB_multitexture not found\n" );
+	}
+	
+	gl_config.mtexcombine = false;
+	if ( strstr( gl_config.extensions_string, "GL_ARB_texture_env_combine" ) )
+	{
+		Com_Printf( "...using GL_ARB_texture_env_combine\n" );
+		gl_config.mtexcombine = true;
+	}
+	else
+	{
+		Com_Printf( "...GL_ARB_texture_env_combine not found\n" );
+	}
+	if ( !gl_config.mtexcombine )
+	{
+		if ( strstr( gl_config.extensions_string, "GL_EXT_texture_env_combine" ) )
+		{
+			Com_Printf( "...using GL_EXT_texture_env_combine\n" );
+			gl_config.mtexcombine = true;
+		}
+		else
+		{
+			Com_Printf( "...GL_EXT_texture_env_combine not found\n" );
+		}
+	}
+
+	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic"))
+	{
+		qglGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
+
+		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE );
+		Cvar_SetValue("r_ext_max_anisotropy", max_aniso);
+
+		r_anisotropic = Cvar_Get("r_anisotropic", "16", CVAR_ARCHIVE);
+		if (r_anisotropic->value >= r_ext_max_anisotropy->value)
+			Cvar_SetValue("r_anisotropic", r_ext_max_anisotropy->value);
+
+		aniso_level = r_anisotropic->value;
+
+		if (r_anisotropic->value == 1)
+			Com_Printf("...ignoring GL_EXT_texture_filter_anisotropic\n");
+		else
+			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n");
+	}
+	else
+	{
+		Com_Printf("...GL_EXT_texture_filter_anisotropic not found\n");
+		r_anisotropic = Cvar_Get("r_anisotropic", "0", CVAR_ARCHIVE);
+		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE);
+	}
+}
+
 GLenum bFunc1 = -1;
 GLenum bFunc2 = -1;
 void GL_BlendFunction (GLenum sfactor, GLenum dfactor)
@@ -77,30 +152,6 @@ void GL_ShadeModel (GLenum mode)
 	{
 		shadeModelMode = mode;
 		qglShadeModel(mode);
-	}
-}
-
-
-void GL_SetTexturePalette( unsigned palette[256] )
-{
-	int i;
-	unsigned char temptable[768];
-
-	if ( qglColorTableEXT && gl_ext_palettedtexture->value )
-	{
-		for ( i = 0; i < 256; i++ )
-		{
-			temptable[i*3+0] = ( palette[i] >> 0 ) & 0xff;
-			temptable[i*3+1] = ( palette[i] >> 8 ) & 0xff;
-			temptable[i*3+2] = ( palette[i] >> 16 ) & 0xff;
-		}
-
-		qglColorTableEXT( GL_SHARED_TEXTURE_PALETTE_EXT,
-						   GL_RGB,
-						   256,
-						   GL_RGB,
-						   GL_UNSIGNED_BYTE,
-						   temptable );
 	}
 }
 
@@ -1241,57 +1292,34 @@ qboolean GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboole
 
 	if (s > sizeof(trans)/4)
 		Com_Error (ERR_DROP, "GL_Upload8: too large");
+	
+	for (i=0 ; i<s ; i++)
+    {
+		p = data[i];
+        trans[i] = d_8to24table[p];
 
-	if ( qglColorTableEXT &&
-		 gl_ext_palettedtexture->value &&
-		 is_sky )
-	{
-		qglTexImage2D( GL_TEXTURE_2D,
-					  0,
-					  GL_COLOR_INDEX8_EXT,
-					  width,
-					  height,
-					  0,
-					  GL_COLOR_INDEX,
-					  GL_UNSIGNED_BYTE,
-					  data );
-
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_max);
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
-
-		return false;
-	}
-	else
-	{
-		for (i=0 ; i<s ; i++)
-		{
-			p = data[i];
-			trans[i] = d_8to24table[p];
-
-			if (p == 255)
-			{	// transparent, so scan around for another color
-				// to avoid alpha fringes
-				// FIXME: do a full flood fill so mips work...
-				if (i > width && data[i-width] != 255)
-					p = data[i-width];
-				else if (i < s-width && data[i+width] != 255)
-					p = data[i+width];
-				else if (i > 0 && data[i-1] != 255)
-					p = data[i-1];
-				else if (i < s-1 && data[i+1] != 255)
-					p = data[i+1];
-				else
-					p = 0;
-				// copy rgb components
-				((byte *)&trans[i])[0] = ((byte *)&d_8to24table[p])[0];
-				((byte *)&trans[i])[1] = ((byte *)&d_8to24table[p])[1];
-				((byte *)&trans[i])[2] = ((byte *)&d_8to24table[p])[2];
-			}
-		}
-		return GL_Upload32 (trans, width, height, mipmap, false);
-	}
+        if (p == 255)
+        {   // transparent, so scan around for another color
+            // to avoid alpha fringes
+            // FIXME: do a full flood fill so mips work...
+            if (i > width && data[i-width] != 255)
+                p = data[i-width];
+            else if (i < s-width && data[i+width] != 255)
+                p = data[i+width];
+            else if (i > 0 && data[i-1] != 255)
+                p = data[i-1];
+            else if (i < s-1 && data[i+1] != 255)
+                p = data[i+1];
+            else
+                p = 0;
+            // copy rgb components
+            ((byte *)&trans[i])[0] = ((byte *)&d_8to24table[p])[0];
+            ((byte *)&trans[i])[1] = ((byte *)&d_8to24table[p])[1];
+            ((byte *)&trans[i])[2] = ((byte *)&d_8to24table[p])[2];
+        }
+    }
+    return GL_Upload32 (trans, width, height, mipmap, false);
 }
-
 
 /*
 ================
@@ -1566,71 +1594,22 @@ void GL_FreeUnusedImages (void)
 	int		i;
 	image_t	*image;
 
-	// never free r_notexture or particle textures
+	// never free r_notexture
 	r_notexture->registration_sequence = registration_sequence;
-	r_particletexture->registration_sequence = registration_sequence;
-    r_shelltexture->registration_sequence = registration_sequence;
-	r_shelltexture2->registration_sequence = registration_sequence;
-	r_shellnormal->registration_sequence = registration_sequence;
-	r_reflecttexture->registration_sequence = registration_sequence;
-	r_mirrorspec->registration_sequence = registration_sequence;
-	r_flare->registration_sequence = registration_sequence;
-	r_smoketexture->registration_sequence = registration_sequence;
-  	r_explosiontexture->registration_sequence = registration_sequence;
-	r_explosion1texture->registration_sequence = registration_sequence;
-	r_explosion2texture->registration_sequence = registration_sequence;
-	r_explosion3texture->registration_sequence = registration_sequence;
-	r_explosion4texture->registration_sequence = registration_sequence;
-	r_explosion5texture->registration_sequence = registration_sequence;
-	r_explosion6texture->registration_sequence = registration_sequence;
-	r_explosion7texture->registration_sequence = registration_sequence;
-	r_bloodtexture->registration_sequence = registration_sequence;
-	r_pufftexture->registration_sequence = registration_sequence;
-	r_bflashtexture->registration_sequence = registration_sequence;
-	r_cflashtexture->registration_sequence = registration_sequence;
-	r_beamtexture->registration_sequence = registration_sequence;
-	r_beam2texture->registration_sequence = registration_sequence;
-	r_beam3texture->registration_sequence = registration_sequence;
-	r_leaderfieldtexture->registration_sequence = registration_sequence;
-	r_deathfieldtexture->registration_sequence = registration_sequence;
-	r_deathfieldtexture2->registration_sequence = registration_sequence;
-	r_hittexture->registration_sequence = registration_sequence;
-	r_bubbletexture->registration_sequence = registration_sequence;
-	r_shottexture->registration_sequence = registration_sequence;
-	r_bullettexture->registration_sequence = registration_sequence;
-	r_bulletnormal->registration_sequence = registration_sequence;
-	r_sayicontexture->registration_sequence = registration_sequence;
-	r_voltagetexture->registration_sequence = registration_sequence;
-	r_raintexture->registration_sequence = registration_sequence;
-	r_leaftexture->registration_sequence = registration_sequence;
-	r_splashtexture->registration_sequence = registration_sequence;
-	r_splash2texture->registration_sequence = registration_sequence;
-	r_flagtexture->registration_sequence = registration_sequence;
-	r_logotexture->registration_sequence = registration_sequence;
-	r_distort->registration_sequence = registration_sequence;
-	r_radarmap->registration_sequence = registration_sequence;
-	r_around->registration_sequence = registration_sequence;
-	sun_object->registration_sequence = registration_sequence;
-	sun1_object->registration_sequence = registration_sequence;
-	sun2_object->registration_sequence = registration_sequence;
-	r_dis1texture->registration_sequence = registration_sequence;
-	r_dis2texture->registration_sequence = registration_sequence;
-	r_dis3texture->registration_sequence = registration_sequence;
-
+	
 	for (i=0, image=gltextures ; i<numgltextures ; i++, image++)
 	{
 		if (image->registration_sequence == registration_sequence)
 			continue;		// used this sequence
 		if (!image->registration_sequence)
 			continue;		// free image_t slot
-		if (image->type == it_pic)
-			continue;		// don't free pics
+		if (image->type == it_pic || image->type == it_sprite)
+			continue;		// don't free pics or particles
 		// free it
 		qglDeleteTextures (1, (unsigned *)&image->texnum );
 		memset (image, 0, sizeof(*image));
 	}
 }
-
 
 /*
 ===============
@@ -1720,13 +1699,6 @@ void	GL_InitImages (void)
 	gl_state.inverse_intensity = 1;
 
 	Draw_GetPalette ();
-
-	if ( qglColorTableEXT )
-	{
-		FS_LoadFile( "pics/16to8.dat", (void *)&gl_state.d_16to8table );
-		if ( !gl_state.d_16to8table )
-			Sys_Error( ERR_FATAL, "Could not load pics/16to8.pcx");
-	}
 
 	R_InitBloomTextures();//BLOOMS
 	R_InitMirrorTextures();//MIRRORS

@@ -110,7 +110,7 @@ void GL_BuildSurfaceVBO(msurface_t *surf)
 	}
 }
 
-void GL_BuildWorldVBO(void)
+void R_BuildWorldVBO(void)
 {
 	msurface_t *surf;
 
@@ -138,7 +138,7 @@ void GL_BuildWorldVBO(void)
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }
 
-void GL_BuildVBOBufferSize(msurface_t *surf)
+void R_BuildVBOBufferSize(msurface_t *surf)
 {
 	glpoly_t *p = surf->polys;
 
