@@ -361,6 +361,21 @@ LONG WINAPI MainWndProc (
 			if (wParam & MK_MBUTTON)
 				temp |= 4;
 
+			/*  TODO: Research Windows mouse button support.
+			 *
+			 * MK_XBUTTON1 and MK_XBUTTON2 are 2 additional. Meaning TBD
+			 *
+			 * (why was mousebuttons set to 7?, )
+			 * (how many does win support. 5 for sure, more how?)
+			 *
+			 *  MK_LBUTTON 0x01
+			 *  MK_RBUTTON 0x02
+			 *  MK_MBUTTION 0x10
+			 *  MK_XBUTTON1 0x20
+			 *  MK_XBUTTON2 0x40
+			 *
+			 */
+
 			IN_MouseEvent (temp);
 		}
 		break;

@@ -342,6 +342,8 @@ const char *Default_MenuKey( menuframework_s *m, int key )
 	case K_MOUSE5:
 	case K_MOUSE6:
 	case K_MOUSE7:
+	case K_MOUSE8:
+	case K_MOUSE9:
 	case K_JOY1:
 	case K_JOY2:
 	case K_JOY3:
@@ -1632,7 +1634,7 @@ static void AddFontNames( char * path , int * nfontnames , char ** list )
 	char ** fontfiles;
 	int nfonts = 0;
 	int i;
-	
+
 	fontfiles = FS_ListFilesInFS( path , &nfonts, 0,
 	    SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
 
