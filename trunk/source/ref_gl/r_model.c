@@ -32,7 +32,6 @@ model_t	*loadmodel;
 int		modfilelen;
 
 void Mod_LoadBrushModel (model_t *mod, void *buffer);
-void Mod_LoadAliasModel (model_t *mod, void *buffer);
 model_t *Mod_LoadModel (model_t *mod, qboolean crash);
 
 byte	mod_novis[MAX_MAP_LEAFS/8];
@@ -410,7 +409,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		{
 			if (mod->type == mod_alias || mod->type == mod_iqm)
 			{
-				// Make sure models scripts are definately reloaded between maps - MrG
+				// Make sure models scripts are definately reloaded between maps
 				char rs[MAX_OSPATH];
 				image_t *img;
 				img=mod->skins[0];
@@ -523,7 +522,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		{
 		case IDALIASHEADER:
 			loadmodel->extradata = Hunk_Begin (0x300000);
-			Mod_LoadAliasModel (mod, buf);
+			Mod_LoadMD2Model (mod, buf);
 			break;
 
 		case IDBSPHEADER:
@@ -836,275 +835,6 @@ void CalcSurfaceExtents (msurface_t *s)
 	}
 }
 
-//lens flares
-int r_numflares;
-flare_t r_flares[MAX_FLARES];
-
-static void R_ClearFlares(void)
-{
-	memset(r_flares, 0, sizeof(r_flares));
-	r_numflares = 0;
-}
-
-void Mod_AddFlareSurface (msurface_t *surf, int type )
-{
-     int i, width, height, intens;
-     glpoly_t *poly;
-     flare_t  *light;
-     byte     *buffer;
-	 byte     *p;
-     float    *v, surf_bound;
-	 vec3_t origin = {0,0,0}, color = {1,1,1}, tmp, rgbSum;
-     vec3_t poly_center, mins, maxs, tmp1;
-
-     if (surf->texinfo->flags & (SURF_SKY|SURF_TRANS33|SURF_TRANS66|SURF_FLOWING|SURF_DRAWTURB|SURF_WARP))
-          return;
-
-     if (!(surf->texinfo->flags & (SURF_LIGHT)))
-          return;
-
-	 if (r_numflares >= MAX_FLARES)
-			return;
-
-    light = &r_flares[r_numflares++];
-    intens = surf->texinfo->value;
-
-
-     //if (intens < 100) //if not a lighted surf, don't do a flare, right?
-	//	 return;
-    /*
-	===================
-	find poligon centre
-	===================
-	*/
-	VectorSet(mins, 999999, 999999, 999999);
-	VectorSet(maxs, -999999, -999999, -999999);
-
-    for ( poly = surf->polys; poly; poly = poly->chain ) {
-         for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE) {
-
-               if(v[0] > maxs[0])   maxs[0] = v[0];
-               if(v[1] > maxs[1])   maxs[1] = v[1];
-               if(v[2] > maxs[2])   maxs[2] = v[2];
-
-               if(v[0] < mins[0])   mins[0] = v[0];
-               if(v[1] < mins[1])   mins[1] = v[1];
-               if(v[2] < mins[2])   mins[2] = v[2];
-            }
-      }
-
-     poly_center[0] = (mins[0] + maxs[0]) /2;
-     poly_center[1] = (mins[1] + maxs[1]) /2;
-     poly_center[2] = (mins[2] + maxs[2]) /2;
-	 VectorCopy(poly_center, origin);
-
-     /*
-	=====================================
-	calc light surf bounds and flare size
-	=====================================
-	*/
-
-
-	 VectorSubtract(maxs, mins, tmp1);
-     surf_bound = VectorLength(tmp1);
-	 if (surf_bound <=25) light->size = 10;
-	 else if (surf_bound <=50)  light->size = 15;
-     else if (surf_bound <=100) light->size = 20;
-	 else if (surf_bound <=150) light->size = 25;
-	 else if (surf_bound <=200) light->size = 30;
-	 else if (surf_bound <=250) light->size = 35;
-
-
-	/*
-	===================
-	calc texture color
-	===================
-	*/
-
-     GL_Bind( surf->texinfo->image->texnum );
-     width = surf->texinfo->image->upload_width;
-	 height = surf->texinfo->image->upload_height;
-
-     buffer = malloc(width * height * 3);
-     qglGetTexImage (GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
-     VectorClear(rgbSum);
-
-     for (i=0, p=buffer; i<width*height; i++, p += 3)
-      {
-        rgbSum[0] += (float)p[0]  * (1.0 / 255);
-        rgbSum[1] += (float)p[1]  * (1.0 / 255);
-        rgbSum[2] += (float)p[2]  * (1.0 / 255);
-      }
-
-      VectorScale(rgbSum, r_lensflare_intens->value / (width *height), color);
-
-      for (i=0; i<3; i++) {
-          if (color[i] < 0.5)
-               color[i] = color[i] * 0.5;
-          else
-               color[i] = color[i] * 0.5 + 0.5;
-          }
-      VectorCopy(color, light->color);
-
-	/*
-	==================================
-	move flare origin in to map bounds
-	==================================
-	*/
-
-     if (surf->flags & SURF_PLANEBACK)
-		VectorNegate(surf->plane->normal, tmp);
-     else
-		VectorCopy(surf->plane->normal, tmp);
-
-     VectorMA(origin, 2, tmp, origin);
-     VectorCopy(origin, light->origin);
-
-     light->style = type;
-
-     free (buffer);
-}
-
-//vegetation
-int r_numgrasses;
-grass_t r_grasses[MAX_GRASSES];
-
-static void R_ClearGrasses(void)
-{
-	memset(r_grasses, 0, sizeof(r_grasses));
-	r_numgrasses = 0;
-}
-
-void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type)
-{
-    glpoly_t *poly;
-    grass_t  *grass;
-	image_t *gl;
-	vec3_t origin = {0,0,0}, binormal, tangent, tmp;
-
-	if (r_numgrasses >= MAX_GRASSES)
-			return;
-
-	if(size == 0.0)
-		size = 1.0f;
-
-	poly = surf->polys;
-
-	VectorCopy(poly->verts[0], origin);
-
-	AngleVectors(surf->plane->normal, NULL, tangent, binormal);
-	VectorNormalize(tangent);
-	VectorNormalize(binormal);
-
-	VectorMA(origin, -32*frand(), tangent, origin);
-
-	if (surf->flags & SURF_PLANEBACK)
-		VectorNegate(surf->plane->normal, tmp);
-	else
-		VectorCopy(surf->plane->normal, tmp);
-
-	VectorMA(origin, 2, tmp, origin);
-
-	grass = &r_grasses[r_numgrasses++];
-	VectorCopy(origin, grass->origin);
-
-	gl = R_RegisterGfxPic (name);
-	if (gl)
-		grass->texsize = gl->height;
-	else
-		grass->texsize = 64; //sane default
-
-	grass->texnum = texnum;
-	VectorCopy(color, grass->color);
-	grass->size = size;
-	strcpy(grass->name, name);
-	grass->type = type;
-}
-
-int r_numbeams;
-beam_t r_beams[MAX_BEAMS];
-
-static void R_ClearBeams(void)
-{
-	memset(r_beams, 0, sizeof(r_beams));
-	r_numbeams = 0;
-}
-
-void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type, float xang, float yang,
-	qboolean rotating)
-{
-    glpoly_t *poly;
-    beam_t  *beam;
-	image_t *gl;
-	vec3_t poly_center, mins, maxs;
-	float *v;
-	int i;
-	vec3_t origin = {0,0,0}, binormal, tangent, tmp;
-
-	if (r_numbeams >= MAX_BEAMS)
-			return;
-
-	if(size == 0.0)
-		size = 1.0f;
-
-	poly = surf->polys;
-
-	 /*
-	===================
-	find poligon centre
-	===================
-	*/
-	VectorSet(mins, 999999, 999999, 999999);
-	VectorSet(maxs, -999999, -999999, -999999);
-
-    for ( poly = surf->polys; poly; poly = poly->chain ) {
-         for (i=0, v=poly->verts[0] ; i< poly->numverts; i++, v+= VERTEXSIZE) {
-
-               if(v[0] > maxs[0])   maxs[0] = v[0];
-               if(v[1] > maxs[1])   maxs[1] = v[1];
-               if(v[2] > maxs[2])   maxs[2] = v[2];
-
-               if(v[0] < mins[0])   mins[0] = v[0];
-               if(v[1] < mins[1])   mins[1] = v[1];
-               if(v[2] < mins[2])   mins[2] = v[2];
-            }
-      }
-
-     poly_center[0] = (mins[0] + maxs[0]) /2;
-     poly_center[1] = (mins[1] + maxs[1]) /2;
-     poly_center[2] = (mins[2] + maxs[2]) /2;
-	 VectorCopy(poly_center, origin);
-
-	AngleVectors(surf->plane->normal, NULL, tangent, binormal);
-	VectorNormalize(tangent);
-	VectorNormalize(binormal);
-
-	if (surf->flags & SURF_PLANEBACK)
-		VectorNegate(surf->plane->normal, tmp);
-	else
-		VectorCopy(surf->plane->normal, tmp);
-
-	VectorMA(origin, 2, tmp, origin);
-
-	beam = &r_beams[r_numbeams++];
-	VectorCopy(origin, beam->origin);
-
-	gl = R_RegisterGfxPic (name);
-	if (gl)
-		beam->texsize = gl->height;
-	else
-		beam->texsize = 64; //sane default
-
-	beam->texnum = texnum;
-	VectorCopy(color, beam->color);
-	beam->size = size;
-	strcpy(beam->name, name);
-	beam->type = type;
-	beam->xang = xang;
-	beam->yang = yang;
-	beam->rotating = rotating;
-}
-
 void Mod_CalcSurfaceNormals(msurface_t *surf)
 {
 
@@ -1184,10 +914,10 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 	}
 }
 
-void GL_BuildPolygonFromSurface(msurface_t *fa);
-void GL_CreateSurfaceLightmap (msurface_t *surf);
-void GL_EndBuildingLightmaps (void);
-void GL_BeginBuildingLightmaps (model_t *m);
+void BSP_BuildPolygonFromSurface(msurface_t *fa);
+void BSP_CreateSurfaceLightmap (msurface_t *surf);
+void BSP_EndBuildingLightmaps (void);
+void BSP_BeginBuildingLightmaps (model_t *m);
 
 /*
 =================
@@ -1217,9 +947,9 @@ void Mod_LoadFaces (lump_t *l)
 
 	currentmodel = loadmodel;
 
-	GL_BeginBuildingLightmaps (loadmodel);
+	BSP_BeginBuildingLightmaps (loadmodel);
 
-	R_VCInit();
+	VB_VCInit();
 
 	for ( surfnum=0 ; surfnum<count ; surfnum++, in++, out++)
 	{
@@ -1275,11 +1005,11 @@ void Mod_LoadFaces (lump_t *l)
 		// create lightmaps and polygons
 		if ( !SurfaceHasNoLightmap(out) )
 		{
-			GL_CreateSurfaceLightmap (out);
+			BSP_CreateSurfaceLightmap (out);
 		}
 
 		if ( (! (out->texinfo->flags & SURF_WARP)) || (gl_state.glsl_shaders && gl_glsl_shaders->value && !fod))
-			GL_BuildPolygonFromSurface(out);
+			BSP_BuildPolygonFromSurface(out);
 
 		rs = (rscript_t *)out->texinfo->image->script;
 
@@ -1313,11 +1043,11 @@ void Mod_LoadFaces (lump_t *l)
 		Mod_CalcSurfaceNormals(out);
 		
 		if(gl_state.vbo) {
-			R_BuildVBOBufferSize(out);
+			VB_BuildVBOBufferSize(out);
 			out->has_vbo = false;
 		}
 	}
-	GL_EndBuildingLightmaps ();	
+	BSP_EndBuildingLightmaps ();	
 }
 
 
@@ -1560,8 +1290,8 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	R_ClearAllRagdolls();
 
 	//ODE - create new world(flush out old first?)
-	ODE_DestroyWorldObject();
-	ODE_CreateWorldObject();
+	RGD_DestroyWorldObject();
+	RGD_CreateWorldObject();
 
 	r_numWorldLights = 0;
 
@@ -1575,13 +1305,13 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	if (i != BSPVERSION)
 		Com_Error (ERR_DROP, "Mod_LoadBrushModel: %s has wrong version number (%i should be %i)", mod->name, i, BSPVERSION);
 
-// swap all the lumps
+	// swap all the lumps
 	mod_base = (byte *)header;
 
 	for (i=0 ; i<sizeof(dheader_t)/sizeof(int) ; i++)
 		((int *)header)[i] = LittleLong ( ((int *)header)[i]);
 
-// load into heap
+	// load into heap
 	Mod_LoadEntityStrn (&header->lumps[LUMP_ENTITIES]);
 	Mod_LoadVertexes (&header->lumps[LUMP_VERTEXES]);
 	Mod_LoadEdges (&header->lumps[LUMP_EDGES]);
@@ -1597,9 +1327,9 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	Mod_LoadSubmodels (&header->lumps[LUMP_MODELS]);
 	mod->num_frames = 2;		// regular and alternate animation
 
-//
-// set up the submodels
-//
+	//
+	// set up the submodels
+	//
 	for (i=0 ; i<mod->numsubmodels ; i++)
 	{
 		model_t	*starmod;
@@ -1626,649 +1356,6 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	}
 
 	R_ParseLightEntities();
-}
-
-/*
-==============================================================================
-
-ALIAS MODELS
-
-==============================================================================
-*/
-
-/*
-========================
-Mod_FindTriangleWithEdge
-Shadow volumes stuff
-========================
-*/
-static int Mod_FindTriangleWithEdge(neighbors_t * neighbors, dtriangle_t * tris, int numtris, int triIndex, int edgeIndex){
-
-
-	int i, j, found = -1, foundj = 0;
-	dtriangle_t *current = &tris[triIndex];
-	qboolean dup = false;
-
-	for (i = 0; i < numtris; i++) {
-		if (i == triIndex)
-			continue;
-
-		for (j = 0; j < 3; j++) {
-			if (((current->index_xyz[edgeIndex] == tris[i].index_xyz[j]) &&
-				 (current->index_xyz[(edgeIndex + 1) % 3] ==
-				  tris[i].index_xyz[(j + 1) % 3]))
-				||
-				((current->index_xyz[edgeIndex] ==
-				  tris[i].index_xyz[(j + 1) % 3])
-				 && (current->index_xyz[(edgeIndex + 1) % 3] ==
-					 tris[i].index_xyz[j]))) {
-				// no edge for this model found yet?
-				if (found == -1) {
-					found = i;
-					foundj = j;
-				} else
-					dup = true;	// the three edges story
-			}
-		}
-	}
-
-	// normal edge, setup neighbor pointers
-	if (!dup && found != -1) {	
-		neighbors[found].n[foundj] = triIndex;
-		return found;
-	}
-	// naughty edge let no-one have the neighbor
-	return -1;
-}
-
-/*
-===============
-Mod_BuildTriangleNeighbors
-
-===============
-*/
-static void Mod_BuildTriangleNeighbors(neighbors_t * neighbors,
-									   dtriangle_t * tris, int numtris)
-{
-	int i, j;
-
-	// set neighbors to -1
-	for (i = 0; i < numtris; i++) {
-		for (j = 0; j < 3; j++)
-			neighbors[i].n[j] = -1;
-	}
-
-	// generate edges information (for shadow volumes)
-	// NOTE: We do this with the original vertices not the reordered onces
-	// since reordering them
-	// duplicates vertices and we only compare indices
-	for (i = 0; i < numtris; i++) {
-		for (j = 0; j < 3; j++) {
-			if (neighbors[i].n[j] == -1)
-				neighbors[i].n[j] =
-					Mod_FindTriangleWithEdge(neighbors, tris, numtris, i,
-											 j);
-		}
-	}
-}
-
-/*
-Mod_LoadMd2VertexArrays
-*/
-extern
-void Mod_LoadMd2VertexArrays(model_t *md2model){
-
-	dmdl_t *md2;
-	daliasframe_t *md2frame;
-	dtrivertx_t	*md2v;
-	int i;
-
-	if(md2model->num_frames > 1)
-		return;
-
-	md2 = (dmdl_t *)md2model->extradata;
-
-	md2frame = (daliasframe_t *)((byte *)md2 + md2->ofs_frames);
-
-	if(md2->num_xyz > MAX_VERTS)
-		return;
-
-	md2model->vertexes = (mvertex_t*)Hunk_Alloc(md2->num_xyz * sizeof(mvertex_t));
-
-	for(i = 0, md2v = md2frame->verts; i < md2->num_xyz; i++, md2v++){  // reconstruct the verts
-		VectorSet(md2model->vertexes[i].position,
-					md2v->v[0] * md2frame->scale[0] + md2frame->translate[0],
-					md2v->v[1] * md2frame->scale[1] + md2frame->translate[1],
-					md2v->v[2] * md2frame->scale[2] + md2frame->translate[2]);
-	}
-
-}
-
-#if 0
-byte Normal2Index(const vec3_t vec)
-{
-	int i, best;
-	float d, bestd;
-
-	bestd = best = 0;
-	for (i=0 ; i<NUMVERTEXNORMALS ; i++)
-	{
-		d = DotProduct (vec, r_avertexnormals[i]);
-		if (d > bestd)
-		{
-			bestd = d;
-			best = i;
-		}
-	}
-
-	return best;
-}
-#else
-// for MD2 load speedup. Adapted from common.c::MSG_WriteDir()
-byte Normal2Index(const vec3_t vec)
-{
-	int i, best;
-	float d, bestd;
-	float x,y,z;
-
-	x = vec[0];
-	y = vec[1];
-	z = vec[2];
-
-	best = 0;
-	// frequently occurring axial cases, use known best index
-	if ( x == 0.0f && y == 0.0f )
-	{
-		best = ( z >= 0.999f ) ? 5  : 84;
-	}
-	else if ( x == 0.0f && z == 0.0f )
-	{
-		best = ( y >= 0.999f ) ? 32 : 104;
-	}
-	else if ( y == 0.0f && z == 0.0f )
-	{
-		best = ( x >= 0.999f ) ? 52 : 143;
-	}
-	else
-	{ // general case
-		bestd = 0.0f;
-		for ( i = 0 ; i < NUMVERTEXNORMALS ; i++ )
-		{ // search for closest match
-			d =	  (x*r_avertexnormals[i][0])
-				+ (y*r_avertexnormals[i][1])
-				+ (z*r_avertexnormals[i][2]);
-			if ( d > 0.998f )
-			{ // no other entry could be a closer match
-				//  0.9679495 is max dot product between anorm.h entries
-				best = i;
-				break;
-			}
-			if ( d > bestd )
-			{
-				bestd = d;
-				best = i;
-			}
-		}
-	}
-
-	return best;
-}
-#endif
-
-void RecalcVertsLightNormalIdx (dmdl_t *pheader)
-{
-	int				i, j, k, l;
-	daliasframe_t	*frame;
-	dtrivertx_t		*verts, *v;
-	vec3_t			normal, triangle[3], v1, v2;
-	dtriangle_t		*tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
-	vec3_t	normals_[MAX_VERTS];
-
-	//for all frames
-	for (i=0; i<pheader->num_frames; i++)
-	{
-		frame = (daliasframe_t *)((byte *)pheader + pheader->ofs_frames + i * pheader->framesize);
-		verts = frame->verts;
-
-		memset(normals_, 0, pheader->num_xyz*sizeof(vec3_t));
-
-		//for all tris
-		for (j=0; j<pheader->num_tris; j++)
-		{
-			//make 3 vec3_t's of this triangle's vertices
-			for (k=0; k<3; k++)
-			{
-				l = tris[j].index_xyz[k];
-				v = &verts[l];
-				for (l=0; l<3; l++)
-					triangle[k][l] = v->v[l];
-			}
-
-			//calculate normal
-			VectorSubtract(triangle[0], triangle[1], v1);
-			VectorSubtract(triangle[2], triangle[1], v2);
-			CrossProduct(v2,v1, normal);
-			VectorScale(normal, -1.0/VectorLength(normal), normal);
-
-			for (k=0; k<3; k++)
-			{
-				l = tris[j].index_xyz[k];
-				VectorAdd(normals_[l], normal, normals_[l]);
-			}
-		}
-
-		for (j=0; j<pheader->num_xyz; j++)
-			for (k=j+1; k<pheader->num_xyz; k++)
-				if(verts[j].v[0] == verts[k].v[0] && verts[j].v[1] == verts[k].v[1] && verts[j].v[2] == verts[k].v[2])
-				{
-					float *jnormal = r_avertexnormals[verts[j].lightnormalindex];
-					float *knormal = r_avertexnormals[verts[k].lightnormalindex];
-					if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))
-					{
-						VectorAdd(normals_[j], normals_[k], normals_[j]);
-						VectorCopy(normals_[j], normals_[k]);
-					}
-				}
-
-		//normalize average
-		for (j=0; j<pheader->num_xyz; j++)
-		{
-			VectorNormalize(normals_[j]);
-			verts[j].lightnormalindex = Normal2Index(normals_[j]);
-		}
-
-	}
-
-}
-
-#if 0
-void VecsForTris(float *v0, float *v1, float *v2, float *st0, float *st1, float *st2, vec3_t Tangent)
-{
-	vec3_t	vec1, vec2;
-	vec3_t	planes[3];
-	float	tmp;
-	int		i;
-
-	for (i=0; i<3; i++)
-	{
-		vec1[0] = v1[i]-v0[i];
-		vec1[1] = st1[0]-st0[0];
-		vec1[2] = st1[1]-st0[1];
-		vec2[0] = v2[i]-v0[i];
-		vec2[1] = st2[0]-st0[0];
-		vec2[2] = st2[1]-st0[1];
-		VectorNormalize(vec1);
-		VectorNormalize(vec2);
-		CrossProduct(vec1,vec2,planes[i]);
-	}
-
-	for (i=0; i<3; i++)
-	{
-		tmp = 1.0 / planes[i][0];
-		Tangent[i] = -planes[i][1]*tmp;
-	}
-	VectorNormalize(Tangent);
-}
-#else
-// Math rearrangement for MD2 load speedup
-static void VecsForTris(
-		const float *v0,
-		const float *v1,
-		const float *v2,
-		const float *st0,
-		const float *st1,
-		const float *st2,
-		vec3_t Tangent
-		)
-{
-	vec3_t vec1, vec2;
-	vec3_t planes[3];
-	float tmp;
-	float vec1_y, vec1_z, vec1_nrml;
-	float vec2_y, vec2_z, vec2_nrml;
-	int i;
-
-	vec1_y = st1[0]-st0[0];
-	vec1_z = st1[1]-st0[1];
-	vec1_nrml = (vec1_y*vec1_y) + (vec1_z*vec1_z); // partial for normalize
-
-	vec2_y = st2[0]-st0[0];
-	vec2_z = st2[1]-st0[1];
-	vec2_nrml = (vec2_y*vec2_y) + (vec2_z*vec2_z); // partial for normalize
-
-	for (i=0; i<3; i++)
-	{
-		vec1[0] = v1[i]-v0[i];
-		// VectorNormalize(vec1);
-		tmp = (vec1[0] * vec1[0]) + vec1_nrml;
-		tmp = sqrt(tmp);
-		if ( tmp > 0.0 )
-		{
-			tmp = 1.0 / tmp;
-			vec1[0] *= tmp;
-			vec1[1] = vec1_y * tmp;
-			vec1[2] = vec1_z * tmp;
-		}
-
-		vec2[0] = v2[i]-v0[i];
-		// --- VectorNormalize(vec2);
-		tmp = (vec2[0] * vec2[0]) + vec2_nrml;
-		tmp = sqrt(tmp);
-		if ( tmp > 0.0 )
-		{
-			tmp = 1.0 / tmp;
-			vec2[0] *= tmp;
-			vec2[1] = vec2_y * tmp;
-			vec2[2] = vec2_z * tmp;
-		}
-
-		// --- CrossProduct(vec1,vec2,planes[i]);
-		planes[i][0] = vec1[1]*vec2[2] - vec1[2]*vec2[1];
-		planes[i][1] = vec1[2]*vec2[0] - vec1[0]*vec2[2];
-		planes[i][2] = vec1[0]*vec2[1] - vec1[1]*vec2[0];
-		// ---
-
-		tmp = 1.0 / planes[i][0];
-		Tangent[i] = -planes[i][1]*tmp;
-	}
-
-	VectorNormalize(Tangent);
-}
-#endif
-
-
-/*
-=================
-Mod_LoadAliasModel
-=================
-*/
-void Mod_LoadAliasModel (model_t *mod, void *buffer)
-{
-	int					i, j, k, l;
-	dmdl_t				*pinmodel, *pheader, *paliashdr;
-	dstvert_t			*pinst, *poutst;
-	dtriangle_t			*pintri, *pouttri, *tris;
-	daliasframe_t		*pinframe, *poutframe, *pframe;
-	int					*pincmd, *poutcmd;
-	int					version;
-	int					cx;
-	float				s, t;
-	float				iw, ih;
-	fstvert_t			*st;
-	daliasframe_t		*frame;
-	dtrivertx_t			*verts;
-	byte				*tangents;
-	vec3_t				tangents_[MAX_VERTS];
-	char *pstring;
-	int count;
-	image_t *image;
-
-	pinmodel = (dmdl_t *)buffer;
-
-	version = LittleLong (pinmodel->version);
-	if (version != ALIAS_VERSION)
-		Com_Printf("%s has wrong version number (%i should be %i)",
-				 mod->name, version, ALIAS_VERSION);
-
-	pheader = Hunk_Alloc (LittleLong(pinmodel->ofs_end));
-
-	// byte swap the header fields and sanity check
-	for (i=0 ; i<sizeof(dmdl_t)/sizeof(int) ; i++)
-		((int *)pheader)[i] = LittleLong (((int *)buffer)[i]);
-
-	if (pheader->skinheight > MAX_LBM_HEIGHT)
-		Com_Printf("model %s has a skin taller than %d", mod->name,
-				   MAX_LBM_HEIGHT);
-
-	if (pheader->num_xyz <= 0)
-		Com_Printf("model %s has no vertices", mod->name);
-
-	if (pheader->num_xyz > MAX_VERTS)
-		Com_Printf("model %s has too many vertices", mod->name);
-
-	if (pheader->num_st <= 0)
-		Com_Printf("model %s has no st vertices", mod->name);
-
-	if (pheader->num_tris <= 0)
-		Com_Printf("model %s has no triangles", mod->name);
-
-	if (pheader->num_frames <= 0)
-		Com_Printf("model %s has no frames", mod->name);
-
-//
-// load base s and t vertices
-//
-	pinst = (dstvert_t *) ((byte *)pinmodel + pheader->ofs_st);
-	poutst = (dstvert_t *) ((byte *)pheader + pheader->ofs_st);
-
-	for (i=0 ; i<pheader->num_st ; i++)
-	{
-		poutst[i].s = LittleShort (pinst[i].s);
-		poutst[i].t = LittleShort (pinst[i].t);
-	}
-
-//
-// load triangle lists
-//
-	pintri = (dtriangle_t *) ((byte *)pinmodel + pheader->ofs_tris);
-	pouttri = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
-
-	for (i=0 ; i<pheader->num_tris ; i++)
-	{
-		for (j=0 ; j<3 ; j++)
-		{
-			pouttri[i].index_xyz[j] = LittleShort (pintri[i].index_xyz[j]);
-			pouttri[i].index_st[j] = LittleShort (pintri[i].index_st[j]);
-		}
-	}
-
-//
-// find neighbours
-//
-	mod->neighbors = Hunk_Alloc(pheader->num_tris * sizeof(neighbors_t));
-	Mod_BuildTriangleNeighbors(mod->neighbors, pouttri, pheader->num_tris);
-
-//
-// load the frames
-//
-	for (i=0 ; i<pheader->num_frames ; i++)
-	{
-		pinframe = (daliasframe_t *) ((byte *)pinmodel
-			+ pheader->ofs_frames + i * pheader->framesize);
-		poutframe = (daliasframe_t *) ((byte *)pheader
-			+ pheader->ofs_frames + i * pheader->framesize);
-
-		memcpy (poutframe->name, pinframe->name, sizeof(poutframe->name));
-		for (j=0 ; j<3 ; j++)
-		{
-			poutframe->scale[j] = LittleFloat (pinframe->scale[j]);
-			poutframe->translate[j] = LittleFloat (pinframe->translate[j]);
-		}
-		// verts are all 8 bit, so no swapping needed
-		memcpy (poutframe->verts, pinframe->verts,
-			pheader->num_xyz*sizeof(dtrivertx_t));
-
-	}
-
-	mod->type = mod_alias;
-	mod->num_frames = pheader->num_frames;
-
-	//
-	// load the glcmds
-	//
-	pincmd = (int *) ((byte *)pinmodel + pheader->ofs_glcmds);
-	poutcmd = (int *) ((byte *)pheader + pheader->ofs_glcmds);
-	for (i=0 ; i<pheader->num_glcmds ; i++)
-		poutcmd[i] = LittleLong (pincmd[i]);
-
-#if 0
-	// register all skins
-	memcpy ((char *)pheader + pheader->ofs_skins, (char *)pinmodel + pheader->ofs_skins,
-		pheader->num_skins*MAX_SKINNAME);
-	for (i=0 ; i<pheader->num_skins ; i++)
-		mod->skins[i] = GL_FindImage ((char *)pheader + pheader->ofs_skins + i*MAX_SKINNAME, it_skin);
-#else
-	// skin names are not always valid or file may not exist
-	// do not register skins that cannot be found to eliminate extraneous
-	//  file system searching.
-	pstring = &((char*)pheader)[ pheader->ofs_skins ];
-	count = pheader->num_skins;
-	if ( count )
-	{ // someday .md2's that do not have skins may have zero for num_skins
-		memcpy( pstring, (char *)pinmodel + pheader->ofs_skins, count*MAX_SKINNAME );
-		i = 0;
-		while ( count-- )
-		{
-			pstring[MAX_SKINNAME-1] = '\0'; // paranoid
-			image = GL_FindImage( pstring, it_skin);
-			if ( image != NULL )
-				mod->skins[i++] = image;
-			else
-				pheader->num_skins--; // the important part: adjust skin count
-			pstring += MAX_SKINNAME;
-		}
-	}
-#endif
-
-	// load script
-	if(pheader->num_skins)
-	{
-		char rs[MAX_OSPATH];
-
-		strcpy(rs,(char *)pinmodel + LittleLong(pinmodel->ofs_skins));
-
-		rs[strlen(rs)-4]=0;
-
-		mod->script = RS_FindScript(rs);
-
-		if (mod->script)
-			RS_ReadyScript( mod->script );
-	}
-
-	cx = pheader->num_st * sizeof(fstvert_t);
-    mod->st = st = (fstvert_t*)Hunk_Alloc (cx);
-
-	// Calculate texcoords for triangles
-    iw = 1.0 / pheader->skinwidth;
-    ih = 1.0 / pheader->skinheight;
-    for (i=0; i<pheader->num_st ; i++)
-    {
-        s = poutst[i].s;
-        t = poutst[i].t;
-        st[i].s = (s + 1.0) * iw; //tweak by one pixel
-        st[i].t = (t + 1.0) * ih;
-    }
-
-	Mod_LoadMd2VertexArrays(mod);
-
-	RecalcVertsLightNormalIdx(pheader);
-
-	cx = pheader->num_xyz * pheader->num_frames * sizeof(byte);
-
-	// Calculate tangents
-	mod->tangents = tangents = (byte*)Hunk_Alloc (cx);
-
-	tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
-
-	//for all frames
-	for (i=0; i<pheader->num_frames; i++)
-	{
-		//set temp to zero
-		memset(tangents_, 0, pheader->num_xyz*sizeof(vec3_t));
-
-		frame = (daliasframe_t *)((byte *)pheader + pheader->ofs_frames + i * pheader->framesize);
-		verts = frame->verts;
-
-		//for all tris
-		for (j=0; j<pheader->num_tris; j++)
-		{
-			vec3_t	vv0,vv1,vv2;
-			vec3_t tangent;
-
-			vv0[0] = (float)verts[tris[j].index_xyz[0]].v[0];
-			vv0[1] = (float)verts[tris[j].index_xyz[0]].v[1];
-			vv0[2] = (float)verts[tris[j].index_xyz[0]].v[2];
-			vv1[0] = (float)verts[tris[j].index_xyz[1]].v[0];
-			vv1[1] = (float)verts[tris[j].index_xyz[1]].v[1];
-			vv1[2] = (float)verts[tris[j].index_xyz[1]].v[2];
-			vv2[0] = (float)verts[tris[j].index_xyz[2]].v[0];
-			vv2[1] = (float)verts[tris[j].index_xyz[2]].v[1];
-			vv2[2] = (float)verts[tris[j].index_xyz[2]].v[2];
-
-			VecsForTris(vv0, vv1, vv2,
-						&st[tris[j].index_st[0]].s,
-						&st[tris[j].index_st[1]].s,
-						&st[tris[j].index_st[2]].s,
-						tangent);
-
-			for (k=0; k<3; k++)
-			{
-				l = tris[j].index_xyz[k];
-				VectorAdd(tangents_[l], tangent, tangents_[l]);
-			}
-		}
-
-		for (j=0; j<pheader->num_xyz; j++)
-			for (k=j+1; k<pheader->num_xyz; k++)
-				if(verts[j].v[0] == verts[k].v[0] && verts[j].v[1] == verts[k].v[1] && verts[j].v[2] == verts[k].v[2])
-				{
-					float *jnormal = r_avertexnormals[verts[j].lightnormalindex];
-					float *knormal = r_avertexnormals[verts[k].lightnormalindex];
-					// if(DotProduct(jnormal, knormal)>=cos(DEG2RAD(45)))
-					if( DotProduct(jnormal, knormal) >= 0.707106781187 ) // cos of 45 degrees.
-					{
-						VectorAdd(tangents_[j], tangents_[k], tangents_[j]);
-						VectorCopy(tangents_[j], tangents_[k]);
-					}
-				}
-
-		//normalize averages
-		for (j=0; j<pheader->num_xyz; j++)
-		{
-			VectorNormalize(tangents_[j]);
-			tangents[i * pheader->num_xyz + j] = Normal2Index(tangents_[j]);
-		}
-	}
-
-	paliashdr = (dmdl_t *)mod->extradata;
-
-	//redo this using max/min from all frames
-	pframe = ( daliasframe_t * ) ( ( byte * ) paliashdr +
-		                              paliashdr->ofs_frames);
-
-	/*
-	** compute axially aligned mins and maxs
-	*/
-	for ( i = 0; i < 3; i++ )
-	{
-		mod->mins[i] = pframe->translate[i];
-		mod->maxs[i] = mod->mins[i] + pframe->scale[i]*255;
-	}
-
-	/*
-	** compute a full bounding box
-	*/
-	for ( i = 0; i < 8; i++ )
-	{
-		vec3_t   tmp;
-
-		if ( i & 1 )
-			tmp[0] = mod->mins[0];
-		else
-			tmp[0] = mod->maxs[0];
-
-		if ( i & 2 )
-			tmp[1] = mod->mins[1];
-		else
-			tmp[1] = mod->maxs[1];
-
-		if ( i & 4 )
-			tmp[2] = mod->mins[2];
-		else
-			tmp[2] = mod->maxs[2];
-
-		VectorCopy( tmp, mod->bbox[i] );
-	}
 }
 
 //=============================================================================
@@ -2513,11 +1600,11 @@ void R_BeginRegistration (char *model)
 	R_RegisterLightGroups();
 
 	//ODE
-	ODE_BuildWorldTrimesh ();
+	RGD_BuildWorldTrimesh ();
 
 	//VBO
 	if(gl_state.vbo)
-		R_BuildWorldVBO();
+		VB_BuildWorldVBO();
 }
 
 /*
@@ -2526,7 +1613,7 @@ R_RegisterModel
 
 @@@@@@@@@@@@@@@@@@@@@
 */
-extern qboolean Mod_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath);
+
 struct model_s *R_RegisterModel (char *name)
 {
 	model_t	*mod;

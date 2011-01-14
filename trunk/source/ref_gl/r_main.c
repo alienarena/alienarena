@@ -959,8 +959,6 @@ r_newrefdef must be set before the first call
 ================
 */
 
-extern void generateShadowFBO();
-
 void R_RenderView (refdef_t *fd)
 {
 	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
@@ -1714,7 +1712,7 @@ cpuinfo_exit:
 	R_InitParticleTexture ();
 	Draw_InitLocal ();
 
-	generateShadowFBO();
+	R_GenerateShadowFBO();
 	VLight_Init();
 
 	//Initialize ODE
