@@ -465,36 +465,9 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		}
 	}
 	else
-	{	//we have an .iqm
-		//if r_usemd2, check for .md2, if none, load the .iqm
-		if(r_usemd2->value)
-		{
-			COM_StripExtension(mod->name, shortname);
-			strcat(shortname, ".md2");
-
-			modfilelen = FS_LoadFile (shortname, (void*)&buf);
-
-			if(!buf)
-			{ //no .md2 for this .iqm, so revert to using the .iqm
-				COM_StripExtension(mod->name, shortname);
-				strcat(shortname, ".iqm");
-
-				modfilelen = FS_LoadFile (shortname, (void*)&buf);
-
-				if (!buf)
-				{ //be cautious
-					if (crash)
-						Com_Error (ERR_DROP, "Mod_NumForName: %s not found", mod->name);
-					memset (mod->name, 0, sizeof(mod->name));
-					return NULL;
-				}
-
-				is_iqm = true;
-			}
-		}
-		else {
-			is_iqm = true;
-		}
+	{	
+		//we have an .iqm
+		is_iqm = true;
 		strcpy(mod->name, shortname);
 	}
 
