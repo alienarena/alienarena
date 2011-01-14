@@ -51,9 +51,6 @@ cvar_t	*gl_glsl_postprocess;
 cvar_t	*gl_arb_fragment_program;
 cvar_t	*gl_glsl_shaders;
 
-cvar_t	*r_legacy;
-cvar_t	*r_usemd2;
-
 entity_t	*currententity;
 model_t	*currentmodel;
 
@@ -1241,9 +1238,6 @@ void R_Register( void )
 	gl_screenshot_type = Cvar_Get("gl_screenshot_type", "jpeg", CVAR_ARCHIVE);
 	gl_screenshot_jpeg_quality = Cvar_Get("gl_screenshot_jpeg_quality", "85", CVAR_ARCHIVE);
 
-	r_legacy = Cvar_Get("r_legacy", "0", CVAR_ARCHIVE);
-	r_usemd2 = Cvar_Get("r_usemd2", "0", CVAR_ARCHIVE);
-
 	r_firstrun = Cvar_Get("r_firstrun", "0", CVAR_ARCHIVE); //first time running the game
 
 	r_test = Cvar_Get("r_test", "1", CVAR_ARCHIVE); //for testing things
@@ -1332,7 +1326,6 @@ void R_SetLowest(void)
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 0);
 	Cvar_SetValue("gl_vlights", 0);
-	Cvar_SetValue("r_legacy", 1);
 
 	Com_Printf("...autodetected LOWEST game setting\n");
 }
@@ -1362,7 +1355,6 @@ void R_SetLow( void )
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 0);
-	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected LOW game setting\n");
 }
@@ -1392,7 +1384,6 @@ void R_SetMedium( void )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
-	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected MEDIUM game setting\n");
 }
@@ -1422,7 +1413,6 @@ void R_SetHigh( void )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
-	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected HIGH game setting\n");
 }
@@ -1452,7 +1442,6 @@ void R_SetHighest( void )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
-	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected HIGHEST game setting\n");
 }
