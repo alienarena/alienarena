@@ -75,7 +75,7 @@ void getOpenGLFunctionPointers(void)
 }
 
 //used for post process stencil volume blurring and shadowmapping
-void generateShadowFBO()
+void R_GenerateShadowFBO()
 {
 	int shadowMapWidth = vid.width * r_shadowmapratio->value;
     int shadowMapHeight = vid.height * r_shadowmapratio->value;
@@ -243,7 +243,7 @@ static void lookAt( float position_x , float position_y , float position_z , flo
 	qglTranslated( -position_x , -position_y , -position_z );
 }
 
-void setupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
+void SM_SetupMatrices(float position_x,float position_y,float position_z,float lookAt_x,float lookAt_y,float lookAt_z)
 {
 
 	qglMatrixMode(GL_PROJECTION);
@@ -254,7 +254,7 @@ void setupMatrices(float position_x,float position_y,float position_z,float look
 	lookAt( position_x , position_y , position_z , lookAt_x , lookAt_y , lookAt_z );
 }
 
-void setTextureMatrix( void )
+void SM_SetTextureMatrix( void )
 {
 	static double modelView[16];
 	static double projection[16];
@@ -287,13 +287,12 @@ void setTextureMatrix( void )
 
 /*
 ================
-R_RecursiveWorldNode
+SM_RecursiveWorldNode
 ================
 */
 static vec3_t modelorg;			// relative to viewpoint
-extern void DrawGLTexturelessPoly (msurface_t *fa);
-extern void R_DrawTexturelessBrushModel (entity_t *e);
-void R_RecursiveShadowMapWorldNode (mnode_t *node, int clipflags)
+
+void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 {
 	int			c, side, sidebit;
 	cplane_t	*plane;
@@ -378,7 +377,7 @@ void R_RecursiveShadowMapWorldNode (mnode_t *node, int clipflags)
 	}
 
 	// recurse down the children, front side first
-	R_RecursiveShadowMapWorldNode (node->children[side], clipflags);
+	SM_RecursiveWorldNode (node->children[side], clipflags);
 
 	// draw stuff
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
@@ -401,13 +400,13 @@ void R_RecursiveShadowMapWorldNode (mnode_t *node, int clipflags)
 		{
 			if (!( surf->flags & SURF_DRAWTURB ) )
 			{
-				DrawGLTexturelessPoly (surf);
+				BSP_DrawTexturelessPoly (surf);
 			}
 		}
 	}
 
 	// recurse down the back side
-	R_RecursiveShadowMapWorldNode (node->children[!side], clipflags);
+	SM_RecursiveWorldNode (node->children[!side], clipflags);
 }
 
 
@@ -430,7 +429,7 @@ void R_DrawShadowMapWorld (void)
 
 	VectorCopy (r_newrefdef.vieworg, modelorg);
 
-	R_RecursiveShadowMapWorldNode (r_worldmodel->nodes, 15);
+	SM_RecursiveWorldNode (r_worldmodel->nodes, 15);
 
 	//draw brush models
 	for (i=0 ; i<r_newrefdef.num_entities ; i++)
@@ -446,7 +445,7 @@ void R_DrawShadowMapWorld (void)
 			continue;
 		}
 		if( currentmodel->type == mod_brush)
-			R_DrawTexturelessBrushModel (currententity);
+			BSP_DrawTexturelessBrushModel (currententity);
 		else
 			continue;
 	}
@@ -503,7 +502,7 @@ void R_DrawDynamicCaster(void)
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
 
 	//set camera
-	setupMatrices(dl->origin[0],dl->origin[1],dl->origin[2]+64,dl->origin[0],dl->origin[1],dl->origin[2]-64);
+	SM_SetupMatrices(dl->origin[0],dl->origin[1],dl->origin[2]+64,dl->origin[0],dl->origin[1],dl->origin[2]-64);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
     qglPolygonOffset( 0.5f, 0.5f );
@@ -557,9 +556,9 @@ void R_DrawDynamicCaster(void)
 		}
 
 		if(currentmodel->type == mod_iqm)
-			R_DrawIQMCaster ();
+			IQM_DrawCaster ();
 		else
-			R_DrawAliasModelCaster ();
+			MD2_DrawCaster ();
 	}
 
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)
@@ -577,10 +576,10 @@ void R_DrawDynamicCaster(void)
 		if(r_trace.fraction != 1.0)
 			continue;
 
-		R_DrawIQMRagDollCaster (RagDollID);
+		IQM_DrawRagDollCaster (RagDollID);
 	}
 
-	setTextureMatrix();
+	SM_SetTextureMatrix();
 
 	qglDepthMask (1);		// back to writing
 

@@ -62,7 +62,7 @@ void R_LoadVBOSubsystem(void)
 	}
 }
 
-void GL_BuildSurfaceVBO(msurface_t *surf)
+void VB_BuildSurfaceVBO(msurface_t *surf)
 {
 	glpoly_t *p = surf->polys;
 	float	*v;
@@ -110,7 +110,7 @@ void GL_BuildSurfaceVBO(msurface_t *surf)
 	}
 }
 
-void R_BuildWorldVBO(void)
+void VB_BuildWorldVBO(void)
 {
 	msurface_t *surf;
 
@@ -129,7 +129,7 @@ void R_BuildWorldVBO(void)
 		{
 			if (!( surf->flags & SURF_DRAWTURB ) )
 			{
-				GL_BuildSurfaceVBO(surf);
+				VB_BuildSurfaceVBO(surf);
 			}
 		}
 	}
@@ -138,7 +138,7 @@ void R_BuildWorldVBO(void)
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }
 
-void R_BuildVBOBufferSize(msurface_t *surf)
+void VB_BuildVBOBufferSize(msurface_t *surf)
 {
 	glpoly_t *p = surf->polys;
 
@@ -147,7 +147,7 @@ void R_BuildVBOBufferSize(msurface_t *surf)
 		totalVBObufferSize += 7*p->numverts;
 	}
 }
-void R_VCInit()
+void VB_VCInit()
 {
 	if (!gl_state.vbo)
 		return;

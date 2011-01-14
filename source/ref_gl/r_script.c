@@ -31,19 +31,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <io.h>
 #endif
 
-
-
-void CIN_FreeCin (int texnum);
-
 extern float	r_turbsin[];
 
 #define		TOK_DELIMINATORS "\r\n\t "
 
 float		rs_realtime = 0;
 rscript_t	*rs_rootscript = NULL;
-
-int r_numgrasses;
-int r_numbeams;
 
 int RS_Animate (rs_stage_t *stage)
 {
@@ -112,9 +105,7 @@ void RS_ResetScript (rscript_t *rs)
 			while (anim != NULL)
 			{
 				tmp_anim = anim;
-				if (anim->texture)
-					//if (anim->texture->is_cin)
-					//	CIN_FreeCin(anim->texture->texnum);
+				
 				anim = anim->next;
 				free (tmp_anim);
 			}
@@ -125,9 +116,7 @@ void RS_ResetScript (rscript_t *rs)
 			while (randStage != NULL)
 			{
 				tmp_rand = randStage;
-				if (randStage->texture)
-				//	if (randStage->texture->is_cin)
-				//		CIN_FreeCin(randStage->texture->texnum);
+
 				randStage = randStage->next;
 				free (tmp_rand);
 			}
@@ -1320,10 +1309,10 @@ endalpha:
 	return alpha;
 }
 
-image_t *R_TextureAnimation (mtexinfo_t *tex);
+image_t *BSP_TextureAnimation (mtexinfo_t *tex);
 rscript_t	*surfaceScript(msurface_t *surf)
 {
-	image_t *image = R_TextureAnimation( surf->texinfo );
+	image_t *image = BSP_TextureAnimation( surf->texinfo );
 
 	if (image && image->script)
 	{
@@ -1374,321 +1363,6 @@ void ToggleLightmap (qboolean toggle)
 		SetVertexOverbrights(true);
 	}
 }
-
-extern int c_grasses;
-grass_t r_grasses[MAX_GRASSES];
-void R_DrawVegetationSurface ( void )
-{
-    int		i, k;
-	grass_t *grass;
-    float   scale;
-	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
-	float	*corner0 = corner[0];
-	qboolean visible;
-	float	lightLevel[3];
-	trace_t r_trace;
-	float	sway;
-
-	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-
-	grass = r_grasses;
-
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs,	0, 0, 0);
-
-	R_InitVArrays (VERT_SINGLE_TEXTURED);
-
-    for (i=0; i<r_numgrasses; i++, grass++) {
-
-		scale = 10.0*grass->size;
-
-		VectorCopy(r_newrefdef.viewangles, angle);
-
-		if(!grass->type)
-			angle[0] = 0;  // keep vertical by removing pitch(grass and plants grow upwards)
-
-		AngleVectors(angle, NULL, right, up);
-		VectorScale(right, scale, right);
-		VectorScale(up, scale, up);
-		VectorCopy(grass->origin, origin);
-
-		// adjust vertical position, scaled
-		origin[2] += (grass->texsize/32) * grass->size;
-
-		if(!grass->type) {
-			r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
-			visible = r_trace.fraction == 1.0;
-		}
-		else
-			visible = true; //leaves tend to use much larger images, culling results in undesired effects
-
-		if(visible) {
-
-			//render grass polygon
-			qglDepthMask( GL_FALSE );
-			qglEnable( GL_BLEND);
-			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-			GL_Bind(grass->texnum);
-
-			if(gl_dynamic->value)
-				R_LightPoint (origin, lightLevel, true);
-			else
-				R_LightPoint (origin, lightLevel, false);
-			VectorScale(lightLevel, 2.0, lightLevel);
-			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
-			GL_TexEnv( GL_MODULATE );
-
-			VectorSet (corner[0],
-				origin[0] + (up[0] + right[0])*(-0.5),
-				origin[1] + (up[1] + right[1])*(-0.5),
-				origin[2] + (up[2] + right[2])*(-0.5));
-
-			//the next two statements create a slight swaying in the wind
-			//perhaps we should add a parameter to control ammount in shader?
-
-			if(grass->type) {
-				sway = 3;
-			}
-			else
-				sway = 2;
-
-			VectorSet ( corner[1],
-				corner0[0] + up[0] + sway*sin (rs_realtime*sway),
-				corner0[1] + up[1] + sway*sin (rs_realtime*sway),
-				corner0[2] + up[2]);
-
-			VectorSet ( corner[2],
-				corner0[0] + (up[0]+right[0] + sway*sin (rs_realtime*sway)),
-				corner0[1] + (up[1]+right[1] + sway*sin (rs_realtime*sway)),
-				corner0[2] + (up[2]+right[2]));
-
-			VectorSet ( corner[3],
-				corner0[0] + right[0],
-				corner0[1] + right[1],
-				corner0[2] + right[2]);
-
-			VArray = &VArrayVerts[0];
-
-			for(k = 0; k < 4; k++) {
-
-				VArray[0] = corner[k][0];
-				VArray[1] = corner[k][1];
-				VArray[2] = corner[k][2];
-
-				switch(k) {
-					case 0:
-						VArray[3] = 1;
-						VArray[4] = 1;
-						break;
-					case 1:
-						VArray[3] = 0;
-						VArray[4] = 1;
-						break;
-					case 2:
-						VArray[3] = 0;
-						VArray[4] = 0;
-						break;
-					case 3:
-						VArray[3] = 1;
-						VArray[4] = 0;
-						break;
-				}
-
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			}
-
-			if(qglLockArraysEXT)
-				qglLockArraysEXT(0, 4);
-
-			qglDrawArrays(GL_QUADS,0,4);
-
-			if(qglUnlockArraysEXT)
-				qglUnlockArraysEXT();
-
-			c_grasses++;
-		}
-	}
-
-	R_KillVArrays ();
-
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	qglColor4f( 1,1,1,1 );
-	qglDisable(GL_BLEND);
-	qglDepthMask( GL_TRUE );
-	GL_TexEnv( GL_REPLACE );
-}
-
-extern int c_beams;
-beam_t r_beams[MAX_BEAMS];
-void R_DrawBeamSurface ( void )
-{
-    int		i, k;
-	beam_t *beam;
-    double   scale, maxang;
-	vec3_t	start, end, mins, maxs, angle, right, up, move, delta, vec, corner[4];
-	float	*corner0 = corner[0];
-	qboolean visible;
-	trace_t r_trace;
-
-	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-
-	beam = r_beams;
-
-	VectorSet(mins, 32, 32, 64);
-	VectorSet(maxs, -32, -32, -64);
-
-	R_InitVArrays (VERT_SINGLE_TEXTURED);
-
-    for (i=0; i<r_numbeams; i++, beam++) {
-		float movdir;
-
-		scale = 10.0*beam->size;
-
-		if(fabs(beam->xang) > fabs(beam->yang))
-			maxang = beam->xang;
-		else
-			maxang = beam->yang;
-
-		if(maxang >= 0.0)
-			movdir = 1.0;
-		else
-			movdir = 0;
-		
-		//to do - this is rather hacky, and really only works for 0 degrees and 45 degree angles(0.25 rads).  
-		//will revisit this as needed, for now it works for what I need it for.
-		VectorCopy(beam->origin, start);
-		if(!beam->type)
-			start[2] -= (2.5 - (10.0*maxang))*beam->size*movdir;
-		else
-			start[2] += (2.5 - (10.0*maxang))*beam->size*movdir;
-		
-		VectorCopy(start, end);
-		if(!beam->type)
-			end[2] -= (2.5 + pow(fabs(maxang),2)*10)*beam->size;
-		else
-			end[2] += (2.5 + pow(fabs(maxang),2)*10)*beam->size;
-
-		if(beam->rotating)
-		{
-			end[0] += sin(rs_realtime)*(pow(fabs(maxang*10), 3)*beam->xang)*beam->size; //angle in rads
-			end[1] += cos(rs_realtime)*(pow(fabs(maxang*10), 3)*beam->yang)*beam->size;
-		}
-		else
-		{
-			end[0] += (pow(fabs(maxang*10), 3)*beam->xang)*beam->size; //angle in rads
-			end[1] += (pow(fabs(maxang*10), 3)*beam->yang)*beam->size;
-		}
-
-		VectorSubtract(end, start, vec);
-		if(!beam->type)
-			VectorScale(vec, beam->size, vec);
-		else
-			VectorScale(vec, -beam->size, vec);
-
-		VectorAdd(start, vec, angle);
-
-		VectorSubtract(start, angle, move);
-		VectorNormalize(move);
-
-		VectorCopy(move, up);
-		VectorSubtract(r_newrefdef.vieworg, angle, delta);
-		CrossProduct(up, delta, right);
-		VectorNormalize(right);
-
-		VectorScale(right, scale, right);
-		VectorScale(up, scale, up);
-		
-		r_trace = CM_BoxTrace(r_origin, beam->origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
-		visible = r_trace.fraction == 1.0;
-
-		if(visible) {
-
-			//render polygon
-			qglDepthMask( GL_FALSE );
-			qglEnable( GL_BLEND);
-			qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);
-
-			qglColor4f( beam->color[0],beam->color[1],beam->color[2], 1 );
-			GL_TexEnv( GL_MODULATE );
-
-			GL_Bind(beam->texnum);
-
-			VectorSet (corner[0],
-				end[0] + (up[0] + right[0])*(-0.5),
-				end[1] + (up[1] + right[1])*(-0.5),
-				end[2] + (up[2] + right[2])*(-0.5));
-
-			VectorSet ( corner[1],
-				corner0[0] + up[0],
-				corner0[1] + up[1],
-				corner0[2] + up[2]);
-
-			VectorSet ( corner[2],
-				corner0[0] + (up[0]+right[0]),
-				corner0[1] + (up[1]+right[1]),
-				corner0[2] + (up[2]+right[2]));
-
-			VectorSet ( corner[3],
-				corner0[0] + right[0],
-				corner0[1] + right[1],
-				corner0[2] + right[2]);
-
-			VArray = &VArrayVerts[0];
-
-			for(k = 0; k < 4; k++) {
-
-				VArray[0] = corner[k][0];
-				VArray[1] = corner[k][1];
-				VArray[2] = corner[k][2];
-
-				switch(k) {
-					case 0:
-						VArray[3] = 1;
-						VArray[4] = 1;
-						break;
-					case 1:
-						VArray[3] = 0;
-						VArray[4] = 1;
-						break;
-					case 2:
-						VArray[3] = 0;
-						VArray[4] = 0;
-						break;
-					case 3:
-						VArray[3] = 1;
-						VArray[4] = 0;
-						break;
-				}
-
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			}
-
-			if(qglLockArraysEXT)
-				qglLockArraysEXT(0, 4);
-
-			qglDrawArrays(GL_QUADS,0,4);
-
-			if(qglUnlockArraysEXT)
-				qglUnlockArraysEXT();
-
-			c_beams++;
-		}
-	}
-
-	R_KillVArrays ();
-
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	qglColor4f( 1,1,1,1 );
-	qglDisable(GL_BLEND);
-	qglDepthMask( GL_TRUE );
-	GL_TexEnv( GL_REPLACE );
-}
-
 
 //to do - rewrite using vertex arrays
 

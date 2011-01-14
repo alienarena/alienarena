@@ -32,6 +32,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 static vec3_t NormalsArray[MAX_VERTICES];
 static vec4_t TangentsArray[MAX_VERTICES];
 
+float modelpitch;
+
 extern  void Q_strncpyz( char *dest, const char *src, size_t size );
 
 //these matrix functions should be moved to matrixlib.c or similar
@@ -204,7 +206,7 @@ double degreeToRadian(double degree)
 	return radian;
 }
 
-void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent)
+void IQM_LoadVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, float *vtangent)
 {
 	int i;
 
@@ -243,7 +245,7 @@ void R_LoadIQMVertexArrays(model_t *iqmmodel, float *vposition, float *vnormal, 
 	}
 }
 
-qboolean Mod_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath)
+qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath)
 {
 	FILE *fp;
 	int length;
@@ -282,7 +284,7 @@ qboolean Mod_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath)
 	return true;
 }
 
-qboolean Mod_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
+qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 {
 	FILE *fp;
 	int length;
@@ -319,7 +321,7 @@ qboolean Mod_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 			}
 			else 
 			{
-				Com_Printf("Mod_ReadRagDollFile: read fail\n");
+				Com_Printf("IQM_ReadRagDollFile: read fail\n");
 			}
 			free( buffer );
 		}
@@ -637,7 +639,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	}
 
 	// load vertex data
-	R_LoadIQMVertexArrays(mod, vposition, vnormal, vtangent);
+	IQM_LoadVertexArrays(mod, vposition, vnormal, vtangent);
 
 	// load texture coodinates
     mod->st = (fstvert_t*)Hunk_Alloc (header->num_vertexes * sizeof(fstvert_t));
@@ -690,7 +692,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	strcat( shortname, ".rgd" );
 	if ( FS_FullPath( fullname, sizeof(fullname), shortname ) )
 	{
-		mod->hasRagDoll = Mod_ReadRagDollFile( fullname, mod );
+		mod->hasRagDoll = IQM_ReadRagDollFile( fullname, mod );
 	}
 
 	//free temp non hunk mem
@@ -700,8 +702,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	return true;
 }
 
-float modelpitch;
-void R_AnimateIQMFrame(float curframe, int nextframe)
+void IQM_AnimateFrame(float curframe, int nextframe)
 {
 	int i, j;
 
@@ -865,7 +866,7 @@ void R_AnimateIQMFrame(float curframe, int nextframe)
 	}
 }
 
-void R_AnimateIQMRagdoll(int RagDollID)
+void IQM_AnimateRagdoll(int RagDollID)
 {
 	//we only deal with one frame
 
@@ -945,8 +946,7 @@ void R_AnimateIQMRagdoll(int RagDollID)
 	}
 }
 
-//to do - combine these two
-void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t lightOut)
+void IQM_Vlight (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t lightOut)
 {
 	float l;
 	float lscale;
@@ -963,7 +963,7 @@ void GL_VlightIQM (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t li
     VectorScale(baselight, l, lightOut);
 }
 
-void R_DrawIQMFrame(int skinnum)
+void IQM_DrawFrame(int skinnum)
 {
 	int		i, j;
 	vec3_t	move, delta, vectors[3];
@@ -1212,7 +1212,7 @@ void R_DrawIQMFrame(int skinnum)
 					VArray[4] = currentmodel->st[index_st].t;
 				}
 
-				GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);
+				IQM_Vlight (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);
 
 				if(mirror && !(currententity->flags & RF_WEAPONMODEL) )
 				{
@@ -1448,7 +1448,7 @@ void R_DrawIQMFrame(int skinnum)
 
 						if (stage->lightmap)
 						{
-							GL_VlightIQM (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);
+							IQM_Vlight (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
 							blue = lightcolor[2];
@@ -1520,7 +1520,7 @@ done:
 }
 
 //Similar to above, but geared more specifically toward ragdoll player models
-void R_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect)
+void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect)
 {
 	int		i, j;
 	vec3_t	vectors[3];
@@ -1666,7 +1666,7 @@ void R_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int she
 					VArray[4] = RagDoll[RagDollID].ragDollMesh->st[index_st].t;
 				}
 
-				GL_VlightIQM (shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], RagDoll[RagDollID].angles, lightcolor);
+				IQM_Vlight (shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], RagDoll[RagDollID].angles, lightcolor);
 
 				VArray[5] = lightcolor[0];
 				VArray[6] = lightcolor[1];
@@ -1868,7 +1868,7 @@ void R_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int she
 
 						if (stage->lightmap)
 						{
-							GL_VlightIQM (shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], RagDoll[RagDollID].angles, lightcolor);
+							IQM_Vlight (shadelight, &RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz], RagDoll[RagDollID].angles, lightcolor);
 							red = lightcolor[0];
 							green = lightcolor[1];
 							blue = lightcolor[2];
@@ -1936,15 +1936,7 @@ done:
 		qglEnable( GL_TEXTURE_2D );
 }
 
-extern qboolean have_stencil;
-extern	vec3_t			lightspot;
-
-/*
-=============
-R_DrawIqmShadow
-=============
-*/
-void R_DrawIQMShadow(vec3_t origin)
+void IQM_DrawShadow(vec3_t origin)
 {
 	vec3_t	point;
 	float	height, lheight;
@@ -2012,7 +2004,7 @@ void R_DrawIQMShadow(vec3_t origin)
 		qglDisable(GL_STENCIL_TEST);
 }
 
-static qboolean R_CullIQMModel( void )
+static qboolean IQM_CullModel( void )
 {
 	int i;
 	vec3_t	vectors[3];
@@ -2081,7 +2073,7 @@ static qboolean R_CullIQMModel( void )
 }
 
 //Can these next two be replaced with some type of animation grouping from the model?
-qboolean inAnimGroup(int frame, int oldframe)
+qboolean IQM_InAnimGroup(int frame, int oldframe)
 {
 	//check if we are in a player anim group that is commonly looping
 	if(frame >= 0 && frame <= 39 && oldframe >=0 && oldframe <= 39)
@@ -2096,7 +2088,7 @@ qboolean inAnimGroup(int frame, int oldframe)
 		return false;
 }
 
-int NextFrame(int frame)
+int IQM_NextFrame(int frame)
 {
 	int outframe;
 
@@ -2175,7 +2167,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 		return;
 
 	//do culling
-	if ( R_CullIQMModel() )
+	if ( IQM_CullModel() )
 		return;
 
 	if(r_ragdolls->value)
@@ -2185,7 +2177,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 		{
 			if(currententity->frame == 199 || currententity->frame == 220 || currententity->frame == 238)
 				if(currentmodel->hasRagDoll)
-					R_AddNewRagdoll(currententity->origin, currententity->name);
+					RGD_AddNewRagdoll(currententity->origin, currententity->name);
 		}
 		//Do not render deathframes if using ragdolls - do not render translucent helmets
 		if((currentmodel->hasRagDoll || (currententity->flags & RF_TRANSLUCENT)) && currententity->frame > 198)
@@ -2302,7 +2294,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 	if(time > 1.0)
 		time = 1.0;
 
-	if((currententity->frame == currententity->oldframe ) && !inAnimGroup(currententity->frame, currententity->oldframe))
+	if((currententity->frame == currententity->oldframe ) && !IQM_InAnimGroup(currententity->frame, currententity->oldframe))
 		time = 0;
 
 	//Check for stopped death anims
@@ -2311,10 +2303,10 @@ void R_DrawINTERQUAKEMODEL ( void )
 
 	frame = currententity->frame + time;
 
-	R_AnimateIQMFrame(frame, NextFrame(currententity->frame));
+	IQM_AnimateFrame(frame, IQM_NextFrame(currententity->frame));
 
 	if(!(currententity->flags & RF_VIEWERMODEL))
-		R_DrawIQMFrame(skin->texnum);
+		IQM_DrawFrame(skin->texnum);
 
 	GL_TexEnv( GL_REPLACE );
 	qglShadeModel (GL_FLAT);
@@ -2342,7 +2334,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 		case 0:
 			break;
 		case 1: //dynamic only - always cast something
-			casted = R_ShadowLight (currententity->origin, currententity->angles, shadevector, 0);
+			casted = SHD_ShadowLight (currententity->origin, currententity->angles, shadevector, 0);
 			qglPushMatrix ();
 			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
 			qglRotatef (currententity->angles[1], 0, 0, 1);
@@ -2354,7 +2346,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 			else
 				qglColor4f (0,0,0,0.3);
 
-			R_DrawIQMShadow (currententity->origin);
+			IQM_DrawShadow (currententity->origin);
 
 			qglEnable (GL_TEXTURE_2D);
 			qglDisable (GL_BLEND);
@@ -2363,7 +2355,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 			break;
 		case 2: //dynamic and world
 			//world
-			casted = R_ShadowLight (currententity->origin, currententity->angles, shadevector, 1);
+			casted = SHD_ShadowLight (currententity->origin, currententity->angles, shadevector, 1);
 			qglPushMatrix ();
 			qglTranslatef	(currententity->origin[0], currententity->origin[1], currententity->origin[2]);
 			qglRotatef (currententity->angles[1], 0, 0, 1);
@@ -2375,14 +2367,14 @@ void R_DrawINTERQUAKEMODEL ( void )
 			else
 				qglColor4f (0,0,0,casted);
 
-			R_DrawIQMShadow (currententity->origin);
+			IQM_DrawShadow (currententity->origin);
 
 			qglEnable (GL_TEXTURE_2D);
 			qglDisable (GL_BLEND);
 			qglPopMatrix ();
 			//dynamic
 			casted = 0;
-		 	casted = R_ShadowLight (currententity->origin, currententity->angles, shadevector, 0);
+		 	casted = SHD_ShadowLight (currententity->origin, currententity->angles, shadevector, 0);
 			if (casted > 0)
 			{ //only draw if there's a dynamic light there
 				qglPushMatrix ();
@@ -2396,7 +2388,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 				else
 					qglColor4f (0,0,0,casted);
 
-				R_DrawIQMShadow (currententity->origin);
+				IQM_DrawShadow (currententity->origin);
 
 				qglEnable (GL_TEXTURE_2D);
 				qglDisable (GL_BLEND);
@@ -2425,7 +2417,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 	}
 }
 
-void GL_DrawIQMCasterFrame ()
+void IQM_DrawCasterFrame ()
 {
 	int     i, j;
     int     index_xyz, index_st;
@@ -2465,7 +2457,7 @@ void GL_DrawIQMCasterFrame ()
     R_KillVArrays ();
 }
 
-void R_DrawIQMCaster ( void )
+void IQM_DrawCaster ( void )
 {
 	float		frame, time;
 
@@ -2478,7 +2470,7 @@ void R_DrawIQMCaster ( void )
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) ) //no shells
 		return;
 
-	if ( R_CullIQMModel() )
+	if ( IQM_CullModel() )
 		return;
 
 	//modelpitch = 0.52 * sinf(rs_realtime); //use this for testing only
@@ -2493,7 +2485,7 @@ void R_DrawIQMCaster ( void )
 	if(time > 1.0)
 		time = 1.0;
 
-	if((currententity->frame == currententity->oldframe ) && !inAnimGroup(currententity->frame, currententity->oldframe))
+	if((currententity->frame == currententity->oldframe ) && !IQM_InAnimGroup(currententity->frame, currententity->oldframe))
 		time = 0;
 
 	//Check for stopped death anims
@@ -2502,25 +2494,25 @@ void R_DrawIQMCaster ( void )
 
 	frame = currententity->frame + time;
 
-	R_AnimateIQMFrame(frame, NextFrame(currententity->frame));
+	IQM_AnimateFrame(frame, IQM_NextFrame(currententity->frame));
 
-	GL_DrawIQMCasterFrame();
+	IQM_DrawCasterFrame();
 
 	qglPopMatrix();
 }
 
-void R_DrawIQMRagDollCaster ( int RagDollID )
+void IQM_DrawRagDollCaster ( int RagDollID )
 {
-	if ( R_CullRagDolls( RagDollID ) )
+	if ( RGD_CullRagDolls( RagDollID ) )
 		return;
 
     qglPushMatrix ();
 
-	R_AnimateIQMRagdoll(RagDollID);
+	IQM_AnimateRagdoll(RagDollID);
 
 	currentmodel = RagDoll[RagDollID].ragDollMesh;
 
-	GL_DrawIQMCasterFrame();
+	IQM_DrawCasterFrame();
 
 	qglPopMatrix();
 }

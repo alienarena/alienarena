@@ -84,12 +84,12 @@ extern void R_BuildLightMap (msurface_t *surf, byte *dest, int stride);
 
 /*
 ===============
-R_TextureAnimation
+BSP_TextureAnimation
 
 Returns the proper texture for a given time and base texture
 ===============
 */
-image_t *R_TextureAnimation (mtexinfo_t *tex)
+image_t *BSP_TextureAnimation (mtexinfo_t *tex)
 {
 	int		c;
 
@@ -108,10 +108,10 @@ image_t *R_TextureAnimation (mtexinfo_t *tex)
 
 /*
 ================
-DrawGLPoly
+BSP_DrawPoly
 ================
 */
-void DrawGLPoly (msurface_t *fa, int flags)
+void BSP_DrawPoly (msurface_t *fa, int flags)
 {
 	float	scroll;
 
@@ -131,10 +131,10 @@ void DrawGLPoly (msurface_t *fa, int flags)
 
 /*
 ================
-DrawGLTexturelessPoly
+BSP_DrawTexturelessPoly
 ================
 */
-void DrawGLTexturelessPoly (msurface_t *fa)
+void BSP_DrawTexturelessPoly (msurface_t *fa)
 {
 
 	R_InitVArrays(VERT_NO_TEXTURE);
@@ -143,7 +143,7 @@ void DrawGLTexturelessPoly (msurface_t *fa)
 
 }
 
-void R_DrawTexturelessInlineBModel (entity_t *e)
+void BSP_DrawTexturelessInlineBModel (entity_t *e)
 {
 	int			i;
 	msurface_t	*psurf;
@@ -155,8 +155,8 @@ void R_DrawTexturelessInlineBModel (entity_t *e)
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
 	{
 
-	// draw the polygon
-		DrawGLTexturelessPoly( psurf );
+		// draw the polygon
+		BSP_DrawTexturelessPoly( psurf );
 		psurf->visframe = r_framecount;
 	}
 
@@ -165,7 +165,7 @@ void R_DrawTexturelessInlineBModel (entity_t *e)
 	GL_TexEnv( GL_REPLACE );
 }
 
-void R_DrawTexturelessBrushModel (entity_t *e)
+void BSP_DrawTexturelessBrushModel (entity_t *e)
 {
 	vec3_t		mins, maxs;
 	int			i;
@@ -219,16 +219,16 @@ void R_DrawTexturelessBrushModel (entity_t *e)
 	e->angles[0] = -e->angles[0];	// stupid quake bug
 	e->angles[2] = -e->angles[2];	// stupid quake bug
 
-	R_DrawTexturelessInlineBModel (e);
+	BSP_DrawTexturelessInlineBModel (e);
 
 	qglPopMatrix ();
 }
 
 
 /*
-** R_DrawTriangleOutlines
+** BSP_DrawTriangleOutlines
 */
-void R_DrawTriangleOutlines (void)
+void BSP_DrawTriangleOutlines (void)
 {
 	int			i, j;
 	glpoly_t	*p;
@@ -265,10 +265,10 @@ void R_DrawTriangleOutlines (void)
 
 /*
 ================
-R_RenderBrushPoly
+BSP_RenderBrushPoly
 ================
 */
-void R_RenderBrushPoly (msurface_t *fa)
+void BSP_RenderBrushPoly (msurface_t *fa)
 {
 	int			maps;
 	image_t		*image;
@@ -277,7 +277,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 
 	c_brush_polys++;
 
-	image = R_TextureAnimation (fa->texinfo);
+	image = BSP_TextureAnimation (fa->texinfo);
 
 	if (fa->flags & SURF_DRAWTURB)
 	{
@@ -476,10 +476,10 @@ void R_DrawAlphaSurfaces (void)
 					qglDepthMask(true);
 				}
 				else
-					DrawGLPoly (s, s->texinfo->flags);
+					BSP_DrawPoly (s, s->texinfo->flags);
 			}
 			else
-				DrawGLPoly (s, s->texinfo->flags);
+				BSP_DrawPoly (s, s->texinfo->flags);
 		}
 
 	}
@@ -492,6 +492,13 @@ void R_DrawAlphaSurfaces (void)
 	r_alpha_surfaces = NULL;
 }
 
+/*
+================
+R_DrawSpecialSurfaces
+
+Draw shader surfaces
+================
+*/
 void R_DrawSpecialSurfaces (void)
 {
 	msurface_t	*s;
@@ -521,12 +528,18 @@ void R_DrawSpecialSurfaces (void)
 	r_special_surfaces = NULL;
 }
 
-static void R_RenderLightmappedPoly( msurface_t *surf )
+/*
+================
+BSP_RenderLightmappedPoly
+
+Main polygon rendering routine(all standard surfaces)
+================
+*/
+static void BSP_RenderLightmappedPoly( msurface_t *surf )
 {
-	// int		nv = surf->polys->numverts; // unused
 	int		map;
 	float	scroll;
-	image_t *image = R_TextureAnimation( surf->texinfo );
+	image_t *image = BSP_TextureAnimation( surf->texinfo );
 	qboolean is_dynamic = false;
 	unsigned lmtex = surf->lightmaptexturenum;
 	glpoly_t *p = surf->polys;
@@ -769,11 +782,15 @@ dynamic:
 		qglDisable( GL_ALPHA_TEST);
 }
 
-//This next section deals with bumpmapped surfaces.  Much of this was gathered from Mike Hiney
-//and "Paul's Projects" tutorials.  Note this is for self per-pixel shadowing of normalmapped bsp
-//surfaces.
-extern GLuint normalisationCubeMap;
-static void R_InitNormalSurfaces ()
+/*
+================
+BSP_DrawNormalSurfaces
+
+Fast rendering of self shadows for normalmapped surfaces
+================
+*/
+
+static void BSP_InitNormalSurfaces ()
 {
 	qglActiveTextureARB (GL_TEXTURE0);
 	qglDisable (GL_TEXTURE_2D);
@@ -811,7 +828,7 @@ static void R_InitNormalSurfaces ()
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 }
 
-void R_KillNormalTMUs(void) {
+void BSP_KillNormalTMUs(void) {
 
 	//kill TMU1
 	qglActiveTextureARB (GL_TEXTURE1);
@@ -827,7 +844,7 @@ void R_KillNormalTMUs(void) {
 	qglEnable (GL_TEXTURE_2D);
 }
 
-static void R_DrawNormalSurfaces (void)
+static void BSP_DrawNormalSurfaces (void)
 {
 	msurface_t *surf = r_normalsurfaces;
 
@@ -839,7 +856,7 @@ static void R_DrawNormalSurfaces (void)
 		return;
 
 	R_InitVArrays (VERT_BUMPMAPPED);
-	R_InitNormalSurfaces();
+	BSP_InitNormalSurfaces();
 
 	qglActiveTextureARB (GL_TEXTURE1);
 	qglEnable (GL_TEXTURE_2D);
@@ -866,7 +883,7 @@ static void R_DrawNormalSurfaces (void)
 		R_AddTexturedSurfToVArray (surf, 0);
 	}
 
-	R_KillNormalTMUs();
+	BSP_KillNormalTMUs();
 	R_KillVArrays ();
 
 	// restore original blend
@@ -879,10 +896,10 @@ static void R_DrawNormalSurfaces (void)
 
 /*
 =================
-R_DrawInlineBModel
+BSP_DrawInlineBModel
 =================
 */
-void R_DrawInlineBModel ( void )
+void BSP_DrawInlineBModel ( void )
 {
 	int			i;
 	cplane_t	*pplane;
@@ -917,12 +934,12 @@ void R_DrawInlineBModel ( void )
 			}
 			else if ( !( psurf->flags & SURF_DRAWTURB ) )
 			{
-				R_RenderLightmappedPoly( psurf );
+				BSP_RenderLightmappedPoly( psurf );
 			}
 			else
 			{
 				GL_EnableMultitexture( false );
-				R_RenderBrushPoly( psurf );
+				BSP_RenderBrushPoly( psurf );
 				GL_EnableMultitexture( true );
 			}
 
@@ -933,7 +950,7 @@ void R_DrawInlineBModel ( void )
 	if ( !(currententity->flags & RF_TRANSLUCENT) )
 	{
 		GL_EnableMultitexture( false );
-		R_DrawNormalSurfaces();
+		BSP_DrawNormalSurfaces();
 		GL_EnableMultitexture( true );
 	}
 	else
@@ -1047,7 +1064,7 @@ void R_DrawBrushModel ( void )
 
 	}
 
-	R_DrawInlineBModel ();
+	BSP_DrawInlineBModel ();
 	GL_EnableMultitexture( false );
 
 	qglPopMatrix ();
@@ -1063,10 +1080,10 @@ void R_DrawBrushModel ( void )
 
 /*
 ================
-R_RecursiveWorldNode
+BSP_RecursiveWorldNode
 ================
 */
-void R_RecursiveWorldNode (mnode_t *node, int clipflags)
+void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 {
 	int			c, side, sidebit;
 	cplane_t	*plane;
@@ -1153,7 +1170,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 	}
 
 	// recurse down the children, front side first
-	R_RecursiveWorldNode (node->children[side], clipflags);
+	BSP_RecursiveWorldNode (node->children[side], clipflags);
 
 	// draw stuff
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
@@ -1178,7 +1195,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 		{
 			if ( !( surf->flags & SURF_DRAWTURB ) )
 			{
-				R_RenderLightmappedPoly( surf );
+				BSP_RenderLightmappedPoly( surf );
 
 				if(r_shaders->value) { //only add to the chain if there is actually a shader
 					rs_shader = (rscript_t *)surf->texinfo->image->script;
@@ -1194,7 +1211,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 				// sorted chain
 
 				// FIXME: this is a hack for animation
-				image = R_TextureAnimation (surf->texinfo);
+				image = BSP_TextureAnimation (surf->texinfo);
 
 				surf->texturechain = image->texturechain;
 				image->texturechain = surf;
@@ -1211,7 +1228,7 @@ void R_RecursiveWorldNode (mnode_t *node, int clipflags)
 	}
 
 	// recurse down the back side
-	R_RecursiveWorldNode (node->children[!side], clipflags);
+	BSP_RecursiveWorldNode (node->children[!side], clipflags);
 }
 
 
@@ -1315,11 +1332,11 @@ void R_DrawWorld (void)
 		}
 	}
 
-	R_RecursiveWorldNode (r_worldmodel->nodes, 15);
+	BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
 
 	GL_EnableMultitexture( false );
 
-	R_DrawNormalSurfaces ();
+	BSP_DrawNormalSurfaces ();
 
 	R_InitSun();
 
@@ -1327,7 +1344,7 @@ void R_DrawWorld (void)
 	R_DrawSkyBox();
 	qglDepthMask(1);
 
-	R_DrawTriangleOutlines ();
+	BSP_DrawTriangleOutlines ();
 }
 
 
@@ -1504,10 +1521,10 @@ static qboolean LM_AllocBlock (int w, int h, int *x, int *y)
 
 /*
 ================
-GL_BuildPolygonFromSurface
+BSP_BuildPolygonFromSurface
 ================
 */
-void GL_BuildPolygonFromSurface(msurface_t *fa)
+void BSP_BuildPolygonFromSurface(msurface_t *fa)
 {
 	int			i, lindex, lnumverts;
 	medge_t		*r_pedge;
@@ -1583,10 +1600,10 @@ void GL_BuildPolygonFromSurface(msurface_t *fa)
 
 /*
 ========================
-GL_CreateSurfaceLightmap
+BSP_CreateSurfaceLightmap
 ========================
 */
-void GL_CreateSurfaceLightmap (msurface_t *surf)
+void BSP_CreateSurfaceLightmap (msurface_t *surf)
 {
 	int		smax, tmax;
 	byte	*base;
@@ -1621,11 +1638,11 @@ void GL_CreateSurfaceLightmap (msurface_t *surf)
 
 /*
 ==================
-GL_BeginBuildingLightmaps
+BSP_BeginBuildingLightmaps
 
 ==================
 */
-void GL_BeginBuildingLightmaps (model_t *m)
+void BSP_BeginBuildingLightmaps (model_t *m)
 {
 	static lightstyle_t	lightstyles[MAX_LIGHTSTYLES];
 	int				i;
@@ -1680,10 +1697,10 @@ void GL_BeginBuildingLightmaps (model_t *m)
 
 /*
 =======================
-GL_EndBuildingLightmaps
+BSP_EndBuildingLightmaps
 =======================
 */
-void GL_EndBuildingLightmaps (void)
+void BSP_EndBuildingLightmaps (void)
 {
 	LM_UploadBlock( false );
 	GL_EnableMultitexture( false );
