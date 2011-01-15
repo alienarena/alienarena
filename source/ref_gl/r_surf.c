@@ -270,7 +270,6 @@ BSP_RenderBrushPoly
 */
 void BSP_RenderBrushPoly (msurface_t *fa)
 {
-	int			maps;
 	image_t		*image;
 	qboolean is_dynamic = false;
 	float		scroll;
@@ -328,64 +327,6 @@ void BSP_RenderBrushPoly (msurface_t *fa)
 	{
 		qglDisable( GL_ALPHA_TEST );
 		return;
-	}
-
-	/*
-	** check for lightmap modification
-	*/
-	for ( maps = 0; maps < MAXLIGHTMAPS && fa->styles[maps] != 255; maps++ )
-	{
-		if ( r_newrefdef.lightstyles[fa->styles[maps]].white != fa->cached_light[maps] )
-			goto dynamic;
-	}
-
-	// dynamic this frame or dynamic previously
-	if ( ( fa->dlightframe == r_framecount ) )
-	{
-dynamic:
-		if ( gl_dynamic->value )
-		{
-			if ( !SurfaceHasNoLightmap( fa ) )
-			{
-				is_dynamic = true;
-			}
-		}
-	}
-
-	if ( is_dynamic )
-	{
-		if ( ( fa->styles[maps] >= 32 || fa->styles[maps] == 0 ) && ( fa->dlightframe != r_framecount ) )
-		{
-			unsigned	temp[34*34];
-			int			smax, tmax;
-
-			smax = (fa->extents[0]>>4)+1;
-			tmax = (fa->extents[1]>>4)+1;
-
-			R_BuildLightMap( fa, (void *)temp, smax*4 );
-			R_SetCacheState( fa );
-
-			GL_Bind( gl_state.lightmap_textures + fa->lightmaptexturenum );
-
-			qglTexSubImage2D( GL_TEXTURE_2D, 0,
-							  fa->light_s, fa->light_t,
-							  smax, tmax,
-							  GL_LIGHTMAP_FORMAT,
-							  GL_UNSIGNED_BYTE, temp );
-
-			fa->lightmapchain = gl_lms.lightmap_surfaces[fa->lightmaptexturenum];
-			gl_lms.lightmap_surfaces[fa->lightmaptexturenum] = fa;
-		}
-		else
-		{
-			fa->lightmapchain = gl_lms.lightmap_surfaces[0];
-			gl_lms.lightmap_surfaces[0] = fa;
-		}
-	}
-	else
-	{
-		fa->lightmapchain = gl_lms.lightmap_surfaces[fa->lightmaptexturenum];
-		gl_lms.lightmap_surfaces[fa->lightmaptexturenum] = fa;
 	}
 }
 
