@@ -495,7 +495,7 @@ void R_DrawDynamicCaster(void)
 	//Disable color rendering, we only want to write to the Z-Buffer
 	qglColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-	// Culling switching, rendering only frontfaces - to do - really?
+	// Culling switching, rendering only frontfaces
 	qglCullFace(GL_BACK);
 
 	// attach the texture to FBO depth attachment point

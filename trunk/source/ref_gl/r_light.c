@@ -322,105 +322,6 @@ void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic)
 static float s_blocklights[34*34*3];
 
 /*
-===============
-R_AddDynamicLights
-===============
-*/
-void R_AddDynamicLights (msurface_t *surf)
-{
-	int			lnum;
-	int			sd, td;
-	float		fdist, frad, fminlight;
-	vec3_t		impact, local, dlorigin;
-	int			s, t;
-	int			i;
-	int			smax, tmax;
-	mtexinfo_t	*tex;
-	dlight_t	*dl;
-	float		*pfBL;
-	float		fsacc, ftacc;
-	qboolean	rotated = false;
-	vec3_t		temp;
-	vec3_t		forward, right, up;
-
-	smax = (surf->extents[0]>>4)+1;
-	tmax = (surf->extents[1]>>4)+1;
-	tex = surf->texinfo;
-
-	if (currententity->angles[0] || currententity->angles[1] || currententity->angles[2])
-	{
-		rotated = true;
-		AngleVectors (currententity->angles, forward, right, up);
-	}
-
-	dl = r_newrefdef.dlights;
-	for (lnum=0 ; lnum<r_newrefdef.num_dlights ; lnum++, dl++)
-	{
-		if ( !(surf->dlightbits & (1<<lnum) ) )
-			continue;		// not lit by this light
-
-		frad = dl->intensity;
-		VectorCopy ( dl->origin, dlorigin );
-
-		VectorSubtract (dlorigin, currententity->origin, dlorigin);
-		if (rotated)
-		{
-			VectorCopy (dlorigin, temp);
-			dlorigin[0] = DotProduct (temp, forward);
-			dlorigin[1] = -DotProduct (temp, right);
-			dlorigin[2] = DotProduct (temp, up);
-		}
-
-		fdist = DotProduct (dlorigin, surf->plane->normal) - surf->plane->dist;
-		frad -= fabs(fdist);
-		// rad is now the highest intensity on the plane
-
-		fminlight = DLIGHT_CUTOFF;	// FIXME: make configurable?
-		if (frad < fminlight)
-			continue;
-		fminlight = frad - fminlight;
-
-		for (i=0 ; i<3 ; i++)
-		{
-			impact[i] = dlorigin[i] -
-					surf->plane->normal[i]*fdist;
-		}
-
-		local[0] = DotProduct (impact, tex->vecs[0]) + tex->vecs[0][3] - surf->texturemins[0];
-		local[1] = DotProduct (impact, tex->vecs[1]) + tex->vecs[1][3] - surf->texturemins[1];
-
-		pfBL = s_blocklights;
-		for (t = 0, ftacc = 0 ; t<tmax ; t++, ftacc += 16)
-		{
-			td = local[1] - ftacc;
-			if ( td < 0 )
-				td = -td;
-
-			for ( s=0, fsacc = 0 ; s<smax ; s++, fsacc += 16, pfBL += 3)
-			{
-				sd = Q_ftol( local[0] - fsacc );
-
-				if ( sd < 0 )
-					sd = -sd;
-
-				if (sd > td)
-					fdist = sd + (td>>1);
-				else
-					fdist = td + (sd>>1);
-
-				if ( fdist < fminlight )
-				{
-					pfBL[0] += ( fminlight - fdist ) * dl->color[0];
-					pfBL[1] += ( fminlight - fdist ) * dl->color[1];
-					pfBL[2] += ( fminlight - fdist ) * dl->color[2];
-				}
-			}
-		}
-	}
-}
-
-
-/*
 ** R_SetCacheState
 */
 void R_SetCacheState( msurface_t *surf )
@@ -556,10 +457,6 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 			lightmap += size*3;		// skip to next lightmap
 		}
 	}
-
-// add all the dynamic lights
-	if (surf->dlightframe == r_framecount)
-		R_AddDynamicLights (surf);
 
 // put into texture format
 store:
