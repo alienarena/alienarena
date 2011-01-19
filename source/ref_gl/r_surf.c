@@ -32,7 +32,7 @@ static vec3_t	modelorg;		// relative to viewpoint
 vec3_t	r_worldLightVec;
 
 msurface_t	*r_alpha_surfaces;
-msurface_t	*r_special_surfaces;
+msurface_t	*r_rscript_surfaces;
 msurface_t	*r_normalsurfaces;
 msurface_t	*r_glsl_surfaces;
 msurface_t  *r_glsl_dynamic_surfaces;
@@ -406,7 +406,7 @@ void R_DrawAlphaSurfaces (void)
 					qglEnable(GL_POLYGON_OFFSET_FILL);
 					qglPolygonOffset(-3, -2);
 
-					RS_SpecialSurface(s);
+					RS_Surface(s);
 
 					qglDisable(GL_POLYGON_OFFSET_FILL);
 					GLSTATE_DISABLE_BLEND
@@ -433,21 +433,21 @@ void R_DrawAlphaSurfaces (void)
 
 /*
 ================
-R_DrawSpecialSurfaces
+R_DrawRSSurfaces
 
 Draw shader surfaces
 ================
 */
-void R_DrawSpecialSurfaces (void)
+void R_DrawRSSurfaces (void)
 {
-	msurface_t	*s = r_special_surfaces;
+	msurface_t	*s = r_rscript_surfaces;
 
 	if(!s)
 		return;
 
 	if (!r_shaders->value)
 	{
-		r_special_surfaces = NULL;
+		r_rscript_surfaces = NULL;
 		return;
 	}
 
@@ -457,8 +457,8 @@ void R_DrawSpecialSurfaces (void)
 	qglEnable(GL_POLYGON_OFFSET_FILL);
 	qglPolygonOffset(-3, -2);
 
-	for (; s; s = s->specialchain)
-		RS_SpecialSurface(s);
+	for (; s; s = s->rscriptchain)
+		RS_Surface(s);
 
 	qglDisable(GL_POLYGON_OFFSET_FILL);
 
@@ -467,7 +467,7 @@ void R_DrawSpecialSurfaces (void)
 
 	qglDepthMask(true);
 
-	r_special_surfaces = NULL;
+	r_rscript_surfaces = NULL;
 }
 
 /*
@@ -1273,8 +1273,8 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 				if(r_shaders->value) { //only add to the chain if there is actually a shader
 					rs_shader = (rscript_t *)surf->texinfo->image->script;
 					if(rs_shader || (surf->flags & SURF_UNDERWATER)) {
-						surf->specialchain = r_special_surfaces;
-						r_special_surfaces = surf;
+						surf->rscriptchain = r_rscript_surfaces;
+						r_rscript_surfaces = surf;
 					}
 				}
 			}
@@ -1292,8 +1292,8 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 				if(r_shaders->value) { //only add to the chain if there is actually a shader
 					rs_shader = (rscript_t *)surf->texinfo->image->script;
 					if(rs_shader) {
-						surf->specialchain = r_special_surfaces;
-						r_special_surfaces = surf;
+						surf->rscriptchain = r_rscript_surfaces;
+						r_rscript_surfaces = surf;
 					}
 				}
 			}
@@ -1304,45 +1304,21 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 	BSP_RecursiveWorldNode (node->children[!side], clipflags);
 }
 
-
 /*
 =============
-R_DrawWorld
+R_CalcWorldLights - this is the fallback for non deluxmapped bsp's
 =============
 */
-void R_DrawWorld (void)
-{
-	entity_t	ent;
+void R_CalcWorldLights( void )
+{	
 	int		i, j;
 	vec3_t	lightAdd, temp;
 	float	dist, weight;
-	int		numlights;
+	int		numlights = 0;
 
-	if (!r_drawworld->value)
-		return;
-
-	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
-		return;
-
-	currentmodel = r_worldmodel;
-
-	VectorCopy (r_newrefdef.vieworg, modelorg);
-
-	// auto cycle the world frame for texture animation
-	memset (&ent, 0, sizeof(ent));
-	ent.frame = (int)(r_newrefdef.time*2);
-	currententity = &ent;
-
-	gl_state.currenttextures[0] = gl_state.currenttextures[1] = -1;
-
-	qglColor3f (1,1,1);
-	memset (gl_lms.lightmap_surfaces, 0, sizeof(gl_lms.lightmap_surfaces));
-
-	//note - this is the fallback for non deluxmapped bsp's
 	if(gl_glsl_shaders->value && gl_state.glsl_shaders)
 	{
 		//get light position relative to player's position
-		numlights = 0;
 		VectorClear(lightAdd);
 		for (i = 0; i < r_lightgroups; i++) 
 		{
@@ -1363,6 +1339,38 @@ void R_DrawWorld (void)
 				r_worldLightVec[i] = (lightAdd[i]/numlights + r_origin[i])/2.0;
 		}
 	}
+}
+
+/*
+=============
+R_DrawWorld
+=============
+*/
+void R_DrawWorld (void)
+{
+	entity_t	ent;
+	
+	if (!r_drawworld->value)
+		return;
+
+	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
+		return;
+
+	currentmodel = r_worldmodel;
+
+	VectorCopy (r_newrefdef.vieworg, modelorg);
+
+	// auto cycle the world frame for texture animation
+	memset (&ent, 0, sizeof(ent));
+	ent.frame = (int)(r_newrefdef.time*2);
+	currententity = &ent;
+
+	gl_state.currenttextures[0] = gl_state.currenttextures[1] = -1;
+
+	qglColor3f (1,1,1);
+	memset (gl_lms.lightmap_surfaces, 0, sizeof(gl_lms.lightmap_surfaces));
+
+	R_CalcWorldLights();
 
 	R_ClearSkyBox ();
 

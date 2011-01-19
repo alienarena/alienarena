@@ -1639,7 +1639,7 @@ void RS_LoadSpecialScripts (void) //the special cases of glass and water caustic
 		RS_ReadyScript(rs_glass);
 }
 
-void RS_SpecialSurface (msurface_t *surf)
+void RS_Surface (msurface_t *surf)
 {
 	rscript_t *rs_shader;
 

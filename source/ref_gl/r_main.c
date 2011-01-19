@@ -1023,7 +1023,7 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawWorld ();
 
-	R_DrawSpecialSurfaces();
+	R_DrawRSSurfaces();
 
 	if(r_lensflare->value)
 		R_RenderFlares ();

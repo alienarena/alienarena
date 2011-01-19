@@ -214,11 +214,10 @@ typedef struct msurface_s
 
 	glpoly_t	*polys;				// multiple if warped
 	struct	msurface_s	*texturechain;
-	struct  msurface_s	*standardchain;
 	struct	msurface_s	*glslchain;
 	struct  msurface_s	*glsldynamicchain;
 	struct  msurface_s	*lightmapchain;
-	struct	msurface_s	*specialchain;
+	struct	msurface_s	*rscriptchain;
 	struct  msurface_s	*normalchain;
 
 	mtexinfo_t	*texinfo;
