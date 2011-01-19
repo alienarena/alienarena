@@ -247,7 +247,7 @@ extern void R_DrawBrushModel (void);
 extern void R_DrawWorld (void);
 extern void R_RenderDlights (void);
 extern void R_DrawAlphaSurfaces (void);
-extern void R_DrawSpecialSurfaces(void);
+extern void R_DrawRSSurfaces(void);
 extern void R_InitParticleTexture (void);
 extern void R_DrawParticles (void);
 extern void R_DrawRadar(void);

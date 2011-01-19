@@ -183,7 +183,7 @@ void RS_UpdateRegistration(void);
 void RS_DrawSurface (msurface_t *surf, qboolean lightmap);
 void RS_SetTexcoords (rs_stage_t *stage, float *os, float *ot, msurface_t *fa);
 void RS_SetTexcoords2D (rs_stage_t *stage, float *os, float *ot);
-void RS_SpecialSurface (msurface_t *surf);
+void RS_Surface (msurface_t *surf);
 void RS_LoadSpecialScripts(void);
 float RS_AlphaFuncAlias (int alphafunc, float alpha, vec3_t normal, vec3_t org);
 
