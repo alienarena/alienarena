@@ -34,12 +34,8 @@ vec3_t	r_worldLightVec;
 msurface_t	*r_alpha_surfaces;
 msurface_t	*r_special_surfaces;
 msurface_t	*r_normalsurfaces;
-msurface_t	*r_standard_surfaces;
 msurface_t	*r_glsl_surfaces;
 msurface_t  *r_glsl_dynamic_surfaces;
-
-#define DYNAMIC_LIGHT_WIDTH  128
-#define DYNAMIC_LIGHT_HEIGHT 128
 
 #define LIGHTMAP_BYTES 4
 
@@ -444,7 +440,10 @@ Draw shader surfaces
 */
 void R_DrawSpecialSurfaces (void)
 {
-	msurface_t	*s;
+	msurface_t	*s = r_special_surfaces;
+
+	if(!s)
+		return;
 
 	if (!r_shaders->value)
 	{
@@ -458,7 +457,7 @@ void R_DrawSpecialSurfaces (void)
 	qglEnable(GL_POLYGON_OFFSET_FILL);
 	qglPolygonOffset(-3, -2);
 
-	for (s=r_special_surfaces ; s ; s=s->specialchain)
+	for (; s; s = s->specialchain)
 		RS_SpecialSurface(s);
 
 	qglDisable(GL_POLYGON_OFFSET_FILL);
@@ -534,11 +533,6 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 		R_InitVArrays (VERT_MULTI_TEXTURED);
 		R_AddLightMappedSurfToVArray (surf, scroll);
 	}
-		
-	if(gl_glsl_shaders->value && gl_state.glsl_shaders)
-		glUseProgramObjectARB( 0 );
-
-	R_KillVArrays ();
 	
 	if (SurfaceIsAlphaBlended(surf))
 		qglDisable( GL_ALPHA_TEST);
@@ -611,8 +605,6 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 		R_InitVArrays (VERT_MULTI_TEXTURED);
 		R_AddLightMappedSurfToVArray (surf, scroll);
 	}
-
-	R_KillVArrays ();
 	
 	if (SurfaceIsAlphaBlended(surf))
 		qglDisable( GL_ALPHA_TEST);
@@ -716,21 +708,9 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf, qboolean fou
 		R_InitVArrays (VERT_MULTI_TEXTURED);
 		R_AddLightMappedSurfToVArray (surf, scroll);
 	}
-
-	R_KillVArrays ();
 	
 	if (SurfaceIsAlphaBlended(surf))
 		qglDisable( GL_ALPHA_TEST);
-}
-
-void BSP_DrawStandardSurfaces (void)
-{
-	msurface_t	*s = r_standard_surfaces;
-
-	for (; s; s = s->standardchain)
-		BSP_RenderLightmappedPoly(s);
-
-	r_standard_surfaces = NULL;
 }
 
 void BSP_DrawGLSLSurfaces (void)
@@ -768,9 +748,8 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 	float		lightCutoffSquared = 0.0f;
 	qboolean	foundLight = false;
 
-	if(!r_newrefdef.num_dlights || !s)
+	if(!s)
 	{
-		r_glsl_dynamic_surfaces = NULL;
 		return;
 	}
 
@@ -812,6 +791,14 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 
 		glUseProgramObjectARB( 0 );
 	}
+	else
+	{
+		for (; s; s = s->glsldynamicchain)
+			BSP_RenderLightmappedPoly(s);
+	}
+
+	qglActiveTextureARB (GL_TEXTURE1);
+	qglDisable (GL_TEXTURE_2D);	
 
 	r_glsl_dynamic_surfaces = NULL;
 }
@@ -921,8 +908,7 @@ static void BSP_DrawNormalSurfaces (void)
 	}
 
 	BSP_KillNormalTMUs();
-	R_KillVArrays ();
-
+	
 	// restore original blend
 	qglTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -936,7 +922,7 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	int map;
 	qboolean is_dynamic = false;
 
-	if(gl_state.glsl_shaders && gl_glsl_shaders->value)
+	if(r_newrefdef.num_dlights && gl_state.glsl_shaders && gl_glsl_shaders->value)
 	{
 		for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
 		{
@@ -971,8 +957,7 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	}
 	else 
 	{
-		surf->standardchain = r_standard_surfaces;
-		r_standard_surfaces = surf;
+		BSP_RenderLightmappedPoly(surf);
 	}
 }
 
@@ -1032,13 +1017,9 @@ void BSP_DrawInlineBModel ( void )
 	//render all GLSL surfaces
 	if(gl_state.glsl_shaders && gl_glsl_shaders->value)
 	{
-		if(gl_normalmaps->value)
-			BSP_DrawGLSLSurfaces();
+		BSP_DrawGLSLSurfaces();
 		BSP_DrawGLSLDynamicSurfaces();
 	}
-
-	//render non GLSL surfaces
-	BSP_DrawStandardSurfaces();
 
 	if ( !(currententity->flags & RF_TRANSLUCENT) )
 	{
@@ -1052,6 +1033,8 @@ void BSP_DrawInlineBModel ( void )
 		qglColor4f (1,1,1,1);
 		GL_TexEnv( GL_REPLACE );
 	}
+
+	R_KillVArrays ();
 }
 
 /*
@@ -1430,18 +1413,16 @@ void R_DrawWorld (void)
 	//render all GLSL surfaces
 	if(gl_state.glsl_shaders && gl_glsl_shaders->value)
 	{
-		if(gl_normalmaps->value)
-			BSP_DrawGLSLSurfaces();
+		BSP_DrawGLSLSurfaces();
 		BSP_DrawGLSLDynamicSurfaces();
 	}
-
-	//render non GLSL surfaces
-	BSP_DrawStandardSurfaces();
-
+	
 	GL_EnableMultitexture( false );
 
 	//render fixed function normalmap self shadowing
 	BSP_DrawNormalSurfaces ();
+
+	R_KillVArrays ();
 
 	R_InitSun();
 
