@@ -725,9 +725,9 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf, qboolean fou
 
 void BSP_DrawStandardSurfaces (void)
 {
-	msurface_t	*s;
+	msurface_t	*s = r_standard_surfaces;
 
-	for (s=r_standard_surfaces ; s ; s=s->standardchain)
+	for (; s; s = s->standardchain)
 		BSP_RenderLightmappedPoly(s);
 
 	r_standard_surfaces = NULL;
@@ -735,7 +735,10 @@ void BSP_DrawStandardSurfaces (void)
 
 void BSP_DrawGLSLSurfaces (void)
 {
-	msurface_t	*s;
+	msurface_t	*s = r_glsl_surfaces;
+
+	if(!s)
+		return;
 
 	glUseProgramObjectARB( g_programObj );
 	
@@ -747,7 +750,7 @@ void BSP_DrawGLSLSurfaces (void)
 	glUniform1iARB( g_location_dynamic, 0);
 	glUniform1iARB( g_location_parallax, 1);
 	
-	for (s=r_glsl_surfaces ; s ; s=s->glslchain)
+	for (; s; s = s->glslchain)
 		BSP_RenderGLSLLightmappedPoly(s);
 
 	glUseProgramObjectARB( 0 );
@@ -757,13 +760,19 @@ void BSP_DrawGLSLSurfaces (void)
 
 void BSP_DrawGLSLDynamicSurfaces (void)
 {
-	msurface_t	*s;
+	msurface_t	*s = r_glsl_dynamic_surfaces;
 	dlight_t	*dl = NULL;
 	int			lnum, sv_lnum = 0;
 	float		add, brightest = 0;
 	vec3_t		lightVec;
 	float		lightCutoffSquared = 0.0f;
 	qboolean	foundLight = false;
+
+	if(!r_newrefdef.num_dlights || !s)
+	{
+		r_glsl_dynamic_surfaces = NULL;
+		return;
+	}
 
 	dl = r_newrefdef.dlights;
 	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
@@ -791,17 +800,14 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 		lightCutoffSquared *= lightCutoffSquared;
 
 		foundLight= true;
-	}
-
-	if(foundLight)
-	{
+	
 		glUseProgramObjectARB( g_programObj );
 	
 		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
 		glUniform1iARB( g_location_fog, map_fog);
 		glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 
-		for (s=r_glsl_dynamic_surfaces ; s ; s=s->glsldynamicchain)
+		for (; s; s = s->glsldynamicchain)
 			BSP_RenderGLSLDynamicLightmappedPoly(s, foundLight, dl->origin, dl->color, lightCutoffSquared );
 
 		glUseProgramObjectARB( 0 );
