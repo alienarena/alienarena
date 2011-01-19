@@ -628,7 +628,12 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf, qboolean fou
 	if(gl_parallaxmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) 
 		glUniform1iARB( g_location_parallax, 1);
 	else
+	{
 		glUniform1iARB( g_location_parallax, 0);
+		//add to normal chain(this must be done since this surface is not self shadowed with glsl by worldlights)
+		surf->normalchain = r_normalsurfaces;
+		r_normalsurfaces = surf;
+	}
 
 	GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
 	glUniform1iARB( g_location_surfTexture, 0);
@@ -1339,7 +1344,8 @@ void R_DrawWorld (void)
 		//get light position relative to player's position
 		numlights = 0;
 		VectorClear(lightAdd);
-		for (i = 0; i < r_lightgroups; i++) {
+		for (i = 0; i < r_lightgroups; i++) 
+		{
 			VectorSubtract(r_origin, LightGroups[i].group_origin, temp);
 			dist = VectorLength(temp);
 			if(dist == 0)
@@ -1351,7 +1357,8 @@ void R_DrawWorld (void)
 			numlights+=weight;
 		}
 
-		if(numlights > 0.0) {
+		if(numlights > 0.0) 
+		{
 			for(i = 0; i < 3; i++)
 				r_worldLightVec[i] = (lightAdd[i]/numlights + r_origin[i])/2.0;
 		}
@@ -1363,7 +1370,8 @@ void R_DrawWorld (void)
 
 	GL_SelectTexture( GL_TEXTURE0);
 
-	if ( !gl_config.mtexcombine ) {
+	if ( !gl_config.mtexcombine ) 
+	{
 		GL_TexEnv( GL_REPLACE );
 			GL_SelectTexture( GL_TEXTURE1);
 
@@ -1372,7 +1380,8 @@ void R_DrawWorld (void)
 		else
 			GL_TexEnv( GL_MODULATE );
 
-	} else {
+	} else 
+	{
 		GL_TexEnv ( GL_COMBINE_EXT );
 		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
 		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
@@ -1381,12 +1390,14 @@ void R_DrawWorld (void)
 		GL_SelectTexture( GL_TEXTURE1 );
 		GL_TexEnv ( GL_COMBINE_EXT );
 
-		if ( gl_lightmap->value ) {
+		if ( gl_lightmap->value ) 
+		{
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
-		} else {
+		} else 
+		{
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
@@ -1395,9 +1406,8 @@ void R_DrawWorld (void)
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT );
 		}
 
-		if ( r_overbrightbits->value ) {
+		if ( r_overbrightbits->value )
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
-		}
 	}
 
 	BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
