@@ -41,8 +41,6 @@ grass_t r_grasses[MAX_GRASSES];
 int r_numbeams;
 beam_t	r_beams[MAX_BEAMS];
 
-qboolean need_free_vbo;
-
 //=============
 extern cvar_t *cl_showPlayerNames;
 extern cvar_t *name;

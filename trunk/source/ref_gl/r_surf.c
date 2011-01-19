@@ -736,6 +736,12 @@ void BSP_DrawStandardSurfaces (void)
 void BSP_DrawGLSLSurfaces (void)
 {
 	msurface_t	*s;
+
+	glUseProgramObjectARB( g_programObj );
+	
+	glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
+	glUniform1iARB( g_location_fog, map_fog);
+	glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 		
 	glUniform1iARB( g_location_shadowmap, 0); //static light shadow handled by stencil volumes
 	glUniform1iARB( g_location_dynamic, 0);
@@ -743,6 +749,8 @@ void BSP_DrawGLSLSurfaces (void)
 	
 	for (s=r_glsl_surfaces ; s ; s=s->glslchain)
 		BSP_RenderGLSLLightmappedPoly(s);
+
+	glUseProgramObjectARB( 0 );
 
 	r_glsl_surfaces = NULL;
 }
@@ -785,8 +793,19 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 		foundLight= true;
 	}
 
-	for (s=r_glsl_dynamic_surfaces ; s ; s=s->glsldynamicchain)
-		BSP_RenderGLSLDynamicLightmappedPoly(s, foundLight, dl->origin, dl->color, lightCutoffSquared );
+	if(foundLight)
+	{
+		glUseProgramObjectARB( g_programObj );
+	
+		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
+		glUniform1iARB( g_location_fog, map_fog);
+		glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
+
+		for (s=r_glsl_dynamic_surfaces ; s ; s=s->glsldynamicchain)
+			BSP_RenderGLSLDynamicLightmappedPoly(s, foundLight, dl->origin, dl->color, lightCutoffSquared );
+
+		glUseProgramObjectARB( 0 );
+	}
 
 	r_glsl_dynamic_surfaces = NULL;
 }
@@ -1005,16 +1024,12 @@ void BSP_DrawInlineBModel ( void )
 	}
 
 	//render all GLSL surfaces
-	glUseProgramObjectARB( g_programObj );
-	
-	glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
-	glUniform1iARB( g_location_fog, map_fog);
-	glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
-
-	BSP_DrawGLSLSurfaces();
-	BSP_DrawGLSLDynamicSurfaces();
-
-	glUseProgramObjectARB( 0 );
+	if(gl_state.glsl_shaders && gl_glsl_shaders->value)
+	{
+		if(gl_normalmaps->value)
+			BSP_DrawGLSLSurfaces();
+		BSP_DrawGLSLDynamicSurfaces();
+	}
 
 	//render non GLSL surfaces
 	BSP_DrawStandardSurfaces();
@@ -1407,16 +1422,12 @@ void R_DrawWorld (void)
 	BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
 
 	//render all GLSL surfaces
-	glUseProgramObjectARB( g_programObj );
-	
-	glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
-	glUniform1iARB( g_location_fog, map_fog);
-	glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
-
-	BSP_DrawGLSLSurfaces();
-	BSP_DrawGLSLDynamicSurfaces();
-
-	glUseProgramObjectARB( 0 );
+	if(gl_state.glsl_shaders && gl_glsl_shaders->value)
+	{
+		if(gl_normalmaps->value)
+			BSP_DrawGLSLSurfaces();
+		BSP_DrawGLSLDynamicSurfaces();
+	}
 
 	//render non GLSL surfaces
 	BSP_DrawStandardSurfaces();

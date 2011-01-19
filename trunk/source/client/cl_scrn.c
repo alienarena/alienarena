@@ -1846,7 +1846,6 @@ void SCR_UpdateScreen (void)
 			// do 3D refresh drawing, and then update the screen
 			SCR_CalcVrect ();
 
-			need_free_vbo = true;
 			V_RenderView ( separation[i] );
 
 			SCR_DrawStats ();
