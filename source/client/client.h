@@ -580,8 +580,6 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player );
 // cl_view.c
 //
 
-extern qboolean need_free_vbo;
-
 #define CL_LOADMSG_LENGTH 96
 
 qboolean loadingMessage;

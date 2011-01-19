@@ -388,8 +388,6 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 	glpoly_t *p = surf->polys;
 	float	*v;
 	int		i;
-
-	//to do - this portion will get skipped if using VBO
 	
 	// reset pointer and counter
 	VArray = &VArrayVerts[0];
