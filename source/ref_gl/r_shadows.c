@@ -960,8 +960,8 @@ void R_CastShadow(void)
 				continue;
 		}
 
-		//if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 10))
-		//	continue;
+		if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 128))
+			continue;
 
 		VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
 		VectorScale (tmp, 1.666, tmp);
