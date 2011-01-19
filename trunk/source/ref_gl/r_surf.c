@@ -574,10 +574,6 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 	KillFlags |= KILL_TMU3_POINTER;
 
 	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
-
-	//add to normal chain
-	surf->normalchain = r_normalsurfaces;
-	r_normalsurfaces = surf;
 	
 	if(gl_state.vbo && surf->has_vbo) 
 	{
@@ -677,10 +673,6 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf, qboolean fou
 		glUniform1iARB( g_location_dynamic, 0);				
 
 	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
-			
-	//add to normal chain
-	surf->normalchain = r_normalsurfaces;
-	r_normalsurfaces = surf;
 	
 	if(gl_state.vbo && surf->has_vbo) 
 	{
@@ -807,7 +799,7 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 ================
 BSP_DrawNormalSurfaces
 
-Fast rendering of self shadows for normalmapped surfaces
+Fixed function rendering of non-glsl normalmapped surfaces
 ================
 */
 
