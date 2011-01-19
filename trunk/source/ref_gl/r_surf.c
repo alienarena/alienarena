@@ -33,7 +33,10 @@ vec3_t	r_worldLightVec;
 
 msurface_t	*r_alpha_surfaces;
 msurface_t	*r_special_surfaces;
-msurface_t *r_normalsurfaces;
+msurface_t	*r_normalsurfaces;
+msurface_t	*r_standard_surfaces;
+msurface_t	*r_glsl_surfaces;
+msurface_t  *r_glsl_dynamic_surfaces;
 
 #define DYNAMIC_LIGHT_WIDTH  128
 #define DYNAMIC_LIGHT_HEIGHT 128
@@ -330,7 +333,6 @@ void BSP_RenderBrushPoly (msurface_t *fa)
 	}
 }
 
-
 /*
 ================
 R_DrawAlphaSurfaces
@@ -478,30 +480,11 @@ Main polygon rendering routine(all standard surfaces)
 */
 static void BSP_RenderLightmappedPoly( msurface_t *surf )
 {
-	int		map;
 	float	scroll;
 	image_t *image = BSP_TextureAnimation( surf->texinfo );
-	qboolean is_dynamic = false;
 	unsigned lmtex = surf->lightmaptexturenum;
 	glpoly_t *p = surf->polys;
-	
-	for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
-	{
-		if ( r_newrefdef.lightstyles[surf->styles[map]].white != surf->cached_light[map] )
-			goto dynamic;
-	}
-
-	// dynamic this frame or dynamic previously
-	if ( ( surf->dlightframe == r_framecount ) )
-	{
-dynamic:
-		if ( gl_dynamic->value )
-		{
-			if ( !SurfaceHasNoLightmap(surf) )
-				is_dynamic = true;
-		}
-	}
-	
+		
 	c_brush_polys++;
 
 	if (SurfaceIsAlphaBlended(surf))
@@ -514,179 +497,17 @@ dynamic:
 		if (scroll == 0.0)
 			scroll = -64.0;
 	}
+		
+	GL_MBind( GL_TEXTURE0, image->texnum );
+	GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );		
 
-	if(gl_glsl_shaders->value && gl_state.glsl_shaders) 
+	if(strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) 
 	{
-		dlight_t	*dl = NULL;
-		int			lnum, sv_lnum = 0;
-		float		add, brightest = 0;
-		vec3_t		lightVec;
-		float		lightCutoffSquared = 0.0f;
-
-		if(is_dynamic) 
-		{
-			dl = r_newrefdef.dlights;
-			for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
-			{
-				VectorSubtract (r_origin, dl->origin, lightVec);
-				add = dl->intensity - VectorLength(lightVec)/10;
-				if (add > brightest) //only bother with lights close by
-				{
-					brightest = add;
-					sv_lnum = lnum; //remember the position of most influencial light
-				}
-			}
-			if(brightest > 0) 
-			{ 
-				//we have a light
-				dl = r_newrefdef.dlights;
-				dl += sv_lnum; //our most influential light
-
-				lightCutoffSquared = ( dl->intensity - DLIGHT_CUTOFF );
-
-				if( lightCutoffSquared <= 0.0f )
-					lightCutoffSquared = 0.0f;
-
-				lightCutoffSquared *= 2.0f;
-				lightCutoffSquared *= lightCutoffSquared;
-			}
-		}
-
-		//parallax maps
-		if(gl_parallaxmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)
-			&& strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) 
-		{			
-			glUseProgramObjectARB( g_programObj );
-
-			GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
-			glUniform1iARB( g_location_surfTexture, 0);
-
-			GL_MBind( GL_TEXTURE1, surf->texinfo->heightMap->texnum);
-			glUniform1iARB( g_location_heightTexture, 1);
-
-			glUniform1iARB( g_location_lmTexture, 2);
-			qglActiveTextureARB(GL_TEXTURE2);
-			qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
-			KillFlags |= KILL_TMU2_POINTER;
-
-			glUniform1iARB( g_location_normalTexture, 3);
-			qglActiveTextureARB(GL_TEXTURE3);
-			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
-			KillFlags |= KILL_TMU3_POINTER;
-
-			glUniform1iARB( g_location_shadowmap, 0); //static light shadow handled by stencil volumes
-
-			if(is_dynamic) 
-			{
-				if(brightest > 0) 
-				{
-					glUniform3fARB( g_location_lightPosition, dl->origin[0], dl->origin[1], dl->origin[2]);
-					glUniform3fARB( g_location_lightColour, dl->color[0], dl->color[1], dl->color[2]);
-
-					glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
-
-					glUniform1iARB( g_location_dynamic, 1);
-
-					if(gl_shadowmaps->value) 
-					{
-						//dynamic shadow
-						glUniform1iARB( g_location_bspShadowmapTexture, 7);
-						qglActiveTextureARB(GL_TEXTURE7);
-						qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
-
-						glUniform1iARB( g_location_shadowmap, 1);
-					}
-					else
-						glUniform1iARB( g_location_shadowmap, 0);
-				}
-				else
-					glUniform1iARB( g_location_dynamic, 0);
-			}
-			else
-				glUniform1iARB( g_location_dynamic, 0);
-
-			glUniform1iARB( g_location_parallax, 1);
-
-			glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
-			glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
-			glUniform1iARB( g_location_fog, map_fog);	
-
-			glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
-
-			//add to normal chain
-			surf->normalchain = r_normalsurfaces;
-			r_normalsurfaces = surf;
-		}
-		//normal mapped surface for dynamic lights
-		else if(is_dynamic && brightest > 0 && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) 
-		{			
-			glUseProgramObjectARB( g_programObj );
-
-			GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
-			glUniform1iARB( g_location_surfTexture, 0);
-
-			GL_MBind( GL_TEXTURE1,  surf->texinfo->heightMap->texnum);
-			glUniform1iARB( g_location_heightTexture, 1);
-
-			glUniform1iARB( g_location_lmTexture, 2);
-			qglActiveTextureARB(GL_TEXTURE2);
-			qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
-			KillFlags |= KILL_TMU2_POINTER;
-
-			glUniform1iARB( g_location_normalTexture, 3);
-			qglActiveTextureARB(GL_TEXTURE3);
-			qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
-			KillFlags |= KILL_TMU3_POINTER;
-
-			if(gl_shadowmaps->value) 
-			{
-				//dynamic shadow
-				glUniform1iARB( g_location_bspShadowmapTexture, 7);
-				qglActiveTextureARB(GL_TEXTURE7);
-				qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
-
-				glUniform1iARB( g_location_shadowmap, 1);
-			}
-			else
-				glUniform1iARB( g_location_shadowmap, 0);
-
-			glUniform3fARB( g_location_lightPosition, dl->origin[0], dl->origin[1], dl->origin[2]);
-			glUniform3fARB( g_location_lightColour, dl->color[0], dl->color[1], dl->color[2]);
-			glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
-			glUniform1iARB( g_location_dynamic, 1);
-			glUniform1iARB( g_location_parallax, 0);
-
-			glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
-			glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
-			glUniform1iARB( g_location_fog, map_fog);	
-
-			glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
-
-			//add to normal chain
-			surf->normalchain = r_normalsurfaces;
-			r_normalsurfaces = surf;
-		}
-		//surface has no normalmap
-		else 
-		{
-			if(strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) 
-			{
-				//add to normal chain
-				surf->normalchain = r_normalsurfaces;
-				r_normalsurfaces = surf;
-			}
-
-			GL_MBind( GL_TEXTURE0, image->texnum );
-			GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );			
-		}
+		//add to normal chain
+		surf->normalchain = r_normalsurfaces;
+		r_normalsurfaces = surf;
 	}
-	//no glsl, standard render
-	else 
-	{
-		GL_MBind( GL_TEXTURE0, image->texnum );
-		GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );		
-	}
-
+	
 	if(gl_state.vbo && surf->has_vbo) 
 	{
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
@@ -721,6 +542,253 @@ dynamic:
 	
 	if (SurfaceIsAlphaBlended(surf))
 		qglDisable( GL_ALPHA_TEST);
+}
+
+static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
+{
+	float	scroll;
+	unsigned lmtex = surf->lightmaptexturenum;
+	glpoly_t *p = surf->polys;
+		
+	c_brush_polys++;
+
+	if (SurfaceIsAlphaBlended(surf))
+		qglEnable( GL_ALPHA_TEST );
+
+	scroll = 0;
+	if (surf->texinfo->flags & SURF_FLOWING)
+	{
+		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
+		if (scroll == 0.0)
+			scroll = -64.0;
+	}	
+
+	GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
+	glUniform1iARB( g_location_surfTexture, 0);
+
+	GL_MBind( GL_TEXTURE1, surf->texinfo->heightMap->texnum);
+	glUniform1iARB( g_location_heightTexture, 1);
+
+	glUniform1iARB( g_location_lmTexture, 2);
+	qglActiveTextureARB(GL_TEXTURE2);
+	qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
+	KillFlags |= KILL_TMU2_POINTER;
+
+	glUniform1iARB( g_location_normalTexture, 3);
+	qglActiveTextureARB(GL_TEXTURE3);
+	qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
+	KillFlags |= KILL_TMU3_POINTER;
+
+	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
+
+	//add to normal chain
+	surf->normalchain = r_normalsurfaces;
+	r_normalsurfaces = surf;
+	
+	if(gl_state.vbo && surf->has_vbo) 
+	{
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+
+		qglEnableClientState( GL_VERTEX_ARRAY );	
+		qglVertexPointer(3, GL_FLOAT, 0, (void *)surf->vbo_pos);
+
+		qglClientActiveTextureARB (GL_TEXTURE0);
+		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);	
+		qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->vbo_pos + surf->xyz_size));
+
+		qglClientActiveTextureARB (GL_TEXTURE1);
+		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);	
+		qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->vbo_pos + surf->xyz_size + surf->st_size));
+
+		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
+				
+		qglDrawArrays (GL_POLYGON, 0, p->numverts);
+
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	}
+	else
+	{
+		R_InitVArrays (VERT_MULTI_TEXTURED);
+		R_AddLightMappedSurfToVArray (surf, scroll);
+	}
+
+	R_KillVArrays ();
+	
+	if (SurfaceIsAlphaBlended(surf))
+		qglDisable( GL_ALPHA_TEST);
+}
+
+static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf, qboolean foundLight, vec3_t origin, vec3_t color, float lightCutoffSquared )
+{
+	float	scroll;
+	unsigned lmtex = surf->lightmaptexturenum;
+	glpoly_t *p = surf->polys;
+		
+	c_brush_polys++;
+
+	if (SurfaceIsAlphaBlended(surf))
+		qglEnable( GL_ALPHA_TEST );
+
+	scroll = 0;
+	if (surf->texinfo->flags & SURF_FLOWING)
+	{
+		scroll = -64 * ( (r_newrefdef.time / 40.0) - (int)(r_newrefdef.time / 40.0) );
+		if (scroll == 0.0)
+			scroll = -64.0;
+	}
+
+	if(gl_parallaxmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) 
+		glUniform1iARB( g_location_parallax, 1);
+	else
+		glUniform1iARB( g_location_parallax, 0);
+
+	GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
+	glUniform1iARB( g_location_surfTexture, 0);
+	
+	GL_MBind( GL_TEXTURE1, surf->texinfo->heightMap->texnum);
+	glUniform1iARB( g_location_heightTexture, 1);
+
+	glUniform1iARB( g_location_lmTexture, 2);
+	qglActiveTextureARB(GL_TEXTURE2);
+	qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
+	KillFlags |= KILL_TMU2_POINTER;
+
+	glUniform1iARB( g_location_normalTexture, 3);
+	qglActiveTextureARB(GL_TEXTURE3);
+	qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
+	KillFlags |= KILL_TMU3_POINTER;
+
+	glUniform1iARB( g_location_shadowmap, 0); //static light shadow handled by stencil volumes
+
+	if(foundLight) 
+	{
+		glUniform3fARB( g_location_lightPosition, origin[0], origin[1], origin[2]);
+		glUniform3fARB( g_location_lightColour, color[0], color[1], color[2]);
+
+		glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
+
+		glUniform1iARB( g_location_dynamic, 1);
+
+		if(gl_shadowmaps->value) 
+		{
+			//dynamic shadow
+			glUniform1iARB( g_location_bspShadowmapTexture, 7);
+			qglActiveTextureARB(GL_TEXTURE7);
+			qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
+
+			glUniform1iARB( g_location_shadowmap, 1);
+		}
+		else
+			glUniform1iARB( g_location_shadowmap, 0);
+	}
+	else
+		glUniform1iARB( g_location_dynamic, 0);				
+
+	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
+			
+	//add to normal chain
+	surf->normalchain = r_normalsurfaces;
+	r_normalsurfaces = surf;
+	
+	if(gl_state.vbo && surf->has_vbo) 
+	{
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
+
+		qglEnableClientState( GL_VERTEX_ARRAY );	
+		qglVertexPointer(3, GL_FLOAT, 0, (void *)surf->vbo_pos);
+
+		qglClientActiveTextureARB (GL_TEXTURE0);
+		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);	
+		qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->vbo_pos + surf->xyz_size));
+
+		qglClientActiveTextureARB (GL_TEXTURE1);
+		qglEnableClientState(GL_TEXTURE_COORD_ARRAY);	
+		qglTexCoordPointer(2, GL_FLOAT, 0, (void*)(surf->vbo_pos + surf->xyz_size + surf->st_size));
+
+		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
+				
+		qglDrawArrays (GL_POLYGON, 0, p->numverts);
+
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	}
+	else
+	{
+		R_InitVArrays (VERT_MULTI_TEXTURED);
+		R_AddLightMappedSurfToVArray (surf, scroll);
+	}
+
+	R_KillVArrays ();
+	
+	if (SurfaceIsAlphaBlended(surf))
+		qglDisable( GL_ALPHA_TEST);
+}
+
+void BSP_DrawStandardSurfaces (void)
+{
+	msurface_t	*s;
+
+	for (s=r_standard_surfaces ; s ; s=s->standardchain)
+		BSP_RenderLightmappedPoly(s);
+
+	r_standard_surfaces = NULL;
+}
+
+void BSP_DrawGLSLSurfaces (void)
+{
+	msurface_t	*s;
+		
+	glUniform1iARB( g_location_shadowmap, 0); //static light shadow handled by stencil volumes
+	glUniform1iARB( g_location_dynamic, 0);
+	glUniform1iARB( g_location_parallax, 1);
+	
+	for (s=r_glsl_surfaces ; s ; s=s->glslchain)
+		BSP_RenderGLSLLightmappedPoly(s);
+
+	r_glsl_surfaces = NULL;
+}
+
+void BSP_DrawGLSLDynamicSurfaces (void)
+{
+	msurface_t	*s;
+	dlight_t	*dl = NULL;
+	int			lnum, sv_lnum = 0;
+	float		add, brightest = 0;
+	vec3_t		lightVec;
+	float		lightCutoffSquared = 0.0f;
+	qboolean	foundLight = false;
+
+	dl = r_newrefdef.dlights;
+	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
+	{
+		VectorSubtract (r_origin, dl->origin, lightVec);
+		add = dl->intensity - VectorLength(lightVec)/10;
+		if (add > brightest) //only bother with lights close by
+		{
+			brightest = add;
+			sv_lnum = lnum; //remember the position of most influencial light
+		}
+	}
+	if(brightest > 0) 
+	{ 
+		//we have a light
+		dl = r_newrefdef.dlights;
+		dl += sv_lnum; //our most influential light
+
+		lightCutoffSquared = ( dl->intensity - DLIGHT_CUTOFF );
+
+		if( lightCutoffSquared <= 0.0f )
+			lightCutoffSquared = 0.0f;
+
+		lightCutoffSquared *= 2.0f;
+		lightCutoffSquared *= lightCutoffSquared;
+
+		foundLight= true;
+	}
+
+	for (s=r_glsl_dynamic_surfaces ; s ; s=s->glsldynamicchain)
+		BSP_RenderGLSLDynamicLightmappedPoly(s, foundLight, dl->origin, dl->color, lightCutoffSquared );
+
+	r_glsl_dynamic_surfaces = NULL;
 }
 
 /*
@@ -794,7 +862,10 @@ static void BSP_DrawNormalSurfaces (void)
 		return;
 
 	if (!gl_normalmaps->value)
+	{
+		r_normalsurfaces = NULL;
 		return;
+	}
 
 	R_InitVArrays (VERT_BUMPMAPPED);
 	BSP_InitNormalSurfaces();
@@ -833,6 +904,51 @@ static void BSP_DrawNormalSurfaces (void)
 	qglDisable (GL_BLEND);
 
 	r_normalsurfaces = NULL;
+}
+
+void BSP_AddToTextureChain(msurface_t *surf)
+{
+	int map;
+	qboolean is_dynamic = false;
+
+	if(gl_state.glsl_shaders && gl_glsl_shaders->value)
+	{
+		for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
+		{
+			if ( r_newrefdef.lightstyles[surf->styles[map]].white != surf->cached_light[map] )
+				goto dynamic;
+		}
+
+		// dynamic this frame or dynamic previously
+		if ( ( surf->dlightframe == r_framecount ) )
+		{
+	dynamic:
+			if ( gl_dynamic->value )
+			{
+				if ( !SurfaceHasNoLightmap(surf) )
+					is_dynamic = true;
+			}
+		}
+	}
+
+	if(is_dynamic && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)
+		&& gl_state.glsl_shaders && gl_glsl_shaders->value) //always glsl for dynamic if it has a normalmap
+	{
+		surf->glsldynamicchain = r_glsl_dynamic_surfaces;
+		r_glsl_dynamic_surfaces = surf;
+	}
+	else if(gl_parallaxmaps->value && gl_normalmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)
+			&& strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)
+			&& gl_state.glsl_shaders && gl_glsl_shaders->value) 
+	{
+		surf->glslchain = r_glsl_surfaces;
+		r_glsl_surfaces = surf;
+	}
+	else 
+	{
+		surf->standardchain = r_standard_surfaces;
+		r_standard_surfaces = surf;
+	}
 }
 
 /*
@@ -875,7 +991,7 @@ void BSP_DrawInlineBModel ( void )
 			}
 			else if ( !( psurf->flags & SURF_DRAWTURB ) )
 			{
-				BSP_RenderLightmappedPoly( psurf );
+				BSP_AddToTextureChain( psurf );
 			}
 			else
 			{
@@ -887,6 +1003,21 @@ void BSP_DrawInlineBModel ( void )
 			psurf->visframe = r_framecount;
 		}
 	}
+
+	//render all GLSL surfaces
+	glUseProgramObjectARB( g_programObj );
+	
+	glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
+	glUniform1iARB( g_location_fog, map_fog);
+	glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
+
+	BSP_DrawGLSLSurfaces();
+	BSP_DrawGLSLDynamicSurfaces();
+
+	glUseProgramObjectARB( 0 );
+
+	//render non GLSL surfaces
+	BSP_DrawStandardSurfaces();
 
 	if ( !(currententity->flags & RF_TRANSLUCENT) )
 	{
@@ -1136,8 +1267,8 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 		{
 			if ( !( surf->flags & SURF_DRAWTURB ) )
 			{
-				BSP_RenderLightmappedPoly( surf );
-
+				BSP_AddToTextureChain( surf );
+	
 				if(r_shaders->value) { //only add to the chain if there is actually a shader
 					rs_shader = (rscript_t *)surf->texinfo->image->script;
 					if(rs_shader || (surf->flags & SURF_UNDERWATER)) {
@@ -1275,8 +1406,24 @@ void R_DrawWorld (void)
 
 	BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
 
+	//render all GLSL surfaces
+	glUseProgramObjectARB( g_programObj );
+	
+	glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
+	glUniform1iARB( g_location_fog, map_fog);
+	glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
+
+	BSP_DrawGLSLSurfaces();
+	BSP_DrawGLSLDynamicSurfaces();
+
+	glUseProgramObjectARB( 0 );
+
+	//render non GLSL surfaces
+	BSP_DrawStandardSurfaces();
+
 	GL_EnableMultitexture( false );
 
+	//render fixed function normalmap self shadowing
 	BSP_DrawNormalSurfaces ();
 
 	R_InitSun();
