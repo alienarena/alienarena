@@ -890,3 +890,10 @@ maps/meshes/mpa2
 		normalmap
 	}
 }
+maps/meshes/tech/turbinefan
+{
+	{
+		map maps/meshes/tech/turbinefan_normal.jpg
+		normalmap
+	}
+}
