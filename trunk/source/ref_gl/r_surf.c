@@ -331,6 +331,75 @@ void BSP_RenderBrushPoly (msurface_t *fa)
 
 /*
 ================
+DrawTextureChains
+================
+*/
+void DrawTextureChains (void)
+{
+    int     i;
+    msurface_t  *s;
+    image_t     *image;
+
+    c_visible_textures = 0;
+
+    if ( !qglSelectTextureARB && !qglActiveTextureARB )
+    {
+        for ( i = 0, image=gltextures ; i<numgltextures ; i++,image++)
+        {
+            if (!image->registration_sequence)
+                continue;
+            s = image->texturechain;
+            if (!s)
+                continue;
+            c_visible_textures++;
+
+            for ( ; s ; s=s->texturechain)
+                BSP_RenderBrushPoly (s);
+
+            image->texturechain = NULL;
+        }
+    }
+    else
+    {
+        for ( i = 0, image=gltextures ; i<numgltextures ; i++,image++)
+        {
+            if (!image->registration_sequence)
+                continue;
+            if (!image->texturechain)
+                continue;
+            c_visible_textures++;
+
+            for ( s = image->texturechain; s ; s=s->texturechain)
+            {
+                if ( !( s->flags & SURF_DRAWTURB ) )
+                    BSP_RenderBrushPoly (s);
+            }
+        }
+
+        GL_EnableMultitexture( false );
+        for ( i = 0, image=gltextures ; i<numgltextures ; i++,image++)
+        {
+            if (!image->registration_sequence)
+                continue;
+            s = image->texturechain;
+            if (!s)
+                continue;
+
+            for ( ; s ; s=s->texturechain)
+            {
+                if ( s->flags & SURF_DRAWTURB )
+                    BSP_RenderBrushPoly (s);
+            }
+
+            image->texturechain = NULL;
+        }
+    }
+
+    GL_TexEnv( GL_REPLACE );
+}
+
+/*
+================
 R_DrawAlphaSurfaces
 
 Draw water surfaces and windows.
@@ -1428,6 +1497,8 @@ void R_DrawWorld (void)
 	}
 	
 	GL_EnableMultitexture( false );
+
+	DrawTextureChains ();
 
 	//render fixed function normalmap self shadowing
 	BSP_DrawNormalSurfaces ();
