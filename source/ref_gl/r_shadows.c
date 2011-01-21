@@ -981,7 +981,7 @@ void R_CastShadow(void)
 		VectorSubtract(r_origin, currententity->origin, dist);
 
 		//cull by distance if soft shadows(to do - test/tweak this)
-		if(VectorLength(dist) > 1024 && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
+		if(VectorLength(dist) > 1280 && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
 			continue;
 
 		if(VectorLength(dist) > 1000) {
@@ -1067,7 +1067,8 @@ float SHD_ShadowLight (vec3_t entPos, vec3_t angles, vec3_t lightAdd, int type)
 
 	if (!r_worldmodel)
 		return 0;
-	if (!r_worldmodel->lightdata) //keep old lame shadow
+
+	if (!r_worldmodel->lightdata)
 		return 0;
 
 	VectorCopy(entPos, pos);
@@ -1137,10 +1138,9 @@ float SHD_ShadowLight (vec3_t entPos, vec3_t angles, vec3_t lightAdd, int type)
 			intens = 0.3;
 	}
 
-	// Barnes improved code
 	shadowdist = VectorNormalize(lightAdd)/5.0;
 	if (shadowdist > 4) shadowdist = 4;
-	if (shadowdist <= 0) // old style static shadow
+	if (shadowdist <= 0) // static shadow
 	{
 		angle[PITCH] = angles[PITCH];
 		angle[YAW] = -angles[YAW];
@@ -1154,7 +1154,6 @@ float SHD_ShadowLight (vec3_t entPos, vec3_t angles, vec3_t lightAdd, int type)
 	}
 	AngleVectors (angle, dist, NULL, NULL);
 	VectorScale (dist, shadowdist, lightAdd);
-	// end Barnes improved code
 
 	return intens;
 }

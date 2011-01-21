@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static vec3_t	modelorg;		// relative to viewpoint
 
 vec3_t	r_worldLightVec;
+dlight_t *dynLight;
 
 msurface_t	*r_alpha_surfaces;
 msurface_t	*r_rscript_surfaces;
@@ -833,10 +834,10 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 	if(brightest > 0) 
 	{ 
 		//we have a light
-		dl = r_newrefdef.dlights;
-		dl += sv_lnum; //our most influential light
+		dynLight = r_newrefdef.dlights;
+		dynLight += sv_lnum; //our most influential light
 
-		lightCutoffSquared = ( dl->intensity - DLIGHT_CUTOFF );
+		lightCutoffSquared = ( dynLight->intensity - DLIGHT_CUTOFF );
 
 		if( lightCutoffSquared <= 0.0f )
 			lightCutoffSquared = 0.0f;
@@ -853,12 +854,14 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 		glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 
 		for (; s; s = s->glsldynamicchain)
-			BSP_RenderGLSLDynamicLightmappedPoly(s, foundLight, dl->origin, dl->color, lightCutoffSquared );
+			BSP_RenderGLSLDynamicLightmappedPoly(s, foundLight, dynLight->origin, dynLight->color, lightCutoffSquared );
 
 		glUseProgramObjectARB( 0 );
 	}
 	else
 	{
+		dynLight = NULL;
+
 		for (; s; s = s->glsldynamicchain)
 			BSP_RenderLightmappedPoly(s);
 	}

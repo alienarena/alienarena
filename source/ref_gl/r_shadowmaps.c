@@ -287,23 +287,22 @@ void SM_SetTextureMatrix( void )
 
 /*
 ================
-SM_RecursiveWorldNode
+SM_RecursiveWorldNode - this variant of the classic routine renders both sides for shadowing
 ================
 */
-static vec3_t modelorg;			// relative to viewpoint
 
 void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 {
-	int			c, side, sidebit;
-	cplane_t	*plane;
+	int			c;
 	msurface_t	*surf, **mark;
 	mleaf_t		*pleaf;
-	float		dot;
 
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid
+
 	if (node->visframe != r_visframecount)
 		return;
+
 	if (!r_nocull->value)
 	{
 		int i, clipped;
@@ -342,51 +341,16 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 		} while (--c);
 
 		return;
-	}
-
-	// node is just a decision point, so go down the apropriate sides
-
-	// find which side of the node we are on
-	plane = node->plane;
-
-	switch (plane->type)
-	{
-	case PLANE_X:
-		dot = modelorg[0] - plane->dist;
-		break;
-	case PLANE_Y:
-		dot = modelorg[1] - plane->dist;
-		break;
-	case PLANE_Z:
-		dot = modelorg[2] - plane->dist;
-		break;
-	default:
-		dot = DotProduct (modelorg, plane->normal) - plane->dist;
-		break;
-	}
-
-	if (dot >= 0)
-	{
-		side = 0;
-		sidebit = 0;
-	}
-	else
-	{
-		side = 1;
-		sidebit = SURF_PLANEBACK;
-	}
+	}	
 
 	// recurse down the children, front side first
-	SM_RecursiveWorldNode (node->children[side], clipflags);
+	SM_RecursiveWorldNode (node->children[0], clipflags);
 
 	// draw stuff
 	for ( c = node->numsurfaces, surf = r_worldmodel->surfaces + node->firstsurface; c ; c--, surf++)
 	{
 		if (surf->visframe != r_framecount)
 			continue;
-
-		if ( (surf->flags & SURF_PLANEBACK) != sidebit )
-			continue;		// wrong side
 
 		if (surf->texinfo->flags & SURF_SKY)
 		{	// no skies here
@@ -406,7 +370,7 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 	}
 
 	// recurse down the back side
-	SM_RecursiveWorldNode (node->children[!side], clipflags);
+	SM_RecursiveWorldNode (node->children[1], clipflags);
 }
 
 
@@ -424,10 +388,6 @@ void R_DrawShadowMapWorld (void)
 
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
 		return;
-
-	currentmodel = r_worldmodel;
-
-	VectorCopy (r_newrefdef.vieworg, modelorg);
 
 	SM_RecursiveWorldNode (r_worldmodel->nodes, 15);
 
@@ -453,34 +413,16 @@ void R_DrawShadowMapWorld (void)
 
 void R_DrawDynamicCaster(void)
 {
-	int			sv_lnum = 0, lnum, i;
-	vec3_t		lightVec, dist, mins, maxs;
-	dlight_t	*dl;
-	float		add, brightest = 0;
-	trace_t		r_trace;
-	int			RagDollID;
+	int		i;
+	vec3_t	dist, mins, maxs;
+	trace_t	r_trace;
+	int		RagDollID;
 
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs, 0, 0, 0);
-
-	//get avg of dynamic lights that are nearby enough to matter.
-	dl = r_newrefdef.dlights;
-	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
-	{
-		VectorSubtract (r_origin, dl->origin, lightVec);
-		add = dl->intensity - VectorLength(lightVec)/10;
-		if (add > brightest) //only bother with lights close by
-		{
-			brightest = add;
-			sv_lnum = lnum; //remember the position of most influencial light
-		}
-	}
-	if(brightest > 0) { //we have a light
-		dl = r_newrefdef.dlights;
-		dl += sv_lnum; //our most influential light
-	}
-	else
-		return;
+		
+	if(!dynLight)  
+		return; //we have no lights of consequence
 
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
 
@@ -502,7 +444,7 @@ void R_DrawDynamicCaster(void)
 	qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,GL_TEXTURE_2D, r_depthtexture->texnum, 0);
 
 	//set camera
-	SM_SetupMatrices(dl->origin[0],dl->origin[1],dl->origin[2]+64,dl->origin[0],dl->origin[1],dl->origin[2]-64);
+	SM_SetupMatrices(dynLight->origin[0],dynLight->origin[1],dynLight->origin[2]+64,dynLight->origin[0],dynLight->origin[1],dynLight->origin[2]-128);
 
 	qglEnable( GL_POLYGON_OFFSET_FILL );
     qglPolygonOffset( 0.5f, 0.5f );
@@ -533,12 +475,12 @@ void R_DrawDynamicCaster(void)
 		}
 
 		//distance from light, if too far, don't render(to do - check against brightness for dist!)
-		VectorSubtract(dl->origin, currententity->origin, dist);
+		VectorSubtract(dynLight->origin, currententity->origin, dist);
 		if(VectorLength(dist) > 256.0f)
 			continue;
 
 		//trace visibility from light - we don't render objects the light doesn't hit!
-		r_trace = CM_BoxTrace(dl->origin, currententity->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+		r_trace = CM_BoxTrace(dynLight->origin, currententity->origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			continue;
 
@@ -567,12 +509,12 @@ void R_DrawDynamicCaster(void)
 	        continue;
 		
 		//distance from light, if too far, don't render(to do - check against brightness for dist!)
-		VectorSubtract(dl->origin, RagDoll[RagDollID].curPos, dist);
+		VectorSubtract(dynLight->origin, RagDoll[RagDollID].curPos, dist);
 		if(VectorLength(dist) > 256.0f)
 			continue;
 
 		//trace visibility from light - we don't render objects the light doesn't hit!
-		r_trace = CM_BoxTrace(dl->origin, RagDoll[RagDollID].curPos, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
+		r_trace = CM_BoxTrace(dynLight->origin, RagDoll[RagDollID].curPos, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
 		if(r_trace.fraction != 1.0)
 			continue;
 
@@ -580,6 +522,8 @@ void R_DrawDynamicCaster(void)
 	}
 
 	SM_SetTextureMatrix();
+
+	dynLight = NULL; //done with dynamic light shadows for this frame
 
 	qglDepthMask (1);		// back to writing
 

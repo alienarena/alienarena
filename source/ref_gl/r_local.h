@@ -269,7 +269,8 @@ extern void R_ReadFogScript(char config_file[128]);
 extern void R_ReadMusicScript(char config_file[128]);
 
 //Lights
-extern  vec3_t lightspot;
+extern dlight_t *dynLight;
+extern vec3_t lightspot;
 extern void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 extern void  VLight_Init (void);
 extern float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );
