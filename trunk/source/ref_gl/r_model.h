@@ -213,6 +213,8 @@ typedef struct msurface_s
 	int			dlight_s, dlight_t; // gl lightmap coordinates for dynamic lightmaps
 
 	glpoly_t	*polys;				// multiple if warped
+
+	//texture chains for batching
 	struct	msurface_s	*texturechain;
 	struct	msurface_s	*glslchain;
 	struct  msurface_s	*glsldynamicchain;
