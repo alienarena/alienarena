@@ -547,6 +547,7 @@ BSP_RenderLightmappedPoly
 Main polygon rendering routine(all standard surfaces)
 ================
 */
+int r_currTex = -9999; //only bind a texture if it is not the same as previous surface
 static void BSP_RenderLightmappedPoly( msurface_t *surf )
 {
 	float	scroll;
@@ -567,8 +568,13 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 			scroll = -64.0;
 	}
 		
-	GL_MBind( GL_TEXTURE0, image->texnum );
-	GL_MBind( GL_TEXTURE1, gl_state.lightmap_textures + lmtex );		
+	if(image->texnum != r_currTex)
+	{
+		qglActiveTextureARB(GL_TEXTURE0);
+		qglBindTexture(GL_TEXTURE_2D, image->texnum );
+	}
+	qglActiveTextureARB(GL_TEXTURE1);
+	qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex );		
 
 	if(strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) 
 	{
@@ -627,20 +633,25 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 			scroll = -64.0;
 	}	
 
-	GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
-	glUniform1iARB( g_location_surfTexture, 0);
+	if(surf->texinfo->image->texnum != r_currTex) 
+	{
+		glUniform1iARB( g_location_surfTexture, 0);
+		qglActiveTextureARB(GL_TEXTURE0);
+		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->image->texnum);
+			
+		glUniform1iARB( g_location_heightTexture, 1);
+		qglActiveTextureARB(GL_TEXTURE1);
+		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->heightMap->texnum);
+		
+		glUniform1iARB( g_location_normalTexture, 2);
+		qglActiveTextureARB(GL_TEXTURE2);
+		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
+		KillFlags |= KILL_TMU2_POINTER;
+	}
 
-	GL_MBind( GL_TEXTURE1, surf->texinfo->heightMap->texnum);
-	glUniform1iARB( g_location_heightTexture, 1);
-
-	glUniform1iARB( g_location_lmTexture, 2);
-	qglActiveTextureARB(GL_TEXTURE2);
-	qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
-	KillFlags |= KILL_TMU2_POINTER;
-
-	glUniform1iARB( g_location_normalTexture, 3);
+	glUniform1iARB( g_location_lmTexture, 3);
 	qglActiveTextureARB(GL_TEXTURE3);
-	qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
+	qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
 	KillFlags |= KILL_TMU3_POINTER;
 
 	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
@@ -676,7 +687,7 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 		qglDisable( GL_ALPHA_TEST);
 }
 
-static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf, qboolean foundLight, vec3_t origin, vec3_t color, float lightCutoffSquared )
+static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 {
 	float	scroll;
 	unsigned lmtex = surf->lightmaptexturenum;
@@ -705,48 +716,27 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf, qboolean fou
 		r_normalsurfaces = surf;
 	}
 
-	GL_MBind( GL_TEXTURE0,  surf->texinfo->image->texnum);
-	glUniform1iARB( g_location_surfTexture, 0);
-	
-	GL_MBind( GL_TEXTURE1, surf->texinfo->heightMap->texnum);
-	glUniform1iARB( g_location_heightTexture, 1);
-
-	glUniform1iARB( g_location_lmTexture, 2);
-	qglActiveTextureARB(GL_TEXTURE2);
-	qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
-	KillFlags |= KILL_TMU2_POINTER;
-
-	glUniform1iARB( g_location_normalTexture, 3);
-	qglActiveTextureARB(GL_TEXTURE3);
-	qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
-	KillFlags |= KILL_TMU3_POINTER;
-
-	glUniform1iARB( g_location_shadowmap, 0); //static light shadow handled by stencil volumes
-
-	if(foundLight) 
+	if(surf->texinfo->image->texnum != r_currTex) 
 	{
-		glUniform3fARB( g_location_lightPosition, origin[0], origin[1], origin[2]);
-		glUniform3fARB( g_location_lightColour, color[0], color[1], color[2]);
-
-		glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
-
-		glUniform1iARB( g_location_dynamic, 1);
-
-		if(gl_shadowmaps->value) 
-		{
-			//dynamic shadow
-			glUniform1iARB( g_location_bspShadowmapTexture, 7);
-			qglActiveTextureARB(GL_TEXTURE7);
-			qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
-
-			glUniform1iARB( g_location_shadowmap, 1);
-		}
-		else
-			glUniform1iARB( g_location_shadowmap, 0);
+		glUniform1iARB( g_location_surfTexture, 0);
+		qglActiveTextureARB(GL_TEXTURE0);
+		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->image->texnum);
+			
+		glUniform1iARB( g_location_heightTexture, 1);
+		qglActiveTextureARB(GL_TEXTURE1);
+		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->heightMap->texnum);
+		
+		glUniform1iARB( g_location_normalTexture, 2);
+		qglActiveTextureARB(GL_TEXTURE2);
+		qglBindTexture(GL_TEXTURE_2D, surf->texinfo->normalMap->texnum);
+		KillFlags |= KILL_TMU2_POINTER;
 	}
-	else
-		glUniform1iARB( g_location_dynamic, 0);				
 
+	glUniform1iARB( g_location_lmTexture, 3);
+	qglActiveTextureARB(GL_TEXTURE3);
+	qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex);
+	KillFlags |= KILL_TMU3_POINTER;	
+	
 	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
 	
 	if(gl_state.vbo && surf->has_vbo) 
@@ -787,6 +777,8 @@ void BSP_DrawGLSLSurfaces (void)
 	if(!s)
 		return;
 
+	r_currTex = -99999;
+
 	glUseProgramObjectARB( g_programObj );
 	
 	glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
@@ -797,13 +789,16 @@ void BSP_DrawGLSLSurfaces (void)
 	glUniform1iARB( g_location_dynamic, 0);
 	glUniform1iARB( g_location_parallax, 1);
 	
-	for (; s; s = s->glslchain)
+	for (; s; s = s->glslchain) {
 		BSP_RenderGLSLLightmappedPoly(s);
+		r_currTex = s->texinfo->image->texnum;
+	}
 
 	glUseProgramObjectARB( 0 );
 
 	r_glsl_surfaces = NULL;
 }
+
 
 void BSP_DrawGLSLDynamicSurfaces (void)
 {
@@ -816,9 +811,7 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 	qboolean	foundLight = false;
 
 	if(!s)
-	{
 		return;
-	}
 
 	dl = r_newrefdef.dlights;
 	for (lnum=0; lnum<r_newrefdef.num_dlights; lnum++, dl++)
@@ -846,6 +839,8 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 		lightCutoffSquared *= lightCutoffSquared;
 
 		foundLight= true;
+
+		r_currTex = -99999;
 	
 		glUseProgramObjectARB( g_programObj );
 	
@@ -853,8 +848,30 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 		glUniform1iARB( g_location_fog, map_fog);
 		glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 
-		for (; s; s = s->glsldynamicchain)
-			BSP_RenderGLSLDynamicLightmappedPoly(s, foundLight, dynLight->origin, dynLight->color, lightCutoffSquared );
+		glUniform3fARB( g_location_lightPosition, dynLight->origin[0], dynLight->origin[1], dynLight->origin[2]);
+		glUniform3fARB( g_location_lightColour, dynLight->color[0], dynLight->color[1], dynLight->color[2]);
+
+		glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
+
+		glUniform1iARB( g_location_dynamic, 1);
+
+		if(gl_shadowmaps->value) 
+		{
+			//dynamic shadow
+			glUniform1iARB( g_location_bspShadowmapTexture, 7);
+			qglActiveTextureARB(GL_TEXTURE7);
+			qglBindTexture(GL_TEXTURE_2D, r_depthtexture->texnum);
+
+			glUniform1iARB( g_location_shadowmap, 1);
+		}
+		else
+			glUniform1iARB( g_location_shadowmap, 0);
+
+		for (; s; s = s->glsldynamicchain) 
+		{
+			BSP_RenderGLSLDynamicLightmappedPoly(s);
+			r_currTex = s->texinfo->image->texnum;
+		}
 
 		glUseProgramObjectARB( 0 );
 	}
@@ -862,8 +879,13 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 	{
 		dynLight = NULL;
 
+		r_currTex = -99999;
+
 		for (; s; s = s->glsldynamicchain)
+		{
 			BSP_RenderLightmappedPoly(s);
+			r_currTex = s->texinfo->image->texnum;
+		}
 	}
 
 	qglActiveTextureARB (GL_TEXTURE1);
@@ -1027,6 +1049,7 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	else 
 	{
 		BSP_RenderLightmappedPoly(surf);
+		r_currTex = surf->texinfo->image->texnum;
 	}
 }
 
@@ -1050,6 +1073,8 @@ void BSP_DrawInlineBModel ( void )
 		qglColor4f (1,1,1,0.25);
 		GL_TexEnv( GL_MODULATE );
 	}
+
+	r_currTex = -99999;
 		
 	psurf = &currentmodel->surfaces[currentmodel->firstmodelsurface];
 	for (i=0 ; i<currentmodel->nummodelsurfaces ; i++, psurf++)
@@ -1489,6 +1514,8 @@ void R_DrawWorld (void)
 		if ( r_overbrightbits->value )
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
 	}
+
+	r_currTex = -99999;
 
 	BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
 
