@@ -1255,7 +1255,7 @@ BSP_RecursiveWorldNode
 */
 void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 {
-	int			c, side, sidebit;
+	int			c, side;
 	cplane_t	*plane;
 	msurface_t	*surf, **mark;
 	mleaf_t		*pleaf;
@@ -1265,8 +1265,10 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 
 	if (node->contents == CONTENTS_SOLID)
 		return;		// solid
+
 	if (node->visframe != r_visframecount)
 		return;
+
 	if (!r_nocull->value)
 	{
 		int i, clipped;
@@ -1328,16 +1330,7 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 		break;
 	}
 
-	if (dot >= 0)
-	{
-		side = 0;
-		sidebit = 0;
-	}
-	else
-	{
-		side = 1;
-		sidebit = SURF_PLANEBACK;
-	}
+	side = !(dot >= 0);
 
 	// recurse down the children, front side first
 	BSP_RecursiveWorldNode (node->children[side], clipflags);
@@ -1348,8 +1341,11 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 		if (surf->visframe != r_framecount)
 			continue;
 
-		if ( (surf->flags & SURF_PLANEBACK) != sidebit )
+		if ( (surf->flags & SURF_PLANEBACK) != side )
 			continue;		// wrong side
+
+		if (R_CullBox (surf->mins, surf->maxs)) 
+			continue;
 
 		if (surf->texinfo->flags & SURF_SKY)
 		{	// just adds to visible sky bounds
@@ -1729,7 +1725,10 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa)
 	float		s, t;
 	glpoly_t	*poly;
 
-// reconstruct the polygon
+	vec3_t surfmaxs = {-99999999, -99999999, -99999999};
+	vec3_t surfmins = {99999999, 99999999, 99999999};
+
+	// reconstruct the polygon
 	lnumverts = fa->numedges;
 
 	//
@@ -1765,6 +1764,15 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa)
 		poly->verts[i][3] = s;
 		poly->verts[i][4] = t;
 
+		// set bbox for the surf used for culling
+		if (vec[0] > surfmaxs[0]) surfmaxs[0] = vec[0];
+		if (vec[1] > surfmaxs[1]) surfmaxs[1] = vec[1];
+		if (vec[2] > surfmaxs[2]) surfmaxs[2] = vec[2];
+
+		if (vec[0] < surfmins[0]) surfmins[0] = vec[0];
+		if (vec[1] < surfmins[1]) surfmins[1] = vec[1];
+		if (vec[2] < surfmins[2]) surfmins[2] = vec[2];
+
 		//
 		// lightmap texture coordinates
 		//
@@ -1793,6 +1801,10 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa)
 		poly->verts[i][7] = s;
 		poly->verts[i][8] = t;
 	}
+
+	// store out the completed bbox
+	VectorCopy (surfmins, fa->mins);
+	VectorCopy (surfmaxs, fa->maxs);
 }
 
 /*

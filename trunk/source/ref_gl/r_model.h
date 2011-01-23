@@ -238,6 +238,9 @@ typedef struct msurface_s
 
 	float	tangentSpaceTransform[3][3];
 
+	vec3_t mins;
+	vec3_t maxs;
+
 	//vbo
 	int vbo_pos;
 	int	xyz_size;
