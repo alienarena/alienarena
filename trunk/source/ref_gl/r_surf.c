@@ -706,7 +706,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 			scroll = -64.0;
 	}
 
-	if(gl_parallaxmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) 
+	if(strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) 
 		glUniform1iARB( g_location_parallax, 1);
 	else
 	{
@@ -1039,7 +1039,7 @@ void BSP_AddToTextureChain(msurface_t *surf)
 		surf->glsldynamicchain = r_glsl_dynamic_surfaces;
 		r_glsl_dynamic_surfaces = surf;
 	}
-	else if(gl_parallaxmaps->value && gl_normalmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)
+	else if(gl_normalmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)
 			&& strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)
 			&& gl_state.glsl_shaders && gl_glsl_shaders->value) 
 	{

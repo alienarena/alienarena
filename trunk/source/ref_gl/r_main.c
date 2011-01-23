@@ -46,7 +46,6 @@ glstate_t		gl_state;
 
 cvar_t	*gl_normalmaps;
 cvar_t  *gl_shadowmaps;
-cvar_t	*gl_parallaxmaps;
 cvar_t	*gl_glsl_postprocess;
 cvar_t	*gl_arb_fragment_program;
 cvar_t	*gl_glsl_shaders;
@@ -1215,7 +1214,6 @@ void R_Register( void )
 
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
-	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE);
 	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
 
 	r_shadowmapratio = Cvar_Get( "r_shadowmapratio", "2", CVAR_ARCHIVE );
@@ -1317,7 +1315,6 @@ void R_SetLowest(void)
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
-	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
@@ -1347,7 +1344,6 @@ void R_SetLow( void )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
-	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
 	Cvar_SetValue("r_shaders", 1);
@@ -1376,7 +1372,6 @@ void R_SetMedium( void )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
-	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
@@ -1405,7 +1400,6 @@ void R_SetHigh( void )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_shadowmaps", 0);
-	Cvar_SetValue("gl_parallaxmaps", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
@@ -1434,7 +1428,6 @@ void R_SetHighest( void )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_shadowmaps", 1);
-	Cvar_SetValue("gl_parallaxmaps", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
