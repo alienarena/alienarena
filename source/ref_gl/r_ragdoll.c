@@ -357,7 +357,7 @@ RagDollBind_t RagDollBinds[] =
 int RagDollBindsCount = (int)(sizeof(RagDollBinds)/sizeof(RagDollBinds[0]));
 
 //build and set initial position of ragdoll
-void R_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
+void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
 {
 
 	//Ragdoll  positions
@@ -689,7 +689,7 @@ void R_DrawMark (vec3_t origin, int type)
 }
 
 //For creating the surfaces for the ragdoll to collide with
-void ODE_BuildODEGeoms(msurface_t *surf)
+void RGD_BuildODEGeoms(msurface_t *surf)
 {
 	glpoly_t *p;
 	float	*v;
@@ -764,7 +764,7 @@ void RGD_BuildWorldTrimesh ( void )
         {
             if (!( surf->flags & SURF_DRAWTURB ) )
             {
-                ODE_BuildODEGeoms(surf);
+                RGD_BuildODEGeoms(surf);
             }
         }
     }
@@ -971,7 +971,7 @@ void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
 	{
 		if(RagDoll[RagDollID].destroyed)
 		{
-			R_RagdollBody_Init(RagDollID, origin, name);
+			RGD_RagdollBody_Init(RagDollID, origin, name);
 
 			if(r_ragdoll_debug->value == 2)
 			{
