@@ -133,12 +133,6 @@ typedef struct rs_stagekey_s
 	void (*func)(rs_stage_t *shader, char **token);
 } rs_stagekey_t;
 
-typedef struct
-{
-	qboolean enable;
-	int width;
-	int height;
-} rs_picsize_t;
 
 // Base script
 typedef struct rscript_s 
@@ -146,28 +140,12 @@ typedef struct rscript_s
 	char				name[MAX_OSPATH];	// name of script
 	unsigned int			hash_key;		// hash key for the script's name
 	
-	unsigned char			subdivide;	// Heffo - chop the surface up this much for vertex warping
-	float					warpdist;	// Heffo - vertex warping distance;
-	float					warpsmooth;	// Heffo - vertex warping smoothness;
-	float					warpspeed;	// Heffo - vertex warping speed;
-
-	qboolean				mirror;		// mirror
-	qboolean				model;		// model hack
-
-	rs_picsize_t			picsize;	//force pic size for hud etc
-
 	qboolean				dontflush;	// dont flush from memory on map change
 	qboolean				ready;		// readied by the engine?
 	rs_stage_t				*stage;		// first rendering stage
 	struct rscript_s		*next;		// next script in linked list
 
 } rscript_t;
-
-typedef struct rs_scriptkey_s
-{
-	char *script;
-	void (*func)(rscript_t *rs, char **token);
-} rs_scriptkey_t;
 
 void RS_SetEnvmap (vec3_t v, float *os, float *ot);
 void RS_LoadScript(char *script);
