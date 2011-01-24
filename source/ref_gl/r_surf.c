@@ -1344,8 +1344,11 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 		if ( (surf->flags & SURF_PLANEBACK) != side )
 			continue;		// wrong side
 
-		if (R_CullBox (surf->mins, surf->maxs)) 
-			continue;
+		if ( !( surf->flags & SURF_DRAWTURB ) )
+		{
+			if (R_CullBox (surf->mins, surf->maxs)) 
+				continue;
+		}
 
 		if (surf->texinfo->flags & SURF_SKY)
 		{	// just adds to visible sky bounds

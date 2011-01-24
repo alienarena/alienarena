@@ -400,20 +400,7 @@ image_t	*R_RegisterPlayerIcon (const char *name)
 Draw_GetPicSize
 =============
 */
-void ShaderResizePic( image_t *gl, int *w, int *h)
-{
-	rscript_t *rs = NULL;
-	char shortname[MAX_QPATH];
 
-	COM_StripExtension ( gl->name, shortname );
-	rs=RS_FindScript(shortname);
-
-	if (!rs)
-		return;
-	if (!rs->picsize.enable)
-		return;
-
-}
 void Draw_GetPicSize (int *w, int *h, char *pic)
 {
 	image_t *gl;
@@ -426,7 +413,6 @@ void Draw_GetPicSize (int *w, int *h, char *pic)
 	}
 	*w = gl->width;
 	*h = gl->height;
-	ShaderResizePic(gl, w, h);
 }
 
 #define DIV254BY255 (0.9960784313725490196078431372549f)

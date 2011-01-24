@@ -127,21 +127,10 @@ void RS_ResetScript (rscript_t *rs)
 
 		free (tmp_stage);
 	}
-
-	rs->picsize.enable = false;
-	rs->picsize.width = 0;
-	rs->picsize.height = 0;
-	rs->model = false;
-	rs->mirror = false;
+	
 	rs->stage = NULL;
-	rs->dontflush = false;
-	rs->subdivide = 0;
-	rs->warpdist = 0;
-	rs->warpsmooth = 0;
-	rs->warpspeed = 0;
+	rs->dontflush = false;	
 	rs->ready = false;
-
-
 }
 
 void RS_ClearStage (rs_stage_t *stage)
@@ -259,16 +248,8 @@ rscript_t *RS_NewScript (char *name)
 
 	rs->stage = NULL;
 	rs->next = NULL;
-	rs->dontflush = false;
-	rs->subdivide = 0;
-	rs->warpdist = 0.0f;
-	rs->warpsmooth = 0.0f;
-	rs->ready = false;
-	rs->mirror = false;
-	rs->model = false;
-	rs->picsize.enable = false;
-	rs->picsize.width = 0;
-	rs->picsize.height = 0;
+	rs->dontflush = false;	
+	rs->ready = false;	
 
 	return rs;
 }
@@ -876,83 +857,6 @@ static int num_stagekeys = sizeof (rs_stagekeys) / sizeof(rs_stagekeys[0]) - 1;
 
 // =====================================================
 
-void rs_script_safe (rscript_t *rs, char **token)
-{
-	rs->dontflush = true;
-}
-
-void rs_script_subdivide (rscript_t *rs, char **token)
-{
-	int divsize, p2divsize;
-
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	divsize = atoi (*token);
-
-	// cap max & min subdivide sizes
-	if (divsize > 128)
-		divsize = 128;
-	else if (divsize <= 8)
-		divsize = 8;
-
-	// find the next smallest valid ^2 size, if not already one
-	for (p2divsize = 2; p2divsize <= divsize ; p2divsize <<= 1 );
-
-	p2divsize >>= 1;
-
-	rs->subdivide = (char)p2divsize;
-}
-
-void rs_script_vertexwarp (rscript_t *rs, char **token)
-{
-	*token = strtok(NULL, TOK_DELIMINATORS);
-	rs->warpspeed = atof (*token);
-	*token = strtok(NULL, TOK_DELIMINATORS);
-	rs->warpdist = atof (*token);
-	*token = strtok(NULL, TOK_DELIMINATORS);
-	rs->warpsmooth = atof (*token);
-
-	if (rs->warpsmooth < 0.001f)
-		rs->warpsmooth = 0.001f;
-	else if (rs->warpsmooth > 1.0f)
-		rs->warpsmooth = 1.0f;
-}
-
-void rs_script_mirror (rscript_t *rs, char **token)
-{
-	rs->mirror = true;
-}
-
-void rs_script_model (rscript_t *rs, char **token)
-{
-	rs->model = true;
-}
-
-void rs_script_picsize (rscript_t *rs, char **token)
-{
-	rs->picsize.enable = true;
-
-	*token = strtok(NULL, TOK_DELIMINATORS);
-	rs->picsize.width = atof (*token);
-
-	*token = strtok(NULL, TOK_DELIMINATORS);
-	rs->picsize.height = atof (*token);
-}
-
-static rs_scriptkey_t rs_scriptkeys[] =
-{
-	{	"safe",			&rs_script_safe			},
-	{	"subdivide",	&rs_script_subdivide	},
-	{	"vertexwarp",	&rs_script_vertexwarp	},
-	{	"mirror",		&rs_script_mirror		},
-	{	"model",		&rs_script_model		},
-	{	"picsize",		&rs_script_picsize		},
-	{	NULL,			NULL					}
-};
-
-static int num_scriptkeys = sizeof (rs_scriptkeys) / sizeof(rs_scriptkeys[0]) - 1;
-
-// =====================================================
-
 void RS_LoadScript(char *script)
 {
 	qboolean		inscript = false, instage = false;
@@ -1034,17 +938,6 @@ void RS_LoadScript(char *script)
 						if (!Q_strcasecmp (rs_stagekeys[i].stage, token))
 						{
 							rs_stagekeys[i].func (stage, &token);
-							break;
-						}
-					}
-				}
-				else
-				{
-					for (i = 0; i < num_scriptkeys; i++)
-					{
-						if (!Q_strcasecmp (rs_scriptkeys[i].script, token))
-						{
-							rs_scriptkeys[i].func (rs, &token);
 							break;
 						}
 					}
@@ -1370,20 +1263,21 @@ void ToggleLightmap (qboolean toggle)
 //existing texture.
 void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 {
-	glpoly_t	*p;
+	glpoly_t	*p = surf->polys;
 	float		*v;
 	int			i, nv;
-	vec3_t		wv, vectors[3];
+	vec3_t		vectors[3];
 	rs_stage_t	*stage;
 	float		os, ot, alpha;
-	float		scale, time, txm=0.0f, tym=0.0f;
+	float		time, txm=0.0f, tym=0.0f;
+	int			VertexCounter;
 
 	if (!rs)
 		return;
 
 	nv = surf->polys->numverts;
 	stage = rs->stage;
-	time = rs_realtime * rs->warpspeed;
+	time = rs_realtime;
 
 	//for envmap by normals
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
@@ -1486,130 +1380,66 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		{
 			GLSTATE_DISABLE_ALPHATEST
 		}
+	
+		R_InitVArrays (VERT_SINGLE_TEXTURED);
 
-		if (rs->subdivide)
+		VArray = &VArrayVerts[0];
+		VertexCounter = 0;
+
+		for (i = 0, v = p->verts[0]; i < nv; i++, v += VERTEXSIZE)
 		{
-			glpoly_t *bp;
-			int i;
-
-			for (bp = surf->polys; bp; bp = bp->next)
+			if (stage->envmap)
 			{
-				p = bp;
+				RS_SetEnvmap (v, &os, &ot);
+				//move by normal & position
+				os-=DotProduct (surf->plane->normal, vectors[1] ) + (r_newrefdef.vieworg[0]-r_newrefdef.vieworg[1]+r_newrefdef.vieworg[2])*0.0025;
+				ot+=DotProduct (surf->plane->normal, vectors[2] ) + (-r_newrefdef.vieworg[0]+r_newrefdef.vieworg[1]-r_newrefdef.vieworg[2])*0.0025;
 
-				qglBegin(GL_TRIANGLE_FAN);
-				for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
-				{
-					if (stage->envmap)
-					{
-						RS_SetEnvmap (v, &os, &ot);
-						//move by normal & position
-						os-=DotProduct (surf->plane->normal, vectors[1] ) + (r_newrefdef.vieworg[0]-r_newrefdef.vieworg[1]+r_newrefdef.vieworg[2])*0.0025;
-						ot+=DotProduct (surf->plane->normal, vectors[2] ) + (-r_newrefdef.vieworg[0]+r_newrefdef.vieworg[1]-r_newrefdef.vieworg[2])*0.0025;
-
-						if (surf->texinfo->flags & SURF_FLOWING)
-							txm = tym = 0;
-					}
-					else 
-					{
-						os = v[3];
-						ot = v[4];
-					}
-
-					RS_SetTexcoords (stage, &os, &ot, surf);
-					{
-						float red=255, green=255, blue=255;
-
-						if (stage->colormap.enabled)
-						{
-							red *= stage->colormap.red/255.0f;
-							green *= stage->colormap.green/255.0f;
-							blue *= stage->colormap.blue/255.0f;
-						}
-
-						alpha = RS_AlphaFunc(stage->alphafunc, alpha, surf->plane->normal, v);
-						if (red>1)red=1; if (red<0) red = 0;
-						if (green>1)green=1; if (green<0) green = 0;
-						if (blue>1)blue=1; if (blue<0) blue = 0;
-
-						qglColor4f (red, green, blue, alpha);
-
-						qglTexCoord2f (os+txm, ot+tym);
-					}
-
-					if (!rs->warpsmooth)
-						qglVertex3fv (v);
-					else
-					{
-						scale = rs->warpdist * sin(v[0]*rs->warpsmooth+time)*sin(v[1]*rs->warpsmooth+time)*sin(v[2]*rs->warpsmooth+time);
-						VectorMA (v, scale, surf->plane->normal, wv);
-						qglVertex3fv (wv);
-					}
-				}
-				qglEnd();
+				if (surf->texinfo->flags & SURF_FLOWING)
+					txm = tym = 0;
+			}
+			else 
+			{
+				os = v[3];
+				ot = v[4];
 			}
 
-		}
-		else
-		{
-			for (p = surf->polys; p; p = p->chain)
+			RS_SetTexcoords (stage, &os, &ot, surf);
 			{
-				qglBegin (GL_TRIANGLE_FAN);
+				float red=255, green=255, blue=255;
 
-				for (i = 0, v = p->verts[0]; i < nv; i++, v += VERTEXSIZE)
+				if (stage->colormap.enabled)
 				{
-					if (stage->envmap)
-					{
-						RS_SetEnvmap (v, &os, &ot);
-						//move by normal & position
-						os-=DotProduct (surf->plane->normal, vectors[1] ) + (r_newrefdef.vieworg[0]-r_newrefdef.vieworg[1]+r_newrefdef.vieworg[2])*0.0025;
-						ot+=DotProduct (surf->plane->normal, vectors[2] ) + (-r_newrefdef.vieworg[0]+r_newrefdef.vieworg[1]-r_newrefdef.vieworg[2])*0.0025;
-
-						if (surf->texinfo->flags & SURF_FLOWING)
-							txm = tym = 0;
-					}
-					else 
-					{
-						os = v[3];
-						ot = v[4];
-					}
-
-					RS_SetTexcoords (stage, &os, &ot, surf);
-
-					{
-
-						float red=255, green=255, blue=255;
-
-						if (stage->colormap.enabled)
-						{
-							red *= stage->colormap.red/255.0f;
-							green *= stage->colormap.green/255.0f;
-							blue *= stage->colormap.blue/255.0f;
-						}
-
-						alpha = RS_AlphaFunc(stage->alphafunc, alpha, surf->plane->normal, v);
-						if (red>1)red=1; if (red<0) red = 0;
-						if (green>1)green=1; if (green<0) green = 0;
-						if (blue>1)blue=1; if (blue<0) blue = 0;
-
-						qglColor4f (red, green, blue, alpha);
-
-						qglTexCoord2f (os+txm, ot+tym);
-					}
-
-					if (!rs->warpsmooth)
-						qglVertex3fv (v);
-					else
-					{
-						scale = rs->warpdist * sin(v[0]*rs->warpsmooth+time)*sin(v[1]*rs->warpsmooth+time)*sin(v[2]*rs->warpsmooth+time);
-						VectorMA (v, scale, surf->plane->normal, wv);
-						qglVertex3fv (wv);
-					}
-
+					red *= stage->colormap.red/255.0f;
+					green *= stage->colormap.green/255.0f;
+					blue *= stage->colormap.blue/255.0f;
 				}
-				qglEnd ();
+
+				alpha = RS_AlphaFunc(stage->alphafunc, alpha, surf->plane->normal, v);
+				if (red>1)red=1; if (red<0) red = 0;
+				if (green>1)green=1; if (green<0) green = 0;
+				if (blue>1)blue=1; if (blue<0) blue = 0;
+
+				qglColor4f (red, green, blue, alpha);
 			}
+
+			// copy in vertex data
+			VArray[0] = v[0];
+			VArray[1] = v[1];
+			VArray[2] = v[2];
+
+			// world texture coords
+			VArray[3] = os+txm;
+			VArray[4] = ot+tym;
+
+			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+			VertexCounter++;		
 		}
 
+		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+
+		R_KillVArrays();
+			
 		qglColor4f(1,1,1,1);
 		if (stage->colormap.enabled)
 			qglEnable (GL_TEXTURE_2D);
@@ -1622,12 +1452,10 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglEnable (GL_BLEND);
 
-
 }
 
 rscript_t *rs_caustics;
 rscript_t *rs_glass;
-extern cvar_t *cl_gun;
 
 void RS_LoadSpecialScripts (void) //the special cases of glass and water caustics
 {
@@ -1644,16 +1472,14 @@ void RS_Surface (msurface_t *surf)
 	rscript_t *rs_shader;
 
 	//Underwater Caustics
-	//hack - can't seem to find fix for when there is no gun model
 	if(rs_caustics)
-		if (surf->flags & SURF_UNDERWATER && cl_gun->value && r_lefthand->value != 2.0F)
+		if (surf->flags & SURF_UNDERWATER )
 				RS_DrawSurfaceTexture(surf, rs_caustics);
 
-	//this was moved here to handle all textures shaders as well.
+	//all other textures shaders
 	rs_shader = (rscript_t *)surf->texinfo->image->script;
 	if(rs_shader)
 		RS_DrawSurfaceTexture(surf, rs_shader);
-
 }
 
 
