@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2011 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -157,14 +158,14 @@ void SubdividePolygon (int numverts, float *verts)
 
 /*
 ================
-GL_SubdivideSurface
+R_SubdivideSurface
 
 Breaks a polygon up along axial 64 unit
 boundaries so that turbulent and sky warps
 can be done reasonably.
 ================
 */
-void GL_SubdivideSurface (msurface_t *fa)
+void R_SubdivideSurface (msurface_t *fa)
 {
 	vec3_t		verts[64];
 	int			numverts;
@@ -229,7 +230,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 	else
 		scroll = 0.0f;
 
-	//special case - note one day we should find a way to check for contents such as mist to do this.
+	//special case - note one day we should find a way to check for contents such as mist to do this. We could maybe use CL_PMpointcontents, but it could be sluggish
 	if(!Q_strcasecmp(fa->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_strcasecmp(fa->texinfo->image->name, "textures/arena5/fod.wal"))
 		fod = true;
 	else
@@ -318,19 +319,13 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 				os = v[3];
 				ot = v[4];
 
-//	#if !id386
 				s = os + r_turbsin[(int)((ot*0.125+r_newrefdef.time) * TURBSCALE) & 255];
-//	#else
-//				s = os + r_turbsin[Q_ftol( ((ot*0.125+rdt) * TURBSCALE) ) & 255];
-//	#endif
+
 				s += scroll;
 				s *= (1.0/64);
 
-//	#if !id386
 				t = ot + r_turbsin[(int)((os*0.125+rdt) * TURBSCALE) & 255];
-//	#else
-//				t = ot + r_turbsin[Q_ftol( ((os*0.125+rdt) * TURBSCALE) ) & 255];
-//	#endif
+
 				t *= (1.0/64);
 
 				if (gl_state.fragment_program && !fod)
