@@ -503,3 +503,15 @@ maps/meshes/xempx/ceillight
 		nolightmap
 	}
 }
+maps/meshes/xempx/lightbomb
+{
+	{
+		map maps/meshes/xempx/lightbomb.jpg
+	}
+	{
+		map maps/meshes/xempx/lightbomb_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
