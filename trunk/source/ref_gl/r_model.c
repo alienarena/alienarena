@@ -972,7 +972,7 @@ void Mod_LoadFaces (lump_t *l)
 				out->texturemins[i] = -8192;
 			}
 			if(!(gl_state.glsl_shaders && gl_glsl_shaders->value) || fod)
-				GL_SubdivideSurface (out);	// cut up polygon for warps
+				R_SubdivideSurface (out);	// cut up polygon for warps
 		}
 
 		// create lightmaps and polygons

@@ -1,5 +1,4 @@
 /*
-Copyright (C) 1997-2001 Id Software, Inc.
 Copyright (C) 2010 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
@@ -19,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 
-// gl_script.c - scripted texture rendering - MrG
+// gl_script.c - scripted texture rendering
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

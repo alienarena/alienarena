@@ -1553,7 +1553,6 @@ void CL_AddClEntities()
 
 	memset(&ent, 0, sizeof(ent));
 
-
 	for (le = active_clentities; le; le = next) {
 		next = le->next;
 
