@@ -158,3 +158,23 @@ textures/blanks/blank2
 		beam
 	}
 }
+textures/blanks/blank3
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		xang -0.25
+	}
+}
+textures/blanks/blank4
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		yang 0.25
+	}
+}

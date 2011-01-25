@@ -897,3 +897,12 @@ maps/meshes/tech/turbinefan
 		normalmap
 	}
 }
+maps/meshes/xempx/lightbomb
+{
+	{
+		map maps/meshes/xempx/lightbomb_normal.jpg
+		normalmap
+		map2 maps/meshes/xempx/lightbomb_fx.tga
+		glow
+	}
+}
