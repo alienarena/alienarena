@@ -981,7 +981,7 @@ void R_CastShadow(void)
 		VectorSubtract(r_origin, currententity->origin, dist);
 
 		//cull by distance if soft shadows(to do - test/tweak this)
-		if(VectorLength(dist) > 1280 && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
+		if(VectorLength(dist) > 1024 && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
 			continue;
 
 		if(VectorLength(dist) > 1000) {
