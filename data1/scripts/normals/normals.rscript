@@ -897,6 +897,13 @@ maps/meshes/tech/turbinefan
 		normalmap
 	}
 }
+maps/meshes/tech/slimegen
+{
+	{
+		map maps/meshes/tech/slimegen_normal.jpg
+		normalmap
+	}
+}
 maps/meshes/xempx/lightbomb
 {
 	{
