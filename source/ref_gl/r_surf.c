@@ -707,7 +707,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 			scroll = -64.0;
 	}
 
-	if(strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) 
+	if(gl_normalmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) 
 		glUniform1iARB( g_location_parallax, 1);
 	else
 	{
@@ -800,7 +800,6 @@ void BSP_DrawGLSLSurfaces (void)
 	r_glsl_surfaces = NULL;
 }
 
-
 void BSP_DrawGLSLDynamicSurfaces (void)
 {
 	msurface_t	*s = r_glsl_dynamic_surfaces;
@@ -825,9 +824,17 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 			sv_lnum = lnum; //remember the position of most influencial light
 		}
 	}
+
+	glUseProgramObjectARB( g_programObj );
+	
+	glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
+	glUniform1iARB( g_location_fog, map_fog);
+	glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
+
 	if(brightest > 0) 
 	{ 
 		//we have a light
+		foundLight= true;
 		dynLight = r_newrefdef.dlights;
 		dynLight += sv_lnum; //our most influential light
 
@@ -837,25 +844,15 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 			lightCutoffSquared = 0.0f;
 
 		lightCutoffSquared *= 2.0f;
-		lightCutoffSquared *= lightCutoffSquared;
+		lightCutoffSquared *= lightCutoffSquared;		
 
-		foundLight= true;
-
-		r_currTex = -99999;
-	
-		glUseProgramObjectARB( g_programObj );
-	
-		glUniform3fARB( g_location_eyePos, r_origin[0], r_origin[1], r_origin[2] );
-		glUniform1iARB( g_location_fog, map_fog);
-		glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
+		r_currTex = -99999;		
 
 		glUniform3fARB( g_location_lightPosition, dynLight->origin[0], dynLight->origin[1], dynLight->origin[2]);
 		glUniform3fARB( g_location_lightColour, dynLight->color[0], dynLight->color[1], dynLight->color[2]);
 
 		glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
-
-		glUniform1iARB( g_location_dynamic, 1);
-
+		
 		if(gl_shadowmaps->value) 
 		{
 			//dynamic shadow
@@ -866,29 +863,19 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 			glUniform1iARB( g_location_shadowmap, 1);
 		}
 		else
-			glUniform1iARB( g_location_shadowmap, 0);
-
-		for (; s; s = s->glsldynamicchain) 
-		{
-			BSP_RenderGLSLDynamicLightmappedPoly(s);
-			r_currTex = s->texinfo->image->texnum;
-		}
-
-		glUseProgramObjectARB( 0 );
+			glUniform1iARB( g_location_shadowmap, 0);		
 	}
-	else
+
+	glUniform1iARB( g_location_dynamic, foundLight);
+	
+	for (; s; s = s->glsldynamicchain) 
 	{
-		dynLight = NULL;
-
-		r_currTex = -99999;
-
-		for (; s; s = s->glsldynamicchain)
-		{
-			BSP_RenderLightmappedPoly(s);
-			r_currTex = s->texinfo->image->texnum;
-		}
+		BSP_RenderGLSLDynamicLightmappedPoly(s);
+		r_currTex = s->texinfo->image->texnum;
 	}
 
+	glUseProgramObjectARB( 0 );
+	
 	qglActiveTextureARB (GL_TEXTURE1);
 	qglDisable (GL_TEXTURE_2D);	
 
