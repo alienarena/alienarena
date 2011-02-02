@@ -902,6 +902,8 @@ maps/meshes/tech/slimegen
 	{
 		map maps/meshes/tech/slimegen_normal.jpg
 		normalmap
+		map2 maps/meshes/tech/slimegen_fx.tga
+		glow
 	}
 }
 maps/meshes/xempx/lightbomb
