@@ -1236,6 +1236,56 @@ void SetVertexOverbrights (qboolean toggle)
 		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
 	}
 }
+
+void SetLightingMode (void)
+{
+	GL_SelectTexture( GL_TEXTURE0);
+
+	if ( !gl_config.mtexcombine ) 
+	{
+		GL_TexEnv( GL_REPLACE );
+		GL_SelectTexture( GL_TEXTURE1);
+
+		if ( gl_lightmap->value )
+			GL_TexEnv( GL_REPLACE );
+		else 
+			GL_TexEnv( GL_MODULATE );
+	}
+	else 
+	{
+		GL_TexEnv ( GL_COMBINE_EXT );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+
+		GL_SelectTexture( GL_TEXTURE1 );
+		GL_TexEnv ( GL_COMBINE_EXT );
+		if ( gl_lightmap->value ) 
+		{
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+		} 
+		else 
+		{
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
+
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT );
+		}
+
+		if ( r_overbrightbits->value )
+		{
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
+		}
+	}
+}
+
 qboolean lightmaptoggle;
 void ToggleLightmap (qboolean toggle)
 {
@@ -1247,7 +1297,7 @@ void ToggleLightmap (qboolean toggle)
 	{
 		SetVertexOverbrights(false);
 		GL_EnableMultitexture( true );
-		//SetLightingMode ();
+		SetLightingMode ();
 	}
 	else
 	{
@@ -1256,13 +1306,12 @@ void ToggleLightmap (qboolean toggle)
 	}
 }
 
-//to do - rewrite using vertex arrays
-
 //This is the shader drawing routine for bsp surfaces - it will draw on top of the
 //existing texture.
 void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 {
 	glpoly_t	*p = surf->polys;
+	unsigned	lmtex = surf->lightmaptexturenum;
 	float		*v;
 	int			i, nv;
 	vec3_t		vectors[3];
@@ -1281,24 +1330,38 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	//for envmap by normals
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 
-	SetVertexOverbrights(true);
-
+	//SetVertexOverbrights(true);
+	lightmaptoggle = true;
 	do
 	{
 
 		if (stage->lensflare || stage->grass || stage->beam)
 			break; //handled elsewhere
 
+		if(stage->lightmap)
+		{
+			ToggleLightmap(true);
+			qglShadeModel (GL_FLAT);
+
+			GL_MBind (GL_TEXTURE1, gl_state.lightmap_textures + lmtex);
+		}
+		else 
+		{
+			ToggleLightmap(false);
+			qglShadeModel (GL_SMOOTH);
+		}
+		
 		if (stage->colormap.enabled)
 			qglDisable (GL_TEXTURE_2D);
 		else if (stage->anim_count){
-			GL_Bind (RS_Animate(stage));
+			GL_MBind (GL_TEXTURE0, RS_Animate(stage));
 		}
 		else
 		{
-		 	GL_Bind (stage->texture->texnum);
+		 	GL_MBind (GL_TEXTURE0, stage->texture->texnum);
 		}
-
+			
+		
 		if (stage->blendfunc.blend)
 		{
 			GL_BlendFunction(stage->blendfunc.source, stage->blendfunc.dest);
@@ -1378,9 +1441,12 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		else
 		{
 			GLSTATE_DISABLE_ALPHATEST
-		}
+		}		
 	
-		R_InitVArrays (VERT_SINGLE_TEXTURED);
+		if(stage->lightmap)
+			R_InitVArrays (VERT_MULTI_TEXTURED);
+		else
+			R_InitVArrays (VERT_SINGLE_TEXTURED);
 
 		VArray = &VArrayVerts[0];
 		VertexCounter = 0;
@@ -1431,25 +1497,37 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			VArray[3] = os+txm;
 			VArray[4] = ot+tym;
 
-			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+			// lightmap texture coords
+			VArray[5] = v[5];
+			VArray[6] = v[6];
+
+			if(stage->lightmap)
+				VArray += VertexSizes[VERT_MULTI_TEXTURED];
+			else
+				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 			VertexCounter++;		
 		}
 
 		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 
-		R_KillVArrays();
+		R_KillVArrays();		
 			
 		qglColor4f(1,1,1,1);
 		if (stage->colormap.enabled)
 			qglEnable (GL_TEXTURE_2D);
 
-	} while ( (stage = stage->next) );
-
-	SetVertexOverbrights(false);
+	} while ( (stage = stage->next) );	
+	
+	ToggleLightmap(true);
 
 	// restore the original blend mode
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglEnable (GL_BLEND);
+
+	GLSTATE_DISABLE_BLEND
+	GLSTATE_DISABLE_ALPHATEST
+	GLSTATE_DISABLE_TEXGEN
+	qglShadeModel (GL_SMOOTH);
 
 }
 
