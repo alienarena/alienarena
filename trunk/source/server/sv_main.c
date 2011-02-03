@@ -210,43 +210,49 @@ char	*SV_StatusString (void)
 		}
 	}
 	//bot score info
-	cl = &svs.clients[0]; //get the bots info from the first client
-	if(cl->edict->client->ps.botnum) {
-		for(i = 0; i < cl->edict->client->ps.botnum; i++) {
+	for (i=0 ; i<maxclients->value ; i++)
+	{
+		cl = &svs.clients[i];
 
-			name = cl->edict->client->ps.bots[i].name;
+		if(cl->edict->client->ps.botnum) {
+			for(i = 0; i < cl->edict->client->ps.botnum; i++) {
+
+				name = cl->edict->client->ps.bots[i].name;
 #ifdef NOTUSED
-			//handle color chars
-			nametxt[0] = 0;
-			k = 0;
-			while(j = *name) {
-				if ( Q_IsColorString( name ) ) {
-					name +=2;
-					continue;
+				//handle color chars
+				nametxt[0] = 0;
+				k = 0;
+				while(j = *name) {
+					if ( Q_IsColorString( name ) ) {
+						name +=2;
+						continue;
+					}
+					nametxt[k] = j;
+					name++;
+					k++;
+					//failsafe - break at 32 chars
+					if(k>30)
+						break;
 				}
-				nametxt[k] = j;
-				name++;
-				k++;
-				//failsafe - break at 32 chars
-				if(k>30)
-					break;
-			}
-			nametxt[k]=0;
+				nametxt[k]=0;
 #else
-			//allow color chars to be sent
-			Q_strncpyz2( nametxt, name, sizeof(nametxt) );
+				//allow color chars to be sent
+				Q_strncpyz2( nametxt, name, sizeof(nametxt) );
 #endif
 
-			Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"127.0.0.1\"\n",
-				cl->edict->client->ps.bots[i].score, 0, nametxt);
-			playerLength = strlen(player);
-			if (statusLength + playerLength >= sizeof(status) )
-				break;		// can't hold any more
-			strcpy (status + statusLength, player);
-			statusLength += playerLength;
+				Com_sprintf (player, sizeof(player), "%i %i \"%s\" \"127.0.0.1\"\n",
+					cl->edict->client->ps.bots[i].score, 0, nametxt);
+				playerLength = strlen(player);
+				if (statusLength + playerLength >= sizeof(status) )
+					break;		// can't hold any more
+				strcpy (status + statusLength, player);
+				statusLength += playerLength;
+			}
+			break;
 		}
 	}
 	//end bot score info
+	
 	return status;
 }
 
@@ -373,10 +379,17 @@ void SVC_Info (void)
 		for (i=0 ; i<maxclients->value ; i++)
 			if (svs.clients[i].state >= cs_connected)
 				count++;
+
 		//bot score info
-		cl = &svs.clients[0];
-		if(cl->edict->client->ps.botnum > 0)
-			count += cl->edict->client->ps.botnum; //add the bots
+		for (i=0 ; i<maxclients->value ; i++)
+		{
+			cl = &svs.clients[i];
+			if(cl->edict->client->ps.botnum > 0)
+			{
+				count += cl->edict->client->ps.botnum; //add the bots
+				break;
+			}
+		}
 		//end bot score info
 
 		Com_sprintf (string, sizeof(string), "%16s %8s %2i/%2i\n", hostname->string, sv.name, count, maxclients->integer);
@@ -632,8 +645,16 @@ void SVC_DirectConnect (void)
 	}
 
 	// find a client slot
-	cl = &svs.clients[0]; //get the active bots info from the first client
-	botnum = cl->edict->client->ps.botnum;
+
+	//get number of bots
+	for (i=0 ; i<maxclients->value ; i++)
+	{
+		cl = &svs.clients[i]; 
+		botnum = cl->edict->client->ps.botnum;
+		if(botnum > 0)
+			break;
+	}
+
 	//still need to reserve one slot
 	newcl = NULL;
 
