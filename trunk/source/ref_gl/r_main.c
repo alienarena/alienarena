@@ -1725,7 +1725,7 @@ void R_Shutdown (void)
 
 	R_VCShutdown();
 
-	Mod_FreeAll ();
+	//Mod_FreeAll ();
 
 	FNT_Shutdown( );
 	GL_ShutdownImages ();
