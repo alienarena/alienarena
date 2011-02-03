@@ -1330,11 +1330,9 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	//for envmap by normals
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 
-	//SetVertexOverbrights(true);
 	lightmaptoggle = true;
 	do
 	{
-
 		if (stage->lensflare || stage->grass || stage->beam)
 			break; //handled elsewhere
 
@@ -1344,24 +1342,34 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			qglShadeModel (GL_FLAT);
 
 			GL_MBind (GL_TEXTURE1, gl_state.lightmap_textures + lmtex);
+
+			if (stage->colormap.enabled)
+			qglDisable (GL_TEXTURE_2D);
+			else if (stage->anim_count){
+				GL_MBind (GL_TEXTURE0, RS_Animate(stage));
+			}
+			else
+			{
+		 		GL_MBind (GL_TEXTURE0, stage->texture->texnum);
+			}			
 		}
 		else 
 		{
 			ToggleLightmap(false);
 			qglShadeModel (GL_SMOOTH);
+
+			if (stage->colormap.enabled)
+				qglDisable (GL_TEXTURE_2D);
+			else if (stage->anim_count)
+			{
+				GL_Bind (RS_Animate(stage));
+			}
+			else
+			{
+		 		GL_Bind (stage->texture->texnum);
+			}			
 		}
-		
-		if (stage->colormap.enabled)
-			qglDisable (GL_TEXTURE_2D);
-		else if (stage->anim_count){
-			GL_MBind (GL_TEXTURE0, RS_Animate(stage));
-		}
-		else
-		{
-		 	GL_MBind (GL_TEXTURE0, stage->texture->texnum);
-		}
-			
-		
+				
 		if (stage->blendfunc.blend)
 		{
 			GL_BlendFunction(stage->blendfunc.source, stage->blendfunc.dest);
@@ -1530,7 +1538,6 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_TEXGEN
 	qglShadeModel (GL_SMOOTH);
-
 }
 
 rscript_t *rs_caustics;
