@@ -424,5 +424,4 @@ void	*Hunk_Alloc (int size);
 int		Hunk_End (void);
 void	Hunk_Free (void *base);
 
-void	Mod_FreeAll (void);
 void	Mod_Free (model_t *mod);
