@@ -1520,6 +1520,8 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	
 	ToggleLightmap(true);
 
+	GL_EnableMultitexture( false );
+
 	// restore the original blend mode
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglEnable (GL_BLEND);
