@@ -927,17 +927,18 @@ void V_RenderView( float stereo_separation )
 
 }
 
-
-/*
-=============
-V_Viewpos_f
-=============
-*/
+/**
+ * \brief Console output of position and orientation
+ *
+ * Target of 'viewpos' command. Modified 2011-02. Added pitch.
+ * Helps with repeatable positioning for timerefresh command
+ * and other performance testing.
+ */
 void V_Viewpos_f (void)
 {
-	Com_Printf ("(%i %i %i) : %i\n", (int)cl.refdef.vieworg[0],
-		(int)cl.refdef.vieworg[1], (int)cl.refdef.vieworg[2],
-		(int)cl.refdef.viewangles[YAW]);
+	Com_Printf ("x:%#1.0f y:%#1.0f z:%#1.0f yaw:%#1.0f pitch:%#1.0f\n",
+		cl.refdef.vieworg[0], cl.refdef.vieworg[1], cl.refdef.vieworg[2],
+		cl.refdef.viewangles[YAW], cl.refdef.viewangles[PITCH] );
 }
 
 /*
