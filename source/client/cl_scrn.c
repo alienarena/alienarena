@@ -59,6 +59,7 @@ cvar_t		*scr_debuggraph;
 cvar_t		*scr_graphheight;
 cvar_t		*scr_graphscale;
 cvar_t		*scr_graphshift;
+cvar_t      *scr_timerefcount; // for timerefresh command
 
 cvar_t		*scr_consize;
 
@@ -446,6 +447,8 @@ void SCR_Init (void)
 	scr_graphheight = Cvar_Get ("graphheight", "32", 0);
 	scr_graphscale = Cvar_Get ("graphscale", "1", 0);
 	scr_graphshift = Cvar_Get ("graphshift", "0", 0);
+	// configurable number of frames for timerefresh command
+	scr_timerefcount = Cvar_Get("scr_timerefcount", "128", 0 );
 
 	cl_drawfps = Cvar_Get ("cl_drawfps", "0", CVAR_ARCHIVE);
 	cl_drawtimer = Cvar_Get("cl_drawtimer", "0", CVAR_ARCHIVE);
@@ -929,53 +932,85 @@ int entitycmpfnc( const entity_t *a, const entity_t *b )
 	}
 }
 
-
-/*
-================
-SCR_TimeRefresh_f
-================
-*/
-void SCR_TimeRefresh_f (void)
+/**
+ * \brief  Rendering performance test.
+ *
+ * Target of 'timerefresh' command. When invoked with an argument, end of
+ * frame flush and page flipping are not done. Modified 2011-02 with
+ * additional info in result. Use 'viewpos' (also modified) command
+ * for repeatable, consistent positioning.
+ */
+void SCR_TimeRefresh_f( void )
 {
-	int		i;
-	int		start, stop;
-	float	time;
+	int   start, stop;
+	float time;
+	float frames_per_sec;
+	float msec_per_frame;
+	float save_yaw;
+	int   frame_count;
+	float num_frames;
+	float yaw_increment;
+	float frame_yaw;
 
 	if ( cls.state != ca_active )
 		return;
 
-	start = Sys_Milliseconds ();
+	save_yaw = cl.refdef.viewangles[YAW];
 
-	if (Cmd_Argc() == 2)
-	{	// run without page flipping
+	num_frames = scr_timerefcount->value;
+	frame_count = scr_timerefcount->integer;
+	if ( frame_count < 1 || frame_count > 720 )
+	{ // silently protect against unreasonable setting
+		num_frames = 128.0f;
+		frame_count = 128;
+	}
+
+	frame_yaw = save_yaw; // start at original yaw
+	yaw_increment = 360.0f / num_frames;
+	start = Sys_Milliseconds();
+	if ( Cmd_Argc() == 2 )
+	{ // run without page flipping.
 		R_BeginFrame( 0 );
-		for (i=0 ; i<128 ; i++)
+		while ( --frame_count )
 		{
-			cl.refdef.viewangles[1] = i/128.0*360.0;
-			R_RenderFrame (&cl.refdef);
+			cl.refdef.viewangles[YAW] = frame_yaw;
+			R_RenderFrame( &cl.refdef );
+			frame_yaw += yaw_increment;
 		}
+		// last frame restores original yaw
+		cl.refdef.viewangles[YAW] = save_yaw;
+		R_RenderFrame( &cl.refdef );
 		R_EndFrame();
+
 	}
 	else
 	{
-		for (i=0 ; i<128 ; i++)
+		while ( --frame_count )
 		{
-			cl.refdef.viewangles[1] = i/128.0*360.0;
-
+			cl.refdef.viewangles[YAW] = frame_yaw;
 			R_BeginFrame( 0 );
-			R_RenderFrame (&cl.refdef);
+			R_RenderFrame( &cl.refdef );
 			R_EndFrame();
+			frame_yaw += yaw_increment;
 		}
+		// last frame restores original yaw
+		cl.refdef.viewangles[YAW] = save_yaw;
+		R_BeginFrame( 0 );
+		R_RenderFrame( &cl.refdef );
+		R_EndFrame();
 	}
+	stop = Sys_Milliseconds();
+	time = (float)(stop - start);
 
-	stop = Sys_Milliseconds ();
-	time = (stop-start)/1000.0;
-	Com_Printf ("%f seconds (%f fps)\n", time, 128/time);
+	msec_per_frame = time / num_frames;
+	time /= 1000.0f;
+	frames_per_sec = num_frames / time;
+	Com_Printf( "%1.0f frames, %1.3f sec, %1.3f msec/frame, %1.1f FPS\n",
+			num_frames, time, msec_per_frame, frames_per_sec );
+
 }
 
-
 //===============================================================
-
 
 #define STAT_MINUS		10	// num frame for '-' stats digit
 char		*sb_nums[2][11] =
@@ -1736,7 +1771,7 @@ void SCR_showFPS(void)
 	}
 
 	font = FNT_AutoGet( CL_gameFont );
-	
+
 	FNT_RawPrint( font , fps_text , strlen( fps_text ) , false ,
 		viddef.width - 8 * font->size , viddef.height - 2.0 * font->size , FNT_colors[ 2 ] );
 }
