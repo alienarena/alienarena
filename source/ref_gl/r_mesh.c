@@ -816,7 +816,7 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
 	VectorClear(lightAdd);
 	for (i=0; i<r_lightgroups; i++)
 	{
-		if(!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > currententity->origin[2]))
+		if(!RagDoll && (currententity->flags & RF_WEAPONMODEL) && (LightGroups[i].group_origin[2] > meshOrigin[2]))
 			r_trace.fraction = 1.0; //don't do traces for lights above weapon models, not smooth enough
 		else
 			r_trace = CM_BoxTrace(tempOrg, LightGroups[i].group_origin, mins, maxs, r_worldmodel->firstnode, MASK_OPAQUE);
