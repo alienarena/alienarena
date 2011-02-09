@@ -906,7 +906,7 @@ void R_CastShadow(void)
 {
 	int i, RagDollID;
 	vec3_t dist, tmp;
-	float rad;
+	float rad, thresh;
     trace_t r_trace;
 
 	//note - we use a combination of stencil volumes(for world light shadows) and shadowmaps(for dynamic shadows)
@@ -980,8 +980,13 @@ void R_CastShadow(void)
 		//get distance, set lod if available
 		VectorSubtract(r_origin, currententity->origin, dist);
 
-		//cull by distance if soft shadows(to do - test/tweak this)
-		if(VectorLength(dist) > 1024 && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
+		//keep some of the truly massive items from having bad disappearing shadow artifacts.
+		thresh = rad*5;
+		if(thresh < 1024)
+			thresh = 1024;
+
+		//cull by distance if soft shadows
+		if(VectorLength(dist) > thresh && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
 			continue;
 
 		if(VectorLength(dist) > 1000) {

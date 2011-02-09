@@ -144,7 +144,7 @@ textures/blanks/blank1
 {
 	{
 		map gfx/beam3.tga
-		scale static 20 static 40
+		scale static 20 static 20
 		colormap 1 1 1
 		beam
 	}
@@ -153,7 +153,7 @@ textures/blanks/blank2
 {
 	{
 		map gfx/beam3.tga
-		scale static 40 static 80
+		scale static 40 static 40
 		colormap 1 1 1
 		beam
 	}

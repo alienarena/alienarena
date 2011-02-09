@@ -243,7 +243,7 @@ typedef struct msurface_s
 	vec3_t maxs;
 
 	//vbo
-	int vbo_pos;
+	size_t vbo_pos;
 	int	xyz_size;
 	int st_size;
 	int lm_size;
