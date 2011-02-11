@@ -584,6 +584,7 @@ extern GLhandleARB	g_waterprogramObj;
 extern GLhandleARB	g_meshprogramObj;
 extern GLhandleARB	g_fbprogramObj;
 extern GLhandleARB	g_blurprogramObj;
+extern GLhandleARB	g_rblurprogramObj;
 
 extern GLhandleARB	g_vertexShader;
 extern GLhandleARB	g_fragmentShader;
@@ -634,14 +635,17 @@ extern GLuint		g_location_useGlow;
 extern GLuint		g_location_framebuffTex;
 extern GLuint		g_location_distortTex;
 extern GLuint		g_location_frametime;
-extern GLuint		g_location_fxType;
 extern GLuint		g_location_fxPos;
-extern GLuint		g_location_fxColor;
 extern GLuint		g_location_fbSampleSize;
 
-//blur
+//gaussian blur
 extern GLuint		g_location_scale;
 extern GLuint		g_location_source;
+
+//radial blur	
+extern GLuint		g_location_rscale;
+extern GLuint		g_location_rsource;
+extern GLuint		g_location_rparams;
 
 //MD2
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
