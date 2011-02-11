@@ -62,6 +62,7 @@ GLhandleARB g_waterprogramObj;
 GLhandleARB g_meshprogramObj;
 GLhandleARB g_fbprogramObj;
 GLhandleARB g_blurprogramObj;
+GLhandleARB g_rblurprogramObj;
 
 GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
@@ -111,14 +112,17 @@ GLuint		g_location_useGlow;
 GLuint		g_location_framebuffTex;
 GLuint		g_location_distortTex;
 GLuint		g_location_frametime;
-GLuint		g_location_fxType;
 GLuint		g_location_fxPos;
-GLuint		g_location_fxColor;
 GLuint		g_location_fbSampleSize;
 
-//blur
+//gaussian blur
 GLuint		g_location_scale;
 GLuint		g_location_source;
+
+//radial blur	
+GLuint		g_location_rscale;
+GLuint		g_location_rsource;
+GLuint		g_location_rparams;
 
 static char water_ARB_program[] =
 "!!ARBfp1.0\n"
@@ -734,8 +738,6 @@ static char fb_fragment_program[] =
 "uniform sampler2D distortiontexture;\n"
 "uniform float frametime;\n"
 "uniform vec2 fxPos;\n"
-"uniform int fxType;\n"
-"uniform vec3 fxColor;\n"
 "uniform int fbSampleSize;\n"
 
 "void main(void)\n"
@@ -780,9 +782,6 @@ static char fb_fragment_program[] =
 "		displacement.y = gl_TexCoord[0].t;\n"
 
 "	gl_FragColor = texture2D(fbtexture, displacement.xy);\n"
-
-"	if(fxType == 2)\n"
-"		gl_FragColor = mix(gl_FragColor, vec4(fxColor, 1.0), 0.3);\n"
 "}\n";
 
 //GAUSSIAN BLUR EFFECTS
@@ -813,6 +812,60 @@ static char blur_fragment_program[] =
 "   sum += texture2D(textureSource, vec2(gl_TexCoord[0].x + 4.0*ScaleU.x, gl_TexCoord[0].y + 4.0*ScaleU.y)) * 0.05;\n"
 
 "   gl_FragColor = sum;\n"
+"}\n";
+
+//RADIAL BLUR EFFECTS // xy = radial center screen space position, z = radius attenuation, w = blur strength
+static char rblur_vertex_program[] =
+"void main()\n"
+"{\n"
+"	gl_Position = ftransform();\n"
+"	gl_TexCoord[0] =  gl_MultiTexCoord0;\n"
+"}\n";
+
+static char rblur_fragment_program[] =
+"uniform sampler2D rtextureSource;\n"
+"uniform vec3 radialBlurParams;\n" 
+"uniform float rblurScale;\n"
+"uniform int fbSampleSize;\n"
+
+"void main(void)\n"
+"{\n"
+"  	 float samples[10] = float[](-0.08,-0.05,-0.03,-0.02,-0.01,0.01,0.02,0.03,0.05,0.08);\n"
+"	 float wScissor;\n"
+"	 float hScissor;\n"
+
+"    vec2 dir = vec2(radialBlurParams.x - gl_TexCoord[0].x, radialBlurParams.x - gl_TexCoord[0].x);\n" 
+"    float dist = sqrt(dir.x*dir.x + dir.y*dir.y);\n" 
+"  	 dir = dir/dist;\n" 
+"    vec4 color = texture2D(rtextureSource,gl_TexCoord[0].xy);\n" 
+"    vec4 sum = color;\n"
+
+"	 float strength = radialBlurParams.z;\n"
+"	 vec2 pDir = vec2(0.5 - gl_TexCoord[0].s, 0.25 - gl_TexCoord[0].t);\n" 
+"    float pDist = sqrt(pDir.x*pDir.x + pDir.y*pDir.y);\n"
+"	 clamp(pDist, 0.0, 1.0);\n"
+
+"    for (int i = 0; i < 10; i++)\n"
+"    {\n"
+"      sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * samples[i] * strength * pDist );\n"
+"    }\n"
+
+"    sum *= 1.0/11.0;\n"
+ 
+"    float t = dist * rblurScale;\n"
+"    t = clamp( t ,0.0,1.0);\n" 
+
+"    vec4 final = mix( color, sum, t );\n"
+
+"	//clamp edges to prevent artifacts\n"
+
+"	wScissor = 0.9;\n"
+"	hScissor = 0.5;\n"
+
+"	if(gl_TexCoord[0].s > 0.01 && gl_TexCoord[0].s < wScissor && gl_TexCoord[0].t > 0.01 && gl_TexCoord[0].t < hScissor)\n"
+"		gl_FragColor = final;\n"
+"	else\n"
+"		gl_FragColor = color;\n"
 "}\n";
 
 void R_LoadGLSLPrograms(void)
@@ -1116,12 +1169,10 @@ void R_LoadGLSLPrograms(void)
 		g_location_framebuffTex = glGetUniformLocationARB( g_fbprogramObj, "fbtexture" );
 		g_location_distortTex = glGetUniformLocationARB( g_fbprogramObj, "distorttexture");
 		g_location_frametime = glGetUniformLocationARB( g_fbprogramObj, "frametime" );
-		g_location_fxType = glGetUniformLocationARB( g_fbprogramObj, "fxType" );
 		g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" );
-		g_location_fxColor = glGetUniformLocationARB( g_fbprogramObj, "fxColor" );
 		g_location_fbSampleSize = glGetUniformLocationARB( g_fbprogramObj, "fbSampleSize" );
 
-		//blur
+		//gaussian blur
 
 		g_blurprogramObj = glCreateProgramObjectARB();
 
@@ -1174,6 +1225,61 @@ void R_LoadGLSLPrograms(void)
 
 		g_location_scale = glGetUniformLocationARB( g_blurprogramObj, "ScaleU" );
 		g_location_source = glGetUniformLocationARB( g_blurprogramObj, "textureSource");
+
+		//radial blur
+
+		g_rblurprogramObj = glCreateProgramObjectARB();
+
+		//
+		// Vertex shader
+		//
+
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)rblur_vertex_program;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_rblurprogramObj, g_vertexShader );
+		else
+		{
+			Com_Printf("...Radial Blur Vertex Shader Compile Error\n");
+		}
+
+		//
+		// Fragment shader
+		//
+
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)rblur_fragment_program;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_rblurprogramObj, g_fragmentShader );
+		else
+		{
+			Com_Printf("...Radial Fragment Blur Shader Compile Error\n");
+		}
+
+		glLinkProgramARB( g_rblurprogramObj );
+		glGetObjectParameterivARB( g_rblurprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+		if( !nResult )
+		{
+			glGetInfoLogARB( g_rblurprogramObj, sizeof(str), NULL, str );
+			Com_Printf("...Linking Error\n");
+		}
+
+		//
+		// Locate some parameters by name so we can set them later...
+		//
+
+		g_location_rscale = glGetUniformLocationARB( g_rblurprogramObj, "rblurScale" );
+		g_location_rsource = glGetUniformLocationARB( g_rblurprogramObj, "rtextureSource");
+		g_location_rparams = glGetUniformLocationARB( g_rblurprogramObj, "radialBlurParams");
 
 	}
 	else

@@ -1928,6 +1928,7 @@ void CL_InitLocal (void)
 	R_RegisterPic("hud_bomber");
 	R_RegisterPic("hud_strafer");
 	R_RegisterPic("hud_hover");
+	R_RegisterPic("blood_ring");
 }
 
 
