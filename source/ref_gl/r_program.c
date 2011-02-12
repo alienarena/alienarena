@@ -749,26 +749,23 @@ static char fb_fragment_program[] =
 
 "    displacement = gl_TexCoord[0].st;\n"
 
-"	displacement.x -= fxPos.x*0.002;\n"
-"	displacement.y -= fxPos.y*0.002;\n"
+"	displacement.x -= fxPos.x*0.1;\n"
+"	displacement.y -= fxPos.y*0.1;\n"
 
 "	noiseVec = normalize(texture2D(distortiontexture, displacement.xy)).xyz;\n"
 "	noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"
 
 "	//clamp edges to prevent artifacts\n"
 
-"	//different sample sizes need different clamps\n"
-"	if(fbSampleSize == 1) {\n"
+"	if(fbSampleSize == 2)\n"
+"	{\n"
 "		wScissor = 0.9;\n"
-"		hScissor = 0.6;\n"
-"	}\n"
-"	else if(fbSampleSize == 2) {\n"
-"		wScissor = 0.5;\n"
-"		hScissor = 0.6;\n"
-"	}\n"
-"	else if(fbSampleSize == 3) {\n"
-"		wScissor = 0.8;\n"
 "		hScissor = 0.5;\n"
+"	}\n"
+"	else\n"
+"	{\n"
+"		wScissor = 0.5;\n"
+"		hScissor = 0.9;\n"
 "	}\n"
 
 "	if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < wScissor)\n"
@@ -825,14 +822,15 @@ static char rblur_vertex_program[] =
 static char rblur_fragment_program[] =
 "uniform sampler2D rtextureSource;\n"
 "uniform vec3 radialBlurParams;\n" 
-"uniform float rblurScale;\n"
-"uniform int fbSampleSize;\n"
+"uniform vec2 rblurScale;\n"
 
 "void main(void)\n"
 "{\n"
 "  	 float samples[10] = float[](-0.08,-0.05,-0.03,-0.02,-0.01,0.01,0.02,0.03,0.05,0.08);\n"
 "	 float wScissor;\n"
 "	 float hScissor;\n"
+
+"	 gl_FragColor = vec4(0,0,0,0);\n"
 
 "    vec2 dir = vec2(radialBlurParams.x - gl_TexCoord[0].x, radialBlurParams.x - gl_TexCoord[0].x);\n" 
 "    float dist = sqrt(dir.x*dir.x + dir.y*dir.y);\n" 
@@ -852,15 +850,23 @@ static char rblur_fragment_program[] =
 
 "    sum *= 1.0/11.0;\n"
  
-"    float t = dist * rblurScale;\n"
+"    float t = dist * rblurScale.x;\n"
 "    t = clamp( t ,0.0,1.0);\n" 
 
 "    vec4 final = mix( color, sum, t );\n"
 
 "	//clamp edges to prevent artifacts\n"
 
-"	wScissor = 0.9;\n"
-"	hScissor = 0.5;\n"
+"	if(rblurScale.y == 2.0)\n"
+"	{\n"
+"		wScissor = 0.9;\n"
+"		hScissor = 0.5;\n"
+"	}\n"
+"	else\n"
+"	{\n"
+"		wScissor = 0.6;\n"
+"		hScissor = 0.9;\n"
+"	}\n"
 
 "	if(gl_TexCoord[0].s > 0.01 && gl_TexCoord[0].s < wScissor && gl_TexCoord[0].t > 0.01 && gl_TexCoord[0].t < hScissor)\n"
 "		gl_FragColor = final;\n"

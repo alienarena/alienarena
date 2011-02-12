@@ -49,7 +49,7 @@ void R_GLSLPostProcess(void)
 	vec2_t fxScreenPos;
 	int offsetX, offsetY;
 	vec3_t	vec;
-	float	dot;
+	float	dot, r_fbeffectLen;
 	vec3_t	forward, mins, maxs;
 	trace_t r_trace;
 
@@ -85,8 +85,13 @@ void R_GLSLPostProcess(void)
 
 	frames++;
 
-	if(r_fbFxType == PAIN)				
+	if(r_fbFxType == PAIN)		
+	{
+		r_fbeffectLen = 0.1;
 		R_DrawBloodEffect();
+	}
+	else
+		r_fbeffectLen = 0.2;
 
 	//set up full screen workspace
 	qglViewport( 0, 0, viddef.width, viddef.height );
@@ -114,7 +119,13 @@ void R_GLSLPostProcess(void)
 
 	offsetY = viddef.height - FB_texture_height;
 	offsetX = viddef.width - FB_texture_width;
-
+	//to do - I think we need to pass the offsets for the shader's scissoring
+	
+	if(FB_texture_width == FB_texture_height)
+		fbSampleSize = 2;
+	else
+		fbSampleSize = 1;
+		
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
@@ -158,21 +169,22 @@ void R_GLSLPostProcess(void)
 		//get position of focal point of warp
 		R_TransformVectorToScreen(&r_newrefdef, r_explosionOrigin, fxScreenPos);
 
-		//translate so that center of screen reads 0,0
-		fxScreenPos[0] -= (float)viddef.width/2.0;
-		fxScreenPos[1] -= (float)viddef.height/2.0;
+		fxScreenPos[0] /= viddef.width;
+		fxScreenPos[1] /= viddef.height;
 
-		//scale
-		fxScreenPos[0] *= 0.25;
-		fxScreenPos[1] *= 0.25;
+		if(fbSampleSize == 2)
+		{
+			fxScreenPos[0] -= 0.05;
+			fxScreenPos[1] -= 0.25;
+		}
+		else
+		{		
+			fxScreenPos[0] -= 0.25;
+			fxScreenPos[1] -= 0.05;
+		}
 
-		//offset according to framebuffer sample size
-		offsetX = (1024 - FB_texture_width)/512 * 32;
-		offsetY = (1024 - FB_texture_height)/512 * 48;
-		fxScreenPos[0] += offsetX;
-		fxScreenPos[1] += offsetY;
-		fxScreenPos[0] -= frames*5;
-		fxScreenPos[1] += frames*5;
+		fxScreenPos[0] -= (float)frames*.02;
+		fxScreenPos[1] -= (float)frames*.02;
 		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
 		
 		qglDrawArrays (GL_QUADS, 0, 4);
@@ -190,7 +202,7 @@ void R_GLSLPostProcess(void)
 
 		glUniform1iARB( g_location_rsource, 0);
 
-		glUniform1fARB( g_location_rscale, 1.0);
+		glUniform2fARB( g_location_rscale, 1.0, (float)fbSampleSize);
 
 		glUniform3fARB( g_location_rparams, viddef.width/2.0, viddef.height/2.0, 0.25);
 
@@ -201,7 +213,7 @@ void R_GLSLPostProcess(void)
 
 	R_KillVArrays();
 
-	if(rs_realtime > r_fbeffectTime+.1) 
+	if(rs_realtime > r_fbeffectTime+r_fbeffectLen) 
 	{
 		frames = 0;
 		r_drawing_fbeffect = false; //done effect
@@ -413,34 +425,12 @@ void R_FB_InitTextures( void )
 	r_colorbuffer = GL_LoadPic( "***r_colorbuffer***", (byte *)data, FB_texture_width, FB_texture_height, it_pic, 3 );
 	free ( data );
 
-	//init the distortion textures(to do - do we really need the different sizes?
-	if(FB_texture_height == FB_texture_width) 
-	{
-		if(FB_texture_height == 1024) 
-		{
-			r_distortwave = GL_FindImage("gfx/distortwave.jpg",it_pic);
-			if (!r_distortwave)
-				r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
+	//init the distortion textures - to do move this to r_misc?
+	r_distortwave = GL_FindImage("gfx/distortwave.jpg",it_pic);
+	if (!r_distortwave)
+		r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
 
-			fbSampleSize = 1; //1024x1024
-		}
-		else 
-		{
-			r_distortwave = GL_FindImage("gfx/wt_distortwave.jpg",it_pic);
-			if (!r_distortwave)
-				r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-
-			fbSampleSize = 3; //2048x2048
-		}
-	}
-	else 
-	{	
-		r_distortwave = GL_FindImage("gfx/w_distortwave.jpg",it_pic);
-		if (!r_distortwave)
-			r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-
-		fbSampleSize = 2;
-	}
+	fbSampleSize = 1; 
 }
 
 extern int vehicle_hud;
