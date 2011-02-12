@@ -52,6 +52,7 @@ void R_GLSLPostProcess(void)
 	float	dot, r_fbeffectLen;
 	vec3_t	forward, mins, maxs;
 	trace_t r_trace;
+	float hScissor, wScissor;
 
 	if(!gl_glsl_postprocess->value)
 		return;
@@ -119,12 +120,14 @@ void R_GLSLPostProcess(void)
 
 	offsetY = viddef.height - FB_texture_height;
 	offsetX = viddef.width - FB_texture_width;
-	//to do - I think we need to pass the offsets for the shader's scissoring
-	
+		
 	if(FB_texture_width == FB_texture_height)
 		fbSampleSize = 2;
 	else
 		fbSampleSize = 1;
+
+	hScissor = (float)viddef.height/(float)FB_texture_height;
+	wScissor = (float)viddef.width/(float)FB_texture_width;
 		
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
@@ -202,7 +205,7 @@ void R_GLSLPostProcess(void)
 
 		glUniform1iARB( g_location_rsource, 0);
 
-		glUniform2fARB( g_location_rscale, 1.0, (float)fbSampleSize);
+		glUniform3fARB( g_location_rscale, 1.0, wScissor, hScissor);
 
 		glUniform3fARB( g_location_rparams, viddef.width/2.0, viddef.height/2.0, 0.25);
 

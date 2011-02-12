@@ -822,11 +822,11 @@ static char rblur_vertex_program[] =
 static char rblur_fragment_program[] =
 "uniform sampler2D rtextureSource;\n"
 "uniform vec3 radialBlurParams;\n" 
-"uniform vec2 rblurScale;\n"
+"uniform vec3 rblurScale;\n"
 
 "void main(void)\n"
 "{\n"
-"  	 float samples[10] = float[](-0.08,-0.05,-0.03,-0.02,-0.01,0.01,0.02,0.03,0.05,0.08);\n"
+"  	 float samples[10] = float[](-0.06,-0.05,-0.03,-0.02,-0.01,0.01,0.02,0.03,0.05,0.06);\n"
 "	 float wScissor;\n"
 "	 float hScissor;\n"
 
@@ -839,7 +839,7 @@ static char rblur_fragment_program[] =
 "    vec4 sum = color;\n"
 
 "	 float strength = radialBlurParams.z;\n"
-"	 vec2 pDir = vec2(0.5 - gl_TexCoord[0].s, 0.25 - gl_TexCoord[0].t);\n" 
+"	 vec2 pDir = vec2(rblurScale.y * 0.5 - gl_TexCoord[0].s, rblurScale.z * 0.5 - gl_TexCoord[0].t);\n" 
 "    float pDist = sqrt(pDir.x*pDir.x + pDir.y*pDir.y);\n"
 "	 clamp(pDist, 0.0, 1.0);\n"
 
@@ -857,18 +857,10 @@ static char rblur_fragment_program[] =
 
 "	//clamp edges to prevent artifacts\n"
 
-"	if(rblurScale.y == 2.0)\n"
-"	{\n"
-"		wScissor = 0.9;\n"
-"		hScissor = 0.5;\n"
-"	}\n"
-"	else\n"
-"	{\n"
-"		wScissor = 0.6;\n"
-"		hScissor = 0.9;\n"
-"	}\n"
+"	wScissor = rblurScale.y - 0.008;\n"
+"	hScissor = rblurScale.z - 0.008;\n"
 
-"	if(gl_TexCoord[0].s > 0.01 && gl_TexCoord[0].s < wScissor && gl_TexCoord[0].t > 0.01 && gl_TexCoord[0].t < hScissor)\n"
+"	if(gl_TexCoord[0].s > 0.008 && gl_TexCoord[0].s < wScissor && gl_TexCoord[0].t > 0.008 && gl_TexCoord[0].t < hScissor)\n"
 "		gl_FragColor = final;\n"
 "	else\n"
 "		gl_FragColor = color;\n"
