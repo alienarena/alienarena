@@ -111,9 +111,8 @@ GLuint		g_location_useGlow;
 //fullscreen distortion effects
 GLuint		g_location_framebuffTex;
 GLuint		g_location_distortTex;
-GLuint		g_location_frametime;
+GLuint		g_location_dParams;
 GLuint		g_location_fxPos;
-GLuint		g_location_fbSampleSize;
 
 //gaussian blur
 GLuint		g_location_scale;
@@ -736,9 +735,8 @@ static char fb_vertex_program[] =
 static char fb_fragment_program[] =
 "uniform sampler2D fbtexture;\n"
 "uniform sampler2D distortiontexture;\n"
-"uniform float frametime;\n"
+"uniform vec2 dParams;\n"
 "uniform vec2 fxPos;\n"
-"uniform int fbSampleSize;\n"
 
 "void main(void)\n"
 "{\n"
@@ -757,16 +755,8 @@ static char fb_fragment_program[] =
 
 "	//clamp edges to prevent artifacts\n"
 
-"	if(fbSampleSize == 2)\n"
-"	{\n"
-"		wScissor = 0.9;\n"
-"		hScissor = 0.5;\n"
-"	}\n"
-"	else\n"
-"	{\n"
-"		wScissor = 0.5;\n"
-"		hScissor = 0.9;\n"
-"	}\n"
+"	wScissor = dParams.x - 0.008;\n"
+"	hScissor = dParams.y - 0.008;\n"
 
 "	if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < wScissor)\n"
 "		displacement.x = gl_TexCoord[0].s + noiseVec.x;\n"
@@ -1166,9 +1156,8 @@ void R_LoadGLSLPrograms(void)
 
 		g_location_framebuffTex = glGetUniformLocationARB( g_fbprogramObj, "fbtexture" );
 		g_location_distortTex = glGetUniformLocationARB( g_fbprogramObj, "distorttexture");
-		g_location_frametime = glGetUniformLocationARB( g_fbprogramObj, "frametime" );
+		g_location_dParams = glGetUniformLocationARB( g_fbprogramObj, "dParams" );
 		g_location_fxPos = glGetUniformLocationARB( g_fbprogramObj, "fxPos" );
-		g_location_fbSampleSize = glGetUniformLocationARB( g_fbprogramObj, "fbSampleSize" );
 
 		//gaussian blur
 
