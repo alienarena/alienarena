@@ -54,11 +54,7 @@ void R_GLSLPostProcess(void)
 	trace_t r_trace;
 	float hScissor, wScissor;
 
-	if(!gl_glsl_postprocess->value)
-		return;
-
-	//don't allow on low resolutions, too much tearing at edges( to do - we should be able to fix all of this now )
-	if(!gl_glsl_shaders->value || vid.width < 1024 || vid.width > 2048 || !gl_state.glsl_shaders)
+	if(!gl_glsl_postprocess->value || !gl_glsl_shaders->value || vid.width > 2048 || !gl_state.glsl_shaders)
 		return;
 
 	if(r_fbFxType == EXPLOSION) 
@@ -164,8 +160,7 @@ void R_GLSLPostProcess(void)
 
 		qglActiveTextureARB(GL_TEXTURE0);
 
-		glUniform1fARB( g_location_frametime, rs_realtime);
-		glUniform1iARB( g_location_fbSampleSize, fbSampleSize);
+		glUniform2fARB( g_location_dParams, wScissor, hScissor);
 
 		fxScreenPos[0] = fxScreenPos[1] = 0;
 
@@ -178,11 +173,11 @@ void R_GLSLPostProcess(void)
 		if(fbSampleSize == 2)
 		{
 			fxScreenPos[0] -= 0.05;
-			fxScreenPos[1] -= 0.25;
+			fxScreenPos[1] -= 0.5;
 		}
 		else
 		{		
-			fxScreenPos[0] -= 0.25;
+			fxScreenPos[0] -= 0.5;
 			fxScreenPos[1] -= 0.05;
 		}
 

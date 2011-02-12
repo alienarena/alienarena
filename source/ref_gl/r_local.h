@@ -634,9 +634,8 @@ extern GLuint		g_location_useGlow;
 //fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;
 extern GLuint		g_location_distortTex;
-extern GLuint		g_location_frametime;
+extern GLuint		g_location_dParams;
 extern GLuint		g_location_fxPos;
-extern GLuint		g_location_fbSampleSize;
 
 //gaussian blur
 extern GLuint		g_location_scale;
