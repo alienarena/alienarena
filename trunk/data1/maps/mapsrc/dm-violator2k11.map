@@ -1,10 +1,10 @@
 {
-"message" "The Violator"
-"classname" "worldspawn"
-"_sun_color" "0.4 0.3 0.3"
-"_sun_light" "25"
-"_sun_ambient" "0"
 "_sun" "sunspot"
+"_sun_ambient" "0"
+"_sun_light" "25"
+"_sun_color" "0.4 0.3 0.3"
+"classname" "worldspawn"
+"message" "The Violator"
 // brush 0
 {
 ( 240 -48 272 ) ( 240 -112 272 ) ( 240 -112 264 ) evil/stepside_mtl 39 24 270 1 1 134217728 0 0
@@ -1114,7 +1114,7 @@
 // brush 124
 {
 ( -288 608 192 ) ( -976 608 192 ) ( -976 648 192 ) arena9/greenwall4 -96 -32 0 0.500000 0.500000 0 0 0
-( -1024 648 144 ) ( -336 648 144 ) ( -336 680 192 ) arena9/metalwall2 72 10 0 1 0.750000 0 0 0
+( -1024 648 144 ) ( -336 648 144 ) ( -336 680 192 ) arena9/metalwall2 76 2 0 1 0.750000 0 0 0
 ( -976 648 128 ) ( -976 648 144 ) ( -976 608 144 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -496 672 88 ) ( -528 672 88 ) ( -528 672 64 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -528 648 64 ) ( -496 648 64 ) ( -496 648 40 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
@@ -1165,7 +1165,7 @@
 // brush 130
 {
 ( -288 608 192 ) ( -976 608 192 ) ( -976 648 192 ) arena9/greenwall4 -96 -32 0 0.500000 0.500000 0 0 0
-( -1024 648 144 ) ( -336 648 144 ) ( -336 680 192 ) arena9/metalwall2 72 10 0 1 0.750000 0 0 0
+( -1024 648 144 ) ( -336 648 144 ) ( -336 680 192 ) arena9/metalwall2 76 2 0 1 0.750000 0 0 0
 ( -496 672 88 ) ( -528 672 88 ) ( -528 672 64 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -528 648 64 ) ( -496 648 64 ) ( -496 648 40 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -528 664 64 ) ( -528 672 64 ) ( -528 664 40 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
@@ -1183,7 +1183,7 @@
 // brush 132
 {
 ( -288 608 192 ) ( -976 608 192 ) ( -976 648 192 ) arena9/greenwall4 -96 -32 0 0.500000 0.500000 0 0 0
-( -1024 648 144 ) ( -336 648 144 ) ( -336 680 192 ) arena9/metalwall2 72 10 0 1 0.750000 0 0 0
+( -1024 648 144 ) ( -336 648 144 ) ( -336 680 192 ) arena9/metalwall2 76 2 0 1 0.750000 0 0 0
 ( -976 648 128 ) ( -976 648 144 ) ( -976 608 144 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -528 672 88 ) ( -496 672 88 ) ( -528 672 64 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -880 608 96 ) ( -880 768 96 ) ( -880 608 64 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
@@ -1191,7 +1191,7 @@
 // brush 133
 {
 ( -288 608 192 ) ( -976 608 192 ) ( -976 648 192 ) arena9/greenwall4 -96 -32 0 0.500000 0.500000 0 0 0
-( -1024 648 144 ) ( -336 648 144 ) ( -336 680 192 ) arena9/metalwall2 72 10 0 1 0.750000 0 0 0
+( -1024 648 144 ) ( -336 648 144 ) ( -336 680 192 ) arena9/metalwall2 76 2 0 1 0.750000 0 0 0
 ( -528 672 88 ) ( -496 672 88 ) ( -528 672 64 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -528 672 160 ) ( -528 712 160 ) ( -528 672 128 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -720 768 96 ) ( -720 608 96 ) ( -720 768 64 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
@@ -4171,7 +4171,7 @@
 {
 ( -1240 -152 400 ) ( -1240 -192 400 ) ( -552 -192 400 ) arena9/greenwall4 -96 -96 0 0.500000 0.500000 0 0 0
 ( -544 -192 448 ) ( -1232 -192 448 ) ( -1232 -152 448 ) arena9/greenwall4 -96 -96 0 0.500000 0.500000 0 0 0
-( -1280 -152 400 ) ( -592 -152 400 ) ( -592 -120 448 ) arena9/metalwall2 -184 95 0 1 0.750000 0 0 0
+( -1280 -152 400 ) ( -592 -152 400 ) ( -592 -120 448 ) arena9/metalwall2 -188 22 0 1 0.750000 0 0 0
 ( -584 -192 384 ) ( -584 -192 400 ) ( -584 -152 400 ) arena9/greenwall4 96 16 0 0.500000 0.500000 0 0 0
 ( -1232 -192 384 ) ( -1232 -192 400 ) ( -544 -192 400 ) evil/e8_mtlwall1 0 40 0 1 1 0 0 0
 ( -1216 224 472 ) ( -1216 -224 472 ) ( -1216 224 -64 ) arena9/greenwall4 96 16 0 0.500000 0.500000 0 0 0
@@ -4180,7 +4180,7 @@
 {
 ( -552 192 400 ) ( -1240 192 400 ) ( -1240 152 400 ) arena9/greenwall4 -96 0 0 0.500000 0.500000 0 0 0
 ( -1232 152 448 ) ( -1232 192 448 ) ( -544 192 448 ) arena9/greenwall4 -96 0 0 0.500000 0.500000 0 0 0
-( -592 120 448 ) ( -592 152 400 ) ( -1280 152 400 ) arena9/metalwall2 -184 95 0 1 0.750000 0 0 0
+( -592 120 448 ) ( -592 152 400 ) ( -1280 152 400 ) arena9/metalwall2 -188 22 0 1 0.750000 0 0 0
 ( -584 152 400 ) ( -584 192 400 ) ( -584 192 384 ) arena9/greenwall4 0 16 0 0.500000 0.500000 0 0 0
 ( -544 192 400 ) ( -1232 192 400 ) ( -1232 192 384 ) arena9/greenwall4 -96 16 0 0.500000 0.500000 0 0 0
 ( -1216 224 472 ) ( -1216 -224 472 ) ( -1216 224 -64 ) arena9/greenwall4 0 16 0 0.500000 0.500000 0 0 0
@@ -4333,7 +4333,7 @@
 {
 ( -552 192 144 ) ( -1240 192 144 ) ( -1240 152 144 ) arena9/greenwall4 -96 0 0 0.500000 0.500000 0 0 0
 ( -1232 152 192 ) ( -1232 192 192 ) ( -544 192 192 ) arena9/greenwall4 -96 0 0 0.500000 0.500000 0 0 0
-( -592 120 192 ) ( -592 152 144 ) ( -1280 152 144 ) arena9/metalwall2 -184 10 0 1 0.750000 0 0 0
+( -592 120 192 ) ( -592 152 144 ) ( -1280 152 144 ) arena9/metalwall2 -188 2 0 1 0.750000 0 0 0
 ( -584 152 144 ) ( -584 192 144 ) ( -584 192 128 ) arena9/greenwall4 0 16 0 0.500000 0.500000 0 0 0
 ( -544 192 144 ) ( -1232 192 144 ) ( -1232 192 128 ) arena9/greenwall4 -96 16 0 0.500000 0.500000 0 0 0
 ( -1216 224 472 ) ( -1216 -224 472 ) ( -1216 224 -64 ) arena9/greenwall4 0 16 0 0.500000 0.500000 0 0 0
@@ -4342,7 +4342,7 @@
 {
 ( -1240 -152 144 ) ( -1240 -192 144 ) ( -552 -192 144 ) arena9/greenwall4 -96 -96 0 0.500000 0.500000 0 0 0
 ( -544 -192 192 ) ( -1232 -192 192 ) ( -1232 -152 192 ) arena9/greenwall4 -96 -96 0 0.500000 0.500000 0 0 0
-( -1280 -152 144 ) ( -592 -152 144 ) ( -592 -120 192 ) arena9/metalwall2 -184 10 0 1 0.750000 0 0 0
+( -1280 -152 144 ) ( -592 -152 144 ) ( -592 -120 192 ) arena9/metalwall2 -188 2 0 1 0.750000 0 0 0
 ( -584 -192 128 ) ( -584 -192 144 ) ( -584 -152 144 ) arena9/greenwall4 96 16 0 0.500000 0.500000 0 0 0
 ( -1232 -192 128 ) ( -1232 -192 144 ) ( -544 -192 144 ) evil/e8_mtlwall1 0 40 0 1 1 0 0 0
 ( -1216 224 472 ) ( -1216 -224 472 ) ( -1216 224 -64 ) arena9/greenwall4 96 16 0 0.500000 0.500000 0 0 0
@@ -5444,7 +5444,7 @@
 // brush 604
 {
 ( -288 608 448 ) ( -976 608 448 ) ( -976 648 448 ) arena9/greenwall4 -96 -32 0 0.500000 0.500000 0 0 0
-( -1024 648 400 ) ( -336 648 400 ) ( -336 680 448 ) arena9/metalwall2 72 95 0 1 0.750000 0 0 0
+( -1024 648 400 ) ( -336 648 400 ) ( -336 680 448 ) arena9/metalwall2 76 86 0 1 0.750000 0 0 0
 ( -976 648 384 ) ( -976 648 400 ) ( -976 608 400 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -528 672 344 ) ( -496 672 344 ) ( -528 672 320 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -528 672 416 ) ( -528 712 416 ) ( -528 672 384 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
@@ -5623,7 +5623,7 @@
 // brush 624
 {
 ( -288 608 448 ) ( -976 608 448 ) ( -976 648 448 ) arena9/greenwall4 -96 -32 0 0.500000 0.500000 0 0 0
-( -1024 648 400 ) ( -336 648 400 ) ( -336 680 448 ) arena9/metalwall2 72 95 0 1 0.750000 0 0 0
+( -1024 648 400 ) ( -336 648 400 ) ( -336 680 448 ) arena9/metalwall2 76 86 0 1 0.750000 0 0 0
 ( -976 648 384 ) ( -976 648 400 ) ( -976 608 400 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -496 672 344 ) ( -528 672 344 ) ( -528 672 320 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
 ( -528 648 320 ) ( -496 648 320 ) ( -496 648 296 ) arena9/greenwall4 32 16 0 0.500000 0.500000 0 0 0
@@ -6391,7 +6391,7 @@
 {
 ( -296 992 144 ) ( -984 992 144 ) ( -984 952 144 ) arena9/greenwall4 -96 64 0 0.500000 0.500000 0 0 0
 ( -976 952 192 ) ( -976 992 192 ) ( -288 992 192 ) arena9/greenwall4 -96 64 0 0.500000 0.500000 0 0 0
-( -336 920 192 ) ( -336 952 144 ) ( -1024 952 144 ) arena9/metalwall2 72 10 0 1 0.750000 0 0 0
+( -336 920 192 ) ( -336 952 144 ) ( -1024 952 144 ) arena9/metalwall2 76 2 0 1 0.750000 0 0 0
 ( -328 952 144 ) ( -328 992 144 ) ( -328 992 128 ) arena9/greenwall4 -64 16 0 0.500000 0.500000 0 0 0
 ( -288 992 144 ) ( -976 992 144 ) ( -976 992 128 ) arena9/greenwall4 -96 16 0 0.500000 0.500000 0 0 0
 ( -976 992 144 ) ( -976 952 144 ) ( -976 952 128 ) arena9/greenwall4 -64 16 0 0.500000 0.500000 0 0 0
@@ -8284,7 +8284,7 @@
 {
 ( -296 992 400 ) ( -984 992 400 ) ( -984 952 400 ) arena9/greenwall4 -96 64 0 0.500000 0.500000 0 0 0
 ( -976 952 448 ) ( -976 992 448 ) ( -288 992 448 ) arena9/greenwall4 -96 64 0 0.500000 0.500000 0 0 0
-( -336 920 448 ) ( -336 952 400 ) ( -1024 952 400 ) arena9/metalwall2 72 95 0 1 0.750000 0 0 0
+( -336 920 448 ) ( -336 952 400 ) ( -1024 952 400 ) arena9/metalwall2 76 86 0 1 0.750000 0 0 0
 ( -328 952 400 ) ( -328 992 400 ) ( -328 992 384 ) arena9/greenwall4 -64 16 0 0.500000 0.500000 0 0 0
 ( -288 992 400 ) ( -976 992 400 ) ( -976 992 384 ) arena9/greenwall4 -96 16 0 0.500000 0.500000 0 0 0
 ( -976 992 400 ) ( -976 952 400 ) ( -976 952 384 ) arena9/greenwall4 -64 16 0 0.500000 0.500000 0 0 0
@@ -13809,164 +13809,164 @@
 }
 // entity 1
 {
-"classname" "info_player_intermission"
-"angle" "360"
 "origin" "-856 8 88"
+"angle" "360"
+"classname" "info_player_intermission"
 }
 // entity 2
 {
-"classname" "info_player_deathmatch"
-"angle" "360"
 "origin" "-1296 776 280"
+"angle" "360"
+"classname" "info_player_deathmatch"
 }
 // entity 3
 {
-"classname" "info_player_deathmatch"
-"angle" "90"
 "origin" "-1408 128 280"
+"angle" "90"
+"classname" "info_player_deathmatch"
 }
 // entity 4
 {
-"classname" "info_player_deathmatch"
-"angle" "360"
 "origin" "-1144 0 280"
+"angle" "360"
+"classname" "info_player_deathmatch"
 }
 // entity 5
 {
-"classname" "info_player_deathmatch"
-"angle" "45"
 "origin" "-432 -400 280"
+"angle" "45"
+"classname" "info_player_deathmatch"
 }
 // entity 6
 {
-"classname" "info_player_deathmatch"
-"angle" "135"
 "origin" "136 -392 280"
+"angle" "135"
+"classname" "info_player_deathmatch"
 }
 // entity 7
 {
-"classname" "info_player_deathmatch"
-"angle" "225"
 "origin" "144 432 280"
+"angle" "225"
+"classname" "info_player_deathmatch"
 }
 // entity 8
 {
-"classname" "info_player_deathmatch"
-"angle" "315"
 "origin" "-424 448 280"
+"angle" "315"
+"classname" "info_player_deathmatch"
 }
 // entity 9
 {
-"classname" "info_player_deathmatch"
-"angle" "270"
 "origin" "-16 720 24"
+"angle" "270"
+"classname" "info_player_deathmatch"
 }
 // entity 10
 {
-"classname" "info_player_deathmatch"
-"angle" "360"
 "origin" "-584 800 24"
+"angle" "360"
+"classname" "info_player_deathmatch"
 }
 // entity 11
 {
-"classname" "info_player_deathmatch"
-"angle" "180"
 "origin" "-1224 800 24"
+"angle" "180"
+"classname" "info_player_deathmatch"
 }
 // entity 12
 {
-"classname" "info_player_deathmatch"
-"angle" "360"
 "origin" "-1392 16 24"
+"angle" "360"
+"classname" "info_player_deathmatch"
 }
 // entity 13
 {
-"classname" "info_player_deathmatch"
-"angle" "360"
 "origin" "-824 0 24"
+"angle" "360"
+"classname" "info_player_deathmatch"
 }
 // entity 14
 {
-"classname" "info_player_deathmatch"
-"angle" "270"
 "origin" "-248 336 24"
+"angle" "270"
+"classname" "info_player_deathmatch"
 }
 // entity 15
 {
-"classname" "ammo_grenades"
 "origin" "-1056 752 40"
+"classname" "ammo_grenades"
 }
 // entity 16
 {
-"classname" "item_health_small"
 "origin" "-1392 512 40"
+"classname" "item_health_small"
 }
 // entity 17
 {
-"classname" "item_armor_shard"
 "origin" "-896 0 288"
+"classname" "item_armor_shard"
 }
 // entity 18
 {
-"classname" "ammo_cells"
 "origin" "-1056 0 288"
+"classname" "ammo_cells"
 }
 // entity 19
 {
-"classname" "ammo_shells"
 "origin" "-1352 -296 40"
+"classname" "ammo_shells"
 }
 // entity 20
 {
-"classname" "item_adrenaline"
 "origin" "-1152 -328 40"
+"classname" "item_adrenaline"
 }
 // entity 21
 {
-"classname" "item_armor_shard"
 "origin" "-1392 504 296"
+"classname" "item_armor_shard"
 }
 // entity 22
 {
-"classname" "item_health_small"
 "origin" "-784 664 40"
+"classname" "item_health_small"
 }
 // entity 23
 {
-"classname" "item_health_large"
 "origin" "-1352 832 40"
+"classname" "item_health_large"
 }
 // entity 24
 {
-"classname" "ammo_shells"
 "origin" "-1144 816 40"
+"classname" "ammo_shells"
 }
 // entity 25
 {
-"classname" "item_armor_shard"
 "origin" "-384 800 40"
+"classname" "item_armor_shard"
 }
 // entity 26
 {
-"classname" "item_health"
 "origin" "-1072 832 296"
+"classname" "item_health"
 }
 // entity 27
 {
-"classname" "ammo_rockets"
 "origin" "-1424 816 296"
+"classname" "ammo_rockets"
 }
 // entity 28
 {
-"classname" "item_armor_shard"
 "origin" "-808 800 296"
+"classname" "item_armor_shard"
 }
 // entity 29
 {
-"classname" "trigger_monsterjump"
-"speed" "100"
-"angle" "360"
 "height" "800"
+"angle" "360"
+"speed" "100"
+"classname" "trigger_monsterjump"
 // brush 0
 {
 ( -1560 304 40 ) ( -1560 208 40 ) ( -1480 208 24 ) arena9/metal4 56 0 0 1 1 0 0 0
@@ -13979,45 +13979,45 @@
 }
 // entity 30
 {
-"origin" "-1056 0 40"
 "classname" "ammo_grenades"
+"origin" "-1056 0 40"
 }
 // entity 31
 {
-"origin" "-160 -440 40"
 "classname" "item_armor_body"
+"origin" "-160 -440 40"
 }
 // entity 32
 {
-"origin" "144 -240 40"
 "classname" "ammo_cells"
+"origin" "144 -240 40"
 }
 // entity 33
 {
-"origin" "-416 352 40"
 "classname" "ammo_rockets"
+"origin" "-416 352 40"
 }
 // entity 34
 {
-"origin" "-96 -448 296"
 "classname" "item_health_small"
+"origin" "-96 -448 296"
 }
 // entity 35
 {
-"origin" "-224 -448 296"
 "classname" "ammo_bullets"
+"origin" "-224 -448 296"
 }
 // entity 36
 {
-"origin" "-160 448 296"
 "classname" "item_health_large"
+"origin" "-160 448 296"
 }
 // entity 37
 {
-"classname" "trigger_monsterjump"
-"angle" "90"
-"speed" "75"
 "height" "800"
+"speed" "75"
+"angle" "90"
+"classname" "trigger_monsterjump"
 // brush 0
 {
 ( -328 608 0 ) ( -496 608 0 ) ( -496 520 0 ) evil/stepside_mtl3 120 0 -90 1 1 0 0 0
@@ -14030,8 +14030,8 @@
 }
 // entity 38
 {
-"classname" "func_rotating"
 "spawnflags" "1"
+"classname" "func_rotating"
 // brush 0
 {
 ( -144 16 664 ) ( -168 16 664 ) ( -168 -8 664 ) blanks/blank2 0 0 0 1 1 16777216 0 0
@@ -14093,425 +14093,425 @@
 }
 // entity 39
 {
-"classname" "light"
-"origin" "-280 -144 808"
 "light" "100"
+"origin" "-280 -144 808"
+"classname" "light"
 }
 // entity 40
 {
-"origin" "20 4 20"
-"light" "25"
 "classname" "light"
+"light" "25"
+"origin" "20 4 20"
 }
 // entity 41
 {
-"light" "40"
-"origin" "-168 -104 112"
 "classname" "light"
+"origin" "-168 -104 112"
+"light" "40"
 }
 // entity 42
 {
-"classname" "info_player_deathmatch"
-"origin" "128 152 24"
 "angle" "180"
+"origin" "128 152 24"
+"classname" "info_player_deathmatch"
 }
 // entity 43
 {
-"angle" "180"
-"origin" "-64 0 -8"
-"model" "maps/meshes/tech/slimegen.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/tech/slimegen.md2"
+"origin" "-64 0 -8"
+"angle" "180"
 }
 // entity 44
 {
-"spawnflags" "1"
-"classname" "misc_mapmodel"
-"model" "maps/meshes/tech/slimegen2.md2"
-"origin" "-128 0 216"
 "angle" "180"
+"origin" "-128 0 216"
+"model" "maps/meshes/tech/slimegen2.md2"
+"classname" "misc_mapmodel"
+"spawnflags" "1"
 }
 // entity 45
 {
-"spawnflags" "1"
-"origin" "56 0 -8"
-"classname" "misc_mapmodel"
-"model" "maps/meshes/tech/railing5.md2"
 "angle" "180"
+"model" "maps/meshes/tech/railing5.md2"
+"classname" "misc_mapmodel"
+"origin" "56 0 -8"
+"spawnflags" "1"
 }
 // entity 46
 {
-"angle" "270"
-"model" "maps/meshes/tech/railing5.md2"
-"classname" "misc_mapmodel"
-"origin" "0 56 -8"
 "spawnflags" "1"
+"origin" "0 56 -8"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/tech/railing5.md2"
+"angle" "270"
 }
 // entity 47
 {
-"spawnflags" "1"
-"origin" "0 -56 -8"
-"classname" "misc_mapmodel"
-"model" "maps/meshes/tech/railing5.md2"
 "angle" "90"
+"model" "maps/meshes/tech/railing5.md2"
+"classname" "misc_mapmodel"
+"origin" "0 -56 -8"
+"spawnflags" "1"
 }
 // entity 48
 {
-"angle" "0"
-"classname" "light"
-"light" "25"
 "origin" "-340 4 20"
+"light" "25"
+"classname" "light"
+"angle" "0"
 }
 // entity 49
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/tech/slimegen.md2"
-"origin" "-256 0 -8"
 "angle" "0"
+"origin" "-256 0 -8"
+"model" "maps/meshes/tech/slimegen.md2"
+"classname" "misc_mapmodel"
 }
 // entity 50
 {
-"angle" "0"
-"model" "maps/meshes/tech/railing5.md2"
-"classname" "misc_mapmodel"
-"origin" "-376 0 -8"
 "spawnflags" "1"
+"origin" "-376 0 -8"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/tech/railing5.md2"
+"angle" "0"
 }
 // entity 51
 {
-"spawnflags" "1"
-"origin" "-320 56 -8"
-"classname" "misc_mapmodel"
-"model" "maps/meshes/tech/railing5.md2"
 "angle" "-90"
+"model" "maps/meshes/tech/railing5.md2"
+"classname" "misc_mapmodel"
+"origin" "-320 56 -8"
+"spawnflags" "1"
 }
 // entity 52
 {
-"angle" "90"
-"model" "maps/meshes/tech/railing5.md2"
-"classname" "misc_mapmodel"
-"origin" "-320 -56 -8"
 "spawnflags" "1"
+"origin" "-320 -56 -8"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/tech/railing5.md2"
+"angle" "90"
 }
 // entity 53
 {
-"classname" "light"
-"origin" "-200 120 112"
 "light" "40"
+"origin" "-200 120 112"
+"classname" "light"
 }
 // entity 54
 {
-"classname" "light"
-"origin" "-168 -96 312"
 "light" "40"
+"origin" "-168 -96 312"
+"classname" "light"
 }
 // entity 55
 {
-"light" "40"
-"origin" "-200 128 312"
 "classname" "light"
+"origin" "-200 128 312"
+"light" "40"
 }
 // entity 56
 {
-"classname" "light"
-"light" "50"
 "origin" "-768 8 120"
+"light" "50"
+"classname" "light"
 }
 // entity 57
 {
-"origin" "-960 0 120"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-960 0 120"
 }
 // entity 58
 {
-"classname" "light"
-"light" "50"
 "origin" "-1152 0 120"
+"light" "50"
+"classname" "light"
 }
 // entity 59
 {
-"model" "maps/meshes/monitor.md2"
-"angle" "270"
-"origin" "-832 112 188"
-"classname" "misc_mapmodel"
 "spawnflags" "1"
+"classname" "misc_mapmodel"
+"origin" "-832 112 188"
+"angle" "270"
+"model" "maps/meshes/monitor.md2"
 }
 // entity 60
 {
-"origin" "-768 8 376"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-768 8 376"
 }
 // entity 61
 {
-"classname" "light"
-"light" "50"
 "origin" "-960 0 376"
+"light" "50"
+"classname" "light"
 }
 // entity 62
 {
-"origin" "-1152 0 376"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-1152 0 376"
 }
 // entity 63
 {
-"spawnflags" "1"
-"classname" "misc_mapmodel"
-"origin" "-832 112 444"
-"angle" "270"
 "model" "maps/meshes/monitor.md2"
+"angle" "270"
+"origin" "-832 112 444"
+"classname" "misc_mapmodel"
+"spawnflags" "1"
 }
 // entity 64
 {
-"origin" "32 152 808"
-"classname" "light"
 "light" "100"
+"classname" "light"
+"origin" "32 152 808"
 }
 // entity 65
 {
-"origin" "-112 656 120"
-"light" "15"
 "classname" "light"
+"light" "15"
+"origin" "-112 656 120"
 }
 // entity 66
 {
-"classname" "light"
-"light" "15"
 "origin" "64 664 120"
+"light" "15"
+"classname" "light"
 }
 // entity 67
 {
-"classname" "light"
-"light" "15"
 "origin" "64 936 120"
+"light" "15"
+"classname" "light"
 }
 // entity 68
 {
-"origin" "-112 944 120"
-"light" "15"
 "classname" "light"
+"light" "15"
+"origin" "-112 944 120"
 }
 // entity 69
 {
-"angle" "180"
-"model" "maps/meshes/tech/ribtubebig3.md2"
-"classname" "misc_mapmodel"
 "origin" "96 608 32"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/tech/ribtubebig3.md2"
+"angle" "180"
 }
 // entity 70
 {
-"origin" "-144 608 32"
-"classname" "misc_mapmodel"
-"model" "maps/meshes/tech/ribtubebig3.md2"
 "angle" "360"
+"model" "maps/meshes/tech/ribtubebig3.md2"
+"classname" "misc_mapmodel"
+"origin" "-144 608 32"
 }
 // entity 71
 {
-"_color" "0 .2 .1"
-"classname" "light"
-"light" "25"
 "origin" "40 608 -8"
+"light" "25"
+"classname" "light"
+"_color" "0 .2 .1"
 }
 // entity 72
 {
-"origin" "-88 608 -8"
-"light" "25"
-"classname" "light"
 "_color" "0 .2 .1"
+"classname" "light"
+"light" "25"
+"origin" "-88 608 -8"
 }
 // entity 73
 {
-"origin" "80 800 168"
-"classname" "misc_mapmodel"
-"model" "maps/meshes/tech/ribtubebig5.md2"
-"angle" "180"
 "spawnflags" "1"
+"angle" "180"
+"model" "maps/meshes/tech/ribtubebig5.md2"
+"classname" "misc_mapmodel"
+"origin" "80 800 168"
 }
 // entity 74
 {
-"origin" "97 -350 48"
-"model" "maps/meshes/bigribpipe.md2"
-"spawnflags" "1"
-"angle" "225"
 "classname" "misc_mapmodel"
+"angle" "225"
+"spawnflags" "1"
+"model" "maps/meshes/bigribpipe.md2"
+"origin" "97 -350 48"
 }
 // entity 75
 {
-"origin" "88 448 72"
-"light" "25"
 "classname" "light"
+"light" "25"
+"origin" "88 448 72"
 }
 // entity 76
 {
-"classname" "light"
-"light" "25"
 "origin" "-136 448 72"
+"light" "25"
+"classname" "light"
 }
 // entity 77
 {
-"origin" "216 -368 72"
-"light" "25"
 "classname" "light"
+"light" "25"
+"origin" "216 -368 72"
 }
 // entity 78
 {
-"classname" "light"
-"light" "25"
 "origin" "104 -488 72"
+"light" "25"
+"classname" "light"
 }
 // entity 79
 {
-"origin" "-472 0 40"
 "classname" "weapon_railgun"
+"origin" "-472 0 40"
 }
 // entity 80
 {
-"model" "maps/meshes/weaponpad.md2"
-"angle" "90"
-"origin" "-472 0 8"
-"classname" "misc_mapmodel"
 "spawnflags" "64"
+"classname" "misc_mapmodel"
+"origin" "-472 0 8"
+"angle" "90"
+"model" "maps/meshes/weaponpad.md2"
 }
 // entity 81
 {
-"classname" "weapon_supershotgun"
 "origin" "-384 0 300"
+"classname" "weapon_supershotgun"
 }
 // entity 82
 {
-"spawnflags" "64"
-"classname" "misc_mapmodel"
-"origin" "-384 0 268"
-"angle" "90"
 "model" "maps/meshes/weaponpad.md2"
+"angle" "90"
+"origin" "-384 0 268"
+"classname" "misc_mapmodel"
+"spawnflags" "64"
 }
 // entity 83
 {
-"classname" "light"
-"origin" "58 -424 884"
-"light" "0"
 "target" "sunspot"
+"light" "0"
+"origin" "58 -424 884"
+"classname" "light"
 }
 // entity 84
 {
-"classname" "info_null"
-"origin" "-416 480 8"
 "targetname" "sunspot"
+"origin" "-416 480 8"
+"classname" "info_null"
 }
 // entity 85
 {
-"origin" "-512 808 120"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-512 808 120"
 }
 // entity 86
 {
-"classname" "light"
-"light" "50"
 "origin" "-704 800 120"
+"light" "50"
+"classname" "light"
 }
 // entity 87
 {
-"origin" "-896 800 120"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-896 800 120"
 }
 // entity 88
 {
-"spawnflags" "1"
-"classname" "misc_mapmodel"
-"origin" "-576 912 188"
-"angle" "270"
 "model" "maps/meshes/monitor.md2"
+"angle" "270"
+"origin" "-576 912 188"
+"classname" "misc_mapmodel"
+"spawnflags" "1"
 }
 // entity 89
 {
-"classname" "light"
-"light" "50"
 "origin" "-512 808 376"
+"light" "50"
+"classname" "light"
 }
 // entity 90
 {
-"origin" "-704 800 376"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-704 800 376"
 }
 // entity 91
 {
-"classname" "light"
-"light" "50"
 "origin" "-896 800 376"
+"light" "50"
+"classname" "light"
 }
 // entity 92
 {
-"model" "maps/meshes/monitor.md2"
-"angle" "270"
-"origin" "-576 912 444"
-"classname" "misc_mapmodel"
 "spawnflags" "1"
+"classname" "misc_mapmodel"
+"origin" "-576 912 444"
+"angle" "270"
+"model" "maps/meshes/monitor.md2"
 }
 // entity 93
 {
-"spawnflags" "1"
-"origin" "-256 760 -8"
-"classname" "misc_mapmodel"
-"model" "maps/meshes/tech/railing5.md2"
 "angle" "270"
+"model" "maps/meshes/tech/railing5.md2"
+"classname" "misc_mapmodel"
+"origin" "-256 760 -8"
+"spawnflags" "1"
 }
 // entity 94
 {
-"angle" "90"
-"model" "maps/meshes/tech/railing5.md2"
-"classname" "misc_mapmodel"
-"origin" "-256 840 -8"
 "spawnflags" "1"
+"origin" "-256 840 -8"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/tech/railing5.md2"
+"angle" "90"
 }
 // entity 95
 {
-"angle" "360"
-"model" "maps/meshes/xempx/lightbomb45.md2"
-"classname" "misc_mapmodel"
-"origin" "-312 800 200"
 "spawnflags" "65"
+"origin" "-312 800 200"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/xempx/lightbomb45.md2"
+"angle" "360"
 }
 // entity 96
 {
-"classname" "light"
-"light" "50"
 "origin" "-256 800 104"
+"light" "50"
+"classname" "light"
 }
 // entity 97
 {
-"classname" "weapon_chaingun"
 "origin" "-24 952 48"
+"classname" "weapon_chaingun"
 }
 // entity 98
 {
-"spawnflags" "64"
-"classname" "misc_mapmodel"
-"origin" "-24 952 16"
-"angle" "90"
 "model" "maps/meshes/weaponpad.md2"
+"angle" "90"
+"origin" "-24 952 16"
+"classname" "misc_mapmodel"
+"spawnflags" "64"
 }
 // entity 99
 {
-"origin" "64 0 300"
 "classname" "item_quad"
+"origin" "64 0 300"
 }
 // entity 100
 {
-"model" "maps/meshes/weaponpad.md2"
-"angle" "90"
-"origin" "64 0 268"
-"classname" "misc_mapmodel"
 "spawnflags" "64"
+"classname" "misc_mapmodel"
+"origin" "64 0 268"
+"angle" "90"
+"model" "maps/meshes/weaponpad.md2"
 }
 // entity 101
 {
-"lip" "32"
-"classname" "func_door"
 "angle" "180"
+"classname" "func_door"
+"lip" "32"
 // brush 0
 {
 ( -1408 656 328 ) ( -1440 656 320 ) ( -1440 640 320 ) arena6/ice -40 112 90 1 1 0 32 0
@@ -14623,9 +14623,9 @@
 }
 // entity 102
 {
-"lip" "32"
-"classname" "func_door"
 "angle" "360"
+"classname" "func_door"
+"lip" "32"
 // brush 0
 {
 ( -1352 656 368 ) ( -1376 656 368 ) ( -1376 640 368 ) arena9/metal4 -40 112 90 1 1 0 0 0
@@ -14737,9 +14737,9 @@
 }
 // entity 103
 {
-"angle" "180"
-"classname" "func_door"
 "lip" "32"
+"classname" "func_door"
+"angle" "180"
 // brush 0
 {
 ( -1408 656 72 ) ( -1440 656 64 ) ( -1440 640 64 ) arena6/ice -40 112 90 1 1 0 32 0
@@ -14851,9 +14851,9 @@
 }
 // entity 104
 {
-"angle" "360"
-"classname" "func_door"
 "lip" "32"
+"classname" "func_door"
+"angle" "360"
 // brush 0
 {
 ( -1352 656 112 ) ( -1376 656 112 ) ( -1376 640 112 ) arena9/metal4 -40 112 90 1 1 0 0 0
@@ -14965,181 +14965,181 @@
 }
 // entity 105
 {
-"origin" "-1392 736 344"
-"light" "35"
 "classname" "light"
+"light" "35"
+"origin" "-1392 736 344"
 }
 // entity 106
 {
-"classname" "light"
-"light" "50"
 "origin" "-1352 496 344"
+"light" "50"
+"classname" "light"
 }
 // entity 107
 {
-"classname" "light"
-"light" "35"
 "origin" "-1392 736 72"
+"light" "35"
+"classname" "light"
 }
 // entity 108
 {
-"origin" "-1392 552 72"
-"light" "50"
 "classname" "light"
+"light" "50"
+"origin" "-1392 552 72"
 }
 // entity 109
 {
-"classname" "item_health_small"
 "origin" "-40 -448 296"
+"classname" "item_health_small"
 }
 // entity 110
 {
-"spawnflags" "1"
-"classname" "misc_mapmodel"
-"origin" "-1168 744 444"
-"angle" "90"
 "model" "maps/meshes/monitor.md2"
+"angle" "90"
+"origin" "-1168 744 444"
+"classname" "misc_mapmodel"
+"spawnflags" "1"
 }
 // entity 111
 {
-"model" "maps/meshes/monitor.md2"
-"angle" "90"
-"origin" "-1168 744 188"
-"classname" "misc_mapmodel"
 "spawnflags" "1"
+"classname" "misc_mapmodel"
+"origin" "-1168 744 188"
+"angle" "90"
+"model" "maps/meshes/monitor.md2"
 }
 // entity 112
 {
-"angle" "270"
-"origin" "-1024 -512 -8"
-"model" "maps/meshes/tech/slimegen.md2"
 "classname" "misc_mapmodel"
+"model" "maps/meshes/tech/slimegen.md2"
+"origin" "-1024 -512 -8"
+"angle" "270"
 }
 // entity 113
 {
-"classname" "misc_mapmodel"
-"model" "maps/meshes/tech/slimegen.md2"
-"origin" "-1408 -512 -8"
 "angle" "270"
+"origin" "-1408 -512 -8"
+"model" "maps/meshes/tech/slimegen.md2"
+"classname" "misc_mapmodel"
 }
 // entity 114
 {
-"classname" "misc_mapmodel"
-"origin" "-1312 904 416"
-"angle" "270"
-"model" "maps/meshes/xempx/lightbomb45.md2"
 "spawnflags" "65"
+"model" "maps/meshes/xempx/lightbomb45.md2"
+"angle" "270"
+"origin" "-1312 904 416"
+"classname" "misc_mapmodel"
 }
 // entity 115
 {
-"spawnflags" "65"
-"model" "maps/meshes/xempx/lightbomb45.md2"
-"angle" "270"
-"origin" "-1120 904 416"
 "classname" "misc_mapmodel"
+"origin" "-1120 904 416"
+"angle" "270"
+"model" "maps/meshes/xempx/lightbomb45.md2"
+"spawnflags" "65"
 }
 // entity 116
 {
-"spawnflags" "65"
-"model" "maps/meshes/xempx/lightbomb45.md2"
-"angle" "270"
-"origin" "-1312 904 160"
 "classname" "misc_mapmodel"
+"origin" "-1312 904 160"
+"angle" "270"
+"model" "maps/meshes/xempx/lightbomb45.md2"
+"spawnflags" "65"
 }
 // entity 117
 {
-"classname" "misc_mapmodel"
-"origin" "-1120 904 160"
-"angle" "270"
-"model" "maps/meshes/xempx/lightbomb45.md2"
 "spawnflags" "65"
+"model" "maps/meshes/xempx/lightbomb45.md2"
+"angle" "270"
+"origin" "-1120 904 160"
+"classname" "misc_mapmodel"
 }
 // entity 118
 {
-"spawnflags" "65"
-"model" "maps/meshes/xempx/lightbomb45.md2"
-"angle" "90"
-"origin" "-1392 -552 168"
 "classname" "misc_mapmodel"
+"origin" "-1392 -552 168"
+"angle" "90"
+"model" "maps/meshes/xempx/lightbomb45.md2"
+"spawnflags" "65"
 }
 // entity 119
 {
-"classname" "misc_mapmodel"
-"origin" "-1040 -552 168"
-"angle" "90"
-"model" "maps/meshes/xempx/lightbomb45.md2"
 "spawnflags" "65"
+"model" "maps/meshes/xempx/lightbomb45.md2"
+"angle" "90"
+"origin" "-1040 -552 168"
+"classname" "misc_mapmodel"
 }
 // entity 120
 {
-"classname" "light"
-"light" "100"
 "origin" "-1392 -480 136"
+"light" "100"
+"classname" "light"
 }
 // entity 121
 {
-"origin" "-1040 -480 136"
-"light" "100"
 "classname" "light"
+"light" "100"
+"origin" "-1040 -480 136"
 }
 // entity 122
 {
-"origin" "-1152 -328 292"
 "classname" "weapon_shotgun"
+"origin" "-1152 -328 292"
 }
 // entity 123
 {
-"model" "maps/meshes/weaponpad.md2"
-"angle" "90"
-"origin" "-1152 -328 260"
-"classname" "misc_mapmodel"
 "spawnflags" "64"
+"classname" "misc_mapmodel"
+"origin" "-1152 -328 260"
+"angle" "90"
+"model" "maps/meshes/weaponpad.md2"
 }
 // entity 124
 {
-"classname" "light"
-"light" "25"
 "origin" "-1120 824 120"
+"light" "25"
+"classname" "light"
 }
 // entity 125
 {
-"origin" "-1120 824 376"
-"light" "25"
 "classname" "light"
+"light" "25"
+"origin" "-1120 824 376"
 }
 // entity 126
 {
-"origin" "-1312 832 120"
-"light" "25"
 "classname" "light"
+"light" "25"
+"origin" "-1312 832 120"
 }
 // entity 127
 {
-"classname" "light"
-"light" "25"
 "origin" "-1312 832 376"
+"light" "25"
+"classname" "light"
 }
 // entity 128
 {
-"classname" "misc_mapmodel"
-"origin" "-1504 776 264"
-"angle" "360"
-"model" "maps/meshes/toxicbarrell.md2"
 "spawnflags" "64"
+"model" "maps/meshes/toxicbarrell.md2"
+"angle" "360"
+"origin" "-1504 776 264"
+"classname" "misc_mapmodel"
 }
 // entity 129
 {
-"spawnflags" "64"
-"model" "maps/meshes/toxicbarrell.md2"
-"angle" "270"
-"origin" "-1536 728 264"
 "classname" "misc_mapmodel"
+"origin" "-1536 728 264"
+"angle" "270"
+"model" "maps/meshes/toxicbarrell.md2"
+"spawnflags" "64"
 }
 // entity 130
 {
-"angle" "90"
-"classname" "func_door"
 "lip" "32"
+"classname" "func_door"
+"angle" "90"
 // brush 0
 {
 ( -1176 432 328 ) ( -1176 464 320 ) ( -1192 464 320 ) arena6/ice 48 79 -180 1 1 0 32 0
@@ -15251,9 +15251,9 @@
 }
 // entity 131
 {
-"angle" "270"
-"classname" "func_door"
 "lip" "32"
+"classname" "func_door"
+"angle" "270"
 // brush 0
 {
 ( -1176 376 368 ) ( -1176 400 368 ) ( -1192 400 368 ) arena9/metal4 48 79 -180 1 1 0 0 0
@@ -15365,170 +15365,170 @@
 }
 // entity 132
 {
-"classname" "light"
-"light" "35"
 "origin" "-1096 416 344"
+"light" "35"
+"classname" "light"
 }
 // entity 133
 {
-"origin" "-1144 -384 344"
-"light" "30"
 "classname" "light"
+"light" "30"
+"origin" "-1144 -384 344"
 }
 // entity 134
 {
-"classname" "misc_mapmodel"
-"origin" "-928 472 392"
-"angle" "270"
-"model" "maps/meshes/xempx/lightbomb45.md2"
 "spawnflags" "65"
+"model" "maps/meshes/xempx/lightbomb45.md2"
+"angle" "270"
+"origin" "-928 472 392"
+"classname" "misc_mapmodel"
 }
 // entity 135
 {
-"classname" "light"
-"light" "25"
 "origin" "-928 400 352"
+"light" "25"
+"classname" "light"
 }
 // entity 136
 {
-"spawnflags" "65"
-"model" "maps/meshes/xempx/lightbomb45.md2"
-"angle" "270"
-"origin" "-768 472 392"
 "classname" "misc_mapmodel"
+"origin" "-768 472 392"
+"angle" "270"
+"model" "maps/meshes/xempx/lightbomb45.md2"
+"spawnflags" "65"
 }
 // entity 137
 {
-"classname" "weapon_rocketlauncher"
 "origin" "-800 408 120"
+"classname" "weapon_rocketlauncher"
 }
 // entity 138
 {
-"spawnflags" "64"
-"classname" "misc_mapmodel"
-"origin" "-800 408 88"
-"angle" "90"
 "model" "maps/meshes/weaponpad.md2"
+"angle" "90"
+"origin" "-800 408 88"
+"classname" "misc_mapmodel"
+"spawnflags" "64"
 }
 // entity 139
 {
-"origin" "-768 400 352"
-"light" "25"
 "classname" "light"
+"light" "25"
+"origin" "-768 400 352"
 }
 // entity 140
 {
-"spawnflags" "64"
-"model" "maps/meshes/toxicbarrell.md2"
-"angle" "360"
-"origin" "-1528 752 8"
 "classname" "misc_mapmodel"
+"origin" "-1528 752 8"
+"angle" "360"
+"model" "maps/meshes/toxicbarrell.md2"
+"spawnflags" "64"
 }
 // entity 141
 {
-"classname" "misc_mapmodel"
-"origin" "-1336 480 -48"
-"angle" "360"
-"model" "maps/meshes/tech/slimetube1.md2"
 "spawnflags" "64"
+"model" "maps/meshes/tech/slimetube1.md2"
+"angle" "360"
+"origin" "-1336 480 -48"
+"classname" "misc_mapmodel"
 }
 // entity 142
 {
-"spawnflags" "64"
-"model" "maps/meshes/tech/slimetube1.md2"
-"angle" "360"
-"origin" "-1336 392 -48"
 "classname" "misc_mapmodel"
+"origin" "-1336 392 -48"
+"angle" "360"
+"model" "maps/meshes/tech/slimetube1.md2"
+"spawnflags" "64"
 }
 // entity 143
 {
-"spawnflags" "64"
-"model" "maps/meshes/tech/slimetube1.md2"
-"angle" "180"
-"origin" "-1472 -128 -48"
 "classname" "misc_mapmodel"
+"origin" "-1472 -128 -48"
+"angle" "180"
+"model" "maps/meshes/tech/slimetube1.md2"
+"spawnflags" "64"
 }
 // entity 144
 {
-"classname" "misc_mapmodel"
-"origin" "-1068 -456 -48"
-"angle" "270"
-"model" "maps/meshes/tech/slimetube1.md2"
 "spawnflags" "64"
+"model" "maps/meshes/tech/slimetube1.md2"
+"angle" "270"
+"origin" "-1068 -456 -48"
+"classname" "misc_mapmodel"
 }
 // entity 145
 {
-"spawnflags" "64"
-"model" "maps/meshes/tech/slimetube1.md2"
-"angle" "270"
-"origin" "-1364 -456 -48"
 "classname" "misc_mapmodel"
+"origin" "-1364 -456 -48"
+"angle" "270"
+"model" "maps/meshes/tech/slimetube1.md2"
+"spawnflags" "64"
 }
 // entity 146
 {
-"classname" "weapon_hyperblaster"
 "origin" "-384 800 296"
+"classname" "weapon_hyperblaster"
 }
 // entity 147
 {
-"spawnflags" "64"
-"classname" "misc_mapmodel"
-"origin" "-384 800 264"
-"angle" "90"
 "model" "maps/meshes/weaponpad.md2"
+"angle" "90"
+"origin" "-384 800 264"
+"classname" "misc_mapmodel"
+"spawnflags" "64"
 }
 // entity 148
 {
-"origin" "-856 796 296"
 "classname" "item_armor_shard"
+"origin" "-856 796 296"
 }
 // entity 149
 {
-"origin" "-440 800 40"
 "classname" "item_armor_shard"
+"origin" "-440 800 40"
 }
 // entity 150
 {
-"origin" "-1392 448 296"
 "classname" "item_armor_shard"
+"origin" "-1392 448 296"
 }
 // entity 151
 {
-"classname" "item_armor_shard"
 "origin" "-1392 400 296"
+"classname" "item_armor_shard"
 }
 // entity 152
 {
-"origin" "-1392 448 40"
 "classname" "item_health_small"
+"origin" "-1392 448 40"
 }
 // entity 153
 {
-"angle" "135"
-"origin" "-32 -360 24"
 "classname" "info_player_deathmatch"
+"origin" "-32 -360 24"
+"angle" "135"
 }
 // entity 154
 {
-"spawnflags" "1"
-"angle" "180"
-"model" "maps/meshes/tech/ribtubebig5.md2"
-"classname" "misc_mapmodel"
 "origin" "-1056 416 384"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/tech/ribtubebig5.md2"
+"angle" "180"
+"spawnflags" "1"
 }
 // entity 155
 {
-"origin" "-800 552 256"
-"classname" "misc_mapmodel"
-"model" "maps/meshes/tech/ribtubebig5.md2"
-"angle" "90"
 "spawnflags" "1"
+"angle" "90"
+"model" "maps/meshes/tech/ribtubebig5.md2"
+"classname" "misc_mapmodel"
+"origin" "-800 552 256"
 }
 // entity 156
 {
-"spawnflags" "1"
-"angle" "90"
-"model" "maps/meshes/tech/ribtubebig5.md2"
-"classname" "misc_mapmodel"
 "origin" "-800 552 376"
+"classname" "misc_mapmodel"
+"model" "maps/meshes/tech/ribtubebig5.md2"
+"angle" "90"
+"spawnflags" "1"
 }
