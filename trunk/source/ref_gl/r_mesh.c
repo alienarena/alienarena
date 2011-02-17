@@ -122,7 +122,7 @@ static int MD2_FindTriangleWithEdge(neighbors_t * neighbors, dtriangle_t * tris,
 	}
 
 	// normal edge, setup neighbor pointers
-	if (!dup && found != -1) {	
+	if (!dup && found != -1) {
 		neighbors[found].n[foundj] = triIndex;
 		return found;
 	}
@@ -730,6 +730,7 @@ opposite directions.  This gives the shading a more prounounced, defined look.
 
 =============
 */
+#if 0
 void MD2_VlightModel (vec3_t baselight, dtrivertx_t *verts, vec3_t lightOut)
 {
     int i;
@@ -748,6 +749,34 @@ void MD2_VlightModel (vec3_t baselight, dtrivertx_t *verts, vec3_t lightOut)
         if (lightOut[i]>1) lightOut[i] = 1;
     }
 }
+#else
+/* Profiling shows this is a "hotspot". Calculation rearranged.
+ * Leave original above for reference.
+ */
+void MD2_VlightModel( const vec3_t baselight, dtrivertx_t *verts, vec3_t lightOut )
+{
+	float l;
+	float c;
+
+	l = shadedots[verts->lightnormalindex];
+
+	c = baselight[0] * l;
+	c += ( c - 0.25 );  // [0,1] => [-0.25,1.75], then clamp to [0,1]
+	c = c < 0.0f ? 0.0f : ( c > 1.0f ? 1.0f : c );
+	lightOut[0] = c;
+
+	c = baselight[1] * l;
+	c += ( c - 0.25 );
+	c = c < 0.0f ? 0.0f : ( c > 1.0f ? 1.0f : c );
+	lightOut[1] = c;
+
+	c = baselight[2] * l;
+	c += ( c - 0.25 );
+	c = c < 0.0f ? 0.0f : ( c > 1.0f ? 1.0f : c );
+	lightOut[2] = c;
+
+}
+#endif
 
 void MD2_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, float move[3], float frontv[3], float backv[3] )
 {
@@ -980,7 +1009,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 	unsigned offs, offs2;
 	byte *tangents, *oldtangents = NULL;
 	qboolean mirror = false;
-	
+
 	offs = paliashdr->num_xyz;
 
 	if(lerped)

@@ -1358,6 +1358,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/bar_loading.tga \
 	data1/pics/beamgun.tga \
 	data1/pics/blaster.tga \
+	data1/pics/blood_ring.tga \
 	data1/pics/blueplayerbox.tga \
 	data1/pics/bomber.tga \
 	data1/pics/bots/enforcer/blue_i.jpg \
@@ -1371,7 +1372,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/bots/martianenforcer/default_i.jpg \
 	data1/pics/bots/martianenforcer/gamara_i.jpg \
 	data1/pics/bots/martianenforcer/red_i.jpg \
-	data1/pics/blood_ring.tga \
 	data1/pics/ch1.tga \
 	data1/pics/ch2.tga \
 	data1/pics/ch3.tga \

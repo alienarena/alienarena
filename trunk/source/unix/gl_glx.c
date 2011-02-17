@@ -720,9 +720,11 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	XSetWindowAttributes attr;
 	XSizeHints *sizehints;
 	unsigned long mask;
+#if defined HAVE_XXF86VM
 	int MajorVersion, MinorVersion;
 	int actualWidth, actualHeight;
 	int i;
+#endif
 
 	r_fakeFullscreen = Cvar_Get( "r_fakeFullscreen", "0", CVAR_ARCHIVE);
 

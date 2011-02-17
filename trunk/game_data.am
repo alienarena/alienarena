@@ -1061,6 +1061,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/bar_loading.tga \
 	data1/pics/beamgun.tga \
 	data1/pics/blaster.tga \
+	data1/pics/blood_ring.tga \
 	data1/pics/blueplayerbox.tga \
 	data1/pics/bomber.tga \
 	data1/pics/bots/enforcer/blue_i.jpg \
@@ -2845,6 +2846,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/evil/e6launchengine_nm.tga \
 	data1/textures/evil/e6launchengine.tga \
 	data1/textures/evil/e6metalfan.tga \
+	data1/textures/evil/e6supptrim128_hm.tga \
+	data1/textures/evil/e6supptrim128_nm.tga \
 	data1/textures/evil/e6supptrim128.tga \
 	data1/textures/evil/e6trim_basic128_nm.tga \
 	data1/textures/evil/e6trim_basic128.tga \
