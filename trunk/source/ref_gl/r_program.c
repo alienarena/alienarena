@@ -830,7 +830,7 @@ static char rblur_fragment_program[] =
 "    float pDist = sqrt(pDir.x*pDir.x + pDir.y*pDir.y);\n"
 "	 clamp(pDist, 0.0, 1.0);\n"
 
-"	 //the following ugliness is due to ATI's drivers inablity to handle a simple for-loop!
+"	 //the following ugliness is due to ATI's drivers inablity to handle a simple for-loop!\n"
 "    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.06 * strength * pDist );\n"
 "    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.05 * strength * pDist );\n"
 "    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.03 * strength * pDist );\n"
