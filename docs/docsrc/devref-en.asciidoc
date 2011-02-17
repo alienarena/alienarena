@@ -94,9 +94,9 @@ To download Alien Arena from the SVN Repository:
 
 === Microsoft Visual C++ 2010 Express ===
 
-Microsoft Visual C++ 2010 Express is part of Microsoft Visual
+Microsoft Visual C\++ 2010 Express is part of Microsoft Visual
 Studio 2010 and is provided free of charge. Registration is
-required. Download Visual C\+\+ 2010 Express from the Microsoft
+required. Download Visual C++ 2010 Express from the Microsoft
 website (http://www.microsoft.com/) and install it using the
 default setups.
 

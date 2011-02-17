@@ -465,7 +465,7 @@ model_t *Mod_ForName (char *name, qboolean crash)
 		}
 	}
 	else
-	{	
+	{
 		//we have an .iqm
 		is_iqm = true;
 		strcpy(mod->name, shortname);
@@ -703,8 +703,12 @@ void Mod_LoadTexinfo (lump_t *l)
 
 	for ( i=0 ; i<count ; i++, in++, out++)
 	{
-		for (j=0 ; j<8 ; j++)
+		for (j=0 ; j<4 ; j++)
+		{
+			/* note: treating as vecs[0][8] gives warning with gcc -O3 */
 			out->vecs[0][j] = LittleFloat (in->vecs[0][j]);
+			out->vecs[1][j] = LittleFloat (in->vecs[1][j]);
+		}
 		out->value = LittleLong (in->value);
 		out->flags = LittleLong (in->flags);
 		next = LittleLong (in->nexttexinfo);
@@ -1008,19 +1012,19 @@ void Mod_LoadFaces (lump_t *l)
 						color[1] = stage->colormap.green;
 						color[2] = stage->colormap.blue;
 					}
-					Mod_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->beamtype, 
+					Mod_AddBeamSurface(out, stage->texture->texnum, color, stage->scale.scaleX, stage->texture->bare_name, stage->beamtype,
 						stage->xang, stage->yang, stage->rotating);
 				}
 			} while ( (stage = stage->next) );
 		}
 		Mod_CalcSurfaceNormals(out);
-		
+
 		if(gl_state.vbo) {
 			VB_BuildVBOBufferSize(out);
 			out->has_vbo = false;
 		}
 	}
-	BSP_EndBuildingLightmaps ();	
+	BSP_EndBuildingLightmaps ();
 }
 
 
