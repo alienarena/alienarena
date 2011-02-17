@@ -816,11 +816,8 @@ static char rblur_fragment_program[] =
 
 "void main(void)\n"
 "{\n"
-"  	 float samples[10] = float[](-0.06,-0.05,-0.03,-0.02,-0.01,0.01,0.02,0.03,0.05,0.06);\n"
 "	 float wScissor;\n"
 "	 float hScissor;\n"
-
-"	 gl_FragColor = vec4(0,0,0,0);\n"
 
 "    vec2 dir = vec2(radialBlurParams.x - gl_TexCoord[0].x, radialBlurParams.x - gl_TexCoord[0].x);\n" 
 "    float dist = sqrt(dir.x*dir.x + dir.y*dir.y);\n" 
@@ -833,10 +830,17 @@ static char rblur_fragment_program[] =
 "    float pDist = sqrt(pDir.x*pDir.x + pDir.y*pDir.y);\n"
 "	 clamp(pDist, 0.0, 1.0);\n"
 
-"    for (int i = 0; i < 10; i++)\n"
-"    {\n"
-"      sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * samples[i] * strength * pDist );\n"
-"    }\n"
+"	 //the following ugliness is due to ATI's drivers inablity to handle a simple for-loop!
+"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.06 * strength * pDist );\n"
+"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.05 * strength * pDist );\n"
+"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.03 * strength * pDist );\n"
+"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.02 * strength * pDist );\n"
+"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * -0.01 * strength * pDist );\n"
+"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.01 * strength * pDist );\n"
+"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.02 * strength * pDist );\n"
+"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.03 * strength * pDist );\n"
+"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.05 * strength * pDist );\n"
+"    sum += texture2D( rtextureSource, gl_TexCoord[0].xy + dir * 0.06 * strength * pDist );\n"
 
 "    sum *= 1.0/11.0;\n"
  

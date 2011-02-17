@@ -1371,6 +1371,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/bots/martianenforcer/default_i.jpg \
 	data1/pics/bots/martianenforcer/gamara_i.jpg \
 	data1/pics/bots/martianenforcer/red_i.jpg \
+	data1/pics/blood_ring.tga \
 	data1/pics/ch1.tga \
 	data1/pics/ch2.tga \
 	data1/pics/ch3.tga \
@@ -3142,6 +3143,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/evil/e6launchengine_nm.tga \
 	data1/textures/evil/e6launchengine.tga \
 	data1/textures/evil/e6metalfan.tga \
+	data1/textures/evil/e6supptrim128_hm.tga \
+	data1/textures/evil/e6supptrim128_nm.tga \
 	data1/textures/evil/e6supptrim128.tga \
 	data1/textures/evil/e6trim_basic128_nm.tga \
 	data1/textures/evil/e6trim_basic128.tga \
