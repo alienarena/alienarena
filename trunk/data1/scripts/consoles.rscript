@@ -64,3 +64,36 @@ vehicles/strafer/console
 		nolightmap
 	}
 }
+pics/hud_strafer
+{
+	{
+		map pics/hud_strafer_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 5 0.0 0.8
+		nolightmap
+	}
+}
+pics/hud_bomber
+{
+	{
+		map pics/hud_bomber_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 5 0.0 0.8
+		nolightmap
+	}
+}
+pics/hud_hover
+{
+	{
+		map pics/hud_hover_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 0
+		alphashift 5 0.0 0.8
+		nolightmap
+	}
+}
