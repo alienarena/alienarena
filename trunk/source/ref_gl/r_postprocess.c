@@ -35,8 +35,6 @@ void R_DrawBloodEffect (void);
 image_t *r_framebuffer;
 image_t *r_distortwave;
 
-float	twodvert_array[MAX_ARRAY][3];
-
 vec3_t r_explosionOrigin;
 int r_drawing_fbeffect;
 int	r_fbFxType;
@@ -129,13 +127,13 @@ void R_GLSLPostProcess(void)
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
-	VA_SetElem2(twodvert_array[0],0, viddef.height);
-	VA_SetElem2(twodvert_array[1],viddef.width-offsetX, viddef.height);
-	VA_SetElem2(twodvert_array[2],viddef.width-offsetX, offsetY);
-	VA_SetElem2(twodvert_array[3],0, offsetY);
+	VA_SetElem2(vert_array[0],0, viddef.height);
+	VA_SetElem2(vert_array[1],viddef.width-offsetX, viddef.height);
+	VA_SetElem2(vert_array[2],viddef.width-offsetX, offsetY);
+	VA_SetElem2(vert_array[3],0, offsetY);
 
 	VA_SetElem2(tex_array[0],r_framebuffer->sl, r_framebuffer->tl);
 	VA_SetElem2(tex_array[1],r_framebuffer->sh, r_framebuffer->tl);
@@ -327,13 +325,13 @@ void R_ShadowBlend(float alpha)
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
 		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 		qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
-		VA_SetElem2(twodvert_array[0],0, vid.height);
-		VA_SetElem2(twodvert_array[1],vid.width, vid.height);
-		VA_SetElem2(twodvert_array[2],vid.width, 0);
-		VA_SetElem2(twodvert_array[3],0, 0);
+		VA_SetElem2(vert_array[0],0, vid.height);
+		VA_SetElem2(vert_array[1],vid.width, vid.height);
+		VA_SetElem2(vert_array[2],vid.width, 0);
+		VA_SetElem2(vert_array[3],0, 0);
 
 		VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
 		VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
@@ -352,13 +350,13 @@ void R_ShadowBlend(float alpha)
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
 		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 		qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
-		VA_SetElem2(twodvert_array[0],0, vid.height);
-		VA_SetElem2(twodvert_array[1],vid.width, vid.height);
-		VA_SetElem2(twodvert_array[2],vid.width, 0);
-		VA_SetElem2(twodvert_array[3],0, 0);
+		VA_SetElem2(vert_array[0],0, vid.height);
+		VA_SetElem2(vert_array[1],vid.width, vid.height);
+		VA_SetElem2(vert_array[2],vid.width, 0);
+		VA_SetElem2(vert_array[3],0, 0);
 
 		VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
 		VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
@@ -436,6 +434,10 @@ extern cvar_t *cl_vehicle_huds;
 void R_DrawVehicleHUD (void)
 {	
 	image_t *gl = NULL;
+	rscript_t *rs = NULL;
+	float	alpha;
+	rs_stage_t *stage;
+	char shortname[MAX_QPATH];
 	
 	//draw image over screen
 	if(!cl_vehicle_huds->value)
@@ -463,7 +465,7 @@ void R_DrawVehicleHUD (void)
 		return;
 	}
 
-	qglEnable (GL_BLEND);
+	GLSTATE_ENABLE_BLEND
 
 	qglActiveTextureARB(GL_TEXTURE0);
 	qglBindTexture(GL_TEXTURE_2D, gl->texnum);
@@ -472,13 +474,13 @@ void R_DrawVehicleHUD (void)
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
-	VA_SetElem2(twodvert_array[0],0, 0);
-	VA_SetElem2(twodvert_array[1],vid.width, 0);
-	VA_SetElem2(twodvert_array[2],vid.width, vid.height);
-	VA_SetElem2(twodvert_array[3],0, vid.height);
+	VA_SetElem2(vert_array[0],0, 0);
+	VA_SetElem2(vert_array[1],vid.width, 0);
+	VA_SetElem2(vert_array[2],vid.width, vid.height);
+	VA_SetElem2(vert_array[3],0, vid.height);
 
 	VA_SetElem2(tex_array[0],gl->sl, gl->tl);
 	VA_SetElem2(tex_array[1],gl->sh, gl->tl);
@@ -486,18 +488,87 @@ void R_DrawVehicleHUD (void)
 	VA_SetElem2(tex_array[3],gl->sl, gl->th);
 
 	qglMatrixMode( GL_PROJECTION );
-    qglLoadIdentity ();
+	qglLoadIdentity ();
 	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
 	qglMatrixMode( GL_MODELVIEW );
-    qglLoadIdentity ();
+	qglLoadIdentity ();
 	
 	qglDrawArrays (GL_QUADS, 0, 4);
+	
+	COM_StripExtension ( gl->name, shortname );
+	rs=RS_FindScript(shortname);
+	
+	if(rs)
+	{
+		RS_ReadyScript(rs);
 
-	qglDisable (GL_BLEND);
+		stage=rs->stage;
+		while (stage)
+		{
+		
+			GLSTATE_ENABLE_BLEND
 
-	R_KillVArrays();	
+			alpha=1.0f;
+			if (stage->alphashift.min || stage->alphashift.speed)
+			{
+				if (!stage->alphashift.speed && stage->alphashift.min > 0)
+				{
+					alpha=stage->alphashift.min;
+				}
+				else if (stage->alphashift.speed)
+				{
+					alpha=sin(rs_realtime * stage->alphashift.speed);
+					alpha=(alpha+1)*0.5f;
+					if (alpha > stage->alphashift.max) alpha=stage->alphashift.max;
+					if (alpha < stage->alphashift.min) alpha=stage->alphashift.min;
+				}
+			}			
+			
+			qglEnableClientState (GL_VERTEX_ARRAY);
+			qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
-	//to do - add radar line effect(shader?)
+			qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
+			qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
+			qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+
+			VA_SetElem2(vert_array[0],0, 0);
+			VA_SetElem2(vert_array[1],vid.width, 0);
+			VA_SetElem2(vert_array[2],vid.width, vid.height);
+			VA_SetElem2(vert_array[3],0, vid.height);
+
+			qglColor4f(1,1,1, alpha);
+			VA_SetElem4(col_array[0], 1,1,1, alpha);
+			VA_SetElem4(col_array[1], 1,1,1, alpha);
+			VA_SetElem4(col_array[2], 1,1,1, alpha);
+			VA_SetElem4(col_array[3], 1,1,1, alpha);
+
+			if (stage->anim_count)
+				GL_Bind(RS_Animate(stage));
+			else
+				GL_Bind (stage->texture->texnum);
+
+			VA_SetElem2(tex_array[0],gl->sl, gl->tl);
+			VA_SetElem2(tex_array[1],gl->sh, gl->tl);
+			VA_SetElem2(tex_array[2],gl->sh, gl->th);
+			VA_SetElem2(tex_array[3],gl->sl, gl->th);
+
+			qglMatrixMode( GL_PROJECTION );
+			qglLoadIdentity ();
+			qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
+			qglMatrixMode( GL_MODELVIEW );
+			qglLoadIdentity ();
+
+			qglDrawArrays(GL_QUADS,0,4);
+
+			stage=stage->next;
+		}	
+	}
+	qglColor4f(1,1,1,1);
+	GLSTATE_ENABLE_ALPHATEST
+	GLSTATE_DISABLE_BLEND
+	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	R_KillVArrays();
 }
 
 void R_DrawBloodEffect (void)
@@ -520,13 +591,13 @@ void R_DrawBloodEffect (void)
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
-	VA_SetElem2(twodvert_array[0],0, 0);
-	VA_SetElem2(twodvert_array[1],vid.width, 0);
-	VA_SetElem2(twodvert_array[2],vid.width, vid.height);
-	VA_SetElem2(twodvert_array[3],0, vid.height);
+	VA_SetElem2(vert_array[0],0, 0);
+	VA_SetElem2(vert_array[1],vid.width, 0);
+	VA_SetElem2(vert_array[2],vid.width, vid.height);
+	VA_SetElem2(vert_array[3],0, vid.height);
 
 	VA_SetElem2(tex_array[0],gl->sl, gl->tl);
 	VA_SetElem2(tex_array[1],gl->sh, gl->tl);
