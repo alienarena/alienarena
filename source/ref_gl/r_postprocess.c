@@ -35,8 +35,6 @@ void R_DrawBloodEffect (void);
 image_t *r_framebuffer;
 image_t *r_distortwave;
 
-float	twodvert_array[MAX_ARRAY][3];
-
 vec3_t r_explosionOrigin;
 int r_drawing_fbeffect;
 int	r_fbFxType;
@@ -129,13 +127,13 @@ void R_GLSLPostProcess(void)
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
-	VA_SetElem2(twodvert_array[0],0, viddef.height);
-	VA_SetElem2(twodvert_array[1],viddef.width-offsetX, viddef.height);
-	VA_SetElem2(twodvert_array[2],viddef.width-offsetX, offsetY);
-	VA_SetElem2(twodvert_array[3],0, offsetY);
+	VA_SetElem2(vert_array[0],0, viddef.height);
+	VA_SetElem2(vert_array[1],viddef.width-offsetX, viddef.height);
+	VA_SetElem2(vert_array[2],viddef.width-offsetX, offsetY);
+	VA_SetElem2(vert_array[3],0, offsetY);
 
 	VA_SetElem2(tex_array[0],r_framebuffer->sl, r_framebuffer->tl);
 	VA_SetElem2(tex_array[1],r_framebuffer->sh, r_framebuffer->tl);
@@ -327,13 +325,13 @@ void R_ShadowBlend(float alpha)
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
 		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 		qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
-		VA_SetElem2(twodvert_array[0],0, vid.height);
-		VA_SetElem2(twodvert_array[1],vid.width, vid.height);
-		VA_SetElem2(twodvert_array[2],vid.width, 0);
-		VA_SetElem2(twodvert_array[3],0, 0);
+		VA_SetElem2(vert_array[0],0, vid.height);
+		VA_SetElem2(vert_array[1],vid.width, vid.height);
+		VA_SetElem2(vert_array[2],vid.width, 0);
+		VA_SetElem2(vert_array[3],0, 0);
 
 		VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
 		VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
@@ -352,13 +350,13 @@ void R_ShadowBlend(float alpha)
 		qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
 		qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+		qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 		qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
-		VA_SetElem2(twodvert_array[0],0, vid.height);
-		VA_SetElem2(twodvert_array[1],vid.width, vid.height);
-		VA_SetElem2(twodvert_array[2],vid.width, 0);
-		VA_SetElem2(twodvert_array[3],0, 0);
+		VA_SetElem2(vert_array[0],0, vid.height);
+		VA_SetElem2(vert_array[1],vid.width, vid.height);
+		VA_SetElem2(vert_array[2],vid.width, 0);
+		VA_SetElem2(vert_array[3],0, 0);
 
 		VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
 		VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
@@ -476,7 +474,7 @@ void R_DrawVehicleHUD (void)
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
 	VA_SetElem2(vert_array[0],0, 0);
@@ -530,7 +528,7 @@ void R_DrawVehicleHUD (void)
 			qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
 			qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-			qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+			qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 			qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
 			VA_SetElem2(vert_array[0],0, 0);
@@ -593,13 +591,13 @@ void R_DrawBloodEffect (void)
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
 
 	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
-	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), twodvert_array[0]);
+	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
 	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
 
-	VA_SetElem2(twodvert_array[0],0, 0);
-	VA_SetElem2(twodvert_array[1],vid.width, 0);
-	VA_SetElem2(twodvert_array[2],vid.width, vid.height);
-	VA_SetElem2(twodvert_array[3],0, vid.height);
+	VA_SetElem2(vert_array[0],0, 0);
+	VA_SetElem2(vert_array[1],vid.width, 0);
+	VA_SetElem2(vert_array[2],vid.width, vid.height);
+	VA_SetElem2(vert_array[3],0, vid.height);
 
 	VA_SetElem2(tex_array[0],gl->sl, gl->tl);
 	VA_SetElem2(tex_array[1],gl->sh, gl->tl);
