@@ -584,7 +584,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 		r_normalsurfaces = surf;
 	}
 	
-	if(gl_state.vbo && surf->has_vbo) 
+	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
 	{
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
 
@@ -657,7 +657,7 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 
 	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
 	
-	if(gl_state.vbo && surf->has_vbo) 
+	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
 	{
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
 
@@ -740,7 +740,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 	
 	glUniformMatrix3fvARB( g_tangentSpaceTransform,	1, GL_FALSE, (const GLfloat *) surf->tangentSpaceTransform );
 	
-	if(gl_state.vbo && surf->has_vbo) 
+	if(gl_state.vbo && surf->has_vbo && !(surf->texinfo->flags & SURF_FLOWING)) 
 	{
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, vboId);
 
