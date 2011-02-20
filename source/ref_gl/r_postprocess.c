@@ -40,7 +40,6 @@ int r_drawing_fbeffect;
 int	r_fbFxType;
 float r_fbeffectTime;
 int frames;
-int fbSampleSize;
 
 void R_GLSLPostProcess(void)
 {
@@ -114,11 +113,6 @@ void R_GLSLPostProcess(void)
 
 	offsetY = viddef.height - FB_texture_height;
 	offsetX = viddef.width - FB_texture_width;
-		
-	if(FB_texture_width == FB_texture_height)
-		fbSampleSize = 2;
-	else
-		fbSampleSize = 1;
 
 	hScissor = (float)viddef.height/(float)FB_texture_height;
 	wScissor = (float)viddef.width/(float)FB_texture_width;
@@ -152,7 +146,8 @@ void R_GLSLPostProcess(void)
 
 		qglActiveTextureARB(GL_TEXTURE0);
 	
-		qglBindTexture(GL_TEXTURE_2D, r_distortwave->texnum);
+		if(r_distortwave)
+			qglBindTexture(GL_TEXTURE_2D, r_distortwave->texnum);
 		glUniform1iARB( g_location_distortTex, 0);
 		KillFlags |= KILL_TMU1_POINTER;
 
@@ -165,22 +160,14 @@ void R_GLSLPostProcess(void)
 		//get position of focal point of warp
 		R_TransformVectorToScreen(&r_newrefdef, r_explosionOrigin, fxScreenPos);
 
-		fxScreenPos[0] /= viddef.width;
+		fxScreenPos[0] /= viddef.width; 
 		fxScreenPos[1] /= viddef.height;
 
-		if(fbSampleSize == 2)
-		{
-			fxScreenPos[0] -= 0.05;
-			fxScreenPos[1] -= 0.5;
-		}
-		else
-		{		
-			fxScreenPos[0] -= 0.5;
-			fxScreenPos[1] -= 0.05;
-		}
+		fxScreenPos[0] -= (0.5 + (abs((float)offsetX)/1024.0)*0.25); 
+		fxScreenPos[1] -= (0.5 + (abs((float)offsetY)/1024.0)*0.15); 
 
-		fxScreenPos[0] -= (float)frames*.02;
-		fxScreenPos[1] -= (float)frames*.02;
+		fxScreenPos[0] -= (float)frames*.001;
+		fxScreenPos[1] -= (float)frames*.001;
 		glUniform2fARB( g_location_fxPos, fxScreenPos[0], fxScreenPos[1]);
 		
 		qglDrawArrays (GL_QUADS, 0, 4);
@@ -423,10 +410,6 @@ void R_FB_InitTextures( void )
 
 	//init the distortion textures - to do move this to r_misc?
 	r_distortwave = GL_FindImage("gfx/distortwave.jpg",it_pic);
-	if (!r_distortwave)
-		r_distortwave = GL_LoadPic ("***r_notexture***", (byte *)data, 16, 16, it_wall, 32);
-
-	fbSampleSize = 1; 
 }
 
 extern int vehicle_hud;
