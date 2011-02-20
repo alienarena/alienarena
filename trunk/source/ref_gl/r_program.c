@@ -745,10 +745,10 @@ static char fb_fragment_program[] =
 "	float wScissor;\n"
 "	float hScissor;\n"
 
-"    displacement = gl_TexCoord[0].st;\n"
+"   displacement = gl_TexCoord[0].st;\n"
 
-"	displacement.x -= fxPos.x*0.1;\n"
-"	displacement.y -= fxPos.y*0.1;\n"
+"	displacement.x -= fxPos.x;\n"
+"	displacement.y -= fxPos.y;\n"
 
 "	noiseVec = normalize(texture2D(distortiontexture, displacement.xy)).xyz;\n"
 "	noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"
