@@ -1,5 +1,8 @@
 /* config/config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Enable ANSI terminal color codes in stdout */
+#undef ANSI_COLOR
+
 /* Enable buffer debugging */
 #undef BUFFER_DEBUG
 

@@ -337,10 +337,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/violatorfx.tga \
 	data1/gfx/water/distort1.tga \
 	data1/gfx/water/normal1.tga \
-	data1/gfx/w_distortwave.jpg \
-	data1/gfx/w_flash_noise.jpg \
-	data1/gfx/wt_distortwave.jpg \
-	data1/gfx/wt_flash_noise.jpg \
 	data1/gfx/yellowline.tga \
 	data1/levelshots/aoa-atlantis.jpg \
 	data1/levelshots/aoa-atlantis.txt \
@@ -1118,8 +1114,11 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/grapple.tga \
 	data1/pics/help.tga \
 	data1/pics/hover.tga \
+	data1/pics/hud_bomber_fx.tga \
 	data1/pics/hud_bomber.tga \
+	data1/pics/hud_hover_fx.tga \
 	data1/pics/hud_hover.tga \
+	data1/pics/hud_strafer_fx.tga \
 	data1/pics/hud_strafer.tga \
 	data1/pics/huds/20061.tga \
 	data1/pics/huds/20062.tga \
@@ -1315,6 +1314,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/commander/weapon.iqm \
 	data1/players/commander/weapon.jpg \
 	data1/players/commander/weapon.md2 \
+	data1/players/commander/weapon.skin \
 	data1/players/commander/w_hyperblaster.iqm \
 	data1/players/commander/w_hyperblaster.md2 \
 	data1/players/commander/w_hyperblaster.skin \
@@ -1391,6 +1391,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/enforcer/weapon.iqm \
 	data1/players/enforcer/weapon.jpg \
 	data1/players/enforcer/weapon.md2 \
+	data1/players/enforcer/weapon.skin \
 	data1/players/enforcer/w_hyperblaster.iqm \
 	data1/players/enforcer/w_hyperblaster.md2 \
 	data1/players/enforcer/w_hyperblaster.skin \
@@ -1461,6 +1462,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/lauren/weapon.iqm \
 	data1/players/lauren/weapon.jpg \
 	data1/players/lauren/weapon.md2 \
+	data1/players/lauren/weapon.skin \
 	data1/players/lauren/w_hyperblaster.iqm \
 	data1/players/lauren/w_hyperblaster.md2 \
 	data1/players/lauren/w_hyperblaster.skin \
@@ -1530,6 +1532,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martiancyborg/weapon.iqm \
 	data1/players/martiancyborg/weapon.jpg \
 	data1/players/martiancyborg/weapon.md2 \
+	data1/players/martiancyborg/weapon.skin \
 	data1/players/martiancyborg/w_hyperblaster.iqm \
 	data1/players/martiancyborg/w_hyperblaster.md2 \
 	data1/players/martiancyborg/w_hyperblaster.skin \
@@ -1609,6 +1612,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martianenforcer/weapon.iqm \
 	data1/players/martianenforcer/weapon.jpg \
 	data1/players/martianenforcer/weapon.md2 \
+	data1/players/martianenforcer/weapon.skin \
 	data1/players/martianenforcer/w_hyperblaster.iqm \
 	data1/players/martianenforcer/w_hyperblaster.md2 \
 	data1/players/martianenforcer/w_hyperblaster.skin \
@@ -1674,6 +1678,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/slashbot/weapon.iqm \
 	data1/players/slashbot/weapon.jpg \
 	data1/players/slashbot/weapon.md2 \
+	data1/players/slashbot/weapon.skin \
 	data1/players/slashbot/w_hyperblaster.iqm \
 	data1/players/slashbot/w_hyperblaster.md2 \
 	data1/players/slashbot/w_hyperblaster.skin \
