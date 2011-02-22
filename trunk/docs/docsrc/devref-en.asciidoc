@@ -350,7 +350,96 @@ install-exec' to limit copying to the executables.
 
 === Configure options ===
 
-TODO.
+Run `./configure --help` to see all 'configure' options. These
+are 'configure' options added for Alien Arena.
+
+--disable-client::
+  build dedicated server only, not the client (default:no)
+
+--enable-alternate-install::
+  traditional single directory, in-place installation
+  (default:no)
+
+--enable-ansi-color::
+  ANSI terminal color (default: no) Added after 7.50.
+
+--enable-debugging-symbols::
+  Compile Alien Arena with full debugging information
+  (default:no)
+
+--enable-full-warnings::
+  Display all compiler warnings (default:no)
+
+--enable-irc-debugging::
+  Debug IRC messages (default: no)
+
+--enable-buffer-debugging::
+  Debug buffers (default: no)
+
+--enable-paranoid-io::
+  Activate paranoid, speed-sapping message checking (default:
+  no)
+
+--enable-assert-statements::
+  Enable debug assert() statements (default: no)
+
+--disable-build-status::
+  hide  the  status message at the end of the configuration
+  script (default:no)
+
+--with(out)-xf86vm::
+  include XF86 VidMode support (default: check)
+
+--with(out)-xf86dga::
+  include XF86 DGA support (default: check) The default may
+  be changed to `without` in a version after 7.50.
+
+
+=== GCC Compiler Options ===
+
+Linux distro's use a variety of different gcc compile
+options. These can give more error warnings; and in rare cases
+program errors.
+
+Also for users who compile from source, there are CPU
+dependendent options that might give better performance. Might
+be good to document some of these in the README.
+
+O2::
+O3::
+  O3 produces different warning messages.
+  
+m32::
+m64::
+  TBD.
+
+march::
+mtune::
+  Set for specific architectures. Might give better performance
+  than generic builds. For instance, `-march=core2` enables
+  higher performance features.
+    
+mfpmath::
+  Testing shows that `-mfpmath=sse` gives better performance.    
+    
+Wp::
+  TBD.
+  
+FORTIFY_SOURCE::
+  From fedora: `-Wp,D_FORTIFY_SOURCE=2` TBD.
+  
+fexceptions::
+  TBD.      
+
+fstack-protector::
+  TBD.
+  
+param::
+  From fedora: `--param=ssp-buffer-size=4`. TBD.
+  
+fasynchronous-unwind-tables::
+  From fedora. TBD.
+
 
 === Generating an Archive Package for Distribution ===
 
@@ -498,4 +587,7 @@ The Autotools build has experimental support for Mac OS X
 using the Darwin X11 environment. There are reports of some
 progress with this using MacPorts and Homebrew.
 
+In February 2011, a native port to Mac OS X was developed.
+Details and test results to be reported as they become
+available.
 

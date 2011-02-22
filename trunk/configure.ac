@@ -161,6 +161,13 @@ AM_COND_IF([BUILD_UNIX],
 			[AC_DEFINE([LINUX_SPECIAL_CASE],1,[linux-specific conditional compile])],
 		[ generic ]
 			[AC_DEFINE([GENERIC_UNIX],1,[non-specific unix conditional compile])])
+			
+	AC_ARG_ENABLE([ansi-color],
+	[AS_HELP_STRING([--enable-ansi-color],[ANSI terminal color (default: no)])],
+	[ansi_color=${enableval}],[ansi_color=no])
+	AS_IF([ test "x$ansi_color" = "xyes" ],[
+		AC_DEFINE([ANSI_COLOR],1,[Enable ANSI terminal color codes in stdout])
+		])
 	])
 
 AM_COND_IF([BUILD_WIN32],
@@ -497,6 +504,7 @@ AS_IF([test "x$hide_status" = "xno"],[
 	AM_COND_IF([BUILD_WIN32],,[
 		AS_IF([ test "x$build_client" = "xyes" ],[dedicated_only=no],[dedicated_only=yes])
 		AS_ECHO([" Dedicated Only: ........ ${dedicated_only}"])
+		AS_ECHO([" ANSI Color Codes: ...... ${ansi_color}"])
 	])
 	AS_IF([ test x"${unix_host}" = xdarwin ],[	
 		AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])

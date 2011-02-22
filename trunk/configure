@@ -737,6 +737,7 @@ enable_dependency_tracking
 with_x
 enable_client
 enable_alternate_install
+enable_ansi_color
 with_xf86vm
 with_xf86dga
 enable_debugging_symbols
@@ -1406,6 +1407,7 @@ Optional Features:
   --enable-alternate-install
                           traditional single directory, in-place installation
                           (default:no)
+  --enable-ansi-color     ANSI terminal color (default: no)
   --enable-debugging-symbols
                           Compile Alien Arena with full debugging information
                           (default:no)
@@ -5369,6 +5371,21 @@ $as_echo "#define LINUX_SPECIAL_CASE 1" >>confdefs.h
 $as_echo "#define GENERIC_UNIX 1" >>confdefs.h
  ;;
 esac
+
+	# Check whether --enable-ansi-color was given.
+if test "${enable_ansi_color+set}" = set; then :
+  enableval=$enable_ansi_color; ansi_color=${enableval}
+else
+  ansi_color=no
+fi
+
+	if  test "x$ansi_color" = "xyes" ; then :
+
+
+$as_echo "#define ANSI_COLOR 1" >>confdefs.h
+
+
+fi
 
 fi
 
@@ -9558,6 +9575,7 @@ else
   dedicated_only=yes
 fi
 		$as_echo " Dedicated Only: ........ ${dedicated_only}"
+		$as_echo " ANSI Color Codes: ...... ${ansi_color}"
 
 fi
 	if  test x"${unix_host}" = xdarwin ; then :
