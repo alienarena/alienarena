@@ -6144,11 +6144,17 @@ static void PlayerConfig_ScanDirectories( void )
 		strcat( scratch, "/tris.md2" );
 		if (!FS_FileExists(scratch))
 		{
-			free( dirnames[i] );
-			dirnames[i] = 0;
-			continue;
+			//try for tris.iqm if no md2
+			strcpy( scratch, dirnames[i] );
+			strcat( scratch, "/tris.iqm" );
+			if (!FS_FileExists(scratch))
+			{
+				free( dirnames[i] );
+				dirnames[i] = 0;
+				continue;
+			}
 		}
-
+		
 		// verify the existence of at least one skin(note, do not mix .tga and .jpeg)
 		strcpy( scratch, dirnames[i] );
 		strcat( scratch, "/*.jpg" );
