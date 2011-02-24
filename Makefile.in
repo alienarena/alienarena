@@ -450,6 +450,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-turbo2k8.nod \
 	botinfo/nav/dm-vesuvius.nod \
 	botinfo/nav/dm-violator.nod \
+	botinfo/nav/dm-violator2k11.nod \
 	botinfo/nav/dm-warmachine2k10.nod \
 	botinfo/nav/dm-zion2k9.nod \
 	botinfo/nav/dm-zorn.nod \
