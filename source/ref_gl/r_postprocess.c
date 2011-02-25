@@ -488,9 +488,6 @@ void R_DrawVehicleHUD (void)
 		stage=rs->stage;
 		while (stage)
 		{
-		
-			GLSTATE_ENABLE_BLEND
-
 			alpha=1.0f;
 			if (stage->alphashift.min || stage->alphashift.speed)
 			{
@@ -547,9 +544,7 @@ void R_DrawVehicleHUD (void)
 		}	
 	}
 	qglColor4f(1,1,1,1);
-	GLSTATE_ENABLE_ALPHATEST
 	GLSTATE_DISABLE_BLEND
-	GL_BlendFunction (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	R_KillVArrays();
 }
