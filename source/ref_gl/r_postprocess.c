@@ -448,7 +448,9 @@ void R_DrawVehicleHUD (void)
 		return;
 	}
 
-	GLSTATE_ENABLE_BLEND
+	GL_TexEnv(GL_MODULATE);
+	qglEnable (GL_BLEND);
+	qglBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	qglActiveTextureARB(GL_TEXTURE0);
 	qglBindTexture(GL_TEXTURE_2D, gl->texnum);
@@ -481,13 +483,16 @@ void R_DrawVehicleHUD (void)
 	COM_StripExtension ( gl->name, shortname );
 	rs=RS_FindScript(shortname);
 	
-	if(rs)
+	if(r_shaders->value && rs)
 	{
 		RS_ReadyScript(rs);
 
 		stage=rs->stage;
 		while (stage)
 		{
+			//change to use shader def
+			qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 			alpha=1.0f;
 			if (stage->alphashift.min || stage->alphashift.speed)
 			{
@@ -544,7 +549,9 @@ void R_DrawVehicleHUD (void)
 		}	
 	}
 	qglColor4f(1,1,1,1);
-	GLSTATE_DISABLE_BLEND
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	qglDisable (GL_BLEND);
+	GL_TexEnv(GL_REPLACE);
 
 	R_KillVArrays();
 }

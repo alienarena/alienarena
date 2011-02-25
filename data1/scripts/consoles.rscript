@@ -60,7 +60,7 @@ vehicles/strafer/console
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
-		alphashift 5 0.2 0.8
+		alphashift 5 0.0 0.99
 		nolightmap
 	}
 }
@@ -71,7 +71,7 @@ pics/hud_strafer
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
-		alphashift 5 0.0 0.8
+		alphashift 5 0.0 0.99
 		nolightmap
 	}
 }
@@ -82,7 +82,7 @@ pics/hud_bomber
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
-		alphashift 5 0.0 0.8
+		alphashift 5 0.0 0.99
 		nolightmap
 	}
 }
@@ -93,7 +93,7 @@ pics/hud_hover
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scale static 1 static 1
 		scroll static 0 static 0
-		alphashift 5 0.0 0.8
+		alphashift 5 0.0 0.99
 		nolightmap
 	}
 }
