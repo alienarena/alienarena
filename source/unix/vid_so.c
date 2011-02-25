@@ -61,10 +61,9 @@ simply by setting the modified flag for the vid_ref variable, which will
 cause the entire video mode and refresh DLL to be reset on the next frame.
 ============
 */
-extern void    Mod_FreeAll (void);
+
 void VID_Restart_f (void)
 {
-	Mod_FreeAll ();
 	vid_restart = true;
 }
 

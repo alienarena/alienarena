@@ -56,8 +56,6 @@ extern void M_ForceMenuOff( void );
 
 extern void RS_FreeUnmarked( void );
 
-extern void Mod_FreeAll (void);
-
 #if defined UNIX_VARIANT
 extern qboolean vid_restart;
 #endif
@@ -364,7 +362,6 @@ static void ApplyChanges( void *unused )
 	RS_FreeUnmarked();
 	Cvar_SetValue("scriptsloaded", 0); //scripts get flushed
 
-	Mod_FreeAll();
 	vid_ref->modified = true;
 #if defined UNIX_VARIANT
 	vid_restart = true;
