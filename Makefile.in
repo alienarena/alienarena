@@ -391,6 +391,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-titan2k8.tmp \
 	botinfo/dm-turbo2k8.tmp \
 	botinfo/dm-vesuvius.tmp \
+	botinfo/dm-vesuvius2k11.tmp \
 	botinfo/dm-violator.tmp \
 	botinfo/dm-violator2k11.tmp \
 	botinfo/dm-warmachine2k10.tmp \
@@ -449,6 +450,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-titan2k8.nod \
 	botinfo/nav/dm-turbo2k8.nod \
 	botinfo/nav/dm-vesuvius.nod \
+	botinfo/nav/dm-vesuvius2k11.nod \
 	botinfo/nav/dm-violator.nod \
 	botinfo/nav/dm-violator2k11.nod \
 	botinfo/nav/dm-warmachine2k10.nod \
@@ -744,6 +746,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-turbo2k8.txt \
 	data1/levelshots/dm-vesuvius.jpg \
 	data1/levelshots/dm-vesuvius.txt \
+	data1/levelshots/dm-vesuvius2k11.jpg \
+	data1/levelshots/dm-vesuvius2k11.txt \
 	data1/levelshots/dm-violator.jpg \
 	data1/levelshots/dm-violator.txt \
 	data1/levelshots/dm-violator2k11.jpg \
@@ -820,6 +824,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-titan2k8.bsp \
 	data1/maps/dm-turbo2k8.bsp \
 	data1/maps/dm-vesuvius.bsp \
+	data1/maps/dm-vesuvius2k11.bsp \
 	data1/maps/dm-violator.bsp \
 	data1/maps/dm-violator2k11.bsp \
 	data1/maps/dm-warmachine2k10.bsp \
@@ -1153,6 +1158,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-turbo2k8.mus \
 	data1/maps/scripts/dm-vesuvius.fog \
 	data1/maps/scripts/dm-vesuvius.mus \
+	data1/maps/scripts/dm-vesuvius2k11.fog \
+	data1/maps/scripts/dm-vesuvius2k11.mus \
 	data1/maps/scripts/dm-violator.mus \
 	data1/maps/scripts/dm-violator2k11.mus \
 	data1/maps/scripts/dm-violator2k11.fog \
@@ -2054,6 +2061,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-titan2k8.rscript \
 	data1/scripts/maps/dm-turbo2k8.rscript \
 	data1/scripts/maps/dm-vesuvius.rscript \
+	data1/scripts/maps/dm-vesuvius2k11.rscript \
 	data1/scripts/maps/dm-violator.rscript \
 	data1/scripts/maps/dm-violator2k11.rscript \
 	data1/scripts/maps/dm-warmachine2k10.rscript \
