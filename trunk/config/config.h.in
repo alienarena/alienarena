@@ -12,6 +12,14 @@
 /* Canonical CPU identification */
 #undef CPUSTRING
 
+/* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
+   systems. This function is required for `alloca.c' support on those systems.
+   */
+#undef CRAY_STACKSEG_END
+
+/* Define to 1 if using `alloca.c'. */
+#undef C_ALLOCA
+
 /* darwin-specific conditional compile */
 #undef DARWIN_SPECIAL_CASE
 
@@ -23,6 +31,13 @@
 
 /* Define to 1 if you have the <alc.h> header file. */
 #undef HAVE_ALC_H
+
+/* Define to 1 if you have `alloca', as a function or macro. */
+#undef HAVE_ALLOCA
+
+/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
+   */
+#undef HAVE_ALLOCA_H
 
 /* Define to 1 if you have the <AL/alc.h> header file. */
 #undef HAVE_AL_ALC_H
@@ -81,6 +96,9 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the `isascii' function. */
+#undef HAVE_ISASCII
+
 /* Define to 1 if you have the <jpeglib.h> header file. */
 #undef HAVE_JPEGLIB_H
 
@@ -123,6 +141,9 @@
 
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
+
+/* Define to 1 if libc includes obstacks. */
+#undef HAVE_OBSTACK
 
 /* Define to 1 if you have the <OpenAL/alc.h> header file. */
 #undef HAVE_OPENAL_ALC_H
@@ -327,6 +348,14 @@
    your system. */
 #undef PTHREAD_CREATE_JOINABLE
 
+/* If using the C implementation of alloca, define if you know the
+   direction of stack growth for your system; otherwise it will be
+   automatically deduced at runtime.
+	STACK_DIRECTION > 0 => grows toward higher addresses
+	STACK_DIRECTION < 0 => grows toward lower addresses
+	STACK_DIRECTION = 0 => direction of growth unknown */
+#undef STACK_DIRECTION
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
@@ -379,3 +408,8 @@
 /* Define to the type of an unsigned integer type of width exactly 64 bits if
    such a type exists and the standard includes do not define it. */
 #undef uint64_t
+
+
+typedef int intP;
+#define dEpsilon DBL_EPSILON
+		

@@ -598,14 +598,21 @@ ac_header_list=
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+ODE_NODEBUG_FALSE
+ODE_NODEBUG_TRUE
 REMOVE_SYMBOLS_FALSE
 REMOVE_SYMBOLS_TRUE
+ALLOCA
 LIBOBJS
 EGREP
 GREP
+USE_SYSTEM_LIBODE_FALSE
+USE_SYSTEM_LIBODE_TRUE
 WIN32_LIBS
 DEPS_LIBS
 DEPS_CFLAGS
+ODE_LIBS
+ODE_CFLAGS
 XXF86DGA_LIBS
 XXF86DGA_CFLAGS
 XXF86VM_LIBS
@@ -738,6 +745,7 @@ with_x
 enable_client
 enable_alternate_install
 enable_ansi_color
+with_system_libode
 with_xf86vm
 with_xf86dga
 enable_debugging_symbols
@@ -746,6 +754,7 @@ enable_irc_debugging
 enable_buffer_debugging
 enable_paranoid_io
 enable_assert_statements
+enable_ode_debug
 enable_build_status
 '
       ac_precious_vars='build_alias
@@ -771,6 +780,8 @@ XXF86VM_CFLAGS
 XXF86VM_LIBS
 XXF86DGA_CFLAGS
 XXF86DGA_LIBS
+ODE_CFLAGS
+ODE_LIBS
 DEPS_CFLAGS
 DEPS_LIBS'
 
@@ -1421,6 +1432,9 @@ Optional Features:
   --enable-assert-statements
                           Enable debug assert() statements (default: no)
 
+  --enable-ode-debug      Enable debug code and assertion statements in
+                          integrated ODE (default:no)
+
   --disable-build-status  hide the status message at the end of the
                           configuration script (default:no)
 
@@ -1428,6 +1442,8 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-x                use the X Window System
+  --with(out)-system-libode
+                          use system-supplied libode (default:without)
   --with(out)-xf86vm      include XF86 VidMode support (default: check)
   --with(out)-xf86dga     include XF86 DGA support (default: check)
 
@@ -1459,6 +1475,8 @@ Some influential environment variables:
               C compiler flags for XXF86DGA, overriding pkg-config
   XXF86DGA_LIBS
               linker flags for XXF86DGA, overriding pkg-config
+  ODE_CFLAGS  C compiler flags for ODE, overriding pkg-config
+  ODE_LIBS    linker flags for ODE, overriding pkg-config
   DEPS_CFLAGS C compiler flags for DEPS, overriding pkg-config
   DEPS_LIBS   linker flags for DEPS, overriding pkg-config
 
@@ -5406,6 +5424,15 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+
+# Check whether --with-system-libode was given.
+if test "${with_system_libode+set}" = set; then :
+  withval=$with_system_libode; system_ode=${withval}
+else
+  system_ode=no
+fi
+
+
 #
 # Checks for libraries.
 #
@@ -6323,37 +6350,39 @@ fi
 
 fi
 
+										if  test "x$system_ode" = "xyes" ; then :
+
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for DEPS" >&5
-$as_echo_n "checking for DEPS... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ODE" >&5
+$as_echo_n "checking for ODE... " >&6; }
 
-if test -n "$DEPS_CFLAGS"; then
-    pkg_cv_DEPS_CFLAGS="$DEPS_CFLAGS"
+if test -n "$ODE_CFLAGS"; then
+    pkg_cv_ODE_CFLAGS="$ODE_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode libcurl ogg vorbis vorbisfile freetype2\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "ode libcurl ogg vorbis vorbisfile freetype2") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "ode") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_DEPS_CFLAGS=`$PKG_CONFIG --cflags "ode libcurl ogg vorbis vorbisfile freetype2" 2>/dev/null`
+  pkg_cv_ODE_CFLAGS=`$PKG_CONFIG --cflags "ode" 2>/dev/null`
 else
   pkg_failed=yes
 fi
  else
     pkg_failed=untried
 fi
-if test -n "$DEPS_LIBS"; then
-    pkg_cv_DEPS_LIBS="$DEPS_LIBS"
+if test -n "$ODE_LIBS"; then
+    pkg_cv_ODE_LIBS="$ODE_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode libcurl ogg vorbis vorbisfile freetype2\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "ode libcurl ogg vorbis vorbisfile freetype2") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"ode\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "ode") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_DEPS_LIBS=`$PKG_CONFIG --libs "ode libcurl ogg vorbis vorbisfile freetype2" 2>/dev/null`
+  pkg_cv_ODE_LIBS=`$PKG_CONFIG --libs "ode" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -6373,14 +6402,158 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        DEPS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "ode libcurl ogg vorbis vorbisfile freetype2" 2>&1`
+	        ODE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "ode" 2>&1`
         else
-	        DEPS_PKG_ERRORS=`$PKG_CONFIG --print-errors "ode libcurl ogg vorbis vorbisfile freetype2" 2>&1`
+	        ODE_PKG_ERRORS=`$PKG_CONFIG --print-errors "ode" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$ODE_PKG_ERRORS" >&5
+
+
+			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error "--with-system-libode specified, but the library or headers could not be found
+See \`config.log' for more details." "$LINENO" 5; }
+
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+			{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error "--with-system-libode specified, but the library or headers could not be found
+See \`config.log' for more details." "$LINENO" 5; }
+
+else
+	ODE_CFLAGS=$pkg_cv_ODE_CFLAGS
+	ODE_LIBS=$pkg_cv_ODE_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+
+else
+
+		ODE_CFLAGS=-DdDOUBLE
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing new_handler" >&5
+$as_echo_n "checking for library containing new_handler... " >&6; }
+if test "${ac_cv_search_new_handler+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char new_handler ();
+int
+main ()
+{
+return new_handler ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' stdc++; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_new_handler=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if test "${ac_cv_search_new_handler+set}" = set; then :
+  break
+fi
+done
+if test "${ac_cv_search_new_handler+set}" = set; then :
+
+else
+  ac_cv_search_new_handler=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_new_handler" >&5
+$as_echo "$ac_cv_search_new_handler" >&6; }
+ac_res=$ac_cv_search_new_handler
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
+
+
+fi
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for DEPS" >&5
+$as_echo_n "checking for DEPS... " >&6; }
+
+if test -n "$DEPS_CFLAGS"; then
+    pkg_cv_DEPS_CFLAGS="$DEPS_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcurl ogg vorbis vorbisfile freetype2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libcurl ogg vorbis vorbisfile freetype2") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_DEPS_CFLAGS=`$PKG_CONFIG --cflags "libcurl ogg vorbis vorbisfile freetype2" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$DEPS_LIBS"; then
+    pkg_cv_DEPS_LIBS="$DEPS_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libcurl ogg vorbis vorbisfile freetype2\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libcurl ogg vorbis vorbisfile freetype2") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_DEPS_LIBS=`$PKG_CONFIG --libs "libcurl ogg vorbis vorbisfile freetype2" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        DEPS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors "libcurl ogg vorbis vorbisfile freetype2" 2>&1`
+        else
+	        DEPS_PKG_ERRORS=`$PKG_CONFIG --print-errors "libcurl ogg vorbis vorbisfile freetype2" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$DEPS_PKG_ERRORS" >&5
 
-	as_fn_error "Package requirements (ode libcurl ogg vorbis vorbisfile freetype2) were not met:
+	as_fn_error "Package requirements (libcurl ogg vorbis vorbisfile freetype2) were not met:
 
 $DEPS_PKG_ERRORS
 
@@ -6423,10 +6596,19 @@ fi
 
 fi
 
+ if  test "x$system_ode" = "xyes" ; then
+  USE_SYSTEM_LIBODE_TRUE=
+  USE_SYSTEM_LIBODE_FALSE='#'
+else
+  USE_SYSTEM_LIBODE_TRUE='#'
+  USE_SYSTEM_LIBODE_FALSE=
+fi
+
+
+
 #
 # Checks for header files
 #
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
 $as_echo_n "checking for grep that handles long lines and -e... " >&6; }
 if test "${ac_cv_path_GREP+set}" = set; then :
@@ -6687,7 +6869,7 @@ fi
 done
 
 
-for ac_header in arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h unistd.h netdb.h termios.h sys/select.h
+for ac_header in  arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h netdb.h termios.h sys/select.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -6702,7 +6884,22 @@ fi
 done
 
 
-for ac_header in  dlfcn.h fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h sys/time.h sys/stat.h
+for ac_header in  inttypes.h stdint.h stddef.h stdlib.h unistd.h float.h limits.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+eval as_val=\$$as_ac_Header
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+for ac_header in  dlfcn.h fcntl.h malloc.h string.h sys/param.h sys/time.h sys/stat.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -7086,6 +7283,16 @@ _ACEOF
 ;;
   esac
 
+ac_fn_c_check_type "$LINENO" "ptrdiff_t" "ac_cv_type_ptrdiff_t" "$ac_includes_default"
+if test "x$ac_cv_type_ptrdiff_t" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_PTRDIFF_T 1
+_ACEOF
+
+
+fi
+
 
 #
 # Checks for library functions.
@@ -7123,6 +7330,196 @@ if test $ac_cv_lib_error_at_line = no; then
   *) LIBOBJS="$LIBOBJS error.$ac_objext"
  ;;
 esac
+
+fi
+
+# The Ultrix 4.2 mips builtin alloca declared by alloca.h only works
+# for constant arguments.  Useless!
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for working alloca.h" >&5
+$as_echo_n "checking for working alloca.h... " >&6; }
+if test "${ac_cv_working_alloca_h+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <alloca.h>
+int
+main ()
+{
+char *p = (char *) alloca (2 * sizeof (int));
+			  if (p) return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_working_alloca_h=yes
+else
+  ac_cv_working_alloca_h=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_working_alloca_h" >&5
+$as_echo "$ac_cv_working_alloca_h" >&6; }
+if test $ac_cv_working_alloca_h = yes; then
+
+$as_echo "#define HAVE_ALLOCA_H 1" >>confdefs.h
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for alloca" >&5
+$as_echo_n "checking for alloca... " >&6; }
+if test "${ac_cv_func_alloca_works+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#ifdef __GNUC__
+# define alloca __builtin_alloca
+#else
+# ifdef _MSC_VER
+#  include <malloc.h>
+#  define alloca _alloca
+# else
+#  ifdef HAVE_ALLOCA_H
+#   include <alloca.h>
+#  else
+#   ifdef _AIX
+ #pragma alloca
+#   else
+#    ifndef alloca /* predefined by HP cc +Olibcalls */
+char *alloca ();
+#    endif
+#   endif
+#  endif
+# endif
+#endif
+
+int
+main ()
+{
+char *p = (char *) alloca (1);
+				    if (p) return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_func_alloca_works=yes
+else
+  ac_cv_func_alloca_works=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_func_alloca_works" >&5
+$as_echo "$ac_cv_func_alloca_works" >&6; }
+
+if test $ac_cv_func_alloca_works = yes; then
+
+$as_echo "#define HAVE_ALLOCA 1" >>confdefs.h
+
+else
+  # The SVR3 libPW and SVR4 libucb both contain incompatible functions
+# that cause trouble.  Some versions do not even contain alloca or
+# contain a buggy version.  If you still want to use their alloca,
+# use ar to extract alloca.o from them instead of compiling alloca.c.
+
+ALLOCA=\${LIBOBJDIR}alloca.$ac_objext
+
+$as_echo "#define C_ALLOCA 1" >>confdefs.h
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether \`alloca.c' needs Cray hooks" >&5
+$as_echo_n "checking whether \`alloca.c' needs Cray hooks... " >&6; }
+if test "${ac_cv_os_cray+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#if defined CRAY && ! defined CRAY2
+webecray
+#else
+wenotbecray
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "webecray" >/dev/null 2>&1; then :
+  ac_cv_os_cray=yes
+else
+  ac_cv_os_cray=no
+fi
+rm -f conftest*
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_os_cray" >&5
+$as_echo "$ac_cv_os_cray" >&6; }
+if test $ac_cv_os_cray = yes; then
+  for ac_func in _getb67 GETB67 getb67; do
+    as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+eval as_val=\$$as_ac_var
+   if test "x$as_val" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define CRAY_STACKSEG_END $ac_func
+_ACEOF
+
+    break
+fi
+
+  done
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking stack direction for C alloca" >&5
+$as_echo_n "checking stack direction for C alloca... " >&6; }
+if test "${ac_cv_c_stack_direction+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  ac_cv_c_stack_direction=0
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int
+find_stack_direction ()
+{
+  static char *addr = 0;
+  auto char dummy;
+  if (addr == 0)
+    {
+      addr = &dummy;
+      return find_stack_direction ();
+    }
+  else
+    return (&dummy > addr) ? 1 : -1;
+}
+
+int
+main ()
+{
+  return find_stack_direction () < 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  ac_cv_c_stack_direction=1
+else
+  ac_cv_c_stack_direction=-1
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_stack_direction" >&5
+$as_echo "$ac_cv_c_stack_direction" >&6; }
+cat >>confdefs.h <<_ACEOF
+#define STACK_DIRECTION $ac_cv_c_stack_direction
+_ACEOF
+
 
 fi
 
@@ -7461,9 +7858,53 @@ $as_echo "#define realloc rpl_realloc" >>confdefs.h
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for obstacks" >&5
+$as_echo_n "checking for obstacks... " >&6; }
+if test "${ac_cv_func_obstack+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+		      #include "obstack.h"
+int
+main ()
+{
+struct obstack mem;
+		       #define obstack_chunk_alloc malloc
+		       #define obstack_chunk_free free
+		       obstack_init (&mem);
+		       obstack_free (&mem, 0);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_func_obstack=yes
+else
+  ac_cv_func_obstack=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_func_obstack" >&5
+$as_echo "$ac_cv_func_obstack" >&6; }
+if test $ac_cv_func_obstack = yes; then
+
+$as_echo "#define HAVE_OBSTACK 1" >>confdefs.h
+
+else
+  case " $LIBOBJS " in
+  *" obstack.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS obstack.$ac_objext"
+ ;;
+esac
+
+fi
+
 
 # network functions
-for ac_func in closesocket socket gethostbyname
+for ac_func in closesocket socket gethostbyname select
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -7493,7 +7934,7 @@ done
 
 
 # string functions
-for ac_func in strchr strerror strrchr strstr strlcpy
+for ac_func in strchr strerror strrchr strstr strlcpy isascii
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -7579,7 +8020,7 @@ done
 
 
 # other functions
-for ac_func in gettimeofday putenv _putenv select
+for ac_func in gettimeofday putenv _putenv
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -7656,7 +8097,7 @@ $as_echo "#define OPENAL_DRIVER \"OpenAL32.dll\"" >>confdefs.h
 
 fi
 
-# 2 required gcc options, see m4/ax_cflags_gcc_option.m4
+# required gcc/g++ options, see m4/ax_cflags_gcc_option.m4
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking CFLAGS for gcc -ffast-math" >&5
 $as_echo_n "checking CFLAGS for gcc -ffast-math... " >&6; }
 if test "${ax_cv_cflags_gcc_option__ffast_math+set}" = set; then :
@@ -7720,6 +8161,70 @@ case ".$ax_cv_cflags_gcc_option__ffast_math" in
  ;;
 esac
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking CXXFLAGS for gcc -ffast-math" >&5
+$as_echo_n "checking CXXFLAGS for gcc -ffast-math... " >&6; }
+if test "${ax_cv_cxxflags_gcc_option__ffast_math+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ax_cv_cxxflags_gcc_option__ffast_math="no, unknown"
+
+ ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+ ac_save_CXXFLAGS="$CXXFLAGS"
+for ac_arg in "-pedantic -Werror % -ffast-math"     "-pedantic % -ffast-math %% no, obsolete"     #
+do CXXFLAGS="$ac_save_CXXFLAGS "`echo $ac_arg | sed -e 's,%%.*,,' -e 's,%,,'`
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_cxxflags_gcc_option__ffast_math=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+ CXXFLAGS="$ac_save_CXXFLAGS"
+ ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cxxflags_gcc_option__ffast_math" >&5
+$as_echo "$ax_cv_cxxflags_gcc_option__ffast_math" >&6; }
+case ".$ax_cv_cxxflags_gcc_option__ffast_math" in
+     .ok|.ok,*)  ;;
+   .|.no|.no,*)  ;;
+   *)
+   if echo " $CXXFLAGS " | grep " $ax_cv_cxxflags_gcc_option__ffast_math " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$ax_cv_cxxflags_gcc_option__ffast_math"; } >&5
+  (: CXXFLAGS does contain $ax_cv_cxxflags_gcc_option__ffast_math) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$ax_cv_cxxflags_gcc_option__ffast_math\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__ffast_math") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+                      CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__ffast_math"
+   fi
+ ;;
+esac
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking CFLAGS for gcc -fno-strict-aliasing" >&5
 $as_echo_n "checking CFLAGS for gcc -fno-strict-aliasing... " >&6; }
 if test "${ax_cv_cflags_gcc_option__fno_strict_aliasing+set}" = set; then :
@@ -7779,6 +8284,69 @@ case ".$ax_cv_cflags_gcc_option__fno_strict_aliasing" in
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
                       CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__fno_strict_aliasing"
+   fi
+ ;;
+esac
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking CXXFLAGS for gcc -fno-strict-aliasing" >&5
+$as_echo_n "checking CXXFLAGS for gcc -fno-strict-aliasing... " >&6; }
+if test "${ax_cv_cxxflags_gcc_option__fno_strict_aliasing+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ax_cv_cxxflags_gcc_option__fno_strict_aliasing="no, unknown"
+
+ ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+ ac_save_CXXFLAGS="$CXXFLAGS"
+for ac_arg in "-pedantic -Werror % -fno-strict-aliasing"     "-pedantic % -fno-strict-aliasing %% no, obsolete"     #
+do CXXFLAGS="$ac_save_CXXFLAGS "`echo $ac_arg | sed -e 's,%%.*,,' -e 's,%,,'`
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_cxxflags_gcc_option__fno_strict_aliasing=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+ CXXFLAGS="$ac_save_CXXFLAGS"
+ ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cxxflags_gcc_option__fno_strict_aliasing" >&5
+$as_echo "$ax_cv_cxxflags_gcc_option__fno_strict_aliasing" >&6; }
+case ".$ax_cv_cxxflags_gcc_option__fno_strict_aliasing" in
+     .ok|.ok,*)  ;;
+   .|.no|.no,*)  ;;
+   *)
+   if echo " $CXXFLAGS " | grep " $ax_cv_cxxflags_gcc_option__fno_strict_aliasing " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$ax_cv_cxxflags_gcc_option__fno_strict_aliasing"; } >&5
+  (: CXXFLAGS does contain $ax_cv_cxxflags_gcc_option__fno_strict_aliasing) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$ax_cv_cxxflags_gcc_option__fno_strict_aliasing\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__fno_strict_aliasing") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+                      CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__fno_strict_aliasing"
    fi
  ;;
 esac
@@ -7862,6 +8430,69 @@ case ".$ax_cv_cflags_gcc_option__g3" in
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
                       CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__g3"
+   fi
+ ;;
+esac
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking CXXFLAGS for gcc -g3" >&5
+$as_echo_n "checking CXXFLAGS for gcc -g3... " >&6; }
+if test "${ax_cv_cxxflags_gcc_option__g3+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ax_cv_cxxflags_gcc_option__g3="no, unknown"
+
+ ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+ ac_save_CXXFLAGS="$CXXFLAGS"
+for ac_arg in "-pedantic -Werror % -g3"     "-pedantic % -g3 %% no, obsolete"     #
+do CXXFLAGS="$ac_save_CXXFLAGS "`echo $ac_arg | sed -e 's,%%.*,,' -e 's,%,,'`
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_cxxflags_gcc_option__g3=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+ CXXFLAGS="$ac_save_CXXFLAGS"
+ ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cxxflags_gcc_option__g3" >&5
+$as_echo "$ax_cv_cxxflags_gcc_option__g3" >&6; }
+case ".$ax_cv_cxxflags_gcc_option__g3" in
+     .ok|.ok,*)  ;;
+   .|.no|.no,*)  ;;
+   *)
+   if echo " $CXXFLAGS " | grep " $ax_cv_cxxflags_gcc_option__g3 " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$ax_cv_cxxflags_gcc_option__g3"; } >&5
+  (: CXXFLAGS does contain $ax_cv_cxxflags_gcc_option__g3) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$ax_cv_cxxflags_gcc_option__g3\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__g3") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+                      CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__g3"
    fi
  ;;
 esac
@@ -7951,6 +8582,69 @@ case ".$ax_cv_cflags_gcc_option__Wall" in
  ;;
 esac
 
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking CXXFLAGS for gcc -Wall" >&5
+$as_echo_n "checking CXXFLAGS for gcc -Wall... " >&6; }
+if test "${ax_cv_cxxflags_gcc_option__Wall+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ax_cv_cxxflags_gcc_option__Wall="no, unknown"
+
+ ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+ ac_save_CXXFLAGS="$CXXFLAGS"
+for ac_arg in "-pedantic -Werror % -Wall"     "-pedantic % -Wall %% no, obsolete"     #
+do CXXFLAGS="$ac_save_CXXFLAGS "`echo $ac_arg | sed -e 's,%%.*,,' -e 's,%,,'`
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_cxxflags_gcc_option__Wall=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+ CXXFLAGS="$ac_save_CXXFLAGS"
+ ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cxxflags_gcc_option__Wall" >&5
+$as_echo "$ax_cv_cxxflags_gcc_option__Wall" >&6; }
+case ".$ax_cv_cxxflags_gcc_option__Wall" in
+     .ok|.ok,*)  ;;
+   .|.no|.no,*)  ;;
+   *)
+   if echo " $CXXFLAGS " | grep " $ax_cv_cxxflags_gcc_option__Wall " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$ax_cv_cxxflags_gcc_option__Wall"; } >&5
+  (: CXXFLAGS does contain $ax_cv_cxxflags_gcc_option__Wall) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$ax_cv_cxxflags_gcc_option__Wall\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__Wall") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+                      CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__Wall"
+   fi
+ ;;
+esac
+
 	debug=yes
 
 fi
@@ -8017,7 +8711,8 @@ fi
 if  test "x$assert_stmts" = "xyes" ; then :
   debug=yes
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking CFLAGS for gcc -DNDEBUG" >&5
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking CFLAGS for gcc -DNDEBUG" >&5
 $as_echo_n "checking CFLAGS for gcc -DNDEBUG... " >&6; }
 if test "${ax_cv_cflags_gcc_option__DNDEBUG+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -8080,8 +8775,92 @@ case ".$ax_cv_cflags_gcc_option__DNDEBUG" in
  ;;
 esac
 
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking CXXFLAGS for gcc -DNDEBUG" >&5
+$as_echo_n "checking CXXFLAGS for gcc -DNDEBUG... " >&6; }
+if test "${ax_cv_cxxflags_gcc_option__DNDEBUG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ax_cv_cxxflags_gcc_option__DNDEBUG="no, unknown"
+
+ ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+ ac_save_CXXFLAGS="$CXXFLAGS"
+for ac_arg in "-pedantic -Werror % -DNDEBUG"     "-pedantic % -DNDEBUG %% no, obsolete"     #
+do CXXFLAGS="$ac_save_CXXFLAGS "`echo $ac_arg | sed -e 's,%%.*,,' -e 's,%,,'`
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_cxxflags_gcc_option__DNDEBUG=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+done
+ CXXFLAGS="$ac_save_CXXFLAGS"
+ ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cxxflags_gcc_option__DNDEBUG" >&5
+$as_echo "$ax_cv_cxxflags_gcc_option__DNDEBUG" >&6; }
+case ".$ax_cv_cxxflags_gcc_option__DNDEBUG" in
+     .ok|.ok,*)  ;;
+   .|.no|.no,*)  ;;
+   *)
+   if echo " $CXXFLAGS " | grep " $ax_cv_cxxflags_gcc_option__DNDEBUG " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$ax_cv_cxxflags_gcc_option__DNDEBUG"; } >&5
+  (: CXXFLAGS does contain $ax_cv_cxxflags_gcc_option__DNDEBUG) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$ax_cv_cxxflags_gcc_option__DNDEBUG\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__DNDEBUG") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+                      CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__DNDEBUG"
+   fi
+ ;;
+esac
+
+
+fi
+
+# Enable ODE debug
+# Check whether --enable-ode-debug was given.
+if test "${enable_ode_debug+set}" = set; then :
+  enableval=$enable_ode_debug; ode_debug=${enableval}
+else
+  ode_debug=no
+fi
+
+if  test "x$ode_debug" = "xyes" && test "x$use_system_libode" != "xyes" ; then :
+  debug=yes
+fi
+ if  test "x$ode_debug" != "xyes" ; then
+  ODE_NODEBUG_TRUE=
+  ODE_NODEBUG_FALSE='#'
+else
+  ODE_NODEBUG_TRUE='#'
+  ODE_NODEBUG_FALSE=
+fi
+
+
 
 #########################################################################################################
 # END OF DEBUGGING OPTIONS
@@ -8228,8 +9007,16 @@ if test -z "${ALTERNATE_INSTALL_TRUE}" && test -z "${ALTERNATE_INSTALL_FALSE}"; 
   as_fn_error "conditional \"ALTERNATE_INSTALL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${USE_SYSTEM_LIBODE_TRUE}" && test -z "${USE_SYSTEM_LIBODE_FALSE}"; then
+  as_fn_error "conditional \"USE_SYSTEM_LIBODE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${REMOVE_SYMBOLS_TRUE}" && test -z "${REMOVE_SYMBOLS_FALSE}"; then
   as_fn_error "conditional \"REMOVE_SYMBOLS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ODE_NODEBUG_TRUE}" && test -z "${ODE_NODEBUG_FALSE}"; then
+  as_fn_error "conditional \"ODE_NODEBUG\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -9576,6 +10363,7 @@ else
 fi
 		$as_echo " Dedicated Only: ........ ${dedicated_only}"
 		$as_echo " ANSI Color Codes: ...... ${ansi_color}"
+		$as_echo " System ODE library ..... ${system_ode}"
 
 fi
 	if  test x"${unix_host}" = xdarwin ; then :
@@ -9602,6 +10390,7 @@ fi
 		$as_echo "   Buffer debugging: ......... ${buffer_debug}"
 		$as_echo "   Paranoid message checks: .. ${buffer_debug}"
 		$as_echo "   Assert statements: ........ ${assert_stmts}"
+		$as_echo "   ODE debug: ................ ${ode_debug}"
 
 fi
 

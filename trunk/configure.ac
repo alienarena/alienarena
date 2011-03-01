@@ -176,6 +176,20 @@ AM_COND_IF([BUILD_WIN32],
 AC_DEFINE_UNQUOTED(CPUSTRING, "${host_cpu}", [Canonical CPU identification])
 AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
 
+dnl
+dnl ODE (Open Dynamic Engine) Library
+dnl 
+dnl if no option or "--without-system-libode" is specified, use the recommended
+dnl  integrated ODE.
+dnl if "--with-system-libode" is specified, check. look under BUILD_CLIENT
+dnl  for details. 
+dnl
+AC_ARG_WITH([system-libode],
+	[AS_HELP_STRING([--with(out)-system-libode],
+		[use system-supplied libode (default:without)])],
+	[system_ode=${withval}],
+	[system_ode=no])
+
 #
 # Checks for libraries.
 #
@@ -259,10 +273,38 @@ AM_COND_IF([BUILD_CLIENT],
 	])
 
 	dnl
-	dnl Check common client dependencies:
-	dnl ODE, Curl, Ogg/Vorbis and vorbisfile
+	dnl if option to use system libode, rather than integrated ODE, is selected
+	dnl  use pkg-config to get cflags and libs. do not default to 
+	dnl  integrated ODE on failure, as that is probably not what is wanted.
 	dnl
-	PKG_CHECK_MODULES([DEPS],[ode libcurl ogg vorbis vorbisfile freetype2])
+	dnl for recommended integrated ODE build, setup client dependencies,
+	dnl  and configuration. Double precision math is "hardwired" here and
+	dnl  is not considered to be a user-specifiable option.
+	dnl 
+	AS_IF([ test "x$system_ode" = "xyes" ],[
+		PKG_CHECK_MODULES([ODE],[ode],,[
+			AC_MSG_FAILURE(
+				[--with-system-libode specified, but the library or headers could not be found])
+			])
+		],[
+		AC_SUBST([ODE_CFLAGS],[-DdDOUBLE])
+		AC_SEARCH_LIBS([new_handler],[stdc++])
+		dnl
+		dnl config.h hacks from ODE configuration
+		dnl intP is an integer type that can type convert to/from a pointer
+		dnl TODO: verify what type to use
+		dnl
+		AH_BOTTOM([
+typedef int intP;
+#define dEpsilon DBL_EPSILON
+		])
+	])
+
+	dnl
+	dnl Check common client dependencies:
+	dnl Curl, Ogg/Vorbis and vorbisfile
+	dnl
+	PKG_CHECK_MODULES([DEPS],[libcurl ogg vorbis vorbisfile freetype2])
 
 	dnl Hack in the extras for Win32
 	dnl TODO: this may not be the best way to do this
@@ -272,6 +314,9 @@ AM_COND_IF([BUILD_CLIENT],
 	AC_SUBST([WIN32_LIBS],[$win32_syslibs])
 
 ])
+
+AM_CONDITIONAL([USE_SYSTEM_LIBODE],[ test "x$system_ode" = "xyes" ])
+
 dnl 
 dnl end of client-only library requirements
 dnl
@@ -279,12 +324,13 @@ dnl
 #
 # Checks for header files
 #
+AC_CHECK_HEADERS(
+	[ arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h netdb.h termios.h sys/select.h ])
+
+AC_CHECK_HEADERS([ inttypes.h stdint.h stddef.h stdlib.h unistd.h float.h limits.h ])
 
 AC_CHECK_HEADERS(
-	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h unistd.h netdb.h termios.h sys/select.h])
-
-AC_CHECK_HEADERS(
-	[ dlfcn.h fcntl.h float.h limits.h malloc.h stddef.h stdlib.h string.h sys/param.h sys/time.h sys/stat.h ])
+	[ dlfcn.h fcntl.h malloc.h string.h sys/param.h sys/time.h sys/stat.h ])
 
 AC_CHECK_HEADERS([ windows.h winsock.h winsock2.h ])
 
@@ -338,24 +384,27 @@ dnl autoscan says that glext.h needs these
 AC_TYPE_INT32_T
 AC_TYPE_INT64_T
 AC_TYPE_UINT64_T
+AC_CHECK_TYPES([ptrdiff_t])
 
 #
 # Checks for library functions.
 #
 
 AC_FUNC_ERROR_AT_LINE
+AC_FUNC_ALLOCA
 AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_FUNC_REALLOC
+AC_FUNC_OBSTACK
 
 # network functions
-AC_CHECK_FUNCS([closesocket socket gethostbyname])
+AC_CHECK_FUNCS([closesocket socket gethostbyname select])
 
 # thread functions
 AC_CHECK_FUNCS([pthread_create _begin_thread])
 
 # string functions
-AC_CHECK_FUNCS([strchr strerror strrchr strstr strlcpy])
+AC_CHECK_FUNCS([strchr strerror strrchr strstr strlcpy isascii])
 AC_CHECK_FUNCS([strcasecmp strncasecmp ])
 AC_CHECK_FUNCS([strdup _strdup stricmp _stricmp strnicmp _strnicmp])
 
@@ -369,7 +418,7 @@ AC_CHECK_FUNCS([pow sqrt floor])
 AC_CHECK_FUNCS([memmove memset munmap mremap])
 
 # other functions
-AC_CHECK_FUNCS([gettimeofday putenv _putenv select])
+AC_CHECK_FUNCS([gettimeofday putenv _putenv])
 
 # time functions
 dnl time function modernize
@@ -412,9 +461,11 @@ AM_COND_IF([BUILD_WIN32],
 	AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])
 ])
 
-# 2 required gcc options, see m4/ax_cflags_gcc_option.m4
+# required gcc/g++ options, see m4/ax_cflags_gcc_option.m4
 AX_CFLAGS_GCC_OPTION([-ffast-math])
+AX_CXXFLAGS_GCC_OPTION([-ffast-math])
 AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
+AX_CXXFLAGS_GCC_OPTION([-fno-strict-aliasing])
 
 
 #########################################################################################################
@@ -431,6 +482,7 @@ AC_ARG_ENABLE([debugging-symbols],
 	[debug_syms=${enableval}],[debug_syms=no])
 AS_IF([ test "x$debug_syms" = "xyes" ], [
 	AX_CFLAGS_GCC_OPTION([-g3])
+	AX_CXXFLAGS_GCC_OPTION([-g3])
 	debug=yes
 ])
 AM_CONDITIONAL(REMOVE_SYMBOLS,[ test "x$debug_syms" = "xno" ])
@@ -441,6 +493,7 @@ AC_ARG_ENABLE([full-warnings],
 	[gcc_whining=${enableval}],[gcc_whining=no])
 AS_IF([ test "x$gcc_whining" = "xyes" ], [
 	AX_CFLAGS_GCC_OPTION([-Wall])
+	AX_CXXFLAGS_GCC_OPTION([-Wall])
 	debug=yes
 ])
 
@@ -479,8 +532,19 @@ AC_ARG_ENABLE([assert-statements],
 	],[assert_stmts=${enableval}],[assert_stmts=no])
 AS_IF([ test "x$assert_stmts" = "xyes" ],
 	[debug=yes],
-	[AX_CFLAGS_GCC_OPTION([-DNDEBUG])
+	[
+	AX_CFLAGS_GCC_OPTION([-DNDEBUG])
+	AX_CXXFLAGS_GCC_OPTION([-DNDEBUG])
 ])
+
+# Enable ODE debug
+AC_ARG_ENABLE([ode-debug],
+	[AS_HELP_STRING([--enable-ode-debug],
+		[Enable debug code and assertion statements in integrated ODE (default:no)])
+	],[ode_debug=${enableval}],[ode_debug=no])
+AS_IF([ test "x$ode_debug" = "xyes" && test "x$use_system_libode" != "xyes" ],[debug=yes])
+AM_CONDITIONAL([ODE_NODEBUG],[ test "x$ode_debug" != "xyes" ])		
+
 
 #########################################################################################################
 # END OF DEBUGGING OPTIONS
@@ -505,6 +569,7 @@ AS_IF([test "x$hide_status" = "xno"],[
 		AS_IF([ test "x$build_client" = "xyes" ],[dedicated_only=no],[dedicated_only=yes])
 		AS_ECHO([" Dedicated Only: ........ ${dedicated_only}"])
 		AS_ECHO([" ANSI Color Codes: ...... ${ansi_color}"])
+		AS_ECHO([" System ODE library ..... ${system_ode}"]) 
 	])
 	AS_IF([ test x"${unix_host}" = xdarwin ],[	
 		AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
@@ -524,6 +589,7 @@ AS_IF([test "x$hide_status" = "xno"],[
 		AS_ECHO(["   Buffer debugging: ......... ${buffer_debug}"])
 		AS_ECHO(["   Paranoid message checks: .. ${buffer_debug}"])
 		AS_ECHO(["   Assert statements: ........ ${assert_stmts}"])
+		AS_ECHO(["   ODE debug: ................ ${ode_debug}"])
 	])
 
 	AM_COND_IF([ALTERNATE_INSTALL],
