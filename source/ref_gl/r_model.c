@@ -911,7 +911,6 @@ void Mod_LoadFaces (lump_t *l)
 	int			ti;
 	rscript_t	*rs;
 	vec3_t		color;
-	qboolean	fod;
 
 	in = (void *)(mod_base + l->fileofs);
 	if (l->filelen % sizeof(*in))
@@ -960,12 +959,6 @@ void Mod_LoadFaces (lump_t *l)
 		else
 			out->samples = loadmodel->lightdata + i;
 
-		//special case - note one day we should find a way to check for contents such as mist to do this.
-		if(!Q_strcasecmp(out->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_strcasecmp(out->texinfo->image->name, "textures/arena5/fod.wal"))
-			fod = true;
-		else
-			fod = false;
-
 		// set the drawing flags
 		if (out->texinfo->flags & SURF_WARP)
 		{
@@ -975,7 +968,7 @@ void Mod_LoadFaces (lump_t *l)
 				out->extents[i] = 16384;
 				out->texturemins[i] = -8192;
 			}
-			if(!(gl_state.glsl_shaders && gl_glsl_shaders->value) || fod)
+			if(!(gl_state.glsl_shaders && gl_glsl_shaders->value) || !strcmp(out->texinfo->normalMap->name, out->texinfo->image->name))
 				R_SubdivideSurface (out);	// cut up polygon for warps
 		}
 
@@ -985,7 +978,7 @@ void Mod_LoadFaces (lump_t *l)
 			BSP_CreateSurfaceLightmap (out);
 		}
 
-		if ( (! (out->texinfo->flags & SURF_WARP)) || (gl_state.glsl_shaders && gl_glsl_shaders->value && !fod))
+		if ( (! (out->texinfo->flags & SURF_WARP)) || (gl_state.glsl_shaders && gl_glsl_shaders->value && strcmp(out->texinfo->normalMap->name, out->texinfo->image->name)))
 			BSP_BuildPolygonFromSurface(out);
 
 		rs = (rscript_t *)out->texinfo->image->script;

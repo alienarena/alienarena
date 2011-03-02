@@ -213,7 +213,6 @@ EmitWaterPolys
 Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
-
 void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 {
 	glpoly_t	*p;
@@ -223,21 +222,14 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 	float		scroll;
 	float		rdt = r_newrefdef.time;
 	vec3_t		nv, tangent;
-	qboolean	fod;
 
 	if (fa->texinfo->flags & SURF_FLOWING)
 		scroll = -64.0f * ((r_newrefdef.time * 0.5f) - (int)(r_newrefdef.time * 0.5f));
 	else
 		scroll = 0.0f;
-
-	//special case - note one day we should find a way to check for contents such as mist to do this. We could maybe use CL_PMpointcontents, but it could be sluggish
-	if(!Q_strcasecmp(fa->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_strcasecmp(fa->texinfo->image->name, "textures/arena5/fod.wal"))
-		fod = true;
-	else
-		fod = false;
-
-	if(!fod && gl_state.glsl_shaders && gl_glsl_shaders->value
-			&& strcmp(fa->texinfo->normalMap->name, fa->texinfo->image->name)) {
+	  
+	if(gl_state.glsl_shaders && gl_glsl_shaders->value
+		&& strcmp(fa->texinfo->normalMap->name, fa->texinfo->image->name)) {
 
 		if (SurfaceIsAlphaBlended(fa))
 			qglEnable( GL_ALPHA_TEST );
@@ -252,7 +244,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		qglBindTexture (GL_TEXTURE_2D, fa->texinfo->image->texnum);
 		glUniform1iARB( g_location_baseTexture, 1);
 		KillFlags |= KILL_TMU1_POINTER;
-
+		 
 		glUniform1iARB( g_location_normTexture, 2);
 		qglActiveTextureARB(GL_TEXTURE2);
 		qglBindTexture(GL_TEXTURE_2D, fa->texinfo->normalMap->texnum);
@@ -263,12 +255,13 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		else
 			glUniform1iARB( g_location_trans, 0);
 
-		if(texnum) {
-			qglActiveTextureARB(GL_TEXTURE3);
-			qglBindTexture(GL_TEXTURE_2D, texnum);
-			glUniform1iARB( g_location_refTexture, 3);
+		qglActiveTextureARB(GL_TEXTURE3);
+		qglBindTexture(GL_TEXTURE_2D, texnum);
+		glUniform1iARB( g_location_refTexture, 3);
+		KillFlags |= KILL_TMU3_POINTER;
+				
+		if(texnum)
 			glUniform1iARB( g_location_reflect, 1);
-		}
 		else
 			glUniform1iARB( g_location_reflect, 0);
 			
@@ -291,11 +284,11 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		if (SurfaceIsAlphaBlended(fa))
 			qglDisable( GL_ALPHA_TEST);
 
-		GL_MBind(GL_TEXTURE0, fa->texinfo->image->texnum);
+		return;
 	}
 	else {
 
-		if (gl_state.fragment_program && !fod)
+		if (gl_state.fragment_program && strcmp(fa->texinfo->normalMap->name, fa->texinfo->image->name))
 		{
 			qglEnable(GL_FRAGMENT_PROGRAM_ARB);
 			qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
@@ -328,7 +321,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 
 				t *= (1.0/64);
 
-				if (gl_state.fragment_program && !fod)
+				if (gl_state.fragment_program)
 				{
 					qglMTexCoord2fARB(GL_TEXTURE0, s, t);
 					qglMTexCoord2fARB(GL_TEXTURE1, 20*s, 20*t);
@@ -354,12 +347,9 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 			qglEnd ();
 		}
 
-		if (gl_state.fragment_program && !fod)
+		if (gl_state.fragment_program)
 			qglDisable(GL_FRAGMENT_PROGRAM_ARB);
 	}
-
-	if(fod || (gl_state.glsl_shaders && gl_glsl_shaders->value))
-		return;
 
 	//env map if specified by shader
 	if(texnum)
