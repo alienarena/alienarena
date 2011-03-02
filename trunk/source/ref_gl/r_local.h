@@ -488,7 +488,6 @@ extern int KillFlags;
 extern float	tex_array[MAX_ARRAY][2];
 extern float	vert_array[MAX_ARRAY][3];
 extern float	col_array[MAX_ARRAY][4];
-extern float	norm_array[MAX_ARRAY][3];
 
 #define MAX_VARRAY_VERTS (MAX_VERTS + 2)
 #define MAX_VARRAY_VERTEX_SIZE 11
