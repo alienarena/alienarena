@@ -252,7 +252,7 @@ static void FS_init_paths( void )
 
 	// set path for "arena" or mod
 	memset( game_gamedata, 0, sizeof(game_gamedata) );
-	fs_gamedirvar = Cvar_Get( "game", "", CVAR_LATCH|CVAR_SERVERINFO);
+	fs_gamedirvar = Cvar_Get( "game", "arena", CVAR_LATCH|CVAR_SERVERINFO);
 	if ( *fs_gamedirvar->string  && fs_gamedirvar->string[0] )
 	{ // not empty
 		if (  Q_strncasecmp( fs_gamedirvar->string, BASE_GAMEDATA, MAX_OSPATH )
