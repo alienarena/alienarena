@@ -163,12 +163,12 @@ char fs_gamesearch[GAME_SEARCH_SLOTS][MAX_OSPATH];
 #define BOT_SEARCH_SLOTS 3
 char fs_botsearch[BOT_SEARCH_SLOTS][MAX_OSPATH];
 
-/*
-===
- FS_init_paths()
-
-===
-*/
+/** \brief Initialize paths: data1, arena, botinfo, etc.
+ *
+ * \note This gets executed after command line "+set" commands are executed
+ *       the first time. But, before any other commands from command line
+ *       or .cfg files are executed.
+ */
 static void FS_init_paths( void )
 {
 	int i;
@@ -252,7 +252,7 @@ static void FS_init_paths( void )
 
 	// set path for "arena" or mod
 	memset( game_gamedata, 0, sizeof(game_gamedata) );
-	fs_gamedirvar = Cvar_Get( "game", "arena", CVAR_LATCH|CVAR_SERVERINFO);
+	fs_gamedirvar = Cvar_Get( "game", "", CVAR_LATCH|CVAR_SERVERINFO);
 	if ( *fs_gamedirvar->string  && fs_gamedirvar->string[0] )
 	{ // not empty
 		if (  Q_strncasecmp( fs_gamedirvar->string, BASE_GAMEDATA, MAX_OSPATH )
@@ -269,9 +269,16 @@ static void FS_init_paths( void )
 	}
 	else
 	{ // was empty, set to "arena"
+#if 0
+		// this can't be right because it could recurse back here
 		fs_gamedirvar = Cvar_ForceSet("game", GAME_GAMEDATA );
 		Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
 				fs_datadir, GAME_GAMEDATA );
+#else
+		fs_gamedirvar = Cvar_ForceSet("gamedir", GAME_GAMEDATA );
+		Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
+				fs_datadir, GAME_GAMEDATA );
+#endif
 	}
 
 	// set path for "botinfo"
@@ -1126,6 +1133,9 @@ FS_InitFilesystem
 */
 void FS_InitFilesystem (void)
 {
+#if defined UNIX_VARIANT
+	char dummy_path[MAX_OSPATH];
+#endif
 
 	Cmd_AddCommand ("path", FS_Path_f);
 	Cmd_AddCommand ("dir", FS_Dir_f );
@@ -1134,6 +1144,13 @@ void FS_InitFilesystem (void)
 
 #if defined UNIX_VARIANT
 	Com_Printf("using %s for writing\n", fs_gamedir );
+	/*
+	 * Create the writeable directory if it does not exist.
+	 * Otherwise, a dedicated server may fail to create a logfile.
+	 * "dummy" is there just so FS_CreatePath works, no file is created.
+	 */
+	Com_sprintf( dummy_path, sizeof(dummy_path), "%s/dummy", fs_gamedir );
+	FS_CreatePath( dummy_path );
 #endif
 
 }
