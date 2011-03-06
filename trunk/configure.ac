@@ -8,11 +8,11 @@
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# 
+#
 # See the GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License along
@@ -37,17 +37,19 @@ dnl 1.11 = require automake 1.11 or greater
 dnl foreign = do not apply GNU doc requirements
 dnl subdir-objects = compile objects into their sub directories
 dnl silent-rules = less output (--disable-silent-rules for more output)
-dnl add dist-zip, dist-bzip2 for other distributions besides tar.gz  
+dnl add dist-zip, dist-bzip2 for other distributions besides tar.gz
 AM_INIT_AUTOMAKE([ 1.11 foreign subdir-objects silent-rules ])
 AM_SILENT_RULES([yes])
 
 dnl use --enable-maintainer-mode to get full set of make targets
-dnl debated issue, but this is better for non-developers updating from svn.    
+dnl debated issue, but this is better for non-developers updating from svn.
 AM_MAINTAINER_MODE
 
 AC_CANONICAL_HOST
 
+#
 # Checks for programs.
+#
 AC_PROG_CXX
 AC_PROG_AWK
 AC_PROG_CC
@@ -69,15 +71,15 @@ unix_host=generic
 AS_CASE([ ${host} ],
 	[ *-*-mingw* ],[ cond_build_win32=yes ],
 	[ *-*-darwin*],
-		[ 
+		[
 		cond_build_unix=yes
-		unix_host=darwin 
+		unix_host=darwin
 		],
 	[ *-*-linux* ],
 		[
 		cond_build_unix=yes
 		unix_host=linux
-		],		 
+		],
 	[ cond_build_unix=yes ])
 
 AM_CONDITIONAL([BUILD_WIN32],[ test "x${cond_build_win32}" = xyes ])
@@ -108,7 +110,7 @@ AS_IF([ test x"${unix_host}" = xdarwin ],
 AC_MSG_CHECKING([whether to build the client])
 AM_COND_IF([BUILD_UNIX],
 	[
-	AC_ARG_ENABLE( 
+	AC_ARG_ENABLE(
 		[client],
 		[AS_HELP_STRING([--disable-client],
 			[build dedicated server only, not the client (default:no)])],
@@ -119,6 +121,7 @@ AM_COND_IF([BUILD_UNIX],
 AC_MSG_RESULT([${build_client}])
 AM_CONDITIONAL([BUILD_CLIENT],[ test "x${build_client}" = xyes ])
 
+#
 # Alternate Install. Install in the traditional single directory way.
 # Might be required for map making tools to work. Also, good when updating
 # from SVN regularly. Affects how Makefile sets DATADIR and does make-install.
@@ -142,12 +145,11 @@ AM_CONDITIONAL([ALTERNATE_INSTALL],[ test "x${alternate_install}" = xyes ])
 dnl
 dnl symbols for config.h
 dnl
-
-AM_COND_IF([BUILD_UNIX], 
+AM_COND_IF([BUILD_UNIX],
 	[
-	
+
 	AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])
-	
+
 	AS_CASE([ ${unix_host} ],
 		[ darwin ],
 			[
@@ -161,7 +163,7 @@ AM_COND_IF([BUILD_UNIX],
 			[AC_DEFINE([LINUX_SPECIAL_CASE],1,[linux-specific conditional compile])],
 		[ generic ]
 			[AC_DEFINE([GENERIC_UNIX],1,[non-specific unix conditional compile])])
-			
+
 	AC_ARG_ENABLE([ansi-color],
 	[AS_HELP_STRING([--enable-ansi-color],[ANSI terminal color (default: no)])],
 	[ansi_color=${enableval}],[ansi_color=no])
@@ -176,14 +178,14 @@ AM_COND_IF([BUILD_WIN32],
 AC_DEFINE_UNQUOTED(CPUSTRING, "${host_cpu}", [Canonical CPU identification])
 AC_DEFINE_UNQUOTED(BUILDSTRING, "${host_os}", [Canonical OS identification])
 
-dnl
-dnl ODE (Open Dynamic Engine) Library
-dnl 
-dnl if no option or "--without-system-libode" is specified, use the recommended
-dnl  integrated ODE.
-dnl if "--with-system-libode" is specified, check. look under BUILD_CLIENT
-dnl  for details. 
-dnl
+#
+# ODE (Open Dynamic Engine) Library
+#
+# if no option or "--without-system-libode" is specified, use the recommended
+#  integrated ODE.
+# if "--with-system-libode" is specified, check. look under BUILD_CLIENT
+#  for details.
+#
 AC_ARG_WITH([system-libode],
 	[AS_HELP_STRING([--with(out)-system-libode],
 		[use system-supplied libode (default:without)])],
@@ -191,13 +193,31 @@ AC_ARG_WITH([system-libode],
 	[system_ode=no])
 
 #
+# Option for installation of documents to allow for custom
+# documentation installation. So, do not include this in
+#  the status message.
+#
+AC_ARG_ENABLE([documents],
+	[AS_HELP_STRING([--disable-documents],
+			[Disable document installation (default: no)])],
+	[no_docs=${enableval}],
+	[no_docs=no])
+AM_CONDITIONAL([INSTALL_DOCS],[ test "x$no_docs" = "xno" ])
+
+#
+# Option for specifying where icon is installed.
+#
+AC_ARG_WITH(icondir,
+	[AS_HELP_STRING([--with-icondir=DIR],
+		[icon install directory (default:DATADIR/icons)])],
+	[ with_icondir=${withval} ], [ with_icondir=${datadir}/icons ])
+AC_SUBST([icondir], [${with_icondir}])
+
+#
 # Checks for libraries.
 #
-
 AC_SEARCH_LIBS([acos],[m])
 AC_SEARCH_LIBS([dlopen],[dl])
-
-dnl modernize Sys_Milliseconds()
 AC_SEARCH_LIBS([clock_gettime],[rt])
 
 dnl
@@ -205,10 +225,13 @@ dnl start of client-only library requirements
 dnl
 AM_COND_IF([BUILD_CLIENT],
 [
-	dnl could be AC_SEARCH_LIBS([pthread_mutex_init],[pthread])
-	dnl but this is probably more portable, see m4/ax_pthread.m4
 	AX_PTHREAD(,[AC_MSG_ERROR(["Required pthreads support not found."])])
-	
+#
+# This might be a workaround for DSO missing pthread library error
+#
+	AS_IF([ test "x$PTHREAD_LIBS" = "x" ],
+		[PTHREAD_LIBS="-pthread"])
+
 	AC_SEARCH_LIBS([jpeg_read_header],[jpeg],,
 		[AC_MSG_ERROR(["Required jpeg library not found."])])
 
@@ -242,7 +265,7 @@ AM_COND_IF([BUILD_CLIENT],
 				])
 			])
 		])
-	
+
 		dnl
 		dnl XF86 DGA extension
 		dnl
@@ -272,15 +295,15 @@ AM_COND_IF([BUILD_CLIENT],
 		])
 	])
 
-	dnl
-	dnl if option to use system libode, rather than integrated ODE, is selected
-	dnl  use pkg-config to get cflags and libs. do not default to 
-	dnl  integrated ODE on failure, as that is probably not what is wanted.
-	dnl
-	dnl for recommended integrated ODE build, setup client dependencies,
-	dnl  and configuration. Double precision math is "hardwired" here and
-	dnl  is not considered to be a user-specifiable option.
-	dnl 
+#
+# if option to use system libode, rather than integrated ODE, is selected
+#  use pkg-config to get cflags and libs. do not default to
+#  integrated ODE on failure, as that is probably not what is wanted.
+#
+# for recommended integrated ODE build, setup client dependencies,
+#  and configuration. Double precision math is "hardwired" here and
+#  is not considered to be a user-specifiable option.
+#
 	AS_IF([ test "x$system_ode" = "xyes" ],[
 		PKG_CHECK_MODULES([ODE],[ode],,[
 			AC_MSG_FAILURE(
@@ -288,16 +311,7 @@ AM_COND_IF([BUILD_CLIENT],
 			])
 		],[
 		AC_SUBST([ODE_CFLAGS],[-DdDOUBLE])
-		AC_SEARCH_LIBS([new_handler],[stdc++])
-		dnl
-		dnl config.h hacks from ODE configuration
-		dnl intP is an integer type that can type convert to/from a pointer
-		dnl TODO: verify what type to use
-		dnl
-		AH_BOTTOM([
-typedef int intP;
-#define dEpsilon DBL_EPSILON
-		])
+		AC_DEFINE([dEpsilon],[DBL_EPSILON],[Define to DBL_EPSILON for ODE])
 	])
 
 	dnl
@@ -317,31 +331,23 @@ typedef int intP;
 
 AM_CONDITIONAL([USE_SYSTEM_LIBODE],[ test "x$system_ode" = "xyes" ])
 
-dnl 
+dnl
 dnl end of client-only library requirements
 dnl
 
 #
 # Checks for header files
 #
-AC_CHECK_HEADERS(
-	[ arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h netdb.h termios.h sys/select.h ])
+AC_CHECK_HEADERS([inttypes.h stdint.h stddef.h stdlib.h unistd.h float.h limits.h])
+AC_CHECK_HEADERS([arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h netdb.h termios.h sys/select.h])
+AC_CHECK_HEADERS([dlfcn.h fcntl.h malloc.h string.h sys/param.h sys/stat.h])
+AC_CHECK_HEADERS([time.h sys/time.h])
+AC_CHECK_HEADERS([windows.h winsock.h winsock2.h])
 
-AC_CHECK_HEADERS([ inttypes.h stdint.h stddef.h stdlib.h unistd.h float.h limits.h ])
-
-AC_CHECK_HEADERS(
-	[ dlfcn.h fcntl.h malloc.h string.h sys/param.h sys/time.h sys/stat.h ])
-
-AC_CHECK_HEADERS([ windows.h winsock.h winsock2.h ])
-
-dnl for time function modernize
-AC_CHECK_HEADERS([ time.h ])	
-
-dnl	
+dnl
 dnl start of client-only header requirements
-dnl	
-AM_COND_IF([BUILD_CLIENT],
-[
+dnl
+AM_COND_IF([BUILD_CLIENT],[
 
 	jpeglib_h_found=no
 	AC_CHECK_HEADERS([jpeglib.h jpeg/jpeglib.h],[ jpeglib_h_found=yes ])
@@ -366,30 +372,27 @@ AM_COND_IF([BUILD_CLIENT],
 		])
 	])
 ])
-dnl 
+dnl
 dnl end of client-only header requirements
 dnl
 
+#
 # Checks for typedefs, structures, and compiler characteristics.
+#
 AC_HEADER_STDBOOL
-#  note: redefines __inline or __inline__ to inline if compiler wants that
 AC_C_INLINE
-#  note: defines a suitable type for size_t if system headers do not
 AC_TYPE_SIZE_T
-#  note: defines a suitable type uid_t and gid_t if system headers do not 
 AC_TYPE_UID_T
-AC_CHECK_TYPES([ptrdiff_t])
-
-dnl autoscan says that glext.h needs these
 AC_TYPE_INT32_T
 AC_TYPE_INT64_T
 AC_TYPE_UINT64_T
 AC_CHECK_TYPES([ptrdiff_t])
+AC_CHECK_TYPES([uintptr_t])
+
 
 #
 # Checks for library functions.
 #
-
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_ALLOCA
 AC_FUNC_MALLOC
@@ -397,36 +400,35 @@ AC_FUNC_MMAP
 AC_FUNC_REALLOC
 AC_FUNC_OBSTACK
 
-# network functions
+dnl network functions
 AC_CHECK_FUNCS([closesocket socket gethostbyname select])
 
-# thread functions
+dnl thread functions
 AC_CHECK_FUNCS([pthread_create _begin_thread])
 
-# string functions
+dnl string functions
 AC_CHECK_FUNCS([strchr strerror strrchr strstr strlcpy isascii])
 AC_CHECK_FUNCS([strcasecmp strncasecmp ])
 AC_CHECK_FUNCS([strdup _strdup stricmp _stricmp strnicmp _strnicmp])
 
-# file system functions
+dnl file system functions
 AC_CHECK_FUNCS([filelength stat fstat getcwd _getcwd unlink _unlink mkdir _mkdir])
 
-# math functions
+dnl math functions
 AC_CHECK_FUNCS([pow sqrt floor])
 
-# mem mgmt functions
+dnl mem mgmt functions
 AC_CHECK_FUNCS([memmove memset munmap mremap])
 
-# other functions
-AC_CHECK_FUNCS([gettimeofday putenv _putenv])
+dnl time functions
+AC_CHECK_FUNCS([gettimeofday clock_gettime])
 
-# time functions
-dnl time function modernize
-AC_CHECK_FUNCS([clock_gettime])
+dnl other functions
+AC_CHECK_FUNCS([ putenv _putenv])
 
-#
-# Set names of dlopened libraries for config.h
-#
+dnl
+dnl Set names of dlopened libraries for config.h
+dnl
 AM_COND_IF([BUILD_UNIX],
 	[AS_CASE([ ${unix_host} ],
 		[ darwin ],
@@ -439,7 +441,7 @@ AM_COND_IF([BUILD_UNIX],
 					["${gl_dlopen_path}/libGL.dylib"],
 					[OpenGL dynamic lib path])
 			])
-					
+
 			AC_DEFINE([OPENAL_DRIVER],
 				["/System/Library/Frameworks/OpenAL.framework/OpenAL"],
 				[OpenAl dynamic lib path])
@@ -448,7 +450,7 @@ AM_COND_IF([BUILD_UNIX],
 		[
 		AC_DEFINE([OPENGL_DRIVER],
 			["libGL.so.1"],[OpenGL shared lib name])
-		
+
 		AC_DEFINE([OPENAL_DRIVER],
 			["libopenal.so.1"],[OpenAL shared lib name])
 	])
@@ -457,11 +459,16 @@ AM_COND_IF([BUILD_UNIX],
 AM_COND_IF([BUILD_WIN32],
 	[
 	AC_DEFINE([OPENGL_DRIVER],["opengl32"],[OpenGL DLL name])
-	
+
 	AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])
 ])
 
-# required gcc/g++ options, see m4/ax_cflags_gcc_option.m4
+#
+# required gcc/g++ options.
+#  fast-math because strict adherence to IEEE standard is not needed.
+#  no-strict-aliasing because strict aliasing is not adhered to in places.
+#  see m4/ax_cflags_gcc_option.m4
+#
 AX_CFLAGS_GCC_OPTION([-ffast-math])
 AX_CXXFLAGS_GCC_OPTION([-ffast-math])
 AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
@@ -543,15 +550,14 @@ AC_ARG_ENABLE([ode-debug],
 		[Enable debug code and assertion statements in integrated ODE (default:no)])
 	],[ode_debug=${enableval}],[ode_debug=no])
 AS_IF([ test "x$ode_debug" = "xyes" && test "x$use_system_libode" != "xyes" ],[debug=yes])
-AM_CONDITIONAL([ODE_NODEBUG],[ test "x$ode_debug" != "xyes" ])		
-
+AM_CONDITIONAL([ODE_NODEBUG],[ test "x$ode_debug" != "xyes" ])
 
 #########################################################################################################
 # END OF DEBUGGING OPTIONS
 #########################################################################################################
 
 # outputs
-AC_CONFIG_FILES([ Makefile 	source/Makefile ])
+AC_CONFIG_FILES([ Makefile source/Makefile ])
 
 AC_OUTPUT
 
@@ -568,10 +574,10 @@ AS_IF([test "x$hide_status" = "xno"],[
 	AM_COND_IF([BUILD_WIN32],,[
 		AS_IF([ test "x$build_client" = "xyes" ],[dedicated_only=no],[dedicated_only=yes])
 		AS_ECHO([" Dedicated Only: ........ ${dedicated_only}"])
-		AS_ECHO([" ANSI Color Codes: ...... ${ansi_color}"])
-		AS_ECHO([" System ODE library ..... ${system_ode}"]) 
+		AS_ECHO([" Server terminal color: . ${ansi_color}"])
+		AS_ECHO([" System ODE library ..... ${system_ode}"])
 	])
-	AS_IF([ test x"${unix_host}" = xdarwin ],[	
+	AS_IF([ test x"${unix_host}" = xdarwin ],[
 		AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
 	])
 	AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
@@ -598,3 +604,4 @@ AS_IF([test "x$hide_status" = "xno"],[
 
 	AS_ECHO(["--------------------------------------------"])
 ])
+

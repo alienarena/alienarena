@@ -35,6 +35,38 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+# include this file in the top level Makefile.am
+#
+# Copyright (C) 2010 COR Entertainment, LLC
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# -------------------------------------------------------------
+# Note: the GPL applies to this file, but not the files listed.
+# See license.txt for details, which states, in part:
+# "It is only permissible to distribute the game data(models,
+# maps, textures, sound, etc) as a whole, and with the
+# intention of being used with Alien Arena.  It is not
+# permissible to distribute individual portions or items ofthe
+# game data without express consent from COR Entertainment."
+#--------------------------------------------------------------
+#
+# Game data for distribution package
+#
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -54,13 +86,13 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = README $(am__configure_deps) $(dist_doc_DATA) \
-	$(nobase_dist_pkgdata_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/game_data.am \
-	$(top_srcdir)/config/config.h.in $(top_srcdir)/configure \
-	COPYING INSTALL config/compile config/config.guess \
-	config/config.sub config/depcomp config/install-sh \
-	config/missing
+DIST_COMMON = README $(am__configure_deps) $(am__dist_doc_DATA_DIST) \
+	$(dist_icon_DATA) $(nobase_dist_pkgdata_DATA) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/game_data.am $(top_srcdir)/config/config.h.in \
+	$(top_srcdir)/configure COPYING INSTALL config/compile \
+	config/config.guess config/config.sub config/depcomp \
+	config/install-sh config/missing
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_cflags_gcc_option.m4 \
@@ -89,6 +121,7 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	install-pdf-recursive install-ps-recursive install-recursive \
 	installcheck-recursive installdirs-recursive pdf-recursive \
 	ps-recursive uninstall-recursive
+am__dist_doc_DATA_DIST = docs/license.txt docs/README.txt README
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -110,8 +143,9 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(docdir)" "$(DESTDIR)$(pkgdatadir)"
-DATA = $(dist_doc_DATA) $(nobase_dist_pkgdata_DATA)
+am__installdirs = "$(DESTDIR)$(docdir)" "$(DESTDIR)$(icondir)" \
+	"$(DESTDIR)$(pkgdatadir)"
+DATA = $(dist_doc_DATA) $(dist_icon_DATA) $(nobase_dist_pkgdata_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
@@ -257,6 +291,7 @@ host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
 htmldir = @htmldir@
+icondir = @icondir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -280,57 +315,25 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = source
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I m4 
 
-# COPYING and INSTALL are GNU/FSF-supplied documents. 
-# Others are Alien Arena documents.
-dist_doc_DATA = \
-	docs/license.txt \
-	docs/README.txt \
-	README \
-	COPYING \
-	INSTALL
+# Alien Arena documents to be installed in $docdir
+@INSTALL_DOCS_TRUE@dist_doc_DATA = \
+@INSTALL_DOCS_TRUE@	docs/license.txt \
+@INSTALL_DOCS_TRUE@	docs/README.txt \
+@INSTALL_DOCS_TRUE@	README
 
 
 # FUSE game server browser and Server management scripts
+# COPYING and INSTALL are GNU/FSF-supplied documents.
 EXTRA_DIST = \
 	Tools/fuse.tar.gz \
-	Tools/LinuxScripts
+	Tools/LinuxScripts \
+	COPYING \
+	INSTALL
 
-
-# include this file in the top level Makefile.am
-#
-# Copyright (C) 2010 COR Entertainment, LLC
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# See the GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-#
-# -------------------------------------------------------------
-# Note: the GPL applies to this file, but not the files listed.
-# See license.txt for details, which states, in part:
-# "It is only permissible to distribute the game data(models, 
-# maps, textures, sound, etc) as a whole, and with the 
-# intention of being used with Alien Arena.  It is not 
-# permissible to distribute individual portions or items ofthe
-# game data without express consent from COR Entertainment."
-#--------------------------------------------------------------
-#
-# Game data for distribution package
-#
+dist_icon_DATA = alienarena.png
 nobase_dist_pkgdata_DATA = \
-	aa.png \
 	arena/motd.txt \
 	arena/server.cfg \
 	botinfo/^3Marty.cfg \
@@ -375,7 +378,6 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-deathray.tmp \
 	botinfo/dm-deimos2k9.tmp \
 	botinfo/dm-dismal2k11.tmp \
-	botinfo/dm-dismal2k8.tmp \
 	botinfo/dm-downfall.tmp \
 	botinfo/dm-dread.tmp \
 	botinfo/dm-dynamo2k8.tmp \
@@ -393,9 +395,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-saucer2k9.tmp \
 	botinfo/dm-titan2k8.tmp \
 	botinfo/dm-turbo2k8.tmp \
-	botinfo/dm-vesuvius.tmp \
 	botinfo/dm-vesuvius2k11.tmp \
-	botinfo/dm-violator.tmp \
 	botinfo/dm-violator2k11.tmp \
 	botinfo/dm-warmachine2k10.tmp \
 	botinfo/dm-zion2k9.tmp \
@@ -434,7 +434,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-crucible2k8.nod \
 	botinfo/nav/dm-deathray.nod \
 	botinfo/nav/dm-deimos2k9.nod \
-	botinfo/nav/dm-dismal2k8.nod \
+	botinfo/nav/dm-dismal2k11.nod \
 	botinfo/nav/dm-downfall.nod \
 	botinfo/nav/dm-dread.nod \
 	botinfo/nav/dm-dynamo2k8.nod \
@@ -452,9 +452,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-saucer2k9.nod \
 	botinfo/nav/dm-titan2k8.nod \
 	botinfo/nav/dm-turbo2k8.nod \
-	botinfo/nav/dm-vesuvius.nod \
 	botinfo/nav/dm-vesuvius2k11.nod \
-	botinfo/nav/dm-violator.nod \
 	botinfo/nav/dm-violator2k11.nod \
 	botinfo/nav/dm-warmachine2k10.nod \
 	botinfo/nav/dm-zion2k9.nod \
@@ -711,8 +709,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-deimos2k9.txt \
 	data1/levelshots/dm-dismal2k11.jpg \
 	data1/levelshots/dm-dismal2k11.txt \
-	data1/levelshots/dm-dismal2k8.jpg \
-	data1/levelshots/dm-dismal2k8.txt \
 	data1/levelshots/dm-downfall.jpg \
 	data1/levelshots/dm-downfall.txt \
 	data1/levelshots/dm-dread.jpg \
@@ -747,12 +743,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-titan2k8.txt \
 	data1/levelshots/dm-turbo2k8.jpg \
 	data1/levelshots/dm-turbo2k8.txt \
-	data1/levelshots/dm-vesuvius.jpg \
-	data1/levelshots/dm-vesuvius.txt \
 	data1/levelshots/dm-vesuvius2k11.jpg \
 	data1/levelshots/dm-vesuvius2k11.txt \
-	data1/levelshots/dm-violator.jpg \
-	data1/levelshots/dm-violator.txt \
 	data1/levelshots/dm-violator2k11.jpg \
 	data1/levelshots/dm-violator2k11.txt \
 	data1/levelshots/dm-warmachine2k10.jpg \
@@ -808,7 +800,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-deathray.bsp \
 	data1/maps/dm-deimos2k9.bsp \
 	data1/maps/dm-dismal2k11.bsp \
-	data1/maps/dm-dismal2k8.bsp \
 	data1/maps/dm-downfall.bsp \
 	data1/maps/dm-dread.bsp \
 	data1/maps/dm-dynamo2k8.bsp \
@@ -826,9 +817,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-saucer2k9.bsp \
 	data1/maps/dm-titan2k8.bsp \
 	data1/maps/dm-turbo2k8.bsp \
-	data1/maps/dm-vesuvius.bsp \
 	data1/maps/dm-vesuvius2k11.bsp \
-	data1/maps/dm-violator.bsp \
 	data1/maps/dm-violator2k11.bsp \
 	data1/maps/dm-warmachine2k10.bsp \
 	data1/maps/dm-zion2k9.bsp \
@@ -1079,8 +1068,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/aoa-corrosion.mus \
 	data1/maps/scripts/aoa-frost2k9.fog \
 	data1/maps/scripts/aoa-frost2k9.mus \
-	data1/maps/scripts/aoa-frost.fog \
-	data1/maps/scripts/aoa-frost.mus \
 	data1/maps/scripts/aoa-morpheus.mus \
 	data1/maps/scripts/aoa-zorn.mus \
 	data1/maps/scripts/cp-grindery.mus \
@@ -1111,7 +1098,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-aquous.mus \
 	data1/maps/scripts/dm-atlantis2k8.mus \
 	data1/maps/scripts/dm-annihilation.fog \
-    data1/maps/scripts/dm-annihilation.mus \
+	data1/maps/scripts/dm-annihilation.mus \
 	data1/maps/scripts/dm-babel2k11.fog \
 	data1/maps/scripts/dm-babel2k11.mus \
 	data1/maps/scripts/dm-beyond.mus \
@@ -1130,8 +1117,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-deimos2k9.mus \
 	data1/maps/scripts/dm-dismal2k11.fog \
 	data1/maps/scripts/dm-dismal2k11.mus \
-	data1/maps/scripts/dm-dismal2k8.fog \
-	data1/maps/scripts/dm-dismal2k8.mus \
 	data1/maps/scripts/dm-downfall.fog \
 	data1/maps/scripts/dm-downfall.mus \
 	data1/maps/scripts/dm-dread.mus \
@@ -1159,11 +1144,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-titan2k8.mus \
 	data1/maps/scripts/dm-turbo2k8.fog \
 	data1/maps/scripts/dm-turbo2k8.mus \
-	data1/maps/scripts/dm-vesuvius.fog \
-	data1/maps/scripts/dm-vesuvius.mus \
 	data1/maps/scripts/dm-vesuvius2k11.fog \
 	data1/maps/scripts/dm-vesuvius2k11.mus \
-	data1/maps/scripts/dm-violator.mus \
 	data1/maps/scripts/dm-violator2k11.mus \
 	data1/maps/scripts/dm-violator2k11.fog \
 	data1/maps/scripts/dm-warmachine2k10.fog \
@@ -2044,7 +2026,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-deathray.rscript \
 	data1/scripts/maps/dm-deimos2k9.rscript \
 	data1/scripts/maps/dm-dismal2k11.rscript \
-	data1/scripts/maps/dm-dismal2k8.rscript \
 	data1/scripts/maps/dm-downfall.rscript \
 	data1/scripts/maps/dm-dread.rscript \
 	data1/scripts/maps/dm-dynamo2k8.rscript \
@@ -2063,9 +2044,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-saucer2k9.rscript \
 	data1/scripts/maps/dm-titan2k8.rscript \
 	data1/scripts/maps/dm-turbo2k8.rscript \
-	data1/scripts/maps/dm-vesuvius.rscript \
 	data1/scripts/maps/dm-vesuvius2k11.rscript \
-	data1/scripts/maps/dm-violator.rscript \
 	data1/scripts/maps/dm-violator2k11.rscript \
 	data1/scripts/maps/dm-warmachine2k10.rscript \
 	data1/scripts/maps/dm-zion2k9.rscript \
@@ -3505,6 +3484,26 @@ uninstall-dist_docDATA:
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(docdir)' && rm -f" $$files ")"; \
 	cd "$(DESTDIR)$(docdir)" && rm -f $$files
+install-dist_iconDATA: $(dist_icon_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(icondir)" || $(MKDIR_P) "$(DESTDIR)$(icondir)"
+	@list='$(dist_icon_DATA)'; test -n "$(icondir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(icondir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(icondir)" || exit $$?; \
+	done
+
+uninstall-dist_iconDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_icon_DATA)'; test -n "$(icondir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(icondir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(icondir)" && rm -f $$files
 install-nobase_dist_pkgdataDATA: $(nobase_dist_pkgdata_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(pkgdatadir)" || $(MKDIR_P) "$(DESTDIR)$(pkgdatadir)"
@@ -3847,7 +3846,7 @@ check: check-recursive
 all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(docdir)" "$(DESTDIR)$(pkgdatadir)"; do \
+	for dir in "$(DESTDIR)$(docdir)" "$(DESTDIR)$(icondir)" "$(DESTDIR)$(pkgdatadir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -3897,7 +3896,7 @@ info: info-recursive
 info-am:
 
 install-data-am: install-data-local install-dist_docDATA \
-	install-nobase_dist_pkgdataDATA
+	install-dist_iconDATA install-nobase_dist_pkgdataDATA
 
 install-dvi: install-dvi-recursive
 
@@ -3943,8 +3942,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-dist_docDATA uninstall-local \
-	uninstall-nobase_dist_pkgdataDATA
+uninstall-am: uninstall-dist_docDATA uninstall-dist_iconDATA \
+	uninstall-local uninstall-nobase_dist_pkgdataDATA
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) ctags-recursive \
 	install-am install-strip tags-recursive
@@ -3957,15 +3956,16 @@ uninstall-am: uninstall-dist_docDATA uninstall-local \
 	distclean-tags distcleancheck distdir distuninstallcheck dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-data-local \
-	install-dist_docDATA install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-nobase_dist_pkgdataDATA \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags \
-	tags-recursive uninstall uninstall-am uninstall-dist_docDATA \
-	uninstall-local uninstall-nobase_dist_pkgdataDATA
+	install-dist_docDATA install-dist_iconDATA install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-nobase_dist_pkgdataDATA install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-dist_docDATA uninstall-dist_iconDATA uninstall-local \
+	uninstall-nobase_dist_pkgdataDATA
 
 
 # remove svn directories from distribution staging area after creating

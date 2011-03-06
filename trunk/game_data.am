@@ -20,17 +20,19 @@
 # -------------------------------------------------------------
 # Note: the GPL applies to this file, but not the files listed.
 # See license.txt for details, which states, in part:
-# "It is only permissible to distribute the game data(models, 
-# maps, textures, sound, etc) as a whole, and with the 
-# intention of being used with Alien Arena.  It is not 
+# "It is only permissible to distribute the game data(models,
+# maps, textures, sound, etc) as a whole, and with the
+# intention of being used with Alien Arena.  It is not
 # permissible to distribute individual portions or items ofthe
 # game data without express consent from COR Entertainment."
 #--------------------------------------------------------------
 #
 # Game data for distribution package
 #
+
+dist_icon_DATA = alienarena.png
+
 nobase_dist_pkgdata_DATA = \
-	aa.png \
 	arena/motd.txt \
 	arena/server.cfg \
 	botinfo/^3Marty.cfg \
@@ -75,7 +77,6 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-deathray.tmp \
 	botinfo/dm-deimos2k9.tmp \
 	botinfo/dm-dismal2k11.tmp \
-	botinfo/dm-dismal2k8.tmp \
 	botinfo/dm-downfall.tmp \
 	botinfo/dm-dread.tmp \
 	botinfo/dm-dynamo2k8.tmp \
@@ -93,9 +94,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-saucer2k9.tmp \
 	botinfo/dm-titan2k8.tmp \
 	botinfo/dm-turbo2k8.tmp \
-	botinfo/dm-vesuvius.tmp \
 	botinfo/dm-vesuvius2k11.tmp \
-	botinfo/dm-violator.tmp \
 	botinfo/dm-violator2k11.tmp \
 	botinfo/dm-warmachine2k10.tmp \
 	botinfo/dm-zion2k9.tmp \
@@ -134,7 +133,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-crucible2k8.nod \
 	botinfo/nav/dm-deathray.nod \
 	botinfo/nav/dm-deimos2k9.nod \
-	botinfo/nav/dm-dismal2k8.nod \
+	botinfo/nav/dm-dismal2k11.nod \
 	botinfo/nav/dm-downfall.nod \
 	botinfo/nav/dm-dread.nod \
 	botinfo/nav/dm-dynamo2k8.nod \
@@ -152,9 +151,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-saucer2k9.nod \
 	botinfo/nav/dm-titan2k8.nod \
 	botinfo/nav/dm-turbo2k8.nod \
-	botinfo/nav/dm-vesuvius.nod \
 	botinfo/nav/dm-vesuvius2k11.nod \
-	botinfo/nav/dm-violator.nod \
 	botinfo/nav/dm-violator2k11.nod \
 	botinfo/nav/dm-warmachine2k10.nod \
 	botinfo/nav/dm-zion2k9.nod \
@@ -411,8 +408,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-deimos2k9.txt \
 	data1/levelshots/dm-dismal2k11.jpg \
 	data1/levelshots/dm-dismal2k11.txt \
-	data1/levelshots/dm-dismal2k8.jpg \
-	data1/levelshots/dm-dismal2k8.txt \
 	data1/levelshots/dm-downfall.jpg \
 	data1/levelshots/dm-downfall.txt \
 	data1/levelshots/dm-dread.jpg \
@@ -447,12 +442,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-titan2k8.txt \
 	data1/levelshots/dm-turbo2k8.jpg \
 	data1/levelshots/dm-turbo2k8.txt \
-	data1/levelshots/dm-vesuvius.jpg \
-	data1/levelshots/dm-vesuvius.txt \
 	data1/levelshots/dm-vesuvius2k11.jpg \
 	data1/levelshots/dm-vesuvius2k11.txt \
-	data1/levelshots/dm-violator.jpg \
-	data1/levelshots/dm-violator.txt \
 	data1/levelshots/dm-violator2k11.jpg \
 	data1/levelshots/dm-violator2k11.txt \
 	data1/levelshots/dm-warmachine2k10.jpg \
@@ -508,7 +499,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-deathray.bsp \
 	data1/maps/dm-deimos2k9.bsp \
 	data1/maps/dm-dismal2k11.bsp \
-	data1/maps/dm-dismal2k8.bsp \
 	data1/maps/dm-downfall.bsp \
 	data1/maps/dm-dread.bsp \
 	data1/maps/dm-dynamo2k8.bsp \
@@ -526,9 +516,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-saucer2k9.bsp \
 	data1/maps/dm-titan2k8.bsp \
 	data1/maps/dm-turbo2k8.bsp \
-	data1/maps/dm-vesuvius.bsp \
 	data1/maps/dm-vesuvius2k11.bsp \
-	data1/maps/dm-violator.bsp \
 	data1/maps/dm-violator2k11.bsp \
 	data1/maps/dm-warmachine2k10.bsp \
 	data1/maps/dm-zion2k9.bsp \
@@ -779,8 +767,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/aoa-corrosion.mus \
 	data1/maps/scripts/aoa-frost2k9.fog \
 	data1/maps/scripts/aoa-frost2k9.mus \
-	data1/maps/scripts/aoa-frost.fog \
-	data1/maps/scripts/aoa-frost.mus \
 	data1/maps/scripts/aoa-morpheus.mus \
 	data1/maps/scripts/aoa-zorn.mus \
 	data1/maps/scripts/cp-grindery.mus \
@@ -811,7 +797,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-aquous.mus \
 	data1/maps/scripts/dm-atlantis2k8.mus \
 	data1/maps/scripts/dm-annihilation.fog \
-    data1/maps/scripts/dm-annihilation.mus \
+	data1/maps/scripts/dm-annihilation.mus \
 	data1/maps/scripts/dm-babel2k11.fog \
 	data1/maps/scripts/dm-babel2k11.mus \
 	data1/maps/scripts/dm-beyond.mus \
@@ -830,8 +816,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-deimos2k9.mus \
 	data1/maps/scripts/dm-dismal2k11.fog \
 	data1/maps/scripts/dm-dismal2k11.mus \
-	data1/maps/scripts/dm-dismal2k8.fog \
-	data1/maps/scripts/dm-dismal2k8.mus \
 	data1/maps/scripts/dm-downfall.fog \
 	data1/maps/scripts/dm-downfall.mus \
 	data1/maps/scripts/dm-dread.mus \
@@ -859,11 +843,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-titan2k8.mus \
 	data1/maps/scripts/dm-turbo2k8.fog \
 	data1/maps/scripts/dm-turbo2k8.mus \
-	data1/maps/scripts/dm-vesuvius.fog \
-	data1/maps/scripts/dm-vesuvius.mus \
 	data1/maps/scripts/dm-vesuvius2k11.fog \
 	data1/maps/scripts/dm-vesuvius2k11.mus \
-	data1/maps/scripts/dm-violator.mus \
 	data1/maps/scripts/dm-violator2k11.mus \
 	data1/maps/scripts/dm-violator2k11.fog \
 	data1/maps/scripts/dm-warmachine2k10.fog \
@@ -1744,7 +1725,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-deathray.rscript \
 	data1/scripts/maps/dm-deimos2k9.rscript \
 	data1/scripts/maps/dm-dismal2k11.rscript \
-	data1/scripts/maps/dm-dismal2k8.rscript \
 	data1/scripts/maps/dm-downfall.rscript \
 	data1/scripts/maps/dm-dread.rscript \
 	data1/scripts/maps/dm-dynamo2k8.rscript \
@@ -1763,9 +1743,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-saucer2k9.rscript \
 	data1/scripts/maps/dm-titan2k8.rscript \
 	data1/scripts/maps/dm-turbo2k8.rscript \
-	data1/scripts/maps/dm-vesuvius.rscript \
 	data1/scripts/maps/dm-vesuvius2k11.rscript \
-	data1/scripts/maps/dm-violator.rscript \
 	data1/scripts/maps/dm-violator2k11.rscript \
 	data1/scripts/maps/dm-warmachine2k10.rscript \
 	data1/scripts/maps/dm-zion2k9.rscript \
@@ -3130,4 +3108,4 @@ nobase_dist_pkgdata_DATA = \
 	data1/vehicles/strafer/tris.md2 \
 	data1/vehicles/strafer/v_wep.md2 \
 	data1/vehicles/strafer/window.md2
-	
+

@@ -19,9 +19,17 @@
 #
 
 if USE_SYSTEM_LIBODE
+
 noinst_LIBRARIES = libgame.a
+
 else
+
+if BUILD_CLIENT
 noinst_LIBRARIES = libgame.a libode.a
+else
+noinst_LIBRARIES = libgame.a
+endif
+
 endif
 
 #
@@ -40,6 +48,10 @@ if !ALTERNATE_INSTALL
 AM_CPPFLAGS += -DDATADIR='"$(pkgdatadir)"'
 endif
 
+# Dedicated Server libraries and flags
+crx_ded_LDADD = libgame.a
+crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
+
 # Client libraries and flags
 crx_CPPFLAGS = $(AM_CPPFLAGS) \
 	$(PTHREAD_CFLAGS) \
@@ -50,6 +62,9 @@ crx_CPPFLAGS = $(AM_CPPFLAGS) \
 	$(XXF86DGA_CFLAGS)
 
 if USE_SYSTEM_LIBODE
+#
+# crx with system libode
+#
 crx_LDADD = libgame.a \
 	$(PTHREAD_LIBS) \
 	$(X11_LIBS) \
@@ -59,6 +74,9 @@ crx_LDADD = libgame.a \
 	$(XXF86DGA_LIBS)
 
 else
+#
+# crx with integrated libode
+#
 crx_LDADD = libgame.a \
 	libode.a \
 	$(PTHREAD_LIBS) \
@@ -76,14 +94,9 @@ libode_a_CPPFLAGS = -I$(top_srcdir)/source/unix/odesrc/OPCODE \
 	
 if ODE_NODEBUG
 libode_a_CPPFLAGS += -DNDEBUG -DdNODEBUG
-endif	
-
 endif
-
-
-# Dedicated Server libraries and flags
-crx_ded_LDADD = libgame.a
-crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
+	
+endif
 
 if BUILD_WIN32
 
@@ -383,7 +396,8 @@ libode_a_SOURCES += \
 	unix/odesrc/lcp.cpp \
 	unix/odesrc/lcp.h \
 	unix/odesrc/mass.cpp \
-	unix/odesrc/mat.cpp mat.h \
+	unix/odesrc/mat.cpp \
+	unix/odesrc/mat.h \
 	unix/odesrc/matrix.cpp \
 	unix/odesrc/memory.cpp \
 	unix/odesrc/misc.cpp \
