@@ -26,6 +26,23 @@
 #include "obstack.h"
 #include "util.h"
 
+/*
+ * Alien Arena 7.51 addition
+ * (This was done by injecting header files and a typedef into
+ *  config.h in configure.ac. Seemed more drastic for a defined type
+ *  that only occurs in this file than doing the following.)
+ */
+#if defined HAVE_STDINT_H
+# include <stdint.h>
+#endif
+
+#if defined HAVE_UINTPTR_T
+typedef uintptr_t intP;
+#else
+typedef unsigned int intP;
+#endif
+/* end of Alien Arena 7.51 addition */
+
 //****************************************************************************
 // macros and constants
 

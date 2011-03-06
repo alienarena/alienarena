@@ -518,6 +518,7 @@ host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
 htmldir = @htmldir@
+icondir = @icondir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -540,7 +541,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-@USE_SYSTEM_LIBODE_FALSE@noinst_LIBRARIES = libgame.a libode.a
+@BUILD_CLIENT_FALSE@@USE_SYSTEM_LIBODE_FALSE@noinst_LIBRARIES = libgame.a
+@BUILD_CLIENT_TRUE@@USE_SYSTEM_LIBODE_FALSE@noinst_LIBRARIES = libgame.a libode.a
 @USE_SYSTEM_LIBODE_TRUE@noinst_LIBRARIES = libgame.a
 @USE_SYSTEM_LIBODE_FALSE@AM_CPPFLAGS = -I $(top_srcdir)/source \
 @USE_SYSTEM_LIBODE_FALSE@	-isystem $(top_srcdir)/source/unix \
@@ -554,15 +556,27 @@ top_srcdir = @top_srcdir@
 @USE_SYSTEM_LIBODE_TRUE@AM_CPPFLAGS = -I $(top_srcdir)/source \
 @USE_SYSTEM_LIBODE_TRUE@	$(am__append_1)
 
+# Dedicated Server libraries and flags
+crx_ded_LDADD = libgame.a
+crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
+
 # Client libraries and flags
 crx_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(X11_CLAGS) \
 	$(DEPS_CFLAGS) $(ODE_CFLAGS) $(XXF86VM_CFLAGS) \
 	$(XXF86DGA_CFLAGS) $(am__append_4)
+
+#
+# crx with integrated libode
+#
 @USE_SYSTEM_LIBODE_FALSE@crx_LDADD = libgame.a libode.a \
 @USE_SYSTEM_LIBODE_FALSE@	$(PTHREAD_LIBS) $(X11_LIBS) \
 @USE_SYSTEM_LIBODE_FALSE@	$(DEPS_LIBS) $(XXF86VM_LIBS) \
 @USE_SYSTEM_LIBODE_FALSE@	$(XXF86DGA_LIBS) -lstdc++ \
 @USE_SYSTEM_LIBODE_FALSE@	$(am__append_3)
+
+#
+# crx with system libode
+#
 @USE_SYSTEM_LIBODE_TRUE@crx_LDADD = libgame.a $(PTHREAD_LIBS) \
 @USE_SYSTEM_LIBODE_TRUE@	$(X11_LIBS) $(DEPS_LIBS) $(ODE_LIBS) \
 @USE_SYSTEM_LIBODE_TRUE@	$(XXF86VM_LIBS) $(XXF86DGA_LIBS) \
@@ -571,10 +585,6 @@ crx_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(X11_CLAGS) \
 @USE_SYSTEM_LIBODE_FALSE@	-isystem $(top_srcdir)/source/unix \
 @USE_SYSTEM_LIBODE_FALSE@	-DdDOUBLE -DdTRIMESH_ENABLED \
 @USE_SYSTEM_LIBODE_FALSE@	-DdTRIMESH_OPCODE $(am__append_2)
-
-# Dedicated Server libraries and flags
-crx_ded_LDADD = libgame.a
-crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
 
 # common client sources
 crx_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
@@ -730,7 +740,7 @@ libode_a_SOURCES = unix/ode/collision.h unix/ode/collision_space.h \
 	unix/odesrc/error.cpp unix/odesrc/export-dif.cpp \
 	unix/odesrc/heightfield.cpp unix/odesrc/heightfield.h \
 	unix/odesrc/lcp.cpp unix/odesrc/lcp.h unix/odesrc/mass.cpp \
-	unix/odesrc/mat.cpp mat.h unix/odesrc/matrix.cpp \
+	unix/odesrc/mat.cpp unix/odesrc/mat.h unix/odesrc/matrix.cpp \
 	unix/odesrc/memory.cpp unix/odesrc/misc.cpp \
 	unix/odesrc/objects.h unix/odesrc/obstack.cpp \
 	unix/odesrc/obstack.h unix/odesrc/ode.cpp \

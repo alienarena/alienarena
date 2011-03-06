@@ -623,6 +623,9 @@ PTHREAD_CFLAGS
 PTHREAD_LIBS
 PTHREAD_CC
 ax_pthread_config
+icondir
+INSTALL_DOCS_FALSE
+INSTALL_DOCS_TRUE
 ALTERNATE_INSTALL_FALSE
 ALTERNATE_INSTALL_TRUE
 BUILD_CLIENT_FALSE
@@ -746,6 +749,8 @@ enable_client
 enable_alternate_install
 enable_ansi_color
 with_system_libode
+enable_documents
+with_icondir
 with_xf86vm
 with_xf86dga
 enable_debugging_symbols
@@ -1419,6 +1424,7 @@ Optional Features:
                           traditional single directory, in-place installation
                           (default:no)
   --enable-ansi-color     ANSI terminal color (default: no)
+  --disable-documents     Disable document installation (default: no)
   --enable-debugging-symbols
                           Compile Alien Arena with full debugging information
                           (default:no)
@@ -1444,6 +1450,7 @@ Optional Packages:
   --with-x                use the X Window System
   --with(out)-system-libode
                           use system-supplied libode (default:without)
+  --with-icondir=DIR      icon install directory (default:DATADIR/icons)
   --with(out)-xf86vm      include XF86 VidMode support (default: check)
   --with(out)-xf86dga     include XF86 DGA support (default: check)
 
@@ -3116,7 +3123,9 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 
+#
 # Checks for programs.
+#
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -5329,6 +5338,7 @@ else
 fi
 
 
+#
 # Alternate Install. Install in the traditional single directory way.
 # Might be required for map making tools to work. Also, good when updating
 # from SVN regularly. Affects how Makefile sets DATADIR and does make-install.
@@ -5359,7 +5369,6 @@ else
   ALTERNATE_INSTALL_TRUE='#'
   ALTERNATE_INSTALL_FALSE=
 fi
-
 
 
 if  test "x${cond_build_unix}" = xyes ; then
@@ -5424,6 +5433,14 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+#
+# ODE (Open Dynamic Engine) Library
+#
+# if no option or "--without-system-libode" is specified, use the recommended
+#  integrated ODE.
+# if "--with-system-libode" is specified, check. look under BUILD_CLIENT
+#  for details.
+#
 
 # Check whether --with-system-libode was given.
 if test "${with_system_libode+set}" = set; then :
@@ -5434,9 +5451,43 @@ fi
 
 
 #
-# Checks for libraries.
+# Option for installation of documents to allow for custom
+# documentation installation. So, do not include this in
+#  the status message.
+#
+# Check whether --enable-documents was given.
+if test "${enable_documents+set}" = set; then :
+  enableval=$enable_documents; no_docs=${enableval}
+else
+  no_docs=no
+fi
+
+ if  test "x$no_docs" = "xno" ; then
+  INSTALL_DOCS_TRUE=
+  INSTALL_DOCS_FALSE='#'
+else
+  INSTALL_DOCS_TRUE='#'
+  INSTALL_DOCS_FALSE=
+fi
+
+
+#
+# Option for specifying where icon is installed.
 #
 
+# Check whether --with-icondir was given.
+if test "${with_icondir+set}" = set; then :
+  withval=$with_icondir;  with_icondir=${withval}
+else
+   with_icondir=${datadir}/icons
+fi
+
+icondir=${with_icondir}
+
+
+#
+# Checks for libraries.
+#
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing acos" >&5
 $as_echo_n "checking for library containing acos... " >&6; }
 if test "${ac_cv_search_acos+set}" = set; then :
@@ -5548,7 +5599,6 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 fi
-
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing clock_gettime" >&5
 $as_echo_n "checking for library containing clock_gettime... " >&6; }
@@ -5801,8 +5851,8 @@ $as_echo_n "checking for the pthreads library -l$flag... " >&6; }
         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <pthread.h>
-	             static void routine(void* a) {a=0;}
-	             static void* start_routine(void* a) {return a;}
+		     static void routine(void* a) {a=0;}
+		     static void* start_routine(void* a) {return a;}
 int
 main ()
 {
@@ -5964,6 +6014,12 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+#
+# This might be a workaround for DSO missing pthread library error
+#
+	if  test "x$PTHREAD_LIBS" = "x" ; then :
+  PTHREAD_LIBS="-pthread"
+fi
 
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing jpeg_read_header" >&5
 $as_echo_n "checking for library containing jpeg_read_header... " >&6; }
@@ -6350,7 +6406,16 @@ fi
 
 fi
 
-										if  test "x$system_ode" = "xyes" ; then :
+#
+# if option to use system libode, rather than integrated ODE, is selected
+#  use pkg-config to get cflags and libs. do not default to
+#  integrated ODE on failure, as that is probably not what is wanted.
+#
+# for recommended integrated ODE build, setup client dependencies,
+#  and configuration. Double precision math is "hardwired" here and
+#  is not considered to be a user-specifiable option.
+#
+	if  test "x$system_ode" = "xyes" ; then :
 
 
 pkg_failed=no
@@ -6436,62 +6501,8 @@ else
 
 		ODE_CFLAGS=-DdDOUBLE
 
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing new_handler" >&5
-$as_echo_n "checking for library containing new_handler... " >&6; }
-if test "${ac_cv_search_new_handler+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
 
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char new_handler ();
-int
-main ()
-{
-return new_handler ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' stdc++; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_new_handler=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if test "${ac_cv_search_new_handler+set}" = set; then :
-  break
-fi
-done
-if test "${ac_cv_search_new_handler+set}" = set; then :
-
-else
-  ac_cv_search_new_handler=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_new_handler" >&5
-$as_echo "$ac_cv_search_new_handler" >&6; }
-ac_res=$ac_cv_search_new_handler
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-fi
-
+$as_echo "#define dEpsilon DBL_EPSILON" >>confdefs.h
 
 
 fi
@@ -6869,7 +6880,7 @@ fi
 done
 
 
-for ac_header in  arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h netdb.h termios.h sys/select.h
+for ac_header in inttypes.h stdint.h stddef.h stdlib.h unistd.h float.h limits.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -6883,8 +6894,7 @@ fi
 
 done
 
-
-for ac_header in  inttypes.h stdint.h stddef.h stdlib.h unistd.h float.h limits.h
+for ac_header in arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h netdb.h termios.h sys/select.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -6898,8 +6908,7 @@ fi
 
 done
 
-
-for ac_header in  dlfcn.h fcntl.h malloc.h string.h sys/param.h sys/time.h sys/stat.h
+for ac_header in dlfcn.h fcntl.h malloc.h string.h sys/param.h sys/stat.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -6913,8 +6922,7 @@ fi
 
 done
 
-
-for ac_header in  windows.h winsock.h winsock2.h
+for ac_header in time.h sys/time.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -6928,8 +6936,7 @@ fi
 
 done
 
-
-for ac_header in  time.h
+for ac_header in windows.h winsock.h winsock2.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -7039,7 +7046,9 @@ fi
 
 fi
 
+#
 # Checks for typedefs, structures, and compiler characteristics.
+#
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for stdbool.h that conforms to C99" >&5
 $as_echo_n "checking for stdbool.h that conforms to C99... " >&6; }
 if test "${ac_cv_header_stdbool_h+set}" = set; then :
@@ -7150,7 +7159,6 @@ $as_echo "#define HAVE_STDBOOL_H 1" >>confdefs.h
 
 fi
 
-#  note: redefines __inline or __inline__ to inline if compiler wants that
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for inline" >&5
 $as_echo_n "checking for inline... " >&6; }
 if test "${ac_cv_c_inline+set}" = set; then :
@@ -7193,7 +7201,6 @@ _ACEOF
     ;;
 esac
 
-#  note: defines a suitable type for size_t if system headers do not
 ac_fn_c_check_type "$LINENO" "size_t" "ac_cv_type_size_t" "$ac_includes_default"
 if test "x$ac_cv_type_size_t" = x""yes; then :
 
@@ -7205,7 +7212,6 @@ _ACEOF
 
 fi
 
-#  note: defines a suitable type uid_t and gid_t if system headers do not
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for uid_t in sys/types.h" >&5
 $as_echo_n "checking for uid_t in sys/types.h... " >&6; }
 if test "${ac_cv_type_uid_t+set}" = set; then :
@@ -7235,17 +7241,6 @@ $as_echo "#define uid_t int" >>confdefs.h
 $as_echo "#define gid_t int" >>confdefs.h
 
 fi
-
-ac_fn_c_check_type "$LINENO" "ptrdiff_t" "ac_cv_type_ptrdiff_t" "$ac_includes_default"
-if test "x$ac_cv_type_ptrdiff_t" = x""yes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_PTRDIFF_T 1
-_ACEOF
-
-
-fi
-
 
 ac_fn_c_find_intX_t "$LINENO" "32" "ac_cv_c_int32_t"
 case $ac_cv_c_int32_t in #(
@@ -7293,11 +7288,21 @@ _ACEOF
 
 fi
 
+ac_fn_c_check_type "$LINENO" "uintptr_t" "ac_cv_type_uintptr_t" "$ac_includes_default"
+if test "x$ac_cv_type_uintptr_t" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_UINTPTR_T 1
+_ACEOF
+
+
+fi
+
+
 
 #
 # Checks for library functions.
 #
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for error_at_line" >&5
 $as_echo_n "checking for error_at_line... " >&6; }
 if test "${ac_cv_lib_error_at_line+set}" = set; then :
@@ -7903,7 +7908,6 @@ esac
 fi
 
 
-# network functions
 for ac_func in closesocket socket gethostbyname select
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -7918,7 +7922,6 @@ fi
 done
 
 
-# thread functions
 for ac_func in pthread_create _begin_thread
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -7933,7 +7936,6 @@ fi
 done
 
 
-# string functions
 for ac_func in strchr strerror strrchr strstr strlcpy isascii
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -7974,7 +7976,6 @@ fi
 done
 
 
-# file system functions
 for ac_func in filelength stat fstat getcwd _getcwd unlink _unlink mkdir _mkdir
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -7989,7 +7990,6 @@ fi
 done
 
 
-# math functions
 for ac_func in pow sqrt floor
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -8004,7 +8004,6 @@ fi
 done
 
 
-# mem mgmt functions
 for ac_func in memmove memset munmap mremap
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -8019,8 +8018,7 @@ fi
 done
 
 
-# other functions
-for ac_func in gettimeofday putenv _putenv
+for ac_func in gettimeofday clock_gettime
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -8034,22 +8032,20 @@ fi
 done
 
 
-# time functions
-for ac_func in clock_gettime
+for ac_func in  putenv _putenv
 do :
-  ac_fn_c_check_func "$LINENO" "clock_gettime" "ac_cv_func_clock_gettime"
-if test "x$ac_cv_func_clock_gettime" = x""yes; then :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+eval as_val=\$$as_ac_var
+   if test "x$as_val" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_CLOCK_GETTIME 1
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
 fi
 done
 
 
-#
-# Set names of dlopened libraries for config.h
-#
 if  test "x${cond_build_unix}" = xyes ; then
   case  ${unix_host}  in #(
    darwin ) :
@@ -8097,7 +8093,12 @@ $as_echo "#define OPENAL_DRIVER \"OpenAL32.dll\"" >>confdefs.h
 
 fi
 
-# required gcc/g++ options, see m4/ax_cflags_gcc_option.m4
+#
+# required gcc/g++ options.
+#  fast-math because strict adherence to IEEE standard is not needed.
+#  no-strict-aliasing because strict aliasing is not adhered to in places.
+#  see m4/ax_cflags_gcc_option.m4
+#
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking CFLAGS for gcc -ffast-math" >&5
 $as_echo_n "checking CFLAGS for gcc -ffast-math... " >&6; }
 if test "${ax_cv_cflags_gcc_option__ffast_math+set}" = set; then :
@@ -8126,7 +8127,7 @@ return 0;
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_cflags_gcc_option__ffast_math=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+  ax_cv_cflags_gcc_option__ffast_math=`echo $ac_arg | sed -e 's,.*% *,,'`; break
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
@@ -8141,22 +8142,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cflags_gcc_option__ffast_math" >&5
 $as_echo "$ax_cv_cflags_gcc_option__ffast_math" >&6; }
-case ".$ax_cv_cflags_gcc_option__ffast_math" in
+var=$ax_cv_cflags_gcc_option__ffast_math
+case ".$var" in
      .ok|.ok,*)  ;;
    .|.no|.no,*)  ;;
    *)
-   if echo " $CFLAGS " | grep " $ax_cv_cflags_gcc_option__ffast_math " 2>&1 >/dev/null
-   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS does contain \$ax_cv_cflags_gcc_option__ffast_math"; } >&5
-  (: CFLAGS does contain $ax_cv_cflags_gcc_option__ffast_math) 2>&5
+   if echo " $CFLAGS " | grep " $var " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS does contain \$var"; } >&5
+  (: CFLAGS does contain $var) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS \$ax_cv_cflags_gcc_option__ffast_math\""; } >&5
-  (: CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__ffast_math") 2>&5
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS \$var\""; } >&5
+  (: CFLAGS="$CFLAGS $var") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-                      CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__ffast_math"
+                      CFLAGS="$CFLAGS $var"
    fi
  ;;
 esac
@@ -8190,7 +8192,7 @@ return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  ax_cv_cxxflags_gcc_option__ffast_math=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+  ax_cv_cxxflags_gcc_option__ffast_math=`echo $ac_arg | sed -e 's,.*% *,,'`; break
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
@@ -8205,22 +8207,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cxxflags_gcc_option__ffast_math" >&5
 $as_echo "$ax_cv_cxxflags_gcc_option__ffast_math" >&6; }
-case ".$ax_cv_cxxflags_gcc_option__ffast_math" in
+var=$ax_cv_cxxflags_gcc_option__ffast_math
+case ".$var" in
      .ok|.ok,*)  ;;
    .|.no|.no,*)  ;;
    *)
-   if echo " $CXXFLAGS " | grep " $ax_cv_cxxflags_gcc_option__ffast_math " 2>&1 >/dev/null
-   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$ax_cv_cxxflags_gcc_option__ffast_math"; } >&5
-  (: CXXFLAGS does contain $ax_cv_cxxflags_gcc_option__ffast_math) 2>&5
+   if echo " $CXXFLAGS " | grep " $var " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$var"; } >&5
+  (: CXXFLAGS does contain $var) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$ax_cv_cxxflags_gcc_option__ffast_math\""; } >&5
-  (: CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__ffast_math") 2>&5
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$var\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $var") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-                      CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__ffast_math"
+                      CXXFLAGS="$CXXFLAGS $var"
    fi
  ;;
 esac
@@ -8253,7 +8256,7 @@ return 0;
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_cflags_gcc_option__fno_strict_aliasing=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+  ax_cv_cflags_gcc_option__fno_strict_aliasing=`echo $ac_arg | sed -e 's,.*% *,,'`; break
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
@@ -8268,22 +8271,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cflags_gcc_option__fno_strict_aliasing" >&5
 $as_echo "$ax_cv_cflags_gcc_option__fno_strict_aliasing" >&6; }
-case ".$ax_cv_cflags_gcc_option__fno_strict_aliasing" in
+var=$ax_cv_cflags_gcc_option__fno_strict_aliasing
+case ".$var" in
      .ok|.ok,*)  ;;
    .|.no|.no,*)  ;;
    *)
-   if echo " $CFLAGS " | grep " $ax_cv_cflags_gcc_option__fno_strict_aliasing " 2>&1 >/dev/null
-   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS does contain \$ax_cv_cflags_gcc_option__fno_strict_aliasing"; } >&5
-  (: CFLAGS does contain $ax_cv_cflags_gcc_option__fno_strict_aliasing) 2>&5
+   if echo " $CFLAGS " | grep " $var " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS does contain \$var"; } >&5
+  (: CFLAGS does contain $var) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS \$ax_cv_cflags_gcc_option__fno_strict_aliasing\""; } >&5
-  (: CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__fno_strict_aliasing") 2>&5
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS \$var\""; } >&5
+  (: CFLAGS="$CFLAGS $var") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-                      CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__fno_strict_aliasing"
+                      CFLAGS="$CFLAGS $var"
    fi
  ;;
 esac
@@ -8316,7 +8320,7 @@ return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  ax_cv_cxxflags_gcc_option__fno_strict_aliasing=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+  ax_cv_cxxflags_gcc_option__fno_strict_aliasing=`echo $ac_arg | sed -e 's,.*% *,,'`; break
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
@@ -8331,22 +8335,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cxxflags_gcc_option__fno_strict_aliasing" >&5
 $as_echo "$ax_cv_cxxflags_gcc_option__fno_strict_aliasing" >&6; }
-case ".$ax_cv_cxxflags_gcc_option__fno_strict_aliasing" in
+var=$ax_cv_cxxflags_gcc_option__fno_strict_aliasing
+case ".$var" in
      .ok|.ok,*)  ;;
    .|.no|.no,*)  ;;
    *)
-   if echo " $CXXFLAGS " | grep " $ax_cv_cxxflags_gcc_option__fno_strict_aliasing " 2>&1 >/dev/null
-   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$ax_cv_cxxflags_gcc_option__fno_strict_aliasing"; } >&5
-  (: CXXFLAGS does contain $ax_cv_cxxflags_gcc_option__fno_strict_aliasing) 2>&5
+   if echo " $CXXFLAGS " | grep " $var " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$var"; } >&5
+  (: CXXFLAGS does contain $var) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$ax_cv_cxxflags_gcc_option__fno_strict_aliasing\""; } >&5
-  (: CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__fno_strict_aliasing") 2>&5
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$var\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $var") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-                      CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__fno_strict_aliasing"
+                      CXXFLAGS="$CXXFLAGS $var"
    fi
  ;;
 esac
@@ -8399,7 +8404,7 @@ return 0;
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_cflags_gcc_option__g3=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+  ax_cv_cflags_gcc_option__g3=`echo $ac_arg | sed -e 's,.*% *,,'`; break
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
@@ -8414,22 +8419,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cflags_gcc_option__g3" >&5
 $as_echo "$ax_cv_cflags_gcc_option__g3" >&6; }
-case ".$ax_cv_cflags_gcc_option__g3" in
+var=$ax_cv_cflags_gcc_option__g3
+case ".$var" in
      .ok|.ok,*)  ;;
    .|.no|.no,*)  ;;
    *)
-   if echo " $CFLAGS " | grep " $ax_cv_cflags_gcc_option__g3 " 2>&1 >/dev/null
-   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS does contain \$ax_cv_cflags_gcc_option__g3"; } >&5
-  (: CFLAGS does contain $ax_cv_cflags_gcc_option__g3) 2>&5
+   if echo " $CFLAGS " | grep " $var " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS does contain \$var"; } >&5
+  (: CFLAGS does contain $var) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS \$ax_cv_cflags_gcc_option__g3\""; } >&5
-  (: CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__g3") 2>&5
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS \$var\""; } >&5
+  (: CFLAGS="$CFLAGS $var") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-                      CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__g3"
+                      CFLAGS="$CFLAGS $var"
    fi
  ;;
 esac
@@ -8462,7 +8468,7 @@ return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  ax_cv_cxxflags_gcc_option__g3=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+  ax_cv_cxxflags_gcc_option__g3=`echo $ac_arg | sed -e 's,.*% *,,'`; break
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
@@ -8477,22 +8483,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cxxflags_gcc_option__g3" >&5
 $as_echo "$ax_cv_cxxflags_gcc_option__g3" >&6; }
-case ".$ax_cv_cxxflags_gcc_option__g3" in
+var=$ax_cv_cxxflags_gcc_option__g3
+case ".$var" in
      .ok|.ok,*)  ;;
    .|.no|.no,*)  ;;
    *)
-   if echo " $CXXFLAGS " | grep " $ax_cv_cxxflags_gcc_option__g3 " 2>&1 >/dev/null
-   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$ax_cv_cxxflags_gcc_option__g3"; } >&5
-  (: CXXFLAGS does contain $ax_cv_cxxflags_gcc_option__g3) 2>&5
+   if echo " $CXXFLAGS " | grep " $var " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$var"; } >&5
+  (: CXXFLAGS does contain $var) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$ax_cv_cxxflags_gcc_option__g3\""; } >&5
-  (: CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__g3") 2>&5
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$var\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $var") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-                      CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__g3"
+                      CXXFLAGS="$CXXFLAGS $var"
    fi
  ;;
 esac
@@ -8547,7 +8554,7 @@ return 0;
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_cflags_gcc_option__Wall=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+  ax_cv_cflags_gcc_option__Wall=`echo $ac_arg | sed -e 's,.*% *,,'`; break
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
@@ -8562,22 +8569,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cflags_gcc_option__Wall" >&5
 $as_echo "$ax_cv_cflags_gcc_option__Wall" >&6; }
-case ".$ax_cv_cflags_gcc_option__Wall" in
+var=$ax_cv_cflags_gcc_option__Wall
+case ".$var" in
      .ok|.ok,*)  ;;
    .|.no|.no,*)  ;;
    *)
-   if echo " $CFLAGS " | grep " $ax_cv_cflags_gcc_option__Wall " 2>&1 >/dev/null
-   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS does contain \$ax_cv_cflags_gcc_option__Wall"; } >&5
-  (: CFLAGS does contain $ax_cv_cflags_gcc_option__Wall) 2>&5
+   if echo " $CFLAGS " | grep " $var " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS does contain \$var"; } >&5
+  (: CFLAGS does contain $var) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS \$ax_cv_cflags_gcc_option__Wall\""; } >&5
-  (: CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__Wall") 2>&5
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS \$var\""; } >&5
+  (: CFLAGS="$CFLAGS $var") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-                      CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__Wall"
+                      CFLAGS="$CFLAGS $var"
    fi
  ;;
 esac
@@ -8610,7 +8618,7 @@ return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  ax_cv_cxxflags_gcc_option__Wall=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+  ax_cv_cxxflags_gcc_option__Wall=`echo $ac_arg | sed -e 's,.*% *,,'`; break
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
@@ -8625,22 +8633,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cxxflags_gcc_option__Wall" >&5
 $as_echo "$ax_cv_cxxflags_gcc_option__Wall" >&6; }
-case ".$ax_cv_cxxflags_gcc_option__Wall" in
+var=$ax_cv_cxxflags_gcc_option__Wall
+case ".$var" in
      .ok|.ok,*)  ;;
    .|.no|.no,*)  ;;
    *)
-   if echo " $CXXFLAGS " | grep " $ax_cv_cxxflags_gcc_option__Wall " 2>&1 >/dev/null
-   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$ax_cv_cxxflags_gcc_option__Wall"; } >&5
-  (: CXXFLAGS does contain $ax_cv_cxxflags_gcc_option__Wall) 2>&5
+   if echo " $CXXFLAGS " | grep " $var " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$var"; } >&5
+  (: CXXFLAGS does contain $var) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$ax_cv_cxxflags_gcc_option__Wall\""; } >&5
-  (: CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__Wall") 2>&5
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$var\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $var") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-                      CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__Wall"
+                      CXXFLAGS="$CXXFLAGS $var"
    fi
  ;;
 esac
@@ -8740,7 +8749,7 @@ return 0;
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_cflags_gcc_option__DNDEBUG=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+  ax_cv_cflags_gcc_option__DNDEBUG=`echo $ac_arg | sed -e 's,.*% *,,'`; break
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
@@ -8755,22 +8764,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cflags_gcc_option__DNDEBUG" >&5
 $as_echo "$ax_cv_cflags_gcc_option__DNDEBUG" >&6; }
-case ".$ax_cv_cflags_gcc_option__DNDEBUG" in
+var=$ax_cv_cflags_gcc_option__DNDEBUG
+case ".$var" in
      .ok|.ok,*)  ;;
    .|.no|.no,*)  ;;
    *)
-   if echo " $CFLAGS " | grep " $ax_cv_cflags_gcc_option__DNDEBUG " 2>&1 >/dev/null
-   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS does contain \$ax_cv_cflags_gcc_option__DNDEBUG"; } >&5
-  (: CFLAGS does contain $ax_cv_cflags_gcc_option__DNDEBUG) 2>&5
+   if echo " $CFLAGS " | grep " $var " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS does contain \$var"; } >&5
+  (: CFLAGS does contain $var) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS \$ax_cv_cflags_gcc_option__DNDEBUG\""; } >&5
-  (: CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__DNDEBUG") 2>&5
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS \$var\""; } >&5
+  (: CFLAGS="$CFLAGS $var") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-                      CFLAGS="$CFLAGS $ax_cv_cflags_gcc_option__DNDEBUG"
+                      CFLAGS="$CFLAGS $var"
    fi
  ;;
 esac
@@ -8803,7 +8813,7 @@ return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"; then :
-  ax_cv_cxxflags_gcc_option__DNDEBUG=`echo $ac_arg | sed -e 's,.*% *,,'` ; break
+  ax_cv_cxxflags_gcc_option__DNDEBUG=`echo $ac_arg | sed -e 's,.*% *,,'`; break
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 done
@@ -8818,22 +8828,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_cxxflags_gcc_option__DNDEBUG" >&5
 $as_echo "$ax_cv_cxxflags_gcc_option__DNDEBUG" >&6; }
-case ".$ax_cv_cxxflags_gcc_option__DNDEBUG" in
+var=$ax_cv_cxxflags_gcc_option__DNDEBUG
+case ".$var" in
      .ok|.ok,*)  ;;
    .|.no|.no,*)  ;;
    *)
-   if echo " $CXXFLAGS " | grep " $ax_cv_cxxflags_gcc_option__DNDEBUG " 2>&1 >/dev/null
-   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$ax_cv_cxxflags_gcc_option__DNDEBUG"; } >&5
-  (: CXXFLAGS does contain $ax_cv_cxxflags_gcc_option__DNDEBUG) 2>&5
+   if echo " $CXXFLAGS " | grep " $var " 2>&1 >/dev/null
+   then { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS does contain \$var"; } >&5
+  (: CXXFLAGS does contain $var) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$ax_cv_cxxflags_gcc_option__DNDEBUG\""; } >&5
-  (: CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__DNDEBUG") 2>&5
+   else { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$var\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $var") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-                      CXXFLAGS="$CXXFLAGS $ax_cv_cxxflags_gcc_option__DNDEBUG"
+                      CXXFLAGS="$CXXFLAGS $var"
    fi
  ;;
 esac
@@ -8859,7 +8870,6 @@ else
   ODE_NODEBUG_TRUE='#'
   ODE_NODEBUG_FALSE=
 fi
-
 
 
 #########################################################################################################
@@ -9005,6 +9015,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ALTERNATE_INSTALL_TRUE}" && test -z "${ALTERNATE_INSTALL_FALSE}"; then
   as_fn_error "conditional \"ALTERNATE_INSTALL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${INSTALL_DOCS_TRUE}" && test -z "${INSTALL_DOCS_FALSE}"; then
+  as_fn_error "conditional \"INSTALL_DOCS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_SYSTEM_LIBODE_TRUE}" && test -z "${USE_SYSTEM_LIBODE_FALSE}"; then
@@ -10362,7 +10376,7 @@ else
   dedicated_only=yes
 fi
 		$as_echo " Dedicated Only: ........ ${dedicated_only}"
-		$as_echo " ANSI Color Codes: ...... ${ansi_color}"
+		$as_echo " Server terminal color: . ${ansi_color}"
 		$as_echo " System ODE library ..... ${system_ode}"
 
 fi
@@ -10403,3 +10417,4 @@ fi
 	$as_echo "--------------------------------------------"
 
 fi
+
