@@ -1,5 +1,5 @@
 .\" GNU/Linux/Unix README for Alien Arena 2011
-.\" 2010-11-30. Revised: 2010-12-08
+.\" 2010-11-30. Revised: 2011-03-08
 .\" Author: Jim Bower
 .\" using groff for paragraph formatting.
 .\" $ groff -T ascii README.groff >README
@@ -10,7 +10,7 @@
 .nr topic 0 1
 
 .tl ''Alien Arena 2011''
-.tl ''Version 7.50''
+.tl ''Version 7.51''
 
 \n+[topic]. Scope
 
@@ -33,7 +33,21 @@ There are links there to the Alien Arena Forum and other helpful Internet resour
 This information is for packagers and those who have a previous installation of Alien Arena.
 (If this does not apply to you, it is safe to skip to the next topic: Installation.)
 
-Briefly, important differences are:
+Version 7.51 has improved performance, bug fixes, plus new and updated game assets.
+Significant changes from Version 7.50 that are related to building and installing the game are:
+
+.nf
+.in +2m
+* The Open Dynamics Engine (ODE) is integrated with the main program;
+  so libode is no longer a required dependency. But, g++ and libstdc++
+  are required to build and link the integrated ODE.
+* A configure option to disable document installation is added.
+* An installation path for the icon, icondir, is added and the icon is 
+  renamed to alienarena.png.
+* The server terminal may be configured to support color output.
+.in 0
+
+Briefly, important differences in previous Version 7.50 are:
 
 .nf
 .in +2m
@@ -43,7 +57,8 @@ Briefly, important differences are:
 * The dedicated server has been renamed to crx-ded.
 * There is an dedicated-server-only build option.
 * There is an "alternate" single directory install option.
-* Additional dependency: Open Dynamics Engine (libode).
+* Additional dependency: Open Dynamics Engine (libode)
+  (optional in 7.51).
 * Additional dependency: FreeType 2 (libfreetype).
 .in
 .fi
@@ -86,10 +101,11 @@ $ tar -xzf alienarena-<some version numbers>.tar.gz
 Or, using the graphical file browser, right click on the file name, and left click on "Extract Here."
 
 If the installation fails, check the error message for required software packages that may be missing.
-Alien Arena uses: X11, OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, ODE (Open Dynamics Engine), and JPEG.
+Alien Arena uses: X11, OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, and JPEG.
+Version 7.50 requires Open Dynamic Engine (ODE), but Version 7.51 does not.
 For Ubuntu and similar systems, see the topic, "Getting Required Packages with Synaptic", below. 
 
-Using the terminal, change to the alienarena-7.50 directory and enter these commands:  
+Using the terminal, change to the alienarena-7.51 directory and enter these commands:  
 .nf
 .in +2m
 $ ./configure
@@ -113,7 +129,7 @@ The details are beyond the scope of this document;
 but a simple example is:
 .nf
 .in +2m
-$ crx +set game arena +set maxclients 10
+$ crx +set maxclients 10
 .in
 .fi
 
@@ -132,7 +148,6 @@ share/
 .in +2m
 alienarena/
 .in +2m
-aa.png  (icon)
 arena/
 botinfo/
 data1/
@@ -142,6 +157,10 @@ doc/
 alienarena/
 .in +2m
 <various documents>
+.in -4m
+icons/
+.in +2m
+alienarena.png
 .in 0
 .fi
 
@@ -196,12 +215,12 @@ build-essential
 libx11-dev
 libgl1-mesa-dev
 libxxf86vm-dev
-libxxf86dga-dev
+libxxf86dga-dev (optional)
 libopenal-dev
 libjpeg8-dev (or libjpeg62-dev)
 libvorbis-dev
 libcurl4-gnutls-dev
-libode-dev
+libode-dev (optional)
 libfreetype6-dev
 .in
 .fi
@@ -210,10 +229,21 @@ libfreetype6-dev
 \n+[topic]. Troubleshooting Tips
 
 When the game exits, it stores settings in config.cfg.
-This file is /home/<user>/.codered/arena/.
+The default location for this file is /home/<user>/.codered/arena/ (might be in .alienarena rather than .codered).
 Sometimes it helps to delete config.cfg, and then re-enter menu settings.
 For persistent storage of custom settings, create a file named autoexec.cfg in the same directory as config.cfg.
 Settings in autoexec.cfg will override settings in config.cfg.
+
+If the game does not run smoothly, graphics settings may need to be adjusted.
+Also, a different or updated video driver may be needed.
+Enable the frame rate display in the "Game Options" menu by setting "display fps" to yes.
+There are settings in both the "Game Options" and "Video Options" sections that affect performance.
+The maximum frame rate is set with the console variable ("cvar"), cl_maxfps.
+Sometimes lowering that from the default "90" will help.
+(Except for local testing, do not set cl_maxfps higher than 145).
+Get more information on the Forum, Websites, and IRC channel.
+
+If you have errors that output messages about "ODE", setting the "ragdolls" option to off in the Game Options menu may help.
 
 There are known sound problems related to PulseAudio and OpenAL on some systems.
 Check
@@ -230,6 +260,24 @@ Put this line into the autoexec.cfg file:
 .in +2m
 set in_dgamouse "0"
 .in
+.fi
+Alternatively, when building the program, use this configure option:
+.nf
+.in +2m
+--without-xf86dga
+.in
+.fi
+
+For advanced users only (if you do not know what this means, do not try it):
+Testing shows that some CFLAGS settings can give a little performance improvement.
+Some to try, depending on system hardware are:
+.nf
+.in +2m
+* -O3
+* -march=core2 
+* -msse or -msse2 or -msse3
+* -fpmath=sse
+.in 0
 .fi
 
 
@@ -255,17 +303,61 @@ To hide that message, use:
 .in
 .fi
 
-To rename the programs, use the standard configure option. For example:
+To rename the programs, use the standard configure option.
+For example:
 .nf
 .in +2m
 --program-transform-name='s/crx/alienarena/'
 .in
 .fi
 
-To install to a different location, use the standard configure option. For example:
+To install to a different location, use the standard configure option.
+For example:
 .nf
 .in +2m
 --prefix=/usr/local/games
+.in
+.fi
+
+To specify an installation location for the icon, use the following option.
+.nf
+.in +2m
+--with-icondir=DIR
+.in
+.fi
+
+To use the system-supplied libode, rather than the integrated ODE, use this option:
+.nf
+.in +2m
+--with-system-libode
+.in
+.fi
+Due to variations in the way libode may be built, this is deemed an "unsupported" option.
+The integrated ODE is built using these compile options:
+.nf
+.in +2m
+* -DdDOUBLE
+* -DdTRIMESH_ENABLED
+* -DdTRIMESH_OPCODE
+* -DNDEBUG and -DdNODEBUG
+.in
+.fi
+Using a libode built with -DdSINGLE makes ragdolls excessively "raggedy".
+Other variations will likely result in program failure.
+
+To disable installation of documents, use the following option.
+.nf
+.in +2m
+--disable-documents
+.in
+.fi
+
+The server terminal will output color if the following option is used.
+This converts Quake-style color codes to ANSI color escapes.
+(It is not enabled by default because some terminal configurations may not support ANSI color escapes.)
+.nf
+.in +2m
+--enable-ansi-color
 .in
 .fi
 
