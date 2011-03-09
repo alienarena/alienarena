@@ -240,14 +240,15 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 
 		GL_EnableMultitexture( true );
 
-		qglActiveTextureARB(GL_TEXTURE1);
+		qglActiveTextureARB(GL_TEXTURE0);
 		qglBindTexture (GL_TEXTURE_2D, fa->texinfo->image->texnum);
-		glUniform1iARB( g_location_baseTexture, 1);
-		KillFlags |= KILL_TMU1_POINTER;
-		 
-		glUniform1iARB( g_location_normTexture, 2);
+		glUniform1iARB( g_location_baseTexture, 0);
+		KillFlags |= KILL_TMU0_POINTER;
+
+		//note - moving this to tmu2 fixed a very odd, obsure bug.  It isn't clear yet why it fixes it, but it does
 		qglActiveTextureARB(GL_TEXTURE2);
 		qglBindTexture(GL_TEXTURE_2D, fa->texinfo->normalMap->texnum);
+		glUniform1iARB( g_location_normTexture, 2);
 		KillFlags |= KILL_TMU2_POINTER;
 
 		if(fa->texinfo->flags &(SURF_TRANS33|SURF_TRANS66))
@@ -255,13 +256,14 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		else
 			glUniform1iARB( g_location_trans, 0);
 
-		qglActiveTextureARB(GL_TEXTURE3);
-		qglBindTexture(GL_TEXTURE_2D, texnum);
-		glUniform1iARB( g_location_refTexture, 3);
-		KillFlags |= KILL_TMU3_POINTER;
-				
 		if(texnum)
+		{
+			qglActiveTextureARB(GL_TEXTURE3);
+			qglBindTexture(GL_TEXTURE_2D, texnum);
+			glUniform1iARB( g_location_refTexture, 3);
+			KillFlags |= KILL_TMU3_POINTER;
 			glUniform1iARB( g_location_reflect, 1);
+		}
 		else
 			glUniform1iARB( g_location_reflect, 0);
 			
