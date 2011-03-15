@@ -1,0 +1,83 @@
+textures/arena6/flamejet
+{
+	{
+		map textures/arena6/flamejet.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 150 .2 .9
+		nolightmap
+	}
+
+}
+textures/arena6/tech1
+{
+	{
+		map gfx/lightning.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 2
+		alphashift 5 0.05 0.4
+	}
+	
+}
+textures/arena7/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena6/skullite
+{
+	{
+		lensflare
+	}
+}
+env/greenup
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/greenrt
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/greenlf
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/greenft
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/greenbk
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+env/greendn
+{
+	{
+		map gfx/cloudsthick.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+	}
+}
+
+

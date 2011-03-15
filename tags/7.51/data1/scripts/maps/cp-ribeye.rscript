@@ -1,0 +1,30 @@
+textures/martian/light3
+{
+	{
+		lensflare
+	}
+}
+textures/arena3/water
+{
+	{
+		map gfx/dmturboreflection.tga
+		distort
+	}
+}
+textures/water/clearwater
+{
+	{
+		map gfx/cpribeyereflection.tga
+		distort
+	}
+}
+textures/arena8/grass2
+{
+	{
+		map gfx/grass.tga
+		scale static 4 static 4
+		colormap 2 2 2
+		grass
+		grasstype 0
+	}
+}
