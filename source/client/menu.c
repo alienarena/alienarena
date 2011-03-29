@@ -3686,7 +3686,6 @@ void JoinServerFunc( void *self )
 		Com_sprintf(local_server_data[5], sizeof(local_server_data[5]), mservers[index+svridx].szVersion);
 		
 		modstring = mservers[index+svridx].modInfo;
-		printf ("client modstring %s\n", modstring);
 		token = strtok(modstring, "%%");
 		for (i=0; i<16; i++) {
 		    if (!token)
