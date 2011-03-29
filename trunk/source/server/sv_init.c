@@ -276,8 +276,8 @@ void SV_InitGame (void)
 	}
 
 	//set player move speed according to excessive value
-	sv_excessive = Cvar_Get ("excessive", "0", CVAR_LATCH);
-	sv_playerspeed = Cvar_Get ("playerspeed", "0", CVAR_LATCH);
+	sv_excessive = Cvar_Get ("excessive", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	sv_playerspeed = Cvar_Get ("playerspeed", "0", CVAR_LATCH|CVAR_GAMEINFO);
 	if(sv_excessive->value || sv_playerspeed->value)
 		pm_maxspeed = 450;
 	else

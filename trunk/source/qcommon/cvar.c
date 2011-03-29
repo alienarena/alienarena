@@ -487,7 +487,7 @@ void Cvar_Set_f (void)
 	c = Cmd_Argc();
 	if (c != 3 && c != 4)
 	{
-		Com_Printf ("usage: set <variable> <value> [u / s]\n");
+		Com_Printf ("usage: set <variable> <value> [u / s / g]\n");
 		return;
 	}
 
@@ -497,9 +497,11 @@ void Cvar_Set_f (void)
 			flags = CVAR_USERINFO;
 		else if (!strcmp(Cmd_Argv(3), "s"))
 			flags = CVAR_SERVERINFO;
+		else if (!strcmp(Cmd_Argv(3), "g"))
+		    flags = CVAR_GAMEINFO;
 		else
 		{
-			Com_Printf ("flags can only be 'u' or 's'\n");
+			Com_Printf ("flags can only be 'u', 's', or 'g'\n");
 			return;
 		}
 		Cvar_FullSet (Cmd_Argv(1), Cmd_Argv(2), flags);
@@ -603,7 +605,38 @@ char	*Cvar_Userinfo (void)
 // returns an info string containing all the CVAR_SERVERINFO cvars
 char	*Cvar_Serverinfo (void)
 {
-	return Cvar_BitInfo (CVAR_SERVERINFO);
+    static char info[MAX_INFO_STRING];
+    Com_sprintf(info, sizeof(info), Cvar_BitInfo (CVAR_SERVERINFO));
+    
+    //add the "mods" field
+    char *gameinfo = Cvar_BitInfo (CVAR_GAMEINFO);
+    char ruleset[MAX_INFO_KEY];
+    char *token;
+    char lasttoken[MAX_INFO_KEY];
+    char current_rule[MAX_INFO_KEY];
+    lasttoken[0] = 0;
+    memset(ruleset, 0, sizeof(ruleset));
+    token = strtok (gameinfo, "\\");
+    while (token) {
+        if (!Cvar_Get(lasttoken, NULL, 0)) {
+            current_rule[0] = 0; //empty string
+        } else if (atof(token) == 1.0f) {
+            //if the value is 1, don't add the value
+            Com_sprintf(current_rule, sizeof(current_rule), "%%%s", lasttoken);
+        } else if (strlen(token) && (token[0] != '0' || atof(token) != 0.0f)) {
+            //any value which is not 0 or 1 will be displayed
+            Com_sprintf(current_rule, sizeof(current_rule), "%%%s=%s", lasttoken, token);
+        }
+        if (strlen(current_rule)+strlen(ruleset)+strlen("mods")+strlen("\\\\")+strlen(info) >= MAX_INFO_STRING)
+            //this mod cannot be added to the ruleset because it would make 
+            //ruleset too long to fit in info.
+            break;
+        strncat(ruleset, current_rule, MAX_INFO_KEY-strlen(ruleset)-1);
+        Com_sprintf(lasttoken, sizeof(lasttoken), "%s", token);
+        token = strtok(NULL, "\\");
+    }
+    Info_SetValueForKey (info, "mods", ruleset);
+    return info;
 }
 
 /*

@@ -186,26 +186,26 @@ void InitGame (void)
 	g_maxclients = gi.cvar ("maxclients", "4", CVAR_SERVERINFO | CVAR_LATCH);
 	maxspectators = gi.cvar ("maxspectators", "4", CVAR_SERVERINFO);
 	deathmatch = gi.cvar ("deathmatch", "0", CVAR_LATCH);
-	ctf = gi.cvar ("ctf", "0", CVAR_LATCH);
-	tca = gi.cvar ("tca", "0", CVAR_LATCH);
-	cp = gi.cvar ("cp", "0", CVAR_LATCH);
+	ctf = gi.cvar ("ctf", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	tca = gi.cvar ("tca", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	cp = gi.cvar ("cp", "0", CVAR_LATCH|CVAR_GAMEINFO);
 	skill = gi.cvar ("skill", "1", CVAR_LATCH);
 	maxentities = gi.cvar ("maxentities", "1024", CVAR_LATCH);
 	sv_botkickthreshold = gi.cvar("sv_botkickthreshold", "0", CVAR_LATCH);
 	sv_custombots = gi.cvar("sv_custombots", "0", CVAR_LATCH);
 
 	//mutator
-	instagib = gi.cvar ("instagib", "0", CVAR_LATCH);
-	rocket_arena = gi.cvar ("rocket_arena", "0", CVAR_LATCH);
-	low_grav = gi.cvar ("low_grav", "0", CVAR_LATCH);
-	regeneration = gi.cvar ("regeneration", "0", CVAR_LATCH);
-	vampire = gi.cvar ("vampire", "0", CVAR_LATCH);
-	excessive = gi.cvar ("excessive", "0", CVAR_LATCH);
-	grapple = gi.cvar ("grapple", "0", CVAR_LATCH);
-	classbased = gi.cvar ("classbased", "0", CVAR_LATCH);
+	instagib = gi.cvar ("instagib", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	rocket_arena = gi.cvar ("rocket_arena", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	low_grav = gi.cvar ("low_grav", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	regeneration = gi.cvar ("regeneration", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	vampire = gi.cvar ("vampire", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	excessive = gi.cvar ("excessive", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	grapple = gi.cvar ("grapple", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	classbased = gi.cvar ("classbased", "0", CVAR_LATCH|CVAR_GAMEINFO);
 
 	//duel mode
-	g_duel = gi.cvar ("g_duel", "0", CVAR_LATCH);
+	g_duel = gi.cvar ("g_duel", "0", CVAR_LATCH|CVAR_GAMEINFO);
 
 	g_losehealth = gi.cvar ("g_losehealth", "1", CVAR_LATCH);
 	g_losehealth_num = gi.cvar ("g_losehealth_num", "100", CVAR_LATCH);
@@ -224,10 +224,10 @@ void InitGame (void)
 	g_maxslugs = gi.cvar("g_maxslugs", "50", 0);
 
 	//quick weapon change
-	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH);
+	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH|CVAR_GAMEINFO);
 
 	//anti-camp
-	anticamp = gi.cvar("anticamp", "0", CVAR_LATCH);
+	anticamp = gi.cvar("anticamp", "0", CVAR_LATCH|CVAR_GAMEINFO);
 	camptime = gi.cvar("camptime", "10", CVAR_LATCH);
 
 	//random quad
@@ -240,7 +240,7 @@ void InitGame (void)
 	g_spawnprotect = gi.cvar("g_spawnprotect", "2", CVAR_SERVERINFO);
 
 	//joust mode
-	joustmode = gi.cvar("sv_joustmode", "0", CVAR_SERVERINFO);
+	joustmode = gi.cvar("sv_joustmode", "0", CVAR_SERVERINFO|CVAR_GAMEINFO);
 
 	//map voting
 	g_mapvote = gi.cvar("g_mapvote", "0", CVAR_SERVERINFO);
@@ -291,6 +291,11 @@ void InitGame (void)
 
 	// items
 	InitItems ();
+	
+	//set this if you're running experimental code on your server
+	gi.cvar("testcode", "0", CVAR_GAMEINFO|CVAR_ROM); 
+	//set this in your config if you're testing an unfinished map
+	gi.cvar("testmap", "0", CVAR_GAMEINFO);
 
 	Com_sprintf (game.helpmessage1, sizeof(game.helpmessage1), "");
 
