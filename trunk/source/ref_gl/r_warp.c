@@ -240,11 +240,9 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 
 		GL_EnableMultitexture( true );
 
-		//qglActiveTextureARB(GL_TEXTURE0);
 		GL_MBind(GL_TEXTURE0, fa->texinfo->image->texnum);
 		glUniform1iARB( g_location_baseTexture, 0);
 
-		//note - moving this to tmu2 fixed a very odd, obsure bug.  It isn't clear yet why it fixes it, but it does
 		GL_MBind(GL_TEXTURE1, fa->texinfo->normalMap->texnum);
 		glUniform1iARB( g_location_normTexture, 1);
 
