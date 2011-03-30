@@ -605,15 +605,15 @@ char	*Cvar_Userinfo (void)
 // returns an info string containing all the CVAR_SERVERINFO cvars
 char	*Cvar_Serverinfo (void)
 {
-    static char info[MAX_INFO_STRING];
-    Com_sprintf(info, sizeof(info), Cvar_BitInfo (CVAR_SERVERINFO));
-    
-    //add the "mods" field
+	//add the "mods" field
     char *gameinfo = Cvar_BitInfo (CVAR_GAMEINFO);
     char ruleset[MAX_INFO_KEY];
     char *token;
     char lasttoken[MAX_INFO_KEY];
     char current_rule[MAX_INFO_KEY];
+    static char info[MAX_INFO_STRING];
+    Com_sprintf(info, sizeof(info), Cvar_BitInfo (CVAR_SERVERINFO));    
+    
     lasttoken[0] = 0;
     memset(ruleset, 0, sizeof(ruleset));
     token = strtok (gameinfo, "\\");
