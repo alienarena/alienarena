@@ -732,11 +732,18 @@ void Mod_LoadTexinfo (lump_t *l)
 			strcat( name, "_nm.tga" );
 			out->normalMap = GL_FindImage( name, it_bump );
 			if( out->normalMap == NULL )
+			{
+				out->has_normalmap = false;
 				out->normalMap = out->image;
-
+			}
+			else
+				out->has_normalmap = true;
 		}
 		else
+		{
+			out->has_normalmap = false;
 			out->normalMap = out->image;
+		}
 
 		strcpy(name, sv_name);
 		if( ( strlen( name ) + 8 ) <= MAX_QPATH )
@@ -744,11 +751,18 @@ void Mod_LoadTexinfo (lump_t *l)
 			strcat( name, "_hm.tga" );
 			out->heightMap = GL_FindImage( name, it_bump );
 			if( out->heightMap == NULL )
+			{
+				out->has_heightmap = false;
 				out->heightMap = out->image;
-
+			}
+			else
+				out->has_heightmap = true;
 		}
 		else
+		{
+			out->has_heightmap = false;
 			out->heightMap = out->image;
+		}
 	}
 
 	// count animation frames
