@@ -302,7 +302,7 @@ void BSP_RenderBrushPoly (msurface_t *fa)
 		GL_TexEnv( GL_REPLACE );
 	}
 
-	if(strcmp(fa->texinfo->normalMap->name, fa->texinfo->image->name)) 
+	if(fa->texinfo->has_normalmap) 
 	{
 		//add to normal chain
 		fa->normalchain = r_normalsurfaces;
@@ -577,7 +577,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 	qglActiveTextureARB(GL_TEXTURE1);
 	qglBindTexture(GL_TEXTURE_2D, gl_state.lightmap_textures + lmtex );		
 
-	if(strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)) 
+	if(surf->texinfo->has_normalmap) 
 	{
 		//add to normal chain
 		surf->normalchain = r_normalsurfaces;
@@ -707,7 +707,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 			scroll = -64.0;
 	}
 
-	if(gl_normalmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)) 
+	if(gl_normalmaps->value && surf->texinfo->has_heightmap) 
 		glUniform1iARB( g_location_parallax, 1);
 	else
 	{
@@ -1021,14 +1021,14 @@ void BSP_AddToTextureChain(msurface_t *surf)
 		}
 	}
 
-	if(is_dynamic && strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)
+	if(is_dynamic && surf->texinfo->has_normalmap
 		&& gl_state.glsl_shaders && gl_glsl_shaders->value) //always glsl for dynamic if it has a normalmap
 	{
 		surf->glsldynamicchain = r_glsl_dynamic_surfaces;
 		r_glsl_dynamic_surfaces = surf;
 	}
-	else if(gl_normalmaps->value && strcmp(surf->texinfo->heightMap->name, surf->texinfo->image->name)
-			&& strcmp(surf->texinfo->normalMap->name, surf->texinfo->image->name)
+	else if(gl_normalmaps->value && surf->texinfo->has_heightmap
+			&& surf->texinfo->has_normalmap
 			&& gl_state.glsl_shaders && gl_glsl_shaders->value) 
 	{
 		surf->glslchain = r_glsl_surfaces;

@@ -229,7 +229,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 		scroll = 0.0f;
 	  
 	if(gl_state.glsl_shaders && gl_glsl_shaders->value
-		&& strcmp(fa->texinfo->normalMap->name, fa->texinfo->image->name)) {
+		&& fa->texinfo->has_normalmap) {
 
 		if (SurfaceIsAlphaBlended(fa))
 			qglEnable( GL_ALPHA_TEST );
@@ -290,7 +290,7 @@ void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 	}
 	else {
 
-		if (gl_state.fragment_program && strcmp(fa->texinfo->normalMap->name, fa->texinfo->image->name))
+		if (gl_state.fragment_program && fa->texinfo->has_normalmap)
 		{
 			qglEnable(GL_FRAGMENT_PROGRAM_ARB);
 			qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);

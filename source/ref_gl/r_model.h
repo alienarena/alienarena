@@ -182,6 +182,8 @@ typedef struct mtexinfo_s
 	image_t		*image;
 	image_t		*normalMap;
 	image_t		*heightMap;
+	qboolean	has_normalmap;
+	qboolean	has_heightmap;
 	struct		rscript_s	*script;
 	int			value;
 } mtexinfo_t;
