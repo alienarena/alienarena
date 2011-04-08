@@ -514,3 +514,15 @@ maps/meshes/xempx/lightbomb
 		nolightmap
 	}
 }
+models/items/mega_h/skin
+{
+	{
+		map models/items/mega_h/skin.jpg
+	}
+	{
+		map models/items/mega_h/skin_fx.jpg
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
