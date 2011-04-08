@@ -915,3 +915,12 @@ maps/meshes/xempx/lightbomb
 		glow
 	}
 }
+models/items/mega_h/skin
+{
+	{
+		map models/items/mega_h/skin_normal.jpg
+		normalmap
+		map2 models/items/mega_h/skin_fx.tga
+		glow
+	}
+}
