@@ -580,8 +580,10 @@ models/items/quaddama/skin
 models/items/sproing/skin
 {
 	{
-		map models/items/sproing/skin_normal.tga
+		map models/items/sproing/skin_normal.jpg
 		normalmap
+		map2 models/items/sproing/skin_fx.jpg
+		glow
 	}
 }
 models/items/adrenaline/skin

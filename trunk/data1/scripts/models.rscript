@@ -526,3 +526,15 @@ models/items/mega_h/skin
 		nolightmap
 	}
 }
+models/items/sproing/skin
+{
+	{
+		map models/items/sproing/skin.jpg
+	}
+	{
+		map models/items/sproing/skin_fx.jpg
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
