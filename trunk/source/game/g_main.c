@@ -46,7 +46,6 @@ g_vote_t		playervote;
 int	sm_meat_index;
 int meansOfDeath;
 int bot_won;
-qboolean stayed;
 
 char *winningmap;
 
@@ -877,15 +876,20 @@ void ExitLevel (void)
 	int			i;
 	edict_t		*ent;
 	char		command [256];
-	qboolean	stayed = false;
 
 	if(strcmp(level.mapname, level.changemap) || timelimit->value) {
 		Com_sprintf (command, sizeof(command), "map \"%s\"\n", level.changemap);
 		gi.AddCommandString (command);
 	}
-	else
-		stayed = true; //no need to reload map if staying on same level!
 
+    //Note-- whenever the map command fails (for instance, misspelled bsp name
+    //in the server cfg,) it will just play another game on the same map. As
+    //of right here in the code, there is no way to detect if that is going to
+    //happen, so we initialize another game on this map just in case. This
+    //fixes many longstanding bugs where misspelled map names in the cfg would
+    //cause servers to glitch out. 
+    // -Max
+    
 	level.changemap = NULL;
 	level.exitintermission = 0;
 	level.intermissiontime = 0;
@@ -901,37 +905,32 @@ void ExitLevel (void)
 		if (ent->health > ent->client->pers.max_health)
 			ent->health = ent->client->pers.max_health;
 
-		if(stayed) {
-			ent->client->resp.score = 0;
-			ent->client->resp.deaths = 0;
-			ent->client->resp.reward_pts = 0;
-			ent->client->homing_shots = 0;
-			ent->takedamage = DAMAGE_AIM;
-			ent->solid = SOLID_BBOX;
-			ent->deadflag = DEAD_NO;
-			if(ent->is_bot) {
-				// when staying on same level, respawn current bots
-				ACESP_PutClientInServer( ent, true );
-			} else {
-				PutClientInServer (ent);
-			}
-			if(g_duel->value) {
-				ClientPlaceInQueue(ent);
-				ClientCheckQueue(ent);
-			}
+		ent->client->resp.score = 0;
+		ent->client->resp.deaths = 0;
+		ent->client->resp.reward_pts = 0;
+		ent->client->homing_shots = 0;
+		ent->takedamage = DAMAGE_AIM;
+		ent->solid = SOLID_BBOX;
+		ent->deadflag = DEAD_NO;
+		if(ent->is_bot) {
+			ACESP_PutClientInServer( ent, true );
+		} else {
+			PutClientInServer (ent);
+		}
+		if(g_duel->value) {
+			ClientPlaceInQueue(ent);
+			ClientCheckQueue(ent);
 		}
 	}
-	if(stayed) {
-		for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) {
+	for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) {
 
-			if (!ent->inuse || ent->client)
-				continue;
-			//remove podiums
-			if(!strcmp(ent->classname, "pad"))
-				G_FreeEdict(ent);
-			if(tca->value)
-				ent->powered = true;
-		}
+		if (!ent->inuse || ent->client)
+			continue;
+		//remove podiums
+		if(!strcmp(ent->classname, "pad"))
+			G_FreeEdict(ent);
+		if(tca->value)
+			ent->powered = true;
 	}
 	if(tca->value) {
 		blue_team_score = 4;
