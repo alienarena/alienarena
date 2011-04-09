@@ -929,8 +929,11 @@ void ExitLevel (void)
 		//remove podiums
 		if(!strcmp(ent->classname, "pad"))
 			G_FreeEdict(ent);
-		if(tca->value)
+		if(tca->value) {
+		    if(strstr(ent->classname, "spidernode"))
+		        ED_CallSpawn (ent);
 			ent->powered = true;
+		}
 	}
 	if(tca->value) {
 		blue_team_score = 4;
