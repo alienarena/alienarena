@@ -562,10 +562,10 @@ vehicles/strafer/console
 models/items/haste/skin
 {
 	{
-		map models/items/haste/skin_normal.tga
+		map models/items/haste/skin_normal.jpg
 		normalmap
-		map2 gfx/greenlightning.tga
-		fx
+		map2 models/items/haste/skin_fx.tga
+		glow
 	}
 }
 models/items/quaddama/skin
