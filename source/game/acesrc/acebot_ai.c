@@ -118,6 +118,12 @@ void ACEAI_Think (edict_t *self)
 	{
 		self->client->buttons = 0;
 		ucmd.buttons = BUTTON_ATTACK;
+		/*
+		 * do nothing else until respawned.
+		 */
+		ClientThink (self, &ucmd);
+		self->nextthink = level.time + FRAMETIME;
+		return;
 	}
 
 	if(self->state == STATE_WANDER && self->wander_timeout < level.time)
@@ -627,21 +633,43 @@ void ACEAI_Use_Sproing (edict_t *ent)
 ///////////////////////////////////////////////////////////////////////
 // Choose the best weapon for bot
 ///////////////////////////////////////////////////////////////////////
+
+/*
+ *
+1 : 1.0 //blaster accuracy
+2 : 1.0 //alien disruptor accuracy
+3 : 1.0 //pulse rifle accuracy
+4 : 1.0 //flame thrower accuracy
+5 : 1.0 //homing rocket launcher accuracy
+6 : 1.0 //rocket launcher accuracy
+7 : 1.0 //alien smartgun accuracy
+8 : 1.0 //alien beamgun accuracy
+9 : 1.0 //alien vaporizer accuracy
+ *
+ */
+#define ACCURACY_BLASTER         1
+#define ACCURACY_DISRUPTOR       2
+#define ACCURACY_CHAINGUN        3
+#define ACCURACY_FLAMETHROWER    4
+#define ACCURACY_NOTUSED         5
+#define ACCURACY_ROCKETLAUNCHER  6
+#define ACCURACY_SMARTGUN        7
+#define ACCURACY_BEAMGUN         8
+#define ACCURACY_VAPORIZER       9
+
 void ACEAI_ChooseWeapon(edict_t *self)
 {
 	float range;
 	vec3_t v;
 	float c;
 
-	if (self->in_vehicle) {
+	if (self->in_vehicle || self->in_deathball)
+	{
 		return;
 	}
 
-	if (self->in_deathball) {
-		return; //cannot switch or fire weapons when in a deathball.
-	}
-
-	if(self->client->resp.powered) { //got enough reward points, use something
+	if(self->client->resp.powered)
+	{ //got enough reward points, use something
 		c = random();
 		if( c < 0.5)
 			ACEAI_Use_Invisibility(self);
@@ -651,13 +679,37 @@ void ACEAI_ChooseWeapon(edict_t *self)
 			ACEAI_Use_Sproing(self);
 	}
 
-	//mutators
-	if(instagib->value || rocket_arena->value)
-		return;
-
 	// if no enemy, then what are we doing here?
 	if(!self->enemy)
 		return;
+
+	//mutators
+	/*
+	 * Unconditionally choose for insta and rockets.
+	 */
+	if ( instagib->integer )
+	{
+		if ( self->client->pers.weapon->weapmodel != WEAP_DISRUPTOR )
+		{
+			self->client->newweapon = FindItem( "Disruptor" );
+			ChangeWeapon( self );
+		}
+		self->accuracy = self->weapacc[ACCURACY_DISRUPTOR];
+		return;
+	}
+
+	if ( rocket_arena->integer )
+	{
+		if ( self->client->pers.weapon->weapmodel != WEAP_ROCKETLAUNCHER )
+		{
+			self->client->newweapon = FindItem( "Rocket Launcher" );
+			ChangeWeapon( self );
+		}
+		self->accuracy = self->weapacc[ACCURACY_ROCKETLAUNCHER];
+		return;
+	}
+
+
 
 	// Base selection on distance.
 	VectorSubtract (self->s.origin, self->enemy->s.origin, v);
@@ -670,7 +722,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	{
 		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
 		{
-			self->accuracy = self->weapacc[9];
+			self->accuracy = self->weapacc[ACCURACY_VAPORIZER];
 			return;
 		}
 	}
@@ -678,7 +730,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	{
 		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
 		{
-			self->accuracy = self->weapacc[2];
+			self->accuracy = self->weapacc[ACCURACY_DISRUPTOR];
 			return;
 		}
 	}
@@ -686,7 +738,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	{
 		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
 		{
-			self->accuracy = self->weapacc[8];
+			self->accuracy = self->weapacc[ACCURACY_BEAMGUN];
 			return;
 		}
 	}
@@ -694,7 +746,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	{
 		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
 		{
-			self->accuracy = self->weapacc[3];
+			self->accuracy = self->weapacc[ACCURACY_CHAINGUN];
 			return;
 		}
 	}
@@ -702,7 +754,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	{
 		if(ACEAI_CheckShot(self) && ACEIT_ChangeWeapon(self, FindItem("Alien Smartgun")))
 		{
-			self->accuracy = self->weapacc[7];
+			self->accuracy = self->weapacc[ACCURACY_SMARTGUN];
 			return;
 		}
 	}
@@ -712,7 +764,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		{
 			if(ACEAI_CheckShot(self) && ACEIT_ChangeWeapon(self,FindItem("Rocket Launcher")))
 			{
-				self->accuracy = self->weapacc[6];
+				self->accuracy = self->weapacc[ACCURACY_ROCKETLAUNCHER];
 				return;
 			}
 		}
@@ -722,7 +774,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		if(range < 500 || (range < 800 && self->skill == 3)) {
 				if(ACEIT_ChangeWeapon(self,FindItem("Flame Thrower")))
 				{
-					self->accuracy = self->weapacc[4];
+				self->accuracy = self->weapacc[ACCURACY_FLAMETHROWER];
 					return;
 				}
 		}
@@ -750,14 +802,14 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	if(self->skill > 1) {
 		if(ACEIT_ChangeWeapon(self,FindItem("Alien Vaporizer")))
 		{
-			self->accuracy = self->weapacc[9];
+			self->accuracy = self->weapacc[ACCURACY_VAPORIZER];
 			return;
 		}
 	}
 
 	if(ACEAI_CheckShot(self) && ACEIT_ChangeWeapon(self, FindItem("Alien Smartgun")))
 	{
-		self->accuracy = self->weapacc[7];
+		self->accuracy = self->weapacc[ACCURACY_SMARTGUN];
 		return;
 	}
 
@@ -766,7 +818,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	{
 		if(ACEAI_CheckShot(self) && ACEIT_ChangeWeapon(self,FindItem("Rocket Launcher")))
 		{
-			self->accuracy = self->weapacc[6];
+			self->accuracy = self->weapacc[ACCURACY_ROCKETLAUNCHER];
 			return;
 		}
 	}
@@ -776,32 +828,32 @@ void ACEAI_ChooseWeapon(edict_t *self)
 
 			if(ACEIT_ChangeWeapon(self,FindItem("Flame Thrower")))
 			{
-				self->accuracy = self->weapacc[4];
+			self->accuracy = self->weapacc[ACCURACY_FLAMETHROWER];
 				return;
 			}
 	}
 
 	if(ACEIT_ChangeWeapon(self,FindItem("Disruptor")))
 	{
-		self->accuracy = self->weapacc[8];
+		self->accuracy = self->weapacc[ACCURACY_BEAMGUN];
 		return;
 	}
 
 	if(ACEIT_ChangeWeapon(self,FindItem("Pulse Rifle")))
 	{
-		self->accuracy = self->weapacc[3];
+		self->accuracy = self->weapacc[ACCURACY_CHAINGUN];
 		return;
 	}
 
 	if(ACEIT_ChangeWeapon(self,FindItem("Alien Disruptor")))
 	{
-		self->accuracy = self->weapacc[2];
+		self->accuracy = self->weapacc[ACCURACY_DISRUPTOR];
 		return;
 	}
 
 	if(ACEIT_ChangeWeapon(self,FindItem("Blaster")))
    	{
-		self->accuracy = self->weapacc[1];
+		self->accuracy = self->weapacc[ACCURACY_BLASTER];
 		return;
 	}
 

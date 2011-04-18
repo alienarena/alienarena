@@ -212,6 +212,7 @@ void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4]);
 void NormalToLatLong( const vec3_t normal, byte latlong[2] );
 void LatLongToNormal( byte latlong[2], vec3_t normal );
 
+void fast_sincosf( float angle, float *sina, float *cosa );
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 void vectoangles (vec3_t value1, vec3_t angles);
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *plane);
