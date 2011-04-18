@@ -385,10 +385,6 @@ void CL_ParseServerData (void)
 	str = MSG_ReadString (&net_message);
 	strncpy (cl.gamedir, str, sizeof(cl.gamedir)-1);
 
-	// 2010-11 TODO: make sense of this.
-	//  changing game from server will require updating file system search paths
-	//    and other things.
-
 	// set gamedir
 	if ((*str && (!fs_gamedirvar->string || !*fs_gamedirvar->string || strcmp(fs_gamedirvar->string, str))) || (!*str && (fs_gamedirvar->string || *fs_gamedirvar->string)))
 		Cvar_Set("game", str);
@@ -515,7 +511,7 @@ void CL_LoadClientinfo (clientinfo_t *ci, char *s)
 		{
 			strcpy(skin_name, "default");
 			Com_sprintf (skin_filename, sizeof(skin_filename), "players/%s/default.pcx", model_name);
-			ci->skin = R_RegisterSkin (skin_filename);			
+			ci->skin = R_RegisterSkin (skin_filename);
 		}
 
 		// weapon file

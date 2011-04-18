@@ -1190,8 +1190,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/items/flags/flag1.md2 \
 	data1/models/items/flags/flag2.md2 \
 	data1/models/items/flags/red.tga \
-	data1/models/items/haste/skin_normal.tga \
-	data1/models/items/haste/skin.tga \
+	data1/models/items/haste/skin.jpg \
+	data1/models/items/haste/skin_fx.tga \
+	data1/models/items/haste/skin_normal.jpg \
 	data1/models/items/haste/tris.md2 \
 	data1/models/items/healing/globe/skin.tga \
 	data1/models/items/healing/globe/tris.md2 \
@@ -1204,12 +1205,17 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/items/invulner/skin_normal.tga \
 	data1/models/items/invulner/skin.tga \
 	data1/models/items/invulner/tris.md2 \
+	data1/models/items/mega_h/skin_fx.tga \
+	data1/models/items/mega_h/skin.jpg \
+	data1/models/items/mega_h/skin_normal.jpg \
+	data1/models/items/mega_h/tris.md2 \
 	data1/models/items/quaddama/skin_normal.tga \
 	data1/models/items/quaddama/skin.tga \
 	data1/models/items/quaddama/tris.md2 \
 	data1/models/items/quaddama/unit.md2 \
-	data1/models/items/sproing/skin_normal.tga \
-	data1/models/items/sproing/skin.tga \
+	data1/models/items/sproing/skin.jpg \
+	data1/models/items/sproing/skin_fx.tga \
+	data1/models/items/sproing/skin_normal.jpg \
 	data1/models/items/sproing/tris.md2 \
 	data1/models/misc/deathray/deathray.md2 \
 	data1/models/misc/deathray/deathray_normal.tga \
