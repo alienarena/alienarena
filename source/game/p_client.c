@@ -1453,8 +1453,8 @@ void BodySink( edict_t *ent ) {
 }
 
 void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
-{   
-	self->s.modelindex3 = 0;    
+{
+	self->s.modelindex3 = 0;
 	self->s.modelindex4 = 0;
 
 	self->takedamage = DAMAGE_NO;
@@ -1475,7 +1475,7 @@ void body_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage,
 	}
 
 	gi.linkentity (self);
-         
+
   }
 
 
@@ -2107,7 +2107,7 @@ void ClientBegin (edict_t *ent)
 
 	ent->client = game.clients + (ent - g_edicts - 1);
 
-	for(i = 0; i < 8; i++) {
+	for(i = 0; i < 9; i++) {
 		ent->client->resp.weapon_shots[i] = 0;
 		ent->client->resp.weapon_hits[i] = 0;
 	}
