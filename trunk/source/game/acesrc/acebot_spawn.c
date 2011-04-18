@@ -884,7 +884,7 @@ void ACECO_ReadConfig( char *config_file )
 			tmpf = 0.1f;
 		else if ( tmpf > 1.0f )
 			tmpf = 1.0f;
-		botvals.awareness = atof( s );
+		botvals.awareness = tmpf;
 	}
 
 	if ( s && ((s = strtok( NULL, delim)) != NULL) )
@@ -1197,7 +1197,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		 * clear the weapon accuracy statistics.
 		 * for testing aim related settings.
 		 */
-		for(i = 0; i < 8; i++)
+		for(i = 0; i < 9; i++)
 		{
 			client->resp.weapon_shots[i] = 0;
 			client->resp.weapon_hits[i] = 0;

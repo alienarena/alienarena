@@ -635,7 +635,7 @@ void ACEAI_Use_Sproing (edict_t *ent)
 ///////////////////////////////////////////////////////////////////////
 
 /*
- *
+
 1 : 1.0 //blaster accuracy
 2 : 1.0 //alien disruptor accuracy
 3 : 1.0 //pulse rifle accuracy
@@ -645,7 +645,7 @@ void ACEAI_Use_Sproing (edict_t *ent)
 7 : 1.0 //alien smartgun accuracy
 8 : 1.0 //alien beamgun accuracy
 9 : 1.0 //alien vaporizer accuracy
- *
+
  */
 #define ACCURACY_BLASTER         1
 #define ACCURACY_DISRUPTOR       2
@@ -691,7 +691,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	{
 		if ( self->client->pers.weapon->weapmodel != WEAP_DISRUPTOR )
 		{
-			self->client->newweapon = FindItem( "Disruptor" );
+			self->client->newweapon = FindItem( "Alien Disruptor" );
 			ChangeWeapon( self );
 		}
 		self->accuracy = self->weapacc[ACCURACY_DISRUPTOR];

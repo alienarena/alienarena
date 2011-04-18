@@ -325,6 +325,9 @@ edict_t *CreateTargetChangeLevel(char *map)
  *         the server console and log file. This version is mostly intended
  *         to collect some data about bot targeting accuracy.
  *
+ *         The odds that the array indexes for the weapon hit data and weapon
+ *         accuracy data are correctly cross-referenced are slim.
+ *
  *  --- from hud stat report (p_hud.c) ---
  * --- currently def'd out ---
  * 0: "blaster"
@@ -351,11 +354,11 @@ edict_t *CreateTargetChangeLevel(char *map)
  * 7 : fire_energy_field : Weapon_Vaporizer
  * 8 : fire_violator     : Weapon_Violator
 
- * --- from sample.cfg accuracy --- output these elsewhere, maybe
- * weapon_hit[] :to: bot weap accuracy
+ * --- from sample.cfg accuracy
+ * weapon_hit[] :to: bot weapacc[]
  * 0: 1: blaster
  * 1: 2: alien disruptor
- * 3: 3: pulse rifle
+ * 3: 3: pulse rifle (chaingun)
  * 4: 4: flame thrower
  * x: 5: homing rocket launcher (not implemented)
  * 5: 6: rocket launcher
@@ -368,15 +371,28 @@ static void game_report( void )
 {
 	static const char* weapname[] =
 	{
-		 "blasterball", // 0 blaster, beamgun, hover
-		 "  disruptor", // 1
-		 "   smartgun", // 2
-		 "   chaingun", // 3
-		 "      flame", // 4
-		 "     rocket", // 5 rocketlauncher, bomber, strafer
-		 "       beam", // 6 beamgun & blaster
-		 "  vaporizer", // 7 +bomber's bomb
-		 "   violator"  // 8
+		 "   blaster", // 0 blaster, hover
+		 " disruptor", // 1
+		 "  smartgun", // 2
+		 "  chaingun", // 3
+		 "     flame", // 4
+		 "    rocket", // 5 rocketlauncher, bomber, strafer
+		 "   beamgun", // 6 beamgun
+		 " vaporizer", // 7 +bomber's bomb
+		 "  violator"  // 8
+	};
+	/* cross-reference from weapon_hit to weapacc[] */
+	static const int accxref[] =
+	{
+		1, /* 0 blaster   */
+		2, /* 1 disruptor */
+		7, /* 2 smartgun  */
+		3, /* 3 chaingun  */
+		4, /* 4 flame     */
+		6, /* 5 rocket    */
+		8, /* 6 beamgun   */
+		9, /* 7 vaporizer */
+		0  /* 8 violator  */ /* no weapacc[] for this */
 	};
 
 	edict_t *pclient;
@@ -418,16 +434,22 @@ static void game_report( void )
 
 					if ( pclient->is_bot )
 					{
-					/* -jjb-
-					 * TODO: bot data is declated in 2 different places!!!
-					 *       SORT THIS OUT.
-					 */
-						gi.dprintf( " %s (%0.2f): %i/%i = %i\%\n",
-								weapname[weap], pclient->weapacc[weap+1], hits, shots, percent );
+						if ( weap == 8 )
+						{ /* violator - no weapacc[], accuracy always 1.0 */
+							gi.dprintf( " %s (1.0): %i/%i = %i%%\n",
+								weapname[weap], hits, shots, percent );
+						}
+						else
+						{
+							gi.dprintf( " %s (%0.2f): %i/%i = %i%%\n",
+								weapname[weap],
+								pclient->weapacc[accxref[weap]],
+								hits, shots, percent );
+						}
 					}
 					else
 					{
-						gi.dprintf( " %s : %i/%i = %i\%\n",
+						gi.dprintf( " %s : %i/%i = %i%%\n",
 								weapname[weap], hits, shots, percent );
 					}
 				}

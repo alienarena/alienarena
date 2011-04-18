@@ -1139,6 +1139,11 @@ struct gclient_s
 
 	//stuff for bots
 	qboolean	is_bot;
+	/* --------------------------*/
+	/*
+	 * this is identical to declarations in edict_t
+	 * it appears this data in gclient_s is not used.
+	 */
 	int			skill;
 	char		faveweap[64];
 	float		weapacc[10];
@@ -1152,6 +1157,7 @@ struct gclient_s
 	char		chatmsg6[128];
 	char		chatmsg7[128];
 	char		chatmsg8[128];
+	/*----------------------------*/
 
 	int			ammo_index;
 
