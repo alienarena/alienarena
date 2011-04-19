@@ -3654,7 +3654,8 @@ void JoinServerFunc( void *self )
 	char	buffer[128];
 	int		index;
 	int     i;
-	char    *modstring, *token;
+	char    modstring[64];
+	char    *token;
 
 	index = ( menuaction_s * ) self - s_joinserver_server_actions;
 
@@ -3685,7 +3686,8 @@ void JoinServerFunc( void *self )
 		Com_sprintf(local_server_data[4], sizeof(local_server_data[4]), mservers[index+svridx].timelimit);
 		Com_sprintf(local_server_data[5], sizeof(local_server_data[5]), mservers[index+svridx].szVersion);
 		
-		modstring = mservers[index+svridx].modInfo;
+		//Copy modstring over since strtok will modify it
+		Q_strncpyz(modstring, mservers[index+svridx].modInfo, sizeof(modstring));
 		token = strtok(modstring, "%%");
 		for (i=0; i<16; i++) {
 		    if (!token)
@@ -3694,6 +3696,7 @@ void JoinServerFunc( void *self )
 		    token = strtok(NULL, "%%");
 		}
 		
+		//Reset all the rest of the strings that haven't been initialized
 		for (; i<16; i++)
 		    local_mods_data[i][0] = 0;
 
