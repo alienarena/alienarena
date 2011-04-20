@@ -281,14 +281,14 @@ models/items/quaddama/skin
 		map gfx/quadbase.tga
 	}
 	{
-		map gfx/bluelightning.tga
+		map gfx/greenlightning.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scroll static 1 static 2
 		alphashift 10 0.1 0.6
 		nolightmap
 	}
 	{
-		map gfx/quadmask.tga
+		map models/items/quaddama/skin.tga
 		alphamask
 	}
 }
