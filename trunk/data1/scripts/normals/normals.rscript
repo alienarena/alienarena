@@ -573,7 +573,7 @@ models/items/quaddama/skin
 	{
 		map models/items/quaddama/skin_normal.tga
 		normalmap
-		map2 gfx/bluelightning.tga
+		map2 gfx/greenlightning.tga
 		fx
 	}
 }
