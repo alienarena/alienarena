@@ -17,7 +17,7 @@ general information, notes, and details about development
 tools, build procedures, packaging, etc. In 2010, the Windows
 build was converted to use Microsoft Visual Studio 2010 and
 the Unix/Linux version was converted to use GNU Autotools.
-Also, some work was done on MinGW and Max OS X/Darwin X11
+Also, some work was done on MinGW and Mac OS X/Darwin X11
 builds. A big reason for creating this document was to organize
 the important details about all that in one place.
 
@@ -38,10 +38,10 @@ text::
 a2x --format=text --destination-dir=. docsrc/devref-en.asciidoc
 
 html::
-a2x --format=xhtml --destination-dir=. --stylesheet='CSSPATH' docsrc/devref-en.txt
+a2x --format=xhtml --destination-dir=. --stylesheet='CSSPATH' docsrc/devref-en.asciidoc
 
 pdf::
-a2x --format=pdf --fop --destination-dir=. --stylesheet='CSSPATH' dossrc/devref-en.txt
+a2x --format=pdf --fop --destination-dir=. --stylesheet='CSSPATH' docsrc/devref-en.asciidoc
 
 Where 'CSSPATH' is something like:
 
@@ -118,7 +118,7 @@ reference.
 *Using premake for ODE config*
 
 A version of premake that supports VC++ 2010 is available at
-http://industriousone.com/premake. 
+http://industriousone.com/premake.
 
 (TODO: add instructions for running 'premake4' with the proper
 options).
@@ -146,7 +146,7 @@ some work to get the build details correct and consistent.
 Download the OpenAL SDK from OpenAL.org:
 http://www.openal.org/. (Redirects to the CreativeLabs
 site.) In the Download section, get the 'OpenAL 1.1 Core
-SDK'. Install it in the default location; the build 
+SDK'. Install it in the default location; the build
 procedure is setup to look for it there.
 
 Run the 'oalinst.exe' program to setup the OpenAL driver,
@@ -177,7 +177,7 @@ alienarena_w32\::
     Build directory for Windows version of Alien Arena.
       Project Files::::
        Project files. Generated and editted with Visual Studio.
-       Somewhat easy to manually edit. 
+       Somewhat easy to manually edit.
        *** crx.vcxproj
        *** game.vcxproj
        *** freetype.vcxproj
@@ -361,7 +361,7 @@ are 'configure' options added for Alien Arena.
   (default:no)
 
 --enable-ansi-color::
-  ANSI terminal color (default: no) Added after 7.50.
+  ANSI terminal color (default: no) Added in 7.51.
 
 --enable-debugging-symbols::
   Compile Alien Arena with full debugging information
@@ -389,10 +389,16 @@ are 'configure' options added for Alien Arena.
 
 --with(out)-xf86vm::
   include XF86 VidMode support (default: check)
+  Note: Needed to support full-screen mode.
+  Note: If 'with' is specified, then the library is required.
 
 --with(out)-xf86dga::
-  include XF86 DGA support (default: check) The default may
-  be changed to `without` in a version after 7.50.
+  include XF86 DGA support (default: check)
+  Note: DGA appears to only used for mouse pointer input and
+  does not appear to be required. It is disabled when
+  Xxf86dga is not installed, _without_xf86dga_ is specified,
+  or when the cvar, _in_dgamouse_, is set to 0.
+  Note: If 'with' is specified, then the library is required.
 
 
 === GCC Compiler Options ===
@@ -408,7 +414,7 @@ be good to document some of these in the README.
 O2::
 O3::
   O3 produces different warning messages.
-  
+
 m32::
 m64::
   TBD.
@@ -418,25 +424,25 @@ mtune::
   Set for specific architectures. Might give better performance
   than generic builds. For instance, `-march=core2` enables
   higher performance features.
-    
+
 mfpmath::
-  Testing shows that `-mfpmath=sse` gives better performance.    
-    
+  Testing shows that `-mfpmath=sse` gives better performance.
+
 Wp::
   TBD.
-  
+
 FORTIFY_SOURCE::
   From fedora: `-Wp,D_FORTIFY_SOURCE=2` TBD.
-  
+
 fexceptions::
-  TBD.      
+  TBD.
 
 fstack-protector::
   TBD.
-  
+
 param::
   From fedora: `--param=ssp-buffer-size=4`. TBD.
-  
+
 fasynchronous-unwind-tables::
   From fedora. TBD.
 
@@ -521,12 +527,86 @@ $ cd ~
 $ crx
 ------------------------------------------------------------------------------
 
-==== config.h ====
+==== BASH script for distribution tarball generation ====
+
+This script uses several SVN 'export' commands to retrieve the
+subset of files needed for the release tarball. It then invokes
+'make dist-check' to build the tarball. Run the script in a
+RELEASE directory.
+
+The following commands generate the checksums and then run a 'diff' to check
+for possibly missing files.
+
+In the RELEASE directory:
+
+--------------------------------------------------------------------------------
+$ mv alienarena/alienarena-<version>.tar.gz .
+$ md5sum alienarena-<version>.tar.gz >md5
+$ sha1sum alienarena-<version>.tar.gz >sha1
+$ tar -xzf alienarena-<version>.tar.gz
+$ diff -r -q alienarena alienarena-<version>
+--------------------------------------------------------------------------------
+
+The Script:
+
+--------------------------------------------------------------------------------
+#!/bin/bash
+#
+# Alien Arena release tarball generation
+#
+# --- top level ---
+svn export --ignore-externals --non-recursive \
+ svn://icculus.org/alienarena/trunk alienarena
+###
+# --- config/ ---
+svn export --ignore-externals \
+ svn://icculus.org/alienarena/trunk/config alienarena/config
+###
+# --- m4/ ---
+svn export --ignore-externals \
+ svn://icculus.org/alienarena/trunk/m4 alienarena/m4
+###
+# --- source/ ---
+svn export --ignore-externals \
+ svn://icculus.org/alienarena/trunk/source alienarena/source
+###
+# --- docs/ ---
+svn export --ignore-externals \
+ svn://icculus.org/alienarena/trunk/docs alienarena/docs
+###
+# --- Tools/ (fuse.tar.gz only) ---
+svn export --ignore-externals --non-recursive \
+ svn://icculus.org/alienarena/trunk/Tools alienarena/Tools
+###
+# --- Tools/LinuxScripts/ ---
+svn export --ignore-externals \
+ svn://icculus.org/alienarena/trunk/Tools/LinuxScripts alienarena/Tools/LinuxScripts
+###
+# --- arena/ ---
+svn export --ignore-externals \
+ svn://icculus.org/alienarena/trunk/arena alienarena/arena
+ ###
+# --- botinfo/ ---
+svn export --ignore-externals \
+ svn://icculus.org/alienarena/trunk/botinfo alienarena/botinfo
+###
+# --- data1/ ---
+svn export --ignore-externals \
+  svn://icculus.org/alienarena/trunk/data1 alienarena/data1
+###
+# --- tarball construction ---
+cd alienarena
+./configure --enable-maintainer-mode
+ make distcheck
+--------------------------------------------------------------------------------
+
+
+=== config.h ===
 
 The config.h file is auto-generated for configurable builds
 (e.g Linux).  It is manually edited for non-configurable builds
 (e.g. Windows). The 'configure.ac' file does generate Windows
-related definitions in 'config.h' so it can be used as a 
+related definitions in 'config.h' so it can be used as a
 basis for the Windows 'config.h'.
 
 Rather than use symbols built into the compiler these
@@ -535,6 +615,15 @@ symbols (and some others related to targets) are defined:
 to keep system dependent variations organized. It is a good
 idea, of course, to minimize system dependent conditional
 compilation in the common code.
+
+=== Open Dynamics Engine (ODE) Integration ===
+
+A static library, 'libode.a', is built and linked with the main
+program, 'crx'. Only files that are used in the library build
+are included in the source tree in SVN and in the distribution.
+There is only one 'config.h' and it includes what is needed
+for building 'libode.a'.
+
 
 === Reading List for Autotools ===
 
@@ -590,4 +679,20 @@ progress with this using MacPorts and Homebrew.
 In February 2011, a native port to Mac OS X was developed.
 Details and test results to be reported as they become
 available.
+
+== Developer's Not-Autotools Makefile ==
+
+In the 'docs/' directory, the file, 'dev-makefile', is
+a 'Makefile' intended to support experimental builds. Its
+primary purpose is to allow custom builds with additional
+or different sources without having to hack the Autotools
+build. Documentation on how to customize it is included within
+the 'dev-makefile' file.
+
+It is simpler to make a full copy of the trunk sources, but that
+is not necessary. It takes some trickiness setting up 'vpaths'
+and customizing '-I' options, but it is possible to do an
+alternate build with a small subset of sources in an alternate
+source subdirectory.  Good for experimenting with optimizations.
+
 
