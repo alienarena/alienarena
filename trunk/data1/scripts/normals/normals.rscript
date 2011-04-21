@@ -598,8 +598,10 @@ models/items/adrenaline/skin
 models/items/invulner/skin
 {
 	{
-		map models/items/invulner/skin_normal.tga
+		map models/items/invulner/skin_normal.jpg
 		normalmap
+		map2 models/items/invulner/skin_fx.tga
+		glow
 	}
 }
 models/items/armor/shard/skin
