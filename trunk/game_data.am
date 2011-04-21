@@ -302,7 +302,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/plate5fx.tga \
 	data1/gfx/purpleline.tga \
 	data1/gfx/quadbase.tga \
-	data1/gfx/quadmask.tga \
 	data1/gfx/radar/around.tga \
 	data1/gfx/radar/radarmap.tga \
 	data1/gfx/rain_a.tga \
@@ -901,8 +900,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/items/healing/medium/tris.md2 \
 	data1/models/items/healing/small/skin.tga \
 	data1/models/items/healing/small/tris.md2 \
-	data1/models/items/invulner/skin_normal.tga \
-	data1/models/items/invulner/skin.tga \
+	data1/models/items/invulner/skin_fx.tga \
+	data1/models/items/invulner/skin.jpg \
+	data1/models/items/invulner/skin_normal.jpg \
 	data1/models/items/invulner/tris.md2 \
 	data1/models/items/mega_h/skin_fx.tga \
 	data1/models/items/mega_h/skin.jpg \
