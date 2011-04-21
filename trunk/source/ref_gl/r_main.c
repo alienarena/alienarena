@@ -430,6 +430,30 @@ void R_DrawNullModel (void)
 
 /*
 =============
+LOD calculation
+
+The width and height occupied by a model on screen after it's been rendered
+will scale as the square of the FOV setting, and proportionally to the
+width/height of the screen itself. Based on the assumption that 500 units is
+an adequate LOD cutoff distance at 1920*1080 with an FOV of 90, we can scale
+the LOD cutoff distance to the lowest point where there will be no noticable
+ugliness.
+
+NOTE: Turns out the player's FOV setting goes to fov_x and not fov_y. Go 
+figure.
+=============
+*/
+#define LOD_BASE_H      1920.0
+#define LOD_BASE_W      1080.0
+#define LOD_BASE_DIST   500.0
+#define LOD_BASE_FOV    90.0
+#define LOD_DIST        (LOD_BASE_DIST*\
+                        (vid.width/LOD_BASE_W)*(vid.height/LOD_BASE_H)*\
+                        (LOD_BASE_FOV/r_newrefdef.fov_x)*\
+                        (LOD_BASE_FOV/r_newrefdef.fov_x))
+
+/*
+=============
 R_DrawEntitiesOnList
 =============
 */
@@ -472,19 +496,16 @@ void R_DrawEntitiesOnList (void)
 		currentmodel = currententity->model;
 
 		//get distance, set lod if available
-		if(r_newrefdef.fov_y >= 90)
+		VectorSubtract(r_origin, currententity->origin, dist);
+		if(VectorLength(dist) > LOD_DIST*2.0)
 		{
-			VectorSubtract(r_origin, currententity->origin, dist);
-			if(VectorLength(dist) > 1000)
-			{
-				if(currententity->lod2)
-					currentmodel = currententity->lod2;
-			}
-			else if(VectorLength(dist) > 500)
-			{
-				if(currententity->lod1)
-					currentmodel = currententity->lod1;
-			}
+			if(currententity->lod2)
+				currentmodel = currententity->lod2;
+		}
+		else if(VectorLength(dist) > LOD_DIST)
+		{
+			if(currententity->lod1)
+				currentmodel = currententity->lod1;
 		}
 
 		if (!currentmodel)
