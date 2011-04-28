@@ -4,6 +4,12 @@ textures/arena7/light3
 		lensflare
 	}
 }
+textures/arena7/light5
+{
+	{
+		lensflare
+	}
+}
 textures/arena7/light10
 {
 	{
@@ -11,6 +17,18 @@ textures/arena7/light10
 	}
 }
 textures/arena7/light11
+{
+	{
+		lensflare
+	}
+}
+textures/rage/light7
+{
+	{
+		lensflare
+	}
+}
+textures/rage/light8
 {
 	{
 		lensflare
