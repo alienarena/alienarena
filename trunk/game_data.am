@@ -257,6 +257,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/dmbeyondreflection.tga \
 	data1/gfx/dmdreadreflection.tga \
 	data1/gfx/dmturboreflection.tga \
+	data1/gfx/e6launchengine_fx.tga \
 	data1/gfx/e6launchengine_glow.tga \
 	data1/gfx/e6launchengine_mask.tga \
 	data1/gfx/e8_jumppad02_fx.tga \
@@ -373,6 +374,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/ctf-titan2k8.txt \
 	data1/levelshots/ctf-vesuvius.jpg \
 	data1/levelshots/ctf-vesuvius.txt \
+	data1/levelshots/ctf-violator.jpg \
+	data1/levelshots/ctf-violator.txt \
 	data1/levelshots/ctf-zorn.jpg \
 	data1/levelshots/ctf-zorn.txt \
 	data1/levelshots/db-chromium.jpg \
@@ -481,6 +484,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/ctf-oblivion.bsp \
 	data1/maps/ctf-titan2k8.bsp \
 	data1/maps/ctf-vesuvius.bsp \
+	data1/maps/ctf-violator.bsp \
 	data1/maps/ctf-zorn.bsp \
 	data1/maps/db-chromium.bsp \
 	data1/maps/db-icarus.bsp \
@@ -787,6 +791,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/ctf-titan2k8.mus \
 	data1/maps/scripts/ctf-vesuvius.fog \
 	data1/maps/scripts/ctf-vesuvius.mus \
+	data1/maps/scripts/ctf-violator.fog \
+	data1/maps/scripts/ctf-violator.mus \
 	data1/maps/scripts/ctf-zorn.mus \
 	data1/maps/scripts/db-chromium.mus \
 	data1/maps/scripts/db-icarus.mus \
@@ -919,8 +925,26 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/misc/deathray/deathray.md2 \
 	data1/models/misc/deathray/deathray_normal.tga \
 	data1/models/misc/deathray/deathray.tga \
+	data1/models/misc/electrode/cover.md2 \
+	data1/models/misc/electrode/electrode.tga \
+	data1/models/misc/electrode/tris.md2 \
+	data1/models/misc/lamp2/lamp2.tga \
+	data1/models/misc/lamp2/tris.md2 \
+	data1/models/misc/lamp/lamp.tga \
+	data1/models/misc/lamp/tris.md2 \
+	data1/models/misc/pod/pod.tga \
+	data1/models/misc/pod/tris.md2 \
+	data1/models/misc/receptor/bulb.md2 \
+	data1/models/misc/receptor/receptor.tga \
+	data1/models/misc/receptor/tris.md2 \
+	data1/models/misc/scope/cover.md2 \
+	data1/models/misc/scope/scope.tga \
+	data1/models/misc/scope/tris.md2 \
 	data1/models/misc/spiderpod/skin.tga \
 	data1/models/misc/spiderpod/tris.md2 \
+	data1/models/misc/tube/cover.md2 \
+	data1/models/misc/tube/tris.md2 \
+	data1/models/misc/tube/tube.tga \
 	data1/models/objects/blank/skin.tga \
 	data1/models/objects/blank/tris.md2 \
 	data1/models/objects/brass/skin.jpg \
@@ -943,6 +967,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/objects/gibs/skin_normal.jpg \
 	data1/models/objects/gibs/sm_meat/skin.jpg \
 	data1/models/objects/gibs/sm_meat/tris.md2 \
+	data1/models/objects/icon/icon.jpg \
+	data1/models/objects/icon/icon_normal.jpg \
+	data1/models/objects/icon/tris.md2 \
 	data1/models/objects/laser/skin.tga \
 	data1/models/objects/laser/tris.md2 \
 	data1/models/objects/rocket/skin.tga \
@@ -1245,6 +1272,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/strafer.tga \
 	data1/pics/tag1.tga \
 	data1/pics/tag2.tga \
+	data1/pics/team1.tga \
+	data1/pics/team2.tga \
 	data1/pics/timer.tga \
 	data1/pics/uparrow.tga \
 	data1/pics/vaporizor.tga \
@@ -1281,8 +1310,10 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/commander/human \
 	data1/players/commander/jump1.wav \
 	data1/players/commander/lod1.iqm \
-	data1/players/commander/lod2.iqm \
+	data1/players/commander/lod1.md2 \
 	data1/players/commander/lod1.rgd \
+	data1/players/commander/lod2.iqm \
+	data1/players/commander/lod2.md2 \
 	data1/players/commander/lod2.rgd \
 	data1/players/commander/pain100_1.wav \
 	data1/players/commander/pain100_2.wav \
@@ -1713,6 +1744,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/ctf-oblivion.rscript \
 	data1/scripts/maps/ctf-titan2k8.rscript \
 	data1/scripts/maps/ctf-vesuvius.rscript \
+	data1/scripts/maps/ctf-violator.rscript \
 	data1/scripts/maps/ctf-zorn.rscript \
 	data1/scripts/maps/db-chromium.rscript \
 	data1/scripts/maps/db-icarus.rscript \
@@ -1847,6 +1879,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/misc/w_pkup.wav \
 	data1/sound/music/cp-ribeye.ogg \
 	data1/sound/music/Divinity_lack_of_success.ogg \
+	data1/sound/music/Divinity_misunderstood.ogg \
+	data1/sound/music/Divinity_never_ending.ogg \
 	data1/sound/music/dm-annihilation.ogg \
 	data1/sound/music/dm-deathray.ogg \
 	data1/sound/music/dm-deimos.ogg \
@@ -1990,6 +2024,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/world/explosion1.wav \
 	data1/sound/world/explosion2.wav \
 	data1/sound/world/forcefield.wav \
+	data1/sound/world/hyprbf1a.wav \
 	data1/sound/world/jumppad1.wav \
 	data1/sound/world/laser1.wav \
 	data1/sound/world/platstop.wav \
@@ -3008,6 +3043,77 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/metal/wall6.tga \
 	data1/textures/metal/walllite.tga \
 	data1/textures/null.tga \
+	data1/textures/phillipk/pk01_panel01a_hm.tga \
+	data1/textures/phillipk/pk01_panel01a.tga \
+	data1/textures/phillipk/pk01_panel01b_hm.tga \
+	data1/textures/phillipk/pk01_panel01b.tga \
+	data1/textures/phillipk/pk01_panel03a_hm.tga \
+	data1/textures/phillipk/pk01_panel03a_nm.tga \
+	data1/textures/phillipk/pk01_panel03a.tga \
+	data1/textures/phillipk/pk01_panel03b_hm.tga \
+	data1/textures/phillipk/pk01_panel03b_nm.tga \
+	data1/textures/phillipk/pk01_panel03b.tga \
+	data1/textures/phillipk/pk01_panel_small01_hm.tga \
+	data1/textures/phillipk/pk01_panel_small01_nm.tga \
+	data1/textures/phillipk/pk01_panel_small01.tga \
+	data1/textures/phillipk/pk01_pan_wall02a1_hm.tga \
+	data1/textures/phillipk/pk01_pan_wall02a1_nm.tga \
+	data1/textures/phillipk/pk01_pan_wall02a1.tga \
+	data1/textures/phillipk/pk01_pan_wall02b1_hm.tga \
+	data1/textures/phillipk/pk01_pan_wall02b1_nm.tga \
+	data1/textures/phillipk/pk01_pan_wall02b1.tga \
+	data1/textures/phillipk/pk01_thin_wall01b_hm.tga \
+	data1/textures/phillipk/pk01_thin_wall01b_nm.tga \
+	data1/textures/phillipk/pk01_thin_wall01b.tga \
+	data1/textures/phillipk/pk01_thin_wall02b_hm.tga \
+	data1/textures/phillipk/pk01_thin_wall02b_nm.tga \
+	data1/textures/phillipk/pk01_thin_wall02b.tga \
+	data1/textures/phillipk/pk01_trims01a_hm.tga \
+	data1/textures/phillipk/pk01_trims01a_nm.tga \
+	data1/textures/phillipk/pk01_trims01a.tga \
+	data1/textures/phillipk/pk01_trims01b_hm.tga \
+	data1/textures/phillipk/pk01_trims01b_nm.tga \
+	data1/textures/phillipk/pk01_trims01b.tga \
+	data1/textures/phillipk/pk01_vent_wall01a_hm.tga \
+	data1/textures/phillipk/pk01_vent_wall01a.tga \
+	data1/textures/phillipk/pk01_vent_wall01_nm.tga \
+	data1/textures/phillipk/pk01_wall02a_hm.tga \
+	data1/textures/phillipk/pk01_wall02a_nm.tga \
+	data1/textures/phillipk/pk01_wall02a.tga \
+	data1/textures/phillipk/pk01_wall02b_hm.tga \
+	data1/textures/phillipk/pk01_wall02b.tga \
+	data1/textures/phillipk/pk01_wall02_nm.tga \
+	data1/textures/phillipk/pk01_wall04b_hm.tga \
+	data1/textures/phillipk/pk01_wall04b_nm.tga \
+	data1/textures/phillipk/pk01_wall04b.tga \
+	data1/textures/phillipk/pk02_ceiling02_fx.tga \
+	data1/textures/phillipk/pk02_ceiling02_nm.tga \
+	data1/textures/phillipk/pk02_ceiling02.tga \
+	data1/textures/phillipk/pk02_ceiling02r_nm.tga \
+	data1/textures/phillipk/pk02_ceiling02r.tga \
+	data1/textures/phillipk/pk02_computer01a_hm.tga \
+	data1/textures/phillipk/pk02_computer01a_nm.tga \
+	data1/textures/phillipk/pk02_computer01a.tga \
+	data1/textures/phillipk/pk02_floor08a_hm.tga \
+	data1/textures/phillipk/pk02_floor08a_nm.tga \
+	data1/textures/phillipk/pk02_floor08b_hm.tga \
+	data1/textures/phillipk/pk02_floor08b_nm.tga \
+	data1/textures/phillipk/pk02_floor08b.tga \
+	data1/textures/phillipk/pk02_floor08.tga \
+	data1/textures/phillipk/pk02_switches01a_nm.tga \
+	data1/textures/phillipk/pk02_switches01a.tga \
+	data1/textures/phillipk/pk02_switches01b_nm.tga \
+	data1/textures/phillipk/pk02_switches01b.tga \
+	data1/textures/phillipk/pk02_switches01c_nm.tga \
+	data1/textures/phillipk/pk02_switches01c.tga \
+	data1/textures/phillipk/pk02_wall07a_nm.tga \
+	data1/textures/phillipk/pk02_wall07a.tga \
+	data1/textures/phillipk/pk02_wall07b_nm.tga \
+	data1/textures/phillipk/pk02_wall07b.tga \
+	data1/textures/phillipk/pk02_wall_big02a_nm.tga \
+	data1/textures/phillipk/pk02_wall_big02a.tga \
+	data1/textures/phillipk/pk02_wall_big02b_nm.tga \
+	data1/textures/phillipk/pk02_wall_big02b.tga \
 	data1/textures/rage/beam_purple_hm.tga \
 	data1/textures/rage/beam_purple_nm.tga \
 	data1/textures/rage/beam_purple.tga \
