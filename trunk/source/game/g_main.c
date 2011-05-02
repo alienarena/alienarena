@@ -1361,6 +1361,7 @@ G_RunFrame
 Advances the world by 0.1 seconds
 ================
 */
+extern void ACEND_DrawPath(void);
 void G_RunFrame (void)
 {
 	int		i, numActiveClients = 0;
@@ -1449,6 +1450,9 @@ void G_RunFrame (void)
 
 	// build the playerstate_t structures for all players
 	ClientEndServerFrames ();
+	
+	// For bot debugging
+	ACEND_DrawPath();
 
 	//unlagged
 	if ( g_antilag->integer)

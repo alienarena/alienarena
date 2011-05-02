@@ -79,6 +79,7 @@ int show_path_to = -1;
 
 // array for node data
 node_t nodes[MAX_NODES];
+edict_t *node_showents[MAX_NODES];
 short int path_table[MAX_NODES][MAX_NODES];
 
 ///////////////////////////////////////////////////////////////////////
@@ -256,7 +257,6 @@ qboolean ACEND_FollowPath(edict_t *self)
 	if(debug_mode) {
 		show_path_from = self->current_node;
 		show_path_to = self->goal_node;
-		ACEND_DrawPath();
 	}
 	//////////////////////////////////////////
 
@@ -367,10 +367,6 @@ void ACEND_PathMap(edict_t *self)
 
 	last_update = level.time + 0.15; // slow down updates a bit
 
-	// Special node drawing code for debugging
-    if(show_path_to != -1)
-		ACEND_DrawPath();
-
 	////////////////////////////////////////////////////////
 	// Special check for ladder nodes
 	///////////////////////////////////////////////////////
@@ -460,19 +456,24 @@ void ACEND_InitNodes(void)
 	numitemnodes = 1;
 	memset(nodes,0,sizeof(node_t) * MAX_NODES);
 	memset(path_table,INVALID,sizeof(short int)*MAX_NODES*MAX_NODES);
+	memset(node_showents,0,sizeof(edict_t *)*MAX_NODES);
 
 }
 
 ///////////////////////////////////////////////////////////////////////
 // Show the node for debugging (utility function)
+// Previously there was a warning comment here about overflows, however it 
+// seems to be just fine on a private server.
 ///////////////////////////////////////////////////////////////////////
 void ACEND_ShowNode(int node)
 {
 	edict_t *ent;
 
-	return; // commented out for now. uncommend to show nodes during debugging,
-	        // but too many will cause overflows. You have been warned.
-
+    if (node_showents[node]) {
+        safe_bprintf(PRINT_MEDIUM, "node %d already being shown\n", node);
+        return;
+    }
+    
 	ent = G_Spawn();
 
 	ent->movetype = MOVETYPE_NONE;
@@ -493,6 +494,8 @@ void ACEND_ShowNode(int node)
 
 	VectorCopy(nodes[node].origin,ent->s.origin);
 	gi.linkentity (ent);
+	
+	node_showents[node] = ent;
 
 }
 
@@ -502,6 +505,9 @@ void ACEND_ShowNode(int node)
 void ACEND_DrawPath()
 {
 	int current_node, goal_node, next_node;
+	
+	if (!debug_mode)
+	    return;
 
 	current_node = show_path_from;
 	goal_node = show_path_to;
@@ -547,7 +553,7 @@ int ACEND_AddNode(edict_t *self, int type)
 
 	// Set type
 	nodes[bot_numnodes].type = type;
-
+	
 	/////////////////////////////////////////////////////
 	// ITEMS
 	// Move the z location up just a bit.
@@ -804,9 +810,13 @@ void ACEND_LoadNodes(void)
 	{
 		gi.dprintf("ACE: Loading node table...");
 
+        //FIXME: This code sucks so bad. Didn't anyone ever tell this Yeager
+        //fellow that dumps of C structs don't make a proper file format? 
+        //If your compiler does padding differently, it breaks. If you want to
+        //add new field types, it breaks. 
 		sz = fread(&bot_numnodes,sizeof(int),1,pIn); // read count
 		sz = fread(&num_items,sizeof(int),1,pIn); // read facts count
-		sz = fread(nodes,sizeof(node_t),bot_numnodes,pIn);
+		sz = fread(nodes,sizeof(node_t),bot_numnodes,pIn); 
 
 		for(i=0;i<bot_numnodes;i++)
 			for(j=0;j<bot_numnodes;j++)
