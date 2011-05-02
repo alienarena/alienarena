@@ -86,10 +86,26 @@ qboolean ACECM_Commands(edict_t *ent)
 
 	else if(Q_strcasecmp (cmd, "showpath") == 0 && debug_mode)
     	ACEND_ShowPath(ent,atoi(gi.argv(1)));
+    
+    else if(Q_strcasecmp (cmd, "shownode") == 0 && debug_mode)
+    	ACEND_ShowNode(atoi(gi.argv(1)));
+    
+    else if(Q_strcasecmp (cmd, "hidenode") == 0 && debug_mode)
+    {
+        node = atoi(gi.argv(1));
+        if (node_showents[node])
+        {
+            G_FreeEdict(node_showents[node]);
+            node_showents[node] = NULL;
+        }
+    }
 
 	else if(Q_strcasecmp (cmd, "findnode") == 0 && debug_mode)
 	{
-		node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY, NODE_ALL);
+	    if (gi.argc() == 2)
+	        node = atoi(gi.argv(1));
+	    else
+		    node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY, NODE_ALL);
 		safe_bprintf(PRINT_MEDIUM,"node: %d type: %d x: %f y: %f z %f\n",node,nodes[node].type,nodes[node].origin[0],nodes[node].origin[1],nodes[node].origin[2]);
 	}
 
