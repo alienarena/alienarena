@@ -149,22 +149,28 @@ void ACEAI_Think (edict_t *self)
 		self->client->spawnprotected = false;
 
 	// Find any short range goal - but not if in air(ie, jumping a jumppad)
-	if(self->groundentity)
+	if (self->groundentity)
 		ACEAI_PickShortRangeGoal(self);
 
 	// Look for enemies
-	if(ACEAI_FindEnemy(self))
+	if ( ACEAI_FindEnemy( self ) )
 	{
-		ACEAI_ChooseWeapon(self);
-		ACEMV_Attack (self, &ucmd);
+		ACEAI_ChooseWeapon( self );
+		ACEMV_Attack( self, &ucmd );
 	}
 	else
 	{
 		// Execute the move, or wander
-		if(self->state == STATE_WANDER)
-			ACEMV_Wander(self,&ucmd);
-		else if(self->state == STATE_MOVE)
-			ACEMV_Move(self,&ucmd);
+		ACEAI_ChooseWeapon( self ); // for deselecting violator
+		if ( self->state == STATE_WANDER )
+		{
+			ACEMV_Wander( self, &ucmd );
+		}
+		else if ( self->state == STATE_MOVE )
+		{
+			ACEMV_Move( self, &ucmd );
+		}
+
 	}
 
 	//debug_printf("State: %d\n",self->state);
@@ -175,9 +181,9 @@ void ACEAI_Think (edict_t *self)
 	self->client->ping = 0; //show in scoreboard ping of 0
 
 	// set bot's view angle
-	ucmd.angles[PITCH] = ANGLE2SHORT(self->s.angles[PITCH]);
-	ucmd.angles[YAW] = ANGLE2SHORT(self->s.angles[YAW]);
-	ucmd.angles[ROLL] = ANGLE2SHORT(self->s.angles[ROLL]);
+	ucmd.angles[PITCH] = ANGLE2SHORT( self->s.angles[PITCH] );
+	ucmd.angles[YAW] = ANGLE2SHORT( self->s.angles[YAW] );
+	ucmd.angles[ROLL] = ANGLE2SHORT( self->s.angles[ROLL] );
 
 	// send command through id's code
 	ClientThink (self, &ucmd);
@@ -545,10 +551,12 @@ qboolean ACEAI_CheckShot(edict_t *self)
 {
 	trace_t tr;
 
+	assert( self->enemy != NULL );
+
 	tr = gi.trace (self->s.origin, tv(-8,-8,-8), tv(8,8,8), self->enemy->s.origin, self, MASK_SOLID);
 
 	// Blocked, do not shoot
-	if (tr.fraction != 1.0)
+	if ( tr.fraction < 1.0f )
 		return false;
 
 	return true;
@@ -662,6 +670,8 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	float range;
 	vec3_t v;
 	float c;
+	qboolean selected;
+	qboolean clear_shot;
 
 	if (self->in_vehicle || self->in_deathball)
 	{
@@ -679,9 +689,24 @@ void ACEAI_ChooseWeapon(edict_t *self)
 			ACEAI_Use_Sproing(self);
 	}
 
-	// if no enemy, then what are we doing here?
-	if(!self->enemy)
+	// calculate distance to enemy target for range-based weapon selection
+	clear_shot = true;
+	if ( self->enemy != NULL )
+	{
+		VectorSubtract( self->s.origin, self->enemy->s.origin, v );
+		range = VectorLength( v );
+		clear_shot = ACEAI_CheckShot( self );
+	}
+	else if ( self->client->pers.weapon->weapmodel == WEAP_VIOLATOR )
+	{
+		// put away the violator, and select something else
+		//  using a fake range.
+		range = 500.0F;
+	}
+	else
+	{ // otherwise, keep current weapon when there is no target.
 		return;
+	}
 
 	//mutators
 	/*
@@ -689,9 +714,12 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	 */
 	if ( instagib->integer )
 	{
+		// TODO: consider whether this prevents using violator
+		//       and whether or not that is a good thing.
 		if ( self->client->pers.weapon->weapmodel != WEAP_DISRUPTOR )
 		{
 			self->client->newweapon = FindItem( "Alien Disruptor" );
+			assert( self->client->newweapon != NULL );
 			ChangeWeapon( self );
 		}
 		self->accuracy = self->weapacc[ACCURACY_DISRUPTOR];
@@ -703,120 +731,153 @@ void ACEAI_ChooseWeapon(edict_t *self)
 		if ( self->client->pers.weapon->weapmodel != WEAP_ROCKETLAUNCHER )
 		{
 			self->client->newweapon = FindItem( "Rocket Launcher" );
+			assert( self->client->newweapon != NULL );
 			ChangeWeapon( self );
 		}
 		self->accuracy = self->weapacc[ACCURACY_ROCKETLAUNCHER];
 		return;
 	}
 
-
-
-	// Base selection on distance.
-	VectorSubtract (self->s.origin, self->enemy->s.origin, v);
-	range = VectorLength(v);
-
-	//what is the bot's favorite weapon? The bot will always check for it's favorite
-	//weapon first, which is set in the bot's config file.
-
-	if(!strcmp(self->faveweap, "Alien Vaporizer") && self->skill > 1)
+	// insta/rockets hybrid
+	if ( insta_rockets->integer  )
 	{
-		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
+		if ( self->skill > 0 && range < 170.0F ) // Little closer than usual (normally 200)
+		{
+			if ( self->client->pers.weapon->weapmodel != WEAP_VIOLATOR )
+			{
+				self->client->newweapon = FindItem( "Violator" );
+				assert( self->client->newweapon != NULL );
+				ChangeWeapon( self );
+			}
+			self->accuracy = 1.0;
+			return;
+		}
+		if ( clear_shot && range > 169.0F && range < 450.0F ) // Medium Range, use Rockets
+		{
+			if ( self->client->pers.weapon->weapmodel != WEAP_ROCKETLAUNCHER )
+			{
+				self->client->newweapon = FindItem( "Rocket Launcher" );
+				assert( self->client->newweapon != NULL );
+				ChangeWeapon( self );
+			}
+			self->accuracy = self->weapacc[ACCURACY_ROCKETLAUNCHER];
+			return;
+		}
+		// Long range (or possibly short range for skill 0 bots)
+		if ( self->client->pers.weapon->weapmodel != WEAP_DISRUPTOR )
+		{
+			self->client->newweapon = FindItem( "Alien Disruptor" );
+			assert( self->client->newweapon != NULL );
+			ChangeWeapon( self );
+		}
+		self->accuracy = self->weapacc[ACCURACY_DISRUPTOR];
+		return;
+	}
+
+	// what is the bot's favorite weapon?
+	// The bot will always check for it's favorite weapon first,
+	// which is set in the bot's config file.
+	if ( !strcmp( self->faveweap, "Alien Vaporizer" ) && self->skill > 1 )
+	{
+		if ( ACEIT_ChangeWeapon( self, FindItem( self->faveweap ) ) )
 		{
 			self->accuracy = self->weapacc[ACCURACY_VAPORIZER];
 			return;
 		}
 	}
-	if(!strcmp(self->faveweap, "Alien Disruptor"))
+	if ( !strcmp( self->faveweap, "Alien Disruptor" ) )
 	{
-		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
+		if ( ACEIT_ChangeWeapon( self, FindItem( self->faveweap ) ) )
 		{
 			self->accuracy = self->weapacc[ACCURACY_DISRUPTOR];
 			return;
 		}
 	}
-	if(!strcmp(self->faveweap, "Disruptor"))
+	if ( !strcmp( self->faveweap, "Disruptor" ) )
 	{
-		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
+		if ( ACEIT_ChangeWeapon( self, FindItem( self->faveweap ) ) )
 		{
 			self->accuracy = self->weapacc[ACCURACY_BEAMGUN];
 			return;
 		}
 	}
-    if(!strcmp(self->faveweap, "Pulse Rifle"))
+    if ( !strcmp( self->faveweap, "Pulse Rifle" ) )
 	{
-		if(ACEIT_ChangeWeapon(self,FindItem(self->faveweap)))
+		if ( ACEIT_ChangeWeapon( self, FindItem( self->faveweap ) ) )
 		{
 			self->accuracy = self->weapacc[ACCURACY_CHAINGUN];
 			return;
 		}
 	}
-	if(!strcmp(self->faveweap, "Alien Smartgun"))
+	if ( !strcmp( self->faveweap, "Alien Smartgun" ) )
 	{
-		if(ACEAI_CheckShot(self) && ACEIT_ChangeWeapon(self, FindItem("Alien Smartgun")))
+		if ( clear_shot && ACEIT_ChangeWeapon( self, FindItem( "Alien Smartgun" )))
 		{
 			self->accuracy = self->weapacc[ACCURACY_SMARTGUN];
 			return;
 		}
 	}
-	if(!strcmp(self->faveweap, "Rocket Launcher"))
+	if ( !strcmp( self->faveweap, "Rocket Launcher" ) )
 	{
-		if(range > 200)
+		if ( range > 200.0f )
 		{
-			if(ACEAI_CheckShot(self) && ACEIT_ChangeWeapon(self,FindItem("Rocket Launcher")))
+			if ( clear_shot && ACEIT_ChangeWeapon( self, FindItem( "Rocket Launcher" )))
 			{
 				self->accuracy = self->weapacc[ACCURACY_ROCKETLAUNCHER];
 				return;
 			}
 		}
 	}
-	if(!strcmp(self->faveweap, "Flame Thrower"))
+	if ( !strcmp( self->faveweap, "Flame Thrower" ) )
 	{
-		if(range < 500 || (range < 800 && self->skill == 3)) {
-				if(ACEIT_ChangeWeapon(self,FindItem("Flame Thrower")))
-				{
-				self->accuracy = self->weapacc[ACCURACY_FLAMETHROWER];
-					return;
-				}
-		}
-	}
-	if(!strcmp(self->faveweap, "Violator") && self->skill > 0)
-	{
-		if(range < 300) { //because it's a fav weap, we want them to really try and use it
-				if(ACEIT_ChangeWeapon(self,FindItem("Violator")))
-				{
-					self->accuracy = 1.0;
-					return;
-				}
-		}
-	}
-	//now go through normal weapon favoring routine
-	// always favor the Vaporizor, unless close, then use the violator
-	if(range < 200 && self->skill > 0) {
-		if(ACEIT_ChangeWeapon(self,FindItem("Violator")))
+		if ( range < 500.0f || (range < 800.0f && self->skill == 3) )
 		{
-			self->accuracy = 1.0;
-			return;
+			if ( ACEIT_ChangeWeapon( self, FindItem( "Flame Thrower" ) ) )
+			{
+				self->accuracy = self->weapacc[ACCURACY_FLAMETHROWER];
+				return;
+			}
+		}
+	}
+	if ( !strcmp( self->faveweap, "Violator" ) && self->skill > 0 )
+	{
+		if ( range < 300.0f )
+		{ //because it's a fav weap, we want them to really try and use it
+			if ( ACEIT_ChangeWeapon( self, FindItem( "Violator" ) ) )
+			{
+				self->accuracy = 1.0;
+				return;
+			}
 		}
 	}
 
-	if(self->skill > 1) {
-		if(ACEIT_ChangeWeapon(self,FindItem("Alien Vaporizer")))
+	// now go through normal weapon favoring routine
+	//  always favor the Vaporizor, unless close, then use the violator
+	if ( range < 200.0f && self->skill > 0 )
+	{
+		selected = ACEIT_ChangeWeapon( self, FindItem( "Violator" ));
+		assert( selected );
+		self->accuracy = 1.0f;
+		return;
+	}
+	if ( self->skill > 1 )
+	{
+		if ( ACEIT_ChangeWeapon( self, FindItem( "Alien Vaporizer" )))
 		{
 			self->accuracy = self->weapacc[ACCURACY_VAPORIZER];
 			return;
 		}
 	}
-
-	if(ACEAI_CheckShot(self) && ACEIT_ChangeWeapon(self, FindItem("Alien Smartgun")))
+	if ( clear_shot && ACEIT_ChangeWeapon( self, FindItem( "Alien Smartgun" )))
 	{
 		self->accuracy = self->weapacc[ACCURACY_SMARTGUN];
 		return;
 	}
 
 	// Longer range so the bot doesn't blow himself up!
-	if(range > 200)
+	if ( clear_shot && range > 200.0f )
 	{
-		if(ACEAI_CheckShot(self) && ACEIT_ChangeWeapon(self,FindItem("Rocket Launcher")))
+		if ( ACEIT_ChangeWeapon( self, FindItem( "Rocket Launcher" )))
 		{
 			self->accuracy = self->weapacc[ACCURACY_ROCKETLAUNCHER];
 			return;
@@ -824,39 +885,32 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	}
 
 	// Only use FT in certain ranges
-	if(range < 500 || (range < 800 && self->skill == 3)) {
-
-			if(ACEIT_ChangeWeapon(self,FindItem("Flame Thrower")))
-			{
+	if ( range < 500.0f || (range < 800.0f && self->skill == 3) )
+	{
+		if ( ACEIT_ChangeWeapon( self, FindItem( "Flame Thrower" ) ))
+		{
 			self->accuracy = self->weapacc[ACCURACY_FLAMETHROWER];
-				return;
-			}
+			return;
+		}
 	}
-
-	if(ACEIT_ChangeWeapon(self,FindItem("Disruptor")))
+	if ( ACEIT_ChangeWeapon( self, FindItem( "Disruptor" ) ))
 	{
 		self->accuracy = self->weapacc[ACCURACY_BEAMGUN];
 		return;
 	}
-
-	if(ACEIT_ChangeWeapon(self,FindItem("Pulse Rifle")))
+	if ( ACEIT_ChangeWeapon( self, FindItem( "Pulse Rifle" ) ))
 	{
 		self->accuracy = self->weapacc[ACCURACY_CHAINGUN];
 		return;
 	}
-
-	if(ACEIT_ChangeWeapon(self,FindItem("Alien Disruptor")))
+	if ( ACEIT_ChangeWeapon( self, FindItem( "Alien Disruptor" ) ))
 	{
 		self->accuracy = self->weapacc[ACCURACY_DISRUPTOR];
 		return;
 	}
 
-	if(ACEIT_ChangeWeapon(self,FindItem("Blaster")))
-   	{
-		self->accuracy = self->weapacc[ACCURACY_BLASTER];
-		return;
-	}
-
-	return;
+	selected = ACEIT_ChangeWeapon( self, FindItem( "Blaster" ) );
+	assert( selected );
+	self->accuracy = self->weapacc[ACCURACY_BLASTER];
 
 }

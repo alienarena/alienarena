@@ -1845,6 +1845,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/misc/deathray/weird2.wav \
 	data1/sound/misc/death.wav \
 	data1/sound/misc/fight.wav \
+	data1/sound/misc/game_tied_ctf.wav \
+	data1/sound/misc/game_tied.wav \
 	data1/sound/misc/godlike.wav \
 	data1/sound/misc/headshot.wav \
 	data1/sound/misc/hit2.wav \

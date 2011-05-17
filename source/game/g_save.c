@@ -197,6 +197,7 @@ void InitGame (void)
 	//mutator
 	instagib = gi.cvar ("instagib", "0", CVAR_LATCH|CVAR_GAMEINFO);
 	rocket_arena = gi.cvar ("rocket_arena", "0", CVAR_LATCH|CVAR_GAMEINFO);
+	insta_rockets = gi.cvar ("insta_rockets", "0", CVAR_LATCH|CVAR_GAMEINFO);
 	low_grav = gi.cvar ("low_grav", "0", CVAR_LATCH|CVAR_GAMEINFO);
 	regeneration = gi.cvar ("regeneration", "0", CVAR_LATCH|CVAR_GAMEINFO);
 	vampire = gi.cvar ("vampire", "0", CVAR_LATCH|CVAR_GAMEINFO);

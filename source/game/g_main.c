@@ -58,6 +58,7 @@ cvar_t  *cp;
 //mutators
 cvar_t  *instagib;
 cvar_t  *rocket_arena;
+cvar_t  *insta_rockets;
 cvar_t  *low_grav;
 cvar_t  *regeneration;
 cvar_t  *vampire;
@@ -1032,8 +1033,8 @@ void ExitLevel (void)
 	char		command [256];
 
 	if(strcmp(level.mapname, level.changemap) || timelimit->value) {
-		Com_sprintf (command, sizeof(command), "map \"%s\"\n", level.changemap);
-		gi.AddCommandString (command);
+		Com_sprintf( command, sizeof(command), "map \"%s\"\n", level.changemap );
+		gi.AddCommandString( command );
 	}
 
     //Note-- whenever the map command fails (for instance, misspelled bsp name
@@ -1450,7 +1451,7 @@ void G_RunFrame (void)
 
 	// build the playerstate_t structures for all players
 	ClientEndServerFrames ();
-	
+
 	// For bot debugging
 	ACEND_DrawPath();
 

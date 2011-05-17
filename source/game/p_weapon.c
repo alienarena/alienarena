@@ -130,8 +130,10 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 	index = ITEM_INDEX(ent->item);
 
 	//mutators
-	if(instagib->value || rocket_arena->value)
+	if ( instagib->integer || rocket_arena->integer || insta_rockets->integer )
+	{
 		return false; //why pick them up in these modes?
+	}
 
 	if ( ( (dmflags->integer & DF_WEAPONS_STAY))
 		&& other->client->pers.inventory[index])
@@ -483,8 +485,11 @@ void Drop_Weapon (edict_t *ent, gitem_t *item)
 {
 	int		index;
 
-	if ((dmflags->integer & DF_WEAPONS_STAY) || instagib->value || rocket_arena->value)
+	if ((dmflags->integer & DF_WEAPONS_STAY) || instagib->integer
+		|| rocket_arena->integer || insta_rockets->integer )
+	{
 		return;
+	}
 
 	index = ITEM_INDEX(item);
 	// see if we're already using it
@@ -687,7 +692,8 @@ void weapon_plasma_fire (edict_t *ent)
 	int		kick;
 	int		buildup;
 
-	if(instagib->value) {
+	if ( instagib->integer || insta_rockets->integer )
+	{
 		damage = 200;
 		kick = 200;
 	} else {
@@ -737,8 +743,12 @@ void weapon_plasma_fire (edict_t *ent)
 	ent->client->ps.gunframe++;
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if (! ( (dmflags->integer & DF_INFINITE_AMMO) || instagib->integer ) )
-		ent->client->pers.inventory[ent->client->ammo_index]= ent->client->pers.inventory[ent->client->ammo_index]-5;
+	if ( !( (dmflags->integer & DF_INFINITE_AMMO) || instagib->integer
+		|| insta_rockets->integer ) )
+	{
+		ent->client->pers.inventory[ent->client->ammo_index] =
+				ent->client->pers.inventory[ent->client->ammo_index]-5;
+	}
 }
 
 void Weapon_Disruptor (edict_t *ent)
@@ -996,8 +1006,10 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
-	if ((! ( dmflags->integer & DF_INFINITE_AMMO ) ) && !rocket_arena->value)
+	if ( (!( dmflags->integer & DF_INFINITE_AMMO )) && !rocket_arena->integer && !insta_rockets->integer )
+	{
 		ent->client->pers.inventory[ent->client->ammo_index]--;
+	}
 }
 
 void Weapon_RocketLauncher (edict_t *ent)

@@ -540,7 +540,7 @@ static void loadbots_team_botkick( edict_t *ent )
 	}
 }
 
-static void loadbots_team( edict_t *ent )
+static void loadbots_team( void )
 {
 	char userinfo[MAX_INFO_STRING];
 	char *name;
@@ -571,7 +571,7 @@ static void loadbots_team( edict_t *ent )
 	}
 }
 
-static void loadbots_nonteam_botkick( edict_t *ent )
+static void loadbots_nonteam_botkick( void )
 {
 	char userinfo[MAX_INFO_STRING];
 	char *name;
@@ -651,7 +651,7 @@ static void loadbots_nonteam_botkick( edict_t *ent )
 	}
 }
 
-static void loadbots_nonteam( edict_t *ent )
+static void loadbots_nonteam( void )
 {
 	char userinfo[MAX_INFO_STRING];
 	char *name;
@@ -702,7 +702,7 @@ void ACESP_LoadBots( edict_t *ent )
 		}
 		else
 		{
-			loadbots_nonteam_botkick( ent );
+			loadbots_nonteam_botkick();
 		}
 	}
 	else
@@ -714,11 +714,11 @@ void ACESP_LoadBots( edict_t *ent )
 		 */
 		if ( TEAM_GAME )
 		{
-			loadbots_team( ent );
+			loadbots_team();
 		}
 		else
 		{
-			loadbots_nonteam( ent );
+			loadbots_nonteam();
 		}
 	}
 
@@ -830,7 +830,7 @@ void ACECO_ReadConfig( char *config_file )
 		fclose( fp );
 		return;
 	}
-	if ( (length = ftell(fp)) < 0L )
+	if ( (length = ftell(fp)) == (size_t)-1L )
 	{ // tell error
 		fclose( fp );
 		return;
@@ -1076,7 +1076,8 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	Q2_FindFile (modelpath, &file);
 	if(file) { //human
 		bot->ctype = 1;
-		if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
+		if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value)) 
+		{
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 				client->pers.inventory[armor_index] += 30;
 				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
@@ -1093,7 +1094,8 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		Q2_FindFile (modelpath, &file);
 		if(file) { //robot
 			bot->ctype = 2;
-			if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
+			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value)) 
+			{
 				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 85;
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 				client->pers.inventory[armor_index] += 175;
@@ -1101,7 +1103,8 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 			fclose(file);
 		}
 		else { //alien
-			if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
+			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value)) 
+			{
 				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 150;
 				client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
 				client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
@@ -1330,7 +1333,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *userinfo )
 		strcpy(playerskin, " ");
 		strcpy(playermodel, " ");
 		j = k = 0;
-		for(i = 0; i <= strlen(skin2) && i < MAX_INFO_STRING; i++)
+		for(i = 0; i <= (int)strlen(skin2) && i < MAX_INFO_STRING; i++)
 		{
 			if(copychar){
 				playerskin[k] = skin2[i];

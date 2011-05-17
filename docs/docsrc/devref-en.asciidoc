@@ -411,6 +411,13 @@ Also for users who compile from source, there are CPU
 dependendent options that might give better performance. Might
 be good to document some of these in the README.
 
+Wall::
+Wextra::
+  With -Wextra many warnings are produced, especially for unused parameters
+  and signed/unsigned comparisons. With just -Wall, a few unused variable 
+  warnings are produced, which are easily fixed. Some bogus uninitialized
+  warnings are produced; it is possible, but annoying, to eliminate these. 
+  
 O2::
 O3::
   O3 produces different warning messages.

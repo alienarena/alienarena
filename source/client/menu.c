@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2005-2011 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -12,9 +13,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
 
@@ -176,7 +177,7 @@ static void M_ArrowPics()
 	//for the player list
 	Draw_StretchPic (viddef.width / 2 - w/2 + (int)(147.5*scale), viddef.height / 2 + 153*scale, 32*scale, 32*scale, "uparrow");
 	Draw_StretchPic (viddef.width / 2 - w/2 + (int)(147.5*scale), viddef.height / 2 + 243*scale, 32*scale, 32*scale, "dnarrow");
-	
+
 	//for the mod list
 	Draw_StretchPic (viddef.width / 2 - w/2 + (int)(382.5*scale), viddef.height / 2 + 10*scale, 32*scale, 32*scale, "uparrow");
 	Draw_StretchPic (viddef.width / 2 - w/2 + (int)(382.5*scale), viddef.height / 2 + 90*scale, 32*scale, 32*scale, "dnarrow");
@@ -3302,7 +3303,7 @@ unsigned int starttime;
 //actually recognized right now anyway, we currently don't.)
 
 //Names. If a cvar isn't recognized, the name of the cvar itself is used.
-static char mod_names[] = 
+static char mod_names[] =
     //cannot be wider than this boundary:    |
     "\\ctf"             "\\capture the flag"
     "\\tca"             "\\team core assault"
@@ -3685,7 +3686,7 @@ void JoinServerFunc( void *self )
 		Com_sprintf(local_server_data[3], sizeof(local_server_data[3]), mservers[index+svridx].fraglimit);
 		Com_sprintf(local_server_data[4], sizeof(local_server_data[4]), mservers[index+svridx].timelimit);
 		Com_sprintf(local_server_data[5], sizeof(local_server_data[5]), mservers[index+svridx].szVersion);
-		
+
 		//Copy modstring over since strtok will modify it
 		Q_strncpyz(modstring, mservers[index+svridx].modInfo, sizeof(modstring));
 		token = strtok(modstring, "%%");
@@ -3695,7 +3696,7 @@ void JoinServerFunc( void *self )
 		    Com_sprintf(local_mods_data[i], sizeof(local_mods_data[i]), token);
 		    token = strtok(NULL, "%%");
 		}
-		
+
 		//Reset all the rest of the strings that haven't been initialized
 		for (; i<16; i++)
 		    local_mods_data[i][0] = 0;
@@ -3886,7 +3887,7 @@ void JoinServer_MenuInit( void )
 	s_playerlist_scrollbar.size			 = 4;
 	s_playerlist_scrollbar.curvalue		 = 0;
 	s_playerlist_scrollbar.generic.callback = PlayerScrollMove;
-	
+
 	s_modlist_moveup.generic.type	= MTYPE_ACTION;
 	s_modlist_moveup.generic.name	= "     ";
 	s_modlist_moveup.generic.flags	= QMF_LEFT_JUSTIFY;
@@ -3926,7 +3927,7 @@ void JoinServer_MenuInit( void )
 
 	for ( i = 0; i < 6; i++ )
 		Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_data[i] );
-	
+
 	for ( i = 0; i < 6; i++ )
     	Menu_AddItem( &s_joinserver_menu, &s_joinserver_mods_data[i] );
 
@@ -4011,7 +4012,7 @@ void JoinServer_MenuDraw(void)
 			s_joinserver_server_data[i].generic.x		= -380*scale;
 		s_joinserver_server_data[i].generic.y		= FONTSCALE*169*scale + FONTSCALE*i*10*scale+offset;
 	}
-	
+
 	for ( i = 0; i < 6; i++)
 	{
 	    Com_sprintf (   modtxt[i], sizeof(modtxt[i]),
@@ -4080,6 +4081,7 @@ MUTATORS MENU
 static menuframework_s s_mutators_menu;
 static menulist_s s_instagib_list;
 static menulist_s s_rocketarena_list;
+static menulist_s s_insta_rockets_list;
 static menulist_s s_excessive_list;
 static menulist_s s_vampire_list;
 static menulist_s s_regen_list;
@@ -4097,6 +4099,8 @@ void InstagibFunc(void *self) {
 		Cvar_SetValue ("instagib", 1);
 		Cvar_SetValue ("rocket_arena", 0);
 		s_rocketarena_list.curvalue = 0;
+		Cvar_SetValue( "insta_rockets", 0 );
+		s_insta_rockets_list.curvalue = 0;
 		Cvar_SetValue ("excessive", 0);
 		s_excessive_list.curvalue = 0;
 		Cvar_SetValue("classbased", 0);
@@ -4111,13 +4115,33 @@ void RocketFunc(void *self) {
 		Cvar_SetValue ("rocket_arena", 1);
 		Cvar_SetValue ("instagib", 0);
 		s_instagib_list.curvalue = 0;
-		Cvar_SetValue ("excessvie", 0);
+		Cvar_SetValue( "insta_rockets", 0 );
+		s_insta_rockets_list.curvalue = 0;
+		Cvar_SetValue ("excessive", 0);
 		s_excessive_list.curvalue = 0;
 		Cvar_SetValue("classbased", 0);
 		s_classbased_list.curvalue = 0;
 	}
 	else
 		Cvar_SetValue ("rocket_arena", 0);
+}
+void InstaRocketsFunc(void *self)
+{
+	if ( s_insta_rockets_list.curvalue )
+	{
+		Cvar_SetValue( "insta_rockets", 1 );
+		Cvar_SetValue ("rocket_arena", 0);
+		s_rocketarena_list.curvalue = 0;
+		Cvar_SetValue( "instagib", 0 );
+		s_instagib_list.curvalue = 0;
+		Cvar_SetValue( "excessive", 0 );
+		s_excessive_list.curvalue = 0;
+		Cvar_SetValue( "classbased", 0 );
+		s_classbased_list.curvalue = 0;
+	}
+	else
+		Cvar_SetValue( "insta_rockets", 0 );
+
 }
 void ExcessiveFunc(void *self) {
 
@@ -4127,6 +4151,8 @@ void ExcessiveFunc(void *self) {
 		s_instagib_list.curvalue = 0;
 		Cvar_SetValue("rocket_arena", 0);
 		s_rocketarena_list.curvalue = 0;
+		Cvar_SetValue( "insta_rockets", 0 );
+		s_insta_rockets_list.curvalue = 0;
 		Cvar_SetValue("classbased", 0);
 		s_classbased_list.curvalue = 0;
 	}
@@ -4143,6 +4169,8 @@ void ClassbasedFunc(void *self) {
 		s_instagib_list.curvalue = 0;
 		Cvar_SetValue("rocket_arena", 0);
 		s_rocketarena_list.curvalue = 0;
+		Cvar_SetValue( "insta_rockets", 0 );
+		s_insta_rockets_list.curvalue = 0;
 	}
 	else
 		Cvar_SetValue("classbased", 0);
@@ -4169,6 +4197,7 @@ void SetMutatorsFunc( void *self) {
 	//set the menu according to current cvar settings
 	s_instagib_list.curvalue = Cvar_VariableValue("instagib");
 	s_rocketarena_list.curvalue = Cvar_VariableValue("rocket_arena");
+	s_insta_rockets_list.curvalue = Cvar_VariableValue("insta_rockets");
 	s_excessive_list.curvalue = Cvar_VariableValue("excessive");
 	s_vampire_list.curvalue = Cvar_VariableValue("vampire");
 	s_regen_list.curvalue = Cvar_VariableValue("regeneration");
@@ -4220,9 +4249,17 @@ void Mutators_MenuInit( void )
 	s_rocketarena_list.itemnames = yn;
 	s_rocketarena_list.curvalue = 0;
 
+	s_insta_rockets_list.generic.type = MTYPE_SPINCONTROL;
+	s_insta_rockets_list.generic.x    = -8*scale;
+	s_insta_rockets_list.generic.y    = FONTSCALE*20*scale + offset;
+	s_insta_rockets_list.generic.name = "insta rockets";
+	s_insta_rockets_list.generic.callback = InstaRocketsFunc;
+	s_insta_rockets_list.itemnames = yn;
+	s_insta_rockets_list.curvalue = 0;
+
 	s_excessive_list.generic.type = MTYPE_SPINCONTROL;
 	s_excessive_list.generic.x	= -8*scale;
-	s_excessive_list.generic.y	= FONTSCALE*20*scale + offset;
+	s_excessive_list.generic.y	= FONTSCALE*30*scale + offset;
 	s_excessive_list.generic.name	= "excessive";
 	s_excessive_list.generic.callback = ExcessiveFunc;
 	s_excessive_list.itemnames = yn;
@@ -4230,7 +4267,7 @@ void Mutators_MenuInit( void )
 
 	s_vampire_list.generic.type = MTYPE_SPINCONTROL;
 	s_vampire_list.generic.x	= -8*scale;
-	s_vampire_list.generic.y	= FONTSCALE*30*scale + offset;
+	s_vampire_list.generic.y	= FONTSCALE*40*scale + offset;
 	s_vampire_list.generic.name	= "vampire";
 	s_vampire_list.generic.callback = MutatorsFunc;
 	s_vampire_list.itemnames = yn;
@@ -4238,7 +4275,7 @@ void Mutators_MenuInit( void )
 
 	s_regen_list.generic.type = MTYPE_SPINCONTROL;
 	s_regen_list.generic.x	= -8*scale;
-	s_regen_list.generic.y	= FONTSCALE*40*scale + offset;
+	s_regen_list.generic.y	= FONTSCALE*50*scale + offset;
 	s_regen_list.generic.name	= "regen";
 	s_regen_list.generic.callback = MutatorsFunc;
 	s_regen_list.itemnames = yn;
@@ -4246,7 +4283,7 @@ void Mutators_MenuInit( void )
 
 	s_quickweaps_list.generic.type = MTYPE_SPINCONTROL;
 	s_quickweaps_list.generic.x	= -8*scale;
-	s_quickweaps_list.generic.y	= FONTSCALE*50*scale + offset;
+	s_quickweaps_list.generic.y	= FONTSCALE*60*scale + offset;
 	s_quickweaps_list.generic.name	= "quick weapons";
 	s_quickweaps_list.generic.callback = MutatorsFunc;
 	s_quickweaps_list.itemnames = yn;
@@ -4254,7 +4291,7 @@ void Mutators_MenuInit( void )
 
 	s_anticamp_list.generic.type = MTYPE_SPINCONTROL;
 	s_anticamp_list.generic.x	= -8*scale;
-	s_anticamp_list.generic.y	= FONTSCALE*60*scale + offset;
+	s_anticamp_list.generic.y	= FONTSCALE*70*scale + offset;
 	s_anticamp_list.generic.name	= "anticamp";
 	s_anticamp_list.generic.callback = MutatorsFunc;
 	s_anticamp_list.itemnames = yn;
@@ -4264,14 +4301,14 @@ void Mutators_MenuInit( void )
 	s_camptime.generic.name = "camp time ";
 	s_camptime.generic.flags = QMF_NUMBERSONLY;
 	s_camptime.generic.x	= 8*scale;
-	s_camptime.generic.y	= FONTSCALE*76*scale + offset;
+	s_camptime.generic.y	= FONTSCALE*86*scale + offset;
 	s_camptime.length = 3;
 	s_camptime.visible_length = 3;
 	strcpy( s_camptime.buffer, Cvar_VariableString("camptime") );
 
 	s_speed_list.generic.type = MTYPE_SPINCONTROL;
 	s_speed_list.generic.x	= -8*scale;
-	s_speed_list.generic.y	= FONTSCALE*92*scale + offset;
+	s_speed_list.generic.y	= FONTSCALE*102*scale + offset;
 	s_speed_list.generic.name	= "speed";
 	s_speed_list.generic.callback = MutatorsFunc;
 	s_speed_list.itemnames = yn;
@@ -4279,7 +4316,7 @@ void Mutators_MenuInit( void )
 
 	s_lowgrav_list.generic.type = MTYPE_SPINCONTROL;
 	s_lowgrav_list.generic.x	= -8*scale;
-	s_lowgrav_list.generic.y	= FONTSCALE*102*scale + offset;
+	s_lowgrav_list.generic.y	= FONTSCALE*112*scale + offset;
 	s_lowgrav_list.generic.name	= "low gravity";
 	s_lowgrav_list.generic.callback = MutatorsFunc;
 	s_lowgrav_list.itemnames = yn;
@@ -4287,7 +4324,7 @@ void Mutators_MenuInit( void )
 
 	s_joust_list.generic.type = MTYPE_SPINCONTROL;
 	s_joust_list.generic.x	= -8*scale;
-	s_joust_list.generic.y	= FONTSCALE*112*scale + offset;
+	s_joust_list.generic.y	= FONTSCALE*122*scale + offset;
 	s_joust_list.generic.name	= "jousting";
 	s_joust_list.generic.callback = MutatorsFunc;
 	s_joust_list.itemnames = yn;
@@ -4295,7 +4332,7 @@ void Mutators_MenuInit( void )
 
 	s_classbased_list.generic.type = MTYPE_SPINCONTROL;
 	s_classbased_list.generic.x	= -8*scale;
-	s_classbased_list.generic.y	= FONTSCALE*122*scale + offset;
+	s_classbased_list.generic.y	= FONTSCALE*132*scale + offset;
 	s_classbased_list.generic.name	= "classbased";
 	s_classbased_list.generic.callback = ClassbasedFunc;
 	s_classbased_list.itemnames = yn;
@@ -4303,6 +4340,7 @@ void Mutators_MenuInit( void )
 
 	Menu_AddItem( &s_mutators_menu, &s_instagib_list );
 	Menu_AddItem( &s_mutators_menu, &s_rocketarena_list );
+	Menu_AddItem( &s_mutators_menu, &s_insta_rockets_list );
 	Menu_AddItem( &s_mutators_menu, &s_excessive_list );
 	Menu_AddItem( &s_mutators_menu, &s_vampire_list );
 	Menu_AddItem( &s_mutators_menu, &s_regen_list );
@@ -6322,7 +6360,7 @@ static void PlayerConfig_ScanDirectories( void )
 				continue;
 			}
 		}
-		
+
 		// verify the existence of at least one skin(note, do not mix .tga and .jpeg)
 		strcpy( scratch, dirnames[i] );
 		strcat( scratch, "/*.jpg" );

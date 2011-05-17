@@ -603,6 +603,7 @@ extern  cvar_t	*sv_custombots;
 //mutators
 extern  cvar_t  *instagib;
 extern  cvar_t  *rocket_arena;
+extern  cvar_t *insta_rockets;
 extern  cvar_t  *low_grav;
 extern  cvar_t  *regeneration;
 extern  cvar_t  *vampire;
@@ -788,7 +789,7 @@ float	*tv (float x, float y, float z);
 char	*vtos (vec3_t v);
 
 float vectoyaw (vec3_t vec);
-void vectoangles (vec3_t vec, vec3_t angles);
+// void vectoangles (vec3_t vec, vec3_t angles);
 
 //
 // g_combat.c

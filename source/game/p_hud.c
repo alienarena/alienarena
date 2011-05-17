@@ -303,6 +303,7 @@ void BeginIntermission (edict_t *targ)
 				ent = G_Find (ent, FOFS(classname), "info_player_intermission");
 		}
 	}
+	assert( ent != NULL );
 
 	VectorCopy (ent->s.origin, level.intermission_origin);
 	VectorCopy (ent->s.angles, level.intermission_angle);
@@ -379,18 +380,33 @@ void BeginIntermission (edict_t *targ)
 
 	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) //team stuff
 	{
-		if(blue_team_score > red_team_score) {
+		if ( blue_team_score > red_team_score )
+		{
 			if(ctf->value || tca->value || cp->value)
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/blue_wins_ctf.wav"), 1, ATTN_NONE, 0);
 			else
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/blue_wins.wav"), 1, ATTN_NONE, 0);
 		}
-		else {
+		else if ( blue_team_score < red_team_score )
+		{
 			if(ctf->value || tca->value || cp->value)
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/red_wins_ctf.wav"), 1, ATTN_NONE, 0);
 
 			else
 				gi.sound (client, CHAN_AUTO, gi.soundindex("misc/red_wins.wav"), 1, ATTN_NONE, 0);
+		}
+		else
+		{
+			if ( ctf->integer )
+			{
+				gi.sound( client, CHAN_AUTO,
+						gi.soundindex("misc/game_tied_ctf.wav"), 1, ATTN_NONE, 0);
+			}
+			else
+			{
+				gi.sound( client, CHAN_AUTO,
+						gi.soundindex("misc/game_tied.wav"), 1, ATTN_NONE, 0);
+			}
 		}
 	}
 	else if ( !(dmflags->integer & DF_BOT_LEVELAD) )

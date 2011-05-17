@@ -343,8 +343,10 @@ void SV_Map (qboolean attractloop, char *levelstring, qboolean loadgame)
 
 	sv.attractloop = attractloop;
 
-	if(loadgame || !svs.initialized)
-		SV_InitGame ();	// the game is just starting
+	if ( loadgame || !svs.initialized )
+	{
+		SV_InitGame(); // the game is just starting
+	}
 
 	strcpy (level, levelstring);
 
@@ -372,22 +374,30 @@ void SV_Map (qboolean attractloop, char *levelstring, qboolean loadgame)
 	if (level[0] == '*')
 		strcpy (level, level+1);
 
-	l = strlen(level);
-	if (l > 4 && !strcmp (level+l-4, ".dm2") )
-	{
-		if(!dedicated->value) //this prevents the client from restarting
-			SCR_BeginLoadingPlaque ();			// for local system
-		SV_BroadcastCommand ("changing\n");
-		SV_SpawnServer (level, spawnpoint, ss_demo, attractloop, loadgame);
+	l = strlen( level );
+	if ( l > 4 && !strcmp( level + l - 4, ".dm2" ) )
+	{ // --- Run client-side demo ---
+		if ( !dedicated->value )
+		{ //this prevents the client from restarting
+			SCR_BeginLoadingPlaque(); // for local system
+		}
+		SV_BroadcastCommand( "changing\n" );
+		// make sure attract loop is set. loadgame may be unused.
+		// disable warmup sequence! otherwise, countdown announcements mess up
+		//   configstrings
+		attractloop = true;
+		loadgame    = false;
+		Cvar_ForceSet( "warmuptime", "0" );
+		SV_SpawnServer( level, spawnpoint, ss_demo, attractloop, loadgame );
 	}
 	else
 	{
-		if(!dedicated->value) //this prevents the client from restarting
-			SCR_BeginLoadingPlaque ();			// for local system
-		SV_BroadcastCommand ("changing\n");
-		SV_SendClientMessages ();
-		SV_SpawnServer (level, spawnpoint, ss_game, attractloop, loadgame);
-		Cbuf_CopyToDefer ();
+		if ( !dedicated->value ) //this prevents the client from restarting
+			SCR_BeginLoadingPlaque(); // for local system
+		SV_BroadcastCommand( "changing\n" );
+		SV_SendClientMessages();
+		SV_SpawnServer( level, spawnpoint, ss_game, attractloop, loadgame );
+		Cbuf_CopyToDefer();
 	}
 
 	SV_BroadcastCommand ("reconnect\n");
