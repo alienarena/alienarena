@@ -594,8 +594,10 @@ void TossClientWeapon (edict_t *self)
 	qboolean	haste;
 	float		spread;
 
-	if ((!deathmatch->value) || instagib->value || rocket_arena->value)
+	if ((!deathmatch->value) || instagib->value || rocket_arena->value || insta_rockets->value)
+	{
 		return;
+	}
 
 	item = self->client->pers.weapon;
 	if (! self->client->pers.inventory[self->client->ammo_index] )
@@ -966,6 +968,15 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value;
 		item = FindItem("Rocket Launcher");
+	}
+	else if ( insta_rockets->integer )
+	{
+		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
+		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value;
+		item = FindItem("Rocket Launcher");
+		client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
+		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxcells->value;
+		item = FindItem("Alien Disruptor");
 	}
 	else
 		item = FindItem("Blaster");
@@ -1809,7 +1820,8 @@ void PutClientInServer (edict_t *ent)
 	Q2_FindFile (modelpath, &file);
 	if(file) { //human
 		ent->ctype = 1;
-		if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
+		if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
+		 {
 			ent->health = ent->max_health = client->pers.max_health = client->pers.health = 100;
 			armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 			client->pers.inventory[armor_index] += 30;
@@ -1827,15 +1839,18 @@ void PutClientInServer (edict_t *ent)
 		Q2_FindFile (modelpath, &file);
 		if(file) {
 			ent->ctype = 2;
-			if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
+			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
+			{
 				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 85;
 				armor_index = ITEM_INDEX(FindItem("Combat Armor"));
 				client->pers.inventory[armor_index] += 175;
 			}
 			fclose(file);
 		}
-		else { //alien
-			if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
+		else 
+		{ //alien
+			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
+			{
 				ent->health = ent->max_health = client->pers.max_health = client->pers.health = 150;
 				client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
 				client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;

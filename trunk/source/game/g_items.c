@@ -979,7 +979,7 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 				return;
 			}
 		}
-		if(excessive->value || instagib->value || rocket_arena->value)
+		if(excessive->value || instagib->value || rocket_arena->value || insta_rockets->value )
 		{
 			if (item->flags == IT_AMMO || (strcmp(ent->classname, "weapon_bfg") == 0) ||
 				(strcmp(ent->classname, "weapon_hyperblaster") == 0) ||
