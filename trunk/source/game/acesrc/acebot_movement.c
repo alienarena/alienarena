@@ -874,7 +874,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 
 	//machinegun/blaster/beamgun strafing for level 3 bots
 	if ( !joustmode->value
-			&& self->skill == 3
+			&& self->skill >= 1
 			&& (self->client->pers.weapon == FindItem( "blaster" )
 					|| self->client->pers.weapon == FindItem( "Pulse Rifle" )
 					|| self->client->pers.weapon == FindItem( "Disruptor" )))
@@ -972,6 +972,7 @@ standardmove:
 				return;
 			}
 			else if ( self->health > 50
+					&& self->skill == 3
 					&& (instagib->integer || insta_rockets->integer)
 					&& ACEIT_ChangeWeapon( self, FindItem( "alien disruptor" )))
 			{ // insta game, DISRUPTOR JUMP
@@ -987,6 +988,7 @@ standardmove:
 				return;
 			}
 			else if ( self->health > 40
+					&& self->skill == 3
 					&& !(instagib->integer || insta_rockets->integer)
 					&& ACEIT_ChangeWeapon( self, FindItem( "alien disruptor" )))
 			{ // not insta game, DISRUPTOR JUMP
@@ -1002,6 +1004,7 @@ standardmove:
 				return;
 			}
 			else if ( self->health > 30
+						&& self->skill == 3
 						&& ACEIT_ChangeWeapon( self, FindItem( "blaster" )))
 			{ // BLASTER JUMP
 				self->s.angles[PITCH] = 90.0f;
