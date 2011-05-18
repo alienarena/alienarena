@@ -874,7 +874,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 
 	//machinegun/blaster/beamgun strafing for level 3 bots
 	if ( !joustmode->value
-			&& self->skill >= 1
+			&& self->skill >= 2
 			&& (self->client->pers.weapon == FindItem( "blaster" )
 					|| self->client->pers.weapon == FindItem( "Pulse Rifle" )
 					|| self->client->pers.weapon == FindItem( "Disruptor" )))
