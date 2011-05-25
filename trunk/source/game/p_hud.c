@@ -44,6 +44,11 @@ void MoveClientToIntermission (edict_t *ent)
 	ent->client->ps.pmove.origin[2] = level.intermission_origin[2]*8;
 	VectorCopy (level.intermission_angle, ent->client->ps.viewangles);
 
+	// 2011-05 stop spectator from drifting, 
+	//  and, possibly, other intermission bogus movement.
+	VectorClear( ent->velocity );
+	VectorClear( ent->avelocity);
+
 	ent->client->ps.pmove.pm_type = PM_FREEZE;
 	ent->client->ps.gunindex = 0;
 	ent->client->ps.blend[3] = 0;
@@ -113,6 +118,11 @@ void PlaceWinnerOnVictoryPad(edict_t *winner, int offset)
 	winner->client->ps.pmove.origin[0] = winner->s.origin[0];
 	winner->client->ps.pmove.origin[1] = winner->s.origin[1];
 	winner->client->ps.pmove.origin[2] = winner->s.origin[2];
+
+	// 2011-05- no velocity nor angular velocity, 
+	//  might stop bogus movement.
+	VectorClear( winner->velocity );
+	VectorClear( winner->avelocity );
 
 	if (deathmatch->value)
 		winner->client->showscores = true;

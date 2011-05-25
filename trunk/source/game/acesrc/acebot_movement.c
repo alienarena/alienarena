@@ -813,6 +813,10 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 
 	ucmd->buttons = 0;
 	use_fuzzy_aim = true; // unless overridden by special cases
+	if ( dmflags->integer & DF_BOT_FUZZYAIM )
+	{ // when bit is set it means fuzzy aim is disabled. for testing mostly.
+		use_fuzzy_aim = false;
+	}
 
 	vehicle = FindItemByClassname("item_bomber");
 
@@ -944,78 +948,29 @@ standardmove:
 		//raise this number to make them crouch alot(lower skills)
 		ucmd->upmove -= 200;
 	}
-	else if ( self->health >= 30
-			&& self->skill >= 2
-			&& c > jump_thresh   // ?was <? skill 2,>0.8, skill 3,>0.5
-	        && !self->in_vehicle
-	        && !self->in_deathball )
-	{ // lets add a weapon jump
+	else if ( c > jump_thresh )
+	{
 		c = random();
-		/*
-		 * skill 2:  0.2 * 0.6 => 0.12
-		 * skill 3:  0.5 * 0.6 => 0.30
-		 */
-		if ( c < 0.6f )
-		{
-			if ( self->health > 70
-					&& ACEIT_ChangeWeapon( self, FindItem( "Rocket Launcher" )))
-			{ // ROCKET JUMP
-				self->s.angles[PITCH] = 90.0f;
-				AngleVectors (self->s.angles, down, NULL, NULL);
-				fire_rocket( self, self->s.origin, down, 200, 650, 120, 120 );
-				ucmd->upmove += 200;
-				self->s.angles[PITCH] = 0.0f;
-				if ( !((int)dmflags->value & DF_INFINITE_AMMO) )
-				{
-					self->client->pers.inventory[self->client->ammo_index]--;
-				}
-				return;
+		if ( self->health >= 70
+				&& self->skill >= 2
+		        && !self->in_vehicle && !self->in_deathball
+		        && ACEIT_ChangeWeapon( self, FindItem( "Rocket Launcher" ) )
+		        && c < 0.6f )
+		{ // Rocket Jump
+			self->s.angles[PITCH] = 90.0f;
+			AngleVectors( self->s.angles, down, NULL, NULL );
+			fire_rocket( self, self->s.origin, down, 200, 650, 120, 120 );
+			ucmd->upmove += 200;
+			self->s.angles[PITCH] = 0.0f;
+			if ( (!(dmflags->integer & DF_INFINITE_AMMO))
+			        && !rocket_arena->integer && !insta_rockets->integer )
+			{
+				self->client->pers.inventory[self->client->ammo_index]--;
 			}
-			else if ( self->health > 50
-					&& self->skill == 3
-					&& (instagib->integer || insta_rockets->integer)
-					&& ACEIT_ChangeWeapon( self, FindItem( "alien disruptor" )))
-			{ // insta game, DISRUPTOR JUMP
-				self->s.angles[PITCH] = 90.0f;
-				AngleVectors( self->s.angles, down, NULL, NULL );
-				fire_plasma( self, self->s.origin, down, 200, 200 );
-				ucmd->upmove += 200;
-				self->s.angles[PITCH] = 0.0f;
-				if ( !((int)dmflags->value & DF_INFINITE_AMMO) )
-				{
-					self->client->pers.inventory[self->client->ammo_index]--;
-				}
-				return;
-			}
-			else if ( self->health > 40
-					&& self->skill == 3
-					&& !(instagib->integer || insta_rockets->integer)
-					&& ACEIT_ChangeWeapon( self, FindItem( "alien disruptor" )))
-			{ // not insta game, DISRUPTOR JUMP
-				self->s.angles[PITCH] = 90.0f;
-				AngleVectors( self->s.angles, down, NULL, NULL );
-				fire_plasma( self, self->s.origin, down, 60, 60 );
-				ucmd->upmove += 200;
-				self->s.angles[PITCH] = 0.0f;
-				if ( !((int)dmflags->value & DF_INFINITE_AMMO) )
-				{
-					self->client->pers.inventory[self->client->ammo_index]--;
-				}
-				return;
-			}
-			else if ( self->health > 30
-						&& self->skill == 3
-						&& ACEIT_ChangeWeapon( self, FindItem( "blaster" )))
-			{ // BLASTER JUMP
-				self->s.angles[PITCH] = 90.0f;
-				AngleVectors( self->s.angles, down, NULL, NULL );
-				fire_blasterball( self, self->s.origin, down, 30, 1200,
-				        EF_BLASTER, false );
-				ucmd->upmove += 200;
-				self->s.angles[PITCH] = 0.0f;
-				return;
-			}
-			// did not weap jump, do a regular jump
+			return;
+		}
+		else
+		{ // Normal Jump
 			ucmd->upmove += 200;
 		}
 	}
