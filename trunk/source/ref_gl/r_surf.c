@@ -786,7 +786,22 @@ void BSP_DrawGLSLSurfaces (void)
 	glUniform1iARB( g_location_fog, map_fog);
 	glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 		
-	glUniform1iARB( g_location_shadowmap, 0); //static light shadow handled by stencil volumes
+	if(r_test->value && (r_shadowmapcount == 2))
+	{
+		//static vegetation shadow
+		glUniform1iARB( g_location_bspShadowmapTexture2, 6);
+		qglActiveTextureARB(GL_TEXTURE6);
+		qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
+
+		glUniform1iARB( g_location_shadowmap, 1);
+		glUniform1iARB( g_Location_statshadow, 1 );
+	}
+	else
+	{
+		glUniform1iARB( g_location_shadowmap, 0);
+		glUniform1iARB( g_Location_statshadow, 0);
+	}
+
 	glUniform1iARB( g_location_dynamic, 0);
 	glUniform1iARB( g_location_parallax, 1);
 	

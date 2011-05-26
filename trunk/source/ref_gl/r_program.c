@@ -75,10 +75,12 @@ GLuint      g_location_heightTexture;
 GLuint		g_location_lmTexture;
 GLuint		g_location_normalTexture;
 GLuint		g_location_bspShadowmapTexture;
+GLuint		g_location_bspShadowmapTexture2;
 GLuint		g_location_fog;
 GLuint	    g_location_parallax;
 GLuint		g_location_dynamic;
 GLuint		g_location_shadowmap;
+GLuint		g_Location_statshadow;
 GLuint	    g_location_lightPosition;
 GLuint		g_location_staticLightPosition;
 GLuint		g_location_lightColour;
@@ -299,11 +301,13 @@ static char bsp_fragment_program[] =
 "uniform sampler2D NormalTexture;\n"
 "uniform sampler2D lmTexture;\n"
 "uniform sampler2D ShadowMap;\n"
+"uniform sampler2D StatShadowMap;\n"
 "uniform vec3 lightColour;\n"
 "uniform float lightCutoffSquared;\n"
 "uniform int FOG;\n"
 "uniform int PARALLAX;\n"
 "uniform int DYNAMIC;\n"
+"uniform int STATSHADOW;\n"
 "uniform int SHADOWMAP;\n"
 
 "varying vec4 sPos;\n"
@@ -323,12 +327,12 @@ static char bsp_fragment_program[] =
 "    	float shadow3 = 1.0;\n"
 "    	float shadows = 1.0;\n"
 
-"	if(SHADOWMAP > 0 && DYNAMIC > 0) {\n"
+"	if(SHADOWMAP > 0) {\n"
 
-"	ShadowCoord = gl_TextureMatrix[7] * sPos;\n"
+"	   ShadowCoord = gl_TextureMatrix[7] * sPos;\n"
 
 "      shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;\n"
-"      // Used to lower moir� pattern and self-shadowing\n"
+"      // Used to lower moir pattern and self-shadowing\n"
 "      shadowCoordinateWdivide.z += 0.0005;\n"
 
 "      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;\n"
@@ -336,7 +340,7 @@ static char bsp_fragment_program[] =
 "      if (ShadowCoord.w > 0.0)\n"
 "		shadows = distanceFromLight < shadowCoordinateWdivide.z ? 0.6 : 1.0 ;\n"
 
-"	//Blur shadows a bit\n"
+"	   //Blur shadows a bit\n"
 "      tempShadowCoord = ShadowCoord + vec4(.2, 0, 0, 0);\n"
 "      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;\n"
 "      shadowCoordinateWdivide.z += 0.0005;\n"
@@ -351,6 +355,56 @@ static char bsp_fragment_program[] =
 "      shadowCoordinateWdivide.z += 0.0005;\n"
 
 "      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;\n"
+
+"      if (ShadowCoord.w > 0.0)\n"
+"          shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;\n"
+
+"      shadows = 0.33 * (shadow1 + shadow2 + shadow3);\n"
+
+"    }\n"
+
+"   return pow(shadows,3.0);\n"
+"}\n"
+
+"float lookupStatshadow( void )\n"
+"{\n"
+"	vec4 ShadowCoord;\n"
+"	vec4 shadowCoordinateWdivide;\n"
+"	float distanceFromLight;\n"
+"    	vec4 tempShadowCoord;\n"
+"    	float shadow1 = 1.0;\n"
+"    	float shadow2 = 1.0;\n"
+"    	float shadow3 = 1.0;\n"
+"    	float shadows = 1.0;\n"
+
+"	if(SHADOWMAP > 0) {\n"
+
+"      ShadowCoord = gl_TextureMatrix[6] * sPos;\n"
+
+"      shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;\n"
+"      // Used to lower moir pattern and self-shadowing\n"
+"      shadowCoordinateWdivide.z += 0.0005;\n"
+
+"      distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;\n"
+
+"      if (ShadowCoord.w > 0.0)\n"
+"		shadows = distanceFromLight < shadowCoordinateWdivide.z ? 0.6 : 1.0 ;\n"
+
+"	   //Blur shadows a bit\n"
+"      tempShadowCoord = ShadowCoord + vec4(.2, 0, 0, 0);\n"
+"      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;\n"
+"      shadowCoordinateWdivide.z += 0.0005;\n"
+
+"      distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;\n"
+
+"      if (ShadowCoord.w > 0.0)\n"
+"          shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;\n"
+
+"      tempShadowCoord = ShadowCoord + vec4(0, .2, 0, 0);\n"
+"      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;\n"
+"      shadowCoordinateWdivide.z += 0.0005;\n"
+
+"      distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;\n"
 
 "      if (ShadowCoord.w > 0.0)\n"
 "          shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;\n"
@@ -379,6 +433,7 @@ static char bsp_fragment_program[] =
 "   vec3 varyingLightColour;\n"
 "   float varyingLightCutoffSquared;\n"
 "   float dynshadowval;\n"
+"	float statshadowval;\n"
 
 "   varyingLightColour = lightColour;\n"
 "   varyingLightCutoffSquared = lightCutoffSquared;\n"
@@ -391,7 +446,15 @@ static char bsp_fragment_program[] =
 "	alphamask = texture2D( surfTexture, gl_TexCoord[0].xy );\n"
 
 "   //shadows\n"
-"   dynshadowval = lookupDynshadow();\n"
+"	if(DYNAMIC > 0)\n"
+"		dynshadowval = lookupDynshadow();\n"
+"	else\n"
+"		dynshadowval = 0.0;\n"
+
+"	if(STATSHADOW > 0)\n"
+"		statshadowval = lookupStatshadow();\n"
+"	else\n"
+"		statshadowval = 1.0;\n"
 
 "   if(PARALLAX > 0) {\n"
 "      //do the parallax mapping\n"
@@ -407,9 +470,9 @@ static char bsp_fragment_program[] =
 "      diffuseTerm = clamp( dot( normal, relativeLightDirection ), 0.0, 1.0 );\n"
 "      colour = vec3( 0.0, 0.0, 0.0 );\n"
 
-"	  if( diffuseTerm > 0.0 )\n"
-"	  {\n"
-"		halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );\n"
+"	   if( diffuseTerm > 0.0 )\n"
+"	   {\n"
+"		 halfAngleVector = normalize( relativeLightDirection + relativeEyeDirection );\n"
 
 "        specularTerm = clamp( dot( normal, halfAngleVector ), 0.0, 1.0 );\n"
 "        specularTerm = pow( specularTerm, 32.0 );\n"
@@ -427,10 +490,12 @@ static char bsp_fragment_program[] =
 "      litColour = vec4( attenuation * colour, 1.0 );\n"
 "      litColour = litColour * lightmap * 6.0;\n"
 "      gl_FragColor = max(litColour, diffuse * lightmap * 2.0);\n"
+"	   gl_FragColor = (gl_FragColor * statshadowval);\n"
 "   }\n"
 "   else {\n"
 "      diffuse = texture2D(surfTexture, gl_TexCoord[0].xy);\n"
 "      gl_FragColor = (diffuse * lightmap * 2.0);\n"
+"	   gl_FragColor = (gl_FragColor * statshadowval);\n"
 "   }\n"
 
 "   if(DYNAMIC > 0) {\n"
@@ -973,10 +1038,12 @@ void R_LoadGLSLPrograms(void)
 		g_location_lmTexture = glGetUniformLocationARB( g_programObj, "lmTexture" );
 		g_location_normalTexture = glGetUniformLocationARB( g_programObj, "NormalTexture" );
 		g_location_bspShadowmapTexture = glGetUniformLocationARB( g_programObj, "ShadowMap" );
+		g_location_bspShadowmapTexture2 = glGetUniformLocationARB( g_programObj, "StatShadowMap" );
 		g_location_fog = glGetUniformLocationARB( g_programObj, "FOG" );
 		g_location_parallax = glGetUniformLocationARB( g_programObj, "PARALLAX" );
 		g_location_dynamic = glGetUniformLocationARB( g_programObj, "DYNAMIC" );
 		g_location_shadowmap = glGetUniformLocationARB( g_programObj, "SHADOWMAP" );
+		g_Location_statshadow = glGetUniformLocationARB( g_programObj, "STATSHADOW" );
 		g_location_lightPosition = glGetUniformLocationARB( g_programObj, "lightPosition" );
 		g_location_staticLightPosition = glGetUniformLocationARB( g_programObj, "staticLightPosition" );
 		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
