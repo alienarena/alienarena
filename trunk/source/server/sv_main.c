@@ -647,7 +647,7 @@ void SVC_DirectConnect (void)
 	// find a client slot
 
 	//get number of bots
-	for (i=0 ; i<maxclients->value ; i++)
+	for (i=botnum=0 ; i<maxclients->value ; i++)
 	{
 		cl = &svs.clients[i]; 
 		botnum = cl->edict->client->ps.botnum;

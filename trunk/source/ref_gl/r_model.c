@@ -46,9 +46,6 @@ model_t	mod_inline[MAX_MOD_KNOWN];
 LightGroup_t LightGroups[MAX_LIGHTS];
 int r_lightgroups;
 
-static float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
-#include "anorms.h"
-};
 
 int		registration_sequence;
 
