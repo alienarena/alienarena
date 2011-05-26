@@ -48,6 +48,24 @@ typedef struct
 
 worldLight_t r_worldLights[MAX_LIGHTS];
 int r_numWorldLights;
+
+/*
+==============================================================================
+
+SUN LIGHTS
+
+==============================================================================
+*/
+
+typedef struct
+{
+	vec3_t	origin;
+	vec3_t	target;
+	qboolean has_Sun;
+} sunLight_t;
+
+sunLight_t *r_sunLight;
+
 /*
 ==============================================================================
 

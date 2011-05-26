@@ -144,7 +144,7 @@ void R_RegisterLightGroups (void)
 
 /*
 ================
-R_ParseLightEntities - BERSERK
+R_ParseLightEntities
 
 parses light entity string
 ================
@@ -235,6 +235,83 @@ static void R_ParseLightEntities (void)
 		r_worldLights[r_numWorldLights].intensity = intensity/2;
 		r_worldLights[r_numWorldLights].surf = NULL;
 		r_numWorldLights++;
+	}
+}
+
+static void R_FindSunEntity (void)
+{
+
+	int			i;
+	char		*entString;
+	char		*buf, *tok;
+	char		block[2048], *bl;
+
+	if(r_sunLight)
+		free(r_sunLight); //free at level load
+
+	r_sunLight = (sunLight_t*)malloc(sizeof(sunLight_t));
+
+	r_sunLight->has_Sun = false;
+
+	entString = map_entitystring;
+
+	buf = CM_EntityString();
+	while (1){
+		tok = Com_ParseExt(&buf, true);
+		if (!tok[0])
+			break;			// End of data
+
+		if (Q_strcasecmp(tok, "{"))
+			continue;		// Should never happen!
+
+		// Parse the text inside brackets
+		block[0] = 0;
+		do {
+			tok = Com_ParseExt(&buf, false);
+			if (!Q_strcasecmp(tok, "}"))
+				break;		// Done
+
+			if (!tok[0])	// Newline
+				Q_strcat(block, "\n", sizeof(block));
+			else {			// Token
+				Q_strcat(block, " ", sizeof(block));
+				Q_strcat(block, tok, sizeof(block));
+			}
+		} while (buf);
+
+		// Now look for "target"
+		tok = strstr(block, "target");
+		if (!tok)
+			continue;		// Not found
+
+		// Skip over "target" and whitespace
+		tok += strlen("target");
+		while (*tok && *tok == ' ')
+			tok++;
+
+		// Next token must be "moonspot" - to do - get this from map info!
+		if (Q_strnicmp(tok, "moonspot", 8))
+			continue;		// Not "moonspot"
+
+		// Finally parse the sun entity
+		bl = block;
+		while (1){
+			tok = Com_ParseExt(&bl, true);
+			if (!tok[0])
+				break;		// End of data
+
+			if (!Q_strcasecmp("origin", tok)){
+				for (i = 0; i < 3; i++){
+					tok = Com_ParseExt(&bl, false);
+					r_sunLight->origin[i] = atof(tok);
+					r_sunLight->target[i] = 0; //is this always 0,0,0?  probably not...if not, we should try to find it.
+				}
+				r_sunLight->has_Sun = true;
+				//Com_Printf("Found sun @ : %4.2f %4.2f %4.2f\n", r_sunLight->origin[0], r_sunLight->origin[1], r_sunLight->origin[2]);
+			}
+			else
+				Com_SkipRestOfLine(&bl);
+		}
 	}
 }
 
@@ -1340,6 +1417,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	}
 
 	R_ParseLightEntities();
+	R_FindSunEntity();
 }
 
 //=============================================================================

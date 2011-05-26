@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 image_t		gltextures[MAX_GLTEXTURES];
 image_t		*r_mirrortexture;
 image_t		*r_depthtexture;
+image_t		*r_depthtexture2;
 int			numgltextures;
 int			base_textureid;		// gltextures[i] = base_textureid+i
 
@@ -1682,6 +1683,7 @@ void R_InitDepthTextures( void )
 	data = malloc( size );
 	memset( data, 255, size );
 	r_depthtexture = GL_LoadPic( "***r_depthtexture***", (byte *)data, texture_width, texture_height, it_pic, 3 );
+	r_depthtexture2 = GL_LoadPic( "***r_depthtexture2***", (byte *)data, texture_width, texture_height, it_pic, 3 );
 	free ( data );
 }
 
