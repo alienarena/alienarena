@@ -272,7 +272,6 @@ BSP_RenderBrushPoly
 void BSP_RenderBrushPoly (msurface_t *fa)
 {
 	image_t		*image;
-	qboolean is_dynamic = false;
 	float		scroll;
 
 	c_brush_polys++;
