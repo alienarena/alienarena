@@ -582,12 +582,49 @@ void R_DrawDynamicCaster(void)
 
 }
 
+void R_Vectoangles (vec3_t value1, vec3_t angles)
+{
+	float	forward;
+	float	yaw, pitch;
+
+	if (value1[1] == 0.0f && value1[0] == 0.0f )
+	{
+		yaw = 0.0f;
+		if (value1[2] > 0.0f)
+			pitch = 90.0f;
+		else
+			pitch = 270.0f;
+	}
+	else
+	{
+	// PMM - fixed to correct for pitch of 0
+		if (value1[0])
+			yaw = (atan2(value1[1], value1[0]) * 180.0f / M_PI);
+		else if (value1[1] > 0)
+			yaw = 90.0f;
+		else
+			yaw = 270.0f;
+
+		if (yaw < 0.0f)
+			yaw += 360.0f;
+
+		forward = sqrt (value1[0]*value1[0] + value1[1]*value1[1]);
+		pitch = (atan2(value1[2], forward) * 180.0f / M_PI);
+		if (pitch < 0.0f)
+			pitch += 360.0f;
+	}
+
+	angles[PITCH] = -pitch;
+	angles[YAW] = yaw;
+	angles[ROLL] = 0.0f;
+}
+
 void R_DrawVegetationCasters ( void )
 {
     int		i, k;
 	grass_t *grass;
     float   scale;
-	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
+	vec3_t	dir, origin, mins, maxs, angle, right, up, corner[4];
 	float	*corner0 = corner[0];
 	qboolean visible;
 	trace_t r_trace;
@@ -607,11 +644,9 @@ void R_DrawVegetationCasters ( void )
 
 		scale = 10.0*grass->size;
 
-		VectorCopy(r_newrefdef.viewangles, angle); // to do - this angle should always be calc'ed from the sun/target
-
-		if(!grass->type)
-			angle[0] = 0;  // keep vertical by removing pitch(grass and plants grow upwards)
-
+		VectorSubtract(r_sunLight->origin, r_sunLight->target, dir);
+		R_Vectoangles(dir, angle);
+		
 		AngleVectors(angle, NULL, right, up);
 		VectorScale(right, scale, right);
 		VectorScale(up, scale, up);
