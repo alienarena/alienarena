@@ -735,6 +735,9 @@ void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float
 	grass->size = size;
 	strcpy(grass->name, name);
 	grass->type = type;
+
+	if(grass->type == 1)
+		r_hasleaves = true;
 }
 
 //rendering
@@ -887,6 +890,7 @@ void R_ClearGrasses(void)
 {
 	memset(r_grasses, 0, sizeof(r_grasses));
 	r_numgrasses = 0;
+	r_hasleaves = 0;
 }
 
 //Light beams/volumes

@@ -59,6 +59,7 @@ SUN LIGHTS
 
 typedef struct
 {
+	char targetname[128];
 	vec3_t	origin;
 	vec3_t	target;
 	qboolean has_Sun;

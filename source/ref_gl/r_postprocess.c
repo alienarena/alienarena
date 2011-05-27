@@ -234,7 +234,7 @@ void R_ShadowBlend(float alpha)
 
 		//blit the stencil mask from main buffer
 		qglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
-		qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fboId[1]);
+		qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fboId[2]);
 
 		qglBlitFramebufferEXT(0, 0, vid.width, vid.height, 0, 0, viddef.width, viddef.height,
 			GL_STENCIL_BUFFER_BIT, GL_NEAREST);
@@ -243,7 +243,7 @@ void R_ShadowBlend(float alpha)
 		qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
 
 		//render offscreen
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[1]);
+		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[2]);
 
 		qglDisable(GL_STENCIL_TEST);
 		GLSTATE_DISABLE_ALPHATEST

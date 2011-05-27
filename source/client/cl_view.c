@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 int			gun_frame;
 struct model_s	*gun_model;
+//=============
 
 int r_numflares;
 flare_t r_flares[MAX_FLARES];
@@ -41,7 +42,6 @@ grass_t r_grasses[MAX_GRASSES];
 int r_numbeams;
 beam_t	r_beams[MAX_BEAMS];
 
-//=============
 extern cvar_t *cl_showPlayerNames;
 extern cvar_t *name;
 extern char map_music[128];

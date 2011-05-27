@@ -999,9 +999,8 @@ void R_RenderView (refdef_t *fd)
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
 		R_DrawDynamicCaster();
-
-		if(r_test->value)
-			R_DrawVegetationCaster();
+		
+		R_DrawVegetationCaster();
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 
