@@ -785,7 +785,7 @@ void BSP_DrawGLSLSurfaces (void)
 	glUniform1iARB( g_location_fog, map_fog);
 	glUniform3fARB( g_location_staticLightPosition, r_worldLightVec[0], r_worldLightVec[1], r_worldLightVec[2]);
 		
-	if(r_test->value && (r_shadowmapcount == 2))
+	if(r_shadowmapcount == 2)
 	{
 		//static vegetation shadow
 		glUniform1iARB( g_location_bspShadowmapTexture2, 6);

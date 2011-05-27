@@ -141,46 +141,6 @@ void R_GenerateShadowFBO()
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
 
-	//FBO for capturing stencil volumes
-
-	//must check for abilit to blit(Many old ATI drivers do not support)
-	if(gl_state.hasFBOblit) {
-		if(!qglBlitFramebufferEXT) {
-			Com_Printf("qglBlitFramebufferEXT not found...\n");
-			//no point in continuing on
-			gl_state.hasFBOblit = false;
-			return;
-		}
-	}
-
-    qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
-    qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vid.width, vid.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    qglBindTexture(GL_TEXTURE_2D, 0);
-
-	qglGenFramebuffersEXT(1, &fboId[1]);
-    qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[1]);
-
-    qglGenRenderbuffersEXT(1, &rboId);
-    qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rboId);
-    qglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_STENCIL_EXT, vid.width, vid.height);
-    qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
-
-    // attach a texture to FBO color attachement point
-    qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, r_colorbuffer->texnum, 0);
-
-    // attach a renderbuffer to depth attachment point
-    qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
-
-	// attach a renderbuffer to stencil attachment point
-    qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
-
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[1]);
-
-	// check FBO status
-	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
-		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use secondary FBO\n");
-
 	//Second FBO for shadowmapping
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum);
 
@@ -197,9 +157,9 @@ void R_GenerateShadowFBO()
 	qglBindTexture(GL_TEXTURE_2D, 0);
 
 	// create a framebuffer object
-	qglGenFramebuffersEXT(1, &fboId[2]);
+	qglGenFramebuffersEXT(1, &fboId[1]);
 
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[2]);
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[1]);
 
 	// Instruct openGL that we won't bind a color texture with the currently binded FBO
 	qglDrawBuffer(GL_NONE);
@@ -216,6 +176,46 @@ void R_GenerateShadowFBO()
 		gl_state.fbo = false;
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	}
+
+	//FBO for capturing stencil volumes
+
+	//must check for abilit to blit(Many old ATI drivers do not support)
+	if(gl_state.hasFBOblit) {
+		if(!qglBlitFramebufferEXT) {
+			Com_Printf("qglBlitFramebufferEXT not found...\n");
+			//no point in continuing on
+			gl_state.hasFBOblit = false;
+			return;
+		}
+	}
+
+    qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
+    qglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vid.width, vid.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    qglBindTexture(GL_TEXTURE_2D, 0);
+
+	qglGenFramebuffersEXT(1, &fboId[2]);
+    qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[2]);
+
+    qglGenRenderbuffersEXT(1, &rboId);
+    qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rboId);
+    qglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_STENCIL_EXT, vid.width, vid.height);
+    qglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+
+    // attach a texture to FBO color attachement point
+    qglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, r_colorbuffer->texnum, 0);
+
+    // attach a renderbuffer to depth attachment point
+    qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
+
+	// attach a renderbuffer to stencil attachment point
+    qglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, rboId);
+
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[2]);
+
+	// check FBO status
+	FBOstatus = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+	if(FBOstatus != GL_FRAMEBUFFER_COMPLETE_EXT)
+		Com_Printf("GL_FRAMEBUFFER_COMPLETE_EXT failed, CANNOT use secondary FBO\n");
 
 	// switch back to window-system-provided framebuffer
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -477,7 +477,7 @@ void R_DrawDynamicCaster(void)
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[0]);
 
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));  //for now
+	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));  
 
 	// Clear previous frame values
 	qglClear( GL_DEPTH_BUFFER_BIT);
@@ -642,6 +642,9 @@ void R_DrawVegetationCasters ( void )
 
     for (i=0; i<r_numgrasses; i++, grass++) {
 
+		if(!grass->type)
+			continue; //only deal with leaves, grass shadows look kind of bad
+
 		scale = 10.0*grass->size;
 
 		VectorSubtract(r_sunLight->origin, r_sunLight->target, dir);
@@ -655,14 +658,9 @@ void R_DrawVegetationCasters ( void )
 		// adjust vertical position, scaled
 		origin[2] += (grass->texsize/32) * grass->size;
 
-		if(!grass->type) {
-			r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
-			visible = r_trace.fraction == 1.0;
-		}
-		else
-			visible = true; //leaves tend to use much larger images, culling results in undesired effects
-
-		//to do - cull all of these for pathline to sunlight
+		//cull for pathline to sunlight
+		r_trace = CM_BoxTrace(r_sunLight->origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
+			visible = r_trace.fraction == 1.0;		
 
 		if(visible) {
 
@@ -678,15 +676,8 @@ void R_DrawVegetationCasters ( void )
 				origin[1] + (up[1] + right[1])*(-0.5),
 				origin[2] + (up[2] + right[2])*(-0.5));
 
-			//the next two statements create a slight swaying in the wind
-			//perhaps we should add a parameter to control ammount in shader?
-
-			if(grass->type) {
-				sway = 3;
-			}
-			else
-				sway = 2;
-
+			sway = 3;
+			
 			VectorSet ( corner[1],
 				corner0[0] + up[0] + sway*sin (rs_realtime*sway),
 				corner0[1] + up[1] + sway*sin (rs_realtime*sway),
@@ -752,12 +743,15 @@ void R_DrawVegetationCasters ( void )
 
 void R_DrawVegetationCaster(void)
 {	
+	if(!r_sunLight->has_Sun || !r_hasleaves)
+		return; //no point if there is no sun or leaves!
+
 	qglBindTexture(GL_TEXTURE_2D, r_depthtexture2->texnum); 
 
-	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[2]); 
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,fboId[1]); 
 
 	// In the case we render the shadowmap to a higher resolution, the viewport must be modified accordingly.
-	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value));  //for now
+	qglViewport(0,0,(int)(vid.width * r_shadowmapratio->value),(int)(vid.height * r_shadowmapratio->value)); 
 
 	//Clear previous frame values
 	qglClear( GL_DEPTH_BUFFER_BIT);

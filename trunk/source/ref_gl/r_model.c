@@ -235,6 +235,74 @@ static void R_ParseLightEntities (void)
 	}
 }
 
+static void R_FindSunTarget (void)
+{
+
+	int			i;
+	char		*entString;
+	char		*buf, *tok;
+	char		block[2048], *bl;
+	
+	entString = map_entitystring;
+
+	buf = CM_EntityString();
+	while (1){
+		tok = Com_ParseExt(&buf, true);
+		if (!tok[0])
+			break;			// End of data
+
+		if (Q_strcasecmp(tok, "{"))
+			continue;		// Should never happen!
+
+		// Parse the text inside brackets
+		block[0] = 0;
+		do {
+			tok = Com_ParseExt(&buf, false);
+			if (!Q_strcasecmp(tok, "}"))
+				break;		// Done
+
+			if (!tok[0])	// Newline
+				Q_strcat(block, "\n", sizeof(block));
+			else {			// Token
+				Q_strcat(block, " ", sizeof(block));
+				Q_strcat(block, tok, sizeof(block));
+			}
+		} while (buf);
+
+		// Now look for "targetname"
+		tok = strstr(block, "targetname");
+		if (!tok)
+			continue;		// Not found
+
+		// Skip over "target" and whitespace
+		tok += strlen("targetname");
+		while (*tok && *tok == ' ')
+			tok++;
+
+		// Next token must match the sun targetname
+		if (Q_strnicmp(tok, "moonspot", 8) && Q_strnicmp(tok, "sunspot", 7))
+			continue;
+	
+		// Finally parse the sun target entity
+		bl = block;
+		while (1){
+			tok = Com_ParseExt(&bl, true);
+			if (!tok[0])
+				break;		// End of data
+
+			if (!Q_strcasecmp("origin", tok)){
+				for (i = 0; i < 3; i++){
+					tok = Com_ParseExt(&bl, false);
+					r_sunLight->target[i] = atof(tok);
+				}
+				//Com_Printf("Found sun target@ : %4.2f %4.2f %4.2f\n", r_sunLight->target[0], r_sunLight->target[1], r_sunLight->target[2]);
+			}
+			else
+				Com_SkipRestOfLine(&bl);
+		}
+	}
+}
+
 static void R_FindSunEntity (void)
 {
 
@@ -286,10 +354,12 @@ static void R_FindSunEntity (void)
 		while (*tok && *tok == ' ')
 			tok++;
 
-		// Next token must be "moonspot" - to do - get this from map info!
-		if (Q_strnicmp(tok, "moonspot", 8))
-			continue;		// Not "moonspot"
+		// Next token must be a valid sun name( to do - maybe read this from the map header if possible?)
+		if (Q_strnicmp(tok, "moonspot", 8) && Q_strnicmp(tok, "sunspot", 7))
+			continue;
 
+		strcpy(r_sunLight->targetname, tok);
+	
 		// Finally parse the sun entity
 		bl = block;
 		while (1){
@@ -301,7 +371,7 @@ static void R_FindSunEntity (void)
 				for (i = 0; i < 3; i++){
 					tok = Com_ParseExt(&bl, false);
 					r_sunLight->origin[i] = atof(tok);
-					r_sunLight->target[i] = 0; //is this always 0,0,0?  probably not...if not, we should try to find it.
+					r_sunLight->target[i] = 0; //default to this
 				}
 				r_sunLight->has_Sun = true;
 				//Com_Printf("Found sun @ : %4.2f %4.2f %4.2f\n", r_sunLight->origin[0], r_sunLight->origin[1], r_sunLight->origin[2]);
@@ -310,6 +380,8 @@ static void R_FindSunEntity (void)
 				Com_SkipRestOfLine(&bl);
 		}
 	}
+	if(r_sunLight->has_Sun)
+		R_FindSunTarget(); //find target
 }
 
 /*
@@ -1347,7 +1419,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	//ODE - clear out any ragdolls;
 	R_ClearAllRagdolls();
 
-	//ODE - create new world(flush out old first?)
+	//ODE - create new world(flush out old first)
 	RGD_DestroyWorldObject();
 	RGD_CreateWorldObject();
 

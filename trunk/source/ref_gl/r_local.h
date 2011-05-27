@@ -319,6 +319,7 @@ extern void R_RenderSun();
 int r_numgrasses;
 extern int c_grasses;
 grass_t r_grasses[MAX_GRASSES];
+qboolean r_hasleaves;
 extern void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type);
 extern void R_DrawVegetationSurface (void);
 extern void R_ClearGrasses(void);
