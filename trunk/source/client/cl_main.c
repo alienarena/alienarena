@@ -2070,7 +2070,7 @@ void CL_Frame( int msec )
 	{
 		if ( cl_maxfps->value < 30.0f )
 		{
-			Com_Printf("Warning: cl_maxfps warning set less than 30.\n");
+			Com_Printf("Warning: cl_maxfps set to less than 30.\n");
 			if ( cl_maxfps->value < 1.0f )
 			{
 				Cvar_ForceSet( "cl_maxfps", "1" );
@@ -2086,6 +2086,7 @@ void CL_Frame( int msec )
 		{
 			framerate_cap = 1;
 		}
+		/* may convert these to Com_DPrintf() later */
 		Com_Printf( "Minimum milliseconds-per-frame set to %i\n", framerate_cap );
 		Com_Printf( "Maximum frames-per-second set to %i\n", 1000 / framerate_cap );
 	}
@@ -2100,8 +2101,16 @@ void CL_Frame( int msec )
 	 *   the packet rate cap. For 16 that gives 8 or 9 msecs.
 	 * Plan is to not implement a user setting for this unless a need for that
 	 *   is discovered.
+	 *
+	 * If performance is low, msec arg may be greater than packetrate_cap.
+	 *  In that case adjust packetrate_cap dynamically.
+	 *  Prevents packet_time_deviation from overflowing.
 	 */
 	packetrate_cap = 16;
+	if ( msec > packetrate_cap )
+	{ /* slow main loop, so adjust cap to match */
+		packetrate_cap = msec;
+	}
 
 	/*
 	 * local triggers for decoupling framerate from packet rate
@@ -2190,7 +2199,7 @@ void CL_Frame( int msec )
 			 * server checks for cmd.msecs to be <= 250
 			 */
 			cls.frametime = 0.24999f ;
-			Com_DPrintf("packet: cls.frametime clamped from %f to 0.24999\n",
+			Com_DPrintf("CL_Frame(): cls.frametime clamped from %f to 0.24999\n",
 					cls.frametime );
 			/*
 			 * try to throttle the video frame rate by overriding the
@@ -2242,17 +2251,21 @@ void CL_Frame( int msec )
 		if ( packet_time_deviation > 500 )
 		{
 			packet_time_deviation = 500;
-			Com_DPrintf("Warning: packet_time_deviation positive clamp\n");
+
+			/* developer test for checking overflow */
+			// Com_DPrintf("Warning: packet_time_deviation positive clamp\n");
 		}
 		else if ( packet_time_deviation < -(packetrate_cap * 2) )
 		{ /* protect against underflow */
 			packet_time_deviation = -(packetrate_cap * 2);
-			Com_DPrintf("Warning: packet_time_deviation negative clamp\n");
+
+			/* developer test for checking underflow */
+			// Com_DPrintf("Warning: packet_time_deviation negative clamp\n");
 		}
-#if 0
+
 		/* developer test for showing client packets per server frame */
-		Com_DPrintf("pkt: %i svf: %i\n", packet_timer, cl.frame.serverframe );
-#endif
+		// Com_DPrintf("pkt: %i svf: %i\n", packet_timer, cl.frame.serverframe );
+
 		/* retrigger packet send timer */
 		packet_timer = 0;
 	}
@@ -2300,10 +2313,9 @@ void CL_Frame( int msec )
 		SCR_RunConsole ();
 
 		++cls.framecount; // does not appear to be used anywhere
-#if 0
+
 		/* developer test for observing timers */
-		Com_DPrintf("rt: %i cft: %f\n", render_timer, cls.frametime );
-#endif
+		// Com_DPrintf("rt: %i cft: %f\n", render_timer, cls.frametime );
 
 		// retrigger render timing
 		render_timer = 0;
