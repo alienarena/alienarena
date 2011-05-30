@@ -125,7 +125,7 @@ int Hunk_End (void)
 	rsvd_hunk_size = new_rsvd_hunk_size;
 	*phunk_size_store = rsvd_hunk_size;
 
-	Com_DPrintf("Hunk_End:0x%X @ %p:\n", rsvd_hunk_size, remap_base );
+	Com_DPrintf("Hunk_End.1:0x%X @ %p:\n", rsvd_hunk_size, remap_base );
 
 	hunk_base = user_hunk_base = NULL;
 	phunk_size_store = NULL;
@@ -179,7 +179,7 @@ int Hunk_End()
 
 	}
 
-	Com_DPrintf( "Hunk_End:0x%X @ %p:\n", rsvd_hunk_size, hunk_base );
+	Com_DPrintf( "Hunk_End.2:0x%X @ %p:\n", rsvd_hunk_size, hunk_base );
 
 	hunk_base = user_hunk_base = NULL;
 	phunk_size_store = NULL;

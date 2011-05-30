@@ -587,12 +587,13 @@ sub parseDefinitionFile
 		}
 
 		# Constants definition block
-		if ( $contents =~ s/^constants(\s+(\w+))\s*{//s ) {
+		if ( $contents =~ s/^constants(\s+(\w+))?\s*{//s ) {
 			$contents = parseConstantsBlock( $data , $bName , $contents , $2 );
 			next;
 		}
 
-		syntaxError( $file , "junk found" );
+		$contents =~ s/^([^\n]+)(\n.*)?/$1/s;
+		syntaxError( $file , "junk found: '$contents'" );
 	}
 }
 
@@ -1037,7 +1038,7 @@ EOL
 			print $fh "\tOOL_Class_AddProperty( _$fData->{class}_cptr , struct $fData->{class}_s , $propName , $prop->{pType} );\n";
 		} else {
 			# Full property definition
-			print $fh "\tClass_AddPropertyEx( _$fData->{class}_cptr , \"$propName\" ,\n"
+			print $fh "\tOOL_Class_AddPropertyEx( _$fData->{class}_cptr , \"$propName\" ,\n"
 				. "\t\tPTR_FieldOffset( struct $fData->{class}_s , $propName ) , $prop->{pType} ,\n"
 				. "\t\tPTR_FieldSize( struct $fData->{class}_s , $propName ) ,\n"
 				. "\t\t" . ( $prop->{validator} ? "_PV_$fData->{class}_$propName" : "NULL" ) . " ,\n"

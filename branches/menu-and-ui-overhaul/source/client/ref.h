@@ -63,6 +63,9 @@ typedef struct
 	vec3_t origin;
 	vec3_t color;
 	float size;
+	float xang;
+	float yang;
+	qboolean rotating;
 	int texsize;
 	int texnum;
 	char name[MAX_QPATH];
@@ -99,52 +102,11 @@ typedef struct
 
 #define RDF_BLOOM         4      //BLOOMS
 
-
-#define	MAX_VERTEX_CACHES	4096
 #define MAX_VBO_XYZs		65536
 
-typedef enum {
-	VBO_STATIC,
-	VBO_DYNAMIC
-} vertCacheMode_t;
-
-typedef enum {
-	VBO_STORE_ANY,
-	VBO_STORE_XYZ,
-	VBO_STORE_NORMAL,
-	VBO_STORE_BINORMAL,
-	VBO_STORE_TANGENT
-} vertStoreMode_t;
-
-typedef struct vertCache_s
-{
-	struct vertCache_s	*prev;
-	struct vertCache_s	*next;
-
-	vertCacheMode_t		mode;
-
-	int					size;
-
-	void				*pointer;
-
-	vertStoreMode_t		store;
-	struct model_s		*mod;
-	int					frame;
-	float				backlerp;
-	float				angles[3];
-	float				origin[3];
-	unsigned			id;
-} vertCache_t;
-
-typedef struct {
-	vertCache_t		*freeVertCache;
-	vertCache_t		activeVertCache;
-	vertCache_t		vertCacheList[MAX_VERTEX_CACHES];
-} vertCacheManager_t;
-
-vertCacheManager_t	vcm;
-
 vec3_t	vbo_shadow[MAX_VBO_XYZs];
+vec3_t	vbo_shadow2[MAX_VBO_XYZs];
+vec3_t	vbo_shadow3[MAX_VBO_XYZs];
 
 typedef struct entity_s
 {
@@ -358,7 +320,6 @@ void	Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale,
 void	Draw_TileClear (int x, int y, int w, int h, char *name);
 void	Draw_Fill (int x, int y, int w, int h, int c);
 void	Draw_FadeScreen (void);
-void	Draw_StretchRaw (int x, int y, int w, int h, int cols, int rows, byte *data);
 
 void	R_BeginFrame( float camera_separation );
 void	R_SwapBuffers( int );

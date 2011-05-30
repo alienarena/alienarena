@@ -28,11 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_ragdoll.h"
 #include "r_text.h"
 
-// stencil volumes
-glStencilFuncSeparatePROC			qglStencilFuncSeparate		= NULL;
-glStencilOpSeparatePROC				qglStencilOpSeparate		= NULL;
-glStencilMaskSeparatePROC			qglStencilMaskSeparate		= NULL;
-
 void R_Clear (void);
 
 viddef_t	vid;
@@ -51,13 +46,9 @@ glstate_t		gl_state;
 
 cvar_t	*gl_normalmaps;
 cvar_t  *gl_shadowmaps;
-cvar_t	*gl_parallaxmaps;
 cvar_t	*gl_glsl_postprocess;
 cvar_t	*gl_arb_fragment_program;
 cvar_t	*gl_glsl_shaders;
-
-cvar_t	*r_legacy;
-cvar_t	*r_usemd2;
 
 entity_t	*currententity;
 model_t	*currentmodel;
@@ -116,11 +107,12 @@ cvar_t  *r_wave; // Water waves
 cvar_t	*r_shadowmapratio;
 
 cvar_t	*r_overbrightbits;
-cvar_t	*gl_ext_mtexcombine;
 
 cvar_t	*gl_vlights;
 
 cvar_t	*gl_nosubimage;
+
+cvar_t	*gl_usevbo;
 
 cvar_t	*gl_particle_min_size;
 cvar_t	*gl_particle_max_size;
@@ -130,8 +122,6 @@ cvar_t	*gl_particle_att_b;
 cvar_t	*gl_particle_att_c;
 
 cvar_t	*gl_ext_swapinterval;
-cvar_t	*gl_ext_palettedtexture;
-cvar_t	*gl_ext_multitexture;
 cvar_t	*gl_ext_pointparameters;
 cvar_t	*gl_ext_compiled_vertex_array;
 
@@ -145,7 +135,6 @@ cvar_t	*gl_mode;
 cvar_t	*gl_dynamic;
 cvar_t	*gl_modulate;
 cvar_t	*gl_nobind;
-cvar_t	*gl_round_down;
 cvar_t	*gl_picmip;
 cvar_t	*gl_skymip;
 cvar_t	*gl_showtris;
@@ -154,15 +143,11 @@ cvar_t	*gl_finish;
 cvar_t	*gl_clear;
 cvar_t	*gl_cull;
 cvar_t	*gl_polyblend;
-cvar_t	*gl_flashblend;
-cvar_t	*gl_playermip;
 cvar_t	*gl_swapinterval;
 cvar_t	*gl_texturemode;
 cvar_t	*gl_texturealphamode;
 cvar_t	*gl_texturesolidmode;
 cvar_t	*gl_lockpvs;
-
-cvar_t	*gl_3dlabs_broken;
 
 cvar_t	*vid_fullscreen;
 cvar_t	*vid_gamma;
@@ -445,6 +430,30 @@ void R_DrawNullModel (void)
 
 /*
 =============
+LOD calculation
+
+The width and height occupied by a model on screen after it's been rendered
+will scale as the square of the FOV setting, and proportionally to the
+width/height of the screen itself. Based on the assumption that 500 units is
+an adequate LOD cutoff distance at 1920*1080 with an FOV of 90, we can scale
+the LOD cutoff distance to the lowest point where there will be no noticable
+ugliness.
+
+NOTE: Turns out the player's FOV setting goes to fov_x and not fov_y. Go 
+figure.
+=============
+*/
+#define LOD_BASE_H      1920.0
+#define LOD_BASE_W      1080.0
+#define LOD_BASE_DIST   500.0
+#define LOD_BASE_FOV    90.0
+#define LOD_DIST        (LOD_BASE_DIST*\
+                        (vid.width/LOD_BASE_W)*(vid.height/LOD_BASE_H)*\
+                        (LOD_BASE_FOV/r_newrefdef.fov_x)*\
+                        (LOD_BASE_FOV/r_newrefdef.fov_x))
+
+/*
+=============
 R_DrawEntitiesOnList
 =============
 */
@@ -487,19 +496,16 @@ void R_DrawEntitiesOnList (void)
 		currentmodel = currententity->model;
 
 		//get distance, set lod if available
-		if(r_newrefdef.fov_y >= 90)
+		VectorSubtract(r_origin, currententity->origin, dist);
+		if(VectorLength(dist) > LOD_DIST*2.0)
 		{
-			VectorSubtract(r_origin, currententity->origin, dist);
-			if(VectorLength(dist) > 1000)
-			{
-				if(currententity->lod2)
-					currentmodel = currententity->lod2;
-			}
-			else if(VectorLength(dist) > 500)
-			{
-				if(currententity->lod1)
-					currentmodel = currententity->lod1;
-			}
+			if(currententity->lod2)
+				currentmodel = currententity->lod2;
+		}
+		else if(VectorLength(dist) > LOD_DIST)
+		{
+			if(currententity->lod1)
+				currentmodel = currententity->lod1;
 		}
 
 		if (!currentmodel)
@@ -970,8 +976,6 @@ r_newrefdef must be set before the first call
 ================
 */
 
-extern void generateShadowFBO();
-
 void R_RenderView (refdef_t *fd)
 {
 	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
@@ -995,6 +999,8 @@ void R_RenderView (refdef_t *fd)
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
 		R_DrawDynamicCaster();
+		
+		R_DrawVegetationCaster();
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
 
@@ -1039,7 +1045,7 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawWorld ();
 
-	R_DrawSpecialSurfaces();
+	R_DrawRSSurfaces();
 
 	if(r_lensflare->value)
 		R_RenderFlares ();
@@ -1181,7 +1187,6 @@ void R_Register( void )
 	gl_lightmap = Cvar_Get ("gl_lightmap", "0", 0);
 	gl_shadows = Cvar_Get ("gl_shadows", "2", CVAR_ARCHIVE );
 	gl_nobind = Cvar_Get ("gl_nobind", "0", 0);
-	gl_round_down = Cvar_Get ("gl_round_down", "1", 0);
 	gl_picmip = Cvar_Get ("gl_picmip", "0", 0);
 	gl_skymip = Cvar_Get ("gl_skymip", "0", 0);
 	gl_showtris = Cvar_Get ("gl_showtris", "0", 0);
@@ -1190,8 +1195,6 @@ void R_Register( void )
 	gl_clear = Cvar_Get ("gl_clear", "0", 0);
 	gl_cull = Cvar_Get ("gl_cull", "1", 0);
 	gl_polyblend = Cvar_Get ("gl_polyblend", "1", 0);
-	gl_flashblend = Cvar_Get ("gl_flashblend", "0", CVAR_ARCHIVE);
-	gl_playermip = Cvar_Get ("gl_playermip", "0", 0);
 
 // OPENGL_DRIVER defined by in config.h
 #if defined DARWIN_SPECIAL_CASE
@@ -1211,20 +1214,17 @@ void R_Register( void )
 	gl_lockpvs = Cvar_Get( "gl_lockpvs", "0", 0 );
 
 	gl_ext_swapinterval = Cvar_Get( "gl_ext_swapinterval", "1", CVAR_ARCHIVE );
-	gl_ext_palettedtexture = Cvar_Get( "gl_ext_palettedtexture", "0", CVAR_ARCHIVE );
-	gl_ext_multitexture = Cvar_Get( "gl_ext_multitexture", "1", CVAR_ARCHIVE );
 	gl_ext_pointparameters = Cvar_Get( "gl_ext_pointparameters", "0", CVAR_ARCHIVE );
 	gl_ext_compiled_vertex_array = Cvar_Get( "gl_ext_compiled_vertex_array", "1", CVAR_ARCHIVE );
 
 	gl_drawbuffer = Cvar_Get( "gl_drawbuffer", "GL_BACK", 0 );
 	gl_swapinterval = Cvar_Get( "gl_swapinterval", "1", CVAR_ARCHIVE );
 
-	gl_3dlabs_broken = Cvar_Get( "gl_3dlabs_broken", "1", CVAR_ARCHIVE );
-
 	r_shaders = Cvar_Get ("r_shaders", "1", CVAR_ARCHIVE);
 
 	r_overbrightbits = Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE );
-	gl_ext_mtexcombine = Cvar_Get( "gl_ext_mtexcombine", "1", CVAR_ARCHIVE );
+
+	gl_usevbo = Cvar_Get("gl_usevbo", "0", CVAR_ARCHIVE );
 
 	gl_mirror = Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE);
 
@@ -1237,7 +1237,6 @@ void R_Register( void )
 
 	gl_normalmaps = Cvar_Get("gl_normalmaps", "0", CVAR_ARCHIVE);
 	gl_shadowmaps = Cvar_Get("gl_shadowmaps", "0", CVAR_ARCHIVE);
-	gl_parallaxmaps = Cvar_Get("gl_parallaxmaps", "0", CVAR_ARCHIVE);
 	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
 
 	r_shadowmapratio = Cvar_Get( "r_shadowmapratio", "2", CVAR_ARCHIVE );
@@ -1260,12 +1259,9 @@ void R_Register( void )
 	gl_screenshot_type = Cvar_Get("gl_screenshot_type", "jpeg", CVAR_ARCHIVE);
 	gl_screenshot_jpeg_quality = Cvar_Get("gl_screenshot_jpeg_quality", "85", CVAR_ARCHIVE);
 
-	r_legacy = Cvar_Get("r_legacy", "0", CVAR_ARCHIVE);
-	r_usemd2 = Cvar_Get("r_usemd2", "0", CVAR_ARCHIVE);
-
 	r_firstrun = Cvar_Get("r_firstrun", "0", CVAR_ARCHIVE); //first time running the game
 
-	r_test = Cvar_Get("r_test", "1", CVAR_ARCHIVE); //for testing things
+	r_test = Cvar_Get("r_test", "0", CVAR_ARCHIVE); //for testing things
 
 	Cmd_AddCommand( "imagelist", GL_ImageList_f );
 	Cmd_AddCommand( "screenshot", GL_ScreenShot_f );
@@ -1336,14 +1332,12 @@ void R_SetLowest(void)
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
 	Cvar_SetValue("vid_gamma", 1);
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
-	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
@@ -1352,7 +1346,6 @@ void R_SetLowest(void)
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 0);
 	Cvar_SetValue("gl_vlights", 0);
-	Cvar_SetValue("r_legacy", 1);
 
 	Com_Printf("...autodetected LOWEST game setting\n");
 }
@@ -1367,7 +1360,6 @@ void R_SetLow( void )
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -1375,7 +1367,6 @@ void R_SetLow( void )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
-	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
 	Cvar_SetValue("r_shaders", 1);
@@ -1383,7 +1374,6 @@ void R_SetLow( void )
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 0);
-	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected LOW game setting\n");
 }
@@ -1398,7 +1388,6 @@ void R_SetMedium( void )
 {
 	Cvar_SetValue("r_bloom", 0);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -1406,7 +1395,6 @@ void R_SetMedium( void )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 0);
 	Cvar_SetValue("gl_shadowmaps", 0);
-	Cvar_SetValue("gl_parallaxmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
@@ -1414,7 +1402,6 @@ void R_SetMedium( void )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
-	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected MEDIUM game setting\n");
 }
@@ -1429,7 +1416,6 @@ void R_SetHigh( void )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -1437,7 +1423,6 @@ void R_SetHigh( void )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_shadowmaps", 0);
-	Cvar_SetValue("gl_parallaxmaps", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
@@ -1445,7 +1430,6 @@ void R_SetHigh( void )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
-	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected HIGH game setting\n");
 }
@@ -1460,7 +1444,6 @@ void R_SetHighest( void )
 {
 	Cvar_SetValue("r_bloom", 1);
 	Cvar_SetValue("r_bloom_intensity", 0.5);
-	Cvar_SetValue("gl_ext_mtexcombine", 1);
 	Cvar_SetValue("r_overbrightbits", 2);
 	Cvar_SetValue("gl_modulate", 2);
 	Cvar_SetValue("gl_picmip", 0);
@@ -1468,7 +1451,6 @@ void R_SetHighest( void )
 	Cvar_SetValue("vid_contrast", 1);
 	Cvar_SetValue("gl_normalmaps", 1);
 	Cvar_SetValue("gl_shadowmaps", 1);
-	Cvar_SetValue("gl_parallaxmaps", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
 	Cvar_SetValue("r_shaders", 1);
@@ -1476,7 +1458,6 @@ void R_SetHighest( void )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
-	Cvar_SetValue("r_legacy", 0);
 
 	Com_Printf("...autodetected HIGHEST game setting\n");
 }
@@ -1516,7 +1497,6 @@ int R_Init( void *hinstance, void *hWnd )
 	int		err;
 	int		j;
 	extern float r_turbsin[256];
-	int		aniso_level, max_aniso;
 
 	for ( j = 0; j < 256; j++ )
 	{
@@ -1621,220 +1601,11 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...GL_EXT_point_parameters not found\n" );
 	}
 
-#if defined UNIX_VARIANT
-	if ( strstr( gl_config.extensions_string, "3DFX_set_global_palette" ))
-	{
-		if ( gl_ext_palettedtexture->value )
-		{
-			Com_Printf ("...using 3DFX_set_global_palette\n" );
-			qgl3DfxSetPaletteEXT = ( void ( APIENTRY * ) (GLuint *) )qwglGetProcAddress( "gl3DfxSetPaletteEXT" );
-			qglColorTableEXT = (void*)Fake_glColorTableEXT;
-		}
-		else
-		{
-			Com_Printf ("...ignoring 3DFX_set_global_palette\n" );
-		}
-	}
-	else
-	{
-		Com_Printf ("...3DFX_set_global_palette not found\n" );
-	}
-#endif
+	R_InitImageSubsystem();	
+	
+	R_InitShadowSubsystem();
 
-	if ( !qglColorTableEXT &&
-		strstr( gl_config.extensions_string, "GL_EXT_paletted_texture" ) &&
-		strstr( gl_config.extensions_string, "GL_EXT_shared_texture_palette" ) )
-	{
-		if ( gl_ext_palettedtexture->value )
-		{
-			Com_Printf ("...using GL_EXT_shared_texture_palette\n" );
-			qglColorTableEXT = ( void ( APIENTRY * ) ( int, int, int, int, int, const void * ) ) qwglGetProcAddress( "glColorTableEXT" );
-		}
-		else
-		{
-			Com_Printf ("...ignoring GL_EXT_shared_texture_palette\n" );
-		}
-	}
-	else
-	{
-		Com_Printf ("...GL_EXT_shared_texture_palette not found\n" );
-	}
-
-	if ( strstr( gl_config.extensions_string, "GL_ARB_multitexture" ) )
-	{
-		if ( gl_ext_multitexture->value )
-		{
-			Com_Printf ("...using GL_ARB_multitexture\n" );
-			qglMTexCoord2fSGIS = ( void * ) qwglGetProcAddress( "glMultiTexCoord2fARB" );
-			qglMTexCoord3fSGIS = ( void * ) qwglGetProcAddress( "glMultiTexCoord3fARB" );
-			qglMultiTexCoord3fvARB = (void*)qwglGetProcAddress("glMultiTexCoord3fvARB");
-			qglActiveTextureARB = ( void * ) qwglGetProcAddress( "glActiveTextureARB" );
-			qglClientActiveTextureARB = ( void * ) qwglGetProcAddress( "glClientActiveTextureARB" );
-			GL_TEXTURE0 = GL_TEXTURE0_ARB;
-			GL_TEXTURE1 = GL_TEXTURE1_ARB;
-			GL_TEXTURE2 = GL_TEXTURE2_ARB;
-			GL_TEXTURE3 = GL_TEXTURE3_ARB;
-			GL_TEXTURE4 = GL_TEXTURE4_ARB;
-			GL_TEXTURE5 = GL_TEXTURE5_ARB;
-			GL_TEXTURE6 = GL_TEXTURE6_ARB;
-			GL_TEXTURE7 = GL_TEXTURE7_ARB;
-		}
-		else
-		{
-			Com_Printf ("...ignoring GL_ARB_multitexture\n" );
-		}
-	}
-	else
-	{
-		Com_Printf ("...GL_ARB_multitexture not found\n" );
-	}
-
-	if ( strstr( gl_config.extensions_string, "GL_SGIS_multitexture" ) )
-	{
-		if ( qglActiveTextureARB )
-		{
-			Com_Printf ("...GL_SGIS_multitexture deprecated in favor of ARB_multitexture\n" );
-		}
-		else if ( gl_ext_multitexture->value )
-		{
-			Com_Printf ("...using GL_SGIS_multitexture\n" );
-			qglMTexCoord2fSGIS = ( void * ) qwglGetProcAddress( "glMTexCoord2fSGIS" );
-			qglMTexCoord3fSGIS = ( void * ) qwglGetProcAddress( "glMTexCoord3fSGIS" );
-			qglSelectTextureSGIS = ( void * ) qwglGetProcAddress( "glSelectTextureSGIS" );
-			GL_TEXTURE0 = GL_TEXTURE0_SGIS;
-			GL_TEXTURE1 = GL_TEXTURE1_SGIS;
-		}
-		else
-		{
-			Com_Printf ("...ignoring GL_SGIS_multitexture\n" );
-		}
-	}
-	else
-	{
-		Com_Printf ("...GL_SGIS_multitexture not found\n" );
-	}
-
-	gl_config.mtexcombine = false;
-	if ( strstr( gl_config.extensions_string, "GL_ARB_texture_env_combine" ) )
-	{
-		if ( gl_ext_mtexcombine->value )
-		{
-			Com_Printf( "...using GL_ARB_texture_env_combine\n" );
-			gl_config.mtexcombine = true;
-		}
-		else
-		{
-			Com_Printf( "...ignoring GL_ARB_texture_env_combine\n" );
-		}
-	}
-	else
-	{
-		Com_Printf( "...GL_ARB_texture_env_combine not found\n" );
-	}
-	if ( !gl_config.mtexcombine )
-	{
-		if ( strstr( gl_config.extensions_string, "GL_EXT_texture_env_combine" ) )
-		{
-			if ( gl_ext_mtexcombine->value )
-			{
-				Com_Printf( "...using GL_EXT_texture_env_combine\n" );
-				gl_config.mtexcombine = true;
-			}
-			else
-			{
-				Com_Printf( "...ignoring GL_EXT_texture_env_combine\n" );
-			}
-		}
-		else
-		{
-			Com_Printf( "...GL_EXT_texture_env_combine not found\n" );
-		}
-	}
-
-	if (strstr(gl_config.extensions_string, "GL_EXT_texture_filter_anisotropic"))
-	{
-		qglGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
-
-		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE );
-		Cvar_SetValue("r_ext_max_anisotropy", max_aniso);
-
-		r_anisotropic = Cvar_Get("r_anisotropic", "16", CVAR_ARCHIVE);
-		if (r_anisotropic->value >= r_ext_max_anisotropy->value)
-			Cvar_SetValue("r_anisotropic", r_ext_max_anisotropy->value);
-
-		aniso_level = r_anisotropic->value;
-
-		if (r_anisotropic->value == 1)
-			Com_Printf("...ignoring GL_EXT_texture_filter_anisotropic\n");
-		else
-			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n");
-	}
-	else
-	{
-		Com_Printf("...GL_EXT_texture_filter_anisotropic not found\n");
-		r_anisotropic = Cvar_Get("r_anisotropic", "0", CVAR_ARCHIVE);
-		r_ext_max_anisotropy = Cvar_Get("r_ext_max_anisotropy", "0", CVAR_ARCHIVE);
-	}
-
-	// openGL 2.0 Unified Separate Stencil
-	gl_state.stencil_wrap = false;
-	if (strstr(gl_config.extensions_string, "GL_EXT_stencil_wrap"))
-	{
-		Com_Printf("...using GL_EXT_stencil_wrap\n");
-		gl_state.stencil_wrap = true;
-	} else
-	{
-		Com_Printf("...GL_EXT_stencil_wrap not found\n");
-		gl_state.stencil_wrap = false;
-	}
-
-	// Framebuffer object blit
-	gl_state.hasFBOblit = false;
-	if (strstr(gl_config.extensions_string, "GL_EXT_framebuffer_blit"))
-	{
-		Com_Printf("...using GL_EXT_framebuffer_blit\n");
-		gl_state.hasFBOblit = true;
-	} else
-	{
-		Com_Printf("...GL_EXT_framebuffer_blit not found\n");
-		gl_state.hasFBOblit = false;
-	}
-
-	qglStencilFuncSeparate		= (void *)qwglGetProcAddress("glStencilFuncSeparate");
-	qglStencilOpSeparate		= (void *)qwglGetProcAddress("glStencilOpSeparate");
-	qglStencilMaskSeparate		= (void *)qwglGetProcAddress("glStencilMaskSeparate");
-
-	gl_state.separateStencil = false;
-	if(qglStencilFuncSeparate && qglStencilOpSeparate && qglStencilMaskSeparate)
-	{
-			Com_Printf("...using GL_EXT_stencil_two_side\n");
-			gl_state.separateStencil = true;
-
-	}
-	else
-		Com_Printf("...GL_EXT_stencil_two_side not found\n");
-
-	gl_state.vbo = false;
-
-	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))
-	{
-		qglBindBufferARB = (void *)qwglGetProcAddress("glBindBufferARB");
-		qglDeleteBuffersARB = (void *)qwglGetProcAddress("glDeleteBuffersARB");
-		qglGenBuffersARB = (void *)qwglGetProcAddress("glGenBuffersARB");
-		qglBufferDataARB = (void *)qwglGetProcAddress("glBufferDataARB");
-		qglBufferSubDataARB = (void *)qwglGetProcAddress("glBufferSubDataARB");
-
-		if (qglGenBuffersARB && qglBindBufferARB && qglBufferDataARB && qglDeleteBuffersARB)
-		{
-			Com_Printf("...using GL_ARB_vertex_buffer_object\n");
-			gl_state.vbo = true;
-			R_VCInit();
-		}
-	} else
-	{
-		Com_Printf(S_COLOR_RED "...GL_ARB_vertex_buffer_object not found\n");
-		gl_state.vbo = false;
-	}
+	R_LoadVBOSubsystem();
 
 #if defined DARWIN_SPECIAL_CASE
 	/*
@@ -1859,7 +1630,6 @@ int R_Init( void *hinstance, void *hWnd )
 	R_LoadGLSLPrograms();
 
 	//if running for the very first time, automatically set video settings
-	//disabled for now
 	if(!r_firstrun->value)
 	{
 		qboolean ati_nvidia = false;
@@ -1947,7 +1717,7 @@ cpuinfo_exit:
 	R_InitParticleTexture ();
 	Draw_InitLocal ();
 
-	generateShadowFBO();
+	R_GenerateShadowFBO();
 	VLight_Init();
 
 	//Initialize ODE
@@ -2148,7 +1918,6 @@ void R_SetPalette ( const unsigned char *palette)
 			rp[i*4+3] = 0xff;
 		}
 	}
-	GL_SetTexturePalette( r_rawpalette );
 
 	if ( qglClear && qglClearColor)
 	{

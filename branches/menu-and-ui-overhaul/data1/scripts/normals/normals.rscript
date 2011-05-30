@@ -562,10 +562,10 @@ vehicles/strafer/console
 models/items/haste/skin
 {
 	{
-		map models/items/haste/skin_normal.tga
+		map models/items/haste/skin_normal.jpg
 		normalmap
-		map2 gfx/greenlightning.tga
-		fx
+		map2 models/items/haste/skin_fx.tga
+		glow
 	}
 }
 models/items/quaddama/skin
@@ -573,15 +573,17 @@ models/items/quaddama/skin
 	{
 		map models/items/quaddama/skin_normal.tga
 		normalmap
-		map2 gfx/bluelightning.tga
+		map2 gfx/greenlightning.tga
 		fx
 	}
 }
 models/items/sproing/skin
 {
 	{
-		map models/items/sproing/skin_normal.tga
+		map models/items/sproing/skin_normal.jpg
 		normalmap
+		map2 models/items/sproing/skin_fx.jpg
+		glow
 	}
 }
 models/items/adrenaline/skin
@@ -596,8 +598,10 @@ models/items/adrenaline/skin
 models/items/invulner/skin
 {
 	{
-		map models/items/invulner/skin_normal.tga
+		map models/items/invulner/skin_normal.jpg
 		normalmap
+		map2 models/items/invulner/skin_fx.tga
+		glow
 	}
 }
 models/items/armor/shard/skin
@@ -888,5 +892,39 @@ maps/meshes/mpa2
 	{
 		map maps/meshes/mpa2_normal.jpg
 		normalmap
+	}
+}
+maps/meshes/tech/turbinefan
+{
+	{
+		map maps/meshes/tech/turbinefan_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/tech/slimegen
+{
+	{
+		map maps/meshes/tech/slimegen_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/slimegen_fx.tga
+		glow
+	}
+}
+maps/meshes/xempx/lightbomb
+{
+	{
+		map maps/meshes/xempx/lightbomb_normal.jpg
+		normalmap
+		map2 maps/meshes/xempx/lightbomb_fx.tga
+		glow
+	}
+}
+models/items/mega_h/skin
+{
+	{
+		map models/items/mega_h/skin_normal.jpg
+		normalmap
+		map2 models/items/mega_h/skin_fx.tga
+		glow
 	}
 }

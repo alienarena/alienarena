@@ -18,6 +18,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#ifndef __H_REF_GL_R_LOCAL
+#define __H_REF_GL_R_LOCAL
+
 #if defined WIN32_VARIANT
 #  include <windows.h>
 #endif
@@ -89,6 +92,7 @@ extern	entity_t	*currententity;
 extern	model_t		*currentmodel;
 extern	int			r_visframecount;
 extern	int			r_framecount;
+extern  int			r_shadowmapcount;	
 extern	cplane_t	frustum[4];
 extern	int			c_brush_polys, c_alias_polys;
 extern 	int c_flares;
@@ -96,14 +100,6 @@ extern  int c_grasses;
 extern	int c_beams;
 
 extern	int			gl_filter_min, gl_filter_max;
-
-//
-// view origin moved to ref.h. -M.
-//
-//extern	vec3_t	vup;
-//extern	vec3_t	vpn;
-//extern	vec3_t	vright;
-//extern	vec3_t	r_origin;
 
 //
 // screen size info
@@ -125,8 +121,6 @@ extern	cvar_t	*r_lightlevel;	// FIXME: This is a HACK to get the client's light 
 extern  cvar_t  *r_wave; //water waves
 
 extern cvar_t	*gl_ext_swapinterval;
-extern cvar_t	*gl_ext_palettedtexture;
-extern cvar_t	*gl_ext_multitexture;
 extern cvar_t	*gl_ext_pointparameters;
 extern cvar_t	*gl_ext_compiled_vertex_array;
 
@@ -144,7 +138,6 @@ extern	cvar_t	*gl_lightmap;
 extern	cvar_t	*gl_shadows;
 extern	cvar_t	*gl_dynamic;
 extern	cvar_t	*gl_nobind;
-extern	cvar_t	*gl_round_down;
 extern	cvar_t	*gl_picmip;
 extern	cvar_t	*gl_skymip;
 extern	cvar_t	*gl_showtris;
@@ -153,14 +146,9 @@ extern	cvar_t	*gl_finish;
 extern	cvar_t	*gl_clear;
 extern	cvar_t	*gl_cull;
 extern	cvar_t	*gl_poly;
-extern	cvar_t	*gl_texsort;
 extern	cvar_t	*gl_polyblend;
-extern	cvar_t	*gl_flashblend;
-extern	cvar_t	*gl_lightmaptype;
 extern	cvar_t	*gl_modulate;
-extern	cvar_t	*gl_playermip;
 extern	cvar_t	*gl_drawbuffer;
-extern	cvar_t	*gl_3dlabs_broken;
 extern	cvar_t	*gl_driver;
 extern	cvar_t	*gl_swapinterval;
 extern	cvar_t	*gl_texturemode;
@@ -168,22 +156,19 @@ extern	cvar_t	*gl_texturealphamode;
 extern	cvar_t	*gl_texturesolidmode;
 extern	cvar_t	*gl_lockpvs;
 extern	cvar_t	*gl_vlights;
+extern  cvar_t	*gl_usevbo;
 
 extern	cvar_t	*vid_fullscreen;
 extern	cvar_t	*vid_gamma;
 extern  cvar_t	*vid_contrast;
 
-extern	cvar_t	*intensity;
-
 extern cvar_t *r_anisotropic;
 extern cvar_t *r_ext_max_anisotropy;
 
 extern cvar_t	*r_overbrightbits;
-extern cvar_t	*gl_ext_mtexcombine;
 
 extern cvar_t	*gl_normalmaps;
 extern cvar_t	*gl_shadowmaps;
-extern cvar_t	*gl_parallaxmaps;
 extern cvar_t	*gl_glsl_postprocess;
 
 extern	cvar_t	*r_shaders;
@@ -209,15 +194,11 @@ extern	cvar_t	*gl_mirror;
 extern	cvar_t	*gl_arb_fragment_program;
 extern	cvar_t	*gl_glsl_shaders;
 
-
 extern	cvar_t	*sys_affinity;
 extern	cvar_t	*sys_priority;
 
 extern	cvar_t	*gl_screenshot_type;
 extern	cvar_t	*gl_screenshot_jpeg_quality;
-
-extern	cvar_t	*r_legacy;
-extern  cvar_t	*r_usemd2;
 
 extern  cvar_t  *r_test;
 
@@ -231,20 +212,23 @@ extern	int		c_visible_lightmaps;
 extern	int		c_visible_textures;
 
 extern	float	r_world_matrix[16];
-extern float r_project_matrix[16];
-extern int	r_viewport[4];
-extern	float		r_farclip, r_farclip_min, r_farclip_bias;
-void GL_Bind (int texnum);
-void GL_MBind( GLenum target, int texnum );
-void GL_TexEnv( GLenum value );
-void GL_EnableMultitexture( qboolean enable );
-void GL_SelectTexture( GLenum );
-void vectoangles (vec3_t value1, vec3_t angles);
-void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic);
-void R_PushDlights (void);
-void R_PushDlightsForBModel (entity_t *e);
-void SetVertexOverbrights (qboolean toggle);
-void RefreshFont (void);
+extern	float	r_project_matrix[16];
+extern	int		r_viewport[4];
+extern	float	r_farclip, r_farclip_min, r_farclip_bias;
+
+//Image
+extern void R_InitImageSubsystem(void);
+extern void GL_Bind (int texnum);
+extern void GL_MBind( GLenum target, int texnum );
+extern void GL_TexEnv( GLenum value );
+extern void GL_EnableMultitexture( qboolean enable );
+extern void GL_SelectTexture( GLenum );
+extern void vectoangles (vec3_t value1, vec3_t angles);
+extern void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic);
+extern void R_PushDlights (void);
+extern void R_PushDlightsForBModel (entity_t *e);
+extern void SetVertexOverbrights (qboolean toggle);
+extern void RefreshFont (void);
 
 //====================================================================
 extern	model_t	*r_worldmodel;
@@ -253,81 +237,104 @@ extern	unsigned	d_8to24table[256];
 
 extern	int		registration_sequence;
 
+extern void V_AddBlend (float r, float g, float b, float a, float *v_blend);
 
-void V_AddBlend (float r, float g, float b, float a, float *v_blend);
+//Renderer main loop
+extern int	R_Init( void *hinstance, void *hWnd );
+extern void R_Shutdown( void );
 
-int	R_Init( void *hinstance, void *hWnd );
-void R_Shutdown( void );
+extern void R_RenderView (refdef_t *fd);
+extern void GL_ScreenShot_f (void);
+extern void R_DrawAliasModel (void);
+extern void R_DrawBrushModel (void);
+extern void R_DrawWorld (void);
+extern void R_RenderDlights (void);
+extern void R_DrawAlphaSurfaces (void);
+extern void R_DrawRSSurfaces(void);
+extern void R_InitParticleTexture (void);
+extern void R_DrawParticles (void);
+extern void R_DrawRadar(void);
+extern void R_DrawVehicleHUD (void);
+extern void R_ClearSkyBox (void);
+extern void R_DrawSkyBox (void);
+extern void Draw_InitLocal (void);
 
-void R_RenderView (refdef_t *fd);
-void GL_ScreenShot_f (void);
-void R_DrawAliasModel (void);
-void R_DrawBrushModel (void);
-void R_DrawWorld (void);
-void R_RenderDlights (void);
-void R_DrawAlphaSurfaces (void);
-void R_RenderBrushPoly (msurface_t *fa);
-void R_DrawSpecialSurfaces(void);
-void R_InitParticleTexture (void);
-void R_DrawParticles (void);
-void R_DrawRadar(void);
-void R_DrawVehicleHUD (void);
-void Draw_InitLocal (void);
-void GL_SubdivideSurface (msurface_t *fa);
-qboolean R_CullBox (vec3_t mins, vec3_t maxs);
-qboolean R_CullOrigin(vec3_t origin);
-qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags );
-void R_RotateForEntity (entity_t *e);
-void R_MarkLeaves (void);
-void R_AddSkySurface (msurface_t *fa);
-void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY);
-void R_ClearSkyBox (void);
-void R_DrawSkyBox (void);
-void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
-float R_ShadowLight (vec3_t pos, vec3_t angles, vec3_t lightAdd, int type);
-void  VLight_Init (void);
-float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );
-void R_ReadFogScript(char config_file[128]);
-void R_ReadMusicScript(char config_file[128]);
+//Renderer utils
+extern void R_SubdivideSurface (msurface_t *fa);
+extern qboolean R_CullBox (vec3_t mins, vec3_t maxs);
+extern qboolean R_CullOrigin(vec3_t origin);
+extern qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags );
+extern void R_RotateForEntity (entity_t *e);
+extern void R_MarkLeaves (void);
+extern void R_AddSkySurface (msurface_t *fa);
+extern void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY);
+extern void R_ReadFogScript(char config_file[128]);
+extern void R_ReadMusicScript(char config_file[128]);
+
+//Lights
+extern dlight_t *dynLight;
+extern vec3_t lightspot;
+extern void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
+extern void  VLight_Init (void);
+extern float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, float ayaw );
+
+//BSP 
+extern GLuint normalisationCubeMap;
+extern void BSP_DrawTexturelessPoly (msurface_t *fa);
+extern void BSP_DrawTexturelessBrushModel (entity_t *e);
+extern void BSP_RenderBrushPoly (msurface_t *fa);
+
+//Postprocess
 void R_GLSLPostProcess(void);
 void R_FB_InitTextures(void);
 
 //VBO
-void R_VCInit(void);
-void GL_BindVBO(vertCache_t *cache);
-vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent);
-vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent);
-void R_VCShutdown(void);
+extern GLuint vboId;
+extern int totalVBOsize;
+extern void R_LoadVBOSubsystem(void);
+extern void R_VCShutdown(void);
+extern void VB_VCInit(void);
+extern void VB_BuildVBOBufferSize(msurface_t *surf);
+extern void VB_BuildWorldVBO(void);
 
-//BLOOMS[start]
-//
-// r_bloom.c
-//
-void R_BloomBlend( refdef_t *fd );
-void R_InitBloomTextures( void );
-//BLOOMS[end]
+//Light Bloom
+extern void R_BloomBlend( refdef_t *fd );
+extern void R_InitBloomTextures( void );
 
-//FLARES and SUN
-void R_RenderFlares (void);
-void R_DrawVegetationSurface (void);
-void R_DrawBeamSurface ( void );
-void R_InitSun();
-void R_RenderSun();
+//Flares and Sun
+int r_numflares;
+extern int c_flares;
+flare_t r_flares[MAX_FLARES];
+extern void Mod_AddFlareSurface (msurface_t *surf, int type );
+extern void R_RenderFlares (void);
+extern void R_ClearFlares(void);
+
 vec3_t sun_origin;
 qboolean spacebox;
+qboolean draw_sun;
+float sun_x;
+float sun_y;
+float sun_size;
+extern void R_InitSun();
+extern void R_RenderSun();
 
-//Shared mesh items
-extern vec3_t	shadelight;
-extern vec3_t	shadevector;
-extern int		model_dlights_num;
-extern m_dlight_t model_dlights[128];
-extern image_t	*r_mirrortexture;
-extern cvar_t	*cl_gun;
-extern vec3_t	lightPosition;
-extern float	dynFactor;
-extern void		GL_GetLightVals(vec3_t origin, qboolean RagDoll, qboolean dynamic);
-extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
-extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
+//Vegetation
+int r_numgrasses;
+extern int c_grasses;
+grass_t r_grasses[MAX_GRASSES];
+qboolean r_hasleaves;
+extern void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type);
+extern void R_DrawVegetationSurface (void);
+extern void R_ClearGrasses(void);
+
+//Light beams/volumes
+int r_numbeams;
+extern int c_beams;
+beam_t r_beams[MAX_BEAMS];
+extern void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type, float xang, float yang,
+	qboolean rotating);
+extern void R_DrawBeamSurface ( void );
+extern void R_ClearBeams(void);
 
 //Player icons
 extern float	scr_playericonalpha;
@@ -335,49 +342,45 @@ extern float	scr_playericonalpha;
 //Team colors
 int r_teamColor;
 
-void	Draw_GetPicSize (int *w, int *h, char *name);
-void	Draw_Pic (int x, int y, char *name);
-void	Draw_ScaledPic (int x, int y, float scale, char *pic);
-void	Draw_StretchPic (int x, int y, int w, int h, char *name);
-void	Draw_Char (int x, int y, int c);
-void	Draw_ColorChar (int x, int y, int num, vec4_t color);
-void	Draw_ScaledChar(float x, float y, int num, float scale, int from_menu);
-void	Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale, int from_menu);
-void	Draw_TileClear (int x, int y, int w, int h, char *name);
-void	Draw_Fill (int x, int y, int w, int h, int c);
-void	Draw_FadeScreen (void);
-void	Draw_StretchRaw (int x, int y, int w, int h, int cols, int rows, byte *data);
+extern void	Draw_GetPicSize (int *w, int *h, char *name);
+extern void	Draw_Pic (int x, int y, char *name);
+extern void	Draw_ScaledPic (int x, int y, float scale, char *pic);
+extern void	Draw_StretchPic (int x, int y, int w, int h, char *name);
+extern void	Draw_Char (int x, int y, int c);
+extern void	Draw_ColorChar (int x, int y, int num, vec4_t color);
+extern void	Draw_ScaledChar(float x, float y, int num, float scale, int from_menu);
+extern void	Draw_ScaledColorChar (float x, float y, int num, vec4_t color, float scale, int from_menu);
+extern void	Draw_TileClear (int x, int y, int w, int h, char *name);
+extern void	Draw_Fill (int x, int y, int w, int h, int c);
+extern void	Draw_FadeScreen (void);
 
-void	R_BeginFrame( float camera_separation );
-void	R_SwapBuffers( int );
-void	R_SetPalette ( const unsigned char *palette);
+extern void	R_BeginFrame( float camera_separation );
+extern void	R_SwapBuffers( int );
+extern void	R_SetPalette ( const unsigned char *palette);
+extern int	Draw_GetPalette (void);
 
-int		Draw_GetPalette (void);
-
-void	GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight);
+extern void	GL_ResampleTexture (unsigned *in, int inwidth, int inheight, unsigned *out,  int outwidth, int outheight);
 
 image_t *R_RegisterSkin (char *name);
 image_t *R_RegisterParticlePic(const char *name);
 image_t *R_RegisterParticleNormal(const char *name);
 image_t *R_RegisterGfxPic(const char *name);
 
-void	LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
-image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits);
-image_t *GL_GetImage( const char * name );
-image_t	*GL_FindImage (char *name, imagetype_t type);
-void	GL_FreeImage( image_t * image );
-void	GL_TextureMode( char *string );
-void	GL_ImageList_f (void);
+extern void	LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
+extern image_t *GL_LoadPic (char *name, byte *pic, int width, int height, imagetype_t type, int bits);
+extern image_t *GL_GetImage( const char * name );
+extern image_t	*GL_FindImage (char *name, imagetype_t type);
+extern void	GL_FreeImage( image_t * image );
+extern void	GL_TextureMode( char *string );
+extern void	GL_ImageList_f (void);
 
-void	GL_SetTexturePalette( unsigned palette[256] );
+extern void	GL_InitImages (void);
+extern void	GL_ShutdownImages (void);
 
-void	GL_InitImages (void);
-void	GL_ShutdownImages (void);
+extern void	GL_FreeUnusedImages (void);
 
-void	GL_FreeUnusedImages (void);
-
-void	GL_TextureAlphaMode( char *string );
-void	GL_TextureSolidMode( char *string );
+extern void	GL_TextureAlphaMode( char *string );
+extern void	GL_TextureSolidMode( char *string );
 
 /*
 ** GL config stuff
@@ -479,6 +482,7 @@ extern glconfig_t  gl_config;
 extern glstate_t   gl_state;
 
 // vertex arrays
+extern int KillFlags;
 
 #define MAX_ARRAY (MAX_PARTICLES*4)
 
@@ -489,7 +493,6 @@ extern glstate_t   gl_state;
 extern float	tex_array[MAX_ARRAY][2];
 extern float	vert_array[MAX_ARRAY][3];
 extern float	col_array[MAX_ARRAY][4];
-extern float	norm_array[MAX_ARRAY][3];
 
 #define MAX_VARRAY_VERTS (MAX_VERTS + 2)
 #define MAX_VARRAY_VERTEX_SIZE 11
@@ -534,25 +537,27 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #endif
 
 // vertex array subsystem
-void R_InitVArrays (int varraytype);
-void R_KillVArrays (void);
-void R_InitQuadVarrays(void);
-void R_AddSurfToVArray (msurface_t *surf);
-void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
-void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
-void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
-void R_KillNormalTMUs(void);
+extern void R_InitVArrays (int varraytype);
+extern void R_KillVArrays (void);
+extern void R_InitQuadVarrays(void);
+extern void R_AddSurfToVArray (msurface_t *surf);
+extern void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);
+extern void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll);
+extern void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll);
+extern void R_KillNormalTMUs(void);
 
 //shadows
 extern	cvar_t		*r_shadowmapratio;
 extern  int			r_lightgroups;
 extern  image_t		*r_depthtexture;
+extern	image_t		*r_depthtexture2;
 extern  image_t		*r_colorbuffer;
 extern  image_t		*r_shadowbuffer;
 extern	image_t		*r_shadowbufferBlur;
-extern GLuint   fboId[2];
+extern GLuint   fboId[3];
 extern GLuint	rboId;
 extern vec3_t	r_worldLightVec;
+extern qboolean have_stencil;
 typedef struct	LightGroup {
 	vec3_t	group_origin;
 	vec3_t	accum_origin;
@@ -560,11 +565,16 @@ typedef struct	LightGroup {
 	float	dist;
 } LightGroup_t;
 extern			LightGroup_t LightGroups[MAX_LIGHTS];
-extern void		R_DrawAliasModelCaster (void);
-extern void		R_DrawIQMCaster (void);
-extern void		R_DrawIQMRagDollCaster (int);
+
+extern void		R_GenerateShadowFBO(void);
+extern void		R_InitShadowSubsystem(void);
+extern void		MD2_DrawCaster (void);
+extern void		IQM_DrawCaster (void);
+extern void		IQM_DrawRagDollCaster (int);
 extern void		R_DrawDynamicCaster(void);
+extern void		R_DrawVegetationCaster(void);
 extern void		R_CastShadow(void);
+extern float	SHD_ShadowLight (vec3_t pos, vec3_t angles, vec3_t lightAdd, int type);
 int				FB_texture_width, FB_texture_height;
 
 //shader programs
@@ -580,6 +590,7 @@ extern GLhandleARB	g_waterprogramObj;
 extern GLhandleARB	g_meshprogramObj;
 extern GLhandleARB	g_fbprogramObj;
 extern GLhandleARB	g_blurprogramObj;
+extern GLhandleARB	g_rblurprogramObj;
 
 extern GLhandleARB	g_vertexShader;
 extern GLhandleARB	g_fragmentShader;
@@ -592,11 +603,13 @@ extern GLuint		g_location_heightTexture;
 extern GLuint		g_location_lmTexture;
 extern GLuint		g_location_normalTexture;
 extern GLuint		g_location_bspShadowmapTexture;
+extern GLuint		g_location_bspShadowmapTexture2;
 extern GLuint		g_location_bspShadowmapNum;
 extern GLuint		g_location_fog;
 extern GLuint		g_location_parallax;
 extern GLuint		g_location_dynamic;
 extern GLuint		g_location_shadowmap;
+extern GLuint		g_Location_statshadow;
 extern GLuint		g_location_lightPosition;
 extern GLuint		g_location_staticLightPosition;
 extern GLuint		g_location_lightColour;
@@ -629,29 +642,47 @@ extern GLuint		g_location_useGlow;
 //fullscreen distortion effects
 extern GLuint		g_location_framebuffTex;
 extern GLuint		g_location_distortTex;
-extern GLuint		g_location_frametime;
-extern GLuint		g_location_fxType;
+extern GLuint		g_location_dParams;
 extern GLuint		g_location_fxPos;
-extern GLuint		g_location_fxColor;
-extern GLuint		g_location_fbSampleSize;
 
-//blur
+//gaussian blur
 extern GLuint		g_location_scale;
 extern GLuint		g_location_source;
 
+//radial blur	
+extern GLuint		g_location_rscale;
+extern GLuint		g_location_rsource;
+extern GLuint		g_location_rparams;
+
+//MD2
+extern void Mod_LoadMD2Model (model_t *mod, void *buffer);
+
+//Shared mesh items
+extern vec3_t	shadelight;
+extern vec3_t	shadevector;
+extern int		model_dlights_num;
+extern m_dlight_t model_dlights[128];
+extern image_t	*r_mirrortexture;
+extern cvar_t	*cl_gun;
+vec3_t lightPosition;
+float  dynFactor;
+extern void		R_GetLightVals(vec3_t origin, qboolean RagDoll, qboolean dynamic);
+extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
+extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
+
 //iqm
-
 #define pi 3.14159265
-
+extern float modelpitch;
+extern double degreeToRadian(double degree);
 extern qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer);
+extern qboolean IQM_ReadSkinFile(char skin_file[MAX_OSPATH], char *skinpath);
 extern void R_DrawINTERQUAKEMODEL(void);
-extern void GL_AnimateIQMFrame(float curframe, int nextframe);
-extern qboolean inAnimGroup(int frame, int oldframe);
-extern int NextFrame(int frame);
-extern void GL_DrawIQMFrame(int skinnum);
-extern void GL_AnimateIQMRagdoll(int RagDollID);
-extern void GL_DrawIQMRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect);
-extern void R_DrawIQMShadow(vec3_t origin);
+extern void IQM_AnimateFrame(float curframe, int nextframe);
+extern qboolean IQM_InAnimGroup(int frame, int oldframe);
+extern int IQM_NextFrame(int frame);
+extern void IQM_AnimateRagdoll(int RagDollID);
+extern void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shellEffect);
+extern void IQM_DrawShadow(vec3_t origin);
 
 //Ragdoll
 int r_DrawingRagDoll;
@@ -671,14 +702,14 @@ IMPLEMENTATION SPECIFIC FUNCTIONS
 ====================================================================
 */
 
-void		GLimp_BeginFrame( float camera_separation );
-void		GLimp_EndFrame( void );
-qboolean	GLimp_Init( void *hinstance, void *hWnd );
-void		GLimp_Shutdown( void );
-rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
-void		GLimp_AppActivate( qboolean active );
-void		GLimp_EnableLogging( qboolean enable );
-void		GLimp_LogNewFrame( void );
+extern void		GLimp_BeginFrame( float camera_separation );
+extern void		GLimp_EndFrame( void );
+extern qboolean	GLimp_Init( void *hinstance, void *hWnd );
+extern void		GLimp_Shutdown( void );
+extern rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean fullscreen );
+extern void		GLimp_AppActivate( qboolean active );
+extern void		GLimp_EnableLogging( qboolean enable );
+extern void		GLimp_LogNewFrame( void );
 
 /*
 ====================================================================
@@ -689,3 +720,5 @@ IMPORTED FUNCTIONS
 */
 
 #include "r_script.h"
+
+#endif // __H_REF_GL_R_LOCAL

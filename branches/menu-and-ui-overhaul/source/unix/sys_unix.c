@@ -63,14 +63,54 @@ extern void *GetGameAPI ( void *import);
 // General routines
 // =======================================================================
 
+// Added ANSI color-escape output based on/inspired by Warsow. -M
 void Sys_ConsoleOutput (char *string)
 {
-	if (nostdout && nostdout->value)
+#if defined ANSI_COLOR
+
+	static int  q3ToAnsi[ 8 ] =
+	{
+		30, // COLOR_BLACK
+		31, // COLOR_RED
+		32, // COLOR_GREEN
+		33, // COLOR_YELLOW
+		34, // COLOR_BLUE
+		36, // COLOR_CYAN
+		35, // COLOR_MAGENTA
+		0   // COLOR_WHITE
+	};
+
+	if ( nostdout && nostdout->integer )
 		return;
 
-	fputs(string, stdout);
+    while (*string) {
+        if (*string == '^' && string[1]) {
+            int colornum = (string[1]-'0')&7;
+            printf ("\033[%dm", q3ToAnsi[colornum]);
+            string += 2;
+            continue;
+        }
+        if (*string == '\n')
+            printf ("\033[0m\n");
+        else if (*string == ' ')
+            printf ("\033[0m ");
+        else
+            printf ("%c", *string);
+        string++;
+    }
+
+#else
+
+    if ( nostdout == NULL || !nostdout->integer )
+	{
+		fputs( string, stdout );
+	}
+
+#endif
 }
 
+#if 0
+// not currently used in Unix/Linux
 void Sys_Printf (const char *fmt, ...)
 {
 	va_list		argptr;
@@ -92,6 +132,7 @@ void Sys_Printf (const char *fmt, ...)
 			putc(*p, stdout);
 	}
 }
+#endif
 
 void Sys_Quit (void)
 {

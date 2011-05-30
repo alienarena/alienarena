@@ -564,7 +564,7 @@ void R_BloomBlend ( refdef_t *fd )
 	sample_width = (BLOOM_SIZE * sampleText_tcw);
 	sample_height = (BLOOM_SIZE * sampleText_tch);
 
-
+	
 	//copy the screen space we'll use to work into the backup texture
 	GL_Bind(r_bloombackuptexture->texnum);
 	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, r_screenbackuptexture_width, r_screenbackuptexture_height );

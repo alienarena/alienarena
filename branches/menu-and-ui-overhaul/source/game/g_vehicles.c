@@ -380,18 +380,24 @@ void Reset_player(edict_t *ent)
 	char		userinfo[MAX_INFO_STRING];
 	int		i, done;
 	char playermodel[MAX_OSPATH] = " ";
-	// char playerskin[MAX_INFO_STRING] = " "; // unused
 	char modelpath[MAX_OSPATH] = " ";
 	FILE *file;
 	char *s;
 
 	//set everything back
-	if(instagib->value)
+	if ( instagib->integer || insta_rockets->integer )
+	{
 		ent->client->newweapon = FindItem("Alien Disruptor");
-	else if(rocket_arena->value)
+	}
+	else if( rocket_arena->integer )
+	{
 		ent->client->newweapon = FindItem("Rocket Launcher");
+	}
 	else
+	{
 		ent->client->newweapon = FindItem("blaster");
+	}
+	assert( ent->client->newweapon != NULL );
 
 	memcpy (userinfo, ent->client->pers.userinfo, sizeof(userinfo));
 	s = Info_ValueForKey (userinfo, "skin");

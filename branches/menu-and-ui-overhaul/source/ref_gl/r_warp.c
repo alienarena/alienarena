@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2011 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -157,14 +158,14 @@ void SubdividePolygon (int numverts, float *verts)
 
 /*
 ================
-GL_SubdivideSurface
+R_SubdivideSurface
 
 Breaks a polygon up along axial 64 unit
 boundaries so that turbulent and sky warps
 can be done reasonably.
 ================
 */
-void GL_SubdivideSurface (msurface_t *fa)
+void R_SubdivideSurface (msurface_t *fa)
 {
 	vec3_t		verts[64];
 	int			numverts;
@@ -212,9 +213,7 @@ EmitWaterPolys
 Does a water warp on the pre-fragmented glpoly_t chain
 =============
 */
-
-extern int KillFlags;
-void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
+void R_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY)
 {
 	glpoly_t	*p;
 	float		*v;
@@ -223,21 +222,14 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 	float		scroll;
 	float		rdt = r_newrefdef.time;
 	vec3_t		nv, tangent;
-	qboolean	fod;
 
 	if (fa->texinfo->flags & SURF_FLOWING)
 		scroll = -64.0f * ((r_newrefdef.time * 0.5f) - (int)(r_newrefdef.time * 0.5f));
 	else
 		scroll = 0.0f;
-
-	//special case - note one day we should find a way to check for contents such as mist to do this.
-	if(!Q_strcasecmp(fa->texinfo->image->name, "textures/arena6/fodblue.wal") || !Q_strcasecmp(fa->texinfo->image->name, "textures/arena5/fod.wal"))
-		fod = true;
-	else
-		fod = false;
-
-	if(!fod && gl_state.glsl_shaders && gl_glsl_shaders->value
-			&& strcmp(fa->texinfo->normalMap->name, fa->texinfo->image->name)) {
+	  
+	if(gl_state.glsl_shaders && gl_glsl_shaders->value
+		&& fa->texinfo->has_normalmap) {
 
 		if (SurfaceIsAlphaBlended(fa))
 			qglEnable( GL_ALPHA_TEST );
@@ -248,29 +240,32 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 
 		GL_EnableMultitexture( true );
 
-		qglActiveTextureARB(GL_TEXTURE1);
+		qglActiveTextureARB(GL_TEXTURE0);
 		qglBindTexture (GL_TEXTURE_2D, fa->texinfo->image->texnum);
-		glUniform1iARB( g_location_baseTexture, 1);
-		KillFlags |= KILL_TMU1_POINTER;
+		glUniform1iARB( g_location_baseTexture, 0);
 
-		glUniform1iARB( g_location_normTexture, 2);
-		qglActiveTextureARB(GL_TEXTURE2);
+		//note - moving this to tmu2 fixed a very odd, obsure bug.  It isn't clear yet why it fixes it, but it does
+		qglActiveTextureARB(GL_TEXTURE1);
 		qglBindTexture(GL_TEXTURE_2D, fa->texinfo->normalMap->texnum);
-		KillFlags |= KILL_TMU2_POINTER;
+		glUniform1iARB( g_location_normTexture, 1);
 
 		if(fa->texinfo->flags &(SURF_TRANS33|SURF_TRANS66))
 			glUniform1iARB( g_location_trans, 1);
 		else
 			glUniform1iARB( g_location_trans, 0);
 
-		if(texnum) {
-			qglActiveTextureARB(GL_TEXTURE3);
-			qglBindTexture(GL_TEXTURE_2D, texnum);
-			glUniform1iARB( g_location_refTexture, 3);
+		qglActiveTextureARB(GL_TEXTURE2);
+		qglBindTexture(GL_TEXTURE_2D, texnum);
+		glUniform1iARB( g_location_refTexture, 2);
+
+		if(texnum)
+		{
 			glUniform1iARB( g_location_reflect, 1);
 		}
 		else
+		{
 			glUniform1iARB( g_location_reflect, 0);
+		}
 			
 		AngleVectors(fa->plane->normal, NULL, tangent, NULL);
 
@@ -291,11 +286,11 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 		if (SurfaceIsAlphaBlended(fa))
 			qglDisable( GL_ALPHA_TEST);
 
-		GL_MBind(GL_TEXTURE0, fa->texinfo->image->texnum);
+		return;
 	}
 	else {
 
-		if (gl_state.fragment_program && !fod)
+		if (gl_state.fragment_program && fa->texinfo->has_normalmap)
 		{
 			qglEnable(GL_FRAGMENT_PROGRAM_ARB);
 			qglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, g_water_program_id);
@@ -319,25 +314,19 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 				os = v[3];
 				ot = v[4];
 
-//	#if !id386
 				s = os + r_turbsin[(int)((ot*0.125+r_newrefdef.time) * TURBSCALE) & 255];
-//	#else
-//				s = os + r_turbsin[Q_ftol( ((ot*0.125+rdt) * TURBSCALE) ) & 255];
-//	#endif
+
 				s += scroll;
 				s *= (1.0/64);
 
-//	#if !id386
 				t = ot + r_turbsin[(int)((os*0.125+rdt) * TURBSCALE) & 255];
-//	#else
-//				t = ot + r_turbsin[Q_ftol( ((os*0.125+rdt) * TURBSCALE) ) & 255];
-//	#endif
+
 				t *= (1.0/64);
 
-				if (gl_state.fragment_program && !fod)
+				if (gl_state.fragment_program)
 				{
-					qglMTexCoord2fSGIS(GL_TEXTURE0, s, t);
-					qglMTexCoord2fSGIS(GL_TEXTURE1, 20*s, 20*t);
+					qglMTexCoord2fARB(GL_TEXTURE0, s, t);
+					qglMTexCoord2fARB(GL_TEXTURE1, 20*s, 20*t);
 				}
 				else
 					qglTexCoord2f (s, t);
@@ -345,21 +334,13 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 				if (!(fa->texinfo->flags & SURF_FLOWING))
 
 				{
-
 					nv[0] =v[0];
 					nv[1] =v[1];
 
-//					#if !id386
 					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
 
 							+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
-/*
-					#else
-					nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+r_newrefdef.time)
 
-							+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
-					#endif
-*/
 					qglVertex3fv (nv);
 				}
 				else
@@ -368,12 +349,9 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 			qglEnd ();
 		}
 
-		if (gl_state.fragment_program && !fod)
+		if (gl_state.fragment_program)
 			qglDisable(GL_FRAGMENT_PROGRAM_ARB);
 	}
-
-	if(fod || (gl_state.glsl_shaders && gl_glsl_shaders->value))
-		return;
 
 	//env map if specified by shader
 	if(texnum)
@@ -397,13 +375,8 @@ void GL_RenderWaterPolys (msurface_t *fa, int texnum, float scaleX, float scaleY
 				nv[0] =v[0];
 				nv[1] =v[1];
 
-//				#if !id386
 				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+r_newrefdef.time)*sin(v[2]*0.05+r_newrefdef.time)
 						+ r_wave->value *sin(v[1]*0.025+r_newrefdef.time*2)*sin(v[2]*0.05+r_newrefdef.time);
-//				#else
-//				nv[2] =v[2] + r_wave->value *sin(v[0]*0.025+rdt)*sin(v[2]*0.05+r_newrefdef.time)
-//						+ r_wave->value *sin(v[1]*0.025+rdt*2)*sin(v[2]*0.05+rdt);
-//				#endif
 
 				qglVertex3fv (nv);
 			}
@@ -897,10 +870,7 @@ void R_SetSky (char *name, float rotate, vec3_t axis)
 		if (gl_skymip->value || skyrotate)
 			gl_picmip->value++;
 
-		if ( qglColorTableEXT && gl_ext_palettedtexture->value )
-			Com_sprintf (pathname, sizeof(pathname), "env/%s%s.pcx", skyname, suf[i]);
-		else
-			Com_sprintf (pathname, sizeof(pathname), "env/%s%s.tga", skyname, suf[i]);
+		Com_sprintf (pathname, sizeof(pathname), "env/%s%s.tga", skyname, suf[i]);
 
 		sky_images[i] = GL_FindImage (pathname, it_sky);
 		if (!sky_images[i])

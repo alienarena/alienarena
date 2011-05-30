@@ -148,6 +148,9 @@ qboolean ACEIT_ChangeWeapon (edict_t *ent, gitem_t *item)
 	// Change to this weapon
 	ent->client->newweapon = item;
 
+	// Make weapon swap visible.	
+	ChangeWeapon( ent );
+
 	return true;
 }
 

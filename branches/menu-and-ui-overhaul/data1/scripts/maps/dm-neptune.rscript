@@ -4,6 +4,15 @@ textures/arena7/light1
 		lensflare
 	}
 }
+textures/arena7/light3
+{
+	{
+		map gfx/bluelightning.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA	
+		alphashift 0 0.4 0.4
+		envmap
+	}
+}
 textures/arena7/light10
 {
 	{

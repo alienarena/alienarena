@@ -261,6 +261,32 @@ static int client_botupdate( void )
 	return botnum;
 }
 
+/**
+ * \brief Update bot info in client records
+ *
+ * \detail  Intended to be called once per frame, in RunFrame. First client
+ *          record should always have current bot info, so that server status
+ *          shows bots even when in intermission.
+ *          In ACE debug mode, reports when bot count changes. ACE debug mode
+ *          is controlled with "sv acedebug on","sv acedebug off"
+ *
+ */
+void ACESP_UpdateBots( void )
+{
+	static int prev_count = 0;
+	int count;
+
+	/* count bots, and, in debug mode, output changes. */
+	count = client_botupdate();
+	if ( debug_mode )
+	{
+		if ( count != prev_count )
+			debug_printf("Bot count %i to %i\n", prev_count, count );
+	}
+	prev_count = count;
+
+}
+
 /*
 ======
  ACESP_SaveBots
@@ -514,7 +540,7 @@ static void loadbots_team_botkick( edict_t *ent )
 	}
 }
 
-static void loadbots_team( edict_t *ent )
+static void loadbots_team( void )
 {
 	char userinfo[MAX_INFO_STRING];
 	char *name;
@@ -545,7 +571,7 @@ static void loadbots_team( edict_t *ent )
 	}
 }
 
-static void loadbots_nonteam_botkick( edict_t *ent )
+static void loadbots_nonteam_botkick( void )
 {
 	char userinfo[MAX_INFO_STRING];
 	char *name;
@@ -625,7 +651,7 @@ static void loadbots_nonteam_botkick( edict_t *ent )
 	}
 }
 
-static void loadbots_nonteam( edict_t *ent )
+static void loadbots_nonteam( void )
 {
 	char userinfo[MAX_INFO_STRING];
 	char *name;
@@ -676,7 +702,7 @@ void ACESP_LoadBots( edict_t *ent )
 		}
 		else
 		{
-			loadbots_nonteam_botkick( ent );
+			loadbots_nonteam_botkick();
 		}
 	}
 	else
@@ -688,11 +714,11 @@ void ACESP_LoadBots( edict_t *ent )
 		 */
 		if ( TEAM_GAME )
 		{
-			loadbots_team( ent );
+			loadbots_team();
 		}
 		else
 		{
-			loadbots_nonteam( ent );
+			loadbots_nonteam();
 		}
 	}
 
@@ -772,13 +798,14 @@ void ACECO_ReadConfig( char *config_file )
 	char *buffer;
 	char *s;
 	const char *delim = "\r\n";
+	float tmpf;
 
 	//set bot defaults(in case no bot config file is present for that bot)
 	botvals.skill = 1; //medium
 	strcpy(botvals.faveweap, "None");
-	for(k = 1; k < 10; k++)
-		botvals.weapacc[k] = 1.0;
-	botvals.awareness = 0.7;
+	for ( k = 1; k < 10; k++ )
+		botvals.weapacc[k] = 0.75;
+	botvals.awareness = 0.7; // 0.7 is 145 degree FOV
 
 	strcpy( botvals.chatmsg1, "%s: You are a real jerk %s!"    );
 	strcpy( botvals.chatmsg2, "%s: Wait till next time %s."    );
@@ -803,7 +830,7 @@ void ACECO_ReadConfig( char *config_file )
 		fclose( fp );
 		return;
 	}
-	if ( (length = ftell(fp)) < 0L )
+	if ( (length = ftell(fp)) == (size_t)-1L )
 	{ // tell error
 		fclose( fp );
 		return;
@@ -831,17 +858,34 @@ void ACECO_ReadConfig( char *config_file )
 	// note: malloc'd buffer is modified by strtok
 	if ( (s = strtok( buffer, delim )) != NULL )
 		botvals.skill = atoi( s );
+	if ( botvals.skill < 0 )
+		botvals.skill = 0;
 
 	if ( s &&  ((s = strtok( NULL, delim )) != NULL) )
 		strncpy( botvals.faveweap, s, sizeof(botvals.faveweap)-1 );
 
-	for(k = 1; k < 10; k++) {
+	for(k = 1; k < 10; k++)
+	{
 		if ( s && ((s = strtok( NULL, delim )) != NULL ) )
-			botvals.weapacc[k] = atof( s );
+		{
+			tmpf = atof( s );
+			if ( tmpf < 0.5f )
+				tmpf = 0.5f;
+			else if (tmpf > 1.0f )
+				tmpf = 1.0f;
+			botvals.weapacc[k] = tmpf;
+		}
 	}
 
 	if ( s && ((s = strtok( NULL, delim)) != NULL) )
-		botvals.awareness = atof( s );
+	{
+		tmpf = atof( s );
+		if ( tmpf < 0.1f )
+			tmpf = 0.1f;
+		else if ( tmpf > 1.0f )
+			tmpf = 1.0f;
+		botvals.awareness = tmpf;
+	}
 
 	if ( s && ((s = strtok( NULL, delim)) != NULL) )
 		strncpy( botvals.chatmsg1, s, sizeof(botvals.chatmsg1)-1 );
@@ -1032,7 +1076,8 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	Q2_FindFile (modelpath, &file);
 	if(file) { //human
 		bot->ctype = 1;
-		if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
+		if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value)) 
+		{
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 				client->pers.inventory[armor_index] += 30;
 				client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
@@ -1049,7 +1094,8 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		Q2_FindFile (modelpath, &file);
 		if(file) { //robot
 			bot->ctype = 2;
-			if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
+			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value)) 
+			{
 				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 85;
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 				client->pers.inventory[armor_index] += 175;
@@ -1057,7 +1103,8 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 			fclose(file);
 		}
 		else { //alien
-			if(classbased->value && !(rocket_arena->value || instagib->value || excessive->value)) {
+			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value)) 
+			{
 				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 150;
 				client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
 				client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = 100;
@@ -1099,8 +1146,13 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	bot->next_move_time = level.time;
 	bot->suicide_timeout = level.time + 15.0;
 
-	if(!respawn) {
-		//if not a respawn, load bot configuration file(specific to each bot)
+	if ( !respawn )
+	{
+		/*
+		 * on initial spawn, load bot configuration
+		 * from botinfo/<botname>.cfg file
+		 * ReadConfig sets defaults if there is no such file.
+		 */
 		info = Info_ValueForKey (bot->client->pers.userinfo, "name");
 		sprintf( bot_configfilename, BOT_GAMEDATA"/%s.cfg", info );
 		ACECO_ReadConfig(bot_configfilename);
@@ -1110,7 +1162,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		strcpy(bot->faveweap, botvals.faveweap);
 		for(k = 1; k < 10; k++)
 			bot->weapacc[k] = botvals.weapacc[k];
-		bot->accuracy = 1.0; //start with this(changes when bot selects a weapon
+		bot->accuracy = 0.75; //start with this(changes when bot selects a weapon
 		bot->awareness = botvals.awareness;
 		strcpy(bot->chatmsg1, botvals.chatmsg1);
 		strcpy(bot->chatmsg2, botvals.chatmsg2);
@@ -1121,17 +1173,38 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		strcpy(bot->chatmsg7, botvals.chatmsg7);
 		strcpy(bot->chatmsg8, botvals.chatmsg8);
 
-		//allow skill level settings to affect overall skills(single player games)
-		if(skill->value == 0.0) {
+		/*
+		 * adjust skill according to cvar. Single Player menu selections
+		 *  force the cvar.
+		 *   0 : forces all to 0 skill (single player easy)
+		 *   1 : skill is cfg setting  (single player medium)
+		 *   2 : skill is cfg setting setting plus 1 (single player hard)
+		 *   3 : forces all to skill 3
+		 */
+		if( skill->integer == 0 )
+		{
 			bot->skill = 0; //dumb as a box of rocks
 		}
-		if(skill->value == 2.0) {
+		else if ( skill->integer == 2 )
+		{
 			bot->skill += 1;
 			if(bot->skill > 3)
 				bot->skill = 3;
 		}
+		else if ( skill->integer >= 3 )
+		{
+			bot->skill = 3;
+		}
 
-
+		/*
+		 * clear the weapon accuracy statistics.
+		 * for testing aim related settings.
+		 */
+		for(i = 0; i < 9; i++)
+		{
+			client->resp.weapon_shots[i] = 0;
+			client->resp.weapon_hits[i] = 0;
+		}
 	}
 
 	// If we are not respawning hold off for up to three seconds before releasing into game
@@ -1260,7 +1333,7 @@ void ACESP_SetName(edict_t *bot, char *name, char *skin, char *userinfo )
 		strcpy(playerskin, " ");
 		strcpy(playermodel, " ");
 		j = k = 0;
-		for(i = 0; i <= strlen(skin2) && i < MAX_INFO_STRING; i++)
+		for(i = 0; i <= (int)strlen(skin2) && i < MAX_INFO_STRING; i++)
 		{
 			if(copychar){
 				playerskin[k] = skin2[i];

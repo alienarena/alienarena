@@ -1,3 +1,26 @@
+/*
+Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 1998 Steve Yeager
+Copyright (C) 2010 COR Entertainment, LLC.
+
+See below for Steve Yeager's original copyright notice.
+Modified to GPL in 2002.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
 ///////////////////////////////////////////////////////////////////////
 //
 //  ACE - Quake II Bot Base Code
@@ -203,6 +226,13 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	trace_t traceRight,traceLeft,traceUp, traceFront; // for eyesight
 
 	// Get current angle and set up "eyes"
+
+/* make sure bot's "eyes" are straight ahead
+ * something is going wrong after rocket jump, and "eyes" are always down
+ * and bot runs in circle.
+ */
+	self->s.angles[PITCH] = 0.0f;
+
 	VectorCopy(self->s.angles,dir);
 	AngleVectors (dir, forward, right, NULL);
 
@@ -229,9 +259,9 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	}
 
 	// If this check fails we need to continue on with more detailed checks
-	if(traceFront.fraction == 1)
+	if ( traceFront.fraction >= 1.0f )
 	{
-		if(ACEMV_CanMove(self, MOVE_FORWARD))
+		if ( ACEMV_CanMove( self, MOVE_FORWARD ) )
 			ucmd->forwardmove = 400;
 		return true;
 	}
@@ -265,7 +295,7 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 		traceUp = gi.trace(upstart, NULL, NULL, upend, self, BOTMASK_OPAQUE);
 
 		// If the upper trace is not open, we need to turn.
-		if(traceUp.fraction != 1)
+		if(traceUp.fraction < 1.0f )
 		{
 			if(traceRight.fraction > traceLeft.fraction)
 				self->s.angles[YAW] += (1.0 - traceLeft.fraction) * 45.0;
@@ -314,15 +344,15 @@ void ACEMV_ChangeBotAngle (edict_t *ent)
 		speed = ent->yaw_speed;
 		if (ideal_yaw > current_yaw)
 		{
-			if (move >= 180)
-				move = move - 360;
+			if (move >= 180.0f)
+				move = move - 360.0f;
 		}
 		else
 		{
-			if (move <= -180)
-				move = move + 360;
+			if (move <= -180.0f)
+				move = move + 360.0f;
 		}
-		if (move > 0)
+		if (move > 0.0f)
 		{
 			if (move > speed)
 				move = speed;
@@ -342,15 +372,15 @@ void ACEMV_ChangeBotAngle (edict_t *ent)
 		speed = ent->yaw_speed;
 		if (ideal_pitch > current_pitch)
 		{
-			if (move >= 180)
-				move = move - 360;
+			if (move >= 180.0f)
+				move = move - 360.0f;
 		}
 		else
 		{
-			if (move <= -180)
-				move = move + 360;
+			if (move <= -180.0f)
+				move = move + 360.0f;
 		}
-		if (move > 0)
+		if (move > 0.0f)
 		{
 			if (move > speed)
 				move = speed;
@@ -710,6 +740,60 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 
 }
 
+/* constants for target fuzzification */
+static const float ktgt_scale = 60.0f;
+static const float ktgt_div   = 50.0f;
+static const float ktgt_ofs   = 20.0f;
+
+/**
+ * @brief  Apply some imprecision to an attacking bot's aim
+ *
+ * @detail Uses a randomly oriented X,Y vector with a length
+ *         distribution calculated using the formula for
+ *         a parabola. Leaves a hole around the center of
+ *         the target, but with higher density nearer the center.
+ *
+ * @param self entity for the bot
+ * @param pdx  x for targeted enemy's origin
+ * @param pdy  y for targeted enemy's origin
+ *
+ * @return  *pdx and *pdy altered
+ */
+static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
+{
+	float accuracy;
+	float random_r;
+	float radius;
+	float angle;
+	float ca,sa;
+	float dx,dy;
+
+	/*
+	 * self->accuracy is weapon specific accuracy from bot configuration
+	 * default is 0.75 (formerly 1.0)
+	 */
+	if ( self->accuracy < 0.5f )
+		self->accuracy = 0.5f;
+	else if ( self->accuracy > 1.0f )
+		self->accuracy = 1.0f;
+
+	accuracy = ( 12.0f / self->accuracy ) - 4.0f;
+	random_r = ktgt_scale * crandom();
+	radius = ((random_r * random_r ) / ( ktgt_div - accuracy )) + ktgt_ofs;
+	angle = random() * 2.0f * M_PI;
+	fast_sincosf( angle, &sa, &ca );
+	*pdx += dx = ca * radius;
+	*pdy += dy = sa * radius;
+
+/*
+	if ( debug_mode )
+	{
+		gi.dprintf("{\t%0.2f\t%0.2f\tacc%0.1f\t}\n", dx, dy, accuracy );
+	}
+*/
+
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Attack movement routine
 ///////////////////////////////////////////////////////////////////////
@@ -718,14 +802,21 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 	float c, d;
 	vec3_t  target;
 	vec3_t  angles;
-	vec3_t	down, right;
+	vec3_t down;
 	int strafespeed;
 	float jump_thresh;
 	float crouch_thresh;
-	float aim;
 	gitem_t *vehicle;
 	float range = 0.0f;
 	vec3_t v;
+	qboolean use_fuzzy_aim;
+
+	ucmd->buttons = 0;
+	use_fuzzy_aim = true; // unless overridden by special cases
+	if ( dmflags->integer & DF_BOT_FUZZYAIM )
+	{ // when bit is set it means fuzzy aim is disabled. for testing mostly.
+		use_fuzzy_aim = false;
+	}
 
 	vehicle = FindItemByClassname("item_bomber");
 
@@ -742,138 +833,170 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 		}
 	}
 
-	switch(self->skill){ //set up the skill levels;
+	switch ( self->skill )
+	{ // set up the skill levels
 	case 0:
-		strafespeed = 300;
-		jump_thresh = 1.0;
-		crouch_thresh = 0.95;
-		aim = 100;
+		strafespeed   = 300;
+		jump_thresh   = 1.0f;  // never jump
+		crouch_thresh = 0.95f; // crouch much
 		break;
+
 	case 1:
-		strafespeed = 400;
-		jump_thresh = 0.95;
-		crouch_thresh = 0.85;
-		aim = 40;
+	default:
+		strafespeed   = 400;
+		jump_thresh   = 0.95f;
+		crouch_thresh = 0.85f;
 		break;
+
 	case 2:
 	case 3:
 		strafespeed = 800;
-		if(!joustmode->value) {
-			jump_thresh = 0.8;
-			crouch_thresh = 0.7;
+		if ( !joustmode->integer )
+		{
+			jump_thresh   = 0.8f;
+			crouch_thresh = 0.7f;
 		}
-		else {
-			jump_thresh = 0.5; //want to jump a whole lot more in joust mode
-			crouch_thresh = 0.4;
+		else
+		{
+			jump_thresh   = 0.5f; // want to jump a whole lot more in joust mode
+			crouch_thresh = 0.4f; // and crouch less
 		}
-		aim = 20;
-		break;
-	default:
-		strafespeed = 400;
-		jump_thresh = 0.95;
-		crouch_thresh = 0.85;
-		aim = 40;
 		break;
 	}
 
-	if(self->accuracy < 0.5)
-		self->accuracy = 0.5; //just a failsafe(don't want it crazily inaccurate)
-	// Randomly choose a movement direction
-	d = random();
-	c = random();
+	d = random(); // for skill 0 movement
+	c = random(); // for strafing, jumping, crouching
 
-
-	//violator attack
-
-
-	if (self->client->pers.weapon == FindItem("Violator")) {
-		if(ACEMV_CanMove(self,MOVE_FORWARD))
+	// violator attack
+	if ( self->client->pers.weapon == FindItem( "Violator" ) )
+	{
+		use_fuzzy_aim = false; // avoid potential odd melee attack behaviour
+		if ( ACEMV_CanMove( self, MOVE_FORWARD ) )
 			ucmd->forwardmove += 400; //lunge at enemy
 		goto attack;
 	}
 
 	//machinegun/blaster/beamgun strafing for level 3 bots
-	if(!joustmode->value && self->skill == 3  && (self->client->pers.weapon == FindItem("blaster") || self->client->pers.weapon == FindItem("Pulse Rifle") || self->client->pers.weapon == FindItem("Disruptor")) )
-
+	if ( !joustmode->value
+			&& self->skill >= 2
+			&& (self->client->pers.weapon == FindItem( "blaster" )
+					|| self->client->pers.weapon == FindItem( "Pulse Rifle" )
+					|| self->client->pers.weapon == FindItem( "Disruptor" )))
 	{
 		//strafe no matter what
-
-		if(c < 0.5 && ACEMV_CanMove(self,MOVE_LEFT)) {
-		ucmd->sidemove -= 400;
-
+		if ( c < 0.5f && ACEMV_CanMove( self, MOVE_LEFT ) )
+		{
+			ucmd->sidemove -= 400;
 		}
-		else if(c < 1 && ACEMV_CanMove(self,MOVE_RIGHT)) {
+		else if ( c < 1.0f && ACEMV_CanMove( self, MOVE_RIGHT ) )
+		{
 			ucmd->sidemove += 400;
-
 		}
 		else
-			goto standardmove; //don't want high skill level bots just standing around
+		{ //don't want high skill level bots just standing around
+			goto standardmove;
+		}
 
 		//allow for some circle strafing
-		if(self->health < 50 && ACEMV_CanMove(self,MOVE_BACK))
+		if ( self->health < 50 && ACEMV_CanMove( self, MOVE_BACK ) )
+		{
 			ucmd->forwardmove -= 400;
-		else if(c < 0.6 && ACEMV_CanMove(self,MOVE_FORWARD)) //keep this at default, not make them TOO hard
+		}
+		else if ( c < 0.6f && ACEMV_CanMove( self, MOVE_FORWARD ) )
+		{ //keep this at default, not make them TOO hard
 			ucmd->forwardmove += 400;
-		else if(c < 0.8 && ACEMV_CanMove(self,MOVE_BACK))
+		}
+		else if ( c < 0.8f && ACEMV_CanMove( self, MOVE_BACK ) )
+		{
 			ucmd->forwardmove -= 400;
-		goto attack; //skip any jumping or crouching
-
+		}
+		goto attack;
+		//skip any jumping or crouching
 	}
 
-	if(self->skill == 0 && d < 0.9)
+	if ( self->skill == 0 && d < 0.9f )
 		goto attack; //skill 0 bots will barely move while firing
 
 standardmove:
 
-	if(c < 0.2 && ACEMV_CanMove(self,MOVE_LEFT)) {
-		ucmd->sidemove -= strafespeed; //300 for low skill 800 for hardest(3 levels?)
-
+	if ( c < 0.2f && ACEMV_CanMove( self, MOVE_LEFT ) )
+	{
+		ucmd->sidemove -= strafespeed;
+		//300 for low skill 800 for hardest(3 levels?)
 	}
-	else if(c < 0.4 && ACEMV_CanMove(self,MOVE_RIGHT)) {
+	else if ( c < 0.4f && ACEMV_CanMove( self, MOVE_RIGHT ) )
+	{
 		ucmd->sidemove += strafespeed;
-
 	}
 
-	if(self->health < 50 && ACEMV_CanMove(self,MOVE_BACK)) //run away if wounded
+	if ( self->health < 50 && ACEMV_CanMove( self, MOVE_BACK ) )
+	{ //run away if wounded
 		ucmd->forwardmove -= 400;
-	else if(c < 0.6 && ACEMV_CanMove(self,MOVE_FORWARD)) //keep this at default, not make them TOO hard
+	}
+	else if ( c < 0.6f && ACEMV_CanMove( self, MOVE_FORWARD ) )
+	{ //keep this at default, not make them TOO hard
 		ucmd->forwardmove += 400;
-	else if(c < 0.8 && ACEMV_CanMove(self,MOVE_BACK))
+	}
+	else if ( c < 0.8f && ACEMV_CanMove( self, MOVE_BACK ) )
+	{
 		ucmd->forwardmove -= 400;
+	}
 
 	c = random(); //really mix this up some
-	if(self->health >= 50 && c < crouch_thresh)  //raise this number to make them crouch alot(lower skills)
+	if ( self->health >= 50 && c < crouch_thresh )
+	{
+		//raise this number to make them crouch alot(lower skills)
 		ucmd->upmove -= 200;
-	else if(self->health >= 50 && c < jump_thresh && !self->in_vehicle && !self->in_deathball){  //lets add a rocket jump
+	}
+	else if ( c > jump_thresh )
+	{
 		c = random();
-		if((self->skill >= 2) && (c < 0.6) && (self->health > 70) && (ACEIT_ChangeWeapon(self,FindItem("Rocket Launcher")))) {
-			self->s.angles[PITCH] = 90;
-			AngleVectors (self->s.angles, down, right, NULL);
-			fire_rocket (self, self->s.origin, down, 200, 650, 120, 120);
+		if ( self->health >= 70
+				&& self->skill >= 2
+		        && !self->in_vehicle && !self->in_deathball
+		        && ACEIT_ChangeWeapon( self, FindItem( "Rocket Launcher" ) )
+		        && c < 0.6f )
+		{ // Rocket Jump
+			self->s.angles[PITCH] = 90.0f;
+			AngleVectors( self->s.angles, down, NULL, NULL );
+			fire_rocket( self, self->s.origin, down, 200, 650, 120, 120 );
 			ucmd->upmove += 200;
-			self->s.angles[PITCH] = 0; //put it back
-			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
+			self->s.angles[PITCH] = 0.0f;
+			if ( (!(dmflags->integer & DF_INFINITE_AMMO))
+			        && !rocket_arena->integer && !insta_rockets->integer )
+			{
 				self->client->pers.inventory[self->client->ammo_index]--;
+			}
 			return;
 		}
 		else
-			ucmd->upmove += 200; //normal jumping
+		{ // Normal Jump
+			ucmd->upmove += 200;
+		}
 	}
+
 attack:
 	// Set the attack
 	if(ACEAI_CheckShot(self)) {
+
 		//bot is taking a shot, lose spawn protection
+		// and calculate distance to enemy
+		range = 0.0f;
 		if(self->enemy)
+		{
 			self->client->spawnprotected = false;
+			VectorSubtract (self->s.origin, self->enemy->s.origin, v);
+			range = VectorLength(v);
+			if ( range < 32.0f )
+			{ // point blank range, avoid potentially odd behaviour
+				use_fuzzy_aim = false;
+			}
+		}
+
 		if(self->skill == 3) { //skill 3 bots can use alt-fires!
 
 			// Base selection on distance.
 			ucmd->buttons = BUTTON_ATTACK;
-
-			if(self->enemy) { //just in case there isn't one, though that should never happen
-				VectorSubtract (self->s.origin, self->enemy->s.origin, v);
-				range = VectorLength(v);
-			}
 
 			if (self->client->pers.weapon == FindItem("blaster")) {
 				if( range > 500)
@@ -885,8 +1008,8 @@ attack:
 			if (self->client->pers.weapon == FindItem("alien disruptor")) {
 				if(range > 1000) {
 					ucmd->buttons = BUTTON_ATTACK2;
-					aim = 10; //make it more accurate, since he's sniping
-					self->accuracy = 1;
+					use_fuzzy_aim = false;
+					//make it more accurate, since he's sniping
 				}
 				else
 					ucmd->buttons = BUTTON_ATTACK;
@@ -936,23 +1059,23 @@ attack:
 			}
 		}
 		else
+		{
 			ucmd->buttons = BUTTON_ATTACK;
+		}
 	}
 	else
+	{ // not taking a shot
 		ucmd->buttons = 0;
+		use_fuzzy_aim = false;
+	}
 
 	// Aim
 	VectorCopy(self->enemy->s.origin,target);
-
-	// modify attack angles based on accuracy (mess this up to make the bot's aim not so deadly)
-    // skill level determines overall accuracy.  Each weapon can be additionally tweaked.
-	if (((int)(dmflags->value) & DF_BOT_FUZZYAIM))
-		aim = 0; //only crazy people would not be running fuzzy aim!
-
-	target[0] += (random()-0.5) * (aim/self->accuracy);
-	target[1] += (random()-0.5) * (aim/self->accuracy);
-
-	// Set direction
+	if ( use_fuzzy_aim  )
+	{
+		fuzzy_target( self, &target[0], &target[1] );
+	}
+	// Set movement direction toward targeted enemy
 	VectorSubtract (target, self->s.origin, self->move_vector);
 	vectoangles (self->move_vector, angles);
 	VectorCopy(angles,self->s.angles);

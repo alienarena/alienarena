@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 int			gun_frame;
 struct model_s	*gun_model;
+//=============
 
 int r_numflares;
 flare_t r_flares[MAX_FLARES];
@@ -41,9 +42,6 @@ grass_t r_grasses[MAX_GRASSES];
 int r_numbeams;
 beam_t	r_beams[MAX_BEAMS];
 
-qboolean need_free_vbo;
-
-//=============
 extern cvar_t *cl_showPlayerNames;
 extern cvar_t *name;
 extern char map_music[128];
@@ -909,9 +907,6 @@ void V_RenderView( float stereo_separation )
 
 	cl.refdef.rdflags |= RDF_BLOOM;   //BLOOMS
 
-//	R_VCFreeFrame();
-//	need_free_vbo = false;
-
 	R_RenderFrame (&cl.refdef);
 	if (cl_stats->value)
 		Com_Printf ("ent:%i  lt:%i  part:%i\n", r_numentities, r_numdlights, r_numparticles);
@@ -932,17 +927,18 @@ void V_RenderView( float stereo_separation )
 
 }
 
-
-/*
-=============
-V_Viewpos_f
-=============
-*/
+/**
+ * \brief Console output of position and orientation
+ *
+ * Target of 'viewpos' command. Modified 2011-02. Added pitch.
+ * Helps with repeatable positioning for timerefresh command
+ * and other performance testing.
+ */
 void V_Viewpos_f (void)
 {
-	Com_Printf ("(%i %i %i) : %i\n", (int)cl.refdef.vieworg[0],
-		(int)cl.refdef.vieworg[1], (int)cl.refdef.vieworg[2],
-		(int)cl.refdef.viewangles[YAW]);
+	Com_Printf ("x:%#1.0f y:%#1.0f z:%#1.0f yaw:%#1.0f pitch:%#1.0f\n",
+		cl.refdef.vieworg[0], cl.refdef.vieworg[1], cl.refdef.vieworg[2],
+		cl.refdef.viewangles[YAW], cl.refdef.viewangles[PITCH] );
 }
 
 /*

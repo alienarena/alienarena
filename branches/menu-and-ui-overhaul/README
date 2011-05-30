@@ -1,6 +1,6 @@
 
                          Alien Arena 2011
-                           Version 7.50
+                           Version 7.51
 
 1. Scope
 
@@ -26,7 +26,19 @@ This information is for packagers and those who have a previous
 installation of Alien Arena.  (If this does not apply to you, it
 is safe to skip to the next topic: Installation.)
 
-Briefly, important differences are:
+Version 7.51 has improved performance, bug fixes, plus new and
+updated game assets.  Significant changes from Version 7.50 that
+are related to building and installing the game are:
+
+  * The Open Dynamics Engine (ODE) is integrated with the main program;
+    so libode is no longer a required dependency. But, g++ and libstdc++
+    are required to build and link the integrated ODE.
+  * A configure option to disable document installation is added.
+  * An installation path for the icon, icondir, is added and the icon is
+    renamed to alienarena.png.
+  * The server terminal may be configured to support color output.
+
+Briefly, important differences in previous Version 7.50 are:
 
   * Alien Arena 2011 uses a GNU Autotools build and install.
   * The game.so shared library no longer exists.
@@ -34,7 +46,8 @@ Briefly, important differences are:
   * The dedicated server has been renamed to crx-ded.
   * There is an dedicated-server-only build option.
   * There is an "alternate" single directory install option.
-  * Additional dependency: Open Dynamics Engine (libode).
+  * Additional dependency: Open Dynamics Engine (libode)
+    (optional in 7.51).
   * Additional dependency: FreeType 2 (libfreetype).
 
 Warning: The game.so library is no longer a separate module.  If
@@ -84,11 +97,12 @@ name, and left click on "Extract Here."
 
 If the installation fails, check the error message for required
 software packages that may be missing.  Alien Arena uses: X11,
-OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, ODE (Open
-Dynamics Engine), and JPEG.  For Ubuntu and similar systems, see
-the topic, "Getting Required Packages with Synaptic", below.
+OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, and JPEG.
+Version 7.50 requires Open Dynamic Engine (ODE), but Version 7.51
+does not.  For Ubuntu and similar systems, see the topic,
+"Getting Required Packages with Synaptic", below.
 
-Using the terminal, change to the alienarena-7.50 directory and
+Using the terminal, change to the alienarena-7.51 directory and
 enter these commands:
   $ ./configure
   $ make
@@ -105,7 +119,7 @@ Command line options to crx are NOT standard.  There is NO
 Quake 2 roots.  Command line options are the same as console
 commands using a '+' character prefix.  The details are beyond
 the scope of this document; but a simple example is:
-  $ crx +set game arena +set maxclients 10
+  $ crx +set maxclients 10
 
 By default, 'sudo make install' will install the game programs
 and data like this:
@@ -116,13 +130,14 @@ and data like this:
       crx-ded  (dedicated server)
     share/
       alienarena/
-        aa.png  (icon)
         arena/
         botinfo/
         data1/
       doc/
         alienarena/
           <various documents>
+      icons/
+        alienarena.png
 
 When the program is run, a directory is created in the user HOME
 directory.  Various kinds of data (config files, downloaded data,
@@ -166,23 +181,38 @@ Ubuntu 10.10.
   libx11-dev
   libgl1-mesa-dev
   libxxf86vm-dev
-  libxxf86dga-dev
+  libxxf86dga-dev (optional)
   libopenal-dev
   libjpeg8-dev (or libjpeg62-dev)
   libvorbis-dev
   libcurl4-gnutls-dev
-  libode-dev
+  libode-dev (optional)
   libfreetype6-dev
 
 
 5. Troubleshooting Tips
 
-When the game exits, it stores settings in config.cfg.  This file
-is /home/<user>/.codered/arena/.  Sometimes it helps to delete
-config.cfg, and then re-enter menu settings.  For persistent
-storage of custom settings, create a file named autoexec.cfg in
-the same directory as config.cfg.  Settings in autoexec.cfg will
-override settings in config.cfg.
+When the game exits, it stores settings in config.cfg.  The
+default location for this file is /home/<user>/.codered/arena/
+(might be in .alienarena rather than .codered).  Sometimes it
+helps to delete config.cfg, and then re-enter menu settings.  For
+persistent storage of custom settings, create a file named
+autoexec.cfg in the same directory as config.cfg.  Settings in
+autoexec.cfg will override settings in config.cfg.
+
+If the game does not run smoothly, graphics settings may need to
+be adjusted.  Also, a different or updated video driver may be
+needed.  Enable the frame rate display in the "Game Options" menu
+by setting "display fps" to yes.  There are settings in both the
+"Game Options" and "Video Options" sections that affect
+performance.  The maximum frame rate is set with the console
+variable ("cvar"), cl_maxfps.  Sometimes lowering that from the
+default "90" will help.  (Except for local testing, do not set
+cl_maxfps higher than 145).  Get more information on the Forum,
+Websites, and IRC channel.
+
+If you have errors that output messages about "ODE", setting the
+"ragdolls" option to off in the Game Options menu may help.
 
 There are known sound problems related to PulseAudio and OpenAL
 on some systems.  Check
@@ -194,6 +224,18 @@ The mouse may behave badly (always pointing up, for instance).
 This can usually be fixed by setting the console variable (cvar),
 in_dgamouse, to zero.  Put this line into the autoexec.cfg file:
   set in_dgamouse "0"
+Alternatively, when building the program, use this configure
+option:
+  --without-xf86dga
+
+For advanced users only (if you do not know what this means, do
+not try it): Testing shows that some CFLAGS settings can give a
+little performance improvement.  Some to try, depending on system
+hardware are:
+  * -O3
+  * -march=core2
+  * -msse or -msse2 or -msse3
+  * -fpmath=sse
 
 
 6. Custom Configure Options
@@ -212,13 +254,40 @@ By default, configure produces a status message giving
 information on the configuration.  To hide that message, use:
   --disable-build-status
 
-To rename the programs, use the standard configure option. For
+To rename the programs, use the standard configure option.  For
 example:
   --program-transform-name='s/crx/alienarena/'
 
 To install to a different location, use the standard configure
-option. For example:
+option.  For example:
   --prefix=/usr/local/games
+
+To specify an installation location for the icon, use the
+following option.
+  --with-icondir=DIR
+
+To use the system-supplied libode, rather than the integrated
+ODE, use this option:
+  --with-system-libode
+Due to variations in the way libode may be built, this is deemed
+an "unsupported" option.  The integrated ODE is built using these
+compile options:
+  * -DdDOUBLE
+  * -DdTRIMESH_ENABLED
+  * -DdTRIMESH_OPCODE
+  * -DNDEBUG and -DdNODEBUG
+Using a libode built with -DdSINGLE makes ragdolls excessively
+"raggedy".  Other variations will likely result in program
+failure.
+
+To disable installation of documents, use the following option.
+  --disable-documents
+
+The server terminal will output color if the following option is
+used.  This converts Quake-style color codes to ANSI color
+escapes.  (It is not enabled by default because some terminal
+configurations may not support ANSI color escapes.)
+  --enable-ansi-color
 
 Other Alien Arena custom options are intended mostly for
 developer use.  If you use them, it is assumed that you know what

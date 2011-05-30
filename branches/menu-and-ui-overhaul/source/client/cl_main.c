@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2011 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -164,7 +165,7 @@ extern	char map_music[128];
 extern void RS_FreeAllScripts(void);
 
 typedef struct _PLAYERINFO {
-	char playername[PLAYERNAME_SIZE]; // TODO: verify 2010-11 was 16
+	char playername[PLAYERNAME_SIZE];
 	int ping;
 	int score;
 } PLAYERINFO;
@@ -780,61 +781,6 @@ void CL_Disconnect_f (void)
 
 
 /*
-====================
-CL_Packet_f
-
-packet <destination> <contents>
-
-Contents allows \n escape character
-====================
-*/
-#if 0
-// disabled, not used
-void CL_Packet_f (void)
-{
-	char	send[2048];
-	int		i, l;
-	char	*in, *out;
-	netadr_t	adr;
-
-	if (Cmd_Argc() != 3)
-	{
-		Com_Printf ("packet <destination> <contents>\n");
-		return;
-	}
-
-	NET_Config (true);		// allow remote
-
-	if (!NET_StringToAdr (Cmd_Argv(1), &adr))
-	{
-		Com_Printf ("Bad address\n");
-		return;
-	}
-	if (!adr.port)
-		adr.port = BigShort (PORT_SERVER);
-
-	in = Cmd_Argv(2);
-	out = send+4;
-	send[0] = send[1] = send[2] = send[3] = (char)0xff;
-
-	l = strlen (in);
-	for (i=0 ; i<l ; i++)
-	{
-		if (in[i] == '\\' && in[i+1] == 'n')
-		{
-			*out++ = '\n';
-			i++;
-		}
-		else
-			*out++ = in[i];
-	}
-	*out = 0;
-
-	NET_SendPacket (NS_CLIENT, out-send, send, adr);
-}
-#endif
-
-/*
 =================
 CL_Changing_f
 
@@ -1110,7 +1056,8 @@ void CL_ConnectionlessPacket (void)
 
 	Com_Printf ("%s: %s\n", NET_AdrToString (net_from), c);
 
-	if(!strncmp(c, "servers", 7)) {
+	if(!strncmp(c, "servers", 7))
+	{
 		CL_ParseGetServersResponse();
 		return;
 	}
@@ -1274,9 +1221,10 @@ void CL_FixUpGender(void)
 	char *p;
 	char sk[80];
 
-	if (gender_auto->value) {
-
-		if (gender->modified) {
+	if (gender_auto->value)
+	{
+		if (gender->modified)
+		{
 			// was set directly, don't override the user
 			gender->modified = false;
 			return;
@@ -1360,17 +1308,35 @@ void CL_RequestNextDownload (void)
 	}
 
 redoSkins:
-	if (precache_check >= CS_MODELS && precache_check < CS_MODELS+MAX_MODELS) {
-		if (allow_download_models->value) {
+	if (precache_check >= CS_MODELS && precache_check < CS_MODELS+MAX_MODELS)
+	{
+		if (allow_download_models->value)
+		{
 			while (precache_check < CS_MODELS+MAX_MODELS &&
-				cl.configstrings[precache_check][0]) {
+				cl.configstrings[precache_check][0])
+			{
 				if (cl.configstrings[precache_check][0] == '*' ||
-					cl.configstrings[precache_check][0] == '#') {
+					cl.configstrings[precache_check][0] == '#')
+				{
 					precache_check++;
 					continue;
 				}
-				if (precache_model_skin == 0) {
-					if (!CL_CheckOrDownloadFile(cl.configstrings[precache_check])) {
+				//do not download player models from this section
+				else if (cl.configstrings[precache_check][0] == 'p' &&
+					cl.configstrings[precache_check][1] == 'l' &&
+					cl.configstrings[precache_check][2] == 'a' &&
+					cl.configstrings[precache_check][3] == 'y' &&
+					cl.configstrings[precache_check][4] == 'e' &&
+					cl.configstrings[precache_check][5] == 'r' &&
+					cl.configstrings[precache_check][6] == 's')
+				{
+					precache_check++;
+					continue;
+				}
+				if (precache_model_skin == 0)
+				{
+					if (!CL_CheckOrDownloadFile(cl.configstrings[precache_check]))
+					{
 						precache_model_skin = 1;
 						return; // started a download
 					}
@@ -1378,15 +1344,17 @@ redoSkins:
 				}
 
 				// checking for skins in the model
-				if (!precache_model) {
-
+				if (!precache_model)
+				{
 					FS_LoadFile (cl.configstrings[precache_check], (void **)&precache_model);
-					if (!precache_model) {
+					if (!precache_model)
+					{
 						precache_model_skin = 0;
 						precache_check++;
 						continue; // couldn't load it
 					}
-					if (LittleLong(*(unsigned *)precache_model) != IDALIASHEADER) {
+					if (LittleLong(*(unsigned *)precache_model) != IDALIASHEADER)
+					{
 						// not an alias model
 						FS_FreeFile(precache_model);
 						precache_model = 0;
@@ -1395,7 +1363,8 @@ redoSkins:
 						continue;
 					}
 					pheader = (dmdl_t *)precache_model;
-					if (LittleLong (pheader->version) != ALIAS_VERSION) {
+					if (LittleLong (pheader->version) != ALIAS_VERSION)
+					{
 						precache_check++;
 						precache_model_skin = 0;
 						continue; // couldn't load it
@@ -1404,16 +1373,19 @@ redoSkins:
 
 				pheader = (dmdl_t *)precache_model;
 
-				while (precache_model_skin - 1 < LittleLong(pheader->num_skins)) {
+				while (precache_model_skin - 1 < LittleLong(pheader->num_skins))
+				{
 					if (!CL_CheckOrDownloadFile((char *)precache_model +
 						LittleLong(pheader->ofs_skins) +
-						(precache_model_skin - 1)*MAX_SKINNAME)) {
+						(precache_model_skin - 1)*MAX_SKINNAME))
+					{
 						precache_model_skin++;
 						return; // started a download
 					}
 					precache_model_skin++;
 				}
-				if (precache_model) {
+				if (precache_model)
+				{
 					FS_FreeFile(precache_model);
 					precache_model = 0;
 				}
@@ -1431,13 +1403,17 @@ redoSkins:
 		precache_check = CS_SOUNDS;
 	}
 
-	if (precache_check >= CS_SOUNDS && precache_check < CS_SOUNDS+MAX_SOUNDS) {
-		if (allow_download_sounds->value) {
+	if (precache_check >= CS_SOUNDS && precache_check < CS_SOUNDS+MAX_SOUNDS)
+	{
+		if (allow_download_sounds->value)
+		{
 			if (precache_check == CS_SOUNDS)
 				precache_check++; // zero is blank
 			while (precache_check < CS_SOUNDS+MAX_SOUNDS &&
-				cl.configstrings[precache_check][0]) {
-				if (cl.configstrings[precache_check][0] == '*') {
+				cl.configstrings[precache_check][0])
+			{
+				if (cl.configstrings[precache_check][0] == '*')
+				{
 					precache_check++;
 					continue;
 				}
@@ -1448,30 +1424,33 @@ redoSkins:
 		}
 		precache_check = CS_IMAGES;
 	}
-	if (precache_check >= CS_IMAGES && precache_check < CS_IMAGES+MAX_IMAGES) {
+	if (precache_check >= CS_IMAGES && precache_check < CS_IMAGES+MAX_IMAGES)
+	{
 		if (precache_check == CS_IMAGES)
 			precache_check++; // zero is blank
 		while (precache_check < CS_IMAGES+MAX_IMAGES &&
-			cl.configstrings[precache_check][0]) {
+			cl.configstrings[precache_check][0])
+		{
 			Com_sprintf(fn, sizeof(fn), "pics/%s.tga", cl.configstrings[precache_check++]);
 			if (!CL_CheckOrDownloadFile(fn))
 				return; // started a download
 		}
 		precache_check = CS_PLAYERSKINS;
 	}
-	// skins are special, since a player has three things to download:
-	// model, weapon model and skin
-	// so precache_check is now *3
-	if (precache_check >= CS_PLAYERSKINS && precache_check < CS_PLAYERSKINS + MAX_CLIENTS * PLAYER_MULT) {
-		if (allow_download_players->value) {
-			while (precache_check < CS_PLAYERSKINS + MAX_CLIENTS * PLAYER_MULT) {
+	if (precache_check >= CS_PLAYERSKINS && precache_check < CS_PLAYERSKINS + MAX_CLIENTS * PLAYER_MULT)
+	{
+		if (allow_download_players->value)
+		{
+			while (precache_check < CS_PLAYERSKINS + MAX_CLIENTS * PLAYER_MULT)
+			{
 				int i, n;
 				char model[MAX_QPATH], skin[MAX_QPATH], *p;
 
 				i = (precache_check - CS_PLAYERSKINS)/PLAYER_MULT;
 				n = (precache_check - CS_PLAYERSKINS)%PLAYER_MULT;
 
-				if (!cl.configstrings[CS_PLAYERSKINS+i][0]) {
+				if (!cl.configstrings[CS_PLAYERSKINS+i][0])
+				{
 					precache_check = CS_PLAYERSKINS + (i + 1) * PLAYER_MULT;
 					continue;
 				}
@@ -1484,57 +1463,63 @@ redoSkins:
 				p = strchr(model, '/');
 				if (!p)
 					p = strchr(model, '\\');
-				if (p) {
+				if (p)
+				{
 					*p++ = 0;
 					strcpy(skin, p);
 				} else
 					*skin = 0;
 
-				switch (n) {
-				case 0: // model
-					Com_sprintf(fn, sizeof(fn), "players/%s/tris.md2", model);
-					if (!CL_CheckOrDownloadFile(fn)) {
-						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 1;
-						return; // started a download
-					}
-					n++;
-					/*FALL THROUGH*/
+				switch (n)
+				{
+					case 0: // model
+						Com_sprintf(fn, sizeof(fn), "players/%s/tris.iqm", model);
+						if (!CL_CheckOrDownloadFile(fn))
+						{
+							precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 1;
+							return; // started a download
+						}
+						n++;
+						/*FALL THROUGH*/
 
-				case 1: // weapon model
-					Com_sprintf(fn, sizeof(fn), "players/%s/weapon.md2", model);
-					if (!CL_CheckOrDownloadFile(fn)) {
-						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 2;
-						return; // started a download
-					}
-					n++;
-					/*FALL THROUGH*/
+					case 1: // weapon model
+						Com_sprintf(fn, sizeof(fn), "players/%s/weapon.iqm", model);
+						if (!CL_CheckOrDownloadFile(fn)) {
+							precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 2;
+							return; // started a download
+						}
+						n++;
+						/*FALL THROUGH*/
 
-				case 2: // weapon skin
-					Com_sprintf(fn, sizeof(fn), "players/%s/weapon.jpg", model);
-					if (!CL_CheckOrDownloadFile(fn)) {
-						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 3;
-						return; // started a download
-					}
-					n++;
-					/*FALL THROUGH*/
+					case 2: // weapon skin
+						Com_sprintf(fn, sizeof(fn), "players/%s/weapon.jpg", model);
+						if (!CL_CheckOrDownloadFile(fn))
+						{
+							precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 3;
+							return; // started a download
+						}
+						n++;
+						/*FALL THROUGH*/
 
-				case 3: // skin
-					Com_sprintf(fn, sizeof(fn), "players/%s/%s.jpg", model, skin);
-					if (!CL_CheckOrDownloadFile(fn)) {
-						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 4;
-						return; // started a download
-					}
-					n++;
-					/*FALL THROUGH*/
+					case 3: // skin
+						Com_sprintf(fn, sizeof(fn), "players/%s/%s.jpg", model, skin);
+						if (!CL_CheckOrDownloadFile(fn))
+						{
+							precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 4;
+							return; // started a download
+						}
+						n++;
+						/*FALL THROUGH*/
 
-				case 4: // skin_i
-					Com_sprintf(fn, sizeof(fn), "players/%s/%s_i.jpg", model, skin);
-					if (!CL_CheckOrDownloadFile(fn)) {
-						precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 5;
-						return; // started a download
-					}
-					// move on to next model
-					precache_check = CS_PLAYERSKINS + (i + 1) * PLAYER_MULT;
+					case 4: // skin_i
+						Com_sprintf(fn, sizeof(fn), "players/%s/%s_i.jpg", model, skin);
+						if (!CL_CheckOrDownloadFile(fn))
+						{
+							precache_check = CS_PLAYERSKINS + i * PLAYER_MULT + 5;
+							return; // started a download
+						}
+						// move on to next model
+						precache_check = CS_PLAYERSKINS + (i + 1) * PLAYER_MULT;
 				}
 			}
 		}
@@ -1542,21 +1527,26 @@ redoSkins:
 		precache_check = ENV_CNT;
 	}
 
-	if (precache_check == ENV_CNT) {
+	if (precache_check == ENV_CNT)
+	{
 		precache_check = ENV_CNT + 1;
 
 		CM_LoadMap (cl.configstrings[CS_MODELS+1], true, &map_checksum);
 
-		if (map_checksum != atoi(cl.configstrings[CS_MAPCHECKSUM])) {
+		if (map_checksum != atoi(cl.configstrings[CS_MAPCHECKSUM]))
+		{
 			Com_Error (ERR_DROP, "Local map version differs from server: %i != '%s'\n",
 				map_checksum, cl.configstrings[CS_MAPCHECKSUM]);
 			return;
 		}
 	}
 
-	if (precache_check > ENV_CNT && precache_check < TEXTURE_CNT) {
-			if (allow_download->value && allow_download_maps->value) {
-				while (precache_check < TEXTURE_CNT) {
+	if (precache_check > ENV_CNT && precache_check < TEXTURE_CNT)
+	{
+			if (allow_download->value && allow_download_maps->value)
+			{
+				while (precache_check < TEXTURE_CNT)
+				{
 					int n = precache_check++ - ENV_CNT - 1;
 
 					Com_sprintf(fn, sizeof(fn), "env/%s%s.tga",
@@ -1567,19 +1557,23 @@ redoSkins:
 			}
 			precache_check = TEXTURE_CNT;
 	}
-	if (precache_check == TEXTURE_CNT) {
+	if (precache_check == TEXTURE_CNT)
+	{
 		precache_check = TEXTURE_CNT+1;
 		precache_tex = 0;
 	}
 
 	// confirm existance of textures, download any that don't exist
-	if (precache_check == TEXTURE_CNT+1) {
+	if (precache_check == TEXTURE_CNT+1)
+	{
 		// from qcommon/cmodel.c
 		extern int			numtexinfo;
 		extern mapsurface_t	map_surfaces[];
 
-		if (allow_download->value && allow_download_maps->value) {
-			while (precache_tex < numtexinfo) {
+		if (allow_download->value && allow_download_maps->value)
+		{
+			while (precache_tex < numtexinfo)
+			{
 				char fn[MAX_OSPATH];
 
 				sprintf(fn, "textures/%s.tga", map_surfaces[precache_tex++].rname);
@@ -1591,15 +1585,17 @@ redoSkins:
 	}
 
 	//get map related scripts
-	if (precache_check == SCRIPT_CNT) {
+	if (precache_check == SCRIPT_CNT)
+	{
 		precache_check = SCRIPT_CNT+1;
-		if (allow_download_maps->value) {
-
+		if (allow_download_maps->value)
+		{
 			//get fog files
 			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
 
 			//remove "maps/" from string
-			for(i = 5, j = 0; i < strlen(fn); i++, j++) {
+			for(i = 5, j = 0; i < strlen(fn); i++, j++)
+			{
 				map[j] = fn[i];
 			}
 			map[i-5] = 0;
@@ -1610,17 +1606,17 @@ redoSkins:
 		}
 	}
 
-	if (precache_check == SCRIPT_CNT+1) {
+	if (precache_check == SCRIPT_CNT+1)
+	{
 		precache_check = SCRIPT_CNT+2;
-		if (allow_download_maps->value) {
-
+		if (allow_download_maps->value)
+		{
 			//get mus files
 			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
 
 			//remove "maps/" from string
-			for(i = 5, j = 0; i < strlen(fn); i++, j++) {
+			for(i = 5, j = 0; i < strlen(fn); i++, j++)
 				map[j] = fn[i];
-			}
 			map[i-5] = 0;
 
 			Com_sprintf(script, sizeof(script), "maps/scripts/%s.mus", map);
@@ -1629,16 +1625,17 @@ redoSkins:
 		}
 	}
 
-	if (precache_check == SCRIPT_CNT+2) {
+	if (precache_check == SCRIPT_CNT+2)
+	{
 		precache_check = SCRIPT_CNT+3;
-		if (allow_download_maps->value) {
+		if (allow_download_maps->value)
+		{
 			//get rscript files
 			COM_StripExtension ( cl.configstrings[CS_MODELS+1], fn );
 
 			//remove "maps/" from string
-			for(i = 5, j = 0; i < strlen(fn); i++, j++) {
+			for(i = 5, j = 0; i < strlen(fn); i++, j++)
 				map[j] = fn[i];
-			}
 			map[i-5] = 0;
 
 			Com_sprintf(script, sizeof(script), "scripts/maps/%s.rscript", map);
@@ -1668,7 +1665,8 @@ void CL_Precache_f (void)
 {
 	//Yet another hack to let old demos work
 	//the old precache sequence
-	if (Cmd_Argc() < 2) {
+	if (Cmd_Argc() < 2)
+	{
 		unsigned	map_checksum;		// for detecting cheater maps
 
 		CM_LoadMap (cl.configstrings[CS_MODELS+1], true, &map_checksum);
@@ -1684,26 +1682,6 @@ void CL_Precache_f (void)
 
 	CL_RequestNextDownload();
 }
-
-/*
- * TODO: Removing pending review. May not be safe.
-#if defined UNIX_VARIANT
-void CL_Shell_f (void)
-{
-	if(Cmd_Argc() < 2)
-	{
-		Com_Printf("Usage: shell command");
-		return;
-	}
-	char line[130];
-	FILE *fp;
-	fp=popen(Cmd_Args(),"r");
-	while (fgets(line, sizeof line, fp))
-	Com_Printf("%s", line);
-	pclose(fp);
- }
- #endif
-*/
 
 /*
 =================
@@ -1846,18 +1824,11 @@ void CL_InitLocal (void)
 
 	Cmd_AddCommand ("rcon", CL_Rcon_f);
 
-// 	Cmd_AddCommand ("packet", CL_Packet_f); // this is dangerous to leave in
-
 	Cmd_AddCommand ("setenv", CL_Setenv_f );
 
 	Cmd_AddCommand ("precache", CL_Precache_f);
 
 	Cmd_AddCommand ("download", CL_Download_f);
-
-// TODO: Removing this pending review. it may not be safe.
-//#if defined UNIX_VARIANT
-//	Cmd_AddCommand ("shell", CL_Shell_f);
-//#endif
 
 	Cmd_AddCommand ("irc_connect", CL_InitIRC);
 	Cmd_AddCommand ("irc_quit", CL_IRCInitiateShutdown);
@@ -1928,6 +1899,7 @@ void CL_InitLocal (void)
 	R_RegisterPic("hud_bomber");
 	R_RegisterPic("hud_strafer");
 	R_RegisterPic("hud_hover");
+	R_RegisterPic("blood_ring");
 }
 
 
@@ -1942,7 +1914,7 @@ Writes key bindings and archived cvars to config.cfg
 void CL_WriteConfiguration (void)
 {
 	FILE	*f;
-	char	path[MAX_QPATH];
+	char	path[MAX_OSPATH];
 
 	if (cls.state == ca_uninitialized)
 		return;
@@ -1977,24 +1949,24 @@ typedef struct
 	cvar_t	*var;
 } cheatvar_t;
 
-cheatvar_t	cheatvars[] = {
-	{"timescale", "1"},
-	{"timedemo", "0"},
-	{"r_drawworld", "1"},
-	{"cl_testlights", "0"},
-	{"r_fullbright", "0"},
-	{"r_drawflat", "0"},
-	{"paused", "0"},
-	{"fixedtime", "0"},
-	{"gl_lightmap", "0"},
-	{"gl_showpolys", "0"},
-	{NULL, NULL}
+cheatvar_t cheatvars[] =
+{
+	{"timescale",     "1", NULL},
+	{"timedemo",      "0", NULL},
+	{"r_drawworld",   "1", NULL},
+	{"cl_testlights", "0", NULL},
+	{"r_fullbright",  "0", NULL},
+	{"r_drawflat",    "0", NULL},
+	{"paused",        "0", NULL},
+	{"fixedtime",     "0", NULL},
+	{"gl_lightmap",   "0", NULL},
+	{"gl_showpolys",  "0", NULL},
+	{NULL, NULL, NULL}
 };
-
-int		numcheatvars;
 
 void CL_FixCvarCheats (void)
 {
+	static int numcheatvars = 0;
 	int			i;
 	cheatvar_t	*var;
 
@@ -2032,136 +2004,349 @@ void CL_FixCvarCheats (void)
 
 //============================================================================
 
+qboolean send_packet_now = false; // instant packets TODO: Needed?
+extern float    r_frametime;      // TODO: move to appropriate .h
+extern unsigned sys_frame_time;   // TODO: ditto
+
+/**
+ * @brief Top level client-side routine for main loop.
+ *
+ * @param msec  the time since the previous CL_Frame.
+ */
 /*
-==================
-CL_SendCommand
-
-==================
-*/
-void CL_SendCommand (void)
+ * Notes on time variables:
+ * cls.frametime :
+ *  float seconds since last render
+ *  clamped for packet processing, now unclamped for rendering
+ *  used in client-to-server move message
+ *  in CL_AddClEntities(): used in bouncing entities (brass) calculations
+ *
+ * r_frametime :
+ *  unclamped float seconds since last render. Used in particle rendering.
+ *
+ * cl.time :
+ *  critical global timer used in various places.
+ *  clamped to [cl.frame.servertime-100, cl.frame.servertime] in CL_ParseFrame()
+ *
+ * cls.realtime :
+ *   set to time at start of frame. Updated anywhere else?
+ *
+ *  cl.frame.servertime:
+ *    equivalent to server frame number times 100msecs. see CL_ParseFrame()
+ */
+void CL_Frame( int msec )
 {
-	// get new key events
-	Sys_SendKeyEvents ();
+	// static int lasttimecalled = 0; // TODO: see below
+	static int framerate_cap  = 0;
+	static int packetrate_cap = 0;
+	static int packet_timer   = 0;
+	static int render_timer   = 0;
+	static int packet_time_deviation = 0;
+	static int render_counter = 0;
+	qboolean render_trigger;
+	qboolean packet_trigger;
 
-	// allow mice or other external controllers to add commands
-	IN_Commands ();
+	cls.realtime  = curtime; // time at start of Qcommon_Frame()
+	cls.frametime = 0.0f;    // zero here for debug purposes, set below
+	cl.time += msec; // clamped to [cl.frame.servertime-100,cl.frame.servertime]
 
-	// process console commands
-	Cbuf_Execute ();
+	/* local timers for decoupling frame rate from packet rate */
+	packet_timer += msec;
+	render_timer += msec;
 
-	// fix any cheating cvars
-	CL_FixCvarCheats ();
-
-	// send intentions now
-	CL_SendCmd ();
-
-	// resend a connection request if necessary
-	CL_CheckForResend ();
-}
-
-
-/*
-==================
-CL_Frame
-
-==================
-*/
-qboolean send_packet_now = false;  // instant packets
-extern float	r_frametime;
-
-void CL_Frame (int msec)
-{
-	static int	extratime;
-	static int  lasttimecalled;
-
-	if (dedicated->value)
-		return;
-
-	extratime += msec;
-
-	if (!cl_timedemo->value)
+	/* periodically override certain test and cheat cvars unless single player.*/
+	if ( (cl.time & 0xfff) == 0 )
 	{
-		if (cls.state == ca_connected && extratime < 100)
-			return;			// don't flood packets out while connecting
-		if (extratime < 1000/cl_maxfps->value && !send_packet_now)
-			return;			// framerate is too high
+		CL_FixCvarCheats ();
 	}
-	if(send_packet_now)
-		send_packet_now = false;
 
-	// let the mouse activate or deactivate
-	IN_Frame ();
-
-	// decide the simulation time
-	cls.frametime = extratime/1000.0;
-	cl.time += extratime;
-	cls.realtime = curtime;
-
-	r_frametime = cls.frametime;
-
-	extratime = 0;
-
-	if (cls.frametime > (1.0 / 5))
-		cls.frametime = (1.0 / 5);
-
-	// if in the debugger last frame, don't timeout
-	if (msec > 5000)
-		cls.netchan.last_received = Sys_Milliseconds ();
-
-	// fetch results from server
-	CL_ReadPackets ();
-
-	// run http downloads
-	CL_HttpDownloadThink();
-
-	// send a new command message to the server
-	CL_SendCommand ();
-
-	// predict all unacknowledged movements
-	CL_PredictMovement ();
-
-	// allow rendering DLL change
-	VID_CheckChanges ();
-	if (!cl.refresh_prepped && cls.state == ca_active)
-		CL_PrepRefresh ();
-
-	// update the screen
-	if (host_speeds->value)
-		time_before_ref = Sys_Milliseconds ();
-	SCR_UpdateScreen ();
-	if (host_speeds->value)
-		time_after_ref = Sys_Milliseconds ();
-
-	// update audio
-	S_Update (cl.refdef.vieworg, cl.v_forward, cl.v_right, cl.v_up);
-
-	// advance local effects for next frame
-	CL_RunDLights ();
-	CL_RunLightStyles ();
-	SCR_RunConsole ();
-
-	cls.framecount++;
-
-	if ( log_stats->value )
+	/*
+	 * update maximum FPS.
+	 * framerate_cap is in msecs/frame and is user specified.
+	 * Note: Quake2World sets a hard lower limit of 30. Not sure if
+	 *   that is needed; to be determined if that is a good thing to do.
+	 */
+	if ( cl_maxfps->modified  )
 	{
-		if ( cls.state == ca_active )
+		if ( cl_maxfps->value < 30.0f )
 		{
-			if ( !lasttimecalled )
+			Com_Printf("Warning: cl_maxfps set to less than 30.\n");
+			if ( cl_maxfps->value < 1.0f )
 			{
-				lasttimecalled = Sys_Milliseconds();
-				if ( log_stats_file )
-					fprintf( log_stats_file, "0\n" );
-			}
-			else
-			{
-				int now = Sys_Milliseconds();
-
-				if ( log_stats_file )
-					fprintf( log_stats_file, "%d\n", now - lasttimecalled );
-				lasttimecalled = now;
+				Cvar_ForceSet( "cl_maxfps", "1" );
 			}
 		}
+		cl_maxfps->modified = false;
+		framerate_cap = 0; // force a recalculation
 	}
+	if ( framerate_cap < 1 )
+	{
+		framerate_cap = (int)(ceil( 1000.0f / cl_maxfps->value ));
+		if ( framerate_cap < 1 )
+		{
+			framerate_cap = 1;
+		}
+		/* may convert these to Com_DPrintf() later */
+		Com_Printf( "Minimum milliseconds-per-frame set to %i\n", framerate_cap );
+		Com_Printf( "Maximum frames-per-second set to %i\n", 1000 / framerate_cap );
+	}
+
+	/*
+	 * Set nominal milliseconds-per-packet for client-to-server messages.
+	 * Idea is to be timely in getting and transmitting player input without
+	 *   congesting the server.
+	 *
+	 * 16 gives 6 or 7 client packets per server 100msec frame.
+	 * With adaptable "catchup" the packet-to-packet time can drop to half of
+	 *   the packet rate cap. For 16 that gives 8 or 9 msecs.
+	 * Plan is to not implement a user setting for this unless a need for that
+	 *   is discovered.
+	 *
+	 * If performance is low, msec arg may be greater than packetrate_cap.
+	 *  In that case adjust packetrate_cap dynamically.
+	 *  Prevents packet_time_deviation from overflowing.
+	 */
+	packetrate_cap = 16;
+	if ( msec > packetrate_cap )
+	{ /* slow main loop, so adjust cap to match */
+		packetrate_cap = msec;
+	}
+
+	/*
+	 * local triggers for decoupling framerate from packet rate
+	 */
+	render_trigger = false;
+	packet_trigger = false;
+
+	if ( cl_timedemo->integer == 1 )
+	{ /* accumulate timed demo statistics, free run both packet and render */
+		if ( !cl.timedemo_start )
+		{
+			cl.timedemo_start = cls.realtime;
+		}
+		cl.timedemo_frames++;
+		render_trigger = true;
+		packet_trigger = true;
+	}
+	else
+	{ /* normal operation. check frame rate cap conditions */
+		if ( render_timer >= framerate_cap )
+		{
+			render_trigger = true;
+		}
+		if ( cls.state == ca_connected )
+		{
+			/*
+			 * connection is established, server is sending configstrings.
+			 * Run client-to-server packet rate at nominal 10-per-second
+			 */
+			if ( packet_timer >= 100 )
+			{
+				packet_trigger = true;
+			}
+			packet_time_deviation = 0;
+		}
+		else if ( packet_timer >= packetrate_cap )
+		{ /* normal, regular trigger */
+			packet_trigger = true;
+		}
+		else if ( packet_time_deviation >= packetrate_cap
+				&& packet_timer > (packetrate_cap / 2) )
+		{ /* packet trigger has been delayed */
+			/*
+			 * reduced packet-to-packet time, to maintain average packet rate
+			 * close to nominal.
+			 */
+			packet_trigger = true;
+		}
+		else if ( (render_counter >= 2)
+					&& render_trigger
+					&& (packet_time_deviation >= 0)
+					&& ((packet_timer + (packetrate_cap / 4)) >= packetrate_cap)
+					)
+		{
+			/* Accelerate next packet on these conditions:
+			 *  more than 1 render since last packet,
+			 *  render triggered,
+			 *  no accumulated rate acceleration,
+			 *  would be significantly delayed by pending render
+			 */
+			packet_trigger = true;
+		}
+	}
+
+	/*
+	 * player input and network input/output processing
+	 */
+	if ( packet_trigger || send_packet_now )
+	{
+		send_packet_now = false; // TODO: send_packet_now may be obsolete
+
+		render_counter = 0; // for counting renders since last packet
+
+		/* let the mouse activate or deactivate */
+		IN_Frame();
+
+		/*
+		 * calculate frametime in seconds for packet procedures
+		 * cls.frametime is source for the cmd.msecs byte
+		 *  in the client-to-server move message.
+		 */
+		cls.frametime  = ((float)packet_timer) / 1000.0f;
+		if ( cls.frametime >= 0.250f )
+		{ /* very long delay */
+			/*
+			 * server checks for cmd.msecs to be <= 250
+			 */
+			cls.frametime = 0.24999f ;
+			Com_DPrintf("CL_Frame(): cls.frametime clamped from %f to 0.24999\n",
+					cls.frametime );
+			/*
+			 * try to throttle the video frame rate by overriding the
+			 * render trigger.
+			 */
+			render_trigger = false;
+			render_timer = 0;
+		}
+
+		/* process server-to-client packets */
+		CL_ReadPackets();
+
+		/* execute pending commands */
+		Cbuf_Execute();
+
+		/* run cURL downloads */
+		CL_HttpDownloadThink();
+
+		/* system dependent keyboard and mouse input event polling */
+		Sys_SendKeyEvents();
+
+		/* joystick input. may or may not be working. */
+		IN_Commands();
+
+		/* execute pending commands */
+		Cbuf_Execute();
+
+		/* send client commands to server */
+		CL_SendCmd();
+
+		/* resend a connection request if necessary */
+		CL_CheckForResend();
+
+		/*
+		 * predict movement for un-acked client-to-server packets
+		 * [The Quake trick that keeps players view smooth in on-line play.]
+		 */
+		CL_PredictMovement();
+
+		/* accumulate deviation from nominal packet rate
+		 *  adds when packet is delayed.
+		 *  subtracts when deviation gets large, and packet sent early.
+		 *  this keeps the packets-per-server-frame stable, although the
+		 *  time between packets may vary.
+		 *  limit the accumulation to 1/2 second; do not want catchup bursts
+		 *    to go on long.
+		 */
+		packet_time_deviation += ( packet_timer - packetrate_cap );
+		if ( packet_time_deviation > 500 )
+		{
+			packet_time_deviation = 500;
+
+			/* developer test for checking overflow */
+			// Com_DPrintf("Warning: packet_time_deviation positive clamp\n");
+		}
+		else if ( packet_time_deviation < -(packetrate_cap * 2) )
+		{ /* protect against underflow */
+			packet_time_deviation = -(packetrate_cap * 2);
+
+			/* developer test for checking underflow */
+			// Com_DPrintf("Warning: packet_time_deviation negative clamp\n");
+		}
+
+		/* developer test for showing client packets per server frame */
+		// Com_DPrintf("pkt: %i svf: %i\n", packet_timer, cl.frame.serverframe );
+
+		/* retrigger packet send timer */
+		packet_timer = 0;
+	}
+
+	/*
+	 * refresh can occur more or less often than client-to->server messages.
+	 */
+	if ( render_trigger )
+	{
+		++render_counter; // counting renders since last packet
+
+		/*
+		 * calculate cls.frametime in seconds for render procedures.
+		 *
+		 * May not need to clamp for rendering.
+		 * Only would affect things if framerate went below 4 FPS.
+		 *
+		 * Using a simple lowpass filter, to smooth out any irregular timing.
+		 */
+		cls.frametime = (float)(render_timer) / 1000.0f;
+		r_frametime = (r_frametime + cls.frametime) / 2.0f;
+		cls.frametime = r_frametime;
+
+		//  Update the display
+		VID_CheckChanges();
+		if ( !cl.refresh_prepped && cls.state == ca_active )
+		{ // re-initialize video configuration
+			CL_PrepRefresh();
+		}
+		else
+		{ // regular screen update
+			if ( host_speeds->value )
+				time_before_ref = Sys_Milliseconds(); // TODO: obsolete test?
+			SCR_UpdateScreen();
+			if ( host_speeds->value )
+				time_after_ref = Sys_Milliseconds();
+		}
+
+		// update audio.
+		S_Update( cl.refdef.vieworg, cl.v_forward, cl.v_right, cl.v_up );
+
+		// advance local effects for next frame
+		CL_RunDLights();
+		CL_RunLightStyles();
+		SCR_RunConsole ();
+
+		++cls.framecount; // does not appear to be used anywhere
+
+		/* developer test for observing timers */
+		// Com_DPrintf("rt: %i cft: %f\n", render_timer, cls.frametime );
+
+		// retrigger render timing
+		render_timer = 0;
+
+#if 0
+		/* TODO: Check if this still works and/or is useful.
+		 */
+		if ( log_stats->value )
+		{
+			if ( cls.state == ca_active )
+			{
+				if ( !lasttimecalled )
+				{
+					lasttimecalled = Sys_Milliseconds();
+					if ( log_stats_file )
+						fprintf( log_stats_file, "0\n" );
+				}
+				else
+				{
+					int now = Sys_Milliseconds();
+
+					if ( log_stats_file )
+						fprintf( log_stats_file, "%d\n", now - lasttimecalled );
+					lasttimecalled = now;
+				}
+			}
+		}
+#endif
+
+	}
+
 }
 
 //============================================================================

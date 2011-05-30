@@ -212,6 +212,7 @@ void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4]);
 void NormalToLatLong( const vec3_t normal, byte latlong[2] );
 void LatLongToNormal( byte latlong[2], vec3_t normal );
 
+void fast_sincosf( float angle, float *sina, float *cosa );
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 void vectoangles (vec3_t value1, vec3_t angles);
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct cplane_s *plane);
@@ -360,7 +361,9 @@ CVARS (console variables)
 #define	CVAR_NOSET		8	// don't allow change from console at all,
 							// but can be set from the command line
 #define	CVAR_LATCH		16	// save changes until server restart
-#define CVAR_ROM		32 //cannot be set by user at all
+#define CVAR_ROM		32  // cannot be set by user at all
+#define CVAR_GAMEINFO   64  // added to the 'mods' field of the serverinfo
+                            // string when changed
 
 // nothing outside the Cvar_*() functions should modify these fields!
 typedef struct cvar_s

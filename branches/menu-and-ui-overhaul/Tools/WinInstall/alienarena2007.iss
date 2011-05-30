@@ -16,19 +16,19 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName=c:/Alien Arena 7_50
+DefaultDirName=c:/Alien Arena 7_51
 DefaultGroupName={#MyAppName}
 LicenseFile=C:\Alien Arena 2007\docs\license.txt
 InfoBeforeFile=C:\Alien Arena 2007\docs\README.txt
 InfoAfterFile=
 OutputDir=C:\Alien Arena Files\Bundle\Bundle
-OutputBaseFilename=alienarena-20101123
+OutputBaseFilename=alienarena-20110306
 SetupIconFile=C:\Alien Arena 2007\Aa1.ico
 Compression=lzma
 SolidCompression=true
 UsePreviousAppDir=false
 UsePreviousGroup=false
-AppCopyright=© 2010 COR Entertainment LLC
+AppCopyright=© 2011 COR Entertainment LLC
 ShowLanguageDialog=no
 AppComments=Please close application before running uninstall
 UninstallDisplayIcon={app}\Aa1.ico
@@ -192,14 +192,11 @@ Source: ..\..\..\Alien Arena 2007\data1\levelshots\db-chromium.txt; DestDir: {ap
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\db-icarus.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\db-vesuvius.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-aquous.txt; DestDir: {app}\data1\levelshots
-Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-babel.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-beyond.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-bloodfactory.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-crucible.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-dread.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-horus.txt; DestDir: {app}\data1\levelshots
-Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-vesuvius.txt; DestDir: {app}\data1\levelshots
-Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-violator.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-zion.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-zorn.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\tca-frost.txt; DestDir: {app}\data1\levelshots
@@ -217,14 +214,10 @@ Source: ..\..\..\Alien Arena 2007\data1\maps\db-chromium.bsp; DestDir: {app}\dat
 Source: ..\..\..\Alien Arena 2007\data1\maps\db-icarus.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\db-vesuvius.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\dm-aquous.bsp; DestDir: {app}\data1\maps
-Source: ..\..\..\Alien Arena 2007\data1\maps\dm-babel.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\dm-beyond.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\dm-bloodfactory.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\dm-dread.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\dm-horus.bsp; DestDir: {app}\data1\maps
-Source: ..\..\..\Alien Arena 2007\data1\maps\dm-vesuvius.bsp; DestDir: {app}\data1\maps
-Source: ..\..\..\Alien Arena 2007\data1\maps\dm-violator.bsp; DestDir: {app}\data1\maps
-Source: ..\..\..\Alien Arena 2007\data1\maps\dm-zion.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\dm-zorn.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\tca-frost.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\tca-zion.bsp; DestDir: {app}\data1\maps
@@ -247,14 +240,11 @@ Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\db-icarus.mus; DestDir: {ap
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\db-vesuvius.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-aquous.fog; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-aquous.mus; DestDir: {app}\data1\maps\scripts
-Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-babel.fog; DestDir: {app}\data1\maps\scripts
-Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-babel.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-beyond.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-bloodfactory.fog; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-bloodfactory.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-dread.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-horus.mus; DestDir: {app}\data1\maps\scripts
-Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-violator.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-zorn.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\tca-zion.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\models\cow\helmet.md2; DestDir: {app}\data1\models\cow
@@ -787,19 +777,15 @@ Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\db-chromium.rscript; DestDi
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\db-icarus.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\db-vesuvius.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-aquous.rscript; DestDir: {app}\data1\scripts\maps
-Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-babel.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-beyond.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-bloodfactory.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-chasmatic.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-crucible.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-dread.rscript; DestDir: {app}\data1\scripts\maps
-Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-dynamo2.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-grindery.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-horus.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-leviathan.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-saucer.rscript; DestDir: {app}\data1\scripts\maps
-Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-vesuvius.rscript; DestDir: {app}\data1\scripts\maps
-Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-violator.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-zion.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-zorn.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\tca-frost.rscript; DestDir: {app}\data1\scripts\maps
@@ -1354,7 +1340,6 @@ Source: ..\..\..\Alien Arena 2007\botinfo\db-icarus.tmp; DestDir: {app}\botinfo
 Source: ..\..\..\Alien Arena 2007\botinfo\db-vesuvius.tmp; DestDir: {app}\botinfo
 Source: ..\..\..\Alien Arena 2007\botinfo\Destoroyah.cfg; DestDir: {app}\botinfo
 Source: ..\..\..\Alien Arena 2007\botinfo\dm-aquous.tmp; DestDir: {app}\botinfo
-Source: ..\..\..\Alien Arena 2007\botinfo\dm-babel.tmp; DestDir: {app}\botinfo
 Source: ..\..\..\Alien Arena 2007\botinfo\dm-beyond.tmp; DestDir: {app}\botinfo
 Source: ..\..\..\Alien Arena 2007\botinfo\dm-bloodfactory.tmp; DestDir: {app}\botinfo
 Source: ..\..\..\Alien Arena 2007\botinfo\dm-chasmatic.tmp; DestDir: {app}\botinfo
@@ -1397,13 +1382,11 @@ Source: ..\..\..\Alien Arena 2007\botinfo\nav\db-chromium.nod; DestDir: {app}\bo
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\db-icarus.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\db-vesuvius.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-aquous.nod; DestDir: {app}\botinfo\nav
-Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-babel.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-beyond.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-blood.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-bloodfactory.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-chasmatic.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-deimos.nod; DestDir: {app}\botinfo\nav
-Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-dismal.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-dread.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-dynamo2.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-frontier2.nod; DestDir: {app}\botinfo\nav
@@ -1593,26 +1576,21 @@ Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-atlantis2k8.txt; DestDir: 
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-turbo2k8.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-eternal.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-furious2k8.txt; DestDir: {app}\data1\levelshots
-Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-dismal2k8.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-leviathan2k8.txt; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\maps\dm-furious2k8.bsp; DestDir: {app}\data1\maps
-Source: ..\..\..\Alien Arena 2007\data1\maps\dm-dismal2k8.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\dm-leviathan2k8.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\dm-turbo2k8.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\dm-eternal.bsp; DestDir: {app}\data1\maps
 Source: ..\..\..\Alien Arena 2007\data1\maps\dm-atlantis2k8.bsp; DestDir: {app}\data1\maps
-Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-dismal2k8.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-leviathan2k8.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-leviathan2k8.fog; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-turbo2k8.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-turbo2k8.fog; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-eternal.mus; DestDir: {app}\data1\maps\scripts
-Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-dismal2k8.fog; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-furious2k8.fog; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-atlantis2k8.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-furious2k8.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-warmachine.rscript; DestDir: {app}\data1\scripts\maps
-Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-dismal2k8.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-leviathan2k8.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-atlantis2k8.rscript; DestDir: {app}\data1\scripts\maps
 Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-turbo2k8.rscript; DestDir: {app}\data1\scripts\maps
@@ -1819,13 +1797,11 @@ Source: ..\..\..\Alien Arena 2007\data1\levelshots\db-icarus.jpg; DestDir: {app}
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\db-vesuvius.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-aquous.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-atlantis2k8.jpg; DestDir: {app}\data1\levelshots
-Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-babel.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-beyond.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-bloodfactory.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-corrosion.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-crucible.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-crucible2k8.jpg; DestDir: {app}\data1\levelshots
-Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-dismal2k8.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-dread.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-dynamo2k8.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-eternal.jpg; DestDir: {app}\data1\levelshots
@@ -1838,8 +1814,6 @@ Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-omega.jpg; DestDir: {app}\
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-omega2k8.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-titan2k8.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-turbo2k8.jpg; DestDir: {app}\data1\levelshots
-Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-vesuvius.jpg; DestDir: {app}\data1\levelshots
-Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-violator.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-zion.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-zorn.jpg; DestDir: {app}\data1\levelshots
 Source: ..\..\..\Alien Arena 2007\data1\levelshots\tca-corrosion.jpg; DestDir: {app}\data1\levelshots
@@ -2051,7 +2025,6 @@ Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\lightgid.tga; DestDir: {
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena7\lightgid2.tga; DestDir: {app}\data1\textures\arena7
 Source: ..\..\..\Alien Arena 2007\data1\pics\timer.tga; DestDir: {app}\data1\pics
 Source: ..\..\..\Alien Arena 2007\data1\particles\watersplash.tga; DestDir: {app}\data1\particles
-Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-vesuvius.mus; DestDir: {app}\data1\maps\scripts
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena3\water_nm.tga; DestDir: {app}\data1\textures\arena3
 Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\slime_nm.tga; DestDir: {app}\data1\textures\arena8
 Source: ..\..\..\Alien Arena 2007\data1\textures\water\clearwater_nm.tga; DestDir: {app}\data1\textures\water
@@ -2072,11 +2045,7 @@ Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-warmachine2k9.nod; DestDir: {ap
 Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-deimos2k9.nod; DestDir: {app}\botinfo\nav
 Source: ..\..\..\Alien Arena 2007\data1\gfx\shard_fx.tga; DestDir: {app}\data1\gfx
 Source: ..\..\..\Alien Arena 2007\data1\gfx\beam2.tga; DestDir: {app}\data1\gfx
-Source: ..\..\..\Alien Arena 2007\data1\gfx\wt_flash_noise.jpg; DestDir: {app}\data1\gfx
-Source: ..\..\..\Alien Arena 2007\data1\gfx\wt_distortwave.jpg; DestDir: {app}\data1\gfx
-Source: ..\..\..\Alien Arena 2007\data1\gfx\w_flash_noise.jpg; DestDir: {app}\data1\gfx
 Source: ..\..\..\Alien Arena 2007\data1\gfx\flash_noise.jpg; DestDir: {app}\data1\gfx
-Source: ..\..\..\Alien Arena 2007\data1\gfx\w_distortwave.jpg; DestDir: {app}\data1\gfx
 Source: ..\..\..\Alien Arena 2007\data1\gfx\distortwave.jpg; DestDir: {app}\data1\gfx
 Source: ..\..\..\Alien Arena 2007\data1\gfx\leaves1.tga; DestDir: {app}\data1\gfx
 Source: ..\..\..\Alien Arena 2007\data1\gfx\blasterfx.tga; DestDir: {app}\data1\gfx
@@ -3290,6 +3259,88 @@ Source: ..\..\..\Alien Arena 2007\data1\sound\music\joyce2.ogg; DestDir: {app}\d
 Source: ..\..\..\Alien Arena 2007\data1\textures\water\flowingwater.tga; DestDir: {app}\data1\textures\water
 Source: ..\..\..\Alien Arena 2007\msvcr100.dll; DestDir: {app}
 Source: ..\..\..\Alien Arena 2007\data1\sound\music\joyce3.ogg; DestDir: {app}\data1\sound\music
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-babel2k11.jpg; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-babel2k11.txt; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\fonts\agentred.ttf; DestDir: {app}\data1\fonts
+Source: ..\..\..\Alien Arena 2007\data1\fonts\bluehigd.ttf; DestDir: {app}\data1\fonts
+Source: ..\..\..\Alien Arena 2007\data1\fonts\chicomono.ttf; DestDir: {app}\data1\fonts
+Source: ..\..\..\Alien Arena 2007\data1\fonts\creativeblock.ttf; DestDir: {app}\data1\fonts
+Source: ..\..\..\Alien Arena 2007\data1\fonts\freemono.ttf; DestDir: {app}\data1\fonts
+Source: ..\..\..\Alien Arena 2007\data1\fonts\freesans.ttf; DestDir: {app}\data1\fonts
+Source: ..\..\..\Alien Arena 2007\data1\maps\dm-babel2k11.bsp; DestDir: {app}\data1\maps
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-babel2k11.fog; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-babel2k11.mus; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-babel2k11.rscript; DestDir: {app}\data1\scripts\maps
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena2\lava_small.tga; DestDir: {app}\data1\textures\arena2
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\blackbrick1_nm.tga; DestDir: {app}\data1\textures\arena8
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\blackbrick2_hm.tga; DestDir: {app}\data1\textures\arena8
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena8\blackbrick2_nm.tga; DestDir: {app}\data1\textures\arena8
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-babel2k11.nod; DestDir: {app}\botinfo\nav
+Source: ..\..\..\Alien Arena 2007\botinfo\dm-babel2k11.tmp; DestDir: {app}\botinfo
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena10\moltenrock_nm.tga; DestDir: {app}\data1\textures\arena10
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena10\moltenrock.tga; DestDir: {app}\data1\textures\arena10
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-vesuvius2k11.jpg; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-vesuvius2k11.txt; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-violator2k11.txt; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-dismal2k11.txt; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-dismal2k11.jpg; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\levelshots\dm-violator2k11.jpg; DestDir: {app}\data1\levelshots
+Source: ..\..\..\Alien Arena 2007\data1\maps\dm-vesuvius2k11.bsp; DestDir: {app}\data1\maps
+Source: ..\..\..\Alien Arena 2007\data1\maps\dm-violator2k11.bsp; DestDir: {app}\data1\maps
+Source: ..\..\..\Alien Arena 2007\data1\maps\dm-dismal2k11.bsp; DestDir: {app}\data1\maps
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-vesuvius2k11.mus; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-vesuvius2k11.fog; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-violator2k11.mus; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-violator2k11.fog; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-dismal2k11.fog; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\maps\scripts\dm-dismal2k11.mus; DestDir: {app}\data1\maps\scripts
+Source: ..\..\..\Alien Arena 2007\data1\gfx\beam4.tga; DestDir: {app}\data1\gfx
+Source: ..\..\..\Alien Arena 2007\data1\gfx\shard_fx.tga; DestDir: {app}\data1\gfx
+Source: ..\..\..\Alien Arena 2007\data1\pics\hud_bomber_fx.tga; DestDir: {app}\data1\pics
+Source: ..\..\..\Alien Arena 2007\data1\pics\hud_hover_fx.tga; DestDir: {app}\data1\pics
+Source: ..\..\..\Alien Arena 2007\data1\pics\hud_strafer_fx.tga; DestDir: {app}\data1\pics
+Source: ..\..\..\Alien Arena 2007\data1\pics\blood_ring.tga; DestDir: {app}\data1\pics
+Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-vesuvius2k11.rscript; DestDir: {app}\data1\scripts\maps
+Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-dismal2k11.rscript; DestDir: {app}\data1\scripts\maps
+Source: ..\..\..\Alien Arena 2007\data1\scripts\maps\dm-violator2k11.rscript; DestDir: {app}\data1\scripts\maps
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-violator2k11.nod; DestDir: {app}\botinfo\nav
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-babel2k11.nod; DestDir: {app}\botinfo\nav
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-dismal2k11.nod; DestDir: {app}\botinfo\nav
+Source: ..\..\..\Alien Arena 2007\botinfo\dm-violator2k11.tmp; DestDir: {app}\botinfo
+Source: ..\..\..\Alien Arena 2007\botinfo\dm-babel2k11.tmp; DestDir: {app}\botinfo
+Source: ..\..\..\Alien Arena 2007\botinfo\dm-dismal2k11.tmp; DestDir: {app}\botinfo
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\slimetube1.md2; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\slimegen_fx.tga; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\railing5.md2; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\slimegen2.md2; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\slimegen.md2; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\slimegen_normal.jpg; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\slimegen.jpg; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\ribtubebig7.md2; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\ribtubebig6.md2; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\bigribtube.jpg; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\turbinefan.md2; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\turbinefan_normal.jpg; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\turbinefan.jpg; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\tech\ribtubebig8.md2; DestDir: {app}\data1\maps\meshes\tech
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\xempx\lightbomb45.md2; DestDir: {app}\data1\maps\meshes\xempx
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\xempx\lightbomb_normal.jpg; DestDir: {app}\data1\maps\meshes\xempx
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\xempx\lightbomb.md2; DestDir: {app}\data1\maps\meshes\xempx
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\xempx\lightbomb.jpg; DestDir: {app}\data1\maps\meshes\xempx
+Source: ..\..\..\Alien Arena 2007\data1\maps\meshes\xempx\lightbomb_fx.tga; DestDir: {app}\data1\maps\meshes\xempx
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\icefloor1_nm.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\arena9\icefloor1.tga; DestDir: {app}\data1\textures\arena9
+Source: ..\..\..\Alien Arena 2007\data1\textures\evil\e6supptrim128_nm.tga; DestDir: {app}\data1\textures\evil
+Source: ..\..\..\Alien Arena 2007\data1\textures\evil\e6supptrim128_hm.tga; DestDir: {app}\data1\textures\evil
+Source: ..\..\..\Alien Arena 2007\data1\textures\evil\e8_mtlwall1_nm.tga; DestDir: {app}\data1\textures\evil
+Source: ..\..\..\Alien Arena 2007\data1\textures\evil\e8_mtlwall1_hm.tga; DestDir: {app}\data1\textures\evil
+Source: ..\..\..\Alien Arena 2007\data1\textures\blanks\blank1.tga; DestDir: {app}\data1\textures\blanks
+Source: ..\..\..\Alien Arena 2007\data1\textures\blanks\blank2.tga; DestDir: {app}\data1\textures\blanks
+Source: ..\..\..\Alien Arena 2007\data1\textures\blanks\blank3.tga; DestDir: {app}\data1\textures\blanks
+Source: ..\..\..\Alien Arena 2007\data1\textures\blanks\blank4.tga; DestDir: {app}\data1\textures\blanks
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-violator2k11.nod; DestDir: {app}\botinfo\nav
+Source: ..\..\..\Alien Arena 2007\botinfo\nav\dm-vesuvius2k11.nod; DestDir: {app}\botinfo\nav
+Source: ..\..\..\Alien Arena 2007\botinfo\dm-vesuvius2k11.tmp; DestDir: {app}\botinfo
 
 [Icons]
 Name: {group}\{cm:ProgramOnTheWeb,{#MyAppName}}; Filename: {#MyAppURL}
@@ -3442,6 +3493,7 @@ Name: {app}\data1\maps\meshes\tech
 Name: {app}\data1\models\misc\deathray
 Name: {app}\data1\sound\misc\deathray
 Name: {app}\data1\maps\meshes\xempx
+Name: {app}\data1\textures\blanks
 
 [INI]
 Filename: galaxy.ini; Section: Galaxy; Key: name; String: Player; Flags: uninsdeletesection createkeyifdoesntexist

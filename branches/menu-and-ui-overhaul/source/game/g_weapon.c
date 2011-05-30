@@ -365,7 +365,7 @@ int speed, int effect, qboolean hyper)
 	ignore = self;
 	water = false;
 	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
-	
+
 	tr = gi.trace (from, NULL, NULL, end, ignore, mask);
 
 	if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
@@ -382,7 +382,7 @@ int speed, int effect, qboolean hyper)
 		}
 	}
 	VectorCopy (tr.endpos, from);
-	
+
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
@@ -573,7 +573,7 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	ignore = self;
 	water = false;
 	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
-	
+
 	tr = gi.trace (from, NULL, NULL, end, ignore, mask);
 
 	if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
@@ -583,16 +583,16 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	}
 	else
 	{
-	
+
 		if ((tr.ent != self) && (tr.ent->takedamage)) {
 			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
 			self->client->resp.weapon_hits[0]++;
 			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 		}
 	}
-	
+
 	VectorCopy (tr.endpos, from);
-	
+
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
@@ -723,7 +723,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 	ignore = self;
 	water = false;
 	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
-	
+
 	tr = gi.trace (from, NULL, NULL, end, ignore, mask);
 
 	if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
@@ -732,7 +732,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 		water = true;
 	}
 	else
-	{	
+	{
 		if ((tr.ent != self) && (tr.ent->takedamage))
 			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
 			if (tr.ent->health > 0)
@@ -741,7 +741,7 @@ void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, in
 			}
 		}
 	VectorCopy (tr.endpos, from);
-	
+
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
@@ -876,7 +876,7 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 	ignore = self;
 	water = false;
 	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
-	
+
 	tr = gi.trace (from, NULL, NULL, end, ignore, mask);
 
 	if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
@@ -886,7 +886,7 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 	}
 	else
 	{
-	
+
 		if ((tr.ent != self) && (tr.ent->takedamage)) {
 			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_DISRUPTOR);
 			self->client->resp.weapon_hits[1]++;
@@ -894,7 +894,7 @@ void fire_plasma (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int ki
 		}
 	}
 	VectorCopy (tr.endpos, from);
-	
+
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
@@ -953,7 +953,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	ignore = self;
 	water = false;
 	mask = MASK_SHOT|CONTENTS_SLIME|CONTENTS_LAVA;
-	
+
 	tr = gi.trace (from, NULL, NULL, end, ignore, mask);
 
 	if (tr.contents & (CONTENTS_SLIME|CONTENTS_LAVA))
@@ -962,7 +962,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 		water = true;
 	}
 	else
-	{	
+	{
 		if ((tr.ent != self) && (tr.ent->takedamage)) {
 			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_VAPORIZER);
 			self->client->resp.weapon_hits[7]++;
@@ -972,7 +972,7 @@ void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 		}
 	}
 	VectorCopy (tr.endpos, from);
-	
+
 	VectorMA (start, 8192, aimdir, end);
 	VectorCopy (start, from);
 
@@ -1156,10 +1156,10 @@ void floater_think (edict_t *self)
 		ignore = self;
 		VectorCopy (self->s.origin, start);
 		VectorMA (start, 2048, dir, end);
-		
+
 		tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
 
-		
+
 		// hurt it if we can
 		if ((tr.ent->takedamage) && !(tr.ent->flags & FL_IMMUNE_LASER) && (tr.ent != self->owner)) {
 			T_Damage (tr.ent, self, self->owner, dir, tr.endpos, vec3_origin, dmg, 1, DAMAGE_ENERGY, MOD_SMARTGUN);
@@ -1167,7 +1167,7 @@ void floater_think (edict_t *self)
 			self->owner->client->resp.weapon_hits[2]++;
 			gi.sound (self->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 		}
-		
+
 		// if we hit something that's not a monster or player we're done
 		if (!(tr.ent->svflags & SVF_MONSTER) && (!tr.ent->client))
 		{
@@ -1181,7 +1181,7 @@ void floater_think (edict_t *self)
 		}
 
 		VectorCopy (tr.endpos, start);
-		
+
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_LIGHTNING);
 		gi.WritePosition (self->s.origin);
@@ -1732,17 +1732,25 @@ void fire_deathball (edict_t *self, vec3_t start, vec3_t aimdir, int speed)
 
 	//remove deathball from players inventory
 	//set everything back
-
 	self->in_deathball = false;
-	if(instagib->value)
-		self->client->newweapon = FindItem("Alien Disruptor");
-	else if(rocket_arena->value)
-		self->client->newweapon = FindItem("Rocket Launcher");
+	if ( instagib->integer || insta_rockets->integer )
+	{
+		self->client->newweapon = FindItem( "Alien Disruptor" );
+	}
+	else if ( rocket_arena->integer )
+	{
+		self->client->newweapon = FindItem( "Rocket Launcher" );
+	}
 	else
-		self->client->newweapon = FindItem("blaster");
+	{
+		self->client->newweapon = FindItem( "blaster" );
+	}
+	assert( self->client->newweapon != NULL );
+
 	self->client->pers.inventory[ITEM_INDEX(deathball_item)] = 0;
 	self->s.modelindex4 = 0;
 }
+
 void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, int alt)
 {
 
@@ -1763,7 +1771,7 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 
 	tr = gi.trace (from, NULL, NULL, end, ignore, MASK_PLAYERSOLID);
 
-	
+
 	if ((tr.ent != self) && (tr.ent->takedamage)) {
 		T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_VIOLATOR);
 		self->client->resp.weapon_hits[8]++;
@@ -1779,7 +1787,7 @@ void fire_violator(edict_t *self, vec3_t start, vec3_t aimdir, int damage, int k
 
 	}
 	VectorCopy (tr.endpos, from);
-	
+
 	if ( g_antilag->integer)
 		G_UndoTimeShiftFor( self );
 }

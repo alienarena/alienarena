@@ -346,12 +346,12 @@ image_t	*R_RegisterParticleNormal (const char *name)
 	if (name[0] != '/' && name[0] != '\\')
 	{
 		Com_sprintf (fullname, sizeof(fullname), "particles/%s.tga", name);
-		gl = GL_FindImage (fullname, it_bump);
+		gl = GL_FindImage (fullname, it_pic);
 	}
 	else
 	{ // 2010-10 match above workaround (paranoid)
 		strcpy( fullname, &name[1] );
-		gl = GL_FindImage( fullname, it_bump );
+		gl = GL_FindImage( fullname, it_pic );
 	}
 
 	return gl;
@@ -400,20 +400,7 @@ image_t	*R_RegisterPlayerIcon (const char *name)
 Draw_GetPicSize
 =============
 */
-void ShaderResizePic( image_t *gl, int *w, int *h)
-{
-	rscript_t *rs = NULL;
-	char shortname[MAX_QPATH];
 
-	COM_StripExtension ( gl->name, shortname );
-	rs=RS_FindScript(shortname);
-
-	if (!rs)
-		return;
-	if (!rs->picsize.enable)
-		return;
-
-}
 void Draw_GetPicSize (int *w, int *h, char *pic)
 {
 	image_t *gl;
@@ -426,7 +413,6 @@ void Draw_GetPicSize (int *w, int *h, char *pic)
 	}
 	*w = gl->width;
 	*h = gl->height;
-	ShaderResizePic(gl, w, h);
 }
 
 #define DIV254BY255 (0.9960784313725490196078431372549f)
@@ -817,105 +803,4 @@ void Draw_FadeScreen (void)
 	qglDisable (GL_BLEND);
 }
 
-
-//====================================================================
-
-
-/*
-=============
-Draw_StretchRaw
-=============
-*/
-extern unsigned	r_rawpalette[256];
-
-void Draw_StretchRaw (int x, int y, int w, int h, int cols, int rows, byte *data)
-{
-	unsigned	image32[256*256];
-	unsigned char image8[256*256];
-	int			i, j, trows;
-	byte		*source;
-	int			frac, fracstep;
-	float		hscale;
-	int			row;
-	float		t;
-
-	GL_Bind (0);
-
-	if (rows<=256)
-	{
-		hscale = 1;
-		trows = rows;
-	}
-	else
-	{
-		hscale = rows/256.0;
-		trows = 256;
-	}
-	t = rows*hscale / 256;
-
-	if ( !qglColorTableEXT )
-	{
-		unsigned *dest;
-
-		for (i=0 ; i<trows ; i++)
-		{
-			row = (int)(i*hscale);
-			if (row > rows)
-				break;
-			source = data + cols*row;
-			dest = &image32[i*256];
-			fracstep = cols*0x10000/256;
-			frac = fracstep >> 1;
-			for (j=0 ; j<256 ; j++)
-			{
-				dest[j] = r_rawpalette[source[frac>>16]];
-				frac += fracstep;
-			}
-		}
-
-		qglTexImage2D (GL_TEXTURE_2D, 0, gl_tex_solid_format, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, image32);
-	}
-	else
-	{
-		unsigned char *dest;
-
-		for (i=0 ; i<trows ; i++)
-		{
-			row = (int)(i*hscale);
-			if (row > rows)
-				break;
-			source = data + cols*row;
-			dest = &image8[i*256];
-			fracstep = cols*0x10000/256;
-			frac = fracstep >> 1;
-			for (j=0 ; j<256 ; j++)
-			{
-				dest[j] = source[frac>>16];
-				frac += fracstep;
-			}
-		}
-
-		qglTexImage2D( GL_TEXTURE_2D,
-			           0,
-					   GL_COLOR_INDEX8_EXT,
-					   256, 256,
-					   0,
-					   GL_COLOR_INDEX,
-					   GL_UNSIGNED_BYTE,
-					   image8 );
-	}
-	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (0, 0);
-	qglVertex2f (x, y);
-	qglTexCoord2f (1, 0);
-	qglVertex2f (x+w, y);
-	qglTexCoord2f (1, t);
-	qglVertex2f (x+w, y+h);
-	qglTexCoord2f (0, t);
-	qglVertex2f (x, y+h);
-	qglEnd ();
-}
 

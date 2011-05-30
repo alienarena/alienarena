@@ -61,6 +61,7 @@ simply by setting the modified flag for the vid_ref variable, which will
 cause the entire video mode and refresh DLL to be reset on the next frame.
 ============
 */
+
 void VID_Restart_f (void)
 {
 	vid_restart = true;

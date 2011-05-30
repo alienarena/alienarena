@@ -1,5 +1,4 @@
 /*
-Copyright (C) 1997-2001 Id Software, Inc.
 Copyright (C) 2010 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
@@ -19,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 
-// gl_script.c - scripted texture rendering - MrG
+// gl_script.c - scripted texture rendering
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -31,19 +30,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <io.h>
 #endif
 
-
-
-void CIN_FreeCin (int texnum);
-
 extern float	r_turbsin[];
 
 #define		TOK_DELIMINATORS "\r\n\t "
 
 float		rs_realtime = 0;
 rscript_t	*rs_rootscript = NULL;
-
-int r_numgrasses;
-int r_numbeams;
 
 int RS_Animate (rs_stage_t *stage)
 {
@@ -112,9 +104,7 @@ void RS_ResetScript (rscript_t *rs)
 			while (anim != NULL)
 			{
 				tmp_anim = anim;
-				if (anim->texture)
-					//if (anim->texture->is_cin)
-					//	CIN_FreeCin(anim->texture->texnum);
+				
 				anim = anim->next;
 				free (tmp_anim);
 			}
@@ -125,9 +115,7 @@ void RS_ResetScript (rscript_t *rs)
 			while (randStage != NULL)
 			{
 				tmp_rand = randStage;
-				if (randStage->texture)
-				//	if (randStage->texture->is_cin)
-				//		CIN_FreeCin(randStage->texture->texnum);
+
 				randStage = randStage->next;
 				free (tmp_rand);
 			}
@@ -138,21 +126,10 @@ void RS_ResetScript (rscript_t *rs)
 
 		free (tmp_stage);
 	}
-
-	rs->picsize.enable = false;
-	rs->picsize.width = 0;
-	rs->picsize.height = 0;
-	rs->model = false;
-	rs->mirror = false;
+	
 	rs->stage = NULL;
-	rs->dontflush = false;
-	rs->subdivide = 0;
-	rs->warpdist = 0;
-	rs->warpsmooth = 0;
-	rs->warpspeed = 0;
+	rs->dontflush = false;	
 	rs->ready = false;
-
-
 }
 
 void RS_ClearStage (rs_stage_t *stage)
@@ -233,6 +210,9 @@ void RS_ClearStage (rs_stage_t *stage)
 	stage->grasstype = 0;
 	stage->beam = false;
 	stage->beamtype = 0;
+	stage->xang = 0;
+	stage->yang = 0;
+	stage->rotating = false;
 	stage->fx = false;
 	stage->glow = false;
 
@@ -267,16 +247,8 @@ rscript_t *RS_NewScript (char *name)
 
 	rs->stage = NULL;
 	rs->next = NULL;
-	rs->dontflush = false;
-	rs->subdivide = 0;
-	rs->warpdist = 0.0f;
-	rs->warpsmooth = 0.0f;
-	rs->ready = false;
-	rs->mirror = false;
-	rs->model = false;
-	rs->picsize.enable = false;
-	rs->picsize.width = 0;
-	rs->picsize.height = 0;
+	rs->dontflush = false;	
+	rs->ready = false;	
 
 	return rs;
 }
@@ -526,6 +498,9 @@ scriptname
 		grasstype
 		beam
 		beamtype
+		xang
+		yang
+		rotating
 		fx
 		glow
 	}
@@ -816,6 +791,21 @@ void rs_stage_beamtype (rs_stage_t *stage, char **token)
 	*token = strtok (NULL, TOK_DELIMINATORS);
 	stage->beamtype = atoi(*token);
 }
+void rs_stage_xang (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->xang = atof(*token);
+}
+void rs_stage_yang (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->yang = atof(*token);
+}
+void rs_stage_rotating (rs_stage_t *stage, char **token)
+{
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	stage->rotating = atoi(*token);
+}
 void rs_stage_fx (rs_stage_t *stage, char **token)
 {
 	stage->fx = true;
@@ -853,6 +843,9 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"grasstype",	&rs_stage_grasstype		},
 	{	"beam",			&rs_stage_beam			},
 	{	"beamtype",		&rs_stage_beamtype		},
+	{	"xang",			&rs_stage_xang			},
+	{	"yang",			&rs_stage_yang			},
+	{	"rotating",		&rs_stage_rotating		},
 	{	"fx",			&rs_stage_fx			},
 	{	"glow",			&rs_stage_glow			},
 
@@ -860,83 +853,6 @@ static rs_stagekey_t rs_stagekeys[] =
 };
 
 static int num_stagekeys = sizeof (rs_stagekeys) / sizeof(rs_stagekeys[0]) - 1;
-
-// =====================================================
-
-void rs_script_safe (rscript_t *rs, char **token)
-{
-	rs->dontflush = true;
-}
-
-void rs_script_subdivide (rscript_t *rs, char **token)
-{
-	int divsize, p2divsize;
-
-	*token = strtok (NULL, TOK_DELIMINATORS);
-	divsize = atoi (*token);
-
-	// cap max & min subdivide sizes
-	if (divsize > 128)
-		divsize = 128;
-	else if (divsize <= 8)
-		divsize = 8;
-
-	// find the next smallest valid ^2 size, if not already one
-	for (p2divsize = 2; p2divsize <= divsize ; p2divsize <<= 1 );
-
-	p2divsize >>= 1;
-
-	rs->subdivide = (char)p2divsize;
-}
-
-void rs_script_vertexwarp (rscript_t *rs, char **token)
-{
-	*token = strtok(NULL, TOK_DELIMINATORS);
-	rs->warpspeed = atof (*token);
-	*token = strtok(NULL, TOK_DELIMINATORS);
-	rs->warpdist = atof (*token);
-	*token = strtok(NULL, TOK_DELIMINATORS);
-	rs->warpsmooth = atof (*token);
-
-	if (rs->warpsmooth < 0.001f)
-		rs->warpsmooth = 0.001f;
-	else if (rs->warpsmooth > 1.0f)
-		rs->warpsmooth = 1.0f;
-}
-
-void rs_script_mirror (rscript_t *rs, char **token)
-{
-	rs->mirror = true;
-}
-
-void rs_script_model (rscript_t *rs, char **token)
-{
-	rs->model = true;
-}
-
-void rs_script_picsize (rscript_t *rs, char **token)
-{
-	rs->picsize.enable = true;
-
-	*token = strtok(NULL, TOK_DELIMINATORS);
-	rs->picsize.width = atof (*token);
-
-	*token = strtok(NULL, TOK_DELIMINATORS);
-	rs->picsize.height = atof (*token);
-}
-
-static rs_scriptkey_t rs_scriptkeys[] =
-{
-	{	"safe",			&rs_script_safe			},
-	{	"subdivide",	&rs_script_subdivide	},
-	{	"vertexwarp",	&rs_script_vertexwarp	},
-	{	"mirror",		&rs_script_mirror		},
-	{	"model",		&rs_script_model		},
-	{	"picsize",		&rs_script_picsize		},
-	{	NULL,			NULL					}
-};
-
-static int num_scriptkeys = sizeof (rs_scriptkeys) / sizeof(rs_scriptkeys[0]) - 1;
 
 // =====================================================
 
@@ -1021,17 +937,6 @@ void RS_LoadScript(char *script)
 						if (!Q_strcasecmp (rs_stagekeys[i].stage, token))
 						{
 							rs_stagekeys[i].func (stage, &token);
-							break;
-						}
-					}
-				}
-				else
-				{
-					for (i = 0; i < num_scriptkeys; i++)
-					{
-						if (!Q_strcasecmp (rs_scriptkeys[i].script, token))
-						{
-							rs_scriptkeys[i].func (rs, &token);
 							break;
 						}
 					}
@@ -1296,10 +1201,10 @@ endalpha:
 	return alpha;
 }
 
-image_t *R_TextureAnimation (mtexinfo_t *tex);
+image_t *BSP_TextureAnimation (mtexinfo_t *tex);
 rscript_t	*surfaceScript(msurface_t *surf)
 {
-	image_t *image = R_TextureAnimation( surf->texinfo );
+	image_t *image = BSP_TextureAnimation( surf->texinfo );
 
 	if (image && image->script)
 	{
@@ -1313,7 +1218,7 @@ rscript_t	*surfaceScript(msurface_t *surf)
 }
 void SetVertexOverbrights (qboolean toggle)
 {
-	if (!r_overbrightbits->value || !gl_ext_mtexcombine->value)
+	if (!r_overbrightbits->value)
 		return;
 
 	if (toggle)//turn on
@@ -1331,6 +1236,56 @@ void SetVertexOverbrights (qboolean toggle)
 		qglTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 1);
 	}
 }
+
+void SetLightingMode (void)
+{
+	GL_SelectTexture( GL_TEXTURE0);
+
+	if ( !gl_config.mtexcombine ) 
+	{
+		GL_TexEnv( GL_REPLACE );
+		GL_SelectTexture( GL_TEXTURE1);
+
+		if ( gl_lightmap->value )
+			GL_TexEnv( GL_REPLACE );
+		else 
+			GL_TexEnv( GL_MODULATE );
+	}
+	else 
+	{
+		GL_TexEnv ( GL_COMBINE_EXT );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
+		qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+
+		GL_SelectTexture( GL_TEXTURE1 );
+		GL_TexEnv ( GL_COMBINE_EXT );
+		if ( gl_lightmap->value ) 
+		{
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+		} 
+		else 
+		{
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
+
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE );
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_PREVIOUS_EXT );
+		}
+
+		if ( r_overbrightbits->value )
+		{
+			qglTexEnvi ( GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, r_overbrightbits->value );
+		}
+	}
+}
+
 qboolean lightmaptoggle;
 void ToggleLightmap (qboolean toggle)
 {
@@ -1342,7 +1297,7 @@ void ToggleLightmap (qboolean toggle)
 	{
 		SetVertexOverbrights(false);
 		GL_EnableMultitexture( true );
-		//SetLightingMode ();
+		SetLightingMode ();
 	}
 	else
 	{
@@ -1351,322 +1306,70 @@ void ToggleLightmap (qboolean toggle)
 	}
 }
 
-extern int c_grasses;
-grass_t r_grasses[MAX_GRASSES];
-void R_DrawVegetationSurface ( void )
-{
-    int		i, k;
-	grass_t *grass;
-    float   scale;
-	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
-	float	*corner0 = corner[0];
-	qboolean visible;
-	float	lightLevel[3];
-	trace_t r_trace;
-	float	sway;
-
-	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-
-	grass = r_grasses;
-
-	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs,	0, 0, 0);
-
-	R_InitVArrays (VERT_SINGLE_TEXTURED);
-
-    for (i=0; i<r_numgrasses; i++, grass++) {
-
-		scale = 10.0*grass->size;
-
-		VectorCopy(r_newrefdef.viewangles, angle);
-
-		if(!grass->type)
-			angle[0] = 0;  // keep vertical by removing pitch(grass and plants grow upwards)
-
-		AngleVectors(angle, NULL, right, up);
-		VectorScale(right, scale, right);
-		VectorScale(up, scale, up);
-		VectorCopy(grass->origin, origin);
-
-		// adjust vertical position, scaled
-		origin[2] += (grass->texsize/32) * grass->size;
-
-		if(!grass->type) {
-			r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
-			visible = r_trace.fraction == 1.0;
-		}
-		else
-			visible = true; //leaves tend to use much larger images, culling results in undesired effects
-
-		if(visible) {
-
-			//render grass polygon
-			qglDepthMask( GL_FALSE );
-			qglEnable( GL_BLEND);
-			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-			GL_Bind(grass->texnum);
-
-			if(gl_dynamic->value)
-				R_LightPoint (origin, lightLevel, true);
-			else
-				R_LightPoint (origin, lightLevel, false);
-			VectorScale(lightLevel, 2.0, lightLevel);
-			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
-			GL_TexEnv( GL_MODULATE );
-
-			VectorSet (corner[0],
-				origin[0] + (up[0] + right[0])*(-0.5),
-				origin[1] + (up[1] + right[1])*(-0.5),
-				origin[2] + (up[2] + right[2])*(-0.5));
-
-			//the next two statements create a slight swaying in the wind
-			//perhaps we should add a parameter to control ammount in shader?
-
-			if(grass->type) {
-				sway = 3;
-			}
-			else
-				sway = 2;
-
-			VectorSet ( corner[1],
-				corner0[0] + up[0] + sway*sin (rs_realtime*sway),
-				corner0[1] + up[1] + sway*sin (rs_realtime*sway),
-				corner0[2] + up[2]);
-
-			VectorSet ( corner[2],
-				corner0[0] + (up[0]+right[0] + sway*sin (rs_realtime*sway)),
-				corner0[1] + (up[1]+right[1] + sway*sin (rs_realtime*sway)),
-				corner0[2] + (up[2]+right[2]));
-
-			VectorSet ( corner[3],
-				corner0[0] + right[0],
-				corner0[1] + right[1],
-				corner0[2] + right[2]);
-
-			VArray = &VArrayVerts[0];
-
-			for(k = 0; k < 4; k++) {
-
-				VArray[0] = corner[k][0];
-				VArray[1] = corner[k][1];
-				VArray[2] = corner[k][2];
-
-				switch(k) {
-					case 0:
-						VArray[3] = 1;
-						VArray[4] = 1;
-						break;
-					case 1:
-						VArray[3] = 0;
-						VArray[4] = 1;
-						break;
-					case 2:
-						VArray[3] = 0;
-						VArray[4] = 0;
-						break;
-					case 3:
-						VArray[3] = 1;
-						VArray[4] = 0;
-						break;
-				}
-
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			}
-
-			if(qglLockArraysEXT)
-				qglLockArraysEXT(0, 4);
-
-			qglDrawArrays(GL_QUADS,0,4);
-
-			if(qglUnlockArraysEXT)
-				qglUnlockArraysEXT();
-
-			c_grasses++;
-		}
-	}
-
-	R_KillVArrays ();
-
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	qglColor4f( 1,1,1,1 );
-	qglDisable(GL_BLEND);
-	qglDepthMask( GL_TRUE );
-	GL_TexEnv( GL_REPLACE );
-}
-
-extern int c_beams;
-beam_t r_beams[MAX_BEAMS];
-void R_DrawBeamSurface ( void )
-{
-    int		i, k;
-	beam_t *beam;
-    float   scale;
-	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
-	float	*corner0 = corner[0];
-	qboolean visible;
-	trace_t r_trace;
-
-	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
-		return;
-
-	beam = r_beams;
-
-	VectorSet(mins, 32, 32, 64);
-	VectorSet(maxs, -32, -32, -64);
-
-	R_InitVArrays (VERT_SINGLE_TEXTURED);
-
-    for (i=0; i<r_numbeams; i++, beam++) {
-
-		scale = 10.0*beam->size;
-
-		VectorCopy(r_newrefdef.viewangles, angle);
-
-		angle[0] = 0;  // keep vertical by removing pitch
-
-		AngleVectors(angle, NULL, right, up);
-		VectorScale(right, scale, right);
-		VectorScale(up, scale, up);
-		VectorCopy(beam->origin, origin);
-
-		if(!beam->type)
-			origin[2] -= up[2]/2; //contingent on direction of beam
-		else
-			origin[2] += up[2]/2;
-
-		r_trace = CM_BoxTrace(r_origin, origin, mins, maxs, r_worldmodel->firstnode, MASK_VISIBILILITY);
-		visible = r_trace.fraction == 1.0;
-
-		if(visible) {
-
-			//render polygon
-			qglDepthMask( GL_FALSE );
-			qglEnable( GL_BLEND);
-			qglBlendFunc   (GL_SRC_ALPHA, GL_ONE);
-
-			qglColor4f( beam->color[0],beam->color[1],beam->color[2], 1 );
-			GL_TexEnv( GL_MODULATE );
-
-			GL_Bind(beam->texnum);
-
-			VectorSet (corner[0],
-				origin[0] + (up[0] + right[0])*(-0.5),
-				origin[1] + (up[1] + right[1])*(-0.5),
-				origin[2] + (up[2] + right[2])*(-0.5));
-
-			VectorSet ( corner[1],
-				corner0[0] + up[0],
-				corner0[1] + up[1],
-				corner0[2] + up[2]);
-
-			VectorSet ( corner[2],
-				corner0[0] + (up[0]+right[0]),
-				corner0[1] + (up[1]+right[1]),
-				corner0[2] + (up[2]+right[2]));
-
-			VectorSet ( corner[3],
-				corner0[0] + right[0],
-				corner0[1] + right[1],
-				corner0[2] + right[2]);
-
-				VArray = &VArrayVerts[0];
-
-			for(k = 0; k < 4; k++) {
-
-				VArray[0] = corner[k][0];
-				VArray[1] = corner[k][1];
-				VArray[2] = corner[k][2];
-
-				switch(k) {
-					case 0:
-						VArray[3] = 1;
-						VArray[4] = 1;
-						break;
-					case 1:
-						VArray[3] = 0;
-						VArray[4] = 1;
-						break;
-					case 2:
-						VArray[3] = 0;
-						VArray[4] = 0;
-						break;
-					case 3:
-						VArray[3] = 1;
-						VArray[4] = 0;
-						break;
-				}
-
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			}
-
-			if(qglLockArraysEXT)
-				qglLockArraysEXT(0, 4);
-
-			qglDrawArrays(GL_QUADS,0,4);
-
-			if(qglUnlockArraysEXT)
-				qglUnlockArraysEXT();
-
-			c_beams++;
-		}
-	}
-
-	R_KillVArrays ();
-
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	qglColor4f( 1,1,1,1 );
-	qglDisable(GL_BLEND);
-	qglDepthMask( GL_TRUE );
-	GL_TexEnv( GL_REPLACE );
-}
-
-
-//to do - rewrite using vertex arrays
-
 //This is the shader drawing routine for bsp surfaces - it will draw on top of the
 //existing texture.
 void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 {
-	glpoly_t	*p;
+	glpoly_t	*p = surf->polys;
+	unsigned	lmtex = surf->lightmaptexturenum;
 	float		*v;
 	int			i, nv;
-	vec3_t		wv, vectors[3];
+	vec3_t		vectors[3];
 	rs_stage_t	*stage;
 	float		os, ot, alpha;
-	float		scale, time, txm=0.0f, tym=0.0f;
+	float		time, txm=0.0f, tym=0.0f;
+	int			VertexCounter;
 
 	if (!rs)
 		return;
 
 	nv = surf->polys->numverts;
 	stage = rs->stage;
-	time = rs_realtime * rs->warpspeed;
+	time = rs_realtime;
 
 	//for envmap by normals
 	AngleVectors (r_newrefdef.viewangles, vectors[0], vectors[1], vectors[2]);
 
-	SetVertexOverbrights(true);
-
+	lightmaptoggle = true;
 	do
 	{
-
 		if (stage->lensflare || stage->grass || stage->beam)
-			break;
+			break; //handled elsewhere
 
-		if (stage->colormap.enabled)
-			qglDisable (GL_TEXTURE_2D);
-		else if (stage->anim_count){
-			GL_Bind (RS_Animate(stage));
-		}
-		else
+		if(stage->lightmap)
 		{
-		 	GL_Bind (stage->texture->texnum);
-		}
+			ToggleLightmap(true);
+			qglShadeModel (GL_FLAT);
 
+			GL_MBind (GL_TEXTURE1, gl_state.lightmap_textures + lmtex);
+
+			if (stage->colormap.enabled)
+			qglDisable (GL_TEXTURE_2D);
+			else if (stage->anim_count){
+				GL_MBind (GL_TEXTURE0, RS_Animate(stage));
+			}
+			else
+			{
+		 		GL_MBind (GL_TEXTURE0, stage->texture->texnum);
+			}			
+		}
+		else 
+		{
+			ToggleLightmap(false);
+			qglShadeModel (GL_SMOOTH);
+
+			if (stage->colormap.enabled)
+				qglDisable (GL_TEXTURE_2D);
+			else if (stage->anim_count)
+			{
+				GL_Bind (RS_Animate(stage));
+			}
+			else
+			{
+		 		GL_Bind (stage->texture->texnum);
+			}			
+		}
+				
 		if (stage->blendfunc.blend)
 		{
 			GL_BlendFunction(stage->blendfunc.source, stage->blendfunc.dest);
@@ -1746,150 +1449,99 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 		else
 		{
 			GLSTATE_DISABLE_ALPHATEST
-		}
-
-		if (rs->subdivide)
-		{
-			glpoly_t *bp;
-			int i;
-
-			for (bp = surf->polys; bp; bp = bp->next)
-			{
-				p = bp;
-
-				qglBegin(GL_TRIANGLE_FAN);
-				for (i = 0, v = p->verts[0]; i < p->numverts; i++, v += VERTEXSIZE)
-				{
-					if (stage->envmap)
-					{
-						RS_SetEnvmap (v, &os, &ot);
-						//move by normal & position
-						os-=DotProduct (surf->plane->normal, vectors[1] ) + (r_newrefdef.vieworg[0]-r_newrefdef.vieworg[1]+r_newrefdef.vieworg[2])*0.0025;
-						ot+=DotProduct (surf->plane->normal, vectors[2] ) + (-r_newrefdef.vieworg[0]+r_newrefdef.vieworg[1]-r_newrefdef.vieworg[2])*0.0025;
-
-						if (surf->texinfo->flags & SURF_FLOWING)
-							txm = tym = 0;
-					}
-
-					os = v[3];
-					ot = v[4];
-
-					RS_SetTexcoords (stage, &os, &ot, surf);
-					{
-						float red=255, green=255, blue=255;
-
-						if (stage->colormap.enabled)
-						{
-							red *= stage->colormap.red/255.0f;
-							green *= stage->colormap.green/255.0f;
-							blue *= stage->colormap.blue/255.0f;
-						}
-
-						alpha = RS_AlphaFunc(stage->alphafunc, alpha, surf->plane->normal, v);
-						if (red>1)red=1; if (red<0) red = 0;
-						if (green>1)green=1; if (green<0) green = 0;
-						if (blue>1)blue=1; if (blue<0) blue = 0;
-
-						qglColor4f (red, green, blue, alpha);
-
-						qglTexCoord2f (os+txm, ot+tym);
-					}
-
-					if (!rs->warpsmooth)
-						qglVertex3fv (v);
-					else
-					{
-						scale = rs->warpdist * sin(v[0]*rs->warpsmooth+time)*sin(v[1]*rs->warpsmooth+time)*sin(v[2]*rs->warpsmooth+time);
-						VectorMA (v, scale, surf->plane->normal, wv);
-						qglVertex3fv (wv);
-					}
-				}
-				qglEnd();
-			}
-
-		}
+		}		
+	
+		if(stage->lightmap)
+			R_InitVArrays (VERT_MULTI_TEXTURED);
 		else
+			R_InitVArrays (VERT_SINGLE_TEXTURED);
+
+		VArray = &VArrayVerts[0];
+		VertexCounter = 0;
+
+		for (i = 0, v = p->verts[0]; i < nv; i++, v += VERTEXSIZE)
 		{
-
-			for (p = surf->polys; p; p = p->chain)
+			if (stage->envmap)
 			{
-				qglBegin (GL_TRIANGLE_FAN);
+				RS_SetEnvmap (v, &os, &ot);
+				//move by normal & position
+				os-=DotProduct (surf->plane->normal, vectors[1] ) + (r_newrefdef.vieworg[0]-r_newrefdef.vieworg[1]+r_newrefdef.vieworg[2])*0.0025;
+				ot+=DotProduct (surf->plane->normal, vectors[2] ) + (-r_newrefdef.vieworg[0]+r_newrefdef.vieworg[1]-r_newrefdef.vieworg[2])*0.0025;
 
-				for (i = 0, v = p->verts[0]; i < nv; i++, v += VERTEXSIZE)
-				{
-
-					if (stage->envmap)
-					{
-						RS_SetEnvmap (v, &os, &ot);
-						//move by normal & position
-						os-=DotProduct (surf->plane->normal, vectors[1] ) + (r_newrefdef.vieworg[0]-r_newrefdef.vieworg[1]+r_newrefdef.vieworg[2])*0.0025;
-						ot+=DotProduct (surf->plane->normal, vectors[2] ) + (-r_newrefdef.vieworg[0]+r_newrefdef.vieworg[1]-r_newrefdef.vieworg[2])*0.0025;
-
-						if (surf->texinfo->flags & SURF_FLOWING)
-							txm = tym = 0;
-					}
-
-					os = v[3];
-					ot = v[4];
-
-					RS_SetTexcoords (stage, &os, &ot, surf);
-
-					{
-
-						float red=255, green=255, blue=255;
-
-						if (stage->colormap.enabled)
-						{
-							red *= stage->colormap.red/255.0f;
-							green *= stage->colormap.green/255.0f;
-							blue *= stage->colormap.blue/255.0f;
-						}
-
-						alpha = RS_AlphaFunc(stage->alphafunc, alpha, surf->plane->normal, v);
-						if (red>1)red=1; if (red<0) red = 0;
-						if (green>1)green=1; if (green<0) green = 0;
-						if (blue>1)blue=1; if (blue<0) blue = 0;
-
-						qglColor4f (red, green, blue, alpha);
-
-						qglTexCoord2f (os+txm, ot+tym);
-					}
-
-					if (!rs->warpsmooth)
-						qglVertex3fv (v);
-					else
-					{
-						scale = rs->warpdist * sin(v[0]*rs->warpsmooth+time)*sin(v[1]*rs->warpsmooth+time)*sin(v[2]*rs->warpsmooth+time);
-						VectorMA (v, scale, surf->plane->normal, wv);
-						qglVertex3fv (wv);
-					}
-
-				}
-
-				qglEnd ();
-
+				if (surf->texinfo->flags & SURF_FLOWING)
+					txm = tym = 0;
+			}
+			else 
+			{
+				os = v[3];
+				ot = v[4];
 			}
 
+			RS_SetTexcoords (stage, &os, &ot, surf);
+			{
+				float red=255, green=255, blue=255;
+
+				if (stage->colormap.enabled)
+				{
+					red *= stage->colormap.red/255.0f;
+					green *= stage->colormap.green/255.0f;
+					blue *= stage->colormap.blue/255.0f;
+				}
+
+				alpha = RS_AlphaFunc(stage->alphafunc, alpha, surf->plane->normal, v);
+				if (red>1)red=1; if (red<0) red = 0;
+				if (green>1)green=1; if (green<0) green = 0;
+				if (blue>1)blue=1; if (blue<0) blue = 0;
+
+				qglColor4f (red, green, blue, alpha);
+			}
+
+			// copy in vertex data
+			VArray[0] = v[0];
+			VArray[1] = v[1];
+			VArray[2] = v[2];
+
+			// world texture coords
+			VArray[3] = os+txm;
+			VArray[4] = ot+tym;
+
+			// lightmap texture coords
+			VArray[5] = v[5];
+			VArray[6] = v[6];
+
+			if(stage->lightmap)
+				VArray += VertexSizes[VERT_MULTI_TEXTURED];
+			else
+				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+			VertexCounter++;		
 		}
 
+		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+
+		R_KillVArrays();		
+			
 		qglColor4f(1,1,1,1);
 		if (stage->colormap.enabled)
 			qglEnable (GL_TEXTURE_2D);
 
-	} while ( (stage = stage->next) );
+	} while ( (stage = stage->next) );	
+	
+	ToggleLightmap(true);
 
-	SetVertexOverbrights(false);
+	GL_EnableMultitexture( false );
 
 	// restore the original blend mode
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	qglEnable (GL_BLEND);
 
-
+	GLSTATE_DISABLE_BLEND
+	GLSTATE_DISABLE_ALPHATEST
+	GLSTATE_DISABLE_TEXGEN
+	qglShadeModel (GL_SMOOTH);
 }
 
 rscript_t *rs_caustics;
 rscript_t *rs_glass;
-extern cvar_t *cl_gun;
 
 void RS_LoadSpecialScripts (void) //the special cases of glass and water caustics
 {
@@ -1901,21 +1553,19 @@ void RS_LoadSpecialScripts (void) //the special cases of glass and water caustic
 		RS_ReadyScript(rs_glass);
 }
 
-void RS_SpecialSurface (msurface_t *surf)
+void RS_Surface (msurface_t *surf)
 {
 	rscript_t *rs_shader;
 
 	//Underwater Caustics
-	//hack - can't seem to find fix for when there is no gun model
 	if(rs_caustics)
-		if (surf->flags & SURF_UNDERWATER && cl_gun->value && r_lefthand->value != 2.0F)
+		if (surf->flags & SURF_UNDERWATER )
 				RS_DrawSurfaceTexture(surf, rs_caustics);
 
-	//this was moved here to handle all textures shaders as well.
+	//all other textures shaders
 	rs_shader = (rscript_t *)surf->texinfo->image->script;
 	if(rs_shader)
 		RS_DrawSurfaceTexture(surf, rs_shader);
-
 }
 
 

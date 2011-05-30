@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2010 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -12,10 +13,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -46,7 +46,6 @@ g_vote_t		playervote;
 int	sm_meat_index;
 int meansOfDeath;
 int bot_won;
-qboolean stayed;
 
 char *winningmap;
 
@@ -59,6 +58,7 @@ cvar_t  *cp;
 //mutators
 cvar_t  *instagib;
 cvar_t  *rocket_arena;
+cvar_t  *insta_rockets;
 cvar_t  *low_grav;
 cvar_t  *regeneration;
 cvar_t  *vampire;
@@ -179,6 +179,7 @@ void InitGame (void);
 void G_RunFrame (void);
 int ACESP_FindBotNum(void);
 extern long filelength(int);
+extern void ED_CallSpawn (edict_t *ent);
 
 static size_t szr;
 
@@ -317,6 +318,150 @@ edict_t *CreateTargetChangeLevel(char *map)
 	return ent;
 }
 
+
+/**
+ * \brief Log scores and stats
+ *
+ * \detail This is a somewhat crude formatted dump of game information to
+ *         the server console and log file. This version is mostly intended
+ *         to collect some data about bot targeting accuracy.
+ *
+ *         The odds that the array indexes for the weapon hit data and weapon
+ *         accuracy data are correctly cross-referenced are slim.
+ *
+ *  --- from hud stat report (p_hud.c) ---
+ * --- currently def'd out ---
+ * 0: "blaster"
+ * 1: "disruptor"
+ * 2: "smartgun"
+ * 3: "chaingun"
+ * 4: "flame"
+ * 5: "rocket"
+ * 6: "beamgun"
+ * 7: "vaporizer"
+ * 8: "violator"
+ *
+ *--- weapon_hit[] incremented ---
+ * 0 : blasterball_touch : Weapon_Beamgun, Weapon_Blaster, Weapon_Hover
+ * 0 : fire_blaster_beam : Weapon_Beamgun, Weapon_Blaster, Weapon_Strafer
+ * 1 : fire_plasma       : Weapon_Disruptor
+ * 2 : floater_think     : Weapon_Smartgun
+ * 3 : fire_lead         : Weapon_Chain
+ * 4 : fireball_touch    : Weapon_Flame
+ * 4 : flame_touch       : Weapon_Flame
+ * 5 : rocket_touch      : Weapon_RocketLauncher, Weapon_Bomber, Weapon_Strafer
+ * 6 : fire_blaster      : Weapon_Beamgun, Weapon_Blaster
+ * 7 : bomb_touch        : Weapon_Bomber, Weapon_Vaporizer
+ * 7 : fire_energy_field : Weapon_Vaporizer
+ * 8 : fire_violator     : Weapon_Violator
+
+ * --- from sample.cfg accuracy
+ * weapon_hit[] :to: bot weapacc[]
+ * 0: 1: blaster
+ * 1: 2: alien disruptor
+ * 3: 3: pulse rifle (chaingun)
+ * 4: 4: flame thrower
+ * x: 5: homing rocket launcher (not implemented)
+ * 5: 6: rocket launcher
+ * 2: 7: alien smartgun
+ * 6: 8: alien beamgun
+ * 7: 9: alien vaporizer
+ * 8: x: violator
+ */
+static void game_report( void )
+{
+	static const char* weapname[] =
+	{
+		 "   blaster", // 0 blaster, hover
+		 " disruptor", // 1
+		 "  smartgun", // 2
+		 "  chaingun", // 3
+		 "     flame", // 4
+		 "    rocket", // 5 rocketlauncher, bomber, strafer
+		 "   beamgun", // 6 beamgun
+		 " vaporizer", // 7 +bomber's bomb
+		 "  violator"  // 8
+	};
+	/* cross-reference from weapon_hit to weapacc[] */
+	static const int accxref[] =
+	{
+		1, /* 0 blaster   */
+		2, /* 1 disruptor */
+		7, /* 2 smartgun  */
+		3, /* 3 chaingun  */
+		4, /* 4 flame     */
+		6, /* 5 rocket    */
+		8, /* 6 beamgun   */
+		9, /* 7 vaporizer */
+		0  /* 8 violator  */ /* no weapacc[] for this */
+	};
+
+	edict_t *pclient;
+	int i;
+	char *client_name;
+
+	gi.dprintf( "<GAME-REPORT-BEGIN>\n" );
+
+	for ( i = 0, pclient = &g_edicts[1] ; i < game.maxclients ; ++pclient, i++ )
+	{ // for each possible client, human or bot
+		if ( pclient->inuse && game.clients[i].resp.spectator == 0 )
+		{
+			int weap;
+
+			/* scoring - UNSORTED */
+			client_name = Info_ValueForKey( pclient->client->pers.userinfo, "name" );
+			if ( pclient->is_bot )
+			{
+				gi.dprintf( "%s (%i,%0.2f): %i\n",
+						client_name,
+						pclient->skill, pclient->awareness,
+						game.clients[i].resp.score );
+			}
+			else
+			{
+				gi.dprintf( "%s: %i\n",
+						client_name,
+						game.clients[i].resp.score );
+			}
+
+			/* weapon skill */
+			for ( weap = 0; weap < 9; weap++ )
+			{
+				if ( pclient->client->resp.weapon_shots[weap] != 0 )
+				{
+					int hits  = pclient->client->resp.weapon_hits[weap];
+					int shots = pclient->client->resp.weapon_shots[weap];
+					int percent = (100 * hits) / shots;
+
+					if ( pclient->is_bot )
+					{
+						if ( weap == 8 )
+						{ /* violator - no weapacc[], accuracy always 1.0 */
+							gi.dprintf( " %s (1.0): %i/%i = %i%%\n",
+								weapname[weap], hits, shots, percent );
+						}
+						else
+						{
+							gi.dprintf( " %s (%0.2f): %i/%i = %i%%\n",
+								weapname[weap],
+								pclient->weapacc[accxref[weap]],
+								hits, shots, percent );
+						}
+					}
+					else
+					{
+						gi.dprintf( " %s : %i/%i = %i%%\n",
+								weapname[weap], hits, shots, percent );
+					}
+				}
+			}
+		}
+	}
+	gi.dprintf("<GAME-REPORT-END>\n");
+
+}
+
+
 /*
 =================
 EndDMLevel
@@ -336,6 +481,12 @@ void EndDMLevel (void)
 	static int	  nummaps;
 	int i;
 	FILE *fp;
+
+	// log game scoring, statistics. currently crude for bot testing mostly.
+	if ( g_dedicated && g_dedicated->integer != 0 )
+	{
+		game_report();
+	}
 
 	/* Search for dead players in order to remove DeathCam and free mem */
 	for (i=0 ; i<g_maxclients->value ; i++)
@@ -678,49 +829,63 @@ CheckDMRules
 */
 void CheckDMRules (void)
 {
-	int			i, top_score, int_time;
-	float		real_time;
-	gclient_t	*cl;
-	edict_t		*cl_ent;
+	int        i, top_score;
+	gclient_t  *cl;
+	edict_t    *cl_ent;
+	float      countdown_time;
+	static int warmup_state = 0;
 
-	if(!tca->value && !ctf->value && !cp->value && !(dmflags->integer & DF_SKINTEAMS)) {
-		if(level.time <= warmuptime->value) {
-			if((warmuptime->value - level.time ) == 3) {
-				cl_ent = g_edicts + 1; //need only one for broadcast sound
-				if (cl_ent->inuse && !cl_ent->is_bot)
-					gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/three.wav"), 1, ATTN_NONE, 0);
-			}
-			if((warmuptime->value - level.time ) == 2) {
-				cl_ent = g_edicts + 1;
-				if (cl_ent->inuse && !cl_ent->is_bot)
-					gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/two.wav"), 1, ATTN_NONE, 0);
-			}
-			if((warmuptime->value - level.time ) == 1) {
-				cl_ent = g_edicts + 1;
-				if (cl_ent->inuse && !cl_ent->is_bot)
-					gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/one.wav"), 1, ATTN_NONE, 0);
-			}
-			if(level.time == warmuptime->value) {
-				cl_ent = g_edicts + 1;
-				if (cl_ent->inuse && !cl_ent->is_bot)
-					gi.sound (cl_ent, CHAN_AUTO, gi.soundindex("misc/fight.wav"), 1, ATTN_NONE, 0);
-					safe_centerprintf(cl_ent, "FIGHT!\n");
-				ResetLevel();
-			}
-			else if(level.time == ceil(level.time)){ //do only on the whole numer to avoid overflowing
-				for (i=0 ; i<g_maxclients->value ; i++)
+	if ( !tca->value && !ctf->value && !cp->value && !(dmflags->integer & DF_SKINTEAMS) )
+	{
+		/*--- non-team game warmup ---*/
+		/*
+		 * note: broadcast sounds require first client to have sound info
+		 * whether or not first client is inuse (bot or not, also not important)
+		 */
+		if ( (warmup_state == 0) && (level.time <= warmuptime->value) )
+		{ /* start warmup countdown */
+			countdown_time = warmuptime->value - level.time;
+			warmup_state = (int)(ceil( countdown_time ));
+		}
+
+		if ( warmup_state > 0 )
+		{ /* warmup in progress */
+			countdown_time = warmuptime->value - level.time;
+			if ( (float)warmup_state > ceil( countdown_time ) )
+			{ /* next state of countdown */
+				--warmup_state;
+				switch ( warmup_state )
 				{
-					cl_ent = g_edicts + 1 + i;
-					if (!cl_ent->inuse || cl_ent->is_bot)
-						continue;
-					int_time = warmuptime->value - level.time;
-					real_time = warmuptime->value - level.time;
-					if(int_time <= 3) {
-						if(int_time == real_time)
-							safe_centerprintf(cl_ent, "%i...\n", int_time);
+				case 3:
+					gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/three.wav" ), 1, ATTN_NONE, 0 );
+					break;
+				case 2:
+					gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/two.wav" ), 1, ATTN_NONE, 0 );
+					break;
+				case 1:
+					gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/one.wav" ), 1, ATTN_NONE, 0 );
+					break;
+				case 0:
+					gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/fight.wav" ), 1, ATTN_NONE, 0 );
+					break;
+				default:
+					break;
+
+				}
+				if ( warmup_state > 0 )
+				{
+					for ( i = 1; i <= g_maxclients->integer; i++ )
+					{
+						safe_centerprintf( &g_edicts[i], "%i...\n", warmup_state );
 					}
-					else if(int_time/2 == real_time/2)
-						safe_centerprintf(cl_ent, "%i...\n", int_time);
+				}
+				else
+				{ /* end of warmup */
+					for ( i = 1; i <= g_maxclients->integer; i++ )
+					{
+						safe_centerprintf( &g_edicts[i], "FIGHT!\n" );
+					}
+					ResetLevel();
 				}
 			}
 		}
@@ -744,25 +909,20 @@ void CheckDMRules (void)
 
 	if (fraglimit->value && ((tca->value || ctf->value || cp->value || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
 	{
-
 		//team scores
 		if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || cp->value) //it's all about the team!
 		{
 			if(blue_team_score >= fraglimit->value)
 			{
 				safe_bprintf(PRINT_HIGH, "Blue Team wins!\n");
-
 				bot_won = 0; //we don't care if it's a bot that wins
-
 				EndDMLevel();
 				return;
 			}
 			if(red_team_score >= fraglimit->value)
 			{
 				safe_bprintf(PRINT_HIGH, "Red Team wins!\n");
-
 				bot_won = 0; //we don't care if it's a bot that wins
-
 				EndDMLevel();
 				return;
 			}
@@ -847,20 +1007,14 @@ void CheckDMRules (void)
 	}
 	if(tca->value) {
 		if(blue_team_score == 0) {
-
 			safe_bprintf(PRINT_HIGH, "Red Team wins!\n");
-
 			bot_won = 0; //we don't care if it's a bot that wins
-
 			EndDMLevel();
 			return;
 		}
 		if(red_team_score == 0) {
-
 			safe_bprintf(PRINT_HIGH, "Blue Team wins!\n");
-
 			bot_won = 0; //we don't care if it's a bot that wins
-
 			EndDMLevel();
 			return;
 		}
@@ -877,14 +1031,19 @@ void ExitLevel (void)
 	int			i;
 	edict_t		*ent;
 	char		command [256];
-	qboolean	stayed = false;
 
 	if(strcmp(level.mapname, level.changemap) || timelimit->value) {
-		Com_sprintf (command, sizeof(command), "map \"%s\"\n", level.changemap);
-		gi.AddCommandString (command);
+		Com_sprintf( command, sizeof(command), "map \"%s\"\n", level.changemap );
+		gi.AddCommandString( command );
 	}
-	else
-		stayed = true; //no need to reload map if staying on same level!
+
+    //Note-- whenever the map command fails (for instance, misspelled bsp name
+    //in the server cfg,) it will just play another game on the same map. As
+    //of right here in the code, there is no way to detect if that is going to
+    //happen, so we initialize another game on this map just in case. This
+    //fixes many longstanding bugs where misspelled map names in the cfg would
+    //cause servers to glitch out.
+    // -Max
 
 	level.changemap = NULL;
 	level.exitintermission = 0;
@@ -901,36 +1060,34 @@ void ExitLevel (void)
 		if (ent->health > ent->client->pers.max_health)
 			ent->health = ent->client->pers.max_health;
 
-		if(stayed) {
-			ent->client->resp.score = 0;
-			ent->client->resp.deaths = 0;
-			ent->client->resp.reward_pts = 0;
-			ent->client->homing_shots = 0;
-			ent->takedamage = DAMAGE_AIM;
-			ent->solid = SOLID_BBOX;
-			ent->deadflag = DEAD_NO;
-			if(ent->is_bot) {
-				// when staying on same level, respawn current bots
-				ACESP_PutClientInServer( ent, true );
-			} else {
-				PutClientInServer (ent);
-			}
-			if(g_duel->value) {
-				ClientPlaceInQueue(ent);
-				ClientCheckQueue(ent);
-			}
+		ent->client->resp.score = 0;
+		ent->client->resp.deaths = 0;
+		ent->client->resp.reward_pts = 0;
+		ent->client->homing_shots = 0;
+		ent->takedamage = DAMAGE_AIM;
+		ent->solid = SOLID_BBOX;
+		ent->deadflag = DEAD_NO;
+		if(ent->is_bot) {
+			ACESP_PutClientInServer( ent, true );
+		} else {
+			PutClientInServer (ent);
+		}
+		if(g_duel->value) {
+			ClientPlaceInQueue(ent);
+			ClientCheckQueue(ent);
 		}
 	}
-	if(stayed) {
-		for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) {
+	for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) {
 
-			if (!ent->inuse || ent->client)
-				continue;
-			//remove podiums
-			if(!strcmp(ent->classname, "pad"))
-				G_FreeEdict(ent);
-			if(tca->value)
-				ent->powered = true;
+		if (!ent->inuse || ent->client)
+			continue;
+		//remove podiums
+		if(!strcmp(ent->classname, "pad"))
+			G_FreeEdict(ent);
+		if(tca->value) {
+		    if(strstr(ent->classname, "spidernode"))
+		        ED_CallSpawn (ent);
+		    ent->powered = true;
 		}
 	}
 	if(tca->value) {
@@ -1205,15 +1362,21 @@ G_RunFrame
 Advances the world by 0.1 seconds
 ================
 */
+extern void ACEND_DrawPath(void);
 void G_RunFrame (void)
 {
 	int		i, numActiveClients = 0;
 	edict_t	*ent;
 
-	level.previousTime = gi.Sys_Milliseconds() - 100; //100 milleseconds(1/10 of a second)
+	level.previousTime = gi.Sys_Milliseconds() - 100;
 
 	level.framenum++;
 	level.time = level.framenum*FRAMETIME;
+
+	/*
+	 * update bot info in first client always, and in other active clients
+	 */
+	ACESP_UpdateBots();
 
 	// choose a client for monsters to target this frame
 	AI_SetSightClient ();
@@ -1288,6 +1451,9 @@ void G_RunFrame (void)
 
 	// build the playerstate_t structures for all players
 	ClientEndServerFrames ();
+
+	// For bot debugging
+	ACEND_DrawPath();
 
 	//unlagged
 	if ( g_antilag->integer)

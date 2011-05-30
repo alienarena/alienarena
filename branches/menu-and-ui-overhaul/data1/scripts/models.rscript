@@ -82,7 +82,6 @@ models/items/armor/shard/skin
 	}
 	{
 		map gfx/shardmask.tga
-		nolightmap
 		alphamask
 	}
 }
@@ -267,19 +266,13 @@ models/items/armor/jacket/skin
 models/items/haste/skin
 {
 	{
-		map gfx/hastebase.tga
+		map models/items/haste/skin.jpg
 	}
 	{
-		map gfx/greenlightning.tga
+		map models/items/haste/skin_fx.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		scale static 2 static 2
-		scroll static 2 static 1
-		alphashift 10 0.1 0.6
+		alphashift 0 1 1
 		nolightmap
-	}
-	{
-		map gfx/hastemask.tga
-		alphamask
 	}
 }
 models/items/quaddama/skin
@@ -288,14 +281,14 @@ models/items/quaddama/skin
 		map gfx/quadbase.tga
 	}
 	{
-		map gfx/bluelightning.tga
+		map gfx/greenlightning.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		scroll static 1 static 2
 		alphashift 10 0.1 0.6
 		nolightmap
 	}
 	{
-		map gfx/quadmask.tga
+		map models/items/quaddama/skin.tga
 		alphamask
 	}
 }
@@ -500,6 +493,54 @@ maps/meshes/xempx/ceillight
 		map maps/meshes/xempx/ceillight_fx.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
 		alphashift 0 1.0 1.0
+		nolightmap
+	}
+}
+maps/meshes/xempx/lightbomb
+{
+	{
+		map maps/meshes/xempx/lightbomb.jpg
+	}
+	{
+		map maps/meshes/xempx/lightbomb_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
+models/items/mega_h/skin
+{
+	{
+		map models/items/mega_h/skin.jpg
+	}
+	{
+		map models/items/mega_h/skin_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
+models/items/sproing/skin
+{
+	{
+		map models/items/sproing/skin.jpg
+	}
+	{
+		map models/items/sproing/skin_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
+models/items/invulner/skin
+{
+	{
+		map models/items/invulner/skin.jpg
+	}
+	{
+		map models/items/invulner/skin_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
 		nolightmap
 	}
 }

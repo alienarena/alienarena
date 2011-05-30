@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2011 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -47,6 +48,25 @@ typedef struct
 
 worldLight_t r_worldLights[MAX_LIGHTS];
 int r_numWorldLights;
+
+/*
+==============================================================================
+
+SUN LIGHTS
+
+==============================================================================
+*/
+
+typedef struct
+{
+	char targetname[128];
+	vec3_t	origin;
+	vec3_t	target;
+	qboolean has_Sun;
+} sunLight_t;
+
+sunLight_t *r_sunLight;
+
 /*
 ==============================================================================
 
@@ -181,6 +201,8 @@ typedef struct mtexinfo_s
 	image_t		*image;
 	image_t		*normalMap;
 	image_t		*heightMap;
+	qboolean	has_normalmap;
+	qboolean	has_heightmap;
 	struct		rscript_s	*script;
 	int			value;
 } mtexinfo_t;
@@ -213,9 +235,13 @@ typedef struct msurface_s
 	int			dlight_s, dlight_t; // gl lightmap coordinates for dynamic lightmaps
 
 	glpoly_t	*polys;				// multiple if warped
+
+	//texture chains for batching
 	struct	msurface_s	*texturechain;
+	struct	msurface_s	*glslchain;
+	struct  msurface_s	*glsldynamicchain;
 	struct  msurface_s	*lightmapchain;
-	struct	msurface_s	*specialchain;
+	struct	msurface_s	*rscriptchain;
 	struct  msurface_s	*normalchain;
 
 	mtexinfo_t	*texinfo;
@@ -233,6 +259,16 @@ typedef struct msurface_s
 	entity_t	*entity;
 
 	float	tangentSpaceTransform[3][3];
+
+	vec3_t mins;
+	vec3_t maxs;
+
+	//vbo
+	size_t vbo_pos;
+	int	xyz_size;
+	int st_size;
+	int lm_size;
+	int has_vbo;
 
 } msurface_t;
 
@@ -386,13 +422,7 @@ typedef struct model_s
 	byte		*tangents;
 
 	fstvert_t	*st;
-	neighbors_t *neighbors;
-
-	//vbo
-	//vertCache_t	*vbo_st;
-	//vertCache_t	*vbo_xyz;
-	//vertCache_t	*vbo_color;
-	//vertCache_t	*vbo_normals;
+	neighbors_t *neighbors;	
 
 	//ragdoll info
 	int hasRagDoll;
@@ -415,5 +445,5 @@ void	*Hunk_Alloc (int size);
 int		Hunk_End (void);
 void	Hunk_Free (void *base);
 
-void	Mod_FreeAll (void);
 void	Mod_Free (model_t *mod);
+void    Mod_FreeAll (void);

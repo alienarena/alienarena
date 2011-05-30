@@ -31,6 +31,10 @@ SHADOW VOLUMES
 ===============
 */
 
+glStencilFuncSeparatePROC			qglStencilFuncSeparate		= NULL;
+glStencilOpSeparatePROC				qglStencilOpSeparate		= NULL;
+glStencilMaskSeparatePROC			qglStencilMaskSeparate		= NULL;
+
 extern glStencilFuncSeparatePROC	qglStencilFuncSeparate;
 extern glStencilOpSeparatePROC		qglStencilOpSeparate;
 extern glStencilMaskSeparatePROC	qglStencilMaskSeparate;
@@ -42,7 +46,36 @@ static qboolean	triangleFacingLight	[MAX_INDICES / 3];
 
 static vec4_t shadow_lerped[MAX_VERTS];
 
-void GL_LerpVerts(int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, float move[3], float frontv[3], float backv[3])
+void R_InitShadowSubsystem(void)
+{	
+	// openGL 2.0 Unified Separate Stencil
+	gl_state.stencil_wrap = false;
+	if (strstr(gl_config.extensions_string, "GL_EXT_stencil_wrap"))
+	{
+		Com_Printf("...using GL_EXT_stencil_wrap\n");
+		gl_state.stencil_wrap = true;
+	} else
+	{
+		Com_Printf("...GL_EXT_stencil_wrap not found\n");
+		gl_state.stencil_wrap = false;
+	}
+
+	qglStencilFuncSeparate		= (void *)qwglGetProcAddress("glStencilFuncSeparate");
+	qglStencilOpSeparate		= (void *)qwglGetProcAddress("glStencilOpSeparate");
+	qglStencilMaskSeparate		= (void *)qwglGetProcAddress("glStencilMaskSeparate");
+
+	gl_state.separateStencil = false;
+	if(qglStencilFuncSeparate && qglStencilOpSeparate && qglStencilMaskSeparate)
+	{
+			Com_Printf("...using GL_EXT_stencil_two_side\n");
+			gl_state.separateStencil = true;
+
+	}
+	else
+		Com_Printf("...GL_EXT_stencil_two_side not found\n");
+}
+
+void SHD_LerpVerts(int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, float move[3], float frontv[3], float backv[3])
 {
     int i;
 
@@ -53,7 +86,7 @@ void GL_LerpVerts(int nverts, dtrivertx_t *v, dtrivertx_t *ov, float *lerp, floa
     }
 }
 
-void R_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightOrg, qboolean lerp)
+void SHD_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightOrg, qboolean lerp)
 {
 	vec3_t	r_triangleNormals[MAX_INDICES / 3];
 	vec3_t	temp, dir0, dir1;
@@ -90,7 +123,7 @@ void R_MarkShadowTriangles(dmdl_t *paliashdr, dtriangle_t *tris, vec3_t lightOrg
 	}
 }
 
-void R_MarkIQMShadowTriangles(vec3_t lightOrg)
+void SHD_MarkIQMShadowTriangles(vec3_t lightOrg)
 {
 	vec3_t	r_triangleNormals[MAX_INDICES / 3];
 	vec3_t	temp, dir0, dir1;
@@ -118,7 +151,7 @@ void R_MarkIQMShadowTriangles(vec3_t lightOrg)
 	}
 }
 
-void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboolean lerp)
+void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboolean lerp)
 {
 	dtriangle_t *ot, *tris;
 	neighbors_t *neighbors;
@@ -136,7 +169,7 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 
 	ot = tris = (dtriangle_t *) ((unsigned char *) hdr + hdr->ofs_tris);
 
-	R_MarkShadowTriangles(hdr, tris, light, lerp);
+	SHD_MarkShadowTriangles(hdr, tris, light, lerp);
 
 	VectorCopy(light, currentShadowLight);
 
@@ -324,14 +357,14 @@ void BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboole
 }
 
 
-void BuildIQMShadowVolume(vec3_t light, float projectdistance)
+void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
 {
 	int i, j, shadow_vert = 0, index = 0;
 	unsigned	ShadowIndex[MAX_INDICES];
 	vec3_t v0, v1, v2, v3;
 	vec3_t currentShadowLight;
 
-	R_MarkIQMShadowTriangles(light);
+	SHD_MarkIQMShadowTriangles(light);
 
 	VectorCopy(light, currentShadowLight);
 
@@ -480,7 +513,7 @@ void BuildIQMShadowVolume(vec3_t light, float projectdistance)
              qglUnlockArraysEXT();
 }
 
-void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolean lerp)
+void SHD_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolean lerp)
 {
 	int incr = gl_state.stencil_wrap ? GL_INCR_WRAP_EXT : GL_INCR;
 	int decr = gl_state.stencil_wrap ? GL_DECR_WRAP_EXT : GL_DECR;
@@ -495,7 +528,7 @@ void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolea
 		qglStencilOpSeparate(GL_BACK, GL_KEEP,  incr, GL_KEEP);
 		qglStencilOpSeparate(GL_FRONT, GL_KEEP, decr, GL_KEEP);
 
-		BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
+		SHD_BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
 
 		qglEnable(GL_CULL_FACE);
 	}
@@ -505,15 +538,15 @@ void GL_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolea
 
 		qglCullFace(GL_BACK);
 		qglStencilOp(GL_KEEP, incr, GL_KEEP);
-		BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
+		SHD_BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
 
 		qglCullFace(GL_FRONT);
 		qglStencilOp(GL_KEEP, decr, GL_KEEP);
-		BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
+		SHD_BuildShadowVolume(paliashdr, lightdir, projdist, lerp);
 	}
 }
 
-void GL_RenderIQMVolumes(vec3_t lightdir, int projdist)
+void SHD_RenderIQMVolumes(vec3_t lightdir, int projdist)
 {
 	int incr = gl_state.stencil_wrap ? GL_INCR_WRAP_EXT : GL_INCR;
 	int decr = gl_state.stencil_wrap ? GL_DECR_WRAP_EXT : GL_DECR;
@@ -528,7 +561,7 @@ void GL_RenderIQMVolumes(vec3_t lightdir, int projdist)
 		qglStencilOpSeparate(GL_BACK, GL_KEEP,  incr, GL_KEEP);
 		qglStencilOpSeparate(GL_FRONT, GL_KEEP, decr, GL_KEEP);
 
-		BuildIQMShadowVolume(lightdir, projdist);
+		SHD_BuildIQMShadowVolume(lightdir, projdist);
 
 		qglEnable(GL_CULL_FACE);
 	}
@@ -539,15 +572,15 @@ void GL_RenderIQMVolumes(vec3_t lightdir, int projdist)
 		qglCullFace(GL_BACK);
 		qglStencilOp(GL_KEEP, incr, GL_KEEP);
 
-		BuildIQMShadowVolume(lightdir, projdist);
+		SHD_BuildIQMShadowVolume(lightdir, projdist);
 
 		qglCullFace(GL_FRONT);
 		qglStencilOp(GL_KEEP, decr, GL_KEEP);
-		BuildIQMShadowVolume(lightdir, projdist);
+		SHD_BuildIQMShadowVolume(lightdir, projdist);
 	}
 }
 
-void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
+void SHD_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 {
 	vec3_t light, temp, tempOrg;
 	int i, j, o;
@@ -630,10 +663,10 @@ void GL_DrawAliasShadowVolume(dmdl_t * paliashdr, qboolean lerp)
 	else
 		project = 1.5;
 
-	GL_RenderVolumes(paliashdr, light, project, lerp);
+	SHD_RenderVolumes(paliashdr, light, project, lerp);
 }
 
-void GL_DrawIQMShadowVolume( vec3_t meshOrigin, vec3_t meshAngles, qboolean RagDoll )
+void SHD_DrawIQMShadowVolume( vec3_t meshOrigin, vec3_t meshAngles, qboolean RagDoll )
 {
 	vec3_t light, temp, tempOrg;
 	int i, j, o;
@@ -716,12 +749,8 @@ void GL_DrawIQMShadowVolume( vec3_t meshOrigin, vec3_t meshAngles, qboolean RagD
 	else
 		project = 1.5;
 
-	GL_RenderIQMVolumes(light, project);
+	SHD_RenderIQMVolumes(light, project);
 }
-
-/*==============
-Vis's CullSphere
-==============*/
 
 qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipflags )
 {
@@ -744,10 +773,7 @@ qboolean R_CullSphere( const vec3_t centre, const float radius, const int clipfl
 	return false;
 }
 
-int CL_PMpointcontents(vec3_t point);
-extern float modelpitch;
-extern double degreeToRadian(double degree);
-void R_DrawShadowVolume()
+void SHD_DrawShadowVolume()
 {
 	dmdl_t *paliashdr=NULL;
     vec3_t move, delta, vectors[3];
@@ -823,7 +849,7 @@ void R_DrawShadowVolume()
 
 			lerp = shadow_lerped[0];
 
-			GL_LerpVerts(paliashdr->num_xyz, v, ov, lerp, move, frontv, backv);
+			SHD_LerpVerts(paliashdr->num_xyz, v, ov, lerp, move, frontv, backv);
 		}
 	}
 
@@ -833,7 +859,7 @@ void R_DrawShadowVolume()
 	qglRotatef(currententity->angles[1], 0, 0, 1);
 
 	if(currentmodel->type == mod_alias)
-		GL_DrawAliasShadowVolume(paliashdr, lerped);
+		SHD_DrawAliasShadowVolume(paliashdr, lerped);
 	else
 	{
 		float time, frame;
@@ -845,7 +871,7 @@ void R_DrawShadowVolume()
 		if(time > 1.0)
 			time = 1.0;
 
-		if((currententity->frame == currententity->oldframe ) && !inAnimGroup(currententity->frame, currententity->oldframe))
+		if((currententity->frame == currententity->oldframe ) && !IQM_InAnimGroup(currententity->frame, currententity->oldframe))
 			time = 0;
 
 		//Check for stopped death anims
@@ -854,23 +880,23 @@ void R_DrawShadowVolume()
 
 		frame = currententity->frame + time;
 
-		GL_AnimateIQMFrame(frame, NextFrame(currententity->frame));
+		IQM_AnimateFrame(frame, IQM_NextFrame(currententity->frame));
 
-		GL_DrawIQMShadowVolume(currententity->origin, currententity->angles, false);
+		SHD_DrawIQMShadowVolume(currententity->origin, currententity->angles, false);
 	}
 
 	qglEnable(GL_TEXTURE_2D);
 	qglPopMatrix();
 }
 
-void R_DrawRagDollShadowVolume(int RagDollID)
+void SHD_DrawRagDollShadowVolume(int RagDollID)
 {
 	qglPushMatrix();
 	qglDisable(GL_TEXTURE_2D);
 
-	GL_AnimateIQMRagdoll(RagDollID);
+	IQM_AnimateRagdoll(RagDollID);
 
-	GL_DrawIQMShadowVolume(RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, true);
+	SHD_DrawIQMShadowVolume(RagDoll[RagDollID].curPos, RagDoll[RagDollID].angles, true);
 	
 	qglEnable(GL_TEXTURE_2D);
 	qglPopMatrix();
@@ -880,7 +906,7 @@ void R_CastShadow(void)
 {
 	int i, RagDollID;
 	vec3_t dist, tmp;
-	float rad;
+	float rad, thresh;
     trace_t r_trace;
 
 	//note - we use a combination of stencil volumes(for world light shadows) and shadowmaps(for dynamic shadows)
@@ -934,7 +960,7 @@ void R_CastShadow(void)
 				continue;
 		}
 
-		if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 10))
+		if (r_newrefdef.vieworg[2] < (currententity->origin[2] - 128))
 			continue;
 
 		VectorSubtract(currententity->model->maxs, currententity->model->mins, tmp);
@@ -954,8 +980,13 @@ void R_CastShadow(void)
 		//get distance, set lod if available
 		VectorSubtract(r_origin, currententity->origin, dist);
 
-		//cull by distance if soft shadows(to do - test/tweak this)
-		if(VectorLength(dist) > 1024 && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
+		//keep some of the truly massive items from having bad disappearing shadow artifacts.
+		thresh = rad*5;
+		if(thresh < 1024)
+			thresh = 1024;
+
+		//cull by distance if soft shadows
+		if(VectorLength(dist) > thresh && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
 			continue;
 
 		if(VectorLength(dist) > 1000) {
@@ -967,7 +998,7 @@ void R_CastShadow(void)
 				currentmodel = currententity->lod1;
 		}
 
-		R_DrawShadowVolume();
+		SHD_DrawShadowVolume();
 	}
 
 	//render volumes for ragdolls
@@ -1008,7 +1039,7 @@ void R_CastShadow(void)
 		if(VectorLength(dist) > 1024 && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
 			continue;
 
-		R_DrawRagDollShadowVolume(RagDollID);
+		SHD_DrawRagDollShadowVolume(RagDollID);
 	}
 
 
@@ -1026,11 +1057,11 @@ void R_CastShadow(void)
 
 /*
 ===============
-R_ShadowLight - Planar stencil shadows
+SHD_ShadowLight - Planar stencil shadows
 ===============
 */
 
-float R_ShadowLight (vec3_t entPos, vec3_t angles, vec3_t lightAdd, int type)
+float SHD_ShadowLight (vec3_t entPos, vec3_t angles, vec3_t lightAdd, int type)
 {
 	int			lnum, i;
 	dlight_t	*dl;
@@ -1041,7 +1072,8 @@ float R_ShadowLight (vec3_t entPos, vec3_t angles, vec3_t lightAdd, int type)
 
 	if (!r_worldmodel)
 		return 0;
-	if (!r_worldmodel->lightdata) //keep old lame shadow
+
+	if (!r_worldmodel->lightdata)
 		return 0;
 
 	VectorCopy(entPos, pos);
@@ -1111,10 +1143,9 @@ float R_ShadowLight (vec3_t entPos, vec3_t angles, vec3_t lightAdd, int type)
 			intens = 0.3;
 	}
 
-	// Barnes improved code
 	shadowdist = VectorNormalize(lightAdd)/5.0;
 	if (shadowdist > 4) shadowdist = 4;
-	if (shadowdist <= 0) // old style static shadow
+	if (shadowdist <= 0) // static shadow
 	{
 		angle[PITCH] = angles[PITCH];
 		angle[YAW] = -angles[YAW];
@@ -1128,7 +1159,6 @@ float R_ShadowLight (vec3_t entPos, vec3_t angles, vec3_t lightAdd, int type)
 	}
 	AngleVectors (angle, dist, NULL, NULL);
 	VectorScale (dist, shadowdist, lightAdd);
-	// end Barnes improved code
 
 	return intens;
 }

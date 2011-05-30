@@ -384,9 +384,9 @@ extern	void ( APIENTRY * qglColorTableEXT)( int, int, int, int, int, const void 
 extern	void ( APIENTRY * qglLockArraysEXT) (int , int);
 extern	void ( APIENTRY * qglUnlockArraysEXT) (void);
 
-extern	void ( APIENTRY * qglMTexCoord2fSGIS)( GLenum, GLfloat, GLfloat );
-extern	void ( APIENTRY * qglMTexCoord3fSGIS)( GLenum, GLfloat, GLfloat, GLfloat );
-extern	void ( APIENTRY * qglSelectTextureSGIS)( GLenum );
+extern	void ( APIENTRY * qglMTexCoord2fARB)( GLenum, GLfloat, GLfloat );
+extern	void ( APIENTRY * qglMTexCoord3fARB)( GLenum, GLfloat, GLfloat, GLfloat );
+extern	void ( APIENTRY * qglSelectTextureARB)( GLenum );
 
 extern	void ( APIENTRY * qglActiveTextureARB)( GLenum );
 extern	void ( APIENTRY * qglClientActiveTextureARB)( GLenum );

@@ -195,6 +195,7 @@ struct botvals_s
 extern edict_t *players[MAX_CLIENTS];		// pointers to all players in the game
 
 // extern decs
+edict_t *node_showents[MAX_NODES]; //ents created by shownode
 extern node_t nodes[MAX_NODES];
 extern item_table_t item_table[MAX_EDICTS];
 extern qboolean debug_mode;
@@ -263,6 +264,7 @@ void     ACEND_SaveNodes();
 void     ACEND_LoadNodes();
 
 // acebot_spawn.c protos
+void     ACESP_UpdateBots(void);
 void	 ACESP_SaveBots();
 void	 ACESP_LoadBots(edict_t *ent);
 int		 ACESP_FindBotNum(void);

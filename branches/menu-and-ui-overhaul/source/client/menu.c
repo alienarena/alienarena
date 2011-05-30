@@ -1,5 +1,6 @@
 /*
 Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 2005-2011 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -12,9 +13,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
 
@@ -47,6 +48,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 #endif
 
+#include "ref_gl/fnt/fontface.h"
+
 static int	m_main_cursor;
 
 extern void RS_LoadScript(char *script);
@@ -67,6 +70,7 @@ static char *menu_out_sound		= "misc/menu3.wav";
 // static char *menu_background	= "misc/menuback.wav"; // unused
 int svridx;
 int playeridx;
+int modidx;
 int hover_time;
 float mappicalpha;
 float banneralpha;
@@ -175,6 +179,10 @@ static void M_ArrowPics()
 	//for the player list
 	Draw_StretchPic (viddef.width / 2 - w/2 + (int)(147.5*scale), viddef.height / 2 + 153*scale, 32*scale, 32*scale, "uparrow");
 	Draw_StretchPic (viddef.width / 2 - w/2 + (int)(147.5*scale), viddef.height / 2 + 243*scale, 32*scale, 32*scale, "dnarrow");
+
+	//for the mod list
+	Draw_StretchPic (viddef.width / 2 - w/2 + (int)(382.5*scale), viddef.height / 2 + 10*scale, 32*scale, 32*scale, "uparrow");
+	Draw_StretchPic (viddef.width / 2 - w/2 + (int)(382.5*scale), viddef.height / 2 + 90*scale, 32*scale, 32*scale, "dnarrow");
 }
 
 // Knightmare- added Psychospaz's mouse support
@@ -342,6 +350,8 @@ const char *Default_MenuKey( menuframework_s *m, int key )
 	case K_MOUSE5:
 	case K_MOUSE6:
 	case K_MOUSE7:
+	case K_MOUSE8:
+	case K_MOUSE9:
 	case K_JOY1:
 	case K_JOY2:
 	case K_JOY3:
@@ -597,6 +607,18 @@ void M_Main_Draw (void)
 	else if(!strcmp(litname, "m_main_quit_sel"))
 		i = 7;
 	Draw_StretchPic( xoffset + 100*scale + (20*i*scale), (int)(ystart + m_main_cursor * 32.5*scale + 13*scale), w*scale, h*scale, litname );
+
+	// XXX Test XXX
+	OOL_Object face = FNT_FontFace_Get( "freesans" );
+	if ( face ) {
+		OOL_Object font = FNT_FontFace_GetFont( OOL_Cast( face , FNT_FontFace ) , 16 , false );
+		if ( font ) {
+			Com_Printf( "font loaded\n" );
+			OOL_Object_Destroy( font );
+		}
+	} else {
+		Com_Printf( "failed to load face\n");
+	}
 }
 
 typedef struct
@@ -1632,7 +1654,7 @@ static void AddFontNames( char * path , int * nfontnames , char ** list )
 	char ** fontfiles;
 	int nfonts = 0;
 	int i;
-	
+
 	fontfiles = FS_ListFilesInFS( path , &nfonts, 0,
 	    SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM );
 
@@ -2806,6 +2828,7 @@ void Game_MenuInit( void )
 	s_hard_game_action.generic.type	= MTYPE_ACTION;
 	s_hard_game_action.generic.x		= FONTSCALE*32*scale;
 	s_hard_game_action.generic.y		= FONTSCALE*70*scale;
+
 	s_hard_game_action.generic.cursor_offset = -16;
 	s_hard_game_action.generic.name	= "hard";
 	s_hard_game_action.generic.callback = HardGameFunc;
@@ -3265,12 +3288,16 @@ static menulist_s		s_joinserver_filterempty_action;
 static menuaction_s		s_joinserver_server_actions[MAX_LOCAL_SERVERS];
 static menuaction_s		s_joinserver_server_info[32];
 static menuaction_s		s_joinserver_server_data[6];
+static menuaction_s     s_joinserver_mods_data[6];
 static menuaction_s		s_joinserver_moveup;
 static menuaction_s		s_joinserver_movedown;
 static menuslider_s		s_joinserver_scrollbar;
 static menuaction_s		s_playerlist_moveup;
 static menuaction_s		s_playerlist_movedown;
 static menuslider_s		s_playerlist_scrollbar;
+static menuaction_s		s_modlist_moveup;
+static menuaction_s		s_modlist_movedown;
+static menuslider_s		s_modlist_scrollbar;
 
 int		m_num_servers;
 int		m_show_empty;
@@ -3279,8 +3306,69 @@ int		m_show_empty;
 
 static char local_server_info[256][256];
 static char local_server_data[6][64];
+static char local_mods_data[16][53]; //53 is measured max tooltip width
 static int	local_server_rankings[64];
 unsigned int starttime;
+
+//Lists for all stock mutators and game modes, plus some of the more popular
+//custom ones. (NOTE: For non-boolean cvars, i.e. those which have values
+//other than 0 or 1, you get a string of the form cvar=value. In the future,
+//we may do something special to parse these, but since no such cvars are
+//actually recognized right now anyway, we currently don't.)
+
+//Names. If a cvar isn't recognized, the name of the cvar itself is used.
+static char mod_names[] =
+    //cannot be wider than this boundary:    |
+    "\\ctf"             "\\capture the flag"
+    "\\tca"             "\\team core assault"
+    "\\cp"              "\\cattle prod"
+    "\\instagib"        "\\instagib"
+    "\\rocket_arena"    "\\rocket arena"
+    "\\low_grav"        "\\low gravity"
+    "\\regeneration"    "\\regeneration"
+    "\\vampire"         "\\vampire"
+    "\\excessive"       "\\excessive"
+    "\\grapple"         "\\grappling hook"
+    "\\classbased"      "\\class based"
+    "\\g_duel"          "\\duel mode"
+    "\\quickweap"       "\\quick switch"
+    "\\anticamp"        "\\anticamp"
+    "\\sv_joustmode"    "\\joust mode"
+    "\\playerspeed"     "\\player speed"
+    "\\insta_rockets"   "\\insta/rockets"
+    "\\chaingun_arena"  "\\chaingun arena"
+    "\\instavap"        "\\vaporizer arena"
+    "\\vape_arena"      "\\vaporizer arena"
+    "\\testcode"        "\\code testing"
+    "\\testmap"         "\\map testing"
+    "\\";
+
+//Descriptions. If a cvar isn't recognized, "(no description)" is used.
+static char mods_desc[] =
+    //cannot be wider than this boundary:                                    |
+    "\\ctf"             "\\capture the enemy team's flag to earn points"
+    "\\tca"             "\\destroy the enemy team's spider node to win"
+    "\\cp"              "\\herd cows through your team's goal for points"
+    "\\instagib"        "\\disruptor only, instant kill, infinite ammo"
+    "\\rocket_arena"    "\\rocket launcher only, infinite ammo"
+    "\\low_grav"        "\\reduced gravity"
+    "\\regeneration"    "\\regain health over time"
+    "\\vampire"         "\\regain health by damaging people"
+    "\\excessive"       "\\all weapons enhanced, infinite ammo"
+    "\\grapple"         "\\spawn with a grappling hook"
+    "\\classbased"      "\\different races have different strengths"
+    "\\g_duel"          "\\wait in line for your turn to duel"
+    "\\quickweap"       "\\switch weapons instantly"
+    "\\anticamp"        "\\you are punished for holding still too long"
+    "\\sv_joustmode"    "\\you can still jump while in midair"
+    "\\playerspeed"     "\\run much faster than normal"
+    "\\insta_rockets"   "\\hybrid of instagib and rocket_arena"
+    "\\chaingun_arena"  "\\chaingun only, infinite ammo"
+    "\\instavap"        "\\vaporizer only, infinite ammo"
+    "\\vape_arena"      "\\vaporizer only, infinite ammo"
+    "\\testcode"        "\\server is testing experimental code"
+    "\\testmap"         "\\server is testing an unfinished map"
+    "\\";
 
 int GetColorTokens( char *string)
 {
@@ -3351,6 +3439,7 @@ typedef struct _SERVERDATA {
 	int ping;
 	netadr_t local_server_netadr;
 	char serverInfo[256];
+	char modInfo[64];
 
 } SERVERDATA;
 
@@ -3415,6 +3504,8 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 			Com_sprintf(mservers[m_num_servers].szHostName, sizeof(mservers[m_num_servers].szHostName), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "maxclients"))
 			Com_sprintf(mservers[m_num_servers].maxClients, sizeof(mservers[m_num_servers].maxClients), "%s", token);
+		else if (!Q_strcasecmp (lasttoken, "mods"))
+		    Com_sprintf(mservers[m_num_servers].modInfo, sizeof(mservers[m_num_servers].modInfo), "%s", token);
 
 		/* Get next token: */
 		Com_sprintf(lasttoken, sizeof(lasttoken), "%s", token);
@@ -3551,16 +3642,40 @@ void PlayerScrollMove ( void *self)
 	if(playeridx > 24)
 		playeridx = 24;
 }
+
+void MoveUp_mlist ( void *self)
+{
+	modidx--;
+	if(modidx < 0)
+		modidx = 0;
+	s_modlist_scrollbar.curvalue--;
+}
+void MoveDown_mlist ( void *self)
+{
+	modidx++;
+	if(modidx > 18)
+		modidx = 18;
+	s_modlist_scrollbar.curvalue++;
+}
+void ModScrollMove ( void *self)
+{
+	modidx = s_modlist_scrollbar.curvalue;
+	if(modidx > 18)
+		modidx = 18;
+}
 //join on double click, return info on single click
 void JoinServerFunc( void *self )
 {
 	char	buffer[128];
 	int		index;
 	int     i;
+	char    modstring[64];
+	char    *token;
 
 	index = ( menuaction_s * ) self - s_joinserver_server_actions;
 
 	playeridx = s_playerlist_scrollbar.curvalue = 0;
+	modidx = s_modlist_scrollbar.curvalue = 0;
 
 	if ( Q_strcasecmp( mservers[index+svridx].szHostName, NO_SERVER_STRING ) == 0 )
 		return;
@@ -3585,6 +3700,20 @@ void JoinServerFunc( void *self )
 		Com_sprintf(local_server_data[3], sizeof(local_server_data[3]), mservers[index+svridx].fraglimit);
 		Com_sprintf(local_server_data[4], sizeof(local_server_data[4]), mservers[index+svridx].timelimit);
 		Com_sprintf(local_server_data[5], sizeof(local_server_data[5]), mservers[index+svridx].szVersion);
+
+		//Copy modstring over since strtok will modify it
+		Q_strncpyz(modstring, mservers[index+svridx].modInfo, sizeof(modstring));
+		token = strtok(modstring, "%%");
+		for (i=0; i<16; i++) {
+		    if (!token)
+		        break;
+		    Com_sprintf(local_mods_data[i], sizeof(local_mods_data[i]), token);
+		    token = strtok(NULL, "%%");
+		}
+
+		//Reset all the rest of the strings that haven't been initialized
+		for (; i<16; i++)
+		    local_mods_data[i][0] = 0;
 
 		//players
 		for(i=0; i<mservers[index+svridx].players; i++) {
@@ -3625,6 +3754,7 @@ void SearchLocalGames( void )
 
 	svridx = 0;
 	playeridx = 0;
+	modidx = 0;
 	m_num_servers = 0;
 	for (i=0 ; i<MAX_LOCAL_SERVERS ; i++)
 		strcpy (mservers[i].serverInfo, NO_SERVER_STRING);
@@ -3691,8 +3821,8 @@ void JoinServer_MenuInit( void )
 
 	s_joinserver_address_book_action.generic.type	= MTYPE_ACTION;
 	s_joinserver_address_book_action.generic.name	= "address book";
-	s_joinserver_address_book_action.generic.x		= 290*scale;
-	s_joinserver_address_book_action.generic.y		= FONTSCALE*-69*scale+offset;
+	s_joinserver_address_book_action.generic.x		= 370*scale;
+	s_joinserver_address_book_action.generic.y		= FONTSCALE*30*scale+offset;
 	s_joinserver_address_book_action.generic.cursor_offset = -16*scale;
 	s_joinserver_address_book_action.generic.callback = AddressBookFunc;
 
@@ -3772,6 +3902,32 @@ void JoinServer_MenuInit( void )
 	s_playerlist_scrollbar.curvalue		 = 0;
 	s_playerlist_scrollbar.generic.callback = PlayerScrollMove;
 
+	s_modlist_moveup.generic.type	= MTYPE_ACTION;
+	s_modlist_moveup.generic.name	= "     ";
+	s_modlist_moveup.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_modlist_moveup.generic.x		= 365*scale;
+	s_modlist_moveup.generic.y		= FONTSCALE*-86*scale+offset;
+	s_modlist_moveup.generic.cursor_offset = -16*scale;
+	s_modlist_moveup.generic.callback = MoveUp_mlist;
+
+	s_modlist_movedown.generic.type	= MTYPE_ACTION;
+	s_modlist_movedown.generic.name	= "     ";
+	s_modlist_movedown.generic.flags	= QMF_LEFT_JUSTIFY;
+	s_modlist_movedown.generic.x		= 365*scale;
+	s_modlist_movedown.generic.y		= FONTSCALE*-46*scale+offset;
+	s_modlist_movedown.generic.cursor_offset = -16*scale;
+	s_modlist_movedown.generic.callback = MoveDown_mlist;
+
+	s_modlist_scrollbar.generic.type  = MTYPE_VERTSLIDER;
+	s_modlist_scrollbar.generic.name  = " ";
+	s_modlist_scrollbar.generic.x	 = 370*scale;
+	s_modlist_scrollbar.generic.y	 = FONTSCALE*-70*scale+offset;
+	s_modlist_scrollbar.minvalue		 = 0;
+	s_modlist_scrollbar.maxvalue		 = 12;
+	s_modlist_scrollbar.size			 = 3;
+	s_modlist_scrollbar.curvalue		 = 0;
+	s_modlist_scrollbar.generic.callback = ModScrollMove;
+
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_address_book_action );
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_search_action );
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_filterempty_action );
@@ -3786,10 +3942,16 @@ void JoinServer_MenuInit( void )
 	for ( i = 0; i < 6; i++ )
 		Menu_AddItem( &s_joinserver_menu, &s_joinserver_server_data[i] );
 
+	for ( i = 0; i < 6; i++ )
+    	Menu_AddItem( &s_joinserver_menu, &s_joinserver_mods_data[i] );
+
 	//add items to move the index
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_moveup );
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_movedown );
 	Menu_AddItem( &s_joinserver_menu, &s_joinserver_scrollbar );
+	Menu_AddItem( &s_joinserver_menu, &s_modlist_moveup );
+	Menu_AddItem( &s_joinserver_menu, &s_modlist_movedown );
+	Menu_AddItem( &s_joinserver_menu, &s_modlist_scrollbar );
 	Menu_AddItem( &s_joinserver_menu, &s_playerlist_moveup );
 	Menu_AddItem( &s_joinserver_menu, &s_playerlist_movedown );
 	Menu_AddItem( &s_joinserver_menu, &s_playerlist_scrollbar );
@@ -3804,6 +3966,8 @@ void JoinServer_MenuDraw(void)
 	int i;
 	float scale, offset, xoffset;
 	char ranktxt[8][32];
+	char modtxt[8][48];
+	char modnames[8][24];
 
 	scale = (float)(viddef.height)/600;
 
@@ -3862,6 +4026,27 @@ void JoinServer_MenuDraw(void)
 			s_joinserver_server_data[i].generic.x		= -380*scale;
 		s_joinserver_server_data[i].generic.y		= FONTSCALE*169*scale + FONTSCALE*i*10*scale+offset;
 	}
+
+	for ( i = 0; i < 6; i++)
+	{
+	    Com_sprintf (   modtxt[i], sizeof(modtxt[i]),
+	                    Info_ValueForKey(mods_desc, local_mods_data[i+modidx])
+	                );
+	    if (!strlen(modtxt[i]))
+	        Com_sprintf (modtxt[i], sizeof(modtxt[i]), "(no description)");
+        Com_sprintf (   modnames[i], sizeof(modnames[i]),
+	                    Info_ValueForKey(mod_names, local_mods_data[i+modidx])
+	                );
+	    if (!strlen(modnames[i]))
+	        Com_sprintf (modnames[i], sizeof(modnames[i]), local_mods_data[i+modidx]);
+		s_joinserver_mods_data[i].generic.type	= MTYPE_COLORACTION;
+		s_joinserver_mods_data[i].generic.name	= modnames[i];
+		s_joinserver_mods_data[i].generic.flags	= QMF_LEFT_JUSTIFY;
+		s_joinserver_mods_data[i].generic.x		= 80*scale;
+		s_joinserver_mods_data[i].generic.y		= FONTSCALE*169*scale + FONTSCALE*i*10*scale+offset;
+		s_joinserver_mods_data[i].generic.statusbar = modtxt[i];
+		s_joinserver_mods_data[i].generic.callback = NULL;
+	}
 	s_joinserver_scrollbar.maxvalue = m_num_servers - 16;
 	M_ArrowPics();
 	Menu_Draw( &s_joinserver_menu );
@@ -3910,6 +4095,7 @@ MUTATORS MENU
 static menuframework_s s_mutators_menu;
 static menulist_s s_instagib_list;
 static menulist_s s_rocketarena_list;
+static menulist_s s_insta_rockets_list;
 static menulist_s s_excessive_list;
 static menulist_s s_vampire_list;
 static menulist_s s_regen_list;
@@ -3927,6 +4113,8 @@ void InstagibFunc(void *self) {
 		Cvar_SetValue ("instagib", 1);
 		Cvar_SetValue ("rocket_arena", 0);
 		s_rocketarena_list.curvalue = 0;
+		Cvar_SetValue( "insta_rockets", 0 );
+		s_insta_rockets_list.curvalue = 0;
 		Cvar_SetValue ("excessive", 0);
 		s_excessive_list.curvalue = 0;
 		Cvar_SetValue("classbased", 0);
@@ -3941,13 +4129,33 @@ void RocketFunc(void *self) {
 		Cvar_SetValue ("rocket_arena", 1);
 		Cvar_SetValue ("instagib", 0);
 		s_instagib_list.curvalue = 0;
-		Cvar_SetValue ("excessvie", 0);
+		Cvar_SetValue( "insta_rockets", 0 );
+		s_insta_rockets_list.curvalue = 0;
+		Cvar_SetValue ("excessive", 0);
 		s_excessive_list.curvalue = 0;
 		Cvar_SetValue("classbased", 0);
 		s_classbased_list.curvalue = 0;
 	}
 	else
 		Cvar_SetValue ("rocket_arena", 0);
+}
+void InstaRocketsFunc(void *self)
+{
+	if ( s_insta_rockets_list.curvalue )
+	{
+		Cvar_SetValue( "insta_rockets", 1 );
+		Cvar_SetValue ("rocket_arena", 0);
+		s_rocketarena_list.curvalue = 0;
+		Cvar_SetValue( "instagib", 0 );
+		s_instagib_list.curvalue = 0;
+		Cvar_SetValue( "excessive", 0 );
+		s_excessive_list.curvalue = 0;
+		Cvar_SetValue( "classbased", 0 );
+		s_classbased_list.curvalue = 0;
+	}
+	else
+		Cvar_SetValue( "insta_rockets", 0 );
+
 }
 void ExcessiveFunc(void *self) {
 
@@ -3957,6 +4165,8 @@ void ExcessiveFunc(void *self) {
 		s_instagib_list.curvalue = 0;
 		Cvar_SetValue("rocket_arena", 0);
 		s_rocketarena_list.curvalue = 0;
+		Cvar_SetValue( "insta_rockets", 0 );
+		s_insta_rockets_list.curvalue = 0;
 		Cvar_SetValue("classbased", 0);
 		s_classbased_list.curvalue = 0;
 	}
@@ -3973,6 +4183,8 @@ void ClassbasedFunc(void *self) {
 		s_instagib_list.curvalue = 0;
 		Cvar_SetValue("rocket_arena", 0);
 		s_rocketarena_list.curvalue = 0;
+		Cvar_SetValue( "insta_rockets", 0 );
+		s_insta_rockets_list.curvalue = 0;
 	}
 	else
 		Cvar_SetValue("classbased", 0);
@@ -3999,6 +4211,7 @@ void SetMutatorsFunc( void *self) {
 	//set the menu according to current cvar settings
 	s_instagib_list.curvalue = Cvar_VariableValue("instagib");
 	s_rocketarena_list.curvalue = Cvar_VariableValue("rocket_arena");
+	s_insta_rockets_list.curvalue = Cvar_VariableValue("insta_rockets");
 	s_excessive_list.curvalue = Cvar_VariableValue("excessive");
 	s_vampire_list.curvalue = Cvar_VariableValue("vampire");
 	s_regen_list.curvalue = Cvar_VariableValue("regeneration");
@@ -4050,9 +4263,17 @@ void Mutators_MenuInit( void )
 	s_rocketarena_list.itemnames = yn;
 	s_rocketarena_list.curvalue = 0;
 
+	s_insta_rockets_list.generic.type = MTYPE_SPINCONTROL;
+	s_insta_rockets_list.generic.x    = -8*scale;
+	s_insta_rockets_list.generic.y    = FONTSCALE*20*scale + offset;
+	s_insta_rockets_list.generic.name = "insta rockets";
+	s_insta_rockets_list.generic.callback = InstaRocketsFunc;
+	s_insta_rockets_list.itemnames = yn;
+	s_insta_rockets_list.curvalue = 0;
+
 	s_excessive_list.generic.type = MTYPE_SPINCONTROL;
 	s_excessive_list.generic.x	= -8*scale;
-	s_excessive_list.generic.y	= FONTSCALE*20*scale + offset;
+	s_excessive_list.generic.y	= FONTSCALE*30*scale + offset;
 	s_excessive_list.generic.name	= "excessive";
 	s_excessive_list.generic.callback = ExcessiveFunc;
 	s_excessive_list.itemnames = yn;
@@ -4060,7 +4281,7 @@ void Mutators_MenuInit( void )
 
 	s_vampire_list.generic.type = MTYPE_SPINCONTROL;
 	s_vampire_list.generic.x	= -8*scale;
-	s_vampire_list.generic.y	= FONTSCALE*30*scale + offset;
+	s_vampire_list.generic.y	= FONTSCALE*40*scale + offset;
 	s_vampire_list.generic.name	= "vampire";
 	s_vampire_list.generic.callback = MutatorsFunc;
 	s_vampire_list.itemnames = yn;
@@ -4068,7 +4289,7 @@ void Mutators_MenuInit( void )
 
 	s_regen_list.generic.type = MTYPE_SPINCONTROL;
 	s_regen_list.generic.x	= -8*scale;
-	s_regen_list.generic.y	= FONTSCALE*40*scale + offset;
+	s_regen_list.generic.y	= FONTSCALE*50*scale + offset;
 	s_regen_list.generic.name	= "regen";
 	s_regen_list.generic.callback = MutatorsFunc;
 	s_regen_list.itemnames = yn;
@@ -4076,7 +4297,7 @@ void Mutators_MenuInit( void )
 
 	s_quickweaps_list.generic.type = MTYPE_SPINCONTROL;
 	s_quickweaps_list.generic.x	= -8*scale;
-	s_quickweaps_list.generic.y	= FONTSCALE*50*scale + offset;
+	s_quickweaps_list.generic.y	= FONTSCALE*60*scale + offset;
 	s_quickweaps_list.generic.name	= "quick weapons";
 	s_quickweaps_list.generic.callback = MutatorsFunc;
 	s_quickweaps_list.itemnames = yn;
@@ -4084,7 +4305,7 @@ void Mutators_MenuInit( void )
 
 	s_anticamp_list.generic.type = MTYPE_SPINCONTROL;
 	s_anticamp_list.generic.x	= -8*scale;
-	s_anticamp_list.generic.y	= FONTSCALE*60*scale + offset;
+	s_anticamp_list.generic.y	= FONTSCALE*70*scale + offset;
 	s_anticamp_list.generic.name	= "anticamp";
 	s_anticamp_list.generic.callback = MutatorsFunc;
 	s_anticamp_list.itemnames = yn;
@@ -4094,14 +4315,14 @@ void Mutators_MenuInit( void )
 	s_camptime.generic.name = "camp time ";
 	s_camptime.generic.flags = QMF_NUMBERSONLY;
 	s_camptime.generic.x	= 8*scale;
-	s_camptime.generic.y	= FONTSCALE*76*scale + offset;
+	s_camptime.generic.y	= FONTSCALE*86*scale + offset;
 	s_camptime.length = 3;
 	s_camptime.visible_length = 3;
 	strcpy( s_camptime.buffer, Cvar_VariableString("camptime") );
 
 	s_speed_list.generic.type = MTYPE_SPINCONTROL;
 	s_speed_list.generic.x	= -8*scale;
-	s_speed_list.generic.y	= FONTSCALE*92*scale + offset;
+	s_speed_list.generic.y	= FONTSCALE*102*scale + offset;
 	s_speed_list.generic.name	= "speed";
 	s_speed_list.generic.callback = MutatorsFunc;
 	s_speed_list.itemnames = yn;
@@ -4109,7 +4330,7 @@ void Mutators_MenuInit( void )
 
 	s_lowgrav_list.generic.type = MTYPE_SPINCONTROL;
 	s_lowgrav_list.generic.x	= -8*scale;
-	s_lowgrav_list.generic.y	= FONTSCALE*102*scale + offset;
+	s_lowgrav_list.generic.y	= FONTSCALE*112*scale + offset;
 	s_lowgrav_list.generic.name	= "low gravity";
 	s_lowgrav_list.generic.callback = MutatorsFunc;
 	s_lowgrav_list.itemnames = yn;
@@ -4117,7 +4338,7 @@ void Mutators_MenuInit( void )
 
 	s_joust_list.generic.type = MTYPE_SPINCONTROL;
 	s_joust_list.generic.x	= -8*scale;
-	s_joust_list.generic.y	= FONTSCALE*112*scale + offset;
+	s_joust_list.generic.y	= FONTSCALE*122*scale + offset;
 	s_joust_list.generic.name	= "jousting";
 	s_joust_list.generic.callback = MutatorsFunc;
 	s_joust_list.itemnames = yn;
@@ -4125,7 +4346,7 @@ void Mutators_MenuInit( void )
 
 	s_classbased_list.generic.type = MTYPE_SPINCONTROL;
 	s_classbased_list.generic.x	= -8*scale;
-	s_classbased_list.generic.y	= FONTSCALE*122*scale + offset;
+	s_classbased_list.generic.y	= FONTSCALE*132*scale + offset;
 	s_classbased_list.generic.name	= "classbased";
 	s_classbased_list.generic.callback = ClassbasedFunc;
 	s_classbased_list.itemnames = yn;
@@ -4133,6 +4354,7 @@ void Mutators_MenuInit( void )
 
 	Menu_AddItem( &s_mutators_menu, &s_instagib_list );
 	Menu_AddItem( &s_mutators_menu, &s_rocketarena_list );
+	Menu_AddItem( &s_mutators_menu, &s_insta_rockets_list );
 	Menu_AddItem( &s_mutators_menu, &s_excessive_list );
 	Menu_AddItem( &s_mutators_menu, &s_vampire_list );
 	Menu_AddItem( &s_mutators_menu, &s_regen_list );
@@ -6142,9 +6364,15 @@ static void PlayerConfig_ScanDirectories( void )
 		strcat( scratch, "/tris.md2" );
 		if (!FS_FileExists(scratch))
 		{
-			free( dirnames[i] );
-			dirnames[i] = 0;
-			continue;
+			//try for tris.iqm if no md2
+			strcpy( scratch, dirnames[i] );
+			strcat( scratch, "/tris.iqm" );
+			if (!FS_FileExists(scratch))
+			{
+				free( dirnames[i] );
+				dirnames[i] = 0;
+				continue;
+			}
 		}
 
 		// verify the existence of at least one skin(note, do not mix .tga and .jpeg)
@@ -6886,6 +7114,7 @@ void Menu_DragSlideItem (menuframework_s *menu, void *menuitem)
 	slider->curvalue = newSliderValueForX(cursor.x, slider);
 	Slider_CheckSlide ( slider );
 }
+
 
 void Menu_DragVertSlideItem (menuframework_s *menu, void *menuitem)
 {
