@@ -635,9 +635,9 @@ sub generateCHeader
 	print $fh $fData->{fileComment} if defined $fData->{fileComment};
 	print $fh <<"EOL";
 
-/** \\file
- * \\brief $fData->{class} class declarations
- * \\note Initially generated from $sFile
+/** \@file
+ * \@brief $fData->{class} class declarations
+ * \@note Initially generated from $sFile
  */
 #ifndef $dicName
 #define $dicName
@@ -670,11 +670,11 @@ EOL
 struct $fData->{class}_s;
 typedef struct $fData->{class}_s * $fData->{class};
 
-/** \\brief Class structure for the $fData->{class} class
+/** \@brief Class structure for the $fData->{class} class
  */
 struct $fData->{class}_cs
 {
-\t/** \\brief Parent class record */
+\t/** \@brief Parent class record */
 \tstruct $fData->{parent}_cs parent;
 EOL
 
@@ -721,11 +721,11 @@ EOL
 	print $fh <<"EOL";
 };
 
-/** \\brief Instance structure for the $fData->{class} class
+/** \]brief Instance structure for the $fData->{class} class
  */
 struct $fData->{class}_s
 {
-\t/** \\brief Parent instance */
+\t/** \@brief Parent instance */
 \tstruct $fData->{parent}_s parent;
 EOL
 
@@ -767,11 +767,11 @@ EOL
 };
 
 
-/** \\brief Defining function for the $fData->{class} class
+/** \@brief Defining function for the $fData->{class} class
  *
  * Initialise the class' definition if needed.
  *
- * \\return the class' definition
+ * \@return the class' definition
  */
 OOL_Class $fData->{class}__Class( );
 
@@ -818,7 +818,7 @@ EOL
 			$comment =~ s/\n\t+/\n/gs;
 			print $fh "\n$comment";
 		} elsif ( $method->{virtual} ) {
-			print $fh "\n/** \\brief Wrapper for the \\link $fData->{class}_cs::$methName $methName \\endlink method */";
+			print $fh "\n/** \@brief Wrapper for the \@link $fData->{class}_cs::$methName $methName \@endlink method */";
 		}
 		print $fh "\n" . ( ( $method->{inline} || $method->{virtual} ) ? "static inline " : "" )
 			.  $method->{retType} . " $fData->{class}_$methName(";
@@ -898,9 +898,9 @@ sub generateCSource
 	print $fh $fData->{fileComment} if defined $fData->{fileComment};
 	print $fh <<"EOL";
 
-/** \\file
- * \\brief $fData->{class} class implementation
- * \\note Initially generated from $sFile
+/** \@file
+ * \@brief $fData->{class} class implementation
+ * \@note Initially generated from $sFile
  */
 
 #include "$bName.h"
@@ -988,9 +988,9 @@ EOL
 	print $fh <<"EOL";
 
 
-/** \\brief $fData->{class} class definition */
+/** \@brief $fData->{class} class definition */
 static struct $fData->{class}_cs _$fData->{class}_class;
-/** \\brief $fData->{class} class definition pointer */
+/** \@brief $fData->{class} class definition pointer */
 static OOL_Class _$fData->{class}_cptr = NULL;
 
 
@@ -1085,8 +1085,8 @@ EOL
 			print $fh <<"EOL";
 
 
-/** \\brief <b>$fData->{class}\:\:$methName</b> method implementation
- * \\note $mType
+/** \@brief <b>$fData->{class}\:\:$methName</b> method implementation
+ * \@note $mType
  *
  * XXX: write implementation documentation here
  */
@@ -1146,7 +1146,7 @@ EOL
 			print $fh <<"EOL";
 
 
-/** \\brief $phData[2] for property <b>$fData->{class}\:\:$propName</b>
+/** \@brief $phData[2] for property <b>$fData->{class}\:\:$propName</b>
  *
  * XXX: documentation
  */
