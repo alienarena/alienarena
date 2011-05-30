@@ -272,19 +272,20 @@ am__crx_SOURCES_DIST = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	game/q_shared.h qcommon/cmd.c qcommon/cmodel.c \
 	qcommon/common.c qcommon/crc.c qcommon/crc.h qcommon/cvar.c \
 	qcommon/files.c qcommon/htable.c qcommon/htable.h \
-	qcommon/mdfour.c qcommon/net_chan.c qcommon/pmove.c \
-	qcommon/qcommon.h qcommon/qfiles.h ref_gl/anorms.h \
-	ref_gl/anormtab.h ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c \
-	ref_gl/r_bmfont.c ref_gl/r_bmfont.h ref_gl/r_draw.c \
-	ref_gl/r_image.c ref_gl/r_image.h ref_gl/r_iqm.h \
-	ref_gl/r_iqm.c ref_gl/r_light.c ref_gl/r_local.h \
-	ref_gl/r_main.c ref_gl/r_math.c ref_gl/r_math.h \
-	ref_gl/r_mesh.c ref_gl/r_misc.c ref_gl/r_model.c \
-	ref_gl/r_model.h ref_gl/r_particle.c ref_gl/r_postprocess.c \
-	ref_gl/r_program.c ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h \
-	ref_gl/r_script.c ref_gl/r_script.h ref_gl/r_shadowmaps.c \
-	ref_gl/r_shadows.c ref_gl/r_surf.c ref_gl/r_text.c \
-	ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
+	qcommon/mdfour.c qcommon/net_chan.c qcommon/objects.c \
+	qcommon/objects.h qcommon/pmove.c qcommon/qcommon.h \
+	qcommon/qfiles.h ref_gl/anorms.h ref_gl/anormtab.h \
+	ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c ref_gl/r_bmfont.c \
+	ref_gl/r_bmfont.h ref_gl/r_draw.c ref_gl/r_engineaware.c \
+	ref_gl/r_engineaware.h ref_gl/r_image.c ref_gl/r_image.h \
+	ref_gl/r_iqm.h ref_gl/r_iqm.c ref_gl/r_light.c \
+	ref_gl/r_local.h ref_gl/r_main.c ref_gl/r_math.c \
+	ref_gl/r_math.h ref_gl/r_mesh.c ref_gl/r_misc.c \
+	ref_gl/r_model.c ref_gl/r_model.h ref_gl/r_particle.c \
+	ref_gl/r_postprocess.c ref_gl/r_program.c ref_gl/r_ragdoll.c \
+	ref_gl/r_ragdoll.h ref_gl/r_script.c ref_gl/r_script.h \
+	ref_gl/r_shadowmaps.c ref_gl/r_shadows.c ref_gl/r_surf.c \
+	ref_gl/r_text.c ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
 	ref_gl/r_varray.c ref_gl/r_vbo.c ref_gl/r_vlights.c \
 	ref_gl/r_warp.c ref_gl/warpsin.h server/server.h \
 	server/sv_ccmds.c server/sv_ents.c server/sv_game.c \
@@ -330,8 +331,9 @@ am_crx_OBJECTS = client/crx-cl_ents.$(OBJEXT) \
 	qcommon/crx-crc.$(OBJEXT) qcommon/crx-cvar.$(OBJEXT) \
 	qcommon/crx-files.$(OBJEXT) qcommon/crx-htable.$(OBJEXT) \
 	qcommon/crx-mdfour.$(OBJEXT) qcommon/crx-net_chan.$(OBJEXT) \
-	qcommon/crx-pmove.$(OBJEXT) ref_gl/crx-r_bloom.$(OBJEXT) \
-	ref_gl/crx-r_bmfont.$(OBJEXT) ref_gl/crx-r_draw.$(OBJEXT) \
+	qcommon/crx-objects.$(OBJEXT) qcommon/crx-pmove.$(OBJEXT) \
+	ref_gl/crx-r_bloom.$(OBJEXT) ref_gl/crx-r_bmfont.$(OBJEXT) \
+	ref_gl/crx-r_draw.$(OBJEXT) ref_gl/crx-r_engineaware.$(OBJEXT) \
 	ref_gl/crx-r_image.$(OBJEXT) ref_gl/crx-r_iqm.$(OBJEXT) \
 	ref_gl/crx-r_light.$(OBJEXT) ref_gl/crx-r_main.$(OBJEXT) \
 	ref_gl/crx-r_math.$(OBJEXT) ref_gl/crx-r_mesh.$(OBJEXT) \
@@ -353,14 +355,14 @@ am_crx_OBJECTS = client/crx-cl_ents.$(OBJEXT) \
 crx_OBJECTS = $(am_crx_OBJECTS)
 am__DEPENDENCIES_1 =
 @BUILD_WIN32_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
-@USE_SYSTEM_LIBODE_FALSE@crx_DEPENDENCIES = libgame.a libode.a \
+@USE_SYSTEM_LIBODE_FALSE@crx_DEPENDENCIES = $(GAMELIBS) libode.a \
 @USE_SYSTEM_LIBODE_FALSE@	$(am__DEPENDENCIES_1) \
 @USE_SYSTEM_LIBODE_FALSE@	$(am__DEPENDENCIES_1) \
 @USE_SYSTEM_LIBODE_FALSE@	$(am__DEPENDENCIES_1) \
 @USE_SYSTEM_LIBODE_FALSE@	$(am__DEPENDENCIES_1) \
 @USE_SYSTEM_LIBODE_FALSE@	$(am__DEPENDENCIES_1) \
 @USE_SYSTEM_LIBODE_FALSE@	$(am__DEPENDENCIES_2)
-@USE_SYSTEM_LIBODE_TRUE@crx_DEPENDENCIES = libgame.a \
+@USE_SYSTEM_LIBODE_TRUE@crx_DEPENDENCIES = $(GAMELIBS) \
 @USE_SYSTEM_LIBODE_TRUE@	$(am__DEPENDENCIES_1) \
 @USE_SYSTEM_LIBODE_TRUE@	$(am__DEPENDENCIES_1) \
 @USE_SYSTEM_LIBODE_TRUE@	$(am__DEPENDENCIES_1) \
@@ -583,7 +585,7 @@ crx_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(X11_CLAGS) \
 #
 # crx with integrated libode
 #
-@USE_SYSTEM_LIBODE_FALSE@crx_LDADD = libgame.a libode.a \
+@USE_SYSTEM_LIBODE_FALSE@crx_LDADD = $(GAMELIBS) libode.a \
 @USE_SYSTEM_LIBODE_FALSE@	$(PTHREAD_LIBS) $(X11_LIBS) \
 @USE_SYSTEM_LIBODE_FALSE@	$(DEPS_LIBS) $(XXF86VM_LIBS) \
 @USE_SYSTEM_LIBODE_FALSE@	$(XXF86DGA_LIBS) -lstdc++ \
@@ -592,7 +594,7 @@ crx_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(X11_CLAGS) \
 #
 # crx with system libode
 #
-@USE_SYSTEM_LIBODE_TRUE@crx_LDADD = libgame.a $(PTHREAD_LIBS) \
+@USE_SYSTEM_LIBODE_TRUE@crx_LDADD = $(GAMELIBS) $(PTHREAD_LIBS) \
 @USE_SYSTEM_LIBODE_TRUE@	$(X11_LIBS) $(DEPS_LIBS) $(ODE_LIBS) \
 @USE_SYSTEM_LIBODE_TRUE@	$(XXF86VM_LIBS) $(XXF86DGA_LIBS) \
 @USE_SYSTEM_LIBODE_TRUE@	$(am__append_3)
@@ -615,19 +617,20 @@ crx_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	game/q_shared.h qcommon/cmd.c qcommon/cmodel.c \
 	qcommon/common.c qcommon/crc.c qcommon/crc.h qcommon/cvar.c \
 	qcommon/files.c qcommon/htable.c qcommon/htable.h \
-	qcommon/mdfour.c qcommon/net_chan.c qcommon/pmove.c \
-	qcommon/qcommon.h qcommon/qfiles.h ref_gl/anorms.h \
-	ref_gl/anormtab.h ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c \
-	ref_gl/r_bmfont.c ref_gl/r_bmfont.h ref_gl/r_draw.c \
-	ref_gl/r_image.c ref_gl/r_image.h ref_gl/r_iqm.h \
-	ref_gl/r_iqm.c ref_gl/r_light.c ref_gl/r_local.h \
-	ref_gl/r_main.c ref_gl/r_math.c ref_gl/r_math.h \
-	ref_gl/r_mesh.c ref_gl/r_misc.c ref_gl/r_model.c \
-	ref_gl/r_model.h ref_gl/r_particle.c ref_gl/r_postprocess.c \
-	ref_gl/r_program.c ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h \
-	ref_gl/r_script.c ref_gl/r_script.h ref_gl/r_shadowmaps.c \
-	ref_gl/r_shadows.c ref_gl/r_surf.c ref_gl/r_text.c \
-	ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
+	qcommon/mdfour.c qcommon/net_chan.c qcommon/objects.c \
+	qcommon/objects.h qcommon/pmove.c qcommon/qcommon.h \
+	qcommon/qfiles.h ref_gl/anorms.h ref_gl/anormtab.h \
+	ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c ref_gl/r_bmfont.c \
+	ref_gl/r_bmfont.h ref_gl/r_draw.c ref_gl/r_engineaware.c \
+	ref_gl/r_engineaware.h ref_gl/r_image.c ref_gl/r_image.h \
+	ref_gl/r_iqm.h ref_gl/r_iqm.c ref_gl/r_light.c \
+	ref_gl/r_local.h ref_gl/r_main.c ref_gl/r_math.c \
+	ref_gl/r_math.h ref_gl/r_mesh.c ref_gl/r_misc.c \
+	ref_gl/r_model.c ref_gl/r_model.h ref_gl/r_particle.c \
+	ref_gl/r_postprocess.c ref_gl/r_program.c ref_gl/r_ragdoll.c \
+	ref_gl/r_ragdoll.h ref_gl/r_script.c ref_gl/r_script.h \
+	ref_gl/r_shadowmaps.c ref_gl/r_shadows.c ref_gl/r_surf.c \
+	ref_gl/r_text.c ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
 	ref_gl/r_varray.c ref_gl/r_vbo.c ref_gl/r_vlights.c \
 	ref_gl/r_warp.c ref_gl/warpsin.h server/server.h \
 	server/sv_ccmds.c server/sv_ents.c server/sv_game.c \
@@ -1479,6 +1482,8 @@ qcommon/crx-mdfour.$(OBJEXT): qcommon/$(am__dirstamp) \
 	qcommon/$(DEPDIR)/$(am__dirstamp)
 qcommon/crx-net_chan.$(OBJEXT): qcommon/$(am__dirstamp) \
 	qcommon/$(DEPDIR)/$(am__dirstamp)
+qcommon/crx-objects.$(OBJEXT): qcommon/$(am__dirstamp) \
+	qcommon/$(DEPDIR)/$(am__dirstamp)
 qcommon/crx-pmove.$(OBJEXT): qcommon/$(am__dirstamp) \
 	qcommon/$(DEPDIR)/$(am__dirstamp)
 ref_gl/$(am__dirstamp):
@@ -1492,6 +1497,8 @@ ref_gl/crx-r_bloom.$(OBJEXT): ref_gl/$(am__dirstamp) \
 ref_gl/crx-r_bmfont.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_draw.$(OBJEXT): ref_gl/$(am__dirstamp) \
+	ref_gl/$(DEPDIR)/$(am__dirstamp)
+ref_gl/crx-r_engineaware.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
 ref_gl/crx-r_image.$(OBJEXT): ref_gl/$(am__dirstamp) \
 	ref_gl/$(DEPDIR)/$(am__dirstamp)
@@ -1740,6 +1747,7 @@ mostlyclean-compile:
 	-rm -f qcommon/crx-htable.$(OBJEXT)
 	-rm -f qcommon/crx-mdfour.$(OBJEXT)
 	-rm -f qcommon/crx-net_chan.$(OBJEXT)
+	-rm -f qcommon/crx-objects.$(OBJEXT)
 	-rm -f qcommon/crx-pmove.$(OBJEXT)
 	-rm -f qcommon/crx_ded-cmd.$(OBJEXT)
 	-rm -f qcommon/crx_ded-cmodel.$(OBJEXT)
@@ -1754,6 +1762,7 @@ mostlyclean-compile:
 	-rm -f ref_gl/crx-r_bloom.$(OBJEXT)
 	-rm -f ref_gl/crx-r_bmfont.$(OBJEXT)
 	-rm -f ref_gl/crx-r_draw.$(OBJEXT)
+	-rm -f ref_gl/crx-r_engineaware.$(OBJEXT)
 	-rm -f ref_gl/crx-r_image.$(OBJEXT)
 	-rm -f ref_gl/crx-r_iqm.$(OBJEXT)
 	-rm -f ref_gl/crx-r_light.$(OBJEXT)
@@ -1995,6 +2004,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-htable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-mdfour.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-net_chan.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-objects.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-pmove.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx_ded-cmd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx_ded-cmodel.Po@am__quote@
@@ -2009,6 +2019,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_bloom.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_bmfont.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_draw.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_engineaware.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_iqm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/$(DEPDIR)/crx-r_light.Po@am__quote@
@@ -2851,6 +2862,22 @@ qcommon/crx-net_chan.obj: qcommon/net_chan.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/crx-net_chan.obj `if test -f 'qcommon/net_chan.c'; then $(CYGPATH_W) 'qcommon/net_chan.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/net_chan.c'; fi`
 
+qcommon/crx-objects.o: qcommon/objects.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/crx-objects.o -MD -MP -MF qcommon/$(DEPDIR)/crx-objects.Tpo -c -o qcommon/crx-objects.o `test -f 'qcommon/objects.c' || echo '$(srcdir)/'`qcommon/objects.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/crx-objects.Tpo qcommon/$(DEPDIR)/crx-objects.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='qcommon/objects.c' object='qcommon/crx-objects.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/crx-objects.o `test -f 'qcommon/objects.c' || echo '$(srcdir)/'`qcommon/objects.c
+
+qcommon/crx-objects.obj: qcommon/objects.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/crx-objects.obj -MD -MP -MF qcommon/$(DEPDIR)/crx-objects.Tpo -c -o qcommon/crx-objects.obj `if test -f 'qcommon/objects.c'; then $(CYGPATH_W) 'qcommon/objects.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/objects.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/crx-objects.Tpo qcommon/$(DEPDIR)/crx-objects.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='qcommon/objects.c' object='qcommon/crx-objects.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/crx-objects.obj `if test -f 'qcommon/objects.c'; then $(CYGPATH_W) 'qcommon/objects.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/objects.c'; fi`
+
 qcommon/crx-pmove.o: qcommon/pmove.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/crx-pmove.o -MD -MP -MF qcommon/$(DEPDIR)/crx-pmove.Tpo -c -o qcommon/crx-pmove.o `test -f 'qcommon/pmove.c' || echo '$(srcdir)/'`qcommon/pmove.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/crx-pmove.Tpo qcommon/$(DEPDIR)/crx-pmove.Po
@@ -2914,6 +2941,22 @@ ref_gl/crx-r_draw.obj: ref_gl/r_draw.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_draw.c' object='ref_gl/crx-r_draw.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_draw.obj `if test -f 'ref_gl/r_draw.c'; then $(CYGPATH_W) 'ref_gl/r_draw.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_draw.c'; fi`
+
+ref_gl/crx-r_engineaware.o: ref_gl/r_engineaware.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_engineaware.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_engineaware.Tpo -c -o ref_gl/crx-r_engineaware.o `test -f 'ref_gl/r_engineaware.c' || echo '$(srcdir)/'`ref_gl/r_engineaware.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/crx-r_engineaware.Tpo ref_gl/$(DEPDIR)/crx-r_engineaware.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_engineaware.c' object='ref_gl/crx-r_engineaware.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_engineaware.o `test -f 'ref_gl/r_engineaware.c' || echo '$(srcdir)/'`ref_gl/r_engineaware.c
+
+ref_gl/crx-r_engineaware.obj: ref_gl/r_engineaware.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_engineaware.obj -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_engineaware.Tpo -c -o ref_gl/crx-r_engineaware.obj `if test -f 'ref_gl/r_engineaware.c'; then $(CYGPATH_W) 'ref_gl/r_engineaware.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_engineaware.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/$(DEPDIR)/crx-r_engineaware.Tpo ref_gl/$(DEPDIR)/crx-r_engineaware.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/r_engineaware.c' object='ref_gl/crx-r_engineaware.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/crx-r_engineaware.obj `if test -f 'ref_gl/r_engineaware.c'; then $(CYGPATH_W) 'ref_gl/r_engineaware.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/r_engineaware.c'; fi`
 
 ref_gl/crx-r_image.o: ref_gl/r_image.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/crx-r_image.o -MD -MP -MF ref_gl/$(DEPDIR)/crx-r_image.Tpo -c -o ref_gl/crx-r_image.o `test -f 'ref_gl/r_image.c' || echo '$(srcdir)/'`ref_gl/r_image.c

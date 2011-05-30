@@ -69,7 +69,7 @@ if USE_SYSTEM_LIBODE
 #
 # crx with system libode
 #
-crx_LDADD = libgame.a \
+crx_LDADD = $(GAMELIBS) \
 	$(PTHREAD_LIBS) \
 	$(X11_LIBS) \
 	$(DEPS_LIBS) \
@@ -81,7 +81,7 @@ else
 #
 # crx with integrated libode
 #
-crx_LDADD = libgame.a \
+crx_LDADD = $(GAMELIBS) \
 	libode.a \
 	$(PTHREAD_LIBS) \
 	$(X11_LIBS) \
@@ -168,6 +168,8 @@ crx_SOURCES = \
 	qcommon/htable.h \
 	qcommon/mdfour.c \
 	qcommon/net_chan.c \
+	qcommon/objects.c \
+	qcommon/objects.h \
 	qcommon/pmove.c \
 	qcommon/qcommon.h \
 	qcommon/qfiles.h \
@@ -179,6 +181,8 @@ crx_SOURCES = \
 	ref_gl/r_bmfont.c \
 	ref_gl/r_bmfont.h \
 	ref_gl/r_draw.c \
+	ref_gl/r_engineaware.c \
+	ref_gl/r_engineaware.h \
 	ref_gl/r_image.c \
 	ref_gl/r_image.h \
 	ref_gl/r_iqm.h \
