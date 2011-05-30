@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-/** \file
- * \brief FNT_TrueTypeFace class implementation
- * \note Initially generated from ref_gl/fnt/truetypeface.cdf
+/** @file
+ * @brief FNT_TrueTypeFace class implementation
+ * @note Initially generated from ref_gl/fnt/truetypeface.cdf
  */
 
 #include "ref_gl/fnt/truetypeface.h"
@@ -34,7 +34,7 @@ static void _FNT_TrueTypeFace_DestroyLibrary( );
 static qboolean _FNT_TrueTypeFace_Load( FNT_FontFace object );
 static void _FNT_TrueTypeFace_Unload( FNT_FontFace object );
 
-/** \brief TrueType face counter
+/** @brief TrueType face counter
  *
  * This counter stores the amount of loaded TrueType faces. It is used
  * to initialise and free the library.
@@ -42,9 +42,9 @@ static void _FNT_TrueTypeFace_Unload( FNT_FontFace object );
 static unsigned int _FNT_TrueTypeFace_counter;
 
 
-/** \brief FNT_TrueTypeFace class definition */
+/** @brief FNT_TrueTypeFace class definition */
 static struct FNT_TrueTypeFace_cs _FNT_TrueTypeFace_class;
-/** \brief FNT_TrueTypeFace class definition pointer */
+/** @brief FNT_TrueTypeFace class definition pointer */
 static OOL_Class _FNT_TrueTypeFace_cptr = NULL;
 
 
@@ -72,12 +72,12 @@ OOL_Class FNT_TrueTypeFace__Class( )
 }
 
 
-/** \brief FreeType library initialisation
+/** @brief FreeType library initialisation
  *
  * Initialise the FreeType library, setting sub-pixel rendering mode if
  * required.
  *
- * \return true on success, false on failure.
+ * @return true on success, false on failure.
  */
 static qboolean _FNT_TrueTypeFace_InitialiseLibrary( )
 {
@@ -86,7 +86,7 @@ static qboolean _FNT_TrueTypeFace_InitialiseLibrary( )
 	// Initialise FreeType
 	error = FT_Init_FreeType( &_FNT_TrueTypeFace_class.library );
 	if ( error != 0 ) {
-		Com_Printf( "FNT_TrueTypeFace: unable to initialise library (error code %d)\n" , error );
+		Com_Printf( "FNT_TrueTypeFace: unable to initialise library (error code %d)@n" , error );
 		return false;
 	}
 
@@ -109,7 +109,7 @@ static qboolean _FNT_TrueTypeFace_InitialiseLibrary( )
 }
 
 
-/** \brief FreeType library destruction
+/** @brief FreeType library destruction
  *
  * Free resources used by the FreeType library.
  */
@@ -119,13 +119,13 @@ static void _FNT_TrueTypeFace_DestroyLibrary( )
 }
 
 
-/** \brief TrueType face loader
+/** @brief TrueType face loader
  *
  * Check if the library needs to be initialised, and do so if necessary.
  * Then attempt to load the specified font; on success, make sure it can
  * be scaled. Finally, increase the counter.
  *
- * \return true on success, or false if any of the steps fails.
+ * @return true on success, or false if any of the steps fails.
  */
 static qboolean _FNT_TrueTypeFace_Load( FNT_FontFace object )
 {
@@ -154,7 +154,7 @@ static qboolean _FNT_TrueTypeFace_Load( FNT_FontFace object )
 	// Load TTF face information
 	error = FT_New_Memory_Face( _FNT_TrueTypeFace_class.library , file_data , data_size , 0 , &ft_face );
 	if ( error != 0 ) {
-		Com_Printf( "FNT_TrueTypeFace: failed to load font from '%s' (error code %d)\n" , file_name , error );
+		Com_Printf( "FNT_TrueTypeFace: failed to load font from '%s' (error code %d)@n" , file_name , error );
 		FS_FreeFile( file_data );
 		return false;
 	}
@@ -163,7 +163,7 @@ static qboolean _FNT_TrueTypeFace_Load( FNT_FontFace object )
 	if ( (ft_face->face_flags & FT_FACE_FLAG_SCALABLE) && (ft_face->face_flags & FT_FACE_FLAG_HORIZONTAL) ) {
 		ok = true;
 	} else {
-		Com_Printf( "FNT_TrueTypeFace: font loaded from '%s' is not scalable\n" , file_name );
+		Com_Printf( "FNT_TrueTypeFace: font loaded from '%s' is not scalable@n" , file_name );
 		ok = false;
 	}
 	FT_Done_Face( ft_face );
@@ -184,7 +184,7 @@ static qboolean _FNT_TrueTypeFace_Load( FNT_FontFace object )
 }
 
 
-/** \brief TrueType face unloader
+/** @brief TrueType face unloader
  *
  * Free the memory used for the file's contents, then decrease the counter.
  * If the counter reached 0, destroy the FreeType library's instance.

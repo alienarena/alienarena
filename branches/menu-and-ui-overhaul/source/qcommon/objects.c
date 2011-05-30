@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-/** \file
- * \brief \link qcommon_objects Object-oriented layer \endlink implementation
+/** @file
+ * @brief @link qcommon_objects Object-oriented layer @endlink implementation
  */
 
 #include "qcommon/objects.h"
@@ -31,50 +31,50 @@ static void _OOL_Object_SetProperty( OOL_Object object , qboolean call_handler ,
 static void _OOL_Object_Destroy( OOL_Object object );
 
 
-/** \brief Maximal length of a property's name */
+/** @brief Maximal length of a property's name */
 #define MAX_PROPERTY_NAME_LENGTH 63
 
 
-/** \brief Tag for memory allocation used by objects */
+/** @brief Tag for memory allocation used by objects */
 #define TAG_OBJECT 572
 
-/** \brief Tag for memory allocation used by object properties */
+/** @brief Tag for memory allocation used by object properties */
 #define TAG_PROPERTY 573
 
-/** \brief Macro that allocates memory for an object
+/** @brief Macro that allocates memory for an object
  *
- * \param X the amount of memory to allocate
- * \return the address of the allocated area
+ * @param X the amount of memory to allocate
+ * @return the address of the allocated area
  */
 #define OBJ_ALLOC(X) Z_TagMalloc((X),TAG_OBJECT)
 
-/** \brief Macro that allocates memory for an object property
+/** @brief Macro that allocates memory for an object property
  *
- * \param X the amount of memory to allocate
- * \return the address of the allocated area
+ * @param X the amount of memory to allocate
+ * @return the address of the allocated area
  */
 #define PROP_ALLOC(X) Z_TagMalloc((X),TAG_PROPERTY)
 
 
 
-/** \brief Property definition structure
+/** @brief Property definition structure
  *
  * This structure is used by property tables to store information regarding a
  * property of objects that belong to a class.
  */
 struct _OOL_property_s
 {
-	/** \brief Name of the property */
+	/** @brief Name of the property */
 	char name[ MAX_PROPERTY_NAME_LENGTH + 1 ];
 
-	/** \brief Location of the instance field
+	/** @brief Location of the instance field
 	 *
 	 * A property always corresponds to an instance field. This field
 	 * indicates the offset of the field within the instance structure.
 	 */
 	ptrdiff_t offset;
 
-	/** \brief Size of the property
+	/** @brief Size of the property
 	 *
 	 * This field's meaning differs depending on the type of property.
 	 * It may indicate an actual size in bytes, or a maximal length. It
@@ -82,31 +82,31 @@ struct _OOL_property_s
 	 */
 	size_t size;
 
-	/** \brief Type of the property
+	/** @brief Type of the property
 	 *
 	 * This field indicates the type of the property, therefore
 	 * determining how it will be copied to the instance.
 	 */
 	unsigned int type;
 
-	/** \brief Validator */
+	/** @brief Validator */
 	OOL_validator_func_t validator;
 
-	/** \brief Custom copy handler */
+	/** @brief Custom copy handler */
 	OOL_copy_handler_func_t copy_handler;
 
-	/** \brief Custom destructor */
+	/** @brief Custom destructor */
 	OOL_custom_destroy_func_t custom_free;
 
-	/** \brief Change handler */
+	/** @brief Change handler */
 	OOL_change_handler_func_t change_handler;
 };
 
 
-/** \brief The #OOL_Object class definition */
+/** @brief The #OOL_Object class definition */
 static struct OOL_Object_cs _OOL_Object_class;
 
-/** \brief Pointer to the #OOL_Object class definition */
+/** @brief Pointer to the #OOL_Object class definition */
 static OOL_Class _OOL_Object_cptr = NULL;
 
 
@@ -204,15 +204,15 @@ void OOL_Class_AddPropertyEx( OOL_Class class , const char * name ,
 }
 
 
-/** \brief Find a class property
+/** @brief Find a class property
  *
  * Look for a property by going through the class and its ancestors
  * recursively.
  *
- * \param class the class
- * \param name the property's name
+ * @param class the class
+ * @param name the property's name
  *
- * \return the property's record or NULL if there was no such property
+ * @return the property's record or NULL if there was no such property
  */
 static struct _OOL_property_s * _OOL_FindProperty( OOL_Class class ,
 					const char * name )
@@ -231,13 +231,13 @@ static struct _OOL_property_s * _OOL_FindProperty( OOL_Class class ,
 
 
 
-/** \brief Empty constructor implementation
+/** @brief Empty constructor implementation
  *
  * This empty function is used for both OOL_Object_cs::PrepareInstance and
  * OOL_Object_cs::instance, as the constructors in the base class do not need
  * to do anything.
  *
- * \param object the object being initialised
+ * @param object the object being initialised
  */
 static void _OOL_Object_EmptyConstructor( OOL_Object object )
 {
@@ -245,15 +245,15 @@ static void _OOL_Object_EmptyConstructor( OOL_Object object )
 }
 
 
-/** \brief Property setter implementation
+/** @brief Property setter implementation
  *
  * This function implements the property setter method (referenced by
  * OOL_Object_cs::SetProperty).
  *
- * \param object the object being updated
- * \param call_handler whether the property's change handler should be called
- * \param property the name of the property to update
- * \param value variadic argument list starting with the property's new value
+ * @param object the object being updated
+ * @param call_handler whether the property's change handler should be called
+ * @param property the name of the property to update
+ * @param value variadic argument list starting with the property's new value
  */
 static void _OOL_Object_SetProperty( OOL_Object object , qboolean call_handler ,
 				const char * property , va_list value )
@@ -380,16 +380,16 @@ static void _OOL_Object_SetProperty( OOL_Object object , qboolean call_handler ,
 }
 
 
-/** \brief Property destructor
+/** @brief Property destructor
  *
  * This function is used by #_OOL_Object_Destroy when an object's properties
  * are being destroyed. It will handle the destruction of individual
  * properties.
  *
- * \param item pointer to the property's record
- * \param extra pointer to the object
+ * @param item pointer to the property's record
+ * @param extra pointer to the object
  *
- * \returns true as all properties need to be examined
+ * @returns true as all properties need to be examined
  */
 static qboolean _OOL_Object_DestroyProperty( void * item , void * extra )
 {
@@ -413,7 +413,7 @@ static qboolean _OOL_Object_DestroyProperty( void * item , void * extra )
 }
 
 
-/** \brief Destructor implementation
+/** @brief Destructor implementation
  *
  * The base class destructor implementation goes through the object's class
  * (and class ancestors), freeing memory used by properties which may be

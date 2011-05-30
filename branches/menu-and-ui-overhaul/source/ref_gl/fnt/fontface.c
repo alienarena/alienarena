@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-/** \file
- * \brief FNT_FontFace class implementation
- * \note Initially generated from ref_gl/fnt/fontface.cdf
+/** @file
+ * @brief FNT_FontFace class implementation
+ * @note Initially generated from ref_gl/fnt/fontface.cdf
  */
 
 #include "ref_gl/fnt/fontface.h"
@@ -31,14 +31,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static void _FNT_FontFace_Initialise( OOL_Object object );
 static void _FNT_FontFace_Destroy( OOL_Object object );
 
-/** \brief Table of font faces
+/** @brief Table of font faces
  *
  * This hash table keeps track of all initialised font faces, using a
  * face's full name as the key.
  */
 static hashtable_t _FNT_FontFace_faces;
 
-/** \brief Table of fonts
+/** @brief Table of fonts
  *
  * This hash table keeps track of all initialised fonts. It uses a
  * concatenation of the font face's full name, the font's size and a
@@ -47,9 +47,9 @@ static hashtable_t _FNT_FontFace_faces;
 static hashtable_t _FNT_FontFace_fonts;
 
 
-/** \brief FNT_FontFace class definition */
+/** @brief FNT_FontFace class definition */
 static struct FNT_FontFace_cs _FNT_FontFace_class;
-/** \brief FNT_FontFace class definition pointer */
+/** @brief FNT_FontFace class definition pointer */
 static OOL_Class _FNT_FontFace_cptr = NULL;
 
 
@@ -85,7 +85,7 @@ OOL_Class FNT_FontFace__Class( )
 }
 
 
-/** \brief Initialisation
+/** @brief Initialisation
  *
  * Initialise the font's base directory if it has not been set, then
  * compute the face's full name. Once this is done, attempt to load
@@ -117,7 +117,7 @@ static void _FNT_FontFace_Initialise( OOL_Object object )
 }
 
 
-/** \brief Destructor
+/** @brief Destructor
  *
  * If the font face had been loaded successfully, unload it and remove
  * it from the table of faces.

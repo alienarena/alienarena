@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-/** \file
- * \brief FNT_BitmapFont class implementation
- * \note Initially generated from ref_gl/fnt/bitmapfont.cdf
+/** @file
+ * @brief FNT_BitmapFont class implementation
+ * @note Initially generated from ref_gl/fnt/bitmapfont.cdf
  */
 
 #include "ref_gl/fnt/bitmapfont.h"
@@ -30,9 +30,9 @@ static void _FNT_BitmapFont_Load( FNT_Font object );
 static void _FNT_BitmapFont_Unload( FNT_Font object );
 
 
-/** \brief FNT_BitmapFont class definition */
+/** @brief FNT_BitmapFont class definition */
 static struct FNT_BitmapFont_cs _FNT_BitmapFont_class;
-/** \brief FNT_BitmapFont class definition pointer */
+/** @brief FNT_BitmapFont class definition pointer */
 static OOL_Class _FNT_BitmapFont_cptr = NULL;
 
 
@@ -54,7 +54,7 @@ OOL_Class FNT_BitmapFont__Class( )
 }
 
 
-/** \brief Bitmap font loader
+/** @brief Bitmap font loader
  *
  * The bitmap font loader generates the GL lists and initialises the
  * font's information. It fails if the GL lists cannot be allocated.
@@ -73,7 +73,7 @@ static void _FNT_BitmapFont_Load( FNT_Font object )
 	qglGetError( );
 	list_base = object->gl_lists = qglGenLists( 256 );
 	if ( qglGetError( ) != GL_NO_ERROR ) {
-		Com_Printf( "FNT_BitmapFont: could not create OpenGL lists\n" );
+		Com_Printf( "FNT_BitmapFont: could not create OpenGL lists@n" );
 		return;
 	}
 
@@ -113,7 +113,7 @@ static void _FNT_BitmapFont_Load( FNT_Font object )
 }
 
 
-/** \brief Bitmap font unloader
+/** @brief Bitmap font unloader
  *
  * The unloader for bitmap fonts simply clears the GL lists.
  */

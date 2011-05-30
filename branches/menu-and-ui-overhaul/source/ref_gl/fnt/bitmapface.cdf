@@ -20,8 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ref_gl/fnt/fontface"
 
 
-/** \defgroup refgl_fnt_bitmapface Bitmap font face
- * \ingroup refgl_fnt
+/** @defgroup refgl_fnt_bitmapface Bitmap font face
+ * @ingroup refgl_fnt
  *
  * The FNT_BitmapFace class implements the loader and unloader for a bitmap
  * font's face. It consists in a texture that is loaded from the face's full
@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 class FNT_BitmapFace : FNT_FontFace
 {
 public:
-	/** \brief Face bitmap
+	/** @brief Face bitmap
 	 *
 	 * This texture is the font face's bitmap, which will be used by the
 	 * fonts.
@@ -38,16 +38,16 @@ public:
 	image_t * texture;
 
 protected:
-	/** \brief Bitmap face loader
+	/** @brief Bitmap face loader
 	 *
 	 * Attempt to load the bitmap face's texture from the face's full
 	 * path.
 	 *
-	 * \return true if the texture was loaded, false otherwise.
+	 * @return true if the texture was loaded, false otherwise.
 	 */
 	virtual qboolean Load( );
 
-	/** \brief Bitmap face unloader
+	/** @brief Bitmap face unloader
 	 *
 	 * Free the bitmap face's texture.
 	 */

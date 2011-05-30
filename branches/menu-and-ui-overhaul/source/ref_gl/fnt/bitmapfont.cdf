@@ -20,8 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ref_gl/fnt/font"
 
 
-/** \defgroup refgl_fnt_bitmapfont Bitmap font
- * \ingroup refgl_fnt
+/** @defgroup refgl_fnt_bitmapfont Bitmap font
+ * @ingroup refgl_fnt
  *
  * The FNT_BitmapFont class implements the loader and unloader for a bitmap
  * font.
@@ -30,14 +30,14 @@ class FNT_BitmapFont : FNT_Font
 {
 public:
 
-	/** \brief Bitmap font loader
+	/** @brief Bitmap font loader
 	 *
 	 * The bitmap font loader generates the GL lists and initialises the
 	 * font's information. It fails if the GL lists cannot be allocated.
 	 */
 	virtual void Load( );
 
-	/** \brief Bitmap font unloader
+	/** @brief Bitmap font unloader
 	 *
 	 * The unloader for bitmap fonts simply clears the GL lists.
 	 */

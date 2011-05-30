@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-/** \file
- * \brief R_EngineAware class declarations
- * \note Initially generated from ref_gl/r_engineaware.cdf
+/** @file
+ * @brief R_EngineAware class declarations
+ * @note Initially generated from ref_gl/r_engineaware.cdf
  */
 #ifndef __H_REF_GL_R_ENGINEAWARE
 #define __H_REF_GL_R_ENGINEAWARE
@@ -27,8 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "qcommon/lists.h"
 
 
-/** \defgroup Engine-aware objects
- * \ingroup ref_gl
+/** @defgroup refgl_engineaware Engine-aware objects
+ * @ingroup ref_gl
  *
  * This abstract class is used to create objects which are kept informed of
  * the rendering engine's initialisation and shutdown. A list of all
@@ -42,28 +42,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 struct R_EngineAware_s;
 typedef struct R_EngineAware_s * R_EngineAware;
 
-/** \brief Class structure for the R_EngineAware class
+/** @brief Class structure for the R_EngineAware class
  */
 struct R_EngineAware_cs
 {
-	/** \brief Parent class record */
+	/** @brief Parent class record */
 	struct OOL_Object_cs parent;
 
-	/** \brief Rendering engine start handler */
+	/** @brief Rendering engine start handler */
 	void (* OnRendererStart)( R_EngineAware object );
 
-	/** \brief Rendering engine stop handler */
+	/** @brief Rendering engine stop handler */
 	void (* OnRendererStop)( R_EngineAware object );
 };
 
-/** \brief Instance structure for the R_EngineAware class
+/** @brief Instance structure for the R_EngineAware class
  */
 struct R_EngineAware_s
 {
-	/** \brief Parent instance */
+	/** @brief Parent instance */
 	struct OOL_Object_s parent;
 
-	/** \brief List entry
+	/** @brief List entry
 	 *
 	 * This field is used to store an engine-aware object's list data.
 	 */
@@ -71,27 +71,27 @@ struct R_EngineAware_s
 };
 
 
-/** \brief Defining function for the R_EngineAware class
+/** @brief Defining function for the R_EngineAware class
  *
  * Initialise the class' definition if needed.
  *
- * \return the class' definition
+ * @return the class' definition
  */
 OOL_Class R_EngineAware__Class( );
 
 
-/** \brief Set the status of the rendering engine
+/** @brief Set the status of the rendering engine
  *
  * This method sets the status of the rendering engine and calls the
  * appropriate handler for all known engine-aware objects.
  *
- * \param status true if the engine is starting, false if it is being
+ * @param status true if the engine is starting, false if it is being
  * shut down.
  */
 void R_EngineAware_SetStatus( qboolean status );
 
 
-/** \brief Wrapper for the \link R_EngineAware_cs::OnRendererStart OnRendererStart \endlink method */
+/** @brief Wrapper for the @link R_EngineAware_cs::OnRendererStart OnRendererStart @endlink method */
 static inline void R_EngineAware_OnRendererStart( OOL_Object object )
 {
 	assert( OOL_GetClassAs( object , R_EngineAware )->OnRendererStart != NULL );
@@ -99,7 +99,7 @@ static inline void R_EngineAware_OnRendererStart( OOL_Object object )
 }
 
 
-/** \brief Wrapper for the \link R_EngineAware_cs::OnRendererStop OnRendererStop \endlink method */
+/** @brief Wrapper for the @link R_EngineAware_cs::OnRendererStop OnRendererStop @endlink method */
 static inline void R_EngineAware_OnRendererStop( OOL_Object object )
 {
 	assert( OOL_GetClassAs( object , R_EngineAware )->OnRendererStop != NULL );

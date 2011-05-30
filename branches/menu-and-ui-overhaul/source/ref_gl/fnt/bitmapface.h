@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-/** \file
- * \brief FNT_BitmapFace class declarations
- * \note Initially generated from ref_gl/fnt/bitmapface.cdf
+/** @file
+ * @brief FNT_BitmapFace class declarations
+ * @note Initially generated from ref_gl/fnt/bitmapface.cdf
  */
 #ifndef __H_REF_GL_FNT_BITMAPFACE
 #define __H_REF_GL_FNT_BITMAPFACE
@@ -27,8 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "ref_gl/r_local.h"
 
 
-/** \defgroup refgl_fnt_bitmapface Bitmap font face
- * \ingroup refgl_fnt
+/** @defgroup refgl_fnt_bitmapface Bitmap font face
+ * @ingroup refgl_fnt
  *
  * The FNT_BitmapFace class implements the loader and unloader for a bitmap
  * font's face. It consists in a texture that is loaded from the face's full
@@ -41,22 +41,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 struct FNT_BitmapFace_s;
 typedef struct FNT_BitmapFace_s * FNT_BitmapFace;
 
-/** \brief Class structure for the FNT_BitmapFace class
+/** @brief Class structure for the FNT_BitmapFace class
  */
 struct FNT_BitmapFace_cs
 {
-	/** \brief Parent class record */
+	/** @brief Parent class record */
 	struct FNT_FontFace_cs parent;
 };
 
-/** \brief Instance structure for the FNT_BitmapFace class
+/** @brief Instance structure for the FNT_BitmapFace class
  */
 struct FNT_BitmapFace_s
 {
-	/** \brief Parent instance */
+	/** @brief Parent instance */
 	struct FNT_FontFace_s parent;
 
-	/** \brief Face bitmap
+	/** @brief Face bitmap
 	 *
 	 * This texture is the font face's bitmap, which will be used by the
 	 * fonts.
@@ -65,11 +65,11 @@ struct FNT_BitmapFace_s
 };
 
 
-/** \brief Defining function for the FNT_BitmapFace class
+/** @brief Defining function for the FNT_BitmapFace class
  *
  * Initialise the class' definition if needed.
  *
- * \return the class' definition
+ * @return the class' definition
  */
 OOL_Class FNT_BitmapFace__Class( );
 

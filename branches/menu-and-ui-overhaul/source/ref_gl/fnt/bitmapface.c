@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-/** \file
- * \brief FNT_BitmapFace class implementation
- * \note Initially generated from ref_gl/fnt/bitmapface.cdf
+/** @file
+ * @brief FNT_BitmapFace class implementation
+ * @note Initially generated from ref_gl/fnt/bitmapface.cdf
  */
 
 #include "ref_gl/fnt/bitmapface.h"
@@ -30,9 +30,9 @@ static qboolean _FNT_BitmapFace_Load( FNT_FontFace object );
 static void _FNT_BitmapFace_Unload( FNT_FontFace object );
 
 
-/** \brief FNT_BitmapFace class definition */
+/** @brief FNT_BitmapFace class definition */
 static struct FNT_BitmapFace_cs _FNT_BitmapFace_class;
-/** \brief FNT_BitmapFace class definition pointer */
+/** @brief FNT_BitmapFace class definition pointer */
 static OOL_Class _FNT_BitmapFace_cptr = NULL;
 
 
@@ -54,12 +54,12 @@ OOL_Class FNT_BitmapFace__Class( )
 }
 
 
-/** \brief Bitmap face loader
+/** @brief Bitmap face loader
  *
  * Attempt to load the bitmap face's texture from the face's full
  * path.
  *
- * \return true if the texture was loaded, false otherwise.
+ * @return true if the texture was loaded, false otherwise.
  */
 static qboolean _FNT_BitmapFace_Load( FNT_FontFace object )
 {
@@ -76,7 +76,7 @@ static qboolean _FNT_BitmapFace_Load( FNT_FontFace object )
 }
 
 
-/** \brief Bitmap face unloader
+/** @brief Bitmap face unloader
  *
  * Free the bitmap face's texture.
  */

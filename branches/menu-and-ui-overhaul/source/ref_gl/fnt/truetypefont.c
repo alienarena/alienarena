@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-/** \file
- * \brief FNT_TrueTypeFont class implementation
- * \note Initially generated from ref_gl/fnt/truetypefont.cdf
+/** @file
+ * @brief FNT_TrueTypeFont class implementation
+ * @note Initially generated from ref_gl/fnt/truetypefont.cdf
  */
 
 #include "ref_gl/fnt/truetypefont.h"
@@ -28,14 +28,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-/** \brief TrueType texture width
+/** @brief TrueType texture width
  *
  * Width of the textures used to store TTF fonts. Should be greater than 64
  * to prevent TTF textures from being uploaded to the scrap buffer.
  */
 #define TTF_TEXTURE_WIDTH 512
 
-/** \brief Supported TTF characters
+/** @brief Supported TTF characters
  *
  * Amount of TTF characters to draw, starting from and including space.
  */
@@ -50,9 +50,9 @@ static void _FNT_TrueTypeFont_Load( FNT_Font object );
 static void _FNT_TrueTypeFont_Unload( FNT_Font object );
 
 
-/** \brief FNT_TrueTypeFont class definition */
+/** @brief FNT_TrueTypeFont class definition */
 static struct FNT_TrueTypeFont_cs _FNT_TrueTypeFont_class;
-/** \brief FNT_TrueTypeFont class definition pointer */
+/** @brief FNT_TrueTypeFont class definition pointer */
 static OOL_Class _FNT_TrueTypeFont_cptr = NULL;
 
 
@@ -74,14 +74,14 @@ OOL_Class FNT_TrueTypeFont__Class( )
 }
 
 
-/** \brief Load a TrueType face
+/** @brief Load a TrueType face
  *
  * Load the data from the TrueType file's contents and set rendering
  * information.
  *
- * \param face pointer to the FreeType face handle
+ * @param face pointer to the FreeType face handle
  *
- * \return true on success, false on error
+ * @return true on success, false on error
  */
 static qboolean _FNT_TrueTypeFont_LoadFace( FNT_TrueTypeFont object,  FT_Face * face )
 {
@@ -94,7 +94,7 @@ static qboolean _FNT_TrueTypeFont_LoadFace( FNT_TrueTypeFont object,  FT_Face * 
 	error = FT_New_Memory_Face( OOL_GetClassAs( tt_face , FNT_TrueTypeFace )->library ,
 				tt_face->file_data , tt_face->file_size , 0 , face );
 	if ( error != 0 ) {
-		Com_Printf( "FNT_TrueTypeFont: failed to load font face '%s' (error code %d)\n" ,
+		Com_Printf( "FNT_TrueTypeFont: failed to load font face '%s' (error code %d)@n" ,
 				OOL_Field( tt_face , FNT_FontFace , name ) , error );
 		return false;
 	}
@@ -102,7 +102,7 @@ static qboolean _FNT_TrueTypeFont_LoadFace( FNT_TrueTypeFont object,  FT_Face * 
 	// Sets the font's size
 	error = FT_Set_Pixel_Sizes( *face , OOL_Field( object , FNT_Font , size ) , 0 );
 	if ( error != 0 ) {
-		Com_Printf( "FNT_TrueTypeFont: could not set size %lu to font '%s' (error code %d)\n" ,
+		Com_Printf( "FNT_TrueTypeFont: could not set size %lu to font '%s' (error code %d)@n" ,
 			OOL_Field( object , FNT_Font , size ) , OOL_Field( tt_face , FNT_FontFace , name ) , error );
 		FT_Done_Face( *face );
 		return false;
@@ -128,21 +128,22 @@ static qboolean _FNT_TrueTypeFont_LoadFace( FNT_TrueTypeFont object,  FT_Face * 
 }
 
 
-/** \brief Compute the face's size information
+/** @brief Compute the face's size information
  *
  * Compute information such as total height, width or widths, and amount
  * of lines on the texture.
  *
- * \param face the FreeType face handle
- * \param glyphs the uninitialised glyph array
+ * @param face the FreeType face handle
+ * @param glyphs the uninitialised glyph array
  *
- * \return the amount of lines on the texture or 0 on error.
+ * @return the amount of lines on the texture or 0 on error.
  */
 static unsigned int _FNT_TrueTypeFont_ComputeSizeInfo( FNT_TrueTypeFont object,  FT_Face face,  unsigned int * glyphs )
 {
 	unsigned int n_lines , max_width , x , i;
 	int * w_buffer;
 	int max_ascent , max_descent;
+	qboolean can_use_fixed;
 	FT_Error error;
 
 	// Allocate array of widths if necessary
@@ -151,7 +152,7 @@ static unsigned int _FNT_TrueTypeFont_ComputeSizeInfo( FNT_TrueTypeFont object, 
 	} else {
 		w_buffer = Z_Malloc( TTF_CHARACTERS * sizeof( int ) );
 		if ( w_buffer == NULL ) {
-			Com_Printf( "FNT_TrueTypeFont: out of memory\n" );
+			Com_Printf( "FNT_TrueTypeFont: out of memory@n" );
 			return false;
 		}
 	}
@@ -161,6 +162,7 @@ static unsigned int _FNT_TrueTypeFont_ComputeSizeInfo( FNT_TrueTypeFont object, 
 	n_lines = 1;
 	max_ascent = max_descent = 0;
 	max_width = 0;
+	can_use_fixed = true;
 	for ( i = 0 ; i < TTF_CHARACTERS ; i ++ ) {
 		unsigned int w;
 		int temp;
@@ -169,7 +171,7 @@ static unsigned int _FNT_TrueTypeFont_ComputeSizeInfo( FNT_TrueTypeFont object, 
 		glyphs[ i ] = FT_Get_Char_Index( face , i + ' ' );
 		error = FT_Load_Glyph( face , glyphs[ i ] , object->_render_mode );
 		if ( error != 0 ) {
-			Com_Printf( "FNT_TrueTypeFont: could not load character '%c' from font '%s' (error code %d)\n" ,
+			Com_Printf( "FNT_TrueTypeFont: could not load character '%c' from font '%s' (error code %d)@n" ,
 				i + ' ' , OOL_Field( OOL_Field( object , FNT_Font , face ) , FNT_FontFace , name ) , error );
 			if ( w_buffer ) {
 				Z_Free( w_buffer );
@@ -184,7 +186,9 @@ static unsigned int _FNT_TrueTypeFont_ComputeSizeInfo( FNT_TrueTypeFont object, 
 		}
 		if ( w_buffer ) {
 			w_buffer[ i ] = w;
-		} else if ( w > max_width ) {
+		}
+		can_use_fixed = can_use_fixed && ( i == 0 || w == max_width );
+		if ( w > max_width ) {
 			max_width = w;
 		}
 
@@ -214,22 +218,22 @@ static unsigned int _FNT_TrueTypeFont_ComputeSizeInfo( FNT_TrueTypeFont object, 
 
 	OOL_Field( object , FNT_Font , height ) = max_ascent + max_descent;
 	OOL_Field( object , FNT_Font , base_line ) = max_ascent;
-	OOL_Field( object , FNT_Font , fixed_width ) = max_width;
+	OOL_Field( object , FNT_Font , fixed_width ) = ( w_buffer && ! can_use_fixed ) ? 0 : max_width;
 	OOL_Field( object , FNT_Font , widths ) = w_buffer;
 
 	return n_lines;
 }
 
 
-/** \brief Load kerning information
+/** @brief Load kerning information
  *
  * If the font supports kerning and is not being forced to fixed width,
  * load kerning values for all supported glyphs.
  *
- * \param face the FreeType face handle
- * \param glyphs the glyph array
+ * @param face the FreeType face handle
+ * @param glyphs the glyph array
  *
- * \return true on success, false on failure
+ * @return true on success, false on failure
  */
 static qboolean _FNT_TrueTypeFont_GetKerningInfo( FNT_TrueTypeFont object,  FT_Face face,  unsigned int * glyphs )
 {
@@ -242,7 +246,7 @@ static qboolean _FNT_TrueTypeFont_GetKerningInfo( FNT_TrueTypeFont object,  FT_F
 
 	kerning = Z_Malloc( sizeof( int ) * TTF_CHARACTERS * TTF_CHARACTERS );
 	if ( kerning == NULL ) {
-		Com_Printf( "FNT_TrueTypeFont: out of memory\n" );
+		Com_Printf( "FNT_TrueTypeFont: out of memory@n" );
 		return false;
 	}
 
@@ -259,17 +263,17 @@ static qboolean _FNT_TrueTypeFont_GetKerningInfo( FNT_TrueTypeFont object,  FT_F
 }
 
 
-/** \brief Initialise rendering data
+/** @brief Initialise rendering data
  *
  * Initialise the bitmap, texture and GL lists that will be used to render
  * the font.
  *
- * \param face the FreeType face handle
- * \param glyphs the glyph array
- * \param n_lines the amount of lines on the texture, as returned by
+ * @param face the FreeType face handle
+ * @param glyphs the glyph array
+ * @param n_lines the amount of lines on the texture, as returned by
  * <b>FNT_TrueTypeFont::ComputeSizeInfo</b>
  *
- * \return true on success, false on failure
+ * @return true on success, false on failure
  */
 static qboolean _FNT_TrueTypeFont_GetRenderData( FNT_TrueTypeFont object,  FT_Face face,  unsigned int * glyphs,  unsigned int n_lines )
 {
@@ -288,14 +292,14 @@ static qboolean _FNT_TrueTypeFont_GetRenderData( FNT_TrueTypeFont object,  FT_Fa
 		}
 	}
 	if ( i > 4096 ) {
-		Com_Printf( "FNT_TrueTypeFont: font too big for texture\n" );
+		Com_Printf( "FNT_TrueTypeFont: font too big for texture@n" );
 		return false;
 	}
 
 	// Allocate texture
 	bitmap = Z_Malloc( TTF_TEXTURE_WIDTH * texture_height * 4 );
 	if ( bitmap == NULL ) {
-		Com_Printf( "FNT_TrueTypeFont: out of memory\n" );
+		Com_Printf( "FNT_TrueTypeFont: out of memory@n" );
 		return false;
 	}
 	memset( bitmap , 0 , TTF_TEXTURE_WIDTH * texture_height * 4 );
@@ -308,7 +312,7 @@ static qboolean _FNT_TrueTypeFont_GetRenderData( FNT_TrueTypeFont object,  FT_Fa
 	qglGetError( );
 	list_id = qglGenLists( TTF_CHARACTERS );
 	if ( qglGetError( ) != GL_NO_ERROR ) {
-		Com_Printf( "FNT_TrueTypeFont: could not create OpenGL lists\n" );
+		Com_Printf( "FNT_TrueTypeFont: could not create OpenGL lists@n" );
 		Z_Free( bitmap );
 		return false;
 	}
@@ -325,7 +329,7 @@ static qboolean _FNT_TrueTypeFont_GetRenderData( FNT_TrueTypeFont object,  FT_Fa
 		// Render the character
 		error = FT_Load_Glyph( face , glyphs[ i ] , object->_render_mode );
 		if ( error != 0 ) {
-			Com_Printf( "TTF: could not load character '%c' from font '%s' (error code %d)\n" ,
+			Com_Printf( "TTF: could not load character '%c' from font '%s' (error code %d)@n" ,
 				i + ' ' ,  OOL_Field( OOL_Field( object , FNT_Font , face ) , FNT_FontFace , name ) , error );
 			Z_Free( bitmap );
 			qglDeleteLists( list_id , TTF_CHARACTERS );
@@ -413,7 +417,7 @@ static qboolean _FNT_TrueTypeFont_GetRenderData( FNT_TrueTypeFont object,  FT_Fa
 }
 
 
-/** \brief TrueType font loader
+/** @brief TrueType font loader
  *
  * Attempt to load the TrueType face's information, compute font metrics,
  * including kerning if available, and generate the font's texture and
@@ -459,7 +463,7 @@ static void _FNT_TrueTypeFont_Load( FNT_Font object )
 }
 
 
-/** \brief TrueType font unloader
+/** @brief TrueType font unloader
  *
  * Free width and kerning arrays, font bitmap and texture, and GL lists.
  */

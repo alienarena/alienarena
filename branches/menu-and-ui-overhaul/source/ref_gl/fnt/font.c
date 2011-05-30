@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-/** \file
- * \brief FNT_Font class implementation
- * \note Initially generated from ref_gl/fnt/font.cdf
+/** @file
+ * @brief FNT_Font class implementation
+ * @note Initially generated from ref_gl/fnt/font.cdf
  */
 
 #include "ref_gl/fnt/font.h"
@@ -32,9 +32,9 @@ static void _FNT_Font_Destroy( OOL_Object object );
 static qboolean _PV_FNT_Font_face(const void * value);
 
 
-/** \brief FNT_Font class definition */
+/** @brief FNT_Font class definition */
 static struct FNT_Font_cs _FNT_Font_class;
-/** \brief FNT_Font class definition pointer */
+/** @brief FNT_Font class definition pointer */
 static OOL_Class _FNT_Font_cptr = NULL;
 
 
@@ -70,7 +70,7 @@ OOL_Class FNT_Font__Class( )
 }
 
 
-/** \brief Font initialisation
+/** @brief Font initialisation
  *
  * The initialiser sets up the font's key and calls the Load() method.
  * If loading succeeds, it initialises the font's renderer object.
@@ -101,13 +101,13 @@ static void _FNT_Font_Initialise( OOL_Object object )
 }
 
 
-/** \brief Font destructor
+/** @brief Font destructor
  *
  * The destructor calls the font's Unload() method if the font had
  * been loaded successfully. It also decrements the font face's use
  * counter and destroys the face if appropriate.
  *
- * \note The renderer is not affected, as it actually contains the
+ * @note The renderer is not affected, as it actually contains the
  * font object and triggers its destruction.
  */
 static void _FNT_Font_Destroy( OOL_Object object )
@@ -127,7 +127,7 @@ static void _FNT_Font_Destroy( OOL_Object object )
 }
 
 
-/** \brief Validator for property <b>FNT_Font::face</b>
+/** @brief Validator for property <b>FNT_Font::face</b>
  *
  * This validator ensures that face is not NULL and that it is a
  * FNT_Face instance.
