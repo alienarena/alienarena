@@ -35,6 +35,28 @@ static void _OOL_Object_Destroy( OOL_Object object );
 #define MAX_PROPERTY_NAME_LENGTH 63
 
 
+/** \brief Tag for memory allocation used by objects */
+#define TAG_OBJECT 572
+
+/** \brief Tag for memory allocation used by object properties */
+#define TAG_PROPERTY 573
+
+/** \brief Macro that allocates memory for an object
+ *
+ * \param X the amount of memory to allocate
+ * \return the address of the allocated area
+ */
+#define OBJ_ALLOC(X) Z_TagMalloc((X),TAG_OBJECT)
+
+/** \brief Macro that allocates memory for an object property
+ *
+ * \param X the amount of memory to allocate
+ * \return the address of the allocated area
+ */
+#define PROP_ALLOC(X) Z_TagMalloc((X),TAG_PROPERTY)
+
+
+
 /** \brief Property definition structure
  *
  * This structure is used by property tables to store information regarding a
@@ -119,7 +141,7 @@ OOL_Object OOL_Object_CreateEx( OOL_Class class , ... )
 	assert( class != NULL );
 
 	// Allocate and prepare the object
-	object = Z_Malloc( class->size );
+	object = OBJ_ALLOC( class->size );
 	assert( object != NULL );
 	memset( object , 0 , class->size );
 	object->class = class;
@@ -315,7 +337,7 @@ static void _OOL_Object_SetProperty( OOL_Object object , qboolean call_handler ,
 				if ( ptr == NULL ) {
 					*( (void **) obj_field ) = NULL;
 				} else {
-					*( (void **) obj_field ) = Z_Malloc( strlen( (char *) ptr ) );
+					*( (void **) obj_field ) = PROP_ALLOC( strlen( (char *) ptr ) );
 					strcpy( *( (char **) obj_field ) , (char *) ptr );
 				}
 				break;
@@ -335,7 +357,7 @@ static void _OOL_Object_SetProperty( OOL_Object object , qboolean call_handler ,
 					}
 				} else {
 					if ( *( (void **) obj_field ) == NULL ) {
-						*( (void **) obj_field ) = Z_Malloc( p_record->size );
+						*( (void **) obj_field ) = PROP_ALLOC( p_record->size );
 					}
 					memcpy( *( (void **) obj_field ) , ptr , p_record->size );
 				}

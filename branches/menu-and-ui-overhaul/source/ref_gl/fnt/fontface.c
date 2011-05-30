@@ -126,19 +126,16 @@ static void _FNT_FontFace_Destroy( OOL_Object object )
 {
 	if ( OOL_Field( object , FNT_FontFace , loaded ) ) {
 		FNT_FontFace_Unload( object );
+		HT_DeleteItem( _FNT_FontFace_faces ,
+				OOL_Field( object , FNT_FontFace , full_name ) ,
+				NULL );
 	}
 
 	OOL_ClassCast( OOL_Object__Class( ) , OOL_Object )->Destroy( object );
 }
 
 
-/** \brief <b>FNT_FontFace::GetFont</b> method implementation
- * \note public method
- *
- * Compute the font's key and try to find it in the table of fonts. If it
- * doesn't already exist, create it and check whether it was loaded. On
- * success, add it to the table; otherwise destroy it.
- */
+/* Documentation in ref_gl/fnt/fontface.h */
 OOL_Object FNT_FontFace_GetFont( FNT_FontFace object,  int size,  qboolean force_fixed )
 {
 	char font_key[ MAX_OSPATH + FNT_FACE_NAME_LEN + 14 + 1 ];
@@ -182,30 +179,43 @@ OOL_Object FNT_FontFace_GetFrom( const char * name,  const char * directory )
 		FNT_TrueTypeFace__Class( )
 	};
 	char full_name[ MAX_OSPATH + FNT_FACE_NAME_LEN + 2 ];
-	OOL_Object font;
+	OOL_Object face;
 	int i;
 
 	// Try obtaining the face from the table of loaded faces
-	Com_sprintf( full_name , sizeof( full_name ) , "%s/%s" , directory , name );
-	font = HT_GetItem( _FNT_FontFace_faces , full_name , NULL );
-	if ( font ) {
-		return font;
+	if ( directory[0] ) {
+		Com_sprintf( full_name , sizeof( full_name ) , "%s/%s" , directory , name );
+	} else {
+		Com_sprintf( full_name , sizeof( full_name ) , "fonts/%s" , name );
+	}
+	face = HT_GetItem( _FNT_FontFace_faces , full_name , NULL );
+	if ( face ) {
+		return face;
 	}
 
-	// Try actually loading the font face
+	// Try actually loading the face face
 	for ( i = 0 ; i < 2 ; i ++ ) {
-		font = OOL_Object_CreateEx( classes[ i ] ,
+		face = OOL_Object_CreateEx( classes[ i ] ,
 			"name" , name ,
 			"base_directory" , directory ,
 			NULL );
 
-		if ( OOL_Field( font , FNT_FontFace , loaded ) ) {
+		if ( OOL_Field( face , FNT_FontFace , loaded ) ) {
 			break;
 		}
 
-		OOL_Object_Destroy( font );
-		font = NULL;
+		OOL_Object_Destroy( face );
+		face = NULL;
 	}
 
-	return font;
+	return face;
+}
+
+
+/* Documentation in ref_gl/fnt/fontface.h */
+void FNT_FontFace_NotifyFontDestroy( OOL_Object font )
+{
+	HT_DeleteItem( _FNT_FontFace_fonts ,
+			OOL_Field( font , FNT_Font , font_key ) ,
+			NULL );
 }

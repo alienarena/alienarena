@@ -834,9 +834,9 @@ struct OOL_Object_s
  *
  * This function allocates and initialises an instance of some type.
  *
- * It starts by allocating the required memory through #Z_Alloc, then prepares
- * the object using its \link OOL_Object_cs::PrepareInstance PrepareInstance
- * \endlink method.
+ * It starts by allocating the required memory through #Z_TagMalloc, then
+ * prepares * the object using its \link OOL_Object_cs::PrepareInstance
+ * PrepareInstance \endlink method.
  *
  * Once the object has been prepared, it will go through its variable
  * arguments and use them to set properties; these variable arguments are

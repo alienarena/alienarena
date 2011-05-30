@@ -158,6 +158,16 @@ public:
 	 * \returns the loaded font face or NULL on failure
 	 */
 	static OOL_Object GetFrom( const char * name , const char * directory );
+
+
+	/** \brief Font destruction callback
+	 *
+	 * This method is called by the fonts' destructor to notify that it is being
+	 * destroyed. It will remove the font from the fonts cache.
+	 *
+	 * \param font the font being destroyed
+	 */
+	static void NotifyFontDestroy( OOL_Object font );
 };
 
 

@@ -120,6 +120,7 @@ static void _FNT_Font_Destroy( OOL_Object object )
 		if ( ! OOL_Field( self->face , FNT_FontFace , n_fonts ) ) {
 			OOL_Object_Destroy( self->face );
 		}
+		FNT_FontFace_NotifyFontDestroy( object );
 	}
 
 	OOL_ClassCast( OOL_Object__Class( ) , OOL_Object )->Destroy( object );

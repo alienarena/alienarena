@@ -137,6 +137,16 @@ OOL_Class FNT_FontFace__Class( );
 OOL_Object FNT_FontFace_GetFrom( const char * name , const char * directory );
 
 
+/** \brief Font destruction callback
+ *
+ * This method is called by the fonts' destructor to notify that it is being
+ * destroyed. It will remove the font from the fonts cache.
+ *
+ * \param font the font being destroyed
+ */
+void FNT_FontFace_NotifyFontDestroy( OOL_Object font );
+
+
 /** \brief Default font loader
  *
  * Attempt to load the face from the default font directory. Try a
