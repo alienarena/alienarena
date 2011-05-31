@@ -365,6 +365,9 @@ librefgl_fnt_a_SOURCES = \
 	ref_gl/fnt/font.h \
 	ref_gl/fnt/fontface.c \
 	ref_gl/fnt/fontface.h \
+	ref_gl/fnt/renderingoperation.c \
+	ref_gl/fnt/renderingoperation.h \
+	ref_gl/fnt/renderingstep.h \
 	ref_gl/fnt/truetypeface.c \
 	ref_gl/fnt/truetypeface.h \
 	ref_gl/fnt/truetypefont.c \

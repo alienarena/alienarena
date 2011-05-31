@@ -253,6 +253,7 @@ am_librefgl_fnt_a_OBJECTS =  \
 	ref_gl/fnt/librefgl_fnt_a-bitmapfont.$(OBJEXT) \
 	ref_gl/fnt/librefgl_fnt_a-font.$(OBJEXT) \
 	ref_gl/fnt/librefgl_fnt_a-fontface.$(OBJEXT) \
+	ref_gl/fnt/librefgl_fnt_a-renderingoperation.$(OBJEXT) \
 	ref_gl/fnt/librefgl_fnt_a-truetypeface.$(OBJEXT) \
 	ref_gl/fnt/librefgl_fnt_a-truetypefont.$(OBJEXT)
 librefgl_fnt_a_OBJECTS = $(am_librefgl_fnt_a_OBJECTS)
@@ -745,6 +746,9 @@ librefgl_fnt_a_SOURCES = \
 	ref_gl/fnt/font.h \
 	ref_gl/fnt/fontface.c \
 	ref_gl/fnt/fontface.h \
+	ref_gl/fnt/renderingoperation.c \
+	ref_gl/fnt/renderingoperation.h \
+	ref_gl/fnt/renderingstep.h \
 	ref_gl/fnt/truetypeface.c \
 	ref_gl/fnt/truetypeface.h \
 	ref_gl/fnt/truetypefont.c \
@@ -1361,6 +1365,9 @@ ref_gl/fnt/librefgl_fnt_a-font.$(OBJEXT): ref_gl/fnt/$(am__dirstamp) \
 ref_gl/fnt/librefgl_fnt_a-fontface.$(OBJEXT):  \
 	ref_gl/fnt/$(am__dirstamp) \
 	ref_gl/fnt/$(DEPDIR)/$(am__dirstamp)
+ref_gl/fnt/librefgl_fnt_a-renderingoperation.$(OBJEXT):  \
+	ref_gl/fnt/$(am__dirstamp) \
+	ref_gl/fnt/$(DEPDIR)/$(am__dirstamp)
 ref_gl/fnt/librefgl_fnt_a-truetypeface.$(OBJEXT):  \
 	ref_gl/fnt/$(am__dirstamp) \
 	ref_gl/fnt/$(DEPDIR)/$(am__dirstamp)
@@ -1789,6 +1796,7 @@ mostlyclean-compile:
 	-rm -f ref_gl/fnt/librefgl_fnt_a-bitmapfont.$(OBJEXT)
 	-rm -f ref_gl/fnt/librefgl_fnt_a-font.$(OBJEXT)
 	-rm -f ref_gl/fnt/librefgl_fnt_a-fontface.$(OBJEXT)
+	-rm -f ref_gl/fnt/librefgl_fnt_a-renderingoperation.$(OBJEXT)
 	-rm -f ref_gl/fnt/librefgl_fnt_a-truetypeface.$(OBJEXT)
 	-rm -f ref_gl/fnt/librefgl_fnt_a-truetypefont.$(OBJEXT)
 	-rm -f server/crx-sv_ccmds.$(OBJEXT)
@@ -2046,6 +2054,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-bitmapfont.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-font.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-fontface.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-renderingoperation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-truetypeface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-truetypefont.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@server/$(DEPDIR)/crx-sv_ccmds.Po@am__quote@
@@ -2333,6 +2342,22 @@ ref_gl/fnt/librefgl_fnt_a-fontface.obj: ref_gl/fnt/fontface.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/fnt/fontface.c' object='ref_gl/fnt/librefgl_fnt_a-fontface.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(librefgl_fnt_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/fnt/librefgl_fnt_a-fontface.obj `if test -f 'ref_gl/fnt/fontface.c'; then $(CYGPATH_W) 'ref_gl/fnt/fontface.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/fnt/fontface.c'; fi`
+
+ref_gl/fnt/librefgl_fnt_a-renderingoperation.o: ref_gl/fnt/renderingoperation.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(librefgl_fnt_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/fnt/librefgl_fnt_a-renderingoperation.o -MD -MP -MF ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-renderingoperation.Tpo -c -o ref_gl/fnt/librefgl_fnt_a-renderingoperation.o `test -f 'ref_gl/fnt/renderingoperation.c' || echo '$(srcdir)/'`ref_gl/fnt/renderingoperation.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-renderingoperation.Tpo ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-renderingoperation.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/fnt/renderingoperation.c' object='ref_gl/fnt/librefgl_fnt_a-renderingoperation.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(librefgl_fnt_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/fnt/librefgl_fnt_a-renderingoperation.o `test -f 'ref_gl/fnt/renderingoperation.c' || echo '$(srcdir)/'`ref_gl/fnt/renderingoperation.c
+
+ref_gl/fnt/librefgl_fnt_a-renderingoperation.obj: ref_gl/fnt/renderingoperation.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(librefgl_fnt_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/fnt/librefgl_fnt_a-renderingoperation.obj -MD -MP -MF ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-renderingoperation.Tpo -c -o ref_gl/fnt/librefgl_fnt_a-renderingoperation.obj `if test -f 'ref_gl/fnt/renderingoperation.c'; then $(CYGPATH_W) 'ref_gl/fnt/renderingoperation.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/fnt/renderingoperation.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-renderingoperation.Tpo ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-renderingoperation.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ref_gl/fnt/renderingoperation.c' object='ref_gl/fnt/librefgl_fnt_a-renderingoperation.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(librefgl_fnt_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ref_gl/fnt/librefgl_fnt_a-renderingoperation.obj `if test -f 'ref_gl/fnt/renderingoperation.c'; then $(CYGPATH_W) 'ref_gl/fnt/renderingoperation.c'; else $(CYGPATH_W) '$(srcdir)/ref_gl/fnt/renderingoperation.c'; fi`
 
 ref_gl/fnt/librefgl_fnt_a-truetypeface.o: ref_gl/fnt/truetypeface.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(librefgl_fnt_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ref_gl/fnt/librefgl_fnt_a-truetypeface.o -MD -MP -MF ref_gl/fnt/$(DEPDIR)/librefgl_fnt_a-truetypeface.Tpo -c -o ref_gl/fnt/librefgl_fnt_a-truetypeface.o `test -f 'ref_gl/fnt/truetypeface.c' || echo '$(srcdir)/'`ref_gl/fnt/truetypeface.c

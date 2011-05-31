@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-/** \file
- * \brief \link qcommon_lists Lists \endlink
+/** @file
+ * @brief @link qcommon_lists Lists @endlink
  */
 
 #ifndef __H_QCOMMON_LISTS
@@ -26,8 +26,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "qcommon/ptrtools.h"
 
 
-/** \defgroup qcommon_ptrtools Doubly-linked, guarded circular lists
- * \ingroup qcommon
+/** @defgroup qcommon_ptrtools Doubly-linked, guarded circular lists
+ * @ingroup qcommon
  *
  * A set of type definitions, inline functions and macros that implement
  * generic lists.
@@ -35,26 +35,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /*@{*/
 
 
-/** \brief A list item
+/** @brief A list item
  *
  * A list item, allowing a doubly-linked list to be created. This structure
  * must be used as the type for a structure's list field, or on its own as
  * the list's head and sentinel.
  */
 struct LST_item_s {
-	/** \brief Previous element in the list */
+	/** @brief Previous element in the list */
 	struct LST_item_s *	previous;
 
-	/** \brief Next element in the list */
+	/** @brief Next element in the list */
 	struct LST_item_s *	next;
 };
 
 
-/** \brief Initialise a list item
+/** @brief Initialise a list item
  *
  * Initialise a list item by setting it to loop upon itself.
  *
- * \param item a pointer to the list's item.
+ * @param item a pointer to the list's item.
  */
 static inline void LST_Init( struct LST_item_s * item )
 {
@@ -62,13 +62,13 @@ static inline void LST_Init( struct LST_item_s * item )
 }
 
 
-/** \brief Insert an item
+/** @brief Insert an item
  *
  * Add an item to a list after another item. If the base item is the list's
  * head, then the item will be inserted at the beginning of the list.
  *
- * \param base a pointer to the item after which the insertion will take place
- * \param item a pointer to the item to insert
+ * @param base a pointer to the item after which the insertion will take place
+ * @param item a pointer to the item to insert
  */
 static inline void LST_Insert( struct LST_item_s * base , struct LST_item_s * item )
 {
@@ -78,14 +78,14 @@ static inline void LST_Insert( struct LST_item_s * base , struct LST_item_s * it
 }
 
 
-/** \brief Append an item
+/** @brief Append an item
  *
  * Add an item before another item. If the base item is the list's head, then
  * the item will be inserted at the end of the list.
  *
- * \param base a pointer to the item before which the insertion will take
+ * @param base a pointer to the item before which the insertion will take
  * place
- * \param item a pointer to the item to insert
+ * @param item a pointer to the item to insert
  */
 static inline void LST_Append( struct LST_item_s * base , struct LST_item_s * item )
 {
@@ -95,11 +95,11 @@ static inline void LST_Append( struct LST_item_s * base , struct LST_item_s * it
 }
 
 
-/** \brief Remove an item
+/** @brief Remove an item
  *
  * Remove a list item from the list it is in.
  *
- * \param item a pointer to the item to remove from the list it's in
+ * @param item a pointer to the item to remove from the list it's in
  */
 static inline void LST_Remove( struct LST_item_s * item )
 {
@@ -109,13 +109,13 @@ static inline void LST_Remove( struct LST_item_s * item )
 }
 
 
-/** \brief Remove the first item from a list and return it
+/** @brief Remove the first item from a list and return it
  *
  * The first item from the list will be removed and returned. If the list
  * was empty, then NULL will be returned and no action will be taken.
  *
- * \param list a pointer to the list's sentry
- * \returns a pointer to list entry that was removed, or NULL if the list was
+ * @param list a pointer to the list's sentry
+ * @returns a pointer to list entry that was removed, or NULL if the list was
  * empty
  */
 static inline struct LST_item_s * LST_TakeFirst( struct LST_item_s * list )
@@ -129,24 +129,24 @@ static inline struct LST_item_s * LST_TakeFirst( struct LST_item_s * list )
 }
 
 
-/** \brief Remove the first item from a list
+/** @brief Remove the first item from a list
  *
  * If the list is not empty, its first item will be removed.
  *
- * \param list a pointer to the list's head
- * \returns true if an item was removed, false if the list was empty
+ * @param list a pointer to the list's head
+ * @returns true if an item was removed, false if the list was empty
  */
 #define LST_RemoveFirst(list) \
 	( LST_TakeFirst( list ) != NULL )
 
 
 
-/** \brief Next item in list
+/** @brief Next item in list
  *
- * \param head a pointer to the list's head
- * \param from a pointer to the list's item
+ * @param head a pointer to the list's head
+ * @param from a pointer to the list's item
  *
- * \returns the list's next item or NULL if the end of the list has been reached.
+ * @returns the list's next item or NULL if the end of the list has been reached.
  */
 static inline void * LST_GetNext( struct LST_item_s * head , struct LST_item_s * from )
 {
@@ -157,12 +157,12 @@ static inline void * LST_GetNext( struct LST_item_s * head , struct LST_item_s *
 }
 
 
-/** \brief Previous item in the list
+/** @brief Previous item in the list
  *
- * \param head a pointer to the list's head
- * \param from a pointer to the list's item
+ * @param head a pointer to the list's head
+ * @param from a pointer to the list's item
  *
- * \returns the list's previous item or NULL if the start of the list has been reached.
+ * @returns the list's previous item or NULL if the start of the list has been reached.
  */
 static inline void * LST_GetPrevious( struct LST_item_s * head , struct LST_item_s * from )
 {
@@ -173,23 +173,23 @@ static inline void * LST_GetPrevious( struct LST_item_s * head , struct LST_item
 }
 
 
-/** \brief Check whether a list is empty
+/** @brief Check whether a list is empty
  *
- * \param list pointer to the list's head
+ * @param list pointer to the list's head
  *
- * \return true if the list is empty, false otherwise
+ * @return true if the list is empty, false otherwise
  */
 #define LST_IsEmpty(list) \
 	( list->next == list )
 
 
-/** \brief Iterate over a list's items
+/** @brief Iterate over a list's items
  *
  * Iterate over a list's item; once the loop is finished, the iterator variable
  * points to the list head.
  *
- * \param head the list's head
- * \param iterator the name of the variable to use as the iterator
+ * @param head the list's head
+ * @param iterator the name of the variable to use as the iterator
  */
 #define LST_Foreach(head, iterator) \
 	iterator = &(head); \

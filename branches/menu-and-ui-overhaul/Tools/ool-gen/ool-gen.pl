@@ -729,7 +729,7 @@ EOL
 	print $fh <<"EOL";
 };
 
-/** \]brief Instance structure for the $fData->{class} class
+/** \@brief Instance structure for the $fData->{class} class
  */
 struct $fData->{class}_s
 {
