@@ -526,6 +526,7 @@ sub parseDefinitionFile
 			curcomments	=> []
 		},
 		include	=> [ ] ,
+		headers	=> [ ] ,
 		consts	=> { } ,
 		members	=> { } ,
 		methods	=> { } ,
@@ -563,15 +564,19 @@ sub parseDefinitionFile
 			my $sep = ( $1 eq '"' ) ? '"' : '>';
 
 			syntaxError( $file , "expected ${sep}filename${sep} after #include" )
-				unless $contents =~ s/([\w\/]+)$sep//;
+				unless $contents =~ s/([\w\/\.]+)$sep//;
 			my $iFile = $1;
 			$iFile =~ s/\/\/+/\//g;
 
-			syntaxError( $file , "trying to self-include" )
-				if $iFile eq $bName;
+			if ( $iFile =~ /\.h$/ ) {
+				push @{ $data->{$bName}{headers} } , $iFile;
+			} else {
+				syntaxError( $file , "trying to self-include" )
+					if $iFile eq $bName;
 
-			parseDefinitionFile( $data , "$root/$iFile.cdf" , $root );
-			push @{ $data->{$bName}{include} } , $iFile;
+				parseDefinitionFile( $data , "$root/$iFile.cdf" , $root );
+				push @{ $data->{$bName}{include} } , $iFile;
+			}
 			next;
 		}
 
@@ -647,6 +652,9 @@ EOL
 	# Include other headers
 	foreach my $included ( @{ $fData->{include} } ) {
 		print $fh "#include \"$included.h\"\n";
+	}
+	foreach my $included ( @{ $fData->{header} } ) {
+		print $fh "#include \"$included\"\n";
 	}
 
 	# Add "class comment" (should be a \defgroup)
