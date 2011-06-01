@@ -1229,8 +1229,8 @@ void SP_misc_bluenode (edict_t *ent)
 	ent->s.modelindex = gi.modelindex ("models/objects/dmspot/tris.md2");
 
 	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
-	VectorSet (ent->mins, -32, -32, -32);
-	VectorSet (ent->maxs, 32, 32, -16);
+	VectorSet (ent->mins, -32, -32, -24);
+	VectorSet (ent->maxs, 32, 32, -8);
 
 	ent->s.frame = 0;
 	ent->powered = true; //start on
