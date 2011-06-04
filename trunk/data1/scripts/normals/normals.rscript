@@ -928,3 +928,31 @@ models/items/mega_h/skin
 		glow
 	}
 }
+maps/meshes/urban/riored
+{
+	{
+		map maps/meshes/urban/rio_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/urban/rioblue
+{
+	{
+		map maps/meshes/urban/rio_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/urban/riosilver
+{
+	{
+		map maps/meshes/urban/rio_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/urban/roadbarrell
+{
+	{
+		map maps/meshes/urban/roadbarrell_normal.jpg
+		normalmap
+	}
+}
