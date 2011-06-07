@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern	unsigned	sys_msg_time;
 extern cursor_t cursor;
+extern qboolean mouse_available;
 
 // joystick defines and variables
 // where should defines be moved?
@@ -114,28 +115,15 @@ cvar_t	*m_accel;
 
 qboolean	mlooking;
 
-void IN_MLookDown (void) { mlooking = true; }
-void IN_MLookUp (void) {
-mlooking = false;
-if (!freelook->value && lookspring->value)
-		IN_CenterView ();
-}
-
 int			mouse_buttons;
 int			mouse_oldbuttonstate;
-POINT		current_pos;
-int			mouse_x, mouse_y, old_mouse_x, old_mouse_y, mx_accum, my_accum;
-
-int			old_x, old_y;
-
-qboolean	mouseactive;	// false when not focus app
 
 qboolean	restore_spi;
 qboolean	mouseinitialized;
 int		originalmouseparms[3], newmouseparms[3] = {0, 0, 1}, noaccelmouseparms[3] = {0, 0, 0};
 qboolean	mouseparmsvalid;
 
-int			window_center_x, window_center_y;
+int		window_center_x, window_center_y;
 RECT		window_rect;
 
 
@@ -154,13 +142,13 @@ void IN_ActivateMouse (void)
 		return;
 	if (!in_mouse->value)
 	{
-		mouseactive = false;
+		mouse_available = false;
 		return;
 	}
-	if (mouseactive)
+	if (mouse_available)
 		return;
 
-	mouseactive = true;
+	mouse_available = true;
 
 	if (mouseparmsvalid) {
 		switch(m_accel->integer) {
@@ -192,9 +180,6 @@ void IN_ActivateMouse (void)
 
 	SetCursorPos (window_center_x, window_center_y);
 
-	old_x = window_center_x;
-	old_y = window_center_y;
-
 	SetCapture ( cl_hwnd );
 	ClipCursor (&window_rect);
 	while (ShowCursor (FALSE) >= 0)
@@ -213,13 +198,13 @@ void IN_DeactivateMouse (void)
 {
 	if (!mouseinitialized)
 		return;
-	if (!mouseactive)
+	if (!mouse_available)
 		return;
 
 	if (restore_spi)
 		SystemParametersInfo (SPI_SETMOUSE, 0, originalmouseparms, 0);
 
-	mouseactive = false;
+	mouse_available = false;
 
 	ClipCursor (NULL);
 	ReleaseCapture ();
@@ -322,114 +307,6 @@ void IN_MouseEvent (int mstate)
 }
 
 
-/*
-===========
-IN_MouseMove
-===========
-*/
-void IN_MouseMove (usercmd_t *cmd)
-{
-	int		mx, my;
-
-	if (!mouseactive)
-		return;
-
-	// find mouse movement
-	if (!GetCursorPos (&current_pos))
-		return;
-
-	mx = current_pos.x - window_center_x;
-	my = current_pos.y - window_center_y;
-
-#if 0
-	if (!mx && !my)
-		return;
-#endif
-
-	if (m_filter->value)
-	{
-		mouse_x = (mx + old_mouse_x) * 0.5;
-		mouse_y = (my + old_mouse_y) * 0.5;
-	}
-	else
-	{
-		mouse_x = mx;
-		mouse_y = my;
-	}
-
-	old_mouse_x = mx;
-	old_mouse_y = my;
-
-
-	if ( m_smoothing->value )
-	{   // reduce sensitivity when frames per sec is below maximum setting
-		// cvar mouse sensitivity * ( current measured fps / cvar set maximum fps )
-		float adjustment;
-		extern cvar_t* cl_maxfps;
-		adjustment = sensitivity->value / (cls.frametime * cl_maxfps->value);
-		mouse_x *= adjustment;
-		mouse_y *= adjustment;
-	}
-	else
-	{
-		if (cls.key_dest == key_menu)
-		{
-			mouse_x *= menu_sensitivity->value;
-			mouse_y *= menu_sensitivity->value;
-		}
-		else
-		{
-			mouse_x *= sensitivity->value;
-			mouse_y *= sensitivity->value;
-		}
-	}
-
-	//now to set the menu cursor
-	if (cls.key_dest == key_menu)
-	{
-		cursor.oldx = cursor.x;
-		cursor.oldy = cursor.y;
-
-		cursor.x += mouse_x * .35;
-		cursor.y += mouse_y * .35;
-
-		if (cursor.x!=cursor.oldx || cursor.y!=cursor.oldy)
-			cursor.mouseaction = true;
-
-		if (cursor.x < 0) cursor.x = 0;
-		if (cursor.x > viddef.width) cursor.x = viddef.width;
-		if (cursor.y < 0) cursor.y = 0;
-		if (cursor.y > viddef.height) cursor.y = viddef.height;
-	}
-	else
-	{
-		cursor.oldx = 0;
-		cursor.oldy = 0;
-
-		//mouse_x *= sensitivity->value;
-		//mouse_y *= sensitivity->value;
-
-	// add mouse X/Y movement to cmd
-		if ( (in_strafe.state & 1) || (lookstrafe->value && mlooking ))
-			cmd->sidemove += m_side->value * mouse_x;
-		else
-			cl.viewangles[YAW] -= m_yaw->value * mouse_x;
-
-		if ( (mlooking || freelook->value) && !(in_strafe.state & 1))
-		{
-			cl.viewangles[PITCH] += m_pitch->value * mouse_y;
-		}
-		else
-		{
-			cmd->forwardmove -= m_forward->value * mouse_y;
-		}
-
-	}
-	// force the mouse to the center, so there's room to move
-	if (mx || my)
-		SetCursorPos (window_center_x, window_center_y);
-}
-
 
 /*
 =========================================================================
@@ -511,7 +388,7 @@ between a deactivate and an activate.
 void IN_Activate (qboolean active)
 {
 	in_appactive = active;
-	mouseactive = !active;		// force a new window check or turn off
+	mouse_available = !active;		// force a new window check or turn off
 }
 
 
@@ -546,22 +423,6 @@ void IN_Frame (void)
 	IN_ActivateMouse ();
 }
 
-/*
-===========
-IN_Move
-===========
-*/
-void IN_Move (usercmd_t *cmd)
-{
-	IN_MouseMove (cmd);
-
-	// Knightmare- added Psychospaz's mouse support
-	if (cls.key_dest == key_menu && cls.key_dest != key_console) // Knightmare added
-		M_Think_MouseCursor();
-
-	if (ActiveApp)
-		IN_JoyMove (cmd);
-}
 
 
 /*
@@ -571,8 +432,6 @@ IN_ClearStates
 */
 void IN_ClearStates (void)
 {
-	mx_accum = 0;
-	my_accum = 0;
 	mouse_oldbuttonstate = 0;
 }
 
@@ -863,6 +722,10 @@ void IN_JoyMove (usercmd_t *cmd)
 	float	speed, aspeed;
 	float	fAxisValue;
 	int		i;
+
+	if ( !ActiveApp ) {
+		return;
+	}
 
 	// complete initialization if first time in
 	// this is needed as cvars are not available at initialization time

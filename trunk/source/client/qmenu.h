@@ -151,7 +151,6 @@ typedef struct
 
 void refreshCursorLink (void);
 menuscale_t menuScale;
-cursor_t cursor;
 
 qboolean Field_Key( menufield_s *field, int key );
 

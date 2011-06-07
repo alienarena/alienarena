@@ -60,6 +60,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /* extern globals */
 // using include files for these has some problems
 extern cursor_t cursor;
+extern qboolean mouse_available;
+extern qboolean mouse_is_position;
+extern int mouse_diff_x;
+extern int mouse_diff_y;
+extern int mouse_odiff_x;
+extern int mouse_odiff_y;
 extern float rs_realtime;
 extern viddef_t vid;
 
@@ -96,8 +102,6 @@ qboolean have_stencil = false; // Stencil shadows - MrG
 /*****************************************************************************/
 /* MOUSE                                                                     */
 /*****************************************************************************/
-
-int mx, my;
 
 static cvar_t	*r_fakeFullscreen;
 extern cvar_t	*in_dgamouse;
@@ -141,7 +145,7 @@ void install_grabs(void)
 // for running on gdb debug. prevents "lockup".
 	Cvar_Set( "in_dgamouse", "0" );
 	dgamouse = false;
-	mouse_active = true;
+	mouse_is_position = false;
 #else // defined DEBUG_GDB_NOGRAB
 # if !defined HAVE_XXF86DGA
 	XGrabPointer(dpy, win, True, 0, GrabModeAsync, GrabModeAsync, win, None, CurrentTime);
@@ -173,7 +177,8 @@ void install_grabs(void)
 
 	XGrabKeyboard(dpy, win, False, GrabModeAsync, GrabModeAsync, CurrentTime);
 
-	mouse_active = true;
+	mouse_is_position = false;
+	mouse_diff_x = mouse_diff_y = 0;
 #endif // defined DEBUG_GDB_NOGRAB
 }
 
@@ -192,7 +197,7 @@ void uninstall_grabs(void)
 	XUngrabPointer(dpy, CurrentTime);
 	XUngrabKeyboard(dpy, CurrentTime);
 
-	mouse_active = false;
+	mouse_is_position = true;
 }
 
 static void IN_DeactivateMouse( void )
@@ -200,9 +205,8 @@ static void IN_DeactivateMouse( void )
 	if (!dpy || !win)
 		return;
 
-	if (mouse_active) {
+	if (!mouse_is_position) {
 		uninstall_grabs();
-		mouse_active = false;
 	}
 }
 
@@ -211,10 +215,8 @@ static void IN_ActivateMouse( void )
 	if (!dpy || !win)
 		return;
 
-	if (!mouse_active) {
-		mx = my = 0; // don't spazz
+	if (mouse_is_position) {
 		install_grabs();
-		mouse_active = true;
 	}
 }
 
@@ -490,27 +492,27 @@ void HandleEvents( void )
 			break;
 
 		case MotionNotify:
-			if ( mouse_active )
+			if ( mouse_is_position )
+			{ // allow mouse movement on menus in windowed mode
+				mouse_diff_x = event.xmotion.x;
+				mouse_diff_y = event.xmotion.y;
+			}
+			else
 			{
 				if ( dgamouse )
 				{ // TODO: find documentation for DGA mouse, explain this
-					mx += (event.xmotion.x + (vidmode_active ? 0 : win_x)) * 2;
-					my += (event.xmotion.y + (vidmode_active ? 0 : win_y)) * 2;
+					mouse_diff_x += (event.xmotion.x + (vidmode_active ? 0 : win_x)) * 2;
+					mouse_diff_y += (event.xmotion.y + (vidmode_active ? 0 : win_y)) * 2;
 				}
 				else
 				{ // add the delta from the current position to the center
 					//  to the pointer motion accumulator
-					mx += ((int)event.xmotion.x - mwx);
-					my += ((int)event.xmotion.y - mwy);
+					mouse_diff_x += ((int)event.xmotion.x - mwx);
+					mouse_diff_y += ((int)event.xmotion.y - mwy);
 
 					// flag to recenter pointer
-					dowarp = (mx != 0 || my != 0 );
+					dowarp = (mouse_diff_x != 0 || mouse_diff_y != 0 );
 				}
-			}
-			else
-			{ // allow mouse movement on menus in windowed mode
-				mx = event.xmotion.x;
-				my = event.xmotion.y;
 			}
 			break;
 
@@ -911,7 +913,7 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 void GLimp_Shutdown( void )
 {
 	uninstall_grabs();
-	mouse_active = false;
+	mouse_is_position = true;
 	dgamouse = false;
 
 	if (dpy) {
