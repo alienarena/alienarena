@@ -32,7 +32,7 @@ cvar_t	*cvar_vars;
 Cvar_InfoValidate
 ============
 */
-static qboolean Cvar_InfoValidate (char *s)
+static qboolean Cvar_InfoValidate (const char *s)
 {
 	if (strstr (s, "\\"))
 		return false;
@@ -130,7 +130,7 @@ Cvar_Allocate
 Creates a new variable's record
 ============
 */
-inline static cvar_t *Cvar_Allocate(char *var_name, char *var_value, int flags, unsigned int hash_key)
+inline static cvar_t *Cvar_Allocate(const char *var_name, const char *var_value, int flags, unsigned int hash_key)
 {
 	cvar_t *nvar;
 
@@ -154,7 +154,7 @@ Cvar_AddBetween
 Adds a variable between two others.
 ============
 */
-inline static cvar_t *Cvar_AddBetween(char *var_name, char *var_value, int flags, unsigned int hash_key,cvar_t **prev, cvar_t *next)
+inline static cvar_t *Cvar_AddBetween(const char *var_name, const char *var_value, int flags, unsigned int hash_key,cvar_t **prev, cvar_t *next)
 {
 	cvar_t *nvar;
 
@@ -190,7 +190,7 @@ If the variable already exists, the value will not be set
 The flags will be or'ed in if the variable exists.
 ============
 */
-cvar_t *Cvar_Get (char *var_name, char *var_value, int flags)
+cvar_t *Cvar_Get (const char *var_name, const char *var_value, int flags)
 {
 	cvar_t		*var, **prev;
 	unsigned int	i, hash_key;

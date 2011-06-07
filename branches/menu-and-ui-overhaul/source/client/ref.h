@@ -22,6 +22,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "qcommon/qcommon.h"
 
+#ifdef	__cplusplus
+extern "C" {
+#endif //__cplusplus
+
 #define DIV254BY255 (0.9960784313725490196078431372549f)
 #define DIV255 (0.003921568627450980392156862745098f)
 #define DIV256 (0.00390625f)
@@ -104,9 +108,9 @@ typedef struct
 
 #define MAX_VBO_XYZs		65536
 
-vec3_t	vbo_shadow[MAX_VBO_XYZs];
-vec3_t	vbo_shadow2[MAX_VBO_XYZs];
-vec3_t	vbo_shadow3[MAX_VBO_XYZs];
+extern vec3_t	vbo_shadow[MAX_VBO_XYZs];
+extern vec3_t	vbo_shadow2[MAX_VBO_XYZs];
+extern vec3_t	vbo_shadow3[MAX_VBO_XYZs];
 
 typedef struct entity_s
 {
@@ -362,5 +366,9 @@ typedef struct RadarEnt_s{
 
 extern int numRadarEnts;
 extern RadarEnt_t RadarEnts[MAX_RADAR_ENTS];
+
+#ifdef	__cplusplus
+}
+#endif //__cplusplus
 
 #endif // __REF_H

@@ -22,6 +22,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #if !defined Q_COMMON_H_
 #define Q_COMMON_H_
 
+#ifdef	__cplusplus
+extern "C" {
+#endif //__cplusplus
+
+
 #include "game/q_shared.h"
 
 #if !defined VERSION
@@ -187,7 +192,7 @@ void COM_AddParm (char *parm);
 void COM_Init (void);
 void COM_InitArgv (int argc, char **argv);
 
-char *CopyString (char *in);
+char *CopyString (const char *in);
 
 //============================================================================
 
@@ -498,7 +503,7 @@ interface from being ambiguous.
 
 extern	cvar_t	*cvar_vars;
 
-cvar_t *Cvar_Get (char *var_name, char *value, int flags);
+cvar_t *Cvar_Get (const char *var_name, const char *value, int flags);
 // creates the variable if it doesn't exist, or returns the existing one
 // if it exists, the value will not be changed, but flags will be ORed in
 // that allows variables to be unarchived without needing bitflags
@@ -788,7 +793,7 @@ MISC
 
 void		Com_BeginRedirect (int target, char *buffer, int buffersize, void (*flush));
 void		Com_EndRedirect (void);
-void 		Com_Printf (char *fmt, ...);
+void 		Com_Printf (const char *fmt, ...);
 void 		Com_DPrintf (char *fmt, ...);
 void 		Com_Error (int code, char *fmt, ...);
 void 		Com_Quit (void);
@@ -878,6 +883,11 @@ void SCR_BeginLoadingPlaque (void);
 void SV_Init (void);
 void SV_Shutdown (char *finalmsg, qboolean reconnect);
 void SV_Frame (int msec);
+
+
+#ifdef	__cplusplus
+}
+#endif //__cplusplus
 
 #endif /* Q_COMMON_H_ */
 

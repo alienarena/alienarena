@@ -18,9 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-GAMELIBS = \
-	libgame.a \
-	librefgl-fnt.a
+GAMELIBS = libgame.a
 
 if USE_SYSTEM_LIBODE
 
@@ -41,10 +39,11 @@ endif
 # note: the -isystem option is for making #include <ode/ode.h> look in
 #  the build directory before the system directory.
 #
+AM_CPPFLAGS = -I $(top_srcdir)/source -I$(top_srcdir)/source/cpp
 if USE_SYSTEM_LIBODE
-AM_CPPFLAGS = -I $(top_srcdir)/source
+AM_CPPFLAGS +=
 else
-AM_CPPFLAGS = -I $(top_srcdir)/source -isystem $(top_srcdir)/source/unix
+AM_CPPFLAGS += -isystem $(top_srcdir)/source/unix
 endif
 
 # CPP flags for standard installation
@@ -75,7 +74,8 @@ crx_LDADD = $(GAMELIBS) \
 	$(DEPS_LIBS) \
 	$(ODE_LIBS) \
 	$(XXF86VM_LIBS) \
-	$(XXF86DGA_LIBS)
+	$(XXF86DGA_LIBS) \
+	-lstdc++
 
 else
 #
@@ -181,8 +181,6 @@ crx_SOURCES = \
 	ref_gl/r_bmfont.c \
 	ref_gl/r_bmfont.h \
 	ref_gl/r_draw.c \
-	ref_gl/r_engineaware.c \
-	ref_gl/r_engineaware.h \
 	ref_gl/r_image.c \
 	ref_gl/r_image.h \
 	ref_gl/r_iqm.h \
@@ -260,6 +258,20 @@ crx_SOURCES += \
 	win32/winquake.h \
 	win32/resource.h
 endif	
+
+#
+# C++ code
+#
+crx_SOURCES += \
+	cpp/com/list.h \
+	\
+	cpp/rgl/engineaware.h \
+	cpp/rgl/engineaware.cpp \
+	cpp/rgl/rectangle.h \
+	cpp/rgl/rectangle.cpp \
+	cpp/rgl/screen.h \
+	cpp/rgl/screen.cpp \
+	cpp/rgl_c.cpp
 
 # Dedicated Server sources (Unix only)
 crx_ded_SOURCES = \
@@ -346,32 +358,6 @@ libgame_a_SOURCES =  \
 	game/q_shared.c \
 	game/q_shared.h \
 	qcommon/qfiles.h
-
-#
-# Font rendering library
-#
-librefgl_fnt_a_CPPFLAGS = $(AM_CPPFLAGS) \
-	$(PTHREAD_CFLAGS) \
-	$(X11_CLAGS) \
-	$(DEPS_CFLAGS) \
-	$(XXF86VM_CFLAGS) \
-	$(XXF86DGA_CFLAGS)
-librefgl_fnt_a_SOURCES = \
-	ref_gl/fnt/bitmapface.c \
-	ref_gl/fnt/bitmapface.h \
-	ref_gl/fnt/bitmapfont.c \
-	ref_gl/fnt/bitmapfont.h \
-	ref_gl/fnt/font.c \
-	ref_gl/fnt/font.h \
-	ref_gl/fnt/fontface.c \
-	ref_gl/fnt/fontface.h \
-	ref_gl/fnt/renderingoperation.c \
-	ref_gl/fnt/renderingoperation.h \
-	ref_gl/fnt/renderingstep.h \
-	ref_gl/fnt/truetypeface.c \
-	ref_gl/fnt/truetypeface.h \
-	ref_gl/fnt/truetypefont.c \
-	ref_gl/fnt/truetypefont.h
 
 	
 #

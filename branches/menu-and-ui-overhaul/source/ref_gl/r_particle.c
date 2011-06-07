@@ -26,7 +26,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_local.h"
 
 particle_t gparticles[MAX_PARTICLES];
-int			num_gparticles;
+int num_gparticles;
+int r_numflares;
+flare_t r_flares[MAX_FLARES];
+
+vec3_t sun_origin;
+qboolean spacebox;
+qboolean draw_sun;
+float sun_x;
+float sun_y;
+float sun_size;
+
+int r_numgrasses;
+grass_t r_grasses[MAX_GRASSES];
+qboolean r_hasleaves;
+
+int r_numbeams;
+beam_t r_beams[MAX_BEAMS];
 
 /*
 ===============

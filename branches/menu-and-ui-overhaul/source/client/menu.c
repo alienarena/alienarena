@@ -48,8 +48,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 #endif
 
-#include "ref_gl/fnt/fontface.h"
-
 static int	m_main_cursor;
 
 extern void RS_LoadScript(char *script);
@@ -607,18 +605,6 @@ void M_Main_Draw (void)
 	else if(!strcmp(litname, "m_main_quit_sel"))
 		i = 7;
 	Draw_StretchPic( xoffset + 100*scale + (20*i*scale), (int)(ystart + m_main_cursor * 32.5*scale + 13*scale), w*scale, h*scale, litname );
-
-	// XXX Test XXX
-	OOL_Object face = FNT_FontFace_Get( "freesans" );
-	if ( face ) {
-		OOL_Object font = FNT_FontFace_GetFont( OOL_Cast( face , FNT_FontFace ) , 16 , false );
-		if ( font ) {
-			Com_Printf( "font loaded\n" );
-			OOL_Object_Destroy( font );
-		}
-	} else {
-		Com_Printf( "failed to load face\n");
-	}
 }
 
 typedef struct

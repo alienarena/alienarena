@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 image_t		*draw_chars;
 image_t		*menu_chars;
+int r_teamColor;
 
 extern	qboolean	scrap_dirty;
 extern cvar_t *con_font;

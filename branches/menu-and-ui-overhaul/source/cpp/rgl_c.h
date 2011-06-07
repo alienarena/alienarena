@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2010 COR Entertainment, LLC.
+Copyright (C) 2011 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -16,30 +16,29 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-
-#include "ref_gl/fnt/font"
-
-
-/** @defgroup refgl_fnt_bitmapfont Bitmap font
- * @ingroup refgl_fnt
- *
- * The FNT_BitmapFont class implements the loader and unloader for a bitmap
- * font.
+/** @file
+ * @brief C interfaces for RGL C++ code
  */
-class FNT_BitmapFont : FNT_Font
-{
-public:
+#ifndef __H_CPP_RGLC
+#define __H_CPP_RGLC
 
-	/** @brief Bitmap font loader
-	 *
-	 * The bitmap font loader generates the GL lists and initialises the
-	 * font's information. It fails if the GL lists cannot be allocated.
-	 */
-	virtual void Load( );
+#include "qcommon/qcommon.h"
 
-	/** @brief Bitmap font unloader
-	 *
-	 * The unloader for bitmap fonts simply clears the GL lists.
-	 */
-	virtual void Unload( );
-};
+#ifdef	__cplusplus
+extern "C" {
+#endif //__cplusplus
+
+
+/** @brief Set the status of engine-aware objects
+ *
+ * @param status whether the renderer is starting (true) or being shut down
+ *	(false)
+ */
+extern void RGL_EngineAware_SetStatus( qboolean status );
+
+
+#ifdef	__cplusplus
+}
+#endif //__cplusplus
+
+#endif //__H_CPP_RGLC

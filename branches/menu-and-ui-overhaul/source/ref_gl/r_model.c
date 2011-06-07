@@ -56,6 +56,10 @@ char		map_entitystring[MAX_MAP_ENTSTRING];
 int			numentitychars;
 byte	*mod_base;
 
+worldLight_t r_worldLights[MAX_LIGHTS];
+int r_numWorldLights;
+sunLight_t *r_sunLight;
+
 /*
 =================
 Mod_LoadEntityString

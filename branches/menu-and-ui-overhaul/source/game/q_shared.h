@@ -33,6 +33,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <ctype.h>
 
+#ifdef	__cplusplus
+extern "C" {
+#endif //__cplusplus
+
 typedef unsigned char 		byte;
 
 // TODO: check for implementation defined boolean
@@ -260,9 +264,7 @@ char *Com_ParseExt (char **data_p, qboolean allowNewLines);
 char *Com_SkipWhiteSpace (char *data_p, qboolean *hasNewLines);
 void Com_SkipRestOfLine (char **data_p);
 
-int com_parseLine;
-
-void Com_sprintf (char *dest, int size, char *fmt, ...);
+void Com_sprintf (char *dest, int size, const char *fmt, ...);
 
 void Com_PageInMemory (byte *buffer, int size);
 
@@ -342,7 +344,7 @@ void	Sys_FindClose (void);
 
 // this is only here so the functions in q_shared.c and q_shwin.c can link
 void Sys_Error (char *error, ...);
-void Com_Printf (char *msg, ...);
+void Com_Printf (const char *msg, ...);
 
 /*
 ==========================================================
@@ -984,5 +986,9 @@ typedef struct
 //unlagged - lag simulation #2
 #define MAX_LATENT_CMDS 64
 //unlagged - lag simulation #2
+
+#ifdef	__cplusplus
+}
+#endif //__cplusplus
 
 #endif  /* Q_SHARED_H_ */

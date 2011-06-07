@@ -29,6 +29,10 @@ GLuint vboId = 0;
 int	vboPosition;
 int	totalVBObufferSize;
 
+vec3_t	vbo_shadow[MAX_VBO_XYZs];
+vec3_t	vbo_shadow2[MAX_VBO_XYZs];
+vec3_t	vbo_shadow3[MAX_VBO_XYZs];
+
 GLvoid			(APIENTRY * qglBindBufferARB)(GLenum target, GLuint buffer);
 GLvoid			(APIENTRY * qglDeleteBuffersARB)(GLsizei n, const GLuint *buffers);
 GLvoid			(APIENTRY * qglGenBuffersARB)(GLsizei n, GLuint *buffers);

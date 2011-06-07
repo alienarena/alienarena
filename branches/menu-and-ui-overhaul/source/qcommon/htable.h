@@ -24,6 +24,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "game/q_shared.h"
 
 
+#ifdef	__cplusplus
+extern "C" {
+#endif //__cplusplus
+
 
 /*=============================================*
  * Hash table types                            *
@@ -175,6 +179,10 @@ void HT_Apply(
 		void *		data
 	);
 
+
+#ifdef	__cplusplus
+}
+#endif //__cplusplus
 
 
 #endif // __H_HASHTABLE

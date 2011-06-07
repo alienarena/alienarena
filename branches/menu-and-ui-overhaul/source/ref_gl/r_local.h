@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef __H_REF_GL_R_LOCAL
 #define __H_REF_GL_R_LOCAL
 
+
 #if defined WIN32_VARIANT
 #  include <windows.h>
 #endif
@@ -73,6 +74,11 @@ typedef enum
 } rserr_t;
 
 #include "r_model.h"
+
+#ifdef	__cplusplus
+extern "C" {
+#endif //__cplusplus
+
 
 extern float	r_frametime;
 
@@ -302,35 +308,35 @@ extern void R_BloomBlend( refdef_t *fd );
 extern void R_InitBloomTextures( void );
 
 //Flares and Sun
-int r_numflares;
+extern int r_numflares;
 extern int c_flares;
-flare_t r_flares[MAX_FLARES];
+extern flare_t r_flares[MAX_FLARES];
 extern void Mod_AddFlareSurface (msurface_t *surf, int type );
 extern void R_RenderFlares (void);
 extern void R_ClearFlares(void);
 
-vec3_t sun_origin;
-qboolean spacebox;
-qboolean draw_sun;
-float sun_x;
-float sun_y;
-float sun_size;
+extern vec3_t sun_origin;
+extern qboolean spacebox;
+extern qboolean draw_sun;
+extern float sun_x;
+extern float sun_y;
+extern float sun_size;
 extern void R_InitSun();
 extern void R_RenderSun();
 
 //Vegetation
-int r_numgrasses;
+extern int r_numgrasses;
 extern int c_grasses;
-grass_t r_grasses[MAX_GRASSES];
-qboolean r_hasleaves;
+extern grass_t r_grasses[MAX_GRASSES];
+extern qboolean r_hasleaves;
 extern void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type);
 extern void R_DrawVegetationSurface (void);
 extern void R_ClearGrasses(void);
 
 //Light beams/volumes
-int r_numbeams;
+extern int r_numbeams;
 extern int c_beams;
-beam_t r_beams[MAX_BEAMS];
+extern beam_t r_beams[MAX_BEAMS];
 extern void Mod_AddBeamSurface (msurface_t *surf, int texnum, vec3_t color, float size, char name[MAX_QPATH], int type, float xang, float yang,
 	qboolean rotating);
 extern void R_DrawBeamSurface ( void );
@@ -340,7 +346,7 @@ extern void R_ClearBeams(void);
 extern float	scr_playericonalpha;
 
 //Team colors
-int r_teamColor;
+extern int r_teamColor;
 
 extern void	Draw_GetPicSize (int *w, int *h, char *name);
 extern void	Draw_Pic (int x, int y, char *name);
@@ -575,7 +581,7 @@ extern void		R_DrawDynamicCaster(void);
 extern void		R_DrawVegetationCaster(void);
 extern void		R_CastShadow(void);
 extern float	SHD_ShadowLight (vec3_t pos, vec3_t angles, vec3_t lightAdd, int type);
-int				FB_texture_width, FB_texture_height;
+extern int				FB_texture_width, FB_texture_height;
 
 //shader programs
 extern void R_LoadARBPrograms(void);
@@ -664,8 +670,8 @@ extern int		model_dlights_num;
 extern m_dlight_t model_dlights[128];
 extern image_t	*r_mirrortexture;
 extern cvar_t	*cl_gun;
-vec3_t lightPosition;
-float  dynFactor;
+extern vec3_t lightPosition;
+extern float  dynFactor;
 extern void		R_GetLightVals(vec3_t origin, qboolean RagDoll, qboolean dynamic);
 extern void R_ModelViewTransform(const vec3_t in, vec3_t out);
 extern void GL_BlendFunction (GLenum sfactor, GLenum dfactor);
@@ -685,8 +691,8 @@ extern void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, i
 extern void IQM_DrawShadow(vec3_t origin);
 
 //Ragdoll
-int r_DrawingRagDoll;
-int r_SurfaceCount;
+extern int r_DrawingRagDoll;
+extern int r_SurfaceCount;
 
 #define TURBSCALE2 (256.0 / (2 * M_PI))
 
@@ -710,6 +716,10 @@ extern rserr_t    	GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode,
 extern void		GLimp_AppActivate( qboolean active );
 extern void		GLimp_EnableLogging( qboolean enable );
 extern void		GLimp_LogNewFrame( void );
+
+#ifdef	__cplusplus
+}
+#endif //__cplusplus
 
 /*
 ====================================================================

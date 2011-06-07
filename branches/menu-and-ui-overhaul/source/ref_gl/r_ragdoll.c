@@ -44,6 +44,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 cvar_t *r_ragdolls;
 cvar_t *r_ragdoll_debug;
 
+int r_DrawingRagDoll;
+int r_SurfaceCount;
+
 vec3_t rightAxis, leftAxis, upAxis, downAxis, bkwdAxis, fwdAxis;
 
 signed int sign(signed int x)

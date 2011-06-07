@@ -49,6 +49,8 @@ static vec4_t TangentsArray[MAX_VERTICES];
 extern	vec3_t	lightspot;
 vec3_t	shadevector;
 float	shadelight[3];
+vec3_t lightPosition;
+float  dynFactor;
 
 #define MAX_MODEL_DLIGHTS 128
 m_dlight_t model_dlights[MAX_MODEL_DLIGHTS];

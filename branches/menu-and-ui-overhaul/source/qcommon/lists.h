@@ -61,6 +61,14 @@ static inline void LST_Init( struct LST_item_s * item )
 	item->previous = item->next = item;
 }
 
+/** @brief Initialise a list item (static)
+ *
+ * This macro encapsulates #LST_Init() for use with static values.
+ *
+ * @param item the item
+ */
+#define SLST_Init(item) LST_Init( &( item ) )
+
 
 /** @brief Insert an item
  *
@@ -76,6 +84,16 @@ static inline void LST_Insert( struct LST_item_s * base , struct LST_item_s * it
 	item->previous = base;
 	item->next->previous = base->next = item;
 }
+
+
+/** @brief Insert an item (static)
+ *
+ * This macro encapsulates #LST_Insert() for use with static values.
+ *
+ * @param base the item after which the insertion will take place
+ * @param item the item to insert
+ */
+#define SLST_Insert(base,item) LST_Insert( &(base) , &(item) )
 
 
 /** @brief Append an item
@@ -95,6 +113,16 @@ static inline void LST_Append( struct LST_item_s * base , struct LST_item_s * it
 }
 
 
+/** @brief Append an item (static)
+ *
+ * This macro encapsulates #LST_Append() for use with static values.
+ *
+ * @param base the item before which the insertion will take place
+ * @param item the item to insert
+ */
+#define SLST_Append(base,item) LST_Append( &(base) , &(item) )
+
+
 /** @brief Remove an item
  *
  * Remove a list item from the list it is in.
@@ -107,6 +135,15 @@ static inline void LST_Remove( struct LST_item_s * item )
 	item->next->previous = item->previous;
 	item->next = item->previous = item;
 }
+
+
+/** @brief Remove an item (static)
+ *
+ * This macro encapsulates #LST_Remove() for use with static values.
+ *
+ * @param item the item to remove
+ */
+#define SLST_Remove(item) LST_Remove( &( item ) )
 
 
 /** @brief Remove the first item from a list and return it
@@ -127,6 +164,16 @@ static inline struct LST_item_s * LST_TakeFirst( struct LST_item_s * list )
 	LST_Remove( f = list->next );
 	return f;
 }
+
+/** @brief Remove the first item from a list and return it (static)
+ *
+ * This macro encapsulates #LST_TakeFirst() for use with static values.
+ *
+ * @param the list's sentry
+ * @returns a pointer to list entry that was removed, or NULL if the list was
+ * empty
+ */
+#define SLST_TakeFirst(item) LST_TakeFirst( &( item ) )
 
 
 /** @brief Remove the first item from a list
@@ -180,7 +227,35 @@ static inline void * LST_GetPrevious( struct LST_item_s * head , struct LST_item
  * @return true if the list is empty, false otherwise
  */
 #define LST_IsEmpty(list) \
-	( list->next == list )
+	( (list)->next == (list) )
+
+
+/** @brief Check whether a list is empty (static)
+ *
+ * @param the list's head
+ *
+ * @return true if the list is empty, false otherwise
+ */
+#define SLST_IsEmpty(list) \
+	( (list).next == &(list) )
+
+
+/** @brief Move all items from a list at the head of another
+ *
+ * @param dest the head of the destination list
+ * @param src the head of the source list; it must not be empty
+ */
+static inline void LST_InsertList( struct LST_item_s * dest ,
+		struct LST_item_s * src )
+{
+	src->next->previous = dest;
+	src->previous->next = dest->next;
+	dest->next->previous = src->previous;
+	dest->next = src->next;
+	LST_Init( src );
+}
+
+#define SLST_InsertList(dest,src) LST_InsertList( &( dest ) , &( src ) )
 
 
 /** @brief Iterate over a list's items

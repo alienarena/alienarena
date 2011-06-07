@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2010 COR Entertainment, LLC.
+Copyright (C) 2011 COR Entertainment, LLC.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -16,66 +16,66 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-
-#include "qcommon/objects"
-
-/** @defgroup refgl_engineaware Engine-aware objects
- * @ingroup refgl
- *
- * This abstract class is used to create objects which are kept informed of
- * the rendering engine's initialisation and shutdown. A list of all
- * such objects is kept and their OnVidStart()/OnVidStop() methods are called
- * as necessary.
+/** @file
+ * @brief RGL::EngineAware class declarations
  */
-class R_EngineAware
+#ifndef __H_CPP_RGL_ENGINEAWARE
+#define __H_CPP_RGL_ENGINEAWARE
+
+
+#include "com/list.h"
+
+namespace RGL {
+
+/** @brief Objects aware of the rendering engine's state
+ *
+ * Objects that inherit this abstract class will be kept informed of the state
+ * of the game's rendering engine.
+ * The class provides two abstract method, which will be called automatically
+ * for all known instances, when the engine is initialised or shut down.
+ */
+class EngineAware
 {
+private:
 	/** @brief List of all engine-aware objects
 	 *
 	 * List head for the list of all engine-aware objects; it is updated
 	 * as objects are created and destroyed, and used by SetStatus() to
 	 * call the appropriate handlers.
 	 */
-	static struct LST_item_s ea_objects = { NULL , NULL };
+	static LST_item_s ea_objects;
 
 	/** @brief Current engine status */
-	static qboolean renderer_status = false;
+	static bool renderer_status;
 
 	/** @brief List entry
 	 *
 	 * This field is used to store an engine-aware object's list data.
 	 */
-	struct LST_item_s eal_item;
+	struct COM::List<EngineAware> eal_item;
 
 public:
 	/** @brief Add the instance to the list of engine-aware objects
 	 *
 	 * The newly created instance is added to the list of engine-aware
-	 * objects so that calls to @link R_EngineAware_SetStatus
-	 * R_EngineAware::SetStatus @endlink will affect it.
-	 *
-	 * @param object the newly created instance
+	 * objects so that calls to EngineAware::SetStatus() will affect it.
 	 */
-	virtual void PrepareInstance( );
+	EngineAware( );
 
-	/** @brief Call the renderer start handler if necessary
+	/** @brief Remove the object from the list
 	 *
-	 * When the object is being initialised, the renderer start handler
-	 * will be called automatically if the renderer is already started.
-	 *
-	 * @param object the object being initialised
+	 * Remove the object from the list of engine-aware objects.
 	 */
-	virtual void Initialise( );
+	virtual ~EngineAware( );
 
-	/** @brief Remove the object from the list and call stop handler
+protected:
+	/** @brief Check if the renderer is active
 	 *
-	 * If the renderer is currently active, the destructor will call the
-	 * renderer stop handler. It will then remove the object from the list
-	 * of engine-aware objects.
-	 *
-	 * @param object the object being destroyed.
+	 * @return true if the renderer is active, false if it isn't.
 	 */
-	virtual void Destroy( );
+	static bool IsRendererActive( );
 
+public:
 	/** @brief Rendering engine start handler */
 	virtual void OnRendererStart( ) = 0;
 
@@ -90,6 +90,16 @@ public:
 	 * @param status true if the engine is starting, false if it is being
 	 * shut down.
 	 */
-	static void SetStatus( qboolean status );
-	
+	static void SetStatus( bool status );
 };
+
+
+inline bool EngineAware::IsRendererActive( )
+{
+	return EngineAware::renderer_status;
+}
+
+
+};
+
+#endif //__H_CPP_RGL_ENGINEAWARE

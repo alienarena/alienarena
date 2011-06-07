@@ -31,6 +31,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+#ifdef	__cplusplus
+extern "C" {
+#endif //__cplusplus
+
 typedef enum 
 {
 	it_skin,
@@ -125,3 +129,7 @@ extern image_t		*sun2_object;
 
 extern	image_t		*r_radarmap;
 extern	image_t		*r_around;
+
+#ifdef	__cplusplus
+}
+#endif //__cplusplus

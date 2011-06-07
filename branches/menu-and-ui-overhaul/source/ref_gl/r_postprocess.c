@@ -40,6 +40,7 @@ int r_drawing_fbeffect;
 int	r_fbFxType;
 float r_fbeffectTime;
 int frames;
+int FB_texture_width, FB_texture_height;
 
 void R_GLSLPostProcess(void)
 {

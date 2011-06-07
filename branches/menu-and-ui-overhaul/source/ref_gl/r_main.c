@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_script.h"
 #include "r_ragdoll.h"
 #include "r_text.h"
+#include "rgl_c.h"
 
 void R_Clear (void);
 
@@ -1540,6 +1541,9 @@ int R_Init( void *hinstance, void *hWnd )
 		return -1;
 	}
 
+	// Engine-aware objects
+	RGL_EngineAware_SetStatus( true );
+
 	VID_MenuInit();
 
 	/*
@@ -1749,6 +1753,9 @@ void R_Shutdown (void)
 	R_VCShutdown();
 
 	Mod_FreeAll ();
+
+	// Engine-aware objects
+	RGL_EngineAware_SetStatus( false );
 
 	FNT_Shutdown( );
 	GL_ShutdownImages ();
