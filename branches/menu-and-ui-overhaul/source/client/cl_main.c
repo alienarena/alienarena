@@ -2046,6 +2046,13 @@ void CL_Frame( int msec )
 	qboolean render_trigger;
 	qboolean packet_trigger;
 
+	if ( dedicated->integer )
+	{ 
+		// 2011-06-03 Big OOPs!
+		// crx running as dedicated server crashes without this.
+		return;
+	}
+
 	cls.realtime  = curtime; // time at start of Qcommon_Frame()
 	cls.frametime = 0.0f;    // zero here for debug purposes, set below
 	cl.time += msec; // clamped to [cl.frame.servertime-100,cl.frame.servertime]
