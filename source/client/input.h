@@ -28,7 +28,9 @@ void IN_Commands (void);
 
 void IN_Frame (void);
 
+// add movement from mouse on top of the keyboard move cmd
 void IN_Move (usercmd_t *cmd);
-// add additional movement on top of the keyboard move cmd
+// add movement from joystick on top of the keyboard and mouse move cmd
+void IN_JoyMove (usercmd_t *cmd);
 
 void IN_Activate (qboolean active);

@@ -399,6 +399,7 @@ usercmd_t CL_CreateCmd (void)
 
 	// allow mice or other external controllers to add to the move
 	IN_Move (&cmd);
+	IN_JoyMove (&cmd);
 
 	CL_FinishMove (&cmd);
 
@@ -554,3 +555,134 @@ void CL_SendCmd (void)
 }
 
 
+#if defined WIN32_VARIANT
+# define OS_MENU_MOUSESCALE 0.35
+#else
+# if defined UNIX_VARIANT
+#  define OS_MENU_MOUSESCALE 0.1
+# else
+#  define OS_MENU_MOUSESCALE 1
+# endif
+#endif
+
+
+qboolean mouse_available = false;
+qboolean mouse_is_position = false;
+qboolean mlooking = false;
+int mouse_diff_x = 0;
+int mouse_diff_y = 0;
+int mouse_odiff_x = 0;
+int mouse_odiff_y = 0;
+cursor_t cursor;
+
+
+void IN_MLookDown (void)
+{
+	mlooking = true;
+}
+
+void IN_MLookUp (void)
+{
+	mlooking = false;
+	if (!freelook->integer && lookspring->integer) {
+		IN_CenterView ();
+	}
+}
+
+static void IN_MoveMenuMouse( int x , int y )
+{
+	cursor.oldx = cursor.x;
+	cursor.oldy = cursor.y;
+
+	// Clip cursor location to window
+	if ( x < 0 ) {
+		x = 0;
+	} else if ( x > viddef.width ) {
+		x = viddef.width;
+	}
+	if ( y < 0 ) {
+		y = 0;
+	} else if ( y > viddef.height ) {
+		y = viddef.height;
+	}
+
+	cursor.x = x;
+	cursor.y = y;
+	cursor.mouseaction = cursor.x != cursor.oldx
+		|| cursor.y != cursor.oldy;
+
+	M_Think_MouseCursor();
+}
+
+void IN_Move (usercmd_t *cmd)
+{
+	float fmx;
+	float fmy;
+	float adjust;
+
+	if ( ! mouse_available ) {
+		return;
+	}
+
+	// If we have a position instead of a diff, don't go through
+	// the normal process. Instead, update the menu's cursor
+	// as necessary, and bail out.
+	if ( mouse_is_position ) {
+		if ( cls.key_dest == key_menu ) {
+			IN_MoveMenuMouse( mouse_diff_x , mouse_diff_y );
+		}
+		return;
+	}
+
+	// Apply interpolation with previous value if necessary
+	fmx = (float) mouse_diff_x;
+	fmy = (float) mouse_diff_y;
+	if ( m_filter->integer ) {
+		fmx = ( fmx + mouse_odiff_x ) * 0.5f;
+		fmy = ( fmy + mouse_odiff_y ) * 0.5f;
+	}
+	mouse_odiff_x = mouse_diff_x;
+	mouse_odiff_y = mouse_diff_y;
+	mouse_diff_x = mouse_diff_y = 0;
+
+	// No mouse in console
+	if ( cls.key_dest == key_console ) {
+		return;
+	}
+
+	// Compute adjustments
+	adjust = 1.0;
+	if ( m_smoothing->value ) {
+		// reduce sensitivity when frames per sec is below maximum
+		// setting by multiplying by:
+		//	current measured fps / cvar set maximum fps
+		adjust /= cls.frametime * cl_maxfps->value;
+	}
+
+	// Update menu cursor location
+	if ( cls.key_dest == key_menu ) {
+		adjust *= menu_sensitivity->value * OS_MENU_MOUSESCALE;
+		IN_MoveMenuMouse( cursor.x + fmx * adjust ,
+				cursor.y + fmy * adjust );
+		return;
+	}
+
+	// Game mouse
+	adjust *= sensitivity->value;
+	fmx *= adjust;
+	fmy *= adjust;
+
+	// Add mouse X/Y movement to cmd
+	if ( ( lookstrafe->integer && mlooking ) || ( in_strafe.state & 1 ) ) {
+		cmd->sidemove += (short)( ( m_side->value * fmx ) + 0.5f );
+	} else {
+		cl.viewangles[ YAW ] -= m_yaw->value * fmx;
+	}
+
+	if ( ( mlooking || freelook->integer ) && !( in_strafe.state & 1 ) ) {
+		cl.viewangles[ PITCH ] += m_pitch->value * fmy;
+	} else {
+		cmd->forwardmove -= (short)( ( m_forward->value * fmy )
+				+ 0.5f );
+	}
+}

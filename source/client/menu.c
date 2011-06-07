@@ -759,8 +759,6 @@ void CheckMainMenuMouse (void)
 		hover_time = 1;
 	}
 
-	cursor.mouseaction = false;
-
 	if ( sound )
 		S_StartLocalSound( sound );
 }

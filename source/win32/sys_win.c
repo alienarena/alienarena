@@ -55,6 +55,11 @@ extern void *GetGameAPI ( void *import);
 
 extern void Q_strncpyz( char *dest, const char *src, size_t size );
 
+extern int window_center_x, window_center_y;
+extern qboolean mouse_available;
+extern int mouse_diff_x;
+extern int mouse_diff_y;
+
 static HANDLE		qwclsemaphore;
 
 #define	MAX_NUM_ARGVS	128
@@ -734,15 +739,24 @@ Send Key_Event calls
 */
 void Sys_SendKeyEvents (void)
 {
-    MSG        msg;
+	MSG        msg;
+	POINT      current_pos;
 
 	while (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
 	{
 		if (!GetMessage (&msg, NULL, 0, 0))
 			Sys_Quit ();
 		sys_msg_time = msg.time;
-      	TranslateMessage (&msg);
-      	DispatchMessage (&msg);
+		TranslateMessage (&msg);
+		DispatchMessage (&msg);
+	}
+
+	if ( mouse_available && GetCursorPos( &current_pos) ) {
+		mouse_diff_x = current_pos.x - window_center_x;
+		mouse_diff_y = current_pos.y - window_center_y;
+		if ( mouse_diff_x || mouse_diff_y ) {
+			SetCursorPos( window_center_x, window_center_y );
+		}
 	}
 
 	// grab frame time

@@ -254,6 +254,7 @@ extern client_static_t	cls;
 //
 extern	cvar_t	*cl_stereo_separation;
 extern	cvar_t	*cl_stereo;
+extern	cvar_t	*cl_maxfps;
 
 extern	cvar_t	*cl_gun;
 extern	cvar_t	*cl_add_blend;
@@ -297,6 +298,7 @@ extern	cvar_t	*sensitivity;
 extern  cvar_t  *menu_sensitivity;
 
 extern	cvar_t	*m_smoothing;
+extern	cvar_t	*m_filter;
 extern	cvar_t	*m_pitch;
 extern	cvar_t	*m_yaw;
 extern	cvar_t	*m_forward;
@@ -527,6 +529,11 @@ void IN_CenterView (void);
 
 float CL_KeyState (kbutton_t *key);
 char *Key_KeynumToString (int keynum);
+
+extern qboolean mouse_available;
+
+void IN_MLookDown (void);
+void IN_MLookUp (void);
 
 //cl_irc.c
 void CL_IRCSetup(void);
