@@ -366,6 +366,7 @@ typedef struct RadarEnt_s{
 
 extern int numRadarEnts;
 extern RadarEnt_t RadarEnts[MAX_RADAR_ENTS];
+extern cursor_t cursor;
 
 #ifdef	__cplusplus
 }

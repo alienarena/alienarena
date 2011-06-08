@@ -569,6 +569,7 @@ extern	cvar_t	*needpass;
 extern	cvar_t	*g_select_empty;
 extern	cvar_t	*g_dedicated;
 extern	cvar_t	*motdfile;
+extern	cvar_t	*motdforce;
 
 extern	cvar_t	*filterban;
 
@@ -1137,6 +1138,14 @@ struct gclient_s
 	qboolean	showinventory;		// set layout stat
 	qboolean	showhelp;
 	qboolean	showhelpicon;
+
+	/** @brief "Message of the day" frames left
+	 *
+	 * Prevent centerprinting until the MOTD has been displayed
+	 * for some time. This makes sure players can actually read
+	 * the MOTD.
+	 */
+	int		motd_frames;
 
 	//stuff for bots
 	qboolean	is_bot;

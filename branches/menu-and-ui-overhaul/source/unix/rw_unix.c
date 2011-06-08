@@ -24,31 +24,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "client/client.h"
 
-extern int mx, my;
-extern qboolean mouse_active;
-extern cursor_t cursor;
-static qboolean	mouse_avail;
-static int old_mouse_x, old_mouse_y;
-
-static qboolean	mlooking;
 
 cvar_t	*m_filter;
 cvar_t	*in_mouse;
 cvar_t	*in_dgamouse;
 cvar_t	*in_joystick;
 cvar_t	*m_accel;
-
-void IN_MLookDown (void)
-{
-	mlooking = true;
-}
-
-void IN_MLookUp (void)
-{
-	mlooking = false;
-	if (!freelook->integer && lookspring->integer)
-	IN_CenterView ();
-}
 
 void IN_Init(void)
 {
@@ -62,8 +43,7 @@ void IN_Init(void)
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
 
-	mx = my = 0.0;
-	mouse_avail = true;
+	mouse_available = true;
 
 	// Knightmare- added Psychospaz's menu mouse support
 	refreshCursorMenu();
@@ -72,12 +52,12 @@ void IN_Init(void)
 
 void IN_Shutdown(void)
 {
-	if (!mouse_avail)
+	if (!mouse_available)
 		return;
 
 	IN_Activate(false);
 
-	mouse_avail = false;
+	mouse_available = false;
 
 	Cmd_RemoveCommand ("+mlook");
 	Cmd_RemoveCommand ("-mlook");
@@ -93,102 +73,10 @@ void IN_Commands (void)
 {
 }
 
-/*
-===========
-IN_Move
-===========
-*/
-void IN_Move (usercmd_t *cmd)
-{
-	float fmx;
-	float fmy;
-
-	if (!mouse_avail)
-		return;
-
-	fmx = (float)mx;
-	fmy = (float)my;
-
-	if (m_filter->integer)
-	{
-		fmx = (fmx + (float)old_mouse_x) * 0.5f;
-		fmy = (fmy + (float)old_mouse_y) * 0.5f;
-	}
-
-	old_mouse_x = mx;
-	old_mouse_y = my;
-
-	//now to set the menu cursor
-	if (cls.key_dest == key_menu)
-	{
-		cursor.oldx = cursor.x;
-		cursor.oldy = cursor.y;
-
-		if ( mouse_active )
-		{
-			cursor.x += (int)((fmx * menu_sensitivity->value/10) + 0.5f);
-			cursor.y += (int)((fmy * menu_sensitivity->value/10) + 0.5f);
-			mx = my = 0;
-		}
-		else
-		{
-			cursor.x = (int)(fmx + 0.5f);
-			cursor.y = (int)(fmy + 0.5f);
-		}
-
-		if (cursor.x!=cursor.oldx || cursor.y!=cursor.oldy)
-			cursor.mouseaction = true;
-
-		if (cursor.x < 0)
-			cursor.x = 0;
-		else if (cursor.x > viddef.width)
-			cursor.x = viddef.width;
-		if (cursor.y < 0)
-			cursor.y = 0;
-		else if (cursor.y > viddef.height)
-		       	cursor.y = viddef.height;
-		M_Think_MouseCursor();
-		return;
-	}
-
-	if (cls.key_dest != key_console)
-	{ // game mouse. don't do mouse movement when in console
-
-		if ( m_smoothing->value )
-		{   // reduce sensitivity when frames per sec is below maximum setting
-			// cvar mouse sensitivity * ( current measured fps / cvar set maximum fps )
-			float adjustment;
-			extern cvar_t* cl_maxfps;
-			adjustment = sensitivity->value / (cls.frametime * cl_maxfps->value);
-			fmx *= adjustment;
-			fmy *= adjustment;
-		}
-		else
-		{
-			fmx *= sensitivity->value;
-			fmy *= sensitivity->value;
-		}
-
-		// add mouse X/Y movement to cmd
-		if ((in_strafe.state & 1) || (lookstrafe->integer && mlooking))
-			cmd->sidemove += (short)((m_side->value * fmx) + 0.5f);
-		else
-			cl.viewangles[YAW] -= m_yaw->value * fmx;
-
-		//if ((mlooking || freelook->integer) && !(in_strafe.state & 1))
-		if ((mlooking || freelook->value) && !(in_strafe.state & 1))
-			cl.viewangles[PITCH] += m_pitch->value * fmy;
-		else
-			cmd->forwardmove -= (short)((m_forward->value * fmy) + 0.5f);
-
-		mx = my = 0;
-	}
-
-}
 
 void IN_Frame (void)
 {
-	if (!mouse_avail)
+	if (!mouse_available)
 		return;
 
 	if ( !cl.refresh_prepped || cls.key_dest == key_console || cls.key_dest == key_menu)
@@ -198,3 +86,8 @@ void IN_Frame (void)
 
 }
 
+
+void IN_JoyMove (usercmd_t *cmd)
+{
+	// No joystick support for Linux
+}
