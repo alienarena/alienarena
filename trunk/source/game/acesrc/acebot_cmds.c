@@ -207,6 +207,12 @@ void safe_centerprintf (edict_t *ent, char *fmt, ...)
 	if (!ent->inuse || ent->is_bot)
 		return;
 
+	// If the MOTD was displayed and is being "protected" from overwrite,
+	// ignore the call.
+	if ( ent->client && ent->client->motd_frames ) {
+		return;
+	}
+
 	va_start (argptr,fmt);
 	len = vsnprintf (bigbuffer,sizeof(bigbuffer),fmt,argptr);
 	va_end (argptr);

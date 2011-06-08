@@ -133,6 +133,14 @@ cvar_t	*g_select_empty;
 cvar_t	*g_dedicated;
 cvar_t	*motdfile;
 
+/** @brief CVar that forces MOTD display
+ *
+ * This CVar should contain an integer, which will indicate how client frames
+ * the MOTD should be forced on for. If it is 0, then the MOTD will not be
+ * forced on.
+ */
+cvar_t	*motdforce;
+
 cvar_t	*filterban;
 
 cvar_t	*sv_maxvelocity;

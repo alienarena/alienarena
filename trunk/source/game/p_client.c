@@ -1995,6 +1995,56 @@ void MoveClientsDownQueue(edict_t *ent)
 		ent->client->pers.queue = 0;
 }
 
+
+#define MAX_MOTD_SIZE	500
+
+/** @brief Read the MOTD file and send it to the client
+ *
+ * Try to open the MOTD file (first from the CVar setting, then from the
+ * default location). If it is found, read it and send it to the client.
+ *
+ * @param ent the entity to send to
+ *
+ * @return true if the message was found and sent
+ */
+static qboolean SendMessageOfTheDay( edict_t * ent )
+{
+	FILE		*file;
+	char		name[ MAX_OSPATH ];
+	qboolean	found;
+	int		size;
+	char		motd[ MAX_MOTD_SIZE ];
+
+	found = false;
+	if ( motdfile && motdfile->string && motdfile->string[0] ) {
+		// look for custom message of the day file
+		found = gi.FullPath( name, sizeof( name ),
+				motdfile->string );
+	}
+	if ( !found ) {
+		// look for default message of the day file
+		found = gi.FullPath( name, sizeof( name ), "motd.txt" );
+	}
+	if ( !found || (file = fopen( name, "rb" )) == NULL ) {
+		// No MOTD at all, or we can't read it
+		return false;
+	}
+
+	// We successfully opened the file "motd.txt" - read it and close it
+	size = fread( motd , 1 , MAX_MOTD_SIZE - 1 , file );
+	fclose( file );
+
+	// Make sure what we read is NULL-terminated
+	motd[ size ] = 0;
+
+	// If the file did contain data, print to the client
+	if ( size ) {
+		gi.centerprintf( ent , motd );
+	}
+	return ( size > 0 );
+}
+
+
 /*
 =====================
 ClientBeginDeathmatch
@@ -2005,13 +2055,6 @@ deathmatch mode, so clear everything out before starting them.
 */
 void ClientBeginDeathmatch (edict_t *ent)
 {
-
-	FILE	*motd_file;
-	char	motd_file_name[MAX_OSPATH];
-	qboolean motd_found;
-	char	line[80];
-	char	motd[500];
-
 	G_InitEdict (ent);
 
 	InitClientResp (ent->client);
@@ -2058,36 +2101,11 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	safe_bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
 
-	// get the name for the MOTD file
-	motd_found = false;
-	if ( motdfile && motdfile->string && motdfile->string[0] )
-	{ // look for custom message of the day file
-		motd_found = gi.FullPath( motd_file_name, sizeof( motd_file_name ), motdfile->string );
-	}
-	if ( !motd_found )
-	{ // look for default message of the day file
-		motd_found = gi.FullPath( motd_file_name, sizeof( motd_file_name ), "motd.txt" );
-	}
-	if ( motd_found && (motd_file = fopen(motd_file_name, "rb")) != NULL )
-	{
-		// we successfully opened the file "motd.txt"
-		if ( fgets(motd, 500, motd_file) )
-		{
-			// we successfully read a line from "motd.txt" into motd
-			// ... read the remaining lines now
-			while ( fgets(line, 80, motd_file) )
-			{
-				// add each new line to motd, to create a BIG message string.
-				// we are using strcat: STRing conCATenation function here.
-				strcat(motd, line);
-			}
-
-			// print our message.
-			gi.centerprintf (ent, motd);
-		}
-		// be good now ! ... close the file
-		fclose(motd_file);
-
+	// Send MOTD and enable MOTD protection if necessary
+	if ( SendMessageOfTheDay( ent ) ) {
+		ent->client->motd_frames = motdforce->integer;
+	} else {
+		ent->client->motd_frames = 0;
 	}
 
 	if(g_callvote->value)
@@ -2839,6 +2857,91 @@ void TeamCensus( teamcensus_t *teamcensus )
 }
 
 
+/** @brief Handle clients that are in "team selection" mode
+ *
+ * @todo this function needs cleaning up - if we set spectator mode to 0, we
+ *	can return from the function; if that is done, then we no longer need
+ *	to make sure that the client is not in a team in the rest of the
+ *	function.
+ *
+ * @param ent entity of the client
+ * @param client the client itself
+ * @param ucmd user command from the client
+ */
+static inline void ClientTeamSelection( edict_t * ent ,
+		gclient_t * client ,
+		usercmd_t * ucmd )
+{
+	teamcensus_t teamcensus;
+
+	if ( client->pers.spectator == 2 )
+	{ // entered with special team spectator mode on
+		// force it off, does not appear to help much. (?)
+		ent->dmteam = NO_TEAM;
+		client->pers.spectator = 0;
+	}
+
+	if ( ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM )
+	{
+		client->pers.spectator = 0;
+	}
+
+	if ( level.time / 2 == ceil( level.time / 2 )
+			&& client->pers.spectator == 1
+			&& ent->dmteam == NO_TEAM ) {
+		// send "how to join" message
+		if ( g_autobalance->integer )
+		{
+			safe_centerprintf( ent,
+				"\n\n\nPress <fire> to join\n"
+				"autobalanced team\n" );
+		}
+		else
+		{
+			safe_centerprintf( ent,
+				"\n\n\nPress <fire> to autojoin\n"
+				"or <jump> to join BLUE\n"
+				"or <crouch> to join RED\n" );
+		}
+	}
+
+	if ( client->latched_buttons & BUTTON_ATTACK )
+	{ // <fire> to auto join
+		client->latched_buttons = 0;
+		if ( client->pers.spectator == 1 && ent->dmteam == NO_TEAM)
+		{
+			TeamCensus( &teamcensus ); // apply team balance rules
+			ent->dmteam = teamcensus.team_for_real;
+			client->pers.spectator = 0;
+			ClientChangeSkin( ent );
+		}
+	}
+
+	if ( ucmd->upmove >= 10 && ent->dmteam == NO_TEAM )
+	{
+		if ( !g_autobalance->integer )
+		{ // jump to join blue
+			ent->dmteam = BLUE_TEAM;
+			client->pers.spectator = 0;
+			ClientChangeSkin( ent );
+		}
+	}
+	else if ( ucmd->upmove < 0 && ent->dmteam == NO_TEAM )
+	{
+		if ( !g_autobalance->integer )
+		{ // crouch to join red
+			ent->dmteam = RED_TEAM;
+			client->pers.spectator = 0;
+			ClientChangeSkin( ent );
+		}
+	}
+	else
+	{
+		client->ps.pmove.pm_flags &= ~PMF_JUMP_HELD;
+	}
+}
+
+
 /*
 ==============
 ClientThink
@@ -2856,10 +2959,18 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	pmove_t	pm;
 	qboolean sproing, haste;
 	vec3_t addspeed, forward, up, right;
-	teamcensus_t teamcensus;
 
 	level.current_entity = ent;
 	client = ent->client;
+
+	// If the MOTD is being forced on, decrease frame counter
+	// and re-send the file if necessary
+	if ( client->motd_frames ) {
+		if ( level.time - floor( level.time ) != 0 ) {
+			SendMessageOfTheDay( ent );
+		}
+		client->motd_frames --;
+	}
 
 	//unlagged
 	if ( g_antilag->integer)
@@ -3156,69 +3267,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		if ( TEAM_GAME && client->resp.spectator < 2 )
 		{ // team selection state
-
-			if ( client->pers.spectator == 2 )
-			{ // entered with special team spectator mode on
-				// force it off, does not appear to help much. (?)
-				ent->dmteam = NO_TEAM;
-				client->pers.spectator = 0;
-			}
-
-			if ( ent->dmteam == RED_TEAM || ent->dmteam == BLUE_TEAM )
-			{
-				client->pers.spectator = 0;
-			}
-
-			if ( client->pers.spectator == 1 && ent->dmteam == NO_TEAM
-					&& (level.time / 2 == ceil( level.time / 2 )) )
-			{ // send "how to join" message
-				if ( g_autobalance->integer )
-				{
-					safe_centerprintf( ent, "\n\n\nPress <fire> to join\n"
-						"autobalanced team\n" );
-				}
-				else
-				{
-					safe_centerprintf( ent, "\n\n\nPress <fire> to autojoin\n"
-						"or <jump> to join BLUE\n"
-						"or <crouch> to join RED\n" );
-				}
-			}
-
-			if ( client->latched_buttons & BUTTON_ATTACK )
-			{ // <fire> to auto join
-				client->latched_buttons = 0;
-				if ( client->pers.spectator == 1 && ent->dmteam == NO_TEAM)
-				{
-					TeamCensus( &teamcensus ); // apply team balance rules
-					ent->dmteam = teamcensus.team_for_real;
-					client->pers.spectator = 0;
-					ClientChangeSkin( ent );
-				}
-			}
-
-			if ( ucmd->upmove >= 10 && ent->dmteam == NO_TEAM )
-			{
-				if ( !g_autobalance->integer )
-				{ // jump to join blue
-					ent->dmteam = BLUE_TEAM;
-					client->pers.spectator = 0;
-					ClientChangeSkin( ent );
-				}
-			}
-			else if ( ucmd->upmove < 0 && ent->dmteam == NO_TEAM )
-			{
-				if ( !g_autobalance->integer )
-				{ // crouch to join red
-					ent->dmteam = RED_TEAM;
-					client->pers.spectator = 0;
-					ClientChangeSkin( ent );
-				}
-			}
-			else
-			{
-				client->ps.pmove.pm_flags &= ~PMF_JUMP_HELD;
-			}
+			ClientTeamSelection( ent , client , ucmd );
 		} /* team selection state */
 		else
 		{ // regular spectator
