@@ -2039,7 +2039,7 @@ static qboolean SendMessageOfTheDay( edict_t * ent )
 
 	// If the file did contain data, print to the client
 	if ( size ) {
-		gi.centerprintf( ent , motd );
+		gi.centerprintf( ent , "%s" , motd );
 	}
 	return ( size > 0 );
 }
@@ -2104,6 +2104,9 @@ void ClientBeginDeathmatch (edict_t *ent)
 	// Send MOTD and enable MOTD protection if necessary
 	if ( SendMessageOfTheDay( ent ) ) {
 		ent->client->motd_frames = motdforce->integer;
+		if ( ent->client->motd_frames < 0 ) {
+			ent->client->motd_frames = 0;
+		}
 	} else {
 		ent->client->motd_frames = 0;
 	}
