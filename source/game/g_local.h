@@ -83,6 +83,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define MELEE_DISTANCE	80
 
+// Anti-camp defaults
+/** @brief Default anti-camp frames
+ *
+ * Default value for the ac_frames anti-camp CVar.
+ */
+#define G_ANTICAMP_FRAMES	30
+
+/** @brief Default anti-camp threshold
+ *
+ * Default value for the ac_threshold anti-camp CVar.
+ */
+#define G_ANTICAMP_THRESHOLD	100
+
+
 #define BODY_QUEUE_SIZE		8
 
 typedef enum
@@ -637,6 +651,8 @@ extern  cvar_t  *quickweap;
 //anti-camp
 extern  cvar_t  *anticamp;
 extern  cvar_t  *camptime;
+extern  cvar_t	*ac_frames;
+extern  cvar_t	*ac_threshold;
 
 extern	cvar_t  *g_randomquad;
 
@@ -1533,6 +1549,38 @@ struct edict_s
 	char leg[64];
 	char arm[64];
 	char body[64];
+
+	// Anti-camp velocity accumulation
+	
+	/** @brief Velocities history
+	 *
+	 * At each server frame, a client's velocity will be stored inside
+	 * this array. While the array may contain up to 100 vectors, the
+	 * ac_frames CVar will determine how many of these vectors will be
+	 * used.
+	 */
+	vec3_t old_velocities[ 100 ];
+
+	/** @brief Velocity accumulator
+	 *
+	 * This vector contains the sum of velocities for the past frames.
+	 * The amount of frames that are indeed accumulated depends on the
+	 * value of the ac_frames CVar.
+	 */
+	vec3_t velocity_accum;
+
+	/** @brief Velocities history index
+	 *
+	 * The last updated vector in the old_velocities array.
+	 */
+	int old_velocities_current;
+
+	/** @brief Stored velocity vectors
+	 *
+	 * The actual amount of vectors currently stored in the old_velocities
+	 * array.
+	 */
+	int old_velocities_count;
 
 };
 

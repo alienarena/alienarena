@@ -230,6 +230,8 @@ void InitGame (void)
 	//anti-camp
 	anticamp = gi.cvar("anticamp", "0", CVAR_LATCH|CVAR_GAMEINFO);
 	camptime = gi.cvar("camptime", "10", CVAR_LATCH);
+	ac_frames = gi.cvar("ac_frames", "0", CVAR_LATCH);
+	ac_threshold = gi.cvar("ac_threshold", "0", CVAR_LATCH);
 
 	//random quad
 	g_randomquad = gi.cvar("g_randomquad", "0", CVAR_LATCH);

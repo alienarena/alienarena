@@ -1748,6 +1748,9 @@ void PutClientInServer (edict_t *ent)
 
 	//anti-camp
 	ent->suicide_timeout = level.time + 10.0;
+	VectorClear (ent->velocity_accum);
+	ent->old_velocities_current = -1;
+	ent->old_velocities_count = 0;
 
 	VectorCopy (mins, ent->mins);
 	VectorCopy (maxs, ent->maxs);
@@ -3336,6 +3339,75 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 }
 
 
+/** @brief Update the anti-camp timeout
+ *
+ * The anti-camp computation accumulates players' velocities, averages them
+ * and updates the "suicide_timeout" field if the length of that average
+ * vector is above some threshold.
+ *
+ * It is controlled by the camptime, ac_frames and ac_threshold CVars.
+ */
+static inline void _UpdateAntiCamp( edict_t * ent )
+{
+	int n_frames = ac_frames->integer;
+	float thresh;
+	vec3_t avg;
+
+	// Make sure we have a valid ac_frames
+	if ( n_frames < 1 || n_frames > 100 ) {
+		n_frames = G_ANTICAMP_FRAMES;
+	}
+
+	if ( ent->old_velocities_count < n_frames ) {
+		// Not enough frames yet
+		ent->old_velocities_count ++;
+		ent->old_velocities_current ++;
+	} else {
+		// Enough frames - remove oldest known velocity from
+		// accumulator
+		ent->old_velocities_current = ( ent->old_velocities_current
+				+ 1 ) % n_frames;
+		VectorSubtract( ent->velocity_accum ,
+			ent->old_velocities[ ent->old_velocities_current ] ,
+			ent->velocity_accum );
+	}
+
+	// Store current velocity into history and add its value to the
+	// accumulator
+	VectorCopy( ent->velocity ,
+			ent->old_velocities[ ent->old_velocities_current ] );
+	VectorAdd( ent->velocity_accum , ent->velocity , ent->velocity_accum );
+	if ( ent->old_velocities_count < n_frames ) {
+		return;
+	}
+
+	// Get and adjust speed threshold
+	thresh = ac_threshold->value;
+	if ( thresh <= 0 || thresh > 500 ) {
+		thresh = G_ANTICAMP_THRESHOLD;
+	}
+	if ( excessive->integer ) {
+		thresh *= 1.5;
+	}
+
+	// Check average velocity lengths against threshold
+	VectorCopy( ent->velocity_accum , avg );
+	avg[0] /= n_frames; avg[1] /= n_frames; avg[2] /= n_frames;
+	if ( VectorLength( avg ) > thresh ) {
+		ent->suicide_timeout = level.time + camptime->integer;
+	}
+
+	// Inflict anti-camp damage
+	if ( ent->suicide_timeout < level.time && ent->takedamage == DAMAGE_AIM
+			&& ! ent->client->resp.spectator) {
+		T_Damage (ent, world, world, vec3_origin, ent->s.origin,
+				vec3_origin, ent->dmg, 0, DAMAGE_NO_ARMOR,
+				MOD_SUICIDE);
+		safe_centerprintf(ent, "Anticamp: move or die!\n");
+	}
+}
+
+
 /*
 ==============
 ClientBeginServerFrame
@@ -3379,20 +3451,8 @@ void ClientBeginServerFrame (edict_t *ent)
 	//end spectator mode
 
 	//anti-camp
-	if(anticamp->value) {
-		if(excessive->value) {
-			if(VectorLength(ent->velocity) > 450)
-				ent->suicide_timeout = level.time + camptime->integer;
-		}
-		else {
-			if(VectorLength(ent->velocity) > 300)
-				ent->suicide_timeout = level.time + camptime->integer;
-		}
-		if(ent->suicide_timeout < level.time && ent->takedamage == DAMAGE_AIM
-			&& !client->resp.spectator) {
-			T_Damage (ent, world, world, vec3_origin, ent->s.origin, vec3_origin, ent->dmg, 0, DAMAGE_NO_ARMOR, MOD_SUICIDE);
-			safe_centerprintf(ent, "Anticamp: move or die!\n");
-		}
+	if(anticamp->integer) {
+		_UpdateAntiCamp( ent ); 
 	}
 
 	//spectator mode
