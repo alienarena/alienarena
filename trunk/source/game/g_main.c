@@ -92,6 +92,32 @@ cvar_t  *quickweap;
 cvar_t  *anticamp;
 cvar_t  *camptime;
 
+/** @brief Anti-camp frames
+ *
+ * This CVar controls the amount of frames velocity is accumulated for when
+ * trying to determine if a player is camping. Its valid range is 1-100,
+ * anything outside this range will default it to the value of the
+ * G_ANTICAMP_FRAMES constant.
+ *
+ * @note If the value is 1, the anti-camp will work exactly as it used to.
+ *
+ * @note This CVar's value should be high enough for the anti-camp to work
+ *	correctly (the higher it is, the more the system "remembers" about
+ *	players' previous velocities), but low enough and for it not to
+ *	punish players for camping long after they've resumed moving.
+ */
+cvar_t	*ac_frames;
+
+/** @brief Anti-camp threshold
+ *
+ * This CVar contains the speed below which the timeout to "suicide" is no
+ * longer updated. It will default to G_ANTICAMP_THRESHOLD if its value is
+ * not in the ]0;500] range.
+ *
+ * @note In excessive mode, this value is multiplied by 1.5
+ */
+cvar_t	*ac_threshold;
+
 //random quad
 cvar_t  *g_randomquad;
 
