@@ -149,6 +149,10 @@ site.) In the Download section, get the 'OpenAL 1.1 Core
 SDK'. Install it in the default location; the build
 procedure is setup to look for it there.
 
+CAUTION: On an x86 system, for example an old XP box, you
+will need to change the path to use "Program files (x86)"
+instead of the default.
+
 Run the 'oalinst.exe' program to setup the OpenAL driver,
 if you have not done that previously.
 
