@@ -933,7 +933,7 @@ int entitycmpfnc( const entity_t *a, const entity_t *b )
 }
 
 /**
- * \brief  Rendering performance test.
+ * @brief  Rendering performance test.
  *
  * Target of 'timerefresh' command. When invoked with an argument, end of
  * frame flush and page flipping are not done. Modified 2011-02 with

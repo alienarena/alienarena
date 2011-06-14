@@ -928,7 +928,7 @@ void V_RenderView( float stereo_separation )
 }
 
 /**
- * \brief Console output of position and orientation
+ * @brief Console output of position and orientation
  *
  * Target of 'viewpos' command. Modified 2011-02. Added pitch.
  * Helps with repeatable positioning for timerefresh command
