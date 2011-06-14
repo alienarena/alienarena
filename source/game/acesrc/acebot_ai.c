@@ -138,6 +138,8 @@ void ACEAI_Think (edict_t *self)
 	{
 		self->health = 0;
 		player_die (self, self, self, 100000, vec3_origin);
+		// bot suicide, branch around irrelevant stuff.
+		goto clientthink;
 	}
 
 	//reset the state from pauses for taunting
@@ -173,11 +175,9 @@ void ACEAI_Think (edict_t *self)
 
 	}
 
-	//debug_printf("State: %d\n",self->state);
-
-	// set approximate ping
-	ucmd.msec = 75 + floor (random () * 25) + 1;
-
+clientthink:
+	// debug_printf("State: %d\n",self->state);
+	ucmd.msec = 100; // bots "client loop" runs at server frame rate
 	self->client->ping = 0; //show in scoreboard ping of 0
 
 	// set bot's view angle

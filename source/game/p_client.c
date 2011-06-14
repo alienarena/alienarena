@@ -1850,7 +1850,7 @@ void PutClientInServer (edict_t *ent)
 			}
 			fclose(file);
 		}
-		else 
+		else
 		{ //alien
 			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
 			{
@@ -3451,8 +3451,11 @@ void ClientBeginServerFrame (edict_t *ent)
 	//end spectator mode
 
 	//anti-camp
-	if(anticamp->integer) {
-		_UpdateAntiCamp( ent ); 
+	// do not apply to godmode cheat or bots.
+	// bots have other suicidal tendencies which may (or may not) conflict.
+	if ( anticamp->integer && !(ent->flags & FL_GODMODE) && !(ent->is_bot) )
+	{
+		_UpdateAntiCamp( ent );
 	}
 
 	//spectator mode

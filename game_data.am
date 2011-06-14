@@ -274,6 +274,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/electrics.tga \
 	data1/gfx/flares/flare0.tga \
 	data1/gfx/flares/flare1.tga \
+	data1/gfx/flares/flare2.tga \
 	data1/gfx/flash_noise.jpg \
 	data1/gfx/flash.tga \
 	data1/gfx/gamarafx.tga \
@@ -509,6 +510,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-europa2k8.bsp \
 	data1/maps/dm-furious2k8.bsp \
 	data1/maps/dm-horus.bsp \
+	data1/maps/dm-impact.bsp \
 	data1/maps/dm-invasion.bsp \
 	data1/maps/dm-leviathan2k8.bsp \
 	data1/maps/dm-liberation.bsp \
@@ -738,6 +740,16 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/unit.jpg \
 	data1/maps/meshes/unit.md2 \
 	data1/maps/meshes/unit_normal.jpg \
+	data1/maps/meshes/urban/rioblue.jpg \
+	data1/maps/meshes/urban/rioblue.md2 \
+	data1/maps/meshes/urban/rio_normal.jpg \
+	data1/maps/meshes/urban/riored.jpg \
+	data1/maps/meshes/urban/riored.md2 \
+	data1/maps/meshes/urban/riosilver.jpg \
+	data1/maps/meshes/urban/riosilver.md2 \
+	data1/maps/meshes/urban/roadbarrell.jpg \
+	data1/maps/meshes/urban/roadbarrell.md2 \
+	data1/maps/meshes/urban/roadbarrell_normal.jpg \
 	data1/maps/meshes/weaponpad.md2 \
 	data1/maps/meshes/weaponpad_normal.tga \
 	data1/maps/meshes/weaponpad.tga \
@@ -1771,6 +1783,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-furious2k8.rscript \
 	data1/scripts/maps/dm-grindery.rscript \
 	data1/scripts/maps/dm-horus.rscript \
+	data1/scripts/maps/dm-impact.rscript \
 	data1/scripts/maps/dm-invasion.rscript \
 	data1/scripts/maps/dm-leviathan2k8.rscript \
 	data1/scripts/maps/dm-liberation.rscript \
@@ -2047,36 +2060,40 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/bluetile.tga \
 	data1/textures/arena10/bricks1_nm.tga \
 	data1/textures/arena10/bricks1.tga \
+	data1/textures/arena10/bricks2_broken_nm.tga \
+	data1/textures/arena10/bricks2_broken.tga \
 	data1/textures/arena10/bricks2_hm.tga \
 	data1/textures/arena10/bricks2_nm.tga \
 	data1/textures/arena10/bricks2.tga \
 	data1/textures/arena10/bricks3.tga \
-	data1/textures/arena10/bricks2_broken_nm.tga \
-	data1/textures/arena10/bricks2_broken.tga \
-	data1/textures/arena10/building10.tga \
 	data1/textures/arena10/building10_broken2_nm.tga \
 	data1/textures/arena10/building10_broken2.tga \
 	data1/textures/arena10/building10_broken_nm.tga \
 	data1/textures/arena10/building10_broken.tga \
 	data1/textures/arena10/building10_nm.tga \
-	data1/textures/arena10/building11.tga \
+	data1/textures/arena10/building10.tga \
 	data1/textures/arena10/building11_nm.tga \
-	data1/textures/arena10/building12.tga \
+	data1/textures/arena10/building11.tga \
 	data1/textures/arena10/building12_nm.tga \
-	data1/textures/arena10/building13.tga \
+	data1/textures/arena10/building12.tga \
 	data1/textures/arena10/building13_nm.tga \
-	data1/textures/arena10/building14.tga \
+	data1/textures/arena10/building13.tga \
 	data1/textures/arena10/building14_nm.tga \
-	data1/textures/arena10/building15.tga \
+	data1/textures/arena10/building14.tga \
 	data1/textures/arena10/building15_nm.tga \
-	data1/textures/arena10/building1_nm.tga \
-	data1/textures/arena10/building1.tga \
+	data1/textures/arena10/building15.tga \
 	data1/textures/arena10/building1_broken_nm.tga \
 	data1/textures/arena10/building1_broken.tga \
+	data1/textures/arena10/building1_nm.tga \
+	data1/textures/arena10/building1.tga \
 	data1/textures/arena10/building2_nm.tga \
 	data1/textures/arena10/building2.tga \
+	data1/textures/arena10/building3_hm.tga \
 	data1/textures/arena10/building3_nm.tga \
 	data1/textures/arena10/building3.tga \
+	data1/textures/arena10/building3ns_hm.tga \
+	data1/textures/arena10/building3ns_nm.tga \
+	data1/textures/arena10/building3ns.tga \
 	data1/textures/arena10/building4_nm.tga \
 	data1/textures/arena10/building4.tga \
 	data1/textures/arena10/building5_nm.tga \
@@ -2085,6 +2102,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/building6.tga \
 	data1/textures/arena10/building7_nm.tga \
 	data1/textures/arena10/building7.tga \
+	data1/textures/arena10/building7s_hm.tga \
+	data1/textures/arena10/building7s_nm.tga \
+	data1/textures/arena10/building7s.tga \
 	data1/textures/arena10/building8_nm.tga \
 	data1/textures/arena10/building8.tga \
 	data1/textures/arena10/building9_nm.tga \
@@ -2092,14 +2112,19 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/cement1_hm.tga \
 	data1/textures/arena10/cement1_nm.tga \
 	data1/textures/arena10/cement1.tga \
+	data1/textures/arena10/cement1ns_nm.tga \
+	data1/textures/arena10/cement1ns.tga \
 	data1/textures/arena10/cobblestone_hm.tga \
+	data1/textures/arena10/cobblestone_nm.tga \
+	data1/textures/arena10/cobblestone.tga \
 	data1/textures/arena10/cobblestoneng_hm.tga \
 	data1/textures/arena10/cobblestoneng_nm.tga \
 	data1/textures/arena10/cobblestoneng.tga \
-	data1/textures/arena10/cobblestone_nm.tga \
-	data1/textures/arena10/cobblestone.tga \
+	data1/textures/arena10/cobblestonens_nm.tga \
+	data1/textures/arena10/cobblestonens.tga \
 	data1/textures/arena10/cobwebs2.tga \
 	data1/textures/arena10/cobwebs.tga \
+	data1/textures/arena10/cocacola.tga \
 	data1/textures/arena10/container1_hm.tga \
 	data1/textures/arena10/container1_nm.tga \
 	data1/textures/arena10/container1.tga \
@@ -2130,10 +2155,10 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/gothwindow3.tga \
 	data1/textures/arena10/heap1_nm.tga \
 	data1/textures/arena10/heap1.tga \
-	data1/textures/arena10/ivy1.tga \
 	data1/textures/arena10/ivy1_nm.tga \
-	data1/textures/arena10/ivy2.tga \
+	data1/textures/arena10/ivy1.tga \
 	data1/textures/arena10/ivy2_nm.tga \
+	data1/textures/arena10/ivy2.tga \
 	data1/textures/arena10/metalfence1.tga \
 	data1/textures/arena10/metalfence2.tga \
 	data1/textures/arena10/metalfloor20_hm.tga \
@@ -2167,6 +2192,10 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/neonsign1.tga \
 	data1/textures/arena10/neonsign20r.tga \
 	data1/textures/arena10/neonsign20.tga \
+	data1/textures/arena10/neonsign21.tga \
+	data1/textures/arena10/neonsign22.tga \
+	data1/textures/arena10/neonsign23.tga \
+	data1/textures/arena10/neonsign24.tga \
 	data1/textures/arena10/neonsign2.tga \
 	data1/textures/arena10/neonsign3.tga \
 	data1/textures/arena10/neonsign4.tga \
@@ -2180,12 +2209,25 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/pipes1.tga \
 	data1/textures/arena10/planks_nm.tga \
 	data1/textures/arena10/planks.tga \
+	data1/textures/arena10/road1_hm.tga \
+	data1/textures/arena10/road1_nm.tga \
+	data1/textures/arena10/road1.tga \
+	data1/textures/arena10/road2_hm.tga \
+	data1/textures/arena10/road2_nm.tga \
+	data1/textures/arena10/road2.tga \
+	data1/textures/arena10/road3_hm.tga \
+	data1/textures/arena10/road3_nm.tga \
+	data1/textures/arena10/road3.tga \
+	data1/textures/arena10/roadbarrier_hm.tga \
+	data1/textures/arena10/roadbarrier_nm.tga \
+	data1/textures/arena10/roadbarrier.tga \
 	data1/textures/arena10/rockdirt1_hm.tga \
 	data1/textures/arena10/rockdirt1ng_hm.tga \
 	data1/textures/arena10/rockdirt1ng_nm.tga \
 	data1/textures/arena10/rockdirt1ng.tga \
 	data1/textures/arena10/rockdirt1_nm.tga \
 	data1/textures/arena10/rockdirt1.tga \
+	data1/textures/arena10/sevenup.tga \
 	data1/textures/arena10/sewergrate1_nm.tga \
 	data1/textures/arena10/sewergrate1.tga \
 	data1/textures/arena10/sign1.tga \
@@ -2196,6 +2238,30 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/sign5.tga \
 	data1/textures/arena10/sign6r.tga \
 	data1/textures/arena10/sign6.tga \
+	data1/textures/arena10/skyscraper1_hm.tga \
+	data1/textures/arena10/skyscraper1_nm.tga \
+	data1/textures/arena10/skyscraper1.tga \
+	data1/textures/arena10/skyscraper2_nm.tga \
+	data1/textures/arena10/skyscraper2.tga \
+	data1/textures/arena10/skyscraper3_nm.tga \
+	data1/textures/arena10/skyscraper3.tga \
+	data1/textures/arena10/skyscraper4_nm.tga \
+	data1/textures/arena10/skyscraper4.tga \
+	data1/textures/arena10/skyscraper5_nm.tga \
+	data1/textures/arena10/skyscraper5.tga \
+	data1/textures/arena10/skyscraper6_hm.tga \
+	data1/textures/arena10/skyscraper6_nm.tga \
+	data1/textures/arena10/skyscraper6.tga \
+	data1/textures/arena10/skyscraper7_nm.tga \
+	data1/textures/arena10/skyscraper7.tga \
+	data1/textures/arena10/skyscraper8_hm.tga \
+	data1/textures/arena10/skyscraper8_nm.tga \
+	data1/textures/arena10/skyscraper8.tga \
+	data1/textures/arena10/skyscraper9_hm.tga \
+	data1/textures/arena10/skyscraper9_nm.tga \
+	data1/textures/arena10/skyscraper9.tga \
+	data1/textures/arena10/stacks1.tga \
+	data1/textures/arena10/stacks2.tga \
 	data1/textures/arena10/stonewall1_nm.tga \
 	data1/textures/arena10/stonewall1.tga \
 	data1/textures/arena10/stonewall2_hm.tga \
@@ -2203,6 +2269,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/stonewall2.tga \
 	data1/textures/arena10/stonewall3_nm.tga \
 	data1/textures/arena10/stonewall3.tga \
+	data1/textures/arena10/storefront_nm.tga \
+	data1/textures/arena10/storefront.tga \
 	data1/textures/arena10/trash1_nm.tga \
 	data1/textures/arena10/trash1.tga \
 	data1/textures/arena10/trash2_nm.tga \
@@ -2212,10 +2280,10 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/vinewall1_hm.tga \
 	data1/textures/arena10/vinewall1_nm.tga \
 	data1/textures/arena10/vinewall1.tga \
-	data1/textures/arena10/wires1.tga \
 	data1/textures/arena10/wires1_nm.tga \
-	data1/textures/arena10/wires2.tga \
+	data1/textures/arena10/wires1.tga \
 	data1/textures/arena10/wires2_nm.tga \
+	data1/textures/arena10/wires2.tga \
 	data1/textures/arena1/jpad1a.tga \
 	data1/textures/arena1/jpad1a.wal \
 	data1/textures/arena1/jpad1b.tga \
@@ -3222,4 +3290,3 @@ nobase_dist_pkgdata_DATA = \
 	data1/vehicles/strafer/tris.md2 \
 	data1/vehicles/strafer/v_wep.md2 \
 	data1/vehicles/strafer/window.md2
-

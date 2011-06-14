@@ -549,9 +549,9 @@ void SV_BuildClientFrame (client_t *client)
 		// add it to the circular client_entities array
 		state = &svs.client_entities[svs.next_client_entities%svs.num_client_entities];
 		if (ent->s.number != e)
-		{
-			// TODO: fix this error message so it gives some information
-			Com_DPrintf ("FIXING ENT->S.NUMBER!!!\n");
+		{ // note: server has limited info about entities
+			Com_DPrintf("Fixing ent->s.number: %i to %i for a %s\n",
+					ent->s.number, e, (ent->client ? "client" : "non-client") );
 			ent->s.number = e;
 		}
 		*state = ent->s;
