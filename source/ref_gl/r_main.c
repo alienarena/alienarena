@@ -557,8 +557,7 @@ void R_DrawEntitiesOnList (void)
 			else
 				currententity->script = NULL;
 		}
-
-
+		
 		currentmodel = currententity->model;
 
 		if (!currentmodel)
@@ -583,7 +582,6 @@ void R_DrawEntitiesOnList (void)
 		}
 	}
 	qglDepthMask (1);		// back to writing
-
 }
 
 void R_DrawViewEntitiesOnList (void)
@@ -623,7 +621,6 @@ void R_DrawViewEntitiesOnList (void)
 			else
 				currententity->script = NULL;
 		}
-
 
 		currentmodel = currententity->model;
 

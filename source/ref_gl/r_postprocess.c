@@ -601,6 +601,3 @@ void R_DrawBloodEffect (void)
 
 	R_KillVArrays();	
 }
-
-
-
