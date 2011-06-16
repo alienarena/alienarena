@@ -338,7 +338,7 @@ static char bsp_fragment_program[] =
 "      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;\n"
 
 "      if (ShadowCoord.w > 0.0)\n"
-"		shadows = distanceFromLight < shadowCoordinateWdivide.z ? 0.6 : 1.0 ;\n"
+"		shadow1 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;\n"
 
 "	   //Blur shadows a bit\n"
 "      tempShadowCoord = ShadowCoord + vec4(.2, 0, 0, 0);\n"
@@ -348,7 +348,7 @@ static char bsp_fragment_program[] =
 "      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;\n"
 
 "      if (ShadowCoord.w > 0.0)\n"
-"          shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;\n"
+"          shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;\n"
 
 "      tempShadowCoord = ShadowCoord + vec4(0, .2, 0, 0);\n"
 "      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;\n"
@@ -357,13 +357,13 @@ static char bsp_fragment_program[] =
 "      distanceFromLight = texture2D(ShadowMap,shadowCoordinateWdivide.xy).z;\n"
 
 "      if (ShadowCoord.w > 0.0)\n"
-"          shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;\n"
+"          shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.25 : 1.0 ;\n"
 
 "      shadows = 0.33 * (shadow1 + shadow2 + shadow3);\n"
 
 "    }\n"
 
-"   return pow(shadows,3.0);\n"
+"    return shadows;\n"
 "}\n"
 
 "float lookupStatshadow( void )\n"
@@ -388,7 +388,7 @@ static char bsp_fragment_program[] =
 "      distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;\n"
 
 "      if (ShadowCoord.w > 0.0)\n"
-"		shadows = distanceFromLight < shadowCoordinateWdivide.z ? 0.6 : 1.0 ;\n"
+"		shadow1 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;\n"
 
 "	   //Blur shadows a bit\n"
 "      tempShadowCoord = ShadowCoord + vec4(.2, 0, 0, 0);\n"
@@ -398,7 +398,7 @@ static char bsp_fragment_program[] =
 "      distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;\n"
 
 "      if (ShadowCoord.w > 0.0)\n"
-"          shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;\n"
+"          shadow2 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;\n"
 
 "      tempShadowCoord = ShadowCoord + vec4(0, .2, 0, 0);\n"
 "      shadowCoordinateWdivide = tempShadowCoord / tempShadowCoord.w ;\n"
@@ -407,13 +407,13 @@ static char bsp_fragment_program[] =
 "      distanceFromLight = texture2D(StatShadowMap,shadowCoordinateWdivide.xy).z;\n"
 
 "      if (ShadowCoord.w > 0.0)\n"
-"          shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.7 : 1.0 ;\n"
+"          shadow3 = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;\n"
 
 "      shadows = 0.33 * (shadow1 + shadow2 + shadow3);\n"
 
 "    }\n"
 
-"   return pow(shadows,3.0);\n"
+"    return shadows;\n"
 "}\n"
 
 "void main( void )\n"
@@ -591,7 +591,7 @@ static char mesh_vertex_program[] =
 "   if(FOG > 0){\n"
 "		fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);\n"
 "		fog = clamp(fog, 0.0, 0.3); //any higher and meshes disappear\n"
-"   	}\n"
+"   }\n"
 "}\n";
 
 static char mesh_fragment_program[] =
@@ -615,8 +615,8 @@ static char mesh_fragment_program[] =
 "	vec4 fx;\n"
 "	vec4 glow;\n"
 
-"    vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;\n"
-"    vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );\n"
+"   vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;\n"
+"   vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );\n"
 
 "	vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);\n"
 "	vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);\n"

@@ -1055,15 +1055,15 @@ void IQM_DrawFrame(int skinnum)
 
             glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
 
-            GL_SelectTexture( GL_TEXTURE1);
+            qglActiveTextureARB( GL_TEXTURE1);
             qglBindTexture (GL_TEXTURE_2D, r_shelltexture2->texnum);
             glUniform1iARB( g_location_baseTex, 1);
 
-            GL_SelectTexture( GL_TEXTURE0);
+            qglActiveTextureARB( GL_TEXTURE0);
             qglBindTexture (GL_TEXTURE_2D, r_shellnormal->texnum);
             glUniform1iARB( g_location_normTex, 0);
 
-            GL_SelectTexture( GL_TEXTURE0);
+            qglActiveTextureARB( GL_TEXTURE0);
 
             glUniform1iARB( g_location_useFX, 0);
 
@@ -1153,12 +1153,12 @@ void IQM_DrawFrame(int skinnum)
 			if( !(currententity->flags & RF_WEAPONMODEL))
 			{
 				GL_EnableMultitexture( true );
-				GL_SelectTexture( GL_TEXTURE0);
+				qglActiveTextureARB( GL_TEXTURE0);
 				GL_TexEnv ( GL_COMBINE_EXT );
 				qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-				GL_SelectTexture( GL_TEXTURE1);
+				qglActiveTextureARB( GL_TEXTURE1);
 				GL_TexEnv ( GL_COMBINE_EXT );
 				qglBindTexture (GL_TEXTURE_2D, r_mirrorspec->texnum);
 				qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE );
@@ -1167,7 +1167,7 @@ void IQM_DrawFrame(int skinnum)
 			}
 			else
 			{
-				GL_SelectTexture( GL_TEXTURE0);
+				qglActiveTextureARB( GL_TEXTURE0);
 				qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
 			}
 		}
@@ -1175,12 +1175,12 @@ void IQM_DrawFrame(int skinnum)
 		{
 			qglDepthMask(false);
 
-			GL_SelectTexture( GL_TEXTURE0);
+			qglActiveTextureARB( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, r_reflecttexture->texnum);
 		}
 		else
 		{
-			GL_SelectTexture( GL_TEXTURE0);
+			qglActiveTextureARB( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, skinnum);
 
  			R_GetLightVals(currententity->origin, false, false);
@@ -1387,19 +1387,19 @@ void IQM_DrawFrame(int skinnum)
 
 				glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
 
-				GL_SelectTexture( GL_TEXTURE1);
+				qglActiveTextureARB( GL_TEXTURE1);
 				qglBindTexture (GL_TEXTURE_2D, skinnum);
 				glUniform1iARB( g_location_baseTex, 1);
 
-				GL_SelectTexture( GL_TEXTURE0);
+				qglActiveTextureARB( GL_TEXTURE0);
 				qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
 				glUniform1iARB( g_location_normTex, 0);
 
-				GL_SelectTexture( GL_TEXTURE2);
+				qglActiveTextureARB( GL_TEXTURE2);
 				qglBindTexture (GL_TEXTURE_2D, stage->texture2->texnum);
 				glUniform1iARB( g_location_fxTex, 2);
 
-				GL_SelectTexture( GL_TEXTURE0);
+				qglActiveTextureARB( GL_TEXTURE0);
 
 				if(stage->fx)
 					glUniform1iARB( g_location_useFX, 1);
@@ -1622,19 +1622,19 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 		{
 			qglDepthMask(false);
 
-			GL_SelectTexture( GL_TEXTURE0);
+			qglActiveTextureARB( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, r_mirrortexture->texnum);
 		}
 		else if(glass)
 		{
 			qglDepthMask(false);
 
-			GL_SelectTexture( GL_TEXTURE0);
+			qglActiveTextureARB( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, r_reflecttexture->texnum);
 		}
 		else
 		{
-			GL_SelectTexture( GL_TEXTURE0);
+			qglActiveTextureARB( GL_TEXTURE0);
 			qglBindTexture (GL_TEXTURE_2D, skinnum);
 
 			R_GetLightVals(RagDoll[RagDollID].curPos, true, false);
@@ -1807,19 +1807,19 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 
 				glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
 
-				GL_SelectTexture( GL_TEXTURE1);
+				qglActiveTextureARB( GL_TEXTURE1);
 				qglBindTexture (GL_TEXTURE_2D, skinnum);
 				glUniform1iARB( g_location_baseTex, 1);
 
-				GL_SelectTexture( GL_TEXTURE0);
+				qglActiveTextureARB( GL_TEXTURE0);
 				qglBindTexture (GL_TEXTURE_2D, stage->texture->texnum);
 				glUniform1iARB( g_location_normTex, 0);
 
-				GL_SelectTexture( GL_TEXTURE2);
+				qglActiveTextureARB( GL_TEXTURE2);
 				qglBindTexture (GL_TEXTURE_2D, stage->texture2->texnum);
 				glUniform1iARB( g_location_fxTex, 2);
-
-				GL_SelectTexture( GL_TEXTURE0);
+							
+				qglActiveTextureARB( GL_TEXTURE0);
 
 				if(stage->fx)
 					glUniform1iARB( g_location_useFX, 1);
