@@ -336,9 +336,12 @@ dist_icon_DATA = alienarena.png
 nobase_dist_pkgdata_DATA = \
 	arena/motd.txt \
 	arena/server.cfg \
+	botinfo/^1Squirtney.cfg \
 	botinfo/^3Marty.cfg \
-	botinfo/^2Squirtney.cfg \
+	botinfo/^3Shploik!.cfg \
+	botinfo/^4Invad^6ur.cfg \
 	botinfo/^5Beavis.cfg \
+	botinfo/^7The^1Zapp.cfg \
 	botinfo/Astral.cfg \
 	botinfo/Beavis.cfg \
 	botinfo/Butthead.cfg \
@@ -385,6 +388,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-europa2k8.tmp \
 	botinfo/dm-furious2k8.tmp \
 	botinfo/dm-horus.tmp \
+	botinfo/dm-impact.tmp \
 	botinfo/dm-invasion.tmp \
 	botinfo/dm-leviathan2k8.tmp \
 	botinfo/dm-liberation.tmp \
@@ -2526,6 +2530,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/rockdirt1ng_hm.tga \
 	data1/textures/arena10/rockdirt1ng_nm.tga \
 	data1/textures/arena10/rockdirt1ng.tga \
+	data1/textures/arena10/rockdirt1ns_nm.tga \
+	data1/textures/arena10/rockdirt1ns.tga \
 	data1/textures/arena10/rockdirt1_nm.tga \
 	data1/textures/arena10/rockdirt1.tga \
 	data1/textures/arena10/sevenup.tga \
