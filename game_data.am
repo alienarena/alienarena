@@ -145,6 +145,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-europa2k8.nod \
 	botinfo/nav/dm-furious2k8.nod \
 	botinfo/nav/dm-horus.nod \
+	botinfo/nav/dm-impact.nod \
 	botinfo/nav/dm-invasion.nod \
 	botinfo/nav/dm-leviathan2k8.nod \
 	botinfo/nav/dm-liberation.nod \
@@ -429,6 +430,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-furious2k8.txt \
 	data1/levelshots/dm-horus.jpg \
 	data1/levelshots/dm-horus.txt \
+	data1/levelshots/dm-impact.jpg \
+	data1/levelshots/dm-impact.txt \
 	data1/levelshots/dm-invasion.jpg \
 	data1/levelshots/dm-invasion.txt \
 	data1/levelshots/dm-leviathan2k8.jpg \
