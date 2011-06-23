@@ -521,7 +521,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 
 	if (ent->client->weaponstate == WEAPON_DROPPING)
 	{
-		if(excessive->value || quickweap->value) {
+		if(excessive->value || quickweap->value || ent->client->invincible_framenum > level.framenum) {
 			ChangeWeapon (ent);
 			return;
 		}
@@ -537,7 +537,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 
 	if (ent->client->weaponstate == WEAPON_ACTIVATING)
 	{
-		if(excessive->value || quickweap->value) {
+		if(excessive->value || quickweap->value || ent->client->invincible_framenum > level.framenum) {
 			ent->client->weaponstate = WEAPON_READY;
 			ent->client->ps.gunframe = FRAME_IDLE_FIRST;
 			return;
@@ -757,7 +757,7 @@ void Weapon_Disruptor (edict_t *ent)
 	static int	fire_frames[]	= {5, 0};
 	static int	excessive_fire_frames[] = {5,7,9,11,0};
 
-	if(excessive->value)
+	if(excessive->value || ent->client->invincible_framenum > level.framenum)
 		Weapon_Generic (ent, 4, 12, 42, 46, pause_frames, excessive_fire_frames, weapon_plasma_fire);
 	else
 		Weapon_Generic (ent, 4, 12, 42, 46, pause_frames, fire_frames, weapon_plasma_fire);
@@ -1018,7 +1018,7 @@ void Weapon_RocketLauncher (edict_t *ent)
 	static int	fire_frames[]	= {6, 0};
 	static int	excessive_fire_frames[]	= {5,7,9,11,13, 0};
 
-	if(excessive->value)
+	if(excessive->value || ent->client->invincible_framenum > level.framenum)
 		Weapon_Generic (ent, 5, 14, 52, 56, pause_frames, excessive_fire_frames, Weapon_RocketLauncher_Fire);
 	else
 		Weapon_Generic (ent, 5, 14, 52, 56, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
@@ -1118,7 +1118,7 @@ void Weapon_Blaster (edict_t *ent)
 	static int	fire_frames[]	= {5,0};
 	static int  excessive_fire_frames[] = {5,6,7,8,0};
 
-	if(excessive->value)
+	if(excessive->value || ent->client->invincible_framenum > level.framenum)
 		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, excessive_fire_frames, Weapon_Blaster_Fire);
 	else
 		Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
@@ -1181,7 +1181,7 @@ void Weapon_Bomber (edict_t *ent)
 	static int	fire_frames[]	= {6,12,0};
 	static int	excessive_fire_frames[]	= {6,8,10,12,0};
 
-	if(excessive->value)
+	if(excessive->value || ent->client->invincible_framenum > level.framenum)
 		Weapon_Generic (ent, 5, 16, 39, 45, pause_frames, excessive_fire_frames, Weapon_Bomber_Fire);
 	else
 		Weapon_Generic (ent, 5, 16, 39, 45, pause_frames, fire_frames, Weapon_Bomber_Fire);
@@ -1278,7 +1278,7 @@ void Weapon_Strafer (edict_t *ent) //for now
 	static int	fire_frames[]	= {6,0};
 	static int	excessive_fire_frames[]	= {6,8,10,0};
 
-	if(excessive->value)
+	if(excessive->value || ent->client->invincible_framenum > level.framenum)
 		Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, excessive_fire_frames, Weapon_Strafer_Fire);
 	else
 		Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, fire_frames, Weapon_Strafer_Fire);
@@ -1347,7 +1347,7 @@ void Weapon_Hover (edict_t *ent) //for now
 	static int	fire_frames[]	= {6,8,10,0};
 	static int	excessive_fire_frames[]	= {6,8,10,0};
 
-	if(excessive->value)
+	if(excessive->value || ent->client->invincible_framenum > level.framenum)
 		Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, excessive_fire_frames, Weapon_Hover_Fire);
 	else
 		Weapon_Generic (ent, 5, 11, 33, 39, pause_frames, fire_frames, Weapon_Hover_Fire);
