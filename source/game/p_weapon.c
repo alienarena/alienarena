@@ -1811,7 +1811,7 @@ void Violator_Fire (edict_t *ent)
 		ent->client->ps.gunframe = 12;
 
 	}
-	else if(!ent->altfire){
+	else if(!ent->altfire) {
 
 		VectorSet(offset, 1, 1, ent->viewheight-0.5);
 		P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -1842,10 +1842,7 @@ void Violator_Fire (edict_t *ent)
 		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
-
-
 	}
-
 }
 
 void Weapon_Violator (edict_t *ent)

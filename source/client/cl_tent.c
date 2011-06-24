@@ -398,7 +398,6 @@ void CL_ParseTEnt (void)
 		MSG_ReadDir (&net_message, dir);
 		CL_BlasterParticles (pos, dir);
 		R_ApplyForceToRagdolls(pos, 100);
-
 		break;
 
 	case TE_RAILTRAIL:			// beam effect
@@ -507,6 +506,7 @@ void CL_ParseTEnt (void)
 		CL_MuzzleParticles (pos);
 		CL_MuzzleFlashParticle(pos, cl.refdef.viewangles, false);
 		break;
+
 	case TE_BLUE_MUZZLEFLASH:
 		MSG_ReadPos (&net_message, pos);
 		CL_BlueMuzzleParticles (pos);
@@ -520,7 +520,9 @@ void CL_ParseTEnt (void)
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadDir (&net_message, dir);
 		CL_Voltage (pos);
+		R_ApplyForceToRagdolls(pos, -50);
 		break;
+
 	case TE_DEATHFIELD:
 		MSG_ReadPos (&net_message, pos);
 		CL_Deathfield (pos, 0);
@@ -530,6 +532,7 @@ void CL_ParseTEnt (void)
 		MSG_ReadDir (&net_message, dir);
 		CL_Deathfield (pos, 1);
 		break;
+
 	case TE_BLASTERBEAM:			// blaster beam effect
 		MSG_ReadPos (&net_message, pos);
 		MSG_ReadPos (&net_message, pos2);
@@ -541,8 +544,9 @@ void CL_ParseTEnt (void)
 		}
 		break;
 
-	default:
-		Com_Error (ERR_DROP, "CL_ParseTEnt: bad type");
+	default:			// Do we really want to drop an error for this?
+		//Com_Error (ERR_DROP, "CL_ParseTEnt: bad type");
+		Com_Printf("CL_ParseTEnt: bad type\n");
 	}
 }
 
