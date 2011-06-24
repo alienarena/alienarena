@@ -1287,7 +1287,7 @@ void R_RenderAllRagdolls ( void )
 							RagDoll[RagDollID].RagDollForces[i].force = 10000;
 
 						//add a force if it's sufficient enough to do anything
-						if(RagDoll[RagDollID].RagDollForces[i].force > 200)
+						if(RagDoll[RagDollID].RagDollForces[i].force > 200 || RagDoll[RagDollID].RagDollForces[i].force < -200)
 						{
 							dBodySetLinearVel(RagDoll[RagDollID].RagDollObject[CHEST].body, -RagDoll[RagDollID].RagDollForces[i].dir[0] *
 							RagDoll[RagDollID].RagDollForces[i].force, -RagDoll[RagDollID].RagDollForces[i].dir[1] *
