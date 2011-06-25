@@ -1152,6 +1152,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-furious2k8.fog \
 	data1/maps/scripts/dm-furious2k8.mus \
 	data1/maps/scripts/dm-horus.mus \
+	data1/maps/scripts/dm-impact.mus \
 	data1/maps/scripts/dm-invasion.mus \
 	data1/maps/scripts/dm-leviathan2k8.fog \
 	data1/maps/scripts/dm-leviathan2k8.mus \
