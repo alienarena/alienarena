@@ -1,3 +1,13 @@
+textures/rage/metallight_2
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		lensflare
+	}
+}
 textures/arena10/cobblestone1
 {
 	{
