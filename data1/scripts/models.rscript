@@ -544,3 +544,15 @@ models/items/invulner/skin
 		nolightmap
 	}
 }
+models/objects/electroball/skin
+{
+	{
+		map models/objects/electroball/skin.jpg
+	}
+	{
+		map models/objects/electroball/skin_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}

@@ -956,3 +956,12 @@ maps/meshes/urban/roadbarrell
 		normalmap
 	}
 }
+models/objects/electroball/skin
+{
+	{
+		map models/objects/electroball/skin_normal.jpg
+		normalmap
+		map2 models/objects/electroball/skin_fx.tga
+		glow
+	}
+}
