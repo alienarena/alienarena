@@ -1191,6 +1191,7 @@ void floater_think (edict_t *self)
 		target = ent;
 	}
 
+	self->s.frame = (self->s.frame + 1) % 23; //pulse grotesquely
 	self->nextthink = level.time + FRAMETIME;
 	floater_timer++;
 
@@ -1198,10 +1199,7 @@ void floater_think (edict_t *self)
 		T_RadiusDamage(self, self->owner, self->radius_dmg, self->enemy, self->dmg_radius, MOD_R_SPLASH, 2);
 
 		gi.WriteByte (svc_temp_entity);
-		if (self->waterlevel)
-			gi.WriteByte (TE_ROCKET_EXPLOSION_WATER);
-		else
-			gi.WriteByte (TE_ROCKET_EXPLOSION);
+		gi.WriteByte (TE_BFG_BIGEXPLOSION);
 		gi.WritePosition (self->s.origin);
 		gi.multicast (self->s.origin, MULTICAST_PHS);
 
@@ -1229,10 +1227,7 @@ void prox_think (edict_t *self)
 		self->owner->client->resp.weapon_hits[2]++;
 
 		gi.WriteByte (svc_temp_entity);
-		if (self->waterlevel)
-		gi.WriteByte (TE_ROCKET_EXPLOSION_WATER);
-			else
-		gi.WriteByte (TE_ROCKET_EXPLOSION);
+		gi.WriteByte (TE_BFG_BIGEXPLOSION);
 		gi.WritePosition (self->s.origin);
 		gi.multicast (self->s.origin, MULTICAST_PHS);
 
@@ -1240,17 +1235,16 @@ void prox_think (edict_t *self)
 		return;
 	}
 
+	self->s.frame = (self->s.frame + 1) % 23; //pulse grotesquely
 	self->nextthink = level.time + FRAMETIME;
 	prox_timer++;
 
-	if(prox_timer > 300) { //explode
+	if(prox_timer > 300)
+	{	//explode
 		T_RadiusDamage(self, self->owner, self->radius_dmg, self->enemy, self->dmg_radius, MOD_R_SPLASH, 2);
 
 		gi.WriteByte (svc_temp_entity);
-		if (self->waterlevel)
-			gi.WriteByte (TE_ROCKET_EXPLOSION_WATER);
-		else
-			gi.WriteByte (TE_ROCKET_EXPLOSION);
+		gi.WriteByte (TE_BFG_BIGEXPLOSION);
 		gi.WritePosition (self->s.origin);
 		gi.multicast (self->s.origin, MULTICAST_PHS);
 
@@ -1294,7 +1288,7 @@ void fire_floater (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	floater->movetype = MOVETYPE_BOUNCE;
 	floater->clipmask = MASK_SHOT;
 	floater->solid = SOLID_BBOX;
-	floater->s.effects |= EF_COLOR_SHELL | EF_ROTATE;
+	floater->s.effects |= EF_COLOR_SHELL;
 	floater->s.renderfx |= RF_SHELL_BLUE | RF_GLOW;
 	VectorClear (floater->mins);
 	VectorClear (floater->maxs);
@@ -1332,8 +1326,6 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	prox->movetype = MOVETYPE_BOUNCE;
 	prox->clipmask = MASK_SHOT;
 	prox->solid = SOLID_BBOX;
-	prox->s.effects |= EF_ROTATE;
-	prox->s.renderfx |= RF_GLOW;
 	VectorClear (prox->mins);
 	VectorClear (prox->maxs);
 	prox->s.modelindex = gi.modelindex ("models/objects/electroball/tris.md2");
