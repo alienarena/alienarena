@@ -747,6 +747,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/unit.jpg \
 	data1/maps/meshes/unit.md2 \
 	data1/maps/meshes/unit_normal.jpg \
+	data1/maps/meshes/urban/mercedes.jpg \
+	data1/maps/meshes/urban/mercedes.md2 \
 	data1/maps/meshes/urban/rioblue.jpg \
 	data1/maps/meshes/urban/rioblue.md2 \
 	data1/maps/meshes/urban/rio_normal.jpg \
@@ -978,7 +980,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/objects/dmspot/skin_normal.tga \
 	data1/models/objects/dmspot/skin.tga \
 	data1/models/objects/dmspot/tris.md2 \
+	data1/models/objects/electroball/skin_fx.tga \
 	data1/models/objects/electroball/skin.jpg \
+	data1/models/objects/electroball/skin_normal.jpg \
 	data1/models/objects/electroball/tris.md2 \
 	data1/models/objects/fireball/skin.tga \
 	data1/models/objects/fireball/tris.md2 \
