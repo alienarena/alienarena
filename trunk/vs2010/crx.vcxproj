@@ -162,6 +162,7 @@
     <ClCompile Include="$(SrcDir)win32\q_shwin.c" />
     <ClCompile Include="$(SrcDir)win32\sys_win.c" />
     <ClCompile Include="$(SrcDir)win32\vid_dll.c" />
+    <ClCompile Include="..\source\qcommon\md5.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(LocalIncludeDir)config.h" />

@@ -111,6 +111,7 @@ cvar_t	*m_side;
 cvar_t	*info_password;
 cvar_t	*info_spectator;
 cvar_t	*name;
+cvar_t	*password;
 cvar_t	*skin;
 cvar_t	*rate;
 cvar_t	*fov;
@@ -1776,6 +1777,8 @@ void CL_InitLocal (void)
 	info_password = Cvar_Get ("password", "", CVAR_USERINFO);
 	info_spectator = Cvar_Get ("spectator", "0", CVAR_USERINFO);
 	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
+	//to do - move this into a seperate config file
+	password = Cvar_Get("stats_password", "password", CVAR_USERINFO | CVAR_ARCHIVE);
 	/* */
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	/* */

@@ -3786,7 +3786,7 @@ void JoinServer_MenuInit( void )
 
 	m_show_empty = true;
 
-	getStatsDB();
+	STATS_getStatsDB();
 
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	Q_strncpyz2( thisPlayer.playername, name->string, sizeof(thisPlayer.playername) );
@@ -3797,6 +3797,9 @@ void JoinServer_MenuInit( void )
 		pNameUnique = false;
 	else
 		pNameUnique = true;
+
+	if(pNameUnique)
+		STATS_AuthenticateStats();
 
 	s_joinserver_menu.x = viddef.width * 0.50;
 	offset = viddef.height/2 + 60*scale;

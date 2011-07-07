@@ -8,7 +8,7 @@ textures/arena7/light3
 {
 	{
 		map gfx/bluelightning.tga
-		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA	
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
 		alphashift 0 0.4 0.4
 		envmap
 	}

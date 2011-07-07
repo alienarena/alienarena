@@ -579,7 +579,8 @@ typedef struct _PLAYERSTATS {
 	int ranking;
 } PLAYERSTATS;
 
-void getStatsDB( void );
+void STATS_getStatsDB( void );
+void STATS_AuthenticateStats (void);
 PLAYERSTATS getPlayerRanking ( PLAYERSTATS player );
 PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player );
 
