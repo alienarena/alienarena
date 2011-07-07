@@ -591,7 +591,7 @@ void rs_stage_blendfunc (rs_stage_t *stage, char **token)
 		stage->blendfunc.dest = GL_SRC_COLOR;
 	}
 	else
-	{
+	{	
 		stage->blendfunc.source = RS_BlendID (*token);
 
 		*token = strtok (NULL, TOK_DELIMINATORS);
@@ -1516,15 +1516,24 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			VertexCounter++;		
 		}
 
-		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+		if(qglLockArraysEXT)
+			qglLockArraysEXT(0, VertexCounter);
 
-		R_KillVArrays();		
-			
+		qglDrawArrays(GL_POLYGON, 0, VertexCounter);
+
+		if(qglUnlockArraysEXT)
+			qglUnlockArraysEXT();
+					
 		qglColor4f(1,1,1,1);
 		if (stage->colormap.enabled)
 			qglEnable (GL_TEXTURE_2D);
 
 	} while ( (stage = stage->next) );	
+	
+	qglDisableClientState( GL_COLOR_ARRAY );
+	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	
+	R_KillVArrays();		
 	
 	ToggleLightmap(true);
 
@@ -1532,12 +1541,10 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 
 	// restore the original blend mode
 	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	qglEnable (GL_BLEND);
 
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_ALPHATEST
 	GLSTATE_DISABLE_TEXGEN
-	qglShadeModel (GL_SMOOTH);
 }
 
 rscript_t *rs_caustics;

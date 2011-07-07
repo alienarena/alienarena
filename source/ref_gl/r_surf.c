@@ -449,16 +449,21 @@ void R_DrawAlphaSurfaces (void)
 			s->entity->angles[2] = -s->entity->angles[2];	// stupid quake bug
 		}
 
-		if (s->flags & SURF_DRAWTURB) {
+		if (s->flags & SURF_DRAWTURB) 
+		{
 			//water shaders
-			if(r_shaders->value) {
+			if(r_shaders->value) 
+			{
 				rs_shader = (rscript_t *)s->texinfo->image->script;
-				if(rs_shader) {
+				if(rs_shader) 
+				{
 					stage = rs_shader->stage;
-					if(stage) { //for now, just map a reflection texture
+					if(stage) 
+					{	//for now, just map a reflection texture
 						texnum = stage->texture->texnum; //pass this to renderwaterpolys
 					}
-					if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) {
+					if(stage->scale.scaleX != 0 && stage->scale.scaleY !=0) 
+					{
 						scaleX = stage->scale.scaleX;
 						scaleY = stage->scale.scaleY;
 					}
@@ -466,24 +471,13 @@ void R_DrawAlphaSurfaces (void)
 			}
 			R_RenderWaterPolys (s, texnum, scaleX, scaleY);
 		}
-		else {
-			if(r_shaders->value && !(s->texinfo->flags & SURF_FLOWING)) {
+		else 
+		{
+			if(r_shaders->value && !(s->texinfo->flags & SURF_FLOWING)) 
+			{
 				rs_shader = (rscript_t *)s->texinfo->image->script;
-				if(rs_shader) {
-
-					qglDepthMask(false);
-					qglShadeModel (GL_SMOOTH);
-					qglEnable(GL_POLYGON_OFFSET_FILL);
-					qglPolygonOffset(-3, -2);
-
+				if(rs_shader) 
 					RS_Surface(s);
-
-					qglDisable(GL_POLYGON_OFFSET_FILL);
-					GLSTATE_DISABLE_BLEND
-					GLSTATE_DISABLE_ALPHATEST
-
-					qglDepthMask(true);
-				}
 				else
 					BSP_DrawPoly (s, s->texinfo->flags);
 			}

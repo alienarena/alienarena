@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include "client.h"
+#include "qcommon/md5.h"
 
 #if defined HAVE_UNISTD_H
 #include <unistd.h>
@@ -32,7 +33,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 CURLM *curlm;
 CURL *curl;
 
-extern cvar_t  *cl_stats_server;
+extern cvar_t *cl_master;
+extern cvar_t *cl_stats_server;
+
+extern cvar_t *name;
+extern cvar_t *password;
 
 static char *cpr; // just for unused result warnings
 
@@ -63,7 +68,7 @@ size_t write_data(const void *buffer, size_t size, size_t nmemb, void *userp)
 }
 
 //get the stats database
-void getStatsDB( void )
+void STATS_getStatsDB( void )
 {
 	FILE* file;
 	char statserver[128];
@@ -197,4 +202,36 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player )
 	}
 
 	return player;
+}
+
+/*
+===================
+CL_AuthenticateStats
+
+Send packet to stats server
+to authenticate player
+===================
+*/
+
+void STATS_AuthenticateStats (void) 
+{
+	char *requeststring;
+	netadr_t adr;	
+
+	return; //don't use yet
+
+	NET_Config (true);
+
+	//to do - use md5 encryption on password, never send raw string!
+	requeststring = va("login\\\\%s\\\\%s\\\\", name->string, password->string );
+
+	if( NET_StringToAdr( cl_master->string, &adr ) ) {
+		if( !adr.port )
+			adr.port = BigShort( PORT_STATS );
+		Netchan_OutOfBandPrint( NS_CLIENT, adr, requeststring );
+	}
+	else
+	{
+		Com_Printf( "Bad address: %s\n", cl_master->string);
+	}
 }

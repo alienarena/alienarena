@@ -219,7 +219,9 @@ PROTOCOL
 
 #define	PORT_MASTER	27900
 #define	PORT_CLIENT	27901
+#define PORT_STATS	27902
 #define	PORT_SERVER	27910
+
 
 //=========================================
 
