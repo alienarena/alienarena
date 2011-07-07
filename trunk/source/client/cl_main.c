@@ -1778,7 +1778,7 @@ void CL_InitLocal (void)
 	info_spectator = Cvar_Get ("spectator", "0", CVAR_USERINFO);
 	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
 	//to do - move this into a seperate config file
-	password = Cvar_Get("stats_password", "password", CVAR_USERINFO | CVAR_ARCHIVE);
+	//password = Cvar_Get("stats_password", "password", CVAR_USERINFO | CVAR_ARCHIVE);
 	/* */
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	/* */
