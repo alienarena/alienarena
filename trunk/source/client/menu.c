@@ -548,6 +548,7 @@ void M_Main_Draw (void)
 	int w, h;
 	char montagepicname[16];
 	char backgroundpic[16];
+	char *version_warning;
 
 	scale = (float)(viddef.height)/600;
 
@@ -576,6 +577,13 @@ void M_Main_Draw (void)
 	M_Background(backgroundpic);
 	M_MontagePic(montagepicname, mainalpha);
 
+	//if appropriate, draw the out-of-date warning
+	if ( cl_latest_game_version->value - atof(VERSION) > 0.00001f ) {
+	    version_warning = va("version %s available (%s currently installed)", cl_latest_game_version->string, VERSION);
+	    M_PrintWhite (0, 5*scale, version_warning);
+	}
+
+	//draw the main menu buttons
 	for ( i = 0; main_names[i] != 0; i++ )
 	{
 		if ( i != m_main_cursor ){
