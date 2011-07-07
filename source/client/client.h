@@ -323,6 +323,8 @@ extern	cvar_t	*cl_IRC_nickname;
 extern	cvar_t	*cl_IRC_kick_rejoin;
 extern	cvar_t	*cl_IRC_reconnect_delay;
 
+extern	cvar_t	*cl_latest_game_version;
+
 typedef struct
 {
 	int		key;				// so entities can reuse same entry
@@ -583,6 +585,12 @@ void STATS_getStatsDB( void );
 void STATS_AuthenticateStats (void);
 PLAYERSTATS getPlayerRanking ( PLAYERSTATS player );
 PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player );
+
+//
+// cl_updates.c
+//
+
+void getLatestGameVersion( void );
 
 //
 // cl_view.c

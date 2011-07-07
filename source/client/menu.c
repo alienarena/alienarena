@@ -3787,6 +3787,8 @@ void JoinServer_MenuInit( void )
 	m_show_empty = true;
 
 	STATS_getStatsDB();
+	
+	getLatestGameVersion();
 
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	Q_strncpyz2( thisPlayer.playername, name->string, sizeof(thisPlayer.playername) );

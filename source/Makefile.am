@@ -131,6 +131,7 @@ crx_SOURCES = \
 	client/cl_pred.c \
 	client/cl_scrn.c \
 	client/cl_stats.c \
+	client/cl_updates.c \
 	client/cl_tent.c \
 	client/cl_view.c \
 	client/console.c \

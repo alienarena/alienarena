@@ -148,6 +148,10 @@ cvar_t  *cl_disbeamclr;
 //Stats
 cvar_t  *cl_stats_server;
 
+//latest version of the game available
+cvar_t	*cl_latest_game_version;
+cvar_t	*cl_latest_game_version_url;
+
 client_static_t	cls;
 client_state_t	cl;
 
@@ -1803,6 +1807,10 @@ void CL_InitLocal (void)
 
 	//stats server
 	cl_stats_server = Cvar_Get("cl_stats_server", "http://stats.planetarena.org", CVAR_ARCHIVE);
+	
+	//update checker
+	cl_latest_game_version = Cvar_Get("cl_latest_game_version", VERSION, CVAR_ARCHIVE);
+	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", "http://red.planetarena.org/version/crx_version", CVAR_ARCHIVE);
 
 	//
 	// register our commands
