@@ -52,7 +52,7 @@ static FILE* statsdb_open( const char* mode )
 	return file;
 }
 
-size_t write_data(const void *buffer, size_t size, size_t nmemb, void *userp)
+static size_t write_data(const void *buffer, size_t size, size_t nmemb, void *userp)
 {
 	FILE* file;
 	size_t bytecount = 0;

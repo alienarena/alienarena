@@ -253,28 +253,28 @@ am__crx_SOURCES_DIST = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	client/cl_http.c client/client.h client/cl_input.c \
 	client/cl_inv.c client/cl_irc.c client/cl_main.c \
 	client/cl_parse.c client/cl_pred.c client/cl_scrn.c \
-	client/cl_stats.c client/cl_tent.c client/cl_view.c \
-	client/console.c client/console.h client/input.h client/keys.c \
-	client/keys.h client/menu.c client/qal.c client/qal.h \
-	client/qmenu.c client/qmenu.h client/ref.h client/screen.h \
-	client/snd_file.c client/snd_openal.c client/sound.h \
-	client/vid.h client/vid_menu.c game/game.h game/q_shared.c \
-	game/q_shared.h qcommon/cmd.c qcommon/cmodel.c \
-	qcommon/common.c qcommon/crc.c qcommon/crc.h qcommon/cvar.c \
-	qcommon/files.c qcommon/htable.c qcommon/htable.h \
-	qcommon/mdfour.c qcommon/net_chan.c qcommon/pmove.c \
-	qcommon/qcommon.h qcommon/qfiles.h ref_gl/anorms.h \
-	ref_gl/anormtab.h ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c \
-	ref_gl/r_bmfont.c ref_gl/r_bmfont.h ref_gl/r_draw.c \
-	ref_gl/r_image.c ref_gl/r_image.h ref_gl/r_iqm.h \
-	ref_gl/r_iqm.c ref_gl/r_light.c ref_gl/r_local.h \
-	ref_gl/r_main.c ref_gl/r_math.c ref_gl/r_math.h \
-	ref_gl/r_mesh.c ref_gl/r_misc.c ref_gl/r_model.c \
-	ref_gl/r_model.h ref_gl/r_particle.c ref_gl/r_postprocess.c \
-	ref_gl/r_program.c ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h \
-	ref_gl/r_script.c ref_gl/r_script.h ref_gl/r_shadowmaps.c \
-	ref_gl/r_shadows.c ref_gl/r_surf.c ref_gl/r_text.c \
-	ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
+	client/cl_stats.c client/cl_updates.c client/cl_tent.c \
+	client/cl_view.c client/console.c client/console.h \
+	client/input.h client/keys.c client/keys.h client/menu.c \
+	client/qal.c client/qal.h client/qmenu.c client/qmenu.h \
+	client/ref.h client/screen.h client/snd_file.c \
+	client/snd_openal.c client/sound.h client/vid.h \
+	client/vid_menu.c game/game.h game/q_shared.c game/q_shared.h \
+	qcommon/cmd.c qcommon/cmodel.c qcommon/common.c qcommon/crc.c \
+	qcommon/crc.h qcommon/cvar.c qcommon/files.c qcommon/htable.c \
+	qcommon/htable.h qcommon/mdfour.c qcommon/net_chan.c \
+	qcommon/pmove.c qcommon/qcommon.h qcommon/qfiles.h \
+	ref_gl/anorms.h ref_gl/anormtab.h ref_gl/glext.h ref_gl/qgl.h \
+	ref_gl/r_bloom.c ref_gl/r_bmfont.c ref_gl/r_bmfont.h \
+	ref_gl/r_draw.c ref_gl/r_image.c ref_gl/r_image.h \
+	ref_gl/r_iqm.h ref_gl/r_iqm.c ref_gl/r_light.c \
+	ref_gl/r_local.h ref_gl/r_main.c ref_gl/r_math.c \
+	ref_gl/r_math.h ref_gl/r_mesh.c ref_gl/r_misc.c \
+	ref_gl/r_model.c ref_gl/r_model.h ref_gl/r_particle.c \
+	ref_gl/r_postprocess.c ref_gl/r_program.c ref_gl/r_ragdoll.c \
+	ref_gl/r_ragdoll.h ref_gl/r_script.c ref_gl/r_script.h \
+	ref_gl/r_shadowmaps.c ref_gl/r_shadows.c ref_gl/r_surf.c \
+	ref_gl/r_text.c ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
 	ref_gl/r_varray.c ref_gl/r_vbo.c ref_gl/r_vlights.c \
 	ref_gl/r_warp.c ref_gl/warpsin.h server/server.h \
 	server/sv_ccmds.c server/sv_ents.c server/sv_game.c \
@@ -310,23 +310,23 @@ am_crx_OBJECTS = client/crx-cl_ents.$(OBJEXT) \
 	client/crx-cl_irc.$(OBJEXT) client/crx-cl_main.$(OBJEXT) \
 	client/crx-cl_parse.$(OBJEXT) client/crx-cl_pred.$(OBJEXT) \
 	client/crx-cl_scrn.$(OBJEXT) client/crx-cl_stats.$(OBJEXT) \
-	client/crx-cl_tent.$(OBJEXT) client/crx-cl_view.$(OBJEXT) \
-	client/crx-console.$(OBJEXT) client/crx-keys.$(OBJEXT) \
-	client/crx-menu.$(OBJEXT) client/crx-qal.$(OBJEXT) \
-	client/crx-qmenu.$(OBJEXT) client/crx-snd_file.$(OBJEXT) \
-	client/crx-snd_openal.$(OBJEXT) client/crx-vid_menu.$(OBJEXT) \
-	game/crx-q_shared.$(OBJEXT) qcommon/crx-cmd.$(OBJEXT) \
-	qcommon/crx-cmodel.$(OBJEXT) qcommon/crx-common.$(OBJEXT) \
-	qcommon/crx-crc.$(OBJEXT) qcommon/crx-cvar.$(OBJEXT) \
-	qcommon/crx-files.$(OBJEXT) qcommon/crx-htable.$(OBJEXT) \
-	qcommon/crx-mdfour.$(OBJEXT) qcommon/crx-net_chan.$(OBJEXT) \
-	qcommon/crx-pmove.$(OBJEXT) ref_gl/crx-r_bloom.$(OBJEXT) \
-	ref_gl/crx-r_bmfont.$(OBJEXT) ref_gl/crx-r_draw.$(OBJEXT) \
-	ref_gl/crx-r_image.$(OBJEXT) ref_gl/crx-r_iqm.$(OBJEXT) \
-	ref_gl/crx-r_light.$(OBJEXT) ref_gl/crx-r_main.$(OBJEXT) \
-	ref_gl/crx-r_math.$(OBJEXT) ref_gl/crx-r_mesh.$(OBJEXT) \
-	ref_gl/crx-r_misc.$(OBJEXT) ref_gl/crx-r_model.$(OBJEXT) \
-	ref_gl/crx-r_particle.$(OBJEXT) \
+	client/crx-cl_updates.$(OBJEXT) client/crx-cl_tent.$(OBJEXT) \
+	client/crx-cl_view.$(OBJEXT) client/crx-console.$(OBJEXT) \
+	client/crx-keys.$(OBJEXT) client/crx-menu.$(OBJEXT) \
+	client/crx-qal.$(OBJEXT) client/crx-qmenu.$(OBJEXT) \
+	client/crx-snd_file.$(OBJEXT) client/crx-snd_openal.$(OBJEXT) \
+	client/crx-vid_menu.$(OBJEXT) game/crx-q_shared.$(OBJEXT) \
+	qcommon/crx-cmd.$(OBJEXT) qcommon/crx-cmodel.$(OBJEXT) \
+	qcommon/crx-common.$(OBJEXT) qcommon/crx-crc.$(OBJEXT) \
+	qcommon/crx-cvar.$(OBJEXT) qcommon/crx-files.$(OBJEXT) \
+	qcommon/crx-htable.$(OBJEXT) qcommon/crx-mdfour.$(OBJEXT) \
+	qcommon/crx-net_chan.$(OBJEXT) qcommon/crx-pmove.$(OBJEXT) \
+	ref_gl/crx-r_bloom.$(OBJEXT) ref_gl/crx-r_bmfont.$(OBJEXT) \
+	ref_gl/crx-r_draw.$(OBJEXT) ref_gl/crx-r_image.$(OBJEXT) \
+	ref_gl/crx-r_iqm.$(OBJEXT) ref_gl/crx-r_light.$(OBJEXT) \
+	ref_gl/crx-r_main.$(OBJEXT) ref_gl/crx-r_math.$(OBJEXT) \
+	ref_gl/crx-r_mesh.$(OBJEXT) ref_gl/crx-r_misc.$(OBJEXT) \
+	ref_gl/crx-r_model.$(OBJEXT) ref_gl/crx-r_particle.$(OBJEXT) \
 	ref_gl/crx-r_postprocess.$(OBJEXT) \
 	ref_gl/crx-r_program.$(OBJEXT) ref_gl/crx-r_ragdoll.$(OBJEXT) \
 	ref_gl/crx-r_script.$(OBJEXT) \
@@ -591,28 +591,28 @@ crx_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	client/cl_http.c client/client.h client/cl_input.c \
 	client/cl_inv.c client/cl_irc.c client/cl_main.c \
 	client/cl_parse.c client/cl_pred.c client/cl_scrn.c \
-	client/cl_stats.c client/cl_tent.c client/cl_view.c \
-	client/console.c client/console.h client/input.h client/keys.c \
-	client/keys.h client/menu.c client/qal.c client/qal.h \
-	client/qmenu.c client/qmenu.h client/ref.h client/screen.h \
-	client/snd_file.c client/snd_openal.c client/sound.h \
-	client/vid.h client/vid_menu.c game/game.h game/q_shared.c \
-	game/q_shared.h qcommon/cmd.c qcommon/cmodel.c \
-	qcommon/common.c qcommon/crc.c qcommon/crc.h qcommon/cvar.c \
-	qcommon/files.c qcommon/htable.c qcommon/htable.h \
-	qcommon/mdfour.c qcommon/net_chan.c qcommon/pmove.c \
-	qcommon/qcommon.h qcommon/qfiles.h ref_gl/anorms.h \
-	ref_gl/anormtab.h ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c \
-	ref_gl/r_bmfont.c ref_gl/r_bmfont.h ref_gl/r_draw.c \
-	ref_gl/r_image.c ref_gl/r_image.h ref_gl/r_iqm.h \
-	ref_gl/r_iqm.c ref_gl/r_light.c ref_gl/r_local.h \
-	ref_gl/r_main.c ref_gl/r_math.c ref_gl/r_math.h \
-	ref_gl/r_mesh.c ref_gl/r_misc.c ref_gl/r_model.c \
-	ref_gl/r_model.h ref_gl/r_particle.c ref_gl/r_postprocess.c \
-	ref_gl/r_program.c ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h \
-	ref_gl/r_script.c ref_gl/r_script.h ref_gl/r_shadowmaps.c \
-	ref_gl/r_shadows.c ref_gl/r_surf.c ref_gl/r_text.c \
-	ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
+	client/cl_stats.c client/cl_updates.c client/cl_tent.c \
+	client/cl_view.c client/console.c client/console.h \
+	client/input.h client/keys.c client/keys.h client/menu.c \
+	client/qal.c client/qal.h client/qmenu.c client/qmenu.h \
+	client/ref.h client/screen.h client/snd_file.c \
+	client/snd_openal.c client/sound.h client/vid.h \
+	client/vid_menu.c game/game.h game/q_shared.c game/q_shared.h \
+	qcommon/cmd.c qcommon/cmodel.c qcommon/common.c qcommon/crc.c \
+	qcommon/crc.h qcommon/cvar.c qcommon/files.c qcommon/htable.c \
+	qcommon/htable.h qcommon/mdfour.c qcommon/net_chan.c \
+	qcommon/pmove.c qcommon/qcommon.h qcommon/qfiles.h \
+	ref_gl/anorms.h ref_gl/anormtab.h ref_gl/glext.h ref_gl/qgl.h \
+	ref_gl/r_bloom.c ref_gl/r_bmfont.c ref_gl/r_bmfont.h \
+	ref_gl/r_draw.c ref_gl/r_image.c ref_gl/r_image.h \
+	ref_gl/r_iqm.h ref_gl/r_iqm.c ref_gl/r_light.c \
+	ref_gl/r_local.h ref_gl/r_main.c ref_gl/r_math.c \
+	ref_gl/r_math.h ref_gl/r_mesh.c ref_gl/r_misc.c \
+	ref_gl/r_model.c ref_gl/r_model.h ref_gl/r_particle.c \
+	ref_gl/r_postprocess.c ref_gl/r_program.c ref_gl/r_ragdoll.c \
+	ref_gl/r_ragdoll.h ref_gl/r_script.c ref_gl/r_script.h \
+	ref_gl/r_shadowmaps.c ref_gl/r_shadows.c ref_gl/r_surf.c \
+	ref_gl/r_text.c ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
 	ref_gl/r_varray.c ref_gl/r_vbo.c ref_gl/r_vlights.c \
 	ref_gl/r_warp.c ref_gl/warpsin.h server/server.h \
 	server/sv_ccmds.c server/sv_ents.c server/sv_game.c \
@@ -1366,6 +1366,8 @@ client/crx-cl_scrn.$(OBJEXT): client/$(am__dirstamp) \
 	client/$(DEPDIR)/$(am__dirstamp)
 client/crx-cl_stats.$(OBJEXT): client/$(am__dirstamp) \
 	client/$(DEPDIR)/$(am__dirstamp)
+client/crx-cl_updates.$(OBJEXT): client/$(am__dirstamp) \
+	client/$(DEPDIR)/$(am__dirstamp)
 client/crx-cl_tent.$(OBJEXT): client/$(am__dirstamp) \
 	client/$(DEPDIR)/$(am__dirstamp)
 client/crx-cl_view.$(OBJEXT): client/$(am__dirstamp) \
@@ -1615,6 +1617,7 @@ mostlyclean-compile:
 	-rm -f client/crx-cl_scrn.$(OBJEXT)
 	-rm -f client/crx-cl_stats.$(OBJEXT)
 	-rm -f client/crx-cl_tent.$(OBJEXT)
+	-rm -f client/crx-cl_updates.$(OBJEXT)
 	-rm -f client/crx-cl_view.$(OBJEXT)
 	-rm -f client/crx-console.$(OBJEXT)
 	-rm -f client/crx-keys.$(OBJEXT)
@@ -1864,6 +1867,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-cl_scrn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-cl_stats.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-cl_tent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-cl_updates.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-cl_view.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-console.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@client/$(DEPDIR)/crx-keys.Po@am__quote@
@@ -2355,6 +2359,22 @@ client/crx-cl_stats.obj: client/cl_stats.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='client/cl_stats.c' object='client/crx-cl_stats.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o client/crx-cl_stats.obj `if test -f 'client/cl_stats.c'; then $(CYGPATH_W) 'client/cl_stats.c'; else $(CYGPATH_W) '$(srcdir)/client/cl_stats.c'; fi`
+
+client/crx-cl_updates.o: client/cl_updates.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT client/crx-cl_updates.o -MD -MP -MF client/$(DEPDIR)/crx-cl_updates.Tpo -c -o client/crx-cl_updates.o `test -f 'client/cl_updates.c' || echo '$(srcdir)/'`client/cl_updates.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) client/$(DEPDIR)/crx-cl_updates.Tpo client/$(DEPDIR)/crx-cl_updates.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='client/cl_updates.c' object='client/crx-cl_updates.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o client/crx-cl_updates.o `test -f 'client/cl_updates.c' || echo '$(srcdir)/'`client/cl_updates.c
+
+client/crx-cl_updates.obj: client/cl_updates.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT client/crx-cl_updates.obj -MD -MP -MF client/$(DEPDIR)/crx-cl_updates.Tpo -c -o client/crx-cl_updates.obj `if test -f 'client/cl_updates.c'; then $(CYGPATH_W) 'client/cl_updates.c'; else $(CYGPATH_W) '$(srcdir)/client/cl_updates.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) client/$(DEPDIR)/crx-cl_updates.Tpo client/$(DEPDIR)/crx-cl_updates.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='client/cl_updates.c' object='client/crx-cl_updates.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o client/crx-cl_updates.obj `if test -f 'client/cl_updates.c'; then $(CYGPATH_W) 'client/cl_updates.c'; else $(CYGPATH_W) '$(srcdir)/client/cl_updates.c'; fi`
 
 client/crx-cl_tent.o: client/cl_tent.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT client/crx-cl_tent.o -MD -MP -MF client/$(DEPDIR)/crx-cl_tent.Tpo -c -o client/crx-cl_tent.o `test -f 'client/cl_tent.c' || echo '$(srcdir)/'`client/cl_tent.c
