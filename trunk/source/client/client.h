@@ -583,6 +583,7 @@ typedef struct _PLAYERSTATS {
 
 void STATS_getStatsDB( void );
 void STATS_AuthenticateStats (void);
+void STATS_Logout (void);
 PLAYERSTATS getPlayerRanking ( PLAYERSTATS player );
 PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player );
 

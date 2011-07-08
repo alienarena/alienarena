@@ -204,26 +204,71 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player )
 	return player;
 }
 
-/*
-===================
-CL_AuthenticateStats
-
-Send packet to stats server
-to authenticate player
-===================
-*/
-
+//Send stats server authentication pw
 void STATS_AuthenticateStats (void) 
 {
 	char *requeststring;
 	netadr_t adr;	
-
-	return; //don't use yet
+	char szPassword[32];
 
 	NET_Config (true);
 
-	//to do - use md5 encryption on password, never send raw string!
-	requeststring = va("login\\\\%s\\\\%s\\\\", name->string, password->string );
+	//use md5 encryption on password, never send raw string!
+	Com_MD5HashString (password->string, strlen(password->string), szPassword, sizeof(szPassword));
+
+	requeststring = va("login\\\\%s\\\\%s\\\\", name->string, szPassword );
+
+	if( NET_StringToAdr( cl_master->string, &adr ) ) {
+		if( !adr.port )
+			adr.port = BigShort( PORT_STATS );
+		Netchan_OutOfBandPrint( NS_CLIENT, adr, requeststring );
+	}
+	else
+	{
+		Com_Printf( "Bad address: %s\n", cl_master->string);
+	}
+}
+
+//Send password change request to server
+void STATS_ChangePassword (char *oldPassword) 
+{
+	char *requeststring;
+	netadr_t adr;	
+	char szPassword[32];
+	char szNewPassword[32];
+
+	NET_Config (true);
+
+	//use md5 encryption on password, never send raw string!
+	Com_MD5HashString (password->string, strlen(password->string), szNewPassword, sizeof(szNewPassword));
+	Com_MD5HashString (oldPassword, strlen(oldPassword), szPassword, sizeof(szPassword));
+
+	requeststring = va("change\\\\%s\\\\%s\\\\%s\\\\", name->string, szPassword, szNewPassword );
+
+	if( NET_StringToAdr( cl_master->string, &adr ) ) {
+		if( !adr.port )
+			adr.port = BigShort( PORT_STATS );
+		Netchan_OutOfBandPrint( NS_CLIENT, adr, requeststring );
+	}
+	else
+	{
+		Com_Printf( "Bad address: %s\n", cl_master->string);
+	}
+}
+
+//Logout of stats server
+void STATS_Logout (void)
+{
+	char *requeststring;
+	netadr_t adr;	
+	char szPassword[32];
+
+	NET_Config (true);
+
+	//use md5 encryption on password, never send raw string!
+	Com_MD5HashString (password->string, strlen(password->string), szPassword, sizeof(szPassword));
+
+	requeststring = va("logout\\\\%s\\\\%s\\\\", name->string, szPassword );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )

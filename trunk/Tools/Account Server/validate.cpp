@@ -51,7 +51,10 @@ bool ValidatePlayer(char name[32], char password[32])
 			return true;
 		}
 		else
+		{
+			printf("invalid password for %s!", name);
 			return false;
+		}
 	}	
 
 	return false;
