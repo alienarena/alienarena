@@ -1534,6 +1534,7 @@ void Qcommon_Init (int argc, char **argv)
 
 	Cbuf_AddText ("exec default.cfg\n");
 	Cbuf_AddText ("exec config.cfg\n");
+	Cbuf_AddText ("exec profile.cfg\n");
 
 	Cbuf_AddEarlyCommands (true);
 	Cbuf_Execute ();

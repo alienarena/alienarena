@@ -364,6 +364,7 @@ CVARS (console variables)
 #define CVAR_ROM		32  // cannot be set by user at all
 #define CVAR_GAMEINFO   64  // added to the 'mods' field of the serverinfo
                             // string when changed
+#define CVAR_PROFILE	128 // profile information
 
 // nothing outside the Cvar_*() functions should modify these fields!
 typedef struct cvar_s

@@ -69,10 +69,10 @@ int retval;
 int timeCount;
 int dumpCount;
 
-//this called only when a packet of "logout" is received
-//we might also want to timeout a player, so maybe a timestamp of when a player is added would be prudent
 void DropPlayer (player_t *player)
 {
+	dprintf("%s expired...\n", player->name);
+
 	//unlink
 	if (player->next)
 		player->next->prev = player->prev;
@@ -100,6 +100,23 @@ void CheckPlayers (void)
 			curTime += 24;
 		if(curTime - player->time > 5)
 			DropPlayer(player);
+	}
+}
+
+//logout player
+void RemovePlayer (char name[32])
+{
+	player_t	*player = &players;
+
+	//check if this player is already in the list
+	while (player->next)
+	{
+		player = player->next;
+		if (!_stricmp(player->name, name))
+		{
+			DropPlayer(player);
+			return;
+		}
 	}
 }
 
@@ -131,7 +148,13 @@ void AddPlayer (char name[32])
 	GetSystemTime(&st);
 	player->time = st.wHour;
 
-	dprintf ("[I] player %s added to queue!\n", name);
+	dprintf ("%s added to queue!\n", name);
+
+	//dump all current players to file for statsgen to read
+	DumpValidPlayersToFile();
+
+	//check for expired players(those who never sent a logout)
+	CheckPlayers();
 }
 
 void SendValidationToClient (struct sockaddr_in *from)
@@ -184,9 +207,27 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			SendValidationToClient (from);
 		}
 	}
-	else if (_strnicmp (data, "logout", 6) == 0)
+	else if (_strnicmp (data, "ÿÿÿÿlogout", 10) == 0)
 	{
-		//remove from stack
+		//parse string, etc validate or create new profile file
+		token = strtok( cmd, seps );
+
+		token = strtok( NULL, seps );
+		if(strlen(token) > 32) 
+			token[32] = 0; //don't allow overflows from malicious hackers
+		strcpy_s(name, token);
+
+		token = strtok( NULL, seps );
+		if(strlen(token) > 32) 
+			token[32] = 0; //don't allow overflows from malicious hackers
+		strcpy_s(password, token);
+
+		printf ("[W] Logout command from %s:%s!\n", name, password);
+
+		if(ValidatePlayer(name, password))
+		{
+			RemovePlayer(name);
+		}
 	}
 	else
 	{
@@ -262,19 +303,6 @@ int main (int argc, char argv[])
 			} else {
 				dprintf ("[E] socket error during select from %s:%d (%d)\n", inet_ntoa (from.sin_addr), ntohs(from.sin_port), WSAGetLastError());
 			}
-		}
-
-		//add a counter, when reaching a certain amount, write out file of current validated player list
-		timeCount++;
-		dumpCount++;
-
-		if(dumpCount > 20000) //maybe do something using time instead
-		{
-			//dump list to file
-			dumpCount = 0;
-
-			//check for expired players
-			CheckPlayers();
 		}
 	}
 }
