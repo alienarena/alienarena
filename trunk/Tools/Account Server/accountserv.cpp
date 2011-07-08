@@ -71,7 +71,7 @@ int dumpCount;
 
 void DropPlayer (player_t *player)
 {
-	dprintf("%s expired...\n", player->name);
+	dprintf("%s dropped...\n", player->name);
 
 	//unlink
 	if (player->next)
@@ -180,7 +180,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	char *token;
 	char seps[] = "\\";
 	char name[32];
-	char password[32];
+	char password[256];
 
 	if (_strnicmp (data, "ÿÿÿÿlogin", 9) == 0)
 	{		
@@ -193,11 +193,11 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		strcpy_s(name, token);
 
 		token = strtok( NULL, seps );
-		if(strlen(token) > 32) 
-			token[32] = 0; //don't allow overflows from malicious hackers
+		if(strlen(token) > 256) 
+			token[256] = 0; //don't allow overflows from malicious hackers
 		strcpy_s(password, token);
 
-		printf ("[W] Login command from %s:%s!\n", name, password);
+		printf ("Login command from %s:%s\n", name, password);
 
 		if(ValidatePlayer(name, password))
 		{
@@ -218,11 +218,11 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		strcpy_s(name, token);
 
 		token = strtok( NULL, seps );
-		if(strlen(token) > 32) 
-			token[32] = 0; //don't allow overflows from malicious hackers
+		if(strlen(token) > 256) 
+			token[256] = 0; //don't allow overflows from malicious hackers
 		strcpy_s(password, token);
 
-		printf ("[W] Logout command from %s:%s!\n", name, password);
+		printf ("Logout command from %s:%s\n", name, password);
 
 		if(ValidatePlayer(name, password))
 		{
@@ -231,7 +231,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	}
 	else
 	{
-		printf ("[W] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+		printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 	}
 
 }

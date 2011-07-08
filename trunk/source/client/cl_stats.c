@@ -209,14 +209,25 @@ void STATS_AuthenticateStats (void)
 {
 	char *requeststring;
 	netadr_t adr;	
-	char szPassword[32];
+	char szPassword[256];
+	char szPassHash[256];
+	char szPassHash2[256];
+	char szRandomString[64];
+
+	strcpy(szRandomString, "thisisatest"); //to do - make this truly random?
 
 	NET_Config (true);
 
 	//use md5 encryption on password, never send raw string!
-	Com_MD5HashString (password->string, strlen(password->string), szPassword, sizeof(szPassword));
 
-	requeststring = va("login\\\\%s\\\\%s\\\\", name->string, szPassword );
+	//salt
+	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", password->string);
+
+	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
+	Com_HMACMD5String(szPassHash, strlen(szPassHash), szRandomString,
+		strlen(szRandomString), szPassHash2, sizeof(szPassHash2));
+
+	requeststring = va("login\\\\%s\\\\%s\\\\", name->string, szPassHash2 );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
@@ -234,16 +245,34 @@ void STATS_ChangePassword (char *oldPassword)
 {
 	char *requeststring;
 	netadr_t adr;	
-	char szPassword[32];
-	char szNewPassword[32];
+	char szPassword[256];
+	char szNewPassword[256];
+	char szPassHash[256];
+	char szNewPassHash[256];
+	char szPassHash2[256];
+	char szNewPassHash2[256];
+	char szRandomString[64];
+
+	strcpy(szRandomString, "thisisatest"); //to do - make this truly random?
 
 	NET_Config (true);
 
 	//use md5 encryption on password, never send raw string!
-	Com_MD5HashString (password->string, strlen(password->string), szNewPassword, sizeof(szNewPassword));
-	Com_MD5HashString (oldPassword, strlen(oldPassword), szPassword, sizeof(szPassword));
 
-	requeststring = va("change\\\\%s\\\\%s\\\\%s\\\\", name->string, szPassword, szNewPassword );
+	//salt
+	Com_sprintf(szNewPassword, sizeof(szNewPassword), "%sAALogin001", password->string);
+
+	Com_MD5HashString (szNewPassword, strlen(szNewPassword), szNewPassHash, sizeof(szNewPassHash));
+	Com_HMACMD5String(szNewPassHash, strlen(szNewPassHash), szRandomString,
+		strlen(szRandomString), szNewPassHash2, sizeof(szNewPassHash2));
+
+	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", oldPassword);
+
+	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
+	Com_HMACMD5String(szPassHash, strlen(szPassHash), szRandomString,
+		strlen(szRandomString), szPassHash2, sizeof(szPassHash2));
+
+	requeststring = va("change\\\\%s\\\\%s\\\\%s\\\\", name->string, szPassHash2, szNewPassHash2 );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
@@ -259,16 +288,27 @@ void STATS_ChangePassword (char *oldPassword)
 //Logout of stats server
 void STATS_Logout (void)
 {
-	char *requeststring;
+char *requeststring;
 	netadr_t adr;	
-	char szPassword[32];
+	char szPassword[256];
+	char szPassHash[256];
+	char szPassHash2[256];
+	char szRandomString[64];
+
+	strcpy(szRandomString, "thisisatest"); //to do - make this truly random?
 
 	NET_Config (true);
 
 	//use md5 encryption on password, never send raw string!
-	Com_MD5HashString (password->string, strlen(password->string), szPassword, sizeof(szPassword));
 
-	requeststring = va("logout\\\\%s\\\\%s\\\\", name->string, szPassword );
+	//salt
+	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", password->string);
+
+	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
+	Com_HMACMD5String(szPassHash, strlen(szPassHash), szRandomString,
+		strlen(szRandomString), szPassHash2, sizeof(szPassHash2));
+
+	requeststring = va("logout\\\\%s\\\\%s\\\\", name->string, szPassHash2 );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
