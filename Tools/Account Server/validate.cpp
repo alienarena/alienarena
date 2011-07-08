@@ -11,12 +11,12 @@ using namespace std;
 
 extern SYSTEMTIME st;
 
-bool ValidatePlayer(char name[32], char password[32])
+bool ValidatePlayer(char name[32], char password[256])
 {
 	ifstream playerProfileFile;
 	ofstream newPlayerProfileFile;
 	char szPath[256];
-	char svPass[32];
+	char svPass[256];
 	char svTime[32];
 
 	sprintf(szPath, "playerprofiles/%s", name);
@@ -42,7 +42,7 @@ bool ValidatePlayer(char name[32], char password[32])
 	{
 		printf("reading profile for %s\n", name);
 
-		playerProfileFile.getline(svPass, 32);
+		playerProfileFile.getline(svPass, 256);
 		playerProfileFile.close();
 
 		if(!_stricmp(svPass, password))
