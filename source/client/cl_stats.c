@@ -218,10 +218,24 @@ void STATS_AuthenticateStats (void)
 	char szRandomString[64];
 	 
 	strcpy(szRandomString, "thisisatest"); //to do - this should be obtained from the server prior 
+	//note - the string will be stored on the server, not in code.  The code below should not 
+	//be executed until we receive the string, which will mean a few minor structural changes
+	//to this function, and possibly the next two.
 
 	NET_Config (true);
 
-	//use md5 encryption on password, never send raw string!
+	//use md5 encryption on password, never send or store a raw password!
+	if(!pw_hashed->value)
+	{
+		Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", password->string);
+		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
+
+		Cvar_Set("stats_pw_hashed", "1");
+		Cvar_Set("stats_password", szPassHash);
+
+		//get new hashed password
+		password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+	}
 
 	//salt
 	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", password->string);
@@ -243,7 +257,7 @@ void STATS_AuthenticateStats (void)
 	}
 }
 
-//Send password change request to server
+//Send password change request to server(this is to be called from the menu when a password is edited)
 void STATS_ChangePassword (char *oldPassword) 
 {
 	char *requeststring;
@@ -260,8 +274,16 @@ void STATS_ChangePassword (char *oldPassword)
 
 	NET_Config (true);
 
-	//use md5 encryption on password, never send raw string!
+	//use md5 encryption on password, never send or store a raw password!
+	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", password->string);
+	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 
+	Cvar_Set("stats_pw_hashed", "1");
+	Cvar_Set("stats_password", szPassHash);
+
+	//get new hashed password
+	password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+	
 	//salt
 	Com_sprintf(szNewPassword, sizeof(szNewPassword), "%sAALogin001", password->string);
 
@@ -302,7 +324,18 @@ void STATS_Logout (void)
 
 	NET_Config (true);
 
-	//use md5 encryption on password, never send raw string!
+	//use md5 encryption on password, never send or store a raw password!
+	if(!pw_hashed->value)
+	{
+		Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", password->string);
+		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
+
+		Cvar_Set("stats_pw_hashed", "1");
+		Cvar_Set("stats_password", szPassHash);
+
+		//get new hashed password
+		password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+	}
 
 	//salt
 	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", password->string);
