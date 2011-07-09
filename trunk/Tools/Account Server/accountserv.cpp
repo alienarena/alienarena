@@ -185,7 +185,8 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	if (_strnicmp (data, "ÿÿÿÿlogin", 9) == 0)
 	{		
 		//parse string, etc validate or create new profile file
-		token = strtok( cmd, seps );
+		token = strtok( cmd, seps ); 
+		token = strtok( NULL, seps ); //protocol - may need this later on
 
 		token = strtok( NULL, seps );
 		if(strlen(token) > 32) 
@@ -211,6 +212,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	{
 		//parse string, etc validate or create new profile file
 		token = strtok( cmd, seps );
+		token = strtok( NULL, seps ); //protocol - may need this later on
 
 		token = strtok( NULL, seps );
 		if(strlen(token) > 32) 

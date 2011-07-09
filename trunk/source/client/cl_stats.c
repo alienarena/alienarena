@@ -33,11 +33,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 CURLM *curlm;
 CURL *curl;
 
+#define STAT_PROTOCOL 1
+
 extern cvar_t *cl_master;
 extern cvar_t *cl_stats_server;
 
 extern cvar_t *name;
 extern cvar_t *password;
+extern cvar_t *pw_hashed;
 
 static char *cpr; // just for unused result warnings
 
@@ -213,8 +216,8 @@ void STATS_AuthenticateStats (void)
 	char szPassHash[256];
 	char szPassHash2[256];
 	char szRandomString[64];
-
-	strcpy(szRandomString, "thisisatest"); //to do - make this truly random?
+	 
+	strcpy(szRandomString, "thisisatest"); //to do - this should be obtained from the server prior 
 
 	NET_Config (true);
 
@@ -227,7 +230,7 @@ void STATS_AuthenticateStats (void)
 	Com_HMACMD5String(szPassHash, strlen(szPassHash), szRandomString,
 		strlen(szRandomString), szPassHash2, sizeof(szPassHash2));
 
-	requeststring = va("login\\\\%s\\\\%s\\\\", name->string, szPassHash2 );
+	requeststring = va("login\\\\%i\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, szPassHash2 );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
@@ -253,7 +256,7 @@ void STATS_ChangePassword (char *oldPassword)
 	char szNewPassHash2[256];
 	char szRandomString[64];
 
-	strcpy(szRandomString, "thisisatest"); //to do - make this truly random?
+	strcpy(szRandomString, "thisisatest"); 
 
 	NET_Config (true);
 
@@ -272,7 +275,7 @@ void STATS_ChangePassword (char *oldPassword)
 	Com_HMACMD5String(szPassHash, strlen(szPassHash), szRandomString,
 		strlen(szRandomString), szPassHash2, sizeof(szPassHash2));
 
-	requeststring = va("change\\\\%s\\\\%s\\\\%s\\\\", name->string, szPassHash2, szNewPassHash2 );
+	requeststring = va("change\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, szPassHash2, szNewPassHash2 );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
@@ -288,14 +291,14 @@ void STATS_ChangePassword (char *oldPassword)
 //Logout of stats server
 void STATS_Logout (void)
 {
-char *requeststring;
+	char *requeststring;
 	netadr_t adr;	
 	char szPassword[256];
 	char szPassHash[256];
 	char szPassHash2[256];
 	char szRandomString[64];
 
-	strcpy(szRandomString, "thisisatest"); //to do - make this truly random?
+	strcpy(szRandomString, "thisisatest"); 
 
 	NET_Config (true);
 
@@ -308,7 +311,7 @@ char *requeststring;
 	Com_HMACMD5String(szPassHash, strlen(szPassHash), szRandomString,
 		strlen(szRandomString), szPassHash2, sizeof(szPassHash2));
 
-	requeststring = va("logout\\\\%s\\\\%s\\\\", name->string, szPassHash2 );
+	requeststring = va("logout\\\\%i\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, szPassHash2 );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
