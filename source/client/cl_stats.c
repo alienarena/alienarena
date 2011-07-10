@@ -42,6 +42,7 @@ extern cvar_t *name;
 extern cvar_t *password;
 extern cvar_t *pw_hashed;
 
+static char szVerificationString[64];
 static char *cpr; // just for unused result warnings
 
 static FILE* statsdb_open( const char* mode )
@@ -207,20 +208,65 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player )
 	return player;
 }
 
+//This next section deals with account verification
+//Passwords are hashed before storing or sending, raw strings are never exposed.
+
+//Send request for login(vstrings are random, unique strings that the server generates for each player - provides an extra layer of encryption)
+void STATS_RequestVerification (void)
+{
+	char *requeststring;
+	netadr_t adr;	
+
+	NET_Config (true);
+
+	currLoginState.requestType = STATSLOGIN;
+
+	requeststring = va("requestvstring\\\\%i\\\\%s", STAT_PROTOCOL, name->string);
+
+	if( NET_StringToAdr( cl_master->string, &adr ) ) {
+		if( !adr.port )
+			adr.port = BigShort( PORT_STATS );
+		Netchan_OutOfBandPrint( NS_CLIENT, adr, requeststring );
+	}
+	else
+	{
+		Com_Printf( "Bad address: %s\n", cl_master->string);
+	}
+}
+
+//Send request for password change
+void STATS_RequestPwChange (void)
+{
+	char *requeststring;
+	netadr_t adr;	
+
+	NET_Config (true);
+
+	currLoginState.requestType = STATSLOGIN;
+
+	requeststring = va("requestvstring\\\\%i\\\\%s", STAT_PROTOCOL, name->string);
+
+	if( NET_StringToAdr( cl_master->string, &adr ) ) {
+		if( !adr.port )
+			adr.port = BigShort( PORT_STATS );
+		Netchan_OutOfBandPrint( NS_CLIENT, adr, requeststring );
+	}
+	else
+	{
+		Com_Printf( "Bad address: %s\n", cl_master->string);
+	}
+}
+
 //Send stats server authentication pw
-void STATS_AuthenticateStats (void) 
+void STATS_AuthenticateStats (char *vstring) 
 {
 	char *requeststring;
 	netadr_t adr;	
 	char szPassword[256];
 	char szPassHash[256];
-	char szPassHash2[256];
-	char szRandomString[64];
+	char szPassHash2[256];	
 	 
-	strcpy(szRandomString, "thisisatest"); //to do - this should be obtained from the server prior 
-	//note - the string will be stored on the server, not in code.  The code below should not 
-	//be executed until we receive the string, which will mean a few minor structural changes
-	//to this function, and possibly the next two.
+	strcpy(szVerificationString, vstring); 
 
 	NET_Config (true);
 
@@ -241,10 +287,10 @@ void STATS_AuthenticateStats (void)
 	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", password->string);
 
 	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
-	Com_HMACMD5String(szPassHash, strlen(szPassHash), szRandomString,
-		strlen(szRandomString), szPassHash2, sizeof(szPassHash2));
+	Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString,
+		strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
 
-	requeststring = va("login\\\\%i\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, szPassHash2 );
+	requeststring = va("login\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, szPassHash2, szVerificationString );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
@@ -258,7 +304,7 @@ void STATS_AuthenticateStats (void)
 }
 
 //Send password change request to server(this is to be called from the menu when a password is edited)
-void STATS_ChangePassword (char *oldPassword) 
+void STATS_ChangePassword (char *oldPassword, char *vstring) 
 {
 	char *requeststring;
 	netadr_t adr;	
@@ -268,9 +314,8 @@ void STATS_ChangePassword (char *oldPassword)
 	char szNewPassHash[256];
 	char szPassHash2[256];
 	char szNewPassHash2[256];
-	char szRandomString[64];
 
-	strcpy(szRandomString, "thisisatest"); 
+	strcpy(szVerificationString, vstring); 
 
 	NET_Config (true);
 
@@ -288,14 +333,14 @@ void STATS_ChangePassword (char *oldPassword)
 	Com_sprintf(szNewPassword, sizeof(szNewPassword), "%sAALogin001", password->string);
 
 	Com_MD5HashString (szNewPassword, strlen(szNewPassword), szNewPassHash, sizeof(szNewPassHash));
-	Com_HMACMD5String(szNewPassHash, strlen(szNewPassHash), szRandomString,
-		strlen(szRandomString), szNewPassHash2, sizeof(szNewPassHash2));
+	Com_HMACMD5String(szNewPassHash, strlen(szNewPassHash), szVerificationString,
+		strlen(szVerificationString), szNewPassHash2, sizeof(szNewPassHash2));
 
 	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", oldPassword);
 
 	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
-	Com_HMACMD5String(szPassHash, strlen(szPassHash), szRandomString,
-		strlen(szRandomString), szPassHash2, sizeof(szPassHash2));
+	Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString,
+		strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
 
 	requeststring = va("change\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, szPassHash2, szNewPassHash2 );
 
@@ -310,7 +355,7 @@ void STATS_ChangePassword (char *oldPassword)
 	}
 }
 
-//Logout of stats server
+//Logout of stats server 
 void STATS_Logout (void)
 {
 	char *requeststring;
@@ -318,9 +363,9 @@ void STATS_Logout (void)
 	char szPassword[256];
 	char szPassHash[256];
 	char szPassHash2[256];
-	char szRandomString[64];
 
-	strcpy(szRandomString, "thisisatest"); 
+	if(currLoginState.requestType != STATSLOGIN && currLoginState.requestType != STATSPWCHANGE)
+		return; //never tried to log in!
 
 	NET_Config (true);
 
@@ -341,10 +386,10 @@ void STATS_Logout (void)
 	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", password->string);
 
 	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
-	Com_HMACMD5String(szPassHash, strlen(szPassHash), szRandomString,
-		strlen(szRandomString), szPassHash2, sizeof(szPassHash2));
+	Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString,
+		strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
 
-	requeststring = va("logout\\\\%i\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, szPassHash2 );
+	requeststring = va("logout\\\\%i\\\\%s\\\\%s\\\\&s\\\\", STAT_PROTOCOL, name->string, szPassHash2, szVerificationString );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )

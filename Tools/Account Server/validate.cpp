@@ -11,7 +11,44 @@ using namespace std;
 
 extern SYSTEMTIME st;
 
-bool ValidatePlayer(char name[32], char password[256])
+char RandomChar()
+{   
+	return (char)((rand() % 78) + 30);
+}
+
+void ObtainVStringForPlayer(char name[32])
+{
+	ifstream playerProfileFile;
+	char szPath[256];
+	char szTmp[256];
+	int i;
+
+	//look for existing account
+	sprintf(szPath, "playerprofiles/%s", name);
+
+	//open file
+	playerProfileFile.open(szPath);
+
+	if(!playerProfileFile)
+	{
+		//create randomstring
+		for(i = 0; i < 32; i++)
+		{
+			vString[i] = RandomChar();
+		}
+
+		vString[31] = 0;
+	}
+	else
+	{
+		playerProfileFile.getline(szTmp, 256);
+		playerProfileFile.getline(vString, 32);
+		playerProfileFile.close();
+	}
+
+}
+
+bool ValidatePlayer(char name[32], char password[256], char pVString[32])
 {
 	ifstream playerProfileFile;
 	ofstream newPlayerProfileFile;
@@ -32,8 +69,9 @@ bool ValidatePlayer(char name[32], char password[256])
 		GetSystemTime(&st);
 		sprintf(svTime, "%i-%i-%i-%i", st.wYear, st.wMonth, st.wDay, st.wHour);
 		newPlayerProfileFile.open(szPath);
-		newPlayerProfileFile << password<<endl;
-		newPlayerProfileFile << svTime<<endl;
+		newPlayerProfileFile << password <<endl;
+		newPlayerProfileFile << pVString <<endl;
+		newPlayerProfileFile << svTime <<endl;
 		newPlayerProfileFile.close();
 
 		return true;

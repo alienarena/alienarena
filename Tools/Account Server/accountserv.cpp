@@ -53,6 +53,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 
 player_t players;
+char vString[32];
 
 SYSTEMTIME st;
 
@@ -165,8 +166,31 @@ void SendValidationToClient (struct sockaddr_in *from)
 	buflen = 0;
 	memset (buff, 0, sizeof(buff));
 
-	memcpy (buff, "validated", 9);
-	buflen += 9;
+	memcpy (buff, "ÿÿÿÿvalidated", 13);
+	buflen += 13;
+	
+	if ((sendto (listener, buff, buflen, 0, (struct sockaddr *)from, sizeof(*from))) == SOCKET_ERROR)
+	{
+		dprintf ("[E] socket error on send! code %d.\n", WSAGetLastError());
+	}
+}
+
+void SendVStringToClient (char name[32], struct sockaddr_in *from)
+{
+	int				buflen;
+	char			buff[0xFFFF];
+
+	buflen = 0;
+	memset (buff, 0, sizeof(buff));
+
+	memcpy (buff, "ÿÿÿÿvstring ", 12);
+	buflen += 12;
+
+	//get player's unique string
+	ObtainVStringForPlayer(name);
+
+	memcpy (buff + buflen, vString, strlen(vString));
+			buflen += strlen(vString);
 	
 	if ((sendto (listener, buff, buflen, 0, (struct sockaddr *)from, sizeof(*from))) == SOCKET_ERROR)
 	{
@@ -181,26 +205,81 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	char seps[] = "\\";
 	char name[32];
 	char password[256];
-
-	if (_strnicmp (data, "ÿÿÿÿlogin", 9) == 0)
-	{		
-		//parse string, etc validate or create new profile file
+	char pVString[32];
+	
+	
+	if (_strnicmp (data, "ÿÿÿÿrequestvstring", 18) == 0)
+	{	
 		token = strtok( cmd, seps ); 
-		token = strtok( NULL, seps ); //protocol - may need this later on
+		if(token)
+			token = strtok( NULL, seps ); //protocol - may need this later on
+		else 
+		{
+			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
 
-		token = strtok( NULL, seps );
+		if(token)
+			token = strtok( NULL, seps );
+		else 
+		{
+			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
 		if(strlen(token) > 32) 
 			token[32] = 0; //don't allow overflows from malicious hackers
 		strcpy_s(name, token);
 
-		token = strtok( NULL, seps );
+		SendVStringToClient(name, from);
+	}
+	else if (_strnicmp (data, "ÿÿÿÿlogin", 9) == 0)
+	{		
+		//parse string, etc validate or create new profile file
+		token = strtok( cmd, seps ); 
+		if(token)
+			token = strtok( NULL, seps ); //protocol - may need this later on
+		else 
+		{
+			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
+
+		if(token)
+			token = strtok( NULL, seps );
+		else 
+		{
+			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
+		if(strlen(token) > 32) 
+			token[32] = 0; //don't allow overflows from malicious hackers
+		strcpy_s(name, token);
+
+		if(token)
+			token = strtok( NULL, seps );
+		else 
+		{
+			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
 		if(strlen(token) > 256) 
 			token[256] = 0; //don't allow overflows from malicious hackers
 		strcpy_s(password, token);
 
+		if(token)
+			token = strtok( NULL, seps );
+		else 
+		{
+			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
+		if(strlen(token) > 32) 
+			token[32] = 0; //don't allow overflows from malicious hackers
+		strcpy_s(pVString, token);
+
 		printf ("Login command from %s:%s\n", name, password);
 
-		if(ValidatePlayer(name, password))
+		if(ValidatePlayer(name, password, pVString))
 		{
 			AddPlayer(name);
 
@@ -210,23 +289,53 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	}
 	else if (_strnicmp (data, "ÿÿÿÿlogout", 10) == 0)
 	{
+		printf("received logout %s \n", data);
 		//parse string, etc validate or create new profile file
 		token = strtok( cmd, seps );
-		token = strtok( NULL, seps ); //protocol - may need this later on
+		if(token)
+			token = strtok( NULL, seps );//protocol - may need this later on
+		else 
+		{
+			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		} 
 
-		token = strtok( NULL, seps );
+		if(token)
+			token = strtok( NULL, seps );
+		else 
+		{
+			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
 		if(strlen(token) > 32) 
 			token[32] = 0; //don't allow overflows from malicious hackers
 		strcpy_s(name, token);
 
-		token = strtok( NULL, seps );
+		if(token)
+			token = strtok( NULL, seps );
+		else 
+		{
+			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
 		if(strlen(token) > 256) 
 			token[256] = 0; //don't allow overflows from malicious hackers
 		strcpy_s(password, token);
 
+		if(token)
+			token = strtok( NULL, seps );
+		else 
+		{
+			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
+		if(strlen(token) > 32) 
+			token[32] = 0; //don't allow overflows from malicious hackers
+		strcpy_s(pVString, token);
+
 		printf ("Logout command from %s:%s\n", name, password);
 
-		if(ValidatePlayer(name, password))
+		if(ValidatePlayer(name, password, pVString))
 		{
 			RemovePlayer(name);
 		}
