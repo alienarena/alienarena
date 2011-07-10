@@ -1068,6 +1068,20 @@ void CL_ConnectionlessPacket (void)
 		return;
 	}
 
+	if(!strncmp(c, "vstring", 7))
+	{
+		s = Cmd_Argv(1);
+		switch(currLoginState.requestType)
+		{
+			case STATSLOGIN:
+				STATS_AuthenticateStats(s);
+				break;
+			case STATSPWCHANGE:
+				break; 
+		}
+		return;
+	}
+
 	// server connection
 	if (!strcmp(c, "client_connect"))
 	{
