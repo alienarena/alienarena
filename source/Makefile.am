@@ -163,6 +163,7 @@ crx_SOURCES = \
 	qcommon/files.c \
 	qcommon/htable.c \
 	qcommon/htable.h \
+	qcommon/md5.c \
 	qcommon/mdfour.c \
 	qcommon/net_chan.c \
 	qcommon/pmove.c \
@@ -284,7 +285,6 @@ crx_ded_SOURCES = \
 	server/sv_user.c \
 	server/sv_world.c \
 	unix/glob.c \
-	unix/glob.h \
 	unix/glob.h \
 	unix/net_udp.c \
 	unix/q_shunix.c \

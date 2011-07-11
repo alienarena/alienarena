@@ -1,6 +1,16 @@
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 //#pragma hdrstop
 #include <string.h>
 #include "qcommon.h"
+
+#if !defined max
+#define max(a,b)  (((a)<(b)) ? (b) : (a))
+#endif
+
 
 /*
 MD5 Message Digest Algorithm. (RFC1321)
@@ -68,7 +78,7 @@ the data and converts bytes into longwords for this routine.
 static void MD5_Transform (unsigned int state[4], unsigned int in[16])
 {
     register unsigned int a, b, c, d;
-	
+
     a = state[0];
     b = state[1];
     c = state[2];
@@ -173,7 +183,7 @@ processing another message block, and updating the context.
 static void MD5_Update (MD5_CTX *ctx, unsigned char const *buf, unsigned int len)
 {
     unsigned int t;
-	
+
     // Update bitcount
     t = ctx->bits[0];
 
@@ -182,12 +192,12 @@ static void MD5_Update (MD5_CTX *ctx, unsigned char const *buf, unsigned int len
 
     ctx->bits[1] += len >> 29;
     t = (t >> 3)& 0x3f;        // Bytes already in shsInfo->data
-	
+
     // Handle any leading odd-sized chunks
     if (t)
 	{
         unsigned char *p = (unsigned char *)ctx->in + t;
-		
+
         t = 64 - t;
 
         if (len < t)
@@ -201,7 +211,7 @@ static void MD5_Update (MD5_CTX *ctx, unsigned char const *buf, unsigned int len
         buf += t;
         len -= t;
     }
-	
+
 	// Process data in 64-byte chunks
     while (len >= 64)
 	{
@@ -210,7 +220,7 @@ static void MD5_Update (MD5_CTX *ctx, unsigned char const *buf, unsigned int len
         buf += 64;
         len -= 64;
     }
-	
+
     // Handle any remaining bytes of data.
     memcpy(ctx->in, buf, len);
 }
@@ -227,25 +237,25 @@ static void MD5_Final (MD5_CTX *ctx, unsigned char digest[16])
 {
 	unsigned count;
     unsigned char *p;
-	
+
     // Compute number of bytes mod 64
     count = (ctx->bits[0] >> 3)& 0x3F;
-	
+
     // Set the first char of padding to 0x80.  This is safe since there is
     // always at least one byte free
     p = ctx->in + count;
     *p++ = 0x80;
-	
+
     // Bytes of padding needed to make 64 bytes
     count = 64 - 1 - count;
-	
+
     // Pad out to 56 mod 64
     if (count < 8)
 	{
         // Two lots of padding:  Pad the first block to 64 bytes
         memset(p, 0, count);
         MD5_Transform(ctx->state, (unsigned int *)ctx->in);
-		
+
         // Now fill the next block with 56 bytes
         memset(ctx->in, 0, 56);
     }
@@ -254,7 +264,7 @@ static void MD5_Final (MD5_CTX *ctx, unsigned char digest[16])
         // Pad block to 56 bytes
         memset(p, 0, count - 8);
     }
-	
+
     // Append length in bits and transform
     ((unsigned int *)ctx->in)[14] = ctx->bits[0];
     ((unsigned int *)ctx->in)[15] = ctx->bits[1];
@@ -270,7 +280,7 @@ unsigned Com_MD5Checksum (void *buffer, int length)
 	int             digest[4];
 	unsigned        val;
 	MD5_CTX         ctx;
-	
+
 	MD5_Init(&ctx);
 	MD5_Update(&ctx, (unsigned char *)buffer, length);
 	MD5_Final(&ctx, (unsigned char *)digest);
@@ -318,7 +328,7 @@ char *Com_MD5HashString (const void *buffer, int length, char *pMD5Out, size_t s
 {
 	int             digest[4];
 	MD5_CTX         ctx;
-	
+
 	MD5_Init(&ctx);
 	MD5_Update(&ctx, (unsigned char *)buffer, length);
 	MD5_Final(&ctx, (unsigned char *)digest);
