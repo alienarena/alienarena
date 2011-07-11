@@ -98,6 +98,37 @@ bool ValidatePlayer(char name[32], char password[256], char pVString[32])
 	return false;
 }
 
+void ChangePlayerPassword(char name[32], char new_password[256], char pVString[32])
+{
+	ofstream playerProfileFile;
+	char szPath[256];
+	char svPass[256];
+	char svTime[32];
+
+	sprintf(szPath, "playerprofiles/%s", name);
+	
+	remove(szPath);
+
+	//open file
+	playerProfileFile.open(szPath);
+
+	//rebuild with new password and timestamp
+	if(!playerProfileFile)
+	{
+		printf("creating new profile for %s\n", name);
+
+		GetSystemTime(&st);
+		sprintf(svTime, "%i-%i-%i-%i", st.wYear, st.wMonth, st.wDay, st.wHour);
+		playerProfileFile.open(szPath);
+		playerProfileFile << new_password <<endl;
+		playerProfileFile << pVString <<endl;
+		playerProfileFile << svTime <<endl;
+		playerProfileFile.close();
+
+		return;
+	}
+}
+
 void DumpValidPlayersToFile(void)
 {
 	ofstream	currPlayers;

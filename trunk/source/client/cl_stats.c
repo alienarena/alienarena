@@ -40,6 +40,7 @@ extern cvar_t *cl_stats_server;
 
 extern cvar_t *name;
 extern cvar_t *password;
+extern cvar_t *old_password;
 extern cvar_t *pw_hashed;
 
 static char szVerificationString[64];
@@ -217,6 +218,9 @@ void STATS_RequestVerification (void)
 	char *requeststring;
 	netadr_t adr;	
 
+	if(currLoginState.validated)
+		return; //already validated
+
 	NET_Config (true);
 
 	currLoginState.requestType = STATSLOGIN;
@@ -304,7 +308,7 @@ void STATS_AuthenticateStats (char *vstring)
 }
 
 //Send password change request to server(this is to be called from the menu when a password is edited)
-void STATS_ChangePassword (char *oldPassword, char *vstring) 
+void STATS_ChangePassword (char *vstring) 
 {
 	char *requeststring;
 	netadr_t adr;	
@@ -336,13 +340,13 @@ void STATS_ChangePassword (char *oldPassword, char *vstring)
 	Com_HMACMD5String(szNewPassHash, strlen(szNewPassHash), szVerificationString,
 		strlen(szVerificationString), szNewPassHash2, sizeof(szNewPassHash2));
 
-	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", oldPassword);
+	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", old_password->string);
 
 	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 	Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString,
 		strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
 
-	requeststring = va("change\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, szPassHash2, szNewPassHash2 );
+	requeststring = va("changepw\\\\%i\\\\%s\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, szPassHash2, szNewPassHash2, szVerificationString);
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
@@ -364,8 +368,8 @@ void STATS_Logout (void)
 	char szPassHash[256];
 	char szPassHash2[256];
 
-	if(currLoginState.requestType != STATSLOGIN && currLoginState.requestType != STATSPWCHANGE)
-		return; //never tried to log in!
+	if(!currLoginState.validated)
+		return; //no point in logging out, we were never validated!
 
 	NET_Config (true);
 

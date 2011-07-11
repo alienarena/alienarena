@@ -3808,9 +3808,6 @@ void JoinServer_MenuInit( void )
 	else
 		pNameUnique = true;
 
-	if(pNameUnique)
-		STATS_RequestVerification();
-
 	s_joinserver_menu.x = viddef.width * 0.50;
 	offset = viddef.height/2 + 60*scale;
 

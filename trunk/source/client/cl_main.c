@@ -112,6 +112,7 @@ cvar_t	*info_password;
 cvar_t	*info_spectator;
 cvar_t	*name;
 cvar_t	*password;
+cvar_t  *old_password;
 cvar_t	*pw_hashed;
 cvar_t	*skin;
 cvar_t	*rate;
@@ -627,6 +628,8 @@ void CL_Connect_f (void)
 	cls.state = ca_connecting;
 	strncpy (cls.servername, server, sizeof(cls.servername)-1);
 	cls.connect_time = -99999;	// CL_CheckForResend() will fire immediately
+
+	STATS_RequestVerification();
 }
 
 
@@ -1078,6 +1081,19 @@ void CL_ConnectionlessPacket (void)
 				break;
 			case STATSPWCHANGE:
 				break; 
+		}
+		return;
+	}
+
+	if(!strncmp(c, "validated", 9))
+	{
+		Com_Printf("Account validated!\n");
+		currLoginState.validated = true;
+
+		//in cases of changed passwords
+		if(currLoginState.requestType == STATSPWCHANGE)
+		{
+			old_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
 		}
 		return;
 	}
@@ -1797,6 +1813,7 @@ void CL_InitLocal (void)
 	info_spectator = Cvar_Get ("spectator", "0", CVAR_USERINFO);
 	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
 	password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+	old_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
 	pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
 	/* */
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
