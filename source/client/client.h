@@ -583,7 +583,7 @@ typedef struct _PLAYERSTATS {
 
 typedef struct _STATSLOGINSTATE {
 	int requestType;
-	//more to be added possibly
+	qboolean validated;
 } LOGINSTATE;
 
 #define STATSLOGIN 1

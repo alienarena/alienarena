@@ -205,8 +205,8 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	char seps[] = "\\";
 	char name[32];
 	char password[256];
-	char pVString[32];
-	
+	char new_password[256];
+	char pVString[32];	
 	
 	if (_strnicmp (data, "ÿÿÿÿrequestvstring", 18) == 0)
 	{	
@@ -215,7 +215,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			token = strtok( NULL, seps ); //protocol - may need this later on
 		else 
 		{
-			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -223,7 +223,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			token = strtok( NULL, seps );
 		else 
 		{
-			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 		if(strlen(token) > 32) 
@@ -240,42 +240,54 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			token = strtok( NULL, seps ); //protocol - may need this later on
 		else 
 		{
-			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 
 		if(token)
 			token = strtok( NULL, seps );
-		else 
+		else
 		{
-			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-		if(strlen(token) > 32) 
-			token[32] = 0; //don't allow overflows from malicious hackers
-		strcpy_s(name, token);
+		if(token)
+		{
+			if(strlen(token) > 32) 
+				token[32] = 0; //don't allow overflows from malicious hackers
+			strcpy_s(name, token);
+			token = strtok( NULL, seps );
+		}
+		else 
+		{
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
 
 		if(token)
+		{
+			if(strlen(token) > 256) 
+				token[256] = 0; //don't allow overflows from malicious hackers
+			strcpy_s(password, token);
 			token = strtok( NULL, seps );
+		}
 		else 
 		{
-			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-		if(strlen(token) > 256) 
-			token[256] = 0; //don't allow overflows from malicious hackers
-		strcpy_s(password, token);
 
 		if(token)
-			token = strtok( NULL, seps );
+		{
+			if(strlen(token) > 32) 
+				token[32] = 0; //don't allow overflows from malicious hackers
+			strcpy_s(pVString, token);
+		}
 		else 
 		{
-			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-		if(strlen(token) > 32) 
-			token[32] = 0; //don't allow overflows from malicious hackers
-		strcpy_s(pVString, token);
 
 		printf ("Login command from %s:%s\n", name, password);
 
@@ -289,55 +301,147 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	}
 	else if (_strnicmp (data, "ÿÿÿÿlogout", 10) == 0)
 	{
-		printf("received logout %s \n", data);
 		//parse string, etc validate or create new profile file
 		token = strtok( cmd, seps );
 		if(token)
-			token = strtok( NULL, seps );//protocol - may need this later on
+			token = strtok( NULL, seps ); //protocol - may need this later on
 		else 
 		{
-			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
-		} 
+		}
 
 		if(token)
 			token = strtok( NULL, seps );
 		else 
 		{
-			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-		if(strlen(token) > 32) 
-			token[32] = 0; //don't allow overflows from malicious hackers
-		strcpy_s(name, token);
 
 		if(token)
+		{
+			if(strlen(token) > 32) 
+				token[32] = 0; //don't allow overflows from malicious hackers
+			strcpy_s(name, token);
 			token = strtok( NULL, seps );
+		}
 		else 
 		{
-			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-		if(strlen(token) > 256) 
-			token[256] = 0; //don't allow overflows from malicious hackers
-		strcpy_s(password, token);
 
 		if(token)
+		{
+			if(strlen(token) > 256) 
+				token[256] = 0; //don't allow overflows from malicious hackers
+			strcpy_s(password, token);
 			token = strtok( NULL, seps );
+		}
 		else 
 		{
-			printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-		if(strlen(token) > 32) 
-			token[32] = 0; //don't allow overflows from malicious hackers
-		strcpy_s(pVString, token);
+
+		if(token)
+		{
+			if(strlen(token) > 32) 
+				token[32] = 0; //don't allow overflows from malicious hackers
+			strcpy_s(pVString, token);
+		}
+		else 
+		{
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
 
 		printf ("Logout command from %s:%s\n", name, password);
 
 		if(ValidatePlayer(name, password, pVString))
 		{
 			RemovePlayer(name);
+		}
+	}
+	else if (_strnicmp (data, "ÿÿÿÿchangepw", 12) == 0)
+	{		
+		//parse string, etc validate or create new profile file
+		token = strtok( cmd, seps ); 
+		if(token)
+			token = strtok( NULL, seps ); //protocol - may need this later on
+		else 
+		{
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
+
+		if(token)
+			token = strtok( NULL, seps );
+		else
+		{
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
+		if(token)
+		{
+			if(strlen(token) > 32) 
+				token[32] = 0; //don't allow overflows from malicious hackers
+			strcpy_s(name, token);
+			token = strtok( NULL, seps );
+		}
+		else 
+		{
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
+
+		if(token)
+		{
+			if(strlen(token) > 256) 
+				token[256] = 0; //don't allow overflows from malicious hackers
+			strcpy_s(password, token);
+			token = strtok( NULL, seps );
+		}
+		else 
+		{
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
+
+		if(token)
+		{
+			if(strlen(token) > 256) 
+				token[256] = 0; //don't allow overflows from malicious hackers
+			strcpy_s(new_password, token);
+			token = strtok( NULL, seps );
+		}
+		else 
+		{
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
+
+		if(token)
+		{
+			if(strlen(token) > 32) 
+				token[32] = 0; //don't allow overflows from malicious hackers
+			strcpy_s(pVString, token);
+		}
+		else 
+		{
+			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			return;
+		}
+
+		printf ("Login command from %s:%s\n", name, password);
+
+		if(ValidatePlayer(name, password, pVString))
+		{
+			ChangePlayerPassword(name, new_password, pVString);
+
+			//let the client know he was validated
+			SendValidationToClient (from);
 		}
 	}
 	else
