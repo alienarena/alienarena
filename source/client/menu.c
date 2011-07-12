@@ -61,6 +61,9 @@ extern cvar_t *dedicated;
 extern cvar_t *cl_drawfps;
 extern cvar_t *cl_drawtimer;
 extern cvar_t *fov;
+extern cvar_t *password;
+extern cvar_t *old_password;
+extern cvar_t *pw_hashed;
 
 static char *menu_in_sound		= "misc/menu1.wav";
 static char *menu_move_sound	= "misc/menu2.wav";
@@ -6229,6 +6232,7 @@ PLAYER CONFIG MENU
 */
 static menuframework_s	s_player_config_menu;
 static menufield_s		s_player_name_field;
+static menufield_s		s_player_password_field;
 static menulist_s		s_player_model_box;
 static menulist_s		s_player_skin_box;
 static menulist_s		s_player_handedness_box;
@@ -6569,10 +6573,21 @@ qboolean PlayerConfig_MenuInit( void )
 	Q_strncpyz2( s_player_name_field.buffer, name->string, sizeof(s_player_name_field.buffer) );
 	s_player_name_field.cursor = strlen( s_player_name_field.buffer );
 
+	s_player_password_field.generic.type = MTYPE_FIELD;
+	s_player_password_field.generic.name = "password";
+	s_player_password_field.generic.callback = 0;
+	s_player_password_field.generic.x		= FONTSCALE*-32;
+	s_player_password_field.generic.y		= FONTSCALE*20*scale;
+	s_player_password_field.length	= 20;
+	s_player_password_field.visible_length = 20;
+	s_player_password_field.generic.statusbar = "COR Entertainment is not responsible for lost or stolen passwords";
+	Q_strncpyz2( s_player_password_field.buffer, "********", sizeof(s_player_password_field.buffer) );
+	s_player_password_field.cursor = strlen( s_player_password_field.buffer );
+
 	s_player_model_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_model_box.generic.name = "model";
 	s_player_model_box.generic.x	= FONTSCALE*-32;
-	s_player_model_box.generic.y	= FONTSCALE*70*scale;
+	s_player_model_box.generic.y	= FONTSCALE*90*scale;
 	s_player_model_box.generic.callback = ModelCallback;
 	s_player_model_box.generic.cursor_offset = -56;
 	s_player_model_box.curvalue = currentdirectoryindex;
@@ -6581,7 +6596,7 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_skin_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_skin_box.generic.name = "skin";
 	s_player_skin_box.generic.x	= FONTSCALE*-32;
-	s_player_skin_box.generic.y	= FONTSCALE*94*scale;
+	s_player_skin_box.generic.y	= FONTSCALE*114*scale;
 	s_player_skin_box.generic.callback = 0;
 	s_player_skin_box.generic.cursor_offset = -56;
 	s_player_skin_box.curvalue = currentskinindex;
@@ -6590,7 +6605,7 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_handedness_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_handedness_box.generic.name = "handedness";
 	s_player_handedness_box.generic.x	= FONTSCALE*-32;
-	s_player_handedness_box.generic.y	= FONTSCALE*118*scale;
+	s_player_handedness_box.generic.y	= FONTSCALE*138*scale;
 	s_player_handedness_box.generic.cursor_offset = -56;
 	s_player_handedness_box.generic.callback = HandednessCallback;
 	s_player_handedness_box.curvalue = Cvar_VariableValue( "hand" );
@@ -6600,7 +6615,7 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_fov_field.generic.name = "fov";
 	s_player_fov_field.generic.callback = 0;
 	s_player_fov_field.generic.x		= FONTSCALE*-32;
-	s_player_fov_field.generic.y		= FONTSCALE*132*scale;
+	s_player_fov_field.generic.y		= FONTSCALE*152*scale;
 	s_player_fov_field.length	= 6;
 	s_player_fov_field.visible_length = 6;
 	s_player_fov_field.generic.callback = FovCallBack;
@@ -6613,7 +6628,7 @@ qboolean PlayerConfig_MenuInit( void )
 
 	s_player_rate_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_rate_box.generic.x	= FONTSCALE*-32;
-	s_player_rate_box.generic.y	= FONTSCALE*146*scale;
+	s_player_rate_box.generic.y	= FONTSCALE*166*scale;
 	s_player_rate_box.generic.name	= "connection";
 	s_player_rate_box.generic.callback = RateCallback;
 	s_player_rate_box.curvalue = i;
@@ -6666,6 +6681,7 @@ qboolean PlayerConfig_MenuInit( void )
 	Menu_AddItem( &s_player_config_menu, &s_allow_download_sounds_box );
 
 	Menu_AddItem( &s_player_config_menu, &s_player_name_field );
+	Menu_AddItem( &s_player_config_menu, &s_player_password_field);
 	Menu_AddItem( &s_player_config_menu, &s_player_model_box );
 	if ( s_player_skin_box.itemnames )
 	{
@@ -6833,7 +6849,7 @@ void PlayerConfig_MenuDraw( void )
 			s_pmi[s_player_model_box.curvalue].directory,
 			s_pmi[s_player_model_box.curvalue].skindisplaynames[s_player_skin_box.curvalue] );
 
-		refdef.y = viddef.height / 2 - 70*scale;
+		refdef.y = viddef.height / 2 - 45*scale;
 		Draw_StretchPic( s_player_config_menu.x - 120*scale, refdef.y - 56*scale, 64*scale, 64*scale, scratch );
 	}
 }
@@ -6849,6 +6865,16 @@ void PConfigAccept (void)
 		pNameUnique = false;
 	else
 		pNameUnique = true;
+
+	//was the password changed?
+	if(strcmp("********", s_player_password_field.buffer))
+	{
+		Cvar_Set( "stats_password", s_player_password_field.buffer);
+		password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+		Cvar_Set( "stats_pw_hashed", "0");
+		pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
+		STATS_RequestPwChange();
+	}
 
 	Com_sprintf( scratch, sizeof( scratch ), "%s/%s",
 		s_pmi[s_player_model_box.curvalue].directory,

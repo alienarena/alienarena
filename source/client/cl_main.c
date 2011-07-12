@@ -112,7 +112,6 @@ cvar_t	*info_password;
 cvar_t	*info_spectator;
 cvar_t	*name;
 cvar_t	*password;
-cvar_t  *old_password;
 cvar_t	*pw_hashed;
 cvar_t	*skin;
 cvar_t	*rate;
@@ -1080,6 +1079,7 @@ void CL_ConnectionlessPacket (void)
 				STATS_AuthenticateStats(s);
 				break;
 			case STATSPWCHANGE:
+				STATS_ChangePassword(s);
 				break; 
 		}
 		return;
@@ -1087,13 +1087,18 @@ void CL_ConnectionlessPacket (void)
 
 	if(!strncmp(c, "validated", 9))
 	{
-		Com_Printf("Account validated!\n");
-		currLoginState.validated = true;
-
 		//in cases of changed passwords
 		if(currLoginState.requestType == STATSPWCHANGE)
 		{
-			old_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+			//make sure the password is stored for future use
+			strncpy(currLoginState.old_password, password->string, 256);
+
+			Com_Printf("Password change successful!\n");
+		}
+		else
+		{
+			Com_Printf("Account validated!\n");
+			currLoginState.validated = true;
 		}
 		return;
 	}
@@ -1813,7 +1818,7 @@ void CL_InitLocal (void)
 	info_spectator = Cvar_Get ("spectator", "0", CVAR_USERINFO);
 	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
 	password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
-	old_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+	strncpy(currLoginState.old_password, password->string, 256);
 	pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
 	/* */
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );

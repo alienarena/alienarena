@@ -16,12 +16,28 @@ char RandomChar()
 	return (char)((rand() % 78) + 30);
 }
 
+void StripIllegalPathChars( char *name )
+{
+	int i = 0;
+
+	while(name[i])
+	{
+		if(name[i] == ':' || name[i] == '*' || name[i] == '"' || name[i] == '/' ||
+			name[i] == '?' || name[i] == '\\' || name[i] == '|' || name[i] == '<' ||
+			name[i] == '>')
+			name[i] = ' ';
+		i++;
+	} 
+}
+
 void ObtainVStringForPlayer(char name[32])
 {
 	ifstream playerProfileFile;
 	char szPath[256];
 	char szTmp[256];
 	int i;
+
+	StripIllegalPathChars(name);
 
 	//look for existing account
 	sprintf(szPath, "playerprofiles/%s", name);
@@ -56,6 +72,8 @@ bool ValidatePlayer(char name[32], char password[256], char pVString[32])
 	char svPass[256];
 	char svTime[32];
 
+	StripIllegalPathChars(name);
+
 	sprintf(szPath, "playerprofiles/%s", name);
 	
 	//open file
@@ -64,7 +82,7 @@ bool ValidatePlayer(char name[32], char password[256], char pVString[32])
 	//if no file, create one and return true
 	if(!playerProfileFile)
 	{
-		printf("creating new profile for %s\n", name);
+		printf("Creating new profile for %s\n", name);
 
 		GetSystemTime(&st);
 		sprintf(svTime, "%i-%i-%i-%i", st.wYear, st.wMonth, st.wDay, st.wHour);
@@ -78,7 +96,7 @@ bool ValidatePlayer(char name[32], char password[256], char pVString[32])
 	}
 	else
 	{
-		printf("reading profile for %s\n", name);
+		printf("Reading profile for %s\n", name);
 
 		playerProfileFile.getline(svPass, 256);
 		playerProfileFile.close();
@@ -90,7 +108,7 @@ bool ValidatePlayer(char name[32], char password[256], char pVString[32])
 		}
 		else
 		{
-			printf("invalid password for %s!", name);
+			printf("[A]Invalid password for %s!\n", name);
 			return false;
 		}
 	}	
@@ -102,31 +120,23 @@ void ChangePlayerPassword(char name[32], char new_password[256], char pVString[3
 {
 	ofstream playerProfileFile;
 	char szPath[256];
-	char svPass[256];
 	char svTime[32];
+
+	StripIllegalPathChars(name);
 
 	sprintf(szPath, "playerprofiles/%s", name);
 	
 	remove(szPath);
 
-	//open file
+	printf("Changing password for %s\n", name);
+
+	GetSystemTime(&st);
+	sprintf(svTime, "%i-%i-%i-%i", st.wYear, st.wMonth, st.wDay, st.wHour);
 	playerProfileFile.open(szPath);
-
-	//rebuild with new password and timestamp
-	if(!playerProfileFile)
-	{
-		printf("creating new profile for %s\n", name);
-
-		GetSystemTime(&st);
-		sprintf(svTime, "%i-%i-%i-%i", st.wYear, st.wMonth, st.wDay, st.wHour);
-		playerProfileFile.open(szPath);
-		playerProfileFile << new_password <<endl;
-		playerProfileFile << pVString <<endl;
-		playerProfileFile << svTime <<endl;
-		playerProfileFile.close();
-
-		return;
-	}
+	playerProfileFile << new_password <<endl;
+	playerProfileFile << pVString <<endl;
+	playerProfileFile << svTime <<endl;
+	playerProfileFile.close();
 }
 
 void DumpValidPlayersToFile(void)

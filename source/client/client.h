@@ -584,6 +584,7 @@ typedef struct _PLAYERSTATS {
 typedef struct _STATSLOGINSTATE {
 	int requestType;
 	qboolean validated;
+	char old_password[256];
 } LOGINSTATE;
 
 #define STATSLOGIN 1
@@ -593,6 +594,7 @@ void STATS_getStatsDB( void );
 void STATS_RequestVerification( void );
 void STATS_RequestPwChange (void);
 void STATS_AuthenticateStats (char *vstring);
+void STATS_ChangePassword (char *vstring);
 void STATS_Logout (void);
 PLAYERSTATS getPlayerRanking ( PLAYERSTATS player );
 PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player );
