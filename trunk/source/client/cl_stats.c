@@ -40,7 +40,6 @@ extern cvar_t *cl_stats_server;
 
 extern cvar_t *name;
 extern cvar_t *password;
-extern cvar_t *old_password;
 extern cvar_t *pw_hashed;
 
 static char szVerificationString[64];
@@ -244,9 +243,11 @@ void STATS_RequestPwChange (void)
 	char *requeststring;
 	netadr_t adr;	
 
+	currLoginState.validated = false; //force new login with new password
+
 	NET_Config (true);
 
-	currLoginState.requestType = STATSLOGIN;
+	currLoginState.requestType = STATSPWCHANGE;
 
 	requeststring = va("requestvstring\\\\%i\\\\%s", STAT_PROTOCOL, name->string);
 
@@ -332,6 +333,7 @@ void STATS_ChangePassword (char *vstring)
 
 	//get new hashed password
 	password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+	pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
 	
 	//salt
 	Com_sprintf(szNewPassword, sizeof(szNewPassword), "%sAALogin001", password->string);
@@ -340,7 +342,7 @@ void STATS_ChangePassword (char *vstring)
 	Com_HMACMD5String(szNewPassHash, strlen(szNewPassHash), szVerificationString,
 		strlen(szVerificationString), szNewPassHash2, sizeof(szNewPassHash2));
 
-	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", old_password->string);
+	Com_sprintf(szPassword, sizeof(szPassword), "%sAALogin001", currLoginState.old_password);
 
 	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 	Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString,

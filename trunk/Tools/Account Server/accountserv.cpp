@@ -434,7 +434,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			return;
 		}
 
-		printf ("Login command from %s:%s\n", name, password);
+		printf ("Change command from %s:%s\n", name, password);
 
 		if(ValidatePlayer(name, password, pVString))
 		{
