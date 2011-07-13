@@ -6582,7 +6582,7 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_password_field.visible_length = 20;
 	s_player_password_field.generic.statusbar = "COR Entertainment is not responsible for lost or stolen passwords";
 	Q_strncpyz2( s_player_password_field.buffer, "********", sizeof(s_player_password_field.buffer) );
-	s_player_password_field.cursor = strlen( s_player_password_field.buffer );
+	s_player_password_field.cursor = 0;
 
 	s_player_model_box.generic.type = MTYPE_SPINCONTROL;
 	s_player_model_box.generic.name = "model";

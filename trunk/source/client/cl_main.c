@@ -1091,7 +1091,7 @@ void CL_ConnectionlessPacket (void)
 		if(currLoginState.requestType == STATSPWCHANGE)
 		{
 			//make sure the password is stored for future use
-			strncpy(currLoginState.old_password, password->string, 256);
+			Q_strncpyz2(currLoginState.old_password, password->string, sizeof(currLoginState.old_password));
 
 			Com_Printf("Password change successful!\n");
 		}
@@ -1818,7 +1818,7 @@ void CL_InitLocal (void)
 	info_spectator = Cvar_Get ("spectator", "0", CVAR_USERINFO);
 	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
 	password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
-	strncpy(currLoginState.old_password, password->string, 256);
+	Q_strncpyz2(currLoginState.old_password, password->string, sizeof(currLoginState.old_password));
 	pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
 	/* */
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
