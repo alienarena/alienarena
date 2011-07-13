@@ -175,29 +175,6 @@ void SendValidationToClient (struct sockaddr_in *from)
 	}
 }
 
-void SendVStringToClient (char name[32], struct sockaddr_in *from)
-{
-	int				buflen;
-	char			buff[0xFFFF];
-
-	buflen = 0;
-	memset (buff, 0, sizeof(buff));
-
-	memcpy (buff, "ÿÿÿÿvstring ", 12);
-	buflen += 12;
-
-	//get player's unique string
-	ObtainVStringForPlayer(name);
-
-	memcpy (buff + buflen, vString, strlen(vString));
-			buflen += strlen(vString);
-	
-	if ((sendto (listener, buff, buflen, 0, (struct sockaddr *)from, sizeof(*from))) == SOCKET_ERROR)
-	{
-		dprintf ("[E] socket error on send! code %d.\n", WSAGetLastError());
-	}
-}
-
 void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 {
 	char *cmd = data;
@@ -206,33 +183,8 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	char name[32];
 	char password[256];
 	char new_password[256];
-	char pVString[32];	
 	
-	if (_strnicmp (data, "ÿÿÿÿrequestvstring", 18) == 0)
-	{	
-		token = strtok( cmd, seps ); 
-		if(token)
-			token = strtok( NULL, seps ); //protocol - may need this later on
-		else 
-		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
-			return;
-		}
-
-		if(token)
-			token = strtok( NULL, seps );
-		else 
-		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
-			return;
-		}
-		if(strlen(token) > 32) 
-			token[32] = 0; //don't allow overflows from malicious hackers
-		strcpy_s(name, token);
-
-		SendVStringToClient(name, from);
-	}
-	else if (_strnicmp (data, "ÿÿÿÿlogin", 9) == 0)
+	if (_strnicmp (data, "ÿÿÿÿlogin", 9) == 0)
 	{		
 		//parse string, etc validate or create new profile file
 		token = strtok( cmd, seps ); 
@@ -276,22 +228,10 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-
-		if(token)
-		{
-			if(strlen(token) > 32) 
-				token[32] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(pVString, token);
-		}
-		else 
-		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
-			return;
-		}
-
+		
 		printf ("Login command from %s:%s\n", name, password);
 
-		if(ValidatePlayer(name, password, pVString))
+		if(ValidatePlayer(name, password))
 		{
 			AddPlayer(name);
 
@@ -344,22 +284,10 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-
-		if(token)
-		{
-			if(strlen(token) > 32) 
-				token[32] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(pVString, token);
-		}
-		else 
-		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
-			return;
-		}
-
+				
 		printf ("Logout command from %s:%s\n", name, password);
 
-		if(ValidatePlayer(name, password, pVString))
+		if(ValidatePlayer(name, password))
 		{
 			RemovePlayer(name);
 		}
@@ -421,24 +349,12 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-
-		if(token)
-		{
-			if(strlen(token) > 32) 
-				token[32] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(pVString, token);
-		}
-		else 
-		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
-			return;
-		}
-
+		
 		printf ("Change command from %s:%s\n", name, password);
 
-		if(ValidatePlayer(name, password, pVString))
+		if(ValidatePlayer(name, password))
 		{
-			ChangePlayerPassword(name, new_password, pVString);
+			ChangePlayerPassword(name, new_password);
 
 			//let the client know he was validated
 			SendValidationToClient (from);
