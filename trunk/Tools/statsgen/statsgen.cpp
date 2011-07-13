@@ -8,12 +8,14 @@
 #include <winsock.h>
 #include <ctype.h>
 #include <string.h>
-#include <iostream.h>
+#include <iostream>
 #include <iomanip> 
 #include <fstream>
 #include <time.h>
 #include "fce.h"
 #include "keycode.h"
+
+#define NOVERIFY 0
 
 using namespace std;
 
@@ -72,56 +74,37 @@ double OLplayerTally = 0;
 
 SOCKET master;
 
-int verify_address(char db_address[21], char address[21])
+int verify_player(char name[32])
 {
-	int i, j;
-	char add1[21], add2[21]; 
-	char *add, *dbadd;
-	//here will determine whether or not this is a valid player, and whether or not we want to
-	//update his stats.  
+	ifstream infile;
+	char vName[32] = "go";
 
-	//if the person in the db has an address of 127.0.0.1, then no matter what, we update it
-	//if the person has an address in the db that is not 127.0.0.1, then only return valid if
-	//they match.
+#ifdef NOVERIFY
+	return true;
+#endif
 
-	//since some people still use dynamic ip's, we will limit the comparison to the first two 
-	strcpy(add1, address);
-	strcpy(add2, db_address);
-	add = add1;
-	dbadd = add2;
+	infile.open("validated");
 
-	//trim off the addies
-	j = 0;
-	for(i = 0; i<strlen(dbadd); i++) {
-		if(dbadd[i] == '.')
-			j++;
-		if(j == 2)
-			dbadd[i] = 0;
+	if(infile.good())
+	{
+		while(strlen(vName))
+		{
+			infile.getline(vName, 32);
+			if(!strcmp(name, vName))
+			{
+				return true;
+			}
+		}
 	}
-	j = 0;
-	for(i = 0; i<strlen(add); i++) {
-		if(add[i] == '.')
-			j++;
-		if(j == 2)
-			add[i] = 0;
-	}
-return true; //implement this once all servers up updated
-	if(!strcmp(dbadd, "127.0"))
-		return true;
-//	else if(!strcmp(add, "192.168")) //home server, don't count towards stats
-//		return false; 
-	
-	else if(!strcmp(add, dbadd))
-		return true;
-	else
-		return false;
+
+	return false;	
 }
 
 PLAYERINFO LoadPlayerInfo(PLAYERINFO player)
 {	
 	ifstream infile;
 	ofstream outfile;
-	int foundplayer, spoofed;
+	bool foundplayer, spoofed;
 	char name[32], points[32], frags[32], totalfrags[32], time[16], totaltime[16], ip[16], poll[16], remote_address[21];
 
 	//find this playername in the database, if he doesn't exist, insert him at the bottom
@@ -132,60 +115,68 @@ PLAYERINFO LoadPlayerInfo(PLAYERINFO player)
 	player.rank = 1;
 	foundplayer = false;
 	spoofed = false;
+	
+	if(verify_player(player.playername))
+	{
+		if(infile.good()) 
+		{
+			strcpy(name, "go");
 
-	if(infile.good()) {
+			while(strlen(name)) { //compare name and get stats
 
-		strcpy(name, "go");
-
-		while(strlen(name)) { //compare ip's AND name
-			infile.getline(name, 32); //name
-			infile.getline(remote_address, 21); //remote address
-			infile.getline(points, 32); //points
-			if(!strcmp(player.playername, name) && verify_address(remote_address, player.remote_address))
-				player.points = atof(points);
-			infile.getline(frags, 32); //frags
-			if(!strcmp(player.playername, name) && verify_address(remote_address, player.remote_address))
-				player.frags = atoi(frags);
-			infile.getline(totalfrags, 32); //total frags
-			if(!strcmp(player.playername, name) && verify_address(remote_address, player.remote_address))
-				player.totalfrags = atoi(totalfrags);
-			infile.getline(time, 16); //current time in poll
-			if(!strcmp(player.playername, name) && verify_address(remote_address, player.remote_address)) {
-				player.time = atof(time);
-				if(player.time > 200) //either a bot, or idling zombie
-					player.time = .008; 
+				infile.getline(name, 32); //name			
+				infile.getline(remote_address, 21); //remote address
+				infile.getline(points, 32); //points
+				if(!strcmp(player.playername, name))
+					player.points = atof(points);
+				infile.getline(frags, 32); //frags
+				if(!strcmp(player.playername, name))
+					player.frags = atoi(frags);
+				infile.getline(totalfrags, 32); //total frags
+				if(!strcmp(player.playername, name))
+					player.totalfrags = atoi(totalfrags);
+				infile.getline(time, 16); //current time in poll
+				if(!strcmp(player.playername, name)) 
+				{
+					player.time = atof(time);
+					if(player.time > 200) //either a bot, or idling zombie
+						player.time = .008; 
+				}
+				infile.getline(totaltime, 16);
+				if(!strcmp(player.playername, name)) 
+					player.totaltime = atof(totaltime);
+				infile.getline(ip, 16); //last server.ip
+				if(!strcmp(player.playername, name)) 
+					strcpy(player.ip, ip);
+				infile.getline(poll, 16); //what poll was our last?
+				if(!strcmp(player.playername, name)) 
+				{ 
+					player.poll = atoi(poll);
+					foundplayer = true;
+					break; //get out we are done
+				}
+				player.rank++;
 			}
-			infile.getline(totaltime, 16);
-			if(!strcmp(player.playername, name) && verify_address(remote_address, player.remote_address)) 
-				player.totaltime = atof(totaltime);
-			infile.getline(ip, 16); //last server.ip
-			if(!strcmp(player.playername, name) && verify_address(remote_address, player.remote_address)) 
-				strcpy(player.ip, ip);
-			infile.getline(poll, 16); //what poll was our last?
-			if(!strcmp(player.playername, name) && verify_address(remote_address, player.remote_address)) { 
-				player.poll = atoi(poll);
-				foundplayer = true;
-				break; //get out we are done
-			}
-			if(!strcmp(player.playername, name) && !verify_address(remote_address, player.remote_address)) { 
-				spoofed = true;
-				foundplayer = false;
-				break;
-			}
-			player.rank++;
 		}
+	}
+	else 
+	{ 
+		spoofed = true;
 	}
 
 	infile.close();
 
-	if(!foundplayer) {
+	if(!foundplayer) 
+	{
 		//we didn't find this player, so give him some defaults and insert him
-		outfile.open("playerrank.db", ios::app);
-		if(strlen(player.playername)) { //don't write out blank player names
-			if(spoofed)
-				outfile << "Spoofer" << endl; //this way we can catch, and ban cheaters
-			else
-				outfile << player.playername << endl;
+		if(spoofed)
+			outfile.open("spoofed.db", ios::app);
+		else
+			outfile.open("playerrank.db", ios::app);
+		if(strlen(player.playername)) 
+		{	
+			//don't write out blank player names
+			outfile << player.playername << endl;
 			outfile << "127.0.0.1" << endl;
 			outfile << "0" << endl;
 			outfile << "0" << endl;
@@ -217,8 +208,8 @@ void ReInsertPlayer(PLAYERINFO player)
 	ofstream outfile;
 	int total_players;
 
-	if(!strlen(player.playername))
-		return; //don't bother with assholes who put in blank names
+	if(!strlen(player.playername) || !(verify_player(player.playername)))
+		return; //don't bother with assholes who put in blank names or don't have accounts
 
 	infile.open("playerrank.db");
 
@@ -936,7 +927,7 @@ void GetClanMemberInfo(void)
 						clans[i].totalpoints += atof(points);
 						//be sure to insert the actual players data too
 						clans[i].players[j].points = atof(points);
-						clans[i].players[j].totalfrags = atof(totalfrags);
+						clans[i].players[j].totalfrags = atoi(totalfrags);
 						clans[i].players[j].totaltime = atof(totaltime);
 						if(clans[i].players[j].totaltime <= 0)
 							clans[i].players[j].totaltime = 1;
@@ -1124,7 +1115,7 @@ void UploadStats(void) { //put all updated files on the server
 
 	error = fcePutFile(0, "playerrank.db");
 	if(error < 0) {
-		printf("Error uploading player database file!\n", i);
+		printf("Error uploading player database file!\n");
 		fceClose(0);
 		return;
 	}
@@ -1251,8 +1242,8 @@ void CheckInactivePlayers(void)
 				strcpy(player[i].playername, name);
 				strcpy(player[i].remote_address, remote_address);
 				player[i].points = pointnumber;
-				player[i].frags = atof(frags);
-				player[i].totalfrags = atof(totalfrags);
+				player[i].frags = atoi(frags);
+				player[i].totalfrags = atoi(totalfrags);
 				player[i].time = atof(time);
 				player[i].totaltime = atof(totaltime);
 				strcpy(player[i].ip, ip);
