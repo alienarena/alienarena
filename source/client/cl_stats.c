@@ -211,48 +211,91 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player )
 //This next section deals with account verification
 //Passwords are hashed before storing or sending, raw strings are never exposed.
 
-char RandomChar()
-{   
-	return (char)((rand() % 78) + 30);
+//Send request for login(vstrings are random, unique strings that the server generates for each player - provides an extra layer of encryption)
+void STATS_RequestVerification (void)
+{
+	char *requeststring;
+	netadr_t adr;	
+
+	if(currLoginState.validated)
+		return; //already validated
+
+	NET_Config (true);
+
+	currLoginState.requestType = STATSLOGIN;
+
+	requeststring = va("requestvstring\\\\%i\\\\%s", STAT_PROTOCOL, name->string);
+
+	if( NET_StringToAdr( cl_master->string, &adr ) ) {
+		if( !adr.port )
+			adr.port = BigShort( PORT_STATS );
+		Netchan_OutOfBandPrint( NS_CLIENT, adr, requeststring );
+	}
+	else
+	{
+		Com_Printf( "Bad address: %s\n", cl_master->string);
+	}
+}
+
+//Send request for password change
+void STATS_RequestPwChange (void)
+{
+	char *requeststring;
+	netadr_t adr;	
+
+	currLoginState.validated = false; //force new login with new password
+
+	NET_Config (true);
+
+	currLoginState.requestType = STATSPWCHANGE;
+
+	requeststring = va("requestvstring\\\\%i\\\\%s", STAT_PROTOCOL, name->string);
+
+	if( NET_StringToAdr( cl_master->string, &adr ) ) {
+		if( !adr.port )
+			adr.port = BigShort( PORT_STATS );
+		Netchan_OutOfBandPrint( NS_CLIENT, adr, requeststring );
+	}
+	else
+	{
+		Com_Printf( "Bad address: %s\n", cl_master->string);
+	}
 }
 
 //Send stats server authentication pw
-void STATS_RequestVerification (void) 
+void STATS_AuthenticateStats (char *vstring) 
 {
 	char *requeststring;
 	netadr_t adr;	
 	char szPassword[256];
 	char szPassHash[256];
-	char rString[32];
-	int i;
+	char szPassHash2[256];	
 
-	currLoginState.requestType = STATSLOGIN;
+	Q_strncpyz2(szVerificationString, vstring, sizeof(szVerificationString));
 
 	NET_Config (true);
 
 	//use md5 encryption on password, never send or store a raw password!
 	if(!pw_hashed->value)
 	{
-		//create randomstring
-		for(i = 0; i < 32; i++)
-		{
-			rString[i] = RandomChar();
-		}
+		//salt
+		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, szVerificationString);
+		//Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 
-		rString[31] = 0;
+		////salt
+		//Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);// do we need to do this twice??
 
-		//salt with random string
-		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, rString);
 		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
+		Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString, strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
 
 		Cvar_Set("stats_pw_hashed", "1");
-		Cvar_Set("stats_password", szPassHash);
+		Cvar_Set("stats_password", szPassHash2);
 
 		//get new hashed password
 		password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
 	}
-
-	requeststring = va("login\\\\%i\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, password->string );
+	
+	requeststring = va("login\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, password->string, szVerificationString );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
@@ -266,42 +309,35 @@ void STATS_RequestVerification (void)
 }
 
 //Send password change request to server(this is to be called from the menu when a password is edited)
-void STATS_RequestPwChange (void) 
+void STATS_ChangePassword (char *vstring) 
 {
 	char *requeststring;
 	netadr_t adr;	
 	char szPassword[256];
 	char szPassHash[256];
-	char rString[32];
-	int i;
+	char szPassHash2[256];
 
-	currLoginState.requestType = STATSPWCHANGE;
-
-	currLoginState.validated = false; //force new login with new password
+	Q_strncpyz2(szVerificationString, vstring, sizeof(szVerificationString));
 
 	NET_Config (true);
 
-	for(i = 0; i < 32; i++)
-	{
-		rString[i] = RandomChar();
-	}
-
-	rString[31] = 0;
-
-	//use md5 encryption on password, never send or store a raw password!
-
-	//salt with random string
-	Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, rString);
+	//salt
+	Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, szVerificationString);
 	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 
+	//salt
+	Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);// do we need to do this twice??
+
+	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
+	Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString, strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
+
 	Cvar_Set("stats_pw_hashed", "1");
-	Cvar_Set("stats_password", szPassHash);
+	Cvar_Set("stats_password", szPassHash2);
 
 	//get new hashed password
 	password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
-	pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
-	
-	requeststring = va("changepw\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, currLoginState.old_password, password->string);
+
+	requeststring = va("changepw\\\\%i\\\\%s\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, currLoginState.old_password, password->string, szVerificationString);
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
@@ -321,8 +357,7 @@ void STATS_Logout (void)
 	netadr_t adr;	
 	char szPassword[256];
 	char szPassHash[256];
-	char rString[32];
-	int i;
+	char szPassHash2[256];
 
 	if(!currLoginState.validated)
 		return; //no point in logging out, we were never validated!
@@ -332,26 +367,24 @@ void STATS_Logout (void)
 	//use md5 encryption on password, never send or store a raw password!
 	if(!pw_hashed->value)
 	{
-		//create randomstring
-		for(i = 0; i < 32; i++)
-		{
-			rString[i] = RandomChar();
-		}
-
-		rString[31] = 0;
-
-		//salt with random string
-		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, rString);
+		//salt
+		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, szVerificationString);
 		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 
+		//salt
+		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);// do we need to do this twice??
+
+		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
+		Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString, strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
+
 		Cvar_Set("stats_pw_hashed", "1");
-		Cvar_Set("stats_password", szPassHash);
+		Cvar_Set("stats_password", szPassHash2);
 
 		//get new hashed password
 		password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
 	}
-
-	requeststring = va("logout\\\\%i\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, password->string );
+	
+	requeststring = va("logout\\\\%i\\\\%s\\\\%s\\\\&s\\\\", STAT_PROTOCOL, name->string, password->string, szVerificationString );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )

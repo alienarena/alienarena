@@ -590,13 +590,14 @@ typedef struct _STATSLOGINSTATE {
 #define STATSLOGIN 1
 #define STATSPWCHANGE 2
 
-void STATS_getStatsDB(void);
-void STATS_RequestVerification(void);
+void STATS_getStatsDB( void );
+void STATS_RequestVerification( void );
 void STATS_RequestPwChange (void);
+void STATS_AuthenticateStats (char *vstring);
 void STATS_ChangePassword (char *vstring);
 void STATS_Logout (void);
-PLAYERSTATS getPlayerRanking (PLAYERSTATS player);
-PLAYERSTATS getPlayerByRank (int rank, PLAYERSTATS player);
+PLAYERSTATS getPlayerRanking ( PLAYERSTATS player );
+PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player );
 LOGINSTATE currLoginState;
 
 //
