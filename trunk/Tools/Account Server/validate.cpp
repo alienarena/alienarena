@@ -11,6 +11,11 @@ using namespace std;
 
 extern SYSTEMTIME st;
 
+char RandomChar()
+{   
+	return (char)((rand() % 78) + 30);
+}
+
 void StripIllegalPathChars( char *name )
 {
 	int i = 0;
@@ -25,7 +30,41 @@ void StripIllegalPathChars( char *name )
 	} 
 }
 
-bool ValidatePlayer(char name[32], char password[256])
+void ObtainVStringForPlayer(char name[32])
+{
+	ifstream playerProfileFile;
+	char szPath[256];
+	char szTmp[256];
+	int i;
+
+	StripIllegalPathChars(name);
+
+	//look for existing account
+	sprintf(szPath, "playerprofiles/%s", name);
+
+	//open file
+	playerProfileFile.open(szPath);
+
+	if(!playerProfileFile)
+	{
+		//create randomstring
+		for(i = 0; i < 32; i++)
+		{
+			vString[i] = RandomChar();
+		}
+
+		vString[31] = 0;
+	}
+	else
+	{
+		playerProfileFile.getline(szTmp, 256);
+		playerProfileFile.getline(vString, 32);
+		playerProfileFile.close();
+	}
+
+}
+
+bool ValidatePlayer(char name[32], char password[256], char pVString[32])
 {
 	ifstream playerProfileFile;
 	ofstream newPlayerProfileFile;
@@ -49,6 +88,7 @@ bool ValidatePlayer(char name[32], char password[256])
 		sprintf(svTime, "%i-%i-%i-%i", st.wYear, st.wMonth, st.wDay, st.wHour);
 		newPlayerProfileFile.open(szPath);
 		newPlayerProfileFile << password <<endl;
+		newPlayerProfileFile << pVString <<endl;
 		newPlayerProfileFile << svTime <<endl;
 		newPlayerProfileFile.close();
 
@@ -76,7 +116,7 @@ bool ValidatePlayer(char name[32], char password[256])
 	return false;
 }
 
-void ChangePlayerPassword(char name[32], char new_password[256])
+void ChangePlayerPassword(char name[32], char new_password[256], char pVString[32])
 {
 	ofstream playerProfileFile;
 	char szPath[256];
@@ -94,6 +134,7 @@ void ChangePlayerPassword(char name[32], char new_password[256])
 	sprintf(svTime, "%i-%i-%i-%i", st.wYear, st.wMonth, st.wDay, st.wHour);
 	playerProfileFile.open(szPath);
 	playerProfileFile << new_password <<endl;
+	playerProfileFile << pVString <<endl;
 	playerProfileFile << svTime <<endl;
 	playerProfileFile.close();
 }

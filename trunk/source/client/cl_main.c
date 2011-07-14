@@ -1069,7 +1069,22 @@ void CL_ConnectionlessPacket (void)
 		CL_ParseGetServersResponse();
 		return;
 	}
-	
+
+	if(!strncmp(c, "vstring", 7))
+	{
+		s = Cmd_Argv(1);
+		switch(currLoginState.requestType)
+		{
+			case STATSLOGIN:
+				STATS_AuthenticateStats(s);
+				break;
+			case STATSPWCHANGE:
+				STATS_ChangePassword(s);
+				break; 
+		}
+		return;
+	}
+
 	if(!strncmp(c, "validated", 9))
 	{
 		//in cases of changed passwords
