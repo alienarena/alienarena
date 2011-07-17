@@ -280,10 +280,10 @@ void STATS_AuthenticateStats (char *vstring)
 	{
 		//salt
 		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, szVerificationString);
-		//Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
+		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 
-		////salt
-		//Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);// do we need to do this twice??
+		//salt
+		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);// do we need to do this twice??
 
 		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 		Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString, strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
