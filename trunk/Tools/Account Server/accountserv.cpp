@@ -273,7 +273,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -285,11 +285,11 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
-		printf ("Login command from %s:%s\n", name, password);
+		printf ("Login command from %s:%s\n", name, inet_ntoa (from->sin_addr));
 
 		if(ValidatePlayer(name, password, pVString))
 		{
@@ -341,7 +341,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -353,11 +353,11 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
-		printf ("Logout command from %s:%s\n", name, password);
+		printf ("Logout command from %s:%s\n", name, inet_ntoa (from->sin_addr));
 
 		if(ValidatePlayer(name, password, pVString))
 		{
@@ -405,7 +405,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -418,7 +418,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -430,11 +430,11 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
-		printf ("Change command from %s:%s\n", name, password);
+		printf ("Change command from %s:%s\n", name, inet_ntoa (from->sin_addr));
 
 		if(!strcmp(password, "password")) //a player either starting the first time, or moving to a new system
 		{
