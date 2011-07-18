@@ -916,6 +916,24 @@ maps/meshes/tech/slimegen
 		glow
 	}
 }
+maps/meshes/tech/slimegenred
+{
+	{
+		map maps/meshes/tech/slimegen_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/slimegenred_fx.tga
+		glow
+	}
+}
+maps/meshes/tech/redribtube
+{
+	{
+		map maps/meshes/tech/bigribtube_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/redribtube_fx.tga
+		glow
+	}
+}
 maps/meshes/xempx/lightbomb
 {
 	{
