@@ -109,6 +109,7 @@ bool ValidatePlayer(char name[32], char password[256], char pVString[32])
 		else
 		{
 			printf("[A]Invalid password for %s!\n", name);
+			printf("Was expecting %s and got %s\n", svPass, password);
 			return false;
 		}
 	}	
@@ -143,6 +144,8 @@ void DumpValidPlayersToFile(void)
 {
 	ofstream	currPlayers;
 	player_t	*player = &players;
+
+	remove("validated");
 
 	currPlayers.open("validated");
 	while (player->next)

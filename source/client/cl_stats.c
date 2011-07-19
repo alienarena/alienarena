@@ -283,13 +283,13 @@ void STATS_AuthenticateStats (char *vstring)
 		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 
 		//salt
-		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);// do we need to do this twice??
+		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);
 
 		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 		Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString, strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
 
-		Cvar_Set("stats_pw_hashed", "1");
-		Cvar_Set("stats_password", szPassHash2);
+		Cvar_FullSet("stats_pw_hashed", "1", CVAR_PROFILE);
+		Cvar_FullSet("stats_password", szPassHash2, CVAR_PROFILE);
 
 		//get new hashed password
 		password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
@@ -326,13 +326,13 @@ void STATS_ChangePassword (char *vstring)
 	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 
 	//salt
-	Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);// do we need to do this twice??
+	Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);
 
 	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 	Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString, strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
 
-	Cvar_Set("stats_pw_hashed", "1");
-	Cvar_Set("stats_password", szPassHash2);
+	Cvar_FullSet("stats_pw_hashed", "1", CVAR_PROFILE);
+	Cvar_FullSet("stats_password", szPassHash2, CVAR_PROFILE);
 
 	//get new hashed password
 	password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
@@ -372,13 +372,13 @@ void STATS_Logout (void)
 		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 
 		//salt
-		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);// do we need to do this twice??
+		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);
 
 		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 		Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString, strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
 
-		Cvar_Set("stats_pw_hashed", "1");
-		Cvar_Set("stats_password", szPassHash2);
+		Cvar_FullSet("stats_pw_hashed", "1", CVAR_PROFILE);
+		Cvar_FullSet("stats_password", szPassHash2, CVAR_PROFILE);
 
 		//get new hashed password
 		password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
