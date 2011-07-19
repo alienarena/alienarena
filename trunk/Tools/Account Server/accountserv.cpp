@@ -77,6 +77,11 @@ void DropPlayer (player_t *player)
 	//unlink
 	if (player->next)
 		player->next->prev = player->prev;
+	else 
+	{
+		free (player);
+		return;
+	}
 
 	if (player->prev)
 		player->prev->next = player->next;
@@ -119,6 +124,8 @@ void RemovePlayer (char name[32])
 			return;
 		}
 	}
+
+	DumpValidPlayersToFile();
 }
 
 //this called only when a packet of "login" is received, and the player is validated
@@ -215,7 +222,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			token = strtok( NULL, seps ); //protocol - may need this later on
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E1] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -223,7 +230,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			token = strtok( NULL, seps );
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E2] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 		if(strlen(token) > 32) 
@@ -240,7 +247,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			token = strtok( NULL, seps ); //protocol - may need this later on
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E1] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -248,7 +255,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			token = strtok( NULL, seps );
 		else
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E2] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 		if(token)
@@ -260,7 +267,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E3] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -273,7 +280,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
+			printf ("[E4] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -285,7 +292,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
+			printf ("[E5] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -307,7 +314,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			token = strtok( NULL, seps ); //protocol - may need this later on
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E1] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -315,7 +322,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			token = strtok( NULL, seps );
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E2] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -328,7 +335,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E3] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -341,7 +348,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
+			printf ("[E4] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -353,7 +360,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
+			printf ("[E5] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -372,7 +379,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			token = strtok( NULL, seps ); //protocol - may need this later on
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E1] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -380,7 +387,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			token = strtok( NULL, seps );
 		else
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E2] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 		if(token)
@@ -392,7 +399,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
+			printf ("[E3] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -405,7 +412,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
+			printf ("[E4] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -418,7 +425,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
+			printf ("[E5] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
@@ -430,7 +437,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		else 
 		{
-			printf ("[E] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
+			printf ("[E6] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
 
