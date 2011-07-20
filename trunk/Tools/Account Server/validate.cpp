@@ -87,9 +87,9 @@ bool ValidatePlayer(char name[32], char password[256], char pVString[32])
 		GetSystemTime(&st);
 		sprintf(svTime, "%i-%i-%i-%i", st.wYear, st.wMonth, st.wDay, st.wHour);
 		newPlayerProfileFile.open(szPath);
-		newPlayerProfileFile << password <<endl;
-		newPlayerProfileFile << pVString <<endl;
-		newPlayerProfileFile << svTime <<endl;
+		newPlayerProfileFile << password << endl;
+		newPlayerProfileFile << pVString << endl;
+		newPlayerProfileFile << svTime << endl;
 		newPlayerProfileFile.close();
 
 		return true;
@@ -134,9 +134,9 @@ void ChangePlayerPassword(char name[32], char new_password[256], char pVString[3
 	GetSystemTime(&st);
 	sprintf(svTime, "%i-%i-%i-%i", st.wYear, st.wMonth, st.wDay, st.wHour);
 	playerProfileFile.open(szPath);
-	playerProfileFile << new_password <<endl;
-	playerProfileFile << pVString <<endl;
-	playerProfileFile << svTime <<endl;
+	playerProfileFile << new_password << endl;
+	playerProfileFile << pVString << endl;
+	playerProfileFile << svTime << endl;
 	playerProfileFile.close();
 }
 
@@ -148,10 +148,11 @@ void DumpValidPlayersToFile(void)
 	remove("validated");
 
 	currPlayers.open("validated");
+
 	while (player->next)
 	{
 		player = player->next;
-		currPlayers << player->name<<endl;		
+		currPlayers << player->name << endl;		
 	}
 	currPlayers.close();
 }

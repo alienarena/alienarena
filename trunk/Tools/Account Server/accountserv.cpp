@@ -77,11 +77,6 @@ void DropPlayer (player_t *player)
 	//unlink
 	if (player->next)
 		player->next->prev = player->prev;
-	else 
-	{
-		free (player);
-		return;
-	}
 
 	if (player->prev)
 		player->prev->next = player->next;
@@ -121,7 +116,7 @@ void RemovePlayer (char name[32])
 		if (!_stricmp(player->name, name))
 		{
 			DropPlayer(player);
-			return;
+			break;
 		}
 	}
 
