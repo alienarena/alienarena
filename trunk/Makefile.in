@@ -545,6 +545,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/blasterfx.tga \
 	data1/gfx/bluelightning2.tga \
 	data1/gfx/bluelightning.tga \
+	data1/gfx/bluemartianfx.tga \
 	data1/gfx/bubbles.tga \
 	data1/gfx/caustics.tga \
 	data1/gfx/chrome2.tga \
@@ -556,6 +557,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/comp1.tga \
 	data1/gfx/comp2.tga \
 	data1/gfx/cpribeyereflection.tga \
+	data1/gfx/defaultmartianfx.tga \
 	data1/gfx/disruptorfx.tga \
 	data1/gfx/disruptormask.tga \
 	data1/gfx/distortwave.jpg \
@@ -1009,6 +1011,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/tech/railing.jpg \
 	data1/maps/meshes/tech/railing.md2 \
 	data1/maps/meshes/tech/railing_normal.jpg \
+	data1/maps/meshes/tech/redribtube1.md2 \
+	data1/maps/meshes/tech/redribtube_fx.tga \
+	data1/maps/meshes/tech/redribtube.jpg \
 	data1/maps/meshes/tech/ribtubebig1.md2 \
 	data1/maps/meshes/tech/ribtubebig2.md2 \
 	data1/maps/meshes/tech/ribtubebig3.md2 \
@@ -1035,6 +1040,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/tech/slimegen.md2 \
 	data1/maps/meshes/tech/slimegen_fx.tga \
 	data1/maps/meshes/tech/slimegen_normal.jpg \
+	data1/maps/meshes/tech/slimegenred_fx.tga \
+	data1/maps/meshes/tech/slimegenred.jpg \
+	data1/maps/meshes/tech/slimegenred.md2 \
 	data1/maps/meshes/tech/slimetube1.md2 \
 	data1/maps/meshes/tech/turbinefan.jpg \
 	data1/maps/meshes/tech/turbinefan.md2 \
@@ -2094,13 +2102,14 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-eternal.rscript \
 	data1/scripts/maps/dm-europa2k8.rscript \
 	data1/scripts/maps/dm-furious2k8.rscript \
+	data1/scripts/maps/dm-goregrinder.rscript \
 	data1/scripts/maps/dm-grindery.rscript \
 	data1/scripts/maps/dm-horus.rscript \
 	data1/scripts/maps/dm-impact.rscript \
 	data1/scripts/maps/dm-invasion.rscript \
 	data1/scripts/maps/dm-leviathan2k8.rscript \
 	data1/scripts/maps/dm-liberation.rscript \
- 	data1/scripts/maps/dm-neptune.rscript \
+	data1/scripts/maps/dm-neptune.rscript \
 	data1/scripts/maps/dm-oblivion.rscript \
 	data1/scripts/maps/dm-omega2k8.rscript \
 	data1/scripts/maps/dm-purgatory.rscript \
