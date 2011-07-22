@@ -47,6 +47,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _putenv putenv
 #endif
 
+/*
+ * Temporary test data collection for packet rate limiting
+ *
+ */
+#define PKT_TEST 1
+
+#if PKT_TEST
+cvar_t *cl_packet_test;
+#endif
 
 cvar_t	*freelook;
 
@@ -1080,7 +1089,7 @@ void CL_ConnectionlessPacket (void)
 				break;
 			case STATSPWCHANGE:
 				STATS_ChangePassword(s);
-				break; 
+				break;
 		}
 		return;
 	}
@@ -1750,6 +1759,10 @@ void CL_InitLocal (void)
 	adr7 = Cvar_Get( "adr7", "", CVAR_ARCHIVE );
 	adr8 = Cvar_Get( "adr8", "", CVAR_ARCHIVE );
 
+#if PKT_TEST
+	cl_packet_test = Cvar_Get( "cl_packet_test", "0", 0 );
+#endif
+
 //
 // register our variables
 //
@@ -1844,7 +1857,7 @@ void CL_InitLocal (void)
 
 	//stats server
 	cl_stats_server = Cvar_Get("cl_stats_server", "http://stats.planetarena.org", CVAR_ARCHIVE);
-	
+
 	//update checker
 	cl_latest_game_version = Cvar_Get("cl_latest_game_version", VERSION, CVAR_ARCHIVE);
 	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", "http://red.planetarena.org/version/crx_version", CVAR_ARCHIVE);
@@ -2082,7 +2095,29 @@ void CL_FixCvarCheats (void)
 
 //============================================================================
 
-qboolean send_packet_now = false; // instant packets TODO: Needed?
+/*
+ * Temporary test data collection for packet rate limiting
+ * cvar: cl_packet_test
+ * Dumps collected packets per server frame and packet delay info
+ *  at 1024 server frame intervals
+ * This is TEMPORARY. To be removed after initial testing.
+ *  'cause the data format is technical, arcane and crude.
+ */
+#if PKT_TEST
+
+#define PPSF_SIZE 16
+int svframe_count;
+int pkts_per_svframe[PPSF_SIZE];
+int ppsfi;
+
+#define PD_SIZE 50
+int pkt_delay_count;
+int pkt_delays[2][PD_SIZE]; // triggered and untriggered
+int pdi;
+
+#endif
+
+qboolean send_packet_now = false; // instant packets. used during downloads
 extern float    r_frametime;      // TODO: move to appropriate .h
 extern unsigned sys_frame_time;   // TODO: ditto
 
@@ -2112,22 +2147,38 @@ extern unsigned sys_frame_time;   // TODO: ditto
  *  cl.frame.servertime:
  *    equivalent to server frame number times 100msecs. see CL_ParseFrame()
  */
+
+/* Packet Rate Limiting Cap in milliseconds
+ *  msecs=PPS :: 12=83, 13=76, 14=71, 15=66, 16=62
+ * Current choice is 12msec/83PPS nominal.
+ *  This matches the default cl_maxfps setting.
+ *  Which is 90, of course, but because of msec rounding, the result is 83
+ *  This results in 8 packets per server frame, mostly.
+ * Packet rate limiting is not invoked unless the PPS is set higher than the FPS.
+ * Seems like a good idea not to invoke packet rate limiting unless the
+ *  cl_maxfps is set higher than the default.
+ */
+#define PKTRATE_CAP 12
+
 void CL_Frame( int msec )
 {
-	// static int lasttimecalled = 0; // TODO: see below
+	// static int lasttimecalled = 0; // TODO: see below, obsolete logging?
+
 	static int framerate_cap  = 0;
 	static int packetrate_cap = 0;
 	static int packet_timer   = 0;
 	static int render_timer   = 0;
-	static int packet_time_deviation = 0;
 	static int render_counter = 0;
-	qboolean render_trigger;
-	qboolean packet_trigger;
+	static int packet_delay = 0;
+	int render_trigger;
+	int packet_trigger;
+
+	// test variables
+	static int prev_server_frame = 0;
+	static int packets_per_server_frame = 0;
 
 	if ( dedicated->integer )
-	{ 
-		// 2011-06-03 Big OOPs!
-		// crx running as dedicated server crashes without this.
+	{ // crx running as dedicated server crashes without this.
 		return;
 	}
 
@@ -2171,37 +2222,41 @@ void CL_Frame( int msec )
 		{
 			framerate_cap = 1;
 		}
-		/* may convert these to Com_DPrintf() later */
-		Com_Printf( "Minimum milliseconds-per-frame set to %i\n", framerate_cap );
-		Com_Printf( "Maximum frames-per-second set to %i\n", 1000 / framerate_cap );
+		Com_DPrintf("framerate_cap set to %i msec\n", framerate_cap );
 	}
 
 	/*
 	 * Set nominal milliseconds-per-packet for client-to-server messages.
 	 * Idea is to be timely in getting and transmitting player input without
 	 *   congesting the server.
-	 *
-	 * 16 gives 6 or 7 client packets per server 100msec frame.
-	 * With adaptable "catchup" the packet-to-packet time can drop to half of
-	 *   the packet rate cap. For 16 that gives 8 or 9 msecs.
 	 * Plan is to not implement a user setting for this unless a need for that
 	 *   is discovered.
-	 *
-	 * If performance is low, msec arg may be greater than packetrate_cap.
-	 *  In that case adjust packetrate_cap dynamically.
-	 *  Prevents packet_time_deviation from overflowing.
+	 * If the cl_maxfps is set low, then FPS will limit PPS, and
+	 *  packet rate limiting is bypassed.
 	 */
-	packetrate_cap = 16;
-	if ( msec > packetrate_cap )
-	{ /* slow main loop, so adjust cap to match */
-		packetrate_cap = msec;
+	if ( cls.state == ca_connected )
+	{ // receiving configstrings from the server, run at nominal 10PPS
+		// avoids unnecessary load on the server
+		if ( packetrate_cap != 100 )
+			Com_DPrintf("packet rate change: 10 PPS\n");
+		packetrate_cap = 100;
+	}
+	else if ( framerate_cap >= PKTRATE_CAP )
+	{ // do not to throttle packet sending, run in sync with render
+		if ( packetrate_cap != -1)
+			Com_DPrintf("packetrate change: framerate\n");
+		packetrate_cap = -1;
+	}
+	else
+	{ // packet rate limiting
+		if ( packetrate_cap != PKTRATE_CAP )
+			Com_DPrintf("packetrate change: %iPPS\n", 1000/PKTRATE_CAP);
+		packetrate_cap = PKTRATE_CAP;
 	}
 
-	/*
-	 * local triggers for decoupling framerate from packet rate
-	 */
-	render_trigger = false;
-	packet_trigger = false;
+	/* local triggers for decoupling framerate from packet rate  */
+	render_trigger = 0;
+	packet_trigger = 0;
 
 	if ( cl_timedemo->integer == 1 )
 	{ /* accumulate timed demo statistics, free run both packet and render */
@@ -2210,62 +2265,71 @@ void CL_Frame( int msec )
 			cl.timedemo_start = cls.realtime;
 		}
 		cl.timedemo_frames++;
-		render_trigger = true;
-		packet_trigger = true;
+		render_trigger = 1;
+		packet_trigger = 1;
 	}
 	else
-	{ /* normal operation. check frame rate cap conditions */
+	{ /* normal operation. */
 		if ( render_timer >= framerate_cap )
 		{
-			render_trigger = true;
+			render_trigger = 1;
 		}
-		if ( cls.state == ca_connected )
-		{
-			/*
-			 * connection is established, server is sending configstrings.
-			 * Run client-to-server packet rate at nominal 10-per-second
-			 */
-			if ( packet_timer >= 100 )
-			{
-				packet_trigger = true;
-			}
-			packet_time_deviation = 0;
+		if ( packetrate_cap == -1 )
+		{ // flagged to run same as framerate_cap
+			packet_trigger = render_trigger;
 		}
 		else if ( packet_timer >= packetrate_cap )
-		{ /* normal, regular trigger */
-			packet_trigger = true;
+		{ // normal packet trigger
+			packet_trigger = 1;
 		}
-		else if ( packet_time_deviation >= packetrate_cap
-				&& packet_timer > (packetrate_cap / 2) )
-		{ /* packet trigger has been delayed */
-			/*
-			 * reduced packet-to-packet time, to maintain average packet rate
-			 * close to nominal.
-			 */
-			packet_trigger = true;
-		}
-		else if ( (render_counter >= 2)
-					&& render_trigger
-					&& (packet_time_deviation >= 0)
-					&& ((packet_timer + (packetrate_cap / 4)) >= packetrate_cap)
-					)
-		{
-			/* Accelerate next packet on these conditions:
-			 *  more than 1 render since last packet,
-			 *  render triggered,
-			 *  no accumulated rate acceleration,
-			 *  would be significantly delayed by pending render
-			 */
-			packet_trigger = true;
+		else if ( packet_delay > 0 )
+		{ // packet sent in previous loop was delayed
+			if ( packet_timer >= 9 )
+			{ // should be ok to send a packet early
+				/* idea is to try to maintain a steady number of
+				 * client-to-server packets per server frame.
+				 * If render is triggered, it is good to poll input and
+				 *  send a packet to avoid more delay.
+				 * If adding the delay to the timer reaches the cap then
+				 *  try to catch up
+				 * Otherwise, do nothing, the next loop should occur soon.
+				 */
+				if ( render_trigger
+					|| ((packet_timer + packet_delay) >= packetrate_cap) )
+				{
+					packet_trigger = 1;
+				}
+			}
+			// otherwise,
+#if PKT_TEST
+			if ( cl_packet_test->integer && packetrate_cap > 0 )
+			{
+				++pkt_delay_count;
+				if ( packet_delay < PD_SIZE-1 )
+				{
+					++pkt_delays[packet_trigger][packet_delay];
+				}
+				else
+				{
+					++pkt_delays[packet_trigger][PD_SIZE-1];
+				}
+			}
+#endif
 		}
 	}
 
-	/*
-	 * player input and network input/output processing
-	 */
 	if ( packet_trigger || send_packet_now )
 	{
-		send_packet_now = false; // TODO: send_packet_now may be obsolete
+		send_packet_now = false; // used during downloads
+
+		if ( packetrate_cap > 0 && packet_timer > packetrate_cap )
+		{ // difference between cap and timer, a delayed packet
+			packet_delay = packet_timer - packetrate_cap;
+		}
+		else
+		{
+			packet_delay = 0;
+		}
 
 		render_counter = 0; // for counting renders since last packet
 
@@ -2284,7 +2348,7 @@ void CL_Frame( int msec )
 			 * server checks for cmd.msecs to be <= 250
 			 */
 			cls.frametime = 0.24999f ;
-			Com_DPrintf("CL_Frame(): cls.frametime clamped from %f to 0.24999\n",
+			Com_DPrintf("CL_Frame(): cls.frametime clamped from %0.8f to 0.24999\n",
 					cls.frametime );
 			/*
 			 * try to throttle the video frame rate by overriding the
@@ -2324,39 +2388,71 @@ void CL_Frame( int msec )
 		 */
 		CL_PredictMovement();
 
-		/* accumulate deviation from nominal packet rate
-		 *  adds when packet is delayed.
-		 *  subtracts when deviation gets large, and packet sent early.
-		 *  this keeps the packets-per-server-frame stable, although the
-		 *  time between packets may vary.
-		 *  limit the accumulation to 1/2 second; do not want catchup bursts
-		 *    to go on long.
-		 */
-		packet_time_deviation += ( packet_timer - packetrate_cap );
-		if ( packet_time_deviation > 500 )
+#if PKT_TEST
+		if ( packetrate_cap > 0 && cl_packet_test->integer )
 		{
-			packet_time_deviation = 500;
+		/* developer test for checking packets per serverframe, packet delays
+		 *  histogram data collection
+		 */
+			if ( prev_server_frame != cl.frame.serverframe )
+			{ // new server frame
+				++svframe_count;
+				if ( packets_per_server_frame > 0
+						&& packets_per_server_frame < PPSF_SIZE-1 )
+				{
+					++pkts_per_svframe[packets_per_server_frame];
+				}
+				else
+				{
+					++pkts_per_svframe[PPSF_SIZE-1];
+				}
 
-			/* developer test for checking overflow */
-			// Com_DPrintf("Warning: packet_time_deviation positive clamp\n");
+				if ( (svframe_count & 0x3FF) == 0 )
+				{ // dump to console and clear every 1024 server frames, ~100 secs
+					/*--- PACKETS PER SERVER FRAME ---*/
+					Com_Printf( "ppsf(%i):", svframe_count );
+					for ( ppsfi = 0; ppsfi < PPSF_SIZE-1; ppsfi++ )
+					{
+						if ( pkts_per_svframe[ppsfi] != 0 )
+						{
+							Com_Printf( "[%i:%i]", ppsfi,
+							        pkts_per_svframe[ppsfi] );
+							pkts_per_svframe[ppsfi] = 0;
+						}
+					}
+					Com_Printf( "\n" );
+					/*--- PACKET DELAYS ---*/
+					Com_Printf( "pdly(%i):", pkt_delay_count );
+					pkt_delay_count = 0;
+					for ( pdi = 0; pdi < PD_SIZE-1; pdi++ )
+					{
+						if ( pkt_delays[0][pdi] != 0 || pkt_delays[1][pdi] != 0 )
+						{
+							Com_Printf( "[%i:%i,%i]", pdi, pkt_delays[0][pdi],
+							        pkt_delays[1][pdi] );
+							pkt_delays[0][pdi] = 0;
+							pkt_delays[1][pdi] = 0;
+						}
+					}
+					Com_Printf( "\n" );
+				}
+				prev_server_frame = cl.frame.serverframe;
+				packets_per_server_frame = 1;
+			}
+			else
+			{
+				++packets_per_server_frame;
+			}
 		}
-		else if ( packet_time_deviation < -(packetrate_cap * 2) )
-		{ /* protect against underflow */
-			packet_time_deviation = -(packetrate_cap * 2);
-
-			/* developer test for checking underflow */
-			// Com_DPrintf("Warning: packet_time_deviation negative clamp\n");
-		}
-
-		/* developer test for showing client packets per server frame */
-		// Com_DPrintf("pkt: %i svf: %i\n", packet_timer, cl.frame.serverframe );
+#endif
 
 		/* retrigger packet send timer */
 		packet_timer = 0;
 	}
 
 	/*
-	 * refresh can occur more or less often than client-to->server messages.
+	 * refresh can occur on different frames than client-to-server messages.
+	 *  when packet rate limiting is in effect
 	 */
 	if ( render_trigger )
 	{
@@ -2368,10 +2464,10 @@ void CL_Frame( int msec )
 		 * May not need to clamp for rendering.
 		 * Only would affect things if framerate went below 4 FPS.
 		 *
-		 * Using a simple lowpass filter, to smooth out any irregular timing.
+		 * Using a simple lowpass filter, to smooth out irregular timing.
 		 */
 		cls.frametime = (float)(render_timer) / 1000.0f;
-		r_frametime = (r_frametime + cls.frametime) / 2.0f;
+		r_frametime = (r_frametime + cls.frametime + cls.frametime) / 3.0f;
 		cls.frametime = r_frametime;
 
 		//  Update the display
