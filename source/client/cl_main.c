@@ -15,7 +15,7 @@ See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
 // cl_main.c  -- client main loop
@@ -49,12 +49,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /*
  * Temporary test data collection for packet rate limiting
- *
+ * and framerate_cap jitter experiment
  */
 #define PKT_TEST 1
 
 #if PKT_TEST
 cvar_t *cl_packet_test;
+cvar_t *cl_frcjitter;
 #endif
 
 cvar_t	*freelook;
@@ -1761,6 +1762,7 @@ void CL_InitLocal (void)
 
 #if PKT_TEST
 	cl_packet_test = Cvar_Get( "cl_packet_test", "0", 0 );
+	cl_frcjitter = Cvar_Get( "cl_frcjitter", "1", 0 );
 #endif
 
 //
@@ -2098,7 +2100,7 @@ void CL_FixCvarCheats (void)
 /*
  * Temporary test data collection for packet rate limiting
  * cvar: cl_packet_test
- * Dumps collected packets per server frame and packet delay info
+ * Dumps collected packets per server frame and packet timer info
  *  at 1024 server frame intervals
  * This is TEMPORARY. To be removed after initial testing.
  *  'cause the data format is technical, arcane and crude.
@@ -2110,10 +2112,9 @@ int svframe_count;
 int pkts_per_svframe[PPSF_SIZE];
 int ppsfi;
 
-#define PD_SIZE 50
-int pkt_delay_count;
-int pkt_delays[2][PD_SIZE]; // triggered and untriggered
-int pdi;
+#define PKTTIME_SIZE 30
+int pkttime_ix;
+int pkttime[PKTTIME_SIZE];
 
 #endif
 
@@ -2164,6 +2165,10 @@ void CL_Frame( int msec )
 {
 	// static int lasttimecalled = 0; // TODO: see below, obsolete logging?
 
+#if PKT_TEST
+	static int frcjitter[4]   = { 0, -1, 0, 1 };
+	static int frcjitter_ix   = 0;
+#endif
 	static int framerate_cap  = 0;
 	static int packetrate_cap = 0;
 	static int packet_timer   = 0;
@@ -2270,10 +2275,33 @@ void CL_Frame( int msec )
 	}
 	else
 	{ /* normal operation. */
+#if PKT_TEST
+		if ( cl_frcjitter->integer )
+		{ // the cvar is temporary for test, to allow disabling this
+			/* Sometimes, the packetrate_cap can be "in phase" with
+			 *  the frame rate affecting the average packets-per-server-frame.
+			 *  A little jitter in the framerate_cap counteracts that.
+			 */
+			if ( render_timer >= (framerate_cap + frcjitter[frcjitter_ix]) )
+			{
+				if ( ++frcjitter_ix > 3 ) frcjitter_ix = 0;
+				render_trigger = 1;
+			}
+		}
+		else
+		{
+			if ( render_timer >= framerate_cap )
+			{
+				render_trigger = 1;
+			}
+
+		}
+#else
 		if ( render_timer >= framerate_cap )
 		{
 			render_trigger = 1;
 		}
+#endif
 		if ( packetrate_cap == -1 )
 		{ // flagged to run same as framerate_cap
 			packet_trigger = render_trigger;
@@ -2300,21 +2328,6 @@ void CL_Frame( int msec )
 					packet_trigger = 1;
 				}
 			}
-			// otherwise,
-#if PKT_TEST
-			if ( cl_packet_test->integer && packetrate_cap > 0 )
-			{
-				++pkt_delay_count;
-				if ( packet_delay < PD_SIZE-1 )
-				{
-					++pkt_delays[packet_trigger][packet_delay];
-				}
-				else
-				{
-					++pkt_delays[packet_trigger][PD_SIZE-1];
-				}
-			}
-#endif
 		}
 	}
 
@@ -2389,11 +2402,25 @@ void CL_Frame( int msec )
 		CL_PredictMovement();
 
 #if PKT_TEST
+
 		if ( packetrate_cap > 0 && cl_packet_test->integer )
 		{
 		/* developer test for checking packets per serverframe, packet delays
 		 *  histogram data collection
 		 */
+			/*
+			 * collect packet timer histogram
+			 */
+			pkttime_ix = packet_timer;
+			if ( pkttime_ix >= PKTTIME_SIZE-1 )
+			{
+				++pkttime[PKTTIME_SIZE-1];
+			}
+			else
+			{
+				++pkttime[pkttime_ix];
+			}
+
 			if ( prev_server_frame != cl.frame.serverframe )
 			{ // new server frame
 				++svframe_count;
@@ -2421,17 +2448,15 @@ void CL_Frame( int msec )
 						}
 					}
 					Com_Printf( "\n" );
-					/*--- PACKET DELAYS ---*/
-					Com_Printf( "pdly(%i):", pkt_delay_count );
-					pkt_delay_count = 0;
-					for ( pdi = 0; pdi < PD_SIZE-1; pdi++ )
+					/*--- PACKET TIMER HISTOGRAM ---*/
+					Com_Printf( "pkttime:");
+					for ( pkttime_ix = 0; pkttime_ix < PKTTIME_SIZE-1; pkttime_ix++ )
 					{
-						if ( pkt_delays[0][pdi] != 0 || pkt_delays[1][pdi] != 0 )
+						if ( pkttime[pkttime_ix] != 0 )
 						{
-							Com_Printf( "[%i:%i,%i]", pdi, pkt_delays[0][pdi],
-							        pkt_delays[1][pdi] );
-							pkt_delays[0][pdi] = 0;
-							pkt_delays[1][pdi] = 0;
+							Com_Printf( "[%i:%i]",
+									pkttime_ix, pkttime[pkttime_ix] );
+							pkttime[pkttime_ix] = 0;
 						}
 					}
 					Com_Printf( "\n" );
