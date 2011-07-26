@@ -52,3 +52,56 @@ textures/arena9/trim2
 		alphamask
 	}
 }
+textures/arena9/roundlightr
+{
+	{
+		map gfx/beam1.tga
+		scale static 20 static 20
+		colormap .5 .2 .1
+		beam
+		xang 0.25
+		yang 0.25
+		rotating 1
+		lensflare
+		flaretype 1
+	}
+}
+textures/blanks/blank1
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		yang 0.25
+	}
+}
+textures/blanks/blank2
+{
+	{
+		map gfx/beam3.tga
+		scale static 60 static 60
+		colormap 1 1 1
+		beam
+	}
+}
+textures/blanks/blank3
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		xang 0.25
+	}
+}
+textures/blanks/blank4
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		yang -0.25
+	}
+}
