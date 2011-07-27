@@ -1773,7 +1773,7 @@ void CL_InitLocal (void)
 	background_music = Cvar_Get("background_music", "1", CVAR_ARCHIVE);
 	background_music_vol = Cvar_Get("background_music_vol", "0.5", CVAR_ARCHIVE);
 
-	cl_add_blend = Cvar_Get ("cl_blend", "1", 0);
+	cl_add_blend = Cvar_Get ("cl_blend", "1", CVAR_ARCHIVE);
 	cl_add_lights = Cvar_Get ("cl_lights", "1", 0);
 	cl_add_particles = Cvar_Get ("cl_particles", "1", 0);
 	cl_add_entities = Cvar_Get ("cl_entities", "1", 0);
