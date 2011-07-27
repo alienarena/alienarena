@@ -878,7 +878,7 @@ void V_RenderView( float stereo_separation )
 			r_numdlights = 0;
 		if (!cl_add_blend->value)
 		{
-			VectorClear (cl.refdef.blend);
+			Vector4Clear (cl.refdef.blend);
 		}
 
 		cl.refdef.num_entities = r_numentities;

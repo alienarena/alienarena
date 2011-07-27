@@ -934,11 +934,16 @@ void R_SetupGL (void)
 R_Clear
 =============
 */
+extern cvar_t *info_spectator;
+extern cvar_t *cl_add_blend;
 extern qboolean have_stencil;
 void R_Clear (void)
 {
+	qglClearColor(0,0,0,1);
 	if (gl_clear->value)
 		qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	else if (!cl_add_blend->value && info_spectator->value && (CM_PointContents(r_newrefdef.vieworg, 0) & CONTENTS_SOLID))
+		qglClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //out of map
 	else
 		qglClear (GL_DEPTH_BUFFER_BIT);
 
