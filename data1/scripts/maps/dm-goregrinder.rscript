@@ -1,3 +1,12 @@
+textures/metal/fade2
+{
+	{
+		map gfx/beam3.tga
+		scale static 45 static 80
+		colormap 1 1 1
+		beam
+	}
+}
 textures/arena7/light3
 {
 	{
@@ -103,5 +112,53 @@ textures/blanks/blank4
 		colormap 1 1 1
 		beam
 		yang -0.25
+	}
+}
+env/tekcityup
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcityrt
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcitylf
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcityft
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcitybk
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcitydn
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
 	}
 }
