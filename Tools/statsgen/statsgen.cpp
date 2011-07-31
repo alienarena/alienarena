@@ -134,6 +134,30 @@ int verify_player(char name[32])
 	return false;	
 }
 
+/**
+ * Calculate points for sorting by rank
+ *
+ * totalpoints  accumulated points
+ * totaltime    accumulated game time
+ * returns      points for ranking 
+ */
+double RankingPoints( char* playername, double totalpoints, double totaltime )
+{
+	if ( totalpoints < 0.0 || totaltime < 1.0 )
+	{
+#if TEST_LOG
+		testlog << "db error: " << playername << " ("
+			<< totalpoints << ", " << totaltime << ')' << endl;
+#endif
+		return 0.49; // slightly less than minimum
+	}
+	// Calculation derived from:
+	//  y = mx + b, with m=0.5, and (x,y) = (1,1)
+	// "compresses" actualpoints range and favors higher t
+	// effectively (points/hour)/2 after ~10 hours
+	return (((totalpoints - 1.0)/(2.0 * totaltime)) + 1.0);
+}
+
 PLAYERINFO LoadPlayerInfo(PLAYERINFO player)
 {	
 	ifstream infile;
@@ -241,6 +265,8 @@ void ReInsertPlayer(PLAYERINFO player)
 	ifstream infile;
 	ofstream outfile;
 	int total_players;
+	double rankpoints_player;
+	double rankpoints_other;
 
 #if 0
 	// don't do this here, player could be in game
@@ -252,6 +278,8 @@ void ReInsertPlayer(PLAYERINFO player)
 	infile.open("playerrank.db");
 
 	outfile.open("temp.db");
+
+	rankpoints_player = RankingPoints( player.playername, player.points, player.totaltime );
 
 	if(infile.good()) {
 
@@ -273,7 +301,8 @@ void ReInsertPlayer(PLAYERINFO player)
 			infile.getline(ip, 16); //ip
 			infile.getline(poll, 16); //poll number
 
-			if(((atof(points)/atof(totaltime)) < (player.points/player.totaltime)) && !inserted) 
+			rankpoints_other = RankingPoints( name, atof(points), atof(totaltime) );
+			if ( !inserted  && rankpoints_other < rankpoints_player )
 			{ //this will add new ranking
 				outfile << player.playername << endl;
 				outfile << player.remote_address << endl;
@@ -1143,12 +1172,10 @@ void GeneratePlayerRankingHtml(void) //Top 1000 players
 				continue;
 			}
 
-			fragrate     = ntotalfrags / actualtime;
-			// TODO: tune the scaling factor (was 100 before)
-			//   no scaling for now, see how that works
-			actualpoints = (1.0 * npoints) / ntotaltime;
-
 			//build row for this player
+			//  with calculated points and fragrate
+			actualpoints = RankingPoints( name, npoints, ntotaltime );
+			fragrate     = ntotalfrags / actualtime;
 			outfile << "<tr>" << endl;
 			sprintf(a_string, "<td>%i</td>", rank);
 			outfile << a_string << endl;
@@ -1164,9 +1191,9 @@ void GeneratePlayerRankingHtml(void) //Top 1000 players
 			}
 			outfile << "</td>" ;
 
-			// TODO: tune the points format. (was 4.2)
-			//   extra precision for no-scaling experiment
-			sprintf(a_string, "<td>%4.5f</td>", actualpoints);
+			// TODO: verify format.
+			//  see RankingPoints()
+			sprintf(a_string, "<td>%3.3f</td>", actualpoints);
 
 			outfile << a_string << endl;
 			sprintf(a_string, "<td>%s</td>", totalfrags);
