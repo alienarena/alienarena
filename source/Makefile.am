@@ -165,6 +165,8 @@ crx_SOURCES = \
 	qcommon/htable.h \
 	qcommon/md5.c \
 	qcommon/mdfour.c \
+	qcommon/sha2.c \
+	qcommon/hmac_sha2.c \
 	qcommon/net_chan.c \
 	qcommon/pmove.c \
 	qcommon/qcommon.h \

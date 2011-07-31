@@ -262,32 +262,32 @@ am__crx_SOURCES_DIST = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	client/vid_menu.c game/game.h game/q_shared.c game/q_shared.h \
 	qcommon/cmd.c qcommon/cmodel.c qcommon/common.c qcommon/crc.c \
 	qcommon/crc.h qcommon/cvar.c qcommon/files.c qcommon/htable.c \
-	qcommon/htable.h qcommon/md5.c qcommon/mdfour.c \
-	qcommon/net_chan.c qcommon/pmove.c qcommon/qcommon.h \
-	qcommon/qfiles.h ref_gl/anorms.h ref_gl/anormtab.h \
-	ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c ref_gl/r_bmfont.c \
-	ref_gl/r_bmfont.h ref_gl/r_draw.c ref_gl/r_image.c \
-	ref_gl/r_image.h ref_gl/r_iqm.h ref_gl/r_iqm.c \
-	ref_gl/r_light.c ref_gl/r_local.h ref_gl/r_main.c \
-	ref_gl/r_math.c ref_gl/r_math.h ref_gl/r_mesh.c \
-	ref_gl/r_misc.c ref_gl/r_model.c ref_gl/r_model.h \
-	ref_gl/r_particle.c ref_gl/r_postprocess.c ref_gl/r_program.c \
-	ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h ref_gl/r_script.c \
-	ref_gl/r_script.h ref_gl/r_shadowmaps.c ref_gl/r_shadows.c \
-	ref_gl/r_surf.c ref_gl/r_text.c ref_gl/r_text.h ref_gl/r_ttf.c \
-	ref_gl/r_ttf.h ref_gl/r_varray.c ref_gl/r_vbo.c \
-	ref_gl/r_vlights.c ref_gl/r_warp.c ref_gl/warpsin.h \
-	server/server.h server/sv_ccmds.c server/sv_ents.c \
-	server/sv_game.c server/sv_init.c server/sv_main.c \
-	server/sv_send.c server/sv_user.c server/sv_world.c \
-	unix/glob.c unix/glob.h unix/gl_glx.c unix/glw_unix.h \
-	unix/net_udp.c unix/qal_unix.c unix/qasm.h unix/qgl_unix.c \
-	unix/q_shunix.c unix/rw_unix.c unix/rw_unix.h unix/sys_unix.c \
-	unix/vid_so.c win32/conproc.c win32/conproc.h win32/glw_imp.c \
-	win32/glw_win.h win32/in_win.c win32/net_wins.c \
-	win32/qal_win.c win32/qgl_win.c win32/q_shwin.c \
-	win32/sys_win.c win32/vid_dll.c win32/winquake.h \
-	win32/resource.h
+	qcommon/htable.h qcommon/md5.c qcommon/mdfour.c qcommon/sha2.c \
+	qcommon/hmac_sha2.c qcommon/net_chan.c qcommon/pmove.c \
+	qcommon/qcommon.h qcommon/qfiles.h ref_gl/anorms.h \
+	ref_gl/anormtab.h ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c \
+	ref_gl/r_bmfont.c ref_gl/r_bmfont.h ref_gl/r_draw.c \
+	ref_gl/r_image.c ref_gl/r_image.h ref_gl/r_iqm.h \
+	ref_gl/r_iqm.c ref_gl/r_light.c ref_gl/r_local.h \
+	ref_gl/r_main.c ref_gl/r_math.c ref_gl/r_math.h \
+	ref_gl/r_mesh.c ref_gl/r_misc.c ref_gl/r_model.c \
+	ref_gl/r_model.h ref_gl/r_particle.c ref_gl/r_postprocess.c \
+	ref_gl/r_program.c ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h \
+	ref_gl/r_script.c ref_gl/r_script.h ref_gl/r_shadowmaps.c \
+	ref_gl/r_shadows.c ref_gl/r_surf.c ref_gl/r_text.c \
+	ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
+	ref_gl/r_varray.c ref_gl/r_vbo.c ref_gl/r_vlights.c \
+	ref_gl/r_warp.c ref_gl/warpsin.h server/server.h \
+	server/sv_ccmds.c server/sv_ents.c server/sv_game.c \
+	server/sv_init.c server/sv_main.c server/sv_send.c \
+	server/sv_user.c server/sv_world.c unix/glob.c unix/glob.h \
+	unix/gl_glx.c unix/glw_unix.h unix/net_udp.c unix/qal_unix.c \
+	unix/qasm.h unix/qgl_unix.c unix/q_shunix.c unix/rw_unix.c \
+	unix/rw_unix.h unix/sys_unix.c unix/vid_so.c win32/conproc.c \
+	win32/conproc.h win32/glw_imp.c win32/glw_win.h win32/in_win.c \
+	win32/net_wins.c win32/qal_win.c win32/qgl_win.c \
+	win32/q_shwin.c win32/sys_win.c win32/vid_dll.c \
+	win32/winquake.h win32/resource.h
 @BUILD_UNIX_TRUE@am__objects_1 = unix/crx-gl_glx.$(OBJEXT) \
 @BUILD_UNIX_TRUE@	unix/crx-net_udp.$(OBJEXT) \
 @BUILD_UNIX_TRUE@	unix/crx-qal_unix.$(OBJEXT) \
@@ -321,7 +321,8 @@ am_crx_OBJECTS = client/crx-cl_ents.$(OBJEXT) \
 	qcommon/crx-common.$(OBJEXT) qcommon/crx-crc.$(OBJEXT) \
 	qcommon/crx-cvar.$(OBJEXT) qcommon/crx-files.$(OBJEXT) \
 	qcommon/crx-htable.$(OBJEXT) qcommon/crx-md5.$(OBJEXT) \
-	qcommon/crx-mdfour.$(OBJEXT) qcommon/crx-net_chan.$(OBJEXT) \
+	qcommon/crx-mdfour.$(OBJEXT) qcommon/crx-sha2.$(OBJEXT) \
+	qcommon/crx-hmac_sha2.$(OBJEXT) qcommon/crx-net_chan.$(OBJEXT) \
 	qcommon/crx-pmove.$(OBJEXT) ref_gl/crx-r_bloom.$(OBJEXT) \
 	ref_gl/crx-r_bmfont.$(OBJEXT) ref_gl/crx-r_draw.$(OBJEXT) \
 	ref_gl/crx-r_image.$(OBJEXT) ref_gl/crx-r_iqm.$(OBJEXT) \
@@ -602,25 +603,26 @@ crx_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	client/vid_menu.c game/game.h game/q_shared.c game/q_shared.h \
 	qcommon/cmd.c qcommon/cmodel.c qcommon/common.c qcommon/crc.c \
 	qcommon/crc.h qcommon/cvar.c qcommon/files.c qcommon/htable.c \
-	qcommon/htable.h qcommon/md5.c qcommon/mdfour.c \
-	qcommon/net_chan.c qcommon/pmove.c qcommon/qcommon.h \
-	qcommon/qfiles.h ref_gl/anorms.h ref_gl/anormtab.h \
-	ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c ref_gl/r_bmfont.c \
-	ref_gl/r_bmfont.h ref_gl/r_draw.c ref_gl/r_image.c \
-	ref_gl/r_image.h ref_gl/r_iqm.h ref_gl/r_iqm.c \
-	ref_gl/r_light.c ref_gl/r_local.h ref_gl/r_main.c \
-	ref_gl/r_math.c ref_gl/r_math.h ref_gl/r_mesh.c \
-	ref_gl/r_misc.c ref_gl/r_model.c ref_gl/r_model.h \
-	ref_gl/r_particle.c ref_gl/r_postprocess.c ref_gl/r_program.c \
-	ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h ref_gl/r_script.c \
-	ref_gl/r_script.h ref_gl/r_shadowmaps.c ref_gl/r_shadows.c \
-	ref_gl/r_surf.c ref_gl/r_text.c ref_gl/r_text.h ref_gl/r_ttf.c \
-	ref_gl/r_ttf.h ref_gl/r_varray.c ref_gl/r_vbo.c \
-	ref_gl/r_vlights.c ref_gl/r_warp.c ref_gl/warpsin.h \
-	server/server.h server/sv_ccmds.c server/sv_ents.c \
-	server/sv_game.c server/sv_init.c server/sv_main.c \
-	server/sv_send.c server/sv_user.c server/sv_world.c \
-	unix/glob.c unix/glob.h $(am__append_6) $(am__append_7)
+	qcommon/htable.h qcommon/md5.c qcommon/mdfour.c qcommon/sha2.c \
+	qcommon/hmac_sha2.c qcommon/net_chan.c qcommon/pmove.c \
+	qcommon/qcommon.h qcommon/qfiles.h ref_gl/anorms.h \
+	ref_gl/anormtab.h ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c \
+	ref_gl/r_bmfont.c ref_gl/r_bmfont.h ref_gl/r_draw.c \
+	ref_gl/r_image.c ref_gl/r_image.h ref_gl/r_iqm.h \
+	ref_gl/r_iqm.c ref_gl/r_light.c ref_gl/r_local.h \
+	ref_gl/r_main.c ref_gl/r_math.c ref_gl/r_math.h \
+	ref_gl/r_mesh.c ref_gl/r_misc.c ref_gl/r_model.c \
+	ref_gl/r_model.h ref_gl/r_particle.c ref_gl/r_postprocess.c \
+	ref_gl/r_program.c ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h \
+	ref_gl/r_script.c ref_gl/r_script.h ref_gl/r_shadowmaps.c \
+	ref_gl/r_shadows.c ref_gl/r_surf.c ref_gl/r_text.c \
+	ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
+	ref_gl/r_varray.c ref_gl/r_vbo.c ref_gl/r_vlights.c \
+	ref_gl/r_warp.c ref_gl/warpsin.h server/server.h \
+	server/sv_ccmds.c server/sv_ents.c server/sv_game.c \
+	server/sv_init.c server/sv_main.c server/sv_send.c \
+	server/sv_user.c server/sv_world.c unix/glob.c unix/glob.h \
+	$(am__append_6) $(am__append_7)
 
 # Dedicated Server sources (Unix only)
 crx_ded_SOURCES = \
@@ -1415,6 +1417,10 @@ qcommon/crx-md5.$(OBJEXT): qcommon/$(am__dirstamp) \
 	qcommon/$(DEPDIR)/$(am__dirstamp)
 qcommon/crx-mdfour.$(OBJEXT): qcommon/$(am__dirstamp) \
 	qcommon/$(DEPDIR)/$(am__dirstamp)
+qcommon/crx-sha2.$(OBJEXT): qcommon/$(am__dirstamp) \
+	qcommon/$(DEPDIR)/$(am__dirstamp)
+qcommon/crx-hmac_sha2.$(OBJEXT): qcommon/$(am__dirstamp) \
+	qcommon/$(DEPDIR)/$(am__dirstamp)
 qcommon/crx-net_chan.$(OBJEXT): qcommon/$(am__dirstamp) \
 	qcommon/$(DEPDIR)/$(am__dirstamp)
 qcommon/crx-pmove.$(OBJEXT): qcommon/$(am__dirstamp) \
@@ -1676,11 +1682,13 @@ mostlyclean-compile:
 	-rm -f qcommon/crx-crc.$(OBJEXT)
 	-rm -f qcommon/crx-cvar.$(OBJEXT)
 	-rm -f qcommon/crx-files.$(OBJEXT)
+	-rm -f qcommon/crx-hmac_sha2.$(OBJEXT)
 	-rm -f qcommon/crx-htable.$(OBJEXT)
 	-rm -f qcommon/crx-md5.$(OBJEXT)
 	-rm -f qcommon/crx-mdfour.$(OBJEXT)
 	-rm -f qcommon/crx-net_chan.$(OBJEXT)
 	-rm -f qcommon/crx-pmove.$(OBJEXT)
+	-rm -f qcommon/crx-sha2.$(OBJEXT)
 	-rm -f qcommon/crx_ded-cmd.$(OBJEXT)
 	-rm -f qcommon/crx_ded-cmodel.$(OBJEXT)
 	-rm -f qcommon/crx_ded-common.$(OBJEXT)
@@ -1927,11 +1935,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-crc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-cvar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-files.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-hmac_sha2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-htable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-md5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-mdfour.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-net_chan.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-pmove.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx-sha2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx_ded-cmd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx_ded-cmodel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@qcommon/$(DEPDIR)/crx_ded-common.Po@am__quote@
@@ -2700,6 +2710,38 @@ qcommon/crx-mdfour.obj: qcommon/mdfour.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='qcommon/mdfour.c' object='qcommon/crx-mdfour.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/crx-mdfour.obj `if test -f 'qcommon/mdfour.c'; then $(CYGPATH_W) 'qcommon/mdfour.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/mdfour.c'; fi`
+
+qcommon/crx-sha2.o: qcommon/sha2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/crx-sha2.o -MD -MP -MF qcommon/$(DEPDIR)/crx-sha2.Tpo -c -o qcommon/crx-sha2.o `test -f 'qcommon/sha2.c' || echo '$(srcdir)/'`qcommon/sha2.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/crx-sha2.Tpo qcommon/$(DEPDIR)/crx-sha2.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='qcommon/sha2.c' object='qcommon/crx-sha2.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/crx-sha2.o `test -f 'qcommon/sha2.c' || echo '$(srcdir)/'`qcommon/sha2.c
+
+qcommon/crx-sha2.obj: qcommon/sha2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/crx-sha2.obj -MD -MP -MF qcommon/$(DEPDIR)/crx-sha2.Tpo -c -o qcommon/crx-sha2.obj `if test -f 'qcommon/sha2.c'; then $(CYGPATH_W) 'qcommon/sha2.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/sha2.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/crx-sha2.Tpo qcommon/$(DEPDIR)/crx-sha2.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='qcommon/sha2.c' object='qcommon/crx-sha2.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/crx-sha2.obj `if test -f 'qcommon/sha2.c'; then $(CYGPATH_W) 'qcommon/sha2.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/sha2.c'; fi`
+
+qcommon/crx-hmac_sha2.o: qcommon/hmac_sha2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/crx-hmac_sha2.o -MD -MP -MF qcommon/$(DEPDIR)/crx-hmac_sha2.Tpo -c -o qcommon/crx-hmac_sha2.o `test -f 'qcommon/hmac_sha2.c' || echo '$(srcdir)/'`qcommon/hmac_sha2.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/crx-hmac_sha2.Tpo qcommon/$(DEPDIR)/crx-hmac_sha2.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='qcommon/hmac_sha2.c' object='qcommon/crx-hmac_sha2.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/crx-hmac_sha2.o `test -f 'qcommon/hmac_sha2.c' || echo '$(srcdir)/'`qcommon/hmac_sha2.c
+
+qcommon/crx-hmac_sha2.obj: qcommon/hmac_sha2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/crx-hmac_sha2.obj -MD -MP -MF qcommon/$(DEPDIR)/crx-hmac_sha2.Tpo -c -o qcommon/crx-hmac_sha2.obj `if test -f 'qcommon/hmac_sha2.c'; then $(CYGPATH_W) 'qcommon/hmac_sha2.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/hmac_sha2.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) qcommon/$(DEPDIR)/crx-hmac_sha2.Tpo qcommon/$(DEPDIR)/crx-hmac_sha2.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='qcommon/hmac_sha2.c' object='qcommon/crx-hmac_sha2.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o qcommon/crx-hmac_sha2.obj `if test -f 'qcommon/hmac_sha2.c'; then $(CYGPATH_W) 'qcommon/hmac_sha2.c'; else $(CYGPATH_W) '$(srcdir)/qcommon/hmac_sha2.c'; fi`
 
 qcommon/crx-net_chan.o: qcommon/net_chan.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(crx_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT qcommon/crx-net_chan.o -MD -MP -MF qcommon/$(DEPDIR)/crx-net_chan.Tpo -c -o qcommon/crx-net_chan.o `test -f 'qcommon/net_chan.c' || echo '$(srcdir)/'`qcommon/net_chan.c
