@@ -1058,6 +1058,7 @@ CL_ConnectionlessPacket
 Responses to broadcasts, etc
 =================
 */
+void CL_WriteProfile (void);
 void CL_ConnectionlessPacket (void)
 {
 	char	*s;
@@ -1102,6 +1103,7 @@ void CL_ConnectionlessPacket (void)
 		{
 			//make sure the password is stored for future use
 			Q_strncpyz2(currLoginState.old_password, password->string, sizeof(currLoginState.old_password));
+			CL_WriteProfile (); //don't loose the plot if the game crashes later
 
 			Com_Printf("Password change successful!\n");
 		}

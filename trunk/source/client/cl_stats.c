@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include "client.h"
-#include "qcommon/md5.h"
+#include "qcommon/cryptohash.c"
 
 #if defined HAVE_UNISTD_H
 #include <unistd.h>
@@ -262,34 +262,41 @@ void STATS_RequestPwChange (void)
 	}
 }
 
+static void STATS_CalculateHash (void)
+{
+	char szPassword[256+64];
+	char szPassHash[256+64];
+	char szPassHash2[256];	
+	
+	//salt
+	Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, szVerificationString);
+	Com_HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash)-strlen(szVerificationString));
+
+	//re-salt
+	Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);
+
+	Com_HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
+	Com_HMACString(szPassHash, strlen(szPassHash), szVerificationString, strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
+
+	Cvar_FullSet("stats_pw_hashed", "1", CVAR_PROFILE);
+	Cvar_FullSet("stats_password", szPassHash2, CVAR_PROFILE);
+}
+    
+
 //Send stats server authentication pw
 void STATS_AuthenticateStats (char *vstring) 
 {
 	char *requeststring;
 	netadr_t adr;	
-	char szPassword[256];
-	char szPassHash[256];
-	char szPassHash2[256];	
 
 	Q_strncpyz2(szVerificationString, vstring, sizeof(szVerificationString));
 
 	NET_Config (true);
 
-	//use md5 encryption on password, never send or store a raw password!
+	//use encryption on password, never send or store a raw password!
 	if(!pw_hashed->value)
 	{
-		//salt
-		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, szVerificationString);
-		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
-
-		//salt
-		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);
-
-		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
-		Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString, strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
-
-		Cvar_FullSet("stats_pw_hashed", "1", CVAR_PROFILE);
-		Cvar_FullSet("stats_password", szPassHash2, CVAR_PROFILE);
+		STATS_CalculateHash ();
 
 		//get new hashed password
 		password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
@@ -313,26 +320,12 @@ void STATS_ChangePassword (char *vstring)
 {
 	char *requeststring;
 	netadr_t adr;	
-	char szPassword[256];
-	char szPassHash[256];
-	char szPassHash2[256];
 
 	Q_strncpyz2(szVerificationString, vstring, sizeof(szVerificationString));
 
 	NET_Config (true);
-
-	//salt
-	Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, szVerificationString);
-	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
-
-	//salt
-	Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);
-
-	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
-	Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString, strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
-
-	Cvar_FullSet("stats_pw_hashed", "1", CVAR_PROFILE);
-	Cvar_FullSet("stats_password", szPassHash2, CVAR_PROFILE);
+	
+	STATS_CalculateHash ();
 
 	//get new hashed password
 	password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
@@ -355,9 +348,6 @@ void STATS_Logout (void)
 {
 	char *requeststring;
 	netadr_t adr;	
-	char szPassword[256];
-	char szPassHash[256];
-	char szPassHash2[256];
 
 	if(!currLoginState.validated)
 		return; //no point in logging out, we were never validated!
@@ -367,18 +357,7 @@ void STATS_Logout (void)
 	//use md5 encryption on password, never send or store a raw password!
 	if(!pw_hashed->value)
 	{
-		//salt
-		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, szVerificationString);
-		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
-
-		//salt
-		Com_sprintf(szPassword, sizeof(szPassword), "%s%s", szPassHash, szVerificationString);
-
-		Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
-		Com_HMACMD5String(szPassHash, strlen(szPassHash), szVerificationString, strlen(szVerificationString), szPassHash2, sizeof(szPassHash2));
-
-		Cvar_FullSet("stats_pw_hashed", "1", CVAR_PROFILE);
-		Cvar_FullSet("stats_password", szPassHash2, CVAR_PROFILE);
+		STATS_CalculateHash ();
 
 		//get new hashed password
 		password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
