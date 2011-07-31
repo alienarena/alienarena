@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "r_ragdoll.h"
 #include "r_text.h"
 
+
 void R_Clear (void);
 
 viddef_t	vid;
@@ -186,6 +187,9 @@ cvar_t	*r_firstrun;
 
 //for testing
 cvar_t  *r_test;
+
+//ODE initialization error check
+int r_odeinit_success; // 0 if dODEInit2() fails, 1 otherwise.
 
 //fog stuff
 struct r_fog
@@ -439,7 +443,7 @@ an adequate LOD cutoff distance at 1920*1080 with an FOV of 90, we can scale
 the LOD cutoff distance to the lowest point where there will be no noticable
 ugliness.
 
-NOTE: Turns out the player's FOV setting goes to fov_x and not fov_y. Go 
+NOTE: Turns out the player's FOV setting goes to fov_x and not fov_y. Go
 figure.
 =============
 */
@@ -466,6 +470,11 @@ void R_DrawEntitiesOnList (void)
 
 	if (!r_drawentities->value)
 		return;
+
+	if ( !r_odeinit_success )
+	{ // ODE init failed, force ragdolls off
+		r_ragdolls = Cvar_ForceSet("r_ragdolls", "0");
+	}
 
 	// draw non-transparent first
 	for (i=0 ; i<r_newrefdef.num_entities ; i++)
@@ -557,7 +566,7 @@ void R_DrawEntitiesOnList (void)
 			else
 				currententity->script = NULL;
 		}
-		
+
 		currentmodel = currententity->model;
 
 		if (!currentmodel)
@@ -1001,7 +1010,7 @@ void R_RenderView (refdef_t *fd)
 		qglHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
 
 		R_DrawDynamicCaster();
-		
+
 		R_DrawVegetationCaster();
 
 		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT,0);
@@ -1079,7 +1088,7 @@ void R_RenderView (refdef_t *fd)
 
 	R_BloomBlend( fd );//BLOOMS
 
-	R_RenderSun();	
+	R_RenderSun();
 
 	R_GLSLPostProcess();
 
@@ -1106,7 +1115,7 @@ void R_RenderView (refdef_t *fd)
 
 	if(map_fog)
 		qglDisable(GL_FOG);
-	
+
 	R_DrawRadar();
 }
 
@@ -1251,7 +1260,6 @@ void R_Register( void )
 	r_minimap_zoom = Cvar_Get ("r_minimap_zoom", "1", CVAR_ARCHIVE );
 	r_minimap_style = Cvar_Get ("r_minimap_style", "1", CVAR_ARCHIVE );
 	r_minimap = Cvar_Get ("r_minimap", "0", CVAR_ARCHIVE );
-
 	r_ragdolls = Cvar_Get ("r_ragdolls", "1", CVAR_ARCHIVE );
 	r_ragdoll_debug = Cvar_Get("r_ragdoll_debug", "0", CVAR_ARCHIVE );
 
@@ -1603,8 +1611,8 @@ int R_Init( void *hinstance, void *hWnd )
 		Com_Printf ("...GL_EXT_point_parameters not found\n" );
 	}
 
-	R_InitImageSubsystem();	
-	
+	R_InitImageSubsystem();
+
 	R_InitShadowSubsystem();
 
 	R_LoadVBOSubsystem();
@@ -1723,9 +1731,19 @@ cpuinfo_exit:
 	VLight_Init();
 
 	//Initialize ODE
-	dInitODE2(0);
+	// ODE assert failures sometimes occur, this may or may not help.
+	r_odeinit_success = dInitODE2(0);
 	//ODE - clear out any ragdolls;
-	R_ClearAllRagdolls();
+	if ( r_odeinit_success )
+	{
+		Com_Printf("...ODE initialized.\n");
+		R_ClearAllRagdolls();
+		Com_Printf("...Ragdolls initialized.\n");
+	}
+	else
+	{
+		Com_Printf("...ODE initialization failed.\n...Ragdolls are disabled.\n");
+	}
 
 	scr_playericonalpha = 0.0;
 
@@ -1772,7 +1790,12 @@ void R_Shutdown (void)
 	QGL_Shutdown();
 
 	//Shutdown ODE
-	dCloseODE();
+	// ODE might fail assert on close when not intialized
+	if ( r_odeinit_success )
+	{
+		Com_DPrintf("Closing ODE\n");
+		dCloseODE();
+	}
 }
 
 

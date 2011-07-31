@@ -274,7 +274,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 
     height = abs(targ->mins[2]) + targ_maxs2;
 
-    if (targ->client && mod == MOD_DISRUPTOR) 
+    if (targ->client && mod == MOD_DISRUPTOR)
 	{
 		z_rel = point[2] - targ->s.origin[2];
         from_top = targ_maxs2 - z_rel;
@@ -282,7 +282,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		if (from_top < 0.0)
 			from_top = 0.0;
 
-        if ( from_top < 2*HEAD_HEIGHT ) 
+        if ( from_top < 2*HEAD_HEIGHT )
 		{
 			vec3_t new_point;
             VerifyHeadShot( point, dir, HEAD_HEIGHT, new_point );
@@ -295,7 +295,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
             }
         }
 
-        if ( head_success ) 
+        if ( head_success )
 		{
 			damage = damage*1.8 + 1;
             if (attacker->client)
@@ -369,7 +369,10 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	}
 	//diminish plasma splash, as we want this to be minimal, as it's more used for tricks
 	if(mod == MOD_PLASMA_SPLASH)
-		damage /= (1+ (int)(random() * 10.0));
+	{
+		// damage /= (1+ (int)(random() * 10.0));
+		damage /= 6; // median of formerly random 1..11
+	}
 
 	take = damage;
 	save = 0;
@@ -390,12 +393,12 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 			gi.sound(targ, CHAN_ITEM, gi.soundindex("items/protect4.wav"), 1, ATTN_NORM, 0);
 			targ->pain_debounce_time = level.time + 2;
 		}
-		if(mod == MOD_TRIGGER_HURT) 
+		if(mod == MOD_TRIGGER_HURT)
 		{
 			take = 0;
 			save = damage;
 		}
-		else 
+		else
 		{
 			take = damage/3;
 			save = 0;
@@ -424,7 +427,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 			else
 				SpawnDamage (TE_BLOOD, point, normal, take);
 		}
-		else 
+		else
 		{
 			if (targ->ctype == 0) //alien, robot, human
 				SpawnDamage (TE_GREENBLOOD, point, normal, take);
@@ -432,7 +435,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 				SpawnDamage (TE_GUNSHOT, point, normal, take);
 			else
 				SpawnDamage (TE_BLOOD, point, normal, take);
-			if(tca->value) 
+			if(tca->value)
 			{
 				if(!(strcmp(targ->classname, "misc_redspidernode")) || !(strcmp(targ->classname, "misc_bluespidernode")))
 					safe_centerprintf(attacker, "Spider health at %i percent", 100*(targ->health-take)/600);

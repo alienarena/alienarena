@@ -1161,6 +1161,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-europa2k8.mus \
 	data1/maps/scripts/dm-furious2k8.fog \
 	data1/maps/scripts/dm-furious2k8.mus \
+	data1/maps/scripts/dm-goregrinder.fog \
 	data1/maps/scripts/dm-horus.mus \
 	data1/maps/scripts/dm-impact.mus \
 	data1/maps/scripts/dm-invasion.mus \
@@ -2863,6 +2864,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena7/metal2.tga \
 	data1/textures/arena7/metal3.tga \
 	data1/textures/arena7/piston1.tga \
+	data1/textures/arena7/redfloro_hm.tga \
+	data1/textures/arena7/redfloro_nm.tga \
+	data1/textures/arena7/redfloro.tga \
 	data1/textures/arena7/redgrid.tga \
 	data1/textures/arena7/tekfloor1_nm.tga \
 	data1/textures/arena7/tekfloor1.tga \

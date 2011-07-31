@@ -963,7 +963,8 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	float	damage_radius;
 	int		radius_damage;
 
-	damage = 100 + (int)(random() * 20.0);
+	// damage = 100 + (int)(random() * 20.0);
+	damage        = 110; // median of formerly random 100..120
 	radius_damage = 120;
 	damage_radius = 120;
 	if (is_quad)
@@ -1592,7 +1593,8 @@ void weapon_floater_fire (edict_t *ent)
 	float	damage_radius;
 	int		radius_damage;
 
-	damage = 100 + (int)(random() * 20.0);
+	// damage = 100 + (int)(random() * 20.0);
+	damage        = 110; // median of formerly random damage of 100..120
 	radius_damage = 120;
 	damage_radius = 120;
 	if (is_quad || excessive->value)
