@@ -242,7 +242,6 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	}
 	else if (_strnicmp (data, "ÿÿÿÿlogin", 9) == 0)
 	{		
-		printf("command: %s\n", data);
 		//parse string, etc validate or create new profile file
 		token = strtok( cmd, seps ); 
 		if(token)
