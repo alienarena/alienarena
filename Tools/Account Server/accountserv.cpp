@@ -97,10 +97,16 @@ void CheckPlayers (void)
 		
 		GetSystemTime(&st);
 		curTime = st.wHour;
-		if(player->time > curTime)
-			curTime += 24;
-		if(curTime - player->time > 5)
-			DropPlayer(player);
+		if(player)
+		{
+			if(player->time)
+			{
+				if(player->time > curTime)
+					curTime += 24;
+				if(curTime - player->time > 5)
+					DropPlayer(player);
+			}
+		}
 	}
 }
 
@@ -236,6 +242,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	}
 	else if (_strnicmp (data, "ÿÿÿÿlogin", 9) == 0)
 	{		
+		printf("command: %s\n", data);
 		//parse string, etc validate or create new profile file
 		token = strtok( cmd, seps ); 
 		if(token)

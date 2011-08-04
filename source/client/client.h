@@ -584,6 +584,7 @@ typedef struct _PLAYERSTATS {
 typedef struct _STATSLOGINSTATE {
 	int requestType;
 	qboolean validated;
+	qboolean hashed;
 	char old_password[256];
 } LOGINSTATE;
 

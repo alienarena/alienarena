@@ -32,7 +32,7 @@
     static char sha512_hmac_output[1024]; //binary
     
     // jit - string version
-    static void BinToHex (void *pData, size_t sizeData, char *HexString, size_t sizeOut) // jit
+    void BinToHex (void *pData, size_t sizeData, char *HexString, size_t sizeOut) // jit
     {
 	    int i, Length;
 	    unsigned char LeftHalf, RightHalf;
