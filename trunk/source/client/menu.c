@@ -6869,11 +6869,24 @@ void PConfigAccept (void)
 	//was the password changed?
 	if(strcmp("********", s_player_password_field.buffer))
 	{
-		Cvar_FullSet( "stats_password", s_player_password_field.buffer, CVAR_PROFILE);
-		password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
-		Cvar_FullSet( "stats_pw_hashed", "0", CVAR_PROFILE);
-		pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
-		STATS_RequestPwChange();
+		//if this is a virgin password, don't change, just authenticate
+		if(!strcmp(password->string, "password"))
+		{
+			Cvar_FullSet( "stats_password", s_player_password_field.buffer, CVAR_PROFILE);
+			password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+			Cvar_FullSet( "stats_pw_hashed", "0", CVAR_PROFILE);
+			pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
+			currLoginState.validated = false;
+			STATS_RequestVerification();
+		}
+		else
+		{
+			Cvar_FullSet( "stats_password", s_player_password_field.buffer, CVAR_PROFILE);
+			password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+			Cvar_FullSet( "stats_pw_hashed", "0", CVAR_PROFILE);
+			pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
+			STATS_RequestPwChange();
+		}
 	}
 
 	Com_sprintf( scratch, sizeof( scratch ), "%s/%s",
