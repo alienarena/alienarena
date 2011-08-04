@@ -1058,7 +1058,6 @@ CL_ConnectionlessPacket
 Responses to broadcasts, etc
 =================
 */
-void CL_WriteProfile (void);
 void CL_ConnectionlessPacket (void)
 {
 	char	*s;
@@ -1103,7 +1102,6 @@ void CL_ConnectionlessPacket (void)
 		{
 			//make sure the password is stored for future use
 			Q_strncpyz2(currLoginState.old_password, password->string, sizeof(currLoginState.old_password));
-			CL_WriteProfile (); //don't loose the plot if the game crashes later
 
 			Com_Printf("Password change successful!\n");
 		}
@@ -1836,6 +1834,7 @@ void CL_InitLocal (void)
 	name = Cvar_Get ("name", "unnamed", CVAR_USERINFO | CVAR_ARCHIVE);
 	password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
 	Q_strncpyz2(currLoginState.old_password, password->string, sizeof(currLoginState.old_password));
+	currLoginState.hashed = false;
 	pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
 	/* */
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
@@ -2013,6 +2012,9 @@ void CL_WriteProfile (void)
 
 	if (cls.state == ca_uninitialized)
 		return;
+
+	if(!currLoginState.hashed)
+		return; //We don't ever want to write out non-hashed passwords, period!
 
 	FS_FullWritePath( path, sizeof(path), "profile.cfg");
 	f = fopen (path, "w");
