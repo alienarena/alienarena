@@ -252,7 +252,7 @@ char	*SV_StatusString (void)
 		}
 	}
 	//end bot score info
-	
+
 	return status;
 }
 
@@ -649,7 +649,7 @@ void SVC_DirectConnect (void)
 	//get number of bots
 	for (i=botnum=0 ; i<maxclients->value ; i++)
 	{
-		cl = &svs.clients[i]; 
+		cl = &svs.clients[i];
 		botnum = cl->edict->client->ps.botnum;
 		if(botnum > 0)
 			break;
@@ -791,8 +791,14 @@ void SVC_RemoteCommand (void)
 			}
 			strcat (remaining, " ");
 		}
-
-		Cmd_ExecuteString (remaining);
+		if ( strncmp( remaining, "killserver", 10 ) )
+		{ // not too surprising, rcon killserver does bad things
+			Cmd_ExecuteString (remaining);
+		}
+		else
+		{
+			Com_Printf("Cannot do that.\n");
+		}
 	}
 
 	Com_EndRedirect ();
