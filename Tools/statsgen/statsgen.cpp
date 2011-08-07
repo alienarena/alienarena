@@ -41,6 +41,7 @@
 #include <iomanip>
 #include <ctime>
 #include <cctype>
+#include <cstring>
 #include <cassert>
 
 #include <WinSock.h>
@@ -412,6 +413,23 @@ void ReInsertPlayer (PLAYERINFO player )
 	}
 
 	ifstream infile( "playerrank.db" );
+	if ( infile.peek() == EOF )
+	{ // empty file, add player
+		infile.close();
+		ofstream initdb( "playerrank.db", ios::trunc );
+		initdb << player.playername << '\n';
+		initdb << player.remote_address << '\n';
+		initdb << player.points << '\n';
+		initdb << player.frags << '\n';
+		initdb << player.totalfrags << '\n';
+		initdb << player.time << '\n';
+		initdb << player.totaltime << '\n';
+		initdb << player.ip << '\n';
+		initdb << player.poll << endl;
+		initdb.close();
+		return;
+	}
+
 	if ( !infile )
 	{
 		cout << "[E] ReInsertPlayer: playerrank.db open failed" << endl;
@@ -514,7 +532,7 @@ void ReInsertPlayer (PLAYERINFO player )
 	// swap in the new playerrank.db
 	if ( remove("playerrank.db") != 0 )
 	{
-		cout << "[E] ReInsertPlayer: remove of playerrank.db failed." << endl;
+		cout << "[E] ReInsertPlayer: remove of playerrank.db failed. " << strerror(errno) << endl;
 	}
 	if ( rename("temp.db", "playerrank.db") != 0 )
 	{
@@ -2216,11 +2234,32 @@ bool InitDatabase( void )
 	int new_record_count = 0;
 
 	cout << "Initializing database..." << endl;
+
+	ifstream newdbchk( "playerrank.db" );
+	if ( newdbchk.peek() == EOF )
+	{
+		cout << "playerrank.db is empty or does not exist" << endl;
+		newdbchk.close();
+		ofstream createdb("playerrank.db", ios::trunc );
+		if ( !createdb )
+		{
+			cout << "  file error. initialization failed." << endl;
+			return false;
+		}
+		else
+		{
+			createdb.close();
+			cout << "  empty file exists. initializaton complete." << endl;
+			return true;
+		}
+	}
+	newdbchk.close();
+
 	cout << "  running CullDatabase()..." << endl;
 	CullDatabase();
 	if ( global_fail )
-	{ // probably database not created yet
-		cout << "[E] CullDatabase failed. Does playerrank.db exist?" << endl;
+	{
+		cout << "[E] CullDatabase failed." << endl;
 		return false;
 	}
 
@@ -2230,6 +2269,12 @@ bool InitDatabase( void )
 	{
 		cout << "[E] unexpected playerrank.db error." << endl;
 		return false;
+	}
+	if ( dbfile.peek() == EOF )
+	{
+		cout << "  nothing to re-insert. playerrank.db is empty." << endl;
+		dbfile.close();
+		return true;
 	}
 	fstream dbcopy("initrank.db", ios::in|ios::out|ios::trunc );
 	if ( !dbcopy )
@@ -2431,6 +2476,15 @@ int main( int argc, char** argv )
 		real_players = 0;
 		numLiveServers = 0;
 
+		ifstream emptycheck( "playerrank.db" );
+		if ( emptycheck.peek() == EOF )
+		{ //empty db. branch around pointless file processing
+			emptycheck.close();
+			cout << "WARNING: playerrank.db is empty" << endl;
+			goto emptybranch;
+		}
+		emptycheck.close();
+
 		//generate the html stats pages at 15 minute intervals
 		if ( (st_poll.wMinute > st_generate.wMinute
 			&& (st_poll.wMinute - st_generate.wMinute > 15))
@@ -2470,6 +2524,7 @@ int main( int argc, char** argv )
 		//remove players from database who do not meet certain criteria
 		CullDatabase();
 
+emptybranch:
 		//write out the completed poll number
 		RecordPollNumber();
 
@@ -2480,6 +2535,7 @@ int main( int argc, char** argv )
 		ifstream exithack( "exit_statsgen" );
 		if ( exithack )
 		{
+			exithack.close();
 			break;
 		}
 
