@@ -989,3 +989,12 @@ models/objects/electroball/skin
 		glow
 	}
 }
+maps/meshes/redblob
+{
+	{
+		map maps/meshes/redblob_normal.jpg
+		normalmap
+		map2 maps/meshes/redblob_fx.tga
+		glow
+	}
+}
