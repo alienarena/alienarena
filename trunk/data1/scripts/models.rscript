@@ -556,3 +556,15 @@ models/objects/electroball/skin
 		nolightmap
 	}
 }
+maps/meshes/redblob
+{
+	{
+		map maps/meshes/redblob.jpg
+	}
+	{
+		map maps/meshes/redblob_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
