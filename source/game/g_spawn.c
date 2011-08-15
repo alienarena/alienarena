@@ -110,6 +110,7 @@ void SP_misc_bluespidernode (edict_t *self);
 void SP_misc_redspidernode (edict_t *self);
 void SP_misc_mapmodel (edict_t *self);
 void SP_misc_watersplash (edict_t *ent);
+void SP_misc_electroflash (edict_t *ent);
 
 spawn_t	spawns[] = {
 	{"item_health", SP_item_health},
@@ -192,6 +193,7 @@ spawn_t	spawns[] = {
 	{"misc_bluespidernode", SP_misc_bluespidernode},
 	{"misc_mapmodel", SP_misc_mapmodel},
 	{"misc_watersplash", SP_misc_watersplash},
+	{"misc_electroflash", SP_misc_electroflash},
 	{NULL, NULL}
 };
 

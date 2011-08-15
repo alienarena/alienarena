@@ -75,14 +75,15 @@ void DropPlayer (player_t *player)
 	dprintf("%s dropped...\n", player->name);
 
 	//unlink
-	if (player->next)
+	if (player->next && player->prev)
 		player->next->prev = player->prev;
 
-	if (player->prev)
+	if (player->prev && player->next)
 		player->prev->next = player->next;
 
 	//free
-	free (player);
+	if(player)
+		free (player);
 }
 
 //check list for possible expired players(5 hour window)
