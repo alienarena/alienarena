@@ -31,22 +31,6 @@ textures/arena7/light11
 		lensflare
 	}
 }
-textures/arena7/grate1
-{
-
-	{
-		map gfx/electrics3a.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 5 0.7 0.9
-		scale static .1 static .1
-		scroll static 2 static 0
-		nolightmap
-	}
-	{	
-		map textures/arena8/grate1.tga
-		alphamask
-	}
-}
 textures/arena9/trim2
 {
 	{

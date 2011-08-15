@@ -1414,3 +1414,27 @@ void SP_misc_watersplash (edict_t *ent)
 
 	gi.linkentity (ent);
 }
+
+void misc_electroflash_think (edict_t *ent)
+{
+	gi.WriteByte (svc_muzzleflash);
+	gi.WriteShort (ent-g_edicts);
+	gi.WriteByte (MZ_RAILGUN);
+	gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+	ent->nextthink = level.time + 0.05 + random();
+}
+
+void SP_misc_electroflash (edict_t *ent) //random electrical pulses
+{
+	gi.setmodel (ent, NULL);
+
+	ent->solid = SOLID_NOT; 
+	ent->movetype = MOVETYPE_NONE;
+	ent->takedamage = DAMAGE_NO;
+	ent->s.sound = gi.soundindex("world/electricity.wav");
+	ent->think = misc_electroflash_think;
+	ent->nextthink = level.time + 0.05 + random();
+
+	gi.linkentity (ent);
+}
