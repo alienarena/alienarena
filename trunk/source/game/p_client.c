@@ -3010,7 +3010,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				}
 
 				j = random() * (n_candidates - 1);
-				strcpy(level.changemap, votedmap[map_candidates[j]].mapname);
+				//copied string will be freed on level change
+				level.changemap = G_CopyString(votedmap[map_candidates[j]].mapname); 
 			}
 			else
 			{
@@ -3020,7 +3021,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 					i = (j + 1) % 4;
 					if ( votedmap[i].tally < mostvotes )
 						continue;
-					strcpy(level.changemap, votedmap[i].mapname);
+					level.changemap = G_CopyString(votedmap[i].mapname);
 					break;
 				}
 			}
