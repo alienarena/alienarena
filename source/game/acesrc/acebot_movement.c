@@ -129,7 +129,7 @@ qboolean ACEMV_CanMove(edict_t *self, int direction)
 	VectorSet(offset, 36, 0, -400);
 	G_ProjectSource (self->s.origin, offset, forward, right, end);
 
-	tr = gi.trace(start, NULL, NULL, end, self, (CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_LAVA|CONTENTS_WINDOW));
+	tr = gi.trace(start, NULL, NULL, end, self, (CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_MIST|CONTENTS_LAVA|CONTENTS_WINDOW));
 
 	if(tr.fraction > 0.3 || tr.contents & (CONTENTS_LAVA|CONTENTS_SLIME|CONTENTS_MIST))
 	{
