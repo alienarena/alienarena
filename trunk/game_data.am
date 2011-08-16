@@ -145,6 +145,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-eternal.nod \
 	botinfo/nav/dm-europa2k8.nod \
 	botinfo/nav/dm-furious2k8.nod \
+ 	botinfo/nav/dm-goregrinder.nod \
 	botinfo/nav/dm-horus.nod \
 	botinfo/nav/dm-impact.nod \
 	botinfo/nav/dm-invasion.nod \
