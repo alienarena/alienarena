@@ -203,7 +203,7 @@ cppflags_odesrc_inc := $(cppflags_ode_inc) -I../../source/unix/odesrc \
 #------------------------------------------------------------------------------
 # CFLAGS, CXXFLAGS
 #------------------------------------------------------------------------------
-cflags_common := -pipe -ffast-math -fno-strict-aliasing \
+cflags_common := $(CFLAGS) -pipe -ffast-math -fno-strict-aliasing \
  -march=i686 -msse -mfpmath=sse
 cflags_debug   := -O0 -g3 $(cflags_common)
 cflags_nodebug := -O2 $(cflags_common) -fomit-frame-pointer
@@ -228,7 +228,7 @@ ldadd_dl := -ldl
 ldadd_rt := -lrt
 ldadd_stdcxx := -lstdc++
 
-ldflags_common := -Wl,--as-needed
+ldflags_common := $(LDFLAGS) -Wl,--as-needed
 
 #------------------------------------------------------------------------------
 # TARGET COMPONENT NAMES, FLAGS AND LIBS
