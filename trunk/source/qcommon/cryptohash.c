@@ -15,6 +15,10 @@
    [1] http://www.kb.cert.org/vuls/id/836068
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #ifdef USE_MD5
 
 
@@ -27,7 +31,9 @@
     
 #else
 
-
+	#include <stddef.h>
+	#include <stdlib.h>
+	#include <assert.h>
     #include "qcommon/hmac_sha2.h"
     static char sha512_hmac_output[1024]; //binary
     
@@ -79,8 +85,6 @@
     #define CRYPTOHASH_STRETCH_COUNT 50000
     
 #endif
-
-
 
 //This "stretches" the hash function by iterating it on itself. This isn't 
 //really very slow, considering the calculation need only be done when a
