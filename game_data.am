@@ -462,6 +462,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-violator2k11.txt \
 	data1/levelshots/dm-warmachine2k10.jpg \
 	data1/levelshots/dm-warmachine2k10.txt \
+	data1/levelshots/dm-zorn2k11.jpg \
 	data1/levelshots/dm-zion2k9.jpg \
 	data1/levelshots/dm-zion2k9.txt \
 	data1/levelshots/dm-zorn.jpg \
@@ -536,6 +537,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-vesuvius2k11.bsp \
 	data1/maps/dm-violator2k11.bsp \
 	data1/maps/dm-warmachine2k10.bsp \
+ 	data1/maps/dm-zorn2k11.bsp \
 	data1/maps/dm-zion2k9.bsp \
 	data1/maps/dm-zorn.bsp \
 	data1/maps/tca-corrosion.bsp \
@@ -789,11 +791,18 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/xempx/crate_normal.jpg \
 	data1/maps/meshes/xempx/doorway1b.jpg \
 	data1/maps/meshes/xempx/doorway1b.md2 \
+	data1/maps/meshes/xempx/floorfan.jpg \
+	data1/maps/meshes/xempx/floorfan.md2 \
+	data1/maps/meshes/xempx/floorfan_normal.jpg \
 	data1/maps/meshes/xempx/lightbomb45.md2 \
 	data1/maps/meshes/xempx/lightbomb_fx.tga \
 	data1/maps/meshes/xempx/lightbomb.jpg \
 	data1/maps/meshes/xempx/lightbomb.md2 \
 	data1/maps/meshes/xempx/lightbomb_normal.jpg \
+	data1/maps/meshes/xempx/powercore.jpg \
+	data1/maps/meshes/xempx/powercore.md2 \
+	data1/maps/meshes/xempx/powercore_normal.jpg \
+	data1/maps/meshes/xempx/powercorering.md2 \
 	data1/maps/meshes/xempx/qtube2.md2 \
 	data1/maps/meshes/xempx/qtube.jpg \
 	data1/maps/meshes/xempx/qtube.md2 \
@@ -893,6 +902,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-violator2k11.fog \
 	data1/maps/scripts/dm-warmachine2k10.fog \
 	data1/maps/scripts/dm-warmachine2k10.mus \
+	data1/maps/scripts/dm-zorn2k11.fog \
 	data1/maps/scripts/dm-zion2k9.mus \
 	data1/maps/scripts/dm-zorn.mus \
 	data1/maps/scripts/tca-corrosion.fog \
@@ -1827,6 +1837,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-vesuvius2k11.rscript \
 	data1/scripts/maps/dm-violator2k11.rscript \
 	data1/scripts/maps/dm-warmachine2k10.rscript \
+	data1/scripts/maps/dm-zorn2k11.rscript \
 	data1/scripts/maps/dm-zion2k9.rscript \
 	data1/scripts/maps/dm-zorn.rscript \
 	data1/scripts/maps/tca-corrosion.rscript \
@@ -2081,9 +2092,11 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/world/steam1.wav \
 	data1/sound/world/steam2.wav \
 	data1/sound/world/turbine1.wav \
+	data1/sound/world/vents.wav \
 	data1/sound/world/water1.wav \
 	data1/sound/world/weird.wav \
 	data1/sound/world/youwin.wav \
+	data1/textures/01empwork/emtl3-1.tga \
 	data1/textures/alien/support5.tga \
 	data1/textures/arena10/bluetile_hm.tga \
 	data1/textures/arena10/bluetile_nm.tga \
@@ -2933,6 +2946,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/blanks/blank2.tga \
 	data1/textures/blanks/blank3.tga \
 	data1/textures/blanks/blank4.tga \
+	data1/textures/blanks/blank5.tga \
 	data1/textures/common/0_clip.tga \
 	data1/textures/common/0_hint.tga \
 	data1/textures/common/0_sky1.tga \
@@ -2980,10 +2994,18 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/evil/e6drstmetal_b.tga \
 	data1/textures/evil/e6dtrimnd_nm.tga \
 	data1/textures/evil/e6dtrimnd.tga \
+	data1/textures/evil/e6grate_flr_hm.tga \
+	data1/textures/evil/e6grate_flr_nm.tga \
+	data1/textures/evil/e6grate_flr.tga \
+	data1/textures/evil/e6horzlight_green.tga \
+	data1/textures/evil/e6horzlight.tga \
 	data1/textures/evil/e6launchengine_hm.tga \
 	data1/textures/evil/e6launchengine_nm.tga \
 	data1/textures/evil/e6launchengine.tga \
 	data1/textures/evil/e6metalfan.tga \
+	data1/textures/evil/e6simpwallsupp_rst_hm.tga \
+	data1/textures/evil/e6simpwallsupp_rst_nm.tga \
+	data1/textures/evil/e6simpwallsupp_rst.tga \
 	data1/textures/evil/e6supptrim128_hm.tga \
 	data1/textures/evil/e6supptrim128_nm.tga \
 	data1/textures/evil/e6supptrim128.tga \
@@ -3025,7 +3047,37 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/evil/ex_floor_mtl_grate_01_hm.tga \
 	data1/textures/evil/ex_floor_mtl_grate_01_nm.tga \
 	data1/textures/evil/ex_floor_mtl_grate_01.tga \
+	data1/textures/evil/ex_floor_tile_03_hm.tga \
+	data1/textures/evil/ex_floor_tile_03_nm.tga \
+	data1/textures/evil/ex_floor_tile_03.tga \
 	data1/textures/evil/ex_lightpanel_01_d.tga \
+	data1/textures/evil/exmetal_plate01b_d_hm.tga \
+	data1/textures/evil/exmetal_plate01b_d_nm.tga \
+	data1/textures/evil/exmetal_plate01b_d.tga \
+	data1/textures/evil/exmetalrib01_d_hm.tga \
+	data1/textures/evil/exmetalrib01_d_nm.tga \
+	data1/textures/evil/exmetalrib01_d.tga \
+	data1/textures/evil/ex_metalsupp01_d_hm.tga \
+	data1/textures/evil/ex_metalsupp01_d_nm.tga \
+	data1/textures/evil/ex_metalsupp01_d.tga \
+	data1/textures/evil/ex_rndfloor_01_d_hm.tga \
+	data1/textures/evil/ex_rndfloor_01_d_nm.tga \
+	data1/textures/evil/ex_rndfloor_01_d.tga \
+	data1/textures/evil/ex_steptop_01_d_hm.tga \
+	data1/textures/evil/ex_steptop_01_d_nm.tga \
+	data1/textures/evil/ex_steptop_01_d.tga \
+	data1/textures/evil/ex_trim_psimple_04_d_hm.tga \
+	data1/textures/evil/ex_trim_psimple_04_d_nm.tga \
+	data1/textures/evil/ex_trim_psimple_04_d.tga \
+	data1/textures/evil/ex_trim_psimple_05_d_hm.tga \
+	data1/textures/evil/ex_trim_psimple_05_d_nm.tga \
+	data1/textures/evil/ex_trim_psimple_05_d.tga \
+	data1/textures/evil/ex_trim_support_03_d_hm.tga \
+	data1/textures/evil/ex_trim_support_03_d_nm.tga \
+	data1/textures/evil/ex_trim_support_03_d.tga \
+	data1/textures/evil/ex_wall_01b_d_hm.tga \
+	data1/textures/evil/ex_wall_01b_d_nm.tga \
+	data1/textures/evil/ex_wall_01b_d.tga \
 	data1/textures/evil/ex_wall_pipe_d_hm.tga \
 	data1/textures/evil/ex_wall_pipe_d_nm.tga \
 	data1/textures/evil/ex_wall_pipe_d.tga \
@@ -3058,6 +3110,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/evil/trstmtl_panelbig_hm.tga \
 	data1/textures/evil/trstmtl_panelbig_nm.tga \
 	data1/textures/evil/trstmtl_panelbig.tga \
+	data1/textures/ex256/ex_metalsupp01_d_hm.tga \
+	data1/textures/ex256/ex_metalsupp01_d_nm.tga \
+	data1/textures/ex256/ex_metalsupp01_d.tga \
+	data1/textures/ex256/ex_wall_panel_05_d_hm.tga \
+	data1/textures/ex256/ex_wall_panel_05_d_nm.tga \
+	data1/textures/ex256/ex_wall_panel_05_d.tga \
 	data1/textures/forsaken/glass.tga \
 	data1/textures/martian/biometal1_hm.tga \
 	data1/textures/martian/biometal1_nm.tga \
@@ -3285,15 +3343,25 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/xempx/cretered_128_nm.tga \
 	data1/textures/xempx/cretered_128.tga \
 	data1/textures/xempx/droplet_fx.tga \
+	data1/textures/xempx/e7trim_hm.tga \
 	data1/textures/xempx/e7trimlight_blue.tga \
+	data1/textures/xempx/e7trim_nm.tga \
+	data1/textures/xempx/e7trim.tga \
 	data1/textures/xempx/e8crete03ccred_hm.tga \
 	data1/textures/xempx/e8crete03ccred_nm.tga \
 	data1/textures/xempx/e8crete03ccred.tga \
+	data1/textures/xempx/emtl3-1_hm.tga \
+	data1/textures/xempx/emtl3-1_nm.tga \
+	data1/textures/xempx/emtl3-1.tga \
 	data1/textures/xempx/full_clip.tga \
-	data1/textures/xempx/ivy3.tga \
 	data1/textures/xempx/ivy3_nm.tga \
+	data1/textures/xempx/ivy3.tga \
 	data1/textures/xempx/light1.tga \
 	data1/textures/xempx/lightbeam1.tga \
+	data1/textures/xempx/sign-electro_hm.tga \
+	data1/textures/xempx/sign-electro.tga \
+	data1/textures/xempx/sign_radioactive_hm.tga \
+	data1/textures/xempx/sign_radioactive.tga \
 	data1/vehicles/bomber/bomb.md2 \
 	data1/vehicles/bomber/bomb.tga \
 	data1/vehicles/bomber/console_normal.tga \
