@@ -49,9 +49,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 /*
  * Temporary test data collection for packet rate limiting
- * and framerate_cap jitter experiment
+ * and framerate_cap jitter experiment.
+ * Following 7.52 release, may be deleted.
  */
-#define PKT_TEST 1
+#define PKT_TEST 0
 
 #if PKT_TEST
 cvar_t *cl_packet_test;
@@ -2102,12 +2103,15 @@ void CL_FixCvarCheats (void)
 //============================================================================
 
 /*
+ *  Disabled now and may be removed following 7.52 release
+ *
  * Temporary test data collection for packet rate limiting
  * cvar: cl_packet_test
  * Dumps collected packets per server frame and packet timer info
  *  at 1024 server frame intervals
- * This is TEMPORARY. To be removed after initial testing.
+ * This is TEMPORARY.
  *  'cause the data format is technical, arcane and crude.
+ *
  */
 #if PKT_TEST
 
@@ -2169,10 +2173,8 @@ void CL_Frame( int msec )
 {
 	// static int lasttimecalled = 0; // TODO: see below, obsolete logging?
 
-#if PKT_TEST
 	static int frcjitter[4]   = { 0, -1, 0, 1 };
 	static int frcjitter_ix   = 0;
-#endif
 	static int framerate_cap  = 0;
 	static int packetrate_cap = 0;
 	static int packet_timer   = 0;
@@ -2182,9 +2184,11 @@ void CL_Frame( int msec )
 	int render_trigger;
 	int packet_trigger;
 
+#if PKT_TEST
 	// test variables
 	static int prev_server_frame = 0;
 	static int packets_per_server_frame = 0;
+#endif
 
 	if ( dedicated->integer )
 	{ // crx running as dedicated server crashes without this.
@@ -2301,8 +2305,13 @@ void CL_Frame( int msec )
 
 		}
 #else
-		if ( render_timer >= framerate_cap )
+		/* Sometimes, the packetrate_cap can be "in phase" with
+		 *  the frame rate affecting the average packets-per-server-frame.
+		 *  A little jitter in the framerate_cap counteracts that.
+		 */
+		if ( render_timer >= (framerate_cap + frcjitter[frcjitter_ix]) )
 		{
+			if ( ++frcjitter_ix > 3 ) frcjitter_ix = 0;
 			render_trigger = 1;
 		}
 #endif

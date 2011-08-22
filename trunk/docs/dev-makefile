@@ -342,6 +342,7 @@ crx_sources = \
  client/cl_scrn.c \
  client/cl_stats.c \
  client/cl_tent.c \
+ client/cl_update.c \
  client/cl_view.c \
  client/console.c \
  client/keys.c \
@@ -359,6 +360,7 @@ crx_sources = \
  qcommon/cvar.c \
  qcommon/files.c \
  qcommon/htable.c \
+ qcommon/md5.c \
  qcommon/mdfour.c \
  qcommon/net_chan.c \
  qcommon/pmove.c \
