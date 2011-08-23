@@ -339,8 +339,10 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	float *vposition = NULL, *vtexcoord = NULL, *vnormal = NULL, *vtangent = NULL;
 	unsigned char *pbase;
 	iqmjoint_t *joint;
+	iqmjoint2_t *joint2;
 	matrix3x4_t	*inversebaseframe;
 	iqmpose_t *poses;
+	iqmpose2_t *poses2;
 	iqmbounds_t *bounds;
 	iqmvertexarray_t *va;
 	unsigned short *framedata;
@@ -358,9 +360,9 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		return false;
 	}
 
-	if (LittleLong(header->version) != 1)
+	if (LittleLong(header->version) != 1 && LittleLong(header->version) != 2)
 	{
-		Com_Printf ("Mod_INTERQUAKEMODEL_Load: only version 1 models are currently supported (name = %s)", mod->name);
+		Com_Printf ("Mod_INTERQUAKEMODEL_Load: only version 1 or 2 models are currently supported (name = %s)", mod->name);
 		return false;
 	}
 
@@ -460,6 +462,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	mod->jointname = (char *)Hunk_Alloc(header->num_text * sizeof(char *));
 	memcpy(mod->jointname, text, header->num_text * sizeof(char *));
 
+	mod->version = header->version;
 	mod->num_frames = header->num_anims;
 	mod->num_joints = header->num_joints;
 	mod->num_poses = header->num_frames;
@@ -467,88 +470,177 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	mod->num_triangles = header->num_triangles;
 
 	// load the joints
-	joint = (iqmjoint_t *) (pbase + header->ofs_joints);
-	mod->joints = (iqmjoint_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint_t));
-	for (i = 0;i < mod->num_joints;i++)
+	if(LittleLong(header->version) == 1)
 	{
-		mod->joints[i].name = LittleLong(joint[i].name);
-		mod->joints[i].parent = LittleLong(joint[i].parent);
-		for (j = 0;j < 3;j++)
+		joint = (iqmjoint_t *) (pbase + header->ofs_joints);
+		mod->joints = (iqmjoint_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint_t));
+		for (i = 0;i < mod->num_joints;i++)
 		{
-			mod->joints[i].origin[j] = LittleFloat(joint[i].origin[j]);
-			mod->joints[i].rotation[j] = LittleFloat(joint[i].rotation[j]);
-			mod->joints[i].scale[j] = LittleFloat(joint[i].scale[j]);
+			mod->joints[i].name = LittleLong(joint[i].name);
+			mod->joints[i].parent = LittleLong(joint[i].parent);
+			for (j = 0;j < 3;j++)
+			{
+				mod->joints[i].origin[j] = LittleFloat(joint[i].origin[j]);
+				mod->joints[i].rotation[j] = LittleFloat(joint[i].rotation[j]);
+				mod->joints[i].scale[j] = LittleFloat(joint[i].scale[j]);
+			}
 		}
 	}
-
+	else 
+	{
+		joint2 = (iqmjoint2_t *) (pbase + header->ofs_joints);
+		mod->joints2 = (iqmjoint2_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint2_t));
+		for (i = 0;i < mod->num_joints;i++)
+		{
+			mod->joints2[i].name = LittleLong(joint2[i].name);
+			mod->joints2[i].parent = LittleLong(joint2[i].parent);
+			for (j = 0;j < 3;j++)
+			{
+				mod->joints2[i].origin[j] = LittleFloat(joint2[i].origin[j]);
+				mod->joints2[i].rotation[j] = LittleFloat(joint2[i].rotation[j]);
+				mod->joints2[i].scale[j] = LittleFloat(joint2[i].scale[j]);
+			}
+			mod->joints2[i].rotation[3] = LittleFloat(joint2[i].rotation[3]);	
+		}
+	}
 	//these don't need to be a part of mod - remember to free them
 	mod->baseframe = (matrix3x4_t*)Hunk_Alloc (header->num_joints * sizeof(matrix3x4_t));
 	inversebaseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
-    for(i = 0; i < (int)header->num_joints; i++)
-    {
-		vec3_t rot;
-		vec4_t q_rot;
-        iqmjoint_t j = joint[i];
 
-		//first need to make a vec4 quat from our rotation vec
-		VectorSet(rot, j.rotation[0], j.rotation[1], j.rotation[2]);
-		Vector4Set(q_rot, j.rotation[0], j.rotation[1], j.rotation[2], -sqrt(max(1.0 - pow(VectorLength(rot),2), 0.0)));
-
-		Matrix3x4_FromQuatAndVectors(&mod->baseframe[i], q_rot, j.origin, j.scale);
-		Matrix3x4_Invert(&inversebaseframe[i], mod->baseframe[i]);
-
-        if(j.parent >= 0)
-        {
-            matrix3x4_t temp;
-            Matrix3x4_Multiply(&temp, mod->baseframe[j.parent], mod->baseframe[i]);
-            mod->baseframe[i] = temp;
-            Matrix3x4_Multiply(&temp, inversebaseframe[i], inversebaseframe[j.parent]);
-            inversebaseframe[i] = temp;
-        }
-    }
-
-	poses = (iqmpose_t *) (pbase + header->ofs_poses);
-	mod->frames = (matrix3x4_t*)Hunk_Alloc (header->num_frames * header->num_poses * sizeof(matrix3x4_t));
-    framedata = (unsigned short *) (pbase + header->ofs_frames);
-
-    for(i = 0; i < header->num_frames; i++)
-    {
-        for(j = 0; j < header->num_poses; j++)
-        {
-            iqmpose_t p = poses[j];
-            vec3_t translate, rotate, scale;
+	if(LittleLong(header->version) == 1)
+	{
+		for(i = 0; i < (int)header->num_joints; i++)
+		{
+			vec3_t rot;
 			vec4_t q_rot;
-			matrix3x4_t m, temp;
+			iqmjoint_t j = joint[i];
 
-            translate[0] = p.channeloffset[0]; if(p.channelmask&0x01) translate[0] += *framedata++ * p.channelscale[0];
-            translate[1] = p.channeloffset[1]; if(p.channelmask&0x02) translate[1] += *framedata++ * p.channelscale[1];
-            translate[2] = p.channeloffset[2]; if(p.channelmask&0x04) translate[2] += *framedata++ * p.channelscale[2];
-            rotate[0] = p.channeloffset[3]; if(p.channelmask&0x08) rotate[0] += *framedata++ * p.channelscale[3];
-            rotate[1] = p.channeloffset[4]; if(p.channelmask&0x10) rotate[1] += *framedata++ * p.channelscale[4];
-            rotate[2] = p.channeloffset[5]; if(p.channelmask&0x20) rotate[2] += *framedata++ * p.channelscale[5];
-            scale[0] = p.channeloffset[6]; if(p.channelmask&0x40) scale[0] += *framedata++ * p.channelscale[6];
-            scale[1] = p.channeloffset[7]; if(p.channelmask&0x80) scale[1] += *framedata++ * p.channelscale[7];
-            scale[2] = p.channeloffset[8]; if(p.channelmask&0x100) scale[2] += *framedata++ * p.channelscale[8];
-            // Concatenate each pose with the inverse base pose to avoid doing this at animation time.
-            // If the joint has a parent, then it needs to be pre-concatenated with its parent's base pose.
-            // Thus it all negates at animation time like so:
-            //   (parentPose * parentInverseBasePose) * (parentBasePose * childPose * childInverseBasePose) =>
-            //   parentPose * (parentInverseBasePose * parentBasePose) * childPose * childInverseBasePose =>
-            //   parentPose * childPose * childInverseBasePose
+			//first need to make a vec4 quat from our rotation vec
+			VectorSet(rot, j.rotation[0], j.rotation[1], j.rotation[2]);
+			Vector4Set(q_rot, j.rotation[0], j.rotation[1], j.rotation[2], -sqrt(max(1.0 - pow(VectorLength(rot),2), 0.0)));
 
-			Vector4Set(q_rot, rotate[0], rotate[1], rotate[2], -sqrt(max(1.0 - pow(VectorLength(rotate),2), 0.0)));
+			Matrix3x4_FromQuatAndVectors(&mod->baseframe[i], q_rot, j.origin, j.scale);
+			Matrix3x4_Invert(&inversebaseframe[i], mod->baseframe[i]);
 
-			Matrix3x4_FromQuatAndVectors(&m, q_rot, translate, scale);
-
-			if(p.parent >= 0)
+			if(j.parent >= 0)
 			{
-				Matrix3x4_Multiply(&temp, mod->baseframe[p.parent], m);
-				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], temp, inversebaseframe[j]);
+				matrix3x4_t temp;
+				Matrix3x4_Multiply(&temp, mod->baseframe[j.parent], mod->baseframe[i]);
+				mod->baseframe[i] = temp;
+				Matrix3x4_Multiply(&temp, inversebaseframe[i], inversebaseframe[j.parent]);
+				inversebaseframe[i] = temp;
 			}
-            else
-				Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], m, inversebaseframe[j]);
-        }
-    }
+		}
+	}
+	else
+	{
+		for(i = 0; i < (int)header->num_joints; i++)
+		{
+			iqmjoint2_t j = joint2[i];
+
+			Matrix3x4_FromQuatAndVectors(&mod->baseframe[i], j.rotation, j.origin, j.scale);
+			Matrix3x4_Invert(&inversebaseframe[i], mod->baseframe[i]);
+
+			if(j.parent >= 0)
+			{
+				matrix3x4_t temp;
+				Matrix3x4_Multiply(&temp, mod->baseframe[j.parent], mod->baseframe[i]);
+				mod->baseframe[i] = temp;
+				Matrix3x4_Multiply(&temp, inversebaseframe[i], inversebaseframe[j.parent]);
+				inversebaseframe[i] = temp;
+			}
+		}
+	}
+
+	if(LittleLong(header->version == 1))
+	{
+		poses = (iqmpose_t *) (pbase + header->ofs_poses);
+		mod->frames = (matrix3x4_t*)Hunk_Alloc (header->num_frames * header->num_poses * sizeof(matrix3x4_t));
+		framedata = (unsigned short *) (pbase + header->ofs_frames);
+
+		for(i = 0; i < header->num_frames; i++)
+		{
+			for(j = 0; j < header->num_poses; j++)
+			{
+				iqmpose_t p = poses[j];
+				vec3_t translate, rotate, scale;
+				vec4_t q_rot;
+				matrix3x4_t m, temp;
+
+				translate[0] = p.channeloffset[0]; if(p.channelmask&0x01) translate[0] += *framedata++ * p.channelscale[0];
+				translate[1] = p.channeloffset[1]; if(p.channelmask&0x02) translate[1] += *framedata++ * p.channelscale[1];
+				translate[2] = p.channeloffset[2]; if(p.channelmask&0x04) translate[2] += *framedata++ * p.channelscale[2];
+				rotate[0] = p.channeloffset[3]; if(p.channelmask&0x08) rotate[0] += *framedata++ * p.channelscale[3];
+				rotate[1] = p.channeloffset[4]; if(p.channelmask&0x10) rotate[1] += *framedata++ * p.channelscale[4];
+				rotate[2] = p.channeloffset[5]; if(p.channelmask&0x20) rotate[2] += *framedata++ * p.channelscale[5];
+				scale[0] = p.channeloffset[6]; if(p.channelmask&0x40) scale[0] += *framedata++ * p.channelscale[6];
+				scale[1] = p.channeloffset[7]; if(p.channelmask&0x80) scale[1] += *framedata++ * p.channelscale[7];
+				scale[2] = p.channeloffset[8]; if(p.channelmask&0x100) scale[2] += *framedata++ * p.channelscale[8];
+				// Concatenate each pose with the inverse base pose to avoid doing this at animation time.
+				// If the joint has a parent, then it needs to be pre-concatenated with its parent's base pose.
+				// Thus it all negates at animation time like so:
+				//   (parentPose * parentInverseBasePose) * (parentBasePose * childPose * childInverseBasePose) =>
+				//   parentPose * (parentInverseBasePose * parentBasePose) * childPose * childInverseBasePose =>
+				//   parentPose * childPose * childInverseBasePose
+
+				Vector4Set(q_rot, rotate[0], rotate[1], rotate[2], -sqrt(max(1.0 - pow(VectorLength(rotate),2), 0.0)));
+
+				Matrix3x4_FromQuatAndVectors(&m, q_rot, translate, scale);
+
+				if(p.parent >= 0)
+				{
+					Matrix3x4_Multiply(&temp, mod->baseframe[p.parent], m);
+					Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], temp, inversebaseframe[j]);
+				}
+				else
+					Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], m, inversebaseframe[j]);
+			}
+		}
+	}
+	else
+	{
+		poses2 = (iqmpose2_t *) (pbase + header->ofs_poses);
+		mod->frames = (matrix3x4_t*)Hunk_Alloc (header->num_frames * header->num_poses * sizeof(matrix3x4_t));
+		framedata = (unsigned short *) (pbase + header->ofs_frames);
+
+		for(i = 0; i < header->num_frames; i++)
+		{
+			for(j = 0; j < header->num_poses; j++)
+			{
+				iqmpose2_t p = poses2[j];
+				vec3_t translate, scale;
+				vec4_t rotate;
+				matrix3x4_t m, temp;
+
+				translate[0] = p.channeloffset[0]; if(p.channelmask&0x01) translate[0] += *framedata++ * p.channelscale[0];
+				translate[1] = p.channeloffset[1]; if(p.channelmask&0x02) translate[1] += *framedata++ * p.channelscale[1];
+				translate[2] = p.channeloffset[2]; if(p.channelmask&0x04) translate[2] += *framedata++ * p.channelscale[2];
+				rotate[0] = p.channeloffset[3]; if(p.channelmask&0x08) rotate[0] += *framedata++ * p.channelscale[3];
+				rotate[1] = p.channeloffset[4]; if(p.channelmask&0x10) rotate[1] += *framedata++ * p.channelscale[4];
+				rotate[2] = p.channeloffset[5]; if(p.channelmask&0x20) rotate[2] += *framedata++ * p.channelscale[5];
+				rotate[3] = p.channeloffset[6]; if(p.channelmask&0x40) rotate[3] += *framedata++ * p.channelscale[6];
+				scale[0] = p.channeloffset[7]; if(p.channelmask&0x80) scale[0] += *framedata++ * p.channelscale[7];
+				scale[1] = p.channeloffset[8]; if(p.channelmask&0x100) scale[1] += *framedata++ * p.channelscale[8];
+				scale[2] = p.channeloffset[9]; if(p.channelmask&0x200) scale[2] += *framedata++ * p.channelscale[9];
+				// Concatenate each pose with the inverse base pose to avoid doing this at animation time.
+				// If the joint has a parent, then it needs to be pre-concatenated with its parent's base pose.
+				// Thus it all negates at animation time like so:
+				//   (parentPose * parentInverseBasePose) * (parentBasePose * childPose * childInverseBasePose) =>
+				//   parentPose * (parentInverseBasePose * parentBasePose) * childPose * childInverseBasePose =>
+				//   parentPose * childPose * childInverseBasePose
+
+				Matrix3x4_FromQuatAndVectors(&m, rotate, translate, scale);
+
+				if(p.parent >= 0)
+				{
+					Matrix3x4_Multiply(&temp, mod->baseframe[p.parent], m);
+					Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], temp, inversebaseframe[j]);
+				}
+				else
+					Matrix3x4_Multiply(&mod->frames[i*header->num_poses+j], m, inversebaseframe[j]);
+			}
+		}
+	}
 
 	mod->outframe = (matrix3x4_t *)Hunk_Alloc(mod->num_joints * sizeof(matrix3x4_t));
 
@@ -729,70 +821,145 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 
 			Matrix3x4_Add(&mat, mat, temp);
 
-			if(currentmodel->joints[i].parent >= 0)
-				Matrix3x4_Multiply(&currentmodel->outframe[i], currentmodel->outframe[currentmodel->joints[i].parent], mat);
+			if(currentmodel->version == 1)
+			{
+				if(currentmodel->joints[i].parent >= 0)
+					Matrix3x4_Multiply(&currentmodel->outframe[i], currentmodel->outframe[currentmodel->joints[i].parent], mat);
+				else
+					Matrix3x4_Copy(&currentmodel->outframe[i], mat);
+			}
 			else
-				Matrix3x4_Copy(&currentmodel->outframe[i], mat);
+			{
+				if(currentmodel->joints2[i].parent >= 0)
+					Matrix3x4_Multiply(&currentmodel->outframe[i], currentmodel->outframe[currentmodel->joints2[i].parent], mat);
+				else
+					Matrix3x4_Copy(&currentmodel->outframe[i], mat);
+			}
 
 			//bend the model at the waist for player pitch
-			if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine")||
-				!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine.001"))
+			if(currentmodel->version == 1)
 			{
-				vec3_t basePosition, oldPosition, newPosition;
-				VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
-				Matrix3x4GenRotate(&rmat, modelpitch, rot);
+				if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine")||
+					!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "Spine.001"))
+				{
+					vec3_t basePosition, oldPosition, newPosition;
+					VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
+					Matrix3x4GenRotate(&rmat, modelpitch, rot);
 
-				// concatenate the rotation with the bone
-				Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
+					// concatenate the rotation with the bone
+					Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
 
-				// get the position of the bone in the base frame
-				VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
+					// get the position of the bone in the base frame
+					VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
 
-				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
-			    VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
-					 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
-					 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
+					// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+					VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
 
-			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
-	   				 DotProduct(basePosition, temp.b) + temp.b[3],
-					 DotProduct(basePosition, temp.c) + temp.c[3]);
+					VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   					 DotProduct(basePosition, temp.b) + temp.b[3],
+						 DotProduct(basePosition, temp.c) + temp.c[3]);
 
-			    temp.a[3] += oldPosition[0] - newPosition[0];
-			    temp.b[3] += oldPosition[1] - newPosition[1];
-			    temp.c[3] += oldPosition[2] - newPosition[2];
+					temp.a[3] += oldPosition[0] - newPosition[0];
+					temp.b[3] += oldPosition[1] - newPosition[1];
+					temp.c[3] += oldPosition[2] - newPosition[2];
 
-			    // replace the old matrix with the rotated one
-			    Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+					// replace the old matrix with the rotated one
+					Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+				}
+				//now rotate the legs back
+				if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "hip.l")||
+					!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "hip.r"))
+				{
+					vec3_t basePosition, oldPosition, newPosition;
+					VectorSet(rot, 0, 1, 0);
+					Matrix3x4GenRotate(&rmat, -modelpitch, rot);
+
+					// concatenate the rotation with the bone
+					Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
+
+					// get the position of the bone in the base frame
+					VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
+
+					// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+					VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
+
+					VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   					 DotProduct(basePosition, temp.b) + temp.b[3],
+						 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+					temp.a[3] += oldPosition[0] - newPosition[0];
+					temp.b[3] += oldPosition[1] - newPosition[1];
+					temp.c[3] += oldPosition[2] - newPosition[2];
+
+					// replace the old matrix with the rotated one
+					Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+				}
 			}
-			//now rotate the legs back
-			if(!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "hip.l")||
-				!strcmp(&currentmodel->jointname[currentmodel->joints[i].name], "hip.r"))
+			else
 			{
-				vec3_t basePosition, oldPosition, newPosition;
-				VectorSet(rot, 0, 1, 0);
-				Matrix3x4GenRotate(&rmat, -modelpitch, rot);
+				if(!strcmp(&currentmodel->jointname[currentmodel->joints2[i].name], "Spine")||
+				!strcmp(&currentmodel->jointname[currentmodel->joints2[i].name], "Spine.001"))
+				{
+					vec3_t basePosition, oldPosition, newPosition;
+					VectorSet(rot, 0, 1, 0); //remember .iqm's are 90 degrees rotated from reality, so this is the pitch axis
+					Matrix3x4GenRotate(&rmat, modelpitch, rot);
 
-				// concatenate the rotation with the bone
-				Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
+					// concatenate the rotation with the bone
+					Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
 
-				// get the position of the bone in the base frame
-				VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
+					// get the position of the bone in the base frame
+					VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
 
-				// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
-			    VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
-					 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
-					 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
+					// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+					VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
 
-			    VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
-	   				 DotProduct(basePosition, temp.b) + temp.b[3],
-					 DotProduct(basePosition, temp.c) + temp.c[3]);
+					VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   					 DotProduct(basePosition, temp.b) + temp.b[3],
+						 DotProduct(basePosition, temp.c) + temp.c[3]);
 
-			    temp.a[3] += oldPosition[0] - newPosition[0];
-			    temp.b[3] += oldPosition[1] - newPosition[1];
-			    temp.c[3] += oldPosition[2] - newPosition[2];
+					temp.a[3] += oldPosition[0] - newPosition[0];
+					temp.b[3] += oldPosition[1] - newPosition[1];
+					temp.c[3] += oldPosition[2] - newPosition[2];
 
-			    // replace the old matrix with the rotated one
-			    Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+					// replace the old matrix with the rotated one
+					Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+				}
+				//now rotate the legs back
+				if(!strcmp(&currentmodel->jointname[currentmodel->joints2[i].name], "hip.l")||
+					!strcmp(&currentmodel->jointname[currentmodel->joints2[i].name], "hip.r"))
+				{
+					vec3_t basePosition, oldPosition, newPosition;
+					VectorSet(rot, 0, 1, 0);
+					Matrix3x4GenRotate(&rmat, -modelpitch, rot);
+
+					// concatenate the rotation with the bone
+					Matrix3x4_Multiply(&temp, rmat, currentmodel->outframe[i]);
+
+					// get the position of the bone in the base frame
+					VectorSet(basePosition, currentmodel->baseframe[i].a[3], currentmodel->baseframe[i].b[3], currentmodel->baseframe[i].c[3]);
+
+					// add in the correct old bone position and subtract off the wrong new bone position to get the correct rotation pivot
+					VectorSet(oldPosition,  DotProduct(basePosition, currentmodel->outframe[i].a) + currentmodel->outframe[i].a[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].b) + currentmodel->outframe[i].b[3],
+						 DotProduct(basePosition, currentmodel->outframe[i].c) + currentmodel->outframe[i].c[3]);
+
+					VectorSet(newPosition, DotProduct(basePosition, temp.a) + temp.a[3],
+	   					 DotProduct(basePosition, temp.b) + temp.b[3],
+						 DotProduct(basePosition, temp.c) + temp.c[3]);
+
+					temp.a[3] += oldPosition[0] - newPosition[0];
+					temp.b[3] += oldPosition[1] - newPosition[1];
+					temp.c[3] += oldPosition[2] - newPosition[2];
+
+					// replace the old matrix with the rotated one
+					Matrix3x4_Copy(&currentmodel->outframe[i], temp);
+				}
 			}
 		}
 	}
@@ -880,18 +1047,36 @@ void IQM_AnimateRagdoll(int RagDollID)
 
             for(j = 0; j < RagDollBindsCount; j++)
             {
-			    if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], RagDollBinds[j].name))
-			    {
-                    int object = RagDollBinds[j].object;
-				    const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
-				    const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
-				    Matrix3x4GenFromODE(&rmat, odeRot, odePos);
-				    Matrix3x4_Multiply(&RagDoll[RagDollID].ragDollMesh->outframe[i], rmat, RagDoll[RagDollID].RagDollObject[object].initmat);
-                    goto nextjoint;
-			    }
+				if(RagDoll[RagDollID].ragDollMesh->version == 1)
+				{
+					if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints[i].name], RagDollBinds[j].name))
+					{
+						int object = RagDollBinds[j].object;
+						const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
+						const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
+						Matrix3x4GenFromODE(&rmat, odeRot, odePos);
+						Matrix3x4_Multiply(&RagDoll[RagDollID].ragDollMesh->outframe[i], rmat, RagDoll[RagDollID].RagDollObject[object].initmat);
+						goto nextjoint;
+					}
+				}
+				else
+				{
+					if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints2[i].name], RagDollBinds[j].name))
+					{
+						int object = RagDollBinds[j].object;
+						const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
+						const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
+						Matrix3x4GenFromODE(&rmat, odeRot, odePos);
+						Matrix3x4_Multiply(&RagDoll[RagDollID].ragDollMesh->outframe[i], rmat, RagDoll[RagDollID].RagDollObject[object].initmat);
+						goto nextjoint;
+					}
+				}
 			}
 
-            parent = RagDoll[RagDollID].ragDollMesh->joints[i].parent;
+			if(RagDoll[RagDollID].ragDollMesh->version == 1)
+				parent = RagDoll[RagDollID].ragDollMesh->joints[i].parent;
+			else
+				parent = RagDoll[RagDollID].ragDollMesh->joints2[i].parent;
             if(parent >= 0)
             {
                 Matrix3x4_Invert(&mat, RagDoll[RagDollID].initframe[parent]);
