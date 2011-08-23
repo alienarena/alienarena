@@ -399,9 +399,11 @@ typedef struct model_s
 	int			num_frames;
 
 	//iqm skeletal model info
+	unsigned int	version;
 	mvertex_t		*animatevertexes;
 	int				num_joints;
 	iqmjoint_t		*joints;
+	iqmjoint2_t		*joints2;
 	matrix3x4_t		*frames;
 	matrix3x4_t		*outframe;
 	matrix3x4_t		*baseframe;
