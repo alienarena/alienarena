@@ -139,6 +139,7 @@ inline static cvar_t *Cvar_Allocate(char *var_name, char *var_value, int flags, 
 	nvar->string = CopyString (var_value);
 	nvar->modified = true;
 	nvar->value = atof (nvar->string);
+	nvar->default_value = atof (nvar->string);
 	nvar->integer = atoi (nvar->string);
 	nvar->flags = flags;
 	nvar->hash_key = hash_key;
@@ -162,7 +163,7 @@ inline static cvar_t *Cvar_AddBetween(char *var_name, char *var_value, int flags
 	if (!var_value)
 		return NULL;
 
-	if (flags & (CVAR_USERINFO | CVAR_SERVERINFO))
+	if (flags & (CVAR_USERINFO | CVAR_SERVERINFO | CVAR_GAMEINFO))
 	{
 		if (!Cvar_InfoValidate (var_value))
 		{
@@ -196,7 +197,7 @@ cvar_t *Cvar_Get (char *var_name, char *var_value, int flags)
 	unsigned int	i, hash_key;
 
 	// validate variable name
-	if (flags & (CVAR_USERINFO | CVAR_SERVERINFO))
+	if (flags & (CVAR_USERINFO | CVAR_SERVERINFO | CVAR_GAMEINFO))
 	{
 		if (!Cvar_InfoValidate (var_value))
 		{
@@ -213,6 +214,8 @@ cvar_t *Cvar_Get (char *var_name, char *var_value, int flags)
 		if (var->hash_key == hash_key && !Q_strcasecmp (var_name, var->name))
 		{
 			var->flags |= flags;
+			if (var_value)
+			    var->default_value = atof (var_value);
 			return var;
 		}
 		prev = &( var->next );
@@ -270,7 +273,7 @@ cvar_t *Cvar_Set2 (char *var_name, char *value, qboolean force)
 	if (!Cvar_FindOrCreate (var_name, value, 0, &var))
 		return var;
 
-	if (var->flags & (CVAR_USERINFO | CVAR_SERVERINFO))
+	if (var->flags & (CVAR_USERINFO | CVAR_SERVERINFO | CVAR_GAMEINFO))
 	{
 		if (!Cvar_InfoValidate (value))
 		{
@@ -388,6 +391,7 @@ cvar_t *Cvar_FullSet (char *var_name, char *value, int flags)
 
 	var->string = CopyString(value);
 	var->value = atof (var->string);
+	var->default_value = var->value;
 	var->integer = atoi(var->string);
 	var->flags = flags;
 
@@ -612,6 +616,7 @@ char	*Cvar_Serverinfo (void)
     char lasttoken[MAX_INFO_KEY];
     char current_rule[MAX_INFO_KEY];
     static char info[MAX_INFO_STRING];
+    cvar_t *cur_cvr;
     Com_sprintf(info, sizeof(info), Cvar_BitInfo (CVAR_SERVERINFO));    
     gameinfo = Cvar_BitInfo (CVAR_GAMEINFO);
     
@@ -619,13 +624,16 @@ char	*Cvar_Serverinfo (void)
     memset(ruleset, 0, sizeof(ruleset));
     token = strtok (gameinfo, "\\");
     while (token) {
-        if (!Cvar_Get(lasttoken, NULL, 0)) {
+        cur_cvr = Cvar_Get(lasttoken, NULL, 0);
+        if (!cur_cvr || !strlen(token) || (atof(token) == cur_cvr->default_value)) {
+            //cvar either doesn't exist or is set to its default value
+            //we only send existent, non-default cvars
             current_rule[0] = 0; //empty string
         } else if (atof(token) == 1.0f) {
             //if the value is 1, don't add the value
             Com_sprintf(current_rule, sizeof(current_rule), "%%%s", lasttoken);
-        } else if (strlen(token) && (token[0] != '0' || atof(token) != 0.0f)) {
-            //any value which is not 0 or 1 will be displayed
+        } else {
+            //any value which is not 1 will be displayed
             Com_sprintf(current_rule, sizeof(current_rule), "%%%s=%s", lasttoken, token);
         }
         if (strlen(current_rule)+strlen(ruleset)+strlen("mods")+strlen("\\\\")+strlen(info) >= MAX_INFO_STRING)
