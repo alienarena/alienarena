@@ -3311,6 +3311,8 @@ unsigned int starttime;
 //we may do something special to parse these, but since no such cvars are
 //actually recognized right now anyway, we currently don't.)
 
+//TODO: Have a menu to explore this list?
+
 //Names. If a cvar isn't recognized, the name of the cvar itself is used.
 static char mod_names[] =
     //cannot be wider than this boundary:    |
@@ -3336,6 +3338,7 @@ static char mod_names[] =
     "\\vape_arena"      "\\vaporizer arena"
     "\\testcode"        "\\code testing"
     "\\testmap"         "\\map testing"
+    "\\dodgedelay=0"    "\\rapid dodging"
     "\\";
 
 //Descriptions. If a cvar isn't recognized, "(no description)" is used.
@@ -3363,6 +3366,7 @@ static char mods_desc[] =
     "\\vape_arena"      "\\vaporizer only, infinite ammo"
     "\\testcode"        "\\server is testing experimental code"
     "\\testmap"         "\\server is testing an unfinished map"
+    "\\dodgedelay=0"    "\\no minimum time between dodges"
     "\\";
 
 int GetColorTokens( char *string)
