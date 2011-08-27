@@ -1433,10 +1433,8 @@ void GeneratePlayerRankingHtml (void)
 			}
 
 			if ( strlen( name) == 0
-				|| !VerifyPlayer( name )
 				|| !_strnicmp( name, "Player", 6 ) )
-			{ //cull out blank name, verify fail, default name
-				//things in database only while player is in game
+			{ //cull out blank name, default name
 #if defined TEST_LOG
 				testlog << "  html cull " 
 					<< (strlen(name)==0?"blank":name) << endl;
