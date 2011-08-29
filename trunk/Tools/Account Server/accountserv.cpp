@@ -72,18 +72,20 @@ int dumpCount;
 
 void DropPlayer (player_t *player)
 {
+	if(!player)
+		return;
+
 	dprintf("%s dropped...\n", player->name);
 
 	//unlink
-	if (player->next && player->prev)
+	if (player->next)
 		player->next->prev = player->prev;
 
-	if (player->prev && player->next)
+	if (player->prev)
 		player->prev->next = player->next;
 
 	//free
-	if(player)
-		free (player);
+	free (player);
 }
 
 //check list for possible expired players(5 hour window)

@@ -145,9 +145,7 @@ void DumpValidPlayersToFile(void)
 	ofstream	currPlayers;
 	player_t	*player = &players;
 
-	remove("validated");
-
-	currPlayers.open("validated");
+	currPlayers.open("validated", ios::out | ios::trunc);
 
 	while (player->next)
 	{
