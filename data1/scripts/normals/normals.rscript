@@ -39,6 +39,8 @@ players/enforcer/default
 	{
 		map players/enforcer/default_normal.tga
 		normalmap
+		map2 gfx/defaultenforcerfx.tga
+		glow
 	}	
 }
 players/enforcer/red
@@ -46,6 +48,8 @@ players/enforcer/red
 	{
 		map players/enforcer/default_normal.tga
 		normalmap
+		map2 gfx/defaultenforcerfx.tga
+		glow
 	}	
 }
 players/enforcer/blue
@@ -53,6 +57,8 @@ players/enforcer/blue
 	{
 		map players/enforcer/default_normal.tga
 		normalmap
+		map2 gfx/defaultenforcerfx.tga
+		glow
 	}	
 }
 players/enforcer/stryker
@@ -60,6 +66,8 @@ players/enforcer/stryker
 	{
 		map players/enforcer/default_normal.tga
 		normalmap
+		map2 gfx/defaultenforcerfx.tga
+		glow
 	}	
 }
 players/cybergirl/blue
@@ -102,6 +110,8 @@ players/martiancyborg/blue
 	{
 		map players/martiancyborg/default_normal.tga
 		normalmap
+		map2 gfx/bluecyborgfx.tga
+		glow
 	}	
 }
 players/martiancyborg/red
@@ -109,6 +119,8 @@ players/martiancyborg/red
 	{
 		map players/martiancyborg/default_normal.tga
 		normalmap
+		map2 gfx/defaultcyborgfx.tga
+		glow
 	}	
 }
 players/martiancyborg/default
@@ -116,6 +128,8 @@ players/martiancyborg/default
 	{
 		map players/martiancyborg/default_normal.tga
 		normalmap
+		map2 gfx/defaultcyborgfx.tga
+		glow
 	}	
 }
 players/lauren/blue
@@ -123,6 +137,8 @@ players/lauren/blue
 	{
 		map players/lauren/default_normal.tga
 		normalmap
+		map2 gfx/defaultlaurenfx.tga
+		glow
 	}	
 }
 players/lauren/red
@@ -130,6 +146,8 @@ players/lauren/red
 	{
 		map players/lauren/default_normal.tga
 		normalmap
+		map2 gfx/defaultlaurenfx.tga
+		glow
 	}	
 }
 players/lauren/default
@@ -137,6 +155,8 @@ players/lauren/default
 	{
 		map players/lauren/default_normal.tga
 		normalmap
+		map2 gfx/defaultlaurenfx.tga
+		glow
 	}	
 }
 players/slashbot/red
@@ -144,6 +164,8 @@ players/slashbot/red
 	{
 		map players/slashbot/default_normal.jpg
 		normalmap
+		map2 gfx/defaultslashbotfx.tga
+		glow
 	}
 }
 players/slashbot/default
@@ -151,6 +173,8 @@ players/slashbot/default
 	{
 		map players/slashbot/default_normal.jpg
 		normalmap
+		map2 gfx/defaultslashbotfx.tga
+		glow
 	}
 }
 players/slashbot/blue
@@ -158,6 +182,8 @@ players/slashbot/blue
 	{
 		map players/slashbot/default_normal.jpg
 		normalmap
+		map2 gfx/defaultslashbotfx.tga
+		glow
 	}	
 }
 players/commander/blue
@@ -165,6 +191,8 @@ players/commander/blue
 	{
 		map players/commander/default_normal.tga
 		normalmap
+		map2 gfx/defaultcommanderfx.tga
+		glow
 	}	
 }
 players/commander/red
@@ -172,6 +200,8 @@ players/commander/red
 	{
 		map players/commander/default_normal.tga
 		normalmap
+		map2 gfx/redcommanderfx.tga
+		glow
 	}	
 }
 players/commander/default
@@ -179,6 +209,8 @@ players/commander/default
 	{
 		map players/commander/default_normal.tga
 		normalmap
+		map2 gfx/defaultcommanderfx.tga
+		glow
 	}	
 }
 models/weapons/v_chain/skin
