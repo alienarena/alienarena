@@ -1,3 +1,45 @@
+textures/xempx/e7trimlight_blue
+{
+	{
+		lensflare
+	}
+}
+textures/evil/e6horzlight
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light11
+{
+	{	
+		lensflare
+	}
+}
+textures/evil/eX_lightpanel_01_d
+{
+	{
+		lensflare
+	}
+}
+textures/rage/light7
+{
+	{
+		lensflare
+	}
+}
+textures/evil/e6horzlight_green
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light4
+{
+	{
+		lensflare
+	}
+}
 textures/xempx/a6bt
 {
 	{
@@ -51,9 +93,10 @@ textures/arena9/lightwhite
 	{
 		map gfx/beam1.tga
 		scale static 18 static 18
-		colormap 1 0.9 0.9
+		colormap 0.9 0.9 0.9
 		beam
 		lensflare
+		flaretype 1
 	}
 }
 textures/blanks/blank1
