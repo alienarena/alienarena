@@ -855,6 +855,29 @@ maps/meshes/xempx/ceillight
 		glow
 	}
 }
+maps/meshes/xempx/powercore
+{
+	{
+		map maps/meshes/xempx/powercore_normal.jpg
+		normalmap
+		map2 maps/meshes/xempx/powercore_fx.tga
+		glow
+	}
+}
+maps/meshes/xempx/powercorering
+{
+	{
+		map maps/meshes/xempx/powercore_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/xempx/floorfan
+{
+	{
+		map maps/meshes/xempx/floorfan_normal.jpg
+		normalmap
+	}
+}
 maps/meshes/toxicbarrell
 {
 	{
