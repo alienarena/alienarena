@@ -92,7 +92,7 @@ void DropPlayer (player_t *player)
 void CheckPlayers (void)
 {
 	player_t	*player = &players;
-	int	curTime;
+	WORD		curTime;
 
 	while (player->next)
 	{
@@ -147,7 +147,7 @@ void AddPlayer (char name[32])
 		}
 	}
 
-	player->next = (player_t *)malloc(sizeof(player_t));
+	player->next = (player_t *)malloc(sizeof(player_s));
 
 	player->next->prev = player;
 	player = player->next;

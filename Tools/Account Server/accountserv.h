@@ -5,7 +5,7 @@ struct player_s {
 	player_t		*next;
 	
 	char			name[32];
-	int				time;
+	WORD			time;
 };
 extern player_t players;
 extern void DumpValidPlayersToFile(void);
