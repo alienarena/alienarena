@@ -104,6 +104,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-warmachine2k10.tmp \
 	botinfo/dm-zion2k9.tmp \
 	botinfo/dm-zorn.tmp \
+	botinfo/dm-zorn2k11.tmp \
 	botinfo/nav/aoa-atlantis.nod \
 	botinfo/nav/aoa-corrosion.nod \
 	botinfo/nav/aoa-frost2k9.nod \
@@ -162,6 +163,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-violator2k11.nod \
 	botinfo/nav/dm-warmachine2k10.nod \
 	botinfo/nav/dm-zion2k9.nod \
+	botinfo/nav/dm-zorn2k11.nod \
 	botinfo/nav/dm-zorn.nod \
 	botinfo/nav/tca-corrosion.nod \
 	botinfo/nav/tca-cryogenic.nod \
@@ -244,6 +246,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/beamfx.tga \
 	data1/gfx/beamgunfx.tga \
 	data1/gfx/blasterfx.tga \
+	data1/gfx/bluecyborgfx.tga \
 	data1/gfx/bluelightning2.tga \
 	data1/gfx/bluelightning.tga \
 	data1/gfx/bluemartianfx.tga \
@@ -258,7 +261,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/comp1.tga \
 	data1/gfx/comp2.tga \
 	data1/gfx/cpribeyereflection.tga \
+	data1/gfx/defaultcommanderfx.tga \
+	data1/gfx/defaultcyborgfx.tga \
+	data1/gfx/defaultenforcerfx.tga \
+	data1/gfx/defaultlaurenfx.tga \
 	data1/gfx/defaultmartianfx.tga \
+	data1/gfx/defaultslashbotfx.tga \
 	data1/gfx/disruptorfx.tga \
 	data1/gfx/disruptormask.tga \
 	data1/gfx/distortwave.jpg \
@@ -326,6 +334,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/rainfxh.tga \
 	data1/gfx/rain.tga \
 	data1/gfx/rayfx.tga \
+	data1/gfx/redcommanderfx.tga \
 	data1/gfx/redcircuit.tga \
 	data1/gfx/redlightning.tga \
 	data1/gfx/reflect.tga \
@@ -432,6 +441,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-europa2k8.txt \
 	data1/levelshots/dm-furious2k8.jpg \
 	data1/levelshots/dm-furious2k8.txt \
+	data1/levelshots/dm-goregrinder.jpg \
+	data1/levelshots/dm-goregrinder.txt \
 	data1/levelshots/dm-horus.jpg \
 	data1/levelshots/dm-horus.txt \
 	data1/levelshots/dm-impact.jpg \
@@ -463,6 +474,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-warmachine2k10.jpg \
 	data1/levelshots/dm-warmachine2k10.txt \
 	data1/levelshots/dm-zorn2k11.jpg \
+	data1/levelshots/dm-zorn2k11.txt \
 	data1/levelshots/dm-zion2k9.jpg \
 	data1/levelshots/dm-zion2k9.txt \
 	data1/levelshots/dm-zorn.jpg \
@@ -484,7 +496,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/aoa-frost2k9.bsp \
 	data1/maps/aoa-morpheus.bsp \
 	data1/maps/aoa-zorn.bsp \
-	data1/maps/cp-grindery.bsp \
 	data1/maps/cp-ribeye.bsp \
 	data1/maps/ctf-atlantis.bsp \
 	data1/maps/ctf-chromium.bsp \
@@ -799,6 +810,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/xempx/lightbomb.jpg \
 	data1/maps/meshes/xempx/lightbomb.md2 \
 	data1/maps/meshes/xempx/lightbomb_normal.jpg \
+	data1/maps/meshes/xempx/powercore_fx.tga \
 	data1/maps/meshes/xempx/powercore.jpg \
 	data1/maps/meshes/xempx/powercore.md2 \
 	data1/maps/meshes/xempx/powercore_normal.jpg \
@@ -817,7 +829,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/aoa-frost2k9.mus \
 	data1/maps/scripts/aoa-morpheus.mus \
 	data1/maps/scripts/aoa-zorn.mus \
-	data1/maps/scripts/cp-grindery.mus \
 	data1/maps/scripts/cp-ribeye.mus \
 	data1/maps/scripts/ctf-atlantis.mus \
 	data1/maps/scripts/ctf-chromium.mus \
@@ -903,6 +914,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-warmachine2k10.fog \
 	data1/maps/scripts/dm-warmachine2k10.mus \
 	data1/maps/scripts/dm-zorn2k11.fog \
+	data1/maps/scripts/dm-zorn2k11.mus \
 	data1/maps/scripts/dm-zion2k9.mus \
 	data1/maps/scripts/dm-zorn.mus \
 	data1/maps/scripts/tca-corrosion.fog \
@@ -2096,7 +2108,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/world/water1.wav \
 	data1/sound/world/weird.wav \
 	data1/sound/world/youwin.wav \
-	data1/textures/01empwork/emtl3-1.tga \
 	data1/textures/alien/support5.tga \
 	data1/textures/arena10/bluetile_hm.tga \
 	data1/textures/arena10/bluetile_nm.tga \
@@ -3078,6 +3089,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/evil/ex_wall_01b_d_hm.tga \
 	data1/textures/evil/ex_wall_01b_d_nm.tga \
 	data1/textures/evil/ex_wall_01b_d.tga \
+	data1/textures/evil/ex_wall_panel_05_d_hm.tga \
+	data1/textures/evil/ex_wall_panel_05_d_nm.tga \
+	data1/textures/evil/ex_wall_panel_05_d.tga \
 	data1/textures/evil/ex_wall_pipe_d_hm.tga \
 	data1/textures/evil/ex_wall_pipe_d_nm.tga \
 	data1/textures/evil/ex_wall_pipe_d.tga \
@@ -3110,12 +3124,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/evil/trstmtl_panelbig_hm.tga \
 	data1/textures/evil/trstmtl_panelbig_nm.tga \
 	data1/textures/evil/trstmtl_panelbig.tga \
-	data1/textures/ex256/ex_metalsupp01_d_hm.tga \
-	data1/textures/ex256/ex_metalsupp01_d_nm.tga \
-	data1/textures/ex256/ex_metalsupp01_d.tga \
-	data1/textures/ex256/ex_wall_panel_05_d_hm.tga \
-	data1/textures/ex256/ex_wall_panel_05_d_nm.tga \
-	data1/textures/ex256/ex_wall_panel_05_d.tga \
 	data1/textures/forsaken/glass.tga \
 	data1/textures/martian/biometal1_hm.tga \
 	data1/textures/martian/biometal1_nm.tga \
@@ -3344,6 +3352,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/xempx/cretered_128.tga \
 	data1/textures/xempx/droplet_fx.tga \
 	data1/textures/xempx/e7trim_hm.tga \
+	data1/textures/xempx/e7trimlight_blue_hm.tga \
+	data1/textures/xempx/e7trimlight_blue_nm.tga \
 	data1/textures/xempx/e7trimlight_blue.tga \
 	data1/textures/xempx/e7trim_nm.tga \
 	data1/textures/xempx/e7trim.tga \
