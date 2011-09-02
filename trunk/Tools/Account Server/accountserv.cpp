@@ -108,6 +108,7 @@ void CheckPlayers (void)
 					curTime += 24;
 				if(curTime - player->time > 5)
 					DropPlayer(player);
+				break;
 			}
 		}
 	}
@@ -117,6 +118,9 @@ void CheckPlayers (void)
 void RemovePlayer (char name[32])
 {
 	player_t	*player = &players;
+
+	if(strlen(name) < 1)
+		return;
 
 	//check if this player is already in the list
 	while (player->next)
@@ -136,6 +140,9 @@ void RemovePlayer (char name[32])
 void AddPlayer (char name[32])
 {
 	player_t	*player = &players;
+
+	if(strlen(name) < 1)
+		return;
 
 	//check if this player is already in the list
 	while (player->next)
