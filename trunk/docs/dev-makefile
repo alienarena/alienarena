@@ -194,7 +194,7 @@ cppflags_datadir := -DDATADIR='"/usr/local/share/alienarena"'
 cppflags_src_inc := -I.. -I../game -I../game/acesrc -I../../source -I../../source/game -I../../source/game/acesrc
 cppflags_ft2_inc := -I/usr/include/freetype2
 cppflags_ode_inc := -isystem ../../source/unix
-cppflags_odemath := -DdDouble
+cppflags_odemath := -DdDOUBLE
 cppflags_odeopt  := $(cppflags_odemath) -DdTRIMESH_ENABLED -DdTRIMESH_OPCODE
 cppflags_odesrc_inc := $(cppflags_ode_inc) -I../../source/unix/odesrc \
  -I../../source/unix/odesrc/OPCODE 
