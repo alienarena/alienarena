@@ -554,6 +554,8 @@ vehicles/hover/skin
 	{
 		map vehicles/hover/skin_normal.tga
 		normalmap
+		map2 vehicles/hover/skin_fx.tga
+		glow
 	}
 }
 vehicles/bomber/skin
@@ -561,6 +563,8 @@ vehicles/bomber/skin
 	{
 		map vehicles/bomber/skin_normal.tga
 		normalmap
+		map2 vehicles/bomber/skin_fx.tga
+		glow
 	}
 }
 vehicles/strafer/skin
@@ -568,6 +572,8 @@ vehicles/strafer/skin
 	{
 		map vehicles/strafer/skin_normal.tga
 		normalmap
+		map2 vehicles/strafer/skin_fx.tga
+		glow
 	}
 }
 vehicles/hover/console
