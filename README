@@ -1,6 +1,6 @@
 
                          Alien Arena 2011
-                           Version 7.51
+                           Version 7.52
 
 1. Scope
 
@@ -20,25 +20,33 @@ The Alien Arena HomePage URL is:
 There are links there to the Alien Arena Forum and other helpful
 Internet resources.
 
-2. Changes from Previous Versions
+2. Summary of changes from 7.51 to 7.52
 
-This information is for packagers and those who have a previous
-installation of Alien Arena.  (If this does not apply to you, it
-is safe to skip to the next topic: Installation.)
+There are no changes to the build and install procedure.
 
-Version 7.51 has improved performance, bug fixes, plus new and
-updated game assets.  Significant changes from Version 7.50 that
-are related to building and installing the game are:
+Besides bug fixes, 7.52 has these additions and changes:
+
+  * New maps, updated game assets and graphics rendering improvements.
+  * An passworded account system for registering player names.
+  * A new game mode that is a hybrid of rocket arena and insta.
+  * The client's network packet send rate is limited when running at
+    higher video frame rates.
+  * The server browser shows server configuration settings, which
+    includes a flag for non-stock modified servers.
+  * Bot improvements: Skill cvar can be set to 3 to force all bots to
+    high skill. Hit scan weapon aiming accuracy is more reasonable.
+
+3. Summary of changes from 7.50 to 7.51
+
+Besides bug fixes, 7.51 has these additions and changes:
 
   * The Open Dynamics Engine (ODE) is integrated with the main program;
     so libode is no longer a required dependency. But, g++ and libstdc++
-    are required to build and link the integrated ODE.
+    are required to build and link the integrated ODE. This is optional.
   * A configure option to disable document installation is added.
   * An installation path for the icon, icondir, is added and the icon is
     renamed to alienarena.png.
   * The server terminal may be configured to support color output.
-
-Briefly, important differences in previous Version 7.50 are:
 
   * Alien Arena 2011 uses a GNU Autotools build and install.
   * The game.so shared library no longer exists.
@@ -77,15 +85,20 @@ install in the user's HOME directory may be preferred.  See the
 Alternate Install topic below for details.
 
 
-3. Installation
+4. Installation
 
 Alien Arena uses OpenGL for 3D graphics rendering.  Alien Arena
 can be played on many computers.  However, not all computers have
 3D acceleration hardware and drivers with adequate performance
-for 3D game play.
+for 3D game play.  A proprietary driver, such as those from
+AMD/ATI and NVidia, is usually needed.
 
 If you are installing Alien Arena using your distribution's
-package manager, follow their instructions.
+package manager, follow their instructions.  Distributions
+install the user's configuration in places other than the default
+~/.codered directory.  This is important if you want to create
+the "arena/autoexec.cfg" file to customize your settings.  Search
+for "arena/config.cfg".
 
 If you are reading this, you may have already unpacked the
 distribution archive (aka, "tarball") into your HOME directory.
@@ -93,23 +106,30 @@ Otherwise, the terminal command line for unpacking the archive
 is:
   $ tar -xzf alienarena-<some version numbers>.tar.gz
 Or, using the graphical file browser, right click on the file
-name, and left click on "Extract Here."
+name, and left click on "Extract Here."  Then follow the
+instructions below to build the program.
 
 If the installation fails, check the error message for required
 software packages that may be missing.  Alien Arena uses: X11,
-OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, and JPEG.
-Version 7.50 requires Open Dynamic Engine (ODE), but Version 7.51
-does not.  For Ubuntu and similar systems, see the topic,
-"Getting Required Packages with Synaptic", below.
+OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, and JPEG.  Some
+major distributions have "dev" versions of the libraries that are
+needed to build programs.  These are not installed by default.
+Version 7.52 does not require the ODE library (it is integrated).
+There is a configure option to use the system ODE library (see
+below.)
 
-Using the terminal, change to the alienarena-7.51 directory and
+For Ubuntu and similar systems, see the topic, "Getting Required
+Packages with Synaptic", below.
+
+Using the terminal, change to the alienarena-7.52 directory and
 enter these commands:
   $ ./configure
   $ make
   $ sudo make install
 
 For advanced configure options, see the topic, "Custom Configure
-Options", below.
+Options", below.  It would be a good idea to take a look at
+those.
 
 To run:
   $ crx
@@ -168,7 +188,7 @@ The uninstall procedure may not remove all files and directories.
 Some manual removal may be required.
 
 
-4. Getting Required Packages with Synaptic
+5. Getting Required Packages with Synaptic
 
 Tools and packages required to build Alien Arena may not be
 installed.  For Ubuntu and similar systems, installing them is
@@ -190,15 +210,15 @@ Ubuntu 10.10.
   libfreetype6-dev
 
 
-5. Troubleshooting Tips
+6. Troubleshooting Tips
 
 When the game exits, it stores settings in config.cfg.  The
-default location for this file is /home/<user>/.codered/arena/
-(might be in .alienarena rather than .codered).  Sometimes it
-helps to delete config.cfg, and then re-enter menu settings.  For
-persistent storage of custom settings, create a file named
-autoexec.cfg in the same directory as config.cfg.  Settings in
-autoexec.cfg will override settings in config.cfg.
+default location for this file is /home/<user>/.codered/arena/,
+but it might be elsewhere depending on your distribution.
+Sometimes it helps to delete config.cfg, and then re-enter menu
+settings.  For persistent storage of custom settings, create a
+file named autoexec.cfg in the same directory as config.cfg.
+Settings in autoexec.cfg will override settings in config.cfg.
 
 If the game does not run smoothly, graphics settings may need to
 be adjusted.  Also, a different or updated video driver may be
@@ -207,8 +227,7 @@ by setting "display fps" to yes.  There are settings in both the
 "Game Options" and "Video Options" sections that affect
 performance.  The maximum frame rate is set with the console
 variable ("cvar"), cl_maxfps.  Sometimes lowering that from the
-default "90" will help.  (Except for local testing, do not set
-cl_maxfps higher than 145).  Get more information on the Forum,
+default "90" will help.  Get more information on the Forum,
 Websites, and IRC channel.
 
 If you have errors that output messages about "ODE", setting the
@@ -228,17 +247,17 @@ Alternatively, when building the program, use this configure
 option:
   --without-xf86dga
 
-For advanced users only (if you do not know what this means, do
-not try it): Testing shows that some CFLAGS settings can give a
+For advanced users (if you do not know what this means, it is ok
+to ignore it): Testing shows that some CFLAGS settings can give a
 little performance improvement.  Some to try, depending on system
 hardware are:
   * -O3
-  * -march=core2
+  * -march=core2 or -march=native
   * -msse or -msse2 or -msse3
   * -fpmath=sse
 
 
-6. Custom Configure Options
+7. Custom Configure Options
 
 Run '$ ./configure --help' for a list of options.  Note that many
 of the options are built-in and some are not meaningful or useful
@@ -270,8 +289,11 @@ To use the system-supplied libode, rather than the integrated
 ODE, use this option:
   --with-system-libode
 Due to variations in the way libode may be built, this is deemed
-an "unsupported" option.  The integrated ODE is built using these
-compile options:
+an "unsupported" option.  However, it may be preferable to use
+the system library, if it was built with double precision math.
+If "pkg-config --cflags ode" returns -DdDOUBLE, it is probably
+safe to use the system library.  The integrated ODE is built
+using these compile options:
   * -DdDOUBLE
   * -DdTRIMESH_ENABLED
   * -DdTRIMESH_OPCODE
@@ -294,7 +316,7 @@ developer use.  If you use them, it is assumed that you know what
 you are doing.
 
 
-7. Tools
+8. Tools
 
 Tools/fuse.tar.gz contains a game server browser.  See documents
 in that package for details.
@@ -303,7 +325,7 @@ Tools/LinuxScripts contains tools for server management.  See the
 README there for details.
 
 
-8. Alternate Install
+9. Alternate Install
 
 This configures the installation to use the "traditional", single
 directory, in-place install.  It does not define DATADIR, and the

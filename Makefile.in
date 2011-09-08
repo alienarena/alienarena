@@ -3679,6 +3679,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/vehicles/bomber/console.tga \
 	data1/vehicles/bomber/helmet.md2 \
 	data1/vehicles/bomber/skin_normal.tga \
+	data1/vehicles/bomber/skin_fx.tga \
 	data1/vehicles/bomber/skin.tga \
 	data1/vehicles/bomber/tris.md2 \
 	data1/vehicles/bomber/v_wep.md2 \
@@ -3692,6 +3693,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/vehicles/hover/console_normal.tga \
 	data1/vehicles/hover/console.tga \
 	data1/vehicles/hover/flames.md2 \
+	data1/vehicles/hover/skin_fx.tga \
 	data1/vehicles/hover/skin.jpg \
 	data1/vehicles/hover/skin_normal.tga \
 	data1/vehicles/hover/tris.md2 \
@@ -3699,6 +3701,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/vehicles/hover/window.md2 \
 	data1/vehicles/strafer/console_normal.tga \
 	data1/vehicles/strafer/console.tga \
+	data1/vehicles/strafer/skin_fx.tga \
 	data1/vehicles/strafer/skin_normal.tga \
 	data1/vehicles/strafer/skin.tga \
 	data1/vehicles/strafer/tris.md2 \
