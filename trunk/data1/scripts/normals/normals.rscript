@@ -449,6 +449,15 @@ models/weapons/v_violator/skin
 		glow
 	}
 }
+models/weapons/v_violator/violator
+{
+	{
+		map models/weapons/v_violator/violator_normal.jpg
+		normalmap
+		map2 gfx/violator2fx.tga
+		glow
+	}
+}
 models/weapons/v_hyperb/disruptor
 {
 	{	
