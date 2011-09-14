@@ -282,7 +282,7 @@ void CTFGrappleDrawCable(edict_t *self)
 	float	distance;
 
 	AngleVectors (self->owner->client->v_angle, f, r, NULL);
-	VectorSet(offset, 16, 16, self->owner->viewheight-8);
+	VectorSet(offset, 32, 6, self->owner->viewheight-5);
 	P_ProjectSource (self->owner->client, self->owner->s.origin, offset, f, r, start);
 
 	VectorSubtract(start, self->owner->s.origin, offset);
