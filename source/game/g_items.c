@@ -1357,7 +1357,7 @@ always owned, never in the world
 		CTFWeapon_Grapple,
 		"misc/w_pkup.wav",
 		NULL, 0,
-		"vehicles/deathball/v_wep.md2",
+		"models/weapons/v_machn/tris.md2",
 /* icon */		"grapple",
 /* pickup */	"Grapple",
 		0,
