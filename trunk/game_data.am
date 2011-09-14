@@ -68,10 +68,8 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/db-icarus.tmp \
 	botinfo/db-vesuvius.tmp \
 	botinfo/dm-annihilation.tmp \
-	botinfo/dm-aquous.tmp \
 	botinfo/dm-atlantis2k8.tmp \
 	botinfo/dm-babel2k11.tmp \
-	botinfo/dm-beyond.tmp \
 	botinfo/dm-bloodfactory.tmp \
 	botinfo/dm-chasmatic2k9.tmp \
 	botinfo/dm-command2k9.tmp \
@@ -81,7 +79,6 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-deimos2k9.tmp \
 	botinfo/dm-dismal2k11.tmp \
 	botinfo/dm-downfall.tmp \
-	botinfo/dm-dread.tmp \
 	botinfo/dm-dynamo2k8.tmp \
 	botinfo/dm-eternal.tmp \
 	botinfo/dm-europa2k8.tmp \
@@ -103,35 +100,27 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-violator2k11.tmp \
 	botinfo/dm-warmachine2k10.tmp \
 	botinfo/dm-zion2k9.tmp \
-	botinfo/dm-zorn.tmp \
 	botinfo/dm-zorn2k11.tmp \
 	botinfo/nav/aoa-atlantis.nod \
 	botinfo/nav/aoa-corrosion.nod \
 	botinfo/nav/aoa-frost2k9.nod \
 	botinfo/nav/aoa-morpheus.nod \
 	botinfo/nav/aoa-zorn.nod \
-	botinfo/nav/cp-grindery.nod \
 	botinfo/nav/cp-ribeye.nod \
-	botinfo/nav/ctf-atlantis.nod \
-	botinfo/nav/ctf-chromium.nod \
 	botinfo/nav/ctf-corrosion.nod \
 	botinfo/nav/ctf-cryogenic.nod \
 	botinfo/nav/ctf-europa2k8.nod \
 	botinfo/nav/ctf-frostbyte.nod \
-	botinfo/nav/ctf-icarus2.nod \
 	botinfo/nav/ctf-invasion.nod \
 	botinfo/nav/ctf-oblivion.nod \
 	botinfo/nav/ctf-titan2k8.nod \
 	botinfo/nav/ctf-vesuvius.nod \
-	botinfo/nav/ctf-zorn.nod \
 	botinfo/nav/db-chromium.nod \
 	botinfo/nav/db-icarus.nod \
 	botinfo/nav/db-vesuvius.nod \
 	botinfo/nav/dm-annihilation.nod \
-	botinfo/nav/dm-aquous.nod \
 	botinfo/nav/dm-atlantis2k8.nod \
 	botinfo/nav/dm-babel2k11.nod \
-	botinfo/nav/dm-beyond.nod \
 	botinfo/nav/dm-bloodfactory.nod \
 	botinfo/nav/dm-chasmatic2k9.nod \
 	botinfo/nav/dm-command2k9.nod \
@@ -141,7 +130,6 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-deimos2k9.nod \
 	botinfo/nav/dm-dismal2k11.nod \
 	botinfo/nav/dm-downfall.nod \
-	botinfo/nav/dm-dread.nod \
 	botinfo/nav/dm-dynamo2k8.nod \
 	botinfo/nav/dm-eternal.nod \
 	botinfo/nav/dm-europa2k8.nod \
@@ -164,7 +152,6 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-warmachine2k10.nod \
 	botinfo/nav/dm-zion2k9.nod \
 	botinfo/nav/dm-zorn2k11.nod \
-	botinfo/nav/dm-zorn.nod \
 	botinfo/nav/tca-corrosion.nod \
 	botinfo/nav/tca-cryogenic.nod \
 	botinfo/nav/tca-europa2k8.nod \
@@ -353,6 +340,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/trim2mask.tga \
 	data1/gfx/vaporbase.tga \
 	data1/gfx/vapormask.tga \
+	data1/gfx/violator2fx.tga \
 	data1/gfx/violatorfx.tga \
 	data1/gfx/water/distort1.tga \
 	data1/gfx/water/normal1.tga \
@@ -367,14 +355,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/aoa-morpheus.txt \
 	data1/levelshots/aoa-zorn.jpg \
 	data1/levelshots/aoa-zorn.txt \
-	data1/levelshots/cp-grindery.jpg \
-	data1/levelshots/cp-grindery.txt \
 	data1/levelshots/cp-ribeye.jpg \
 	data1/levelshots/cp-ribeye.txt \
-	data1/levelshots/ctf-atlantis.jpg \
-	data1/levelshots/ctf-atlantis.txt \
-	data1/levelshots/ctf-chromium.jpg \
-	data1/levelshots/ctf-chromium.txt \
 	data1/levelshots/ctf-corrosion.jpg \
 	data1/levelshots/ctf-corrosion.txt \
 	data1/levelshots/ctf-cryogenic.jpg \
@@ -383,8 +365,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/ctf-europa2k8.txt \
 	data1/levelshots/ctf-frostbyte.jpg \
 	data1/levelshots/ctf-frostbyte.txt \
-	data1/levelshots/ctf-icarus2.jpg \
-	data1/levelshots/ctf-icarus2.txt \
 	data1/levelshots/ctf-invasion.jpg \
 	data1/levelshots/ctf-invasion.txt \
 	data1/levelshots/ctf-oblivion.jpg \
@@ -395,8 +375,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/ctf-vesuvius.txt \
 	data1/levelshots/ctf-violator.jpg \
 	data1/levelshots/ctf-violator.txt \
-	data1/levelshots/ctf-zorn.jpg \
-	data1/levelshots/ctf-zorn.txt \
 	data1/levelshots/db-chromium.jpg \
 	data1/levelshots/db-chromium.txt \
 	data1/levelshots/db-icarus.jpg \
@@ -405,14 +383,10 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/db-vesuvius.txt \
 	data1/levelshots/dm-annihilation.jpg \
 	data1/levelshots/dm-annihilation.txt \
-	data1/levelshots/dm-aquous.jpg \
-	data1/levelshots/dm-aquous.txt \
 	data1/levelshots/dm-atlantis2k8.jpg \
 	data1/levelshots/dm-atlantis2k8.txt \
 	data1/levelshots/dm-babel2k11.jpg \
 	data1/levelshots/dm-babel2k11.txt \
-	data1/levelshots/dm-beyond.jpg \
-	data1/levelshots/dm-beyond.txt \
 	data1/levelshots/dm-bloodfactory.jpg \
 	data1/levelshots/dm-bloodfactory.txt \
 	data1/levelshots/dm-chasmatic2k9.jpg \
@@ -431,8 +405,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-dismal2k11.txt \
 	data1/levelshots/dm-downfall.jpg \
 	data1/levelshots/dm-downfall.txt \
-	data1/levelshots/dm-dread.jpg \
-	data1/levelshots/dm-dread.txt \
 	data1/levelshots/dm-dynamo2k8.jpg \
 	data1/levelshots/dm-dynamo2k8.txt \
 	data1/levelshots/dm-eternal.jpg \
@@ -477,8 +449,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-zorn2k11.txt \
 	data1/levelshots/dm-zion2k9.jpg \
 	data1/levelshots/dm-zion2k9.txt \
-	data1/levelshots/dm-zorn.jpg \
-	data1/levelshots/dm-zorn.txt \
 	data1/levelshots/tca-corrosion.jpg \
 	data1/levelshots/tca-corrosion.txt \
 	data1/levelshots/tca-cryogenic.jpg \
@@ -497,27 +467,21 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/aoa-morpheus.bsp \
 	data1/maps/aoa-zorn.bsp \
 	data1/maps/cp-ribeye.bsp \
-	data1/maps/ctf-atlantis.bsp \
-	data1/maps/ctf-chromium.bsp \
 	data1/maps/ctf-corrosion.bsp \
 	data1/maps/ctf-cryogenic.bsp \
 	data1/maps/ctf-europa2k8.bsp \
 	data1/maps/ctf-frostbyte.bsp \
-	data1/maps/ctf-icarus2.bsp \
 	data1/maps/ctf-invasion.bsp \
 	data1/maps/ctf-oblivion.bsp \
 	data1/maps/ctf-titan2k8.bsp \
 	data1/maps/ctf-vesuvius.bsp \
 	data1/maps/ctf-violator.bsp \
-	data1/maps/ctf-zorn.bsp \
 	data1/maps/db-chromium.bsp \
 	data1/maps/db-icarus.bsp \
 	data1/maps/db-vesuvius.bsp \
 	data1/maps/dm-annihilation.bsp \
-	data1/maps/dm-aquous.bsp \
 	data1/maps/dm-atlantis2k8.bsp \
 	data1/maps/dm-babel2k11.bsp \
-	data1/maps/dm-beyond.bsp \
 	data1/maps/dm-bloodfactory.bsp \
 	data1/maps/dm-chasmatic2k9.bsp \
 	data1/maps/dm-command2k9.bsp \
@@ -527,7 +491,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-deimos2k9.bsp \
 	data1/maps/dm-dismal2k11.bsp \
 	data1/maps/dm-downfall.bsp \
-	data1/maps/dm-dread.bsp \
 	data1/maps/dm-dynamo2k8.bsp \
 	data1/maps/dm-eternal.bsp \
 	data1/maps/dm-europa2k8.bsp \
@@ -550,7 +513,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-warmachine2k10.bsp \
  	data1/maps/dm-zorn2k11.bsp \
 	data1/maps/dm-zion2k9.bsp \
-	data1/maps/dm-zorn.bsp \
 	data1/maps/tca-corrosion.bsp \
 	data1/maps/tca-cryogenic.bsp \
 	data1/maps/tca-europa2k8.bsp \
@@ -830,8 +792,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/aoa-morpheus.mus \
 	data1/maps/scripts/aoa-zorn.mus \
 	data1/maps/scripts/cp-ribeye.mus \
-	data1/maps/scripts/ctf-atlantis.mus \
-	data1/maps/scripts/ctf-chromium.mus \
 	data1/maps/scripts/ctf-corrosion.fog \
 	data1/maps/scripts/ctf-corrosion.mus \
 	data1/maps/scripts/ctf-cryogenic.fog \
@@ -840,7 +800,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/ctf-frostbyte.fog \
 	data1/maps/scripts/ctf-frostbyte.mus \
 	data1/maps/scripts/ctf-frost.fog \
-	data1/maps/scripts/ctf-icarus2.mus \
 	data1/maps/scripts/ctf-invasion.mus \
 	data1/maps/scripts/ctf-oblivion.fog \
 	data1/maps/scripts/ctf-oblivion.mus \
@@ -849,19 +808,15 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/ctf-vesuvius.mus \
 	data1/maps/scripts/ctf-violator.fog \
 	data1/maps/scripts/ctf-violator.mus \
-	data1/maps/scripts/ctf-zorn.mus \
 	data1/maps/scripts/db-chromium.mus \
 	data1/maps/scripts/db-icarus.mus \
 	data1/maps/scripts/db-vesuvius.fog \
 	data1/maps/scripts/db-vesuvius.mus \
-	data1/maps/scripts/dm-aquous.fog \
-	data1/maps/scripts/dm-aquous.mus \
 	data1/maps/scripts/dm-atlantis2k8.mus \
 	data1/maps/scripts/dm-annihilation.fog \
 	data1/maps/scripts/dm-annihilation.mus \
 	data1/maps/scripts/dm-babel2k11.fog \
 	data1/maps/scripts/dm-babel2k11.mus \
-	data1/maps/scripts/dm-beyond.mus \
 	data1/maps/scripts/dm-bloodfactory.fog \
 	data1/maps/scripts/dm-bloodfactory.mus \
 	data1/maps/scripts/dm-chasmatic2k9.fog \
@@ -879,7 +834,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-dismal2k11.mus \
 	data1/maps/scripts/dm-downfall.fog \
 	data1/maps/scripts/dm-downfall.mus \
-	data1/maps/scripts/dm-dread.mus \
 	data1/maps/scripts/dm-dynamo2k8.fog \
 	data1/maps/scripts/dm-dynamo2k8.mus \
 	data1/maps/scripts/dm-eternal.fog \
@@ -916,7 +870,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-zorn2k11.fog \
 	data1/maps/scripts/dm-zorn2k11.mus \
 	data1/maps/scripts/dm-zion2k9.mus \
-	data1/maps/scripts/dm-zorn.mus \
 	data1/maps/scripts/tca-corrosion.fog \
 	data1/maps/scripts/tca-corrosion.mus \
 	data1/maps/scripts/tca-cryogenic.fog \
@@ -1080,6 +1033,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/weapons/v_violator/skin.jpg \
 	data1/models/weapons/v_violator/skin_normal.jpg \
 	data1/models/weapons/v_violator/tris.md2 \
+	data1/models/weapons/v_violator/violator.jpg \
+	data1/models/weapons/v_violator/violator_normal.jpg \
 	data1/particles/aflash.tga \
 	data1/particles/basic.tga \
 	data1/particles/beam.tga \
@@ -1407,7 +1362,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/commander/w_hyperblaster.iqm \
 	data1/players/commander/w_hyperblaster.md2 \
 	data1/players/commander/w_hyperblaster.skin \
+	data1/players/commander/w_machinegun.iqm \
 	data1/players/commander/w_machinegun.md2 \
+	data1/players/commander/w_machinegun.skin \
 	data1/players/commander/w_railgun.iqm \
 	data1/players/commander/w_railgun.md2 \
 	data1/players/commander/w_railgun.skin \
@@ -1484,7 +1441,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/enforcer/w_hyperblaster.iqm \
 	data1/players/enforcer/w_hyperblaster.md2 \
 	data1/players/enforcer/w_hyperblaster.skin \
+	data1/players/enforcer/w_machinegun.iqm \
 	data1/players/enforcer/w_machinegun.md2 \
+	data1/players/enforcer/w_machinegun.skin \
 	data1/players/enforcer/w_railgun.iqm \
 	data1/players/enforcer/w_railgun.md2 \
 	data1/players/enforcer/w_railgun.skin \
@@ -1555,7 +1514,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/lauren/w_hyperblaster.iqm \
 	data1/players/lauren/w_hyperblaster.md2 \
 	data1/players/lauren/w_hyperblaster.skin \
+	data1/players/lauren/w_machinegun.iqm \
 	data1/players/lauren/w_machinegun.md2 \
+	data1/players/lauren/w_machinegun.skin \
 	data1/players/lauren/w_railgun.iqm \
 	data1/players/lauren/w_railgun.md2 \
 	data1/players/lauren/w_railgun.skin \
@@ -1625,7 +1586,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martiancyborg/w_hyperblaster.iqm \
 	data1/players/martiancyborg/w_hyperblaster.md2 \
 	data1/players/martiancyborg/w_hyperblaster.skin \
+	data1/players/martiancyborg/w_machinegun.iqm \
 	data1/players/martiancyborg/w_machinegun.md2 \
+	data1/players/martiancyborg/w_machinegun.skin \
 	data1/players/martiancyborg/w_railgun.iqm \
 	data1/players/martiancyborg/w_railgun.md2 \
 	data1/players/martiancyborg/w_railgun.skin \
@@ -1705,7 +1668,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martianenforcer/w_hyperblaster.iqm \
 	data1/players/martianenforcer/w_hyperblaster.md2 \
 	data1/players/martianenforcer/w_hyperblaster.skin \
+	data1/players/martianenforcer/w_machinegun.iqm \
 	data1/players/martianenforcer/w_machinegun.md2 \
+	data1/players/martianenforcer/w_machinegun.skin \
 	data1/players/martianenforcer/w_railgun.iqm \
 	data1/players/martianenforcer/w_railgun.md2 \
 	data1/players/martianenforcer/w_railgun.skin \
@@ -1771,7 +1736,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/slashbot/w_hyperblaster.iqm \
 	data1/players/slashbot/w_hyperblaster.md2 \
 	data1/players/slashbot/w_hyperblaster.skin \
+	data1/players/slashbot/w_machinegun.iqm \
 	data1/players/slashbot/w_machinegun.md2 \
+	data1/players/slashbot/w_machinegun.skin \
 	data1/players/slashbot/w_railgun.iqm \
 	data1/players/slashbot/w_railgun.md2 \
 	data1/players/slashbot/w_railgun.skin \
@@ -1794,29 +1761,22 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/aoa-frost2k9.rscript \
 	data1/scripts/maps/aoa-morpheus.rscript \
 	data1/scripts/maps/aoa-zorn.rscript \
-	data1/scripts/maps/cp-grindery.rscript \
 	data1/scripts/maps/cp-ribeye.rscript \
-	data1/scripts/maps/ctf-atlantis.rscript \
-	data1/scripts/maps/ctf-chromium.rscript \
 	data1/scripts/maps/ctf-corrosion.rscript \
 	data1/scripts/maps/ctf-cryogenic.rscript \
 	data1/scripts/maps/ctf-europa2k8.rscript \
 	data1/scripts/maps/ctf-frostbyte.rscript \
-	data1/scripts/maps/ctf-icarus2.rscript \
 	data1/scripts/maps/ctf-invasion.rscript \
 	data1/scripts/maps/ctf-oblivion.rscript \
 	data1/scripts/maps/ctf-titan2k8.rscript \
 	data1/scripts/maps/ctf-vesuvius.rscript \
 	data1/scripts/maps/ctf-violator.rscript \
-	data1/scripts/maps/ctf-zorn.rscript \
 	data1/scripts/maps/db-chromium.rscript \
 	data1/scripts/maps/db-icarus.rscript \
 	data1/scripts/maps/db-vesuvius.rscript \
-	data1/scripts/maps/dm-aquous.rscript \
 	data1/scripts/maps/dm-annihilation.rscript \
 	data1/scripts/maps/dm-atlantis2k8.rscript \
 	data1/scripts/maps/dm-babel2k11.rscript \
-	data1/scripts/maps/dm-beyond.rscript \
 	data1/scripts/maps/dm-bloodfactory.rscript \
 	data1/scripts/maps/dm-chasmatic2k9.rscript \
 	data1/scripts/maps/dm-chasmatic.rscript \
@@ -1827,13 +1787,11 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-deimos2k9.rscript \
 	data1/scripts/maps/dm-dismal2k11.rscript \
 	data1/scripts/maps/dm-downfall.rscript \
-	data1/scripts/maps/dm-dread.rscript \
 	data1/scripts/maps/dm-dynamo2k8.rscript \
 	data1/scripts/maps/dm-eternal.rscript \
 	data1/scripts/maps/dm-europa2k8.rscript \
 	data1/scripts/maps/dm-furious2k8.rscript \
 	data1/scripts/maps/dm-goregrinder.rscript \
-	data1/scripts/maps/dm-grindery.rscript \
 	data1/scripts/maps/dm-horus.rscript \
 	data1/scripts/maps/dm-impact.rscript \
 	data1/scripts/maps/dm-invasion.rscript \
@@ -1851,7 +1809,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-warmachine2k10.rscript \
 	data1/scripts/maps/dm-zorn2k11.rscript \
 	data1/scripts/maps/dm-zion2k9.rscript \
-	data1/scripts/maps/dm-zorn.rscript \
 	data1/scripts/maps/tca-corrosion.rscript \
 	data1/scripts/maps/tca-cryogenic.rscript \
 	data1/scripts/maps/tca-europa2k8.rscript \
