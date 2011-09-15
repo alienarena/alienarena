@@ -1745,7 +1745,6 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 
 	AngleVectors (RagDoll[RagDollID].angles, vectors[0], vectors[1], vectors[2]);
 
-	//render the model
 	if(shellEffect)
 	{
 		//shell render
@@ -1756,8 +1755,68 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 		qglEnable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		GL_Bind(r_shelltexture2->texnum);
-		R_InitVArrays (VERT_COLOURED_TEXTURED);
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+
+            vec3_t lightVec, lightVal;
+
+			R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+            qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+			glEnableVertexAttribArrayARB (1);
+            glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+
+            R_GetLightVals(RagDoll[RagDollID].curPos, true, true);
+
+            //send light level and color to shader, ramp up a bit
+            VectorCopy(lightcolor, lightVal);
+            for(i = 0; i < 3; i++) {
+                if(lightVal[i] < shadelight[i]/2)
+                    lightVal[i] = shadelight[i]/2; //never go completely black
+                lightVal[i] *= 5;
+                lightVal[i] += dynFactor;
+                if(lightVal[i] > 1.0+dynFactor)
+                    lightVal[i] = 1.0+dynFactor;
+            }
+
+            //simple directional(relative light position)
+            VectorSubtract(lightPosition, RagDoll[RagDollID].curPos, lightVec);
+            VectorMA(lightPosition, 1.0, lightVec, lightPosition);
+            R_ModelViewTransform(lightPosition, lightVec);
+
+            //brighten things slightly
+            for (i = 0; i < 3; i++ )
+                lightVal[i] *= 1.25;
+
+            GL_EnableMultitexture( true );
+
+            glUseProgramObjectARB( g_meshprogramObj );
+
+            glUniform3fARB( g_location_meshlightPosition, lightVec[0], lightVec[1], lightVec[2]);
+
+            GL_SelectTexture( GL_TEXTURE1);
+            qglBindTexture (GL_TEXTURE_2D, r_shelltexture2->texnum);
+            glUniform1iARB( g_location_baseTex, 1);
+
+            GL_SelectTexture( GL_TEXTURE0);
+            qglBindTexture (GL_TEXTURE_2D, r_shellnormal->texnum);
+            glUniform1iARB( g_location_normTex, 0);
+
+            GL_SelectTexture( GL_TEXTURE0);
+
+            glUniform1iARB( g_location_useFX, 0);
+
+            glUniform1iARB( g_location_useGlow, 0);
+
+            glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
+
+            glUniform1fARB( g_location_meshTime, rs_realtime);
+
+            glUniform1iARB( g_location_meshFog, map_fog);
+        }
+		else
+		{
+			GL_Bind(r_shelltexture2->texnum);
+			R_InitVArrays (VERT_COLOURED_TEXTURED);
+		}
 
 		for (i=0; i<RagDoll[RagDollID].ragDollMesh->num_triangles; i++)
         {
@@ -1776,13 +1835,22 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 					RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
                 VArray[4] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
 
+				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+				{
+					VectorCopy(RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
+                    Vector4Copy(RagDoll[RagDollID].ragDollMesh->animatetangent[index_xyz].dir, TangentsArray[va]);
+				}
+
 				VArray[5] = shadelight[0];
 				VArray[6] = shadelight[1];
 				VArray[7] = shadelight[2];
 				VArray[8] = shellAlpha; //decrease over time
 
                 // increment pointer and counter
-                VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+                 if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+                    VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
+                else
+                    VArray += VertexSizes[VERT_COLOURED_TEXTURED];
                 va++;
             }
         }
@@ -1794,6 +1862,12 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 
 		if(qglUnlockArraysEXT)
 			qglUnlockArraysEXT();
+
+		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+		{
+            glUseProgramObjectARB( 0 );
+            GL_EnableMultitexture( false );
+        }
 
 	}
 	else if(!rs || mirror || glass)
