@@ -1951,7 +1951,7 @@ void CGalaxyDlg::GetNews()
 		m_news.SetWindowText("Unable to connect to news feed at this time...");
 		return;
 	}
-	hFile = InternetOpenUrl( hINet, "http://news.planetarena.org/news.db", NULL, 0, 0, 0 );
+	hFile = InternetOpenUrl( hINet, "http://red.planetarena.org/news.db", NULL, 0, 0, 0 );
 	if(hFile) {
 		DWORD dwRead;
 		newslocal.open("news.db");
