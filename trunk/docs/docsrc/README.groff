@@ -1,5 +1,5 @@
 .\" GNU/Linux/Unix README for Alien Arena 2011
-.\" 2010-11-30. Revised: 2011-09-07
+.\" 2010-11-30. Revised: 2011-09-18
 .\" Author: Jim Bower
 .\" using groff for paragraph formatting.
 .\" $ groff -T ascii README.groff >README
@@ -27,8 +27,13 @@ The Alien Arena HomePage URL is:
 http://red.planetarena.org/
 .in
 There are links there to the Alien Arena Forum and other helpful Internet resources.
+The Alien Arena IRC channel is now served by:
+.in +2m
+irc.planetarena.org
+.in
+The in-game IRC connects to #alienarena there. 
 
-\n+[topic]. Summary of changes from 7.51 to 7.52
+\n+[topic]. Summary of changes for version 7.52
 
 There are no changes to the build and install procedure.
 
@@ -36,65 +41,33 @@ Besides bug fixes, 7.52 has these additions and changes:
 
 .nf
 .in +2m
-* New maps, updated game assets and graphics rendering improvements.
-* An passworded account system for registering player names.
-* A new game mode that is a hybrid of rocket arena and insta.
+* Four new levels. New and improved models and textures.
+* Improved graphics effects, including vegetation shadowmapping. 
+* A passworded stats account system for registering player names.
 * The client's network packet send rate is limited when running at 
   higher video frame rates.
-* The server browser shows server configuration settings, which 
-  includes a flag for non-stock modified servers.
 * Bot improvements: Skill cvar can be set to 3 to force all bots to
   high skill. Hit scan weapon aiming accuracy is more reasonable.   
+* A new game mode that is a hybrid of rocket arena and insta.
+* The server browser shows server configuration settings, which 
+  includes a flag for non-stock modified servers.
 .in 0
  
-\n+[topic]. Summary of changes from 7.50 to 7.51
+Some previous version changes affecting build and install:
 
-Besides bug fixes, 7.51 has these additions and changes:
-
-.nf
 .in +2m
 * The Open Dynamics Engine (ODE) is integrated with the main program;
-  so libode is no longer a required dependency. But, g++ and libstdc++
-  are required to build and link the integrated ODE. This is optional.
-* A configure option to disable document installation is added.
-* An installation path for the icon, icondir, is added and the icon is 
+  so libode is, optionally, not required. ODE is written 
+  in c++, so g++ and libstdc++ are required to build and link the 
+  integrated ODE.
+* A configure option to disable document installation was added.
+* An installation path for the icon, icondir, was added and the icon was 
   renamed to alienarena.png.
 * The server terminal may be configured to support color output.
+* The dedicated server was renamed to crx-ded.
+* The game.so shared library and LIBDIR variable were eliminated. 
 .in 0
-
-.nf
-.in +2m
-* Alien Arena 2011 uses a GNU Autotools build and install.
-* The game.so shared library no longer exists. 
-* All file writes go to the user's HOME directory. 
-* The dedicated server has been renamed to crx-ded.
-* There is an dedicated-server-only build option.
-* There is an "alternate" single directory install option.
-* Additional dependency: Open Dynamics Engine (libode)
-  (optional in 7.51).
-* Additional dependency: FreeType 2 (libfreetype).
-.in
 .fi
-
-Warning: The game.so library is no longer a separate module.
-If a game.so file exists in an arena/ or data1/ directory, the results are "undefined".
-Configurable LIBDIR is no longer needed and is eliminated.
-
-Attempts to write into read-only space when data is installed in a shared/ directory have been corrected.
-Data file access using a configurable DATADIR is now fully supported.
-There is now a botinfo/ directory in the user's HOME directory.
-The default directory name for Alien Arena data in the HOME directory is .codered/.
-That can be changed using an environment variable, COR_GAME.
-
-The dedicated server was renamed to simplify program name translation using the standard configure option.
-Also, the dedicated server is intended to be an integral part of the package.
-We would prefer it not be distributed separately and there is no particular reason to do so.
-There is a configure option, provided mostly for Game Server Providers, to disable building the client program.
-
-The standard installation now uses the GNU Autotools methods and defaults.
-In some cases, the "traditional" single directory install in the user's HOME directory may be preferred.
-See the Alternate Install topic below for details.
-
 
 \n+[topic]. Installation
 
@@ -104,9 +77,9 @@ However, not all computers have 3D acceleration hardware and drivers with adequa
 A proprietary driver, such as those from AMD/ATI and NVidia, is usually needed.
 
 If you are installing Alien Arena using your distribution's package manager, follow their instructions.
-Distributions install the user's configuration in places other than the default ~/.codered directory.
+Distributions install the user's configuration in places other than the default "~/.codered" directory.
 This is important if you want to create the "arena/autoexec.cfg" file to customize your settings.
-Search for "arena/config.cfg". 
+Search for "arena/config.cfg" to find the configuration directory. 
 
 If you are reading this, you may have already unpacked the distribution archive (aka, "tarball") into your HOME directory.
 Otherwise, the terminal command line for unpacking the archive is:
@@ -121,13 +94,16 @@ Then follow the instructions below to build the program.
 If the installation fails, check the error message for required software packages that may be missing.
 Alien Arena uses: X11, OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, and JPEG.
 Some major distributions have "dev" versions of the libraries that are needed to build programs.
-These are not installed by default. 
+These are not installed by default, so you may need to install them using your distributions package manager. 
 Version 7.52 does not require the ODE library (it is integrated).
 There is a configure option to use the system ODE library (see below.)
 
 For Ubuntu and similar systems, see the topic, "Getting Required Packages with Synaptic", below. 
 
-Using the terminal, change to the alienarena-7.52 directory and enter these commands:  
+For advanced configure options, see the topic, "Custom Configure Options", below.
+It is not necessary, but it would be a good idea to take a look at those.
+
+Using the terminal, change to the "alienarena-7.52" directory and enter these commands:  
 .nf
 .in +2m
 $ ./configure
@@ -135,9 +111,6 @@ $ make
 $ sudo make install
 .in
 .fi
-
-For advanced configure options, see the topic, "Custom Configure Options", below.
-It would be a good idea to take a look at those.
 
 To run:
 .in +2m
@@ -189,7 +162,7 @@ alienarena.png
 
 When the program is run, a directory is created in the user HOME directory.
 Various kinds of data (config files, downloaded data, custom bot setups) are written there.
-The default directory name is .codered/.
+The default directory name is ".codered/".
 That can be changed using an environment variable, COR_GAME.
 
 For example:
@@ -199,8 +172,8 @@ $ export COR_GAME=/home/user/.alienarena
 .in
 .fi
 
-Current settings are stored in .codered/arena/config.cfg.
-For custom settings, create a file, .codered/arena/autoexec.cfg.
+Current settings are stored in ".codered/arena/config.cfg".
+For custom settings, create a file, ".codered/arena/autoexec.cfg".
 Details about settings are beyond the scope of this document.
 Go to the websites, the forum and the IRC channel for more information.
 
@@ -251,34 +224,29 @@ libfreetype6-dev
 
 \n+[topic]. Troubleshooting Tips
 
-When the game exits, it stores settings in config.cfg.
-The default location for this file is /home/<user>/.codered/arena/,
+When the game program exits, it stores settings in "config.cfg".
+The default location for this file is "/home/<user>/.codered/arena/",
 but it might be elsewhere depending on your distribution.
 Sometimes it helps to delete config.cfg, and then re-enter menu settings.
-For persistent storage of custom settings, create a file named autoexec.cfg in the same directory as config.cfg.
-Settings in autoexec.cfg will override settings in config.cfg.
+For persistent storage of custom settings, create a file named "autoexec.cfg" in the same directory as "config.cfg".
+Settings in "autoexec.cfg" will override settings in "config.cfg".
 
 If the game does not run smoothly, graphics settings may need to be adjusted.
 Also, a different or updated video driver may be needed.
-Enable the frame rate display in the "Game Options" menu by setting "display fps" to yes.
+Enable the video frame rate display in the "Game Options" menu by setting "display fps" to yes.
 There are settings in both the "Game Options" and "Video Options" sections that affect performance.
-The maximum frame rate is set with the console variable ("cvar"), cl_maxfps.
+The maximum frame rate is set with the console variable ("cvar"), "cl_maxfps".
 Sometimes lowering that from the default "90" will help.
 Get more information on the Forum, Websites, and IRC channel.
 
 If you have errors that output messages about "ODE", setting the "ragdolls" option to off in the Game Options menu may help.
 
 There are known sound problems related to PulseAudio and OpenAL on some systems.
-Check
-.nf
-/usr/share/doc/libopenal1/examples/alsoftrc.sample.gz
-.fi 
-for information on OpenAL configuration.
-See the Alien Arena forum and other support forums for solutions.
+Check for for information on OpenAL configuration using "~/.alsoftrc" in your distributions shared doc directory.
 
 The mouse may behave badly (always pointing up, for instance).
-This can usually be fixed by setting the console variable (cvar), in_dgamouse, to zero.
-Put this line into the autoexec.cfg file:
+This can usually be fixed by setting the console variable (cvar), "in_dgamouse", to zero.
+Put this line into the "autoexec.cfg" file:
 .nf
 .in +2m
 set in_dgamouse "0"
@@ -293,20 +261,21 @@ Alternatively, when building the program, use this configure option:
 
 For advanced users (if you do not know what this means, it is ok to ignore it):
 Testing shows that some CFLAGS settings can give a little performance improvement.
+Add CFLAGS="<put options here>" to the ./configure command.
 Some to try, depending on system hardware are:
 .nf
 .in +2m
-* -O3
+* -O3 (-O2 is the default)
 * -march=core2 or -march=native 
-* -msse or -msse2 or -msse3
-* -fpmath=sse
+* -msse, -msse2, -msse3 or other sse options, and -mfpmath=sse
 .in 0
 .fi
+If you modify CFLAGS, you probably also want the "--disable-silent-rules" configure option.
 
 
 \n+[topic]. Custom Configure Options
 
-Run '$ ./configure --help' for a list of options.
+Run './configure --help' for a list of options.
 Note that many of the options are built-in and some are not meaningful or useful for Alien Arena.
 Options are entered on the command line in the usual way; the help output has the details.
 Refer to the GNU INSTALL document for general details.
@@ -355,10 +324,10 @@ To use the system-supplied libode, rather than the integrated ODE, use this opti
 --with-system-libode
 .in
 .fi
-Due to variations in the way libode may be built, this is deemed an "unsupported" option.
-However, it may be preferable to use the system library, if it was built with
+Due to variations in the way libode may be built, this is may not work.
+It may be preferable to use the system library, however, if it was built with
 double precision math.
-If "pkg-config --cflags ode" returns -DdDOUBLE, it is probably safe to use the system library.
+If 'pkg-config --cflags ode' returns -DdDOUBLE, it is probably safe to use the system library.
 The integrated ODE is built using these compile options:
 .nf
 .in +2m
@@ -369,7 +338,7 @@ The integrated ODE is built using these compile options:
 .in
 .fi
 Using a libode built with -DdSINGLE makes ragdolls excessively "raggedy".
-Other variations will likely result in program failure.
+Other libode build variations will likely result in program failure.
 
 To disable installation of documents, use the following option.
 .nf
@@ -406,7 +375,7 @@ This configures the installation to use the "traditional", single directory, in-
 It does not define DATADIR, and the executables need to be in the top game directory.
 Normally, this install would be done somewhere in your HOME directory.
 Root privileges would not be required to write the game data.
-Currently, the configure option for renaming of the executables is not supported.
+The configure option for renaming of the executables is not supported.
 
 If you are a map-builder, you should use this option.
 Some mapping tools may not work with the "standard" install.
