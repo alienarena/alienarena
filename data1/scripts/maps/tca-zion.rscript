@@ -44,15 +44,10 @@ textures/arena7/glass
 }
 textures/arena7/light9
 {
-	{	map textures/arena7/light9.tga
-		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
-		alphashift 0 0.33 0.33
-		nolightmap
-	}
 	{
 		map gfx/grchrome.tga
 		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA	
-		alphashift 0 0.1 0.1
+		alphashift 0 0.33 0.33
 		envmap
 	}
 }
