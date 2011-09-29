@@ -430,6 +430,13 @@ typedef struct model_s
 	int hasRagDoll;
 	mragdoll_t ragdoll;
 
+	//vbo
+	vertCache_t	*vbo_st;
+	vertCache_t	*vbo_xyz;
+	vertCache_t	*vbo_color;
+	vertCache_t	*vbo_normals;
+	vertCache_t *vbo_tangents;
+
 } model_t;
 
 //============================================================================

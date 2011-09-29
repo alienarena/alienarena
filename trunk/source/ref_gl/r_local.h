@@ -288,11 +288,15 @@ void R_FB_InitTextures(void);
 //VBO
 extern GLuint vboId;
 extern int totalVBOsize;
+extern int	vboPosition;
 extern void R_LoadVBOSubsystem(void);
 extern void R_VCShutdown(void);
 extern void VB_VCInit(void);
 extern void VB_BuildVBOBufferSize(msurface_t *surf);
 extern void VB_BuildWorldVBO(void);
+void GL_BindVBO(vertCache_t *cache);
+vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent);
+vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent);
 
 //Light Bloom
 extern void R_BloomBlend( refdef_t *fd );
@@ -489,6 +493,8 @@ extern int KillFlags;
 
 extern float	tex_array[MAX_ARRAY][2];
 extern float	vert_array[MAX_ARRAY][3];
+extern float	norm_array[MAX_ARRAY][3];
+extern float	tan_array[MAX_ARRAY][4];
 extern float	col_array[MAX_ARRAY][4];
 
 #define MAX_VARRAY_VERTS (MAX_VERTS + 2)

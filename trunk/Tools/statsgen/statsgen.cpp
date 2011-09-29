@@ -2087,7 +2087,7 @@ void CheckInactivePlayers(void)
 				diff += 100000;
 			}
 		}
-		if ( player_poll > 100000 || diff > 20160 )
+		if ( player_poll > 100000 || diff > 80640 )
 		{ //start decay after a week with no play
 			//and decay each day
 #if defined TEST_LOG
