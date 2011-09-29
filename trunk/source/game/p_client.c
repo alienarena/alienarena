@@ -3186,7 +3186,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("items/sproing.wav"), 1, ATTN_NORM, 0);
 				ent->velocity[2] += 400;
 			}
-			if(haste) {
+			if(haste && ucmd->forwardmove > 0) {
 				AngleVectors (ent->s.angles, addspeed, right, up);
 				addspeed[0] *= 400;
 				addspeed[1] *= 400;
