@@ -79,7 +79,7 @@ void IN_Frame (void)
 	if (!mouse_available)
 		return;
 
-	if ( !cl.refresh_prepped || cls.key_dest == key_console || cls.key_dest == key_menu)
+	if ( !cl.refresh_prepped || cls.key_dest == key_console || cls.key_dest == key_menu || cl.attractloop )
 		IN_Activate(false);
 	else
 		IN_Activate(true);
