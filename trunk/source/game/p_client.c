@@ -1769,18 +1769,11 @@ void PutClientInServer (edict_t *ent)
 	if(ent->client->chasecam)
 		G_FreeEdict (ent->client->chasecam);
 
-	if (deathmatch->value && (dmflags->integer & DF_FIXED_FOV))
-	{
+	client->ps.fov = atoi(Info_ValueForKey(client->pers.userinfo, "fov"));
+	if (client->ps.fov < 1)
 		client->ps.fov = 90;
-	}
-	else
-	{
-		client->ps.fov = atoi(Info_ValueForKey(client->pers.userinfo, "fov"));
-		if (client->ps.fov < 1)
-			client->ps.fov = 90;
-		else if (client->ps.fov > 160)
-			client->ps.fov = 160;
-	}
+	else if (client->ps.fov > 160)
+		client->ps.fov = 160;
 
 	client->ps.gunindex = gi.modelindex(client->pers.weapon->view_model);
 
@@ -2381,18 +2374,11 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	}
 
 	// fov
-	if (deathmatch->value && (dmflags->integer & DF_FIXED_FOV))
-	{
+	ent->client->ps.fov = atoi(Info_ValueForKey(userinfo, "fov"));
+	if (ent->client->ps.fov < 1)
 		ent->client->ps.fov = 90;
-	}
-	else
-	{
-		ent->client->ps.fov = atoi(Info_ValueForKey(userinfo, "fov"));
-		if (ent->client->ps.fov < 1)
-			ent->client->ps.fov = 90;
-		else if (ent->client->ps.fov > 160)
-			ent->client->ps.fov = 160;
-	}
+	else if (ent->client->ps.fov > 160)
+		ent->client->ps.fov = 160;
 
 	// handedness
 	s = Info_ValueForKey (userinfo, "hand");
@@ -2492,18 +2478,11 @@ void ClientChangeSkin (edict_t *ent)
 	gi.configstring (CS_PLAYERSKINS+playernum, va("%s\\%s", ent->client->pers.netname, s) );
 
 	// fov
-	if (deathmatch->value && (dmflags->integer & DF_FIXED_FOV))
-	{
+	ent->client->ps.fov = atoi(Info_ValueForKey(userinfo, "fov"));
+	if (ent->client->ps.fov < 1)
 		ent->client->ps.fov = 90;
-	}
-	else
-	{
-		ent->client->ps.fov = atoi(Info_ValueForKey(userinfo, "fov"));
-		if (ent->client->ps.fov < 1)
-			ent->client->ps.fov = 90;
-		else if (ent->client->ps.fov > 160)
-			ent->client->ps.fov = 160;
-	}
+	else if (ent->client->ps.fov > 160)
+		ent->client->ps.fov = 160;
 
 	// handedness
 	s = Info_ValueForKey (userinfo, "hand");
