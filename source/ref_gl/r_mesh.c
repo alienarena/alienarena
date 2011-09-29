@@ -714,6 +714,38 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 
 		VectorCopy( tmp, mod->bbox[i] );
 	}
+
+	if (gl_state.vbo)
+	{
+		int		index_st;
+		int		index_xyz;
+		float	*map;
+
+		mod->vbo_st = NULL;
+		mod->vbo_xyz = NULL;
+
+		tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
+		map = (float*) vbo_shadow;	
+
+		for (l=0, i=0; i<pheader->num_tris; i++)
+		{
+			for (j=0; j<3; j++)
+			{
+				index_st = tris[i].index_st[j];
+				map[l++] = mod->st[index_st].s;
+				map[l++] = mod->st[index_st].t;
+
+				index_xyz = tris[i].index_xyz[j];
+			}
+		}
+
+		if (l>3*MAX_VBO_XYZs)
+			Com_Error(ERR_FATAL, "Temporary buffer overflow\n");
+
+		mod->vbo_st = R_VCLoadData(VBO_STATIC, l*sizeof(float), &vbo_shadow, VBO_STORE_ANY, NULL);
+		//mod->vbo_xyz = R_VCLoadData(VBO_STATIC, paliashdr->num_xyz*sizeof(vec3_t), &mod->r_mesh_verts, VBO_STORE_ANY, NULL);
+		GL_BindVBO(NULL);
+	}
 }
 
 //==============================================================
@@ -1437,13 +1469,15 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 			if(stage->normalmap)
 			{
-
 				vec3_t lightVec, lightVal;
 
-				R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
-				qglNormalPointer(GL_FLOAT, 0, NormalsArray);
-				glEnableVertexAttribArrayARB (1);
-				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+				if(!(gl_state.vbo && !lerped))
+				{
+					R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+					qglNormalPointer(GL_FLOAT, 0, NormalsArray);
+					glEnableVertexAttribArrayARB (1);
+					glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+				}
 
 				R_GetLightVals(currententity->origin, false, true);
 
@@ -1530,7 +1564,16 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				glUniform1fARB( g_location_meshTime, rs_realtime);
 
 				glUniform1iARB( g_location_meshFog, map_fog);
-			}
+
+				if (gl_state.vbo && !lerped)
+				{
+					currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
+					if (currentmodel->vbo_xyz) {
+						//Com_Printf("skipped\n");
+						goto skipLoad;
+					}
+				}
+			}			
 
 			for (i=0; i<paliashdr->num_tris; i++)
 			{
@@ -1671,6 +1714,12 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 							VArray[8] = nAlpha;
 						}
 					}
+					else if(gl_state.vbo && !lerped) 
+					{
+						vert_array[va][0] = VArray[0];
+						vert_array[va][1] = VArray[1];
+						vert_array[va][2] = VArray[2];
+					}
 
 					// increment pointer and counter
 					if(stage->normalmap)
@@ -1683,6 +1732,32 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				}
 			}
 
+			if(gl_state.vbo && !lerped && stage->normalmap) //note couldn't this all be done at model load as a static?
+			{
+                currentmodel->vbo_xyz = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &vert_array, VBO_STORE_XYZ, currententity);
+				currentmodel->vbo_normals = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL, currententity);
+				currentmodel->vbo_tangents = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT, currententity);
+            }
+skipLoad:
+			if(gl_state.vbo && !lerped && stage->normalmap) 
+			{
+                qglEnableClientState( GL_VERTEX_ARRAY );
+                GL_BindVBO(currentmodel->vbo_xyz);
+                qglVertexPointer(3, GL_FLOAT, 0, 0);
+
+                qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+                GL_BindVBO(currentmodel->vbo_st);
+                qglTexCoordPointer(2, GL_FLOAT, 0, 0);
+
+                qglEnableClientState( GL_NORMAL_ARRAY );
+                GL_BindVBO(currentmodel->vbo_normals);
+                qglNormalPointer(GL_FLOAT, 0, 0);
+
+	/*			glEnableVertexAttribArrayARB (1);
+				GL_BindVBO(currentmodel->vbo_tangents);
+				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, 0);*/
+            }
+         
 			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 			{
 				if(qglLockArraysEXT)
@@ -1722,6 +1797,9 @@ done:
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
 	R_KillVArrays ();
+
+	if (gl_state.vbo)
+		GL_BindVBO(NULL);
 
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
 		qglEnable( GL_TEXTURE_2D );

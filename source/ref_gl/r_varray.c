@@ -56,6 +56,8 @@ static int VertexCounter = 0;
 
 float	tex_array[MAX_ARRAY][2];
 float	vert_array[MAX_ARRAY][3];
+float	norm_array[MAX_ARRAY][3];
+float	tan_array[MAX_ARRAY][4];
 float	col_array[MAX_ARRAY][4];
 
 // sizes of our vertexes.  the vertex type can be used as an index into this array

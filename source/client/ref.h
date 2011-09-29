@@ -108,6 +108,52 @@ vec3_t	vbo_shadow[MAX_VBO_XYZs];
 vec3_t	vbo_shadow2[MAX_VBO_XYZs];
 vec3_t	vbo_shadow3[MAX_VBO_XYZs];
 
+#define	MAX_VERTEX_CACHES	4096
+#define MAX_VBO_XYZs		65536
+
+typedef enum {
+	VBO_STATIC,
+	VBO_DYNAMIC
+} vertCacheMode_t;
+
+typedef enum {
+	VBO_STORE_ANY,
+	VBO_STORE_XYZ,
+	VBO_STORE_NORMAL,
+	VBO_STORE_BINORMAL,
+	VBO_STORE_TANGENT
+} vertStoreMode_t;
+
+typedef struct vertCache_s
+{
+	struct vertCache_s	*prev;
+	struct vertCache_s	*next;
+
+	vertCacheMode_t		mode;
+
+	int					size;
+
+	void				*pointer;
+
+	vertStoreMode_t		store;
+	struct model_s		*mod;
+	int					frame;
+	float				backlerp;
+	float				angles[3];
+	float				origin[3];
+	unsigned			id;
+} vertCache_t;
+
+typedef struct {
+	vertCache_t		*freeVertCache;
+	vertCache_t		activeVertCache;
+	vertCache_t		vertCacheList[MAX_VERTEX_CACHES];
+} vertCacheManager_t;
+
+vertCacheManager_t	vcm;
+
+vec3_t	vbo_shadow[MAX_VBO_XYZs];
+
 typedef struct entity_s
 {
 	char	name[MAX_QPATH];

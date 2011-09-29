@@ -54,6 +54,7 @@ void R_LoadVBOSubsystem(void)
 		{
 			Com_Printf("...using GL_ARB_vertex_buffer_object\n");
 			gl_state.vbo = true;
+			VB_VCInit();
 		}
 	} else
 	{
@@ -81,17 +82,17 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 		for (v = p->verts[0], i = 0, l = 0, m = 0, n = 0; i < p->numverts; i++, v += VERTEXSIZE)
 		{
 			// copy in vertex data
-			map3[n++] = v[0];
-			map3[n++] = v[1];
-			map3[n++] = v[2];
+			map[n++] = v[0];
+			map[n++] = v[1];
+			map[n++] = v[2];
 
 			// world texture coords
-			map[l++] = v[3];
-			map[l++] = v[4];
+			map2[l++] = v[3];
+			map2[l++] = v[4];
 
 			// lightmap texture coords
-			map2[m++] = v[5];
-			map2[m++] = v[6];
+			map3[m++] = v[5];
+			map3[m++] = v[6];
 		}
 
 		surf->vbo_pos = vboPosition;
@@ -102,9 +103,9 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 
 		surf->has_vbo = true;
 		
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition, surf->xyz_size, &vbo_shadow3);                             
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size, surf->st_size, &vbo_shadow);                
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size + surf->st_size, surf->lm_size, &vbo_shadow2);  
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition, surf->xyz_size, &vbo_shadow);                             
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size, surf->st_size, &vbo_shadow2);                
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size + surf->st_size, surf->lm_size, &vbo_shadow3);  
 
 		vboPosition += (surf->xyz_size + surf->st_size + surf->lm_size);
 	}
@@ -134,8 +135,7 @@ void VB_BuildWorldVBO(void)
 		}
 	}
 
-	if(gl_state.vbo)
-		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }
 
 void VB_BuildVBOBufferSize(msurface_t *surf)
@@ -147,8 +147,181 @@ void VB_BuildVBOBufferSize(msurface_t *surf)
 		totalVBObufferSize += 7*p->numverts;
 	}
 }
+
+void GL_BindVBO(vertCache_t *cache)
+{
+	if (cache)
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, cache->id);
+	else
+		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+}
+
+vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent)
+{
+	model_t		*mod;
+	int			frame;
+	float		backlerp;
+	vec3_t		angles, orgs;
+	vertCache_t	*cache, *next;
+
+	if (store == VBO_STORE_XYZ)
+	{
+		mod = ent->model;
+		frame = ent->frame;
+		if ( r_lerpmodels->value )
+			backlerp = ent->backlerp;
+		else
+			backlerp = 0;
+		angles[0] = ent->angles[0];
+		angles[1] = ent->angles[1];
+		angles[2] = ent->angles[2];
+		orgs[0] = ent->origin[0];
+		orgs[1] = ent->origin[1];
+		orgs[2] = ent->origin[2];
+		for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
+		{
+			next = cache->next;
+			if (backlerp)
+			{	//  oldorigin è oldframe.
+				if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->backlerp == backlerp && cache->angles[0] == angles[0] && cache->angles[1] == angles[1] && cache->angles[2] == angles[2] && cache->origin[0] == orgs[0] && cache->origin[1] == orgs[1] && cache->origin[2] == orgs[2])
+				{	// already cached!
+					GL_BindVBO(cache);
+					return cache;
+				}
+			}
+			else
+			{	
+				if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->angles[0] == angles[0] && cache->angles[1] == angles[1] && cache->angles[2] == angles[2])
+				{	// already cached!
+					GL_BindVBO(cache);
+					return cache;
+				}
+			}
+		}
+	}
+	else if (store == VBO_STORE_NORMAL || store == VBO_STORE_BINORMAL || store == VBO_STORE_TANGENT)
+	{
+		mod = ent->model;
+		frame = ent->frame;
+		if ( r_lerpmodels->value )
+			backlerp = ent->backlerp;
+		else
+			backlerp = 0;
+		for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
+		{
+			next = cache->next;
+			if (cache->store == store && cache->mod == mod && cache->frame == frame && cache->backlerp == backlerp)
+			{	// already cached!
+				GL_BindVBO(cache);
+				return cache;
+			}
+		}
+	}
+
+	return NULL;
+}
+
+vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent)
+{
+	vertCache_t *cache;
+
+	if (!vcm.freeVertCache)
+		Com_Error(ERR_FATAL, "VBO cache overflow\n");
+
+	cache = vcm.freeVertCache;
+	cache->mode = mode;
+	cache->size = size;
+	cache->pointer = buffer;
+	cache->store = store;
+	if (store != VBO_STORE_ANY)
+	{
+		cache->mod = ent->model;
+		cache->frame = ent->frame;
+		cache->backlerp = ent->backlerp;
+		cache->angles[0] = ent->angles[0];
+		cache->angles[1] = ent->angles[1];
+		cache->angles[2] = ent->angles[2];
+		cache->origin[0] = ent->origin[0];
+		cache->origin[1] = ent->origin[1];
+		cache->origin[2] = ent->origin[2];
+	}
+
+	// link
+	vcm.freeVertCache = vcm.freeVertCache->next;
+
+	cache->next = vcm.activeVertCache.next;
+	cache->prev = &vcm.activeVertCache;
+
+	vcm.activeVertCache.next->prev = cache;
+	vcm.activeVertCache.next = cache;
+
+	GL_BindVBO(cache);
+
+	switch (cache->mode)
+	{
+		case VBO_STATIC:
+			qglBufferDataARB(GL_ARRAY_BUFFER_ARB, cache->size, cache->pointer, GL_STATIC_DRAW_ARB);
+		case VBO_DYNAMIC:
+			qglBufferDataARB(GL_ARRAY_BUFFER_ARB, cache->size, cache->pointer, GL_DYNAMIC_DRAW_ARB);
+	}
+
+	return cache;
+}
+
+
+vertCache_t *R_VCCreate(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent)
+{
+	vertCache_t	*cache;
+
+	cache = R_VCFindCache(store, ent);
+	if (cache)
+		return cache;
+
+	return R_VCLoadData(mode, size, buffer, store, ent);
+}
+
+
+void R_VCFree(vertCache_t *cache)
+{
+	if (!cache)
+		return;
+
+	// unlink
+	cache->prev->next = cache->next;
+	cache->next->prev = cache->prev;
+
+	cache->next = vcm.freeVertCache;
+	vcm.freeVertCache = cache;
+}
+
+/*
+===============
+R_VCFreeFrame
+
+Deletes all non-STATIC buffers from the previous frame.
+PS: VBO_STATIC using for ST texture/skin coordinates and static shadow volumes
+===============
+*/
+void R_VCFreeFrame()
+{
+	vertCache_t	*cache, *next;
+
+	if (!gl_state.vbo)
+		return;
+
+	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
+	{
+		next = cache->next;
+		if (cache->mode != VBO_STATIC)
+			R_VCFree(cache);
+	}
+}
+
+
 void VB_VCInit()
 {
+	int	i;
+
 	if (!gl_state.vbo)
 		return;
 
@@ -157,15 +330,40 @@ void VB_VCInit()
 
 	vboPosition = 0;
 	totalVBObufferSize = 0;	
+
+	memset(&vcm, 0, sizeof(vcm));
+
+	// setup the linked lists
+	vcm.activeVertCache.next = &vcm.activeVertCache;
+	vcm.activeVertCache.prev = &vcm.activeVertCache;
+
+	vcm.freeVertCache = vcm.vertCacheList;
+
+	for (i=0; i<MAX_VERTEX_CACHES-1; i++)
+		vcm.vertCacheList[i].next = &vcm.vertCacheList[i+1];
+
+	for (i=0; i<MAX_VERTEX_CACHES; i++)
+		qglGenBuffersARB(1, &vcm.vertCacheList[i].id);
 }
 
 
 void R_VCShutdown()
 {
+	int			i;
+	vertCache_t	*cache, *next;
 
 	if (!gl_state.vbo)
 		return;
 
 	//delete buffers
 	qglDeleteBuffersARB(1, &vboId);
+
+	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
+	{
+		next = cache->next;
+		R_VCFree(cache);
+	}
+
+	for (i=0; i<MAX_VERTEX_CACHES; i++)
+		qglDeleteBuffersARB(1, &vcm.vertCacheList[i].id);
 }
