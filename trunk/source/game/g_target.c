@@ -100,6 +100,11 @@ void SP_target_speaker (edict_t *ent)
 		gi.dprintf("target_speaker with no noise set at %s\n", vtos(ent->s.origin));
 		return;
 	}
+	if (strstr (st.noise, "music"))
+	{
+		gi.dprintf("SHUT UP SHUT UP SHUT UP YOU INFERNAL BONGO DRUMS!\n");
+		return;
+	}
 	if (!strstr (st.noise, ".wav"))
 		Com_sprintf (buffer, sizeof(buffer), "%s.wav", st.noise);
 	else
