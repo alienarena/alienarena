@@ -4573,6 +4573,7 @@ void Addbots_MenuDraw(void)
 
 	//draw the pics for the bots here
 	for(i = 0; i < totalbots; i++) {
+
 		Draw_StretchPic (viddef.width / 2 + 16*scale, y, 16*scale, 16*scale, bots[i].model);
 		y+=20*scale;
 	}
@@ -5404,7 +5405,6 @@ static menulist_s	s_force_respawn_box;
 static menulist_s	s_armor_box;
 static menulist_s	s_allow_exit_box;
 static menulist_s	s_infinite_ammo_box;
-static menulist_s	s_fixed_fov_box;
 static menulist_s	s_quad_drop_box;
 
 void M_Menu_Addbots_f (void)
@@ -5614,10 +5614,6 @@ static void DMFlagCallback( void *self )
 	{
 		bit = DF_INFINITE_AMMO;
 	}
-	else if ( f == &s_fixed_fov_box )
-	{
-		bit = DF_FIXED_FOV;
-	}
 	else if ( f == &s_quad_drop_box )
 	{
 		bit = DF_QUAD_DROP;
@@ -5808,14 +5804,6 @@ void DMOptions_MenuInit( void )
 	s_infinite_ammo_box.itemnames = yes_no_names;
 	s_infinite_ammo_box.curvalue = ( dmflags & DF_INFINITE_AMMO ) != 0;
 
-	s_fixed_fov_box.generic.type = MTYPE_SPINCONTROL;
-	s_fixed_fov_box.generic.x	= 0;
-	s_fixed_fov_box.generic.y	= y += FONTSCALE*10*scale;
-	s_fixed_fov_box.generic.name	= "fixed FOV";
-	s_fixed_fov_box.generic.callback = DMFlagCallback;
-	s_fixed_fov_box.itemnames = yes_no_names;
-	s_fixed_fov_box.curvalue = ( dmflags & DF_FIXED_FOV ) != 0;
-
 	s_quad_drop_box.generic.type = MTYPE_SPINCONTROL;
 	s_quad_drop_box.generic.x	= 0;
 	s_quad_drop_box.generic.y	= y += FONTSCALE*10*scale;
@@ -5895,7 +5883,6 @@ void DMOptions_MenuInit( void )
 	Menu_AddItem( &s_dmoptions_menu, &s_teamplay_box );
 	Menu_AddItem( &s_dmoptions_menu, &s_allow_exit_box );
 	Menu_AddItem( &s_dmoptions_menu, &s_infinite_ammo_box );
-	Menu_AddItem( &s_dmoptions_menu, &s_fixed_fov_box );
 	Menu_AddItem( &s_dmoptions_menu, &s_quad_drop_box );
 	Menu_AddItem( &s_dmoptions_menu, &s_friendlyfire_box );
 	Menu_AddItem( &s_dmoptions_menu, &s_botchat_box );
