@@ -1583,7 +1583,8 @@ redoSkins:
 	{
 		precache_check = ENV_CNT + 1;
 
-		CM_LoadMap (cl.configstrings[CS_MODELS+1], true, &map_checksum);
+		//FIXME: support for new map specification files
+		CM_LoadBSP (cl.configstrings[CS_MODELS+1], true, &map_checksum);
 
 		if (map_checksum != atoi(cl.configstrings[CS_MAPCHECKSUM]))
 		{
@@ -1721,7 +1722,8 @@ void CL_Precache_f (void)
 	{
 		unsigned	map_checksum;		// for detecting cheater maps
 
-		CM_LoadMap (cl.configstrings[CS_MODELS+1], true, &map_checksum);
+		//FIXME: support for new map specification files
+		CM_LoadBSP (cl.configstrings[CS_MODELS+1], true, &map_checksum);
 		CL_RegisterSounds ();
 		CL_PrepRefresh ();
 		return;

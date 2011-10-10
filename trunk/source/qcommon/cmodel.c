@@ -543,13 +543,34 @@ void CMod_LoadEntityString (lump_t *l)
 
 
 /*
+=================
+CMod_LoadAlternateEntityData
+=================
+*/
+void CMod_LoadAlternateEntityData (char *entity_file_name)
+{
+    char *buf;
+    
+	numentitychars = FS_LoadFile (entity_file_name, (void **)&buf);
+	
+	if (numentitychars > MAX_MAP_ENTSTRING)
+		Com_Error (ERR_DROP, "Entity data has too large entity lump");
+
+	memcpy (map_entitystring, buf, numentitychars);
+	
+	FS_FreeFile (buf);
+}
+
+
+
+/*
 ==================
 CM_LoadMap
 
 Loads in the map and all submodels
 ==================
 */
-cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum)
+cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 {
 	unsigned		*buf;
 	int				i;
@@ -634,6 +655,74 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum)
 	strcpy (map_name, name);
 
 	return &map_cmodels[0];
+}
+
+cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum) {
+	char        *buf;
+	char        *buf_bak;
+	int		    length;
+	cmodel_t    *tmp;
+
+	char    *bsp_file = NULL;
+	char    *ent_file = NULL;
+	char    *token = NULL;
+
+
+	//
+	// load the file
+	//
+	length = FS_LoadFile (name, (void **)&buf);
+	if (!buf) //fallback to just looking for a BSP
+		return CM_LoadBSP (va("%s.bsp", name), clientload, checksum);
+	
+	//since buf will be repeatedly modified, we keep a backup pointer
+	buf_bak = buf; 
+
+	// get the name of the BSP and entdef files
+	// if we ever add more map data files, be sure to add them here
+	buf = strtok (buf, ";");
+	while (buf) {
+		token = COM_Parse (&buf);
+		if (!buf && !(buf = strtok (NULL, ";")))
+			break;
+
+		if (!Q_strcasecmp (token, "bsp")){
+			if (bsp_file)
+				Z_Free (bsp_file);
+			bsp_file = CopyString (COM_Parse (&buf));
+			if (!buf)
+				Com_Error (ERR_DROP, "CM_LoadMap: EOL when expecting BSP filename! (File %s is invalid)", name);
+		} else if (!Q_strcasecmp (token, "entdef")){
+			if (ent_file)
+				Z_Free (ent_file);
+			ent_file = CopyString (COM_Parse (&buf));
+			if (!buf)
+				Com_Error (ERR_DROP, "CM_LoadMap: EOL when expecting entdef filename! (File %s is invalid)", name);
+		}
+		
+		//For forward compatibility-- if this file has a statement type we
+		//don't recognize, or if a recognized statement type has extra
+		//arguments supplied to it, then this is probably supported in a newer
+		//newer version of CRX. But the best we can do is just fast-forward
+		//through it.
+		buf = strtok (NULL, ";");
+	}
+
+	FS_FreeFile (buf_bak);
+
+	if (!bsp_file)
+		Com_Error (ERR_DROP, "CM_LoadMap: BSP file not defined! (File %s is invalid)", name);
+
+	tmp = CM_LoadBSP (bsp_file, clientload, checksum);
+
+	if (ent_file){ //overwrite the entity data from another data file
+		CMod_LoadAlternateEntityData (ent_file);
+		Z_Free (ent_file);
+	}
+
+	Z_Free (bsp_file);
+
+	return tmp;
 }
 
 /*
