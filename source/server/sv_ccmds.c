@@ -157,11 +157,15 @@ void SV_Map_f (void)
 	map = Cmd_Argv(1);
 	if (!strstr (map, "."))
 	{
-		Com_sprintf (expanded, sizeof(expanded), "maps/%s.bsp", map);
+		Com_sprintf (expanded, sizeof(expanded), "maps/%s", map);
 		if (FS_LoadFile (expanded, NULL) == -1)
 		{
-			Com_Printf ("Cannot find %s\n", expanded);
-			return;
+			Com_sprintf (expanded, sizeof(expanded), "maps/%s.bsp", map);
+			if (FS_LoadFile (expanded, NULL) == -1)
+			{
+				Com_Printf ("Cannot find %s\n", expanded);
+				return;
+			}
 		}
 	}
 
@@ -180,11 +184,15 @@ void SV_StartMap_f (void)
 	map = Cmd_Argv(1);
 	if (!strstr (map, "."))
 	{
-		Com_sprintf (expanded, sizeof(expanded), "maps/%s.bsp", map);
+		Com_sprintf (expanded, sizeof(expanded), "maps/%s", map);
 		if (FS_LoadFile (expanded, NULL) == -1)
 		{
-			Com_Printf ("Cannot find %s\n", expanded);
-			return;
+			Com_sprintf (expanded, sizeof(expanded), "maps/%s.bsp", map);
+			if (FS_LoadFile (expanded, NULL) == -1)
+			{
+				Com_Printf ("Cannot find %s\n", expanded);
+				return;
+			}
 		}
 	}
 

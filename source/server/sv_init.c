@@ -190,8 +190,10 @@ void SV_SpawnServer (char *server, char *spawnpoint, server_state_t serverstate,
 	else
 	{
 		Com_sprintf (sv.configstrings[CS_MODELS+1],sizeof(sv.configstrings[CS_MODELS+1]),
-			"maps/%s.bsp", server);
+			"maps/%s", server);
 		sv.models[1] = CM_LoadMap (sv.configstrings[CS_MODELS+1], false, &checksum);
+		Com_sprintf (sv.configstrings[CS_MODELS+1],sizeof(sv.configstrings[CS_MODELS+1]),
+			"%s", map_name);
 	}
 	Com_sprintf (sv.configstrings[CS_MAPCHECKSUM],sizeof(sv.configstrings[CS_MAPCHECKSUM]),
 		"%i", checksum);

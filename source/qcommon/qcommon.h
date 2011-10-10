@@ -665,6 +665,7 @@ CMODEL
 #include "qcommon/qfiles.h"
 
 cmodel_t	*CM_LoadMap (char *name, qboolean clientload, unsigned *checksum);
+cmodel_t	*CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum);
 cmodel_t	*CM_InlineModel (char *name);	// *1, *2, etc
 
 int			CM_NumClusters (void);
@@ -709,6 +710,8 @@ qboolean	CM_HeadnodeVisible (int headnode, byte *visbits);
 
 void		CM_WritePortalState (FILE *f);
 void		CM_ReadPortalState (FILE *f);
+
+extern char map_name[MAX_QPATH];
 
 /*
 ==============================================================
