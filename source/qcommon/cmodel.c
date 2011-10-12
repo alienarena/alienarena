@@ -672,8 +672,12 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum) {
 	// load the file
 	//
 	length = FS_LoadFile (name, (void **)&buf);
-	if (!buf) //fallback to just looking for a BSP
-		return CM_LoadBSP (va("%s.bsp", name), clientload, checksum);
+	if (!buf) {
+		if (!name[0]) //no real map
+			return CM_LoadBSP (name, clientload, checksum);
+		else //fallback to just looking for a BSP
+			return CM_LoadBSP (va("%s.bsp", name), clientload, checksum);
+	}
 	
 	//since buf will be repeatedly modified, we keep a backup pointer
 	buf_bak = buf; 
