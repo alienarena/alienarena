@@ -67,8 +67,6 @@ WSADATA ws;
 fd_set set;
 char incoming[150000];
 int retval;
-int timeCount;
-int dumpCount;
 
 void DropPlayer (player_t *player)
 {
@@ -115,7 +113,7 @@ void CheckPlayers (void)
 }
 
 //logout player
-void RemovePlayer (char name[32])
+void RemovePlayer (char name[64])
 {
 	player_t	*player = &players;
 
@@ -137,7 +135,7 @@ void RemovePlayer (char name[32])
 }
 
 //this called only when a packet of "login" is received, and the player is validated
-void AddPlayer (char name[32])
+void AddPlayer (char name[64])
 {
 	player_t	*player = &players;
 
@@ -160,7 +158,7 @@ void AddPlayer (char name[32])
 	player = player->next;
 
 	//copy name
-	strcpy_s(player->name, name);
+	strncpy_s(player->name, name, 32);
 	player->next = NULL;
 
 	//timestamp
@@ -193,7 +191,7 @@ void SendValidationToClient (struct sockaddr_in *from)
 	}
 }
 
-void SendVStringToClient (char name[32], struct sockaddr_in *from)
+void SendVStringToClient (char name[64], struct sockaddr_in *from)
 {
 	int				buflen;
 	char			buff[0xFFFF];
@@ -221,10 +219,10 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	char *cmd = data;
 	char *token;
 	char seps[] = "\\";
-	char name[32];
-	char password[256];
-	char new_password[256];
-	char pVString[32];	
+	char name[64];
+	char password[512];
+	char new_password[512];
+	char pVString[64];	
 	
 	if (_strnicmp (data, "ÿÿÿÿrequestvstring", 18) == 0)
 	{	
@@ -244,9 +242,8 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			printf ("[E2] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-		if(strlen(token) > 32) 
-			token[32] = 0; //don't allow overflows from malicious hackers
-		strcpy_s(name, token);
+
+		strncpy_s(name, token, 32);
 
 		SendVStringToClient(name, from);
 	}
@@ -271,9 +268,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		if(token)
 		{
-			if(strlen(token) > 32) 
-				token[32] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(name, token);
+			strncpy_s(name, token, 32);
 			token = strtok( NULL, seps );
 		}
 		else 
@@ -284,9 +279,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 
 		if(token)
 		{
-			if(strlen(token) > 256) 
-				token[256] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(password, token);
+			strncpy_s(password, token, 256);
 			token = strtok( NULL, seps );
 		}
 		else 
@@ -297,9 +290,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 
 		if(token)
 		{
-			if(strlen(token) > 32) 
-				token[32] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(pVString, token);
+			strncpy_s(pVString, token, 32);
 		}
 		else 
 		{
@@ -307,11 +298,12 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			return;
 		}
 
-		printf ("Login command from %s:%s\n", name, inet_ntoa (from->sin_addr));
-
 		if(ValidatePlayer(name, password, pVString))
 		{
+			printf("Validated name\n");
 			AddPlayer(name);
+
+			printf("Added player\n");
 
 			//let the client know he was validated
 			SendValidationToClient (from);
@@ -339,9 +331,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 
 		if(token)
 		{
-			if(strlen(token) > 32) 
-				token[32] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(name, token);
+			strncpy_s(name, token, 32);
 			token = strtok( NULL, seps );
 		}
 		else 
@@ -352,9 +342,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 
 		if(token)
 		{
-			if(strlen(token) > 256) 
-				token[256] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(password, token);
+			strncpy_s(password, token, 256);
 			token = strtok( NULL, seps );
 		}
 		else 
@@ -365,17 +353,13 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 
 		if(token)
 		{
-			if(strlen(token) > 32) 
-				token[32] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(pVString, token);
+			strncpy_s(pVString, token, 32);
 		}
 		else 
 		{
 			printf ("[E5] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
-
-		printf ("Logout command from %s:%s\n", name, inet_ntoa (from->sin_addr));
 
 		if(ValidatePlayer(name, password, pVString))
 		{
@@ -403,9 +387,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 		if(token)
 		{
-			if(strlen(token) > 32) 
-				token[32] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(name, token);
+			strncpy_s(name, token, 32);
 			token = strtok( NULL, seps );
 		}
 		else 
@@ -416,9 +398,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 
 		if(token)
 		{
-			if(strlen(token) > 256) 
-				token[256] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(password, token);
+			strncpy_s(password, token, 256);
 			token = strtok( NULL, seps );
 		}
 		else 
@@ -429,9 +409,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 
 		if(token)
 		{
-			if(strlen(token) > 256) 
-				token[256] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(new_password, token);
+			strncpy_s(new_password, token, 256);
 			token = strtok( NULL, seps );
 		}
 		else 
@@ -442,17 +420,13 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 
 		if(token)
 		{
-			if(strlen(token) > 32) 
-				token[32] = 0; //don't allow overflows from malicious hackers
-			strcpy_s(pVString, token);
+			strncpy_s(pVString, token, 32);
 		}
 		else 
 		{
 			printf ("[E6] Invalid command %s from %s:%s!\n", cmd, name, inet_ntoa (from->sin_addr));
 			return;
 		}
-
-		printf ("Change command from %s:%s\n", name, inet_ntoa (from->sin_addr));
 
 		if(!strcmp(password, "password")) //a player either starting the first time, or moving to a new system
 		{
@@ -479,7 +453,6 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	{
 		printf ("[E] Unknown command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 	}
-
 }
 
 int main (int argc, char argv[])
@@ -520,8 +493,6 @@ int main (int argc, char argv[])
 
 	printf ("listening on port 27902 (UDP)\n");
 
-	timeCount = dumpCount = 0;
-
 	while (1)
 	{
 		FD_SET (listener, &set);
@@ -531,6 +502,7 @@ int main (int argc, char argv[])
 		retval = select(listener+1, &set, NULL, NULL, &delay);
 		if (retval == 1)
 		{
+			printf("Receiving...\n");
 			len = recvfrom (listener, incoming, sizeof(incoming), 0, (struct sockaddr *)&from, &fromlen);
 			if (len != SOCKET_ERROR)
 			{
@@ -541,13 +513,13 @@ int main (int argc, char argv[])
 				}
 				else
 				{
-					dprintf ("[W] runt packet from %s:%d\n", inet_ntoa (from.sin_addr), ntohs(from.sin_port));
+					printf ("[W] runt packet from %s:%d\n", inet_ntoa (from.sin_addr), ntohs(from.sin_port));
 				}
 
 				//reset for next packet
 				memset (incoming, 0, sizeof(incoming));
 			} else {
-				dprintf ("[E] socket error during select from %s:%d (%d)\n", inet_ntoa (from.sin_addr), ntohs(from.sin_port), WSAGetLastError());
+				printf ("[E] socket error during select from %s:%d (%d)\n", inet_ntoa (from.sin_addr), ntohs(from.sin_port), WSAGetLastError());
 			}
 		}
 	}

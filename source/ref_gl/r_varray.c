@@ -55,6 +55,7 @@ static vec3_t NormalsArray[MAX_VERTICES];
 static int VertexCounter = 0;
 
 float	tex_array[MAX_ARRAY][2];
+float	st_array[MAX_ARRAY][2];
 float	vert_array[MAX_ARRAY][3];
 float	norm_array[MAX_ARRAY][3];
 float	tan_array[MAX_ARRAY][4];

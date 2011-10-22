@@ -30,7 +30,7 @@ void StripIllegalPathChars( char *name )
 	} 
 }
 
-void ObtainVStringForPlayer(char name[32])
+void ObtainVStringForPlayer(char name[64])
 {
 	ifstream playerProfileFile;
 	char szPath[256];
@@ -64,7 +64,7 @@ void ObtainVStringForPlayer(char name[32])
 
 }
 
-bool ValidatePlayer(char name[32], char password[256], char pVString[32])
+bool ValidatePlayer(char name[64], char password[512], char pVString[64])
 {
 	ifstream playerProfileFile;
 	ofstream newPlayerProfileFile;
@@ -117,7 +117,7 @@ bool ValidatePlayer(char name[32], char password[256], char pVString[32])
 	return false;
 }
 
-void ChangePlayerPassword(char name[32], char new_password[256], char pVString[32])
+void ChangePlayerPassword(char name[64], char new_password[512], char pVString[64])
 {
 	ofstream playerProfileFile;
 	char szPath[256];
