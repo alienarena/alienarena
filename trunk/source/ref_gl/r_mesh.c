@@ -42,7 +42,8 @@ float	r_avertexnormals[NUMVERTEXNORMALS][3] = {
 
 static  vec4_t  s_lerped[MAX_VERTS];
 
-// static	vec3_t	s_normals[MAX_VERTS]; // unused
+static vec3_t VertexArray[MAX_VERTICES];
+static vec2_t TexCoordArray[MAX_VERTICES];
 static vec3_t NormalsArray[MAX_VERTICES];
 static vec4_t TangentsArray[MAX_VERTICES];
 
@@ -675,6 +676,39 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 		}
 	}
 
+	/*if (gl_state.vbo)
+	{
+		int		index_st;
+		int		index_xyz;
+		float	*map;
+
+		mod->vbo_st = NULL;
+		mod->vbo_xyz = NULL;
+
+		tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
+		map = (float*) vbo_shadow;	
+
+		for (l=0, i=0; i<pheader->num_tris; i++)
+		{
+			for (j=0; j<3; j++)
+			{
+				index_st = tris[i].index_st[j];
+				map[l++] = mod->st[index_st].s;
+				map[l++] = mod->st[index_st].t;
+
+				index_xyz = tris[i].index_xyz[j];
+			}
+		}
+
+		if (l>3*MAX_VBO_XYZs)
+			Com_Error(ERR_FATAL, "Temporary buffer overflow\n");
+
+		mod->vbo_st = R_VCLoadData(VBO_STATIC, l*sizeof(float), &vbo_shadow, VBO_STORE_ANY, NULL);
+		GL_BindVBO(NULL);
+	}*/
+
+	mod->num_triangles = pheader->num_tris;
+
 	paliashdr = (dmdl_t *)mod->extradata;
 
 	//redo this using max/min from all frames
@@ -713,39 +747,7 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 			tmp[2] = mod->maxs[2];
 
 		VectorCopy( tmp, mod->bbox[i] );
-	}
-
-	if (gl_state.vbo)
-	{
-		int		index_st;
-		int		index_xyz;
-		float	*map;
-
-		mod->vbo_st = NULL;
-		mod->vbo_xyz = NULL;
-
-		tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
-		map = (float*) vbo_shadow;	
-
-		for (l=0, i=0; i<pheader->num_tris; i++)
-		{
-			for (j=0; j<3; j++)
-			{
-				index_st = tris[i].index_st[j];
-				map[l++] = mod->st[index_st].s;
-				map[l++] = mod->st[index_st].t;
-
-				index_xyz = tris[i].index_xyz[j];
-			}
-		}
-
-		if (l>3*MAX_VBO_XYZs)
-			Com_Error(ERR_FATAL, "Temporary buffer overflow\n");
-
-		mod->vbo_st = R_VCLoadData(VBO_STATIC, l*sizeof(float), &vbo_shadow, VBO_STORE_ANY, NULL);
-		//mod->vbo_xyz = R_VCLoadData(VBO_STATIC, paliashdr->num_xyz*sizeof(vec3_t), &mod->r_mesh_verts, VBO_STORE_ANY, NULL);
-		GL_BindVBO(NULL);
-	}
+	}	
 }
 
 //==============================================================
@@ -1471,7 +1473,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			{
 				vec3_t lightVec, lightVal;
 
-				if(!(gl_state.vbo && !lerped))
+				if(!(gl_state.vbo && !lerped && r_test->value))
 				{
 					R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 					qglNormalPointer(GL_FLOAT, 0, NormalsArray);
@@ -1565,12 +1567,25 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 				glUniform1iARB( g_location_meshFog, map_fog);
 
-				if (gl_state.vbo && !lerped)
+				if (gl_state.vbo && !lerped && r_test->value)
 				{
 					currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
-					if (currentmodel->vbo_xyz) {
-						//Com_Printf("skipped\n");
-						goto skipLoad;
+					if (currentmodel->vbo_xyz) 
+					{						
+						currentmodel->vbo_st = R_VCFindCache(VBO_STORE_ST, currententity);
+						if(currentmodel->vbo_st)
+						{
+							currentmodel->vbo_normals = R_VCFindCache(VBO_STORE_NORMAL, currententity);
+							if(currentmodel->vbo_normals)
+							{
+								currentmodel->vbo_tangents = R_VCFindCache(VBO_STORE_TANGENT, currententity);
+								if(currentmodel->vbo_tangents)
+								{
+									//Com_Printf("skipped\n");
+									goto skipLoad;
+								}
+							}
+						}
 					}
 				}
 			}			
@@ -1714,11 +1729,14 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 							VArray[8] = nAlpha;
 						}
 					}
-					else if(gl_state.vbo && !lerped) 
+					else if(gl_state.vbo && !lerped && r_test->value) 
 					{
-						vert_array[va][0] = VArray[0];
-						vert_array[va][1] = VArray[1];
-						vert_array[va][2] = VArray[2];
+						VertexArray[va][0] = VArray[0];
+						VertexArray[va][1] = VArray[1];
+						VertexArray[va][2] = VArray[2];
+
+						TexCoordArray[va][0] = VArray[3];
+						TexCoordArray[va][1] = VArray[4];
 					}
 
 					// increment pointer and counter
@@ -1732,14 +1750,17 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				}
 			}
 
-			if(gl_state.vbo && !lerped && stage->normalmap) //note couldn't this all be done at model load as a static?
+			if(gl_state.vbo && !lerped && stage->normalmap && r_test->value)
 			{
-                currentmodel->vbo_xyz = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), &vert_array, VBO_STORE_XYZ, currententity);
-				currentmodel->vbo_normals = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL, currententity);
-				currentmodel->vbo_tangents = R_VCLoadData(VBO_DYNAMIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT, currententity);
+                currentmodel->vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currententity);
+				currentmodel->vbo_st = R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, currententity);
+				currentmodel->vbo_normals = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL, currententity);
+				currentmodel->vbo_tangents = R_VCLoadData(VBO_STATIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT, currententity);
+
+				//Com_Printf("Building vbo.\n");
             }
 skipLoad:
-			if(gl_state.vbo && !lerped && stage->normalmap) 
+			if(gl_state.vbo && !lerped && stage->normalmap && r_test->value) 
 			{
                 qglEnableClientState( GL_VERTEX_ARRAY );
                 GL_BindVBO(currentmodel->vbo_xyz);
@@ -1753,9 +1774,9 @@ skipLoad:
                 GL_BindVBO(currentmodel->vbo_normals);
                 qglNormalPointer(GL_FLOAT, 0, 0);
 
-	/*			glEnableVertexAttribArrayARB (1);
+				glEnableVertexAttribArrayARB (1);
 				GL_BindVBO(currentmodel->vbo_tangents);
-				glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, 0);*/
+				glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(currentmodel->num_triangles*3), 0);
             }
          
 			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
@@ -1763,7 +1784,7 @@ skipLoad:
 				if(qglLockArraysEXT)
 					qglLockArraysEXT(0, va);
 
-				qglDrawArrays(GL_TRIANGLES,0,paliashdr->num_tris*3);
+				qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
 
 				if(qglUnlockArraysEXT)
 					qglUnlockArraysEXT();
