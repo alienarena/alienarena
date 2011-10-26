@@ -73,17 +73,23 @@ void DropPlayer (player_t *player)
 	if(!player)
 		return;
 
-	dprintf("%s dropped...\n", player->name);
+	printf("%s dropped...\n", player->name);
 
 	//unlink
 	if (player->next)
 		player->next->prev = player->prev;
 
+	printf("Drop stage 1 completed.\n");
+
 	if (player->prev)
 		player->prev->next = player->next;
 
+	printf("Drop stage 2 completed.\n");
+
 	//free
 	free (player);
+
+	printf("Drop stage 3 completed.\n");
 }
 
 //check list for possible expired players(5 hour window)
@@ -219,13 +225,21 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	char *cmd = data;
 	char *token;
 	char seps[] = "\\";
-	char name[64];
-	char password[512];
-	char new_password[512];
-	char pVString[64];	
+	char name[128];
+	char password[1024];
+	char new_password[1024];
+	char pVString[128];	
+
+	printf("Processing %s.\n", data);
 	
 	if (_strnicmp (data, "ÿÿÿÿrequestvstring", 18) == 0)
 	{	
+		if(strlen(data) > 64)
+		{
+			printf("[E0] Invalid or malicious request detected from %s\n", inet_ntoa (from->sin_addr));
+			return;
+		}
+
 		token = strtok( cmd, seps ); 
 		if(token)
 			token = strtok( NULL, seps ); //protocol - may need this later on
@@ -243,12 +257,20 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			return;
 		}
 
-		strncpy_s(name, token, 32);
-
-		SendVStringToClient(name, from);
+		if(strlen(name))
+		{
+			strncpy_s(name, token, 32);
+			SendVStringToClient(name, from);
+		}
 	}
 	else if (_strnicmp (data, "ÿÿÿÿlogin", 9) == 0)
 	{		
+		if(strlen(data) > 364)
+		{
+			printf("[E0] Invalid or malicious request detected from %s\n", inet_ntoa (from->sin_addr));
+			return;
+		}
+
 		//parse string, etc validate or create new profile file
 		token = strtok( cmd, seps ); 
 		if(token)
@@ -303,14 +325,18 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			printf("Validated name\n");
 			AddPlayer(name);
 
-			printf("Added player\n");
-
 			//let the client know he was validated
 			SendValidationToClient (from);
 		}
 	}
 	else if (_strnicmp (data, "ÿÿÿÿlogout", 10) == 0)
 	{
+		if(strlen(data) > 364)
+		{
+			printf("[E0] Invalid or malicious request detected from %s\n", inet_ntoa (from->sin_addr));
+			return;
+		}
+
 		//parse string, etc validate or create new profile file
 		token = strtok( cmd, seps );
 		if(token)
@@ -367,7 +393,14 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		}
 	}
 	else if (_strnicmp (data, "ÿÿÿÿchangepw", 12) == 0)
-	{		
+	{	
+
+		if(strlen(data) > 620)
+		{
+			printf("[E0] Invalid or malicious request detected from %s\n", inet_ntoa (from->sin_addr));
+			return;
+		}
+
 		//parse string, etc validate or create new profile file
 		token = strtok( cmd, seps ); 
 		if(token)

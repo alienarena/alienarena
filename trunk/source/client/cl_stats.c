@@ -358,7 +358,7 @@ void STATS_Logout (void)
 		STATS_EncryptPassword();
 	}
 	
-	requeststring = va("logout\\\\%i\\\\%s\\\\%s\\\\&s\\\\", STAT_PROTOCOL, name->string, password->string, szVerificationString );
+	requeststring = va("logout\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, password->string, szVerificationString );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
