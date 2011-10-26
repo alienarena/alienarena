@@ -363,6 +363,8 @@ void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
 	unsigned	ShadowIndex[MAX_INDICES];
 	vec3_t v0, v1, v2, v3;
 	vec3_t currentShadowLight;
+	//GLuint shadowVboId = 0;
+	//GLuint shadowIboId = 0;
 
 	SHD_MarkIQMShadowTriangles(light);
 
@@ -491,7 +493,6 @@ void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
 			v0[j] = v0[j] + ((v0[j] - light[j]) * projectdistance);
 			v1[j] = v1[j] + ((v1[j] - light[j]) * projectdistance);
 			v2[j] = v2[j] + ((v2[j] - light[j]) * projectdistance);
-
 		}
 
 		VA_SetElem3(ShadowArray[shadow_vert+0], v0[0], v0[1], v0[2]);
@@ -504,13 +505,24 @@ void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
 		shadow_vert +=3;
 	}
 
+	////testing vbo(works, but needs to be moved outside of this)
+	//qglGenBuffersARB(1, &shadowVboId);
+	//qglBindBufferARB(GL_ARRAY_BUFFER, shadowVboId);
+	//qglBufferDataARB(GL_ARRAY_BUFFER, sizeof(vec3_t)*index, ShadowArray, GL_STATIC_DRAW);
+
+	//qglGenBuffersARB(1, &shadowIboId);
+	//qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, shadowIboId);
+	//qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*3, ShadowIndex, GL_STATIC_DRAW);
+
 	if ( qglLockArraysEXT != 0 )
-           qglLockArraysEXT( 0, shadow_vert );
+		qglLockArraysEXT( 0, shadow_vert );
 
 	qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
-
+	
 	if ( qglUnlockArraysEXT != 0 )
-             qglUnlockArraysEXT();
+        qglUnlockArraysEXT();
+
+	//GL_BindVBO(NULL);
 }
 
 void SHD_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolean lerp)

@@ -1478,7 +1478,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 					qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 					glEnableVertexAttribArrayARB (1);
-					glVertexAttribPointerARB(1, 4, GL_FLOAT,GL_FALSE, 0, TangentsArray);
+					glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
 				}
 
 				R_GetLightVals(currententity->origin, false, true);
@@ -1776,7 +1776,7 @@ skipLoad:
 
 				glEnableVertexAttribArrayARB (1);
 				GL_BindVBO(currentmodel->vbo_tangents);
-				glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(currentmodel->num_triangles*3), 0);
+				glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
             }
          
 			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
@@ -1798,7 +1798,8 @@ skipLoad:
 			if(stage->normalmap)
 			{
 				glUseProgramObjectARB( 0 );
-
+				if(gl_state.vbo && !lerped && r_test->value)
+					glDisableVertexAttribArrayARB (1);
 				GL_EnableMultitexture( false );
 			}
 
