@@ -1265,17 +1265,17 @@ void IQM_DrawFrame(int skinnum)
 			GL_Bind(r_shelltexture2->texnum);
 			R_InitVArrays (VERT_COLOURED_TEXTURED);
 		}
+		
+		if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value))
+			shellscale = 0.4;
+		else
+			shellscale = 1.6;
 
 		for (i=0; i<currentmodel->num_triangles; i++)
         {
             for (j=0; j<3; j++)
             {
                 index_xyz = index_st = currentmodel->tris[i].vertex[j];
-
-				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value))
-					shellscale = 0.4;
-				else
-					shellscale = 1.6;
 
 				VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0] + currentmodel->animatenormal[index_xyz].dir[0]*shellscale;
                 VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatenormal[index_xyz].dir[1]*shellscale;
@@ -1284,22 +1284,17 @@ void IQM_DrawFrame(int skinnum)
 				VArray[3] = (currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
                 VArray[4] = currentmodel->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
 
-				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
-				{
-					VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
-                    Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
-				}
-
 				VArray[5] = shadelight[0];
 				VArray[6] = shadelight[1];
 				VArray[7] = shadelight[2];
 				VArray[8] = 0.33;
 
-                // increment pointer and counter
-                if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
-                    VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
-                else
-                    VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+                if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+                    VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
+                    Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
+                    VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
+                } else
+                    VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
                 va++;
             }
         }
@@ -1405,6 +1400,7 @@ void IQM_DrawFrame(int skinnum)
 					VArray[8] = lightcolor[1];
 					VArray[9] = lightcolor[2];
 					VArray[10] = alpha;
+					VArray += VertexSizes[VERT_COLOURED_MULTI_TEXTURED]; // increment pointer and counter
 				}
 				else
 				{
@@ -1412,13 +1408,9 @@ void IQM_DrawFrame(int skinnum)
 					VArray[6] = lightcolor[1];
 					VArray[7] = lightcolor[2];
 					VArray[8] = alpha;
+					VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
 				}
 
-				// increment pointer and counter
-				if(mirror && !(currententity->flags & RF_WEAPONMODEL))
-					VArray += VertexSizes[VERT_COLOURED_MULTI_TEXTURED];
-				else
-					VArray += VertexSizes[VERT_COLOURED_TEXTURED];
 				va++;
 			}
 		}
@@ -1625,9 +1617,9 @@ void IQM_DrawFrame(int skinnum)
 					if(stage->normalmap) { //send normals and tangents to shader
 						VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]);
 						Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
+						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
 					}
-
-					if(!stage->normalmap)
+					else
 					{
 						float red = 1, green = 1, blue = 1;
 
@@ -1652,13 +1644,10 @@ void IQM_DrawFrame(int skinnum)
 							VArray[7] = blue;
 							VArray[8] = alpha;
 						}
+						
+						VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
 					}
-
-					// increment pointer and counter
-					if(stage->normalmap)
-						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
-					else
-						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+						
 					va++;
 				}
 			}
@@ -1835,22 +1824,19 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 					RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
                 VArray[4] = RagDoll[RagDollID].ragDollMesh->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
 
-				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
-				{
-					VectorCopy(RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
-                    Vector4Copy(RagDoll[RagDollID].ragDollMesh->animatetangent[index_xyz].dir, TangentsArray[va]);
-				}
-
 				VArray[5] = shadelight[0];
 				VArray[6] = shadelight[1];
 				VArray[7] = shadelight[2];
 				VArray[8] = shellAlpha; //decrease over time
 
-                // increment pointer and counter
-                 if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
-                    VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
+                if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+                {
+                    VectorCopy(RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
+                    Vector4Copy(RagDoll[RagDollID].ragDollMesh->animatetangent[index_xyz].dir, TangentsArray[va]);
+                    VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
+                }
                 else
-                    VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+                    VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
                 va++;
             }
         }
@@ -2119,9 +2105,9 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 					if(stage->normalmap) { //send normals and tangents to shader
 						VectorCopy(RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, NormalsArray[va]);
 						Vector4Copy(RagDoll[RagDollID].ragDollMesh->animatetangent[index_xyz].dir, TangentsArray[va]);
+						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
 					}
-
-					if(!stage->normalmap)
+					else
 					{
 						float red = 1, green = 1, blue = 1;
 
@@ -2146,13 +2132,10 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 							VArray[7] = blue;
 							VArray[8] = alpha;
 						}
+						
+						VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
 					}
-
-					// increment pointer and counter
-					if(stage->normalmap)
-						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
-					else
-						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+					
 					va++;
 				}
 			}
