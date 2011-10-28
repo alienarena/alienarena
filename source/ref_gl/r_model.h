@@ -436,6 +436,8 @@ typedef struct model_s
 	vertCache_t	*vbo_color;
 	vertCache_t	*vbo_normals;
 	vertCache_t *vbo_tangents;
+	vertCache_t *vbo_shadowxyz;
+	vertCache_t *vbo_shadowindices;
 
 } model_t;
 

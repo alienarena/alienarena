@@ -248,7 +248,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			printf ("[E1] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-
+		printf("Got to last check.\n");
 		if(token)
 			token = strtok( NULL, seps );
 		else 
@@ -256,8 +256,8 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			printf ("[E2] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-
-		if(strlen(name))
+		printf("Copying name.\n");
+		if(strlen(token))
 		{
 			strncpy_s(name, token, 32);
 			SendVStringToClient(name, from);

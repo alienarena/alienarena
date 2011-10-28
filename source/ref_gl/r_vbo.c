@@ -158,6 +158,16 @@ void GL_BindVBO(vertCache_t *cache)
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 }
 
+void GL_BindIBO(vertCache_t *cache)
+{
+	if (cache) 
+	{
+		qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, cache->id);
+	}
+	else
+		qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
 vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent)
 {
 	model_t		*mod;
@@ -168,10 +178,22 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent)
 	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
 	{
 		next = cache->next;
-		if (cache->store == store && cache->mod == mod)
-		{	// already cached!
-			GL_BindVBO(cache);
-			return cache;
+		if(store == VBO_STORE_SHADOWINDICES || store == VBO_STORE_SHADOWXYZ)
+		{
+			if (cache->store == store && cache->mod == mod && cache->position[0] == ent->origin[0] && cache->position[1] == ent->origin[1]
+				&& cache->position[2] == ent->origin[2])
+			{	// already cached!
+				GL_BindVBO(cache);
+				return cache;
+			}
+		}
+		else
+		{
+			if (cache->store == store && cache->mod == mod)
+			{	// already cached!
+				GL_BindVBO(cache);
+				return cache;
+			}
 		}
 	}
 
@@ -191,6 +213,7 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 	cache->pointer = buffer;
 	cache->store = store;
 	cache->mod = ent->model;
+	VectorCopy(ent->origin, cache->position);
 
 	// link
 	vcm.freeVertCache = vcm.freeVertCache->next;
@@ -201,14 +224,25 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 	vcm.activeVertCache.next->prev = cache;
 	vcm.activeVertCache.next = cache;
 
-	GL_BindVBO(cache);
+	if(store == VBO_STORE_SHADOWINDICES)
+		GL_BindIBO(cache);
+	else
+		GL_BindVBO(cache);
 
 	switch (cache->mode)
 	{
 		case VBO_STATIC:
-			qglBufferDataARB(GL_ARRAY_BUFFER_ARB, cache->size, cache->pointer, GL_STATIC_DRAW_ARB);
+			if(store == VBO_STORE_SHADOWINDICES)
+				qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, cache->size, cache->pointer, GL_STATIC_DRAW_ARB);
+			else
+				qglBufferDataARB(GL_ARRAY_BUFFER_ARB, cache->size, cache->pointer, GL_STATIC_DRAW_ARB);
+			break;
 		case VBO_DYNAMIC:
-			qglBufferDataARB(GL_ARRAY_BUFFER_ARB, cache->size, cache->pointer, GL_DYNAMIC_DRAW_ARB);
+			if(store == VBO_STORE_SHADOWINDICES)
+				qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, cache->size, cache->pointer, GL_DYNAMIC_DRAW_ARB);
+			else
+				qglBufferDataARB(GL_ARRAY_BUFFER_ARB, cache->size, cache->pointer, GL_DYNAMIC_DRAW_ARB);
+			break;
 	}
 
 	return cache;
@@ -243,9 +277,7 @@ void R_VCFree(vertCache_t *cache)
 /*
 ===============
 R_VCFreeFrame
-
 Deletes all non-STATIC buffers from the previous frame.
-PS: VBO_STATIC using for ST texture/skin coordinates and static shadow volumes
 ===============
 */
 void R_VCFreeFrame()

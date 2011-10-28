@@ -1757,7 +1757,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				currentmodel->vbo_normals = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), NormalsArray, VBO_STORE_NORMAL, currententity);
 				currentmodel->vbo_tangents = R_VCLoadData(VBO_STATIC, va*sizeof(vec4_t), TangentsArray, VBO_STORE_TANGENT, currententity);
 
-				//Com_Printf("Building vbo.\n");
+				//Com_Printf("Loading mesh vbo.\n");
             }
 skipLoad:
 			if(gl_state.vbo && !lerped && stage->normalmap && r_test->value) 
@@ -2328,7 +2328,8 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 
 	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
 
-	if(lerped) {
+	if(lerped) 
+	{
 		move[0] = DotProduct (delta, vectors[0]);	// forward
 		move[1] = -DotProduct (delta, vectors[1]);	// left
 		move[2] = DotProduct (delta, vectors[2]);	// up
@@ -2341,51 +2342,82 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 			frontv[i] = frontlerp*frame->scale[i];
 			backv[i] = backlerp*oldframe->scale[i];
 		}
-
 	}
 
 	va=0;
 	VArray = &VArrayVerts[0];
 	R_InitVArrays (VERT_NO_TEXTURE);
 
-	for (i=0; i<paliashdr->num_tris; i++)
+	if (gl_state.vbo && !lerped && r_test->value)
 	{
-		for (j=0; j<3; j++)
+		currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
+		if (currentmodel->vbo_xyz) 
+		{
+			//Com_Printf("Skipped.\n");
+			goto skipLoad;
+		}
+	}
+
+	for (i = 0; i < paliashdr->num_tris; i++)
+	{
+		for (j = 0; j < 3; j++)
 		{
 			index_xyz = tris[i].index_xyz[j];
 			index_st = tris[i].index_st[j];
 
-			if(lerped) {
-
+			if(lerped) 
+			{
 				VArray[0] = s_lerped[index_xyz][0] = move[0] + ov[index_xyz].v[0]*backv[0] + v[index_xyz].v[0]*frontv[0];
 				VArray[1] = s_lerped[index_xyz][1] = move[1] + ov[index_xyz].v[1]*backv[1] + v[index_xyz].v[1]*frontv[1];
 				VArray[2] = s_lerped[index_xyz][2] = move[2] + ov[index_xyz].v[2]*backv[2] + v[index_xyz].v[2]*frontv[2];
 
 			}
-			else {
-
+			else 
+			{
 				VArray[0] = currentmodel->vertexes[index_xyz].position[0];
 				VArray[1] = currentmodel->vertexes[index_xyz].position[1];
 				VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
+				if(gl_state.vbo && r_test->value) 
+				{
+					VertexArray[va][0] = VArray[0];
+					VertexArray[va][1] = VArray[1];
+					VertexArray[va][2] = VArray[2];
+				}
 			}
 
 			// increment pointer and counter
 			VArray += VertexSizes[VERT_NO_TEXTURE];
 			va++;
 		}
-
 	}
 
+	if(gl_state.vbo && !lerped && r_test->value)
+	{
+		currentmodel->vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currententity);
+		//Com_Printf("Loading mesh vbo.\n");
+    }
+
+skipLoad:
+	if(gl_state.vbo && !lerped && r_test->value) 
+	{
+		qglEnableClientState( GL_VERTEX_ARRAY );
+        GL_BindVBO(currentmodel->vbo_xyz);
+        qglVertexPointer(3, GL_FLOAT, 0, 0);   
+    }
+    
 	if(qglLockArraysEXT)
 		qglLockArraysEXT(0, va);
 
-	qglDrawArrays(GL_TRIANGLES,0,va);
+	qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
 
 	if(qglUnlockArraysEXT)
 		qglUnlockArraysEXT();
 
 	R_KillVArrays ();
+
+	if (gl_state.vbo)
+		GL_BindVBO(NULL);
 }
 
 //to do - alpha and alphamasks possible?
