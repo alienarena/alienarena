@@ -295,6 +295,7 @@ extern void VB_VCInit(void);
 extern void VB_BuildVBOBufferSize(msurface_t *surf);
 extern void VB_BuildWorldVBO(void);
 void GL_BindVBO(vertCache_t *cache);
+void GL_BindIBO(vertCache_t *cache);
 vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent);
 vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStoreMode_t store, entity_t *ent);
 

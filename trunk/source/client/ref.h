@@ -119,8 +119,10 @@ typedef enum {
 typedef enum {
 	VBO_STORE_ANY,
 	VBO_STORE_XYZ,
-	VBO_STORE_ST,
 	VBO_STORE_INDICES,
+	VBO_STORE_ST,
+	VBO_STORE_SHADOWXYZ,
+	VBO_STORE_SHADOWINDICES,
 	VBO_STORE_NORMAL,
 	VBO_STORE_BINORMAL,
 	VBO_STORE_TANGENT
@@ -136,6 +138,8 @@ typedef struct vertCache_s
 	int					size;
 
 	void				*pointer;
+
+	vec3_t				position;
 
 	vertStoreMode_t		store;
 	struct model_s		*mod;

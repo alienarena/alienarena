@@ -163,6 +163,20 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 	daliasframe_t *frame;
 	dtrivertx_t *verts;
 
+	//check for vbo
+	if(gl_state.vbo && !lerp && !currententity->flags & RF_BOBBING && r_test->value)
+	{
+		currentmodel->vbo_shadowxyz = R_VCFindCache(VBO_STORE_SHADOWXYZ, currententity);
+		{
+			if (currentmodel->vbo_shadowxyz) 
+			{
+				currentmodel->vbo_shadowindices = R_VCFindCache(VBO_STORE_SHADOWINDICES, currententity);
+				if(currentmodel->vbo_shadowindices)
+					goto skipLoad;
+			}
+		}
+	}
+
 	frame = (daliasframe_t *) ((byte *) hdr + hdr->ofs_frames
 							   + currententity->frame * hdr->framesize);
 	verts = frame->verts;
@@ -347,13 +361,38 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 		shadow_vert +=3;
 	}
 
-	if ( qglLockArraysEXT != 0 )
-           qglLockArraysEXT( 0, shadow_vert );
+	//store vbo
+	if(gl_state.vbo && !lerp && !currententity->flags & RF_BOBBING && r_test->value)
+	{
+		currentmodel->vbo_shadowxyz = R_VCLoadData(VBO_STATIC, index*sizeof(vec3_t), ShadowArray, VBO_STORE_SHADOWXYZ, currententity);
+		currentmodel->vbo_shadowindices = R_VCLoadData(VBO_STATIC, index*sizeof(unsigned int), ShadowIndex, VBO_STORE_SHADOWINDICES, currententity);
+		//Com_Printf("Loading shadow vbo\n");
+	}
 
-	qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
+skipLoad:
 
-	if ( qglUnlockArraysEXT != 0 )
-             qglUnlockArraysEXT();
+	if(gl_state.vbo && !lerp && !currententity->flags & RF_BOBBING && r_test->value)
+	{		
+        GL_BindVBO(currentmodel->vbo_shadowxyz);
+		qglVertexPointer(3, GL_FLOAT, sizeof(vec3_t), 0);
+
+        GL_BindIBO(currentmodel->vbo_shadowindices);
+	
+		qglDrawElements(GL_TRIANGLES, currentmodel->vbo_shadowxyz->size/sizeof(vec3_t), GL_UNSIGNED_INT, 0);
+
+		GL_BindVBO(NULL);
+		GL_BindIBO(NULL);
+	}
+	else
+	{
+		if ( qglLockArraysEXT != 0 )
+			   qglLockArraysEXT( 0, shadow_vert );
+
+		qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
+
+		if ( qglUnlockArraysEXT != 0 )
+				 qglUnlockArraysEXT();
+	}
 }
 
 
