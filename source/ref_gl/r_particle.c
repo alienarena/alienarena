@@ -753,6 +753,7 @@ void R_DrawVegetationSurface ( void )
 	float	lightLevel[3];
 	trace_t r_trace;
 	float	sway;
+	int ng;
 
 	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 		return;
@@ -760,41 +761,54 @@ void R_DrawVegetationSurface ( void )
 	grass = r_grasses;
 
 	VectorSet(mins, 0, 0, 0);
-	VectorSet(maxs,	0, 0, 0);
+	VectorSet(maxs,	0, 0, 0);	
 
-	R_InitVArrays (VERT_SINGLE_TEXTURED);
+    for (i=0; i<r_numgrasses; i++, grass++)
+	{
+		int gCount = 3;
+		int va = 0;
 
-    for (i=0; i<r_numgrasses; i++, grass++) {
+		R_InitVArrays (VERT_SINGLE_TEXTURED);
+		VArray = &VArrayVerts[0];
 
 		scale = 10.0*grass->size;
 
-		VectorCopy(r_newrefdef.viewangles, angle);
+		if(grass->type) 
+			gCount = 1; 
 
-		if(!grass->type)
-			angle[0] = 0;  // keep vertical by removing pitch(grass and plants grow upwards)
+		//the next two statements create a slight swaying in the wind
+		//perhaps we should add a parameter to control ammount in shader?
 
-		AngleVectors(angle, NULL, right, up);
-		VectorScale(right, scale, right);
-		VectorScale(up, scale, up);
+		if(grass->type) 
+			sway = 3;
+		else
+			sway = 2;
+
 		VectorCopy(grass->origin, origin);
 
 		// adjust vertical position, scaled
 		origin[2] += (grass->texsize/32) * grass->size;
 
-		if(!grass->type) {
+		if(!grass->type) 
+		{
 			r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
 			visible = r_trace.fraction == 1.0;
 		}
 		else
 			visible = true; //leaves tend to use much larger images, culling results in undesired effects
 
-		if(visible) {
-
-			//render grass polygon
+		if(visible)
+		{
 			qglDepthMask( GL_FALSE );
 			qglEnable( GL_BLEND);
 			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
+			if(gCount > 1)
+				qglDisable( GL_CULL_FACE );
+
+			qglTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+			qglTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+				
 			GL_Bind(grass->texnum);
 
 			if(gl_dynamic->value)
@@ -804,86 +818,92 @@ void R_DrawVegetationSurface ( void )
 			VectorScale(lightLevel, 2.0, lightLevel);
 			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
 			GL_TexEnv( GL_MODULATE );
+		
+			VectorCopy(r_newrefdef.viewangles, angle);
+			
+			for(ng = 0; ng < gCount; ng ++)
+			{
+				if(!grass->type)
+					angle[0] = 0;  // keep vertical by removing pitch(grass and plants grow upwards)
 
-			VectorSet (corner[0],
-				origin[0] + (up[0] + right[0])*(-0.5),
-				origin[1] + (up[1] + right[1])*(-0.5),
-				origin[2] + (up[2] + right[2])*(-0.5));
+				AngleVectors(angle, NULL, right, up);
+				VectorScale(right, scale, right);
+				VectorScale(up, scale, up);			
 
-			//the next two statements create a slight swaying in the wind
-			//perhaps we should add a parameter to control ammount in shader?
+				//render grass polygon				
 
-			if(grass->type) {
-				sway = 3;
-			}
-			else
-				sway = 2;
+				VectorSet (corner[0],
+					origin[0] + (up[0] + right[0])*(-0.5),
+					origin[1] + (up[1] + right[1])*(-0.5),
+					origin[2] + (up[2] + right[2])*(-0.5));				
 
-			VectorSet ( corner[1],
-				corner0[0] + up[0] + sway*sin (rs_realtime*sway),
-				corner0[1] + up[1] + sway*sin (rs_realtime*sway),
-				corner0[2] + up[2]);
+				VectorSet ( corner[1],
+					corner0[0] + up[0] + sway*sin (rs_realtime*sway),
+					corner0[1] + up[1] + sway*sin (rs_realtime*sway),
+					corner0[2] + up[2]);
 
-			VectorSet ( corner[2],
-				corner0[0] + (up[0]+right[0] + sway*sin (rs_realtime*sway)),
-				corner0[1] + (up[1]+right[1] + sway*sin (rs_realtime*sway)),
-				corner0[2] + (up[2]+right[2]));
+				VectorSet ( corner[2],
+					corner0[0] + (up[0]+right[0] + sway*sin (rs_realtime*sway)),
+					corner0[1] + (up[1]+right[1] + sway*sin (rs_realtime*sway)),
+					corner0[2] + (up[2]+right[2]));
 
-			VectorSet ( corner[3],
-				corner0[0] + right[0],
-				corner0[1] + right[1],
-				corner0[2] + right[2]);
+				VectorSet ( corner[3],
+					corner0[0] + right[0],
+					corner0[1] + right[1],
+					corner0[2] + right[2]);				
 
-			VArray = &VArrayVerts[0];
+				for(k = 0; k < 4; k++) 
+				{
+					VArray[0] = corner[k][0];
+					VArray[1] = corner[k][1];
+					VArray[2] = corner[k][2];
+					switch(k) 
+					{
+						case 0:
+							VArray[3] = 1;
+							VArray[4] = 1;
+							break;
+						case 1:
+							VArray[3] = 0;
+							VArray[4] = 1;
+							break;
+						case 2:
+							VArray[3] = 0;
+							VArray[4] = 0;
+							break;
+						case 3:
+							VArray[3] = 1;
+							VArray[4] = 0;
+							break;
+					}
 
-			for(k = 0; k < 4; k++) {
-
-				VArray[0] = corner[k][0];
-				VArray[1] = corner[k][1];
-				VArray[2] = corner[k][2];
-
-				switch(k) {
-					case 0:
-						VArray[3] = 1;
-						VArray[4] = 1;
-						break;
-					case 1:
-						VArray[3] = 0;
-						VArray[4] = 1;
-						break;
-					case 2:
-						VArray[3] = 0;
-						VArray[4] = 0;
-						break;
-					case 3:
-						VArray[3] = 1;
-						VArray[4] = 0;
-						break;
+					VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+					va++;								
 				}
-
-				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+				angle[1]+=60;	
 			}
 
+			c_grasses++;
+	
 			if(qglLockArraysEXT)
-				qglLockArraysEXT(0, 4);
+				qglLockArraysEXT(0, va);
 
-			qglDrawArrays(GL_QUADS,0,4);
+			qglDrawArrays(GL_QUADS, 0, va);
 
 			if(qglUnlockArraysEXT)
 				qglUnlockArraysEXT();
-
-			c_grasses++;
+		
+			R_KillVArrays ();
 		}
 	}
-
-	R_KillVArrays ();
-
+	
 	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglColor4f( 1,1,1,1 );
 	qglDisable(GL_BLEND);
 	qglDepthMask( GL_TRUE );
 	GL_TexEnv( GL_REPLACE );
+	qglEnable( GL_CULL_FACE );
 }
 
 void R_ClearGrasses(void)

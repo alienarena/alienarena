@@ -136,8 +136,9 @@ void RemovePlayer (char name[64])
 			break;
 		}
 	}
-
+	printf("Successfully dumped player.\n");
 	DumpValidPlayersToFile();
+	printf("Rebuilt valid file.\n");
 }
 
 //this called only when a packet of "login" is received, and the player is validated
@@ -260,7 +261,9 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		if(strlen(token))
 		{
 			strncpy_s(name, token, 32);
+			printf("Name copied successfully.\n");
 			SendVStringToClient(name, from);
+			printf("String sent to client.\n");
 		}
 	}
 	else if (_strnicmp (data, "ÿÿÿÿlogin", 9) == 0)
