@@ -1151,7 +1151,7 @@ void IQM_Vlight (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t ligh
 void IQM_DrawFrame(int skinnum)
 {
 	int		i, j;
-	vec3_t	move, delta, vectors[3];
+	vec3_t	vectors[3];
 	rscript_t *rs = NULL;
 	rs_stage_t *stage = NULL;
 	float	shellscale;
@@ -1187,13 +1187,7 @@ void IQM_DrawFrame(int skinnum)
 	else
 		alpha = basealpha = 1.0;
 
-	VectorSubtract (currententity->oldorigin, currententity->origin, delta);
-
 	AngleVectors (currententity->angles, vectors[0], vectors[1], vectors[2]);
-
-	move[0] = DotProduct (delta, vectors[0]);	// forward
-	move[1] = -DotProduct (delta, vectors[1]);	// left
-	move[2] = DotProduct (delta, vectors[2]);	// up
 
 	//render the model
 
@@ -1277,9 +1271,9 @@ void IQM_DrawFrame(int skinnum)
             {
                 index_xyz = index_st = currentmodel->tris[i].vertex[j];
 
-				VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0] + currentmodel->animatenormal[index_xyz].dir[0]*shellscale;
-                VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatenormal[index_xyz].dir[1]*shellscale;
-                VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2] + currentmodel->animatenormal[index_xyz].dir[2]*shellscale;
+				VArray[0] = currentmodel->animatevertexes[index_xyz].position[0] + currentmodel->animatenormal[index_xyz].dir[0]*shellscale;
+                VArray[1] = currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatenormal[index_xyz].dir[1]*shellscale;
+                VArray[2] = currentmodel->animatevertexes[index_xyz].position[2] + currentmodel->animatenormal[index_xyz].dir[2]*shellscale;
 
 				VArray[3] = (currentmodel->animatevertexes[index_xyz].position[1] + currentmodel->animatevertexes[index_xyz].position[0]) * (1.0f/40.f);
                 VArray[4] = currentmodel->animatevertexes[index_xyz].position[2] * (1.0f/40.f) - r_newrefdef.time * 0.25f;
@@ -1372,9 +1366,9 @@ void IQM_DrawFrame(int skinnum)
 			{
 				index_xyz = index_st = currentmodel->tris[i].vertex[j];
 
-				VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0];
-				VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1];
-				VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2];
+				VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];
+				VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];
+				VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];
 
 				if(mirror)
 				{
@@ -1607,9 +1601,9 @@ void IQM_DrawFrame(int skinnum)
 				{
 					index_xyz = index_st = currentmodel->tris[i].vertex[j];
 
-					VArray[0] = move[0] + currentmodel->animatevertexes[index_xyz].position[0];
-					VArray[1] = move[1] + currentmodel->animatevertexes[index_xyz].position[1];
-					VArray[2] = move[2] + currentmodel->animatevertexes[index_xyz].position[2];
+					VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];
+					VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];
+					VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];
 
 					VArray[3] = currentmodel->st[index_st].s;
 					VArray[4] = currentmodel->st[index_st].t;
