@@ -763,6 +763,13 @@ void R_DrawVegetationSurface ( void )
 	VectorSet(mins, 0, 0, 0);
 	VectorSet(maxs,	0, 0, 0);	
 
+	qglDepthMask( GL_FALSE );
+	qglEnable( GL_BLEND);
+	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST );
+	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST );
+	GL_TexEnv( GL_MODULATE );
+
     for (i=0; i<r_numgrasses; i++, grass++)
 	{
 		int gCount = 3;
@@ -775,6 +782,8 @@ void R_DrawVegetationSurface ( void )
 
 		if(grass->type) 
 			gCount = 1; 
+		else
+			qglDisable( GL_CULL_FACE );
 
 		//the next two statements create a slight swaying in the wind
 		//perhaps we should add a parameter to control ammount in shader?
@@ -799,16 +808,6 @@ void R_DrawVegetationSurface ( void )
 
 		if(visible)
 		{
-			qglDepthMask( GL_FALSE );
-			qglEnable( GL_BLEND);
-			qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-			if(gCount > 1)
-				qglDisable( GL_CULL_FACE );
-
-			qglTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-			qglTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-				
 			GL_Bind(grass->texnum);
 
 			if(gl_dynamic->value)
@@ -817,8 +816,7 @@ void R_DrawVegetationSurface ( void )
 				R_LightPoint (origin, lightLevel, false);
 			VectorScale(lightLevel, 2.0, lightLevel);
 			qglColor4f( grass->color[0]*(lightLevel[0]+0.1),grass->color[1]*(lightLevel[1]+0.1),grass->color[2]*(lightLevel[2]+0.1), 1 );
-			GL_TexEnv( GL_MODULATE );
-		
+					
 			VectorCopy(r_newrefdef.viewangles, angle);
 			
 			for(ng = 0; ng < gCount; ng ++)
