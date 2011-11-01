@@ -1061,14 +1061,14 @@ void R_RenderView (refdef_t *fd)
 	if(r_lensflare->value)
 		R_RenderFlares ();
 
-	R_DrawVegetationSurface ();
-
 	R_DrawEntitiesOnList ();
 
+	R_RenderAllRagdolls();
+	
+	R_DrawVegetationSurface ();
+
 	R_CastShadow();
-
-	R_RenderAllRagdolls(); //move back ahead of r_castshadow when we figure out shadow jitter bug
-
+	
 	R_DrawViewEntitiesOnList ();
 
 	R_DrawAlphaSurfaces ();
