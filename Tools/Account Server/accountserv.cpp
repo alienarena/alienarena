@@ -258,8 +258,9 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			return;
 		}
 		printf("Copying name.\n");
-		if(strlen(token))
+		if(token)
 		{
+			printf("token valid");
 			strncpy_s(name, token, 32);
 			printf("Name copied successfully.\n");
 			SendVStringToClient(name, from);
