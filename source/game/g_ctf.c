@@ -636,7 +636,7 @@ static void CTFDropFlagThink(edict_t *ent)
 	}
 
 }
-void CTFDeadDropFlag(edict_t *self)
+void CTFDeadDropFlag(edict_t *self, edict_t *other)
 {
 	edict_t *dropped = NULL;
 	gitem_t *flag1_item, *flag2_item;
@@ -647,12 +647,32 @@ void CTFDeadDropFlag(edict_t *self)
 	flag1_item = FindItemByClassname("item_flag_red");
 	flag2_item = FindItemByClassname("item_flag_blue");
 
+	/* notes on assist bonus:
+	 *  other can be NULL, if self is disconnecting, or self is a bot being kicked.
+	 *  other can be self for suicides, but that is handled with team check.
+	 */
 	if (self->client->pers.inventory[ITEM_INDEX(flag1_item)]) {
+
+		if ( other != NULL && other->client
+			&& ( (other->dmteam == RED_TEAM && self->dmteam == BLUE_TEAM)
+				|| (other->dmteam == BLUE_TEAM && self->dmteam == RED_TEAM) ))
+		{//kill enemy w flag; assist bonus (1 for frag + 4 = 5 total)
+			other->client->resp.score += 4;
+		}
+
 		dropped = Drop_Item(self, flag1_item);
 		self->client->pers.inventory[ITEM_INDEX(flag1_item)] = 0;
 		safe_bprintf(PRINT_HIGH, "%s lost the %s flag!\n",
 			self->client->pers.netname, "Red");
 	} else if (self->client->pers.inventory[ITEM_INDEX(flag2_item)]) {
+
+		if ( other != NULL && other->client
+			&& ( (other->dmteam == RED_TEAM && self->dmteam == BLUE_TEAM)
+				|| (other->dmteam == BLUE_TEAM && self->dmteam == RED_TEAM ) ))
+		{ //kill enemy w flag; assist bonus (1 for frag + 4 = 5 total)
+			other->client->resp.score += 4;
+		}
+
 		dropped = Drop_Item(self, flag2_item);
 		self->client->pers.inventory[ITEM_INDEX(flag2_item)] = 0;
 		safe_bprintf(PRINT_HIGH, "%s lost the %s flag!\n",
@@ -790,7 +810,7 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 		// hey, its not home.  return it by teleporting it back
 		safe_bprintf(PRINT_HIGH, "%s returned the %s flag!\n",
 			other->client->pers.netname, team_name);
-		other->client->resp.score += 2;//CTF_RECOVERY_BONUS;
+		other->client->resp.score += 5;//CTF_RECOVERY_BONUS;
 		if(!strcmp("Red", team_name))
 			gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/red_returned.wav"), 1, ATTN_NONE, 0);
 		else

@@ -692,6 +692,15 @@ void GL_SetDefaultState( void )
 	}
 
 	GL_UpdateSwapInterval();
+
+	/* set memory alignment for glReadPixels() and glDrawPixels().
+	 * default is 4, screenshots with 1366 vid width fail with that.
+	 * setting to 1 should work with any custom vid width.
+	 * also affects glTexImage2D() and other commands, so might cause problems.
+	 */
+	qglPixelStorei(GL_PACK_ALIGNMENT, 1);
+	qglPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
 }
 
 void GL_UpdateSwapInterval( void )
