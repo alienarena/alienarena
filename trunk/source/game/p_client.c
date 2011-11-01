@@ -766,7 +766,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			if (self->client->pers.inventory[ITEM_INDEX(flag1_item)] || self->client->pers.inventory[ITEM_INDEX(flag1_item)])
 				hasFlag = true;
 
-			CTFDeadDropFlag(self);
+			CTFDeadDropFlag(self, attacker);
 			if(anticamp->value && meansOfDeath == MOD_SUICIDE && hasFlag) {
 
 				//make campers really pay for hiding flags
@@ -2608,7 +2608,9 @@ void ClientDisconnect (edict_t *ent)
 	safe_bprintf (PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
 
     if(ctf->value)
-		CTFDeadDropFlag(ent);
+    { //if carrying flag, don't take it with you! no attacker points.
+		CTFDeadDropFlag(ent, NULL);
+    }
 
 	DeadDropDeathball(ent);
 

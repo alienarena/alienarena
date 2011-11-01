@@ -1519,7 +1519,7 @@ static void remove_bot( edict_t *bot )
 	}
 	if(ctf->value)
 	{
-		CTFDeadDropFlag(bot);
+		CTFDeadDropFlag(bot, NULL);
 	}
 	if ( bot->in_deathball )
 	{
