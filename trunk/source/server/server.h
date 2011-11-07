@@ -138,6 +138,10 @@ typedef struct client_s
 	int				challenge;			// challenge of this user, randomly generated
 
 	netchan_t		netchan;
+	
+	//speed cheat detection; these numbers get reset every 12 seconds.
+	unsigned int    claimedmsec;        // how many msec claimed by the client
+	int             lastresettime;
 } client_t;
 
 // a client can leave the server in one of four ways:

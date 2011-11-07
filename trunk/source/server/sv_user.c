@@ -535,12 +535,6 @@ void SV_ClientThink (client_t *cl, usercmd_t *cmd)
 {
 	cl->commandMsec -= cmd->msec;
 
-	if (cl->commandMsec < 0 && sv_enforcetime->value )
-	{
-		Com_DPrintf ("commandMsec underflow from %s\n", cl->name);
-		return;
-	}
-
 	ge->ClientThink (cl->edict, cmd);
 }
 
@@ -567,6 +561,7 @@ void SV_ExecuteClientMessage (client_t *cl)
 	int		checksumIndex;
 	qboolean	move_issued;
 	int		lastframe;
+	float	timeratio;
 
 	sv_client = cl;
 	sv_player = sv_client->edict;
@@ -640,6 +635,34 @@ void SV_ExecuteClientMessage (client_t *cl)
 				{
 					Com_DPrintf ("Hmm, 0 msec move from %s[%s]. Should this ever happen?\n", cl->name, NET_AdrToString (cl->netchan.remote_address));
 				}
+				
+				if (sv_enforcetime->integer)
+				{
+					//Speed cheat detection-- speed cheats work by increasing 
+					//the amount of time a client says to simulate. This code
+					//does a sanity check; if over any period of 12 seconds,
+					//the client claims significantly more time than actually
+					//elapsed, it is probably cheating.
+					cl->claimedmsec += newcmd.msec;
+					
+					if (svs.realtime - cl->lastresettime >= 12000) {
+						//This ratio should almost never be more than 1. If 
+						//it's more than 1.05, someone's probably trying to
+						//cheat.
+						timeratio = (float)cl->claimedmsec/(float)(svs.realtime - cl->lastresettime);
+						
+						if (timeratio > 1.05) {
+							Com_Printf ("EXPLOIT: Client %s[%s] is trying to go approximately %4.2f times faster than normal!\n", 
+										cl->name, NET_AdrToString (cl->netchan.remote_address), timeratio);
+							SV_KickClient (cl, "illegal pmove msec scaling detected", NULL);
+							return;
+						}
+					
+						cl->lastresettime = svs.realtime;
+						cl->claimedmsec = 0;
+					}
+				}
+					 
 			}
 
 			if ( cl->state != cs_spawned )
