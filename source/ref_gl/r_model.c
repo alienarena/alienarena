@@ -1549,6 +1549,13 @@ void R_RegisterBasePlayerModels( void )
 	// int npms = 0; // unused
 	int nskins = 0;
 	char **skinnames;
+	
+	if (is_localhost) {
+	    //then the client is also the server so we have this cvar available
+	    cvar_t *maxclients = Cvar_Get ("maxclients", 0, 0);
+	    if (!maxclients|| maxclients->integer <= 1)
+	        return; //don't bother
+	}
 
 	//precache all player and weapon models(base only, otherwise could take very long loading a map!)
 	for (i = 0; i < PModelsCount; i++)

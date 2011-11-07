@@ -413,4 +413,7 @@ extern RadarEnt_t RadarEnts[MAX_RADAR_ENTS];
 
 extern cursor_t cursor;
 
+
+qboolean is_localhost; //because ref_gl can't access cls.servername.
+
 #endif // __REF_H

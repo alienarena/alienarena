@@ -1132,6 +1132,7 @@ void CL_ConnectionlessPacket (void)
 		{
 			strncpy(cls.downloadurl, Cmd_Argv(1), sizeof(cls.downloadurl) - 1);
 		}
+		is_localhost = !strcmp(cls.servername, "localhost");
 		return;
 	}
 
