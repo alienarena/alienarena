@@ -28,7 +28,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <unistd.h>
 #endif
 
-// TODO: either implement stubs like cl_http.c, or require curl here and there
 #include "curl/curl.h"
 CURLM *curlm;
 CURL *curl;
@@ -86,6 +85,9 @@ void STATS_getStatsDB( void )
 	Com_sprintf(statserver, sizeof(statserver), "%s%s", cl_stats_server->string, "/playerrank.db");
 
 	curl_easy_setopt( easyhandle, CURLOPT_URL, statserver ) ;
+
+	// time out in 5s
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5);
 
 	curl_easy_setopt( easyhandle, CURLOPT_WRITEFUNCTION, write_data ) ;
 
@@ -215,7 +217,7 @@ PLAYERSTATS getPlayerByRank ( int rank, PLAYERSTATS player )
 void STATS_RequestVerification (void)
 {
 	char *requeststring;
-	netadr_t adr;	
+	netadr_t adr;
 
 	if(currLoginState.validated)
 		return; //already validated
@@ -241,7 +243,7 @@ void STATS_RequestVerification (void)
 void STATS_RequestPwChange (void)
 {
 	char *requeststring;
-	netadr_t adr;	
+	netadr_t adr;
 
 	currLoginState.validated = false; //force new login with new password
 
@@ -282,16 +284,16 @@ void STATS_EncryptPassword(void)
 	Cvar_FullSet("stats_password", szPassHash2, CVAR_PROFILE);
 
 	currLoginState.hashed = true;
-		
+
 	//get new hashed password
 	password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
 }
 
 //Send stats server authentication pw
-void STATS_AuthenticateStats (char *vstring) 
+void STATS_AuthenticateStats (char *vstring)
 {
 	char *requeststring;
-	netadr_t adr;	
+	netadr_t adr;
 
 	Q_strncpyz2(szVerificationString, vstring, sizeof(szVerificationString));
 
@@ -302,7 +304,7 @@ void STATS_AuthenticateStats (char *vstring)
 	{
 		STATS_EncryptPassword();
 	}
-	
+
 	requeststring = va("login\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, password->string, szVerificationString );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
@@ -317,10 +319,10 @@ void STATS_AuthenticateStats (char *vstring)
 }
 
 //Send password change request to server(this is to be called from the menu when a password is edited)
-void STATS_ChangePassword (char *vstring) 
+void STATS_ChangePassword (char *vstring)
 {
 	char *requeststring;
-	netadr_t adr;	
+	netadr_t adr;
 
 	Q_strncpyz2(szVerificationString, vstring, sizeof(szVerificationString));
 
@@ -341,11 +343,11 @@ void STATS_ChangePassword (char *vstring)
 	}
 }
 
-//Logout of stats server 
+//Logout of stats server
 void STATS_Logout (void)
 {
 	char *requeststring;
-	netadr_t adr;	
+	netadr_t adr;
 
 	if(!currLoginState.validated)
 		return; //no point in logging out, we were never validated!
@@ -357,7 +359,7 @@ void STATS_Logout (void)
 	{
 		STATS_EncryptPassword();
 	}
-	
+
 	requeststring = va("logout\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, password->string, szVerificationString );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
