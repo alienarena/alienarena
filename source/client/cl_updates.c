@@ -27,14 +27,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <unistd.h>
 #endif
 
-// TODO: either implement stubs like cl_http.c, or require curl here and there
 #include "curl/curl.h"
 CURLM *curlm;
 CURL *curl;
 
 extern cvar_t  *cl_latest_game_version_url;
 
-static char *cpr; // just for unused result warnings
 
 static char *versionstr;
 static size_t versionstr_sz;
@@ -65,16 +63,15 @@ static size_t write_data(const void *buffer, size_t size, size_t nmemb, void *us
 
 	memcpy ( buffer_pos, buffer, bytecount );
 	buffer_pos[bytecount] = 0;
-	
+
 	return bytecount;
 }
 
-//get the stats database
 void getLatestGameVersion( void )
 {
 	char url[128];
 	CURL* easyhandle;
-	
+
 	easyhandle = curl_easy_init() ;
 
     versionstr_sz = 0;
@@ -83,16 +80,19 @@ void getLatestGameVersion( void )
 
 	curl_easy_setopt( easyhandle, CURLOPT_URL, url ) ;
 
+	// time out in 5s
+	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5);
+
 	curl_easy_setopt( easyhandle, CURLOPT_WRITEFUNCTION, write_data ) ;
 
 	curl_easy_perform( easyhandle );
 
 	curl_easy_cleanup( easyhandle );
-	
+
     if ( versionstr ){
         if ( atof ( versionstr ) )
             Cvar_SetValue ( "cl_latest_game_version", atof ( versionstr ) );
         free ( versionstr );
     }
-        
+
 }
