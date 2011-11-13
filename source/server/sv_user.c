@@ -645,7 +645,13 @@ void SV_ExecuteClientMessage (client_t *cl)
 					//elapsed, it is probably cheating.
 					cl->claimedmsec += newcmd.msec;
 					
-					if (svs.realtime - cl->lastresettime >= 12000) {
+					if (svs.realtime < cl->lastresettime) {
+						//This can happen with either a map change or an
+						//integer overflow after around 25 days on the same
+						//map. In this case, we just throw out all the data.
+						cl->lastresettime = svs.realtime;
+						cl->claimedmsec = 0;
+					} else if (svs.realtime - cl->lastresettime >= 12000) {
 						//This ratio should almost never be more than 1. If 
 						//it's more than 1.05, someone's probably trying to
 						//cheat.
