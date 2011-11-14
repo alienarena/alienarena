@@ -38,7 +38,7 @@ extern cvar_t *cl_master;
 extern cvar_t *cl_stats_server;
 
 extern cvar_t *name;
-extern cvar_t *password;
+extern cvar_t *stats_password;
 extern cvar_t *pw_hashed;
 
 static char szVerificationString[64];
@@ -271,7 +271,7 @@ void STATS_EncryptPassword(void)
 	char szPassHash2[256];
 
 	//salt
-	Com_sprintf(szPassword, sizeof(szPassword), "%s%s", password->string, szVerificationString);
+	Com_sprintf(szPassword, sizeof(szPassword), "%s%s", stats_password->string, szVerificationString);
 	Com_MD5HashString (szPassword, strlen(szPassword), szPassHash, sizeof(szPassHash));
 
 	//salt
@@ -286,7 +286,7 @@ void STATS_EncryptPassword(void)
 	currLoginState.hashed = true;
 
 	//get new hashed password
-	password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+	stats_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
 }
 
 //Send stats server authentication pw
@@ -305,7 +305,7 @@ void STATS_AuthenticateStats (char *vstring)
 		STATS_EncryptPassword();
 	}
 
-	requeststring = va("login\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, password->string, szVerificationString );
+	requeststring = va("login\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, stats_password->string, szVerificationString );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
@@ -330,7 +330,7 @@ void STATS_ChangePassword (char *vstring)
 
 	STATS_EncryptPassword();
 
-	requeststring = va("changepw\\\\%i\\\\%s\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, currLoginState.old_password, password->string, szVerificationString);
+	requeststring = va("changepw\\\\%i\\\\%s\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, currLoginState.old_password, stats_password->string, szVerificationString);
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
@@ -360,7 +360,7 @@ void STATS_Logout (void)
 		STATS_EncryptPassword();
 	}
 
-	requeststring = va("logout\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, password->string, szVerificationString );
+	requeststring = va("logout\\\\%i\\\\%s\\\\%s\\\\%s\\\\", STAT_PROTOCOL, name->string, stats_password->string, szVerificationString );
 
 	if( NET_StringToAdr( cl_master->string, &adr ) ) {
 		if( !adr.port )
