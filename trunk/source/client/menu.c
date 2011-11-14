@@ -61,7 +61,7 @@ extern cvar_t *dedicated;
 extern cvar_t *cl_drawfps;
 extern cvar_t *cl_drawtimer;
 extern cvar_t *fov;
-extern cvar_t *password;
+extern cvar_t *stats_password;
 extern cvar_t *old_password;
 extern cvar_t *pw_hashed;
 
@@ -6861,10 +6861,10 @@ void PConfigAccept (void)
 	if(strcmp("********", s_player_password_field.buffer))
 	{
 		//if this is a virgin password, don't change, just authenticate
-		if(!strcmp(password->string, "password"))
+		if(!strcmp(stats_password->string, "password"))
 		{
 			Cvar_FullSet( "stats_password", s_player_password_field.buffer, CVAR_PROFILE);
-			password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+			stats_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
 			Cvar_FullSet( "stats_pw_hashed", "0", CVAR_PROFILE);
 			pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
 			currLoginState.validated = false;
@@ -6873,7 +6873,7 @@ void PConfigAccept (void)
 		else
 		{
 			Cvar_FullSet( "stats_password", s_player_password_field.buffer, CVAR_PROFILE);
-			password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
+			stats_password = Cvar_Get("stats_password", "password", CVAR_PROFILE);
 			Cvar_FullSet( "stats_pw_hashed", "0", CVAR_PROFILE);
 			pw_hashed = Cvar_Get("stats_pw_hashed", "0", CVAR_PROFILE);
 			STATS_RequestPwChange();
