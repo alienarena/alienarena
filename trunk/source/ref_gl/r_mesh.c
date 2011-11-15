@@ -1473,7 +1473,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			{
 				vec3_t lightVec, lightVal;
 
-				if(!(gl_state.vbo && !lerped && r_test->value))
+				if(!(gl_state.vbo && !lerped))
 				{
 					R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 					qglNormalPointer(GL_FLOAT, 0, NormalsArray);
@@ -1567,7 +1567,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 				glUniform1iARB( g_location_meshFog, map_fog);
 
-				if (gl_state.vbo && !lerped && r_test->value)
+				if (gl_state.vbo && !lerped)
 				{
 					currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
 					if (currentmodel->vbo_xyz) 
@@ -1729,7 +1729,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 							VArray[8] = nAlpha;
 						}
 					}
-					else if(gl_state.vbo && !lerped && r_test->value) 
+					else if(gl_state.vbo && !lerped) 
 					{
 						VertexArray[va][0] = VArray[0];
 						VertexArray[va][1] = VArray[1];
@@ -1750,7 +1750,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				}
 			}
 
-			if(gl_state.vbo && !lerped && stage->normalmap && r_test->value)
+			if(gl_state.vbo && !lerped && stage->normalmap)
 			{
                 currentmodel->vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currententity);
 				currentmodel->vbo_st = R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, currententity);
@@ -1760,7 +1760,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				//Com_Printf("Loading mesh vbo.\n");
             }
 skipLoad:
-			if(gl_state.vbo && !lerped && stage->normalmap && r_test->value) 
+			if(gl_state.vbo && !lerped && stage->normalmap) 
 			{
                 qglEnableClientState( GL_VERTEX_ARRAY );
                 GL_BindVBO(currentmodel->vbo_xyz);
@@ -1798,7 +1798,7 @@ skipLoad:
 			if(stage->normalmap)
 			{
 				glUseProgramObjectARB( 0 );
-				if(gl_state.vbo && !lerped && r_test->value)
+				if(gl_state.vbo && !lerped)
 					glDisableVertexAttribArrayARB (1);
 				GL_EnableMultitexture( false );
 			}
@@ -2348,7 +2348,7 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	VArray = &VArrayVerts[0];
 	R_InitVArrays (VERT_NO_TEXTURE);
 
-	if (gl_state.vbo && !lerped && r_test->value)
+	if (gl_state.vbo && !lerped)
 	{
 		currentmodel->vbo_xyz = R_VCFindCache(VBO_STORE_XYZ, currententity);
 		if (currentmodel->vbo_xyz) 
@@ -2378,7 +2378,7 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 				VArray[1] = currentmodel->vertexes[index_xyz].position[1];
 				VArray[2] = currentmodel->vertexes[index_xyz].position[2];
 
-				if(gl_state.vbo && r_test->value) 
+				if(gl_state.vbo) 
 				{
 					VertexArray[va][0] = VArray[0];
 					VertexArray[va][1] = VArray[1];
@@ -2392,14 +2392,14 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 		}
 	}
 
-	if(gl_state.vbo && !lerped && r_test->value)
+	if(gl_state.vbo && !lerped)
 	{
 		currentmodel->vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currententity);
 		//Com_Printf("Loading mesh vbo.\n");
     }
 
 skipLoad:
-	if(gl_state.vbo && !lerped && r_test->value) 
+	if(gl_state.vbo && !lerped) 
 	{
 		qglEnableClientState( GL_VERTEX_ARRAY );
         GL_BindVBO(currentmodel->vbo_xyz);

@@ -125,6 +125,24 @@ void Matrix3x4_Scale(matrix3x4_t *out, matrix3x4_t in, float scale)
 	Vector4Scale(in.c, scale, out->c);
 }
 
+void Matrix3x4_ScaleAdd (matrix3x4_t *out, matrix3x4_t *base, float scale, matrix3x4_t *add)
+{
+   out->a[0] = base->a[0] * scale + add->a[0];
+   out->a[1] = base->a[1] * scale + add->a[1];
+   out->a[2] = base->a[2] * scale + add->a[2];
+   out->a[3] = base->a[3] * scale + add->a[3];
+
+   out->b[0] = base->b[0] * scale + add->b[0];
+   out->b[1] = base->b[1] * scale + add->b[1];
+   out->b[2] = base->b[2] * scale + add->b[2];
+   out->b[3] = base->b[3] * scale + add->b[3];
+
+   out->c[0] = base->c[0] * scale + add->c[0];
+   out->c[1] = base->c[1] * scale + add->c[1];
+   out->c[2] = base->c[2] * scale + add->c[2];
+   out->c[3] = base->c[3] * scale + add->c[3];
+}
+
 void Matrix3x4_Add(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2)
 {
 	Vector4Add(mat1.a, mat2.a, out->a);
@@ -990,11 +1008,11 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 
 			Matrix3x4_Scale(&mat, currentmodel->outframe[index[0]], weight[0]/255.0f);
 
-			for(j = 1; j < 4 && weight[j]; j++) {
-				Matrix3x4_Scale(&temp, currentmodel->outframe[index[j]], weight[j]/255.0f);
-				Matrix3x4_Add(&mat, mat, temp);
+			for(j = 1; j < 4 && weight[j]; j++) 
+			{
+				Matrix3x4_ScaleAdd (&mat, &currentmodel->outframe[index[j]], weight[j]/255.0f, &mat);
 			}
-
+			
 			// Transform attributes by the blended matrix.
 			// Position uses the full 3x4 transformation matrix.
 			// Normals and tangents only use the 3x3 rotation part
@@ -1107,9 +1125,9 @@ void IQM_AnimateRagdoll(int RagDollID)
 
 			Matrix3x4_Scale(&mat, RagDoll[RagDollID].ragDollMesh->outframe[index[0]], weight[0]/255.0f);
 
-			for(j = 1; j < 4 && weight[j]; j++) {
-				Matrix3x4_Scale(&temp, RagDoll[RagDollID].ragDollMesh->outframe[index[j]], weight[j]/255.0f);
-				Matrix3x4_Add(&mat, mat, temp);
+			for(j = 1; j < 4 && weight[j]; j++) 
+			{
+				Matrix3x4_ScaleAdd (&mat, &RagDoll[RagDollID].ragDollMesh->outframe[index[j]], weight[j]/255.0f, &mat);
 			}
 
 			Matrix3x4_Transform(dstpos, mat, *srcpos);
