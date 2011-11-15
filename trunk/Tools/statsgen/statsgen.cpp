@@ -22,15 +22,15 @@
 /* Compile Options
  *
  * -DNO_UPLOAD to disable FTP upload to web server
- * 
+ *
  * -DNO_VERIFY to disable verification.
- *   
+ *
  * -DCLANSTATS to include clan related html page generation.
  *   (Clan related code not yet updated)
- * 
+ *
  * -DTEST_LOG for logging test/debug info to 'testlog' file
- *   (lots of data, but much or all of this could be removed after testing) 
- * 
+ *   (lots of data, but much or all of this could be removed after testing)
+ *
  */
 
 #define WINDOWS_LEAN_AND_MEAN
@@ -99,6 +99,13 @@ CLANINFO clans[32];
 #endif
 
 SERVERINFO servers[128];
+
+#define VALIDATED_SIZE 1024
+struct validated_s
+{
+	int count;
+	char name[VALIDATED_SIZE][32];
+} validated;
 
 int numServers = 0;
 int numLiveServers = 0;
@@ -230,37 +237,27 @@ void GetPlayerName( FstreamType& infile, char *dst_name, size_t dstsize )
 }
 
 /**
- * Search the list of currently validated players from AccountServ 
- *
- * TODO: AccountServ program deletes and rewrites the validated file
- *       so some kind of mutual exclusion is needed.
- *
+ * Search the list of currently validated players from AccountServ
+ * 
+ * name    the player's name string to check
+ * return  true if player is logged in, false otherwise
  */
 bool VerifyPlayer (char *name)
 {
-	ifstream infile;
-	char vName[32] = "go";
+	int i;
 
 #if defined NO_VERIFY
 	return true;
 #endif
 
-	//This will fail if the AccountServ program
-	// is rewriting the file
-	infile.open("validated");
-
-	if(infile.good())
+	for ( i = 0 ; i < validated.count ; i++ )
 	{
-		while(strlen(vName))
+		if ( !strcmp( name, validated.name[i] ) )
 		{
-			infile.getline(vName, 32);
-			if(!strcmp(name, vName))
-			{
-				return true;
-			}
+			return true;
 		}
 	}
-
+	
 	return false;
 }
 
@@ -273,7 +270,7 @@ bool VerifyPlayer (char *name)
  */
 double RankingPoints (char* playername, double totalpoints, double totaltime)
 {
-	
+
 	if ( totalpoints < 0.0 || totaltime < 1.0 )
 	{
 		return 0.49; //slightly less than minimum
@@ -283,22 +280,22 @@ double RankingPoints (char* playername, double totalpoints, double totaltime)
 	// "compresses" actualpoints range and favors higher totaltime
 	// approx equal to points-per-1/2-hour, after ~10 hours
 	return (((totalpoints - 1.0)/(2.0 * totaltime)) + 1.0);
-	
+
 }
 
 /**
  * Get player info for a real person player actively in the game.
  * Add to the database, if not already there.
- * 
+ *
  * Bots and non-validated players should never get here.
- *  
+ *
  *  player  PLAYERINFO record with name
- *  returns PLAYERINFO record with rest of data, including current rank 
- *  
+ *  returns PLAYERINFO record with rest of data, including current rank
+ *
  */
 PLAYERINFO LoadPlayerInfo (PLAYERINFO player)
 {
-	char name[32], 
+	char name[32],
 		points[32],
 		frags[32],
 		totalfrags[32],
@@ -355,9 +352,9 @@ PLAYERINFO LoadPlayerInfo (PLAYERINFO player)
 	if ( !foundplayer && strlen( player.playername ) )
 	{ //player not already in database, add to end with defaults
 		//don't write out blank player names, should not get here anyway
-		
+
 		dbfile.seekg( 0, ios::end );
-		
+
 		dbfile << player.playername << '\n';
 		dbfile << "127.0.0.1" << '\n';
 		dbfile << "0" << '\n';
@@ -367,7 +364,7 @@ PLAYERINFO LoadPlayerInfo (PLAYERINFO player)
 		dbfile << "1.0" << '\n';
 		dbfile << "my ip" << '\n';
 		dbfile << currentpoll << endl;
-		
+
 		strcpy( player.remote_address, "127.0.0.1" );
 		player.points     = 0;
 		player.frags      = 0;
@@ -384,14 +381,14 @@ PLAYERINFO LoadPlayerInfo (PLAYERINFO player)
 
 /**
  * Put player's current data into database at current ranking position
- * 
+ *
  * player   the record for the player to be re-inserted
  */
 void ReInsertPlayer (PLAYERINFO player )
 {
-	char name[32], 
-		points[32], 
-		frags[32], 
+	char name[32],
+		points[32],
+		frags[32],
 		totalfrags[32],
 		time[16],
 		totaltime[16],
@@ -442,12 +439,12 @@ void ReInsertPlayer (PLAYERINFO player )
 		cout << "[E] ReInsertPlayer: temp.db open failed" << endl;
 		return;
 	}
-	
-	if( infile.good() && outfile.good() ) 
+
+	if( infile.good() && outfile.good() )
 	{
 		inserted = false;
 		total_players = 0;
-		
+
 		//the idea of this is, when rebuilding this file, keep it to a reasonable size
 		//we only be tracking the top 1000 players then.
 		//with an extra 50 slots to handle overflow. Scoring requires that
@@ -500,11 +497,11 @@ void ReInsertPlayer (PLAYERINFO player )
 				outfile << poll << endl;
 			}
 			total_players++;
-		
+
 		}
-		if( !inserted && total_players < 1050 ) 
+		if( !inserted && total_players < 1050 )
 		{ //worst player ever!
-			if(strlen(player.playername)) 
+			if(strlen(player.playername))
 			{
 				outfile << player.playername << endl;
 				outfile << player.remote_address << endl;
@@ -520,7 +517,7 @@ void ReInsertPlayer (PLAYERINFO player )
 		infile.close();
 		outfile.close();
 	}
-	else 
+	else
 	{
 		infile.close();
 		outfile.close();
@@ -626,7 +623,7 @@ void ProcessPlayers (SERVERINFO *server)
 			//accumulate total score for qualified players
 			total_score += (double)player_info.score;
 		}
-		else 
+		else
 		{ //possibly downloading, idling, or just doing poorly.
 			// need to initialize time and reinsert, otherwise
 			// time could be 0, screwing up prop_score calc
@@ -638,7 +635,7 @@ void ProcessPlayers (SERVERINFO *server)
 			{
 				player_info.time  = .008;
 			}
-			player_info.frags = 0; 
+			player_info.frags = 0;
 			// TODO: not too sure setting about setting frags.
 			//  question is, when player becomes active,
 			//  what should stored values be?
@@ -803,7 +800,7 @@ void ProcessPlayers (SERVERINFO *server)
 		}
 		else {
 			server->players[i].time      += (.008);
-			server->players[i].totaltime += (.008); 
+			server->players[i].totaltime += (.008);
 		}
 		strcpy(server->players[i].ip, server_ip); //we are in this server now
 		ReInsertPlayer(server->players[i]);
@@ -821,7 +818,7 @@ void ProcessPlayers (SERVERINFO *server)
 /**
  * Query the master for current servers
  */
-void GetServerList (void) 
+void GetServerList (void)
 {
 
 	HOSTENT *hp;
@@ -887,6 +884,39 @@ void GetServerList (void)
 		if (++numServers == 128)
 			break;
 	}
+}
+
+/**
+ * Read the logged in players list from Account Server
+ */
+void GetValidatedPlayers (void)
+{
+	int index = 0;
+
+	validated.count = 0;
+
+	ifstream infile( "validated" );
+	if ( !infile )
+	{
+		cout << "[E] GetValidatedPlayers: validated file failed open." << endl;
+		return;
+	}
+
+	for (;;)
+	{
+		GetPlayerName( infile, validated.name[index++], 32 );
+		if ( infile.eof() )
+		{
+			break;
+		}
+		++validated.count;
+		if ( index >= VALIDATED_SIZE )
+		{
+			cout << "[E] GetValidatedPlayers: overflow." << endl;
+		}
+	}
+	infile.close();
+
 }
 
 /**
@@ -1162,7 +1192,7 @@ void CullDatabase  (void)
 				continue;
 			}
 		}
-		
+
 		if ( strlen( name ) > 0 )
 		{
 			//keep this player record
@@ -1181,7 +1211,7 @@ void CullDatabase  (void)
 		{
 #if defined TEST_LOG
 			testlog << "  culled for null name string @ " << input_count << endl;
-#endif			
+#endif
 		}
 	}
 
@@ -1211,7 +1241,7 @@ void CullDatabase  (void)
 /**
  * Translate Quake Color Escapes to HTML tags.
  * Also, translate html reserved characters.
- * 
+ *
  */
 bool ColorizePlayerName (const char *src, char *dst, size_t dstsize)
 {
@@ -1367,20 +1397,20 @@ void GeneratePlayerRankingHtml (void)
 	ifstream infile( "playerrank.db" );
 	if ( !infile )
 	{
-		cout << "[E] GeneratePlayerRankingHtml: playerrank.db open failed." << endl;	
+		cout << "[E] GeneratePlayerRankingHtml: playerrank.db open failed." << endl;
 		return;
 	}
 
 	GetSystemTime(&stime);
 
-	if(infile.good()) 
+	if(infile.good())
 	{
 		rank = 1;
 		currentPos = 1;
 		while( rank <= currentPos )
 		{
 			page = rank/100 + 1; //[1,99]=>1, [100,199]=>2,...
-			if(rank == currentPos) 
+			if(rank == currentPos)
 			{ // new page
 				currentPos += 100; // 101,201,...
 				if (currentPos >= 1101 )
@@ -1417,7 +1447,7 @@ void GeneratePlayerRankingHtml (void)
 				outfile << "</tr>" << endl;
 
 			}
-			
+
 			GetPlayerName( infile, name, 32 );
 			infile.getline(remote_address, 21);
 			infile.getline(points, 32);
@@ -1436,7 +1466,7 @@ void GeneratePlayerRankingHtml (void)
 				|| !_strnicmp( name, "Player", 6 ) )
 			{ //cull out blank name, default name
 #if defined TEST_LOG
-				testlog << "  html cull " 
+				testlog << "  html cull "
 					<< (strlen(name)==0?"blank":name) << endl;
 #endif
 				continue;
@@ -1450,8 +1480,8 @@ void GeneratePlayerRankingHtml (void)
 			{ //cull out minimum time, zero frags, minimal points
 				//to help keep floating point math stable
 #if defined TEST_LOG
-				testlog << "  html cull " 
-					<< name << " ( " 
+				testlog << "  html cull "
+					<< name << " ( "
 					<< actualtime << ','
 					<< ntotalfrags << ','
 					<< npoints << " )" << endl;
@@ -1461,7 +1491,7 @@ void GeneratePlayerRankingHtml (void)
 
 			//build row for this player
 			// with calculated points and fragrate
-			//Scaling displayed points by 10, for psych. reasons. 
+			//Scaling displayed points by 10, for psych. reasons.
 			actualpoints = RankingPoints( name, npoints, ntotaltime );
 			actualpoints *= 10.0;
 			fragrate     = ntotalfrags / actualtime;
@@ -1492,10 +1522,10 @@ void GeneratePlayerRankingHtml (void)
 			outfile << "</tr>" << endl;
 
 			rank++;
-			if ( rank == currentPos ) 
+			if ( rank == currentPos )
 			{ // this page is full  ( rank == 100,200,... )
 				outfile << "</table>\n";
-				sprintf(a_string, 
+				sprintf(a_string,
 					"<p><font face=\"Arial,Helvetica\"><font size=-1><a href=\"stats%i.html\">Page %i</a></font></center>",
 					page, page);
 				outfile << a_string << '\n';
@@ -1514,8 +1544,8 @@ void GeneratePlayerRankingHtml (void)
 	}
 	infile.close();
 
-	if(!closed) 
-	{ // last page was partial. less than 1000 qualified players 
+	if(!closed)
+	{ // last page was partial. less than 1000 qualified players
 		outfile << "</table>\n";
 		sprintf(a_string, "<p><font face=\"Arial,Helvetica\"><font size=-1><a href=\"stats%i.html\">Page %i</a></font></font></center>", 1, 1);
 		outfile << a_string << '\n';
@@ -1878,7 +1908,7 @@ void GenerateClanRankingHtml(void) //Clan Rankings
 /**
  * Hourly copy of player database to backup directory
  */
-void BackupStats (void) 
+void BackupStats (void)
 {
 
 	char backupfile[32];
@@ -2067,16 +2097,38 @@ void CheckInactivePlayers(void)
 			break;
 		}
 
-		// decay player's points while inactive > 1 week (20160 polls)
+		// decay player's points while inactive > inactive limit
 		//   if points >= 10, decay 10%/day
 		//   if points >=2 and points < 10, decay 1pt/day
 		//   if points < 2 , set points to zero
-		// examples for days to zero points:
-		//  1000pts:53days, 500pts:47days, 200pts:38days, 100pts:31days
-		// once a player passes the one week interval, their poll
+		//
+		// examples for days to zero points after inactive decay begins
+		//  2000pts:60days, 1000pts:53days, 500pts:47days,
+		//  200pts:38days, 100pts:31days
+		//
+		// once a player passes inactive limit, their poll
 		//  is set to 100001. And their points are decayed until they
-		//  play again. This prevents suspending decay after the
+		//  play again or are removed from the database.
+		//  This prevents suspending decay after the
 		//  current poll wraps and passes player's last poll.
+		//
+		// setting the intactive limit is a compromise between
+		//  * giving a player some room for a "vacation".
+		//  * preventing the database from getting overloaded with inactive
+		//     and abandoned names,
+		//
+		//  For a player name with lots of points, it takes a long time for
+		//   the name to be removed ( inactive limit + >60 days ). This keeps
+		//   new players out of the database.
+		//  Even if an active player gets decayed some, they will be able to
+		//   re-establish higher rank fairly quickly, because they will be
+		//   outscoring higher ranked players.
+		//  An inactive name in the database cannot be "challenged" by other
+		//    players, so it is not good for an inactive name to be highly
+		//    ranked.
+		//  For a player name with a low score after the inactive limit point,
+		//    it is likely that this is not an active player, so it is good
+		//    to eliminate these from the database.
 
 		player_poll = atoi(poll);
 		diff = currentpoll - player_poll;
@@ -2087,8 +2139,11 @@ void CheckInactivePlayers(void)
 				diff += 100000;
 			}
 		}
-		if ( player_poll > 100000 || diff > 80640 )
-		{ //start decay after a week with no play
+
+		// inactive interval set to approx 2 weeks (40320 polls)
+		//  1 week too short, 4 weeks too long (see above).
+		if ( player_poll > 100000 || diff > 40320 )
+		{ //start decay after the inactive interval with no play
 			//and decay each day
 #if defined TEST_LOG
 			testlog << "decay " << name
@@ -2168,7 +2223,7 @@ void CheckInactivePlayers(void)
 			decaylog.close();
 		}
 	}
-	
+
 }
 
 void RepairDb(void) {
@@ -2281,11 +2336,11 @@ bool InitDatabase( void )
 		cout << "[E] could not create initrank.db." << endl;
 		return false;
 	}
-	
+
 	dbcopy << dbfile.rdbuf();
 	dbfile.close();
 	cout << "    copied playerrank.db to initrank.db." << endl;
-	
+
 	int record_no = 0;
 	dbcopy.seekg( 0, ios::beg );
 	for (;;)
@@ -2330,7 +2385,7 @@ bool InitDatabase( void )
 		if ( global_fail )
 		{
 			dbcopy.close();
-			cout << "[E] ReInsertPlayer() failed at record no " 
+			cout << "[E] ReInsertPlayer() failed at record no "
 				<< record_no << " for " << name << endl;
 			return false;
 		}
@@ -2405,6 +2460,10 @@ int main( int argc, char** argv )
 	st_tally = st_generate = st_backup = st_decay = st_poll;
 	loop_t0 = GetTickCount();
 
+	//initialize validated players list
+	validated.count = 0;
+	memset( validated.name, 0, sizeof( validated.name ) );
+
 	while(1) {
 
 		printf("Polling master.  Current poll: %i\n", currentpoll);
@@ -2413,6 +2472,7 @@ int main( int argc, char** argv )
 		if(currentpoll > 100000)
 			currentpoll = 1;
 		pollTally++;
+
 
 		/*
 		 * Collect data from servers at nominal 30 second intervals
@@ -2448,6 +2508,9 @@ int main( int argc, char** argv )
 			<< st_poll.wHour << ':' << st_poll.wMinute << ':' << st_poll.wSecond
 			<< endl;
 #endif
+		//load list of currently validated players
+		 GetValidatedPlayers();		
+
 		//poll the servers and process player info
 		for( i = 0; i < numServers; i++)
 		{
@@ -2488,7 +2551,7 @@ int main( int argc, char** argv )
 			&& (st_poll.wMinute - st_generate.wMinute > 15))
 			|| ( st_poll.wMinute < st_generate.wMinute
 			&& (st_generate.wMinute - st_poll.wMinute < 45)) )
-		{ 
+		{
 			GeneratePlayerRankingHtml();
 #if defined CLANSTATS
 			GenerateClanRankingHtml();
