@@ -355,6 +355,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	int i, j;
 	const int *inelements;
 	float *vposition = NULL, *vtexcoord = NULL, *vnormal = NULL, *vtangent = NULL;
+	unsigned char *vblendweights = NULL;
 	unsigned char *pbase;
 	iqmjoint_t *joint;
 	iqmjoint2_t *joint2;
@@ -463,13 +464,13 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		case IQM_BLENDWEIGHTS:
 			if (va[i].format == IQM_UBYTE && va[i].size == 4)
 			{
-				mod->blendweights = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
-				memcpy(mod->blendweights, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
+				vblendweights = (unsigned char *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(unsigned char));
+				memcpy(vblendweights, (unsigned char *)(pbase + va[i].offset), header->num_vertexes * 4 * sizeof(unsigned char));
 			}
 			break;
 		}
 	}
-	if (!vposition || !vtexcoord || !mod->blendindexes || !mod->blendweights)
+	if (!vposition || !vtexcoord || !mod->blendindexes || !vblendweights)
 	{
 		Com_Printf("%s is missing vertex array data\n", mod->name);
 		return false;
@@ -753,6 +754,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 	// load texture coodinates
     mod->st = (fstvert_t*)Hunk_Alloc (header->num_vertexes * sizeof(fstvert_t));
+	mod->blendweights = (float *)Hunk_Alloc(header->num_vertexes * 4 * sizeof(float));
 
 	for (i = 0;i < (int)header->num_vertexes;i++)
 	{
@@ -760,6 +762,11 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		mod->st[i].t = vtexcoord[1];
 
 		vtexcoord+=2;
+
+		for(j = 0; j < 4; j++)
+			mod->blendweights[i*4+j] = vblendweights[j]/255.0f;
+
+		vblendweights+=4;
 	}
 
 	/*
@@ -991,7 +998,9 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 		mnormal_t *dstnorm = (mnormal_t *)currentmodel->animatenormal;
 		mtangent_t *dsttan = (mtangent_t *)currentmodel->animatetangent;
 
-		const unsigned char *index = currentmodel->blendindexes, *weight = currentmodel->blendweights;
+		const unsigned char *index = currentmodel->blendindexes;
+			
+		float *weight = currentmodel->blendweights;
 
 		for(i = 0; i < currentmodel->numvertexes; i++)
 		{
@@ -1006,11 +1015,11 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 			// sorted order from highest weight to lowest weight. Weights with
 			// 0 values, which are always at the end, are unused.
 
-			Matrix3x4_Scale(&mat, currentmodel->outframe[index[0]], weight[0]/255.0f);
+			Matrix3x4_Scale(&mat, currentmodel->outframe[index[0]], weight[0]);
 
 			for(j = 1; j < 4 && weight[j]; j++) 
 			{
-				Matrix3x4_ScaleAdd (&mat, &currentmodel->outframe[index[j]], weight[j]/255.0f, &mat);
+				Matrix3x4_ScaleAdd (&mat, &currentmodel->outframe[index[j]], weight[j], &mat);
 			}
 			
 			// Transform attributes by the blended matrix.
@@ -1117,17 +1126,18 @@ void IQM_AnimateRagdoll(int RagDollID)
 		mnormal_t *dstnorm = (mnormal_t *)RagDoll[RagDollID].ragDollMesh->animatenormal;
 		mtangent_t *dsttan = (mtangent_t *)RagDoll[RagDollID].ragDollMesh->animatetangent;
 
-		const unsigned char *index = RagDoll[RagDollID].ragDollMesh->blendindexes, *weight = RagDoll[RagDollID].ragDollMesh->blendweights;
+		const unsigned char *index = RagDoll[RagDollID].ragDollMesh->blendindexes;
+		float *weight = RagDoll[RagDollID].ragDollMesh->blendweights;
 
 		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->numvertexes; i++)
 		{
 			matrix3x4_t mat, temp;
 
-			Matrix3x4_Scale(&mat, RagDoll[RagDollID].ragDollMesh->outframe[index[0]], weight[0]/255.0f);
+			Matrix3x4_Scale(&mat, RagDoll[RagDollID].ragDollMesh->outframe[index[0]], weight[0]);
 
 			for(j = 1; j < 4 && weight[j]; j++) 
 			{
-				Matrix3x4_ScaleAdd (&mat, &RagDoll[RagDollID].ragDollMesh->outframe[index[j]], weight[j]/255.0f, &mat);
+				Matrix3x4_ScaleAdd (&mat, &RagDoll[RagDollID].ragDollMesh->outframe[index[j]], weight[j], &mat);
 			}
 
 			Matrix3x4_Transform(dstpos, mat, *srcpos);
