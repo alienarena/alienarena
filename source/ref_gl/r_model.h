@@ -415,7 +415,7 @@ typedef struct model_s
 	mtangent_t		*tangent;
 	mtangent_t		*animatetangent;
 	unsigned char	*blendindexes;
-	unsigned char	*blendweights;
+	float			*blendweights;
 	char			skinname[MAX_QPATH];
 	char			*jointname;
 	//end iqm
