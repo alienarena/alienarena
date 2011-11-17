@@ -164,7 +164,8 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 	dtrivertx_t *verts;
 
 	//check for vbo
-	if(gl_state.vbo && !lerp && !currententity->flags & RF_BOBBING)
+#if 0
+	if(gl_state.vbo && !lerp && !(currententity->flags & RF_BOBBING))
 	{
 		currentmodel->vbo_shadowxyz = R_VCFindCache(VBO_STORE_SHADOWXYZ, currententity);
 		{
@@ -176,6 +177,7 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 			}
 		}
 	}
+#endif
 
 	frame = (daliasframe_t *) ((byte *) hdr + hdr->ofs_frames
 							   + currententity->frame * hdr->framesize);
@@ -360,9 +362,9 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 		ShadowIndex[index++] = shadow_vert+0;
 		shadow_vert +=3;
 	}
-
+#if 0
 	//store vbo
-	if(gl_state.vbo && !lerp && !currententity->flags & RF_BOBBING)
+	if(gl_state.vbo && !lerp && !(currententity->flags & RF_BOBBING))
 	{
 		currentmodel->vbo_shadowxyz = R_VCLoadData(VBO_STATIC, index*sizeof(vec3_t), ShadowArray, VBO_STORE_SHADOWXYZ, currententity);
 		currentmodel->vbo_shadowindices = R_VCLoadData(VBO_STATIC, index*sizeof(unsigned int), ShadowIndex, VBO_STORE_SHADOWINDICES, currententity);
@@ -371,7 +373,7 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 
 skipLoad:
 
-	if(gl_state.vbo && !lerp && !currententity->flags & RF_BOBBING)
+	if(gl_state.vbo && !lerp && !(currententity->flags & RF_BOBBING))
 	{		
         GL_BindVBO(currentmodel->vbo_shadowxyz);
 		qglVertexPointer(3, GL_FLOAT, sizeof(vec3_t), 0);
@@ -384,6 +386,7 @@ skipLoad:
 		GL_BindIBO(NULL);
 	}
 	else
+#endif
 	{
 		if ( qglLockArraysEXT != 0 )
 			   qglLockArraysEXT( 0, shadow_vert );
@@ -544,15 +547,6 @@ void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
 		shadow_vert +=3;
 	}
 
-	////testing vbo(works, but needs to be moved outside of this)
-	//qglGenBuffersARB(1, &shadowVboId);
-	//qglBindBufferARB(GL_ARRAY_BUFFER, shadowVboId);
-	//qglBufferDataARB(GL_ARRAY_BUFFER, sizeof(vec3_t)*index, ShadowArray, GL_STATIC_DRAW);
-
-	//qglGenBuffersARB(1, &shadowIboId);
-	//qglBindBufferARB(GL_ELEMENT_ARRAY_BUFFER, shadowIboId);
-	//qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*3, ShadowIndex, GL_STATIC_DRAW);
-
 	if ( qglLockArraysEXT != 0 )
 		qglLockArraysEXT( 0, shadow_vert );
 
@@ -560,8 +554,6 @@ void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
 	
 	if ( qglUnlockArraysEXT != 0 )
         qglUnlockArraysEXT();
-
-	//GL_BindVBO(NULL);
 }
 
 void SHD_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolean lerp)

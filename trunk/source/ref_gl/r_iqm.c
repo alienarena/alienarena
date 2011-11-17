@@ -1004,7 +1004,7 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 
 		for(i = 0; i < currentmodel->numvertexes; i++)
 		{
-			matrix3x4_t mat, temp;
+			matrix3x4_t mat;
 
 			// Blend matrixes for this vertex according to its blend weights.
 			// the first index/weight is always present, and the weights are
@@ -1131,7 +1131,7 @@ void IQM_AnimateRagdoll(int RagDollID)
 
 		for(i = 0; i < RagDoll[RagDollID].ragDollMesh->numvertexes; i++)
 		{
-			matrix3x4_t mat, temp;
+			matrix3x4_t mat;
 
 			Matrix3x4_Scale(&mat, RagDoll[RagDollID].ragDollMesh->outframe[index[0]], weight[0]);
 
