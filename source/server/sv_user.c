@@ -548,6 +548,7 @@ SV_ExecuteClientMessage
 The current net_message is parsed for the given client
 ===================
 */
+int sys_msec_as_of_packet_read = 0;
 void SV_ExecuteClientMessage (client_t *cl)
 {
 	int		c;
@@ -645,26 +646,26 @@ void SV_ExecuteClientMessage (client_t *cl)
 					//elapsed, it is probably cheating.
 					cl->claimedmsec += newcmd.msec;
 					
-					if (svs.realtime < cl->lastresettime) {
+					if (sys_msec_as_of_packet_read < cl->lastresettime) {
 						//This can happen with either a map change or an
 						//integer overflow after around 25 days on the same
 						//map. In this case, we just throw out all the data.
-						cl->lastresettime = svs.realtime;
+						cl->lastresettime = sys_msec_as_of_packet_read;
 						cl->claimedmsec = 0;
-					} else if (svs.realtime - cl->lastresettime >= 12000) {
+					} else if (sys_msec_as_of_packet_read - cl->lastresettime >= 12000) {
 						//This ratio should almost never be more than 1. If 
 						//it's more than 1.05, someone's probably trying to
 						//cheat.
-						timeratio = (float)cl->claimedmsec/(float)(svs.realtime - cl->lastresettime);
+						timeratio = (float)cl->claimedmsec/(float)(sys_msec_as_of_packet_read - cl->lastresettime);
 						
 						if (timeratio > 1.05) {
 							Com_Printf ("EXPLOIT: Client %s[%s] is trying to go approximately %4.2f times faster than normal!\n", 
 										cl->name, NET_AdrToString (cl->netchan.remote_address), timeratio);
-							SV_KickClient (cl, "illegal pmove msec scaling detected", NULL);
+							SV_KickClient (cl, va ("illegal pmove msec scaling by %4.2f detected", timeratio), NULL);
 							return;
 						}
 					
-						cl->lastresettime = svs.realtime;
+						cl->lastresettime = sys_msec_as_of_packet_read;
 						cl->claimedmsec = 0;
 					}
 				}
