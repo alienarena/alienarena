@@ -942,11 +942,13 @@ void SV_GiveMsec (void)
 SV_ReadPackets
 =================
 */
+extern int sys_msec_as_of_packet_read;
 void SV_ReadPackets (void)
 {
 	int			i;
 	client_t	*cl;
 	int			qport;
+	sys_msec_as_of_packet_read = Sys_Milliseconds ();
 
 	while (NET_GetPacket (NS_SERVER, &net_from, &net_message))
 	{
