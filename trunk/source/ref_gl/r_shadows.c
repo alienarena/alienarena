@@ -16,6 +16,25 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+Notes on shadow rendering:
+
+CRX uses a combination of shadowmapping and stencil volumes for it's shadowing 
+effects.  The shadow maps are used for dynamic shadows only, while the stencil 
+volumes are used for static items and vegetation.  There are a couple of compelling 
+reaons why we do this.  First, the goal is speed.  It is slightly faster to create 
+the volumes than it is to render the mesh to create a shadow caster.  Another 
+consideration is that the stencil volumes cast on any object without the need for 
+a shader to be present.  We are able to create a soft shadow effect by blitting the
+stencil buffer to an offscreen FBO, blurring it in a GLSL shader, then rendering the
+image on a single quad overlay with the correct blending.  
+
+The drawbacks are that we do not have fading penumbras(this could change depending on 
+what the idtech 4 shadow code looks like).  
+
+Dynamic shadows are handled via shadowmaps since dynamic lighting is handled using GLSL.
+This allows us to easily create fading penumbras with dynamic lights.  While it is 
+slightly slower, it allows for an excellent, and accurate effect.
+
 */
 
 #ifdef HAVE_CONFIG_H
@@ -151,6 +170,14 @@ void SHD_MarkIQMShadowTriangles(vec3_t lightOrg)
 	}
 }
 
+/* Notes on this section of code
+   In my tests, it appears that using VBO/IBO for rendering these shadows
+   is actually a tad slower than just building them each time.  There are also
+   some odd problems regarding the bobbing items, as well as the issue with gibs
+   or any other moving object.  The code is left here, commented out, because there
+   are some useful things that could be used in other places of the engine.  However
+   for shadows, it appears to be quite useless.  
+*/
 void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qboolean lerp)
 {
 	dtriangle_t *ot, *tris;
@@ -405,8 +432,6 @@ void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
 	unsigned	ShadowIndex[MAX_INDICES];
 	vec3_t v0, v1, v2, v3;
 	vec3_t currentShadowLight;
-	//GLuint shadowVboId = 0;
-	//GLuint shadowIboId = 0;
 
 	SHD_MarkIQMShadowTriangles(light);
 
