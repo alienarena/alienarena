@@ -3802,7 +3802,7 @@ void JoinServer_MenuInit( void )
 	m_show_empty = true;
 
 	STATS_getStatsDB();
-	
+
 	getLatestGameVersion();
 
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
@@ -6109,9 +6109,9 @@ void PlayerRanking_MenuInit( void )
 		Com_sprintf(rank, sizeof(rank), "Rank: ^1%i", player.ranking);
 	else
 		Com_sprintf(rank, sizeof(rank), "Rank: ^1Unranked");
-	Com_sprintf(fragrate, sizeof(fragrate), "Frag Rate: %6.2f", (float)(player.totalfrags/player.totaltime));
+	Com_sprintf(fragrate, sizeof(fragrate), "Frag Rate: %6.2f", (float)(player.totalfrags)/(player.totaltime - 1.0f) );
 	Com_sprintf(totalfrags, sizeof(totalfrags), "Total Frags: ^1%i", player.totalfrags);
-	Com_sprintf(totaltime, sizeof(totaltime), "Total Time: %6.2f", player.totaltime);
+	Com_sprintf(totaltime, sizeof(totaltime), "Total Time: %6.2f", player.totaltime - 1.0f);
 
 	s_playerranking_title.generic.type	= MTYPE_ACTION;
 	s_playerranking_title.generic.name	= "Player Ranking and Stats";
