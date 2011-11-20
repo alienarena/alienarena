@@ -47,9 +47,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "accountserv.h"
 
 #ifndef _DEBUG
-#define dprintf printf
+#define printf printf
 #else
-#define dprintf printf
+#define printf printf
 #endif
 
 player_t players;
@@ -79,17 +79,11 @@ void DropPlayer (player_t *player)
 	if (player->next)
 		player->next->prev = player->prev;
 
-	printf("Drop stage 1 completed.\n");
-
 	if (player->prev)
 		player->prev->next = player->next;
 
-	printf("Drop stage 2 completed.\n");
-
 	//free
 	free (player);
-
-	printf("Drop stage 3 completed.\n");
 }
 
 //check list for possible expired players(5 hour window)
@@ -136,13 +130,12 @@ void RemovePlayer (char name[64])
 			break;
 		}
 	}
-	printf("Successfully dumped player.\n");
+
 	DumpValidPlayersToFile();
-	printf("Rebuilt valid file.\n");
 }
 
 //this called only when a packet of "login" is received, and the player is validated
-void AddPlayer (char name[64])
+void AddPlayer (char name[64], char rawname[64])
 {
 	player_t	*player = &players;
 
@@ -166,13 +159,14 @@ void AddPlayer (char name[64])
 
 	//copy name
 	strncpy_s(player->name, name, 32);
+	strncpy_s(player->rawname, rawname, 32);
 	player->next = NULL;
 
 	//timestamp
 	GetSystemTime(&st);
 	player->time = st.wHour;
 
-	dprintf ("%s added to queue!\n", name);
+	printf ("%s added to queue!\n", name);
 
 	//dump all current players to file for statsgen to read
 	DumpValidPlayersToFile();
@@ -194,7 +188,7 @@ void SendValidationToClient (struct sockaddr_in *from)
 	
 	if ((sendto (listener, buff, buflen, 0, (struct sockaddr *)from, sizeof(*from))) == SOCKET_ERROR)
 	{
-		dprintf ("[E] socket error on send! code %d.\n", WSAGetLastError());
+		printf ("[E] socket error on send! code %d.\n", WSAGetLastError());
 	}
 }
 
@@ -217,7 +211,7 @@ void SendVStringToClient (char name[64], struct sockaddr_in *from)
 	
 	if ((sendto (listener, buff, buflen, 0, (struct sockaddr *)from, sizeof(*from))) == SOCKET_ERROR)
 	{
-		dprintf ("[E] socket error on send! code %d.\n", WSAGetLastError());
+		printf ("[E] socket error on send! code %d.\n", WSAGetLastError());
 	}
 }
 
@@ -227,6 +221,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 	char *token;
 	char seps[] = "\\";
 	char name[128];
+	char rawname[128];
 	char password[1024];
 	char new_password[1024];
 	char pVString[128];	
@@ -249,7 +244,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			printf ("[E1] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-		printf("Got to last check.\n");
+
 		if(token)
 			token = strtok( NULL, seps );
 		else 
@@ -257,14 +252,11 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 			printf ("[E2] Invalid command %s from %s!\n", cmd, inet_ntoa (from->sin_addr));
 			return;
 		}
-		printf("Copying name.\n");
+
 		if(token)
 		{
-			printf("token valid");
 			strncpy_s(name, token, 32);
-			printf("Name copied successfully.\n");
 			SendVStringToClient(name, from);
-			printf("String sent to client.\n");
 		}
 	}
 	else if (_strnicmp (data, "ÿÿÿÿlogin", 9) == 0)
@@ -295,6 +287,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		if(token)
 		{
 			strncpy_s(name, token, 32);
+			strncpy_s(rawname, token, 32);
 			token = strtok( NULL, seps );
 		}
 		else 
@@ -327,7 +320,7 @@ void ParseResponse (struct sockaddr_in *from, char *data, int dglen)
 		if(ValidatePlayer(name, password, pVString))
 		{
 			printf("Validated name\n");
-			AddPlayer(name);
+			AddPlayer(name, rawname);
 
 			//let the client know he was validated
 			SendValidationToClient (from);
@@ -539,7 +532,6 @@ int main (int argc, char argv[])
 		retval = select(listener+1, &set, NULL, NULL, &delay);
 		if (retval == 1)
 		{
-			printf("Receiving...\n");
 			len = recvfrom (listener, incoming, sizeof(incoming), 0, (struct sockaddr *)&from, &fromlen);
 			if (len != SOCKET_ERROR)
 			{
