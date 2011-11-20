@@ -5,6 +5,7 @@ struct player_s {
 	player_t		*next;
 	
 	char			name[32];
+	char			rawname[32];
 	WORD			time;
 };
 extern player_t players;

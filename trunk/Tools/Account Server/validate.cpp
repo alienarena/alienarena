@@ -121,15 +121,15 @@ void ChangePlayerPassword(char name[64], char new_password[512], char pVString[6
 {
 	ofstream playerProfileFile;
 	char szPath[256];
-	char svTime[32];
+	char svTime[32];	
+	
+	printf("Changing password for %s\n", name);
 
 	StripIllegalPathChars(name);
 
 	sprintf(szPath, "playerprofiles/%s", name);
 	
 	remove(szPath);
-
-	printf("Changing password for %s\n", name);
 
 	GetSystemTime(&st);
 	sprintf(svTime, "%i-%i-%i-%i", st.wYear, st.wMonth, st.wDay, st.wHour);
@@ -150,7 +150,7 @@ void DumpValidPlayersToFile(void)
 	while (player->next)
 	{
 		player = player->next;
-		currPlayers << player->name << endl;		
+		currPlayers << player->rawname << endl;		
 	}
 	currPlayers.close();
 }
