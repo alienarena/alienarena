@@ -1891,6 +1891,9 @@ void CL_InitLocal (void)
 	//update checker
 	cl_latest_game_version = Cvar_Get("cl_latest_game_version", VERSION, CVAR_ARCHIVE);
 	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", "http://red.planetarena.org/version/crx_version", CVAR_ARCHIVE);
+	
+	//throwaway cvars
+	Cvar_Get("g_dm_lights", "0", CVAR_ARCHIVE); //mark this as archived even if game code doesn't run.
 
 	//
 	// register our commands
