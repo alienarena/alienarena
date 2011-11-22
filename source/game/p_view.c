@@ -859,6 +859,8 @@ void G_SetClientEffects (edict_t *ent)
 
 	if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value )
 		TeamEffects(ent);
+	else if (g_dmlights->integer)
+	    ent->s.effects |= EF_TEAM2;
 
 	if (ent->client->quad_framenum > level.framenum)
 	{

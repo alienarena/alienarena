@@ -92,6 +92,9 @@ cvar_t  *quickweap;
 cvar_t  *anticamp;
 cvar_t  *camptime;
 
+//show player lights for visibility even in non-team games
+cvar_t	*g_dmlights;
+
 /** @brief Anti-camp frames
  *
  * This CVar controls the amount of frames velocity is accumulated for when
@@ -868,6 +871,8 @@ void CheckDMRules (void)
 	edict_t    *cl_ent;
 	float      countdown_time;
 	static int warmup_state = 0;
+	
+	gi.cvar_set ("g_teamgame", va("%d", TEAM_GAME));
 
 	if ( !tca->value && !ctf->value && !cp->value && !(dmflags->integer & DF_SKINTEAMS) )
 	{

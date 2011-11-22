@@ -680,6 +680,9 @@ extern cvar_t	*g_autobalance;
 //reward point threshold
 extern cvar_t	*g_reward;
 
+//show player lights for visibility even in non-team games
+extern cvar_t	*g_dmlights;
+
 #define world	(&g_edicts[0])
 
 // item spawnflags

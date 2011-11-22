@@ -686,6 +686,7 @@ void CL_DiminishingTrail (vec3_t start, vec3_t end, centity_t *old, int flags);
 void CL_BfgParticles (entity_t *ent);
 void CL_AddParticles (void);
 void CL_EntityEvent (entity_state_t *ent);
+qboolean server_is_team; //used for player visibility light code
 
 //
 // menus
