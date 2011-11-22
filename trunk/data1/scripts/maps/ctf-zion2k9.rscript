@@ -136,3 +136,20 @@ textures/rage/light7
 		end
 	}
 }
+textures/arena9/chainlinkfence
+{
+	{
+		map textures/arena5/lighta.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .05 static .05
+		scroll sin 0.1 sin 0
+		anim .05
+			textures/arena5/lighta.tga
+			textures/arena5/lightb.tga
+			textures/arena5/lightc.tga
+			textures/arena5/lightd.tga
+			textures/arena5/lighte.tga
+			textures/arena5/lightf.tga
+		end
+	}
+}
