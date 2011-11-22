@@ -2521,6 +2521,7 @@ static const char *idcredits[] =
 	"John Diamond",
 	"Jim Bower",
 	"Emmanuel Benoit",
+	"Max Eliaser",
 	"Lee Salzman",
 	"Dave Carter",
 	"Victor Luchits",
