@@ -550,14 +550,15 @@ CMod_LoadAlternateEntityData
 void CMod_LoadAlternateEntityData (char *entity_file_name)
 {
     char *buf;
-    
+
 	numentitychars = FS_LoadFile (entity_file_name, (void **)&buf);
-	
-	if (numentitychars > MAX_MAP_ENTSTRING)
+
+	if (numentitychars >= MAX_MAP_ENTSTRING)
 		Com_Error (ERR_DROP, "Entity data has too large entity lump");
 
 	memcpy (map_entitystring, buf, numentitychars);
-	
+	map_entitystring[numentitychars] = '\0';
+
 	FS_FreeFile (buf);
 }
 
@@ -678,9 +679,9 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum) {
 		else //fallback to just looking for a BSP
 			return CM_LoadBSP (va("%s.bsp", name), clientload, checksum);
 	}
-	
+
 	//since buf will be repeatedly modified, we keep a backup pointer
-	buf_bak = buf; 
+	buf_bak = buf;
 
 	// get the name of the BSP and entdef files
 	// if we ever add more map data files, be sure to add them here
@@ -703,7 +704,7 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum) {
 			if (!buf)
 				Com_Error (ERR_DROP, "CM_LoadMap: EOL when expecting entdef filename! (File %s is invalid)", name);
 		}
-		
+
 		//For forward compatibility-- if this file has a statement type we
 		//don't recognize, or if a recognized statement type has extra
 		//arguments supplied to it, then this is probably supported in a newer
