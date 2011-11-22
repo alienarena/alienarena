@@ -276,6 +276,8 @@ void InitGame (void)
 	motdforce = gi.cvar ("motdforce", "0", 0);
 
 	g_select_empty = gi.cvar ("g_select_empty", "0", CVAR_ARCHIVE);
+	
+	g_dmlights = gi.cvar ("g_dm_lights", "0", CVAR_ARCHIVE|CVAR_GAMEINFO);
 
 	run_pitch = gi.cvar ("run_pitch", "0.002", 0);
 	run_roll = gi.cvar ("run_roll", "0.005", 0);
@@ -292,6 +294,9 @@ void InitGame (void)
 
 	// dm map list
 	sv_maplist = gi.cvar ("sv_maplist", "", 0);
+	
+	//throwaway cvars
+	gi.cvar ("g_teamgame", va("%d", TEAM_GAME), CVAR_SERVERINFO);
 
 	// items
 	InitItems ();

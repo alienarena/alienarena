@@ -851,7 +851,9 @@ void SV_ConnectionlessPacket (void)
 		SVC_DirectConnect ();
 	else if (!strcmp(c, "rcon"))
 		SVC_RemoteCommand ();
-	else
+	else if (!strcmp(c, "teamgame")) {
+		Netchan_OutOfBandPrint (NS_SERVER, net_from, "teamgame %f", Cvar_VariableValue ("g_teamgame"));
+	} else
 		Com_Printf ("bad connectionless packet from %s:\n%s\n"
 		, NET_AdrToString (net_from), s);
 }

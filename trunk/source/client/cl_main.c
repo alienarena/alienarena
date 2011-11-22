@@ -552,7 +552,7 @@ void CL_SendConnectPacket (void)
 
 	port = Cvar_VariableValue ("qport");
 	userinfo_modified = false;
-
+	
 	Netchan_OutOfBandPrint (NS_CLIENT, adr, "connect %i %i %i \"%s\"\n",
 		PROTOCOL_VERSION, port, cls.challenge, Cvar_Userinfo() );
 }
@@ -1162,6 +1162,8 @@ void CL_ConnectionlessPacket (void)
 	// ping from somewhere
 	if (!strcmp(c, "ping"))
 	{
+
+
 		Netchan_OutOfBandPrint (NS_CLIENT, net_from, "ack");
 		return;
 	}
@@ -1178,6 +1180,12 @@ void CL_ConnectionlessPacket (void)
 	if (!strcmp(c, "echo"))
 	{
 		Netchan_OutOfBandPrint (NS_CLIENT, net_from, "%s", Cmd_Argv(1) );
+		return;
+	}
+	
+	if (!strcmp(c, "teamgame"))
+	{
+		server_is_team = atoi (Cmd_Argv(1));
 		return;
 	}
 
@@ -1704,6 +1712,16 @@ redoSkins:
 
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message, va("begin %i\n", precache_spawncount) );
+	
+	{
+		netadr_t	adr;
+		assert (NET_StringToAdr (cls.servername, &adr));
+		
+		// default true to avoid messing up legacy ctf servers
+		// legacy DM servers don't send visibility lights anyway
+		server_is_team = true; 
+		Netchan_OutOfBandPrint (NS_CLIENT, adr, "teamgame\n");
+	}
 }
 
 

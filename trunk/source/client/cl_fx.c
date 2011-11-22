@@ -1831,7 +1831,10 @@ void CL_BlueTeamLight(vec3_t pos)
 		p->texnum = r_flaretexture->texnum;
 		p->blendsrc = GL_ONE;
 		p->blenddst = GL_ONE;
-		p->color = 0x74;
+		if (server_is_team)
+			p->color = 0x74;
+		else
+			p->color = 0xd6;
 		p->scale = 10*i;
 		p->alphavel = -50;
 		for (j=0 ; j<3 ; j++)
