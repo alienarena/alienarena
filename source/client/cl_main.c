@@ -1715,8 +1715,13 @@ redoSkins:
 	
 	{
 		netadr_t	adr;
-		assert (NET_StringToAdr (cls.servername, &adr));
-		
+
+		if (!NET_StringToAdr (cls.servername, &adr))
+		{
+			Com_Printf ("Bad address: %s\n",  cls.servername);
+			return;
+		}
+		 
 		// default true to avoid messing up legacy ctf servers
 		// legacy DM servers don't send visibility lights anyway
 		server_is_team = true; 
