@@ -1834,7 +1834,7 @@ void CL_BlueTeamLight(vec3_t pos)
 		if (server_is_team)
 			p->color = 0x74;
 		else
-			p->color = 0xd6;
+			p->color = 0xd2;
 		p->scale = 10*i;
 		p->alphavel = -50;
 		for (j=0 ; j<3 ; j++)
