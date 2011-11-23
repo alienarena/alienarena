@@ -160,6 +160,9 @@
 /* Define to 1 if you have the `pthread_create' function. */
 #undef HAVE_PTHREAD_CREATE
 
+/* Have PTHREAD_PRIO_INHERIT. */
+#undef HAVE_PTHREAD_PRIO_INHERIT
+
 /* Define to 1 if the system has the type `ptrdiff_t'. */
 #undef HAVE_PTRDIFF_T
 

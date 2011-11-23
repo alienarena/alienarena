@@ -1778,6 +1778,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/ctf-titan2k8.rscript \
 	data1/scripts/maps/ctf-vesuvius.rscript \
 	data1/scripts/maps/ctf-violator.rscript \
+	data1/scripts/maps/ctf-zion2k9.rscript \
 	data1/scripts/maps/db-chromium.rscript \
 	data1/scripts/maps/db-icarus.rscript \
 	data1/scripts/maps/db-vesuvius.rscript \
