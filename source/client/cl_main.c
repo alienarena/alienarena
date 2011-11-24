@@ -1809,7 +1809,7 @@ void CL_InitLocal (void)
 	cl_noskins = Cvar_Get ("cl_noskins", "0", CVAR_ARCHIVE);
 	cl_autoskins = Cvar_Get ("cl_autoskins", "0", 0);
 	cl_predict = Cvar_Get ("cl_predict", "1", 0);
-	cl_maxfps = Cvar_Get ("cl_maxfps", "90", CVAR_ARCHIVE);
+	cl_maxfps = Cvar_Get ("cl_maxfps", "60", CVAR_ARCHIVE);
 	cl_showPlayerNames = Cvar_Get ("cl_showplayernames", "0", CVAR_ARCHIVE);
 	cl_healthaura = Cvar_Get ("cl_healthaura", "1", CVAR_ARCHIVE);
 	cl_noblood = Cvar_Get ("cl_noblood", "0", CVAR_ARCHIVE);
@@ -2188,15 +2188,15 @@ extern unsigned sys_frame_time;   // TODO: ditto
 
 /* Packet Rate Limiting Cap in milliseconds
  *  msecs=PPS :: 12=83, 13=76, 14=71, 15=66, 16=62
- * Current choice is 12msec/83PPS nominal.
+ * Current choice is 16msec/62PPS nominal.
  *  This matches the default cl_maxfps setting.
- *  Which is 90, of course, but because of msec rounding, the result is 83
- *  This results in 8 packets per server frame, mostly.
+ *  Which is 60, of course, but because of msec rounding, the result is 62
+ *  This results in 6 packets per server frame, mostly.
  * Packet rate limiting is not invoked unless the PPS is set higher than the FPS.
  * Seems like a good idea not to invoke packet rate limiting unless the
  *  cl_maxfps is set higher than the default.
  */
-#define PKTRATE_CAP 12
+#define PKTRATE_CAP 16
 
 void CL_Frame( int msec )
 {
