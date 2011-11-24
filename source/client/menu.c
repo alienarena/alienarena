@@ -6110,7 +6110,10 @@ void PlayerRanking_MenuInit( void )
 		Com_sprintf(rank, sizeof(rank), "Rank: ^1%i", player.ranking);
 	else
 		Com_sprintf(rank, sizeof(rank), "Rank: ^1Unranked");
-	Com_sprintf(fragrate, sizeof(fragrate), "Frag Rate: %6.2f", (float)(player.totalfrags)/(player.totaltime - 1.0f) );
+	if ( player.totaltime > 1.0f )
+		Com_sprintf(fragrate, sizeof(fragrate), "Frag Rate: %6.2f", (float)(player.totalfrags)/(player.totaltime - 1.0f) );
+	else
+		Com_sprintf(fragrate, sizeof(fragrate), "Frag Rate: 0" );
 	Com_sprintf(totalfrags, sizeof(totalfrags), "Total Frags: ^1%i", player.totalfrags);
 	Com_sprintf(totaltime, sizeof(totaltime), "Total Time: %6.2f", player.totaltime - 1.0f);
 
