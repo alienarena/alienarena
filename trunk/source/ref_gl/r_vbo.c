@@ -184,7 +184,10 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent)
 			if (cache->store == store && cache->mod == mod && cache->position[0] == ent->origin[0] && cache->position[1] == ent->origin[1]
 				&& cache->position[2] == ent->origin[2])
 			{	// already cached!
-				GL_BindVBO(cache);
+				if(store == VBO_STORE_SHADOWINDICES)
+					GL_BindIBO(cache);
+				else
+					GL_BindVBO(cache);
 				return cache;
 			}
 		}
