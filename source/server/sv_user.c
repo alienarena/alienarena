@@ -550,6 +550,28 @@ The current net_message is parsed for the given client
 */
 int sys_msec_as_of_packet_read = 0;
 int sys_lasthang = 0;
+
+
+static char *timestamp( void )
+{
+	static char utc_string[256];
+	struct tm *utc;
+	time_t now;
+
+	now = time( NULL );
+	utc = gmtime( &now );
+	sprintf( utc_string, "%s", asctime( utc ) );
+	utc_string[ strlen(utc_string)-1] =  '\0'; // remove \n
+
+	return utc_string;
+}
+
+static char *ipaddr( client_t *cl )
+{
+	return NET_AdrToString( cl->netchan.remote_address );
+}
+
+
 void SV_ExecuteClientMessage (client_t *cl)
 {
 	int		c;
@@ -576,9 +598,10 @@ void SV_ExecuteClientMessage (client_t *cl)
 	{
 		if (net_message.readcount > net_message.cursize)
 		{
-			Com_Printf ("SV_ReadClientMessage: badread\n");
-			SV_DropClient (cl);
-			return;
+			Com_Printf( "PACKET: readcount > cursize from %s[%s] (UTC: %s)\n",
+					cl->name, ipaddr(cl), timestamp() );
+			//formerly was drop client and return
+			break;
 		}
 
 		c = MSG_ReadByte (&net_message);
@@ -587,10 +610,12 @@ void SV_ExecuteClientMessage (client_t *cl)
 
 		switch (c)
 		{
+
 		default:
-			Com_Printf ("SV_ReadClientMessage: unknown command char\n");
-			SV_DropClient (cl);
-			return;
+			Com_Printf ("PACKET: invalid command byte from %s[%s] (UTC: %s)\n",
+					cl->name, ipaddr(cl), timestamp() );
+			//formerly was drop client and return
+			break;
 
 		case clc_nop:
 			break;
@@ -601,21 +626,16 @@ void SV_ExecuteClientMessage (client_t *cl)
 			break;
 
 		case clc_move:
-			if (move_issued)
-			{
-				SV_KickClient (cl, "client issued clc_move when move_issued", "SV_ExecuteClientMessage: clc_move when move_issued\n");
-				return;		// someone is trying to cheat...
-			}
-
-			move_issued = true;
 			checksumIndex = net_message.readcount;
-			checksum = MSG_ReadByte (&net_message);
-			lastframe = MSG_ReadLong (&net_message);
-			if (lastframe != cl->lastframe) {
+			checksum      = MSG_ReadByte (&net_message);
+			lastframe     = MSG_ReadLong (&net_message);
+			if ( lastframe != cl->lastframe )
+			{
 				cl->lastframe = lastframe;
-				if (cl->lastframe > 0) {
-					cl->frame_latency[cl->lastframe&(LATENCY_COUNTS-1)] =
-						svs.realtime - cl->frames[cl->lastframe & UPDATE_MASK].senttime;
+				if ( cl->lastframe > 0 )
+				{
+					cl->frame_latency[cl->lastframe & (LATENCY_COUNTS - 1)]
+						= svs.realtime - cl->frames[cl->lastframe & UPDATE_MASK].senttime;
 				}
 			}
 
@@ -624,34 +644,65 @@ void SV_ExecuteClientMessage (client_t *cl)
 			MSG_ReadDeltaUsercmd (&net_message, &oldest, &oldcmd);
 			MSG_ReadDeltaUsercmd (&net_message, &oldcmd, &newcmd);
 
-			//r1: normal q2 client caps at 250 internally so this is a nice hack check
+			// checks the lastframe and deltauser parts of command
+			calculatedChecksum = COM_BlockSequenceCRCByte(
+					net_message.data + checksumIndex + 1,      // base
+					net_message.readcount - checksumIndex - 1, // length
+					cl->netchan.incoming_sequence );           // sequence
+			if ( calculatedChecksum != checksum )
+			{
+				Com_Printf(
+					"PACKET: Failed command checksum for %s[%s] (%d != %d)/%d (UTC: %s)\n",
+					cl->name, ipaddr(cl), calculatedChecksum, checksum,
+					cl->netchan.incoming_sequence, timestamp() );
+				break;
+			}
+
 			if (cl->state == cs_spawned)
 			{
+				if ( move_issued )
+				{ //only one clc_move per message
+					Com_Printf(
+						"EXPLOIT: multiple clc_move from %s[%s] (UTC: %s)\n",
+						cl->name, ipaddr(cl), timestamp() );
+					SV_KickClient(cl, "illegal multiple clc_move commands", NULL );
+					return;
+				}
+				move_issued = true;
+
+				//client clamps the msec byte to 250. should never issue msec
+				//byte of zero.
 				if (newcmd.msec > 250)
 				{
-					Com_Printf ("EXPLOIT: Client %s[%s] tried to use illegal msec value: %d\n", cl->name, NET_AdrToString (cl->netchan.remote_address), newcmd.msec);
+					Com_Printf(
+						"EXPLOIT: illegal msec value from %s[%s], %d (UTC: %s)\n",
+						cl->name, ipaddr(cl), newcmd.msec, timestamp() );
 					SV_KickClient (cl, "illegal pmove msec detected", NULL);
 					return;
 				}
 				else if (newcmd.msec == 0)
 				{
-					Com_DPrintf ("Hmm, 0 msec move from %s[%s]. Should this ever happen?\n", cl->name, NET_AdrToString (cl->netchan.remote_address));
+					Com_Printf(
+						"EXPLOIT: 0 msec move from %s[%s] (UTC: %s)\n",
+						cl->name, ipaddr(cl), timestamp() );
+					SV_KickClient (cl, "zero pmove msec detected", NULL);
+					return;
 				}
-				
+
 				if (sv_enforcetime->integer)
 				{
-					//Speed cheat detection-- speed cheats work by increasing 
+					//Speed cheat detection-- speed cheats work by increasing
 					//the amount of time a client says to simulate. This code
 					//does a sanity check; if over any period of 12 seconds,
 					//the client claims significantly more time than actually
 					//elapsed, it is probably cheating.
 					cl->claimedmsec += newcmd.msec;
-					
+
 					if (cl->lasthang > sys_lasthang) {
 						//This can happen with an integer overflow
 						cl->lasthang = sys_lasthang;
 					}
-					
+
 					if (sys_msec_as_of_packet_read < cl->lastresettime) {
 						//This can happen with either a map change or an
 						//integer overflow after around 25 days on the same
@@ -665,23 +716,24 @@ void SV_ExecuteClientMessage (client_t *cl)
 						cl->claimedmsec = 0;
 						cl->lasthang = sys_lasthang;
 					} else if (sys_msec_as_of_packet_read - cl->lastresettime >= 12000) {
-						//This ratio should almost never be more than 1. If 
+						//This ratio should almost never be more than 1. If
 						//it's more than 1.05, someone's probably trying to
 						//cheat.
 						timeratio = (float)cl->claimedmsec/(float)(sys_msec_as_of_packet_read - cl->lastresettime);
-						
+
 						if (timeratio > 1.05) {
-							Com_Printf ("EXPLOIT: Client %s[%s] is trying to go approximately %4.2f times faster than normal!\n", 
-										cl->name, NET_AdrToString (cl->netchan.remote_address), timeratio);
+							Com_Printf (
+								"EXPLOIT: Client %s[%s] is trying to go approximately %4.2f times faster than normal! (UTC: %s)\n",
+								cl->name, ipaddr( cl ), timeratio, timestamp() );
 							SV_KickClient (cl, va ("illegal pmove msec scaling by %4.2f detected", timeratio), NULL);
 							return;
 						}
-					
+
 						cl->lastresettime = sys_msec_as_of_packet_read;
 						cl->claimedmsec = 0;
 					}
 				}
-					 
+
 			}
 
 			if ( cl->state != cs_spawned )
@@ -690,54 +742,45 @@ void SV_ExecuteClientMessage (client_t *cl)
 				break;
 			}
 
-			// if the checksum fails, ignore the rest of the packet
-			calculatedChecksum = COM_BlockSequenceCRCByte (
-				net_message.data + checksumIndex + 1,
-				net_message.readcount - checksumIndex - 1,
-				cl->netchan.incoming_sequence);
-
-			if (calculatedChecksum != checksum)
-			{
-				Com_DPrintf ("Failed command checksum for %s (%d != %d)/%d\n",
-					cl->name, calculatedChecksum, checksum,
-					cl->netchan.incoming_sequence);
-				return;
-			}
-
 			if (!sv_paused->value)
 			{
 				net_drop = cl->netchan.dropped;
-				if (net_drop < 20)
+				if ( net_drop > 0 )
 				{
-
-//if (net_drop > 2)
-
-//	Com_Printf ("drop %i\n", net_drop);
-					while (net_drop > 2)
+					/* when packets are dropped, or out of sequence
+					 *  execute backup commands. if drop is more than
+					 *  2, there is a problem; formerly, was executing
+					 *  the last command multiple times, but that does
+					 *  not seem to make sense.
+					 */
+					if ( net_drop > 2 )
 					{
-						SV_ClientThink (cl, &cl->lastcmd);
-
-						net_drop--;
+						Com_Printf(
+							"PACKET: net_drop is %i for %s[%s] (UTC: %s)\n",
+							net_drop, cl->name, ipaddr( cl ), timestamp() );
 					}
 					if (net_drop > 1)
 						SV_ClientThink (cl, &oldest);
-
-					if (net_drop > 0)
-						SV_ClientThink (cl, &oldcmd);
-
+					SV_ClientThink (cl, &oldcmd);
 				}
 				SV_ClientThink (cl, &newcmd);
 			}
-
 			cl->lastcmd = newcmd;
 			break;
 
 		case clc_stringcmd:
+
 			s = MSG_ReadString (&net_message);
 
 			// malicious users may try using too many string commands
 			if (++stringCmdCount < MAX_STRINGCMDS)
 				SV_ExecuteUserCommand (s);
+			else
+			{
+				Com_Printf(
+					"EXPLOIT: too many clc_stringcmd from %s[%s] (UTC: %s)\n",
+					cl->name, ipaddr( cl ), timestamp() );
+			}
 
 			if (cl->state == cs_zombie)
 				return;	// disconnect command

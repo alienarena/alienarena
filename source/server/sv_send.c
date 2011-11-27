@@ -14,7 +14,7 @@ See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
 // sv_send.c
@@ -171,36 +171,31 @@ void SV_Multicast (vec3_t origin, multicast_t to)
 	qboolean	reliable;
 	int			area1, area2;
 
-	reliable = false;
-
-	if (to != MULTICAST_ALL_R && to != MULTICAST_ALL)
-	{
-		leafnum = CM_PointLeafnum (origin);
-		area1 = CM_LeafArea (leafnum);
-	}
-	else
-	{
-		leafnum = 0;	// just to avoid compiler warnings
-		area1 = 0;
-	}
+	/* 2011-11 Remove redundancy, was calling CM_PointLeafnum(origin) twice
+	 * for every PVS/PHS message. Was doing unnecessary check on client
+	 * location for PVS/PHS. Both minor performance hits.
+	 */
 
 	// if doing a serverrecord, store everything
 	if (svs.demofile)
 		SZ_Write (&svs.demo_multicast, sv.multicast.data, sv.multicast.cursize);
 
+	reliable = false;
+	mask     = NULL;
+	area1    = 0;
 	switch (to)
 	{
 	case MULTICAST_ALL_R:
 		reliable = true;	// intentional fallthrough
 	case MULTICAST_ALL:
-		leafnum = 0;
-		mask = NULL;
 		break;
 
 	case MULTICAST_PHS_R:
 		reliable = true;	// intentional fallthrough
 	case MULTICAST_PHS:
+		// location for source of the sound that may be hearable
 		leafnum = CM_PointLeafnum (origin);
+		area1   = CM_LeafArea (leafnum);
 		cluster = CM_LeafCluster (leafnum);
 		mask = CM_ClusterPHS (cluster);
 		break;
@@ -208,18 +203,19 @@ void SV_Multicast (vec3_t origin, multicast_t to)
 	case MULTICAST_PVS_R:
 		reliable = true;	// intentional fallthrough
 	case MULTICAST_PVS:
+		// location for entity or effect that may be visible
 		leafnum = CM_PointLeafnum (origin);
+		area1   = CM_LeafArea (leafnum);
 		cluster = CM_LeafCluster (leafnum);
 		mask = CM_ClusterPVS (cluster);
 		break;
 
 	default:
-		mask = NULL;
 		Com_Error (ERR_FATAL, "SV_Multicast: bad to:%i", to);
 	}
 
 	// send the data to all relevent clients
-	for (j = 0, client = svs.clients; j < maxclients->value; j++, client++)
+	for ( j=maxclients->integer, client=svs.clients ; j-- ; client++ )
 	{
 		if (client->state == cs_free || client->state == cs_zombie)
 			continue;
@@ -227,14 +223,15 @@ void SV_Multicast (vec3_t origin, multicast_t to)
 			continue;
 
 		if (mask)
-		{
+		{ // check for "hearable" or "visible"
+			// find cluster player is in
 			leafnum = CM_PointLeafnum (client->edict->s.origin);
 			cluster = CM_LeafCluster (leafnum);
+			if ( !(mask[cluster>>3] & (1<<(cluster & 7))) )
+				continue; // by cluster mask, player cannot see/hear this
 			area2 = CM_LeafArea (leafnum);
 			if (!CM_AreasConnected (area1, area2))
-				continue;
-			if ( mask && (!(mask[cluster>>3] & (1<<(cluster&7)) ) ) )
-				continue;
+				continue; // by leaf, player cannot see/hear this
 		}
 
 		if (reliable)
