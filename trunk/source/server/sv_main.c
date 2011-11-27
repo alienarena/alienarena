@@ -1112,8 +1112,13 @@ SV_Frame
 
 ==================
 */
+extern int sys_lasthang;
 void SV_Frame (int msec)
 {
+	int tmp_systime, tmp_hangtime;
+	static int old_systime = 0;
+	if (!old_systime)
+		old_systime = Sys_Milliseconds ();
 	time_before_game = time_after_game = 0;
 
 	// if server is not active, do nothing
@@ -1165,6 +1170,13 @@ void SV_Frame (int msec)
 
 	// clear teleport flags, etc for next frame
 	SV_PrepWorldFrame ();
+	
+	tmp_systime = Sys_Milliseconds ();
+	tmp_hangtime = tmp_systime-old_systime;
+	old_systime = tmp_systime;
+	if (tmp_hangtime > 150) {
+		sys_lasthang = tmp_systime;
+	}
 
 }
 
