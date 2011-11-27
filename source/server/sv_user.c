@@ -549,6 +549,7 @@ The current net_message is parsed for the given client
 ===================
 */
 int sys_msec_as_of_packet_read = 0;
+int sys_lasthang = 0;
 void SV_ExecuteClientMessage (client_t *cl)
 {
 	int		c;
@@ -646,12 +647,23 @@ void SV_ExecuteClientMessage (client_t *cl)
 					//elapsed, it is probably cheating.
 					cl->claimedmsec += newcmd.msec;
 					
+					if (cl->lasthang > sys_lasthang) {
+						//This can happen with an integer overflow
+						cl->lasthang = sys_lasthang;
+					}
+					
 					if (sys_msec_as_of_packet_read < cl->lastresettime) {
 						//This can happen with either a map change or an
 						//integer overflow after around 25 days on the same
 						//map. In this case, we just throw out all the data.
 						cl->lastresettime = sys_msec_as_of_packet_read;
 						cl->claimedmsec = 0;
+					} else if (sys_lasthang > cl->lasthang) {
+						//The server has hung on the boundary of the 12-
+						//second interval. The data is invalid.
+						cl->lastresettime = sys_msec_as_of_packet_read;
+						cl->claimedmsec = 0;
+						cl->lasthang = sys_lasthang;
 					} else if (sys_msec_as_of_packet_read - cl->lastresettime >= 12000) {
 						//This ratio should almost never be more than 1. If 
 						//it's more than 1.05, someone's probably trying to
