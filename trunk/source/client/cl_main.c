@@ -552,7 +552,7 @@ void CL_SendConnectPacket (void)
 
 	port = Cvar_VariableValue ("qport");
 	userinfo_modified = false;
-	
+
 	Netchan_OutOfBandPrint (NS_CLIENT, adr, "connect %i %i %i \"%s\"\n",
 		PROTOCOL_VERSION, port, cls.challenge, Cvar_Userinfo() );
 }
@@ -1182,7 +1182,7 @@ void CL_ConnectionlessPacket (void)
 		Netchan_OutOfBandPrint (NS_CLIENT, net_from, "%s", Cmd_Argv(1) );
 		return;
 	}
-	
+
 	if (!strcmp(c, "teamgame"))
 	{
 		server_is_team = atoi (Cmd_Argv(1));
@@ -1712,7 +1712,7 @@ redoSkins:
 
 	MSG_WriteByte (&cls.netchan.message, clc_stringcmd);
 	MSG_WriteString (&cls.netchan.message, va("begin %i\n", precache_spawncount) );
-	
+
 	{
 		netadr_t	adr;
 
@@ -1721,10 +1721,10 @@ redoSkins:
 			Com_Printf ("Bad address: %s\n",  cls.servername);
 			return;
 		}
-		 
+
 		// default true to avoid messing up legacy ctf servers
 		// legacy DM servers don't send visibility lights anyway
-		server_is_team = true; 
+		server_is_team = true;
 		Netchan_OutOfBandPrint (NS_CLIENT, adr, "teamgame\n");
 	}
 }
@@ -1891,7 +1891,7 @@ void CL_InitLocal (void)
 	//update checker
 	cl_latest_game_version = Cvar_Get("cl_latest_game_version", VERSION, CVAR_ARCHIVE);
 	cl_latest_game_version_url = Cvar_Get("cl_latest_game_version_server", "http://red.planetarena.org/version/crx_version", CVAR_ARCHIVE);
-	
+
 	//throwaway cvars
 	Cvar_Get("g_dm_lights", "1", CVAR_ARCHIVE); //mark this as archived even if game code doesn't run.
 
@@ -2402,9 +2402,9 @@ void CL_Frame( int msec )
 			/*
 			 * server checks for cmd.msecs to be <= 250
 			 */
-			cls.frametime = 0.24999f ;
 			Com_DPrintf("CL_Frame(): cls.frametime clamped from %0.8f to 0.24999\n",
 					cls.frametime );
+			cls.frametime = 0.24999f ;
 			/*
 			 * try to throttle the video frame rate by overriding the
 			 * render trigger.
