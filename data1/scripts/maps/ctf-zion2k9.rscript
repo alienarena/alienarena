@@ -17,14 +17,6 @@ textures/arena7/light5
 {
 	{
 		lensflare
-		colormap .5 .1 .1
-	}
-}
-textures/arena7/light9
-{
-	{
-		lensflare
-		colormap 0 .5 .5
 	}
 }
 textures/arena7/light10
@@ -120,6 +112,23 @@ textures/metal/fade2
 	}
 }
 textures/rage/light7
+{
+	{
+		map textures/arena5/lighta.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll sin 1 sin 0
+		anim .05
+			textures/arena5/lighta.tga
+			textures/arena5/lightb.tga
+			textures/arena5/lightc.tga
+			textures/arena5/lightd.tga
+			textures/arena5/lighte.tga
+			textures/arena5/lightf.tga
+		end
+	}
+}
+textures/rage/light8
 {
 	{
 		map textures/arena5/lighta.tga
