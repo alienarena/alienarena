@@ -838,14 +838,14 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 	case 0:
 		strafespeed   = 300;
 		jump_thresh   = 1.0f;  // never jump
-		crouch_thresh = 0.95f; // crouch much
+		crouch_thresh = 0.0f;  // never crouch
 		break;
 
 	case 1:
 	default:
 		strafespeed   = 400;
 		jump_thresh   = 0.95f;
-		crouch_thresh = 0.85f;
+		crouch_thresh = 0.85f; // crouch much
 		break;
 
 	case 2:
