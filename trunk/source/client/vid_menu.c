@@ -189,6 +189,7 @@ static void SetLowest( void *unused )
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
+	Cvar_SetValue("gl_usevbo", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 0);
@@ -212,6 +213,7 @@ static void SetLow( void *unused )
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 0);
 	Cvar_SetValue("gl_glsl_shaders", 0);
+	Cvar_SetValue("gl_usevbo", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
@@ -236,6 +238,7 @@ static void SetMedium( void *unused )
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("gl_usevbo", 0);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
@@ -260,6 +263,7 @@ static void SetHigh( void *unused )
 	Cvar_SetValue("gl_shadowmaps", 0);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("gl_usevbo", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
@@ -284,6 +288,7 @@ static void SetHighest( void *unused )
 	Cvar_SetValue("gl_shadowmaps", 1);
 	Cvar_SetValue("gl_glsl_postprocess", 1);
 	Cvar_SetValue("gl_glsl_shaders", 1);
+	Cvar_SetValue("gl_usevbo", 1);
 
 	//do other things that aren't in the vid menu per se, but are related "high end" effects
 	Cvar_SetValue("r_shaders", 1);
