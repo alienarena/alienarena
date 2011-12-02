@@ -1235,7 +1235,7 @@ void R_Register( void )
 
 	r_overbrightbits = Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE );
 
-	gl_usevbo = Cvar_Get("gl_usevbo", "0", CVAR_ARCHIVE );
+	gl_usevbo = Cvar_Get("gl_usevbo", "1", CVAR_ARCHIVE );
 
 	gl_mirror = Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE);
 
@@ -1356,7 +1356,6 @@ void R_SetLowest(void)
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 0);
 	Cvar_SetValue("gl_vlights", 0);
-	Cvar_SetValue("gl_usevbo", 0);
 
 	Com_Printf("...autodetected LOWEST game setting\n");
 }
@@ -1385,7 +1384,6 @@ void R_SetLow( void )
 	Cvar_SetValue("gl_dynamic", 0);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 0);
-	Cvar_SetValue("gl_usevbo", 0);
 
 	Com_Printf("...autodetected LOW game setting\n");
 }
@@ -1414,7 +1412,6 @@ void R_SetMedium( void )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
-	Cvar_SetValue("gl_usevbo", 0);
 
 	Com_Printf("...autodetected MEDIUM game setting\n");
 }
@@ -1443,7 +1440,6 @@ void R_SetHigh( void )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
-	Cvar_SetValue("gl_usevbo", 1);
 
 	Com_Printf("...autodetected HIGH game setting\n");
 }
@@ -1472,7 +1468,6 @@ void R_SetHighest( void )
 	Cvar_SetValue("gl_dynamic", 1);
 	Cvar_SetValue("gl_mirror", 1);
 	Cvar_SetValue("gl_vlights", 1);
-	Cvar_SetValue("gl_usevbo", 1);
 
 	Com_Printf("...autodetected HIGHEST game setting\n");
 }

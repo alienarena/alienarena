@@ -61,14 +61,14 @@ void Action_Draw( menuaction_s *a )
 {
 	if ( a->generic.flags & QMF_LEFT_JUSTIFY )
 	{
-		if ( a->generic.flags & QMF_GRAYED )
+		if ( !(a->generic.flags & QMF_GRAYED) )
 			Menu_DrawStringDark( a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET, a->generic.y + a->generic.parent->y, a->generic.name );
 		else
 			Menu_DrawString( a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET, a->generic.y + a->generic.parent->y, a->generic.name );
 	}
 	else
 	{
-		if ( a->generic.flags & QMF_GRAYED )
+		if ( !(a->generic.flags & QMF_GRAYED) )
 			Menu_DrawStringR2LDark( a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET, a->generic.y + a->generic.parent->y, a->generic.name );
 		else
 			Menu_DrawStringR2L( a->generic.x + a->generic.parent->x + LCOLUMN_OFFSET, a->generic.y + a->generic.parent->y, a->generic.name );
@@ -552,12 +552,12 @@ void Menu_Draw( menuframework_s *menu )
 			if(item->name && item->type == MTYPE_COLORACTION)
 				Menu_DrawFilteredString(menu->x + item->x - 24, menu->y + item->y, item->name);
 			else if(item->name)
-				Menu_DrawString(menu->x + item->x - 24, menu->y + item->y, item->name);
+				Menu_DrawStringDark(menu->x + item->x - 24, menu->y + item->y, item->name);
 		}
 		else
 		{
 			if(item->name)
-				Menu_DrawStringR2LDark(menu->x + item->x - 24, menu->y + item->y, item->name);
+				Menu_DrawStringR2L(menu->x + item->x - 24, menu->y + item->y, item->name);
 		}
 	}
 	else if ( item && item->type != MTYPE_FIELD ) //change to a "highlite"
