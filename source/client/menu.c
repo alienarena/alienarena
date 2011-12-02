@@ -3296,7 +3296,7 @@ static menuaction_s		s_modlist_movedown;
 static menuslider_s		s_modlist_scrollbar;
 
 int		m_num_servers;
-int		m_show_empty;
+int		m_show_empty = true;;
 
 #define	NO_SERVER_STRING	"<no server>"
 
@@ -3663,7 +3663,7 @@ void ModScrollMove ( void *self)
 	if(modidx > 18)
 		modidx = 18;
 }
-//join on double click, return info on single click
+//join on double click, return info on single click - to do - might consider putting player info in a tooltip on single click/right click
 void JoinServerFunc( void *self )
 {
 	char	buffer[128];
@@ -3783,6 +3783,7 @@ static void FilterEmptyFunc( void *unused )
 {
 	m_show_empty = s_joinserver_filterempty_action.curvalue;
 }
+
 void JoinServer_MenuInit( void )
 {
 	int i;
@@ -3796,15 +3797,17 @@ void JoinServer_MenuInit( void )
 		0
 	};
 
+	static int gotServers = false;
+
 	scale = (float)(viddef.height)/600;
 
 	banneralpha = 0.1;
 
-	m_show_empty = true;
-
-	STATS_getStatsDB();
-
-	getLatestGameVersion();
+	if(!gotServers)
+	{
+		STATS_getStatsDB();
+		getLatestGameVersion();
+	}
 
 	ValidatePlayerName( name->string, (strlen(name->string)+1) );
 	Q_strncpyz2( thisPlayer.playername, name->string, sizeof(thisPlayer.playername) );
@@ -3960,7 +3963,9 @@ void JoinServer_MenuInit( void )
 
 	Menu_Center( &s_joinserver_menu );
 
-	SearchLocalGames();
+	if(!gotServers)
+		SearchLocalGames();
+	gotServers = true;
 }
 
 void JoinServer_MenuDraw(void)
