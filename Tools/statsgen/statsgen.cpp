@@ -31,6 +31,9 @@
  * -DTEST_LOG for logging test/debug info to 'testlog' file
  *   (lots of data, but much or all of this could be removed after testing)
  *
+ * -DNONREG_LOG  for log players that fail verification to "nonreglog" file
+ *   uses crude method and file can grow quickly. it is emptied automatically.
+ *
  */
 
 #define WINDOWS_LEAN_AND_MEAN
@@ -39,10 +42,13 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <cstdlib>
+#include <cstdio>
 #include <ctime>
 #include <cctype>
 #include <cstring>
 #include <cassert>
+#include <io.h>
 
 #include <WinSock.h>
 #include "fce.h"
@@ -50,11 +56,25 @@
 
 using namespace std;
 
+/**
+ * file names
+ */
+const char playerdb_file[]  = "playerrank.db";
+const char tempdb_file[]    = "temp.db";
+const char validated_file[] = "validated";
+
 #if defined TEST_LOG
 /* test/debug log file */
 ofstream testlog;
 #endif
 
+#if defined NONREG_LOG
+/* a file for logging players that fail verification */
+ofstream nonreglog;
+#endif
+
+
+#define IPSZ 32
 typedef struct _PLAYERINFO {
 	char playername[32];
 	int ping;
@@ -65,14 +85,13 @@ typedef struct _PLAYERINFO {
 	int totalfrags;
 	double time;
 	double totaltime;
-	char ip[16];
+	char ip[IPSZ];  // crx reads upto 32 bytes
 	char remote_address[21];
 	int poll;
 } PLAYERINFO;
 
 typedef struct _SERVERINFO {
 	unsigned int ip;
-	//char host[256];
 	unsigned short port;
 	char szHostName[256];
 	char szMapName[256];
@@ -119,13 +138,6 @@ double pollTally = 0;
 double OLplayerTally = 0;
 
 SOCKET master;
-
-//Error flags.
-// TODO: either complete this, or throw it out
-const unsigned db_ifs  = 0x01;
-const unsigned db_ofs  = 0x02;
-const unsigned db_open = 0x04;
-unsigned global_fail = 0;
 
 /*
  * Strings for HTML Color
@@ -182,6 +194,25 @@ inline int ColorIndex( const char* c )
 }
 
 /**
+ * Check for poor player name choice.
+ *
+ * "Player" and variations are filtered out.
+ *
+ * @param playername   name string
+ * @return true if name should be filtered out, false otherwise
+ */
+bool PoorNameChoice( const char* playername )
+{
+	bool result = false;
+
+	if ( !_strnicmp( playername, "Player", 6 ) )
+	{ //using a default name or a variation thereof
+		result = true;
+	}
+	return result;
+}
+
+/**
  * Check for name containing visible characters
  *
  * return  true if name has visible chars, false otherwise
@@ -207,7 +238,7 @@ bool VisibleName( char *namestr )
  *  Prevents bogus eof when player name is a null string.
  *  Also filters out names with no displayable characters.
  *
- * infile    ifstream reference to the source file
+ * infile    stream reference to the source file
  * dst_name  pointer to string storage
  * dstsize   max size of string storage
  */
@@ -227,7 +258,7 @@ void GetPlayerName( FstreamType& infile, char *dst_name, size_t dstsize )
 		}
 	}
 	else
-	{ // empty name string or eof
+	{ //empty name string or eof
 		dst_name[0] = infile.get(); // nul
 		if ( infile.peek() == '\n')
 		{
@@ -238,7 +269,7 @@ void GetPlayerName( FstreamType& infile, char *dst_name, size_t dstsize )
 
 /**
  * Search the list of currently validated players from AccountServ
- * 
+ *
  * name    the player's name string to check
  * return  true if player is logged in, false otherwise
  */
@@ -257,7 +288,7 @@ bool VerifyPlayer (char *name)
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -268,7 +299,7 @@ bool VerifyPlayer (char *name)
  * totaltime    accumulated game time
  * returns      points for ranking
  */
-double RankingPoints (char* playername, double totalpoints, double totaltime)
+double RankingPoints( double totalpoints, double totaltime )
 {
 
 	if ( totalpoints < 0.0 || totaltime < 1.0 )
@@ -284,99 +315,80 @@ double RankingPoints (char* playername, double totalpoints, double totaltime)
 }
 
 /**
- * Get player info for a real person player actively in the game.
- * Add to the database, if not already there.
+ * Calculate hash value for servers current map
  *
- * Bots and non-validated players should never get here.
- *
- *  player  PLAYERINFO record with name
- *  returns PLAYERINFO record with rest of data, including current rank
- *
+ * mapname  map name string
+ * returns  hash integer
  */
-PLAYERINFO LoadPlayerInfo (PLAYERINFO player)
+
+unsigned short MapNameHash( const char* mapname )
 {
-	char name[32],
-		points[32],
-		frags[32],
-		totalfrags[32],
-		time[16],
-		totaltime[16],
-		ip[16],
-		poll[16],
-		remote_address[21];
-	bool foundplayer;
+	unsigned short hashnum = 1259;
+	const char* pc = mapname;
 
-	fstream dbfile( "playerrank.db" );
-	if ( !dbfile )
+	assert( mapname != NULL );
+
+	//quick and dirty, no attempt to make a perfect hash
+	while ( *pc )
 	{
-		global_fail |= db_open;
-		cout << "[E] LoadPlayerInfo: playerrank.db open failed." << endl;
-		name[0] = '\0';
-		return player;
+		hashnum += (unsigned short)(*pc++) * 3;
 	}
+	return hashnum;
+}
 
-	player.rank = 1;
-	foundplayer = false;
-	for (;;)
+
+/**
+ *  Swap the tempdb_file in place of the playerdb_file
+ */
+void RemoveAndRename( void )
+{
+	/* Seems there are sometimes problems doing the remove and rename.
+	 */
+	//remove the original file
+	int retry=4 ;
+	do
 	{
-		//get the next record
-		GetPlayerName( dbfile, name, 32 );
-		dbfile.getline( remote_address, 21 ); //remote address
-		dbfile.getline( points, 32 ); //points
-		dbfile.getline( frags, 32 ); //frags
-		dbfile.getline( totalfrags, 32 ); //total frags
-		dbfile.getline( time, 16 ); //current time in poll
-		dbfile.getline( totaltime, 16 );
-		dbfile.getline( ip, 16 ); //last server.ip
-		dbfile.getline( poll, 16 ); //what poll was our last?
-		if ( dbfile.eof() )
+		switch ( --retry )
 		{
+		case 3:
 			break;
+		case 2:
+		case 1:
+		default:
+			Sleep(5);
+			break;
+		case 0:
+			cerr << "[E] RemoveAndRename: cannot remove " << playerdb_file
+					<< ". " << strerror( errno ) << endl;
+			exit(1);
 		}
+		remove( playerdb_file );
+	}
+	while ( _access_s( playerdb_file, 0 ) == 0 ); //file exists
 
-		if ( !strcmp( player.playername, name ) )
-		{ //found this player
-			player.points = atof( points );
-			player.frags = atoi( frags );
-			player.totalfrags = atoi( totalfrags );
-			player.time = atof( time );
-			player.totaltime = atof( totaltime );
-			strcpy( player.ip, ip );
-			player.poll = atoi( poll );
-			foundplayer = true;
-			break; //get out we are done
+	//and rename the output file
+	retry=4 ;
+	do
+	{
+		switch ( --retry )
+		{
+		case 3:
+			break;
+		case 2:
+		case 1:
+		default:
+			Sleep(5);
+			break;
+		case 0:
+			cerr << "[E] RemoveAndRename: cannot rename " << tempdb_file
+					<< " to " << playerdb_file << ". "
+					<< strerror( errno ) << endl;
+			exit(1);
 		}
-		player.rank++ ;
+		rename( tempdb_file, playerdb_file );
 	}
+	while ( _access_s( tempdb_file, 0 ) == 0 ); //file exists
 
-	if ( !foundplayer && strlen( player.playername ) )
-	{ //player not already in database, add to end with defaults
-		//don't write out blank player names, should not get here anyway
-
-		dbfile.seekg( 0, ios::end );
-
-		dbfile << player.playername << '\n';
-		dbfile << "127.0.0.1" << '\n';
-		dbfile << "0" << '\n';
-		dbfile << "0" << '\n';
-		dbfile << "0" << '\n';
-		dbfile << ".008" << '\n';
-		dbfile << "1.0" << '\n';
-		dbfile << "my ip" << '\n';
-		dbfile << currentpoll << endl;
-
-		strcpy( player.remote_address, "127.0.0.1" );
-		player.points     = 0;
-		player.frags      = 0;
-		player.totalfrags = 0;
-		player.totaltime  = 1.0;
-		player.time       = .008;
-		strcpy( player.ip, "my ip" );
-		player.poll       = currentpoll;
-	}
-	dbfile.close();
-
-	return player;
 }
 
 /**
@@ -392,7 +404,7 @@ void ReInsertPlayer (PLAYERINFO player )
 		totalfrags[32],
 		time[16],
 		totaltime[16],
-		ip[16],
+		ip[IPSZ],
 		poll[16],
 		remote_address[21];
 	int inserted;
@@ -401,100 +413,104 @@ void ReInsertPlayer (PLAYERINFO player )
 	double rankpoints_other;
 
 	if ( strlen(player.playername) > 0 )
-	{
-		rankpoints_player = RankingPoints( player.playername, player.points, player.totaltime );
+	{ //ranking points for this player
+		rankpoints_player =	RankingPoints( player.points, player.totaltime );
 	}
 	else
 	{ //should not happen, but if it does...
 		return;
 	}
 
-	ifstream infile( "playerrank.db" );
-	if ( infile.peek() == EOF )
-	{ // empty file, add player
-		infile.close();
-		ofstream initdb( "playerrank.db", ios::trunc );
-		initdb << player.playername << '\n';
-		initdb << player.remote_address << '\n';
-		initdb << player.points << '\n';
-		initdb << player.frags << '\n';
-		initdb << player.totalfrags << '\n';
-		initdb << player.time << '\n';
-		initdb << player.totaltime << '\n';
-		initdb << player.ip << '\n';
-		initdb << player.poll << endl;
-		initdb.close();
+	ifstream idbfile( playerdb_file );
+	if ( !idbfile )
+	{
+		cerr << "[E] ReInsertPlayer: " << playerdb_file << " open failed. "
+			<< strerror(errno) << endl;
+		exit(1);
+	}
+	if ( idbfile.peek() == EOF )
+	{ //empty file, add first player
+		idbfile.close();
+		ofstream odbfile( playerdb_file );
+		odbfile.seekp( 0, ios::beg );
+		odbfile << player.playername     << '\n';
+		odbfile << player.remote_address << '\n';
+		odbfile << player.points         << '\n';
+		odbfile << player.frags          << '\n';
+		odbfile << player.totalfrags     << '\n';
+		odbfile << player.time           << '\n';
+		odbfile << player.totaltime      << '\n';
+		odbfile << player.ip             << '\n';
+		odbfile << player.poll           << endl;
+		odbfile.flush();
+		odbfile.close();
 		return;
 	}
 
-	if ( !infile )
-	{
-		cout << "[E] ReInsertPlayer: playerrank.db open failed" << endl;
-		return;
-	}
-	ofstream outfile("temp.db", ios::trunc );
+	ofstream outfile( tempdb_file, ios::trunc );
 	if ( !outfile )
 	{
-		infile.close();
-		cout << "[E] ReInsertPlayer: temp.db open failed" << endl;
-		return;
+		idbfile.close();
+		cerr << "[E] ReInsertPlayer: " << tempdb_file << " open failed. "
+			<< strerror(errno) << endl;
+		exit(1);
 	}
 
-	if( infile.good() && outfile.good() )
+	if( idbfile.good() && outfile.good() )
 	{
+		//place this player in the rank ordered database
+		//limited to 1000 ranked positions. with 50 extra.
 		inserted = false;
 		total_players = 0;
-
-		//the idea of this is, when rebuilding this file, keep it to a reasonable size
-		//we only be tracking the top 1000 players then.
-		//with an extra 50 slots to handle overflow. Scoring requires that
-		//active players are in the database.
 		while ( total_players < 1050 )
 		{
-			GetPlayerName( infile, name, 32 );
-			infile.getline(remote_address, 21);
-			infile.getline(points, 32);
-			infile.getline(frags, 32);
-			infile.getline(totalfrags, 32);
-			infile.getline(time, 16);
-			infile.getline(totaltime, 16);
-			infile.getline(ip, 16);
-			infile.getline(poll, 16);
-			if ( infile.eof() )
+			GetPlayerName( idbfile, name, 32 );
+			idbfile.getline(remote_address, 21);
+			idbfile.getline(points, 32);
+			idbfile.getline(frags, 32);
+			idbfile.getline(totalfrags, 32);
+			idbfile.getline(time, 16);
+			idbfile.getline(totaltime, 16);
+			idbfile.getline(ip, IPSZ);
+			idbfile.getline(poll, 16);
+			if ( idbfile.eof() )
 			{
 				break;
 			}
 
-			if ( !inserted && strlen(name) && strcmp( player.playername, name ))
-			{ //not in yet, somebody is, and its not me.
-				rankpoints_other = RankingPoints(name, atof( points ), atof( totaltime ));
+			if ( !inserted
+				&& strlen(name)
+				&& strcmp( player.playername, name ))
+			{ //not inserted yet, somebody is, and its not me.
+				//rankpoints for player in database
+				rankpoints_other = RankingPoints( atof( points ), atof( totaltime ));
 				if ( rankpoints_other < rankpoints_player )
 				{ //this will add new ranking
 					//and I win!
-					outfile << player.playername << '\n';
+					outfile << player.playername     << '\n';
 					outfile << player.remote_address << '\n';
-					outfile << player.points << '\n';
-					outfile << player.frags << '\n';
-					outfile << player.totalfrags << '\n';
-					outfile << player.time << '\n';
-					outfile << player.totaltime << '\n';
-					outfile << player.ip << '\n';
-					outfile << player.poll << endl;
+					outfile << player.points         << '\n';
+					outfile << player.frags          << '\n';
+					outfile << player.totalfrags     << '\n';
+					outfile << player.time           << '\n';
+					outfile << player.totaltime      << '\n';
+					outfile << player.ip             << '\n';
+					outfile << player.poll           << endl;
 					inserted = true;
 				}
 			}
 
 			if ( strcmp(name, player.playername) && strlen(name) )
 			{ //output other player records, this will remove old ranking
-				outfile << name << endl;
-				outfile << remote_address << endl;
-				outfile << points << endl;
-				outfile << frags << endl;
-				outfile << totalfrags << endl;
-				outfile << time << endl;
-				outfile << totaltime << endl;
-				outfile << ip << endl;
-				outfile << poll << endl;
+				outfile << name           << '\n';
+				outfile << remote_address << '\n';
+				outfile << points         << '\n';
+				outfile << frags          << '\n';
+				outfile << totalfrags     << '\n';
+				outfile << time           << '\n';
+				outfile << totaltime      << '\n';
+				outfile << ip             << '\n';
+				outfile << poll           << endl;
 			}
 			total_players++;
 
@@ -503,40 +519,33 @@ void ReInsertPlayer (PLAYERINFO player )
 		{ //worst player ever!
 			if(strlen(player.playername))
 			{
-				outfile << player.playername << endl;
-				outfile << player.remote_address << endl;
-				outfile << player.points << endl;
-				outfile << player.frags << endl;
-				outfile << player.totalfrags << endl;
-				outfile << player.time << endl;
-				outfile << player.totaltime << endl;
-				outfile << player.ip << endl;
-				outfile << player.poll << endl;
+				outfile << player.playername     << '\n';
+				outfile << player.remote_address << '\n';
+				outfile << player.points         << '\n';
+				outfile << player.frags          << '\n';
+				outfile << player.totalfrags     << '\n';
+				outfile << player.time           << '\n';
+				outfile << player.totaltime      << '\n';
+				outfile << player.ip             << '\n';
+				outfile << player.poll           << endl;
 			}
 		}
-		infile.close();
+		idbfile.close();
 		outfile.close();
 	}
 	else
 	{
-		infile.close();
+		idbfile.close();
 		outfile.close();
-		global_fail |= db_ifs | db_ofs;
-		cout << "[E] ReInsertPlayer: good() file checks failed" << endl;
-		return;
+		cerr << "[E] ReInsertPlayer: good() file checks failed" << endl;
+		exit(1);
 	}
 
-	// swap in the new playerrank.db
-	if ( remove("playerrank.db") != 0 )
-	{
-		cout << "[E] ReInsertPlayer: remove of playerrank.db failed. " << strerror(errno) << endl;
-	}
-	if ( rename("temp.db", "playerrank.db") != 0 )
-	{
-		cout << "[E] ReInsertPlayer: rename from temp.db to playerrank.db failed." << endl;
-	}
+	//outfile becomes new player database
+	RemoveAndRename();
 
 }
+
 
 /**
  * Update scoring from server status response
@@ -548,17 +557,34 @@ void ProcessPlayers (SERVERINFO *server)
 	int i, j;
 	double total_score;
 	SOCKADDR_IN addr;
-	char server_ip[16];
 	int realpeeps;
 	double prop_score[64];
 	double sum_prop_score;
 	double total_score_factor;
 	PLAYERINFO player_info;
+	char server_record[IPSZ];
+	bool foundplayer;
+	char name[32],
+		points[32],
+		frags[32],
+		totalfrags[32],
+		time[16],
+		totaltime[16],
+		ip[IPSZ],
+		poll[16],
+		remote_address[21];
+#if defined TEST_LOG
+	char* state_info;
+#endif
 
-	//convert the ip to a string
+	//convert the servers IP addr
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_addr.S_un.S_addr = server->ip;
-	sprintf (server_ip, "%s", inet_ntoa(addr.sin_addr));
+	//server addr with port and a map name hash value to help distinguish games.
+	//not perfect, but an improvement on ip address only
+	sprintf (server_record, "%s:%hu,%hu",
+		inet_ntoa(addr.sin_addr), server->port,
+		MapNameHash( server->szMapName ) );
 
 	/*
 	 * load the player information for this server's current poll
@@ -567,93 +593,223 @@ void ProcessPlayers (SERVERINFO *server)
 	total_score = 0.0;
 	for ( j = 0, i = 0; i < server->curClients ; i++ )
 	{
-		//check early for bots, and equivalents
-		//  LoadPlayerInfo() would insert them in database.
-		if ( server->players[i].ping == 0 )
-		{ //bots and connecting players
+		if ( !VisibleName( server->players[i].playername ) )
+		{ //no graphic chars in name, reject
 			continue;
 		}
-		if ( strlen( server->players[i].playername ) == 0  )
-		{ //empty name string
-			//same as bots, no effect on scoring and ranking
+		if ( PoorNameChoice( server->players[i].playername ) )
+		{ //"Player" variations, for example
 			continue;
 		}
-		if ( !VerifyPlayer( server->players[i].playername ) )
-		{ //spoofed or non-registered
-			//same as bots, no effect on scoring and ranking
-
-			// TODO: log this ?
-
-			continue;
-		}
-		if ( !strcmp( server->players[i].playername, "Player" ) )
-		{ //exact match to default player name
-			//not unusual for multiple players online simultaneously with this name
-			//which would mess up scoring badly
-			continue;
-		}
-
-		//complete record generated from server info and database
-		player_info = LoadPlayerInfo( server->players[i] );
-		if ( strlen( player_info.playername) == 0 )
-		{ // this should not happen
-			cout << "[E] ProcessPlayers: LoadPlayerInfo() null string program error" << endl;
-			continue;
-		}
-
-		if ( player_info.poll != currentpoll-1
-			|| strcmp( player_info.ip, server_ip )	)
-		{ //first poll on this server for this player
-			//set time to minimum
-			if(realDelay > 30)
+		if ( !VerifyPlayer( server->players[i].playername) )
+		{ //spoofed or non-registered name, reject
+#if defined NONREG_LOG
+			if ( server->players[i].ping > 0 )
 			{
-				player_info.time = (realDelay * .008/30);
+				nonreglog << server->players[i].playername
+						<< ", [" << server->szHostName << ']'
+						<< endl;
+			}
+#endif
+			continue;
+		}
+
+		//open the player database
+		fstream dbfile( playerdb_file );
+		if ( !dbfile )
+		{
+			cerr << "[E] ProcessPlayers: " << playerdb_file << " open failed. "
+				<< strerror(errno) << endl;
+			exit(1);
+		}
+		foundplayer = false;
+		player_info.rank = 1;
+		for (;;)
+		{
+			/*
+			 * search database for player
+			 */
+			GetPlayerName( dbfile, name, 32 );
+			dbfile.getline( remote_address, 21 );
+			dbfile.getline( points, 32 );
+			dbfile.getline( frags, 32 );
+			dbfile.getline( totalfrags, 32 );
+			dbfile.getline( time, 16 );
+			dbfile.getline( totaltime, 16 );
+			dbfile.getline( ip, IPSZ );
+			dbfile.getline( poll, 16 );
+			if ( dbfile.eof() )
+			{
+				break;
+			}
+
+			if ( !strcmp( server->players[i].playername, name ) )
+			{ //found this player
+				strcpy( player_info.playername, name );
+				strcpy( player_info.remote_address, remote_address );
+				player_info.points     = atof( points );
+				player_info.frags      = atoi( frags );
+				player_info.totalfrags = atoi( totalfrags );
+				player_info.time       = atof( time );
+				player_info.totaltime  = atof( totaltime );
+				strcpy( player_info.ip, server_record );
+				player_info.poll       = atoi( poll );
+				foundplayer = true;
+				break;
+			}
+			player_info.rank++ ;
+		}
+
+		if ( !foundplayer )
+		{ //player not in database
+			if ( server->players[i].ping > 0 && server->players[i].score > 0 )
+			{ //player is not a bot and has some score
+				strcpy( player_info.playername, server->players[i].playername );
+				strcpy( player_info.remote_address, "127.0.0.1" );
+				player_info.points     = 0.0;
+				player_info.frags      = 0;
+				player_info.totalfrags = 0;
+				player_info.time       = 0.0;
+				player_info.totaltime  = 1.0;
+				strcpy( player_info.ip, "my ip" );
+				player_info.poll       = currentpoll;
+				player_info.ping       = server->players[i].ping;
+				player_info.score      = server->players[i].score;
+				if(realDelay > 30)
+				{
+					player_info.time += (realDelay * .008/30);
+				}
+				else
+				{
+					player_info.time += .008;
+				}
+
+				dbfile.seekg( 0, ios::end );
+				dbfile << player_info.playername     << '\n';
+				dbfile << player_info.remote_address << '\n';
+				dbfile << player_info.points         << '\n';
+				dbfile << player_info.frags          << '\n';
+				dbfile << player_info.totalfrags     << '\n';
+				dbfile << player_info.time           << '\n';
+				dbfile << player_info.totaltime      << '\n';
+				dbfile << player_info.ip             << '\n';
+				dbfile << player_info.poll           << endl;
+
+				//add to active list
+				server->players[j++] = player_info;
+				++realpeeps;
+				//accumulate game total score for qualified players
+				total_score += (double)player_info.score;
+				dbfile.close();
 			}
 			else
-			{
-				player_info.time  = .008;
+			{ //bot, or inactive player
+				dbfile.close();
+				continue;
 			}
-		}
-
-		if ( player_info.score > 0 )
-		{ //add active, real player to the player list
-			//note: overwrites record at or before current 'i'
-			server->players[j++] = player_info;
-			++realpeeps;
-			//accumulate total score for qualified players
-			total_score += (double)player_info.score;
 		}
 		else
-		{ //possibly downloading, idling, or just doing poorly.
-			// need to initialize time and reinsert, otherwise
-			// time could be 0, screwing up prop_score calc
+		{ //player is in database
+			dbfile.close();
+
+			if ( player_info.poll != currentpoll-1
+					|| strcmp( player_info.ip, server_record )	)
+			{ //first poll on this server and map for this player
+				//just entered this game, init per-game time and score
+				player_info.frags = 0;
+				player_info.time  = 0.0;
+			}
+			//update to current poll
+			player_info.poll = currentpoll;
+			//update server record for player. with IP:PORT,MAPHASH
+			strcpy( player_info.ip, server_record );
+			//accumulate time for this game
 			if(realDelay > 30)
 			{
-				player_info.time = (realDelay * .008/30);
+				player_info.time += (realDelay * .008/30);
 			}
 			else
 			{
-				player_info.time  = .008;
+				player_info.time += .008;
 			}
-			player_info.frags = 0;
-			// TODO: not too sure setting about setting frags.
-			//  question is, when player becomes active,
-			//  what should stored values be?
-			ReInsertPlayer( player_info );
+			//update ping as reported by server
+			player_info.ping  = server->players[i].ping;
+			//update score for this game
+			player_info.score = server->players[i].score;
+
+			if ( player_info.score > 0 )
+			{ //add active, real player to the player list
+				//note: overwrites record at or before current 'i'
+				server->players[j++] = player_info;
+				++realpeeps;
+				//accumulate game total score for qualified players
+				total_score += (double)player_info.score;
+#if defined TEST_LOG
+				if ( player_info.time == 0.0 )
+				{
+					state_info = "init,active";
+				}
+				else
+				{
+					state_info = "active";
+				}
+#endif
+			}
+			else
+			{ //possibly downloading, idling, or just doing poorly.
+				//do not include in current scoring
+				//if score goes positive on later poll
+				// set up to be sort of like just entering the game
+				player_info.time  = 0.0;
+				player_info.frags = 0;
+				ReInsertPlayer( player_info );
+#if defined TEST_LOG
+				if ( player_info.time == 0.0 )
+				{
+					state_info = "init,inactive";
+				}
+				else
+				{
+					state_info = "inactive";
+				}
+#endif
+			}
 		}
-	}
+
+#if defined TEST_LOG
+		testlog << player_info.playername
+			<< " state_info: "  << state_info
+			<< " points: "      << player_info.points
+			<< " time: "        << player_info.time
+			<< " frags: "       << player_info.frags
+			<< " totaltime: "	<< player_info.totaltime
+			<< " totalfrags: "  << player_info.totalfrags
+			<< " poll: "        << player_info.poll
+			<< " ip: "          << player_info.ip << endl ;
+#endif
+
+	} /* end of active player load loop */
+
 	assert( j == realpeeps );
 	if ( realpeeps == 0 )
 	{ //early return if no active, real players in list
 		return;
 	}
-	else if ( realpeeps == 1 )
-	{ //only 1, nothing counts. init time and frags increments, and reinsert
-		player_info.time  = .008;
-		player_info.frags = 0;
-		ReInsertPlayer( player_info );
-	}
 	assert( total_score > 0.0 );
+	if ( realpeeps == 1 )
+	{ //only 1 active, verified player. update game frags and return.
+		//.time will used if realpeeps becomes >1 in a later poll for this game
+		//not really correct would need to have some way to subtract time and
+		//score that was accumulated before another realpeep entered game.
+		//.totalfrags and .totaltime should still be correct though.
+		server->players[0].frags = server->players[0].score;
+		ReInsertPlayer( server->players[0] );
+#if defined TEST_LOG
+			testlog << "One realpeep: "
+					<< server->players[0].playername << endl;
+#endif
+		return;
+	}
 
 	/*
 	 * a factor used to compensate for low total score
@@ -753,6 +909,8 @@ void ProcessPlayers (SERVERINFO *server)
 			}
 			else if ( prop_score[i] > prop_score[j] )
 			{
+				//a problem here is that it is easier to have a larger
+				//difference in proportional scores in CTF.
 				new_points = (prop_score[i] - prop_score[j]) - total_score_factor;
 				if ( new_points < points_epsilon )
 				{ //use an epsilon to avoid floating point instability
@@ -778,36 +936,29 @@ void ProcessPlayers (SERVERINFO *server)
 	{ //for each player in the server's filtered list, re-insert in database
 		//separate loop to be (paranoid) sure that changes don't affect scoring
 
-		//first tally up total frags by comparing with our last poll's number
-		//(only if player is currently in consecutive polls)
-		if(server->players[i].poll == currentpoll-1)
-		{
-			if((server->players[i].score - server->players[i].frags) > 0)
-			{ //record only positive increment in frags
-				//score is current frags for game, frags is previously tallied frags
-				server->players[i].totalfrags +=
-					(server->players[i].score - server->players[i].frags);
-			}
+		//tally up total frags by comparing with our last poll's number
+		//score is current frags for game, frags is previously tallied frags
+		int new_frags = server->players[i].score - server->players[i].frags;
+		if( new_frags > 0 )
+		{ //record only positive increment in frags
+			server->players[i].totalfrags += new_frags;
 		}
-		//update to current frags, poll, time and server ip
-		//and reinsert player into database with new values
-		//the time increment can adjust to the polling interval
+		//update to current frags
 		server->players[i].frags = server->players[i].score;
-		server->players[i].poll = currentpoll;
+		//accumulate total time
 		if(realDelay > 30) {
-			server->players[i].time      += (realDelay * .008/30);
 			server->players[i].totaltime += (realDelay * .008/30);
 		}
 		else {
-			server->players[i].time      += (.008);
 			server->players[i].totaltime += (.008);
 		}
-		strcpy(server->players[i].ip, server_ip); //we are in this server now
+		//reinsert player into database with new values
 		ReInsertPlayer(server->players[i]);
 #if defined TEST_LOG
 		testlog << "  " << server->players[i].playername
-				<< " .time: " << server->players[i].time
-				<< " .points: " << server->players[i].points << '\n';
+				<< " .totaltime: " << server->players[i].totaltime
+				<< " .totalfrags: " << server->players[i].totalfrags
+				<< " .points: "    << server->players[i].points << endl;
 #endif
 	} //for each player
 #if defined TEST_LOG
@@ -817,6 +968,9 @@ void ProcessPlayers (SERVERINFO *server)
 
 /**
  * Query the master for current servers
+ *
+ * returns  global numServers set to number of servers in server list.
+ *          may be zero.
  */
 void GetServerList (void)
 {
@@ -828,58 +982,82 @@ void GetServerList (void)
 	struct sockaddr_in dgFrom;
 	char recvBuff[0xFFFF], *p;
 
-	hp = gethostbyname ("master.corservers.com");
-	if (!hp) {
-		printf("couldn't resolve master server");
-		return; //couldn't resolve master server
+	numServers = 0; //global return value
+
+	for ( i=3 ; i-- ;)
+	{
+		hp = gethostbyname ("master.corservers.com");
+		if ( hp )
+			break;
+		Sleep( 1000 );
+		cerr << "Could not resolve master server, retrying" << endl;
 	}
+	if ( !hp )
+		return;
 
 	memset (recvBuff, 0, sizeof(recvBuff));
 
-	for (i = 0; i < 3; i++) {
+	for ( i=3 ; i-- ; )
+	{
 		dgFrom.sin_family = AF_INET;
-		dgFrom.sin_port = htons (27900);
+		dgFrom.sin_port   = htons (27900);
 		memset (&dgFrom.sin_zero, 0, sizeof(dgFrom.sin_zero));
 		memcpy (&dgFrom.sin_addr, hp->h_addr_list[0], sizeof(dgFrom.sin_addr));
 
-		result = sendto (master, "query", 5, 0, (const struct sockaddr *)&dgFrom, sizeof (dgFrom));
-		if (result == SOCKET_ERROR) {
-			return; //couldn't contact master server
+		result = sendto( master, "query", 5, 0,
+		        (const struct sockaddr *)&dgFrom, sizeof(dgFrom) );
+		if ( result == -1 )
+		{
+			Sleep( 1000 );
+			cerr << "Master server send failed. Retrying" << endl;
+			continue;
 		}
+
 		memset (&stoc, 0, sizeof(stoc));
 		FD_SET (master, &stoc);
 		delay.tv_sec = 2;
 		delay.tv_usec = 0;
 		result = select (0, &stoc, NULL, NULL, &delay);
-		if (result) {
+		if ( result == -1 )
+		{
+			cerr << "Master server select failed. Retrying." << endl;
+			continue;
+		}
+		if (result)
+		{
 			int fromlen = sizeof(dgFrom);
-			result = recvfrom (master, recvBuff, sizeof(recvBuff), 0, (struct sockaddr *)&dgFrom, &fromlen);
-			if (result >= 0) {
-				break;
-			} else if (result == -1) {
-				return; //couldn't contact master server
+			result = recvfrom( master, recvBuff, sizeof(recvBuff), 0,
+			        (struct sockaddr *)&dgFrom, &fromlen );
+			if ( result <= -1 )
+			{
+				cerr << "Master server receive failed. Retrying." << endl;
+				continue;
 			}
+			break;
 		}
 	}
-
-	if (!result) {
+	if ( result <= 0 )
+	{
 		return; //couldn't contact master server
 	}
 
+	//server entries start after first 12 bytes of message
 	p = recvBuff + 12;
-
 	result -=12;
+	while ( result > 0 )
+	{
+		servers[numServers].temporary = 1; // what is this for?
 
-	numServers = 0;
-
-	while (result) {
-		servers[numServers].temporary = 1;
-		memcpy (&servers[numServers].ip, p, sizeof (servers[numServers].ip));
+		//read 32 bit IP address (network byte order)
+		memcpy( &servers[numServers].ip, p, sizeof (servers[numServers].ip) );
 		p += 4;
+
+		//get port, convert to host byte order.
 		memcpy (&servers[numServers].port, p, sizeof (servers[numServers].port));
 		servers[numServers].port = ntohs(servers[numServers].port);
 		p += 2;
-		result -= 6;
+
+		result -= 6; //6 bytes per server entry
 
 		if (++numServers == 128)
 			break;
@@ -889,17 +1067,16 @@ void GetServerList (void)
 /**
  * Read the logged in players list from Account Server
  */
-void GetValidatedPlayers (void)
+bool GetValidatedPlayers (void)
 {
 	int index = 0;
-
 	validated.count = 0;
-
-	ifstream infile( "validated" );
+	ifstream infile( validated_file );
 	if ( !infile )
 	{
-		cout << "[E] GetValidatedPlayers: validated file failed open." << endl;
-		return;
+		cerr  << "[E] GetValidatedPlayers: "<< validated_file << " open failed. "
+				<< strerror( errno ) << endl;
+		exit(1);
 	}
 
 	for (;;)
@@ -912,11 +1089,13 @@ void GetValidatedPlayers (void)
 		++validated.count;
 		if ( index >= VALIDATED_SIZE )
 		{
-			cout << "[E] GetValidatedPlayers: overflow." << endl;
+			cerr << "[E] GetValidatedPlayers: overflow." << endl;
+			exit(1);
 		}
 	}
 	infile.close();
 
+	return true;
 }
 
 /**
@@ -1094,9 +1273,11 @@ void PingServers (SERVERINFO *server)
 		//process this server's players
 		ProcessPlayers(server);
 
-	} else {
-		//printf ("No response from %s:%d", inet_ntoa (addr.sin_addr), server->port);
 	}
+//	else
+//	{
+//		printf ("No response from %s:%d", inet_ntoa (addr.sin_addr), server->port);
+//	}
 	if (s)
 		closesocket(s);
 }
@@ -1117,26 +1298,27 @@ void CullDatabase  (void)
 		totalfrags[32],
 		time[16],
 		totaltime[16],
-		ip[16],
+		ip[IPSZ],
 		poll[16],
 		remote_address[21];
 	int input_count;
 	int output_count;
+	int player_poll;
+	double player_points;
 
-	ofstream outfile( "temp.db" );
+
+	ofstream outfile( tempdb_file );
 	if ( !outfile )
 	{
-		global_fail |= db_ofs;
-		cout << "[E] CullDatabase: temp.db open fail." << endl;
-		return;
+		cout << "[E] CullDatabase: "<< tempdb_file << "open failed." << endl;
+		exit(1);
 	}
-	ifstream infile( "playerrank.db" );
+	ifstream infile( playerdb_file );
 	if ( !infile )
 	{
 		outfile.close();
-		global_fail = db_ifs;
-		cout << "[E] CullDatabase: playerrank.db open fail." << endl;
-		return;
+		cout << "[E] CullDatabase: " << playerdb_file <<  " open failed." << endl;
+		exit(1);
 	}
 
 	output_count = input_count = 0;
@@ -1154,7 +1336,7 @@ void CullDatabase  (void)
 		infile.getline(totalfrags, 32);
 		infile.getline(time, 16);
 		infile.getline(totaltime, 16);
-		infile.getline(ip, 16);
+		infile.getline(ip, IPSZ);
 		infile.getline(poll, 16);
 		if ( infile.eof() || infile.bad() )
 		{
@@ -1163,64 +1345,55 @@ void CullDatabase  (void)
 		++input_count;
 
 		//Culling Criteria
-		if ( atoi(poll) != currentpoll )
-		{ //not currently in game. (that would screw up point calcs)
-			// NOTE: non-verified players and players with empty name strings
-			//  should not be in the database and have no effect on scoring.
-			if ( strlen( name ) == 0 )
-			{
-#if defined TEST_LOG
-				testlog << "  culled for null name string @ " << input_count << endl;
-#endif
-				continue;
-			}
-			if ( !_strnicmp( name, "Player", 6 ) )
-			{ //using a default name or a variation thereof
-#if defined TEST_LOG
-				testlog << "  " << name << " culled for name." << endl;
-#endif
-				continue;
-			}
-			if ( atof(points) <= 0.0  )
-			{ //has no points, so no point in being in the database
-				//single-player only player
-				//or, so far, only played online against bots
-				//or points have decayed to nothing.
-#if defined TEST_LOG
-				testlog << "  " << name << " culled for points: " << points << endl;
-#endif
-				continue;
-			}
-		}
-
-		if ( strlen( name ) > 0 )
-		{
-			//keep this player record
-			outfile << name << '\n';
-			outfile << remote_address << '\n';
-			outfile << points << '\n';
-			outfile << frags << '\n';
-			outfile << totalfrags << '\n';
-			outfile << time << '\n';
-			outfile << totaltime << '\n';
-			outfile << ip << '\n';
-			outfile << poll << endl;
-			++output_count;
-		}
-		else
+		// NOTE: non-verified players and players with empty name strings
+		//  should not be in the database and have no effect on scoring.
+		if ( strlen( name ) == 0 )
 		{
 #if defined TEST_LOG
 			testlog << "  culled for null name string @ " << input_count << endl;
 #endif
+			continue;
 		}
+		if ( PoorNameChoice( name) )
+		{ //using a default name or a variation thereof
+#if defined TEST_LOG
+			testlog << "  " << name << " culled for name." << endl;
+#endif
+			continue;
+		}
+
+		player_points = atof( points );
+		player_poll   = atoi( poll );
+		if ( player_poll != currentpoll
+				&& player_points <= 0.0 )
+		{ //not currently playing and has no points
+#if defined TEST_LOG
+			testlog << "  " << name << " culled for points: " << points << endl;
+#endif
+			continue;
+		}
+
+		//keep this player record
+		outfile << name           << '\n';
+		outfile << remote_address << '\n';
+		outfile << points         << '\n';
+		outfile << frags          << '\n';
+		outfile << totalfrags     << '\n';
+		outfile << time           << '\n';
+		outfile << totaltime      << '\n';
+		outfile << ip             << '\n';
+		outfile << poll           << endl;
+		++output_count;
 	}
 
 	if ( !infile.bad() && !outfile.bad() )
 	{
 		infile.close();
 		outfile.close();
-		remove("playerrank.db");
-		rename("temp.db", "playerrank.db");
+
+		//outfile becomes new player database
+		RemoveAndRename();
+
 #if defined TEST_LOG
 		testlog << "Database cull complete."
 			<< "( " << input_count << ", " << output_count << " )" << endl;
@@ -1230,7 +1403,7 @@ void CullDatabase  (void)
 	{
 		infile.close();
 		outfile.close();
-		cout << "[E] CullDatabase: failed, playerrank.db not updated." << endl;
+		cerr << "[E] CullDatabase: failed, " << playerdb_file << " not updated." << endl;
 #if defined TEST_LOG
 		testlog << "Database cull failed."
 			<< "( " << input_count << ", " << output_count << " )" << endl;
@@ -1378,7 +1551,7 @@ void GeneratePlayerRankingHtml (void)
 		totalfrags[32],
 		time[16],
 		totaltime[16],
-		ip[16],
+		ip[IPSZ],
 		poll[16],
 		remote_address[21];
 	ofstream outfile;
@@ -1392,13 +1565,13 @@ void GeneratePlayerRankingHtml (void)
 	int	closed = false;
 	SYSTEMTIME stime;
 
-	printf("Generating html.\n");
+	cout << "Generating html." << endl;
 
-	ifstream infile( "playerrank.db" );
+	ifstream infile( playerdb_file );
 	if ( !infile )
 	{
-		cout << "[E] GeneratePlayerRankingHtml: playerrank.db open failed." << endl;
-		return;
+		cerr << "[E] GeneratePlayerRankingHtml: " << playerdb_file << " open failed." << endl;
+		exit(1);
 	}
 
 	GetSystemTime(&stime);
@@ -1455,7 +1628,7 @@ void GeneratePlayerRankingHtml (void)
 			infile.getline(totalfrags, 32);
 			infile.getline(time, 16);
 			infile.getline(totaltime, 16);
-			infile.getline(ip, 16);
+			infile.getline(ip, IPSZ);
 			infile.getline(poll, 16);
 			if ( infile.eof() )
 			{ // all done, for less than 1000
@@ -1463,7 +1636,7 @@ void GeneratePlayerRankingHtml (void)
 			}
 
 			if ( strlen( name) == 0
-				|| !_strnicmp( name, "Player", 6 ) )
+				|| PoorNameChoice( name ) )
 			{ //cull out blank name, default name
 #if defined TEST_LOG
 				testlog << "  html cull "
@@ -1492,7 +1665,7 @@ void GeneratePlayerRankingHtml (void)
 			//build row for this player
 			// with calculated points and fragrate
 			//Scaling displayed points by 10, for psych. reasons.
-			actualpoints = RankingPoints( name, npoints, ntotaltime );
+			actualpoints = RankingPoints( npoints, ntotaltime );
 			actualpoints *= 10.0;
 			fragrate     = ntotalfrags / actualtime;
 			outfile << "<tr>\n";
@@ -1737,7 +1910,7 @@ void InsertClanIntoDb(int i) { //this will give us a top 32 clans database in or
 }
 void GetClanMemberInfo(void)
 {
-	char name[32], points[32], frags[32], totalfrags[32], time[16], totaltime[16], ip[16], poll[16], remote_address[21];
+	char name[32], points[32], frags[32], totalfrags[32], time[16], totaltime[16], ip[IPSZ], poll[16], remote_address[21];
 	ifstream infile;
 	int i, j;
 
@@ -1754,7 +1927,7 @@ void GetClanMemberInfo(void)
 		infile.getline(totalfrags, 32); //total frags
 		infile.getline(time, 16); //current time in poll
 		infile.getline(totaltime, 16);
-		infile.getline(ip, 16); //last server.ip
+		infile.getline(ip, IPSZ); //last server.ip
 		infile.getline(poll, 16); //what poll was our last?
 
 		//find it in the clan db and add in that player's data
@@ -1910,9 +2083,7 @@ void GenerateClanRankingHtml(void) //Clan Rankings
  */
 void BackupStats (void)
 {
-
-	char backupfile[32];
-	char line[32];
+	char backupfile[64];
 	ofstream outfile;
 	ifstream infile;
 	SYSTEMTIME st;
@@ -1920,18 +2091,24 @@ void BackupStats (void)
 	GetSystemTime(&st);
 
 	sprintf(backupfile, "backup/day%ihour%i.db", st.wDayOfWeek, st.wHour);
-	infile.open("playerrank.db");
-	outfile.open(backupfile);
-	strcpy(line, "go");
-	while(strlen(line)) {
-		infile.getline(line, 32);
-		outfile << line << endl;
+	infile.open( playerdb_file );
+	if ( !infile )
+	{
+		cerr << "[E] BackupStats " << playerdb_file << " failed open." << endl;
+		exit(1);
 	}
-	infile.close();
+	outfile.open(backupfile);
+	if ( !outfile )
+	{
+		infile.close();
+		cerr << "[E] BackupStats " << backupfile << " failed open." << endl;
+		exit(1);
+	}
 
+	outfile << infile.rdbuf();
+	infile.close();
 	outfile.close();
 
-	return;
 }
 
 #if !defined NO_UPLOAD
@@ -2063,7 +2240,7 @@ void CheckInactivePlayers(void)
 		totalfrags[32],
 		time[16],
 		totaltime[16],
-		ip[16],
+		ip[IPSZ],
 		poll[16],
 		remote_address[21];
 	PLAYERINFO player[1101]; //very unlikely to ever use all of this
@@ -2072,30 +2249,30 @@ void CheckInactivePlayers(void)
 	int i, j;
 	int player_poll;
 
-	ifstream infile( "playerrank.db" );
+	ifstream infile( playerdb_file );
 	if ( !infile )
 	{
-		cout << "[E] CheckInactivePlayers: playerrank.db failed open." << endl;
-		return;
+		cerr << "[E] CheckInactivePlayers: " << playerdb_file << " failed open." << endl;
+		exit(1);
 	}
 
 	i = 0;
 	for (;;)
 	{
 		GetPlayerName( infile, name, 32 );
-		infile.getline(remote_address, 21); //remote address
-		infile.getline(points, 32); //points
-		pointnumber = atof(points); //so we can manipulate this
-		infile.getline(frags, 32); //frags
-		infile.getline(totalfrags, 32); //total frags
-		infile.getline(time, 16); //current time in poll
+		infile.getline(remote_address, 21);
+		infile.getline(points, 32);
+		infile.getline(frags, 32);
+		infile.getline(totalfrags, 32);
+		infile.getline(time, 16);
 		infile.getline(totaltime, 16);
-		infile.getline(ip, 16); //last server.ip
-		infile.getline(poll, 16); //what poll was our last?
+		infile.getline(ip, IPSZ);
+		infile.getline(poll, 16);
 		if ( infile.eof() )
 		{
 			break;
 		}
+		pointnumber = atof(points); //so we can manipulate this
 
 		// decay player's points while inactive > inactive limit
 		//   if points >= 10, decay 10%/day
@@ -2190,78 +2367,18 @@ void CheckInactivePlayers(void)
 
 	if ( i != 0 )
 	{
-		ofstream decaylog( "decay.log", ios::app );
-		if ( decaylog )
-		{
-			decaylog << "POLL: " << currentpoll << endl;
-		}
-		else
-		{
-			cout << "DECAY. POLL: " << currentpoll << endl;
-		}
+#if defined TEST_LOG
+		testlog << "DECAY. POLL: " << currentpoll << endl;
+#endif
 		for ( j = 0; j < i ; j++ )
 		{ //for each player with decayed points, reinsert to update rank
 			//players with 0 points will be culled by CullDatabase
 			ReInsertPlayer( player[j] );
-			if ( decaylog )
-			{
-				decaylog << player[j].playername
-						<< " points: " << player[j].points << endl;
-			}
-			else
-			{
-				cout << player[j].playername
-						<< " points: " << player[j].points << endl;
-			}
-	#if defined TEST_LOG
+#if defined TEST_LOG
 			testlog << "decay reinsert " << player[j].playername
 				<< " points: " << player[j].points << endl;
-	#endif
+#endif
 		}
-		if ( decaylog )
-		{
-			decaylog.close();
-		}
-	}
-
-}
-
-void RepairDb(void) {
-	char name[32], points[32], frags[32], totalfrags[32], time[16], totaltime[16], ip[16], poll[16];
-	ifstream infile;
-	ofstream outfile;
-
-	infile.open("playerrank.db");
-	outfile.open("newdb.db");
-
-	if(infile.good()) {
-
-		strcpy(name, "go");
-
-		while(strlen(name)) {
-
-			infile.getline(name, 32); //name
-			infile.getline(points, 32); //points
-			infile.getline(frags, 32); //frags
-			infile.getline(totalfrags, 32); //total frags
-			infile.getline(time, 16); //current time in poll
-			infile.getline(totaltime, 16);
-			infile.getline(ip, 16); //last server.ip
-			infile.getline(poll, 16); //what poll was our last?
-
-			outfile << name << endl;
-			outfile << "127.0.0.1" << endl;
-			outfile << points << endl;
-			outfile << frags << endl;
-			outfile << totalfrags << endl;
-			outfile << time << endl;
-			outfile << totaltime << endl;
-			outfile << ip << endl;
-			outfile << poll << endl;
-
-		}
-		infile.close();
-		outfile.close();
 	}
 }
 
@@ -2282,18 +2399,18 @@ bool InitDatabase( void )
 		totalfrags[32],
 		time[16],
 		totaltime[16],
-		server_ip[16],
+		server_ip[IPSZ],
 		poll[16];
 	int new_record_count = 0;
 
 	cout << "Initializing database..." << endl;
 
-	ifstream newdbchk( "playerrank.db" );
+	ifstream newdbchk( playerdb_file );
 	if ( newdbchk.peek() == EOF )
 	{
-		cout << "playerrank.db is empty or does not exist" << endl;
+		cout << playerdb_file << " is empty or does not exist" << endl;
 		newdbchk.close();
-		ofstream createdb("playerrank.db", ios::trunc );
+		ofstream createdb( playerdb_file, ios::trunc );
 		if ( !createdb )
 		{
 			cout << "  file error. initialization failed." << endl;
@@ -2302,44 +2419,36 @@ bool InitDatabase( void )
 		else
 		{
 			createdb.close();
-			cout << "  empty file exists. initializaton complete." << endl;
+			cout << "  empty file exists. initialization complete." << endl;
 			return true;
 		}
 	}
 	newdbchk.close();
 
-	cout << "  running CullDatabase()..." << endl;
-	CullDatabase();
-	if ( global_fail )
-	{
-		cout << "[E] CullDatabase failed." << endl;
-		return false;
-	}
-
 	cout << "  re-inserting all records..." << endl;
-	ifstream dbfile( "playerrank.db" );
+	ifstream dbfile( playerdb_file );
 	if ( !dbfile )
 	{
-		cout << "[E] unexpected playerrank.db error." << endl;
+		cout << "[E] unexpected " << playerdb_file << " error." << endl;
 		return false;
 	}
 	if ( dbfile.peek() == EOF )
 	{
-		cout << "  nothing to re-insert. playerrank.db is empty." << endl;
+		cout << "  nothing to re-insert. " << playerdb_file << " is empty." << endl;
 		dbfile.close();
 		return true;
 	}
-	fstream dbcopy("initrank.db", ios::in|ios::out|ios::trunc );
+	fstream dbcopy( "initcopy.db", ios::in|ios::out|ios::trunc );
 	if ( !dbcopy )
 	{
 		dbfile.close();
-		cout << "[E] could not create initrank.db." << endl;
+		cout << "[E] could not create initcopy.db file" << endl;
 		return false;
 	}
 
 	dbcopy << dbfile.rdbuf();
 	dbfile.close();
-	cout << "    copied playerrank.db to initrank.db." << endl;
+	cout << "    copied " << playerdb_file << " to initcopy.db" << endl;
 
 	int record_no = 0;
 	dbcopy.seekg( 0, ios::beg );
@@ -2361,34 +2470,36 @@ bool InitDatabase( void )
 		++record_no;
 
 		if ( strlen( name ) == 0 )
-		{ //should not happen
+		{ //should not happen, but remove record if it does
 			continue;
 		}
-		strncpy_s( player.playername, sizeof(player.playername),
-			name, _TRUNCATE);
-		strncpy_s( player.remote_address, sizeof(player.remote_address),
-			remote_address, _TRUNCATE);
-		player.points = atof( points );
+		if ( atof( points ) <= 0.0 )
+		{ //cull records with no points
+			continue;
+		}
+		else if ( atoi( totalfrags) == 0 )
+		{ //inconsistent record in existing database. clear it.
+			//has points but no accumulated frags.
+			//several of these seen in 2011-12 database.
+			continue;
+		}
+
+		strncpy_s( player.playername, sizeof(player.playername), name, _TRUNCATE);
+		strncpy_s( player.remote_address, sizeof(player.remote_address), remote_address, _TRUNCATE);
+		player.points     = atof( points );
 		player.frags      = 0;
 		player.totalfrags = atoi( totalfrags );
-		player.time       = 0.008;
+		player.time       = 0.0;
 		player.totaltime  = atof( totaltime );
 		strncpy_s( player.ip, sizeof(player.ip), server_ip, _TRUNCATE);
 		player.poll       = atoi( poll );
-		// non-database properties
+		// non-database properties.
 		player.score      = 0;
 		player.ping       = 1;
 		player.rank       = 1001;
 
 		ReInsertPlayer( player );
 		++new_record_count;
-		if ( global_fail )
-		{
-			dbcopy.close();
-			cout << "[E] ReInsertPlayer() failed at record no "
-				<< record_no << " for " << name << endl;
-			return false;
-		}
 	}
 	dbcopy.close();
 	cout << "  Initialize complete with "
@@ -2411,10 +2522,6 @@ int main( int argc, char** argv )
 	DWORD loop_t1;
 	DWORD loop_msecs;
 
-	//just stick this here
-
-	//RepairDb();
-	//return 0;
 
 #if defined TEST_LOG
 	testlog.open( "testlog" );
@@ -2424,15 +2531,22 @@ int main( int argc, char** argv )
 	}
 	else
 	{
-		cout << "[E] testlog failed open." << endl;
-		return 1;
+		cerr << "[E] testlog failed open." << endl;
+	}
+#endif
+
+#if defined NONREG_LOG
+	nonreglog.open( "nonreglog", ios::trunc  );
+	if ( nonreglog.bad() )
+	{
+		cerr << "[E] nonreglog failed open." << endl;
 	}
 #endif
 
 	if ( !InitDatabase() )
 	{
-		cout << "[E] Database initial clean failed" << endl;
-		return 1;
+		cerr << "[E] Database initial clean failed" << endl;
+		exit(1);
 	}
 
 	WSACleanup(); //Cleanup Winsock - not sure if this needed, but can it hurt?
@@ -2440,8 +2554,8 @@ int main( int argc, char** argv )
 	//initialize Winsock
 	error = WSAStartup ((WORD)MAKEWORD (1,1), &ws);
 	if (error) {
-		printf("Couldn't load Winsock!");
-		return 0;
+		cerr << "Could not load Winsock!" << endl;
+		exit(1);
 	}
 
 	//open a socket for polling the master
@@ -2466,13 +2580,12 @@ int main( int argc, char** argv )
 
 	while(1) {
 
-		printf("Polling master.  Current poll: %i\n", currentpoll);
-		GetServerList(); //poll the master
 		currentpoll++;   //advance the poll sequence number
 		if(currentpoll > 100000)
 			currentpoll = 1;
+		cout << "Polling master. Current poll: " << currentpoll << endl;
+		GetServerList(); //poll the master
 		pollTally++;
-
 
 		/*
 		 * Collect data from servers at nominal 30 second intervals
@@ -2509,7 +2622,7 @@ int main( int argc, char** argv )
 			<< endl;
 #endif
 		//load list of currently validated players
-		 GetValidatedPlayers();		
+		 GetValidatedPlayers();
 
 		//poll the servers and process player info
 		for( i = 0; i < numServers; i++)
@@ -2537,11 +2650,11 @@ int main( int argc, char** argv )
 		real_players = 0;
 		numLiveServers = 0;
 
-		ifstream emptycheck( "playerrank.db" );
+		ifstream emptycheck( playerdb_file );
 		if ( emptycheck.peek() == EOF )
 		{ //empty db. branch around pointless file processing
 			emptycheck.close();
-			cout << "WARNING: playerrank.db is empty" << endl;
+			cout << "WARNING: " << playerdb_file << " is empty." << endl;
 			goto emptybranch;
 		}
 		emptycheck.close();
@@ -2580,6 +2693,14 @@ int main( int argc, char** argv )
 			cout << "Backing up databases..." << endl;
 			BackupStats();
 			st_backup = st_poll;
+
+#if defined NONREG_LOG
+			//also clear the nonregistered log, keep copy of previous hour
+			nonreglog.close();
+			remove( "nonreglog1" );
+			rename( "nonreglog", "nonreglog1" );
+			nonreglog.open( "nonreglog", ios::trunc  );
+#endif
 		}
 
 		//remove players from database who do not meet certain criteria
@@ -2609,6 +2730,10 @@ emptybranch:
 #if defined TEST_LOG
 	testlog << "\nEXIT" << endl;
 	testlog.close();
+#endif
+
+#if defined NONREG_LOG
+	nonreglog.close();
 #endif
 
 	return 0;
