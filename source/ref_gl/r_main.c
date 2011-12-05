@@ -1235,7 +1235,7 @@ void R_Register( void )
 
 	r_overbrightbits = Cvar_Get( "r_overbrightbits", "2", CVAR_ARCHIVE );
 
-	gl_usevbo = Cvar_Get("gl_usevbo", "1", CVAR_ARCHIVE );
+	gl_usevbo = Cvar_Get("gl_usevbo", "0", CVAR_ARCHIVE );
 
 	gl_mirror = Cvar_Get("gl_mirror", "1", CVAR_ARCHIVE);
 

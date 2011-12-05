@@ -1820,6 +1820,9 @@ void CL_BlueTeamLight(vec3_t pos)
 	int			i,j;
 	particle_t	*p;
 
+	if(!server_is_team && !cl_dmlights->value)
+		return;
+
 	for(i=1; i<3; i++) {
 		if (!(p = new_particle()))
 			return;
@@ -1834,7 +1837,7 @@ void CL_BlueTeamLight(vec3_t pos)
 		if (server_is_team)
 			p->color = 0x74;
 		else
-			p->color = 0xd2;
+			p->color = 0xd3;
 		p->scale = 10*i;
 		p->alphavel = -50;
 		for (j=0 ; j<3 ; j++)

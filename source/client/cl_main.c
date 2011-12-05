@@ -157,6 +157,8 @@ cvar_t  *cl_noblood;
 //beam color for disruptor
 cvar_t  *cl_disbeamclr;
 
+cvar_t  *cl_dmlights;
+
 //Stats
 cvar_t  *cl_stats_server;
 
@@ -1815,6 +1817,7 @@ void CL_InitLocal (void)
 	cl_noblood = Cvar_Get ("cl_noblood", "0", CVAR_ARCHIVE);
 	cl_disbeamclr = Cvar_Get("cl_disbeamclr", "0", CVAR_ARCHIVE);
 	cl_brass = Cvar_Get ("cl_brass", "1", CVAR_ARCHIVE);
+	cl_dmlights = Cvar_Get("cl_dmlights", "1", CVAR_ARCHIVE);
 	cl_playtaunts = Cvar_Get ("cl_playtaunts", "1", CVAR_ARCHIVE);
 	cl_centerprint = Cvar_Get ("cl_centerprint", "1", CVAR_ARCHIVE);
 	cl_precachecustom = Cvar_Get ("cl_precachecustom", "0", CVAR_ARCHIVE);
