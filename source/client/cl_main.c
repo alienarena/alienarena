@@ -2195,8 +2195,11 @@ extern unsigned sys_frame_time;   // TODO: ditto
  * Packet rate limiting is not invoked unless the PPS is set higher than the FPS.
  * Seems like a good idea not to invoke packet rate limiting unless the
  *  cl_maxfps is set higher than the default.
+ *
+ *  PKTRATE_EARLY is the minimum msecs for catching up when packets are delayed
  */
 #define PKTRATE_CAP 16
+#define PKTRATE_EARLY 12
 
 void CL_Frame( int msec )
 {
@@ -2354,7 +2357,7 @@ void CL_Frame( int msec )
 		}
 		else if ( packet_delay > 0 )
 		{ // packet sent in previous loop was delayed
-			if ( packet_timer >= 9 )
+			if ( packet_timer >= PKTRATE_EARLY )
 			{ // should be ok to send a packet early
 				/* idea is to try to maintain a steady number of
 				 * client-to-server packets per server frame.
