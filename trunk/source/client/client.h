@@ -268,6 +268,7 @@ extern	cvar_t	*cl_autoskins;
 extern  cvar_t	*cl_healthaura;
 extern  cvar_t	*cl_noblood;
 extern  cvar_t	*cl_disbeamclr;
+extern  cvar_t	*cl_dmlights;
 extern  cvar_t	*cl_brass;
 extern  cvar_t	*cl_playtaunts;
 extern	cvar_t	*cl_centerprint;
