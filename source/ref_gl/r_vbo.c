@@ -316,6 +316,12 @@ void VB_VCInit()
 	//clear out previous buffer
 	qglDeleteBuffersARB(1, &vboId);
 
+	for (i=0; i<MAX_VERTEX_CACHES; i++)
+	{
+		if(&vcm.vertCacheList[i])
+			qglDeleteBuffersARB(1, &vcm.vertCacheList[i].id);
+	}
+
 	vboPosition = 0;
 	totalVBObufferSize = 0;	
 
