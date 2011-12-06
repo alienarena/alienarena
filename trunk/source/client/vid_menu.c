@@ -37,6 +37,7 @@ extern cvar_t *gl_glsl_postprocess;
 extern cvar_t *gl_glsl_shaders;
 extern cvar_t *gl_modulate;
 extern cvar_t *gl_vlights;
+extern cvar_t *gl_usevbo;
 
 extern cvar_t *vid_width;
 extern cvar_t *vid_height;
@@ -96,6 +97,7 @@ static menulist_s		s_normalmaps_box;
 static menulist_s		s_shadowmaps_box;
 static menulist_s		s_postprocess_box;
 static menulist_s		s_glsl_box;
+static menulist_s		s_vbo_box;
 
 #if 0
 // unused
@@ -164,6 +166,7 @@ static void PostProcessCallback( void *s )
 		s_glsl_box.curvalue = s_postprocess_box.curvalue;
 	}
 }
+
 static void GlslCallback( void *s )
 {
 	Cvar_SetValue("gl_glsl_shaders", s_glsl_box.curvalue);
@@ -176,6 +179,12 @@ static void GlslCallback( void *s )
 		s_postprocess_box.curvalue = s_glsl_box.curvalue;
 	}
 }
+
+static void VboCallback( void *s )
+{
+	Cvar_SetValue("gl_usevbo", s_vbo_box.curvalue);
+}
+
 static void SetLowest( void *unused )
 {
 	Cvar_SetValue("r_bloom", 0);
@@ -358,6 +367,7 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "gl_glsl_shaders", s_glsl_box.curvalue);
 	if(s_normalmaps_box.curvalue)
 		Cvar_SetValue("r_shaders", 1); //shaders must be enabled for this to work
+	Cvar_SetValue( "gl_usevbo", s_vbo_box.curvalue);
 
 	RS_FreeUnmarked();
 	Cvar_SetValue("scriptsloaded", 0); //scripts get flushed
@@ -393,6 +403,7 @@ void VID_MenuInit( void )
 		"[1360 768 ]",
 		"[1600 1200]",
 		"[1680 1050]",
+		"[1920 1080]",
 		"[2048 1536]",
 		"[custom   ]",
 		0
@@ -444,6 +455,8 @@ void VID_MenuInit( void )
 		gl_glsl_postprocess = Cvar_Get( "gl_glsl_postprocess", "1", CVAR_ARCHIVE);
 	if (!gl_glsl_shaders)
 		gl_glsl_shaders = Cvar_Get( "gl_glsl_shaders", "1", CVAR_ARCHIVE);
+	if (!gl_usevbo)
+		gl_usevbo = Cvar_Get( "gl_usevbo", "1", CVAR_ARCHIVE);
 
 	if ( !_windowed_mouse)
 		_windowed_mouse = Cvar_Get( "_windowed_mouse", "1", CVAR_ARCHIVE );
@@ -569,7 +582,6 @@ void VID_MenuInit( void )
 	s_shadowmaps_box.curvalue = gl_shadowmaps->value;
 	s_shadowmaps_box.itemnames = yesno_names;
 	s_shadowmaps_box.generic.callback = ShadowMapsCallback;
-	s_shadowmaps_box.generic.statusbar = "for testing only, incomplete code";
 
 	s_postprocess_box.generic.type	= MTYPE_SPINCONTROL;
 	s_postprocess_box.generic.x		= 24*scale;
@@ -582,10 +594,18 @@ void VID_MenuInit( void )
 	s_glsl_box.generic.type	= MTYPE_SPINCONTROL;
 	s_glsl_box.generic.x		= 24*scale;
 	s_glsl_box.generic.y		= FONTSCALE*190*scale;
-	s_glsl_box.generic.name	= "use GLSL shaders";
+	s_glsl_box.generic.name	= "GLSL shaders";
 	s_glsl_box.curvalue = gl_glsl_shaders->value;
 	s_glsl_box.itemnames = yesno_names;
 	s_glsl_box.generic.callback = GlslCallback;
+
+	s_vbo_box.generic.type	= MTYPE_SPINCONTROL;
+	s_vbo_box.generic.x		= 24*scale;
+	s_vbo_box.generic.y		= FONTSCALE*200*scale;
+	s_vbo_box.generic.name	= "vertex buffer objects";
+	s_vbo_box.curvalue = gl_usevbo->value;
+	s_vbo_box.itemnames = yesno_names;
+	s_vbo_box.generic.callback = VboCallback;
 
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
 	s_finish_box.generic.x	= 24*scale;
@@ -664,6 +684,7 @@ void VID_MenuInit( void )
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_shadowmaps_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_postprocess_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_glsl_box );
+	Menu_AddItem( &s_opengl_menu, ( void * ) &s_vbo_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_finish_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_vsync_box );
 	Menu_AddItem( &s_opengl_menu, ( void * ) &s_windowed_mouse );

@@ -475,6 +475,9 @@ void ReInsertPlayer (PLAYERINFO player )
 			idbfile.getline(poll, 16);
 			if ( idbfile.eof() )
 			{
+#if defined TEST_LOG
+				testlog << "  file broke out @ " << total_players << endl;
+#endif
 				break;
 			}
 
@@ -1340,6 +1343,9 @@ void CullDatabase  (void)
 		infile.getline(poll, 16);
 		if ( infile.eof() || infile.bad() )
 		{
+#if defined TEST_LOG
+				testlog << "  file broke out @ " << input_count << endl;
+#endif
 			break;
 		}
 		++input_count;
@@ -2118,8 +2124,20 @@ void UploadStats(void) { //put all updated files on the server
 	int error;
 	int i;
 	char a_string[16];
+	char username[32];
+	char password[32];
+	ifstream accFile;
 	FILE *filename;
 
+	//get username and password from text file
+	accFile.open("ftpacc.db");
+	if(accFile)
+	{
+		accFile.getline(username, 32);
+		accFile.getline(password, 32);
+	}
+	accFile.close();
+	
 	printf("Uploading to ftp server.\n");
 
 	fceSetInteger(0, FCE_SET_PASSIVE, 1);
@@ -2127,7 +2145,7 @@ void UploadStats(void) { //put all updated files on the server
 	fceSetInteger(0, FCE_SET_MAX_RESPONSE_WAIT, 1000);
 
 	//Connect to FTP server
-	error = fceConnect(0,"ftp.martianbackup.com","user","password");
+	error = fceConnect(0,"ftp.martianbackup.com",username, password);
 	if(error < 0) {
 		printf("Error connecting to host!\n");
 		return;

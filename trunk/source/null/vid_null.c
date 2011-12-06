@@ -59,7 +59,8 @@ vidmode_t vid_modes[] =
 	{ "Mode 6: 1360x768",  1360, 768, 6 },
     { "Mode 7: 1600x1200", 1600, 1200, 7 },
 	{ "Mode 8: 1680x1050", 1680, 1050, 8 },
-	{ "Mode 9: 2048x1536", 2048, 1536, 9 }
+	{ "Mode 9: 1920x1080", 1920, 1080, 9 },
+	{ "Mode 10: 2048x1536", 2048, 1536, 10 }
 };
 #define VID_NUM_MODES ( sizeof( vid_modes ) / sizeof( vid_modes[0] ) )
 
