@@ -320,7 +320,7 @@ static void ApplyChanges( void *unused )
 	Cvar_SetValue( "gl_finish", s_finish_box.curvalue );
 	Cvar_SetValue( "gl_swapinterval", s_vsync_box.curvalue );
 
-	if (s_mode_list.curvalue == 10) {
+	if (s_mode_list.curvalue == 13) {
 		Cvar_SetValue( "gl_mode", -1);
 
 		//set custom width and height only in this case
@@ -400,7 +400,9 @@ void VID_MenuInit( void )
 		"[1024 768 ]",
 		"[1152 864 ]",
 		"[1280 960 ]",
+		"[1280 1024]",
 		"[1360 768 ]",
+		"[1366 768 ]",
 		"[1600 1200]",
 		"[1680 1050]",
 		"[1920 1080]",
@@ -462,7 +464,7 @@ void VID_MenuInit( void )
 		_windowed_mouse = Cvar_Get( "_windowed_mouse", "1", CVAR_ARCHIVE );
 
 	if(gl_mode->value == -1)
-		s_mode_list.curvalue = 10;
+		s_mode_list.curvalue = 13;
 	else
 		s_mode_list.curvalue = gl_mode->value;
 
