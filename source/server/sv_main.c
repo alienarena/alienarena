@@ -1406,7 +1406,7 @@ void SV_Init (void)
 	sv_showclamp = Cvar_Get ("showclamp", "0", 0);
 	sv_paused = Cvar_Get ("paused", "0", 0);
 	sv_timedemo = Cvar_Get ("timedemo", "0", 0);
-	sv_enforcetime = Cvar_Get ("sv_enforcetime", "1", 0);
+	sv_enforcetime = Cvar_Get ("sv_enforcetime", "0", 0);
 	allow_download = Cvar_Get ("allow_download", "1", CVAR_ARCHIVE);
 	allow_download_players  = Cvar_Get ("allow_download_players", "0", CVAR_ARCHIVE);
 	allow_download_models = Cvar_Get ("allow_download_models", "1", CVAR_ARCHIVE);
