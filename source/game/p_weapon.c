@@ -1807,9 +1807,8 @@ void Violator_Fire (edict_t *ent)
 		VectorAdd(start, right, start);
 
 		gi.WriteByte (svc_temp_entity);
-		gi.WriteByte (TE_VOLTAGE);
+		gi.WriteByte (TE_BOSSTPORT);
 		gi.WritePosition (start);
-		gi.WriteDir(forward);
 		gi.multicast (start, MULTICAST_PVS);
 
 		gi.WriteByte (svc_temp_entity);
