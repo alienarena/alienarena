@@ -574,8 +574,8 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	if(ACEMV_CanMove(self, MOVE_FORWARD))
 		ucmd->forwardmove = 400;
 
-	if(self->skill == 3) //ultra skill level(will be 3)
-	{
+	if(self->skill == 3) 
+	{ //ultra skill level(will be 3)
 		c = random();
 
 		if(!self->in_deathball && grapple->value && c <= .7) 
@@ -595,10 +595,11 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 			return;
 		}		
 		else if(self->client->ctf_grapplestate != CTF_GRAPPLE_STATE_PULL &&
-			self->client->ctf_grapplestate != CTF_GRAPPLE_STATE_HANG) //don't interrupt a pull
-		{	
+			self->client->ctf_grapplestate != CTF_GRAPPLE_STATE_HANG) 
+		{ //don't interrupt a pull
 			float weight;
 			int strafeJump = false;			
+
 			//Strafejumping should only occur now if a bot is far enough from a node
 			//and not wandering.  We really don't want them to jump around when wandering
 			//as it seems to hinder locating a goal.
@@ -613,22 +614,20 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 				if(c > .7)
 					ucmd->upmove = 400; //jump around the level
 
-				if(c > 0.9 && ACEMV_CanMove(self, MOVE_LEFT)) //strafejump left(was -400)
-					ucmd->sidemove = -200;
+				if(c > 0.9 && ACEMV_CanMove(self, MOVE_LEFT)) 
+					ucmd->sidemove = -200; //strafejump left(was -400)
 
-				else if(c > 0.8 && ACEMV_CanMove(self, MOVE_RIGHT)) //strafejump right(was 400)
-					ucmd->sidemove = 200;
+				else if(c > 0.8 && ACEMV_CanMove(self, MOVE_RIGHT)) 
+					ucmd->sidemove = 200; //strafejump right(was 400)
 			}
 		}
 
 		//Now if we have the Alien Smartgun, drop some prox mines :)
 		if (self->client->pers.weapon == FindItem("alien smartgun") && c < 0.2)
 			ucmd->buttons = BUTTON_ATTACK2;
-
 	}
 
 	ACEMV_ChangeBotAngle(self);
-
 }
 
 
@@ -884,7 +883,7 @@ void ACEMV_Attack (edict_t *self, usercmd_t *ucmd)
 		goto attack;
 	}
 
-	//machinegun/blaster/beamgun strafing for level 3 bots
+	//machinegun/blaster/beamgun strafing for level 2/3 bots
 	if ( !joustmode->value
 			&& self->skill >= 2
 			&& (self->client->pers.weapon == FindItem( "blaster" )
@@ -953,7 +952,6 @@ standardmove:
 	c = random(); //really mix this up some
 	if ( self->health >= 50 && c < crouch_thresh )
 	{
-		//raise this number to make them crouch alot(lower skills)
 		ucmd->upmove -= 200;
 	}
 	else if ( c > jump_thresh )
