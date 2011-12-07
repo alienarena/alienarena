@@ -26,7 +26,7 @@
 #  Mac OS X / Darwin using X11 - Experimental
 
 AC_PREREQ(2.65)
-AC_INIT([alienarena],[7.52],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.53],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -147,7 +147,6 @@ dnl symbols for config.h
 dnl
 AM_COND_IF([BUILD_UNIX],
 	[
-
 	AC_DEFINE([UNIX_VARIANT],1,[unix-specific conditional compile])
 
 	AS_CASE([ ${unix_host} ],
@@ -170,7 +169,7 @@ AM_COND_IF([BUILD_UNIX],
 	AS_IF([ test "x$ansi_color" = "xyes" ],[
 		AC_DEFINE([ANSI_COLOR],1,[Enable ANSI terminal color codes in stdout])
 		])
-	])
+])
 
 AM_COND_IF([BUILD_WIN32],
 	[AC_DEFINE([WIN32_VARIANT],1,[win32-specific conditional compile])])
@@ -220,17 +219,18 @@ AC_SEARCH_LIBS([acos],[m])
 AC_SEARCH_LIBS([dlopen],[dl])
 AC_SEARCH_LIBS([clock_gettime],[rt])
 
+
 dnl
 dnl start of client-only library requirements
 dnl
 AM_COND_IF([BUILD_CLIENT],
-[
-	AX_PTHREAD(,[AC_MSG_ERROR(["Required pthreads support not found."])])
+	[
+		
+	AX_PTHREAD([],[AC_MSG_ERROR(["Required pthreads support not found."])])
 #
 # This might be a workaround for DSO missing pthread library error
 #
-	AS_IF([ test "x$PTHREAD_LIBS" = "x" ],
-		[PTHREAD_LIBS="-pthread"])
+	AS_IF([ test "x$PTHREAD_LIBS" = "x" ],[PTHREAD_LIBS="-pthread"])
 
 	AC_SEARCH_LIBS([jpeg_read_header],[jpeg],,
 		[AC_MSG_ERROR(["Required jpeg library not found."])])
@@ -326,6 +326,7 @@ AM_COND_IF([BUILD_CLIENT],
 	AM_COND_IF([BUILD_WIN32],
 		[ win32_syslibs="-lmingw32 -lwinmm -lwsock32 -lws2_32 -lgdi32 -luser32"])
 	AC_SUBST([WIN32_LIBS],[$win32_syslibs])
+	
 
 ])
 
@@ -467,13 +468,16 @@ AM_COND_IF([BUILD_WIN32],
 # required gcc/g++ options.
 #  fast-math because strict adherence to IEEE standard is not needed.
 #  no-strict-aliasing because strict aliasing is not adhered to in places.
-#  see m4/ax_cflags_gcc_option.m4
 #
-AX_CFLAGS_GCC_OPTION([-ffast-math])
-AX_CXXFLAGS_GCC_OPTION([-ffast-math])
-AX_CFLAGS_GCC_OPTION([-fno-strict-aliasing])
-AX_CXXFLAGS_GCC_OPTION([-fno-strict-aliasing])
-
+AX_CHECK_COMPILE_FLAG(
+	[-ffast-math],
+	[AX_APPEND_FLAG([-ffast-math])],
+	[])
+	
+AX_CHECK_COMPILE_FLAG(
+	[-fno-strict-aliasing],
+	[AX_APPEND_FLAG([-fno-strict-aliasing])],
+	[])
 
 #########################################################################################################
 # DEBUGGING OPTIONS
@@ -487,9 +491,9 @@ debug=no
 AC_ARG_ENABLE([debugging-symbols],
 	[AS_HELP_STRING([--enable-debugging-symbols],[Compile Alien Arena with full debugging information (default:no)])],
 	[debug_syms=${enableval}],[debug_syms=no])
-AS_IF([ test "x$debug_syms" = "xyes" ], [
-	AX_CFLAGS_GCC_OPTION([-g3])
-	AX_CXXFLAGS_GCC_OPTION([-g3])
+	
+AS_IF([ test "x$debug_syms" = "xyes" ],
+	[AX_CHECK_COMPILE_FLAG([-g3],[AX_APPEND_FLAG([-g3])],[])]
 	debug=yes
 ])
 AM_CONDITIONAL(REMOVE_SYMBOLS,[ test "x$debug_syms" = "xno" ])
@@ -498,9 +502,9 @@ AM_CONDITIONAL(REMOVE_SYMBOLS,[ test "x$debug_syms" = "xno" ])
 AC_ARG_ENABLE([full-warnings],
 	[AS_HELP_STRING([--enable-full-warnings],[Display all compiler warnings (default:no)])],
 	[gcc_whining=${enableval}],[gcc_whining=no])
-AS_IF([ test "x$gcc_whining" = "xyes" ], [
-	AX_CFLAGS_GCC_OPTION([-Wall])
-	AX_CXXFLAGS_GCC_OPTION([-Wall])
+	
+AS_IF([ test "x$gcc_whining" = "xyes" ],
+	[AX_CHECK_COMPILE_FLAG([-Wall],[AX_APPEND_FLAG([-Wall])],[])]
 	debug=yes
 ])
 
@@ -540,8 +544,7 @@ AC_ARG_ENABLE([assert-statements],
 AS_IF([ test "x$assert_stmts" = "xyes" ],
 	[debug=yes],
 	[
-	AX_CFLAGS_GCC_OPTION([-DNDEBUG])
-	AX_CXXFLAGS_GCC_OPTION([-DNDEBUG])
+	AX_APPEND_FLAG([-DNDEBUG])	
 ])
 
 # Enable ODE debug

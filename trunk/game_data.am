@@ -116,6 +116,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/ctf-titan2k8.nod \
 	botinfo/nav/ctf-vesuvius.nod \
 	botinfo/nav/ctf-violator.nod \
+	botinfo/nav/ctf-zion2k9.nod \
 	botinfo/nav/db-chromium.nod \
 	botinfo/nav/db-icarus.nod \
 	botinfo/nav/db-vesuvius.nod \
