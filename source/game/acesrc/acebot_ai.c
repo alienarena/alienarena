@@ -495,9 +495,12 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 
 	if(self->oldenemy != NULL) //(was shot from behind)
 	{
-		self->enemy = self->oldenemy;
-		self->oldenemy = NULL;
-		return true;
+		if(!OnSameTeam(self, self->oldenemy))
+		{
+			self->enemy = self->oldenemy;
+			self->oldenemy = NULL;
+			return true;
+		}
 	}
 
 	for(i=0;i<game.maxclients;i++)
