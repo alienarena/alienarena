@@ -186,6 +186,8 @@ qboolean ACEMV_SpecialMove(edict_t *self, usercmd_t *ucmd)
 		{
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
 				ucmd->forwardmove = 400;
+			else if(ACEMV_CanMove(self, MOVE_BACK))
+				ucmd->forwardmove = -400;
 			ucmd->upmove = -400;
 			return true;
 		}
@@ -199,6 +201,8 @@ qboolean ACEMV_SpecialMove(edict_t *self, usercmd_t *ucmd)
 		{
 			if(ACEMV_CanMove(self, MOVE_FORWARD))
 				ucmd->forwardmove = 400;
+			else if(ACEMV_CanMove(self, MOVE_BACK))
+				ucmd->forwardmove = -400;
 			ucmd->upmove = 400;
 			return true;
 		}
@@ -262,7 +266,7 @@ qboolean ACEMV_CheckEyes(edict_t *self, usercmd_t *ucmd)
 	if ( traceFront.fraction >= 1.0f )
 	{
 		if ( ACEMV_CanMove( self, MOVE_FORWARD ) )
-			ucmd->forwardmove = 400;
+			ucmd->forwardmove = 400; //only try forward, bot should be looking to move in direction of eyes
 		return true;
 	}
 
@@ -422,8 +426,16 @@ void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 		// Set bot's movement direction
 		VectorSubtract (self->movetarget->s.origin, self->s.origin, self->move_vector);
 		ACEMV_ChangeBotAngle(self);
+
+		//try moving forward, if blocked, strafe around it if possible.
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
 			ucmd->forwardmove = 400;
+		else if(ACEMV_CanMove(self, MOVE_BACK))
+				ucmd->forwardmove = -400; 
+		else if(ACEMV_CanMove(self, MOVE_RIGHT))
+				ucmd->sidemove = 400;
+		else if(ACEMV_CanMove(self, MOVE_LEFT))
+				ucmd->sidemove = -400;
 		return;
 	}
 }
@@ -562,11 +574,15 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 			return;
 
 		self->s.angles[YAW] += random() * 180 - 90;
+		// Try moving foward, if not, try to strafe around obstacle
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
 			ucmd->forwardmove = 400;
 		else if(ACEMV_CanMove(self, MOVE_BACK))
 			ucmd->forwardmove = -400;
-
+		else if(ACEMV_CanMove(self, MOVE_RIGHT))
+				ucmd->sidemove = 400;
+		else if(ACEMV_CanMove(self, MOVE_LEFT))
+				ucmd->sidemove = -400;
 		return;
 	}
 
@@ -700,16 +716,21 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 	// Check for special movement if we have a normal move (have to test)
  	if(VectorLength(self->velocity) < 37)
 	{
-		//if(random() > 0.1 && ACEMV_SpecialMove(self,ucmd))
-		//	return; //removed this because when wandering, the last thing you want is bots jumping
+		/*if(random() > 0.1 && ACEMV_SpecialMove(self,ucmd))
+			return;*/ //removed this because when wandering, the last thing you want is bots jumping
 		//over things and going off ledges.  It's better for them to just bounce around the map.
 
 		self->s.angles[YAW] += random() * 180 - 90;
 
+		// Try to move forward, if blocked, try to strafe around obstacle
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
 			ucmd->forwardmove = 400;
 		else if(ACEMV_CanMove(self, MOVE_BACK))
 			ucmd->forwardmove = -400;
+		else if(ACEMV_CanMove(self, MOVE_RIGHT))
+				ucmd->sidemove = 400;
+		else if(ACEMV_CanMove(self, MOVE_LEFT))
+				ucmd->sidemove = -400;
 
 		if(!M_CheckBottom(self) || !self->groundentity) // if there is ground continue, otherwise wait for next move.
 		{
@@ -723,28 +744,14 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 	if(ACEMV_CanMove(self, MOVE_FORWARD))
 		ucmd->forwardmove = 400;
 
-	if(self->skill == 3) {//ultra skill level(will be 3)
-
+	if(self->skill == 3) 
+	{ //ultra skill level(will be 3)
 		c = random();
 
-		if(c > .7)
-
-			ucmd->upmove = 400; //jump around the level
-
-		if(c > 0.9 && ACEMV_CanMove(self, MOVE_LEFT)) //strafejump left
-
-			ucmd->sidemove = -400;
-
-		else if(c > 0.8 && ACEMV_CanMove(self, MOVE_RIGHT)) //strafejump right
-
-			ucmd->sidemove = 400;
-
-		//Now if we have the Alien Smartgun, drop some prox mines :)
+		//If we have the Alien Smartgun, drop some prox mines :)
 		if (self->client->pers.weapon == FindItem("alien smartgun") && c < 0.2)
 			ucmd->buttons = BUTTON_ATTACK2;
-
 	}
-
 }
 
 /* constants for target fuzzification */
