@@ -1,5 +1,5 @@
 .\" GNU/Linux/Unix README for Alien Arena 2011
-.\" 2010-11-30. Revised: 2011-09-18
+.\" 2010-11-30. Revised: 2011-12-06
 .\" Author: Jim Bower
 .\" using groff for paragraph formatting.
 .\" $ groff -T ascii README.groff >README
@@ -10,7 +10,7 @@
 .nr topic 0 1
 
 .tl ''Alien Arena 2011''
-.tl ''Version 7.52''
+.tl ''Version 7.53''
 
 \n+[topic]. Scope
 
@@ -33,27 +33,40 @@ irc.planetarena.org
 .in
 The in-game IRC connects to #alienarena there. 
 
-\n+[topic]. Summary of changes for version 7.52
+
+\n+[topic]. Summary of changes for version 7.53
 
 There are no changes to the build and install procedure.
+The Autotools build uses autoconf 2.68, and automake 1.11.1.
+The m4 macros are updated and configure.ac modified accordingly.
 
-Besides bug fixes, 7.52 has these additions and changes:
+Besides bug fixes, 7.53 has these additions and changes:
 
 .nf
 .in +2m
-* Four new levels. New and improved models and textures.
-* Improved graphics effects, including vegetation shadowmapping. 
-* A passworded stats account system for registering player names.
-* The client's network packet send rate is limited when running at 
-  higher video frame rates.
-* Bot improvements: Skill cvar can be set to 3 to force all bots to
-  high skill. Hit scan weapon aiming accuracy is more reasonable.   
-* A new game mode that is a hybrid of rocket arena and insta.
-* The server browser shows server configuration settings, which 
-  includes a flag for non-stock modified servers.
+* TODO
+* (Improved graphics rendering performance.)
+* (New Levels)
+* (experimental speed hack detection)
+* (packet rate limit change)
+* (account system and stats improvements)
+* ...
 .in 0
- 
-Some previous version changes affecting build and install:
+.fi
+
+\n+[topic]. Recent changes in Console Variables (cvars)
+
+.nf
+.in +2m
+* TODO
+* (sv_enforcetime)
+* (skill)
+* (gl_usevbo)
+* (insta_rockets)
+.in 0
+.fi
+
+\n+[topic]. Some previous version changes affecting build and install:
 
 .in +2m
 * The Open Dynamics Engine (ODE) is integrated with the main program;
@@ -69,17 +82,25 @@ Some previous version changes affecting build and install:
 .in 0
 .fi
 
-\n+[topic]. Installation
+\n+[topic]. Requirements
 
 Alien Arena uses OpenGL for 3D graphics rendering.
-Alien Arena can be played on many computers. 
+Alien Arena can be played on many computers.
 However, not all computers have 3D acceleration hardware and drivers with adequate performance for 3D game play.
-A proprietary driver, such as those from AMD/ATI and NVidia, is usually needed.
+While some systems may perform ok with open source drivers,
+a proprietary driver, such as those from AMD/ATI and NVidia, is often needed.
+
+Playing online may require firewall configuration.
+Online performance will vary depending on the network connection between the client and the server.
+
+\n+[topic]. Installation
 
 If you are installing Alien Arena using your distribution's package manager, follow their instructions.
 Distributions install the user's configuration in places other than the default "~/.codered" directory.
 This is important if you want to create the "arena/autoexec.cfg" file to customize your settings.
 Search for "arena/config.cfg" to find the configuration directory. 
+
+Two installation alternatives are PlayDeb and Desura. TODO: ADD MORE INFO HERE. 
 
 If you are reading this, you may have already unpacked the distribution archive (aka, "tarball") into your HOME directory.
 Otherwise, the terminal command line for unpacking the archive is:
@@ -95,7 +116,7 @@ If the installation fails, check the error message for required software package
 Alien Arena uses: X11, OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, and JPEG.
 Some major distributions have "dev" versions of the libraries that are needed to build programs.
 These are not installed by default, so you may need to install them using your distributions package manager. 
-Version 7.52 does not require the ODE library (it is integrated).
+Version 7.53 does not require the ODE library (it is integrated).
 There is a configure option to use the system ODE library (see below.)
 
 For Ubuntu and similar systems, see the topic, "Getting Required Packages with Synaptic", below. 
@@ -103,7 +124,7 @@ For Ubuntu and similar systems, see the topic, "Getting Required Packages with S
 For advanced configure options, see the topic, "Custom Configure Options", below.
 It is not necessary, but it would be a good idea to take a look at those.
 
-Using the terminal, change to the "alienarena-7.52" directory and enter these commands:  
+Using the terminal, change to the "alienarena-7.53" directory and enter these commands:  
 .nf
 .in +2m
 $ ./configure

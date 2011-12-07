@@ -96,7 +96,6 @@ DIST_COMMON = README $(am__configure_deps) $(am__dist_doc_DATA_DIST) \
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_append_flag.m4 \
-	$(top_srcdir)/m4/ax_cflags_gcc_option.m4 \
 	$(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/ax_pthread.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/configure.ac
@@ -419,6 +418,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/ctf-titan2k8.nod \
 	botinfo/nav/ctf-vesuvius.nod \
 	botinfo/nav/ctf-violator.nod \
+	botinfo/nav/ctf-zion2k9.nod \
 	botinfo/nav/db-chromium.nod \
 	botinfo/nav/db-icarus.nod \
 	botinfo/nav/db-vesuvius.nod \
