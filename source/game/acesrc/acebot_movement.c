@@ -399,8 +399,6 @@ void ACEMV_ChangeBotAngle (edict_t *ent)
 ///////////////////////////////////////////////////////////////////////
 void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 {
-
-
 	// If a rocket or grenade is around deal with it
 	// Simple, but effective (could be rewritten to be more accurate)
 	if(strcmp(self->movetarget->classname,"rocket")==0 ||
@@ -441,7 +439,6 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	int i;
 	float c;
 
-
 	// Get current and next node back from nav code.
 	if(!ACEND_FollowPath(self))
 	{
@@ -461,8 +458,6 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	///////////////////////////
 	if (self->movetarget)
 		ACEMV_MoveToGoal(self,ucmd);
-
-
 
 	////////////////////////////////////////////////////////
 	// Platforms
@@ -499,8 +494,8 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 
 		ACEMV_ChangeBotAngle(self);
 
-		VectorCopy(self->move_vector,dist);
-		VectorScale(dist,440,self->velocity);
+		VectorCopy(self->move_vector, dist);
+		VectorScale(dist, 440, self->velocity);
 
 		return;
 	}
@@ -579,13 +574,15 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	if(ACEMV_CanMove(self, MOVE_FORWARD))
 		ucmd->forwardmove = 400;
 
-	if(self->skill == 3) {//ultra skill level(will be 3)
-
+	if(self->skill == 3) //ultra skill level(will be 3)
+	{
 		c = random();
 
-		if(!self->in_deathball && grapple->value && c <= .7) {	//use the grapple once in awhile to pull itself around
+		if(!self->in_deathball && grapple->value && c <= .7) 
+		{	//use the grapple once in awhile to pull itself around
 
-			if(self->client->ctf_grapplestate == CTF_GRAPPLE_STATE_HANG) {
+			if(self->client->ctf_grapplestate == CTF_GRAPPLE_STATE_HANG) 
+			{
 				CTFPlayerResetGrapple(self);
 				ACEMV_ChangeBotAngle(self);
 				return;
@@ -596,21 +593,32 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 			ucmd->buttons = BUTTON_ATTACK;
 			ACEMV_ChangeBotAngle(self);
 			return;
-		}
+		}		
 		else if(self->client->ctf_grapplestate != CTF_GRAPPLE_STATE_PULL &&
-			self->client->ctf_grapplestate != CTF_GRAPPLE_STATE_HANG){ //don't interrupt a pull
+			self->client->ctf_grapplestate != CTF_GRAPPLE_STATE_HANG) //don't interrupt a pull
+		{	
+			float weight;
+			int strafeJump = false;			
+			//Strafejumping should only occur now if a bot is far enough from a node
+			//and not wandering.  We really don't want them to jump around when wandering
+			//as it seems to hinder locating a goal.
+	
+			VectorSubtract(self->s.origin, nodes[self->current_node].origin, dist);
+			weight = VectorLength( dist );
+			if(weight > 300)
+				strafeJump = true;
+			
+			if(strafeJump)
+			{
+				if(c > .7)
+					ucmd->upmove = 400; //jump around the level
 
-			if(c > .7)
+				if(c > 0.9 && ACEMV_CanMove(self, MOVE_LEFT)) //strafejump left(was -400)
+					ucmd->sidemove = -200;
 
-				ucmd->upmove = 400; //jump around the level
-
-			if(c > 0.9 && ACEMV_CanMove(self, MOVE_LEFT)) //strafejump left
-
-				ucmd->sidemove = -400;
-
-			else if(c > 0.8 && ACEMV_CanMove(self, MOVE_RIGHT)) //strafejump right
-
-				ucmd->sidemove = 400;
+				else if(c > 0.8 && ACEMV_CanMove(self, MOVE_RIGHT)) //strafejump right(was 400)
+					ucmd->sidemove = 200;
+			}
 		}
 
 		//Now if we have the Alien Smartgun, drop some prox mines :)

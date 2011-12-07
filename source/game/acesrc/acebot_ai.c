@@ -417,6 +417,7 @@ qboolean ACEAI_infront (edict_t *self, edict_t *other)
 
 	if (dot > (1.0 - self->awareness))
 		return true;
+
 	return false;
 }
 
