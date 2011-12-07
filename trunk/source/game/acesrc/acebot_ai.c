@@ -130,7 +130,6 @@ void ACEAI_Think (edict_t *self)
 	  ACEAI_PickLongRangeGoal(self); // pick a new long range goal
 
 	// Kill the bot if completely stuck somewhere
-
 	if(VectorLength(self->velocity) > 37)
 		self->suicide_timeout = level.time + 10.0;
 
