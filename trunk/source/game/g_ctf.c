@@ -849,7 +849,14 @@ qboolean CTFPickup_Flag (edict_t *ent, edict_t *other)
 		gi.sound (ent, CHAN_AUTO, gi.soundindex("misc/blue_picked.wav"), 1, ATTN_NONE, 0);
 
 	other->client->resp.reward_pts+=2;
-
+#ifdef CTFNODES
+	//if a bot, break off of path, so we can find base path
+	if(other->is_bot)
+	{
+		other->state = STATE_WANDER;
+		other->wander_timeout = level.time + 1.0;
+	}
+#endif
 	if(other->client->resp.reward_pts >= g_reward->integer && !other->client->resp.powered) { //give them speed and invis powerups
 		it = FindItem("Invisibility");
 		other->client->pers.inventory[ITEM_INDEX(it)] += 1;

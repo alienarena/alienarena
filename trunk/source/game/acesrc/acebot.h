@@ -88,10 +88,13 @@
 #define NODE_WATER 5
 #define NODE_GRAPPLE 6
 #define NODE_JUMP 7
+#define NODE_REDBASE 8
+#define NODE_BLUEBASE 9
+#define NODE_DEFEND 10
 #define NODE_ALL 99 // For selecting all nodes
 
 // Density setting for nodes
-#define NODE_DENSITY 128
+#define NODE_DENSITY 256
 
 // Bot state types
 #define STATE_STAND 0

@@ -550,8 +550,8 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 			ucmd->upmove = 400;
 
 		ucmd->forwardmove = 300;
-		return;
 
+		return;
 	}
 
 	// Falling off ledge?
@@ -781,6 +781,7 @@ static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 	float angle;
 	float ca,sa;
 	float dx,dy;
+	float accBase;
 
 	/*
 	 * self->accuracy is weapon specific accuracy from bot configuration
@@ -791,7 +792,22 @@ static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 	else if ( self->accuracy > 1.0f )
 		self->accuracy = 1.0f;
 
-	accuracy = ( 12.0f / self->accuracy ) - 4.0f;
+	switch(self->skill)
+	{
+		case 0:
+			accBase = 24.0f;
+			break;
+		case 1:
+			accBase = 20.0f;
+			break;
+		case 2:
+		case 3:
+		default:
+			accBase = 12.0f;
+			break;
+	}
+
+	accuracy = ( accBase / self->accuracy ) - 4.0f;
 	random_r = ktgt_scale * crandom();
 	radius = ((random_r * random_r ) / ( ktgt_div - accuracy )) + ktgt_ofs;
 	angle = random() * 2.0f * M_PI;
