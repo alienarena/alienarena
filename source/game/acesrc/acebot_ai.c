@@ -197,90 +197,125 @@ clientthink:
 ///////////////////////////////////////////////////////////////////////
 void ACEAI_PickLongRangeGoal(edict_t *self)
 {
-
 	int i;
 	int node;
 	float weight,best_weight=0.0;
 	int current_node,goal_node=0;
 	edict_t *goal_ent=NULL, *ent;
 	float cost;
+#ifdef CTFNODES
+	gitem_t *flag1_item, *flag2_item;
+	qboolean hasFlag = false;
 
 	// look for a target
-	current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
+
+	//if flag in possession, try to find base nodes
+	if(ctf->value)
+	{
+		flag1_item = FindItemByClassname("item_flag_red");
+		flag2_item = FindItemByClassname("item_flag_blue");
+
+		if (self->client->pers.inventory[ITEM_INDEX(flag1_item)])
+		{
+			current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_BLUEBASE);
+			hasFlag = true;
+		}
+		else if (self->client->pers.inventory[ITEM_INDEX(flag2_item)])
+		{
+			current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_REDBASE);
+			hasFlag = true;
+		}
+		else
+			current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
+	}
+	else
+#endif
+		current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
 
 	self->current_node = current_node;
 
 	if(current_node == -1)
-	{
+	{		
 		self->state = STATE_WANDER;
 		self->wander_timeout = level.time + 1.0;
 		self->goal_node = -1;
 		return;
 	}
-
-	///////////////////////////////////////////////////////
-	// Items
-	///////////////////////////////////////////////////////
-	for(i=0;i<num_items;i++)
+#ifdef CTFNODES
+	if(!hasFlag)
 	{
-		if(item_table[i].ent == NULL || item_table[i].ent->solid == SOLID_NOT) // ignore items that are not there.
-			continue;
-
-		cost = ACEND_FindCost(current_node,item_table[i].node);
-
-		if(cost == INVALID || cost < 2) // ignore invalid and very short hops
-			continue;
-
-		weight = ACEIT_ItemNeed(self, item_table[i].item);
-
-		weight *= random(); // Allow random variations
-		weight /= cost; // Check against cost of getting there
-
-		if(weight > best_weight)
+#endif
+		///////////////////////////////////////////////////////
+		// Items
+		///////////////////////////////////////////////////////
+		for(i=0;i<num_items;i++)
 		{
-			best_weight = weight;
-			goal_node = item_table[i].node;
-			goal_ent = item_table[i].ent;
-		}
-	}
+			if(item_table[i].ent == NULL || item_table[i].ent->solid == SOLID_NOT) // ignore items that are not there.
+				continue;
 
-	///////////////////////////////////////////////////////
-	// Players
-	///////////////////////////////////////////////////////
-	// This should be its own function and is for now just
-	// finds a player to set as the goal.
-	for(i=0;i<game.maxclients;i++)
+			cost = ACEND_FindCost(current_node,item_table[i].node);
+
+			if(cost == INVALID || cost < 2) // ignore invalid and very short hops
+				continue;
+
+			weight = ACEIT_ItemNeed(self, item_table[i].item);
+
+			weight *= random(); // Allow random variations
+			weight /= cost; // Check against cost of getting there
+
+			if(weight > best_weight)
+			{
+				best_weight = weight;
+				goal_node = item_table[i].node;
+				goal_ent = item_table[i].ent;
+			}
+		}
+
+		///////////////////////////////////////////////////////
+		// Players
+		///////////////////////////////////////////////////////
+		// This should be its own function and is for now just
+		// finds a player to set as the goal.
+		for(i=0;i<game.maxclients;i++)
+		{
+			ent = g_edicts + i + 1;
+			if(ent == self || !ent->inuse || (ent->client->invis_framenum > level.framenum))
+				continue;
+
+			node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY,NODE_ALL);
+			cost = ACEND_FindCost(current_node, node);
+
+			if(cost == INVALID || cost < 3) // ignore invalid and very short hops
+				continue;
+
+			weight = 0.3;
+
+			weight *= random(); // Allow random variations
+			weight /= cost; // Check against cost of getting there
+
+			//to do - check for flag, and if enemy has the flag, up the weight.
+			if(weight > best_weight)
+			{
+				best_weight = weight;
+				goal_node = node;
+				goal_ent = ent;
+			}
+		}
+#ifdef CTFNODES
+	}
+	else
 	{
-		ent = g_edicts + i + 1;
-		if(ent == self || !ent->inuse || (ent->client->invis_framenum > level.framenum))
-			continue;
-
-		node = ACEND_FindClosestReachableNode(ent,NODE_DENSITY,NODE_ALL);
-		cost = ACEND_FindCost(current_node, node);
-
-		if(cost == INVALID || cost < 3) // ignore invalid and very short hops
-			continue;
-
-		weight = 0.3;
-
-		weight *= random(); // Allow random variations
-		weight /= cost; // Check against cost of getting there
-
-		//check for flag, and if enemy has the flag, up the weight.
-		if(weight > best_weight)
-		{
-			best_weight = weight;
-			goal_node = node;
-			goal_ent = ent;
-		}
+		goal_node = current_node;
+		best_weight = 1.0;
 	}
-
+#endif
 	// If do not find a goal, go wandering....
 	if(best_weight == 0.0 || goal_node == INVALID)
-	{
+	{			
 		self->goal_node = INVALID;
 		self->state = STATE_WANDER;
 		self->wander_timeout = level.time + 1.0;
+
 		if(debug_mode)
 			debug_printf("%s did not find a LR goal, wandering.\n",self->client->pers.netname);
 		return; // no path?
@@ -291,7 +326,9 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 	self->tries = 0; // Reset the count of how many times we tried this goal
 
 	if(goal_ent != NULL && debug_mode)
-		debug_printf("%s selected a %s at node %d for LR goal.\n",self->client->pers.netname, goal_ent->classname, goal_node);
+		debug_printf("%s selected a %s at node %d (type: %i) for LR goal.\n",self->client->pers.netname, goal_ent->classname, goal_node, nodes[goal_node].type);
+	else if(debug_mode)
+		debug_printf("%s selected node %d (type: %i) for LR goal.\n",self->client->pers.netname, goal_node, nodes[goal_node].type);
 
 	ACEND_SetGoal(self,goal_node);
 
@@ -329,9 +366,9 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 	float weight,best_weight=0.0;
 	edict_t *best = NULL;
 	int index;
-
+			
 	// look for a target (should make more efficent later)
-	target = findradius(NULL, self->s.origin, 200);//was 200
+	target = findradius(NULL, self->s.origin, 200);
 
 	while(target)
 	{

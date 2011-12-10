@@ -87,7 +87,7 @@ short int path_table[MAX_NODES][MAX_NODES];
 ///////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////
-// Determin cost of moving from one node to another
+// Determine cost of moving from one node to another
 ///////////////////////////////////////////////////////////////////////
 int ACEND_FindCost(int from, int to)
 {
@@ -127,45 +127,6 @@ int ACEND_FindCost(int from, int to)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Find a close node to the player within dist.
-//
-// Faster than looking for the closest node, but not very
-// accurate.
-///////////////////////////////////////////////////////////////////////
-int ACEND_FindCloseReachableNode(edict_t *self, int range, int type)
-{
-	vec3_t v;
-	int i;
-	trace_t tr;
-	float dist;
-
-	range *= range;
-
-	for(i=0;i<bot_numnodes;i++)
-	{
-		if(type == NODE_ALL || type == nodes[i].type) // check node type
-		{
-
-			VectorSubtract(nodes[i].origin,self->s.origin,v); // subtract first
-
-			dist = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
-
-			if(dist < range) // square range instead of sqrt
-			{
-				// make sure it is visible
-				//trace = gi.trace (self->s.origin, vec3_origin, vec3_origin, nodes[i].origin, self, MASK_OPAQUE);
-				tr = gi.trace (self->s.origin, self->mins, self->maxs, nodes[i].origin, self, BOTMASK_OPAQUE);
-
-				if(tr.fraction == 1.0)
-					return i;
-			}
-		}
-	}
-
-	return -1;
-}
-
-///////////////////////////////////////////////////////////////////////
 // Find the closest node to the player within a certain range
 ///////////////////////////////////////////////////////////////////////
 int ACEND_FindClosestReachableNode(edict_t *self, int range, int type)
@@ -191,15 +152,23 @@ int ACEND_FindClosestReachableNode(edict_t *self, int range, int type)
 	else
 		mins[2] += 18; // Stepsize
 
-	rng = (float)(range * range); // square range for distance comparison (eliminate sqrt)
+	rng = (float)(range); // square range for distance comparison (eliminate sqrt)
 
 	for(i=0;i<bot_numnodes;i++)
 	{
 		if(type == NODE_ALL || type == nodes[i].type) // check node type
 		{
-			VectorSubtract(nodes[i].origin, self->s.origin,v); // subtract first
+			if(type == NODE_ALL && (nodes[i].type == NODE_REDBASE || nodes[i].type == NODE_BLUEBASE))
+				continue; //we don't want to look for these unless specifically doing so
 
-			dist = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+			VectorSubtract(nodes[i].origin, self->s.origin, v); // subtract first
+
+			dist = VectorLength(v);
+
+			if(self->current_node != -1)
+			{
+				dist = dist + abs(self->current_node - i); //try to keep the bot on the current path(i.e - nodes in sequence are weighted over those out)
+			}
 
 			if(dist < closest && dist < rng)
 			{
@@ -227,16 +196,33 @@ int ACEND_FindClosestReachableNode(edict_t *self, int range, int type)
 void ACEND_SetGoal(edict_t *self, int goal_node)
 {
 	int node;
-
+#ifdef CTFNODES
+	gitem_t *flag1_item, *flag2_item;
+#endif
 	self->goal_node = goal_node;
-	node = ACEND_FindClosestReachableNode(self, NODE_DENSITY*3, NODE_ALL);
+#ifdef CTFNODES
+	//if flag in possession only use base nodes
+	if(ctf->value)
+	{
+		flag1_item = FindItemByClassname("item_flag_red");
+		flag2_item = FindItemByClassname("item_flag_blue");
+
+		if (self->client->pers.inventory[ITEM_INDEX(flag1_item)])
+			node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_BLUEBASE);
+		else if (self->client->pers.inventory[ITEM_INDEX(flag2_item)])
+			node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_REDBASE);
+		else
+			node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_ALL);
+	}
+	else
+#endif
+		node = ACEND_FindClosestReachableNode(self, NODE_DENSITY*3, NODE_ALL);
 
 	if(node == -1)
 		return;
 
 	if(debug_mode)
-		debug_printf("%s new start node selected %d\n",self->client->pers.netname,node);
-
+		debug_printf("%s new start node (type: %i) selected %d\n",self->client->pers.netname, nodes[node].type, node);
 
 	self->current_node = node;
 	self->next_node = self->current_node; // make sure we get to the nearest node first
@@ -298,153 +284,6 @@ qboolean ACEND_FollowPath(edict_t *self)
 	VectorSubtract (nodes[self->next_node].origin, self->s.origin , self->move_vector);
 
 	return true;
-}
-
-
-///////////////////////////////////////////////////////////////////////
-// MAPPING CODE
-///////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////
-// Capture when the grappling hook has been fired for mapping purposes.
-///////////////////////////////////////////////////////////////////////
-void ACEND_GrapFired(edict_t *self)
-{
-
-
-	if(!self->owner)
-		return; // should not be here
-
-	return;
-}
-
-
-///////////////////////////////////////////////////////////////////////
-// Check for adding ladder nodes
-///////////////////////////////////////////////////////////////////////
-qboolean ACEND_CheckForLadder(edict_t *self)
-{
-	int closest_node;
-
-	// If there is a ladder and we are moving up, see if we should add a ladder node
-	if (gi.pointcontents(self->s.origin) & CONTENTS_LADDER && self->velocity[2] > 0)
-	{
-		//debug_printf("contents: %x\n",tr.contents);
-
-		closest_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_LADDER);
-		if(closest_node == -1)
-		{
-			closest_node = ACEND_AddNode(self,NODE_LADDER);
-
-			// Now add link
-		    ACEND_UpdateNodeEdge(self->last_node,closest_node);
-
-			// Set current to last
-			self->last_node = closest_node;
-		}
-		else
-		{
-			ACEND_UpdateNodeEdge(self->last_node,closest_node);
-			self->last_node = closest_node; // set visited to last
-		}
-		return true;
-	}
-	return false;
-}
-
-///////////////////////////////////////////////////////////////////////
-// This routine is called to hook in the pathing code and sets
-// the current node if valid.
-///////////////////////////////////////////////////////////////////////
-void ACEND_PathMap(edict_t *self)
-{
-	int closest_node;
-	static float last_update=0; // start off low
-	vec3_t v;
-
-	if(level.time < last_update)
-		return;
-
-	last_update = level.time + 0.15; // slow down updates a bit
-
-	////////////////////////////////////////////////////////
-	// Special check for ladder nodes
-	///////////////////////////////////////////////////////
-	if(ACEND_CheckForLadder(self)) // check for ladder nodes
-		return;
-
-	// Not on ground, and not in the water, so bail
-    if(!self->groundentity && !self->waterlevel)
-		return;
-
-	////////////////////////////////////////////////////////
-	// Lava/Slime
-	////////////////////////////////////////////////////////
-	VectorCopy(self->s.origin,v);
-	v[2] -= 18;
-	if(gi.pointcontents(v) & (CONTENTS_LAVA|CONTENTS_SLIME))
-		return; // no nodes in slime
-
-    ////////////////////////////////////////////////////////
-	// Jumping
-	///////////////////////////////////////////////////////
-	if(self->is_jumping)
-	{
-	   // See if there is a closeby jump landing node (prevent adding too many)
-		closest_node = ACEND_FindClosestReachableNode(self, 64, NODE_JUMP);
-
-		if(closest_node == INVALID)
-			closest_node = ACEND_AddNode(self,NODE_JUMP);
-
-		// Now add link
-		if(self->last_node != -1)
-			ACEND_UpdateNodeEdge(self->last_node, closest_node);
-
-		self->is_jumping = false;
-		return;
-	}
-
-
-	// Iterate through all nodes to make sure far enough apart
-	closest_node = ACEND_FindClosestReachableNode(self, NODE_DENSITY, NODE_ALL);
-
-	////////////////////////////////////////////////////////
-	// Special Check for Platforms
-	////////////////////////////////////////////////////////
-	if(self->groundentity && self->groundentity->use == Use_Plat)
-	{
-		if(closest_node == INVALID)
-			return; // Do not want to do anything here.
-
-		// Here we want to add links
-		if(closest_node != self->last_node && self->last_node != INVALID)
-			ACEND_UpdateNodeEdge(self->last_node,closest_node);
-
-		self->last_node = closest_node; // set visited to last
-		return;
-	}
-
-	 ////////////////////////////////////////////////////////
-	 // Add Nodes as needed
-	 ////////////////////////////////////////////////////////
-	 if(closest_node == INVALID)
-	 {
-		// Add nodes in the water as needed
-		if(self->waterlevel)
-			closest_node = ACEND_AddNode(self,NODE_WATER);
-		else
-		    closest_node = ACEND_AddNode(self,NODE_MOVE);
-
-		// Now add link
-		if(self->last_node != -1)
-			ACEND_UpdateNodeEdge(self->last_node, closest_node);
-
-	 }
-	 else if(closest_node != self->last_node && self->last_node != INVALID)
-	 	ACEND_UpdateNodeEdge(self->last_node,closest_node);
-
-	 self->last_node = closest_node; // set visited to last
-
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -633,6 +472,12 @@ int ACEND_AddNode(edict_t *self, int type)
 			debug_printf("Node added %d type: Water\n",bot_numnodes);
 		else if(nodes[bot_numnodes].type == NODE_GRAPPLE)
 			debug_printf("Node added %d type: Grapple\n",bot_numnodes);
+		else if(nodes[bot_numnodes].type == NODE_REDBASE)
+			debug_printf("Node added %d type: Red Base\n",bot_numnodes);
+		else if(nodes[bot_numnodes].type == NODE_BLUEBASE)
+			debug_printf("Node added %d type: Blue Base\n",bot_numnodes);
+		else if(nodes[bot_numnodes].type == NODE_DEFEND)
+			debug_printf("Node added %d type: Defend Base\n",bot_numnodes);
 
 		ACEND_ShowNode(bot_numnodes);
 	}
