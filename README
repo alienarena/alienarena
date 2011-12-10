@@ -1,6 +1,6 @@
 
                          Alien Arena 2011
-                           Version 7.52
+                           Version 7.53
 
 1. Scope
 
@@ -15,6 +15,9 @@ in the distribution archive).
 For generic information about installation, see the GNU INSTALL
 document.
 
+
+2. Resources
+
 The Alien Arena HomePage URL is:
   http://red.planetarena.org/
 There are links there to the Alien Arena Forum and other helpful
@@ -23,43 +26,53 @@ by:
   irc.planetarena.org
 The in-game IRC connects to #alienarena there.
 
-2. Summary of changes for version 7.52
+There is a Subversion (SVN) repository for Alien Arena.  See the
+topic "Getting Alien Arena from SVN" below.
 
-There are no changes to the build and install procedure.
 
-Besides bug fixes, 7.52 has these additions and changes:
+3. Changes for version 7.53
 
-  * Four new levels. New and improved models and textures.
-  * Improved graphics effects, including vegetation shadowmapping.
-  * A passworded stats account system for registering player names.
-  * The client's network packet send rate is limited when running at
-    higher video frame rates.
-  * Bot improvements: Skill cvar can be set to 3 to force all bots to
-    high skill. Hit scan weapon aiming accuracy is more reasonable.
-  * A new game mode that is a hybrid of rocket arena and insta.
-  * The server browser shows server configuration settings, which
-    includes a flag for non-stock modified servers.
+The Autotools build uses autoconf 2.68, and automake 1.11.1.  The
+m4 macros are updated and configure.ac modified accordingly.
+There are no major changes to the build procedure from earlier
+7.5x versions.
 
-Some previous version changes affecting build and install:
+Besides bug fixes, 7.53 has these additions and changes:
+
+  * TBD.
+
+See the section "Notes about Console Variables" below.  There are
+some new and changed "cvars".
+
+
+4. Some previous version changes affecting build and install:
 
   * The Open Dynamics Engine (ODE) is integrated with the main program;
-    so libode is, optionally, not required. ODE is written
-    in c++, so g++ and libstdc++ are required to build and link the
-    integrated ODE.
+    so libode is, optionally, not required. ODE is written in c++, so g++
+    and libstdc++ are required to build and link the integrated ODE.
   * A configure option to disable document installation was added.
-  * An installation path for the icon, icondir, was added and the icon was
-    renamed to alienarena.png.
+  * An installation path for the icon, icondir, was added and the icon
+    was renamed to alienarena.png.
   * The server terminal may be configured to support color output.
   * The dedicated server was renamed to crx-ded.
   * The game.so shared library and LIBDIR variable were eliminated.
 
-3. Installation
+
+5. Requirements
 
 Alien Arena uses OpenGL for 3D graphics rendering.  Alien Arena
 can be played on many computers.  However, not all computers have
 3D acceleration hardware and drivers with adequate performance
-for 3D game play.  A proprietary driver, such as those from
-AMD/ATI and NVidia, is usually needed.
+for 3D game play.  While some systems may perform ok with open
+source drivers, a proprietary driver, such as those from AMD/ATI
+and NVidia, is often needed.
+
+Playing online may require firewall configuration.  Online
+performance will vary depending on the network connection between
+the client and the server.
+
+
+6. Installation
 
 If you are installing Alien Arena using your distribution's
 package manager, follow their instructions.  Distributions
@@ -67,6 +80,13 @@ install the user's configuration in places other than the default
 "~/.codered" directory.  This is important if you want to create
 the "arena/autoexec.cfg" file to customize your settings.  Search
 for "arena/config.cfg" to find the configuration directory.
+
+Two installation alternatives are PlayDeb and Desura.  If using
+those, follow their installation procedures.  PlayDeb is at
+http://www.playdeb.net/.  Desura is at http://www.desura.com/.
+
+The version available with a distribution or the game
+distribution services may not be the latest.
 
 If you are reading this, you may have already unpacked the
 distribution archive (aka, "tarball") into your HOME directory.
@@ -83,7 +103,7 @@ OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, and JPEG.  Some
 major distributions have "dev" versions of the libraries that are
 needed to build programs.  These are not installed by default, so
 you may need to install them using your distributions package
-manager.  Version 7.52 does not require the ODE library (it is
+manager.  Version 7.53 does not require the ODE library (it is
 integrated).  There is a configure option to use the system ODE
 library (see below.)
 
@@ -94,7 +114,7 @@ For advanced configure options, see the topic, "Custom Configure
 Options", below.  It is not necessary, but it would be a good
 idea to take a look at those.
 
-Using the terminal, change to the "alienarena-7.52" directory and
+Using the terminal, change to the "alienarena-7.53" directory and
 enter these commands:
   $ ./configure
   $ make
@@ -102,6 +122,14 @@ enter these commands:
 
 To run:
   $ crx
+
+In the menu, Single Player will run a simple pre-configured local
+game.  For more single player options, go to the Host Server menu
+and set "public server" to no.  For multiplayer, online play,
+first enter your player name and a password in the Player Setup
+menu.  Then go to the Join Server menu to find a Server.  (Yes,
+we know the menu system needs updating and there are plans to do
+that.)
 
 Command line options to crx are NOT standard.  There is NO
 "--help".  They follow a format inherited from Alien Arena's
@@ -157,7 +185,7 @@ The uninstall procedure may not remove all files and directories.
 Some manual removal may be required.
 
 
-4. Getting Required Packages with Synaptic
+7. Getting Required Packages with Synaptic
 
 Tools and packages required to build Alien Arena may not be
 installed.  For Ubuntu and similar systems, installing them is
@@ -179,7 +207,26 @@ Ubuntu 10.10.
   libfreetype6-dev
 
 
-5. Troubleshooting Tips
+8. Notes about Console Variables (cvars)
+
+New or changed server cvars:
+  * sv_enforcetime - setting to 1 enables experimental
+    speed hack detection.
+  * skill - for bot skill. setting to 3 forces all bots
+    to skill level 3.
+  * insta_rockets - a game mode combination of Instagib
+    and Rocket Arena.
+
+New or changed client cvars:
+  * gl_usevbo - enables the use of Vertex Buffer Objects
+    for better performance.
+
+Alien Arena is based on Quake games.  Many of the cvars are the
+same as Quake 2.  More information can be found on the Forum and
+on the Web.
+
+
+9. Troubleshooting Tips
 
 When the game program exits, it stores settings in "config.cfg".
 The default location for this file is
@@ -204,9 +251,14 @@ If you have errors that output messages about "ODE", setting the
 "ragdolls" option to off in the Game Options menu may help.
 
 There are known sound problems related to PulseAudio and OpenAL
-on some systems.  Check for for information on OpenAL
-configuration using "~/.alsoftrc" in your distributions shared
-doc directory.
+with some versions of those sound drivers.  Check for for
+information on OpenAL configuration using "~/.alsoftrc" in your
+distributions shared doc directory.
+
+If you have a high resolution mouse, you may need to set the
+mouse sensitivity cvar.  The cvar name is "sensitivity" and it
+may be set to fractional values between 0.0 and 1.0.  Use the
+console to determine the value, then put it in autoexec.cfg.
 
 The mouse may behave badly (always pointing up, for instance).
 This can usually be fixed by setting the console variable (cvar),
@@ -229,7 +281,7 @@ If you modify CFLAGS, you probably also want the "--disable-
 silent-rules" configure option.
 
 
-6. Custom Configure Options
+10. Custom Configure Options
 
 Run './configure --help' for a list of options.  Note that many
 of the options are built-in and some are not meaningful or useful
@@ -288,7 +340,7 @@ developer use.  If you use them, it is assumed that you know what
 you are doing.
 
 
-7. Tools
+11. Tools
 
 Tools/fuse.tar.gz contains a game server browser.  See documents
 in that package for details.
@@ -297,7 +349,7 @@ Tools/LinuxScripts contains tools for server management.  See the
 README there for details.
 
 
-8. Alternate Install
+12. Alternate Install
 
 This configures the installation to use the "traditional", single
 directory, in-place install.  It does not define DATADIR, and the
@@ -325,3 +377,22 @@ Following the usual 'make', it requires
 
 This just copies the executables to the top game directory.  The
 effect of using any other 'install' make target is "undefined".
+
+
+13. Getting Alien Arena from SVN
+
+The repository has the latest development version of Alien Arena.
+It contains tools and other resources that are not a part of the
+regular distribution.
+
+The SVN repository may be browsed at:
+
+http://svn.icculus.org/alienarena/trunk/
+
+Anonymous read-only checkout is available using this command:
+
+svn co svn://svn.icculus.org/alienarena/trunk alienarena
+
+More information about Subversion may be found at:
+http://subversion.apache.org/
+
