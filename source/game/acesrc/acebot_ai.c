@@ -534,6 +534,7 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 	{
 		if(!OnSameTeam(self, self->oldenemy))
 		{
+			//to do - add code to ask for help if carrying the flag
 			self->enemy = self->oldenemy;
 			self->oldenemy = NULL;
 			return true;
@@ -552,6 +553,8 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 		{
 			VectorSubtract(self->s.origin, ent->s.origin, dist);
 			weight = VectorLength( dist );
+
+			//add some more checks here, for health and armor, just slight, but enough to make them favor going for the weaker player
 
 			// Check if best target, or better than current target
 			if (weight < bestweight)
