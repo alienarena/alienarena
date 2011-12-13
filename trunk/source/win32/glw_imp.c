@@ -868,10 +868,10 @@ void GLimp_BeginFrame( float camera_separation )
 void GLimp_EndFrame (void)
 {
 	//2011-12 - This may have been causing problems, and probably no longer needed
-	//int		err;
+	int		err;
 
-	//err = qglGetError();
-	//assert( err == GL_NO_ERROR ); // 2010-08 This assert is happening
+	err = qglGetError();
+	assert( err == GL_NO_ERROR ); // 2010-08 This assert is happening
 
 	if ( Q_strcasecmp( gl_drawbuffer->string, "GL_BACK" ) == 0 )
 	{
