@@ -50,7 +50,6 @@ int r_lightgroups;
 int		registration_sequence;
 
 char map_music[128];
-extern unsigned r_weather;
 
 char		map_entitystring[MAX_MAP_ENTSTRING];
 int			numentitychars;
@@ -1675,6 +1674,7 @@ void R_BeginRegistration (char *model)
 	r_oldviewcluster = -1;		// force markleafs
 
 	r_weather = 0; //default is 0
+	r_nosun = 0;
 
 	// check for fog file, using file system search path
 	path = NULL;
