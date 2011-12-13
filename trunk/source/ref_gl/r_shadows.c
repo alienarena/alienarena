@@ -191,7 +191,7 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 	dtrivertx_t *verts;
 
 	//check for vbo
-#if 0
+#ifdef SHADOWVBO
 	if(gl_state.vbo && !lerp && !(currententity->flags & RF_BOBBING))
 	{
 		currentmodel->vbo_shadowxyz = R_VCFindCache(VBO_STORE_SHADOWXYZ, currententity);
@@ -389,18 +389,18 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 		ShadowIndex[index++] = shadow_vert+0;
 		shadow_vert +=3;
 	}
-#if 0
+#ifdef SHADOWVBO
 	//store vbo
-	if(gl_state.vbo && !lerp && !(currententity->flags & RF_BOBBING))
+	if(gl_state.vbo && !lerp)
 	{
-		currentmodel->vbo_shadowxyz = R_VCLoadData(VBO_STATIC, index*sizeof(vec3_t), ShadowArray, VBO_STORE_SHADOWXYZ, currententity);
-		currentmodel->vbo_shadowindices = R_VCLoadData(VBO_STATIC, index*sizeof(unsigned int), ShadowIndex, VBO_STORE_SHADOWINDICES, currententity);
+		currentmodel->vbo_shadowxyz = R_VCLoadData(VBO_DYNAMIC, index*sizeof(vec3_t), ShadowArray, VBO_STORE_SHADOWXYZ, currententity);
+		currentmodel->vbo_shadowindices = R_VCLoadData(VBO_DYNAMIC, index*sizeof(unsigned int), ShadowIndex, VBO_STORE_SHADOWINDICES, currententity);
 		//Com_Printf("Loading shadow vbo\n");
 	}
 
 skipLoad:
 
-	if(gl_state.vbo && !lerp && !(currententity->flags & RF_BOBBING))
+	if(gl_state.vbo && !lerp)
 	{		
         GL_BindVBO(currentmodel->vbo_shadowxyz);
 		qglVertexPointer(3, GL_FLOAT, sizeof(vec3_t), 0);

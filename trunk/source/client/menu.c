@@ -2736,6 +2736,7 @@ static menuaction_s		s_game_title;
 static menuaction_s		s_easy_game_action;
 static menuaction_s		s_medium_game_action;
 static menuaction_s		s_hard_game_action;
+static menuaction_s		s_ultra_game_action;
 static menuaction_s		s_credits_action;
 static menuseparator_s	s_blankline;
 
@@ -2775,6 +2776,12 @@ static void MediumGameFunc( void *data )
 static void HardGameFunc( void *data )
 {
 	Cvar_ForceSet( "skill", "2" );
+	StartGame();
+}
+
+static void UltraGameFunc( void *data )
+{
+	Cvar_ForceSet( "skill", "3" );
 	StartGame();
 }
 
@@ -2824,16 +2831,22 @@ void Game_MenuInit( void )
 	s_hard_game_action.generic.type	= MTYPE_ACTION;
 	s_hard_game_action.generic.x		= FONTSCALE*32*scale;
 	s_hard_game_action.generic.y		= FONTSCALE*70*scale;
-
 	s_hard_game_action.generic.cursor_offset = -16;
 	s_hard_game_action.generic.name	= "hard";
 	s_hard_game_action.generic.callback = HardGameFunc;
+
+	s_ultra_game_action.generic.type	= MTYPE_ACTION;
+	s_ultra_game_action.generic.x		= FONTSCALE*32*scale;
+	s_ultra_game_action.generic.y		= FONTSCALE*80*scale;
+	s_ultra_game_action.generic.cursor_offset = -16;
+	s_ultra_game_action.generic.name	= "ultra";
+	s_ultra_game_action.generic.callback = UltraGameFunc;
 
 	s_blankline.generic.type = MTYPE_SEPARATOR;
 
 	s_credits_action.generic.type	= MTYPE_ACTION;
 	s_credits_action.generic.x		= FONTSCALE*32*scale;
-	s_credits_action.generic.y		= FONTSCALE*90*scale;
+	s_credits_action.generic.y		= FONTSCALE*100*scale;
 	s_credits_action.generic.cursor_offset = -16;
 	s_credits_action.generic.name	= "credits";
 	s_credits_action.generic.callback = CreditsFunc;
@@ -2842,6 +2855,7 @@ void Game_MenuInit( void )
 	Menu_AddItem( &s_game_menu, ( void * ) &s_easy_game_action );
 	Menu_AddItem( &s_game_menu, ( void * ) &s_medium_game_action );
 	Menu_AddItem( &s_game_menu, ( void * ) &s_hard_game_action );
+	Menu_AddItem( &s_game_menu, ( void * ) &s_ultra_game_action );
 	Menu_AddItem( &s_game_menu, ( void * ) &s_blankline );
 	Menu_AddItem( &s_game_menu, ( void * ) &s_blankline );
 	Menu_AddItem( &s_game_menu, ( void * ) &s_credits_action );
