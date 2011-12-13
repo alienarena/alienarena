@@ -202,6 +202,7 @@ struct r_fog
 	float density;
 } fog;
 unsigned r_weather;
+unsigned r_nosun;
 
 /*
 =================
@@ -248,6 +249,8 @@ void R_ReadFogScript( char *config_file )
 			fog.density = atof(a_string);
 			strcpy( a_string, COM_Parse( &s ) );
 			r_weather = atoi(a_string);
+			strcpy( a_string, COM_Parse( &s ) );
+			r_nosun = atoi(a_string);
 
 			if(fog.density > 0)
 				map_fog = true;

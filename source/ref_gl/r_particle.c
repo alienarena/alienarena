@@ -619,6 +619,9 @@ void R_RenderSun()
     if (!draw_sun)
         return;
 
+	if (r_nosun)
+		return;
+
     if (r_newrefdef.rdflags & RDF_NOWORLDMODEL)
         return;
 

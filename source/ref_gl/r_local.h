@@ -180,6 +180,7 @@ extern  cvar_t  *r_ragdoll_debug;
 extern	qboolean	map_fog;
 extern	char		map_music[128];
 extern  unsigned	r_weather;
+extern unsigned		r_nosun;
 
 extern  cvar_t		*r_minimap;
 extern  cvar_t		*r_minimap_size;
