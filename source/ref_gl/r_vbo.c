@@ -178,11 +178,10 @@ vertCache_t *R_VCFindCache(vertStoreMode_t store, entity_t *ent)
 	for (cache = vcm.activeVertCache.next; cache != &vcm.activeVertCache; cache = next)
 	{
 		next = cache->next;
-#if 0
+#ifdef SHADOWVBO
 		if(store == VBO_STORE_SHADOWINDICES || store == VBO_STORE_SHADOWXYZ)
 		{
-			if (cache->store == store && cache->mod == mod && cache->position[0] == ent->origin[0] && cache->position[1] == ent->origin[1]
-				&& cache->position[2] == ent->origin[2])
+			if (cache->store == store && cache->ent == ent)
 			{	// already cached!
 				if(store == VBO_STORE_SHADOWINDICES)
 					GL_BindIBO(cache);
@@ -218,6 +217,9 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 	cache->pointer = buffer;
 	cache->store = store;
 	cache->mod = ent->model;
+#ifdef SHADOWVBO
+	cache->ent = ent;
+#endif
 	VectorCopy(ent->origin, cache->position);
 
 	// link
@@ -228,7 +230,7 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 
 	vcm.activeVertCache.next->prev = cache;
 	vcm.activeVertCache.next = cache;
-#if 0
+#ifdef SHADOWVBO
 	if(store == VBO_STORE_SHADOWINDICES)
 		GL_BindIBO(cache);
 	else
@@ -238,7 +240,7 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 	switch (cache->mode)
 	{
 		case VBO_STATIC:
-#if 0
+#ifdef SHADOWVBO
 			if(store == VBO_STORE_SHADOWINDICES)
 				qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, cache->size, cache->pointer, GL_STATIC_DRAW_ARB);
 			else
@@ -246,7 +248,7 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 				qglBufferDataARB(GL_ARRAY_BUFFER_ARB, cache->size, cache->pointer, GL_STATIC_DRAW_ARB);
 			break;
 		case VBO_DYNAMIC:
-#if 0
+#ifdef SHADOWVBO
 			if(store == VBO_STORE_SHADOWINDICES)
 				qglBufferDataARB(GL_ELEMENT_ARRAY_BUFFER, cache->size, cache->pointer, GL_DYNAMIC_DRAW_ARB);
 			else

@@ -143,6 +143,9 @@ typedef struct vertCache_s
 
 	vertStoreMode_t		store;
 	struct model_s		*mod;
+#ifdef SHADOWVBO
+	struct entity_s		*ent;
+#endif
 	unsigned			id;
 } vertCache_t;
 
