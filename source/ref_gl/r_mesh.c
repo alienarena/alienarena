@@ -1782,7 +1782,7 @@ skipLoad:
 			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 			{
 				if(qglLockArraysEXT)
-					qglLockArraysEXT(0, va);
+					qglLockArraysEXT(0, paliashdr->num_tris*3);
 
 				qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
 
