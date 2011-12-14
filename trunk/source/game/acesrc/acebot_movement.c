@@ -129,9 +129,9 @@ qboolean ACEMV_CanMove(edict_t *self, int direction)
 	VectorSet(offset, 36, 0, -400);
 	G_ProjectSource (self->s.origin, offset, forward, right, end);
 
-	tr = gi.trace(start, NULL, NULL, end, self, (CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_MIST|CONTENTS_LAVA|CONTENTS_WINDOW));
-
-	if(tr.fraction > 0.3 || tr.contents & (CONTENTS_LAVA|CONTENTS_SLIME|CONTENTS_MIST))
+	tr = gi.trace(start, NULL, NULL, end, self,
+			(CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_MIST|CONTENTS_LAVA|CONTENTS_WINDOW));
+	if(tr.fraction > 0.3 || (tr.contents & (CONTENTS_LAVA|CONTENTS_SLIME|CONTENTS_MIST)) )
 	{
 		if(debug_mode)
 			debug_printf("%s: move blocked\n",self->client->pers.netname);
@@ -431,7 +431,7 @@ void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 		if(ACEMV_CanMove(self, MOVE_FORWARD))
 			ucmd->forwardmove = 400;
 		else if(ACEMV_CanMove(self, MOVE_BACK))
-				ucmd->forwardmove = -400; 
+				ucmd->forwardmove = -400;
 		else if(ACEMV_CanMove(self, MOVE_RIGHT))
 				ucmd->sidemove = 400;
 		else if(ACEMV_CanMove(self, MOVE_LEFT))
@@ -590,14 +590,14 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 	if(ACEMV_CanMove(self, MOVE_FORWARD))
 		ucmd->forwardmove = 400;
 
-	if(self->skill == 3) 
+	if(self->skill == 3)
 	{ //ultra skill level(will be 3)
 		c = random();
 
-		if(!self->in_deathball && grapple->value && c <= .7) 
+		if(!self->in_deathball && grapple->value && c <= .7)
 		{	//use the grapple once in awhile to pull itself around
 
-			if(self->client->ctf_grapplestate == CTF_GRAPPLE_STATE_HANG) 
+			if(self->client->ctf_grapplestate == CTF_GRAPPLE_STATE_HANG)
 			{
 				CTFPlayerResetGrapple(self);
 				ACEMV_ChangeBotAngle(self);
@@ -609,31 +609,31 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 			ucmd->buttons = BUTTON_ATTACK;
 			ACEMV_ChangeBotAngle(self);
 			return;
-		}		
+		}
 		else if(self->client->ctf_grapplestate != CTF_GRAPPLE_STATE_PULL &&
-			self->client->ctf_grapplestate != CTF_GRAPPLE_STATE_HANG) 
+			self->client->ctf_grapplestate != CTF_GRAPPLE_STATE_HANG)
 		{ //don't interrupt a pull
 			float weight;
-			int strafeJump = false;			
+			int strafeJump = false;
 
 			//Strafejumping should only occur now if a bot is far enough from a node
 			//and not wandering.  We really don't want them to jump around when wandering
 			//as it seems to hinder locating a goal.
-	
+
 			VectorSubtract(self->s.origin, nodes[self->current_node].origin, dist);
 			weight = VectorLength( dist );
 			if(weight > 300)
 				strafeJump = true;
-			
+
 			if(strafeJump)
 			{
 				if(c > .7)
 					ucmd->upmove = 400; //jump around the level
 
-				if(c > 0.9 && ACEMV_CanMove(self, MOVE_LEFT)) 
+				if(c > 0.9 && ACEMV_CanMove(self, MOVE_LEFT))
 					ucmd->sidemove = -200; //strafejump left(was -400)
 
-				else if(c > 0.8 && ACEMV_CanMove(self, MOVE_RIGHT)) 
+				else if(c > 0.8 && ACEMV_CanMove(self, MOVE_RIGHT))
 					ucmd->sidemove = 200; //strafejump right(was 400)
 			}
 		}
@@ -744,7 +744,7 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 	if(ACEMV_CanMove(self, MOVE_FORWARD))
 		ucmd->forwardmove = 400;
 
-	if(self->skill == 3) 
+	if(self->skill == 3)
 	{ //ultra skill level(will be 3)
 		c = random();
 
@@ -754,18 +754,12 @@ void ACEMV_Wander(edict_t *self, usercmd_t *ucmd)
 	}
 }
 
-/* constants for target fuzzification */
-static const float ktgt_scale = 60.0f;
-static const float ktgt_div   = 50.0f;
-static const float ktgt_ofs   = 20.0f;
-
 /**
  * @brief  Apply some imprecision to an attacking bot's aim
  *
- * @detail Uses a randomly oriented X,Y vector with a length
- *         distribution calculated using the formula for
- *         a parabola. Leaves a hole around the center of
- *         the target, but with higher density nearer the center.
+ * @detail Uses a randomly oriented X,Y vector with a random length
+ *         plus an offset, which leaves a hole in the center of the
+ *         target area.
  *
  * @param self entity for the bot
  * @param pdx  x for targeted enemy's origin
@@ -773,6 +767,17 @@ static const float ktgt_ofs   = 20.0f;
  *
  * @return  *pdx and *pdy altered
  */
+/*
+ * constants for target fuzzification
+ */
+static const float ktgt_scale = 250.0f; //scaling factor
+static const float ktgt_ofs   = 20.0f;  //radius of hole
+/* scaling for weap skill for bot cfg skill 0, 1, 2 & 3 */
+static const float ktgt_skill[4] =
+	{ 0.7f, 0.8f, 0.9f, 1.0f }; //accuracy scaling by skill
+//accuracy factor = ktgt_skill[0] * self->accuracy minimum clamp
+static const float ktgt_acc = 0.35;
+
 static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 {
 	float accuracy;
@@ -781,46 +786,50 @@ static void fuzzy_target( edict_t *self, float *pdx, float *pdy )
 	float angle;
 	float ca,sa;
 	float dx,dy;
-	float accBase;
 
 	/*
-	 * self->accuracy is weapon specific accuracy from bot configuration
-	 * default is 0.75 (formerly 1.0)
+	 * self->accuracy is weapon specific accuracy from bot .cfg file
 	 */
-	if ( self->accuracy < 0.5f )
-		self->accuracy = 0.5f;
-	else if ( self->accuracy > 1.0f )
-		self->accuracy = 1.0f;
+	accuracy = self->accuracy;
+	if ( accuracy < 0.5f )
+		accuracy = 0.5f;
+	else if ( accuracy > 1.0f )
+		accuracy = 1.0f;
 
-	switch(self->skill)
+	//calc weap accuracy factor with scaling on bot skill
+	switch ( self->skill )
 	{
-		case 0:
-			accBase = 24.0f;
-			break;
-		case 1:
-			accBase = 20.0f;
-			break;
-		case 2:
-		case 3:
-		default:
-			accBase = 12.0f;
-			break;
+	case 0:
+		accuracy *= ktgt_skill[0];
+		break;
+	case 1:
+	default:
+		accuracy *= ktgt_skill[1];
+		break;
+	case 2:
+		accuracy *= ktgt_skill[2];
+		break;
+	case 3:
+		//override 3->2 for CTF
+		accuracy *= (ctf->integer) ? ktgt_skill[2] : ktgt_skill[3];
+		break;
 	}
 
-	accuracy = ( accBase / self->accuracy ) - 4.0f;
+	//radius calc
 	random_r = ktgt_scale * crandom();
-	radius = ((random_r * random_r ) / ( ktgt_div - accuracy )) + ktgt_ofs;
+	radius =  (random_r * ( ktgt_acc / accuracy)) + ktgt_ofs;
+	//angle calc
 	angle = random() * 2.0f * M_PI;
 	fast_sincosf( angle, &sa, &ca );
+	//apply delta to target
 	*pdx += dx = ca * radius;
 	*pdy += dy = sa * radius;
 
-/*
-	if ( debug_mode )
-	{
-		gi.dprintf("{\t%0.2f\t%0.2f\tacc%0.1f\t}\n", dx, dy, accuracy );
-	}
-*/
+//	if ( debug_mode )
+//	{
+//		gi.dprintf("{\t%0.2f\t%0.2f\tacc%0.1f\t%i}\n",
+//				dx, dy, accuracy, self->skill );
+//	}
 
 }
 

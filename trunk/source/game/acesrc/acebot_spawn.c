@@ -1076,7 +1076,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 	Q2_FindFile (modelpath, &file);
 	if(file) { //human
 		bot->ctype = 1;
-		if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value)) 
+		if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
 		{
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
 				client->pers.inventory[armor_index] += 30;
@@ -1094,7 +1094,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		Q2_FindFile (modelpath, &file);
 		if(file) { //robot
 			bot->ctype = 2;
-			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value)) 
+			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
 			{
 				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 85;
 				armor_index = ITEM_INDEX(FindItem("Jacket Armor"));
@@ -1103,7 +1103,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 			fclose(file);
 		}
 		else { //alien
-			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value)) 
+			if(classbased->value && !(rocket_arena->value || instagib->value || insta_rockets->value || excessive->value))
 			{
 				bot->health = bot->max_health = client->pers.max_health = client->pers.health = 150;
 				client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
@@ -1179,7 +1179,7 @@ void ACESP_PutClientInServer (edict_t *bot, qboolean respawn )
 		 *   0 : forces all to 0 skill (single player easy)
 		 *   1 : skill is cfg setting  (single player medium)
 		 *   2 : skill is cfg setting setting plus 1 (single player hard)
-		 *   3 : forces all to skill 3
+		 *   3 : forces all to skill 3 (single player ultra)
 		 */
 		if( skill->integer == 0 )
 		{
