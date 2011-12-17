@@ -1777,9 +1777,11 @@ skipLoad:
 				glEnableVertexAttribArrayARB (1);
 				GL_BindVBO(currentmodel->vbo_tangents);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
+
+				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
+					qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
             }
-         
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+         	else if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
 			{
 				if(qglLockArraysEXT)
 					qglLockArraysEXT(0, paliashdr->num_tris*3);
@@ -2404,15 +2406,19 @@ skipLoad:
 		qglEnableClientState( GL_VERTEX_ARRAY );
         GL_BindVBO(currentmodel->vbo_xyz);
         qglVertexPointer(3, GL_FLOAT, 0, 0);   
+
+		qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
     }
-    
-	if(qglLockArraysEXT)
-		qglLockArraysEXT(0, va);
+	else
+	{    
+		if(qglLockArraysEXT)
+			qglLockArraysEXT(0, paliashdr->num_tris*3);
 
-	qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+		qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
 
-	if(qglUnlockArraysEXT)
-		qglUnlockArraysEXT();
+		if(qglUnlockArraysEXT)
+			qglUnlockArraysEXT();
+	}
 
 	R_KillVArrays ();
 
