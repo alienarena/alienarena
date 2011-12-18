@@ -1760,7 +1760,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				//Com_Printf("Loading mesh vbo.\n");
             }
 skipLoad:
-			if(gl_state.vbo && !lerped && stage->normalmap) 
+			if(gl_state.vbo && !lerped && stage->normalmap && paliashdr->num_tris*3 > 0) 
 			{
                 qglEnableClientState( GL_VERTEX_ARRAY );
                 GL_BindVBO(currentmodel->vbo_xyz);
@@ -2401,7 +2401,7 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
     }
 
 skipLoad:
-	if(gl_state.vbo && !lerped) 
+	if(gl_state.vbo && !lerped && paliashdr->num_tris*3 > 0) 
 	{
 		qglEnableClientState( GL_VERTEX_ARRAY );
         GL_BindVBO(currentmodel->vbo_xyz);
