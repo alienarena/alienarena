@@ -70,13 +70,14 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <Optimization>Full</Optimization>
+      <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;dDOUBLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SrcDir);$(OpenALIncludeDir);$(LocalIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BrowseInformation>true</BrowseInformation>
       <DisableSpecificWarnings>4996;4244;4018</DisableSpecificWarnings>
       <CompileAs>CompileAsC</CompileAs>
       <StructMemberAlignment>1Byte</StructMemberAlignment>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
