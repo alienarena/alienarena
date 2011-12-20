@@ -373,6 +373,27 @@ qboolean Cbuf_AddLateCommands (void)
 
 
 /*
+=================
+Cmd_SimulateHang_f
+
+(FOR TESTING) Simulate the program hanging for a specified number of
+milliseconds. 
+=================
+*/
+void Cmd_SimulateHang_f (void)
+{
+	if (Cmd_Argc() != 2) {
+		Com_Printf ("Usage: hang <msec>\n");
+	}
+#if defined UNIX_VARIANT
+#if defined HAVE_UNISTD_H
+	usleep (atoi(Cmd_Argv(1))*1000);
+#endif
+#endif
+}
+
+
+/*
 ===============
 Cmd_Exec_f
 ===============
@@ -1077,5 +1098,6 @@ void Cmd_Init (void)
 	Cmd_AddCommand ("alias",Cmd_Alias_f);
 	Cmd_AddCommand ("unalias",Cmd_Unalias_f);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
+	Cmd_AddCommand ("hang", Cmd_SimulateHang_f);
 }
 
