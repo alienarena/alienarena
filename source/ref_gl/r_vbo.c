@@ -68,17 +68,13 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 	glpoly_t *p = surf->polys;
 	float	*v;
 	int		i;
-	float   *map;
-	float	*map2;
-	float	*map3;
 	int		l, m, n;
+	float map[MAX_VBO_XYZs];
+	float map2[MAX_VBO_XYZs];
+	float map3[MAX_VBO_XYZs];
 
 	if (gl_state.vbo)
 	{
-		map = (float*) vbo_shadow;
-		map2 = (float*) vbo_shadow2;
-		map3 = (float*) vbo_shadow3;
-				
 		for (v = p->verts[0], i = 0, l = 0, m = 0, n = 0; i < p->numverts; i++, v += VERTEXSIZE)
 		{
 			// copy in vertex data
@@ -103,9 +99,9 @@ void VB_BuildSurfaceVBO(msurface_t *surf)
 
 		surf->has_vbo = true;
 		
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition, surf->xyz_size, &vbo_shadow);                             
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size, surf->st_size, &vbo_shadow2);                
-		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size + surf->st_size, surf->lm_size, &vbo_shadow3);  
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition, surf->xyz_size, &map);                             
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size, surf->st_size, &map2);                
+		qglBufferSubDataARB(GL_ARRAY_BUFFER_ARB, vboPosition + surf->xyz_size + surf->st_size, surf->lm_size, &map3);  
 
 		vboPosition += (surf->xyz_size + surf->st_size + surf->lm_size);
 	}
