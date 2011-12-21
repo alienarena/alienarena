@@ -676,37 +676,6 @@ void Mod_LoadMD2Model (model_t *mod, void *buffer)
 		}
 	}
 
-	/*if (gl_state.vbo)
-	{
-		int		index_st;
-		int		index_xyz;
-		float	*map;
-
-		mod->vbo_st = NULL;
-		mod->vbo_xyz = NULL;
-
-		tris = (dtriangle_t *) ((byte *)pheader + pheader->ofs_tris);
-		map = (float*) vbo_shadow;	
-
-		for (l=0, i=0; i<pheader->num_tris; i++)
-		{
-			for (j=0; j<3; j++)
-			{
-				index_st = tris[i].index_st[j];
-				map[l++] = mod->st[index_st].s;
-				map[l++] = mod->st[index_st].t;
-
-				index_xyz = tris[i].index_xyz[j];
-			}
-		}
-
-		if (l>3*MAX_VBO_XYZs)
-			Com_Error(ERR_FATAL, "Temporary buffer overflow\n");
-
-		mod->vbo_st = R_VCLoadData(VBO_STATIC, l*sizeof(float), &vbo_shadow, VBO_STORE_ANY, NULL);
-		GL_BindVBO(NULL);
-	}*/
-
 	mod->num_triangles = pheader->num_tris;
 
 	paliashdr = (dmdl_t *)mod->extradata;
@@ -1765,24 +1734,27 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 skipLoad:
 			if(gl_state.vbo && !lerped && stage->normalmap) 
 			{
-                qglEnableClientState( GL_VERTEX_ARRAY );
-                GL_BindVBO(currentmodel->vbo_xyz);
-                qglVertexPointer(3, GL_FLOAT, 0, 0);
+				if(currentmodel->vbo_xyz) //failsafe
+				{
+					qglEnableClientState( GL_VERTEX_ARRAY );
+					GL_BindVBO(currentmodel->vbo_xyz);
+					qglVertexPointer(3, GL_FLOAT, 0, 0);
 
-                qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-                GL_BindVBO(currentmodel->vbo_st);
-                qglTexCoordPointer(2, GL_FLOAT, 0, 0);
+					qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+					GL_BindVBO(currentmodel->vbo_st);
+					qglTexCoordPointer(2, GL_FLOAT, 0, 0);
 
-                qglEnableClientState( GL_NORMAL_ARRAY );
-                GL_BindVBO(currentmodel->vbo_normals);
-                qglNormalPointer(GL_FLOAT, 0, 0);
+					qglEnableClientState( GL_NORMAL_ARRAY );
+					GL_BindVBO(currentmodel->vbo_normals);
+					qglNormalPointer(GL_FLOAT, 0, 0);
 
-				glEnableVertexAttribArrayARB (1);
-				GL_BindVBO(currentmodel->vbo_tangents);
-				glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
+					glEnableVertexAttribArrayARB (1);
+					GL_BindVBO(currentmodel->vbo_tangents);
+					glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 
-				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
-					qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
+						qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+				}
             }
          	else if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
 			{
@@ -2409,11 +2381,14 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 skipLoad:
 	if(gl_state.vbo && !lerped) 
 	{
-		qglEnableClientState( GL_VERTEX_ARRAY );
-        GL_BindVBO(currentmodel->vbo_xyz);
-        qglVertexPointer(3, GL_FLOAT, 0, 0);   
+		if(currentmodel->vbo_xyz) //failsafe
+		{
+			qglEnableClientState( GL_VERTEX_ARRAY );
+			GL_BindVBO(currentmodel->vbo_xyz);
+			qglVertexPointer(3, GL_FLOAT, 0, 0);   
 
-		qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+			qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+		}
     }
 	else
 	{    
