@@ -1740,20 +1740,29 @@ skipLoad:
 					GL_BindVBO(currentmodel->vbo_xyz);
 					qglVertexPointer(3, GL_FLOAT, 0, 0);
 
-					qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-					GL_BindVBO(currentmodel->vbo_st);
-					qglTexCoordPointer(2, GL_FLOAT, 0, 0);
+					if(currentmodel->vbo_st)
+					{
+						qglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+						GL_BindVBO(currentmodel->vbo_st);
+						qglTexCoordPointer(2, GL_FLOAT, 0, 0);
 
-					qglEnableClientState( GL_NORMAL_ARRAY );
-					GL_BindVBO(currentmodel->vbo_normals);
-					qglNormalPointer(GL_FLOAT, 0, 0);
+						if(currentmodel->vbo_normals)
+						{
+							qglEnableClientState( GL_NORMAL_ARRAY );
+							GL_BindVBO(currentmodel->vbo_normals);
+							qglNormalPointer(GL_FLOAT, 0, 0);
 
-					glEnableVertexAttribArrayARB (1);
-					GL_BindVBO(currentmodel->vbo_tangents);
-					glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
+							if(currentmodel->vbo_tangents)
+							{
+								glEnableVertexAttribArrayARB (1);
+								GL_BindVBO(currentmodel->vbo_tangents);
+								glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 
-					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
-						qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+								if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
+									qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+							}
+						}
+					}
 				}
             }
          	else if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
