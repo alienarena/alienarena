@@ -607,6 +607,7 @@ void VID_MenuInit( void )
 	s_vbo_box.generic.name	= "vertex buffer objects";
 	s_vbo_box.curvalue = gl_usevbo->value;
 	s_vbo_box.itemnames = yesno_names;
+	s_vbo_box.generic.statusbar = "increase performance - may be unstable";
 	s_vbo_box.generic.callback = VboCallback;
 
 	s_finish_box.generic.type = MTYPE_SPINCONTROL;
