@@ -102,12 +102,6 @@ typedef struct
 
 #define RDF_BLOOM         4      //BLOOMS
 
-#define MAX_VBO_XYZs		65536
-
-vec3_t	vbo_shadow[MAX_VBO_XYZs];
-vec3_t	vbo_shadow2[MAX_VBO_XYZs];
-vec3_t	vbo_shadow3[MAX_VBO_XYZs];
-
 #define	MAX_VERTEX_CACHES	4096
 #define MAX_VBO_XYZs		65536
 

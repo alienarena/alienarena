@@ -867,7 +867,6 @@ void GLimp_BeginFrame( float camera_separation )
 */
 void GLimp_EndFrame (void)
 {
-	//2011-12 - This may have been causing problems, and probably no longer needed
 	int		err;
 
 	err = qglGetError();
