@@ -151,8 +151,6 @@ typedef struct {
 
 vertCacheManager_t	vcm;
 
-vec3_t	vbo_shadow[MAX_VBO_XYZs];
-
 typedef struct entity_s
 {
 	char	name[MAX_QPATH];
