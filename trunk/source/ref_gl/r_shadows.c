@@ -418,13 +418,16 @@ skipLoad:
 	else
 #endif
 	{
-		if ( qglLockArraysEXT != 0 )
-		   qglLockArraysEXT( 0, shadow_vert );
+		if(index > 0)
+		{
+			if ( qglLockArraysEXT != 0 )
+			   qglLockArraysEXT( 0, shadow_vert );
 
-		qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
+			qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
 
-		if ( qglUnlockArraysEXT != 0 )
-			 qglUnlockArraysEXT();
+			if ( qglUnlockArraysEXT != 0 )
+				 qglUnlockArraysEXT();
+		}
 	}
 }
 
@@ -578,13 +581,16 @@ void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
 		shadow_vert +=3;
 	}
 
-	if ( qglLockArraysEXT != 0 )
-		qglLockArraysEXT( 0, shadow_vert );
+	if(index > 0)
+	{
+		if ( qglLockArraysEXT != 0 )
+			qglLockArraysEXT( 0, shadow_vert );
 
-	qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
+		qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
 	
-	if ( qglUnlockArraysEXT != 0 )
-		qglUnlockArraysEXT();
+		if ( qglUnlockArraysEXT != 0 )
+			qglUnlockArraysEXT();
+	}
 }
 
 void SHD_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolean lerp)
