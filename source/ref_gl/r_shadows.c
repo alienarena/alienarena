@@ -418,7 +418,7 @@ skipLoad:
 	else
 #endif
 	{
-		if(index > 0)
+		if(shadow_vert > 0)
 		{
 			if ( qglLockArraysEXT != 0 )
 			   qglLockArraysEXT( 0, shadow_vert );
@@ -581,7 +581,7 @@ void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
 		shadow_vert +=3;
 	}
 
-	if(index > 0)
+	if(shadow_vert > 0)
 	{
 		if ( qglLockArraysEXT != 0 )
 			qglLockArraysEXT( 0, shadow_vert );
