@@ -1014,9 +1014,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 	qboolean mirror = false;
 	qboolean has_vbo = false;
 
-	if(paliashdr->num_tris < 1)
-		return;
-
 	offs = paliashdr->num_xyz;
 
 	if(lerped)
@@ -2264,9 +2261,6 @@ void MD2_DrawCasterFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped)
 	int		va = 0;
 	fstvert_t *st;
 	qboolean has_vbo = false;
-
-	if(paliashdr->num_tris < 1)
-		return;
 
 	if(lerped)
 		frame = (daliasframe_t *)((byte *)paliashdr + paliashdr->ofs_frames

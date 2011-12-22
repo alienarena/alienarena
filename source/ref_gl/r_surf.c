@@ -549,9 +549,6 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 	unsigned lmtex = surf->lightmaptexturenum;
 	glpoly_t *p = surf->polys;
 
-	if(p->numverts < 1)
-		return;
-		
 	c_brush_polys++;
 
 	if (SurfaceIsAlphaBlended(surf))
@@ -616,9 +613,6 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 	float	scroll;
 	unsigned lmtex = surf->lightmaptexturenum;
 	glpoly_t *p = surf->polys;
-
-	if(p->numverts < 1)
-		return;
 		
 	c_brush_polys++;
 
@@ -692,9 +686,6 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 	float	scroll;
 	unsigned lmtex = surf->lightmaptexturenum;
 	glpoly_t *p = surf->polys;
-
-	if(p->numverts < 1)
-		return;
 		
 	c_brush_polys++;
 
