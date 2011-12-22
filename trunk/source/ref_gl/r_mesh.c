@@ -1796,9 +1796,9 @@ done:
 	GLSTATE_DISABLE_BLEND
 	GLSTATE_DISABLE_TEXGEN
 
-	qglDisableClientState( GL_NORMAL_ARRAY);
-	qglDisableClientState( GL_COLOR_ARRAY );
-	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	//qglDisableClientState( GL_NORMAL_ARRAY);
+	//qglDisableClientState( GL_COLOR_ARRAY );
+	//qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
 	glDisableVertexAttribArrayARB (1);
 
 	R_KillVArrays ();	
