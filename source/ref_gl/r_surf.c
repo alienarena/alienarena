@@ -958,7 +958,7 @@ void BSP_KillNormalTMUs(void) {
 	qglLoadIdentity ();
 	qglMatrixMode (GL_MODELVIEW);
 	qglDisable (GL_TEXTURE_CUBE_MAP_ARB);
-	qglEnable (GL_TEXTURE_2D);
+	qglDisable (GL_TEXTURE_2D);
 }
 
 static void BSP_DrawNormalSurfaces (void)
