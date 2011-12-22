@@ -219,14 +219,7 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			 VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 		}
 
-		if(qglLockArraysEXT)
-			qglLockArraysEXT(0, 4);
-
-		qglDrawArrays(GL_QUADS,0,4);
-
-		if(qglUnlockArraysEXT)
-			qglUnlockArraysEXT();
-
+		R_DrawVarrays(GL_QUADS, 0, 4, false);
 	}
 
 	R_KillVArrays ();
@@ -426,7 +419,7 @@ void PART_RenderFlare (flare_t *light)
 	VectorMA (vert_array[3], 1+dist, vright, vert_array[3]);
     VA_SetElem2(tex_array[3], 1, 1);
 
-	qglDrawArrays(GL_QUADS, 0 , 4);
+	R_DrawVarrays(GL_QUADS, 0 , 4, false);
 
 	GL_TexEnv( GL_REPLACE );
 	qglEnable(GL_DEPTH_TEST);
@@ -886,16 +879,7 @@ void R_DrawVegetationSurface ( void )
 
 			c_grasses++;
 	
-			if(va > 0)
-			{
-				if(qglLockArraysEXT)
-					qglLockArraysEXT(0, va);
-
-				qglDrawArrays(GL_QUADS, 0, va);
-
-				if(qglUnlockArraysEXT)
-					qglUnlockArraysEXT();
-			}
+			R_DrawVarrays(GL_QUADS, 0, va, false);
 		
 			R_KillVArrays ();
 		}
@@ -1140,13 +1124,7 @@ void R_DrawBeamSurface ( void )
 				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 			}
 
-			if(qglLockArraysEXT)
-				qglLockArraysEXT(0, 4);
-
-			qglDrawArrays(GL_QUADS,0,4);
-
-			if(qglUnlockArraysEXT)
-				qglUnlockArraysEXT();
+			R_DrawVarrays(GL_QUADS, 0, 4, false);
 
 			c_beams++;
 		}

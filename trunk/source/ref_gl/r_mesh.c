@@ -1261,18 +1261,9 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
             }
         }
 
-		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
-
-			if(va > 0)
-			{
-				if(qglLockArraysEXT)
-					qglLockArraysEXT(0, va);
-
-				qglDrawArrays(GL_TRIANGLES,0,va);
-
-				if(qglUnlockArraysEXT)
-					qglUnlockArraysEXT();
-			}
+		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+		{
+			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 		}
 
 		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
@@ -1334,16 +1325,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		}
 		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
-			if(va > 0)
-			{
-				if(qglLockArraysEXT)
-					qglLockArraysEXT(0, va);
-
-				qglDrawArrays(GL_TRIANGLES,0,va);
-
-				if(qglUnlockArraysEXT)
-					qglUnlockArraysEXT();
-			}
+			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 		}
 	}
 	else if(rs)
@@ -1764,20 +1746,14 @@ skipLoad:
 					glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 
 					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
-						qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+						R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, true);
 										
 					GL_BindVBO(NULL);
 				}
 	        }
          	else if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
 			{
-				if(qglLockArraysEXT)
-					qglLockArraysEXT(0, paliashdr->num_tris*3);
-
-				qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
-
-				if(qglUnlockArraysEXT)
-					qglUnlockArraysEXT();
+				R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, false);
 			}
 
 			qglColor4f(1,1,1,1);
@@ -1903,8 +1879,7 @@ void MD2_DrawShadow(dmdl_t *paliashdr, qboolean lerped)
 
 	}
 
-	if(va > 0)
-		qglDrawArrays(GL_TRIANGLES,0,va);
+	R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
@@ -2399,20 +2374,14 @@ skipLoad:
 			GL_BindVBO(currentmodel->vbo_xyz);
 			qglVertexPointer(3, GL_FLOAT, 0, 0);   
 
-			qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+			R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, true);
 			
 			GL_BindVBO(NULL);
 		}
     }
 	else
 	{    
-		if(qglLockArraysEXT)
-			qglLockArraysEXT(0, paliashdr->num_tris*3);
-
-		qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
-
-		if(qglUnlockArraysEXT)
-			qglUnlockArraysEXT();
+		R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, false);
 	}
 
 	R_KillVArrays ();

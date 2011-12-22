@@ -723,13 +723,7 @@ void R_DrawVegetationCasters ( void )
 				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
 			}
 
-			if(qglLockArraysEXT)
-				qglLockArraysEXT(0, 4);
-
-			qglDrawArrays(GL_QUADS,0,4);
-
-			if(qglUnlockArraysEXT)
-				qglUnlockArraysEXT();
+			R_DrawVarrays(GL_QUADS, 0, 4, false);
 
 			r_shadowmapcount = 2;
 		}
