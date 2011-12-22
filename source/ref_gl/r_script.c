@@ -1516,16 +1516,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			VertexCounter++;		
 		}
 
-		if(VertexCounter > 0)
-		{
-			if(qglLockArraysEXT)
-				qglLockArraysEXT(0, VertexCounter);
-
-			qglDrawArrays(GL_POLYGON, 0, VertexCounter);
-
-			if(qglUnlockArraysEXT)
-				qglUnlockArraysEXT();
-		}
+		R_DrawVarrays(GL_POLYGON, 0, VertexCounter, false);
 					
 		qglColor4f(1,1,1,1);
 		if (stage->colormap.enabled)

@@ -544,6 +544,7 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 // vertex array subsystem
 extern void R_InitVArrays (int varraytype);
 extern void R_KillVArrays (void);
+extern void R_DrawVarrays(GLenum mode, GLint first, GLsizei count, qboolean vbo);
 extern void R_InitQuadVarrays(void);
 extern void R_AddSurfToVArray (msurface_t *surf);
 extern void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll);

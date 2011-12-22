@@ -463,7 +463,7 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 		VA_SetElem2(tex_array[1],gl->sh, gl->tl);
 		VA_SetElem2(tex_array[2],gl->sh, gl->th);
 		VA_SetElem2(tex_array[3],gl->sl, gl->th);
-		qglDrawArrays (GL_QUADS, 0, 4);
+		R_DrawVarrays (GL_QUADS, 0, 4, false);
 		qglEnable (GL_ALPHA_TEST);
 		qglDisable (GL_BLEND);
 		R_KillVArrays();
@@ -545,7 +545,7 @@ void Draw_ShaderPic (image_t *gl, float alphaval)
 			RS_SetTexcoords2D (stage, &s, &t);
 			VA_SetElem2(tex_array[2],s, t);
 
-			qglDrawArrays(GL_QUADS,0,4);
+			R_DrawVarrays(GL_QUADS, 0, 4, false);
 
 			qglColor4f(1,1,1,1);
 			if (stage->colormap.enabled)

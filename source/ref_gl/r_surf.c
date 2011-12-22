@@ -597,7 +597,7 @@ static void BSP_RenderLightmappedPoly( msurface_t *surf )
 
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 				
-		qglDrawArrays (GL_POLYGON, 0, p->numverts);
+		R_DrawVarrays (GL_POLYGON, 0, p->numverts, true);
 
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	}
@@ -673,7 +673,7 @@ static void BSP_RenderGLSLLightmappedPoly( msurface_t *surf )
 
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 				
-		qglDrawArrays (GL_POLYGON, 0, p->numverts);
+		R_DrawVarrays (GL_POLYGON, 0, p->numverts, true);
 
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	}
@@ -759,7 +759,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 
 		KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER);
 				
-		qglDrawArrays (GL_POLYGON, 0, p->numverts);
+		R_DrawVarrays (GL_POLYGON, 0, p->numverts, true);
 
 		qglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	}
