@@ -1516,7 +1516,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 			VertexCounter++;		
 		}
 
-		if(VertexCounter > 2)
+		if(VertexCounter > 0)
 		{
 			if(qglLockArraysEXT)
 				qglLockArraysEXT(0, VertexCounter);
