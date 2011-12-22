@@ -326,7 +326,8 @@ void R_AddSurfToVArray (msurface_t *surf)
 		}
 
 		// draw the poly
-		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+		if(VertexCounter > 0)
+			qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 	}
 }
 
@@ -370,7 +371,8 @@ void R_AddTexturedSurfToVArray (msurface_t *surf, float scroll)
 		}
 
 		// draw the poly
-		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+		if(VertexCounter > 0)
+			qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 	}
 }
 
@@ -444,7 +446,8 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 	}
 	
 	// draw the polys
-	qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+	if(VertexCounter > 0)
+		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 }
 
 void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
@@ -482,7 +485,8 @@ void R_AddGLSLShadedWarpSurfToVArray (msurface_t *surf, float scroll)
 	qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 
 	// draw the polys
-	qglDrawArrays (GL_POLYGON, 0, VertexCounter);
+	if(VertexCounter > 0)
+		qglDrawArrays (GL_POLYGON, 0, VertexCounter);
 }
 
 
