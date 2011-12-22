@@ -1263,6 +1263,8 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) {
 
+			if(va > 0)
+			{
 				if(qglLockArraysEXT)
 					qglLockArraysEXT(0, va);
 
@@ -1270,6 +1272,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 				if(qglUnlockArraysEXT)
 					qglUnlockArraysEXT();
+			}
 		}
 
 		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
@@ -1331,6 +1334,8 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		}
 		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
+			if(va > 0)
+			{
 				if(qglLockArraysEXT)
 					qglLockArraysEXT(0, va);
 
@@ -1338,6 +1343,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 				if(qglUnlockArraysEXT)
 					qglUnlockArraysEXT();
+			}
 		}
 	}
 	else if(rs)
@@ -1897,7 +1903,8 @@ void MD2_DrawShadow(dmdl_t *paliashdr, qboolean lerped)
 
 	}
 
-	qglDrawArrays(GL_TRIANGLES,0,va);
+	if(va > 0)
+		qglDrawArrays(GL_TRIANGLES,0,va);
 
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
