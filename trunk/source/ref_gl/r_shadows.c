@@ -190,9 +190,6 @@ void SHD_BuildShadowVolume(dmdl_t * hdr, vec3_t light, float projectdistance, qb
 	daliasframe_t *frame;
 	dtrivertx_t *verts;
 
-	if(hdr->num_tris < 1)
-		return;
-
 	//check for vbo
 #ifdef SHADOWVBO
 	if(gl_state.vbo && !lerp && !(currententity->flags & RF_BOBBING))
@@ -418,16 +415,16 @@ skipLoad:
 	else
 #endif
 	{
-		if(shadow_vert > 0)
-		{
-			if ( qglLockArraysEXT != 0 )
-			   qglLockArraysEXT( 0, shadow_vert );
+		if(gl_state.vbo)
+			GL_BindVBO(NULL); //make sure that we aren't using an invalid buffer
 
-			qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
+		if ( qglLockArraysEXT != 0 )
+		   qglLockArraysEXT( 0, shadow_vert );
 
-			if ( qglUnlockArraysEXT != 0 )
-				 qglUnlockArraysEXT();
-		}
+		qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
+
+		if ( qglUnlockArraysEXT != 0 )
+			 qglUnlockArraysEXT();
 	}
 }
 
@@ -438,9 +435,6 @@ void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
 	unsigned	ShadowIndex[MAX_INDICES];
 	vec3_t v0, v1, v2, v3;
 	vec3_t currentShadowLight;
-
-	if(currentmodel->num_triangles < 1)
-		return;
 
 	SHD_MarkIQMShadowTriangles(light);
 
@@ -581,16 +575,16 @@ void SHD_BuildIQMShadowVolume(vec3_t light, float projectdistance)
 		shadow_vert +=3;
 	}
 
-	if(shadow_vert > 0)
-	{
-		if ( qglLockArraysEXT != 0 )
-			qglLockArraysEXT( 0, shadow_vert );
+	if(gl_state.vbo)
+		GL_BindVBO(NULL); //make sure that we aren't using an invalid buffer
 
-		qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
+	if ( qglLockArraysEXT != 0 )
+		qglLockArraysEXT( 0, shadow_vert );
+
+	qglDrawElements(GL_TRIANGLES, index, GL_UNSIGNED_INT, ShadowIndex);
 	
-		if ( qglUnlockArraysEXT != 0 )
-			qglUnlockArraysEXT();
-	}
+	if ( qglUnlockArraysEXT != 0 )
+		qglUnlockArraysEXT();
 }
 
 void SHD_RenderVolumes(dmdl_t * paliashdr, vec3_t lightdir, int projdist, qboolean lerp)

@@ -213,7 +213,6 @@ vertCache_t *R_VCLoadData(vertCacheMode_t mode, int size, void *buffer, vertStor
 	cache->pointer = buffer;
 	cache->store = store;
 	cache->mod = ent->model;
-	qglGenBuffersARB(1, &cache->id);
 #ifdef SHADOWVBO
 	cache->ent = ent;
 #endif
@@ -308,19 +307,18 @@ void R_VCFreeFrame()
 void VB_VCInit()
 {
 	int	i;
-	vertCache_t	*cache, *next;
 
 	if (!gl_state.vbo)
 		return;
 
-	//clear out previous buffers
+	//clear out previous buffer
 	qglDeleteBuffersARB(1, &vboId);
 
 	for (i=0; i<MAX_VERTEX_CACHES; i++)
 	{
 		if(&vcm.vertCacheList[i])
 			qglDeleteBuffersARB(1, &vcm.vertCacheList[i].id);
-	}	
+	}
 
 	vboPosition = 0;
 	totalVBObufferSize = 0;	
@@ -335,6 +333,9 @@ void VB_VCInit()
 
 	for (i=0; i<MAX_VERTEX_CACHES-1; i++)
 		vcm.vertCacheList[i].next = &vcm.vertCacheList[i+1];
+
+	for (i=0; i<MAX_VERTEX_CACHES; i++)
+		qglGenBuffersARB(1, &vcm.vertCacheList[i].id);
 }
 
 
