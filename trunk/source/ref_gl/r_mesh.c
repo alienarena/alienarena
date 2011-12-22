@@ -1739,8 +1739,6 @@ skipLoad:
 
 				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
 					R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, true);
-										
-				GL_BindVBO(NULL);
 	        }
          	else if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
 			{
@@ -2359,8 +2357,6 @@ skipLoad:
 		qglVertexPointer(3, GL_FLOAT, 0, 0);   
 
 		R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, true);
-			
-		GL_BindVBO(NULL);
     }
 	else
 	{    
