@@ -1339,7 +1339,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				if(qglUnlockArraysEXT)
 					qglUnlockArraysEXT();
 		}
-
 	}
 	else if(rs)
 	{
@@ -1446,7 +1445,11 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			{
 				vec3_t lightVec, lightVal;
 
-				if(!(gl_state.vbo && !lerped))
+				if(gl_state.vbo && !lerped)
+				{
+					KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);
+				}
+				else 
 				{
 					R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
 					qglNormalPointer(GL_FLOAT, 0, NormalsArray);
@@ -1756,6 +1759,8 @@ skipLoad:
 
 					if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
 						qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+										
+					GL_BindVBO(NULL);
 				}
 	        }
          	else if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
@@ -1777,8 +1782,6 @@ skipLoad:
 			if(stage->normalmap)
 			{
 				glUseProgramObjectARB( 0 );
-				if(gl_state.vbo && !lerped)
-					glDisableVertexAttribArrayARB (1);
 				GL_EnableMultitexture( false );
 			}
 
@@ -1796,11 +1799,9 @@ done:
 	qglDisableClientState( GL_NORMAL_ARRAY);
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	glDisableVertexAttribArrayARB (1);
 
-	R_KillVArrays ();
-
-	if (gl_state.vbo)
-		GL_BindVBO(NULL);
+	R_KillVArrays ();	
 
 	if ( currententity->flags & ( RF_SHELL_RED | RF_SHELL_GREEN | RF_SHELL_BLUE | RF_SHELL_DOUBLE | RF_SHELL_HALF_DAM ) )
 		qglEnable( GL_TEXTURE_2D );
@@ -2392,6 +2393,8 @@ skipLoad:
 			qglVertexPointer(3, GL_FLOAT, 0, 0);   
 
 			qglDrawArrays(GL_TRIANGLES, 0, paliashdr->num_tris*3);
+			
+			GL_BindVBO(NULL);
 		}
     }
 	else
@@ -2406,9 +2409,6 @@ skipLoad:
 	}
 
 	R_KillVArrays ();
-
-	if (gl_state.vbo)
-		GL_BindVBO(NULL);
 }
 
 //to do - alpha and alphamasks possible?
