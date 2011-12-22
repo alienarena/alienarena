@@ -886,13 +886,16 @@ void R_DrawVegetationSurface ( void )
 
 			c_grasses++;
 	
-			if(qglLockArraysEXT)
-				qglLockArraysEXT(0, va);
+			if(va > 0)
+			{
+				if(qglLockArraysEXT)
+					qglLockArraysEXT(0, va);
 
-			qglDrawArrays(GL_QUADS, 0, va);
+				qglDrawArrays(GL_QUADS, 0, va);
 
-			if(qglUnlockArraysEXT)
-				qglUnlockArraysEXT();
+				if(qglUnlockArraysEXT)
+					qglUnlockArraysEXT();
+			}
 		
 			R_KillVArrays ();
 		}

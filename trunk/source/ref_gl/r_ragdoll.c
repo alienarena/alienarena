@@ -1145,7 +1145,8 @@ void RGD_DrawRagDollShadow(int RagDollID)
 		}
 	}
 
-	qglDrawArrays(GL_TRIANGLES,0,va);
+	if(va > 0)
+		qglDrawArrays(GL_TRIANGLES,0,va);
 
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
