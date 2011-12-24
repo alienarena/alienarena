@@ -19,12 +19,20 @@ document.
 2. Resources
 
 The Alien Arena HomePage URL is:
+
   http://red.planetarena.org/
+
 There are links there to the Alien Arena Forum and other helpful
-Internet resources.  The Alien Arena IRC channel is now served
-by:
+Internet resources.  The Alien Arena IRC (Internet Relay Chat)
+channel is now served by:
+
   irc.planetarena.org
+
 The in-game IRC connects to #alienarena there.
+
+There is a Server Browser on the Web at:
+
+  http://chaingun.org/alienarena/tools/browser/
 
 There is a Subversion (SVN) repository for Alien Arena.  See the
 topic "Getting Alien Arena from SVN" below.
@@ -32,14 +40,37 @@ topic "Getting Alien Arena from SVN" below.
 
 3. Changes for version 7.53
 
-The Autotools build uses autoconf 2.68, and automake 1.11.1.  The
+The Autotools build uses autoconf 2.68, and automake 1.11.  The
 m4 macros are updated and configure.ac modified accordingly.
 There are no major changes to the build procedure from earlier
 7.5x versions.
 
-Besides bug fixes, 7.53 has these additions and changes:
+The complete version 7.53 changelog is available at:
 
-  * TBD.
+  http://icculus.org/alienarena/changelogs/7.53.txt
+
+Following are some highlights.
+
+Visual and performance improvements:
+  * Significant performance increases on high settings from extending
+    implementation of VBO (Vertex Buffer Objects).
+  * IQM and MD2 model rendering improvements.
+  * Grass/vegetation rendering improvements.
+  * Model precaching improvements.
+
+Game-related updates:
+  * New CTF map based on dm-zion2k9: ctf-zion2k9
+  * New TCA map, tca-invasion, derived from ctf-invasion using new
+    entity definition feature.
+  * Improvements to bot AI navigation, aiming and movement.
+  * CTF scoring improvements.
+  * Speed-hack detection (sv_enforcetime) improvements.
+  * Optional player lights ("DM Lights") for non-team games.
+
+Other:
+  * Additional video resolutions in menu and other menu additions.
+  * Player password account system and statistics improvements.
+  * Client to server packet rate limit lowered to approx. 60 pps.
 
 See the section "Notes about Console Variables" below.  There are
 some new and changed "cvars".
@@ -60,16 +91,33 @@ some new and changed "cvars".
 
 5. Requirements
 
-Alien Arena uses OpenGL for 3D graphics rendering.  Alien Arena
-can be played on many computers.  However, not all computers have
-3D acceleration hardware and drivers with adequate performance
-for 3D game play.  While some systems may perform ok with open
-source drivers, a proprietary driver, such as those from AMD/ATI
-and NVidia, is often needed.
+Alien Arena uses OpenGL for 3D graphics rendering.  Not all
+computers have 3D acceleration hardware and drivers with adequate
+performance for 3D game play.  While some systems may perform ok
+with open source drivers, a proprietary driver, such as those
+from AMD/ATI and NVidia, is often needed.  The Video Settings
+menu may be used to override the automatically selected
+performance level.
 
-Playing online may require firewall configuration.  Online
-performance will vary depending on the network connection between
-the client and the server.
+Online performance will vary depending on the network connection
+between the client and the server.  Servers with *lower* ping
+will usually perform better.
+
+Playing online may require firewall configuration.
+
+These ports are used by the program:
+  * UDP 27900 for the master server. Used for getting server list.
+  * UDP 27901 for the client.
+  * UDP 27902 for account/stats system password validation.
+  * UDP 27910 is the default for a server, but is often configured otherwise.
+  * TCP 6667 is the default for in-game connection to the IRC channel.
+
+The cURL library is used to retrieve map resources, player
+ranking information, and current version information from these
+URLs:
+  * http://icculus.org/alienarena/sv_downloadurl
+  * http://stats.planetarena.org
+  * http://red.planetarena.org/version/crx_version
 
 
 6. Installation
@@ -124,12 +172,13 @@ To run:
   $ crx
 
 In the menu, Single Player will run a simple pre-configured local
-game.  For more single player options, go to the Host Server menu
-and set "public server" to no.  For multiplayer, online play,
-first enter your player name and a password in the Player Setup
-menu.  Then go to the Join Server menu to find a Server.  (Yes,
-we know the menu system needs updating and there are plans to do
-that.)
+game.  For more single player options, go to the Host Server
+menu.  Setting "public server" to no will keep your local game
+from being broadcast with the master server list.  For
+multiplayer, online play, first enter your player name and a
+password in the Player Setup menu.  Then go to the Join Server
+menu to find a Server.  (Yes, we know the menu system needs
+updating and there are plans to do that.)
 
 Command line options to crx are NOT standard.  There is NO
 "--help".  They follow a format inherited from Alien Arena's
@@ -210,23 +259,26 @@ Ubuntu 10.10.
 8. Notes about Console Variables (cvars)
 
 New or changed server cvars:
-  * sv_enforcetime - setting to 1 enables experimental
-    speed hack detection.
+  * sv_enforcetime - setting to 1 enables speed hack
+    detection. (May give false positives.)
   * skill - for bot skill. setting to 3 forces all bots
     to skill level 3.
   * insta_rockets - a game mode combination of Instagib
     and Rocket Arena.
+  * g_dm_lights - 1 enable, 0 disable DM Lights.
 
-New or changed client cvars:
+New client cvars:
   * gl_usevbo - enables the use of Vertex Buffer Objects
     for better performance.
+  * cl_dmlights - 1 enable, 0 disable DM Lights when
+    enabled on server.
 
 Alien Arena is based on Quake games.  Many of the cvars are the
 same as Quake 2.  More information can be found on the Forum and
 on the Web.
 
 
-9. Troubleshooting Tips
+9. Troubleshooting and Configuration Tips
 
 When the game program exits, it stores settings in "config.cfg".
 The default location for this file is

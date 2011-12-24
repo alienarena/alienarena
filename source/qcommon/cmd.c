@@ -23,8 +23,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #endif
 
-#include "qcommon.h"
+#if defined UNIX_VARIANT
+#if defined HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#endif
 
+#include "qcommon.h"
 
 
 #define	MAX_ALIAS_NAME	32
@@ -377,7 +382,7 @@ qboolean Cbuf_AddLateCommands (void)
 Cmd_SimulateHang_f
 
 (FOR TESTING) Simulate the program hanging for a specified number of
-milliseconds. 
+milliseconds.
 =================
 */
 void Cmd_SimulateHang_f (void)
