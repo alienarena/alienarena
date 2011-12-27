@@ -8118,37 +8118,7 @@ fi
 #  fast-math because strict adherence to IEEE standard is not needed.
 #  no-strict-aliasing because strict aliasing is not adhered to in places.
 #
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -ffast-math" >&5
-$as_echo_n "checking whether C compiler accepts -ffast-math... " >&6; }
-if ${ax_cv_check_cflags___ffast_math+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -ffast-math"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_check_cflags___ffast_math=yes
-else
-  ax_cv_check_cflags___ffast_math=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___ffast_math" >&5
-$as_echo "$ax_cv_check_cflags___ffast_math" >&6; }
-if test x"$ax_cv_check_cflags___ffast_math" = xyes; then :
-  if ${CFLAGS+:} false; then :
+if ${CFLAGS+:} false; then :
   case " $CFLAGS " in
     *" -ffast-math "*)
       { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -ffast-math"; } >&5
@@ -8170,42 +8140,29 @@ else
   CFLAGS="-ffast-math"
 fi
 
+if ${CXXFLAGS+:} false; then :
+  case " $CXXFLAGS " in
+    *" -ffast-math "*)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS already contains -ffast-math"; } >&5
+  (: CXXFLAGS already contains -ffast-math) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      ;;
+    *)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS -ffast-math\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS -ffast-math") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      CXXFLAGS="$CXXFLAGS -ffast-math"
+      ;;
+   esac
 else
-  :
+  CXXFLAGS="-ffast-math"
 fi
 
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -fno-strict-aliasing" >&5
-$as_echo_n "checking whether C compiler accepts -fno-strict-aliasing... " >&6; }
-if ${ax_cv_check_cflags___fno_strict_aliasing+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -fno-strict-aliasing"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_check_cflags___fno_strict_aliasing=yes
-else
-  ax_cv_check_cflags___fno_strict_aliasing=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___fno_strict_aliasing" >&5
-$as_echo "$ax_cv_check_cflags___fno_strict_aliasing" >&6; }
-if test x"$ax_cv_check_cflags___fno_strict_aliasing" = xyes; then :
-  if ${CFLAGS+:} false; then :
+if ${CFLAGS+:} false; then :
   case " $CFLAGS " in
     *" -fno-strict-aliasing "*)
       { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -fno-strict-aliasing"; } >&5
@@ -8227,9 +8184,28 @@ else
   CFLAGS="-fno-strict-aliasing"
 fi
 
+if ${CXXFLAGS+:} false; then :
+  case " $CXXFLAGS " in
+    *" -fno-strict-aliasing "*)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS already contains -fno-strict-aliasing"; } >&5
+  (: CXXFLAGS already contains -fno-strict-aliasing) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      ;;
+    *)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS -fno-strict-aliasing\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS -fno-strict-aliasing") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      CXXFLAGS="$CXXFLAGS -fno-strict-aliasing"
+      ;;
+   esac
 else
-  :
+  CXXFLAGS="-fno-strict-aliasing"
 fi
+
 
 
 #########################################################################################################
@@ -8248,39 +8224,9 @@ else
   debug_syms=no
 fi
 
-
 if  test "x$debug_syms" = "xyes" ; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -g3" >&5
-$as_echo_n "checking whether C compiler accepts -g3... " >&6; }
-if ${ax_cv_check_cflags___g3+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
 
-  ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -g3"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_check_cflags___g3=yes
-else
-  ax_cv_check_cflags___g3=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___g3" >&5
-$as_echo "$ax_cv_check_cflags___g3" >&6; }
-if test x"$ax_cv_check_cflags___g3" = xyes; then :
-  if ${CFLAGS+:} false; then :
+	if ${CFLAGS+:} false; then :
   case " $CFLAGS " in
     *" -g3 "*)
       { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -g3"; } >&5
@@ -8302,12 +8248,30 @@ else
   CFLAGS="-g3"
 fi
 
+	if ${CXXFLAGS+:} false; then :
+  case " $CXXFLAGS " in
+    *" -g3 "*)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS already contains -g3"; } >&5
+  (: CXXFLAGS already contains -g3) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      ;;
+    *)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS -g3\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS -g3") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      CXXFLAGS="$CXXFLAGS -g3"
+      ;;
+   esac
 else
-  :
+  CXXFLAGS="-g3"
 fi
 
 	debug=yes
-]
+
 fi
  if  test "x$debug_syms" = "xno" ; then
   REMOVE_SYMBOLS_TRUE=
@@ -8326,39 +8290,9 @@ else
   gcc_whining=no
 fi
 
-
 if  test "x$gcc_whining" = "xyes" ; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Wall" >&5
-$as_echo_n "checking whether C compiler accepts -Wall... " >&6; }
-if ${ax_cv_check_cflags___Wall+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
 
-  ax_check_save_flags=$CFLAGS
-  CFLAGS="$CFLAGS  -Wall"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ax_cv_check_cflags___Wall=yes
-else
-  ax_cv_check_cflags___Wall=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Wall" >&5
-$as_echo "$ax_cv_check_cflags___Wall" >&6; }
-if test x"$ax_cv_check_cflags___Wall" = xyes; then :
-  if ${CFLAGS+:} false; then :
+	if ${CFLAGS+:} false; then :
   case " $CFLAGS " in
     *" -Wall "*)
       { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -Wall"; } >&5
@@ -8380,12 +8314,30 @@ else
   CFLAGS="-Wall"
 fi
 
+	if ${CXXFLAGS+:} false; then :
+  case " $CXXFLAGS " in
+    *" -Wall "*)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS already contains -Wall"; } >&5
+  (: CXXFLAGS already contains -Wall) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      ;;
+    *)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS -Wall\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS -Wall") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      CXXFLAGS="$CXXFLAGS -Wall"
+      ;;
+   esac
 else
-  :
+  CXXFLAGS="-Wall"
 fi
 
 	debug=yes
-]
+
 fi
 
 # IRC client debugging
@@ -8451,26 +8403,26 @@ if  test "x$assert_stmts" = "xyes" ; then :
   debug=yes
 else
 
-	if ${CFLAGS+:} false; then :
-  case " $CFLAGS " in
+	if ${CPPFLAGS+:} false; then :
+  case " $CPPFLAGS " in
     *" -DNDEBUG "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS already contains -DNDEBUG"; } >&5
-  (: CFLAGS already contains -DNDEBUG) 2>&5
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS already contains -DNDEBUG"; } >&5
+  (: CPPFLAGS already contains -DNDEBUG) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
       ;;
     *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CFLAGS=\"\$CFLAGS -DNDEBUG\""; } >&5
-  (: CFLAGS="$CFLAGS -DNDEBUG") 2>&5
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CPPFLAGS=\"\$CPPFLAGS -DNDEBUG\""; } >&5
+  (: CPPFLAGS="$CPPFLAGS -DNDEBUG") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-      CFLAGS="$CFLAGS -DNDEBUG"
+      CPPFLAGS="$CPPFLAGS -DNDEBUG"
       ;;
    esac
 else
-  CFLAGS="-DNDEBUG"
+  CPPFLAGS="-DNDEBUG"
 fi
 
 

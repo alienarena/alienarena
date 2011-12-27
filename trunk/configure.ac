@@ -469,15 +469,11 @@ AM_COND_IF([BUILD_WIN32],
 #  fast-math because strict adherence to IEEE standard is not needed.
 #  no-strict-aliasing because strict aliasing is not adhered to in places.
 #
-AX_CHECK_COMPILE_FLAG(
-	[-ffast-math],
-	[AX_APPEND_FLAG([-ffast-math])],
-	[])
-	
-AX_CHECK_COMPILE_FLAG(
-	[-fno-strict-aliasing],
-	[AX_APPEND_FLAG([-fno-strict-aliasing])],
-	[])
+AX_APPEND_FLAG([-ffast-math],[CFLAGS])
+AX_APPEND_FLAG([-ffast-math],[CXXFLAGS])
+AX_APPEND_FLAG([-fno-strict-aliasing],[CFLAGS])
+AX_APPEND_FLAG([-fno-strict-aliasing],[CXXFLAGS])
+
 
 #########################################################################################################
 # DEBUGGING OPTIONS
@@ -491,9 +487,9 @@ debug=no
 AC_ARG_ENABLE([debugging-symbols],
 	[AS_HELP_STRING([--enable-debugging-symbols],[Compile Alien Arena with full debugging information (default:no)])],
 	[debug_syms=${enableval}],[debug_syms=no])
-	
-AS_IF([ test "x$debug_syms" = "xyes" ],
-	[AX_CHECK_COMPILE_FLAG([-g3],[AX_APPEND_FLAG([-g3])],[])]
+AS_IF([ test "x$debug_syms" = "xyes" ],[
+	AX_APPEND_FLAG([-g3],[CFLAGS])
+	AX_APPEND_FLAG([-g3],[CXXFLAGS])
 	debug=yes
 ])
 AM_CONDITIONAL(REMOVE_SYMBOLS,[ test "x$debug_syms" = "xno" ])
@@ -502,9 +498,9 @@ AM_CONDITIONAL(REMOVE_SYMBOLS,[ test "x$debug_syms" = "xno" ])
 AC_ARG_ENABLE([full-warnings],
 	[AS_HELP_STRING([--enable-full-warnings],[Display all compiler warnings (default:no)])],
 	[gcc_whining=${enableval}],[gcc_whining=no])
-	
-AS_IF([ test "x$gcc_whining" = "xyes" ],
-	[AX_CHECK_COMPILE_FLAG([-Wall],[AX_APPEND_FLAG([-Wall])],[])]
+AS_IF([ test "x$gcc_whining" = "xyes" ],[
+	AX_APPEND_FLAG([-Wall],[CFLAGS])
+	AX_APPEND_FLAG([-Wall],[CXXFLAGS])
 	debug=yes
 ])
 
@@ -542,9 +538,8 @@ AC_ARG_ENABLE([assert-statements],
 		[Enable debug assert() statements (default: no)])
 	],[assert_stmts=${enableval}],[assert_stmts=no])
 AS_IF([ test "x$assert_stmts" = "xyes" ],
-	[debug=yes],
-	[
-	AX_APPEND_FLAG([-DNDEBUG])	
+	[debug=yes],[
+	AX_APPEND_FLAG([-DNDEBUG],[CPPFLAGS])
 ])
 
 # Enable ODE debug
