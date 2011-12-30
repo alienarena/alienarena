@@ -3326,7 +3326,7 @@ static int weather_particles;
 extern unsigned r_weather;
 
 /*
-Cl_WeatherEffects - adopted from Jay Dolan's Q2W
+Cl_WeatherEffects - originally adopted from Jay Dolan's Q2W
 */
 void Cl_WeatherEffects()
 {
@@ -3344,7 +3344,66 @@ void Cl_WeatherEffects()
 
 	k = 0;
 
-	if(r_weather == 3) 
+	if(r_weather == 5) 
+	{
+		while(i++ < WEATHER_PARTICLES && k++ < 1)
+		{
+			VectorCopy(cl.refdef.vieworg, start);
+			start[0] = start[0] + (rand() % 5096) - 2048;
+			start[1] = start[1] + (rand() % 5096) - 2048;
+
+			VectorCopy(start, end);
+			end[2] += 8192;
+
+			// trace up looking for sky
+			tr = CM_BoxTrace(start, end, vec3_origin, vec3_origin, 0, MASK_SHOT);
+
+			if(!(tr.surface->flags & SURF_SKY))
+				continue;
+
+			// drop down somewhere between sky and player
+			ceiling = tr.endpos[2] > start[2] + 1024 ? start[2] + 1024 : tr.endpos[2];
+			tr.endpos[2] = tr.endpos[2] - ((ceiling - start[2]) * frand());
+
+			if (!(p = new_particle()))
+				return;
+
+			VectorCopy(tr.endpos, p->org);
+			p->org[2] -= 1;
+
+			VectorCopy(start, end);
+			end[2] -= 8192;
+
+			tr = CM_BoxTrace(p->org, end, vec3_origin, vec3_origin, 0, MASK_ALL);
+
+			if(!tr.surface)  // this shouldn't happen
+				VectorCopy(start, p->end);
+			else
+				VectorCopy(tr.endpos, p->end);
+
+			p->type = PARTICLE_WEATHER;
+			// setup the particles
+			//trash
+			p->texnum = r_trashtexture->texnum;
+			p->vel[2] = -80;
+			p->accel[2] = 0;
+			p->alpha = 0.9;
+			p->alphavel = 0;
+			p->color = 8;
+			p->scale = 12;
+			p->scalevel = 0;
+			p->blendsrc = GL_SRC_ALPHA;
+			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+			
+			for(j = 0; j < 2; j++)
+			{
+				p->vel[j] = crand() * 40;
+				p->accel[j] = crand() * 50;
+			}
+			weather_particles++;
+		}		
+	}
+	else if(r_weather == 3 || r_weather == 4) 
 	{
 		while(i++ < WEATHER_PARTICLES && k++ < 2)
 		{
@@ -3383,17 +3442,32 @@ void Cl_WeatherEffects()
 
 			p->type = PARTICLE_WEATHER;
 			// setup the particles
-			p->texnum = r_leaftexture->texnum;
-			p->vel[2] = -80;
-			p->accel[2] = 0;
-			p->alpha = 0.9;
-			p->alphavel = 0;
-			p->color = 8;
-			p->scale = 2;
-			p->scalevel = 0;
-			p->blendsrc = GL_SRC_ALPHA;
-			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
-
+			if(r_weather == 3) //leaves
+			{
+				p->texnum = r_leaftexture->texnum;
+				p->vel[2] = -80;
+				p->accel[2] = 0;
+				p->alpha = 0.9;
+				p->alphavel = 0;
+				p->color = 8;
+				p->scale = 2;
+				p->scalevel = 0;
+				p->blendsrc = GL_SRC_ALPHA;
+				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+			}
+			else //embers
+			{
+				p->texnum = r_particletexture->texnum;
+				p->vel[2] = -80;
+				p->accel[2] = 0;
+				p->alpha = 0.8;
+				p->alphavel = frand() * -1;
+				p->color = 0xe8;
+				p->scale = 1;
+				p->scalevel = 0;
+				p->blendsrc = GL_ONE;
+				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+			}	
 			for(j = 0; j < 2; j++)
 			{
 				p->vel[j] = crand() * 25;

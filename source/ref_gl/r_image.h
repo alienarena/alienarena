@@ -107,6 +107,7 @@ extern image_t		*r_dis3texture;
 extern image_t		*r_voltagetexture;
 extern image_t		*r_raintexture;
 extern image_t		*r_leaftexture;
+extern image_t		*r_trashtexture;
 extern image_t		*r_splashtexture;
 extern image_t		*r_splash2texture;
 extern image_t		*r_flagtexture;
