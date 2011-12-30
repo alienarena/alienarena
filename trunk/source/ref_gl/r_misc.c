@@ -72,6 +72,7 @@ image_t		*r_bulletnormal;
 image_t		*r_voltagetexture;
 image_t		*r_raintexture;
 image_t		*r_leaftexture;
+image_t		*r_trashtexture;
 image_t		*r_splashtexture;
 image_t		*r_splash2texture;
 image_t		*r_radarmap;
@@ -351,6 +352,10 @@ void R_InitParticleTexture (void)
 	r_leaftexture = R_RegisterParticlePic("leaf");
 	if (!r_leaftexture) {
 		r_leaftexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
+    }
+	r_trashtexture = R_RegisterParticlePic("trash");
+	if (!r_trashtexture) {
+		r_trashtexture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 	r_splashtexture = R_RegisterParticlePic("ripples");
 	if (!r_splashtexture) {
