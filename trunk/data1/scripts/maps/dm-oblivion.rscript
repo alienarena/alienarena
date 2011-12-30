@@ -342,3 +342,51 @@ textures/arena10/neonsign19r
 		envmap
 	}
 }
+env/tekcityup
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcityrt
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcitylf
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcityft
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcitybk
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}
+env/tekcitydn
+{
+	{
+		map gfx/clouds.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 0.8
+	}
+}

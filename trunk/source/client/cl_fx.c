@@ -3455,18 +3455,18 @@ void Cl_WeatherEffects()
 				p->blendsrc = GL_SRC_ALPHA;
 				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 			}
-			else //embers
+			else if(r_weather == 4) //embers
 			{
 				p->texnum = r_particletexture->texnum;
 				p->vel[2] = -80;
 				p->accel[2] = 0;
-				p->alpha = 0.8;
+				p->alpha = 0.9;
 				p->alphavel = frand() * -1;
 				p->color = 0xe8;
-				p->scale = 1;
+				p->scale = 2;
 				p->scalevel = 0;
-				p->blendsrc = GL_ONE;
-				p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
+				p->blendsrc = GL_SRC_ALPHA;
+				p->blenddst = GL_ONE;
 			}	
 			for(j = 0; j < 2; j++)
 			{
@@ -3476,8 +3476,8 @@ void Cl_WeatherEffects()
 			weather_particles++;
 		}
 	}
-	else {
-
+	else 
+	{
 		while(i++ < WEATHER_PARTICLES && k++ < 25)
 		{
 			VectorCopy(cl.refdef.vieworg, start);
@@ -3515,7 +3515,7 @@ void Cl_WeatherEffects()
 
 			p->type = PARTICLE_WEATHER;
 			// setup the particles
-			if(r_weather == 1)
+			if(r_weather == 1) //rain
 			{
 				p->texnum = r_raintexture->texnum;
 				p->vel[2] = -800;
@@ -3526,7 +3526,7 @@ void Cl_WeatherEffects()
 				p->scale = 6;
 				p->scalevel = 0;
 			}
-			else if(r_weather == 2)
+			else if(r_weather == 2) //snow
 			{
 				p->texnum = r_particletexture->texnum;
 				p->vel[2] = -120;
