@@ -64,6 +64,7 @@ GLhandleARB g_meshprogramObj;
 GLhandleARB g_fbprogramObj;
 GLhandleARB g_blurprogramObj;
 GLhandleARB g_rblurprogramObj;
+GLhandleARB g_dropletsprogramObj;
 
 GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
@@ -125,6 +126,12 @@ GLuint		g_location_source;
 GLuint		g_location_rscale;
 GLuint		g_location_rsource;
 GLuint		g_location_rparams;
+
+//water droplets
+GLuint		g_location_drSource;
+GLuint		g_location_drTex;
+GLuint		g_location_drTime;
+GLuint		g_location_drParams;
 
 static char water_ARB_program[] =
 "!!ARBfp1.0\n"
@@ -926,6 +933,67 @@ static char rblur_fragment_program[] =
 "		gl_FragColor = color;\n"
 "}\n";
 
+//WATER DROPLETS
+static char droplets_vertex_program[] =
+"uniform float drTime;\n"
+
+"void main( void )\n"
+"{\n"
+"    gl_Position = ftransform();\n"
+
+"	 //for vertical scrolling\n"
+"	 vec4 texco = gl_MultiTexCoord0;\n"
+"	 texco.t = texco.t + drTime*1.0;\n"
+"	 gl_TexCoord[1] = texco;\n"
+
+"	 texco = gl_MultiTexCoord0;\n"
+"	 texco.t = texco.t + drTime*0.8;\n"
+"	 gl_TexCoord[2] = texco;\n"
+
+"    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
+"}\n";
+
+static char droplets_fragment_program[] =
+"uniform sampler2D drSource;\n"
+"uniform sampler2D drTex;\n"
+"uniform vec2 drParams;\n"
+
+"void main(void)\n"
+"{\n"
+"	vec3 noiseVec;\n"
+"	vec3 noiseVec2;\n"
+"	vec2 displacement;\n"
+"	float wScissor;\n"
+"	float hScissor;\n"
+
+"   displacement = gl_TexCoord[1].st;\n"
+
+"	noiseVec = normalize(texture2D(drTex, displacement.xy)).xyz;\n"
+"	noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"
+
+"   displacement = gl_TexCoord[2].st;\n"
+
+"	noiseVec2 = normalize(texture2D(drTex, displacement.xy)).xyz;\n"
+"	noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;\n"
+
+"	//clamp edges to prevent artifacts\n"
+
+"	wScissor = drParams.x - 0.008;\n"
+"	hScissor = drParams.y - 0.028;\n"
+
+"	if(gl_TexCoord[0].s > 0.1 && gl_TexCoord[0].s < wScissor)\n"
+"		displacement.x = gl_TexCoord[0].s + noiseVec.x + noiseVec2.x;\n"
+"	else\n"
+"		displacement.x = gl_TexCoord[0].s;\n"
+
+"	if(gl_TexCoord[0].t > 0.1 && gl_TexCoord[0].t < hScissor) \n"
+"		displacement.y = gl_TexCoord[0].t + noiseVec.y + noiseVec2.y;\n"
+"	else\n"
+"		displacement.y = gl_TexCoord[0].t;\n"
+
+"	gl_FragColor = texture2D(drSource, displacement.xy);\n"
+"}\n";
+
 void R_LoadGLSLPrograms(void)
 {
 	const char *shaderStrings[1];
@@ -1340,6 +1408,61 @@ void R_LoadGLSLPrograms(void)
 		g_location_rscale = glGetUniformLocationARB( g_rblurprogramObj, "rblurScale" );
 		g_location_rsource = glGetUniformLocationARB( g_rblurprogramObj, "rtextureSource");
 		g_location_rparams = glGetUniformLocationARB( g_rblurprogramObj, "radialBlurParams");
+
+		//water droplets
+		g_dropletsprogramObj = glCreateProgramObjectARB();
+
+		//
+		// Vertex shader
+		//
+
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)droplets_vertex_program;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_dropletsprogramObj, g_vertexShader );
+		else
+		{
+			Com_Printf("...Water Droplets Vertex Shader Compile Error\n");
+		}
+
+		//
+		// Fragment shader
+		//
+
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)droplets_fragment_program;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_dropletsprogramObj, g_fragmentShader );
+		else
+		{
+			Com_Printf("...Water Droplets Fragment Shader Compile Error\n");
+		}
+
+		glLinkProgramARB( g_dropletsprogramObj );
+		glGetObjectParameterivARB( g_dropletsprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+		if( !nResult )
+		{
+			glGetInfoLogARB( g_dropletsprogramObj, sizeof(str), NULL, str );
+			Com_Printf("...Linking Error\n");
+		}
+
+		//
+		// Locate some parameters by name so we can set them later...
+		//
+
+		g_location_drSource = glGetUniformLocationARB( g_dropletsprogramObj, "drSource" );
+		g_location_drTex = glGetUniformLocationARB( g_dropletsprogramObj, "drTex");
+		g_location_drParams = glGetUniformLocationARB( g_dropletsprogramObj, "drParams" );
+		g_location_drTime = glGetUniformLocationARB( g_dropletsprogramObj, "drTime" );
 
 	}
 	else

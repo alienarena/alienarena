@@ -597,6 +597,7 @@ extern GLhandleARB	g_meshprogramObj;
 extern GLhandleARB	g_fbprogramObj;
 extern GLhandleARB	g_blurprogramObj;
 extern GLhandleARB	g_rblurprogramObj;
+extern GLhandleARB  g_dropletsprogramObj;
 
 extern GLhandleARB	g_vertexShader;
 extern GLhandleARB	g_fragmentShader;
@@ -659,6 +660,12 @@ extern GLuint		g_location_source;
 extern GLuint		g_location_rscale;
 extern GLuint		g_location_rsource;
 extern GLuint		g_location_rparams;
+
+//water droplets
+extern GLuint		g_location_drSource;
+extern GLuint		g_location_drTex;
+extern GLuint		g_location_drTime;
+extern GLuint		g_location_drParams;
 
 //MD2
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);

@@ -276,6 +276,7 @@ extern	cvar_t	*cl_precachecustom;
 
 extern	cvar_t	*cl_paindist;
 extern	cvar_t	*cl_explosiondist;
+extern  cvar_t	*cl_raindist;
 
 extern	cvar_t	*cl_upspeed;
 extern	cvar_t	*cl_forwardspeed;

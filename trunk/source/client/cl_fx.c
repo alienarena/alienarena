@@ -3328,7 +3328,8 @@ extern unsigned r_weather;
 /*
 Cl_WeatherEffects - adopted from Jay Dolan's Q2W
 */
-void Cl_WeatherEffects(){
+void Cl_WeatherEffects()
+{
 	int i, j, k;
 	vec3_t start, end;
 	trace_t tr;
@@ -3343,10 +3344,10 @@ void Cl_WeatherEffects(){
 
 	k = 0;
 
-	if(r_weather == 3) {
-
-		while(i++ < WEATHER_PARTICLES && k++ < 2){
-
+	if(r_weather == 3) 
+	{
+		while(i++ < WEATHER_PARTICLES && k++ < 2)
+		{
 			VectorCopy(cl.refdef.vieworg, start);
 			start[0] = start[0] + (rand() % 2048) - 1024;
 			start[1] = start[1] + (rand() % 2048) - 1024;
@@ -3393,7 +3394,8 @@ void Cl_WeatherEffects(){
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE_MINUS_SRC_ALPHA;
 
-			for(j = 0; j < 2; j++){
+			for(j = 0; j < 2; j++)
+			{
 				p->vel[j] = crand() * 25;
 				p->accel[j] = crand() * 50;
 			}
@@ -3402,8 +3404,8 @@ void Cl_WeatherEffects(){
 	}
 	else {
 
-		while(i++ < WEATHER_PARTICLES && k++ < 25){
-
+		while(i++ < WEATHER_PARTICLES && k++ < 25)
+		{
 			VectorCopy(cl.refdef.vieworg, start);
 			start[0] = start[0] + (rand() % 2048) - 1024;
 			start[1] = start[1] + (rand() % 2048) - 1024;
@@ -3439,7 +3441,8 @@ void Cl_WeatherEffects(){
 
 			p->type = PARTICLE_WEATHER;
 			// setup the particles
-			if(r_weather == 1){
+			if(r_weather == 1)
+			{
 				p->texnum = r_raintexture->texnum;
 				p->vel[2] = -800;
 				p->accel[2] = 0;
@@ -3449,7 +3452,8 @@ void Cl_WeatherEffects(){
 				p->scale = 6;
 				p->scalevel = 0;
 			}
-			else if(r_weather == 2){
+			else if(r_weather == 2)
+			{
 				p->texnum = r_particletexture->texnum;
 				p->vel[2] = -120;
 				p->accel[2] = 0;
@@ -3462,7 +3466,8 @@ void Cl_WeatherEffects(){
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
 
-			for(j = 0; j < 2; j++){
+			for(j = 0; j < 2; j++)
+			{
 				p->vel[j] = crand() * 2;
 				p->accel[j] = crand() * 2;
 			}
