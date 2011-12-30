@@ -34,6 +34,7 @@ void R_DrawBloodEffect (void);
 
 image_t *r_framebuffer;
 image_t *r_distortwave;
+image_t *r_droplets;
 
 vec3_t r_explosionOrigin;
 int r_drawing_fbeffect;
@@ -41,7 +42,9 @@ int	r_fbFxType;
 float r_fbeffectTime;
 int frames;
 
-void R_GLSLPostProcess(void)
+extern  cvar_t	*cl_raindist;
+
+void R_GLSLDistortion(void)
 {
 	vec2_t fxScreenPos;
 	int offsetX, offsetY;
@@ -142,16 +145,14 @@ void R_GLSLPostProcess(void)
 		qglActiveTextureARB(GL_TEXTURE1);
 		qglBindTexture (GL_TEXTURE_2D,r_framebuffer->texnum);
 		glUniform1iARB( g_location_framebuffTex, 1);
-		KillFlags |= KILL_TMU0_POINTER;
+		KillFlags |= KILL_TMU1_POINTER;
 
 		qglActiveTextureARB(GL_TEXTURE0);
 	
 		if(r_distortwave)
 			qglBindTexture(GL_TEXTURE_2D, r_distortwave->texnum);
 		glUniform1iARB( g_location_distortTex, 0);
-		KillFlags |= KILL_TMU1_POINTER;
-
-		qglActiveTextureARB(GL_TEXTURE0);
+		KillFlags |= KILL_TMU0_POINTER;
 
 		glUniform2fARB( g_location_dParams, wScissor, hScissor);
 
@@ -204,6 +205,106 @@ void R_GLSLPostProcess(void)
 
 	return;
 }
+
+
+void R_GLSLWaterDroplets(void)
+{
+	int offsetX, offsetY;
+	float hScissor, wScissor;
+	trace_t tr;
+	vec3_t end;
+	static float r_drTime;
+
+	if(!(r_weather == 1) || !cl_raindist->value || !gl_glsl_postprocess->value || !gl_glsl_shaders->value || vid.width > 2048 || !gl_state.glsl_shaders)
+		return;
+
+	VectorCopy(r_newrefdef.vieworg, end);
+	end[2] += 8192;
+
+	// trace up looking for sky
+	tr = CM_BoxTrace(r_newrefdef.vieworg, end, vec3_origin, vec3_origin, 0, MASK_SHOT);
+
+	if((tr.surface->flags & SURF_SKY))
+	{
+		r_drTime = rs_realtime;
+	}
+
+	if(rs_realtime - r_drTime > 0.5)
+		return; //been out of the rain long enough for effect to dry up
+	
+	//set up full screen workspace
+	qglViewport( 0, 0, viddef.width, viddef.height );
+	qglDisable( GL_DEPTH_TEST );
+	qglMatrixMode( GL_PROJECTION );
+    qglLoadIdentity ();
+	qglOrtho(0, viddef.width, viddef.height, 0, -10, 100);
+	qglMatrixMode( GL_MODELVIEW );
+    qglLoadIdentity ();
+	qglDisable(GL_CULL_FACE);
+
+	qglDisable( GL_BLEND );
+	qglEnable( GL_TEXTURE_2D );
+
+	qglViewport(0,0,FB_texture_width,FB_texture_height);
+
+	//we need to grab the frame buffer
+	qglBindTexture(GL_TEXTURE_2D, r_framebuffer->texnum);
+	qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
+				0, 0, 0, 0, FB_texture_width, FB_texture_height);
+
+	qglViewport(0,0,viddef.width, viddef.height);
+
+	//render quad on screen
+
+	offsetY = viddef.height - FB_texture_height;
+	offsetX = viddef.width - FB_texture_width;
+
+	hScissor = (float)viddef.height/(float)FB_texture_height;
+	wScissor = (float)viddef.width/(float)FB_texture_width;
+		
+	qglEnableClientState (GL_VERTEX_ARRAY);
+	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
+	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
+	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+
+	VA_SetElem2(vert_array[0],0, viddef.height);
+	VA_SetElem2(vert_array[1],viddef.width-offsetX, viddef.height);
+	VA_SetElem2(vert_array[2],viddef.width-offsetX, offsetY);
+	VA_SetElem2(vert_array[3],0, offsetY);
+
+	VA_SetElem2(tex_array[0],r_framebuffer->sl, r_framebuffer->tl);
+	VA_SetElem2(tex_array[1],r_framebuffer->sh, r_framebuffer->tl);
+	VA_SetElem2(tex_array[2],r_framebuffer->sh, r_framebuffer->th);
+	VA_SetElem2(tex_array[3],r_framebuffer->sl, r_framebuffer->th);
+		
+	//draw water droplets
+	glUseProgramObjectARB( g_dropletsprogramObj ); //this program will have two or three of the normalmap scrolling over the buffer
+
+	qglActiveTextureARB(GL_TEXTURE1);
+	qglBindTexture (GL_TEXTURE_2D,r_framebuffer->texnum);
+	glUniform1iARB( g_location_drSource, 1);
+	KillFlags |= KILL_TMU1_POINTER;
+
+	qglActiveTextureARB(GL_TEXTURE0);
+	qglBindTexture(GL_TEXTURE_2D, r_droplets->texnum);
+	glUniform1iARB( g_location_drTex, 0);
+	KillFlags |= KILL_TMU0_POINTER;
+
+	glUniform1fARB( g_location_drTime, rs_realtime);
+	
+	glUniform2fARB( g_location_drParams, wScissor, hScissor);
+
+	R_DrawVarrays(GL_QUADS, 0, 4, false);
+
+	glUseProgramObjectARB( 0 );
+	
+	R_KillVArrays();
+
+	return;
+}
+
 
 /*
 ==============
@@ -408,8 +509,9 @@ void R_FB_InitTextures( void )
 	r_colorbuffer = GL_LoadPic( "***r_colorbuffer***", (byte *)data, FB_texture_width, FB_texture_height, it_pic, 3 );
 	free ( data );
 
-	//init the distortion textures - to do move this to r_misc?
+	//init the distortion textures
 	r_distortwave = GL_FindImage("gfx/distortwave.jpg",it_pic);
+	r_droplets = GL_FindImage("gfx/droplets.jpg",it_pic);
 }
 
 extern int vehicle_hud;
@@ -600,4 +702,12 @@ void R_DrawBloodEffect (void)
 	qglDisable (GL_BLEND);
 
 	R_KillVArrays();	
+}
+
+
+void R_GLSLPostProcess(void)
+{
+	R_GLSLWaterDroplets();
+	
+	R_GLSLDistortion();
 }
