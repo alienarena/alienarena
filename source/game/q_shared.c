@@ -1935,7 +1935,7 @@ size_t ValidatePlayerName( char *player_name, size_t player_name_size )
 	{ // while chars and 1+ glyphs possible and 1+ chars possible.
 		if ( Q_IsColorString( pch ) )
 		{
-			if ( char_count < (char_count_limit-4) )
+			if ( char_count < (char_count_limit-3) )
 			{ // room for 3 chars is available
 				char_count += 2;
 				pch += 2;
