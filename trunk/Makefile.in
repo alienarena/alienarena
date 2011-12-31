@@ -469,6 +469,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/env/alienlf.tga \
 	data1/env/alienrt.tga \
 	data1/env/alienup.tga \
+	data1/env/deadcitybk.tga \
+	data1/env/deadcitydn.tga \
+	data1/env/deadcityft.tga \
+	data1/env/deadcitylf.tga \
+	data1/env/deadcityrt.tga \
+	data1/env/deadcityup.tga \
 	data1/env/egyptbk.tga \
 	data1/env/egyptdn.tga \
 	data1/env/egyptft.tga \
@@ -564,6 +570,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/dmbeyondreflection.tga \
 	data1/gfx/dmdreadreflection.tga \
 	data1/gfx/dmturboreflection.tga \
+	data1/gfx/droplets.jpg \
 	data1/gfx/e6launchengine_fx.tga \
 	data1/gfx/e6launchengine_glow.tga \
 	data1/gfx/e6launchengine_mask.tga \
@@ -1108,6 +1115,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/ctf-frostbyte.fog \
 	data1/maps/scripts/ctf-frostbyte.mus \
 	data1/maps/scripts/ctf-frost.fog \
+	data1/maps/scripts/ctf-invasion.fog \
 	data1/maps/scripts/ctf-invasion.mus \
 	data1/maps/scripts/ctf-oblivion.fog \
 	data1/maps/scripts/ctf-oblivion.mus \
@@ -1153,7 +1161,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-goregrinder.fog \
 	data1/maps/scripts/dm-goregrinder.mus \
 	data1/maps/scripts/dm-horus.mus \
+	data1/maps/scripts/dm-impact.fog \
 	data1/maps/scripts/dm-impact.mus \
+	data1/maps/scripts/dm-invasion.fog \
 	data1/maps/scripts/dm-invasion.mus \
 	data1/maps/scripts/dm-leviathan2k8.fog \
 	data1/maps/scripts/dm-leviathan2k8.mus \
@@ -1382,6 +1392,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/particles/shell.tga \
 	data1/particles/smoke_org.tga \
 	data1/particles/smoke.tga \
+	data1/particles/trash.tga \
 	data1/particles/voltage.tga \
 	data1/particles/watersplash.tga \
 	data1/pics/a_bullets.tga \
