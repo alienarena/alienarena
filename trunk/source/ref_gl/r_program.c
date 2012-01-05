@@ -551,6 +551,7 @@ static char bsp_fragment_program[] =
 "}\n";
 
 //MESHES
+//#define SUBSURFACESCATTERING
 static char mesh_vertex_program[] =
 "uniform vec3 lightPos;\n"
 "uniform float time;\n"
@@ -562,10 +563,27 @@ static char mesh_vertex_program[] =
 "varying vec3 EyeDir;\n"
 "varying float fog;\n"
 
+#ifdef SUBSURFACESCATTERING
+"varying vec3 vertPos, lightVec, eyeVec;\n"
+"varying vec3 worldNormal;\n"
+
+"void subScatterVS(in vec4 ecVert)\n"
+"{\n"
+"	lightVec = lightPos - ecVert.xyz;\n"
+"	eyeVec = -ecVert.xyz;\n"
+"	vertPos = ecVert.xyz;\n"
+"}\n"
+#endif
+
 "void main()\n"
 "{\n"
 "	vec3 t;\n"
 "	vec3 b;\n"
+
+#ifdef SUBSURFACESCATTERING
+"	vec4 ecPos = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
+"	subScatterVS(ecPos);\n"
+#endif
 
 "	gl_Position = ftransform();\n"
 
@@ -573,6 +591,9 @@ static char mesh_vertex_program[] =
 "	gl_TexCoord[0] = gl_MultiTexCoord0;\n"
 
 "	vec3 n = normalize(gl_NormalMatrix * gl_Normal);\n"
+#ifdef SUBSURFACESCATTERING
+"	worldNormal = n;\n"
+#endif
 
 "	vec3 tangent3 = vec3(tangent);\n"
 "	t = normalize(gl_NormalMatrix * tangent3);\n"
@@ -611,11 +632,34 @@ static char mesh_fragment_program[] =
 "uniform int useFX;\n"
 "uniform int useGlow;\n"
 "uniform float minLight;\n"
+"uniform vec3 lightPos;\n"
 "const float SpecularFactor = 0.5;\n"
 
 "varying vec3 LightDir;\n"
 "varying vec3 EyeDir;\n"
 "varying float fog;\n"
+
+#ifdef SUBSURFACESCATTERING
+//next group could be made uniforms if we want to control this 
+"const float MaterialThickness = 2.0;\n" //this val seems good for now
+"const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20);\n" //controls subsurface value
+"const float RimScalar = 20.0;\n" //intensity of the rim effect
+
+"varying vec3 vertPos, lightVec, eyeVec;\n" 
+"varying vec3 worldNormal;\n"
+
+"float halfLambert(in vec3 vect1, in vec3 vect2)\n"
+"{\n"
+"	float product = dot(vect1,vect2);\n"
+"	return product * 0.5 + 0.5;\n"
+"}\n"
+
+"float blinnPhongSpecular(in vec3 normalVec, in vec3 lightVec, in float specPower)\n"
+"{\n"
+"	vec3 halfAngle = normalize(normalVec + lightVec);\n"
+"	return pow(clamp(0.0,1.0,dot(normalVec,halfAngle)),specPower);\n"
+"}\n"
+#endif
 
 "void main()\n"
 "{\n"
@@ -628,6 +672,36 @@ static char mesh_fragment_program[] =
 
 "	vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);\n"
 "	vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);\n"
+
+#ifdef SUBSURFACESCATTERING
+"	vec4 SpecColor = vec4(baseColor, 1.0) / 2;\n"
+
+"	float attenuation = 10.0 * (1.0 / distance(lightPos, vertPos));\n" 
+"	vec3 wNorm = worldNormal;\n"
+"	vec3 eVec = normalize(eyeVec);\n"
+"	vec3 lVec = normalize(lightVec);\n"
+
+"	vec4 dotLN = vec4(halfLambert(lVec, wNorm) * attenuation);\n"
+
+"	vec3 indirectLightComponent = vec3(MaterialThickness * max(0.0,dot(-wNorm, lVec)));\n"
+"	indirectLightComponent += MaterialThickness * halfLambert(-eVec, lVec);\n"
+"	indirectLightComponent *= attenuation;\n"
+"	indirectLightComponent.r *= ExtinctionCoefficient.r;\n"
+"	indirectLightComponent.g *= ExtinctionCoefficient.g;\n"
+"	indirectLightComponent.b *= ExtinctionCoefficient.b;\n"
+
+"	vec3 rim = vec3(1.0 - max(0.0,dot(wNorm, eVec)));\n"
+"	rim *= rim;\n"
+"	rim *= max(0.0,dot(wNorm, lVec)) * SpecColor.rgb;\n"
+
+"	vec4 scatterCol = dotLN + vec4(indirectLightComponent, 1.0);\n"
+"	scatterCol.rgb += (rim * RimScalar * attenuation * scatterCol.a);\n"
+"	scatterCol.rgb += vec3(blinnPhongSpecular(wNorm, lVec, SpecularFactor*2.0) * attenuation * SpecColor * scatterCol.a * 0.05);\n"
+"	scatterCol.rgb *= baseColor;\n" 
+"	scatterCol.rgb /= (10*specmask.a);\n"//we use the spec mask for scatter mask, presuming non-spec areas are always soft/skin
+#else
+"	vec4 scatterCol = vec4(0.0, 0.0, 0.0, 0.0);\n"
+#endif
 
 "	//moving fx texture\n"
 "	if(useFX > 0)\n"
@@ -652,7 +726,8 @@ static char mesh_fragment_program[] =
 
 "	gl_FragColor = vec4(litColor * baseColor, 1.0);\n"
 
-"	gl_FragColor = mix(fx, gl_FragColor, alphamask.a);\n"
+//"	gl_FragColor = scatterCol;\n" //for testing the subsurface scattering effect
+"	gl_FragColor = mix(fx, gl_FragColor + scatterCol, alphamask.a);\n"
 
 "	if(useGlow > 0)\n"
 "		gl_FragColor = mix(gl_FragColor, glow, glow.a);\n"
