@@ -1538,7 +1538,8 @@ void IQM_DrawFrame(int skinnum)
 						lightVal[i] = shadelight[i]/2; //never go completely black
 					lightVal[i] *= 5;
 					lightVal[i] += dynFactor;
-					if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) {
+					if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) 
+					{
 						if(lightVal[i] > 1.5)
 							lightVal[i] = 1.5;
 					}
@@ -1549,13 +1550,19 @@ void IQM_DrawFrame(int skinnum)
 					}
 				}
 
-				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) //menu model
 				{
 					//fixed light source pointing down, slightly forward and to the left
-					lightPosition[0] = -1.0;
-					lightPosition[1] = 12.0;
-					lightPosition[2] = 8.0;
+					lightPosition[0] = -25.0;
+					lightPosition[1] = 300.0;
+					lightPosition[2] = 400.0;
+					VectorMA(lightPosition, 5.0, lightVec, lightPosition);
 					R_ModelViewTransform(lightPosition, lightVec);
+
+					for (i = 0; i < 3; i++ )
+					{
+						lightVal[i] = 1.1;
+					}
 				}
 				else
 				{
@@ -1726,13 +1733,8 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 	if (RagDoll[RagDollID].flags & RF_TRANSLUCENT)
 	{
 		alpha = 0.33;
-		if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
-		{
-			if(gl_mirror->value)
-				mirror = true;
-			else
-				glass = true;
-		}
+		if(gl_mirror->value)
+			mirror = true;
 		else
 			glass = true;
 	}
