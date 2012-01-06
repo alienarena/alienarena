@@ -1463,13 +1463,19 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					}
 				}
 
-				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+				if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) //menu model
 				{
 					//fixed light source pointing down, slightly forward and to the left
-					lightPosition[0] = -1.0;
-					lightPosition[1] = 4.0;
-					lightPosition[2] = 8.0;
+					lightPosition[0] = -25.0;
+					lightPosition[1] = 300.0;
+					lightPosition[2] = 400.0;
+					VectorMA(lightPosition, 5.0, lightVec, lightPosition);
 					R_ModelViewTransform(lightPosition, lightVec);
+
+					for (i = 0; i < 3; i++ )
+					{
+						lightVal[i] = 1.1;
+					}
 				}
 				else
 				{
@@ -1481,7 +1487,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					//brighten things slightly
 					for (i = 0; i < 3; i++ )
 					{
-						lightVal[i] *= 1.15;
+						lightVal[i] *= 1.05;
 					}
 				}
 

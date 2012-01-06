@@ -551,7 +551,7 @@ static char bsp_fragment_program[] =
 "}\n";
 
 //MESHES
-//#define SUBSURFACESCATTERING
+#define SUBSURFACESCATTERING
 static char mesh_vertex_program[] =
 "uniform vec3 lightPos;\n"
 "uniform float time;\n"
@@ -643,7 +643,7 @@ static char mesh_fragment_program[] =
 //next group could be made uniforms if we want to control this 
 "const float MaterialThickness = 2.0;\n" //this val seems good for now
 "const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20);\n" //controls subsurface value
-"const float RimScalar = 20.0;\n" //intensity of the rim effect
+"const float RimScalar = 10.0;\n" //intensity of the rim effect
 
 "varying vec3 vertPos, lightVec, eyeVec;\n" 
 "varying vec3 worldNormal;\n"
@@ -674,9 +674,9 @@ static char mesh_fragment_program[] =
 "	vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);\n"
 
 #ifdef SUBSURFACESCATTERING
-"	vec4 SpecColor = vec4(baseColor, 1.0) / 2;\n"
+"	vec4 SpecColor = vec4(baseColor, 1.0)/2.0;\n"
 
-"	float attenuation = 10.0 * (1.0 / distance(lightPos, vertPos));\n" 
+"	float attenuation = 2.0 * (1.0 / distance(lightPos, vertPos));\n" 
 "	vec3 wNorm = worldNormal;\n"
 "	vec3 eVec = normalize(eyeVec);\n"
 "	vec3 lVec = normalize(lightVec);\n"
@@ -698,7 +698,7 @@ static char mesh_fragment_program[] =
 "	scatterCol.rgb += (rim * RimScalar * attenuation * scatterCol.a);\n"
 "	scatterCol.rgb += vec3(blinnPhongSpecular(wNorm, lVec, SpecularFactor*2.0) * attenuation * SpecColor * scatterCol.a * 0.05);\n"
 "	scatterCol.rgb *= baseColor;\n" 
-"	scatterCol.rgb /= (10*specmask.a);\n"//we use the spec mask for scatter mask, presuming non-spec areas are always soft/skin
+"	scatterCol.rgb /= (specmask.a*specmask.a);\n"//we use the spec mask for scatter mask, presuming non-spec areas are always soft/skin
 #else
 "	vec4 scatterCol = vec4(0.0, 0.0, 0.0, 0.0);\n"
 #endif
@@ -726,7 +726,7 @@ static char mesh_fragment_program[] =
 
 "	gl_FragColor = vec4(litColor * baseColor, 1.0);\n"
 
-//"	gl_FragColor = scatterCol;\n" //for testing the subsurface scattering effect
+//"	gl_FragColor = scatterCol;\n" //for testing the subsurface scattering effect alone
 "	gl_FragColor = mix(fx, gl_FragColor + scatterCol, alphamask.a);\n"
 
 "	if(useGlow > 0)\n"

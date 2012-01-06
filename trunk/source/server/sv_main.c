@@ -1412,7 +1412,7 @@ void SV_Init (void)
 	allow_download_models = Cvar_Get ("allow_download_models", "1", CVAR_ARCHIVE);
 	allow_download_sounds = Cvar_Get ("allow_download_sounds", "1", CVAR_ARCHIVE);
 	allow_download_maps	  = Cvar_Get ("allow_download_maps", "1", CVAR_ARCHIVE);
-	sv_downloadurl = Cvar_Get("sv_downloadurl", "http://icculus.org/alienarena/sv_downloadurl", CVAR_SERVERINFO);
+	sv_downloadurl = Cvar_Get("sv_downloadurl", "http://red.planetarena.org/sv_downloadurl", CVAR_SERVERINFO);
 
 	sv_iplogfile = Cvar_Get("sv_iplogfile" , "" , CVAR_ARCHIVE);
 
