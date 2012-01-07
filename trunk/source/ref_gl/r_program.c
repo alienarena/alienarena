@@ -674,7 +674,7 @@ static char mesh_fragment_program[] =
 #ifdef SUBSURFACESCATTERING
 "	vec4 SpecColor = vec4(baseColor, 1.0)/2.0;\n"
 
-"	float attenuation = 2.5 * (1.0 / distance(lightPos, vertPos));\n" 
+"	float attenuation = 2.0 * (1.0 / distance(lightPos, vertPos));\n" 
 "	vec3 wNorm = worldNormal;\n"
 "	vec3 eVec = EyeDir;\n"
 "	vec3 lVec = normalize(lightVec);\n"
