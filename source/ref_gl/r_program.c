@@ -564,13 +564,12 @@ static char mesh_vertex_program[] =
 "varying float fog;\n"
 
 #ifdef SUBSURFACESCATTERING
-"varying vec3 vertPos, lightVec, eyeVec;\n"
+"varying vec3 vertPos, lightVec;\n"
 "varying vec3 worldNormal;\n"
 
 "void subScatterVS(in vec4 ecVert)\n"
 "{\n"
 "	lightVec = lightPos - ecVert.xyz;\n"
-"	eyeVec = -ecVert.xyz;\n"
 "	vertPos = ecVert.xyz;\n"
 "}\n"
 #endif
@@ -645,8 +644,7 @@ static char mesh_fragment_program[] =
 "const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20);\n" //controls subsurface value
 "const float RimScalar = 10.0;\n" //intensity of the rim effect
 
-"varying vec3 vertPos, lightVec, eyeVec;\n" 
-"varying vec3 worldNormal;\n"
+"varying vec3 vertPos, lightVec, worldNormal;\n" 
 
 "float halfLambert(in vec3 vect1, in vec3 vect2)\n"
 "{\n"
@@ -678,7 +676,7 @@ static char mesh_fragment_program[] =
 
 "	float attenuation = 2.0 * (1.0 / distance(lightPos, vertPos));\n" 
 "	vec3 wNorm = worldNormal;\n"
-"	vec3 eVec = normalize(eyeVec);\n"
+"	vec3 eVec = EyeDir;\n"
 "	vec3 lVec = normalize(lightVec);\n"
 
 "	vec4 dotLN = vec4(halfLambert(lVec, wNorm) * attenuation);\n"
