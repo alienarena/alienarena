@@ -1276,6 +1276,8 @@ void IQM_DrawFrame(int skinnum)
 
             glUniform1iARB( g_location_useGlow, 0);
 
+			glUniform1iARB( g_location_useScatter, 0);
+
             glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
             glUniform1fARB( g_location_meshTime, rs_realtime);
@@ -1608,6 +1610,8 @@ void IQM_DrawFrame(int skinnum)
 				else
 					glUniform1iARB( g_location_useGlow, 0);
 
+				glUniform1iARB( g_location_useScatter, 1);
+
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
 				//if using shadowmaps, offset self shadowed areas a bit so not to get too dark
@@ -1803,6 +1807,8 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
             glUniform1iARB( g_location_useFX, 0);
 
             glUniform1iARB( g_location_useGlow, 0);
+
+			glUniform1iARB( g_location_useScatter, 0);
 
             glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
@@ -2072,6 +2078,8 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 					glUniform1iARB( g_location_useGlow, 1);
 				else
 					glUniform1iARB( g_location_useGlow, 0);
+
+				glUniform1iARB( g_location_useScatter, 1);
 
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 

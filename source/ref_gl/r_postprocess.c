@@ -704,9 +704,84 @@ void R_DrawBloodEffect (void)
 	R_KillVArrays();	
 }
 
+extern void PART_RenderSunFlare(image_t * tex, float offset, float size, float r,
+                      float g, float b, float alpha);
+extern void R_DrawVegetationCasters(void);
+void R_GLSLGodRays(void)
+{
+	float size;
+
+	//switch to fbo
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[2]); //need color buffer
+
+	//render sun object all white
+	qglMatrixMode(GL_PROJECTION);
+    qglPushMatrix();
+    qglLoadIdentity();
+    qglOrtho(0, r_newrefdef.width, r_newrefdef.height, 0, -99999,
+             99999);
+    qglMatrixMode(GL_MODELVIEW);
+    qglPushMatrix();
+    qglLoadIdentity();
+    qglEnable(GL_BLEND);
+    qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    qglDepthRange(0, 0.3);
+
+    size = r_newrefdef.width * sun_size;
+    PART_RenderSunFlare(sun_object, 0, size, 1.0, 1.0, 1.0, 1.0);
+       
+    qglDepthRange(0, 1);
+    qglColor4f(1, 1, 1, 1);
+    qglDisable(GL_BLEND);
+    qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // set 3d
+    qglPopMatrix();
+    qglMatrixMode(GL_PROJECTION);
+    qglPopMatrix();
+    qglMatrixMode(GL_MODELVIEW);
+
+	//render occuders(for now start with vegetation, we will add in relevant bsp items that we can save off in a vbo)
+	R_DrawVegetationCasters();
+
+	//glsl the fbo with effect
+
+	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); 
+
+	qglActiveTextureARB(GL_TEXTURE0);
+	qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
+
+	//render quad 
+	//qglEnable (GL_BLEND);
+	//qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+	qglEnableClientState (GL_VERTEX_ARRAY);
+	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
+
+	qglTexCoordPointer (2, GL_FLOAT, sizeof(tex_array[0]), tex_array[0]);
+	qglVertexPointer (2, GL_FLOAT, sizeof(vert_array[0]), vert_array[0]);
+	qglColorPointer (4, GL_FLOAT, sizeof(col_array[0]), col_array[0]);
+
+	VA_SetElem2(vert_array[0],0, vid.height);
+	VA_SetElem2(vert_array[1],vid.width, vid.height);
+	VA_SetElem2(vert_array[2],vid.width, 0);
+	VA_SetElem2(vert_array[3],0, 0);
+
+	VA_SetElem2(tex_array[0],r_colorbuffer->sl, r_colorbuffer->tl);
+	VA_SetElem2(tex_array[1],r_colorbuffer->sh, r_colorbuffer->tl);
+	VA_SetElem2(tex_array[2],r_colorbuffer->sh, r_colorbuffer->th);
+	VA_SetElem2(tex_array[3],r_colorbuffer->sl, r_colorbuffer->th);
+	
+	R_DrawVarrays(GL_QUADS, 0, 4, false);
+
+	qglDisable (GL_BLEND);
+
+	R_KillVArrays();	
+}
 
 void R_GLSLPostProcess(void)
 {
+	//R_GLSLGodRays();
+
 	R_GLSLWaterDroplets();
 	
 	R_GLSLDistortion();
