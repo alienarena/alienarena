@@ -111,6 +111,7 @@ GLuint		g_location_meshTime;
 GLuint		g_location_meshFog;
 GLuint		g_location_useFX;
 GLuint		g_location_useGlow;
+GLuint		g_location_useScatter;
 
 //fullscreen distortion effects
 GLuint		g_location_framebuffTex;
@@ -551,7 +552,6 @@ static char bsp_fragment_program[] =
 "}\n";
 
 //MESHES
-#define SUBSURFACESCATTERING
 static char mesh_vertex_program[] =
 "uniform vec3 lightPos;\n"
 "uniform float time;\n"
@@ -563,7 +563,6 @@ static char mesh_vertex_program[] =
 "varying vec3 EyeDir;\n"
 "varying float fog;\n"
 
-#ifdef SUBSURFACESCATTERING
 "varying vec3 vertPos, lightVec;\n"
 "varying vec3 worldNormal;\n"
 
@@ -572,17 +571,14 @@ static char mesh_vertex_program[] =
 "	lightVec = lightPos - ecVert.xyz;\n"
 "	vertPos = ecVert.xyz;\n"
 "}\n"
-#endif
 
 "void main()\n"
 "{\n"
 "	vec3 t;\n"
 "	vec3 b;\n"
 
-#ifdef SUBSURFACESCATTERING
 "	vec4 ecPos = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
 "	subScatterVS(ecPos);\n"
-#endif
 
 "	gl_Position = ftransform();\n"
 
@@ -590,9 +586,7 @@ static char mesh_vertex_program[] =
 "	gl_TexCoord[0] = gl_MultiTexCoord0;\n"
 
 "	vec3 n = normalize(gl_NormalMatrix * gl_Normal);\n"
-#ifdef SUBSURFACESCATTERING
 "	worldNormal = n;\n"
-#endif
 
 "	vec3 tangent3 = vec3(tangent);\n"
 "	t = normalize(gl_NormalMatrix * tangent3);\n"
@@ -630,6 +624,7 @@ static char mesh_fragment_program[] =
 "uniform int FOG;\n"
 "uniform int useFX;\n"
 "uniform int useGlow;\n"
+"uniform int useScatter;\n"
 "uniform float minLight;\n"
 "uniform vec3 lightPos;\n"
 "const float SpecularFactor = 0.5;\n"
@@ -638,7 +633,6 @@ static char mesh_fragment_program[] =
 "varying vec3 EyeDir;\n"
 "varying float fog;\n"
 
-#ifdef SUBSURFACESCATTERING
 //next group could be made uniforms if we want to control this 
 "const float MaterialThickness = 2.0;\n" //this val seems good for now
 "const vec3 ExtinctionCoefficient = vec3(0.80, 0.12, 0.20);\n" //controls subsurface value
@@ -657,13 +651,13 @@ static char mesh_fragment_program[] =
 "	vec3 halfAngle = normalize(normalVec + lightVec);\n"
 "	return pow(clamp(0.0,1.0,dot(normalVec,halfAngle)),specPower);\n"
 "}\n"
-#endif
 
 "void main()\n"
 "{\n"
 "	vec3 litColor;\n"
 "	vec4 fx;\n"
 "	vec4 glow;\n"
+"	vec4 scatterCol = vec4(0.0, 0.0, 0.0, 0.0);\n"
 
 "   vec3 textureColour = texture2D( baseTex, gl_TexCoord[0].xy ).rgb;\n"
 "   vec3 normal = 2.0 * ( texture2D( normalTex, gl_TexCoord[0].xy).xyz - vec3( 0.5, 0.5, 0.5 ) );\n"
@@ -671,35 +665,34 @@ static char mesh_fragment_program[] =
 "	vec4 alphamask = texture2D( baseTex, gl_TexCoord[0].xy);\n"
 "	vec4 specmask = texture2D( normalTex, gl_TexCoord[0].xy);\n"
 
-#ifdef SUBSURFACESCATTERING
-"	vec4 SpecColor = vec4(baseColor, 1.0)/2.0;\n"
+"	if(useScatter > 0)\n"
+"	{\n"
+"		vec4 SpecColor = vec4(baseColor, 1.0)/2.0;\n"
 
-"	float attenuation = 2.0 * (1.0 / distance(lightPos, vertPos));\n" 
-"	vec3 wNorm = worldNormal;\n"
-"	vec3 eVec = EyeDir;\n"
-"	vec3 lVec = normalize(lightVec);\n"
+"		float attenuation = 2.0 * (1.0 / distance(lightPos, vertPos));\n" 
+"		vec3 wNorm = worldNormal;\n"
+"		vec3 eVec = EyeDir;\n"
+"		vec3 lVec = normalize(lightVec);\n"
 
-"	vec4 dotLN = vec4(halfLambert(lVec, wNorm) * attenuation);\n"
+"		vec4 dotLN = vec4(halfLambert(lVec, wNorm) * attenuation);\n"
 
-"	vec3 indirectLightComponent = vec3(MaterialThickness * max(0.0,dot(-wNorm, lVec)));\n"
-"	indirectLightComponent += MaterialThickness * halfLambert(-eVec, lVec);\n"
-"	indirectLightComponent *= attenuation;\n"
-"	indirectLightComponent.r *= ExtinctionCoefficient.r;\n"
-"	indirectLightComponent.g *= ExtinctionCoefficient.g;\n"
-"	indirectLightComponent.b *= ExtinctionCoefficient.b;\n"
+"		vec3 indirectLightComponent = vec3(MaterialThickness * max(0.0,dot(-wNorm, lVec)));\n"
+"		indirectLightComponent += MaterialThickness * halfLambert(-eVec, lVec);\n"
+"		indirectLightComponent *= attenuation;\n"
+"		indirectLightComponent.r *= ExtinctionCoefficient.r;\n"
+"		indirectLightComponent.g *= ExtinctionCoefficient.g;\n"
+"		indirectLightComponent.b *= ExtinctionCoefficient.b;\n"
 
-"	vec3 rim = vec3(1.0 - max(0.0,dot(wNorm, eVec)));\n"
-"	rim *= rim;\n"
-"	rim *= max(0.0,dot(wNorm, lVec)) * SpecColor.rgb;\n"
+"		vec3 rim = vec3(1.0 - max(0.0,dot(wNorm, eVec)));\n"
+"		rim *= rim;\n"
+"		rim *= max(0.0,dot(wNorm, lVec)) * SpecColor.rgb;\n"
 
-"	vec4 scatterCol = dotLN + vec4(indirectLightComponent, 1.0);\n"
-"	scatterCol.rgb += (rim * RimScalar * attenuation * scatterCol.a);\n"
-"	scatterCol.rgb += vec3(blinnPhongSpecular(wNorm, lVec, SpecularFactor*2.0) * attenuation * SpecColor * scatterCol.a * 0.05);\n"
-"	scatterCol.rgb *= baseColor;\n" 
-"	scatterCol.rgb /= (specmask.a*specmask.a);\n"//we use the spec mask for scatter mask, presuming non-spec areas are always soft/skin
-#else
-"	vec4 scatterCol = vec4(0.0, 0.0, 0.0, 0.0);\n"
-#endif
+"		scatterCol = dotLN + vec4(indirectLightComponent, 1.0);\n"
+"		scatterCol.rgb += (rim * RimScalar * attenuation * scatterCol.a);\n"
+"		scatterCol.rgb += vec3(blinnPhongSpecular(wNorm, lVec, SpecularFactor*2.0) * attenuation * SpecColor * scatterCol.a * 0.05);\n"
+"		scatterCol.rgb *= baseColor;\n" 
+"		scatterCol.rgb /= (specmask.a*specmask.a);\n"//we use the spec mask for scatter mask, presuming non-spec areas are always soft/skin
+"	}\n"
 
 "	//moving fx texture\n"
 "	if(useFX > 0)\n"
@@ -1316,6 +1309,7 @@ void R_LoadGLSLPrograms(void)
 		g_location_meshFog = glGetUniformLocationARB( g_meshprogramObj, "FOG" );
 		g_location_useFX = glGetUniformLocationARB( g_meshprogramObj, "useFX" );
 		g_location_useGlow = glGetUniformLocationARB( g_meshprogramObj, "useGlow");
+		g_location_useScatter = glGetUniformLocationARB( g_meshprogramObj, "useScatter");
 
 		//fullscreen distortion effects
 
