@@ -65,6 +65,7 @@ GLhandleARB g_fbprogramObj;
 GLhandleARB g_blurprogramObj;
 GLhandleARB g_rblurprogramObj;
 GLhandleARB g_dropletsprogramObj;
+GLhandleARB g_godraysprogramObj;
 
 GLhandleARB g_vertexShader;
 GLhandleARB g_fragmentShader;
@@ -133,6 +134,10 @@ GLuint		g_location_drSource;
 GLuint		g_location_drTex;
 GLuint		g_location_drTime;
 GLuint		g_location_drParams;
+
+//god rays
+GLuint g_location_lightPositionOnScreen;
+GLuint g_location_sunTex;
 
 static char water_ARB_program[] =
 "!!ARBfp1.0\n"
@@ -1060,6 +1065,48 @@ static char droplets_fragment_program[] =
 "	gl_FragColor = texture2D(drSource, displacement.xy);\n"
 "}\n";
 
+static char rgodrays_vertex_program[] =
+"void main()\n"
+"{\n"
+"	gl_TexCoord[0] =  gl_MultiTexCoord0;\n"
+"	gl_Position = ftransform();\n"
+"}\n";
+
+static char rgodrays_fragment_program[] =
+
+"uniform vec2 lightPositionOnScreen;\n"
+"uniform sampler2D sunTexture;\n"
+
+//note - these could be made uniforms to control externally
+"const float exposure = 0.0034;\n"
+"const float decay = 1.0;\n"
+"const float density = 0.84;\n"
+"const float weight = 5.65;\n"
+"const int NUM_SAMPLES = 75 ;\n" //seems a drastically high number
+
+"void main()\n"
+"{\n"	
+"	vec2 deltaTextCoord = vec2( gl_TexCoord[0].st - lightPositionOnScreen.xy );\n"
+"	vec2 textCoo = gl_TexCoord[0].st;\n"
+"	deltaTextCoord *= 1.0 /  float(NUM_SAMPLES) * density;\n"
+"	float illuminationDecay = 1.0;\n"
+
+//this will have to be fixed for it to work on ATI
+"	for(int i=0; i < NUM_SAMPLES ; i++)\n"
+"	{\n"
+"			textCoo -= deltaTextCoord;\n"
+"			vec4 sample = texture2D(sunTexture, textCoo );\n"
+			
+"			sample *= illuminationDecay * weight;\n"
+			
+"			gl_FragColor += sample;\n"
+			
+"			illuminationDecay *= decay;\n"
+"	}\n"
+	
+"	gl_FragColor *= exposure;\n"
+"}\n";
+
 void R_LoadGLSLPrograms(void)
 {
 	const char *shaderStrings[1];
@@ -1531,6 +1578,58 @@ void R_LoadGLSLPrograms(void)
 		g_location_drParams = glGetUniformLocationARB( g_dropletsprogramObj, "drParams" );
 		g_location_drTime = glGetUniformLocationARB( g_dropletsprogramObj, "drTime" );
 
+		//god rays
+		g_godraysprogramObj = glCreateProgramObjectARB();
+
+		//
+		// Vertex shader
+		//
+
+		g_vertexShader = glCreateShaderObjectARB( GL_VERTEX_SHADER_ARB );
+		shaderStrings[0] = (char*)rgodrays_vertex_program;
+		glShaderSourceARB( g_vertexShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_vertexShader);
+		glGetObjectParameterivARB( g_vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_godraysprogramObj, g_vertexShader );
+		else
+		{
+			Com_Printf("...God Rays Vertex Shader Compile Error\n");
+		}
+
+		//
+		// Fragment shader
+		//
+
+		g_fragmentShader = glCreateShaderObjectARB( GL_FRAGMENT_SHADER_ARB );
+		shaderStrings[0] = (char*)rgodrays_fragment_program;
+		glShaderSourceARB( g_fragmentShader, 1, shaderStrings, NULL );
+		glCompileShaderARB( g_fragmentShader );
+		glGetObjectParameterivARB( g_fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &nResult );
+
+		if( nResult )
+			glAttachObjectARB( g_godraysprogramObj, g_fragmentShader );
+		else
+		{
+			Com_Printf("...God Rays Fragment Shader Compile Error\n");
+		}
+
+		glLinkProgramARB( g_godraysprogramObj );
+		glGetObjectParameterivARB( g_godraysprogramObj, GL_OBJECT_LINK_STATUS_ARB, &nResult );
+
+		if( !nResult )
+		{
+			glGetInfoLogARB( g_godraysprogramObj, sizeof(str), NULL, str );
+			Com_Printf("...Linking Error\n");
+		}
+
+		//
+		// Locate some parameters by name so we can set them later...
+		//
+
+		g_location_lightPositionOnScreen = glGetUniformLocationARB( g_godraysprogramObj, "lightPositionOnScreen" );
+		g_location_sunTex = glGetUniformLocationARB( g_godraysprogramObj, "sunTexture");
 	}
 	else
 	{
