@@ -598,6 +598,7 @@ extern GLhandleARB	g_fbprogramObj;
 extern GLhandleARB	g_blurprogramObj;
 extern GLhandleARB	g_rblurprogramObj;
 extern GLhandleARB  g_dropletsprogramObj;
+extern GLhandleARB g_godraysprogramObj;
 
 extern GLhandleARB	g_vertexShader;
 extern GLhandleARB	g_fragmentShader;
@@ -667,6 +668,11 @@ extern GLuint		g_location_drSource;
 extern GLuint		g_location_drTex;
 extern GLuint		g_location_drTime;
 extern GLuint		g_location_drParams;
+
+//god rays
+extern GLuint g_location_lightPositionOnScreen;
+extern GLuint g_location_sunTex;
+
 
 //MD2
 extern void Mod_LoadMD2Model (model_t *mod, void *buffer);

@@ -706,53 +706,96 @@ void R_DrawBloodEffect (void)
 
 extern void PART_RenderSunFlare(image_t * tex, float offset, float size, float r,
                       float g, float b, float alpha);
-extern void R_DrawVegetationCasters(void);
+extern void R_DrawShadowMapWorld (void);
+extern float sun_alpha;
+extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 void R_GLSLGodRays(void)
 {
-	float size;
+	float size, screenaspect;
+	vec2_t fxScreenPos;
+
+	if (R_CullOrigin(sun_origin))
+        return;
+
+	if (sun_alpha <= 0)
+		return;
 
 	//switch to fbo
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[2]); //need color buffer
 
-	//render sun object all white
+	qglClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+
+	//render sun object center
 	qglMatrixMode(GL_PROJECTION);
     qglPushMatrix();
     qglLoadIdentity();
-    qglOrtho(0, r_newrefdef.width, r_newrefdef.height, 0, -99999,
-             99999);
+    qglOrtho(0, r_newrefdef.width, r_newrefdef.height, 0, -99999, 99999);
     qglMatrixMode(GL_MODELVIEW);
     qglPushMatrix();
     qglLoadIdentity();
-    qglEnable(GL_BLEND);
-    qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    qglDepthRange(0, 0.3);
 
-    size = r_newrefdef.width * sun_size;
-    PART_RenderSunFlare(sun_object, 0, size, 1.0, 1.0, 1.0, 1.0);
-       
-    qglDepthRange(0, 1);
-    qglColor4f(1, 1, 1, 1);
-    qglDisable(GL_BLEND);
-    qglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // set 3d
-    qglPopMatrix();
-    qglMatrixMode(GL_PROJECTION);
-    qglPopMatrix();
+	size = r_newrefdef.width * sun_size/4.0;
+    PART_RenderSunFlare(sun2_object, 0, size, 1.0, 1.0, 1.0, 1.0);
+
+	//render occuders simple, textureless
+	//need to set up proper matrix for this view!
+
+	screenaspect = (float)r_newrefdef.width/r_newrefdef.height;
+	qglMatrixMode(GL_PROJECTION);
+    qglLoadIdentity ();
+
+	if(r_newrefdef.fov_y < 90)
+		MYgluPerspective (r_newrefdef.fov_y,  screenaspect,  4,  128000);
+	else
+		MYgluPerspective(r_newrefdef.fov_y, screenaspect, 4 * 74 / r_newrefdef.fov_y, 15000); 
+
+	qglMatrixMode(GL_MODELVIEW);
+    qglLoadIdentity ();
+
+	qglRotatef (-90, 1, 0, 0);	    // put Z going up
+    qglRotatef (90,  0, 0, 1);	    // put Z going up
+
+    qglRotatef (-r_newrefdef.viewangles[2],  1, 0, 0);
+	qglRotatef (-r_newrefdef.viewangles[0],  0, 1, 0);
+	qglRotatef (-r_newrefdef.viewangles[1],  0, 0, 1);
+	qglTranslatef (-r_newrefdef.vieworg[0],  -r_newrefdef.vieworg[1],  -r_newrefdef.vieworg[2]);
+
+	qglCullFace(GL_FRONT);
+	if (gl_cull->value)
+		qglEnable(GL_CULL_FACE);
+
+	R_DrawShadowMapWorld(); //could tweak this to only draw surfaces that are in the sun?
+
+	qglMatrixMode(GL_PROJECTION);
+    qglPushMatrix();
+    qglLoadIdentity();
+    qglOrtho(0, r_newrefdef.width, r_newrefdef.height, 0, -99999, 99999);
     qglMatrixMode(GL_MODELVIEW);
-
-	//render occuders(for now start with vegetation, we will add in relevant bsp items that we can save off in a vbo)
-	R_DrawVegetationCasters();
+    qglPushMatrix();
+    qglLoadIdentity();
 
 	//glsl the fbo with effect
 
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); 
 
+	glUseProgramObjectARB( g_godraysprogramObj );
+
 	qglActiveTextureARB(GL_TEXTURE0);
 	qglBindTexture(GL_TEXTURE_2D, r_colorbuffer->texnum);
 
+	glUniform1iARB( g_location_sunTex, 0);
+
+	R_TransformVectorToScreen(&r_newrefdef, sun_origin, fxScreenPos);
+
+	fxScreenPos[0] /= viddef.width; 
+	fxScreenPos[1] /= viddef.height;
+
+	glUniform2fARB( g_location_lightPositionOnScreen, fxScreenPos[0], fxScreenPos[1]);
+
 	//render quad 
-	//qglEnable (GL_BLEND);
-	//qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	qglEnable (GL_BLEND);
+	qglBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	qglDisable(GL_CULL_FACE);
 
 	qglEnableClientState (GL_VERTEX_ARRAY);
 	qglEnableClientState (GL_TEXTURE_COORD_ARRAY);
@@ -774,13 +817,22 @@ void R_GLSLGodRays(void)
 	R_DrawVarrays(GL_QUADS, 0, 4, false);
 
 	qglDisable (GL_BLEND);
+	qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	R_KillVArrays();	
+
+	glUseProgramObjectARB( 0 );
+	
+	qglPopMatrix();
+    qglMatrixMode(GL_PROJECTION);
+    qglPopMatrix();
+    qglMatrixMode(GL_MODELVIEW);	
 }
 
 void R_GLSLPostProcess(void)
 {
-	//R_GLSLGodRays();
+	if(r_test->value)
+		R_GLSLGodRays();
 
 	R_GLSLWaterDroplets();
 	
