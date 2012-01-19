@@ -398,6 +398,9 @@ void SM_RecursiveWorldNode (mnode_t *node, int clipflags)
 		if (surf->visframe != r_framecount)
 			continue;
 
+		if (R_CullBox (surf->mins, surf->maxs)) 
+			continue;
+			
 		if (surf->texinfo->flags & SURF_SKY)
 		{	// no skies here
 			continue;

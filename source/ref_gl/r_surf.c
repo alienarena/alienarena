@@ -1337,6 +1337,9 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 		if (surf->visframe != r_framecount)
 			continue;
 
+		if(surf->texinfo->flags & SURF_NODRAW)
+			continue;
+
 		if ( (surf->flags & SURF_PLANEBACK) != side )
 			continue;		// wrong side
 
