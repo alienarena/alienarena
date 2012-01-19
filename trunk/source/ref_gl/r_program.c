@@ -1082,7 +1082,7 @@ static char rgodrays_fragment_program[] =
 "const float decay = 1.0;\n"
 "const float density = 0.84;\n"
 "const float weight = 5.65;\n"
-"const int NUM_SAMPLES = 75 ;\n" //seems a drastically high number
+"const int NUM_SAMPLES = 75;\n" //seems a drastically high number
 
 "void main()\n"
 "{\n"	
