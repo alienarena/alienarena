@@ -888,8 +888,8 @@ void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
 				{
 					//make dynamic lights more influential than world
 					for(j = 0; j < 3; j++)
-						lightAdd[j] += dl->origin[j]*100*dl->intensity;
-					numlights+=100*dl->intensity;
+						lightAdd[j] += dl->origin[j]*10*dl->intensity;
+					numlights+=10*dl->intensity;
 
 					VectorSubtract (dl->origin, meshOrigin, temp);
 					dynFactor += (dl->intensity/20.0)/VectorLength(temp);
