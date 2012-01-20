@@ -622,7 +622,7 @@ void R_Vectoangles (vec3_t value1, vec3_t angles)
 	angles[ROLL] = 0.0f;
 }
 
-void R_DrawVegetationCasters ( void )
+void R_DrawVegetationCasters ( qboolean forShadows )
 {
     int		i, k;
 	grass_t *grass;
@@ -668,11 +668,13 @@ void R_DrawVegetationCasters ( void )
 		if(visible) {
 
 			//render grass polygon
-			GL_Bind(grass->texnum);
+			
+			GL_SelectTexture( GL_TEXTURE0);
+			qglBindTexture (GL_TEXTURE_2D, grass->texnum);
 
 			GLSTATE_ENABLE_ALPHATEST
 
-			qglColor4f( grass->color[0],grass->color[1],grass->color[2], 1 );
+			qglColor4f( 0, 0, 0, 1 );
 
 			VectorSet (corner[0],
 				origin[0] + (up[0] + right[0])*(-0.5),
@@ -728,7 +730,8 @@ void R_DrawVegetationCasters ( void )
 
 			R_DrawVarrays(GL_QUADS, 0, 4, false);
 
-			r_shadowmapcount = 2;
+			if(forShadows)
+				r_shadowmapcount = 2;
 		}
 	}
 
@@ -770,7 +773,7 @@ void R_DrawVegetationCaster(void)
     qglPolygonOffset( 0.5f, 0.5f );
 
 	//render vegetation
-	R_DrawVegetationCasters(); 
+	R_DrawVegetationCasters(true); 
 	
 	SM_SetTextureMatrix(1);
 		
@@ -779,5 +782,4 @@ void R_DrawVegetationCaster(void)
 	qglPolygonOffset( 0.0f, 0.0f );
     qglDisable( GL_POLYGON_OFFSET_FILL );
 	qglEnable(GL_CULL_FACE);
-
 }

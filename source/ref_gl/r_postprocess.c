@@ -707,6 +707,7 @@ void R_DrawBloodEffect (void)
 extern void PART_RenderSunFlare(image_t * tex, float offset, float size, float r,
                       float g, float b, float alpha);
 extern void R_DrawShadowMapWorld (void);
+extern void R_DrawVegetationCasters( qboolean forShadows );
 extern float sun_alpha;
 extern void MYgluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 void R_GLSLGodRays(void)
@@ -765,6 +766,7 @@ void R_GLSLGodRays(void)
 		qglEnable(GL_CULL_FACE);
 
 	R_DrawShadowMapWorld(); //could tweak this to only draw surfaces that are in the sun?
+	R_DrawVegetationCasters(false);
 
 	qglMatrixMode(GL_PROJECTION);
     qglPushMatrix();
