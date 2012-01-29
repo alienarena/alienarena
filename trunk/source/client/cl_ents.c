@@ -200,6 +200,7 @@ void CL_DeltaEntity (frame_t *frame, int newnum, entity_state_t *old, int bits)
 	if (ent->serverframe != cl.frame.serverframe - 1)
 	{	// wasn't in last update, so initialize some things
 		ent->trailcount = 1024;		// for diminishing rocket / grenade trails
+		ent->pr = NULL;             // for chained particle trails
 		// duplicate the current state so lerping doesn't hurt anything
 		ent->prev = *state;
 		if (state->event == EV_OTHER_TELEPORT)
@@ -1251,6 +1252,7 @@ void CL_AddViewWeapon (player_state_t *ps, player_state_t *ops)
 					if (s1->effects & EF_PENT)
 					{
 						gun.flags = oldeffects | RF_TRANSLUCENT | RF_SHELL_RED;
+
 
 						V_AddViewEntity (&gun);
 					}

@@ -99,6 +99,7 @@ typedef struct
 #define PARTICLE_ROTATINGROLL		8
 #define PARTICLE_ROTATINGYAWMINUS   9
 #define PARTICLE_VERT				10
+#define PARTICLE_CHAINED            11
 
 #define RDF_BLOOM         4      //BLOOMS
 
@@ -262,6 +263,11 @@ typedef struct particle_s
 	int		current_color;
 	float	current_alpha;
 	float	current_scale;
+
+	// For particle chains-- the particle renderer will automatically play
+	// connect-the-dots with these.
+	struct particle_s	*chain_prev;
+	vec3_t				current_pspan;
 
 } particle_t;
 
