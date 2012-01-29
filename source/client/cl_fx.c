@@ -531,6 +531,7 @@ static inline particle_t *new_particle (void)
 		plight->lightcol[2] = 0;
 	}
 	p->fromsustainedeffect = false;
+	p->chain_prev = NULL;
 
 	return (active_particles = p);
 }
@@ -727,6 +728,8 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 	int			i, j, k;
 	float		inc, scale, nudge;
 	particle_t	*p;
+	particle_t	*pr;
+	particle_t	*center;
 
 	for( i=0; i<3; i++) {
 		nudge = frand();
@@ -757,6 +760,7 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 	p->alpha = .5;
 
 	p->alphavel = -1.0 / (3 + frand()*0.3);
+	center = p;
 
 	//shoot off sparks
 
@@ -764,17 +768,18 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 
 	for( k=0; k<2; k++) {
 
-		scale = frand();
+		scale = frand()*3.0;
+		pr = NULL;
 
 		i = 0;
-		for (inc=1.0 ; inc<2.0 ; inc+=0.1, i++)
+		for (inc=1.0 ; inc<2.0 ; inc+=0.25, i++)
 		{
 			if (!(p = new_particle()))
 				return;
 
 			p->color = 0xe0 + (rand()&2);
-			p->type = PARTICLE_STANDARD;
-			p->texnum = r_particletexture->texnum;
+			p->type = PARTICLE_CHAINED;
+			p->texnum = r_raintexture->texnum;
 			p->blendsrc = GL_SRC_ALPHA;
 			p->blenddst = GL_ONE;
 			p->scale = 1.25*scale/inc;
@@ -791,7 +796,13 @@ void CL_BulletSparks (vec3_t org, vec3_t dir)
 			p->accel[2] = -(PARTICLE_GRAVITY)/(.5*inc);
 			p->alpha = .5;
 
-			p->alphavel = -1.0 / (1.5 + frand()*0.3);
+			p->alphavel = -1.0 / (2.5 + frand()*0.3);
+			
+			if (pr) 
+			{
+				p->chain_prev = pr;
+			}
+			pr = p;
 		}
 	}
 }
@@ -1944,6 +1955,8 @@ void CL_FlagEffects(vec3_t pos, qboolean team)
 	else
 		p->color = 0xe8;
 
+
+
 	angle = M_PI*2*(rand()&1023)/1023.0;
 	dist = rand()&5;
 	p->org[0] = pos[0] + cos(angle)*dist;
@@ -2942,6 +2955,7 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 	float		len;
 	int			j;
 	particle_t	*p;
+	particle_t	*pr = NULL;
 	float		dec;
 	vec3_t		right, up;
 	int			i;
@@ -2955,7 +2969,7 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 
 	MakeNormalVectors (vec, right, up);
 
-	dec = 0.75;
+	dec = .75;
 	VectorScale (vec, dec, vec);
 	VectorCopy (start, move);
 	skewx = skewy = skewz = .1;
@@ -2993,13 +3007,13 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 		p->org[1] = move[1] + skewy * ++y;
 		p->org[2] = move[2] + skewz * ++z;
 
-		p->alpha = 0.8;
-		p->alphavel = -2.0 / (0.6+frand()*0.2);
-		p->type = PARTICLE_STANDARD;
-		p->texnum = r_particletexture->texnum;
+		p->alpha = 1.2;
+		p->alphavel = -3.33;
+		p->type = PARTICLE_CHAINED;
+		p->texnum = r_raintexture->texnum;
 		p->blendsrc = GL_SRC_ALPHA;
 		p->blenddst = GL_ONE;
-		p->scale = .5 + (rand()&2);
+		p->scale = 1 + (rand()&2);
 		p->scalevel = 0;
 		p->color = 0xff;
 		for (j=0 ; j<3 ; j++)
@@ -3009,9 +3023,14 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 		}
 		if (p && len < 4)
 			addParticleLight (p,
-						p->scale*150, 0,
+						p->scale*75, 0,
 					.25, 0, .3);
 		VectorAdd (p->org, vec, move);
+		if (pr) 
+		{
+			p->chain_prev = pr;
+		}
+		pr = p;
 	}
 
 }
@@ -3943,7 +3962,19 @@ void CL_AddParticles (void)
             p->dist = 2 + p->dist * 0.004;
         else
             p->dist = 2;
-
+        
+        if ((p->type == PARTICLE_CHAINED && true) != (p->chain_prev && true))
+        	continue;
+        
+        if (p->type == PARTICLE_CHAINED && p->chain_prev) {
+        	vec3_t span, delta;
+        	VectorSubtract (p->current_origin, p->chain_prev->current_origin, span);
+        	VectorSubtract (r_origin, p->current_origin, delta);
+        	CrossProduct (span, delta, p->current_pspan);
+        	VectorNormalize (p->current_pspan);
+        	VectorScale (p->current_pspan, p->dist*p->current_scale, p->current_pspan);
+        }
+        
 		V_AddParticle (p);
 		// PMM
 		if (p->alphavel == INSTANT_PARTICLE)

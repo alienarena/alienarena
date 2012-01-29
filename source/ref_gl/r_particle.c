@@ -176,20 +176,49 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 			VectorScale ( right, p->dist, pright );
 			VectorScale ( up, p->dist, pup );
 		}
-
-		VectorSet (corner[0],
-			p->current_origin[0] + (pup[0] + pright[0])*(-0.5),
-			p->current_origin[1] + (pup[1] + pright[1])*(-0.5),
-			p->current_origin[2] + (pup[2] + pright[2])*(-0.5));
-
-		VectorSet ( corner[1],
-			corner0[0] + pup[0], corner0[1] + pup[1], corner0[2] + pup[2]);
-		VectorSet ( corner[2], corner0[0] + (pup[0]+pright[0]),
-			corner0[1] + (pup[1]+pright[1]), corner0[2] + (pup[2]+pright[2]));
-		VectorSet ( corner[3],
-			corner0[0] + pright[0], corner0[1] + pright[1], corner0[2] + pright[2]);
-
+		
 		VArray = &VArrayVerts[0];
+
+        if (p->type == PARTICLE_CHAINED && p->chain_prev) {
+        	particle_t *pr;
+        	vec3_t span;
+        	vec3_t pspan, prev_pspan;
+        	pr = p->chain_prev;
+        	VectorCopy (p->current_pspan, pspan);
+        	if (pr->type == PARTICLE_CHAINED && pr->chain_prev)
+        		VectorCopy (pr->current_pspan, prev_pspan);
+        	else
+        		VectorCopy (pspan, prev_pspan);
+        	VectorCopy (pspan, pright);
+			VectorSet ( corner[0],
+				p->current_origin[0] + pspan[0]*(0.5),
+				p->current_origin[1] + pspan[1]*(0.5),
+				p->current_origin[2] + pspan[2]*(0.5));
+			VectorSet ( corner[1],
+				pr->current_origin[0] + prev_pspan[0]*(0.5),
+				pr->current_origin[1] + prev_pspan[1]*(0.5),
+				pr->current_origin[2] + prev_pspan[2]*(0.5));
+			VectorSet (corner[2],
+				pr->current_origin[0] + prev_pspan[0]*(-0.5),
+				pr->current_origin[1] + prev_pspan[1]*(-0.5),
+				pr->current_origin[2] + prev_pspan[2]*(-0.5));
+			VectorSet (corner[3],
+				p->current_origin[0] + pspan[0]*(-0.5),
+				p->current_origin[1] + pspan[1]*(-0.5),
+				p->current_origin[2] + pspan[2]*(-0.5));
+        } else {
+			VectorSet (corner[0],
+				p->current_origin[0] + (pup[0] + pright[0])*(-0.5),
+				p->current_origin[1] + (pup[1] + pright[1])*(-0.5),
+				p->current_origin[2] + (pup[2] + pright[2])*(-0.5));
+
+			VectorSet ( corner[1],
+				corner0[0] + pup[0], corner0[1] + pup[1], corner0[2] + pup[2]);
+			VectorSet ( corner[2], corner0[0] + (pup[0]+pright[0]),
+				corner0[1] + (pup[1]+pright[1]), corner0[2] + (pup[2]+pright[2]));
+			VectorSet ( corner[3],
+				corner0[0] + pright[0], corner0[1] + pright[1], corner0[2] + pright[2]);
+		}
 
 		for(k = 0; k < 4; k++) {
 

@@ -66,6 +66,8 @@ typedef struct
 
 	float		frametime;
 	int			prevframe;
+	
+	particle_t  *pr;                // for chained particles (such as EF_SHIPEXHAUST)
 
 } centity_t;
 
