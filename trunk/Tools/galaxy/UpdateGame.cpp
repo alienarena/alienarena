@@ -12,7 +12,7 @@
 #include <string.h>
 #include <direct.h>
 #include <Wininet.h>
-#include <iostream.h>
+#include <io.h>
 #include <iomanip> 
 #include <fstream>
 
