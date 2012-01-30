@@ -6,7 +6,7 @@
 #include <time.h>
 #include <windows.h>
 #include <winsock.h>
-#include <iostream.h>
+#include <io.h>
 #include "userinfo.h"
 
 class cSocket 
