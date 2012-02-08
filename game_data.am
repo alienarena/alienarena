@@ -1248,12 +1248,16 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/menu_back.jpg \
 	data1/pics/m_irc.tga \
 	data1/pics/m_joinserver.tga \
+	data1/pics/m_main_game_fx.tga \
 	data1/pics/m_main_game_sel.tga \
 	data1/pics/m_main_game.tga \
+	data1/pics/m_main_host_fx.tga \
 	data1/pics/m_main_host_sel.tga \
 	data1/pics/m_main_host.tga \
+	data1/pics/m_main_irc_fx.tga \
 	data1/pics/m_main_irc_sel.tga \
 	data1/pics/m_main_irc.tga \
+	data1/pics/m_main_join_fx.tga \
 	data1/pics/m_main_join_sel.tga \
 	data1/pics/m_main_join.tga \
 	data1/pics/m_main_mont0.tga \
@@ -1262,13 +1266,17 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/m_main_mont3.tga \
 	data1/pics/m_main_mont4.tga \
 	data1/pics/m_main_mont5.tga \
+	data1/pics/m_main_options_fx.tga \
 	data1/pics/m_main_options_sel.tga \
 	data1/pics/m_main_options.tga \
+	data1/pics/m_main_player_fx.tga \
 	data1/pics/m_main_player_sel.tga \
 	data1/pics/m_main_player.tga \
+	data1/pics/m_main_quit_fx.tga \
 	data1/pics/m_main_quit_sel.tga \
 	data1/pics/m_main_quit.tga \
 	data1/pics/m_main.tga \
+	data1/pics/m_main_video_fx.tga \
 	data1/pics/m_main_video_sel.tga \
 	data1/pics/m_main_video.tga \
 	data1/pics/m_mouse_cursor.tga \
