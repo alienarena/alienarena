@@ -206,7 +206,6 @@ void R_GLSLDistortion(void)
 	return;
 }
 
-
 void R_GLSLWaterDroplets(void)
 {
 	int offsetX, offsetY;

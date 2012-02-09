@@ -228,6 +228,10 @@ void ED_CallSpawn (edict_t *ent)
 		if(!Q_strcasecmp(ent->classname, "weapon_machinegun"))
 			ent->classname = "weapon_bfg"; //hack to remove old weapons
 
+		//to do - add random mind eraser spawn here, if it's been two minutes since last respawn of it,
+		//go ahead and set the next weapon spawned to be the mind eraser
+		//need to check if first part of name is weapon
+
 		if (!strcmp(item->classname, ent->classname))
 		{	// found it
 			SpawnItem (ent, item);

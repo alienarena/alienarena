@@ -278,6 +278,9 @@ extern float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, flo
 
 //BSP 
 extern GLuint normalisationCubeMap;
+extern image_t *r_droplets;
+extern image_t *r_blooddroplets;
+extern image_t *r_blooddroplets_nm;
 extern void BSP_DrawTexturelessPoly (msurface_t *fa);
 extern void BSP_DrawTexturelessBrushModel (entity_t *e);
 extern void BSP_RenderBrushPoly (msurface_t *fa);
@@ -537,8 +540,10 @@ extern vec3_t ShadowArray[MAX_SHADOW_VERTS];
 #define KILL_TMU1_POINTER	0x02
 #define KILL_TMU2_POINTER	0x04
 #define KILL_TMU3_POINTER	0x08
-#define KILL_RGBA_POINTER	0x10
-#define KILL_NORMAL_POINTER 0x20
+#define KILL_TMU4_POINTER   0x10
+#define KILL_TMU5_POINTER	0x20
+#define KILL_RGBA_POINTER	0x40
+#define KILL_NORMAL_POINTER 0x80
 #endif
 
 // vertex array subsystem
@@ -622,6 +627,10 @@ extern GLuint		g_location_lightPosition;
 extern GLuint		g_location_staticLightPosition;
 extern GLuint		g_location_lightColour;
 extern GLuint		g_location_lightCutoffSquared;
+extern GLuint		g_location_liquid;
+extern GLuint		g_location_rsTime;
+extern GLuint		g_location_liquidTexture;
+extern GLuint		g_location_liquidNormTex;
 
 //water
 extern GLuint		g_location_baseTexture;

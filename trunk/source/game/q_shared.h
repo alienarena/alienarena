@@ -425,8 +425,6 @@ COLLISION DETECTION
 #define	CONTENTS_TRANSLUCENT	0x10000000	// auto set if any surface has trans
 #define	CONTENTS_LADDER			0x20000000
 
-
-
 #define	SURF_LIGHT		0x1		// value will hold the light strength
 
 #define	SURF_SLICK		0x2		// effects game physics
@@ -437,8 +435,8 @@ COLLISION DETECTION
 #define	SURF_TRANS66	0x20
 #define	SURF_FLOWING	0x40	// scroll towards angle
 #define	SURF_NODRAW		0x80	// don't bother referencing the texture
-
-
+#define SURF_BLOOD		0x400	// dripping blood surface
+#define SURF_WATER		0x800	// dripping water surface
 
 // content masks
 #define	MASK_ALL				(-1)
@@ -452,12 +450,10 @@ COLLISION DETECTION
 #define MASK_CURRENT			(CONTENTS_CURRENT_0|CONTENTS_CURRENT_90|CONTENTS_CURRENT_180|CONTENTS_CURRENT_270|CONTENTS_CURRENT_UP|CONTENTS_CURRENT_DOWN)
 #define MASK_VISIBILILITY   (CONTENTS_SOLID/*|CONTENTS_WINDOW*/|CONTENTS_WATER|CONTENTS_LAVA|CONTENTS_SLIME)
 
-
 // gi.BoxEdicts() can return a list of either solid or trigger entities
 // FIXME: eliminate AREA_ distinction?
 #define	AREA_SOLID		1
 #define	AREA_TRIGGERS	2
-
 
 // plane_t structure
 // !!! if this is changed, it must be changed in asm code too !!!
@@ -513,8 +509,6 @@ typedef struct
 	struct edict_s	*ent;		// not set by CM_*() functions
 } trace_t;
 
-
-
 // pmove_state_t is the information necessary for client side movement
 // prediction
 typedef enum
@@ -555,7 +549,6 @@ typedef struct
 									// changed by spawns, rotating objects, and teleporters
 } pmove_state_t;
 
-
 //
 // button bits
 //
@@ -563,7 +556,6 @@ typedef struct
 #define	BUTTON_USE			2
 #define BUTTON_ATTACK2		4
 #define	BUTTON_ANY			128			// any key whatsoever
-
 
 // usercmd_t is sent to the server each client frame
 typedef struct usercmd_s
@@ -575,7 +567,6 @@ typedef struct usercmd_s
 	byte	impulse;		// remove?
 	byte	lightlevel;		// light level the player is standing on
 } usercmd_t;
-
 
 #define	MAXTOUCH	32
 typedef struct
