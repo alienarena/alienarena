@@ -24,9 +24,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "g_local.h"
 
-int floater_timer;
-int prox_timer;
-
 /*
 =================
 fire_lead
@@ -1193,9 +1190,9 @@ void floater_think (edict_t *self)
 
 	self->s.frame = (self->s.frame + 1) % 23; //pulse grotesquely
 	self->nextthink = level.time + FRAMETIME;
-	floater_timer++;
+	self->nade_timer++;
 
-	if(floater_timer > 10) { //explode
+	if(self->nade_timer > 10) { //explode
 		T_RadiusDamage(self, self->owner, self->radius_dmg, self->enemy, self->dmg_radius, MOD_R_SPLASH, 2);
 
 		gi.WriteByte (svc_temp_entity);
@@ -1207,6 +1204,7 @@ void floater_think (edict_t *self)
 	}
 
 }
+void prox_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point);
 void prox_think (edict_t *self)
 {
 	edict_t	*ent;
@@ -1222,8 +1220,14 @@ void prox_think (edict_t *self)
 
 		if (!ent->takedamage)
 			continue;
+		
+		if (ent->die == prox_die)
+			continue;
+		
+		//avoid infinite recursion
+		self->takedamage = DAMAGE_NO;
 
-		T_RadiusDamage(self, self->owner, self->radius_dmg, self->enemy, self->dmg_radius, MOD_R_SPLASH, -1);
+		T_RadiusDamage(self, self->owner, self->radius_dmg, NULL, self->dmg_radius, MOD_R_SPLASH, -1);
 		self->owner->client->resp.weapon_hits[2]++;
 
 		gi.WriteByte (svc_temp_entity);
@@ -1237,11 +1241,15 @@ void prox_think (edict_t *self)
 
 	self->s.frame = (self->s.frame + 1) % 23; //pulse grotesquely
 	self->nextthink = level.time + FRAMETIME;
-	prox_timer++;
+	self->nade_timer++;
 
-	if(prox_timer > 300)
+	if(self->nade_timer > 300)
 	{	//explode
-		T_RadiusDamage(self, self->owner, self->radius_dmg, self->enemy, self->dmg_radius, MOD_R_SPLASH, 2);
+		
+		//avoid infinite recursion
+		self->takedamage = DAMAGE_NO;
+		
+		T_RadiusDamage(self, self->owner, self->radius_dmg, NULL, self->dmg_radius, MOD_R_SPLASH, 2);
 
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_BFG_BIGEXPLOSION);
@@ -1267,6 +1275,21 @@ void floater_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *s
 	gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/clank.wav"), 1, ATTN_NORM, 0);
 	return;
 
+}
+void prox_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
+{
+	//avoid infinite recursion
+	self->takedamage = DAMAGE_NO;
+	
+	//explode
+	T_RadiusDamage(self, self->owner, self->radius_dmg, NULL, self->dmg_radius, MOD_R_SPLASH, 2);
+
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_BFG_BIGEXPLOSION);
+	gi.WritePosition (self->s.origin);
+	gi.multicast (self->s.origin, MULTICAST_PHS);
+
+	G_FreeEdict (self);
 }
 
 void fire_floater (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float damage_radius, int radius_damage, float timer)
@@ -1302,7 +1325,7 @@ void fire_floater (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	floater->dmg_radius = damage_radius;
 	floater->s.sound = gi.soundindex ("weapons/electroball.wav");
 	floater->classname = "grenade";
-	floater_timer = 0;
+	floater->nade_timer = 0;
 
 
 	gi.linkentity (floater);
@@ -1337,7 +1360,10 @@ void fire_prox (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int spee
 	prox->radius_dmg = radius_damage;
 	prox->dmg_radius = damage_radius;
 	prox->classname = "mine";
-	prox_timer = 0;
+	prox->takedamage = DAMAGE_YES;
+	prox->health = 20;
+	prox->die = prox_die;
+	prox->nade_timer = 0;
 
 	gi.linkentity (prox);
 }

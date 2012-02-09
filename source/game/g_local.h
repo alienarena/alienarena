@@ -1536,6 +1536,9 @@ struct edict_s
 	int	 Flames;
 	int	 FlameDamage;
 	edict_t *orb;
+	
+	//Prox mines and grenades
+	int		nade_timer;
 
 	//alt-fires
 	qboolean altfire;
