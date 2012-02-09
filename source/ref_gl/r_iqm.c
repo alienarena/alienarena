@@ -988,6 +988,7 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 			}
 		}
 	}
+	// to do - this entire section could be handled in a glsl shader, saving huge amounts of cpu overhead
 	// The actual vertex generation based on the matrixes follows...
 	{
 		const mvertex_t *srcpos = (const mvertex_t *)currentmodel->vertexes;

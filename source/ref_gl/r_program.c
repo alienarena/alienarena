@@ -88,6 +88,10 @@ GLuint	    g_location_lightPosition;
 GLuint		g_location_staticLightPosition;
 GLuint		g_location_lightColour;
 GLuint	    g_location_lightCutoffSquared;
+GLuint		g_location_liquid;
+GLuint		g_location_rsTime;
+GLuint		g_location_liquidTexture;
+GLuint		g_location_liquidNormTex;
 
 //water
 GLuint		g_location_baseTexture;
@@ -278,6 +282,8 @@ static char bsp_vertex_program[] =
 "uniform vec3 Eye;\n"
 "uniform vec3 lightPosition;\n"
 "uniform vec3 staticLightPosition;\n"
+"uniform float rsTime;\n"
+"uniform int LIQUID;\n"
 "uniform int FOG;\n"
 
 "varying vec3 EyeDir;\n"
@@ -288,19 +294,39 @@ static char bsp_vertex_program[] =
 
 "void main( void )\n"
 "{\n"
-"   sPos = gl_Vertex;\n"
+"    sPos = gl_Vertex;\n"
 
-"   gl_Position = ftransform();\n"
+"    gl_Position = ftransform();\n"
 
-"   gl_FrontColor = gl_Color;\n"
+"    gl_FrontColor = gl_Color;\n"
 
-"   EyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );\n"
-"   LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);\n"
-"   StaticLightDir = tangentSpaceTransform * (staticLightPosition - gl_Vertex.xyz);\n"
+"    EyeDir = tangentSpaceTransform * ( Eye - gl_Vertex.xyz );\n"
+"    LightDir = tangentSpaceTransform * (lightPosition - gl_Vertex.xyz);\n"
+"    StaticLightDir = tangentSpaceTransform * (staticLightPosition - gl_Vertex.xyz);\n"
 
-"   // pass any active texunits through\n"
+"    // pass any active texunits through\n"
 "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
 "    gl_TexCoord[1] = gl_MultiTexCoord1;\n"
+
+"	 if(LIQUID > 0)\n"
+"	 {\n"
+"		//for liquid fx scrolling\n"
+"		vec4 texco = gl_MultiTexCoord0;\n"
+"		texco.t = texco.t - rsTime*1.0/LIQUID;\n"
+"		gl_TexCoord[3] = texco;\n"
+
+"		texco = gl_MultiTexCoord0;\n"
+"		texco.t = texco.t - rsTime*0.9/LIQUID;\n"
+"		gl_TexCoord[4] = texco;\n"
+
+"		texco = gl_MultiTexCoord0;\n"
+"		texco.t = texco.t - rsTime*0.8/LIQUID;\n"
+"		gl_TexCoord[5] = texco;\n"
+
+"		texco = gl_MultiTexCoord0;\n"
+"		texco.t = texco.t - rsTime*0.7/LIQUID;\n"
+"		gl_TexCoord[6] = texco;\n"
+"	 }\n"
 
 "    //fog\n"
 "    if(FOG > 0){\n"
@@ -314,6 +340,8 @@ static char bsp_fragment_program[] =
 "uniform sampler2D HeightTexture;\n"
 "uniform sampler2D NormalTexture;\n"
 "uniform sampler2D lmTexture;\n"
+"uniform sampler2D liquidTexture;\n"
+"uniform sampler2D liquidNormTex;\n"
 "uniform sampler2D ShadowMap;\n"
 "uniform sampler2D StatShadowMap;\n"
 "uniform vec3 lightColour;\n"
@@ -323,6 +351,7 @@ static char bsp_fragment_program[] =
 "uniform int DYNAMIC;\n"
 "uniform int STATSHADOW;\n"
 "uniform int SHADOWMAP;\n"
+"uniform int LIQUID;\n"
 
 "varying vec4 sPos;\n"
 "varying vec3 EyeDir;\n"
@@ -435,6 +464,7 @@ static char bsp_fragment_program[] =
 "   vec4 diffuse;\n"
 "   vec4 lightmap;\n"
 "	vec4 alphamask;\n"
+"	vec4 bloodColor;\n"
 "   float distanceSquared;\n"
 "   vec3 relativeLightDirection;\n"
 "   float diffuseTerm;\n"
@@ -448,6 +478,7 @@ static char bsp_fragment_program[] =
 "   float varyingLightCutoffSquared;\n"
 "   float dynshadowval;\n"
 "	float statshadowval;\n"
+"	vec2 displacement;\n"
 
 "   varyingLightColour = lightColour;\n"
 "   varyingLightCutoffSquared = lightCutoffSquared;\n"
@@ -470,11 +501,56 @@ static char bsp_fragment_program[] =
 "	else\n"
 "		statshadowval = 1.0;\n"
 
+"	if(LIQUID > 0)\n"
+"	{\n"
+"		vec3 noiseVec;\n"
+"		vec3 noiseVec2;\n"
+"		vec3 noiseVec3;\n"
+"		vec3 noiseVec4;\n"
+
+"		displacement = gl_TexCoord[3].st;\n"
+
+"		noiseVec = normalize(texture2D(liquidNormTex, displacement.xy)).xyz;\n"
+"		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"
+
+"		displacement = gl_TexCoord[4].st;\n"
+
+"		noiseVec2 = normalize(texture2D(liquidNormTex, displacement.xy)).xyz;\n"
+"		noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;\n"
+
+"		if(LIQUID > 2)\n"
+"		{\n"
+"			displacement = gl_TexCoord[5].st;\n"
+
+"			noiseVec3 = normalize(texture2D(liquidNormTex, displacement.xy)).xyz;\n"
+"			noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;\n"
+
+"			displacement = gl_TexCoord[6].st;\n"
+
+"			noiseVec4 = normalize(texture2D(liquidNormTex, displacement.xy)).xyz;\n"
+"			noiseVec4 = (noiseVec4 * 2.0 - 0.635) * 0.035;\n"
+"		}\n"
+
+"		displacement.x = gl_TexCoord[0].s + noiseVec.x + noiseVec2.x + noiseVec3.x + noiseVec4.x;\n"
+"		displacement.y = gl_TexCoord[0].t + noiseVec.y + noiseVec2.y + noiseVec3.y + noiseVec4.y;\n"
+
+"		if(LIQUID > 2)\n"
+"		{\n"
+"			vec4 diffuse1 = texture2D(liquidTexture, gl_TexCoord[3].st + displacement.xy);\n"
+"			vec4 diffuse2 = texture2D(liquidTexture, gl_TexCoord[4].st + displacement.xy);\n"
+"			vec4 diffuse3 = texture2D(liquidTexture, gl_TexCoord[5].st + displacement.xy);\n"
+"			vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[6].st + displacement.xy);\n"
+"			bloodColor = max(diffuse1, diffuse2);\n"
+"			bloodColor = max(bloodColor, diffuse3);\n"
+"			bloodColor = max(bloodColor, diffuse4);\n"
+"		}\n"
+"	}\n"
+
 "   if(PARALLAX > 0) {\n"
 "      //do the parallax mapping\n"
 "      vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
 "      Offset = Offset * 0.04 - 0.02;\n"
-"      vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;\n"
+"      vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement.xy;\n"
 
 "      diffuse = texture2D( surfTexture, TexCoords );\n"
 
@@ -504,6 +580,7 @@ static char bsp_fragment_program[] =
 "      litColour = vec4( attenuation * colour, 1.0 );\n"
 "      litColour = litColour * lightmap * 6.0;\n"
 "      gl_FragColor = max(litColour, diffuse * lightmap * 2.0);\n"
+"	   gl_FragColor = gl_FragColor + bloodColor;\n"
 "	   gl_FragColor = (gl_FragColor * statshadowval);\n"
 "   }\n"
 "   else {\n"
@@ -514,7 +591,7 @@ static char bsp_fragment_program[] =
 
 "   if(DYNAMIC > 0) {\n"
 
-"	  lightmap = texture2D(lmTexture, gl_TexCoord[1].st);\n"
+"	   lightmap = texture2D(lmTexture, gl_TexCoord[1].st);\n"
 
 "      //now do the dynamic lighting\n"
 "      distanceSquared = dot( LightDir, LightDir );\n"
@@ -551,6 +628,7 @@ static char bsp_fragment_program[] =
 "      }\n"
 "      gl_FragColor = dynamicColour;\n"
 "   }\n"
+
 "	gl_FragColor = mix(vec4(0.0, 0.0, 0.0, alphamask.a), gl_FragColor, alphamask.a);\n"
 "   if(FOG > 0)\n"
 "      gl_FragColor = mix(gl_FragColor, gl_Fog.color, fog);\n"
@@ -1231,6 +1309,10 @@ void R_LoadGLSLPrograms(void)
 		g_location_staticLightPosition = glGetUniformLocationARB( g_programObj, "staticLightPosition" );
 		g_location_lightColour = glGetUniformLocationARB( g_programObj, "lightColour" );
 		g_location_lightCutoffSquared = glGetUniformLocationARB( g_programObj, "lightCutoffSquared" );
+		g_location_liquid = glGetUniformLocationARB( g_programObj, "LIQUID" );
+		g_location_rsTime = glGetUniformLocationARB( g_programObj, "rsTime" );
+		g_location_liquidTexture = glGetUniformLocationARB( g_programObj, "liquidTexture" );
+		g_location_liquidNormTex = glGetUniformLocationARB( g_programObj, "liquidNormTex" );
 
 		//warp(water) bsp surfaces
 

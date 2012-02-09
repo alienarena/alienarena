@@ -272,6 +272,18 @@ void R_KillVArrays (void)
 	if (KillFlags & KILL_RGBA_POINTER)
 		qglDisableClientState (GL_COLOR_ARRAY);
 
+	if (KillFlags & KILL_TMU5_POINTER)
+	{
+		qglClientActiveTextureARB (GL_TEXTURE5);
+		qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
+	}
+
+	if (KillFlags & KILL_TMU4_POINTER)
+	{
+		qglClientActiveTextureARB (GL_TEXTURE4);
+		qglDisableClientState (GL_TEXTURE_COORD_ARRAY);
+	}
+
 	if (KillFlags & KILL_TMU3_POINTER)
 	{
 		qglClientActiveTextureARB (GL_TEXTURE3);

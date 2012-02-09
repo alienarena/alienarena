@@ -354,9 +354,8 @@ typedef struct
 #define	SURF_TRANS66	0x20
 #define	SURF_FLOWING	0x40	// scroll towards angle
 #define	SURF_NODRAW		0x80	// don't bother referencing the texture
-
-
-
+#define SURF_BLOOD		0x400	// dripping blood surface
+#define SURF_WATER		0x800	// dripping water surface
 
 typedef struct
 {
