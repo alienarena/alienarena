@@ -501,6 +501,7 @@ static char bsp_fragment_program[] =
 "	else\n"
 "		statshadowval = 1.0;\n"
 
+"	bloodColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
 "	if(LIQUID > 0)\n"
 "	{\n"
 "		vec3 noiseVec;\n"
