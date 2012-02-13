@@ -1068,3 +1068,31 @@ maps/meshes/redblob
 		glow
 	}
 }
+maps/meshes/gothic/blade
+{
+	{
+		map maps/meshes/gothic/blade_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/gothic/meat1
+{
+	{
+		map maps/meshes/gothic/meat1_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/gothic/meat2
+{
+	{
+		map maps/meshes/gothic/meat2_normal.jpg
+		normalmap
+	}
+}
+maps/meshes/gothic/meat3
+{
+	{
+		map maps/meshes/gothic/meat3_normal.jpg
+		normalmap
+	}
+}
