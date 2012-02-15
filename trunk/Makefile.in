@@ -3272,6 +3272,11 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/blanks/blank3.tga \
 	data1/textures/blanks/blank4.tga \
 	data1/textures/blanks/blank5.tga \
+	data1/textures/blood/blood_handprint.tga \
+	data1/textures/blood/blood_splatter1.tga \
+	data1/textures/blood/blood_splatter2.tga \
+	data1/textures/blood/blood_splatter3.tga \
+	data1/textures/blood/blood_splatter4.tga \
 	data1/textures/common/0_clip.tga \
 	data1/textures/common/0_hint.tga \
 	data1/textures/common/0_sky1.tga \
