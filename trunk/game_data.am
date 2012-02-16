@@ -71,6 +71,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-atlantis2k8.tmp \
 	botinfo/dm-babel2k11.tmp \
 	botinfo/dm-bloodfactory.tmp \
+	botinfo/dm-bloodfactory2k12.tmp \
 	botinfo/dm-chasmatic2k9.tmp \
 	botinfo/dm-command2k9.tmp \
 	botinfo/dm-corrosion.tmp \
@@ -124,6 +125,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-atlantis2k8.nod \
 	botinfo/nav/dm-babel2k11.nod \
 	botinfo/nav/dm-bloodfactory.nod \
+	botinfo/nav/dm-bloodfactory2k12.nod \
 	botinfo/nav/dm-chasmatic2k9.nod \
 	botinfo/nav/dm-command2k9.nod \
 	botinfo/nav/dm-corrosion.nod \
@@ -402,6 +404,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-babel2k11.txt \
 	data1/levelshots/dm-bloodfactory.jpg \
 	data1/levelshots/dm-bloodfactory.txt \
+	data1/levelshots/dm-bloodfactory2k12.jpg \
+	data1/levelshots/dm-bloodfactory2k12.txt \
 	data1/levelshots/dm-chasmatic2k9.jpg \
 	data1/levelshots/dm-chasmatic2k9.txt \
 	data1/levelshots/dm-command2k9.jpg \
@@ -608,7 +612,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/gothic/dragon_normal.jpg \
 	data1/maps/meshes/gothic/fdstatue_green.md2 \
 	data1/maps/meshes/gothic/fd_statue_normal.jpg \
+	data1/maps/meshes/gothic/fdstatue_red.md2 \
 	data1/maps/meshes/gothic/freedom_statue_green.jpg \
+	data1/maps/meshes/gothic/freedom_statue_red.jpg \
 	data1/maps/meshes/gothic/lamp2b_fx.tga \
 	data1/maps/meshes/gothic/lamp2b.md2 \
 	data1/maps/meshes/gothic/lamp2b.tga \
