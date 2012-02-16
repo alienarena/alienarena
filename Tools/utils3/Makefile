@@ -185,7 +185,7 @@ $(cmn_objs): %o : %c
 
 # link qbsp3
 $(builddir)/qbsp3: $(qbsp3_objs_all)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(addprefix $(builddir)/, $(qbsp3_objs_all)) -o $(builddir)/qbsp3
+	$(CC) $(CFLAGS) $(addprefix $(builddir)/, $(qbsp3_objs_all)) -o $(builddir)/qbsp3 $(LDFLAGS)
 
 # compile qbsp3 sources
 $(qbsp3_objs): %o : %c
@@ -193,7 +193,7 @@ $(qbsp3_objs): %o : %c
 
 # link qvis3
 $(builddir)/qvis3: $(qvis3_objs_all)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(addprefix $(builddir)/, $(qvis3_objs_all)) -o $(builddir)/qvis3
+	$(CC) $(CFLAGS) $(addprefix $(builddir)/, $(qvis3_objs_all)) -o $(builddir)/qvis3 $(LDFLAGS)
 
 # compile qvis3 sources
 $(qvis3_objs): %o : %c
@@ -201,7 +201,7 @@ $(qvis3_objs): %o : %c
 
 # link qrad3
 $(builddir)/qrad3: $(qrad3_objs_all)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(addprefix $(builddir)/, $(qrad3_objs_all)) -o $(builddir)/qrad3
+	$(CC) $(CFLAGS) $(addprefix $(builddir)/, $(qrad3_objs_all)) -o $(builddir)/qrad3 $(LDFLAGS)
 
 # compile qrad3 sources
 $(qrad3_objs): %o : %c
