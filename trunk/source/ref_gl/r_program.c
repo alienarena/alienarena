@@ -317,15 +317,13 @@ static char bsp_vertex_program[] =
 
 "		texco = gl_MultiTexCoord0;\n"
 "		texco.t = texco.t - rsTime*0.9/LIQUID;\n"
+"		//shift the horizontal here a bit\n"
+"		texco.s = texco.s/1.5;\n"
 "		gl_TexCoord[4] = texco;\n"
 
 "		texco = gl_MultiTexCoord0;\n"
-"		texco.t = texco.t - rsTime*0.8/LIQUID;\n"
+"		texco.t = texco.t - rsTime*0.6/LIQUID;\n"
 "		gl_TexCoord[5] = texco;\n"
-
-"		texco = gl_MultiTexCoord0;\n"
-"		texco.t = texco.t - rsTime*0.7/LIQUID;\n"
-"		gl_TexCoord[6] = texco;\n"
 "	 }\n"
 
 "    //fog\n"
@@ -479,6 +477,9 @@ static char bsp_fragment_program[] =
 "   float dynshadowval;\n"
 "	float statshadowval;\n"
 "	vec2 displacement;\n"
+"	vec2 displacement2;\n"
+"	vec2 displacement3;\n"
+"	vec2 displacement4;\n"
 
 "   varyingLightColour = lightColour;\n"
 "   varyingLightCutoffSquared = lightCutoffSquared;\n"
@@ -502,48 +503,56 @@ static char bsp_fragment_program[] =
 "		statshadowval = 1.0;\n"
 
 "	bloodColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+"	displacement4 = vec2(0.0, 0.0);\n"
 "	if(LIQUID > 0)\n"
 "	{\n"
 "		vec3 noiseVec;\n"
 "		vec3 noiseVec2;\n"
 "		vec3 noiseVec3;\n"
-"		vec3 noiseVec4;\n"
+
+"       vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
+"       Offset = Offset * 0.04 - 0.02;\n"
+"       vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;\n"
 
 "		displacement = gl_TexCoord[3].st;\n"
 
-"		noiseVec = normalize(texture2D(liquidNormTex, displacement.xy)).xyz;\n"
+"		noiseVec = normalize(texture2D(liquidNormTex, gl_TexCoord[3].st)).xyz;\n"
 "		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"
 
-"		displacement = gl_TexCoord[4].st;\n"
+"		displacement2 = gl_TexCoord[4].st;\n"
 
-"		noiseVec2 = normalize(texture2D(liquidNormTex, displacement.xy)).xyz;\n"
+"		noiseVec2 = normalize(texture2D(liquidNormTex, displacement2.xy)).xyz;\n"
 "		noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;\n"
 
 "		if(LIQUID > 2)\n"
 "		{\n"
-"			displacement = gl_TexCoord[5].st;\n"
+"			displacement3 = gl_TexCoord[5].st;\n"
 
-"			noiseVec3 = normalize(texture2D(liquidNormTex, displacement.xy)).xyz;\n"
+"			noiseVec3 = normalize(texture2D(liquidNormTex, displacement3.xy)).xyz;\n"
 "			noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;\n"
-
-"			displacement = gl_TexCoord[6].st;\n"
-
-"			noiseVec4 = normalize(texture2D(liquidNormTex, displacement.xy)).xyz;\n"
-"			noiseVec4 = (noiseVec4 * 2.0 - 0.635) * 0.035;\n"
+"		}\n"
+"		else\n"
+"		{\n"
+"			//used for water effect only\n"
+"			displacement4.x = gl_TexCoord[0].s + noiseVec.x + noiseVec2.x + TexCoords.x;\n"
+"			displacement4.y = gl_TexCoord[0].s + noiseVec.y + noiseVec2.y + TexCoords.y;\n"
 "		}\n"
 
-"		displacement.x = gl_TexCoord[0].s + noiseVec.x + noiseVec2.x + noiseVec3.x + noiseVec4.x;\n"
-"		displacement.y = gl_TexCoord[0].t + noiseVec.y + noiseVec2.y + noiseVec3.y + noiseVec4.y;\n"
+"		displacement.x = gl_TexCoord[3].s + noiseVec.x + TexCoords.x;\n"
+"		displacement.y = gl_TexCoord[3].t + noiseVec.y + TexCoords.y;\n"
+"		displacement2.x = gl_TexCoord[4].s + noiseVec2.x + TexCoords.x;\n"
+"		displacement2.y = gl_TexCoord[4].t + noiseVec2.y + TexCoords.y;\n"
+"		displacement3.x = gl_TexCoord[5].s + noiseVec3.x + TexCoords.x;\n"
+"		displacement3.y = gl_TexCoord[5].t + noiseVec3.y + TexCoords.y;\n"
 
 "		if(LIQUID > 2)\n"
 "		{\n"
 "			vec4 diffuse1 = texture2D(liquidTexture, gl_TexCoord[3].st + displacement.xy);\n"
-"			vec4 diffuse2 = texture2D(liquidTexture, gl_TexCoord[4].st + displacement.xy);\n"
-"			vec4 diffuse3 = texture2D(liquidTexture, gl_TexCoord[5].st + displacement.xy);\n"
-"			vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[6].st + displacement.xy);\n"
+"			vec4 diffuse2 = texture2D(liquidTexture, gl_TexCoord[4].st + displacement2.xy);\n"
+"			vec4 diffuse3 = texture2D(liquidTexture, gl_TexCoord[5].st + displacement3.xy);\n"
+"			vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[6].st + displacement4.xy);\n"
 "			bloodColor = max(diffuse1, diffuse2);\n"
 "			bloodColor = max(bloodColor, diffuse3);\n"
-"			bloodColor = max(bloodColor, diffuse4);\n"
 "		}\n"
 "	}\n"
 
@@ -551,7 +560,7 @@ static char bsp_fragment_program[] =
 "      //do the parallax mapping\n"
 "      vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
 "      Offset = Offset * 0.04 - 0.02;\n"
-"      vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement.xy;\n"
+"      vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy + displacement4.xy;\n"
 
 "      diffuse = texture2D( surfTexture, TexCoords );\n"
 
