@@ -287,6 +287,7 @@ float ACEIT_ItemNeed(edict_t *self, int item)
 		case ITEMLIST_SUPERSHOTGUN:
 		case ITEMLIST_BFG10K:
 		case ITEMLIST_HYPERBLASTER:
+		case ITEMLIST_MINDERASER:
 			if(!self->client->pers.inventory[item])
 				return 0.9; //was .7
 			else
@@ -426,6 +427,9 @@ int ACEIT_ClassnameToIndex(char *classname)
 
 	if(strcmp(classname,"weapon_bfg")==0)
 		return ITEMLIST_BFG10K;
+
+	if(strcmp(classname, "weapon_minderaser") == 0)
+		return ITEMLIST_MINDERASER;
 
 	if(strcmp(classname,"ammo_shells")==0)
 		return ITEMLIST_SHELLS;

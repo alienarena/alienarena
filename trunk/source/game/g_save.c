@@ -223,6 +223,7 @@ void InitGame (void)
 	g_maxgrenades = gi.cvar("g_maxgrenades", "50", 0);
 	g_maxcells = gi.cvar("g_maxcells", "200", 0);
 	g_maxslugs = gi.cvar("g_maxslugs", "50", 0);
+	g_maxseekers = gi.cvar("g_maxseekers", "1", 0);
 
 	//quick weapon change
 	quickweap = gi.cvar ("quickweap", "0", CVAR_LATCH|CVAR_GAMEINFO);
@@ -330,6 +331,10 @@ void InitGame (void)
 		red_team_score = 0;
 		blue_team_score = 0;
 	}
+
+	//reset minderaser
+	mindEraserTime = level.time;
+
 	print1 = print2 = print3 = false;
 
 }

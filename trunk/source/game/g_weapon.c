@@ -1055,7 +1055,7 @@ void homing_think (edict_t *ent)
 		VectorScale(targetdir, speed, ent->velocity);
 	}
 
-	ent->nextthink = level.time + .1;
+	ent->nextthink = level.time + FRAMETIME;
 }
 
 void fire_homingrocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
@@ -1101,6 +1101,165 @@ void fire_homingrocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int
 	rocket->classname = "rocket";
 
 	gi.linkentity (rocket);
+}
+
+/*
+=================
+fire_minderaser
+=================
+*/
+
+void minderaser_think (edict_t *ent)
+{
+	edict_t *target = NULL;
+	edict_t *blip = NULL;
+	vec3_t  targetdir, blipdir;
+	vec_t   speed;
+
+	while ((blip = findradius(blip, ent->s.origin, 1000)) != NULL)
+	{
+		if (!(blip->svflags & SVF_MONSTER) && !blip->client)
+			continue;
+		if (blip == ent->owner)
+			continue;
+		if (!blip->takedamage)
+			continue;
+		if (blip->health <= 0)
+			continue;
+		if (!visible(ent, blip))
+			continue;
+
+		VectorSubtract(blip->s.origin, ent->s.origin, blipdir);
+		blipdir[2] += 16;
+		if ((target == NULL) || (VectorLength(blipdir) < VectorLength(targetdir)))
+		{
+			target = blip;
+			VectorCopy(blipdir, targetdir);
+		}
+	}
+
+	if (target != NULL)
+	{
+		// target acquired, nudge our direction toward it
+		VectorNormalize(targetdir);
+		VectorScale(targetdir, 0.2, targetdir);
+		VectorAdd(targetdir, ent->movedir, targetdir);
+		VectorNormalize(targetdir);
+		VectorCopy(targetdir, ent->movedir);
+		vectoangles(targetdir, ent->s.angles);
+		speed = 450;  //speed it up we have a target
+		VectorScale(targetdir, speed, ent->velocity);
+		ent->s.frame = (ent->s.frame + 1) % 24;
+		ent->s.effects = EF_SHIPEXHAUST;
+	
+		//zap it if close enough and clear
+		if(VectorLength(blipdir) < 128)
+		{
+			//to do - we probably want to use "is_visible" here.
+			//tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
+
+			//we are close, slow it down
+			speed = 30;  
+			VectorScale(targetdir, speed, ent->velocity);
+			ent->s.effects = 0;
+		
+			// hurt it if we can
+			if ((target->takedamage) && (target != ent->owner)) 
+			{
+				T_Damage (target, ent, ent->owner, targetdir, target->s.origin, vec3_origin, 35, 1, DAMAGE_ENERGY, MOD_MINDERASER);
+				gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
+			}
+
+			gi.WriteByte (svc_temp_entity);
+			gi.WriteByte (TE_LIGHTNING);
+			gi.WritePosition (ent->s.origin);
+			gi.WritePosition (target->s.origin);
+			gi.multicast (ent->s.origin, MULTICAST_PHS);
+
+			ent->s.frame = 27;
+		}
+	}
+	else
+	{
+		speed = 30;  
+		VectorScale(ent->movedir, speed, ent->velocity);
+		ent->s.effects = 0;
+		ent->s.frame = (ent->s.frame + 1) % 24;
+	}
+	
+	ent->nade_timer++;
+	ent->nextthink = level.time + FRAMETIME;
+
+	if(ent->nade_timer > 300) 
+	{	//explode
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_BFG_BIGEXPLOSION);
+		gi.WritePosition (ent->s.origin);
+		gi.multicast (ent->s.origin, MULTICAST_PHS);
+
+		G_FreeEdict (ent);
+	}
+}
+
+void minderaser_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (other == ent->owner)
+		return;
+
+	if (surf && (surf->flags & SURF_SKY))
+	{
+		G_FreeEdict (ent);
+		return;
+	}
+	else if(surf)
+	{
+		//explode
+		gi.WriteByte (svc_temp_entity);
+		gi.WriteByte (TE_BFG_BIGEXPLOSION);
+		gi.WritePosition (ent->s.origin);
+		gi.multicast (ent->s.origin, MULTICAST_PHS);
+
+		G_FreeEdict (ent);
+		return;
+	}
+
+	//just bounce off of anything else
+	gi.sound (ent, CHAN_VOICE, gi.soundindex ("weapons/clank.wav"), 1, ATTN_NORM, 0);
+	return;
+
+}
+
+void fire_minderaser (edict_t *self, vec3_t start, vec3_t dir, float timer)
+{
+	edict_t	*spud;
+	float *v;
+
+	spud = G_Spawn();
+	VectorCopy (start, spud->s.origin);
+	VectorCopy (dir, spud->movedir);
+	vectoangles (dir, spud->s.angles);
+	VectorScale (dir, 30, spud->velocity);
+	spud->movetype = MOVETYPE_FLYMISSILE;
+	spud->clipmask = MASK_SHOT;
+	spud->solid = SOLID_BBOX;
+	spud->s.effects = 0;
+	spud->s.renderfx = 0;
+	v = tv(-8,-8,-8);
+	VectorCopy (v, spud->mins);
+	v = tv(8,8,8);
+	VectorCopy (v, spud->maxs);
+	spud->s.modelindex = gi.modelindex ("models/objects/spud/tris.md2");
+	spud->owner = self;
+	spud->touch = minderaser_touch;
+	spud->nade_timer = 0;
+		
+	spud->nextthink = level.time + FRAMETIME;
+	spud->think = minderaser_think;
+
+	spud->s.sound = gi.soundindex ("weapons/rockfly.wav"); //to do - give it it's own sound!
+	spud->classname = "seeker"; //to do - make sure bots know to run like hell away from these things
+
+	gi.linkentity (spud);
 }
 
 /*

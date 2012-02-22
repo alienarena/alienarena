@@ -121,7 +121,8 @@ typedef enum
 	AMMO_ROCKETS,
 	AMMO_GRENADES,
 	AMMO_CELLS,
-	AMMO_SLUGS
+	AMMO_SLUGS,
+	AMMO_SEEKERS
 } ammo_t;
 
 //teams
@@ -278,10 +279,11 @@ typedef struct
 #define WEAP_BEAMGUN			10
 #define WEAP_VAPORIZER			11
 #define WEAP_VIOLATOR			12
-#define WEAP_BOMBER				13
-#define WEAP_STRAFER			14
-#define WEAP_DEATHBALL			15
-#define WEAP_HOVER				16
+#define WEAP_MINDERASER			13
+#define WEAP_BOMBER				14
+#define WEAP_STRAFER			15
+#define WEAP_DEATHBALL			16
+#define WEAP_HOVER				17
 
 
 
@@ -554,6 +556,7 @@ extern  int print3;
 #define MOD_TARGET_BLASTER	33
 #define MOD_GRAPPLE			34
 #define MOD_HEADSHOT		35
+#define MOD_MINDERASER		36
 #define MOD_FRIENDLY_FIRE   0x8000000
 
 extern	int	meansOfDeath;
@@ -644,6 +647,7 @@ extern	cvar_t	*g_maxrockets;
 extern	cvar_t	*g_maxgrenades;
 extern	cvar_t	*g_maxcells;
 extern	cvar_t	*g_maxslugs;
+extern	cvar_t	*g_maxseekers;
 
 //quick weapon change
 extern  cvar_t  *quickweap;
@@ -728,6 +732,9 @@ typedef struct
 extern	field_t fields[];
 extern	gitem_t	itemlist[];
 
+//mind eraser globals
+extern edict_t *replaced_weapon;
+extern float mindEraserTime;
 
 //
 // g_cmds.c
@@ -895,6 +902,7 @@ void fire_floater (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 void fire_floater_alien (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage, float timer);
 void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius);
 void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean detonate);
+void fire_minderaser (edict_t *self, vec3_t start, vec3_t dir, float timer);
 
 //new weapon code
 void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
@@ -1041,6 +1049,7 @@ qboolean G_NameMatch( const char* netname, const char *kickname );
 #define BASE_SLUGS		10
 #define BASE_GRENADES	50
 #define BASE_BULLETS	50
+#define BASE_SEEKERS	1
 
 
 // client data that stays across multiple level loads
@@ -1071,6 +1080,7 @@ typedef struct
 	int			max_grenades;
 	int			max_cells;
 	int			max_slugs;
+	int			max_seekers;
 
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;

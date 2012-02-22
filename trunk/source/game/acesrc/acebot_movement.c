@@ -405,19 +405,28 @@ void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 {
 	// If a rocket or grenade is around deal with it
 	// Simple, but effective (could be rewritten to be more accurate)
-	if(strcmp(self->movetarget->classname,"rocket")==0 ||
-	   strcmp(self->movetarget->classname,"grenade")==0)
+	if(strcmp(self->movetarget->classname,"rocket") == 0 ||
+	   strcmp(self->movetarget->classname,"grenade") == 0 ||
+	   strcmp(self->movetarget->classname,"seeker") == 0 )
 	{
 		VectorSubtract (self->movetarget->s.origin, self->s.origin, self->move_vector);
 		ACEMV_ChangeBotAngle(self);
 		if(debug_mode)
 			debug_printf("%s: Oh crap a rocket!\n",self->client->pers.netname);
 
-		// strafe left/right
-		if(rand()%1 && ACEMV_CanMove(self, MOVE_LEFT))
-				ucmd->sidemove = -400;
-		else if(ACEMV_CanMove(self, MOVE_RIGHT))
-				ucmd->sidemove = 400;
+		if(strcmp(self->movetarget->classname,"seeker") == 0)
+		{
+			//turn and run like hell away from it
+			ucmd->forwardmove = 400;
+		}
+		else
+		{
+			// strafe left/right
+			if(rand()%1 && ACEMV_CanMove(self, MOVE_LEFT))
+					ucmd->sidemove = -400;
+			else if(ACEMV_CanMove(self, MOVE_RIGHT))
+					ucmd->sidemove = 400;
+		}
 		return;
 
 	}
@@ -591,7 +600,7 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 		ucmd->forwardmove = 400;
 
 	if(self->skill == 3)
-	{ //ultra skill level(will be 3)
+	{	//ultra skill level(will be 3)
 		c = random();
 
 		if(!self->in_deathball && grapple->value && c <= .7)
@@ -612,7 +621,7 @@ void ACEMV_Move(edict_t *self, usercmd_t *ucmd)
 		}
 		else if(self->client->ctf_grapplestate != CTF_GRAPPLE_STATE_PULL &&
 			self->client->ctf_grapplestate != CTF_GRAPPLE_STATE_HANG)
-		{ //don't interrupt a pull
+		{	//don't interrupt a pull
 			float weight;
 			int strafeJump = false;
 

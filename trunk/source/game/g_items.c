@@ -37,6 +37,7 @@ void Weapon_Disruptor (edict_t *ent);
 void Weapon_RocketLauncher (edict_t *ent);
 void Weapon_Beamgun (edict_t *ent);
 void Weapon_Vaporizer (edict_t *ent);
+void Weapon_Minderaser (edict_t *ent);
 void Weapon_Bomber (edict_t *ent);
 void Weapon_Strafer (edict_t *ent);
 void Weapon_Deathball (edict_t *ent);
@@ -120,8 +121,69 @@ gitem_t	*FindItem (char *pickup_name)
 
 //======================================================================
 
+static void drop_temp_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
+{
+	if (other == ent->owner)
+		return;
+
+	Touch_Item (ent, other, plane, surf);
+}
+
+static void drop_make_touchable (edict_t *ent)
+{
+	ent->touch = Touch_Item;
+	if (deathmatch->value)
+	{
+		ent->nextthink = level.time + 29;
+		ent->think = G_FreeEdict;
+	}
+}
+
+float mindEraserTime;
+edict_t *replaced_weapon;
+void SpawnMinderaser(edict_t *ent)
+{
+	edict_t *minderaser;
+	safe_bprintf(PRINT_MEDIUM, "A Mind Eraser has spawned\n");
+
+	minderaser = G_Spawn();
+	VectorCopy(ent->s.origin, minderaser->s.origin);
+	minderaser->spawnflags = DROPPED_PLAYER_ITEM;
+	minderaser->model = "models/weapons/g_minderaser/tris.md2";
+	minderaser->classname = "weapon_minderaser";
+	minderaser->item = FindItem ("Minderaser");
+	minderaser->s.effects = minderaser->item->world_model_flags;
+	minderaser->s.renderfx = RF_GLOW;
+	VectorSet (minderaser->mins, -15, -15, -15);
+	VectorSet (minderaser->maxs, 15, 15, 15);
+	gi.setmodel (minderaser, minderaser->item->world_model);
+	minderaser->solid = SOLID_TRIGGER;
+	minderaser->health = 100;
+	minderaser->movetype = MOVETYPE_TOSS;
+	minderaser->touch = drop_temp_touch;
+	minderaser->owner = NULL;
+
+	SetRespawn (ent, 1000000); //huge delay until ME is picked up from pad.			
+	replaced_weapon = ent; //remember this entity
+}
+
 void DoRespawn (edict_t *ent)
 {
+	char szTmp[64];
+	//Add mind eraser spawn here, if it's been two minutes since last respawn of it,
+	//go ahead and set the next weapon spawned to be the mind eraser
+	//need to check if first part of name is weapon
+	/*if(level.time > mindEraserTime + 120.0)
+	{
+		strcpy(szTmp, ent->classname);
+		szTmp[6] = 0;
+		if(!Q_strcasecmp(szTmp, "weapon"))
+		{
+			SpawnMinderaser(ent);
+			return;
+		}
+	}*/
+
 	if (ent->team)
 	{
 		edict_t	*master;
@@ -359,29 +421,40 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboo
 	if (!ent->client)
 		return false;
 
-	if (item->tag == AMMO_BULLETS) {
+	if (item->tag == AMMO_BULLETS) 
+	{
 		max = ent->client->pers.max_bullets;
 		base = BASE_BULLETS;
 	}
-	else if (item->tag == AMMO_SHELLS) {
+	else if (item->tag == AMMO_SHELLS) 
+	{
 		max = ent->client->pers.max_shells;
 		base = BASE_SHELLS;
 	}
-	else if (item->tag == AMMO_ROCKETS) {
+	else if (item->tag == AMMO_ROCKETS) 
+	{
 		max = ent->client->pers.max_rockets;
 		base = BASE_ROCKETS;
 	}
-	else if (item->tag == AMMO_GRENADES) {
+	else if (item->tag == AMMO_GRENADES) 
+	{
 		max = ent->client->pers.max_grenades;
 		base = BASE_GRENADES;
 	}
-	else if (item->tag == AMMO_CELLS) {
+	else if (item->tag == AMMO_CELLS) 
+	{
 		max = ent->client->pers.max_cells;
 		base = BASE_CELLS;
 	}
-	else if (item->tag == AMMO_SLUGS) {
+	else if (item->tag == AMMO_SLUGS) 
+	{
 		max = ent->client->pers.max_slugs;
 		base = BASE_SLUGS;
+	}
+	else if (item->tag == AMMO_SEEKERS) 
+	{
+		max = ent->client->pers.max_seekers;
+		base = BASE_SEEKERS;
 	}
 	else
 		return false;
@@ -691,24 +764,6 @@ void Touch_Item (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf
 }
 
 //======================================================================
-
-static void drop_temp_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
-{
-	if (other == ent->owner)
-		return;
-
-	Touch_Item (ent, other, plane, surf);
-}
-
-static void drop_make_touchable (edict_t *ent)
-{
-	ent->touch = Touch_Item;
-	if (deathmatch->value)
-	{
-		ent->nextthink = level.time + 29;
-		ent->think = G_FreeEdict;
-	}
-}
 
 edict_t *Drop_Item (edict_t *ent, gitem_t *item)
 {
@@ -1575,6 +1630,27 @@ always owned, never in the world
 /* precache */ "weapons/energyfield.wav smallmech/sight.wav weapons/vaporizer_hum.wav"
 	},
 
+	{
+		"weapon_minderaser",
+		Pickup_Weapon,
+		Use_Weapon,
+		NULL, //never drop
+		Weapon_Minderaser,
+		"misc/w_pkup.wav",
+		"models/weapons/g_minderaser/tris.md2", EF_ROTATE,
+		"models/weapons/v_minderaser/tris.md2",
+/* icon */		"minderaser",
+/* pickup */	"Minderaser",
+		0,
+		1,
+		"Seekers", 
+		IT_WEAPON,
+		WEAP_MINDERASER,
+		NULL,
+		0,
+/* precache */ "weapons/clank.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav" //to do - new sounds for this weapon
+	},
+
 	//
 	// AMMO ITEMS
 	//
@@ -1716,6 +1792,27 @@ always owned, never in the world
 /* precache */ ""
 	},
 
+	{
+		"ammo_seekers",
+		Pickup_Ammo, //set to null
+		NULL,
+		Drop_Ammo, //set to null
+		NULL,
+		"misc/am_pkup.wav",
+		NULL,
+		0,
+		NULL,
+/* icon */		"a_seekers",
+/* pickup */	"Seekers",
+/* width */		3,
+		1,
+		NULL,
+		IT_AMMO,
+		0,
+		NULL,
+		AMMO_SEEKERS,
+/* precache */ ""
+	},
 
 	//
 	// POWERUP ITEMS
