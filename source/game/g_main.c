@@ -84,6 +84,7 @@ cvar_t	*g_maxrockets;
 cvar_t	*g_maxgrenades;
 cvar_t	*g_maxcells;
 cvar_t	*g_maxslugs;
+cvar_t	*g_maxseekers;
 
 //quick weapon change
 cvar_t  *quickweap;
@@ -822,6 +823,8 @@ void ResetLevel (void) //for resetting players and items after warmup
 
 	blue_team_score = 0;
 	red_team_score = 0;
+
+	mindEraserTime = level.time;
 
 	//reset level items
 	for (i=1, ent=g_edicts+i ; i < globals.num_edicts ; i++,ent++) {

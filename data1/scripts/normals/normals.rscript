@@ -323,6 +323,16 @@ models/items/armor/jacket/skin
 		fx
 	}
 }
+models/objects/spud/skin
+{
+
+	{
+		map models/objects/spud/skin_normal.tga
+		normalmap
+		map2 models/objects/spud/skin_fx.tga
+		glow
+	}
+}
 maps/meshes/hanger
 {
 	{

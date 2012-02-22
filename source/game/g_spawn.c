@@ -227,11 +227,7 @@ void ED_CallSpawn (edict_t *ent)
 			ent->classname = "weapon_rocketlauncher"; //hack to remove old weapons
 		if(!Q_strcasecmp(ent->classname, "weapon_machinegun"))
 			ent->classname = "weapon_bfg"; //hack to remove old weapons
-
-		//to do - add random mind eraser spawn here, if it's been two minutes since last respawn of it,
-		//go ahead and set the next weapon spawned to be the mind eraser
-		//need to check if first part of name is weapon
-
+				
 		if (!strcmp(item->classname, ent->classname))
 		{	// found it
 			SpawnItem (ent, item);
@@ -989,6 +985,7 @@ void SP_worldspawn (edict_t *ent)
 	    gi.modelindex ("players/martianenforcer/w_railgun.md2");
 	    gi.modelindex ("players/martianenforcer/w_bfg.md2");
 	    gi.modelindex ("players/martianenforcer/w_violator.md2");
+		gi.modelindex ("players/martianenforcer/w_minderaser.md2");
 
 	    gi.modelindex ("players/martiancyborg/weapon.md2");
 	    gi.modelindex ("players/martiancyborg/w_blaster.md2");
@@ -1001,6 +998,7 @@ void SP_worldspawn (edict_t *ent)
 	    gi.modelindex ("players/martiancyborg/w_railgun.md2");
 	    gi.modelindex ("players/martiancyborg/w_bfg.md2");
 	    gi.modelindex ("players/martiancyborg/w_violator.md2");
+		gi.modelindex ("players/martiancyborg/w_minderaser.md2");
 
 	    gi.modelindex ("players/enforcer/weapon.md2");
 	    gi.modelindex ("players/enforcer/w_blaster.md2");
@@ -1013,6 +1011,7 @@ void SP_worldspawn (edict_t *ent)
 	    gi.modelindex ("players/enforcer/w_railgun.md2");
 	    gi.modelindex ("players/enforcer/w_bfg.md2");
 	    gi.modelindex ("players/enforcer/w_violator.md2");
+		gi.modelindex ("players/enforcer/w_minderaser.md2");
 
 	    gi.modelindex ("players/lauren/weapon.md2");
 	    gi.modelindex ("players/lauren/w_blaster.md2");
@@ -1025,6 +1024,7 @@ void SP_worldspawn (edict_t *ent)
 	    gi.modelindex ("players/lauren/w_railgun.md2");
 	    gi.modelindex ("players/lauren/w_bfg.md2");
 	    gi.modelindex ("players/lauren/w_violator.md2");
+		gi.modelindex ("players/lauren/w_minderaser.md2");
 
 	    gi.modelindex ("players/slashbot/weapon.md2");
 	    gi.modelindex ("players/slashbot/w_blaster.md2");
@@ -1037,6 +1037,7 @@ void SP_worldspawn (edict_t *ent)
 	    gi.modelindex ("players/slashbot/w_railgun.md2");
 	    gi.modelindex ("players/slashbot/w_bfg.md2");
 	    gi.modelindex ("players/slashbot/w_violator.md2");
+		gi.modelindex ("players/slashbot/w_minderaser.md2");
 
 	    gi.modelindex ("players/commander/weapon.md2");
 	    gi.modelindex ("players/commander/w_blaster.md2");
@@ -1049,6 +1050,7 @@ void SP_worldspawn (edict_t *ent)
 	    gi.modelindex ("players/commander/w_railgun.md2");
 	    gi.modelindex ("players/commander/w_bfg.md2");
 	    gi.modelindex ("players/commander/w_violator.md2");
+		gi.modelindex ("players/commander/w_minderaser.md2");
 	}
 	
 	//these are needed for custom player models for when they enter a game
@@ -1064,6 +1066,7 @@ void SP_worldspawn (edict_t *ent)
 	gi.modelindex ("#w_railgun.md2");
 	gi.modelindex ("#w_bfg.md2");
 	gi.modelindex ("#w_violator.md2");
+	gi.modelindex ("#w_minderaser.md2");
 
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is doublebright.

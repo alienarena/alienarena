@@ -296,6 +296,10 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				message = "couldn't hide from";
 				message2 = "'s vaporizer";
 				break;
+			case MOD_MINDERASER:
+				message = "had it's mind erased by";
+				message2 = "'s alien seeker";
+				break;
 			case MOD_PLASMA_SPLASH: //blaster splash damage
 				message = "was melted";
 				message2 = "'s plasma";
@@ -431,6 +435,9 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 
 				if (deathmatch->value)
 				{
+					if(mod == MOD_MINDERASER)
+						self->client->resp.score-=2;
+				
 					if (ff) {
 						attacker->client->resp.score--;
 						attacker->client->resp.deaths++;
@@ -606,6 +613,8 @@ void TossClientWeapon (edict_t *self)
 		item = NULL;
 	if (item && (strcmp (item->pickup_name, "Violator") == 0))
 		item = NULL;
+	if (item && (strcmp (item->pickup_name, "Minderaser") == 0))
+		item = NULL;
 
 	if (!(dmflags->integer & DF_QUAD_DROP))
 		quad = false;
@@ -751,12 +760,14 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		ClientObituary (self, inflictor, attacker);
 		if(got_vehicle) //special for vehicles
 			VehicleDeadDrop(self);
-		else {
+		else 
+		{
 			if(!excessive->value)
 				TossClientWeapon (self);
 		}
 
-		if(ctf->value) {
+		if(ctf->value) 
+		{
 			//check to see if they had a flag
 			flag1_item = flag2_item = NULL;
 
@@ -767,8 +778,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 				hasFlag = true;
 
 			CTFDeadDropFlag(self, attacker);
-			if(anticamp->value && meansOfDeath == MOD_SUICIDE && hasFlag) {
-
+			if(anticamp->value && meansOfDeath == MOD_SUICIDE && hasFlag) 
+			{
 				//make campers really pay for hiding flags
 				if(self->dmteam == BLUE_TEAM)
 					CTFResetFlag(RED_TEAM);
@@ -784,9 +795,11 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		if (deathmatch->value)
 			Cmd_Help_f (self);		// show scores
 
-		if(self->health < -40 && attacker->client) {
+		if(self->health < -40 && attacker->client) 
+		{
 			attacker->client->resp.reward_pts++;
-			if(attacker->client->resp.reward_pts >= g_reward->integer && !attacker->client->resp.powered) { //give them speed and invis powerups
+			if(attacker->client->resp.reward_pts >= g_reward->integer && !attacker->client->resp.powered) 
+			{	//give them speed and invis powerups
 				it = FindItem("Invisibility");
 				attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
 
@@ -801,7 +814,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 				gi.sound (attacker, CHAN_VOICE, gi.soundindex("misc/pc_up.wav"), 1, ATTN_STATIC, 0);
 			}
 		}
-
 	}
 
 	// remove powerups
@@ -834,8 +846,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			number_of_gibs = DEATH_GIBS_TO_THROW - 1;
 		}
 
-		if(self->ctype == 0) { //alien
-
+		if(self->ctype == 0) 
+		{	//alien
 			gi.WriteByte (svc_temp_entity);
 			gi.WriteByte (TE_DEATHFIELD);
 			gi.WritePosition (self->s.origin);
@@ -849,9 +861,11 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 				ThrowGib (self, "models/objects/debris2/tris.md2", damage, GIB_METALLIC, 0);
 			}
 		}
-		else if(self->ctype == 2) { //robot
+		else if(self->ctype == 2) 
+		{	//robot
 			gib_effect = 0;
-			for (n= 0; n < number_of_gibs; n++) {
+			for (n= 0; n < number_of_gibs; n++) 
+			{
 				ThrowGib (self, "models/objects/debris3/tris.md2", damage, GIB_METALLIC, 0);
 				ThrowGib (self, "models/objects/debris1/tris.md2", damage, GIB_METALLIC, 0);
 			}
@@ -861,8 +875,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			gi.WritePosition (self->s.origin);
 			gi.multicast (self->s.origin, MULTICAST_PHS);
 		}
-		else { //human
-
+		else 
+		{	//human
 			gi.WriteByte (svc_temp_entity);
 			gi.WriteByte (TE_DEATHFIELD2);
 			gi.WritePosition (self->s.origin);
@@ -870,7 +884,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			gi.multicast (self->s.origin, MULTICAST_PVS);
 
 			gib_effect = EF_GIB;
-			for (n= 0; n < number_of_gibs; n++) {
+			for (n= 0; n < number_of_gibs; n++) 
+			{
 				if(mod == MOD_R_SPLASH || mod == MOD_ROCKET)
 					ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_METALLIC, EF_SHIPEXHAUST);
 				else
@@ -878,7 +893,8 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 			}
 		}
 
-		if(self->usegibs) {
+		if(self->usegibs) 
+		{
 			if(mod == MOD_R_SPLASH || mod == MOD_ROCKET)
 				gib_effect = EF_SHIPEXHAUST;
 			ThrowGib (self, self->head, damage, GIB_ORGANIC, gib_effect);
@@ -951,7 +967,8 @@ void InitClientPersistant (gclient_t *client)
 	if(g_duel->value)
 		client->pers.queue = queue;
 
-	if(!rocket_arena->value) { //gets a violator, unless RA
+	if(!rocket_arena->value) 
+	{	//gets a violator, unless RA
 		item = FindItem("Violator");
 		client->pers.selected_item = ITEM_INDEX(item);
 		client->pers.inventory[client->pers.selected_item] = 1;
@@ -959,12 +976,14 @@ void InitClientPersistant (gclient_t *client)
 	}
 
 	//mutator - will need to have item
-	if(instagib->value) {
+	if(instagib->value) 
+	{
 		client->pers.inventory[ITEM_INDEX(FindItem("Alien Disruptor"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("cells"))] = g_maxcells->value;
 		item = FindItem("Alien Disruptor");
 	}
-	else if(rocket_arena->value) {
+	else if(rocket_arena->value) 
+	{
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value;
 		item = FindItem("Rocket Launcher");
@@ -995,6 +1014,7 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_grenades	= g_maxgrenades->value * 10;
 		client->pers.max_cells		= g_maxcells->value * 2.5;
 		client->pers.max_slugs		= g_maxslugs->value * 10;
+		client->pers.max_seekers	= g_maxseekers->value * 2;
 
 		client->pers.inventory[ITEM_INDEX(FindItem("Rocket Launcher"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("rockets"))] = g_maxrockets->value * 10;
@@ -1009,6 +1029,8 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.inventory[ITEM_INDEX(FindItem("slugs"))] = g_maxslugs->value * 10;
 		client->pers.inventory[ITEM_INDEX(FindItem("Flame Thrower"))] = 1;
 		client->pers.inventory[ITEM_INDEX(FindItem("napalm"))] = g_maxgrenades->value * 10;
+		client->pers.inventory[ITEM_INDEX(FindItem("Minderaser"))] = 1;
+		client->pers.inventory[ITEM_INDEX(FindItem("seekers"))] = g_maxseekers->value * 2;
 	} else {
 		client->pers.health 		= g_spawnhealth->value;
 		client->pers.max_bullets 	= g_maxbullets->value;
@@ -1017,6 +1039,7 @@ void InitClientPersistant (gclient_t *client)
 		client->pers.max_grenades	= g_maxgrenades->value;
 		client->pers.max_cells		= g_maxcells->value;
 		client->pers.max_slugs		= g_maxslugs->value;
+		client->pers.max_seekers	= g_maxseekers->value;
 	}
 
 	if(vampire->value)

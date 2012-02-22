@@ -377,10 +377,11 @@ void ACEAI_PickShortRangeGoal(edict_t *self)
 
 		// Missle avoidance code
 		// Set our movetarget to be the rocket or grenade fired at us.
-		if(strcmp(target->classname,"rocket")==0 || strcmp(target->classname,"grenade") ==0)
+		if(strcmp(target->classname,"rocket") == 0 || strcmp(target->classname,"grenade") == 0
+			|| strcmp(target->classname,"seeker") == 0)
 		{
 			if(debug_mode)
-				debug_printf("ROCKET ALERT!\n");
+				debug_printf("PROJECTILE ALERT!\n");
 
 			self->movetarget = target;
 			return;
@@ -437,12 +438,14 @@ qboolean ACEAI_infront (edict_t *self, edict_t *other)
 
 	vehicle = FindItemByClassname("item_bomber");
 
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) 
+	{
 		return true;	//do this so that they aren't getting lost and just flying off
 	}
 	vehicle = FindItemByClassname("item_strafer");
 
-	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) {
+	if (self->client->pers.inventory[ITEM_INDEX(vehicle)]) 
+	{
 		return true;	//do this so that they aren't getting lost and just flying off
 	}
 
@@ -468,18 +471,22 @@ qboolean ACEAI_FindEnemy(edict_t *self)
 	edict_t *target;
 	edict_t	*ent;
 
-	if(ctf->value) {
+	if(ctf->value) 
+	{
 		flag1_item = FindItemByClassname("item_flag_red");
 		flag2_item = FindItemByClassname("item_flag_blue");
 	}
 
-	if(self->in_deathball && (self->health > 25)) { //cannot, or should not, fire at players when in a deathball
+	if(self->in_deathball && (self->health > 25)) 
+	{ 
+		//cannot, or should not, fire at players when in a deathball
 		//look for goal - if health is too low, drop the ball and fight back
 		target = findradius(NULL, self->s.origin, 200);
 		self->enemy = NULL;
 		while(target)
 		{
-			if(target->classname == NULL) {
+			if(target->classname == NULL) 
+			{
 				self->enemy = NULL;
 				return false;
 			}
@@ -818,8 +825,18 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	}
 
 	// what is the bot's favorite weapon?
-	// The bot will always check for it's favorite weapon first,
-	// which is set in the bot's config file.
+	// The bot will always check for it's favorite weapon first, 
+	// which is set in the bot's config file, 
+	// unless it has a minderaser
+	if ( clear_shot && self->skill > 0 )
+	{
+		if ( ACEIT_ChangeWeapon( self, FindItem( "Minderaser" ) ) )
+		{
+			//keep same accurace as if firing a rocket
+			self->accuracy = self->weapacc[ACCURACY_ROCKETLAUNCHER]; 
+			return;
+		}
+	}
 	if ( !strcmp( self->faveweap, "Alien Vaporizer" ) && self->skill > 1 )
 	{
 		if ( ACEIT_ChangeWeapon( self, FindItem( self->faveweap ) ) )

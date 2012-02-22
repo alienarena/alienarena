@@ -156,6 +156,14 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		else
 			Add_Ammo (other, ammo, ammo->quantity, true, false);
 
+		//if ME, make sure original weapon gets respawned
+		if(!strcmp(ent->classname, "weapon_minderaser"))
+		{
+			mindEraserTime = level.time;
+			if(replaced_weapon != NULL)
+				SetRespawn(replaced_weapon, 5);
+		}
+
 		if (! (ent->spawnflags & DROPPED_PLAYER_ITEM) )
 		{
 			if (deathmatch->value)
@@ -311,6 +319,8 @@ void ChangeWeapon (edict_t *ent)
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_hyperblaster.md2");
 	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"models/weapons/v_chain/tris.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_chaingun.md2");
+	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model, "models/weapons/v_minderaser/tris.md2"))
+		sprintf(weaponmodel, "players/%s%s", weaponame, "w_minderaser.md2");
 	else if( !Q_strcasecmp(ent->client->pers.weapon->view_model,"vehicles/deathball/v_wep.md2"))
 		sprintf(weaponmodel, "players/%s%s", weaponame, "w_machinegun.md2");
 
@@ -1665,6 +1675,67 @@ void Weapon_Smartgun (edict_t *ent)
 		ent->altfire = false;
 
 	Weapon_Generic (ent, 3, 11, 31, 35, pause_frames, fire_frames, weapon_floater_fire);
+}
+
+void weapon_minderaser_fire (edict_t *ent)
+{
+	vec3_t	offset, start;
+	vec3_t	forward, right;
+	int		damage;
+	float	damage_radius;
+	int		radius_damage;
+
+	damage        = 110; 
+	radius_damage = 120;
+	damage_radius = 120;
+	if (is_quad || excessive->value)
+	{
+		damage *= 2;
+		radius_damage *= 2;
+	}
+
+	AngleVectors (ent->client->v_angle, forward, right, NULL);
+
+	VectorScale (forward, -2, ent->client->kick_origin);
+	ent->client->kick_angles[0] = -1;
+
+	VectorSet(offset, 8, 8, ent->viewheight-4);
+	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	forward[0] = forward[0] * 2.6;
+	forward[1] = forward[1] * 2.6;
+	forward[2] = forward[2] * 2.6;
+	
+	fire_minderaser (ent, start, forward, 30);
+	
+	// send muzzle flash
+	gi.WriteByte (svc_muzzleflash);
+	gi.WriteShort (ent-g_edicts);
+	gi.WriteByte (MZ_SHOTGUN | is_silenced);
+	gi.multicast (ent->s.origin, MULTICAST_PVS);
+
+	ent->client->ps.gunframe++;
+
+	PlayerNoise(ent, start, PNOISE_WEAPON);
+
+	//create visual muzzle flash sprite!
+	forward[0] = forward[0] * 10;
+	forward[1] = forward[1] * 10;
+
+	VectorAdd(start, forward, start);
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_SMART_MUZZLEFLASH);
+	gi.WritePosition (start);
+	gi.multicast (start, MULTICAST_PVS);
+
+	ent->client->pers.inventory[ent->client->ammo_index]--;
+}
+
+void Weapon_Minderaser (edict_t *ent)
+{
+	static int	pause_frames[]	= {31, 0};
+	static int	fire_frames[]	= {6, 0};
+
+	Weapon_Generic (ent, 3, 11, 31, 35, pause_frames, fire_frames, weapon_minderaser_fire);
 }
 
 void Weapon_Deathball_Fire (edict_t *ent)
