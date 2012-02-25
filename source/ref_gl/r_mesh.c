@@ -1430,7 +1430,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			if(stage->normalmap)
 			{
 				vec3_t lightVec, lightVal;
-
+				
 				if(gl_state.vbo && !lerped)
 				{
 					KillFlags |= (KILL_TMU0_POINTER | KILL_TMU1_POINTER | KILL_TMU2_POINTER | KILL_NORMAL_POINTER);

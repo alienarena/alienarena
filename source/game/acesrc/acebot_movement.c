@@ -408,19 +408,25 @@ void ACEMV_MoveToGoal(edict_t *self, usercmd_t *ucmd)
 	if(strcmp(self->movetarget->classname,"rocket") == 0 ||
 	   strcmp(self->movetarget->classname,"grenade") == 0 ||
 	   strcmp(self->movetarget->classname,"seeker") == 0 )
-	{
-		VectorSubtract (self->movetarget->s.origin, self->s.origin, self->move_vector);
-		ACEMV_ChangeBotAngle(self);
+	{		
 		if(debug_mode)
 			debug_printf("%s: Oh crap a rocket!\n",self->client->pers.netname);
 
 		if(strcmp(self->movetarget->classname,"seeker") == 0)
 		{
+			VectorSubtract (self->s.origin, self->movetarget->s.origin, self->move_vector);
+			ACEMV_ChangeBotAngle(self);
+
 			//turn and run like hell away from it
-			ucmd->forwardmove = 400;
+			//to do - needs improvement - bot should run when getting hit by seeker as well
+			if(ACEMV_CanMove(self, MOVE_FORWARD))
+				ucmd->forwardmove = 400;
 		}
 		else
 		{
+			VectorSubtract (self->movetarget->s.origin, self->s.origin, self->move_vector);
+			ACEMV_ChangeBotAngle(self);
+
 			// strafe left/right
 			if(rand()%1 && ACEMV_CanMove(self, MOVE_LEFT))
 					ucmd->sidemove = -400;

@@ -143,8 +143,17 @@ float mindEraserTime;
 edict_t *replaced_weapon;
 void SpawnMinderaser(edict_t *ent)
 {
-	edict_t *minderaser;
-	safe_bprintf(PRINT_MEDIUM, "A Mind Eraser has spawned\n");
+	edict_t *minderaser, *cl_ent;
+	int i;
+
+	for (i = 0; i < g_maxclients->value; i++)
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (!cl_ent->inuse || cl_ent->is_bot)
+			continue;
+		safe_centerprintf(cl_ent, "A Mind Eraser has spawned!\n");
+	}
+	//to do - play level wide klaxxon 
 
 	minderaser = G_Spawn();
 	VectorCopy(ent->s.origin, minderaser->s.origin);
@@ -165,6 +174,8 @@ void SpawnMinderaser(edict_t *ent)
 
 	SetRespawn (ent, 1000000); //huge delay until ME is picked up from pad.			
 	replaced_weapon = ent; //remember this entity
+
+	mindEraserTime = level.time;
 }
 
 void DoRespawn (edict_t *ent)
@@ -173,7 +184,7 @@ void DoRespawn (edict_t *ent)
 	//Add mind eraser spawn here, if it's been two minutes since last respawn of it,
 	//go ahead and set the next weapon spawned to be the mind eraser
 	//need to check if first part of name is weapon
-	/*if(level.time > mindEraserTime + 120.0)
+	if(level.time > mindEraserTime + 120.0)
 	{
 		strcpy(szTmp, ent->classname);
 		szTmp[6] = 0;
@@ -182,7 +193,7 @@ void DoRespawn (edict_t *ent)
 			SpawnMinderaser(ent);
 			return;
 		}
-	}*/
+	}
 
 	if (ent->team)
 	{
