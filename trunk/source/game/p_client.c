@@ -436,7 +436,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				if (deathmatch->value)
 				{
 					if(mod == MOD_MINDERASER)
-						self->client->resp.score-=2;
+						self->client->resp.reward_pts = 0; 
 				
 					if (ff) {
 						attacker->client->resp.score--;

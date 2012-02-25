@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define DIV512 (0.001953125f)
 
 #define	MAX_DLIGHTS			32
-#define	MAX_ENTITIES		128
+#define	MAX_ENTITIES		256 //was 128 - use of static meshes necessitates an increase.
 #define	MAX_PARTICLES		8192
 #define	MAX_LIGHTSTYLES		256
 

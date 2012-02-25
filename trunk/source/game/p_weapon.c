@@ -1696,21 +1696,21 @@ void weapon_minderaser_fire (edict_t *ent)
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
-	VectorScale (forward, -2, ent->client->kick_origin);
+	VectorScale (forward, 2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
 	VectorSet(offset, 8, 8, ent->viewheight-4);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	forward[0] = forward[0] * 2.6;
-	forward[1] = forward[1] * 2.6;
-	forward[2] = forward[2] * 2.6;
+	forward[0] = forward[0] * 12.0;
+	forward[1] = forward[1] * 12.0;
+	forward[2] = forward[2] * 12.0;
 	
 	fire_minderaser (ent, start, forward, 30);
 	
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_SHOTGUN | is_silenced);
+	gi.WriteByte (MZ_RAILGUN | is_silenced);
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	ent->client->ps.gunframe++;
@@ -1718,12 +1718,19 @@ void weapon_minderaser_fire (edict_t *ent)
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	//create visual muzzle flash sprite!
-	forward[0] = forward[0] * 10;
-	forward[1] = forward[1] * 10;
+	forward[0] = forward[0] * 2;
+	forward[1] = forward[1] * 2;
 
 	VectorAdd(start, forward, start);
+	start[2]+=6;
+
 	gi.WriteByte (svc_temp_entity);
-	gi.WriteByte (TE_SMART_MUZZLEFLASH);
+	gi.WriteByte (TE_BOSSTPORT);
+	gi.WritePosition (start);
+	gi.multicast (start, MULTICAST_PVS);
+
+	gi.WriteByte (svc_temp_entity);
+	gi.WriteByte (TE_BLUE_MUZZLEFLASH);
 	gi.WritePosition (start);
 	gi.multicast (start, MULTICAST_PVS);
 
@@ -1769,13 +1776,9 @@ void Weapon_Deathball_Fire (edict_t *ent)
 		gi.WriteByte (TE_BLUE_MUZZLEFLASH);
 		gi.WritePosition (start);
 		gi.multicast (start, MULTICAST_PVS);
-
-
+		
 		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/energyfield.wav"), 1, ATTN_NORM, 0);
 		ent->client->weapon_sound = 0;
-
-
-
 	}
 	ent->client->ps.gunframe++;
 

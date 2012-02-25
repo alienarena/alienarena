@@ -329,8 +329,8 @@ models/objects/spud/skin
 	{
 		map models/objects/spud/skin_normal.tga
 		normalmap
-		map2 models/objects/spud/skin_fx.tga
-		glow
+		map2 models/objects/spud/skin_fx2.tga
+		fx
 	}
 }
 maps/meshes/hanger
@@ -493,6 +493,15 @@ models/weapons/v_bfg/skin
 		map models/weapons/v_bfg/skin_normal.tga
 		normalmap
 		map2 gfx/vapormask.tga
+		glow
+	}
+}
+models/weapons/v_minderaser/minderaser
+{
+	{
+		map models/weapons/v_minderaser/minderaser_normal.jpg
+		normalmap
+		map2 gfx/minderaser_fx.tga
 		glow
 	}
 }

@@ -214,6 +214,30 @@ models/weapons/v_bfg/skin
 		nolightmap
 	}
 }
+models/weapons/v_minderaser/minderaser
+{
+	{
+		map models/weapons/v_minderaser/minderaser.tga
+	}
+	{
+		map gfx/minderaser_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
+models/objects/spud/skin
+{
+	{
+		map models/objects/spud/skin.tga
+	}
+	{
+		map models/objects/spud/skin_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 0.8 .8
+		nolightmap
+	}
+}
 vehicles/deathball/skin
 {
 	{

@@ -1140,28 +1140,36 @@ void minderaser_think (edict_t *ent)
 
 	if (target != NULL)
 	{
-		// target acquired, nudge our direction toward it
-		VectorNormalize(targetdir);
-		VectorScale(targetdir, 0.2, targetdir);
-		VectorAdd(targetdir, ent->movedir, targetdir);
-		VectorNormalize(targetdir);
-		VectorCopy(targetdir, ent->movedir);
-		vectoangles(targetdir, ent->s.angles);
-		speed = 450;  //speed it up we have a target
-		VectorScale(targetdir, speed, ent->velocity);
-		ent->s.frame = (ent->s.frame + 1) % 24;
-		ent->s.effects = EF_SHIPEXHAUST;
+		trace_t tr;
+
+		tr = gi.trace (ent->s.origin, NULL, NULL, target->s.origin, ent, MASK_SOLID);
+
+		// only move to it if path is not blocked
+		if (tr.fraction == 1.0)
+		{
+			// target acquired, nudge our direction toward it
+			VectorNormalize(targetdir);
+			VectorScale(targetdir, 0.2, targetdir);
+			VectorAdd(targetdir, ent->movedir, targetdir);
+			VectorNormalize(targetdir);
+			VectorCopy(targetdir, ent->movedir);
+			vectoangles(targetdir, ent->s.angles);
+			speed = 450;  //speed it up we have a target
+			VectorScale(targetdir, speed, ent->velocity);
+			ent->s.frame = (ent->s.frame + 1) % 24;
+			ent->s.effects = EF_SHIPEXHAUST; //to do - add different sound for when it speeds up
+			ent->s.renderfx = 0;
+		}
 	
 		//zap it if close enough and clear
 		if(VectorLength(blipdir) < 128)
 		{
-			//to do - we probably want to use "is_visible" here.
-			//tr = gi.trace (start, NULL, NULL, end, ignore, CONTENTS_SOLID|CONTENTS_MONSTER|CONTENTS_DEADMONSTER);
-
 			//we are close, slow it down
 			speed = 30;  
 			VectorScale(targetdir, speed, ent->velocity);
-			ent->s.effects = 0;
+		
+			ent->s.effects = EF_COLOR_SHELL;
+			ent->s.renderfx = RF_SHELL_BLUE;
 		
 			// hurt it if we can
 			if ((target->takedamage) && (target != ent->owner)) 
@@ -1184,6 +1192,7 @@ void minderaser_think (edict_t *ent)
 		speed = 30;  
 		VectorScale(ent->movedir, speed, ent->velocity);
 		ent->s.effects = 0;
+		ent->s.renderfx = 0;
 		ent->s.frame = (ent->s.frame + 1) % 24;
 	}
 	
