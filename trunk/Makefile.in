@@ -627,6 +627,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/menubar1.tga \
 	data1/gfx/menubar2.tga \
 	data1/gfx/metal3glow.tga \
+	data1/gfx/minderaser_fx.tga \
 	data1/gfx/mirrorspec.tga \
 	data1/gfx/noise.tga \
 	data1/gfx/plate5fx.tga \
@@ -1342,6 +1343,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/objects/laser/tris.md2 \
 	data1/models/objects/rocket/skin.tga \
 	data1/models/objects/rocket/tris.md2 \
+	data1/models/objects/spud/skin_fx2.tga \
+	data1/models/objects/spud/skin_fx.tga \
+	data1/models/objects/spud/skin_normal.jpg \
+	data1/models/objects/spud/skin.tga \
+	data1/models/objects/spud/spud.mdo \
+	data1/models/objects/spud/tris.md2 \
 	data1/models/weapons/g_bfg/tris.md2 \
 	data1/models/weapons/g_chain/tris.md2 \
 	data1/models/weapons/g_hyperb/cover.md2 \
@@ -1349,6 +1356,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/weapons/g_launch/skin.tga \
 	data1/models/weapons/g_launch/tris.md2 \
 	data1/models/weapons/g_machn/tris.md2 \
+	data1/models/weapons/g_minderaser/tris.md2 \
 	data1/models/weapons/g_rail/tris.md2 \
 	data1/models/weapons/g_rocket/cover.md2 \
 	data1/models/weapons/g_rocket/tris.md2 \
@@ -1369,6 +1377,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/weapons/v_hyperb/disruptor_normal.jpg \
 	data1/models/weapons/v_hyperb/tris.md2 \
 	data1/models/weapons/v_machn/tris.md2 \
+	data1/models/weapons/v_minderaser/minderaser.jpg \
+	data1/models/weapons/v_minderaser/minderaser_normal.jpg \
+	data1/models/weapons/v_minderaser/tris.md2 \
 	data1/models/weapons/v_rail/beamgun.jpg \
 	data1/models/weapons/v_rail/beamgun_normal.jpg \
 	data1/models/weapons/v_rail/tris.md2 \
