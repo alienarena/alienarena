@@ -1210,6 +1210,10 @@ void minderaser_think (edict_t *ent)
 		gi.WritePosition (ent->s.origin);
 		gi.multicast (ent->s.origin, MULTICAST_PHS);
 
+		gi.sound (ent, CHAN_WEAPON, gi.soundindex("vehicles/explodebomb.wav"), 1, ATTN_NORM, 0);
+
+		T_RadiusDamage(ent, ent->owner, 400, ent->enemy, 120, MOD_R_SPLASH, 2);
+
 		G_FreeEdict (ent);
 	}
 }
@@ -1232,6 +1236,10 @@ void minderaser_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t
 		gi.WritePosition (ent->s.origin);
 		gi.multicast (ent->s.origin, MULTICAST_PHS);
 
+		gi.sound (ent, CHAN_WEAPON, gi.soundindex("vehicles/explodebomb.wav"), 1, ATTN_NORM, 0);
+		
+		T_RadiusDamage(ent, ent->owner, 400, ent->enemy, 120, MOD_R_SPLASH, 2);
+		
 		G_FreeEdict (ent);
 		return;
 	}
