@@ -1659,7 +1659,7 @@ always owned, never in the world
 		WEAP_MINDERASER,
 		NULL,
 		0,
-/* precache */ "weapons/clank.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav" //to do - new sounds for this weapon
+/* precache */ "weapons/clank.wav weapons/minderaserfire.wav weapons/shotgf1b.wav weapons/smartgun_hum.wav"
 	},
 
 	//
