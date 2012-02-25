@@ -1157,7 +1157,8 @@ void minderaser_think (edict_t *ent)
 			speed = 450;  //speed it up we have a target
 			VectorScale(targetdir, speed, ent->velocity);
 			ent->s.frame = (ent->s.frame + 1) % 24;
-			ent->s.effects = EF_SHIPEXHAUST; //to do - add different sound for when it speeds up
+			ent->s.effects = EF_SHIPEXHAUST; 
+			ent->s.sound = gi.soundindex ("weapons/seeker_fast.wav");
 			ent->s.renderfx = 0;
 		}
 	
@@ -1178,6 +1179,8 @@ void minderaser_think (edict_t *ent)
 				gi.sound (ent->owner, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
 			}
 
+			ent->s.sound = gi.soundindex ("weapons/seeker_zap.wav");
+
 			gi.WriteByte (svc_temp_entity);
 			gi.WriteByte (TE_LIGHTNING);
 			gi.WritePosition (ent->s.origin);
@@ -1193,6 +1196,7 @@ void minderaser_think (edict_t *ent)
 		VectorScale(ent->movedir, speed, ent->velocity);
 		ent->s.effects = 0;
 		ent->s.renderfx = 0;
+		ent->s.sound = gi.soundindex ("weapons/seeker.wav");
 		ent->s.frame = (ent->s.frame + 1) % 24;
 	}
 	
@@ -1265,7 +1269,7 @@ void fire_minderaser (edict_t *self, vec3_t start, vec3_t dir, float timer)
 	spud->nextthink = level.time + FRAMETIME;
 	spud->think = minderaser_think;
 
-	spud->s.sound = gi.soundindex ("weapons/rockfly.wav"); //to do - give it it's own sound!
+	spud->s.sound = gi.soundindex ("weapons/seeker.wav"); 
 	spud->classname = "seeker"; //to do - make sure bots know to run like hell away from these things
 
 	gi.linkentity (spud);

@@ -1706,6 +1706,8 @@ void weapon_minderaser_fire (edict_t *ent)
 	forward[2] = forward[2] * 12.0;
 	
 	fire_minderaser (ent, start, forward, 30);
+
+	gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/minderaserfire.wav"), 1, ATTN_NORM, 0);
 	
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
