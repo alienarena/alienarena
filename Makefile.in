@@ -1737,6 +1737,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/commander/w_machinegun.iqm \
 	data1/players/commander/w_machinegun.md2 \
 	data1/players/commander/w_machinegun.skin \
+	data1/players/commander/w_minderaser.iqm \
+	data1/players/commander/w_minderaser.md2 \
+	data1/players/commander/w_minderaser.skin \
 	data1/players/commander/w_railgun.iqm \
 	data1/players/commander/w_railgun.md2 \
 	data1/players/commander/w_railgun.skin \
@@ -1816,6 +1819,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/enforcer/w_machinegun.iqm \
 	data1/players/enforcer/w_machinegun.md2 \
 	data1/players/enforcer/w_machinegun.skin \
+	data1/players/enforcer/w_minderaser.iqm \
+	data1/players/enforcer/w_minderaser.md2 \
+	data1/players/enforcer/w_minderaser.skin \
 	data1/players/enforcer/w_railgun.iqm \
 	data1/players/enforcer/w_railgun.md2 \
 	data1/players/enforcer/w_railgun.skin \
@@ -1889,6 +1895,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/lauren/w_machinegun.iqm \
 	data1/players/lauren/w_machinegun.md2 \
 	data1/players/lauren/w_machinegun.skin \
+	data1/players/lauren/w_minderaser.iqm \
+	data1/players/lauren/w_minderaser.md2 \
+	data1/players/lauren/w_minderaser.skin \
 	data1/players/lauren/w_railgun.iqm \
 	data1/players/lauren/w_railgun.md2 \
 	data1/players/lauren/w_railgun.skin \
@@ -1961,6 +1970,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martiancyborg/w_machinegun.iqm \
 	data1/players/martiancyborg/w_machinegun.md2 \
 	data1/players/martiancyborg/w_machinegun.skin \
+	data1/players/martiancyborg/w_minderaser.iqm \
+	data1/players/martiancyborg/w_minderaser.md2 \
+	data1/players/martiancyborg/w_minderaser.skin \
 	data1/players/martiancyborg/w_railgun.iqm \
 	data1/players/martiancyborg/w_railgun.md2 \
 	data1/players/martiancyborg/w_railgun.skin \
@@ -2043,6 +2055,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martianenforcer/w_machinegun.iqm \
 	data1/players/martianenforcer/w_machinegun.md2 \
 	data1/players/martianenforcer/w_machinegun.skin \
+	data1/players/martianenforcer/w_minderaser.iqm \
+	data1/players/martianenforcer/w_minderaser.md2 \
+	data1/players/martianenforcer/w_minderaser.skin \
 	data1/players/martianenforcer/w_railgun.iqm \
 	data1/players/martianenforcer/w_railgun.md2 \
 	data1/players/martianenforcer/w_railgun.skin \
@@ -2111,6 +2126,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/slashbot/w_machinegun.iqm \
 	data1/players/slashbot/w_machinegun.md2 \
 	data1/players/slashbot/w_machinegun.skin \
+	data1/players/slashbot/w_minderaser.iqm \
+	data1/players/slashbot/w_minderaser.md2 \
+	data1/players/slashbot/w_minderaser.skin \
 	data1/players/slashbot/w_railgun.iqm \
 	data1/players/slashbot/w_railgun.md2 \
 	data1/players/slashbot/w_railgun.skin \
@@ -2403,12 +2421,16 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/weapons/machgf3b.wav \
 	data1/sound/weapons/machgf4b.wav \
 	data1/sound/weapons/machgf5b.wav \
+	data1/sound/weapons/minderaserfire.wav \
 	data1/sound/weapons/noammo.wav \
 	data1/sound/weapons/railgf1a.wav \
 	data1/sound/weapons/rockfly.wav \
 	data1/sound/weapons/rocklf1a.wav \
 	data1/sound/weapons/rocklr1b.wav \
 	data1/sound/weapons/rocklx1a.wav \
+	data1/sound/weapons/seeker_fast.wav \
+	data1/sound/weapons/seeker.wav \
+	data1/sound/weapons/seeker_zap.wav \
 	data1/sound/weapons/shotgf1b.wav \
 	data1/sound/weapons/smartgun_hum.wav \
 	data1/sound/weapons/vaporizer_hum.wav \
