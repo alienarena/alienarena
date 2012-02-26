@@ -436,9 +436,13 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 				if (deathmatch->value)
 				{
 					if(mod == MOD_MINDERASER)
+					{
 						self->client->resp.reward_pts = 0; 
+						self->client->resp.powered = false;
+					}
 				
-					if (ff) {
+					if (ff) 
+					{
 						attacker->client->resp.score--;
 						attacker->client->resp.deaths++;
 						if ((dmflags->integer & DF_SKINTEAMS) && !ctf->value) {
@@ -448,38 +452,45 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 								blue_team_score--;
 						}
 					}
-					else {
-
+					else 
+					{
 						attacker->client->resp.score++;
 
-						if(!self->groundentity) {
+						if(!self->groundentity) 
+						{
 							attacker->client->resp.reward_pts+=3;
 							safe_centerprintf(attacker, "Midair shot!\n");
 						}
 						else
 							attacker->client->resp.reward_pts++;
 
-						if(mod == MOD_HEADSHOT) { //3 more pts for a headshot
+						if(mod == MOD_HEADSHOT) 
+						{	
+							//3 more pts for a headshot
 							attacker->client->resp.reward_pts+=3;
 							safe_centerprintf(attacker, "HEADSHOT!\n");
 							gi.sound(attacker, CHAN_AUTO, gi.soundindex("misc/headshot.wav"), 1, ATTN_STATIC, 0);
 						}
 
 						//mutators
-						if(vampire->value) {
+						if(vampire->value) 
+						{
 							attacker->health+=20;
 							if(attacker->health > attacker->max_health)
 								attacker->health = attacker->max_health;
 						}
 						self->client->resp.deaths++;
 
-						if ((dmflags->integer & DF_SKINTEAMS)  && !ctf->value) {
-							if(attacker->dmteam == RED_TEAM){
+						if ((dmflags->integer & DF_SKINTEAMS)  && !ctf->value) 
+						{
+							if(attacker->dmteam == RED_TEAM)
+							{
 								red_team_score++;
 								safe_bprintf(PRINT_MEDIUM, "Red Team scores!\n");
 								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/red_scores.wav"), 1, ATTN_NONE, 0);
 							}
-							else {
+							else 
+							{
 								blue_team_score++;
 								safe_bprintf(PRINT_MEDIUM, "Blue Team scores!\n");
 								gi.sound (self, CHAN_AUTO, gi.soundindex("misc/blue_scores.wav"), 1, ATTN_NONE, 0);
@@ -488,7 +499,8 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						}
 						//kill streaks
 						attacker->client->kill_streak++;
-						switch(attacker->client->kill_streak) {
+						switch(attacker->client->kill_streak) 
+						{
 							case 3:
 								for (i=0 ; i<g_maxclients->value ; i++)
 								{
@@ -532,19 +544,22 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 							default:
 								break;
 						}
-						if(self->client->kill_streak >=3) {
+						if(self->client->kill_streak >=3) 
+						{
 							for (i=0 ; i<g_maxclients->value ; i++)
-								{
-									cl_ent = g_edicts + 1 + i;
-									if (!cl_ent->inuse || cl_ent->is_bot)
-										continue;
-									safe_centerprintf(cl_ent, "%s's killing spree\nended by %s!\n", cleanname, cleanname2);
+							{
+								cl_ent = g_edicts + 1 + i;
+								if (!cl_ent->inuse || cl_ent->is_bot)
+									continue;
+								safe_centerprintf(cl_ent, "%s's killing spree\nended by %s!\n", cleanname, cleanname2);
 							}
 						}
 					}
 
 				}
-				if(attacker->client->resp.reward_pts >= g_reward->integer && !attacker->client->resp.powered) { //give them speed and invis powerups
+				if(attacker->client->resp.reward_pts >= g_reward->integer && !attacker->client->resp.powered) 
+				{ 
+					//give them speed and invis powerups
 					it = FindItem("Invisibility");
 					attacker->client->pers.inventory[ITEM_INDEX(it)] += 1;
 
@@ -565,7 +580,8 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 
 	}
 
-	if(mod == MOD_DEATHRAY) {
+	if(mod == MOD_DEATHRAY) 
+	{
 		safe_bprintf(PRINT_MEDIUM, "%s killed by Deathray!\n", self->client->pers.netname);
 
 		//immune player (activator) gets score increase
@@ -582,7 +598,8 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 	}
 
 	safe_bprintf (PRINT_MEDIUM,"%s died.\n", self->client->pers.netname);
-	if (deathmatch->value) {
+	if (deathmatch->value) 
+	{
 		self->client->resp.score--;
 		self->client->resp.deaths++;
 	}
