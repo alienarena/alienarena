@@ -152,7 +152,9 @@ void SpawnMinderaser(edict_t *ent)
 			continue;
 		safe_centerprintf(cl_ent, "A Mind Eraser has spawned!\n");
 	}
+
 	//to do - play level wide klaxxon 
+	gi.sound( &g_edicts[1], CHAN_AUTO, gi.soundindex( "misc/minderaser.wav" ), 1, ATTN_NONE, 0 );
 
 	minderaser = G_Spawn();
 	VectorCopy(ent->s.origin, minderaser->s.origin);
