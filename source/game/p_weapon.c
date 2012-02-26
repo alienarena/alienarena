@@ -159,9 +159,8 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		//if ME, make sure original weapon gets respawned
 		if(!strcmp(ent->classname, "weapon_minderaser"))
 		{
-			mindEraserTime = level.time;
-			if(replaced_weapon != NULL)
-				SetRespawn(replaced_weapon, 5);
+			if(ent->replaced_weapon != NULL)
+				SetRespawn(ent->replaced_weapon, 5);
 		}
 
 		if (! (ent->spawnflags & DROPPED_PLAYER_ITEM) )

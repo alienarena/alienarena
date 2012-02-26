@@ -140,7 +140,6 @@ static void drop_make_touchable (edict_t *ent)
 }
 
 float mindEraserTime;
-edict_t *replaced_weapon;
 void SpawnMinderaser(edict_t *ent)
 {
 	edict_t *minderaser, *cl_ent;
@@ -173,7 +172,7 @@ void SpawnMinderaser(edict_t *ent)
 	minderaser->owner = NULL;
 
 	SetRespawn (ent, 1000000); //huge delay until ME is picked up from pad.			
-	replaced_weapon = ent; //remember this entity
+	minderaser->replaced_weapon = ent; //remember this entity
 
 	mindEraserTime = level.time;
 }
