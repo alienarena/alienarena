@@ -733,7 +733,6 @@ extern	field_t fields[];
 extern	gitem_t	itemlist[];
 
 //mind eraser globals
-extern edict_t *replaced_weapon;
 extern float mindEraserTime;
 
 //
@@ -1489,6 +1488,8 @@ struct edict_s
 	monsterinfo_t	monsterinfo;
 
 	edict_t		*flashlight;
+	
+	edict_t		*replaced_weapon;
 
 	int			dmteam;
 	int			teamset;
