@@ -1087,6 +1087,15 @@ maps/meshes/redblob
 		glow
 	}
 }
+maps/meshes/greenblob
+{
+	{
+		map maps/meshes/redblob_normal.jpg
+		normalmap
+		map2 maps/meshes/greenblob_fx.tga
+		glow
+	}
+}
 maps/meshes/gothic/blade
 {
 	{
@@ -1113,5 +1122,32 @@ maps/meshes/gothic/meat3
 	{
 		map maps/meshes/gothic/meat3_normal.jpg
 		normalmap
+	}
+}
+maps/meshes/urban/orangelantern
+{
+	{
+		map maps/meshes/urban/lantern_normal.jpg
+		normalmap
+		map2 maps/meshes/urban/orangelantern_fx.tga
+		glow
+	}
+}
+maps/meshes/urban/bluelantern
+{
+	{
+		map maps/meshes/urban/lantern_normal.jpg
+		normalmap
+		map2 maps/meshes/urban/bluelantern_fx.tga
+		glow
+	}
+}
+maps/meshes/urban/yellowlantern
+{
+	{
+		map maps/meshes/urban/lantern_normal.jpg
+		normalmap
+		map2 maps/meshes/urban/yellowlantern_fx.tga
+		glow
 	}
 }

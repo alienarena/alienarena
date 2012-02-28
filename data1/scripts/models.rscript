@@ -592,3 +592,39 @@ maps/meshes/redblob
 		nolightmap
 	}
 }
+maps/meshes/urban/orangelantern
+{
+	{
+		map maps/meshes/urban/orangelantern.tga
+	}
+	{
+		map maps/meshes/urban/orangelantern_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
+maps/meshes/urban/bluelantern
+{
+	{
+		map maps/meshes/urban/bluelantern.tga
+	}
+	{
+		map maps/meshes/urban/bluelantern_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
+maps/meshes/urban/yellowlantern
+{
+	{
+		map maps/meshes/urban/yellowlantern.tga
+	}
+	{
+		map maps/meshes/urban/yellowlantern_fx.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 0 1 1
+		nolightmap
+	}
+}
