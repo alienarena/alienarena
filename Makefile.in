@@ -752,6 +752,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-impact.txt \
 	data1/levelshots/dm-invasion.jpg \
 	data1/levelshots/dm-invasion.txt \
+	data1/levelshots/dm-leviathan2k12.jpg \
+	data1/levelshots/dm-leviathan2k12.txt \
 	data1/levelshots/dm-leviathan2k8.jpg \
 	data1/levelshots/dm-leviathan2k8.txt \
 	data1/levelshots/dm-liberation.jpg \
