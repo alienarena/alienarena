@@ -1205,11 +1205,13 @@ void SP_func_door (edict_t *ent)
 
 	ent->moveinfo.state = STATE_BOTTOM;
 
-    if (!ent->health || ent->health > 8)
+    if (!ent->targetname && (!ent->health || ent->health > 8))
         ent->health = 1;
-	ent->takedamage = DAMAGE_YES;
-	ent->die = door_killed;
-	ent->max_health = ent->health;
+    if (ent->health) {
+	    ent->takedamage = DAMAGE_YES;
+	    ent->die = door_killed;
+	    ent->max_health = ent->health;
+	}
 	if (ent->targetname && ent->message)
 	{
 		gi.soundindex ("misc/talk.wav");
@@ -1237,7 +1239,10 @@ void SP_func_door (edict_t *ent)
 	gi.linkentity (ent);
 
 	ent->nextthink = level.time + FRAMETIME;
-	ent->think = Think_SpawnDoorTrigger;
+	if (ent->targetname)
+	    ent->think = Think_CalcMoveSpeed;
+	else
+	    ent->think = Think_SpawnDoorTrigger;
 }
 
 
