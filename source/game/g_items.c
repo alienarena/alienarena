@@ -429,6 +429,7 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboo
 {
 	int			index;
 	int			max, base;
+	gitem_t     *failedswitch;
 
 	if (!ent->client)
 		return false;
@@ -487,6 +488,12 @@ qboolean Add_Ammo (edict_t *ent, gitem_t *item, int count, qboolean weapon, qboo
 
 	if (ent->client->pers.inventory[index] > max)
 		ent->client->pers.inventory[index] = max;
+    
+    failedswitch = ent->client->pers.lastfailedswitch;
+    if (failedswitch && failedswitch->ammo && 
+        (FindItem(failedswitch->ammo) == item) && 
+        (level.framenum - ent->client->pers.failedswitch_framenum) < 5)
+		ent->client->newweapon = failedswitch;
 
 	return true;
 }
