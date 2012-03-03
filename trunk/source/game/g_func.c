@@ -1237,10 +1237,7 @@ void SP_func_door (edict_t *ent)
 	gi.linkentity (ent);
 
 	ent->nextthink = level.time + FRAMETIME;
-	if (ent->health || ent->targetname)
-		ent->think = Think_CalcMoveSpeed;
-	else
-		ent->think = Think_SpawnDoorTrigger;
+	ent->think = Think_SpawnDoorTrigger;
 }
 
 
