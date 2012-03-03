@@ -1205,13 +1205,12 @@ void SP_func_door (edict_t *ent)
 
 	ent->moveinfo.state = STATE_BOTTOM;
 
-	if (ent->health)
-	{
-		ent->takedamage = DAMAGE_YES;
-		ent->die = door_killed;
-		ent->max_health = ent->health;
-	}
-	else if (ent->targetname && ent->message)
+    if (!ent->health || ent->health > 8)
+        ent->health = 1;
+	ent->takedamage = DAMAGE_YES;
+	ent->die = door_killed;
+	ent->max_health = ent->health;
+	if (ent->targetname && ent->message)
 	{
 		gi.soundindex ("misc/talk.wav");
 		ent->touch = door_touch;
