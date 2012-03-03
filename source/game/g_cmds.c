@@ -423,6 +423,10 @@ void Cmd_Use_f (edict_t *ent)
 	if (!ent->client->pers.inventory[index])
 	{
 		safe_cprintf (ent, PRINT_HIGH, "Out of item: %s\n", s);
+		if (it->flags & IT_WEAPON) {
+		    ent->client->pers.lastfailedswitch = it;
+		    ent->client->pers.failedswitch_framenum = level.framenum;
+		}
 		return;
 	}
 

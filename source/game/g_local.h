@@ -1083,6 +1083,8 @@ typedef struct
 
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;
+	gitem_t     *lastfailedswitch;
+	float       failedswitch_framenum;
 
 	int			game_helpchanged;
 	int			helpchanged;

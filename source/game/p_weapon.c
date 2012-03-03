@@ -184,6 +184,10 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 		(other->client->pers.inventory[index] == 1) &&
 		( !deathmatch->value || other->client->pers.weapon == FindItem("blaster") ) )
 		other->client->newweapon = ent->item;
+	
+	if (other->client->pers.lastfailedswitch == ent->item &&
+	    (level.framenum - other->client->pers.failedswitch_framenum) < 5)
+	    other->client->newweapon = ent->item;
 
 	return true;
 }
@@ -595,6 +599,7 @@ void Weapon_Generic (edict_t *ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 						ent->s.frame = FRAME_attack1-1;
 						ent->client->anim_end = FRAME_attack8;
 					}
+
 				}
 			}
 			else
