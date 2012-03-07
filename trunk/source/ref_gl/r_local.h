@@ -279,6 +279,7 @@ extern float VLight_GetLightValue ( vec3_t normal, vec3_t dir, float apitch, flo
 //BSP 
 extern GLuint normalisationCubeMap;
 extern image_t *r_droplets;
+extern image_t *r_droplets_nm;
 extern image_t *r_blooddroplets;
 extern image_t *r_blooddroplets_nm;
 extern void BSP_DrawTexturelessPoly (msurface_t *fa);
