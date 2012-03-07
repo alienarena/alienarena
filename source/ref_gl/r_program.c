@@ -534,8 +534,8 @@ static char bsp_fragment_program[] =
 "		else\n"
 "		{\n"
 "			//used for water effect only\n"
-"			displacement4.x = gl_TexCoord[0].s + noiseVec.x + noiseVec2.x + TexCoords.x;\n"
-"			displacement4.y = gl_TexCoord[0].s + noiseVec.y + noiseVec2.y + TexCoords.y;\n"
+"			displacement4.x = noiseVec.x + noiseVec2.x;\n"
+"			displacement4.y = noiseVec.y + noiseVec2.y;\n"
 "		}\n"
 
 "		displacement.x = gl_TexCoord[3].s + noiseVec.x + TexCoords.x;\n"
