@@ -203,6 +203,7 @@ cvar_t  *sv_custombots;
 
 //unlagged
 cvar_t	*g_antilag;
+cvar_t	*g_antilag_latency;
 cvar_t	*g_antilagdebug;
 
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint);
