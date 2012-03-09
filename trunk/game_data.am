@@ -81,6 +81,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-deimos2k9.tmp \
 	botinfo/dm-dismal2k11.tmp \
 	botinfo/dm-downfall.tmp \
+	botinfo/dm-dynamo2k12.tmp \
 	botinfo/dm-dynamo2k8.tmp \
 	botinfo/dm-eternal.tmp \
 	botinfo/dm-europa2k8.tmp \
@@ -137,6 +138,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-deimos2k9.nod \
 	botinfo/nav/dm-dismal2k11.nod \
 	botinfo/nav/dm-downfall.nod \
+	botinfo/nav/dm-dynamo2k12.nod \
 	botinfo/nav/dm-dynamo2k8.nod \
 	botinfo/nav/dm-eternal.nod \
 	botinfo/nav/dm-europa2k8.nod \
@@ -429,6 +431,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/dm-dismal2k11.txt \
 	data1/levelshots/dm-downfall.jpg \
 	data1/levelshots/dm-downfall.txt \
+	data1/levelshots/dm-dynamo2k12.jpg \
+	data1/levelshots/dm-dynamo2k12.txt \
 	data1/levelshots/dm-dynamo2k8.jpg \
 	data1/levelshots/dm-dynamo2k8.txt \
 	data1/levelshots/dm-eternal.jpg \
@@ -520,6 +524,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-deimos2k9.bsp \
 	data1/maps/dm-dismal2k11.bsp \
 	data1/maps/dm-downfall.bsp \
+	data1/maps/dm-dynamo2k12.bsp \
 	data1/maps/dm-dynamo2k8.bsp \
 	data1/maps/dm-eternal.bsp \
 	data1/maps/dm-europa2k8.bsp \
@@ -810,6 +815,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/urban/yellowlantern_fx.tga \
 	data1/maps/meshes/urban/yellowlantern.jpg \
 	data1/maps/meshes/urban/yellowlantern.md2 \
+	data1/maps/meshes/weaponpad_fx.tga \
 	data1/maps/meshes/weaponpad.md2 \
 	data1/maps/meshes/weaponpad_normal.tga \
 	data1/maps/meshes/weaponpad.tga \
@@ -901,6 +907,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-dismal2k11.mus \
 	data1/maps/scripts/dm-downfall.fog \
 	data1/maps/scripts/dm-downfall.mus \
+	data1/maps/scripts/dm-dynamo2k12.fog \
+	data1/maps/scripts/dm-dynamo2k12.mus \
 	data1/maps/scripts/dm-dynamo2k8.fog \
 	data1/maps/scripts/dm-dynamo2k8.mus \
 	data1/maps/scripts/dm-eternal.fog \
@@ -1898,6 +1906,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-deimos2k9.rscript \
 	data1/scripts/maps/dm-dismal2k11.rscript \
 	data1/scripts/maps/dm-downfall.rscript \
+	data1/scripts/maps/dm-dynamo2k12.rscript \
 	data1/scripts/maps/dm-dynamo2k8.rscript \
 	data1/scripts/maps/dm-eternal.rscript \
 	data1/scripts/maps/dm-europa2k8.rscript \
