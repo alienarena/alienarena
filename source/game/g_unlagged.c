@@ -246,7 +246,8 @@ void G_DoTimeShiftFor( edict_t *ent ) {
 	}
 
 	// do the full lag compensation
-	time = ent->client->attackTime - ent->client->ping; 
+	time = ent->client->attackTime - ent->client->ping - g_antilag_latency->integer; 
+	//100 ms is our "built-in" lag due to the 10fps server frame
 
 	G_TimeShiftAllClients( time, ent );
 }
