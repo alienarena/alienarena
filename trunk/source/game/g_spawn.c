@@ -229,7 +229,7 @@ void ED_CallSpawn (edict_t *ent)
 			ent->classname = "weapon_bfg"; //hack to remove old weapons
 		if(!Q_strcasecmp(ent->classname, "weapon_minderaser"))
 			continue; //never place one of these traditionally
-				
+
 		if (!strcmp(item->classname, ent->classname))
 		{	// found it
 			SpawnItem (ent, item);
@@ -1058,11 +1058,10 @@ void SP_worldspawn (edict_t *ent)
 		gi.modelindex ("models/weapons/v_minderaser/tris.md2");
 		gi.modelindex ("models/weapons/g_minderaser/tris.md2");
 		gi.modelindex ("models/objects/spud/tris.md2");
-
-		gi.modelindex ("models/weapons/v_blaster/tris.md2");
+		gi.modelindex ("models/weapons/v_blast/tris.md2");
 		gi.modelindex ("models/weapons/v_violator/tris.md2");
 	}
-	
+
 	//these are needed for custom player models for when they enter a game
 	gi.modelindex ("#w_blaster.md2");
 	gi.modelindex ("#w_shotgun.md2");
