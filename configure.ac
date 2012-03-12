@@ -591,7 +591,7 @@ AS_IF([test "x$hide_status" = "xno"],[
 		AS_ECHO(["   Debugging symbols: ........ ${debug_syms}"])
 		AS_ECHO(["   IRC protocol dump: ........ ${irc_debug}"])
 		AS_ECHO(["   Buffer debugging: ......... ${buffer_debug}"])
-		AS_ECHO(["   Paranoid message checks: .. ${buffer_debug}"])
+		AS_ECHO(["   Paranoid message checks: .. ${paranoid_io}"])
 		AS_ECHO(["   Assert statements: ........ ${assert_stmts}"])
 		AS_ECHO(["   ODE debug: ................ ${ode_debug}"])
 	])

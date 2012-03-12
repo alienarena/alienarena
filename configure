@@ -10066,7 +10066,7 @@ fi
 		$as_echo "   Debugging symbols: ........ ${debug_syms}"
 		$as_echo "   IRC protocol dump: ........ ${irc_debug}"
 		$as_echo "   Buffer debugging: ......... ${buffer_debug}"
-		$as_echo "   Paranoid message checks: .. ${buffer_debug}"
+		$as_echo "   Paranoid message checks: .. ${paranoid_io}"
 		$as_echo "   Assert statements: ........ ${assert_stmts}"
 		$as_echo "   ODE debug: ................ ${ode_debug}"
 
