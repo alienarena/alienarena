@@ -1631,7 +1631,6 @@ extern qboolean StringToFilter (char *s, ipfilter_t *f);
 
 //unlagged
 extern	cvar_t	*g_antilag;
-extern	cvar_t	*g_antilag_latency;
 extern  cvar_t	*g_antilagdebug;
 
 // ACEBOT_ADD
