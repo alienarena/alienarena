@@ -337,7 +337,7 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 				strcpy( a_string, COM_Parse( &s ) );
 				mod->ragdoll.hasHelmet = atoi(a_string);
 			}
-			else 
+			else
 			{
 				Com_Printf("IQM_ReadRagDollFile: read fail\n");
 			}
@@ -345,7 +345,7 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 		}
 		fclose( fp );
 	}
-	
+
 	return true;
 }
 
@@ -357,8 +357,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	float *vposition = NULL, *vtexcoord = NULL, *vnormal = NULL, *vtangent = NULL;
 	unsigned char *vblendweights = NULL;
 	unsigned char *pbase;
-	iqmjoint_t *joint;
-	iqmjoint2_t *joint2;
+	iqmjoint_t *joint = NULL;
+	iqmjoint2_t *joint2 = NULL;
 	matrix3x4_t	*inversebaseframe;
 	iqmpose_t *poses;
 	iqmpose2_t *poses2;
@@ -505,7 +505,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			}
 		}
 	}
-	else 
+	else
 	{
 		joint2 = (iqmjoint2_t *) (pbase + header->ofs_joints);
 		mod->joints2 = (iqmjoint2_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint2_t));
@@ -519,7 +519,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 				mod->joints2[i].rotation[j] = LittleFloat(joint2[i].rotation[j]);
 				mod->joints2[i].scale[j] = LittleFloat(joint2[i].scale[j]);
 			}
-			mod->joints2[i].rotation[3] = LittleFloat(joint2[i].rotation[3]);	
+			mod->joints2[i].rotation[3] = LittleFloat(joint2[i].rotation[3]);
 		}
 	}
 	//these don't need to be a part of mod - remember to free them
@@ -532,7 +532,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		{
 			vec3_t rot;
 			vec4_t q_rot;
-			iqmjoint_t j = joint[i];
+			iqmjoint_t j = mod->joints[i];
 
 			//first need to make a vec4 quat from our rotation vec
 			VectorSet(rot, j.rotation[0], j.rotation[1], j.rotation[2]);
@@ -555,7 +555,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	{
 		for(i = 0; i < (int)header->num_joints; i++)
 		{
-			iqmjoint2_t j = joint2[i];
+			iqmjoint2_t j = mod->joints2[i];
 
 			Matrix3x4_FromQuatAndVectors(&mod->baseframe[i], j.rotation, j.origin, j.scale);
 			Matrix3x4_Invert(&inversebaseframe[i], mod->baseframe[i]);
@@ -1000,7 +1000,7 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 		mtangent_t *dsttan = (mtangent_t *)currentmodel->animatetangent;
 
 		const unsigned char *index = currentmodel->blendindexes;
-			
+
 		float *weight = currentmodel->blendweights;
 
 		for(i = 0; i < currentmodel->numvertexes; i++)
@@ -1018,11 +1018,11 @@ void IQM_AnimateFrame(float curframe, int nextframe)
 
 			Matrix3x4_Scale(&mat, currentmodel->outframe[index[0]], weight[0]);
 
-			for(j = 1; j < 4 && weight[j]; j++) 
+			for(j = 1; j < 4 && weight[j]; j++)
 			{
 				Matrix3x4_ScaleAdd (&mat, &currentmodel->outframe[index[j]], weight[j], &mat);
 			}
-			
+
 			// Transform attributes by the blended matrix.
 			// Position uses the full 3x4 transformation matrix.
 			// Normals and tangents only use the 3x3 rotation part
@@ -1136,7 +1136,7 @@ void IQM_AnimateRagdoll(int RagDollID)
 
 			Matrix3x4_Scale(&mat, RagDoll[RagDollID].ragDollMesh->outframe[index[0]], weight[0]);
 
-			for(j = 1; j < 4 && weight[j]; j++) 
+			for(j = 1; j < 4 && weight[j]; j++)
 			{
 				Matrix3x4_ScaleAdd (&mat, &RagDoll[RagDollID].ragDollMesh->outframe[index[j]], weight[j], &mat);
 			}
@@ -1290,7 +1290,7 @@ void IQM_DrawFrame(int skinnum)
 			GL_Bind(r_shelltexture2->texnum);
 			R_InitVArrays (VERT_COLOURED_TEXTURED);
 		}
-		
+
 		if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value))
 			shellscale = 0.4;
 		else
@@ -1541,7 +1541,7 @@ void IQM_DrawFrame(int skinnum)
 						lightVal[i] = shadelight[i]/2; //never go completely black
 					lightVal[i] *= 5;
 					lightVal[i] += dynFactor;
-					if(r_newrefdef.rdflags & RDF_NOWORLDMODEL) 
+					if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
 					{
 						if(lightVal[i] > 1.5)
 							lightVal[i] = 1.5;
@@ -1669,10 +1669,10 @@ void IQM_DrawFrame(int skinnum)
 							VArray[7] = blue;
 							VArray[8] = alpha;
 						}
-						
+
 						VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
 					}
-						
+
 					va++;
 				}
 			}
@@ -2138,10 +2138,10 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 							VArray[7] = blue;
 							VArray[8] = alpha;
 						}
-						
+
 						VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
 					}
-					
+
 					va++;
 				}
 			}
