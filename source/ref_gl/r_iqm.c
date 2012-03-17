@@ -352,7 +352,7 @@ qboolean IQM_ReadRagDollFile(char ragdoll_file[MAX_OSPATH], model_t *mod)
 qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 {
 	iqmheader_t *header;
-	int i, j;
+	int i, j, k;
 	const int *inelements;
 	float *vposition = NULL, *vtexcoord = NULL, *vnormal = NULL, *vtangent = NULL;
 	unsigned char *vblendweights = NULL;
@@ -410,6 +410,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	header->num_frames = LittleLong(header->num_frames);
 	header->num_framechannels = LittleLong(header->num_framechannels);
 	header->ofs_frames = LittleLong(header->ofs_frames);
+	header->ofs_bounds = LittleLong(header->ofs_bounds);
 	header->num_comment = LittleLong(header->num_comment);
 	header->ofs_comment = LittleLong(header->ofs_comment);
 	header->num_extensions = LittleLong(header->num_extensions);
@@ -560,6 +561,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 			Matrix3x4_FromQuatAndVectors(&mod->baseframe[i], j.rotation, j.origin, j.scale);
 			Matrix3x4_Invert(&inversebaseframe[i], mod->baseframe[i]);
 
+			assert(j.parent < (int)header->num_joints);
+
 			if(j.parent >= 0)
 			{
 				matrix3x4_t temp;
@@ -586,15 +589,23 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 				vec4_t q_rot;
 				matrix3x4_t m, temp;
 
-				translate[0] = p.channeloffset[0]; if(p.channelmask&0x01) translate[0] += *framedata++ * p.channelscale[0];
-				translate[1] = p.channeloffset[1]; if(p.channelmask&0x02) translate[1] += *framedata++ * p.channelscale[1];
-				translate[2] = p.channeloffset[2]; if(p.channelmask&0x04) translate[2] += *framedata++ * p.channelscale[2];
-				rotate[0] = p.channeloffset[3]; if(p.channelmask&0x08) rotate[0] += *framedata++ * p.channelscale[3];
-				rotate[1] = p.channeloffset[4]; if(p.channelmask&0x10) rotate[1] += *framedata++ * p.channelscale[4];
-				rotate[2] = p.channeloffset[5]; if(p.channelmask&0x20) rotate[2] += *framedata++ * p.channelscale[5];
-				scale[0] = p.channeloffset[6]; if(p.channelmask&0x40) scale[0] += *framedata++ * p.channelscale[6];
-				scale[1] = p.channeloffset[7]; if(p.channelmask&0x80) scale[1] += *framedata++ * p.channelscale[7];
-				scale[2] = p.channeloffset[8]; if(p.channelmask&0x100) scale[2] += *framedata++ * p.channelscale[8];
+				p.parent = LittleLong(p.parent);
+                                p.channelmask = LittleLong(p.channelmask);
+                                for(k = 0; k < 9; k++)
+                                {
+                                        p.channeloffset[k] = LittleFloat(p.channeloffset[k]);
+                                        p.channelscale[k] = LittleFloat(p.channelscale[k]);
+                                }
+
+				translate[0] = p.channeloffset[0]; if(p.channelmask&0x01) translate[0] += (unsigned short)LittleShort(*framedata++) * p.channelscale[0];
+				translate[1] = p.channeloffset[1]; if(p.channelmask&0x02) translate[1] += (unsigned short)LittleShort(*framedata++) * p.channelscale[1];
+				translate[2] = p.channeloffset[2]; if(p.channelmask&0x04) translate[2] += (unsigned short)LittleShort(*framedata++) * p.channelscale[2];
+				rotate[0] = p.channeloffset[3]; if(p.channelmask&0x08) rotate[0] += (unsigned short)LittleShort(*framedata++) * p.channelscale[3];
+				rotate[1] = p.channeloffset[4]; if(p.channelmask&0x10) rotate[1] += (unsigned short)LittleShort(*framedata++) * p.channelscale[4];
+				rotate[2] = p.channeloffset[5]; if(p.channelmask&0x20) rotate[2] += (unsigned short)LittleShort(*framedata++) * p.channelscale[5];
+				scale[0] = p.channeloffset[6]; if(p.channelmask&0x40) scale[0] += (unsigned short)LittleShort(*framedata++) * p.channelscale[6];
+				scale[1] = p.channeloffset[7]; if(p.channelmask&0x80) scale[1] += (unsigned short)LittleShort(*framedata++) * p.channelscale[7];
+				scale[2] = p.channeloffset[8]; if(p.channelmask&0x100) scale[2] += (unsigned short)LittleShort(*framedata++) * p.channelscale[8];
 				// Concatenate each pose with the inverse base pose to avoid doing this at animation time.
 				// If the joint has a parent, then it needs to be pre-concatenated with its parent's base pose.
 				// Thus it all negates at animation time like so:
@@ -631,16 +642,24 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 				vec4_t rotate;
 				matrix3x4_t m, temp;
 
-				translate[0] = p.channeloffset[0]; if(p.channelmask&0x01) translate[0] += *framedata++ * p.channelscale[0];
-				translate[1] = p.channeloffset[1]; if(p.channelmask&0x02) translate[1] += *framedata++ * p.channelscale[1];
-				translate[2] = p.channeloffset[2]; if(p.channelmask&0x04) translate[2] += *framedata++ * p.channelscale[2];
-				rotate[0] = p.channeloffset[3]; if(p.channelmask&0x08) rotate[0] += *framedata++ * p.channelscale[3];
-				rotate[1] = p.channeloffset[4]; if(p.channelmask&0x10) rotate[1] += *framedata++ * p.channelscale[4];
-				rotate[2] = p.channeloffset[5]; if(p.channelmask&0x20) rotate[2] += *framedata++ * p.channelscale[5];
-				rotate[3] = p.channeloffset[6]; if(p.channelmask&0x40) rotate[3] += *framedata++ * p.channelscale[6];
-				scale[0] = p.channeloffset[7]; if(p.channelmask&0x80) scale[0] += *framedata++ * p.channelscale[7];
-				scale[1] = p.channeloffset[8]; if(p.channelmask&0x100) scale[1] += *framedata++ * p.channelscale[8];
-				scale[2] = p.channeloffset[9]; if(p.channelmask&0x200) scale[2] += *framedata++ * p.channelscale[9];
+				p.parent = LittleLong(p.parent);
+				p.channelmask = LittleLong(p.channelmask);
+				for(k = 0; k < 10; k++)
+				{
+					p.channeloffset[k] = LittleFloat(p.channeloffset[k]);
+					p.channelscale[k] = LittleFloat(p.channelscale[k]);
+				}
+
+				translate[0] = p.channeloffset[0]; if(p.channelmask&0x01) translate[0] += (unsigned short)LittleShort(*framedata++) * p.channelscale[0];
+				translate[1] = p.channeloffset[1]; if(p.channelmask&0x02) translate[1] += (unsigned short)LittleShort(*framedata++) * p.channelscale[1];
+				translate[2] = p.channeloffset[2]; if(p.channelmask&0x04) translate[2] += (unsigned short)LittleShort(*framedata++) * p.channelscale[2];
+				rotate[0] = p.channeloffset[3]; if(p.channelmask&0x08) rotate[0] += (unsigned short)LittleShort(*framedata++) * p.channelscale[3];
+				rotate[1] = p.channeloffset[4]; if(p.channelmask&0x10) rotate[1] += (unsigned short)LittleShort(*framedata++) * p.channelscale[4];
+				rotate[2] = p.channeloffset[5]; if(p.channelmask&0x20) rotate[2] += (unsigned short)LittleShort(*framedata++) * p.channelscale[5];
+				rotate[3] = p.channeloffset[6]; if(p.channelmask&0x40) rotate[3] += (unsigned short)LittleShort(*framedata++) * p.channelscale[6];
+				scale[0] = p.channeloffset[7]; if(p.channelmask&0x80) scale[0] += (unsigned short)LittleShort(*framedata++) * p.channelscale[7];
+				scale[1] = p.channeloffset[8]; if(p.channelmask&0x100) scale[1] += (unsigned short)LittleShort(*framedata++) * p.channelscale[8];
+				scale[2] = p.channeloffset[9]; if(p.channelmask&0x200) scale[2] += (unsigned short)LittleShort(*framedata++) * p.channelscale[9];
 				// Concatenate each pose with the inverse base pose to avoid doing this at animation time.
 				// If the joint has a parent, then it needs to be pre-concatenated with its parent's base pose.
 				// Thus it all negates at animation time like so:
@@ -758,8 +777,8 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 
 	for (i = 0;i < (int)header->num_vertexes;i++)
 	{
-		mod->st[i].s = vtexcoord[0];
-		mod->st[i].t = vtexcoord[1];
+		mod->st[i].s = LittleFloat(vtexcoord[0]);
+		mod->st[i].t = LittleFloat(vtexcoord[1]);
 
 		vtexcoord+=2;
 
