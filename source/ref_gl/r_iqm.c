@@ -490,7 +490,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	mod->num_triangles = header->num_triangles;
 
 	// load the joints
-	if(LittleLong(header->version) == 1)
+	if( header->version == 1 )
 	{
 		joint = (iqmjoint_t *) (pbase + header->ofs_joints);
 		mod->joints = (iqmjoint_t*)Hunk_Alloc (header->num_joints * sizeof(iqmjoint_t));
@@ -527,7 +527,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 	mod->baseframe = (matrix3x4_t*)Hunk_Alloc (header->num_joints * sizeof(matrix3x4_t));
 	inversebaseframe = (matrix3x4_t*)malloc (header->num_joints * sizeof(matrix3x4_t));
 
-	if(LittleLong(header->version) == 1)
+	if( header->version == 1 )
 	{
 		for(i = 0; i < (int)header->num_joints; i++)
 		{
@@ -574,7 +574,7 @@ qboolean Mod_INTERQUAKEMODEL_Load(model_t *mod, void *buffer)
 		}
 	}
 
-	if(LittleLong(header->version == 1))
+	if( header->version == 1 )
 	{
 		poses = (iqmpose_t *) (pbase + header->ofs_poses);
 		mod->frames = (matrix3x4_t*)Hunk_Alloc (header->num_frames * header->num_poses * sizeof(matrix3x4_t));

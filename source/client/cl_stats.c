@@ -42,7 +42,7 @@ extern cvar_t *stats_password;
 extern cvar_t *pw_hashed;
 
 static char szVerificationString[64];
-static char *cpr; // just for unused result warnings
+static char *cpr; // mostly for unused result warnings
 
 static FILE* statsdb_open( const char* mode )
 {
@@ -100,7 +100,7 @@ void STATS_getStatsDB( void )
 PLAYERSTATS getPlayerRanking ( PLAYERSTATS player )
 {
 	FILE* file;
-	char name[32], points[32], frags[32], totalfrags[32], time[16], totaltime[16], ip[32], poll[16], remote_address[21];
+	char name[34], points[32], frags[32], totalfrags[32], time[16], totaltime[16], ip[32], poll[16], remote_address[21];
 	int foundplayer = false;
 
 	//open file,
@@ -111,9 +111,17 @@ PLAYERSTATS getPlayerRanking ( PLAYERSTATS player )
 		//parse it, and compare to player name
 		while(player.ranking < 1000) {
 
-			//name
+			//name. upto 31 chars total, 15 are printable.
+			//  fgets needs at least 33 chars. 31 + newline + terminating nul
 			cpr = fgets(name, sizeof(name), file);
-			name[strlen(name) - 1] = 0; //truncate garbage byte
+			if ( cpr == NULL )
+			{ // end-of-file
+				break;
+			}
+			if ( name[strlen(name) - 1] == '\n' )
+			{
+				name[strlen(name) - 1] = 0; //truncate garbage byte
+			}
 			//remote address
 			cpr = fgets(remote_address, sizeof(remote_address), file);
 			//points
@@ -146,6 +154,7 @@ PLAYERSTATS getPlayerRanking ( PLAYERSTATS player )
 	}
 
 	if(!foundplayer) {
+		player.ranking = 1000;
 		player.totalfrags = 0;
 		player.totaltime = 1;
 	}
