@@ -268,6 +268,13 @@ long ovbfr_tell( void *datasource )
 // function pointers for Ogg Vorbis file-like io
 ov_callbacks ovbfr_callbacks = { ovbfr_read, ovbfr_seek, NULL, ovbfr_tell };
 
+/* return 0 for little endian, 1 for big endian */
+int  bigendian( void )
+{
+	long one = 1;
+	return !(*((char*)(&one)));
+}
+
 /*
  ============
  ReadVorbisFile
@@ -287,6 +294,7 @@ qboolean ReadVorbisFile( const char *name, byte *pdata, int filelength,
 	size_t bytes_remaining;
 	long read_result;
 	int bitstream;
+	int bigendianp;
 
 	Com_DPrintf("ReadVorbisFile: %s\n", name );
 
@@ -329,9 +337,10 @@ qboolean ReadVorbisFile( const char *name, byte *pdata, int filelength,
 		return false;
 	}
 
+	bigendianp = bigendian();
 	do
-	{ // decode Ogg Vorbis data to little-endian, 16-bit, signed PCM data
-		read_result = ov_read( &vf, pdest, bytes_remaining, 0, 2, 1, &bitstream );
+	{ // decode Ogg Vorbis data to host endian, 16-bit, signed PCM data
+		read_result = ov_read( &vf, pdest, bytes_remaining, bigendianp, 2, 1, &bitstream );
 		if ( read_result > 0 )
 		{
 			bytes_remaining -= (size_t)read_result;
