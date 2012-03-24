@@ -45,6 +45,13 @@ typedef struct
 	int dataofs; // chunk starts this many bytes from file start
 } pcminfo_t;
 
+/* return 0 for little endian, 1 for big endian */
+int  bigendian( void )
+{
+	long one = 1;
+	return !(*((char*)(&one)));
+}
+
 /*
  ==
  .WAV file parsing
@@ -181,6 +188,15 @@ qboolean ReadWavFile( const char *name, byte *wav, int wavlength,
 	info->samples = samples;
 	info->dataofs = data_p - wav;
 
+	if ( (info->width == 2) && bigendian() )
+	{ /* for big-endian byte swap little-endian 16-bit samples */
+		short *psample = (short*)data_p;
+		while ( samples-- )
+		{
+			*psample++ = GetLittleShort(); /* note: increments data_p */
+		}
+	}
+
 	return true;
 }
 
@@ -268,12 +284,6 @@ long ovbfr_tell( void *datasource )
 // function pointers for Ogg Vorbis file-like io
 ov_callbacks ovbfr_callbacks = { ovbfr_read, ovbfr_seek, NULL, ovbfr_tell };
 
-/* return 0 for little endian, 1 for big endian */
-int  bigendian( void )
-{
-	long one = 1;
-	return !(*((char*)(&one)));
-}
 
 /*
  ============
