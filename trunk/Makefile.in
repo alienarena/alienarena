@@ -566,6 +566,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/bluelightning2.tga \
 	data1/gfx/bluelightning.tga \
 	data1/gfx/bluemartianfx.tga \
+	data1/gfx/blueoverlordfx.tga \
 	data1/gfx/bubbles.tga \
 	data1/gfx/caustics.tga \
 	data1/gfx/chrome2.tga \
@@ -582,6 +583,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/defaultenforcerfx.tga \
 	data1/gfx/defaultlaurenfx.tga \
 	data1/gfx/defaultmartianfx.tga \
+	data1/gfx/defaultoverlordfx.tga \
 	data1/gfx/defaultslashbotfx.tga \
 	data1/gfx/disruptorfx.tga \
 	data1/gfx/disruptormask.tga \
@@ -2110,6 +2112,81 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martianenforcer/w_violator.iqm \
 	data1/players/martianenforcer/w_violator.md2 \
 	data1/players/martianenforcer/w_violator.skin \
+	data1/players/martianoverlord/alien \
+	data1/players/martianoverlord/blue_i.jpg \
+	data1/players/martianoverlord/blue.jpg \
+	data1/players/martianoverlord/bump1.wav \
+	data1/players/martianoverlord/death1.wav \
+	data1/players/martianoverlord/death2.wav \
+	data1/players/martianoverlord/death3.wav \
+	data1/players/martianoverlord/death4.wav \
+	data1/players/martianoverlord/default_i.jpg \
+	data1/players/martianoverlord/default.jpg \
+	data1/players/martianoverlord/default_normal.tga \
+	data1/players/martianoverlord/drown1.wav \
+	data1/players/martianoverlord/fall1.wav \
+	data1/players/martianoverlord/fall2.wav \
+	data1/players/martianoverlord/gasp1.wav \
+	data1/players/martianoverlord/gasp2.wav \
+	data1/players/martianoverlord/gurp1.wav \
+	data1/players/martianoverlord/gurp2.wav \
+	data1/players/martianoverlord/helmet.iqm \
+	data1/players/martianoverlord/helmet.md2 \
+	data1/players/martianoverlord/jump1.wav \
+	data1/players/martianoverlord/lod1.iqm \
+	data1/players/martianoverlord/lod1.rgd \
+	data1/players/martianoverlord/lod2.iqm \
+	data1/players/martianoverlord/lod2.rgd \
+	data1/players/martianoverlord/pain100_1.wav \
+	data1/players/martianoverlord/pain100_2.wav \
+	data1/players/martianoverlord/pain25_1.wav \
+	data1/players/martianoverlord/pain25_2.wav \
+	data1/players/martianoverlord/pain50_1.wav \
+	data1/players/martianoverlord/pain50_2.wav \
+	data1/players/martianoverlord/pain75_1.wav \
+	data1/players/martianoverlord/pain75_2.wav \
+	data1/players/martianoverlord/red_i.jpg \
+	data1/players/martianoverlord/red.jpg \
+	data1/players/martianoverlord/tris.iqm \
+	data1/players/martianoverlord/tris.md2 \
+	data1/players/martianoverlord/tris.rgd \
+	data1/players/martianoverlord/w_bfg.iqm \
+	data1/players/martianoverlord/w_bfg.md2 \
+	data1/players/martianoverlord/w_bfg.skin \
+	data1/players/martianoverlord/w_blaster.iqm \
+	data1/players/martianoverlord/w_blaster.md2 \
+	data1/players/martianoverlord/w_blaster.skin \
+	data1/players/martianoverlord/w_chaingun.iqm \
+	data1/players/martianoverlord/w_chaingun.md2 \
+	data1/players/martianoverlord/w_chaingun.skin \
+	data1/players/martianoverlord/weapon.iqm \
+	data1/players/martianoverlord/weapon.jpg \
+	data1/players/martianoverlord/weapon.md2 \
+	data1/players/martianoverlord/weapon.skin \
+	data1/players/martianoverlord/w_hyperblaster.iqm \
+	data1/players/martianoverlord/w_hyperblaster.md2 \
+	data1/players/martianoverlord/w_hyperblaster.skin \
+	data1/players/martianoverlord/w_machinegun.iqm \
+	data1/players/martianoverlord/w_machinegun.md2 \
+	data1/players/martianoverlord/w_machinegun.skin \
+	data1/players/martianoverlord/w_minderaser.iqm \
+	data1/players/martianoverlord/w_minderaser.md2 \
+	data1/players/martianoverlord/w_minderaser.skin \
+	data1/players/martianoverlord/w_railgun.iqm \
+	data1/players/martianoverlord/w_railgun.md2 \
+	data1/players/martianoverlord/w_railgun.skin \
+	data1/players/martianoverlord/w_rlauncher.iqm \
+	data1/players/martianoverlord/w_rlauncher.md2 \
+	data1/players/martianoverlord/w_rlauncher.skin \
+	data1/players/martianoverlord/w_shotgun.iqm \
+	data1/players/martianoverlord/w_shotgun.md2 \
+	data1/players/martianoverlord/w_shotgun.skin \
+	data1/players/martianoverlord/w_sshotgun.iqm \
+	data1/players/martianoverlord/w_sshotgun.md2 \
+	data1/players/martianoverlord/w_sshotgun.skin \
+	data1/players/martianoverlord/w_violator.iqm \
+	data1/players/martianoverlord/w_violator.md2 \
+	data1/players/martianoverlord/w_violator.skin \
 	data1/players/slashbot/blue_i.jpg \
 	data1/players/slashbot/blue.jpg \
 	data1/players/slashbot/bump1.wav \
