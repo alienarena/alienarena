@@ -1095,6 +1095,13 @@ void Cmd_VoiceTaunt_f (edict_t *ent)
 
 			strcpy(name, ent->client->pers.netname);
 			info = Info_ValueForKey (ent->client->pers.userinfo, "skin");
+
+			if ( *info == '\0' )
+			{ /* could not find skin. probable programming error. */
+				gi.dprintf("Cmd_VoiceTaunt_f: skin not found in userinfo\n");
+				return;
+			}
+
 			info[96] = 0; //truncate to prevent bad people from harming the server
 
 			i = 0;

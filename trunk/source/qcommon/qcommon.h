@@ -576,7 +576,7 @@ typedef struct
 	byte	ip[4];
 	byte	ipx[10];
 
-	unsigned short	port;
+	unsigned short	port; /* network byte order (bigendian) */
 } netadr_t;
 
 void		NET_Init (void);
