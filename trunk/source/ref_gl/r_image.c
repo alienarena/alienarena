@@ -1706,6 +1706,7 @@ void	GL_InitImages (void)
 	R_InitMirrorTextures();//MIRRORS
 	R_InitDepthTextures();//DEPTH(SHADOWMAPS)
 	R_FB_InitTextures();//FULLSCREEN EFFECTS
+	R_SI_InitTextures();//SIMPLE ITEMS
 }
 
 /*

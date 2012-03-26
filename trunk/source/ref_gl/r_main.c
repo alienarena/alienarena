@@ -1065,9 +1065,11 @@ void R_RenderView (refdef_t *fd)
 		R_RenderFlares ();
 
 	R_DrawEntitiesOnList ();
-		
+			
 	R_DrawVegetationSurface ();
 
+	R_DrawSimpleItems ();
+	
 	R_CastShadow();
 
 	R_RenderAllRagdolls(); //move back ahead of r_castshadow when we figure out shadow jitter bug

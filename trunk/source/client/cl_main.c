@@ -89,6 +89,7 @@ cvar_t  *cl_showPlayerNames;
 cvar_t	*cl_playtaunts;
 cvar_t	*cl_centerprint;
 cvar_t	*cl_precachecustom;
+cvar_t	*cl_simpleitems;
 
 cvar_t	*cl_paindist;
 cvar_t	*cl_explosiondist;
@@ -1822,6 +1823,7 @@ void CL_InitLocal (void)
 	cl_playtaunts = Cvar_Get ("cl_playtaunts", "1", CVAR_ARCHIVE);
 	cl_centerprint = Cvar_Get ("cl_centerprint", "1", CVAR_ARCHIVE);
 	cl_precachecustom = Cvar_Get ("cl_precachecustom", "0", CVAR_ARCHIVE);
+	cl_simpleitems = Cvar_Get ("cl_simpleitems", "0", CVAR_ARCHIVE);
 
 	cl_paindist = Cvar_Get ("cl_paindist", "1", CVAR_ARCHIVE);
 	cl_explosiondist = Cvar_Get ("cl_explosiondist", "1", CVAR_ARCHIVE);

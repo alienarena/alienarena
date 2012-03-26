@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_FLARES      512
 #define MAX_GRASSES		2048
 #define MAX_BEAMS		128
+#define MAX_SIMPLEITEMS 256
 
 typedef struct
 {
@@ -70,6 +71,12 @@ typedef struct
 	int texnum;
 	char name[MAX_QPATH];
 } beam_t;
+
+typedef struct
+{
+	int type;
+	vec3_t origin;
+} simpleitem_t;
 
 #define SHELL_RED_COLOR		0xF2
 #define SHELL_GREEN_COLOR	0xD0

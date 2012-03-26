@@ -889,7 +889,7 @@ void G_SetClientEffects (edict_t *ent)
 		ent->s.effects |= EF_PENT;
 
 	if(ent->client->kill_streak >= 8)
-		ent->s.effects |= EF_FLIES;
+		ent->s.effects |= EF_BUBBLES;
 
 	//invisibility
 	if(ent->client->invis_framenum > level.framenum) {

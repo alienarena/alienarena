@@ -334,6 +334,14 @@ extern void Mod_AddVegetationSurface (msurface_t *surf, int texnum, vec3_t color
 extern void R_DrawVegetationSurface (void);
 extern void R_ClearGrasses(void);
 
+//Simple Items
+int r_numsimpleitems;
+simpleitem_t r_simpleitems[MAX_SIMPLEITEMS];
+extern void R_SI_InitTextures( void );
+extern void R_AddSimpleItem(int type, vec3_t origin);
+extern void R_DrawSimpleItems( void );
+extern void R_ClearSimpleItems( void );
+
 //Light beams/volumes
 int r_numbeams;
 extern int c_beams;

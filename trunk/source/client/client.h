@@ -275,6 +275,7 @@ extern  cvar_t	*cl_brass;
 extern  cvar_t	*cl_playtaunts;
 extern	cvar_t	*cl_centerprint;
 extern	cvar_t	*cl_precachecustom;
+extern  cvar_t	*cl_simpleitems;
 
 extern	cvar_t	*cl_paindist;
 extern	cvar_t	*cl_explosiondist;
@@ -749,3 +750,6 @@ void CL_ShutdownHttpDownload(void);
 extern FNT_auto_t	CL_gameFont;
 extern FNT_auto_t	CL_centerFont;
 extern FNT_auto_t	CL_consoleFont;
+
+//external renderer
+extern void R_AddSimpleItem(int type, vec3_t origin);

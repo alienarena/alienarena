@@ -181,7 +181,6 @@ void PART_DrawParticles( int num_particles, particle_t **particles, const unsign
 
         if (p->type == PARTICLE_CHAINED && p->chain_prev) {
         	particle_t *pr;
-        	vec3_t span;
         	vec3_t pspan, prev_pspan;
         	pr = p->chain_prev;
         	VectorCopy (p->current_pspan, pspan);
@@ -1173,4 +1172,218 @@ void R_ClearBeams(void)
 {
 	memset(r_beams, 0, sizeof(r_beams));
 	r_numbeams = 0;
+}
+
+//Simple items
+
+//simple item images
+image_t		*s_item0;
+image_t		*s_item1;
+image_t		*s_item2;
+image_t		*s_item3;
+image_t		*s_item4;
+image_t		*s_item5;
+image_t		*s_item6;
+image_t		*s_item7;
+image_t		*s_item8;
+image_t		*s_item9;
+
+void R_SI_InitTextures( void )
+{
+	byte	nullpic[16][16][4];
+	int x, y;
+
+	//
+	// blank texture
+	//
+	for (x = 0 ; x < 16 ; x++)
+	{
+		for (y = 0 ; y < 16 ; y++)
+		{
+			nullpic[y][x][0] = 255;
+			nullpic[y][x][1] = 255;
+			nullpic[y][x][2] = 255;
+			nullpic[y][x][3] = 255;
+		}
+	}
+
+	s_item0 = GL_FindImage("pics/w_sshotgun.tga", it_pic);
+	if (!s_item0) 
+		s_item0 = GL_LoadPic ("***s_item0***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item1 = GL_FindImage("pics/w_railgun.tga", it_pic);
+	if (!s_item1) 
+		s_item1 = GL_LoadPic ("***s_item1***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item2 = GL_FindImage("pics/w_chaingun.tga", it_pic);
+	if (!s_item2) 
+		s_item2 = GL_LoadPic ("***s_item2***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item3 = GL_FindImage("pics/w_rlauncher.tga", it_pic);
+	if (!s_item3) 
+		s_item3 = GL_LoadPic ("***s_item3***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item4 = GL_FindImage("pics/w_shotgun.tga", it_pic);
+	if (!s_item4) 
+		s_item4 = GL_LoadPic ("***s_item4***", (byte *)nullpic, 16, 16, it_pic, 32);
+}
+
+void R_AddSimpleItem (int type, vec3_t origin)
+{
+    simpleitem_t  *item;
+
+	if (r_numsimpleitems >= MAX_SIMPLEITEMS)
+			return;
+
+	item = &r_simpleitems[r_numsimpleitems++];
+	VectorCopy(origin, item->origin);
+
+	item->type = type;
+}
+
+//rendering
+
+void R_DrawSimpleItems ( void )
+{
+    int		i, k;
+	simpleitem_t *item;
+    float   scale;
+	vec3_t	origin, mins, maxs, angle, right, up, corner[4];
+	float	*corner0 = corner[0];
+	qboolean visible;
+	trace_t r_trace;
+
+	if(r_newrefdef.rdflags & RDF_NOWORLDMODEL)
+		return;
+
+	item = r_simpleitems;
+
+	VectorSet(mins, 0, 0, 0);
+	VectorSet(maxs,	0, 0, 0);	
+
+	qglEnable( GL_BLEND);
+	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST );
+	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST );
+	GL_TexEnv( GL_MODULATE );
+
+    for (i=0; i<r_numsimpleitems; i++, item++)
+	{
+		int va = 0;
+
+		R_InitVArrays (VERT_SINGLE_TEXTURED);
+		VArray = &VArrayVerts[0];
+
+		scale = 20.0;
+
+		VectorCopy(item->origin, origin);
+
+		r_trace = CM_BoxTrace(r_origin, origin, maxs, mins, r_worldmodel->firstnode, MASK_VISIBILILITY);
+		visible = r_trace.fraction == 1.0;
+		
+		if(visible)
+		{
+			switch(item->type)
+			{
+				case 0:
+					//bind tex
+					GL_Bind(s_item0->texnum);
+					break;
+				case 1:
+					GL_Bind(s_item1->texnum);
+					break;
+				case 2:
+					GL_Bind(s_item2->texnum);
+					break;
+				case 3:
+					GL_Bind(s_item3->texnum);
+					break;
+				case 4:
+					GL_Bind(s_item4->texnum);
+					break;
+				default:
+					GL_Bind(s_item0->texnum);
+					break;
+			}
+					
+			qglColor4f( 1, 1, 1, 1 ); //uses texture for color
+					
+			VectorCopy(r_newrefdef.viewangles, angle);
+			
+			angle[0] = 0;  // keep vertical by removing pitch
+
+			AngleVectors(angle, NULL, right, up);
+			VectorScale(right, scale, right);
+			VectorScale(up, scale, up);			
+
+			//render polygon				
+
+			VectorSet (corner[0],
+				origin[0] + (up[0] + right[0])*(-0.5),
+				origin[1] + (up[1] + right[1])*(-0.5),
+				origin[2] + (up[2] + right[2])*(-0.5));				
+
+			VectorSet ( corner[1],
+				corner0[0] + up[0],
+				corner0[1] + up[1],
+				corner0[2] + up[2]);
+
+			VectorSet ( corner[2],
+				corner0[0] + (up[0]+right[0]),
+				corner0[1] + (up[1]+right[1]),
+				corner0[2] + (up[2]+right[2]));
+
+			VectorSet ( corner[3],
+				corner0[0] + right[0],
+				corner0[1] + right[1],
+				corner0[2] + right[2]);				
+
+			for(k = 0; k < 4; k++) 
+			{
+				VArray[0] = corner[k][0];
+				VArray[1] = corner[k][1];
+				VArray[2] = corner[k][2];
+				switch(k) 
+				{
+					
+					case 0:
+						VArray[3] = 0;
+						VArray[4] = 1;
+						break;
+					case 1:
+						VArray[3] = 0;
+						VArray[4] = 0;
+						break;
+					case 2:
+						VArray[3] = 1;
+						VArray[4] = 0;
+						break;
+					case 3:
+						VArray[3] = 1;
+						VArray[4] = 1;
+						break;
+				}
+
+				VArray += VertexSizes[VERT_SINGLE_TEXTURED];
+				va++;								
+			}
+	
+			R_DrawVarrays(GL_QUADS, 0, va, false);
+		
+			R_KillVArrays ();
+		}
+	}
+	
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	qglDisable(GL_BLEND);
+	GL_TexEnv( GL_REPLACE );
+
+	R_ClearSimpleItems();
+}
+
+void R_ClearSimpleItems(void)
+{
+	memset(r_simpleitems, 0, sizeof(r_simpleitems));
+	r_numsimpleitems = 0;
 }

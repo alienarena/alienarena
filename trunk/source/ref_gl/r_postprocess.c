@@ -35,6 +35,8 @@ void R_DrawBloodEffect (void);
 image_t *r_framebuffer;
 image_t *r_distortwave;
 image_t *r_droplets;
+image_t	*r_blooddroplets;
+image_t	*r_blooddroplets_nm;
 
 vec3_t r_explosionOrigin;
 int r_drawing_fbeffect;
@@ -482,7 +484,22 @@ R_FB_InitTextures
 void R_FB_InitTextures( void )
 {
 	byte	*data;
-	int		size;
+	int		size, x, y;
+	byte	nullpic[16][16][4];
+
+	//
+	// blank texture
+	//
+	for (x = 0 ; x < 16 ; x++)
+	{
+		for (y = 0 ; y < 16 ; y++)
+		{
+			nullpic[y][x][0] = 255;
+			nullpic[y][x][1] = 255;
+			nullpic[y][x][2] = 255;
+			nullpic[y][x][3] = 255;
+		}
+	}
 
 	//find closer power of 2 to screen size
 	for (FB_texture_width = 1;FB_texture_width < viddef.width;FB_texture_width *= 2);
@@ -509,8 +526,20 @@ void R_FB_InitTextures( void )
 	free ( data );
 
 	//init the distortion textures
-	r_distortwave = GL_FindImage("gfx/distortwave.jpg",it_pic);
-	r_droplets = GL_FindImage("gfx/droplets.jpg",it_pic);
+	r_distortwave = GL_FindImage("gfx/distortwave.jpg", it_pic);
+	if (!r_distortwave) 
+		r_distortwave = GL_LoadPic ("***r_distortwave***", (byte *)nullpic, 16, 16, it_pic, 32);
+	r_droplets = GL_FindImage("gfx/droplets.jpg", it_pic);
+	if (!r_droplets) 
+		r_droplets = GL_LoadPic ("***r_droplets***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	//init gore/blood textures
+	r_blooddroplets = GL_FindImage("gfx/blooddrops.jpg", it_pic);
+	if (!r_blooddroplets) 
+		r_blooddroplets = GL_LoadPic ("***r_blooddroplets***", (byte *)nullpic, 16, 16, it_pic, 32);
+	r_blooddroplets_nm = GL_FindImage("gfx/blooddrops_nm.jpg", it_pic);
+	if (!r_blooddroplets_nm) 
+		r_blooddroplets_nm = GL_LoadPic ("***r_blooddroplets_nm***", (byte *)nullpic, 16, 16, it_pic, 32);
 }
 
 extern int vehicle_hud;
