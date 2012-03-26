@@ -84,8 +84,6 @@ image_t		*r_distort;
 image_t		*sun_object;
 image_t		*sun1_object;
 image_t		*sun2_object;
-image_t		*r_blooddroplets;
-image_t		*r_blooddroplets_nm;
 
 static size_t szr; // just for unused result warnings
 
@@ -367,6 +365,8 @@ void R_InitParticleTexture (void)
 	if (!r_splash2texture) {
 		r_splash2texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
+
+	//to do - move more or all of this to their appropriate places
 	r_radarmap = GL_FindImage("gfx/radar/radarmap",it_pic);
 	if (!r_radarmap) {
 		r_radarmap = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
@@ -402,16 +402,6 @@ void R_InitParticleTexture (void)
 	r_dis3texture = R_RegisterParticlePic("disbeam3");
 	if (!r_dis3texture) {
 		r_dis3texture = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }
-
-	r_blooddroplets = R_RegisterGfxPic("blooddrops");
-	if (!r_blooddroplets) {
-		r_blooddroplets = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
-    }
-
-	r_blooddroplets_nm = R_RegisterGfxPic("blooddrops_nm");
-	if (!r_blooddroplets_nm) {
-		r_blooddroplets_nm = GL_LoadPic ("***particle***", (byte *)data, 16, 16, it_sprite, 32);
     }
 
 	//

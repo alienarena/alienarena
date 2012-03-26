@@ -615,7 +615,7 @@ typedef struct
 #define	EF_ANIM23			0x00000800		// automatically cycle between frames 2 and 3 at 2 hz
 #define EF_ANIM_ALL			0x00001000		// automatically cycle through all frames at 2hz
 #define EF_ANIM_ALLFAST		0x00002000		// automatically cycle through all frames at 10hz
-#define	EF_FLIES			0x00004000
+#define	EF_BUBBLES			0x00004000
 #define	EF_QUAD				0x00008000
 #define	EF_PENT				0x00010000
 #define	EF_TELEPORTER		0x00020000		// particle fountain

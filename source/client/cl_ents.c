@@ -803,23 +803,55 @@ void CL_AddPacketEntities (frame_t *frame)
 		if (!s1->modelindex)
 			continue;
 
+		if(cl_simpleitems->value)
+		{
+			//don't draw any of these as meshes
+			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/ammo/bullets/medium/tris.md2"))
+			{
+				R_AddSimpleItem (0, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/ammo/cells/medium/tris.md2"))
+			{
+				R_AddSimpleItem (1, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/ammo/grenades/medium/tris.md2"))
+			{
+				R_AddSimpleItem (2, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/ammo/rockets/medium/tris.md2"))
+			{
+				R_AddSimpleItem (3, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/ammo/shells/medium/tris.md2"))
+			{
+				R_AddSimpleItem (4, ent.origin);
+				continue;
+			}
+		}
+
 		if (effects & EF_PLASMA)
 		{
 			ent.flags |= RF_TRANSLUCENT;
 			ent.alpha = 0.6;
 		}
 
-		if (effects & EF_FLIES)
+		if (effects & EF_BUBBLES)
 		{
 			CL_PoweredEffects (ent.origin);
 		}
 
 		//cool new ctf flag effects
-		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/flags/flag1.md2")) {
+		if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/flags/flag1.md2")) 
+		{
 			CL_FlagEffects(ent.origin, 0);
 			ent.team = 1;
 		}
-		else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/flags/flag2.md2")) {
+		else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/flags/flag2.md2")) 
+		{
 			CL_FlagEffects(ent.origin, 1);
 			ent.team = 2;
 		}
