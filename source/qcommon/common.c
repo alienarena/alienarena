@@ -351,6 +351,8 @@ void MSG_WriteByte (sizebuf_t *sb, int c)
 
 void MSG_WriteShort (sizebuf_t *sb, int c)
 {
+#if 0
+	/* Original Version */
 	byte	*buf;
 
 #ifdef PARANOID
@@ -364,10 +366,19 @@ void MSG_WriteShort (sizebuf_t *sb, int c)
 	buf = SZ_GetSpace (sb, 2);
 	buf[0] = c&0xff;
 	buf[1] = c>>8;
+#else
+	/* Experimental Version */
+	short *buf;
+
+	buf  = (short*)SZ_GetSpace( sb , 2 );
+	*buf = LittleShort( c );
+#endif
 }
 
 void MSG_WriteLong (sizebuf_t *sb, int c)
 {
+#if 0
+	/* Original Version */
 	byte	*buf;
 
 	buf = SZ_GetSpace (sb, 4);
@@ -375,6 +386,13 @@ void MSG_WriteLong (sizebuf_t *sb, int c)
 	buf[1] = (c>>8)&0xff;
 	buf[2] = (c>>16)&0xff;
 	buf[3] = c>>24;
+#else
+	/* Experimental Version */
+	int *buf;
+
+	buf  = (int*)SZ_GetSpace( sb, 4 );
+	*buf = LittleLong( c );
+#endif
 }
 
 void MSG_WriteFloat (sizebuf_t *sb, float f)
@@ -796,6 +814,8 @@ int MSG_ReadByte (sizebuf_t *msg_read)
 
 int MSG_ReadShort (sizebuf_t *msg_read)
 {
+#if 0
+	/* Origninal Version */
 	int	c;
 
 	if (msg_read->readcount+2 > msg_read->cursize)
@@ -807,10 +827,27 @@ int MSG_ReadShort (sizebuf_t *msg_read)
 	msg_read->readcount += 2;
 
 	return c;
+#else
+	/* Experimental Version */
+	int c     = -1;
+	int rc    = msg_read->readcount;
+	short *pi = (short*)(&msg_read->data[ rc ]);
+
+	rc += 2;
+	if ( rc <= msg_read->cursize )
+	{
+		c = LittleShort( *pi );
+		msg_read->readcount = rc;
+	}
+
+	return c;
+#endif
 }
 
 int MSG_ReadLong (sizebuf_t *msg_read)
 {
+#if 0
+	/* Original Version */
 	int	c;
 
 	if (msg_read->readcount+4 > msg_read->cursize)
@@ -824,6 +861,21 @@ int MSG_ReadLong (sizebuf_t *msg_read)
 	msg_read->readcount += 4;
 
 	return c;
+#else
+	/* Experimental Version */
+	int c   = -1;
+	int rc  = msg_read->readcount;
+	int *pi = (int*)(&msg_read->data[rc]);
+
+	rc += 4;
+	if ( rc <= msg_read->cursize )
+	{
+		c = LittleLong( *pi );
+		msg_read->readcount = rc;
+	}
+
+	return c;
+#endif
 }
 
 float MSG_ReadFloat (sizebuf_t *msg_read)

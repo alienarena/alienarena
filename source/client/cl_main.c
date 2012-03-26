@@ -922,6 +922,7 @@ void CL_ParseGetServersResponse()
 	netadr_t	adr;
 	char		adrString[32];
 	byte		addr[4];
+	byte		port[2];
 
 	MSG_BeginReading (&net_message);
 	MSG_ReadLong (&net_message);	// skip the -1
@@ -938,23 +939,30 @@ void CL_ParseGetServersResponse()
 	}
 	numServers = 0;
 
-	if(net_message.readcount +8 < net_message.cursize)
-	net_message.readcount += 8;
+	if ( net_message.readcount + 8 < net_message.cursize )
+		net_message.readcount += 8;
 
-	while( net_message.readcount +6 <= net_message.cursize ) {
+	while( net_message.readcount +6 <= net_message.cursize )
+	{
 		MSG_ReadData( &net_message, addr, 4 );
-		servers[numServers].port = MSG_ReadShort( &net_message );
+		Com_sprintf( adrString, sizeof( adrString ), "%u.%u.%u.%u",
+				addr[0], addr[1], addr[2], addr[3]);
+		memcpy( &servers[numServers].ip, adrString, sizeof(servers[numServers].ip) );
 
-		Com_sprintf( adrString, sizeof( adrString ), "%u.%u.%u.%u", addr[0], addr[1], addr[2], addr[3]);
+		MSG_ReadData( &net_message, port, 2 ); /* network byte order (bigendian) */
+		servers[numServers].port = port[1];
+		servers[numServers].port <<= 8;
+		servers[numServers].port |= port[0];
 
-		memcpy (&servers[numServers].ip, adrString, sizeof (servers[numServers].ip));
-
-		Com_Printf ("pinging %s...\n", servers[numServers].ip);
 		if (!NET_StringToAdr (servers[numServers].ip, &adr))
 		{
 			Com_Printf ("Bad address: %s\n", servers[numServers].ip);
 			continue;
 		}
+
+		Com_Printf ("pinging %s:%hu...\n", servers[numServers].ip,
+				(unsigned short)( BigShort( servers[numServers].port ) ));
+
 		adr.port = servers[numServers].port;
 		if (!adr.port) {
 			adr.port = BigShort(PORT_SERVER);
