@@ -1187,6 +1187,11 @@ image_t		*s_item6;
 image_t		*s_item7;
 image_t		*s_item8;
 image_t		*s_item9;
+image_t		*s_item10;
+image_t		*s_item11;
+image_t		*s_item12;
+image_t		*s_item13;
+image_t		*s_item14;
 
 void R_SI_InitTextures( void )
 {
@@ -1226,6 +1231,47 @@ void R_SI_InitTextures( void )
 	s_item4 = GL_FindImage("pics/w_shotgun.tga", it_pic);
 	if (!s_item4) 
 		s_item4 = GL_LoadPic ("***s_item4***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item5 = GL_FindImage("pics/p_haste.tga", it_pic);
+	if (!s_item5) 
+		s_item5 = GL_LoadPic ("***s_item5***", (byte *)nullpic, 16, 16, it_pic, 32);
+	
+	s_item6 = GL_FindImage("pics/p_invulnerability.tga", it_pic);
+	if (!s_item6) 
+		s_item6 = GL_LoadPic ("***s_item6***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item7 = GL_FindImage("pics/p_quad.tga", it_pic);
+	if (!s_item7) 
+		s_item7 = GL_LoadPic ("***s_item7***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item8 = GL_FindImage("pics/p_sproing.tga", it_pic);
+	if (!s_item8) 
+		s_item8 = GL_LoadPic ("***s_item8***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item9 = GL_FindImage("pics/p_adrenaline.tga", it_pic);
+	if (!s_item9) 
+		s_item9 = GL_LoadPic ("***s_item9***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item10 = GL_FindImage("pics/p_shard.tga", it_pic);
+	if (!s_item10) 
+		s_item10 = GL_LoadPic ("***s_item10***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item11 = GL_FindImage("pics/p_jacket.tga", it_pic);
+	if (!s_item11) 
+		s_item11 = GL_LoadPic ("***s_item11***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item12 = GL_FindImage("pics/p_combat.tga", it_pic);
+	if (!s_item12) 
+		s_item12 = GL_LoadPic ("***s_item12***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item13 = GL_FindImage("pics/p_body.tga", it_pic);
+	if (!s_item13) 
+		s_item13 = GL_LoadPic ("***s_item13***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item14 = GL_FindImage("pics/p_health.tga", it_pic);
+	if (!s_item14) 
+		s_item14 = GL_LoadPic ("***s_item14***", (byte *)nullpic, 16, 16, it_pic, 32);
+
 }
 
 void R_AddSimpleItem (int type, vec3_t origin)
@@ -1262,10 +1308,14 @@ void R_DrawSimpleItems ( void )
 	VectorSet(maxs,	0, 0, 0);	
 
 	qglEnable( GL_BLEND);
-	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	qglBlendFunc ( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
 	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST );
 	qglTexParameteri( GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST );
 	GL_TexEnv( GL_MODULATE );
+
+	qglDepthMask( GL_TRUE );
+	GLSTATE_ENABLE_ALPHATEST
+	qglColor4f( 1, 1, 1, 1 ); //uses texture for color unless specified
 
     for (i=0; i<r_numsimpleitems; i++, item++)
 	{
@@ -1301,12 +1351,49 @@ void R_DrawSimpleItems ( void )
 				case 4:
 					GL_Bind(s_item4->texnum);
 					break;
+				case 5:
+					GL_Bind(s_item5->texnum);
+					break;
+				case 6:
+					GL_Bind(s_item6->texnum);
+					break;
+				case 7:
+					GL_Bind(s_item7->texnum);
+					break;
+				case 8:
+					GL_Bind(s_item8->texnum);
+					break;
+				case 9:
+					GL_Bind(s_item9->texnum);
+					break;
+				case 10:
+					GL_Bind(s_item10->texnum);
+					break;
+				case 11:
+					GL_Bind(s_item11->texnum);
+					break;
+				case 12:
+					GL_Bind(s_item12->texnum);
+					break;
+				case 13:
+					GL_Bind(s_item13->texnum);
+					break;
+				case 14:
+					GL_Bind(s_item14->texnum);
+					qglColor4f( 0, 1, 0, 1 ); 
+					break;
+				case 15:
+					GL_Bind(s_item14->texnum);
+					qglColor4f( 0, .3, 1, 1 ); 
+					break;
+				case 16:
+					GL_Bind(s_item14->texnum);
+					qglColor4f( 1, 0, 1, 1 ); 
+					break;
 				default:
 					GL_Bind(s_item0->texnum);
 					break;
-			}
-					
-			qglColor4f( 1, 1, 1, 1 ); //uses texture for color
+			}			
 					
 			VectorCopy(r_newrefdef.viewangles, angle);
 			
@@ -1369,14 +1456,17 @@ void R_DrawSimpleItems ( void )
 			}
 	
 			R_DrawVarrays(GL_QUADS, 0, va, false);
+
+			qglColor4f( 1, 1, 1, 1 );
 		
 			R_KillVArrays ();
 		}
 	}
-	
-	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
 	qglBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	qglDisable(GL_BLEND);
+	GLSTATE_DISABLE_ALPHATEST
+	qglTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	GL_TexEnv( GL_REPLACE );
 
 	R_ClearSimpleItems();
