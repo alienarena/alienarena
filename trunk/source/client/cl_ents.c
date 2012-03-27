@@ -831,6 +831,66 @@ void CL_AddPacketEntities (frame_t *frame)
 				R_AddSimpleItem (4, ent.origin);
 				continue;
 			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/haste/tris.md2"))
+			{
+				R_AddSimpleItem (5, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/invulner/tris.md2"))
+			{
+				R_AddSimpleItem (6, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/quaddama/tris.md2"))
+			{
+				R_AddSimpleItem (7, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/sproing/tris.md2"))
+			{
+				R_AddSimpleItem (8, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/adrenaline/tris.md2"))
+			{
+				R_AddSimpleItem (9, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/armor/shard/tris.md2"))
+			{
+				R_AddSimpleItem (10, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/armor/jacket/tris.md2"))
+			{
+				R_AddSimpleItem (11, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/armor/combat/tris.md2"))
+			{
+				R_AddSimpleItem (12, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/armor/body/tris.md2"))
+			{
+				R_AddSimpleItem (13, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/small/tris.md2"))
+			{
+				R_AddSimpleItem (14, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/medium/tris.md2"))
+			{
+				R_AddSimpleItem (15, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/large/tris.md2"))
+			{
+				R_AddSimpleItem (16, ent.origin);
+				continue;
+			}
 		}
 
 		if (effects & EF_PLASMA)
@@ -879,7 +939,7 @@ void CL_AddPacketEntities (frame_t *frame)
 		ci = &cl.clientinfo[s1->skinnum & 0xff];
 
 		//give health an "aura"
-		if(cl_healthaura->value) 
+		if(cl_healthaura->value && !cl_simpleitems->value) 
 		{
 			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/small/tris.md2"))
 				CL_SmallHealthParticles(ent.origin);
@@ -927,12 +987,13 @@ void CL_AddPacketEntities (frame_t *frame)
 			{
 				ent.model = cl.model_draw[s1->modelindex2];
 			}
-
-			
+						
 			//here is where we will set the alpha for certain model parts - would like to eventually
 			//do something a little less uh, hardcoded.
 			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex2)], "models/items/healing/globe/tris.md2"))
 			{
+				if(cl_simpleitems->value)
+					continue;
 				ent.alpha = 0.4;
 				ent.flags = RF_TRANSLUCENT;
 			}
