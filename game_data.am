@@ -1304,16 +1304,24 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/huds/terminal-red2.tga \
 	data1/pics/huds/therock1.tga \
 	data1/pics/huds/therock2.tga \
+	data1/pics/i_beamgun.tga \
 	data1/pics/i_bodyarmor.tga \
+	data1/pics/i_chaingun.tga \
 	data1/pics/i_combatarmor.tga \
+	data1/pics/i_disruptor.tga \
 	data1/pics/i_flag1.tga \
 	data1/pics/i_flag2.tga \
+	data1/pics/i_flamegun.tga \
 	data1/pics/i_health.tga \
 	data1/pics/i_jacketarmor.tga \
+	data1/pics/i_minderaser.tga \
 	data1/pics/inventory.tga \
+	data1/pics/i_rocketlauncher.tga \
 	data1/pics/i_score.tga \
+	data1/pics/i_smartgun.tga \
 	data1/pics/i_team1.tga \
 	data1/pics/i_team2.tga \
+	data1/pics/i_vaporizer.tga \
 	data1/pics/m_bots.tga \
 	data1/pics/m_controls.tga \
 	data1/pics/m_cursor0.tga \
@@ -1373,13 +1381,18 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/num_9.tga \
 	data1/pics/num_minus.tga \
 	data1/pics/p_adrenaline.tga \
+	data1/pics/p_body.tga \
+	data1/pics/p_combat.tga \
 	data1/pics/p_haste.tga \
+	data1/pics/p_health.tga \
 	data1/pics/p_invis.tga \
 	data1/pics/p_invulnerability.tga \
+	data1/pics/p_jacket.tga \
 	data1/pics/playerbox.tga \
 	data1/pics/p_powered.tga \
 	data1/pics/p_quad.tga \
 	data1/pics/p_rewardpts.tga \
+	data1/pics/p_shard.tga \
 	data1/pics/p_sproing.tga \
 	data1/pics/redplayerbox.tga \
 	data1/pics/rocketlauncher.tga \
@@ -2196,6 +2209,11 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/taunts/martianenforcer/taunt3.wav \
 	data1/sound/taunts/martianenforcer/taunt4.wav \
 	data1/sound/taunts/martianenforcer/taunt5.wav \
+	data1/sound/taunts/martianoverlord/taunt1.wav \
+	data1/sound/taunts/martianoverlord/taunt2.wav \
+	data1/sound/taunts/martianoverlord/taunt3.wav \
+	data1/sound/taunts/martianoverlord/taunt4.wav \
+	data1/sound/taunts/martianoverlord/taunt5.wav \
 	data1/sound/taunts/slashbot/taunt1.wav \
 	data1/sound/taunts/slashbot/taunt2.wav \
 	data1/sound/taunts/slashbot/taunt3.wav \

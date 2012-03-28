@@ -193,7 +193,7 @@ typedef struct _PLAYERINFO {
 
 typedef struct _SERVERINFO {
 	char ip[32];
-	int port;
+	unsigned short port;
 	char szHostName[256];
 	char szMapName[256];
 	int curClients;
@@ -950,9 +950,9 @@ void CL_ParseGetServersResponse()
 		memcpy( &servers[numServers].ip, adrString, sizeof(servers[numServers].ip) );
 
 		MSG_ReadData( &net_message, port, 2 ); /* network byte order (bigendian) */
-		servers[numServers].port = port[1];
-		servers[numServers].port <<= 8;
-		servers[numServers].port |= port[0];
+		/* convert to unsigned short in host byte order */
+		servers[numServers].port =
+				(((unsigned short)port[0]) * 256 ) + (unsigned short)port[1] ;
 
 		if (!NET_StringToAdr (servers[numServers].ip, &adr))
 		{
@@ -960,10 +960,11 @@ void CL_ParseGetServersResponse()
 			continue;
 		}
 
-		Com_Printf ("pinging %s:%hu...\n", servers[numServers].ip,
-				(unsigned short)( BigShort( servers[numServers].port ) ));
+		Com_Printf ("pinging %s:%hu...\n",
+				servers[numServers].ip, servers[numServers].port );
 
-		adr.port = servers[numServers].port;
+		/* adr.port is in network byte order (bigendian) */
+		adr.port = (unsigned short)BigShort( servers[numServers].port );
 		if (!adr.port) {
 			adr.port = BigShort(PORT_SERVER);
 		}
