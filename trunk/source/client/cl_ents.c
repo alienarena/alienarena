@@ -806,6 +806,8 @@ void CL_AddPacketEntities (frame_t *frame)
 		if(cl_simpleitems->value)
 		{
 			//don't draw any of these as meshes
+
+			//ammo
 			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/ammo/bullets/medium/tris.md2"))
 			{
 				R_AddSimpleItem (0, ent.origin);
@@ -831,6 +833,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				R_AddSimpleItem (4, ent.origin);
 				continue;
 			}
+			//powerups
 			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/haste/tris.md2"))
 			{
 				R_AddSimpleItem (5, ent.origin);
@@ -856,6 +859,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				R_AddSimpleItem (9, ent.origin);
 				continue;
 			}
+			//armor
 			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/armor/shard/tris.md2"))
 			{
 				R_AddSimpleItem (10, ent.origin);
@@ -876,6 +880,7 @@ void CL_AddPacketEntities (frame_t *frame)
 				R_AddSimpleItem (13, ent.origin);
 				continue;
 			}
+			//health
 			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/small/tris.md2"))
 			{
 				R_AddSimpleItem (14, ent.origin);
@@ -889,6 +894,47 @@ void CL_AddPacketEntities (frame_t *frame)
 			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/items/healing/large/tris.md2"))
 			{
 				R_AddSimpleItem (16, ent.origin);
+				continue;
+			}
+			//weapons
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_rail/tris.md2"))
+			{
+				R_AddSimpleItem (17, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_bfg/tris.md2"))
+			{
+				R_AddSimpleItem (18, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_hyperb/tris.md2"))
+			{
+				R_AddSimpleItem (19, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_chain/tris.md2"))
+			{
+				R_AddSimpleItem (20, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_shotg/tris.md2"))
+			{
+				R_AddSimpleItem (21, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_shotg2/tris.md2"))
+			{
+				R_AddSimpleItem (22, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_rocket/tris.md2"))
+			{
+				R_AddSimpleItem (23, ent.origin);
+				continue;
+			}
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex)], "models/weapons/g_minderaser/tris.md2"))
+			{
+				R_AddSimpleItem (24, ent.origin);
 				continue;
 			}
 		}

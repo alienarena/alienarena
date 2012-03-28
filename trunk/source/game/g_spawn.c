@@ -960,6 +960,12 @@ void SP_worldspawn (edict_t *ent)
 	    gi.soundindex ("taunts/martiancyborg/taunt4.wav");
 	    gi.soundindex ("taunts/martiancyborg/taunt5.wav");
 
+		gi.soundindex ("taunts/martianoverlord/taunt1.wav");
+	    gi.soundindex ("taunts/martianoverlord/taunt2.wav");
+	    gi.soundindex ("taunts/martianoverlord/taunt3.wav");
+	    gi.soundindex ("taunts/martianoverlord/taunt4.wav");
+	    gi.soundindex ("taunts/martianoverlord/taunt5.wav");
+
 	    //precache any gibs
 	    sm_meat_index = gi.modelindex ("models/objects/gibs/sm_meat/tris.md2");
 	    gi.modelindex ("models/objects/gibs/mart_gut/tris.md2");
@@ -1053,6 +1059,19 @@ void SP_worldspawn (edict_t *ent)
 	    gi.modelindex ("players/commander/w_bfg.md2");
 	    gi.modelindex ("players/commander/w_violator.md2");
 		gi.modelindex ("players/commander/w_minderaser.md2");
+
+		gi.modelindex ("players/martianoverlord/weapon.md2");
+	    gi.modelindex ("players/martianoverlord/w_blaster.md2");
+	    gi.modelindex ("players/martianoverlord/w_shotgun.md2");
+	    gi.modelindex ("players/martianoverlord/w_sshotgun.md2");
+	    gi.modelindex ("players/martianoverlord/w_machinegun.md2");
+	    gi.modelindex ("players/martianoverlord/w_chaingun.md2");
+	    gi.modelindex ("players/martianoverlord/w_rlauncher.md2");
+	    gi.modelindex ("players/martianoverlord/w_hyperblaster.md2");
+	    gi.modelindex ("players/martianoverlord/w_railgun.md2");
+	    gi.modelindex ("players/martianoverlord/w_bfg.md2");
+	    gi.modelindex ("players/martianoverlord/w_violator.md2");
+		gi.modelindex ("players/martianoverlord/w_minderaser.md2");
 
 		//weapon models that aren't placed in levels
 		gi.modelindex ("models/weapons/v_minderaser/tris.md2");
