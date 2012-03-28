@@ -1192,6 +1192,14 @@ image_t		*s_item11;
 image_t		*s_item12;
 image_t		*s_item13;
 image_t		*s_item14;
+image_t		*s_item17;
+image_t		*s_item18;
+image_t		*s_item19;
+image_t		*s_item20;
+image_t		*s_item21;
+image_t		*s_item22;
+image_t		*s_item23;
+image_t		*s_item24;
 
 void R_SI_InitTextures( void )
 {
@@ -1272,6 +1280,37 @@ void R_SI_InitTextures( void )
 	if (!s_item14) 
 		s_item14 = GL_LoadPic ("***s_item14***", (byte *)nullpic, 16, 16, it_pic, 32);
 
+	s_item17 = GL_FindImage("pics/i_beamgun.tga", it_pic);
+	if (!s_item17) 
+		s_item17 = GL_LoadPic ("***s_item17***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item18 = GL_FindImage("pics/i_vaporizer.tga", it_pic);
+	if (!s_item18) 
+		s_item18 = GL_LoadPic ("***s_item18***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item19 = GL_FindImage("pics/i_disruptor.tga", it_pic);
+	if (!s_item19) 
+		s_item19 = GL_LoadPic ("***s_item19***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item20 = GL_FindImage("pics/i_flamegun.tga", it_pic);
+	if (!s_item20) 
+		s_item20 = GL_LoadPic ("***s_item20***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item21 = GL_FindImage("pics/i_smartgun.tga", it_pic);
+	if (!s_item21) 
+		s_item21 = GL_LoadPic ("***s_item21***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item22 = GL_FindImage("pics/i_chaingun.tga", it_pic);
+	if (!s_item22) 
+		s_item22 = GL_LoadPic ("***s_item22***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item23 = GL_FindImage("pics/i_rocketlauncher.tga", it_pic);
+	if (!s_item23) 
+		s_item23 = GL_LoadPic ("***s_item23***", (byte *)nullpic, 16, 16, it_pic, 32);
+
+	s_item24 = GL_FindImage("pics/i_minderaser.tga", it_pic);
+	if (!s_item24) 
+		s_item24 = GL_LoadPic ("***s_item24***", (byte *)nullpic, 16, 16, it_pic, 32);
 }
 
 void R_AddSimpleItem (int type, vec3_t origin)
@@ -1389,6 +1428,38 @@ void R_DrawSimpleItems ( void )
 				case 16:
 					GL_Bind(s_item14->texnum);
 					qglColor4f( 1, 0, 1, 1 ); 
+					break;
+				case 17:
+					GL_Bind(s_item17->texnum);
+					scale = 40;
+					break;
+				case 18:
+					GL_Bind(s_item18->texnum);
+					scale = 40;
+					break;
+				case 19:
+					GL_Bind(s_item19->texnum);
+					scale = 40;
+					break;
+				case 20:
+					GL_Bind(s_item20->texnum);
+					scale = 40;
+					break;
+				case 21:
+					GL_Bind(s_item21->texnum);
+					scale = 40;
+					break;
+				case 22:
+					GL_Bind(s_item22->texnum);
+					scale = 40;
+					break;
+				case 23:
+					GL_Bind(s_item23->texnum);
+					scale = 40;
+					break;
+				case 24:
+					GL_Bind(s_item24->texnum);
+					scale = 40;
 					break;
 				default:
 					GL_Bind(s_item0->texnum);
