@@ -203,33 +203,37 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 	int current_node,goal_node=0;
 	edict_t *goal_ent=NULL, *ent;
 	float cost;
-#ifdef CTFNODES
 	gitem_t *flag1_item, *flag2_item;
 	qboolean hasFlag = false;
 
 	// look for a target
-
+	
+	flag1_item = FindItemByClassname("item_flag_red");
+	flag2_item = FindItemByClassname("item_flag_blue");
+	
 	//if flag in possession, try to find base nodes
 	if(ctf->value)
 	{
-		flag1_item = FindItemByClassname("item_flag_red");
-		flag2_item = FindItemByClassname("item_flag_blue");
-
 		if (self->client->pers.inventory[ITEM_INDEX(flag1_item)])
 		{
 			current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_BLUEBASE);
-			hasFlag = true;
+			if(current_node == -1)
+				current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
+			else
+				hasFlag = true;
 		}
 		else if (self->client->pers.inventory[ITEM_INDEX(flag2_item)])
 		{
 			current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_REDBASE);
-			hasFlag = true;
+			if(current_node == -1)
+				current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
+			else
+				hasFlag = true;
 		}
 		else
 			current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
 	}
 	else
-#endif
 		current_node = ACEND_FindClosestReachableNode(self,NODE_DENSITY,NODE_ALL);
 
 	self->current_node = current_node;
@@ -241,10 +245,9 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 		self->goal_node = -1;
 		return;
 	}
-#ifdef CTFNODES
+
 	if(!hasFlag)
 	{
-#endif
 		///////////////////////////////////////////////////////
 		// Items
 		///////////////////////////////////////////////////////
@@ -276,7 +279,7 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 		///////////////////////////////////////////////////////
 		// This should be its own function and is for now just
 		// finds a player to set as the goal.
-		for(i=0;i<game.maxclients;i++)
+		for(i = 0; i < game.maxclients; i++)
 		{
 			ent = g_edicts + i + 1;
 			if(ent == self || !ent->inuse || (ent->client->invis_framenum > level.framenum))
@@ -301,14 +304,44 @@ void ACEAI_PickLongRangeGoal(edict_t *self)
 				goal_ent = ent;
 			}
 		}
-#ifdef CTFNODES
 	}
 	else
 	{
-		goal_node = current_node;
+		qboolean hadCTFnode = false;
+		//we need to get node at the end of the path
+		//We can walk the node table and get the last linked node of this type further down the list than this node
+		for(i = 0;i < bot_numnodes; i++)
+		{
+			if (self->client->pers.inventory[ITEM_INDEX(flag1_item)])
+			{
+				if(nodes[i].type == NODE_BLUEBASE)
+				{
+					goal_node = i; 
+					hadCTFnode = true;
+				}
+			}
+
+			if (self->client->pers.inventory[ITEM_INDEX(flag2_item)])
+			{
+				if(nodes[i].type == NODE_REDBASE)
+				{
+					goal_node = i;
+					hadCTFnode = true;
+				}
+			}
+		}
+
+		if(!hadCTFnode)
+		{
+			self->state = STATE_WANDER;
+			self->wander_timeout = level.time + 1.0;
+			self->goal_node = -1;
+			return;
+		}
+
 		best_weight = 1.0;
 	}
-#endif
+
 	// If do not find a goal, go wandering....
 	if(best_weight == 0.0 || goal_node == INVALID)
 	{			

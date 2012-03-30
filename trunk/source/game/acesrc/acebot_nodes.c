@@ -196,11 +196,9 @@ int ACEND_FindClosestReachableNode(edict_t *self, int range, int type)
 void ACEND_SetGoal(edict_t *self, int goal_node)
 {
 	int node;
-#ifdef CTFNODES
 	gitem_t *flag1_item, *flag2_item;
-#endif
 	self->goal_node = goal_node;
-#ifdef CTFNODES
+
 	//if flag in possession only use base nodes
 	if(ctf->value)
 	{
@@ -208,14 +206,21 @@ void ACEND_SetGoal(edict_t *self, int goal_node)
 		flag2_item = FindItemByClassname("item_flag_blue");
 
 		if (self->client->pers.inventory[ITEM_INDEX(flag1_item)])
+		{
 			node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_BLUEBASE);
+			if(node == -1)
+				node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_ALL);
+		}
 		else if (self->client->pers.inventory[ITEM_INDEX(flag2_item)])
+		{
 			node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_REDBASE);
+			if(node == -1)
+				node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_ALL);
+		}
 		else
 			node = ACEND_FindClosestReachableNode(self,NODE_DENSITY*3,NODE_ALL);
 	}
 	else
-#endif
 		node = ACEND_FindClosestReachableNode(self, NODE_DENSITY*3, NODE_ALL);
 
 	if(node == -1)
