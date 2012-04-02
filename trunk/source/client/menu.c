@@ -3482,8 +3482,10 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	char lasttoken[256];
 	char seps[]   = "\\";
 	int players = 0;
+	int bots = 0;
 	int result;
 	char playername[PLAYERNAME_SIZE];
+	char szServerinfoF[24];
 	int score, ping, rankTotal, i, x;
 	PLAYERSTATS	player;
 
@@ -3501,7 +3503,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 
 	result = strlen(status_string);
 
-	//server info - we may revisit this
+	//server info
 	rLine = GetLine (&status_string, &result);
 
 	//set the displayed default data first
@@ -3583,6 +3585,9 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		rankTotal += player.ranking;
 
 		players++;
+
+		if(ping == 0)
+			bots++;
 	}
 
 	if(players) {
@@ -3622,8 +3627,15 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 			mservers[m_num_servers].szMapName[i] = 32;
 	}
 	mservers[m_num_servers].szMapName[12] = 0;
-	Com_sprintf(mservers[m_num_servers].serverInfo, sizeof(mservers[m_num_servers].serverInfo), "%s  %12s  %2i/%2s  %4i", mservers[m_num_servers].szHostName,
-		mservers[m_num_servers].szMapName, players, mservers[m_num_servers].maxClients, mservers[m_num_servers].ping);
+	if(bots < 10)
+		strcpy(szServerinfoF, "%s  %12s%2i(%1i)/%2s %4i");
+	else
+		strcpy(szServerinfoF, "%s  %12s%2i(%2i)/%2s%4i");
+
+	if(strlen(mservers[m_num_servers].maxClients) > 2)
+		strcpy(mservers[m_num_servers].maxClients, "??");
+	Com_sprintf(mservers[m_num_servers].serverInfo, sizeof(mservers[m_num_servers].serverInfo), szServerinfoF, mservers[m_num_servers].szHostName,
+		mservers[m_num_servers].szMapName, players, bots, mservers[m_num_servers].maxClients, mservers[m_num_servers].ping);
 
 	CON_Clear();
 	m_num_servers++;
