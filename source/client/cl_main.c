@@ -1163,6 +1163,7 @@ void CL_ConnectionlessPacket (void)
 		Cbuf_AddText ("\n");
 		return;
 	}
+
 	// print command from somewhere
 	if (!strcmp(c, "print"))
 	{
@@ -1175,8 +1176,6 @@ void CL_ConnectionlessPacket (void)
 	// ping from somewhere
 	if (!strcmp(c, "ping"))
 	{
-
-
 		Netchan_OutOfBandPrint (NS_CLIENT, net_from, "ack");
 		return;
 	}

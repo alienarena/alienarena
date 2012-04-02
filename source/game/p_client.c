@@ -2235,10 +2235,10 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo, int whereFrom)
 	if(playervote.called && whereFrom == INGAME)
 		return; //do not allow people to change info during votes
 
-	if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
+	/*if(((dmflags->integer & DF_SKINTEAMS) || ctf->value || tca->value || cp->value) && !whereFrom && (ent->dmteam != NO_TEAM)) {
 		safe_bprintf (PRINT_MEDIUM, "Changing settings not allowed during a team game\n");
 		return;
-	}
+	}*/
 
 	// validate and set name
 	s = Info_ValueForKey (userinfo, "name");
