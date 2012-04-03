@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 static void	 Action_DoEnter( menuaction_s *a );
 static void	 Action_Draw( menuaction_s *a );
 static void  Menu_DrawStatusBar( const char *string );
-// static void	 Menulist_DoEnter( menulist_s *l ); // unused
+static void  Menu_DrawToolTip( const char *string );
 static void	 MenuList_Draw( menulist_s *l );
 static void	 Separator_Draw( menuseparator_s *s );
 static void	 Separator2_Draw( menuseparator_s *s );
@@ -39,7 +39,6 @@ static void  ColorTxt_Draw( menutxt_s *s );
 static void	 Slider_DoSlide( menuslider_s *s, int dir );
 static void	 Slider_Draw( menuslider_s *s );
 static void  VertSlider_Draw( menuslider_s *s );
-// static void	 SpinControl_DoEnter( menulist_s *s ); // unused
 static void	 SpinControl_Draw( menulist_s *s );
 static void	 SpinControl_DoSlide( menulist_s *s, int dir );
 
@@ -530,8 +529,9 @@ void Menu_Draw( menuframework_s *menu )
 				break;
 			}
 		}
+		
 	}
-
+	
 	cursor.mouseaction = false;
 	// end Knightmare
 
@@ -588,6 +588,12 @@ void Menu_Draw( menuframework_s *menu )
 	{
 		Menu_DrawStatusBar( menu->statusbar );
 	}
+
+	if ( item  && cursor.menuitem)
+	{
+		if ( item->tooltip )
+			Menu_DrawToolTip( item->tooltip );
+	}	
 }
 
 void Menu_DrawStatusBar( const char *string )
@@ -609,6 +615,27 @@ void Menu_DrawStatusBar( const char *string )
 	else
 	{
 		Draw_Fill( 0, VID_HEIGHT-charscale, VID_WIDTH, charscale, 0 );
+	}
+}
+
+void Menu_DrawToolTip( const char *string )
+{
+	int	charscale;
+
+	charscale = (float)(viddef.height)*16/600;
+
+	if ( string )
+	{
+		int i;
+		int colorChars = 0;
+		//position at cursor
+		//remove length of color escape chars
+		for(i = 0; i < strlen(string); i++)
+			if(string[i] == '^' && i < strlen(string) - 1)
+				if(string[i+1] != '^')
+					colorChars+=2;
+		Draw_Fill( cursor.x, cursor.y-charscale, (strlen(string)-colorChars)*charscale, charscale, 4 );
+		Menu_DrawColorString( cursor.x, cursor.y - charscale, string );
 	}
 }
 

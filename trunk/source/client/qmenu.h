@@ -73,6 +73,8 @@ typedef struct _tag_menuframework
 
 	const char *statusbar;
 
+	const char *tooltip;
+
 	void (*cursordraw)( struct _tag_menuframework *m );
 	
 } menuframework_s;
@@ -88,6 +90,8 @@ typedef struct
 	unsigned flags;
 
 	const char *statusbar;
+
+	const char *tooltip;
 
 	void (*callback)( void *self );
 	void (*statusbarfunc)( void *self );
