@@ -3467,6 +3467,7 @@ typedef struct _SERVERDATA {
 	netadr_t local_server_netadr;
 	char serverInfo[256];
 	char modInfo[64];
+	char szRawName[64];
 
 } SERVERDATA;
 
@@ -3478,7 +3479,7 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 {
 	char *rLine;
 	char *token;
-	char skillLevel[24];
+	char skillLevel[25];
 	char lasttoken[256];
 	char seps[]   = "\\";
 	int players = 0;
@@ -3612,6 +3613,8 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 
 	//build the string for the server (hostname - address - mapname - players/maxClients)
 	//pad the strings - gotta do this for both maps and hostname
+	//save off the raw name for tooltip use
+	strcpy(mservers[m_num_servers].szRawName, mservers[m_num_servers].szHostName);
 	x = 0;
 	for(i=0; i<32; i++) {
 		if(!mservers[m_num_servers].szHostName[i])
@@ -4040,6 +4043,7 @@ void JoinServer_MenuDraw(void)
 		s_joinserver_server_actions[i].generic.y		= FONTSCALE*-1*scale + FONTSCALE*i*10*scale+offset;
 		s_joinserver_server_actions[i].generic.cursor_offset = -16*scale;
 		s_joinserver_server_actions[i].generic.callback = JoinServerFunc;
+		s_joinserver_server_actions[i].generic.tooltip = mservers[i+svridx].szRawName;
 		if(pNameUnique)
 			s_joinserver_server_actions[i].generic.statusbar = "press ENTER or DBL CLICK to connect";
 		else
