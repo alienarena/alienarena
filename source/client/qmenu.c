@@ -582,7 +582,6 @@ void Menu_Draw( menuframework_s *menu )
 			Menu_DrawStatusBar( item->statusbar );
 		else
 			Menu_DrawStatusBar( menu->statusbar );
-
 	}
 	else
 	{
