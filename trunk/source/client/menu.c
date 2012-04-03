@@ -3479,14 +3479,14 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 {
 	char *rLine;
 	char *token;
-	char skillLevel[25];
+	char skillLevel[24];
 	char lasttoken[256];
 	char seps[]   = "\\";
 	int players = 0;
 	int bots = 0;
 	int result;
 	char playername[PLAYERNAME_SIZE];
-	char szServerinfoF[24];
+	char szServerinfoF[25];
 	int score, ping, rankTotal, i, x;
 	PLAYERSTATS	player;
 
