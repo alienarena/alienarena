@@ -1444,6 +1444,7 @@ static menulist_s		s_options_showtime_box;
 static menulist_s		s_options_paindist_box;
 static menulist_s		s_options_explosiondist_box;
 static menulist_s		s_options_raindist_box;
+static menulist_s		s_options_simpleitems_box;
 
 static void TargetFunc( void *unused )
 {
@@ -1505,14 +1506,6 @@ static void AlwaysRunFunc( void *unused )
 	Cvar_SetValue( "cl_run", s_options_alwaysrun_box.curvalue );
 }
 
-/*
-// unused
-static void FreeLookFunc( void *unused )
-{
-	Cvar_SetValue( "freelook", s_options_freelook_box.curvalue );
-}
-*/
-
 static void DisColorFunc( void *unused )
 {
 	Cvar_SetValue( "cl_disbeamclr", s_options_discolor_box.curvalue );
@@ -1536,6 +1529,11 @@ static void MenuMouseSpeedFunc( void *unused )
 static void MouseSmoothingFunc( void *unused )
 {
 	Cvar_SetValue( "m_smoothing", s_options_smoothing_box.curvalue );
+}
+
+static void SimpleItemsFunc( void *unused )
+{
+	Cvar_SetValue( "cl_simpleitems", s_options_simpleitems_box.curvalue);
 }
 
 #if !defined UNIX_VARIANT
@@ -2043,6 +2041,9 @@ static void ControlsSetMenuItemValues( void )
 	else
 		s_options_minimap_box.curvalue = 0;
 
+	Cvar_SetValue("cl_simpleitems", ClampCvar(0, 1, cl_simpleitems->value ) );
+	s_options_simpleitems_box.curvalue	= cl_simpleitems->value;
+
 }
 
 static void ControlsResetDefaultsFunc( void *unused )
@@ -2429,9 +2430,16 @@ void Options_MenuInit( void )
 	s_options_showtime_box.generic.callback = ShowtimeFunc;
 	s_options_showtime_box.itemnames = yesno_names;
 
+	s_options_simpleitems_box.generic.type = MTYPE_SPINCONTROL;
+	s_options_simpleitems_box.generic.x	= 0;
+	s_options_simpleitems_box.generic.y	= FONTSCALE*306*scale;
+	s_options_simpleitems_box.generic.name	= "simple items";
+	s_options_simpleitems_box.generic.callback = SimpleItemsFunc;
+	s_options_simpleitems_box.itemnames = yesno_names;
+
 	s_options_defaults_action.generic.type	= MTYPE_ACTION;
 	s_options_defaults_action.generic.x		= 0;
-	s_options_defaults_action.generic.y		= FONTSCALE*312*scale;
+	s_options_defaults_action.generic.y		= FONTSCALE*316*scale;
 	s_options_defaults_action.generic.name	= "reset defaults";
 	s_options_defaults_action.generic.callback = ControlsResetDefaultsFunc;
 
@@ -2466,6 +2474,7 @@ void Options_MenuInit( void )
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_joystick_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_showfps_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_showtime_box );
+	Menu_AddItem( &s_options_menu, ( void * ) &s_options_simpleitems_box );
 	Menu_AddItem( &s_options_menu, ( void * ) &s_options_defaults_action );
 }
 
@@ -2833,6 +2842,8 @@ void Game_MenuInit( void )
 	s_easy_game_action.generic.cursor_offset = -16;
 	s_easy_game_action.generic.name	= "easy";
 	s_easy_game_action.generic.callback = EasyGameFunc;
+	s_easy_game_action.generic.tooltip = "You will win";
+	s_easy_game_action.generic.statusbar = "Progress levels against bots";
 
 	s_medium_game_action.generic.type	= MTYPE_ACTION;
 	s_medium_game_action.generic.x		= FONTSCALE*32*scale;
@@ -2840,6 +2851,8 @@ void Game_MenuInit( void )
 	s_medium_game_action.generic.cursor_offset = -16;
 	s_medium_game_action.generic.name	= "medium";
 	s_medium_game_action.generic.callback = MediumGameFunc;
+	s_medium_game_action.generic.tooltip = "You might win";
+	s_medium_game_action.generic.statusbar = "Progress levels against bots";
 
 	s_hard_game_action.generic.type	= MTYPE_ACTION;
 	s_hard_game_action.generic.x		= FONTSCALE*32*scale;
@@ -2847,6 +2860,8 @@ void Game_MenuInit( void )
 	s_hard_game_action.generic.cursor_offset = -16;
 	s_hard_game_action.generic.name	= "hard";
 	s_hard_game_action.generic.callback = HardGameFunc;
+	s_hard_game_action.generic.tooltip = "Very challenging";
+	s_hard_game_action.generic.statusbar = "Progress levels against bots";
 
 	s_ultra_game_action.generic.type	= MTYPE_ACTION;
 	s_ultra_game_action.generic.x		= FONTSCALE*32*scale;
@@ -2854,6 +2869,8 @@ void Game_MenuInit( void )
 	s_ultra_game_action.generic.cursor_offset = -16;
 	s_ultra_game_action.generic.name	= "ultra";
 	s_ultra_game_action.generic.callback = UltraGameFunc;
+	s_ultra_game_action.generic.tooltip = "Only the best will win";
+	s_ultra_game_action.generic.statusbar = "Progress levels against bots";
 
 	s_blankline.generic.type = MTYPE_SEPARATOR;
 
