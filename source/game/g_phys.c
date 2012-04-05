@@ -82,7 +82,7 @@ void SV_CheckVelocity (edict_t *ent)
 //
 	for (i=0 ; i<3 ; i++)
 	{
-		if (ent->velocity[i] > sv_maxvelocity->value)
+		if (ent->velocity[i] > sv_maxvelocity->value)		
 			ent->velocity[i] = sv_maxvelocity->value;
 		else if (ent->velocity[i] < -sv_maxvelocity->value)
 			ent->velocity[i] = -sv_maxvelocity->value;

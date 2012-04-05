@@ -1482,7 +1482,7 @@ void G_RunFrame (void)
 				G_UnTimeShiftAllClients( NULL );
 		}
 		else*/
-			G_RunEntity (ent);
+		G_RunEntity (ent);
 	}
 
 	// see if it is time to end a deathmatch

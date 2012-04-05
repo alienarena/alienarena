@@ -2992,8 +2992,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	// If the MOTD is being forced on, decrease frame counter
 	// and re-send the file if necessary
-	if ( client->motd_frames ) {
-		if ( level.time - floor( level.time ) != 0 ) {
+	if ( client->motd_frames ) 
+	{
+		if ( level.time - floor( level.time ) != 0 ) 
+		{
 			SendMessageOfTheDay( ent );
 		}
 		client->motd_frames --;
@@ -3009,12 +3011,13 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		// can exit intermission after 10 seconds, or 20 if map voting enables
 		// (voting will only work if g_mapvote wasn't modified during intermission)
-		if (g_mapvote->value && ! g_mapvote->modified) {
-
+		if (g_mapvote->value && ! g_mapvote->modified) 
+		{
 			//print out results, track winning map
 			mostvotes = 0;
 
-			for (j = 0; j < 4; j++) {
+			for (j = 0; j < 4; j++) 
+			{
 				if (votedmap[j].tally > mostvotes)
 					mostvotes = votedmap[j].tally;
 			}
@@ -3024,7 +3027,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				// we're using a random value for the next map
 				// if a choice needs to be done
 				n_candidates = 0;
-				for ( j = 0 ; j < 4 ; j ++ ) {
+				for ( j = 0 ; j < 4 ; j ++ ) 
+				{
 					if ( votedmap[j].tally < mostvotes )
 						continue;
 					map_candidates[n_candidates ++] = j;
@@ -3037,7 +3041,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			{
 				// "old" voting system, take the first map that
 				// has enough votes
-				for ( j = 0 ; j < 4 ; j ++ ) {
+				for ( j = 0 ; j < 4 ; j ++ ) 
+				{
 					i = (j + 1) % 4;
 					if ( votedmap[i].tally < mostvotes )
 						continue;
@@ -3050,7 +3055,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				&& (ucmd->buttons & BUTTON_ANY) )
 				level.exitintermission = true;
 		}
-		else {
+		else 
+		{
 			if (level.time > level.intermissiontime + 10.0
 				&& (ucmd->buttons & BUTTON_ANY) )
 				level.exitintermission = true;
@@ -3064,15 +3070,14 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	pm_passent = ent;
 
-	if (ent->client->chase_target) {
-
+	if (ent->client->chase_target) 
+	{
 		client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
 		client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
 		client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
 
-	} else {
-
-
+	} else 
+	{
 		// set up for pmove
 		memset (&pm, 0, sizeof(pm));
 
@@ -3118,7 +3123,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && client->moved == false
 			&& ((level.time - client->lastmovetime) < .15))
 		{
-			if((ucmd->sidemove < 0 && client->lastsidemove < 0) || (ucmd->sidemove > 0 && client->lastsidemove > 0)) {
+			if((ucmd->sidemove < 0 && client->lastsidemove < 0) || (ucmd->sidemove > 0 && client->lastsidemove > 0)) 
+			{
 				if(ucmd->sidemove > 0)
 					client->dodge = 1;
 				else
@@ -3126,10 +3132,23 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 				ucmd->upmove += 100;
 			}
 		}
+		if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove != 0 && ucmd->sidemove == 0 && client->moved == false
+			&& ((level.time - client->lastmovetime) < .15))
+		{
+			if((ucmd->forwardmove < 0 && client->lastforwardmove < 0) || (ucmd->forwardmove > 0 && client->lastforwardmove > 0)) 
+			{
+				if(ucmd->forwardmove > 0)
+					client->dodge = 2;
+				else
+					client->dodge = -2;
+				ucmd->upmove += 100;
+			}
+		}
 
 		if(ucmd->sidemove != 0 || ucmd->forwardmove != 0) {
 			client->lastmovetime = level.time;
 			client->lastsidemove = ucmd->sidemove;
+			client->lastforwardmove = ucmd->forwardmove;
 			client->moved = true;
 		}
 		else //we had a frame with no movement
@@ -3141,13 +3160,16 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		pm.pointcontents = gi.pointcontents;
 
 		//joust mode
-		if(joustmode->value) {
+		if(joustmode->value) 
+		{
 			if(ent->groundentity)
 				client->joustattempts = 0;
-			if(pm.cmd.upmove >= 10) {
+			if(pm.cmd.upmove >= 10) 
+			{
 				client->joustattempts++;
 				pm.joustattempts = client->joustattempts;
-				if(pm.joustattempts == 10 || pm.joustattempts == 20) {
+				if(pm.joustattempts == 10 || pm.joustattempts == 20) 
+				{
 					gi.sound(ent, CHAN_VOICE, gi.soundindex("*jump1.wav"), 1, ATTN_NORM, 0);
 					PlayerNoise(ent, ent->s.origin, PNOISE_SELF);
 				}
@@ -3170,18 +3192,29 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 
 		//check for a dodge, and peform if true
-		if(client->dodge != 0) {
-			AngleVectors (ent->s.angles, forward, addspeed, up);
+		if(client->dodge != 0) 
+		{
+			//check for dodge direction
+			if(client->dodge == 2 || client->dodge == -2)
+			{
+				//was forward or backward
+				AngleVectors (ent->s.angles, addspeed, right, up);
+				client->dodge /= 2;
+			}
+			else
+			{
+				//was sideways
+				AngleVectors (ent->s.angles, forward, addspeed, up);
+			}
+
 			addspeed[0] *= 300*client->dodge;
 			addspeed[1] *= 300*client->dodge;
-			//limit to reasonable
-			for(i = 0; i < 2; i++) {
-				if(addspeed[i] > 800)
-					addspeed[i] = 800;
-				if(addspeed[i] < -800)
-					addspeed[i] = -800;
-			}
+			
 			VectorAdd(ent->velocity, addspeed, ent->velocity);
+
+			//check velocity
+			SV_CheckVelocity(ent);
+
 			client->dodge = false;
 			client->lastdodge = client->lastmovetime = level.time;
 		}
@@ -3203,17 +3236,20 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		{
 			sproing = client->sproing_framenum > level.framenum;
 			haste = client->haste_framenum > level.framenum;
-			if(sproing) {
+			if(sproing) 
+			{
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("items/sproing.wav"), 1, ATTN_NORM, 0);
 				ent->velocity[2] += 400;
 			}
-			if(haste && ucmd->forwardmove > 0) {
+			if(haste && ucmd->forwardmove > 0) 
+			{
 				AngleVectors (ent->s.angles, addspeed, right, up);
 				addspeed[0] *= 400;
 				addspeed[1] *= 400;
-				for(i = 0; i < 2; i++) {
-				if(addspeed[i] > 200)
-					addspeed[i] = 200;
+				for(i = 0; i < 2; i++) 
+				{
+					if(addspeed[i] > 200)
+						addspeed[i] = 200;
 				}
 				VectorAdd(ent->velocity, addspeed, ent->velocity);
 
@@ -3330,15 +3366,18 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	} /* spectator mode */
 
 	// update chase cam if being followed
-	for (i = 1; i <= g_maxclients->value; i++) {
+	for (i = 1; i <= g_maxclients->value; i++) 
+	{
 		other = g_edicts + i;
 		if (other->inuse && other->client->chase_target == ent)
 			UpdateChaseCam(other);
 	}
 
 	//mutators
-	if((regeneration->value || excessive->value) && !ent->deadflag) {
-		if((ent->health < ent->max_health) && (client->regen_framenum < level.framenum)) {
+	if((regeneration->value || excessive->value) && !ent->deadflag) 
+	{
+		if((ent->health < ent->max_health) && (client->regen_framenum < level.framenum)) 
+		{
 			client->regen_framenum = level.framenum + 5;
 			ent->health+=2;
 		}
@@ -3349,10 +3388,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		ent->client->spawnprotected = false;
 
 	//lose one health every second
-	if(g_losehealth->value && !ent->deadflag) {
+	if(g_losehealth->value && !ent->deadflag) 
+	{
 		if(regeneration->value || excessive->value || vampire->value)
 			return;
-		if((ent->health > g_losehealth_num->value) && (client->losehealth_framenum < level.framenum)) {
+		if((ent->health > g_losehealth_num->value) && (client->losehealth_framenum < level.framenum)) 
+		{
 			client->losehealth_framenum = level.framenum + 10;
 			ent->health-=1;
 		}
