@@ -1015,7 +1015,7 @@ void M_ChangeYaw (edict_t *ent);
 // g_phys.c
 //
 void G_RunEntity (edict_t *ent);
-
+void SV_CheckVelocity (edict_t *ent);
 
 //
 // g_chase.c
@@ -1303,6 +1303,7 @@ struct gclient_s
 	//movetime - used for special moves
 	float lastmovetime;
 	int lastsidemove;
+	int lastforwardmove;
 	int dodge;
 	int moved;
 	float lastdodge;
