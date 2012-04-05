@@ -861,7 +861,7 @@ void ACEAI_ChooseWeapon(edict_t *self)
 	// The bot will always check for it's favorite weapon first, 
 	// which is set in the bot's config file, 
 	// unless it has a minderaser
-	if ( clear_shot && self->skill > 0 )
+	if ( clear_shot )
 	{
 		if ( ACEIT_ChangeWeapon( self, FindItem( "Minderaser" ) ) )
 		{
