@@ -631,6 +631,7 @@ PTHREAD_CFLAGS
 PTHREAD_LIBS
 PTHREAD_CC
 ax_pthread_config
+ALIENARENA_HOMEDIR
 icondir
 INSTALL_DOCS_FALSE
 INSTALL_DOCS_TRUE
@@ -790,6 +791,7 @@ PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
 XMKMF
 GL_LIBDIR
+ALIENARENA_HOMEDIR
 X11_CFLAGS
 X11_LIBS
 XXF86VM_CFLAGS
@@ -1484,6 +1486,8 @@ Some influential environment variables:
               path overriding pkg-config's built-in search path
   XMKMF       Path to xmkmf, Makefile generator for X Window System
   GL_LIBDIR   directory containing libGL.dylib
+  ALIENARENA_HOMEDIR
+              User data and cfg subdirectory in $HOME
   X11_CFLAGS  C compiler flags for X11, overriding pkg-config
   X11_LIBS    linker flags for X11, overriding pkg-config
   XXF86VM_CFLAGS
@@ -2537,6 +2541,12 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 ac_config_headers="$ac_config_headers config/config.h"
+
+
+  # The prefix default can be set in configure.ac (otherwise it is /usr/local)
+  test "x$prefix" = xNONE && prefix=$ac_default_prefix
+  # Let make expand exec_prefix. Allows to override the makevar 'prefix' later
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
 
 
 am__api_version='1.11'
@@ -5123,6 +5133,7 @@ $as_echo "no" >&6; }
 	fi
 fi
 
+
 #
 # check host environment
 #
@@ -5554,6 +5565,36 @@ else
 fi
 
 icondir=${with_icondir}
+
+
+#
+# User writable data and configuration subdirectory in $HOME
+#  normally this is a hidden subdirectory
+#  default is .codered
+#  can be overridden by environment variable, COR_GAME
+#
+# (These also are #defined in qcommon.h, but changing them is not a good idea
+# BASE_GAMEDATA  "data1", GAME_GAMEDATA  "arena", BOT_GAMEDATA   "botinfo")
+#
+# AC_ARG_VAR creates ALIENARENA_HOMEDIR entry for ./configure --help
+# AC_DEFINE_UNQUOTED adds the setting to config.h,
+#  overriding the define in qcommon.h
+#   and
+#  using the default, if not specified in the commandline
+#  (Note: could also be specified in enviroment. That is not recommended
+#   but is the reason for the package specific variable name.)
+#
+alienarena_homedir=".codered"
+
+if  test "x${ALIENARENA_HOMEDIR}" = "x" ; then :
+  ALIENARENA_HOMEDIR=${alienarena_homedir}
+else
+  alienarena_homedir=${ALIENARENA_HOMEDIR}
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define USER_GAMEDATA "${alienarena_homedir}"
+_ACEOF
 
 
 #
@@ -8173,6 +8214,8 @@ $as_echo "#define OPENAL_DRIVER \"OpenAL32.dll\"" >>confdefs.h
 
 fi
 
+
+
 #
 # required gcc/g++ options.
 #  fast-math because strict adherence to IEEE standard is not needed.
@@ -8276,7 +8319,9 @@ debug=no
 
 # Debugging support + symbols removal
 # Note: removing symbols applies to alternate install only
-#   use 'make install-strip', or custom CFLAGS for standard install
+#   use make install-strip or custom CFLAGS for standard install
+#
+
 # Check whether --enable-debugging-symbols was given.
 if test "${enable_debugging_symbols+set}" = set; then :
   enableval=$enable_debugging_symbols; debug_syms=${enableval}
@@ -10056,7 +10101,14 @@ fi
 
 	if test -z "$ALTERNATE_INSTALL_TRUE"; then :
   else
-  $as_echo " Prefix: ................ '${prefix}'"
+
+		game_data=${datadir}/${PACKAGE}
+		game_data_a=`eval "echo ${game_data}"`
+		game_data=`eval "echo ${game_data_a}"`
+
+		$as_echo "Game Data Directories:"
+		$as_echo " Shared RO Data: ........ ${game_data}"
+		$as_echo " User Home R/W Data ..... ${alienarena_homedir}"
 fi
 
 	if  test "x$debug" = "xyes" ; then :

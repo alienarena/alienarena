@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define BASE_GAMEDATA "data1"
 #endif
 
-#if !defined MOD_GAMEDATA
+#if !defined GAME_GAMEDATA
 #define GAME_GAMEDATA "arena"
 #endif
 

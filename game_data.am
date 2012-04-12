@@ -916,6 +916,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-eternal.fog \
 	data1/maps/scripts/dm-eternal.mus \
 	data1/maps/scripts/dm-europa2k8.mus \
+	data1/maps/scripts/dm-extermination.fog \
 	data1/maps/scripts/dm-furious2k8.fog \
 	data1/maps/scripts/dm-furious2k8.mus \
 	data1/maps/scripts/dm-goregrinder.fog \
@@ -2000,6 +2001,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-dynamo2k8.rscript \
 	data1/scripts/maps/dm-eternal.rscript \
 	data1/scripts/maps/dm-europa2k8.rscript \
+	data1/scripts/maps/dm-extermination.rscript \
 	data1/scripts/maps/dm-furious2k8.rscript \
 	data1/scripts/maps/dm-goregrinder.rscript \
 	data1/scripts/maps/dm-horus.rscript \
@@ -2322,10 +2324,10 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/building2.tga \
 	data1/textures/arena10/building3_hm.tga \
 	data1/textures/arena10/building3_nm.tga \
-	data1/textures/arena10/building3.tga \
 	data1/textures/arena10/building3ns_hm.tga \
 	data1/textures/arena10/building3ns_nm.tga \
 	data1/textures/arena10/building3ns.tga \
+	data1/textures/arena10/building3.tga \
 	data1/textures/arena10/building4_nm.tga \
 	data1/textures/arena10/building4.tga \
 	data1/textures/arena10/building5_nm.tga \
@@ -2333,27 +2335,27 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/building6_nm.tga \
 	data1/textures/arena10/building6.tga \
 	data1/textures/arena10/building7_nm.tga \
-	data1/textures/arena10/building7.tga \
 	data1/textures/arena10/building7s_hm.tga \
 	data1/textures/arena10/building7s_nm.tga \
 	data1/textures/arena10/building7s.tga \
+	data1/textures/arena10/building7.tga \
 	data1/textures/arena10/building8_nm.tga \
 	data1/textures/arena10/building8.tga \
 	data1/textures/arena10/building9_nm.tga \
 	data1/textures/arena10/building9.tga \
 	data1/textures/arena10/cement1_hm.tga \
 	data1/textures/arena10/cement1_nm.tga \
-	data1/textures/arena10/cement1.tga \
 	data1/textures/arena10/cement1ns_nm.tga \
 	data1/textures/arena10/cement1ns.tga \
+	data1/textures/arena10/cement1.tga \
 	data1/textures/arena10/cobblestone_hm.tga \
-	data1/textures/arena10/cobblestone_nm.tga \
-	data1/textures/arena10/cobblestone.tga \
 	data1/textures/arena10/cobblestoneng_hm.tga \
 	data1/textures/arena10/cobblestoneng_nm.tga \
 	data1/textures/arena10/cobblestoneng.tga \
+	data1/textures/arena10/cobblestone_nm.tga \
 	data1/textures/arena10/cobblestonens_nm.tga \
 	data1/textures/arena10/cobblestonens.tga \
+	data1/textures/arena10/cobblestone.tga \
 	data1/textures/arena10/cobwebs2.tga \
 	data1/textures/arena10/cobwebs.tga \
 	data1/textures/arena10/cocacola.tga \
@@ -2369,6 +2371,29 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/container4_hm.tga \
 	data1/textures/arena10/container4_nm.tga \
 	data1/textures/arena10/container4.tga \
+	data1/textures/arena10/cretewall1_nm.tga \
+	data1/textures/arena10/cretewall1.tga \
+	data1/textures/arena10/cretewall2_nm.tga \
+	data1/textures/arena10/cretewall2.tga \
+	data1/textures/arena10/elecpanel1_hm.tga \
+	data1/textures/arena10/elecpanel1_nm.tga \
+	data1/textures/arena10/elecpanel1.tga \
+	data1/textures/arena10/elecpanel2_hm.tga \
+	data1/textures/arena10/elecpanel2_nm.tga \
+	data1/textures/arena10/elecpanel2.tga \
+	data1/textures/arena10/elecpanel3_hm.tga \
+	data1/textures/arena10/elecpanel3_nm.tga \
+	data1/textures/arena10/elecpanel3.tga \
+	data1/textures/arena10/elecpanel4_hm.tga \
+	data1/textures/arena10/elecpanel4_nm.tga \
+	data1/textures/arena10/elecpanel4.tga \
+	data1/textures/arena10/elecvents_hm.tga \
+	data1/textures/arena10/elecvents_nm.tga \
+	data1/textures/arena10/elecvents.tga \
+	data1/textures/arena10/elecwall1_nm.tga \
+	data1/textures/arena10/elecwall1.tga \
+	data1/textures/arena10/elecwall2_nm.tga \
+	data1/textures/arena10/elecwall2.tga \
 	data1/textures/arena10/floortile10_hm.tga \
 	data1/textures/arena10/floortile10_nm.tga \
 	data1/textures/arena10/floortile10.tga \
@@ -2385,8 +2410,16 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/gothwindow2.tga \
 	data1/textures/arena10/gothwindow3_hm.tga \
 	data1/textures/arena10/gothwindow3.tga \
+	data1/textures/arena10/graffitiwall1.tga \
+	data1/textures/arena10/grafittiwall2.tga \
 	data1/textures/arena10/heap1_nm.tga \
 	data1/textures/arena10/heap1.tga \
+	data1/textures/arena10/heap2_nm.tga \
+	data1/textures/arena10/heap2.tga \
+	data1/textures/arena10/heap3_nm.tga \
+	data1/textures/arena10/heap3.tga \
+	data1/textures/arena10/heap4_nm.tga \
+	data1/textures/arena10/heap4.tga \
 	data1/textures/arena10/ivy1_nm.tga \
 	data1/textures/arena10/ivy1.tga \
 	data1/textures/arena10/ivy2_nm.tga \
@@ -2457,10 +2490,16 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/rockdirt1ng_hm.tga \
 	data1/textures/arena10/rockdirt1ng_nm.tga \
 	data1/textures/arena10/rockdirt1ng.tga \
+	data1/textures/arena10/rockdirt1_nm.tga \
 	data1/textures/arena10/rockdirt1ns_nm.tga \
 	data1/textures/arena10/rockdirt1ns.tga \
-	data1/textures/arena10/rockdirt1_nm.tga \
 	data1/textures/arena10/rockdirt1.tga \
+	data1/textures/arena10/rustdoor1_hm.tga \
+	data1/textures/arena10/rustdoor1_nm.tga \
+	data1/textures/arena10/rustdoor1.tga \
+	data1/textures/arena10/rustwall1_hm.tga \
+	data1/textures/arena10/rustwall1_nm.tga \
+	data1/textures/arena10/rustwall1.tga \
 	data1/textures/arena10/sevenup.tga \
 	data1/textures/arena10/sewergrate1_nm.tga \
 	data1/textures/arena10/sewergrate1.tga \
@@ -2472,6 +2511,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/sign5.tga \
 	data1/textures/arena10/sign6r.tga \
 	data1/textures/arena10/sign6.tga \
+	data1/textures/arena10/sign7_hm.tga \
+	data1/textures/arena10/sign7_nm.tga \
+	data1/textures/arena10/sign7.tga \
 	data1/textures/arena10/skyscraper1_hm.tga \
 	data1/textures/arena10/skyscraper1_nm.tga \
 	data1/textures/arena10/skyscraper1.tga \
@@ -2496,6 +2538,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/skyscraper9.tga \
 	data1/textures/arena10/stacks1.tga \
 	data1/textures/arena10/stacks2.tga \
+	data1/textures/arena10/starsign_hm.tga \
+	data1/textures/arena10/starsign_nm.tga \
+	data1/textures/arena10/starsign.tga \
 	data1/textures/arena10/stonewall1_nm.tga \
 	data1/textures/arena10/stonewall1.tga \
 	data1/textures/arena10/stonewall2_hm.tga \

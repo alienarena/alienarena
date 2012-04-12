@@ -33,6 +33,9 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADERS([config/config.h])
 
+dnl insure default prefix
+AX_EXPAND_PREFIX
+
 dnl 1.11 = require automake 1.11 or greater
 dnl foreign = do not apply GNU doc requirements
 dnl subdir-objects = compile objects into their sub directories
@@ -61,6 +64,7 @@ AC_PROG_RANLIB
 AC_PROG_MKDIR_P
 AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
+
 
 #
 # check host environment
@@ -211,6 +215,31 @@ AC_ARG_WITH(icondir,
 		[icon install directory (default:DATADIR/icons)])],
 	[ with_icondir=${withval} ], [ with_icondir=${datadir}/icons ])
 AC_SUBST([icondir], [${with_icondir}])
+
+#
+# User writable data and configuration subdirectory in $HOME
+#  normally this is a hidden subdirectory
+#  default is .codered
+#  can be overridden by environment variable, COR_GAME
+# 
+# (These also are #defined in qcommon.h, but changing them is not a good idea
+# BASE_GAMEDATA  "data1", GAME_GAMEDATA  "arena", BOT_GAMEDATA   "botinfo")
+#
+# AC_ARG_VAR creates ALIENARENA_HOMEDIR entry for ./configure --help
+# AC_DEFINE_UNQUOTED adds the setting to config.h,
+#  overriding the define in qcommon.h
+#   and
+#  using the default, if not specified in the commandline
+#  (Note: could also be specified in enviroment. That is not recommended
+#   but is the reason for the package specific variable name.)
+#
+alienarena_homedir=".codered"
+AC_ARG_VAR([ALIENARENA_HOMEDIR],[User data and cfg subdirectory in $HOME])
+AS_IF([ test "x${ALIENARENA_HOMEDIR}" = "x" ],
+	[ALIENARENA_HOMEDIR=${alienarena_homedir}],
+	[alienarena_homedir=${ALIENARENA_HOMEDIR}])
+AC_DEFINE_UNQUOTED([USER_GAMEDATA],["${alienarena_homedir}"],
+	[User data and cfg subdirectory in $HOME])
 
 #
 # Checks for libraries.
@@ -464,6 +493,8 @@ AM_COND_IF([BUILD_WIN32],
 	AC_DEFINE([OPENAL_DRIVER],["OpenAL32.dll"],[OpenAL dll name])
 ])
 
+
+
 #
 # required gcc/g++ options.
 #  fast-math because strict adherence to IEEE standard is not needed.
@@ -483,9 +514,12 @@ debug=no
 
 # Debugging support + symbols removal
 # Note: removing symbols applies to alternate install only
-#   use 'make install-strip', or custom CFLAGS for standard install
+#   use make install-strip or custom CFLAGS for standard install
+#
+
 AC_ARG_ENABLE([debugging-symbols],
-	[AS_HELP_STRING([--enable-debugging-symbols],[Compile Alien Arena with full debugging information (default:no)])],
+	[AS_HELP_STRING([--enable-debugging-symbols],
+		[Compile Alien Arena with full debugging information (default:no)])],
 	[debug_syms=${enableval}],[debug_syms=no])
 AS_IF([ test "x$debug_syms" = "xyes" ],[
 	AX_APPEND_FLAG([-g3],[CFLAGS])
@@ -583,7 +617,17 @@ AS_IF([test "x$hide_status" = "xno"],[
 	AS_ECHO([" Alternate install: ..... ${alternate_install}"])
 
 	AM_COND_IF([ALTERNATE_INSTALL],,
-		[AS_ECHO([" Prefix: ................ '${prefix}'"])])
+		[
+dnl
+dnl try to get the full path for automake's pkgdatadir which determines DATADIR
+dnl		
+		game_data=${datadir}/${PACKAGE}
+		game_data_a=`eval "echo ${game_data}"`
+		game_data=`eval "echo ${game_data_a}"`
+		]
+		[AS_ECHO(["Game Data Directories:"])]
+		[AS_ECHO([" Shared RO Data: ........ ${game_data}"])]
+		[AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"])] )
 
 	AS_IF([ test "x$debug" = "xyes" ],[
 		AS_ECHO(["- DEBUGGING OPTIONS ------------------------"])
