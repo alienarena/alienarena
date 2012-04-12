@@ -47,17 +47,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #define _putenv putenv
 #endif
 
-/*
- * Temporary test data collection for packet rate limiting
- * and framerate_cap jitter experiment.
- * Following 7.52 release, may be deleted.
- */
-#define PKT_TEST 0
-
-#if PKT_TEST
-cvar_t *cl_packet_test;
-cvar_t *cl_frcjitter;
-#endif
 
 cvar_t	*freelook;
 
@@ -1799,11 +1788,6 @@ void CL_InitLocal (void)
 	adr7 = Cvar_Get( "adr7", "", CVAR_ARCHIVE );
 	adr8 = Cvar_Get( "adr8", "", CVAR_ARCHIVE );
 
-#if PKT_TEST
-	cl_packet_test = Cvar_Get( "cl_packet_test", "0", 0 );
-	cl_frcjitter = Cvar_Get( "cl_frcjitter", "1", 0 );
-#endif
-
 //
 // register our variables
 //
@@ -2146,30 +2130,6 @@ void CL_FixCvarCheats (void)
 
 //============================================================================
 
-/*
- *  Disabled now and may be removed following 7.52 release
- *
- * Temporary test data collection for packet rate limiting
- * cvar: cl_packet_test
- * Dumps collected packets per server frame and packet timer info
- *  at 1024 server frame intervals
- * This is TEMPORARY.
- *  'cause the data format is technical, arcane and crude.
- *
- */
-#if PKT_TEST
-
-#define PPSF_SIZE 16
-int svframe_count;
-int pkts_per_svframe[PPSF_SIZE];
-int ppsfi;
-
-#define PKTTIME_SIZE 30
-int pkttime_ix;
-int pkttime[PKTTIME_SIZE];
-
-#endif
-
 qboolean send_packet_now = false; // instant packets. used during downloads
 extern float    r_frametime;      // TODO: move to appropriate .h
 extern unsigned sys_frame_time;   // TODO: ditto
@@ -2230,12 +2190,6 @@ void CL_Frame( int msec )
 	static int packet_delay = 0;
 	int render_trigger;
 	int packet_trigger;
-
-#if PKT_TEST
-	// test variables
-	static int prev_server_frame = 0;
-	static int packets_per_server_frame = 0;
-#endif
 
 	if ( dedicated->integer )
 	{ // crx running as dedicated server crashes without this.
@@ -2330,28 +2284,6 @@ void CL_Frame( int msec )
 	}
 	else
 	{ /* normal operation. */
-#if PKT_TEST
-		if ( cl_frcjitter->integer )
-		{ // the cvar is temporary for test, to allow disabling this
-			/* Sometimes, the packetrate_cap can be "in phase" with
-			 *  the frame rate affecting the average packets-per-server-frame.
-			 *  A little jitter in the framerate_cap counteracts that.
-			 */
-			if ( render_timer >= (framerate_cap + frcjitter[frcjitter_ix]) )
-			{
-				if ( ++frcjitter_ix > 3 ) frcjitter_ix = 0;
-				render_trigger = 1;
-			}
-		}
-		else
-		{
-			if ( render_timer >= framerate_cap )
-			{
-				render_trigger = 1;
-			}
-
-		}
-#else
 		/* Sometimes, the packetrate_cap can be "in phase" with
 		 *  the frame rate affecting the average packets-per-server-frame.
 		 *  A little jitter in the framerate_cap counteracts that.
@@ -2361,7 +2293,6 @@ void CL_Frame( int msec )
 			if ( ++frcjitter_ix > 3 ) frcjitter_ix = 0;
 			render_trigger = 1;
 		}
-#endif
 		if ( packetrate_cap == -1 )
 		{ // flagged to run same as framerate_cap
 			packet_trigger = render_trigger;
@@ -2460,76 +2391,6 @@ void CL_Frame( int msec )
 		 * [The Quake trick that keeps players view smooth in on-line play.]
 		 */
 		CL_PredictMovement();
-
-#if PKT_TEST
-
-		if ( packetrate_cap > 0 && cl_packet_test->integer )
-		{
-		/* developer test for checking packets per serverframe, packet delays
-		 *  histogram data collection
-		 */
-			/*
-			 * collect packet timer histogram
-			 */
-			pkttime_ix = packet_timer;
-			if ( pkttime_ix >= PKTTIME_SIZE-1 )
-			{
-				++pkttime[PKTTIME_SIZE-1];
-			}
-			else
-			{
-				++pkttime[pkttime_ix];
-			}
-
-			if ( prev_server_frame != cl.frame.serverframe )
-			{ // new server frame
-				++svframe_count;
-				if ( packets_per_server_frame > 0
-						&& packets_per_server_frame < PPSF_SIZE-1 )
-				{
-					++pkts_per_svframe[packets_per_server_frame];
-				}
-				else
-				{
-					++pkts_per_svframe[PPSF_SIZE-1];
-				}
-
-				if ( (svframe_count & 0x3FF) == 0 )
-				{ // dump to console and clear every 1024 server frames, ~100 secs
-					/*--- PACKETS PER SERVER FRAME ---*/
-					Com_Printf( "ppsf(%i):", svframe_count );
-					for ( ppsfi = 0; ppsfi < PPSF_SIZE-1; ppsfi++ )
-					{
-						if ( pkts_per_svframe[ppsfi] != 0 )
-						{
-							Com_Printf( "[%i:%i]", ppsfi,
-							        pkts_per_svframe[ppsfi] );
-							pkts_per_svframe[ppsfi] = 0;
-						}
-					}
-					Com_Printf( "\n" );
-					/*--- PACKET TIMER HISTOGRAM ---*/
-					Com_Printf( "pkttime:");
-					for ( pkttime_ix = 0; pkttime_ix < PKTTIME_SIZE-1; pkttime_ix++ )
-					{
-						if ( pkttime[pkttime_ix] != 0 )
-						{
-							Com_Printf( "[%i:%i]",
-									pkttime_ix, pkttime[pkttime_ix] );
-							pkttime[pkttime_ix] = 0;
-						}
-					}
-					Com_Printf( "\n" );
-				}
-				prev_server_frame = cl.frame.serverframe;
-				packets_per_server_frame = 1;
-			}
-			else
-			{
-				++packets_per_server_frame;
-			}
-		}
-#endif
 
 		/* retrigger packet send timer */
 		packet_timer = 0;

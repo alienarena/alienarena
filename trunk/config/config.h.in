@@ -368,6 +368,9 @@
 /* unix-specific conditional compile */
 #undef UNIX_VARIANT
 
+/* User data and cfg subdirectory in $HOME */
+#undef USER_GAMEDATA
+
 /* Version number of package */
 #undef VERSION
 
