@@ -748,6 +748,7 @@ void CL_Disconnect (void)
 		if (time > 0)
 			Com_Printf ("%i frames, %3.1f seconds: %3.1f fps\n", cl.timedemo_frames,
 			time/1000.0, cl.timedemo_frames*1000.0 / time);
+		cl.timedemo_start = 0;
 	}
 
 	VectorClear (cl.refdef.blend);
@@ -2274,12 +2275,11 @@ void CL_Frame( int msec )
 
 	if ( cl_timedemo->integer == 1 )
 	{ /* accumulate timed demo statistics, free run both packet and render */
-		if ( !cl.timedemo_start )
-		{
-			cl.timedemo_start = cls.realtime;
-		}
-		cl.timedemo_frames++;
-		render_trigger = 1;
+		/* setting render_trigger to 1 forces timedemo_start to be set if it
+		 * hasn't been already. It also forces cl.timedemo_frames to be 
+		 * incremented.
+		 */
+		render_trigger = 1; 
 		packet_trigger = 1;
 	}
 	else
