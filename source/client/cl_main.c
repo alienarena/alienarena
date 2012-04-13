@@ -95,6 +95,7 @@ cvar_t	*cl_showclamp;
 
 cvar_t	*cl_paused;
 cvar_t	*cl_timedemo;
+cvar_t	*cl_demoquit;
 
 cvar_t	*lookspring;
 cvar_t	*lookstrafe;
@@ -384,6 +385,7 @@ void CL_Record_f (void)
 }
 
 //======================================================================
+
 
 /*
 ===================
@@ -740,7 +742,7 @@ void CL_Disconnect (void)
 	if (cls.state == ca_disconnected)
 		return;
 
-	if (cl_timedemo && cl_timedemo->value)
+	if (cl_timedemo && cl_timedemo->integer)
 	{
 		int	time;
 
@@ -780,11 +782,10 @@ void CL_Disconnect (void)
 
 	cls.state = ca_disconnected;
 
-/*
-** From Max's timedemo benchmarks:
-**	For automated test runs using demos, can exit here by calling CL_Quit_f()
-*/
-
+	if 		(cl_demoquit && cl_demoquit->integer && 
+			cl_timedemo && cl_timedemo->integer) {
+		CL_Quit_f();
+	}
 }
 
 void CL_Disconnect_f (void)
@@ -1849,6 +1850,7 @@ void CL_InitLocal (void)
 	cl_timeout = Cvar_Get ("cl_timeout", "120", 0);
 	cl_paused = Cvar_Get ("paused", "0", 0);
 	cl_timedemo = Cvar_Get ("timedemo", "0", 0);
+	cl_demoquit = Cvar_Get ("demoquit", "0", 0);
 
 	rcon_client_password = Cvar_Get ("rcon_password", "", 0);
 	rcon_address = Cvar_Get ("rcon_address", "", 0);
