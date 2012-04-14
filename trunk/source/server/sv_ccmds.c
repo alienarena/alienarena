@@ -366,9 +366,19 @@ SV_Serverinfo_f
   Examine or change the serverinfo string
 ===========
 */
+extern netadr_t *CL_GetRemoteserver (void);
 void SV_Serverinfo_f (void)
 {
+	netadr_t *remoteserver;
 	Com_Printf ("Server info settings:\n");
+	if (!(svs.clients || dedicated->value)) {
+		remoteserver = CL_GetRemoteServer ();
+		if (remoteserver) {
+			Netchan_OutOfBandPrint (NS_CLIENT, *remoteserver, va("status %i", PROTOCOL_VERSION));
+			return;
+		}
+		Com_Printf ("(No remote server connected, printing local cvars.)\n");
+	}
 	Info_Print (Cvar_Serverinfo());
 }
 
