@@ -1733,6 +1733,16 @@ redoSkins:
 }
 
 
+netadr_t *CL_GetRemoteServer (void) {
+	static netadr_t remoteserver;
+	if (cls.state >= ca_connected) {
+		remoteserver = cls.netchan.remote_address;
+		return &remoteserver;
+	}
+	return NULL;
+}
+
+
 /*
 =================
 CL_Precache_f

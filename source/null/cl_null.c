@@ -76,3 +76,8 @@ void Key_Init (void)
 	Cmd_AddCommand ("bind", Key_Bind_Null_f);
 }
 
+netadr_t *CL_GetRemoteServer (void)
+{
+	return NULL;
+}
+
