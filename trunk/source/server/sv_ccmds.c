@@ -366,7 +366,7 @@ SV_Serverinfo_f
   Examine or change the serverinfo string
 ===========
 */
-extern netadr_t *CL_GetRemoteserver (void);
+extern netadr_t *CL_GetRemoteServer (void);
 void SV_Serverinfo_f (void)
 {
 	netadr_t *remoteserver;
