@@ -105,6 +105,16 @@ textures/blanks/blank6
 		alphashift 0 0.2 0.2
 	}
 }
+textures/blanks/blank7
+{
+	{
+		map gfx/beam1.tga
+		scale static 10 static 10
+		colormap 1 1 1
+		beam
+		lensflare
+	}
+}
 textures/rage/metallight_2
 {
 	{
