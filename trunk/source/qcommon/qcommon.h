@@ -546,6 +546,10 @@ char	*Cvar_Userinfo (void);
 char	*Cvar_Serverinfo (void);
 // returns an info string containing all the CVAR_SERVERINFO cvars
 
+void	Anon_Cvar_Set(cvar_t *nvar, char *var_value);
+//Initializes a new cvar struct holding just a value, with no name in it.
+//Used in some places where a weak-typed variable is needed.
+
 extern	qboolean	userinfo_modified;
 // this is set each time a CVAR_USERINFO variable is changed
 // so that the client knows to send it to the server
