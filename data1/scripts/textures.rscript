@@ -106,17 +106,3 @@ textures/arena9/weapongrate
 		beamtype 1
 	}
 }
-textures/arena10/neonsign11
-{
-    { if ( $ rs_hasflag && ( $ rs_team == blue ) )
-        map textures/rage/ceiling
-        blendFunc GL_ONE_MINUS_SRC_COLOR GL_ZERO
-    }
-}
-textures/arena10/neonsign11b
-{
-    { if ( $ rs_hasflag && ( $ rs_team == red ) )
-        map textures/rage/ceiling
-        blendFunc GL_ONE_MINUS_SRC_COLOR GL_ZERO
-    }
-}
