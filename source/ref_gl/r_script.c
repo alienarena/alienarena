@@ -132,12 +132,26 @@ void RS_ResetScript (rscript_t *rs)
 	rs->ready = false;
 }
 
+void rs_free_if_subexpr (rs_cond_val_t *expr)
+{
+	if (expr->subexpr1)
+		rs_free_if_subexpr (expr->subexpr1);
+	if (expr->subexpr2)
+		rs_free_if_subexpr (expr->subexpr2);
+	Z_Free (expr);
+}
+
 void RS_ClearStage (rs_stage_t *stage)
 {
 	anim_stage_t	*anim = stage->anim_stage, *tmp_anim;
 	random_stage_t	*randStage = stage->rand_stage, *tmp_rand;
 
 
+	if (stage->condv != NULL)
+	{
+		rs_free_if_subexpr (stage->condv);
+		stage->condv = NULL;
+	}
 	while (anim != NULL)
 	{
 		tmp_anim = anim;
@@ -279,6 +293,7 @@ rs_stage_t *RS_NewStage (rscript_t *rs)
 	stage->anim_stage = NULL;
 	stage->next = NULL;
 	stage->last_anim = NULL;
+	stage->condv = NULL;
 
 	RS_ClearStage (stage);
 
@@ -814,6 +829,126 @@ void rs_stage_glow (rs_stage_t *stage, char **token)
 {
 	stage->glow = true;
 }
+
+typedef struct 
+{
+	char			*opname;
+	rs_cond_op_t	op;
+} rs_cond_op_key_t;
+static rs_cond_op_key_t rs_cond_op_keys[] = 
+{
+	{	"==",	rs_cond_eq		},
+	{	"!=",	rs_cond_neq		},
+	{	">",	rs_cond_gt		},
+	{	"<=",	rs_cond_ngt		},
+	{	"<",	rs_cond_lt		},
+	{	">=",	rs_cond_nlt		},
+	{	"&&",	rs_cond_and		},
+	{	"||",	rs_cond_or		},
+	
+	{	NULL,	0				}
+};
+rs_cond_val_t *rs_stage_if_subexpr (char **token)
+{
+	int i;
+	rs_cond_val_t *res = Z_Malloc (sizeof(rs_cond_val_t));
+	*token = strtok (NULL, TOK_DELIMINATORS);
+	if (!(*token)) 
+	{
+		Z_Free (res);
+		return NULL;
+	}
+	Com_Printf ("Starting subexpr %s\n", *token);
+	if (!Q_strcasecmp (*token, "(")) 
+	{
+		res->subexpr1 = rs_stage_if_subexpr (token);
+		if (!res->subexpr1) //there was an error somewhere
+		{
+			Z_Free (res);
+			return NULL;
+		}
+		*token = strtok (NULL, TOK_DELIMINATORS);
+		if (!(*token)) {
+			Com_Printf ("Ran out of tokens in stage conditional!\n");
+			rs_free_if_subexpr (res->subexpr1);
+			Z_Free (res);
+			return NULL;
+		}
+		if (!Q_strcasecmp (*token, ")"))
+		{
+			res->optype = rs_cond_is;
+			return res;
+		}
+		for (i = 0; rs_cond_op_keys[i].opname; i++)
+			if (!Q_strcasecmp (*token, rs_cond_op_keys[i].opname))
+				break;
+		if (!rs_cond_op_keys[i].opname) 
+		{
+			Com_Printf ("Invalid stage conditional operation %s\n", *token);
+			rs_free_if_subexpr (res->subexpr1);
+			Z_Free (res);
+			return NULL;
+		}
+		res->optype = rs_cond_op_keys[i].op;
+		res->subexpr2 = rs_stage_if_subexpr (token);
+		if (!res->subexpr2) //there was an error somewhere
+		{
+			rs_free_if_subexpr (res->subexpr1);
+			Z_Free (res);
+			return NULL;
+		}
+		*token = strtok (NULL, TOK_DELIMINATORS);
+		if (!(*token) || Q_strcasecmp (*token, ")")) 
+		{
+			Com_Printf ("Missing ) in stage conditional!\n");
+			if (*token)
+				Com_Printf ("Instead got %s\n", *token);
+			rs_free_if_subexpr (res->subexpr1);
+			rs_free_if_subexpr (res->subexpr2);
+			Z_Free (res);
+			return NULL;
+		}
+		return res;
+	} 
+	else if (!Q_strcasecmp (*token, "!"))
+	{
+		res->optype = rs_cond_lnot;
+		res->subexpr1 = rs_stage_if_subexpr (token);
+		if (!res->subexpr1) // there was an error somewhere
+		{
+			Z_Free (res);
+			return NULL;
+		}
+		return res;
+	}
+	else if (!Q_strcasecmp (*token, "$"))
+	{
+		res->optype = rs_cond_none;
+		*token = strtok (NULL, TOK_DELIMINATORS);
+		if (!(*token)) {
+			Com_Printf ("Missing cvar name in stage conditional!\n");
+			rs_free_if_subexpr (res->subexpr1);
+			Z_Free (res);
+			return NULL;
+		}
+		res->val = Cvar_Get (*token, "0", 0);
+		return res;
+	}
+	else
+	{
+		res->optype = rs_cond_none;
+		res->val = &(res->lval);
+		Anon_Cvar_Set (res->val, *token);
+		return res;
+	}
+}
+void rs_stage_if (rs_stage_t *stage, char **token)
+{
+	stage->condv = rs_stage_if_subexpr (token);
+	if (!stage->condv)
+		Com_Printf ("ERROR in stage conditional!\n");
+}
+
 static rs_stagekey_t rs_stagekeys[] =
 {
 	{	"colormap",		&rs_stage_colormap		},
@@ -848,6 +983,7 @@ static rs_stagekey_t rs_stagekeys[] =
 	{	"rotating",		&rs_stage_rotating		},
 	{	"fx",			&rs_stage_fx			},
 	{	"glow",			&rs_stage_glow			},
+	{	"if",			&rs_stage_if			},
 
 	{	NULL,			NULL					}
 };
@@ -1306,6 +1442,75 @@ void ToggleLightmap (qboolean toggle)
 	}
 }
 
+static cvar_t rs_eval_if_subexpr (rs_cond_val_t *expr)
+{
+	cvar_t	res;
+	int		resv;
+	switch (expr->optype)
+	{
+		case rs_cond_none:
+			return *expr->val;
+		case rs_cond_is:
+			return rs_eval_if_subexpr (expr->subexpr1);
+		case rs_cond_lnot:
+			resv = (rs_eval_if_subexpr (expr->subexpr2).value == 0);
+			break;
+		case rs_cond_eq:
+/*			Com_Printf ("%s == %s\n", */
+/*					rs_eval_if_subexpr (expr->subexpr1).string,*/
+/*					rs_eval_if_subexpr (expr->subexpr2).string*/
+/*				);*/
+			resv = Q_strcasecmp (
+					rs_eval_if_subexpr (expr->subexpr1).string,
+					rs_eval_if_subexpr (expr->subexpr2).string
+				) == 0;
+			break;
+		case rs_cond_neq:
+			resv = Q_strcasecmp (
+					rs_eval_if_subexpr (expr->subexpr1).string,
+					rs_eval_if_subexpr (expr->subexpr2).string
+				) != 0;
+			break;
+		case rs_cond_gt:
+			resv = (rs_eval_if_subexpr (expr->subexpr1).value >
+					rs_eval_if_subexpr (expr->subexpr2).value
+				);
+			break;
+		case rs_cond_ngt:
+			resv = (rs_eval_if_subexpr (expr->subexpr1).value <=
+					rs_eval_if_subexpr (expr->subexpr2).value
+				);
+			break;
+		case rs_cond_lt:
+			resv = (rs_eval_if_subexpr (expr->subexpr1).value <
+					rs_eval_if_subexpr (expr->subexpr2).value
+				);
+			break;
+		case rs_cond_nlt:
+			resv = (rs_eval_if_subexpr (expr->subexpr1).value >=
+					rs_eval_if_subexpr (expr->subexpr2).value
+				);
+			break;
+		case rs_cond_and:
+			resv = (rs_eval_if_subexpr (expr->subexpr1).value &&
+					rs_eval_if_subexpr (expr->subexpr2).value
+				);
+			break;
+		case rs_cond_or:
+			resv = (rs_eval_if_subexpr (expr->subexpr1).value ||
+					rs_eval_if_subexpr (expr->subexpr2).value
+				);
+			break;
+		default:
+			Com_Printf ("Unknown optype %d! (Can't happen)\n", expr->optype);
+			resv = 0;
+			break;
+	}
+	memset (&res, 0, sizeof (cvar_t));
+	Anon_Cvar_Set (&res, va ("%d", resv));
+	return res;
+}
+
 //This is the shader drawing routine for bsp surfaces - it will draw on top of the
 //existing texture.
 void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
@@ -1335,6 +1540,8 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	{
 		if (stage->lensflare || stage->grass || stage->beam)
 			break; //handled elsewhere
+		if (stage->condv && !(rs_eval_if_subexpr(stage->condv).value))
+			break; //stage should not execute
 
 		if(stage->lightmap)
 		{

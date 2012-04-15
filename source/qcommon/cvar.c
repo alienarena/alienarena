@@ -150,6 +150,25 @@ inline static cvar_t *Cvar_Allocate(char *var_name, char *var_value, int flags, 
 
 /*
 ============
+Anon_Cvar_Allocate
+
+Initializes a new cvar struct holding just a value, with no name in it.
+Used in some places where a weak-typed variable is needed.
+============
+*/ 
+void Anon_Cvar_Set(cvar_t *nvar, char *var_value)
+{
+	if (nvar->string)
+		Z_Free (nvar->string);
+	nvar->string = CopyString (var_value);
+	nvar->value = atof (nvar->string);
+	nvar->default_value = atof (nvar->string);
+	nvar->integer = atoi (nvar->string);
+}
+
+
+/*
+============
 Cvar_AddBetween
 
 Adds a variable between two others.

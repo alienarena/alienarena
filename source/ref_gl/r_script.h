@@ -66,6 +66,30 @@ typedef struct
 	int	start, end;
 } rs_frames_t;
 
+//conditional operation types
+typedef enum
+{
+	rs_cond_none,	// no comparison, no subexpressions
+	rs_cond_is,		// no comparison, use first subexpresson
+	rs_cond_eq,		// ==
+	rs_cond_neq,	// !=
+	rs_cond_gt,		// >
+	rs_cond_ngt,	// <=
+	rs_cond_lt,		// <
+	rs_cond_nlt,	// >=
+	rs_cond_and,	// &&
+	rs_cond_or,		// ||
+	rs_cond_lnot,   // !, use first subexpression
+} rs_cond_op_t;
+//conditional operation value
+typedef struct rs_cond_val_s
+{
+	rs_cond_op_t			optype;					//what type of operation
+	struct rs_cond_val_s	*subexpr1, *subexpr2;	//sub expressions, if applicable
+	cvar_t					*val;					//value, if applicable
+	cvar_t					lval;					//for use storing literal values                
+} rs_cond_val_t;
+
 // Script stage
 typedef struct rs_stage_s 
 {
@@ -75,6 +99,8 @@ typedef struct rs_stage_s
 	char					name2[MAX_OSPATH];		// texture name
 
 	char					model[MAX_OSPATH];		// name of model
+	
+	rs_cond_val_t			*condv;			// conditional expression
 	
 	anim_stage_t			*anim_stage;	// first animation stage
 	float					anim_delay;		// Delay between anim frames
