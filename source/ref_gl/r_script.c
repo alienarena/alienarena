@@ -1105,6 +1105,21 @@ void RS_ScanPathForScripts (void)
 
 		FS_FreeFileList(script_list, script_count);
 	}
+	
+	script_count = 0;
+	//TODO: gl_interactivescripts cvar
+	script_list = FS_ListFilesInFS("scripts/interactive/*.rscript", &script_count, 0, SFF_SUBDIR | SFF_HIDDEN | SFF_SYSTEM);
+
+	if(script_list) {
+		for (i = 0; i < script_count; i++)
+		{
+			c = COM_SkipPath(script_list[i]);
+			Com_sprintf(script, MAX_OSPATH, "scripts/interactive/%s", c);
+			RS_LoadScript(script);
+		}
+
+		FS_FreeFileList(script_list, script_count);
+	}
 
 	script_count = 0;
 	if(gl_normalmaps->value) { //search for normal map scripts ONLY if we are using normal mapping, do last to overide anything
