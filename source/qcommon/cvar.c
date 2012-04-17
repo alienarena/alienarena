@@ -384,9 +384,9 @@ cvar_t *Cvar_ForceSet (char *var_name, char *value)
 Cvar_Set
 ============
 */
-cvar_t *Cvar_Set (char *var_name, char *value)
+void Cvar_Set (char *var_name, char *value)
 {
-	return Cvar_Set2 (var_name, value, false);
+	(void)Cvar_Set2 (var_name, value, false);
 }
 
 /*
@@ -394,12 +394,12 @@ cvar_t *Cvar_Set (char *var_name, char *value)
 Cvar_FullSet
 ============
 */
-cvar_t *Cvar_FullSet (char *var_name, char *value, int flags)
+void Cvar_FullSet (char *var_name, char *value, int flags)
 {
 	cvar_t	*var;
 
 	if (!Cvar_FindOrCreate (var_name, value, flags, &var))
-		return var;
+		return;
 
 	var->modified = true;
 
@@ -413,8 +413,6 @@ cvar_t *Cvar_FullSet (char *var_name, char *value, int flags)
 	var->default_value = var->value;
 	var->integer = atoi(var->string);
 	var->flags = flags;
-
-	return var;
 }
 
 /*

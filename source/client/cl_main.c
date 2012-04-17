@@ -387,6 +387,7 @@ void CL_Record_f (void)
 //======================================================================
 
 
+
 /*
 ===================
 Cmd_ForwardToServer
@@ -1984,28 +1985,28 @@ void CL_InitLocal (void)
 	strcpy(map_music, "music/none.wav");
 
 	//register all our menu gfx
-	R_RegisterPic("m_main");
-	R_RegisterPic("m_options");
-	R_RegisterPic("menu_back");
-	R_RegisterPic("m_video");
-	R_RegisterPic("m_controls");
-	R_RegisterPic("m_player");
-	R_RegisterPic("m_bots");
-	R_RegisterPic("m_startserver");
-	R_RegisterPic("m_dmoptions");
-	R_RegisterPic("m_mutators");
-	R_RegisterPic("m_single");
-	R_RegisterPic("m_quit");
-	R_RegisterPic("m_main_mont0");
-	R_RegisterPic("m_main_mont1");
-	R_RegisterPic("m_main_mont2");
-	R_RegisterPic("m_main_mont3");
-	R_RegisterPic("m_main_mont4");
-	R_RegisterPic("m_main_mont5");
-	R_RegisterPic("hud_bomber");
-	R_RegisterPic("hud_strafer");
-	R_RegisterPic("hud_hover");
-	R_RegisterPic("blood_ring");
+	(void)R_RegisterPic("m_main");
+	(void)R_RegisterPic("m_options");
+	(void)R_RegisterPic("menu_back");
+	(void)R_RegisterPic("m_video");
+	(void)R_RegisterPic("m_controls");
+	(void)R_RegisterPic("m_player");
+	(void)R_RegisterPic("m_bots");
+	(void)R_RegisterPic("m_startserver");
+	(void)R_RegisterPic("m_dmoptions");
+	(void)R_RegisterPic("m_mutators");
+	(void)R_RegisterPic("m_single");
+	(void)R_RegisterPic("m_quit");
+	(void)R_RegisterPic("m_main_mont0");
+	(void)R_RegisterPic("m_main_mont1");
+	(void)R_RegisterPic("m_main_mont2");
+	(void)R_RegisterPic("m_main_mont3");
+	(void)R_RegisterPic("m_main_mont4");
+	(void)R_RegisterPic("m_main_mont5");
+	(void)R_RegisterPic("hud_bomber");
+	(void)R_RegisterPic("hud_strafer");
+	(void)R_RegisterPic("hud_hover");
+	(void)R_RegisterPic("blood_ring");
 }
 
 
@@ -2039,6 +2040,7 @@ void CL_WriteConfiguration (void)
 
 	Cvar_WriteVariables (path);
 }
+
 
 /*
 ===============

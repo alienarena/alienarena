@@ -234,7 +234,7 @@ void BSP_DrawTriangleOutlines (void)
 	int			i, j;
 	glpoly_t	*p;
 
-	if (!gl_showtris->value)
+	if (!gl_showtris->integer)
 		return;
 
 	qglDisable (GL_TEXTURE_2D);
@@ -452,7 +452,7 @@ void R_DrawAlphaSurfaces (void)
 		if (s->flags & SURF_DRAWTURB) 
 		{
 			//water shaders
-			if(r_shaders->value) 
+			if(r_shaders->integer) 
 			{
 				rs_shader = (rscript_t *)s->texinfo->image->script;
 				if(rs_shader) 
@@ -473,7 +473,7 @@ void R_DrawAlphaSurfaces (void)
 		}
 		else 
 		{
-			if(r_shaders->value && !(s->texinfo->flags & SURF_FLOWING)) 
+			if(r_shaders->integer && !(s->texinfo->flags & SURF_FLOWING)) 
 			{
 				rs_shader = (rscript_t *)s->texinfo->image->script;
 				if(rs_shader) 
@@ -509,7 +509,7 @@ void R_DrawRSSurfaces (void)
 	if(!s)
 		return;
 
-	if (!r_shaders->value)
+	if (!r_shaders->integer)
 	{
 		r_rscript_surfaces = NULL;
 		return;
@@ -727,7 +727,7 @@ static void BSP_RenderGLSLDynamicLightmappedPoly( msurface_t *surf )
 			scroll = -64.0;
 	}
 
-	if(gl_normalmaps->value && surf->texinfo->has_heightmap) 
+	if(gl_normalmaps->integer && surf->texinfo->has_heightmap) 
 		glUniform1iARB( g_location_parallax, 1);
 	else
 	{
@@ -915,7 +915,7 @@ void BSP_DrawGLSLDynamicSurfaces (void)
 
 		glUniform1fARB( g_location_lightCutoffSquared, lightCutoffSquared);
 		
-		if(gl_shadowmaps->value) 
+		if(gl_shadowmaps->integer) 
 		{
 			//dynamic shadow
 			glUniform1iARB( g_location_bspShadowmapTexture, 7);
@@ -1014,7 +1014,7 @@ static void BSP_DrawNormalSurfaces (void)
 	if (!surf)
 		return;
 
-	if (!gl_normalmaps->value)
+	if (!gl_normalmaps->integer)
 	{
 		r_normalsurfaces = NULL;
 		return;
@@ -1063,7 +1063,7 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	int map;
 	qboolean is_dynamic = false;
 
-	if(r_newrefdef.num_dlights && gl_state.glsl_shaders && gl_glsl_shaders->value)
+	if(r_newrefdef.num_dlights && gl_state.glsl_shaders && gl_glsl_shaders->integer)
 	{
 		for ( map = 0; map < MAXLIGHTMAPS && surf->styles[map] != 255; map++ )
 		{
@@ -1075,7 +1075,7 @@ void BSP_AddToTextureChain(msurface_t *surf)
 		if ( ( surf->dlightframe == r_framecount ) )
 		{
 	dynamic:
-			if ( gl_dynamic->value )
+			if ( gl_dynamic->integer )
 			{
 				if ( !SurfaceHasNoLightmap(surf) )
 					is_dynamic = true;
@@ -1084,14 +1084,14 @@ void BSP_AddToTextureChain(msurface_t *surf)
 	}
 
 	if(is_dynamic && surf->texinfo->has_normalmap
-		&& gl_state.glsl_shaders && gl_glsl_shaders->value) //always glsl for dynamic if it has a normalmap
+		&& gl_state.glsl_shaders && gl_glsl_shaders->integer) //always glsl for dynamic if it has a normalmap
 	{
 		surf->glsldynamicchain = r_glsl_dynamic_surfaces;
 		r_glsl_dynamic_surfaces = surf;
 	}
-	else if(gl_normalmaps->value && surf->texinfo->has_heightmap
+	else if(gl_normalmaps->integer && surf->texinfo->has_heightmap
 			&& surf->texinfo->has_normalmap
-			&& gl_state.glsl_shaders && gl_glsl_shaders->value) 
+			&& gl_state.glsl_shaders && gl_glsl_shaders->integer) 
 	{
 		surf->glslchain = r_glsl_surfaces;
 		r_glsl_surfaces = surf;
@@ -1159,7 +1159,7 @@ void BSP_DrawInlineBModel ( void )
 	}
 
 	//render all GLSL surfaces
-	if(gl_state.glsl_shaders && gl_glsl_shaders->value)
+	if(gl_state.glsl_shaders && gl_glsl_shaders->integer)
 	{
 		BSP_DrawGLSLSurfaces();
 		BSP_DrawGLSLDynamicSurfaces();
@@ -1250,7 +1250,7 @@ void R_DrawBrushModel ( void )
 
 		GL_SelectTexture( GL_TEXTURE1);
 
-		if ( gl_lightmap->value )
+		if ( gl_lightmap->integer )
 			GL_TexEnv( GL_REPLACE );
 		else
 			GL_TexEnv( GL_MODULATE );
@@ -1264,7 +1264,7 @@ void R_DrawBrushModel ( void )
 		GL_SelectTexture( GL_TEXTURE1 );
 		GL_TexEnv ( GL_COMBINE_EXT );
 
-		if ( gl_lightmap->value ) {
+		if ( gl_lightmap->integer ) {
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE );
@@ -1319,7 +1319,7 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 	if (node->visframe != r_visframecount)
 		return;
 
-	if (!r_nocull->value)
+	if (!r_nocull->integer)
 	{
 		int i, clipped;
 		cplane_t *clipplane;
@@ -1419,7 +1419,7 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 			{
 				BSP_AddToTextureChain( surf );
 	
-				if(r_shaders->value) { //only add to the chain if there is actually a shader
+				if(r_shaders->integer) { //only add to the chain if there is actually a shader
 					rs_shader = (rscript_t *)surf->texinfo->image->script;
 					if(rs_shader || (surf->flags & SURF_UNDERWATER)) {
 						surf->rscriptchain = r_rscript_surfaces;
@@ -1438,7 +1438,7 @@ void BSP_RecursiveWorldNode (mnode_t *node, int clipflags)
 				surf->texturechain = image->texturechain;
 				image->texturechain = surf;
 
-				if(r_shaders->value) { //only add to the chain if there is actually a shader
+				if(r_shaders->integer) { //only add to the chain if there is actually a shader
 					rs_shader = (rscript_t *)surf->texinfo->image->script;
 					if(rs_shader) {
 						surf->rscriptchain = r_rscript_surfaces;
@@ -1465,7 +1465,7 @@ void R_CalcWorldLights( void )
 	float	dist, weight;
 	int		numlights = 0;
 
-	if(gl_glsl_shaders->value && gl_state.glsl_shaders)
+	if(gl_glsl_shaders->integer && gl_state.glsl_shaders)
 	{
 		//get light position relative to player's position
 		VectorClear(lightAdd);
@@ -1499,7 +1499,7 @@ void R_DrawWorld (void)
 {
 	entity_t	ent;
 	
-	if (!r_drawworld->value)
+	if (!r_drawworld->integer)
 		return;
 
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL )
@@ -1532,7 +1532,7 @@ void R_DrawWorld (void)
 		GL_TexEnv( GL_REPLACE );
 			GL_SelectTexture( GL_TEXTURE1);
 
-		if ( gl_lightmap->value )
+		if ( gl_lightmap->integer )
 			GL_TexEnv( GL_REPLACE );
 		else
 			GL_TexEnv( GL_MODULATE );
@@ -1547,7 +1547,7 @@ void R_DrawWorld (void)
 		GL_SelectTexture( GL_TEXTURE1 );
 		GL_TexEnv ( GL_COMBINE_EXT );
 
-		if ( gl_lightmap->value ) 
+		if ( gl_lightmap->integer ) 
 		{
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_REPLACE );
 			qglTexEnvi ( GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
@@ -1572,7 +1572,7 @@ void R_DrawWorld (void)
 	BSP_RecursiveWorldNode (r_worldmodel->nodes, 15);
 
 	//render all GLSL surfaces
-	if(gl_state.glsl_shaders && gl_glsl_shaders->value)
+	if(gl_state.glsl_shaders && gl_glsl_shaders->integer)
 	{
 		BSP_DrawGLSLSurfaces();
 		BSP_DrawGLSLDynamicSurfaces();
@@ -1614,19 +1614,19 @@ void R_MarkLeaves (void)
 	mleaf_t	*leaf;
 	int		cluster;
 
-	if (r_oldviewcluster == r_viewcluster && r_oldviewcluster2 == r_viewcluster2 && !r_novis->value && r_viewcluster != -1)
+	if (r_oldviewcluster == r_viewcluster && r_oldviewcluster2 == r_viewcluster2 && !r_novis->integer && r_viewcluster != -1)
 		return;
 
 	// development aid to let you run around and see exactly where
 	// the pvs ends
-	if (gl_lockpvs->value)
+	if (gl_lockpvs->integer)
 		return;
 
 	r_visframecount++;
 	r_oldviewcluster = r_viewcluster;
 	r_oldviewcluster2 = r_viewcluster2;
 
-	if (r_novis->value || r_viewcluster == -1 || !r_worldmodel->vis)
+	if (r_novis->integer || r_viewcluster == -1 || !r_worldmodel->vis)
 	{
 		// mark everything
 		for (i=0 ; i<r_worldmodel->numleafs ; i++)
@@ -2126,7 +2126,7 @@ void R_DrawRadar(void)
 	float	fS[4]={0,0,-1.0/512.0,0};
 
 	if ( r_newrefdef.rdflags & RDF_NOWORLDMODEL ) return;
-	if(!r_minimap->value) return;
+	if(!r_minimap->integer) return;
 
 	qglViewport (vid.width-r_minimap_size->value,0, r_minimap_size->value, r_minimap_size->value);
 
@@ -2136,7 +2136,7 @@ void R_DrawRadar(void)
 	qglLoadIdentity ();
 
 
-	if (r_minimap_style->value) {
+	if (r_minimap_style->integer) {
 		qglOrtho(-1024,1024,-1024,1024,-256,256);
 	} else {
 		qglOrtho(-1024,1024,-512,1536,-256,256);
@@ -2163,7 +2163,7 @@ void R_DrawRadar(void)
 		if(r_around)
 			GL_Bind(r_around->texnum);
 		qglBegin(GL_TRIANGLE_FAN);
-		if (r_minimap_style->value){
+		if (r_minimap_style->integer){
 			qglTexCoord2f(0,1); qglVertex3f(1024,-1024,1);
 			qglTexCoord2f(1,1); qglVertex3f(-1024,-1024,1);
 			qglTexCoord2f(1,0); qglVertex3f(-1024,1024,1);
@@ -2188,7 +2188,7 @@ void R_DrawRadar(void)
 		qglScalef(r_minimap_zoom->value,r_minimap_zoom->value,r_minimap_zoom->value);
 	}
 
-	if (r_minimap_style->value) {
+	if (r_minimap_style->integer) {
 		qglPushMatrix();
 		qglRotatef (90-r_newrefdef.viewangles[1],  0, 0, -1);
 

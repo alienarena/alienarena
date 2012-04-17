@@ -1038,7 +1038,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 	st = currentmodel->st;
 
-	if (r_shaders->value)
+	if (r_shaders->integer)
 			rs=(rscript_t *)currententity->script;
 
 	VectorCopy(shadelight, lightcolor);
@@ -1054,7 +1054,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		if(!rs)
 			GL_Bind(r_reflecttexture->texnum);
 		else if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL)) {
-			if(gl_mirror->value)
+			if(gl_mirror->integer)
 				mirror = true;
 		}
 	}
@@ -1085,7 +1085,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		}
 
 		if(currententity->flags & RF_VIEWERMODEL) { //lerp the vertices for self shadows, and leave
-			if(gl_shadows->value && !gl_shadowmaps->value) {
+			if(gl_shadows->integer && !gl_shadowmaps->integer) {
 				lerp = s_lerped[0];
 				MD2_LerpSelfShadowVerts( paliashdr->num_xyz, v, ov, lerp, move, frontv, backv);
 				return;
@@ -1102,7 +1102,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		va=0;
 		VArray = &VArrayVerts[0];
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
 
             vec3_t lightVec, lightVal;
 
@@ -1178,7 +1178,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				index_xyz = tris[i].index_xyz[j];
 				index_st = tris[i].index_st[j];
 
-				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value))
+				if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer))
 					shellscale = .4;
 				else
 					shellscale = 1.6;
@@ -1192,7 +1192,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					VArray[3] = (s_lerped[index_xyz][1] + s_lerped[index_xyz][0]) * (1.0f / 40.0f);
 					VArray[4] = s_lerped[index_xyz][2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
-					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+					if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 					{
 						for (k=0; k<3; k++)
 						{
@@ -1223,7 +1223,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					VArray[3] = (currentmodel->vertexes[index_xyz].position[1] + currentmodel->vertexes[index_xyz].position[0]) * (1.0f / 40.0f);
 					VArray[4] = currentmodel->vertexes[index_xyz].position[2] * (1.0f / 40.0f) - r_newrefdef.time * 0.5f;
 
-					if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+					if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 					{
                         for (k=0;k<3;k++)
 						{
@@ -1242,7 +1242,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				}
 				tangent[3] = 1.0;
 
-				if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+				if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 				{
                     VectorNormalize ( normal );
                     VectorCopy(normal, NormalsArray[va]); //shader needs normal array
@@ -1251,7 +1251,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
                 }
 
                 // increment pointer and counter
-                if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+                if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
                     VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
                 else
                     VArray += VertexSizes[VERT_COLOURED_TEXTURED];
@@ -1259,12 +1259,12 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
             }
         }
 
-		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
+		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) ) 
 		{
 			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 		}
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
             glUseProgramObjectARB( 0 );
             GL_EnableMultitexture( false );
         }
@@ -1321,7 +1321,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			}
 
 		}
-		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
 			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 		}
@@ -1344,7 +1344,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			VArray = &VArrayVerts[0];
 			GLSTATE_ENABLE_ALPHATEST
 
-			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders))
+			if (stage->normalmap && (!gl_normalmaps->integer || !gl_glsl_shaders->integer || !gl_state.glsl_shaders))
 			{
 				if(stage->next)
 				{
@@ -1528,7 +1528,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
 				//if using shadowmaps, offset self shadowed areas a bit so not to get too dark
-				if(gl_shadowmaps->value && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
+				if(gl_shadowmaps->integer && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
 					glUniform1fARB( g_location_minLight, 0.20);
 				else
 					glUniform1fARB( g_location_minLight, 0.15);
@@ -1747,10 +1747,10 @@ skipLoad:
 				GL_BindVBO(currentmodel->vbo_tangents);
 				glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, sizeof(vec4_t), 0);
 
-				if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
+				if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
 					R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, true);
 	        }
-         	else if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL )))
+         	else if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL )))
 			{
 				R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, false);
 			}
@@ -1915,7 +1915,7 @@ void R_DrawAliasModel ( void )
 	}
 	else
 	{
-		if ( r_lefthand->value == 2 )
+		if ( r_lefthand->integer == 2 )
 			return;
 	}
 
@@ -1929,7 +1929,7 @@ void R_DrawAliasModel ( void )
 	//
 	if ( currententity->flags & ( RF_SHELL_HALF_DAM | RF_SHELL_GREEN | RF_SHELL_RED | RF_SHELL_BLUE | RF_SHELL_DOUBLE) )
 	{
-		if(!cl_gun->value && (currententity->flags & RF_WEAPONMODEL))
+		if(!cl_gun->integer && (currententity->flags & RF_WEAPONMODEL))
 			return;
 
 		VectorClear (shadelight);
@@ -1971,7 +1971,7 @@ void R_DrawAliasModel ( void )
 	{
 		float minlight;
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
@@ -1992,7 +1992,7 @@ void R_DrawAliasModel ( void )
 		float	minlight;
 
 		scale = 0.2 * sin(r_newrefdef.time*7);
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
@@ -2019,13 +2019,13 @@ void R_DrawAliasModel ( void )
 	if (currententity->flags & RF_DEPTHHACK) // hack the depth range to prevent view model from poking into walls
 		qglDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
 
-	if ((currententity->flags & RF_WEAPONMODEL) && r_lefthand->value != 2.0F)
+	if ((currententity->flags & RF_WEAPONMODEL) && r_lefthand->integer != 2)
     {
 		qglMatrixMode(GL_PROJECTION);
 		qglPushMatrix();
 		qglLoadIdentity();
 
-		if (r_lefthand->value == 1.0F)
+		if (r_lefthand->integer == 1)
 		{
 			qglScalef(-1, 1, 1);
 			qglCullFace(GL_BACK);
@@ -2099,7 +2099,7 @@ void R_DrawAliasModel ( void )
 		currententity->oldframe = 0;
 	}
 
-	if ( !r_lerpmodels->value )
+	if ( !r_lerpmodels->integer )
 		currententity->backlerp = 0;
 
 	if(currententity->frame == 0 && currentmodel->num_frames == 1) {
@@ -2114,7 +2114,7 @@ void R_DrawAliasModel ( void )
 
 	qglPopMatrix ();
 
-	if ( ( currententity->flags & RF_WEAPONMODEL ) && ( r_lefthand->value != 2.0F ) )
+	if ( ( currententity->flags & RF_WEAPONMODEL ) && ( r_lefthand->integer != 2 ) )
 	{
 		qglMatrixMode( GL_PROJECTION );
 		qglPopMatrix();
@@ -2232,7 +2232,7 @@ void R_DrawAliasModel ( void )
 	}
 	qglColor4f (1,1,1,1);
 
-	if(r_minimap->value)
+	if(r_minimap->integer)
     {
 	   if ( currententity->flags & RF_MONSTER)
 	   {
@@ -2417,7 +2417,7 @@ void MD2_DrawCaster ( void )
 		currententity->oldframe = 0;
 	}
 
-	if ( !r_lerpmodels->value )
+	if ( !r_lerpmodels->integer )
 		currententity->backlerp = 0;
 
 	if(currententity->frame == 0 && currentmodel->num_frames == 1)

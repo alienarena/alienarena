@@ -239,8 +239,8 @@ void M_ForceMenuOff (void)
 	// Knightmare- added Psychospaz's mouse support
 	refreshCursorLink();
 
-	m_drawfunc = 0;
-	m_keyfunc = 0;
+	m_drawfunc = NULL;
+	m_keyfunc = NULL;
 	cls.key_dest = key_game;
 	m_menudepth = 0;
 	Key_ClearStates ();
@@ -1707,18 +1707,6 @@ extern cvar_t *crosshair;
 char **crosshair_names = NULL;
 int	numcrosshairs;
 
-static void CrosshairFunc( void *unused )
-{
-	char cHair[MAX_OSPATH];
-
-	if(s_options_crosshair_box.curvalue > 3)
-		sprintf(cHair, "crosshairs/%s", crosshair_names[s_options_crosshair_box.curvalue]);
-	else
-		strcpy(cHair, crosshair_names[s_options_crosshair_box.curvalue]);
-
-	Cvar_Set( "crosshair", cHair );
-}
-
 void SetCrosshairCursor (void)
 {
 	int i;
@@ -2086,25 +2074,6 @@ static void UpdateBGMusicFunc( void *unused )
 		S_StartMenuMusic();
 	}
 }
-static void ConsoleFunc( void *unused )
-{
-	/*
-	** the proper way to do this is probably to have ToggleConsole_f accept a parameter
-	*/
-	extern void Key_ClearTyping( void );
-
-// 	if ( cl.attractloop )
-// 	{
-// 		Cbuf_AddText ("killserver\n");
-// 		return;
-// 	}
-
-	Key_ClearTyping ();
-	CON_ClearNotify ();
-
-	M_ForceMenuOff ();
-	cls.key_dest = key_console;
-}
 
 static void UpdateDopplerEffectFunc( void *unused )
 {
@@ -2380,7 +2349,6 @@ void Options_MenuInit( void )
 	s_options_crosshair_box.generic.x	= 0;
 	s_options_crosshair_box.generic.y	= FONTSCALE*236*scale;
 	s_options_crosshair_box.generic.name	= "crosshair";
-	s_options_crosshair_box.generic.callback = CrosshairFunc;
 	s_options_crosshair_box.itemnames = (const char **) crosshair_names;
 	s_options_crosshair_box.generic.statusbar	= "select your crosshair";
 
@@ -3154,7 +3122,6 @@ static void ApplyIRCSettings( void * self )
 static void IRC_SettingsMenuInit( )
 {
 	float scale;
-	extern cvar_t *name;
 
 	static const char *yes_no_names[] =
 	{
@@ -6074,7 +6041,7 @@ void AddressBook_MenuInit( void )
 
 		s_addressbook_fields[i].generic.type = MTYPE_FIELD;
 		s_addressbook_fields[i].generic.name = 0;
-		s_addressbook_fields[i].generic.callback = 0;
+		s_addressbook_fields[i].generic.callback = NULL;
 		s_addressbook_fields[i].generic.x		= 0;
 		s_addressbook_fields[i].generic.y		= FONTSCALE*i * 18*scale + 0;
 		s_addressbook_fields[i].generic.localdata[0] = i;
@@ -6625,7 +6592,7 @@ qboolean PlayerConfig_MenuInit( void )
 
 	s_player_name_field.generic.type = MTYPE_FIELD;
 	s_player_name_field.generic.name = "name";
-	s_player_name_field.generic.callback = 0;
+	s_player_name_field.generic.callback = NULL;
 	s_player_name_field.generic.x		= FONTSCALE*-32;
 	s_player_name_field.generic.y		= 0;
 	s_player_name_field.length	= 20;
@@ -6635,7 +6602,7 @@ qboolean PlayerConfig_MenuInit( void )
 
 	s_player_password_field.generic.type = MTYPE_FIELD;
 	s_player_password_field.generic.name = "password";
-	s_player_password_field.generic.callback = 0;
+	s_player_password_field.generic.callback = NULL;
 	s_player_password_field.generic.x		= FONTSCALE*-32;
 	s_player_password_field.generic.y		= FONTSCALE*20*scale;
 	s_player_password_field.length	= 20;
@@ -6657,7 +6624,7 @@ qboolean PlayerConfig_MenuInit( void )
 	s_player_skin_box.generic.name = "skin";
 	s_player_skin_box.generic.x	= FONTSCALE*-32;
 	s_player_skin_box.generic.y	= FONTSCALE*114*scale;
-	s_player_skin_box.generic.callback = 0;
+	s_player_skin_box.generic.callback = NULL;
 	s_player_skin_box.generic.cursor_offset = -56;
 	s_player_skin_box.curvalue = currentskinindex;
 	s_player_skin_box.itemnames = (const char **) s_pmi[currentdirectoryindex].skindisplaynames;
@@ -6673,7 +6640,7 @@ qboolean PlayerConfig_MenuInit( void )
 
 	s_player_fov_field.generic.type = MTYPE_FIELD;
 	s_player_fov_field.generic.name = "fov";
-	s_player_fov_field.generic.callback = 0;
+	s_player_fov_field.generic.callback = NULL;
 	s_player_fov_field.generic.x		= FONTSCALE*-32;
 	s_player_fov_field.generic.y		= FONTSCALE*152*scale;
 	s_player_fov_field.length	= 6;

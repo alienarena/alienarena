@@ -456,10 +456,10 @@ void R_AddLightMappedSurfToVArray (msurface_t *surf, float scroll)
 	 *  gl_showpolys == 1 : perform depth test.
 	 *  gl_showpolys == 2 : disable depth test. everything in "visible set"
 	 */
-	if (gl_showpolys->value) // restricted cvar, maxclients = 1
+	if (gl_showpolys->integer) // restricted cvar, maxclients = 1
 	{
 		qglDisable (GL_TEXTURE_2D);
-		if (gl_showpolys->value > 1.9f)
+		if (gl_showpolys->integer >= 2)
 		{ // lots of lines so make them narrower
 			qglDisable(GL_DEPTH_TEST);
 			qglLineWidth (2.0f);

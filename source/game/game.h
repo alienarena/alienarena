@@ -165,7 +165,7 @@ typedef struct
 
 	// console variable interaction
 	cvar_t	*(*cvar) (char *var_name, char *value, int flags);
-	cvar_t	*(*cvar_set) (char *var_name, char *value);
+	void	(*cvar_set) (char *var_name, char *value);
 	cvar_t	*(*cvar_forceset) (char *var_name, char *value);
 
 	// ClientCommand and ServerCommand parameter access
