@@ -144,6 +144,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-dynamo2k8.nod \
 	botinfo/nav/dm-eternal.nod \
 	botinfo/nav/dm-europa2k8.nod \
+	botinfo/nav/dm-extermination.nod \
 	botinfo/nav/dm-furious2k8.nod \
  	botinfo/nav/dm-goregrinder.nod \
 	botinfo/nav/dm-horus.nod \
@@ -170,6 +171,7 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/tca-frost.nod \
 	botinfo/nav/tca-titan2k8.nod \
 	botinfo/nav/tca-zion.nod \
+	botinfo/nav/tca-zion2k9.nod \
 	data1/default.cfg \
 	data1/maps.lst \
 	data1/env/alienbk.tga \
@@ -393,6 +395,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/ctf-invasion.txt \
 	data1/levelshots/ctf-oblivion.jpg \
 	data1/levelshots/ctf-oblivion.txt \
+	data1/levelshots/ctf-purgatory.jpg \
+	data1/levelshots/ctf-purgatory.txt \
 	data1/levelshots/ctf-titan2k8.jpg \
 	data1/levelshots/ctf-titan2k8.txt \
 	data1/levelshots/ctf-vesuvius.jpg \
@@ -497,6 +501,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/tca-titan2k8.txt \
 	data1/levelshots/tca-zion.jpg \
 	data1/levelshots/tca-zion.txt \
+	data1/levelshots/tca-zion2k9.jpg \
+	data1/levelshots/tca-zion2k9.txt \
 	data1/maps/aoa-atlantis.bsp \
 	data1/maps/aoa-corrosion.bsp \
 	data1/maps/aoa-frost2k9.bsp \
@@ -509,6 +515,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/ctf-frostbyte.bsp \
 	data1/maps/ctf-invasion.bsp \
 	data1/maps/ctf-oblivion.bsp \
+	data1/maps/ctf-purgatory.bsp \
 	data1/maps/ctf-titan2k8.bsp \
 	data1/maps/ctf-vesuvius.bsp \
 	data1/maps/ctf-violator.bsp \
@@ -563,6 +570,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/tca-invasion.entdef \
 	data1/maps/tca-titan2k8.bsp \
 	data1/maps/tca-zion.bsp \
+	data1/maps/tca-zion2k9.bsp \
 	data1/maps/meshes/arch_fx.tga \
 	data1/maps/meshes/arch.md2 \
 	data1/maps/meshes/arch_normal.jpg \
@@ -878,6 +886,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/ctf-invasion.mus \
 	data1/maps/scripts/ctf-oblivion.fog \
 	data1/maps/scripts/ctf-oblivion.mus \
+	data1/maps/scripts/ctf-purgatory.fog \
+	data1/maps/scripts/ctf-purgatory.mus \
 	data1/maps/scripts/ctf-titan2k8.mus \
 	data1/maps/scripts/ctf-vesuvius.fog \
 	data1/maps/scripts/ctf-vesuvius.mus \
@@ -965,6 +975,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/tca-europa2k8.mus \
 	data1/maps/scripts/tca-titan2k8.mus \
 	data1/maps/scripts/tca-zion.mus \
+	data1/maps/scripts/tca-zion2k9.mus \
 	data1/models/cow/helmet.md2 \
 	data1/models/cow/skin.tga \
 	data1/models/cow/tris.md2 \
@@ -1981,6 +1992,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/ctf-frostbyte.rscript \
 	data1/scripts/maps/ctf-invasion.rscript \
 	data1/scripts/maps/ctf-oblivion.rscript \
+	data1/scripts/maps/ctf-purgatory.rscript \
 	data1/scripts/maps/ctf-titan2k8.rscript \
 	data1/scripts/maps/ctf-vesuvius.rscript \
 	data1/scripts/maps/ctf-violator.rscript \
@@ -2034,6 +2046,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/tca-frost.rscript \
 	data1/scripts/maps/tca-titan2k8.rscript \
 	data1/scripts/maps/tca-zion.rscript \
+	data1/scripts/maps/tca-zion2k9.rscript \
 	data1/scripts/menu.rscript \
 	data1/scripts/models.rscript \
 	data1/scripts/normals/normals.rscript \
@@ -2415,8 +2428,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/gothwindow1.tga \
 	data1/textures/arena10/gothwindow2_hm.tga \
 	data1/textures/arena10/gothwindow2.tga \
+	data1/textures/arena10/gothwindow2r_hm.tga \
+	data1/textures/arena10/gothwindow2r.tga \
 	data1/textures/arena10/gothwindow3_hm.tga \
 	data1/textures/arena10/gothwindow3.tga \
+	data1/textures/arena10/gothwindow3r_hm.tga \
+	data1/textures/arena10/gothwindow3r.tga \
 	data1/textures/arena10/graffitiwall1.tga \
 	data1/textures/arena10/grafittiwall2.tga \
 	data1/textures/arena10/heap1_nm.tga \
@@ -2481,6 +2498,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena10/pipes1.tga \
 	data1/textures/arena10/planks_nm.tga \
 	data1/textures/arena10/planks.tga \
+	data1/textures/arena10/redtile_hm.tga \
+	data1/textures/arena10/redtile_nm.tga \
+	data1/textures/arena10/redtile.tga \
 	data1/textures/arena10/road1_hm.tga \
 	data1/textures/arena10/road1_nm.tga \
 	data1/textures/arena10/road1.tga \
@@ -3569,6 +3589,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/ramp1f.wal \
 	data1/textures/ramp1.tga \
 	data1/textures/ramp1.wal \
+	data1/textures/rigel/baselightblue.tga \
+	data1/textures/rigel/baselightred.tga \
 	data1/textures/water/blood_nm.tga \
 	data1/textures/water/blood.tga \
 	data1/textures/water/bluewater_nm.tga \

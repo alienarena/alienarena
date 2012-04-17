@@ -368,10 +368,27 @@ dnl
 #
 # Checks for header files
 #
-AC_CHECK_HEADERS([inttypes.h stdint.h stddef.h stdlib.h unistd.h float.h limits.h])
-AC_CHECK_HEADERS([arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h netdb.h termios.h sys/select.h])
-AC_CHECK_HEADERS([dlfcn.h fcntl.h malloc.h string.h sys/param.h sys/stat.h])
-AC_CHECK_HEADERS([time.h sys/time.h])
+
+AC_CHECK_HEADERS(
+	[inttypes.h stdint.h stddef.h stdlib.h unistd.h],
+	[],[],[])
+
+AC_CHECK_HEADERS(
+	[float.h limits.h],
+	[],[],[])
+
+AC_CHECK_HEADERS(
+	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h netdb.h termios.h sys/select.h]
+	[],[],[])
+	
+AC_CHECK_HEADERS(
+	[dlfcn.h fcntl.h malloc.h string.h sys/param.h sys/stat.h]
+	[],[],[])
+
+AC_CHECK_HEADERS(
+	[time.h sys/time.h]
+	[],[],[])
+
 AC_CHECK_HEADERS([windows.h winsock.h winsock2.h])
 
 dnl
@@ -607,28 +624,32 @@ AS_IF([test "x$hide_status" = "xno"],[
 		AS_IF([ test "x$build_client" = "xyes" ],[dedicated_only=no],[dedicated_only=yes])
 		AS_ECHO([" Dedicated Only: ........ ${dedicated_only}"])
 		AS_ECHO([" Server terminal color: . ${ansi_color}"])
-		AS_ECHO([" System ODE library ..... ${system_ode}"])
 	])
-	AS_IF([ test x"${unix_host}" = xdarwin ],[
-		AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
-	])
-	AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
-	AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
 	AS_ECHO([" Alternate install: ..... ${alternate_install}"])
 
-	AM_COND_IF([ALTERNATE_INSTALL],,
-		[
+	AM_COND_IF([ALTERNATE_INSTALL],[
+		AS_ECHO([" Shared Data ............  ${srcdir}"])
+		AS_ECHO(["   note: with alternate install, data is located relative to CWD."])
+		AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"])
+		],[
 dnl
-dnl try to get the full path for automake's pkgdatadir which determines DATADIR
+dnl try to generate the full path for automake pkgdatadir 
+dnl  which determines DATADIR that locates data1, arena, and botinfo
 dnl		
 		game_data=${datadir}/${PACKAGE}
 		game_data_a=`eval "echo ${game_data}"`
 		game_data=`eval "echo ${game_data_a}"`
-		]
-		[AS_ECHO(["Game Data Directories:"])]
-		[AS_ECHO([" Shared RO Data: ........ ${game_data}"])]
-		[AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"])] )
-
+		AS_IF([ test x"${unix_host}" = xdarwin ],[
+			AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
+		])
+		AS_ECHO([" System ODE library ..... ${system_ode}"])
+		AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
+		AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+		AS_ECHO([" Prefix ................. ${prefix}"])
+		AS_ECHO([" Shared RO Data: ........ ${game_data}"])
+		AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"]) 
+	])
+		
 	AS_IF([ test "x$debug" = "xyes" ],[
 		AS_ECHO(["- DEBUGGING OPTIONS ------------------------"])
 		AS_ECHO(["   All compiler warnings: .... ${gcc_whining}"])

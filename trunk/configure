@@ -6779,6 +6779,7 @@ fi
 #
 # Checks for header files
 #
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
 $as_echo_n "checking for grep that handles long lines and -e... " >&6; }
 if ${ac_cv_path_GREP+:} false; then :
@@ -7038,7 +7039,7 @@ fi
 done
 
 
-for ac_header in inttypes.h stdint.h stddef.h stdlib.h unistd.h float.h limits.h
+for ac_header in inttypes.h stdint.h stddef.h stdlib.h unistd.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -7050,8 +7051,24 @@ _ACEOF
 fi
 
 done
+
+
+for ac_header in float.h limits.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
 
 for ac_header in arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h netdb.h termios.h sys/select.h
+
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -7063,8 +7080,10 @@ _ACEOF
 fi
 
 done
+
 
 for ac_header in dlfcn.h fcntl.h malloc.h string.h sys/param.h sys/stat.h
+
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -7076,8 +7095,10 @@ _ACEOF
 fi
 
 done
+
 
 for ac_header in time.h sys/time.h
+
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -7089,6 +7110,7 @@ _ACEOF
 fi
 
 done
+
 
 for ac_header in windows.h winsock.h winsock2.h
 do :
@@ -10087,28 +10109,33 @@ else
 fi
 		$as_echo " Dedicated Only: ........ ${dedicated_only}"
 		$as_echo " Server terminal color: . ${ansi_color}"
-		$as_echo " System ODE library ..... ${system_ode}"
 
 fi
-	if  test x"${unix_host}" = xdarwin ; then :
-
-		$as_echo " GL_LIBDIR: ............. ${gl_dlopen_path}"
-
-fi
-	$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
-	$as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
 	$as_echo " Alternate install: ..... ${alternate_install}"
 
 	if test -z "$ALTERNATE_INSTALL_TRUE"; then :
-  else
+
+		$as_echo " Shared Data ............  ${srcdir}"
+		$as_echo "   note: with alternate install, data is located relative to CWD."
+		$as_echo " User Home R/W Data ..... ${alienarena_homedir}"
+
+else
 
 		game_data=${datadir}/${PACKAGE}
 		game_data_a=`eval "echo ${game_data}"`
 		game_data=`eval "echo ${game_data_a}"`
+		if  test x"${unix_host}" = xdarwin ; then :
 
-		$as_echo "Game Data Directories:"
+			$as_echo " GL_LIBDIR: ............. ${gl_dlopen_path}"
+
+fi
+		$as_echo " System ODE library ..... ${system_ode}"
+		$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
+		$as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
+		$as_echo " Prefix ................. ${prefix}"
 		$as_echo " Shared RO Data: ........ ${game_data}"
 		$as_echo " User Home R/W Data ..... ${alienarena_homedir}"
+
 fi
 
 	if  test "x$debug" = "xyes" ; then :
