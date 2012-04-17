@@ -522,10 +522,10 @@ void GL_ScreenShot_JPEG(void)
 	cinfo.input_components = 3;
 	jpeg_set_defaults(&cinfo);
 
-	if ((gl_screenshot_jpeg_quality->value >= 101) || (gl_screenshot_jpeg_quality->value <= 0))
+	if ((gl_screenshot_jpeg_quality->integer >= 101) || (gl_screenshot_jpeg_quality->integer <= 0))
 		Cvar_Set("gl_screenshot_jpeg_quality", "85");
 
-	jpeg_set_quality(&cinfo, gl_screenshot_jpeg_quality->value, TRUE);
+	jpeg_set_quality(&cinfo, gl_screenshot_jpeg_quality->integer, TRUE);
 
 	/* Start Compression */
 	jpeg_start_compress(&cinfo, true);

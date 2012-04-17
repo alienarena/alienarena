@@ -28,8 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include "curl/curl.h"
-CURLM *curlm;
-CURL *curl;
+static CURL *curl;
 
 extern cvar_t  *cl_latest_game_version_url;
 
@@ -78,16 +77,16 @@ void getLatestGameVersion( void )
 
 	Com_sprintf(url, sizeof(url), "%s", cl_latest_game_version_url->string);
 
-	curl_easy_setopt( easyhandle, CURLOPT_URL, url ) ;
+	if (curl_easy_setopt( easyhandle, CURLOPT_URL, url ) != CURLE_OK) return ;
 
 	// time out in 5s
-	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5);
+	if (curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5) != CURLE_OK) return ;
 
-	curl_easy_setopt( easyhandle, CURLOPT_WRITEFUNCTION, write_data ) ;
+	if (curl_easy_setopt( easyhandle, CURLOPT_WRITEFUNCTION, write_data ) != CURLE_OK) return ;
 
-	curl_easy_perform( easyhandle );
+	if (curl_easy_perform( easyhandle ) != CURLE_OK) return;
 
-	curl_easy_cleanup( easyhandle );
+	(void)curl_easy_cleanup( easyhandle );
 
     if ( versionstr ){
         if ( atof ( versionstr ) )

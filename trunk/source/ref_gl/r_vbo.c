@@ -39,7 +39,7 @@ void R_LoadVBOSubsystem(void)
 {
 	gl_state.vbo = false;
 
-	if(!gl_usevbo->value)
+	if(!gl_usevbo->integer)
 		return;
 
 	if (strstr(gl_config.extensions_string, "GL_ARB_vertex_buffer_object"))

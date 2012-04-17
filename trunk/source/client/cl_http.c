@@ -35,8 +35,8 @@
 #endif
 
 #include "curl/curl.h"
-CURLM *curlm;
-CURL *curl;
+static CURLM *curlm;
+static CURL *curl;
 
 // generic encapsulation for common http response codes
 typedef struct response_s {
@@ -104,19 +104,19 @@ qboolean CL_HttpDownload(void){
         curl_easy_reset(curl);
 
         // set url from which to retrieve the file
-        curl_easy_setopt(curl, CURLOPT_URL, url);
+        if (curl_easy_setopt(curl, CURLOPT_URL, url) != CURLE_OK) return false;
 
 		// time out in 5s
-		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5);
+		if (curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5) != CURLE_OK) return false;
 
         // set error buffer so we may print meaningful messages
         memset(curlerr, 0, sizeof(curlerr));
-        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curlerr);
+        if (curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curlerr) != CURLE_OK) return false;
 
         // set the callback for when data is received
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CL_HttpDownloadRecv);
+        if (curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CL_HttpDownloadRecv) != CURLE_OK) return false;
 
-        curl_multi_add_handle(curlm, curl);
+        if (curl_multi_add_handle(curlm, curl) != CURLM_OK) return false;
 
 		return true;
 }
@@ -148,7 +148,7 @@ void CL_HttpDownloadCleanup(){
         if(!cls.download || !cls.downloadhttp)
                 return;
 
-        curl_multi_remove_handle(curlm, curl);  // cleanup curl
+        (void)curl_multi_remove_handle(curlm, curl);  // cleanup curl
 
         fclose(cls.download);  // always close the file
         cls.download = NULL;
@@ -206,8 +206,8 @@ void CL_HttpDownloadThink(void){
 
         // check for http status code
         if(!status){
-                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
-                if(status > 0 && status != 200){  // 404, 403, etc..
+                if (curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status) != CURLE_OK || 
+                    (status > 0 && status != 200)){  // 404, 403, etc..
                         CL_HttpDownloadCleanup();
                         return;
                 }
@@ -254,6 +254,6 @@ void CL_ShutdownHttpDownload(void){
         curl_easy_cleanup(curl);
         curl = NULL;
 
-        curl_multi_cleanup(curlm);
+        (void)curl_multi_cleanup(curlm);
         curlm = NULL;
 }

@@ -1110,6 +1110,7 @@ void IQM_AnimateRagdoll(int RagDollID)
 				{
 					if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints2[i].name], RagDollBinds[j].name))
 					{
+
 						int object = RagDollBinds[j].object;
 						const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
 						const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
@@ -1186,7 +1187,7 @@ void IQM_Vlight (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t ligh
 
 	VectorScale(baselight, gl_modulate->value, lightOut);
 
-	if(!gl_vlights->value)
+	if(!gl_vlights->integer)
 		return;
 
 	lscale = 3.0;
@@ -1211,7 +1212,7 @@ void IQM_DrawFrame(int skinnum)
 	qboolean glass = false;
 	qboolean depthmaskrscipt = false;
 
-	if (r_shaders->value)
+	if (r_shaders->integer)
 		rs = currententity->script;
 
 	VectorCopy(shadelight, lightcolor);
@@ -1224,7 +1225,7 @@ void IQM_DrawFrame(int skinnum)
 		alpha = currententity->alpha;
 		if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL))
 		{
-			if(gl_mirror->value)
+			if(gl_mirror->integer)
 				mirror = true;
 			else
 				glass = true;
@@ -1245,7 +1246,7 @@ void IQM_DrawFrame(int skinnum)
 		va=0;
 		VArray = &VArrayVerts[0];
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
 
             vec3_t lightVec, lightVal;
 
@@ -1310,7 +1311,7 @@ void IQM_DrawFrame(int skinnum)
 			R_InitVArrays (VERT_COLOURED_TEXTURED);
 		}
 
-		if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value))
+		if((currententity->flags & (RF_WEAPONMODEL | RF_SHELL_GREEN)) || (gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer))
 			shellscale = 0.4;
 		else
 			shellscale = 1.6;
@@ -1333,7 +1334,7 @@ void IQM_DrawFrame(int skinnum)
 				VArray[7] = shadelight[2];
 				VArray[8] = 0.33;
 
-                if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+                if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
                     VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
                     Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
                     VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
@@ -1343,12 +1344,12 @@ void IQM_DrawFrame(int skinnum)
             }
         }
 
-		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
 			R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 		}
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 		{
             glUseProgramObjectARB( 0 );
             GL_EnableMultitexture( false );
@@ -1453,7 +1454,7 @@ void IQM_DrawFrame(int skinnum)
 			}
 		}
 
-		if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+		if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 		{
 			if(va > 0)
 			{
@@ -1484,7 +1485,7 @@ void IQM_DrawFrame(int skinnum)
 			VArray = &VArrayVerts[0];
 			GLSTATE_ENABLE_ALPHATEST
 
-			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders))
+			if (stage->normalmap && (!gl_normalmaps->integer || !gl_glsl_shaders->integer || !gl_state.glsl_shaders))
 			{
 				if(stage->next)
 				{
@@ -1635,7 +1636,7 @@ void IQM_DrawFrame(int skinnum)
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
 				//if using shadowmaps, offset self shadowed areas a bit so not to get too dark
-				if(gl_shadowmaps->value && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
+				if(gl_shadowmaps->integer && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
 					glUniform1fARB( g_location_minLight, 0.20);
 				else
 					glUniform1fARB( g_location_minLight, 0.15);
@@ -1696,7 +1697,7 @@ void IQM_DrawFrame(int skinnum)
 				}
 			}
 
-			if (!(!cl_gun->value && ( currententity->flags & RF_WEAPONMODEL ) ) )
+			if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
 			{
 				R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 			}
@@ -1746,7 +1747,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 	qboolean glass = false;
 	qboolean depthmaskrscipt = false;
 
-	if (r_shaders->value && RagDoll[RagDollID].script)
+	if (r_shaders->integer && RagDoll[RagDollID].script)
 		rs = RagDoll[RagDollID].script;
 
 	VectorCopy(shadelight, lightcolor);
@@ -1757,7 +1758,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 	if (RagDoll[RagDollID].flags & RF_TRANSLUCENT)
 	{
 		alpha = 0.33;
-		if(gl_mirror->value)
+		if(gl_mirror->integer)
 			mirror = true;
 		else
 			glass = true;
@@ -1777,7 +1778,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 		qglEnable (GL_BLEND);
 		qglBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value) {
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
 
             vec3_t lightVec, lightVal;
 
@@ -1864,7 +1865,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				VArray[7] = shadelight[2];
 				VArray[8] = shellAlpha; //decrease over time
 
-                if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+                if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
                 {
                     VectorCopy(RagDoll[RagDollID].ragDollMesh->animatenormal[index_xyz].dir, NormalsArray[va]); //shader needs normal array
                     Vector4Copy(RagDoll[RagDollID].ragDollMesh->animatetangent[index_xyz].dir, TangentsArray[va]);
@@ -1878,7 +1879,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 
 		R_DrawVarrays(GL_TRIANGLES, 0, va, false);
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 		{
             glUseProgramObjectARB( 0 );
             GL_EnableMultitexture( false );
@@ -1978,7 +1979,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 			VArray = &VArrayVerts[0];
 			GLSTATE_ENABLE_ALPHATEST
 
-			if (stage->normalmap && (!gl_normalmaps->value || !gl_glsl_shaders->value || !gl_state.glsl_shaders))
+			if (stage->normalmap && (!gl_normalmaps->integer || !gl_glsl_shaders->integer || !gl_state.glsl_shaders))
 			{
 				if(stage->next)
 				{
@@ -2104,7 +2105,7 @@ void IQM_DrawRagDollFrame(int RagDollID, int skinnum, float shellAlpha, int shel
 				glUniform3fARB( g_location_color, lightVal[0], lightVal[1], lightVal[2]);
 
 				//if using shadowmaps, offset self shadowed areas a bit so not to get too dark
-				if(gl_shadowmaps->value)
+				if(gl_shadowmaps->integer)
 					glUniform1fARB( g_location_minLight, 0.20);
 				else
 					glUniform1fARB( g_location_minLight, 0.15);
@@ -2431,7 +2432,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 	if ( IQM_CullModel() )
 		return;
 
-	if(r_ragdolls->value)
+	if(r_ragdolls->integer)
 	{
 		//Ragdolls take over at beginning of each death sequence
 		if(!(currententity->flags & RF_TRANSLUCENT))
@@ -2486,7 +2487,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 	{
 		float minlight;
 
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
@@ -2507,7 +2508,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 		float	minlight;
 
 		scale = 0.2 * sin(r_newrefdef.time*7);
-		if(gl_glsl_shaders->value && gl_state.glsl_shaders && gl_normalmaps->value)
+		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer)
 			minlight = 0.1;
 		else
 			minlight = 0.2;
@@ -2661,7 +2662,7 @@ void R_DrawINTERQUAKEMODEL ( void )
 	}
 	qglColor4f (1,1,1,1);
 
-	if(r_minimap->value)
+	if(r_minimap->integer)
     {
 	   if ( currententity->flags & RF_MONSTER)
 	   {

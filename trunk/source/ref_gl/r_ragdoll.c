@@ -166,7 +166,7 @@ void RGD_addBody(int RagDollID, matrix3x4_t *bindmat, char *name, int objectID, 
 	}
     if(nans > 0)
     {
-        if(r_ragdoll_debug->value)
+        if(r_ragdoll_debug->integer)
             Com_Printf("There was a NaN in creating body %i\n", objectID);
     }
 
@@ -399,7 +399,7 @@ void RGD_RagdollBody_Init( int RagDollID, vec3_t origin, char name[MAX_QPATH] )
     RagDoll[RagDollID].initframe = (matrix3x4_t *)malloc (currententity->model->num_joints*sizeof(matrix3x4_t));
     memcpy(RagDoll[RagDollID].initframe, currententity->model->outframe, currententity->model->num_joints*sizeof(matrix3x4_t));
 
-	if(r_shaders->value && currententity->script)
+	if(r_shaders->integer && currententity->script)
 	{
 		RagDoll[RagDollID].script = (rscript_t *)malloc (sizeof(rscript_t));
 		memcpy(RagDoll[RagDollID].script, currententity->script, sizeof(rscript_t));
@@ -988,7 +988,7 @@ void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
 		{
 			RGD_RagdollBody_Init(RagDollID, origin, name);
 
-			if(r_ragdoll_debug->value == 2)
+			if(r_ragdoll_debug->integer == 2)
 			{
 				Com_Printf("RagDoll name: %s Ent name: %s Mesh: %s Ent Mesh: %s\n", RagDoll[RagDollID].name, name,
 					RagDoll[RagDollID].ragDollMesh->name, currentmodel->name);
@@ -997,7 +997,7 @@ void RGD_AddNewRagdoll( vec3_t origin, char name[MAX_QPATH] )
 					Com_Printf("ragdoll val %i: %4.2f\n", i, RagDoll[RagDollID].ragDollMesh->ragdoll.RagDollDims[i]);
 			}
 
-			if(r_ragdoll_debug->value)
+			if(r_ragdoll_debug->integer)
 				Com_Printf("Added a ragdoll @ %4.2f,%4.2f,%4.2f\n", RagDoll[RagDollID].origin[0], RagDoll[RagDollID].origin[1],
 					RagDoll[RagDollID].origin[2]);
 
@@ -1162,7 +1162,7 @@ void R_RenderAllRagdolls ( void )
 	int RagDollID;
 	int i;
 
-	if(!r_ragdolls->value)
+	if(!r_ragdolls->integer)
 		return;
 
 	//Iterate though the ragdoll stack, and render each one that is active.
@@ -1184,7 +1184,7 @@ void R_RenderAllRagdolls ( void )
 		{
 			R_DestroyRagDoll(RagDollID, true);
             RagDoll[RagDollID].destroyed = true;
-            if(r_ragdoll_debug->value)
+            if(r_ragdoll_debug->integer)
 				Com_Printf("Destroyed a ragdoll");
 		}
 		else
@@ -1317,7 +1317,7 @@ void R_RenderAllRagdolls ( void )
 			}
 
 
-			if(r_ragdoll_debug->value)
+			if(r_ragdoll_debug->integer)
 			{
 				//debug - draw ragdoll bodies
 				for(i = CHEST; i <= LEFTHAND; i++)
@@ -1372,7 +1372,7 @@ void R_ApplyForceToRagdolls(vec3_t origin, float force)
 {
 	int RagDollID, i;
 
-	if(!r_ragdolls->value)
+	if(!r_ragdolls->integer)
 		return;
 
 	for(RagDollID = 0; RagDollID < MAX_RAGDOLLS; RagDollID++)

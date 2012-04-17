@@ -119,7 +119,7 @@ void R_InitImageSubsystem(void)
 
 		aniso_level = r_anisotropic->value;
 
-		if (r_anisotropic->value == 1)
+		if (r_anisotropic->integer == 1)
 			Com_Printf("...ignoring GL_EXT_texture_filter_anisotropic\n");
 		else
 			Com_Printf("...using GL_EXT_texture_filter_anisotropic\n");
@@ -238,7 +238,7 @@ void GL_Bind (int texnum)
 {
 	extern	image_t	*draw_chars;
 
-	if (gl_nobind->value && draw_chars)		// performance evaluation option
+	if (gl_nobind->integer && draw_chars)		// performance evaluation option
 		texnum = draw_chars->texnum;
 	if ( gl_state.currenttextures[gl_state.currenttmu] == texnum)
 		return;
