@@ -1707,6 +1707,18 @@ extern cvar_t *crosshair;
 char **crosshair_names = NULL;
 int	numcrosshairs;
 
+static void CrosshairFunc( void *unused )
+{
+    char cHair[MAX_OSPATH];
+
+    if(s_options_crosshair_box.curvalue > 3)
+        sprintf(cHair, "crosshairs/%s", crosshair_names[s_options_crosshair_box.curvalue]);
+    else
+        strcpy(cHair, crosshair_names[s_options_crosshair_box.curvalue]);
+
+    Cvar_Set( "crosshair", cHair );
+}
+
 void SetCrosshairCursor (void)
 {
 	int i;
@@ -1730,6 +1742,7 @@ void SetCrosshairCursor (void)
 }
 
 void insertCrosshair (char ** list, char *insert, int len )
+
 {
 	int i, j;
 
@@ -2049,6 +2062,7 @@ static void ControlsResetDefaultsFunc( void *unused )
 //JD - the next three functions were completely screwed up out of the box by id...so they
 //are fixed now.
 static void InvertMouseFunc( void *unused )
+
 {
 	if(s_options_invertmouse_box.curvalue && m_pitch->value > 0)
 		Cvar_SetValue( "m_pitch", -m_pitch->value );
@@ -2349,6 +2363,7 @@ void Options_MenuInit( void )
 	s_options_crosshair_box.generic.x	= 0;
 	s_options_crosshair_box.generic.y	= FONTSCALE*236*scale;
 	s_options_crosshair_box.generic.name	= "crosshair";
+	s_options_crosshair_box.generic.callback = CrosshairFunc;
 	s_options_crosshair_box.itemnames = (const char **) crosshair_names;
 	s_options_crosshair_box.generic.statusbar	= "select your crosshair";
 
