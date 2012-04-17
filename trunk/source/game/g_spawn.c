@@ -89,7 +89,7 @@ extern void SP_target_earthquake (edict_t *ent);
 extern void SP_target_fire (edict_t *ent);
 extern void SP_target_changelevel (edict_t *ent);
 
-extern void SP_worldspawn (edict_t *ent);
+void SP_worldspawn (edict_t *ent);
 
 extern void SP_light (edict_t *self);
 extern void SP_info_null (edict_t *self);
@@ -789,7 +789,7 @@ Only used for the world.
 "gravity"	800 is default gravity
 "message"	text to print at user logon
 */
-extern void SP_worldspawn (edict_t *ent)
+void SP_worldspawn (edict_t *ent)
 {
 	ent->movetype = MOVETYPE_PUSH;
 	ent->solid = SOLID_BSP;
