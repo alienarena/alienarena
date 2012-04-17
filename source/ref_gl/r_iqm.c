@@ -1110,7 +1110,6 @@ void IQM_AnimateRagdoll(int RagDollID)
 				{
 					if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints2[i].name], RagDollBinds[j].name))
 					{
-
 						int object = RagDollBinds[j].object;
 						const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
 						const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);

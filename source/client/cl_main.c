@@ -2041,7 +2041,6 @@ void CL_WriteConfiguration (void)
 	Cvar_WriteVariables (path);
 }
 
-
 /*
 ===============
 CL_WriteProfile
