@@ -144,7 +144,13 @@ void Cbuf_InsertText (char *text)
 // add the copied off data
 	if (templen)
 	{
-		if (cmd_text.cursize + templen >= cmd_text.maxsize)
+		if (cmd_text.cursize + templen >= cmd_text.maxsize) 
+			/* possible "graceful" solution: Cbuf_Execute here to flush the 
+			 * buffer? Would change behavior of successive Cbuf_InsertText 
+			 * calls and probably screw things up with exec'd cfgs within 
+			 * exec'd cfgs, possibly resulting in infinite recursion loops.
+			 * TODO: study this option with some pathological test cfgs.
+			 */ 
 			Com_Printf ("Cbuf_InsertText: overflow! Discarding text: %s\n", temp);
 		else
 			SZ_Write (&cmd_text, temp, templen);
