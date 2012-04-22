@@ -106,10 +106,10 @@ void Cbuf_AddText (char *text)
 
 	if (cmd_text.cursize + l >= cmd_text.maxsize)
 	{
-		Com_Printf ("Cbuf_AddText: overflow\n");
+		Com_Printf ("Cbuf_AddText: overflow! Discarding text: %s\n", text);
 		return;
 	}
-	SZ_Write (&cmd_text, text, strlen (text));
+	SZ_Write (&cmd_text, text, l);
 }
 
 
@@ -144,7 +144,10 @@ void Cbuf_InsertText (char *text)
 // add the copied off data
 	if (templen)
 	{
-		SZ_Write (&cmd_text, temp, templen);
+		if (cmd_text.cursize + templen >= cmd_text.maxsize)
+			Com_Printf ("Cbuf_InsertText: overflow! Discarding text: %s\n", temp);
+		else
+			SZ_Write (&cmd_text, temp, templen);
 		Z_Free (temp);
 	}
 }
