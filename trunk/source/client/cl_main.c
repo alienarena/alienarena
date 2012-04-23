@@ -171,8 +171,13 @@ extern	cvar_t *allow_download_models;
 extern	cvar_t *allow_download_sounds;
 extern	cvar_t *allow_download_maps;
 
+#if defined WIN32_VARIANT
 extern	char map_music[MAX_PATH];
 extern  char map_music_sec[MAX_PATH];
+#else
+extern	char map_music[MAX_OSPATH];
+extern  char map_music_sec[MAX_OSPATH];
+#endif
 
 extern void RS_FreeAllScripts(void);
 

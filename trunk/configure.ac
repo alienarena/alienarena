@@ -628,7 +628,10 @@ AS_IF([test "x$hide_status" = "xno"],[
 	AS_ECHO([" Alternate install: ..... ${alternate_install}"])
 
 	AM_COND_IF([ALTERNATE_INSTALL],[
-		AS_ECHO([" Shared Data ............  ${srcdir}"])
+        AS_ECHO([" System ODE library ..... ${system_ode}"])
+        AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
+        AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+		AS_ECHO([" Shared Data ............ ${srcdir}"])
 		AS_ECHO(["   note: with alternate install, data is located relative to CWD."])
 		AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"])
 		],[
