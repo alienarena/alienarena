@@ -2036,6 +2036,18 @@ void S_StartSound( vec3_t origin, int entnum, int entchannel, sfx_t *arg_sfx,
 		return;
 	}
 
+	// this next section is hacky - we can replace with server cmds
+	// here we are setting flags to change the music when a player has the ctf flag.
+	if(!strcmp(arg_sfx->name, "misc/red_picked.wav") || !strcmp(arg_sfx->name, "misc/blue_picked.wav"))
+		r_hasFlag = true;
+
+	if(!strcmp(arg_sfx->name, "misc/blue_scores.wav") || !strcmp(arg_sfx->name, "misc/blue_returned.wav")
+		|| !strcmp(arg_sfx->name, "misc/blue_takes.wav") || !strcmp(arg_sfx->name, "misc/blue_increases.wav")
+		|| !strcmp(arg_sfx->name, "misc/red_scores.wav") || !strcmp(arg_sfx->name, "misc/red_returned.wav")
+		|| !strcmp(arg_sfx->name, "misc/red_takes.wav") || !strcmp(arg_sfx->name, "misc/red_increases.wav")
+		|| !strcmp(arg_sfx->name, "misc/scores_tied.wav"))
+		r_noFlag = true;
+
 	// cull sound by distance
 	attn_class = (int)(attenuation + 0.5f);
 	if( attn_class != ATTN_NONE )
@@ -2254,7 +2266,7 @@ void S_StartMenuMusic( void )
 	S_StartMusic( "music/menumusic.wav" );
 }
 
-extern char map_music[128]; // declared and set in r_model.c
+extern char map_music[260]; // declared and set in r_model.c
 
 void S_StartMapMusic( void )
 {

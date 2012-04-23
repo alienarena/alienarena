@@ -273,6 +273,7 @@ R_ReadMusicScript
 =================
 */
 
+//to do - read in secondary music location(for CTF music shift)
 void R_ReadMusicScript( char *config_file )
 {
 	FILE *fp;

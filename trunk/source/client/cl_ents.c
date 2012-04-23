@@ -1085,18 +1085,20 @@ void CL_AddPacketEntities (frame_t *frame)
 			ent.flags = 0;
 			ent.alpha = 1.0;
 
-			//cool new ctf flag effects
-			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag1.md2")) {
+			//new ctf flag effects
+			if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag1.md2")) 
+			{
 				CL_FlagEffects(ent.origin, 0);
 				ent.model = 0;
 			}
-			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag2.md2")) {
+			else if (!Q_strcasecmp (cl.configstrings[CS_MODELS+(s1->modelindex4)], "models/items/flags/flag2.md2")) 
+			{
 				CL_FlagEffects(ent.origin, 1);
 				ent.model = 0;
 			}
-			else {
+			else 
+			{
 				ent.model = cl.model_draw[s1->modelindex4];
-
 				V_AddEntity (&ent);
 			}
 		}

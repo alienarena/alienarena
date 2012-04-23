@@ -54,7 +54,7 @@ extern void RS_LoadScript(char *script);
 extern void RS_LoadSpecialScripts(void);
 extern void RS_ScanPathForScripts(void);
 extern cvar_t *scriptsloaded;
-extern char map_music[128];
+extern char map_music[MAX_PATH];
 extern cvar_t *background_music;
 extern cvar_t *background_music_vol;
 extern cvar_t *dedicated;

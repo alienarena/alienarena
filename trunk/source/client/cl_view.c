@@ -44,7 +44,7 @@ beam_t	r_beams[MAX_BEAMS];
 
 extern cvar_t *cl_showPlayerNames;
 extern cvar_t *name;
-extern char map_music[128];
+extern char map_music[260];
 extern cvar_t *background_music;
 extern qboolean IsVisible(vec3_t org1,vec3_t org2);
 extern void R_VCFreeFrame(void);
