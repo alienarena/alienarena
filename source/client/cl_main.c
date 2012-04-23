@@ -2143,6 +2143,7 @@ void CL_FixCvarCheats (void)
 	}
 }
 
+//to do - note - we need to discern between red and blue teams here
 void CL_CheckFlagStatus( void )
 {
 	if(r_hasFlag)
