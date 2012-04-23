@@ -178,7 +178,7 @@ extern  cvar_t	*r_ragdolls;
 extern  cvar_t  *r_ragdoll_debug;
 
 extern	qboolean	map_fog;
-extern	char		map_music[128];
+extern	char		map_music[MAX_PATH];
 extern  unsigned	r_weather;
 extern unsigned		r_nosun;
 
@@ -356,6 +356,8 @@ extern float	scr_playericonalpha;
 
 //Team colors
 int r_teamColor;
+qboolean r_hasFlag;
+qboolean r_noFlag;
 
 extern void	Draw_GetPicSize (int *w, int *h, char *name);
 extern void	Draw_Pic (int x, int y, char *name);

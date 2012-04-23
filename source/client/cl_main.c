@@ -171,7 +171,8 @@ extern	cvar_t *allow_download_models;
 extern	cvar_t *allow_download_sounds;
 extern	cvar_t *allow_download_maps;
 
-extern	char map_music[128];
+extern	char map_music[MAX_PATH];
+extern  char map_music_sec[MAX_PATH];
 
 extern void RS_FreeAllScripts(void);
 
@@ -2142,6 +2143,25 @@ void CL_FixCvarCheats (void)
 	}
 }
 
+void CL_CheckFlagStatus( void )
+{
+	if(r_hasFlag)
+	{
+		//start the new music
+		S_StartMusic(map_music_sec); 
+
+		r_hasFlag = false;
+	}
+
+	if(r_noFlag)
+	{
+		//start the original map music back up
+		S_StartMusic(map_music);
+
+		r_noFlag = false;
+	}
+}
+
 //============================================================================
 
 qboolean send_packet_now = false; // instant packets. used during downloads
@@ -2443,6 +2463,9 @@ void CL_Frame( int msec )
 			if ( host_speeds->value )
 				time_after_ref = Sys_Milliseconds();
 		}
+
+		// check for flag and update music src if possesed or lost
+		CL_CheckFlagStatus();
 
 		// update audio.
 		S_Update( cl.refdef.vieworg, cl.v_forward, cl.v_right, cl.v_up );

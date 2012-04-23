@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "r_local.h"
 #include "r_iqm.h"
 #include "r_ragdoll.h"
+#include "../client/sound.h"
 
 model_t	*loadmodel;
 int		modfilelen;
@@ -49,7 +50,8 @@ int r_lightgroups;
 
 int		registration_sequence;
 
-char map_music[128];
+char map_music[MAX_PATH];
+char map_music_sec[MAX_PATH];
 
 char		map_entitystring[MAX_MAP_ENTSTRING];
 int			numentitychars;
@@ -1699,7 +1701,9 @@ void R_BeginRegistration (char *model)
 	}
 
 	// check for background music file, , using file system search path
-	strcpy(map_music, "music/none.wav");
+	//defaults below
+	strcpy(map_music, "music/menumusic.ogg");
+	strcpy(map_music_sec, "music/adrenaline.ogg");
 	path = NULL;
 	for(;;)
 	{
@@ -1711,13 +1715,19 @@ void R_BeginRegistration (char *model)
 		Com_sprintf(fullname, sizeof(fullname), "%s/maps/scripts/%s.mus", path, model);
 		i = 0;
 		R_FindFile( fullname, &file ); //does a music file exist?
-		if(file) {
+		if(file) 
+		{
 			//read the file, get music information
 			fclose( file );
 			R_ReadMusicScript( fullname );
+			S_RegisterSound (map_music);
+			S_RegisterSound (map_music_sec);			
 			break;
 		}
 	}
+	//set ctf music flags
+	r_hasFlag = false;
+	r_noFlag = false;
 
 	Com_sprintf (fullname, sizeof(fullname), "maps/%s.bsp", model);
 
