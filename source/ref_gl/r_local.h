@@ -178,7 +178,11 @@ extern  cvar_t	*r_ragdolls;
 extern  cvar_t  *r_ragdoll_debug;
 
 extern	qboolean	map_fog;
+#if defined WIN32_VARIANT
 extern	char		map_music[MAX_PATH];
+#else
+extern	char		map_music[MAX_OSPATH];
+#endif
 extern  unsigned	r_weather;
 extern unsigned		r_nosun;
 

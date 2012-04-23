@@ -10115,7 +10115,10 @@ fi
 
 	if test -z "$ALTERNATE_INSTALL_TRUE"; then :
 
-		$as_echo " Shared Data ............  ${srcdir}"
+        $as_echo " System ODE library ..... ${system_ode}"
+        $as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
+        $as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
+		$as_echo " Shared Data ............ ${srcdir}"
 		$as_echo "   note: with alternate install, data is located relative to CWD."
 		$as_echo " User Home R/W Data ..... ${alienarena_homedir}"
 

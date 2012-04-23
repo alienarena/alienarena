@@ -2448,6 +2448,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/misc/trigger1.wav \
 	data1/sound/misc/two.wav \
 	data1/sound/misc/w_pkup.wav \
+	data1/sound/music/adrenaline.ogg \
 	data1/sound/music/cp-ribeye.ogg \
 	data1/sound/music/Divinity_lack_of_success.ogg \
 	data1/sound/music/Divinity_misunderstood.ogg \

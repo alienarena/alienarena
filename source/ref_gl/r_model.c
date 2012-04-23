@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "r_local.h"
 #include "r_iqm.h"
 #include "r_ragdoll.h"
-#include "../client/sound.h"
+#include "client/sound.h"
 
 model_t	*loadmodel;
 int		modfilelen;
@@ -50,8 +50,13 @@ int r_lightgroups;
 
 int		registration_sequence;
 
+#if defined WIN32_VARIANT
 char map_music[MAX_PATH];
 char map_music_sec[MAX_PATH];
+#else
+char map_music[MAX_OSPATH];
+char map_music_sec[MAX_OSPATH];
+#endif
 
 char		map_entitystring[MAX_MAP_ENTSTRING];
 int			numentitychars;
