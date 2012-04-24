@@ -2148,23 +2148,17 @@ void CL_FixCvarCheats (void)
 	}
 }
 
-//to do - note - we need to discern between red and blue teams here
 void CL_CheckFlagStatus( void )
 {
-	if(r_hasFlag)
+	if(r_gotFlag)
 	{
 		//start the new music
 		S_StartMusic(map_music_sec); 
-
-		r_hasFlag = false;
 	}
-
-	if(r_noFlag)
+	else if(r_lostFlag)
 	{
 		//start the original map music back up
 		S_StartMusic(map_music);
-
-		r_noFlag = false;
 	}
 }
 

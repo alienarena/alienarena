@@ -1259,6 +1259,18 @@ void SCR_ExecuteLayoutString (char *s)
 				if( cl.configstrings[CS_IMAGES+value][0] )
 				{
 					Draw_ScaledPic (x, y, scale, cl.configstrings[CS_IMAGES+value]);
+					if(!strcmp(cl.configstrings[CS_IMAGES+value], "i_team1") || 
+						!strcmp(cl.configstrings[CS_IMAGES+value], "i_team2"))
+					{
+						r_gotFlag = false;
+						r_lostFlag = true;
+					}
+					else if(!strcmp(cl.configstrings[CS_IMAGES+value], "i_flag1") || 
+						!strcmp(cl.configstrings[CS_IMAGES+value], "i_flag2"))
+					{
+						r_gotFlag = true;
+						r_lostFlag = false;
+					}
 				}
 			}
 
