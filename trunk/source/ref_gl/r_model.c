@@ -47,7 +47,6 @@ model_t	mod_inline[MAX_MOD_KNOWN];
 LightGroup_t LightGroups[MAX_LIGHTS];
 int r_lightgroups;
 
-
 int		registration_sequence;
 
 #if defined WIN32_VARIANT
@@ -1709,6 +1708,7 @@ void R_BeginRegistration (char *model)
 	//defaults below
 	strcpy(map_music, "music/menumusic.ogg");
 	strcpy(map_music_sec, "music/adrenaline.ogg");
+	S_RegisterSound (map_music_sec);
 	path = NULL;
 	for(;;)
 	{
@@ -1724,9 +1724,7 @@ void R_BeginRegistration (char *model)
 		{
 			//read the file, get music information
 			fclose( file );
-			R_ReadMusicScript( fullname );
-			S_RegisterSound (map_music);
-			S_RegisterSound (map_music_sec);			
+			R_ReadMusicScript( fullname );						
 			break;
 		}
 	}
