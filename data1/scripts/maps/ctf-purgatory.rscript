@@ -111,4 +111,16 @@ textures/evil/e6launchengine
 		lensflare
 	}
 }
-		
+textures/evil/e8_jumppad02
+{
+    	{
+        	map gfx/e8_jumppad02_fx.tga
+        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	alphashift 9 0 9
+        	nolightmap
+    	}
+    	{
+        	map gfx/e8_jumppad02_mask.tga
+        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+    	}
+}
