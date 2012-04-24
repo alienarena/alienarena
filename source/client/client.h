@@ -753,5 +753,5 @@ extern FNT_auto_t	CL_consoleFont;
 
 //external renderer
 extern void R_AddSimpleItem(int type, vec3_t origin);
-extern qboolean r_hasFlag;
-extern qboolean r_noFlag;
+extern qboolean r_gotFlag;
+extern qboolean r_lostFlag;

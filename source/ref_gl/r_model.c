@@ -1731,8 +1731,8 @@ void R_BeginRegistration (char *model)
 		}
 	}
 	//set ctf music flags
-	r_hasFlag = false;
-	r_noFlag = false;
+	r_gotFlag = false;
+	r_lostFlag = false;
 
 	Com_sprintf (fullname, sizeof(fullname), "maps/%s.bsp", model);
 

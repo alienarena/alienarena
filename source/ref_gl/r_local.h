@@ -360,8 +360,8 @@ extern float	scr_playericonalpha;
 
 //Team colors
 int r_teamColor;
-qboolean r_hasFlag;
-qboolean r_noFlag;
+qboolean r_gotFlag;
+qboolean r_lostFlag;
 
 extern void	Draw_GetPicSize (int *w, int *h, char *name);
 extern void	Draw_Pic (int x, int y, char *name);
