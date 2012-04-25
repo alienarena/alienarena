@@ -223,6 +223,27 @@ void DoRespawn (edict_t *ent)
 
 void SetRespawn (edict_t *ent, float delay)
 {
+    if (	ent->item && g_duel->integer && 
+    		ent->item->weapmodel != WEAP_MINDERASER		)
+	{
+		switch (ent->item->flags)
+		{
+			//TODO: playtest this and adjust the scaling factors.
+			case IT_WEAPON:
+				delay *= 3.0;
+				break;
+			case IT_POWERUP:
+			case IT_AMMO: //intentional fallthrough
+				delay *= 2.0;
+				break;
+			case IT_ARMOR:
+			case IT_HEALTH: //intentional fallthrough
+				delay *= 1.5;
+				break;
+			default:
+				break;
+		}
+	}
 	ent->flags |= FL_RESPAWN;
 	ent->svflags |= SVF_NOCLIENT;
 	ent->solid = SOLID_NOT;
@@ -1899,7 +1920,7 @@ gives +1 to maximum health
 /* width */		2,
 		60,
 		NULL,
-		0,
+		IT_HEALTH,
 		0,
 		NULL,
 		0,
@@ -1920,7 +1941,7 @@ gives +1 to maximum health
 /* width */		3,
 		0,
 		NULL,
-		0,
+		IT_HEALTH,
 		0,
 		NULL,
 		0,
