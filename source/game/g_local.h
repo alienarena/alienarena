@@ -267,6 +267,7 @@ typedef struct
 #define IT_ARMOR		4
 #define IT_KEY			8
 #define IT_POWERUP		16
+#define IT_HEALTH		32
 
 // gitem_t->weapmodel for weapons indicates model index
 #define WEAP_BLASTER			1
