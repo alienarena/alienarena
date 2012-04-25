@@ -87,7 +87,7 @@ typedef struct rs_cond_val_s
 	rs_cond_op_t			optype;					//what type of operation
 	struct rs_cond_val_s	*subexpr1, *subexpr2;	//sub expressions, if applicable
 	cvar_t					*val;					//value, if applicable
-	cvar_t					lval;					//for use storing literal values                
+	cvar_t					lval;					//for use storing literal values
 } rs_cond_val_t;
 
 // Script stage
