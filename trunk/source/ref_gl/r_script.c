@@ -134,6 +134,8 @@ void RS_ResetScript (rscript_t *rs)
 
 void rs_free_if_subexpr (rs_cond_val_t *expr)
 {
+	if (expr->lval.string)
+		Z_Free (expr->lval.string);
 	if (expr->subexpr1)
 		rs_free_if_subexpr (expr->subexpr1);
 	if (expr->subexpr2)
@@ -1457,63 +1459,58 @@ void ToggleLightmap (qboolean toggle)
 	}
 }
 
-static cvar_t rs_eval_if_subexpr (rs_cond_val_t *expr)
+static cvar_t *rs_eval_if_subexpr (rs_cond_val_t *expr)
 {
-	cvar_t	res;
-	int		resv;
+	int resv;
 	switch (expr->optype)
 	{
 		case rs_cond_none:
-			return *expr->val;
+			return expr->val;
 		case rs_cond_is:
 			return rs_eval_if_subexpr (expr->subexpr1);
 		case rs_cond_lnot:
-			resv = (rs_eval_if_subexpr (expr->subexpr2).value == 0);
+			resv = (rs_eval_if_subexpr (expr->subexpr1)->value == 0);
 			break;
 		case rs_cond_eq:
-/*			Com_Printf ("%s == %s\n", */
-/*					rs_eval_if_subexpr (expr->subexpr1).string,*/
-/*					rs_eval_if_subexpr (expr->subexpr2).string*/
-/*				);*/
 			resv = Q_strcasecmp (
-					rs_eval_if_subexpr (expr->subexpr1).string,
-					rs_eval_if_subexpr (expr->subexpr2).string
+					rs_eval_if_subexpr (expr->subexpr1)->string,
+					rs_eval_if_subexpr (expr->subexpr2)->string
 				) == 0;
 			break;
 		case rs_cond_neq:
 			resv = Q_strcasecmp (
-					rs_eval_if_subexpr (expr->subexpr1).string,
-					rs_eval_if_subexpr (expr->subexpr2).string
+					rs_eval_if_subexpr (expr->subexpr1)->string,
+					rs_eval_if_subexpr (expr->subexpr2)->string
 				) != 0;
 			break;
 		case rs_cond_gt:
-			resv = (rs_eval_if_subexpr (expr->subexpr1).value >
-					rs_eval_if_subexpr (expr->subexpr2).value
+			resv = (rs_eval_if_subexpr (expr->subexpr1)->value >
+					rs_eval_if_subexpr (expr->subexpr2)->value
 				);
 			break;
 		case rs_cond_ngt:
-			resv = (rs_eval_if_subexpr (expr->subexpr1).value <=
-					rs_eval_if_subexpr (expr->subexpr2).value
+			resv = (rs_eval_if_subexpr (expr->subexpr1)->value <=
+					rs_eval_if_subexpr (expr->subexpr2)->value
 				);
 			break;
 		case rs_cond_lt:
-			resv = (rs_eval_if_subexpr (expr->subexpr1).value <
-					rs_eval_if_subexpr (expr->subexpr2).value
+			resv = (rs_eval_if_subexpr (expr->subexpr1)->value <
+					rs_eval_if_subexpr (expr->subexpr2)->value
 				);
 			break;
 		case rs_cond_nlt:
-			resv = (rs_eval_if_subexpr (expr->subexpr1).value >=
-					rs_eval_if_subexpr (expr->subexpr2).value
+			resv = (rs_eval_if_subexpr (expr->subexpr1)->value >=
+					rs_eval_if_subexpr (expr->subexpr2)->value
 				);
 			break;
 		case rs_cond_and:
-			resv = (rs_eval_if_subexpr (expr->subexpr1).value &&
-					rs_eval_if_subexpr (expr->subexpr2).value
+			resv = (rs_eval_if_subexpr (expr->subexpr1)->value &&
+					rs_eval_if_subexpr (expr->subexpr2)->value
 				);
 			break;
 		case rs_cond_or:
-			resv = (rs_eval_if_subexpr (expr->subexpr1).value ||
-					rs_eval_if_subexpr (expr->subexpr2).value
+			resv = (rs_eval_if_subexpr (expr->subexpr1)->value ||
+					rs_eval_if_subexpr (expr->subexpr2)->value
 				);
 			break;
 		default:
@@ -1521,9 +1518,8 @@ static cvar_t rs_eval_if_subexpr (rs_cond_val_t *expr)
 			resv = 0;
 			break;
 	}
-	memset (&res, 0, sizeof (cvar_t));
-	Anon_Cvar_Set (&res, va ("%d", resv));
-	return res;
+	Anon_Cvar_Set (&(expr->lval), va ("%d", resv));
+	return &(expr->lval);
 }
 
 //This is the shader drawing routine for bsp surfaces - it will draw on top of the
@@ -1555,7 +1551,7 @@ void RS_DrawSurfaceTexture (msurface_t *surf, rscript_t *rs)
 	{
 		if (stage->lensflare || stage->grass || stage->beam)
 			break; //handled elsewhere
-		if (stage->condv && !(rs_eval_if_subexpr(stage->condv).value))
+		if (stage->condv && !(rs_eval_if_subexpr(stage->condv)->value))
 			break; //stage should not execute
 
 		if(stage->lightmap)
