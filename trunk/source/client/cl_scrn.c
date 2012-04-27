@@ -75,7 +75,8 @@ void SCR_TimeRefresh_f (void);
 void SCR_Loading_f (void);
 
 extern void R_VCFreeFrame(void);
-
+extern cvar_t *rs_hasflag;
+extern cvar_t *rs_team;
 /*
 ===============================================================================
 
@@ -1264,12 +1265,22 @@ void SCR_ExecuteLayoutString (char *s)
 					{
 						r_gotFlag = false;
 						r_lostFlag = true;
+						Cvar_Set("rs_hasflag", "0");
+						if(!strcmp(cl.configstrings[CS_IMAGES+value], "i_team1"))
+							Cvar_Set("rs_team", "blue");
+						else
+							Cvar_Set("rs_team", "red");
 					}
 					else if(!strcmp(cl.configstrings[CS_IMAGES+value], "i_flag1") || 
 						!strcmp(cl.configstrings[CS_IMAGES+value], "i_flag2"))
 					{
 						r_gotFlag = true;
 						r_lostFlag = false;
+						Cvar_Set("rs_hasflag", "1");
+						if(!strcmp(cl.configstrings[CS_IMAGES+value], "i_flag1"))
+							Cvar_Set("rs_team", "blue");
+						else
+							Cvar_Set("rs_team", "red");
 					}
 				}
 			}
