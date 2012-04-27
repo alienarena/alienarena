@@ -628,9 +628,11 @@ AS_IF([test "x$hide_status" = "xno"],[
 	AS_ECHO([" Alternate install: ..... ${alternate_install}"])
 
 	AM_COND_IF([ALTERNATE_INSTALL],[
-        AS_ECHO([" System ODE library ..... ${system_ode}"])
-        AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
-        AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+        AM_COND_IF([BUILD_CLIENT],[
+            AS_ECHO([" System ODE library ..... ${system_ode}"])
+            AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
+            AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+            ])
 		AS_ECHO([" Shared Data ............ ${srcdir}"])
 		AS_ECHO(["   note: with alternate install, data is located relative to CWD."])
 		AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"])
@@ -642,12 +644,14 @@ dnl
 		game_data=${datadir}/${PACKAGE}
 		game_data_a=`eval "echo ${game_data}"`
 		game_data=`eval "echo ${game_data_a}"`
-		AS_IF([ test x"${unix_host}" = xdarwin ],[
-			AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
-		])
-		AS_ECHO([" System ODE library ..... ${system_ode}"])
-		AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
-		AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+        AM_COND_IF([BUILD_CLIENT],[
+            AS_ECHO([" System ODE library ..... ${system_ode}"])
+            AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
+            AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+            AS_IF([ test x"${unix_host}" = xdarwin ],[
+                AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
+            ])
+        ])
 		AS_ECHO([" Prefix ................. ${prefix}"])
 		AS_ECHO([" Shared RO Data: ........ ${game_data}"])
 		AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"]) 

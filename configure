@@ -10115,9 +10115,13 @@ fi
 
 	if test -z "$ALTERNATE_INSTALL_TRUE"; then :
 
-        $as_echo " System ODE library ..... ${system_ode}"
-        $as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
-        $as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
+        if test -z "$BUILD_CLIENT_TRUE"; then :
+
+            $as_echo " System ODE library ..... ${system_ode}"
+            $as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
+            $as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
+
+fi
 		$as_echo " Shared Data ............ ${srcdir}"
 		$as_echo "   note: with alternate install, data is located relative to CWD."
 		$as_echo " User Home R/W Data ..... ${alienarena_homedir}"
@@ -10127,14 +10131,18 @@ else
 		game_data=${datadir}/${PACKAGE}
 		game_data_a=`eval "echo ${game_data}"`
 		game_data=`eval "echo ${game_data_a}"`
-		if  test x"${unix_host}" = xdarwin ; then :
+        if test -z "$BUILD_CLIENT_TRUE"; then :
 
-			$as_echo " GL_LIBDIR: ............. ${gl_dlopen_path}"
+            $as_echo " System ODE library ..... ${system_ode}"
+            $as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
+            $as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
+            if  test x"${unix_host}" = xdarwin ; then :
+
+                $as_echo " GL_LIBDIR: ............. ${gl_dlopen_path}"
 
 fi
-		$as_echo " System ODE library ..... ${system_ode}"
-		$as_echo " XF86 DGA support: ...... ${have_Xxf86dga}"
-		$as_echo " XF86 VidMode support: .. ${have_Xxf86vm}"
+
+fi
 		$as_echo " Prefix ................. ${prefix}"
 		$as_echo " Shared RO Data: ........ ${game_data}"
 		$as_echo " User Home R/W Data ..... ${alienarena_homedir}"
