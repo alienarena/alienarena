@@ -1728,9 +1728,10 @@ void R_BeginRegistration (char *model)
 			break;
 		}
 	}
-	//set ctf music flags
+	//set ctf flags
 	r_gotFlag = false;
 	r_lostFlag = false;
+	Cvar_Set("rs_hasflag", "0");
 
 	Com_sprintf (fullname, sizeof(fullname), "maps/%s.bsp", model);
 
