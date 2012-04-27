@@ -1307,6 +1307,7 @@ struct gclient_s
 	int lastforwardmove;
 	int dodge;
 	int moved;
+	int keydown;
 	float lastdodge;
 
 	float spawnprotecttime;

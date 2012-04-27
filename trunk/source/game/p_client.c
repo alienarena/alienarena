@@ -3120,8 +3120,9 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		//dodging
 		client->dodge = false;
+
 		if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove == 0 && ucmd->sidemove != 0 && client->moved == false
-			&& ((level.time - client->lastmovetime) < .15))
+			&& client->keydown < 10 && ((level.time - client->lastmovetime) < .15))
 		{
 			if((ucmd->sidemove < 0 && client->lastsidemove < 0) || (ucmd->sidemove > 0 && client->lastsidemove > 0)) 
 			{
@@ -3133,7 +3134,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			}
 		}
 		if((level.time - client->lastdodge) > 1.0 && ent->groundentity && ucmd->forwardmove != 0 && ucmd->sidemove == 0 && client->moved == false
-			&& ((level.time - client->lastmovetime) < .15))
+			&& client->keydown < 10 && ((level.time - client->lastmovetime) < .15))
 		{
 			if((ucmd->forwardmove < 0 && client->lastforwardmove < 0) || (ucmd->forwardmove > 0 && client->lastforwardmove > 0)) 
 			{
@@ -3143,13 +3144,24 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 					client->dodge = -2;
 				ucmd->upmove += 100;
 			}
+		}			
+		
+		//checking previous frame's movement
+		if(client->moved == true && (ucmd->buttons & BUTTON_ANY))
+		{
+			client->keydown++;
+		}
+		else if (ucmd->sidemove != 0 || ucmd->forwardmove != 0)
+		{
+			client->keydown = 0;
 		}
 
-		if(ucmd->sidemove != 0 || ucmd->forwardmove != 0) {
+		if(ucmd->sidemove != 0 || ucmd->forwardmove != 0) 
+		{
 			client->lastmovetime = level.time;
 			client->lastsidemove = ucmd->sidemove;
 			client->lastforwardmove = ucmd->forwardmove;
-			client->moved = true;
+			client->moved = true;		
 		}
 		else //we had a frame with no movement
 			client->moved = false;
