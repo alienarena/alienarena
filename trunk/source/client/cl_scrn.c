@@ -65,6 +65,7 @@ cvar_t		*scr_consize;
 
 cvar_t		*cl_drawfps;
 cvar_t		*cl_drawtimer;
+cvar_t		*cl_drawbandwidth;
 
 cvar_t		*cl_drawtime;
 
@@ -453,6 +454,9 @@ void SCR_Init (void)
 
 	cl_drawfps = Cvar_Get ("cl_drawfps", "0", CVAR_ARCHIVE);
 	cl_drawtimer = Cvar_Get("cl_drawtimer", "0", CVAR_ARCHIVE);
+	cl_drawbandwidth = Cvar_Get ("cl_drawbandwidth", "0", CVAR_ARCHIVE);
+	
+	memset (perftests, 0, sizeof(perftests));
 
 //
 // register our commands
@@ -1736,67 +1740,138 @@ void SCR_showTimer(void)
 /*
 ================
 
-SCR_showFPS
+SCR_showPerfTest
 
 ================
 */
 
-int		fpscounter;
+perftest_t *get_perftest(char *name) {
+    int         i; 
+    perftest_t  *test = NULL;
+    
+    for (i = 0; i < MAX_PERFTESTS; i++) {
+        if (!perftests[i].in_use) {
+            test = &perftests[i];
+            break;
+        }
+        if (!strncmp(perftests[i].name, name, sizeof(perftests[i].name)))
+            return &perftests[i];
+    }
+    
+    if (!test) 
+        return NULL; //remember to handle this in your code!
+    
+    memset(test, 0, sizeof(perftest_t));
+    
+    test->in_use = true;
+    strncpy (test->name, name, sizeof(test->name));
+    
+    return test;
+}
+    
+
+//slotnum is used for the vertical offset on the screen
+void SCR_showPerfTest (perftest_t *test, int slotnum) {
+	FNT_font_t		font;
+	int			    end_msec;
+	float			time_sec;
+	float			rate;
+	int				height;
+	
+	if (!test->in_use)
+	    return;
+	
+	if (cls.key_dest == key_menu || cls.key_dest == key_console || !test->cvar->integer) {
+		test->restart = true;
+		return;
+	}
+	
+	if (test->restart) {
+	    test->start_msec = Sys_Milliseconds();
+	    test->counter = 0.0f;
+	    test->framecounter = 0.0f;
+	    test->update_trigger = 10.0f; //initial delay to update
+	    test->text[0] = 0; //blank the text buffer
+	    test->restart = false;
+	    return;
+	}
+	
+	test->framecounter += 1.0f;
+	if (test->framecounter >= test->update_trigger) {
+	    end_msec = Sys_Milliseconds();
+        time_sec = ((float)(end_msec - test->start_msec)) / 1000.0f;
+	    if (test->is_timerate) {
+	        //calculate rate to display
+	        rate = test->scale * test->counter / time_sec;
+	    } else {
+	        rate = test->scale * test->counter;
+	    }
+	    
+	    //update text buffer for display
+	    Com_sprintf( test->text, sizeof(test->text), test->format, rate );
+	    
+	    test->start_msec = end_msec;
+	    if (test->is_timerate)
+	        //setup for next update - 0.25 sec update interval
+	        test->update_trigger = test->framecounter / (4.0 * time_sec); 
+	    else
+	        //0.05 sec update interval
+	        test->update_trigger = test->framecounter / (20.0 * time_sec); 
+	    test->framecounter = 0.0f;
+	    test->counter = 0.0f;
+	} 
+	
+	font = FNT_AutoGet( CL_gameFont );
+
+	height = viddef.height - 2.0 * font->size * (slotnum + 1);
+	if (cl_drawtimer->integer)
+		height -= 5.25 * font->size;
+	FNT_RawPrint( font , test->text , strlen( test->text ) , false ,
+		viddef.width - 8 * font->size , height, FNT_colors[ 2 ] );
+}
+
+void SCR_showAllPerfTests (void) {
+    int i, testsDrawn;
+    for (i = 0, testsDrawn = 0; i < MAX_PERFTESTS; i++) {
+        if (perftests[i].in_use && perftests[i].cvar->integer) {
+            SCR_showPerfTest (&perftests[i], testsDrawn);
+            testsDrawn++;
+        }
+    }
+}
 
 void SCR_showFPS(void)
 {
-	static qboolean		restart		= true;
-	static float		update_trigger	= 0.0f;
-	static float		framecounter	= 0.0f;
-	static int		start_msec;
-	static char		fps_text[32];
+    static perftest_t *test = NULL;
+    if (!test) {
+        test = get_perftest("fps");
+        if (!test)
+            return; //couldn't acquire test
+        test->cvar = cl_drawfps;
+        test->is_timerate = true;
+        strcpy (test->format, "%3.0ffps");
+        test->scale = 1.0f;
+    }
+    
+    test->counter += 1.0f;
+    
+}
 
-	FNT_font_t		font;
-	int			end_msec;
-	float			time_sec;
-	float			framerate;
-
-	if (cls.key_dest == key_menu || cls.key_dest == key_console) {
-		restart = true;
-		return;
-	}
-
-	if( restart ) {
-		start_msec = Sys_Milliseconds();
-		framecounter = 0.0f;
-		update_trigger = 10.0f; // initial delay to update
-		fps_text[0] = 0; // blank the text buffer
-		restart = false;
-		return;
-	}
-
-	framecounter += 1.0f;
-	if( framecounter >= update_trigger ) {
-		// calculate frames-per-second
-		end_msec = Sys_Milliseconds();
-		time_sec = ((float)(end_msec - start_msec)) / 1000.0f;
-		framerate = framecounter / time_sec ;
-
-		// update text buffer for display
-		if ( cl_drawfps->integer == 2 )
-		{ // for developers
-			Com_sprintf( fps_text, sizeof(fps_text), "%3.1ffps", framerate );
-		}
-		else
-		{
-			Com_sprintf( fps_text, sizeof(fps_text), "%3.0ffps", framerate );
-		}
-
-		// setup for next update
-		framecounter = 0.0f;
-		start_msec = end_msec;
-		update_trigger = framerate / 2.0 ; // for .5 sec update interval
-	}
-
-	font = FNT_AutoGet( CL_gameFont );
-
-	FNT_RawPrint( font , fps_text , strlen( fps_text ) , false ,
-		viddef.width - 8 * font->size , viddef.height - 2.0 * font->size , FNT_colors[ 2 ] );
+// Shows kilobytes per second from the server
+void SCR_showBandwidth (sizebuf_t *src) {
+    static perftest_t *test = NULL;
+    if (!test) {
+        test = get_perftest("bandwidth");
+        if (!test)
+            return; //couldn't acquire test
+        test->is_timerate = true;
+        test->cvar = cl_drawbandwidth;
+        strcpy (test->format, "%2.2fkibps");
+        test->scale = 1.0f/1024.0f; //the SI is wrong, it's 1024
+    }
+    
+    test->counter += src->cursize;
+    
 }
 
 /*
@@ -1935,12 +2010,19 @@ void SCR_UpdateScreen (void)
 
 			SCR_DrawLoading ();
 
-			if(cl_drawfps->value)
+			if(cl_drawfps->integer)
 			{
 				SCR_showFPS();
 			}
+			
+			if(cl_drawbandwidth->integer)
+			{
+				SCR_showBandwidth(&net_message);
+			}
+			
+			SCR_showAllPerfTests();
 
-			if(cl_drawtimer->value)
+			if(cl_drawtimer->integer)
 			{
 				SCR_showTimer();
 			}
