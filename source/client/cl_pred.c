@@ -305,6 +305,10 @@ void CL_PredictMovement (void)
 	cl.predicted_origin[0] = pm.s.origin[0]*0.125;
 	cl.predicted_origin[1] = pm.s.origin[1]*0.125;
 	cl.predicted_origin[2] = pm.s.origin[2]*0.125;
+	
+	cl.predicted_velocity[0] = pm.s.velocity[0]*0.125;
+	cl.predicted_velocity[1] = pm.s.velocity[1]*0.125;
+	cl.predicted_velocity[2] = pm.s.velocity[2]*0.125;
 
 	VectorCopy (pm.viewangles, cl.predicted_angles);
 }

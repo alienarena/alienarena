@@ -2224,6 +2224,7 @@ void CL_Frame( int msec )
 	static int packet_delay = 0;
 	int render_trigger;
 	int packet_trigger;
+	static perftest_t *speedometer = NULL;
 
 	if ( dedicated->integer )
 	{ // crx running as dedicated server crashes without this.
@@ -2237,6 +2238,17 @@ void CL_Frame( int msec )
 	/* local timers for decoupling frame rate from packet rate */
 	packet_timer += msec;
 	render_timer += msec;
+	
+    if (!speedometer) {
+        speedometer = get_perftest("speedometer");
+        if (speedometer) {
+            speedometer->is_timerate = false;
+            speedometer->cvar = Cvar_Get("cl_showspeedometer", "0", CVAR_ARCHIVE);
+            strcpy (speedometer->format, "speed %4.0f u/s");
+            speedometer->scale = 1.0f;///12.3f;
+        }
+    }
+    
 
 	/* periodically override certain test and cheat cvars unless single player.*/
 	if ( (cl.time & 0xfff) == 0 )
@@ -2424,6 +2436,13 @@ void CL_Frame( int msec )
 		 * [The Quake trick that keeps players view smooth in on-line play.]
 		 */
 		CL_PredictMovement();
+		
+		if (speedometer && speedometer->cvar->integer) {
+	        speedometer->counter = sqrt(
+	            cl.predicted_velocity[0]*cl.predicted_velocity[0]+
+	            cl.predicted_velocity[1]*cl.predicted_velocity[1]
+	        );
+	    }
 
 		/* retrigger packet send timer */
 		packet_timer = 0;
