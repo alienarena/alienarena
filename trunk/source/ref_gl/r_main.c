@@ -96,7 +96,6 @@ int		r_viewcluster, r_viewcluster2, r_oldviewcluster, r_oldviewcluster2;
 cvar_t	*r_norefresh;
 cvar_t	*r_drawentities;
 cvar_t	*r_drawworld;
-cvar_t	*r_speeds;
 cvar_t	*r_fullbright;
 cvar_t	*r_novis;
 cvar_t	*r_nocull;
@@ -994,7 +993,6 @@ r_newrefdef must be set before the first call
 void R_RenderView (refdef_t *fd)
 {
 	GLfloat colors[4] = {(GLfloat) fog.red, (GLfloat) fog.green, (GLfloat) fog.blue, (GLfloat) 0.1};
-	static int printf_throttle;
 
 	numRadarEnts = 0;
 
@@ -1102,23 +1100,6 @@ void R_RenderView (refdef_t *fd)
 
 	R_Flash();
 
-	if (r_speeds->value == 1 )
-	{ // display r_speeds 'wpoly' and 'epoly'counters (value==2 puts on HUD)
-		if ( c_brush_polys != last_c_brush_polys
-			|| c_alias_polys != last_c_alias_polys )
-		{
-			Com_Printf( "%5i wpoly %5i epoly\n", c_brush_polys, c_alias_polys );
-		}
-	}
-	else if( r_speeds->value == 3 )
-	{ // display other counters, of unknown utility
-		if ( !(++printf_throttle % 32) )
-		{
-			Com_Printf( "%5i flares %5i grasses %5i vlmaps %5i vtex %5i beams\n",
-			c_flares, c_grasses, c_visible_lightmaps, c_visible_textures, c_beams );
-		}
-	}
-
 	if(map_fog)
 		qglDisable(GL_FOG);
 
@@ -1184,7 +1165,6 @@ void R_Register( void )
 	r_novis = Cvar_Get ("r_novis", "0", 0);
 	r_nocull = Cvar_Get ("r_nocull", "0", 0);
 	r_lerpmodels = Cvar_Get ("r_lerpmodels", "1", 0);
-	r_speeds = Cvar_Get ("r_speeds", "0", 0);
 
 	r_wave = Cvar_Get ("r_wave", "2", CVAR_ARCHIVE); // Water waves
 

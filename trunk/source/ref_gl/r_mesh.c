@@ -2010,8 +2010,10 @@ void R_DrawAliasModel ( void )
 	// locate the proper data
 	//
 
-	if ( !(currententity->flags & RF_VIEWERMODEL) )
-		c_alias_polys += paliashdr->num_tris; // for r_speeds epoly count
+	if ( !(currententity->flags & RF_VIEWERMODEL) && !(currententity->flags & RF_WEAPONMODEL) )
+	{
+		c_alias_polys += paliashdr->num_tris; /* for rspeed_epoly count */
+	}
 
 	//
 	// draw all the triangles
