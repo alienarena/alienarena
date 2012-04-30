@@ -752,6 +752,9 @@ void R_GLSLGodRays(void)
 	//switch to fbo
 	qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId[2]); //need color buffer
 
+	qglDisable( GL_DEPTH_TEST );
+	qglDepthMask (1);
+
 	qglClear ( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
 	//render sun object center
@@ -795,14 +798,14 @@ void R_GLSLGodRays(void)
 
 	R_DrawShadowMapWorld(); //could tweak this to only draw surfaces that are in the sun?
 	R_DrawVegetationCasters(false);
-
+	
 	qglMatrixMode(GL_PROJECTION);
     qglPushMatrix();
     qglLoadIdentity();
     qglOrtho(0, r_newrefdef.width, r_newrefdef.height, 0, -99999, 99999);
     qglMatrixMode(GL_MODELVIEW);
     qglPushMatrix();
-    qglLoadIdentity();
+    qglLoadIdentity();	
 
 	//glsl the fbo with effect
 
@@ -861,10 +864,12 @@ void R_GLSLGodRays(void)
 
 void R_GLSLPostProcess(void)
 {
-	if(r_test->value)
+	if(gl_glsl_shaders->integer && gl_state.glsl_shaders)
+	{
 		R_GLSLGodRays();
 
-	R_GLSLWaterDroplets();
+		R_GLSLWaterDroplets();
 	
-	R_GLSLDistortion();
+		R_GLSLDistortion();
+	}
 }
