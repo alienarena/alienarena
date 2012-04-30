@@ -812,11 +812,17 @@ void V_RenderView( float stereo_separation )
 	if (!cl.refresh_prepped)
 		return;			// still loading
 
-	if (cl_timedemo->value)
+	if ( cl_timedemo && cl_timedemo->integer )
 	{
-		if (!cl.timedemo_start)
+		if ( cl.timedemo_start > 0 )
+		{ /* frame counter increment for timedemo benchmark */
+			cl.timedemo_frames++;
+		}
+		else
+		{ /* time demo start trigger */
 			cl.timedemo_start = Sys_Milliseconds ();
-		cl.timedemo_frames++;
+			cl.timedemo_frames = 0;
+		}
 	}
 
 	// an invalid frame will just use the exact previous refdef

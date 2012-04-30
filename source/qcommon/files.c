@@ -163,9 +163,10 @@ char fs_gamesearch[GAME_SEARCH_SLOTS][MAX_OSPATH];
 #define BOT_SEARCH_SLOTS 3
 char fs_botsearch[BOT_SEARCH_SLOTS][MAX_OSPATH];
 
-/** \brief Initialize paths: data1, arena, botinfo, etc.
+/**
+ * @brief Initialize paths: data1, arena, botinfo, etc.
  *
- * \note This gets executed after command line "+set" commands are executed
+ * @note This gets executed after command line "+set" commands are executed
  *       the first time. But, before any other commands from command line
  *       or .cfg files are executed.
  */
@@ -269,16 +270,9 @@ static void FS_init_paths( void )
 	}
 	else
 	{ // was empty, set to "arena"
-#if 0
-		// this can't be right because it could recurse back here
-		fs_gamedirvar = Cvar_ForceSet("game", GAME_GAMEDATA );
-		Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
-				fs_datadir, GAME_GAMEDATA );
-#else
 		fs_gamedirvar = Cvar_ForceSet("gamedir", GAME_GAMEDATA );
 		Com_sprintf( game_gamedata, sizeof(game_gamedata), "%s/%s",
 				fs_datadir, GAME_GAMEDATA );
-#endif
 	}
 
 	// set path for "botinfo"
@@ -840,10 +834,10 @@ void FS_SetGamedir (char *dir)
 		Cbuf_AddText ("vid_restart\nsnd_restart\n");
 	}
 
+	// note: FullSet triggers sending info to client
 	if ( !strcmp( dir, BASE_GAMEDATA ) || ( *dir == 0 ) )
-	{
+	{ // either "data1" or "", set to empty string.
 		Cvar_FullSet ("gamedir", "", CVAR_SERVERINFO|CVAR_NOSET);
-		Cvar_FullSet ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
 	}
 	else
 	{

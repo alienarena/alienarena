@@ -78,6 +78,30 @@ void SCR_Loading_f (void);
 extern void R_VCFreeFrame(void);
 extern cvar_t *rs_hasflag;
 extern cvar_t *rs_team;
+
+/*
+ * map performance counters
+ *
+ * Used to measure the complexity of map areas.
+ * Modified for display in performance counter array
+ * Replace general "r_speed" cvar.
+ *
+ * Note: c_visible_textures seems to be always 0 and
+ *   c_visible_lightmaps is not used
+ */
+// extern cvar_t *r_speeds;
+cvar_t *rspeed_wpolys;
+cvar_t *rspeed_epolys;
+cvar_t *rspeed_flares;
+cvar_t *rspeed_grasses;
+cvar_t *rspeed_beams;
+
+extern int c_brush_polys;  /* "wpoly"   polygons from brushes */
+extern int c_alias_polys;  /* "epoly"   polygons from .md2 meshes */
+extern int c_flares;       /* "flares"  lens flares */
+extern int c_grasses;      /* "grasses" vegetation instances */
+extern int c_beams;        /* "beams"   light beams (?) */
+
 /*
 ===============================================================================
 
@@ -455,6 +479,12 @@ void SCR_Init (void)
 	cl_drawfps = Cvar_Get ("cl_drawfps", "0", CVAR_ARCHIVE);
 	cl_drawtimer = Cvar_Get("cl_drawtimer", "0", CVAR_ARCHIVE);
 	cl_drawbandwidth = Cvar_Get ("cl_drawbandwidth", "0", CVAR_ARCHIVE);
+
+	rspeed_wpolys   = Cvar_Get("rspeed_wpolys",  "0", 0);
+	rspeed_epolys   = Cvar_Get("rspeed_epolys",  "0", 0);
+	rspeed_flares   = Cvar_Get("rspeed_flares",  "0", 0);
+	rspeed_grasses  = Cvar_Get("rspeed_grasses", "0", 0);
+	rspeed_beams    = Cvar_Get("rspeed_beams",   "0", 0);
 	
 	memset (perftests, 0, sizeof(perftests));
 
@@ -1874,36 +1904,69 @@ void SCR_showBandwidth (sizebuf_t *src) {
     
 }
 
-/*
- * SCR_ShowRSpeeds()
- *   display the cvar r_speeds activated performance counters
+/**
+ *
+ * @brief Construct map-maker's "r_speed" performance counter displays
+ *
+ * the traditional r_speeds cvar is replaced by individual counter cvars,
+ *  named "rspeed_*"
  */
+static void show_rspeed_helper(
+	cvar_t*     test_cvar,
+	perftest_t* test_obj,
+	char*       test_name,
+	char*       test_format,
+	int         test_counter
+	)
+{
+	if ( test_cvar && test_cvar->integer )
+	{
+		if ( test_obj == NULL )
+		{ /* constructor */
+			test_obj = get_perftest( test_name );
+			if ( test_obj != NULL )
+			{ /* slot allocated, construct */
+				test_obj->is_timerate = false;
+				test_obj->cvar = test_cvar;
+				strcpy( test_obj->format, test_format );
+				test_obj->scale = 1.0f;
+				test_obj->counter = test_counter;
+			}
+			else
+			{ /* no slot, force disable */
+				(void)Cvar_ForceSet( test_cvar->name, "0" );
+			}
+		}
+		else
+		{ /* running, update counter from refresh counter */
+			test_obj->counter = test_counter;
+		}
+	}
+}
+
 void SCR_showRSpeeds( void )
 {
- 	extern int		c_brush_polys;
- 	extern int		c_alias_polys;
+	static perftest_t *test_wpoly    = NULL;
+	static perftest_t *test_epoly    = NULL;
+	static perftest_t *test_flares   = NULL;
+	static perftest_t *test_grasses  = NULL;
+	static perftest_t *test_beams    = NULL;
 
-	FNT_font_t		font;
-	struct FNT_window_s	box;
-	char			prtstring[32];
- 	float			scale;
+	show_rspeed_helper( rspeed_wpolys, test_wpoly,
+			"wpolys", "%5.0f wpolys", c_brush_polys );
 
- 	if (cls.key_dest == key_menu || cls.key_dest == key_console)
- 		return;
+	show_rspeed_helper( rspeed_epolys, test_epoly,
+			"epolys", "%5.0f epolys", c_alias_polys );
 
- 	scale = (float)(viddef.height)/600;
- 	if(scale < 1)
- 		scale = 1;
+	show_rspeed_helper( rspeed_flares, test_flares,
+			"flares", "%5.0f flares", c_flares );
 
- 	Com_sprintf( prtstring, sizeof( prtstring ),
- 		"%5.5i wpoly %5.5i epoly",  c_brush_polys, c_alias_polys );
+	show_rspeed_helper( rspeed_grasses, test_grasses,
+			"grasses", "%5.0f grasses", c_grasses );
 
-	font = FNT_AutoGet( CL_consoleFont );
-	box.x = 0;
-	box.y = viddef.height - 6 * font->size;
-	box.width = viddef.width;
-	box.height = 0;
-	FNT_BoundedPrint( font , prtstring , FNT_CMODE_NONE , FNT_ALIGN_CENTER , &box , FNT_colors[ 7 ] );
+	show_rspeed_helper( rspeed_beams, test_beams,
+			"beams", "%5.0f beams", c_beams );
+
 }
 
 /*
@@ -2019,6 +2082,10 @@ void SCR_UpdateScreen (void)
 			{
 				SCR_showBandwidth(&net_message);
 			}
+
+#if 1
+			SCR_showRSpeeds(); /* map-maker's performance counters */
+#endif
 			
 			SCR_showAllPerfTests();
 
@@ -2026,11 +2093,13 @@ void SCR_UpdateScreen (void)
 			{
 				SCR_showTimer();
 			}
+#if 0
 			{
 				extern cvar_t* r_speeds;
 				if( r_speeds->value == 2 )
 					SCR_showRSpeeds();
 			}
+#endif
 			SCR_DrawPlayerIcon();
 		}
 	}
