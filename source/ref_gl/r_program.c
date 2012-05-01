@@ -308,24 +308,6 @@ static char bsp_vertex_program[] =
 "    gl_TexCoord[0] = gl_MultiTexCoord0;\n"
 "    gl_TexCoord[1] = gl_MultiTexCoord1;\n"
 
-"	 if(LIQUID > 0)\n"
-"	 {\n"
-"		//for liquid fx scrolling\n"
-"		vec4 texco = gl_MultiTexCoord0;\n"
-"		texco.t = texco.t - rsTime*1.0/LIQUID;\n"
-"		gl_TexCoord[3] = texco;\n"
-
-"		texco = gl_MultiTexCoord0;\n"
-"		texco.t = texco.t - rsTime*0.9/LIQUID;\n"
-"		//shift the horizontal here a bit\n"
-"		texco.s = texco.s/1.5;\n"
-"		gl_TexCoord[4] = texco;\n"
-
-"		texco = gl_MultiTexCoord0;\n"
-"		texco.t = texco.t - rsTime*0.6/LIQUID;\n"
-"		gl_TexCoord[5] = texco;\n"
-"	 }\n"
-
 "    //fog\n"
 "    if(FOG > 0){\n"
 "      fog = (gl_Position.z - gl_Fog.start) / (gl_Fog.end - gl_Fog.start);\n"
@@ -350,6 +332,7 @@ static char bsp_fragment_program[] =
 "uniform int STATSHADOW;\n"
 "uniform int SHADOWMAP;\n"
 "uniform int LIQUID;\n"
+"uniform float rsTime;\n"
 
 "varying vec4 sPos;\n"
 "varying vec3 EyeDir;\n"
@@ -510,23 +493,35 @@ static char bsp_fragment_program[] =
 "		vec3 noiseVec2;\n"
 "		vec3 noiseVec3;\n"
 
+"		//for liquid fx scrolling\n"
+"		vec4 texco3 = gl_TexCoord[0];\n"
+"		texco3.t = texco3.t - rsTime*1.0/LIQUID;\n"
+
+"		vec4 texco4 = gl_TexCoord[0];\n"
+"		texco4.t = texco4.t - rsTime*0.9/LIQUID;\n"
+"		//shift the horizontal here a bit\n"
+"		texco4.s = texco4.s/1.5;\n"
+
+"		vec4 texco5 = gl_TexCoord[0];\n"
+"		texco5.t = texco5.t - rsTime*0.6/LIQUID;\n"
+
 "       vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
 "       Offset = Offset * 0.04 - 0.02;\n"
 "       vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;\n"
 
 "		displacement = gl_TexCoord[3].st;\n"
 
-"		noiseVec = normalize(texture2D(liquidNormTex, gl_TexCoord[3].st)).xyz;\n"
+"		noiseVec = normalize(texture2D(liquidNormTex, texco3.st)).xyz;\n"
 "		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"
 
-"		displacement2 = gl_TexCoord[4].st;\n"
+"		displacement2 = texco4.st;\n"
 
 "		noiseVec2 = normalize(texture2D(liquidNormTex, displacement2.xy)).xyz;\n"
 "		noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;\n"
 
 "		if(LIQUID > 2)\n"
 "		{\n"
-"			displacement3 = gl_TexCoord[5].st;\n"
+"			displacement3 = texco5.st;\n"
 
 "			noiseVec3 = normalize(texture2D(liquidNormTex, displacement3.xy)).xyz;\n"
 "			noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;\n"
@@ -538,19 +533,19 @@ static char bsp_fragment_program[] =
 "			displacement4.y = noiseVec.y + noiseVec2.y;\n"
 "		}\n"
 
-"		displacement.x = gl_TexCoord[3].s + noiseVec.x + TexCoords.x;\n"
-"		displacement.y = gl_TexCoord[3].t + noiseVec.y + TexCoords.y;\n"
-"		displacement2.x = gl_TexCoord[4].s + noiseVec2.x + TexCoords.x;\n"
-"		displacement2.y = gl_TexCoord[4].t + noiseVec2.y + TexCoords.y;\n"
-"		displacement3.x = gl_TexCoord[5].s + noiseVec3.x + TexCoords.x;\n"
-"		displacement3.y = gl_TexCoord[5].t + noiseVec3.y + TexCoords.y;\n"
+"		displacement.x = texco3.s + noiseVec.x + TexCoords.x;\n"
+"		displacement.y = texco3.t + noiseVec.y + TexCoords.y;\n"
+"		displacement2.x = texco4.s + noiseVec2.x + TexCoords.x;\n"
+"		displacement2.y = texco4.t + noiseVec2.y + TexCoords.y;\n"
+"		displacement3.x = texco5.s + noiseVec3.x + TexCoords.x;\n"
+"		displacement3.y = texco5.t + noiseVec3.y + TexCoords.y;\n"
 
 "		if(LIQUID > 2)\n"
 "		{\n"
-"			vec4 diffuse1 = texture2D(liquidTexture, gl_TexCoord[3].st + displacement.xy);\n"
-"			vec4 diffuse2 = texture2D(liquidTexture, gl_TexCoord[4].st + displacement2.xy);\n"
-"			vec4 diffuse3 = texture2D(liquidTexture, gl_TexCoord[5].st + displacement3.xy);\n"
-"			vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[6].st + displacement4.xy);\n"
+"			vec4 diffuse1 = texture2D(liquidTexture, texco3.st + displacement.xy);\n"
+"			vec4 diffuse2 = texture2D(liquidTexture, texco4.st + displacement2.xy);\n"
+"			vec4 diffuse3 = texture2D(liquidTexture, texco5.st + displacement3.xy);\n"
+"			vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[0].st + displacement4.xy);\n"
 "			bloodColor = max(diffuse1, diffuse2);\n"
 "			bloodColor = max(bloodColor, diffuse3);\n"
 "		}\n"
@@ -1170,7 +1165,7 @@ static char rgodrays_fragment_program[] =
 "const float decay = 1.0;\n"
 "const float density = 0.84;\n"
 "const float weight = 5.65;\n"
-"const int NUM_SAMPLES = 75;\n" //seems a drastically high number
+"const int NUM_SAMPLES = 75;\n" 
 
 "void main()\n"
 "{\n"	
@@ -1179,17 +1174,16 @@ static char rgodrays_fragment_program[] =
 "	deltaTextCoord *= 1.0 /  float(NUM_SAMPLES) * density;\n"
 "	float illuminationDecay = 1.0;\n"
 
-//this will have to be fixed for it to work on ATI
-"	for(int i=0; i < NUM_SAMPLES ; i++)\n"
+"	for(int i = 0; i < NUM_SAMPLES; i++)\n"
 "	{\n"
-"			textCoo -= deltaTextCoord;\n"
-"			vec4 sample = texture2D(sunTexture, textCoo );\n"
+"		textCoo -= deltaTextCoord;\n"
+"		vec4 sample = texture2D(sunTexture, textCoo );\n"
 			
-"			sample *= illuminationDecay * weight;\n"
+"		sample *= illuminationDecay * weight;\n"
 			
-"			gl_FragColor += sample;\n"
+"		gl_FragColor += sample;\n"
 			
-"			illuminationDecay *= decay;\n"
+"		illuminationDecay *= decay;\n"
 "	}\n"
 	
 "	gl_FragColor *= exposure;\n"
@@ -1295,7 +1289,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_programObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error\n");
+			Com_Printf("...BSP Shader Linking Error\n");
 		}
 
 		//
@@ -1368,7 +1362,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_waterprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error\n");
+			Com_Printf("...Water Surface Shader Linking Error\n");
 		}
 
 		//
@@ -1430,7 +1424,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_meshprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error\n");
+			Com_Printf("...Mesh Shader Linking Error\n");
 		}
 
 		//
@@ -1494,7 +1488,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_fbprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error\n");
+			Com_Printf("...FBO Shader Linking Error\n");
 		}
 
 		//
@@ -1550,7 +1544,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_blurprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error\n");
+			Com_Printf("...FBO Blur Shader Linking Error\n");
 		}
 
 		//
@@ -1604,7 +1598,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_rblurprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error\n");
+			Com_Printf("...Radial Blur Shader Linking Error\n");
 		}
 
 		//
@@ -1658,7 +1652,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_dropletsprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error\n");
+			Com_Printf("...Liquid Droplet Shader Linking Error\n");
 		}
 
 		//
@@ -1713,7 +1707,7 @@ void R_LoadGLSLPrograms(void)
 		if( !nResult )
 		{
 			glGetInfoLogARB( g_godraysprogramObj, sizeof(str), NULL, str );
-			Com_Printf("...Linking Error\n");
+			Com_Printf("...God Ray Shader Linking Error\n");
 		}
 
 		//
