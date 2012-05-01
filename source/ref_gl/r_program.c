@@ -494,34 +494,34 @@ static char bsp_fragment_program[] =
 "		vec3 noiseVec3;\n"
 
 "		//for liquid fx scrolling\n"
-"		vec4 texco3 = gl_TexCoord[0];\n"
-"		texco3.t = texco3.t - rsTime*1.0/LIQUID;\n"
+"		vec4 texco = gl_TexCoord[0];\n"
+"		texco.t = texco.t - rsTime*1.0/LIQUID;\n"
 
-"		vec4 texco4 = gl_TexCoord[0];\n"
-"		texco4.t = texco4.t - rsTime*0.9/LIQUID;\n"
+"		vec4 texco2 = gl_TexCoord[0];\n"
+"		texco2.t = texco2.t - rsTime*0.9/LIQUID;\n"
 "		//shift the horizontal here a bit\n"
-"		texco4.s = texco4.s/1.5;\n"
+"		texco2.s = texco2.s/1.5;\n"
 
-"		vec4 texco5 = gl_TexCoord[0];\n"
-"		texco5.t = texco5.t - rsTime*0.6/LIQUID;\n"
+"		vec4 texco3 = gl_TexCoord[0];\n"
+"		texco3.t = texco3.t - rsTime*0.6/LIQUID;\n"
 
 "       vec4 Offset = texture2D( HeightTexture,gl_TexCoord[0].xy );\n"
 "       Offset = Offset * 0.04 - 0.02;\n"
 "       vec2 TexCoords = Offset.xy * relativeEyeDirection.xy + gl_TexCoord[0].xy;\n"
 
-"		displacement = gl_TexCoord[3].st;\n"
+"		displacement =texco.st;\n"
 
-"		noiseVec = normalize(texture2D(liquidNormTex, texco3.st)).xyz;\n"
+"		noiseVec = normalize(texture2D(liquidNormTex, texco.st)).xyz;\n"
 "		noiseVec = (noiseVec * 2.0 - 0.635) * 0.035;\n"
 
-"		displacement2 = texco4.st;\n"
+"		displacement2 = texco2.st;\n"
 
 "		noiseVec2 = normalize(texture2D(liquidNormTex, displacement2.xy)).xyz;\n"
 "		noiseVec2 = (noiseVec2 * 2.0 - 0.635) * 0.035;\n"
 
 "		if(LIQUID > 2)\n"
 "		{\n"
-"			displacement3 = texco5.st;\n"
+"			displacement3 = texco3.st;\n"
 
 "			noiseVec3 = normalize(texture2D(liquidNormTex, displacement3.xy)).xyz;\n"
 "			noiseVec3 = (noiseVec3 * 2.0 - 0.635) * 0.035;\n"
@@ -533,18 +533,18 @@ static char bsp_fragment_program[] =
 "			displacement4.y = noiseVec.y + noiseVec2.y;\n"
 "		}\n"
 
-"		displacement.x = texco3.s + noiseVec.x + TexCoords.x;\n"
-"		displacement.y = texco3.t + noiseVec.y + TexCoords.y;\n"
-"		displacement2.x = texco4.s + noiseVec2.x + TexCoords.x;\n"
-"		displacement2.y = texco4.t + noiseVec2.y + TexCoords.y;\n"
-"		displacement3.x = texco5.s + noiseVec3.x + TexCoords.x;\n"
-"		displacement3.y = texco5.t + noiseVec3.y + TexCoords.y;\n"
+"		displacement.x = texco.s + noiseVec.x + TexCoords.x;\n"
+"		displacement.y = texco.t + noiseVec.y + TexCoords.y;\n"
+"		displacement2.x = texco2.s + noiseVec2.x + TexCoords.x;\n"
+"		displacement2.y = texco2.t + noiseVec2.y + TexCoords.y;\n"
+"		displacement3.x = texco3.s + noiseVec3.x + TexCoords.x;\n"
+"		displacement3.y = texco3.t + noiseVec3.y + TexCoords.y;\n"
 
 "		if(LIQUID > 2)\n"
 "		{\n"
-"			vec4 diffuse1 = texture2D(liquidTexture, texco3.st + displacement.xy);\n"
-"			vec4 diffuse2 = texture2D(liquidTexture, texco4.st + displacement2.xy);\n"
-"			vec4 diffuse3 = texture2D(liquidTexture, texco5.st + displacement3.xy);\n"
+"			vec4 diffuse1 = texture2D(liquidTexture, texco.st + displacement.xy);\n"
+"			vec4 diffuse2 = texture2D(liquidTexture, texco2.st + displacement2.xy);\n"
+"			vec4 diffuse3 = texture2D(liquidTexture, texco3.st + displacement3.xy);\n"
 "			vec4 diffuse4 = texture2D(liquidTexture, gl_TexCoord[0].st + displacement4.xy);\n"
 "			bloodColor = max(diffuse1, diffuse2);\n"
 "			bloodColor = max(bloodColor, diffuse3);\n"
