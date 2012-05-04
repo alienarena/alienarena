@@ -743,6 +743,9 @@ void R_GLSLGodRays(void)
 	float size, screenaspect;
 	vec2_t fxScreenPos;
 
+	if(!gl_glsl_postprocess->value)
+		return;
+
 	if (R_CullOrigin(sun_origin))
         return;
 
