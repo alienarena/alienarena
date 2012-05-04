@@ -66,6 +66,7 @@ cvar_t		*scr_consize;
 cvar_t		*cl_drawfps;
 cvar_t		*cl_drawtimer;
 cvar_t		*cl_drawbandwidth;
+cvar_t		*cl_drawframesover;
 
 cvar_t		*cl_drawtime;
 
@@ -479,6 +480,7 @@ void SCR_Init (void)
 	cl_drawfps = Cvar_Get ("cl_drawfps", "0", CVAR_ARCHIVE);
 	cl_drawtimer = Cvar_Get("cl_drawtimer", "0", CVAR_ARCHIVE);
 	cl_drawbandwidth = Cvar_Get ("cl_drawbandwidth", "0", CVAR_ARCHIVE);
+	cl_drawframesover = Cvar_Get ("cl_drawframesover", "0", CVAR_ARCHIVE);
 
 	rspeed_wpolys   = Cvar_Get("rspeed_wpolys",  "0", 0);
 	rspeed_epolys   = Cvar_Get("rspeed_epolys",  "0", 0);
@@ -1868,7 +1870,31 @@ void SCR_showBandwidth (sizebuf_t *src) {
     }
     
     test->counter += src->cursize;
+}
+
+// Shows number of frames per second which took longer than a configurable
+// amount of milliseconds. This is a useful measure of jitter, which isn't
+// usually reflected in average FPS rates but which can still be visually
+// annoying. 
+void SCR_showFramesOver (void) {
+    static perftest_t *test = NULL;
+    static int old_milliseconds = 0;
+    int new_milliseconds;
+    if (!test) {
+        test = get_perftest("framesover");
+        if (!test)
+            return; //couldn't acquire test
+        test->is_timerate = true;
+        test->cvar = cl_drawframesover;
+        strcpy (test->format, "%3.0fjfps"); //jfps = jitter frames per second
+        test->scale = 1.0f;
+        old_milliseconds = Sys_Milliseconds();
+    }
     
+    new_milliseconds = Sys_Milliseconds();
+    if ((new_milliseconds - old_milliseconds) > cl_drawframesover->integer)
+    	test->counter++;
+    old_milliseconds = new_milliseconds;
 }
 
 /**
@@ -2048,6 +2074,11 @@ void SCR_UpdateScreen (void)
 			if(cl_drawbandwidth->integer)
 			{
 				SCR_showBandwidth(&net_message);
+			}
+			
+			if(cl_drawframesover->integer)
+			{
+				SCR_showFramesOver();
 			}
 
 #if 1
