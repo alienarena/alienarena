@@ -669,6 +669,15 @@ vehicles/strafer/console
 		glow
 	}
 }
+maps/meshes/electrode
+{
+	{
+		map maps/meshes/electrode_normal.tga
+		normalmap
+		map2 gfx/greenlightning.tga
+		fx
+	}
+}
 models/items/haste/skin
 {
 	{
