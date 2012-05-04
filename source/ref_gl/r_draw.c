@@ -108,49 +108,6 @@ void Draw_InitLocal (void)
 	RefreshFont();
 }
 
-/*
-================
-Draw_Char
-
-Draws one 8*8 graphics character with 0 being transparent.
-It can be clipped to the top of the screen to allow the console to be
-smoothly scrolled off.
-================
-*/
-void Draw_Char (int x, int y, int num)
-{
-	int				row, col;
-	float			frow, fcol, size;
-
-	num &= 255;
-
-	if ( (num&127) == 32 )
-		return;		// space
-
-	if (y <= -8)
-		return;			// totally off screen
-
-	row = num>>4;
-	col = num&15;
-
-	frow = row*0.0625;
-	fcol = col*0.0625;
-	size = 0.0625;
-
-	GL_Bind (draw_chars->texnum);
-
-	qglBegin (GL_QUADS);
-	qglColor4f( 1,1,1,1 );
-	qglTexCoord2f (fcol, frow);
-	qglVertex2f (x, y);
-	qglTexCoord2f (fcol + size, frow);
-	qglVertex2f (x+8, y);
-	qglTexCoord2f (fcol + size, frow + size);
-	qglVertex2f (x+8, y+8);
-	qglTexCoord2f (fcol, frow + size);
-	qglVertex2f (x, y+8);
-	qglEnd ();
-}
 static byte R_FloatToByte( float x )
 {
 	union {
@@ -164,49 +121,6 @@ static byte R_FloatToByte( float x )
 
 	// then read as integer and kill float bits...
 	return ( byte )min( f2i.i, 255 );
-}
-
-void Draw_ColorChar (int x, int y, int num, vec4_t color)
-{
-	int				row, col;
-	float			frow, fcol, size;
-	byte			colors[4];
-
-	colors[0] = R_FloatToByte( color[0] );
-	colors[1] = R_FloatToByte( color[1] );
-	colors[2] = R_FloatToByte( color[2] );
-	colors[3] = R_FloatToByte( color[3] );
-
-	num &= 255;
-
-	if ( (num&127) == 32 )
-		return;		// space
-
-	if (y <= -8)
-		return;			// totally off screen
-
-	row = num>>4;
-	col = num&15;
-
-	frow = row*0.0625;
-	fcol = col*0.0625;
-	size = 0.0625;
-
-	GL_Bind (draw_chars->texnum);
-
-	qglColor4ubv( colors );
-	GL_TexEnv(GL_MODULATE);
-	qglBegin (GL_QUADS);
-	qglTexCoord2f (fcol, frow);
-	qglVertex2f (x, y);
-	qglTexCoord2f (fcol + size, frow);
-	qglVertex2f (x+8, y);
-	qglTexCoord2f (fcol + size, frow + size);
-	qglVertex2f (x+8, y+8);
-	qglTexCoord2f (fcol, frow + size);
-	qglVertex2f (x, y+8);
-	qglEnd ();
-	qglColor4f( 1,1,1,1 );
 }
 
 void Draw_ScaledChar (float x, float y, int num, float scale, int from_menu)

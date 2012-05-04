@@ -41,27 +41,6 @@ void CL_ParseInventory (void)
 
 /*
 ================
-Inv_DrawString
-================
-*/
-void Inv_DrawString (int x, int y, char *string)
-{
-	while (*string)
-	{
-		Draw_Char (x, y, *string);
-		x+=8;
-		string++;
-	}
-}
-
-void SetStringHighBit (char *s)
-{
-	while (*s)
-		*s++ |= 128;
-}
-
-/*
-================
 CL_DrawInventory
 ================
 */

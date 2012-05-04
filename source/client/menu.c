@@ -2657,47 +2657,40 @@ static const char *idcredits[] =
 	"stands proud as the undefeated champion of the",
 	"Alien Arena?",
 	"",
-	"Alien Arena (C)2007 COR Entertainment, LLC",
+	"Alien Arena (C)2007-2012 COR Entertainment, LLC",
 	"All Rights Reserved.",
 	0
 };
 
 void M_Credits_MenuDraw( void )
 {
-	int i, y;
-
+	int i, y, scale;
+	FNT_font_t		font;
+	struct FNT_window_s	box;
+	
+	font = FNT_AutoGet( CL_gameFont );
+	scale = font->size / 8.0;
+	
 	/*
 	** draw the credits
 	*/
-	for ( i = 0, y = viddef.height - ( ( cls.realtime - credits_start_time ) / 40.0F ); credits[i]; y += 10, i++ )
+	for ( i = 0, y = viddef.height - ( ( cls.realtime - credits_start_time ) / 40.0F ); credits[i]; y += 12*scale, i++ )
 	{
-		int j, stringoffset = 0;
-		int bold = false;
-
-		if ( y <= -8 )
+		if ( y <= -12*scale )
 			continue;
+		
+		box.y = y;
+		box.x = 0;
+		box.height = 0;
+		box.width = viddef.width;
 
 		if ( credits[i][0] == '+' )
 		{
-			bold = true;
-			stringoffset = 1;
+			FNT_BoundedPrint (font, credits[i]+1, FNT_CMODE_NONE, FNT_ALIGN_CENTER, &box, FNT_colors[3]);
 		}
 		else
 		{
-			bold = false;
-			stringoffset = 0;
-		}
-
-		for ( j = 0; credits[i][j+stringoffset]; j++ )
-		{
-			int x;
-
-			x = ( viddef.width - strlen( credits[i] ) * 8 - stringoffset * 8 ) / 2 + ( j + stringoffset ) * 8;
-
-			if ( bold )
-				Draw_Char( x, y, credits[i][j+stringoffset] + 128 );
-			else
-				Draw_Char( x, y, credits[i][j+stringoffset] );
+			FNT_BoundedPrint (font, credits[i], FNT_CMODE_NONE, FNT_ALIGN_CENTER, &box, FNT_colors[7]);
 		}
 	}
 
