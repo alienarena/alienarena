@@ -1103,47 +1103,6 @@ void SizeHUDString (char *string, int *w, int *h)
 	*h = lines * charscale;
 }
 
-void DrawHUDString (char *string, int x, int y, int centerwidth, int xor)
-{
-	int		margin;
-	char	line[1024];
-	int		width;
-	int		i;
-	int		charscale;
-
-	charscale = (float)(viddef.height)*8/600;
-	if(charscale < 8)
-		charscale = 8;
-
-	margin = x;
-
-	while (*string)
-	{
-		// scan out one line of text from the string
-		width = 0;
-		while (*string && *string != '\n')
-			line[width++] = *string++;
-		line[width] = 0;
-
-		if (centerwidth)
-			x = margin + (centerwidth - width*charscale)/2;
-		else
-			x = margin;
-		for (i=0 ; i<width ; i++)
-		{
-			Draw_Char (x, y, line[i]^xor);
-			x += charscale;
-		}
-		if (*string)
-		{
-			string++;	// skip the \n
-			x = margin;
-			y += charscale;
-		}
-	}
-}
-
-
 /*
 ==============
 SCR_DrawField
@@ -1609,7 +1568,11 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "cstring"))
 		{
 			token = COM_Parse (&s);
-			DrawHUDString (token, x, y, 320, 0);
+			box.width = 2*(x>(viddef.width/2)?(viddef.width-x):x); 
+			box.x = x-box.width/2;
+			box.y = y;
+			box.height = 0;
+			FNT_BoundedPrint( font , token , FNT_CMODE_NONE , FNT_ALIGN_CENTER , &box , FNT_colors[ 7 ] );
 			continue;
 		}
 
@@ -1626,7 +1589,11 @@ void SCR_ExecuteLayoutString (char *s)
 		if (!strcmp(token, "cstring2"))
 		{
 			token = COM_Parse (&s);
-			DrawHUDString (token, x, y, 320,0x80);
+			box.width = 2*(x>(viddef.width/2)?(viddef.width-x):x); 
+			box.x = x-box.width/2;
+			box.y = y;
+			box.height = 0;
+			FNT_BoundedPrint( font , token , FNT_CMODE_NONE , FNT_ALIGN_CENTER , &box , FNT_colors[ 3 ] );
 			continue;
 		}
 
