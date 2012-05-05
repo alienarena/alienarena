@@ -1111,6 +1111,7 @@ void IQM_AnimateRagdoll(int RagDollID)
 					if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints2[i].name], RagDollBinds[j].name))
 					{
 
+
 						int object = RagDollBinds[j].object;
 						const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
 						const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
@@ -2260,11 +2261,11 @@ done:
 
 void IQM_DrawShadow(vec3_t origin)
 {
-	vec3_t	point;
+	vec_t	*position;
 	float	height, lheight;
 	int		i, j;
-	int		index_xyz, index_st;
-	int		va = 0;
+	int		index_vert;
+	int 	vertsize;
 
 	lheight = origin[2] - lightspot[2];
 
@@ -2285,36 +2286,27 @@ void IQM_DrawShadow(vec3_t origin)
 		qglStencilOp(GL_KEEP,GL_KEEP,GL_INCR);
 	}
 
-	va=0;
 	VArray = &VArrayVerts[0];
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
+	vertsize = VertexSizes[VERT_SINGLE_TEXTURED];
 
+	#define SHADOW_VARRAY_VERTEX(trinum,vnum) \
+		index_vert = currentmodel->tris[trinum].vertex[vnum];\
+        position = currentmodel->animatevertexes[index_vert].position;\
+        VArray[0] = position[0]-shadevector[0]*(position[2]+lheight);\
+        VArray[1] = position[1]-shadevector[1]*(position[2]+lheight);\
+        VArray[2] = height;\
+		VArray[3] = currentmodel->st[index_vert].s;\
+        VArray[4] = currentmodel->st[index_vert].t;\
+		VArray += vertsize;
 	for (i=0; i<currentmodel->num_triangles; i++)
     {
-        for (j=0; j<3; j++)
-        {
-            index_xyz = index_st = currentmodel->tris[i].vertex[j];
-
-			memcpy( point, currentmodel->animatevertexes[index_xyz].position, sizeof( point )  );
-
-			point[0] -= shadevector[0]*(point[2]+lheight);
-			point[1] -= shadevector[1]*(point[2]+lheight);
-			point[2] = height;
-
-			VArray[0] = point[0];
-			VArray[1] = point[1];
-			VArray[2] = point[2];
-
-			VArray[3] = currentmodel->st[index_st].s;
-            VArray[4] = currentmodel->st[index_st].t;
-
-			// increment pointer and counter
-			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			va++;
-		}
+        SHADOW_VARRAY_VERTEX(i,0);
+        SHADOW_VARRAY_VERTEX(i,1);
+        SHADOW_VARRAY_VERTEX(i,2);
 	}
 
-	R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+	R_DrawVarrays(GL_TRIANGLES, 0, currentmodel->num_triangles*3, false);
 
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
