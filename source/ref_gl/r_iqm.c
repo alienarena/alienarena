@@ -1208,8 +1208,7 @@ void IQM_Vlight (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t ligh
 	VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]);\
 	Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
 #define INC_VARRAY \
-	VArray += vertsize; \
-	va++;
+	VArray += vertsize;
 
 void IQM_DrawFrame(int skinnum)
 {
@@ -1667,12 +1666,15 @@ void IQM_DrawFrame(int skinnum)
 					COPY_VERTEX(i,0);
 					COPY_NMDATA;
 					INC_VARRAY;
+					va++;
 					COPY_VERTEX(i,1);
 					COPY_NMDATA;
 					INC_VARRAY;
+					va++;
 					COPY_VERTEX(i,2);
 					COPY_NMDATA;
 					INC_VARRAY;
+					va++;
 				}
 			}
 			else
@@ -1752,6 +1754,7 @@ void IQM_DrawFrame(int skinnum)
 						}
 					}
 				}
+				va = currentmodel->num_triangles*3;
 			}
 
 			if (!(!cl_gun->integer && ( currententity->flags & RF_WEAPONMODEL ) ) )
