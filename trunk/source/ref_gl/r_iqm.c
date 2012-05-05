@@ -1110,6 +1110,7 @@ void IQM_AnimateRagdoll(int RagDollID)
 				{
 					if(!strcmp(&RagDoll[RagDollID].ragDollMesh->jointname[RagDoll[RagDollID].ragDollMesh->joints2[i].name], RagDollBinds[j].name))
 					{
+
 						int object = RagDollBinds[j].object;
 						const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
 						const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
@@ -1196,6 +1197,20 @@ void IQM_Vlight (vec3_t baselight, mnormal_t *normal, vec3_t angles, vec3_t ligh
     VectorScale(baselight, l, lightOut);
 }
 
+#define COPY_VERTEX(trinum,vnum) \
+	index_xyz = index_st = currentmodel->tris[trinum].vertex[vnum];\
+	VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];\
+	VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];\
+	VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];\
+	VArray[3] = currentmodel->st[index_st].s;\
+	VArray[4] = currentmodel->st[index_st].t;
+#define COPY_NMDATA \
+	VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]);\
+	Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
+#define INC_VARRAY \
+	VArray += vertsize; \
+	va++;
+
 void IQM_DrawFrame(int skinnum)
 {
 	int		i, j;
@@ -1207,6 +1222,7 @@ void IQM_DrawFrame(int skinnum)
 	vec3_t	lightcolor;
 	int		index_xyz, index_st;
 	int		va = 0;
+	int		vertsize;
 	qboolean mirror = false;
 	qboolean glass = false;
 	qboolean depthmaskrscipt = false;
@@ -1643,56 +1659,98 @@ void IQM_DrawFrame(int skinnum)
 				glUniform1fARB( g_location_meshTime, rs_realtime);
 
 				glUniform1iARB( g_location_meshFog, map_fog);
-			}
-
-			for (i=0; i<currentmodel->num_triangles; i++)
-			{
-				for (j=0; j<3; j++)
+				
+				vertsize = VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
+				
+				for (i=0; i<currentmodel->num_triangles; i++)
 				{
-					index_xyz = index_st = currentmodel->tris[i].vertex[j];
+					COPY_VERTEX(i,0);
+					COPY_NMDATA;
+					INC_VARRAY;
+					COPY_VERTEX(i,1);
+					COPY_NMDATA;
+					INC_VARRAY;
+					COPY_VERTEX(i,2);
+					COPY_NMDATA;
+					INC_VARRAY;
+				}
+			}
+			else
+			{
+				vertsize = VertexSizes[VERT_COLOURED_TEXTURED];
 
-					VArray[0] = currentmodel->animatevertexes[index_xyz].position[0];
-					VArray[1] = currentmodel->animatevertexes[index_xyz].position[1];
-					VArray[2] = currentmodel->animatevertexes[index_xyz].position[2];
-
-					VArray[3] = currentmodel->st[index_st].s;
-					VArray[4] = currentmodel->st[index_st].t;
-
-					if(stage->normalmap) { //send normals and tangents to shader
-						VectorCopy(currentmodel->animatenormal[index_xyz].dir, NormalsArray[va]);
-						Vector4Copy(currentmodel->animatetangent[index_xyz].dir, TangentsArray[va]);
-						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED]; // increment pointer and counter
+				if (stage->lightmap)
+				{
+					if (mirror && !(currententity->flags & RF_WEAPONMODEL) )
+					{
+						#define MIRROR_LIGHTMAP_ITER(vnum) \
+							COPY_VERTEX(i,vnum);\
+							IQM_Vlight (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);\
+							VArray[7] = lightcolor[0];\
+							VArray[8] = lightcolor[1];\
+							VArray[9] = lightcolor[2];\
+							VArray[10] = alpha;\
+							INC_VARRAY;
+						for (i=0; i<currentmodel->num_triangles; i++)
+						{
+							MIRROR_LIGHTMAP_ITER(0);
+							MIRROR_LIGHTMAP_ITER(1);
+							MIRROR_LIGHTMAP_ITER(2);
+						}
 					}
 					else
 					{
-						float red = 1, green = 1, blue = 1;
-
-						if (stage->lightmap)
+						#define NONMIRROR_LIGHTMAP_ITER(vnum) \
+							COPY_VERTEX(i,vnum);\
+							IQM_Vlight (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);\
+							VArray[5] = lightcolor[0];\
+							VArray[6] = lightcolor[1];\
+							VArray[7] = lightcolor[2];\
+							VArray[8] = alpha;\
+							INC_VARRAY;
+						for (i=0; i<currentmodel->num_triangles; i++)
 						{
-							IQM_Vlight (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);
-							red = lightcolor[0];
-							green = lightcolor[1];
-							blue = lightcolor[2];
+							NONMIRROR_LIGHTMAP_ITER(0);
+							NONMIRROR_LIGHTMAP_ITER(1);
+							NONMIRROR_LIGHTMAP_ITER(2);
 						}
-						if(mirror && !(currententity->flags & RF_WEAPONMODEL) )
-						{
-							VArray[7] = red;
-							VArray[8] = green;
-							VArray[9] = blue;
-							VArray[10] = alpha;
-						}
-						else
-						{
-							VArray[5] = red;
-							VArray[6] = green;
-							VArray[7] = blue;
-							VArray[8] = alpha;
-						}
-
-						VArray += VertexSizes[VERT_COLOURED_TEXTURED]; // increment pointer and counter
 					}
-
-					va++;
+				}
+				else
+				{
+					if (mirror && !(currententity->flags & RF_WEAPONMODEL) )
+					{
+						#define MIRROR_NONLIGHTMAP_ITER(vnum) \
+							COPY_VERTEX(i,vnum);\
+							VArray[7] = 1;\
+							VArray[8] = 1;\
+							VArray[9] = 1;\
+							VArray[10] = alpha;\
+							INC_VARRAY;
+						for (i=0; i<currentmodel->num_triangles; i++)
+						{
+							MIRROR_NONLIGHTMAP_ITER(0);
+							MIRROR_NONLIGHTMAP_ITER(1);
+							MIRROR_NONLIGHTMAP_ITER(2);
+						}
+					}
+					else
+					{
+						#define NONMIRROR_NONLIGHTMAP_ITER(vnum) \
+							COPY_VERTEX(i,vnum);\
+							IQM_Vlight (shadelight, &currentmodel->animatenormal[index_xyz], currententity->angles, lightcolor);\
+							VArray[5] = 1;\
+							VArray[6] = 1;\
+							VArray[7] = 1;\
+							VArray[8] = alpha;\
+							INC_VARRAY;
+						for (i=0; i<currentmodel->num_triangles; i++)
+						{
+							NONMIRROR_NONLIGHTMAP_ITER(0);
+							NONMIRROR_NONLIGHTMAP_ITER(1);
+							NONMIRROR_NONLIGHTMAP_ITER(2);
+						}
+					}
 				}
 			}
 
