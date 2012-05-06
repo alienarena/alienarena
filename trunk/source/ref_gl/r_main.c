@@ -594,6 +594,7 @@ void R_DrawEntitiesOnList (void)
 		}
 
 		currentmodel = currententity->model;
+		fadeShadow = 1.0;
 
 		if (!currentmodel)
 		{
