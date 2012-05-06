@@ -514,7 +514,6 @@ void R_DrawEntitiesOnList (void)
 		
 		//fade out shadows. (TODO: apply to shadowmaps, currently only r_shadows.)
 		fadeshadow_cutoff = r_shadowcutoff->value * (LOD_DIST/LOD_BASE_DIST);
-		printf ("%f\n", LOD_DIST);
 		if (dist[2] < 0.1)
 			fadeShadow = 1.0;
 		else if (r_shadowcutoff->value < 0.1)
