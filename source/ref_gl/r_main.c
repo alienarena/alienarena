@@ -471,6 +471,7 @@ void R_DrawEntitiesOnList (void)
 	rscript_t	*rs = NULL;
 	vec3_t	dist;
 	char    shortname[MAX_QPATH];
+	float	fadeshadow_cutoff;
 
 	if (!r_drawentities->value)
 		return;
@@ -512,15 +513,17 @@ void R_DrawEntitiesOnList (void)
 		VectorSubtract(r_origin, currententity->origin, dist);
 		
 		//fade out shadows. (TODO: apply to shadowmaps, currently only r_shadows.)
+		fadeshadow_cutoff = r_shadowcutoff->value * (LOD_DIST/LOD_BASE_DIST);
+		printf ("%f\n", LOD_DIST);
 		if (dist[2] < 0.1)
 			fadeShadow = 1.0;
 		else if (r_shadowcutoff->value < 0.1)
 			fadeShadow = 1.0;
-		else if (VectorLength (dist)-dist[2] > r_shadowcutoff->value)
+		else if (VectorLength (dist)-dist[2] > fadeshadow_cutoff)
 		{
 			//NOTE: this is designed to really emphasize height differences,
 			//since shadows are more visible from higher up.
-			fadeShadow = 100.0-VectorLength(dist)+dist[2]+r_shadowcutoff->value;
+			fadeShadow = 100.0-VectorLength(dist)+dist[2]+fadeshadow_cutoff;
 			if (fadeShadow < 0.01)
 				fadeShadow = 0.0;
 			else
@@ -1258,7 +1261,7 @@ void R_Register( void )
 	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
 
 	r_shadowmapratio = Cvar_Get( "r_shadowmapratio", "2", CVAR_ARCHIVE );
-	r_shadowcutoff = Cvar_Get( "r_shadowcutoff", "250", CVAR_ARCHIVE );
+	r_shadowcutoff = Cvar_Get( "r_shadowcutoff", "880", CVAR_ARCHIVE );
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
