@@ -394,6 +394,7 @@ void R_RotateForEntity (entity_t *e)
 
     qglRotatef (e->angles[1],  0, 0, 1);
     qglRotatef (-e->angles[0],  0, 1, 0);
+
     qglRotatef (-e->angles[2],  1, 0, 0);
 }
 
@@ -507,8 +508,28 @@ void R_DrawEntitiesOnList (void)
 
 		currentmodel = currententity->model;
 
-		//get distance, set lod if available
+		//get distance
 		VectorSubtract(r_origin, currententity->origin, dist);
+		
+		//fade out shadows. (TODO: apply to shadowmaps, currently only r_shadows.)
+		if (dist[2] < 0.1)
+			fadeShadow = 1.0;
+		else if (r_shadowcutoff->value < 0.1)
+			fadeShadow = 1.0;
+		else if (VectorLength (dist)-dist[2] > r_shadowcutoff->value)
+		{
+			//NOTE: this is designed to really emphasize height differences,
+			//since shadows are more visible from higher up.
+			fadeShadow = 100.0-VectorLength(dist)+dist[2]+r_shadowcutoff->value;
+			if (fadeShadow < 0.01)
+				fadeShadow = 0.0;
+			else
+				fadeShadow /= 100.0; //fade out smoothly over 100 units.
+		}
+		else
+			fadeShadow = 1.0;
+		
+		//set lod if available
 		if(VectorLength(dist) > LOD_DIST*2.0)
 		{
 			if(currententity->lod2)
@@ -1237,6 +1258,7 @@ void R_Register( void )
 	gl_glsl_postprocess = Cvar_Get("gl_glsl_postprocess", "1", CVAR_ARCHIVE);
 
 	r_shadowmapratio = Cvar_Get( "r_shadowmapratio", "2", CVAR_ARCHIVE );
+	r_shadowcutoff = Cvar_Get( "r_shadowcutoff", "250", CVAR_ARCHIVE );
 
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);

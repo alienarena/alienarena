@@ -599,6 +599,8 @@ extern void		R_DrawVegetationCaster(void);
 extern void		R_CastShadow(void);
 extern float	SHD_ShadowLight (vec3_t pos, vec3_t angles, vec3_t lightAdd, int type);
 int				FB_texture_width, FB_texture_height;
+float			fadeShadow;
+cvar_t			*r_shadowcutoff;
 
 //shader programs
 extern void R_LoadARBPrograms(void);
