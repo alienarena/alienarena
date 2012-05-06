@@ -2634,7 +2634,10 @@ void R_DrawINTERQUAKEMODEL ( void )
 	}
 
 	//Basic stencil shadows
-	if (!(r_newrefdef.rdflags & RDF_NOWORLDMODEL) && gl_shadows->integer && !gl_shadowmaps->integer && !(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS)))
+	if	(	!(r_newrefdef.rdflags & RDF_NOWORLDMODEL) && fadeShadow >= 0.01 && 
+			gl_shadows->integer && !gl_shadowmaps->integer && 
+			!(currententity->flags & (RF_WEAPONMODEL | RF_NOSHADOWS))
+		)
 	{
 		float casted;
 		float an = currententity->angles[1]/180*M_PI;
@@ -2656,9 +2659,9 @@ void R_DrawINTERQUAKEMODEL ( void )
 			qglEnable (GL_BLEND);
 
 			if (currententity->flags & RF_TRANSLUCENT)
-				qglColor4f (0,0,0,0.3 * currententity->alpha); //Knightmare- variable alpha
+				qglColor4f (0,0,0,0.3 * fadeShadow * currententity->alpha); //Knightmare- variable alpha
 			else
-				qglColor4f (0,0,0,0.3);
+				qglColor4f (0,0,0,0.3 * fadeShadow);
 
 			IQM_DrawShadow (currententity->origin);
 
@@ -2677,9 +2680,9 @@ void R_DrawINTERQUAKEMODEL ( void )
 			qglEnable (GL_BLEND);
 
 			if (currententity->flags & RF_TRANSLUCENT)
-				qglColor4f (0,0,0,casted * currententity->alpha);
+				qglColor4f (0,0,0,casted * fadeShadow * currententity->alpha);
 			else
-				qglColor4f (0,0,0,casted);
+				qglColor4f (0,0,0,casted * fadeShadow);
 
 			IQM_DrawShadow (currententity->origin);
 
@@ -2698,9 +2701,9 @@ void R_DrawINTERQUAKEMODEL ( void )
 				qglEnable (GL_BLEND);
 
 				if (currententity->flags & RF_TRANSLUCENT)
-					qglColor4f (0,0,0,casted * currententity->alpha);
+					qglColor4f (0,0,0,casted * fadeShadow * currententity->alpha);
 				else
-					qglColor4f (0,0,0,casted);
+					qglColor4f (0,0,0,casted * fadeShadow);
 
 				IQM_DrawShadow (currententity->origin);
 
