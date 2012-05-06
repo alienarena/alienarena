@@ -1800,14 +1800,14 @@ MD2_DrawShadow
 void MD2_DrawShadow(dmdl_t *paliashdr, qboolean lerped)
 {
 	dtrivertx_t	*verts;
-	vec3_t	point;
 	float	height, lheight;
 	daliasframe_t	*frame;
 	fstvert_t	*st;
 	dtriangle_t		*tris;
-	int		i, j;
+	int		i;
 	int		index_xyz, index_st;
-	int		va = 0;
+	int		vertsize;
+	vec_t	*position;
 
 	lheight = currententity->origin[2] - lightspot[2];
 
@@ -1844,41 +1844,51 @@ void MD2_DrawShadow(dmdl_t *paliashdr, qboolean lerped)
 
 	}
 
-	va=0;
 	VArray = &VArrayVerts[0];
 	R_InitVArrays (VERT_SINGLE_TEXTURED);
+	vertsize = VertexSizes[VERT_SINGLE_TEXTURED];
+	
+	#define SHADOW_VARRAY_LERPED_ITER(trinum,vnum)\
+		index_xyz = tris[trinum].index_xyz[vnum];\
+		index_st = tris[trinum].index_st[vnum];\
+		position = s_lerped[index_xyz];\
+		VArray[0] = position[0]-shadevector[0]*(position[2]+lheight);\
+		VArray[1] = position[1]-shadevector[1]*(position[2]+lheight);\
+		VArray[2] = height;\
+		VArray[3] = st[index_st].s;\
+		VArray[4] = st[index_st].t;\
+		VArray += vertsize;
+	#define SHADOW_VARRAY_NONLERPED_ITER(trinum,vnum)\
+		index_xyz = tris[trinum].index_xyz[vnum];\
+		index_st = tris[trinum].index_st[vnum];\
+		position =  currentmodel->vertexes[index_xyz].position;\
+		VArray[0] = position[0]-shadevector[0]*(position[2]+lheight);\
+		VArray[1] = position[1]-shadevector[1]*(position[2]+lheight);\
+		VArray[2] = height;\
+		VArray[3] = st[index_st].s;\
+		VArray[4] = st[index_st].t;\
+		VArray += vertsize;
 
-	for (i=0; i<paliashdr->num_tris; i++)
+	if (lerped)
 	{
-		for (j=0; j<3; j++)
+		for (i=0; i<paliashdr->num_tris; i++)
 		{
-			index_xyz = tris[i].index_xyz[j];
-			index_st = tris[i].index_st[j];
-
-			if(lerped)
-				memcpy( point, s_lerped[index_xyz], sizeof( point )  );
-			else
-				memcpy( point, currentmodel->vertexes[index_xyz].position, sizeof( point )  );
-
-			point[0] -= shadevector[0]*(point[2]+lheight);
-			point[1] -= shadevector[1]*(point[2]+lheight);
-			point[2] = height;
-
-			VArray[0] = point[0];
-			VArray[1] = point[1];
-			VArray[2] = point[2];
-
-			VArray[3] = st[index_st].s;
-			VArray[4] = st[index_st].t;
-
-			// increment pointer and counter
-			VArray += VertexSizes[VERT_SINGLE_TEXTURED];
-			va++;
+			SHADOW_VARRAY_LERPED_ITER(i,0);
+			SHADOW_VARRAY_LERPED_ITER(i,1);
+			SHADOW_VARRAY_LERPED_ITER(i,2);
 		}
-
+	}
+	else
+	{
+		for (i=0; i<paliashdr->num_tris; i++)
+		{
+			SHADOW_VARRAY_NONLERPED_ITER(i,0);
+			SHADOW_VARRAY_NONLERPED_ITER(i,1);
+			SHADOW_VARRAY_NONLERPED_ITER(i,2);
+		}
 	}
 
-	R_DrawVarrays(GL_TRIANGLES, 0, va, false);
+	R_DrawVarrays(GL_TRIANGLES, 0, paliashdr->num_tris*3, false);
 
 	qglDisableClientState( GL_COLOR_ARRAY );
 	qglEnableClientState( GL_TEXTURE_COORD_ARRAY );
