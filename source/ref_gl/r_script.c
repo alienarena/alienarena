@@ -860,7 +860,6 @@ rs_cond_val_t *rs_stage_if_subexpr (char **token)
 		Z_Free (res);
 		return NULL;
 	}
-	Com_Printf ("Starting subexpr %s\n", *token);
 	if (!Q_strcasecmp (*token, "(")) 
 	{
 		res->subexpr1 = rs_stage_if_subexpr (token);
