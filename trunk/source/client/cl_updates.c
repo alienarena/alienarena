@@ -38,12 +38,18 @@ static size_t versionstr_sz;
 
 static char* extend_versionstr ( size_t bytecount )
 {
+	char *new_versionstr;
 	size_t cur_sz = versionstr_sz;
 	if ( cur_sz ){
 	    versionstr_sz += bytecount;
-	    versionstr = realloc ( versionstr, versionstr_sz );
-	    if (!versionstr)
-	        return versionstr;
+	    new_versionstr = realloc ( versionstr, versionstr_sz );
+	    if (new_versionstr == NULL) {
+	    	free (versionstr);
+	    	Com_Printf ("WARN: SYSTEM MEMORY EXHAUSTION!\n");
+	    	versionstr_sz = 0;
+	        return NULL;
+	    }
+	    versionstr = new_versionstr;
 	    return versionstr+cur_sz;
 	}
 	versionstr_sz = bytecount;

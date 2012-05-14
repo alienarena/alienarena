@@ -930,6 +930,7 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned cant
 	int		tmpnfiles;		/* Temp number of files. */
 	char		**tmplist;		/* Temporary list of files. */
 	char		**list;			/* List of files found. */
+	char		**new_list;
 	char		path[MAX_OSPATH];	/* Temporary path. */
 	int s;
 
@@ -943,7 +944,13 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned cant
 		if (tmplist != NULL)
 		{
 			nfiles += tmpnfiles;
-			list = realloc(list, nfiles * sizeof(char *));
+			new_list = realloc(list, nfiles * sizeof(char *));
+			if (new_list == NULL) {
+				FS_FreeFileList (tmplist, tmpnfiles);
+				Com_Printf ("WARN: SYSTEM MEMORY EXHAUSTION!\n");
+				break;
+			}
+			list = new_list;
 			for (i = 0, j = nfiles - tmpnfiles; i < tmpnfiles; i++, j++)
 			{ // copy from full path to relative path
 				list[j] = strdup( tmplist[i] + strlen( fs_gamesearch[s] ) + 1  );
@@ -981,7 +988,13 @@ FS_ListFilesInFS(char *findname, int *numfiles, unsigned musthave, unsigned cant
 	if (nfiles > 0)
 	{
 		nfiles++;
-		list = realloc(list, nfiles * sizeof(char *));
+		new_list = realloc(list, nfiles * sizeof(char *));
+		if (new_list == NULL) {
+			Com_Printf ("WARN: SYSTEM MEMORY EXHAUSTION!\n");
+			nfiles--; // convert previous entry into a guard
+		} else {
+			list = new_list;
+		}
 		list[nfiles - 1] = NULL;
 	} else
 	{

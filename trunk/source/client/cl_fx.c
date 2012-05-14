@@ -1042,7 +1042,7 @@ void CL_ItemRespawnParticles (vec3_t org)
 
 		p->alphavel = -1.0 / (1.0 + frand()*0.3);
 
-		if (p && i < 4)
+		if (i < 4)
 			addParticleLight (p,
 						p->scale*30, 10,
 					0, 1, 1);
@@ -1727,7 +1727,7 @@ void CL_BlasterParticles (vec3_t org, vec3_t dir)
 
 		p->alphavel = -8.8 / ((i*2) + frand()*0.3);
 
-		if (p && i > 4)
+		if (i > 4)
 			addParticleLight (p,
 					p->scale*25, 50,
 				0, .8, 1);
@@ -3021,7 +3021,7 @@ void CL_NewLightning (vec3_t start, vec3_t end)
 			p->vel[j] = 0;
 			p->accel[j] = 0;
 		}
-		if (p && len < 4)
+		if (len < 4)
 			addParticleLight (p,
 						p->scale*75, 0,
 					.25, 0, .3);
@@ -3205,7 +3205,7 @@ void CL_BFGExplosionParticles (vec3_t org)
 		p->alpha = 0.4;
 
 		p->alphavel = -0.8 / (2.5 + frand()*0.3);
-		if (p && i > 28)
+		if (i > 28)
 			addParticleLight (p,
 						p->scale*(15+(rand()&5)), 10,
 					0, 0.6, 0.5);
@@ -3331,7 +3331,7 @@ void CL_TeleportParticles (vec3_t start)
 			p->vel[j] = 0;
 		}
 		p->vel[2] = PARTICLE_GRAVITY*2;
-		if (p && i < 1)
+		if (i < 1)
 		addParticleLight (p,
 					p->scale, 10,
 				0, 1, 1);

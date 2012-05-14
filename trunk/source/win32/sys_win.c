@@ -141,6 +141,9 @@ void Sys_Print (const char *text){
 	char	buffer[MAX_PRINTMSG];
 	int		len = 0;
 
+	//FIXME: add a check for text == NULL and print an error message
+	//without potentially creating an infinite recursion loop
+	
 	// Change \n to \r\n so it displays properly in the edit box and
 	// remove color escapes
 	while (*text){

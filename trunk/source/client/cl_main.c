@@ -1301,7 +1301,8 @@ void CL_FixUpGender(void)
 			return;
 		}
 
-		strncpy(sk, skin->string, sizeof(sk) - 1);
+		strncpy(sk, skin->string, sizeof(sk) - 2);
+		sk[sizeof(sk) - 1] = '\0'; // in case skin->string is 79 chars or more
 		if ((p = strchr(sk, '/')) != NULL)
 			*p = 0;
 		if (Q_strcasecmp(sk, "male") == 0 || Q_strcasecmp(sk, "cyborg") == 0)
