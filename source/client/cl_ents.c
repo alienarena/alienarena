@@ -1870,7 +1870,7 @@ void CL_ClearClEntities()
 	free_clentities = &clentities[0];
 	active_clentities = NULL;
 
-	for (i = 0; i < MAX_CLENTITIES; i++)
+	for (i = 0; i < MAX_CLENTITIES-1; i++)
 		clentities[i].next = &clentities[i + 1];
 	clentities[MAX_CLENTITIES - 1].next = NULL;
 }

@@ -997,6 +997,5 @@ void ai_run (edict_t *self, float dist)
 
 	G_FreeEdict(tempgoal);
 
-	if (self)
-		self->goalentity = save;
+	self->goalentity = save;
 }

@@ -141,7 +141,10 @@ int Encode(char *filename, unsigned char *buffer, int bufsize, int version)
 		text_buf[r + len] = c;  /* Read F bytes into the last F bytes of
 			the buffer */
 	}
-	if ((textsize = len) == 0) return -1;  /* text of size zero */
+	if ((textsize = len) == 0) {
+		fclose (pOut);
+		return -1;  /* text of size zero */
+	}
 	for (i = 1; i <= F; i++) InsertNode(r - i);  /* Insert the F strings,
 		each of which begins with one or more 'space' characters.  Note
 		the order in which these strings are inserted.  This way,

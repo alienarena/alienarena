@@ -72,30 +72,6 @@ void norm3(vec3_t v, vec3_t out)
 	}
 }
 
-matrix4x4_t* makeOpenGLMatrix(matrix3x3_t r, vec3_t p)
-{
-	matrix4x4_t *rm = NULL;
-
-	rm->a[0] = r.a[0];
-	rm->a[1] = r.b[0];
-	rm->a[2] = r.c[0];
-	rm->a[3] = 0.0;
-	rm->b[0] = r.a[1];
-	rm->b[1] = r.b[1];
-	rm->b[2] = r.c[1];
-	rm->b[3] = 0.0;
-	rm->c[0] = r.a[2];
-	rm->c[1] = r.b[2];
-	rm->c[2] = r.c[2];
-	rm->c[3] = 0.0;
-	rm->d[0] = p[0];
-	rm->d[1] = p[1];
-	rm->d[2] = p[2];
-	rm->d[3] = 1.0;
-
-	return rm;
-}
-
 extern void Matrix3x4ForEntity(matrix3x4_t *out, entity_t *ent);
 extern void Matrix3x4_Invert(matrix3x4_t *out, matrix3x4_t in);
 extern void Matrix3x4_Multiply(matrix3x4_t *out, matrix3x4_t mat1, matrix3x4_t mat2);

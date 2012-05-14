@@ -4814,6 +4814,8 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 
 	if ( nummaps == 0 )
 	{
+		fclose( fp );
+		free( buffer );
 		Com_Error( ERR_DROP, "no maps in maps.lst\n" );
 		return; // for showing above is fatal.
 	}
