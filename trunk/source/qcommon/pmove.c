@@ -789,6 +789,9 @@ void PM_CheckJump (void)
 
 	if(sv_joustmode->value)
 		jousting = true;
+	
+	if (remoteserver_jousting)
+	    jousting = true;
 
 //	if (pm->s.pm_flags & PMF_TIME_LAND)
 //	{	// hasn't been long enough since landing to jump again

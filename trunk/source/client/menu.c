@@ -3445,33 +3445,12 @@ char *GetLine (char **contents, int *len)
 	return ret;
 }
 
-typedef struct _SERVERDATA {
-
-	char szHostName[64];
-	char szMapName[64];
-	char szAdmin[64];
-	char szVersion[64];
-	char szWebsite[64];
-	char maxClients[32];
-	char fraglimit[32];
-	char timelimit[32];
-	char playerInfo[64][80];
-	int	 playerRankings[64];
-	char skill[32];
-	int players;
-	int ping;
-	netadr_t local_server_netadr;
-	char serverInfo[256];
-	char modInfo[64];
-	char szRawName[64];
-
-} SERVERDATA;
-
 SERVERDATA mservers[MAX_LOCAL_SERVERS];
 
 PLAYERSTATS thisPlayer;
 
-void M_AddToServerList (netadr_t adr, char *status_string)
+//TODO: Move this out of the menu section!
+void M_ParseServerInfo (netadr_t adr, char *status_string, SERVERDATA *destserver)
 {
 	char *rLine;
 	char *token;
@@ -3486,15 +3465,8 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	int score, ping, rankTotal, i, x;
 	PLAYERSTATS	player;
 
-	//if by some chance this gets called without the menu being up, return
-	if(cls.key_dest != key_menu)
-		return;
-
-	if (m_num_servers == MAX_LOCAL_SERVERS)
-		return;
-
-	mservers[m_num_servers].local_server_netadr = adr;
-	mservers[m_num_servers].ping = Sys_Milliseconds() - starttime;
+	destserver->local_server_netadr = adr;
+	destserver->ping = Sys_Milliseconds() - starttime;
 
 	//parse it
 
@@ -3504,34 +3476,36 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 	rLine = GetLine (&status_string, &result);
 
 	//set the displayed default data first
-	Com_sprintf(mservers[m_num_servers].szAdmin, sizeof(mservers[m_num_servers].szAdmin), "Admin:");
-	Com_sprintf(mservers[m_num_servers].szWebsite, sizeof(mservers[m_num_servers].szWebsite), "Website:");
-	Com_sprintf(mservers[m_num_servers].fraglimit, sizeof(mservers[m_num_servers].fraglimit), "Fraglimit:");
-	Com_sprintf(mservers[m_num_servers].timelimit, sizeof(mservers[m_num_servers].timelimit), "Timelimit:");
-	Com_sprintf(mservers[m_num_servers].szVersion, sizeof(mservers[m_num_servers].szVersion), "Version:");
+	Com_sprintf(destserver->szAdmin, sizeof(destserver->szAdmin), "Admin:");
+	Com_sprintf(destserver->szWebsite, sizeof(destserver->szWebsite), "Website:");
+	Com_sprintf(destserver->fraglimit, sizeof(destserver->fraglimit), "Fraglimit:");
+	Com_sprintf(destserver->timelimit, sizeof(destserver->timelimit), "Timelimit:");
+	Com_sprintf(destserver->szVersion, sizeof(destserver->szVersion), "Version:");
 
 	/* Establish string and get the first token: */
 	token = strtok( rLine, seps );
 	while( token != NULL ) {
 		/* While there are tokens in "string" */
 		if (!Q_strcasecmp (lasttoken, "admin"))
-			Com_sprintf(mservers[m_num_servers].szAdmin, sizeof(mservers[m_num_servers].szAdmin), "Admin: %s", token);
+			Com_sprintf(destserver->szAdmin, sizeof(destserver->szAdmin), "Admin: %s", token);
 		else if (!Q_strcasecmp (lasttoken, "website"))
-			Com_sprintf(mservers[m_num_servers].szWebsite, sizeof(mservers[m_num_servers].szWebsite), "%s", token);
+			Com_sprintf(destserver->szWebsite, sizeof(destserver->szWebsite), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "fraglimit"))
-			Com_sprintf(mservers[m_num_servers].fraglimit, sizeof(mservers[m_num_servers].fraglimit), "Fraglimit: %s", token);
+			Com_sprintf(destserver->fraglimit, sizeof(destserver->fraglimit), "Fraglimit: %s", token);
 		else if (!Q_strcasecmp (lasttoken, "timelimit"))
-			Com_sprintf(mservers[m_num_servers].timelimit, sizeof(mservers[m_num_servers].timelimit), "Timelimit: %s", token);
+			Com_sprintf(destserver->timelimit, sizeof(destserver->timelimit), "Timelimit: %s", token);
 		else if (!Q_strcasecmp (lasttoken, "version"))
-			Com_sprintf(mservers[m_num_servers].szVersion, sizeof(mservers[m_num_servers].szVersion), "%s", token);
+			Com_sprintf(destserver->szVersion, sizeof(destserver->szVersion), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "mapname"))
-			Com_sprintf(mservers[m_num_servers].szMapName, sizeof(mservers[m_num_servers].szMapName), "%s", token);
+			Com_sprintf(destserver->szMapName, sizeof(destserver->szMapName), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "hostname"))
-			Com_sprintf(mservers[m_num_servers].szHostName, sizeof(mservers[m_num_servers].szHostName), "%s", token);
+			Com_sprintf(destserver->szHostName, sizeof(destserver->szHostName), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "maxclients"))
-			Com_sprintf(mservers[m_num_servers].maxClients, sizeof(mservers[m_num_servers].maxClients), "%s", token);
+			Com_sprintf(destserver->maxClients, sizeof(destserver->maxClients), "%s", token);
 		else if (!Q_strcasecmp (lasttoken, "mods"))
-		    Com_sprintf(mservers[m_num_servers].modInfo, sizeof(mservers[m_num_servers].modInfo), "%s", token);
+		    Com_sprintf(destserver->modInfo, sizeof(destserver->modInfo), "%s", token);
+		else if (!Q_strcasecmp (lasttoken, "sv_joustmode"))
+			destserver->joust = atoi(token);
 
 		/* Get next token: */
 		Com_sprintf(lasttoken, sizeof(lasttoken), "%s", token);
@@ -3574,10 +3548,10 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		if ( x > 0 && ( (x + strlen(playername)) < sizeof(playername) ) )
 			strncat( playername, "               ", x );
 
-		Com_sprintf(mservers[m_num_servers].playerInfo[players], sizeof(mservers[m_num_servers].playerInfo[players]),
+		Com_sprintf(destserver->playerInfo[players], sizeof(destserver->playerInfo[players]),
 			"%s    %4i    %4i", playername, score, ping);
 
-		mservers[m_num_servers].playerRankings[players] = player.ranking;
+		destserver->playerRankings[players] = player.ranking;
 
 		rankTotal += player.ranking;
 
@@ -3596,49 +3570,74 @@ void M_AddToServerList (netadr_t adr, char *status_string)
 		else
 			strcpy(skillLevel, "Your Skill is ^3Even");
 
-		Com_sprintf(mservers[m_num_servers].skill, sizeof(mservers[m_num_servers].skill), "Skill: %s", skillLevel);
+		Com_sprintf(destserver->skill, sizeof(destserver->skill), "Skill: %s", skillLevel);
 	}
 	else
-		Com_sprintf(mservers[m_num_servers].skill, sizeof(mservers[m_num_servers].skill), "Skill Level: Unknown");
+		Com_sprintf(destserver->skill, sizeof(destserver->skill), "Skill Level: Unknown");
 
-	if(!m_show_empty)
-		if(!players)
-			return;
-
-	mservers[m_num_servers].players = players;
+	destserver->players = players;
 
 	//build the string for the server (hostname - address - mapname - players/maxClients)
 	//pad the strings - gotta do this for both maps and hostname
 	//save off the raw name for tooltip use
-	strcpy(mservers[m_num_servers].szRawName, mservers[m_num_servers].szHostName);
+	strcpy(destserver->szRawName, destserver->szHostName);
 	x = 0;
 	for(i=0; i<32; i++) {
-		if(!mservers[m_num_servers].szHostName[i])
-			mservers[m_num_servers].szHostName[i] = 32;
-		else if(mservers[m_num_servers].szHostName[i] == '^' && i < strlen( mservers[m_num_servers].szHostName )-1) {
-			if(mservers[m_num_servers].szHostName[i+1] != '^')
+		if(!destserver->szHostName[i])
+			destserver->szHostName[i] = 32;
+		else if(destserver->szHostName[i] == '^' && i < strlen( destserver->szHostName )-1) {
+			if(destserver->szHostName[i+1] != '^')
 				x += 2;
 		}
 	}
-	mservers[m_num_servers].szHostName[20+x] = 0; //fix me this is dangerous
+	destserver->szHostName[20+x] = 0; //fix me this is dangerous
 	for(i=0; i<12; i++) {
-		if(!mservers[m_num_servers].szMapName[i])
-			mservers[m_num_servers].szMapName[i] = 32;
+		if(!destserver->szMapName[i])
+			destserver->szMapName[i] = 32;
 	}
-	mservers[m_num_servers].szMapName[12] = 0;
+	destserver->szMapName[12] = 0;
 	if(bots < 10)
 		strcpy(szServerinfoF, "%s  %12s%2i(%1i)/%2s %4i");
 	else
 		strcpy(szServerinfoF, "%s  %12s%2i(%2i)/%2s%4i");
 
-	if(strlen(mservers[m_num_servers].maxClients) > 2)
-		strcpy(mservers[m_num_servers].maxClients, "??");
-	Com_sprintf(mservers[m_num_servers].serverInfo, sizeof(mservers[m_num_servers].serverInfo), szServerinfoF, mservers[m_num_servers].szHostName,
-		mservers[m_num_servers].szMapName, players, bots, mservers[m_num_servers].maxClients, mservers[m_num_servers].ping);
+	if(strlen(destserver->maxClients) > 2)
+		strcpy(destserver->maxClients, "??");
+	Com_sprintf(destserver->serverInfo, sizeof(destserver->serverInfo), szServerinfoF, destserver->szHostName,
+		destserver->szMapName, players, bots, destserver->maxClients, destserver->ping);
+}
 
+void M_AddToServerList (netadr_t adr, char *status_string)
+{
+	//if by some chance this gets called without the menu being up, return
+	if(cls.key_dest != key_menu)
+		return;
+
+	if (m_num_servers == MAX_LOCAL_SERVERS)
+		return;
+	
+	M_ParseServerInfo (adr, status_string, &mservers[m_num_servers]);
+	
 	CON_Clear();
+	
+	if(!m_show_empty)
+	{
+		if(mservers[m_num_servers].players == 0)
+		{
+			strcpy (mservers[m_num_servers].serverInfo, NO_SERVER_STRING);
+			return;
+		}
+	}
+	
 	m_num_servers++;
 }
+
+void M_UpdateConnectedServerInfo (netadr_t adr, char *status_string)
+{
+	M_ParseServerInfo (adr, status_string, &connectedserver);
+	remoteserver_jousting = connectedserver.joust;
+}
+
 void MoveUp ( void *self)
 {
 	svridx--;

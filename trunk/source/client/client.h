@@ -697,12 +697,39 @@ qboolean server_is_team; //used for player visibility light code
 //
 // menus
 //
+
+typedef struct _SERVERDATA {
+
+	char szHostName[64];
+	char szMapName[64];
+	char szAdmin[64];
+	char szVersion[64];
+	char szWebsite[64];
+	char maxClients[32];
+	char fraglimit[32];
+	char timelimit[32];
+	char playerInfo[64][80];
+	int	 playerRankings[64];
+	char skill[32];
+	int players;
+	int ping;
+	netadr_t local_server_netadr;
+	char serverInfo[256];
+	char modInfo[64];
+	char szRawName[64];
+	qboolean joust; //for client-side prediction
+
+} SERVERDATA;
+
+SERVERDATA connectedserver;
+
 void M_Init (void);
 void M_Keydown (int key);
 void M_Draw (void);
 void M_Menu_Main_f (void);
 void M_ForceMenuOff (void);
 void M_AddToServerList (netadr_t adr, char *status_string);
+void M_UpdateConnectedServerInfo (netadr_t adr, char *status_string);
 //
 // cl_inv.c
 //
