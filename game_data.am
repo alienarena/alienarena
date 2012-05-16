@@ -621,11 +621,13 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/electrodecover.md2 \
 	data1/maps/meshes/electrode.md2 \
 	data1/maps/meshes/electrode.tga \
+	data1/maps/meshes/electrode_normal.tga \
 	data1/maps/meshes/eyejar_fx.tga \
 	data1/maps/meshes/eyejarglass.md2 \
 	data1/maps/meshes/eyejar.md2 \
 	data1/maps/meshes/eyejar_normal.tga \
 	data1/maps/meshes/eyejar.tga \
+	data1/maps/meshes/flagpad_fx.tga \
 	data1/maps/meshes/flagpad.md2 \
 	data1/maps/meshes/flagpad_normal.tga \
 	data1/maps/meshes/flagpad.tga \
