@@ -728,6 +728,7 @@ Common between server and client so prediction matches
 */
 
 extern float pm_airaccelerate;
+qboolean remoteserver_jousting;
 
 void Pmove (pmove_t *pmove);
 
@@ -814,6 +815,7 @@ float	crand(void);	// -1 to 1
 extern	cvar_t	*developer;
 extern	cvar_t	*dedicated;
 extern	cvar_t	*host_speeds;
+
 extern	cvar_t	*log_stats;
 
 extern	FILE *log_stats_file;

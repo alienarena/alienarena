@@ -1144,6 +1144,7 @@ void CL_ConnectionlessPacket (void)
 			strncpy(cls.downloadurl, Cmd_Argv(1), sizeof(cls.downloadurl) - 1);
 		}
 		is_localhost = !strcmp(cls.servername, "localhost");
+		Netchan_OutOfBandPrint (NS_CLIENT, net_from, va("status %i", PROTOCOL_VERSION));
 		return;
 	}
 
@@ -1166,11 +1167,21 @@ void CL_ConnectionlessPacket (void)
 	if (!strcmp(c, "print"))
 	{
 		s = MSG_ReadString (&net_message);
-		Com_Printf ("%s", s);
-		M_AddToServerList (net_from, s); //add net_from so we have the addy
+		if (s[0] == '\\')
+		{
+			Info_Print (s);
+			if (cls.state >= ca_connected && 
+			    !memcmp(&net_from, &cls.netchan.remote_address, sizeof(netadr_t)))
+				M_UpdateConnectedServerInfo (net_from, s);
+			if (cls.key_dest == key_menu)
+				M_AddToServerList (net_from, s); //add net_from so we have the addy
+			
+		}
+		else 
+			Com_Printf ("%s", s);
 		return;
 	}
-
+	
 	// ping from somewhere
 	if (!strcmp(c, "ping"))
 	{
