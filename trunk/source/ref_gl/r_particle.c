@@ -834,7 +834,7 @@ void R_DrawVegetationSurface ( void )
 		{
 			GL_Bind(grass->texnum);
 
-			if(gl_dynamic->value)
+			if(gl_dynamic->integer)
 				R_LightPoint (origin, lightLevel, true);
 			else
 				R_LightPoint (origin, lightLevel, false);

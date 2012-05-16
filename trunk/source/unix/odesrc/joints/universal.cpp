@@ -640,10 +640,11 @@ void dJointGetUniversalAngles( dJointID j, dReal *angle1, dReal *angle2 )
     {
         joint->getAngles( angle2, angle1 );
         *angle2 = -(*angle2);
-        return;
     }
     else
-        return joint->getAngles( angle1, angle2 );
+    {
+       joint->getAngles( angle1, angle2 );
+    }
 }
 
 
