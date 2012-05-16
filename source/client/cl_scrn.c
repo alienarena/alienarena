@@ -2081,9 +2081,7 @@ void SCR_UpdateScreen (void)
 				SCR_showFramesOver();
 			}
 
-#if 1
 			SCR_showRSpeeds(); /* map-maker's performance counters */
-#endif
 			
 			SCR_showAllPerfTests();
 
@@ -2091,13 +2089,6 @@ void SCR_UpdateScreen (void)
 			{
 				SCR_showTimer();
 			}
-#if 0
-			{
-				extern cvar_t* r_speeds;
-				if( r_speeds->value == 2 )
-					SCR_showRSpeeds();
-			}
-#endif
 			SCR_DrawPlayerIcon();
 		}
 	}

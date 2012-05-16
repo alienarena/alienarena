@@ -201,7 +201,7 @@ typedef struct _SERVERINFO {
 
 SERVERINFO servers[64];
 int numServers = 0;
-extern unsigned int starttime;
+extern int starttime;
 
 static size_t szr; // just for unused result warnings
 
@@ -1034,6 +1034,11 @@ void CL_PingServers_f (void)
 		Netchan_OutOfBandPrint (NS_CLIENT, adr, va("status %i", PROTOCOL_VERSION));
 
 	}
+
+	/* for local lan and address book entries. not be accurate but it 
+	 * prevents pings calculated from uninitialized or previous starttime
+	 */
+	starttime = Sys_Milliseconds() + 1000;
 
 	// -JD restart the menu music that was stopped during this procedure
 	S_StartMenuMusic();

@@ -544,11 +544,11 @@ void dMassAdd (dMass *a, const dMass *b)
 // Backwards compatible API
 void dMassSetCappedCylinder(dMass *a, dReal b, int c, dReal d, dReal e)
 {
-  return dMassSetCapsule(a,b,c,d,e);
+  dMassSetCapsule(a,b,c,d,e);
 }
 
 void dMassSetCappedCylinderTotal(dMass *a, dReal b, int c, dReal d, dReal e)
 {
-  return dMassSetCapsuleTotal(a,b,c,d,e);
+  dMassSetCapsuleTotal(a,b,c,d,e);
 }
 
