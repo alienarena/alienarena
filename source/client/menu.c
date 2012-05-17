@@ -537,8 +537,8 @@ void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
 		*totalheight += ( h*scale + 24*scale);
 	}
 
-	*ystart = ( viddef.height / 2 - 25*scale );
-	*xoffset = ( viddef.width - *widest + 150*scale) / 2;
+	*ystart = ( viddef.height / 2 - 35*scale );
+	*xoffset = ( viddef.width - *widest + 250*scale) / 2;
 
 }
 
@@ -565,7 +565,7 @@ void M_Main_Draw (void)
 
 	findMenuCoords(&xoffset, &ystart, &totalheight, &widest);
 
-	ystart = ( viddef.height / 2 - 25*scale );
+	ystart = ( viddef.height / 2 - 35*scale );
 	xoffset = ( viddef.width - widest - 25*scale) / 2;
 
 	M_Background("m_main");
@@ -585,7 +585,8 @@ void M_Main_Draw (void)
 	M_MontagePic(montagepicname, mainalpha);
 
 	//if appropriate, draw the out-of-date warning
-	if ( cl_latest_game_version->value - atof(VERSION) > 0.00001f ) {
+	if ( cl_latest_game_version->value - atof(VERSION) > 0.00001f ) 
+	{
 	    version_warning = va("version %s available (%s currently installed)", cl_latest_game_version->string, VERSION);
 	    M_PrintWhite (0, 5*scale, version_warning);
 	}
@@ -593,10 +594,10 @@ void M_Main_Draw (void)
 	//draw the main menu buttons
 	for ( i = 0; main_names[i] != 0; i++ )
 	{
-		if ( i != m_main_cursor ){
+		if ( i != m_main_cursor )
+		{
 			Draw_GetPicSize( &w, &h, main_names[i] );
 			Draw_StretchPic( xoffset + 100*scale + (20*i*scale), (int)(ystart + i * 32.5*scale + 13*scale), w*scale, h*scale, main_names[i] );
-
 		}
 	}
 	strcpy( litname, main_names[m_main_cursor] );
