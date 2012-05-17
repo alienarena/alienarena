@@ -4846,43 +4846,55 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 		strcpy( longname, COM_Parse( &s ) );
 		Com_sprintf( scratch, sizeof( scratch ), "%s\n%s", longname, shortname );
 
-		if (s_rules_box.curvalue == 0 || s_rules_box.curvalue == 6) {
-			if((shortname[0] == 'd' && shortname[1] == 'm') || (shortname[0] == 't' && shortname[1] == 'o')) {
+		if (s_rules_box.curvalue == 0 || s_rules_box.curvalue == 6) 
+		{
+			if((shortname[0] == 'd' && shortname[1] == 'm') || (shortname[0] == 't' && shortname[1] == 'o')) 
+			{
 				mapnames[k] = malloc( strlen( scratch ) + 1 );
 				strcpy( mapnames[k], scratch );
 				k++;
 			}
 		}
-		else if (s_rules_box.curvalue == 1) {
-			if(shortname[0] == 'c' && shortname[1] == 't' && shortname[2] == 'f') {
+		else if (s_rules_box.curvalue == 1) 
+		{
+			if(shortname[0] == 'c' && shortname[1] == 't' && shortname[2] == 'f') 
+			{
 				mapnames[k] = malloc( strlen( scratch ) + 1 );
 				strcpy( mapnames[k], scratch );
 				k++;
 			}
 		}
-		else if (s_rules_box.curvalue == 2) {
-			if(shortname[0] == 'a' && shortname[1] == 'o' && shortname[2] == 'a') {
+		else if (s_rules_box.curvalue == 2) 
+		{
+			if(shortname[0] == 'a' && shortname[1] == 'o' && shortname[2] == 'a') 
+			{
 				mapnames[k] = malloc( strlen( scratch ) + 1 );
 				strcpy( mapnames[k], scratch );
 				k++;
 			}
 		}
-		else if (s_rules_box.curvalue == 3) {
-			if(shortname[0] == 'd' && shortname[1] == 'b') {
+		else if (s_rules_box.curvalue == 3) 
+		{
+			if(shortname[0] == 'd' && shortname[1] == 'b') 
+			{
 				mapnames[k] = malloc( strlen( scratch ) + 1 );
 				strcpy( mapnames[k], scratch );
 				k++;
 			}
 		}
-		else if (s_rules_box.curvalue == 4) {
-			if(shortname[0] == 't' && shortname[1] == 'c' && shortname[2] == 'a') {
+		else if (s_rules_box.curvalue == 4) 
+		{
+			if(shortname[0] == 't' && shortname[1] == 'c' && shortname[2] == 'a') 
+			{
 				mapnames[k] = malloc( strlen( scratch ) + 1 );
 				strcpy( mapnames[k], scratch );
 				k++;
 			}
 		}
-		else if (s_rules_box.curvalue == 5) {
-			if(shortname[0] == 'c' && shortname[1] == 'p') {
+		else if (s_rules_box.curvalue == 5) 
+		{
+			if(shortname[0] == 'c' && shortname[1] == 'p') 
+			{
 				mapnames[k] = malloc( strlen( scratch ) + 1 );
 				strcpy( mapnames[k], scratch );
 				k++;
@@ -4935,48 +4947,60 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 		}
 		if ( l )
 		{ //didn't find it in our list
-			if (s_rules_box.curvalue == 0) {
-				if((curMap[0] == 'd' && curMap[1] == 'm') || (curMap[0] == 't' && curMap[1] == 'o')) {
+			if (s_rules_box.curvalue == 0) 
+			{
+				if((curMap[0] == 'd' && curMap[1] == 'm') || (curMap[0] == 't' && curMap[1] == 'o')) 
+				{
 					mapnames[k] = malloc( strlen( scratch ) + 1 );
 					strcpy( mapnames[k], scratch );
 					k++;
 					totalmaps++;
 				}
 			}
-			else if (s_rules_box.curvalue == 1) {
-				if(curMap[0] == 'c' && curMap[1] == 't' && curMap[2] == 'f') {
+			else if (s_rules_box.curvalue == 1) 
+			{
+				if(curMap[0] == 'c' && curMap[1] == 't' && curMap[2] == 'f') 
+				{
 					mapnames[k] = malloc( strlen( scratch ) + 1 );
 					strcpy( mapnames[k], scratch );
 					k++;
 					totalmaps++;
 				}
 			}
-			else if (s_rules_box.curvalue == 2) {
-				if(curMap[0] == 'a' && curMap[1] == 'o' && curMap[2] == 'a') {
+			else if (s_rules_box.curvalue == 2) 
+			{
+				if(curMap[0] == 'a' && curMap[1] == 'o' && curMap[2] == 'a') 
+				{
 					mapnames[k] = malloc( strlen( scratch ) + 1 );
 					strcpy( mapnames[k], scratch );
 					k++;
 					totalmaps++;
 				}
 			}
-			else if (s_rules_box.curvalue == 3) {
-				if(curMap[0] == 'd' && curMap[1] == 'b') {
+			else if (s_rules_box.curvalue == 3) 
+			{
+				if(curMap[0] == 'd' && curMap[1] == 'b') 
+				{
 					mapnames[k] = malloc( strlen( scratch ) + 1 );
 					strcpy( mapnames[k], scratch );
 					k++;
 					totalmaps++;
 				}
 			}
-			else if (s_rules_box.curvalue == 4) {
-				if(curMap[0] == 't' && curMap[1] == 'c' && curMap[2] == 'a') {
+			else if (s_rules_box.curvalue == 4) 
+			{
+				if(curMap[0] == 't' && curMap[1] == 'c' && curMap[2] == 'a') 
+				{
 					mapnames[k] = malloc( strlen( scratch ) + 1 );
 					strcpy( mapnames[k], scratch );
 					k++;
 					totalmaps++;
 				}
 			}
-			else if (s_rules_box.curvalue == 5) {
-				if(curMap[0] == 'c' && curMap[1] == 'p') {
+			else if (s_rules_box.curvalue == 5) 
+			{
+				if(curMap[0] == 'c' && curMap[1] == 'p') 
+				{
 					mapnames[k] = malloc( strlen( scratch ) + 1 );
 					strcpy( mapnames[k], scratch );
 					k++;
@@ -4992,7 +5016,8 @@ void RulesChangeFunc ( void *self ) //this has been expanded to rebuild map list
 	if (mapfiles)
 		FS_FreeFileList(mapfiles, nmaps);
 
-	for(i = k; i<=nummaps; i++) {
+	for(i = k; i<=nummaps; i++) 
+	{
 		free(mapnames[i]);
 		mapnames[i] = 0;
 	}
@@ -5011,7 +5036,6 @@ void StartServerActionFunc( void *self )
 	int		timelimit;
 	int		fraglimit;
 	int		maxclients;
-	char	*spot;
 
 	strcpy( startmap, strchr( mapnames[s_startmap_list.curvalue], '\n' ) + 1 );
 
@@ -5107,50 +5131,8 @@ void StartServerActionFunc( void *self )
 		Cvar_SetValue ("gamerules", s_rules_box.curvalue );
 	}
 
-	spot = NULL;
-	if (s_rules_box.curvalue == 0)		// PGM
-	{
- 		if(Q_strcasecmp(startmap, "dm-dynamo") == 0)
-  			spot = "start";
-
-	}
-	if (s_rules_box.curvalue == 1)		// PGM
-	{
- 		if(Q_strcasecmp(startmap, "ctf-chromium") == 0)
-  			spot = "start";
-
-	}
-	if (s_rules_box.curvalue == 2)
-	{
-		if(Q_strcasecmp(startmap, "aoa-morpheus") == 0)
-			spot = "start";
-	}
-	if (s_rules_box.curvalue == 3)
-	{
-		if(Q_strcasecmp(startmap, "db-chromium") == 0)
-			spot = "start";
-	}
-	if (s_rules_box.curvalue == 4)
-	{
-		if(Q_strcasecmp(startmap, "tca-europa") == 0)
-			spot = "start";
-	}
-	if (s_rules_box.curvalue == 5)
-	{
-		if(Q_strcasecmp(startmap, "cp-grindery") == 0)
-			spot = "start";
-	}
-	if (spot)
-	{
-		if (Com_ServerState())
-			Cbuf_AddText ("disconnect\n");
-		Cbuf_AddText (va("startmap %s\n", startmap));
-	}
-	else
-	{
-		Cbuf_AddText (va("startmap %s\n", startmap));
-	}
-
+	Cbuf_AddText (va("startmap %s\n", startmap));
+	
 	M_ForceMenuOff ();
 
 }
