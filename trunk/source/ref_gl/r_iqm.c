@@ -1112,6 +1112,7 @@ void IQM_AnimateRagdoll(int RagDollID)
 					{
 
 
+
 						int object = RagDollBinds[j].object;
 						const dReal *odeRot = dBodyGetRotation(RagDoll[RagDollID].RagDollObject[object].body);
 						const dReal *odePos = dBodyGetPosition(RagDoll[RagDollID].RagDollObject[object].body);
