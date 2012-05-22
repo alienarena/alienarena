@@ -394,9 +394,6 @@ void R_RotateForEntity (entity_t *e)
 
     qglRotatef (e->angles[1],  0, 0, 1);
     qglRotatef (-e->angles[0],  0, 1, 0);
-
-
-
     qglRotatef (-e->angles[2],  1, 0, 0);
 }
 
@@ -522,8 +519,6 @@ void R_DrawEntitiesOnList (void)
 			if(currententity->lod1)
 				currentmodel = currententity->lod1;
 		}
-		if (currententity->lod2)
-		    currentmodel = currententity->lod2;
 
 		if (!currentmodel)
 		{
