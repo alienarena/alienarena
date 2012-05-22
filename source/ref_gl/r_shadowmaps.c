@@ -460,6 +460,8 @@ void R_DrawShadowMapWorld (void)
 	}
 }
 
+#include "r_lodcalc.h"
+
 void R_DrawDynamicCaster(void)
 {
 	int		i;
@@ -537,16 +539,22 @@ void R_DrawDynamicCaster(void)
 
 		currentmodel = currententity->model;
 
-		//get view distance, set lod if available
+		//get distance
 		VectorSubtract(r_origin, currententity->origin, dist);
-		if(VectorLength(dist) > 300) {
+		
+		//set lod if available
+		if(VectorLength(dist) > LOD_DIST*(3.0/5.0))
+		{
 			if(currententity->lod2)
 				currentmodel = currententity->lod2;
 		}
-		else if(VectorLength(dist) > 100) {
+		else if(VectorLength(dist) > LOD_DIST*(1.0/5.0))
+		{
 			if(currententity->lod1)
 				currentmodel = currententity->lod1;
 		}
+		if (currententity->lod2)
+		    currentmodel = currententity->lod2;
 
 		if(currentmodel->type == mod_iqm)
 			IQM_DrawCaster ();

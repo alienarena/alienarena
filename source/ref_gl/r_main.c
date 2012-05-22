@@ -395,6 +395,8 @@ void R_RotateForEntity (entity_t *e)
     qglRotatef (e->angles[1],  0, 0, 1);
     qglRotatef (-e->angles[0],  0, 1, 0);
 
+
+
     qglRotatef (-e->angles[2],  1, 0, 0);
 }
 
@@ -436,29 +438,7 @@ void R_DrawNullModel (void)
 	qglEnable (GL_TEXTURE_2D);
 }
 
-/*
-=============
-LOD calculation
-
-The width and height occupied by a model on screen after it's been rendered
-will scale as the square of the FOV setting, and proportionally to the
-width/height of the screen itself. Based on the assumption that 500 units is
-an adequate LOD cutoff distance at 1920*1080 with an FOV of 90, we can scale
-the LOD cutoff distance to the lowest point where there will be no noticable
-ugliness.
-
-NOTE: Turns out the player's FOV setting goes to fov_x and not fov_y. Go
-figure.
-=============
-*/
-#define LOD_BASE_H      1920.0
-#define LOD_BASE_W      1080.0
-#define LOD_BASE_DIST   500.0
-#define LOD_BASE_FOV    90.0
-#define LOD_DIST        (LOD_BASE_DIST*\
-                        (vid.width/LOD_BASE_W)*(vid.height/LOD_BASE_H)*\
-                        (LOD_BASE_FOV/r_newrefdef.fov_x)*\
-                        (LOD_BASE_FOV/r_newrefdef.fov_x))
+#include "r_lodcalc.h"
 
 /*
 =============
@@ -512,7 +492,7 @@ void R_DrawEntitiesOnList (void)
 		//get distance
 		VectorSubtract(r_origin, currententity->origin, dist);
 		
-		//fade out shadows. (TODO: apply to shadowmaps, currently only r_shadows.)
+		//fade out shadows. 
 		fadeshadow_cutoff = r_shadowcutoff->value * (LOD_DIST/LOD_BASE_DIST);
 		if (dist[2] < 0.1)
 			fadeShadow = 1.0;
@@ -542,6 +522,8 @@ void R_DrawEntitiesOnList (void)
 			if(currententity->lod1)
 				currentmodel = currententity->lod1;
 		}
+		if (currententity->lod2)
+		    currentmodel = currententity->lod2;
 
 		if (!currentmodel)
 		{

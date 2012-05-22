@@ -982,6 +982,8 @@ void SHD_DrawRagDollShadowVolume(int RagDollID)
 	qglPopMatrix();
 }
 
+#include "r_lodcalc.h"
+
 void R_CastShadow(void)
 {
 	int i, RagDollID;
@@ -1066,14 +1068,17 @@ void R_CastShadow(void)
 			thresh = 1024;
 
 		//cull by distance if soft shadows
-		if(VectorLength(dist) > thresh && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
+		if	(	VectorLength(dist) > LOD_DIST*(((float)thresh)/500.0) && 
+				gl_state.hasFBOblit && 
+				atoi(&gl_config.version_string[0]) >= 3.0
+			)
 			continue;
 
-		if(VectorLength(dist) > 1000) {
+		if(VectorLength(dist) > LOD_DIST*2.0) {
 			if(currententity->lod2)
 				currentmodel = currententity->lod2;
 		}
-		else if(VectorLength(dist) > 500) {
+		else if(VectorLength(dist) > LOD_DIST) {
 			if(currententity->lod1)
 				currentmodel = currententity->lod1;
 		}
@@ -1116,7 +1121,8 @@ void R_CastShadow(void)
 		VectorSubtract(r_origin, RagDoll[RagDollID].origin, dist);
 
 		//cull by distance if soft shadows(to do - test/tweak this)
-		if(VectorLength(dist) > 1024 && gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
+		if	(	VectorLength(dist) > LOD_DIST*(1024.0/500.0) && 
+				gl_state.hasFBOblit && atoi(&gl_config.version_string[0]) >= 3.0)
 			continue;
 
 		SHD_DrawRagDollShadowVolume(RagDollID);
