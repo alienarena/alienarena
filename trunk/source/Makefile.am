@@ -184,6 +184,7 @@ crx_SOURCES = \
 	ref_gl/r_iqm.c \
 	ref_gl/r_light.c \
 	ref_gl/r_local.h \
+	ref_gl/r_lodcalc.h \
 	ref_gl/r_main.c \
 	ref_gl/r_math.c \
 	ref_gl/r_math.h \

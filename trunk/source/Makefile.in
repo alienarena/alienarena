@@ -286,26 +286,26 @@ am__crx_SOURCES_DIST = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c ref_gl/r_bmfont.c \
 	ref_gl/r_bmfont.h ref_gl/r_draw.c ref_gl/r_image.c \
 	ref_gl/r_image.h ref_gl/r_iqm.h ref_gl/r_iqm.c \
-	ref_gl/r_light.c ref_gl/r_local.h ref_gl/r_main.c \
-	ref_gl/r_math.c ref_gl/r_math.h ref_gl/r_mesh.c \
-	ref_gl/r_misc.c ref_gl/r_model.c ref_gl/r_model.h \
-	ref_gl/r_particle.c ref_gl/r_postprocess.c ref_gl/r_program.c \
-	ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h ref_gl/r_script.c \
-	ref_gl/r_script.h ref_gl/r_shadowmaps.c ref_gl/r_shadows.c \
-	ref_gl/r_surf.c ref_gl/r_text.c ref_gl/r_text.h ref_gl/r_ttf.c \
-	ref_gl/r_ttf.h ref_gl/r_varray.c ref_gl/r_vbo.c \
-	ref_gl/r_vlights.c ref_gl/r_warp.c ref_gl/warpsin.h \
-	server/server.h server/sv_ccmds.c server/sv_ents.c \
-	server/sv_game.c server/sv_init.c server/sv_main.c \
-	server/sv_send.c server/sv_user.c server/sv_world.c \
-	unix/glob.c unix/glob.h unix/gl_glx.c unix/glw_unix.h \
-	unix/net_udp.c unix/qal_unix.c unix/qasm.h unix/qgl_unix.c \
-	unix/q_shunix.c unix/rw_unix.c unix/rw_unix.h unix/sys_unix.c \
-	unix/vid_so.c win32/conproc.c win32/conproc.h win32/glw_imp.c \
-	win32/glw_win.h win32/in_win.c win32/net_wins.c \
-	win32/qal_win.c win32/qgl_win.c win32/q_shwin.c \
-	win32/sys_win.c win32/vid_dll.c win32/winquake.h \
-	win32/resource.h
+	ref_gl/r_light.c ref_gl/r_local.h ref_gl/r_lodcalc.h \
+	ref_gl/r_main.c ref_gl/r_math.c ref_gl/r_math.h \
+	ref_gl/r_mesh.c ref_gl/r_misc.c ref_gl/r_model.c \
+	ref_gl/r_model.h ref_gl/r_particle.c ref_gl/r_postprocess.c \
+	ref_gl/r_program.c ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h \
+	ref_gl/r_script.c ref_gl/r_script.h ref_gl/r_shadowmaps.c \
+	ref_gl/r_shadows.c ref_gl/r_surf.c ref_gl/r_text.c \
+	ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
+	ref_gl/r_varray.c ref_gl/r_vbo.c ref_gl/r_vlights.c \
+	ref_gl/r_warp.c ref_gl/warpsin.h server/server.h \
+	server/sv_ccmds.c server/sv_ents.c server/sv_game.c \
+	server/sv_init.c server/sv_main.c server/sv_send.c \
+	server/sv_user.c server/sv_world.c unix/glob.c unix/glob.h \
+	unix/gl_glx.c unix/glw_unix.h unix/net_udp.c unix/qal_unix.c \
+	unix/qasm.h unix/qgl_unix.c unix/q_shunix.c unix/rw_unix.c \
+	unix/rw_unix.h unix/sys_unix.c unix/vid_so.c win32/conproc.c \
+	win32/conproc.h win32/glw_imp.c win32/glw_win.h win32/in_win.c \
+	win32/net_wins.c win32/qal_win.c win32/qgl_win.c \
+	win32/q_shwin.c win32/sys_win.c win32/vid_dll.c \
+	win32/winquake.h win32/resource.h
 @BUILD_UNIX_TRUE@am__objects_1 = unix/crx-gl_glx.$(OBJEXT) \
 @BUILD_UNIX_TRUE@	unix/crx-net_udp.$(OBJEXT) \
 @BUILD_UNIX_TRUE@	unix/crx-qal_unix.$(OBJEXT) \
@@ -632,19 +632,20 @@ crx_SOURCES = client/anorms.h client/cl_ents.c client/cl_fx.c \
 	ref_gl/glext.h ref_gl/qgl.h ref_gl/r_bloom.c ref_gl/r_bmfont.c \
 	ref_gl/r_bmfont.h ref_gl/r_draw.c ref_gl/r_image.c \
 	ref_gl/r_image.h ref_gl/r_iqm.h ref_gl/r_iqm.c \
-	ref_gl/r_light.c ref_gl/r_local.h ref_gl/r_main.c \
-	ref_gl/r_math.c ref_gl/r_math.h ref_gl/r_mesh.c \
-	ref_gl/r_misc.c ref_gl/r_model.c ref_gl/r_model.h \
-	ref_gl/r_particle.c ref_gl/r_postprocess.c ref_gl/r_program.c \
-	ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h ref_gl/r_script.c \
-	ref_gl/r_script.h ref_gl/r_shadowmaps.c ref_gl/r_shadows.c \
-	ref_gl/r_surf.c ref_gl/r_text.c ref_gl/r_text.h ref_gl/r_ttf.c \
-	ref_gl/r_ttf.h ref_gl/r_varray.c ref_gl/r_vbo.c \
-	ref_gl/r_vlights.c ref_gl/r_warp.c ref_gl/warpsin.h \
-	server/server.h server/sv_ccmds.c server/sv_ents.c \
-	server/sv_game.c server/sv_init.c server/sv_main.c \
-	server/sv_send.c server/sv_user.c server/sv_world.c \
-	unix/glob.c unix/glob.h $(am__append_6) $(am__append_7)
+	ref_gl/r_light.c ref_gl/r_local.h ref_gl/r_lodcalc.h \
+	ref_gl/r_main.c ref_gl/r_math.c ref_gl/r_math.h \
+	ref_gl/r_mesh.c ref_gl/r_misc.c ref_gl/r_model.c \
+	ref_gl/r_model.h ref_gl/r_particle.c ref_gl/r_postprocess.c \
+	ref_gl/r_program.c ref_gl/r_ragdoll.c ref_gl/r_ragdoll.h \
+	ref_gl/r_script.c ref_gl/r_script.h ref_gl/r_shadowmaps.c \
+	ref_gl/r_shadows.c ref_gl/r_surf.c ref_gl/r_text.c \
+	ref_gl/r_text.h ref_gl/r_ttf.c ref_gl/r_ttf.h \
+	ref_gl/r_varray.c ref_gl/r_vbo.c ref_gl/r_vlights.c \
+	ref_gl/r_warp.c ref_gl/warpsin.h server/server.h \
+	server/sv_ccmds.c server/sv_ents.c server/sv_game.c \
+	server/sv_init.c server/sv_main.c server/sv_send.c \
+	server/sv_user.c server/sv_world.c unix/glob.c unix/glob.h \
+	$(am__append_6) $(am__append_7)
 
 # Dedicated Server sources (Unix only)
 crx_ded_SOURCES = \
