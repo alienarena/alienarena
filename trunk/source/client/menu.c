@@ -539,7 +539,6 @@ void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
 
 	*ystart = ( viddef.height / 2 - 35*scale );
 	*xoffset = ( viddef.width - *widest + 250*scale) / 2;
-
 }
 
 void M_Main_Draw (void)
@@ -572,10 +571,13 @@ void M_Main_Draw (void)
 
 	//draw the montage pics
 	mainalpha += cls.frametime; //fade image in
-	if(mainalpha > 4) { //switch pics at this point
+	if(mainalpha > 4) 
+	{		
+		//switch pics at this point
 		mainalpha = 0.1;
 		montagepic++;
-		if(montagepic > 5) {
+		if(montagepic > 5) 
+		{
 			montagepic = 1;
 		}
 	}
