@@ -34,6 +34,33 @@ players/martianenforcer/gamara
 		glow
 	}
 }
+players/martianwarrior/red
+{
+	{
+		map players/martianwarrior/default_normal.tga
+		normalmap
+		map2 gfx/defaultwarriorfx.tga
+		glow
+	}
+}
+players/martianwarrior/default
+{
+	{
+		map players/martianwarrior/default_normal.tga
+		normalmap
+		map2 gfx/defaultwarriorfx.tga
+		glow
+	}
+}
+players/martianwarrior/blue
+{
+	{
+		map players/martianwarrior/default_normal.tga
+		normalmap
+		map2 gfx/bluewarriorfx.tga
+		glow
+	}	
+}
 players/martianoverlord/red
 {
 	{
@@ -555,6 +582,15 @@ models/weapons/v_rocket/skin
 	}
 }
 players/martianenforcer/weapon
+{
+	{	
+		map models/weapons/v_rail/beamgun_normal.tga
+		normalmap
+		map2 gfx/beamgunfx.tga
+		glow
+	}		
+}
+players/martianwarrior/weapon
 {
 	{	
 		map models/weapons/v_rail/beamgun_normal.tga
