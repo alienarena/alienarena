@@ -1522,6 +1522,7 @@ PModelList_t BasePModels[] =
 	{ "martianenforcer" },
 	{ "martiancyborg" },
 	{ "martianoverlord" },
+	{ "martianwarrior" },
     { "enforcer" },
 	{ "commander" },
 	{ "lauren" },
