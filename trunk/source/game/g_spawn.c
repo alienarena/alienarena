@@ -982,6 +982,8 @@ void SP_worldspawn (edict_t *ent)
 	    //this should be here for the cases of 7.45 clients and older
 	    gi.modelindex ("players/martianenforcer/tris.md2");
 	    gi.modelindex ("players/martiancyborg/tris.md2");
+		gi.modelindex ("players/martianoverlord/tris.md2");
+		gi.modelindex ("players/martianwarrior/tris.md2");
 	    gi.modelindex ("players/enforcer/tris.md2");
 	    gi.modelindex ("players/lauren/tris.md2");
 	    gi.modelindex ("players/slashbot/tris.md2");
