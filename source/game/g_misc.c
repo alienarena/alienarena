@@ -1280,8 +1280,9 @@ void SP_misc_redspidernode (edict_t *ent)
 	ent->takedamage = DAMAGE_NO;
 
 	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.md2");
+	ent->s.modelindex3 = gi.modelindex ("models/misc/spiderpod/helmet.md2");
 
-	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
+	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW);
 	VectorSet (ent->mins, -64, -64, 0);
 	VectorSet (ent->maxs, 64, 64, 128);
 	ent->health = 600;
@@ -1330,8 +1331,9 @@ void SP_misc_bluespidernode (edict_t *ent)
 	ent->takedamage = DAMAGE_NO;
 
 	ent->s.modelindex = gi.modelindex ("models/misc/spiderpod/tris.md2");
+	ent->s.modelindex3 = gi.modelindex ("models/misc/spiderpod/helmet.md2");
 
-	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW | RF_NOSHADOWS);
+	ent->s.renderfx = (RF_FULLBRIGHT | RF_GLOW);
 	VectorSet (ent->mins, -64, -64, 0);
 	VectorSet (ent->maxs, 64, 64, 128);
 	ent->health = 600;

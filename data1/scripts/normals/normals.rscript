@@ -581,6 +581,15 @@ models/weapons/v_rocket/skin
 		glow
 	}
 }
+models/misc/spiderpod/spider
+{
+	{
+		map models/misc/spiderpod/spider_normal.tga
+		normalmap
+		map2 models/misc/spiderpod/spider_fx.tga
+		glow
+	}
+}
 players/martianenforcer/weapon
 {
 	{	
