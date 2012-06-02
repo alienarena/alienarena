@@ -748,8 +748,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	info = Info_ValueForKey (self->client->pers.userinfo, "skin");
 
 	self->s.modelindex2 = 0;	// remove linked weapon model
-	if(info[0] == 'b')		//fix this ugly crap before ver 3.0!
-		self->s.modelindex4 = 0; //remove brainlet gunrack
 
 	if(ctf->value)
 		self->s.modelindex4 = 0;	// remove linked ctf flag
