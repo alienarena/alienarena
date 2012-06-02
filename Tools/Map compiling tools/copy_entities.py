@@ -73,12 +73,22 @@ def get_brush_origin (brush):
 #return the new index, the brush's "contents" bitmask, and the brush's origin
 #if the brush's "contents" has the CONTENTS_ORIGIN bit set
 #TODO: better validation?
+
+#NOTE: Each face of the brush is specified in the following format:
+# ( x y z ) ( x y z ) ( x y z ) texture_name xoffs yoffs xscale yscale
+#Additionally, other numbers may follow, the first of which is the brush
+#contents bitmask. If the brush contents bitmask is zero, and if no other 
+#properties need to be specified for that face, then it may be omitted. 
+#Otherwise it must be there and it must be the same on every face of the 
+#brush. 
 def parse_brush (tokens, num_tokens, index):
     brush = []
     while index < num_tokens:
         if tokens[index] == "}":
-            assert len(brush) >= 24, "invalid brush!"
             index += 1
+            assert len(brush) > 21, "Invalid brush!"
+            if brush[21] in ('(', '}'):
+                return index, 0, None #Contents are 0 and have been omitted.
             contents = int(brush[21]) #Brush contents are token 21. I counted.
             if contents & 16777216: #CONTENTS_ORIGIN
                 origin = get_brush_origin (brush)
