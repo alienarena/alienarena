@@ -669,14 +669,6 @@ cmodel_t *CM_LoadMap (char *name, qboolean clientload, unsigned *checksum) {
 	char    *token = NULL;
 
 
-	if (!clientload)
-		// Future clients will try looking for this serverinfo cvar before
-		// falling back on the config string. That way, if we ever add map
-		// data files which are useable on the client side, the client knows
-		// not just what the BSP file is, but also what the map specification
-		// file is if applicable.
-		Cvar_FullSet ("sv_mapspec", name, CVAR_SERVERINFO|CVAR_NOSET);
-	
 	//
 	// load the file
 	//
