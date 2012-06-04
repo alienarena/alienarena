@@ -1687,7 +1687,7 @@ mostlyclean-compile:
 	-rm -f game/g_phys.$(OBJEXT)
 	-rm -f game/g_save.$(OBJEXT)
 	-rm -f game/g_spawn.$(OBJEXT)
-	-rm -f game/g_spider.&(OBJEXT)
+	-rm -f game/g_spider.$(OBJEXT)
 	-rm -f game/g_svcmds.$(OBJEXT)
 	-rm -f game/g_target.$(OBJEXT)
 	-rm -f game/g_trigger.$(OBJEXT)
