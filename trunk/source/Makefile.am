@@ -324,6 +324,7 @@ libgame_a_SOURCES =  \
 	game/g_phys.c \
 	game/g_save.c \
 	game/g_spawn.c \
+	game/g_spider.c \
 	game/g_svcmds.c \
 	game/g_target.c \
 	game/g_trigger.c \
