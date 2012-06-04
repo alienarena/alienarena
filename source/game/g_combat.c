@@ -346,7 +346,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	if (targ->flags & FL_NO_KNOCKBACK)
 		knockback = 0;
 
-// figure momentum add
+	// figure momentum add
 	if (!(dflags & DAMAGE_NO_KNOCKBACK))
 	{
 		if ((knockback) && (targ->movetype != MOVETYPE_NONE) && (targ->movetype != MOVETYPE_BOUNCE) && (targ->movetype != MOVETYPE_PUSH) && (targ->movetype != MOVETYPE_STOP))

@@ -558,6 +558,7 @@ extern  int print3;
 #define MOD_GRAPPLE			34
 #define MOD_HEADSHOT		35
 #define MOD_MINDERASER		36
+#define MOD_SPIDER			37
 #define MOD_FRIENDLY_FIRE   0x8000000
 
 extern	int	meansOfDeath;
@@ -903,6 +904,7 @@ void fire_floater_alien (edict_t *self, vec3_t start, vec3_t dir, int damage, in
 void fire_flamethrower(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius);
 void fire_hover_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick, qboolean detonate);
 void fire_minderaser (edict_t *self, vec3_t start, vec3_t dir, float timer);
+void fire_spider (edict_t *self, vec3_t start, vec3_t aimdir, int speed);
 
 //new weapon code
 void fire_energy_field (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick);
