@@ -580,8 +580,8 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	}
 	else
 	{
-
-		if ((tr.ent != self) && (tr.ent->takedamage)) {
+		if ((tr.ent != self) && (tr.ent->takedamage)) 
+		{
 			T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_BLASTER);
 			self->client->resp.weapon_hits[0]++;
 			gi.sound (self, CHAN_VOICE, gi.soundindex("misc/hit.wav"), 1, ATTN_STATIC, 0);
@@ -612,7 +612,8 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	gi.WriteDir (tr.plane.normal);
 	gi.multicast (tr.endpos, MULTICAST_PVS);
 
-	if(detonate) {
+	if(detonate) 
+	{
 		//spawn a new ent at end of explosion - and detonate it
 		bomb = G_Spawn();
 		VectorCopy (tr.endpos, bomb->s.origin);
@@ -628,11 +629,11 @@ void fire_blaster_beam (edict_t *self, vec3_t start, vec3_t aimdir, int damage, 
 	}
 
 	if (gi.pointcontents (start) & MASK_WATER)
-		{
-			water = true;
-			VectorCopy (start, water_start);
-			content_mask &= ~MASK_WATER;
-		}
+	{
+		water = true;
+		VectorCopy (start, water_start);
+		content_mask &= ~MASK_WATER;
+	}
 
 	tr = gi.trace (start, NULL, NULL, end, self, content_mask);
 

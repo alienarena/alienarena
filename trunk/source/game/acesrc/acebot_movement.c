@@ -1046,19 +1046,22 @@ attack:
 			}
 		}
 
-		if(self->skill == 3) { //skill 3 bots can use alt-fires!
+		if(self->skill >= 2) 
+		{	//skill 2/3 bots can use alt-fires!
 
 			// Base selection on distance.
 			ucmd->buttons = BUTTON_ATTACK;
 
-			if (self->client->pers.weapon == FindItem("blaster")) {
+			if (self->client->pers.weapon == FindItem("blaster")) 
+			{
 				if( range > 500)
 					ucmd->buttons = BUTTON_ATTACK2;
 				else
 					ucmd->buttons = BUTTON_ATTACK;
 			}
 
-			if (self->client->pers.weapon == FindItem("alien disruptor")) {
+			if (self->client->pers.weapon == FindItem("alien disruptor")) 
+			{
 				if(range > 1000) {
 					ucmd->buttons = BUTTON_ATTACK2;
 					use_fuzzy_aim = false;
@@ -1068,43 +1071,57 @@ attack:
 					ucmd->buttons = BUTTON_ATTACK;
 			}
 
-			if (self->client->pers.weapon == FindItem("flame thrower")) {
+			if (self->client->pers.weapon == FindItem("flame thrower")) 
+			{
 				if(range < 500)
 					ucmd->buttons = BUTTON_ATTACK;
 				else
 					ucmd->buttons = BUTTON_ATTACK2;
 			}
 
-			if (self->client->pers.weapon == FindItem("pulse rifle")) {
+			if (self->client->pers.weapon == FindItem("pulse rifle")) 
+			{
 				if(range < 200)
 					ucmd->buttons = BUTTON_ATTACK2;
 				else
 					ucmd->buttons = BUTTON_ATTACK;
 			}
 
-			if (self->client->pers.weapon == FindItem("disruptor")) {
-				if(range < 500)
-					ucmd->buttons = BUTTON_ATTACK2;
-				else
-					ucmd->buttons = BUTTON_ATTACK;
-			}
-
-			if (self->client->pers.weapon == FindItem("alien vaporizer")) {
+			if (self->client->pers.weapon == FindItem("disruptor")) 
+			{
 				if(range < 300)
 					ucmd->buttons = BUTTON_ATTACK2;
 				else
 					ucmd->buttons = BUTTON_ATTACK;
 			}
 
+			if (self->client->pers.weapon == FindItem("alien vaporizer")) 
+			{
+				if(range < 300)
+					ucmd->buttons = BUTTON_ATTACK2;
+				else
+					ucmd->buttons = BUTTON_ATTACK;
+			}
+
+			if (self->client->pers.weapon == FindItem("Minderaser")) 
+			{
+				if(range < 400)
+					ucmd->buttons = BUTTON_ATTACK;
+				else
+					ucmd->buttons = BUTTON_ATTACK2;
+			}
+
 			//vehicle alt-fires
 			if (self->client->pers.weapon == FindItem("bomber")
-				|| self->client->pers.weapon == FindItem("strafer")) {
+				|| self->client->pers.weapon == FindItem("strafer")) 
+			{
 				if(range > 500)
 					ucmd->buttons = BUTTON_ATTACK2;
 				else
 					ucmd->buttons = BUTTON_ATTACK;
 			}
-			if (self->client->pers.weapon == FindItem("hover")) {
+			if (self->client->pers.weapon == FindItem("hover")) 
+			{
 				if(range < 300)
 					ucmd->buttons = BUTTON_ATTACK2;
 				else

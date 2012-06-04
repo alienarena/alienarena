@@ -440,7 +440,7 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 						self->client->resp.reward_pts = 0; 
 						self->client->resp.powered = false;
 					}
-				
+
 					if (ff) 
 					{
 						attacker->client->resp.score--;
@@ -597,6 +597,18 @@ void ClientObituary (edict_t *self, edict_t *inflictor, edict_t *attacker)
 		return;
 	}
 
+	if(mod == MOD_SPIDER) 
+	{
+		safe_bprintf(PRINT_MEDIUM, "%s killed by Spiderbot!\n", self->client->pers.netname);
+
+		self->client->resp.reward_pts = 0; 
+		self->client->resp.powered = false;
+
+		if(inflictor->owner->client)
+			inflictor->owner->client->resp.score++;
+		return;
+	}
+	
 	safe_bprintf (PRINT_MEDIUM,"%s died.\n", self->client->pers.netname);
 	if (deathmatch->value) 
 	{

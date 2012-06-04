@@ -537,7 +537,11 @@ qboolean M_CheckAttack (edict_t *self)
 		if (enemy_range == RANGE_FAR)
 			return false;
 
-	if (self->monsterinfo.aiflags & AI_STAND_GROUND)
+	if(strcmp(self->classname, "proj_spider"))
+	{
+		chance = 0.8;
+	}
+	else if (self->monsterinfo.aiflags & AI_STAND_GROUND)
 	{
 		chance = 0.4;
 	}
@@ -775,6 +779,11 @@ qboolean ai_checkattack (edict_t *self, float dist)
 			if(self->enemy->client->rayImmunity && ((level.time - self->enemy->client->rayTime) < 60))
 				return false;
 
+	if(!strcmp(self->classname, "proj_spider"))
+		if(self->enemy->client && self->enemy->inuse)
+			if(self->enemy == self->owner)
+				return false;
+
 	// JDC self->ideal_yaw = enemy_yaw;
 
 	if (self->monsterinfo.attack_state == AS_MISSILE)
@@ -847,6 +856,10 @@ void ai_run (edict_t *self, float dist)
 		ai_run_slide (self, dist);
 		return;
 	}
+
+	if(!strcmp(self->classname, "proj_spider"))
+		if(self->goalentity == self->owner)
+				return;
 
 	if (enemy_vis)
 	{

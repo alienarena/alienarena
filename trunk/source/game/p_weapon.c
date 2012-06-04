@@ -1639,7 +1639,8 @@ void weapon_floater_fire (edict_t *ent)
 	forward[0] = forward[0] * 2.6;
 	forward[1] = forward[1] * 2.6;
 	forward[2] = forward[2] * 2.6;
-	if(ent->altfire) {
+	if(ent->altfire) 
+	{
 		if(excessive->value)
 			fire_floater (ent, start, forward, damage, 400, damage_radius, radius_damage, 8);
 		else
@@ -1713,7 +1714,10 @@ void weapon_minderaser_fire (edict_t *ent)
 	forward[1] = forward[1] * 12.0;
 	forward[2] = forward[2] * 12.0;
 	
-	fire_minderaser (ent, start, forward, 30);
+	if(ent->altfire) 
+		fire_spider (ent, start, forward, 25);
+	else
+		fire_minderaser (ent, start, forward, 30);
 
 	gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/minderaserfire.wav"), 1, ATTN_NORM, 0);
 	
@@ -1751,6 +1755,11 @@ void Weapon_Minderaser (edict_t *ent)
 {
 	static int	pause_frames[]	= {31, 0};
 	static int	fire_frames[]	= {6, 0};
+
+	if(ent->client->buttons & BUTTON_ATTACK2)
+		ent->altfire = true;
+	else if(ent->client->buttons & BUTTON_ATTACK)
+		ent->altfire = false;
 
 	Weapon_Generic (ent, 3, 11, 31, 35, pause_frames, fire_frames, weapon_minderaser_fire);
 }
