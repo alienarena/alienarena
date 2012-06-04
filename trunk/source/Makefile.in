@@ -152,7 +152,6 @@ am_libgame_a_OBJECTS = game/acesrc/acebot_ai.$(OBJEXT) \
 	game/g_main.$(OBJEXT) game/g_misc.$(OBJEXT) \
 	game/g_monster.$(OBJEXT) game/g_phys.$(OBJEXT) \
 	game/g_save.$(OBJEXT) game/g_spawn.$(OBJEXT) \
-	game/g_spider.$(OBJEXT) \
 	game/g_svcmds.$(OBJEXT) game/g_target.$(OBJEXT) \
 	game/g_trigger.$(OBJEXT) game/g_unlagged.$(OBJEXT) \
 	game/g_utils.$(OBJEXT) game/g_vehicles.$(OBJEXT) \
@@ -716,7 +715,6 @@ libgame_a_SOURCES = \
 	game/g_phys.c \
 	game/g_save.c \
 	game/g_spawn.c \
-	game/g_spider.c \
 	game/g_svcmds.c \
 	game/g_target.c \
 	game/g_trigger.c \
@@ -993,8 +991,6 @@ game/g_phys.$(OBJEXT): game/$(am__dirstamp) \
 game/g_save.$(OBJEXT): game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
 game/g_spawn.$(OBJEXT): game/$(am__dirstamp) \
-	game/$(DEPDIR)/$(am__dirstamp)
-game/g_spider.$(OBJEXT): game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
 game/g_svcmds.$(OBJEXT): game/$(am__dirstamp) \
 	game/$(DEPDIR)/$(am__dirstamp)
@@ -1687,7 +1683,6 @@ mostlyclean-compile:
 	-rm -f game/g_phys.$(OBJEXT)
 	-rm -f game/g_save.$(OBJEXT)
 	-rm -f game/g_spawn.$(OBJEXT)
-	-rm -f game/g_spider.$(OBJEXT)
 	-rm -f game/g_svcmds.$(OBJEXT)
 	-rm -f game/g_target.$(OBJEXT)
 	-rm -f game/g_trigger.$(OBJEXT)
@@ -1933,10 +1928,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_phys.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_save.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_spawn.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/
-$(DEPDIR)/g_spider.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@game/
-$(DEPDIR)/g_svcmds.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_svcmds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_target.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_trigger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@game/$(DEPDIR)/g_unlagged.Po@am__quote@
