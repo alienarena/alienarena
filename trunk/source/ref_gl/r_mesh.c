@@ -1665,7 +1665,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 					if(!stage->normalmap)
 					{
-						float red = 1, green = 1, blue = 1, nAlpha;
+						float nAlpha;
 
 						if(lerped)
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
@@ -1674,28 +1674,17 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 								calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position), normal, currentmodel->vertexes[index_xyz].position);
 
-						if (stage->lightmap)
+						if (mirror && !(currententity->flags & RF_WEAPONMODEL) )
 						{
-							if(lerped)
-								MD2_VlightModel (shadelight, &verts[index_xyz], lightcolor);
-							else
-								MD2_VlightModel (shadelight, &verts[index_xyz], lightcolor);
-							red = lightcolor[0];
-							green = lightcolor[1];
-							blue = lightcolor[2];
-						}
-
-						if(mirror && !(currententity->flags & RF_WEAPONMODEL) )
-						{
-							VArray[7] = red;
-							VArray[8] = green;
-							VArray[9] = blue;
+							VArray[7] = VArray[8] = VArray[9] = 1;
 							VArray[10] = nAlpha;
 						}
-						else {
-							VArray[5] = red;
-							VArray[6] = green;
-							VArray[7] = blue;
+						else
+						{
+							if (stage->lightmap)
+								MD2_VlightModel (shadelight, &verts[index_xyz], &VArray[5]);
+							else
+								VArray[5] = VArray[6] = VArray[7] = 1;
 							VArray[8] = nAlpha;
 						}
 					}
