@@ -1340,6 +1340,17 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 		while (stage)
 		{
+			qboolean normalmap;
+			qboolean mirror_noweap;
+			qboolean dovbo;
+			int vertsize = VertexSizes[VERT_COLOURED_TEXTURED];
+			
+			dovbo = gl_state.vbo && !lerped;
+			
+			normalmap = stage->normalmap;
+			mirror_noweap = mirror && !(currententity->flags & RF_WEAPONMODEL);
+			
+			
 			va=0;
 			VArray = &VArrayVerts[0];
 			GLSTATE_ENABLE_ALPHATEST
@@ -1362,6 +1373,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					if( !(currententity->flags & RF_WEAPONMODEL))
 					{
 						R_InitVArrays(VERT_COLOURED_MULTI_TEXTURED);
+						vertsize = VertexSizes[VERT_COLOURED_MULTI_TEXTURED];
 
 						GL_EnableMultitexture( true );
 						GL_SelectTexture( GL_TEXTURE0);
@@ -1427,7 +1439,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				}
 			}
 
-			if(stage->normalmap)
+			if(normalmap)
 			{
 				vec3_t lightVec, lightVal;
 				
@@ -1438,6 +1450,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				else 
 				{
 					R_InitVArrays (VERT_NORMAL_COLOURED_TEXTURED);
+					vertsize = VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
 					qglNormalPointer(GL_FLOAT, 0, NormalsArray);
 					glEnableVertexAttribArrayARB (1);
 					glVertexAttribPointerARB(1, 4, GL_FLOAT, GL_FALSE, 0, TangentsArray);
@@ -1560,6 +1573,27 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				}
 			}			
 
+			if (stage->envmap) 
+			{
+				if (mirror)
+				{
+					if (mirror_noweap)
+					{
+						stage->scale.scaleX = -0.5;
+						stage->scale.scaleY = 0.5;
+					}
+					else
+					{
+						stage->scale.scaleX = -1.0;
+						stage->scale.scaleY = 1.0;
+					}
+				}
+				else if (currententity->flags & RF_TRANSLUCENT) //return to original glass script's scale(mostly for when going into menu)
+				{
+					stage->scale.scaleX = stage->scale.scaleY = 0.5;
+				}
+			}
+			
 			for (i=0; i<paliashdr->num_tris; i++)
 			{
 				for (j=0; j<3; j++)
@@ -1604,48 +1638,23 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 						}
 					}
 
-					VectorNormalize ( normal );
+					// we can safely assume that the contents of
+					// r_avertexnormals need not be converted to unit vectors,
+					// however lerped normals may require this.
+					if (lerped)
+						VectorNormalize ( normal );
 					tangent[3] = 1.0;
-
-					if(stage->normalmap)
-					{
-						//send tangent to shader
-						VectorCopy(normal, NormalsArray[va]); //shader needs normal array
-						Vector4Copy(tangent, TangentsArray[va]);
-					}
 
 					if (stage->envmap)
 					{
-						vec3_t envmapvec;
-
-						VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
-
-						if(mirror)
+						if (!mirror)
 						{
-							if( !(currententity->flags & RF_WEAPONMODEL))
-							{
-									stage->scale.scaleX = -0.5;
-									stage->scale.scaleY = 0.5;
-									os -= DotProduct (normal , vectors[1]);
-									ot += DotProduct (normal, vectors[2]);
-							}
-							else
-							{
-								stage->scale.scaleX = -1.0;
-								stage->scale.scaleY = 1.0;
-							}
-
-						}
-						else
-						{
+							vec3_t envmapvec;
+							VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
 							RS_SetEnvmap (envmapvec, &os, &ot);
-
-							if (currententity->flags & RF_TRANSLUCENT) //return to original glass script's scale(mostly for when going into menu)
-								stage->scale.scaleX = stage->scale.scaleY = 0.5;
-
-							os -= DotProduct (normal , vectors[1] );
-							ot += DotProduct (normal, vectors[2] );
 						}
+						os -= DotProduct (normal, vectors[1] );
+						ot += DotProduct (normal, vectors[2] );
 					}
 
 					RS_SetTexcoords2D(stage, &os, &ot);
@@ -1653,9 +1662,9 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					VArray[3] = os;
 					VArray[4] = ot;
 
-					if(mirror && !(currententity->flags & RF_WEAPONMODEL))
+					if(mirror_noweap)
 					{
-						os2 -= DotProduct (normal , vectors[1] );
+						os2 -= DotProduct (normal, vectors[1] );
 						ot2 += DotProduct (normal, vectors[2] );
 						RS_SetTexcoords2D(stage, &os2, &ot2);
 
@@ -1663,7 +1672,22 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 						VArray[6] = ot2;
 					}
 
-					if(!stage->normalmap)
+					if(normalmap)
+					{
+						//send tangent to shader
+						VectorCopy(normal, NormalsArray[va]); //shader needs normal array
+						Vector4Copy(tangent, TangentsArray[va]);
+						if (dovbo)
+						{
+							VertexArray[va][0] = VArray[0];
+							VertexArray[va][1] = VArray[1];
+							VertexArray[va][2] = VArray[2];
+
+							TexCoordArray[va][0] = VArray[3];
+							TexCoordArray[va][1] = VArray[4];
+						}
+					}
+					else
 					{
 						float nAlpha;
 
@@ -1674,7 +1698,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
 								calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position), normal, currentmodel->vertexes[index_xyz].position);
 
-						if (mirror && !(currententity->flags & RF_WEAPONMODEL) )
+						if (mirror_noweap)
 						{
 							VArray[7] = VArray[8] = VArray[9] = 1;
 							VArray[10] = nAlpha;
@@ -1688,28 +1712,14 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 							VArray[8] = nAlpha;
 						}
 					}
-					else if(gl_state.vbo && !lerped) 
-					{
-						VertexArray[va][0] = VArray[0];
-						VertexArray[va][1] = VArray[1];
-						VertexArray[va][2] = VArray[2];
-
-						TexCoordArray[va][0] = VArray[3];
-						TexCoordArray[va][1] = VArray[4];
-					}
 
 					// increment pointer and counter
-					if(stage->normalmap)
-						VArray += VertexSizes[VERT_NORMAL_COLOURED_TEXTURED];
-					else if(mirror && !(currententity->flags & RF_WEAPONMODEL))
-						VArray += VertexSizes[VERT_COLOURED_MULTI_TEXTURED];
-					else
-						VArray += VertexSizes[VERT_COLOURED_TEXTURED];
+					VArray += vertsize;
 					va++;
 				}
 			}
 
-			if(gl_state.vbo && !lerped && stage->normalmap)
+			if(dovbo && normalmap)
 			{
                 currentmodel->vbo_xyz = R_VCLoadData(VBO_STATIC, va*sizeof(vec3_t), VertexArray, VBO_STORE_XYZ, currententity);
 				currentmodel->vbo_st = R_VCLoadData(VBO_STATIC, va*sizeof(vec2_t), TexCoordArray, VBO_STORE_ST, currententity);
@@ -1718,7 +1728,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				//Com_Printf("Loading mesh vbo.\n");
             }
 skipLoad:
-			if(gl_state.vbo && !lerped && stage->normalmap) 
+			if(gl_state.vbo && !lerped && normalmap) 
 			{
 				qglEnableClientState( GL_VERTEX_ARRAY );
 				GL_BindVBO(currentmodel->vbo_xyz);
@@ -1749,7 +1759,7 @@ skipLoad:
 			if(mirror && !(currententity->flags & RF_WEAPONMODEL))
 				GL_EnableMultitexture( false );
 
-			if(stage->normalmap)
+			if(normalmap)
 			{
 				glUseProgramObjectARB( 0 );
 				GL_EnableMultitexture( false );
