@@ -792,25 +792,6 @@ void MD2_LerpSelfShadowVerts( int nverts, dtrivertx_t *v, dtrivertx_t *ov, float
         }
 }
 
-float calcEntAlpha (float alpha, vec3_t point)
-{
-	float newAlpha;
-	vec3_t vert_len;
-
-	if (!(currententity->flags&RF_TRANSLUCENT))
-	{
-		return alpha;
-	}
-	
-	newAlpha = alpha;
-
-	VectorSubtract(r_newrefdef.vieworg, point, vert_len);
-	newAlpha *= VectorLength(vert_len);
-	if (newAlpha>alpha)	newAlpha = alpha;
-
-	return newAlpha;
-}
-
 //This routine bascially finds the average light position, by factoring in all lights and
 //accounting for their distance, visiblity, and intensity.
 void R_GetLightVals(vec3_t meshOrigin, qboolean RagDoll, qboolean dynamic)
@@ -1211,7 +1192,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 						VArray[5] = shadelight[0];
 						VArray[6] = shadelight[1];
 						VArray[7] = shadelight[2];
-						VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
+						VArray[8] = alpha;
 					}
 				}
 				else
@@ -1237,7 +1218,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 						VArray[5] = shadelight[0];
 						VArray[6] = shadelight[1];
 						VArray[7] = shadelight[2];
-						VArray[8] = calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position);
+						VArray[8] = alpha;
 					}
 				}
 				tangent[3] = 1.0;
@@ -1301,7 +1282,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					VArray[5] = lightcolor[0];
 					VArray[6] = lightcolor[1];
 					VArray[7] = lightcolor[2];
-					VArray[8] = calcEntAlpha(alpha, s_lerped[index_xyz]);
+					VArray[8] = alpha;
 				}
 				else {
 					MD2_VlightModel (shadelight, &verts[index_xyz], lightcolor);
@@ -1316,7 +1297,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					VArray[5] = lightcolor[0];
 					VArray[6] = lightcolor[1];
 					VArray[7] = lightcolor[2];
-					VArray[8] = calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position);
+					VArray[8] = alpha;
 				}
 
 				// increment pointer and counter
@@ -1698,14 +1679,10 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					}
 					else
 					{
-						float nAlpha;
-
-						nAlpha = calcEntAlpha(alpha, VArray);
-
 						if (mirror_noweap)
 						{
 							VArray[7] = VArray[8] = VArray[9] = 1;
-							VArray[10] = nAlpha;
+							VArray[10] = alpha;
 						}
 						else
 						{
@@ -1713,7 +1690,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 								MD2_VlightModel (shadelight, &verts[index_xyz], &VArray[5]);
 							else
 								VArray[5] = VArray[6] = VArray[7] = 1;
-							VArray[8] = nAlpha;
+							VArray[8] = alpha;
 						}
 					}
 
