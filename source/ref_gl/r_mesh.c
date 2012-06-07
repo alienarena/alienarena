@@ -1328,14 +1328,12 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			qboolean normalmap;
 			qboolean mirror_noweap;
 			qboolean dovbo;
-			qboolean alphafunc_negative;
 			int vertsize = VertexSizes[VERT_COLOURED_TEXTURED];
 			
 			dovbo = gl_state.vbo && !lerped;
 			
 			normalmap = stage->normalmap;
-			mirror_noweap = mirror && !(currententity->flags & RF_WEAPONMODEL);
-			
+			mirror_noweap = mirror && !(currententity->flags & RF_WEAPONMODEL);			
 			
 			va=0;
 			VArray = &VArrayVerts[0];
