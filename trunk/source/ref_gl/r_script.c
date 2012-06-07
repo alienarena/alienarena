@@ -1332,27 +1332,6 @@ endalpha:
 	return alpha;
 }
 
-float RS_AlphaFuncAlias (int alphafunc, float alpha, vec3_t normal, vec3_t org)
-{
-	// float oldalpha = alpha; // unused
-
-	if (!abs(alphafunc))
-		goto endalpha;
-
-	if (alphafunc == ALPHAFUNC_GLOSS)
-	{
-		//glossmap stuff here...
-	}
-
-endalpha:
-
-	if (alpha<0) alpha = 0;
-	if (alpha>1) alpha = 1;
-	if (alphafunc<0) alpha = 1-alpha;
-
-	return alpha;
-}
-
 image_t *BSP_TextureAnimation (mtexinfo_t *tex);
 rscript_t	*surfaceScript(msurface_t *surf)
 {
