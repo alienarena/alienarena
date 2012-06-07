@@ -797,21 +797,16 @@ float calcEntAlpha (float alpha, vec3_t point)
 	float newAlpha;
 	vec3_t vert_len;
 
-	newAlpha = alpha;
-
 	if (!(currententity->flags&RF_TRANSLUCENT))
 	{
-		if (newAlpha<0) newAlpha = 0;
-		if (newAlpha>1) newAlpha = 1;
-		return newAlpha;
+		return alpha;
 	}
+	
+	newAlpha = alpha;
 
 	VectorSubtract(r_newrefdef.vieworg, point, vert_len);
 	newAlpha *= VectorLength(vert_len);
 	if (newAlpha>alpha)	newAlpha = alpha;
-
-	if (newAlpha<0) newAlpha = 0;
-	if (newAlpha>1) newAlpha = 1;
 
 	return newAlpha;
 }
@@ -1101,6 +1096,11 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 
 		va=0;
 		VArray = &VArrayVerts[0];
+		
+		if (alpha < 0.0)
+			alpha = 0.0;
+		else if (alpha > 1.0)
+			alpha = 1.0;
 
 		if(gl_glsl_shaders->integer && gl_state.glsl_shaders && gl_normalmaps->integer) {
 
@@ -1274,6 +1274,10 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 		va=0;
 		VArray = &VArrayVerts[0];
 		alpha = basealpha;
+		if (alpha < 0.0)
+			alpha = 0.0;
+		else if (alpha > 1.0)
+			alpha = 1.0;
 		R_InitVArrays (VERT_COLOURED_TEXTURED);
 		GLSTATE_ENABLE_ALPHATEST
 
@@ -1343,6 +1347,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 			qboolean normalmap;
 			qboolean mirror_noweap;
 			qboolean dovbo;
+			qboolean alphafunc_negative;
 			int vertsize = VertexSizes[VERT_COLOURED_TEXTURED];
 			
 			dovbo = gl_state.vbo && !lerped;
@@ -1594,6 +1599,11 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 				}
 			}
 			
+			if (alpha < 0.0)
+				alpha = 0.0;
+			else if (alpha > 1.0)
+				alpha = 1.0;
+			
 			for (i=0; i<paliashdr->num_tris; i++)
 			{
 				for (j=0; j<3; j++)
@@ -1624,6 +1634,10 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 							( r_avertexnormals[oldtangents[index_xyz]][k] -
 							r_avertexnormals[tangents[index_xyz]][k] ) * backlerp;
 						}
+						// we can safely assume that the contents of
+						// r_avertexnormals need not be converted to unit 
+						// vectors, however lerped normals may require this.
+						VectorNormalize ( normal );
 					}
 					else
 					{
@@ -1638,11 +1652,6 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 						}
 					}
 
-					// we can safely assume that the contents of
-					// r_avertexnormals need not be converted to unit vectors,
-					// however lerped normals may require this.
-					if (lerped)
-						VectorNormalize ( normal );
 					tangent[3] = 1.0;
 
 					if (stage->envmap)
@@ -1650,7 +1659,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 						if (!mirror)
 						{
 							vec3_t envmapvec;
-							VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
+							VectorAdd(currententity->origin, VArray, envmapvec);
 							RS_SetEnvmap (envmapvec, &os, &ot);
 						}
 						os -= DotProduct (normal, vectors[1] );
@@ -1691,12 +1700,7 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 					{
 						float nAlpha;
 
-						if(lerped)
-							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-								calcEntAlpha(alpha, s_lerped[index_xyz]), normal, s_lerped[index_xyz]);
-						else
-							nAlpha = RS_AlphaFuncAlias (stage->alphafunc,
-								calcEntAlpha(alpha, currentmodel->vertexes[index_xyz].position), normal, currentmodel->vertexes[index_xyz].position);
+						nAlpha = calcEntAlpha(alpha, VArray);
 
 						if (mirror_noweap)
 						{
