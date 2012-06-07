@@ -1640,13 +1640,18 @@ void MD2_DrawFrame (dmdl_t *paliashdr, float backlerp, qboolean lerped, int skin
 						if (!mirror)
 						{
 							vec3_t envmapvec;
-							VectorAdd(currententity->origin, VArray, envmapvec);
+							VectorAdd(currententity->origin, s_lerped[index_xyz], envmapvec);
 							RS_SetEnvmap (envmapvec, &os, &ot);
+							os -= DotProduct (normal, vectors[1]);
+							ot += DotProduct (normal, vectors[2]);
 						}
-						os -= DotProduct (normal, vectors[1] );
-						ot += DotProduct (normal, vectors[2] );
+						else if (mirror_noweap)
+						{
+							os -= DotProduct (normal, vectors[1]);
+							ot += DotProduct (normal, vectors[2]);
+						}
 					}
-
+                    
 					RS_SetTexcoords2D(stage, &os, &ot);
 
 					VArray[3] = os;
