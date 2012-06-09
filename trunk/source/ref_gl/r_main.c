@@ -1084,8 +1084,8 @@ void R_RenderView (refdef_t *fd)
 
 	R_DrawParticles ();
 
-	if(gl_mirror->value) {
-
+	if(gl_mirror->value) 
+	{
 		qglBindTexture(GL_TEXTURE_2D, r_mirrortexture->texnum);
 		qglCopyTexSubImage2D(GL_TEXTURE_2D, 0,
 					0, 0, 0, 256, 512, 512);
