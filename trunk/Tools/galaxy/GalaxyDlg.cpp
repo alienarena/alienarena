@@ -434,7 +434,7 @@ BOOL CGalaxyDlg::OnInitDialog()
 
 	GetPrivateProfileString("Galaxy", "name", defName, user.nick, 32, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "email", "email@email.com", user.email, 100, "galaxy.ini");
-	GetPrivateProfileString("Galaxy", "exe", "C:/Alien Arena 2008/", CRXPath, MAX_PATH, "galaxy.ini");
+	GetPrivateProfileString("Galaxy", "exe", "C:/Program Files/Alien Arena/", CRXPath, MAX_PATH, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "chatstart", "true", user.joinatstart, 12, "galaxy.ini");
 	GetPrivateProfileString("Galaxy", "server", "irc.planetarena.org", servidor, 100, "galaxy.ini");
 	//set the join flag for the dialog bool
@@ -449,7 +449,7 @@ BOOL CGalaxyDlg::OnInitDialog()
 		ppDlg.DoModal();
 	}
 	//get daily news
-	m_news.SetWindowText("Newsfeed: Welcome to Alien Arena 2007!");
+	m_news.SetWindowText("Newsfeed: Welcome to Alien Arena!");
 	GetNews();
 	//initialize IRC, log into channel, and start streaming to edit box
 
@@ -1374,14 +1374,14 @@ void CGalaxyDlg::OnJoin(NMHDR* pNMHDR, LRESULT* pResult)
 	s.cb = sizeof(s);
 	myCRXPath[strlen(myCRXPath)-1] = '\0';
 
-	sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
+	sprintf (CRXbuff, "%s\\%s", myCRXPath, "alienarena.exe");
 
 	//some checks in case their path got wonkered.
 	file = NULL; //quiet compiler warning
 	file = fopen (CRXbuff, "rb");
 	if (!file) {
 
-		if ( !BrowseForFolder( CRXPath, _T("Folder location of Alien Arena 2008") )) 
+		if ( !BrowseForFolder( CRXPath, _T("Folder location of Alien Arena") )) 
 		{
 			AfxMessageBox("Unable to use this folder!");
 		}
@@ -1390,10 +1390,10 @@ void CGalaxyDlg::OnJoin(NMHDR* pNMHDR, LRESULT* pResult)
 			memset (&s, 0, sizeof(s));
 			s.cb = sizeof(s);
 			myCRXPath[strlen(myCRXPath)-1] = '\0';
-			sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
+			sprintf (CRXbuff, "%s\\%s", myCRXPath, "alienarena.exe");
 			file = fopen (CRXbuff, "rb");
 			if (!file) {
-				AfxMessageBox("Unable to locate crx.exe in this folder!");
+				AfxMessageBox("Unable to locate alienarena.exe in this folder!");
 			}
 		}
 	}
@@ -1417,14 +1417,14 @@ void CGalaxyDlg::OnJoin2()  //used from the menu pulldown, doesn't return pointe
 	s.cb = sizeof(s);
 	myCRXPath[strlen(myCRXPath)-1] = '\0';
 
-	sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
+	sprintf (CRXbuff, "%s\\%s", myCRXPath, "alienarena.exe");
 
 	//some checks in case their path got wonkered.
 	file = NULL; //quiet compiler warning
 	file = fopen (CRXbuff, "rb");
 	if (!file) {
 
-		if ( !BrowseForFolder( CRXPath, _T("Folder location of Alien Arena 2008") )) 
+		if ( !BrowseForFolder( CRXPath, _T("Folder location of Alien Arena") )) 
 		{
 			AfxMessageBox("Unable to use this folder!");
 		}
@@ -1433,7 +1433,7 @@ void CGalaxyDlg::OnJoin2()  //used from the menu pulldown, doesn't return pointe
 			memset (&s, 0, sizeof(s));
 			s.cb = sizeof(s);
 			myCRXPath[strlen(myCRXPath)-1] = '\0';
-			sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
+			sprintf (CRXbuff, "%s\\%s", myCRXPath, "alienarena.exe");
 			file = fopen (CRXbuff, "rb");
 			if (!file) {
 				AfxMessageBox("Unable to locate crx.exe in this folder!");
@@ -1462,14 +1462,14 @@ void CGalaxyDlg::OnLaunch()
 	s.cb = sizeof(s);
 	myCRXPath[strlen(myCRXPath)-1] = '\0';
 
-	sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
+	sprintf (CRXbuff, "%s\\%s", myCRXPath, "alienarena.exe");
 
 	//some checks in case their path got wonkered.
 	file = NULL; //quiet compiler warning
 	file = fopen (CRXbuff, "rb");
 	if (!file) {
 
-		if ( !BrowseForFolder( CRXPath, _T("Folder location of Alien Arena 2008") )) 
+		if ( !BrowseForFolder( CRXPath, _T("Folder location of Alien Arena") )) 
 		{
 			AfxMessageBox("Unable to use this folder!");
 		}
@@ -1478,10 +1478,10 @@ void CGalaxyDlg::OnLaunch()
 			memset (&s, 0, sizeof(s));
 			s.cb = sizeof(s);
 			myCRXPath[strlen(myCRXPath)-1] = '\0';
-			sprintf (CRXbuff, "%s\\%s", myCRXPath, "crx.exe");
+			sprintf (CRXbuff, "%s\\%s", myCRXPath, "alienarena.exe");
 			file = fopen (CRXbuff, "rb");
 			if (!file) {
-				AfxMessageBox("Unable to locate crx.exe in this folder!");
+				AfxMessageBox("Unable to locate alienarena.exe in this folder!");
 			}
 			else
 				WritePrivateProfileString("Galaxy", "exe", myCRXPath, "galaxy.ini");
