@@ -1126,6 +1126,15 @@ maps/meshes/tech/redribtube
 		glow
 	}
 }
+maps/meshes/tech/blueribtube
+{
+	{
+		map maps/meshes/tech/bigribtube_normal.jpg
+		normalmap
+		map2 maps/meshes/tech/blueribtube_fx.tga
+		glow
+	}
+}
 maps/meshes/xempx/lightbomb
 {
 	{
