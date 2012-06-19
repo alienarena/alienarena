@@ -85,14 +85,13 @@ int TestLine_r (int node, vec3_t set_start, vec3_t stop)
 {
 	tnode_t	*tnode;
 	float	front, back;
-	vec3_t	mid, start;
+	vec3_t	mid;
+	vec_t	*start;
 	float	frac;
 	int		side;
 	int		r;
 
-    start[0] = set_start[0];
-    start[1] = set_start[1];
-    start[2] = set_start[2];
+	start = set_start;
 
 re_test:
 
@@ -149,9 +148,7 @@ re_test:
 
     node = tnode->children[!side];
 
-    start[0] = mid[0];
-    start[1] = mid[1];
-    start[2] = mid[2];
+    start = mid;
 
     goto re_test;
 }
