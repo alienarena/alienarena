@@ -836,6 +836,8 @@ void RadWorld (void)
 
 		CheckPatches ();
 	}
+	else
+		numthreads = 1;
 
     if(memory)
 	{
