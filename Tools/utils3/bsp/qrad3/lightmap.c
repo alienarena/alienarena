@@ -13,9 +13,6 @@ edgeshare_t	edgeshare[MAX_MAP_EDGES];
 int			facelinks[MAX_MAP_FACES];
 int			planelinks[2][MAX_MAP_PLANES];
 
-qboolean sun_ambient_once;
-qboolean sun_main_once;
-
 /*
 ============
 LinkPlaneFaces
@@ -1106,7 +1103,12 @@ float SpotLight( float dot1, float intensity, float dist, float dot2, float stop
 LightContributionToPoint
 =============
 */
-void LightContributionToPoint (directlight_t *l, vec3_t pos, vec3_t normal, vec3_t color, float lightscale2 )
+void LightContributionToPoint	(	directlight_t *l, vec3_t pos, 
+									vec3_t normal, vec3_t color, 
+									float lightscale2, 
+									qboolean *sun_main_once, 
+									qboolean *sun_ambient_once
+								)
 {
 	vec3_t			delta, target;
 	float			dot, dot2;
@@ -1139,14 +1141,14 @@ void LightContributionToPoint (directlight_t *l, vec3_t pos, vec3_t normal, vec3
 	if( l->type == emit_sky )
 	{  // this might be the sun ambient and it might be directional
 		set_main = false;
-		if( sun_main_once ) // don't do -extra multisampling on sun
+		if( *sun_main_once ) // don't do -extra multisampling on sun
 			return;
 
 		dot2 = -DotProduct (delta, l->normal);
 		if( dot2 <= 0.001f )
 			return; // behind light surface
 
-		if( !sun_ambient_once ) // Ambient sky, no -extra multisampling
+		if( !*sun_ambient_once ) // Ambient sky, no -extra multisampling
 			scale = sun_ambient;
 		else
 			scale = 0.0f;
@@ -1165,7 +1167,7 @@ void LightContributionToPoint (directlight_t *l, vec3_t pos, vec3_t normal, vec3
 					TestLine_r( 0, pos, target )
 				)
 				{
-					set_main = sun_main_once;
+					set_main = *sun_main_once;
 					main_val = 0.0f;
 				}
 				else
@@ -1177,7 +1179,7 @@ void LightContributionToPoint (directlight_t *l, vec3_t pos, vec3_t normal, vec3
 		}
 		else
 		{
-			if( sun_ambient_once )
+			if( *sun_ambient_once )
 				return;
 			set_main = false;
 			main_val = 0.0f;
@@ -1187,8 +1189,8 @@ void LightContributionToPoint (directlight_t *l, vec3_t pos, vec3_t normal, vec3
 		else
 			VectorScale ( l->color, scale, color );
 
-		sun_ambient_once = true;
-		sun_main_once = set_main;
+		*sun_ambient_once = true;
+		*sun_main_once = set_main;
 	}
 	else
 	{
@@ -1230,7 +1232,8 @@ Lightscale2 is the normalizer for multisampling, -extra cmd line arg
 */
 
 void GatherSampleLight (vec3_t pos, vec3_t normal,
-			float **styletable, int offset, int mapsize, float lightscale2)
+			float **styletable, int offset, int mapsize, float lightscale2,
+			qboolean *sun_main_once, qboolean *sun_ambient_once)
 {
 	int				i;
 	directlight_t	*l;
@@ -1251,7 +1254,7 @@ void GatherSampleLight (vec3_t pos, vec3_t normal,
 
 		for (l=directlights[i] ; l ; l=l->next)
 		{
-			LightContributionToPoint ( l, pos, normal, color, lightscale2 );
+			LightContributionToPoint ( l, pos, normal, color, lightscale2, sun_main_once, sun_ambient_once);
 
 			// no contribution
 			if ( VectorCompare ( color, vec3_origin ) )
@@ -1339,6 +1342,7 @@ void BuildFacelights (int facenum)
 	int			numsamples;
 	int			tablesize;
 	facelight_t		*fl;
+	qboolean	sun_main_once, sun_ambient_once;
 
 	this_face = &dfaces[facenum];
 
@@ -1390,7 +1394,7 @@ void BuildFacelights (int facenum)
 		for (j=0 ; j<numsamples ; j++)
 		{
 			GatherSampleLight (liteinfo[j].surfpt[i], liteinfo[0].facenormal, styletable,
-				i*3, tablesize, 1.0/numsamples);
+				i*3, tablesize, 1.0/numsamples, &sun_main_once, &sun_ambient_once);
 		}
 
 		// contribute the sample to one or more patches

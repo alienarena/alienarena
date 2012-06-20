@@ -798,6 +798,7 @@ RadWorld
 void RadWorld (void)
 {
 
+	int _numthreads = numthreads;
 	if (numnodes == 0 || numfaces == 0)
 		Error ("Empty map");
 	MakeBackplanes ();
@@ -812,10 +813,10 @@ void RadWorld (void)
 
 	// create directlights out of patches and lights
 	CreateDirectLights ();
-
+	
 	// build initial facelights
 	RunThreadsOnIndividual (numfaces, true, BuildFacelights);
-
+	
 	if (numbounce > 0)
 	{
 		// build transfer lists
@@ -825,7 +826,9 @@ void RadWorld (void)
 			qprintf ("transfer lists: %5.1f megs\n"
 				, (float)total_transfer * sizeof(transfer_t) / (1024*1024));
 		}
-
+		
+		numthreads = 1;
+		
 		// spread light around
 		BounceLight ();
 
@@ -872,6 +875,7 @@ int main (int argc, char **argv)
 
 	verbose = false;
     full_help = false;
+    numthreads = 4;
 
     LoadConfigurationFile("qrad3", 0);
     LoadConfiguration(argc-1, argv+1);
@@ -909,11 +913,11 @@ int main (int argc, char **argv)
 			extrasamples = true;
 			// qprintf ("extrasamples set to true\n");
 		}
-//		else if (!strcmp(param,"-threads"))
-//		{
-//            param2 = WalkConfiguration();
-//			numthreads = atoi (param2);
-//		}
+		else if (!strcmp(param,"-threads"))
+		{
+            param2 = WalkConfiguration();
+			numthreads = atoi (param2);
+		}
 		else if (!strcmp(param,"-subdiv"))
 		{
             param2 = WalkConfiguration();
@@ -1020,8 +1024,6 @@ int main (int argc, char **argv)
 //        numthreads = 1;
 
 //	ThreadSetDefault ();
-
-    numthreads = 1;
 
 	if (maxlight > 255.0f)
 		maxlight = 255.0f;
