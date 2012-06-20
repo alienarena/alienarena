@@ -623,7 +623,7 @@ int main (int argc, char **argv)
 	LoadPortals (portalfile);
 
 	CalcVis ();
-
+	
 	CalcPHS ();
 
 	visdatasize = vismap_p - dvisdata;

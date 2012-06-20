@@ -18,7 +18,7 @@ INSTALL_DIR ?= /usr/local/bin
 CC ?= gcc
 
 # Compile Options
-BASE_CFLAGS ?= -Wall
+BASE_CFLAGS ?= -Wall -pthread -DUSE_PTHREADS
 RELEASE_CFLAGS ?= $(BASE_CFLAGS) -O3 
 DEBUG_CFLAGS ?= $(BASE_CFLAGS) -O0 -g
 
