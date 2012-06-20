@@ -130,7 +130,6 @@ re_test:
 	if (front < ON_EPSILON && back < ON_EPSILON)
 	{
         node = tnode->children[1];
-
         goto re_test;
 	}
 
@@ -143,9 +142,7 @@ re_test:
 	mid[2] = start[2] + (stop[2] - start[2])*frac;
 
 
-    r = TestLine_r (tnode->children[side], start, mid);
-	
-    if (r)
+    if (r = TestLine_r (tnode->children[side], start, mid))
 		return r;
 
     node = tnode->children[!side];
