@@ -85,13 +85,14 @@ int TestLine_r (int node, vec3_t set_start, vec3_t stop)
 {
 	tnode_t	*tnode;
 	float	front, back;
-	vec3_t	mid;
-	vec_t	*start;
+	vec3_t	mid, start;
 	float	frac;
 	int		side;
 	int		r;
 
-	start = set_start;
+	start[0] = set_start[0];
+	start[1] = set_start[1];
+	start[2] = set_start[2];
 
 re_test:
 
@@ -130,6 +131,7 @@ re_test:
 	if (front < ON_EPSILON && back < ON_EPSILON)
 	{
         node = tnode->children[1];
+
         goto re_test;
 	}
 
@@ -141,6 +143,7 @@ re_test:
 	mid[1] = start[1] + (stop[1] - start[1])*frac;
 	mid[2] = start[2] + (stop[2] - start[2])*frac;
 
+
     r = TestLine_r (tnode->children[side], start, mid);
 	
     if (r)
@@ -148,7 +151,9 @@ re_test:
 
     node = tnode->children[!side];
 
-    start = mid;
+    start[0] = mid[0];
+    start[1] = mid[1];
+    start[2] = mid[2];
 
     goto re_test;
 }
