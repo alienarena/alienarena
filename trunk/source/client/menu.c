@@ -503,7 +503,7 @@ MAIN MENU
 
 =======================================================================
 */
-#define	MAIN_ITEMS	8
+#define	MAIN_ITEMS	9
 
 char *main_names[] =
 {
@@ -513,8 +513,9 @@ char *main_names[] =
 	"m_main_host",
 	"m_main_irc",
 	"m_main_options",
-	"m_main_video",
+	"m_main_video",	
 	"m_main_quit",
+	"m_main_credits",
 	0
 };
 
@@ -537,7 +538,7 @@ void findMenuCoords (int *xoffset, int *ystart, int *totalheight, int *widest)
 		*totalheight += ( h*scale + 24*scale);
 	}
 
-	*ystart = ( viddef.height / 2 - 35*scale );
+	*ystart = ( viddef.height / 2 - 60*scale );
 	*xoffset = ( viddef.width - *widest + 250*scale) / 2;
 }
 
@@ -564,7 +565,7 @@ void M_Main_Draw (void)
 
 	findMenuCoords(&xoffset, &ystart, &totalheight, &widest);
 
-	ystart = ( viddef.height / 2 - 35*scale );
+	ystart = ( viddef.height / 2 - 60*scale );
 	xoffset = ( viddef.width - widest - 25*scale) / 2;
 
 	M_Background("m_main");
@@ -622,6 +623,9 @@ void M_Main_Draw (void)
 		i = 6;
 	else if(!strcmp(litname, "m_main_quit_sel"))
 		i = 7;
+	else if(!strcmp(litname, "m_main_credits_sel"))
+		i = 8;
+	
 	Draw_StretchPic( xoffset + 100*scale + (20*i*scale), (int)(ystart + m_main_cursor * 32.5*scale + 13*scale), w*scale, h*scale, litname );
 }
 
@@ -671,6 +675,8 @@ void addButton (mainmenuobject_t *thisObj, int index, int x, int y)
 		thisObj->OpenMenu = M_Menu_Video_f;
 	case 7:
 		thisObj->OpenMenu = M_Menu_Quit_f;
+	case 8:
+		thisObj->OpenMenu = M_Menu_Credits_f;
 	}
 }
 
@@ -707,6 +713,10 @@ void openMenuFromMain (void)
 
 		case 7:
 			M_Menu_Quit_f ();
+			break;
+		
+		case 8:
+			M_Menu_Credits_f ();
 			break;
 	}
 }
@@ -838,6 +848,10 @@ const char *M_Main_Key (int key)
 
 		case 7:
 			M_Menu_Quit_f ();
+			break;
+
+		case 8:
+			M_Menu_Credits_f ();
 			break;
 		}
 	}
@@ -2546,6 +2560,7 @@ static const char *idcredits[] =
 	"+ART",
 	"John Diamond",
 	"Dennis -xEMPx- Zedlach",
+	"Franc Cassar",
 	"Shawn Keeth",
 	"Enki",
 	"",
@@ -2742,8 +2757,6 @@ static menuaction_s		s_easy_game_action;
 static menuaction_s		s_medium_game_action;
 static menuaction_s		s_hard_game_action;
 static menuaction_s		s_ultra_game_action;
-static menuaction_s		s_credits_action;
-static menuseparator_s	s_blankline;
 
 static void StartGame( void )
 {
@@ -2797,15 +2810,6 @@ static void CreditsFunc( void *unused )
 
 void Game_MenuInit( void )
 {
-/*
-	static const char *difficulty_names[] =
-	{
-		"easy",
-		"medium",
-		"hard",
-		0
-	};
-*/
 	float scale;;
 	scale = (float)(viddef.height)/600;
 
@@ -2855,23 +2859,11 @@ void Game_MenuInit( void )
 	s_ultra_game_action.generic.tooltip = "Only the best will win";
 	s_ultra_game_action.generic.statusbar = "Progress levels against bots";
 
-	s_blankline.generic.type = MTYPE_SEPARATOR;
-
-	s_credits_action.generic.type	= MTYPE_ACTION;
-	s_credits_action.generic.x		= FONTSCALE*32*scale;
-	s_credits_action.generic.y		= FONTSCALE*100*scale;
-	s_credits_action.generic.cursor_offset = -16;
-	s_credits_action.generic.name	= "credits";
-	s_credits_action.generic.callback = CreditsFunc;
-
 	Menu_AddItem( &s_game_menu, ( void * ) &s_game_title );
 	Menu_AddItem( &s_game_menu, ( void * ) &s_easy_game_action );
 	Menu_AddItem( &s_game_menu, ( void * ) &s_medium_game_action );
 	Menu_AddItem( &s_game_menu, ( void * ) &s_hard_game_action );
 	Menu_AddItem( &s_game_menu, ( void * ) &s_ultra_game_action );
-	Menu_AddItem( &s_game_menu, ( void * ) &s_blankline );
-	Menu_AddItem( &s_game_menu, ( void * ) &s_blankline );
-	Menu_AddItem( &s_game_menu, ( void * ) &s_credits_action );
 
 	Menu_Center( &s_game_menu );
 }

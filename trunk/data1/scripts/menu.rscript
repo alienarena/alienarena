@@ -109,6 +109,18 @@ pics/m_main_video_sel
 		alphashift 15 0.1 0.9
 	}
 }
+pics/m_main_credits_sel
+{
+	{
+		map pics/m_main_credits_sel.tga
+		alphamask
+	}
+	{
+		map pics/m_main_credits_fx.tga
+		blendFunc GL_SRC_ALPHA GL_ONE
+		alphashift 15 0.1 0.9
+	}
+}
 pics/m_main_quit_sel
 {
 	{
