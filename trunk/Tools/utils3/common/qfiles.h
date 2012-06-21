@@ -199,7 +199,6 @@ typedef struct miptex_s
 
 #define IDBSPHEADER	(('P'<<24)+('S'<<16)+('B'<<8)+'I')
 		// little-endian "IBSP"
-
 #define BSPVERSION	38
 
 
@@ -226,8 +225,8 @@ typedef struct miptex_s
 #define	MAX_MAP_EDGES		128000
 #define	MAX_MAP_SURFEDGES	256000
 // crx can handle >0x200000 for MAX_MAP_LIGHTING
-#define	MAX_MAP_LIGHTING	0x300000
-#define	MAX_MAP_VISIBILITY	0x100000
+#define	MAX_MAP_LIGHTING		0x300000	//1024*1024*3
+#define	MAX_MAP_VISIBILITY		0x100000
 
 // key / value pair sizes
 
@@ -464,3 +463,39 @@ typedef struct
 	int		numareaportals;
 	int		firstareaportal;
 } darea_t;
+
+
+// FOR REFINE
+
+#define MAX_OVERRIDE_LIGHTING	0xC00000	//2048*2048*3
+
+#define IDLIGHTMAPHEADER	(('P'<<24)+('M'<<16)+('T'<<8)+'L')
+		// little-endian "LTMP" for "lightmap"
+#define LTMPVERSION			1
+
+#define LTMP_LUMP_FACELOOKUP	0
+#define LTMP_LUMP_LIGHTING		1
+#define LTMP_LUMPS				2
+
+//TODO: add a file checksum to the header
+typedef struct
+{
+	int			ident;
+	int			version;
+	lump_t		lumps[LTMP_LUMPS];
+} lightmapheader_t;
+
+typedef struct
+{
+	// this program may not override every single face in the future
+	int			override;	//either an offset in the data or else 0
+							//to default back to built in BSP lightmap
+	// this program may output different hights/widths for each face at some
+	// point in the future
+	int			width;		//width in pixels
+	int			height;	 	//height in pixels
+	// this program may output heights scaled differently from widths at some
+	// point in the future
+	float		xscale;     //xscale in game units per lightmap pixel
+	float		yscale;		//yscale in game units per lightmap pixel
+} ltmp_facelookup_t;

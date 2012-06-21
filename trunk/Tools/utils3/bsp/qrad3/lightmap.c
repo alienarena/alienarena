@@ -498,11 +498,13 @@ void CalcFaceExtents (lightinfo_t *l)
 	dface_t *s;
 	vec_t	mins[2], maxs[2], val;
 	int		i,j, e;
+	int 	facenum;
 	dvertex_t	*v;
 	texinfo_t	*tex;
 	vec3_t		vt;
 
 	s = l->face;
+	facenum = s-dfaces;
 
 	mins[0] = mins[1] = 999999;
 	maxs[0] = maxs[1] = -99999;
@@ -535,12 +537,14 @@ void CalcFaceExtents (lightinfo_t *l)
 		l->exactmins[i] = mins[i];
 		l->exactmaxs[i] = maxs[i];
 
-		mins[i] = floor(mins[i]/16);
-		maxs[i] = ceil(maxs[i]/16);
+		mins[i] = floor((mins[i]*refine_amt)/16);
+		maxs[i] = ceil((maxs[i]*refine_amt)/16);
 
 		l->texmins[i] = mins[i];
 		l->texsize[i] = maxs[i] - mins[i];
 	}
+	lfacelookups[facenum].width = l->texsize[0]+1;
+	lfacelookups[facenum].height = l->texsize[1]+1;
 
 	if (l->texsize[0] * l->texsize[1] > SINGLEMAP/4)	// div 4 for extrasamples
 	{
@@ -553,8 +557,8 @@ void CalcFaceExtents (lightinfo_t *l)
 			l->exactmins[i] = mins[i];
 			l->exactmaxs[i] = maxs[i];
 
-			mins[i] = floor(mins[i]/16);
-			maxs[i] = ceil(maxs[i]/16);
+			mins[i] = floor((mins[i]*refine_amt)/16);
+			maxs[i] = ceil((maxs[i]*refine_amt)/16);
 
 			l->texmins[i] = mins[i];
 			l->texsize[i] = maxs[i] - mins[i];
@@ -674,9 +678,9 @@ void CalcPoints (lightinfo_t *l, float sofs, float tofs)
 	w = l->texsize[0]+1;
 	l->numsurfpt = w * h;
 
-	starts = l->texmins[0]*16;
-	startt = l->texmins[1]*16;
-	step = 16;
+	step = 16/refine_amt;
+	starts = l->texmins[0]*step;
+	startt = l->texmins[1]*step;
 
 
 	for (t=0 ; t<h ; t++)
@@ -1307,9 +1311,9 @@ void AddSampleToPatch (vec3_t pos, vec3_t color, int facenum)
 		WindingBounds (patch->winding, mins, maxs);
 		for (i=0 ; i<3 ; i++)
 		{
-			if (mins[i] > pos[i] + 16)
+			if (mins[i] > pos[i] + 16/refine_amt)
 				goto nextpatch;
-			if (maxs[i] < pos[i] - 16)
+			if (maxs[i] < pos[i] - 16/refine_amt)
 				goto nextpatch;
 		}
 
@@ -1475,8 +1479,10 @@ void FinalLightFace (int facenum)
 	f->lightofs = lightdatasize;
 	lightdatasize += fl->numstyles*(fl->numsamples*3);
 
-	if (lightdatasize > MAX_MAP_LIGHTING)
+	if (refine_amt == 0 && lightdatasize > MAX_MAP_LIGHTING)
 		Error ("MAX_MAP_LIGHTING");
+	if (refine_amt > 1 && lightdatasize > MAX_OVERRIDE_LIGHTING)
+		Error ("MAX_OVERRIDE_LIGHTING");
 	ThreadUnlock ();
 
 	f->styles[0] = 0;

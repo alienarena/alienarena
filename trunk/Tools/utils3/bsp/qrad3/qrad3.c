@@ -858,6 +858,16 @@ void RadWorld (void)
 }
 
 
+void TranslateRefine (void)
+{
+	int i;
+	for (i = 0; i < numfaces; i++)
+	{
+		lfacelookups[i].override = dfaces[i].lightofs+1;
+		lfacelookups[i].xscale = lfacelookups[i].yscale = 16.0/refine_amt;
+	}
+}
+
 /*
 ========
 main
@@ -871,6 +881,7 @@ int main (int argc, char **argv)
 	double	start, end;
 	char	name[1024];
     char	game_path[1024] = "";
+    char	refine_fname[1024];
     char	*param, *param2 = NULL;
 
 	printf ("--- Alien Arena QRAD3 ---\n");
@@ -878,6 +889,7 @@ int main (int argc, char **argv)
 	verbose = false;
     full_help = false;
     numthreads = 4;
+    refine_amt = 1;
 
     LoadConfigurationFile("qrad3", 0);
     LoadConfiguration(argc-1, argv+1);
@@ -997,6 +1009,11 @@ int main (int argc, char **argv)
             param2 = WalkConfiguration();
 			maxlight = atof (param2);
 		}
+		else if (!strcmp(param,"-refine"))
+		{
+			param2 = WalkConfiguration();
+			refine_amt = refine_setting = atoi (param2);
+		}
 		else if (!strcmp (param,"-tmpin"))
 			strcpy (inbase, "/tmp");
 		else if (!strcmp (param,"-tmpout"))
@@ -1072,7 +1089,9 @@ int main (int argc, char **argv)
     // param is map/bsp file name
 	strcpy (source, ExpandArg(param));
 	StripExtension (source);
+	strcpy (refine_fname, source);
 	DefaultExtension (source, ".bsp");
+	DefaultExtension (refine_fname, ".lightmap");
 
 //	ReadLightFile ();
 
@@ -1091,9 +1110,24 @@ int main (int argc, char **argv)
 
 	RadWorld ();
 
-	sprintf (name, "%s%s", outbase, source);
+	if (refine_setting > 0)
+	{
+		sprintf (name, "%s%s", outbase, refine_fname);
+	}
+	else
+	{
+		sprintf (name, "%s%s", outbase, source);
+	}
 	printf ("writing %s\n", name);
-	WriteBSPFile (name);
+	if (refine_setting > 0)
+	{
+		TranslateRefine ();
+		WriteLTMPFile (name);
+	}
+	else
+	{
+		WriteBSPFile (name);
+	}
 
 	end = I_FloatTime ();
 	printf ("%5.0f seconds elapsed\n", end-start);

@@ -10,7 +10,7 @@ extern	byte		dvisdata[MAX_MAP_VISIBILITY];
 extern	dvis_t		*dvis;
 
 extern	int			lightdatasize;
-extern	byte		dlightdata[MAX_MAP_LIGHTING];
+extern	byte		dlightdata[MAX_OVERRIDE_LIGHTING];
 
 extern	int			entdatasize;
 extern	char		dentdata[MAX_MAP_ENTSTRING];
@@ -58,7 +58,6 @@ extern	int			numbrushsides;
 extern	dbrushside_t	dbrushsides[MAX_MAP_BRUSHSIDES];
 
 extern	byte		dpop[256];
-
 void DecompressVis (byte *in, byte *decompressed);
 int CompressVis (byte *vis, byte *dest);
 
@@ -66,6 +65,12 @@ void	LoadBSPFile (char *filename);
 void	LoadBSPFileTexinfo (char *filename);	// just for qdata
 void	WriteBSPFile (char *filename);
 void	PrintBSPFileSizes (void);
+
+
+//FOR REFINE
+ltmp_facelookup_t   lfacelookups[MAX_MAP_FACES];
+//dlightdata and lightdatasize are reused
+void    WriteLTMPFile (char *filename);
 
 //===============
 
