@@ -21,7 +21,7 @@ byte		dvisdata[MAX_MAP_VISIBILITY];
 dvis_t		*dvis = (dvis_t *)dvisdata;
 
 int			lightdatasize;
-byte		dlightdata[MAX_MAP_LIGHTING];
+byte		dlightdata[MAX_OVERRIDE_LIGHTING];
 
 int			entdatasize;
 char		dentdata[MAX_MAP_ENTSTRING];
@@ -217,6 +217,11 @@ void SwapBSPFile (qboolean todisk)
 		dfaces[i].lightofs = LittleLong (dfaces[i].lightofs);
 		dfaces[i].firstedge = LittleLong (dfaces[i].firstedge);
 		dfaces[i].numedges = LittleShort (dfaces[i].numedges);
+		lfacelookups[i].override = LittleLong (lfacelookups[i].override);
+		lfacelookups[i].width = LittleLong (lfacelookups[i].width);
+		lfacelookups[i].height = LittleLong (lfacelookups[i].height);
+		lfacelookups[i].xscale = LittleFloat (lfacelookups[i].xscale);
+		lfacelookups[i].yscale = LittleFloat (lfacelookups[i].yscale);
 	}
 
 //
@@ -455,6 +460,7 @@ void	LoadBSPFileTexinfo (char *filename)
 
 FILE		*wadfile;
 dheader_t	outheader;
+lightmapheader_t lightmap_outheader;
 
 void AddLump (int lumpnum, void *data, int len)
 {
@@ -771,4 +777,23 @@ void 	GetVectorForKey (entity_t *ent, char *key, vec3_t vec)
 	vec[2] = v3;
 }
 
+void	WriteLTMPFile (char *filename)
+{
+	header = (dheader_t *)(&lightmap_outheader);
+	memset (header, 0, sizeof(lightmapheader_t));
 
+	SwapBSPFile (true);
+
+	header->ident = LittleLong (IDLIGHTMAPHEADER);
+	header->version = LittleLong (LTMPVERSION);
+
+	wadfile = SafeOpenWrite (filename);
+	SafeWrite (wadfile, header, sizeof(lightmapheader_t));	// overwritten later
+
+	AddLump (LTMP_LUMP_FACELOOKUP, lfacelookups, numfaces*sizeof(ltmp_facelookup_t));
+	AddLump (LTMP_LUMP_LIGHTING, dlightdata, lightdatasize);
+
+	fseek (wadfile, 0, SEEK_SET);
+	SafeWrite (wadfile, header, sizeof(lightmapheader_t));
+	fclose (wadfile);
+}
