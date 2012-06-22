@@ -1013,6 +1013,14 @@ int main (int argc, char **argv)
 		{
 			param2 = WalkConfiguration();
 			refine_amt = refine_setting = atoi (param2);
+			switch (refine_amt)
+			{
+				case 1: case 2: case 4: case 8:
+				case 16: //heaven forbid
+					break;
+				default:
+					Error ("Valid refine settings are 1, 2, 4, and 8");
+			}
 		}
 		else if (!strcmp (param,"-tmpin"))
 			strcpy (inbase, "/tmp");

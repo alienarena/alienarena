@@ -258,7 +258,7 @@ void RunThreadsOn (int workcnt, qboolean showpacifier, void(*func)(int))
 
 	if (pthread_attr_init (&attrib) == -1)
 		Error ("pthread_attr_create failed");
-	if (pthread_attr_setstacksize (&attrib, 0x100000) == -1)
+	if (pthread_attr_setstacksize (&attrib, 0x1000000) == -1)
 		Error ("pthread_attr_setstacksize failed");
 
 	for (i=0 ; i<numthreads ; i++)

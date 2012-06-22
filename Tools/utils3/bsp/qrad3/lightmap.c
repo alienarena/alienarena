@@ -461,7 +461,7 @@ void SampleTriangulation (vec3_t point, triangulation_t *trian, triangle_t **las
 */
 
 
-#define	SINGLEMAP	(64*64*4)
+#define	SINGLEMAP	(256*256*4)
 
 typedef struct
 {
@@ -1479,10 +1479,16 @@ void FinalLightFace (int facenum)
 	f->lightofs = lightdatasize;
 	lightdatasize += fl->numstyles*(fl->numsamples*3);
 
-	if (refine_amt == 0 && lightdatasize > MAX_MAP_LIGHTING)
+	if (refine_setting == 0 && lightdatasize > MAX_MAP_LIGHTING)
+	{
+	    printf ("face %d of %d\n", facenum, numfaces);
 		Error ("MAX_MAP_LIGHTING");
-	if (refine_amt > 1 && lightdatasize > MAX_OVERRIDE_LIGHTING)
+	}
+	if (refine_setting > 0 && lightdatasize > MAX_OVERRIDE_LIGHTING)
+	{
+	    printf ("face %d of %d\n", facenum, numfaces);
 		Error ("MAX_OVERRIDE_LIGHTING");
+	}
 	ThreadUnlock ();
 
 	f->styles[0] = 0;
