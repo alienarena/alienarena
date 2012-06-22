@@ -467,7 +467,7 @@ typedef struct
 
 // FOR REFINE
 
-#define MAX_OVERRIDE_LIGHTING	0xC00000	//2048*2048*3
+#define MAX_OVERRIDE_LIGHTING	0x6000000	//2048*2048*8*3
 
 #define IDLIGHTMAPHEADER	(('P'<<24)+('M'<<16)+('T'<<8)+'L')
 		// little-endian "LTMP" for "lightmap"
