@@ -131,8 +131,8 @@ There is a long list of credits - ALIEN ARENA is greatly indebted to the followi
 
 Design:  John Diamond with input from the community at large.
 Programming:  John Diamond, Jim Bower, Dave Stewart, Emmanuel Benoit, Max Eliaser, Charles Hudson, Lee Salzman, Victor Luchits, Shane Bayer, Jan Rafaj, Tony Jackson, Kyle Hunter, Andres Mejia
-Models and skins:  John Diamond, Alex Perez, Shawn Keeth
-Maps:  John Diamond, Dennis "xEMPx" Zedlach, Charles Hudson
+Models and skins:  John Diamond, Alex Perez, Shawn Keeth, Franc Cassar
+Maps:  John Diamond, Dennis "xEMPx" Zedlach, Charles Hudson, Torben Fahrnbach
 Textures and Artwork:  John Diamond, Dennis "xEMPx" Zedlach, Enki, Adam Saizlai, Yves Allaire
 Sounds:  John Diamond, Sound Rangers, Jon Ward, Jim Bower
 Music:  Paul Joyce, Arteria Games, Divinity, Whitelipper, and SoundRangers

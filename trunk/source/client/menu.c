@@ -2576,6 +2576,7 @@ static const char *idcredits[] =
 	"John Diamond",
 	"Dennis -xEMPx- Zedlach",
 	"Charles Hudson",
+	"Torben Fahrnbach",
 	"",
 	"+SOUND EFFECTS AND MUSIC",
 	"Music/FX Composed and Produced by",
