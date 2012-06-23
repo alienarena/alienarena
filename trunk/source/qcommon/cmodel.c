@@ -548,7 +548,15 @@ void CMod_LoadVisibility (lump_t *l)
 	for (i=0 ; i<map_vis->numclusters ; i++)
 	{
 		map_vis->bitofs[i][0] = LittleLong (map_vis->bitofs[i][0]);
+		if (map_vis->bitofs[i][0] < 0 || map_vis->bitofs[i][0] >= numvisibility)
+			Com_Error (	ERR_DROP, 
+				"Map contains invalid PVS bit offsets!\n"
+				"The file is likely corrupted, please obtain a fresh copy.");
 		map_vis->bitofs[i][1] = LittleLong (map_vis->bitofs[i][1]);
+		if (map_vis->bitofs[i][1] < 0 || map_vis->bitofs[i][1] >= numvisibility)
+			Com_Error (	ERR_DROP, 
+				"Map contains invalid PHS bit offsets!\n"
+				"The file is likely corrupted, please obtain a fresh copy.");
 	}
 }
 

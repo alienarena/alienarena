@@ -1067,7 +1067,9 @@ Mod_LoadFaces
 =================
 */
 
-void Mod_LoadFaces (lump_t *l)
+// We need access to the lighting lump so we can check the bounds of lightmap
+// offsets. Otherwise, crafted or corrupted BSPs could crash the client.
+void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 {
 	dface_t		*in;
 	msurface_t 	*out;
@@ -1119,7 +1121,7 @@ void Mod_LoadFaces (lump_t *l)
 			out->styles[i] = in->styles[i];
 		i = LittleLong(in->lightofs);
 
-		if (i == -1)
+		if (i < 0 || i >= lighting->filelen)
 			out->samples = NULL;
 		else
 			out->samples = loadmodel->lightdata + i;
@@ -1454,7 +1456,7 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 	Mod_LoadLighting (&header->lumps[LUMP_LIGHTING]);
 	Mod_LoadPlanes (&header->lumps[LUMP_PLANES]);
 	Mod_LoadTexinfo (&header->lumps[LUMP_TEXINFO]);
-	Mod_LoadFaces (&header->lumps[LUMP_FACES]);
+	Mod_LoadFaces (&header->lumps[LUMP_FACES], &header->lumps[LUMP_LIGHTING]);
 	Mod_LoadMarksurfaces (&header->lumps[LUMP_LEAFFACES]);
 	Mod_LoadVisibility (&header->lumps[LUMP_VISIBILITY]);
 	Mod_LoadLeafs (&header->lumps[LUMP_LEAFS]);
