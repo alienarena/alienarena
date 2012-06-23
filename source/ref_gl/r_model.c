@@ -863,7 +863,7 @@ void Mod_LoadTexinfo (lump_t *l)
 		out->value = LittleLong (in->value);
 		out->flags = LittleLong (in->flags);
 		next = LittleLong (in->nexttexinfo);
-		if (next > 0)
+		if (next > 0 && next < loadmodel->numtexinfo)
 			out->next = loadmodel->texinfo + next;
 		else
 		    out->next = NULL;
@@ -946,9 +946,17 @@ void CalcSurfaceExtents (msurface_t *s)
 
 	tex = s->texinfo;
 
+	if (s->firstedge < 0 || s->firstedge+s->numedges-1 >= loadmodel->numsurfedges)
+		Com_Error (ERR_DROP,
+			"Map contains invalid value for s->firstedge!\n"
+			"The file is likely corrupted, please obtain a fresh copy.");
 	for (i=0 ; i<s->numedges ; i++)
 	{
 		e = loadmodel->surfedges[s->firstedge+i];
+		if (abs(e) > loadmodel->numvertexes)
+			Com_Error (ERR_DROP,	
+				"Map contains invalid vertex offsets!\n"
+				"The file is likely corrupted, please obtain a fresh copy.");
 		if (e >= 0)
 			v = &loadmodel->vertexes[loadmodel->edges[e].v[0]];
 		else
@@ -1106,11 +1114,17 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 		if (side)
 			out->flags |= SURF_PLANEBACK;
 
+		if (planenum < 0 || planenum >= loadmodel->numplanes)
+			Com_Error (ERR_DROP, 
+				"Map has invalid plane offsets!\n"
+				"The file is likely corrupted, please obtain a fresh copy.");
 		out->plane = loadmodel->planes + planenum;
 
 		ti = LittleShort (in->texinfo);
 		if (ti < 0 || ti >= loadmodel->numtexinfo)
-			Com_Error (ERR_DROP, "MOD_LoadBmodel: bad texinfo number");
+			Com_Error (ERR_DROP, 
+				"Map has invalid texinfo offsets!\n"
+				"The file is likely corrupted, please obtain a fresh copy.");
 		out->texinfo = loadmodel->texinfo + ti;
 
 		CalcSurfaceExtents (out);
@@ -1231,6 +1245,10 @@ void Mod_LoadNodes (lump_t *l)
 		}
 
 		p = LittleLong(in->planenum);
+		if (p < 0 || p >= loadmodel->numplanes)
+			Com_Error (ERR_DROP,
+				"Map has invalid plane offsets!\n"
+				"The file is likely corrupted, please obtain a fresh copy.");
 		out->plane = loadmodel->planes + p;
 
 		out->firstsurface = LittleShort (in->firstface);
@@ -1241,9 +1259,21 @@ void Mod_LoadNodes (lump_t *l)
 		{
 			p = LittleLong (in->children[j]);
 			if (p >= 0)
+			{
+				if (p >= loadmodel->numnodes)
+					Com_Error (ERR_DROP, 
+						"Map file has invalid node offsets!\n"
+						"The file is likely corrupted, please obtain a fresh copy.");
 				out->children[j] = loadmodel->nodes + p;
+			}
 			else
+			{
+				if (-1-p >= loadmodel->numleafs)
+					Com_Error (ERR_DROP,
+						"Map file has invalid leaf offsets!\n"
+						"The file is likely corrupted, please obtain a fresh copy.");
 				out->children[j] = (mnode_t *)(loadmodel->leafs + (-1 - p));
+			}
 		}
 
 	}
@@ -1288,6 +1318,12 @@ void Mod_LoadLeafs (lump_t *l)
 		out->firstmarksurface = loadmodel->marksurfaces +
 			LittleShort(in->firstleafface);
 		out->nummarksurfaces = LittleShort(in->numleaffaces);
+		if (out->firstmarksurface < loadmodel->marksurfaces || 
+			out->nummarksurfaces < 0 ||
+			out->firstmarksurface+out->nummarksurfaces > loadmodel->nummarksurfaces)
+			Com_Error (ERR_DROP,
+				"Map file has invalid leaf surface offsets!\n"
+				"The file is likely corrupted, please obtain a fresh copy.");
 
 		// gl underwater warp
 		if (out->contents & MASK_WATER )
