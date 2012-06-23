@@ -953,14 +953,19 @@ void CalcSurfaceExtents (msurface_t *s)
 	for (i=0 ; i<s->numedges ; i++)
 	{
 		e = loadmodel->surfedges[s->firstedge+i];
-		if (abs(e) > loadmodel->numvertexes)
+		if (abs(e) > loadmodel->numedges)
+			Com_Error (ERR_DROP,	
+				"Map contains invalid edge offsets!\n"
+				"The file is likely corrupted, please obtain a fresh copy.");
+		if (e >= 0)
+			vnum = loadmodel->edges[e].v[0];
+		else
+			vnum = loadmodel->edges[-e].v[1];
+		if (vnum < 0 || vnum >= loadmodel->numvertexes)
 			Com_Error (ERR_DROP,	
 				"Map contains invalid vertex offsets!\n"
 				"The file is likely corrupted, please obtain a fresh copy.");
-		if (e >= 0)
-			v = &loadmodel->vertexes[loadmodel->edges[e].v[0]];
-		else
-			v = &loadmodel->vertexes[loadmodel->edges[-e].v[1]];
+		v = &loadmodel->vertexes[vnum];
 
 		for (j=0 ; j<2 ; j++)
 		{
@@ -1320,7 +1325,7 @@ void Mod_LoadLeafs (lump_t *l)
 		out->nummarksurfaces = LittleShort(in->numleaffaces);
 		if (out->firstmarksurface < loadmodel->marksurfaces || 
 			out->nummarksurfaces < 0 ||
-			out->firstmarksurface+out->nummarksurfaces > loadmodel->nummarksurfaces)
+			LittleShort(in->numleaffaces) > loadmodel->nummarksurfaces)
 			Com_Error (ERR_DROP,
 				"Map file has invalid leaf surface offsets!\n"
 				"The file is likely corrupted, please obtain a fresh copy.");
