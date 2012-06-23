@@ -267,6 +267,8 @@ typedef struct
 	lump_t		lumps[HEADER_LUMPS];
 } dheader_t;
 
+qboolean checkLumps (lump_t *l, int *lump_order, void *file_base, int num_lumps, int file_len);
+
 typedef struct
 {
 	float		mins[3], maxs[3];
