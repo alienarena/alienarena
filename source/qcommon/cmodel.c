@@ -133,6 +133,33 @@ int		c_traces, c_brush_traces;
 
 byte	*cmod_base;
 
+//Performs a sanity check on the BSP file, making sure all the lumps are nice
+//and shipshape and won't lead off a cliff somewhere. This does mean that the 
+//BSP file format has been made less extensible, but we've tended to add more
+//data using separate files instead of adding lumps to the BSP, so I think we
+//can live with that.
+qboolean checkLumps (lump_t *l, int *lump_order, void *file_base, int num_lumps, int file_len)
+{
+	int i = 0;
+	lump_t *in;
+	void *lumpdata_base;
+	void *lumpdata_next = file_base+2*sizeof(int)+sizeof(lump_t)*num_lumps;
+	void *file_end = file_base + file_len;
+	for (i = 0; i < num_lumps; i++)
+	{
+		in = l+lump_order[i];
+		lumpdata_base = file_base+in->fileofs;
+		if (lumpdata_base != lumpdata_next)
+			return true;
+		lumpdata_next = lumpdata_base+((in->filelen+3)&~3);
+		if (lumpdata_next < lumpdata_base)
+			return true;
+	}
+	if (lumpdata_next != file_end)
+		return true;
+	return false;
+}
+
 /*
 =================
 CMod_LoadSubmodels
@@ -578,6 +605,15 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 	dheader_t		header;
 	int				length;
 	static unsigned	last_checksum;
+	int				bsp_lump_order[HEADER_LUMPS] = 
+	{
+		LUMP_PLANES, LUMP_LEAFS, LUMP_VERTEXES, LUMP_NODES, 
+		LUMP_TEXINFO, LUMP_FACES, LUMP_BRUSHES,
+		LUMP_BRUSHSIDES, LUMP_LEAFFACES, LUMP_LEAFBRUSHES,
+		LUMP_SURFEDGES, LUMP_EDGES, LUMP_MODELS, LUMP_AREAS,
+		LUMP_AREAPORTALS, LUMP_LIGHTING, LUMP_VISIBILITY,
+		LUMP_ENTITIES, LUMP_POP
+	};
 
 	map_noareas = Cvar_Get ("map_noareas", "0", 0);
 
@@ -631,6 +667,10 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 		, name, header.version, BSPVERSION);
 
 	cmod_base = (byte *)buf;
+	
+	if (checkLumps(header.lumps, bsp_lump_order, cmod_base, HEADER_LUMPS, length))
+		Com_Error (ERR_DROP,"CMod_LoadBrushModel: lumps in %s don't add up right!\n"
+							"The file is likely corrupt, please obtain a fresh copy.",name);
 
 	// load into heap
 	CMod_LoadSurfaces (&header.lumps[LUMP_TEXINFO]);
