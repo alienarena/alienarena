@@ -81,7 +81,7 @@ void GL_UpdateSwapInterval( void );
 
 extern	float	gldepthmin, gldepthmax;
 
-#define	MAX_LBM_HEIGHT		512
+#define	MAX_LBM_HEIGHT		1024
 
 #define BACKFACE_EPSILON	0.01
 
