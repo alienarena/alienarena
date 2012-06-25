@@ -860,7 +860,7 @@ rserr_t GLimp_SetMode( unsigned *pwidth, unsigned *pheight, int mode, qboolean f
 	if (sizehints)
 		XFree(sizehints);
 
-	XStoreName(dpy, win, "CRX");
+	XStoreName(dpy, win, "Alien Arena");
 
 	wmDeleteWindow = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	XSetWMProtocols(dpy, win, &wmDeleteWindow, 1);

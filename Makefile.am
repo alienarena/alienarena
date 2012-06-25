@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-SUBDIRS = source
+SUBDIRS = source 
 
 ACLOCAL_AMFLAGS = -I m4 
 
@@ -30,6 +30,9 @@ dist_doc_DATA = \
 	README
 endif
 
+# Alien Arena icon
+dist_icon_DATA = alienarena.png
+
 # FUSE game server browser and Server management scripts
 # COPYING and INSTALL are GNU/FSF-supplied documents.
 EXTRA_DIST = \
@@ -40,6 +43,8 @@ EXTRA_DIST = \
 
 # remove svn directories from distribution staging area after creating
 #  distribution in staging area and before running archiver
+# but, it is probably a better idea to export the repository to the
+#  staging area since export does not include the .svn parts
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 
@@ -59,15 +64,15 @@ dist-hook:
 install-alternate:
 if ALTERNATE_INSTALL
 if BUILD_CLIENT
-	cp $(top_builddir)/source/crx@EXEEXT@ $(srcdir)/crx@EXEEXT@
+	cp $(top_builddir)/source/alienarena@EXEEXT@ $(srcdir)/alienarena@EXEEXT@
 if REMOVE_SYMBOLS
-	strip $(srcdir)/crx@EXEEXT@
+	strip $(srcdir)/alienarena@EXEEXT@
 endif
 endif	
 if BUILD_UNIX	
-	cp $(top_builddir)/source/crx-ded $(srcdir)/crx-ded
+	cp $(top_builddir)/source/alienarena-ded $(srcdir)/alienarena-ded
 if REMOVE_SYMBOLS
-	strip $(srcdir)/crx-ded
+	strip $(srcdir)/alienarena-ded
 endif
 endif
 else
@@ -88,9 +93,4 @@ if ALTERNATE_INSTALL
 	@echo "Alternate install. Manual uninstall required!!!"
 	exit 1
 endif
-
-#
-# game data for distribution package
-# 
-include game_data.am
 
