@@ -49,11 +49,11 @@ AM_CPPFLAGS += -DDATADIR='"$(pkgdatadir)"'
 endif
 
 # Dedicated Server libraries and flags
-crx_ded_LDADD = libgame.a
-crx_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
+alienarena_ded_LDADD = libgame.a
+alienarena_ded_CPPFLAGS = $(AM_CPPFLAGS) -DDEDICATED_ONLY
 
 # Client libraries and flags
-crx_CPPFLAGS = $(AM_CPPFLAGS) \
+alienarena_CPPFLAGS = $(AM_CPPFLAGS) \
 	$(PTHREAD_CFLAGS) \
 	$(X11_CLAGS) \
 	$(DEPS_CFLAGS) \
@@ -63,9 +63,9 @@ crx_CPPFLAGS = $(AM_CPPFLAGS) \
 
 if USE_SYSTEM_LIBODE
 #
-# crx with system libode
+# alienarena with system libode
 #
-crx_LDADD = libgame.a \
+alienarena_LDADD = libgame.a \
 	$(PTHREAD_LIBS) \
 	$(X11_LIBS) \
 	$(DEPS_LIBS) \
@@ -75,9 +75,9 @@ crx_LDADD = libgame.a \
 
 else
 #
-# crx with integrated libode
+# alienarena with integrated libode
 #
-crx_LDADD = libgame.a \
+alienarena_LDADD = libgame.a \
 	libode.a \
 	$(PTHREAD_LIBS) \
 	$(X11_LIBS) \
@@ -102,22 +102,22 @@ if BUILD_WIN32
 
 # On Win32, always build the client
 # TODO: maybe fixup libs, cppflags hacks
-bin_PROGRAMS = crx
-crx_LDADD += $(WIN32_LIBS)
-crx_CPPFLAGS += -DCURL_STATICLIB -DNDEBUG
+bin_PROGRAMS = alienarena
+alienarena_LDADD += $(WIN32_LIBS)
+alienarena_CPPFLAGS += -DCURL_STATICLIB -DNDEBUG
 
 else
 
 # On Unix, always build the server, and the client if BUILD_CLIENT is enabled
-bin_PROGRAMS = crx-ded
+bin_PROGRAMS = alienarena-ded
 if BUILD_CLIENT
-bin_PROGRAMS += crx
+bin_PROGRAMS += alienarena
 endif
 
 endif
 
 # common client sources
-crx_SOURCES = \
+alienarena_SOURCES = \
 	client/anorms.h \
 	client/cl_ents.c \
 	client/cl_fx.c \
@@ -225,7 +225,7 @@ crx_SOURCES = \
 
 # Unix Client sources
 if BUILD_UNIX
-crx_SOURCES += \
+alienarena_SOURCES += \
 	unix/gl_glx.c \
 	unix/glw_unix.h \
 	unix/net_udp.c \
@@ -241,7 +241,7 @@ endif
 
 # Win32 MinGW Client sources
 if BUILD_WIN32
-crx_SOURCES += \
+alienarena_SOURCES += \
 	win32/conproc.c \
 	win32/conproc.h \
 	win32/glw_imp.c \
@@ -258,7 +258,7 @@ crx_SOURCES += \
 endif	
 
 # Dedicated Server sources (Unix only)
-crx_ded_SOURCES = \
+alienarena_ded_SOURCES = \
 	client/anorms.h \
 	game/game.h \
 	game/q_shared.c \

@@ -26,7 +26,7 @@
 #  Mac OS X / Darwin using X11 - Experimental
 
 AC_PREREQ(2.65)
-AC_INIT([alienarena],[7.54],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.60],[alienrace@comcast.net],[alienarena])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -221,7 +221,7 @@ AC_SUBST([icondir], [${with_icondir}])
 #  normally this is a hidden subdirectory
 #  default is .codered
 #  can be overridden by environment variable, COR_GAME
-# 
+#
 # (These also are #defined in qcommon.h, but changing them is not a good idea
 # BASE_GAMEDATA  "data1", GAME_GAMEDATA  "arena", BOT_GAMEDATA   "botinfo")
 #
@@ -254,7 +254,7 @@ dnl start of client-only library requirements
 dnl
 AM_COND_IF([BUILD_CLIENT],
 	[
-		
+
 	AX_PTHREAD([],[AC_MSG_ERROR(["Required pthreads support not found."])])
 #
 # This might be a workaround for DSO missing pthread library error
@@ -355,7 +355,7 @@ AM_COND_IF([BUILD_CLIENT],
 	AM_COND_IF([BUILD_WIN32],
 		[ win32_syslibs="-lmingw32 -lwinmm -lwsock32 -lws2_32 -lgdi32 -luser32"])
 	AC_SUBST([WIN32_LIBS],[$win32_syslibs])
-	
+
 
 ])
 
@@ -380,7 +380,7 @@ AC_CHECK_HEADERS(
 AC_CHECK_HEADERS(
 	[arpa/inet.h netinet/in.h sys/ioctl.h sys/socket.h netdb.h termios.h sys/select.h]
 	[],[],[])
-	
+
 AC_CHECK_HEADERS(
 	[dlfcn.h fcntl.h malloc.h string.h sys/param.h sys/stat.h]
 	[],[],[])
@@ -412,7 +412,7 @@ AM_COND_IF([BUILD_CLIENT],[
 		[AC_MSG_ERROR("Required OpenAL header file not found.")])
 
 	AC_CHECK_HEADERS([GL/gl.h],,
-	      [AC_MSG_ERROR("Required OpenGL header files not found.")])
+		[AC_MSG_ERROR("Required OpenGL header files not found.")])
 	AM_COND_IF([BUILD_UNIX],
 		[AC_CHECK_HEADERS([GL/glx.h],,
 			[AC_MSG_ERROR("Required OpenGL header files not found.")
@@ -628,35 +628,35 @@ AS_IF([test "x$hide_status" = "xno"],[
 	AS_ECHO([" Alternate install: ..... ${alternate_install}"])
 
 	AM_COND_IF([ALTERNATE_INSTALL],[
-        AM_COND_IF([BUILD_CLIENT],[
-            AS_ECHO([" System ODE library ..... ${system_ode}"])
-            AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
-            AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
-            ])
+		AM_COND_IF([BUILD_CLIENT],[
+			AS_ECHO([" System ODE library ..... ${system_ode}"])
+			AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
+			AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+			])
 		AS_ECHO([" Shared Data ............ ${srcdir}"])
 		AS_ECHO(["   note: with alternate install, data is located relative to CWD."])
 		AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"])
 		],[
 dnl
-dnl try to generate the full path for automake pkgdatadir 
+dnl try to generate the full path for automake pkgdatadir
 dnl  which determines DATADIR that locates data1, arena, and botinfo
-dnl		
+dnl
 		game_data=${datadir}/${PACKAGE}
 		game_data_a=`eval "echo ${game_data}"`
 		game_data=`eval "echo ${game_data_a}"`
-        AM_COND_IF([BUILD_CLIENT],[
-            AS_ECHO([" System ODE library ..... ${system_ode}"])
-            AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
-            AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
-            AS_IF([ test x"${unix_host}" = xdarwin ],[
-                AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
-            ])
-        ])
+		AM_COND_IF([BUILD_CLIENT],[
+			AS_ECHO([" System ODE library ..... ${system_ode}"])
+			AS_ECHO([" XF86 DGA support: ...... ${have_Xxf86dga}"])
+			AS_ECHO([" XF86 VidMode support: .. ${have_Xxf86vm}"])
+			AS_IF([ test x"${unix_host}" = xdarwin ],[
+				AS_ECHO([" GL_LIBDIR: ............. ${gl_dlopen_path}"])
+			])
+		])
 		AS_ECHO([" Prefix ................. ${prefix}"])
 		AS_ECHO([" Shared RO Data: ........ ${game_data}"])
-		AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"]) 
+		AS_ECHO([" User Home R/W Data ..... ${alienarena_homedir}"])
 	])
-		
+
 	AS_IF([ test "x$debug" = "xyes" ],[
 		AS_ECHO(["- DEBUGGING OPTIONS ------------------------"])
 		AS_ECHO(["   All compiler warnings: .... ${gcc_whining}"])
@@ -674,4 +674,3 @@ dnl
 
 	AS_ECHO(["--------------------------------------------"])
 ])
-

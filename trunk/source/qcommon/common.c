@@ -1655,7 +1655,7 @@ void Qcommon_Init (int argc, char **argv)
 	if (!dedicated->value)
 		S_StartMenuMusic();
 #endif
-	Com_Printf ("======== CRX Initialized ========\n\n");
+	Com_Printf ("======== Alien Arena Initialized ========\n\n");
 }
 
 /*
