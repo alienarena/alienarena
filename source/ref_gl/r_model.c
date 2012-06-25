@@ -1321,7 +1321,7 @@ void Mod_LoadLeafs (lump_t *l)
 		out->area = LittleShort(in->area);
 
 		out->firstmarksurface = loadmodel->marksurfaces +
-			LittleShort(in->firstleafface);
+			(unsigned short)(LittleShort(in->firstleafface));
 		out->nummarksurfaces = LittleShort(in->numleaffaces);
 		if (out->firstmarksurface < loadmodel->marksurfaces || 
 			out->nummarksurfaces < 0 ||
