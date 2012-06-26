@@ -24262,12 +24262,12 @@
 // entity 381
 {
 "classname" "item_flag_red"
-"origin" "-128 -168 0"
+"origin" "-128.000000 -168.000000 24.000000"
 }
 // entity 382
 {
 "classname" "item_flag_blue"
-"origin" "3584 -168 0"
+"origin" "3584.000000 -168.000000 24.000000"
 }
 // entity 383
 {

@@ -23073,7 +23073,7 @@
 "classname" "trigger_monsterjump"
 "speed" "100"
 "height" "800"
-"angle" "270"
+"angle" "90"
 // brush 0
 {
 ( 3392 1088 -256 ) ( 3520 1088 -256 ) ( 3520 1152 -256 ) arena8/metal1 0 0 0 1 1 0 0 0
