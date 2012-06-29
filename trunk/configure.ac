@@ -26,7 +26,7 @@
 #  Mac OS X / Darwin using X11 - Experimental
 
 AC_PREREQ(2.65)
-AC_INIT([alienarena],[7.60],[alienrace@comcast.net],[alienarena])
+AC_INIT([alienarena],[7.60],[alienrace@comcast.net])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -219,7 +219,7 @@ AC_SUBST([icondir], [${with_icondir}])
 #
 # User writable data and configuration subdirectory in $HOME
 #  normally this is a hidden subdirectory
-#  default is .codered
+#  default is .codered. but distros modify this
 #  can be overridden by environment variable, COR_GAME
 #
 # (These also are #defined in qcommon.h, but changing them is not a good idea
@@ -273,6 +273,8 @@ AM_COND_IF([BUILD_CLIENT],
 
 		dnl
 		dnl XF86 VidMode extension
+		dnl  Note: supports full-screen display. if it is not installed, the
+		dnl   build will succeed but full-screen will not work. 
 		dnl
 		dnl If no option is specified, then check for the library and act accordingly.
 		dnl If "--without-xf86vm" is specified, do not check, and disable the library.
@@ -295,17 +297,21 @@ AM_COND_IF([BUILD_CLIENT],
 			])
 		])
 
+
+
 		dnl
 		dnl XF86 DGA extension
+		dnl  Note: this is changed to default to "without", 
+		dnl    so "--with-xf86dga" must be specified to use this library
 		dnl
-		dnl If no option is specified, then check for the library and act accordingly.
+		dnl If no option is specified, disable the library.
 		dnl If "--without-xf86dga" is specified, do not check, and disable the library.
 		dnl If "--with-xf86dga" is specified, check and bail out if it cannot be found.
 		dnl
 		AC_ARG_WITH([xf86dga],
-			[AS_HELP_STRING([--with(out)-xf86dga],[include XF86 DGA support (default: check)])],
+			[AS_HELP_STRING([--with(out)-xf86dga],[include XF86 DGA support (default: without)])],
 			[],
-			[with_xf86dga=check])
+			[with_xf86dga=no])
 		have_Xxf86dga=no
 		AS_IF([ test "x$with_xf86dga" != "xno" ],[
 			PKG_CHECK_MODULES([XXF86DGA],[xxf86dga],[
@@ -641,7 +647,7 @@ dnl
 dnl try to generate the full path for automake pkgdatadir
 dnl  which determines DATADIR that locates data1, arena, and botinfo
 dnl
-		game_data=${datadir}/${PACKAGE}
+		game_data=${datadir}/${PACKAGE_NAME}
 		game_data_a=`eval "echo ${game_data}"`
 		game_data=`eval "echo ${game_data_a}"`
 		AM_COND_IF([BUILD_CLIENT],[
