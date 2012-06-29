@@ -635,6 +635,9 @@ By Robert 'Heffo' Heffernan
 =================================================================
 */
 
+static JOCTET eoi_buffer[2] = {(JOCTET)0xFF, (JOCTET)JPEG_EOI};
+static qboolean crjpg_corrupted;
+
 void crjpg_null(j_decompress_ptr cinfo)
 {
 }
@@ -642,6 +645,9 @@ void crjpg_null(j_decompress_ptr cinfo)
 int crjpg_fill_input_buffer(j_decompress_ptr cinfo)
 {
     Com_Printf("Premature end of JPEG data\n");
+    cinfo->src->next_input_byte = eoi_buffer;
+    cinfo->src->bytes_in_buffer = 2;
+    crjpg_corrupted = true;
     return 1;
 }
 
@@ -652,7 +658,12 @@ void crjpg_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
     cinfo->src->bytes_in_buffer -= (size_t) num_bytes;
 
     if (cinfo->src->bytes_in_buffer < 0)
+    {
 		Com_Printf("Premature end of JPEG data\n");
+		cinfo->src->next_input_byte = eoi_buffer;
+    	cinfo->src->bytes_in_buffer = 2;
+    	crjpg_corrupted = true;
+    }
 }
 
 void crjpg_mem_src(j_decompress_ptr cinfo, byte *mem, int len)
@@ -682,6 +693,7 @@ void LoadJPG (char *filename, byte **pic, int *width, int *height)
 	byte							*rawdata, *rgbadata, *scanline, *p, *q;
 	int								rawsize, i;
 
+	crjpg_corrupted = false;
 	// Load JPEG file into memory
 	rawsize = FS_LoadFile(filename, (void **)&rawdata);
 	if (!rawdata)
@@ -770,6 +782,9 @@ void LoadJPG (char *filename, byte **pic, int *width, int *height)
 
 	// Free the raw data now that it's done being processed
     FS_FreeFile(rawdata);
+    
+    if (crjpg_corrupted)
+    	Com_Printf ("JPEG file %s is likely corrupted, please obtain a fresh copy.\n", filename);
 
 	// Return the 'rgbadata'
 	*pic = rgbadata;
