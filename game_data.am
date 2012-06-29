@@ -30,11 +30,15 @@
 # Game data for distribution package
 #
 
-dist_icon_DATA = alienarena.png
+arenadir=$(pkgdatadir)
 
-nobase_dist_pkgdata_DATA = \
+nobase_dist_arena_DATA = \
 	arena/motd.txt \
-	arena/server.cfg \
+	arena/server.cfg
+
+botinfodir = $(pkgdatadir)
+
+nobase_dist_botinfo_DATA = \
 	botinfo/^1Squirtney.cfg \
 	botinfo/^3Marty.cfg \
 	botinfo/^3Shploik!.cfg \
@@ -71,19 +75,16 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-annihilation.tmp \
 	botinfo/dm-atlantis2k8.tmp \
 	botinfo/dm-babel2k11.tmp \
-	botinfo/dm-bloodfactory.tmp \
 	botinfo/dm-bloodfactory2k12.tmp \
 	botinfo/dm-chasmatic2k9.tmp \
 	botinfo/dm-command2k9.tmp \
 	botinfo/dm-corrosion.tmp \
 	botinfo/dm-crucible2k12.tmp \
-	botinfo/dm-crucible2k8.tmp \
 	botinfo/dm-deathray.tmp \
 	botinfo/dm-deimos2k9.tmp \
 	botinfo/dm-dismal2k11.tmp \
 	botinfo/dm-downfall.tmp \
 	botinfo/dm-dynamo2k12.tmp \
-	botinfo/dm-dynamo2k8.tmp \
 	botinfo/dm-eternal.tmp \
 	botinfo/dm-europa2k8.tmp \
 	botinfo/dm-extermination.tmp \
@@ -93,7 +94,6 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/dm-impact.tmp \
 	botinfo/dm-invasion.tmp \
 	botinfo/dm-leviathan2k12.tmp \
-	botinfo/dm-leviathan2k8.tmp \
 	botinfo/dm-liberation.tmp \
 	botinfo/dm-neptune.tmp \
 	botinfo/dm-oblivion.tmp \
@@ -117,11 +117,12 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/ctf-cryogenic.nod \
 	botinfo/nav/ctf-europa2k8.nod \
 	botinfo/nav/ctf-frostbyte.nod \
+	botinfo/nav/ctf-goregrinder.nod \
 	botinfo/nav/ctf-invasion.nod \
 	botinfo/nav/ctf-oblivion.nod \
 	botinfo/nav/ctf-purgatory.nod \
 	botinfo/nav/ctf-titan2k8.nod \
-	botinfo/nav/ctf-vesuvius.nod \
+	botinfo/nav/ctf-vesuvius2k11.nod \
 	botinfo/nav/ctf-violator.nod \
 	botinfo/nav/ctf-zion2k9.nod \
 	botinfo/nav/db-chromium.nod \
@@ -130,19 +131,16 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-annihilation.nod \
 	botinfo/nav/dm-atlantis2k8.nod \
 	botinfo/nav/dm-babel2k11.nod \
-	botinfo/nav/dm-bloodfactory.nod \
 	botinfo/nav/dm-bloodfactory2k12.nod \
 	botinfo/nav/dm-chasmatic2k9.nod \
 	botinfo/nav/dm-command2k9.nod \
 	botinfo/nav/dm-corrosion.nod \
 	botinfo/nav/dm-crucible2k12.nod \
-	botinfo/nav/dm-crucible2k8.nod \
 	botinfo/nav/dm-deathray.nod \
 	botinfo/nav/dm-deimos2k9.nod \
 	botinfo/nav/dm-dismal2k11.nod \
 	botinfo/nav/dm-downfall.nod \
 	botinfo/nav/dm-dynamo2k12.nod \
-	botinfo/nav/dm-dynamo2k8.nod \
 	botinfo/nav/dm-eternal.nod \
 	botinfo/nav/dm-europa2k8.nod \
 	botinfo/nav/dm-extermination.nod \
@@ -152,7 +150,6 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/dm-impact.nod \
 	botinfo/nav/dm-invasion.nod \
 	botinfo/nav/dm-leviathan2k12.nod \
-	botinfo/nav/dm-leviathan2k8.nod \
 	botinfo/nav/dm-liberation.nod \
 	botinfo/nav/dm-neptune.nod \
 	botinfo/nav/dm-oblivion.nod \
@@ -170,11 +167,26 @@ nobase_dist_pkgdata_DATA = \
 	botinfo/nav/tca-cryogenic.nod \
 	botinfo/nav/tca-europa2k8.nod \
 	botinfo/nav/tca-frost.nod \
+	botinfo/nav/tca-purgatory.nod \
 	botinfo/nav/tca-titan2k8.nod \
 	botinfo/nav/tca-zion.nod \
-	botinfo/nav/tca-zion2k9.nod \
+	botinfo/nav/tca-zion2k9.nod
+	
+
+data1dir = $(pkgdatadir)
+
+nobase_dist_data1_DATA = \
 	data1/default.cfg \
-	data1/maps.lst \
+	data1/maps.lst
+
+# Note: partitioning the data files like this keeps the command line length
+#  in legal range for installation. However it does not work for creation
+#  of the distribution package. Hence, "nodist" is specified and data is
+#  copied to the distribution directory in "dist-hook:"
+#
+envdir = $(pkgdatadir)
+
+nobase_nodist_env_DATA = \
 	data1/env/alienbk.tga \
 	data1/env/aliendn.tga \
 	data1/env/alienft.tga \
@@ -228,7 +240,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/env/tekcityft.tga \
 	data1/env/tekcitylf.tga \
 	data1/env/tekcityrt.tga \
-	data1/env/tekcityup.tga \
+	data1/env/tekcityup.tga
+
+
+fontsdir = $(pkgdatadir)
+
+nobase_nodist_fonts_DATA = \
 	data1/fonts/agentred.ttf \
 	data1/fonts/bluehigd.ttf \
 	data1/fonts/chicomono.ttf \
@@ -238,7 +255,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/fonts/fat.tga \
 	data1/fonts/freemono.ttf \
 	data1/fonts/freesans.ttf \
-	data1/fonts/menu.tga \
+	data1/fonts/menu.tga
+
+
+gfxdir = $(pkgdatadir)
+
+nobase_nodist_gfx_DATA = \
 	data1/gfx/aaglow.tga \
 	data1/gfx/adrenalbase.tga \
 	data1/gfx/adrenalmask.tga \
@@ -261,6 +283,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/bluelightning.tga \
 	data1/gfx/bluemartianfx.tga \
 	data1/gfx/blueoverlordfx.tga \
+	data1/gfx/bluewarriorfx.tga \
 	data1/gfx/bubbles.tga \
 	data1/gfx/caustics.tga \
 	data1/gfx/chrome2.tga \
@@ -279,6 +302,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/defaultmartianfx.tga \
 	data1/gfx/defaultoverlordfx.tga \
 	data1/gfx/defaultslashbotfx.tga \
+	data1/gfx/defaultwarriorfx.tga \
 	data1/gfx/disruptorfx.tga \
 	data1/gfx/disruptormask.tga \
 	data1/gfx/distortwave.jpg \
@@ -365,13 +389,42 @@ nobase_dist_pkgdata_DATA = \
 	data1/gfx/sun.jpg \
 	data1/gfx/tekwallmask.tga \
 	data1/gfx/trim2mask.tga \
+	data1/gfx/tron2_commanderfx.tga \
+	data1/gfx/tron2_cyborgfx.tga \
+	data1/gfx/tron2_enforcerfx.tga \
+	data1/gfx/tron2_laurenfx.tga \
+	data1/gfx/tron2_martianfx.tga \
+	data1/gfx/tron2_overlordfx.tga \
+	data1/gfx/tron2_slashbotfx.tga \
+	data1/gfx/tron2_warriorfx.tga \
+	data1/gfx/tron3_commanderfx.tga \
+	data1/gfx/tron3_cyborgfx.tga \
+	data1/gfx/tron3_enforcerfx.tga \
+	data1/gfx/tron3_laurenfx.tga \
+	data1/gfx/tron3_martianfx.tga \
+	data1/gfx/tron3_overlordfx.tga \
+	data1/gfx/tron3_slashbotfx.tga \
+	data1/gfx/tron3_warriorfx.tga \
+	data1/gfx/tron_commanderfx.tga \
+	data1/gfx/tron_cyborgfx.tga \
+	data1/gfx/tron_enforcerfx.tga \
+	data1/gfx/tron_laurenfx.tga \
+	data1/gfx/tron_martianfx.tga \
+	data1/gfx/tron_overlordfx.tga \
+	data1/gfx/tron_slashbotfx.tga \
+	data1/gfx/tron_warriorfx.tga \
 	data1/gfx/vaporbase.tga \
 	data1/gfx/vapormask.tga \
 	data1/gfx/violator2fx.tga \
 	data1/gfx/violatorfx.tga \
 	data1/gfx/water/distort1.tga \
 	data1/gfx/water/normal1.tga \
-	data1/gfx/yellowline.tga \
+	data1/gfx/yellowline.tga
+
+
+levelshotsdir = $(pkgdatadir)
+
+nobase_nodist_levelshots_DATA = \
 	data1/levelshots/aoa-atlantis.jpg \
 	data1/levelshots/aoa-atlantis.txt \
 	data1/levelshots/aoa-corrosion.jpg \
@@ -394,6 +447,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/ctf-extermination.txt \
 	data1/levelshots/ctf-frostbyte.jpg \
 	data1/levelshots/ctf-frostbyte.txt \
+	data1/levelshots/ctf-goregrinder.jpg \
+	data1/levelshots/ctf-goregrinder.txt \
 	data1/levelshots/ctf-invasion.jpg \
 	data1/levelshots/ctf-invasion.txt \
 	data1/levelshots/ctf-oblivion.jpg \
@@ -402,8 +457,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/ctf-purgatory.txt \
 	data1/levelshots/ctf-titan2k8.jpg \
 	data1/levelshots/ctf-titan2k8.txt \
-	data1/levelshots/ctf-vesuvius.jpg \
-	data1/levelshots/ctf-vesuvius.txt \
+	data1/levelshots/ctf-vesuvius2k11.jpg \
+	data1/levelshots/ctf-vesuvius2k11.txt \
 	data1/levelshots/ctf-violator.jpg \
 	data1/levelshots/ctf-violator.txt \
 	data1/levelshots/ctf-zion2k9.jpg \
@@ -509,7 +564,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/levelshots/tca-zion.jpg \
 	data1/levelshots/tca-zion.txt \
 	data1/levelshots/tca-zion2k9.jpg \
-	data1/levelshots/tca-zion2k9.txt \
+	data1/levelshots/tca-zion2k9.txt
+
+
+mapsdir = $(pkgdatadir)
+
+nobase_nodist_maps_DATA = \
 	data1/maps/aoa-atlantis.bsp \
 	data1/maps/aoa-corrosion.bsp \
 	data1/maps/aoa-frost2k9.bsp \
@@ -518,14 +578,14 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/cp-ribeye.bsp \
 	data1/maps/ctf-corrosion.bsp \
 	data1/maps/ctf-cryogenic.bsp \
-	data1/maps/ctf-europa2k8.bsp \
 	data1/maps/ctf-extermination.bsp \
 	data1/maps/ctf-frostbyte.bsp \
+	data1/maps/ctf-goregrinder.bsp \
 	data1/maps/ctf-invasion.bsp \
 	data1/maps/ctf-oblivion.bsp \
 	data1/maps/ctf-purgatory.bsp \
 	data1/maps/ctf-titan2k8.bsp \
-	data1/maps/ctf-vesuvius.bsp \
+	data1/maps/ctf-vesuvius2k11.bsp \
 	data1/maps/ctf-violator.bsp \
 	data1/maps/ctf-zion2k9.bsp \
 	data1/maps/db-chromium.bsp \
@@ -534,21 +594,17 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-annihilation.bsp \
 	data1/maps/dm-atlantis2k8.bsp \
 	data1/maps/dm-babel2k11.bsp \
-	data1/maps/dm-bloodfactory.bsp \
 	data1/maps/dm-bloodfactory2k12.bsp \
 	data1/maps/dm-chasmatic2k9.bsp \
 	data1/maps/dm-command2k9.bsp \
 	data1/maps/dm-corrosion.bsp \
 	data1/maps/dm-crucible2k12.bsp \
-	data1/maps/dm-crucible2k8.bsp \
 	data1/maps/dm-deathray.bsp \
 	data1/maps/dm-deimos2k9.bsp \
 	data1/maps/dm-dismal2k11.bsp \
 	data1/maps/dm-downfall.bsp \
 	data1/maps/dm-dynamo2k12.bsp \
-	data1/maps/dm-dynamo2k8.bsp \
 	data1/maps/dm-eternal.bsp \
-	data1/maps/dm-europa2k8.bsp \
 	data1/maps/dm-extermination.bsp \
 	data1/maps/dm-furious2k8.bsp \
 	data1/maps/dm-goregrinder.bsp \
@@ -556,14 +612,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-impact.bsp \
 	data1/maps/dm-invasion.bsp \
 	data1/maps/dm-leviathan2k12.bsp \
-	data1/maps/dm-leviathan2k8.bsp \
 	data1/maps/dm-liberation.bsp \
 	data1/maps/dm-neptune.bsp \
 	data1/maps/dm-oblivion.bsp \
 	data1/maps/dm-omega2k8.bsp \
 	data1/maps/dm-purgatory.bsp \
 	data1/maps/dm-saucer2k9.bsp \
-	data1/maps/dm-titan2k8.bsp \
 	data1/maps/dm-turbo2k8.bsp \
 	data1/maps/dm-vesuvius2k11.bsp \
 	data1/maps/dm-violator2k11.bsp \
@@ -572,14 +626,11 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/dm-zion2k9.bsp \
 	data1/maps/tca-corrosion.bsp \
 	data1/maps/tca-cryogenic.bsp \
-	data1/maps/tca-europa2k8.bsp \
 	data1/maps/tca-extermination.bsp \
-	data1/maps/tca-frost.bsp \
 	data1/maps/tca-invasion \
 	data1/maps/tca-invasion.entdef \
 	data1/maps/tca-purgatory.bsp \
 	data1/maps/tca-titan2k8.bsp \
-	data1/maps/tca-zion.bsp \
 	data1/maps/tca-zion2k9.bsp \
 	data1/maps/meshes/arch_fx.tga \
 	data1/maps/meshes/arch.md2 \
@@ -765,6 +816,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/straightconduit.md2 \
 	data1/maps/meshes/tech/bigribtube.jpg \
 	data1/maps/meshes/tech/bigribtube_normal.jpg \
+	data1/maps/meshes/tech/blueribtube1.md2 \
+	data1/maps/meshes/tech/blueribtube_fx.tga \
+	data1/maps/meshes/tech/blueribtube.jpg \
 	data1/maps/meshes/tech/glasstube.md2 \
 	data1/maps/meshes/tech/railing2.md2 \
 	data1/maps/meshes/tech/railing3.md2 \
@@ -801,6 +855,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/meshes/tech/slimegen.jpg \
 	data1/maps/meshes/tech/slimegen.md2 \
 	data1/maps/meshes/tech/slimegen_fx.tga \
+	data1/maps/meshes/tech/slimegenblue_fx.tga \
+	data1/maps/meshes/tech/slimegenblue.jpg \
+	data1/maps/meshes/tech/slimegenblue.md2 \
 	data1/maps/meshes/tech/slimegen_normal.jpg \
 	data1/maps/meshes/tech/slimegenred_fx.tga \
 	data1/maps/meshes/tech/slimegenred.jpg \
@@ -895,7 +952,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/ctf-extermination.mus \
 	data1/maps/scripts/ctf-frostbyte.fog \
 	data1/maps/scripts/ctf-frostbyte.mus \
-	data1/maps/scripts/ctf-frost.fog \
+	data1/maps/scripts/ctf-goregrinder.fog \
+	data1/maps/scripts/ctf-goregrinder.mus \
 	data1/maps/scripts/ctf-invasion.fog \
 	data1/maps/scripts/ctf-invasion.mus \
 	data1/maps/scripts/ctf-oblivion.fog \
@@ -903,8 +961,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/ctf-purgatory.fog \
 	data1/maps/scripts/ctf-purgatory.mus \
 	data1/maps/scripts/ctf-titan2k8.mus \
-	data1/maps/scripts/ctf-vesuvius.fog \
-	data1/maps/scripts/ctf-vesuvius.mus \
+	data1/maps/scripts/ctf-vesuvius2k11.fog \
+	data1/maps/scripts/ctf-vesuvius2k11.mus \
 	data1/maps/scripts/ctf-violator.fog \
 	data1/maps/scripts/ctf-violator.mus \
 	data1/maps/scripts/ctf-zion2k9.mus \
@@ -917,8 +975,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-annihilation.mus \
 	data1/maps/scripts/dm-babel2k11.fog \
 	data1/maps/scripts/dm-babel2k11.mus \
-	data1/maps/scripts/dm-bloodfactory.fog \
-	data1/maps/scripts/dm-bloodfactory.mus \
 	data1/maps/scripts/dm-bloodfactory2k12.fog \
 	data1/maps/scripts/dm-bloodfactory2k12.mus \
 	data1/maps/scripts/dm-chasmatic2k9.fog \
@@ -929,8 +985,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-corrosion.mus \
 	data1/maps/scripts/dm-crucible2k12.fog \
 	data1/maps/scripts/dm-crucible2k12.mus \
-	data1/maps/scripts/dm-crucible2k8.fog \
-	data1/maps/scripts/dm-crucible2k8.mus \
 	data1/maps/scripts/dm-deathray.fog \
 	data1/maps/scripts/dm-deathray.mus \
 	data1/maps/scripts/dm-deimos2k9.mus \
@@ -940,11 +994,8 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-downfall.mus \
 	data1/maps/scripts/dm-dynamo2k12.fog \
 	data1/maps/scripts/dm-dynamo2k12.mus \
-	data1/maps/scripts/dm-dynamo2k8.fog \
-	data1/maps/scripts/dm-dynamo2k8.mus \
 	data1/maps/scripts/dm-eternal.fog \
 	data1/maps/scripts/dm-eternal.mus \
-	data1/maps/scripts/dm-europa2k8.mus \
 	data1/maps/scripts/dm-extermination.fog \
 	data1/maps/scripts/dm-extermination.mus \
 	data1/maps/scripts/dm-furious2k8.fog \
@@ -958,8 +1009,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-invasion.mus \
 	data1/maps/scripts/dm-leviathan2k12.fog \
 	data1/maps/scripts/dm-leviathan2k12.mus \
-	data1/maps/scripts/dm-leviathan2k8.fog \
-	data1/maps/scripts/dm-leviathan2k8.mus \
 	data1/maps/scripts/dm-liberation.fog \
 	data1/maps/scripts/dm-liberation.mus \
 	data1/maps/scripts/dm-neptune.mus \
@@ -970,7 +1019,6 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/dm-purgatory.mus \
 	data1/maps/scripts/dm-saucer2k9.fog \
 	data1/maps/scripts/dm-saucer2k9.mus \
-	data1/maps/scripts/dm-titan2k8.mus \
 	data1/maps/scripts/dm-turbo2k8.fog \
 	data1/maps/scripts/dm-turbo2k8.mus \
 	data1/maps/scripts/dm-vesuvius2k11.fog \
@@ -986,14 +1034,16 @@ nobase_dist_pkgdata_DATA = \
 	data1/maps/scripts/tca-corrosion.mus \
 	data1/maps/scripts/tca-cryogenic.fog \
 	data1/maps/scripts/tca-cryogenic.mus \
-	data1/maps/scripts/tca-europa2k8.mus \
 	data1/maps/scripts/tca-extermination.fog \
 	data1/maps/scripts/tca-extermination.mus \
 	data1/maps/scripts/tca-purgatory.fog \
 	data1/maps/scripts/tca-purgatory.mus \
-	data1/maps/scripts/tca-titan2k8.mus \
-	data1/maps/scripts/tca-zion.mus \
-	data1/maps/scripts/tca-zion2k9.mus \
+	data1/maps/scripts/tca-zion2k9.mus
+
+
+modelsdir = $(pkgdatadir)
+
+nobase_nodist_models_DATA = \
 	data1/models/cow/helmet.md2 \
 	data1/models/cow/skin.tga \
 	data1/models/cow/tris.md2 \
@@ -1071,8 +1121,15 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/misc/scope/cover.md2 \
 	data1/models/misc/scope/scope.tga \
 	data1/models/misc/scope/tris.md2 \
+	data1/models/misc/spiderpod/helmet.iqm \
+	data1/models/misc/spiderpod/helmet.md2 \
 	data1/models/misc/spiderpod/skin.tga \
+	data1/models/misc/spiderpod/spider_fx.tga \
+	data1/models/misc/spiderpod/spider.jpg \
+	data1/models/misc/spiderpod/spider_normal.jpg \
+	data1/models/misc/spiderpod/tris.iqm \
 	data1/models/misc/spiderpod/tris.md2 \
+	data1/models/misc/spiderpod/tris.skin \
 	data1/models/misc/tube/cover.md2 \
 	data1/models/misc/tube/tris.md2 \
 	data1/models/misc/tube/tube.tga \
@@ -1107,6 +1164,11 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/objects/laser/tris.md2 \
 	data1/models/objects/rocket/skin.tga \
 	data1/models/objects/rocket/tris.md2 \
+	data1/models/objects/spider/helmet.iqm \
+	data1/models/objects/spider/helmet.md2 \
+	data1/models/objects/spider/tris.iqm \
+	data1/models/objects/spider/tris.md2 \
+	data1/models/objects/spider/tris.skin \
 	data1/models/objects/spud/skin_fx2.tga \
 	data1/models/objects/spud/skin_fx.tga \
 	data1/models/objects/spud/skin_normal.jpg \
@@ -1161,7 +1223,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/models/weapons/v_violator/skin_normal.jpg \
 	data1/models/weapons/v_violator/tris.md2 \
 	data1/models/weapons/v_violator/violator.jpg \
-	data1/models/weapons/v_violator/violator_normal.jpg \
+	data1/models/weapons/v_violator/violator_normal.jpg
+
+
+particlesdir = $(pkgdatadir)
+
+nobase_nodist_particles_DATA = \
 	data1/particles/aflash.tga \
 	data1/particles/basic.tga \
 	data1/particles/beam.tga \
@@ -1202,7 +1269,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/particles/smoke.tga \
 	data1/particles/trash.tga \
 	data1/particles/voltage.tga \
-	data1/particles/watersplash.tga \
+	data1/particles/watersplash.tga
+
+
+picsdir = $(pkgdatadir)
+
+nobase_nodist_pics_DATA = \
 	data1/pics/a_bullets.tga \
 	data1/pics/a_cells.tga \
 	data1/pics/a_grenades.tga \
@@ -1365,6 +1437,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/menu_back.jpg \
 	data1/pics/m_irc.tga \
 	data1/pics/m_joinserver.tga \
+	data1/pics/m_main_credits.tga \
+	data1/pics/m_main_credits_fx.tga \
+	data1/pics/m_main_credits_sel.tga \
 	data1/pics/m_main_game_fx.tga \
 	data1/pics/m_main_game_sel.tga \
 	data1/pics/m_main_game.tga \
@@ -1458,7 +1533,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/pics/w_sshotgun.tga \
 	data1/pics/zoomscope1.tga \
 	data1/pics/zoomscope2.tga \
-	data1/pics/zoomscope3.tga \
+	data1/pics/zoomscope3.tga
+
+
+playersdir = $(pkgdatadir)
+
+nobase_nodist_players_DATA = \
 	data1/players/commander/blue_i.jpg \
 	data1/players/commander/blue.jpg \
 	data1/players/commander/bump1.wav \
@@ -1495,6 +1575,13 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/commander/tris.iqm \
 	data1/players/commander/tris.md2 \
 	data1/players/commander/tris.rgd \
+	data1/players/commander/tron2_i.jpg \
+	data1/players/commander/tron2.jpg \
+	data1/players/commander/tron3_i.jpg \
+	data1/players/commander/tron3.jpg \
+	data1/players/commander/tron_i.jpg \
+	data1/players/commander/tron.jpg \
+	data1/players/commander/tron_normal.tga \
 	data1/players/commander/w_bfg.iqm \
 	data1/players/commander/w_bfg.md2 \
 	data1/players/commander/w_bfg.skin \
@@ -1576,6 +1663,13 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/enforcer/tris.iqm \
 	data1/players/enforcer/tris.md2 \
 	data1/players/enforcer/tris.rgd \
+	data1/players/enforcer/tron2_i.jpg \
+	data1/players/enforcer/tron2.jpg \
+	data1/players/enforcer/tron3_i.jpg \
+	data1/players/enforcer/tron3.jpg \
+	data1/players/enforcer/tron_i.jpg \
+	data1/players/enforcer/tron.jpg \
+	data1/players/enforcer/tron_normal.tga \
 	data1/players/enforcer/usegibs \
 	data1/players/enforcer/w_bfg.iqm \
 	data1/players/enforcer/w_bfg.md2 \
@@ -1652,6 +1746,13 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/lauren/tris.iqm \
 	data1/players/lauren/tris.md2 \
 	data1/players/lauren/tris.rgd \
+	data1/players/lauren/tron2_i.jpg \
+	data1/players/lauren/tron2.jpg \
+	data1/players/lauren/tron3_i.jpg \
+	data1/players/lauren/tron3.jpg \
+	data1/players/lauren/tron_i.jpg \
+	data1/players/lauren/tron.jpg \
+	data1/players/lauren/tron_normal.tga \
 	data1/players/lauren/usegibs \
 	data1/players/lauren/w_bfg.iqm \
 	data1/players/lauren/w_bfg.md2 \
@@ -1728,6 +1829,13 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martiancyborg/tris.iqm \
 	data1/players/martiancyborg/tris.md2 \
 	data1/players/martiancyborg/tris.rgd \
+	data1/players/martiancyborg/tron2_i.jpg \
+	data1/players/martiancyborg/tron2.jpg \
+	data1/players/martiancyborg/tron3_i.jpg \
+	data1/players/martiancyborg/tron3.jpg \
+	data1/players/martiancyborg/tron_i.jpg \
+	data1/players/martiancyborg/tron.jpg \
+	data1/players/martiancyborg/tron_normal.tga \
 	data1/players/martiancyborg/w_bfg.iqm \
 	data1/players/martiancyborg/w_bfg.md2 \
 	data1/players/martiancyborg/w_bfg.skin \
@@ -1812,6 +1920,13 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martianenforcer/tris.iqm \
 	data1/players/martianenforcer/tris.md2 \
 	data1/players/martianenforcer/tris.rgd \
+	data1/players/martianenforcer/tron2_i.jpg \
+	data1/players/martianenforcer/tron2.jpg \
+	data1/players/martianenforcer/tron3_i.jpg \
+	data1/players/martianenforcer/tron3.jpg \
+	data1/players/martianenforcer/tron_i.jpg \
+	data1/players/martianenforcer/tron.jpg \
+	data1/players/martianenforcer/tron_normal.tga \
 	data1/players/martianenforcer/usegibs \
 	data1/players/martianenforcer/w_bfg.iqm \
 	data1/players/martianenforcer/w_bfg.md2 \
@@ -1888,6 +2003,13 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martianoverlord/tris.iqm \
 	data1/players/martianoverlord/tris.md2 \
 	data1/players/martianoverlord/tris.rgd \
+	data1/players/martianoverlord/tron2_i.jpg \
+	data1/players/martianoverlord/tron2.jpg \
+	data1/players/martianoverlord/tron3_i.jpg \
+	data1/players/martianoverlord/tron3.jpg \
+	data1/players/martianoverlord/tron_i.jpg \
+	data1/players/martianoverlord/tron.jpg \
+	data1/players/martianoverlord/tron_normal.tga \
 	data1/players/martianoverlord/w_bfg.iqm \
 	data1/players/martianoverlord/w_bfg.md2 \
 	data1/players/martianoverlord/w_bfg.skin \
@@ -1925,6 +2047,90 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/martianoverlord/w_violator.iqm \
 	data1/players/martianoverlord/w_violator.md2 \
 	data1/players/martianoverlord/w_violator.skin \
+	data1/players/martianwarrior/alien \
+	data1/players/martianwarrior/blue_i.jpg \
+	data1/players/martianwarrior/blue.jpg \
+	data1/players/martianwarrior/bump1.wav \
+	data1/players/martianwarrior/death1.wav \
+	data1/players/martianwarrior/death2.wav \
+	data1/players/martianwarrior/death3.wav \
+	data1/players/martianwarrior/death4.wav \
+	data1/players/martianwarrior/default_i.jpg \
+	data1/players/martianwarrior/default.jpg \
+	data1/players/martianwarrior/default_normal.tga \
+	data1/players/martianwarrior/drown1.wav \
+	data1/players/martianwarrior/fall1.wav \
+	data1/players/martianwarrior/fall2.wav \
+	data1/players/martianwarrior/gasp1.wav \
+	data1/players/martianwarrior/gasp2.wav \
+	data1/players/martianwarrior/gurp1.wav \
+	data1/players/martianwarrior/gurp2.wav \
+	data1/players/martianwarrior/helmet.iqm \
+	data1/players/martianwarrior/helmet.md2 \
+	data1/players/martianwarrior/jump1.wav \
+	data1/players/martianwarrior/lod1.iqm \
+	data1/players/martianwarrior/lod1.md2 \
+	data1/players/martianwarrior/lod1.rgd \
+	data1/players/martianwarrior/lod2.iqm \
+	data1/players/martianwarrior/lod2.md2 \
+	data1/players/martianwarrior/lod2.rgd \
+	data1/players/martianwarrior/pain100_1.wav \
+	data1/players/martianwarrior/pain100_2.wav \
+	data1/players/martianwarrior/pain25_1.wav \
+	data1/players/martianwarrior/pain25_2.wav \
+	data1/players/martianwarrior/pain50_1.wav \
+	data1/players/martianwarrior/pain50_2.wav \
+	data1/players/martianwarrior/pain75_1.wav \
+	data1/players/martianwarrior/pain75_2.wav \
+	data1/players/martianwarrior/red_i.jpg \
+	data1/players/martianwarrior/red.jpg \
+	data1/players/martianwarrior/tris.iqm \
+	data1/players/martianwarrior/tris.md2 \
+	data1/players/martianwarrior/tris.rgd \
+	data1/players/martianwarrior/tron2_i.jpg \
+	data1/players/martianwarrior/tron2.jpg \
+	data1/players/martianwarrior/tron3_i.jpg \
+	data1/players/martianwarrior/tron3.jpg \
+	data1/players/martianwarrior/tron_i.jpg \
+	data1/players/martianwarrior/tron.jpg \
+	data1/players/martianwarrior/tron_normal.tga \
+	data1/players/martianwarrior/w_bfg.iqm \
+	data1/players/martianwarrior/w_bfg.md2 \
+	data1/players/martianwarrior/w_bfg.skin \
+	data1/players/martianwarrior/w_blaster.iqm \
+	data1/players/martianwarrior/w_blaster.md2 \
+	data1/players/martianwarrior/w_blaster.skin \
+	data1/players/martianwarrior/w_chaingun.iqm \
+	data1/players/martianwarrior/w_chaingun.md2 \
+	data1/players/martianwarrior/w_chaingun.skin \
+	data1/players/martianwarrior/weapon.iqm \
+	data1/players/martianwarrior/weapon.jpg \
+	data1/players/martianwarrior/weapon.md2 \
+	data1/players/martianwarrior/weapon.skin \
+	data1/players/martianwarrior/w_hyperblaster.iqm \
+	data1/players/martianwarrior/w_hyperblaster.md2 \
+	data1/players/martianwarrior/w_hyperblaster.skin \
+	data1/players/martianwarrior/w_machinegun.iqm \
+	data1/players/martianwarrior/w_machinegun.md2 \
+	data1/players/martianwarrior/w_machinegun.skin \
+	data1/players/martianwarrior/w_minderaser.iqm \
+	data1/players/martianwarrior/w_minderaser.md2 \
+	data1/players/martianwarrior/w_minderaser.skin \
+	data1/players/martianwarrior/w_railgun.iqm \
+	data1/players/martianwarrior/w_railgun.md2 \
+	data1/players/martianwarrior/w_railgun.skin \
+	data1/players/martianwarrior/w_rlauncher.iqm \
+	data1/players/martianwarrior/w_rlauncher.md2 \
+	data1/players/martianwarrior/w_rlauncher.skin \
+	data1/players/martianwarrior/w_shotgun.iqm \
+	data1/players/martianwarrior/w_shotgun.md2 \
+	data1/players/martianwarrior/w_shotgun.skin \
+	data1/players/martianwarrior/w_sshotgun.iqm \
+	data1/players/martianwarrior/w_sshotgun.md2 \
+	data1/players/martianwarrior/w_sshotgun.skin \
+	data1/players/martianwarrior/w_violator.iqm \
+	data1/players/martianwarrior/w_violator.md2 \
+	data1/players/martianwarrior/w_violator.skin \
 	data1/players/slashbot/blue_i.jpg \
 	data1/players/slashbot/blue.jpg \
 	data1/players/slashbot/bump1.wav \
@@ -1959,6 +2165,13 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/slashbot/tris.iqm \
 	data1/players/slashbot/tris.md2 \
 	data1/players/slashbot/tris.rgd \
+	data1/players/slashbot/tron2_i.jpg \
+	data1/players/slashbot/tron2.jpg \
+	data1/players/slashbot/tron3_i.jpg \
+	data1/players/slashbot/tron3.jpg \
+	data1/players/slashbot/tron_i.jpg \
+	data1/players/slashbot/tron.jpg \
+	data1/players/slashbot/tron_normal.tga \
 	data1/players/slashbot/w_bfg.iqm \
 	data1/players/slashbot/w_bfg.md2 \
 	data1/players/slashbot/w_bfg.skin \
@@ -1995,7 +2208,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/players/slashbot/w_sshotgun.skin \
 	data1/players/slashbot/w_violator.iqm \
 	data1/players/slashbot/w_violator.md2 \
-	data1/players/slashbot/w_violator.skin \
+	data1/players/slashbot/w_violator.skin
+
+
+scriptsdir = $(pkgdatadir)
+
+nobase_nodist_scripts_DATA = \
 	data1/scripts/caustics.rscript \
 	data1/scripts/consoles.rscript \
 	data1/scripts/interactive/textures.rscript \
@@ -2007,14 +2225,14 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/cp-ribeye.rscript \
 	data1/scripts/maps/ctf-corrosion.rscript \
 	data1/scripts/maps/ctf-cryogenic.rscript \
-	data1/scripts/maps/ctf-europa2k8.rscript \
 	data1/scripts/maps/ctf-extermination.rscript \
 	data1/scripts/maps/ctf-frostbyte.rscript \
+	data1/scripts/maps/ctf-goregrinder.rscript \
 	data1/scripts/maps/ctf-invasion.rscript \
 	data1/scripts/maps/ctf-oblivion.rscript \
 	data1/scripts/maps/ctf-purgatory.rscript \
 	data1/scripts/maps/ctf-titan2k8.rscript \
-	data1/scripts/maps/ctf-vesuvius.rscript \
+	data1/scripts/maps/ctf-vesuvius2k11.rscript \
 	data1/scripts/maps/ctf-violator.rscript \
 	data1/scripts/maps/ctf-zion2k9.rscript \
 	data1/scripts/maps/db-chromium.rscript \
@@ -2023,22 +2241,17 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-annihilation.rscript \
 	data1/scripts/maps/dm-atlantis2k8.rscript \
 	data1/scripts/maps/dm-babel2k11.rscript \
-	data1/scripts/maps/dm-bloodfactory.rscript \
 	data1/scripts/maps/dm-bloodfactory2k12.rscript \
 	data1/scripts/maps/dm-chasmatic2k9.rscript \
-	data1/scripts/maps/dm-chasmatic.rscript \
 	data1/scripts/maps/dm-command2k9.rscript \
 	data1/scripts/maps/dm-corrosion.rscript \
 	data1/scripts/maps/dm-crucible2k12.rscript \
-	data1/scripts/maps/dm-crucible2k8.rscript \
 	data1/scripts/maps/dm-deathray.rscript \
 	data1/scripts/maps/dm-deimos2k9.rscript \
 	data1/scripts/maps/dm-dismal2k11.rscript \
 	data1/scripts/maps/dm-downfall.rscript \
 	data1/scripts/maps/dm-dynamo2k12.rscript \
-	data1/scripts/maps/dm-dynamo2k8.rscript \
 	data1/scripts/maps/dm-eternal.rscript \
-	data1/scripts/maps/dm-europa2k8.rscript \
 	data1/scripts/maps/dm-extermination.rscript \
 	data1/scripts/maps/dm-furious2k8.rscript \
 	data1/scripts/maps/dm-goregrinder.rscript \
@@ -2046,14 +2259,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-impact.rscript \
 	data1/scripts/maps/dm-invasion.rscript \
 	data1/scripts/maps/dm-leviathan2k12.rscript \
-	data1/scripts/maps/dm-leviathan2k8.rscript \
 	data1/scripts/maps/dm-liberation.rscript \
 	data1/scripts/maps/dm-neptune.rscript \
 	data1/scripts/maps/dm-oblivion.rscript \
 	data1/scripts/maps/dm-omega2k8.rscript \
 	data1/scripts/maps/dm-purgatory.rscript \
 	data1/scripts/maps/dm-saucer2k9.rscript \
-	data1/scripts/maps/dm-titan2k8.rscript \
 	data1/scripts/maps/dm-turbo2k8.rscript \
 	data1/scripts/maps/dm-vesuvius2k11.rscript \
 	data1/scripts/maps/dm-violator2k11.rscript \
@@ -2062,18 +2273,20 @@ nobase_dist_pkgdata_DATA = \
 	data1/scripts/maps/dm-zion2k9.rscript \
 	data1/scripts/maps/tca-corrosion.rscript \
 	data1/scripts/maps/tca-cryogenic.rscript \
-	data1/scripts/maps/tca-europa2k8.rscript \
 	data1/scripts/maps/tca-extermination.rscript \
-	data1/scripts/maps/tca-frost.rscript \
 	data1/scripts/maps/tca-purgatory.rscript \
-	data1/scripts/maps/tca-titan2k8.rscript \
-	data1/scripts/maps/tca-zion.rscript \
 	data1/scripts/maps/tca-zion2k9.rscript \
 	data1/scripts/menu.rscript \
 	data1/scripts/models.rscript \
 	data1/scripts/normals/normals.rscript \
+	data1/scripts/normals/tron.rscript \
 	data1/scripts/players.rscript \
-	data1/scripts/textures.rscript \
+	data1/scripts/textures.rscript
+
+
+sounddir = $(pkgdatadir)
+
+nobase_nodist_sound_DATA = \
 	data1/sound/doors/dr1_end.wav \
 	data1/sound/doors/dr1_mid.wav \
 	data1/sound/doors/dr1_strt.wav \
@@ -2259,6 +2472,11 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/taunts/martianoverlord/taunt3.wav \
 	data1/sound/taunts/martianoverlord/taunt4.wav \
 	data1/sound/taunts/martianoverlord/taunt5.wav \
+	data1/sound/taunts/martianwarrior/taunt1.wav \
+	data1/sound/taunts/martianwarrior/taunt2.wav \
+	data1/sound/taunts/martianwarrior/taunt3.wav \
+	data1/sound/taunts/martianwarrior/taunt4.wav \
+	data1/sound/taunts/martianwarrior/taunt5.wav \
 	data1/sound/taunts/slashbot/taunt1.wav \
 	data1/sound/taunts/slashbot/taunt2.wav \
 	data1/sound/taunts/slashbot/taunt3.wav \
@@ -2303,6 +2521,7 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/weapons/seeker_zap.wav \
 	data1/sound/weapons/shotgf1b.wav \
 	data1/sound/weapons/smartgun_hum.wav \
+	data1/sound/weapons/spidermov.wav \
 	data1/sound/weapons/vaporizer_hum.wav \
 	data1/sound/weapons/viofire1.wav \
 	data1/sound/weapons/viofire2.wav \
@@ -2330,7 +2549,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/sound/world/vents.wav \
 	data1/sound/world/water1.wav \
 	data1/sound/world/weird.wav \
-	data1/sound/world/youwin.wav \
+	data1/sound/world/youwin.wav
+
+
+texturesdir = $(pkgdatadir)
+
+nobase_nodist_textures_DATA = \
 	data1/textures/alien/support5.tga \
 	data1/textures/arena10/bluetile_hm.tga \
 	data1/textures/arena10/bluetile_nm.tga \
@@ -2836,6 +3060,9 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/arena6/wires1_hm.tga \
 	data1/textures/arena6/wires1_nm.tga \
 	data1/textures/arena6/wires1.tga \
+	data1/textures/arena7/bluefloro_hm.tga \
+	data1/textures/arena7/bluefloro_nm.tga \
+	data1/textures/arena7/bluefloro.tga \
 	data1/textures/arena7/bluegrid.tga \
 	data1/textures/arena7/ceiling1.tga \
 	data1/textures/arena7/floor1_hm.tga \
@@ -3655,7 +3882,12 @@ nobase_dist_pkgdata_DATA = \
 	data1/textures/xempx/sign-electro_hm.tga \
 	data1/textures/xempx/sign-electro.tga \
 	data1/textures/xempx/sign_radioactive_hm.tga \
-	data1/textures/xempx/sign_radioactive.tga \
+	data1/textures/xempx/sign_radioactive.tga
+
+
+vehiclesdir = $(pkgdatadir)
+
+nobase_nodist_vehicles_DATA = \
 	data1/vehicles/bomber/bomb.md2 \
 	data1/vehicles/bomber/bomb.tga \
 	data1/vehicles/bomber/console_normal.tga \
@@ -3690,3 +3922,20 @@ nobase_dist_pkgdata_DATA = \
 	data1/vehicles/strafer/tris.md2 \
 	data1/vehicles/strafer/v_wep.md2 \
 	data1/vehicles/strafer/window.md2
+
+
+gamedata_files = \
+ $(nobase_nodist_env_DATA) \
+ $(nobase_nodist_fonts_DATA) \
+ $(nobase_nodist_gfx_DATA) \
+ $(nobase_nodist_levelshots_DATA) \
+ $(nobase_nodist_maps_DATA) \
+ $(nobase_nodist_models_DATA) \
+ $(nobase_nodist_particles_DATA) \
+ $(nobase_nodist_pics_DATA) \
+ $(nobase_nodist_players_DATA) \
+ $(nobase_nodist_scripts_DATA) \
+ $(nobase_nodist_sound_DATA) \
+ $(nobase_nodist_textures_DATA) \
+ $(nobase_nodist_vehicles_DATA)
+

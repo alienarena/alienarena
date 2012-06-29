@@ -1466,7 +1466,7 @@ Optional Packages:
                           use system-supplied libode (default:without)
   --with-icondir=DIR      icon install directory (default:DATADIR/icons)
   --with(out)-xf86vm      include XF86 VidMode support (default: check)
-  --with(out)-xf86dga     include XF86 DGA support (default: check)
+  --with(out)-xf86dga     include XF86 DGA support (default: without)
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -5570,7 +5570,7 @@ icondir=${with_icondir}
 #
 # User writable data and configuration subdirectory in $HOME
 #  normally this is a hidden subdirectory
-#  default is .codered
+#  default is .codered. but distros modify this
 #  can be overridden by environment variable, COR_GAME
 #
 # (These also are #defined in qcommon.h, but changing them is not a good idea
@@ -6433,11 +6433,13 @@ fi
 fi
 
 
+
+
 # Check whether --with-xf86dga was given.
 if test "${with_xf86dga+set}" = set; then :
   withval=$with_xf86dga;
 else
-  with_xf86dga=check
+  with_xf86dga=no
 fi
 
 		have_Xxf86dga=no
@@ -10128,7 +10130,7 @@ fi
 
 else
 
-		game_data=${datadir}/${PACKAGE}
+		game_data=${datadir}/${PACKAGE_NAME}
 		game_data_a=`eval "echo ${game_data}"`
 		game_data=`eval "echo ${game_data_a}"`
 		if test -z "$BUILD_CLIENT_TRUE"; then :

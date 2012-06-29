@@ -18,7 +18,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-SUBDIRS = source 
+SUBDIRS = source
 
 ACLOCAL_AMFLAGS = -I m4 
 
@@ -45,8 +45,18 @@ EXTRA_DIST = \
 #  distribution in staging area and before running archiver
 # but, it is probably a better idea to export the repository to the
 #  staging area since export does not include the .svn parts
+#
+# copy noinst DATA to the distribution directory. while partitioning the
+# data files into subdirectory groups solves the problem with exceeding
+# command length limits for installation, it does not help with tarball
+# creation. 
+#
 dist-hook:
 	rm -rf `find $(distdir) -name .svn`
+	for gamefile in $(gamedata_files); do \
+		mkdir -p $(distdir)/`dirname $$gamefile` && \
+		cp $(srcdir)/$$gamefile  $(distdir)/$$gamefile; \
+	done
 
 #
 # Alternate Install
@@ -94,3 +104,5 @@ if ALTERNATE_INSTALL
 	exit 1
 endif
 
+
+include game_data.am
