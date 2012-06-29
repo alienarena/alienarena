@@ -1322,10 +1322,11 @@ void Mod_LoadLeafs (lump_t *l)
 
 		out->firstmarksurface = loadmodel->marksurfaces +
 			(unsigned short)(LittleShort(in->firstleafface));
-		out->nummarksurfaces = LittleShort(in->numleaffaces);
+		out->nummarksurfaces = (unsigned short)LittleShort(in->numleaffaces);
 		if (out->firstmarksurface < loadmodel->marksurfaces || 
 			out->nummarksurfaces < 0 ||
-			LittleShort(in->numleaffaces) > loadmodel->nummarksurfaces)
+			(unsigned short)LittleShort(in->firstleafface) > 
+			loadmodel->nummarksurfaces)
 			Com_Error (ERR_DROP,
 				"Map file has invalid leaf surface offsets!\n"
 				"The file is likely corrupted, please obtain a fresh copy.");
