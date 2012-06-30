@@ -6043,7 +6043,14 @@ $as_echo_n "checking if more special flags are required for pthreads... " >&6; }
         flag=no
         case "${host_cpu}-${host_os}" in
             *-aix* | *-freebsd* | *-darwin*) flag="-D_THREAD_SAFE";;
-            *solaris* | *-osf* | *-hpux*) flag="-D_REENTRANT";;
+            *-osf* | *-hpux*) flag="-D_REENTRANT";;
+            *solaris*)
+            if test "$GCC" = "yes"; then
+                flag="-D_REENTRANT"
+            else
+                flag="-mt -D_REENTRANT"
+            fi
+            ;;
         esac
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${flag}" >&5
 $as_echo "${flag}" >&6; }

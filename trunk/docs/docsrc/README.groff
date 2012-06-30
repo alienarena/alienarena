@@ -1,5 +1,5 @@
-.\" GNU/Linux/Unix README for Alien Arena 2011
-.\" 2010-11-30. Revised: 2011-12-23
+.\" GNU/Linux/Unix README for Alien Arena Reloaded
+.\" 2010-11-30. Revised: 2012-06-29
 .\" Author: Jim Bower
 .\" using groff for paragraph formatting.
 .\" $ groff -T ascii README.groff >README
@@ -9,12 +9,34 @@
 .in 0
 .nr topic 0 1
 
-.tl ''Alien Arena 2011''
-.tl ''Version 7.53''
+.tl ''Alien Arena Reloaded''
+.tl ''Version 7.60''
+
+ATTENTION: Build and install for 7.60 has some significant differences from 7.53.
+
+ATTENTION: The executables are now "alienarena" and "alienarena-ded", NOT "crx" and "crx-ded".
+
+ATTENTION: Distro packagers: please review installation.
+The standard install for the Unix/Linux supports both read-only data in a shared directory
+and writable data in a user's home directory.
+The shared directory is defined at compile time (see source/Makefile.am) to be exactly "$(pkgdatadir)".
+The program expects the "arena", "botinfo", and "data1" shared subdirectories to be there. 
+A configure variable, "ALIENARENA_HOMEDIR", has been added for customizing the user home directory location at compile time.
+This is in addition to the environment variable, COR_GAME, for changing the user
+home directory from the default ".codered"
+
+ATTENTION: Version 7.60 does NOT work with Open Dynamics Engine (ODE) Version 0.12.
+
+ATTENTION: The configuration default for the DGA library (Xxf86dga) is now "without".
+
+ATTENTION: The Home Page and Forum have been upgraded.
+Home Page URL is the same.
+The Forum URL is not -- see the Home Page for the new link.
+
 
 \n+[topic]. Scope
 
-This document includes information about the GNU-Linux/Unix version of Alien Arena 2011.
+This document includes information about the GNU-Linux/Unix version of Alien Arena Reloaded.
 Custom options and other information specific to Alien Arena are included here.
 
 For general information, licensing, and contributers, see the README.txt and license.txt documents
@@ -25,7 +47,7 @@ For generic information about installation, see the GNU INSTALL document.
 
 \n+[topic]. Resources
 
-The Alien Arena HomePage URL is:
+The Alien Arena Home Page URL is:
 
 .in +2m
 http://red.planetarena.org/
@@ -40,79 +62,40 @@ irc.planetarena.org
 
 The in-game IRC connects to #alienarena there.
 
-There is a Server Browser on the Web at:
-
-.in +2m
-http://chaingun.org/alienarena/tools/browser/
-.in
+There are web sites with 3rd party maps, skins, etc.
+See the Home Page for links.
 
 There is a Subversion (SVN) repository for Alien Arena.
 See the topic "Getting Alien Arena from SVN" below.
 
+\n+[topic]. Changes for version 7.60
 
-\n+[topic]. Changes for version 7.53
+Version 7.60 is "Alien Arena Reloaded."
+There are new features and new maps; see the Home Page for the change log and 
+more info on those.
 
-The Autotools build uses autoconf 2.68, and automake 1.11.
+The Autotools build used autoconf 2.68, and automake 1.11.5.
 The m4 macros are updated and configure.ac modified accordingly.
-There are no major changes to the build procedure from earlier 7.5x versions.
+The build and install procedure is mostly the same with some option changes and additions.
+(Note: AM_MAINTAINER_MODE is used. See "configure.ac".)
 
-The complete version 7.53 changelog is available at:
-
-.in +2m
-http://icculus.org/alienarena/changelogs/7.53.txt
-.in
-
-Following are some highlights.
-
-.nf
-Visual and performance improvements:
-.in +2m
-* Significant performance increases on high settings from extending   
-  implementation of VBO (Vertex Buffer Objects).
-* IQM and MD2 model rendering improvements.
-* Grass/vegetation rendering improvements.
-* Model precaching improvements.
-.in 0
-
-Game-related updates:
-.in +2m
-* New CTF map based on dm-zion2k9: ctf-zion2k9
-* New TCA map, tca-invasion, derived from ctf-invasion using new
-  entity definition feature.
-* Improvements to bot AI navigation, aiming and movement.
-* CTF scoring improvements.
-* Speed-hack detection (sv_enforcetime) improvements.
-* Optional player lights ("DM Lights") for non-team games.
-.in 0
-
-Other:
-.in +2m
-* Additional video resolutions in menu and other menu additions.
-* Player password account system and statistics improvements.
-* Client to server packet rate limit lowered to approx. 60 pps.
-.in 0
-.fi
-
-See the section "Notes about Console Variables" below.
-There are some new and changed "cvars".
+As noted above, the install is not the old quake-style.
+There appears to have been some confusion about that, so please review it.
+We apologize for not making that clear
+(Editors note: programmers writing user manuals ... not a good idea.)
+(If you like the old ways, see Alternate Install below.) 
 
 
-\n+[topic]. Some previous version changes affecting build and install:
+\n+[topic]. Open Dynamic Engine
 
-.nf
-.in +2m
-* The Open Dynamics Engine (ODE) is integrated with the main program;
-  so libode is, optionally, not required. ODE is written in c++, so g++
-  and libstdc++ are required to build and link the integrated ODE.
-* A configure option to disable document installation was added.
-* An installation path for the icon, icondir, was added and the icon 
-  was renamed to alienarena.png.
-* The server terminal may be configured to support color output.
-* The dedicated server was renamed to crx-ded.
-* The game.so shared library and LIBDIR variable were eliminated.
-.in 0
-.fi
+The Open Dynamics Engine (ODE) is integrated with the main program;
+so libode is, optionally, not required. ODE is written in c++, so g++
+and libstdc++ are required to build and link the integrated ODE.
 
+As noted above, ODE 0.12 is not compatible with 7.60.
+The preferred approach is to use the integrated ODE.
+The system ODE library may be used if it is version 1.11 or 1.11.1 and
+if it uses double precision math. See below for more details.
 
 \n+[topic]. Requirements
 
@@ -137,11 +120,11 @@ These ports are used by the program:
 .in
 .fi
 
-The cURL library is used to retrieve map resources, player ranking information, and current version information from these URLs:
+The cURL library is used to retrieve game resources, player ranking information, and current version information from these URLs:
 .nf
 .in +2
-* http://icculus.org/alienarena/sv_downloadurl
-* http://stats.planetarena.org
+* http://red.planetarena.org/sv_downloadurl
+* http://stats.planetarena.org/playerrank.db
 * http://red.planetarena.org/version/crx_version
 .in
 .fi
@@ -175,7 +158,7 @@ If the installation fails, check the error message for required software package
 Alien Arena uses: X11, OpenGL, OpenAL 1.1, Ogg-Vorbis, cURL, FreeType2, and JPEG.
 Some major distributions have "dev" versions of the libraries that are needed to build programs.
 These are not installed by default, so you may need to install them using your distributions package manager.
-Version 7.53 does not require the ODE library (it is integrated).
+Version 7.60 does not require the ODE library (it is integrated).
 There is a configure option to use the system ODE library (see below.)
 
 For Ubuntu and similar systems, see the topic, "Getting Required Packages with Synaptic", below.
@@ -183,7 +166,7 @@ For Ubuntu and similar systems, see the topic, "Getting Required Packages with S
 For advanced configure options, see the topic, "Custom Configure Options", below.
 It is not necessary, but it would be a good idea to take a look at those.
 
-Using the terminal, change to the "alienarena-7.53" directory and enter these commands:
+Using the terminal, change to the "alienarena-7.60" directory and enter these commands:
 .nf
 .in +2m
 $ ./configure
@@ -194,7 +177,7 @@ $ sudo make install
 
 To run:
 .in +2m
-$ crx
+$ alienarena
 .in
 
 In the menu, Single Player will run a simple pre-configured local game.
@@ -202,17 +185,16 @@ For more single player options, go to the Host Server menu.
 Setting "public server" to no will keep your local game from being broadcast with the master server list.
 For multiplayer, online play, first enter your player name and a password in the Player Setup menu.
 Then go to the Join Server menu to find a Server.
-(Yes, we know the menu system needs updating and there are plans to do that.)
 
-Command line options to crx are NOT standard.
-There is NO "--help".
+Command line options to alienarena are NOT standard.
+(There is NO "--help", nor is there a "man alienarena".)
 They follow a format inherited from Alien Arena's Quake 2 roots.
-Command line options are the same as console commands using a '+' character prefix.
+Command line options are the same as console commands, normally using a '+' character prefix.
 The details are beyond the scope of this document;
 but a simple example is:
 .nf
 .in +2m
-$ crx +set maxclients 10
+$ alienarena +set maxclients 10
 .in
 .fi
 
@@ -224,8 +206,8 @@ By default, 'sudo make install' will install the game programs and data like thi
 .in +2m
 bin/
 .in +2m
-crx
-crx-ded  (dedicated server)
+alienarena
+alienarena-ded  (dedicated server)
 .in
 share/
 .in +2m
@@ -256,6 +238,20 @@ For example:
 .nf
 .in +2m
 $ export COR_GAME=/home/user/.alienarena
+.in
+.fi
+
+This may also be changed using a new (in 7.60) configure variable, ALIENARENA_HOMEDIR.
+It is an environment variable. 
+It is relative to the user home directory, NOT the full path.
+You might find it is preferable to use something other than the hidden ".codered" directory,
+because downloaded resources are written into this directory.
+Also, 3rd party maps, skins, etc. are usually put into the "arena" subdirectory in this directory.
+
+For example:
+.nf
+.in +2m
+$ ./configure ALIENARENA_HOMEDIR=my_alienarena
 .in
 .fi
 
@@ -297,13 +293,13 @@ This list is based on Ubuntu 10.10.
 build-essential
 libx11-dev
 libgl1-mesa-dev
-libxxf86vm-dev
+libxxf86vm-dev (optional. needed for full screen display)
 libxxf86dga-dev (optional)
 libopenal-dev
 libjpeg8-dev (or libjpeg62-dev)
 libvorbis-dev
 libcurl4-gnutls-dev
-libode-dev (optional)
+libode-dev (optional. using integrated ODE instead is recommended)
 libfreetype6-dev
 .in
 .fi
@@ -311,28 +307,12 @@ libfreetype6-dev
 
 \n+[topic]. Notes about Console Variables (cvars)
 
-New or changed server cvars:
-.nf
-.in +2m
-* sv_enforcetime - setting to 1 enables speed hack 
-  detection. (May give false positives.)
-* skill - for bot skill. setting to 3 forces all bots
-  to skill level 3.
-* insta_rockets - a game mode combination of Instagib
-  and Rocket Arena.
-* g_dm_lights - 1 enable, 0 disable DM Lights.  
-.in 0
-.fi
-
-New client cvars:
-.nf
-.in +2m
-* gl_usevbo - enables the use of Vertex Buffer Objects
-  for better performance.
-* cl_dmlights - 1 enable, 0 disable DM Lights when 
-  enabled on server.   
-.in 0
-.fi
+Version 7.60 adds some console variables.
+Details are beyond the scope of this document.
+(Editors note: yeah, sure. Just ran out of time, didn't ya.)
+There are changes and additions to the HUD display.
+Check the forum for more info.
+Or ask the friendly people in the IRC channel.
 
 Alien Arena is based on Quake games.
 Many of the cvars are the same as Quake 2.
@@ -343,7 +323,7 @@ More information can be found on the Forum and on the Web.
 
 When the game program exits, it stores settings in "config.cfg".
 The default location for this file is "/home/<user>/.codered/arena/",
-but it might be elsewhere depending on your distribution.
+but it might be elsewhere depending on your distribution or configuration.
 Sometimes it helps to delete config.cfg, and then re-enter menu settings.
 For persistent storage of custom settings, create a file named "autoexec.cfg" in the same directory as "config.cfg".
 Settings in "autoexec.cfg" will override settings in "config.cfg".
@@ -353,12 +333,9 @@ Also, a different or updated video driver may be needed.
 Enable the video frame rate display in the "Game Options" menu by setting "display fps" to yes.
 There are settings in both the "Game Options" and "Video Options" sections that affect performance.
 The maximum frame rate is set with the console variable ("cvar"), "cl_maxfps".
-Sometimes lowering that from the default "90" will help.
 Get more information on the Forum, Websites, and IRC channel.
 
-If you have errors that output messages about "ODE", setting the "ragdolls" option to off in the Game Options menu may help.
-
-There are known sound problems related to PulseAudio and OpenAL with some versions of those sound drivers.
+In the past, there have been sound problems related to PulseAudio and OpenAL with some versions of those sound drivers.
 Check for for information on OpenAL configuration using "~/.alsoftrc" in your distributions shared doc directory.
 
 If you have a high resolution mouse, you may need to set the mouse sensitivity cvar.
@@ -373,10 +350,10 @@ Put this line into the "autoexec.cfg" file:
 set in_dgamouse "0"
 .in
 .fi
-Alternatively, when building the program, use this configure option:
+By default, the program is built "without" DGA, so this only applies if the following configure option was set. 
 .nf
 .in +2m
---without-xf86dga
+--with-xf86dga
 .in
 .fi
 
@@ -387,7 +364,7 @@ Some to try, depending on system hardware are:
 .nf
 .in +2m
 * -O3 (-O2 is the default)
-* -march=core2 or -march=native
+*  -march=native
 * -msse, -msse2, -msse3 or other sse options, and -mfpmath=sse
 .in 0
 .fi
@@ -420,7 +397,7 @@ To rename the programs, use the standard configure option.
 For example:
 .nf
 .in +2m
---program-transform-name='s/crx/alienarena/'
+--program-transform-name='s/alienarena/alien-arena/'
 .in
 .fi
 
@@ -445,6 +422,7 @@ To use the system-supplied libode, rather than the integrated ODE, use this opti
 --with-system-libode
 .in
 .fi
+As noted above, Alien Arena is not compatible with ODE version 0.12.
 Due to variations in the way libode may be built, this is may not work.
 It may be preferable to use the system library, however, if it was built with
 double precision math.

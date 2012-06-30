@@ -439,7 +439,6 @@ nobase_dist_botinfo_DATA = \
 	botinfo/dm-downfall.tmp \
 	botinfo/dm-dynamo2k12.tmp \
 	botinfo/dm-eternal.tmp \
-	botinfo/dm-europa2k8.tmp \
 	botinfo/dm-extermination.tmp \
 	botinfo/dm-furious2k8.tmp \
 	botinfo/dm-goregrinder.tmp \
@@ -453,7 +452,6 @@ nobase_dist_botinfo_DATA = \
 	botinfo/dm-omega2k8.tmp \
 	botinfo/dm-purgatory.tmp \
 	botinfo/dm-saucer2k9.tmp \
-	botinfo/dm-titan2k8.tmp \
 	botinfo/dm-turbo2k8.tmp \
 	botinfo/dm-vesuvius2k11.tmp \
 	botinfo/dm-violator2k11.tmp \
@@ -786,8 +784,6 @@ nobase_nodist_levelshots_DATA = \
 	data1/levelshots/ctf-corrosion.txt \
 	data1/levelshots/ctf-cryogenic.jpg \
 	data1/levelshots/ctf-cryogenic.txt \
-	data1/levelshots/ctf-europa2k8.jpg \
-	data1/levelshots/ctf-europa2k8.txt \
 	data1/levelshots/ctf-extermination.jpg \
 	data1/levelshots/ctf-extermination.txt \
 	data1/levelshots/ctf-frostbyte.jpg \
@@ -820,8 +816,6 @@ nobase_nodist_levelshots_DATA = \
 	data1/levelshots/dm-atlantis2k8.txt \
 	data1/levelshots/dm-babel2k11.jpg \
 	data1/levelshots/dm-babel2k11.txt \
-	data1/levelshots/dm-bloodfactory.jpg \
-	data1/levelshots/dm-bloodfactory.txt \
 	data1/levelshots/dm-bloodfactory2k12.jpg \
 	data1/levelshots/dm-bloodfactory2k12.txt \
 	data1/levelshots/dm-chasmatic2k9.jpg \
@@ -832,8 +826,6 @@ nobase_nodist_levelshots_DATA = \
 	data1/levelshots/dm-corrosion.txt \
 	data1/levelshots/dm-crucible2k12.jpg \
 	data1/levelshots/dm-crucible2k12.txt \
-	data1/levelshots/dm-crucible2k8.jpg \
-	data1/levelshots/dm-crucible2k8.txt \
 	data1/levelshots/dm-deathray.jpg \
 	data1/levelshots/dm-deathray.txt \
 	data1/levelshots/dm-deimos2k9.jpg \
@@ -844,12 +836,8 @@ nobase_nodist_levelshots_DATA = \
 	data1/levelshots/dm-downfall.txt \
 	data1/levelshots/dm-dynamo2k12.jpg \
 	data1/levelshots/dm-dynamo2k12.txt \
-	data1/levelshots/dm-dynamo2k8.jpg \
-	data1/levelshots/dm-dynamo2k8.txt \
 	data1/levelshots/dm-eternal.jpg \
 	data1/levelshots/dm-eternal.txt \
-	data1/levelshots/dm-europa2k8.jpg \
-	data1/levelshots/dm-europa2k8.txt \
 	data1/levelshots/dm-extermination.jpg \
 	data1/levelshots/dm-extermination.txt \
 	data1/levelshots/dm-furious2k8.jpg \
@@ -864,8 +852,6 @@ nobase_nodist_levelshots_DATA = \
 	data1/levelshots/dm-invasion.txt \
 	data1/levelshots/dm-leviathan2k12.jpg \
 	data1/levelshots/dm-leviathan2k12.txt \
-	data1/levelshots/dm-leviathan2k8.jpg \
-	data1/levelshots/dm-leviathan2k8.txt \
 	data1/levelshots/dm-liberation.jpg \
 	data1/levelshots/dm-liberation.txt \
 	data1/levelshots/dm-neptune.jpg \
@@ -878,8 +864,6 @@ nobase_nodist_levelshots_DATA = \
 	data1/levelshots/dm-purgatory.txt \
 	data1/levelshots/dm-saucer2k9.jpg \
 	data1/levelshots/dm-saucer2k9.txt \
-	data1/levelshots/dm-titan2k8.jpg \
-	data1/levelshots/dm-titan2k8.txt \
 	data1/levelshots/dm-turbo2k8.jpg \
 	data1/levelshots/dm-turbo2k8.txt \
 	data1/levelshots/dm-vesuvius2k11.jpg \
@@ -896,8 +880,6 @@ nobase_nodist_levelshots_DATA = \
 	data1/levelshots/tca-corrosion.txt \
 	data1/levelshots/tca-cryogenic.jpg \
 	data1/levelshots/tca-cryogenic.txt \
-	data1/levelshots/tca-europa2k8.jpg \
-	data1/levelshots/tca-europa2k8.txt \
 	data1/levelshots/tca-extermination.jpg \
 	data1/levelshots/tca-extermination.txt \
 	data1/levelshots/tca-frost.jpg \
@@ -906,8 +888,6 @@ nobase_nodist_levelshots_DATA = \
 	data1/levelshots/tca-purgatory.txt \
 	data1/levelshots/tca-titan2k8.jpg \
 	data1/levelshots/tca-titan2k8.txt \
-	data1/levelshots/tca-zion.jpg \
-	data1/levelshots/tca-zion.txt \
 	data1/levelshots/tca-zion2k9.jpg \
 	data1/levelshots/tca-zion2k9.txt
 
@@ -1447,21 +1427,6 @@ nobase_nodist_models_DATA = \
 	data1/models/misc/deathray/deathray.md2 \
 	data1/models/misc/deathray/deathray_normal.tga \
 	data1/models/misc/deathray/deathray.tga \
-	data1/models/misc/electrode/cover.md2 \
-	data1/models/misc/electrode/electrode.tga \
-	data1/models/misc/electrode/tris.md2 \
-	data1/models/misc/lamp2/lamp2.tga \
-	data1/models/misc/lamp2/tris.md2 \
-	data1/models/misc/lamp/lamp.tga \
-	data1/models/misc/lamp/tris.md2 \
-	data1/models/misc/pod/pod.tga \
-	data1/models/misc/pod/tris.md2 \
-	data1/models/misc/receptor/bulb.md2 \
-	data1/models/misc/receptor/receptor.tga \
-	data1/models/misc/receptor/tris.md2 \
-	data1/models/misc/scope/cover.md2 \
-	data1/models/misc/scope/scope.tga \
-	data1/models/misc/scope/tris.md2 \
 	data1/models/misc/spiderpod/helmet.iqm \
 	data1/models/misc/spiderpod/helmet.md2 \
 	data1/models/misc/spiderpod/skin.tga \
@@ -1471,9 +1436,6 @@ nobase_nodist_models_DATA = \
 	data1/models/misc/spiderpod/tris.iqm \
 	data1/models/misc/spiderpod/tris.md2 \
 	data1/models/misc/spiderpod/tris.skin \
-	data1/models/misc/tube/cover.md2 \
-	data1/models/misc/tube/tris.md2 \
-	data1/models/misc/tube/tube.tga \
 	data1/models/objects/blank/skin.tga \
 	data1/models/objects/blank/tris.md2 \
 	data1/models/objects/brass/skin.jpg \
@@ -1498,9 +1460,6 @@ nobase_nodist_models_DATA = \
 	data1/models/objects/gibs/skin_normal.jpg \
 	data1/models/objects/gibs/sm_meat/skin.jpg \
 	data1/models/objects/gibs/sm_meat/tris.md2 \
-	data1/models/objects/icon/icon.jpg \
-	data1/models/objects/icon/icon_normal.jpg \
-	data1/models/objects/icon/tris.md2 \
 	data1/models/objects/laser/skin.tga \
 	data1/models/objects/laser/tris.md2 \
 	data1/models/objects/rocket/skin.tga \
@@ -1514,7 +1473,6 @@ nobase_nodist_models_DATA = \
 	data1/models/objects/spud/skin_fx.tga \
 	data1/models/objects/spud/skin_normal.jpg \
 	data1/models/objects/spud/skin.tga \
-	data1/models/objects/spud/spud.mdo \
 	data1/models/objects/spud/tris.md2 \
 	data1/models/weapons/g_bfg/tris.md2 \
 	data1/models/weapons/g_chain/tris.md2 \
@@ -3610,9 +3568,6 @@ nobase_nodist_textures_DATA = \
 	data1/textures/arena9/hexfloor2_hm.tga \
 	data1/textures/arena9/hexfloor2_nm.tga \
 	data1/textures/arena9/hexfloor2.tga \
-	data1/textures/arena9/hexfloor3_hm.tga \
-	data1/textures/arena9/hexfloor3_nm.tga \
-	data1/textures/arena9/hexfloor3.tga \
 	data1/textures/arena9/hexglass.tga \
 	data1/textures/arena9/hexgratefloor_hm.tga \
 	data1/textures/arena9/hexgratefloor_nm.tga \
@@ -5271,7 +5226,7 @@ dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 	for gamefile in $(gamedata_files); do \
 		mkdir -p $(distdir)/`dirname $$gamefile` && \
-		cp $(srcdir)/$$gamefile  $(distdir)/$$gamefile; \
+		cp -p $(srcdir)/$$gamefile  $(distdir)/$$gamefile; \
 	done
 
 #
