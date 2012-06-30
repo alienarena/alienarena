@@ -25,7 +25,7 @@
 #  Windows (32-bit) using MinGW - Experimental
 #  Mac OS X / Darwin using X11 - Experimental
 
-AC_PREREQ(2.65)
+AC_PREREQ([2.68])
 AC_INIT([alienarena],[7.60],[alienrace@comcast.net])
 
 AC_CONFIG_SRCDIR([source/ref_gl/r_image.h])

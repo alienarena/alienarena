@@ -55,7 +55,7 @@ dist-hook:
 	rm -rf `find $(distdir) -name .svn`
 	for gamefile in $(gamedata_files); do \
 		mkdir -p $(distdir)/`dirname $$gamefile` && \
-		cp $(srcdir)/$$gamefile  $(distdir)/$$gamefile; \
+		cp -p $(srcdir)/$$gamefile  $(distdir)/$$gamefile; \
 	done
 
 #
