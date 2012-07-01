@@ -1,0 +1,208 @@
+textures/xempx/e7trimlight_blue
+{
+	{
+		lensflare
+	}
+}
+textures/evil/e6horzlight
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light11
+{
+	{	
+		lensflare
+	}
+}
+textures/evil/eX_lightpanel_01_d
+{
+	{
+		lensflare
+	}
+}
+textures/rage/light7
+{
+	{
+		lensflare
+	}
+}
+textures/evil/e6horzlight_green
+{
+	{
+		lensflare
+	}
+}
+textures/arena7/light4
+{
+	{
+		lensflare
+	}
+}
+textures/xempx/a6bt
+{
+	{
+		map textures/arena5/lighta.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .5
+		scroll sin 2 sin 0
+		anim .05
+			textures/arena5/lighta.tga
+			textures/arena5/lightb.tga
+			textures/arena5/lightc.tga
+			textures/arena5/lightd.tga
+			textures/arena5/lighte.tga
+			textures/arena5/lightf.tga
+		end
+	}
+}
+textures/blanks/blank5
+{
+	{
+		map textures/arena5/lighta.tga
+		blendfunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static .5 static .3
+		scroll sin 0 sin 0
+		anim .05
+			textures/arena5/lighta.tga
+			textures/arena5/lightb.tga
+			textures/arena5/lightc.tga
+			textures/arena5/lightd.tga
+			textures/arena5/lighte.tga
+			textures/arena5/lightf.tga
+		end
+	}
+}
+textures/arena9/trim2
+{
+	{
+		map gfx/bluelightning2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 5 0.3 0.9
+		scroll static 5 static 0
+		nolightmap
+	}
+	{
+		map gfx/trim2mask.tga
+		alphamask
+	}
+}
+textures/arena9/lightwhite
+{
+	{
+		map gfx/beam1.tga
+		scale static 18 static 18
+		colormap 0.9 0.9 0.9
+		beam
+		lensflare
+		flaretype 1
+	}
+}
+textures/blanks/blank1
+{
+	{
+		map gfx/beam4.tga
+		scale static 30 static 30
+		colormap 1 1 1
+		beam
+		xang 0.25
+		lensflare
+		flaretype 1
+	}
+}
+textures/blanks/blank2
+{
+	{
+		map gfx/beam4.tga
+		scale static 30 static 30
+		colormap 1 1 1
+		beam
+		yang 0.25
+		lensflare
+		flaretype 1
+	}
+}
+textures/blanks/blank3
+{
+	{
+		map gfx/beam4.tga
+		scale static 30 static 30
+		colormap 1 1 1
+		beam
+		xang -0.25
+		lensflare
+		flaretype 1
+	}
+}
+textures/blanks/blank4
+{
+	{
+		map gfx/beam4.tga
+		scale static 30 static 30
+		colormap 1 1 1
+		beam
+		yang -0.25
+		lensflare
+		flaretype 1
+	}
+}
+textures/evil/e6launchengine
+{
+    {
+        map gfx/e6launchengine_fx.tga
+        blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        alphashift 2.5 0.0 1.0
+        nolightmap
+    }
+    {
+        map gfx/e6launchengine_mask.tga
+        blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+    }
+}
+textures/evil/e8_launchpad1
+{
+	{
+		map gfx/e8_launchpad1_fx1.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		alphashift 9 0 9
+		nolightmap
+	}
+	{
+		map gfx/e8_launchpad1_fx2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+		scale static 1 static 1
+		scroll static 0 static 3
+		nolightmap
+	}
+	{
+		map gfx/e8_launchpad1_mask2.tga
+		blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+	}
+}
+textures/evil/e8_jumppad02
+{
+    	{
+        	map gfx/e8_jumppad02_fx.tga
+        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	alphashift 9 0 9
+        	nolightmap
+    	}
+    	{
+        	map gfx/e8_jumppad02_mask.tga
+        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+    	}
+}
+textures/evil/stepside_mtl4light
+{
+    {
+        	map gfx/stepside_mtl4light_fx1.tga
+        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	alphashift 2.5 0.0 1.0
+    }
+    {
+        	map textures/evil/stepside_mtl4light.tga
+        	blendFunc GL_ONE GL_ONE_MINUS_SRC_ALPHA
+        	alphashift 2.5 0.0 1.0
+    }
+}

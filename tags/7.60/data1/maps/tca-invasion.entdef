@@ -1,0 +1,531 @@
+{
+	"sky"		"tekcity"
+	"classname"		"worldspawn"
+	"message"		"The Invasion"
+}
+{
+	"angle"		"180"
+	"origin"		"-48 -1160 184"
+	"classname"		"info_player_intermission"
+}
+{
+	"origin"		"-888 -784 160"
+	"classname"		"item_health_small"
+}
+{
+	"origin"		"-1080 -1552 160"
+	"classname"		"ammo_rockets"
+}
+{
+	"origin"		"-896 -656 168"
+	"classname"		"weapon_hyperblaster"
+}
+{
+	"origin"		"-616 -656 184"
+	"classname"		"ammo_bullets"
+}
+{
+	"origin"		"-520 -1128 184"
+	"classname"		"ammo_cells"
+}
+{
+	"origin"		"64 -1280 32"
+	"classname"		"weapon_supershotgun"
+}
+{
+	"origin"		"160 128 24"
+	"classname"		"item_health"
+}
+{
+	"origin"		"512 384 24"
+	"classname"		"ammo_rockets"
+}
+{
+	"origin"		"0 384 24"
+	"classname"		"ammo_bullets"
+}
+{
+	"origin"		"320.000000 416.000000 256.000000"
+	"classname"		"weapon_rocketlauncher"
+}
+{
+	"_color"		"0.6 0.2 0.1"
+	"origin"		"-856 -1912 424"
+	"classname"		"light"
+	"light"		"100"
+}
+{
+	"_color"		"0.6 0.2 0.1"
+	"origin"		"280 -352 208"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"_color"		"0.6 0.2 0.1"
+	"origin"		"112 232 272"
+	"classname"		"light"
+	"light"		"100"
+}
+{
+	"origin"		"272 0 24"
+	"classname"		"info_player_red"
+}
+{
+	"origin"		"264 -856 208"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"origin"		"320 56 208"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"origin"		"248 232 752"
+	"classname"		"light"
+	"light"		"500"
+}
+{
+	"origin"		"-112 -1184 272"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"_color"		"0.6 0.2 0.1"
+	"origin"		"-776 -864 336"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"_color"		"0.6 0.2 0.1"
+	"origin"		"-968 -1632 336"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"_color"		"1 0.2 0"
+	"origin"		"-728 -1112 424"
+	"classname"		"light"
+	"light"		"100"
+}
+{
+	"origin"		"-792 -1720 520"
+	"classname"		"light"
+	"light"		"150"
+}
+{
+	"origin"		"-560 -1088 520"
+	"classname"		"light"
+	"light"		"150"
+}
+{
+	"origin"		"-1080 -1144 288"
+	"classname"		"light"
+	"light"		"50"
+}
+{
+	"origin"		"-856 -560 520"
+	"classname"		"light"
+	"light"		"50"
+}
+{
+	"angle"		"-90.000000"
+	"origin"		"320.000000 416.000000 232.000000"
+	"classname"		"misc_mapmodel"
+	"spawnflags"		"65"
+	"model"		"maps/meshes/weaponpad.md2"
+}
+{
+	"angle"		"270"
+	"spawnflags"		"65"
+	"classname"		"misc_mapmodel"
+	"origin"		"64 -1280 8"
+	"model"		"maps/meshes/weaponpad.md2"
+}
+{
+	"angle"		"270"
+	"spawnflags"		"65"
+	"classname"		"misc_mapmodel"
+	"origin"		"-896 -656 136"
+	"model"		"maps/meshes/weaponpad.md2"
+}
+{
+	"angle"		"-90.000000"
+	"origin"		"-832.000000 -1792.000000 136.000000"
+	"classname"		"misc_mapmodel"
+	"spawnflags"		"65"
+	"model"		"maps/meshes/flagpad.md2"
+}
+{
+	"origin"		"-616 -720 160"
+	"classname"		"item_health_small"
+}
+{
+	"_color"		"0.6 0.2 0.1"
+	"origin"		"-576 -1912 336"
+	"classname"		"light"
+	"light"		"25"
+}
+{
+	"origin"		"16 296 24"
+	"classname"		"info_player_red"
+}
+{
+	"angle"		"180"
+	"origin"		"480 -608 24"
+	"classname"		"info_player_red"
+}
+{
+	"angle"		"180"
+	"origin"		"192 -1152 24"
+	"classname"		"info_player_red"
+}
+{
+	"angle"		"135"
+	"origin"		"-520 -1216 184"
+	"classname"		"info_player_red"
+}
+{
+	"angle"		"270"
+	"origin"		"-752 -776 160"
+	"classname"		"info_player_red"
+}
+{
+	"angle"		"270"
+	"origin"		"-1088 -1216 160"
+	"classname"		"info_player_red"
+}
+{
+	"angle"		"270"
+	"origin"		"-864 -1656 160"
+	"classname"		"info_player_red"
+}
+{
+	"angle"		"90"
+	"origin"		"-584 -1504 160"
+	"classname"		"info_player_red"
+}
+{
+	"angle"		"90"
+	"origin"		"-1024 -2048 160"
+	"classname"		"info_player_red"
+}
+{
+	"angle"		"0"
+	"origin"		"2936 -784 160"
+	"classname"		"item_health_small"
+}
+{
+	"angle"		"0"
+	"origin"		"3128 -1552 160"
+	"classname"		"ammo_rockets"
+}
+{
+	"angle"		"0"
+	"origin"		"2944 -656 168"
+	"classname"		"weapon_hyperblaster"
+}
+{
+	"angle"		"0"
+	"origin"		"2664 -656 184"
+	"classname"		"ammo_bullets"
+}
+{
+	"angle"		"0"
+	"origin"		"2568 -1128 184"
+	"classname"		"ammo_cells"
+}
+{
+	"angle"		"0"
+	"origin"		"1984 -1280 32"
+	"classname"		"weapon_supershotgun"
+}
+{
+	"angle"		"0"
+	"origin"		"1888 128 24"
+	"classname"		"item_health"
+}
+{
+	"angle"		"0"
+	"origin"		"1536 384 24"
+	"classname"		"ammo_rockets"
+}
+{
+	"angle"		"0"
+	"origin"		"2048 384 24"
+	"classname"		"ammo_bullets"
+}
+{
+	"origin"		"1728.000000 416.000000 256.000000"
+	"classname"		"weapon_rocketlauncher"
+}
+{
+	"angle"		"0"
+	"_color"		".2 0.5 1"
+	"origin"		"2904 -1912 424"
+	"classname"		"light"
+	"light"		"100"
+}
+{
+	"_color"		".2 0.5 1"
+	"angle"		"0"
+	"origin"		"1768 -352 208"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"angle"		"0"
+	"_color"		".2 0.5 1"
+	"origin"		"1936 232 272"
+	"classname"		"light"
+	"light"		"100"
+}
+{
+	"angle"		"0"
+	"origin"		"1776 0 24"
+	"classname"		"info_player_blue"
+}
+{
+	"angle"		"0"
+	"origin"		"1784 -856 208"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"angle"		"0"
+	"origin"		"1728 56 208"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"angle"		"0"
+	"origin"		"1800 232 752"
+	"classname"		"light"
+	"light"		"500"
+}
+{
+	"angle"		"0"
+	"origin"		"2160 -1184 272"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"_color"		".2 0.5 1"
+	"angle"		"0"
+	"origin"		"2824 -864 336"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"_color"		".2 0.5 1"
+	"angle"		"0"
+	"origin"		"3016 -1632 336"
+	"classname"		"light"
+	"light"		"200"
+}
+{
+	"angle"		"0"
+	"_color"		"1 0.2 0"
+	"origin"		"2776 -1112 424"
+	"classname"		"light"
+	"light"		"100"
+}
+{
+	"angle"		"0"
+	"origin"		"2840 -1720 520"
+	"classname"		"light"
+	"light"		"150"
+}
+{
+	"angle"		"0"
+	"origin"		"2608 -1088 520"
+	"classname"		"light"
+	"light"		"150"
+}
+{
+	"angle"		"0"
+	"origin"		"3128 -1144 288"
+	"classname"		"light"
+	"light"		"50"
+}
+{
+	"angle"		"0"
+	"origin"		"2904 -560 520"
+	"classname"		"light"
+	"light"		"50"
+}
+{
+	"angle"		"-90.000000"
+	"spawnflags"		"65"
+	"classname"		"misc_mapmodel"
+	"origin"		"1728.000000 416.000000 232.000000"
+	"model"		"maps/meshes/weaponpad.md2"
+}
+{
+	"angle"		"-90"
+	"origin"		"1984 -1280 8"
+	"classname"		"misc_mapmodel"
+	"spawnflags"		"65"
+	"model"		"maps/meshes/weaponpad.md2"
+}
+{
+	"angle"		"-90"
+	"origin"		"2944 -656 136"
+	"classname"		"misc_mapmodel"
+	"spawnflags"		"65"
+	"model"		"maps/meshes/weaponpad.md2"
+}
+{
+	"angle"		"-90.000000"
+	"spawnflags"		"65"
+	"classname"		"misc_mapmodel"
+	"origin"		"2904.000000 -1792.000000 136.000000"
+	"model"		"maps/meshes/flagpad.md2"
+}
+{
+	"angle"		"0"
+	"origin"		"2664 -720 160"
+	"classname"		"item_health_small"
+}
+{
+	"angle"		"0"
+	"_color"		"0 0.5 1"
+	"origin"		"2624 -1912 336"
+	"classname"		"light"
+	"light"		"25"
+}
+{
+	"angle"		"0"
+	"origin"		"2032 296 24"
+	"classname"		"info_player_blue"
+}
+{
+	"angle"		"0"
+	"origin"		"1568 -608 24"
+	"classname"		"info_player_blue"
+}
+{
+	"angle"		"0"
+	"origin"		"1856 -1152 24"
+	"classname"		"info_player_blue"
+}
+{
+	"angle"		"45"
+	"origin"		"2568 -1216 184"
+	"classname"		"info_player_blue"
+}
+{
+	"angle"		"-90"
+	"origin"		"2800 -776 160"
+	"classname"		"info_player_blue"
+}
+{
+	"angle"		"-90"
+	"origin"		"3136 -1216 160"
+	"classname"		"info_player_blue"
+}
+{
+	"angle"		"-90"
+	"origin"		"2912 -1648 160"
+	"classname"		"info_player_blue"
+}
+{
+	"angle"		"90"
+	"origin"		"2632 -1504 160"
+	"classname"		"info_player_blue"
+}
+{
+	"angle"		"90"
+	"origin"		"3072 -2048 160"
+	"classname"		"info_player_blue"
+}
+{
+	"origin"		"2624.000000 -1984.000000 288.000000"
+	"classname"		"weapon_railgun"
+}
+{
+	"angle"		"-90.000000"
+	"origin"		"2624.000000 -1984.000000 264.000000"
+	"classname"		"misc_mapmodel"
+	"spawnflags"		"65"
+	"model"		"maps/meshes/weaponpad.md2"
+}
+{
+	"origin"		"-576.000000 -1984.000000 288.000000"
+	"classname"		"weapon_railgun"
+}
+{
+	"angle"		"-90.000000"
+	"spawnflags"		"65"
+	"classname"		"misc_mapmodel"
+	"origin"		"-576.000000 -1984.000000 264.000000"
+	"model"		"maps/meshes/weaponpad.md2"
+}
+{
+	"angle"		"225"
+	"spawnflags"		"64"
+	"classname"		"misc_mapmodel"
+	"origin"		"1080 -24 8"
+	"model"		"maps/meshes/toxicbarrell.md2"
+}
+{
+	"angle"		"315"
+	"spawnflags"		"64"
+	"classname"		"misc_mapmodel"
+	"origin"		"1016 -40 8"
+	"model"		"maps/meshes/toxicbarrell.md2"
+}
+{
+	"angle"		"180"
+	"origin"		"1184 136 8"
+	"classname"		"misc_mapmodel"
+	"model"		"maps/meshes/toxicbarrell.md2"
+}
+{
+	"angle"		"315"
+	"origin"		"864 88 8"
+	"classname"		"misc_mapmodel"
+	"model"		"maps/meshes/toxicbarrell.md2"
+}
+{
+	"angle"		"45.000000"
+	"origin"		"-832.000000 -1792.000000 160.000000"
+	"classname"		"misc_redspidernode"
+}
+{
+	"origin"		"-960 -1160 280"
+	"classname"		"misc_rednode"
+}
+{
+	"origin"		"224.000000 -864.000000 32.000000"
+	"classname"		"misc_rednode"
+}
+{
+	"origin"		"64.000000 128.000000 160.000000"
+	"classname"		"misc_rednode"
+}
+{
+	"angle"		"-45.000008"
+	"origin"		"2904.000000 -1792.000000 160.000000"
+	"classname"		"misc_bluespidernode"
+}
+{
+	"origin"		"3008.000000 -1160.000000 280.000000"
+	"classname"		"misc_bluenode"
+}
+{
+	"origin"		"1824.000000 -864.000000 32.000000"
+	"classname"		"misc_bluenode"
+}
+{
+	"origin"		"1984.000000 128.000000 160.000000"
+	"classname"		"misc_bluenode"
+}
+{
+	"origin"		"-1088.000000 -1312.000000 160.000000"
+	"classname"		"item_health"
+}
+{
+	"origin"		"3136.000000 -1312.000000 160.000000"
+	"classname"		"item_health"
+}
