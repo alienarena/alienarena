@@ -896,15 +896,6 @@ void G_SetStats (edict_t *ent)
     }
 
 	//
-	// pickup message
-	//
-	if (level.time > ent->client->pickup_msg_time)
-	{
-		ent->client->ps.stats[STAT_PICKUP_ICON] = 0;
-		ent->client->ps.stats[STAT_PICKUP_STRING] = 0;
-	}
-
-	//
 	// timers
 	//
 	if (ent->client->quad_framenum > level.framenum)
@@ -946,11 +937,6 @@ void G_SetStats (edict_t *ent)
 	//
 	// selected item
 	//
-	if (ent->client->pers.selected_item == -1)
-		ent->client->ps.stats[STAT_SELECTED_ICON] = 0;
-	else
-		ent->client->ps.stats[STAT_SELECTED_ICON] = gi.imageindex (itemlist[ent->client->pers.selected_item].icon);
-
 	ent->client->ps.stats[STAT_SELECTED_ITEM] = ent->client->pers.selected_item;
 
 	//ctf
@@ -1082,6 +1068,11 @@ void G_SetStats (edict_t *ent)
 	//team
 	ent->client->ps.stats[STAT_REDSCORE] = red_team_score;
 	ent->client->ps.stats[STAT_BLUESCORE] = blue_team_score;
+	
+	if (tca->integer) {
+		ent->client->ps.stats[STAT_RED_MATCHES] = red_team_matches;
+		ent->client->ps.stats[STAT_BLUE_MATCHES] = blue_team_matches;
+	}
 
 	//spectator mode
 	ent->client->ps.stats[STAT_SPECTATOR] = 0;
