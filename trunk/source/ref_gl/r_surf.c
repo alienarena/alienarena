@@ -44,8 +44,9 @@ msurface_t  *r_glsl_dynamic_surfaces;
 #define	BLOCK_WIDTH		128
 #define	BLOCK_HEIGHT	128
 
-#define	LIGHTMAP_SIZE	1024
-#define	MAX_LIGHTMAPS	8
+//Pretty safe bet most cards support this
+#define	LIGHTMAP_SIZE	2048 
+#define	MAX_LIGHTMAPS	12
 
 int		c_visible_lightmaps;
 int		c_visible_textures;
@@ -73,7 +74,7 @@ static void		LM_UploadBlock( qboolean dynamic );
 static qboolean	LM_AllocBlock (int w, int h, int *x, int *y);
 
 extern void R_SetCacheState( msurface_t *surf );
-extern void R_BuildLightMap (msurface_t *surf, byte *dest, int stride);
+extern void R_BuildLightMap (msurface_t *surf, byte *dest, int smax, int tmax, int stride);
 
 /*
 =============================================================
@@ -1773,9 +1774,9 @@ static qboolean LM_AllocBlock (int w, int h, int *x, int *y)
 BSP_BuildPolygonFromSurface
 ================
 */
-void BSP_BuildPolygonFromSurface(msurface_t *fa)
+void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale)
 {
-	int			i, lindex, lnumverts;
+	int			i, j, lindex, lnumverts;
 	medge_t		*r_pedge;
 	float		*vec;
 	float		s, t;
@@ -1834,15 +1835,15 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa)
 		//
 		s = DotProduct (vec, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3];
 		s -= fa->texturemins[0];
-		s += fa->light_s*16;
-		s += 8;
-		s /= LIGHTMAP_SIZE*16; //fa->texinfo->texture->width;
+		s += fa->light_s*xscale;
+		s += xscale/2.0;
+		s /= LIGHTMAP_SIZE*xscale; //fa->texinfo->texture->width;
 
 		t = DotProduct (vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
 		t -= fa->texturemins[1];
-		t += fa->light_t*16;
-		t += 8;
-		t /= LIGHTMAP_SIZE*16; //fa->texinfo->texture->height;
+		t += fa->light_t*yscale;
+		t += yscale/2.0;
+		t /= LIGHTMAP_SIZE*yscale; //fa->texinfo->texture->height;
 
 		poly->verts[i][5] = s;
 		poly->verts[i][6] = t;
@@ -1856,7 +1857,21 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa)
 
 		poly->verts[i][7] = s;
 		poly->verts[i][8] = t;
+		
 	}
+#if 0 //SO PRETTY and useful for checking how much lightmap data is used up
+	if (lnumverts == 4)
+	{
+		poly->verts[0][5] = 1;
+		poly->verts[0][6] = 1;
+		poly->verts[1][5] = 1;
+		poly->verts[1][6] = 0;
+		poly->verts[2][5] = 0;
+		poly->verts[2][6] = 0;
+		poly->verts[3][5] = 0;
+		poly->verts[3][6] = 1;
+	}
+#endif
 
 	// store out the completed bbox
 	VectorCopy (surfmins, fa->mins);
@@ -1868,9 +1883,8 @@ void BSP_BuildPolygonFromSurface(msurface_t *fa)
 BSP_CreateSurfaceLightmap
 ========================
 */
-void BSP_CreateSurfaceLightmap (msurface_t *surf)
+void BSP_CreateSurfaceLightmap (msurface_t *surf, int smax, int tmax)
 {
-	int		smax, tmax;
 	byte	*base;
 
 	if (!surf->samples)
@@ -1878,9 +1892,6 @@ void BSP_CreateSurfaceLightmap (msurface_t *surf)
 
 	if (surf->texinfo->flags & (SURF_SKY|SURF_WARP))
 		return; //may not need this?
-
-	smax = (surf->extents[0]>>4)+1;
-	tmax = (surf->extents[1]>>4)+1;
 
 	if ( !LM_AllocBlock( smax, tmax, &surf->light_s, &surf->light_t ) )
 	{
@@ -1898,7 +1909,7 @@ void BSP_CreateSurfaceLightmap (msurface_t *surf)
 	base += (surf->light_t * LIGHTMAP_SIZE + surf->light_s) * LIGHTMAP_BYTES;
 
 	R_SetCacheState( surf );
-	R_BuildLightMap (surf, base, LIGHTMAP_SIZE*LIGHTMAP_BYTES);
+	R_BuildLightMap (surf, base, smax, tmax, LIGHTMAP_SIZE*LIGHTMAP_BYTES);
 }
 
 /*

@@ -933,7 +933,7 @@ CalcSurfaceExtents
 Fills in s->texturemins[] and s->extents[]
 ================
 */
-void CalcSurfaceExtents (msurface_t *s)
+void CalcSurfaceExtents (msurface_t *s, qboolean override, int *smax, int *tmax, float *xscale, float *yscale)
 {
 	float	mins[2], maxs[2], val;
 	int		i,j, e, vnum;
@@ -980,14 +980,33 @@ void CalcSurfaceExtents (msurface_t *s)
 		}
 	}
 
-	for (i=0 ; i<2 ; i++)
+	if (!override)
 	{
-		bmins[i] = floor(mins[i]/16);
-		bmaxs[i] = ceil(maxs[i]/16);
+#define DEFAULT_LIGHTMAP_SCALE 16 //each lightmap pixel represents 16x16 units
+	    *xscale = *yscale = DEFAULT_LIGHTMAP_SCALE;
+		for (i=0 ; i<2 ; i++)
+	    {
+		    bmins[i] = floor(mins[i]/DEFAULT_LIGHTMAP_SCALE);
+		    bmaxs[i] = ceil(maxs[i]/DEFAULT_LIGHTMAP_SCALE);
 
-		s->texturemins[i] = bmins[i] * 16;
-		s->extents[i] = (bmaxs[i] - bmins[i]) * 16;
-	}
+		    s->texturemins[i] = bmins[i] * DEFAULT_LIGHTMAP_SCALE;
+		    s->extents[i] = (bmaxs[i] - bmins[i]) * DEFAULT_LIGHTMAP_SCALE;
+	    }
+	    *smax = (s->extents[0]/DEFAULT_LIGHTMAP_SCALE)+1;
+        *tmax = (s->extents[1]/DEFAULT_LIGHTMAP_SCALE)+1;
+    }
+    else
+    {
+	    bmins[0] = floor(mins[0]/(*xscale));
+	    bmaxs[0] = ceil(maxs[0]/(*xscale));
+	    s->texturemins[0] = bmins[0] * (*xscale);
+	    s->extents[0] = (bmaxs[0] - bmins[0]) * (*xscale);
+	    
+	    bmins[1] = floor(mins[1]/(*yscale));
+	    bmaxs[1] = ceil(maxs[1]/(*yscale));
+	    s->texturemins[1] = bmins[1] * (*yscale);
+	    s->extents[1] = (bmaxs[1] - bmins[1]) * (*yscale);
+    }
 }
 
 void Mod_CalcSurfaceNormals(msurface_t *surf)
@@ -1069,10 +1088,97 @@ void Mod_CalcSurfaceNormals(msurface_t *surf)
 	}
 }
 
-void BSP_BuildPolygonFromSurface(msurface_t *fa);
-void BSP_CreateSurfaceLightmap (msurface_t *surf);
+void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale);
+void BSP_CreateSurfaceLightmap (msurface_t *surf, int smax, int tmax);
 void BSP_EndBuildingLightmaps (void);
 void BSP_BeginBuildingLightmaps (model_t *m);
+
+
+// FOR REFINE: .lightmap high-detail lightmap override files
+
+ltmp_facelookup_t   lfacelookups[MAX_MAP_FACES];
+int					lightdatasize;
+byte				override_lightdata[MAX_OVERRIDE_LIGHTING];
+byte				*lightmap_header;
+
+void Mod_LoadRefineFaceLookups (lump_t *l)
+{
+	int i, count;
+	ltmp_facelookup_t *in;
+	ltmp_facelookup_t *out;
+	
+	if (!l->filelen)
+		return;
+	in = (void *)(lightmap_header+l->fileofs);
+	printf ("%d / %d\n", l->filelen, sizeof(*in));
+	if (l->filelen % sizeof (*in))
+		Com_Error (ERR_DROP, "Mod_LoadRefineFaceLookups: funny lump size");
+	count = l->filelen / sizeof (*in);
+	if (count > MAX_MAP_FACES)
+		Com_Error (ERR_DROP, "Mod_LoadRefineFaceeLookups: too many faces");
+	
+	out = lfacelookups;
+	
+	for (i = 0; i < count; i++, out++, in++)
+	{
+		out->override = LittleLong(in->override);
+		out->width = LittleLong(in->width);
+		out->height = LittleLong(in->height);
+		out->xscale = LittleFloat(in->xscale);
+		out->yscale = LittleFloat(in->yscale);
+	}
+}
+
+void Mod_LoadRefineLighting (lump_t *l)
+{
+	if (!l->filelen)
+		return;
+	if (l->filelen > MAX_OVERRIDE_LIGHTING)
+		Com_Error (ERR_DROP, "Mod_LoadRefineLighting: too much light data");
+	lightdatasize = l->filelen;
+	memcpy (override_lightdata, lightmap_header + l->fileofs, l->filelen);
+}
+
+void Mod_LoadRefineLightmap (char *bsp_name)
+{
+	unsigned 			*buf;
+	lightmapheader_t	header;
+	int					length;
+	char				name[MAX_OSPATH];
+	char				*extension;
+	int					lightmap_file_lump_order[LTMP_LUMPS] = {
+		LTMP_LUMP_FACELOOKUP, LTMP_LUMP_LIGHTING
+	};
+	
+	strncpy (name, bsp_name, MAX_OSPATH-1-strlen(".lightmap")+strlen(".bsp"));
+	extension = strstr (name, ".bsp");
+	if (extension)
+		*extension = 0;
+	strcat (name, ".lightmap"); 
+	
+	length = FS_LoadFile (name, (void **)&buf);
+	if (!buf)
+	{
+		Com_Printf ("Could not load %s\n", name);
+		return;
+	}
+	else
+		Com_Printf ("Loaded %s\n", name);
+	lightmap_header = buf;
+	header = *(lightmapheader_t *)buf;
+	
+	if (header.ident != IDLIGHTMAPHEADER)
+		Com_Error (ERR_DROP, "Mod_LoadRefineLightmap: invalid magic number");
+	if (header.version != LTMPVERSION)
+		Com_Error (ERR_DROP, "Mod_LoadRefineLightmap: invalid version");
+	
+	if (checkLumps (header.lumps, lightmap_file_lump_order, buf, LTMP_LUMPS, length))
+		Com_Error (ERR_DROP,"Mod_LoadRefineLightmap: lumps in %s don't add up right!\n"
+							"The file is likely corrupt, please obtain a fresh copy.",name);
+	
+	Mod_LoadRefineFaceLookups (&header.lumps[LTMP_LUMP_FACELOOKUP]);
+	Mod_LoadRefineLighting (&header.lumps[LTMP_LUMP_LIGHTING]);
+}
 
 /*
 =================
@@ -1089,6 +1195,8 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 	int			i, count, surfnum;
 	int			planenum, side;
 	int			ti;
+	int			smax, tmax;
+	float		xscale, yscale;
 	rscript_t	*rs;
 	vec3_t		color;
 
@@ -1102,6 +1210,10 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 	loadmodel->numsurfaces = count;
 
 	currentmodel = loadmodel;
+	
+	memset (lfacelookups, 0, sizeof(lfacelookups));
+	if (r_hdlightmaps->integer)
+		Mod_LoadRefineLightmap (loadmodel->name);
 
 	BSP_BeginBuildingLightmaps (loadmodel);
 
@@ -1132,7 +1244,18 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 				"The file is likely corrupted, please obtain a fresh copy.");
 		out->texinfo = loadmodel->texinfo + ti;
 
-		CalcSurfaceExtents (out);
+		if (lfacelookups[surfnum].override)
+		{
+			smax=lfacelookups[surfnum].width;
+			tmax=lfacelookups[surfnum].height;
+			xscale=lfacelookups[surfnum].xscale; 
+			yscale=lfacelookups[surfnum].yscale;
+			CalcSurfaceExtents (out, true, &smax, &tmax, &xscale, &yscale);
+		}
+		else
+		{
+			CalcSurfaceExtents (out, false, &smax, &tmax, &xscale, &yscale);
+		}
 
 	// lighting info
 
@@ -1142,6 +1265,8 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 
 		if (i < 0 || i >= lighting->filelen)
 			out->samples = NULL;
+		else if (lfacelookups[surfnum].override > 0 && lfacelookups[surfnum].override <= lightdatasize)
+			out->samples = override_lightdata + lfacelookups[surfnum].override-1;
 		else
 			out->samples = loadmodel->lightdata + i;
 
@@ -1161,11 +1286,11 @@ void Mod_LoadFaces (lump_t *l, lump_t *lighting)
 		// create lightmaps and polygons
 		if ( !SurfaceHasNoLightmap(out) )
 		{
-			BSP_CreateSurfaceLightmap (out);
+			BSP_CreateSurfaceLightmap (out, smax, tmax);
 		}
 
 		if ( (! (out->texinfo->flags & SURF_WARP)) || (gl_state.glsl_shaders && gl_glsl_shaders->value && strcmp(out->texinfo->normalMap->name, out->texinfo->image->name)))
-			BSP_BuildPolygonFromSurface(out);
+			BSP_BuildPolygonFromSurface(out, xscale, yscale);
 
 		rs = (rscript_t *)out->texinfo->image->script;
 
