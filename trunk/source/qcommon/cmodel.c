@@ -691,7 +691,6 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 	CMod_LoadSubmodels (&header.lumps[LUMP_MODELS]);
 	CMod_LoadNodes (&header.lumps[LUMP_NODES]);
 	CMod_LoadAreas (&header.lumps[LUMP_AREAS]);
-
 	CMod_LoadAreaPortals (&header.lumps[LUMP_AREAPORTALS]);
 	CMod_LoadVisibility (&header.lumps[LUMP_VISIBILITY]);
 	CMod_LoadEntityString (&header.lumps[LUMP_ENTITIES]);
