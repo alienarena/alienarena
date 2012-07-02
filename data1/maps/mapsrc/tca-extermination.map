@@ -29373,6 +29373,7 @@
 {
 "classname" "misc_bluespidernode"
 "origin" "1060.000000 -16.000000 -232.000000"
+"angle" "180.000000"
 }
 // entity 369
 {
