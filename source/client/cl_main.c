@@ -158,6 +158,9 @@ cvar_t  *cl_stats_server;
 cvar_t	*cl_latest_game_version;
 cvar_t	*cl_latest_game_version_url;
 
+cvar_t	*cl_speedrecord;
+cvar_t	*cl_alltimespeedrecord;
+
 client_static_t	cls;
 client_state_t	cl;
 
@@ -1885,6 +1888,9 @@ void CL_InitLocal (void)
 	cl_paused = Cvar_Get ("paused", "0", 0);
 	cl_timedemo = Cvar_Get ("timedemo", "0", 0);
 	cl_demoquit = Cvar_Get ("demoquit", "0", 0);
+	
+	cl_speedrecord = Cvar_Get ("cl_speedrecord", "450", 0);
+	cl_alltimespeedrecord = Cvar_Get ("cl_alltimespeedrecord", "450", CVAR_ARCHIVE);
 
 	rcon_client_password = Cvar_Get ("rcon_password", "", 0);
 	rcon_address = Cvar_Get ("rcon_address", "", 0);
@@ -2459,6 +2465,11 @@ void CL_Frame( int msec )
 	            cl.predicted_velocity[0]*cl.predicted_velocity[0]+
 	            cl.predicted_velocity[1]*cl.predicted_velocity[1]
 	        );
+	        if (speedometer->counter > cl_speedrecord->value) {
+	        	Cvar_SetValue ("cl_speedrecord", speedometer->counter);
+	        	if (speedometer->counter > cl_alltimespeedrecord->value) 
+	        		Cvar_SetValue ("cl_alltimespeedrecord", speedometer->counter);
+	        }
 	    }
 
 		/* retrigger packet send timer */
