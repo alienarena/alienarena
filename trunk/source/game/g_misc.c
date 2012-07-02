@@ -1255,6 +1255,7 @@ void redspidernode_think (edict_t *ent)
 }
 void red_roundend(edict_t *ent) {
 	red_team_score = 0;
+	blue_team_matches++;
 }
 void redspidernode_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {
@@ -1306,6 +1307,7 @@ void bluespidernode_think (edict_t *ent)
 }
 void blue_roundend(edict_t *self) {
 	blue_team_score = 0;
+	red_team_matches++;
 }
 void bluespidernode_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 {

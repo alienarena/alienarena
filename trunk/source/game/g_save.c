@@ -28,6 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 int red_team_score;
 int blue_team_score;
+int red_team_matches; //for tca
+int blue_team_matches; //for tca
 int reddiff;
 int bluediff;
 int redwinning;
@@ -323,9 +325,9 @@ void InitGame (void)
 	globals.num_edicts = game.maxclients+1;
 
 	//clear out team scores and player counts
-	if(tca->value) {
-		blue_team_score = 4;
-		red_team_score = 4;
+	if(tca->integer) {
+		blue_team_score = red_team_score = 4;
+		blue_team_matches = red_team_matches = 0;
 	}
 	else {
 		red_team_score = 0;

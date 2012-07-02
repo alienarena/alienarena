@@ -793,9 +793,9 @@ void CheckNeedPass (void)
 ResetLevel
 =================
 */
-void ResetLevel (void) //for resetting players and items after warmup
+void ResetLevel (qboolean keepscores) //for resetting players and items after warmup
 {
-	int i;
+	int i, backup_score;
 	edict_t	*ent;
 	gitem_t *item;
 
@@ -804,6 +804,8 @@ void ResetLevel (void) //for resetting players and items after warmup
 		ent = g_edicts + i + 1;
 		if (!ent->inuse || ent->client->resp.spectator)
 			continue;
+		if (keepscores)
+			backup_score = ent->client->resp.score;
 		// locate ent at a spawn point and reset everything
 		InitClientResp (ent->client);
 		if(ent->is_bot)
@@ -817,6 +819,8 @@ void ResetLevel (void) //for resetting players and items after warmup
 			PutClientInServer (ent);
 		}
 		ent->client->homing_shots = 0;
+		if (keepscores)
+			ent->client->resp.score = backup_score;
 	}
 
 	ACESP_SaveBots(); // update bots.tmp and client bot information
@@ -846,7 +850,19 @@ void ResetLevel (void) //for resetting players and items after warmup
 				break;
 			}
 		}
-
+		
+		if (!strcmp(ent->classname, "misc_bluenode") || !strcmp(ent->classname, "misc_rednode"))
+			ent->powered = true;
+		if (!strcmp(ent->classname, "misc_redspidernode"))
+		{
+			gi.unlinkentity (ent);
+			SP_misc_redspidernode (ent);
+		}
+		if (!strcmp(ent->classname, "misc_bluespidernode"))
+		{
+			gi.unlinkentity (ent);
+			SP_misc_bluespidernode (ent);
+		}
 	}
 
 	if(g_callvote->value)
@@ -927,7 +943,7 @@ void CheckDMRules (void)
 					{
 						safe_centerprintf( &g_edicts[i], "FIGHT!\n" );
 					}
-					ResetLevel();
+					ResetLevel(false);
 				}
 			}
 		}
@@ -949,7 +965,7 @@ void CheckDMRules (void)
 		}
 	}
 
-	if (fraglimit->value && ((tca->value || ctf->value || cp->value || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
+	if (fraglimit->value && ((tca->integer || ctf->integer || cp->integer || (dmflags->integer & DF_SKINTEAMS)) || level.time > warmuptime->value))
 	{
 		//team scores
 		if ((dmflags->integer & DF_SKINTEAMS) || ctf->value || cp->value) //it's all about the team!
@@ -1047,17 +1063,31 @@ void CheckDMRules (void)
 			}
 		}
 	}
-	if(tca->value) {
-		if(blue_team_score == 0) {
+	if(tca->integer) {
+		if(red_team_matches == 2) {
 			safe_bprintf(PRINT_HIGH, "Red Team wins!\n");
 			bot_won = 0; //we don't care if it's a bot that wins
 			EndDMLevel();
 			return;
 		}
-		if(red_team_score == 0) {
+		if(blue_team_matches == 2) {
 			safe_bprintf(PRINT_HIGH, "Blue Team wins!\n");
 			bot_won = 0; //we don't care if it's a bot that wins
 			EndDMLevel();
+			return;
+		}
+		if (blue_team_score == 0) {
+			safe_bprintf(PRINT_HIGH, "Red Team wins match %d out of 3!\n", red_team_matches);
+			bot_won = 0;
+			ResetLevel(true);
+			blue_team_score = red_team_score = 4;
+			return;
+		}
+		if (red_team_score == 0) {
+			safe_bprintf(PRINT_HIGH, "Blue Team wins match %d out of 3!\n", blue_team_matches);
+			bot_won = 0;
+			ResetLevel(true);
+			blue_team_score = red_team_score = 4;
 			return;
 		}
 	}
@@ -1133,8 +1163,8 @@ void ExitLevel (void)
 		}
 	}
 	if(tca->value) {
-		blue_team_score = 4;
-		red_team_score = 4;
+		blue_team_score = red_team_score = 4;
+		red_team_matches = blue_team_matches = 0;
 	}
 	else {
 		red_team_score = 0;

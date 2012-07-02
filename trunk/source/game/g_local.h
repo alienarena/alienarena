@@ -516,6 +516,8 @@ extern	int	sm_meat_index;
 
 extern  int red_team_score;
 extern  int blue_team_score;
+extern	int	red_team_matches; //for tca
+extern	int	blue_team_matches; //for tca
 extern  int reddiff;
 extern	int bluediff;
 extern	int redwinning;
