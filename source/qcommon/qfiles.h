@@ -461,3 +461,38 @@ typedef struct
 	int		numareaportals;
 	int		firstareaportal;
 } darea_t;
+
+// FOR REFINE
+
+#define MAX_OVERRIDE_LIGHTING	0x6000000	//2048*2048*8*3
+
+#define IDLIGHTMAPHEADER	(('P'<<24)+('M'<<16)+('T'<<8)+'L')
+		// little-endian "LTMP" for "lightmap"
+#define LTMPVERSION			1
+
+#define LTMP_LUMP_FACELOOKUP	0
+#define LTMP_LUMP_LIGHTING		1
+#define LTMP_LUMPS				2
+
+//TODO: add a file checksum to the header
+typedef struct
+{
+	int			ident;
+	int			version;
+	lump_t		lumps[LTMP_LUMPS];
+} lightmapheader_t;
+
+typedef struct
+{
+	// qrad3 may not override every single face in the future
+	int			override;	//either an offset in the data or else 0
+							//to default back to built in BSP lightmap
+	// qrad3 may output different hights/widths for each face at some point in
+	// the future
+	int			width;		//width in pixels
+	int			height;	 	//height in pixels
+	// qrad3 may output heights scaled differently from widths at some point
+	// in the future
+	float		xscale;     //xscale in game units per lightmap pixel
+	float		yscale;		//yscale in game units per lightmap pixel
+} ltmp_facelookup_t;
