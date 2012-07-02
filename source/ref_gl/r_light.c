@@ -319,7 +319,7 @@ void R_LightPoint (vec3_t p, vec3_t color, qboolean addDynamic)
 
 //===================================================================
 
-static float s_blocklights[34*34*3];
+static float s_blocklights[1024*1024*3];
 
 /*
 ** R_SetCacheState
@@ -342,9 +342,8 @@ R_BuildLightMap
 Combine and scale multiple lightmaps into the floating format in blocklights
 ===============
 */
-void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
+void R_BuildLightMap (msurface_t *surf, byte *dest, int smax, int tmax, int stride)
 {
-	int			smax, tmax;
 	int			r, g, b, a, max;
 	int			i, j, size;
 	byte		*lightmap;
@@ -356,8 +355,6 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 	if ( SurfaceHasNoLightmap( surf ) )
 		Com_Error (ERR_DROP, "R_BuildLightMap called for non-lit surface");
 
-	smax = (surf->extents[0]>>4)+1;
-	tmax = (surf->extents[1]>>4)+1;
 	size = smax*tmax;
 	if (size > (sizeof(s_blocklights)>>4) )
 		Com_Error (ERR_DROP, "Bad s_blocklights size");

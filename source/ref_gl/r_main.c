@@ -163,6 +163,8 @@ cvar_t	*r_lensflare;
 cvar_t	*r_lensflare_intens;
 cvar_t	*r_drawsun;
 
+cvar_t	*r_hdlightmaps;
+
 qboolean	map_fog;
 
 cvar_t	*con_font;
@@ -394,6 +396,7 @@ void R_RotateForEntity (entity_t *e)
 
     qglRotatef (e->angles[1],  0, 0, 1);
     qglRotatef (-e->angles[0],  0, 1, 0);
+
     qglRotatef (-e->angles[2],  1, 0, 0);
 }
 
@@ -1243,6 +1246,8 @@ void R_Register( void )
 	r_lensflare = Cvar_Get( "r_lensflare", "1", CVAR_ARCHIVE );
 	r_lensflare_intens = Cvar_Get ("r_lensflare_intens", "3", CVAR_ARCHIVE);
 	r_drawsun =	Cvar_Get("r_drawsun", "2", CVAR_ARCHIVE);
+	
+	r_hdlightmaps = Cvar_Get("r_hdlightmaps", "1", CVAR_ARCHIVE);
 
 	r_minimap_size = Cvar_Get ("r_minimap_size", "256", CVAR_ARCHIVE );
 	r_minimap_zoom = Cvar_Get ("r_minimap_zoom", "1", CVAR_ARCHIVE );

@@ -173,6 +173,8 @@ extern	cvar_t	*r_lensflare;
 extern	cvar_t	*r_lensflare_intens;
 extern	cvar_t	*r_drawsun;
 
+extern	cvar_t	*r_hdlightmaps;
+
 extern  cvar_t	*r_ragdolls;
 extern  cvar_t  *r_ragdoll_debug;
 
