@@ -138,13 +138,14 @@ byte	*cmod_base;
 //BSP file format has been made less extensible, but we've tended to add more
 //data using separate files instead of adding lumps to the BSP, so I think we
 //can live with that.
-qboolean checkLumps (lump_t *l, int *lump_order, void *file_base, int num_lumps, int file_len)
+qboolean checkLumps (lump_t *l, int *lump_order, void *_file_base, int num_lumps, int file_len)
 {
 	int i = 0;
 	lump_t *in;
-	void *lumpdata_base;
-	void *lumpdata_next = file_base+2*sizeof(int)+sizeof(lump_t)*num_lumps;
-	void *file_end = file_base + file_len;
+	byte *lumpdata_base;
+	byte *file_base = (byte *)_file_base;
+	byte *lumpdata_next = file_base+2*sizeof(int)+sizeof(lump_t)*num_lumps;
+	byte *file_end = file_base + file_len;
 	for (i = 0; i < num_lumps; i++)
 	{
 		in = l+lump_order[i];
@@ -690,6 +691,7 @@ cmodel_t *CM_LoadBSP (char *name, qboolean clientload, unsigned *checksum)
 	CMod_LoadSubmodels (&header.lumps[LUMP_MODELS]);
 	CMod_LoadNodes (&header.lumps[LUMP_NODES]);
 	CMod_LoadAreas (&header.lumps[LUMP_AREAS]);
+
 	CMod_LoadAreaPortals (&header.lumps[LUMP_AREAPORTALS]);
 	CMod_LoadVisibility (&header.lumps[LUMP_VISIBILITY]);
 	CMod_LoadEntityString (&header.lumps[LUMP_ENTITIES]);

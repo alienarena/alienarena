@@ -1164,7 +1164,7 @@ void Mod_LoadRefineLightmap (char *bsp_name)
 	}
 	else
 		Com_Printf ("Loaded %s\n", name);
-	lightmap_header = buf;
+	lightmap_header = (byte *)buf;
 	header = *(lightmapheader_t *)buf;
 	
 	if (header.ident != IDLIGHTMAPHEADER)
