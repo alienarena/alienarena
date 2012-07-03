@@ -21,13 +21,7 @@ byte		dvisdata[MAX_MAP_VISIBILITY];
 dvis_t		*dvis = (dvis_t *)dvisdata;
 
 int			lightdatasize;
-#ifdef WIN32
-// dynamically allocate because we couldn't figure out how to increase the 
-// stack size on Windows
-byte		*dlightdata;
-#else
 byte		dlightdata[MAX_OVERRIDE_LIGHTING];
-#endif
 
 int			entdatasize;
 char		dentdata[MAX_MAP_ENTSTRING];
