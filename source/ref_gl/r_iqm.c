@@ -2264,7 +2264,7 @@ void IQM_DrawShadow(vec3_t origin)
 {
 	vec_t	*position;
 	float	height, lheight;
-	int		i, j;
+	int		i;
 	int		index_vert;
 	int 	vertsize;
 
