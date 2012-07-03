@@ -1776,7 +1776,7 @@ BSP_BuildPolygonFromSurface
 */
 void BSP_BuildPolygonFromSurface(msurface_t *fa, float xscale, float yscale)
 {
-	int			i, j, lindex, lnumverts;
+	int			i, lindex, lnumverts;
 	medge_t		*r_pedge;
 	float		*vec;
 	float		s, t;
