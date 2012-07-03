@@ -1338,7 +1338,11 @@ float	sampleofs[5][2] =
 void BuildFacelights (int facenum)
 {
 	dface_t	*this_face;
+#ifdef WIN32
+	lightinfo_t *liteinfo; //damn you, MSVC dinky stack!
+#else
 	lightinfo_t	liteinfo[5];
+#endif
 	float		*styletable[MAX_LSTYLES];
 	int			i, j;
 	float		*spot;
@@ -1347,6 +1351,10 @@ void BuildFacelights (int facenum)
 	int			tablesize;
 	facelight_t		*fl;
 	qboolean	sun_main_once, sun_ambient_once;
+
+#ifdef WIN32
+	liteinfo = malloc(sizeof(lightinfo_t)*5);
+#endif
 
 	this_face = &dfaces[facenum];
 
@@ -1442,6 +1450,9 @@ void BuildFacelights (int facenum)
 			VectorAdd (spot, face_patches[facenum]->baselight, spot);
 		}
 	}
+#ifdef WIN32
+	free (liteinfo);
+#endif
 }
 
 
