@@ -1087,6 +1087,10 @@ int main (int argc, char **argv)
 
 	start = I_FloatTime ();
 
+#ifdef WIN32
+    dlightdata = malloc (MAX_OVERRIDE_LIGHTING);
+#endif
+
     /*
      * param is the map/bsp file
      */
@@ -1139,6 +1143,10 @@ int main (int argc, char **argv)
 
 	end = I_FloatTime ();
 	printf ("%5.0f seconds elapsed\n", end-start);
+	
+#ifdef WIN32
+    free (dlightdata);
+#endif
 
 	return 0;
 }
