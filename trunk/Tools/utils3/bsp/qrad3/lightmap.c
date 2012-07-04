@@ -1352,14 +1352,14 @@ void BuildFacelights (int facenum)
 	facelight_t		*fl;
 	qboolean	sun_main_once, sun_ambient_once;
 
-#ifdef WIN32
-	liteinfo = malloc(sizeof(lightinfo_t)*5);
-#endif
-
 	this_face = &dfaces[facenum];
 
 	if ( texinfo[this_face->texinfo].flags & (SURF_WARP|SURF_SKY) )
 		return;		// non-lit texture
+
+#ifdef WIN32
+	liteinfo = malloc(sizeof(lightinfo_t)*5);
+#endif
 
 	memset (styletable,0, sizeof(styletable));
 
