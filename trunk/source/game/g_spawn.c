@@ -380,6 +380,7 @@ Creates a server's entity / program execution context by
 parsing textual entity definitions out of an ent file.
 ==============
 */
+int levelnum;
 void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 {
 	edict_t		*ent;
@@ -411,6 +412,7 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	ent = NULL;
 	inhibit = 0;
+	levelnum++;
 
 // parse ents
 	while (1)

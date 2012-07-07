@@ -90,10 +90,11 @@ void Target_Speaker_Think (edict_t *ent)
 
 	ent->nextthink = level.time + 1;
 }
+extern int levelnum;
 void SP_target_speaker (edict_t *ent)
 {
 	char	buffer[MAX_QPATH];
-
+	static int prev_levelnum;
 
 	if(!st.noise)
 	{
@@ -102,7 +103,13 @@ void SP_target_speaker (edict_t *ent)
 	}
 	if (strstr (st.noise, "music"))
 	{
-		gi.dprintf("SHUT UP SHUT UP SHUT UP YOU INFERNAL BONGO DRUMS!\n");
+		if (levelnum != prev_levelnum) //only warn once per level
+		{
+			prev_levelnum = levelnum;
+			gi.dprintf("SHUT UP SHUT UP SHUT UP YOU INFERNAL BONGO DRUMS!\n");
+			gi.dprintf("Map contains one or more target_speakers with \"music\" in its sound file name.\n");
+			gi.dprintf("These have been disabled.\n");
+		}
 		return;
 	}
 	if (!strstr (st.noise, ".wav"))
