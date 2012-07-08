@@ -10,6 +10,14 @@
 #include <windows.h>
 #endif
 
+#ifdef USE_SETRLIMIT
+#include <sys/resource.h>
+#endif
+
+#if defined WIN32 || (!defined USE_PTHREADS && !defined USE_SETRLIMIT)
+#define STACK_CONSTRAINED
+#endif
+
 typedef enum
 {
 	emit_surface,
