@@ -1338,7 +1338,7 @@ float	sampleofs[5][2] =
 void BuildFacelights (int facenum)
 {
 	dface_t	*this_face;
-#ifdef WIN32
+#ifdef STACK_CONSTRAINED
 	lightinfo_t *liteinfo; //damn you, MSVC dinky stack!
 #else
 	lightinfo_t	liteinfo[5];
@@ -1357,7 +1357,7 @@ void BuildFacelights (int facenum)
 	if ( texinfo[this_face->texinfo].flags & (SURF_WARP|SURF_SKY) )
 		return;		// non-lit texture
 
-#ifdef WIN32
+#ifdef STACK_CONSTRAINED
 	liteinfo = malloc(sizeof(lightinfo_t)*5);
 #endif
 
@@ -1450,7 +1450,7 @@ void BuildFacelights (int facenum)
 			VectorAdd (spot, face_patches[facenum]->baselight, spot);
 		}
 	}
-#ifdef WIN32
+#ifdef STACK_CONSTRAINED
 	free (liteinfo);
 #endif
 }

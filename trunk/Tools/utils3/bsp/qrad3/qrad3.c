@@ -798,7 +798,6 @@ RadWorld
 void RadWorld (void)
 {
 
-	int _numthreads = numthreads;
 	if (numnodes == 0 || numfaces == 0)
 		Error ("Empty map");
 	MakeBackplanes ();
@@ -883,6 +882,25 @@ int main (int argc, char **argv)
     char	game_path[1024] = "";
     char	refine_fname[1024];
     char	*param, *param2 = NULL;
+#ifdef USE_SETRLIMIT
+	const rlim_t kStackSize = 16L * 1024L * 1024L; //16 megs
+	struct rlimit rl;
+    int getrlimit_result;
+
+	getrlimit_result = getrlimit(RLIMIT_STACK, &rl);
+	if (getrlimit_result == 0)
+	{
+		if (rl.rlim_cur < kStackSize)
+		{
+			rl.rlim_cur = kStackSize;
+			getrlimit_result = setrlimit(RLIMIT_STACK, &rl);
+			if (getrlimit_result != 0)
+			{
+				fprintf(stderr, "setrlimit returned result = %d\n", getrlimit_result);
+			}
+		}
+	}
+#endif
 
 	printf ("--- Alien Arena QRAD3 ---\n");
 
