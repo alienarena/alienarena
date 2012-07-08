@@ -468,6 +468,9 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	gi.dprintf ("%i entities inhibited\n", inhibit);
 
+	//reset minderaser
+	mindEraserTime = level.time;
+
 	ACEND_InitNodes();
 	ACEND_LoadNodes();
 
