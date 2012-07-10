@@ -9,7 +9,7 @@
 #
 
 # BUILD = RELEASE or DEBUG
-BUILD ?= RELEASE
+BUILD ?= DEBUG
 
 # Where programs will be installed on 'make install'
 INSTALL_DIR ?= /usr/local/bin
@@ -27,7 +27,7 @@ RELEASE_CFLAGS ?= $(BASE_CFLAGS) -O3
 DEBUG_CFLAGS ?= $(BASE_CFLAGS) -O0 -g -ggdb
 
 # Link Options
-LDFLAGS ?= -lm
+LDFLAGS ?= -lm -lz
 
 #
 srcdir = .
