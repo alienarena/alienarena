@@ -9,6 +9,51 @@ static char THIS_FILE[] = __FILE__;
 #include "bspfile.h"
 #include "scriplib.h"
 
+#ifdef USE_ZLIB
+#include <zlib.h>
+
+//Following function ripped off from R1Q2, then adapted
+int ZLibCompress(byte *in, int len_in, byte *out, int len_out)
+{
+	z_stream zs;
+	int result;
+
+	zs.next_in = in;
+	zs.avail_in = len_in;
+	zs.total_in = 0;
+
+	zs.next_out = out;
+	zs.avail_out = len_out;
+	zs.total_out = 0;
+
+	zs.msg = NULL;
+	zs.state = NULL;
+	zs.zalloc = Z_NULL;
+	zs.zfree = Z_NULL;
+	zs.opaque = NULL;
+
+	zs.data_type = Z_BINARY;
+	zs.adler = 0;
+	zs.reserved = 0;
+
+	//wbits = 31 means use 15 window bits, and use the gzip header/trailer
+	//instead of the zlib ones
+	result = deflateInit2 (&zs, Z_BEST_COMPRESSION, Z_DEFLATED, 31, 9, Z_DEFAULT_STRATEGY);
+	if (result != Z_OK)
+		return -1;
+
+	result = deflate(&zs, Z_FINISH);
+	if (result != Z_STREAM_END)
+		return -1;
+
+	result = deflateEnd(&zs);
+	if (result != Z_OK)
+		return -1;
+
+	return zs.total_out;
+}
+#endif
+
 void GetLeafNums (void);
 
 //=============================================================================
@@ -777,8 +822,39 @@ void 	GetVectorForKey (entity_t *ent, char *key, vec3_t vec)
 	vec[2] = v3;
 }
 
+//more than necessary
+#define SIZEOF_LIGHTMAP_UNCOMPRESSED \
+	 (sizeof(lightmapheader_t)+sizeof(lfacelookups)+sizeof(dlightdata)+16)
+byte lightmap_data_buf[SIZEOF_LIGHTMAP_UNCOMPRESSED];
+//impossible worst case scenario: no compression is possible, and now we must 
+//fit the gzip header and trailer
+#define SIZEOF_LIGHTMAP_COMPRESSED (SIZEOF_LIGHTMAP_UNCOMPRESSED+18)
+byte lightmap_output_buf[SIZEOF_LIGHTMAP_COMPRESSED];
+
+void WriteToLightmapBuf (void *data, int len, size_t *ofs)
+{
+	if (*ofs+len >= SIZEOF_LIGHTMAP_UNCOMPRESSED)
+		Error ("SIZEOF_LIGHTMAP_UNCOMPRESSED\n");
+	memcpy (lightmap_data_buf+(*ofs), data, len);
+	*ofs+=len;
+}
+
+void AddLumpToLightmapBuf (int lumpnum, void *data, int len, size_t *ofs)
+{
+	lump_t *lump;
+
+	lump = &header->lumps[lumpnum];
+
+	lump->fileofs = LittleLong(*ofs);
+	lump->filelen = LittleLong(len);
+	WriteToLightmapBuf (data, (len+3)&~3, ofs);
+}
+
 void	WriteLTMPFile (char *filename)
 {
+	size_t ofs = 0;
+	size_t start = 0;
+	int compressed_size;
 	header = (dheader_t *)(&lightmap_outheader);
 	memset (header, 0, sizeof(lightmapheader_t));
 
@@ -787,13 +863,24 @@ void	WriteLTMPFile (char *filename)
 	header->ident = LittleLong (IDLIGHTMAPHEADER);
 	header->version = LittleLong (LTMPVERSION);
 
+	WriteToLightmapBuf (header, sizeof(lightmapheader_t), &ofs);	// overwritten later
+
+	AddLumpToLightmapBuf (LTMP_LUMP_FACELOOKUP, lfacelookups, numfaces*sizeof(ltmp_facelookup_t), &ofs);
+	AddLumpToLightmapBuf (LTMP_LUMP_LIGHTING, dlightdata, lightdatasize, &ofs);
+
+	WriteToLightmapBuf (header, sizeof(lightmapheader_t), &start);
+#ifdef USE_ZLIB
+	compressed_size = ZLibCompress(lightmap_data_buf, ofs, lightmap_output_buf, SIZEOF_LIGHTMAP_COMPRESSED);
+	
+	if (compressed_size == -1)
+		Error ("Zlib error!\n");
+#endif
+	
 	wadfile = SafeOpenWrite (filename);
-	SafeWrite (wadfile, header, sizeof(lightmapheader_t));	// overwritten later
-
-	AddLump (LTMP_LUMP_FACELOOKUP, lfacelookups, numfaces*sizeof(ltmp_facelookup_t));
-	AddLump (LTMP_LUMP_LIGHTING, dlightdata, lightdatasize);
-
-	fseek (wadfile, 0, SEEK_SET);
-	SafeWrite (wadfile, header, sizeof(lightmapheader_t));
+#ifdef USE_ZLIB
+	SafeWrite (wadfile, lightmap_output_buf, compressed_size);
+#else
+	SafeWrite (wadfile, lightmap_data_buf, ofs);
+#endif
 	fclose (wadfile);
 }
