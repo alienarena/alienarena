@@ -3236,10 +3236,11 @@ CL_TeleportParticles
 
 ===============
 */
-void CL_TeleportParticles (vec3_t start)
+void CL_TeleportParticles (vec3_t orig_start)
 {
 	vec3_t		move;
 	vec3_t		vec;
+	vec3_t		start;
 	vec3_t		end;
 	float		len;
 	int			j;
@@ -3250,6 +3251,8 @@ void CL_TeleportParticles (vec3_t start)
 	// static vec3_t mins = { -1, -1, -1 };
     // static vec3_t maxs = { 1, 1, 1 };
 
+	//make a copy to prevent modifying an important vector
+	VectorCopy(orig_start, start); 
 	VectorCopy(start, pos1);
 	pos2[2] = 1;
 	pos2[0] = pos2[1] = 0;
